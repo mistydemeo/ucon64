@@ -222,7 +222,7 @@ snes_dint (st_rominfo_t *rominfo)
   st_unknown_header_t header;
   FILE *srcfile, *destfile;
   unsigned char *buffer;
-  char backup_name[FILENAME_MAX];
+  char src_name[FILENAME_MAX];
   int size = rominfo->file_size - rominfo->buheader_len, success = 1;
 
   puts ("Converting to deinterleaved format...");
@@ -231,12 +231,11 @@ snes_dint (st_rominfo_t *rominfo)
       fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n", size);
       exit (1);
     }
-  strcpy (backup_name, ucon64.rom);
-  setext (backup_name, ".BAK");
-  rename (ucon64.rom, backup_name);
-  if ((srcfile = fopen (backup_name, "rb")) == NULL)
+  strcpy (src_name, ucon64.rom);
+  handle_existing_file (ucon64.rom, src_name);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", backup_name);
+      fprintf (stderr, "ERROR: Could not open %s\n", src_name);
       return -1;
     }
   if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
@@ -273,8 +272,8 @@ snes_dint (st_rominfo_t *rominfo)
   fclose (srcfile);
   fclose (destfile);
 
-  puts ("Done");
   ucon64_wrote (ucon64.rom);
+  remove_temp_file ();
 
   return 0;
 }
@@ -366,22 +365,21 @@ int
 snes_convert_sramfile (st_rominfo_t *rominfo, const void *header)
 {
   FILE *srcfile, *destfile;
-  char srcname[FILENAME_MAX], destname[FILENAME_MAX], buf[32 * 1024];
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], buf[32 * 1024];
   int blocksize, byteswritten;
 
-  strcpy (srcname, ucon64.rom);
-  strcpy (destname, ucon64.rom);
-  setext (destname, ".SAV");
-  if (!strcmp (srcname, destname))                      // be sure src and dest have
-    rename (ucon64.rom, strcat (srcname, ".bak"));      //  a different name
-  if ((srcfile = fopen (srcname, "rb")) == NULL)
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  setext (dest_name, ".SAV");
+  handle_existing_file (dest_name, src_name);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", srcname);
+      fprintf (stderr, "ERROR: Could not open %s\n", src_name);
       return -1;
     }
-  if ((destfile = fopen (destname, "wb")) == NULL)
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", destname);
+      fprintf (stderr, "ERROR: Could not open %s\n", dest_name);
       return -1;
     }
 
@@ -397,7 +395,7 @@ snes_convert_sramfile (st_rominfo_t *rominfo, const void *header)
 
   fclose (srcfile);
   fclose (destfile);
-  ucon64_wrote (destname);
+  ucon64_wrote (dest_name);
 
   return 0;
 }
@@ -457,8 +455,8 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
   0x1e6                 low byte of original SNES checksum
   0x1e7                 high byte of original SNES checksum
   0x1e8 - 0x1eb         "NSRT"
-  0x1ec                 header version; a value of for example 20 should be
-                        interpreted as 2.0
+  0x1ec                 header version; a value of for example 15 should be
+                        interpreted as 1.5
   0x1ed                 low nibble = port 1 controller type
                         high nibble = port 2 controller type
                         0 = gamepad
@@ -471,12 +469,13 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
                         7 = mouse / super scope / gamepad
   0x1ee                 NSRT header checksum
                         the checksum is calculated by adding all bytes of the
-                        NSRT header (except the checksum bytes themselves) and
-                        taking the modulus of 256
+                        NSRT header (except the checksum bytes themselves) 
+                        subtracting 1 and then taking the modulus of 256
   0x1ef                 inverse NSRT header checksum
 */
 {
-  int x, checksum = 0;
+  int x;
+  char checksum = -1;                           // byte => no need to take the modulus of 256
 
   if (UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
     {
@@ -491,7 +490,7 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
       ((unsigned char *) header)[0x1e6] = snes_header.checksum_low;
       ((unsigned char *) header)[0x1e7] = snes_header.checksum_high;
       memcpy (((unsigned char *) header) + 0x1e8, "NSRT", 4);
-      ((unsigned char *) header)[0x1ec] = 20;   // version 2.0 header
+      ((unsigned char *) header)[0x1ec] = 15;   // version 1.5 header
     }
 
   if (UCON64_ISSET (ucon64.controller))
@@ -521,7 +520,6 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
 
       for (x = 0x1d0; x <= 0x1ef; x++)
         checksum += ((unsigned char *) header)[x];
-      checksum %= 256;
       ((unsigned char *) header)[0x1ee] = checksum;
       ((unsigned char *) header)[0x1ef] = ~checksum;
     }
@@ -1212,18 +1210,17 @@ becomes:a9 00 00 a2 fe 1f df 00 00 70 ea ea     // lda #$0000; ldx #$1ffe; cmp $
         5c 7f d0 83 18 fb 78 c2 30              // jmp $83d07f; clc; xce; sei; rep #$30
 becomes:ea ea ea ea ea ea ea ea ea              // nop; nop; nop; nop; nop; nop; nop; nop; nop
 */
-  char header[512], buffer[32 * 1024], backup_name[FILENAME_MAX];
+  char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
   int bytesread;
 
   puts ("Attempting crack...");
 
-  strcpy (backup_name, ucon64.rom);
-  setext (backup_name, ".BAK");
-  rename (ucon64.rom, backup_name);
-  if ((srcfile = fopen (backup_name, "rb")) == NULL)
+  strcpy (src_name, ucon64.rom);
+  handle_existing_file (ucon64.rom, src_name);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", backup_name);
+      fprintf (stderr, "ERROR: Could not open %s\n", src_name);
       return -1;
     }
   if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
@@ -1264,7 +1261,9 @@ becomes:ea ea ea ea ea ea ea ea ea              // nop; nop; nop; nop; nop; nop;
   fclose (srcfile);
   fclose (destfile);
 
-  puts ("Done");
+  ucon64_wrote (ucon64.rom);
+  remove_temp_file ();
+
   return 0;
 }
 
@@ -1304,18 +1303,17 @@ ad 3f 21 29 10 c9 00 d0         ad 3f 21 29 10 c9 00 80
 ad 3f 21 29 10 c9 10 f0         ad 3f 21 29 10 c9 10 80
 ad 3f 21 29 10 c9 10 d0         ad 3f 21 29 10 c9 10 ea ea
 */
-  char header[512], buffer[32 * 1024], backup_name[FILENAME_MAX];
+  char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
   int bytesread;
 
   puts ("Attempting NTSC/PAL fix...");
 
-  strcpy (backup_name, ucon64.rom);
-  setext (backup_name, ".BAK");
-  rename (ucon64.rom, backup_name);
-  if ((srcfile = fopen (backup_name, "rb")) == NULL)
+  strcpy (src_name, ucon64.rom);
+  handle_existing_file (ucon64.rom, src_name);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", backup_name);
+      fprintf (stderr, "ERROR: Could not open %s\n", src_name);
       return -1;
     }
   if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
@@ -1369,8 +1367,8 @@ ad 3f 21 29 10 c9 10 d0         ad 3f 21 29 10 c9 10 ea ea
   fclose (srcfile);
   fclose (destfile);
 
-  puts ("Done");
   ucon64_wrote (ucon64.rom);
+  remove_temp_file ();
 
   return 0;
 }
@@ -1395,18 +1393,17 @@ A9/A2 01 8D/8E 0D 42            A9/A2 00 8D/8E 0D 42
 A9 01 00 8D 0D 42               A9 00 00 8D 0D 42
 A9 01 8F 0D 42 00               A9 00 8F 0D 42 00
 */
-  char header[512], buffer[32 * 1024], backup_name[FILENAME_MAX];
+  char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
   int bytesread;
 
   puts ("Attempting slowROM fix...");
 
-  strcpy (backup_name, ucon64.rom);
-  setext (backup_name, ".BAK");
-  rename (ucon64.rom, backup_name);
-  if ((srcfile = fopen (backup_name, "rb")) == NULL)
+  strcpy (src_name, ucon64.rom);
+  handle_existing_file (ucon64.rom, src_name);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", backup_name);
+      fprintf (stderr, "ERROR: Could not open %s\n", src_name);
       return -1;
     }
   if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
@@ -1441,8 +1438,8 @@ A9 01 8F 0D 42 00               A9 00 8F 0D 42 00
   fclose (srcfile);
   fclose (destfile);
 
-  puts ("Done");
   ucon64_wrote (ucon64.rom);
+  remove_temp_file ();
 
   return 0;
 }
@@ -2069,7 +2066,7 @@ snes_init (st_rominfo_t *rominfo)
       sprintf (buf, "\nNSRT info:\n"
                       "  Original country: %s\n"
                       "  Original game name: \"%s\"\n"
-                      "  Original checksum: 0x%x\n"
+                      "  Original checksum: 0x%04x\n"
                       "  Port 1 controller type: %s\n"
                       "  Port 2 controller type: %s\n"
                       "  Header version: %.1f",

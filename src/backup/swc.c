@@ -24,17 +24,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define IBUSY_BIT       0x80
 #define STROBE_BIT      1
 
-#define N_TRY_MAX       65536   // # times to test if SWC ready
+#define N_TRY_MAX       65536                   // # times to test if SWC ready
 
-#define BUFFERSIZE      8192    // don't change, only 8192 works!
-#define HEADERSIZE      512     // SWC header is 512 bytes
+#define BUFFERSIZE      8192                    // don't change, only 8192 works!
+#define HEADERSIZE      512                     // SWC header is 512 bytes
 
-#include "swc.h"
-#include "../misc.h"            // kbhit(), getch()
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <sys/stat.h>
+#include "swc.h"
+#include "../misc.h"                            // kbhit(), getch()
 
 static void init_io (unsigned int port);
 static void checkabort (int status);
@@ -57,7 +57,7 @@ static unsigned char receiveb (void);
 static inline unsigned char wait_while_busy (void);
 static inline void wait_for_ready (void);
 
-static int swc_port, special;
+static int swc_port, hirom;                     // `hirom' was `special'
 
 void
 init_io (unsigned int port)
@@ -101,14 +101,12 @@ swc_write_rom (char *filename, unsigned int parport, int sram_size)
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (STDERR, "Not enough memory for file buffer (%d bytes)\n",
-               BUFFERSIZE);
+      fprintf (STDERR, "Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
       exit (1);
     }
 
   stat (filename, &fstate);
-  printf ("Send: %d Bytes (%.4f Mb)\n", (int) fstate.st_size,
-          (float) fstate.st_size / MBIT);
+  printf ("Send: %d Bytes (%.4f Mb)\n", (int) fstate.st_size, (float) fstate.st_size / MBIT);
 
   send_command0 (0xc008, 0);
   fread (buffer, 1, HEADERSIZE, file);
@@ -116,21 +114,21 @@ swc_write_rom (char *filename, unsigned int parport, int sram_size)
   send_block (0x400, buffer, HEADERSIZE);       // send header
   bytessend = HEADERSIZE;
 
-  emu_mode_select = buffer[2];  // this byte is needed later
-  if (buffer[3] & 0x80)         // Pro Fighter (FIG) HiROM dump
-    emu_mode_select |= 0x30;    // set bit 5&4 (SRAM & DRAM mem map mode 21)
+  emu_mode_select = buffer[2];                  // this byte is needed later
+  if (buffer[3] & 0x80)                         // Pro Fighter (FIG) HiROM dump
+    emu_mode_select |= 0x30;                    // set bit 5&4 (SRAM & DRAM mem map mode 21)
   if (sram_size == 0)
     {
-      if (emu_mode_select & 0x10)       // bit 4 == 1 => DRAM mode 21 (HiROM)
-        emu_mode_select &= ~0x20;       // disable SRAM by setting SRAM mem map mode 20
-      else                      // bit 4 == 0 => DRAM mode 20 (LoROM)
-        emu_mode_select |= 0x20;        // disable SRAM by setting SRAM mem map mode 21
+      if (emu_mode_select & 0x10)               // bit 4 == 1 => DRAM mode 21 (HiROM)
+        emu_mode_select &= ~0x20;               // disable SRAM by setting SRAM mem map mode 20
+      else                                      // bit 4 == 0 => DRAM mode 20 (LoROM)
+        emu_mode_select |= 0x20;                // disable SRAM by setting SRAM mem map mode 21
     }
 
-  printf ("Press q to abort\n\n");      // print here, NOT before first SWC I/O,
-  //  because if we get here q works ;)
-  address = 0x200;              // vgs '00 uses 0x200, vgs '96 uses 0,
-  starttime = time (NULL);      //  but then some ROMs don't work
+  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+                                                //  because if we get here q works ;-)
+  address = 0x200;                              // vgs '00 uses 0x200, vgs '96 uses 0,
+  starttime = time (NULL);                      //  but then some ROMs don't work
   while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
     {
       send_command0 (0xc010, blocksdone >> 9);  // only 3 ROM dumps exist where 2nd arg != 0
@@ -144,17 +142,17 @@ swc_write_rom (char *filename, unsigned int parport, int sram_size)
       checkabort (2);
     }
 
-  if (blocksdone > 0x200)       // ROM dump > 512 8KB blocks (=32Mb (=4MB))
+  if (blocksdone > 0x200)                       // ROM dump > 512 8KB blocks (=32Mb (=4MB))
     send_command0 (0xc010, 2);
 
   send_command (5, 0, 0);
-  totalblocks = (fstate.st_size - HEADERSIZE + BUFFERSIZE - 1) / BUFFERSIZE;    // round up
-  send_command (6, 5 | (totalblocks << 8), totalblocks >> 8);   // bytes: 6, 5, #8K L, #8K H, 0
+  totalblocks = (fstate.st_size - HEADERSIZE + BUFFERSIZE - 1) / BUFFERSIZE; // round up
+  send_command (6, 5 | (totalblocks << 8), totalblocks >> 8); // bytes: 6, 5, #8K L, #8K H, 0
   send_command (6, 1 | (emu_mode_select << 8), 0);
 
   wait_for_ready ();
   outportb (swc_port + PARPORT_DATA, 0);
-  outportb (swc_port + PARPORT_CONTROL, inportb (swc_port + PARPORT_CONTROL) ^ STROBE_BIT);     // invert strobe
+  outportb (swc_port + PARPORT_CONTROL, inportb (swc_port + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
 
   free (buffer);
   fclose (file);
@@ -185,17 +183,17 @@ swc_write_sram (char *filename, unsigned int parport)
       exit (1);
     }
 
-  stat (filename, &fstate);     // SWC SRAM is 4*8KB, emu SRAM often not
+  stat (filename, &fstate);                     // SWC SRAM is 4*8KB, emu SRAM often not
   size = fstate.st_size - HEADERSIZE;
   printf ("Send: %d Bytes\n", size);
-  fseek (file, HEADERSIZE, SEEK_SET);   // skip the header
+  fseek (file, HEADERSIZE, SEEK_SET);           // skip the header
 
   send_command (5, 0, 0);
   send_command0 (0xe00d, 0);
   send_command0 (0xc008, 0);
 
-  printf ("Press q to abort\n\n");      // print here, NOT before first SWC I/O,
-  //  because if we get here q works ;)
+  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+                                                //  because if we get here q works ;-)
   address = 0x100;
   starttime = time (NULL);
   while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
@@ -244,11 +242,11 @@ send_command (unsigned char command_code, unsigned short a, unsigned short l)
   sendb (0xaa);
   sendb (0x96);
   sendb (command_code);
-  sendb (a);                    // low byte
-  sendb (a >> 8);               // high byte
-  sendb (l);                    // low byte
-  sendb (l >> 8);               // high byte
-  sendb (0x81 ^ command_code ^ a ^ (a >> 8) ^ l ^ (l >> 8));    // checksum
+  sendb (a);                                    // low byte
+  sendb (a >> 8);                               // high byte
+  sendb (l);                                    // low byte
+  sendb (l >> 8);                               // high byte
+  sendb (0x81 ^ command_code ^ a ^ (a >> 8) ^ l ^ (l >> 8)); // checksum
 }
 
 void
@@ -256,8 +254,8 @@ sendb (unsigned char byte)
 {
   wait_for_ready ();
   outportb (swc_port + PARPORT_DATA, byte);
-  outportb (swc_port + PARPORT_CONTROL, inportb (swc_port + PARPORT_CONTROL) ^ STROBE_BIT);     // invert strobe
-  wait_for_ready ();            // necessary if followed by receiveb()
+  outportb (swc_port + PARPORT_CONTROL, inportb (swc_port + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
+  wait_for_ready ();                            // necessary if followed by receiveb()
 }
 
 int
@@ -278,24 +276,21 @@ swc_read_rom (char *filename, unsigned int parport)
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (STDERR, "Not enough memory for file buffer (%d bytes)\n",
-               BUFFERSIZE);
+      fprintf (STDERR, "Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
       exit (1);
     }
 
   size = receive_rom_info (buffer);
   if (size == 0)
     {
-      fprintf (STDERR,
-               "There is no cartridge present in the Super Wild Card\n");
+      fprintf (STDERR, "There is no cartridge present in the Super Wild Card\n");
       fclose (file);
       remove (filename);
       exit (1);
     }
-  blocksleft = size * 16;       // 1 Mb (128KB) unit == 16 8KB units
-  printf ("Receive: %d Bytes (%.4f Mb) %s\n",
-          size * MBIT, (float) size, special ? "SPECIAL" : "");
-  size *= MBIT;                 // size in bytes for parport_gauge() below
+  blocksleft = size * 16;                       // 1 Mb (128KB) unit == 16 8KB units
+  printf ("Receive: %d Bytes (%.4f Mb)\n", size * MBIT, (float) size);
+  size *= MBIT;                                 // size in bytes for parport_gauge() below
 
   send_command (5, 0, 0);
   send_command0 (0xe00c, 0);
@@ -306,19 +301,19 @@ swc_read_rom (char *filename, unsigned int parport)
     printf ("received data is corrupt\n");
 
   buffer[2] = get_emu_mode_select (byte, blocksleft / 16);
-  fwrite (buffer, 1, HEADERSIZE, file); // write header (other necessary fields are
-  //  filled in by receive_rom_info())
-  if (special)
-    blocksleft >>= 1;           // this must come _after_ get_emu_mode_select()!
+  fwrite (buffer, 1, HEADERSIZE, file);         // write header (other necessary fields are
+                                                //  filled in by receive_rom_info())
+  if (hirom)
+    blocksleft >>= 1;                           // this must come _after_ get_emu_mode_select()!
 
-  printf ("Press q to abort\n\n");      // print here, NOT before first SWC I/O,
-  //  because if we get here q works ;)
-  address1 = 0x300;             // address1 = 0x100, address2 = 0 should
-  address2 = 0x200;             //  also work
+  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+                                                //  because if we get here q works ;-)
+  address1 = 0x300;                             // address1 = 0x100, address2 = 0 should
+  address2 = 0x200;                             //  also work
   starttime = time (NULL);
   while (blocksleft > 0)
     {
-      if (special)
+      if (hirom)
         {
           for (n = 0; n < 4; n++)
             {
@@ -363,7 +358,7 @@ receive_rom_info (unsigned char *buffer)
   - returns size of ROM in Mb (128KB) units
   - returns ROM header in buffer (index 2 (emulation mode select) is not yet
     filled in)
-  - sets global `special'
+  - sets global `hirom'
 */
 {
   int n, m, size;
@@ -376,12 +371,12 @@ receive_rom_info (unsigned char *buffer)
   byte = receiveb ();
   if ((0x81 ^ byte) != receiveb ())
     printf ("received data is corrupt\n");
-  special = byte & 1;           // Caz (vgs '96) does (byte & 0x21) == 0x21 ? 1 : 0;
+  hirom = byte & 1;                             // Caz (vgs '96) does (byte & 0x21) == 0x21 ? 1 : 0;
 
   address = 0x200;
   for (n = 0; n < HEADERSIZE; n++)
     {
-      for (m = 0; m < 65536; m++)       // a delay is necessary here
+      for (m = 0; m < 65536; m++)               // a delay is necessary here
         ;
       send_command (5, address, 0);
       send_command (1, 0xa0a0, 1);
@@ -393,12 +388,12 @@ receive_rom_info (unsigned char *buffer)
     }
 
   size = get_rom_size (buffer);
-  if (special)
+  if (hirom)
     size <<= 1;
 
   memset (buffer, 0, HEADERSIZE);
-  buffer[0] = size << 4 & 0xff; // *16 for 8KB units; low byte
-  buffer[1] = size >> 4;        // *16 for 8KB units /256 for high byte
+  buffer[0] = size << 4 & 0xff;                 // *16 for 8KB units; low byte
+  buffer[1] = size >> 4;                        // *16 for 8KB units /256 for high byte
   buffer[8] = 0xaa;
   buffer[9] = 0xbb;
   buffer[10] = 4;
@@ -509,7 +504,7 @@ get_emu_mode_select (unsigned char byte, int size)
   else
     x = 0;
 
-  if (special)
+  if (hirom)
     {
       if (x == 0xc && size <= 0x1c)
         ems = 0x1c;
@@ -548,8 +543,7 @@ swc_read_sram (char *filename, unsigned int parport)
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (STDERR, "Not enough memory for file buffer (%d bytes)\n",
-               BUFFERSIZE);
+      fprintf (STDERR, "Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
       exit (1);
     }
 
@@ -564,9 +558,9 @@ swc_read_sram (char *filename, unsigned int parport)
   send_command0 (0xe00d, 0);
   send_command0 (0xc008, 0);
 
-  printf ("Press q to abort\n\n");      // print here, NOT before first SWC I/O,
-  //  because if we get here q works ;)
-  blocksleft = 4;               // SRAM is 4*8KB
+  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+                                                //  because if we get here q works ;-)
+  blocksleft = 4;                               // SRAM is 4*8KB
   address = 0x100;
   starttime = time (NULL);
   while (blocksleft > 0)
@@ -601,7 +595,7 @@ receive_block (unsigned short address, unsigned char *buffer, int len)
   if (checksum != receiveb ())
     printf ("\nreceived data is corrupt\n");
 
-  for (m = 0; m < 65536; m++)   // a delay is necessary here
+  for (m = 0; m < 65536; m++)                   // a delay is necessary here
     ;
 }
 
@@ -610,10 +604,10 @@ receiveb (void)
 {
   unsigned char byte;
 
-  byte = (wait_while_busy () & INPUT_MASK) >> 3;        // receive low nibble
-  outportb (swc_port + PARPORT_CONTROL, inportb (swc_port + PARPORT_CONTROL) ^ STROBE_BIT);     // invert strobe
-  byte |= (wait_while_busy () & INPUT_MASK) << 1;       // receive high nibble
-  outportb (swc_port + PARPORT_CONTROL, inportb (swc_port + PARPORT_CONTROL) ^ STROBE_BIT);     // invert strobe
+  byte = (wait_while_busy () & INPUT_MASK) >> 3; // receive low nibble
+  outportb (swc_port + PARPORT_CONTROL, inportb (swc_port + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
+  byte |= (wait_while_busy () & INPUT_MASK) << 1; // receive high nibble
+  outportb (swc_port + PARPORT_CONTROL, inportb (swc_port + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
 
   return byte;
 }
@@ -638,7 +632,7 @@ wait_while_busy (void)
 */
   if (n_try >= N_TRY_MAX)
     {
-      fprintf (STDERR, "The Super Wild Card is not ready\n"     // yes, "ready" :)
+      fprintf (STDERR, "The Super Wild Card is not ready\n" // yes, "ready" :-)
                "Turn it off for a few seconds then turn it on and try again\n");
       exit (1);
     }
@@ -678,7 +672,7 @@ checkabort (int status)
       puts ("\nProgram aborted");
       exit (status);
     }
-//  send_command(5, 0, 0);                      // vgs: when sending/receiving a ROM
+//  send_command (5, 0, 0);                       // vgs: when sending/receiving a ROM
 }
 
 void

@@ -1440,7 +1440,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
       currentsize2, requiredsize2, currentsize3, requiredsize3;
   FILE *srcfile;
 
-  strcpy (src_name, filename);
+  realpath2 (filename, src_name);
   // First try the current directory, then the configuration directory
   if (access (src_name, F_OK | R_OK) == -1)
     sprintf (src_name, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, filename);
@@ -2406,15 +2406,27 @@ q_fbackup (const char *filename, int mode)
           exit (1);
         }
     }
-  else
-    // handle the case where filename has the suffix ".BAK".
+  else // handle the case where filename has the suffix ".BAK".
     {
-      strcpy (buf, basename (tmpnam2 (buf)));
+      char *dir = dirname2 (filename), buf2[FILENAME_MAX];
+
+      if (dir == NULL)
+        {
+          fprintf (stderr, "INTERNAL ERROR: dirname2() returned NULL\n");
+          exit (1);
+        }
+      strcpy (buf, dir);
+      if (buf[0] != 0)
+        if (buf[strlen (buf) - 1] != FILE_SEPARATOR)
+          strcat (buf, FILE_SEPARATOR_S);
+
+      strcat (buf, basename (tmpnam2 (buf2)));
       if (rename (filename, buf))
         {
           fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
           exit (1);
         }
+      free (dir);
     }
 
   switch (mode)

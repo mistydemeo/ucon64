@@ -2346,6 +2346,17 @@ ucon64_pattern (st_rominfo_t *rominfo, const char *pattern_fname)
       cleanup_cm_patterns (&patterns, n_patterns);
       return -1;
     }
+  else if (n_patterns < 0)
+    {
+      char *dir1 = dirname2 (pattern_fname), *dir2 = dirname2 (src_name);
+
+      fprintf (stderr, "ERROR: Could not read from %s, not in %s nor in %s\n",
+                       basename2 (pattern_fname), dir1, dir2);
+      free (dir1);
+      free (dir2);
+      // when build_cm_patterns() returns -1, cleanup_cm_patterns() should not be called
+      return -1;
+    }
 
   printf ("Found %d pattern%s in %s\n", n_patterns, n_patterns != 1 ? "s" : "", src_name);
 

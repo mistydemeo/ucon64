@@ -150,9 +150,9 @@ typedef signed __int64 int64_t;
   #define CURRENT_OS_S "BeOS"
 #elif   defined AMIGA
   #if defined __PPC__
-    #define CURRENT_OS_S "AmigaPPC"
+    #define CURRENT_OS_S "Amiga (PPC)"
   #else
-    #define CURRENT_OS_S "Amiga"                // 68k
+    #define CURRENT_OS_S "Amiga (68K)"
   #endif
 #else
   #define CURRENT_OS_S "?"

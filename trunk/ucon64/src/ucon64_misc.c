@@ -62,6 +62,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   This is a string pool. gcc 2.9x generates something like this itself, but it
   seems gcc 3.x does not. By using a string pool the executable will be
   smaller than without it.
+  It's also handy in order to be consistent with messages.
 */
 const char *ucon64_msg[] = {
   "ERROR: Please check cables and connection\n"
@@ -89,7 +90,7 @@ const char *ucon64_msg[] = {
   "         configuration file or the environment) points to an incorrect\n"
   "         directory. Read the FAQ for more information.\n",
   "Reading config file %s\n",
-  "NOTE: %s not found or too old, support disabled\n",
+  "NOTE: %s not found or too old, support for discmage disabled\n",
   NULL
 };
 
@@ -220,7 +221,7 @@ const st_usage_t vc4000_usage[] =
 
 const st_usage_t odyssey2_usage[] =
   {
-    {NULL, NULL, "G7400+/Odyssey²"},
+    {NULL, NULL, "G7400+/Odyssey2"},
     {NULL, NULL, "1978"},
     {NULL, NULL, NULL}
   };
@@ -344,7 +345,7 @@ const st_usage_t ucon64_options_usage[] = {
 #ifdef  __MSDOS__
   {"hex", NULL, "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex ...|more\""},
 #else
-  {"hex", NULL, "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex ...|less\""},       // less is more ;-)
+  {"hex", NULL, "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex ...|less\""}, // less is more ;-)
 #endif
   {"find", "STRING", "find STRING in ROM (wildcard: '?')"},
   {"c", "FILE", "compare FILE with ROM for differences"},
@@ -606,7 +607,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
 #ifdef  ANSI_COLOR
   {UCON64_NCOL, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
 #endif
-  {UCON64_NHD, UCON64_UNKNOWN, ucon64_options_usage,  WF_SWITCH},
+  {UCON64_NHD, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_NHI, UCON64_SNES, snes_usage,        WF_SWITCH},
   {UCON64_NINT, UCON64_UNKNOWN, ucon64_options_usage,WF_SWITCH},
   {UCON64_NS, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
@@ -1592,9 +1593,8 @@ ucon64_configfile (void)
 #endif
     , dirname);
 #ifdef  DJGPP
-  // this is DJGPP specific - not necessary, but causes less confusion
-  change_mem (ucon64.configfile, strlen (ucon64.configfile), "/", 1, 0, 0,
-              FILE_SEPARATOR_S, 1, 0);
+  // this is DJGPP specific - not necessary, but prevents confusion
+  change_mem (ucon64.configfile, strlen (ucon64.configfile), "/", 1, 0, 0, "\\", 1, 0);
 #endif
 
 //  if (!access (ucon64.configfile, F_OK))

@@ -508,7 +508,6 @@ gameboy_init (st_rominfo_t *rominfo)
 
   value = gameboy_header.start_high << 8;
   value += gameboy_header.start_low;
-
   sprintf (buf, "Start address: %04x", value);
   strcat (rominfo->misc, buf);
 

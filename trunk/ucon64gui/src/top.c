@@ -33,6 +33,7 @@ ucon64gui_top (void)
 #include "xpm/emulate.xpm"
 #include "xpm/icon.xpm"
 #include "xpm/back.xpm"
+#include "xpm/db.xpm"
 #ifdef BACKUP_CD
 #include "xpm/cdrw.xpm"
 #include "xpm/cdrw2.xpm"
@@ -162,6 +163,8 @@ ucon64gui_top (void)
   ucon64gui_spacer ();
 
 #ifdef DB
+
+  h2g_img (db_xpm, 0, 0, 0, NULL);
 
   h2g_ ("Database: ");
 

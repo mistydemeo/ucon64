@@ -168,7 +168,7 @@ typedef struct st_snes_header
 
 static st_snes_header_t snes_header;
 static int snes_split, snes_sramsize, snes_header_base, snes_hirom,
-           snes_hirom_ok, nsrt_header, force_interleaved, bs_dump, st_dump;
+           snes_hirom_ok, nsrt_header, bs_dump, st_dump;
 static snes_file_t type;
 
 static unsigned char gd3_hirom_8mb_map[GD3_HEADER_MAPSIZE] = {
@@ -282,7 +282,6 @@ snes_dint (st_rominfo_t *rominfo)
       return -1;
     }
 
-  force_interleaved = 1;                        // force snes_deinterleave() to do its work
   snes_deinterleave (rominfo, &buffer, size);
 
   if (rominfo->buheader_len)
@@ -474,7 +473,6 @@ write_deinterleaved_data (st_rominfo_t *rominfo, const char *dest_name, int size
       exit (1);
     }
   q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
-  force_interleaved = 1;
   snes_deinterleave (rominfo, &buffer, size);
   q_fwrite (buffer, SWC_HEADER_LEN, size, dest_name, "ab");
   free (buffer);
@@ -820,7 +818,7 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       if (total4Mbparts == 5)
         total4Mbparts = 6;                      // 20 Mbit HiROMs get padded to 24 Mbit
-      else if (total4Mbparts > 8 && total4Mbparts < 12)
+      else if (total4Mbparts > 8 && total4Mbparts <= 12) // <= instead of < to test Star Ocean
         {                                       // 36-44 Mbit HiROMs get padded to 48 Mbit
           if (snes_header_base != SNES_EROM)
             {
@@ -1917,11 +1915,14 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     0x0c0bc8c5: Street Fighter Zero 2 (J)
     These games have two nearly identical headers which can't be used to
     determine whether the dump is interleaved or not.
+    
+    0x39b94597: BS Satella2 1 (J) has a LoROM map type byte while it's a HiROM
+    game
   */
   if (crc1 == 0xfa83b519 || crc1 == 0x4a54adc7)
     check_map_type = 0;                         // not interleaved
   else if (crc2 == 0x4a54adc7 || crc2 == 0xe43491b8 || crc2 == 0x44ca1045 ||
-           crc2 == 0x0c0bc8c5)
+           crc2 == 0x0c0bc8c5 || crc2 == 0x39b94597)
     {
       interleaved = 1;
       snes_hirom = 0;
@@ -1952,7 +1953,6 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
               interleaved = 1;
               snes_hirom = 0;
               snes_hirom_ok = 2;                // fix for snes_deinterleave()
-              force_interleaved = 1;            //  and another
               check_map_type = 0;
             }
         }
@@ -1973,8 +1973,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
         }
       if (snes_header.map_type == 0x21 || snes_header.map_type == 0x31 ||
           snes_header.map_type == 0x35 || snes_header.map_type == 0x3a ||
-          snes_header.bs_map_type == 0x21 || snes_header.bs_map_type == 0x31 ||
-          snes_header.bs_map_type == 0x20)      // BS Satella2 1 (J)
+          snes_header.bs_map_type == 0x21 || snes_header.bs_map_type == 0x31)
         interleaved = 1;
     }
 
@@ -2503,7 +2502,6 @@ snes_init (st_rominfo_t *rominfo)
   rominfo->header = &snes_header;
 
   // step 4.
-  force_interleaved = UCON64_ISSET (ucon64.interleaved) ? 1 : 0;
   rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
     ucon64.interleaved : snes_testinterleaved (rom_buffer, size, x);
 

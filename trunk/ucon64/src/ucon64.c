@@ -399,7 +399,6 @@ main (int argc, char *argv[])
 
   if (argcmp (argc, argv, "-swap"))
     {
-
       fileswap (ucon64_fbackup (&rom, rom.rom), 0, quickftell (rom.rom));
       return 0;
     }

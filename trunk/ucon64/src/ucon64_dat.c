@@ -168,11 +168,11 @@ get_dat_header (char *fname, st_ucon64_dat_t *dat)
 static int
 fname_to_console (const char *fname, st_ucon64_dat_t *dat)
 {
+  int pos;
   // We use the filename to find out for what console a DAT file is meant.
   //  The field "refname" seems too unreliable.
   // TODO: update this list to contain only strings that real DAT filenames
   //  start with
-
   static const st_console_t console_type[] = {
     {"GoodSNES", custom_strnicmp, UCON64_SNES, snes_usage},
     {"GoodNES", custom_strnicmp, UCON64_NES, nes_usage},
@@ -188,19 +188,20 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
     {"Good2600", custom_strnicmp, UCON64_ATARI, atari_usage},
     {"Good5200", custom_strnicmp, UCON64_ATARI, atari_usage},
     {"Good7800", custom_strnicmp, UCON64_ATARI, atari_usage},
+//  more or less unique names could be compared with custom_strnicmp()
     {"Neo-Geo", custom_strnicmp, UCON64_NEOGEO, neogeo_usage},
     {"MAME", custom_stristr, UCON64_MAME, mame_usage},
-/*
+    {"Dreamcast", custom_stristr, UCON64_DC, dc_usage},
+    {"Saturn", custom_stristr, UCON64_SATURN, sat_usage},
+    {"3do", custom_stristr, UCON64_REAL3DO, real3do_usage},
+    {"cdi", custom_stristr, UCON64_CDI, cdi_usage},
+/* TODO:
     {"psx", custom_stristr, UCON64_PSX, psx_usage},
     {"ps1", custom_stristr, UCON64_PSX, psx_usage},
     {"psone", custom_stristr, UCON64_PSX, psx_usage},
     {"ps2", custom_stristr, UCON64_PS2, ps2_usage},
-    {"sat", custom_stristr, UCON64_SATURN, sat_usage},
-    {"dreamcast", custom_stristr, UCON64_DC, dc_usage},
     {"dc", custom_stristr, UCON64_DC, dc_usage},
     {"cd32", custom_stristr, UCON64_CD32, cd32_usage},
-    {"cdi", custom_stristr, UCON64_CDI, cdi_usage},
-    {"3do", custom_stristr, UCON64_REAL3DO, real3do_usage},
     {"system", custom_stristr, UCON64_SYSTEM16, s16_usage},
     {"pocket", custom_stristr, UCON64_NEOGEOPOCKET, ngp_usage},
     {"vectrex", custom_stristr, UCON64_VECTREX, vectrex_usage},
@@ -228,7 +229,6 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
 */
     {0, 0, 0, 0}
   };
-  int pos;
 
   for (pos = 0; console_type[pos].id; pos++)
     {

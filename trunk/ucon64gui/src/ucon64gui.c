@@ -30,7 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "top.h"
 #include "bottom.h"
-#include "config/config.h"
+#include "configmenu/configmenu.h"
 #include "snes/snes.h"
 #include "n64/n64.h"
 #include "nes/nes.h"

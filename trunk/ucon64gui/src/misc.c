@@ -26,36 +26,35 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
-
-#ifdef __MSDOS__
-  #include <conio.h>                              // getch()
-  #include <pc.h>                                 // kbhit()
-#endif
-
-#include "misc.h"
-
-#define MAXBUFSIZE 32768
-
-#if     defined __unix__ || defined __BEOS__
-#include <stdlib.h>                             // atexit()
-//#include <unistd.h>                             // tcsetattr()
-#include <termios.h>
-
-typedef struct termios tty_t;
-#endif
+#include <sys/stat.h>
 
 #ifdef  __CYGWIN__                              // under Cygwin (gcc for Windows) we
 #define USE_POLL                                //  need poll() for kbhit(). poll()
 #include <sys/poll.h>                           //  is available under Linux, but not
 #endif                                          //  under BeOS. DOS already has kbhit()
 
+#ifdef __MSDOS__
+#include <conio.h>                              // getch()
+#include <pc.h>                                 // kbhit()
+#endif
+
+#if     defined __unix__ || defined __BEOS__
+#include <termios.h>
+
+typedef struct termios tty_t;
+#endif
+
+#include "config.h"
+#include "misc.h"
+
 #if     defined __unix__ || defined __BEOS__
 static void deinit_conio (void);
 static void set_tty (tty_t param);
 #endif
+
+#define MAXBUFSIZE 32768
 
 /*
   like isprint() but for strings
@@ -1064,11 +1063,16 @@ getchd (char *buffer, size_t buffer_size)
       strcat (homedir, getenv ("HOMEPATH"));
     }
   else
-#ifdef __MSDOS__
-    strcpy (homedir, "C:");
-#else
+    /*
+      Don't just use C:\\ under DOS, the user might not have write access
+      there (Windows NT DOS-box). Besides, it would make uCON64 behave
+      differently on DOS than on the other platforms.
+      Having none of the above environment variables can be seen as a feature.
+      A frontend could execute uCON64 with an environment without any of the
+      environment variables set, so that the directory from where uCON64 starts
+      will be used.
+    */
     getcwd (homedir, buffer_size);
-#endif // __MSDOS__
 
 #ifdef __CYGWIN__
   /*

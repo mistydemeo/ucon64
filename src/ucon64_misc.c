@@ -857,8 +857,9 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
   switch (mode)
     {
     case UCON64_LSV:
-      if (!result) ucon64_nfo (&rominfo);
-        break;
+      if (!result)
+        ucon64_nfo (&rominfo);
+      break;
 
     case UCON64_RROM:
     case UCON64_RR83:

@@ -43,6 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "smd.h"
 #include "ssc.h"
 #include "swc.h"
+#include "ufo.h"
 #include "yoko.h"
 #include "z64.h"
 #endif // PARALLEL

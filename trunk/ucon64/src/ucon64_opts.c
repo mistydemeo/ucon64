@@ -1095,18 +1095,6 @@ ucon64_options (int c, const char *optarg)
       gba_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
       break;
 
-    case UCON64_SWCS:
-      snes_swcs ();
-      break;
-
-    case UCON64_FIGS:
-      snes_figs ();
-      break;
-
-    case UCON64_UFOS:
-      snes_ufos ();
-      break;
-
     case UCON64_E:
       ucon64_e ();
       break;
@@ -1227,6 +1215,10 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_FIG:
       snes_fig (ucon64.rominfo);
+      break;
+
+    case UCON64_FIGS:
+      snes_figs ();
       break;
 
     case UCON64_GBX:
@@ -1485,6 +1477,18 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_SWC:
       snes_swc (ucon64.rominfo);
+      break;
+
+    case UCON64_SWCS:
+      snes_swcs ();
+      break;
+
+    case UCON64_UFO:
+      snes_ufo (ucon64.rominfo);
+      break;
+
+    case UCON64_UFOS:
+      snes_ufos ();
       break;
 
     case UCON64_UNIF:

@@ -287,6 +287,7 @@ const struct option options[] = {
     {"swap", 0, 0, UCON64_SWAP},
     {"swc", 0, 0, UCON64_SWC},
     {"swcs", 0, 0, UCON64_SWCS},
+    {"ufo", 0, 0, UCON64_UFO},
     {"ufos", 0, 0, UCON64_UFOS},
     {"unif", 0, 0, UCON64_UNIF},
     {"usms", 1, 0, UCON64_USMS},
@@ -299,7 +300,7 @@ const struct option options[] = {
     {"xbox", 0, 0, UCON64_XBOX},
 #ifdef  DISCMAGE
     {"xcdrw", 0, 0, UCON64_XCDRW},
-#endif    
+#endif
 #ifdef  PARALLEL
     {"xdex", 1, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
@@ -826,7 +827,7 @@ ucon64_execute_options (void)
 
       opts++;
 
-      // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
+      // WF_NO_SPLIT, WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
       result = ucon64_rom_handling ();
 
       if (result == -1) // no rom, but WF_NO_ROM
@@ -925,17 +926,14 @@ ucon64_rom_handling (void)
   // The next statement is important and should be executed as soon as
   //  possible (and sensible) in this function
   ucon64.file_size = q_fsize (ucon64.rom);
-
-  // Does the option allow split ROMs?
-  if (ucon64.flags & WF_NO_SPLIT)
-    // test for split files only if the console type knows about split files at all
-    if (ucon64.console == UCON64_NES || ucon64.console == UCON64_SNES ||
-        ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG)
-      if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.rom))
-        {
-          fprintf (stderr, "ERROR: %s seems to be split. You have to join it first.\n", basename2 (ucon64.rom));
-          return -1;
-        }
+  // We have to do this here, because we don't know the file size until now
+  if (ucon64.buheader_len > ucon64.file_size)
+    {
+      fprintf (stderr,
+               "ERROR: A backup unit header length was specified that is larger than the file\n"
+               "       size (%d > %d)\n", ucon64.buheader_len, ucon64.file_size);
+      return -1;
+    }
 
   if (!(ucon64.flags & WF_INIT))
     return 0;
@@ -972,6 +970,21 @@ ucon64_rom_handling (void)
 #endif
     }
   // end of WF_PROBE
+
+  // Does the option allow split ROMs?
+  if (ucon64.flags & WF_NO_SPLIT)
+    /*
+      Test for split files only if the console type knows about split files at
+      all. However we only know the console type after probing.
+    */
+    if (ucon64.console == UCON64_NES || ucon64.console == UCON64_SNES ||
+        ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG)
+      if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.rom))
+        {
+          fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n",
+                   basename2 (ucon64.rom));
+          return -1;
+        }
 
 
   /*

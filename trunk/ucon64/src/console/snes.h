@@ -29,33 +29,34 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SNES_HIROM 0x8000
 #define SNES_EROM 0x400000                      // "Extended" ROM, Hi or Lo
 
-typedef enum { SWC, GD3, FIG, MGD, SMC } snes_file_t;
+typedef enum { SWC, GD3, UFO, FIG, MGD, SMC } snes_file_t;
 
 extern const st_usage_t snes_usage[];
 
+extern int snes_buheader_info (st_rominfo_t *rominfo);
 extern int snes_chk (st_rominfo_t *rominfo);
 extern int snes_col (const char *color);
+extern int snes_demirror (st_rominfo_t *rominfo);
 extern int snes_dint (st_rominfo_t *rominfo);
 extern int snes_f (st_rominfo_t *rominfo);
 extern int snes_fig (st_rominfo_t *rominfo);
 extern int snes_figs (void);
 extern int snes_gd3 (st_rominfo_t *rominfo);
+extern snes_file_t snes_get_file_type (void);
+extern int snes_get_snes_hirom (void);
 extern int snes_init (st_rominfo_t *rominfo);
 extern int snes_j (st_rominfo_t *rominfo);
 extern int snes_k (st_rominfo_t *rominfo);
 extern int snes_l (st_rominfo_t *rominfo);
+extern int snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names);
 extern int snes_mgd (st_rominfo_t *rominfo);
 extern int snes_mgh (st_rominfo_t *rominfo);
 extern int snes_n (st_rominfo_t *rominfo, const char *name);
 extern int snes_s (st_rominfo_t *rominfo);
+extern void snes_set_fig_header (st_rominfo_t *rominfo, st_fig_header_t *header);
 extern int snes_smc (st_rominfo_t *rominfo);
 extern int snes_swc (st_rominfo_t *rominfo);
 extern int snes_swcs (void);
+extern int snes_ufo (st_rominfo_t *rominfo);
 extern int snes_ufos (void);
-extern int snes_buheader_info (st_rominfo_t *rominfo);
-extern int snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names);
-extern int snes_get_snes_hirom (void);
-extern snes_file_t snes_get_file_type (void);
-extern void snes_set_fig_header (st_rominfo_t *rominfo, st_fig_header_t *header);
-extern int snes_demirror (st_rominfo_t *rominfo);
 #endif /* SNES_H */

@@ -261,7 +261,7 @@ extern char *strcasestr2 (const char *str, const char *search);
 #define stristr strcasestr2
 extern char *setext (char *filename, const char *ext);
 extern const char *getext (const char *filename);
-#define EXTCMP(filename, ext) (strcasecmp (getext (filename), ext))
+//#define EXTCMP(filename, ext) (strcasecmp (getext (filename), ext))
 extern char *basename2 (const char *str);
 /*
   the following define *IS* important since it's said that XPG basename()

@@ -1200,16 +1200,16 @@ ucon64_usage (int argc, char *argv[])
     argv[0], ucon64.configfile, MAXROMSIZE, TOMBIT_F (MAXROMSIZE));
 
   printf ("Padding\n"
+    "  " OPTION_LONG_S "ispad       check if ROM is padded\n"
+    "  " OPTION_S "p, " OPTION_LONG_S "pad    pad ROM to full Mb\n"
+    "  " OPTION_LONG_S "padn=N      pad ROM to N Bytes (put Bytes with value 0x00 after end)\n"
+    "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
     "  " OPTION_LONG_S "stpn=N      strip N Bytes from ROM beginning\n"
     "  " OPTION_LONG_S "stp         same as " OPTION_LONG_S "stpn=512\n"
     "                  most backup units use a header with 512 Bytes size\n"
     "  " OPTION_LONG_S "insn=N      insert N Bytes (0x00) before ROM\n"
     "  " OPTION_LONG_S "ins         same as " OPTION_LONG_S "insn=512\n"
     "                  most backup units use a header with 512 Bytes size\n"
-    "  " OPTION_LONG_S "ispad       check if ROM is padded\n"
-    "  " OPTION_S "p, " OPTION_LONG_S "pad    pad ROM to full Mb\n"
-    "  " OPTION_LONG_S "padn=N      pad ROM to N Bytes (put Bytes with value 0x00 after end)\n"
-    "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
     "\n");
 
 //  if (ucon64.dat_enabled)
@@ -1235,6 +1235,43 @@ ucon64_usage (int argc, char *argv[])
       gameboy_usage[0],
       gba_usage[0],
       n64_usage[0]);
+
+/*
+GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
+*visit NEWNet #rareroms*
+
+Usage: GoodSNES	[rename|move|scan[d]|scannew[d]|list[d]|audit[2]
+		[changes[-]][changesnew[-]][quiet][dirs|inplace][deep][sepX]
+
+rename     = Rename files
+renamebad  = Rename bad checksummed files
+move       = Move files
+move       = Move bad checksummed files
+scan       = Generate listing of all files [w/dirs]
+scannew    = Generate listing of unknown files [w/dirs]
+list       = Lists files you have/need without renaming [w/dirs]
+audit      = Prints names not matching any line in Goodinfo.cfg
+inplace    = Renames files in same dir, not making 'Ren' dir
+changes    = Log rename/move operations (- reverses)
+changesnew = Log rename/move operations that change a filename
+dirs       = Move to dirs using Goodinfo.cfg info
+quiet      = Suppress most non-error messages
+sepX       = Replaces space in filenames with char X ('nosep' removes spaces)
+deep       = Adds more detail to scanfiles (where applicable)
+force63    = Force all filenames into Joliet CD format
+Hit ENTER to continue 
+Several output files are created depending on selected options:
+
+GoodSNES.db  = database of scanned ROMs
+SNESMiss     = ROMs missing (if in rename/move/list mode)
+SNESHave     = ROMS present (if in rename/move/list mode)
+SNESScan     = log of 'scan' and 'scannew'
+SNESLog      = log of 'changes' and 'changesnew'
+Good_ZIP     = log of ZIP errors
+Good_RAR     = log of RAR errors
+
+Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
+*/
 
   printf ("Patching\n");
 

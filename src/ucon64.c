@@ -780,10 +780,11 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
   rom->internal_crc=0;	//custom crc (if not current_crc32)
   rom->internal_crc_start=0;
   rom->internal_crc_len=0;	//size in bytes
-  rom->has_internal_inverse_crc=0;
-  rom->internal_inverse_crc=0;	//crc complement
-  rom->internal_inverse_crc_start=0;
-  rom->internal_inverse_crc_len=0;		//size in bytes
+//  rom->has_internal_inverse_crc=0;
+//  rom->internal_inverse_crc=0;
+  strcpy(rom->internal_crc2,"");
+  rom->internal_crc2_start=0;
+  rom->internal_crc2_len=0;		//size in bytes
 
   memset(rom->buheader,0,sizeof(rom->buheader));
   rom->buheader_start=0;
@@ -1129,23 +1130,7 @@ if(rom->splitted[0])printf("Splitted: Yes, %d parts (recommended: use -j to join
            (rom->current_internal_crc == rom->internal_crc) ? "=" : "!",
            rom->internal_crc);
 
-    if(rom->has_internal_inverse_crc)
-    {
-	if(rom->internal_inverse_crc_len==2)/* Super Nintendo */
-	{
-      sprintf(buf,"Inverse checksum: %%s, %%0%dlx + %%0%dlx = %%0%dlx %%s\n"
-           ,rom->internal_inverse_crc_len*2,rom->internal_inverse_crc_len*2,rom->internal_inverse_crc_len*2);
-      printf(buf,
-           (rom->current_internal_crc + rom->internal_inverse_crc == 0xffff) ? "ok" : "bad",
-           rom->current_internal_crc, rom->internal_inverse_crc, rom->current_internal_crc + rom->internal_inverse_crc,
-           (rom->current_internal_crc + rom->internal_inverse_crc == 0xffff) ? "" : "~0xffff");
-        }
-        else
-        { 
-          sprintf(buf,"2nd/inverse checksum: %%0%dlx\n",rom->internal_inverse_crc_len*2);
-          printf(buf,rom->internal_inverse_crc);
-        }
-    }
+    if(rom->internal_crc2[0])printf("%s\n",rom->internal_crc2);
   }
   printf("Checksum (CRC32): %08lx\n",rom->current_crc32);
 

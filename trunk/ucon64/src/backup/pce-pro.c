@@ -170,27 +170,30 @@ pce_write_rom (const char *filename, unsigned int parport)
     size += 2 * MBIT;
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
+  eep_reset ();
+  if (ttt_get_id () != 0xb0d0)
+    {
+      fputs ("ERROR: PCE-PRO flash card (programmer) not detected\n", stderr);
+      fclose (file);
+      ttt_deinit_io ();
+      exit (1);
+    }
+
   starttime = time (NULL);
   eep_reset ();
-  if (ttt_get_id () == 0xb0d0)
+  while ((bytesread = fread (buffer, 1, 0x4000, file)))
     {
-      eep_reset ();
-      while ((bytesread = fread (buffer, 1, 0x4000, file)))
-        {
-          if ((address & 0xffff) == 0)
-            ttt_erase_block (address);
-          write_block (&address, buffer);
-          if ((fsize == 3 * MBIT) && (address == 2 * MBIT))
-            address += 2 * MBIT;
-          if ((fsize == 4 * MBIT) && (address == 4 * MBIT))
-            fseek (file, 2 * MBIT, SEEK_SET);
+      if ((address & 0xffff) == 0)
+        ttt_erase_block (address);
+      write_block (&address, buffer);
+      if ((fsize == 3 * MBIT) && (address == 2 * MBIT))
+        address += 2 * MBIT;
+      if ((fsize == 4 * MBIT) && (address == 4 * MBIT))
+        fseek (file, 2 * MBIT, SEEK_SET);
 
-          bytessend += bytesread;
-          ucon64_gauge (starttime, bytessend, size);
-        }
+      bytessend += bytesread;
+      ucon64_gauge (starttime, bytessend, size);
     }
-  else
-    fputs ("ERROR: PCE-PRO flash card (programmer) not detected\n", stderr);
 
   fclose (file);
   ttt_deinit_io ();

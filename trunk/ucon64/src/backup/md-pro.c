@@ -232,25 +232,28 @@ md_write_rom (const char *filename, unsigned int parport)
   size = fsizeof (filename);
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
-  starttime = time (NULL);
   eep_reset ();
   md_id = ttt_get_id ();
-  if ((md_id == 0xb0d0) || (md_id == 0x8917))   // Sharp 32M, Intel 64J3
+  if ((md_id != 0xb0d0) && (md_id != 0x8917))   // Sharp 32M, Intel 64J3
     {
-      eep_reset ();
-      while ((bytesread = fread (buffer, 1, 0x4000, file)))
-        {
-          ucon64_bswap16_n (buffer, 0x4000);
-          if ((((address & 0xffff) == 0) && (md_id == 0xb0d0)) ||
-              (((address & 0x1ffff) == 0) && (md_id == 0x8917)))
-            ttt_erase_block (address);
-          write_block (&address, buffer);
-          bytessend += bytesread;
-          ucon64_gauge (starttime, bytessend, size);
-        }
+      fputs ("ERROR: MD-PRO flash card (programmer) not detected\n", stderr);
+      fclose (file);
+      ttt_deinit_io ();
+      exit (1);
     }
-  else
-    fputs ("ERROR: MD-PRO flash card (programmer) not detected\n", stderr);
+
+  starttime = time (NULL);
+  eep_reset ();
+  while ((bytesread = fread (buffer, 1, 0x4000, file)))
+    {
+      ucon64_bswap16_n (buffer, 0x4000);
+      if ((((address & 0xffff) == 0) && (md_id == 0xb0d0)) ||
+          (((address & 0x1ffff) == 0) && (md_id == 0x8917)))
+        ttt_erase_block (address);
+      write_block (&address, buffer);
+      bytessend += bytesread;
+      ucon64_gauge (starttime, bytessend, size);
+    }
 
   fclose (file);
   ttt_deinit_io ();
@@ -279,7 +282,8 @@ md_read_sram (const char *filename, unsigned int parport, int start_bank)
   int blocksleft, address, bytesreceived = 0, size, i;
   time_t starttime;
   void (*read_block) (int, unsigned char *) = ttt_read_ram_b; // ttt_read_ram_w
-  // This function does not seem to work if ttt_read_ram_w() is used
+  // This function does not seem to work if ttt_read_ram_w() is used, but see
+  //  note below
 
   if (start_bank == -1)
     {
@@ -310,7 +314,11 @@ md_read_sram (const char *filename, unsigned int parport, int start_bank)
     {
 //      address *= 2;
       ttt_ram_enable ();
+#if 0
+      // According to JohnDie, disabling this statement should make it possible
+      //  to use ttt_read_ram_w().
       ttt_set_ai_data (6, 0x98);        // rst=1, wei=0(dis.), rdi=0(dis.), inc mode, rom_CS
+#endif
     }
 //  else
 //    ttt_set_ai_data (6, 0x94);          // rst=1, wei=0(dis.), rdi=0(dis.), inc mode, rom_CS

@@ -209,22 +209,25 @@ smsgg_write_rom (const char *filename, unsigned int parport)
   size = fsizeof (filename);
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
+  eep_reset ();
+  if (ttt_get_id () != 0xb0d0)
+    {
+      fputs ("ERROR: SMS-PRO/GG-PRO flash card (programmer) not detected\n", stderr);
+      fclose (file);
+      ttt_deinit_io ();
+      exit (1);
+    }
+
   starttime = time (NULL);
   eep_reset ();
-  if (ttt_get_id () == 0xb0d0)
+  while ((bytesread = fread (buffer, 1, 0x4000, file)))
     {
-      eep_reset ();
-      while ((bytesread = fread (buffer, 1, 0x4000, file)))
-        {
-          if ((address & 0xffff) == 0)
-            ttt_erase_block (address);
-          write_block (&address, buffer);
-          bytessend += bytesread;
-          ucon64_gauge (starttime, bytessend, size);
-        }
+      if ((address & 0xffff) == 0)
+        ttt_erase_block (address);
+      write_block (&address, buffer);
+      bytessend += bytesread;
+      ucon64_gauge (starttime, bytessend, size);
     }
-  else
-    fputs ("ERROR: SMS-PRO/GG-PRO flash card (programmer) not detected\n", stderr);
 
   fclose (file);
   ttt_deinit_io ();

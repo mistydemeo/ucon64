@@ -60,10 +60,17 @@ int ucon64_exit(int value,struct ucon64_ *rom)
 #include "wswan/wswan.h"
 #include "intelli/intelli.h"
 
+//#ifdef BACKUP
 #include "backup/fig.h"
 #include "backup/swc.h"
 #include "backup/unknown_bu.h"
 #include "backup/unknown_bu512.h"
+#ifdef BACKUP
+  #ifdef CD
+    #include "backup/cdrecord.h"
+    #include "backup/cdrdao.h"
+  #endif
+#endif
 
 #include "patch/aps.h"
 #include "patch/ips.h"
@@ -80,35 +87,36 @@ int main(int argc,char *argv[])
   struct dirent *ep;
   struct stat puffer;
   DIR *dp;
-  char buf[MAXBUFSIZE], buf2[4096], buf3[4096], *ucon64_argv[128], *forceargs[] =
-  {
-    "",
-    "-gb",
-    "-gen",
-    "-sms",
-    "-jag",
-    "-lynx",
-    "-n64",
-    "-ng",
-    "-nes",
-    "-pce",
-    "-psx",
-    "-psx2",
-    "-snes",
-    "-sat",
-    "-dc",
-    "-cd32",
-    "-cdi",
-    "-3do",
-    "-ata",
-    "-s16",
-    "-ngp",
-    "-gba",
-    "-vec",
-    "-vboy",
-    "-swan",
-    "-coleco",
-    "-int"
+  char buf[MAXBUFSIZE], buf2[4096], buf3[4096], *ucon64_argv[128];
+char *forceargs[] = 
+{
+  "",
+  "-gb",
+  "-gen",
+  "-sms",
+  "-jag",
+  "-lynx",
+  "-n64",
+  "-ng",
+  "-nes",
+  "-pce",
+  "-psx",
+  "-psx2",
+  "-snes",
+  "-sat",
+  "-dc",
+  "-cd32",
+  "-cdi",
+  "-3do",
+  "-ata",
+  "-s16",
+  "-ngp",
+  "-gba",
+  "-vec",
+  "-vboy",
+  "-swan",
+  "-coleco",
+  "-int"
   };
 
 #ifdef	__UNIX__
@@ -482,26 +490,13 @@ if (setgid(gid) == -1)                          //  was used, but just in case (
 
 #endif
 
-
-
+/*
+  here comes the console and ROM *specific* stuff
+*/
 if(argcmp(argc,argv,"-ata"))rom.console=ucon64_ATARI;
 if(argcmp(argc,argv,"-s16"))rom.console=ucon64_SYSTEM16;
-if(argcmp(argc,argv,"-n64"))rom.console=ucon64_N64;
 if(argcmp(argc,argv,"-psx"))rom.console=ucon64_PSX;
 if(argcmp(argc,argv,"-psx2"))rom.console=ucon64_PSX2;
-if(argcmp(argc,argv,"-lynx"))rom.console=ucon64_LYNX;
-if(argcmp(argc,argv,"-jag"))rom.console=ucon64_JAGUAR;
-if(argcmp(argc,argv,"-sms"))rom.console=ucon64_SMS;
-if(argcmp(argc,argv,"-snes"))rom.console=ucon64_SNES;
-if(argcmp(argc,argv,"-gen"))rom.console=ucon64_GENESIS;
-if(argcmp(argc,argv,"-gb"))rom.console=ucon64_GB;
-if(argcmp(argc,argv,"-gba"))rom.console=ucon64_GBA;
-if(argcmp(argc,argv,"-ng"))rom.console=ucon64_NEOGEO;
-if(argcmp(argc,argv,"-ngp"))rom.console=ucon64_NEOGEOPOCKET;
-if(argcmp(argc,argv,"-nes"))rom.console=ucon64_NES;
-if(argcmp(argc,argv,"-pce"))rom.console=ucon64_PCE;
-if(argcmp(argc,argv,"-sat"))rom.console=ucon64_SATURN;
-if(argcmp(argc,argv,"-dc"))rom.console=ucon64_DC;
 if(argcmp(argc,argv,"-cdi"))rom.console=ucon64_CDI;
 if(argcmp(argc,argv,"-cd32"))rom.console=ucon64_CD32;
 if(argcmp(argc,argv,"-3do"))rom.console=ucon64_REAL3DO;
@@ -510,34 +505,44 @@ if(argcmp(argc,argv,"-vboy"))rom.console=ucon64_VIRTUALBOY;
 if(argcmp(argc,argv,"-swan"))rom.console=ucon64_WONDERSWAN;
 if(argcmp(argc,argv,"-vec"))rom.console=ucon64_VECTREX;
 if(argcmp(argc,argv,"-int"))rom.console=ucon64_INTELLI;
+if(argcmp(argc,argv,"-lynx"))rom.console=ucon64_LYNX;
+if(argcmp(argc,argv,"-jag"))rom.console=ucon64_JAGUAR;
+if(argcmp(argc,argv,"-sms"))rom.console=ucon64_SMS;
+if(argcmp(argc,argv,"-gen"))rom.console=ucon64_GENESIS;
+if(argcmp(argc,argv,"-ngp"))rom.console=ucon64_NEOGEOPOCKET;
+if(argcmp(argc,argv,"-nes"))rom.console=ucon64_NES;
+if(argcmp(argc,argv,"-pce"))rom.console=ucon64_PCE;
+if(argcmp(argc,argv,"-sat"))rom.console=ucon64_SATURN;
 
-strcpy(buf,rom.rom);
-if(!strcmp(strupr(&buf[strlen(buf)-4]),".FDS")&&(quickftell(rom.rom)%65500)==0)
-	rom.console=ucon64_NES;
-if(argcmp(argc,argv,"-col"))rom.console=ucon64_SNES;
-if(argcmp(argc,argv,"-ip"))rom.console=ucon64_DC;
-if(argcmp(argc,argv,"-sam"))rom.console=ucon64_NEOGEO;
-if(argcmp(argc,argv,"-xv64"))rom.console=ucon64_N64;
-if(argcmp(argc,argv,"-xdjr"))rom.console=ucon64_N64;
-if(argcmp(argc,argv,"-bot"))rom.console=ucon64_N64;
-if(argcmp(argc,argv,"-n2gb"))rom.console=ucon64_GB;
-if(argcmp(argc,argv,"-xfal"))rom.console=ucon64_GBA;
-if(argcmp(argc,argv,"-xswc"))rom.console=ucon64_SNES;
-if(argcmp(argc,argv,"-xswcs"))rom.console=ucon64_SNES;
-if(argcmp(argc,argv,"-swcs"))rom.console=ucon64_SNES;
-if(argcmp(argc,argv,"-figs"))rom.console=ucon64_SNES;
-if(argcmp(argc,argv,"-ufos"))rom.console=ucon64_SNES;
-if(argcmp(argc,argv,"-xfalm"))rom.console=ucon64_GBA;
-if(argncmp(argc,argv,"-xfalc",6))rom.console=ucon64_GBA;
-if(argcmp(argc,argv,"-xgbx"))rom.console=ucon64_GB;
-if(argcmp(argc,argv,"-xgbxs"))rom.console=ucon64_GB;
-if(argncmp(argc,argv,"-xgbxb",6))rom.console=ucon64_GB;
+rom.console = (argcmp(argc,argv,"-dc") ||
+               argcmp(argc,argv,"-ip")) ? ucon64_DC : rom.console;
 
-if(!access(rom.rom,F_OK))
-{
-	ucon64_init(&rom);
-	if(rom.console!=ucon64_UNKNOWN)ucon64_nfo(&rom);
-}
+rom.console = (argcmp(argc,argv,"-ng") ||
+               argcmp(argc,argv,"-sam")) ? ucon64_NEOGEO : rom.console;
+
+rom.console = (argcmp(argc,argv,"-n64") ||
+               argcmp(argc,argv,"-xdjr") ||
+               argcmp(argc,argv,"-bot") ||
+               argcmp(argc,argv,"-xv64")) ? ucon64_N64 : rom.console;
+
+rom.console = (argcmp(argc,argv,"-snes") ||
+               argcmp(argc,argv,"-col") ||
+               argcmp(argc,argv,"-xswc") ||
+               argcmp(argc,argv,"-xswcs") ||
+               argcmp(argc,argv,"-swcs") ||
+               argcmp(argc,argv,"-figs") ||
+               argcmp(argc,argv,"-ufos")) ? ucon64_SNES : rom.console;
+
+rom.console = (argcmp(argc,argv,"-gba") ||
+               argcmp(argc,argv,"-xfalm") ||
+               argncmp(argc,argv,"-xfalc",6) ||
+               argcmp(argc,argv,"-xfal")) ? ucon64_GBA : rom.console;
+
+rom.console = (argcmp(argc,argv,"-gb") ||
+               argcmp(argc,argv,"-n2gb") ||
+               argcmp(argc,argv,"-xgbx") ||
+               argcmp(argc,argv,"-xgbxs") ||
+               argncmp(argc,argv,"-xgbxb",6)) ? ucon64_GB : rom.console;
 
 if(argcmp(argc,argv,"-db"))
 {
@@ -574,6 +579,14 @@ if(argcmp(argc,argv,"-dbv"))
 	return(ucon64_exit(0,&rom));
 }
 
+if( rom.console == ucon64_UNKNOWN &&
+    !access(rom.rom,F_OK)
+)
+{
+  ucon64_init(&rom);
+  if(rom.console!=ucon64_UNKNOWN)ucon64_nfo(&rom);
+}
+
 switch(rom.console)
 {
 case ucon64_GB:
@@ -606,7 +619,10 @@ break;
 case ucon64_PCE:
   pcengine_main(&rom);
 break;
-/*  ucon64 is cartridge only
+/*
+#ifdef BACKUP
+
+#ifdef CD
 case ucon64_PSX:
 case ucon64_PSX2:
   playstation_main(&rom);
@@ -614,6 +630,9 @@ break;
 case ucon64_DC:
   dreamcast_main(&rom);
 break;
+#endif
+
+#endif
 */
 case ucon64_SYSTEM16:
   system16_main(&rom);
@@ -985,16 +1004,8 @@ xps_usage( argc, argv );
 
 printf("\n");
 
-
-/*
-if(argcmp(argc,argv,"-dc"))dreamcast_usage(argc,argv);
-else */
 if(argcmp(argc,argv,"-gba"))gbadvance_usage(argc,argv);
 else if(argcmp(argc,argv,"-n64"))nintendo64_usage(argc,argv);
-/*
-else if(argcmp(argc,argv,"-psx") ||
-	argcmp(argc,argv,"-psx2"))playstation_usage(argc,argv);
-*/
 else if(argcmp(argc,argv,"-jag"))jaguar_usage(argc,argv);
 else if(argcmp(argc,argv,"-snes"))snes_usage(argc,argv);
 else if(argcmp(argc,argv,"-ng"))neogeo_usage(argc,argv);
@@ -1013,6 +1024,13 @@ else if(argcmp(argc,argv,"-vboy"))virtualboy_usage(argc,argv);
 else if(argcmp(argc,argv,"-swan"))wonderswan_usage(argc,argv);
 else if(argcmp(argc,argv,"-vec"))vectrex_usage(argc,argv);
 else if(argcmp(argc,argv,"-int"))intelli_usage(argc,argv);
+#ifdef BACKUP
+#ifdef CD
+else if(argcmp(argc,argv,"-dc"));
+else if(argcmp(argc,argv,"-psx"));
+else if(argcmp(argc,argv,"-psx2"));
+#endif
+#endif
 else
 {
 	gbadvance_usage(argc,argv);
@@ -1051,6 +1069,25 @@ printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 ,vectrex_TITLE
 ,intelli_TITLE
 );
+
+#ifdef BACKUP
+
+#ifdef CD
+printf("%s\n%s\n%s\n"
+	"  -dc, -psx, -psx2\n"
+	"		force recognition; NEEDED"
+	"\n  *		show info (default)\n"
+        "  -xcd\n\n"
+,system16_TITLE
+,atari_TITLE
+,coleco_TITLE
+);
+
+cdrdao_usage(argc,argv);
+cdrecord_usage(argc,argv);
+#endif
+
+#endif
 
 }
 
@@ -1122,7 +1159,7 @@ if(rom->splitted[0])printf("Splitted: Yes, %d parts (recommended: use -j to join
 
   if(rom->has_internal_crc)
   {
-    sprintf(buf,"Checksum: %%s, %%0%dlx (calculated) %%s= %%0%dlx (internal)\n"
+    sprintf(buf,"Checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)\n"
              ,rom->internal_crc_len*2,rom->internal_crc_len*2);
     printf(buf,
            (rom->current_internal_crc == rom->internal_crc) ? "ok" : "bad (use -chk to fix)",
@@ -1132,7 +1169,7 @@ if(rom->splitted[0])printf("Splitted: Yes, %d parts (recommended: use -j to join
 
     if(rom->internal_crc2[0])printf("%s\n",rom->internal_crc2);
   }
-  printf("Checksum (CRC32): %08lx\n",rom->current_crc32);
+  printf("Checksum (CRC32): 0x%08lx\n",rom->current_crc32);
 
   printf("\n");
 

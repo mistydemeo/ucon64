@@ -25,7 +25,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/stat.h>
 #include "config.h"
 #include "misc.h"
 #include "ucon64.h"
@@ -533,16 +532,8 @@ WriteN64Header ()
 
 
 void
-WriteSizeHeader ()
+WriteSizeHeader (long ORGSize, long NEWSize)
 {
-  long NEWSize, ORGSize;
-  struct stat fstate;
-
-  fstat (fileno (n64caps_NEWFile), &fstate);
-  NEWSize = fstate.st_size;
-  fstat (fileno (n64caps_ORGFile), &fstate);
-  ORGSize = fstate.st_size;
-
   fwrite (&NEWSize, sizeof (NEWSize), 1, n64caps_APSFile);
   if (ORGSize != NEWSize)
     n64caps_ChangeFound = n64caps_TRUE;
@@ -666,7 +657,7 @@ n64caps_main (int argc, const char *argv[])
 
   WriteStdHeader (Description);
   WriteN64Header ();
-  WriteSizeHeader ();
+  WriteSizeHeader (quickftell (File1), quickftell (File2));
 
   if (!n64caps_Quiet)
     {

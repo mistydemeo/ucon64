@@ -104,13 +104,16 @@ static void ucon64_usage (int argc, char *argv[]);
 st_ucon64_t ucon64;
 #ifdef  ANSI_COLOR
 int ucon64_ansi_color = 0;
+#ifdef  DJGPP
+#include <dpmi.h>
+#endif
 #endif
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S
 #if 0
                              "/" CURRENT_ENDIAN_S
 #endif
                              " 1999-2002 by (various)";
-static int ucon64_fsize;
+static int ucon64_fsize = 0;
 
 const struct option long_options[] = {
     {"1991", 0, 0, UCON64_1991},
@@ -322,8 +325,18 @@ main (int argc, char **argv)
   st_rominfo_t rom;
 
 #ifdef  ANSI_COLOR
-#ifndef __MSDOS__                               // TODO: colors for DOS port _via DOS_
   ucon64_ansi_color = isatty (STDOUT_FILENO);
+#ifdef  DJGPP
+// Don't use __MSDOS__, because __dpmi_regs and __dpmi_int are DJGPP specific
+  if (ucon64_ansi_color)
+    {
+      __dpmi_regs reg;
+
+      reg.x.ax = 0x1a00;                        // DOS 4.0+ ANSI.SYS installation check
+      __dpmi_int (0x2f, &reg);
+      if (reg.h.al != 0xff)                     // AL == 0xff if installed
+        ucon64_ansi_color = 0;
+    }
 #endif
 #endif
 
@@ -396,7 +409,7 @@ main (int argc, char **argv)
     ucon64.rom = argv[optind++];
 
   ucon64.rom = ucon64_rom_in_archive (&ucon64.temp, ucon64.rom, ucon64.rom_in_archive,
-                             ucon64.configfile);
+                                      ucon64.configfile);
 
   if (optind < argc)
     ucon64.file = argv[optind++];
@@ -405,9 +418,6 @@ main (int argc, char **argv)
   if (ucon64.file)
     sscanf (ucon64.file, "%x", &ucon64.parport);
 #endif
-
-  ucon64_fsize = quickftell (ucon64.rom);
-  rom.file_size = ucon64_fsize;                 // ugly!
 
   if (!ucon64_init (ucon64.rom, &rom))
     if (ucon64.show_nfo == UCON64_YES)
@@ -560,7 +570,6 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 {
   int result = -1;
   struct stat fstate;
-  long size;
 
   if (access (romfile, F_OK | R_OK) == -1)
     return result;
@@ -569,13 +578,14 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   if (S_ISREG (fstate.st_mode) != TRUE)
     return result;
 
-  size = fstate.st_size;
+  ucon64_fsize = quickftell (ucon64.rom);       // save size in ucon64_fsize
+  rominfo->file_size = ucon64_fsize;
 
 /*
   currently the media type is determined by its size
 */
   if (ucon64.type == UCON64_UNKNOWN)
-    ucon64.type = (size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
+    ucon64.type = (rominfo->file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
 
   ucon64_flush (rominfo);
 

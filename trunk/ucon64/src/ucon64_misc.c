@@ -89,6 +89,7 @@ const char *ucon64_console_error =
 
 static char *ucon64_temp_file = NULL;
 
+
 void
 ucon64_wrote (const char *filename)
 {
@@ -676,7 +677,7 @@ ucon64_rom_in_archive (DIR **dp, const char *archive, char *romname,
     }
 #endif // UNZIP
 
-#ifndef __MSDOS__ 
+#ifndef __MSDOS__
   getcwd (cwd, FILENAME_MAX);
   sprintf (buf, "%s" FILE_SEPARATOR_S "%s", cwd, archive);
 //  strcpy (buf, archive);
@@ -901,10 +902,9 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
 
   ucon64.console = console;
   ucon64.rom = filename;
-  ucon64.type = (quickftell (ucon64.rom) <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
   ucon64_flush (&rominfo);
-
   result = ucon64_init (ucon64.rom, &rominfo);
+  ucon64.type = (rominfo.file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
 
   switch (mode)
     {
@@ -936,8 +936,8 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
     case UCON64_LS:
     default:
       strftime (buf, 13, "%b %d %H:%M", localtime (&fstate->st_mtime));
-      printf ("%-31.31s %10ld %s %s\n", mkprint(rominfo.name, ' '),
-            (long) fstate->st_size, buf, ucon64.rom);
+      printf ("%-31.31s %10d %s %s\n", mkprint (rominfo.name, ' '),
+              rominfo.file_size, buf, ucon64.rom);
       fflush (stdout);
       break;
     }

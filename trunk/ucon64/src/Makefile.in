@@ -1,10 +1,9 @@
 .PHONY: all clean distclean install uninstall
 
-CC=gcc
+CC=@CC@
 
-CFLAGS=-I. -Wall -O3
-LDFLAGS=-s
-#LDFLAGS+=-lz
+CFLAGS=@CFLAGS@
+LDFLAGS=@LDFLAGS@
 
 OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
@@ -71,7 +70,11 @@ ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	rm -f ../bin/$(TARGET) Makefile config.log config.status config.cache
 else
 ifdef DJGPP
-	del ..\bin\$(TARGET) Makefile config.log config.status config.cache
+	del ..\bin\$(TARGET)
+	del Makefile
+	del config.log
+	del config.status
+	del config.cache
 else
 	rm -f ../bin/$(TARGET) Makefile config.log config.status config.cache
 endif                                   # DJGPP

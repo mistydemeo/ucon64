@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>             // ioperm() (libc5)
 #include "config.h"
@@ -32,8 +31,6 @@
 
 static unsigned char psx_parallel_out_0 = 0xff;
 static unsigned char psx_parallel_out_2 = 0x00;
-
-
 
 
 /*

@@ -1578,7 +1578,7 @@ ucon64_options (int c, const char *optarg)
 #ifdef  USE_LIBCD64
     case UCON64_XCD64:
       if (access (ucon64.rom, F_OK) != 0)
-        cd64_read_rom (ucon64.rom, 8);
+        cd64_read_rom (ucon64.rom, 64);
       else
         cd64_write_rom (ucon64.rom);
       fputc ('\n', stdout);

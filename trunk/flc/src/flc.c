@@ -30,9 +30,7 @@
 #include "getopt.h"
 #include "misc.h"
 #include "flc.h"
-#include "extract.h"
-#include "sort.h"
-#include "output.h"
+#include "flc_misc.h"
 
 static void flc_exit (void);
 static int flc_configfile (void);
@@ -307,7 +305,7 @@ flc_configfile (void)
 
   if (!access (flc.configfile, F_OK))
     {
-      if (strtol (get_property (flc.configfile, "version", buf, "0"), NULL, 10) < FLC_VERSION)
+      if (strtol (get_property (flc.configfile, "version", buf, "0"), NULL, 10) < FLC_CONFIG_VERSION)
         {
           strcpy (buf, flc.configfile);
           setext (buf, ".OLD");
@@ -367,7 +365,7 @@ flc_configfile (void)
          "# MP3 (ID3) support\n"
          "#\n"
          "mp3_extract=id3extract \"%%s\"\n",
-         FLC_VERSION);
+         FLC_CONFIG_VERSION);
 
   fclose (fh);
   printf ("OK\n\n");

@@ -19,54 +19,9 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef FLC_H
-#define FLC_H
-
-#define MAXBUFSIZE 32768
-
-extern void flc_usage (int argc, char *argv[]);
-
-#define FLC_VERSION_S "1.0.4"
-//#define FLC_VERSION 104
-#define FLC_CONFIG_VERSION 104
-
-typedef struct st_flc
-{
-  int kb;
-  int html;
-  int check;
-
-  int sort;
-  int bydate;
-  int bysize;
-  int byname;
-  int fr;
-
-  char configfile[FILENAME_MAX];
-} st_flc_t;
-
-extern st_flc_t flc;
-
-#define FID_LINES_MAX 20
-
-typedef struct st_sub
-{
-  char name[FILENAME_MAX + 1];
-  char fullpath[FILENAME_MAX + 1];
-  off_t size;
-  unsigned int date;
-  int checked;
-  char file_id[FID_LINES_MAX + 1][49];
-}
-st_sub_t;
-
-struct st_file
-{
-  struct st_file *next;
-
-  st_sub_t sub;
-};
-
-typedef struct st_file st_file_t;
-
-#endif
+#ifndef FLC_MISC_H
+#define FLC_MISC_H
+extern int extract (st_sub_t * file);
+extern int sort (st_file_t * file);
+extern int output (const st_sub_t * file);
+#endif // FLC_MISC_H

@@ -54,6 +54,12 @@ const st_usage_t gd_usage[] =
                 "receives automatically when ROM does not exist\n"
 #endif
                 "this option uses the Game Doctor SF6 protocol"},
+#if 1 // dumping is not yet supported (probably never)
+    {"xgd3s", NULL, "send SRAM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT"},
+#else
+    {"xgd3s", NULL, "send/receive SRAM to/from Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when SRAM does not exist"},
+#endif
 #if 1 // dumping is not yet supported (might happen soon)
     {"xgd6s", NULL, "send SRAM to Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT"},
 #else
@@ -96,6 +102,8 @@ static int gd6_send_bytes (unsigned char *data, int len);
 static int gd_send_unit_prolog (int header, unsigned size);
 static int gd_write_rom (const char *filename, unsigned int parport,
                          st_rominfo_t *rominfo, const char *prolog_str);
+static int gd_write_sram (const char *filename, unsigned int parport,
+                          const char *prolog_str);
 
 typedef struct st_gd3_memory_unit
 {
@@ -637,6 +645,15 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
 
 
 int
+gd3_read_sram (const char *filename, unsigned int parport)
+{
+  (void) filename;                              // warning remover
+  (void) parport;                               // warning remover
+  return fprintf (stderr, "ERROR: The function for dumping SRAM is not yet implemented\n");
+}
+
+
+int
 gd6_read_sram (const char *filename, unsigned int parport)
 {
 #if 0
@@ -669,7 +686,27 @@ gd6_read_sram (const char *filename, unsigned int parport)
 
 
 int
+gd3_write_sram (const char *filename, unsigned int parport)
+{
+  gd_send_prolog_bytes = gd3_send_prolog_bytes;
+  gd_send_bytes = gd3_send_bytes;
+
+  return gd_write_sram (filename, parport, GD3_PROLOG_STRING);
+}
+
+
+int
 gd6_write_sram (const char *filename, unsigned int parport)
+{
+  gd_send_prolog_bytes = gd6_send_prolog_bytes;
+  gd_send_bytes = gd6_send_bytes;
+
+  return gd_write_sram (filename, parport, GD6_PROLOG_STRING);
+}
+
+
+int
+gd_write_sram (const char *filename, unsigned int parport, const char *prolog_str)
 {
   FILE *file;
   unsigned char *buffer;
@@ -708,18 +745,19 @@ gd6_write_sram (const char *filename, unsigned int parport)
   printf ("Send: %d Bytes\n", size);
   fseek (file, (size_t) header_size, SEEK_SET); // skip the header
 
-  memcpy (buffer, GD6_PROLOG_STRING, 4);
+  if (memcmp (prolog_str, GD6_PROLOG_STRING, 4) == 0)
+    if (gd6_sync_hardware () == GD_ERROR)
+      io_error ();
+  memcpy (buffer, prolog_str, 4);
   buffer[4] = 1;
-  if (gd6_sync_hardware () == GD_ERROR)
-    io_error ();
-  if (gd6_send_prolog_bytes (buffer, 5) == GD_ERROR)
+  if (gd_send_prolog_bytes (buffer, 5) == GD_ERROR)
     io_error ();
 
   buffer[0] = 0x00;
   buffer[1] = 0x80;
   buffer[2] = 0x00;
   buffer[3] = 0x00;
-  if (gd6_send_prolog_bytes (buffer, 4) == GD_ERROR)
+  if (gd_send_prolog_bytes (buffer, 4) == GD_ERROR)
     io_error ();
 
   /*
@@ -728,7 +766,7 @@ gd6_write_sram (const char *filename, unsigned int parport)
     extension of .B## (where # is a digit from 0-9)
   */
   strcpy ((char *) gdfilename, "SF8123  B00"); // TODO: we might need to make a GD file name from the real one
-  if (gd6_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
+  if (gd_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
     io_error ();
 
   printf ("Press q to abort\n\n");              // print here, NOT before first GD I/O,
@@ -736,7 +774,7 @@ gd6_write_sram (const char *filename, unsigned int parport)
   starttime = time (NULL);
   while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
     {
-      if (gd6_send_bytes (buffer, bytesread) == GD_ERROR)
+      if (gd_send_bytes (buffer, bytesread) == GD_ERROR)
         io_error ();
 
       bytessend += bytesread;

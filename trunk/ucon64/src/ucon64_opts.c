@@ -258,6 +258,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XGBXS:
     case UCON64_XGBXB:
     case UCON64_XGD3:
+    case UCON64_XGD3S:
     case UCON64_XGD6:
     case UCON64_XGD6S:
     case UCON64_XLIT:
@@ -1608,8 +1609,16 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
+    case UCON64_XGD3S:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        gd3_read_sram (ucon64.rom, ucon64.parport); // dumping is not yet supported
+      else
+        gd3_write_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
+      fputc ('\n', stdout);
+      break;
+
     case UCON64_XGD6:
-      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
+      if (access (ucon64.rom, F_OK) != 0)
         gd6_read_rom (ucon64.rom, ucon64.parport); // dumping is not yet supported
       else
         {
@@ -1617,16 +1626,16 @@ ucon64_options (int c, const char *optarg)
             fprintf (stderr,
                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format.\n");
           else
-            gd6_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo); // file exists -> send it to the copier
+            gd6_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo);
         }
       fputc ('\n', stdout);
       break;
 
     case UCON64_XGD6S:
-      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
+      if (access (ucon64.rom, F_OK) != 0)
         gd6_read_sram (ucon64.rom, ucon64.parport); // dumping is not yet supported
       else
-        gd6_write_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
+        gd6_write_sram (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;
 

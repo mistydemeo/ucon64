@@ -140,8 +140,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_P (UCON64_OPTION + 107)
 #define UCON64_PAD (UCON64_OPTION + 108)
 #define UCON64_PADHD (UCON64_OPTION + 109)
-#define UCON64_PAS (UCON64_OPTION + 110)
-#define UCON64_PASOFAMI (UCON64_OPTION + 111)
+#define UCON64_PASOFAMI (UCON64_OPTION + 110)
 #define UCON64_PORT (UCON64_OPTION + 112)
 #define UCON64_PPF (UCON64_OPTION + 113)
 #define UCON64_RROM (UCON64_OPTION + 116)
@@ -249,7 +248,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MAXROMSIZE ((512 + 1) * MBIT)
 
 /*
-  this struct holds only workflow relevant informations
+  this struct holds only workflow relevant information
 */
 typedef struct st_ucon64
 {

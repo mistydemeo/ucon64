@@ -362,7 +362,7 @@ main (int argc, char *argv[])
         case ucon64_C:
         case ucon64_CHK:
         case ucon64_CRC:
-        case ucon64_CRCHD://TODO obsolete since -hd and -nhd are global
+        case ucon64_CRCHD://obsolete only for compat.
         case ucon64_CS:
         case ucon64_DB:
         case ucon64_DBS:
@@ -396,7 +396,7 @@ main (int argc, char *argv[])
         case ucon64_NPPF:
         case ucon64_P:
         case ucon64_PAD:
-        case ucon64_PADHD://TODO obsolete since -hd and -nhd are global
+        case ucon64_PADHD://obsolete only for compat.
         case ucon64_PPF:
         case ucon64_RL:
         case ucon64_RU:
@@ -657,12 +657,9 @@ main (int argc, char *argv[])
           ucon64_usage (argc, argv);
           return 0;
 
+        case ucon64_CRCHD://obsolete only for compat.
         case ucon64_CRC:
-          printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, 0));
-          return 0;
-
-        case ucon64_CRCHD:
-          printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, 512));
+          printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, rom.buheader_len));
           return 0;
 
         case ucon64_RL:
@@ -709,14 +706,10 @@ main (int argc, char *argv[])
           printf ("Wrote output to %s\n", rom.rom);
           return result;
   
+        case ucon64_PADHD:
         case ucon64_PAD:
           ucon64_fbackup (rom.rom);
-  
-          return filepad (rom.rom, 0, MBIT);
-  
-        case ucon64_PADHD:
-          ucon64_fbackup (rom.rom);
-          return filepad (rom.rom, 512, MBIT);
+          return filepad (rom.rom, rom.buheader_len, MBIT);
   
         case ucon64_ISPAD:
           if ((padded = filetestpad (rom.rom)) != -1)
@@ -1357,7 +1350,7 @@ ucon64_init (char *romfile, struct rom_ *rom)
 //      strcpy (rom->name, "?");
       strcpy (rom->manufacturer, "Unknown Manufacturer");
       strcpy (rom->country, "Unknown Country");
-    
+
       return 0;
     }
 
@@ -1917,7 +1910,7 @@ ucon64_usage (int argc, char *argv[])
            "  " OPTION_S "e           emulate/run ROM (see $HOME/.ucon64rc for more)\n"
 #endif
            "  " OPTION_LONG_S "crc         show CRC32 value of ROM\n"
-           "  " OPTION_LONG_S "crchd       show CRC32 value of ROM (regarding to +512 Bytes header)\n"
+//obsolete since -hd and -nhd are global   "  " OPTION_LONG_S "crchd       show CRC32 value of ROM (regarding to +512 Bytes header)\n"
            "  " OPTION_LONG_S "dbs         search ROM database (all entries) by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
            "  " OPTION_LONG_S "db          ROM database statistics (# of entries)\n"
            "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
@@ -1929,9 +1922,9 @@ ucon64_usage (int argc, char *argv[])
            "  " OPTION_LONG_S "rl          rename all files in DIRECTORY to lowercase; " OPTION_LONG_S "rom=DIRECTORY\n"
            "  " OPTION_LONG_S "ru          rename all files in DIRECTORY to uppercase; " OPTION_LONG_S "rom=DIRECTORY\n"
 #ifdef	__MSDOS__
-           "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom|more\"\n"
+           "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\"\n"
 #else
-           "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom|less\"\n"       // less is better ;-)
+           "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\"\n"       // less is better ;-)
 #endif
            "  " OPTION_LONG_S "find        find string in ROM; " OPTION_LONG_S "file=STRING ('?'==wildcard for ONE char!)\n"
            "  " OPTION_S "c           compare ROMs for differencies; " OPTION_LONG_S "file=OTHER_ROM\n"
@@ -1939,7 +1932,7 @@ ucon64_usage (int argc, char *argv[])
            "  " OPTION_LONG_S "swap        swap/(de)interleave ALL Bytes in ROM (1234<->2143)\n"
            "  " OPTION_LONG_S "ispad       check if ROM is padded\n"
            "  " OPTION_LONG_S "pad         pad ROM to full Mb\n"
-           "  " OPTION_LONG_S "padhd       pad ROM to full Mb (regarding to +512 Bytes header)\n"
+//obsolete since -hd and -nhd are global  "  " OPTION_LONG_S "padhd       pad ROM to full Mb (regarding to +512 Bytes header)\n"
            "  " OPTION_LONG_S "stp         strip first 512 Bytes (possible header) from ROM\n"
            "  " OPTION_LONG_S "ins         insert 512 Bytes (0x00) before ROM\n"
            "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
@@ -1958,102 +1951,132 @@ ucon64_usage (int argc, char *argv[])
 
   optind = option_index = 0;//TODO is there a better way to "reset"?
 
+  single = 0;
+
   while ((c = getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
     {
-      single = 1;
+      if (single) break;
       
       switch (c)
         {
       case ucon64_GBA:
         gbadvance_usage ();
+        single = 1;
         break;
       case ucon64_N64:
         nintendo64_usage ();
+        single = 1;
         break;
       case ucon64_JAG:
         jaguar_usage ();
+        single = 1;
         break;
       case ucon64_SNES:
         snes_usage ();
+        single = 1;
         break;
       case ucon64_NG:
         neogeo_usage ();
+        single = 1;
         break;
       case ucon64_NGP:
         neogeopocket_usage ();
+        single = 1;
         break;
       case ucon64_GEN:
         genesis_usage ();
+        single = 1;
         break;
       case ucon64_GB:
         gameboy_usage ();
+        single = 1;
         break;
       case ucon64_LYNX:
         lynx_usage ();
+        single = 1;
         break;
       case ucon64_PCE:
         pcengine_usage ();
+        single = 1;
         break;
       case ucon64_SMS:
         sms_usage ();
+        single = 1;
         break;
       case ucon64_NES:
         nes_usage ();
+        single = 1;
         break;
       case ucon64_S16:
         sys16_usage ();
+        single = 1;
         break;
       case ucon64_ATA:
         atari_usage ();
+        single = 1;
         break;
       case ucon64_COLECO:
         coleco_usage ();
+        single = 1;
         break;
       case ucon64_VBOY:
         virtualboy_usage ();
+        single = 1;
         break;
       case ucon64_SWAN:
         wonderswan_usage ();
+        single = 1;
         break;
       case ucon64_VEC:
         vectrex_usage ();
+        single = 1;
         break;
       case ucon64_INTELLI:
         intelli_usage ();
+        single = 1;
         break;
       case ucon64_DC:
         dc_usage ();
+        single = 1;
         break;
       case ucon64_PSX:
         psx_usage ();
+        single = 1;
         break;
       case ucon64_PS2:
         ps2_usage ();
+        single = 1;
         break;
       case ucon64_SAT:
         saturn_usage ();
+        single = 1;
         break;
       case ucon64_3DO:
         real3do_usage ();
+        single = 1;
         break;
       case ucon64_CD32:
         cd32_usage ();
+        single = 1;
         break;
       case ucon64_CDI:
         cdi_usage ();
+        single = 1;
         break;
       case ucon64_GC:
         gamecube_usage ();
+        single = 1;
         break;
       case ucon64_XBOX:
         xbox_usage ();
+        single = 1;
         break;
       case ucon64_GP32:
         gp32_usage ();
+        single = 1;
         break;
   
       default:
-        single = 0;
         break;
       }
     }

@@ -109,7 +109,7 @@ extern const st_usage_t ucon64_patching_usage[];
                       will be ignored
   WF_NFO            show info output before processing rom
   WF_NFO_AFTER      show info output AFTER processing rom
-  WF_ROM_REQ        for this option a [--rom=]ROM is required
+  WF_NO_ROM         for this option no ROM is required
   WF_NOCRC32        no CRC32 calculation necessary for this option; this
                       overrides even WF_INIT, WF_NFO and WF_NFO_AFTER
   WF_STOP           a "stop" option:
@@ -122,10 +122,10 @@ extern const st_usage_t ucon64_patching_usage[];
   WF_USB            this option requires a USB port
   WF_SERIAL         this option requires a serial port
   WF_NO_SPLIT       these options do not work with split ROMs
-  WF_DEFAULT        same as WF_PROBE|WF_INIT|WF_NFO (default workflow)
+  WF_DEFAULT        same as WF_PROBE|WF_INIT|WF_NFO
 
   example:
-  WF_NFO|WF_MFO_AFTER|WF_ROM_REQ
+  WF_NFO|WF_MFO_AFTER|WF_NO_ROM
                     a ROM is required and info will be shown before and after
                     it has been processed
 */
@@ -135,7 +135,7 @@ extern const st_usage_t ucon64_patching_usage[];
 #define WF_NFO 4
 #define WF_STOP 8
 #define WF_NFO_AFTER 16
-#define WF_ROM_REQ 32
+#define WF_NO_ROM 32
 #define WF_PAR 64
 #define WF_USB 128
 #define WF_SERIAL 256

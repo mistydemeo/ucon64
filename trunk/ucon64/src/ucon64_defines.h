@@ -24,6 +24,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_DEFINES_H
 // please make sure that NO definition except FALSE has 0 as value
 
+/*
+  maximum # of arguments uCON64 takes
+  (DEBUG checks this against struct option)
+*/
+#define UCON64_MAX_ARGS (0xff)
+
 #define UCON64_UNKNOWN_S "Unknown"
 
 #define NULL_TO_UNKNOWN_S(str) ((str) ? (str) : (UCON64_UNKNOWN_S))

@@ -99,7 +99,7 @@ typedef struct
       char *optarg; // option argument
   } st_args_t;
 
-static st_args_t arg[ARG_MAX]; // is ARG_MAX correct?
+static st_args_t arg[UCON64_MAX_ARGS];
 
 const struct option options[] =   {
     {"83", 0, 0, UCON64_83},
@@ -335,6 +335,8 @@ ucon64_runtime_debug (void)
 
   // How many option do we have?
   printf ("DEBUG: Total options: %d\n", x);
+  printf ("DEBUG: UCON64_MAX_ARGS == %d, %s \n", UCON64_MAX_ARGS, 
+    (x < UCON64_MAX_ARGS ? "good" : "\nERROR: too few. Must be more than options"));
 
   // the other way
   for (x = 0; ucon64_wf[x].option; x++)
@@ -388,6 +390,7 @@ ucon64_runtime_debug (void)
       printf ("DEBUG: No usage assigned (option: %d in ucon64_wf)\n", x);
 
   printf ("DEBUG: Sanity check finished\n");
+
 }
 #endif  // DEBUG
 
@@ -508,7 +511,7 @@ main (int argc, char **argv)
   // getopt() is utilized to make uCON64 handle/parse cmdlines in a sane
   // and expected way
   x = optind = 0;
-  memset (&arg, 0, sizeof (st_args_t) * ARG_MAX);
+  memset (&arg, 0, sizeof (st_args_t) * UCON64_MAX_ARGS);
   while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
       if (c == '?') // getopt() returns 0x3f when a unknown option was given
@@ -519,7 +522,7 @@ main (int argc, char **argv)
           exit (1);
         }
         
-      if (x < ARG_MAX) 
+      if (x < UCON64_MAX_ARGS) 
         {
           arg[x].val = c;
           arg[x++].optarg = (optarg ? optarg : NULL);
@@ -735,7 +738,7 @@ ucon64_execute_options (void)
       // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
       result = ucon64_rom_handling (); 
 
-      if (result == -1) // no_rom but WF_ROM_REQ
+      if (result == -1) // no_rom but WF_NO_ROM
         return -1;
 
       if (ucon64_options (arg[x].val, arg[x].optarg) == -1) // because we have more than 180 options
@@ -780,7 +783,7 @@ ucon64_execute_options (void)
 
       // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
       if (ucon64_rom_handling () == -1)
-        return -1; // no_rom but WF_ROM_REQ
+        return -1; // no_rom but WF_NO_ROM
     }
 
   fflush (stdout);
@@ -803,7 +806,7 @@ ucon64_rom_handling (void)
     no_rom = 1;
   else if (!ucon64.rom[0])
     no_rom = 1;
-  else if (access (ucon64.rom, F_OK | R_OK) == -1 && (ucon64.flags & WF_ROM_REQ))
+  else if (access (ucon64.rom, F_OK | R_OK) == -1 && (!(ucon64.flags & WF_NO_ROM)))
     {
       fprintf (stderr, "ERROR: Could not open %s\n", ucon64.rom);
       no_rom = 1;
@@ -817,7 +820,7 @@ ucon64_rom_handling (void)
     
   if (no_rom)
     {
-      if (ucon64.flags & WF_ROM_REQ)
+      if (!(ucon64.flags & WF_NO_ROM))
         {
           fprintf (stderr, "ERROR: A ROM is required for this option\n");
           return -1;

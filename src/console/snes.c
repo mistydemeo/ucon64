@@ -2620,9 +2620,7 @@ snes_init (st_rominfo_t *rominfo)
 #endif
                rominfo->current_internal_crc, x, rominfo->current_internal_crc + x,
                (rominfo->current_internal_crc + x == 0xffff) ? "" : "~0xffff");
-      if (rominfo->interleaved)
-        ucon64.crc32 = crc32 (0, rom_buffer, size);
-      else if (bs_dump)
+      if (bs_dump)
         {
           unsigned short int *bs_date_ptr = (unsigned short int *)
             (rom_buffer + snes_header_base + SNES_HEADER_START + snes_hirom + 38);
@@ -2636,6 +2634,8 @@ snes_init (st_rominfo_t *rominfo)
           ucon64.crc32 = crc32 (0, rom_buffer, size);
           *bs_date_ptr = bs_date;
         }
+      else if (rominfo->interleaved)
+        ucon64.crc32 = crc32 (0, rom_buffer, size);
       else
         {
           ucon64.crc32 = ucon64.fcrc32;

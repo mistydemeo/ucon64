@@ -82,18 +82,13 @@ write programs in C
 #include "patch/ips.h"
 #include "patch/bsl.h"
 
-FILE *frontend_file;
+int frontend = 0;
 
 void
 ucon64_exit (void)
 {
   printf ("+++EOF");
   fflush (stdout);
-  if (frontend_file != stdout)
-    {
-      fclose (frontend_file);
-      remove (FRONTEND_FILENAME);
-    }
 }
 
 int
@@ -210,15 +205,10 @@ main (int argc, char *argv[])
     support for frontends
 */
 
-  frontend_file = stdout;
   if (argcmp (argc, argv, "-frontend"))
     {
-/*
-  this should disappear before 1.9.8
-*/
       atexit (ucon64_exit);
-      if ((frontend_file = fopen (FRONTEND_FILENAME, "wt")) == NULL)
-        frontend_file = stdout;
+      frontend = 1;                             // used by parport_gauge()
     }
 
 /*
@@ -281,8 +271,8 @@ main (int argc, char *argv[])
                  "emulate_gba=vgba -scale 2 -uperiod 6\n"
                  "emulate_vec=\n"
                  "emulate_vboy=\n"
-                 "emulate_swan=\n" 
-                 "emulate_coleco=\n" 
+                 "emulate_swan=\n"
+                 "emulate_coleco=\n"
                  "emulate_intelli=\n"
                  "emulate_psx=pcsx\n"
                  "emulate_ps2=\n"

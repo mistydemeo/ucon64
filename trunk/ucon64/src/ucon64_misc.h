@@ -103,7 +103,6 @@ unsigned long CalculateFileCRC (FILE * file);
   this is just a wrapper
 */
 unsigned long unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size);
-
 unsigned long fileCRC32 (char *filename, long start);   // calculate CRC32 of filename beginning from start
 
 //ucon64 specific wrapper for misc.c/filebackup()
@@ -115,9 +114,7 @@ long filetestpad (char *filename); //test if a ROM is padded
 int testsplit (char *filename);//test if a ROM is splitted
 
 unsigned int parport_probe (unsigned int parport);
-
-int fparport_gauge (FILE *output, time_t init_time, long pos, long size);
-#define parport_gauge(a, b, c) (fparport_gauge(frontend_file, a, b, c))
+int parport_gauge (time_t init_time, long pos, long size);
 
 int trackmode (long imagesize);
 

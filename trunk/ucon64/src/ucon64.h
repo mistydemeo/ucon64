@@ -104,8 +104,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_ROM	1
 #define ucon64_FILE	2
 
-#define FRONTEND_FILENAME "frontend.txt"
-
 struct ucon64_
 {
 //TODO get rid of argc and argv here
@@ -175,7 +173,7 @@ struct ucon64_
 };
 
 
-extern FILE *frontend_file;
+extern int frontend;
 
 #include "ucon64_misc.h"
 

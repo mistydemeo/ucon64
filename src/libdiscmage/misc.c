@@ -228,7 +228,7 @@ ansi_parser (char *str)
       {35, },
       {36, },
       {37, },
-      
+
       {40, },
       {41, },
       {42, },
@@ -421,7 +421,7 @@ ansi_init (void)
 #ifdef  DJGPP
   if (result)
     {
-// Don't use __MSDOS__, because __dpmi_regs and __dpmi_int are DJGPP specific
+      // Don't use __MSDOS__, because __dpmi_regs and __dpmi_int are DJGPP specific
       __dpmi_regs reg;
 
       reg.x.ax = 0x1a00;                        // DOS 4.0+ ANSI.SYS installation check
@@ -2426,8 +2426,8 @@ q_fbackup (const char *filename, int mode)
 int
 q_fcrc32 (const char *filename, int start)
 {
-  unsigned int count, crc = 0;                  // don't name it crc32 to avoid
-  unsigned char buffer[512];                    //  name clash with zlib's func
+  unsigned int n, crc = 0;                      // don't name it crc32 to avoid
+  unsigned char buffer[MAXBUFSIZE];             //  name clash with zlib's func
   FILE *fh = fopen (filename, "rb");
 
   if (!fh)
@@ -2435,8 +2435,8 @@ q_fcrc32 (const char *filename, int start)
 
   fseek (fh, start, SEEK_SET);
 
-  while ((count = fread (buffer, 1, 512, fh)))
-    crc = crc32 (crc, buffer, count);
+  while ((n = fread (buffer, 1, MAXBUFSIZE, fh)))
+    crc = crc32 (crc, buffer, n);
 
   fclose (fh);
 
@@ -2447,7 +2447,7 @@ q_fcrc32 (const char *filename, int start)
 int
 q_fcpy (const char *src, int start, int len, const char *dest, const char *mode)
 {
-  int seg_len = 0, size = q_fsize (src);
+  int seg_len;
   char buf[MAXBUFSIZE];
   FILE *fh, *fh2;
 
@@ -2459,7 +2459,6 @@ q_fcpy (const char *src, int start, int len, const char *dest, const char *mode)
       errno = ENOENT;
       return -1;
     }
-
   if (!(fh2 = fopen (dest, mode)))
     {
       errno = ENOENT;
@@ -2470,14 +2469,11 @@ q_fcpy (const char *src, int start, int len, const char *dest, const char *mode)
   fseek (fh, start, SEEK_SET);
   fseek (fh2, 0, SEEK_END);
 
-  len = MIN (len, size - start);
-
-  for (; ; len -= seg_len)
+  for (; len > 0; len -= seg_len)
     {
-      seg_len = MIN (len, MAXBUFSIZE);
-      if (!fread (buf, seg_len, 1, fh))
+      if (!(seg_len = fread (buf, 1, MIN (len, MAXBUFSIZE), fh)))
         break;
-      fwrite (buf, seg_len, 1, fh2);
+      fwrite (buf, 1, seg_len, fh2);
     }
 
   fclose (fh);
@@ -2711,12 +2707,12 @@ fdopen (int fd, const char *mode)
 #endif
 
 #endif // _WIN32
-  
+
 
 int
 argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
 {
-//TODO replace with argz_extract() 
+// TODO: replace with argz_extract()
 #ifdef  DEBUG
   int pos = 0;
 #endif

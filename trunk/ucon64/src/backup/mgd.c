@@ -171,15 +171,31 @@ q_fread_mgd (void *buffer, size_t start, size_t len, const char *filename)
 }
 
 
-void
-mgd_make_name (const char *filename, const char *prefix0, int size, char *name)
+static void
+remove_mgd_id (char *name, const char *id)
 {
-  char *p, *fname, *size_str = 0, *suffix = 0, prefix[3]; // copy of prefix0 that can be modified
+  char *p = name;
+  while ((p = strstr (p, id)))
+    {
+      *p = 'X';
+      *(p + 1) = 'X';
+      p += 2;
+    }
+}
+
+
+void
+mgd_make_name (const char *filename, const char *prefix, int size, char *name)
+{
+  char *p, *fname, *size_str = 0, *suffix = 0;
   int n;
 
   fname = basename (filename);
-  strncpy (prefix, prefix0, 3);
-  prefix[2] = 0;
+  if (strlen (prefix) > 2)
+    {
+      fprintf (stderr, "INTERNAL ERROR: Prefix is longer than 2 characters\n");
+      exit (1);
+    }
 
   if (prefix[0] == 'S' && prefix[1] == 'F')
     {
@@ -275,9 +291,38 @@ mgd_make_name (const char *filename, const char *prefix0, int size, char *name)
           suffix = ".018";
         }
     }
+  else if (prefix[0] == 'G' && prefix[1] == 'B')
+    /*
+      TODO: More info is needed about GB MGD2 file names as these are pure
+            guesses
+      What is the maximum game size the MGD2 supports for GB (color) games? At
+      least one 64 Mbit game exists, Densha De Go! 2 (J) [C][!].
+    */
+    {
+      if (size <= 1 * MBIT)
+        {
+          size_str = "1";
+          suffix = ".040";
+        }
+      else if (size <= 2 * MBIT)
+        {
+          size_str = "2";
+          suffix = ".040";
+        }
+      else if (size <= 4 * MBIT)
+        {
+          size_str = "4";
+          suffix = ".048";
+        }
+      else
+        {
+          size_str = "8";
+          suffix = ".058";
+        }
+    }
 
-  sprintf (name, "%s%s%s", is_func (fname, strlen (fname), isupper) ?
-           prefix : strlwr (prefix), size_str, fname);
+  // Do NOT mess with prefix (strupr()/strlwr()). See below (remove_mgd_id()).
+  sprintf (name, "%s%s%s", prefix, size_str, fname);
   if (size < 10 * MBIT)
     {
       if (!strnicmp (name, fname, 3))
@@ -298,6 +343,18 @@ mgd_make_name (const char *filename, const char *prefix0, int size, char *name)
   for (n = 3; n < 7; n++)                       // we can skip the prefix
     if (name[n] == ' ')
       name[n] = '_';
+
+  /*
+    the transfer program "pclink" contains a bug in that it looks at the
+    entire file name for an ID string (it should look only at the first 2
+    characters).
+  */
+  strupr (name);
+  remove_mgd_id (name + 3, "SF");
+  remove_mgd_id (name + 3, "MD");
+  remove_mgd_id (name + 3, "PC");
+  remove_mgd_id (name + 3, "GG");
+  remove_mgd_id (name + 3, "GB");
 
   set_suffix (name, suffix);
 }

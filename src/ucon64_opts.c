@@ -1722,7 +1722,10 @@ ucon64_options (int c, const char *optarg)
           free (dir);
         }
       gba_multi (strtol (optarg, NULL, 10) * MBIT, src_name);
+
+      ucon64.file_size = q_fsize (src_name);
       fal_write_rom (src_name, ucon64.parport);
+
       unregister_func (remove_temp_file);
       remove_temp_file ();
       fputc ('\n', stdout);

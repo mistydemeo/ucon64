@@ -141,7 +141,7 @@ const struct option options[] = {
     {"dint", 0, 0, UCON64_DINT},
 #ifdef  DISCMAGE
     {"disc", 0, 0, UCON64_DISC},
-#endif    
+#endif
     {"dumpinfo", 1, 0, UCON64_DUMPINFO},
     {"e", 0, 0, UCON64_E},
     {"erom", 0, 0, UCON64_EROM},
@@ -165,10 +165,9 @@ const struct option options[] = {
     {"ggd", 1, 0, UCON64_GGD},
     {"gge", 1, 0, UCON64_GGE},
     {"gp32", 0, 0, UCON64_GP32},
-    {"gui", 1, 0, UCON64_GUI},
 #ifdef  GUI
     {"gui", 1, 0, UCON64_GUI},
-#endif    
+#endif
     {"h", 0, 0, UCON64_HELP},
     {"hd", 0, 0, UCON64_HD},
     {"hdn", 1, 0, UCON64_HDN},
@@ -1218,7 +1217,6 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
           printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
         }
 #endif
-      printf ("\n");
     }
 
   // ROM header

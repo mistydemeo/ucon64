@@ -351,7 +351,10 @@ unsigned int parport_probe(unsigned int port)
     ucon64_io_fd = open("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
     if (ucon64_io_fd == -1)
     {
-      fprintf(stderr, "Could not open I/O port driver\n");
+      fprintf(stderr,
+              "Could not open I/O port device (no driver)\n"
+              "You can download the latest ioport driver from\n"
+              "http://www.infernal.currantbun.com or http://ucon64.sourceforge.net\n");
       exit(1);
     }
     else
@@ -431,7 +434,7 @@ int parport_gauge(time_t init_time, long pos, long size)
   strcat(buf, "------------------------");
   buf[24] = 0;
 
-  printf("\r%10lu Bytes [%s] %lu%%,CPS=%lu, ",
+  printf("\r%10lu Bytes [%s] %lu%%, CPS=%lu, ",
          pos, buf, (unsigned long) 100*pos/size, (unsigned long) cps);
 
   if (pos == size)                              // last printed CPS is average transfer speed

@@ -1,15 +1,11 @@
-#UNZIP=0
+CC=@CC@
+
+CFLAGS=@CFLAGS@
+LDFLAGS=@LDFLAGS@
 
 OBJECTS=flc.o misc.o output.o extract.o sort.o getopt.o
 OBJECTS_TXT=misc.o txtextract.o
 OBJECTS_ID3=misc.o id3extract.o
-
-CC=gcc
-
-CCFLAGS=-I. -Wall -O3
-
-CFLAGS=$(CCFLAGS)
-LDFLAGS=-s
 
 all: flc txtextract id3extract
 
@@ -17,7 +13,7 @@ clean:
 	rm -f $(OBJECTS) $(OBJECTS_TXT) $(OBJECTS_ID3) DEADJOE flc txtextract id3extract *~ */*~ */*/*~ *.core 
 
 distclean: clean
-	
+	rm -f Makefile config.log config.status config.cache config.h
 
 flc: $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS)  $(LDFLAGS)

@@ -5,6 +5,9 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
 
+CFLAGS="-I. -Wall -O3"
+LDFLAGS=-s
+
 dnl Checks for libraries.
 
 dnl Checks for header files.
@@ -22,4 +25,7 @@ dnl Checks for library functions.
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(getcwd mkdir rmdir strcspn strtol)
 
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile config.h)
+
+echo
+echo NOTE: On non-Linux systems you might need to use gmake instead of make

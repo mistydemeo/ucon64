@@ -286,7 +286,7 @@ ucon64_switches (int c, const char *optarg)
           2.) ucon64 <transfer option> <rom> <parallel port address>
           3.) ucon64 <transfer option> <rom> --port=<parallel port address>
       */
-      if (!ucon64.parport)
+      if (ucon64.parport == UCON64_UNKNOWN)
         if (ucon64.argc >= 4)
           if (access (ucon64.argv[ucon64.argc - 1], F_OK))
             // Yes, we don't get here if ucon64.argv[ucon64.argc - 1] is [0x]278,

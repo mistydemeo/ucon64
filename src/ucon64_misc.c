@@ -285,7 +285,7 @@ Coleco Vision
 Colecovision (1982)
 Dreamcast
 FC Channel F
-G7400+/Odyssey² (1978)
+G7400+/Odyssey2 (1978)
 GameBoy
 Game.com ? Tiger
 Game Cube
@@ -1543,8 +1543,8 @@ ucon64_parport_probe (unsigned int port)
 }
 
 
-unsigned int
-ucon64_parport_init (unsigned int port)
+int
+ucon64_parport_init (int port)
 {
 #if     defined __BEOS__
   ucon64_io_fd = open ("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
@@ -1727,7 +1727,7 @@ ucon64_parport_init (unsigned int port)
     }
 #endif // _WIN32 || __CYGWIN__
 
-  if (!port)                                    // no port specified or forced?
+  if (port == UCON64_UNKNOWN)                   // no port specified or forced?
     {
       unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };
       int x, found = 0;

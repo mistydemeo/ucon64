@@ -537,9 +537,12 @@ main (int argc, char **argv)
   strcpy (ucon64.parport_dev,
           get_property (ucon64.configfile, "parport_dev", buf, "parallel.device"));
 #endif
-  // Use "0" to force probing if the config file doesn't contain a parport line
-  //  (does not apply to the Amiga version, parport 0 is a valid value)
-  sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
+  /*
+    Use -1 (UCON64_UNKNOWN) to force probing if the config file doesn't contain
+    a parport line. This does not apply to the Amiga version. That version just
+    uses whatever value ucon64.parport has.
+  */
+  sscanf (get_property (ucon64.configfile, "parport", buf, "-1"), "%x", &ucon64.parport);
 
   // make backups?
   ucon64.backup = get_property_int (ucon64.configfile, "backups", '=');

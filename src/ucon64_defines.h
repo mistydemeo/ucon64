@@ -21,7 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef UCON64_DEFINES_H
 #define UCON64_DEFINES_H
-// please make sure that NO definition except FALSE has 0 as value
+
+// Please make sure that NO definition except FALSE has 0 as value!
 
 /*
   maximum # of arguments uCON64 takes

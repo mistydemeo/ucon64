@@ -61,7 +61,7 @@ const st_usage_t gameboy_usage[] =
     {"gbx", NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC"},
     {"n2gb", "NESROM", "KAMI's FC EMUlator (NES emulator);\n"
                        "ROM should be KAMI's FC Emulator ROM image\n"
-                       "NESROM should contain 16 KB of PRG data and 8 KB of CHR data"},
+                       "NESROM should contain 16 kB of PRG data and 8 kB of CHR data"},
     {"chk", NULL, "fix ROM checksum"},
     {NULL, NULL, NULL}
   };

@@ -34,6 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "fal.h"
 #include "misc_par.h"
+#include "console/gba.h"
 
 
 const st_usage_t fal_usage[] =
@@ -171,6 +172,7 @@ void l40226c (void);
 static int debug, verbose, DataSize16, Device, EPPMode, RepairHeader,
            VisolyTurbo, WaitDelay, FileHeader[0xc0], HeaderBad, Complement = 0;
 
+#if 0 // we use the one in gba.c
 const u8 GoodHeader[] = {
   46, 0, 0, 234, 36, 255, 174, 81, 105, 154, 162, 33, 61, 132, 130, 10,
   132, 228, 9, 173, 17, 36, 139, 152, 192, 129, 127, 33, 163, 82, 190, 25,
@@ -185,6 +187,7 @@ const u8 GoodHeader[] = {
 // 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,48,49,150,0,0,0,0,0,
 // 0,0,0,0,0,240,0,0
 };
+#endif
 
 void
 iodelay (void)
@@ -489,7 +492,9 @@ ReadFlash (int addr)
 void
 l402684 (void)
 {
+#ifndef PPDEV // probably #if 0, but first test if this works with ppdev - dbjh
   outpb (SPPStatPort, 1);
+#endif
   l40226c ();
 }
 
@@ -851,7 +856,7 @@ GetFileByte (FILE * fp)
       if (FilePos < 0xa0)
         {
           if ((HeaderBad) && (FilePos > 3))
-            i = GoodHeader[FilePos];
+            i = gba_logodata[FilePos - 4]; // GoodHeader[FilePos];
           else
             i = FileHeader[FilePos];
         }
@@ -915,7 +920,7 @@ GetFileSize2 (FILE * fp)
       i = 4;
       while (i < 0xa0)          //9c)
         {
-          if (FileHeader[i] != GoodHeader[i])
+          if (FileHeader[i] != gba_logodata[i - 4]) // GoodHeader[i]
             HeaderBad = 1;
           i++;
         }

@@ -55,7 +55,7 @@ const st_usage_t swc_usage[] =
   help should be complete - dbjh
 */
     {"xswc-io", "MODE", "specify SWC I/O mode; use with -xswc or -xswcc\n"
-                        "MODE=0x01 force 32 Mbit\n"
+                        "MODE=0x01 force 32 Mbit dump\n"
                         "MODE=0x02 use alternative method for determining ROM size\n"
                         "MODE=0x04 Super FX\n"
                         "MODE=0x08 S-DD1\n"
@@ -517,8 +517,16 @@ set_bank_and_page (unsigned char bank, unsigned char page)
 
   page &= 3;
 
+#if 0
   // We only send a command to the SWC if the bank or page differs.
+  /*
+    In order to avoid problems with that no other code should change the bank or
+    page number. So, no calls to ffe_send_command(5, ...). I prefer to be able
+    to call ffe_send_command(5, ...) without breaking this function. Besides,
+    the benefit of this optimisation is rather small. - dbjh
+  */
   if (bank != currentbank || page != currentpage)
+#endif
     {
       currentbank = bank;
       currentpage = page;
@@ -526,13 +534,12 @@ set_bank_and_page (unsigned char bank, unsigned char page)
       if (dx2_trick)
         {
           /*
-            The SWC DX2 does not allow to access banks 00-7f. But this is
-            needed to dump some cartridges (ToP, DKJM2 and Super FX 2).
-            This trick avoids using ffe_send_command() to set the bank
-            value and writes the bank value directly into the SNES RAM
-            where the DX2 BIOS would store it.
-            Note that this hack is specific to the SWC DX2 and will probably
-            not work with other copiers. (JohnDie)
+            The SWC DX2 does not allow to access banks 00-7f. But this is needed
+            to dump some cartridges (ToP, DKJM2 and Super FX 2). This trick
+            avoids using ffe_send_command(5, ...) to set the bank value and
+            writes the bank value directly into the SNES RAM where the DX2 BIOS
+            would store it. Note that this hack is specific to the SWC DX2 and
+            will probably not work with other copiers. - JohnDie
           */
           ffe_send_command (5, currentpage, 0);
           ffe_send_command0 (0x0007, currentbank);
@@ -613,7 +620,7 @@ dump_rom (FILE *file, int size, int numblocks, unsigned int mask1, unsigned int 
 
   for (i = 0; i < numblocks; i++)
     {
-      address |= mask1;                 // make sure to stay in ROM areas
+      address |= mask1;                         // make sure to stay in ROM areas
       address &= mask2;
 
 #ifdef  DUMP_SA1

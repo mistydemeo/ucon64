@@ -364,7 +364,7 @@ ucon64_switches (int c, const char *optarg)
 
               flagstr[0] = 0;
               if (ucon64.swc_io_mode & SWC_IO_FORCE_32MBIT)
-                strcat (flagstr, "force 32 Mbit, ");
+                strcat (flagstr, "force 32 Mbit dump, ");
               if (ucon64.swc_io_mode & SWC_IO_ALT_ROM_SIZE)
                 strcat (flagstr, "alternative ROM size method, ");
               if (ucon64.swc_io_mode & SWC_IO_SUPER_FX)
@@ -1839,10 +1839,11 @@ ucon64_options (int c, const char *optarg)
             strcat (ucon64.output_path, FILE_SEPARATOR_S);
           free (dir);
         }
-      gba_multi (strtol (optarg, NULL, 10) * MBIT, src_name);
-
-      ucon64.file_size = q_fsize (src_name);
-      fal_write_rom (src_name, ucon64.parport);
+      if (gba_multi (strtol (optarg, NULL, 10) * MBIT, src_name) == 0)
+        { // Don't try to start a transfer if there was a problem
+          ucon64.file_size = q_fsize (src_name);
+          fal_write_rom (src_name, ucon64.parport);
+        }
 
       unregister_func (remove_temp_file);
       remove_temp_file ();

@@ -38,34 +38,34 @@
 #include "flc.h"
 #include "flc_misc.h"
 
+
 static void flc_exit (void);
 static int flc_configfile (void);
+static void flc_usage (int argc, char *argv[]);
+static const char *flc_title = "flc " FLC_VERSION_S " " CURRENT_OS_S " 1999-2003 by NoisyB (noisyb@gmx.net)";
 
-static const char *flc_title = "flc " FLC_VERSION_S " " CURRENT_OS_S
-                       " 1999-2002 by NoisyB (noisyb@gmx.net)";
 
-st_flc_t flc;
+st_flc_t flc; // workflow
 
 void
 flc_exit (void)
 {
+  chdir (flc.cwd);
+  rmdir2 (flc.temp);
   printf ("+++EOF");
   fflush (stdout);
 }
 
+
 int
 main (int argc, char *argv[])
 {
-  char buf[FILENAME_MAX + 1];
-  char temp[FILENAME_MAX];
-  char cwd[FILENAME_MAX];
-  st_file_t file, *file_p = NULL, *file_0 = NULL;
   char path[FILENAME_MAX];
-  struct dirent *ep;
-  struct stat puffer;
-  DIR *dp;
-  int c;
+  char buf[FILENAME_MAX + 1];
+  st_file_t **file = NULL;
+  int x = 0, c;
   int option_index = 0;
+  int file_index = 0;
   static const struct option long_options[] = {
     {"frontend", 0, 0, 1},
     {"t", 0, 0, 't'},
@@ -77,6 +77,7 @@ main (int argc, char *argv[])
     {"c", 0, 0, 'c'},
     {"h", 0, 0, 'h'},
     {"help", 0, 0, 'h'},
+    {"bbs", 0, 0, 4},
     {"?", 0, 0, 'h'},
     {"version", 0, 0, 'v'},
     {0, 0, 0, 0}
@@ -95,6 +96,10 @@ main (int argc, char *argv[])
         {
         case 1:
           atexit (flc_exit);
+          break;
+
+        case 4:
+          flc.bbs = 1;
           break;
 
         case 't':
@@ -142,120 +147,79 @@ main (int argc, char *argv[])
           return -1;
         }
     }
-                    
-  if (flc.html)
-    printf ("<html><head><title></title></head><body><pre><tt>");
-  if (optind < argc)
-    {
-      while (optind < argc)
-        strcpy (path, argv[optind++]);
-    }
 
-  if (!path[0])
-    getcwd (path, FILENAME_MAX);
-  else 
-    if (stat (path, &puffer) != -1)
-      if (S_ISREG (puffer.st_mode) == TRUE)
-      {
-/*
-    single file handling
-*/
-        file.next = NULL;
-        file.sub.date = puffer.st_mtime;
-        file.sub.size = puffer.st_size;
-        file.sub.checked = 'N';
-        strcpy (file.sub.name, path);
-
-        extract (&file.sub);
-
-        output (&file.sub);
-
-        return 0;
-      }
-
-/*
-  turn relative path into absolute path
-*/
-  getcwd (cwd, FILENAME_MAX);
-  chdir (path);
-  getcwd (path, FILENAME_MAX);
-  chdir (cwd);
-
-/*
-  multiple file handling
-*/
-  if (!(dp = opendir (path)))
+  file_index = optind;
+  
+  if (!file_index)
     {
       flc_usage (argc, argv);
       return -1;
     }
 
-  if (!tmpnam2 (temp))
+  if (!(file = (st_file_t **) malloc ((argc - file_index) * sizeof (st_file_t *))))
     {
-      fprintf (stderr, "ERROR: could not create temp dir");
-      return -1;
-    }
-  if (mkdir (temp, S_IRUSR|S_IWUSR) == -1)
-    {
-      fprintf (stderr, "ERROR: could not create temp dir");
+      fprintf (stderr, "ERROR: malloc failed (out of memory)\n");
       return -1;
     }
 
-  getcwd (cwd, FILENAME_MAX);
-  chdir (temp);
+  for (x = 0; x < (argc - file_index); x++)
+    if (!(file = (st_file_t *) malloc (sizeof (st_file_t))))
+      {
+        fprintf (stderr, "ERROR: malloc failed (out of memory)\n");
+        return -1;
+      }
 
-  file_0 = file_p = NULL;
-
-  while ((ep = readdir (dp)) != NULL)
+// temp directories
+  if (!tmpnam2 (flc.temp))
     {
-      sprintf (buf, "%s/%s", path, ep->d_name);
+      fprintf (stderr, "ERROR: could not create %s", flc.temp);
+      return -1;
+    }
 
-      if (stat (buf, &puffer) == -1)
+  strcpy (buf, flc.temp);
+  realpath2 (buf, flc.temp);
+  if (mkdir (flc.temp, S_IRUSR|S_IWUSR) == -1)
+    {
+      fprintf (stderr, "ERROR: could not create %s", flc.temp);
+      return -1;
+    }
+                    
+  if (flc.html)
+    printf ("<html><head><title></title></head><body><pre><tt>");
+
+  getcwd (flc.cwd, FILENAME_MAX); // keep cwd in mind
+
+  flc.files = 0;
+  for (file_index = optind; file_index < argc; file_index++)
+    {
+      struct stat puffer;
+
+      strcpy (buf, argv[file_index]);
+      realpath2 (buf, path); 
+
+      if (stat (path, &puffer) == -1)
         continue;
-      if (S_ISREG (puffer.st_mode) != TRUE)
-        continue;
-
-      if (!file_p) file_0 = file_p = (st_file_t *) malloc (sizeof (st_file_t));
-      else
-        {
-          file_p->next = (st_file_t *) malloc (sizeof (st_file_t));
-
-          if (!file_p->next)
-            {
-              fprintf (stderr, "ERROR: allocating memory\n");
-              (void) closedir (dp);
-              return -1;
-            }
-
-          file_p = file_p->next;
-        }
         
-      file_p->sub.date = puffer.st_mtime;
-      file_p->sub.size = puffer.st_size;
-      file_p->sub.checked = 'N';
-      strcpy (file_p->sub.fullpath, buf);
-      strcpy (file_p->sub.name, basename (buf));
-      extract (&file_p->sub);
-      flc.files++;
+      chdir (flc.temp);
+            
+      if (extract (file[flc.files], path))
+         flc.files++;
+      
+      chdir (flc.cwd);
     }
-  (void) closedir (dp);
-  chdir (cwd);
-  rmdir2 (temp);
-  if (file_p) file_p->next = NULL;
-  file_p = file_0;
 
-  if (flc.sort) sort (file_p);
+  if (flc.sort) sort (file);
 
-  while (file_p)
+  for (x = 0; x < flc.files; x++)
     {
-      output (&file_p->sub);
-      file_p = file_p->next;
+      output (file[x]);
+      free (file[x]);
     }
-
-  free (file_p);
 
   if (flc.html)
     printf ("</pre></tt></body></html>\n");
+
+  free (file);
 
   return 0;
 }
@@ -267,18 +231,18 @@ flc_usage (int argc, char *argv[])
   printf ("\n%s\n"
           "This may be freely redistributed under the terms of the GNU Public License\n\n"
           "Usage: %s [OPTION]... [FILE]...\n\n"
-          "  " OPTION_S
-          "c           also test every possible archive in DIRECTORY for errors\n"
+          "  " OPTION_S "c           also test every possible archive in DIRECTORY for errors\n"
           "                return flags: N=not checked (default), P=passed, F=failed\n"
-          "  " OPTION_LONG_S
-          "html        output as HTML document with links to the files\n" "  "
-          OPTION_S "t           sort by modification time\n" "  " OPTION_S
-          "X           sort alphabetical\n" "  " OPTION_S
-          "S           sort by byte size\n" "  " OPTION_LONG_S
-          "fr          sort reverse\n" "  " OPTION_S
-          "k           show sizes in kilobytes\n" "  " OPTION_LONG_S
-          "help        display this help and exit\n" "  " OPTION_LONG_S
-          "version     output version information and exit\n" "\n"
+          "  " OPTION_LONG_S "html        output as HTML document with links to the files\n"
+          "  " OPTION_LONG_S "bbs    output as BBS style filelisting\n"
+          "  " OPTION_S "t           sort by modification time\n"
+          "  " OPTION_S "X           sort alphabetical\n"
+          "  " OPTION_S "S           sort by byte size\n"
+          "  " OPTION_LONG_S "fr          sort reverse\n"
+          "  " OPTION_S "k           show sizes in kilobytes\n"
+          "  " OPTION_LONG_S "help        display this help and exit\n"
+          "  " OPTION_LONG_S "version     output version information and exit\n"
+          "\n"
           "Amiga version: noC-flc Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
           "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n",
           flc_title, argv[0]);
@@ -315,7 +279,7 @@ flc_configfile (void)
       if (strtol (get_property (flc.configfile, "version", buf, "0"), NULL, 10) < FLC_CONFIG_VERSION)
         {
           strcpy (buf, flc.configfile);
-          setext (buf, ".OLD");
+          set_suffix (buf, ".OLD");
 
           printf ("NOTE: updating config: will be renamed to %s...", buf);
 

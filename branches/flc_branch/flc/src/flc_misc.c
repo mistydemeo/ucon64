@@ -39,29 +39,39 @@
 #include "flc_misc.h"
 
 
-int
-extract (st_sub_t *file)
+st_file_t *
+extract (st_file_t *file, const char *fname)
 {
   int x = 0;
   struct stat puffer;
+  char suffix[FILENAME_MAX];
   struct dirent *ep;
   DIR *dp;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], *p = NULL;
   char property_name[MAXBUFSIZE];
   char cwd[FILENAME_MAX];
   FILE *fh;
-  for (x = 0; x < FID_LINES_MAX; x++)
-    file->file_id[x][0] = 0;
 
-  strncpy (file->file_id[0], basename (file->fullpath), 46);
-    file->file_id[0][46] = 0;
-
+  memset (file, 0, sizeof (st_file_t));
   file->checked = 'N';
+
+  if (stat (fname, &puffer) == -1)
+    return NULL;
+  if (S_ISREG (puffer.st_mode) != TRUE)
+    return NULL;
+  file->date = puffer.st_mtime;
+  file->size = puffer.st_size;
+  strcpy (file->fname, fname);
+
+  strcpy (suffix, get_suffix (fname));
+
+  strncpy (file->file_id[0], basename (file->fname), 46);
+    file->file_id[0][46] = 0;
 
   if (flc.check)
     {
-      sprintf (property_name, "%s_test", &getext (file->fullpath)[1]);
-      sprintf (buf, NULL_TO_EMPTY (get_property (flc.configfile, strlwr (property_name), buf2, NULL)), file->fullpath);
+      sprintf (property_name, "%s_test", &suffix[1]);
+      sprintf (buf, NULL_TO_EMPTY (get_property (flc.configfile, strlwr (property_name), buf2, NULL)), file->fname);
 
       if (buf[0])
         {
@@ -75,10 +85,10 @@ extract (st_sub_t *file)
         }
     }
 
-  sprintf (property_name, "%s_extract", &getext (file->fullpath)[1]);
-  sprintf (buf, NULL_TO_EMPTY (get_property (flc.configfile, strlwr (property_name), buf2, NULL)), file->fullpath);
+  sprintf (property_name, "%s_extract", &suffix[1]);
+  sprintf (buf, NULL_TO_EMPTY (get_property (flc.configfile, strlwr (property_name), buf2, NULL)), file->fname);
 
-  if (!buf[0]) return 0;
+  if (!buf[0]) return file;
 
   system (buf);
   sync ();
@@ -87,7 +97,7 @@ extract (st_sub_t *file)
   file_id.diz stuff here
 */
 
-  if (!(dp = opendir (getcwd (cwd, FILENAME_MAX)))) return -1;
+  if (!(dp = opendir (getcwd (cwd, FILENAME_MAX)))) return NULL;
 
   while ((ep = readdir (dp)) != 0)
     {
@@ -100,7 +110,7 @@ extract (st_sub_t *file)
 /*
   read the file_id.diz
 */
-            if (!(fh = fopen (ep->d_name, "rb"))) return -1;
+            if (!(fh = fopen (ep->d_name, "rb"))) return file;
 
             for (x = 0; x < FID_LINES_MAX; x++)
               {
@@ -123,12 +133,12 @@ extract (st_sub_t *file)
           }
     }
   
-  return 0;
+  return file;
 }
 
 
 int
-output (const st_sub_t *file)
+output (const st_file_t *file)
 {
   int x;
   char buf[MAXBUFSIZE];
@@ -136,10 +146,10 @@ output (const st_sub_t *file)
   if (!file) return -1;
 
   if (flc.html)
-    fprintf (stdout, "<a href=\"%s\">", file->fullpath);
+    fprintf (stdout, "<a href=\"%s\">", file->fname);
 
   fprintf (stdout, "%-12.12s%s %c", 
-    file->name,
+    basename2 (file->fname),
     flc.html ? "</a>" : "",
     file->checked ? file->checked : 'N');
 
@@ -165,12 +175,12 @@ compare (st_file_t *a, st_file_t *b)
 {
 #if 1
   return (flc.fr ?
-    ((flc.bydate && a->sub.date < b->sub.date) ||
-     (flc.byname && (a->sub.name)[0] < (b->sub.name)[0]) ||
-     (flc.bysize && a->sub.size < b->sub.size)) :
-    ((flc.bydate && a->sub.date > b->sub.date) ||
-     (flc.byname && (a->sub.name)[0] > (b->sub.name)[0]) ||
-     (flc.bysize && a->sub.size > b->sub.size))) ? 1 : 0;
+    ((flc.bydate && a->date < b->date) ||
+     (flc.byname && (basename2 (a->fname))[0] < (basename2 (b->fname))[0]) ||
+     (flc.bysize && a->size < b->size)) :
+    ((flc.bydate && a->date > b->date) ||
+     (flc.byname && (basename2 (a->fname))[0] > (basename2 (b->fname))[0]) ||
+     (flc.bysize && a->size > b->size))) ? 1 : 0;
 #else
   if (flc.bysize)
     return (flc.fr && *(uint32_t *)a < *(uint32_t *)b) ||
@@ -185,32 +195,30 @@ compare (st_file_t *a, st_file_t *b)
 }
 
 
-#if 1
+#if 0
 int
 sort (st_file_t * file)
 {
   st_file_t *file_p;
-  st_sub_t sub;
-  int sub_size;
-
-  sub_size = sizeof (st_sub_t);
+  int file_size = sizeof (st_file_t);
+  
   while (file->next)
     {
-      file_p = file->next;
+//      file_p = file->next;
 
       for (;;)
         {
           if (flc.fr ?
-              ((flc.bydate && file->sub.date < file_p->sub.date) ||
-               (flc.byname && (file->sub.name)[0] < (file_p->sub.name)[0]) ||
-               (flc.bysize && file->sub.size < file_p->sub.size)) :
-              ((flc.bydate && file->sub.date > file_p->sub.date) ||
-               (flc.byname && (file->sub.name)[0] > (file_p->sub.name)[0]) ||
-               (flc.bysize && file->sub.size > file_p->sub.size)))
+              ((flc.bydate && file->date < file_p->date) ||
+               (flc.byname && (basename2 (file->fname))[0] < (basename2 (file_p->fname))[0]) ||
+               (flc.bysize && file->size < file_p->size)) :
+              ((flc.bydate && file->date > file_p->date) ||
+               (flc.byname && (basename2 (file->fname))[0] > (basename2 (file_p->fname))[0]) ||
+               (flc.bysize && file->size > file_p->size)))
             {
-              memcpy (&sub, &file->sub, sub_size);
-              memcpy (&file->sub, &file_p->sub, sub_size);
-              memcpy (&file_p->sub, &sub, sub_size);
+              memcpy (&sub, &file->sub, file_size);
+              memcpy (&file->sub, &file_p->sub, file_size);
+              memcpy (&file_p->sub, &sub, file_size);
             }
 
           if (!file_p->next)
@@ -227,10 +235,9 @@ int
 sort (st_file_t * file)
 {
   st_file_t *file_p;
-  st_sub_t sub;
-  uint32_t size = sizeof (st_sub_t);
+  uint32_t size = sizeof (st_file_t);
 
-  qsort (file, flc.files, size, compare);
+//  qsort (file, flc.files, size, compare);
 
   return 0;
 }

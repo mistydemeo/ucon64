@@ -24,17 +24,19 @@
 
 #define MAXBUFSIZE 32768
 
-extern void flc_usage (int argc, char *argv[]);
+//extern void flc_usage (int argc, char *argv[]);
 
 #define FLC_VERSION_S "1.0.4"
 //#define FLC_VERSION 104
 #define FLC_CONFIG_VERSION 105
 
-typedef struct st_flc
+typedef struct
 {
   int kb;
-  int html;
   int check;
+
+  int html;
+  int bbs;
 
   int sort;
   int bydate;
@@ -44,31 +46,22 @@ typedef struct st_flc
 
   int files;
 
+  char temp[FILENAME_MAX];
   char configfile[FILENAME_MAX];
-} st_flc_t;
+  char cwd[FILENAME_MAX];
+} st_flc_t; // workflow
 
 extern st_flc_t flc;
 
-#define FID_LINES_MAX 20
 
-typedef struct st_sub
+typedef struct
 {
-  char name[FILENAME_MAX + 1];
-  char fullpath[FILENAME_MAX + 1];
+  char fname[FILENAME_MAX + 1];
   off_t size;
   unsigned int date;
   int checked;
+#define FID_LINES_MAX 20
   char file_id[FID_LINES_MAX + 1][49];
-}
-st_sub_t;
-
-struct st_file
-{
-  struct st_file *next;
-
-  st_sub_t sub;
-};
-
-typedef struct st_file st_file_t;
+} st_file_t;
 
 #endif

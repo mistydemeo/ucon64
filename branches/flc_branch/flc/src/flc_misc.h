@@ -21,7 +21,15 @@
 */
 #ifndef FLC_MISC_H
 #define FLC_MISC_H
-extern int extract (st_sub_t * file);
+typedef struct
+{
+  const char *suffix;
+  st_file_t (* extract) (const char *);
+} st_flc_wf_t;
+
+extern st_file_t *extract (st_file_t * file, const char *fname);
 extern int sort (st_file_t * file);
-extern int output (const st_sub_t * file);
+extern int output (const st_file_t * file);
+
+
 #endif // FLC_MISC_H

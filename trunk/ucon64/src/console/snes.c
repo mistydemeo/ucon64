@@ -2047,13 +2047,11 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_si
         }
 
       if ((snes_hirom || snes_hirom_ok == 2) && type == GD3 && rom_size == 24 * MBIT)
-      {
         for (i = 0; i < nblocks; i++)
           {
             blocks[i * 2] = i + ((i < (16 * MBIT >> 16) ? 16 : 4) * MBIT >> 15);
             blocks[i * 2 + 1] = i;
           }
-      }
       else if (snes_header_base == SNES_EROM)
         {
           if (rom_size == 40 * MBIT)

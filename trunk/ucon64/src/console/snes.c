@@ -896,8 +896,10 @@ snes_gd3 (st_rominfo_t *rominfo)
   if ((p = strrchr (dest_name, '.')))
     *p = 0;
   strcat (dest_name, "________");
-  dest_name[7] = 'X';
-  dest_name[8] = 0;
+  if (total4Mbparts < 3)
+    dest_name[6] = 0;
+  else
+    dest_name[7] = 0;
 
   if (snes_hirom)
     {
@@ -1110,7 +1112,8 @@ snes_s (st_rominfo_t *rominfo)
           half_size = size / 2;
           // 8 Mbit or less HiROMs, X is used to pad filename to 8 (SF4###XA)
 
-          *(strrchr (dest_name, '.') - 2) = areupper (basename (ucon64.rom)) ? 'X' : 'x';
+          if (size < 0x140000)
+            *(strrchr (dest_name, '.') - 2) = areupper (basename (ucon64.rom)) ? 'X' : 'x';
 //          dest_name[strrcspn (dest_name, ".") - 2] = areupper (basename (ucon64.rom)) ? 'X' : 'x';
 
           // don't write backups of parts, because one name is used

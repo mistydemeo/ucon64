@@ -92,9 +92,6 @@ const char *snes_usage[] =
     "  " OPTION_LONG_S "dbuh        display (relevant part of) backup unit header\n"
     "  " OPTION_LONG_S "stp         convert SRAM from backup unit for use with an emulator\n"
     "                  " OPTION_LONG_S "stp just strips the first 512 bytes\n"
-#if 0
-    "  " OPTION_LONG_S "gdf         fix Professor SF(2) Game Doctor SF3/6/7 savegame problems\n"
-#endif
     "  " OPTION_LONG_S "dint        convert ROM to non-interleaved format\n"
     "  " OPTION_LONG_S "ctrl=TYPE   specify type of controller in port 1 for emu when converting\n"
     "                  TYPE='0' gamepad\n"
@@ -1049,30 +1046,6 @@ snes_gd3 (st_rominfo_t *rominfo)
       rominfo->buheader_len = SMC_HEADER_LEN;
       rominfo->interleaved = 1;
     }
-
-  return 0;
-}
-
-
-int
-snes_gdf (st_rominfo_t *rominfo)
-{
-  char header[512];
-
-  if (!rominfo->buheader_len)
-    {
-      printf ("ERROR: This ROM has no header and therefore it does not need to be fixed\n");
-      return -1;
-    }
-
-  q_fread (header, 0, rominfo->buheader_len, ucon64.rom);
-  reset_header (header);
-  header[0x10] = 0x81;
-  header[0x29] = 0x0c;
-  header[0x30] = 0x0c;
-
-  ucon64_fbackup (NULL, ucon64.rom);
-  q_fwrite (header, 0, SMC_HEADER_LEN, ucon64.rom, "r+b");
 
   return 0;
 }

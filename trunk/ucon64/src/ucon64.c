@@ -53,7 +53,6 @@ write programs in C
 #include "misc.h"
 #include "quick_io.h"
 #include "libdiscmage/libdiscmage.h"
-#include "libdiscmage/sheets.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"

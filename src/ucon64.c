@@ -731,7 +731,8 @@ ucon64_console_probe (st_rominfo_t *rominfo)
           (!jaguar_init (ucon64_flush (rominfo))) ? UCON64_JAGUAR :
           UCON64_UNKNOWN;
 
-      ucon64_flush (rominfo);
+//      if (ucon64.console == UCON64_UNKNOWN)
+//        ucon64_flush (rominfo);
 
       return (ucon64.console == UCON64_UNKNOWN) ? (-1) : 0;
 
@@ -805,8 +806,9 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
             if (rominfo->dat)
               {
                 strcpy (rominfo->name, rominfo->dat->name);
-                strcpy (rominfo->fname, rominfo->dat->fname);
+//                strcpy (rominfo->fname, rominfo->dat->fname);
                 if (ucon64.console == UCON64_UNKNOWN)
+
                   ucon64.console = rominfo->dat->console;
               }
             break;

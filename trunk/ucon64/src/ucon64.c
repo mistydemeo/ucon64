@@ -504,7 +504,6 @@ return(-1);
 return(0);
 }
 
-
 rom.console=
 (argcmp(argc,argv,"-ata")) ? ucon64_ATARI :
 (argcmp(argc,argv,"-s16")) ? ucon64_SYSTEM16 :
@@ -546,9 +545,6 @@ if(!access(rom.rom,F_OK))
 }
 else
 {
-/*
-   receive a ROM?
-*/
 rom.console=
 (argcmp(argc,argv,"-xdjr") ||
  argcmp(argc,argv,"-xv64")) ? ucon64_N64 :
@@ -557,18 +553,12 @@ rom.console=
  argncmp(argc,argv,"-xgbxb",6) ||
  argcmp(argc,argv,"-xgbxs")) ? ucon64_GB :
 
-(argcmp(argc,argv,"-xsmd") ||
- argcmp(argc,argv,"-xsmds")) ? ucon64_GENESIS :
-
 (argcmp(argc,argv,"-xswc") ||
  argcmp(argc,argv,"-xswcs")) ? ucon64_SNES :
 
 (argcmp(argc,argv,"-xfal") ||
  argncmp(argc,argv,"-xfalc",6)) ? ucon64_GBA :
-
-(argcmp(argc,argv,"-cdaot") ||
- argcmp(argc,argv,"-xcdao")) ? ucon64_PSX : /* TODO what about other cd-based consoles? */
-                                                    ucon64_UNKNOWN;
+                                                    rom.console;
 }
 
 switch(rom.console)
@@ -810,12 +800,21 @@ break;
 
 case ucon64_UNKNOWN:
 default:
-  if(!access(rom.rom,F_OK))
+  if(!access(rom.rom,F_OK) ||
+ argcmp(argc,argv,"-xsmd") ||  //the SMD made backups for Genesis and Sega Master System
+ argcmp(argc,argv,"-xsmds") ||
+ argcmp(argc,argv,"-cdaot") ||  //take image for which cd-based console?
+ argcmp(argc,argv,"-xcdao")
+)
   {
 //    filehexdump(rom.rom,0,512);//show possible header or maybe the internal rom header
     printf(
-      "\nERROR: Unknown ROM: %s not found in internal database\n"
-      "TIP:   if this is a ROM you might try to force the recognition\n"
+      "\nERROR: Unknown ROM: %s not found (in internal database)\n"
+      "TIP:   If this is a ROM you might try to force the recognition\n"
+      "       the force recognition option for Super Nintendo would be -snes\n"
+      "       This is also needed for backup units which support more than one\n"
+      "       console system\n"
+
 //      "       if you compiled from the sources you can add it to ucon64_db.c and\n"
 //      "       recompile\n"
     ,rom.rom);
@@ -951,86 +950,96 @@ return(0);
 
 int ucon64_init(struct ucon64_ *rom)
 {
-
-if(rom->console != ucon64_UNKNOWN)
+if(quickftell(rom->rom) <= MAXROMSIZE)
 {
-//  rom->console_forced=1;
   switch(rom->console)
   {
-  case ucon64_GB:
-    gameboy_init(rom);
-  break;
-  case ucon64_GBA:
-    gbadvance_init(rom);
-  break;
-  case ucon64_GENESIS:
-    genesis_init(rom);
-  break;
-  case ucon64_SMS:
-    sms_init(rom);
-  break;
-  case ucon64_JAGUAR:
-    jaguar_init(rom);
-  break;
-  case ucon64_LYNX:
-    lynx_init(rom);
-  break;
-  case ucon64_N64:
-    nintendo64_init(rom);
-  break;
-  case ucon64_NEOGEO:
-    neogeo_init(rom);
-  break;
-  case ucon64_NES:
-    nes_init(rom);
-  break;
-  case ucon64_PCE:
-    pcengine_init(rom);
-  break;
-  case ucon64_SYSTEM16:
-    system16_init(rom);
-  break;
-  case ucon64_ATARI:
-    atari_init(rom);
-  break;
-  case ucon64_SNES:
-    snes_init(rom);
-  break;
-  case ucon64_NEOGEOPOCKET:
-    neogeopocket_init(rom);
-  break;
-  case ucon64_VECTREX:
-    vectrex_init(rom);
-  break;
-  case ucon64_VIRTUALBOY:
-    virtualboy_init(rom);
-  break;
-  case ucon64_WONDERSWAN:
-    wonderswan_init(rom);
-  break;
-  case ucon64_COLECO:
-    coleco_init(rom);
-  break;
-  case ucon64_INTELLI:
-    intelli_init(rom);
-  break;
+    case ucon64_GB:
+      gameboy_init(rom);
+    break;
+    case ucon64_GBA:
+      gbadvance_init(rom);
+    break;
+    case ucon64_GENESIS:
+      genesis_init(rom);
+    break;
+    case ucon64_SMS:
+      sms_init(rom);
+    break;
+    case ucon64_JAGUAR:
+      jaguar_init(rom);
+    break;
+    case ucon64_LYNX:
+      lynx_init(rom);
+    break;
+    case ucon64_N64:
+      nintendo64_init(rom);
+    break;
+    case ucon64_NEOGEO:
+      neogeo_init(rom);
+    break;
+    case ucon64_NES:
+      nes_init(rom);
+    break;
+    case ucon64_PCE:
+      pcengine_init(rom);
+    break;
+    case ucon64_SYSTEM16:
+      system16_init(rom);
+    break;
+    case ucon64_ATARI:
+      atari_init(rom);
+    break;
+    case ucon64_SNES:
+      snes_init(rom);
+    break;
+    case ucon64_NEOGEOPOCKET:
+      neogeopocket_init(rom);
+    break;
+    case ucon64_VECTREX:
+      vectrex_init(rom);
+    break;
+    case ucon64_VIRTUALBOY:
+      virtualboy_init(rom);
+    break;
+    case ucon64_WONDERSWAN:
+      wonderswan_init(rom);
+    break;
+    case ucon64_COLECO:
+      coleco_init(rom);
+    break;
+    case ucon64_INTELLI:
+      intelli_init(rom);
+    break;
+
+    case ucon64_UNKNOWN:
+    default:
+      rom->console=ucon64_UNKNOWN;
+    break;
+  }
+}
+else 
+{
 #ifdef CD
+  switch(rom->console)
+  {
     case ucon64_PS2:
-    case ucon64_PSX:
     case ucon64_DC:
     case ucon64_SATURN:
     case ucon64_CDI:
     case ucon64_CD32:
-    case ucon64_REAL3DO:
-
-psx_init(rom);
 //TODO init
     break;
-#endif
-  default:
-    rom->console=ucon64_UNKNOWN;
-  break;
+    case ucon64_PSX:
+      psx_init(rom);
+    break;
+
+    case ucon64_UNKNOWN:
+    default:
+      rom->console=ucon64_UNKNOWN;
+    break;
   }
+#endif
 }
 
 if(rom->console == ucon64_UNKNOWN)

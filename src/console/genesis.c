@@ -1070,7 +1070,7 @@ genesis_multi (int truncate_size, char *fname)
       file_no++;
     }
   // fill the next game table entry
-  fseek (destfile, 0x8000 + file_no * 0x20, SEEK_SET);
+  fseek (destfile, 0x8000 + (file_no - 1) * 0x20, SEEK_SET);
   fputc (0, destfile);                          // indicate no next game
   fclose (destfile);
   ucon64.console = UCON64_GEN;

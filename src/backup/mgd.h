@@ -2,7 +2,7 @@
 mgd.h - Multi Game Doctor/Hunter support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2002 - 2003 dbjh
+           2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -178,6 +178,7 @@ extern int q_fread_mgd (void *buffer, size_t start, size_t len,
                         const char *filename);
 extern void mgd_make_name (const char *filename, int console, int size,
                            char *name);
+extern void mgd_write_index_file (void *ptr, int n_names);
 
 #define MGD_HEADER_START 0
 #define MGD_HEADER_LEN 512

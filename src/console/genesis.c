@@ -206,9 +206,11 @@ int
 genesis_mgd (st_rominfo_t *rominfo)
 {
 #define CC (const char)
-  int x, y;
   unsigned char *rom_buffer = NULL;
-  char dest_name[FILENAME_MAX], buf[FILENAME_MAX], mgh[512];
+  char dest_name[FILENAME_MAX];
+#if 0 // TODO: We need more info about the Multi Game Hunter
+  int x, y;
+  char mgh[512], buf[FILENAME_MAX];
   const char mghcharset[1024] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -339,6 +341,7 @@ genesis_mgd (st_rominfo_t *rominfo)
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   };
+#endif
 
   // pad the file to the next valid MGD2 size if it doesn't have a valid size
   if (genesis_rom_size <= 1 * MBIT)
@@ -370,6 +373,7 @@ genesis_mgd (st_rominfo_t *rominfo)
   printf (ucon64_msg[WROTE], dest_name);
   free (rom_buffer);
 
+#if 0 // TODO: We need more info about the Multi Game Hunter (and a new option)
   // automatically create MGH name file
   memset (mgh, 0, sizeof (mgh));
   mgh[0] = 'M';
@@ -398,8 +402,9 @@ genesis_mgd (st_rominfo_t *rominfo)
     ROM backup is more important, so we don't write a backup of the MGH file.
   */
   q_fwrite (mgh, 0, sizeof (mgh), dest_name, "wb");
+#endif
+  mgd_write_index_file (basename2 (dest_name), 1);
 
-  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -409,7 +414,7 @@ int
 genesis_s (st_rominfo_t *rominfo)
 {
   st_smd_header_t smd_header;
-  char dest_name[FILENAME_MAX];
+  char dest_name[FILENAME_MAX], *p;
   int x, nparts, surplus, size = ucon64.file_size - rominfo->buheader_len,
       part_size;
 
@@ -451,6 +456,7 @@ genesis_s (st_rominfo_t *rominfo)
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".1");
       ucon64_output_fname (dest_name, 0);
+      p = strrchr (dest_name, '.') + 1;
 
       smd_header.size = part_size / 16384;
       smd_header.id0 = 3;
@@ -466,7 +472,7 @@ genesis_s (st_rominfo_t *rominfo)
           q_fcpy (ucon64.rom, x * part_size + rominfo->buheader_len, part_size, dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
 
-          (*(strrchr (dest_name, '.') + 1))++;
+          (*p)++;
         }
 
       if (surplus != 0)
@@ -482,8 +488,11 @@ genesis_s (st_rominfo_t *rominfo)
     }
   else // type == MGD_GEN
     {
-      char suffix[5], *p;
-      int n, offset, size;
+      char suffix[5], *p_index, name[9], *names[16], names_mem[16][9];
+      int n, offset, size, name_i = 0;
+
+      for (n = 0; n < 16; n++)
+        names[n] = names_mem[n];
 
       mgd_make_name (ucon64.rom, UCON64_GEN, genesis_rom_size, dest_name);
       strcpy (suffix, (char *) get_suffix (dest_name));
@@ -492,10 +501,15 @@ genesis_s (st_rominfo_t *rominfo)
       n = strlen (dest_name);
       if (n > 7)
         n = 7;
-      dest_name[n] = is_func (dest_name, strlen (dest_name), isupper) ? 'A' : 'a';
+      dest_name[n] = 'A';
       dest_name[n + 1] = 0;
+
+      strcpy (name, dest_name);
+      p_index = &name[n];
+
       strcat (dest_name, suffix);
       ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
+      p = strrchr (dest_name, '.') - 1;
 
       if (surplus)
         nparts++;
@@ -511,8 +525,14 @@ genesis_s (st_rominfo_t *rominfo)
           // write second half of file; don't do: "(nparts / 2) * part_size"!
           q_fcpy (ucon64.rom, ucon64.file_size / 2 + offset, size, dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
-          (*(strrchr (dest_name, '.') - 1))++;
+
+          (*p)++;
+
+          strcpy (names[name_i], name);
+          name_i++;
+          (*p_index)++;
         }
+      mgd_write_index_file (names, name_i);
     }
   return 0;
 }
@@ -521,7 +541,7 @@ genesis_s (st_rominfo_t *rominfo)
 int
 genesis_j (st_rominfo_t *rominfo)
 {
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *p;
   int block_size, total_size = 0;
 
   if (type == BIN)
@@ -538,6 +558,7 @@ genesis_j (st_rominfo_t *rominfo)
       set_suffix (dest_name, ".SMD");
       strcpy (src_name, ucon64.rom);
       ucon64_file_handler (dest_name, NULL, 0);
+      p = strrchr (src_name, '.') + 1;
 
       q_fcpy (src_name, 0, rominfo->buheader_len, dest_name, "wb");
       block_size = ucon64.file_size - rominfo->buheader_len;
@@ -545,7 +566,7 @@ genesis_j (st_rominfo_t *rominfo)
         {
           printf ("Joined: %s\n", src_name);
           total_size += block_size;
-          (*(strrchr (src_name, '.') + 1))++;
+          (*p)++;
           block_size = q_fsize (src_name) - rominfo->buheader_len;
         }
 
@@ -577,21 +598,23 @@ genesis_j (st_rominfo_t *rominfo)
       remove (dest_name);
 
       strcpy (src_name, ucon64.rom);
+      p = strrchr (src_name, '.') - 1;
       block_size = (ucon64.file_size - rominfo->buheader_len) / 2;
       while (q_fcpy (src_name, rominfo->buheader_len, block_size, dest_name, "ab") != -1)
         {
-          (*(strrchr (src_name, '.') - 1))++;
+          (*p)++;
           // BUG ALERT: Assume all parts have the same header length
           block_size = (q_fsize (src_name) - rominfo->buheader_len) / 2;
         }
 
       strcpy (src_name, ucon64.rom);
+      p = strrchr (src_name, '.') - 1;
       block_size = (ucon64.file_size - rominfo->buheader_len) / 2;
       while (q_fcpy (src_name, rominfo->buheader_len + block_size,
              block_size, dest_name, "ab") != -1)
         {
           printf ("Joined: %s\n", src_name);    // print this here, not in the
-          (*(strrchr (src_name, '.') - 1))++;   //  previous loop
+          (*p)++;                               //  previous loop
           // BUG ALERT: Assume all parts have the same header length
           block_size = (q_fsize (src_name) - rominfo->buheader_len) / 2;
         }
@@ -1300,7 +1323,7 @@ genesis_init (st_rominfo_t *rominfo)
     }
   else if (type == MGD_GEN)
     {
-      // We use rominfo->buheader_len to make it user controllable. Normally it
+      // We use rominfo->buheader_len to make it user definable. Normally it
       //  should be 0 for MGD_GEN.
       genesis_rom_size = ucon64.file_size - rominfo->buheader_len;
       q_fread_mgd (&genesis_header, rominfo->buheader_len + GENESIS_HEADER_START,
@@ -1308,7 +1331,7 @@ genesis_init (st_rominfo_t *rominfo)
     }
   else // type == BIN
     {
-      // We use rominfo->buheader_len to make it user controllable.
+      // We use rominfo->buheader_len to make it user definable.
       genesis_rom_size = ucon64.file_size - rominfo->buheader_len;
       q_fread (&genesis_header, rominfo->buheader_len + GENESIS_HEADER_START,
         GENESIS_HEADER_LEN, ucon64.rom);

@@ -99,6 +99,9 @@ sms_mgd (st_rominfo_t *rominfo, int console)
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
+
+  mgd_write_index_file (basename2 (dest_name), 1);
+
   if (size <= 4 * MBIT)
     printf ("NOTE: It may be necessary to change the suffix in order to make the game work\n"
             "      on an MGD2. You could try suffixes like .010, .024, .040, .048 or .078.\n");

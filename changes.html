@@ -600,8 +600,25 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - added support for Mac OS X (including libdiscmage) (by dbjh; many thanks to
   Steve Paige for his help)<br>
 - added (SNES) -xswc-dm=MODE specify SWC dump mode (by dbjh)<br>
-  You should explicitly specify the parallel port address when using this switch<br>
 - removed (SNES) -xswc-super, use -xswc -xswc-dm=1 instead (by dbjh)<br>
+- updated (all) uCON64 won't accept a parallel port address without using --port
+  anymore (by dbjh)<br>
+  This used to be possible:<br>
+  ucon64 &#60;transfer option&#62; &#60;rom&#62; &#60;parallel port address&#62;<br>
+  Now you should use a command like this:<br>
+  ucon64 &#60;transfer option&#62; &#60;rom&#62; --port=&#60;parallel port address&#62;<br>
+  Or of course, if uCON64 automatically detects the right port or if you have
+  specified the correct port in the configuration file, a command like this:<br>
+  ucon64 &#60;transfer option&#62; &#60;rom&#62;<br>
+  This change removes the requirement of specifying the parallel port address
+  when using additional command line options (switches) like -xfalm or -xswc-dm.
+  It also prevents uCON64 from accessing I/O ports not associated to the
+  parallel port if you specify additional transfer switches while &#60;rom&#62;
+  has a name that starts with a number<br>
+- updated (SNES, Genesis, PC-Engine, SMS, Game Gear &amp; GB) -mgd produces
+  correct index files (MULTI-GD) (by dbjh)<br>
+- updated (SNES &amp; Genesis) -s produces an index file if the ROM dump is in
+  MGD format (by dbjh)<br>
 <br>
 <br>
 <br>

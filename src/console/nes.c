@@ -5304,7 +5304,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
   char buf[SIZE_INFO], number[80];              // 4 should be enough, but don't
                                                 //  be too sensitive to errors
   memset (info, 0, sizeof (st_dumper_info_t));
-  if (ucon64_fread (buf, 0, SIZE_INFO, fname) == -1)
+  if (ucon64_fread (buf, 0, SIZE_INFO, fname) <= 0)
     return -1;
 
   for (n = 0; n < 99; n++)

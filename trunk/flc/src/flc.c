@@ -364,7 +364,11 @@ flc_configfile (void)
                  "#\n"
                  "txt_extract=txtextract \"%%s\"\n"
                  "nfo_extract=txtextract \"%%s\"\n"
-                 "faq_extract=txtextract \"%%s\"\n",
+                 "faq_extract=txtextract \"%%s\"\n"
+                 "#\n"
+                 "# MP3 (ID3) support\n"
+                 "#\n"
+                 "mp3_extract=id3extract \"%%s\"\n",
                  FLC_VERSION);
 
           fclose (fh);

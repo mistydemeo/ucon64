@@ -139,7 +139,7 @@ gameboy_n2gb (st_rominfo_t *rominfo, const char *emu_rom)
   buf[0x14f] = crc & 0xff;
 
   q_fwrite (buf, 0, EMULATOR_LEN, emu_rom, "wb");
-  fprintf (stdout, ucon64_msg[WROTE], emu_rom);
+  printf (ucon64_msg[WROTE], emu_rom);
   return 0;
 }
 
@@ -188,8 +188,7 @@ gameboy_gbx (st_rominfo_t *rominfo)
   set_suffix (dest_name, ((OFFSET (dest_name, strlen (dest_name) - 2) == 'B' ||
                        OFFSET (dest_name, strlen (dest_name) - 2) == 'b') ? ".GBC" : ".GB"));
 
-  ucon64_output_fname (dest_name, 0);
-  handle_existing_file (dest_name, NULL);
+  ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, rominfo->buheader_len, dest_name, "wb");
 
   x = 0;
@@ -198,7 +197,7 @@ gameboy_gbx (st_rominfo_t *rominfo)
       q_fwrite (&gbx2gbc[c], rominfo->buheader_len + x, 1, dest_name, "ab");
       x++;
     }
-  fprintf (stdout, ucon64_msg[WROTE], dest_name);
+  printf (ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -249,7 +248,7 @@ gameboy_sgb (st_rominfo_t *rominfo)
   set_suffix (buf, ((OFFSET (buf, strlen (buf) - 2) == 'B' ||
                  OFFSET (buf, strlen (buf) - 2) == 'b') ? ".GBX" : ".GX"));
 
-  handle_existing_file (buf, NULL);
+  ucon64_file_handler (buf, NULL, 0);
   q_fwrite (ucon64.rom, 0, rominfo->buheader_len, buf, "wb");
 
   x = 0;
@@ -258,7 +257,7 @@ gameboy_sgb (st_rominfo_t *rominfo)
       q_fwrite (&gbc2gbx[c], rominfo->buheader_len + x, 1, buf, "ab");
       x++;
     }
-  fprintf (stdout, ucon64_msg[WROTE], buf);
+  printf (ucon64_msg[WROTE], buf);
 
   return 0;
 }
@@ -271,11 +270,11 @@ gameboy_n (st_rominfo_t *rominfo, const char *name)
 
   memset (buf, 0, MAXBUFSIZE);
   strcpy (buf, name);
-  handle_existing_file (ucon64.rom, NULL);
+  ucon64_file_handler (ucon64.rom, NULL, 0);
   q_fwrite (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x034, 16,
             ucon64.rom, "r+b");
 
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 
@@ -285,7 +284,7 @@ gameboy_chk (st_rominfo_t *rominfo)
 {
   char buf[4];
 
-  handle_existing_file (ucon64.rom, NULL);
+  ucon64_file_handler (ucon64.rom, NULL, 0);
 
   q_fputc (ucon64.rom,
               GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d,
@@ -300,7 +299,7 @@ gameboy_chk (st_rominfo_t *rominfo)
 
   mem_hexdump (buf, 3, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d);
 
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 
@@ -327,11 +326,10 @@ gameboy_mgd (st_rominfo_t *rominfo)
 
   sprintf (dest_name, "%s.%03lu", buf,
            (unsigned long) ((q_fsize (ucon64.rom) - rominfo->buheader_len) / MBIT));
-  ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
-  handle_existing_file (dest_name, NULL);
+  ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
   q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), dest_name, "wb");
 
-  fprintf (stdout, ucon64_msg[WROTE], dest_name);
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -361,12 +359,11 @@ gameboy_ssc (st_rominfo_t *rominfo)
   strcat (dest_name, p);
   set_suffix (dest_name, ".GB");
 
-  ucon64_output_fname (dest_name, 0);
-  handle_existing_file (dest_name, NULL);
+  ucon64_file_handler (dest_name, NULL, 0);
   q_fwrite (&unknown_header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
   q_fcpy (ucon64.rom, 0, size, dest_name, "ab");
 
-  fprintf (stdout, ucon64_msg[WROTE], dest_name);
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 

@@ -162,23 +162,18 @@ extern const char *ucon64_msg[];
 
 
 /*
-  wrapper for misc.c/q_fbackup()
-
-  Read the comment at the header of handle_existing_file() to see how it works!
+  ucon64_file_handler() handels backups (before modifying the ROM) and ROMs
+                        inside archives. Read the comment at the header to
+                        see how it and the flags work
+  remove_temp_file()    remove possible temp file created by ucon64_file_handler()
 */
-#if 1
-extern void handle_existing_file (const char *dest, char *src);
-#else
-extern void handle_existing_file (char *dest, char *src, int flags);
-#endif
-extern void remove_temp_file (void); // possible temp file created by handle_existing_file()
-
 #define OF_FORCE_BASENAME 1
 #define OF_FORCE_SUFFIX   2
-extern char *ucon64_output_fname (char *requested_fname, int flags);
+extern void ucon64_file_handler (const char *dest, char *src, int flags);
+extern void remove_temp_file (void);
+//extern char *ucon64_output_fname (char *requested_fname, int flags);
 
 extern int ucon64_fhexdump (const char *filename, int start, int len);
-
 extern unsigned int ucon64_filefile (const char *filename1, int start1, const char *filename2, int start2, int similar);
 
 /*
@@ -190,7 +185,7 @@ extern int ucon64_gauge (time_t init_time, int pos, int size);
 
   unlike ucon64_gauge() the timer will reset if pos == 0
 */
-extern int ucon64_dm_gauge (int pos, int size);
+extern int ucon64_libdm_gauge (int pos, int size);
 
 extern int ucon64_pad (const char *filename, int start, int size); // pad ROM to a certain size
 extern int ucon64_testpad (const char *filename, st_rominfo_t *rominfo); // test if ROM is padded

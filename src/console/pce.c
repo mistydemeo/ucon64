@@ -634,11 +634,11 @@ pcengine_smg (st_rominfo_t *rominfo)
   strcpy (buf, ucon64.rom);
   set_suffix (buf, ".SMG");
 
-  handle_existing_file (buf, NULL);
+  ucon64_file_handler (buf, NULL, 0);
   q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
 
   q_fcpy (ucon64.rom, 0, size, buf, "ab");
-  fprintf (stdout, ucon64_msg[WROTE], buf);
+  printf (ucon64_msg[WROTE], buf);
 
   return 0;
 }
@@ -691,10 +691,10 @@ random number when backing up games.
   sprintf (buf2, "%s.%03u", buf,
            (unsigned int) ((q_fsize (ucon64.rom) - rominfo->buheader_len) / MBIT));
 
-  handle_existing_file (buf2, NULL);
+  ucon64_file_handler (buf2, NULL, 0);
   q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), buf2, "wb");
 
-  fprintf (stdout, ucon64_msg[WROTE], buf2);
+  printf (ucon64_msg[WROTE], buf2);
   return 0;
 }
 

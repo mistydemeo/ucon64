@@ -46,7 +46,7 @@ bsl_apply (const char *modname, const char *bslname)
   unsigned char byte, addstr[10], datstr[10], buf[4096];
   int dat, numdat, i, done = 0, add;
 
-  handle_existing_file (modname, NULL);
+  ucon64_file_handler (modname, NULL, 0);
 
   if ((modfile = fopen (modname, "r+b")) == NULL)
     {

@@ -680,9 +680,9 @@ ucon64_dat_indexer (void)
       size = q_fsize (fname_dat);
 
 #if 0 // PR decision
-      fprintf (stdout, "%s: %s\n", "Create", basename (fname_index));
+      printf ("%s: %s\n", "Create", basename (fname_index));
 #else
-      fprintf (stdout, "%s: %s\n", (update ? "Update" : "Create"), basename (fname_index));
+      printf ("%s: %s\n", (update ? "Update" : "Create"), basename (fname_index));
 #endif
       pos = 0;
       n_duplicates = 0;
@@ -785,7 +785,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
 
   if (!dat)
     {
-      fprintf (stdout, ucon64_msg[DAT_NOT_FOUND], ucon64.crc32);
+      printf (ucon64_msg[DAT_NOT_FOUND], ucon64.crc32);
       return;
     }
 

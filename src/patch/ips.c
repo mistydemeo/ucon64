@@ -91,7 +91,7 @@ ips_apply (const char *modname, const char *ipsname)
   unsigned char byte, byte2, byte3, magic[6];
   unsigned int offset, length, i;
 
-  handle_existing_file (modname, NULL);
+  ucon64_file_handler (modname, NULL, 0);
 
   if ((modfile = fopen (modname, "rb+")) == NULL)
     {
@@ -360,7 +360,7 @@ ips_create (const char *orgname, const char *modname)
     }
   strcpy (ipsname, orgname);
   set_suffix (ipsname, ".IPS");
-  handle_existing_file (ipsname, NULL);
+  ucon64_file_handler (ipsname, NULL, 0);
   if ((ipsfile = fopen (ipsname, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], ipsname);
@@ -484,7 +484,7 @@ next_byte:
   fclose (orgfile);
   fclose (modfile);
   fclose (ipsfile);
-  fprintf (stdout, ucon64_msg[WROTE], ipsname);
+  printf (ucon64_msg[WROTE], ipsname);
 
   return 0;
 }

@@ -67,11 +67,12 @@ write programs in C
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "ucon64_opts.h"
+#ifdef  DISCMAGE
 #include "ucon64_lib.h"
+#endif
 #ifdef  GUI
 #include "ucon64_libng.h"
 #endif
-#include "ucon64_opts.h"
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
@@ -110,12 +111,16 @@ const struct option options[] = {
     {"b0", 1, 0, UCON64_B0},
     {"b1", 1, 0, UCON64_B1},
     {"bat", 0, 0, UCON64_BAT},
+#ifdef  DISCMAGE
     {"bin2iso", 1, 0, UCON64_BIN2ISO},
+#endif
     {"bios", 1, 0, UCON64_BIOS},
     {"bot", 1, 0, UCON64_BOT},
     {"bs", 0, 0, UCON64_BS},
     {"c", 1, 0, UCON64_C},
+#ifdef  DISCMAGE
     {"cdmage", 1, 0, UCON64_CDMAGE},
+#endif    
 //    {"cd32", 0, 0, UCON64_CD32},
 //    {"cdi", 0, 0, UCON64_CDI},
     {"chk", 0, 0, UCON64_CHK},
@@ -134,7 +139,9 @@ const struct option options[] = {
     {"dbv", 0, 0, UCON64_DBV},
     {"dc", 0, 0, UCON64_DC},
     {"dint", 0, 0, UCON64_DINT},
+#ifdef  DISCMAGE
     {"disc", 0, 0, UCON64_DISC},
+#endif    
     {"dumpinfo", 1, 0, UCON64_DUMPINFO},
     {"e", 0, 0, UCON64_E},
     {"erom", 0, 0, UCON64_EROM},
@@ -159,6 +166,9 @@ const struct option options[] = {
     {"gge", 1, 0, UCON64_GGE},
     {"gp32", 0, 0, UCON64_GP32},
     {"gui", 1, 0, UCON64_GUI},
+#ifdef  GUI
+    {"gui", 1, 0, UCON64_GUI},
+#endif    
     {"h", 0, 0, UCON64_HELP},
     {"hd", 0, 0, UCON64_HD},
     {"hdn", 1, 0, UCON64_HDN},
@@ -175,7 +185,9 @@ const struct option options[] = {
     {"int2", 0, 0, UCON64_INT2},
     {"intelli", 0, 0, UCON64_INTELLI},
 //    {"ip", 0, 0, UCON64_IP},
+#ifdef  DISCMAGE
     {"isofix", 1, 0, UCON64_ISOFIX},
+#endif
     {"ispad", 0, 0, UCON64_ISPAD},
     {"j", 0, 0, UCON64_J},
     {"jag", 0, 0, UCON64_JAG},
@@ -194,12 +206,16 @@ const struct option options[] = {
 //    {"mgh", 0, 0, UCON64_MGH},
     {"mirr", 1, 0, UCON64_MIRR},
     {"mka", 1, 0, UCON64_MKA},
+#ifdef  DISCMAGE
     {"mkcue", 0, 0, UCON64_MKCUE},
+#endif
     {"mkdat", 1, 0, UCON64_MKDAT},
     {"mki", 1, 0, UCON64_MKI},
     {"mkppf", 1, 0, UCON64_MKPPF},
+#ifdef  DISCMAGE
     {"mksheet", 0, 0, UCON64_MKSHEET},
     {"mktoc", 0, 0, UCON64_MKTOC},
+#endif    
     {"multi", 1, 0, UCON64_MULTI},
 //    {"mvs", 0, 0, UCON64_MVS},
     {"n", 1, 0, UCON64_N},
@@ -243,7 +259,9 @@ const struct option options[] = {
     {"q", 0, 0, UCON64_Q},
     {"qq", 0, 0, UCON64_QQ},
     {"rename", 0, 0, UCON64_RENAME},
+#ifdef  DISCMAGE
     {"rip", 1, 0, UCON64_RIP},
+#endif    
     {"rr83", 0, 0, UCON64_RR83},
     {"rrom", 0, 0, UCON64_RROM},
     {"rl", 0, 0, UCON64_RL},
@@ -285,7 +303,9 @@ const struct option options[] = {
     {"version", 0, 0, UCON64_VER},
     {"vram", 0, 0, UCON64_VRAM},
     {"xbox", 0, 0, UCON64_XBOX},
+#ifdef  DISCMAGE
     {"xcdrw", 0, 0, UCON64_XCDRW},
+#endif    
 #ifdef  PARALLEL
     {"xdex", 1, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
@@ -747,7 +767,9 @@ ucon64_execute_options (void)
 
   ucon64.console = UCON64_UNKNOWN;
   ucon64.dat = NULL;
+#ifdef  DISCMAGE
   ucon64.image = NULL;
+#endif
   ucon64.rominfo = NULL;
 
   ucon64.buheader_len =
@@ -1119,7 +1141,11 @@ ucon64_nfo (void)
   if (ucon64.fname_arch[0])
     printf ("  (%s)\n", ucon64.fname_arch);
   fputc ('\n', stdout);
+#ifdef  DISCMAGE
   if (ucon64.console == UCON64_UNKNOWN && !ucon64.image)
+#else
+  if (ucon64.console == UCON64_UNKNOWN)
+#endif     
     {
       fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
       printf ("\n");

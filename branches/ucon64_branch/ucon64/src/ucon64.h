@@ -33,10 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
 #include "misc.h"
-#include "libdiscmage/libdiscmage.h"            // dm_image_t
-#ifdef  GUI
-#include "libnetgui/libnetgui.h"
-#endif
 
 typedef struct
 {

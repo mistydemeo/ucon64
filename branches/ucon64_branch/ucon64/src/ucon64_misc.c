@@ -317,7 +317,9 @@ unknown_init (st_rominfo_t *rominfo)
 {
   ucon64.rominfo = rominfo;
   ucon64.dat = NULL;
+#ifdef  DISCMAGE
   ucon64.image = NULL;
+#endif
 
   return 0;
 }
@@ -494,6 +496,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   these options do not (need to) know the console or work for more than one
 */
+#ifdef  DISCMAGE
   {UCON64_BIN2ISO, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
   {UCON64_MKSHEET, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
   {UCON64_MKTOC, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
@@ -501,6 +504,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_MKCUE, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
   {UCON64_RIP, UCON64_UNKNOWN, libdm_usage,    WF_DEFAULT},
   {UCON64_XCDRW, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
+  {UCON64_CDMAGE, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
+#endif
 
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},
   {UCON64_A, UCON64_UNKNOWN, aps_usage,        WF_STOP},
@@ -561,7 +566,9 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   force recognition switches
 */
+#ifdef  DISCMAGE
   {UCON64_DISC, UCON64_UNKNOWN, libdm_usage,   WF_SWITCH},
+#endif
 
   {UCON64_3DO, UCON64_3DO, real3do_usage,      WF_SWITCH},
   {UCON64_ATA, UCON64_ATA, atari_usage,        WF_SWITCH},

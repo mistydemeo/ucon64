@@ -69,6 +69,7 @@ main (int argc, char *argv[])
     {"h", 0, 0, 'h'},
     {"help", 0, 0, 'h'},
     {"?", 0, 0, 'h'},
+    {"version", 0, 0, 'v'},
     {0, 0, 0, 0}
   };
 
@@ -121,6 +122,10 @@ main (int argc, char *argv[])
 
         case 'h':
           flc_usage (argc, argv);
+          return 0;
+
+        case 'v':
+          printf ("%s\n", flc_VERSION);
           return 0;
 
         default:
@@ -255,6 +260,8 @@ flc_usage (int argc, char *argv[])
           "  " OPTION_S "S           sort by byte size\n"
           "  " OPTION_LONG_S "fr          sort reverse\n"
           "  " OPTION_S "k           show sizes in kilobytes\n"
+          "  " OPTION_LONG_S "help        display this help and exit\n"
+          "  " OPTION_LONG_S "version     output version information and exit\n"
           "\n"
           "Amiga version: noC-FLC Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
           "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n",

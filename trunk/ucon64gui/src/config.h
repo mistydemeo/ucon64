@@ -9,26 +9,26 @@
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
-/* #undef HAVE_DIRENT_H */
+#define HAVE_DIRENT_H 1
 
 /* Define to 1 if you have the `getcwd' function. */
-/* #undef HAVE_GETCWD */
+#define HAVE_GETCWD 1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
-/* #undef HAVE_INTTYPES_H */
+#define HAVE_INTTYPES_H 1
 
-/* Define to 1 if your system has a working `malloc' function, and to 0
-   otherwise. */
-/* #undef HAVE_MALLOC */
+/* Define to 1 if your system has a GNU libc compatible `malloc' function, and
+   to 0 otherwise. */
+#define HAVE_MALLOC 1
 
 /* Define to 1 if you have the <memory.h> header file. */
-/* #undef HAVE_MEMORY_H */
+#define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the `memset' function. */
-/* #undef HAVE_MEMSET */
+#define HAVE_MEMSET 1
 
 /* Define to 1 if you have the `mkdir' function. */
-/* #undef HAVE_MKDIR */
+#define HAVE_MKDIR 1
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 /* #undef HAVE_NDIR_H */
@@ -37,53 +37,53 @@
 /* #undef HAVE_OS_H */
 
 /* Define to 1 if you have the `rmdir' function. */
-/* #undef HAVE_RMDIR */
+#define HAVE_RMDIR 1
 
 /* Define to 1 if `stat' has the bug that it succeeds when given the
    zero-length file name argument. */
 /* #undef HAVE_STAT_EMPTY_STRING_BUG */
 
 /* Define to 1 if you have the <stdint.h> header file. */
-/* #undef HAVE_STDINT_H */
+#define HAVE_STDINT_H 1
 
 /* Define to 1 if you have the <stdlib.h> header file. */
-/* #undef HAVE_STDLIB_H */
+#define HAVE_STDLIB_H 1
 
 /* Define to 1 if you have the `strcasecmp' function. */
-/* #undef HAVE_STRCASECMP */
+#define HAVE_STRCASECMP 1
 
 /* Define to 1 if you have the `strchr' function. */
-/* #undef HAVE_STRCHR */
+#define HAVE_STRCHR 1
 
 /* Define to 1 if you have the `strcspn' function. */
-/* #undef HAVE_STRCSPN */
+#define HAVE_STRCSPN 1
 
 /* Define to 1 if you have the `strdup' function. */
-/* #undef HAVE_STRDUP */
+#define HAVE_STRDUP 1
 
 /* Define to 1 if you have the <strings.h> header file. */
-/* #undef HAVE_STRINGS_H */
+#define HAVE_STRINGS_H 1
 
 /* Define to 1 if you have the <string.h> header file. */
-/* #undef HAVE_STRING_H */
+#define HAVE_STRING_H 1
 
 /* Define to 1 if you have the `strncasecmp' function. */
-/* #undef HAVE_STRNCASECMP */
+#define HAVE_STRNCASECMP 1
 
 /* Define to 1 if you have the `strpbrk' function. */
-/* #undef HAVE_STRPBRK */
+#define HAVE_STRPBRK 1
 
 /* Define to 1 if you have the `strrchr' function. */
-/* #undef HAVE_STRRCHR */
+#define HAVE_STRRCHR 1
 
 /* Define to 1 if you have the `strspn' function. */
-/* #undef HAVE_STRSPN */
+#define HAVE_STRSPN 1
 
 /* Define to 1 if you have the `strstr' function. */
-/* #undef HAVE_STRSTR */
+#define HAVE_STRSTR 1
 
 /* Define to 1 if you have the `strtol' function. */
-/* #undef HAVE_STRTOL */
+#define HAVE_STRTOL 1
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
@@ -94,17 +94,17 @@
 /* #undef HAVE_SYS_NDIR_H */
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
-/* #undef HAVE_SYS_STAT_H */
+#define HAVE_SYS_STAT_H 1
 
 /* Define to 1 if you have the <sys/types.h> header file. */
-/* #undef HAVE_SYS_TYPES_H */
+#define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
-/* #undef HAVE_UNISTD_H */
+#define HAVE_UNISTD_H 1
 
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
-/* #undef LSTAT_FOLLOWS_SLASHED_SYMLINK */
+#define LSTAT_FOLLOWS_SLASHED_SYMLINK 1
 
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT "noisyb@gmx.net"
@@ -122,13 +122,13 @@
 #define PACKAGE_VERSION "1.0.0"
 
 /* Define to 1 if you have the ANSI C header files. */
-/* #undef STDC_HEADERS */
+#define STDC_HEADERS 1
 
 /* enable todo output (default: no) */
 /* #undef TODO */
 
 /* Define to empty if `const' does not conform to ANSI C. */
-#define const 
+/* #undef const */
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 /* #undef gid_t */
@@ -137,7 +137,7 @@
 /* #undef malloc */
 
 /* Define to `unsigned' if <sys/types.h> does not define. */
-#define size_t unsigned
+/* #undef size_t */
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 /* #undef uid_t */

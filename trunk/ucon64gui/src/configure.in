@@ -7,8 +7,8 @@ AC_CONFIG_HEADER([config.h])
 AC_PROG_CC
 AC_PROG_INSTALL
 
-CFLAGS="-I. -Wall -O3 \`gtk-config --cflags\`"
-LDFLAGS="-s \`gtk-config --cflags --libs\`"
+CFLAGS="-I. -Wall -O3"
+LDFLAGS="-s"
 
 
 AC_MSG_CHECKING(whether todo output is enabled)
@@ -49,6 +49,11 @@ AC_MSG_RESULT($enable_ansi_color)
 
 
 # Checks for libraries.
+AC_PATH_PROG(gtkpath, gtk-config)
+AC_MSG_CHECKING(for GTK compile flags)
+GTK_CFLAGS=`$gtkpath --cflags 2>/dev/null`
+GTK_LDFLAGS=`$gtkpath --libs gthread 2>/dev/null`
+AC_MSG_RESULT(ok)
 
 # Checks for header files.
 AC_HEADER_DIRENT
@@ -64,6 +69,10 @@ AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
 AC_FUNC_STAT
 AC_CHECK_FUNCS([getcwd memset mkdir rmdir strcasecmp strchr strcspn strdup strncasecmp strpbrk strrchr strspn strstr strtol])
+
+CFLAGS="$CFLAGS $GTK_CFLAGS"
+LDFLAGS="$LDFLAGS $LIBS $GTK_LDFLAGS"
+
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

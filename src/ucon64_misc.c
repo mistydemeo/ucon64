@@ -193,17 +193,18 @@ unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size)
 */
 
 const char *
-ucon64_fbackup (const char *filename)
+ucon64_fbackup (char *move_name, const char *filename)
 {
   if (!ucon64.backup)
     return filename;
 
   if (!access (filename, F_OK))
     {
-      printf ("Writing backup of: %s\n", filename);
+      printf ("Writing backup of: %s\n", filename);//verbose
       fflush (stdout);
     }
-  return filebackup (filename, NULL);
+
+  return filebackup (move_name, filename);
 }
 
 size_t
@@ -708,7 +709,7 @@ ucon64_mktoc (st_rominfo_t *rominfo)
   setext (buf2, ".TOC");
 
   if (!access (buf2, F_OK))
-    ucon64_fbackup(buf2);
+    ucon64_fbackup (NULL, buf2);
 
   if (!(fh = fopen (buf2, "wb")))
     return -1;
@@ -741,7 +742,7 @@ ucon64_mkcue (st_rominfo_t *rominfo)
   setext (buf2, ".CUE");
 
   if (!access (buf2, F_OK))
-    ucon64_fbackup(buf2);
+    ucon64_fbackup (NULL, buf2);
 
   if (!(fh = fopen (buf2, "wb")))
     return -1;

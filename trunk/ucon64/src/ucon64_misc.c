@@ -1373,7 +1373,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
                 // TODO: here should come some code that checks if buf is really
                 //       the file that its name suggests
                 //       DON'T remove buf! That would be stupid.
-                printf ("File \"%s\" aleady exists, skipping \"%s\"\n", buf, ucon64.rom);
+                printf ("File \"%s\" already exists, skipping \"%s\"\n", buf, ucon64.rom);
             }
         }
       break;

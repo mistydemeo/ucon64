@@ -1,9 +1,9 @@
 A Super Wild Card compatibility list
-Version: 1.22
+Version: 1.23
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 14 July 2003
+Date: 23 July 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
-Software: uCON64 1.9.8-1
+Software: uCON64 1.9.8-2
 
 
 Legend:
@@ -40,6 +40,7 @@ byte before sending the game. This causes that some games don't have code 3,
 because uCON64 already makes the required modification. For example, if Addams
 Family Values is loaded from diskette the emulation mode select byte should
 have the value 0x2c instead of the value 0x0c (before the file is split).
+For games marked with an asterisk uCON64 1.9.8-2 is required.
 
 
 Code    Game
@@ -127,7 +128,7 @@ Code    Game
 0 -     Donald Duck Mahou no Boushi (J)
 1 -     Donkey Kong Country 2 - Diddy's Kong Quest (E)
 1+2+4 - Donkey Kong Country 2 - Diddy's Kong Quest (U) (V1.1) <= can't get past the first level
-6 -     Donkey Kong Country 3 - Dixie Kong's Double Trouble (E) <= works on an SWC DX2 64 Mbit PAL
+1* -    Donkey Kong Country 3 - Dixie Kong's Double Trouble (E)
 0 -     Donkey Kong Country - Competition Cartridge (U)
 1 -     Donkey Kong Country (E) (V1.0)
 1 -     Donkey Kong Country (E) (V1.1)

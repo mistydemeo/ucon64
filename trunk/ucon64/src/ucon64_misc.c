@@ -535,30 +535,6 @@ parport_probe (unsigned int port)
   return port;
 }
 
-#ifdef __unix__
-int
-drop_privileges (void)
-{
-  uid_t uid;
-  gid_t gid;
-
-  // now we can drop privileges
-  uid = getuid ();
-  if (setuid (uid) == -1)
-    {
-      fprintf (stderr, "Could not set uid\n");
-      return 1;
-    }
-  gid = getgid ();                              // This shouldn't be necessary
-  if (setgid (gid) == -1)                       //  if `make install' was
-    {                                           //  used, but just in case
-      fprintf (stderr, "Could not set gid\n");  //  (root did `chmod +s')
-      return 1;
-    }
-
-  return 0;
-}
-#endif
 
 unsigned int
 ucon64_parport_probe (unsigned int port)
@@ -588,6 +564,7 @@ ucon64_parport_probe (unsigned int port)
     }
 #endif
   {
+    // now we can drop privileges
     int val = drop_privileges ();
     if (val != 0)
       return val;

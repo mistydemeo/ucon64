@@ -128,9 +128,6 @@ extern int ucon64_testsplit (const char *filename);//test if a ROM is split
 extern unsigned int ucon64_parport_probe (unsigned int parport);
 extern const char *ucon64_parport_error; //std. error message for parport
 extern const char *ucon64_console_error; //std. error message if the correct console couldn't be found
-#ifdef  __unix__
-int drop_privileges (void);
-#endif
 
 extern void ucon64_wrote (const char *filename);
 

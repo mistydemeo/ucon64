@@ -420,20 +420,20 @@ strcpy(buf,filenameonly(filename));
 if(!strchr(buf,'.'))return(0);
 
 strcpy(buf,filename);
-buf[strcspn(buf,".")-1]++;
+buf[findlast(buf,".")-1]++;
 while(!access(buf,F_OK))
 {
-	buf[strcspn(buf,".")-1]++;
+	buf[findlast(buf,".")-1]++;
 	x++;
 }
 
 if(x!=0)return(x);
 
 strcpy(buf,filename);
-buf[strcspn(buf,".")+1]++;
+buf[findlast(buf,".")+1]++;
 while(!access(buf,F_OK))
 {
-	buf[strcspn(buf,".")+1]++;
+	buf[findlast(buf,".")+1]++;
 	x++;
 }
 

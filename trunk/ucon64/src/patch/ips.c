@@ -216,7 +216,7 @@ if(!(fp=fopen(name,"rb")))
 	}
 
 	strcpy(buf,name);
-	buf[strcspn(buf,".")+1]=0;
+	buf[findlast(buf,".")+1]=0;
 	strcat(buf,findlwr(buf)?"ips":"IPS");
 	
 	if(!(fp3 = fopen (buf,"wb")))

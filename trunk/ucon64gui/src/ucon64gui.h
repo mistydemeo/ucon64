@@ -47,6 +47,8 @@ void ucon64_root (void);
 
 void ucon64_bottom (void);
 
+void ucon64gui_top (void);
+
 void ucon64_system (void);
 
 void ucon64_rom (void);

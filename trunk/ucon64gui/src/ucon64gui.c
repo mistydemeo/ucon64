@@ -36,15 +36,15 @@ ucon64_bottom (void)
   html2gui_br ();
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
   html2gui_br ();
-/*  html2gui_textarea (ucon64gui.ucon64_output, 80, 30);
+/*  html2gui_textarea (ucon64gui.ucon64_output, 0, 0);
 
   html2gui_br ();
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
   html2gui_br ();
-  html2gui_textarea (ucon64gui.cmd, 80, 1);
+  html2gui_textarea (ucon64gui.cmd, 0, 0);
   html2gui_br ();
 */
-  html2gui_img (icon_16x16_xpm, 48, 48, 0);
+  html2gui_img (icon_16x16_xpm, 0, 0, 0);
 
   html2gui_ ("uCON64gui "
 #ifdef __GTK_GUI__
@@ -134,22 +134,14 @@ ucon64_e (void)
 }
 
 
+
 void
-ucon64_root (void)
+ucon64gui_top(void)
 {
-
-  ucon64gui.console = ucon64_UNKNOWN;
-
 //<html>
-  html2gui_html (0, 0, 0);
 
-  html2gui_title ("uCON64gui", icon_xpm);
-
-
-  html2gui_input_submit (ucon64_rom, "Open ROM", "Open ROM", 100, 50,
+  html2gui_input_submit (ucon64_rom, "Open ROM", "Open ROM", 0, 0,
                          open_xpm);
-  html2gui_input_submit (ucon64_e, "Emulate", "Run ROM in an emulator", 100,
-                         50, NULL);
 
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
   html2gui_br ();
@@ -157,8 +149,10 @@ ucon64_root (void)
   html2gui_ ("Miscellaneous options");
   html2gui_br ();
   html2gui_input_submit (ucon64_info, "Show info",
-                         "Click here to see information about ROM", 10, 10,
+                         "Click here to see information about ROM", 0, 0,
                          NULL);
+  html2gui_input_submit (ucon64_e, "Emulate", "Run ROM in an emulator\nNOTE: uCON64 is not an emulator it works as intelligent frontend to choose the right emulator for the ROM. Check it's config file for the settings.", 0,
+                         0, NULL);
 
 /*
   -e            emulate/run ROM (see $HOME/.ucon64rc for more)
@@ -196,10 +190,26 @@ ucon64_root (void)
   html2gui_br ();
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
 //  html2gui_hr ();
+
+}
+
+
+void
+ucon64_root (void)
+{
+
+  ucon64gui.console = ucon64_UNKNOWN;
+  html2gui_html (0, 0, 0);
+
+  html2gui_title ("uCON64gui", icon_xpm);
+
+  
+  ucon64gui_top();
+
   html2gui_ ("Console specific options");
   html2gui_br ();
   html2gui_input_submit (ucon64_snes, "Super Nintendo",
-                         "Options for Super Nintendo", 10, 10, NULL);
+                         "Options for Super Nintendo", 0, 0, NULL);
 
   html2gui_br ();
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
@@ -207,7 +217,7 @@ ucon64_root (void)
   html2gui_ ("Backup unit specific options");
   html2gui_br ();
   html2gui_input_submit (ucon64_swc, "Super Wild Card",
-                         "Options for Super Wild Card", 10, 10, NULL);
+                         "Options for Super Wild Card", 0, 0, NULL);
 
   ucon64_bottom ();
 

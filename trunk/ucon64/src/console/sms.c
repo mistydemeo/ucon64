@@ -43,7 +43,8 @@ const st_usage_t sms_usage[] =
     {"sms", NULL, "force recognition"},
     {"int", NULL, "force ROM is in interleaved format (SMD)"},
     {"nint", NULL, "force ROM is not in interleaved format (RAW)"},
-    {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
+    {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)"},
+    {"mgdgg", NULL, "same as " OPTION_LONG_S "mgd, but gives GG name"},
     {"smd", NULL, "convert to Super Magic Drive/SMD (+512 Bytes)"},
     {"smds", NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"},
     {NULL, NULL, NULL}
@@ -64,14 +65,14 @@ st_sms_header_t sms_header;
 
 // see src/backup/mgd.h for the file naming scheme
 int
-sms_mgd (st_rominfo_t *rominfo)
+sms_mgd (st_rominfo_t *rominfo, int console)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
   int size = ucon64.file_size - rominfo->buheader_len;
 
   strcpy (src_name, ucon64.rom);
-  mgd_make_name (ucon64.rom, "GG", size, dest_name);
+  mgd_make_name (ucon64.rom, console, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   if (!(buffer = (unsigned char *) malloc (size)))

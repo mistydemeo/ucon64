@@ -185,26 +185,24 @@ remove_mgd_id (char *name, const char *id)
 
 
 void
-mgd_make_name (const char *filename, const char *prefix, int size, char *name)
+mgd_make_name (const char *filename, int console, int size, char *name)
 // these characters are also valid in MGD file names: !@#$%^&_
 {
-  char *p, *fname, *size_str = 0, *suffix = 0;
+  char *prefix = 0, *p, *fname, *size_str = 0, *suffix = 0;
   int n;
 
-  fname = basename (filename);
-  if (strlen (prefix) > 2)
+  switch (console)
     {
-      fprintf (stderr, "INTERNAL ERROR: Prefix is longer than 2 characters\n");
-      exit (1);
-    }
-
-  if (prefix[0] == 'S' && prefix[1] == 'F')
-    {
-      if (size <= 4 * MBIT)
-        {
-          size_str = "4";
-          suffix = ".048";
-        }
+    default:                                    // falling through
+    case UCON64_SNES:
+      prefix = "SF";
+      suffix = ".048";
+      if (size <= 1 * MBIT)
+        size_str = "1";
+      else if (size <= 2 * MBIT)
+        size_str = "2";
+      else if (size <= 4 * MBIT)
+        size_str = "4";
       else if (size <= 8 * MBIT)
         {
           size_str = "8";
@@ -213,7 +211,11 @@ mgd_make_name (const char *filename, const char *prefix, int size, char *name)
       else
         {
           suffix = ".078";
-          if (size <= 16 * MBIT)
+          if (size <= 10 * MBIT)
+            size_str = "10";
+          else if (size <= 12 * MBIT)
+            size_str = "12";
+          else if (size <= 16 * MBIT)
             size_str = "16";
           else if (size <= 20 * MBIT)
             size_str = "20";
@@ -222,9 +224,9 @@ mgd_make_name (const char *filename, const char *prefix, int size, char *name)
           else // MGD supports SNES games with sizes up to 32 Mbit
             size_str = "32";
         }
-    }
-  else if (prefix[0] == 'M' && prefix[1] == 'D')
-    {
+      break;
+    case UCON64_GEN:
+      prefix = "MD";
       suffix = ".000";
       if (size <= 1 * MBIT)
         size_str = "1";
@@ -255,19 +257,14 @@ mgd_make_name (const char *filename, const char *prefix, int size, char *name)
                 size_str = "32";
             }
         }
-    }
-  else if (prefix[0] == 'P' && prefix[1] == 'C')
-    {
+      break;
+    case UCON64_PCE:
+      prefix = "PC";
+      suffix = ".040";
       if (size <= 1 * MBIT)
-        {
-          size_str = "1";
-          suffix = ".040";
-        }
+        size_str = "1";
       else if (size <= 2 * MBIT)
-        {
-          size_str = "2";
-          suffix = ".040";
-        }
+        size_str = "2";
       else if (size <= 3 * MBIT)
         {
           size_str = "3";
@@ -278,65 +275,80 @@ mgd_make_name (const char *filename, const char *prefix, int size, char *name)
           size_str = "4";
           suffix = ".048";
         }
-      else if (size <= 6 * MBIT)
-        {
-          size_str = "6";
-          suffix = ".058";
-        }
-      else // MGD supports PC-Engine games with sizes up to 8 Mbit
-        {
-          size_str = "8";
-          suffix = ".058";
-        }
-    }
-  else if (prefix[0] == 'G' && prefix[1] == 'G')
-    {
-      if (size <= MBIT)
-        {
-          suffix = ".000";
-          if (size <= MBIT / 4)
-            size_str = "04";
-          else if (size <= MBIT / 2)
-            size_str = "05";
-          else
-            size_str = "1";
-        }
       else
         {
-          if (size <= 2 * MBIT)
-            {
-              size_str = "2";
-              suffix = ".024";
-            }
-          else if (size <= 4 * MBIT)
-            {
-              size_str = "4";
-              suffix = ".058";
-            }
-          else // MGD supports Game Gear/Sega Master System games with sizes up to 6 Mbit
-            {
-              size_str = "6";
-              suffix = ".078";
-            }
+          suffix = ".058";
+          if (size <= 6 * MBIT)
+            size_str = "6";
+          else // MGD supports PC-Engine games with sizes up to 8 Mbit
+            size_str = "8";
         }
-    }
-  else if (prefix[0] == 'G' && prefix[1] == 'B')
-    /*
-      TODO: More info is needed about GB MGD2 file names as these are pure
-            guesses
-      What is the maximum game size the MGD2 supports for GB (color) games? At
-      least one 64 Mbit game exists, Densha De Go! 2 (J) [C][!].
-    */
-    {
-      if (size <= 1 * MBIT)
-        {
-          size_str = "1";
-          suffix = ".040";
-        }
+      break;
+    case UCON64_SMS:
+      prefix = "GG";
+      suffix = ".060";
+      if (size < 1 * MBIT)
+        size_str = "0";
+      else if (size == 1 * MBIT)
+        size_str = "1";
       else if (size <= 2 * MBIT)
+        size_str = "2";
+      else
         {
-          size_str = "2";
-          suffix = ".040";
+          suffix = ".078";
+          if (size <= 3 * MBIT)
+            size_str = "3";
+          else if (size <= 4 * MBIT)
+            size_str = "4";
+          else if (size <= 6 * MBIT)
+            size_str = "6";
+          else // MGD supports Sega Master System games with sizes up to 8 Mbit
+            size_str = "8";
+        }
+      break;
+    case UCON64_GAMEGEAR:
+      prefix = "GG";
+      suffix = ".040";
+      if (size < 1 * MBIT)
+        size_str = "0";
+      else if (size == 1 * MBIT)
+        size_str = "1";
+      else if (size <= 2 * MBIT)
+        size_str = "2";
+      else
+        {
+          suffix = ".048";
+          if (size <= 3 * MBIT)
+            size_str = "3";
+          else if (size <= 4 * MBIT)
+            size_str = "4";
+          else
+            {
+              suffix = ".078";
+              if (size <= 6 * MBIT)
+                size_str = "6";
+              else // MGD supports Game Gear games with sizes up to 8 Mbit
+                size_str = "8";
+            }
+        }
+      break;
+    case UCON64_GB:
+      prefix = "GB";
+      /*
+        What is the maximum game size the MGD2 supports for GB (color) games?
+        At least one 64 Mbit game exists, Densha De Go! 2 (J) [C][!].
+      */
+      suffix = ".040";
+      if (size < 1 * MBIT)
+        size_str = "0";
+      else if (size == 1 * MBIT)
+        size_str = "1";
+      else if (size <= 2 * MBIT)
+        size_str = "2";
+      else if (size <= 3 * MBIT)
+        {
+          size_str = "3";
+          suffix = ".030";
         }
       else if (size <= 4 * MBIT)
         {
@@ -345,15 +357,19 @@ mgd_make_name (const char *filename, const char *prefix, int size, char *name)
         }
       else
         {
-          size_str = "8";
           suffix = ".058";
+          if (size <= 6 * MBIT)
+            size_str = "6";
+          else
+            size_str = "8";
         }
+      break;
     }
 
+  fname = basename (filename);
   // Do NOT mess with prefix (strupr()/strlwr()). See below (remove_mgd_id()).
   sprintf (name, "%s%s%s", prefix, size_str, fname);
-  if (size >= 10 * MBIT ||
-      (prefix[0] == 'G' && prefix[1] == 'G' && size < MBIT))
+  if (size >= 10 * MBIT)
     {
       if (!strnicmp (name, fname, 4))
         strcpy (name, fname);
@@ -366,13 +382,23 @@ mgd_make_name (const char *filename, const char *prefix, int size, char *name)
   if ((p = strchr (name, '.')))
     *p = 0;
   n = strlen (name);
-  if (n > 7)
-    n = 7;
-  name[n] = 'X';
+  if (size >= 10 * MBIT)
+    {
+      if (n < 7)
+        strcat (name, "XXX");                   // in case fname is 1 character long
+      n = 7;
+    }
+  else
+    {
+      if (n < 6)
+        strcat (name, "XX");
+      n = 6;
+    }
+  name[n] = '0';                                // last character must be a number
   name[n + 1] = 0;
-  for (n = 3; n < 7; n++)                       // we can skip the prefix
+  for (n = 3; n < 8; n++)                       // we can skip the prefix
     if (name[n] == ' ')
-      name[n] = '_';
+      name[n] = 'X';
 
   /*
     the transfer program "pclink" contains a bug in that it looks at the

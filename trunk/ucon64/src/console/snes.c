@@ -612,7 +612,7 @@ snes_mgd (st_rominfo_t *rominfo)
     printf ("NOTE: This game might not work with a MGD because it's a HiROM game\n");
 
   strcpy (src_name, ucon64.rom);
-  mgd_make_name (ucon64.rom, "SF", size, dest_name);
+  mgd_make_name (ucon64.rom, UCON64_SNES, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   if (rominfo->interleaved)

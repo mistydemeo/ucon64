@@ -357,7 +357,7 @@ genesis_mgd (st_rominfo_t *rominfo)
   if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
     return -1;
 
-  mgd_make_name (ucon64.rom, "MD", genesis_rom_size, dest_name);
+  mgd_make_name (ucon64.rom, UCON64_GEN, genesis_rom_size, dest_name);
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
 
   mgd_interleave (&rom_buffer, genesis_rom_size);
@@ -481,7 +481,7 @@ genesis_s (st_rominfo_t *rominfo)
       char suffix[5], *p;
       int n, offset, size;
 
-      mgd_make_name (ucon64.rom, "MD", genesis_rom_size, dest_name);
+      mgd_make_name (ucon64.rom, UCON64_GEN, genesis_rom_size, dest_name);
       strcpy (suffix, (char *) get_suffix (dest_name));
       if ((p = strchr (dest_name, '.')))
         *p = 0;

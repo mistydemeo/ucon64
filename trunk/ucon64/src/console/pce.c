@@ -699,7 +699,7 @@ pcengine_mgd (st_rominfo_t *rominfo)
       }
 
   strcpy (src_name, ucon64.rom);
-  mgd_make_name (ucon64.rom, "PC", size, dest_name);
+  mgd_make_name (ucon64.rom, UCON64_PCE, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   if (rominfo->interleaved)

@@ -333,7 +333,7 @@ gameboy_mgd (st_rominfo_t *rominfo)
   int size = ucon64.file_size - rominfo->buheader_len;
 
   strcpy (src_name, ucon64.rom);
-  mgd_make_name (ucon64.rom, "GB", size, dest_name);
+  mgd_make_name (ucon64.rom, UCON64_GB, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "wb");

@@ -310,8 +310,8 @@ if(argcmp(argc,argv,"-stp"))
 {
 	strcpy(buf,filebackup(ucon64_rom()));
 	newext(buf,".TMP");
-
 	rename(ucon64_rom(),buf);
+
 	filecopy(buf,512,quickftell(buf),ucon64_rom(),"wb");
 	remove(buf);
 	return(0);
@@ -321,7 +321,6 @@ if(argcmp(argc,argv,"-ins"))
 {
 	strcpy(buf,filebackup(ucon64_rom()));
 	newext(buf,".TMP");
-
 	rename(ucon64_rom(),buf);
 
         memset(buf2,0,512);

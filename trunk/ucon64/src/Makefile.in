@@ -5,8 +5,10 @@ CC=@CC@
 CFLAGS=@CFLAGS@
 LDFLAGS=@LDFLAGS@
 
+LIB=libdiscmage/libdiscmage.o libdiscmage/cdi.o libdiscmage/nero.o \
+	libdiscmage/sheets.o libdiscmage/buffer.o libdiscmage/audio.o
+
 OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
-        ucon64_disc.o cdi.o nero.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
@@ -23,6 +25,7 @@ ifdef ZLIB
 OBJECTS+=unzip.o
 endif
 
+OBJECTS+=$(LIB)
 
 TARGET=ucon64
 ifeq ($(TERM),cygwin)                   # OSTYPE is not a real env var on Cygwin
@@ -111,17 +114,18 @@ endif                                   # cygwin
 # Dependencies
 
 # Most source files include these
-UCON64_STD_H=ucon64.h ucon64_misc.h ucon64_disc.h misc.h config.h ucon64_defines.h quick_io.h
+UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
 
 getopt.o: getopt.h
 unzip.o: unzip.h
 misc.o: misc.h config.h
 quick_io.o: quick_io.h misc.h config.h
 ucon64.o: switches.c options.c $(UCON64_STD_H)
-ucon64_misc.o: cdi.h nero.h $(UCON64_STD_H)
+ucon64_misc.o: libdiscmage/cdi.h libdiscmage/nero.h $(UCON64_STD_H)
 ucon64_db.o: ucon64_db.h $(UCON64_STD_H)
-nero.o: nero.h cdi.h config.h
-cdi.o: cdi.h misc.h config.h
+libdiscmage/lib_misc.o: $(UCON64_STD_H)
+libdiscmage/nero.o: libdiscmage/nero.h libdiscmage/cdi.h config.h
+libdiscmage/cdi.o: libdiscmage/cdi.h misc.h config.h
 console/gb.o: console/gb.h $(UCON64_STD_H)
 console/gba.o: console/gba.h $(UCON64_STD_H)
 console/genesis.o: console/genesis.h $(UCON64_STD_H)

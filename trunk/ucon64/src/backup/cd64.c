@@ -756,7 +756,7 @@ int send (char comm, unsigned long saddr, char *str)
                 exit (2);
         }
 
-        flength=quick_fsize (str);
+        flength=file_size (str);
 
         if ((flength&0x00000003)!=0)
         {

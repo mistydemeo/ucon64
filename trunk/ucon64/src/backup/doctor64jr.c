@@ -672,7 +672,7 @@ short int download_n64()
       printf("open error !!!\07\n");
       return(-1);
       }
-   size = quick_fsize (file_name);
+   size = file_size (file_name);
 
    if (sel==0)
       printf("Downloading");

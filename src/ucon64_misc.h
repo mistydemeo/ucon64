@@ -36,17 +36,6 @@ extern void outportb (unsigned short port, unsigned char byte);
 extern void outportw (unsigned short port, unsigned short word);
 #endif // BACKUP
 
-typedef struct st_track_modes
-{
-  char *common;
-  char *cdrdao;
-} st_track_modes_t;
-#define MODE1_2048 0
-#define MODE1_2352 1
-#define MODE2_2336 2
-#define MODE2_2352 3
-extern const st_track_modes_t track_modes[];
-
 #define MBIT 131072
 
 #define PARPORT_DATA    0                       // output
@@ -80,24 +69,6 @@ typedef struct st_unknown_header
 #define UNKNOWN_HEADER_START 0
 #define UNKNOWN_HEADER_LEN (sizeof (st_unknown_header_t))
 extern const char *unknown_usage[];
-
-
-typedef struct st_wav_header
-{
-  char magic[4];
-  unsigned int total_length;
-  char type[4];
-  char fmt[4];
-  unsigned int header_length;
-  unsigned short format;
-  unsigned short channels;
-  unsigned int samplerate;
-  unsigned int bitrate;
-  unsigned short blockalign;
-  unsigned short bitspersample;
-  char data[4];
-  unsigned int data_length;
-} st_wav_header_t;
 
 
 extern char *ucon64_temp_file;
@@ -138,17 +109,6 @@ extern void ucon64_wrote (const char *filename);
   to delete the tempdir *dp must be closed with closedir2()
 */
 extern const char *ucon64_extract (const char *archive);
-
-extern int ucon64_bin2iso (const char *image, int track_mode);
-extern int ucon64_trackmode_probe (const char *image);
-extern int ucon64_mktoc (st_rominfo_t *rominfo);
-extern int ucon64_mkcue (st_rominfo_t *rominfo);
-//extern int ucon64_toc2cue (const char *toc_file);
-extern int ucon64_cdirip (const char *image);
-extern int ucon64_cdi2nero (const char *image);
-//extern int ucon64_isofix (const char *image);
-//extern int ucon64_readiso (const char *image);
-
 extern int ucon64_e (const char *rominfo);
 extern int ucon64_ls (const char *path, int mode);
 extern int ucon64_configfile (void);

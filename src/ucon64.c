@@ -55,6 +55,7 @@ write programs in C
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
+#include "ucon64_disc.h"
 
 #include "console/snes.h"
 #include "console/gb.h"

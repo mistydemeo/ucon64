@@ -778,7 +778,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 
   if (UCON64_TYPE_ISROM (ucon64.type))
     {
-      // Calculating the CRC for the ROM data of a UNIF file (NES) shouldn't
+      // TODO Calculating the CRC for the ROM data of a UNIF file (NES) shouldn't
       //  be done with q_fcrc32(). nes_init() uses mem_crc32().
       if (rominfo->current_crc32 == 0)
         rominfo->current_crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
@@ -857,17 +857,19 @@ ucon64_dat_nfo (const ucon64_dat_t *dat)
           "DAT: Version: %s (%s, %s)\n"
           "DAT: Author: %s\n"
 //          "DAT: Comment: %s\n"
-          "DAT: %s\n"
-          "DAT: Filename: %s\n"
-          "DAT: Size: %d Bytes (%.4f Mb)\n",
+          "DAT: %s\n",
           dat->datfile,
           dat->version,
           dat->date,
           dat->refname,
           dat->author,
 //          dat->comment,
-          dat->name,
-          dat->fname,
+          dat->name);
+
+  if (stricmp (dat->name, dat->fname) != 0)
+    printf ("DAT: Filename: %s\n", dat->fname);
+
+  printf ("DAT: Size: %d Bytes (%.4f Mb)\n",
           dat->fsize,
           TOMBIT_F (dat->fsize));
 }

@@ -74,13 +74,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //  5. If no diff get device Manuf ID for flash.
 //  6. If no Manuf ID detected then report no cart backup available.
 
-#include "fal.h"
-#include <sys/stat.h>
+#include <fcntl.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <stddef.h>
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <unistd.h>
+#include "../misc.h"
+#include "../ucon64.h"
+#include "../ucon64_db.h"
+#include "../ucon64_misc.h"
+#include <sys/stat.h>
 #include <math.h>
+#include "fal.h"
 
 #define outpb(p,v)  outportb(p,v); iodelay()
 #define inpb(p)   inportb(p)

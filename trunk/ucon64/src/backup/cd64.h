@@ -19,8 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef CD64_H
 #define CD64_H
-#include "../ucon64.h"
-
 #define cd64_TITLE "CD64\n19XX UFO http://www.cd64.com"
 #define cd64_HEADER_START 0
 #define cd64_HEADER_LEN 0

@@ -20,8 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef DEX_H
 #define DEX_H
-#include "../ucon64.h"
-
 #define dex_TITLE "DexDrive\nInterAct http://www.dexdrive.de"
 
 int dex_usage (int argc, char *argv[]);

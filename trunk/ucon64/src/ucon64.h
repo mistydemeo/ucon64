@@ -26,20 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_H
 #define UCON64_H
 
-#include <fcntl.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <unistd.h>             // ioperm() (libc5)
-//#include <getopt.h>           // __FreeBSD__ problems
-//#include "config.h"
-
-#include "ucon64_db.h"
 
 //#define ucon64_KNOWN          -1
 #define ucon64_UNKNOWN		0
@@ -170,7 +156,6 @@ struct ucon64_
 
 extern struct ucon64_ rom;
 
-#include "ucon64_misc.h"
 
 int ucon64_usage (int argc, char *argv[]);
 int ucon64_init (struct ucon64_ *rom);

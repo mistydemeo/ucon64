@@ -45,6 +45,10 @@ write programs in C
 #endif
 
 #include "config.h"
+#ifdef DEBUG
+#warning DEBUG active
+#endif
+
 
 #include "getopt.h"
 #include "misc.h"
@@ -66,6 +70,7 @@ write programs in C
 #include "swan/swan.h"
 #include "dc/dc.h"
 #include "jaguar/jaguar.h"
+#include "psx/psx.h"
 #include "sample/sample.h"
 
 #include "patch/ppf.h"
@@ -90,6 +95,7 @@ write programs in C
 #include "backup/fpl.h"
 #include "backup/mgd.h"
 #include "backup/mccl.h"
+#include "backup/lynxit.h"
 
 static void ucon64_exit (void);
 //static void usage (const char **usage);
@@ -254,6 +260,7 @@ const struct option long_options[] = {
     {"xfalb", 1, 0, UCON64_XFALB},
     {"xfalc", 1, 0, UCON64_XFALC},
     {"xfals", 0, 0, UCON64_XFALS},
+    {"xlit", 0, 0, UCON64_XLIT},
     {"xmccl", 0, 0, UCON64_XMCCL},
     {"xgbx", 0, 0, UCON64_XGBX},
     {"xgbxb", 1, 0, UCON64_XGBXB},
@@ -293,8 +300,8 @@ const struct option long_options[] = {
 void
 ucon64_exit (void)
 {
-//  if (ucon64.temp)
-//    closedir2 (ucon64.temp);
+  if (ucon64.temp)
+    closedir2 (ucon64.temp);
 
   handle_registered_funcs ();
   fflush (stdout);
@@ -375,7 +382,7 @@ main (int argc, char **argv)
   if (optind < argc)
     ucon64.rom = argv[optind++];
 
-  ucon64.rom = ucon64_rom_in_archive (ucon64.temp, ucon64.rom, ucon64.rom_in_archive,
+  ucon64.rom = ucon64_rom_in_archive (&ucon64.temp, ucon64.rom, ucon64.rom_in_archive,
                              ucon64.configfile);
 
   if (optind < argc)
@@ -481,10 +488,13 @@ ucon64_console_probe (st_rominfo_t *rominfo)
       jaguar_init (rominfo);
       break;
 
+    case UCON64_PSX:
+      psx_init (rominfo);
+      break;
+
     case UCON64_SATURN:
     case UCON64_CDI:
     case UCON64_CD32:
-    case UCON64_PSX:
     case UCON64_GAMECUBE:
     case UCON64_XBOX:
     case UCON64_GP32:
@@ -829,7 +839,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
-    "  " OPTION_LONG_S "lsfid       generate ROM list in FILE_ID.DIZ format; " OPTION_LONG_S "rom=DIRECTORY\n"
+//    "  " OPTION_LONG_S "lsfid       generate ROM list in FILE_ID.DIZ format; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
     "                  this is often used by people who lose control of their ROMs\n"
     "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"
@@ -902,6 +912,7 @@ ucon64_usage (int argc, char *argv[])
 #ifdef TODO
 #warning TODO  --toc    convert CloneCD *.cue to cdrdao *.toc
 #warning TODO  --cue    convert cdrdao *.toc to *.cue
+#warning TODO  ISO->CDI, ISO->NRG, CDI->NRG, NRG->ISO, TOC->CUE
 #endif // TODO
 //    "TODO:  " OPTION_LONG_S "toc    convert CloneCD *.cue to cdrdao *.toc\n"
 //    "TODO:  " OPTION_LONG_S "cue    convert cdrdao *.toc to *.cue\n"
@@ -925,10 +936,6 @@ ucon64_usage (int argc, char *argv[])
   );
 
   optind = option_index = 0;
-#ifdef TODO
-#warning TODO is there a better way to reset?
-#endif // TODO
-
   single = 0;
 
   while (!single && (c = getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
@@ -1005,6 +1012,9 @@ ucon64_usage (int argc, char *argv[])
 
       case UCON64_LYNX:
         UCON64_USAGE (lynx_usage);
+#ifdef BACKUP
+        UCON64_USAGE (lynxit_usage);
+#endif // BACKUP
         single = 1;
         break;
 
@@ -1039,6 +1049,14 @@ ucon64_usage (int argc, char *argv[])
         single = 1;
         break;
 
+      case UCON64_PSX:
+        UCON64_USAGE (psx_usage);
+#ifdef BACKUP
+        UCON64_USAGE (dex_usage);
+#endif // BACKUP
+        single = 1;
+        break;
+
       case UCON64_GC:
       case UCON64_S16:
       case UCON64_ATA:
@@ -1046,7 +1064,6 @@ ucon64_usage (int argc, char *argv[])
       case UCON64_VBOY:
       case UCON64_VEC:
       case UCON64_INTELLI:
-      case UCON64_PSX:
       case UCON64_PS2:
       case UCON64_SAT:
       case UCON64_3DO:
@@ -1071,6 +1088,12 @@ ucon64_usage (int argc, char *argv[])
       UCON64_USAGE (dc_usage);
       printf("\n");
 
+      UCON64_USAGE (psx_usage);
+#ifdef BACKUP
+      UCON64_USAGE (dex_usage);
+#endif // BACKUP
+      printf ("\n");
+
       UCON64_USAGE (gba_usage);
 #ifdef BACKUP
       UCON64_USAGE (fal_usage);
@@ -1082,7 +1105,7 @@ ucon64_usage (int argc, char *argv[])
       UCON64_USAGE (doctor64_usage);
       UCON64_USAGE (doctor64jr_usage);
 //      UCON64_USAGE (cd64_usage);
-//      UCON64_USAGE (dex_usage);
+      UCON64_USAGE (dex_usage);
 #endif // BACKUP
       printf ("\n");
 
@@ -1113,6 +1136,9 @@ ucon64_usage (int argc, char *argv[])
       printf ("\n");
 
       UCON64_USAGE (lynx_usage);
+#ifdef BACKUP
+      UCON64_USAGE (lynxit_usage);
+#endif // BACKUP
       printf ("\n");
 
       UCON64_USAGE (pcengine_usage);

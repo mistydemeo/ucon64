@@ -106,22 +106,7 @@ static int ucon64_parport_probe (void);
 
 struct ucon64_ rom;
 
-void
-ucon64_exit (void)
-{
-  printf ("+++EOF");
-  fflush (stdout);
-}
-
-int
-main (int argc, char *argv[])
-{
-  long x, y = 0;
-  int ucon64_argc, skip_init_nfo = 0, c = 0, result = 0;
-  unsigned long padded;
-  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], *ucon64_argv[128];
-  int option_index = 0;
-  struct option long_options[] = {
+static struct option long_options[] = {
     {"1991", 0, 0, 168},
     {"3do", 0, 0, 252},
     {"?", 0, 0, 'h'},
@@ -271,6 +256,21 @@ main (int argc, char *argv[])
     {0, 0, 0, 0}
   };
 
+void
+ucon64_exit (void)
+{
+  printf ("+++EOF");
+  fflush (stdout);
+}
+
+int
+main (int argc, char *argv[])
+{
+  long x, y = 0;
+  int ucon64_argc, skip_init_nfo = 0, c = 0, result = 0;
+  unsigned long padded;
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], *ucon64_argv[128];
+  int option_index = 0;
   printf ("%s\n", ucon64_TITLE);
   printf ("Uses code from various people. See 'developers.html' for more!\n");
   printf ("This may be freely redistributed under the terms of the GNU Public License\n\n");
@@ -1295,10 +1295,11 @@ else
 int
 ucon64_usage (int argc, char *argv[])
 {
-  printf ("USAGE: %s [OPTION(S)] ROM [FILE]\n\n",
-          getarg (argc, argv, ucon64_NAME));
+  int c = 0;
+  int option_index = 0;
+  int single = 0;
 
-  printf (
+  printf ("USAGE: %s [OPTION(S)] ROM [FILE]\n\n"
          /*
            "TODO: $ROM could also be the name of a *.ZIP archive\n"
            "      it will automatically find and extract the ROM\n"
@@ -1337,7 +1338,8 @@ ucon64_usage (int argc, char *argv[])
            "  -padhd        pad ROM to full Mb (regarding to +512 Bytes header)\n"
            "  -stp          strip first 512 Bytes (possible header) from ROM\n"
            "  -ins          insert 512 Bytes (0x00) before ROM\n"
-           "  -strip        strip Bytes from end of ROM; $FILE=VALUE\n");
+           "  -strip        strip Bytes from end of ROM; $FILE=VALUE\n"
+           ,getarg (argc, argv, ucon64_NAME));
 
   bsl_usage (argc, argv);
   ips_usage (argc, argv);
@@ -1347,67 +1349,111 @@ ucon64_usage (int argc, char *argv[])
   ppf_usage (argc, argv);
   xps_usage (argc, argv);
 
+  cdrw_usage (argc, argv);
+
   printf ("\n");
 
-  if (argcmp (argc, argv, "-gba"))
-    gbadvance_usage (argc, argv);
-  else if (argcmp (argc, argv, "-n64"))
-    nintendo64_usage (argc, argv);
-  else if (argcmp (argc, argv, "-jag"))
-    jaguar_usage (argc, argv);
-  else if (argcmp (argc, argv, "-snes"))
-    snes_usage (argc, argv);
-  else if (argcmp (argc, argv, "-ng"))
-    neogeo_usage (argc, argv);
-  else if (argcmp (argc, argv, "-ngp"))
-    neogeopocket_usage (argc, argv);
-  else if (argcmp (argc, argv, "-gen"))
-    genesis_usage (argc, argv);
-  else if (argcmp (argc, argv, "-gb"))
-    gameboy_usage (argc, argv);
-  else if (argcmp (argc, argv, "-lynx"))
-    lynx_usage (argc, argv);
-  else if (argcmp (argc, argv, "-pce"))
-    pcengine_usage (argc, argv);
-  else if (argcmp (argc, argv, "-sms"))
-    sms_usage (argc, argv);
-  else if (argcmp (argc, argv, "-nes"))
-    nes_usage (argc, argv);
-  else if (argcmp (argc, argv, "-s16"))
-    sys16_usage (argc, argv);
-  else if (argcmp (argc, argv, "-ata"))
-    atari_usage (argc, argv);
-  else if (argcmp (argc, argv, "-coleco"))
-    coleco_usage (argc, argv);
-  else if (argcmp (argc, argv, "-vboy"))
-    virtualboy_usage (argc, argv);
-  else if (argcmp (argc, argv, "-swan"))
-    wonderswan_usage (argc, argv);
-  else if (argcmp (argc, argv, "-vec"))
-    vectrex_usage (argc, argv);
-  else if (argcmp (argc, argv, "-intelli"))
-    intelli_usage (argc, argv);
-  else if (argcmp (argc, argv, "-dc"))
-    dc_usage (argc, argv);
-  else if (argcmp (argc, argv, "-psx"))
-    psx_usage (argc, argv);
-  else if (argcmp (argc, argv, "-ps2"))
-    ps2_usage (argc, argv);
-  else if (argcmp (argc, argv, "-sat"))
-    saturn_usage (argc, argv);
-  else if (argcmp (argc, argv, "-3do"))
-    real3do_usage (argc, argv);
-  else if (argcmp (argc, argv, "-cd32"))
-    cd32_usage (argc, argv);
-  else if (argcmp (argc, argv, "-cdi"))
-    cdi_usage (argc, argv);
-  else if (argcmp (argc, argv, "-gc"))
-    gamecube_usage (argc, argv);
-  else if (argcmp (argc, argv, "-xbox"))
-    xbox_usage (argc, argv);
-  else if (argcmp (argc, argv, "-gp32"))
-    gp32_usage (argc, argv);
-  else
+while ((c =
+        getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
+  {
+    single = 1;
+    
+    switch (c)
+      {
+    case 245://gba
+      gbadvance_usage (argc, argv);
+      break;
+    case 213://n64
+      nintendo64_usage (argc, argv);
+      break;
+    case 181://jag
+      jaguar_usage (argc, argv);
+      break;
+    case 214://snes
+      snes_usage (argc, argv);
+      break;
+    case 211://ng
+      neogeo_usage (argc, argv);
+      break;
+    case 242://ngp
+      neogeopocket_usage (argc, argv);
+      break;
+    case 191://gen
+      genesis_usage (argc, argv);
+      break;
+    case 246://gb
+      gameboy_usage (argc, argv);
+      break;
+    case 240://lynx
+      lynx_usage (argc, argv);
+      break;
+    case 244://pce
+      pcengine_usage (argc, argv);
+      break;
+    case 241://sms
+      sms_usage (argc, argv);
+      break;
+    case 243://nes
+      nes_usage (argc, argv);
+      break;
+    case 234://s16
+      sys16_usage (argc, argv);
+      break;
+    case 233://ata
+      atari_usage (argc, argv);
+      break;
+    case 235://coleco
+      coleco_usage (argc, argv);
+      break;
+    case 236://vboy
+      virtualboy_usage (argc, argv);
+      break;
+    case 237://swan
+      wonderswan_usage (argc, argv);
+      break;
+    case 238://vec
+      vectrex_usage (argc, argv);
+      break;
+    case 239://intelli
+      intelli_usage (argc, argv);
+      break;
+    case 253://dc
+      dc_usage (argc, argv);
+      break;
+    case 248://psx
+      psx_usage (argc, argv);
+      break;
+    case 249://ps2
+      ps2_usage (argc, argv);
+      break;
+    case 247://sat
+      saturn_usage (argc, argv);
+      break;
+    case 252://3do
+      real3do_usage (argc, argv);
+      break;
+    case 251://cd32
+      cd32_usage (argc, argv);
+      break;
+    case 250://cdi
+      cdi_usage (argc, argv);
+      break;
+    case 255://gc
+      gamecube_usage (argc, argv);
+      break;
+    case 254://xbox
+      xbox_usage (argc, argv);
+      break;
+    case 129://gp32
+      gp32_usage (argc, argv);
+      break;
+
+    default:
+      break;
+    }
+  }
+
+  if (!single)
     {
       gamecube_usage (argc, argv);
       dc_usage (argc, argv);
@@ -1420,7 +1466,6 @@ ucon64_usage (int argc, char *argv[])
       cdi_usage(argc,argv);
 */
       printf ("%s\n%s\n%s\n%s\n%s\n%s\n"
-//            "  -xbox, -ps2, -sat, -3do, -cd32, -cdi\n"
               "  -xbox, -ps2, -sat, -3do, -cd32, -cdi\n"
               "                force recognition; NEEDED\n"
 //            "  -iso          force image is ISO9660\n"
@@ -1473,15 +1518,10 @@ ucon64_usage (int argc, char *argv[])
               "  *             show info (default)\n\n", system16_TITLE,
               atari_TITLE, coleco_TITLE, virtualboy_TITLE,
               vectrex_TITLE, intelli_TITLE, gp32_TITLE);
-
     }
 
-  printf ("Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n",
-          ucon64_dbsize (ucon64_UNKNOWN),
-          ucon64_dbsize (ucon64_UNKNOWN) - ucon64_DBSIZE);
-
-  printf
-    ("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
+  printf ("Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n"
+     "TIP: %s -help -snes (would show only Super Nintendo related help)\n"
 #ifdef	__MSDOS__
      "     %s -help|more (to see everything in more)\n"
 #else
@@ -1490,7 +1530,11 @@ ucon64_usage (int argc, char *argv[])
      "     give the force recognition option a try if something went wrong\n"
      "\n"
      "Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
-     "\n", getarg (argc, argv, ucon64_NAME), getarg (argc, argv, ucon64_NAME));
+     "\n"
+     , ucon64_dbsize (ucon64_UNKNOWN)
+     , ucon64_dbsize (ucon64_UNKNOWN) - ucon64_DBSIZE
+     , getarg (argc, argv, ucon64_NAME), getarg (argc, argv, ucon64_NAME)
+   );
 
   return 0;
 /*

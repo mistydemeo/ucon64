@@ -965,7 +965,10 @@ ucon64_nfo (const st_rominfo_t *rominfo)
   else if (ucon64.crc32)
     printf ("Checksum (CRC32): 0x%08x\n", ucon64.crc32);
 
-  if (ucon64.dat_enabled)
+  // The check for the size of the file is made, so that uCON64 won't display a
+  //  (nonsense) DAT info line when dumping a ROM (file doesn't exist and has
+  //  size 0).
+  if (ucon64.file_size > 0 && ucon64.dat_enabled)
     ucon64_dat_nfo (ucon64_dat, 1);
 
   printf ("\n");
@@ -1272,7 +1275,7 @@ ucon64_usage (int argc, char *argv[])
 #else
       0, 0,
 #endif // PARALLEL
-      0, 0, 0}},  
+      0, 0, 0}},
     {UCON64_LYNX, {lynx_usage,
 #ifdef  PARALLEL
       lynxit_usage,

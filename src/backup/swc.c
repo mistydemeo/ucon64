@@ -267,7 +267,7 @@ handle_fig_header (unsigned char *header)
   else if ((header[4] == 0xdd && header[5] == 0x82) ||
            (header[4] == 0x00 && header[5] == 0x80))
     /*
-      8 kB *or* 2 kB (shortcoming of FIG header format). We give the emu mode
+      8 kB *or* 2 kB (shortcomming of FIG header format). We give the emu mode
       select byte a value as if the game uses 8 kB. At least this makes games
       that use 8 kB work.
       Users should not complain if the game doesn't work because of a SRAM
@@ -432,7 +432,7 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
   if ((emu_mode_select & 0x1c) == 0x0c)
     emu_mode_select |= 0x20;
 #else
-  // TODO: The code below doesn't seem to work for some HiROM games. This has to be verified.
+  // The code below doesn't work for some HiROM games that don't use SRAM.
   if ((emu_mode_select & 0x0c) == 0x0c)         // 0x0c == no SRAM; we use the header, so
     {                                           //  that the user can override this
       if (emu_mode_select & 0x10)               // bit 4 == 1 => DRAM mode 21 (HiROM)

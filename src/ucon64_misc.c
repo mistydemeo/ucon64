@@ -688,7 +688,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_NTSC, UCON64_NES, nes_usage,         WF_SWITCH},
   {UCON64_NVRAM, UCON64_NES, nes_usage,        WF_SWITCH},
   {UCON64_O, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
-  {UCON64_PAL, UCON64_NES, nes_usage,          WF_SWITCH},
+  {UCON64_PAL, UCON64_UNKNOWN, NULL,           WF_SWITCH}, // for NES & Genesis
   {UCON64_PATCH, UCON64_UNKNOWN, ucon64_patching_usage, WF_SWITCH},
 #ifdef  PARALLEL
   {UCON64_PORT, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},

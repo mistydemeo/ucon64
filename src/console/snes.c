@@ -1521,7 +1521,7 @@ snes_j (st_rominfo_t *rominfo)
   if (p == NULL)                                // filename doesn't contain a period
     p = src_name + strlen (src_name) - 1;
   else
-    (type == GD3 || type == MGD) ? p-- : p++;
+    (type == GD3 || type == MGD_SNES) ? p-- : p++;
 
   // Split GD3 files don't have a header _except_ the first one
   block_size = q_fsize (src_name) - header_len;
@@ -2488,7 +2488,7 @@ snes_buheader_info (st_rominfo_t *rominfo)
   int x, y;
   snes_file_t org_type = type;
 
-  if (rominfo->buheader_len == 0) // type == MGD
+  if (rominfo->buheader_len == 0) // type == MGD_SNES
     {
       printf ("This ROM has no backup unit header\n");
       return -1;
@@ -2761,14 +2761,14 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
           )
     type = FIG;
   else if (rominfo->buheader_len == 0 && x == 0xffff)
-    type = MGD;
+    type = MGD_SNES;
 
   /*
     x can be better trusted than type == FIG, but x being 0xffff is definitely
     not a guarantee that rominfo->buheader_len already has the right value
     (e.g. Earthworm Jim (U), Alfred Chicken (U|E), Soldiers of Fortune (U)).
   */
-  if (type != MGD) // don't do "&& type != SMC" or we'll miss a lot of PD ROMs
+  if (type != MGD_SNES) // don't do "&& type != SMC" or we'll miss a lot of PD ROMs
     {
       y = ((header->size_high << 8) + header->size_low) * 8 * 1024;
       y += SWC_HEADER_LEN;                      // if SWC-like header -> hdr[1] high byte,
@@ -2781,7 +2781,7 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
             // most likely we guessed the copier type wrong
             {
               rominfo->buheader_len = 0;
-              type = MGD;
+              type = MGD_SNES;
             }
           /*
             16384 instead of MAXBUFSIZE (32768) to detect "Joystick Sampler
@@ -2799,7 +2799,7 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn switch was specified
     {
       rominfo->buheader_len = ucon64.buheader_len;
-      if (type == MGD && rominfo->buheader_len)
+      if (type == MGD_SNES && rominfo->buheader_len)
         type = SMC;
     }
 }

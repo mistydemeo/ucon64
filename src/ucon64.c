@@ -1098,6 +1098,11 @@ main (int argc, char *argv[])
           return cdrw_mktoc (&rom);
         }
         
+      if(argcmp (argc, argv, "-mkcue"))
+        {
+          return cdrw_mkcue (&rom);
+        }
+        
       if (argcmp (argc, argv, "-xcdrw"))
         {
           return (!access (rom.rom, F_OK)) ? cdrw_write (&rom) : cdrw_read (&rom);

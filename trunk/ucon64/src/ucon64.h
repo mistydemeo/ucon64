@@ -99,6 +99,13 @@ struct ucon64_
   unsigned int parport;
   int parport_mode;             //parallel port mode: ECP, EPP, SPP, other
 
+/*
+  If ucon64 operates as backend for a front end and the commandline argument 
+  -frontend was given output will contain a pointer to an existing file 
+  instead of stdout
+*/
+//  FILE *output;
+
   long console;                 //integer for the detected console system
 //  long console_forced;
 //  int show_nfo;

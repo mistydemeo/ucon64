@@ -48,10 +48,6 @@ const st_usage_t pcengine_usage[] =
     {NULL, NULL, "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\nSuper Grafx/Turbo (Grafx(16)/CD/DUO/Express)"},
     {NULL, NULL, "1987/19XX/19XX NEC"},
     {"pce", NULL, "force recognition"},
-#if 0
-    "  " OPTION_LONG_S "hd          force ROM has SMG header (+512 Bytes)\n"
-    "  " OPTION_LONG_S "nhd         force ROM has no SMG header (MGD2/RAW)\n"
-#endif
     {"smg", NULL, "convert to Super Magic Griffin/SMG"},
     {"mgd", NULL, "convert to Multi Game Doctor*/MGD2/RAW"},
     {NULL, NULL, NULL}

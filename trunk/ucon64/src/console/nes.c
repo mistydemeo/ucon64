@@ -45,11 +45,6 @@ const st_usage_t nes_usage[] =
     {NULL, NULL, "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)"},
     {NULL, NULL, "1983 Nintendo http://www.nintendo.com"},
     {"nes", NULL, "force recognition"},
-#if 0
-    "  " OPTION_LONG_S "hd          force ROM has FFE header (+512 Bytes)\n"
-    "  " OPTION_LONG_S "nhd         force ROM has no FFE header\n"
-    "  " OPTION_LONG_S "ns          force ROM is not split\n"
-#endif
     {"unif", NULL, "convert to UNIF format/UNF (uses default values)"},
     {"ines", NULL, "convert to iNES format/NES (uses default values)"},
     {"ineshd", NULL, "extract iNES header from ROM (16 Bytes)"},
@@ -89,13 +84,9 @@ const st_usage_t nes_usage[] =
     {"fds", NULL, "convert Famicom Disk System file (diskimage) from FAM to FDS"},
     {"fdsl", NULL, "list Famicom Disk System/FDS (diskimage) contents"},
 #if 0
-    "TODO  " OPTION_LONG_S "fam     convert Famicom Disk System file (diskimage) from FDS to FAM\n"
-    "TODO:  " OPTION_LONG_S "tr     truncate doubled PRG/CHR\n"
-    "TODO:  " OPTION_LONG_S "nfs    convert NFS sound to WAV; " OPTION_LONG_S "rom=NFSFILE\n"
-    "  " OPTION_LONG_S "gge         encode GameGenie code; " OPTION_LONG_S "rom=AAAA:VV or " OPTION_LONG_S "rom=AAAA:VV:CC\n"
-    "  " OPTION_LONG_S "ggd         decode GameGenie code; " OPTION_LONG_S "rom=XXXXXX or " OPTION_LONG_S "rom=XXXXXXXX\n"
-    "  " OPTION_LONG_S "gg          apply GameGenie code (permanent);\n"
-    "                  " OPTION_LONG_S "file=XXXXXX or " OPTION_LONG_S "file=XXXXXXXX\n"
+    {"fam", NULL, "convert Famicom Disk System file (diskimage) from FDS to FAM"},
+    {"tr", NULL, "truncate doubled PRG/CHR"},
+    {"nfs", NULL, "convert NFS sound to WAV; " OPTION_LONG_S "rom=NFSFILE"},
 #endif
       {NULL, NULL, NULL}
   };

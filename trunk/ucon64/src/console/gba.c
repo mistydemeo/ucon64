@@ -46,11 +46,9 @@ const st_usage_t gba_usage[] =
     {NULL, NULL, "Game Boy Advance"},
     {NULL, NULL, "2001 Nintendo http://www.nintendo.com"},
     {"gba", NULL, "force recognition"},
-//    {"hd",  "force ROM has header (+512 Bytes)"},
-//    "  " OPTION_LONG_S "nhd         force ROM has no header\n"
     {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
     {"logo", NULL, "restore ROM logo character data (offset: 0x04-0x9F)"},
-//    "  " OPTION_LONG_S "chk         fix ROM header checksum\n"
+//  {"chk", NULL, "fix ROM header checksum"},
     {"sram", NULL, "patch ROM for SRAM saving"},
     {"crp", "WAIT_TIME", "slow down Flash Advance Linker access for ROM (crash patch);\n"
                          "WAIT_TIME='0'  (default in most crash patches)\n"

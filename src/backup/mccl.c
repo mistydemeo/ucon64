@@ -59,7 +59,9 @@ Data Read Procedure:
 13. Go to step 1
 */
 #include <stdio.h>
+#ifdef  HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"

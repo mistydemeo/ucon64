@@ -23,7 +23,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#ifdef  HAVE_CONFIG_H
 #include "config.h"
+#endif
 const char *yoko_usage[] =
   {
     "YOKO backup unit",

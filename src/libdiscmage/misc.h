@@ -37,7 +37,9 @@ extern "C" {
 #include <time.h>                               // gauge() prototype contains time_t
 #include <stdio.h>
 #include <dirent.h>
-#include "config.h"                             // HAVE_ZLIB_H, ANSI_COLOR support
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif                             // HAVE_ZLIB_H, ANSI_COLOR support
 
 #ifdef  HAVE_ZLIB_H
 #include <zlib.h>

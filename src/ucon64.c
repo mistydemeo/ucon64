@@ -43,7 +43,9 @@ write programs in C
 #include <sys/io.h>
 #endif
 
+#ifdef  HAVE_CONFIG_H
 #include "config.h"
+#endif
 #ifdef  DEBUG
 #warning DEBUG active
 #endif

@@ -374,9 +374,9 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
 <a name="6"><b>Q6</b>: How do I make uCON64 display only information about a
    ROM?</a><br>
 <b>A</b>: If you want to display information about a ROM just run uCON64 with
-   the name of the ROM as the only argument. Note that sometimes you will have
-   to specify the console type for uCON64, because the ROM dump is damaged or
-   simply not detected correctly by uCON64. For example:<br>
+   the name of the ROM as the only argument. Sometimes you will have to specify
+   the console type for uCON64, because the ROM dump is damaged or simply not
+   detected correctly by uCON64. For example:<br>
    &nbsp;&nbsp; ucon64 -snes "Super Aleste (J) [t1].swc"<br>
 <br>
 <p>
@@ -397,8 +397,8 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    present add one. You do not have to use the prefix 0x. For example:<br>
    &nbsp;&nbsp; parport=278<br>
    You can also set an environment variable with the name parport to the right
-   value. Note that the value of the environment variable takes precedence over
-   the value in the configuration file.<br>
+   value. The value of the environment variable takes precedence over the value
+   in the configuration file.<br>
 <br>
 <p>
 <a name="8"><b>Q8</b>: I tried to dump a SNES cartridge using a Super Wild Card
@@ -428,7 +428,8 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
 <p>
 <a name="9"><b>Q9</b>: I have a SNES ROM of which GoodSNES says it is good, but
    uCON64 says it is bad. Who is right?</a><br>
-<b>A</b>: GoodSNES.<br>
+<b>A</b>: It depends.<br>
+   If uCON64 displays the text "Checksum: Bad" GoodSNES might be right.<br>
    There may be several reasons why uCON64 reports that the check sum is bad.
    It could have made a mistake while determining if the ROM is a HiROM or a
    LoROM dump. Try the switches -hi and -nhi and see if uCON64 reports the
@@ -437,13 +438,21 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    if you get better results. If the check sum is reported as good it is likely
    that the ROM is really good. Alternatively, you may want to convert the ROM
    to a non-interleaved format with -dint and run uCON64 on the converted ROM.
-   That gives the best results. Luckily you wil not find many interleaved ROM
-   dumps that uCON64 cannot handle, probably because Snes9x and ZSNES often
-   cannot handle them either.<br>
+   Luckily you will not find many interleaved ROM dumps that uCON64 cannot
+   handle, probably because Snes9x and ZSNES often cannot handle them either.<br>
+   Perhaps "Ok" looks nicer than "Bad", but it is far more important that
+   uCON64 displays DAT file information. If you installed a SNES DAT file (see
+   <a href="#36">question 36</a>) and uCON64 does not display a line with the
+   text "DAT info:" then the ROM dump could not be identified. It could be that
+   you  have an unknown ROM dump, but it is more likely that you have a modified
+   (i.e. bad) dump or an overdump. GoodSNES 0.999.5 does not use the CRC32 to
+   identify files, so if uCON64 does not display DAT info, but GoodSNES
+   identified it as good then uCON64 is right. For reasons see
+   <a href="#42">question 42</a>).<br>
 <br>
 <p>
 <a name="10"><b>Q10</b>: I have a SNES ROM of which Snes9x and ZSNES say it is
-   bad, but uCON64 says it is good. Who is right?</a><br>
+   bad, but uCON64 says it is good ("Checksum: Ok"). Who is right?</a><br>
 <b>A</b>: uCON64, probably :-)<br>
    Neither Snes9x 1.39 nor ZSNES 1.36 calculate the check sum correctly for BS
    ROMs, so you can be pretty sure the ROM is good if it is a BS ROM. See
@@ -494,8 +503,8 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    can try -k to remove that protection. Several games also check if they are
    running on a PAL or an NTSC SNES. Use -f to remove that form of copy
    protection. Some other games check the ROM speed. You can use -l for those.
-   Note that some games have more than one type of copy protection, so it might
-   be necessary to use uCON64 several times with a different option.<br>
+   Some games have more than one type of copy protection, so it could be
+   necessary to use uCON64 several times with a different option.<br>
    See <a href="#39">question 39</a> and <a href="#40">question 40</a> for more
    information about a new feature in uCON64 1.9.8beta8 that can be used to
    update or improve the options -k, -f and -l without having to (re)compile
@@ -555,7 +564,9 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    <form method=GET action="http://www.google.com/search" target="_blank">
    <table bgcolor="#FFFFFF" border="0">
    <tr><td><br>
-   <a href="http://www.google.com/" target="_blank"><img src="http://www.google.com/logos/Logo_25wht.gif" alt="Google" align="absmiddle"></a><br><br>
+   <a href="http://www.google.com/" target="_blank">
+     <img src="http://www.google.com/logos/Logo_25wht.gif" alt="Google" align="absmiddle">
+   </a><br><br>
    <input type=text name=q maxlength=255 value="ppf aps ips patch"><br><br>
    <input type=submit name=btnG value="Google Search"><br>
    </td></tr>
@@ -602,9 +613,9 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    Super Mario Advance 2 (J) in your Flash Card in "ROM bank" 4 (GBA Pack) and
    would like to save/restore SRAM bank 4 you should do something like:<br>
    &nbsp;&nbsp; ucon64 -xfalb 4 "Super Mario Advance 2 (J).sav"<br>
-   Note that the file size determines how many bytes are restored, even when
-   you use -xfalb &#60;n&#62;. So, if the file is greater than 64 kB more than
-   one bank will be written to.<br>
+   The file size determines how many bytes are restored, even when you use
+   -xfalb &#60;n&#62;. So, if the file is greater than 64 kB more than one bank
+   will be written to.<br>
 <br>
 <p>
 <a name="22"><b>Q22</b>: uCON64 exits with the message "Flash cart erase
@@ -656,9 +667,9 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    &nbsp;&nbsp; set HOME=c:\ucon64<br>
    and reboot. You can also type that line on the command line. The directory
    c:\ucon64 must exist, of course. If you want uCON64 to use another directory
-   you should change c:\ucon64 to a directory of your choice. Note that you
-   should not let the last character of the environment variable be a forward
-   or backward slash.<br>
+   you should change c:\ucon64 to a directory of your choice. You should not
+   let the last character of the environment variable be a forward or backward
+   slash.<br>
    If you have Cygwin installed, the Cygwin runtime system will create an
    internal environment for the uCON64 executable with HOME set to Cygwin's
    home directory if it has not already been set. You can override this value
@@ -715,9 +726,9 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    5570 [main] ucon64 356 open_stackdumpfile: Dumping stack trace to ucon64.exe.stackdump<br>
    or like this:<br>
    &nbsp;&nbsp; Illegal instruction (core dumped)<br>
-   then you did not install an I/O driver (correctly). Note that in this case
-   "install" means that the I/O driver is running at the time uCON64 tries to
-   access the parallel port. See <a href="#4">question 4</a>.<br>
+   then you did not install an I/O driver (correctly). In this case "install"
+   means that the I/O driver is running at the time uCON64 tries to access the
+   parallel port. See <a href="#4">question 4</a>.<br>
    You will also see this message if you tried to enable EPP mode for the FAL
    under Windows XP (NT/2000), i.e., you specified the switch -xfalm, without
    an appropriate I/O port driver. UserPort is <i>inappropriate</i> for this,
@@ -793,8 +804,8 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    Say ANSI.SYS is located in the directory c:\windows\command, then the line
    would have to look like this:<br>
    &nbsp;&nbsp; device=c:\windows\command\ansi.sys<br>
-   Note that changes made to config.sys under DOS and Windows&nbsp;9x will
-   become active only after a reboot.<br>
+   Changes made to config.sys under DOS and Windows&nbsp;9x will become active
+   only after a reboot.<br>
    Under Windows&nbsp;XP/NT you should add a similar line to your
    %SystemRoot%\system32\CONFIG.NT:<br>
    &nbsp;&nbsp; device=%SystemRoot%\system32\ansi.sys<br>
@@ -835,9 +846,9 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    HOMEPATH. If none of those environment variables are set, the current
    directory will be handled as the home directory. Again, see
    <a href="#25">question 25</a>.<br>
-   You can also set an environment variable with the name ucon64_datdir. Note
-   that the value of the environment variable takes precedence over the value
-   in the configuration file.<br>
+   You can also set an environment variable with the name ucon64_datdir. The
+   value of the environment variable takes precedence over the value in the
+   configuration file.<br>
    Then copy all DAT files you have into that directory. You can download DAT
    files from sites like
    <a href="http://gooddat.emu-france.com/" target="_blank">
@@ -847,9 +858,16 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    which speed up the access to the DAT files dramatically. Now uCON64 uses the
    information inside the DAT files to identify or rename ROMs without an
    internal header.<br>
-   Note that starting with version 1.9.8beta8 uCON64 does not have an internal
-   database anymore, so you will <b>need</b> DAT files for files like NES ROM
-   dumps.<br>
+   Starting with version 1.9.8beta8 uCON64 does not have an internal database
+   anymore, so you will <b>need</b> DAT files for files like NES ROM dumps.<br>
+   You can check which DAT files are used by uCON64 with the option -db. You
+   can view or list all DAT entries with the option -dbv. You can search for a
+   specific CRC32 value with the option -dbs. The force-console-type options
+   can be used in combination with -db, -dbv and -dbs. For example, to see
+   which DAT files are used to identify SNES ROM dumps, type:<br>
+   &nbsp;&nbsp; ucon64 -db -snes<br>
+   If uCON64 reports that it found 0 DAT files you did not install the DAT
+   file(s) correctly.<br>
 <br>
 <p>
 <a name="37"><b>Q37</b>: Some SNES games do not work on my Super Pro Fighter
@@ -937,14 +955,14 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    01. In that case you would not have to change it, because it is already a
    number.<br>
    Now save the changed file and place it either in the directory from where
-   you will run uCON64 (note that this is not necessarily the same directory as
-   the one where the uCON64 executable might be located!) or in uCON64's
-   configuration directory. Use the option -version to find out which directory
-   that is. Then try if uCON64 is able to crack your game. uCON64 will display
-   a warning message if it detects an error in your new line. If you made a
-   mistake with escape symbols uCON64 might very well crash. You can use the
-   switch -v (in combination with -k, -f or -l) to make uCON64 display what
-   information it reads from the file.<br>
+   you will run uCON64 (this is not necessarily the same directory as the one
+   where the uCON64 executable might be located!) or in uCON64's configuration
+   directory. Use the option -version to find out which directory that is. Then
+   try if uCON64 is able to crack your game. uCON64 will display a warning
+   message if it detects an error in your new line. If you made a mistake with
+   escape symbols uCON64 might very well crash. You can use the switch -v (in
+   combination with -k, -f or -l) to make uCON64 display what information it
+   reads from the file.<br>
    If you cannot find which line you need you will either have to add a line to
    snescopy.txt, snespal.txt or snesntsc.txt for every code that is not already
    mentioned in those files or ask someone else to do it for you. For example
@@ -1188,7 +1206,7 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    example:<br>
    &nbsp;&nbsp;ucon64 --mkdat=n64-02062003.dat c:\rom\mario64.v64 c:\rom<br>
    2.) Use a force recognition switch. For example:<br>
-   &nbsp;&nbsp;ucon64 --mkdat=sms-02062003.dat c:\rom -sms<br>
+   &nbsp;&nbsp;ucon64 --mkdat=sms-02062003.dat c:\rom --sms<br>
 <br>
    The second option should only be used when you are sure all the files are
    for a certain console and uCON64 fails to recognise some.<br>

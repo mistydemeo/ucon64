@@ -1,5 +1,5 @@
 DLOPEN=1
-#ZLIB=1
+#USE_ZLIB=1
 
 CC=cl.exe
 CFLAGS=/nologo /W3 /O2 /DHAVE_CONFIG_H /DDLL
@@ -10,7 +10,7 @@ CFLAGS=$(CFLAGS) /DDLOPEN
 LIBNAME=discmage
 OBJECTS=libdm_misc.obj dllinit.obj misc.obj format/format.obj format/cdi.obj \
         format/nero.obj format/cue.obj format/toc.obj format/other.obj
-!ifdef ZLIB
+!ifdef USE_ZLIB
 LIBS=zlib.lib
 OBJECTS=$(OBJECTS) unzip.obj map.obj misc_z.obj
 !else

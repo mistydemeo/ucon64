@@ -119,7 +119,8 @@ const char *snes_usage[] =
     "TODO:  " OPTION_LONG_S "spc    convert SPC sound to WAV; " OPTION_LONG_S "rom=SPCFILE\n"
 #endif
     "  " OPTION_S "j           join split ROM\n"
-    "  " OPTION_S "s           split ROM into 4 Mb parts (for backup unit(s) with fdd)\n"
+    "  " OPTION_S "s           split ROM into 8 Mb parts (for backup unit(s) with fdd)\n"
+// NOTE: part size number should match with size actually used
 #if 0
     "  " OPTION_S "p           pad ROM to full Mb\n"
 #endif
@@ -563,8 +564,8 @@ snes_ffe (st_rominfo_t *rominfo, char *ext, int smc)
   int size;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
-  if (snes_hirom && smc)
-    printf ("NOTE: This game might not work with a Super Magicom because it's HiROM\n");
+  if ((snes_header.map_type & 0x10) && smc)
+    printf ("NOTE: This game might not work with a Super Magicom because it's a FastROM game\n");
 
   q_fread (&header, 0, rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
@@ -775,7 +776,7 @@ snes_mgd (st_rominfo_t *rominfo)
 
   return 0;
 #else
-  char mgh[32], buf[FILENAME_MAX], buf2[4096], *p = NULL;
+  char mgh[32], buf[FILENAME_MAX], buf2[FILENAME_MAX], *p = NULL;
 
   strcpy (buf, areupper (basename2 (ucon64.rom)) ? "SF" : "sf");
   strcpy (buf2, ucon64.rom);
@@ -1064,46 +1065,12 @@ snes_gdf (st_rominfo_t *rominfo)
 }
 
 
-int
-snes_j (st_rominfo_t *rominfo)
-{
-  char buf[FILENAME_MAX], buf2[4096], *p = NULL;
-  int file_size, total_size = 0;
-
-  strcpy (buf, ucon64.rom);
-  strcpy (buf2, ucon64.rom);
-  setext (buf2, ".SMC");
-
-  ucon64_fbackup (NULL, buf2);
-  q_fcpy (buf, 0, rominfo->buheader_len, buf2, "wb"); // copy header (if any)
-  file_size = q_fsize (buf);
-  while (q_fcpy (buf, rominfo->buheader_len, file_size, buf2, "ab") != -1)
-    {
-      total_size += file_size - rominfo->buheader_len;
-      if ((p = strrchr (buf, '.')))
-        (*(p + (!rominfo->buheader_len ?
-                 -1 :                           // without header (see code of "-s")
-                 1                              // with header (see code of "-s")
-               )))++;
-    }
-
-  if (rominfo->buheader_len)
-    {                                           // fix header
-      q_fputc (buf2, 0, total_size / 8192, "r+b"); // # 8K blocks low byte
-      q_fputc (buf2, 1, total_size / 8192 >> 8, "r+b"); // # 8K blocks high byte
-      q_fputc (buf2, 2, q_fgetc (buf2, 2) & ~0x40, "r+b"); // last file -> clear bit 6
-    }
-  ucon64_wrote (buf2);
-
-  return 0;
-}
-
-
+#define PARTSIZE  (8 * MBIT)
 int
 snes_s (st_rominfo_t *rominfo)
 {
-  char header[512], buf[FILENAME_MAX], buf2[4096], *p = NULL;
-  int n4Mbparts, surplus4Mb, x, n8Mbparts, surplus8Mb, gd3_format, sf_romname,
+  char header[512], buf[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL;
+  int nparts, surplus, x, gd3_format, sf_romname,
       half_size, size;
 
   size = rominfo->file_size - rominfo->buheader_len;
@@ -1113,9 +1080,9 @@ snes_s (st_rominfo_t *rominfo)
 
   if (gd3_format)
     {
-      n8Mbparts = size / (8 * MBIT);
-      surplus8Mb = size % (8 * MBIT);
-
+      nparts = size / (8 * MBIT);               // Don't use PARTSIZE here, because
+      surplus = size % (8 * MBIT);              //  I (dbjh) don't know if other sizes
+                                                //  are also valid
       if (sf_romname)
         strcpy (buf, basename2 (ucon64.rom));
       else
@@ -1128,42 +1095,41 @@ snes_s (st_rominfo_t *rominfo)
       strcat (buf, "________");
       buf[7] = areupper (buf) ? 'A' : 'a';
       buf[8] = 0;
-      sprintf (buf2, "%s.078", buf);
+      sprintf (dest_name, "%s.078", buf);
 
-      if (snes_hirom && ((n8Mbparts + ((surplus8Mb > 0) ? 1 : 0)) <= 2))
+      if (snes_hirom && ((nparts + ((surplus > 0) ? 1 : 0)) <= 2))
         {
           half_size = size / 2;
           // 8 Mbit or less HiRoms, X is used to pad filename to 8 (SF4###XA)
 
-          *(strrchr (buf2, '.') - 2) = areupper (basename2 (ucon64.rom)) ? 'X' : 'x';
-//          buf2[strrcspn (buf2, ".") - 2] = areupper (basename2 (ucon64.rom)) ? 'X' : 'x';
+          *(strrchr (dest_name, '.') - 2) = areupper (basename2 (ucon64.rom)) ? 'X' : 'x';
+//          dest_name[strrcspn (dest_name, ".") - 2] = areupper (basename2 (ucon64.rom)) ? 'X' : 'x';
 
-          ucon64_fbackup (NULL, buf2);
-          q_fcpy (ucon64.rom, 0, half_size + rominfo->buheader_len, buf2, "wb");
-          ucon64_wrote (buf2);
+          // don't write backups of parts, because one name is used
+          q_fcpy (ucon64.rom, 0, half_size + rominfo->buheader_len, dest_name, "wb");
+          ucon64_wrote (dest_name);
 
-          (*(strrchr (buf2, '.') - 1))++;
-          ucon64_fbackup (NULL, buf2);
-          q_fcpy (ucon64.rom, half_size + rominfo->buheader_len, size - half_size, buf2, "wb");
-          ucon64_wrote (buf2);
+          (*(strrchr (dest_name, '.') - 1))++;
+          q_fcpy (ucon64.rom, half_size + rominfo->buheader_len, size - half_size, dest_name, "wb");
+          ucon64_wrote (dest_name);
         }
       else
         {
-          for (x = 0; x < n8Mbparts; x++)
+          for (x = 0; x < nparts; x++)
             {
-              ucon64_fbackup (NULL, buf2);
+              // don't write backups of parts, because one name is used
               q_fcpy (ucon64.rom, x * 8 * MBIT + (x ? rominfo->buheader_len : 0),
-                        8 * MBIT + (x ? 0 : rominfo->buheader_len), buf2, "wb");
-              ucon64_wrote (buf2);
-              (*(strrchr (buf2, '.') - 1))++;
+                        8 * MBIT + (x ? 0 : rominfo->buheader_len), dest_name, "wb");
+              ucon64_wrote (dest_name);
+              (*(strrchr (dest_name, '.') - 1))++;
             }
 
-          if (surplus8Mb != 0)
+          if (surplus != 0)
             {
-              ucon64_fbackup (NULL, buf2);
+              // don't write backups of parts, because one name is used
               q_fcpy (ucon64.rom, x * 8 * MBIT + (x ? rominfo->buheader_len : 0),
-                        surplus8Mb + (x ? 0 : rominfo->buheader_len), buf2, "wb");
-              ucon64_wrote (buf2);
+                        surplus + (x ? 0 : rominfo->buheader_len), dest_name, "wb");
+              ucon64_wrote (dest_name);
             }
         }
 
@@ -1171,44 +1137,80 @@ snes_s (st_rominfo_t *rominfo)
     }
   else
     {
-      n4Mbparts = size / (4 * MBIT);
-      surplus4Mb = size % (4 * MBIT);
+      nparts = size / PARTSIZE;
+      surplus = size % PARTSIZE;
 
-      strcpy (buf, ucon64.rom);
-      setext (buf, ".1");
+      strcpy (dest_name, ucon64.rom);
+      setext (dest_name, ".1");
 
       q_fread (header, 0, SMC_HEADER_LEN, ucon64.rom);
-      header[0] = 4 * MBIT / 8192;
-      header[1] = 4 * MBIT / 8192 >> 8;
+      header[0] = PARTSIZE / 8192;
+      header[1] = PARTSIZE / 8192 >> 8;
       // if header[2], bit 6 == 0 -> SWC/FIG knows this is the last file of the ROM
       header[2] |= 0x40;
-      for (x = 0; x < n4Mbparts; x++)
+      for (x = 0; x < nparts; x++)
         {
-          if (surplus4Mb == 0 && x == n4Mbparts - 1)
+          if (surplus == 0 && x == nparts - 1)
             header[2] &= ~0x40;                 // last file -> clear bit 6
 
-          ucon64_fbackup (NULL, buf);
-          q_fwrite (header, 0, SMC_HEADER_LEN, buf, "wb");
-          q_fcpy (ucon64.rom, x * 4 * MBIT + rominfo->buheader_len, 4 * MBIT, buf, "ab");
-          ucon64_wrote (buf);
+          // don't write backups of parts, because one name is used
+          q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
+          q_fcpy (ucon64.rom, x * PARTSIZE + rominfo->buheader_len, PARTSIZE, dest_name, "ab");
+          ucon64_wrote (dest_name);
 
-          (*(strrchr (buf, '.') + 1))++;
+          (*(strrchr (dest_name, '.') + 1))++;
         }
 
-      if (surplus4Mb != 0)
+      if (surplus != 0)
         {
-          header[0] = surplus4Mb / 8192;
-          header[1] = surplus4Mb / 8192 >> 8;
+          header[0] = surplus / 8192;
+          header[1] = surplus / 8192 >> 8;
           header[2] &= ~0x40;                   // last file -> clear bit 6
 
-          ucon64_fbackup (NULL, buf);
-          q_fwrite (header, 0, SMC_HEADER_LEN, buf, "wb");
-          q_fcpy (ucon64.rom, x * 4 * MBIT + rominfo->buheader_len, surplus4Mb, buf, "ab");
-          ucon64_wrote (buf);
+          // don't write backups of parts, because one name is used
+          q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
+          q_fcpy (ucon64.rom, x * PARTSIZE + rominfo->buheader_len, surplus, dest_name, "ab");
+          ucon64_wrote (dest_name);
         }
 
       return 0;
     }
+}
+
+
+int
+snes_j (st_rominfo_t *rominfo)
+{
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL;
+  int block_size, total_size = 0;
+
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  setext (dest_name, ".SMC");
+
+  ucon64_fbackup (NULL, dest_name);
+  q_fcpy (src_name, 0, rominfo->buheader_len, dest_name, "wb"); // copy header (if any)
+  block_size = q_fsize (src_name) - rominfo->buheader_len;
+  while (q_fcpy (src_name, rominfo->buheader_len, block_size, dest_name, "ab") != -1)
+    {
+      total_size += block_size;
+      if ((p = strrchr (src_name, '.')))
+        (*(p + (!rominfo->buheader_len ?
+                 -1 :                           // without header (see code of "-s")
+                 1                              // with header (see code of "-s")
+               )))++;
+      block_size = q_fsize (src_name) - rominfo->buheader_len;
+    }
+
+  if (rominfo->buheader_len)
+    {                                           // fix header
+      q_fputc (dest_name, 0, total_size / 8192, "r+b"); // # 8K blocks low byte
+      q_fputc (dest_name, 1, total_size / 8192 >> 8, "r+b"); // # 8K blocks high byte
+      q_fputc (dest_name, 2, q_fgetc (dest_name, 2) & ~0x40, "r+b"); // last file -> clear bit 6
+    }
+  ucon64_wrote (dest_name);
+
+  return 0;
 }
 
 
@@ -1786,8 +1788,6 @@ snes_init (st_rominfo_t *rominfo)
       return 0;                                 // rest is nonsense for SRAM file
     }
 
-  snes_split = UCON64_ISSET (ucon64.split) ? ucon64.split : ucon64_testsplit (ucon64.rom);
-
   /*
     snes_testinterleaved() needs the correct value for snes_hirom and
     rominfo->header_start. snes_hirom may be used only after the check for -hi/-nhi
@@ -1876,6 +1876,22 @@ snes_init (st_rominfo_t *rominfo)
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
     rominfo->buheader_len = ucon64.buheader_len;
 
+  if (UCON64_ISSET (ucon64.split))
+    snes_split = ucon64.split;
+  else
+    {
+      if (type == SWC || type == FIG)
+        {
+          // TODO?: fix this code for last split file
+          snes_split = 0;
+          if (header.emulation & 0x40)
+            snes_split = ucon64_testsplit (ucon64.rom);
+          ucon64.split = snes_split;            // force displayed info to be correct
+        }                                       //  if not split (see ucon64.c)
+      else
+        snes_split = ucon64_testsplit (ucon64.rom);
+    }
+
   size = rominfo->file_size - rominfo->buheader_len;
   if (size < 0xfffd)
     return -1;                                  // don't continue (seg faults!)
@@ -1908,8 +1924,7 @@ snes_init (st_rominfo_t *rominfo)
   if (size > x + SNES_HEADER_LEN)
     if (!memcmp(rom_buffer + x + 16, "DAIKAIJYUMONOGATARI2", 20) || // yes, kaijYu
         !memcmp(rom_buffer + x + 16, "TALES OF PHANTASIA", 18) ||
-        (!memcmp(rom_buffer + x + 16, "ToP", 3) && // skip language string
-         !memcmp(rom_buffer + x + 16 + 12, "(C) DeJap", 9)))
+        !memcmp(rom_buffer + x + 16, "ToP ", 4))
       {
         rominfo->header_start = x;
         // -hi/-nhi has no effect so we better give snes_hirom the right value

@@ -1,4 +1,3 @@
-
 /*
 ucon64_misc.h - miscellaneous functions for uCON64
 
@@ -53,6 +52,7 @@ extern const st_track_modes_t track_modes[];
 #define PARPORT_DATA    0                       // output
 #define PARPORT_STATUS  1                       // input
 #define PARPORT_CONTROL 2
+
 /*
   defines for unknown backup units/emulators
 */
@@ -105,11 +105,9 @@ extern char *ucon64_temp_file;
 /*
   wrapper for misc.c/q_fbackup()
 
-  if move_name != NULL then filename will just be moved (renamed) and NOT
-  duplicated (faster); move_name will contain the new name then
+  Read the comment at the header of handle_existing_file() to see how it works!
 */
 extern void handle_existing_file (const char *dest, char *src);
-//extern void ucon64_fbackup (char *move_name, const char *filename);
 #define ucon64_fbackup(a,b) (handle_existing_file(b,a))
 extern void remove_temp_file (void); // possible temp file created by handle_existing_file()
 
@@ -123,13 +121,13 @@ extern unsigned int ucon64_filefile (const char *filename1, int start1, const ch
 extern int ucon64_gauge (time_t init_time, int pos, int size);
 
 extern int ucon64_pad (const char *filename, int start, int size); // pad a ROM to a certain size
-extern int ucon64_testpad (const char *filename, st_rominfo_t *rominfo); //test if a ROM is padded
+extern int ucon64_testpad (const char *filename, st_rominfo_t *rominfo); // test if a ROM is padded
 
-extern int ucon64_testsplit (const char *filename);//test if a ROM is split
+extern int ucon64_testsplit (const char *filename); // test if a ROM is split
 
 extern unsigned int ucon64_parport_init (unsigned int parport);
-extern const char *ucon64_parport_error; //std. error message for parport
-extern const char *ucon64_console_error; //std. error message if the correct console couldn't be found
+extern const char *ucon64_parport_error; // std. error message for parport
+extern const char *ucon64_console_error; // std. error message if the correct console couldn't be found
 
 extern void ucon64_wrote (const char *filename);
 

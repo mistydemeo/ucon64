@@ -1161,7 +1161,7 @@ nes_mapper_number (const char *board_name)
   } st_string_value_t;
 
   int n;
-  st_string_value_t name_to_mapr[] =              // TODO: expand this list
+  st_string_value_t name_to_mapr[] =            // TODO: expand this list
     {
       { "NROM", 0 },
       { "NES-RROM", 0 },
@@ -1499,7 +1499,7 @@ nes_dint (st_rominfo_t *rominfo)
   register_func (remove_destfile);
   // type == INES
   if (nes_ines_ines (srcfile, destfile, 1) == -1) // -1 == error
-    exit (1);                       // calls remove_temp_file() & remove_destfile()
+    exit (1);                           // calls remove_temp_file() & remove_destfile()
 
   unregister_func (remove_destfile);
   fclose (srcfile);
@@ -1550,7 +1550,7 @@ parse_prm (st_ines_header_t *header, const char *fname)
   // ignore default foreground/background (always 'R')
   // ignore "break order?"
 
-  if (prm[14] == 'E')                            // preserve extension RAM
+  if (prm[14] == 'E')                           // preserve extension RAM
     header->ctrl1 |= INES_SRAM;
   else
     header->ctrl1 &= ~INES_SRAM;
@@ -1685,7 +1685,7 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
   if (ines_header.ctrl1 & INES_TRAINER)
     {
       setext (src_name, ".700");
-      q_fread (buffer, 0, 512, src_name);   // use 512 bytes at max
+      q_fread (buffer, 0, 512, src_name);       // use 512 bytes at max
       bytes_read = 512;
     }
 
@@ -2135,7 +2135,7 @@ nes_init (st_rominfo_t *rominfo)
           str_list[3] = "Arkanoid controller";
           str_list[4] = "power pad";
           str_list[5] = "four-score adapter";
-          str_list[6] = "unknown";            // bit 6 and 7 are reserved
+          str_list[6] = "unknown";              // bit 6 and 7 are reserved
           str_list[7] = str_list[6];
           ctrl_str[0] = 0;
 
@@ -2233,7 +2233,7 @@ nes_init (st_rominfo_t *rominfo)
       x = 0;
       if ((unif_chunk = read_chunk (BATR_ID, rom_buffer, 0)) != NULL)
         x = 1;
-      sprintf (buf, "Save RAM: %s\n", (x != 0) ? "yes" : "no");
+      sprintf (buf, "Save RAM: %s\n", x ? "yes" : "no");
       strcat (rominfo->misc, buf);
       free (unif_chunk);
       if ((unif_chunk = read_chunk (MIRR_ID, rom_buffer, 0)) != NULL)
@@ -2252,7 +2252,7 @@ nes_init (st_rominfo_t *rominfo)
       x = 0;
       if ((unif_chunk = read_chunk (VROR_ID, rom_buffer, 0)) != NULL)
         x = 1;
-      sprintf (buf, "VRAM override: %s", (x != 0) ? "yes" : "no");
+      sprintf (buf, "VRAM override: %s", x ? "yes" : "no");
       strcat (rominfo->misc, buf);
       free (unif_chunk);
 

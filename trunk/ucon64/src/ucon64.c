@@ -88,7 +88,7 @@ int main(int argc,char *argv[])
   struct stat puffer;
   DIR *dp;
   char buf[MAXBUFSIZE], buf2[4096], buf3[4096], *ucon64_argv[128];
-char *forceargs[] = 
+char *forceargs[] =
 {
   "",
   "-gb",
@@ -368,7 +368,7 @@ if(argcmp(argc,argv,"-nppf"))
 	strcpy(buf2,rom.file);
 	strcat(buf2
 ,"                                                            ");
-                                                            
+
 	quickfwrite(buf2,6,50,filebackup(rom.rom),"r+b");
 	return(ucon64_exit(0,&rom));
 }
@@ -569,7 +569,7 @@ if(argcmp(argc,argv,"-dbs"))
 	sscanf(rom.rom, "%lx", &rom.current_crc32);
 
 	ucon64_dbsearch(&rom);
-	
+
 	ucon64_nfo(&rom);
 
 	printf("TIP: %s -dbs -nes would search only for a NES ROM\n\n",getarg(argc,argv,ucon64_NAME));
@@ -585,9 +585,7 @@ if(argcmp(argc,argv,"-dbv"))
 	return(ucon64_exit(0,&rom));
 }
 
-if( rom.console == ucon64_UNKNOWN &&
-    !access(rom.rom,F_OK)
-)
+if(!access(rom.rom,F_OK))
 {
   ucon64_init(&rom);
   if(rom.console!=ucon64_UNKNOWN)ucon64_nfo(&rom);
@@ -788,6 +786,9 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
 //  for( x = 0 ; x < argc ; x++ )strcpy(rom->argv[x],argv[x]);
   for( x = 0 ; x < argc ; x++ )rom->argv[x]=argv[x];
 
+  strcpy(rom->name,"");
+//  strcpy(rom->name2,"");
+
   rom->name[0]=0;
 //  rom->name2[0]=0;
 
@@ -833,16 +834,31 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
   strcpy(rom->name,"?");
   rom->name_start=0;
   rom->name_len=0;
+<<<<<<< ucon64.c
+
+  strcpy(rom->manufacturer,"?");
+=======
 	
   strcpy(rom->manufacturer,"Unknown Manufacturer");
+>>>>>>> 1.112
   rom->manufacturer_start=0;
   rom->manufacturer_len=0;
+<<<<<<< ucon64.c
+
+  strcpy(rom->country,"?");
+=======
 	
   strcpy(rom->country,"Unknown Country");
+>>>>>>> 1.112
   rom->country_start=0;
   rom->country_len=0;
+<<<<<<< ucon64.c
+
+  strcpy(rom->misc,"");
+=======
 	
   rom->misc[0]=0;
+>>>>>>> 1.112
 
   return(0);
 }
@@ -1063,7 +1079,11 @@ else if(argcmp(argc,argv,"-dc"));
 else if(argcmp(argc,argv,"-psx"));
 else if(argcmp(argc,argv,"-psx2"));
 #endif
+#endif
+<<<<<<< ucon64.c
+=======
 //#endif
+>>>>>>> 1.112
 else
 {
 //#ifdef BACKUP

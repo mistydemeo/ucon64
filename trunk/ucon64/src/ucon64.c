@@ -637,7 +637,8 @@ ucon64_flush (st_rominfo_t *rominfo)
   memset (rominfo, 0L, sizeof (st_rominfo_t));
   rominfo->data_size = UCON64_UNKNOWN;
   ucon64.file_size = ucon64_fsize;
-//  ucon64.crc32 = 0;
+  // We *have* to reset these in a central place or else in *every* init function
+  ucon64.crc32 = ucon64.fcrc32 = 0;
 #if 0
   rominfo->maker = rominfo->country = "";
   rominfo->console_usage = rominfo->copier_usage = NULL;

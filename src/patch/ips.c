@@ -134,7 +134,7 @@ ips_main (int argc, const char *argv[])
 
   fread (&byte, 1, 1, ipsfile);
   if (!feof (ipsfile))
-    {                           //IPS2 stuff     
+    {                           //IPS2 stuff
       if ((len2 = byte) < 0)
         len2 += 256;
       fread (&byte, 1, 1, ipsfile);
@@ -148,7 +148,7 @@ ips_main (int argc, const char *argv[])
       printf ("File truncated to %ld MBit\n", (length / 1048576) * 8);
     }
 
-  printf ("Patching complete!\n\n"
+  printf ("Patching complete\n\n"
           "NOTE: sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
           "      This means you must convert for example a Super Nintendo ROM with -swc\n"
           "      or -mgd or the patch will not work\n");

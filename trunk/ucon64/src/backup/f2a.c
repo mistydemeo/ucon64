@@ -469,7 +469,7 @@ f2a_read_usb (int address, int size, const char *filename)
           fclose (file);
           return -1;                            // see comment for fopen() call
         }
-      ucon64_gauge (starttime, i, size);
+      ucon64_gauge (starttime, i + 1024, size);
     }
   fclose (file);
   return 0;
@@ -539,6 +539,7 @@ f2a_write_usb (int n_files, char **files, int address)
           //exit (1); for now, return, although registering misc_usb_close() is better
           return -1;
         }
+      clearerr (file);
 
       sm.size = me2le_32 (size);
       sm.address = me2le_32 (address);
@@ -561,7 +562,7 @@ f2a_write_usb (int n_files, char **files, int address)
             }
           if (misc_usb_write (f2ahandle, buffer, 1024) == -1)
             return -1;
-          ucon64_gauge (starttime, i, size);
+          ucon64_gauge (starttime, i + 1024, size);
         }
       fputc ('\n', stdout);                     // start new gauge on new line
 
@@ -1043,7 +1044,7 @@ f2a_receive_data_par (int cmd, int address, int size, const char *filename, int 
         fprintf (stderr, "reading chunk %d of %d\n", (int) (i / 1024) + 1,
                  (int) (size / 1024));
       else
-        ucon64_gauge (starttime, i, size);
+        ucon64_gauge (starttime, i + 1024, size);
     }
   if (!parport_debug)
     fputc ('\n', stdout);
@@ -1118,12 +1119,15 @@ f2a_send_buffer_par (int cmd, int address, int size, const unsigned char *resour
     return -1;
 
   if (mode == 1)
-    if ((file = fopen ((char *) resource, "rb")) == NULL)
-      {
-        fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], (char *) resource);
-        //exit (1); return, because the other code does it too...
-        return -1;
-      }
+    {
+      if ((file = fopen ((char *) resource, "rb")) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], (char *) resource);
+          //exit (1); return, because the other code does it too...
+          return -1;
+        }
+      clearerr (file);
+    }
 
   for (i = 0; i < size; i += 1024)
     {
@@ -1158,7 +1162,7 @@ f2a_send_buffer_par (int cmd, int address, int size, const unsigned char *resour
         fprintf (stderr, "sending chunk %d of %d\n", (int) (i / 1024) + 1,
                  (int) (size / 1024));
       else
-        ucon64_gauge (starttime, i, size);
+        ucon64_gauge (starttime, i + 1024, size);
       f2a_send_raw_par (buffer, 1024);
       if (mode == 0)
         resource += 1024;

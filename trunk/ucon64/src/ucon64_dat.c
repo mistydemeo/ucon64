@@ -53,7 +53,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define DAT_FIELD_SEPARATOR (0xac)
 #define DAT_FIELD_SEPARATOR_S ("\xac")
 
-#define NEW_CODE
 
 typedef struct
 {
@@ -399,11 +398,7 @@ ucon64_dat_view (int console)
       get_dat_header (buf, &dat);
       strcpy (buf2, buf);
       setext (buf2, ".idx");
-#ifdef  NEW_CODE
       entries = q_fsize (buf2) / sizeof (st_idx_entry_t);
-#else
-      entries = q_fsize (buf2) / sizeof (uint32_t);
-#endif
       dat_counter++;
 
       printf ("DAT info:\n"
@@ -445,18 +440,13 @@ ucon64_dat_total_entries (int console)
     {
       setext (buf, ".idx");
       fsize = q_fsize (buf);
-#ifdef  NEW_CODE
       entries += (fsize < 0 ? 0 : fsize / sizeof (st_idx_entry_t)); // TODO: handle this case gracefully
-#else
-      entries += (fsize < 0 ? 0 : fsize / sizeof (uint32_t)); // TODO: handle this case gracefully
-#endif
     }
 
   return entries;
 }
 
 
-#ifdef  NEW_CODE
 static int
 idx_compare (const void *key, const void *found)
 {
@@ -469,7 +459,6 @@ idx_compare (const void *key, const void *found)
   return ((int64_t) ((st_idx_entry_t *) key)->crc32 -
           (int64_t) ((st_idx_entry_t *) found)->crc32) / 2;
 }
-#endif
 
 
 st_ucon64_dat_t *
@@ -479,11 +468,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
   unsigned char *p = NULL;
   uint32_t fsize = 0;
   FILE *fh = NULL;
-#ifdef  NEW_CODE
   st_idx_entry_t *idx_entry, key;
-#else
-  uint32_t pos = 0;
-#endif
 
   if (!crc32)
     return NULL;
@@ -520,7 +505,6 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
       fclose (fh);
 
       // search index for crc
-#ifdef  NEW_CODE
       key.crc32 = crc32;
       idx_entry = bsearch (&key, p, fsize / sizeof (st_idx_entry_t),
                            sizeof (st_idx_entry_t), idx_compare);
@@ -539,24 +523,6 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
                 return dat;
               }
         }
-#else
-      for (pos = 0; pos < fsize; pos += sizeof (uint32_t))
-        if (get_uint32 (&p[pos]) == crc32) // crc32 found
-          {
-            // open dat file and read entry
-            free (p);
-            setext (buf, ".dat");
-
-            fclose_fdat ();
-            while (get_dat_entry (buf, dat, crc32, -1))
-              if (crc32 == dat->current_crc32)
-                {
-                  strcpy (dat->datfile, basename (buf));
-                  get_dat_header (buf, dat);
-                  return dat;
-                }
-          }
-#endif
 
       free (p);
     }
@@ -565,23 +531,19 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
 }
 
 
+#define MAX_GAMES_FOR_CONSOLE 50000             // TODO?: dynamic size
 int
 ucon64_dat_indexer (void)
 // create or update index of cache
 {
-  char buf[FILENAME_MAX], buf2[FILENAME_MAX];
+  char buf[FILENAME_MAX], buf2[FILENAME_MAX], errorfname[FILENAME_MAX];
   struct stat cache, index;
   st_ucon64_dat_t dat;
-  FILE *fh = NULL;
+  FILE *fh = NULL, *errorfile;
   uint32_t size = 0, pos;
   time_t start_time = 0;
-  int update = 0;
-#ifdef  NEW_CODE
-#define MAX_GAMES_FOR_CONSOLE 50000             // TODO?: dynamic size
+  int update = 0, duplicates, n;
   st_idx_entry_t *idx_entries, *idx_entry;
-  int duplicates, n;
-  FILE *errorfile;
-  char errorfname[FILENAME_MAX];
 
   if (!(idx_entries = (st_idx_entry_t *)
           malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t))))
@@ -590,7 +552,6 @@ ucon64_dat_indexer (void)
         MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t));
       exit (1);
     }
-#endif
 
   closedir_dptr ();
   while (get_next_file (buf))
@@ -626,7 +587,6 @@ ucon64_dat_indexer (void)
       errorfile = NULL;
       while (get_dat_entry (buf, &dat, 0, -1))
         {
-#ifdef  NEW_CODE
           if (pos == MAX_GAMES_FOR_CONSOLE)
             {
               fprintf (stderr,
@@ -679,20 +639,16 @@ ucon64_dat_indexer (void)
 
           idx_entries[pos].crc32 = dat.current_crc32;
           idx_entries[pos].filepos = filepos_line;
-#else
-          fwrite (&dat.current_crc32, sizeof (uint32_t), 1, fh);
-#endif
+
           if (!(pos % 20))
             ucon64_gauge (start_time, ftell (fdat), size);
           pos++;
         }
-#ifdef  NEW_CODE
       qsort (idx_entries, pos, sizeof (st_idx_entry_t), idx_compare);
       fwrite (idx_entries, 1, pos * sizeof (st_idx_entry_t), fh);
-#endif
+
       ucon64_gauge (start_time, size, size);
 
-#ifdef  NEW_CODE
       if (duplicates > 0)
         printf ("\n"
                 "\n"
@@ -704,14 +660,12 @@ ucon64_dat_indexer (void)
           fclose (errorfile);
           errorfile = NULL;
         }
-#endif
+
       fprintf (stdout, "\n\n");
       fclose (fh);
     }
 // stats
-#ifdef  NEW_CODE
   free (idx_entries);
-#endif
 
   return 0;
 }
@@ -764,11 +718,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat)
     suffix).
   */
   n = strlen (dat->fname);
-#if 0
-  p = (char *) dat->fname + n - 4; //nb: 4?
-#else
   p = (char *) getext (dat->fname);
-#endif
   if (stricmp (p, ".nes") &&                    // NES
       stricmp (p, ".gb") &&                     // Game Boy
       stricmp (p, ".smc") &&                    // SNES
@@ -780,11 +730,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat)
     }
   else
     {
-#if 0
-      n -= 4; //nb: 4?
-#else
       n -= strlen (p);
-#endif
       if (strnicmp (dat->name, dat->fname, n) != 0)
         printf ("  Filename: %s\n", dat->fname);
     }

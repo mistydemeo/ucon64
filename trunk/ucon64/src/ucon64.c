@@ -215,7 +215,7 @@ main (int argc, char *argv[])
   if (argcmp (argc, argv, "-frontend"))
     {
 /*
-  this must disappear before 1.9.8
+  this should disappear before 1.9.8
 */
       atexit (ucon64_exit);
 #ifndef __BEOS__ // keep behaviour like 1.9.7 under BeOS until BeOS frontend is updated
@@ -238,42 +238,10 @@ main (int argc, char *argv[])
 #endif
 
   if (access (buf, F_OK) == -1)
-    printf ("WARNING: %s not found: creating...", buf);
-  else if (strcmp (getProperty (buf, "version", buf2, ""), "198") != 0)
-    {
-/*
-      strcpy (buf2, buf);
-
-      newext (buf2, ".OLD");
-
-      printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
-
-      filecopy (buf, 0, quickftell(buf), buf2, "wb");
-
-      setProperty(buf,"version","198");
-
-      setProperty(buf,"cdrw_read",
-         getProperty (buf, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
-      setProperty(buf,"cdrw_write",
-         getProperty (buf, "cdrw_raw_write", buf2, "cdrdao write --device 0,0,0 --driver generic-mmc "));
-
-      deleteProperty(buf,"cdrw_raw_read");
-      deleteProperty(buf,"cdrw_raw_write");
-      deleteProperty(buf,"cdrw_iso_read");
-      deleteProperty(buf,"cdrw_iso_write");
-
-      sync ();
-
-      printf ("OK\n\n");
-*/
-      printf("ERROR: old config file (<1.9.8) found (%s), please remove it\n", buf);
-
-      return 0;
-    }
-
-  if (access (buf, F_OK) == -1)
     {
       FILE *fh;
+
+    printf ("WARNING: %s not found: creating...", buf);
 
       if (!(fh = fopen (buf, "wb")))
         {
@@ -334,16 +302,36 @@ main (int argc, char *argv[])
 
 //      return 0;
     }
-
-/*
-// TODO shell modus
-  if (argcmp (argc, argv, "-sh"))
+  else if (strcmp(getProperty (buf, "version", buf2, "198"), "198") != 0)
     {
-      for (;;)
-        printf ("ucon64>");
-      return (0);
+      strcpy (buf2, buf);
+
+      newext (buf2, ".OLD");
+
+      printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
+
+      filecopy (buf, 0, quickftell(buf), buf2, "wb");
+
+      setProperty(buf,"version","198");
+
+      setProperty(buf,"cdrw_read",
+         getProperty (buf, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
+      setProperty(buf,"cdrw_write",
+         getProperty (buf, "cdrw_raw_write", buf2, "cdrdao write --device 0,0,0 --driver generic-mmc "));
+
+      deleteProperty(buf,"cdrw_raw_read");
+      deleteProperty(buf,"cdrw_raw_write");
+      deleteProperty(buf,"cdrw_iso_read");
+      deleteProperty(buf,"cdrw_iso_write");
+
+      sync ();
+
+      printf ("OK\n\n");
+
+//      printf("ERROR: old config file (<1.9.8) found (%s), please remove it\n", buf);
+
+//      return 0;
     }
-*/
 
   if (argcmp (argc, argv, "-crc"))
     {

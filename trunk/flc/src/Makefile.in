@@ -1,0 +1,37 @@
+#UNZIP=0
+
+OBJECTS=flc.o misc.o output.o extract.o sort.o getopt.o
+OBJECTS_TXT=misc.o txtextract.o
+OBJECTS_ID3=misc.o id3extract.o
+
+CC=gcc
+
+CCFLAGS=-I. -Wall -O3
+
+CFLAGS=$(CCFLAGS)
+LDFLAGS=-s
+
+all: flc txtextract id3extract
+
+clean:
+	rm -f $(OBJECTS) $(OBJECTS_TXT) $(OBJECTS_ID3) DEADJOE flc txtextract id3extract *~ */*~ */*/*~ *.core 
+
+distclean: clean
+	
+
+flc: $(OBJECTS)
+	$(CC) -o $@ $(OBJECTS)  $(LDFLAGS)
+
+txtextract: $(OBJECTS_TXT)
+	$(CC) -o $@ $(OBJECTS_TXT)  $(LDFLAGS)
+
+id3extract: $(OBJECTS_ID3)
+	$(CC) -o $@ $(OBJECTS_ID3)  $(LDFLAGS)
+
+install:
+	./install.sh
+
+uninstall:
+	rm -f /usr/local/bin/flc
+	rm -f /usr/local/bin/txtextract
+	rm -f /usr/local/bin/id3extract

@@ -1276,7 +1276,7 @@ f2a_write_rom (const char *filename, unsigned int parport, int size)
           fsize = q_fsize (ucon64.argv[n]);
           if (totalsize + fsize > size)
             {
-              printf ("WARNING: The sum of the sizes of the files is larger then the specified flash\n"
+              printf ("WARNING: The sum of the sizes of the files is larger than the specified flash\n"
                       "         card size (%d Mbit). Skipping files, starting with\n"
                       "         %s\n",
                       size / MBIT, ucon64.argv[n]);

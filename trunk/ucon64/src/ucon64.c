@@ -469,7 +469,7 @@ ucon64_console_probe (st_rominfo_t *rominfo)
         if (UCON64_TYPE_ISROM (ucon64.type))
           ucon64.console =
 #ifdef CONSOLE_PROBE
-            (!nes_init (ucon64_flush (rominfo))) ? UCON64_NES :
+//            (!nes_init (ucon64_flush (rominfo))) ? UCON64_NES :
             (!gba_init (ucon64_flush (rominfo))) ? UCON64_GBA :
             (!n64_init (ucon64_flush (rominfo))) ? UCON64_N64 :
             (!genesis_init (ucon64_flush (rominfo))) ? UCON64_GENESIS :
@@ -591,8 +591,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 
   printf ("%s\n\n", ucon64.rom);
 
-
-  if (rominfo->buheader_len && rominfo->buheader_len != SMC_HEADER_LEN)
+  if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != SMC_HEADER_LEN)
     {
       memhexdump (rominfo->buheader, rominfo->buheader_len, rominfo->buheader_start);
       printf ("\n");
@@ -611,7 +610,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
       printf ("\n");
     }
 
-  if (rominfo->header_len)
+  if (rominfo->header && rominfo->header_len)
     {
       memhexdump (rominfo->header, rominfo->header_len,
         rominfo->header_start + rominfo->buheader_len);
@@ -630,7 +629,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
         }
     }
 
-  strcpy (buf, rominfo->name);
+  strcpy (buf, NULL_TO_EMPTY (rominfo->name));
   printf ("%s\n%s\n%s\n%ld Bytes (%.4f Mb)\n\n",
           // some ROMs have a name with control chars in it -> replace control chars
           mkprint (buf, '.'),

@@ -36,7 +36,9 @@ const char *doctor64jr_usage[] =
 #ifdef BACKUP
     "  " OPTION_LONG_S "xdjr        send/receive ROM to/from Doctor64 Jr; " OPTION_LONG_S "file=PORT\n"
 //          "                receives automatically when ROM does not exist\n"
-    "                  currently only sending is supported\n",
+    "                  currently only sending is supported\n"
+    "  " OPTION_LONG_S "xdjrs       send/receive SRAM to/from Doctor64 Jr; " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when SRAM does not exist\n",
 #endif // BACKUP
     NULL
   };

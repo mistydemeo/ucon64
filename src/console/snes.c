@@ -2052,33 +2052,36 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_si
             blocks[i * 2] = i + ((i < (16 * MBIT >> 16 ? 16 : 4) * MBIT) >> 15);
             blocks[i * 2 + 1] = i;
           }
-      else if (snes_header_base == SNES_EROM && rom_size == 40 * MBIT)
-        {
-          for (i = 0; i < (32 * MBIT) >> 16; i++)
-            {
-              blocks[i * 2] = i + (24 * MBIT >> 15);
-              blocks[i * 2 + 1] = i + ((i < (8 * MBIT >> 16) ? 4 : 8) * MBIT >> 15);
-            }
-          for (; i < (40 * MBIT) >> 16; i++)
-            {
-              blocks[i * 2] = i - (8 * MBIT >> 15);
-              blocks[i * 2 + 1] = i - (16 * MBIT >> 15);
-            }
-        }
       else if (snes_header_base == SNES_EROM)
         {
-          int size2 = rom_size - 32 * MBIT;     // size of second ROM
-          j = 32 * MBIT >> 16;
-          for (i = 0; i < j; i++)
+          if (rom_size == 40 * MBIT)
             {
-              blocks[i * 2] = i + j + (size2 >> 15);
-              blocks[i * 2 + 1] = i + (size2 >> 15);
+              for (i = 0; i < (32 * MBIT) >> 16; i++)
+                {
+                  blocks[i * 2] = i + (24 * MBIT >> 15);
+                  blocks[i * 2 + 1] = i + ((i < (8 * MBIT >> 16) ? 4 : 8) * MBIT >> 15);
+                }
+              for (; i < (40 * MBIT) >> 16; i++)
+                {
+                  blocks[i * 2] = i - (8 * MBIT >> 15);
+                  blocks[i * 2 + 1] = i - (16 * MBIT >> 15);
+                }
             }
-          j = size2 >> 16;
-          for (; i < j + (32 * MBIT >> 16); i++)
+          else
             {
-              blocks[i * 2] = i + j - (32 * MBIT >> 16);
-              blocks[i * 2 + 1] = i - (32 * MBIT >> 16);
+              int size2 = rom_size - 32 * MBIT;     // size of second ROM
+              j = 32 * MBIT >> 16;
+              for (i = 0; i < j; i++)
+                {
+                  blocks[i * 2] = i + j + (size2 >> 15);
+                  blocks[i * 2 + 1] = i + (size2 >> 15);
+                }
+              j = size2 >> 16;
+              for (; i < j + (32 * MBIT >> 16); i++)
+                {
+                  blocks[i * 2] = i + j - (32 * MBIT >> 16);
+                  blocks[i * 2 + 1] = i - (32 * MBIT >> 16);
+                }
             }
         }
       else

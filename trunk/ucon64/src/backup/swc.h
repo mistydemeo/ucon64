@@ -46,7 +46,7 @@ typedef struct st_swc_header
 #define SWC_HEADER_LEN (sizeof (st_swc_header_t))
 
 #ifdef PARALLEL
-extern int swc_read_rom (const char *filename, unsigned int parport);
+extern int swc_read_rom (const char *filename, unsigned int parport, int superdump);
 extern int swc_write_rom (const char *filename, unsigned int parport, int enableRTS);
 extern int swc_read_sram (const char *filename, unsigned int parport);
 extern int swc_write_sram (const char *filename, unsigned int parport);

@@ -267,7 +267,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XSMD:
     case UCON64_XSMDS:
     case UCON64_XSWC:
-    case UCON64_XSWC_SUPERHI:
+    case UCON64_XSWC_SUPER:
     case UCON64_XSWC2:
     case UCON64_XSWCS:
     case UCON64_XV64:
@@ -1612,11 +1612,11 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                    "ERROR: This ROM has no header. Convert to a FIG compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to a FIG compatible format.\n");
           else if (ucon64.rominfo->interleaved)
             fprintf (stderr,
-                    "ERROR: This ROM seems to be interleaved but the FIG doesn't support\n"
-                    "       interleaved ROMs. Convert to a FIG compatible format.\n");
+                     "ERROR: This ROM seems to be interleaved but the FIG doesn't support\n"
+                     "       interleaved ROMs. Convert to a FIG compatible format.\n");
           else // file exists -> send it to the copier
             fig_write_rom (ucon64.rom, ucon64.parport);
         }
@@ -1638,7 +1638,7 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                    "ERROR: This ROM has no header. Convert to a Game Doctor compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format.\n");
           else
             gd3_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo); // file exists -> send it to the copier
         }
@@ -1660,7 +1660,7 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                    "ERROR: This ROM has no header. Convert to a Game Doctor compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format.\n");
           else
             gd6_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo);
         }
@@ -1705,11 +1705,11 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                    "ERROR: This ROM has no header. Convert to an SMD compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to an SMD compatible format.\n");
           else if (!ucon64.rominfo->interleaved)
             fprintf (stderr,
-                    "ERROR: This ROM doesn't seem to be interleaved but the SMD only supports\n"
-                    "       interleaved ROMs. Convert to an SMD compatible format.\n");
+                     "ERROR: This ROM doesn't seem to be interleaved but the SMD only supports\n"
+                     "       interleaved ROMs. Convert to an SMD compatible format.\n");
           else
             smd_write_rom (ucon64.rom, ucon64.parport);
         }
@@ -1724,30 +1724,28 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
-    case UCON64_XSWC_SUPERHI:
-      ucon64.snes_superhi = 1;
-      enableRTS = 0;
-      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
-        swc_read_rom (ucon64.rom, ucon64.parport);
+    case UCON64_XSWC_SUPER:
+      if (access (ucon64.rom, F_OK) != 0)
+        swc_read_rom (ucon64.rom, ucon64.parport, 1);
       else
         fprintf (stderr,
-                "ERROR: -xswc-superhi dump requested but ROM image file exists\n");
+                 "ERROR: Super dump requested but ROM image file already exists\n");
       break;
 
     case UCON64_XSWC:
       enableRTS = 0;                            // falling through
     case UCON64_XSWC2:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
-        swc_read_rom (ucon64.rom, ucon64.parport);
+        swc_read_rom (ucon64.rom, ucon64.parport, 0);
       else
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                    "ERROR: This ROM has no header. Convert to an SWC compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to an SWC compatible format.\n");
           else if (ucon64.rominfo->interleaved)
             fprintf (stderr,
-                    "ERROR: This ROM seems to be interleaved but the SWC doesn't support\n"
-                    "       interleaved ROMs. Convert to an SWC compatible format.\n");
+                     "ERROR: This ROM seems to be interleaved but the SWC doesn't support\n"
+                     "       interleaved ROMs. Convert to an SWC compatible format.\n");
           else
             {
               if (enableRTS != 0)

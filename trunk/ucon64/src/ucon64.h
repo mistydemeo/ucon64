@@ -171,7 +171,6 @@ typedef struct
   // the following values are for the SNES, NES and the Genesis
   int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
   int snes_hirom;                               // SNES ROM is HiROM
-  int snes_superhi;                             // Do a SNES SUPERHI ROM dump
   int part_size;                                // SNES/Genesis split part size
   int split;                                    // ROM is split
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump

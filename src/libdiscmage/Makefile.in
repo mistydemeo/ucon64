@@ -46,18 +46,18 @@ FULLLIBNAME=$(LIBNAME).dxe
 else                                    # Unix or BeOS
 
 CFLAGS+=-fPIC
+ifdef DLOPEN
+FULLLIBNAME=$(LIBNAME).so
+else
+FULLLIBNAME=lib$(LIBNAME).so
+endif
 
 ifeq ($(OSTYPE),beos)
 DLLFLAGS=$(LDFLAGS) -nostart
 else
 DLLFLAGS=$(LDFLAGS) -shared
 endif
-
-ifdef DLOPEN
-FULLLIBNAME=$(LIBNAME).so
-else
-FULLLIBNAME=lib$(LIBNAME).so
-endif
+DLLFLAGS+=-o $(FULLLIBNAME) $(OBJECTS)
 
 endif                                   # DJGPP
 endif                                   # cygwin
@@ -68,7 +68,8 @@ all: $(FULLLIBNAME)
 
 clean:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f $(LIBNAME).dll $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o
+	rm -f $(LIBNAME).dll $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
+              tmp.def tmp.base tmp.exp
 else
 ifdef DJGPP
 	del $(LIBNAME).dxe
@@ -141,7 +142,7 @@ else                                    # Unix or BeOS
 # Unix uses LD_LIBRARY_PATH for dynamic linking, BeOS uses LIBRARY_PATH
 
 $(FULLLIBNAME): $(OBJECTS)
-	$(CC) $(DLLFLAGS) $(OBJECTS) -o $(FULLLIBNAME)
+	$(CC) $(DLLFLAGS)
 
 endif                                   # DJGPP
 endif                                   # cygwin

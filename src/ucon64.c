@@ -781,6 +781,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       if (rominfo->current_crc32 == 0)
         rominfo->current_crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
 
+#if 0
       switch (ucon64.console)
         {
           case UCON64_SNES:
@@ -795,6 +796,9 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
             ucon64_dbsearch (rominfo);
             break;
         }
+#else
+      ucon64_dbsearch (rominfo);
+#endif        
     }
   else if (UCON64_TYPE_ISCD (ucon64.type))
     {

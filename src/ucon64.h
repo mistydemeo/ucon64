@@ -110,6 +110,7 @@ typedef struct st_rominfo
   const void *header;                           // (possible) internal ROM header
 
   char name[MAXBUFSIZE];                        // internal ROM name
+  char fname[FILENAME_MAX];			// ROM name according to DAT file
   const char *maker;                            // maker name of the ROM
   const char *country;                          // country name of the ROM
   char misc[MAXBUFSIZE];                        // some miscellaneous information

@@ -443,6 +443,7 @@ gba_init (st_rominfo_t *rominfo)
     }
 
   rominfo->console_usage = gba_usage;
+  // We use fal_usage, but we could just as well use f2a_usage
   rominfo->copier_usage = (!rominfo->buheader_len ? fal_usage : unknown_usage);
 
   return result;
@@ -474,7 +475,7 @@ gba_chksum (st_rominfo_t *rominfo)
 
 
 int
-gba_multi (int truncate_size, char *fname)
+gba_multi (int truncate_size, char *multi_fname)
 // TODO: Check if 1024 Mbit multiroms are supported by the FAL code
 {
 #define BUFSIZE (32 * 1024)
@@ -482,7 +483,8 @@ gba_multi (int truncate_size, char *fname)
       truncated = 0, size_pow2_lesser = 1, size_pow2 = 1, truncate_size_ispow2 = 0;
   struct stat fstate;
   FILE *srcfile, *destfile;
-  char buffer[BUFSIZE], *destname;
+  char buffer[BUFSIZE], *destname, *fname, loader_fname[FILENAME_MAX];
+
 
   if (truncate_size == 0)
     {
@@ -500,12 +502,12 @@ gba_multi (int truncate_size, char *fname)
     }
 #endif
 
-  if (fname != NULL)
+  if (multi_fname != NULL)                      // -xfalmulti
     {
-      destname = fname;
+      destname = multi_fname;
       n_files = ucon64.argc;
     }
-  else
+  else                                          // -multi
     {
       destname = ucon64.argv[ucon64.argc - 1];
       n_files = ucon64.argc - 1;
@@ -530,17 +532,37 @@ gba_multi (int truncate_size, char *fname)
 
       if (file_no == 0)
         {
-          printf ("Loader: %s\n", ucon64.argv[n]);
-          if (q_fsize (ucon64.argv[n]) > 64 * 1024)
-            printf ("WARNING: Are you sure %s is a loader binary?\n",
-                    ucon64.argv[n]);
+          if (multi_fname != NULL)              // -xfalmulti
+            {
+              get_property_fname (ucon64.configfile, "gbaloader", loader_fname,
+                                  "loader.bin");
+              if (access (loader_fname, F_OK))
+                {
+                  fprintf (stderr, "ERROR: Cannot open loader binary (%s)\n",
+                           loader_fname);
+                  return -1;
+                }
+              fname = loader_fname;
+              // NOTE: loop counter is modified, because we have to insert
+              //       loader in the file list
+              n--;
+            }
+          else                                  // -multi
+            fname = ucon64.argv[n];
+
+          printf ("Loader: %s\n", fname);
+          if (q_fsize (fname) > 64 * 1024)
+            printf ("WARNING: Are you sure %s is a loader binary?\n", fname);
         }
       else
-        printf ("ROM%d: %s\n", file_no, ucon64.argv[n]);
-
-      if ((srcfile = fopen (ucon64.argv[n], "rb")) == NULL)
         {
-          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.argv[n]);
+          fname = ucon64.argv[n];
+          printf ("ROM%d: %s\n", file_no, fname);
+        }
+
+      if ((srcfile = fopen (fname, "rb")) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname);
           continue;
         }
       done = 0;
@@ -554,8 +576,8 @@ gba_multi (int truncate_size, char *fname)
               done = 1;
               truncated = 1;
               printf ("Output file is %d Mbit, truncating %s, skipping %d bytes\n",
-                      truncate_size / MBIT, ucon64.argv[n],
-                      q_fsize (ucon64.argv[n]) - (byteswritten + bytestowrite));
+                      truncate_size / MBIT, fname,
+                      q_fsize (fname) - (byteswritten + bytestowrite));
               // DON'T use fstate.st_size, because file could be compressed
             }
           totalsize += bytestowrite;

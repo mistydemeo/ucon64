@@ -1,5 +1,5 @@
 /*
-doctor64.c - Bung Doctor 64 support for uCON64
+doctor64.c - Bung Doctor V64 support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
 

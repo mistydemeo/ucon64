@@ -1,5 +1,5 @@
 /*
-doctor64jr.c - Bung Doctor 64jr support for uCON64
+doctor64jr.c - Bung Doctor V64 Junior support for uCON64
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
 
@@ -33,10 +33,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "doctor64jr.h"
 
 const st_usage_t doctor64jr_usage[] = {
-  {NULL, NULL, "Doctor64 Jr"},
+  {NULL, NULL, "Doctor V64 Junior"},
   {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef PARALLEL
-  {"xdjr", NULL, "send/receive ROM to/from Doctor64 Jr; " OPTION_LONG_S "port=PORT\n"
+  {"xdjr", NULL, "send/receive ROM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
 //          "                receives automatically when ROM does not exist\n"
               "currently only sending is supported"},
 #if 0

@@ -149,7 +149,6 @@ int swc_write_rom(char *filename, unsigned int parport)
   size = (size + BUFFERSIZE - 1) / BUFFERSIZE;  // size in 8KB blocks (rounded up)
   send_command(6, 5 | (size << 8), size >> 8);  // bytes: 6, 5, #8K L, #8K H, 0
   send_command(6, 1 | (emu_mode_select << 8), 0);
-  send_command(6, 0, 0);                        // "unlock" swc
 
   wait_for_ready();
   outportb(swc_port + PARPORT_DATA, 0);
@@ -283,7 +282,10 @@ int swc_read_rom(char *filename, unsigned int parport)
     size >>= 1;
   printf("Receive: %d Bytes (%.4f Mb) %s\n",
          size*MBIT, (float) size, special ?  "SPECIAL" : "");
-  size *= MBIT;                                 // size in bytes for parport_gauge() below
+  if (special)                                  // size in bytes for parport_gauge() below
+    size *= MBIT * 2;
+  else
+    size *= MBIT;
 
   send_command(5, 0, 0);
   send_command0(0xe00c, 0);
@@ -653,6 +655,17 @@ void checkabort(int status)
     exit(status);
   }
 //  send_command(5, 0, 0);                      // vgs: when sending/receiving a rom
+}
+
+void swc_unlock(unsigned int parport)
+/*
+  "unlock" the swc. However, just starting to send, then stopping with ^C,
+  gives the same result.
+*/
+{
+  init_io(parport);
+
+  send_command(6, 0, 0);
 }
 
 int swc_usage(int argc, char *argv[])

@@ -358,7 +358,7 @@ unsigned int parport_probe(unsigned int port)
     {                                           // print warning, but continue
       fprintf(stderr,
               "Support for the driver parnew is deprecated. Future versions of ucon64 might\n"
-              "not support this driver. You can donwload the latest ioport driver from\n"
+              "not support this driver. You can download the latest ioport driver from\n"
               "http://www.infernal.currantbun.com or http://ucon64.sourceforge.com.\n");
     }
   }

@@ -20,8 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef YOKO_H
 #define YOKO_H
-#include "../ucon64.h"
-
 #define yoko_TITLE "YOKO backup unit"
 
 #define yoko_HEADER_START 0

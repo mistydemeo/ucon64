@@ -23,9 +23,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#include <unistd.h>
 #include <stdlib.h>
 #include "config.h"
+#include "ucon64gui.h"
 #include "html2gui/src/html2gui.h"
 #include "misc.h"
-#include "ucon64gui.h"
 
 #include "top.h"
 #include "bottom.h"
@@ -142,7 +142,6 @@ const struct option long_options[] = {
   {"p", 0, 0, UCON64_P},
   {"pad", 0, 0, UCON64_PAD},
   {"padhd", 0, 0, UCON64_PADHD},
-  {"pas", 0, 0, UCON64_PAS},
   {"pasofami", 0, 0, UCON64_PASOFAMI},
   {"pce", 0, 0, UCON64_PCE},
   {"port", 1, 0, UCON64_PORT},

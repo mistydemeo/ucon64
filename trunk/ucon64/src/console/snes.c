@@ -1278,6 +1278,10 @@ knowing when that is necessary.
    a9 00 00 a2 fe 1f df 00 00 70 d0     lda #$0000; ldx #$1ffe; cmp $700000,x; bne ...
 => a9 00 00 a2 fe 1f df 00 00 70 ea ea  lda #$0000; ldx #$1ffe; cmp $700000,x; nop; nop
 
+- Uniracers/Unirally
+   8f XX YY 77 e2 XX af XX YY 77 c9 XX f0
+=> 8f XX YY 77 e2 XX af XX YY 77 c9 XX 80
+
 - most probably only Killer Instinct
    5c 7f d0 83 18 fb 78 c2 30           jmp $83d07f; clc; xce; sei; rep #$30
 => ea ea ea ea ea ea ea ea ea           nop; nop; nop; nop; nop; nop; nop; nop; nop
@@ -1313,9 +1317,12 @@ TODO: make sense of Diddy's Kong Quest codes
 => 29 ff 00 c9 00 00 90 16
 
 - most probably only Kirby's Dream Course
-   9c 0b 42 9c 0c 42 a9 01 8d
-=> 9c 0b 42 9c 0c 42 a9 01 9c
-I'm not sure what this is for, but it does break the menu controls.
+   ca 10 f8 38 ef 1a 80 81 8d
+=> ca 10 f8 38 ef 1a 80 81 9c
+
+- most probably only Kirby's Dream Course
+   81 ca 10 f8 cf 39 80 87 f0
+=> 81 ca 10 f8 cf 39 80 87 80
 
 - probably only Earthbound
    84 26 ad 39 b5 d0 1a
@@ -1384,6 +1391,7 @@ Same here.
                          "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
         }
 
+      change_string ("\x8f**\x77\xe2*\xaf**\x77\xc9*\xf0", 13, '*', '!', "\x80", 1, buffer, bytesread, 0);
       change_string ("!!!!!!\x60!\xd0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
                      "\x8f\x9f", 2, "\x57\x59", 2, "\x60\x68", 2, "\x30\x31\x32\x33", 4,
                      "\xcf\xdf", 2, "\x57\x59", 2, "\x30\x31\x32\x33", 4);
@@ -1415,7 +1423,9 @@ Same here.
       change_string ("\xda\xe2\x30\xc9\x01\xf0\x18\xc9\x02", 9, '*', '!',
                                      "\x09\xf0\x18\xc9\x07", 5, buffer, bytesread, -4);
       change_string ("\x29\xff\x00\xc9\x07\x00\x90\x16", 8, '*', '!', "\x00", 1, buffer, bytesread, -3);
-//      change_string ("\x9c\x0b\x42\x9c\x0c\x42\xa9\x01\x8d", 9, '*', '!', "\x9c", 1, buffer, bytesread, 0);
+
+      change_string ("\xca\x10\xf8\x38\xef\x1a\x80\x81\x8d", 9, '*', '!', "\x9c", 1, buffer, bytesread, 0);
+      change_string ("\x81\xca\x10\xf8\xcf\x39\x80\x87\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0);
 
       change_string ("\x84\x26\xad\x39\xb5\xd0\x1a", 7, '*', '!', "\xea\xea", 2, buffer, bytesread, -1);
       change_string ("\x10\xf8\x38\xef\xef\xff\xc1", 7, '*', '!',

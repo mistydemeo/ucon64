@@ -925,13 +925,11 @@ cmc_test (int test, unsigned int parport, int speed)
   init_conio ();
 #endif
 
-#if 0
   if (test < 1 || test > 2)
     {
       fputs ("ERROR: Choose a test between 1 and 2 (inclusive)\n", stderr);
       exit (1);
     }
-#endif
   if (speed < 1 || speed > 4)
     speed = DEFAULT_SPEED;
   cyan_test_copier (test, speed, parport);

@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.28 2003-03-01 14:22:38 dbjh Exp $
+ * $Id: gg.c,v 1.29 2003-03-03 00:56:15 dbjh Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -799,9 +799,7 @@ unmapSnesChar (char genie)
 int
 gameGenieDecodeSNES (const char *in, char *out)
 {
-  int value, hirom;
-  long address;
-  long transposed;
+  int value, hirom, address, transposed;
 
   if (!isxdigit ((int) in[0]) || !isxdigit ((int) in[1]) ||
       !isxdigit ((int) in[2]) || !isxdigit ((int) in[3]) ||
@@ -860,7 +858,7 @@ gameGenieDecodeSNES (const char *in, char *out)
       address = (address & 0x7fff) | ((address & 0xff0000) >> 1);
     }
 
-  sprintf (out, "%06lX:%02X", address, value);
+  sprintf (out, "%06X:%02X", address, value);
 
   return 0;
 }
@@ -869,9 +867,7 @@ gameGenieDecodeSNES (const char *in, char *out)
 int
 gameGenieEncodeSNES (const char *in, char *out)
 {
-  int value;
-  long address;
-  long transposed;
+  int value, address, transposed;
 
   if (!isxdigit ((int) in[0]) || !isxdigit ((int) in[1]) ||
       !isxdigit ((int) in[2]) || !isxdigit ((int) in[3]) ||
@@ -880,7 +876,7 @@ gameGenieEncodeSNES (const char *in, char *out)
     return -1;
 
   value = hexByteValue (mapSnesChar (in[7]), mapSnesChar (in[8]));
-  sscanf (in, "%lx", &address);
+  sscanf (in, "%x", &address);
 
   transposed = 0;
   encodeSNES (0, 4);
@@ -990,10 +986,6 @@ gg_main (int argc, const char **argv)
 }
 
 
-/*
-  It will save you some work if you don't fully integrate the code above with
-  uCON64's code, because it is a project separate from the uCON64 project.
-*/
 int gg_argc;
 const char *gg_argv[128];
 
@@ -1045,9 +1037,9 @@ gg_display (st_rominfo_t *rominfo, const char *code)
 int
 gg_apply (st_rominfo_t *rominfo, const char *code)
 {
-  long size = ucon64.file_size - rominfo->buheader_len, address, value;
+  int size = ucon64.file_size - rominfo->buheader_len, address, value,
+      result = -1;
   char buf[MAXBUFSIZE], dest_name[FILENAME_MAX];
-  int result = -1;
 
   if (ucon64.file_size > 0)                   // check if rominfo contains valid ROM info
     gg_rominfo = rominfo;
@@ -1089,11 +1081,11 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
     printf ("%-12s = %s (CPU address: %06X)\n", code, buf, CPUaddress);
   else
     printf ("%-12s = %s\n", code, buf);
-  sscanf (buf, "%lx:%lx:*", &address, &value);
+  sscanf (buf, "%x:%x:*", &address, &value);
 
   if (address >= size)
     {
-      fprintf (stderr, "ERROR: address is too high for this ROM (%ld)\n", address);
+      fprintf (stderr, "ERROR: Address is too high for this ROM (%d)\n", address);
       return -1;
     }
 
@@ -1105,11 +1097,12 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
   buf[0] = q_fgetc (dest_name, address + rominfo->buheader_len);
   mem_hexdump (buf, 1, address + rominfo->buheader_len);
 
-  q_fputc (dest_name, address + rominfo->buheader_len, (unsigned char) value, "r+b");
+  q_fputc (dest_name, address + rominfo->buheader_len, value, "r+b");
 
   buf[0] = value;
   mem_hexdump (buf, 1, address + rominfo->buheader_len);
   printf ("\n");
 
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }

@@ -285,8 +285,8 @@ aps_apply (const char *mod, const char *apsname)
 
   fclose (n64aps_modfile);
   fclose (n64aps_apsfile);
-  printf (ucon64_msg[WROTE], modname);
 
+  printf (ucon64_msg[WROTE], modname);
   return 0;
 }
 
@@ -533,7 +533,7 @@ aps_set_desc (const char *aps, const char *description)
   if (!ucon64_file_handler (apsname, NULL, 0))
     q_fcpy (aps, 0, q_fsize (aps), apsname, "wb");
   q_fwrite (desc, 7, 50, apsname, "r+b");
-  printf (ucon64_msg[WROTE], apsname);
 
+  printf (ucon64_msg[WROTE], apsname);
   return 0;
 }

@@ -7191,9 +7191,14 @@ nes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
 
-      // The current DAT file (2.2A as of Febrary 18 2003) contains only CRC32
-      //  checksums where the emulator header was also used in the calculation!
-      ucon64.crc32 = q_fcrc32 (ucon64.rom, 0);
+      /*
+        The current DAT file (2.2A as of Febrary 18 2003) contains only CRC32
+        checksums where the emulator header was also used in the calculation!
+        However, instead of propagating this error by adding the line:
+          ucon64.crc32 = q_fcrc32 (ucon64.rom, 0);
+        we now require users to specify -nhd if they really want to use DAT
+        files created by incorrect tools.
+      */
       break;
     case FAM:
       rominfo->copier_usage = fds_usage;
@@ -7221,6 +7226,9 @@ nes_init (st_rominfo_t *rominfo)
       break;
     }
 
+  if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn switch was specified
+    rominfo->buheader_len = ucon64.buheader_len;
+
   if (ucon64.crc32 == 0)
     ucon64.crc32 = q_fcrc32 (ucon64.rom, rominfo->buheader_len);
 
@@ -7229,32 +7237,32 @@ nes_init (st_rominfo_t *rominfo)
   info = (st_nes_data_t *) bsearch (&key, nes_data, sizeof nes_data / sizeof (st_nes_data_t),
                                     sizeof (st_nes_data_t), nes_compare);
   if (info)
-      {
-        if (info->maker)
-          rominfo->maker = NULL_TO_UNKNOWN_S (nes_maker[MIN (info->maker, NES_MAKER_MAX - 1)]);
+    {
+      if (info->maker)
+        rominfo->maker = NULL_TO_UNKNOWN_S (nes_maker[MIN (info->maker, NES_MAKER_MAX - 1)]);
 
-        rominfo->country = NULL_TO_UNKNOWN_S (nes_country[MIN (info->country, NES_COUNTRY_MAX - 1)]);
+      rominfo->country = NULL_TO_UNKNOWN_S (nes_country[MIN (info->country, NES_COUNTRY_MAX - 1)]);
 
-        if (info->date)
-          {
-            int month = info->date / 100, year = info->date % 100;
-            char format[80];
+      if (info->date)
+        {
+          int month = info->date / 100, year = info->date % 100;
+          char format[80];
 
-            if (month)
-              {
-                sprintf (format, "\nDate: %%d/19%%d");
-                strcat (format, (year == 8 || year == 9) ? "x" : "");
-                sprintf (buf, format, month, year);
-              }
-            else
-              {
-                sprintf (format, "\nDate: 19%%d");
-                strcat (format, (year == 8 || year == 9) ? "x" : "");
-                sprintf (buf, format, year);
-              }
-            strcat (rominfo->misc, buf);
-          }
-      }
+          if (month)
+            {
+              sprintf (format, "\nDate: %%d/19%%d");
+              strcat (format, (year == 8 || year == 9) ? "x" : "");
+              sprintf (buf, format, month, year);
+            }
+          else
+            {
+              sprintf (format, "\nDate: 19%%d");
+              strcat (format, (year == 8 || year == 9) ? "x" : "");
+              sprintf (buf, format, year);
+            }
+          strcat (rominfo->misc, buf);
+        }
+    }
 
   rominfo->console_usage = nes_usage;
 

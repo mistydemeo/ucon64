@@ -22,11 +22,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef MISC_H
 #define MISC_H
-#ifdef __cplusplus
-extern "C" {
-#endif
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // HAVE_ZLIB_H, ANSI_COLOR support
+#endif
+#ifdef __cplusplus
+extern "C" {
 #endif
 #include <string.h>
 #include <limits.h>
@@ -312,8 +312,8 @@ extern int rmdir (const char *path);
   memwcmp()    memcmp with wildcard support
   mem_swap()   swap n Bytes from add on
   mem_hexdump() hexdump n Bytes from add on; you can use here a virtual_start for the displayed counter
-  mem_crc16()  (miscz.h) calculate the crc16 of buffer for size bytes
-  mem_crc32()  (miscz.h) calculate the crc32 of buffer for size bytes
+  crc16()      calculate the crc16 of buffer for size bytes
+  crc32()      calculate the crc32 of buffer for size bytes
 */
 extern int memwcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildcard);
 extern void mem_hexdump (const void *add, uint32_t n, int virtual_start);
@@ -327,6 +327,10 @@ extern uint16_t bswap_16 (uint16_t x);
 extern uint32_t bswap_32 (uint32_t x);
 extern uint64_t bswap_64 (uint64_t x);
 #endif // OWN_BYTESWAP
+#endif
+//extern unsigned short crc16 (unsigned short crc16, const void *buffer, unsigned int size);
+#ifndef  HAVE_ZLIB_H
+extern unsigned int crc32 (unsigned int crc32, const void *buffer, unsigned int size);
 #endif
 
 
@@ -409,7 +413,9 @@ extern char *q_fbackup (const char *filename, int mode);
 #else
 extern char *q_fbackup (char *move_name, const char *filename);
 #endif
-
+#ifndef  HAVE_ZLIB_H
+extern int q_fsize (const char *filename);
+#endif
 
 /*
   Configuration file handling

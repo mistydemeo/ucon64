@@ -2863,10 +2863,10 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer)
   rom_size = ucon64.file_size - rominfo->buheader_len;
   if (rominfo->interleaved)
     {
-      ucon64.fcrc32 = mem_crc32 (rom_size, 0, rom_buffer);
+      ucon64.fcrc32 = crc32 (0, rom_buffer, rom_size);
       snes_deinterleave (rominfo, rom_buffer, rom_size);
     }
-  ucon64.crc32 = mem_crc32 (rom_size, 0, rom_buffer);
+  ucon64.crc32 = crc32 (0, rom_buffer, rom_size);
 
   pow2size = 1;
   while (pow2size < rom_size)

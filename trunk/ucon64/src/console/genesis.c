@@ -646,7 +646,7 @@ load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
           // Use calc_fcrc32, because the first iteration ucon64.fcrc32 is zero
           //  while the next it's non-zero.
           if (calc_fcrc32)
-            ucon64.fcrc32 = mem_crc32 (16384, ucon64.fcrc32, buf);
+            ucon64.fcrc32 = crc32 (ucon64.fcrc32, buf, 16384);
           // Deinterleave each 16 KB chunk
           deinterleave_chunk (rom_buffer + pos, buf);
           pos += 16384;
@@ -662,7 +662,7 @@ load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
     }
 
   if (ucon64.crc32 == 0)                        // Calculate the CRC32 only once
-    ucon64.crc32 = mem_crc32 (pos, 0, rom_buffer);
+    ucon64.crc32 = crc32 (0, rom_buffer, pos);
 
   fclose (file);
   return rom_buffer;

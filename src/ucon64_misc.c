@@ -568,7 +568,8 @@ ucon64_bin2iso (const char *image, int track_mode)
   long i, size;
   char buf[MAXBUFSIZE];
   FILE *dest, *src;
-//  time_t starttime = time (NULL);
+  time_t starttime = time (NULL);
+
 
   switch (track_mode)
     {
@@ -635,7 +636,7 @@ ucon64_bin2iso (const char *image, int track_mode)
         }
       fseek (src, seek_ecc, SEEK_CUR);
 
-//      ucon64_gauge (starttime, i * sector_size, size * sector_size);
+      ucon64_gauge (starttime, i * sector_size, size * sector_size);
     }
 
   fclose (dest);

@@ -48,8 +48,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t ppf_usage[] =
 {
-    {"ppf", NULL, "apply PPF PATCH to IMAGE (PPF<=v2.0); ROM will be an IMAGE"},
-    {"mkppf", "ORG_IMG", "create PPF patch; ROM will be modified IMAGE"},
+    {"ppf", NULL, "apply PPF PATCH to IMAGE (PPF<=v2.0); ROM should be an IMAGE"},
+    {"mkppf", "ORG_IMG", "create PPF patch; ROM should be the modified IMAGE"},
     {"nppf", "DESC", "change PPF single line DESCRIPTION"},
     {"idppf", "FILE_ID.DIZ", "change FILE_ID.DIZ of PPF PATCH (PPF v2.0)"},
     {NULL, NULL, NULL}

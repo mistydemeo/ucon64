@@ -59,6 +59,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/poll.h>                           //  is available on Linux, not on
 #endif                                          //  BeOS. DOS already has kbhit()
 
+// map code should be included unconditionally (needed by gz/zip & DLL (DXE) code)
+#include "map.c"
+
 #if     (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
 #include <termios.h>
 typedef struct termios tty_t;

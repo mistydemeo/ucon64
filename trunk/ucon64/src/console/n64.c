@@ -68,12 +68,12 @@ const st_usage_t n64_usage[] =
 #endif
     {"bot", "BOOTCODE", "add/extract BOOTCODE (4032 Bytes) to/from ROM;\n"
                         "extracts automatically if BOOTCODE does not exist"},
-    {"lsram", "SRAM", "LAC's Makesram; ROM will be LAC's ROM image\n"
+    {"lsram", "SRAM", "LAC's Makesram; ROM should be LAC's ROM image\n"
                        "the SRAM must have a size of 512 Bytes\n"
                        "this option generates a ROM which can be used to transfer\n"
                        "SRAMs to your console"},
     {"usms", "SMSROM", "Jos Kwanten's ultraSMS (Sega Master System/GameGear emulator);\n"
-                       "ROMs will be Jos Kwanten's ultraSMS ROM image\n"
+                       "ROM should be Jos Kwanten's ultraSMS ROM image\n"
                        "works only for SMSROMs which are <= 4 Mb in size"},
     {"chk", NULL, "fix ROM checksum\n"
               "supports only 6101 and 6102 boot codes"},

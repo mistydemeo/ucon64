@@ -44,7 +44,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 const st_usage_t aps_usage[] =
   {
     {"a", NULL, "apply APS PATCH to ROM (APS<=v1.2)"},
-    {"mka", "ORG_ROM", "create APS patch; ROM will be the modified ROM"},
+    {"mka", "ORG_ROM", "create APS patch; ROM should be the modified ROM"},
     {"na", "DESC", "change APS single line DESCRIPTION"},
     {NULL, NULL, NULL}
   };

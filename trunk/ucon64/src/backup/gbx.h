@@ -2,7 +2,7 @@
 gbx.h - GameBoy Xchanger support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2001 dbjh
+           2001 - 2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -24,12 +24,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "../ucon64.h"
 
 #define gbx_TITLE "GameBoy Xchanger"
+#define gbx_HEADER_START 0
+#define gbx_HEADER_LEN 0
 
 int gbx_read_rom(char *filename, unsigned int parport);
 int gbx_write_rom(char *filename, unsigned int parport);
 int gbx_read_sram(char *filename, unsigned int parport, int bank);
 int gbx_write_sram(char *filename, unsigned int parport, int bank);
 int gbx_usage(int argc, char *argv[]);
-#define gbx_HEADER_START 0
-#define gbx_HEADER_LEN 0
+
 #endif /* GBX_H */

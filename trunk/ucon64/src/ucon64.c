@@ -6,7 +6,7 @@ handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2001 dbjh
+           2001 - 2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -678,15 +678,10 @@ if(argcmp(argc,argv,"-dbv"))
 	return(0);
 }
 
-if(!access(rom.rom,F_OK))
-{
-    ucon64_init(&rom);
-    if(rom.console!=ucon64_UNKNOWN)ucon64_nfo(&rom);
-}
-else
-{
 /*
-    sometimes the ROM does not exist but will be received
+  do the following outside the if that checks for existence of rom.rom
+  (necessary for headerless SRAM files, which can't be detected without
+  looking at the command line options)
 */
 rom.console=
 (argcmp(argc,argv,"-xdjr") ||
@@ -700,8 +695,15 @@ rom.console=
  argcmp(argc,argv,"-xswcs")) ? ucon64_SNES :
 
 (argcmp(argc,argv,"-xfal") ||
- argncmp(argc,argv,"-xfalc",6)) ? ucon64_GBA :
+ argncmp(argc,argv,"-xfalc",6) ||
+ argncmp(argc,argv,"-xfalb",6) ||
+ argcmp(argc,argv,"-xfals")) ? ucon64_GBA :
                                                     rom.console;
+if(!access(rom.rom,F_OK))
+{
+    ucon64_init(&rom);
+    if (rom.console != ucon64_UNKNOWN)
+      ucon64_nfo(&rom);
 }
 
 if (argcmp(argc, argv, "-e"))
@@ -812,6 +814,8 @@ case ucon64_GBA:
 #ifdef	BACKUP
     (argcmp(argc,argv,"-xfal")) ? gbadvance_xfal(&rom) :
     (argncmp(argc,argv,"-xfalc",6)) ? gbadvance_xfal(&rom) :
+    (argncmp(argc,argv,"-xfalb",6)) ? gbadvance_xfalb(&rom) :
+    (argcmp(argc,argv,"-xfals")) ? gbadvance_xfals(&rom) :
 #endif
     0
   );
@@ -1082,8 +1086,14 @@ int ucon64_init(struct ucon64_ *rom)
 
   bytes = quickftell(rom->rom);
 
-  if( bytes <= MAXROMSIZE )
-    rom->current_crc32=fileCRC32(rom->rom,0);
+  if (bytes <= MAXROMSIZE)
+    rom->current_crc32 = fileCRC32(rom->rom, 0);
+
+// call testsplit() before any <CONSOLE>_init() function to provide for a
+//  possible override in those functions
+  rom->splitted[0] = testsplit(rom->rom);
+  if (argcmp(rom->argc, rom->argv, "-ns"))
+    rom->splitted[0] = 0;
 
 if(rom->console != ucon64_UNKNOWN)
 {
@@ -1211,13 +1221,9 @@ if(rom->console == ucon64_UNKNOWN && bytes <= MAXROMSIZE )
   }
 #endif
 
-  rom->padded=filetestpad(rom->rom);
-  rom->intro= ((rom->bytes-rom->buheader_len)>MBIT) ?
+  rom->padded = filetestpad(rom->rom);
+  rom->intro = ((rom->bytes-rom->buheader_len)>MBIT) ?
                  ((rom->bytes-rom->buheader_len)%MBIT)  : 0;
-
-  rom->splitted[0] = testsplit(rom->rom);
-  if (argcmp(rom->argc, rom->argv, "-ns"))
-    rom->splitted[0] = 0;
 
 //  if(!rom->current_crc32)rom->current_crc32=fileCRC32(rom->rom,rom->buheader_len);
 

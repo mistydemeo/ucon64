@@ -2,7 +2,7 @@
 ucon64_misc.h - miscellaneous functions for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2001 dbjh
+           2001 - 2002 dbjh
                   2001 Caz
 
 
@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <unistd.h>				// ioperm() (libc5)
+#include <unistd.h>                             // ioperm() (libc5)
 #include "misc.h"
 
 #ifdef  BACKUP
@@ -62,73 +62,45 @@ typedef struct IO_Tuple
 #endif                                          // __BEOS__
 #endif                                          // BACKUP
 
-
 #define MBIT 131072
 
 #define PARPORT_DATA    0                       // output
 #define PARPORT_STATUS  1                       // input
 #define PARPORT_CONTROL 2
 
-char hexDigit(	int value	//GameGenie "codec" routine
-);
-
-int hexValue(	char digit	//GameGenie "codec" routine
-);
-
-//#define hexByteValue(x ,y) ((hexValue(x) << 4) + hexValue(y))
-int hexByteValue(	char x	//GameGenie "codec" routine
-			,char y
-);
-
-void BuildCRCTable();		//needed for CRC32
-
-unsigned long CalculateBufferCRC(	unsigned int count	//needed for CRC32
-					,unsigned long crc
-					,void *buffer
-);
-
-unsigned long CalculateFileCRC(	FILE *file	//needed for CRC32
-);
-
-unsigned long fileCRC32(	char *filename	//calculate CRC32 of filename beginning from start
-				,long start
-);
-
-char *ucon64_fbackup(   char *filename
-);
-
-size_t filepad(	char *filename	//pad file (if necessary) from start
-		,long start	//ignore start bytes (if file has header or something)
-		,long unit	//size of block (example: MBIT)
-);
-
-long filetestpad(	char *filename	//test if EOF is padded (repeating bytes) beginning from start
-);
-
-int testsplit(	char *filename		//test if ROM is splitted into parts
-);
-
-#define out1byte(p,x)	outportb(p,x)
-#define in1byte(p)	inportb(p)
+#define out1byte(p,x)   outportb(p,x)
+#define in1byte(p)      inportb(p)
 // DJGPP (DOS) has outportX() & inportX()
 
+// GameGenie "codec" routines
+char hexDigit(int value);
+int hexValue(char digit);
+//#define hexByteValue(x ,y) ((hexValue(x) << 4) + hexValue(y))
+int hexByteValue(char x, char y);
+
+// CRC32 routines
+void BuildCRCTable();
+unsigned long CalculateBufferCRC(unsigned int count, unsigned long crc, void *buffer);
+unsigned long CalculateFileCRC(FILE *file);
+unsigned long fileCRC32(char *filename, long start);    // calculate CRC32 of filename beginning from start
+
+char *ucon64_fbackup(char *filename);
+
+size_t filepad(char *filename, long start, long unit);
+long filetestpad(char *filename);
+
+int testsplit(char *filename);
+
 #if     (__UNIX__ || __BEOS__)
-inline unsigned char inportb(unsigned short port);
-inline unsigned short inportw(unsigned short port);
-inline void outportb(unsigned short port, unsigned char byte);
-inline void outportw(unsigned short port, unsigned short word);
+unsigned char inportb(unsigned short port);
+unsigned short inportw(unsigned short port);
+void outportb(unsigned short port, unsigned char byte);
+void outportw(unsigned short port, unsigned short word);
 #endif
 
-unsigned int parport_probe(	unsigned int parport	//detect parallel port
-);
-
-int parport_gauge(	time_t init_time
-			,long pos
-			,long size
-);
-
-int raw2iso(char *filename);	//convert MODE1_RAW, MODE2_RAW, MODE2 and MODE2_FORM_MIX to ISO9660
-
-//int trackmode(long imagesize);	//tries to figure out the used track mode of the cd image
+unsigned int parport_probe(unsigned int parport);
+int parport_gauge(time_t init_time, long pos, long size);
+int raw2iso(char *filename);
+//int trackmode(long imagesize);
 
 #endif                                          // #ifndef UCON64_MISC_H

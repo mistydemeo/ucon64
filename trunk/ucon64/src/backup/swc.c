@@ -2,7 +2,7 @@
 swc.c - Super Wild Card support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2001 dbjh
+           2001 - 2002 dbjh
                   2001 Caz
 
 This program is free software; you can redistribute it and/or modify
@@ -125,7 +125,7 @@ int swc_write_rom(char *filename, unsigned int parport, int sram_size)
   starttime = time(NULL);                       //  but then some ROMs don't work
   while ((bytesread = fread(buffer, 1, BUFFERSIZE, file)))
   {
-    send_command0(0xc010, blocksdone >> 9);     // only 2 ROM dumps exist where 2nd arg != 0
+    send_command0(0xc010, blocksdone >> 9);     // only 3 ROM dumps exist where 2nd arg != 0
     send_command(5, address, 0);
     send_block(0x8000, buffer, bytesread);
     address++;
@@ -271,6 +271,7 @@ int swc_read_rom(char *filename, unsigned int parport)
   if (size == 0)
   {
     fprintf(STDERR, "There is no cartridge present in the Super Wild Card\n");
+    fclose(file);
     remove(filename);
     exit(1);
   }

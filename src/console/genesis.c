@@ -924,7 +924,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
       flags &= ~0x30;                           // clear E(uro) & P(AL)
     }
 
-  fputc (flags, destfile);                          // 0x1f = flags
+  fputc (flags, destfile);                      // 0x1f = flags
 }
 
 

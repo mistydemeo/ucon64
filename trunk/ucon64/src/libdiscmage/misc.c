@@ -485,6 +485,7 @@ isfname (int c)
       case '.':
       case ',':
       case '\'':
+      case '+':
       case '-':
       case ' ':
       case '(':
@@ -492,6 +493,7 @@ isfname (int c)
       case '[':
       case ']':
       case '!':
+      case '&':
         return TRUE;
     }
 
@@ -636,9 +638,9 @@ get_suffix (const char *filename)
 
 
 /*
- Removes all trailing blanks from a string.
- Blanks are defined with ISSPACE  (blank, tab, newline, return, formfeed,
- vertical tab = 0x09 - 0x0D + 0x20)
+  Removes all trailing blanks from a string.
+  Blanks are defined with isspace (blank, tab, newline, return, formfeed,
+  vertical tab = 0x09 - 0x0D + 0x20)
 */
 static int
 strtrimr (char *str)
@@ -656,7 +658,7 @@ strtrimr (char *str)
 
 /*
   Removes all leading blanks from a string.
-  Blanks are defined with ISSPACE  (blank, tab, newline, return, formfeed,
+  Blanks are defined with isspace (blank, tab, newline, return, formfeed,
   vertical tab = 0x09 - 0x0D + 0x20)
 */
 static int
@@ -678,7 +680,7 @@ strtriml (char *str)
 
 /*
   Removes all leading and trailing blanks in a string.
-  Blanks are defined with ISSPACE  (blank, tab, newline, return, formfeed,
+  Blanks are defined with isspace (blank, tab, newline, return, formfeed,
   vertical tab = 0x09 - 0x0D + 0x20)
 */
 char *

@@ -34,6 +34,8 @@ struct ucon64gui_
 }
 ucon64;
 
+int snes_window=0;
+
 void
 ucon64_system (void)
 {
@@ -69,7 +71,14 @@ ucon64_snes (void)
 #include "xpm/info.xpm"
 #include "xpm/icon.xpm"
 
-
+  if(snes_window)
+  {
+    html2gui_html_end (&snes_html);
+    snes_window=0;
+    return;
+  }
+  snes_window=1;
+  
 //<html>
   html2gui_html (&snes_html, 640, 400, 0);
 
@@ -79,10 +88,8 @@ ucon64_snes (void)
 
   html2gui_br (&snes_html);
 
-
   html2gui_button (&snes_html, ucon64_nfo, "NFO", "Click here to see ROM info", 10, 10, info_xpm);
 
-  html2gui_html_end (&snes_html);
 //</html>
 }
 
@@ -115,9 +122,7 @@ main (int argc, char *argv[])
   html2gui_br (&index_html);
   html2gui_button (&index_html, ucon64_snes, "Super Nintendo", "Super Nintendo Options", 10, 10, snes_xpm);
 
-
-
-  html2gui_html_end (&index_html);
+//  html2gui_html_end (&index_html);
 //</html>
 
   html2gui_end();

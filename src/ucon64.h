@@ -243,7 +243,12 @@ extern struct ucon64__
   int backup;			//flag if backups files (*.bak) should be created
   int frontend;			//flag if uCON64 was started by a frontend
 
-  int skip_init_nfo;
+  int show_nfo;                 //show or skip info output for ROM
+                                //values:
+                                //0 show before processing of ROM (default)
+                                //1 skip before and after processing of ROM
+                                //2 show after processing of ROM
+                                //3 show before and after processing of ROM
 
 //  long console_forced;          //detection of console was forced
 //  int show_nfo;                 //!show_nfo == no ucon64_nfo ()

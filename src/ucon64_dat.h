@@ -59,7 +59,7 @@ typedef struct
   ucon64_dat_nfo()            view contents of ucon64_dat_t
 */
 extern st_ucon64_dat_t *ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat);
-extern unsigned int ucon64_dat_total_entries (int console);
+extern unsigned int ucon64_dat_total_entries (void);
 extern int ucon64_dat_view (int console, int verbose);
 extern int ucon64_dat_indexer (void);
 extern st_ucon64_dat_t *ucon64_dat_flush (st_ucon64_dat_t *dat);

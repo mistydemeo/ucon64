@@ -5766,7 +5766,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
 
 
 int
-nes_unif (st_rominfo_t *rominfo)
+nes_unif (void)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer;
@@ -6015,7 +6015,7 @@ nes_mapper_number (const char *board_name)
       { "EWROM", 5 },
       { "AOROM", 7 },
       { "PNROM", 9 },
-      { NULL }
+      { NULL, 0 }
     };
 
   n = 0;
@@ -6156,7 +6156,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
 
 
 int
-nes_ines (st_rominfo_t *rominfo)
+nes_ines (void)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer;
@@ -6175,7 +6175,7 @@ nes_ines (st_rominfo_t *rominfo)
 
   // Pasofami doesn't fit well in the source -> destination "paradigm"
   if (type == PASOFAMI)
-    return nes_j (rominfo, NULL);
+    return nes_j (NULL);
 
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".NES");
@@ -6229,10 +6229,10 @@ nes_ines (st_rominfo_t *rominfo)
 
 
 int
-nes_pasofami (st_rominfo_t *rominfo)
+nes_pasofami (void)
 {
   // nes_s() does iNES -> Pasofami. nes_s() checks for type
-  return nes_s (rominfo);
+  return nes_s ();
 }
 
 
@@ -6291,7 +6291,7 @@ nes_ineshd (st_rominfo_t *rominfo)
 
 
 int
-nes_dint (st_rominfo_t *rominfo)
+nes_dint (void)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
@@ -6396,7 +6396,7 @@ parse_prm (st_ines_header_t *header, const char *fname)
 
 
 int
-nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
+nes_j (unsigned char **mem_image)
 /*
   The Pasofami format consists of several files:
   - .PRM: header (uCON64 treats it as optional in order to support RAW images)
@@ -6611,7 +6611,7 @@ write_prm (st_ines_header_t *header, const char *fname)
 
 
 int
-nes_s (st_rominfo_t *rominfo)
+nes_s (void)
 {
   char dest_name[FILENAME_MAX];
   unsigned char *trainer_data = NULL, *prg_data = NULL, *chr_data = NULL;
@@ -6704,7 +6704,7 @@ nes_s (st_rominfo_t *rominfo)
 
 
 int
-nes_n (st_rominfo_t *rominfo, const char *name)
+nes_n (const char *name)
 {
   if (type != UNIF)
     {
@@ -6717,7 +6717,7 @@ nes_n (st_rominfo_t *rominfo, const char *name)
   else
     internal_name = NULL;
 
-  return nes_unif (rominfo);                    // will call nes_unif_unif()
+  return nes_unif ();                           // will call nes_unif_unif()
 }
 
 
@@ -7115,7 +7115,7 @@ nes_init (st_rominfo_t *rominfo)
         Note that nes_j() wouldn't be much different if q_fcrc32() would be
         used. This function wouldn't be much different either.
       */
-      x = nes_j (rominfo, &rom_buffer);
+      x = nes_j (&rom_buffer);
       rominfo->data_size = (ines_header.prg_size << 14) + (ines_header.chr_size << 13) +
                              ((ines_header.ctrl1 & INES_TRAINER) ? 512 : 0);
       if (x == 0)
@@ -7366,7 +7366,7 @@ nes_fdsl (st_rominfo_t *rominfo, char *output_str)
 
 
 int
-nes_fds (st_rominfo_t *rominfo)
+nes_fds (void)
 /*
   This function converts a Famicom Disk System disk image from FAM format to
   FDS format. It does almost the same as -strip apart from three checks

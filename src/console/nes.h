@@ -219,18 +219,18 @@ typedef struct
 #define FAM_HEADER_LEN  192
 
 
-extern int nes_fds (st_rominfo_t *rominfo);
+extern int nes_fds (void);
 extern int nes_fdsl (st_rominfo_t *rominfo, char *output_str);
-extern int nes_n (st_rominfo_t *rominfo, const char *name);
-extern int nes_s (st_rominfo_t *rominfo);
-extern int nes_pasofami (st_rominfo_t *rominfo);
+extern int nes_n (const char *name);
+extern int nes_s (void);
+extern int nes_pasofami (void);
 extern int nes_ineshd (st_rominfo_t *rominfo);
 extern int nes_ffe (st_rominfo_t *rominfo);
-extern int nes_ines (st_rominfo_t *rominfo);
+extern int nes_ines (void);
 extern int nes_init (st_rominfo_t *rominfo);
-extern int nes_unif (st_rominfo_t *rominfo);
-extern int nes_j (st_rominfo_t *rominfo, unsigned char **mem_image);
-extern int nes_dint (st_rominfo_t *rominfo);
+extern int nes_unif (void);
+extern int nes_j (unsigned char **mem_image);
+extern int nes_dint (void);
 extern nes_file_t nes_get_file_type (void);
 
 #endif // NES_H

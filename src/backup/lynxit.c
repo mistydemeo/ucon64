@@ -144,6 +144,8 @@ ptr_port_init (unsigned int port)
 
   if (!print_data)
     return FALSE;
+#else
+  port = ucon64.parport;                        // warning remover
 #endif
   print_stat = print_data + 1;
   print_ctrl = print_data + 2;
@@ -385,11 +387,13 @@ cart_read_page (unsigned int cart, unsigned int page_number,
 }
 
 
+#if 0
 void
 cart_write_page (unsigned int cart, unsigned int page_number,
                  unsigned int page_size, unsigned char *page_ptr)
 {
 }
+#endif
 
 
 int
@@ -727,14 +731,14 @@ cart_read (char *filename)
 }
 
 
+#if 0
 int
 cart_write (char *filename)
 {
-#if 0
   DEBUG (("write_cart() called with <%s>\n\n", filename));
-#endif
   return TRUE;
 }
+#endif
 
 
 int
@@ -990,7 +994,7 @@ lynxit_main (int argc, char **argv)
   else if (strcmp (argv[loop], "WRITE") == 0)
     {
       strcpy (buf, argv[++loop]);
-      cart_write (buf);
+//      cart_write (buf);                       // warning remover
     }
   else if (strcmp (argv[loop], "VERIFY") == 0)
     {

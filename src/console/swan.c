@@ -31,7 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "swan.h"
 
-static int swan_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
+static int swan_chksum (unsigned char *rom_buffer);
 
 const st_usage_t swan_usage[] =
   {
@@ -154,7 +154,7 @@ Byte6 - Additional capabilities(?)
 
   rominfo->has_internal_crc = 1;
   rominfo->internal_crc_len = rominfo->internal_crc2_len = 2;
-  rominfo->current_internal_crc = swan_chksum (rominfo, rom_buffer);
+  rominfo->current_internal_crc = swan_chksum (rom_buffer);
 
   rominfo->internal_crc = OFFSET (swan_header, 8);              // low byte of checksum
   rominfo->internal_crc += OFFSET (swan_header, 9) << 8;        // high byte of checksum
@@ -174,7 +174,7 @@ Byte6 - Additional capabilities(?)
 
 
 int
-swan_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer)
+swan_chksum (unsigned char *rom_buffer)
 {
   unsigned int csum = 0;
   int t;

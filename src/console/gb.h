@@ -26,7 +26,7 @@ extern int gameboy_chk (st_rominfo_t *rominfo);
 extern int gameboy_gbx (st_rominfo_t *rominfo);
 extern int gameboy_mgd (st_rominfo_t *rominfo);
 extern int gameboy_n (st_rominfo_t *rominfo, const char *name);
-extern int gameboy_n2gb (st_rominfo_t *rominfo, const char *emu_rom);
+extern int gameboy_n2gb (const char *emu_rom);
 extern int gameboy_sgb (st_rominfo_t *rominfo);
 extern int gameboy_ssc (st_rominfo_t *rominfo);
 extern int gameboy_init (st_rominfo_t *rominfo);

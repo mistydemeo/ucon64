@@ -305,7 +305,7 @@ int
 unknown_init (st_rominfo_t *rominfo)
 // init routine for all consoles missing in console/.
 {
-  ucon64.rominfo = NULL;
+  ucon64.rominfo = rominfo;
   ucon64.dat = NULL;
   ucon64.image = NULL;
 

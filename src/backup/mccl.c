@@ -63,6 +63,7 @@ Data Read Procedure:
 #endif
 #include <stdio.h>
 #include "misc.h"
+#include "quick_io.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "mccl.h"
@@ -79,9 +80,6 @@ const st_usage_t mccl_usage[] = {
 
 #ifdef PARALLEL
 
-static int mccl_argc;
-static char *mccl_argv[128];
-
 #if 0
 #define lptbase 0x378
 #endif
@@ -95,9 +93,11 @@ unsigned char buffer[0x1760];
 
 
 int
-mccl_main (int argc, char *argv[])
+mccl_read (const char *filename, unsigned int parport)
 {
+  char dest_name[FILENAME_MAX];
   int inbyte, count = 0;
+  lptbase = parport;
 
   fprintf (stderr, "Resetting device.\n");
   fflush (stderr);
@@ -147,23 +147,11 @@ mccl_main (int argc, char *argv[])
   while (1);
 #endif
 
-  printf ("\n");
-  for (count = 0; count < 40; count++)
-    printf ("%2x  ", buffer[count]);
-  printf ("\n");
-
+  strcpy (dest_name, filename);
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fwrite (buffer, 0, count, dest_name, "wb");
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
-}
-
-
-int
-mccl_read (const char *filename, unsigned int parport)
-{
-  mccl_argv[0] = "ucon64";
-  mccl_argc = 1;
-
-  lptbase = parport;
-  return mccl_main (mccl_argc, mccl_argv);
 }
 
 #endif // PARALLEL

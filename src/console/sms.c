@@ -166,7 +166,7 @@ sms_smd (st_rominfo_t *rominfo)
 
 
 int
-sms_smds (st_rominfo_t *rominfo)
+sms_smds (void)
 {
   st_smd_header_t header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];

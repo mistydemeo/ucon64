@@ -843,10 +843,10 @@ test_dram (void)
   return (pages);
 }
 
+#if 0
 static void
 usage (char *progname)
 {
-#if 0
   fprintf (stderr, "Usage: %s [-w] [-v] [-t] [-a] <File>\n", progname);
   fprintf (stderr, "-w : DRAM write protect disabled.\n");
   fprintf (stderr, "-v : verify File data vs DRAM data.\n");
@@ -854,9 +854,9 @@ usage (char *progname)
   fprintf (stderr, "-a : enable cartridge and unprotect.\n");
   /*end_port(); */
   exit (2);
-#endif
   return;
 }
+#endif
 
 /*************************************************
 *                  MAIN ENTRY                    *
@@ -865,7 +865,7 @@ int
 doctor64jr_main (int argc, char *argv[])
 {
   char card_present;
-  char *progname = argv[0];
+//  char *progname = argv[0];
   unsigned short int dram_size;
 #if 0
   printf ("---------- DrJr pc-download EPP version 1.0 ----------\n");
@@ -883,14 +883,14 @@ doctor64jr_main (int argc, char *argv[])
   ioperm (0x378, 6, 1);
 #endif
   if (argc == 1)
-    usage (progname);
+    return -1; //usage (progname);
   for (i = 1; i < argc; i++)
     {
       if (argv[i][0] == '-')
         {
           char *c = argv[i] + 1;
           if (*(c + 1) != '\0')
-            usage (progname);
+            return -1; //usage (progname);
           switch (*c)
             {
             case 'w':
@@ -915,7 +915,7 @@ doctor64jr_main (int argc, char *argv[])
               write_en = 3;
               break;
             default:
-              usage (progname);
+              return -1; //usage (progname);
             }
         }
       else
@@ -926,7 +926,7 @@ doctor64jr_main (int argc, char *argv[])
             }
           else
             {
-              usage (progname);
+              return -1; //usage (progname);
             }
         }
     }
@@ -1031,8 +1031,7 @@ doctor64jr_read (const char *filename, unsigned int parport)
 
 
 int
-doctor64jr_write (const char *filename, long start, long len,
-                  unsigned int parport)
+doctor64jr_write (const char *filename, unsigned int parport)
 {
   char buf[MAXBUFSIZE];
   init_time = time (0);

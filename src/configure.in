@@ -3,7 +3,7 @@ AC_INIT(uCON64, 1.9.8beta8, noisyb@gmx.net)
 AC_CONFIG_HEADER(config.h)
 
 
-CFLAGS="-I. -Wall -O3"
+CFLAGS="-I. -Wall -W -O3"
 LDFLAGS=-s
 
 dnl Checks for programs.

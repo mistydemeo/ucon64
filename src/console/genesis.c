@@ -41,7 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 static void interleave_buffer (unsigned char *buffer, int size);
 static void deinterleave_chunk (unsigned char *dest, unsigned char *src);
-static int genesis_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
+static int genesis_chksum (unsigned char *rom_buffer);
 static unsigned char *load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer);
 static int save_smd (const char *name, unsigned char *buffer, st_smd_header_t *header, long size);
 static int save_bin (const char *name, unsigned char *buffer, long size);
@@ -157,7 +157,7 @@ genesis_smd (st_rominfo_t *rominfo)
 
 
 int
-genesis_smds (st_rominfo_t *rominfo)
+genesis_smds (void)
 {
   char dest_name[FILENAME_MAX];
   unsigned char buf[32768];
@@ -1006,7 +1006,7 @@ genesis_init (st_rominfo_t *rominfo)
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 2;
 
-      rominfo->current_internal_crc = genesis_chksum (rominfo, rom_buffer);
+      rominfo->current_internal_crc = genesis_chksum (rom_buffer);
       rominfo->internal_crc = OFFSET (genesis_header, 143);          // low byte of checksum
       rominfo->internal_crc += (OFFSET (genesis_header, 142)) << 8;  // high byte of checksum
 
@@ -1021,7 +1021,7 @@ genesis_init (st_rominfo_t *rominfo)
 
 
 int
-genesis_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer)
+genesis_chksum (unsigned char *rom_buffer)
 {
   int i, len = genesis_rom_size - 2;
   unsigned short checksum = 0;

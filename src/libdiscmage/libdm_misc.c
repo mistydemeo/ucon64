@@ -339,7 +339,7 @@ dm_reopen (const char *fname, dm_image_t *image_p)
       char *desc;
     } st_probe_t;
 
-  static st_probe_t probe[] = 
+  static st_probe_t probe[] =
     {
       {DM_CDI, cdi_init, "CDI (DiscJuggler) Image"},
       {DM_SHEET, sheet_init, "Image with external sheet file (like: CUE, TOC, ...)"},
@@ -354,7 +354,9 @@ dm_reopen (const char *fname, dm_image_t *image_p)
   static dm_track_t track; //TODO: malloc
   int x = 0, identified = 0;
   FILE *fh;
-  
+
+  x = image_p != NULL ? 1 : 0;                  // warning remover
+
   memset (&track, 0, sizeof (dm_track_t));
 
   memset (&image, 0, sizeof (dm_image_t));
@@ -392,6 +394,9 @@ dm_reopen (const char *fname, dm_image_t *image_p)
 int
 dm_fseek (FILE *fp, int track, int how)
 {
+ fp = (FILE *) NULL;                            // warning remover
+ track = 0;                                     // warning remover
+ how = 0;                                       // warning remover
  return 0;
 }
 
@@ -408,6 +413,7 @@ dm_close (dm_image_t *image)
 {
 //  fclose (image->fh);
 //  free (image);
+  image = NULL;                                 // warning remover
   return 0;
 }
 
@@ -415,6 +421,7 @@ dm_close (dm_image_t *image)
 int
 dm_rip (const dm_image_t *image)
 {
+  image = NULL;                                 // warning remover
   return 0;
 }
 
@@ -426,12 +433,12 @@ dm_bin2iso (const dm_image_t *image)
   uint32_t i, size, netto_size = 0;
   char buf[MAXBUFSIZE];
   FILE *dest, *src;
-  
+
   if (!image)
     return -1;
 
   track = image->track;
-    
+
   if (track->mode == 1 && track->sector_size == 2048)
     {
       fprintf (stderr, dm_msg[ALREADY_2048]);
@@ -502,7 +509,7 @@ dm_isofix (const dm_image_t * image, int start_lba)
 
   track = image->track;
   mac = (track->sector_size == 2056 ? TRUE : FALSE);
-    
+
   if (!(src = fopen (image->fname, "rb")))
     return -1;
 
@@ -516,7 +523,7 @@ dm_isofix (const dm_image_t * image, int start_lba)
 
   // Saving boot area to file 'bootfile.bin'...
   if (!(boot = fopen (BOOTFILE_S, "wb")))
-    { 
+    {
       fclose (src);
 
       fclose (dest);
@@ -580,7 +587,7 @@ dm_isofix (const dm_image_t * image, int start_lba)
       printf ("Found %s at sector %d\n",
         !memcmp (pvd_magic, buf, 8) ? "PVD" :
         !memcmp (svd_magic, buf, 8) ? "SVD" :
-        !memcmp (vdt_magic, buf, 8) ? "VDT" : "unknown Volume Descriptor", 
+        !memcmp (vdt_magic, buf, 8) ? "VDT" : "unknown Volume Descriptor",
         last_pos / track->sector_size);
 
       if (mac)
@@ -657,7 +664,8 @@ dm_disc_read (const dm_image_t *image)
 {
 #if 1
   fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_read()");
-#else 
+  if (!image) return -1;                        // warning remover
+#else
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
 
   get_property (ucon64.configfile, "cdrw_raw_read", buf2,
@@ -686,10 +694,11 @@ dm_disc_write (const dm_image_t *image)
 {
 #if 1
   fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_write()");
+  if (!image) return -1;                        // warning remover
 #else
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
 
-  get_property (ucon64.configfile, "cdrw_raw_write", buf2, 
+  get_property (ucon64.configfile, "cdrw_raw_write", buf2,
     get_property (ucon64.configfile, "cdrw_write", buf2, "cdrdao write --eject --device 0,0,0 --driver generic-mmc"));
 
   strcpy (buf3, ucon64.rom);

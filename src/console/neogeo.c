@@ -94,21 +94,21 @@ neogeo_sam (const char *fname)
 
 
 int
-neogeo_mgd (st_rominfo_t *rominfo)
+neogeo_mgd (void)
 {
   return 0;
 }
 
 
 int
-neogeo_mvs (st_rominfo_t *rominfo)
+neogeo_mvs (void)
 {
   return 0;
 }
 
 
 int
-neogeo_s (st_rominfo_t *rominfo)
+neogeo_s (void)
 {
   return 0;
 }

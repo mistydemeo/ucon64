@@ -316,6 +316,8 @@ psx_obtain_io_permission (int base)
       return 0;
     }
 #endif
+#else
+  base = ucon64.parport;                        // warning remover
 #endif
   already = 1;
   return 1;

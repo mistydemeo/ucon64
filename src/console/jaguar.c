@@ -70,7 +70,7 @@ jaguar_init (st_rominfo_t *rominfo)
   else
     {
       rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-        ucon64.buheader_len : UNKNOWN_HEADER_LEN;
+        ucon64.buheader_len : (int) UNKNOWN_HEADER_LEN;
 
       q_fread (&jaguar_header, JAGUAR_HEADER_START +
           rominfo->buheader_len, JAGUAR_HEADER_LEN, ucon64.rom);

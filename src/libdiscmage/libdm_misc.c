@@ -323,7 +323,7 @@ dm_open (const char *image_filename)
 // recurses through all <image_type>_init functions to find correct image type
 {
   dm_image_t *image = NULL;
-  dm_track_t *track = NULL;
+//  dm_track_t *track = NULL;
   int x = 0, identified = 0;
   char buf[MAXBUFSIZE];
   FILE *fh;

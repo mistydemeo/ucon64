@@ -3,6 +3,7 @@ fig.c - Super PRO Fighter support for uCON64
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2003 dbjh
+                  2003 JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -60,9 +61,6 @@ static int get_rom_size (unsigned char *info_block);
 static int check1 (unsigned char *info_block, int index);
 static int check2 (unsigned char *info_block, int index, unsigned char value);
 static int check3 (unsigned char *info_block, int index1, int index2, int size);
-#if 0 // not for FIG?
-static unsigned char get_emu_mode_select (unsigned char byte, int size);
-#endif
 
 static int hirom;
 
@@ -75,8 +73,6 @@ int
 receive_rom_info (unsigned char *buffer)
 /*
   - returns size of ROM in Mb (128 KB) units
-  - returns ROM header in buffer (index 2 (emulation mode select) is not yet
-    filled in)
   - sets global `hirom'
 */
 {
@@ -118,12 +114,6 @@ receive_rom_info (unsigned char *buffer)
   size = get_rom_size (buffer);
   if (hirom)
     size <<= 1;
-
-  memset (buffer, 0, FIG_HEADER_LEN);
-  buffer[0] = size << 4 & 0xff;                 // *16 for 8 KB units; low byte
-  buffer[1] = size >> 4;                        // *16 for 8 KB units /256 for high byte
-  buffer[3] = hirom ? 0x80 : 0;
-  // TODO: set SRAM/special chip bytes
 
   return size;
 }
@@ -221,45 +211,6 @@ check3 (unsigned char *info_block, int index1, int index2, int size)
 }
 
 
-#if 0 // not for FIG?
-unsigned char
-get_emu_mode_select (unsigned char byte, int size)
-{
-  int x;
-  unsigned char ems;
-
-  if (byte == 0)
-    x = 0xc;
-  else if (byte == 1)
-    x = 8;
-  else if (byte == 3)
-    x = 4;
-  else
-    x = 0;
-
-  if (hirom)
-    {
-      if (x == 0xc && size <= 0x1c)
-        ems = 0x1c;
-      else
-        ems = x + 0x30;
-    }
-  else
-    {
-      if (x == 0xc)
-        ems = 0x2c;
-      else
-        ems = x;
-
-      if (size <= 8)
-        ems++;
-    }
-
-  return ems;
-}
-#endif
-
-
 int
 fig_read_rom (const char *filename, unsigned int parport)
 {
@@ -268,6 +219,7 @@ fig_read_rom (const char *filename, unsigned int parport)
   int n, size, blocksleft, bytesreceived = 0;
   unsigned short address1, address2;
   time_t starttime;
+  st_rominfo_t rominfo;
 
   ffe_init_io (parport);
 
@@ -302,11 +254,9 @@ fig_read_rom (const char *filename, unsigned int parport)
   if ((0x81 ^ byte) != ffe_receiveb ())
     printf ("received data is corrupt\n");
 
-#if 0 // not for FIG?
-  buffer[2] = get_emu_mode_select (byte, blocksleft / 16);
-#endif
-  fwrite (buffer, 1, FIG_HEADER_LEN, file);     // write header (other necessary fields are
-                                                //  filled in by receive_rom_info())
+  memset (buffer, 0, FIG_HEADER_LEN);
+  fwrite (buffer, 1, FIG_HEADER_LEN, file);     // write temporary empty header
+
   if (hirom)
     blocksleft >>= 1;                           // this must come _after_ get_emu_mode_select()!
 
@@ -346,6 +296,25 @@ fig_read_rom (const char *filename, unsigned int parport)
         }
     }
   ffe_send_command (5, 0, 0);
+
+  // Create a correct header. We can't obtain the header from the Pro Fighter
+  //  unless a (the same) cartridge was just dumped to floppy...
+  ucon64.rom = filename;
+  ucon64.file_size = size + FIG_HEADER_LEN;
+  // override everything we know for sure
+  ucon64.console = UCON64_SNES;
+  ucon64.buheader_len = FIG_HEADER_LEN;
+  ucon64.split = 0;
+  ucon64.snes_hirom = hirom ? SNES_HIROM : 0;
+  ucon64.interleaved = 0;
+  memset (&rominfo, 0, sizeof (st_rominfo_t));
+
+  fflush (file);
+  snes_init (&rominfo);
+  memset (buffer, 0, FIG_HEADER_LEN);
+  snes_set_fig_header (&rominfo, (st_fig_header_t *) buffer);
+  fseek (file, 0, SEEK_SET);
+  fwrite (buffer, 1, FIG_HEADER_LEN, file);     // write correct header
 
   free (buffer);
   fclose (file);

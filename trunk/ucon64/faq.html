@@ -115,6 +115,9 @@ Q38: <a href="#38">When will the next version of uCON64 be released? I
 <br>
 Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
 <br>
+Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
+   (file) instead of that it depends on whether the file exists?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -693,20 +696,16 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
 <p>
 <a name="36"><b>Q36</b>: Some SNES games don't work on my Super Pro Fighter Q(+).
    What can I do about that?</a><br>
-<b>A</b>: First read the answer to <a href="#11">question 11</a>. The Super Pro
-   Fighter Q(+) is a bit of a strange copier. You can send games (smaller than
-   32 Mbit) via the parallel port by using the option -xswc. Yes, you read
-   that right, the same option that is used to transfer games to a Super Wild
-   Card. However, some games work better when you load them from diskette. For
-   example Earthbound (after being cracked) doesn't work when loaded via the
-   parallel port, but it does when loaded from diskette.<br>
-   More importantly, several games need to be in Super Wild Card format in
-   order for them to work correctly what SRAM concerns. So, instead of
-   converting them with -fig you have to use the option -swc. For example
-   Earthbound and "Lufia & The Fortress of Doom" have all sorts of problems
-   when they are in FIG format, but not when they are in SWC format. Other
-   games work best when you convert them with -fig. For example Seiken
-   Densetsu 3 will run best (but not good) when converted with -fig.<br>
+<b>A</b>: First read the answer to <a href="#11">question 11</a>.
+   Starting with versions after 1.9.8beta8 you can send (and dump) games with
+   the option -xfig. It could be that some games need to be in Super Wild Card
+   format in order for them to work correctly what SRAM concerns if you load
+   them from diskette. So, instead of converting them with -fig you have to use
+   the option -swc. For example Earthbound and "Lufia & The Fortress of Doom"
+   have all sorts of problems when they are in FIG format, but not when they
+   are in SWC format. Other games work best when you convert them with -fig.
+   For example Seiken Densetsu 3 will run best (but not good) when converted
+   with -fig.<br>
 <br>
 <p>
 <a name="37"><b>Q37</b>: uCON64 displays too many lines for my DOS-box. What
@@ -815,7 +814,41 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    Using the above search pattern, uCON64 will search and replace two bytes six
    bytes "back" from the end of any matched byte sequence.
    For example, any occurence of the byte sequence 01 22 01 19 42 84 19 75 will
-   be changed into 01 02 03 19 42 84 19 75.
+   be changed into 01 02 03 19 42 84 19 75.<br>
+<br>
+<p>
+<a name="40"><b>Q40</b>: Is it possible to force uCON64 to send or dump (an)
+   SRAM (file) instead of that it depends on whether the file exists?</a><br>
+<b>A</b>: No, but you could use a simple script or batch file to force sending
+   or dumping. Here is an example batch file to force dumping SRAM with a Pro
+   Fighter:<br>
+   &nbsp;&nbsp;if exist "%1" goto error<br>
+   &nbsp;&nbsp;ucon64 -xfigs "%1"<br>
+   &nbsp;&nbsp;goto exit<br>
+   &nbsp;&nbsp;:error<br>
+   &nbsp;&nbsp;echo %1 already exists, use a different name<br>
+   &nbsp;&nbsp;:exit<br>
+   Save that text to a file that ends with ".bat" (without the quotes). Say you
+   save it to a file named dumpsram.bat. Then you can dump the SRAM of the Pro
+   Fighter with a command line like:<br>
+   &nbsp;&nbsp;dumpsram save1.sav<br>
+   You don't have to check if save1.sav exists anymore as the batch file will
+   do it for you.<br>
+   Here is the Bash script equivalent of the above batch file:<br>
+   &nbsp;&nbsp;#! /bin/bash<br>
+   &nbsp;&nbsp;if [ -e "$1" ]; then<br>
+   &nbsp;&nbsp;echo $1 already exists, use a different name<br>
+   &nbsp;&nbsp;exit<br>
+   &nbsp;&nbsp;fi<br>
+   &nbsp;&nbsp;ucon64 -xfigs "$1"<br>
+   You don't have to give the file a specific name. Just don't forget to make
+   the file executable. Say you name it dumpsram, then you could make it
+   executable with:<br>
+   &nbsp;&nbsp;chmod +x dumpsram<br>
+   Now you can dump the SRAM with:<br>
+   &nbsp;&nbsp;./dumpsram save1.sav<br>
+<br>
+<br>
 <br>
 <br>
 <br>

@@ -843,7 +843,8 @@ Optional Features:
   --enable-db             enable internal database (default: yes)
   --enable-backup         enable support for parallel port backup units
                           (default: yes)
-  --enable-libdiscmage    enable support for DISC backups (default: yes)
+  --enable-libdiscmage    enable support for DISC-based consoles (default:
+                          yes)
   --enable-ansi-color     enable usage of color (default: yes)
 
 Optional Packages:
@@ -2163,8 +2164,8 @@ echo "$as_me:$LINENO: result: $enable_backup" >&5
 echo "${ECHO_T}$enable_backup" >&6
 
 
-echo "$as_me:$LINENO: checking whether support for DISC backups is enabled" >&5
-echo $ECHO_N "checking whether support for DISC backups is enabled... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking whether support for DISC-based consoles is enabled" >&5
+echo $ECHO_N "checking whether support for DISC-based consoles is enabled... $ECHO_C" >&6
 # Check whether --enable-libdiscmage or --disable-libdiscmage was given.
 if test "${enable_libdiscmage+set}" = set; then
   enableval="$enable_libdiscmage"

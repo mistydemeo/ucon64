@@ -42,15 +42,6 @@ const char *dc_usage[] =
 #warning TODO  --ip  extract IP.BIN; --rom=RAW_IMAGE
 #endif // TODO
     "  " OPTION_LONG_S "dc          force recognition; NEEDED\n"
-#ifdef LIBDISCMAGE
-      "                  " OPTION_LONG_S "xcdrw works currently only for MODE1/2048 backups which\n"
-      "                  need the Utopia BootCD\n"
-#endif // LIBDISCMAGE
-#if 0
-    "TEST: " OPTION_LONG_S "cdirip  rip/split track(s) from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
-    "TODO: " OPTION_LONG_S "nero    convert DiscJuggler/CDI IMAGE for use with Nero;\n"
-    "                  " OPTION_LONG_S "rom=CDI_IMAGE\n"
-#endif
       ,
       NULL
 };

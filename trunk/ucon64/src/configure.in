@@ -50,10 +50,10 @@ fi
 AC_MSG_RESULT($enable_backup)
 AC_SUBST(DEFINE_BACKUP)
 
-AC_MSG_CHECKING(whether support for DISC backups is enabled)
+AC_MSG_CHECKING(whether support for DISC-based consoles is enabled)
 AC_ARG_ENABLE(libdiscmage,
               AC_HELP_STRING([--enable-libdiscmage],
-                             [enable support for DISC backups (default: yes)]),
+                             [enable support for DISC-based consoles (default: yes)]),
               enable_libdiscmage=$enableval,
               enable_libdiscmage=yes)
 if test $enable_libdiscmage = yes; then

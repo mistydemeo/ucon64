@@ -1630,8 +1630,8 @@ int fal_usage(int argc, char *argv[])
 #endif
          "  -xfals        send/receive SRAM to/from Flash Advance Linker; $FILE=PORT\n"
          "                receives automatically when $ROM(=SRAM) does not exist\n"
-         "  -xfalb<n>     send/receive SRAM to/from Flash Advance Linker bank n; $FILE=PORT\n"
-         "                receives automatically when $ROM(=SRAM) does not exist\n");
+         "  -xfalb<n>     send/receive SRAM to/from Flash Advance Linker bank n\n"
+         "                $FILE=PORT; receives automatically when SRAM does not exist\n");
 
   if (verbose)
     printf("\n"

@@ -45,7 +45,8 @@ const st_usage_t fig_usage[] =
                    "receives automatically when ROM does not exist"},
     {"xfigs", NULL, "send/receive SRAM to/from *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT\n"
                     "receives automatically when SRAM does not exist"},
-    {"xfigc", NULL, "send/receive SRAM to/from cart in *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT\n"
+    {"xfigc", NULL, "send/receive SRAM to/from cartridge in *Pro Fighter*/(all)FIG;\n"
+                    OPTION_LONG_S "port=PORT\n"
                     "receives automatically when SRAM does not exist"},
 //                    "Press q to abort; ^C might cause invalid state of backup unit"},
 #endif

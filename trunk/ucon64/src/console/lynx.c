@@ -149,8 +149,8 @@ lynx_rot (st_rominfo_t *rominfo, int rotation)
   header.rotation = rotation;                   // header.rotation is an 8-bit field
 
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -197,8 +197,8 @@ lynx_n (st_rominfo_t *rominfo, const char *name)
   strncpy (header.cartname, name, sizeof (header.cartname));
 
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -232,8 +232,8 @@ lynx_b (st_rominfo_t *rominfo, int bank, const char *value)
 #endif
 
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);

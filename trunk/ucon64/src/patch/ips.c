@@ -93,8 +93,8 @@ ips_apply (const char *mod, const char *ipsname)
   unsigned int offset, length, i;
 
   strcpy (modname, mod);
-  if (!ucon64_file_handler (modname, NULL, 0))
-    q_fcpy (mod, 0, q_fsize (mod), modname, "wb");
+  ucon64_file_handler (modname, NULL, 0);
+  q_fcpy (mod, 0, q_fsize (mod), modname, "wb");
 
   if ((modfile = fopen (modname, "rb+")) == NULL)
     {

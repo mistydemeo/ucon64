@@ -264,8 +264,8 @@ gameboy_n (st_rominfo_t *rominfo, const char *name)
   memset (buf, 0, 16);
   strncpy (buf, name, 16);
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   q_fwrite (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x034, 16,
             dest_name, "r+b");
 
@@ -280,8 +280,8 @@ gameboy_chk (st_rominfo_t *rominfo)
   char buf[4], dest_name[FILENAME_MAX];
 
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
   q_fputc (dest_name,
               GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d,

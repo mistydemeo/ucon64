@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.30 2003-03-04 00:51:35 dbjh Exp $
+ * $Id: gg.c,v 1.31 2003-03-04 15:14:58 dbjh Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -1090,8 +1090,8 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
     }
 
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
   printf ("\n");
   buf[0] = q_fgetc (dest_name, address + rominfo->buheader_len);

@@ -661,12 +661,12 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_PATCH, UCON64_UNKNOWN, ucon64_patching_usage,         WF_DEFAULT},
   {UCON64_POKE, UCON64_UNKNOWN, ucon64_patching_usage,          0},
   {UCON64_PPF, UCON64_UNKNOWN, ppf_usage,           WF_STOP},
-  {UCON64_RENAME, UCON64_UNKNOWN, NULL,        WF_INIT|WF_PROBE|WF_NO_SPLIT},
+  {UCON64_RENAME, UCON64_UNKNOWN, ucon64_dat_usage,        WF_INIT|WF_PROBE|WF_NO_SPLIT},
   {UCON64_RROM, UCON64_UNKNOWN, ucon64_dat_usage,          WF_INIT|WF_PROBE|WF_NO_SPLIT},
-  {UCON64_RR83, UCON64_UNKNOWN, ucon64_dat_usage,          WF_INIT|WF_PROBE|WF_NO_SPLIT},
+  {UCON64_RR83, UCON64_UNKNOWN, NULL,          WF_INIT|WF_PROBE|WF_NO_SPLIT},
   {UCON64_RL, UCON64_UNKNOWN, NULL,            0},
   {UCON64_S, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
-  {UCON64_SCAN, UCON64_UNKNOWN, NULL,        WF_INIT|WF_PROBE|WF_NO_SPLIT},
+  {UCON64_SCAN, UCON64_UNKNOWN, ucon64_dat_usage,        WF_INIT|WF_PROBE|WF_NO_SPLIT},
 #if 1
   {UCON64_SMD, UCON64_UNKNOWN, NULL,           WF_DEFAULT},
   {UCON64_SMDS, UCON64_UNKNOWN, NULL,          WF_INIT},
@@ -715,10 +715,11 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   other switches
 */
+  {UCON64_83, UCON64_UNKNOWN, ucon64_dat_usage,          WF_SWITCH},
   {UCON64_BS, UCON64_SNES, snes_usage,            WF_SWITCH},
   {UCON64_FILE, UCON64_UNKNOWN, NULL,          WF_SWITCH},
   {UCON64_FRONTEND, UCON64_UNKNOWN, NULL,      WF_SWITCH},
-  {UCON64_GOOD, UCON64_UNKNOWN, ucon64_dat_usage,          WF_SWITCH},
+//  {UCON64_GOOD, UCON64_UNKNOWN, ucon64_dat_usage,          WF_SWITCH},
   {UCON64_HD, UCON64_UNKNOWN, ucon64_options_usage,            WF_SWITCH},
   {UCON64_HDN, UCON64_UNKNOWN, ucon64_options_usage,           WF_SWITCH},
   {UCON64_HI, UCON64_SNES, snes_usage,            WF_SWITCH},

@@ -134,6 +134,7 @@ switch (c)
             DISCMAGE_STATUS_MSG
             "discmage enabled:                  %s\n"
             "configuration directory:           %s\n"
+            "directory containing DAT files:    %s\n"
             "entries in DATabase:               %d\n"
             "DATabase enabled:                  %s\n",
             UCON64_VERSION_S,
@@ -148,6 +149,7 @@ switch (c)
             ptr,
             ucon64.discmage_enabled ? "yes" : "no",
             ucon64.configdir,
+            ucon64.datdir,
             ucon64_dat_total_entries (UCON64_UNKNOWN),
             ucon64.dat_enabled ? "yes" : "no"
     );
@@ -380,17 +382,9 @@ switch (c)
       }
     break;
 
-  case UCON64_LS:
-//  case UCON64_LSV:                            // crc calculation is NEEDED for this
-  case UCON64_RROM:
+  case UCON64_83:
   case UCON64_RR83:
-//  case UCON64_LSD:
-    ucon64.do_not_calc_crc = 1;
-    break;
-
-  case UCON64_GOOD:
-    ucon64.good_enabled = 1;
-//    ucon64.do_not_calc_crc = 0;
+    ucon64.force_83 = 1;
     break;
 
   case UCON64_Q:
@@ -415,53 +409,51 @@ switch (c)
 
 
 static int
-ucon64_dat_rename (int mode)
+ucon64_rename (int mode)
 {
   char buf[FILENAME_MAX], *p;
   char buf2[FILENAME_MAX];
 
   buf[0] = 0;
-  if (ucon64.good_enabled || UCON64_RENAME)
-    {
-      if (ucon64.dat)
-        if (ucon64.dat->fname)
-          {
-            p = (char *) get_suffix (ucon64.dat->fname);
 
-            if (stricmp (p, ".nes") &&                    // NES
-                stricmp (p, ".fds") &&                    // NES FDS
-                stricmp (p, ".gb") &&                     // Game Boy
-                stricmp (p, ".gbc") &&                    // Game Boy Color
-                stricmp (p, ".gba") &&                    // Game Boy Advance
-                stricmp (p, ".smc") &&                    // SNES
-//                    stricmp (p, ".smd") &&                    // Genesis
-                stricmp (p, ".v64"))                      // Nintendo 64
-              strcpy (buf, ucon64.dat->fname);
-            else
-              {
-                strcpy (buf, ucon64.dat->fname);
-                if (mode == UCON64_RR83)
-                  buf[8] = 0;
-                else
-                  buf[strlen (ucon64.dat->fname) - strlen (p)] = 0;
-              }
-          }
-    }
-  else
-    if (mode != UCON64_RENAME)
-      if (ucon64.rominfo)
-        if (ucon64.rominfo->name)
-          strcpy (buf, ucon64.rominfo->name);
+  if (mode != UCON64_RENAME)
+    if (ucon64.rominfo)
+      if (ucon64.rominfo->name)
+        strcpy (buf, strtrim (ucon64.rominfo->name));
 
-  strcpy (buf2, strtrim (buf));
+  if (!buf[0] || mode == UCON64_RENAME) // GoodXXXX mode
+    if (ucon64.dat)
+      if (ucon64.dat->fname)
+        {
+          p = (char *) get_suffix (ucon64.dat->fname);
 
-  if (!buf2[0]) return 0;
+          if (stricmp (p, ".nes") &&                    // NES
+              stricmp (p, ".fds") &&                    // NES FDS
+              stricmp (p, ".gb") &&                     // Game Boy
+              stricmp (p, ".gbc") &&                    // Game Boy Color
+              stricmp (p, ".gba") &&                    // Game Boy Advance
+              stricmp (p, ".smc") &&                    // SNES
+//              stricmp (p, ".smd") &&                    // Genesis
+              stricmp (p, ".v64"))                      // Nintendo 64
+            strcpy (buf, ucon64.dat->fname);
+          else
+            {
+              strcpy (buf2, ucon64.dat->fname);
+              buf2[strlen (ucon64.dat->fname) - strlen (p)] = 0;
+              strcpy (buf, strtrim (buf2));
+            }
+        }
+
+  if (!buf[0]) return 0;
   
-  strcpy (buf, to_func (buf2, strlen (buf2), tofname)); // replace chars the fs might not like
-  if (mode == UCON64_RR83)
-    buf[8] = 0;
-  strcat (buf, get_suffix (ucon64.rom));
-  if (mode == UCON64_RR83)
+  strcpy (buf2, to_func (buf, strlen (buf), tofname)); // replace chars the fs might not like
+
+  if (ucon64.force_83)
+    buf2[8] = 0;
+
+  sprintf (buf, "%s%s", strtrim (buf2), get_suffix (ucon64.rom));
+
+  if (ucon64.force_83)
     buf[12] = 0;
 
   if (!strcmp (basename2 (ucon64.rom), basename2 (buf)))
@@ -772,6 +764,7 @@ switch (c)
     ppf_set_fid (ucon64.rom, optarg);
     break;
 
+  case UCON64_SCAN:
   case UCON64_LSD:
     if (ucon64.dat_enabled)
       {
@@ -795,25 +788,22 @@ switch (c)
     break;
 
   case UCON64_LS:
-      if (ucon64.rominfo)
-        p = ucon64.rominfo->name;
+    if (ucon64.rominfo)
+      p = ucon64.rominfo->name;
 
-  case UCON64_SCAN:
-      if (ucon64.dat)
-        {
-          if (!p)
-             p = ucon64.dat->name;
-          else if (!p[0])
-             p = ucon64.dat->name;
-        }
+    if (ucon64.dat)
+      {
+        if (!p)
+           p = ucon64.dat->name;
+        else if (!p[0])
+           p = ucon64.dat->name;
+      }
 
-      if (p)
-        if (p[0])
+    if (p)
+      if (p[0])
         {
           if (stat (ucon64.rom, &fstate) != 0) break;
-
           strftime (buf, 13, "%b %d %Y", localtime (&fstate.st_mtime));
-
           printf ("%-31.31s ", to_func (p, strlen (p), toprint2));
 
           printf ("%10d %s %s", ucon64.file_size, buf, basename2 (ucon64.rom));
@@ -825,15 +815,13 @@ switch (c)
     break;
 
   case UCON64_RENAME:
-    ucon64_dat_rename (UCON64_RENAME);
-    break;
-
-  case UCON64_RROM:
-    ucon64_dat_rename (UCON64_RROM);
+    ucon64_rename (UCON64_RENAME);
     break;
 
   case UCON64_RR83:
-    ucon64_dat_rename (UCON64_RR83);
+    ucon64.force_83 = 1;
+  case UCON64_RROM:
+    ucon64_rename (UCON64_RROM);
     break;
 
 #if 0

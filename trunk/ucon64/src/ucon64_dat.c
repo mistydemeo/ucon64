@@ -63,14 +63,21 @@ const st_usage_t ucon64_dat_usage[] = {
   {"db", NULL, "DATabase statistics"},
   {"dbv", NULL, "like " OPTION_LONG_S "db but more verbose"},
   {"dbs", "CRC32", "search ROM with CRC32 in DATabase"},
-  {"lsd", NULL, "generate ROM list for all ROM(s) using DATabase"},
+  {"scan", NULL, "generate ROM list for all ROM(s) using DATabase\n"
+                    "same as: GoodXXXX scan ..."},
+  {"lsd", NULL, "same as " OPTION_LONG_S "scan"},
   {"rrom", NULL, "rename ROM(s) to their internal names"},
-  {"rr83", NULL, "like " OPTION_LONG_S "rrom but with 8.3 filenames"},
-  {"good", NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed using\n"
-              "the DATabase"},
-  {"scan", NULL, "same as: GoodXXXX scan ..."},
-  {"rename", NULL, "same as: GoodXXXX rename inplace ...\n"
+  {"rename", NULL, "rename ROM(S) to their DATabase names\n"
+                    "same as: GoodXXXX rename inplace ..."},
+  {"83", NULL, "force to rename to 8.3 filenames\n"
+//  {"force63", NULL, "force to rename all filenames into Joliet CD format\n"
+//              "same as: GoodXXXX rename inplace force63 ...\n"
               "TIP: using " OPTION_LONG_S "nes would process only NES ROM(S)"},
+
+
+//  {"good", NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed using\n"
+//              "the DATabase"},
+
 /*
 GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
 *visit NEWNet #rareroms*

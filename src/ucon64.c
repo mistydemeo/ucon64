@@ -177,9 +177,9 @@ const struct option long_options[] = {
     {"mki", 0, 0, UCON64_MKI},
     {"mkppf", 0, 0, UCON64_MKPPF},
     {"mktoc", 0, 0, UCON64_MKTOC},
-    {"multi", 1, 0, UCON64_MULTI},
-    {"multi1", 1, 0, UCON64_MULTI1},
-    {"multi2", 1, 0, UCON64_MULTI2},
+    {"multi", 0, 0, UCON64_MULTI},
+    {"multi1", 0, 0, UCON64_MULTI1},
+    {"multi2", 0, 0, UCON64_MULTI2},
     {"mvs", 0, 0, UCON64_MVS},
     {"n", 0, 0, UCON64_N},
     {"n2", 0, 0, UCON64_N2},
@@ -264,6 +264,8 @@ const struct option long_options[] = {
     {"nint", 0, 0, UCON64_NINT},
     {"hi", 0, 0, UCON64_HI},
     {"nhi", 0, 0, UCON64_NHI},
+    {"bs", 0, 0, UCON64_BS},
+    {"nbs", 0, 0, UCON64_NBS},
     {"version", 0, 0, UCON64_VERSION},
     {0, 0, 0, 0}
   };
@@ -305,7 +307,8 @@ main (int argc, char **argv)
   ucon64.buheader_len =
   ucon64.interleaved =
   ucon64.split =
-  ucon64.snes_hirom = 
+  ucon64.snes_hirom =
+  ucon64.bs_dump =
   ucon64.console = UCON64_UNKNOWN;
 
   ucon64.rom =

@@ -334,14 +334,11 @@ detect_parport (unsigned int port)
 {
   int i;
 
-#if     defined  __linux__ || defined __FreeBSD__
-  if (
-#ifdef  __linux__
-      ioperm
-#else
-      i386_set_ioperm
-#endif // __linux__
-      (port, 1, 1) == -1)
+#if     defined  __linux__
+  if (ioperm (port, 1, 1) == -1)
+    return -1;
+#elif   defined __FreeBSD__
+  if (i386_set_ioperm (port, 1, 1) == -1)
     return -1;
 #endif
 
@@ -357,14 +354,11 @@ detect_parport (unsigned int port)
           break;
     }
 
-#if     defined  __linux__ || defined __FreeBSD__
-  if (
-#ifdef  __linux__
-      ioperm
-#else
-      i386_set_ioperm
-#endif // __linux__
-      (port, 1, 0) == -1)
+#if     defined  __linux__
+  if (ioperm (port, 1, 0) == -1)
+    return -1;
+#elif   defined __FreeBSD__
+  if (i386_set_ioperm (port, 1, 0) == -1)
     return -1;
 #endif
 
@@ -434,13 +428,11 @@ parport_probe (unsigned int port)
   if (port != 0)
     {
 #if     defined  __linux__ || defined __FreeBSD__
-  if (
-#ifdef __linux__
-      ioperm
+#ifdef  __linux__
+      if (ioperm (port, 3, 1) == -1)            // data, status & control
 #else
-      i386_set_ioperm
+      if (i386_set_ioperm (port, 3, 1) == -1)   // data, status & control
 #endif // __linux__
-      (port, 3, 1) == -1)                       // data, status & control
         {
           fprintf (stderr,
                    "Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
@@ -970,20 +962,23 @@ int ucon64_ls (const char *path, int mode)
 }
 
 
-int
-ucon64_configfile (void)
-{
-  char buf2[MAXBUFSIZE];
 /*
   configfile handling
 */
+int
+ucon64_configfile (void)
+{
+  char buf2[MAXBUFSIZE], *dirname;
+
+  dirname = getenv2 ("HOME"); 
   sprintf (ucon64.configfile, "%s" FILE_SEPARATOR_S
 #ifdef  __MSDOS__
   "ucon64.cfg"
 #else
   ".ucon64rc"
 #endif
-  , ms_getenv ("HOME"));
+  , dirname);
+  free (dirname);
 
   if (access (ucon64.configfile, F_OK) != 0)
     {

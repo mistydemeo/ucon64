@@ -52,10 +52,11 @@ write programs in C
 #include "getopt.h"
 #include "misc.h"
 #include "quick_io.h"
+#include "libdiscmage/libdiscmage.h"
+#include "libdiscmage/sheets.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
-#include "ucon64_disc.h"
 
 #include "console/snes.h"
 #include "console/gb.h"
@@ -616,7 +617,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       q_fread (&iso_header, ISO_HEADER_START +
           UCON64_ISSET (ucon64.buheader_len) ?
             ucon64.buheader_len :
-            CDRW_HEADER_START (ucon64_trackmode_probe (romfile)),
+            CDRW_HEADER_START (trackmode_probe (romfile)),
               ISO_HEADER_LEN, romfile);
       rominfo->header_start = ISO_HEADER_START;
       rominfo->header_len = ISO_HEADER_LEN;
@@ -629,7 +630,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       rominfo->maker = iso_header.publisher_id;
 
 //misc stuff
-      value = ucon64_trackmode_probe (romfile);
+      value = trackmode_probe (romfile);
       if (value == -1)
         strcpy (rominfo->misc, "Track Mode: Unknown (Maybe CDI or NRG?)\n");
       else
@@ -934,8 +935,9 @@ ucon64_usage (int argc, char *argv[])
 
 
   printf (
-    "  " OPTION_LONG_S "mktoc       generate TOC file for cdrdao; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
-    "  " OPTION_LONG_S "mkcue       generate CUE file; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
+    "  " OPTION_LONG_S "sheet       generate sheet files (TOC (Cdrdao) and CUE); " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
+//    "  " OPTION_LONG_S "mktoc       generate TOC file for cdrdao; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
+//    "  " OPTION_LONG_S "mkcue       generate CUE file; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
 //    "                TRACK_MODE='CD_DA'     (2352 Bytes; AUDIO)\n"
     "                  TRACK_MODE='MODE2_RAW' (2352 Bytes; default)\n"
     "                  TRACK_MODE='MODE1'     (2048 Bytes; standard ISO9660)\n"
@@ -1067,7 +1069,7 @@ ucon64_usage (int argc, char *argv[])
       case UCON64_SMS:
         UCON64_USAGE (sms_usage);
 #ifdef BACKUP
-        UCON64_USAGE (smd_usage);
+//        UCON64_USAGE (smd_usage);
 #endif // BACKUP
         single = 1;
         break;
@@ -1187,7 +1189,7 @@ ucon64_usage (int argc, char *argv[])
 
       UCON64_USAGE (sms_usage);
 #ifdef BACKUP
-      UCON64_USAGE (smd_usage);
+//      UCON64_USAGE (smd_usage);
 #endif // BACKUP
       printf ("\n");
 

@@ -1105,7 +1105,7 @@ ucon64_e (const char *romfile)
   //  returns 0 when the exe could not be started
   if (result != 127 && result != -1 && result != 0)        // 127 && -1 are system() errors, rest are exit codes
     {
-      fprintf (stderr, "ERROR: the emulator returned an error code (%d)\n"
+      fprintf (stderr, "ERROR: the emulator returned an error? code (%d)\n"
                "TIP:   If the wrong emulator was used you might try to force recognition\n"
                "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
                result);

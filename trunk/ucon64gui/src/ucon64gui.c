@@ -253,29 +253,26 @@ html2gui_request (const char *uri, const char *query)
   char name[MAXBUFSIZE];
   const char *value;
   char buf[MAXBUFSIZE];
-  char cmdline[MAXBUFSIZE];
   const char *p = NULL;
-
-  int argc = 0;
-  char *argv[ARGS_MAX];
+  st_url_t url;
 
 #ifdef DEBUG
-  printf ("query: %s\n", query);
+  fprintf (stderr, "query: %s\n", query);
 #endif // DEBUG
 
   p = strchr (query, '=');
   if (*(++p) != '-')
     p = query;
 
-  query2cmd (cmdline, uri, p);
+  sprintf (buf, "localhost%s%s%s", uri, p ? "?" : "", p ? p : "");
+    
+  url_parser (&url, buf);
 
 #ifdef DEBUG
-  printf ("cmdline: %s\n", cmdline);
+  printf ("cmdline: %s\n", url.cmd);
 #endif
 
-  argc = cmd2args (argv, cmdline);
-
-  sprintf (buf, "%s %s", cmdline,
+  sprintf (buf, "%s %s", url.cmd,
            NULL_TO_EMPTY (ucon64gui.console));
 
 

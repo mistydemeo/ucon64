@@ -46,7 +46,7 @@ typedef struct
 //  int hd;
   const char *hd;                       // header
   const char *ns;                       // not splitted
-  const char *int;                      // interleaved
+  const char *interleaved;              // interleaved
   const char *snes_hirom;
   const char *bs;                  //Broadcast Satellaview dump
 

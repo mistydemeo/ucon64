@@ -98,7 +98,7 @@ ucon64gui_top (void)
       
       sprintf (buf, OPTION_LONG_S "emulate_%s", p);
       h2g_input_text (buf,
-                  getProperty (ucon64gui.configfile, &buf[2], buf2, ""),
+                  get_property (ucon64gui.configfile, &buf[2], buf2, ""),
                   45, 0, FALSE,
                   "uCON64 can operate as frontend for many Emulators\n"
                   "Enter here the commandline used for the emulator the name of the ROM will be attached to it");

@@ -169,21 +169,9 @@ void mainproc(void *arg) {
 
 #ifdef PARALLEL
 
-//TODO doctor64jr.c sram routines
+// TODO: doctor64jr.c sram routines
 
 #if 0
-
-// The following include-block should be moved to the other includes when the SRAM
-// code is finished. misc.h should be included after OS.h to avoid a warning.
-#ifdef  __unix__
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>             // usleep(), microseconds
-#endif
-#elif   defined __MSDOS__
-#include <dos.h>                // delay(), milliseconds
-#elif   defined __BEOS__
-#include <OS.h>                 // snooze(), microseconds
-#endif
 
 //typedef unsigned short u16;     // unsigned 16-bit
 //void docmd(jr_command cmd);
@@ -247,13 +235,7 @@ saveram_pc_main (int argc, char *argv[], char *envp[])
   while (!(i & V64JR_N64POWER))
     i = v64jr_status ();
 
-#ifdef  __unix__                                // wait 2000 milliseconds
-  usleep (2000);
-#elif   defined __MSDOS__
-  delay (2);
-#elif   defined __BEOS__
-  snooze (2000);
-#endif
+  wait2 (2);                                    // wait 2000 milliseconds
 
   printf("\nPower N64 and press any key to continue...");
   fflush(stdout);
@@ -445,7 +427,7 @@ void
 set_ai (unsigned char _ai)
 {
   set_ai_write                  // ninit=1, nwrite=0
-    outportb (port_b, _ai);
+  outportb (port_b, _ai);
 }
 
 void
@@ -453,13 +435,15 @@ set_ai_data (unsigned char _ai, unsigned char _data)
 {
   set_ai (_ai);
   set_data_write                // ninit=0, nwrite=0
-    outportb (port_c, _data);
+  outportb (port_c, _data);
 }
 
 void
 init_port (void)
 {
+#ifndef PPDEV // probably #if 0, but first test if this works with ppdev - dbjh
   outportb (port_9, 1);         // clear EPP time flag
+#endif
   set_ai_data (6, 0x0a);
   set_ai_data (7, 0x05);        // 6==0x0a, 7==0x05 is pc_control mode
 //   set_ai(5);
@@ -495,13 +479,13 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
           set_ai_data (0, 0);
           set_ai (4);           // set address index=4
           set_data_write        // ninit=0, nWrite=0
-            fix = i << 8;
+          fix = i << 8;
           for (j = 0; j < 256; j++)
             {
               outportw (port_c, mix.bufferx[j + fix]);
             }
           set_data_read         // ninit=0, nWrite=1
-            if (wv_mode)
+          if (wv_mode)
             {
               for (j = 0; j < 256; j++)
                 {
@@ -533,7 +517,7 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
                   set_ai_data (0, 0xf8);
                   set_ai (4);
                   set_data_read // ninit=0, nWrite=1
-                    for (j = 252; j < 256; j++)
+                  for (j = 252; j < 256; j++)
                     {
                       temp = inportw (port_c);
                       if (mix.bufferx[j + fix] != temp)
@@ -591,7 +575,7 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
           set_ai_data (0, 0);
           set_ai (4);
           set_data_read         // ninit=0, nwrite=1
-            fix = i << 8;
+          fix = i << 8;
           for (j = 0; j < 256; j++)
             {
               temp = inportw (port_c);
@@ -654,7 +638,7 @@ read_some (void)
   set_ai_data (3, 0x10);
   set_ai (4);
   set_data_read                 // ninit=0, nWrite=1
-    for (i = 0; i < 64; i++)
+  for (i = 0; i < 64; i++)
     {
       mix.bufferx[i] = inportw (port_c);
     }

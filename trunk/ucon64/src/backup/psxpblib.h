@@ -19,37 +19,14 @@
 #endif
 #ifdef PARALLEL
 
-/*
-  added for uCON64 support
-*/
-#ifdef  __MSDOS__
-#define _PSXPB_DJGPP_
-#elif   defined __unix__
-#define _PSXPB_UNIX_
-#elif   defined __BEOS__
-#define _PSXPB_BEOS_
-#elif   defined _WIN32
-#define _PSXPB_WIN32_
-#endif
-
-
 // outportb() and inportb() are only present in uCON64 if PARALLEL is defined
-
 #define psx_outportb(P, B) outportb((unsigned short) (P), (unsigned char) (B))
 #define psx_inportb(P) inportb((unsigned short) (P))
 
-#ifdef  _PSXPB_DJGPP_
+#ifdef  __MSDOS__
 #include <stdlib.h>
 #include <pc.h>
 #endif
-
-#if     defined _PSXPB_UNIX_ || defined _PSXPB_BEOS_ || defined _PSXPB_WIN32_
-#include <string.h>
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#endif
-
 
 #define LPT1_BASE 0x378
 #define LPT2_BASE 0x278

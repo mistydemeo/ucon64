@@ -928,11 +928,6 @@ ucon64_usage (int argc, char *argv[])
   printf (
     "\n"
     "Support for DISC-based consoles (libdiscmage)\n"
-    "  " OPTION_LONG_S "xcdrw       read/write IMAGE from/to CD-Writer;\n"
-    "                  " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
-    "                  reads automatically when CD_IMAGE does not exist\n"
-    "                  " OPTION_LONG_S "xcdrw is depricated for portability reasons\n"
-    "                  use the scripts in contrib/ instead\n"
     "TODO: " OPTION_LONG_S "mksheet generate TOC and CUE sheet files for CD_IMAGE; " OPTION_LONG_S "rom=CD_IMAGE\n"
     "                  " OPTION_LONG_S "rom could also be an existing TOC or CUE file\n"
     "TODO: " OPTION_LONG_S "iso     convert BIN/RAW CD_IMAGE to MODE1 (2048 Bytes); " OPTION_LONG_S "rom=CD_IMAGE\n"

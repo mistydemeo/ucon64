@@ -68,7 +68,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "gbx.h"
-#include "console/gb.h"                         // gb_logodata
+#include "console/gb.h"                         // gb_logodata, rocket_logodata
 #include "misc/parallel.h"
 
 
@@ -118,14 +118,7 @@ typedef enum { UNKNOWN_MBC, BUNG, ROM, MBC1, MBC2, MBC3, MBC5, CAMERA, ROCKET } 
 typedef enum { UNKNOWN_EEPROM, WINBOND, MX, INTEL } eeprom_t;
 
 static unsigned short int port_8, port_9, port_a, port_b, port_c, rocket_game_no;
-static unsigned char buffer[32768], rocket_logodata[] = {
-  0x11, 0x23, 0xf1, 0x1e, 0x01, 0x22, 0xf0, 0x00,
-  0x08, 0x99, 0x78, 0x00, 0x08, 0x11, 0x9a, 0x48,
-  0x11, 0x23, 0xf0, 0x0e, 0x70, 0x01, 0xf8, 0x80,
-  0x22, 0x44, 0x44, 0x22, 0x22, 0x21, 0x00, 0x1e,
-  0x99, 0x10, 0x00, 0x1e, 0x19, 0x22, 0x44, 0x22,
-  0x22, 0x47, 0x00, 0x0e, 0x11, 0x22, 0x00, 0x00
-};
+static unsigned char buffer[32768];
 static mbc_t mbc_type;
 static eeprom_t eeprom_type;
 static parport_mode_t port_mode;

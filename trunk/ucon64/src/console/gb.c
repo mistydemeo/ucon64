@@ -143,14 +143,24 @@ typedef struct st_gameboy_header
 } st_gameboy_header_t;
 
 static st_gameboy_header_t gameboy_header;
-const unsigned char gb_logodata[] = {           // Note: not a static variable
-  0xce, 0xed, 0x66, 0x66, 0xcc, 0x0d, 0x00, 0x0b,
-  0x03, 0x73, 0x00, 0x83, 0x00, 0x0c, 0x00, 0x0d,
-  0x00, 0x08, 0x11, 0x1f, 0x88, 0x89, 0x00, 0x0e,
-  0xdc, 0xcc, 0x6e, 0xe6, 0xdd, 0xdd, 0xd9, 0x99,
-  0xbb, 0xbb, 0x67, 0x63, 0x6e, 0x0e, 0xec, 0xcc,
-  0xdd, 0xdc, 0x99, 0x9f, 0xbb, 0xb9, 0x33, 0x3e
-};
+const unsigned char gb_logodata[] =             // Note: not a static variable
+  {
+    0xce, 0xed, 0x66, 0x66, 0xcc, 0x0d, 0x00, 0x0b,
+    0x03, 0x73, 0x00, 0x83, 0x00, 0x0c, 0x00, 0x0d,
+    0x00, 0x08, 0x11, 0x1f, 0x88, 0x89, 0x00, 0x0e,
+    0xdc, 0xcc, 0x6e, 0xe6, 0xdd, 0xdd, 0xd9, 0x99,
+    0xbb, 0xbb, 0x67, 0x63, 0x6e, 0x0e, 0xec, 0xcc,
+    0xdd, 0xdc, 0x99, 0x9f, 0xbb, 0xb9, 0x33, 0x3e
+  },
+  rocket_logodata[] =                           // idem
+  {
+    0x11, 0x23, 0xf1, 0x1e, 0x01, 0x22, 0xf0, 0x00,
+    0x08, 0x99, 0x78, 0x00, 0x08, 0x11, 0x9a, 0x48,
+    0x11, 0x23, 0xf0, 0x0e, 0x70, 0x01, 0xf8, 0x80,
+    0x22, 0x44, 0x44, 0x22, 0x22, 0x21, 0x00, 0x1e,
+    0x99, 0x10, 0x00, 0x1e, 0x19, 0x22, 0x44, 0x22,
+    0x22, 0x47, 0x00, 0x0e, 0x11, 0x22, 0x00, 0x00
+  };
 
 typedef struct st_gameboy_chksum
 {
@@ -170,8 +180,11 @@ gameboy_logo (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fwrite (gb_logodata, rominfo->buheader_len + GAMEBOY_HEADER_START + 4,
-            GB_LOGODATA_LEN, dest_name, "r+b");
+  q_fwrite ((unsigned char *)
+              ((gameboy_header.rom_type >= 0x97 && gameboy_header.rom_type <= 0x99) ?
+                 rocket_logodata : gb_logodata),
+            rominfo->buheader_len + GAMEBOY_HEADER_START + 4, GB_LOGODATA_LEN,
+            dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -452,48 +465,54 @@ gameboy_init (st_rominfo_t *rominfo)
 {
   int result = -1, value, x;
   char buf[MAXBUFSIZE];
-  static const char *gameboy_romtype1[0x20] = {
-    "ROM only",
-    "ROM + MBC1",
-    "ROM + MBC1 + RAM",
-    "ROM + MBC1 + RAM + Battery",
-    NULL,
-    "ROM + MBC2",
-    "ROM + MBC2 + Battery",
-    NULL,
-    "ROM + RAM",                                // correct? - dbjh
-    "ROM + RAM + Battery",                      // correct? - dbjh
-    NULL,
-    "ROM + MMM01",
-    "ROM + MMM01 + SRAM",
-    "ROM + MMM01 + SRAM + Battery",
-    NULL,
-    "ROM + MBC3 + Battery + Timer",
-    "ROM + MBC3 + RAM + Battery + Timer",
-    "ROM + MBC3",
-    "ROM + MBC3 + RAM",
-    "ROM + MBC3 + RAM + Battery",
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    "ROM + MBC5",
-    "ROM + MBC5 + RAM",
-    "ROM + MBC5 + RAM + Battery",
-    "ROM + MBC5 + Rumble",
-    "ROM + MBC5 + SRAM + Rumble",
-    "ROM + MBC5 + SRAM + Battery + Rumble",
-    "Nintendo Pocket Camera"},
-  *gameboy_romtype2[3] = {
-    "Rocket Games",
-    NULL,
-    "Rocket Games 2-in-1"},
-  *gameboy_romtype3[3] = {
-    "Bandai TAMA5",
-    "Hudson HuC-3",
-    "Hudson HuC-1"},
-  *str;
+  static const char *gameboy_romtype1[0x20] =
+    {
+      "ROM only",
+      "ROM + MBC1",
+      "ROM + MBC1 + RAM",
+      "ROM + MBC1 + RAM + Battery",
+      NULL,
+      "ROM + MBC2",
+      "ROM + MBC2 + Battery",
+      NULL,
+      "ROM + RAM",                              // correct? - dbjh
+      "ROM + RAM + Battery",                    // correct? - dbjh
+      NULL,
+      "ROM + MMM01",
+      "ROM + MMM01 + SRAM",
+      "ROM + MMM01 + SRAM + Battery",
+      NULL,
+      "ROM + MBC3 + Battery + Timer",
+      "ROM + MBC3 + RAM + Battery + Timer",
+      "ROM + MBC3",
+      "ROM + MBC3 + RAM",
+      "ROM + MBC3 + RAM + Battery",
+      NULL,
+      NULL,
+      NULL,
+      NULL,
+      NULL,
+      "ROM + MBC5",
+      "ROM + MBC5 + RAM",
+      "ROM + MBC5 + RAM + Battery",
+      "ROM + MBC5 + Rumble",
+      "ROM + MBC5 + SRAM + Rumble",
+      "ROM + MBC5 + SRAM + Battery + Rumble",
+      "Nintendo Pocket Camera"
+    },
+    *gameboy_romtype2[3] =
+    {
+      "Rocket Games",
+      NULL,
+      "Rocket Games 2-in-1"
+    },
+    *gameboy_romtype3[3] =
+    {
+      "Bandai TAMA5",
+      "Hudson HuC-3",
+      "Hudson HuC-1"
+    },
+    *str;
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
@@ -584,17 +603,37 @@ gameboy_init (st_rominfo_t *rominfo)
 
   sprintf (buf, "Game Boy type: %s\n",
            (gameboy_header.gb_type == 0x80) ? "Color" :
-//           (OFFSET (gameboy_header, 0x46) == 0x3) ? "Super" :
+//           (OFFSET (gameboy_header, 0x46) == 0x03) ? "Super" :
            "Standard (4 colors)");
   strcat (rominfo->misc, buf);
 
   value = gameboy_header.start_high << 8;
   value += gameboy_header.start_low;
-  sprintf (buf, "Start address: %04x", value);
+  sprintf (buf, "Start address: 0x%04x\n", value);
   strcat (rominfo->misc, buf);
 
-  rominfo->console_usage = gameboy_usage;
-  rominfo->copier_usage = (!rominfo->buheader_len ? mgd_usage : ssc_usage);
+  strcat (rominfo->misc, "Logo data: ");
+  if (memcmp (gameboy_header.logo,
+              (gameboy_header.rom_type >= 0x97 && gameboy_header.rom_type <= 0x99) ?
+                rocket_logodata : gb_logodata,
+              GB_LOGODATA_LEN) == 0)
+    {
+#ifdef  USE_ANSI_COLOR
+      if (ucon64.ansi_color)
+        strcat (rominfo->misc, "\x1b[01;32mOk\x1b[0m");
+      else
+#endif
+        strcat (rominfo->misc, "Ok");
+    }
+  else
+    {
+#ifdef  USE_ANSI_COLOR
+      if (ucon64.ansi_color)
+        strcat (rominfo->misc, "\x1b[01;31mBad\x1b[0m");
+      else
+#endif
+        strcat (rominfo->misc, "Bad");
+    }
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
@@ -624,6 +663,10 @@ gameboy_init (st_rominfo_t *rominfo)
 #endif
                checksum.header, (checksum.header == x) ? "=" : "!", x);
     }
+
+  rominfo->console_usage = gameboy_usage;
+  rominfo->copier_usage = (!rominfo->buheader_len ? mgd_usage : ssc_usage);
+
   return result;
 }
 

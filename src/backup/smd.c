@@ -43,6 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  and 24MB copiers.
 */
 
+#include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -51,6 +52,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "../ucon64_db.h"
 #include "../ucon64_misc.h"
 #include "smd.h"
+
+#ifdef BACKUP
+
 #ifdef  __unix__
 #include <unistd.h>             // usleep(), microseconds
 #elif   defined __MSDOS__
@@ -690,25 +694,27 @@ dump_bios (char *filename)
   return 1;
 }
 
+#endif // BACKUP
+
 int
 smd_usage (int argc, char *argv[])
 {
-    printf ("%s\n", smd_TITLE);
+#ifdef BACKUP
 
-  printf
-    ("  -xsmd         send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT\n"
+    printf (smd_TITLE "\n"
+    "  -xsmd         send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT\n"
      "                receives automatically when $ROM does not exist\n"
      "  -xsmds        send/receive SRAM to/from Super Magic Drive/SMD; $FILE=PORT\n"
      "                receives automatically when $ROM(=SRAM) does not exist\n");
 
-      //TODO more info like technical info about cabeling and stuff for the copier
-
+#endif // BACKUP
   return 0;
 }
 
 int
 smd_read_rom (char *filename, unsigned int parport)
 {
+#ifdef BACKUP
   lpt = parport;
 
   smd_argv[0] = "ucon64";
@@ -717,13 +723,16 @@ smd_read_rom (char *filename, unsigned int parport)
   smd_argc = 3;
 
   smd_main (smd_argc, smd_argv);
-
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+#endif // BACKUP  
   return 0;
 }
 
 int
 smd_write_rom (char *filename, unsigned int parport)
 {
+#ifdef BACKUP
   lpt = parport;
 
   smd_argv[0] = "ucon64";
@@ -738,13 +747,16 @@ smd_write_rom (char *filename, unsigned int parport)
   smd_argc = 2;
 
   smd_main (smd_argc, smd_argv);
-
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+#endif // BACKUP
   return 0;
 }
 
 int
 smd_read_sram (char *filename, unsigned int parport)
 {
+#ifdef BACKUP
   lpt = parport;
 
   smd_argv[0] = "ucon64";
@@ -753,13 +765,16 @@ smd_read_sram (char *filename, unsigned int parport)
   smd_argc = 3;
 
   smd_main (smd_argc, smd_argv);
-
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+#endif // BACKUP
   return 0;
 }
 
 int
 smd_write_sram (char *filename, unsigned int parport)
 {
+#ifdef BACKUP
   lpt = parport;
 
   smd_argv[0] = "ucon64";
@@ -768,6 +783,8 @@ smd_write_sram (char *filename, unsigned int parport)
   smd_argc = 3;
 
   smd_main (smd_argc, smd_argv);
-
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+#endif // BACKUP
   return 0;
 }

@@ -12,7 +12,7 @@
  * see psxpblib.h for details.
  *
  */
-
+#include "../config.h"
 #include <fcntl.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -27,6 +27,8 @@
 #include "../misc.h"
 #include "../ucon64_misc.h"
 #include "psxpblib.h"
+
+#ifdef BACKUP
 
 static unsigned char psx_parallel_out_0 = 0xff;
 static unsigned char psx_parallel_out_2 = 0x00;
@@ -1062,3 +1064,5 @@ psx_mcb_read_info (int base, int conport, int tap, int delay, int block)
   mcb_info_dat = psx_mcb_read_dat (base, conport, tap, delay, block);
   return psx_mcb_info_merge (*mcb_info_dir, *mcb_info_dat, &mcb_info);
 }
+
+#endif // BACKUP

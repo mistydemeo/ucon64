@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "../misc.h"
@@ -29,14 +30,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 int
 mgd_usage (int argc, char *argv[])
 {
-//    printf ("%s\n", mgd_TITLE);
+#ifdef BACKUP
+    printf (mgd_TITLE "\n"
 
-/*
-  printf
-    ("TODO:  -xmgd    send/receive ROM to/from Multi Game* /MGD2/MGH/RAW; $FILE=PORT\n"
+    "TODO:  -xmgd    send/receive ROM to/from Multi Game* /MGD2/MGH/RAW; $FILE=PORT\n"
      "		receives automatically when $ROM does not exist\n");
-*/
-//TODO more info like technical info about cabeling and stuff for the copier
-
+#endif // BACKUP
   return 0;
 }

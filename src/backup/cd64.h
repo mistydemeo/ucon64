@@ -23,25 +23,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define cd64_HEADER_START 0
 #define cd64_HEADER_LEN 0
 
-/*
-void c_break (int signum);
-void test_key (void);
-void parse_switches (int argc, char *argv[]);
-void send_byte (unsigned char c);
-void send_pbyte (unsigned char c);
-unsigned char exchange_byte (char c);
-unsigned char exchange_pbyte (char c);
-unsigned char read_pbyte (void);
-unsigned char header_byte (char c);
-unsigned char header_pbyte (char c);
-void send_long (unsigned long value);
-void send_plong (unsigned long value);
-unsigned int verify_checksum (unsigned int checksum_out);
-void usage_message (void);
-unsigned long long_hex_atoi (char *str);
-int send (char comm, unsigned long saddr, char *str);
-int grab (char comm, unsigned long addr, unsigned long length, char *str);
-main (int argc, char *argv[]);
-*/
 int cd64_usage (int argc, char *argv[]);
-#endif /* CD64_H */
+#endif // CD64_H

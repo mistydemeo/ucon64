@@ -1,5 +1,5 @@
 /*
-fal.h - Flash Linker Advance support for uCON64
+cartlib.c - Flash Linker Advance support for uCON64
 
 written by 2001        Jeff Frohwein
            2002        dbjh
@@ -18,6 +18,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include "../config.h"
+
+#ifdef BACKUP
+
+
+
 // *** GBA flash cart support routines in GCC ***
 //  This library allows programming FA/Visoly (both Turbo
 // and non-Turbo) and official Nintendo flash carts. They
@@ -741,3 +747,5 @@ WriteTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
   return Ready != 0;
 }
 #endif
+
+#endif // BACKUP

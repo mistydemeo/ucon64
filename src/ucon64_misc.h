@@ -92,6 +92,4 @@ ucon64_gauge (struct ucon64_ *rom, time_t init_time, long pos, long size);
 
 int trackmode_probe (long imagesize);
 
-int raw2iso (char *filename);
-
 #endif // #ifndef UCON64_MISC_H

@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "../misc.h"
@@ -26,12 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "../ucon64_misc.h"
 #include "doctor64jr.h"
 
-/*#include <dos.h>*/
-#include <stdio.h>
-#include <stdlib.h>
-/*#include <io.h>*/
-/*#include <dir.h>*/
-
+#ifdef BACKUP
 
 //#define ai 0x37b
 //#define data 0x37c
@@ -678,11 +674,15 @@ d64jr_main (int argc, char *argv[])
 int doctor64jr_argc;
 char *doctor64jr_argv[128];
 
+#endif // BACKUP
+
 int
 doctor64jr_read (char *filename, unsigned int parport)
 {
+#ifdef BACKUP
   port[0] = parport;
 /*    
+TODO
   doctor64jr_argv[0] = "jrsend";
   doctor64jr_argv[1] = filename;
   doctor64jr_argc = 2;
@@ -692,12 +692,18 @@ doctor64jr_read (char *filename, unsigned int parport)
       return 0;
     }
 */
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+  
+#endif // BACKUP
+
   return 0;
 }
 
 int
 doctor64jr_write (char *filename, long start, long len, unsigned int parport)
 {
+#ifdef BACKUP
   port[0] = parport;
 
   doctor64jr_argv[0] = "jrsend";
@@ -709,6 +715,11 @@ doctor64jr_write (char *filename, long start, long len, unsigned int parport)
       return 0;
     }
   return -1;
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+  
+  return 0;
+#endif // BACKUP
 }
 
 
@@ -717,13 +728,15 @@ doctor64jr_write (char *filename, long start, long len, unsigned int parport)
 int
 doctor64jr_usage (int argc, char *argv[])
 {
-    printf ("%s\n", doctor64jr_TITLE);
+#ifdef BACKUP
 
-  printf ("  -xdjr         send/receive ROM to/from Doctor64 Jr; $FILE=PORT\n"
+    printf ( doctor64jr_TITLE "\n"
+
+  "  -xdjr         send/receive ROM to/from Doctor64 Jr; $FILE=PORT\n"
           "                receives automatically when $ROM does not exist\n"
           "NOTE: currently only sending is supported\n");
 
-//TODO more info like technical info about cabeling and stuff for the copier
+#endif
 
   return 0;
 }

@@ -20,13 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef DOCTOR64_H
 #define DOCTOR64_H
-int syncHeader (unsigned int baseport);
-int initCommunication (unsigned int port);
-int checkSync (unsigned int baseport);
-int sendFilename (unsigned int baseport, char name[]);
-int sendUploadHeader (unsigned int baseport, char name[], long len);
-int sendDownloadHeader (unsigned int baseport, char name[], long *len);
-
 int doctor64_read (char *filename, unsigned int parport);
 
 int doctor64_write (char *filename, long start, long len,

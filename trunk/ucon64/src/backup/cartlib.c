@@ -2,7 +2,8 @@
 cartlib.c - Flash Linker Advance support for uCON64
 
 written by 2001        Jeff Frohwein
-           2002        dbjh
+           2002 - 2004 dbjh
+
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -553,6 +554,11 @@ WriteNintendoFlashCart (u32 SrcAddr, u32 FlashAddr, u32 Length)
 {
   int j;
   int LoopCount = 0;
+  u16 *SrcAddr2 = (u16 *)
+#ifdef  __LP64__
+                  (u64)
+#endif
+                  SrcAddr;
 
   while (LoopCount < (int) Length)
     {
@@ -563,8 +569,8 @@ WriteNintendoFlashCart (u32 SrcAddr, u32 FlashAddr, u32 Length)
       while ((j & 0x80) == 0);
 
       WriteFlash (FlashAddr, SHARP28F_WORDWRITE);
-      WriteFlash (FlashAddr, *(u16 *) SrcAddr);
-      SrcAddr += 2;
+      WriteFlash (FlashAddr, *SrcAddr2);
+      SrcAddr2 += 2;
       FlashAddr += _MEM_INC;
       LoopCount++;
     }
@@ -591,6 +597,11 @@ WriteNonTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
   int Ready = 0;
   int Timeout = 0;
   int LoopCount = 0;
+  u16 *SrcAddr2 = (u16 *)
+#ifdef  __LP64__
+                  (u64)
+#endif
+                  SrcAddr;
 
   while (LoopCount < (int) Length)
     {
@@ -616,8 +627,8 @@ WriteNonTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
 
           for (i = 0; i < 16; i++)
             {
-              WRITE_FLASH_NEXT (FlashAddr, *(u16 *) SrcAddr);
-              SrcAddr += 2;
+              WRITE_FLASH_NEXT (FlashAddr, *SrcAddr2);
+              SrcAddr2 += 2;
               FlashAddr += _MEM_INC;
             }
 
@@ -677,6 +688,11 @@ WriteTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
   int Timeout;
   int Ready = 0;
   int LoopCount = 0;
+  u16 *SrcAddr2 = (u16 *)
+#ifdef  __LP64__
+                  (u64)
+#endif
+                  SrcAddr;
 
   while (LoopCount < (int) Length)
     {
@@ -709,8 +725,8 @@ WriteTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
 
           for (i = 0; i < 32; i++)
             {
-              WRITE_FLASH_NEXT (FlashAddr, *(u16 *) SrcAddr);
-              SrcAddr += 2;
+              WRITE_FLASH_NEXT (FlashAddr, *SrcAddr2);
+              SrcAddr2 += 2;
               FlashAddr += _MEM_INC;
             }
           WRITE_FLASH_NEXT (FlashAddr, INTEL28F_CONFIRM);

@@ -1436,7 +1436,7 @@ ucon64_init (const char *romfile, st_rom_t *rominfo)
 
   if (!stat (romfile, &puffer) == -1) return -1;
   if (S_ISREG (puffer.st_mode) != TRUE) return -1;
-        
+
   strcpy(rominfo->rom, romfile);
 
   rominfo->bytes = quickftell (rominfo->rom);
@@ -1444,13 +1444,10 @@ ucon64_init (const char *romfile, st_rom_t *rominfo)
   // The next 4 if-statements MUST precede the call to ucon64_console_probe!
   if (ucon64.buheader_len != -1)
     rominfo->buheader_len = ucon64.buheader_len;
-
   if (ucon64.interleaved != -1)
     rominfo->interleaved = ucon64.interleaved;
-
   if (ucon64.splitted != -1)
     rominfo->splitted = ucon64.splitted;
-
   if (ucon64.snes_hirom != -1)
     rominfo->snes_hirom = ucon64.snes_hirom;
 
@@ -1714,8 +1711,8 @@ ucon64_nfo (const st_rom_t *rominfo)
         printf ("Intro/Trainer: Maybe, %ld Bytes\n", rominfo->intro);
 
       if (!rominfo->buheader_len)
-        printf ("Backup unit/Emulator header: No\n");    // printing this is handy for
-      else if (rominfo->buheader_len)            //  SNES ROMs
+        printf ("Backup unit/Emulator header: No\n");   // printing this is handy for
+      else if (rominfo->buheader_len)                   //  SNES ROMs
         printf ("Backup unit/Emulator header: Yes, %ld Bytes\n", rominfo->buheader_len);
 
 //    if (!rominfo->splitted)
@@ -1866,12 +1863,23 @@ int ucon64_ls (st_rom_t *rominfo, int mode)
           S_ISREG (puffer.st_mode))
     {
 #endif // UCON64_LS_SAVE
-              // ucon64_init(NULL,...) sets rominfo->rom to UCON64_UNKNOWN, but
-	      //  we have to remember a possible force recoginition option
+              // ucon64_init(NULL,...) clears rominfo and sets rominfo->rom to
+              //  UCON64_UNKNOWN, but we have to remember possible force
+              //  recoginition options
               if (forced_console == UCON64_UNKNOWN)
                 ucon64_init (NULL, rominfo);
               else
                 rominfo->console = forced_console;
+
+              if (ucon64.buheader_len != -1)
+                rominfo->buheader_len = ucon64.buheader_len;
+              if (ucon64.interleaved != -1)
+                rominfo->interleaved = ucon64.interleaved;
+              if (ucon64.splitted != -1)
+                rominfo->splitted = ucon64.splitted;
+              if (ucon64.snes_hirom != -1)
+                rominfo->snes_hirom = ucon64.snes_hirom;
+
               if (ucon64_init (ep->d_name, rominfo) != -1)
                 switch (mode)
                   {

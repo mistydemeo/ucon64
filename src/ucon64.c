@@ -255,6 +255,11 @@ main (int argc, char *argv[])
                  "#\n"
                  "version=198\n"
                  "#\n"
+                 "# create backups of files? (1=yes; 0=no)\n"
+//                 "# before processing a ROM uCON64 will make a backup of it\n"
+                 "#\n"
+                 "backups=1\n"
+                 "#\n"
                  "# emulate_<console shortcut>=<emulator with options>\n"
                  "#\n"
                  "emulate_gb=vgb -sound -sync 50 -sgb -scale 2\n"
@@ -273,7 +278,9 @@ main (int argc, char *argv[])
                  "emulate_gba=vgba -scale 2 -uperiod 6\n"
                  "emulate_vec=\n"
                  "emulate_vboy=\n"
-                 "emulate_swan=\n" "emulate_coleco=\n" "emulate_intelli=\n"
+                 "emulate_swan=\n" 
+                 "emulate_coleco=\n" 
+                 "emulate_intelli=\n"
                  "emulate_psx=pcsx\n"
                  "emulate_ps2=\n"
                  "emulate_sat=\n"
@@ -304,7 +311,7 @@ main (int argc, char *argv[])
     }
   else if (strcmp(getProperty (rom.config_file, "version", buf2, "198"), "198") != 0)
     {
-/*      strcpy (buf2, rom.config_file);
+      strcpy (buf2, rom.config_file);
 
       newext (buf2, ".OLD");
 
@@ -313,6 +320,8 @@ main (int argc, char *argv[])
       filecopy (rom.config_file, 0, quickftell(rom.config_file), buf2, "wb");
 
       setProperty(rom.config_file,"version","198");
+
+      setProperty(rom.config_file,"backups","1");
 
       setProperty(rom.config_file,"cdrw_read",
          getProperty (rom.config_file, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
@@ -327,11 +336,14 @@ main (int argc, char *argv[])
       sync ();
 
       printf ("OK\n\n");
-*/
+
 //      return 0;
     }
 
-  rom.backup = (argcmp (argc, argv, "-nbak")) ? 0 : 1;
+  rom.backup = (argcmp (argc, argv, "-nbak")) ? 0 :
+    (
+      (!strcmp( getProperty (rom.config_file, "backups", buf2, "1"), "1")) ? 1 : 0
+    );
 
   if (argcmp (argc, argv, "-crc"))
     {
@@ -460,6 +472,8 @@ main (int argc, char *argv[])
 
   if (argcmp (argc, argv, "-b"))
     {
+      ucon64_fbackup(&rom, rom.rom);
+
       if (bsl (rom.rom, rom.file) != 0)
         printf ("ERROR: failed\n");
       return (0);
@@ -471,6 +485,8 @@ main (int argc, char *argv[])
       ucon64_argv[1] = rom.file;
       ucon64_argv[2] = rom.rom;
       ucon64_argc = 3;
+
+      ucon64_fbackup(&rom, rom.rom);
 
       ips_main (ucon64_argc, ucon64_argv);
 
@@ -484,6 +500,8 @@ main (int argc, char *argv[])
       ucon64_argv[2] = rom.rom;
       ucon64_argv[3] = rom.file;
       ucon64_argc = 4;
+
+      ucon64_fbackup(&rom, rom.rom);
 
       n64aps_main (ucon64_argc, ucon64_argv);
       return (0);

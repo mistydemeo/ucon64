@@ -31,7 +31,7 @@ bsl (char *name, char *option2)
   long done = 0, add;
   int dat;
 
-  if (!(fh = fopen (filebackup (name), "r+b")))
+  if (!(fh = fopen (name, "r+b")))
     return (-1);
   if (!(fh2 = fopen (option2, "rb")))
     return (-1);

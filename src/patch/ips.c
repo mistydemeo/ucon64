@@ -51,7 +51,7 @@ ips_main (int argc, char *argv[])
       exit (0);
     }
 
-  patchee = fopen (filebackup (argv[2]), "r+");
+  patchee = fopen (argv[2], "r+");
   if (patchee == NULL)
     {
       printf ("Could not open the file %s\n", argv[2]);

@@ -30,8 +30,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
 #include <sys/stat.h>
+#include "config.h"                             // ZLIB
+#include "misc.h"
 
-#ifdef HAVE_UNISTD
+#ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -52,8 +54,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <termios.h>
 typedef struct termios tty_t;
 #endif
-#include "config.h"                             // ZLIB
-#include "misc.h"
 
 #ifdef  ZLIB
 #include <zlib.h>

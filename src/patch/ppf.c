@@ -495,8 +495,8 @@ int addppfid(int argc, char *argv[])
 int ppf_usage(int argc,char *argv[])
 {
 
-printf("  -ppf		apply PPF patch (<=2.0); $ROM=BIN_IMAGE $FILE=PATCHFILE\n\
-  -mkppf	create PPF patch; $ROM=BIN_IMAGE $FILE=CHANGED_IMAGE\n\
+printf("  -ppf		apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE\n\
+  -mkppf	create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE\n\
   -nppf		change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION\n\
   -idppf	change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ\n\
 ");

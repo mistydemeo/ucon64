@@ -62,33 +62,37 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define ucon64_VERSION "1.9.7"
 
-  #ifdef __UNIX__
-	#define ucon64_TITLE "uCON64 1.9.7 Unix 1999-2001 by (various)"
-  #elif __DOS__
-	#define ucon64_TITLE "uCON64 1.9.7 DOS 1999-2001 by (various)"
-  #elif __BEOS__
-	#define ucon64_TITLE "uCON64 1.9.7 BeOS 1999-2001 by (various)"
-  #elif __SOLARIS__
-	#define ucon64_TITLE "uCON64 1.9.7 Solaris 1999-2001 by (various)"
-  #else
-	#define ucon64_TITLE "uCON64 1.9.7 1999-2001 by (various)"
-  #endif
+#ifdef __UNIX__
+  #define ucon64_TITLE "uCON64 1.9.7 Unix 1999-2001 by (various)"
+#elif __DOS__
+  #define ucon64_TITLE "uCON64 1.9.7 DOS 1999-2001 by (various)"
+#elif __BEOS__
+  #define ucon64_TITLE "uCON64 1.9.7 BeOS 1999-2001 by (various)"
+#elif __SOLARIS__
+  #define ucon64_TITLE "uCON64 1.9.7 Solaris 1999-2001 by (various)"
+#else
+  #define ucon64_TITLE "uCON64 1.9.7 1999-2001 by (various)"
+#endif
 
 #define MBIT	131072
-
+#define MAXROMSIZE ( 1024 * MBIT )
 #define MAXBUFSIZE 32768
 
 struct ucon64_
 {
+//TODO get rid of argc and argv here
+
   int argc;
-//  char argv[128][4096];
   char *argv[128];
 
-//  char arg0[4096];
   char rom[4096];		//$ROM (cmdline) with path
   char file[4096];	//$FILE (cmdline) with path
+  unsigned int parport;
 
-  long console;	//integer for the console system
+
+  long console;	//integer for the detected console system
+//  long console_forced;
+//  int show_nfo;
 
   char title[4096];
   char copier[4096];
@@ -137,8 +141,6 @@ struct ucon64_
 };
 
 
-
-
 #define ucon64_NAME	0
 #define ucon64_ROM	1
 #define ucon64_FILE	2
@@ -147,11 +149,6 @@ int ucon64_usage(int argc,char *argv[]);
 int ucon64_init(struct ucon64_ *rom);
 int ucon64_main(int argc,char *argv[]);
 int ucon64_nfo(struct ucon64_ *rom);
-
-int ucon64_exit(int value,struct ucon64_ *rom);
-
-
-unsigned int ucon64_parport;
 
 int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom);
 

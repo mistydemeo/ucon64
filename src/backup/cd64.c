@@ -194,6 +194,9 @@ b. Check the IO port setting as following.
 #include <signal.h>
 #include <graph.h>
 
+static int cd64_argc;
+static char *cd64_argv[128];
+
 int data_reg=0x310;
 int status_reg=0x312;
 int control_reg;
@@ -211,9 +214,9 @@ void c_break (int signum)
 
         if (ecp==0)
         {
-                inp (data_reg);
-                outp (data_reg, 0xff);
-                inp (data_reg);
+                inportb (data_reg);
+                outportb (data_reg, 0xff);
+                inportb (data_reg);
         }
                 else
                 {
@@ -221,27 +224,27 @@ void c_break (int signum)
                         temp=ecp_mode;
                         temp&=0x1f;
                         temp|=0x20;
-                        outp (ecp_reg, temp);
+                        outportb (ecp_reg, temp);
 
-                        outp (control_reg, 0x04);
+                        outportb (control_reg, 0x04);
                         delay (1);
 
 //           _   _
 // set /PCRD  |_| to reset PCX
-//                      outp (control_reg, 0x24);
-                        outp (control_reg, 0x26);
-//                      outp (control_reg, 0x24);
+//                      outportb (control_reg, 0x24);
+                        outportb (control_reg, 0x26);
+//                      outportb (control_reg, 0x24);
 
 //           _   _
 // set /PCWR  |_| to set PCX
-// set all output hi
-                        outp (control_reg, 0x04);
-                        outp (data_reg, 0xff);
-                        outp (control_reg, 0x05);
-                        outp (control_reg, 0x04);
+// set all outportbut hi
+                        outportb (control_reg, 0x04);
+                        outportb (data_reg, 0xff);
+                        outportb (control_reg, 0x05);
+                        outportb (control_reg, 0x04);
 
 // reset ecp mode
-                        outp (ecp_reg, ecp_mode);
+                        outportb (ecp_reg, ecp_mode);
                 }
                                                                         
                 printf ("\nControl-Break pressed.  Program aborting ...\n");
@@ -260,9 +263,9 @@ void test_key (void)
                 {
                         if (ecp==0)
                         {
-                                inp (data_reg);
-                                outp (data_reg, 0xff);
-                                inp (data_reg);
+                                inportb (data_reg);
+                                outportb (data_reg, 0xff);
+                                inportb (data_reg);
                         }
                                 else
                                 {
@@ -270,27 +273,27 @@ void test_key (void)
                                         temp=ecp_mode;
                                         temp&=0x1f;
                                         temp|=0x20;
-                                        outp (ecp_reg, temp);
+                                        outportb (ecp_reg, temp);
 
-                                        outp (control_reg, 0x04);
+                                        outportb (control_reg, 0x04);
                                         delay (1);
 
 //           _   _
 // set /PCRD  |_| to reset PCX
-//                                      outp (control_reg, 0x24);
-                                        outp (control_reg, 0x26);
-//                                      outp (control_reg, 0x24);
+//                                      outportb (control_reg, 0x24);
+                                        outportb (control_reg, 0x26);
+//                                      outportb (control_reg, 0x24);
 
 //           _   _
 // set /PCWR  |_| to set PCX
-// set all output hi
-                                        outp (control_reg, 0x04);
-                                        outp (data_reg, 0xff);
-                                        outp (control_reg, 0x05);
-                                        outp (control_reg, 0x04);
+// set all outportbut hi
+                                        outportb (control_reg, 0x04);
+                                        outportb (data_reg, 0xff);
+                                        outportb (control_reg, 0x05);
+                                        outportb (control_reg, 0x04);
 
 // reset ecp mode
-                                        outp (ecp_reg, ecp_mode);
+                                        outportb (ecp_reg, ecp_mode);
                                 }
                                                                         
                         printf ("\nQuitting program!!\n");
@@ -355,14 +358,14 @@ void send_byte (unsigned char c)
         unsigned char status;
         unsigned long i;
 
-        outp (data_reg, c);
+        outportb (data_reg, c);
         i=0;
-        while ((inp (status_reg)&1)&&(i<800000)) i++;
+        while ((inportb (status_reg)&1)&&(i<800000)) i++;
         if (i<800000)
         {
-                if (c!=inp (data_reg))
+                if (c!=inportb (data_reg))
                 {
-                        status=inp (data_reg);
+                        status=inportb (data_reg);
                         printf ("\nBad!!");
                         printf ("\nvalue out was %2.2X\nvalue back was %2.2X\n", c, status);
                         exit (11);
@@ -384,22 +387,22 @@ void send_pbyte (unsigned char c)
         unsigned long i;
 
         i=0;
-        while ((inp (status_reg)&0x80)&&(i<800000)) i++;
+        while ((inportb (status_reg)&0x80)&&(i<800000)) i++;
         if (i<800000)
         {
 //           _   _
 // set /PCRD  |_| to reset PCX
-//              outp (control_reg, 0x24);
-                outp (control_reg, 0x26);
-//              outp (control_reg, 0x24);
+//              outportb (control_reg, 0x24);
+                outportb (control_reg, 0x26);
+//              outportb (control_reg, 0x24);
 
 //           _   _
 // set /PCWR  |_| to set PCX
 // export to cd64
-                outp (control_reg, 0x04);
-                outp (data_reg, c);
-                outp (control_reg, 0x05);
-                outp (control_reg, 0x04);
+                outportb (control_reg, 0x04);
+                outportb (data_reg, c);
+                outportb (control_reg, 0x05);
+                outportb (control_reg, 0x04);
         }
 
                 else
@@ -418,12 +421,12 @@ unsigned char exchange_byte (char c)
         char status;
         unsigned long i;
 
-        outp (data_reg, c);
+        outportb (data_reg, c);
         i=0;
-        while ((inp (status_reg)&1)&&(i<800000)) i++;
+        while ((inportb (status_reg)&1)&&(i<800000)) i++;
         if (i<800000)
         {
-                status=inp (data_reg);
+                status=inportb (data_reg);
         }
                 else
                 {
@@ -444,24 +447,24 @@ unsigned char exchange_pbyte (char c)
         unsigned long i;
 
         i=0;
-        while ((inp (status_reg)&0x80)&&(i<800000)) i++;
+        while ((inportb (status_reg)&0x80)&&(i<800000)) i++;
         if (i<800000)
         {
 //                       _   _
 // set /PCRD  |_| to reset PCX
 // import from cd64
-//              outp (control_reg, 0x24);
-                outp (control_reg, 0x26);
-                status=inp (data_reg);
-//              outp (control_reg, 0x24);
+//              outportb (control_reg, 0x24);
+                outportb (control_reg, 0x26);
+                status=inportb (data_reg);
+//              outportb (control_reg, 0x24);
 
 //                       _   _
 // set /PCWR  |_| to set PCX
 // export to cd64
-                outp (control_reg, 0x04);
-                outp (data_reg, c);
-                outp (control_reg, 0x05);
-                outp (control_reg, 0x04);
+                outportb (control_reg, 0x04);
+                outportb (data_reg, c);
+                outportb (control_reg, 0x05);
+                outportb (control_reg, 0x04);
 
         }
                 else
@@ -483,23 +486,23 @@ unsigned char read_pbyte (void)
         unsigned long i;
 
         i=0;
-        while ((inp (status_reg)&0x80)&&(i<800000)) i++;
+        while ((inportb (status_reg)&0x80)&&(i<800000)) i++;
         if (i<800000)
         {
 //                       _   _
 // set /PCRD  |_| to reset PCX
 // import from cd64
-//              outp (control_reg, 0x24);
-                outp (control_reg, 0x26);
-                status=inp (data_reg);
-//              outp (control_reg, 0x24);
+//              outportb (control_reg, 0x24);
+                outportb (control_reg, 0x26);
+                status=inportb (data_reg);
+//              outportb (control_reg, 0x24);
 
 //                       _   _
 // set /PCWR  |_| to set PCX
 // export to cd64
-                outp (control_reg, 0x04);
-                outp (control_reg, 0x05);
-                outp (control_reg, 0x04);
+                outportb (control_reg, 0x04);
+                outportb (control_reg, 0x05);
+                outportb (control_reg, 0x04);
 
         }
                 else
@@ -520,10 +523,10 @@ unsigned char header_byte (char c)
         char status, spinner;
 
         spinner ='|';
-        outp (data_reg, c);
+        outportb (data_reg, c);
         do
         {
-                status=inp (status_reg);
+                status=inportb (status_reg);
 
                 switch (spinner)
                 {
@@ -550,7 +553,7 @@ unsigned char header_byte (char c)
         }
         while (status&1);
 
-        status=inp (data_reg);
+        status=inportb (data_reg);
 
         return status;
 }
@@ -565,7 +568,7 @@ unsigned char header_pbyte (char c)
         spinner ='|';
         do
         {
-                status=inp (status_reg);
+                status=inportb (status_reg);
 
                 switch (spinner)
                 {
@@ -595,18 +598,18 @@ unsigned char header_pbyte (char c)
 //           _   _
 // set /PCRD  |_| to reset PCX
 // import from cd64
-//      outp (control_reg, 0x24);
-        outp (control_reg, 0x26);
-        status=inp (data_reg);
-//      outp (control_reg, 0x24);
+//      outportb (control_reg, 0x24);
+        outportb (control_reg, 0x26);
+        status=inportb (data_reg);
+//      outportb (control_reg, 0x24);
 
 //           _   _
 // set /PCWR  |_| to set PCX
 // export to cd64
-        outp (control_reg, 0x04);
-        outp (data_reg, c);
-        outp (control_reg, 0x05);
-        outp (control_reg, 0x04);
+        outportb (control_reg, 0x04);
+        outportb (data_reg, c);
+        outportb (control_reg, 0x05);
+        outportb (control_reg, 0x04);
 
         return status;
 }
@@ -644,7 +647,6 @@ unsigned int verify_checksum (unsigned int checksum_out)
 
         return checksum_in;
 }
-
 
 void usage_message (void)
 {
@@ -752,7 +754,7 @@ int send (char comm, unsigned long saddr, char *str)
 
         if (ecp==0)
         {
-                inp (data_reg);
+                inportb (data_reg);
                 do
                 {
                         while (header_byte ('W')!='R');
@@ -793,17 +795,17 @@ int send (char comm, unsigned long saddr, char *str)
                                 {
 //           _   _
 // set /PCRD  |_| to reset PCX
-//                                      outp (control_reg, 0x24);
-                                        outp (control_reg, 0x26);
-//                                      outp (control_reg, 0x24);
+//                                      outportb (control_reg, 0x24);
+                                        outportb (control_reg, 0x26);
+//                                      outportb (control_reg, 0x24);
 
 //           _   _
 // set /PCWR  |_| to set PCX
 // export to cd64
-                                        outp (control_reg, 0x04);
-                                        outp (data_reg, 'W');
-                                        outp (control_reg, 0x05);
-                                        outp (control_reg, 0x04);
+                                        outportb (control_reg, 0x04);
+                                        outportb (data_reg, 'W');
+                                        outportb (control_reg, 0x05);
+                                        outportb (control_reg, 0x04);
                         
                                         header_pbyte ('B');
                                         temp=header_pbyte ('B');
@@ -889,7 +891,7 @@ int grab (char comm, unsigned long addr, unsigned long length, char *str)
 
         if (ecp==0)
         {
-                inp (data_reg);
+                inportb (data_reg);
                 do
                 {
                         while (header_byte ('W')!='R');
@@ -931,17 +933,17 @@ int grab (char comm, unsigned long addr, unsigned long length, char *str)
                                 {
 //           _   _
 // set /PCRD  |_| to reset PCX
-//                      outp (control_reg, 0x24);
-                        outp (control_reg, 0x26);
-//                      outp (control_reg, 0x24);
+//                      outportb (control_reg, 0x24);
+                        outportb (control_reg, 0x26);
+//                      outportb (control_reg, 0x24);
 
 //           _   _
 // set /PCWR  |_| to set PCX
 // export to cd64
-                                        outp (control_reg, 0x04);
-                                        outp (data_reg, 'W');
-                                        outp (control_reg, 0x05);
-                                        outp (control_reg, 0x04);
+                                        outportb (control_reg, 0x04);
+                                        outportb (data_reg, 'W');
+                                        outportb (control_reg, 0x05);
+                                        outportb (control_reg, 0x04);
                         
                                         header_pbyte ('B');
                                         temp=header_pbyte ('B');
@@ -1046,29 +1048,29 @@ main (int argc, char *argv[])
                                 ecp_reg=0x77a;
                                 status_reg=0x379;
                                 control_reg=0x37a;
-                                ecp_mode=inp (ecp_reg);
+                                ecp_mode=inportb (ecp_reg);
                                 temp=ecp_mode;
                                 temp&=0x1f;
                                 temp|=0x20;
-                                outp (ecp_reg, temp);
+                                outportb (ecp_reg, temp);
 
 // set power supply
-                                outp (control_reg, 0x04);
+                                outportb (control_reg, 0x04);
                                                                 delay (1);
 
 //                      _   _
 // set /PCRD |_| to reset PCX
-//                              outp (control_reg, 0x24);
-                                outp (control_reg, 0x26);
-//                              outp (control_reg, 0x24);
+//                              outportb (control_reg, 0x24);
+                                outportb (control_reg, 0x26);
+//                              outportb (control_reg, 0x24);
 
 //                       _       _
 // set /PCWR  |_| to set PCX
-// set all output hi
-                                outp (control_reg, 0x04);
-                                outp (data_reg, 0xff);
-                                outp (control_reg, 0x05);
-                                outp (control_reg, 0x04);
+// set all outportbut hi
+                                outportb (control_reg, 0x04);
+                                outportb (data_reg, 0xff);
+                                outportb (control_reg, 0x05);
+                                outportb (control_reg, 0x04);
                         }
         }
 
@@ -1187,11 +1189,10 @@ main (int argc, char *argv[])
                 else usage_message();
 }
 */
-
 int cd64_usage(int argc, char *argv[])
 {
   if (argcmp(argc, argv, "-help"))
-    printf("\n%s\n", cd64_TITLE);
+    printf("%s\n", cd64_TITLE);
 
   printf("TODO:  -xcd64	send/receive ROM to/from CD64; $FILE=PORT\n"
          "		receives automatically when $ROM does not exist\n"
@@ -1200,3 +1201,67 @@ int cd64_usage(int argc, char *argv[])
 
   return 0;
 }
+
+/*
+int cd64_read_rom(char *filename, unsigned int parport)
+{
+  lpt = parport;
+
+  cd64_argv[0] = "ucon64";
+  cd64_argv[1] = "-bc";
+  cd64_argv[2] = filename;
+  cd64_argc = 3;
+
+  cd64_main(cd64_argc, cd64_argv);
+
+  return 0;
+}
+
+int cd64_write_rom(char *filename, unsigned int parport)
+{
+  lpt = parport;
+
+  cd64_argv[0] = "ucon64";
+  cd64_argv[1] = "-lc";
+  cd64_argv[2] = filename;
+  cd64_argc = 3;
+
+  cd64_main(cd64_argc, cd64_argv);
+
+  cd64_argv[0] = "ucon64";
+  cd64_argv[1] = "-rc";
+  cd64_argc = 2;
+
+  cd64_main(cd64_argc, cd64_argv);
+
+  return 0;
+}
+
+int cd64_read_sram(char *filename, unsigned int parport)
+{
+  lpt = parport;
+
+  cd64_argv[0] = "ucon64";
+  cd64_argv[1] = "-bs";
+  cd64_argv[2] = filename;
+  cd64_argc = 3;
+
+  cd64_main(cd64_argc, cd64_argv);
+
+  return 0;
+}
+
+int cd64_write_sram(char *filename, unsigned int parport)
+{
+  lpt = parport;
+
+  cd64_argv[0] = "ucon64";
+  cd64_argv[1] = "-ls";
+  cd64_argv[2] = filename;
+  cd64_argc = 3;
+
+  cd64_main(cd64_argc, cd64_argv);
+
+  return 0;
+}
+*/

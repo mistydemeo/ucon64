@@ -370,6 +370,7 @@ int load_smd(char *filename)
     int block_size;
     int is_smd = 0;
     FILE *fd = NULL;
+    time_t starttime;
 
     /* Attempt to open file */
     fd = fopen(filename, "rb");
@@ -421,10 +422,13 @@ int load_smd(char *filename)
         header[0] = block_size;
     }
 
+    starttime = time(NULL);
+    
     /* Send blocks to SMD */
     for(count = 0; count < header[0]; count += 1)
     {
-        printf("Sending block %d of %d\r", 1+count, header[0]);
+//        printf("Sending block %d of %d\r", 1+count, header[0]);
+        parport_gauge(starttime, (1+count)*16384, header[0]*16384);
         fflush(stdout);
         smd_send_command(0x05, count, 0x00);
         smd_send_command(0x00, 0x8000, 0x4000);
@@ -472,7 +476,8 @@ int save_smd(char *filename)
     uint8 header[0x200];
     int count;
     FILE *fd;
-
+    time_t starttime;
+    
     fd = fopen(filename, "wb");
     if(!fd) return (0);
 
@@ -488,9 +493,12 @@ int save_smd(char *filename)
     /* Write header to disk */
     fwrite(header, 0x200, 1, fd);
 
+    starttime = time(NULL);
+
     for(count = 0; count < header[0]; count += 1)
     {
-        printf("Recieving block %d of %d\r", 1+count, header[0]);
+        parport_gauge(starttime, (1+count)*16384, header[0]*16384);
+//        printf("Recieving block %d of %d\r", 1+count, header[0]);
         fflush(stdout);
         smd_send_command(0x05, count, 0x00);
         smd_send_command(0x01, 0x4000, 0x4000);
@@ -515,7 +523,8 @@ int load_sram(char *filename)
 {
     uint8 header[0x200];
     FILE *fd = NULL;
-
+    time_t starttime;
+    
     /* Attempt to open file */
     fd = fopen(filename, "rb");
     if(!fd) return (0);
@@ -527,13 +536,16 @@ int load_sram(char *filename)
     smd_poke(0x2000, 0x00);
     smd_poke(0x2001, 0x04);
 
-    printf("Loading SRAM block 1\r");
+    starttime = time(NULL);
+   
+
+    parport_gauge(starttime, 0x4000, 0x8000);
     fflush(stdout);
     smd_send_command(0x00, 0x4000, 0x4000);
     fread(block, 0x4000, 1, fd);
     smd_send_block(0x4000, block);
 
-    printf("Loading SRAM block 2\r");
+    parport_gauge(starttime, 0x8000, 0x8000);
     fflush(stdout);
     smd_send_command(0x00, 0x8000, 0x4000);
     fread(block, 0x4000, 1, fd);
@@ -555,6 +567,7 @@ int save_sram(char *filename)
 {
     uint8 header[0x200];
     FILE *fd = NULL;
+    time_t starttime;
 
     /* Attempt to open file */
     fd = fopen(filename, "wb");
@@ -574,13 +587,17 @@ int save_sram(char *filename)
     smd_poke(0x2000, 0x00);
     smd_poke(0x2001, 0x04);
 
-    printf("Saving SRAM block 1\r");
+    starttime = time(NULL);
+
+//    printf("Saving SRAM block 1\r");
+    parport_gauge(starttime, 0x4000, 0x8000);
     fflush(stdout);
     smd_send_command(0x01, 0x4000, 0x4000);
     smd_recieve_block(0x4000, block);
     fwrite(block, 0x4000, 1, fd);
 
-    printf("Saving SRAM block 2\r");
+//    printf("Saving SRAM block 2\r");
+    parport_gauge(starttime, 0x8000, 0x8000);
     fflush(stdout);
     smd_send_command(0x01, 0x8000, 0x4000);
     smd_recieve_block(0x4000, block);
@@ -630,7 +647,7 @@ int dump_bios(char *filename)
 int smd_usage(int argc, char *argv[])
 {
   if(argcmp(argc, argv, "-help"))
-    printf("\n%s\n",smd_TITLE);
+    printf("%s\n",smd_TITLE);
 
   printf("  -xsmd         send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT\n"
          "                receives automatically when $ROM does not exist\n"

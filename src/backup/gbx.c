@@ -2382,7 +2382,7 @@ int gbx_usage(int argc, char *argv[])
     verbose = 1;
 
   if (verbose)
-    printf("\n%s\n", gbx_TITLE);
+    printf("%s\n", gbx_TITLE);
 
   printf("  -xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
          "                receives automatically when $ROM does not exist\n"

@@ -1270,7 +1270,7 @@ int fal_usage(int argc, char *argv[])
     verbose = 1;
 
   if (verbose)
-    printf("\n%s\n", fal_TITLE);
+    printf("%s\n", fal_TITLE);
 
   printf("  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
          "                receives automatically when $ROM does not exist\n"

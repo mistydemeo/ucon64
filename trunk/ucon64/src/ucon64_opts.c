@@ -343,6 +343,7 @@ ucon64_switches (int c, const char *optarg)
       if (ucon64.swc_dumping_mode &
           (SWC_DM_ALT_ROM_SIZE | SWC_DM_SUPER_FX | SWC_DM_SPC7110 | SWC_DM_DX2_TRICK))
         printf ("WARNING: Dumping mode(s) not yet implemented\n");
+      // NOTE: The next message only applies to the current (old) version of swc.c
       if (ucon64.swc_dumping_mode & (SWC_DM_SDD1 | SWC_DM_SA1 | SWC_DM_MMX2))
         printf ("WARNING: Be sure to compile swc.c with the appropriate constants defined\n");
 
@@ -352,7 +353,36 @@ ucon64_switches (int c, const char *optarg)
           ucon64.swc_dumping_mode = 0;
         }
       else
-        printf ("Dumping mode: 0x%02x\n", ucon64.swc_dumping_mode);
+        {
+          printf ("Dumping mode: 0x%02x", ucon64.swc_dumping_mode);
+          if (ucon64.swc_dumping_mode)
+            {
+              char flagstr[100];
+
+              flagstr[0] = 0;
+              if (ucon64.swc_dumping_mode & SWC_DM_FORCE_32MBIT)
+                strcat (flagstr, "force 32 Mbit, ");
+              if (ucon64.swc_dumping_mode & SWC_DM_ALT_ROM_SIZE)
+                strcat (flagstr, "alternative ROM size method, ");
+              if (ucon64.swc_dumping_mode & SWC_DM_SUPER_FX)
+                strcat (flagstr, "Super FX, ");
+              if (ucon64.swc_dumping_mode & SWC_DM_SDD1)
+                strcat (flagstr, "S-DD1, ");
+              if (ucon64.swc_dumping_mode & SWC_DM_SA1)
+                strcat (flagstr, "SA-1, ");
+              if (ucon64.swc_dumping_mode & SWC_DM_SPC7110)
+                strcat (flagstr, "SPC7110, ");
+              if (ucon64.swc_dumping_mode & SWC_DM_DX2_TRICK)
+                strcat (flagstr, "DX2 trick, ");
+              if (ucon64.swc_dumping_mode & SWC_DM_MMX2)
+                strcat (flagstr, "Mega Man X 2, ");
+
+              if (flagstr[0])
+                flagstr[strlen (flagstr) - 2] = 0;
+              printf (" (%s)", flagstr);
+            }
+          fputc ('\n', stdout);
+        }
 
       if (!access (ucon64.rom, F_OK))
         printf ("WARNING: Dumping mode flags are ignored, because file already exists\n");

@@ -261,17 +261,24 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize)
 int
 sms_multi (int truncate_size, char *fname)
 {
-#define BUFSIZE (32 * 1024)                     // must be a multiple of 16 kB
+#define BUFSIZE 0x20000
+// BUFSIZE must be a multiple of 16 kB (for deinterleaving) and larger than or
+//  equal to 1 Mbit (for check sum calculation)
   int n, n_files, file_no, bytestowrite, byteswritten, totalsize = 0, done,
       truncated = 0, paddedsize, org_do_not_calc_crc = ucon64.do_not_calc_crc;
   struct stat fstate;
   FILE *srcfile, *destfile;
   char *destname;
-  unsigned char buffer[BUFSIZE];
+  unsigned char *buffer;
 
   if (truncate_size == 0)
     {
       fprintf (stderr, "ERROR: Can't make multi-game file of 0 bytes\n");
+      return -1;
+    }
+  if (!(buffer = (unsigned char *) malloc (BUFSIZE)))
+    {
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFSIZE);
       return -1;
     }
 
@@ -287,7 +294,7 @@ sms_multi (int truncate_size, char *fname)
     }
 
   ucon64_file_handler (destname, NULL, OF_FORCE_BASENAME);
-  if ((destfile = fopen (destname, "wb")) == NULL)
+  if ((destfile = fopen (destname, "w+b")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], destname);
       return -1;
@@ -398,6 +405,27 @@ sms_multi (int truncate_size, char *fname)
   // fill the next game table entry
   fseek (destfile, 0x2000 + (file_no - 1) * 0x10, SEEK_SET);
   fputc (0, destfile);                          // indicate no next game
+
+  /*
+    The SMS requires the check sum to match the data. The ToToTEK loaders have
+    the lower nibble of the "check sum range byte" set to 0x0f. Maybe ToToTEK
+    will change this or maybe somebody else will write a loader. To avoid extra
+    code to handle those cases we just overwite the value.
+    We don't handle a GG multi-game file differently, because we cannot detect
+    that the user intended to make such a file (other than by adding a new GG
+    multi-game option). ToToTEK's GG loader has an SMS header.
+  */
+  fseek (destfile, 0, SEEK_SET);
+  n = fread (buffer, 1, 0x20000, destfile);     // 0x0f => check sum range = 0x20000
+  buffer[SMS_HEADER_START + 15] |= 0x0f;        // overwrite check sum range byte
+  sms_header.checksum_range = 0x0f;             // sms_chksum() uses this variable
+  n = sms_chksum (buffer, n);
+
+  buffer[SMS_HEADER_START + 10] = n;            // low byte
+  buffer[SMS_HEADER_START + 11] = n >> 8;       // high byte
+  fseek (destfile, SMS_HEADER_START + 10, SEEK_SET);
+  fwrite (buffer + SMS_HEADER_START + 10, 1, 6, destfile);
+
   fclose (destfile);
   ucon64.console = UCON64_SMS;
   ucon64.do_not_calc_crc = org_do_not_calc_crc;

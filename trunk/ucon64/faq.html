@@ -62,7 +62,7 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
    What does that mean?</a><br>
 <br>
 Q26: <a href="#26">I tried to run the Win32 executable of uCON64 but Windows gave an
-   error message that cygwin1.dll could not be found.</a><br>
+   error message that cygwin1.dll or cygz.dll could not be found.</a><br>
 <br>
 Q27: <a href="#27">How do I make uCON64 display one help screen at a time?</a><br>
 <br>
@@ -102,7 +102,8 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
    &nbsp;&nbsp; ./configure<br>
 <br>
    You may want to enable gzip support by passing the option --with-zlib to the configure
-   script.<br>
+   script. zlib is available from
+   <a href="http://www.gzip.org/zlib" target="_blank">http://www.gzip.org/zlib</a>.<br>
    If you don't have autoconf installed, copy config.h.orig to config.h and Makefile.orig
    to Makefile.<br>
    Now you can optionally open config.h in an editor and change the defines. Then enter
@@ -233,11 +234,10 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
    uses a DSP chip) your Super Wild Card should have an extension with the correct DSP chip
    (or have the right cartridge with that chip plugged in your SWC). Then, make sure you are
    using a good dump (look at the checksum information). Also verify that the backup header is
-   correct. You can make uCON64 rewrite the header with -swc or -fig (the SWC send code of
-   uCON64 supports Pro Fighter dumps). uCON64 uses the information in the ROM dump's header,
-   so this is important! You can also try to rewrite the header with the option -hi or -nhi to
-   force uCON64 to handle it as a HiROM or a LoROM dump. Additionally you could use the option
-   -hd, -nhd or -hdn. For example:<br>
+   correct. You can make uCON64 rewrite the header with -swc. uCON64 uses the information in the
+   ROM dump's header, so this is important! You can also try to rewrite the header in combination
+   with the option -hi or -nhi to force uCON64 to handle it as a HiROM or a LoROM dump. Additionally
+   you could use the option -hd, -nhd or -hdn to specify the backup unit header size. For example:<br>
    &nbsp;&nbsp; ucon64 -swc -hi -hd "Chrono Trigger (U).swc"<br>
    There are many (good) ROMs on the internet with incorrect headers, so this might well solve
    the problem.<br>
@@ -247,6 +247,25 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
    to remove that form of copy protection. Some other games check the ROM speed. You can use -l
    for those. Note that some games have more than one type of copy protection, so it might be
    necessary to use uCON64 several times with a different option.<br>
+<br>
+   Some games seem to work, but after a while it becomes clear that they don't run as was
+   intended. Two examples of such games are Demon's Crest and Mega Man X. For completeness
+   here follows an explanation on how to get them to work. All credits go to Gideon Zhi for
+   sharing this info on cherryroms. Start with ROM images in SWC format.<br>
+<br>
+   Demon's Crest:<br>
+   &nbsp;&nbsp; ucon64 -stp "Demon's Crest.swc"<br>
+   &nbsp;&nbsp; cat "Demon's Crest.swc" "Demon's Crest.swc" > "Demon's Crest (SWC-fix).swc"<br>
+   &nbsp;&nbsp; ucon64 -swc "Demon's Crest (SWC-fix).swc"<br>
+<br>
+   Mega Man X:<br>
+   &nbsp;&nbsp; ucon64 -stp "Mega Man X.swc"<br>
+   &nbsp;&nbsp; ucon64 -padn=2097152 "Mega Man X.swc"<br>
+   &nbsp;&nbsp; cat "Mega Man X.swc" "Mega Man X.swc" > "Mega Man X (SWC-fix).swc"<br>
+   &nbsp;&nbsp; ucon64 -swc "Mega Man X (SWC-fix).swc"<br>
+<br>
+   WinDOS users without the program cat should use the command copy. For example:<br>
+   &nbsp;&nbsp; copy /b "Mega Man X.swc" + "Mega Man X.swc" "Mega Man X (SWC-fix).swc"<br>
 <br>
 <p>
 <a name="12"><b>Q12</b>: Which backup devices are supported by uCON64?</a><br>
@@ -359,10 +378,10 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
 <br>
 <p>
 <a name="26"><b>Q26</b>: I tried to run the Win32 executable of uCON64 but Windows gave an
-   error message that cygwin1.dll could not be found.</a><br>
-<b>A</b>: The Win32 executable of uCON64 needs that DLL in order to run. You can download
-   it from <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>.
-   Copy the file to the same directory as the uCON64 executable or to a directory in your PATH.<br>
+   error message that cygwin1.dll or cygz.dll could not be found.</a><br>
+<b>A</b>: The Win32 executable of uCON64 needs those DLLs in order to run. You can download
+   them from <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>.
+   Copy the files to the same directory as the uCON64 executable or to a directory in your PATH.<br>
 <br>
 <p>
 <a name="27"><b>Q27</b>: How do I make uCON64 display one help screen at a time?</a><br>

@@ -93,10 +93,7 @@ write programs in C
 #include "backup/cdrw.h"
 
 static void ucon64_usage (int argc, char *argv[]);
-
 static int ucon64_init (char *romfile, struct rom_ *rom);
-#define ucon64_flush(a) ucon64_init(NULL, a)
-
 static int ucon64_nfo (struct rom_ *rom);
 static void ucon64_exit (void);
 static int ucon64_ls (int verbose);
@@ -104,7 +101,6 @@ static int ucon64_e (struct rom_ *rom);
 static int ucon64_configfile (void);
 
 struct rom_ rom;
-
 struct ucon64_ ucon64;
 
 static struct option long_options[] = {
@@ -295,7 +291,6 @@ main (int argc, char *argv[])
        return 0;
     }
 
-
   memset (&ucon64, 0L, sizeof (struct ucon64_));
 
   ucon64_configfile ();
@@ -306,7 +301,7 @@ main (int argc, char *argv[])
   ucon64.argc = argc;
   for (x = 0; x < argc; x++)ucon64.argv[x] = argv[x];
 
-  ucon64_flush (&rom);
+  ucon64_init (NULL, &rom);
 
 /*
   getopt_long_only() - switches and overrides
@@ -874,7 +869,7 @@ main (int argc, char *argv[])
           break;
 
         case ucon64_DBS:
-          ucon64_flush (&rom);
+          ucon64_init (NULL, &rom);
           sscanf (rom.rom, "%lx", &rom.current_crc32);
           ucon64_dbsearch (&rom);
           ucon64_nfo (&rom);
@@ -1741,7 +1736,7 @@ int ucon64_ls (int verbose)
               ucon64_argv[1] = ep->d_name;
               ucon64_argc = 2;
 
-              ucon64_flush (&rom);
+              ucon64_init (NULL, &rom);
               result = ucon64_init (ep->d_name, &rom);
 
               if (verbose == 0)

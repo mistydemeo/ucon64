@@ -243,7 +243,6 @@ remove_temp_file (void)
 }
 
 
-#if 1
 int
 ucon64_fhexdump (const char *filename, long start, long len)
 {
@@ -270,32 +269,195 @@ ucon64_fhexdump (const char *filename, long start, long len)
 
   return 0;
 }
-#else
-int
-ucon64_fhexdump (const char *filename, long start, long len)
+
+
+#if 0
+unsigned long
+ucon64_filefile (const char *filename1, long start1, const char *filename2, long start2, int similar)
 {
-  int x, size = q_fsize (filename), dump;
-  char buf[MAXBUFSIZE];
-  FILE *fh = fopen (filename, "rb");
+  int base, fsize1, fsize2, len, chunksize1, chunksize2, readok = 1,
+      bytesread1, bytesread2, bytesleft1, bytesleft2;
+  unsigned char buf1[MAXBUFSIZE], buf2[MAXBUFSIZE];
+  FILE *file1, *file2;
 
-  if (!fh) return -1;
-  
-  if ((size - start) < len)
-    len = size - start;
+  if (!strcmp (filename1, filename2))
+    return 0;
+  if (access (filename1, R_OK) != 0 || access (filename2, R_OK) != 0)
+    return -1;
 
-  fseek (fh, start, SEEK_SET);
-  for (x = 0; x < len; x++)
+  fsize1 = q_fsize (filename1);              // q_fsize() returns size in bytes
+  fsize2 = q_fsize (filename2);
+  if (fsize1 < start1 || fsize2 < start2)
+    return -1;
+
+  if (!(file1 = fopen (filename1, "rb")))
+    return -1;
+
+  if (!(file2 = fopen (filename2, "rb")))
     {
-      if (!(x % 16))
-        printf ("%s%s%08lx  ", x?buf:"", x?"\n":"", x + start);
-
-      dump = fgetc (fh);
-      printf ("%02x %s", dump & 0xff, !((x + 1) % 4) ? " " : "");
-      sprintf (&buf[x % 16], "%c", isprint (dump) ? ((char) dump) : '.');
+      fclose (file1);
+      return -1;
     }
-  printf ("%s\n", buf);
-  fclose (fh);
 
+  fseek (file1, start1, SEEK_SET);
+  fseek (file2, start2, SEEK_SET);
+  bytesleft1 = fsize1;
+  bytesread1 = 0;
+  bytesleft2 = fsize2;
+  bytesread2 = 0;
+
+  while (bytesleft1 > 0 && bytesread1 < fsize2 && readok)
+    {
+      chunksize1 = fread (buf1, 1, MAXBUFSIZE, file1);
+      if (chunksize1 == 0)
+        readok = 0;
+      else
+        {
+          bytesread1 += chunksize1;
+          bytesleft1 -= chunksize1;
+        }
+
+      while (bytesleft2 > 0 && bytesread2 < bytesread1 && readok)
+        {
+          chunksize2 = fread (buf2, 1, chunksize1, file2);
+          if (chunksize2 == 0)
+            readok = 0;
+          else
+            {
+              for (base = 0; base < chunksize2; base++)
+                {
+                  if (similar == TRUE ? 
+                      buf1[base] == buf2[base] :
+                      buf1[base] != buf2[base])
+                    {
+                      for (len = 0; base + len < chunksize2; len++)
+                        if (similar == TRUE ?
+                            buf1[base + len] != buf2[base + len] :
+                            buf1[base + len] == buf2[base + len]) break;
+
+                      printf ("%s:\n", filename1);
+                      mem_hexdump (&buf1[base], len, start1 + base + bytesread2);
+                      printf ("%s:\n", filename2);
+                      mem_hexdump (&buf2[base], len, start2 + base + bytesread2);
+                      printf ("\n");
+                      base += len;
+                    }
+                }
+
+              bytesread2 += chunksize2;
+              bytesleft2 -= chunksize2;
+            }
+        }
+    }
+
+  fclose (file1);
+  fclose (file2);
+  return 0;
+}
+#else
+unsigned long
+ucon64_filefile (const char *filename1, long start1, const char *filename2, long start2, int similar)
+{
+  int base, fsize1, fsize2, len, chunksize1, chunksize2, readok = 1,
+      bytesread1, bytesread2, bytesleft1, bytesleft2, bufsize = 1024 * 1024;
+  unsigned char *buf1, *buf2;
+  FILE *file1, *file2;
+
+  if (!strcmp (filename1, filename2))
+    return 0;
+  if (access (filename1, R_OK) != 0 || access (filename2, R_OK) != 0)
+    return -1;
+
+  fsize1 = q_fsize (filename1);              // q_fsize() returns size in bytes
+  fsize2 = q_fsize (filename2);
+  if (fsize1 < start1 || fsize2 < start2)
+    return -1;
+
+  if (!(buf1 = (unsigned char *) malloc (bufsize)))
+    return -1;
+
+  if (!(buf2 = (unsigned char *) malloc (bufsize)))
+    {
+      free (buf1);
+      return -1;
+    }
+
+  if (!(file1 = fopen (filename1, "rb")))
+    {
+      free (buf1);
+      free (buf2);
+      return -1;
+    }
+  if (!(file2 = fopen (filename2, "rb")))
+    {
+      fclose (file1);
+      free (buf1);
+      free (buf2);
+      return -1;
+    }
+
+  fseek (file1, start1, SEEK_SET);
+  fseek (file2, start2, SEEK_SET);
+  bytesleft1 = fsize1;
+  bytesread1 = 0;
+  bytesleft2 = fsize2;
+  bytesread2 = 0;
+
+  while (bytesleft1 > 0 && bytesread1 < fsize2 && readok)
+    {
+      chunksize1 = fread (buf1, 1, bufsize, file1);
+      if (chunksize1 == 0)
+        readok = 0;
+      else
+        {
+          bytesread1 += chunksize1;
+          bytesleft1 -= chunksize1;
+        }
+
+      while (bytesleft2 > 0 && bytesread2 < bytesread1 && readok)
+        {
+          chunksize2 = fread (buf2, 1, chunksize1, file2);
+          if (chunksize2 == 0)
+            readok = 0;
+          else
+            {
+              base = 0;
+              while (base < chunksize2)
+                {
+                  if ((similar == FALSE && buf1[base] != buf2[base]) ||
+                      (similar == TRUE && buf1[base] == buf2[base]))
+                    {
+                      len = 0;
+                      while ((similar == TRUE) ?
+                             (buf1[base + len] == buf2[base + len]) :
+                             (buf1[base + len] != buf2[base + len]))
+                        {
+                          len++;
+                          if (base + len >= chunksize2)
+                            break;
+                        }
+
+                      printf ("%s:\n", filename1);
+                      mem_hexdump (&buf1[base], len, start1 + base + bytesread2);
+                      printf ("%s:\n", filename2);
+                      mem_hexdump (&buf2[base], len, start2 + base + bytesread2);
+                      printf ("\n");
+                      base += len;
+                    }
+                  else
+                    base++;
+                }
+
+              bytesread2 += chunksize2;
+              bytesleft2 -= chunksize2;
+            }
+        }
+    }
+
+  fclose (file1);
+  fclose (file2);
+  free (buf1);
+  free (buf2);
   return 0;
 }
 #endif

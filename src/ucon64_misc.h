@@ -92,6 +92,7 @@ extern void remove_temp_file (void); // possible temp file created by handle_exi
 
 extern int ucon64_fhexdump (const char *filename, long start, long len);
 
+extern unsigned long ucon64_filefile (const char *filename1, long start1, const char *filename2, long start2, int similar);
 
 /*
   wrapper for misc.c/gauge()

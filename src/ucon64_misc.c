@@ -1014,6 +1014,7 @@ ucon64_ls (const char *path, int mode)
 int
 ucon64_configfile (void)
 {
+  char buf[256];
   char buf2[MAXBUFSIZE], *dirname;
 
   dirname = getenv2 ("HOME");
@@ -1040,9 +1041,9 @@ ucon64_configfile (void)
         }
       else
         {
-          fputs ("# uCON64 config\n"
+          fprintf (fh, "# uCON64 config\n"
                  "#\n"
-                 "version=" UCON64_VERSION_S "\n"
+                 "version=%d\n"
                  "#\n"
                  "# create backups of files? (1=yes; 0=no)\n"
 //                 "# before processing a ROM uCON64 will make a backup of it\n"
@@ -1086,23 +1087,23 @@ ucon64_configfile (void)
                  "#\n"
                  "# LHA support\n"
                  "#\n"
-                 "lha_extract=lha efi %s\n"
+                 "lha_extract=lha efi \"%%s\"\n"
                  "#\n"
                  "# LZH support\n"
                  "#\n"
-                 "lzh_extract=lha efi %s\n"
+                 "lzh_extract=lha efi \"%%s\"\n"
                  "#\n"
                  "# ZIP support\n"
                  "#\n"
-                 "zip_extract=unzip -xojC %s\n"
+                 "zip_extract=unzip -xojC \"%%s\"\n"
                  "#\n"
                  "# RAR support\n"
                  "#\n"
-                 "rar_extract=unrar x %s\n"
+                 "rar_extract=unrar x \"%%s\"\n"
                  "#\n"
                  "# ACE support\n"
                  "#\n"
-                 "ace_extract=unace e %s\n"
+                 "ace_extract=unace e \"%%s\"\n"
 #endif
 #ifdef BACKUP_CD
                  "#\n"
@@ -1117,12 +1118,12 @@ ucon64_configfile (void)
                  "cdrw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
                  "cdrw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
 #endif
-                 , fh);
+                 , UCON64_VERSION);
           fclose (fh);
           printf ("OK\n\n");
         }
     }
-  else if (strcmp (getProperty (ucon64.configfile, "version", buf2, UCON64_VERSION_S), UCON64_VERSION_S) != 0)
+  else if (strtol (getProperty (ucon64.configfile, "version", buf2, "0"), NULL, 10) < UCON64_VERSION )
     {
       strcpy (buf2, ucon64.configfile);
       setext (buf2, ".OLD");
@@ -1131,7 +1132,8 @@ ucon64_configfile (void)
 
       filecopy (ucon64.configfile, 0, quickftell (ucon64.configfile), buf2, "wb");
 
-      setProperty (ucon64.configfile, "version", UCON64_VERSION_S);
+      sprintf (buf, "%d", UCON64_VERSION);
+      setProperty (ucon64.configfile, "version", buf);
 
 #if 0
       setProperty (ucon64.configfile, "backups", "1");
@@ -1152,11 +1154,11 @@ ucon64_configfile (void)
       DELETEPROPERTY (ucon64.configfile, "cdrw_iso_read");
       DELETEPROPERTY (ucon64.configfile, "cdrw_iso_write");
 
-      setProperty (ucon64.configfile, "lha_extract", "lha efi %s");
-      setProperty (ucon64.configfile, "lzh_extract", "lha efi %s");
-      setProperty (ucon64.configfile, "zip_extract", "unzip -xojC %s");
-      setProperty (ucon64.configfile, "rar_extract", "unrar x %s");
-      setProperty (ucon64.configfile, "ace_extract", "unace e %s");
+      setProperty (ucon64.configfile, "lha_extract", "lha efi \"%s\"");
+      setProperty (ucon64.configfile, "lzh_extract", "lha efi \"%s\"");
+      setProperty (ucon64.configfile, "zip_extract", "unzip -xojC \"%s\"");
+      setProperty (ucon64.configfile, "rar_extract", "unrar x \"%s\"");
+      setProperty (ucon64.configfile, "ace_extract", "unace e \"%s\"");
 
       sync ();
       printf ("OK\n\n");

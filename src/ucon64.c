@@ -293,7 +293,7 @@ const struct option long_options[] = {
     {"mapr", 1, 0, UCON64_MAPR},
     {"cmnt", 1, 0, UCON64_CMNT},                // will be active only if UNIF_REVISION > 7
     {"dumpinfo", 0, 0, UCON64_DUMPINFO},
-    {"version", 0, 0, UCON64_VERSION},
+    {"version", 0, 0, UCON64_VER},
     {0, 0, 0, 0}
   };
 

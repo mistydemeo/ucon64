@@ -30,8 +30,11 @@ want to copy ucon64.exe to a directory in your PATH and maybe edit ucon64.cfg.<b
 <br />
 BeOS users will also need Caz's driver inside ioport.zip or available at
 <a href="http://www.infernal.currantbun.com" target="_blank">http://www.infernal.currantbun.com</a><br /><br />
-Under Windows NT/2000/XP you will need a driver too (giveio/userport). Have a look at
+Under Windows NT/2000/XP you will need a driver only if you want to use uCON64 for
+sending/receiving ROMs to/from a copier. You could use giveio or UserPort. At
 <a href="http://www.devrs.com/gba/files/mbv2faqs.php" target="_blank">http://www.devrs.com/gba/files/mbv2faqs.php</a>
+you can find links to those programs. With giveio sending ROMs goes faster than with
+UserPort, but UserPort is a bit easier to use.
 </tt></p>
 <p><tt>
 Q: Sometimes my terminal seems to be locked after I do<br />
@@ -51,7 +54,7 @@ strange results.<br />
 A: The help says that * will show info to indicate that <u>every</u> uCON64 option
 will show information about a ROM. Note that sometimes you will have to specify the
 console type for uCON64, because the ROM dump is damaged or simply not detected
-correctly by uCON64. For example<br />
+correctly by uCON64. For example:<br />
 &nbsp;&nbsp; ucon64 -snes "Super Aleste (J) [t1].swc"<br />
 </tt></p>
 <p><tt>
@@ -60,7 +63,7 @@ second. However, when I try to use uCON64 to send a demo to the FAL something go
 What happened?<br />
 A: Well, many things could have gone wrong, but uCON64 only detects your first parallel
 port (it stops probing for a parallel port if it finds one). So, you should specify the
-address of the second parallel port on the command line. For example<br />
+address of the second parallel port on the command line. For example:<br />
 &nbsp;&nbsp; ucon64 -xfal demo.gba 0x278<br />
 </tt></p>
 <p><tt>
@@ -126,5 +129,10 @@ necessary to use uCON64 several times with a different option.<br />
 <p><tt>
 Q: Which backup devices are supported by uCON64?<br />
 A: See <a href="hardware.html" target="_blank">hardware.html</a>.<br />
+</tt></p>
+<p><tt>
+Q: I use Windows XP (NT/2000). When I try to run ucon64.exe under command.com (start -> Run...
+-> command) uCON64 crashes. What do I do wrong?<br />
+A: You shouldn't use command, use cmd instead.<br />
 </tt></p>
 </tt></body></html>

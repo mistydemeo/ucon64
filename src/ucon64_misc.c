@@ -218,7 +218,8 @@ ucon64_fhexdump (const char *filename, int start, int len)
   char buf[MAXBUFSIZE];
   FILE *fh = fopen (filename, "rb");
 
-  if (!fh) return -1;
+  if (!fh)
+    return -1;
 
   if ((size - start) < len)
     len = size - start;
@@ -1372,7 +1373,7 @@ ucon64_configfile (void)
                  "# use ANSI colors in output? (1=yes; 0=no)\n"
                  "#\n"
                  "ansi_color=1\n"
-#endif                 
+#endif
                  "#\n"
                  "# parallel port\n"
                  "#\n"

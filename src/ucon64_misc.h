@@ -24,6 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_MISC_H
 #define UCON64_MISC_H
 
+#include "ucon64.h"                             // st_rominfo_t
+
 #ifdef  BACKUP
 #define out1byte(p,x)   outportb(p,x)
 #define in1byte(p)      inportb(p)

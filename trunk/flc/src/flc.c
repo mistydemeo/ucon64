@@ -77,8 +77,10 @@ main (int argc, char *argv[])
 
   flc_configfile ();
 
+//  flc.tmppath = tempnam (ms_getenv("TEMP"), "flc");
+
   while ((c =
-          getopt_long (argc, argv, "tXSkch", long_options,
+          getopt_long (argc, argv, "tXSkchv", long_options,
                             &option_index)) != -1)
 
     {
@@ -290,7 +292,7 @@ flc_configfile (void)
             */
            ".flcrc"
 #endif
-           , getchd (buf2, FILENAME_MAX));
+           , ms_getenv ("HOME"));
 
 
   if (access (flc.configfile, F_OK) == -1)

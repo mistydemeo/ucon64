@@ -19,8 +19,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */ 
-#ifndef st_flc_t_H
-#define st_flc_t_H
+#ifndef FLC_H
+#define FLC_H
 
 #define MAXBUFSIZE 32768
 
@@ -49,9 +49,11 @@ typedef struct st_flc
 
   int check;
   
-  char path[MAXBUFSIZE];
+  char tmppath[FILENAME_MAX];
 
-  char configfile[MAXBUFSIZE];
+  char path[FILENAME_MAX];
+
+  char configfile[FILENAME_MAX];
   char config[4096];
 }st_flc_t;
 

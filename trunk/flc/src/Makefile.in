@@ -4,7 +4,7 @@ CC=@CC@
 CFLAGS=@CFLAGS@
 LDFLAGS=@LDFLAGS@
 
-OBJECTS=flc.o misc.o output.o extract.o sort.o getopt.o
+OBJECTS=flc.o misc.o flc_misc.o getopt.o
 OBJECTS_TXT=misc.o txtextract.o
 OBJECTS_ID3=misc.o id3extract.o
 
@@ -41,8 +41,6 @@ FLC_STD_H=flc.h misc.h config.h
 getopt.o: getopt.h
 misc.o: misc.h config.h
 flc.o: extract.h getopt.h output.h sort.h $(FLC_STD_H)
-extract.o: $(FLC_STD_H)
-output.o: $(FLC_STD_H)
-sort.o: $(FLC_STD_H)
+flc_misc.o: $(FLC_STD_H)
 txtextract.o: misc.h $(FLC_STD_H)
 id3extract.o: misc.h $(FLC_STD_H)

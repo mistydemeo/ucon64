@@ -1963,39 +1963,39 @@ ucon64_usage (int argc, char *argv[])
   int single = 0;
 
   printf ("USAGE: %s [OPTION(S)] ROM [FILE]\n\n"
-           "  " OPTION_LONG_S "nbak         prevents backup files (*.bak)\n"
+           "  " OPTION_LONG_S "nbak        prevents backup files (*.bak)\n"
 #ifdef	__MSDOS__
-           "  " OPTION_S "e            emulate/run ROM (see ucon64.cfg for more)\n"
+           "  " OPTION_S "e           emulate/run ROM (see ucon64.cfg for more)\n"
 #else
-           "  " OPTION_S "e            emulate/run ROM (see $HOME/.ucon64rc for more)\n"
+           "  " OPTION_S "e           emulate/run ROM (see $HOME/.ucon64rc for more)\n"
 #endif
-           "  " OPTION_LONG_S "crc          show CRC32 value of ROM\n"
-           "  " OPTION_LONG_S "crchd        show CRC32 value of ROM (regarding to +512 Bytes header)\n"
-           "  " OPTION_LONG_S "dbs          search ROM database (all entries) by CRC32; $ROM=0xCRC32\n"
-           "  " OPTION_LONG_S "db           ROM database statistics (# of entries)\n"
-           "  " OPTION_LONG_S "dbv          view ROM database (all entries)\n"
-           "  " OPTION_LONG_S "ls           generate ROM list for all ROMs; $ROM=DIRECTORY\n"
-           "  " OPTION_LONG_S "lsv          like " OPTION_LONG_S "ls but more verbose; $ROM=DIRECTORY\n"
-//         "TODO:  " OPTION_LONG_S "rrom    rename all ROMs in DIRECTORY to their internal names; $ROM=DIR\n"
-//         "TODO:  " OPTION_LONG_S "rr83    like " OPTION_LONG_S "rrom but with 8.3 filenames; $ROM=DIR\n"
-//         "                this is often used by people who loose control of their ROMs\n"
-           "  " OPTION_LONG_S "rl           rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
-           "  " OPTION_LONG_S "ru           rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"
+           "  " OPTION_LONG_S "crc         show CRC32 value of ROM\n"
+           "  " OPTION_LONG_S "crchd       show CRC32 value of ROM (regarding to +512 Bytes header)\n"
+           "  " OPTION_LONG_S "dbs         search ROM database (all entries) by CRC32; $ROM=0xCRC32\n"
+           "  " OPTION_LONG_S "db          ROM database statistics (# of entries)\n"
+           "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
+           "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; $ROM=DIRECTORY\n"
+           "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; $ROM=DIRECTORY\n"
+//         "TODO:  " OPTION_LONG_S "rrom   rename all ROMs in DIRECTORY to their internal names; $ROM=DIR\n"
+//         "TODO:  " OPTION_LONG_S "rr83   like " OPTION_LONG_S "rrom but with 8.3 filenames; $ROM=DIR\n"
+//         "               this is often used by people who loose control of their ROMs\n"
+           "  " OPTION_LONG_S "rl          rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
+           "  " OPTION_LONG_S "ru          rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"
 #ifdef	__MSDOS__
-           "  " OPTION_LONG_S "hex          show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex $ROM|more\"\n"
+           "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex $ROM|more\"\n"
 #else
-           "  " OPTION_LONG_S "hex          show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex $ROM|less\"\n"       // less is better ;-)
+           "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex $ROM|less\"\n"       // less is better ;-)
 #endif
-           "  " OPTION_LONG_S "find         find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)\n"
-           "  " OPTION_S "c            compare ROMs for differencies; $FILE=OTHER_ROM\n"
-           "  " OPTION_LONG_S "cs           compare ROMs for similarities; $FILE=OTHER_ROM\n"
-           "  " OPTION_LONG_S "swap         swap/(de)interleave ALL Bytes in ROM (1234<->2143)\n"
-           "  " OPTION_LONG_S "ispad        check if ROM is padded\n"
-           "  " OPTION_LONG_S "pad          pad ROM to full Mb\n"
-           "  " OPTION_LONG_S "padhd        pad ROM to full Mb (regarding to +512 Bytes header)\n"
-           "  " OPTION_LONG_S "stp          strip first 512 Bytes (possible header) from ROM\n"
-           "  " OPTION_LONG_S "ins          insert 512 Bytes (0x00) before ROM\n"
-           "  " OPTION_LONG_S "strip        strip Bytes from end of ROM; $FILE=VALUE\n"
+           "  " OPTION_LONG_S "find        find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)\n"
+           "  " OPTION_S "c           compare ROMs for differencies; $FILE=OTHER_ROM\n"
+           "  " OPTION_LONG_S "cs          compare ROMs for similarities; $FILE=OTHER_ROM\n"
+           "  " OPTION_LONG_S "swap        swap/(de)interleave ALL Bytes in ROM (1234<->2143)\n"
+           "  " OPTION_LONG_S "ispad       check if ROM is padded\n"
+           "  " OPTION_LONG_S "pad         pad ROM to full Mb\n"
+           "  " OPTION_LONG_S "padhd       pad ROM to full Mb (regarding to +512 Bytes header)\n"
+           "  " OPTION_LONG_S "stp         strip first 512 Bytes (possible header) from ROM\n"
+           "  " OPTION_LONG_S "ins         insert 512 Bytes (0x00) before ROM\n"
+           "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; $FILE=VALUE\n"
            ,getarg (argc, argv, ucon64_NAME));
 
   bsl_usage ();
@@ -2126,9 +2126,9 @@ ucon64_usage (int argc, char *argv[])
       printf ("%s\n%s\n%s\n%s\n%s\n%s\n"
               "  " OPTION_LONG_S "xbox, " OPTION_LONG_S "ps2, " OPTION_LONG_S "sat, " OPTION_LONG_S "3do, " OPTION_LONG_S "cd32, " OPTION_LONG_S "cdi\n"
               "                force recognition; NEEDED\n"
-//            "  " OPTION_LONG_S "iso          force image is ISO9660\n"
-//            "  " OPTION_LONG_S "raw          force image is MODE2_RAW/BIN\n"
-              "  " OPTION_LONG_S "iso          convert RAW/BIN to ISO9660; $ROM=RAW_IMAGE\n",
+//            "  " OPTION_LONG_S "iso         force image is ISO9660\n"
+//            "  " OPTION_LONG_S "raw         force image is MODE2_RAW/BIN\n"
+              "  " OPTION_LONG_S "iso         convert RAW/BIN to ISO9660; $ROM=RAW_IMAGE\n",
               xbox_title,
               ps2_title, saturn_title, real3do_title, cd32_title,
               cdi_title);
@@ -2170,8 +2170,8 @@ ucon64_usage (int argc, char *argv[])
               "; NEEDED"
 #endif
               "\n"
-              "  " OPTION_LONG_S "hd           force ROM has header (+512 Bytes)\n"
-              "  " OPTION_LONG_S "nhd          force ROM has no header\n"
+              "  " OPTION_LONG_S "hd          force ROM has header (+512 Bytes)\n"
+              "  " OPTION_LONG_S "nhd         force ROM has no header\n"
               "\n", system16_title,
               atari_title, coleco_title, virtualboy_title,
               vectrex_title, intelli_title, gp32_title);

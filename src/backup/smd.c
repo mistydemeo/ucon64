@@ -702,9 +702,9 @@ smd_usage (void)
 {
 
     printf ("%s\n"
-    "  " OPTION_LONG_S "xsmd         send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT\n"
+    "  " OPTION_LONG_S "xsmd        send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT\n"
      "                receives automatically when $ROM does not exist\n"
-     "  " OPTION_LONG_S "xsmds        send/receive SRAM to/from Super Magic Drive/SMD; $FILE=PORT\n"
+     "  " OPTION_LONG_S "xsmds       send/receive SRAM to/from Super Magic Drive/SMD; $FILE=PORT\n"
      "                receives automatically when $ROM(=SRAM) does not exist\n", smd_title);
 }
 

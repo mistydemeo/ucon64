@@ -31,8 +31,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 void
 ips_usage (void)
 {
-  printf ("  " OPTION_S "i            apply IPS patch (<=1.2); $FILE=PATCHFILE\n"
-           "  "OPTION_LONG_S "mki          create IPS patch; $FILE=CHANGED_ROM\n");
+  printf ("  " OPTION_S "i           apply IPS patch (<=1.2); $FILE=PATCHFILE\n"
+           "  "OPTION_LONG_S "mki         create IPS patch; $FILE=CHANGED_ROM\n");
 }
 
 

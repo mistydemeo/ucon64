@@ -31,7 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 void
 bsl_usage (void)
 {
-  printf("  " OPTION_S "b            apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE\n");
+  printf("  " OPTION_S "b           apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE\n");
 }
 
 

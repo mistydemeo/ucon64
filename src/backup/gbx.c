@@ -2632,16 +2632,15 @@ void
 gbx_usage (void)
 {
   printf ("%s\n"
-          "  " OPTION_LONG_S "xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
+          "  " OPTION_LONG_S "xgbx        send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
           "                receives automatically when $ROM does not exist\n"
-          "  " OPTION_LONG_S "xgbxs        send/receive SRAM to/from GB Xchanger; $FILE=PORT\n"
+          "  " OPTION_LONG_S "xgbxs       send/receive SRAM to/from GB Xchanger; $FILE=PORT\n"
           "                receives automatically when $ROM(=SRAM) does not exist\n"
-          "  " OPTION_LONG_S "xgbxb <n>    send/receive 64kbits SRAM to/from GB Xchanger bank n\n"
+          "  " OPTION_LONG_S "xgbxb <n>   send/receive 64kbits SRAM to/from GB Xchanger bank n\n"
           "                n can be a number from 0 to 15\n"
           "                $FILE=PORT; receives automatically when $ROM does not exist\n"
-          "                You only need to specify PORT if uCON64 doesn't detect the\n"
-          "                (right) parallel port. If that is the case give a hardware\n"
-          "                address, for example:\n"
-          "                ucon64 " OPTION_LONG_S "xgbx \"Pokemon (Green).gb\" 0x378\n", gbx_title);
+"NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
+"      parallel port. If that is the case give a hardware address:\n"
+"      ucon64 " OPTION_LONG_S "xgbx \"Pokemon (Green).gb\" 0x378\n", gbx_title);
 }
 #endif // BACKUP

@@ -1430,15 +1430,11 @@ snes_s (st_rominfo_t *rominfo)
     part_size = PARTSIZE;
 
   if (type == GD3)
-    /*
-      part_size is ignored for Game Doctor.
-      Note that 4 Mbit is the smallest size a split Game Doctor file can be
-      (the minimum size of a GD memory unit).
-    */
+    // part_size is ignored for Game Doctor
     {
-      if (size <= 4 * MBIT && size != 2 * MBIT)
+      if (size < 4 * MBIT && size != 2 * MBIT)
         { // "&& size != 2 * MBIT" is a fix for BS Chrono Trigger - Jet Bike Special (J)
-          printf ("NOTE: ROM size is smaller than or equal to 4 Mbit -- won't be split\n");
+          printf ("NOTE: ROM size is smaller than 4 Mbit -- won't be split\n");
           return -1;
         }
     }

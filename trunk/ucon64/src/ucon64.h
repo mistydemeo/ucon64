@@ -185,6 +185,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_XSWCS (UCON64_OPTION + 169)
 #define UCON64_XV64 (UCON64_OPTION + 170)
 #define UCON64_Z64 (UCON64_OPTION + 171)
+#define UCON64_BS (UCON64_OPTION + 172)
+#define UCON64_NBS (UCON64_OPTION + 173)
 
 #define UCON64_ATARI UCON64_ATA
 #define UCON64_CD32 (UCON64_CONSOLE + 2)
@@ -268,7 +270,8 @@ typedef struct st_ucon64
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
   long buheader_len;            //length of backup unit header (==0)?no bu head
   int split;                    //rom is split
-  int snes_hirom;               //super nintendo ROM is a HiROM
+  int snes_hirom;               //Super Nintendo ROM is HiROM
+  int bs_dump;                  //Super Nintendo "ROM" is a Broadcast Satellaview dump
   int interleaved;              //rom is interleaved (swapped)
   int console;                  //integer for the detected console system
 

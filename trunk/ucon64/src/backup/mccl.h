@@ -24,4 +24,4 @@ extern const char *mccl_usage[];
 #ifdef BACKUP
 extern int mccl_read (const char *filename, unsigned int parport);
 #endif // BACKUP
-#endif GBCAMERA_H
+#endif // GBCAMERA_H

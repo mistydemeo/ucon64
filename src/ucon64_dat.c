@@ -72,12 +72,10 @@ static DIR *ddat = NULL;
 static HANDLE ddat = NULL;
 #endif
 static FILE *fdat = NULL;
-static int filepos_line = 0;
-static int warning = 1;                         // show the warning only once when indexing
-static FILE *ucon64_datfile;
+static int ucon64_n_files = 0, filepos_line = 0, warning = 1; // show the warning
+static FILE *ucon64_datfile;                                  // only once when indexing
 static char ucon64_dat_fname[FILENAME_MAX];
 static st_mkdat_entry_t *ucon64_mkdat_entries = NULL;
-static int ucon64_n_files = 0;
 
 const st_usage_t ucon64_dat_usage[] = {
   {NULL, NULL, "DATabase (support for DAT files)"},

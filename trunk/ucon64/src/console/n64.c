@@ -180,7 +180,7 @@ int
 n64_v64 (st_rominfo_t *rominfo)
 {
   long size = q_fsize (ucon64.rom);
-  char buf[MAXBUFSIZE];
+  char buf[FILENAME_MAX];
 
   if (rominfo->interleaved != 0)
     {
@@ -204,7 +204,7 @@ int
 n64_z64 (st_rominfo_t *rominfo)
 {
   long size = q_fsize (ucon64.rom);
-  char buf[MAXBUFSIZE];
+  char buf[FILENAME_MAX];
 
   if (!rominfo->interleaved)
     {
@@ -257,7 +257,7 @@ int
 n64_chk (st_rominfo_t *rominfo)
 {
   int x;
-  char buf[10];
+  char buf[8];
 
   ucon64_fbackup (NULL, ucon64.rom);
 
@@ -290,7 +290,7 @@ n64_chk (st_rominfo_t *rominfo)
 int
 n64_bot (st_rominfo_t *rominfo)
 {
-  char buf[MAXBUFSIZE];
+  char buf[FILENAME_MAX];
 
   if (!access (ucon64.file, F_OK))
     {
@@ -324,7 +324,7 @@ n64_bot (st_rominfo_t *rominfo)
 int
 n64_usms (st_rominfo_t *rominfo)
 {
-  char *usmsbuf, buf[MAXBUFSIZE];
+  char *usmsbuf, buf[FILENAME_MAX];
 
   if (!access (ucon64.file, F_OK))
     {

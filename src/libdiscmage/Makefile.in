@@ -18,12 +18,12 @@ LDFLAGS=-s
 
 LIBNAME=discmage
 OBJECTS=libdm_misc.o cdi.o nero.o sheets.o dllinit.o misc.o
-ifdef ZLIB
-LIBS=-lz
-OBJECTS+=unzip.o
-else
+#ifdef ZLIB
+#LIBS=-lz
+#OBJECTS+=unzip.o
+#else
 LIBS=
-endif
+#endif
 
 
 # The test for Cygwin should be done before the test for DJGPP, because the

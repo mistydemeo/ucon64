@@ -22,12 +22,22 @@ ifeq ($(findstring CYGWIN,$(OSTYPE)),CYGWIN)
 GCC_WIN=1
 endif
 
+ifdef DJGPP
+LDFLAGS=
+else
+ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
+LDFLAGS=-nostart
+else # Unix or Win GCC
+LDFLAGS=-shared
+endif
+endif
+
 ifeq ($(findstring DJGPP,$(OSTYPE)),)
 ifneq ($(GCC_WIN),1)
 CFLAGS += -fPIC
 else
 # Cygwin and MinGW need an import library for a DLL
-LIBS += -Wl,--out-implib,libcd64dll.a
+LDFLAGS += -Wl,--out-implib,libcd64dll.a
 endif
 endif
 
@@ -38,6 +48,7 @@ ifeq ($(findstring OpenBSD,$(OSTYPE)),)
 CFLAGS += -std=gnu99
 endif
 endif
+
 
 DEFAULT_BUILD = 1
 
@@ -145,17 +156,14 @@ libcd64.a: cd64lib.o cd64io.o
 #	rm -f $@
 	ar crs $@ $*.o
 
+LDFLAGS+=$(LIBS)
 ifeq ($(GCC_WIN),1)
 cd64.dll: cd64lib.o cd64io.o
 else
 libcd64.so: cd64lib.o cd64io.o
 endif
 #	rm -f $@
-ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
-	$(CC) $^ -nostart $(LIBS) -o $@
-else
-	$(CC) $^ -shared $(LIBS) -o $@
-endif
+	$(CC) $^ $(LDFLAGS) -o $@
 
 clean:
 	rm -f *.o *.so *.a a.out

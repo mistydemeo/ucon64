@@ -62,6 +62,10 @@ OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
         backup/psxpblib.o backup/mccl.o backup/lynxit.o backup/ffe.o
 ifdef ZLIB
 OBJECTS+=unzip.o map.o miscz.o
+else
+ifdef DJGPP                             # DJGPP code in dlopen needs map code
+OBJECTS+=map.o
+endif
 endif
 
 

@@ -22,7 +22,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GB_H
 
 #define GB_LOGODATA_LEN 48
-
+#define GB_NAME_LEN 15                          // correct for GBC games, not
+                                                //  for {S}GB games (should be 16)
 extern const st_getopt2_t gameboy_usage[];
 extern const unsigned char gb_logodata[], rocket_logodata[];
 

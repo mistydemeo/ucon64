@@ -74,8 +74,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "gbx.h"
-#include "console/gb.h"                         // gb_logodata, rocket_logodata
-
+#include "console/gb.h"                         // GB_NAME_LEN, gb_logodata,
+                                                //  rocket_logodata
 
 const st_getopt2_t gbx_usage[] =
   {
@@ -757,8 +757,8 @@ check_card (void)
 */
 {
   unsigned char sum = 0;
-  char game_name[16];
-  int i;
+  char game_name[GB_NAME_LEN + 2];
+  int gb_name_len, i;
 
   puts ("Checking ROM data...");
 
@@ -770,9 +770,11 @@ check_card (void)
       dumper (stdout, buffer, 0x50, 0x100, DUMPER_HEX);
     }
 
-  memcpy (game_name, buffer + 0x34, 15);
-  game_name[15] = 0;
-  for (i = 0; i < 15; i++)
+  gb_name_len = (buffer[0x43] == 0x80 || buffer[0x43] == 0xc0) ?
+                  GB_NAME_LEN : GB_NAME_LEN + 1;
+  memcpy (game_name, buffer + 0x34, gb_name_len);
+  game_name[gb_name_len] = 0;
+  for (i = 0; i < gb_name_len; i++)
     if (!isprint ((int) game_name[i]) && game_name[i] != 0)
       game_name[i] = '.';
   printf ("Game name: \"%s\"\n", game_name);
@@ -867,7 +869,7 @@ static void
 read_rom_16k (unsigned int bank)                // ROM or EEPROM
 {
   int idx = 0, i, j;
-  char game_name[16];
+  char game_name[GB_NAME_LEN + 2];
 
   set_bank2 (bank);
   for (j = 0; j < 64; j++)
@@ -901,7 +903,7 @@ read_rom_16k (unsigned int bank)                // ROM or EEPROM
                 // Reread the last two pages, because the data came from the
                 //  previously selected game (data is "mirrored"). This does not
                 //  apply to the first game.
-                int k;
+                int k, gb_name_len;
 
                 idx = 0;
                 for (k = 0; k < 2; k++)
@@ -917,9 +919,11 @@ read_rom_16k (unsigned int bank)                // ROM or EEPROM
                   }
 
                 clear_line ();                  // remove last gauge
-                memcpy (game_name, buffer + 0x134, 15);
-                game_name[15] = 0;
-                for (i = 0; i < 15; i++)
+                gb_name_len = (buffer[0x143] == 0x80 || buffer[0x143] == 0xc0) ?
+                                GB_NAME_LEN : GB_NAME_LEN + 1;
+                memcpy (game_name, buffer + 0x134, gb_name_len);
+                game_name[gb_name_len] = 0;
+                for (i = 0; i < gb_name_len; i++)
                   if (!isprint ((int) game_name[i]) && game_name[i] != 0)
                     game_name[i] = '.';
                 printf ("Found another game: \"%s\"\n\n", game_name);

@@ -66,6 +66,7 @@ st_ucon64_obj_t ucon64_wf[] =
     {0, WF_DEFAULT},                            // WF_OBJ_ALL_DEFAULT
     {0, WF_DEFAULT | WF_NO_SPLIT},              // WF_OBJ_ALL_DEFAULT_NO_SPLIT
     {0, WF_STOP},                               // WF_OBJ_ALL_STOP
+    {0, WF_NO_ROM},                             // WF_OBJ_ALL_NO_ROM
     {0, WF_STOP | WF_NO_ROM},                   // WF_OBJ_ALL_STOP_NO_ROM
     {0, WF_DEFAULT | WF_STOP | WF_NO_ROM},      // WF_OBJ_ALL_DEFAULT_STOP_NO_ROM
     {0, WF_INIT},                               // WF_OBJ_ALL_INIT
@@ -749,6 +750,13 @@ const st_getopt2_t ucon64_options_usage[] =
       NULL, "be more verbose (show backup unit headers also)",
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
+#ifdef  USE_PARALLEL
+    {
+      "xreset", 0, 0, UCON64_XRESET,
+      NULL, "reset parallel port",
+      &ucon64_wf[WF_OBJ_ALL_NO_ROM]             // it's NOT a stop option
+    },
+#endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 

@@ -50,7 +50,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define GAMEBOY_HEADER_START 0x100
 #define GAMEBOY_HEADER_LEN (sizeof (st_gameboy_header_t))
-#define GB_NAME_LEN 15
 
 const st_getopt2_t gameboy_usage[] =
   {
@@ -132,10 +131,10 @@ typedef struct st_gameboy_header
   unsigned char start_high;                     // 0x03 second byte
   unsigned char logo[GB_LOGODATA_LEN];          // 0x04
   unsigned char name[GB_NAME_LEN];              // 0x34
-  unsigned char gb_type;                        // 0x43
+  unsigned char gb_type;                        // 0x43 last byte of name if not 0x80 or 0xc0
   unsigned char maker_high;                     // 0x44
   unsigned char maker_low;                      // 0x45
-  unsigned char pad;
+  unsigned char sgb_features;                   // 0x46
   unsigned char rom_type;                       // 0x47
   unsigned char rom_size;                       // 0x48
   unsigned char sram_size;                      // 0x49
@@ -372,15 +371,18 @@ gameboy_sgb (st_rominfo_t *rominfo)
 int
 gameboy_n (st_rominfo_t *rominfo, const char *name)
 {
-  char buf[GB_NAME_LEN], dest_name[FILENAME_MAX];
+  char buf[GB_NAME_LEN + 1], dest_name[FILENAME_MAX];
+  int gb_name_len =
+    (gameboy_header.gb_type == 0x80 || gameboy_header.gb_type == 0xc0) ?
+      GB_NAME_LEN : GB_NAME_LEN + 1;
 
-  memset (buf, 0, GB_NAME_LEN);
-  strncpy (buf, name, GB_NAME_LEN);
+  memset (buf, 0, gb_name_len);
+  strncpy (buf, name, gb_name_len);
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (buf, rominfo->buheader_len + GAMEBOY_HEADER_START + 0x34,
-                 GB_NAME_LEN, dest_name, "r+b");
+                 gb_name_len, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -524,6 +526,10 @@ gameboy_init (st_rominfo_t *rominfo)
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
+  if (ucon64.file_size <
+      (int) (rominfo->buheader_len + GAMEBOY_HEADER_START + GAMEBOY_HEADER_LEN))
+    return -1;                                  // Don't continue if it makes no sense
+
   ucon64_fread (&gameboy_header, rominfo->buheader_len + GAMEBOY_HEADER_START,
                 GAMEBOY_HEADER_LEN, ucon64.rom);
   if (gameboy_header.opcode1 == 0x00 && gameboy_header.opcode2 == 0xc3)
@@ -548,8 +554,10 @@ gameboy_init (st_rominfo_t *rominfo)
   rominfo->header = &gameboy_header;
 
   // internal ROM name
-  strncpy (rominfo->name, (const char *) gameboy_header.name, GB_NAME_LEN);
-  rominfo->name[GB_NAME_LEN] = 0;               // terminate string
+  x = (gameboy_header.gb_type == 0x80 || gameboy_header.gb_type == 0xc0) ?
+        GB_NAME_LEN : GB_NAME_LEN + 1;
+  strncpy (rominfo->name, (const char *) gameboy_header.name, x);
+  rominfo->name[x] = 0;                         // terminate string
 
   // ROM maker
   if (gameboy_header.maker == 0x33)
@@ -609,10 +617,23 @@ gameboy_init (st_rominfo_t *rominfo)
   sprintf (buf, "Version: 1.%d\n", gameboy_header.version);
   strcat (rominfo->misc, buf);
 
-  sprintf (buf, "Game Boy type: %s\n",
-           (gameboy_header.gb_type == 0x80) ? "Color" :
-//           (OFFSET (gameboy_header, 0x46) == 0x03) ? "Super" :
-           "Standard (4 colors)");
+  if (gameboy_header.gb_type == 0x80)
+    {
+      if (gameboy_header.sgb_features == 3)
+        str = "Game Boy/Super Game Boy (SGB features present)/Game Boy Color";
+      else
+        str = "Game Boy/Super Game Boy/Game Boy Color";
+    }
+  else if (gameboy_header.gb_type == 0xc0)
+    str = "Game Boy Color";                     // GBC _only_
+  else
+    {
+      if (gameboy_header.sgb_features == 3)
+        str = "Game Boy/Super Game Boy (SGB features present)";
+      else
+        str = "Game Boy/Super Game Boy";
+    }
+  sprintf (buf, "Game type: %s\n", str);
   strcat (rominfo->misc, buf);
 
   value = gameboy_header.start_high << 8;

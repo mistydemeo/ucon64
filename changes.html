@@ -50,7 +50,7 @@ The original uCON for SNES and Genesis was written by Chicken &amp; chp in
 - cleaned up the usage output<br>
 - added -chk fix checksum for Super NES/Super Famicom<br>
 - removed most CDROM based consoles from usage since uCON64 could support
-  them only by showing some informations about the CDROM itself (option -cdrom)<br>
+  them only by showing some information about the CDROM itself (option -cdrom)<br>
 - added -gd3 convert to Professor SF(2) Game Doctor SF3/6/7 (autojoin)<br>
 - added -gdf fix Professor SF(2) Game Doctor SF3/6/7 savegame problems<br>
 <p>
@@ -739,6 +739,13 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (N64) added support for 6105 boot codes to check sum routine (by dbjh)<br>
 - updated (SNES) fixed some other issues with auto-detection (by dbjh; many
   thanks to Dweezledap for reporting these problems and for testing)<br>
+<p>
+<a name="201">2.0.1</a><br>
+- updated (GB) internal name is 15 characters long only for GBC games. For GB
+  and SGB games it's 16 characters long. Updated ROM info and -n (by dbjh;
+  thanks to Anna Kubisty for reporting the problem and info)<br>
+- added (all) --xreset reset parallel port (by dbjh; thanks to Cyan Helkaraxe
+  for the idea)<br>
 <br>
 <br>
 <br>

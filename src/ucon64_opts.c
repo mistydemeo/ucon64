@@ -45,6 +45,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "patch/patch.h"
 #include "backup/backup.h"
 #include "misc/chksum.h"
+#ifdef  USE_PARALLEL
+#include "misc/parallel.h"
+#endif
 
 
 #ifdef  _MSC_VER
@@ -304,6 +307,7 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_XPCE:
     case UCON64_XPL:
     case UCON64_XPLI:
+    case UCON64_XRESET:
     case UCON64_XSF:
     case UCON64_XSFS:
     case UCON64_XSMC:
@@ -1681,6 +1685,13 @@ ucon64_options (st_ucon64_t *p)
       fputc ('\n', stdout);
       break;
 #endif
+
+    case UCON64_XRESET:
+      fputs ("Resetting parallel port...", stdout);
+      outportb ((unsigned short) (ucon64.parport + PARPORT_DATA), 0);
+      outportb ((unsigned short) (ucon64.parport + PARPORT_CONTROL), 0);
+      puts ("done");
+      break;
 
     case UCON64_XCMC:
       if (!access (ucon64.rom, F_OK) && ucon64.backup)

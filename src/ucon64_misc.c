@@ -346,7 +346,6 @@ close_io_port (void)
 #endif
 
 
-#if     defined __unix__ || defined __BEOS__    // __unix__ is defined under DJGPP
 unsigned char
 inportb (unsigned short port)
 {
@@ -431,7 +430,6 @@ outportw (unsigned short port, unsigned short word)
   );
 #endif
 }
-#endif // defined __unix__ || defined __BEOS__
 
 
 #define DETECT_MAX_CNT 1000
@@ -1475,5 +1473,3 @@ read_raw_frame (int fd, int lba, unsigned char *buf)
   return rc;
 }
 #endif
-
-

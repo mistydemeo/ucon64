@@ -1240,7 +1240,7 @@ games. However, the newer copiers get around this detection somehow.
 
    sta $70YYXX/sta $70YYXX,x; cmp $70YYXX/cmp $70YYXX,x; bne
 
-TODO: The following three codes should be verfied for many games. For example,
+TODO: The following three codes should be verified for many games. For example,
 the first code replaces D0 (bne) with 80 (bra), but for some games (like Donkey
 Kong Country (U|E)) it should do the opposite, i.e., writing EA EA (nop nop).
    8f/9f XX YY 30/31/32/33 cf/df XX YY 30/31/32/33 d0

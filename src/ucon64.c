@@ -342,14 +342,16 @@ while((ep=readdir(dp))!=0)
 	{
 		if(S_ISREG(puffer.st_mode)==1)
 		{
+
 			strftime(buf,13,"%b %d %H:%M",localtime(&puffer.st_mtime));
 
 	ucon64_argv[0]=ucon64_name();
 	ucon64_argv[1]="-ls";
 	ucon64_argv[2]=ep->d_name;
 	ucon64_argc=3;
-			ucon64_probe(ucon64_argc,ucon64_argv);
-			printf("%10ld %s %s\n",puffer.st_size,buf,ep->d_name);
+			db.name="";
+			ucon64_probe(ucon64_argc,ucon64_argv,&db);
+			printf("%-31.31s %10ld %s %s\n",db.name,puffer.st_size,buf,ep->d_name);
 		}
 	}
 }
@@ -614,7 +616,7 @@ if(console==ucon64_UNKNOWN)
 {
 //the same but automatic
         if(!access(ucon64_rom(),F_OK))
-        	console=ucon64_probe(argc,argv);
+        	console=ucon64_probe(argc,argv,NULL);
 }
 
 
@@ -793,29 +795,29 @@ return(0);
 }
 
 
-int ucon64_probe(int argc,char *argv[])
+int ucon64_probe(int argc,char *argv[],struct ucon64_DB *buf)
 {
 	int console=ucon64_UNKNOWN;
 
-	if(supernintendo_probe(argc,argv)!=-1)console=ucon64_SNES;
-	else if(genesis_probe(argc,argv)!=-1)console=ucon64_GENESIS;
-	else if(nintendo64_probe(argc,argv)!=-1)console=ucon64_N64;
-	else if(atari_probe(argc,argv)!=-1)console=ucon64_ATARI;
-	else if(nes_probe(argc,argv)!=-1)console=ucon64_NES;
-	else if(lynx_probe(argc,argv)!=-1)console=ucon64_LYNX;
-	else if(gameboy_probe(argc,argv)!=-1)console=ucon64_GB;
-	else if(gbadvance_probe(argc,argv)!=-1)console=ucon64_GBA;
-	else if(jaguar_probe(argc,argv)!=-1)console=ucon64_JAGUAR;
-	else if(pcengine_probe(argc,argv)!=-1)console=ucon64_PCE;
-	else if(coleco_probe(argc,argv)!=-1)console=ucon64_COLECO;
-	else if(intelli_probe(argc,argv)!=-1)console=ucon64_INTELLI;
-	else if(neogeo_probe(argc,argv)!=-1)console=ucon64_NEOGEO;
-	else if(neogeopocket_probe(argc,argv)!=-1)console=ucon64_NEOGEOPOCKET;
-	else if(sms_probe(argc,argv)!=-1)console=ucon64_SMS;
-	else if(system16_probe(argc,argv)!=-1)console=ucon64_SYSTEM16;
-	else if(virtualboy_probe(argc,argv)!=-1)console=ucon64_VIRTUALBOY;
-	else if(vectrex_probe(argc,argv)!=-1)console=ucon64_VECTREX;
-	else if(wonderswan_probe(argc,argv)!=-1)console=ucon64_WONDERSWAN;
+	if(supernintendo_probe(argc,argv,buf)!=-1)console=ucon64_SNES;
+	else if(genesis_probe(argc,argv,buf)!=-1)console=ucon64_GENESIS;
+	else if(nintendo64_probe(argc,argv,buf)!=-1)console=ucon64_N64;
+	else if(atari_probe(argc,argv,buf)!=-1)console=ucon64_ATARI;
+	else if(nes_probe(argc,argv,buf)!=-1)console=ucon64_NES;
+	else if(lynx_probe(argc,argv,buf)!=-1)console=ucon64_LYNX;
+	else if(gameboy_probe(argc,argv,buf)!=-1)console=ucon64_GB;
+	else if(gbadvance_probe(argc,argv,buf)!=-1)console=ucon64_GBA;
+	else if(jaguar_probe(argc,argv,buf)!=-1)console=ucon64_JAGUAR;
+	else if(pcengine_probe(argc,argv,buf)!=-1)console=ucon64_PCE;
+	else if(coleco_probe(argc,argv,buf)!=-1)console=ucon64_COLECO;
+	else if(intelli_probe(argc,argv,buf)!=-1)console=ucon64_INTELLI;
+	else if(neogeo_probe(argc,argv,buf)!=-1)console=ucon64_NEOGEO;
+	else if(neogeopocket_probe(argc,argv,buf)!=-1)console=ucon64_NEOGEOPOCKET;
+	else if(sms_probe(argc,argv,buf)!=-1)console=ucon64_SMS;
+	else if(system16_probe(argc,argv,buf)!=-1)console=ucon64_SYSTEM16;
+	else if(virtualboy_probe(argc,argv,buf)!=-1)console=ucon64_VIRTUALBOY;
+	else if(vectrex_probe(argc,argv,buf)!=-1)console=ucon64_VECTREX;
+	else if(wonderswan_probe(argc,argv,buf)!=-1)console=ucon64_WONDERSWAN;
 	else console=ucon64_UNKNOWN;
 	return(console);
 }
@@ -838,7 +840,7 @@ printf(/*"TODO: $ROM could also be the name of a *.ZIP archive\n"
 	"  -dbs		search ROM database (all entries) by CRC32; $ROM=0xCRC32\n"
 	"  -db		ROM database statistics (# of entries)\n"
 	"  -dbv		view ROM database (all entries)\n"
-//	"TODO:  -ls	generate ROM list for all ROMs; $ROM=DIRECTORY\n"
+	"  -ls		generate ROM list for all ROMs; $ROM=DIRECTORY\n"
 	"  -lsv		like -ls but more verbose; $ROM=DIRECTORY\n"
 //	"TODO:  -rrom	rename all ROMs in DIRECTORY to their internal names; $ROM=DIR\n"
 //	"		this is often used by people who loose control of their ROMs\n"

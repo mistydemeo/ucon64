@@ -82,7 +82,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_file() (getarg(argc,argv,ucon64_FILE))
 
 int ucon64_usage(int argc,char *argv[]);
-int ucon64_probe(int argc,char *argv[]);
+int ucon64_probe(int argc,char *argv[],struct ucon64_DB *db);
 int ucon64_main(int argc,char *argv[]);
 
 unsigned int ucon64_parport;

@@ -460,7 +460,7 @@ genesis_j (st_rominfo_t *rominfo)
     }
   else
     {
-      char buf[3];
+      unsigned char buf[3];
 
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".SMD");

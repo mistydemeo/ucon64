@@ -224,23 +224,24 @@ sms_init (st_rominfo_t *rominfo)
   //  is alright to set result to 0
   if (magic[8] == 0xaa && magic[9] == 0xbb && magic[10] == 6)
     {
-      int size = ucon64.file_size - SMD_HEADER_LEN;
-
-      if (!(buffer = (unsigned char *) malloc (size)))
-        {
-          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
-          return -1;
-        }
-      q_fread (buffer, SMD_HEADER_LEN, size, ucon64.rom);
       if (!(UCON64_ISSET (ucon64.interleaved) && !ucon64.interleaved) &&
           !UCON64_ISSET (ucon64.do_not_calc_crc))
         {
+          int size = ucon64.file_size - SMD_HEADER_LEN;
+
+          if (!(buffer = (unsigned char *) malloc (size)))
+            {
+              fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+              return -1;
+            }
+          q_fread (buffer, SMD_HEADER_LEN, size, ucon64.rom);
+
           ucon64.fcrc32 = crc32 (0, buffer, size);
           smd_deinterleave (buffer, size);
           ucon64.crc32 = crc32 (0, buffer, size);
-        }
 
-      free (buffer);
+          free (buffer);
+        }
       rominfo->buheader_len = SMD_HEADER_LEN;
       result = 0;
     }

@@ -66,7 +66,8 @@ static int snes_isprint (int c);
 static int check_banktype (unsigned char *rom_buffer, int header_offset);
 static void reset_header (void *header);
 static void set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header);
-static void get_nsrt_info (unsigned char *rom_buffer, int header_start, unsigned char *header);
+static void get_nsrt_info (unsigned char *rom_buffer, int header_start,
+                           unsigned char *buheader);
 static void handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
                                 const char **snes_country);
 
@@ -2150,6 +2151,7 @@ int
 snes_n (st_rominfo_t *rominfo, const char *name)
 {
   char buf[SNES_NAME_LEN], dest_name[FILENAME_MAX];
+  int size = ucon64.file_size - rominfo->buheader_len, header_start;
 
   memset (buf, ' ', SNES_NAME_LEN);
   strncpy (buf, name, strlen (name) > SNES_NAME_LEN ? SNES_NAME_LEN : strlen (name));
@@ -2157,9 +2159,13 @@ snes_n (st_rominfo_t *rominfo, const char *name)
   ucon64_file_handler (dest_name, NULL, 0);
 
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fwrite (buf, (rominfo->interleaved ?
-                   rominfo->header_start - SNES_HIROM : rominfo->header_start) +
-            rominfo->buheader_len + 16, SNES_NAME_LEN, dest_name, "r+b");
+
+  if (rominfo->interleaved)
+    header_start = SNES_HEADER_START + (snes_hirom ? 0 : size / 2); // (Ext.) HiROM : LoROM
+  else
+    header_start = rominfo->header_start;
+  q_fwrite (buf, header_start + rominfo->buheader_len + 16, SNES_NAME_LEN,
+            dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -2170,9 +2176,7 @@ int
 snes_chk (st_rominfo_t *rominfo)
 {
   char buf[4], dest_name[FILENAME_MAX];
-  int image = (rominfo->interleaved ?
-                rominfo->header_start - SNES_HIROM :
-                rominfo->header_start) + rominfo->buheader_len;
+  int size = ucon64.file_size - rominfo->buheader_len, header_start;
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
@@ -2194,9 +2198,13 @@ snes_chk (st_rominfo_t *rominfo)
   // change checksum
   buf[2] = rominfo->current_internal_crc;       // low byte
   buf[3] = rominfo->current_internal_crc >> 8;  // high byte
-  q_fwrite (buf, image + 44, 4, dest_name, "r+b");
+  if (rominfo->interleaved)
+    header_start = SNES_HEADER_START + (snes_hirom ? 0 : size / 2); // (Ext.) HiROM : LoROM
+  else
+    header_start = rominfo->header_start;
+  q_fwrite (buf, header_start + rominfo->buheader_len + 44, 4, dest_name, "r+b");
 
-  mem_hexdump (buf, 4, image + 44);
+  mem_hexdump (buf, 4, header_start + rominfo->buheader_len + 44);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -3720,9 +3728,9 @@ snes_demirror (st_rominfo_t *rominfo)           // nice verb :-)
 int
 snes_densrt (st_rominfo_t *rominfo)
 {
-  int size = ucon64.file_size - rominfo->buheader_len;
+  int size = ucon64.file_size - rominfo->buheader_len, header_start;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  unsigned char header[512], *buffer;
+  unsigned char buheader[512], *buffer;
 
   if (!nsrt_header)
     {
@@ -3730,7 +3738,7 @@ snes_densrt (st_rominfo_t *rominfo)
       return 1;
     }
 
-  q_fread (header, 0, 512, ucon64.rom);
+  q_fread (buheader, 0, 512, ucon64.rom);
   if (!(buffer = (unsigned char *) malloc (size)))
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
@@ -3738,18 +3746,18 @@ snes_densrt (st_rominfo_t *rominfo)
     }
   q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
 
-  get_nsrt_info (buffer,
-                 rominfo->interleaved ?
-                   rominfo->header_start - SNES_HIROM :
-                   rominfo->header_start,
-                 header);
-  memset (header + 0x1d0, 0, 32);               // remove NSRT header
+  if (rominfo->interleaved)
+    header_start = SNES_HEADER_START + (snes_hirom ? 0 : size / 2); // (Ext.) HiROM : LoROM
+  else
+    header_start = rominfo->header_start;
+  get_nsrt_info (buffer, header_start, buheader);
+  memset (buheader + 0x1d0, 0, 32);             // remove NSRT header
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, src_name, 0);
 
-  q_fwrite (header, 0, 512, dest_name, "wb");
+  q_fwrite (buheader, 0, 512, dest_name, "wb");
   if (rominfo->buheader_len > 512)
     q_fcpy (src_name, 512, rominfo->buheader_len - 512, dest_name, "ab");
   q_fwrite (buffer, rominfo->buheader_len, size, dest_name, "ab");
@@ -3868,16 +3876,18 @@ set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header)
 
 
 static void
-get_nsrt_info (unsigned char *rom_buffer, int header_start, unsigned char *header)
+get_nsrt_info (unsigned char *rom_buffer, int header_start, unsigned char *buheader)
 {
   if (nsrt_header)
     {
-      memcpy (rom_buffer + header_start + 16, header + 0x1d1, SNES_NAME_LEN); // name
-      rom_buffer[header_start + 41] = header[0x1d0] & 0x0f; // region
-      rom_buffer[header_start + 44] = ~header[0x1e6]; // inverse checksum low
-      rom_buffer[header_start + 45] = ~header[0x1e7]; // inverse checksum high
-      rom_buffer[header_start + 46] = header[0x1e6]; // checksum low
-      rom_buffer[header_start + 47] = header[0x1e7]; // checksum high
+      memcpy (rom_buffer + header_start + 16, buheader + 0x1d1, SNES_NAME_LEN); // name
+      // Yep, conflict here. I assume not many people change the region byte... - dbjh
+      if (!bs_dump)
+        rom_buffer[header_start + 41] = buheader[0x1d0] & 0x0f; // region
+      rom_buffer[header_start + 44] = ~buheader[0x1e6]; // inverse checksum low
+      rom_buffer[header_start + 45] = ~buheader[0x1e7]; // inverse checksum high
+      rom_buffer[header_start + 46] = buheader[0x1e6]; // checksum low
+      rom_buffer[header_start + 47] = buheader[0x1e7]; // checksum high
     }
 }
 

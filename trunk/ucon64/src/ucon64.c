@@ -1286,14 +1286,15 @@ else
   cd32_usage(argc,argv);
   cdi_usage(argc,argv);
 */
-  printf("%s\n%s\n%s\n%s\n%s\n%s\n"
-	"  -xbox, -ps2, -sat, -3do, -cd32, -cdi\n"
+  printf("%s\n%s\n%s\n%s\n%s\n"
+//	"  -xbox, -ps2, -sat, -3do, -cd32, -cdi\n"
+	"  -ps2, -sat, -3do, -cd32, -cdi\n"
 	"		force recognition; NEEDED\n"
 //	"  -iso		force image is ISO9660\n"
 //	"  -raw		force image is MODE2_RAW/BIN\n"
 	"  *		show info (default); ONLY $ROM=RAW_IMAGE\n"
 	"  -r2i          convert MODE2_RAW/BIN to ISO9660; $ROM=RAW_IMAGE\n"
-  ,xbox_TITLE
+//  ,xbox_TITLE
   ,ps2_TITLE
   ,saturn_TITLE
   ,real3do_TITLE

@@ -69,6 +69,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/gb.h"                         // gb_logodata
 #include "misc_par.h"
 
+
 const st_usage_t gbx_usage[] =
   {
     {NULL, NULL, "Game Boy Xchanger/GBDoctor"},
@@ -103,9 +104,9 @@ static unsigned char buffer[32768], rocket_logodata[] = {
   0x99, 0x10, 0x00, 0x1e, 0x19, 0x22, 0x44, 0x22,
   0x22, 0x47, 0x00, 0x0e, 0x11, 0x22, 0x00, 0x00
 };
-mbc_t mbc_type;
-eeprom_t eeprom_type;
-static parport_mode_t port_mode = UCON64_EPP;
+static mbc_t mbc_type;
+static eeprom_t eeprom_type;
+static parport_mode_t port_mode;
 
 
 static volatile void
@@ -113,7 +114,8 @@ delay_us (int n_us)
 // Hmmm, usleep() can be used under UNIX, but default under DOS is delay() which
 //  waits for a number of milliseconds... Better use the same code on all platforms.
 {
-  int n, n_max;
+  volatile int n;
+  int n_max;
 
   // it's probably best to use the original strange loop values
   if (n_us == 10)
@@ -1766,7 +1768,7 @@ sram_size_banks (int pocket_camera, unsigned char sram_size_byte)
   else
     {
       // if eeprom_type != UNKNOWN_EEPROM, it has to be WINBOND, MX or INTEL (no
-      //  need to set bank_size to a default value)
+      //  need to set n_banks to a default value)
       if (eeprom_type == WINBOND)
         n_banks = 4;                            // 4 x 8 kB = 32 kB
       else // if (eeprom_type == MX || eeprom_type == INTEL)

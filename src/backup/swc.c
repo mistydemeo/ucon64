@@ -151,7 +151,8 @@ receive_rom_info (unsigned char *buffer, int io_mode)
   - sets global `hirom'
 */
 {
-  int n, m, size;
+  int n, size;
+  volatile int m;
   unsigned char byte;
 
 #ifdef  DUMP_MMX2
@@ -194,15 +195,6 @@ receive_rom_info (unsigned char *buffer, int io_mode)
 
   for (n = 0; n < (int) SWC_HEADER_LEN; n++)
     {
-#ifdef  _WIN32
-      /*
-        Talk about strange. Somehow this loop takes unusually long (like 1
-        minute) if no Windows function is called. As a side effect (?) an
-        incorrect size value will be obtained, resulting in an overdump. For
-        example calling kbhit() or printf() solves the problem...
-      */
-      kbhit ();
-#endif
       for (m = 0; m < 65536; m++)               // a delay is necessary here
         ;
       ffe_send_command (5, (unsigned short) (0x200 + n), 0);
@@ -473,7 +465,7 @@ swc_unlock (unsigned int parport)
 void
 set_sa1_map (unsigned short chunk)
 {
-  int m;
+  volatile int m;
 
   // map the 8 Mbit ROM chunk specified by chunk into the F0 bank
   write_cartridge1 (0x002223, (unsigned char) ((chunk & 0x07) | 0x80));
@@ -487,7 +479,7 @@ set_sa1_map (unsigned short chunk)
 void
 set_sdd1_map (unsigned short chunk)
 {
-  int m;
+  volatile int m;
 
   // map the 8 Mbit ROM chunk specified by chunk into the F0 bank
   write_cartridge1 (0x004807, (unsigned char) (chunk & 0x07));
@@ -501,7 +493,7 @@ set_sdd1_map (unsigned short chunk)
 void
 set_spc7110_map (unsigned short chunk)
 {
-  int m;
+  volatile int m;
 
   // map the 8 Mbit ROM chunk specified by chunk into the F0 bank
   write_cartridge1 (0x004834, 0xff);
@@ -861,7 +853,7 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
 
   printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
-  address = 0x200;                              // vgs '00 uses 0x200, vgs '96 uses 0,
+  address = 0x200;                              // VGS '00 uses 0x200, VGS '96 uses 0,
   starttime = time (NULL);                      //  but then some ROMs don't work
   while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
     {

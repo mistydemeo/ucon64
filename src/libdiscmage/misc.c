@@ -2296,7 +2296,7 @@ wait2 (int nmillis)
 #else
 #pragma message ("Please provide a wait2() implementation")
 #endif
-  int n;
+  volatile int n;
   for (n = 0; n < nmillis * 65536; n++)
     ;
 #endif

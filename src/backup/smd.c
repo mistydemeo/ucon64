@@ -43,25 +43,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  and 24MB copiers.
 */
 
-#include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
-#include "../misc.h"
-#include "../ucon64.h"
-#include "../ucon64_db.h"
-#include "../ucon64_misc.h"
-#include "smd.h"
+#include "config.h"
 
 #ifdef BACKUP
 
 #ifdef  __unix__
-#include <unistd.h>             // usleep(), microseconds
+#include <unistd.h>                             // usleep(), microseconds
 #elif   defined __MSDOS__
-#include <dos.h>                // delay(), milliseconds
+#include <dos.h>                                // delay(), milliseconds
 #elif   defined __BEOS__
-#include <OS.h>                 // snooze(), microseconds
+#include <OS.h>                                 // snooze(), microseconds
 #endif
+#include "misc.h"
+#include "ucon64.h"
+#include "ucon64_db.h"
+#include "ucon64_misc.h"
+#include "smd.h"
 
 #ifndef __BEOS__
 typedef unsigned char uint8;
@@ -316,7 +317,7 @@ smd_recieve_block (uint32 length, uint8 * buffer)
   uint32 count;
   uint8 temp, checksum = 0x81;
 
-#ifdef  __unix__                // wait 32 milliseconds
+#ifdef  __unix__                                // wait 32 milliseconds
   usleep (32000);
 #elif   defined __MSDOS__
   delay (32);

@@ -56,11 +56,11 @@ Q22: <a href="#22">Where can I get that loader or "game pack" file?</a><br>
 Q23: <a href="#23">What is the meaning of the -col option (Super Nintendo)?</a><br>
 <br>
 Q24: <a href="#24">Why does uCON64 create ucon64.cfg (DOS executable) or .ucon64rc (Win32 executable)
-                   files all over the place under DOS and Windows 9x (command.com)?</a><br>
+   files all over the place under DOS and Windows 9x (command.com)?</a><br>
 <br>
 Q25: <a href="#25">When I try to create a multirom under Windows I get the message
-                   "The system cannot execute the specified program." (or something like that).
-                   What does that mean?</a><br>
+   "The system cannot execute the specified program." (or something like that).
+   What does that mean?</a><br>
 <br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
@@ -74,9 +74,9 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
 <br>
 <p>
 <a name="2"><b>Q2</b>: How do I compile uCON64?</a><br>
-<b>A</b>: You can optionally open src/config.h in an editor and change the defines<br>
+<b>A</b>: You can optionally open src/config.h in an editor and change the defines.<br>
 <br>
-   Afterwards enter the following lines<br>
+   Afterwards enter the following lines:<br>
 <br>
    make -f Makefile.&#60;your&nbsp;OS&#62; clean<br>
    make -f Makefile.&#60;your&nbsp;OS&#62;<br>
@@ -273,7 +273,7 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
 <br>
 <p>
 <a name="24"><b>Q24</b>: Why does uCON64 create ucon64.cfg (DOS executable) or .ucon64rc (Win32 executable)
-                  files all over the place under DOS and Windows 9x (command.com)?</a><br>
+   files all over the place under DOS and Windows 9x (command.com)?</a><br>
 <b>A</b>: uCON64 needs to know where it can find the configuration file or a directory where it can create one.
    It checks the environment for a variable with the name HOME, USERPROFILE or HOMEDRIVE and HOMEPATH
    (in that order). Under Unix HOME is normally set. Under Windows XP and 2000 (NT?) USERPROFILE,
@@ -290,8 +290,8 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
 <br>
 <p>
 <a name="25"><b>Q25</b>: When I try to create a multirom under Windows I get the message
-                   "The system cannot execute the specified program." (or something like that).
-                   What does that mean?</a><br>
+   "The system cannot execute the specified program." (or something like that).
+   What does that mean?</a><br>
 <b>A</b>: You can get that message with the DOS executable if you pass more than 127
    characters as argument to uCON64. There are two solutions:<br>
    1.) Use the Win32 binary (download it from the uCON64 homepage).<br>

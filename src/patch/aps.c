@@ -2,7 +2,8 @@
 aps.c - APS support for uCON64
 
 written by 1998 Silo / BlackBag
-	   1999 - 2001 NoisyB (noisyb@gmx.net)
+           1999 - 2001 NoisyB (noisyb@gmx.net)
+
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,8 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "../misc.h"
-#include "../ucon64.h"
+#include "misc.h"
+#include "ucon64.h"
 #include "aps.h"
 
 /* Apply an APS (Advanced Patch System) File for N64 Images

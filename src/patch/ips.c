@@ -23,16 +23,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "../misc.h"
-#include "../ucon64.h"
+#include <string.h>
+#include "misc.h"
+#include "ucon64.h"
 #include "ips.h"
-/* 
-  
+
+/*
+
   IPS v1.0 for UNIX by madman
-  
+
 */
 
-#include <stdio.h>
 int
 ips_main (int argc, char *argv[])
 {

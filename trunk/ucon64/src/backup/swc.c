@@ -50,8 +50,6 @@ const st_usage_t swc_usage[] =
                  OPTION_LONG_S "port=PORT\n"
                  "receives automatically when SRAM does not exist\n"
                  "Press q to abort; ^C will cause invalid state of backup unit"},
-#else
-    "",
 #endif // PARALLEL
     {NULL, NULL}
   };

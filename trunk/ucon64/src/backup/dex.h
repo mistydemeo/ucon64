@@ -25,9 +25,9 @@ extern const st_usage_t dex_usage[];
 #define DEX_HEADER_START 0
 #define DEX_HEADER_LEN 0
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 extern int dex_read_block (const char *filename, int block_num, unsigned int parport);
 extern int dex_write_block (const char *filename, int block_num, unsigned int parport);
-#endif // PARALLEL
+#endif // USE_PARALLEL
 
 #endif // DEX_H

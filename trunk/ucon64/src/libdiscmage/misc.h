@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MISC_H
 
 #ifdef  HAVE_CONFIG_H
-#include "config.h"                             // HAVE_ZLIB_H, ANSI_COLOR support
+#include "config.h"                             // USE_ZLIB, USE_ANSI_COLOR support
 #endif
 
 #ifdef  __cplusplus
@@ -34,9 +34,9 @@ extern "C" {
 #include <string.h>
 #include <time.h>                               // gauge() prototype contains time_t
 #include <stdio.h>
-#ifdef  HAVE_ZLIB_H
+#ifdef  USE_ZLIB
 #include "misc_z.h"
-#endif                                          // HAVE_ZLIB_H
+#endif                                          // USE_ZLIB
 
 #ifdef __sun
 #ifdef __SVR4
@@ -180,6 +180,9 @@ typedef signed __int64 int64_t;
 
 #define PROPERTY_SEPARATOR '='
 #define PROPERTY_SEPARATOR_S "="
+#define PROPERTY_COMMENT '#'
+#define PROPERTY_COMMENT_S "#"
+
 
 #define OPTION '-'
 #define OPTION_S "-"
@@ -423,7 +426,7 @@ extern char *q_fbackup (const char *filename, int mode);
 #else
 extern char *q_fbackup (char *move_name, const char *filename);
 #endif
-#ifndef  HAVE_ZLIB_H
+#ifndef  USE_ZLIB
 extern int q_fsize (const char *filename);
 #endif
 
@@ -448,8 +451,8 @@ extern char *get_property (const char *filename, const char *propname, char *val
 extern int32_t get_property_int (const char *filename, const char *propname);
 extern char *get_property_fname (const char *filename, const char *propname,
                                  char *buffer, const char *def);
-extern int set_property (const char *filename, const char *propname, const char *value);
-#define DELETE_PROPERTY(a, b) (set_property(a, b, NULL))
+extern int set_property (const char *filename, const char *propname, const char *value, const char *comment);
+#define DELETE_PROPERTY(a, b) (set_property(a, b, NULL, NULL))
 
 
 #ifdef  _WIN32
@@ -469,7 +472,7 @@ extern int sync (void);
 #define popen   _popen
 #endif
 
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
 #include <stdarg.h>
 
 extern int vprintf2 (const char *format, va_list argptr);
@@ -478,7 +481,7 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #define vprintf vprintf2
 #define printf  printf2
 #define fprintf fprintf2
-#endif // ANSI_COLOR
+#endif // USE_ANSI_COLOR
 
 #ifndef __MINGW32__
 #include <io.h>

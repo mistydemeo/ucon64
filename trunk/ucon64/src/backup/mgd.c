@@ -453,5 +453,5 @@ mgd_write_index_file (void *ptr, int n_names)
 }
 
 
-#ifdef PARALLEL
-#endif // PARALLEL
+#ifdef USE_PARALLEL
+#endif // USE_PARALLEL

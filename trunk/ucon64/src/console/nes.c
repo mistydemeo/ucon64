@@ -7123,7 +7123,7 @@ nes_init (st_rominfo_t *rominfo)
                   x = bswap_32 (x);
 #endif
                   str = (char *)
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
                     (ucon64.ansi_color ?
                       ((x == *((int *) unif_chunk2->data)) ?
                         "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
@@ -7157,7 +7157,7 @@ nes_init (st_rominfo_t *rominfo)
                   x = bswap_32 (x);
 #endif
                   str = (char *)
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
                     (ucon64.ansi_color ?
                       ((x == *((int *) unif_chunk2->data)) ?
                         "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")

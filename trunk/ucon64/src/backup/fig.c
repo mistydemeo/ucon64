@@ -41,7 +41,7 @@ const st_usage_t fig_usage[] =
   {
     {NULL, NULL, "Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)"},
     {NULL, NULL, "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw"},
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
     {"xfig", NULL, "send/receive ROM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
                    "receives automatically when ROM does not exist"},
     {"xfigs", NULL, "send/receive SRAM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
@@ -54,7 +54,7 @@ const st_usage_t fig_usage[] =
     {NULL, NULL, NULL}
   };
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 
 #define BUFFERSIZE 8192                         // don't change, only 8192 works!
 
@@ -723,4 +723,4 @@ fig_write_cart_sram (const char *filename, unsigned int parport)
   return 0;
 }
 
-#endif // PARALLEL
+#endif // USE_PARALLEL

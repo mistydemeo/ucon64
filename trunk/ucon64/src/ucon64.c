@@ -5,7 +5,7 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-written by 1999 - 2003 NoisyB (noisyb@gmx.net)
+written by 1999 - 2004 NoisyB (noisyb@gmx.net)
            2001 - 2004 dbjh
 
 
@@ -58,7 +58,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #endif
 #include "misc.h"
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
 #include "misc_par.h"
 #endif
 #include "misc_chk.h"
@@ -68,7 +68,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "ucon64_opts.h"
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
 #include "ucon64_dm.h"
 #endif
 #include "console/console.h"
@@ -116,14 +116,14 @@ const struct option options[] = {
     {"b1", 1, 0, UCON64_B1},
     {"bat", 0, 0, UCON64_BAT},
     {"bin", 0, 0, UCON64_BIN},
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
     {"bin2iso", 1, 0, UCON64_BIN2ISO},
 #endif
     {"bios", 1, 0, UCON64_BIOS},
     {"bot", 1, 0, UCON64_BOT},
     {"bs", 0, 0, UCON64_BS},
     {"c", 1, 0, UCON64_C},
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
     {"cdmage", 1, 0, UCON64_CDMAGE},
 #endif
 //    {"cd32", 0, 0, UCON64_CD32},
@@ -144,7 +144,7 @@ const struct option options[] = {
     {"dbv", 0, 0, UCON64_DBV},
     {"dc", 0, 0, UCON64_DC},
     {"dint", 0, 0, UCON64_DINT},
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
     {"disc", 0, 0, UCON64_DISC},
 #endif
     {"dmirr", 0, 0, UCON64_DMIRR},
@@ -190,7 +190,7 @@ const struct option options[] = {
     {"int2", 0, 0, UCON64_INT2},
     {"intelli", 0, 0, UCON64_INTELLI},
 //    {"ip", 0, 0, UCON64_IP},
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
     {"isofix", 1, 0, UCON64_ISOFIX},
 #endif
     {"ispad", 0, 0, UCON64_ISPAD},
@@ -213,13 +213,13 @@ const struct option options[] = {
 //    {"mgh", 0, 0, UCON64_MGH},
     {"mirr", 1, 0, UCON64_MIRR},
     {"mka", 1, 0, UCON64_MKA},
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
     {"mkcue", 0, 0, UCON64_MKCUE},
 #endif
     {"mkdat", 1, 0, UCON64_MKDAT},
     {"mki", 1, 0, UCON64_MKI},
     {"mkppf", 1, 0, UCON64_MKPPF},
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
     {"mksheet", 0, 0, UCON64_MKSHEET},
     {"mktoc", 0, 0, UCON64_MKTOC},
 #endif
@@ -234,7 +234,7 @@ const struct option options[] = {
     {"nbak", 0, 0, UCON64_NBAK},
     {"nbat", 0, 0, UCON64_NBAT},
     {"nbs", 0, 0, UCON64_NBS},
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
     {"ncol", 0, 0, UCON64_NCOL},
 #endif
     {"nes", 0, 0, UCON64_NES},
@@ -259,7 +259,7 @@ const struct option options[] = {
     {"pattern", 1, 0, UCON64_PATTERN},
     {"pce", 0, 0, UCON64_PCE},
     {"poke", 1, 0, UCON64_POKE},
-#if     defined PARALLEL || defined HAVE_USB_H
+#if     defined USE_PARALLEL || defined USE_USB
     {"port", 1, 0, UCON64_PORT},
 #endif
     {"ppf", 0, 0, UCON64_PPF},
@@ -269,7 +269,7 @@ const struct option options[] = {
     {"qq", 0, 0, UCON64_QQ},
     {"region", 1, 0, UCON64_REGION},
     {"rename", 0, 0, UCON64_RENAME},
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
     {"rip", 1, 0, UCON64_RIP},
 #endif
     {"rr83", 0, 0, UCON64_RR83},
@@ -315,10 +315,10 @@ const struct option options[] = {
     {"version", 0, 0, UCON64_VER},
     {"vram", 0, 0, UCON64_VRAM},
     {"xbox", 0, 0, UCON64_XBOX},
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
     {"xcdrw", 0, 0, UCON64_XCDRW},
 #endif
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
     {"xdex", 1, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
     {"xfal", 0, 0, UCON64_XFAL},
@@ -355,8 +355,8 @@ const struct option options[] = {
     {"xswcs", 0, 0, UCON64_XSWCS},
     {"xswcc", 0, 0, UCON64_XSWCC},
     {"xv64", 0, 0, UCON64_XV64},
-#endif // PARALLEL
-#if     defined PARALLEL || defined HAVE_USB_H
+#endif // USE_PARALLEL
+#if     defined USE_PARALLEL || defined USE_USB
     {"xf2a", 0, 0, UCON64_XF2A},
     {"xf2amulti", 1, 0, UCON64_XF2AMULTI},
     {"xf2ab", 1, 0, UCON64_XF2AB},
@@ -485,7 +485,7 @@ ucon64_runtime_debug (void)
 void
 ucon64_exit (void)
 {
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   if (ucon64.discmage_enabled)
     if (ucon64.image)
       dm_close (ucon64.image);
@@ -545,7 +545,7 @@ main (int argc, char **argv)
 #endif
   ucon64_configfile ();
 
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
   // ANSI colors?
   ucon64.ansi_color = get_property_int (ucon64.configfile, "ansi_color");
   // the conditional call to ansi_init() has to be done *after* the check for
@@ -553,7 +553,7 @@ main (int argc, char **argv)
 #endif
 
   // parallel port?
-#ifdef  PPDEV
+#ifdef  USE_PPDEV
   get_property (ucon64.configfile, "parport_dev", ucon64.parport_dev, "/dev/parport0");
 #elif   defined AMIGA
   get_property (ucon64.configfile, "parport_dev", ucon64.parport_dev, "parallel.device");
@@ -600,7 +600,7 @@ main (int argc, char **argv)
   if (ucon64.dat_enabled)
     ucon64_dat_indexer ();  // update cache (index) files if necessary
 
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   // load libdiscmage
   ucon64.discmage_enabled = ucon64_load_discmage ();
 #endif
@@ -735,7 +735,7 @@ main (int argc, char **argv)
 int
 ucon64_process_rom (char *fname)
 {
-#ifdef  HAVE_ZLIB_H
+#ifdef  USE_ZLIB
   int n_entries = unzip_get_number_entries (fname);
   if (n_entries != -1)                          // it's a zip file
     {
@@ -797,7 +797,7 @@ ucon64_execute_options (void)
 
   ucon64.console = UCON64_UNKNOWN;
   ucon64.dat = NULL;
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   ucon64.image = NULL;
 #endif
   ucon64.rominfo = NULL;
@@ -839,12 +839,12 @@ ucon64_execute_options (void)
 //      if (wf->flags & WF_SWITCH)
         ucon64_switches (arg[x].val, arg[x].optarg);
     }
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
   if (ucon64.ansi_color && first_call)
     ucon64.ansi_color = ansi_init ();
 #endif
 
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
   /*
     The copier options need root privileges for misc_parport_open()
     We can't use ucon64.flags & WF_PAR to detect whether a (parallel port)
@@ -853,7 +853,7 @@ ucon64_execute_options (void)
   */
   if (ucon64_parport_needed)
     ucon64.parport = misc_parport_open (ucon64.parport);
-#endif // PARALLEL
+#endif // USE_PARALLEL
 #if     defined __unix__ && !defined __MSDOS__
   /*
     We can drop privileges after we have set up parallel port access. We cannot
@@ -865,7 +865,7 @@ ucon64_execute_options (void)
     things as root is bad anyway (from a security viewpoint).
   */
   if (first_call
-#ifdef  HAVE_USB_H
+#ifdef  USE_USB
       && !ucon64.usbport
 #endif
      )
@@ -1016,7 +1016,7 @@ ucon64_rom_handling (void)
         }
       ucon64.rominfo = ucon64_probe (&rominfo); // determines console type
 
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
       // check for disc image only if ucon64_probe() failed or --disc was used
       if (ucon64.discmage_enabled)
 //        if (!ucon64.rominfo || ucon64.force_disc)
@@ -1210,7 +1210,7 @@ ucon64_nfo (void)
   if (ucon64.fname_arch[0])
     printf ("  (%s)\n", ucon64.fname_arch);
   fputc ('\n', stdout);
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   if (ucon64.console == UCON64_UNKNOWN && !ucon64.image)
 #else
   if (ucon64.console == UCON64_UNKNOWN)
@@ -1220,7 +1220,7 @@ ucon64_nfo (void)
   if (ucon64.rominfo && ucon64.console != UCON64_UNKNOWN && !ucon64.force_disc)
     ucon64_rom_nfo (ucon64.rominfo);
 
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   if (ucon64.discmage_enabled)
     if (ucon64.image)
       {
@@ -1384,7 +1384,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
 
       sprintf (buf, fstr,
         rominfo->internal_crc_len * 2, rominfo->internal_crc_len * 2);
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
       printf (buf,
         ucon64.ansi_color ?
           ((rominfo->current_internal_crc == rominfo->internal_crc) ?
@@ -1413,7 +1413,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
 }
 
 
-#ifdef  HAVE_ZLIB_H
+#ifdef  USE_ZLIB
 void
 ucon64_fname_arch (const char *fname)
 {
@@ -1536,88 +1536,88 @@ ucon64_usage (int argc, char *argv[])
   st_usage_array_t usage_array[] = {
     {UCON64_DC, {dc_usage, 0, 0, 0, 0, 0}},
     {UCON64_PSX, {psx_usage,
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
       dex_usage,
 #else
       0,
-#endif // PARALLEL
+#endif // USE_PARALLEL
       0, 0, 0, 0}},
     {UCON64_GBA, {gba_usage,
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
       fal_usage,
       f2a_usage,
 #else
       0,
       0,
-#endif // PARALLEL
+#endif // USE_PARALLEL
       0, 0, 0}},
     {UCON64_N64, {n64_usage,
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
       doctor64_usage,
       doctor64jr_usage,
 //      cd64_usage,
       dex_usage,
 #else
       0, 0, 0,
-#endif // PARALLEL
+#endif // USE_PARALLEL
       0, 0}},
     {UCON64_SNES, {snes_usage,
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
       swc_usage,
       gd_usage,
       fig_usage,
 //      mgd_usage,
 #else
       0, 0, 0,
-#endif // PARALLEL
+#endif // USE_PARALLEL
       0, 0}},
     {UCON64_NG, {neogeo_usage, 0, 0, 0, 0, 0}},
     {UCON64_GEN, {genesis_usage,
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
       smd_usage,
       md_usage,
 //      mgd_usage,
 #else
       0, 0,
-#endif // PARALLEL
+#endif // USE_PARALLEL
       0, 0, 0}},
     {UCON64_GB, {gameboy_usage,
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
       gbx_usage,
       mccl_usage,
 #else
       0, 0,
-#endif // PARALLEL
+#endif // USE_PARALLEL
       0, 0, 0}},
     {UCON64_LYNX, {lynx_usage,
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
       lynxit_usage,
 #else
       0,
-#endif // PARALLEL
+#endif // USE_PARALLEL
       0, 0, 0, 0}},
     {UCON64_PCE, {pcengine_usage,
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
       msg_usage,
 //      mgd_usage,
 #else
       0,
-#endif // PARALLEL
+#endif // USE_PARALLEL
       0, 0, 0, 0}},
     {UCON64_NES, {nes_usage,
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
       smc_usage,
 #else
       0,
-#endif // PARALLEL
+#endif // USE_PARALLEL
       0, 0, 0, 0}},
     {UCON64_SMS, {sms_usage, 0, 0, 0, 0, 0}},
     {UCON64_SWAN, {swan_usage, 0, 0, 0, 0, 0}},
     {UCON64_JAG, {jaguar_usage, 0, 0, 0, 0, 0}},
     {UCON64_NGP, {ngp_usage,
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
 //        fpl_usage,
-#endif // PARALLEL
+#endif // USE_PARALLEL
       0, 0, 0, 0, 0}},
 #if 0
     {UCON64_G, {nes_usage, 0, 0, 0, 0, 0}},
@@ -1639,12 +1639,12 @@ ucon64_usage (int argc, char *argv[])
   };
   int x = 0, c = 0, single = 0;
   char *name_exe = basename2 (argv[0]);
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   char *name_discmage;
 #endif
   (void) argc;                                  // warning remover
 
-#ifdef  HAVE_ZLIB_H
+#ifdef  USE_ZLIB
 #define USAGE_S "Usage: %s [OPTION]... [ROM|IMAGE|SRAM|FILE|DIR|ARCHIVE]...\n\n"
 #else
 #define USAGE_S "Usage: %s [OPTION]... [ROM|IMAGE|SRAM|FILE|DIR]...\n\n"
@@ -1696,7 +1696,7 @@ ucon64_usage (int argc, char *argv[])
 //        genesis_usage[0].desc,
         nes_usage[0].desc, snes_usage[0].desc);
 
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
       if (ucon64.discmage_enabled)
         {
           ucon64_render_usage (libdm_usage);
@@ -1717,7 +1717,7 @@ ucon64_usage (int argc, char *argv[])
   printf ("DATabase: %d known ROMs (DAT files: %s)\n\n",
           ucon64_dat_total_entries (), ucon64.datdir);
 
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   name_discmage =
 #ifdef  DLOPEN
     ucon64.discmage_path;
@@ -1743,7 +1743,7 @@ ucon64_usage (int argc, char *argv[])
 #endif
 
 #undef  PARALLEL_MSG
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
 #define PARALLEL_MSG "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n" \
      "      parallel port. If that is the case give a hardware address. For example:\n" \
      "        ucon64 " OPTION_LONG_S "xswc \"rom.swc\" " OPTION_LONG_S "port=0x378\n" \

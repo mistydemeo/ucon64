@@ -36,14 +36,14 @@ const st_usage_t msg_usage[] =
   {
     {NULL, NULL, "Magic Super Griffin/MSG"},
     {NULL, NULL, "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
     {"xmsg", NULL, "send/receive ROM to/from Magic Super Griffin/MSG; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically when ROM does not exist"},
-#endif // PARALLEL
+#endif // USE_PARALLEL
     {NULL, NULL, NULL}
   };
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 
 #define BUFFERSIZE 8192                         // don't change, only 8192 works!
 
@@ -233,4 +233,4 @@ msg_write_rom (const char *filename, unsigned int parport)
   return 0;
 }
 
-#endif // PARALLEL
+#endif // USE_PARALLEL

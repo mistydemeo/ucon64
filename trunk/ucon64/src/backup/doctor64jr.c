@@ -158,7 +158,7 @@ const st_usage_t doctor64jr_usage[] = {
 };
 
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 
 #define BUFFERSIZE 32768
 #define set_ai_write outportb(port_a, 5);       // ninit=1, nwrite=0
@@ -609,4 +609,4 @@ doctor64jr_write (const char *filename, unsigned int parport)
   return 0;
 }
 
-#endif // PARALLEL
+#endif // USE_PARALLEL

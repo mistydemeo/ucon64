@@ -79,7 +79,7 @@ const st_usage_t mccl_usage[] = {
 };
 
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 
 #if 0
 #define lptbase 0x378
@@ -156,4 +156,4 @@ mccl_read (const char *filename, unsigned int parport)
   return 0;
 }
 
-#endif // PARALLEL
+#endif // USE_PARALLEL

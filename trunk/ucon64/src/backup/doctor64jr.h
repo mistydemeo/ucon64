@@ -21,10 +21,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef DOCTOR64JR_H
 #define DOCTOR64JR_H
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 extern int doctor64jr_read (const char *filename, unsigned int parport);
 extern int doctor64jr_write (const char *filename, unsigned int parport);
-#endif // PARALLEL
+#endif // USE_PARALLEL
 
 extern const st_usage_t doctor64jr_usage[];
 

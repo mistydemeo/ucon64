@@ -27,11 +27,11 @@ extern const st_usage_t gbx_usage[];
 #define GBX_HEADER_START 0
 #define GBX_HEADER_LEN 0
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 extern int gbx_read_rom (const char *filename, unsigned int parport);
 extern int gbx_write_rom (const char *filename, unsigned int parport);
 extern int gbx_read_sram (const char *filename, unsigned int parport, int bank);
 extern int gbx_write_sram (const char *filename, unsigned int parport, int bank);
-#endif // PARALLEL
+#endif // USE_PARALLEL
 
 #endif // GBX_H

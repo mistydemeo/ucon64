@@ -44,7 +44,7 @@ const st_usage_t dex_usage[] =
   };
 
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 
 #define CONPORT 1
 #define TAP 1
@@ -126,4 +126,4 @@ dex_write_block (const char *filename, int block_num, unsigned int parport)
   return 0;
 }
 
-#endif // PARALLEL
+#endif // USE_PARALLEL

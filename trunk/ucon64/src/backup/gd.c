@@ -40,7 +40,7 @@ const st_usage_t gd_usage[] =
   {
     {NULL, NULL, "Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"},
     {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
     {"xgd3", NULL, "send ROM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
                    "this option uses the Game Doctor SF3 protocol"},
 #if 1 // dumping is not yet supported (might happen soon)
@@ -56,11 +56,11 @@ const st_usage_t gd_usage[] =
     {"xgd6r", NULL, "send/receive saver (RTS) data to/from Game Doctor SF6/SF7;\n"
                     OPTION_LONG_S "port=PORT\n"
                     "receives automatically when saver file does not exist"},
-#endif // PARALLEL
+#endif // USE_PARALLEL
     {NULL, NULL, NULL}
   };
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 
 #define BUFFERSIZE 8192
 #define GD_OK 0
@@ -1113,4 +1113,4 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
   return 0;
 }
 
-#endif // PARALLEL
+#endif // USE_PARALLEL

@@ -43,7 +43,7 @@ const st_usage_t swc_usage[] =
   {
     {NULL, NULL, "Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC"},
     {NULL, NULL, "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
     {"xswc", NULL, "send/receive ROM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
                    "receives automatically when ROM does not exist"},
     {"xswc2", NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)"},
@@ -55,14 +55,15 @@ const st_usage_t swc_usage[] =
   help should be complete - dbjh
 */
     {"xswc-io", "MODE", "specify SWC I/O mode; use with -xswc or -xswcc\n"
-                        "MODE=0x01 force 32 Mbit dump\n"
-                        "MODE=0x02 use alternative method for determining ROM size\n"
-                        "MODE=0x04 Super FX\n"
-                        "MODE=0x08 S-DD1\n"
-                        "MODE=0x10 SA-1\n"
-                        "MODE=0x20 SPC7110\n"
-                        "MODE=0x40 DX2 trick (might work with other SWC models)\n"
-                        "MODE=0x80 Mega Man X 2\n"
+                        "MODE=0x001 force 32 Mbit dump\n"
+                        "MODE=0x002 use alternative method for determining ROM size\n"
+                        "MODE=0x004 Super FX\n"
+                        "MODE=0x008 S-DD1\n"
+                        "MODE=0x010 SA-1\n"
+                        "MODE=0x020 SPC7110\n"
+                        "MODE=0x040 DX2 trick (might work with other SWC models)\n"
+                        "MODE=0x080 Mega Man X 2\n"
+                        "MODE=0x100 dump BIOS\n"
                         "It is possible to combine flags. MODE=0x44 makes it possible\n"
                         "to dump for example Yoshi's Island"},
 #endif
@@ -73,11 +74,11 @@ const st_usage_t swc_usage[] =
                     "receives automatically when SRAM does not exist"},
     {"xswcr", NULL, "send/receive RTS data to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
                     "receives automatically when RTS file does not exist"},
-#endif // PARALLEL
+#endif // USE_PARALLEL
     {NULL, NULL, NULL}
   };
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 
 #define BUFFERSIZE 8192                         // don't change, only 8192 works!
 
@@ -114,6 +115,9 @@ static unsigned char read_cartridge1 (unsigned int address);
 static void write_cartridge (unsigned int address, unsigned char *buffer,
                              unsigned int length);
 static void write_cartridge1 (unsigned int address, unsigned char byte);
+static void dump_rom (FILE *file, int size, int numblocks, unsigned int mask1,
+                      unsigned int mask2, unsigned int address);
+static void dump_bios (FILE *file);
 static int sub (void);
 static int mram_helper (int x);
 static int mram (void);
@@ -600,7 +604,8 @@ write_cartridge1 (unsigned int address, unsigned char byte)
 
 
 void
-dump_rom (FILE *file, int size, int numblocks, unsigned int mask1, unsigned int mask2, unsigned int address)
+dump_rom (FILE *file, int size, int numblocks, unsigned int mask1,
+          unsigned int mask2, unsigned int address)
 {
   int i, bytesreceived = 0;
   unsigned char *buffer;
@@ -651,11 +656,40 @@ dump_rom (FILE *file, int size, int numblocks, unsigned int mask1, unsigned int 
 }
 
 
+void
+dump_bios (FILE *file)
+{
+  int address, bytesreceived = 0;
+  unsigned char *buffer;
+  time_t starttime;
+
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
+      exit (1);
+    }
+
+  starttime = time (NULL);
+  for (address = 0; address < 0x080; address += 4) // banks 00-1f
+    {
+      ffe_send_command (5, address, 0);
+      ffe_receive_block (0xe000, buffer, BUFFERSIZE);
+      fwrite (buffer, 1, BUFFERSIZE, file);
+
+      bytesreceived += BUFFERSIZE;
+      ucon64_gauge (starttime, bytesreceived, 0x20 * 0x2000);
+      ffe_checkabort (2);
+    }
+
+  free (buffer);
+}
+
+
 int
 swc_read_rom (const char *filename, unsigned int parport, int io_mode)
 {
   FILE *file;
-  unsigned char *buffer, byte;
+  unsigned char buffer[SWC_HEADER_LEN], byte;
   int size, blocksleft;
 
   ffe_init_io (parport);
@@ -680,10 +714,16 @@ swc_read_rom (const char *filename, unsigned int parport, int io_mode)
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
       exit (1);
     }
-  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+
+  if (io_mode & SWC_IO_DUMP_BIOS)
     {
-      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
-      exit (1);
+      printf ("Press q to abort\n\n");
+
+      dump_bios (file);
+
+      ffe_deinit_io ();
+      fclose (file);
+      return 0;                                 // skip the other code in this function
     }
 
   size = receive_rom_info (buffer, io_mode);
@@ -757,7 +797,6 @@ swc_read_rom (const char *filename, unsigned int parport, int io_mode)
 #endif
   ffe_send_command (5, 0, 0);
 
-  free (buffer);
   fclose (file);
   ffe_deinit_io ();
 
@@ -1290,4 +1329,4 @@ swc_write_cart_sram (const char *filename, unsigned int parport, int io_mode)
   return 0;
 }
 
-#endif // PARALLEL
+#endif // USE_PARALLEL

@@ -26,10 +26,10 @@ extern const st_usage_t f2a_usage[];
 #define F2A_HEADER_START 0
 #define F2A_HEADER_LEN 0
 
-#if     defined PARALLEL || defined HAVE_USB_H
+#if     defined USE_PARALLEL || defined USE_USB
 extern int f2a_read_rom (const char *filename, unsigned int parport, int size);
 extern int f2a_write_rom (const char *filename, unsigned int parport, int size);
 extern int f2a_read_sram (const char *filename, unsigned int parport, int bank);
 extern int f2a_write_sram (const char *filename, unsigned int parport, int bank);
-#endif // PARALLEL
+#endif // USE_PARALLEL
 #endif

@@ -47,10 +47,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "f2a.h"
 #include "console/gba.h"
-#ifdef  HAVE_USB_H
+#ifdef  USE_USB
 #include "misc_usb.h"
 #endif
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
 #include "misc_par.h"
 #endif
 
@@ -59,7 +59,7 @@ const st_usage_t f2a_usage[] =
   {
     {NULL, NULL, "Flash 2 Advance (Ultra)"},
     {NULL, NULL, "2003 Flash2Advance http://www.flash2advance.com"},
-#if     defined PARALLEL || defined HAVE_USB_H
+#if     defined USE_PARALLEL || defined USE_USB
     {"xf2a", NULL, "send/receive ROM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
                    "receives automatically (32 Mbits) when ROM does not exist"},
     {"xf2amulti", "SIZE", "send multiple ROMs to Flash 2 Advance (Ultra); specify a\n"
@@ -71,12 +71,12 @@ const st_usage_t f2a_usage[] =
     {"xf2ab", "BANK", "send/receive SRAM to/from Flash 2 Advance (Ultra) BANK\n"
                       "BANK should be a number >= 1; " OPTION_LONG_S "port=PORT\n"
                       "receives automatically when SRAM does not exist"},
-#endif // PARALLEL || HAVE_USB_H
+#endif // USE_PARALLEL || USE_USB
     {NULL, NULL, NULL}
 };
 
 
-#ifdef  HAVE_USB_H
+#ifdef  USE_USB
 
 #define EZDEV             "/proc/ezusb/dev0"
 #define F2A_FIRM_SIZE     23053
@@ -119,10 +119,10 @@ static int f2a_read_usb (int address, int size, const char *filename);
 static int f2a_write_usb (int n_files, char **files, int address);
 
 static usb_dev_handle *f2ahandle;
-#endif // HAVE_USB_H
+#endif // USE_USB
 
 
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
 
 #define LOGO_ADDR         0x06000000
 #define EXEC_STUB         0x03002000
@@ -180,10 +180,10 @@ static int parport_debug = 1;
 static int parport_debug = 0;
 #endif
 static int parport_nop_cntr;
-#endif // PARALLEL
+#endif // USE_PARALLEL
 
 
-#if     defined PARALLEL || defined HAVE_USB_H
+#if     defined USE_PARALLEL || defined USE_USB
 
 #define LOADER_SIZE       32768
 
@@ -208,7 +208,7 @@ static const char *f2a_msg[] = {
 #endif
 
 
-#ifdef  HAVE_USB_H
+#ifdef  USE_USB
 
 static int
 f2a_init_usb (void)
@@ -574,10 +574,10 @@ f2a_write_usb (int n_files, char **files, int address)
   return 0;
 }
 
-#endif // HAVE_USB_H
+#endif // USE_USB
 
 
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
 
 static int
 f2a_init_par (int parport, int parport_delay)
@@ -1298,18 +1298,18 @@ f2a_wait_par (void)
     }
   return 0;
 }
-#endif // PARALLEL
+#endif // USE_PARALLEL
 
 
-#if     defined PARALLEL || defined HAVE_USB_H
+#if     defined USE_PARALLEL || defined USE_USB
 int
 f2a_read_rom (const char *filename, unsigned int parport, int size)
 {
   int offset = 0;
 
   starttime = time (NULL);
-#ifdef  HAVE_USB_H
-  (void) parport;                               // warning remover if only HAVE_USB_H
+#ifdef  USE_USB
+  (void) parport;                               // warning remover if only USE_USB
   if (ucon64.usbport)
     {
       f2a_init_usb ();
@@ -1317,10 +1317,10 @@ f2a_read_rom (const char *filename, unsigned int parport, int size)
       misc_usb_close (f2ahandle);
     }
 #endif
-#if     defined PARALLEL && defined HAVE_USB_H
+#if     defined USE_PARALLEL && defined USE_USB
   else
 #endif
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
     {
       f2a_init_par (parport, 10);
       f2a_read_par (0x08000000 + offset * MBIT, size * MBIT, filename);
@@ -1383,8 +1383,8 @@ f2a_write_rom (const char *filename, unsigned int parport, int size)
     }
 
   starttime = time (NULL);
-#ifdef  HAVE_USB_H
-  (void) parport;                               // warning remover if only HAVE_USB_H
+#ifdef  USE_USB
+  (void) parport;                               // warning remover if only USE_USB
   if (ucon64.usbport)
     {
       f2a_init_usb ();
@@ -1392,10 +1392,10 @@ f2a_write_rom (const char *filename, unsigned int parport, int size)
       misc_usb_close (f2ahandle);
     }
 #endif
-#if     defined PARALLEL && defined HAVE_USB_H
+#if     defined USE_PARALLEL && defined USE_USB
   else
 #endif
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
     {
       f2a_init_par (parport, 10);
       //f2a_erase_par (0x08000000, size * MBIT);
@@ -1432,8 +1432,8 @@ f2a_read_sram (const char *filename, unsigned int parport, int bank)
   bank--;
 
   starttime = time (NULL);
-#ifdef  HAVE_USB_H
-  (void) parport;                               // warning remover if only HAVE_USB_H
+#ifdef  USE_USB
+  (void) parport;                               // warning remover if only USE_USB
   if (ucon64.usbport)
     {
       f2a_init_usb ();
@@ -1441,10 +1441,10 @@ f2a_read_sram (const char *filename, unsigned int parport, int bank)
       misc_usb_close (f2ahandle);
     }
 #endif
-#if     defined PARALLEL && defined HAVE_USB_H
+#if     defined USE_PARALLEL && defined USE_USB
   else
 #endif
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
     {
       f2a_init_par (parport, 10);
       f2a_read_par (0xe000000 + bank * 64 * 1024, size, filename);
@@ -1471,8 +1471,8 @@ f2a_write_sram (const char *filename, unsigned int parport, int bank)
   bank--;
 
   starttime = time (NULL);
-#ifdef  HAVE_USB_H
-  (void) parport;                               // warning remover if only HAVE_USB_H
+#ifdef  USE_USB
+  (void) parport;                               // warning remover if only USE_USB
   if (ucon64.usbport)
     {
       f2a_init_usb ();
@@ -1480,10 +1480,10 @@ f2a_write_sram (const char *filename, unsigned int parport, int bank)
       misc_usb_close (f2ahandle);
     }
 #endif
-#if     defined PARALLEL && defined HAVE_USB_H
+#if     defined USE_PARALLEL && defined USE_USB
   else
 #endif
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
     {
       f2a_init_par (parport, 10);
       //f2a_erase_par (0xe000000, size * MBIT);
@@ -1493,4 +1493,4 @@ f2a_write_sram (const char *filename, unsigned int parport, int bank)
   return 0;
 }
 
-#endif // defined PARALLEL || defined HAVE_USB_H
+#endif // defined USE_PARALLEL || defined USE_USB

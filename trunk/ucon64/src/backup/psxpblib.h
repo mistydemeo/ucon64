@@ -17,7 +17,7 @@
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 
 // outportb() and inportb() are only present in uCON64 if PARALLEL is defined
 #define psx_outportb(P, B) outportb((unsigned short) (P), (unsigned char) (B))
@@ -205,4 +205,4 @@ PSX_MCB_INFO *psx_mcb_info_merge (PSX_MCB_INFO_DIR mcb_info_dir,
 PSX_MCB_INFO *psx_mcb_read_info (int base, int conport, int tap, int delay,
                                  int block);
 
-#endif // PARALLEL
+#endif // USE_PARALLEL

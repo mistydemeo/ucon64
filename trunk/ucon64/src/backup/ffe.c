@@ -34,7 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc_par.h"
 
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 
 
 #define N_TRY_MAX          65536                // # times to test if copier ready
@@ -306,5 +306,4 @@ ffe_checkabort (int status)
     }
 }
 
-#endif // PARALLEL
-
+#endif // USE_PARALLEL

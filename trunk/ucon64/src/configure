@@ -1999,13 +1999,6 @@ fi
 
 
 
-
-cat >>confdefs.h <<\_ACEOF
-#define UCON64 1
-_ACEOF
-
-
-
 echo "$as_me:$LINENO: checking whether debug output is enabled" >&5
 echo $ECHO_N "checking whether debug output is enabled... $ECHO_C" >&6
 # Check whether --enable-debug or --disable-debug was given.
@@ -2038,7 +2031,7 @@ fi;
 if test $enable_parallel = yes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define PARALLEL 1
+#define USE_PARALLEL 1
 _ACEOF
 
 fi
@@ -2099,7 +2092,7 @@ fi
 if test $enable_ppdev = yes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define PPDEV 1
+#define USE_PPDEV 1
 _ACEOF
 
 fi
@@ -2119,7 +2112,7 @@ fi;
 if test $enable_ansi_color = yes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define ANSI_COLOR 1
+#define USE_ANSI_COLOR 1
 _ACEOF
 
 fi
@@ -2161,10 +2154,10 @@ fi;
 if test $enable_discmage = yes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define DISCMAGE 1
+#define USE_DISCMAGE 1
 _ACEOF
 
-  DEFINE_DISCMAGE_MAKE="DISCMAGE=1"
+  DEFINE_DISCMAGE_MAKE="USE_DISCMAGE=1"
 fi
 echo "$as_me:$LINENO: result: $enable_discmage" >&5
 echo "${ECHO_T}$enable_discmage" >&6
@@ -2223,10 +2216,10 @@ fi
 if test $with_zlib = yes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define HAVE_ZLIB_H 1
+#define USE_ZLIB 1
 _ACEOF
 
-  DEFINE_ZLIB_MAKE="ZLIB=1"
+  DEFINE_ZLIB_MAKE="USE_ZLIB=1"
 fi
 echo "$as_me:$LINENO: result: $with_zlib" >&5
 echo "${ECHO_T}$with_zlib" >&6
@@ -2285,10 +2278,10 @@ fi
 if test $with_libusb = yes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define HAVE_USB_H 1
+#define USE_USB 1
 _ACEOF
 
-  DEFINE_USB_MAKE="USB=1"
+  DEFINE_USB_MAKE="USE_USB=1"
 fi
 echo "$as_me:$LINENO: result: $with_libusb" >&5
 echo "${ECHO_T}$with_libusb" >&6

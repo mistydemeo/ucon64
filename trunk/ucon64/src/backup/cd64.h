@@ -24,7 +24,7 @@ extern const st_usage_t cd64_usage[];
 #define CD64_HEADER_START 0
 #define CD64_HEADER_LEN 0
 
-#ifdef PARALLEL
-#endif // PARALLEL
+#ifdef USE_PARALLEL
+#endif // USE_PARALLEL
 
 #endif // CD64_H

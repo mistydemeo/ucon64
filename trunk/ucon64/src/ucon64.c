@@ -1424,6 +1424,8 @@ ucon64_usage (int argc, char *argv[])
      "      In order to connect a copier to a PC's parallel port you need a standard\n" \
      "      bidirectional parallel cable\n" \
      "\n"
+#else
+#define PARALLEL_MSG ""
 #endif
 
 #ifdef  __MSDOS__

@@ -848,7 +848,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "int         force ROM is interleaved (2143)\n"
     "  " OPTION_LONG_S "nint        force ROM is not interleaved (1234)\n"
     "  " OPTION_LONG_S "dint        convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
-    "                  this differs from the Super Nintendo & NES " OPTION_LONG_S "dint option\n"
+    "                  this differs from the SNES & NES " OPTION_LONG_S "dint option\n"
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
 #ifdef	__MSDOS__
     "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"

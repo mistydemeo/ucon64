@@ -75,6 +75,7 @@ ifdef DJGPP
 	del config.log
 	del config.status
 	del config.cache
+	del config.h
 else
 	rm -f ../bin/$(TARGET) Makefile config.log config.status config.cache config.h
 endif                                   # DJGPP
@@ -135,7 +136,7 @@ endif                                   # cygwin
 UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h
 
 getopt.o: getopt.h
-misc.o: misc.h
+misc.o: misc.h config.h
 ucon64.o: switches.c options.c $(UCON64_STD_H)
 ucon64_misc.o: $(UCON64_STD_H)
 ucon64_db.o: ucon64_db.h $(UCON64_STD_H)

@@ -59,65 +59,25 @@ A: cvs -d:ext:<name>@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 checkout -P ucon
    because -d:ext:&#60;name&#62;@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 is stored
    in the CVS directories then
 
-Q: How are the sources of uCON64 organized?
-A: This is the concept of ucon64.c which recurses into all other source files
-   It might be possible to separate sources to let them become independend
-   executables by just renaming their bla_main() function to main()
+Q: How is the source of uCON64 organized?
+A: The heart of uCON64 is ucon64.h/struct ucon64_
+   This struct is designed to hold all informations you could get from any ROM 
+   
+   You start uCON64 with the name of a ROM as argument
 
-	int argcmp(int argc,char *argv[],char *str)
-	{
-		//check for an option
-		register int x=0;
-	
-		for(x=1;x&lt;argc;x++)//leave out first arg
-		{
-			if(argv[x][0]=='-'&&!strdcmp(argv[x],str))return(x);
-		}
+   ucon64.c/ucon64_flush() will initialize struct ucon64_ with empty strings
+   and NULL's
 
-		return(0);//not found
-	}
+   ucon64.c/ucon64_init() will recurse into all &#60;console&#62;.c/&#60;console&#62;_init()
+   functions which probe if the ROM belongs to their console
 
-	char *getarg(int argc,char *argv[],int pos)
-	{
-		//return a filename
-		register int x=0,y=0;
+   If the right console was found struct ucon64_ will be filled with the right
+   values and strings
 
-		for(x=0;x&lt;argc;x++)
-		{
-			if(argv[x][0]!='-')
-			{
-				if(y!=pos)y++;
-				else return(argv[x]);
-			}
-		}
+   ucon64.c/ucon64_nfo() displays the values and strings of struct ucon64_
 
-		return("");//not found
-	}
-
-
-
-
-	int main(int argc,char *argv[])
-	{
-		if(argcmp(argc,argv,"-0"))bla0_main(argc,argv);
-		if(argcmp(argc,argv,"-1"))bla1_main(argc,argv);
-		if(argcmp(argc,argv,"-2"))bla2_main(argc,argv);
-	}
-
-	int bla0_main(int argc,char *argv[])
-	{
-		if(argcmp(argc,argv,"--help"))
-		{
-			printf("You used --help as option");
-			return(0);
-		}
-
-		printf("Filename: ",getarg(argc,argv,1);
-		
-		return(0);
-	}
-
-
+   Then ucon64.c will check for further commandline arguments and will
+   probably recurse into &#60;console&#62;/&#60;console&#62;_main() to proceed
 
 
 

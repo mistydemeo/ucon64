@@ -24,25 +24,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_MISC_H
 
 #ifdef  BACKUP
-#ifdef  __BEOS__
-typedef struct st_ioport
-{
-  unsigned int port;
-  unsigned char data8;
-  unsigned short data16;
-} st_ioport_t;
-#endif // __BEOS__
-
 #define out1byte(p,x)   outportb(p,x)
 #define in1byte(p)      inportb(p)
 
-// DJGPP (DOS) has outportX() & inportX()
-#if     defined __unix__ || defined __BEOS__
+// DJGPP (DOS) has these, but it's better that all code uses the same functions
 extern unsigned char inportb (unsigned short port);
 extern unsigned short inportw (unsigned short port);
 extern void outportb (unsigned short port, unsigned char byte);
 extern void outportw (unsigned short port, unsigned short word);
-#endif // defined __unix__ || defined __BEOS__
 #endif // BACKUP
 
 typedef struct st_track_modes
@@ -79,8 +68,8 @@ typedef struct st_unknown_header
   unsigned char emulation1;
   unsigned char emulation2;
   unsigned char pad[2];
-  unsigned char id_code1;
-  unsigned char id_code2;
+  unsigned char id1;
+  unsigned char id2;
   unsigned char type;
   unsigned char pad2[501];
 } st_unknown_header_t;
@@ -89,6 +78,7 @@ typedef struct st_unknown_header
 #define UNKNOWN_HEADER_LEN (sizeof (st_unknown_header_t))
 extern const char *unknown_usage[];
 
+extern char *ucon64_temp_file;
 
 /*
   wrapper for misc.c/q_fbackup()

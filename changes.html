@@ -171,7 +171,7 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - added (GBA) -xfalb&#60;n&#62; send/receive SRAM to/from Flash Advance Linker bank n; $FILE=PORT (by dbjh)<br>
 - removed (GBA) -xfalm (use SPP mode), because it is not needed anymore (by dbjh)<br>
 - updated (SNES) fixed checksum function for Far East of Eden Zero (J) (by dbjh)<br>
-- added (GBA) -multi(1,2,3) make multirom for Flash Advance Linker (by dbjh)<br>
+- added (GBA) -multi{1,2,3} make multirom for Flash Advance Linker (by dbjh)<br>
 - updated/added (SNES) Game Doctor ROM file support (-gd3 & -s) (by John Weidman)<br>
 - updated (all) fixed DOS specific bug in IPS code (by dbjh)<br>
 - updated (SNES) fixed DOS specific problem for -swc, -fig and -smc (by dbjh)<br>
@@ -240,6 +240,9 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - added --padn=N pad ROM to N Bytes (put Bytes with value 0x00 after end) (by dbjh)<br>
 <!-- beta4 -->
 - updated (NES) FDS images are now recognized without -fdsl (by dbjh)<br>
+- added (GBA) added -xfalmulti send multiple ROMs to Flash Advance Linker (by dbjh)<br>
+- updated (GBA) changed -multi so that it takes a size argument (by dbjh)<br>
+- removed (GBA) -multi{1,2,3}, -multi can be used instead (by dbjh)<br>
 <br>
 <br>
 <br>

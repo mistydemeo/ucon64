@@ -60,8 +60,8 @@ typedef struct st_swc_header
   unsigned char size_high;
   unsigned char emulation;
   unsigned char pad[5];
-  unsigned char id_code1;
-  unsigned char id_code2;
+  unsigned char id1;
+  unsigned char id2;
   unsigned char type;
   unsigned char pad2[501];
 } st_swc_header_t;

@@ -25,23 +25,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include <unistd.h>             // ioperm() (libc5)
 #include <dirent.h>
 #include <sys/stat.h>
+
+#ifdef  __unix__
+#include <unistd.h>                             // ioperm() (libc5)
+#endif
+
 #include "config.h"
+
 #ifdef  BACKUP
 #ifdef  __FreeBSD__
 #include <machine/sysarch.h>
-#elif   defined __linux__ // __FreeBSD__
+#elif   defined __linux__
 #ifdef  __GLIBC__
-#include <sys/io.h>             // ioperm() (glibc)
-#endif // __GLIBC__
-#elif   defined __MSDOS__ // __linux__
-#include <pc.h>                 // inportb(), inportw()
-#elif   defined __BEOS__ // __MSDOS__
+#include <sys/io.h>                             // ioperm() (glibc)
+#endif
+#elif   defined __BEOS__
 #include <fcntl.h>
-#endif // __BEOS__
+#endif
 #endif // BACKUP
+
 #include "ucon64.h"
 #include "misc.h"
 #include "ucon64_misc.h"
@@ -85,7 +89,7 @@ const char *ucon64_console_error =
   "TIP:   If this is a ROM or CD IMAGE you might try to force the recognition\n"
   "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n";
 
-static char *ucon64_temp_file = NULL;
+char *ucon64_temp_file = NULL;
 
 void
 ucon64_wrote (const char *filename)
@@ -95,6 +99,13 @@ ucon64_wrote (const char *filename)
 
 
 #if     defined BACKUP && defined __BEOS__
+typedef struct st_ioport
+{
+  unsigned int port;
+  unsigned char data8;
+  unsigned short data16;
+} st_ioport_t;
+
 static int ucon64_io_fd;
 #endif
 
@@ -307,7 +318,7 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
         pos -= MAXBUFSIZE, buf_pos = MAXBUFSIZE)
     {
       fread (buf, 1, buf_pos, fh);
-      
+
       for (; buf_pos > 0; buf_pos--)
         if (buf[buf_pos - 1] != c)
           {
@@ -335,7 +346,7 @@ close_io_port (void)
 #endif
 
 
-#if     defined __unix__ || defined __BEOS__ // DJGPP (DOS) has outportX() & inportX()
+#if     defined __unix__ || defined __BEOS__    // __unix__ is defined under DJGPP
 unsigned char
 inportb (unsigned short port)
 {
@@ -346,7 +357,7 @@ inportb (unsigned short port)
   ioctl (ucon64_io_fd, 'r', &temp, 0);
 
   return temp.data8;
-#else
+#elif   defined __i386__
   unsigned char byte;
 
   __asm__ __volatile__
@@ -370,7 +381,7 @@ inportw (unsigned short port)
   ioctl (ucon64_io_fd, 'r16', &temp, 0);
 
   return temp.data16;
-#else
+#elif   defined __i386__
   unsigned short word;
 
   __asm__ __volatile__
@@ -393,7 +404,7 @@ outportb (unsigned short port, unsigned char byte)
   temp.port = port;
   temp.data8 = byte;
   ioctl (ucon64_io_fd, 'w', &temp, 0);
-#else
+#elif   defined __i386__
   __asm__ __volatile__
   ("outb %1, %0"
     :
@@ -412,7 +423,7 @@ outportw (unsigned short port, unsigned short word)
   temp.port = port;
   temp.data16 = word;
   ioctl (ucon64_io_fd, 'w16', &temp, 0);
-#else
+#elif   defined __i386__
   __asm__ __volatile__
   ("outw %1, %0"
     :
@@ -496,7 +507,7 @@ ucon64_parport_init (unsigned int port)
       exit (1);
     }
 #elif   defined __i386__                        // 0x3bc, 0x378, 0x278
-  if (!port)                                    // no port specified or forced yet?
+  if (!port)                                    // no port specified or forced?
     {
       unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };
       int x, found = 0;
@@ -1079,7 +1090,6 @@ ucon64_configfile (void)
     ".ucon64rc"
 #endif
     , dirname);
-  free (dirname);
 
   if (access (ucon64.configfile, F_OK) != 0)
     {

@@ -252,7 +252,7 @@ mgd_make_name (const char *filename, const char *prefix0, int size, char *name)
           size_str = "4";
           suffix = ".048";
         }
-      else // MGD supports SNES games with sizes up to 8 Mbit
+      else // MGD supports PC-Engine games with sizes up to 8 Mbit
         {
           size_str = "8";
           suffix = ".058";

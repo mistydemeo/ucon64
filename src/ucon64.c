@@ -1740,16 +1740,16 @@ int ucon64_e (struct rom_ *rombuf)
   return result;
 }
 
+
 int ucon64_ls (char *path, int mode)
 {
-  int ucon64_argc;
   struct dirent *ep;
   struct stat puffer;
   struct rom_ rom;
   int single_file = 0;
   char current_dir[FILENAME_MAX];
   DIR *dp;
-  char buf[MAXBUFSIZE], *ucon64_argv[128];
+  char buf[MAXBUFSIZE];
 
 //TODO dir or single file?
 
@@ -1764,16 +1764,20 @@ int ucon64_ls (char *path, int mode)
   getcwd (current_dir,FILENAME_MAX);
   chdir (path);
 
+#define UCON64_LS_SAVE
+#ifdef UCON64_LS_SAVE
   while ((ep = readdir (dp)) != 0)
     {
       if (!stat (ep->d_name, &puffer))
         {
           if (S_ISREG (puffer.st_mode))
             {
-              ucon64_argv[0] = "ucon64";
-              ucon64_argv[1] = ep->d_name;
-              ucon64_argc = 2;
-
+#else
+  while ((((ep = readdir (dp)) != 0) &&
+          !stat (ep->d_name, &puffer)) &&
+          S_ISREG (puffer.st_mode))
+    {
+#endif // UCON64_LS_SAVE
               ucon64_init (NULL, &rom);
               if (ucon64_init (ep->d_name, &rom) != -1)
                 switch (mode)
@@ -1790,7 +1794,7 @@ int ucon64_ls (char *path, int mode)
                           strcpy (buf, &rom.rom[findlast (rom.rom, ".") + 1]);
                           printf ("%s.%s\n", rom.name, buf);
                         }
-                    break;
+                      break;
 */
                     default:
                     case ucon64_LS:
@@ -1804,14 +1808,17 @@ int ucon64_ls (char *path, int mode)
                       break;
                 }
             }
+#ifdef UCON64_LS_SAVE
         }
     }
+#endif // UCON64_LS_SAVE
   closedir (dp);
 
   chdir (current_dir);
   
   return 0;
 }
+
 
 int
 ucon64_configfile (void)
@@ -1938,6 +1945,7 @@ ucon64_configfile (void)
     }
   return 0;
 }
+
 
 void
 ucon64_usage (int argc, char *argv[])
@@ -2288,14 +2296,6 @@ romcenter.com
 emuchina.net
 #endif
 }
-
-
-
-
-
-
-
-
 
 
 /*

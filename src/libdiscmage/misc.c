@@ -2298,8 +2298,10 @@ unregister_func (void (*func) (void))
     {
       prev_node->next = func_node->next;
       free (func_node);
+      return 0;
     }
-  return 0;
+  else
+    return -1;
 }
 
 

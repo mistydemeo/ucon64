@@ -2,6 +2,7 @@
 f2a.c - Flash 2 Advance support for uCON64
 
 written by 2003 Ulrich Hecht (uli@emulinks.de)
+           2003 David Voswinkel (d.voswinkel@netcologne)
            2004 NoisyB (noisyb@gmx.net)
            2004 dbjh
 
@@ -297,7 +298,7 @@ find_f2a:
       return -1;
     }
 
-  f2ahandle = usb_open (f2adev);
+  f2ahandle = misc_usb_open (f2adev);
 
   result = usb_claim_interface (f2ahandle, 0x4);
   if (result == -1)
@@ -330,9 +331,9 @@ f2a_info (recvmsg *rm)
   sm.command = CMD_GETINF;
 
 /*
-  if (usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
+  if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
     return -1;
-  if (usb_read (f2ahandle, (char *) rm, sizeof (recvmsg)) == -1)
+  if (misc_usb_read (f2ahandle, (char *) rm, sizeof (recvmsg)) == -1)
     return -1;
 */
 
@@ -373,19 +374,19 @@ f2a_boot_usb (const char *ilclient_fname)
   // boot the GBA
   memset (&sm, 0, SENDMSG_SIZE);
   sm.command = CMD_MULTIBOOT1;
-  usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE);
+  misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE);
   sm.command = CMD_MULTIBOOT2;
   sm.size = 16 * 1024;
-  usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE);
+  misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE);
 
   // send the multiboot image
-  if (usb_write (f2ahandle, ilclient, 16 * 1024) == -1)
+  if (misc_usb_write (f2ahandle, ilclient, 16 * 1024) == -1)
     {
       fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
       return -1;
     }
 
-  if (usb_read (f2ahandle, (char *) ack, 16 * 4) == -1)
+  if (misc_usb_read (f2ahandle, (char *) ack, 16 * 4) == -1)
     return -1;
 
   if (ucon64.quiet < 0)
@@ -415,7 +416,7 @@ f2a_read_usb (int address, int size, const char *filename)
   if ((file = fopen (filename, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
-      //exit (1); for now, return, although registering usb_disconnect() is better
+      //exit (1); for now, return, although registering misc_usb_close() is better
       return -1;
     }
 
@@ -425,12 +426,12 @@ f2a_read_usb (int address, int size, const char *filename)
   sm.address = address;
   sm.size = size;
   sm.sizekb = size / 1024;
-  if (usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
+  if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
     return -1;
 
   for (i = 0; i < sm.sizekb; i++)
     {
-      if (usb_read (f2ahandle, buffer, 1024) == -1)
+      if (misc_usb_read (f2ahandle, buffer, 1024) == -1)
         {
           fclose (file);
           return -1;
@@ -481,7 +482,7 @@ f2a_write_usb (int numfiles, char **files, int address)
       if ((file = fopen (files[j], "rb")) == NULL)
         {
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], files[j]);
-          //exit (1); for now, return, although registering usb_disconnect() is better
+          //exit (1); for now, return, although registering misc_usb_close() is better
           return -1;
         }
 
@@ -490,7 +491,7 @@ f2a_write_usb (int numfiles, char **files, int address)
       sm.address = address;
       sm.sizekb = fsize / 1024;
 
-      if (usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
+      if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
         return -1;
 
       for (i = 0; i < fsize; i += 1024)
@@ -502,7 +503,7 @@ f2a_write_usb (int numfiles, char **files, int address)
               fclose (file);
               return -1;                        // see comment for fopen() call
             }
-          if (usb_write (f2ahandle, buffer, 1024) == -1)
+          if (misc_usb_write (f2ahandle, buffer, 1024) == -1)
             return -1;
         }
 
@@ -1282,7 +1283,7 @@ f2a_read_rom (const char *filename, unsigned int parport, int size)
     {
       f2a_init_usb ();
       f2a_read_usb (0x8000000 + offset * MBIT, size * MBIT, filename);
-      usb_disconnect (f2ahandle);
+      misc_usb_close (f2ahandle);
     }
   else
 #endif
@@ -1306,7 +1307,7 @@ f2a_write_rom (const char *filename, unsigned int parport)
     {
       f2a_init_usb ();
       f2a_write_usb (1, files, 0x8000000 + offset * MBIT);
-      usb_disconnect (f2ahandle);
+      misc_usb_close (f2ahandle);
     }
   else
 #endif
@@ -1347,7 +1348,7 @@ f2a_read_sram (const char *filename, unsigned int parport, int bank)
     {
       f2a_init_usb ();
       f2a_read_usb (0xe000000 + bank * 64 * 1024, size, filename);
-      usb_disconnect (f2ahandle);
+      misc_usb_close (f2ahandle);
     }
   else
 #endif
@@ -1382,7 +1383,7 @@ f2a_write_sram (const char *filename, unsigned int parport, int bank)
     {
       f2a_init_usb ();
       f2a_write_usb (1, files, 0xe000000 + bank * 64 * 1024);
-      usb_disconnect (f2ahandle);
+      misc_usb_close (f2ahandle);
     }
   else
 #endif

@@ -1401,11 +1401,11 @@ ucon64_configfile (void)
                    "#\n"
                    "# F2A support files\n"
                    "#\n"
-                   "#f2afirmware=f2afirm.hex\n"
-                   "#f2aloader=loader.bin\n"
-                   "#ilclient=ilclient.bin\n"
-                   "#ilclient2=ilclient2.bin\n"
-                   "#illogo=illogo.bin\n"
+                   "f2afirmware=f2afirm.hex\n"
+                   "f2aloader=loader.bin\n"
+                   "ilclient=ilclient.bin\n"
+                   "ilclient2=ilclient2.bin\n"
+                   "illogo=illogo.bin\n"
                    "#\n"
                    "# emulate_<console shortcut>=<emulator with options>\n"
                    "#\n"
@@ -1541,6 +1541,12 @@ ucon64_configfile (void)
       set_property (ucon64.configfile, "rar_extract", "unrar x \"%s\"");
       set_property (ucon64.configfile, "ace_extract", "unace e \"%s\"");
 #endif
+
+      set_property (ucon64.configfile, "f2afirmware", "f2afirm.hex");
+      set_property (ucon64.configfile, "f2aloader", "loader.bin");
+      set_property (ucon64.configfile, "ilclient", "ilclient.bin");
+      set_property (ucon64.configfile, "ilclient2", "ilclient2.bin");
+      set_property (ucon64.configfile, "illogo", "illogo.bin");
 
       sync ();
       printf ("OK\n\n");

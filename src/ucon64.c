@@ -840,13 +840,13 @@ ucon64_execute_options (void)
 
 #ifdef  PARALLEL
   /*
-    The copier options need root privileges for ucon64_parport_init()
+    The copier options need root privileges for misc_parport_open()
     We can't use ucon64.flags & WF_PAR to detect whether a (parallel port)
     copier option has been specified, because another switch might've been
     specified after -port.
   */
   if (ucon64_parport_needed)
-    ucon64.parport = ucon64_parport_init (ucon64.parport);
+    ucon64.parport = misc_parport_open (ucon64.parport);
 #endif
 #if     defined __unix__ && !defined __MSDOS__
   if (first_call)

@@ -540,25 +540,26 @@ main (int argc, char **argv)
   for (; rom_index < argc; rom_index++)
     {
 #ifdef  HAVE_ZLIB_H
-      int process_multizips = 1, n_entries;
+      int n_entries;
+#endif
 
       // Was the last argument the name of a (the) patch file?
       if (rom_index == argc - 1)
         if (!strcmp (argv[rom_index], ucon64.patch_file))
           break;
+#if 0 // TODO: detect nonsense arguments. Using access() requires users to
+      //       always specify -rom or -port, which is annoying.
       if (access (argv[rom_index], F_OK) != 0)
         continue;
+#endif
 
+#ifdef  HAVE_ZLIB_H
       n_entries = unzip_get_number_entries (argv[rom_index]);
       if (n_entries != -1)                      // it's a zip file
-        ucon64_fname_arch (argv[rom_index]);
-      if (n_entries != -1 && process_multizips) // yes, repeat the check on n_entries
         {
           int stop = 0;
 
-          if (ucon64_process_rom (argv[rom_index], console, show_nfo))
-            break;
-          for (unzip_current_file_nr = 1; unzip_current_file_nr < n_entries;
+          for (unzip_current_file_nr = 0; unzip_current_file_nr < n_entries;
                unzip_current_file_nr++)
             {
               ucon64_fname_arch (argv[rom_index]);
@@ -757,7 +758,7 @@ ucon64_console_probe (st_rominfo_t *rominfo)
     }
   else // give auto_recognition a try
     {
-      if (UCON64_TYPE_ISROM (ucon64.type)) // TODO: still needed?
+      if (UCON64_TYPE_ISROM (ucon64.type))      // TODO: still needed?
         for (x = 0; probe[x].console != 0; x++)
           if (probe[x].auto_recognition)
             {

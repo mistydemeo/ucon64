@@ -40,6 +40,9 @@ GCC_WIN=1
 endif
 
 LIBNAME=discmage
+# SHAME ON YOU!
+#OBJECTS=libdm_misc.o dllinit.o misc.o misc_wav.o format/format.o format/cdi.o \
+#        format/nero.o format/cue.o format/toc.o format/other.o
 OBJECTS=libdm_misc.o dllinit.o misc.o format/format.o format/cdi.o \
         format/nero.o format/cue.o format/toc.o format/other.o
 ifdef USE_ZLIB
@@ -252,9 +255,11 @@ format/nero.o: format/nero.h $(LIBDM_STD_H)
 format/cue.o: format/cue.h $(LIBDM_STD_H)
 format/toc.o: format/toc.h $(LIBDM_STD_H)
 format/other.o: format/other.h $(LIBDM_STD_H)
+misc_wav.o: $(LIBDM_STD_H)
 dllinit.o: $(LIBDM_STD_H)
 misc.o: misc.h dxedll_priv.h
 misc_z.o: misc_z.h misc.h dxedll_priv.h
 dxe_misc.o: dxedll_pub.h
 djimport.o: libdiscmage.h dlopen.h dxedll_pub.h
 dlopen.o: dlopen.h dxedll_pub.h
+

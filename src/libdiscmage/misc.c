@@ -113,6 +113,147 @@ q_fsize (const char *filename)
 #endif
 
 
+#ifdef  DEBUG
+void
+parse_usage_code (const char *usage_output)
+// parse usage output into C code (for development)
+{
+  int i = 0, count = 0;
+  char buf[MAXBUFSIZE], *s = NULL, *d = NULL;
+  FILE *fh = fopen (usage_output, "r");
+
+  if (!fh)
+    return;
+
+  while (fgets (buf, MAXBUFSIZE, fh))
+    {
+      st_usage_t usage;
+      int value = 0;
+
+      if (*buf == '\n')
+        continue;
+
+      memset (&usage, 0, sizeof (st_usage_t));
+
+#ifdef  DEBUG
+      printf (buf);
+#endif
+      s = d = buf;
+      d = strstr (s, " " OPTION_S);
+      if (d && (d - s) < 10)
+        {
+          s = (d + strspn (++d, OPTION_S));
+
+          for (i = 0; s[i] && s[i] != ' '; i++)
+            if (s[i] == OPTARG)
+              {
+                value = 1;
+                d = strtok (s, OPTARG_S);
+                break;
+              }
+
+          if (!value)
+            d = strtok (s, " ");
+
+          if (d)
+            usage.option_s = d;
+
+          if (value)            // parse =VALUE
+            {
+              d = strtok (NULL, " ");
+
+              if (d)
+                usage.optarg = d;
+            }
+        }
+
+
+      if (usage.option_s)
+        {
+          printf ("{\"%s\", ", usage.option_s);
+
+          if (usage.optarg)
+            printf ("1, \"%s\", ", usage.optarg);
+          else
+            printf ("0, NULL, ");
+
+          printf ("\"%s\", NULL},", strtrim (strtok (NULL, "\n")));
+
+        }
+      else
+        printf ("{NULL, 0, NULL, \"%s\", NULL},", strtrim (strtok (s, "\n")));
+
+      count++;
+      if (!(count % 10))
+        printf ("         // %d", count);
+      fputc ('\n', stdout);
+    }
+}
+#endif
+
+
+void
+render_usage (const st_usage_t *usage, int more)
+{
+  int opt;
+  char buf[MAXBUFSIZE];
+
+#ifdef  DEBUG
+  // look for malformed usages
+  for (opt = 0; usage[opt].option_s || usage[opt].optarg || usage[opt].desc; opt++)
+    fprintf (stderr, "{\"%s\", \"%s\", \"%s\"},\n",
+      usage[opt].option_s,
+      usage[opt].optarg,
+      usage[opt].desc);
+#endif
+
+  for (opt = 0; usage[opt].option_s || usage[opt].desc; opt++)
+    {
+      if (usage[opt].option_s)
+        {
+          sprintf (buf, "%s%s%s%s%s%s ",
+            // long or short option_s?
+            (usage[opt].option_s[1] ? "  " OPTION_LONG_S : "   " OPTION_S),
+            usage[opt].option_s,
+            usage[opt].has_arg == 2 ? "[" : "", // == 2 optarg is optional
+            usage[opt].optarg ? OPTARG_S : "",
+            usage[opt].optarg ? usage[opt].optarg : "",
+            usage[opt].has_arg == 2 ? "]" : ""); // == 2 optarg is optional
+
+          if (strlen (buf) < 16)
+            {
+              strcat (buf, "                             ");
+              buf[16] = 0;
+            }
+          fputs (buf, stdout);
+        }
+
+      if (usage[opt].desc)
+        {
+          char c, *p = buf, *p2 = NULL;
+
+          if (more && usage[opt].desc_more)
+            sprintf (buf, "%s\n%s", usage[opt].desc, usage[opt].desc_more);
+          else
+            strcpy (buf, usage[opt].desc);
+
+          if (usage[opt].option_s)
+            for (; (p2 = strchr (p, '\n')); p = p2 + 1)
+              {
+                c = p2[1];
+                p2[1] = 0;
+                fputs (p, stdout);
+                fputs ("                  ", stdout);
+                p2[1] = c;
+              }
+
+          fputs (p, stdout);
+          fputc ('\n', stdout);
+        }
+    }
+}
+
+
 #if     defined _WIN32 && defined USE_ANSI_COLOR
 int
 vprintf2 (const char *format, va_list argptr)

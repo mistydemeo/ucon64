@@ -330,6 +330,8 @@ extern uint64_t bswap_64 (uint64_t x);
                   from a file
   cleanup_cm_patterns() helper function for build_cm_patterns() to free all
                   memory allocated for a (list of) st_pattern_t structure(s)
+  render_usage()  a renderer for a nice usage output
+                    takes an st_usage_t array
   ansi_init()     initialize ANSI output
   ansi_strip()    strip ANSI codes from a string
   gauge()         init_time == time when gauge() was first started or when
@@ -371,6 +373,25 @@ extern int change_mem2 (char *buf, int bufsize, char *searchstr, int strsize,
                         int offset, st_cm_set_t *sets);
 extern int build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose);
 extern void cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns);
+
+typedef struct
+{
+  const char *option_s;                         // the NAME
+  int has_arg;
+  /*
+    has_arg is identical to getopt()'s has_arg meaning that a value of 2 will
+    result in --NAME[=VALUE] instead of --NAME=VALUE. All other values are
+    ignored, currently.
+  */
+  const char *optarg;                           // the VALUE
+  const char *desc;                             // description
+  const char *desc_more;                        // attach desc_more to desc (if more != 0)
+} st_usage_t;
+
+extern void render_usage (const st_usage_t *usage, int more);
+#ifdef  DEBUG
+extern void parse_usage_code (const char *usage_output);
+#endif
 extern int ansi_init (void);
 extern char *ansi_strip (char *str);
 extern int gauge (time_t init_time, int pos, int size);

@@ -221,6 +221,7 @@ cdi_init (dm_image_t *image)
   int result;
   unsigned char buf[MAXBUFSIZE];
 #endif
+
   header_start =
   version =
   position = 0;

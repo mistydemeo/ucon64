@@ -155,6 +155,8 @@ extern int dm_close (dm_image_t *image);
 
 //extern int dm_seek (FILE *fp, int track_num, int how);
 extern FILE *dm_fdopen (dm_image_t *image, int track_num, const char *mode);
+//#define DM_NFO_ANSI_COLOR 1
+//#define DM_NFO_VERBOSE 2
 extern void dm_nfo (const dm_image_t *image, int verbose, int ansi_color);
 
 extern int dm_read (char *buffer, int track_num, int sector, const dm_image_t *image);

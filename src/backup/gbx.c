@@ -1668,7 +1668,7 @@ gbx_read_rom (const char *filename, unsigned int parport)
     n_banks = 512;                              // backup 64 Mbit
 
   totalbytes = n_banks * 16 * 1024;
-  printf ("Receive: %d Bytes (%.4f Mb)\n\n", totalbytes, totalbytes / (float) MBIT);
+  printf ("Receive: %d Bytes (%.4f Mb)\n\n", totalbytes, (float) totalbytes / MBIT);
 
   starttime = time (NULL);
   for (bank = 0; bank < n_banks; bank++)

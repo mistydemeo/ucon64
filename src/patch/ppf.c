@@ -539,7 +539,7 @@ addppfid (const char *filename)
   sprintf (buf, "@BEGIN_FILE_ID.DIZ%s@END_FILE_ID.DIZ", fileidbuf);
 
   pos =
-    filencmp (filename, 0, quickftell (filename), "@BEGIN_FILE_ID.DIZ", 18);
+    filencmp (filename, 0, quickftell (filename), "@BEGIN_FILE_ID.DIZ", 18, -1);
   if (pos == -1)
     pos = quickftell (filename);
   truncate (filename, pos);

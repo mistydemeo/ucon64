@@ -35,12 +35,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 struct ucon64gui_
 {
-
   char cmd[FILENAME_MAX];
   char rom[FILENAME_MAX];
   char file[FILENAME_MAX];
 
+  char console[4096];
+
   char ucon64_output[MAXBUFSIZE];
+
+  int submenu;
 
   int page; //current "html page"
 

@@ -52,6 +52,7 @@ h2g_system (char *query)
 
   strcpy (name, &query[len + 1]);
 
+
   if (!strncmp (query, "rom=", 4))
     {
       strcpy (ucon64gui.rom, &query[4]);
@@ -63,22 +64,59 @@ h2g_system (char *query)
       return;
     }
 
+//  ucon64gui.console[0] = 0;
+
   if (!strncmp (value, "ucon64gui_", 10))
     {
       if (!strdcmp (value, "ucon64gui_gb"))
-        ucon64gui_gb ();
+        {
+          strcpy(ucon64gui.console,"-gb"); 
+          ucon64gui_gb ();
+        }
       if (!strdcmp (value, "ucon64gui_snes"))
-        ucon64gui_snes ();
+        {
+          strcpy(ucon64gui.console,"-snes");
+          ucon64gui_snes ();
+        }
       if (!strdcmp (value, "ucon64gui_n64"))
-        ucon64gui_n64 ();
-      if (!strdcmp (value, "ucon64gui_root"))
-        ucon64gui_root ();
+        {
+          strcpy(ucon64gui.console,"-n64");
+          ucon64gui_n64 ();
+        }
       if (!strdcmp (value, "ucon64gui_nes"))
-        ucon64gui_nes ();
+        {
+          strcpy(ucon64gui.console,"-nes");
+          ucon64gui_nes ();
+        }
+        
       if (!strdcmp (value, "ucon64gui_swc"))
         ucon64gui_swc ();
+
+      if (!strdcmp (value, "ucon64gui_root"))
+        {
+           if(ucon64gui.submenu != 0)
+             {
+               ucon64gui.submenu = 0;
+
+               if (!strdcmp (ucon64gui.console,"-gb"))
+                 ucon64gui_gb ();
+               if (!strdcmp (ucon64gui.console,"-snes"))
+                 ucon64gui_snes ();
+               if (!strdcmp (ucon64gui.console,"-n64"))
+                 ucon64gui_n64 ();
+               if (!strdcmp (ucon64gui.console,"-nes"))
+                 ucon64gui_nes ();
+
+               return;
+            }
+          ucon64gui_root ();
+        }
+
       if (!strdcmp (value, "ucon64gui_config"))
-        ucon64gui_config ();
+        {
+          ucon64gui.submenu = 1;
+          ucon64gui_config ();
+        }
 
       return;
     }
@@ -115,7 +153,9 @@ h2g_system (char *query)
 /*
   options
 */
-  sprintf (buf2, "ucon64 %s \"%s\" \"%s\"", value,
+  sprintf (buf2, "ucon64 %s %s \"%s\" \"%s\"", 
+  (ucon64gui.console != NULL) ? ucon64gui.console : "",
+  value,
            (ucon64gui.rom != NULL) ? ucon64gui.rom : "",
            (ucon64gui.file != NULL) ? ucon64gui.file : "");
 
@@ -135,6 +175,7 @@ h2g_system (char *query)
 
   pclose (fh);
 
+  ucon64gui.submenu = 1;
   ucon64gui_output(ucon64gui.ucon64_output);
 
   return;
@@ -177,6 +218,12 @@ main (int argc, char *argv[])
 }
 
 
+/*
+void ucon64gui_root(void)
+{
+  
+}
+*/
 
 
 void

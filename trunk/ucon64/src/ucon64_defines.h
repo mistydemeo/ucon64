@@ -27,7 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define UCON64_UNKNOWN_S "Unknown"
 
-#define NULL_TO_UNKNOWN_S(str) ((str)?(str):UCON64_UNKNOWN_S)
+#define NULL_TO_UNKNOWN_S(str) ((str) ? (str) : (UCON64_UNKNOWN_S))
 
 //#define UCON64_KNOWN -1
 #define UCON64_UNKNOWN -1
@@ -238,7 +238,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_VERSION 200
 
 #define MBIT	131072
-#define TOMBIT(x) ((long)(x) / MBIT)
+#define TOMBIT(x) ((int)(x) / MBIT)
 #define TOMBIT_F(x) ((float)(x) / MBIT)
 
 #define MAXROMSIZE ((512 + 1) * MBIT)

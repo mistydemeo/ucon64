@@ -1258,15 +1258,17 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
         unsigned char list[8];
       } st_value_list_t;
 
-      st_value_list_t size_to_partsizes[4] =
+      st_value_list_t size_to_partsizes[5] =
         {
+          { 2, 2, {1, 1} },
           { 4, 2, {2, 2} },
           { 12, 4, {4, 2, 4, 2} },              // 10 Mbit files are padded by snes_ufo()
           { 20, 6, {4, 4, 2, 4, 4, 2} },
           { 32, 8, {4, 4, 4, 4, 4, 4, 4, 4} }
         }, *size_to_partsizes_ptr = NULL;
-      st_value_list_t size_to_flags[7] =
+      st_value_list_t size_to_flags[8] =
         {
+          { 2, 2, {0x10, 0} },
           { 4, 2, {0x10, 0} },
           { 8, 2, {0x10, 0} },
           { 12, 4, {0x40, 0x10, 0x10, 0} },
@@ -1288,7 +1290,7 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
           }
       if (!size_to_partsizes_ptr)               // size was not found
         {
-          size_to_partsizes_ptr = &size_to_partsizes[3];
+          size_to_partsizes_ptr = &size_to_partsizes[4];
           nparts = size / (4 * MBIT);
           surplus = size % (4 * MBIT);
         }
@@ -1297,7 +1299,7 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
         if (size_to_flags[n].value == x)
           size_to_flags_ptr = &size_to_flags[n];
       if (!size_to_flags_ptr)
-        size_to_flags_ptr = &size_to_flags[6];
+        size_to_flags_ptr = &size_to_flags[7];
 
       nbytesdone = rominfo->buheader_len;
       for (n = 0; n < nparts; n++)
@@ -1438,7 +1440,7 @@ snes_s (st_rominfo_t *rominfo)
   else
     part_size = PARTSIZE;
 
-  if (type == GD3 || type == UFO)
+  if (type == GD3)
     /*
       part_size is ignored for Game Doctor.
       Note that 4 Mbit is the smallest size a split Game Doctor file can be
@@ -1447,24 +1449,29 @@ snes_s (st_rominfo_t *rominfo)
     {
       if (size <= 4 * MBIT && size != 2 * MBIT)
         { // "&& size != 2 * MBIT" is a fix for BS Chrono Trigger - Jet Bike Special (J)
-          printf (
-            "NOTE: ROM size is smaller than or equal to 4 Mbit -- won't be split\n");
+          printf ("NOTE: ROM size is smaller than or equal to 4 Mbit -- won't be split\n");
+          return -1;
+        }
+    }
+  else if (type == UFO && snes_hirom)
+    {
+      if (size < 2 * MBIT)
+        {
+          printf ("NOTE: ROM size is smaller than 2 Mbit -- won't be split\n");
           return -1;
         }
     }
   else if (size <= part_size)
     {
-      printf (
-        "NOTE: ROM size is smaller than or equal to %d Mbit -- won't be split\n",
-        part_size / MBIT);
+      printf ("NOTE: ROM size is smaller than or equal to %d Mbit -- won't be split\n",
+              part_size / MBIT);
       return -1;
     }
 
   if (!rominfo->buheader_len || type == GD3)    // GD3 format
     {
       if (UCON64_ISSET (ucon64.part_size))
-        printf (
-          "WARNING: ROM will be split as Game Doctor SF3 ROM, ignoring switch "OPTION_LONG_S"ssize\n");
+        printf ("WARNING: ROM will be split as Game Doctor SF3 ROM, ignoring switch "OPTION_LONG_S"ssize\n");
       snes_split_gd3 (rominfo, size);
     }
   else if (type == UFO)

@@ -4,15 +4,11 @@ cd $(dirname "$0")
 
 areply=$(alert "This will start installation of uCON64 in a BeOS system.
 
-ucon64 will be installed in $HOME/config/bin and .ucon64rc copied to $HOME.
+ucon64 will be installed in $HOME/config/bin.
 
 Do you want to continue?" "Cancel" "Install")
 if [ "$areply" ==  "Install" ]; then
 	cp $(pwd)/ucon64 $HOME/config/bin
-	if [ -e "$HOME/.ucon64rc" ] ; then
-		cp $HOME/.ucon64rc $HOME/.ucon64rc.old
-	fi
-	cp $(pwd)/.ucon64rc $HOME
 	# ask for ioport driver installation
 	drreply=$(alert "uCON64 needs the BeOS ioport driver by Caz Jones.
 

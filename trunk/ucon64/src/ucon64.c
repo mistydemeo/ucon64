@@ -71,17 +71,15 @@ void ucon64_exit(void)
   #include "patch/xps.h"
   #include "patch/pal4u.h"
   #include "patch/ciso.h"
+
+  #include "backup/cdrw.h"
 #endif
 
 #ifdef	BACKUP
-#include "backup/fig.h"
-#include "backup/swc.h"
-#include "backup/unknown_bu.h"
-#include "backup/unknown_bu512.h"
-  #ifdef	CD
-    #include "backup/cdrecord.h"
-    #include "backup/cdrdao.h"
-  #endif
+  #include "backup/fig.h"
+  #include "backup/swc.h"
+  #include "backup/unknown_bu.h"
+  #include "backup/unknown_bu512.h"
 #endif
 
 #include "patch/aps.h"
@@ -134,31 +132,58 @@ char *forceargs[] =
   #endif
 #endif
 
+
 struct ucon64_ rom;
+
+ 
+/*
+    support for frontends
+*/
+if(argcmp(argc, argv, "-frontend"))atexit(ucon64_exit);
+
 ucon64_flush(argc,argv,&rom);
 
+printf("%s\n",ucon64_TITLE);
+printf("Uses code from various people. See 'developers.html' for more!\n");
+printf("This may be freely redistributed under the terms of the GNU Public License\n\n");
+
+
+/*
+   configfile handling
+*/
 #ifdef	__DOS__
   strcpy(buf, "ucon64.cfg");
 #else
   sprintf(buf, "%s%c.ucon64rc", getenv("HOME"), FILE_SEPARATOR);
 #endif
 
-if(access(buf,R_OK)==-1)
+if(access(buf,F_OK)==-1)printf("ERROR: %s not found: creating...",buf);
+else if(getProperty(buf, "version", buf2, NULL) == NULL)
+{
+  strcpy(buf2,buf);
+  newext(buf2,".OLD");
+
+  printf("NOTE: updating config: will be renamed to %s...",buf2);
+
+  rename(buf,buf2);
+
+  sync();
+}
+
+if(access(buf,F_OK)==-1)
 {
   FILE *fh;
 
-  printf("ERROR: %s not found: creating...",buf);
-
-/*
-    create default configfile
-*/
-
   if(!(fh=fopen(buf,"wb")))
+  {
     printf("FAILED\n\n");
+  }
   else
   {
     fputs(        
 "# uCON64 config\n"
+"#\n"
+"version=197\n"
 "#\n"
 "# emulate_<console shortcut>=<emulator with options>\n"
 "#\n"
@@ -183,39 +208,28 @@ if(access(buf,R_OK)==-1)
 "emulate_ata=\n"
 "emulate_s16=\n"
 "emulate_gba=vgba -scale 2 -uperiod 6\n"
-"# ...to be continued!\n"
+"# ...etc.\n"
 "#\n"
 "# uCON64 can operate as frontend for CD burning software to make backups\n"
 "# for CD-based consoles \n"
 "#\n"
-"# It currently supports cdrdao and cdrecord; make sure you check this\n"
-"# configfile for the right settings\n"
+"# We suggest cdrdao (http://cdrdao.sourceforge.net) as burn engine for uCON64\n"
+"# Make sure you check this configfile for the right settings\n"
 "#\n"
 "# --device [bus,id,lun] (cdrdao)\n"
-"# or\n"
-"# dev=[bus,id,lun] (cdrecord)\n"
 "#\n"
-"# cdrecord has still problems with RAW formats so it is used only to\n"
-"# read/write ISO9660 compatible images like un-bootable Dreamcast backups\n"
-"#\n"
-"cdrdao_raw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
-"cdrdao_raw_write=cdrdao write --eject --speed 12 --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
-"cdrdao_iso_read=cdrdao read-cd --device 0,0,0 --driver generic-mmc --datafile #bin and toc filenames are added by ucon64 at the end\n"
-"cdrdao_iso_write=cdrdao write --eject --speed 12 --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
-"cdrecord_iso_read=\n"
-"cdrecord_iso_write=\n"
+"cdrw_raw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
+"cdrw_raw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
+"cdrw_iso_read=cdrdao read-cd --device 0,0,0 --driver generic-mmc --datafile #bin and toc filenames are added by ucon64 at the end\n"
+"cdrw_iso_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
     ,fh);
 
     fclose(fh);
     printf("OK\n\n");
+return(0);
   }
 }
 
-  printf("%s\n",ucon64_TITLE);
-  printf("Uses code from various people. See 'developers.html' for more!\n");
-  printf("This may be freely redistributed under the terms of the GNU Public License\n\n");
-
-  if(argcmp(argc, argv, "-frontend"))atexit(ucon64_exit);
 
   if (argc<2 ||
       argcmp(argc, argv, "-h") ||
@@ -279,16 +293,17 @@ if (!strlen(rom.rom)) getcwd(rom.rom,sizeof(rom.rom));
 
 strcpy(rom.file,getarg(argc,argv,ucon64_FILE));
 
-
+/*
 if(argcmp(argc, argv, "-sh"))
 {
 //TODO shell modus
-//  for(;;)
+  for(;;)
   {
     printf("ucon64>");
   }
   return(0);
 }
+*/
 
 if (argcmp(argc, argv, "-crc"))
 {
@@ -716,8 +731,8 @@ case ucon64_GENESIS:
     (argcmp(argc,argv,"-xsmds")) ? genesis_xsmds(&rom) :
 #endif
 #ifdef	CD
-    (argcmp(argc,argv,"-cdaot")) ? genesis_cdaot(&rom) :
-    (argcmp(argc,argv,"-xcdao")) ? genesis_xcdao(&rom) :
+    (argcmp(argc,argv,"-rawt")) ? genesis_rawt(&rom) :
+    (argcmp(argc,argv,"-xraw")) ? genesis_xraw(&rom) :
 #endif
     0
   );
@@ -764,8 +779,8 @@ case ucon64_NEOGEO:
     (argcmp(argc,argv,"-s")) ? neogeo_s(&rom) :
     (argcmp(argc,argv,"-sam")) ? neogeo_sam(&rom) :
 #ifdef	CD
-    (argcmp(argc,argv,"-cdaot")) ? neogeo_cdaot(&rom) :
-    (argcmp(argc,argv,"-xcdao")) ? neogeo_xcdao(&rom) :
+    (argcmp(argc,argv,"-rawt")) ? neogeo_rawt(&rom) :
+    (argcmp(argc,argv,"-xraw")) ? neogeo_xraw(&rom) :
 #endif
     0
   );
@@ -825,8 +840,8 @@ case ucon64_PCE:
     (argcmp(argc,argv,"-mgd")) ? pcengine_mgd(&rom) :
     (argcmp(argc,argv,"-smg")) ? pcengine_smg(&rom) :
 #ifdef	CD
-    (argcmp(argc,argv,"-cdaot")) ? pcengine_cdaot(&rom) :
-    (argcmp(argc,argv,"-xcdao")) ? pcengine_xcdao(&rom) :
+    (argcmp(argc,argv,"-rawt")) ? pcengine_rawt(&rom) :
+    (argcmp(argc,argv,"-xraw")) ? pcengine_xraw(&rom) :
 #endif
     0
   );
@@ -835,8 +850,8 @@ break;
 case ucon64_JAGUAR:
   return(
 #ifdef	CD
-    (argcmp(argc,argv,"-cdaot")) ? jaguar_cdaot(&rom) :
-    (argcmp(argc,argv,"-xcdao")) ? jaguar_xcdao(&rom) :
+    (argcmp(argc,argv,"-rawt")) ? jaguar_rawt(&rom) :
+    (argcmp(argc,argv,"-xraw")) ? jaguar_xraw(&rom) :
 #endif
     0
   );
@@ -859,8 +874,8 @@ break;
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
 #ifdef	CD
-      (argcmp(argc,argv,"-cdaot")) ? dc_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? dc_xcdao(&rom) :
+    (argcmp(argc,argv,"-isot")) ? dc_isot(&rom) :
+    (argcmp(argc,argv,"-xiso")) ? dc_xiso(&rom) :
 #endif
       0
     );
@@ -871,8 +886,8 @@ break;
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
 #ifdef	CD
-      (argcmp(argc,argv,"-cdaot")) ? psx_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? psx_xcdao(&rom) :
+    (argcmp(argc,argv,"-rawt")) ? psx_rawt(&rom) :
+    (argcmp(argc,argv,"-xraw")) ? psx_xraw(&rom) :
 #endif
       0
     );
@@ -883,8 +898,8 @@ break;
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
 #ifdef	CD
-      (argcmp(argc,argv,"-cdaot")) ? ps2_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? ps2_xcdao(&rom) :
+    (argcmp(argc,argv,"-rawt")) ? ps2_rawt(&rom) :
+    (argcmp(argc,argv,"-xraw")) ? ps2_xraw(&rom) :
 #endif
       0
     );
@@ -895,8 +910,8 @@ break;
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
 #ifdef	CD
-      (argcmp(argc,argv,"-cdaot")) ? saturn_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? saturn_xcdao(&rom) :
+    (argcmp(argc,argv,"-rawt")) ? saturn_rawt(&rom) :
+    (argcmp(argc,argv,"-xraw")) ? saturn_xraw(&rom) :
 #endif
       0
     );
@@ -907,8 +922,8 @@ break;
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
 #ifdef	CD
-      (argcmp(argc,argv,"-cdaot")) ? cdi_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? cdi_xcdao(&rom) :
+    (argcmp(argc,argv,"-rawt")) ? cdi_rawt(&rom) :
+    (argcmp(argc,argv,"-xraw")) ? cdi_xraw(&rom) :
 #endif
       0
     );
@@ -919,8 +934,8 @@ break;
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
 #ifdef	CD
-      (argcmp(argc,argv,"-cdaot")) ? cd32_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? cd32_xcdao(&rom) :
+    (argcmp(argc,argv,"-rawt")) ? cd32_rawt(&rom) :
+    (argcmp(argc,argv,"-xraw")) ? cd32_xraw(&rom) :
 #endif
       0
     );
@@ -931,8 +946,8 @@ break;
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
 #ifdef	CD
-      (argcmp(argc,argv,"-cdaot")) ? real3do_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? real3do_xcdao(&rom) :
+    (argcmp(argc,argv,"-rawt")) ? real3do_rawt(&rom) :
+    (argcmp(argc,argv,"-xraw")) ? real3do_rawt(&rom) :
 #endif
       0
     );
@@ -943,8 +958,10 @@ default:
   if(!access(rom.rom,F_OK) ||
  argcmp(argc,argv,"-xsmd") ||  //the SMD made backups for Genesis and Sega Master System
  argcmp(argc,argv,"-xsmds") ||
- argcmp(argc,argv,"-cdaot") ||  //take image for which cd-based console?
- argcmp(argc,argv,"-xcdao")
+ argcmp(argc,argv,"-isot") ||  //take image for which cd-based console?
+ argcmp(argc,argv,"-xiso") ||
+ argcmp(argc,argv,"-rawt") ||
+ argcmp(argc,argv,"-xraw")
 )
   {
 //    filehexdump(rom.rom,0,512);//show possible header or maybe the internal rom header
@@ -1043,72 +1060,9 @@ return(0);
 return(0);
 }
 
-/*  switch(rom->console)
-  {
-    case ucon64_GB:
-      gameboy_init(rom);
-    break;
-    case ucon64_GBA:
-      gbadvance_init(rom);
-    break;
-    case ucon64_GENESIS:
-      genesis_init(rom);
-    break;
-    case ucon64_SMS:
-      sms_init(rom);
-    break;
-    case ucon64_JAGUAR:
-      jaguar_init(rom);
-    break;
-    case ucon64_LYNX:
-      lynx_init(rom);
-    break;
-    case ucon64_N64:
-      nintendo64_init(rom);
-    break;
-    case ucon64_NEOGEO:
-      neogeo_init(rom);
-    break;
-    case ucon64_NES:
-      nes_init(rom);
-    break;
-    case ucon64_PCE:
-      pcengine_init(rom);
-    break;
-    case ucon64_SYSTEM16:
-      system16_init(rom);
-    break;
-    case ucon64_ATARI:
-      atari_init(rom);
-    break;
-    case ucon64_SNES:
-      snes_init(rom);
-    break;
-    case ucon64_NEOGEOPOCKET:
-      neogeopocket_init(rom);
-    break;
-    case ucon64_VECTREX:
-      vectrex_init(rom);
-    break;
-    case ucon64_VIRTUALBOY:
-      virtualboy_init(rom);
-    break;
-    case ucon64_WONDERSWAN:
-      wonderswan_init(rom);
-    break;
-    case ucon64_COLECO:
-      coleco_init(rom);
-    break;
-    case ucon64_INTELLI:
-      intelli_init(rom);
-    break;
 
-    case ucon64_UNKNOWN:
-    default:
-      rom->console=ucon64_UNKNOWN;
-    break;
-  }
-  */
+
+
 
 int ucon64_init(struct ucon64_ *rom)
 {
@@ -1246,9 +1200,6 @@ int ucon64_usage(int argc,char *argv[])
 	"  -c            compare ROMs for differencies; $FILE=OTHER_ROM\n"
 	"  -cs           compare ROMs for similarities; $FILE=OTHER_ROM\n"
 	"  -swap         swap/(de)interleave ALL Bytes in ROM (1234<->2143)\n"
-#ifdef CD
-	"  -r2i          convert RAW to ISO9660; $ROM=RAW_IMAGE\n"
-#endif
 	"  -ispad        check if ROM is padded\n"
 	"  -pad          pad ROM to full Mb\n"
 	"  -padhd        pad ROM to full Mb (regarding to +512 Bytes header)\n"
@@ -1300,7 +1251,7 @@ else if(argcmp(argc,argv,"-intelli"))intelli_usage(argc,argv);
 else
 {
 #ifdef CD
-//  dc_usage(argc,argv);
+  dc_usage(argc,argv);
   psx_usage(argc,argv);
 /*
   ps2_usage(argc,argv);
@@ -1309,14 +1260,13 @@ else
   cd32_usage(argc,argv);
   cdi_usage(argc,argv);
 */
-  printf("%s\n%s\n%s\n%s\n%s\n%s\n"
-	"  -dc, -ps2, -sat, -3do, -cd32, -cdi\n"
+  printf("%s\n%s\n%s\n%s\n%s\n"
+	"  -ps2, -sat, -3do, -cd32, -cdi\n"
 	"		force recognition; NEEDED\n"
-	"  -iso		force image is ISO9660 (2048 Bytes/Sector)\n"
-	"  -raw		force image is RAW (2352 Bytes/Sector)\n"
+	"  -iso		force image is ISO9660\n"
+	"  -raw		force image is MODE2_RAW/BIN\n"
 	"  *		show info (default); ONLY $ROM=RAW_IMAGE\n"
-	"  -r2i          convert RAW to ISO9660; $ROM=RAW_IMAGE\n"
-  ,dc_TITLE
+	"  -r2i          convert MODE2_RAW/BIN to ISO9660; $ROM=RAW_IMAGE\n"
   ,ps2_TITLE
   ,saturn_TITLE
   ,real3do_TITLE
@@ -1326,11 +1276,10 @@ else
 
 //  ppf_usage( argc, argv );
 //  xps_usage( argc, argv );
+  ciso_usage( argc, argv );
 
-  #ifdef BACKUP
-//    cdrdao_usage(argc,argv);
-//    cdrecord_usage(argc,argv);
-  #endif
+  cdrw_raw_usage(argc,argv);
+
   printf("\n");
 #endif
 

@@ -1,5 +1,5 @@
 DLOPEN=1
-ZLIB=1
+#ZLIB=1
 DISCMAGE=1
 
 CC=cl.exe

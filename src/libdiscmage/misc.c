@@ -420,7 +420,7 @@ isfname (int c)
     return TRUE;
 
   // characters that are also allowed in filenames
-  return strchr (".,\'+- ()[]!&", c) ? TRUE : FALSE;
+  return strchr (".,'+- ()[]!&", c) ? TRUE : FALSE;
 }
 
 

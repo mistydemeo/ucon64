@@ -195,7 +195,7 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t * dat)
     {"psx", UCON64_PSX, psx_usage},
     {"ps1", UCON64_PSX, psx_usage},
     {"psone", UCON64_PSX, psx_usage},
-    {"ps2, UCON64_PS2, ps2_usage},
+    {"ps2", UCON64_PS2, ps2_usage},
     {"sat", UCON64_SATURN, sat_usage},
     {"dreamcast", UCON64_DC, dc_usage},
     {"dc", UCON64_DC, dc_usage},
@@ -214,6 +214,7 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t * dat)
     {"swan", UCON64_WONDERSWAN, swan_usage},
     {"coleco", UCON64_COLECO, coleco_usage},
     {"intelli", UCON64_INTELLI, intelli_usage},
+//TODO add more; see ucon64_misc.c/*_usage[]
     {0, 0, 0}
   };
 

@@ -72,20 +72,25 @@ typedef struct //st_unknown_header
   usage for consoles not directly supported by uCON64
 */
 extern const char *unknown_usage[];
-extern const char *gc_usage[];
-extern const char *s16_usage[];
 extern const char *atari_usage[];
-extern const char *coleco_usage[];
-extern const char *vboy_usage[];
-extern const char *vectrex_usage[];
-extern const char *intelli_usage[];
-extern const char *gp32_usage[];
-extern const char *ps2_usage[];
-extern const char *xbox_usage[];
-extern const char *sat_usage[];
-extern const char *real3do_usage[];
 extern const char *cd32_usage[];
 extern const char *cdi_usage[];
+extern const char *channelf_usage[];
+extern const char *coleco_usage[];
+extern const char *gamecom_usage[];
+extern const char *gc_usage[];
+extern const char *gp32_usage[];
+extern const char *intelli_usage[];
+extern const char *odyssey2_usage[];
+extern const char *odyssey_usage[];
+extern const char *ps2_usage[];
+extern const char *real3do_usage[];
+extern const char *s16_usage[];
+extern const char *sat_usage[];
+extern const char *vboy_usage[];
+extern const char *vc4000_usage[];
+extern const char *vectrex_usage[];
+extern const char *xbox_usage[];
 
 
 extern char *ucon64_temp_file;

@@ -46,21 +46,61 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int sms_chksum (unsigned char *rom_buffer, int rom_size);
 
 
-const st_usage_t sms_usage[] =
+const st_getopt2_t sms_usage[] =
   {
-    {NULL, 0, NULL, "Sega Master System(II/III)/Game Gear (Handheld)", "1986/19XX SEGA http://www.sega.com"},
-    {"sms", 0, NULL, "force recognition", NULL},
-    {"int", 0, NULL, "force ROM is in interleaved format (SMD)", NULL},
-    {"nint", 0, NULL, "force ROM is not in interleaved format (RAW)", NULL},
-    {"mgd", 0, NULL, "convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)", NULL},
-    {"mgdgg", 0, NULL, "same as " OPTION_LONG_S "mgd, but gives GG name", NULL},
-    {"smd", 0, NULL, "convert to Super Magic Drive/SMD", NULL},
-    {"smds", 0, NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD", NULL},
-    {"chk", 0, NULL, "fix ROM checksum (SMS only)", NULL},
-    {"multi", 1, "SIZE", "make multi-game file for use with SMS-PRO/GG-PRO flash card,\n"
-                         "truncated to SIZE Mbit; file with loader must be specified\n"
-                         "first, then all the ROMs, multi-game file to create last", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Sega Master System(II/III)/Game Gear (Handheld)"/*"1986/19XX SEGA http://www.sega.com"*/,
+      NULL
+    },
+    {
+      "sms", 0, 0, UCON64_SMS,
+      NULL, "force recognition",
+      (void *) (UCON64_SMS|WF_SWITCH)
+    },
+    {
+      "int", 0, 0, UCON64_INT,
+      NULL, "force ROM is in interleaved format (SMD)",
+      (void *) WF_SWITCH
+    },
+    {
+      "nint", 0, 0, UCON64_NINT,
+      NULL, "force ROM is not in interleaved format (RAW)",
+      (void *) WF_SWITCH
+    },
+    {
+      "mgd", 0, 0, UCON64_MGD,
+      NULL, "convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)",
+      (void *) (WF_DEFAULT|WF_NO_SPLIT)
+    },
+    {
+      "mgdgg", 0, 0, UCON64_MGDGG,
+      NULL, "same as " OPTION_LONG_S "mgd, but gives GG name",
+      (void *) (UCON64_SMS|WF_DEFAULT|WF_NO_SPLIT)
+    },
+    {
+      "smd", 0, 0, UCON64_SMD,
+      NULL, "convert to Super Magic Drive/SMD",
+      (void *) (WF_DEFAULT|WF_NO_SPLIT)
+    },
+    {
+      "smds", 0, 0, UCON64_SMDS,
+      NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD",
+      NULL
+    },
+    {
+      "chk", 0, 0, UCON64_CHK,
+      NULL, "fix ROM checksum (SMS only)",
+      (void *) WF_DEFAULT
+    },
+    {
+      "multi", 1, 0, UCON64_MULTI,
+      "SIZE", "make multi-game file for use with SMS-PRO/GG-PRO flash card,\n"
+      "truncated to SIZE Mbit; file with loader must be specified\n"
+      "first, then all the ROMs, multi-game file to create last",
+      (void *) (WF_INIT|WF_PROBE|WF_STOP)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 typedef struct st_sms_header

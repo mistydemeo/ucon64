@@ -256,8 +256,13 @@ ucon64_switches (int c, const char *optarg)
 
     case UCON64_PORT:
 #ifdef  USE_USB
-      if (strlen (optarg) == 4 && !strnicmp (optarg, "usb", 3))
-        ucon64.usbport = strtol (optarg + 3, NULL, 10) + 1; // usb0 => ucon64.usbport = 1
+      if (!strnicmp (optarg, "usb", 3))
+        {
+          if (strlen (optarg) >= 4)
+            ucon64.usbport = strtol (optarg + 3, NULL, 10) + 1; // usb0 => ucon64.usbport = 1
+          else                                  // we automatically detect the
+            ucon64.usbport = 1;                 //  USB port in the F2A code
+        }
       else
 #endif
         ucon64.parport = strtol (optarg, NULL, 16);
@@ -518,9 +523,8 @@ ucon64_switches (int c, const char *optarg)
       ucon64.dump_info = optarg;
       break;
 
-    case UCON64_83:
     case UCON64_RR83:
-      ucon64.fname_len = UCON64_83;
+      ucon64.fname_len = UCON64_RR83;
       break;
 
     case UCON64_FORCE63:
@@ -874,7 +878,7 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_RR83:
-      ucon64.fname_len = UCON64_83;
+      ucon64.fname_len = UCON64_RR83;
     case UCON64_RROM:
       ucon64_rename (UCON64_RROM);
       break;

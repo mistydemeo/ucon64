@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define GBA_LOGODATA_LEN 156
 
-extern const st_usage_t gba_usage[];
+extern const st_getopt2_t gba_usage[];
 extern const unsigned char gba_logodata[];
 
 extern int gba_chk (st_rominfo_t *rominfo);

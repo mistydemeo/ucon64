@@ -95,285 +95,123 @@ char vers[] = "$VER: uCON64 "UCON64_VERSION_S" "CURRENT_OS_S" ("__DATE__") ("__T
 
 typedef struct
 {
-  int val; // option
-//    const
-  char *optarg; // option argument
+  int val;         // (st_getopt2_t->val)
+//  const
+    char *optarg;  // option argument
+  int console;     // the console (st_getopt2_t->object)
+  int flags;       // workflow flags (st_getopt2_t->object)
 } st_args_t;
 
 static st_args_t arg[UCON64_MAX_ARGS];
 
-const struct option options[] = {
-    {"1991", 0, 0, UCON64_1991},
-    {"3do", 0, 0, UCON64_3DO},
-    {"83", 0, 0, UCON64_83},
-    {"?", 0, 0, UCON64_HELP},
-    {"a", 0, 0, UCON64_A},
-    {"ata", 0, 0, UCON64_ATA},
-    {"b", 0, 0, UCON64_B},
-    {"b0", 1, 0, UCON64_B0},
-    {"b1", 1, 0, UCON64_B1},
-    {"bat", 0, 0, UCON64_BAT},
-    {"bin", 0, 0, UCON64_BIN},
+
+st_getopt2_t options[UCON64_MAX_ARGS];
+const st_getopt2_t lf[] = {
+    {NULL, 0, 0, 0, NULL, "", NULL},
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
+  }, *option[] = {
+  ucon64_options_usage,
+  ucon64_options_without_usage,
+  lf,
+  ucon64_padding_usage,
+  lf,
+  ucon64_dat_usage,
+  lf,
+  ucon64_patching_usage,
+  bsl_usage,
+  ips_usage,
+  aps_usage,
+  pal4u_usage,
+  ppf_usage,
+  xps_usage,
+  gg_usage,
+  lf,
 #ifdef  USE_DISCMAGE
-    {"bin2iso", 1, 0, UCON64_BIN2ISO},
-#endif
-    {"bios", 1, 0, UCON64_BIOS},
-    {"bot", 1, 0, UCON64_BOT},
-    {"bs", 0, 0, UCON64_BS},
-    {"c", 1, 0, UCON64_C},
-#ifdef  USE_DISCMAGE
-    {"cdmage", 1, 0, UCON64_CDMAGE},
-#endif
-//    {"cd32", 0, 0, UCON64_CD32},
-//    {"cdi", 0, 0, UCON64_CDI},
-    {"chk", 0, 0, UCON64_CHK},
-    {"cmnt", 1, 0, UCON64_CMNT},                // will be active only if UNIF_REVISION > 7
-    {"col", 1, 0, UCON64_COL},
-    {"coleco", 0, 0, UCON64_COLECO},
-    {"crc", 0, 0, UCON64_CRC},
-    {"crchd", 0, 0, UCON64_CRCHD},
-    {"crp", 1, 0, UCON64_CRP},
-    {"cs", 1, 0, UCON64_CS},
-    {"ctrl", 1, 0, UCON64_CTRL},
-    {"ctrl2", 1, 0, UCON64_CTRL2},
-    {"db", 0, 0, UCON64_DB},
-    {"dbs", 1, 0, UCON64_DBS},
-    {"dbuh", 0, 0, UCON64_DBUH},
-    {"dbv", 0, 0, UCON64_DBV},
-    {"dc", 0, 0, UCON64_DC},
-    {"dint", 0, 0, UCON64_DINT},
-#ifdef  USE_DISCMAGE
-    {"disc", 0, 0, UCON64_DISC},
-#endif
-    {"dmirr", 0, 0, UCON64_DMIRR},
-    {"dnsrt", 0, 0, UCON64_DNSRT},
-    {"dumpinfo", 1, 0, UCON64_DUMPINFO},
-    {"e", 0, 0, UCON64_E},
-    {"erom", 0, 0, UCON64_EROM},
-    {"f", 0, 0, UCON64_F},
-    {"fds", 0, 0, UCON64_FDS},
-    {"fdsl", 0, 0, UCON64_FDSL},
-    {"ffe", 0, 0, UCON64_FFE},
-    {"fig", 0, 0, UCON64_FIG},
-    {"figs", 0, 0, UCON64_FIGS},
-    {"file", 1, 0, UCON64_FILE},
-    {"find", 1, 0, UCON64_FIND},
-    {"force63", 0, 0, UCON64_FORCE63},
-    {"frontend", 0, 0, UCON64_FRONTEND},
-    {"gb", 0, 0, UCON64_GB},
-    {"gba", 0, 0, UCON64_GBA},
-    {"gbx", 0, 0, UCON64_GBX},
-    {"gc", 0, 0, UCON64_GC},
-    {"gd3", 0, 0, UCON64_GD3},
-    {"gd3s", 0, 0, UCON64_GD3S},
-    {"gen", 0, 0, UCON64_GEN},
-    {"gg", 1, 0, UCON64_GG},
-    {"ggd", 1, 0, UCON64_GGD},
-    {"gge", 1, 0, UCON64_GGE},
-    {"gp32", 0, 0, UCON64_GP32},
-    {"h", 0, 0, UCON64_HELP},
-    {"hd", 0, 0, UCON64_HD},
-    {"hdn", 1, 0, UCON64_HDN},
-    {"help", 0, 0, UCON64_HELP},
-    {"hex", 0, 0, UCON64_HEX},
-    {"hi", 0, 0, UCON64_HI},
-    {"i", 0, 0, UCON64_I},
-    {"id", 0, 0, UCON64_ID},
-    {"idppf", 1, 0, UCON64_IDPPF},
-    {"ines", 0, 0, UCON64_INES},
-    {"ineshd", 0, 0, UCON64_INESHD},
-    {"ins", 0, 0, UCON64_INS},
-    {"insn", 1, 0, UCON64_INSN},
-    {"int", 0, 0, UCON64_INT},
-    {"int2", 0, 0, UCON64_INT2},
-    {"intelli", 0, 0, UCON64_INTELLI},
-//    {"ip", 0, 0, UCON64_IP},
-#ifdef  USE_DISCMAGE
-    {"isofix", 1, 0, UCON64_ISOFIX},
-#endif
-    {"ispad", 0, 0, UCON64_ISPAD},
-    {"j", 0, 0, UCON64_J},
-    {"jag", 0, 0, UCON64_JAG},
-    {"k", 0, 0, UCON64_K},
-    {"l", 0, 0, UCON64_L},
-    {"lnx", 0, 0, UCON64_LNX},
-    {"logo", 0, 0, UCON64_LOGO},
-    {"ls", 0, 0, UCON64_LS},
-    {"lsd", 0, 0, UCON64_LSD},
-    {"lsram", 1, 0, UCON64_LSRAM},
-    {"lsv", 0, 0, UCON64_LSV},
-    {"lynx", 0, 0, UCON64_LYNX},
-    {"lyx", 0, 0, UCON64_LYX},
-    {"mapr", 1, 0, UCON64_MAPR},
-    {"md5", 0, 0, UCON64_MD5},
-    {"mgd", 0, 0, UCON64_MGD},
-    {"mgdgg", 0, 0, UCON64_MGDGG},
-//    {"mgh", 0, 0, UCON64_MGH},
-    {"mirr", 1, 0, UCON64_MIRR},
-    {"mka", 1, 0, UCON64_MKA},
-#ifdef  USE_DISCMAGE
-    {"mkcue", 0, 0, UCON64_MKCUE},
-#endif
-    {"mkdat", 1, 0, UCON64_MKDAT},
-    {"mki", 1, 0, UCON64_MKI},
-    {"mkip", 0, 0, UCON64_MKIP},
-    {"mkppf", 1, 0, UCON64_MKPPF},
-#ifdef  USE_DISCMAGE
-    {"mksheet", 0, 0, UCON64_MKSHEET},
-    {"mktoc", 0, 0, UCON64_MKTOC},
-#endif
-    {"msg", 0, 0, UCON64_MSG},
-    {"multi", 1, 0, UCON64_MULTI},
-//    {"mvs", 0, 0, UCON64_MVS},
-    {"n", 1, 0, UCON64_N},
-    {"n2", 1, 0, UCON64_N2},
-    {"n2gb", 1, 0, UCON64_N2GB},
-    {"n64", 0, 0, UCON64_N64},
-    {"na", 1, 0, UCON64_NA},
-    {"nbak", 0, 0, UCON64_NBAK},
-    {"nbat", 0, 0, UCON64_NBAT},
-    {"nbs", 0, 0, UCON64_NBS},
-#ifdef  USE_ANSI_COLOR
-    {"ncol", 0, 0, UCON64_NCOL},
-#endif
-    {"nes", 0, 0, UCON64_NES},
-    {"nhd", 0, 0, UCON64_NHD},
-    {"nhi", 0, 0, UCON64_NHI},
-    {"nint", 0, 0, UCON64_NINT},
-    {"ng", 0, 0, UCON64_NG},
-    {"ngp", 0, 0, UCON64_NGP},
-    {"nppf", 1, 0, UCON64_NPPF},
-    {"nrot", 0, 0, UCON64_NROT},
-    {"ns", 0, 0, UCON64_NS},
-    {"ntsc", 0, 0, UCON64_NTSC},
-    {"nvram", 0, 0, UCON64_NVRAM},
-    {"o", 1, 0, UCON64_O},
-    {"p", 0, 0, UCON64_P},
-    {"pad", 0, 0, UCON64_PAD},
-    {"padhd", 0, 0, UCON64_PADHD},
-    {"padn", 1, 0, UCON64_PADN},
-    {"pal", 0, 0, UCON64_PAL},
-    {"parse", 1, 0, UCON64_PARSE},
-    {"pasofami", 0, 0, UCON64_PASOFAMI},
-    {"patch", 1, 0, UCON64_PATCH},
-    {"pattern", 1, 0, UCON64_PATTERN},
-    {"pce", 0, 0, UCON64_PCE},
-    {"poke", 1, 0, UCON64_POKE},
-#if     defined USE_PARALLEL || defined USE_USB
-    {"port", 1, 0, UCON64_PORT},
-#endif
-    {"ppf", 0, 0, UCON64_PPF},
-    {"ps2", 0, 0, UCON64_PS2},
-    {"psx", 0, 0, UCON64_PSX},
-    {"q", 0, 0, UCON64_Q},
-    {"qq", 0, 0, UCON64_QQ},
-    {"region", 1, 0, UCON64_REGION},
-    {"rename", 0, 0, UCON64_RENAME},
-#ifdef  USE_DISCMAGE
-    {"rip", 1, 0, UCON64_RIP},
-#endif
-    {"rr83", 0, 0, UCON64_RR83},
-    {"rrom", 0, 0, UCON64_RROM},
-    {"rl", 0, 0, UCON64_RL},
-    // yes, in reality --rom doesn't take an argument... it's just a dummy to
-    //  make the usage easier to understand and might be gone soon...
-    {"rom", 0, 0, UCON64_ROM},
-    {"rotl", 0, 0, UCON64_ROTL},
-    {"rotr", 0, 0, UCON64_ROTR},
-    {"ru", 0, 0, UCON64_RU},
-    {"s", 0, 0, UCON64_S},
-    {"s16", 0, 0, UCON64_S16},
-    {"sam", 1, 0, UCON64_SAM},
-    {"sat", 0, 0, UCON64_SAT},
-    {"scan", 0, 0, UCON64_SCAN},
-    {"scr", 0, 0, UCON64_SCR},
-    {"sgb", 0, 0, UCON64_SGB},
-    {"sha1", 0, 0, UCON64_SHA1},
-    {"smc", 0, 0, UCON64_SMC},
-    {"smd", 0, 0, UCON64_SMD},
-    {"smds", 0, 0, UCON64_SMDS},
-    {"sms", 0, 0, UCON64_SMS},
-    {"snes", 0, 0, UCON64_SNES},
-    {"sram", 0, 0, UCON64_SRAM},
-    {"ssc", 0, 0, UCON64_SSC},
-    {"ssize", 1, 0, UCON64_SSIZE},
-    {"stp", 0, 0, UCON64_STP},
-    {"stpn", 1, 0, UCON64_STPN},
-    {"strip", 1, 0, UCON64_STRIP},
-    {"swan", 0, 0, UCON64_SWAN},
-    {"swap", 0, 0, UCON64_SWAP},
-    {"swap2", 0, 0, UCON64_SWAP2},
-    {"swc", 0, 0, UCON64_SWC},
-    {"swcs", 0, 0, UCON64_SWCS},
-    {"ufo", 0, 0, UCON64_UFO},
-    {"ufos", 0, 0, UCON64_UFOS},
-    {"unif", 0, 0, UCON64_UNIF},
-    {"unscr", 0, 0, UCON64_UNSCR},
-    {"usms", 1, 0, UCON64_USMS},
-    {"v", 0, 0, UCON64_V},
-    {"v64", 0, 0, UCON64_V64},
-    {"vboy", 0, 0, UCON64_VBOY},
-    {"vec", 0, 0, UCON64_VEC},
-    {"version", 0, 0, UCON64_VER},
-    {"vram", 0, 0, UCON64_VRAM},
-    {"xbox", 0, 0, UCON64_XBOX},
-#ifdef  USE_DISCMAGE
-    {"xcdrw", 0, 0, UCON64_XCDRW},
-#endif
+  libdm_usage,
+  lf,
+#endif  // USE_DISCMAGE
+  dc_usage,
+  lf,
+  psx_usage,
 #ifdef  USE_PARALLEL
-    {"xdex", 1, 0, UCON64_XDEX},
-    {"xdjr", 0, 0, UCON64_XDJR},
-    {"xfal", 0, 0, UCON64_XFAL},
-    {"xfalmulti", 1, 0, UCON64_XFALMULTI},
-    {"xfalb", 1, 0, UCON64_XFALB},
-    {"xfalc", 1, 0, UCON64_XFALC},
-    {"xfals", 0, 0, UCON64_XFALS},
-    {"xfalm", 0, 0, UCON64_XFALM},
-    {"xfig", 0, 0, UCON64_XFIG},
-    {"xfigs", 0, 0, UCON64_XFIGS},
-    {"xfigc", 0, 0, UCON64_XFIGC},
-    {"xgbx", 0, 0, UCON64_XGBX},
-    {"xgbxb", 1, 0, UCON64_XGBXB},
-    {"xgbxs", 0, 0, UCON64_XGBXS},
-    {"xgbxm", 0, 0, UCON64_XGBXM},
-    {"xgd3", 0, 0, UCON64_XGD3},
-    {"xgd3r", 0, 0, UCON64_XGD3R},
-    {"xgd3s", 0, 0, UCON64_XGD3S},
-    {"xgd6", 0, 0, UCON64_XGD6},
-    {"xgd6r", 0, 0, UCON64_XGD6R},
-    {"xgd6s", 0, 0, UCON64_XGD6S},
-    {"xgg", 0, 0, UCON64_XGG},
-    {"xggb", 1, 0, UCON64_XGGB},
-    {"xggs", 0, 0, UCON64_XGGS},
-    {"xlit", 0, 0, UCON64_XLIT},
-    {"xmccl", 0, 0, UCON64_XMCCL},
-    {"xmd", 0, 0, UCON64_XMD},
-    {"xmdb", 1, 0, UCON64_XMDB},
-    {"xmds", 0, 0, UCON64_XMDS},
-    {"xmsg", 0, 0, UCON64_XMSG},
-    {"xpce", 0, 0, UCON64_XPCE},
-    {"xsmc", 0, 0, UCON64_XSMC},
-    {"xsmcr", 0, 0, UCON64_XSMCR},
-    {"xsmd", 0, 0, UCON64_XSMD},
-    {"xsmds", 0, 0, UCON64_XSMDS},
-    {"xswc", 0, 0, UCON64_XSWC},
-    {"xswc2", 0, 0, UCON64_XSWC2},
-    {"xswc-io", 1, 0, UCON64_XSWC_IO},
-    {"xswcr", 0, 0, UCON64_XSWCR},
-    {"xswcs", 0, 0, UCON64_XSWCS},
-    {"xswcc", 0, 0, UCON64_XSWCC},
-    {"xv64", 0, 0, UCON64_XV64},
-#endif // USE_PARALLEL
-#if     defined USE_PARALLEL || defined USE_USB
-    {"xf2a", 0, 0, UCON64_XF2A},
-    {"xf2amulti", 1, 0, UCON64_XF2AMULTI},
-    {"xf2ab", 1, 0, UCON64_XF2AB},
-    {"xf2ac", 1, 0, UCON64_XF2AC},
-    {"xf2as", 0, 0, UCON64_XF2AS},
+  dex_usage,
 #endif
-    {"z64", 0, 0, UCON64_Z64},
-    {0, 0, 0, 0}
-  };
+  lf,
+  gba_usage,
+#if     defined USE_PARALLEL || defined USE_USB
+  // f2a_usage has to come before fal_usage in case only USE_USB is defined
+  //  (no support for parallel port)
+  f2a_usage,
+#ifdef  USE_PARALLEL
+  fal_usage,
+#endif // USE_PARALLEL
+#endif
+  lf,
+  n64_usage,
+#ifdef  USE_PARALLEL
+  doctor64_usage,
+  doctor64jr_usage,
+//  cd64_usage,
+  dex_usage,
+#endif
+  lf,
+  snes_usage,
+#ifdef  USE_PARALLEL
+  swc_usage,
+  gd_usage,
+  fig_usage,
+//  mgd_usage,
+#endif
+  lf,
+  neogeo_usage,
+  lf,
+  genesis_usage,
+#ifdef  USE_PARALLEL
+  smd_usage,
+  mdpro_usage,
+//  mgd_usage, 
+#endif
+  lf,
+  gameboy_usage,
+#ifdef  USE_PARALLEL
+  gbx_usage,
+  mccl_usage,
+#endif
+  lf,
+  lynx_usage,
+#ifdef  USE_PARALLEL
+  lynxit_usage,
+#endif
+  lf,
+  pcengine_usage,
+#ifdef  USE_PARALLEL
+  msg_usage,
+  pcepro_usage,
+//  mgd_usage,
+#endif
+  lf,
+  nes_usage,
+#ifdef  USE_PARALLEL
+  smc_usage,
+#endif
+  lf,
+  sms_usage,
+#ifdef  USE_PARALLEL
+  smsggpro_usage,
+#endif
+  lf,
+  swan_usage,
+  lf,
+  jaguar_usage,
+  lf,
+  ngp_usage,
+#ifdef  USE_PARALLEL
+//  fpl_usage,
+#endif
+  lf,
+  atari_usage,
+  NULL
+};
 
 
 static st_rominfo_t *
@@ -390,102 +228,127 @@ ucon64_rom_flush (st_rominfo_t * rominfo)
 }
 
 
-static const struct option *
-ucon64_get_opt (const int option)
+#ifdef  DEBUG
+void
+ucon64_runtime_debug_output (st_getopt2_t *p)
 {
-  int x = 0;
-
-  for (x = 0; options[x].val != 0; x++)
-    if (options[x].val == option)
-      return (struct option *) &options[x];
-
-  return NULL;
+  printf ("{\"%s\", %d, 0, %d, \"%s\", \"%s\", %d}, // console: %d workflow: %d\n",
+    p->name,
+    p->has_arg,
+    p->val,
+    p->arg_name,
+//    p->help ? "usage" : p->help, // i (nb) mean it
+    p->help,
+    (int) p->object,
+    ((int) p->object) & 0xffff,
+    ((int) p->object) >> 16);
 }
 
 
-#ifdef  DEBUG
 static void
 ucon64_runtime_debug (void)
 {
-  int x = 0, y = 0;
-  char buf[MAXBUFSIZE];
+  int x = 0, y = 0, c = 0;
 
-  // how many consoles does uCON64 support?
-  for (x = 0; ucon64_wf[x].option; x++)
-    if (ucon64_wf[x].option == ucon64_wf[x].console)
+#if 0
+  // how many options (incl. dupes) do we have?
+  for (x = y = 0; options[x].name || options[x].help; x++)
+    if (options[x].name)
       y++;
+  printf ("DEBUG: Total options (with dupes): %d\n", y);
+  printf ("DEBUG: UCON64_MAX_ARGS == %d, %s\n", UCON64_MAX_ARGS,
+    (y < UCON64_MAX_ARGS ? "good" : "\nERROR: too small; must be larger than options"));
+#endif
 
-  fprintf (stderr, "DEBUG: %d consoles found\n", y);
 
-  // sanity check at runtime
-  // Does ucon64_wf cover all getopt() options and vice versa?
-  for (x = 0; options[x].val; x++)
-    if (!ucon64_get_wf (options[x].val)) // compare options with workflow
-      {
-        fprintf (stderr, "DEBUG: Sanity check failed (option \"%s\" in (struct option *) options)\n", options[x].name);
-//        exit (1);
-      }
+#if 1
+  // list all options as a single st_getopt2_t array
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name)
+      ucon64_runtime_debug_output ((st_getopt2_t *) &options[x]);
+#endif
 
-  // How many option do we have?
-  printf ("DEBUG: Total options: %d\n", x);
-  printf ("DEBUG: UCON64_MAX_ARGS == %d, %s \n", UCON64_MAX_ARGS,
-    (x < UCON64_MAX_ARGS ? "good" : "\nERROR:   too small; must be larger than options"));
 
-  // the other way
-  for (x = 0; ucon64_wf[x].option; x++)
-    if (!ucon64_get_opt (ucon64_wf[x].option)) // compare workflow with options
-      {
-        strcpy (buf, (ucon64_get_opt (ucon64_wf[x].option))->name);
-        fprintf (stderr, "DEBUG: Sanity check failed (option \"%s\" in ucon64_wf)\n", buf);
-        exit (1);
-      }
+#if 0
+  // how many consoles does uCON64 support?
+  for (x = y = 0; options[x].name || options[x].help; x++)
+    if (options[x].name && options[x].object)
+      if (options[x].val == (((int) options[x].object) & 0xffff))
+        ucon64_runtime_debug_output ((st_getopt2_t *) &options[x]);
+#endif
 
-  // Any duplicates in ucon64_wf?
-  for (x = 0; ucon64_wf[x].option; x++)
-    {
-      for (y = 0; ucon64_wf[y].option; y++)
-        if (ucon64_wf[x].option == ucon64_wf[y].option && x != y)
-          break;
 
-      if (ucon64_wf[x].option == ucon64_wf[y].option && x != y)
-        {
-          strcpy (buf, (ucon64_get_opt (ucon64_wf[x].option))->name);
-          fprintf (stderr, "DEBUG: Sanity check failed (option \"%s\" in ucon64_wf is a dupe)\n", buf);
-//          exit (1);
-        }
-    }
+#if 0
+  // find options without an object (allowed)
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name && !options[x].object)
+      ucon64_runtime_debug_output ((st_getopt2_t *) &options[x]);
+#endif
 
-  // Check for wrong usage assignments in ucon64_wf
-  for (x = 0; ucon64_wf[x].option; x++)
-    {
-      strcpy (buf, (ucon64_get_opt (ucon64_wf[x].option))->name);
-      if (ucon64_wf[x].usage)
-        {
-          const st_usage_t *p = ucon64_wf[x].usage;
 
-          for (y = 0; p[y].option_s || p[y].desc; y++)
-            if (p[y].option_s)
-              if (!stricmp (buf, p[y].option_s))
-                break;
+#if 0
+  // find options without a console (allowed)
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name && !(((int) options[x].object) & 0xffff))
+      ucon64_runtime_debug_output ((st_getopt2_t *) &options[x]);
+#endif
 
-          if (p[y].option_s)
-            if (stricmp (buf, p[y].option_s) != 0 || (!p[y].option_s && !p[y].desc))
+
+#if 0
+  // find options without a workflow (allowed)
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name && !(((int) options[x].object) >> 16))
+      ucon64_runtime_debug_output ((st_getopt2_t *) &options[x]);
+#endif
+
+
+#if 0
+  // find options without a val (NOT allowed)
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name && !options[x].val)
+      ucon64_runtime_debug_output ((st_getopt2_t *) &options[x]);
+#endif
+
+
+#if 0
+  // find options with has_arg but without arg_name AND/OR usage
+  // hidden options without arg_name AND usage are allowed
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name &&
+        ((!options[x].has_arg && options[x].arg_name) ||
+         (options[x].has_arg && !options[x].arg_name) ||
+         !options[x].help))
+      ucon64_runtime_debug_output ((st_getopt2_t *) &options[x]);
+#endif
+
+
+#if 0
+  // find dupe (NOT a problem) options that have different values for val,
+  // flag, and/or object (NOT allowed)
+  // getopt1() will always use the 1st option in the array
+  // (st_getopt2_t *)->arg_name and (st_getopt2_t *)->help can be as
+  // different as you like
+  for (x = 0; options[x].name || options[x].help; x++)
+    if (options[x].name)
+      for (y = 0; options[y].name || options[y].help; y++)
+        if (options[y].name && x != y) // IS option
+          if (!strcmp (options[y].name, options[x].name))
+            if (options[y].has_arg != options[x].has_arg || // (NOT allowed)
+                options[y].flag != options[x].flag || // (NOT allowed)
+                options[y].val != options[x].val || // (NOT allowed)
+//                options[y].arg_name != options[x].arg_name || // (allowed)
+//                options[y].help != options[x].help || // (allowed)
+                options[y].object != options[x].object) // (NOT allowed)
               {
-                fprintf (stderr, "DEBUG: Wrong usage assigned (option \"%s\" in ucon64_wf)\n", buf);
-//                exit (1);
+                printf ("ERROR: different dupe options found\n  ");
+                ucon64_runtime_debug_output ((st_getopt2_t *) &options[x]);
+                printf ("  ");
+                ucon64_runtime_debug_output ((st_getopt2_t *) &options[y]);
+                printf ("\n\n");
               }
-
-            if (!p[y].option_s && !p[y].desc)
-              {
-                fprintf (stderr, "DEBUG: Wrong usage assigned (option \"%s\" in ucon64_wf)\n", buf);
-//                exit (1);
-              }
-        }
-      else
-        printf ("DEBUG: No usage assigned (option \"%s\" in ucon64_wf)\n", buf);
-    }
-
+#endif
   printf ("DEBUG: Sanity check finished\n");
+  fflush (stdout);
 }
 #endif  // DEBUG
 
@@ -507,22 +370,19 @@ ucon64_exit (void)
 int
 main (int argc, char **argv)
 {
-  int x = 0, rom_index = 0, c = 0;
+  int x = 0, y = 0, rom_index = 0, c = 0;
 #if (FILENAME_MAX < MAXBUFSIZE)
   static char buf[MAXBUFSIZE];
 #else
   static char buf[FILENAME_MAX];
 #endif
   struct stat fstate;
+  struct option long_options[UCON64_MAX_ARGS];
 
   printf ("%s\n"
     "Uses code from various people. See 'developers.html' for more!\n"
     "This may be freely redistributed under the terms of the GNU Public License\n\n",
     ucon64_title);
-
-#ifdef  DEBUG
-  ucon64_runtime_debug ();
-#endif
 
   if (atexit (ucon64_exit) == -1)
     {
@@ -613,18 +473,39 @@ main (int argc, char **argv)
   ucon64.discmage_enabled = ucon64_load_discmage ();
 #endif
 
-  // ucon64.dat_enabled and ucon64.discmage_enabled can affect the usage output
+  // convert (st_getopt2_t **) to (st_getopt2_t *)
+  memset (&options, 0, sizeof (st_getopt2_t) * UCON64_MAX_ARGS);
+  for (c = x = 0; option[x]; x++)
+    for (y = 0; option[x][y].name || option[x][y].help; y++)
+      if (c < UCON64_MAX_ARGS)
+        {
+          options[c].name = option[x][y].name;
+          options[c].has_arg = option[x][y].has_arg;
+          options[c].flag = option[x][y].flag;
+          options[c].val = option[x][y].val;
+          options[c].arg_name = option[x][y].arg_name;
+          options[c].help = option[x][y].help;
+          options[c++].object = option[x][y].object;
+        }
+
+#ifdef  DEBUG
+  ucon64_runtime_debug (); // check (st_getopt2_t *) options consistency
+#endif
+
   if (argc < 2)
     {
       ucon64_usage (argc, argv);
       return 0;
     }
 
+  // turn st_getopt2_t into struct option
+  getopt2_long (long_options, options, UCON64_MAX_ARGS);
+
   // getopt() is utilized to make uCON64 handle/parse cmdlines in a sane
   //  and expected way
   x = optind = 0;
   memset (&arg, 0, sizeof (st_args_t) * UCON64_MAX_ARGS);
-  while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
+  while ((c = getopt_long_only (argc, argv, "", long_options, NULL)) != -1)
     {
       if (c == '?') // getopt() returns 0x3f ('?') when an unknown option was given
         {
@@ -636,6 +517,20 @@ main (int argc, char **argv)
 
       if (x < UCON64_MAX_ARGS)
         {
+          const st_getopt2_t *p = getopt2_get_index_by_val (options, c);
+
+          arg[x].console = UCON64_UNKNOWN; // default
+
+          if (p)
+            if (p->object)
+              {
+                arg[x].flags = (uint32_t) p->object;
+                arg[x].console = ((uint32_t) p->object) & 0xffff;
+
+                if (!arg[x].console)
+                  arg[x].console = UCON64_UNKNOWN;
+              }
+
           arg[x].val = c;
           arg[x++].optarg = (optarg ? optarg : NULL);
         }
@@ -646,7 +541,11 @@ main (int argc, char **argv)
 
 #ifdef  DEBUG
   for (x = 0; arg[x].val; x++)
-    printf ("%d %s\n\n", arg[x].val, arg[x].optarg ? arg[x].optarg : "(null)");
+    printf ("%d %s %d %d\n\n",
+      arg[x].val,
+      arg[x].optarg ? arg[x].optarg : "(null)",
+      arg[x].flags,
+      arg[x].console);
 #endif
 
   rom_index = optind;                           // save index of first file
@@ -801,7 +700,6 @@ ucon64_execute_options (void)
 {
   int c = 0, result = 0, x = 0, opts = 0;
   static int first_call = 1;                    // first call to this function
-  const st_ucon64_wf_t *wf = NULL;
 
   ucon64.console = UCON64_UNKNOWN;
   ucon64.dat = NULL;
@@ -837,14 +735,12 @@ ucon64_execute_options (void)
   // switches
   for (x = 0; arg[x].val; x++)
     {
-      if ((wf = ucon64_get_wf (arg[x].val)))    // get workflow for that option
-        {
-          if (wf->console != UCON64_UNKNOWN)
-            ucon64.console = wf->console;
-          ucon64.flags = wf->flags;
-        }
+      if (arg[x].console)
+        ucon64.console = arg[x].console;
+      if (arg[x].flags)
+        ucon64.flags = arg[x].flags;
 
-//      if (wf->flags & WF_SWITCH)
+//      if (ucon64.flags & WF_SWITCH)
         ucon64_switches (arg[x].val, arg[x].optarg);
     }
 #ifdef  USE_ANSI_COLOR
@@ -882,62 +778,55 @@ ucon64_execute_options (void)
   first_call = 0;
 
   for (x = 0; arg[x].val; x++)
-    {
-      if ((wf = ucon64_get_wf (arg[x].val)))    // get workflow for that option
-        if (wf->flags & WF_SWITCH)
-          continue;
-
-      if (wf)
-        {
-          if (ucon64.console == UCON64_UNKNOWN)
-            ucon64.console = wf->console;
-          ucon64.flags = wf->flags;
-        }
-
-      opts++;
-
-      // WF_NO_SPLIT, WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
-      result = ucon64_rom_handling ();
-
-      if (result == -1) // no rom, but WF_NO_ROM
-        return -1;
-
-      if (ucon64_options (arg[x].val, arg[x].optarg) == -1)
-        {
-          const struct option *option = ucon64_get_opt (c);
-//          const st_usage_t *p = (ucon64_get_wf (c))->usage;
-          const char *opt = option ? option->name : NULL;
-
-          fprintf (stderr, "ERROR: %s%s encountered a problem\n",
-                           opt ? (!opt[1] ? OPTION_S : OPTION_LONG_S) : "",
-                           opt ? opt : "uCON64");
-
-//          if (p)
-//            render_usage (p, ucon64.quiet < 0);
-
-          fprintf (stderr, "       Is the option you used available for the current console system?\n"
-                           "       Please report bugs to noisyb@gmx.net or ucon64-announce@lists.sf.net\n\n");
-
+    if (!(arg[x].flags & WF_SWITCH))
+      {
+        if (ucon64.console == UCON64_UNKNOWN)
+          ucon64.console = arg[x].console;
+        ucon64.flags = arg[x].flags;
+  
+        opts++;
+  
+        // WF_NO_SPLIT, WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
+        result = ucon64_rom_handling ();
+  
+        if (result == -1) // no rom, but WF_NO_ROM
           return -1;
-        }
-
+  
+        if (ucon64_options (arg[x].val, arg[x].optarg) == -1)
+          {
+            const st_getopt2_t *p = getopt2_get_index_by_val (options, c);
+            const char *opt = p ? p->name : NULL;
+  
+            fprintf (stderr, "ERROR: %s%s encountered a problem\n",
+                             opt ? (!opt[1] ? OPTION_S : OPTION_LONG_S) : "",
+                             opt ? opt : "uCON64");
+  
+//            if (p)
+//              getopt2_usage (p);
+  
+            fprintf (stderr, "       Is the option you used available for the current console system?\n"
+                             "       Please report bugs to noisyb@gmx.net or ucon64-announce@lists.sf.net\n\n");
+  
+            return -1;
+          }
+  
 #if 0
-      // WF_NFO_AFTER?!
-      if (!result && (ucon64.flags & WF_NFO_AFTER) && ucon64.quiet < 1)
-        ucon64_rom_handling ();
+        // WF_NFO_AFTER?!
+        if (!result && (ucon64.flags & WF_NFO_AFTER) && ucon64.quiet < 1)
+          ucon64_rom_handling ();
 #endif
-
-      /*
-        "stop" options:
-        - -multi (and -xfalmulti) takes more than one file as argument, but
-          should be executed only once.
-        - stop after sending one ROM to a copier ("multizip")
-        - stop after applying a patch so that the patch file won't be
-          interpreted as ROM
-      */
-      if (ucon64.flags & WF_STOP)
-        break;
-    }
+  
+        /*
+          "stop" options:
+          - -multi (and -xfalmulti) takes more than one file as argument, but
+            should be executed only once.
+          - stop after sending one ROM to a copier ("multizip")
+          - stop after applying a patch so that the patch file won't be
+            interpreted as ROM
+        */
+        if (ucon64.flags & WF_STOP)
+          break;
+      }
 
   if (!opts) // no options => just display ROM info
     {
@@ -1288,16 +1177,8 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   // backup unit type?
   if (rominfo->copier_usage != NULL)
     {
-      strcpy (buf, rominfo->copier_usage[0].desc);
+      strcpy (buf, rominfo->copier_usage[0].help);
       printf ("%s\n\n", to_func (buf, strlen (buf), toprint2));
-
-#if 0
-      if (rominfo->copier_usage[1].desc)
-        {
-          strcpy (buf, rominfo->copier_usage[1].desc);
-          printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
-        }
-#endif
     }
 
   // ROM header
@@ -1311,16 +1192,8 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   // console type
   if (rominfo->console_usage != NULL)
     {
-      strcpy (buf, rominfo->console_usage[0].desc);
+      strcpy (buf, rominfo->console_usage[0].help);
       puts (to_func (buf, strlen (buf), toprint2));
-
-#if 0
-      if (rominfo->console_usage[1].desc)
-        {
-          strcpy (buf, rominfo->console_usage[1].desc);
-          printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
-        }
-#endif
     }
 
   // name, maker, country and size
@@ -1451,146 +1324,7 @@ ucon64_fname_arch (const char *fname)
 void
 ucon64_usage (int argc, char *argv[])
 {
-  typedef struct
-    {
-      int console;
-      const st_usage_t *usage[10];
-    } st_usage_array_t;
-
-  st_usage_array_t usage_array[] = {
-    {
-      UCON64_DC,
-      {dc_usage, NULL}
-    },
-    {
-      UCON64_PSX,
-#ifdef  USE_PARALLEL
-      {psx_usage, dex_usage, NULL}
-#else
-      {psx_usage, NULL}
-#endif // USE_PARALLEL
-    },
-    {
-      UCON64_GBA,
-      {gba_usage,
-#if     defined USE_PARALLEL || defined USE_USB
-      // f2a_usage has to come before fal_usage in case only USE_USB is defined
-      //  (no support for parallel port)
-      f2a_usage,
-#else
-      NULL,
-#endif
-#ifdef  USE_PARALLEL
-      fal_usage,
-#endif // USE_PARALLEL
-      NULL}
-    },
-    {
-      UCON64_N64,
-#ifdef  USE_PARALLEL
-      {n64_usage, doctor64_usage, doctor64jr_usage, /* cd64_usage, */ dex_usage, NULL}
-#else
-      {n64_usage, NULL}
-#endif // USE_PARALLEL
-    },
-    {
-      UCON64_SNES,
-#ifdef  USE_PARALLEL
-      {snes_usage, swc_usage, gd_usage, fig_usage, /* mgd_usage, */ NULL}
-#else
-      {snes_usage, NULL}
-#endif // USE_PARALLEL
-    },
-    {
-      UCON64_NG,
-      {neogeo_usage, NULL}
-    },
-    {
-      UCON64_GEN,
-#ifdef  USE_PARALLEL
-      {genesis_usage, smd_usage, mdpro_usage, /* mgd_usage, */ NULL}
-#else
-      {genesis_usage, NULL}
-#endif // USE_PARALLEL
-    },
-    {
-      UCON64_GB,
-#ifdef  USE_PARALLEL
-      {gameboy_usage, gbx_usage, mccl_usage, NULL}
-#else
-      {gameboy_usage, NULL}
-#endif // USE_PARALLEL
-    },
-    {
-      UCON64_LYNX,
-#ifdef  USE_PARALLEL
-      {lynx_usage, lynxit_usage, NULL}
-#else
-      {lynx_usage, NULL}
-#endif // USE_PARALLEL
-    },
-    {
-      UCON64_PCE,
-#ifdef  USE_PARALLEL
-      {pcengine_usage, msg_usage, pcepro_usage, /* mgd_usage, */ NULL}
-#else
-      {pcengine_usage, NULL}
-#endif // USE_PARALLEL
-    },
-    {
-      UCON64_NES,
-#ifdef  USE_PARALLEL
-      {nes_usage, smc_usage, NULL}
-#else
-      {nes_usage, NULL}
-#endif // USE_PARALLEL
-    },
-    {
-      UCON64_SMS,
-#ifdef  USE_PARALLEL
-      {sms_usage, smsggpro_usage, NULL}
-#else
-      {sms_usage, NULL}
-#endif // USE_PARALLEL
-    },
-    {
-      UCON64_SWAN,
-      {swan_usage, NULL}
-    },
-    {
-      UCON64_JAG,
-      {jaguar_usage, NULL}
-    },
-    {
-      UCON64_NGP,
-#ifdef  USE_PARALLEL
-       {ngp_usage, /* fpl_usage, */ NULL}
-#else
-       {ngp_usage, NULL}
-#endif // USE_PARALLEL
-    },
-    {
-      UCON64_ATA,
-      {atari_usage, /* cc2_usage, spsc_usage, */ NULL}
-    },
-#if 0
-    {UCON64_G, {nes_usage, NULL}},
-    {UCON64_S16, {unknown_usage, NULL}},
-    {UCON64_COLECO, {unknown_usage, NULL}},
-    {UCON64_VBOY, {unknown_usage, NULL}},
-    {UCON64_VEC, {unknown_usage, NULL}},
-    {UCON64_INTELLI, {unknown_usage, NULL}},
-    {UCON64_PS2, {unknown_usage, NULL}},
-    {UCON64_SAT, {unknown_usage, NULL}},
-    {UCON64_3DO, {unknown_usage, NULL}},
-    {UCON64_CD32, {unknown_usage, NULL}},
-    {UCON64_CDI, {unknown_usage, NULL}},
-    {UCON64_XBOX, {unknown_usage, NULL}},
-    {UCON64_GP32, {unknown_usage, NULL}},
-#endif
-    {0, {NULL}}
-  };
-  int x = 0, c = 0, single = 0;
+  int x = 0, y = 0, c = 0, single = 0;
   char *name_exe = basename2 (argv[0]);
 #ifdef  USE_DISCMAGE
   char *name_discmage;
@@ -1604,68 +1338,27 @@ ucon64_usage (int argc, char *argv[])
 #endif
   printf (USAGE_S, name_exe);
 
-  // getopt()?
-  for (c = 0; arg[c].val; c++)
-    for (x = 0; usage_array[x].console != 0; x++)
-      if (usage_array[x].console == arg[c].val)
-        {
-          int y = 0;
-          for (; usage_array[x].usage[y]; y++)
-            render_usage (usage_array[x].usage[y], ucon64.quiet < 0);
-          single = 1; // we show only the usage for the specified console(s)
-
+  //single usage
+  for (x = 0; arg[x].val; x++)
+    if (arg[x].console) // IS console
+      {
+        for (y = 0; option[y]; y++)
+          for (c = 0; option[y][c].name || option[y][c].help; c++)
+            if (option[y][c].object)
+              if ((((int) option[y][c].object) & 0xffff) == arg[x].console)
+                {
+                  getopt2_usage (option[y]);
+                  single = 1;
+                  break;
+                }
+        if (single)
           fputc ('\n', stdout);
-        }
+      }
 
-  if (!single)
-    {
-      render_usage (ucon64_options_usage, ucon64.quiet < 0);
-      fputc ('\n', stdout);
+  if (!single) 
+    getopt2_usage (options);
 
-      render_usage (ucon64_padding_usage, ucon64.quiet < 0);
-      fputc ('\n', stdout);
-
-//      if (ucon64.dat_enabled)
-      render_usage (ucon64_dat_usage, ucon64.quiet < 0);
-      fputc ('\n', stdout);
-
-      render_usage (ucon64_patching_usage, ucon64.quiet < 0);
-
-      render_usage (bsl_usage, ucon64.quiet < 0);
-      render_usage (ips_usage, ucon64.quiet < 0);
-      render_usage (aps_usage, ucon64.quiet < 0);
-      render_usage (pal4u_usage, ucon64.quiet < 0);
-      render_usage (ppf_usage, ucon64.quiet < 0);
-      render_usage (xps_usage, ucon64.quiet < 0);
-      render_usage (gg_usage, ucon64.quiet < 0);
-
-      printf ("                  supported are:\n"
-        "                  %s,\n"
-        "                  %s,\n"
-//        "                  %s,\n"
-        "                  %s,\n"
-        "                  %s\n\n",
-        gameboy_usage[0].desc, sms_usage[0].desc,
-//        genesis_usage[0].desc,
-        nes_usage[0].desc, snes_usage[0].desc);
-
-#ifdef  USE_DISCMAGE
-      if (ucon64.discmage_enabled)
-        {
-          render_usage (libdm_usage, ucon64.quiet < 0);
-          fputc ('\n', stdout);
-        }
-#endif
-
-      for (x = 0; usage_array[x].console != 0; x++)
-        {
-          int y = 0;
-          for (; usage_array[x].usage[y]; y++)
-            render_usage (usage_array[x].usage[y], ucon64.quiet < 0);
-
-          fputc ('\n', stdout);
-        }
-    }
+  fputc ('\n', stdout);
 
   printf ("DATabase: %d known ROMs (DAT files: %s)\n\n",
           ucon64_dat_total_entries (), ucon64.datdir);
@@ -1713,15 +1406,14 @@ ucon64_usage (int argc, char *argv[])
 #define MORE_MSG "     %s " OPTION_LONG_S "help|less (to see everything in less)\n" // less is more ;-)
 #endif
 
-  if (!single)
-    printf (
-      PARALLEL_MSG
-      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
-      MORE_MSG
-      "     Give the force recognition switch a try if something went wrong\n"
-      "\n"
-      "Please report any problems/ideas/fixes to noisyb@gmx.net or\n"
-      "ucon64-announce@lists.sf.net or visit http://ucon64.sf.net\n"
-      "\n",
-      name_exe, name_exe);
+  printf (
+    PARALLEL_MSG
+    "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
+    MORE_MSG
+    "     Give the force recognition switch a try if something went wrong\n"
+    "\n"
+    "Please report any problems/ideas/fixes to noisyb@gmx.net or\n"
+    "ucon64-announce@lists.sf.net or visit http://ucon64.sf.net\n"
+    "\n",
+    name_exe, name_exe);
 }

@@ -31,10 +31,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "yoko.h"
 
 
-const st_usage_t yoko_usage[] =
+const st_getopt2_t yoko_usage[] =
   {
-    {NULL, 0, NULL, "YOKO backup unit", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "YOKO backup unit",
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 #ifdef USE_PARALLEL

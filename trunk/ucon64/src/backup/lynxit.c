@@ -39,13 +39,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc_par.h"
 
 
-const st_usage_t lynxit_usage[] = {
-    {NULL, 0, NULL, "Lynxit (Lynx cartridge backup board)", "1997 K.Wilkins (selfmade)"},
+const st_getopt2_t lynxit_usage[] = {
+    {
+      NULL, 0, 0, 0,
+      NULL, "Lynxit (Lynx cartridge backup board)"/*"1997 K.Wilkins (selfmade)"*/,
+      NULL
+    },
 #ifdef USE_PARALLEL
-    {"xlit", 0, NULL, "receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT", NULL},
+    {
+      "xlit", 0, 0, UCON64_XLIT,
+      NULL, "receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT",
 //    "                  receives automatically when ROM does not exist\n"
+      (void *) (UCON64_LYNX|WF_STOP|WF_NO_ROM)
+    },
 #endif // USE_PARALLEL
-    {NULL, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 #ifdef USE_PARALLEL

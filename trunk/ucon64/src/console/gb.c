@@ -47,21 +47,62 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GAMEBOY_HEADER_LEN (sizeof (st_gameboy_header_t))
 #define GB_NAME_LEN 15
 
-const st_usage_t gameboy_usage[] =
+const st_getopt2_t gameboy_usage[] =
   {
-    {NULL, 0, NULL, "Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)", "1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com"},
-    {"gb", 0, NULL, "force recognition", NULL},
-    {"n", 1, "NEW_NAME", "change internal ROM name to NEW_NAME", NULL},
-    {"logo", 0, NULL, "restore ROM logo character data (offset: 0x104-0x134)", NULL},
-    {"mgd", 0, NULL, "convert to Multi Game*/MGD2/RAW", NULL},
-    {"ssc", 0, NULL, "convert to Super Smart Card/SSC", NULL},
-    {"sgb", 0, NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX", NULL},
-    {"gbx", 0, NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC", NULL},
-    {"n2gb", 1, "NESROM", "KAMI's FC EMUlator (NES emulator);\n"
-                       "ROM should be KAMI's FC Emulator ROM image\n"
-                       "NESROM should contain 16 kB of PRG data and 8 kB of CHR data", NULL},
-    {"chk", 0, NULL, "fix ROM checksum", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)"
+      /*"1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com"*/,
+      NULL
+    },
+    {
+      "gb", 0, 0, UCON64_GB,
+      NULL, "force recognition",
+      (void *) (UCON64_GB|WF_SWITCH)
+    },
+    {
+      "n", 1, 0, UCON64_N,
+      "NEW_NAME", "change internal ROM name to NEW_NAME",
+      (void *) WF_DEFAULT
+    },
+    {
+      "logo", 0, 0, UCON64_LOGO,
+      NULL, "restore ROM logo character data (offset: 0x104-0x134)",
+      (void *) WF_DEFAULT
+    },
+    {
+      "mgd", 0, 0, UCON64_MGD,
+      NULL, "convert to Multi Game*/MGD2/RAW",
+      (void *) (WF_DEFAULT|WF_NO_SPLIT)
+    },
+    {
+      "ssc", 0, 0, UCON64_SSC,
+      NULL, "convert to Super Smart Card/SSC",
+      (void *) (UCON64_GB|WF_DEFAULT)
+    },
+    {
+      "sgb", 0, 0, UCON64_SGB,
+      NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX",
+      (void *) (UCON64_GB|WF_DEFAULT)
+    },
+    {
+      "gbx", 0, 0, UCON64_GBX,
+      NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC",
+      (void *) (UCON64_GB|WF_DEFAULT)
+    },
+    {
+      "n2gb", 1, 0, UCON64_N2GB,
+      "NESROM", "KAMI's FC EMUlator (NES emulator);\n"
+      "ROM should be KAMI's FC Emulator ROM image\n"
+      "NESROM should contain 16 kB of PRG data and 8 kB of CHR data",
+      (void *) (UCON64_GB|WF_DEFAULT)
+    },
+    {
+      "chk", 0, 0, UCON64_CHK,
+      NULL, "fix ROM checksum",
+      (void *) WF_DEFAULT
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

@@ -52,8 +52,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 typedef struct
 {
-  const st_usage_t *console_usage;              // console system usage
-  const st_usage_t *copier_usage;               // backup unit usage
+  const st_getopt2_t *console_usage;            // console system usage
+  const st_getopt2_t *copier_usage;             // backup unit usage
 
   int interleaved;                              // ROM is interleaved (swapped)
   int data_size;                                // ROM data size without "red tape"
@@ -101,7 +101,7 @@ typedef struct
   const char *rom;                              // ROM (cmdline) with path
 
   int fname_len;                                // force fname output format for --rrom, --rename, etc...
-  // fname_len can be UCON64_83 (8.3) or UCON64_FORCE63 (63.x)
+  // fname_len can be UCON64_RR83 (8.3) or UCON64_FORCE63 (63.x)
   char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
   int file_size;                                // (uncompressed) ROM file size
   unsigned int crc32;                           // crc32 value of ROM (used for DAT files)
@@ -204,6 +204,6 @@ extern void ucon64_fname_arch (const char *fname);
 
 extern st_ucon64_t ucon64;
 extern int ucon64_parport_needed;
-extern const struct option options[];
+extern st_getopt2_t options[UCON64_MAX_ARGS];
 
 #endif // #ifndef UCON64_H

@@ -23,8 +23,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ufo.h"
 
 
-const st_usage_t ufo_usage[] =
+const st_getopt2_t ufo_usage[] =
   {
-    {NULL, 0, NULL, "Super UFO Pro 8", "UFO Enterprises"},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Super UFO Pro 8"/*"UFO Enterprises"*/,
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };

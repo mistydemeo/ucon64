@@ -33,11 +33,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "jaguar.h"
 
-const st_usage_t jaguar_usage[] =
+const st_getopt2_t jaguar_usage[] =
   {
-    {NULL, 0, NULL, "Panther(32bit prototype)/Jaguar64/Jaguar64 CD", "1989 Flare2/1993 Atari/1995 Atari"},
-    {"jag", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Panther(32bit prototype)/Jaguar64/Jaguar64 CD"/*"1989 Flare2/1993 Atari/1995 Atari"*/,
+      NULL
+    },
+    {
+      "jag", 0, 0, UCON64_JAG,
+      NULL, "force recognition",
+      (void *) (UCON64_JAG|WF_SWITCH)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 typedef struct st_jaguar

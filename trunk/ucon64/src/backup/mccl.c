@@ -69,11 +69,19 @@ Data Read Procedure:
 #include "misc_par.h"
 
 
-const st_usage_t mccl_usage[] = {
-  {NULL, 0, NULL, "Mad Catz Camera Link (Game Boy Camera)", "XXXX Mad Catz Inc. http://www.madcatz.com"},
-  {"xmccl", 0, NULL, "send/receive BYTES to/from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT\n"
-              "currently only receiving is supported", NULL},
-  {NULL, 0, NULL, NULL, NULL}
+const st_getopt2_t mccl_usage[] = {
+  {
+    NULL, 0, 0, 0,
+    NULL, "Mad Catz Camera Link (Game Boy Camera)"/*"XXXX Mad Catz Inc. http://www.madcatz.com"*/,
+    NULL
+  },
+  {
+    "xmccl", 0, 0, UCON64_XMCCL,
+    NULL, "send/receive BYTES to/from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT\n"
+    "currently only receiving is supported",
+    (void *) (UCON64_GB|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+  },
+  {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 

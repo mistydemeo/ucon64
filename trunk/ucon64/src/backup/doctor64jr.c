@@ -143,16 +143,28 @@ void mainproc(void *arg) {
 #include "misc_par.h"
 
 
-const st_usage_t doctor64jr_usage[] = {
-  {NULL, 0, NULL, "Doctor V64 Junior", "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
+const st_getopt2_t doctor64jr_usage[] = {
+  {
+    NULL, 0, 0, 0,
+    NULL, "Doctor V64 Junior"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/,
+    NULL
+  },
 #ifdef  USE_PARALLEL
-  {"xdjr", 0, NULL, "send ROM to Doctor V64 Junior; " OPTION_LONG_S "port=PORT", NULL},
+  {
+    "xdjr", 0, 0, UCON64_XDJR,
+    NULL, "send ROM to Doctor V64 Junior; " OPTION_LONG_S "port=PORT",
+    (void *) (UCON64_N64|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+  },
 #if 0
-  {"xdjrs", 0, NULL, "send/receive SRAM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when SRAM does not exist", NULL},
+  {
+    "xdjrs", 0, 0, UCON64_XDJRS,
+    NULL, "send/receive SRAM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
+    "receives automatically when SRAM does not exist",
+    (void *) (UCON64_N64|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+  },
 #endif
 #endif // USE_PARALLEL
-  {NULL, 0, NULL, NULL, NULL}
+  {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 

@@ -32,16 +32,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "mgd.h"
 
 
-const st_usage_t mgd_usage[] =
+const st_getopt2_t mgd_usage[] =
   {
-    {NULL, 0, NULL, "Multi Game Doctor (2)/Multi Game Hunter/MGH",
-                    "19XX Bung Enterprises Ltd http://www.bung.com.hk\n"
-                    "?Makko Toys Co., Ltd.?"},
+    {
+      NULL, 0, 0, 0,
+      NULL, "Multi Game Doctor (2)/Multi Game Hunter/MGH"
+      /*"19XX Bung Enterprises Ltd http://www.bung.com.hk\n" "?Makko Toys Co., Ltd.?"*/,
+      NULL
+    },
 #if 0
-    {"xmgd", 0, NULL, "(TODO) send/receive ROM to/from Multi Game* /MGD2/MGH; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when " OPTION_LONG_S "rom does not exist", NULL},
+    {
+      "xmgd", 0, 0, UCON64_XMGD,
+      NULL, "(TODO) send/receive ROM to/from Multi Game* /MGD2/MGH; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when " OPTION_LONG_S "rom does not exist",
+      NULL
+    },
 #endif
-    {NULL, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef SMSGG_PRO_H
 #define SMSGG_PRO_H
-extern const st_usage_t smsggpro_usage[];
+extern const st_getopt2_t smsggpro_usage[];
 
 #ifdef USE_PARALLEL
 extern int smsgg_read_rom (const char *filename, unsigned int parport, int size);

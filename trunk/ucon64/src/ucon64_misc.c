@@ -83,187 +83,296 @@ const char *ucon64_msg[] = {
   NULL
 };
 
-const st_usage_t unknown_usage[] =
+const st_getopt2_t unknown_usage[] =
   {
-    {NULL, 0, NULL, "Unknown backup unit/emulator", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, "Unknown backup unit/emulator", NULL},
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t gc_usage[] =
+const st_getopt2_t gc_usage[] =
   {
-    {NULL, 0, NULL, "Nintendo Game Cube/Panasonic Gamecube Q",
-                    "2001/2002 Nintendo http://www.nintendo.com"},
-    {"gc", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Nintendo Game Cube/Panasonic Gamecube Q"
+      /*"2001/2002 Nintendo http://www.nintendo.com"*/,
+      NULL
+    },
+    {
+      "gc", 0, 0, UCON64_GC,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_GC)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t s16_usage[] =
+const st_getopt2_t s16_usage[] =
   {
-    {NULL, 0, NULL, "Sega System 16(A/B)/Sega System 18/dual 68000",
-                    "1987/19XX/19XX SEGA http://www.sega.com"},
-    {"s16", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Sega System 16(A/B)/Sega System 18/dual 68000"
+      /*"1987/19XX/19XX SEGA http://www.sega.com"*/,
+      NULL
+    },
+    {
+      "s16", 0, 0, UCON64_S16,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_S16)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t atari_usage[] =
+const st_getopt2_t atari_usage[] =
   {
-    {NULL, 0, NULL, "Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr",
-                    "1977/1982/1984/1986 Atari"},
-    {"ata", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr"
+      /*"1977/1982/1984/1986 Atari"*/,
+      NULL
+    },
+    {
+      "ata", 0, 0, UCON64_ATA,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_ATA)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t coleco_usage[] =
+const st_getopt2_t coleco_usage[] =
   {
-    {NULL, 0, NULL, "ColecoVision", "1982"},
-    {"coleco", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "ColecoVision"/*"1982"*/,
+      NULL
+    },
+    {
+      "coleco", 0, 0, UCON64_COLECO,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_COLECO)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t vboy_usage[] =
+const st_getopt2_t vboy_usage[] =
   {
-    {NULL, 0, NULL, "Nintendo Virtual Boy", "19XX Nintendo http://www.nintendo.com"},
-    {"vboy", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Nintendo Virtual Boy"/*"19XX Nintendo http://www.nintendo.com"*/,
+      NULL
+    },
+    {
+      "vboy", 0, 0, UCON64_VBOY,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_VBOY)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t vectrex_usage[] =
+const st_getopt2_t vectrex_usage[] =
   {
-    {NULL, 0, NULL, "Vectrex", "1982"},
-    {"vec", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Vectrex"/*"1982"*/,
+      NULL
+    },
+    {
+      "vec", 0, 0, UCON64_VEC,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_VEC)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t intelli_usage[] =
+const st_getopt2_t intelli_usage[] =
   {
-    {NULL, 0, NULL, "Intellivision", "1979 Mattel"},
-    {"intelli", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Intellivision"/*"1979 Mattel"*/,
+      NULL
+    },
+    {
+      "intelli", 0, 0, UCON64_INTELLI,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_INTELLI)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t gp32_usage[] =
+const st_getopt2_t gp32_usage[] =
   {
-    {NULL, 0, NULL, "GP32 Game System", "2002 Gamepark http://www.gamepark.co.kr"},
-    {"gp32", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "GP32 Game System"/*"2002 Gamepark http://www.gamepark.co.kr"*/,
+      NULL
+    },
+    {
+      "gp32", 0, 0, UCON64_GP32,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_GP32)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t ps2_usage[] =
+const st_getopt2_t ps2_usage[] =
   {
-    {NULL, 0, NULL, "Playstation 2", "2000 Sony http://www.playstation.com"},
-    {"ps2", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Playstation 2"/*"2000 Sony http://www.playstation.com"*/,
+      NULL
+    },
+    {
+      "ps2", 0, 0, UCON64_PS2,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_PS2)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t xbox_usage[] =
+const st_getopt2_t xbox_usage[] =
   {
-    {NULL, 0, NULL, "XBox", "2001 Microsoft http://www.xbox.com"},
-    {"xbox", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "XBox"/*"2001 Microsoft http://www.xbox.com"*/,
+      NULL
+    },
+    {
+      "xbox", 0, 0, UCON64_XBOX,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_XBOX)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t sat_usage[] =
+const st_getopt2_t sat_usage[] =
   {
-    {NULL, 0, NULL, "Saturn", "1994 SEGA http://www.sega.com"},
-    {"sat", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Saturn"/*"1994 SEGA http://www.sega.com"*/,
+      NULL
+    },
+    {
+      "sat", 0, 0, UCON64_SAT,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_SAT)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t real3do_usage[] =
+const st_getopt2_t real3do_usage[] =
   {
-    {NULL, 0, NULL, "Real3DO", "1993 Panasonic/Goldstar/Philips"},
-    {"3do", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Real3DO"/*"1993 Panasonic/Goldstar/Philips"*/,
+      NULL
+    },
+    {
+      "3do", 0, 0, UCON64_3DO,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_3DO)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t cd32_usage[] =
+const st_getopt2_t cd32_usage[] =
   {
-    {NULL, 0, NULL, "CD32", "1993 Commodore"},
-    {"cd32", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "CD32"/*"1993 Commodore"*/,
+      NULL
+    },
+    {
+      "cd32", 0, 0, UCON64_CD32,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_CD32)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t cdi_usage[] =
+const st_getopt2_t cdi_usage[] =
   {
-    {NULL, 0, NULL, "CD-i", "1991 Philips"},
-    {"cdi", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "CD-i"/*"1991 Philips"*/,
+      NULL
+    },
+    {
+      "cdi", 0, 0, UCON64_CDI,
+      NULL, "force recognition",
+      (void *) (WF_SWITCH|UCON64_CDI)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t vc4000_usage[] =
+const st_getopt2_t vc4000_usage[] =
   {
-    {NULL, 0, NULL, "Interton VC4000", "~1980"},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Interton VC4000"/*"~1980"*/,
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t odyssey2_usage[] =
+const st_getopt2_t odyssey2_usage[] =
   {
-    {NULL, 0, NULL, "G7400+/Odyssey2", "1978"},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "G7400+/Odyssey2"/*"1978"*/,
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t channelf_usage[] =
+const st_getopt2_t channelf_usage[] =
   {
-    {NULL, 0, NULL, "FC Channel F", "1976"},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "FC Channel F"/*"1976"*/,
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t odyssey_usage[] =
+const st_getopt2_t odyssey_usage[] =
   {
-    {NULL, 0, NULL, "Magnavox Odyssey", "1972 Ralph Baer (USA)"},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Magnavox Odyssey"/*"1972 Ralph Baer (USA)"*/,
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t gamecom_usage[] =
+const st_getopt2_t gamecom_usage[] =
   {
-    {NULL, 0, NULL, "Game.com", "? Tiger"},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Game.com"/*"? Tiger"*/,
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t mame_usage[] =
+const st_getopt2_t mame_usage[] =
   {
-    {NULL, 0, NULL, "M.A.M.E. (Multiple Arcade Machine Emulator)", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "M.A.M.E. (Multiple Arcade Machine Emulator)",
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 #if 0
 Adv. Vision
 Arcadia
 Astrocade
-Atari 2600
-Atari 5200
-Atari 7800
-Atari Pong
-CD-i (1991) 1991
-Channel F (1976)
-Coleco Vision
-Colecovision (1982)
-Dreamcast
-FC Channel F
-G7400+/Odyssey2 (1978)
-GameBoy
-Game.com ? Tiger
-Game Cube
-Game Gear
 Indrema
-Intellivision (1979)
-Interton VC4000 (~1980)
 Microvision
-N-Gage (Handheld) 2003 Nokia http://www.n-gage.com
+N-Gage 2003 Nokia http://www.n-gage.com
 Nuon
-Odyssey (Ralph Baer/USA/1972)
-Philips CDI
-PONG
 RCA Studio 2
 RDI Halcyon
-Real 3DO 1993 Panasonic/Goldstar/Philips?
-Sega 32X
-Sega CD
 Telstar
-Turbo Grafx 16
-Vectrex (1982)
-Virtual Boy
-X-Box
 XE System
 #endif
 
@@ -282,434 +391,362 @@ unknown_init (st_rominfo_t *rominfo)
 }
 
 
-const char *
-ucon64_get_option_s (int option)
-{
-  int x = 0;
-
-  for (x = 0; options[x].name; x++)
-    if (options[x].val == option)
-      return options[x].name;
-
-  return NULL;
-}
-
-
-const char *
-ucon64_get_desc (int option)
-{
-  const char *option_s = NULL;
-  int x = 0;
-  const st_usage_t *usage = NULL;
-
-  if (!(option_s = ucon64_get_option_s (option)))
-    return NULL;
-
-  if (!(usage = (const st_usage_t *) (ucon64_get_wf (option))->usage))
-    return NULL;
-
-  for (x = 0; usage[x].option_s || usage[x].optarg || usage[x].desc; x++)
-    if (usage[x].option_s)
-      if (!strcmp (option_s, usage[x].option_s))
-        {
-          return usage[x].desc;
-        }
-
-  return NULL;
-}
-
-
-const st_usage_t ucon64_options_usage[] = {
-  {NULL, 0, NULL, "Options", NULL},
-  {"o", 1, "DIRECTORY", "specify output directory", NULL},
-  {"nbak", 0, NULL, "prevents backup files (*.BAK)", NULL},
+const st_getopt2_t ucon64_options_usage[] = {
+  {
+    NULL, 0, 0, 0,
+    NULL, "Options",
+    NULL
+  },
+  {
+    "o", 1, 0, UCON64_O,
+    "DIRECTORY", "specify output directory",
+    (void *) WF_SWITCH
+  },
+  {
+    "nbak", 0, 0, UCON64_NBAK,
+    NULL, "prevents backup files (*.BAK)",
+    (void *) WF_SWITCH
+  },
 #ifdef  USE_ANSI_COLOR
-  {"ncol", 0, NULL, "disable ANSI colors in output", NULL},
+  {
+    "ncol", 0, 0, UCON64_NCOL,
+    NULL, "disable ANSI colors in output",
+    (void *) WF_SWITCH
+  },
 #endif
-
 #if     defined USE_PARALLEL || defined USE_USB
-  {"port", 1, "PORT", "specify "
+  {
+    "port", 1, 0, UCON64_PORT,
+    "PORT", "specify "
 #ifdef  USE_USB
-                   "USB"
+      "USB"
 #endif
 #if     defined USE_PARALLEL && defined USE_USB
-                   " or "
+      " or "
 #endif
 #ifdef  USE_PARALLEL
-                   "parallel"
+      "parallel"
 #endif
-                   " PORT={"
+      " PORT={"
 #ifdef  USE_USB
-                   "USB0, USB1, "
+      "USB0, USB1, "
 #endif
 #ifdef  USE_PARALLEL
-                   "3bc, 378, 278, "
+      "3bc, 378, 278, "
 #endif
-                   "...}", NULL},
+      "...}",
+    (void *) WF_SWITCH
+  },
 #endif  // defined USE_PARALLEL || defined USE_USB
 
-  {"hdn", 1, "N", "force ROM has backup unit/emulator header with size of N Bytes", NULL},
-  {"hd", 0, NULL, "same as " OPTION_LONG_S "hdn=512\n"
-                   "most backup units use a header with a size of 512 Bytes", NULL},
-  {"nhd", 0, NULL, "force ROM has no backup unit/emulator header", NULL},
-  {"ns", 0, NULL, "force ROM is not split", NULL},
+  {
+    "hdn", 1, 0, UCON64_HDN,
+    "N", "force ROM has backup unit/emulator header with size of N Bytes",
+    (void *) WF_SWITCH
+  },
+  {
+    "hd", 0, 0, UCON64_HD,
+    NULL, "same as " OPTION_LONG_S "hdn=512\n"
+    "most backup units use a header with a size of 512 Bytes",
+    (void *) WF_SWITCH
+  },
+  {
+    "nhd", 0, 0, UCON64_NHD,
+    NULL, "force ROM has no backup unit/emulator header",
+    (void *) WF_SWITCH
+  },
+  {
+    "ns", 0, 0, UCON64_NS,
+    NULL, "force ROM is not split",
+    (void *) WF_SWITCH
+  },
+  {
+    "e", 0, 0, UCON64_E,
 #ifdef  __MSDOS__
-  {"e", 0, NULL, "emulate/run ROM (check ucon64.cfg for more)", NULL},
+    NULL, "emulate/run ROM (check ucon64.cfg for more)",
 #else
-  {"e", 0, NULL, "emulate/run ROM (check .ucon64rc for more)", NULL},
+    NULL, "emulate/run ROM (check .ucon64rc for more)",
 #endif
-  {"crc", 0, NULL, "show CRC32 value of ROM"  //; this will also force calculation for\n"
-             /* "files bigger than %d Bytes (%.4f Mb)" */, NULL},
-  {"sha1", 0, NULL, "show SHA1 value of ROM", NULL},
-  {"md5", 0, NULL, "show MD5 value of ROM", NULL},
-  {"ls", 0, NULL, "generate ROM list for all recognized ROMs", NULL},
-  {"lsv", 0, NULL, "like " OPTION_LONG_S "ls but more verbose", NULL},
+    (void *) WF_DEFAULT
+  },
+  {
+    "crc", 0, 0, UCON64_CRC,
+    NULL, "show CRC32 value of ROM",
+#if 0
+    "; this will also force calculation for\n"
+    "files bigger than %d Bytes (%.4f Mb)"
+#endif
+    (void *) (WF_INIT|WF_PROBE|WF_NOCRC32)
+  },
+  {
+    "sha1", 0, 0, UCON64_SHA1,
+    NULL, "show SHA1 value of ROM",
+    (void *) (WF_INIT|WF_PROBE|WF_NOCRC32)
+  },
+  {
+    "md5", 0, 0, UCON64_MD5,
+    NULL, "show MD5 value of ROM",
+    (void *) (WF_INIT|WF_PROBE|WF_NOCRC32)
+  },
+  {
+    "ls", 0, 0, UCON64_LS,
+    NULL, "generate ROM list for all recognized ROMs",
+    (void *) (WF_INIT|WF_PROBE)
+  },
+  {
+    "lsv", 0, 0, UCON64_LSV,
+    NULL, "like " OPTION_LONG_S "ls but more verbose",
+    (void *) (WF_INIT|WF_PROBE)
+  },
+  {
+    "hex", 0, 0, UCON64_HEX,
 #ifdef  __MSDOS__
-  {"hex", 0, NULL, "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex ...|more\"", NULL},
+    NULL, "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex ...|more\"",
 #else
-  {"hex", 0, NULL, "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex ...|less\"", NULL}, // less is more ;-)
+    NULL, "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex ...|less\"", // less is more ;-)
 #endif
-  {"find", 1, "STRING", "find STRING in ROM (wildcard: '?')", NULL},
-  {"c", 1, "FILE", "compare FILE with ROM for differences", NULL},
-  {"cs", 1, "FILE", "compare FILE with ROM for similarities", NULL},
-  {"help", 0, NULL, "display this help and exit", NULL},
-  {"version", 0, NULL, "output version information and exit", NULL},
-  {"q", 0, NULL, "be quiet (don't show ROM info)", NULL},
-//  {"qq", 0, NULL, "be even more quiet", NULL},
-  {"v", 0, NULL, "be more verbose (show backup unit headers also)", NULL},
-  {NULL, 0, NULL, NULL, NULL}
+    NULL
+  },
+  {
+    "find", 1, 0, UCON64_FIND,
+    "STRING", "find STRING in ROM (wildcard: '?')",
+    (void *) WF_INIT
+  },
+  {
+    "c", 1, 0, UCON64_C,
+    "FILE", "compare FILE with ROM for differences",
+    NULL
+  },
+  {
+    "cs", 1, 0, UCON64_CS,
+    "FILE", "compare FILE with ROM for similarities",
+    NULL
+  },
+  {
+    "help", 0, 0, UCON64_HELP,
+    NULL, "display this help and exit",
+    (void *) WF_STOP
+  },
+  {
+    "version", 0, 0, UCON64_VER,
+    NULL, "output version information and exit",
+    (void *) WF_STOP
+  },
+  {
+    "q", 0, 0, UCON64_Q,
+    NULL, "be quiet (don't show ROM info)",
+    (void *) WF_SWITCH
+  },
+#if 0
+  {
+    "qq", 0, 0, UCON64_QQ,
+    NULL, "be even more quiet",
+    (void *) WF_SWITCH
+  },
+#endif
+  {
+    "v", 0, 0, UCON64_V,
+    NULL, "be more verbose (show backup unit headers also)",
+    (void *) WF_SWITCH
+  },
+  {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 
-const st_usage_t ucon64_padding_usage[] = {
-  {NULL, 0, NULL, "Padding", NULL},
-  {"ispad", 0, NULL, "check if ROM is padded", NULL},
-  {"pad", 0, NULL, "pad ROM to next Mb", NULL},
-  {"p", 0, NULL, "same as " OPTION_LONG_S "pad", NULL},
-  {"padn", 1, "N", "pad ROM to N Bytes (put Bytes with value 0x00 after end)", NULL},
-  {"strip", 1, "N", "strip N Bytes from end of ROM", NULL},
-  {"stpn", 1, "N", "strip N Bytes from start of ROM", NULL},
-  {"stp", 0, NULL, "same as " OPTION_LONG_S "stpn=512\n"
-            "most backup units use a header with a size of 512 Bytes", NULL},
-  {"insn", 1, "N", "insert N Bytes (0x00) before ROM", NULL},
-  {"ins", 0, NULL, "same as " OPTION_LONG_S "insn=512\n"
-             "most backup units use a header with a size of 512 Bytes", NULL},
-  {NULL, 0, NULL, NULL, NULL}
+const st_getopt2_t ucon64_options_without_usage[] = {
+  {
+    "crchd", 0, 0, UCON64_CRCHD,                // backward compat.
+    NULL, NULL,
+    (void *) (WF_INIT|WF_PROBE|WF_NOCRC32)
+  },
+  {
+    "file", 1, 0, UCON64_FILE,                  // obsolete?
+    NULL, NULL,
+    (void *) WF_SWITCH
+  },
+  {
+    "frontend", 0, 0, UCON64_FRONTEND,          // no usage?
+    NULL, NULL,
+    (void *) WF_SWITCH
+  },
+  {
+    "?", 0, 0, UCON64_HELP,                     // same as --help
+    NULL, NULL,
+    (void *) WF_STOP
+  },
+  {
+    "h", 0, 0, UCON64_HELP,                     // same as --help
+    NULL, NULL,
+    (void *) WF_STOP
+  },
+  {
+    "id", 0, 0, UCON64_ID,                      // currently only used in snes.c
+    NULL, NULL,
+    (void *) WF_SWITCH
+  },
+  {
+    "rom", 0, 0, UCON64_ROM,                    // obsolete?
+    NULL, NULL,
+    (void *) WF_SWITCH
+  },
+  {
+    "83", 0, 0, UCON64_RR83,                    // is now "rr83"
+    NULL, NULL,
+    (void *) (WF_INIT|WF_PROBE|WF_NO_SPLIT)
+  },
+#if 0
+  {
+    "xcdrw", 0, 0, UCON64_XCDRW, // obsolete
+    NULL, NULL,
+    (void *) (WF_DEFAULT|WF_STOP|WF_NO_ROM)
+  },
+  {
+    "cdmage", 1, 0, UCON64_CDMAGE, // obsolete
+    NULL, NULL,
+    (void *) WF_DEFAULT
+  },
+#endif
+  // these consoles are (still) not supported
+  {
+    "3do", 0, 0, UCON64_3DO,
+    NULL, NULL,
+    (void *) (WF_SWITCH|UCON64_3DO)
+  },
+  {
+    "gp32", 0, 0, UCON64_GP32,
+    NULL, NULL,
+    (void *) (WF_SWITCH|UCON64_GP32)
+  },
+  {
+    "intelli", 0, 0, UCON64_INTELLI,
+    NULL, NULL,
+    (void *) (WF_SWITCH|UCON64_INTELLI)
+  },
+  {
+    "ps2", 0, 0, UCON64_PS2,
+    NULL, NULL,
+    (void *) (WF_SWITCH|UCON64_PS2)
+  },
+  {
+    "s16", 0, 0, UCON64_S16,
+    NULL, NULL,
+    (void *) (WF_SWITCH|UCON64_S16)
+  },
+  {
+    "sat", 0, 0, UCON64_SAT,
+    NULL, NULL,
+    (void *) (WF_SWITCH|UCON64_SAT)
+  },
+  {
+    "vboy", 0, 0, UCON64_VBOY,
+    NULL, NULL,
+    (void *) (WF_SWITCH|UCON64_VBOY)
+  },
+  {
+    "vec", 0, 0, UCON64_VEC,
+    NULL, NULL,
+    (void *) (WF_SWITCH|UCON64_VEC)
+  },
+  {
+    "xbox", 0, 0, UCON64_XBOX,
+    NULL, NULL,
+    (void *) (WF_SWITCH|UCON64_XBOX)
+  },
+  {
+    "coleco", 0, 0, UCON64_COLECO,
+    NULL, NULL,
+    (void *) (WF_SWITCH|UCON64_COLECO)
+  },
+  {
+    "gc", 0, 0, UCON64_GC,
+    NULL, NULL,
+    (void *) (WF_SWITCH|UCON64_GC)
+  },
+  {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 
-const st_usage_t ucon64_patching_usage[] = {
-  {NULL, 0, NULL, "Patching", NULL},
-  {"poke", 1, "OFF:V", "change byte at file offset OFF to value V (both in hexadecimal)", NULL},
-  {"pattern", 1, "FILE", "change ROM based on patterns specified in FILE", NULL},
-  {"patch", 1, "PATCH", "specify the PATCH for the following options\n"
-                    "use this option or uCON64 expects the last commandline\n"
-                    "argument to be the name of the PATCH file", NULL},
-  {NULL, 0, NULL, NULL, NULL}
+const st_getopt2_t ucon64_padding_usage[] = {
+  {
+    NULL, 0, 0, 0,
+    NULL, "Padding",
+    NULL
+  },
+  {
+    "ispad", 0, 0, UCON64_ISPAD,
+    NULL, "check if ROM is padded",
+    (void *) (WF_INIT|WF_NO_SPLIT)
+  },
+  {
+    "pad", 0, 0, UCON64_PAD,
+    NULL, "pad ROM to next Mb",
+    (void *) WF_DEFAULT
+  },
+  {
+    "p", 0, 0, UCON64_P,
+    NULL, "same as " OPTION_LONG_S "pad",
+    (void *) WF_DEFAULT
+  },
+  {
+    "padn", 1, 0, UCON64_PADN,
+    "N", "pad ROM to N Bytes (put Bytes with value 0x00 after end)",
+    (void *) WF_DEFAULT
+  },
+  {
+    "strip", 1, 0, UCON64_STRIP,
+    "N", "strip N Bytes from end of ROM",
+    NULL
+  },
+  {
+    "stpn", 1, 0, UCON64_STPN,
+    "N", "strip N Bytes from start of ROM",
+    NULL
+  },
+  {
+    "stp", 0, 0, UCON64_STP,
+    NULL, "same as " OPTION_LONG_S "stpn=512\n"
+    "most backup units use a header with a size of 512 Bytes",
+    NULL
+  },
+  {
+    "insn", 1, 0, UCON64_INSN,
+    "N", "insert N Bytes (0x00) before ROM",
+    NULL
+  },
+  {
+    "ins", 0, 0, UCON64_INS,
+    NULL, "same as " OPTION_LONG_S "insn=512\n"
+    "most backup units use a header with a size of 512 Bytes",
+    NULL
+  },
+  {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 
-const st_ucon64_wf_t *
-ucon64_get_wf (const int option)
-{
-  int x = 0;
-
-  for (x = 0; ucon64_wf[x].option != 0; x++)
-    if (ucon64_wf[x].option == option)
-      return (st_ucon64_wf_t *) &ucon64_wf[x];
-
-  return NULL;
-}
-
-
-/*
-  -xgd3 & -xgd6 handle split files. Only SNES and Genesis files can be detected
-  as being split (by ucon64_testsplit()). Split NES files (Pasofami format) are
-  detected by nes_init().
-*/
-const st_ucon64_wf_t ucon64_wf[] = {
-//  {option, console, usage, flags},
-/*
-  these options "know" the console
-*/
-  {UCON64_1991, UCON64_GEN, genesis_usage,     WF_DEFAULT},
-  {UCON64_B0, UCON64_LYNX, lynx_usage,         WF_DEFAULT},
-  {UCON64_B1, UCON64_LYNX, lynx_usage,         WF_DEFAULT},
-  {UCON64_BIOS, UCON64_NG, neogeo_usage,       WF_DEFAULT},
-  {UCON64_BOT, UCON64_N64, n64_usage,          WF_DEFAULT},
-  {UCON64_CRP, UCON64_GBA, gba_usage,          WF_DEFAULT},
-  {UCON64_COL, UCON64_SNES, snes_usage,        WF_NO_ROM},
-  {UCON64_DBUH, UCON64_SNES, snes_usage,       WF_DEFAULT},
-  {UCON64_DMIRR, UCON64_SNES, snes_usage,      WF_DEFAULT},
-  {UCON64_DNSRT, UCON64_SNES, snes_usage,      WF_DEFAULT},
-  {UCON64_FDS, UCON64_NES, nes_usage,          WF_DEFAULT},
-  {UCON64_FDSL, UCON64_NES, nes_usage,         WF_DEFAULT},
-  {UCON64_FFE, UCON64_NES, nes_usage,          WF_DEFAULT},
-  {UCON64_FIG, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
-  {UCON64_FIGS, UCON64_SNES, snes_usage,       0},
-  {UCON64_GBX, UCON64_GB, gameboy_usage,       WF_DEFAULT},
-  {UCON64_GD3, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
-  {UCON64_GD3S, UCON64_SNES, snes_usage,       0},
-  {UCON64_INES, UCON64_NES, nes_usage,         WF_DEFAULT},
-  {UCON64_INESHD, UCON64_NES, nes_usage,       WF_DEFAULT},
-//  {UCON64_IP, UCON64_DC, dc_usage,             WF_DEFAULT},
-  {UCON64_K, UCON64_SNES, snes_usage,          WF_DEFAULT},
-  {UCON64_L, UCON64_SNES, snes_usage,          WF_DEFAULT},
-  {UCON64_LNX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
-  {UCON64_LSRAM, UCON64_N64, n64_usage,        WF_INIT|WF_PROBE},
-  {UCON64_LYX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
-  {UCON64_MGDGG, UCON64_SMS, sms_usage,        WF_DEFAULT|WF_NO_SPLIT},
-  {UCON64_MKIP, UCON64_DC, dc_usage,           WF_NO_ROM},
-  {UCON64_MSG, UCON64_PCE, pcengine_usage,     WF_DEFAULT},
-//  {UCON64_MVS, UCON64_NG, neogeo_usage,        WF_DEFAULT},
-  {UCON64_N2, UCON64_GEN, genesis_usage,       WF_DEFAULT},
-  {UCON64_N2GB, UCON64_GB, gameboy_usage,      WF_DEFAULT},
-  {UCON64_NROT, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
-  {UCON64_PARSE, UCON64_DC, dc_usage,          WF_NO_ROM},
-  {UCON64_PASOFAMI, UCON64_NES, nes_usage,     WF_DEFAULT},
-  {UCON64_ROTL, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
-  {UCON64_ROTR, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
-  {UCON64_SAM, UCON64_NG, neogeo_usage,        WF_DEFAULT},
-  {UCON64_SCR, UCON64_DC, dc_usage,            WF_DEFAULT},
-  {UCON64_SGB, UCON64_GB, gameboy_usage,       WF_DEFAULT},
-  {UCON64_SMC, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
-  {UCON64_SRAM, UCON64_GBA, gba_usage,         0},
-  {UCON64_SSC, UCON64_GB, gameboy_usage,       WF_DEFAULT},
-  {UCON64_SWC, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
-  {UCON64_SWCS, UCON64_SNES, snes_usage,       0},
-  {UCON64_UFO, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
-  {UCON64_UFOS, UCON64_SNES, snes_usage,       0},
-  {UCON64_UNIF, UCON64_NES, nes_usage,         WF_DEFAULT},
-  {UCON64_UNSCR, UCON64_DC, dc_usage,          WF_DEFAULT},
-  {UCON64_USMS, UCON64_N64, n64_usage,         WF_DEFAULT},
-  {UCON64_V64, UCON64_N64, n64_usage,          WF_DEFAULT},
-  {UCON64_VMS, UCON64_DC, dc_usage,            0},
-#ifdef  USE_PARALLEL
-  // We have to add |WF_NO_ROM to the copier options workflow parameter in
-  //  order to support dumping of cartridges or copier SRAM.
-  {UCON64_XDEX, UCON64_N64, dex_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_XDJR, UCON64_N64, doctor64jr_usage,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_XFAL, UCON64_GBA, fal_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_XFALB, UCON64_GBA, fal_usage,        WF_STOP|WF_NO_ROM},
-  {UCON64_XFALC, UCON64_GBA, fal_usage,        WF_STOP|WF_NO_ROM},
-  {UCON64_XFALMULTI, UCON64_GBA, fal_usage,    WF_DEFAULT|WF_STOP}, // send only
-  {UCON64_XFALS, UCON64_GBA, fal_usage,        WF_STOP|WF_NO_ROM},
-  {UCON64_XFIG, UCON64_SNES, fig_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
-  {UCON64_XFIGS, UCON64_SNES, fig_usage,       WF_STOP|WF_NO_ROM},
-  {UCON64_XFIGC, UCON64_SNES, fig_usage,       WF_STOP|WF_NO_ROM},
-  {UCON64_XGBX, UCON64_GB, gbx_usage,          WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_XGBXB, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_ROM},
-  {UCON64_XGBXS, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_ROM},
-  {UCON64_XGD3, UCON64_SNES, gd_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM}, // supports split files
-  {UCON64_XGD3R, UCON64_SNES, gd_usage,        WF_STOP|WF_NO_ROM},
-  {UCON64_XGD3S, UCON64_SNES, gd_usage,        WF_STOP|WF_NO_ROM},
-  {UCON64_XGD6, UCON64_SNES, gd_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM}, // supports split files
-  {UCON64_XGD6R, UCON64_SNES, gd_usage,        WF_STOP|WF_NO_ROM},
-  {UCON64_XGD6S, UCON64_SNES, gd_usage,        WF_STOP|WF_NO_ROM},
-  {UCON64_XGG, UCON64_SMS, smsggpro_usage,     WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_XGGB, UCON64_SMS, smsggpro_usage,    WF_STOP|WF_NO_ROM},
-  {UCON64_XGGS, UCON64_SMS, smsggpro_usage,    WF_STOP|WF_NO_ROM},
-  {UCON64_XLIT, UCON64_GB, lynxit_usage,       WF_STOP|WF_NO_ROM},
-  {UCON64_XMCCL, UCON64_LYNX, mccl_usage,      WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_XMD, UCON64_GEN, mdpro_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
-  {UCON64_XMDB, UCON64_GEN, mdpro_usage,       WF_STOP|WF_NO_ROM},
-  {UCON64_XMDS, UCON64_GEN, mdpro_usage,       WF_STOP|WF_NO_ROM},
-  {UCON64_XMSG, UCON64_PCE, msg_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
-  {UCON64_XPCE, UCON64_PCE, pcepro_usage,      WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_XSMC, UCON64_NES, smc_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT}, // send only
-  {UCON64_XSMCR, UCON64_NES, smc_usage,        WF_STOP|WF_NO_ROM},
-#if 1
-  {UCON64_XSMD, UCON64_GEN, smd_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
-  {UCON64_XSMDS, UCON64_GEN, smd_usage,        WF_STOP|WF_NO_ROM},
-#else
-  {UCON64_XSMD, UCON64_UNKNOWN, smd_usage,     WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
-  {UCON64_XSMDS, UCON64_UNKNOWN, smd_usage,    WF_STOP|WF_NO_ROM},
-#endif
-  {UCON64_XSWC, UCON64_SNES, swc_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
-  {UCON64_XSWC2, UCON64_SNES, swc_usage,       WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
-  {UCON64_XSWCR, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
-  {UCON64_XSWCS, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
-  {UCON64_XSWCC, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
-  {UCON64_XV64, UCON64_N64, doctor64_usage,    WF_DEFAULT|WF_STOP|WF_NO_ROM},
-#endif // USE_PARALLEL
-#if     defined USE_PARALLEL || defined USE_USB
-  {UCON64_XF2A, UCON64_GBA, f2a_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_XF2AB, UCON64_GBA, f2a_usage,        WF_STOP|WF_NO_ROM},
-  {UCON64_XF2AC, UCON64_GBA, f2a_usage,        WF_STOP|WF_NO_ROM},
-  {UCON64_XF2AMULTI, UCON64_GBA, f2a_usage,    WF_DEFAULT|WF_STOP}, // send only
-  {UCON64_XF2AS, UCON64_GBA, f2a_usage,        WF_STOP|WF_NO_ROM},
-#endif
-  {UCON64_Z64, UCON64_N64, n64_usage,          WF_DEFAULT},
-/*
-  these options do not (need to) know the console or work for more than one
-*/
-#ifdef  USE_DISCMAGE
-  {UCON64_BIN2ISO, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
-  {UCON64_MKSHEET, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
-  {UCON64_MKTOC, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
-  {UCON64_ISOFIX, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
-  {UCON64_MKCUE, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
-  {UCON64_RIP, UCON64_UNKNOWN, libdm_usage,    WF_DEFAULT},
-  {UCON64_XCDRW, UCON64_UNKNOWN, NULL,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_CDMAGE, UCON64_UNKNOWN, NULL,  WF_DEFAULT},
-#endif
-
-  {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},
-  {UCON64_A, UCON64_UNKNOWN, aps_usage,        WF_STOP},
-  {UCON64_B, UCON64_UNKNOWN, bsl_usage,        WF_STOP},
-  {UCON64_BIN, UCON64_GEN, genesis_usage,      WF_DEFAULT|WF_NO_SPLIT},
-  {UCON64_C, UCON64_UNKNOWN, ucon64_options_usage, 0},
-  {UCON64_CHK, UCON64_UNKNOWN, NULL,           WF_DEFAULT},
-  {UCON64_CRC, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NOCRC32},
-  {UCON64_CRCHD, UCON64_UNKNOWN, NULL,         WF_INIT|WF_PROBE|WF_NOCRC32},
-  {UCON64_CS, UCON64_UNKNOWN, ucon64_options_usage, 0},
-  {UCON64_DB, UCON64_UNKNOWN, ucon64_dat_usage, WF_NO_ROM},
-  {UCON64_DBS, UCON64_UNKNOWN, ucon64_dat_usage, WF_NO_ROM},
-  {UCON64_DBV, UCON64_UNKNOWN, ucon64_dat_usage, WF_NO_ROM},
-  {UCON64_DINT, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
-  {UCON64_E, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
-  // -f is used for SNES, Genesis and PC-Engine
-  {UCON64_F, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
-  {UCON64_FIND, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT},
-  {UCON64_GG, UCON64_UNKNOWN, gg_usage,        WF_INIT|WF_PROBE},
-  {UCON64_GGD, UCON64_UNKNOWN, gg_usage,       WF_INIT|WF_PROBE|WF_NO_ROM},
-  {UCON64_GGE, UCON64_UNKNOWN, gg_usage,       WF_INIT|WF_PROBE|WF_NO_ROM},
-  {UCON64_HEX, UCON64_UNKNOWN, ucon64_options_usage, 0},
-  {UCON64_I, UCON64_UNKNOWN, ips_usage,        WF_STOP},
-  {UCON64_IDPPF, UCON64_UNKNOWN, ppf_usage,    0},
-  {UCON64_INS, UCON64_UNKNOWN, ucon64_padding_usage, 0},
-  {UCON64_INSN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
-  {UCON64_ISPAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_INIT|WF_NO_SPLIT},
-  {UCON64_J, UCON64_UNKNOWN, NULL,             WF_INIT|WF_PROBE},
-  {UCON64_LOGO, UCON64_UNKNOWN, NULL,          WF_DEFAULT},
-  {UCON64_LS, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
-  {UCON64_LSD, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE},
-  {UCON64_LSV, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
-  {UCON64_MD5, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NOCRC32},
-  {UCON64_MGD, UCON64_UNKNOWN, NULL,           WF_DEFAULT|WF_NO_SPLIT},
-//  {UCON64_MGH, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
-  {UCON64_MKA, UCON64_UNKNOWN, aps_usage,      WF_STOP},
-  {UCON64_MKDAT, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE},
-  {UCON64_MKI, UCON64_UNKNOWN, ips_usage,      WF_STOP},
-  {UCON64_MKPPF, UCON64_UNKNOWN, ppf_usage,    WF_STOP},
-  // -multi is used for GBA, Genesis, SMS/GG and PC-Engine
-  {UCON64_MULTI, UCON64_UNKNOWN, NULL,         WF_INIT|WF_PROBE|WF_STOP},
-  {UCON64_N, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
-  {UCON64_NA, UCON64_UNKNOWN, aps_usage,       0},
-  {UCON64_NPPF, UCON64_UNKNOWN, ppf_usage,     0},
-  {UCON64_P, UCON64_UNKNOWN, ucon64_padding_usage, WF_DEFAULT},
-  {UCON64_PAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_DEFAULT},
-  {UCON64_PADHD, UCON64_UNKNOWN, NULL,         WF_DEFAULT},
-  {UCON64_PADN, UCON64_UNKNOWN, ucon64_padding_usage, WF_DEFAULT},
-  {UCON64_PATTERN, UCON64_UNKNOWN, ucon64_patching_usage, WF_INIT|WF_PROBE},
-  {UCON64_POKE, UCON64_UNKNOWN, ucon64_patching_usage, 0},
-  {UCON64_PPF, UCON64_UNKNOWN, ppf_usage,      WF_STOP},
-  {UCON64_RENAME, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
-  {UCON64_RROM, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
-  {UCON64_RR83, UCON64_UNKNOWN, NULL,          WF_INIT|WF_PROBE|WF_NO_SPLIT},
-  {UCON64_RL, UCON64_UNKNOWN, NULL,            0},
-  {UCON64_RU, UCON64_UNKNOWN, NULL,            0},
-  {UCON64_S, UCON64_UNKNOWN, NULL,             WF_DEFAULT|WF_NO_SPLIT},
-  {UCON64_SCAN, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
-  {UCON64_SHA1, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NOCRC32},
-  {UCON64_SMD, UCON64_UNKNOWN, NULL,           WF_DEFAULT|WF_NO_SPLIT}, // Genesis AND Sega Master System
-  {UCON64_SMDS, UCON64_UNKNOWN, NULL,          0}, // Genesis AND Sega Master System
-  {UCON64_STP, UCON64_UNKNOWN, ucon64_padding_usage, 0},
-  {UCON64_STPN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
-  {UCON64_STRIP, UCON64_UNKNOWN, ucon64_padding_usage, 0},
-  {UCON64_SWAP, UCON64_UNKNOWN, NULL,          WF_INIT|WF_PROBE},
-  {UCON64_SWAP2, UCON64_UNKNOWN, NULL,         0},
-  {UCON64_VER, UCON64_UNKNOWN, ucon64_options_usage, WF_STOP},
-/*
-  force recognition switches
-*/
-#ifdef  USE_DISCMAGE
-  {UCON64_DISC, UCON64_UNKNOWN, libdm_usage,   WF_SWITCH},
-#endif
-
-  {UCON64_3DO, UCON64_3DO, real3do_usage,      WF_SWITCH},
-  {UCON64_ATA, UCON64_ATA, atari_usage,        WF_SWITCH},
-//  {UCON64_CD32, UCON64_CD32, cd32_usage,       WF_SWITCH},
-//  {UCON64_CDI, UCON64_CDI, cdi_usage,          WF_SWITCH},
-  {UCON64_COLECO, UCON64_COLECO, coleco_usage, WF_SWITCH},
-  {UCON64_DC, UCON64_DC, dc_usage,             WF_SWITCH},
-  {UCON64_GB, UCON64_GB, gameboy_usage,        WF_SWITCH},
-  {UCON64_GBA, UCON64_GBA, gba_usage,          WF_SWITCH},
-  {UCON64_GC, UCON64_GC, gc_usage,             WF_SWITCH},
-  {UCON64_GEN, UCON64_GEN, genesis_usage,      WF_SWITCH},
-  {UCON64_GP32, UCON64_GP32, gp32_usage,       WF_SWITCH},
-  {UCON64_INTELLI, UCON64_INTELLI, intelli_usage, WF_SWITCH},
-  {UCON64_JAG, UCON64_JAG, jaguar_usage,       WF_SWITCH},
-  {UCON64_LYNX, UCON64_LYNX, lynx_usage,       WF_SWITCH},
-  {UCON64_N64, UCON64_N64, n64_usage,          WF_SWITCH},
-  {UCON64_NES, UCON64_NES, nes_usage,          WF_SWITCH},
-  {UCON64_NG, UCON64_NG, neogeo_usage,         WF_SWITCH},
-  {UCON64_NGP, UCON64_NGP, ngp_usage,          WF_SWITCH},
-  {UCON64_PCE, UCON64_PCE, pcengine_usage,     WF_SWITCH},
-  {UCON64_PS2, UCON64_PS2, ps2_usage,          WF_SWITCH},
-  {UCON64_PSX, UCON64_PSX, psx_usage,          WF_SWITCH},
-  {UCON64_S16, UCON64_S16, s16_usage,          WF_SWITCH},
-  {UCON64_SAT, UCON64_SAT, sat_usage,          WF_SWITCH},
-  {UCON64_SMS, UCON64_SMS, sms_usage,          WF_SWITCH},
-  {UCON64_SNES, UCON64_SNES, snes_usage,       WF_SWITCH},
-  {UCON64_SWAN, UCON64_SWAN, swan_usage,       WF_SWITCH},
-  {UCON64_VBOY, UCON64_VBOY, vboy_usage,       WF_SWITCH},
-  {UCON64_VEC, UCON64_VEC, vectrex_usage,      WF_SWITCH},
-  {UCON64_XBOX, UCON64_XBOX, xbox_usage,       WF_SWITCH},
-/*
-  other switches
-*/
-  {UCON64_83, UCON64_UNKNOWN, ucon64_dat_usage, WF_SWITCH},
-  {UCON64_BAT, UCON64_NES, nes_usage,          WF_SWITCH},
-  {UCON64_BS, UCON64_SNES, snes_usage,         WF_SWITCH},
-  {UCON64_CMNT, UCON64_NES, nes_usage,         WF_SWITCH},
-  {UCON64_CTRL, UCON64_UNKNOWN, NULL,          WF_SWITCH}, // for NES & SNES
-  {UCON64_CTRL2, UCON64_SNES, snes_usage,      WF_SWITCH},
-  {UCON64_DUMPINFO, UCON64_NES, nes_usage,     WF_SWITCH},
-  {UCON64_EROM, UCON64_SNES, snes_usage,       WF_SWITCH},
-  {UCON64_FILE, UCON64_UNKNOWN, NULL,          WF_SWITCH},
-  {UCON64_FORCE63, UCON64_UNKNOWN, ucon64_dat_usage, WF_SWITCH},
-  {UCON64_FRONTEND, UCON64_UNKNOWN, NULL,      WF_SWITCH},
-//  {UCON64_GOOD, UCON64_UNKNOWN, ucon64_dat_usage, WF_SWITCH},
-  {UCON64_HD, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
-  {UCON64_HDN, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
-  {UCON64_HI, UCON64_SNES, snes_usage,         WF_SWITCH},
-  {UCON64_ID, UCON64_UNKNOWN, NULL,            WF_SWITCH}, // might be used for different
-  {UCON64_INT, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH}, //  consoles in the future
-  {UCON64_INT2, UCON64_UNKNOWN, NULL,          WF_SWITCH}, // for SNES & Genesis
-  {UCON64_MAPR, UCON64_NES, nes_usage,         WF_SWITCH},
-  {UCON64_MIRR, UCON64_NES, nes_usage,         WF_SWITCH},
-  {UCON64_NBAK, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
-  {UCON64_NBAT, UCON64_NES, nes_usage,         WF_SWITCH},
-  {UCON64_NBS, UCON64_SNES, snes_usage,        WF_SWITCH},
-#ifdef  USE_ANSI_COLOR
-  {UCON64_NCOL, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
-#endif
-  {UCON64_NHD, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
-  {UCON64_NHI, UCON64_SNES, snes_usage,        WF_SWITCH},
-  {UCON64_NINT, UCON64_UNKNOWN, ucon64_options_usage,WF_SWITCH},
-  {UCON64_NS, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
-  {UCON64_NTSC, UCON64_NES, nes_usage,         WF_SWITCH},
-  {UCON64_NVRAM, UCON64_NES, nes_usage,        WF_SWITCH},
-  {UCON64_O, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
-  {UCON64_PAL, UCON64_NES, nes_usage,          WF_SWITCH},
-  {UCON64_PATCH, UCON64_UNKNOWN, ucon64_patching_usage, WF_SWITCH},
-#if     defined USE_PARALLEL || defined USE_USB
-  {UCON64_PORT, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
-#endif
-  {UCON64_Q, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
-  {UCON64_QQ, UCON64_UNKNOWN, NULL,            WF_SWITCH},
-  {UCON64_REGION, UCON64_GEN, genesis_usage,   WF_SWITCH},
-  {UCON64_ROM, UCON64_UNKNOWN, NULL,           WF_SWITCH},
-  {UCON64_SSIZE, UCON64_UNKNOWN, NULL,         WF_SWITCH}, // for SNES & Genesis
-  {UCON64_V, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
-  {UCON64_VRAM, UCON64_NES, nes_usage,         WF_SWITCH},
-#ifdef  USE_PARALLEL
-  {UCON64_XFALM, UCON64_GBA, fal_usage,        WF_SWITCH},
-  {UCON64_XGBXM, UCON64_GBA, fal_usage,        WF_SWITCH},
-  {UCON64_XSWC_IO, UCON64_SNES, swc_usage,     WF_SWITCH},
-#endif
-  {0, 0, NULL, 0}
+const st_getopt2_t ucon64_patching_usage[] = {
+  {
+    NULL, 0, 0, 0,
+    NULL, "Patching",
+    NULL
+  },
+  {
+    "poke", 1, 0, UCON64_POKE,
+    "OFF:V", "change byte at file offset OFF to value V (both in hexadecimal)",
+    NULL
+  },
+  {
+    "pattern", 1, 0, UCON64_PATTERN,
+    "FILE", "change ROM based on patterns specified in FILE",
+    (void *) (WF_INIT|WF_PROBE)
+  },
+  {
+    "patch", 1, 0, UCON64_PATCH,
+    "PATCH", "specify the PATCH for the following options\n"
+    "use this option or uCON64 expects the last commandline\n"
+    "argument to be the name of the PATCH file",
+    (void *) WF_SWITCH
+  },
+  {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 
@@ -1563,7 +1600,7 @@ ucon64_rename (int mode)
 
   if (ucon64.fname_len == UCON64_FORCE63)
     buf[63] = 0;
-  else if (ucon64.fname_len == UCON64_83)
+  else if (ucon64.fname_len == UCON64_RR83)
     buf[8] = 0;
 
   // replace chars the fs might not like
@@ -1604,7 +1641,7 @@ ucon64_rename (int mode)
   //  "Final Fantasy III (V1.1) (U) [!]". The suffix is ".1) (U) [!]"...
   strcat (buf2, suffix);
 
-  if (ucon64.fname_len == UCON64_83)
+  if (ucon64.fname_len == UCON64_RR83)
     buf2[12] = 0;
 
   ucon64_output_fname (buf2, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);

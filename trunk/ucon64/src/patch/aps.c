@@ -40,12 +40,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define N64APS_BUFFERSIZE 255
 #define N64APS_MAGICLENGTH 5
 
-const st_usage_t aps_usage[] =
+const st_getopt2_t aps_usage[] =
   {
-    {"a", 0, NULL, "apply APS PATCH to ROM (APS<=v1.2)", NULL},
-    {"mka", 1, "ORG_ROM", "create APS patch; ROM should be the modified ROM", NULL},
-    {"na", 1, "DESC", "change APS single line DESCRIPTION", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      "a", 0, 0, UCON64_A,
+      NULL, "apply APS PATCH to ROM (APS<=v1.2)",
+      (void *) WF_STOP
+    },
+    {
+      "mka", 1, 0, UCON64_MKA,
+      "ORG_ROM", "create APS patch; ROM should be the modified ROM",
+      (void *) WF_STOP
+    },
+    {
+      "na", 1, 0, UCON64_NA,
+      "DESC", "change APS single line DESCRIPTION",
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 char n64aps_magic[] = "APS10";
@@ -70,7 +82,7 @@ readstdheader (void)
   n64aps_patchtype = fgetc (n64aps_apsfile);
   if (n64aps_patchtype != 1)                    // N64 patch
     {
-      fprintf (stderr, "ERROR: Unable to process patch file\n");
+      fprintf (stderr, "ERROR: Could not process patch file\n");
       fclose (n64aps_modfile);
       fclose (n64aps_apsfile);
       exit (1);

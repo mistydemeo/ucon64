@@ -26,7 +26,7 @@ extern int doctor64jr_read (const char *filename, unsigned int parport);
 extern int doctor64jr_write (const char *filename, unsigned int parport);
 #endif // USE_PARALLEL
 
-extern const st_usage_t doctor64jr_usage[];
+extern const st_getopt2_t doctor64jr_usage[];
 
 #define DOCTOR64JR_HEADER_START 0
 #define DOCTOR64JR_HEADER_LEN 0

@@ -177,7 +177,7 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
    Normally, they should choose a package with "win32" in its name. The DOS
    version also runs under Windows, but has some limitations. For example, the
    DOS version cannot handle long command lines. The Cygwin version does not
-   have any serious limitations compared to the "normal" Win32 version, but
+   have any serious limitations compared to the "normal" Win32 versions, but
    behaves a bit more Unix-like than Windows users might want. Users accustomed
    to Unix might prefer the Cygwin version. The Cygwin version needs some
    additional files, though. See <a href="#27">question 27</a>.<br>
@@ -410,45 +410,40 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
    <a href="http://www.pkware.com/" target="_blank">PKUNZIP</a>.<br>
    We recommend to extract the package to a directory (or folder) of its own.
    The zip file contains a directory, but you need not use that directory.<br>
-   Windows&nbsp;NT/2000/XP users might need a driver for copier I/O. You do not
-   need a driver if you use Windows&nbsp;95, 98 or ME. A driver is also not needed
-   when you will not use uCON64 to communicate with a backup unit.<br>
-   You could use a driver like GiveIO, UserPort, io.dll or inpout32.dll. At
-   <a href="http://www.devrs.com/gba/files/mbv2faqs.php#WinXP" target="_blank">
-   http://www.devrs.com/gba/files/mbv2faqs.php#WinXP</a> you can find links to
-   GiveIO and UserPort.
-<!--
-I admit that it's a bit strange to include this link, but UserPort doesn't seem
-to have an official homepage. GiveIO should be available from the site of
-Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
--->
+   Windows&nbsp;NT/2000/XP users are likely to need a driver for copier I/O. You
+   do not need a driver if you use Windows&nbsp;95, 98 or ME. A driver is also
+   not needed when you will not use uCON64 to communicate with a backup unit.<br>
+   You could use a driver like UserPort, DlPortIO, io.dll or inpout32.dll.
+<!-- UserPort doesn't seem to have an official homepage. -->
+   You can download DlPortIO at
+   <a href="http://www.driverlinx.com/DownLoad/dnload.htm#Windows%2095/NT%20Port%20I/O%20Driver" target="_blank">
+   http://www.driverlinx.com/DownLoad/dnload.htm#Windows%2095/NT%20Port%20I/O%20Driver</a>, directly at
+   <a href="http://www.driverlinx.com/DownLoad/DlPortIO.htm" target="_blank">
+   http://www.driverlinx.com/DownLoad/DlPortIO.htm</a> or from
+   <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>.
    You can find io.dll in a file named io.zip at
    <a href="http://www.geekhideout.com/iodll.shtml" target="_blank">
    http://www.geekhideout.com/iodll.shtml</a> and you can find inpout32.dll in
    a file named inpout32_source_and_bins.zip at
    <a href="http://www.logix4u.net" target="_blank">http://www.logix4u.net</a>.
-   GiveIO is plainly horrible to configure. We recommend UserPort, io.dll and
-   inpout32.dll. They are also included with the binary release. With GiveIO
-   sending ROMs seems to go a bit faster than with UserPort, but UserPort is
-   much easier to use. To install io.dll or inpout32.dll, put it in uCON64's
-   configuration directory. See the section
+   UserPort and io.dll are included with the binary release. We recommend
+   DlPortIO and io.dll. To install DlPortIO simply start port95nt.exe. After the
+   installation is completed, copy DLPORTIO.dll from the Windows system(32)
+   directory to uCON64's configuration directory. To install io.dll or
+   inpout32.dll, put them in uCON64's configuration directory. See the section
    <a href="#configbin">"How to configure the uCON64 executable"</a> for more
    information about the configuration directory.<br>
-   Note that although inpout32.dll is even easier to use than UserPort, the
-   transfer speed is much lower (about half as fast compared to the transfer
-   speed in combination with UserPort). io.dll does not have this limitation,
-   but its source code is not freely available.<br>
-   uCON64 will display a message if it finds io.dll or inpout32.dll before
-   communicating with a copier. It displays this message before it displays
-   file information, so you might want to use the command line switch -q. Only
-   the Windows versions of uCON64 are able to use io.dll or inpout32.dll. If
-   both inpout32.dll and io.dll are present in the configuration directory,
-   uCON64 will first try to load io.dll. If that fails it will try to load
-   inpout32.dll.<br>
+   uCON64 displays a message if it finds DLPORTIO.dll, io.dll or inpout32.dll
+   before communicating with a copier. It displays this message before it
+   displays file information, so you might want to use the command line switch
+   -q. Only the Windows versions of uCON64 are able to use DLPORTIO.dll, io.dll
+   or inpout32.dll. If more than one I/O driver is present in the configuration
+   directory, uCON64 will first try to load DLPORTIO.dll. If that fails it will
+   try to load io.dll. If that also fails it will try to load inpout32.dll.<br>
    It <i>is</i> possible to use the DOS version of uCON64 as a transfer tool
-   under Windows&nbsp;XP without GiveIO or UserPort. We have received reports
-   from people who were able to send and receive ROMs under Windows&nbsp;XP as
-   a regular user (no Administrator rights and not "Power Users").<br>
+   under Windows&nbsp;XP without UserPort. We have received reports from people
+   who were able to send and receive ROMs under Windows&nbsp;XP as a regular
+   user (no Administrator rights and not "Power Users").<br>
 <br>
 <a name="cmdline">The command line environment<br></a>
    uCON64 is a command line program and is usually started from a program like
@@ -764,10 +759,12 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    necessary anymore for Demon's Crest. Use the option -k instead. For
    Mega Man X you will need version 1.9.8beta7 or later.<br>
 <br>
-   Finally, you could have a look at an (incomplete) Super Wild Card
-   compatibility list on the uCON64 homepage (it can also be found in the
-   source package) to see if it is possible to run a certain game on a Super
-   Wild Card <u>2.8cc 32 Mbit PAL</u>.<br>
+   Finally, you could have a look at an incomplete
+<!-- Keep next URL absolute. -->
+   <a href="http://ucon64.sourceforge.net/ucon64/SWC-compatibility.txt" target="_blank">
+   Super Wild Card compatibility list</a> on the uCON64 homepage (it can also be
+   found in the source package) to see if it is possible to run a certain game
+   on a Super Wild Card <u>2.8cc 32 Mbit PAL</u>.<br>
 <br>
 <p>
 <a name="13"><b>Q13</b>: Which backup devices are supported by uCON64?</a><br>
@@ -1823,15 +1820,18 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    GNU/Linux distributions)<br>
    - usbdevfs has to be mounted (most (?) distributions have usbdevfs mounted by
    default, but you can do it manually with "mount -t usbdevfs none /proc/bus/usb")<br>
-   - the EZUSB2131 firmware upload driver has to be loaded, see
-     <a href="http://ezusb2131.sourceforge.net/" target="_blank">http://ezusb2131.sourceforge.net/</a><br>
+   - if you use Linux 2.4 or older then the EZUSB2131 firmware upload driver has
+   to be loaded, see <a href="http://ezusb2131.sourceforge.net/" target="_blank">http://ezusb2131.sourceforge.net/</a><br>
+   - if you use Linux 2.5 or later fxload should be present in /sbin<br>
    - you need to have read/write access to /proc/ezusb and /proc/bus/usb, so you
    have to run uCON64 as root (or setuid root) for the USB version of the F2A<br>
 <br>
    By default, uCON64 tries to access a parallel port to communicate with an
    F2A. In order to make uCON64 communicate with an F2A connected to a USB port,
-   specify one. For example:<br>
-   &nbsp;&nbsp;ucon64 -xf2a "Wario Ware Inc.zip" -port=usb0<br>
+   use the switch -port. For example:<br>
+   &nbsp;&nbsp;ucon64 -xf2a "Wario Ware Inc.zip" -port=usb<br>
+   uCON64 detects to which USB port the F2A is connected, so you do not have to
+   specify a specific port.<br>
 <br>
 <p>
 <br>

@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef DEX_H
 #define DEX_H
-extern const st_usage_t dex_usage[];
+extern const st_getopt2_t dex_usage[];
 
 #define DEX_HEADER_START 0
 #define DEX_HEADER_LEN 0

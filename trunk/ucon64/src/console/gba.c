@@ -46,28 +46,60 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int gba_chksum (void);
 static int gbautil (const char *filein, const char *fileout);
 
-const st_usage_t gba_usage[] =
+const st_getopt2_t gba_usage[] =
   {
-    {NULL, 0, NULL, "Game Boy Advance", "2001 Nintendo http://www.nintendo.com"},
-    {"gba", 0, NULL, "force recognition", NULL},
-    {"n", 1, "NEW_NAME", "change internal ROM name to NEW_NAME", NULL},
-    {"logo", 0, NULL, "restore ROM logo character data (offset: 0x04-0x9F)", NULL},
-    {"chk", 0, NULL, "fix ROM header checksum", NULL},
-    {"sram", 0, NULL, "patch ROM for SRAM saving", NULL},
-    {"crp", 1, "WAIT_TIME", "slow down Flash Advance Linker access for ROM (crash patch);\n"
-                         "WAIT_TIME=0  default in most crash patches\n"
-                         "WAIT_TIME=4  faster than 0, slower than 8\n"
-                         "WAIT_TIME=8  faster than 4, slower than 28\n"
-                         "WAIT_TIME=12 slowest cartridge access speed\n"
-                         "WAIT_TIME=16 faster than 28, but slower than 20\n"
-                         "WAIT_TIME=20 default in most original carts\n"
-                         "WAIT_TIME=24 fastest cartridge access speed\n"
-                         "WAIT_TIME=28 faster than 8 but slower than 16", NULL},
+    {
+      NULL, 0, 0, 0,
+      NULL, "Game Boy Advance"/*"2001 Nintendo http://www.nintendo.com"*/,
+      NULL
+    },
+    {
+      "gba", 0, 0, UCON64_GBA,
+      NULL, "force recognition",
+      (void *) (UCON64_GBA|WF_SWITCH)
+    },
+    {
+      "n", 1, 0, UCON64_N,
+      "NEW_NAME", "change internal ROM name to NEW_NAME",
+      (void *) WF_DEFAULT
+    },
+    {
+      "logo", 0, 0, UCON64_LOGO,
+      NULL, "restore ROM logo character data (offset: 0x04-0x9F)",
+      (void *) WF_DEFAULT
+    },
+    {
+      "chk", 0, 0, UCON64_CHK,
+      NULL, "fix ROM header checksum",
+      (void *) WF_DEFAULT
+    },
+    {
+      "sram", 0, 0, UCON64_SRAM,
+      NULL, "patch ROM for SRAM saving",
+      (void *) UCON64_GBA
+    },
+    {
+      "crp", 1, 0, UCON64_CRP,
+      "WAIT_TIME", "slow down Flash Advance Linker access for ROM (crash patch);\n"
+      "WAIT_TIME=0  default in most crash patches\n"
+      "WAIT_TIME=4  faster than 0, slower than 8\n"
+      "WAIT_TIME=8  faster than 4, slower than 28\n"
+      "WAIT_TIME=12 slowest cartridge access speed\n"
+      "WAIT_TIME=16 faster than 28, but slower than 20\n"
+      "WAIT_TIME=20 default in most original carts\n"
+      "WAIT_TIME=24 fastest cartridge access speed\n"
+      "WAIT_TIME=28 faster than 8 but slower than 16",
+      (void *) (UCON64_GBA|WF_DEFAULT)
+    },
 //  "n 0 and 28, with a stepping of 4. I.e. 0, 4, 8, 12 ...\n"
-    {"multi", 1, "SIZE", "make multi-game file for use with FAL/F2A flash card, truncated\n"
-                         "to SIZE Mbit; file with loader must be specified first, then\n"
-                         "all the ROMs, multi-game file to create last", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      "multi", 1, 0, UCON64_MULTI,
+      "SIZE", "make multi-game file for use with FAL/F2A flash card, truncated\n"
+      "to SIZE Mbit; file with loader must be specified first, then\n"
+      "all the ROMs, multi-game file to create last",
+      (void *) (WF_INIT|WF_PROBE|WF_STOP)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

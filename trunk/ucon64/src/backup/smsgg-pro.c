@@ -35,21 +35,35 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "smsgg-pro.h"
 
 
-const st_usage_t smsggpro_usage[] =
+const st_getopt2_t smsggpro_usage[] =
   {
-    {NULL, 0, NULL, "SMS-PRO/GG-PRO flash card programmer", "2004 ToToTEK Multi Media http://www.tototek.com"},
+    {
+      NULL, 0, 0, 0,
+      NULL, "SMS-PRO/GG-PRO flash card programmer"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/,
+      NULL
+    },
 #ifdef USE_PARALLEL
-    {"xgg", 0, NULL, "send/receive ROM to/from SMS-PRO/GG-PRO flash card programmer\n"
-                      OPTION_LONG_S "port=PORT\n"
-                      "receives automatically (32 Mbits) when ROM does not exist", NULL},
-    {"xggs", 0, NULL, "send/receive SRAM to/from SMS-PRO/GG-PRO flash card programmer\n"
-                       OPTION_LONG_S "port=PORT\n"
-                       "receives automatically when SRAM does not exist", NULL},
-    {"xggb", 1, "BANK", "send/receive SRAM to/from SMS-PRO/GG-PRO BANK\n"
-                        "BANK can be a number from 1 to 4; " OPTION_LONG_S "port=PORT\n"
-                        "receives automatically when SRAM does not exist", NULL},
+    {
+      "xgg", 0, 0, UCON64_XGG,
+      NULL, "send/receive ROM to/from SMS-PRO/GG-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
+      "receives automatically (32 Mbits) when ROM does not exist",
+      (void *) (UCON64_SMS|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xggs", 0, 0, UCON64_XGGS,
+      NULL, "send/receive SRAM to/from SMS-PRO/GG-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
+      "receives automatically when SRAM does not exist",
+      (void *) (UCON64_SMS|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xggb", 1, 0, UCON64_XGGB,
+      "BANK", "send/receive SRAM to/from SMS-PRO/GG-PRO BANK\n"
+      "BANK can be a number from 1 to 4; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when SRAM does not exist",
+      (void *) (UCON64_SMS|WF_STOP|WF_NO_ROM)
+    },
 #endif // USE_PARALLEL
-    {NULL, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

@@ -55,88 +55,34 @@ typedef struct // st_unknown_header
 /*
   usage for consoles not directly supported by uCON64
 */
-extern const st_usage_t unknown_usage[];
-extern const st_usage_t atari_usage[];
-extern const st_usage_t cd32_usage[];
-extern const st_usage_t cdi_usage[];
-extern const st_usage_t channelf_usage[];
-extern const st_usage_t coleco_usage[];
-extern const st_usage_t gamecom_usage[];
-extern const st_usage_t gc_usage[];
-extern const st_usage_t gp32_usage[];
-extern const st_usage_t intelli_usage[];
-extern const st_usage_t odyssey2_usage[];
-extern const st_usage_t odyssey_usage[];
-extern const st_usage_t ps2_usage[];
-extern const st_usage_t real3do_usage[];
-extern const st_usage_t s16_usage[];
-extern const st_usage_t sat_usage[];
-extern const st_usage_t vboy_usage[];
-extern const st_usage_t vc4000_usage[];
-extern const st_usage_t vectrex_usage[];
-extern const st_usage_t xbox_usage[];
-extern const st_usage_t mame_usage[];
+extern const st_getopt2_t unknown_usage[];
+extern const st_getopt2_t atari_usage[];
+extern const st_getopt2_t cd32_usage[];
+extern const st_getopt2_t cdi_usage[];
+extern const st_getopt2_t channelf_usage[];
+extern const st_getopt2_t coleco_usage[];
+extern const st_getopt2_t gamecom_usage[];
+extern const st_getopt2_t gc_usage[];
+extern const st_getopt2_t gp32_usage[];
+extern const st_getopt2_t intelli_usage[];
+extern const st_getopt2_t odyssey2_usage[];
+extern const st_getopt2_t odyssey_usage[];
+extern const st_getopt2_t ps2_usage[];
+extern const st_getopt2_t real3do_usage[];
+extern const st_getopt2_t s16_usage[];
+extern const st_getopt2_t sat_usage[];
+extern const st_getopt2_t vboy_usage[];
+extern const st_getopt2_t vc4000_usage[];
+extern const st_getopt2_t vectrex_usage[];
+extern const st_getopt2_t xbox_usage[];
+extern const st_getopt2_t mame_usage[];
 
 extern int unknown_init (st_rominfo_t *rominfo);
 
-extern const st_usage_t ucon64_options_usage[];
-extern const st_usage_t ucon64_padding_usage[];
-extern const st_usage_t ucon64_patching_usage[];
-
-
-/*
-  uCON64 workflow flags for st_ucon64_wf_t
-
-  WF_PROBE          probe for console type
-  WF_INIT           init ROM info (ucon64_init()) necessary
-                      w/o this flag WF_NFO and WF_NFO_AFTER
-                      will be ignored
-  WF_NFO            show info output before processing rom
-  WF_NFO_AFTER      show info output AFTER processing rom
-  WF_NO_ROM         for this option no ROM is required
-  WF_NOCRC32        no CRC32 calculation necessary for this option; this
-                      overrides even WF_INIT, WF_NFO and WF_NFO_AFTER
-  WF_STOP           a "stop" option:
-                    - -multi (and -xfalmulti) takes more than one file as
-                      argument, but should be executed only once.
-                    - stop after sending one ROM to a copier ("multizip")
-                    - stop after applying a patch so that the patch file won't
-                      be interpreted as ROM
-  WF_PAR            this option requires a parallel port
-  WF_USB            this option requires a USB port
-  WF_SERIAL         this option requires a serial port
-  WF_NO_SPLIT       this option does not work with split ROMs
-  WF_DEFAULT        same as WF_INIT|WF_PROBE|WF_NFO
-
-  example:
-  WF_NFO|WF_MFO_AFTER
-                    a ROM is required and info will be shown before and
-                    after it has been processed
-*/
-#define WF_DEFAULT (WF_PROBE|WF_INIT|WF_NFO)
-#define WF_PROBE 1
-#define WF_INIT 2
-#define WF_NFO 4
-#define WF_STOP 8
-#define WF_NFO_AFTER 16
-#define WF_NO_ROM 32
-#define WF_PAR 64
-#define WF_USB 128
-#define WF_SERIAL 256
-#define WF_NOCRC32 512
-#define WF_NO_SPLIT 1024
-#define WF_SWITCH 2048
-
-typedef struct
-{
-  int option;
-  int console;                                // UCON64_SNES, ...
-  const st_usage_t *usage;
-  uint32_t flags;                             // flags for workflow, etc..
-} st_ucon64_wf_t;
-
-extern const st_ucon64_wf_t *ucon64_get_wf (const int option); // get workflow struct for option
-extern const st_ucon64_wf_t ucon64_wf[];
+extern const st_getopt2_t ucon64_options_usage[];
+extern const st_getopt2_t ucon64_options_without_usage[];
+extern const st_getopt2_t ucon64_padding_usage[];
+extern const st_getopt2_t ucon64_patching_usage[];
 
 extern char *ucon64_temp_file;
 extern int (*ucon64_testsplit_callback) (const char *filename);
@@ -196,15 +142,5 @@ extern int ucon64_configfile (void);
 extern int ucon64_rename (int mode);
 extern int ucon64_e (void);
 extern int ucon64_pattern (st_rominfo_t *rominfo, const char *pattern_fname);
-
-/*
-  ucon64_get_options_s() returns option name
-                         ucon64_get_option_s(UCON64_HELP) == "help"
-  ucon64_get_desc()      returns option description
-                         ucon64_get_desc(UCON64_HELP) == "to get more information"
-*/
-extern const char *ucon64_get_option_s (int option);
-extern const char *ucon64_get_desc (int option);
-
 #endif // #ifndef UCON64_MISC_H
 

@@ -50,5 +50,5 @@ extern int lynx_rotr (st_rominfo_t *rominfo);
 
 extern int lynx_init (st_rominfo_t *rominfo);
 
-extern const st_usage_t lynx_usage[];
+extern const st_getopt2_t lynx_usage[];
 #endif /* LYNX_H */

@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef MSG_H
 #define MSG_H
 
-extern const st_usage_t msg_usage[];
+extern const st_getopt2_t msg_usage[];
 
 // For the header format, see ffe.h
 typedef struct st_msg_header

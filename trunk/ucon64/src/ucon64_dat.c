@@ -53,7 +53,7 @@ typedef struct
   int (*compare) (const void *a, const void *b); // the function which compares the id with the filename
                                                 // compare() == 0 means success
   int8_t console;                               // UCON64_SNES, UCON64_NES, etc.
-  const st_usage_t *console_usage;
+  const st_getopt2_t *console_usage;
 } st_console_t;
 
 typedef struct
@@ -79,27 +79,84 @@ static FILE *ucon64_datfile;                                  // only once when 
 static char ucon64_dat_fname[FILENAME_MAX];
 static st_mkdat_entry_t *ucon64_mkdat_entries = NULL;
 
-const st_usage_t ucon64_dat_usage[] = {
-  {NULL, 0, NULL, "DATabase (support for DAT files)", NULL},
-  {"db", 0, NULL, "DATabase statistics", NULL},
-  {"dbv", 0, NULL, "like " OPTION_LONG_S "db but more verbose", NULL},
-  {"dbs", 1, "CRC32", "search ROM with CRC32 in DATabase", NULL},
-  {"scan", 0, NULL, "generate ROM list for all ROMs using DATabase\n"
-              "like: GoodXXXX scan ...", NULL},
-  {"lsd", 0, NULL, "same as " OPTION_LONG_S "scan", NULL},
-  {"mkdat", 1, "DATFILE", "create DAT file; use -o to specify an output directory", NULL},
-  {"rrom", 0, NULL, "rename ROMs to their internal names", NULL},
-  {"rename", 0, NULL, "rename ROMs to their DATabase names\n"
-                    "use -o to specify an output directory", NULL},
-  {"83", 0, NULL, "force to rename to 8.3 filenames", NULL},
-  {"force63", 0, NULL, "force to rename all filenames into Joliet CD format\n"
-              "like: GoodXXXX rename inplace force63 ...\n"
-              "TIP: using " OPTION_LONG_S "nes would process only NES ROMs", NULL},
-  {"rl", 0, NULL, "rename all ROMs to lowercase", NULL},
-  {"ru", 0, NULL, "rename all ROMs to uppercase", NULL},
-//  {"good", 0, NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed using\n"
-//              "the DATabase", NULL},
-
+const st_getopt2_t ucon64_dat_usage[] = {
+  {
+    NULL, 0, 0, 0,
+    NULL, "DATabase (support for DAT files)",
+    NULL
+  },
+  {
+    "db", 0, 0, UCON64_DB,
+    NULL, "DATabase statistics",
+    (void *) WF_NO_ROM
+  },
+  {
+    "dbv", 0, 0, UCON64_DBV,
+    NULL, "like " OPTION_LONG_S "db but more verbose",
+    (void *) WF_NO_ROM
+  },
+  {
+    "dbs", 1, 0, UCON64_DBS,
+    "CRC32", "search ROM with CRC32 in DATabase",
+    (void *) WF_NO_ROM
+  },
+  {
+    "scan", 0, 0, UCON64_SCAN,
+    NULL, "generate ROM list for all ROMs using DATabase\n"
+    "like: GoodXXXX scan ...",
+    (void *) (WF_INIT|WF_PROBE|WF_NO_SPLIT)
+  },
+  {
+    "lsd", 0, 0, UCON64_LSD,
+    NULL, "same as " OPTION_LONG_S "scan",
+    (void *) (WF_INIT|WF_PROBE)
+  },
+  {
+    "mkdat", 1, 0, UCON64_MKDAT,
+    "DATFILE", "create DAT file; use -o to specify an output directory",
+    (void *) (WF_INIT|WF_PROBE)
+  },
+  {
+    "rrom", 0, 0, UCON64_RROM,
+    NULL, "rename ROMs to their internal names",
+    (void *) (WF_INIT|WF_PROBE|WF_NO_SPLIT)
+  },
+  {
+    "rename", 0, 0, UCON64_RENAME,
+    NULL, "rename ROMs to their DATabase names\n"
+    "use -o to specify an output directory",
+    (void *) (WF_INIT|WF_PROBE|WF_NO_SPLIT)
+  },
+  {
+    "rr83", 0, 0, UCON64_RR83,
+    NULL, "force to rename to 8.3 filenames",
+    (void *) (WF_INIT|WF_PROBE|WF_NO_SPLIT)
+  },
+  {
+    "force63", 0, 0, UCON64_FORCE63,
+    NULL, "force to rename all filenames into Joliet CD format\n"
+    "like: GoodXXXX rename inplace force63 ...\n"
+    "TIP: using " OPTION_LONG_S "nes would process only NES ROMs",
+    (void *) WF_SWITCH
+  },
+  {
+    "rl", 0, 0, UCON64_RL,
+    NULL, "rename all ROMs to lowercase",
+    NULL
+  },
+  {
+    "ru", 0, 0, UCON64_RU,
+    NULL, "rename all ROMs to uppercase",
+    NULL
+  },
+#if 0
+  {
+    "good", 0, 0, UCON64_GOOD,
+    NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed using\n"
+    "the DATabase",
+    NULL
+  },
+#endif
 /*
 GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
 *visit NEWNet #rareroms*
@@ -136,7 +193,11 @@ Good_RAR     = log of RAR errors
 
 Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 */
-  {NULL, 0, NULL, NULL, NULL}
+  {
+    NULL, 0, 0, 0,
+    NULL, NULL,
+    NULL
+  }
 };
 
 
@@ -882,19 +943,11 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   // console type?
   if (dat->console_usage != NULL)
     {
-      strcpy (buf, dat->console_usage[0].desc);
+      strcpy (buf, dat->console_usage[0].help);
       // fix ugly multi-line console "usages" (PC-Engine)
       if ((p = strchr (buf, '\n')) != NULL)
         *p = 0;
       printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
-
-#if 0
-      if (dat->console_usage[1].desc)
-        {
-          strcpy (buf, dat->console_usage[1]->desc);
-          printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
-        }
-#endif
     }
 
   printf ("  %s\n", dat->name);

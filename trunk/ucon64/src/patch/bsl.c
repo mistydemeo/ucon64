@@ -32,10 +32,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "bsl.h"
 
 
-const st_usage_t bsl_usage[] =
+const st_getopt2_t bsl_usage[] =
   {
-    {"b", 0, NULL, "apply Baseline/BSL PATCH to ROM", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      "b", 0, 0, UCON64_B,
+      NULL, "apply Baseline/BSL PATCH to ROM",
+      (void *) WF_STOP
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

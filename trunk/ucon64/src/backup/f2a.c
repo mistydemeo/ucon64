@@ -57,23 +57,46 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
-const st_usage_t f2a_usage[] =
+const st_getopt2_t f2a_usage[] =
   {
-    {NULL, 0, NULL, "Flash 2 Advance (Ultra)", "2003 Flash2Advance http://www.flash2advance.com"},
+    {
+      NULL, 0, 0, 0,
+      NULL, "Flash 2 Advance (Ultra)"/*"2003 Flash2Advance http://www.flash2advance.com"*/,
+      NULL
+    },
 #if     defined USE_PARALLEL || defined USE_USB
-    {"xf2a", 0, NULL, "send/receive ROM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
-                   "receives automatically (32 Mbits) when ROM does not exist", NULL},
-    {"xf2amulti", 1, "SIZE", "send multiple ROMs to Flash 2 Advance (Ultra); specify a\n"
-                          "loader in the configuration file; " OPTION_LONG_S "port=PORT", NULL},
-    {"xf2ac", 1, "N", "receive N Mbits of ROM from Flash 2 Advance (Ultra);\n"
-                   OPTION_LONG_S "port=PORT", NULL},
-    {"xf2as", 1, NULL, "send/receive SRAM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when SRAM does not exist", NULL},
-    {"xf2ab", 1, "BANK", "send/receive SRAM to/from Flash 2 Advance (Ultra) BANK\n"
-                      "BANK should be a number >= 1; " OPTION_LONG_S "port=PORT\n"
-                      "receives automatically when SRAM does not exist", NULL},
+    {
+      "xf2a", 0, 0, UCON64_XF2A,
+      NULL, "send/receive ROM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
+      "receives automatically (32 Mbits) when ROM does not exist",
+      (void *) (UCON64_GBA|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xf2amulti", 1, 0, UCON64_XF2AMULTI, // send only
+      "SIZE", "send multiple ROMs to Flash 2 Advance (Ultra); specify a\n"
+      "loader in the configuration file; " OPTION_LONG_S "port=PORT",
+      (void *) (UCON64_GBA|WF_DEFAULT|WF_STOP)
+    },
+    {
+      "xf2ac", 1, 0, UCON64_XF2AC,
+      "N", "receive N Mbits of ROM from Flash 2 Advance (Ultra);\n" OPTION_LONG_S "port=PORT",
+      (void *) (UCON64_GBA|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xf2as", 0, 0, UCON64_XF2AS,
+      NULL, "send/receive SRAM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when SRAM does not exist",
+      (void *) (UCON64_GBA|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xf2ab", 1, 0, UCON64_XF2AB,
+      "BANK", "send/receive SRAM to/from Flash 2 Advance (Ultra) BANK\n"
+      "BANK should be a number >= 1; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when SRAM does not exist",
+      (void *) (UCON64_GBA|WF_STOP|WF_NO_ROM)
+    },
 #endif // USE_PARALLEL || USE_USB
-    {NULL, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 
@@ -219,7 +242,7 @@ exec (const char *program, int argc, ...)
   programs that require root privileges. We cannot use system(), because it
   might drop privileges.
   argc should be the number of _arguments_ (excluding the program name itself).
-  DON'T move this function to misc.c. It's only necessary under Linux 2.6 (and
+  DON'T move this function to misc.c. It's only necessary under Linux 2.5 (and
   later) for the USB version of the F2A. It's hard to be more system dependent
   than that. - dbjh
 */
@@ -293,7 +316,7 @@ f2a_init_usb (void)
 
   if (f2a_connect_usb ())
     {
-      fprintf (stderr, "ERROR: Unable to connect to F2A USB linker\n");
+      fprintf (stderr, "ERROR: Could not connect to F2A USB linker\n");
       exit (1);                                 // fatal
     }
   f2a_info (&rm);
@@ -317,46 +340,38 @@ f2a_connect_usb (void)
   int fp, result, firmware_loaded = 0;
   unsigned char f2afirmware[F2A_FIRM_SIZE];
   char f2afirmware_fname[FILENAME_MAX];
-  struct usb_bus *busses, *bus;
+  struct usb_bus *bus;
   struct usb_device *dev, *f2adev = NULL;
 
   get_property_fname (ucon64.configfile, "f2afirmware", f2afirmware_fname, "f2afirm.hex");
   if (q_fread (f2afirmware, 0, F2A_FIRM_SIZE, f2afirmware_fname) == -1)
     {
-      fprintf (stderr, "ERROR: Unable to load F2A firmware (%s)\n", f2afirmware_fname);
+      fprintf (stderr, "ERROR: Could not load F2A firmware (%s)\n", f2afirmware_fname);
       exit (1);                                 // fatal
     }
 
   usb_init ();
   usb_find_busses ();
-
-find_f2a:
   usb_find_devices ();
-  busses = usb_busses;                          // usb_busses is present in libusb
-
-  for (bus = busses; bus; bus = bus->next)
+  for (bus = usb_busses; bus; bus = bus->next) // usb_busses is present in libusb
     {
       for (dev = bus->devices; dev; dev = dev->next)
         {
-          if ((dev->descriptor.idVendor == 0x547) &&
-              (dev->descriptor.idProduct == 0x1002))
-            f2adev = dev;
-          if ((dev->descriptor.idVendor == 0x547) &&
-              (dev->descriptor.idProduct == 0x2131) && !firmware_loaded)
+          if (dev->descriptor.idVendor == 0x547 && dev->descriptor.idProduct == 0x2131)
             {
               struct utsname info;
               int version;
 
               if (uname (&info) == -1)
                 {
-                  fputs ("ERROR: Unable to determine version of the running kernel\n", stderr);
+                  fputs ("ERROR: Could not determine version of the running kernel\n", stderr);
                   return -1;
                 }
 
               version = strtol (&info.release[0], NULL, 10) * 10 +
                         strtol (&info.release[2], NULL, 10);
               // example contents of info.release: "2.4.18-14custom"
-              if (version >= 25)                // Linux kernel 2.5 or higher
+              if (version >= 25)                // Linux kernel 2.5 or later
                 {
                   // use fxload to upload the F2A firmware
                   char device_path[160];
@@ -365,31 +380,32 @@ find_f2a:
                   snprintf (device_path, 160, "/proc/bus/usb/%s/%s",
                             bus->dirname, dev->filename);
                   exitstatus = exec ("/sbin/fxload", 7, "-D", device_path, "-I",
-                                     f2afirmware_fname, "-vv", "-t", "an21");
+                                     f2afirmware_fname, "-t", "an21",
+                                     ucon64.quiet < 0 ? "-vv" : "-v");
                   if (WEXITSTATUS (exitstatus))
                     {
                       char cmd[10 * 80];
 
-                      snprintf (cmd, 10 * 80, "/sbin/fxload -D %s -I %s -vv -t an21",
+                      snprintf (cmd, 10 * 80, ucon64.quiet < 0 ?
+                                  "/sbin/fxload -D %s -I %s -t an21 -vv" :
+                                  "/sbin/fxload -D %s -I %s -t an21 -v",
                                 device_path, f2afirmware_fname);
-                      fprintf (stderr, "ERROR: Unable to upload EZUSB firmware using fxload. Command:\n"
+                      fprintf (stderr, "ERROR: Could not upload EZUSB firmware using fxload. Command:\n"
                                        "       %s\n", cmd);
                       return -1;
                     }
-                  firmware_loaded = 1;
-                  wait2 (2000);                 // give the EZUSB some time to renumerate
-                  goto find_f2a;
                 }
               else
                 {
                   int wrote, w;
 
                   // Linux kernel version 2.4 or older (2.2.16 is supported by
-                  //  the EZUSB2131 driver)
+                  //  the EZUSB2131 driver). It is possible to use fxload under
+                  //  (later versions of?) Linux 2.4...
                   if ((fp = open (EZDEV, O_WRONLY)) == -1)
                     {
-                      fprintf (stderr, "ERROR: Unable to upload EZUSB firmware (opening "
-                               EZDEV": %s)\n", strerror (errno));
+                      fprintf (stderr, "ERROR: Could not upload EZUSB firmware (opening "
+                                 EZDEV": %s)\n", strerror (errno));
                       return -1;
                     }
 
@@ -399,8 +415,8 @@ find_f2a:
                     {
                       if ((w = write (fp, f2afirmware + wrote, F2A_FIRM_SIZE - wrote)) == -1)
                         {
-                          fprintf (stderr, "ERROR: Unable to upload EZUSB firmware (writing "
-                                    EZDEV": %s)\n", strerror (errno));
+                          fprintf (stderr, "ERROR: Could not upload EZUSB firmware (writing "
+                                     EZDEV": %s)\n", strerror (errno));
                           return -1;
                         }
                       if (ucon64.quiet < 0)
@@ -408,12 +424,29 @@ find_f2a:
                                 w, wrote, wrote + w, F2A_FIRM_SIZE);
                     }
                   close (fp);
-                  firmware_loaded = 1;
-                  wait2 (2000);                 // give the EZUSB some time to renumerate
-                  goto find_f2a;
                 }
+              firmware_loaded = 1;
+              wait2 (2000);                     // give the EZUSB some time to renumerate
+              break;
             }
         }
+      if (firmware_loaded)
+        break;
+    }
+
+  usb_find_devices ();
+  for (bus = usb_busses; bus; bus = bus->next)
+    {
+      for (dev = bus->devices; dev; dev = dev->next)
+        {
+          if (dev->descriptor.idVendor == 0x547 && dev->descriptor.idProduct == 0x1002)
+            {
+              f2adev = dev;
+              break;
+            }
+        }
+      if (f2adev)
+        break;
     }
 
   if (f2adev == NULL)
@@ -497,7 +530,7 @@ f2a_boot_usb (const char *ilclient_fname)
 
   if (q_fread (ilclient, 0, 16 * 1024, ilclient_fname) == -1)
     {
-      fprintf (stderr, "ERROR: Unable to load GBA client binary (%s)\n", ilclient_fname);
+      fprintf (stderr, "ERROR: Could not load GBA client binary (%s)\n", ilclient_fname);
       return -1;
     }
 
@@ -598,7 +631,7 @@ f2a_write_usb (int n_files, char **files, int address)
       get_property_fname (ucon64.configfile, "gbaloader", loader_fname, "loader.bin");
       if (q_fread (loader, 0, LOADER_SIZE, loader_fname) == -1)
         {
-          fprintf (stderr, "ERROR: Unable to load loader binary (%s)\n", loader_fname);
+          fprintf (stderr, "ERROR: Could not load loader binary (%s)\n", loader_fname);
           return -1;
         }
 #if 0 // just use a correct loader file - dbjh
@@ -686,7 +719,7 @@ f2a_init_par (int parport, int parport_delay)
 
   if (parport_init (parport, parport_delay))
     {
-      fprintf (stderr, "ERROR: Unable to connect to F2A parport linker\n");
+      fprintf (stderr, "ERROR: Could not connect to F2A parport linker\n");
       exit (1);                                 // fatal
     }
 
@@ -896,7 +929,7 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
       printf ("Uploading iLinker logo\n");
       if (q_fread (ilogo, 0, LOGO_SIZE, ilogo_fname) == -1)
         {
-          fprintf (stderr, "ERROR: Unable to load logo file (%s)\n", ilogo_fname);
+          fprintf (stderr, "ERROR: Could not load logo file (%s)\n", ilogo_fname);
           return -1;
         }
       if (f2a_send_buffer_par (CMD_WRITEDATA, LOGO_ADDR, LOGO_SIZE, ilogo,
@@ -910,7 +943,7 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
   printf ("Uploading iLinker client\n");
   if (q_fread (iclientp, 0, BOOT_SIZE, iclientp_fname) == -1)
     {
-      fprintf (stderr, "ERROR: Unable to load GBA client binary (%s)\n", iclientp_fname);
+      fprintf (stderr, "ERROR: Could not load GBA client binary (%s)\n", iclientp_fname);
       return -1;
     }
   if (f2a_send_buffer_par (CMD_WRITEDATA, EXEC_STUB, BOOT_SIZE, iclientp,
@@ -936,7 +969,7 @@ f2a_write_par (int n_files, char **files, unsigned int address)
       get_property_fname (ucon64.configfile, "gbaloader", loader_fname, "loader.bin");
       if (q_fread (loader, 0, LOADER_SIZE, loader_fname) == -1)
         {
-          fprintf (stderr, "ERROR: Unable to load loader binary (%s)\n", loader_fname);
+          fprintf (stderr, "ERROR: Could not load loader binary (%s)\n", loader_fname);
           return -1;
         }
 #if 0 // just use a correct loader file - dbjh

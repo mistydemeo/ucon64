@@ -52,54 +52,166 @@ static int save_rom (st_rominfo_t *rominfo, const char *name,
                      unsigned char **buffer, int size);
 
 
-const st_usage_t genesis_usage[] =
+const st_getopt2_t genesis_usage[] =
   {
-    {NULL, 0, NULL, "Genesis/Sega Mega Drive/Sega CD/32X/Nomad", "1989/19XX/19XX Sega http://www.sega.com"},
-    {"gen", 0, NULL, "force recognition", NULL},
-    {"int", 0, NULL, "force ROM is in interleaved format (SMD)", NULL},
-    {"int2", 0, NULL, "force ROM is in interleaved format 2 (MGD)", NULL},
-    {"nint", 0, NULL, "force ROM is not in interleaved format (BIN/RAW)", NULL},
-    {"n", 1, "NEW_NAME", "change foreign ROM name to NEW_NAME", NULL},
-    {"n2", 1, "NEW_NAME", "change Japanese ROM name to NEW_NAME", NULL},
-    {"smd", 0, NULL, "convert to Super Magic Drive/SMD", NULL},
-    {"smds", 0, NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD", NULL},
-    {"bin", 0, NULL, "convert to binary format/BIN/RAW", NULL},
-    {"mgd", 0, NULL, "convert to Multi Game*/MGD2/MGH", NULL},
+    {
+      NULL, 0, 0, 0,
+      NULL, "Genesis/Sega Mega Drive/Sega CD/32X/Nomad"/*"1989/19XX/19XX Sega http://www.sega.com"*/,
+      NULL
+    },
+    {
+      "gen", 0, 0, UCON64_GEN,
+      NULL, "force recognition",
+      (void *) (UCON64_GEN|WF_SWITCH)
+    },
+    {
+      "int", 0, 0, UCON64_INT,
+      NULL, "force ROM is in interleaved format (SMD)",
+      (void *) WF_SWITCH
+    },
+    {
+      "int2", 0, 0, UCON64_INT2,
+      NULL, "force ROM is in interleaved format 2 (MGD)",
+      (void *) WF_SWITCH
+    },
+    {
+      "nint", 0, 0, UCON64_NINT,
+      NULL, "force ROM is not in interleaved format (BIN/RAW)",
+      (void *) WF_SWITCH
+    },
+    {
+      "n", 1, 0, UCON64_N,
+      "NEW_NAME", "change foreign ROM name to NEW_NAME",
+      (void *) WF_DEFAULT
+    },
+    {
+      "n2", 1, 0, UCON64_N2,
+      "NEW_NAME", "change Japanese ROM name to NEW_NAME",
+      (void *) (UCON64_GEN|WF_DEFAULT)
+    },
+    {
+      "smd", 0, 0, UCON64_SMD,
+      NULL, "convert to Super Magic Drive/SMD",
+      (void *) (WF_DEFAULT|WF_NO_SPLIT)
+    },
+    {
+      "smds", 0, 0, UCON64_SMDS,
+      NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD",
+      NULL
+    },
+    {
+      "bin", 0, 0, UCON64_BIN,
+      NULL, "convert to binary format/BIN/RAW",
+      (void *) (UCON64_GEN|WF_DEFAULT|WF_NO_SPLIT)
+    },
+    {
+      "mgd", 0, 0, UCON64_MGD,
+      NULL, "convert to Multi Game*/MGD2/MGH",
+      (void *) (WF_DEFAULT|WF_NO_SPLIT)
+    },
 #if 0
-    {"gf", 0, NULL, "convert Sega CD country code to Europe; ROM=$CD_IMAGE", NULL},
-    {"ga", 0, NULL, "convert Sega CD country code to U.S.A.; ROM=$CD_IMAGE", NULL},
-    {"gc", 0, NULL, "convert to Genecyst (emulator)/GSV save state; " OPTION_LONG_S "rom=SAVESTATE", NULL},
-    {"ge", 0, NULL, "convert to GenEm (emulator)/SAV save state; " OPTION_LONG_S "rom=SAVESTATE", NULL},
-    {"gym", 0, NULL, "convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE", NULL},
-    {"cym", 0, NULL, "convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE", NULL},
+    {
+      "gf", 0, 0, UCON64_GF,
+      NULL, "convert Sega CD country code to Europe; ROM=$CD_IMAGE",
+      NULL
+    },
+    {
+      "ga", 0, 0, UCON64_GA,
+      NULL, "convert Sega CD country code to U.S.A.; ROM=$CD_IMAGE",
+      NULL
+    },
+    {
+      "gc", 0, 0, UCON64_GC,
+      NULL, "convert to Genecyst (emulator)/GSV save state; " OPTION_LONG_S "rom=SAVESTATE",
+      NULL
+    },
+    {
+      "ge", 0, 0, UCON64_GE,
+      NULL, "convert to GenEm (emulator)/SAV save state; " OPTION_LONG_S "rom=SAVESTATE",
+      NULL
+    },
+    {
+      "gym", 0, 0, UCON64_GYM,
+      NULL, "convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE",
+      NULL
+    },
+    {
+      "cym", 0, 0, UCON64_CYM,
+      NULL, "convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE",
+      NULL
+    },
 #endif
-    {"stp", 0, NULL, "convert SRAM from backup unit for use with an emulator\n"
-               OPTION_LONG_S "stp just strips the first 512 bytes", NULL},
-    {"j", 0, NULL, "join split ROM", NULL},
-    {"s", 0, NULL, "split ROM; default part size is 4 Mb", NULL},
-    {"ssize", 1, "SIZE", "specify split part size in Mbit", NULL},
+    {
+      "stp", 0, 0, UCON64_STP,
+      NULL, "convert SRAM from backup unit for use with an emulator\n"
+      OPTION_LONG_S "stp just strips the first 512 bytes",
+      NULL
+    },
+    {
+      "j", 0, 0, UCON64_J,
+      NULL, "join split ROM",
+      (void *) (WF_INIT|WF_PROBE)
+    },
+    {
+      "s", 0, 0, UCON64_S,
+      NULL, "split ROM; default part size is 4 Mb",
+      (void *) (WF_DEFAULT|WF_NO_SPLIT)
+    },
+    {
+      "ssize", 1, 0, UCON64_SSIZE,
+      "SIZE", "specify split part size in Mbit",
+      (void *) WF_SWITCH
+    },
 #if 0
-    {"p", 0, NULL, "pad ROM to full Mb", NULL},
+    {
+      "p", 0, 0, UCON64_P,
+      NULL, "pad ROM to full Mb",
+      NULL
+    },
 #endif
-    {"f", 0, NULL, "remove NTSC/PAL protection", NULL},
-    {"chk", 0, NULL, "fix ROM checksum", NULL},
-    {"1991", 0, NULL, "fix old third party ROMs to work with consoles build after\n"
-                      "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\"", NULL},
-    {"multi", 1, "SIZE", "make multi-game file for use with MD-PRO flash card, truncated\n"
-                         "to SIZE Mbit; file with loader must be specified first, then\n"
-                         "all the ROMs, multi-game file to create last", NULL},
-    {"region", 1, "CODE", "enable region function; use with -multi\n"
-                          "CODE=0 force NTSC/Japan for all games\n"
-                          "CODE=1 force NTSC/U.S.A. for all games\n"
-                          "CODE=2 force PAL for all games\n"
-                          "CODE=x use whatever setting games expect", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      "f", 0, 0, UCON64_F,
+      NULL, "remove NTSC/PAL protection",
+      (void *) WF_DEFAULT
+    },
+    {
+      "chk", 0, 0, UCON64_CHK,
+      NULL, "fix ROM checksum",
+      (void *) WF_DEFAULT
+    },
+    {
+      "1991", 0, 0, UCON64_1991,
+      NULL, "fix old third party ROMs to work with consoles build after\n"
+      "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\"",
+      (void *) (UCON64_GEN|WF_DEFAULT)
+    },
+    {
+      "multi", 1, 0, UCON64_MULTI,
+      "SIZE", "make multi-game file for use with MD-PRO flash card, truncated\n"
+      "to SIZE Mbit; file with loader must be specified first, then\n"
+      "all the ROMs, multi-game file to create last",
+      (void *) (WF_INIT|WF_PROBE|WF_STOP)
+    },
+    {
+      "region", 1, 0, UCON64_REGION,
+      "CODE", "enable region function; use with -multi\n"
+      "CODE=0 force NTSC/Japan for all games\n"
+      "CODE=1 force NTSC/U.S.A. for all games\n"
+      "CODE=2 force PAL for all games\n"
+      "CODE=x use whatever setting games expect",
+      (void *) (UCON64_GEN|WF_SWITCH)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-const st_usage_t bin_usage[] =
+const st_getopt2_t bin_usage[] =
   {
-    {NULL, 0, NULL, "Binary file/BIN/RAW", "Emulator format?"},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Binary file/BIN/RAW"/*"Emulator format?"*/,
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 typedef struct st_genesis_header

@@ -34,7 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define SWC_IO_MAX          0x1ff               // highest valid dumping mode value
 
-extern const st_usage_t swc_usage[];
+extern const st_getopt2_t swc_usage[];
 
 // For the header format, see ffe.h
 typedef struct st_swc_header

@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef F2A_H
 #define F2A_H
-extern const st_usage_t f2a_usage[];
+extern const st_getopt2_t f2a_usage[];
 
 #define F2A_HEADER_START 0
 #define F2A_HEADER_LEN 0

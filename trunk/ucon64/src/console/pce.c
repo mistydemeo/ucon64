@@ -46,22 +46,57 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 // static unsigned int pcengine_chksum (st_rominfo_t *rominfo);
 
-const st_usage_t pcengine_usage[] =
+const st_getopt2_t pcengine_usage[] =
   {
-    {NULL, 0, NULL, "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\n"
-                    "Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)",
-                    "1987/19XX/19XX NEC"},
-    {"pce", 0, NULL, "force recognition", NULL},
-    {"int", 0, NULL, "force ROM is in interleaved (bit-swapped) format", NULL},
-    {"nint", 0, NULL, "force ROM is not in interleaved (bit-swapped) format", NULL},
-    {"msg", 0, NULL, "convert to Magic Super Griffin/MSG", NULL},
-    {"mgd", 0, NULL, "convert to Multi Game Doctor*/MGD2/RAW", NULL},
-    {"swap", 0, NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)", NULL},
-    {"f", 0, NULL, "fix region protection", NULL},
-    {"multi", 1, "SIZE", "make multi-game file for use with PCE-PRO flash card, truncated\n"
-                         "to SIZE Mbit; file with loader must be specified first, then\n"
-                         "all the ROMs, multi-game file to create last", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\n"
+      "Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)"/*"1987/19XX/19XX NEC"*/,
+      NULL
+    },
+    {
+      "pce", 0, 0, UCON64_PCE,
+      NULL, "force recognition",
+      (void *) (UCON64_PCE|WF_SWITCH)
+    },
+    {
+      "int", 0, 0, UCON64_INT,
+      NULL, "force ROM is in interleaved (bit-swapped) format",
+      (void *) WF_SWITCH
+    },
+    {
+      "nint", 0, 0, UCON64_NINT,
+      NULL, "force ROM is not in interleaved (bit-swapped) format",
+      (void *) WF_SWITCH
+    },
+    {
+      "msg", 0, 0, UCON64_MSG,
+      NULL, "convert to Magic Super Griffin/MSG",
+      (void *) (UCON64_PCE|WF_DEFAULT)
+    },
+    {
+      "mgd", 0, 0, UCON64_MGD,
+      NULL, "convert to Multi Game Doctor*/MGD2/RAW",
+      (void *) (WF_DEFAULT|WF_NO_SPLIT)
+    },
+    {
+      "swap", 0, 0, UCON64_SWAP,
+      NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)",
+      (void *) (WF_INIT|WF_PROBE)
+    },
+    {
+      "f", 0, 0, UCON64_F,
+      NULL, "fix region protection",
+      (void *) WF_DEFAULT
+    },
+    {
+      "multi", 1, 0, UCON64_MULTI,
+      "SIZE", "make multi-game file for use with PCE-PRO flash card, truncated\n"
+      "to SIZE Mbit; file with loader must be specified first, then\n"
+      "all the ROMs, multi-game file to create last",
+      (void *) (WF_INIT|WF_PROBE|WF_STOP)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 #define PCE_MAKER_MAX 86

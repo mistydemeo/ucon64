@@ -218,18 +218,21 @@ long filetestpad(	char *filename
 	);
 }
 
-#ifdef BACKUP
+#ifdef  BACKUP
+#ifdef  __BEOS__
 static int ucon64_io_fd;
+#endif
 
+#if     (__UNIX__ || __BEOS__)                  // DJGPP (DOS) has outportX() & inportX()
 unsigned char inportb(unsigned short port)
 {
-#ifdef __BEOS__
+#ifdef  __BEOS__
   IO_Tuple temp;
 
   temp.Port = port;
   ioctl(ucon64_io_fd, DRV_READ_IO_8, &temp, 0);
 
-  return (temp.Data);
+  return temp.Data;
 #else
   unsigned char byte;
 
@@ -245,13 +248,13 @@ unsigned char inportb(unsigned short port)
 
 unsigned short inportw(unsigned short port)
 {
-#ifdef __BEOS__
+#ifdef  __BEOS__
   IO_Tuple temp;
 
   temp.Port = port;
   ioctl(ucon64_io_fd, DRV_READ_IO_16, &temp, 0);
 
-  return (temp.Data16);
+  return temp.Data16;
 #else
   unsigned short word;
 
@@ -267,7 +270,7 @@ unsigned short inportw(unsigned short port)
 
 void outportb(unsigned short port, unsigned char byte)
 {
-#ifdef __BEOS__
+#ifdef  __BEOS__
   IO_Tuple temp;
 
   temp.Port = port;
@@ -284,7 +287,7 @@ void outportb(unsigned short port, unsigned char byte)
 
 void outportw(unsigned short port, unsigned short word)
 {
-#ifdef __BEOS__
+#ifdef  __BEOS__
   IO_Tuple temp;
 
   temp.Port = port;
@@ -298,6 +301,7 @@ void outportw(unsigned short port, unsigned short word)
   );
 #endif
 }
+#endif                                          // (__UNIX__ || __BEOS__)
 
 #define DETECT_MAX_CNT 1000
 
@@ -333,10 +337,12 @@ int detectParPort(unsigned int port)
   return 1;
 }
 
+#ifdef  __BEOS__
 static void close_io_port(void)
 {
   close(ucon64_io_fd);
 }
+#endif
 
 #define getParPort(x) parport_probe(x)
 unsigned int parport_probe(unsigned int port)
@@ -344,7 +350,7 @@ unsigned int parport_probe(unsigned int port)
   unsigned int parPortAddresses[] = {0x3bc, 0x378, 0x278};
   int i;
 
-#ifdef __BEOS__
+#ifdef  __BEOS__
   ucon64_io_fd = open("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
   if (ucon64_io_fd == -1)
   {
@@ -372,7 +378,7 @@ unsigned int parport_probe(unsigned int port)
     fprintf(stderr, "Could not register function with atexit()\n");
     exit(1);
   }
-#endif
+#endif                                          // __BEOS__
 
   if (port <= 3)
   {
@@ -429,9 +435,6 @@ int parport_gauge(time_t init_time, long pos, long size)
   strcat(buf, "------------------------");
   buf[24] = 0;
 
-/*
-    the first character here produces a CR w/o LF
-*/
   printf("\r%10lu Bytes [%s] %lu%%, CPS=%lu, ",
          pos, buf, (unsigned long) 100*pos/size, (unsigned long) cps);
 
@@ -444,8 +447,7 @@ int parport_gauge(time_t init_time, long pos, long size)
 
   return 0;
 }
-
-#endif
+#endif                                          // BACKUP
 
 int testsplit(char *filename)
 {

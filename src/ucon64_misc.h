@@ -4,7 +4,7 @@ ucon64_misc.h - miscellaneous functions for uCON64
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
                   2001 dbjh
                   2001 Caz
-                  
+
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,32 +34,34 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>				// ioperm() (libc5)
-#ifdef BACKUP
-  #ifdef __BEOS__
-    #include <fcntl.h>
+#include "misc.h"
 
-    #define DRV_READ_IO_8 'r'
-    #define DRV_WRITE_IO_8 'w'
-    #define DRV_READ_IO_16 'r16'
-    #define DRV_WRITE_IO_16 'w16'
-
-    typedef struct IO_Tuple
-    {
-	unsigned long Port;
-	unsigned char  Data;
-	unsigned short Data16;
-    } IO_Tuple;
-
-  #elif __linux__
-    #ifdef __GLIBC__
-      #include <sys/io.h>                       // ioperm() (glibc)
-    #endif
-  #elif __DOS__
-    #include <pc.h>                             // inportb(), inportw()
-  #endif
+#ifdef  BACKUP
+#ifdef  __linux__
+#ifdef  __GLIBC__
+#include <sys/io.h>                             // ioperm() (glibc)
 #endif
 
-#include "misc.h"
+#elif   __DOS__
+#include <pc.h>                                 // inportb(), inportw()
+
+#elif   __BEOS__
+#include <fcntl.h>
+
+#define DRV_READ_IO_8 'r'
+#define DRV_WRITE_IO_8 'w'
+#define DRV_READ_IO_16 'r16'
+#define DRV_WRITE_IO_16 'w16'
+
+typedef struct IO_Tuple
+{
+  unsigned long Port;
+  unsigned char  Data;
+  unsigned short Data16;
+} IO_Tuple;
+#endif                                          // __BEOS__
+#endif                                          // BACKUP
+
 
 #define MBIT 131072
 
@@ -105,7 +107,7 @@ int testsplit(	char *filename		//test if ROM is splitted into parts
 
 #define out1byte(p,x)	outportb(p,x)
 #define in1byte(p)	inportb(p)
-// DJGPP has outportX() & inportX()
+// DJGPP (DOS) has outportX() & inportX()
 
 #if     (__UNIX__ || __BEOS__)
 inline unsigned char inportb(unsigned short port);

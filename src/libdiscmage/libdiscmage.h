@@ -52,192 +52,6 @@ typedef signed long long int int64_t;
 #endif // OWN_INTTYPES
 #endif // HAVE_INTTYPES_H
 
-#ifdef __MSDOS__
-#define FILE_SEPARATOR '\\'
-#define FILE_SEPARATOR_S "\\"
-#else
-#define FILE_SEPARATOR '/'
-#define FILE_SEPARATOR_S "/"
-#endif
-
-#if 0
-#ifdef  HAVE_BASENAME
-#else
-extern char *basename2 (const char *str);
-#define basename basename2
-#endif
-#endif
-
-#define stricmp strcasecmp
-#define strnicmp strncasecmp
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifdef WORDS_BIGENDIAN
-#undef WORDS_BIGENDIAN
-#endif
-
-#if     defined _LIBC || defined __GLIBC__
-  #include <endian.h>
-  #if __BYTE_ORDER == __BIG_ENDIAN
-    #define WORDS_BIGENDIAN 1
-  #endif
-#elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || \
-        defined __APPLE__
-  #define WORDS_BIGENDIAN 1
-#endif
-
-#ifdef  HAVE_BYTESWAP_H
-#include <byteswap.h>
-#else
-#ifndef OWN_BYTESWAP
-#define OWN_BYTESWAP                            // signal that these are defined
-extern unsigned short int bswap_16 (unsigned short int x);
-extern unsigned int bswap_32 (unsigned int x);
-extern unsigned long long int bswap_64 (unsigned long long int x);
-#endif // OWN_BYTESWAP
-#endif
-
-#ifdef WORDS_BIGENDIAN
-#define me2be_16(x) (x)
-#define me2be_32(x) (x)
-#define me2be_64(x) (x)
-#define me2le_16(x) (bswap_16(x))
-#define me2le_32(x) (bswap_32(x))
-#define me2le_64(x) (bswap_64(x))
-#else
-#define me2be_16(x) (bswap_16(x))
-#define me2be_32(x) (bswap_32(x))
-#define me2be_64(x) (bswap_64(x))
-#define me2le_16(x) (x)
-#define me2le_32(x) (x)
-#define me2le_64(x) (x)
-#endif
-
-#if     defined __linux__ || defined HAVE_LINUX_CDROM_H
-#include <linux/cdrom.h>
-#else
-/*
-  some useful structs and defines from <linux/cdrom.h>
-*/
-
-/*
- * -- <linux/cdrom.h>
- * General header file for linux CD-ROM drivers
- * Copyright (C) 1992         David Giller, rafetmad@oxy.edu
- *               1994, 1995   Eberhard Moenkeberg, emoenke@gwdg.de
- *               1996         David van Leeuwen, david@tm.tno.nl
- *               1997, 1998   Erik Andersen, andersee@debian.org
- *               1998-2000    Jens Axboe, axboe@suse.de
- */
-
-/*******************************************************
- * CDROM IOCTL structures
- *******************************************************/
-
-/* Address in MSF format */
-struct cdrom_msf0
-{
-	unsigned char	minute;
-	unsigned char	second;
-	unsigned char	frame;
-};
-
-/* Address in either MSF or logical format */
-union cdrom_addr
-{
-	struct cdrom_msf0	msf;
-	int			lba;
-};
-
-/* This struct is used by the CDROMPLAYMSF ioctl */
-struct cdrom_msf
-{
-	unsigned char	cdmsf_min0;	/* start minute */
-	unsigned char	cdmsf_sec0;	/* start second */
-	unsigned char	cdmsf_frame0;	/* start frame */
-	unsigned char	cdmsf_min1;	/* end minute */
-	unsigned char	cdmsf_sec1;	/* end second */
-	unsigned char	cdmsf_frame1;	/* end frame */
-};
-
-
-/*
- * A CD-ROM physical sector size is 2048, 2052, 2056, 2324, 2332, 2336,
- * 2340, or 2352 bytes long.
-
-*         Sector types of the standard CD-ROM data formats:
- *
- * format   sector type               user data size (bytes)
- * -----------------------------------------------------------------------------
- *   1     (Red Book)    CD-DA          2352    (CD_FRAMESIZE_RAW)
- *   2     (Yellow Book) Mode1 Form1    2048    (CD_FRAMESIZE)
- *   3     (Yellow Book) Mode1 Form2    2336    (CD_FRAMESIZE_RAW0)
- *   4     (Green Book)  Mode2 Form1    2048    (CD_FRAMESIZE)
- *   5     (Green Book)  Mode2 Form2    2328    (2324+4 spare bytes)
- *
- *
- *       The layout of the standard CD-ROM data formats:
- * -----------------------------------------------------------------------------
- * - audio (red):                  | audio_sample_bytes |
- *                                 |        2352        |
- *
- * - data (yellow, mode1):         | sync - head - data - EDC - zero - ECC |
- *                                 |  12  -   4  - 2048 -  4  -   8  - 276 |
- *
- * - data (yellow, mode2):         | sync - head - data |
- *                                 |  12  -   4  - 2336 |
- *
- * - XA data (green, mode2 form1): | sync - head - sub - data - EDC - ECC |
- *                                 |  12  -   4  -  8  - 2048 -  4  - 276 |
- *
- * - XA data (green, mode2 form2): | sync - head - sub - data - Spare |
- *                                 |  12  -   4  -  8  - 2324 -  4    |
- *
- */
-
-/* Some generally useful CD-ROM information -- mostly based on the above */
-#define CD_MINS              74 /* max. minutes per CD, not really a limit */
-#define CD_SECS              60 /* seconds per minute */
-#define CD_FRAMES            75 /* frames per second */
-#define CD_SYNC_SIZE         12 /* 12 sync bytes per raw data frame */
-#define CD_MSF_OFFSET       150 /* MSF numbering offset of first frame */
-#define CD_CHUNK_SIZE        24 /* lowest-level "data bytes piece" */
-#define CD_NUM_OF_CHUNKS     98 /* chunks per frame */
-#define CD_FRAMESIZE_SUB     96 /* subchannel data "frame" size */
-#define CD_HEAD_SIZE          4 /* header (address) bytes per raw data frame */
-#define CD_SUBHEAD_SIZE       8 /* subheader bytes per raw XA data frame */
-#define CD_EDC_SIZE           4 /* bytes EDC per most raw data frame types */
-#define CD_ZERO_SIZE          8 /* bytes zero per yellow book mode 1 frame */
-#define CD_ECC_SIZE         276 /* bytes ECC per most raw data frame types */
-#define CD_FRAMESIZE       2048 /* bytes per frame, "cooked" mode */
-#define CD_FRAMESIZE_RAW   2352 /* bytes per frame, "raw" mode */
-#define CD_FRAMESIZE_RAWER 2646 /* The maximum possible returned bytes */
-/* most drives don't deliver everything: */
-#define CD_FRAMESIZE_RAW1 (CD_FRAMESIZE_RAW-CD_SYNC_SIZE) /*2340*/
-#define CD_FRAMESIZE_RAW0 (CD_FRAMESIZE_RAW-CD_SYNC_SIZE-CD_HEAD_SIZE) /*2336*/
-
-#define CD_XA_HEAD        (CD_HEAD_SIZE+CD_SUBHEAD_SIZE) /* "before data" part of raw XA frame */
-#define CD_XA_TAIL        (CD_EDC_SIZE+CD_ECC_SIZE) /* "after data" part of raw XA frame */
-#define CD_XA_SYNC_HEAD   (CD_SYNC_SIZE+CD_XA_HEAD) /* sync bytes + header of XA frame */
-
-/* CD-ROM address types (cdrom_tocentry.cdte_format) */
-#define	CDROM_LBA 0x01 /* "logical block": first frame is #0 */
-#define	CDROM_MSF 0x02 /* "minute-second-frame": binary, not bcd here! */
-
-/* bit to tell whether track is data or audio (cdrom_tocentry.cdte_ctrl) */
-#define	CDROM_DATA_TRACK	0x04
-
-/* The leadout track is always 0xAA, regardless of # of tracks on disc */
-#define	CDROM_LEADOUT		0xAA
-#endif // defined __linux__ || defined HAVE_LINUX_CDROM_H
-
 #if 0
 #define MODE1_2048 0
 #define MODE1_2352 1
@@ -258,22 +72,6 @@ struct cdrom_msf
 #define WRITE_BUF_SIZE (1024*1024)
 
 
-typedef struct
-{
-  unsigned char magic[4];
-  uint32_t total_length;
-  unsigned char type[4];
-  unsigned char fmt[4];
-  uint32_t header_length;
-  unsigned short format;
-  unsigned short channels;
-  uint32_t samplerate;
-  uint32_t bitrate;
-  unsigned short blockalign;
-  unsigned short bitspersample;
-  unsigned char data[4];
-  uint32_t data_length;
-} wav_header_t;
 
 
 typedef struct
@@ -322,23 +120,51 @@ typedef struct
 } dm_image_t;
 
 
-#include "sheets.h"
+/*
+  mksheets()  automagically generates cue and toc sheets
+              src could be images or existing cue or toc sheets
 
-#include "cdi.h"
-#include "ccd.h"
-#include "bin.h"
-#include "iso.h"
-#include "nero.h"
+              0  (success)
+              -1 (error)
+*/
+extern int32_t dm_mksheets (dm_image_t *image);
+
+extern int32_t dm_mktoc (dm_image_t *image);
+extern int32_t dm_mkcue (dm_image_t *image);
+
+#define CDI_V2  0x80000004
+#define CDI_V3  0x80000005
+#define CDI_V35 0x80000006
+//#define CDI_V4 0x80000006
+
+
+extern int cdi_init (dm_image_t *image);
+
+extern int32_t ask_type (FILE * fsource, int32_t header_position);
+extern int32_t cdi_read_track (dm_image_t * cdi_image);
+extern void cdi_get_sessions (dm_image_t * cdi_image);
+extern void cdi_get_tracks (dm_image_t * cdi_image);
+extern void cdi_skip_next_session (dm_image_t * cdi_image);
+
+extern int nrg_init (dm_image_t * image);
+
+extern void nrg_write_cues_hdr (char *fcues, int32_t *fcues_i, dm_image_t * image);
+extern void nrg_write_daoi_hdr (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image);
+extern void nrg_write_cues_track (char *fcues, int32_t *fcues_i, dm_image_t * image);
+extern void nrg_write_daoi_track (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image, int32_t nrg_offset);
+extern void nrg_write_cues_tail (char *fcues, int32_t *fcues_i, dm_image_t * image);
+extern void nrg_write_sinf (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image);
+extern void nrg_write_etnf_hdr (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image);
+extern void nrg_write_etnf_track (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image, int32_t nrg_offset);
 
 
 /*
   some support routines
 */
-extern int lba_to_msf (uint32_t lba, struct cdrom_msf * mp);
-extern uint32_t msf_to_lba (int m, int s, int f, int force_positive);
-extern int from_bcd (int b);
-extern int to_bcd (int i);
-extern int fsize (const char *filename);
+//extern int lba_to_msf (uint32_t lba, struct cdrom_msf * mp);
+//extern uint32_t msf_to_lba (int m, int s, int f, int force_positive);
+//extern int from_bcd (int b);
+//extern int to_bcd (int i);
 
 
 /*
@@ -363,54 +189,6 @@ extern int32_t dm_nrgrip (dm_image_t *image);
 extern int32_t dm_rip (dm_image_t *image);
 extern int32_t dm_cdi2nero (dm_image_t *image);
 //extern int32_t dm_isofix (dm_image_t *image);
-
-
-#define ISODCL(from, to) (to - from + 1)
-typedef struct st_iso_header
-{
-  char type[ISODCL (1, 1)];   /* 711 */
-  char id[ISODCL (2, 6)];
-  char version[ISODCL (7, 7)];        /* 711 */
-  char unused1[ISODCL (8, 8)];
-  char system_id[ISODCL (9, 40)];     /* achars */
-  char volume_id[ISODCL (41, 72)];    /* dchars */
-  char unused2[ISODCL (73, 80)];
-  char volume_space_size[ISODCL (81, 88)];    /* 733 */
-  char unused3[ISODCL (89, 120)];
-  char volume_set_size[ISODCL (121, 124)];    /* 723 */
-  char volume_sequence_number[ISODCL (125, 128)];     /* 723 */
-  char logical_block_size[ISODCL (129, 132)]; /* 723 */
-  char path_table_size[ISODCL (133, 140)];    /* 733 */
-  char type_l_path_table[ISODCL (141, 144)];  /* 731 */
-  char opt_type_l_path_table[ISODCL (145, 148)];      /* 731 */
-  char type_m_path_table[ISODCL (149, 152)];  /* 732 */
-  char opt_type_m_path_table[ISODCL (153, 156)];      /* 732 */
-  char root_directory_record[ISODCL (157, 190)];      /* 9.1 */
-  char volume_set_id[ISODCL (191, 318)];      /* dchars */
-  char publisher_id[ISODCL (319, 446)];       /* achars */
-  char preparer_id[ISODCL (447, 574)];        /* achars */
-  char application_id[ISODCL (575, 702)];     /* achars */
-  char copyright_file_id[ISODCL (703, 739)];  /* 7.5 dchars */
-  char abstract_file_id[ISODCL (740, 776)];   /* 7.5 dchars */
-  char bibliographic_file_id[ISODCL (777, 813)];      /* 7.5 dchars */
-  char creation_date[ISODCL (814, 830)];      /* 8.4.26.1 */
-  char modification_date[ISODCL (831, 847)];  /* 8.4.26.1 */
-  char expiration_date[ISODCL (848, 864)];    /* 8.4.26.1 */
-  char effective_date[ISODCL (865, 881)];     /* 8.4.26.1 */
-  char file_structure_version[ISODCL (882, 882)];     /* 711 */
-  char unused4[ISODCL (883, 883)];
-  char application_data[ISODCL (884, 1395)];
-  char unused5[ISODCL (1396, 2048)];
-} st_iso_header_t;
-
-#define ISO_HEADER_START 0
-#define ISO_HEADER_LEN (sizeof (st_iso_header_t))
-
-#define CDRW_HEADER_START(x) ((x == 1) ? 0x9310 : (x == 2) ? 0 : (x == 3) ? 0x9310 : 0)
-//   0, //MODE1/2048
-//   0x9310, //MODE1/2352
-//   0, //MODE2/2336
-//   0x9310, //MODE2/2352
 
 extern int dm_disc_read (dm_image_t *image);
 extern int dm_disc_write (dm_image_t *image);

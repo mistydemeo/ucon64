@@ -2636,7 +2636,7 @@ gbx_write_sram (const char *filename, unsigned int parport, int bank)
   else
     SetSramBank ();                             // set bank_size = 4/16 banks of 8kB
 
-  fsize = quickftell (filename);
+  fsize = quick_fsize (filename);
   if (fsize == 8 * 1024 || bank != -1)
     {
       cmd = 'l';

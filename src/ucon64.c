@@ -367,9 +367,9 @@ main (int argc, char **argv)
   ucon64.mapr =
   ucon64.comment = "";
 
-  sscanf (getProperty (ucon64.configfile, "parport", buf2, "0x378"), "%x", &ucon64.parport);
+  sscanf (get_property (ucon64.configfile, "parport", buf2, "0x378"), "%x", &ucon64.parport);
 
-  ucon64.backup = ((!strcmp (getProperty (ucon64.configfile, "backups", buf2, "1"), "1")) ?
+  ucon64.backup = ((!strcmp (get_property (ucon64.configfile, "backups", buf2, "1"), "1")) ?
                1 : 0);
 
   if (argc < 2)
@@ -561,7 +561,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   if (S_ISREG (fstate.st_mode) != TRUE)
     return result;
 
-  ucon64_fsize = quickftell (ucon64.rom);       // save size in ucon64_fsize
+  ucon64_fsize = quick_fsize (ucon64.rom);       // save size in ucon64_fsize
   rominfo->file_size = ucon64_fsize;
 
 /*
@@ -607,7 +607,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 
       result = 0;
 
-      quickfread (&iso_header, ISO_HEADER_START +
+      quick_fread (&iso_header, ISO_HEADER_START +
           UCON64_ISSET (ucon64.buheader_len) ?
             ucon64.buheader_len :
             CDRW_HEADER_START (ucon64_trackmode_probe (romfile)),
@@ -647,7 +647,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 
   if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != SMC_HEADER_LEN)
     {
-      memhexdump (rominfo->buheader, rominfo->buheader_len, rominfo->buheader_start);
+      mem_hexdump (rominfo->buheader, rominfo->buheader_len, rominfo->buheader_start);
       printf ("\n");
     }
 
@@ -668,7 +668,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 
   if (rominfo->header && rominfo->header_len)
     {
-      memhexdump (rominfo->header, rominfo->header_len,
+      mem_hexdump (rominfo->header, rominfo->header_len,
         rominfo->header_start + rominfo->buheader_len);
       printf ("\n");
     }

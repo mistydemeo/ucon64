@@ -424,7 +424,7 @@ load_smd (const char *filename)
     return 0;
 
   /* Get file size */
-  file_size = quickftell (filename);
+  file_size = quick_fsize (filename);
 
   /* Load SMD header */
   if (EXTCMP (filename, ".smd") == 0)

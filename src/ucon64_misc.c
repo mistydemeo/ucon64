@@ -114,7 +114,7 @@ const char *unknown_usage[] =
 
 /*
   Return type is not const char *, because it may return move_name (indirectly
-  via filebackup()), which is not a pointer to constant characters.
+  via file_backup()), which is not a pointer to constant characters.
 */
 char *
 ucon64_fbackup (char *move_name, const char *filename)
@@ -128,7 +128,7 @@ ucon64_fbackup (char *move_name, const char *filename)
       fflush (stdout);
     }
 
-  return filebackup (move_name, filename);
+  return file_backup (move_name, filename);
 }
 
 
@@ -161,7 +161,7 @@ handle_existing_file (const char *dest, char *src)
             {                                   // case 1a
               ucon64_fbackup (NULL, dest);
               setext (src, ".BAK");
-            }                                   // must match with what filebackup() does
+            }                                   // must match with what file_backup() does
           else
             {                                   // case 1b
               ucon64.backup = 1;                // force ucon64_fbackup() to _rename_ file
@@ -196,7 +196,7 @@ filepad (const char *filename, int start, int size)
 */
 {
   FILE *file;
-  int oldsize = quickftell (filename) - start, sizeleft;
+  int oldsize = quick_fsize (filename) - start, sizeleft;
   unsigned char padbuffer[MAXBUFSIZE];
 
   // Now we can also "pad" to smaller sizes
@@ -231,13 +231,13 @@ filetestpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
   long size = rominfo->file_size, pos = size - 2;
-  int c = quickfgetc (filename, size - 1);
+  int c = quick_fgetc (filename, size - 1);
   char *buf;
 
   if (!(buf = (char *) malloc ((size + 2) * sizeof (char))))
     return -1;
 
-  quickfread (buf, 0, size, filename);
+  quick_fread (buf, 0, size, filename);
 
   while (c == (buf[pos] & 0xff))
     pos--;
@@ -255,10 +255,10 @@ filetestpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
   long pos = rominfo->file_size - 2;
-  int c = quickfgetc (filename, pos + 1);
+  int c = quick_fgetc (filename, pos + 1);
   char buf[MAXBUFSIZE];
 
-  while (quickfread (buf, pos - (pos % MAXBUFSIZE),
+  while (quick_fread (buf, pos - (pos % MAXBUFSIZE),
       pos % MAXBUFSIZE, filename) > 0)
     {
 
@@ -630,9 +630,9 @@ ucon64_bin2iso (const char *image, int track_mode)
         return -1;
     }
 
-  strcpy (buf, FILENAME_ONLY(image));
+  strcpy (buf, filename_only(image));
   setext (buf, ".ISO");
-  size = quickftell (image) / sector_size;
+  size = quick_fsize (image) / sector_size;
 
   if (!(src = fopen (image, "rb"))) return -1;
   if (!(dest = fopen (buf, "wb")))
@@ -690,7 +690,7 @@ seek_pvd (int sector_size, int mode, const char *filename)
 
   fread (buffer, 1, 8, fsource);
 #endif
-  quickfread (buf, 16 * sector_size
+  quick_fread (buf, 16 * sector_size
     + ((sector_size == 2352) ? 16 : 0) // header
     + ((mode == 2) ? 8 : 0)            // subheader
     ,8 , filename);
@@ -717,7 +717,7 @@ ucon64_rom_in_archive (DIR **dp, const char *archive, char *romname,
   char buf[FILENAME_MAX], cwd[FILENAME_MAX];
 
 #ifdef UNZIP
-  if (!stricmp (GETEXT (archive), ".zip"))
+  if (!stricmp (getext (archive), ".zip"))
     {
 //use libz
 
@@ -771,10 +771,10 @@ ucon64_trackmode_probe (const char *image)
     { 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0 };
   char buf[MAXBUFSIZE];
 
-  quickfread (buf, 0, 16, image);
+  quick_fread (buf, 0, 16, image);
 
 #ifdef DEBUG
-  memhexdump(buf, 16, 0);
+  mem_hexdump(buf, 16, 0);
 #endif
 
   if (!memcmp (SYNC_HEADER, buf, 12))
@@ -818,7 +818,7 @@ ucon64_mktoc (st_rominfo_t *rominfo)
   int result, fsize;
 
   result = ucon64_trackmode_probe (ucon64.rom);
-  fsize = quickftell (ucon64.rom);
+  fsize = quick_fsize (ucon64.rom);
 
   sprintf (buf, "%s\n" "\n" "\n" "// Track 1\n"
            "TRACK %s\n"
@@ -903,7 +903,7 @@ int ucon64_e (const char *romfile)
     }
 
 
-  property = getProperty (ucon64.configfile, buf3, buf2, NULL);   // buf2 also contains property value
+  property = get_property (ucon64.configfile, buf3, buf2, NULL);   // buf2 also contains property value
   if (property == NULL)
     {
       fprintf (stderr, "ERROR: could not find the correct settings (%s) in\n"
@@ -969,7 +969,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
             strcpy (buf, mkfile (UCON64_UNKNOWN_S, '_'));
           if (mode == UCON64_RR83)
             buf[8] = 0;
-          strcat (buf, GETEXT (ucon64.rom));
+          strcat (buf, getext (ucon64.rom));
           if (mode == UCON64_RR83)
             buf[12] = 0;
           if (!strcmp (ucon64.rom, buf))
@@ -1154,43 +1154,43 @@ ucon64_configfile (void)
           printf ("OK\n\n");
         }
     }
-  else if (strtol (getProperty (ucon64.configfile, "version", buf2, "0"), NULL, 10) < UCON64_VERSION)
+  else if (strtol (get_property (ucon64.configfile, "version", buf2, "0"), NULL, 10) < UCON64_VERSION)
     {
       strcpy (buf2, ucon64.configfile);
       setext (buf2, ".OLD");
 
       printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
 
-      filecopy (ucon64.configfile, 0, quickftell (ucon64.configfile), buf2, "wb");
+      filecopy (ucon64.configfile, 0, quick_fsize (ucon64.configfile), buf2, "wb");
 
       sprintf (buf, "%d", UCON64_VERSION);
-      setProperty (ucon64.configfile, "version", buf);
+      set_property (ucon64.configfile, "version", buf);
 
 #if 0
-      setProperty (ucon64.configfile, "backups", "1");
+      set_property (ucon64.configfile, "backups", "1");
 
 #ifdef BACKUP
-      setProperty (ucon64.configfile, "parport", "0x378");
+      set_property (ucon64.configfile, "parport", "0x378");
 #endif // BACKUP
 
-      setProperty (ucon64.configfile, "emulate_gp32", "");
-      setProperty (ucon64.configfile, "cdrw_read",
-        getProperty (ucon64.configfile, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
-      setProperty (ucon64.configfile, "cdrw_write",
-        getProperty (ucon64.configfile, "cdrw_raw_write", buf2, "cdrdao write --device 0,0,0 --driver generic-mmc "));
+      set_property (ucon64.configfile, "emulate_gp32", "");
+      set_property (ucon64.configfile, "cdrw_read",
+        get_property (ucon64.configfile, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
+      set_property (ucon64.configfile, "cdrw_write",
+        get_property (ucon64.configfile, "cdrw_raw_write", buf2, "cdrdao write --device 0,0,0 --driver generic-mmc "));
 #endif
 
-      DELETEPROPERTY (ucon64.configfile, "cdrw_raw_read");
-      DELETEPROPERTY (ucon64.configfile, "cdrw_raw_write");
-      DELETEPROPERTY (ucon64.configfile, "cdrw_iso_read");
-      DELETEPROPERTY (ucon64.configfile, "cdrw_iso_write");
+      DELETE_PROPERTY (ucon64.configfile, "cdrw_raw_read");
+      DELETE_PROPERTY (ucon64.configfile, "cdrw_raw_write");
+      DELETE_PROPERTY (ucon64.configfile, "cdrw_iso_read");
+      DELETE_PROPERTY (ucon64.configfile, "cdrw_iso_write");
 
 #if 0
-      setProperty (ucon64.configfile, "lha_extract", "lha efi \"%s\"");
-      setProperty (ucon64.configfile, "lzh_extract", "lha efi \"%s\"");
-      setProperty (ucon64.configfile, "zip_extract", "unzip -xojC \"%s\"");
-      setProperty (ucon64.configfile, "rar_extract", "unrar x \"%s\"");
-      setProperty (ucon64.configfile, "ace_extract", "unace e \"%s\"");
+      set_property (ucon64.configfile, "lha_extract", "lha efi \"%s\"");
+      set_property (ucon64.configfile, "lzh_extract", "lha efi \"%s\"");
+      set_property (ucon64.configfile, "zip_extract", "unzip -xojC \"%s\"");
+      set_property (ucon64.configfile, "rar_extract", "unrar x \"%s\"");
+      set_property (ucon64.configfile, "ace_extract", "unace e \"%s\"");
 #endif
 
       sync ();

@@ -62,16 +62,30 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define ucon64_VERSION "1.9.7"
 
-#ifdef __UNIX__
-	#define ucon64_TITLE "uCON64 1.9.7 Unix 1999-2001 by (various)"
-#elif __DOS__
-	#define ucon64_TITLE "uCON64 1.9.7 DOS 1999-2001 by (various)"
-#elif __BEOS__
-	#define ucon64_TITLE "uCON64 1.9.7 BeOS 1999-2001 by (various)"
-#elif __SOLARIS__
-	#define ucon64_TITLE "uCON64 1.9.7 Solaris 1999-2001 by (various)"
+#ifdef CD
+  #ifdef __UNIX__
+	#define ucon64_TITLE "uCONCD 1.9.7 Unix 1999-2001 by (various)"
+  #elif __DOS__
+	#define ucon64_TITLE "uCONCD 1.9.7 DOS 1999-2001 by (various)"
+  #elif __BEOS__
+	#define ucon64_TITLE "uCONCD 1.9.7 BeOS 1999-2001 by (various)"
+  #elif __SOLARIS__
+	#define ucon64_TITLE "uCONCD 1.9.7 Solaris 1999-2001 by (various)"
+  #else
+	#define ucon64_TITLE "uCONCD 1.9.7 1999-2001 by (various)"
+  #endif
 #else
+  #ifdef __UNIX__
+	#define ucon64_TITLE "uCON64 1.9.7 Unix 1999-2001 by (various)"
+  #elif __DOS__
+	#define ucon64_TITLE "uCON64 1.9.7 DOS 1999-2001 by (various)"
+  #elif __BEOS__
+	#define ucon64_TITLE "uCON64 1.9.7 BeOS 1999-2001 by (various)"
+  #elif __SOLARIS__
+	#define ucon64_TITLE "uCON64 1.9.7 Solaris 1999-2001 by (various)"
+  #else
 	#define ucon64_TITLE "uCON64 1.9.7 1999-2001 by (various)"
+  #endif
 #endif
 
 #define MBIT	131072

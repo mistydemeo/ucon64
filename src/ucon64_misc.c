@@ -845,7 +845,13 @@ ucon64_file_handler (char *dest, char *src, int flags)
   Otherwise it returns 0;
 */
 {
-  struct stat src_info, dest_info;
+  struct stat dest_info;
+#ifndef _WIN32
+  struct stat src_info;
+#else
+  HANDLE src_handle, dest_handle;
+  BY_HANDLE_FILE_INFORMATION src_info, dest_info2;
+#endif
 
   ucon64_output_fname (dest, flags);            // call this function unconditionally
 
@@ -864,10 +870,24 @@ ucon64_file_handler (char *dest, char *src, int flags)
           return 1;
         }
 
+#ifndef _WIN32
       // Check if src and dest are the same file based on the inode and device info,
       //  not the filenames
       stat (src, &src_info);
       if (src_info.st_dev == dest_info.st_dev && src_info.st_ino == dest_info.st_ino)
+#else
+      src_handle = CreateFile (src, GENERIC_READ, FILE_SHARE_READ, NULL,
+                               OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+      dest_handle = CreateFile (dest, GENERIC_READ, FILE_SHARE_READ, NULL,
+                                OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+      GetFileInformationByHandle (src_handle, &src_info);
+      GetFileInformationByHandle (dest_handle, &dest_info2);
+      CloseHandle (src_handle);
+      CloseHandle (dest_handle);
+      if (src_info.dwVolumeSerialNumber == dest_info2.dwVolumeSerialNumber &&
+          (src_info.nFileIndexHigh << 16 | src_info.nFileIndexLow) ==
+          (dest_info2.nFileIndexHigh << 16 | dest_info2.nFileIndexLow))
+#endif
         {                                       // case 1
           if (ucon64.backup)
             {                                   // case 1a
@@ -1000,7 +1020,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 #else
   HANDLE hfile1, hfile2;
   BY_HANDLE_FILE_INFORMATION finfo1, finfo2;
-  
+
   hfile1 = CreateFile (filename1, GENERIC_READ, FILE_SHARE_READ, NULL,
                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   hfile2 = CreateFile (filename2, GENERIC_READ, FILE_SHARE_READ, NULL,

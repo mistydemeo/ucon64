@@ -79,73 +79,56 @@ const st_usage_t mccl_usage[] = {
 
 #ifdef USE_PARALLEL
 
-#if 0
-#define lptbase 0x378
-#endif
-static int lptbase;
-
-#define DATA ((unsigned short) (lptbase + 0))
-#define STATUS ((unsigned short) (lptbase + 1))
-#define CONTROL ((unsigned short) (lptbase + 2))
-
-unsigned char buffer[0x1760];
+#define DATA ((unsigned short) (parport + PARPORT_DATA))
+#define STATUS ((unsigned short) (parport + PARPORT_STATUS))
+#define CONTROL ((unsigned short) (parport + PARPORT_CONTROL))
 
 
 int
 mccl_read (const char *filename, unsigned int parport)
 {
+  unsigned char buffer[0x1760];
   char dest_name[FILENAME_MAX];
   int inbyte, count = 0;
-  lptbase = parport;
+  time_t starttime;
 
   misc_parport_print_info ();
-  fprintf (stderr, "Resetting device.\n");
-  fflush (stderr);
+  puts ("Resetting device");
   do
     {
       outportb (CONTROL, 0x24);
       while ((inportb (STATUS) & 0x20) == 0)
-        {
-        }
-      inbyte = inportw (DATA) & 0xF;
-      printf ("%x\n", inbyte);
+        ;
     }
-  while (inbyte != 4);
+  while ((inportw (DATA) & 0xf) != 4);
   outportb (CONTROL, 0x22);
   while ((inportb (STATUS) & 0x20) != 0)
-    {
-    }
+    ;
   outportb (CONTROL, 0x26);
-  fprintf (stderr, "Receiving data:\n");
-  fflush (stderr);
+
+  printf ("Receive: %d Bytes (%.4f Mb)\n\n", 0x1760, (float) 0x1760 / MBIT);
+  starttime = time (NULL);
   do
     {
       outportb (CONTROL, 0x26);
       while ((inportb (STATUS) & 0x20) == 0)
-        {
-        }
-      inbyte = inportw (DATA) & 0xF;
+        ;
+      inbyte = inportw (DATA) & 0xf;
       outportb (CONTROL, 0x22);
       while ((inportb (STATUS) & 0x20) != 0)
-        {
-        }
+        ;
       outportb (CONTROL, 0x26);
       while ((inportb (STATUS) & 0x20) == 0)
-        {
-        }
-      inbyte |= (inportw (DATA) & 0xF) << 4;
-      printf ("%2x  ", inbyte);
+        ;
+      inbyte |= (inportw (DATA) & 0xf) << 4;
       outportb (CONTROL, 0x22);
       while ((inportb (STATUS) & 0x20) != 0)
-        {
-        }
+        ;
       buffer[count++] = inbyte;
+      if ((count & 0x1f) == 0)
+        ucon64_gauge (starttime, count, 0x1760);
     }
-#if 0
-  while (count < 40);
-#else
-  while (1);
-#endif
+  while (count < 0x1760);
 
   strcpy (dest_name, filename);
   ucon64_file_handler (dest_name, NULL, 0);

@@ -295,33 +295,10 @@ psx_sendbyte (int base, int conport, int delay, unsigned char byte, int wait)
     }
 
   /* wait for controller ack */
-  for (i = 0; wait && i < 10240 && psx_ack (base, conport); i++);
+  for (i = 0; wait && i < 10240 && psx_ack (base, conport); i++)
+    ;
 
   return data;
-}
-
-
-int
-psx_obtain_io_permission (int base)
-{
-  static int already = 0;
-  if (already == 1)
-    {
-      return 1;
-    }
-  // return 1 if successful, otherwise, 0
-#if 0                                           // uCON64 already enabled access to I/O ports
-#ifdef  _PSXPB_UNIX_
-  if (ioperm (base, 3, 1))
-    {
-      return 0;
-    }
-#endif
-#else
-  (void) base;                                  // warning remover
-#endif
-  already = 1;
-  return 1;
 }
 
 
@@ -333,7 +310,7 @@ psx_obtain_io_permission (int base)
 void
 psx_sendinit (int base, int conport, int delay)
 {
-  psx_obtain_io_permission (base);
+//  psx_obtain_io_permission (base);// uCON64 already enabled access to I/O ports
   psx_att (base, conport, 1);   /* set att on for conport */
   psx_clk (base, conport, 1);   /* clock high */
   psx_cmd (base, conport, 1);   /* set command on for conport */

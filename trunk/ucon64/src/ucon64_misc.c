@@ -846,12 +846,6 @@ ucon64_file_handler (char *dest, char *src, int flags)
 */
 {
   struct stat dest_info;
-#ifndef _WIN32
-  struct stat src_info;
-#else
-  HANDLE src_handle, dest_handle;
-  BY_HANDLE_FILE_INFORMATION src_info, dest_info2;
-#endif
 
   ucon64_output_fname (dest, flags);            // call this function unconditionally
 
@@ -870,24 +864,7 @@ ucon64_file_handler (char *dest, char *src, int flags)
           return 1;
         }
 
-#ifndef _WIN32
-      // Check if src and dest are the same file based on the inode and device info,
-      //  not the filenames
-      stat (src, &src_info);
-      if (src_info.st_dev == dest_info.st_dev && src_info.st_ino == dest_info.st_ino)
-#else
-      src_handle = CreateFile (src, GENERIC_READ, FILE_SHARE_READ, NULL,
-                               OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-      dest_handle = CreateFile (dest, GENERIC_READ, FILE_SHARE_READ, NULL,
-                                OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-      GetFileInformationByHandle (src_handle, &src_info);
-      GetFileInformationByHandle (dest_handle, &dest_info2);
-      CloseHandle (src_handle);
-      CloseHandle (dest_handle);
-      if (src_info.dwVolumeSerialNumber == dest_info2.dwVolumeSerialNumber &&
-          (src_info.nFileIndexHigh << 16 | src_info.nFileIndexLow) ==
-          (dest_info2.nFileIndexHigh << 16 | dest_info2.nFileIndexLow))
-#endif
+      if (one_file (src, dest))
         {                                       // case 1
           if (ucon64.backup)
             {                                   // case 1a
@@ -1006,36 +983,9 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
   unsigned char buf1[MAXBUFSIZE], buf2[MAXBUFSIZE];
 #endif
   FILE *file1, *file2;
-#ifndef _WIN32
-  struct stat finfo1, finfo2;
 
-  if (access (filename1, R_OK) != 0 || access (filename2, R_OK) != 0)
-    return -1;
-
-  // Not the name, but the combination inode & device identify a file
-  stat (filename1, &finfo1);
-  stat (filename2, &finfo2);
-  if (finfo1.st_dev == finfo2.st_dev && finfo1.st_ino == finfo2.st_ino)
-    return -2;                                  // one file
-#else
-  HANDLE hfile1, hfile2;
-  BY_HANDLE_FILE_INFORMATION finfo1, finfo2;
-
-  hfile1 = CreateFile (filename1, GENERIC_READ, FILE_SHARE_READ, NULL,
-                       OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-  hfile2 = CreateFile (filename2, GENERIC_READ, FILE_SHARE_READ, NULL,
-                       OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-  if (hfile1 == INVALID_HANDLE_VALUE || hfile2 == INVALID_HANDLE_VALUE)
-    return -1;
-  GetFileInformationByHandle (hfile1, &finfo1);
-  GetFileInformationByHandle (hfile2, &finfo2);
-  CloseHandle (hfile1);
-  CloseHandle (hfile2);
-  if (finfo1.dwVolumeSerialNumber == finfo2.dwVolumeSerialNumber &&
-      (finfo1.nFileIndexHigh << 16 | finfo1.nFileIndexLow) ==
-      (finfo2.nFileIndexHigh << 16 | finfo2.nFileIndexLow))
-    return -2;                                  // one file
-#endif
+  if (one_file (filename1, filename2))
+    return -2;
 
   fsize1 = q_fsize (filename1);                 // q_fsize() returns size in bytes
   fsize2 = q_fsize (filename2);

@@ -89,13 +89,12 @@ int
 ips_apply (const char *mod, const char *ipsname)
 {
   unsigned char byte, byte2, byte3;
-  char modname[FILENAME_MAX], srcname[FILENAME_MAX], magic[6];
+  char modname[FILENAME_MAX], magic[6];
   unsigned int offset, length, i;
 
-  strcpy (srcname, mod);
   strcpy (modname, mod);
-  ucon64_file_handler (modname, srcname, 0);
-  q_fcpy (srcname, 0, q_fsize (srcname), modname, "wb");
+  ucon64_file_handler (modname, NULL, 0);
+  q_fcpy (mod, 0, q_fsize (mod), modname, "wb"); // no copy if one file
 
   if ((modfile = fopen (modname, "rb+")) == NULL)
     {
@@ -171,7 +170,6 @@ ips_apply (const char *mod, const char *ipsname)
 
   printf ("Patching complete\n\n");
   printf (ucon64_msg[WROTE], modname);
-  remove_temp_file ();
   printf ("\n"
           "NOTE: Sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
           "      This means you must modify for example a SNES ROM with -swc or -stp or\n"
@@ -179,6 +177,7 @@ ips_apply (const char *mod, const char *ipsname)
 
   unregister_func (remove_destfile);            // unregister _after_ possible padding
   fclose (ipsfile);
+
   return 0;
 }
 

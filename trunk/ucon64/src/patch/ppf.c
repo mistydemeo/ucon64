@@ -145,14 +145,13 @@ ppf_apply (const char *mod, const char *ppfname)
 {
   FILE *modfile, *ppffile;
   char desc[50 + 1], diz[MAX_ID_SIZE + 1], buffer[1024], ppfblock[1024],
-       modname[FILENAME_MAX], srcname[FILENAME_MAX];
+       modname[FILENAME_MAX];
   int x, method, dizlen = 0, modlen, ppfsize, bytes_to_skip = 0, n_changes;
   unsigned int pos;
 
-  strcpy (srcname, mod);
   strcpy (modname, mod);
-  ucon64_file_handler (modname, srcname, 0);
-  q_fcpy (srcname, 0, q_fsize (srcname), modname, "wb");
+  ucon64_file_handler (modname, NULL, 0);
+  q_fcpy (mod, 0, q_fsize (mod), modname, "wb"); // no copy if one file
 
   if ((modfile = fopen (modname, "rb+")) == NULL)
     {
@@ -278,7 +277,6 @@ ppf_apply (const char *mod, const char *ppfname)
   fclose (modfile);
 
   printf (ucon64_msg[WROTE], modname);
-  remove_temp_file ();
   return 0;
 }
 
@@ -435,18 +433,16 @@ ppf_create (const char *orgname, const char *modname)
 int
 ppf_set_desc (const char *ppf, const char *description)
 {
-  char desc[50], ppfname[FILENAME_MAX], srcname[FILENAME_MAX];
+  char desc[50], ppfname[FILENAME_MAX];
 
-  strcpy (srcname, ppf);
   strcpy (ppfname, ppf);
   memset (desc, ' ', 50);
   strncpy (desc, description, strlen (description));
-  ucon64_file_handler (ppfname, srcname, 0);
-  q_fcpy (srcname, 0, q_fsize (srcname), ppfname, "wb");
+  ucon64_file_handler (ppfname, NULL, 0);
+  q_fcpy (ppf, 0, q_fsize (ppf), ppfname, "wb"); // no copy if one file
   q_fwrite (desc, 6, 50, ppfname, "r+b");
 
   printf (ucon64_msg[WROTE], ppfname);
-  remove_temp_file ();
   return 0;
 }
 
@@ -455,13 +451,12 @@ int
 ppf_set_fid (const char *ppf, const char *fidname)
 {
   int fidsize, ppfsize, pos;
-  char ppfname[FILENAME_MAX], srcname[FILENAME_MAX],
+  char ppfname[FILENAME_MAX],
        fidbuf[MAX_ID_SIZE + 34 + 1] = "@BEGIN_FILE_ID.DIZ"; // +1 for string terminator
 
-  strcpy (srcname, ppf);
   strcpy (ppfname, ppf);
-  ucon64_file_handler (ppfname, srcname, 0);
-  q_fcpy (srcname, 0, q_fsize (srcname), ppfname, "wb");
+  ucon64_file_handler (ppfname, NULL, 0);
+  q_fcpy (ppf, 0, q_fsize (ppf), ppfname, "wb"); // no copy if one file
 
   printf ("Adding file_id.diz (%s)...\n", fidname);
   fidsize = q_fread (fidbuf + 18, 0, MAX_ID_SIZE, fidname);
@@ -481,6 +476,5 @@ ppf_set_fid (const char *ppf, const char *fidname)
   q_fwrite (&fidsize, pos, 4, ppfname, "r+b");
 
   printf (ucon64_msg[WROTE], ppfname);
-  remove_temp_file ();
   return 0;
 }

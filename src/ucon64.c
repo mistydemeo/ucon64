@@ -202,7 +202,6 @@ const struct option long_options[] = {
     {"p", 0, 0, UCON64_P},
     {"pad", 0, 0, UCON64_PAD},
     {"padhd", 0, 0, UCON64_PADHD},
-    {"pas", 0, 0, UCON64_PAS},
     {"pasofami", 0, 0, UCON64_PASOFAMI},
     {"pce", 0, 0, UCON64_PCE},
     {"port", 1, 0, UCON64_PORT},
@@ -294,8 +293,6 @@ const struct option long_options[] = {
 void
 ucon64_exit (void)
 {
-  if (ucon64.frontend == 1)
-    printf ("+++EOF");
 #if 0
   if (ucon64.dp)
     closedir2 (ucon64.dp);
@@ -569,7 +566,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 #endif
 
       // Calculating the CRC for the ROM data of a UNIF file (NES) shouldn't
-      // be done with file_crc32(). nes_init() uses calculate_buffer_crc().
+      // be done with file_crc32(). nes_init() uses mem_crc32().
       if (rominfo->current_crc32 == 0)
         rominfo->current_crc32 = file_crc32 (romfile, rominfo->buheader_len);
 

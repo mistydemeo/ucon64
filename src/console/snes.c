@@ -51,7 +51,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                                                 //  interleaved LoROM "format"
 
 static int snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer);
-static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_size);
+static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer,
+                              int rom_size);
 static unsigned short int get_internal_sums (st_rominfo_t *rominfo);
 //static int snes_special_bs (void);
 static int snes_bs_name(void);
@@ -282,7 +283,7 @@ snes_dint (st_rominfo_t *rominfo)
     }
 
   force_interleaved = 1;                        // force snes_deinterleave() to do its work
-  snes_deinterleave (rominfo, buffer, size);
+  snes_deinterleave (rominfo, &buffer, size);
 
   if (rominfo->buheader_len)
     fwrite (&header, 1, SWC_HEADER_LEN, destfile);
@@ -474,7 +475,7 @@ write_deinterleaved_data (st_rominfo_t *rominfo, const char *dest_name, int size
     }
   q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
   force_interleaved = 1;
-  snes_deinterleave (rominfo, buffer, size);
+  snes_deinterleave (rominfo, &buffer, size);
   q_fwrite (buffer, SWC_HEADER_LEN, size, dest_name, "ab");
   free (buffer);
 }
@@ -1887,7 +1888,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   copier, but by incorrect ROM tools...
 */
 {
-  int interleaved = 0, check_map_type = 1;
+  int interleaved = 0, check_map_type = 1, org_snes_header_base;
   unsigned int crc1 = crc32 (0, rom_buffer, 512),
                crc2 = crc32 (0, rom_buffer + size / 2, 512);
 
@@ -1916,7 +1917,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     }
   else
     {
-      int org_snes_header_base = snes_header_base;
+      org_snes_header_base = snes_header_base;
 #ifdef  DETECT_SMC_COM_FUCKED_UP_LOROM
       snes_header_base = size / 2;
       if (check_banktype (rom_buffer, snes_header_base) > banktype_score)
@@ -1947,6 +1948,16 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     }
   if (check_map_type && !snes_hirom)
     {
+      // first check if it's an interleaved Extended HiROM dump
+      if (size >= (int) (SNES_HEADER_START + SNES_EROM + SNES_HEADER_LEN))
+        {
+          org_snes_header_base = snes_header_base;
+          snes_header_base = size - SNES_EROM;
+          if (check_banktype (rom_buffer, snes_header_base) >= banktype_score)
+            snes_header_base = SNES_EROM;
+          else
+            snes_header_base = org_snes_header_base;
+        }
       if (snes_header.map_type == 0x21 || snes_header.map_type == 0x31 ||
           snes_header.map_type == 0x35 || snes_header.map_type == 0x3a ||
           snes_header.bs_map_type == 0x21 || snes_header.bs_map_type == 0x31)
@@ -1958,13 +1969,10 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
 
 
 int
-snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_size)
+snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
 {
-  unsigned char blocks[256], tmp[0x8000], b;
+  unsigned char blocks[256], *rom_buffer2, tmp[0x8000];
   int nblocks, i, j, org_hirom;
-#if 0
-  int score_hi, score_lo;
-#endif
 
   org_hirom = snes_hirom;
   nblocks = rom_size >> 16;                     // # 64 kB blocks
@@ -1984,14 +1992,16 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_siz
           snes_hirom = SNES_HIROM;
           snes_hirom_ok = 1;
         }
+      // TODO: replace the following code with code that fills the array
+      //       `blocks' with correct values
       if ((snes_hirom || snes_hirom_ok == 2) && type == GD3 && rom_size == 24 * MBIT)
         { // Fix-up the weird 24 Mbit Game Doctor HiROM format
           unsigned char *p1, *p2, *p3;
 
-          p1 = &rom_buffer[0x180000];
-          p2 = &rom_buffer[0x200000];
-          p3 = &rom_buffer[0x280000];
-          for (; p1 < &rom_buffer[0x200000]; p1 += 0x8000, p2 += 0x8000, p3 += 0x8000)
+          p1 = &(*rom_buffer)[0x180000];
+          p2 = &(*rom_buffer)[0x200000];
+          p3 = &(*rom_buffer)[0x280000];
+          for (; p1 < &(*rom_buffer)[0x200000]; p1 += 0x8000, p2 += 0x8000, p3 += 0x8000)
             {
               memmove (tmp, p1, 0x8000);
               memmove (p1, p2, 0x8000);
@@ -1999,48 +2009,40 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_siz
               memmove (p3, tmp, 0x8000);
             }
         }
-      for (i = 0; i < nblocks; i++)
-        {
-          blocks[i * 2] = i + nblocks;
-          blocks[i * 2 + 1] = i;
-        }
-    }
 
-  // TODO: change this code into something decent
-  for (i = 0; i < nblocks * 2; i++)
-    {
-      for (j = i; j < nblocks * 2; j++)
+      if (snes_header_base == SNES_EROM)
         {
-          if (blocks[j] == i)
+          j = (32 * MBIT) >> 16;
+          for (i = 0; i < j; i++)
             {
-              memmove (tmp, &rom_buffer[blocks[j] * 0x8000], 0x8000);
-              memmove (&rom_buffer[blocks[j] * 0x8000],
-                       &rom_buffer[blocks[i] * 0x8000], 0x8000);
-              memmove (&rom_buffer[blocks[i] * 0x8000], tmp, 0x8000);
-              b = blocks[j];
-              blocks[j] = blocks[i];
-              blocks[i] = b;
-              break;
+              blocks[i * 2] = i + j + ((16 * MBIT) >> 15);
+              blocks[i * 2 + 1] = i + ((16 * MBIT) >> 15);
+            }
+          j = (rom_size - (32 * MBIT)) >> 16;
+          for (; i < j + ((32 * MBIT) >> 16); i++)
+            {
+              blocks[i * 2] = i - ((32 * MBIT) >> 16) + j;
+              blocks[i * 2 + 1] = i - ((32 * MBIT) >> 16);
             }
         }
+      else
+        for (i = 0; i < nblocks; i++)
+          {
+            blocks[i * 2] = i + nblocks;
+            blocks[i * 2 + 1] = i;
+          }
     }
 
-#if 0
-  // TODO: remove this code? It's only necessary if snes_testinterleaved() fails
-  score_hi = check_banktype (rom_buffer, snes_header_base + SNES_HIROM);
-  score_lo = check_banktype (rom_buffer, snes_header_base);
-
-  if (!force_interleaved &&
-       ((snes_hirom && (score_lo >= score_hi)) ||
-        (!snes_hirom && (score_hi > score_lo))))
-    {                                           // ROM seems to be non-interleaved after all
-      q_fread (rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
-      rominfo->interleaved = 0;
-      snes_hirom = org_hirom;
-      return -1;
+  if (!(rom_buffer2 = (unsigned char *) malloc (rom_size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
+      exit (1);
     }
-#endif
+  for (i = 0; i < nblocks * 2; i++)
+    memcpy (rom_buffer2 + i * 0x8000, (*rom_buffer) + blocks[i] * 0x8000, 0x8000);
 
+  free (*rom_buffer);
+  *rom_buffer = rom_buffer2;
   return 0;
 }
 
@@ -2510,7 +2512,7 @@ snes_init (st_rominfo_t *rominfo)
     {
       if (calc_checksums)
         ucon64.fcrc32 = crc32 (0, rom_buffer, size);
-      snes_deinterleave (rominfo, rom_buffer, size);
+      snes_deinterleave (rominfo, &rom_buffer, size);
       snes_set_hirom (rom_buffer, size);
       rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
       memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
@@ -2951,27 +2953,6 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
 //              internal_rom_size, half_internal_rom_size, remainder);
     }
 
-#if 0 // We *want* rom_buffer to contain deinterleaved data
-  /*
-    Load rom_buffer with the ROM again if uCON64 detected it as interleaved or
-    if uCON64 was forced to handle it as being interleaved, so that rom_buffer
-    matches with the ROM dump on disk. rom_buffer was "deinterleaved" (=changed)
-    in order to calculate the checksum. However, it isn't necessary to load
-    rom_buffer again in the case that uCON64 wasn't forced to handle the ROM as
-    interleaved and snes_deinterleave() detected that the ROM wasn't interleaved
-    after all. In that case snes_deinterleave() already reloaded rom_buffer. Of
-    course, it also isn't necessary to reload rom_buffer if ROM is a normal ROM.
-    In short:
-      force_interleaved?  interleaved?    reload?
-      yes                 yes             yes
-      yes                 no              yes
-      no                  yes             yes
-      no                  no              no
-  */
-  if (force_interleaved || rominfo->interleaved)
-    q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
-#endif
-
   return sum1;
 }
 #else
@@ -3038,11 +3019,6 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
       for (i = i_start; i < internal_rom_size; i++)
         sum += (*rom_buffer)[i];
     }
-
-#if 0
-  if (force_interleaved || rominfo->interleaved)
-    q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
-#endif
 
   return sum;
 }

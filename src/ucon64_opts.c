@@ -1626,7 +1626,7 @@ ucon64_options (int c, const char *optarg)
         md_read_rom (ucon64.rom, ucon64.parport);
       else                                      // file exists -> send it to the copier
         {
-          // TODO: I (dbjh) don't know yet what format the MD-PRO uses
+#if 0
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
                     "ERROR: This ROM has no header. Convert to an MD compatible format.\n");
@@ -1635,6 +1635,7 @@ ucon64_options (int c, const char *optarg)
                     "ERROR: This ROM doesn't seem to be interleaved but the MD only supports\n"
                     "       interleaved ROMs. Convert to an MD compatible format.\n");
           else
+#endif
             md_write_rom (ucon64.rom, ucon64.parport);
         }
       fputc ('\n', stdout);

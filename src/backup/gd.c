@@ -58,13 +58,14 @@ const st_usage_t gd_usage[] =
     {"xgd6s", NULL, "send SRAM to Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT"},
 #else
     {"xgd6s", NULL, "send/receive SRAM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when ROM does not exist"},
+                    "receives automatically when SRAM does not exist"},
 #endif
 #endif // PARALLEL
     {NULL, NULL, NULL}
   };
 
 #ifdef PARALLEL
+
 #define BUFFERSIZE 8192
 #define GD_OK 0
 #define GD_ERROR 1
@@ -77,6 +78,7 @@ const st_usage_t gd_usage[] =
  // somebody please explain why this isn't proof that VC++ 6 is broken
 #define inline __inline
 #endif
+
 
 static void init_io (unsigned int port);
 static void deinit_io (void);

@@ -1,3 +1,4 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
 /*
 config.h - config file for uCON64
 
@@ -20,8 +21,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef CONFIG_H
 #define CONFIG_H
 //#define TODO
-#define DEBUG
+@DEFINE_DEBUG@
 #define MAXBUFSIZE 32768
+
+/* enables/disables the use of color in the display output */
+@DEFINE_ANSI_COLOR@
 
 /*
 sample/sample.[ch] are for consoles which have no specific support, yet
@@ -29,14 +33,6 @@ sample/sample.[ch] are for consoles which have no specific support, yet
 it is a good start to add support for a new console
 */
 //#define SAMPLE
-
-/*
-  enables/disables support for zip files
-
-  comment this if there is no zlib for your platform
-  NOTE: not implemented yet and has therefore no effect
-*/
-//#define UNZIP
 
 
 /*
@@ -73,9 +69,6 @@ it is a good start to add support for a new console
 #define BACKUP_CD
 
 #endif // __MSDOS__
-
-#endif // CONFIG_H
-/* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define to empty if the keyword does not work.  */
 #undef const
@@ -136,3 +129,4 @@ it is a good start to add support for a new console
 
 /* Define if you have the ibs library (-libs).  */
 #undef HAVE_LIBIBS
+#endif // CONFIG_H

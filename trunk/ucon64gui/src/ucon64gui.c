@@ -524,6 +524,13 @@ ucon64gui_root (void)
 
   h2g_ ("Console specific options");
   h2g_br ();
+
+
+  html2gui_parser ("<input type=\"submit\" name=\"abl\">"
+  "kjhsdgkhdfgkjhsdfgkjh"
+  "<input type=\"submit\" name=\"l2\">"
+  );
+
 #if 0
   h2g_input_submit ("NES", OPTION_LONG_S "nes",
                     "(" OPTION_LONG_S "nes) options for Nintendo Entertainment System/NES\n1983 Nintendo http://www.nintendo.com");

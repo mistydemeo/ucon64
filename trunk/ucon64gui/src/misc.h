@@ -34,7 +34,7 @@ extern "C" {
 #include <limits.h>
 #include <time.h>                               // gauge() prototype contains time_t
 #include <dirent.h>
-#include "config.h"                             // ZLIB, ANSI_COLOR, NETWORK support
+#include "config.h"                             // ZLIB, ANSI_COLOR support
 
 #ifdef  ZLIB
 #include <zlib.h>
@@ -196,7 +196,7 @@ extern char *setext (char *filename, const char *ext);
 extern const char *getext (const char *filename);
 #define EXTCMP(filename, ext) (strcasecmp (getext (filename), ext))
 extern char *basename2 (const char *str);
-//extern char *abs_dirname (const char *str);
+
 
 /*
   mem functions
@@ -220,7 +220,7 @@ extern void *mem_swap (void *add, size_t n);
 #define bswap_16(x) ((unsigned short int)mem_swap(x,2,2))
 #define bswap_32(x) ((unsigned int)mem_swap(x,4,4))
 #define bswap_64(x) ((unsigned long long int)mem_swap(x,8,8))
-//#else
+#else
 extern unsigned short int bswap_16 (unsigned short int x);
 extern unsigned int bswap_32 (unsigned int x);
 extern unsigned long long int bswap_64 (unsigned long long int x);
@@ -253,6 +253,7 @@ extern unsigned long long int bswap_64 (unsigned long long int x);
   unregister_func() unregisters a previously registered function
                   returns -1 if it fails, 0 if it was successful
   handle_registered_funcs() calls all the registered functions
+  wait            wait (sleep) a specified number of milliseconds
 */
 extern void change_string (char *searchstr, int strsize, char wc, char esc,
                            char *end, int endsize, char *buf, int bufsize,
@@ -273,14 +274,10 @@ extern int renlwr (const char *dir);
 #if     defined __unix__ && !defined __MSDOS__
 extern int drop_privileges (void);
 #endif
-typedef struct st_func_node
-{
-  void (*func) (void);
-  struct st_func_node *next;
-} st_func_node_t;
 extern int register_func (void (*func) (void));
 extern int unregister_func (void (*func) (void));
 extern void handle_registered_funcs (void);
+extern void wait (int nmillis);
 
 
 /*

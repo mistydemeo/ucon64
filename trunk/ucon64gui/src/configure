@@ -824,6 +824,12 @@ if test -n "$ac_init_help"; then
 
   cat <<\_ACEOF
 
+Optional Features:
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-debug          enable support for debugging output (default is NO)
+  --enable-ansi-color     enable usage of color (default is YES)
+
 Some influential environment variables:
   CC          C compiler command
   CFLAGS      C compiler flags
@@ -1163,9 +1169,6 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-
-
 
 
 
@@ -2511,13 +2514,39 @@ rm conftest.sed
 CFLAGS="-I. -I./html2gui/ -Wall -O3 \`gtk-config --cflags\`"
 LDFLAGS="-s \`gtk-config --cflags --libs\`"
 
-
-if test "x$prefix" = "xNONE"; then
-  prefix="/usr/local"
+echo "$as_me:$LINENO: checking whether debugging output is enabled" >&5
+echo $ECHO_N "checking whether debugging output is enabled... $ECHO_C" >&6
+# Check whether --enable-debug or --disable-debug was given.
+if test "${enable_debug+set}" = set; then
+  enableval="$enable_debug"
+  enable_debug=$enableval
 else
-  prefix=$prefix
+  enable_debug=no
+fi;
+if test x$enable_debug = xyes; then
+  DEFINE_DEBUG="#define DEBUG"
+else
+  DEFINE_DEBUG="//#define DEBUG"
 fi
+echo "$as_me:$LINENO: result: $enable_debug" >&5
+echo "${ECHO_T}$enable_debug" >&6
 
+echo "$as_me:$LINENO: checking whether the use of color is enabled" >&5
+echo $ECHO_N "checking whether the use of color is enabled... $ECHO_C" >&6
+# Check whether --enable-ansi_color or --disable-ansi_color was given.
+if test "${enable_ansi_color+set}" = set; then
+  enableval="$enable_ansi_color"
+  enable_ansi_color=$enableval
+else
+  enable_ansi_color=yes
+fi;
+if test x$enable_ansi_color = xyes; then
+  DEFINE_ANSI_COLOR="#define ANSI_COLOR"
+else
+  DEFINE_ANSI_COLOR="//#define ANSI_COLOR"
+fi
+echo "$as_me:$LINENO: result: $enable_ansi_color" >&5
+echo "${ECHO_T}$enable_ansi_color" >&6
 
 
 echo "$as_me:$LINENO: checking for main in -libs" >&5
@@ -3552,6 +3581,8 @@ fi
 done
 
 
+
+
 ac_config_files="$ac_config_files Makefile config.h"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -4143,6 +4174,8 @@ s,@INSTALL_PROGRAM@,$INSTALL_PROGRAM,;t t
 s,@INSTALL_SCRIPT@,$INSTALL_SCRIPT,;t t
 s,@INSTALL_DATA@,$INSTALL_DATA,;t t
 s,@CPP@,$CPP,;t t
+s,@DEFINE_DEBUG@,$DEFINE_DEBUG,;t t
+s,@DEFINE_ANSI_COLOR@,$DEFINE_ANSI_COLOR,;t t
 CEOF
 
 _ACEOF

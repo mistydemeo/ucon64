@@ -40,6 +40,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/poll.h>                           //  is available on Linux, not on
 #endif                                          //  BeOS. DOS already has kbhit()
 
+#ifdef  __MSDOS__
+#include <dos.h>                                // delay(), milliseconds
+#elif   defined __unix__
+#include <unistd.h>                             // usleep(), microseconds
+#elif   defined __BEOS__
+#include <OS.h>                                 // snooze(), microseconds
+#endif
+
 #if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
 #include <termios.h>
 
@@ -58,14 +66,14 @@ typedef struct termios tty_t;
 #include <dpmi.h>                               // needed for __dpmi_int() by ansi_init()
 #endif
 
-#ifdef  NETWORK
-#include <netinet/in.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#endif
-
 extern int errno;
+
+typedef struct st_func_node
+{
+  void (*func) (void);
+  struct st_func_node *next;
+} st_func_node_t;
+
 static st_func_node_t func_list = { NULL, NULL };
 static int func_list_locked = 0;
 static int misc_ansi_color = 0;
@@ -411,53 +419,6 @@ memwcmp (const void *add, const void *add_with_wildcards, size_t n, int wildcard
 
 
 #if 0
-unsigned short int
-bswap_16 (unsigned short int x)
-{
-  unsigned char *ptr = (unsigned char *) &x, tmp;
-  tmp = ptr[0];
-  ptr[0] = ptr[1];
-  ptr[1] = tmp;
-  return x;
-}
-
-
-unsigned int
-bswap_32 (unsigned int x)
-{
-  unsigned char *ptr = (unsigned char *) &x, tmp;
-  tmp = ptr[0];
-  ptr[0] = ptr[3];
-  ptr[3] = tmp;
-  tmp = ptr[1];
-  ptr[1] = ptr[2];
-  ptr[2] = tmp;
-  return x;
-}
-
-
-unsigned long long int
-bswap_64 (unsigned long long int x)
-{
-  unsigned char *ptr = (unsigned char *) &x, tmp;
-  tmp = ptr[0];
-  ptr[0] = ptr[7];
-  ptr[7] = tmp;
-  tmp = ptr[1];
-  ptr[1] = ptr[6];
-  ptr[6] = tmp;
-  tmp = ptr[2];
-  ptr[2] = ptr[5];
-  ptr[5] = tmp;
-  tmp = ptr[3];
-  ptr[3] = ptr[4];
-  ptr[4] = tmp;
-  return x;
-}
-#endif
-
-
-#if 0
 void *
 mem_swap (void *add, size_t bit, size_t n)
 {
@@ -507,14 +468,14 @@ mem_hexdump (const void *mem, size_t n, int virtual_start)
       if (!(pos % 16))
         printf ("%s%s%08x  ", pos ? buf : "",
                                pos ? "\n" : "",
-                               pos + virtual_start);
+                               (int) pos + virtual_start);
       printf ("%02x %s", *p, !((pos + 1) % 4) ? " ": "");
 #if 1
       sprintf (buf + (pos % 16), "%c", isprint (*p) ? *p : '.');
 #else
       *(buf + (pos % 16)) = isprint (*p) ? *p : '.';
       *(buf + (pos % 16) + 1) = 0;
-#endif      
+#endif
     }
   printf ("%s\n", buf);
 }
@@ -1009,7 +970,7 @@ tmpnam3 (char *temp, int type)
       case TYPE_DIR:
         mkdir (temp, S_IRUSR|S_IWUSR);
         break;
-      
+
       case TYPE_FILE:
       default: // a file is the default
         if ((fh = fopen (temp, "wb+")) != 0)
@@ -1391,18 +1352,15 @@ unzip_get_number_entries (const char *filename)
 int
 unzip_goto_file (unzFile file, int file_index)
 {
-  if (file_index == 0)
-    return unzGoToFirstFile (file);
-  else
-    {
-      int n = 0, retval = 0;
-      while (n < file_index)
-        {
-          retval = unzGoToNextFile (file);
-          n++;
-        }
-      return retval;
-    }
+  int retval = unzGoToFirstFile (file), n = 0;
+
+  if (file_index > 0)
+    while (n < file_index)
+      {
+        retval = unzGoToNextFile (file);
+        n++;
+      }
+  return retval;
 }
 
 
@@ -1807,4 +1765,17 @@ bswap_64 (unsigned long long int x)
   ptr[3] = ptr[4];
   ptr[4] = tmp;
   return x;
+}
+
+
+void
+wait (int nmillis)
+{
+#ifdef  __MSDOS__
+  delay (nmillis);
+#elif   defined __unix__
+  usleep (nmillis * 1000);
+#elif   defined __BEOS__
+  snooze (nmillis * 1000);
+#endif
 }

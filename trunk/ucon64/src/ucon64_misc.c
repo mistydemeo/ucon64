@@ -1007,6 +1007,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
   char buf[MAXBUFSIZE];
   st_rominfo_t rominfo;
 
+//  ucon64.dat_enabled = 0;
   ucon64.console = console;
   ucon64.rom = filename;
   ucon64_flush (&rominfo);

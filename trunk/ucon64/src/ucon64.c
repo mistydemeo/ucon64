@@ -747,11 +747,11 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   struct stat fstate;
 
   if (access (romfile, F_OK | R_OK) == -1)
-    return result;
+    return -1;
   if (!stat (romfile, &fstate) == -1)
-    return result;
+    return -1;
   if (S_ISREG (fstate.st_mode) != TRUE)
-    return result;
+    return -1;
 
   ucon64_fsize = q_fsize (ucon64.rom);          // save size in ucon64_fsize
   rominfo->file_size = ucon64_fsize;

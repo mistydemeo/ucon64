@@ -1000,17 +1000,17 @@ snes_ufo (st_rominfo_t *rominfo)
   reset_header (&header);
   header.multi = snes_split ? 0x40 : 0; // TODO
   memcpy (header.id, "SUPERUFO", 8);
-  header.isrom = 0x01;
-  header.size = size / MBIT; // Should this byte match the padded ROM size?
+  header.isrom = 1;
+  header.size = size / MBIT;
   header.banktype = snes_hirom ? 0 : 1;
 
   if (snes_sramsize > 32 * 1024)
     header.sram_size = 8;
-  else if (snes_sramsize > 8 * 1024)   // 64Kb < size <= 256Kb
+  else if (snes_sramsize > 8 * 1024)            // 64 kb < size <= 256 kb
     header.sram_size = 3;
-  else if (snes_sramsize > 2 * 1024)   // 16Kb < size <= 64Kb
+  else if (snes_sramsize > 2 * 1024)            // 16 kb < size <= 64 kb
     header.sram_size = 2;
-  else if (snes_sramsize > 0)          // 1 - 16Kb
+  else if (snes_sramsize > 0)                   // 1 - 16 kb
     header.sram_size = 1;
   // header.sram_size is already ok for snes_sramsize == 0
 
@@ -1034,21 +1034,10 @@ snes_ufo (st_rominfo_t *rominfo)
       header.size_low = newsize / 8192;
       header.size_high = newsize / 8192 >> 8;
 
-      // TODO: wait for a newer revision of John's UFO header spec as it
-      //       is way too unclear
-      if (snes_sramsize == 0)
-        {
-          // header.sram_a15 = 0; already ok
-          // header.sram_a20_a21 = 0; already ok
-          header.sram_a22_a23 = 2;
-        }
-      else // cartridge contains SRAM
-        {
-          // header.sram_a15 = 0x00; // already ok
-          header.sram_a20_a21 = 0x0c;  // Try 3 if game gives protection message
-          header.sram_a22_a23 = 0x02;
-          // Tales of Phantasia (J) & Dai Kaiju Monogatari 2 (J): 0 0x0e 0
-        }
+      if (snes_sramsize != 0)
+        header.sram_a20_a21 = 0x0c;             // Try 3 if game gives protection message
+      header.sram_a22_a23 = 2;
+      // Tales of Phantasia (J) & Dai Kaiju Monogatari 2 (J) [14-17]: 0 0x0e 0 0
 
       if (!(srcbuf = (unsigned char *) malloc (size)))
         {
@@ -1083,38 +1072,28 @@ snes_ufo (st_rominfo_t *rominfo)
       free (srcbuf);
       free (dstbuf);
     }
-  else
+  else // LoROM
     {
       header.size_low = size / 8192;
       header.size_high = size / 8192 >> 8;
 
-      // TODO: wait for a newer revision of John's UFO header spec as it
-      //       is way too unclear
       if (snes_sramsize == 0)
         {
           // check if the game uses a DSP chip
           if (snes_header.rom_type == 3 || snes_header.rom_type == 4 ||
               snes_header.rom_type == 5 || snes_header.rom_type == 0xf6)
             {
-              // header.sram_size = 0;     // already OK
-              header.sram_a15 = 0x01;
+              header.sram_a15 = 1;
               header.sram_a20_a21 = 0x0c;
-              // header.sram_a22_a23 = 0;
-              header.sram_type = 0x03;    // type=skip
             }
           else // no SRAM & doesn't use a DSP chip
-            {
-              // header.sram_a15 = 0x00;  // already ok
-              // header.sram_a20_a21 = 0x00;  // already ok
-              header.sram_a22_a23 = 0x02;
-            }
+            header.sram_a22_a23 = 2;
         }
       else // cartridge contains SRAM
         {
-          header.sram_a15 = 2;  // may need to try 1 if game gives protection error
+          header.sram_a15 = 2;                  // Try 1 if game gives protection error
           header.sram_a20_a21 = 0x0f;
-          header.sram_a22_a23 = 0x03;
-          header.sram_type = 3;  // type=skip
+          header.sram_a22_a23 = 3;
         }
 
       q_fwrite (&header, 0, UFO_HEADER_LEN, dest_name, "wb");
@@ -1595,6 +1574,14 @@ knowing when that is necessary.
    a9 00 00 a2 fe 1f df 00 00 70 d0     lda #$0000; ldx #$1ffe; cmp $700000,x; bne ...
 => a9 00 00 a2 fe 1f df 00 00 70 ea ea  lda #$0000; ldx #$1ffe; cmp $700000,x; nop; nop
 
+- Tetris Attack
+(generic)
+   8f XX YY 70 af XX YY 70 c9 XX YY d0
+=> 8f XX YY 70 af XX YY 70 c9 XX YY 80
+(game specific)
+   c2 30 ad fc 1f c9 50 44 d0
+=> c2 30 4c d1 80 c9 50 44 d0
+
 - Uniracers/Unirally
    8f XX YY 77 e2 XX af XX YY 77 c9 XX f0
 => 8f XX YY 77 e2 XX af XX YY 77 c9 XX 80
@@ -1745,6 +1732,7 @@ Same here.
       n += change_mem (buffer, bytesread, "!**!\xaf**!\xc9**\xd0", 12, '*', '!', "\x80", 1, 0,
                        "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\x30\x31\x32\x33", 4);
       n += change_mem (buffer, bytesread, "\xa9\x00\x00\xa2\xfe\x1f\xdf\x00\x00\x70\xd0", 11, '*', '!', "\xea\xea", 2, 0);
+      n += change_mem (buffer, bytesread, "\x8f**\x70\xaf**\x70\xc9**\xd0", 12, '*', '!', "\x80", 1, 0);
       n += change_mem (buffer, bytesread, "!**!!**!\xf0", 9, '*', '!', "\x80", 1, 0,
                        "\xaf\xbf", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
 
@@ -1776,6 +1764,8 @@ Same here.
                                                       "\xea\xa9\x00\x00", 4, -3);
       n += change_mem (buffer, bytesread, "\x10\xf8\x38\xef\xf2\xfd\xc3\xf0", 8, '*', '!',
                                                       "\xea\xa9\x00\x00\x80", 5, -4);
+
+      n += change_mem (buffer, bytesread, "\xc2\x30\xad\xfc\x1f\xc9\x50\x44\xd0", 9, '*', '!', "\x4c\xd1\x80", 3, -6);
 
       fwrite (buffer, 1, bytesread, destfile);
     }
@@ -2584,34 +2574,34 @@ snes_buheader_info (st_rominfo_t *rominfo)
       printf ("[12]     DRAM mapping mode: %s => %s\n",
         y ? "LoROM" : "HiROM", matches_deviates ((snes_hirom ? 0 : 1) == y));
 
-      y = (header[0x14] <= 3 ? sram_sizes[header[0x14]] : 128) * 1024;
-      printf ("[14]     SRAM size: %d kB => %s\n",
+      y = (header[0x13] <= 3 ? sram_sizes[header[0x13]] : 128) * 1024;
+      printf ("[13]     SRAM size: %d kB => %s\n",
         y / 1024, matches_deviates (snes_sramsize == y));
 
-      y = header[0x15];
+      y = header[0x14];
       if (y)
-        printf ("[15]     A15=%s selects SRAM\n", y == 1 ? "x" : y == 2 ? "0" : "1");
+        printf ("[14]     A15=%s selects SRAM\n", y == 1 ? "x" : y == 2 ? "0" : "1");
       else
-        printf ("[15]     A15 not used for SRAM control\n");
+        printf ("[14]     A15 not used for SRAM control\n");
       for (x = 0; x < 4; x++)
         {
           if (x & 1)
             {
-              y = header[0x16 + x / 2] >> 2;
+              y = header[0x15 + x / 2] >> 2;
               z = 2;
             }
           else
             {
-              y = header[0x16 + x / 2] & 0x3;
+              y = header[0x15 + x / 2] & 0x3;
               z = 0;
             }
           if (y != 1)
             printf ("[%x:%d-%d] A%d=%s selects SRAM\n",
-              0x16 + x / 2, z + 1, z, 20 + x, y == 0 ? "x" : y == 2 ? "0" : "1");
+              0x15 + x / 2, z + 1, z, 20 + x, y == 0 ? "x" : y == 2 ? "0" : "1");
         }
 
-      y = header[0x18];
-      printf ("[18]     SRAM mapping mode: %s => %s\n",
+      y = header[0x17];
+      printf ("[17]     SRAM mapping mode: %s => %s\n",
         y == 3 ? "LoROM" : y == 0 ? "HiROM" : "unknown",
         matches_deviates ((snes_hirom ? 0 : 3) == y));
     }

@@ -166,15 +166,15 @@ receive_rom_info (unsigned char *buffer, int io_mode)
       unsigned short address = 0x7f52;
       ffe_send_command0 (0xe00c, 0);
 
-      ffe_send_command (5, address / 0x2000, 0);
-      ffe_receive_block ((address & 0x1fff) + 0x2000, buffer, 8);
+      ffe_send_command (5, (unsigned short) (address / 0x2000), 0);
+      ffe_receive_block ((unsigned short) ((address & 0x1fff) + 0x2000), buffer, 8);
       mem_hexdump (buffer, 8, address);
 
-      ffe_send_command (5, address / 0x2000, 0);
-      ffe_send_command0 ((address & 0x1fff) + 0x2000, 0);
+      ffe_send_command (5, (unsigned short) (address / 0x2000), 0);
+      ffe_send_command0 ((unsigned short) ((address & 0x1fff) + 0x2000), 0);
 
-      ffe_send_command (5, address / 0x2000, 0);
-      ffe_receive_block ((address & 0x1fff) + 0x2000, buffer, 8);
+      ffe_send_command (5, (unsigned short) (address / 0x2000), 0);
+      ffe_receive_block ((unsigned short) ((address & 0x1fff) + 0x2000), buffer, 8);
       mem_hexdump (buffer, 8, address);
     }
 #endif
@@ -203,7 +203,7 @@ receive_rom_info (unsigned char *buffer, int io_mode)
 #endif
       for (m = 0; m < 65536; m++)               // a delay is necessary here
         ;
-      ffe_send_command (5, 0x200 + n, 0);
+      ffe_send_command (5, (unsigned short) (0x200 + n), 0);
       buffer[n] = ffe_send_command1 (0xa0a0);
     }
 
@@ -474,7 +474,7 @@ set_sa1_map (unsigned short chunk)
   int m;
 
   // map the 8 Mbit ROM chunk specified by chunk into the F0 bank
-  write_cartridge1 (0x002223, (chunk & 0x07) | 0x80);
+  write_cartridge1 (0x002223, (unsigned char) ((chunk & 0x07) | 0x80));
   for (m = 0; m < 65536; m++)
     ;
 }
@@ -488,7 +488,7 @@ set_sdd1_map (unsigned short chunk)
   int m;
 
   // map the 8 Mbit ROM chunk specified by chunk into the F0 bank
-  write_cartridge1 (0x004807, chunk & 0x07);
+  write_cartridge1 (0x004807, (unsigned char) (chunk & 0x07));
   for (m = 0; m < 65536; m++)
     ;
 }
@@ -503,7 +503,7 @@ set_spc7110_map (unsigned short chunk)
 
   // map the 8 Mbit ROM chunk specified by chunk into the F0 bank
   write_cartridge1 (0x004834, 0xff);
-  write_cartridge1 (0x004833, chunk & 0x07);
+  write_cartridge1 (0x004833, (unsigned char) (chunk & 0x07));
   for (m = 0; m < 65536; m++)
     ;
 }
@@ -538,7 +538,7 @@ set_bank_and_page (unsigned char bank, unsigned char page)
           ffe_send_command0 (0x0007, currentbank);
         }
       else
-        ffe_send_command (5, (currentbank << 2) | currentpage, 0);
+        ffe_send_command (5, (unsigned short) ((currentbank << 2) | currentpage), 0);
     }
 }
 
@@ -547,13 +547,15 @@ void
 read_cartridge (unsigned int address, unsigned char *buffer, unsigned int length)
 {
   address &= 0xffffff;
-  set_bank_and_page (address >> 16, (address & 0x7fff) / 0x2000);
+  set_bank_and_page ((unsigned char) (address >> 16),
+                     (unsigned char) ((address & 0x7fff) / 0x2000));
 
   if ((address & 0x00ffff) < 0x8000)
-    ffe_receive_block ((((address & 0x7fffff) < 0x400000) ? 0x6000 : 0x2000) +
-                       (address & 0x001fff), buffer, length);
+    ffe_receive_block ((unsigned short) (((address & 0x7fffff) < 0x400000 ?
+                         0x6000 : 0x2000) + (address & 0x001fff)), buffer, length);
   else
-    ffe_receive_block (0xa000 + (address & 0x001fff), buffer, length);
+    ffe_receive_block ((unsigned short) (0xa000 + (address & 0x001fff)),
+                       buffer, length);
 }
 
 
@@ -572,13 +574,15 @@ void
 write_cartridge (unsigned int address, unsigned char *buffer, unsigned int length)
 {
   address &= 0xffffff;
-  set_bank_and_page (address >> 16, (address & 0x7fff) / 0x2000);
+  set_bank_and_page ((unsigned char) (address >> 16),
+                     (unsigned char) ((address & 0x7fff) / 0x2000));
 
   if ((address & 0x00ffff) < 0x8000)
-    ffe_send_block ((((address & 0x7fffff) < 0x400000) ? 0x6000 : 0x2000) +
-                    (address & 0x001fff), buffer, length);
+    ffe_send_block ((unsigned short) (((address & 0x7fffff) < 0x400000 ?
+                      0x6000 : 0x2000) + (address & 0x001fff)), buffer, length);
   else
-    ffe_send_block (0xa000 + (address & 0x001fff), buffer, length);
+    ffe_send_block ((unsigned short) (0xa000 + (address & 0x001fff)),
+                    buffer, length);
 }
 
 
@@ -1193,7 +1197,7 @@ swc_read_cart_sram (const char *filename, unsigned int parport, int io_mode)
   starttime = time (NULL);
   while (bytesreceived < size)
     {
-      set_bank_and_page (address >> 2, address & 3);
+      set_bank_and_page ((unsigned char) (address >> 2), (unsigned char) (address & 3));
       ffe_receive_block ((unsigned short) (hirom ? 0x6000 : 0x2000), buffer, BUFFERSIZE);
       fwrite (buffer, 1, BUFFERSIZE, file);
       address += hirom ? 4 : 1;
@@ -1265,7 +1269,7 @@ swc_write_cart_sram (const char *filename, unsigned int parport, int io_mode)
   starttime = time (NULL);
   while ((bytessend < size) && (bytesread = fread (buffer, 1, MIN (size, BUFFERSIZE), file)))
     {
-      set_bank_and_page (address >> 2, address & 3);
+      set_bank_and_page ((unsigned char) (address >> 2), (unsigned char) (address & 3));
       ffe_send_block ((unsigned short) (hirom ? 0x6000 : 0x2000), buffer, bytesread);
       address += hirom ? 4 : 1;
 

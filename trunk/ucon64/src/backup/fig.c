@@ -108,7 +108,7 @@ receive_rom_info (unsigned char *buffer)
 #endif
       for (m = 0; m < 65536; m++)               // a delay is necessary here
         ;
-      ffe_send_command (5, 0x200 + n, 0);
+      ffe_send_command (5, (unsigned short) (0x200 + n), 0);
       buffer[n] = ffe_send_command1 (0xa0a0);
     }
 

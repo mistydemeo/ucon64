@@ -250,12 +250,12 @@ unsigned char
 inportb (unsigned short port)
 {
 #ifdef  __BEOS__
-  IO_Tuple temp;
+  st_ioport_t temp;
 
-  temp.Port = port;
-  ioctl (ucon64_io_fd, DRV_READ_IO_8, &temp, 0);
+  temp.port = port;
+  ioctl (ucon64_io_fd, 'r', &temp, 0);
 
-  return temp.Data;
+  return temp.data8;
 #else
   unsigned char byte;
 
@@ -273,12 +273,12 @@ unsigned short
 inportw (unsigned short port)
 {
 #ifdef  __BEOS__
-  IO_Tuple temp;
+  st_ioport_t temp;
 
-  temp.Port = port;
-  ioctl (ucon64_io_fd, DRV_READ_IO_16, &temp, 0);
+  temp.port = port;
+  ioctl (ucon64_io_fd, 'r16', &temp, 0);
 
-  return temp.Data16;
+  return temp.data16;
 #else
   unsigned short word;
 
@@ -297,11 +297,11 @@ void
 outportb (unsigned short port, unsigned char byte)
 {
 #ifdef  __BEOS__
-  IO_Tuple temp;
+  st_ioport_t temp;
 
-  temp.Port = port;
-  temp.Data = byte;
-  ioctl (ucon64_io_fd, DRV_WRITE_IO_8, &temp, 0);
+  temp.port = port;
+  temp.data8 = byte;
+  ioctl (ucon64_io_fd, 'w', &temp, 0);
 #else
   __asm__ __volatile__
   ("outb %1, %0"
@@ -316,11 +316,11 @@ void
 outportw (unsigned short port, unsigned short word)
 {
 #ifdef  __BEOS__
-  IO_Tuple temp;
+  st_ioport_t temp;
 
-  temp.Port = port;
-  temp.Data16 = word;
-  ioctl (ucon64_io_fd, DRV_WRITE_IO_16, &temp, 0);
+  temp.port = port;
+  temp.data16 = word;
+  ioctl (ucon64_io_fd, 'w16', &temp, 0);
 #else
   __asm__ __volatile__
   ("outw %1, %0"

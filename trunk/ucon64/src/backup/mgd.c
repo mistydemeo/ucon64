@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 const char *mgd_usage[] =
   {
-    "Multi Game Doctor(2)/Multi Game Hunter/MGH/RAW",
+    "Multi Game Doctor(2/3)/Multi Game Hunter/MGH/RAW",
     "19XX Bung Enterprises Ltd http://www.bung.com.hk\n"
     "?Makko Toys Co., Ltd.?",
 #ifdef TODO

@@ -124,7 +124,7 @@ main (int argc, char *argv[])
     "-vboy",
     "-swan",
     "-coleco",
-    "-intelli" "-gc" "-xbox"
+    "-intelli", "-gc", "-xbox"
   };
 
 #ifdef	BACKUP
@@ -914,6 +914,7 @@ if(argcmp(argc, argv, "-sh"))
 	      (argcmp (argc, argv, "-ineshd")) ? nes_ineshd (&rom) :
 	      (argcmp (argc, argv, "-j")) ? nes_j (&rom) :
 	      (argcmp (argc, argv, "-pas")) ? nes_pas (&rom) :
+	      (argcmp (argc, argv, "-unif")) ? nes_unif (&rom) :
 	      (argcmp (argc, argv, "-s")) ? nes_s (&rom) : 0);
       break;
 

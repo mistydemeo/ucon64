@@ -729,9 +729,7 @@ int cd64_upload_eeprom(struct cd64_t *cd64, FILE *infile) {
 	cd64->seek_callback(infile, origpos, SEEK_SET);
 
 	if (length != CART_EEPROM_LENGTH && length != CART_2XEEPROM_LENGTH) {
-		char buf[200]; /* should be large enough (35 for constant chars + 4 for 32-bit int) */
-		sprintf(buf, "Wrong length of EEPROM data: %d bytes", (int) length);
-		cd64->notice_callback2(buf);
+		cd64->notice_callback2("Wrong length of EEPROM data: %d bytes", (int) length);
 		return 0;
 	}
 	else if (cd64->protocol == GHEMOR) {

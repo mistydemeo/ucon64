@@ -65,7 +65,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_VERSION "1.9.7"
 
 #ifdef __UNIX__
-  #define ucon64_TITLE "uCON64 1.9.7 Unix 1999-2001 by (various)"
+  #define ucon64_TITLE "uCON64 1.9.7 UNIX 1999-2001 by (various)"
 #elif __DOS__
   #define ucon64_TITLE "uCON64 1.9.7 DOS 1999-2001 by (various)"
 #elif __BEOS__

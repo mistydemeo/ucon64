@@ -457,25 +457,31 @@ char binblock[1025];
 #include "../ucon64.h"
 int addppfid(int argc, char *argv[])
 {
-	long fsize;
-	char fileidbuf[3072];
-	char buf[4095];
+  long fsize;
+  long pos=0;
 
-        printf("Adding file_id.diz .. ");
-	fsize=quickftell(getarg(argc,argv,ucon64_ROM));
-        if(fsize>3072) fsize=3072;	/* File id only up to 3072 bytes! */
-        quickfread(fileidbuf, 0, fsize ,getarg(argc,argv,ucon64_FILE));
+  char filename[4096];
+  char fileidbuf[3072];
+  char buf[4095];
 
-	sprintf(buf,"@BEGIN_FILE_ID.DIZ%s@END_FILE_ID.DIZ",fileidbuf);
+  strcpy(filename,getarg(argc,argv,ucon64_ROM));
 
-        quickfwrite(buf,quickftell(getarg(argc,argv,ucon64_ROM)), strlen(buf), getarg(argc,argv,ucon64_ROM),"r+b");
+  printf("Adding file_id.diz .. ");
+  fsize=quickftell(filename);
+  if(fsize>3072) fsize=3072;	/* File id only up to 3072 bytes! */
+  quickfread(fileidbuf, 0, fsize ,getarg(argc,argv,ucon64_FILE));
+  fileidbuf[fsize]=0;
+  sprintf(buf,"@BEGIN_FILE_ID.DIZ%s@END_FILE_ID.DIZ",fileidbuf);
 
+  pos=filencmp(filename,0,quickftell(filename),"@BEGIN_FILE_ID.DIZ",18);
+  if(pos==-1)pos=quickftell(filename);
+  truncate(filename,pos);
 
-        quickfwrite(&fsize, quickftell(getarg(argc,argv,ucon64_ROM)), 4, getarg(argc,argv,ucon64_ROM),"r+b");
-        printf("done!\n");
+  quickfwrite(buf,pos, strlen(buf), filename,"r+b");
 
-	return(0);
-
+  quickfwrite(&fsize, quickftell(filename), 4, filename,"r+b");
+  printf("done!\n");
+  return(0);
 }
 
 

@@ -299,6 +299,7 @@ if (setgid(gid) == -1)                          //  was used, but just in case (
 #endif
 
 
+
 strcpy(rom.rom,getarg(argc,argv,ucon64_ROM));
 if (!strlen(rom.rom)) getcwd(rom.rom,sizeof(rom.rom));
 
@@ -548,12 +549,15 @@ if (argcmp(argc, argv, "-ls") ||
     argcmp(argc,argv,  "-rr83")
 )
 {
+
   char current_dir[FILENAME_MAX];
+
   if (access(rom.rom, R_OK) == -1 || (dp = opendir(rom.rom)) == NULL)
     return(-1);
 
   getcwd(current_dir, FILENAME_MAX);
   chdir(rom.rom);
+
 
   while ((ep = readdir(dp)) != 0)
   {
@@ -561,9 +565,14 @@ if (argcmp(argc, argv, "-ls") ||
     {
       if (S_ISREG(puffer.st_mode))
       {
-	ucon64_flush(argc,argv,&rom);
+        ucon64_argv[0]="ucon64";
+        ucon64_argv[1]=ep->d_name;
+        ucon64_argc=2;
+
+	ucon64_flush(ucon64_argc,ucon64_argv,&rom);
 	strcpy(rom.rom,ep->d_name);
         ucon64_init(&rom);
+
 	if (argcmp(argc, argv, "-ls"))
 	{
           strftime(buf, 13, "%b %d %H:%M", localtime(&puffer.st_mtime));
@@ -1122,6 +1131,7 @@ if(rom->console == ucon64_UNKNOWN && rom->bytes <= MAXROMSIZE )
     (pcengine_init(rom)==-1) &&
     (neogeo_init(rom)==-1) &&
     (neogeopocket_init(rom)==-1) &&
+
     (sms_init(rom)==-1) &&
     (system16_init(rom)==-1) &&
     (virtualboy_init(rom)==-1) &&
@@ -1135,6 +1145,7 @@ if(rom->console == ucon64_UNKNOWN && rom->bytes <= MAXROMSIZE )
     return(-1);
   }
 }
+
   quickfread(rom->buheader,rom->buheader_start,rom->buheader_len,rom->rom);
 //  quickfread(rom->header,rom->header_start,rom->header_len,rom->rom);
 

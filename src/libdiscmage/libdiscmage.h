@@ -192,4 +192,6 @@ extern int32_t dm_cdi2nero (dm_image_t *image);
 
 extern int dm_disc_read (dm_image_t *image);
 extern int dm_disc_write (dm_image_t *image);
+
+extern const char *dm_version;
 #endif  // LIBDISCMAGE_H

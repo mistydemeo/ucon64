@@ -493,6 +493,8 @@ main (int argc, char **argv)
   ucon64.argc = argc;
   ucon64.argv = argv;
 
+  ucon64_index_cache (); // update cache index file (eventually)
+
   ucon64_flush (&rom);
 
   while ((c = getopt_long_only (argc, argv, "", long_options, NULL)) != -1)
@@ -1383,7 +1385,7 @@ ucon64_usage (int argc, char *argv[])
 
   printf (
 #ifdef  HAVE_ZLIB_H
-     "Database: %d known ROMs in cache (%+d)\n"
+     "Database: %d known ROMs in %scache.zip\n"
 #endif // HAVE_ZLIB_H
      "\n"
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
@@ -1398,7 +1400,7 @@ ucon64_usage (int argc, char *argv[])
      "\n"
 #ifdef  HAVE_ZLIB_H
      , ucon64_dbsize (UCON64_UNKNOWN)
-     , ucon64_dbsize (UCON64_UNKNOWN) - UCON64_DBSIZE
+     , ucon64.cache_path
 #endif // HAVE_ZLIB_H
      , argv[0], argv[0]);
 }

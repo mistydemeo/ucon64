@@ -100,6 +100,7 @@ mccl_read (const char *filename, unsigned int parport)
   int inbyte, count = 0;
   lptbase = parport;
 
+  misc_parport_print_info ();
   fprintf (stderr, "Resetting device.\n");
   fflush (stderr);
   do

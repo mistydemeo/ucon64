@@ -258,7 +258,7 @@ const struct option options[] = {
     {"pattern", 1, 0, UCON64_PATTERN},
     {"pce", 0, 0, UCON64_PCE},
     {"poke", 1, 0, UCON64_POKE},
-#ifdef  PARALLEL
+#if     defined PARALLEL || defined HAVE_USB_H
     {"port", 1, 0, UCON64_PORT},
 #endif
     {"ppf", 0, 0, UCON64_PPF},
@@ -320,11 +320,6 @@ const struct option options[] = {
 #ifdef  PARALLEL
     {"xdex", 1, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
-    {"xf2a", 0, 0, UCON64_XF2A},
-    {"xf2amulti", 1, 0, UCON64_XF2AMULTI},
-    {"xf2ab", 1, 0, UCON64_XF2AB},
-    {"xf2ac", 1, 0, UCON64_XF2AC},
-    {"xf2as", 0, 0, UCON64_XF2AS},
     {"xfal", 0, 0, UCON64_XFAL},
     {"xfalmulti", 1, 0, UCON64_XFALMULTI},
     {"xfalb", 1, 0, UCON64_XFALB},
@@ -360,6 +355,13 @@ const struct option options[] = {
     {"xswcc", 0, 0, UCON64_XSWCC},
     {"xv64", 0, 0, UCON64_XV64},
 #endif // PARALLEL
+#if     defined PARALLEL || defined HAVE_USB_H
+    {"xf2a", 0, 0, UCON64_XF2A},
+    {"xf2amulti", 1, 0, UCON64_XF2AMULTI},
+    {"xf2ab", 1, 0, UCON64_XF2AB},
+    {"xf2ac", 1, 0, UCON64_XF2AC},
+    {"xf2as", 0, 0, UCON64_XF2AS},
+#endif
     {"z64", 0, 0, UCON64_Z64},
     {0, 0, 0, 0}
   };
@@ -848,13 +850,30 @@ ucon64_execute_options (void)
     copier option has been specified, because another switch might've been
     specified after -port.
   */
-  if (ucon64_parport_needed)
+  if (ucon64_parport_needed
+#ifdef  HAVE_USB_H
+      && !ucon64.usbport
+#endif
+     )
     ucon64.parport = misc_parport_open (ucon64.parport);
-#endif
+#endif // PARALLEL
 #if     defined __unix__ && !defined __MSDOS__
-  if (first_call)
-    drop_privileges ();                         // now we can drop privileges
+  /*
+    We can drop privileges after we have set up parallel port access. We cannot
+    drop privileges if the user wants to communicate with the USB version of the
+    F2A.
+    SECURITY WARNING: We stay in root mode if the user specified an F2A option!
+    We could of course drop privileges which requires the user to run uCON64 as
+    root (not setuid root), but we want to be user friendly. Besides, doing
+    things as root is bad anyway (from a security viewpoint).
+  */
+  if (first_call
+#ifdef  HAVE_USB_H
+      && !ucon64.usbport
 #endif
+     )
+    drop_privileges ();
+#endif // __unix__ && !__MSDOS__
   first_call = 0;
 
   for (x = 0; arg[x].val; x++)

@@ -2654,7 +2654,7 @@ gbx_init (unsigned int parport, const char *filename)
       exit (1);
     }
 #endif
-  printf ("Using I/O port 0x%x\n", port_8);
+  misc_parport_print_info ();
 
   if (check_port () != 0)
     {

@@ -1634,6 +1634,8 @@ fal_args (unsigned int parport)
 {
   char parport_str[80];
 
+  misc_parport_print_info ();
+
   fal_argv[fal_argc++] = "fl";
 #if 0 // we want to support non-standard parallel port addresses
   if (parport != 0x3bc && parport != 0x378 && parport != 0x278)

@@ -54,7 +54,7 @@ const st_usage_t f2a_usage[] =
   {
     {NULL, NULL, "Flash 2 Advance (Ultra)"},
     {NULL, NULL, "2003 Flash2Advance http://www.flash2advance.com"},
-#ifdef PARALLEL
+#if     defined PARALLEL || defined HAVE_USB_H
     {"xf2a", NULL, "send/receive ROM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
                    "receives automatically (32 Mbits) when ROM does not exist"},
     {"xf2amulti", "SIZE", "send multiple ROMs to Flash 2 Advance (Ultra); specify a\n"
@@ -66,54 +66,71 @@ const st_usage_t f2a_usage[] =
     {"xf2ab", "BANK", "send/receive SRAM to/from Flash 2 Advance (Ultra) BANK\n"
                       "BANK should be a number >= 1; " OPTION_LONG_S "port=PORT\n"
                       "receives automatically when SRAM does not exist"},
-#endif // PARALLEL
+#endif // PARALLEL || HAVE_USB_H
     {NULL, NULL, NULL}
 };
 
 
-#if     (defined PARALLEL || defined HAVE_USB_H)
+#ifdef  HAVE_USB_H
 
-typedef struct
-{
-  unsigned int command;         // command to execute, see below
-  unsigned int size;            // size of data block to read/write
-  unsigned int pad1[2];
-  unsigned int magic;           // magic number, see below
-  unsigned int pad2[3];
-  unsigned int unknown;         // no idea what this is for, seems to have to be 0xa for write, 0x7 for read
-  unsigned int address;         // base address for read/write
-  unsigned int sizekb;          // size of data block to read/write in kB
-  unsigned char pad3[5 * 4 /*-1*/];
-  // for some reason the original software uses a 63 bytes structure for outgoing messages,
-  // not 64 as it does for incoming messages, hence the "-1". It all seems to work fine with
-  // 64 bytes, too, and I therefore suspect this to be a bug in the original SW.
-
-  // we use SENDMSG_SIZE to solve the problem - dbjh
-} /*__attribute__ ((packed))*/ f2a_sendmsg_t;
+#define F2A_FIRM_SIZE     23053
+#define CMD_GETINF        0x05          // get info on the system status
+#define CMD_MULTIBOOT1    0xff          // boot up the GBA stage 1, no parameters
+#define CMD_MULTIBOOT2    0             // boot up the GBA stage 2, f2a_sendmsg_t.size has to be set
 
 #define SENDMSG_SIZE (sizeof (f2a_sendmsg_t) - 1)
 
+typedef struct
+{
+  unsigned int command;                 // command to execute, see below
+  unsigned int size;                    // size of data block to read/write
+  unsigned int pad1[2];
+  unsigned int magic;                   // magic number, see below
+  unsigned int pad2[3];
+  unsigned int unknown;                 // no idea what this is for, seems to have to be 0xa for write, 0x7 for read
+  unsigned int address;                 // base address for read/write
+  unsigned int sizekb;                  // size of data block to read/write in kB
+  unsigned char pad3[5 * 4 /*-1*/];
+  /*
+    For some reason the original software uses a 63 bytes structure for outgoing
+    messages, not 64 as it does for incoming messages, hence the "-1". It all
+    seems to work fine with 64 bytes, too, and I therefore suspect this to be a
+    bug in the original software.
+  */
+  // we use SENDMSG_SIZE to solve the problem - dbjh
+} /*__attribute__ ((packed))*/ f2a_sendmsg_t;
 
 typedef struct
 {
   unsigned char data[64];
-} recvmsg;
+} f2a_recvmsg_t;
 
-#define CMD_GETINF 5                    // get info on the system status
-#define CMD_WRITEDATA 6                 // write data to RAM/ROM/SRAM
-#define CMD_READDATA 7                  // read data from RAM/ROM/SRAM
-#define CMD_MULTIBOOT1 0xff             // boot up the GBA stage 1, no parameters
-#define CMD_MULTIBOOT2 0                // boot up the GBA stage 2, f2a_sendmsg_t.size has to be set
+static int f2a_init_usb (void);
+static int f2a_connect_usb (void);
+static int f2a_info (f2a_recvmsg_t *rm);
+static int f2a_boot_usb (const char *ilclient_fname);
+static int f2a_read_usb (int address, int size, const char *filename);
+static int f2a_write_usb (int n_files, char **files, int address);
 
-#define MAGIC_NUMBER 0xa46e5b91         // needs to be properly set for almost all commands
+static usb_dev_handle *f2ahandle;
+#endif // HAVE_USB_H
 
-static int f2a_pport;
-static time_t starttime = 0;
-#ifdef  DEBUG
-static int parport_debug = 1;
-#else
-static int parport_debug = 0;
-#endif
+
+#ifdef  PARALLEL
+
+#define LOGO_ADDR         0x06000000
+#define EXEC_STUB         0x03002000
+#define ERASE_STUB        0x03000c00
+#define LOGO_SIZE         76800
+#define BOOT_SIZE         18432
+
+#define FLIP              1
+#define HEAD              1
+#define EXEC              1
+
+#define PP_CMD_WRITEROM   0x0a
+#define PP_CMD_ERASE      0x0b
+#define PP_HEAD_BOOT      0x01
 
 typedef struct
 {
@@ -127,29 +144,6 @@ typedef struct
   unsigned int exec_stub;
   unsigned char pad3[984];
 } /*__attribute__ ((packed))*/ f2a_msg_cmd_t; // packed attribute is not necessary
-
-
-#define PP_CMD_WRITEDATA  0x06
-#define PP_CMD_READDATA   0x07
-#define PP_CMD_WRITEROM   0x0a
-#define PP_CMD_ERASE      0x0b
-#define PP_HEAD_BOOT      0x01
-#define PP_HEAD_READ      0x07
-#define PP_HEAD_WRITE     0x06
-#define PP_MAGIC_NUMBER   0xa46e5b91
-
-#define LOGO_ADDR         0x06000000
-#define EXEC_STUB         0x03002000
-#define ERASE_STUB        0x03000c00
-#define LOGO_SIZE         76800
-#define BOOT_SIZE         18432
-#define LOADER_SIZE       32768
-#define F2A_FIRM_SIZE     23053
-
-#define FLIP  1
-#define HEAD  1
-#define EXEC  1
-
 
 static int f2a_boot_par (const char *ilclient2_fname, const char *illogo_fname);
 static int f2a_write_par (int n_files, char **files, unsigned int address);
@@ -173,12 +167,23 @@ static void parport_out31 (unsigned char val);
 static void parport_out91 (unsigned char val);
 static void parport_nop ();
 
+static int f2a_pport;
+#ifdef  DEBUG
+static int parport_debug = 1;
+#else
+static int parport_debug = 0;
+#endif
 static int parport_nop_cntr;
+#endif // PARALLEL
 
-static const unsigned char header[] = {
-  0x49, 0x2d, 0x4c, 0x69, 0x6e, 0x6b, 0x65, 0x72,
-  0x2e, 0x31, 0x30, 0x30, 0x00, 0x00, 0x01, 0xe8
-};
+
+#if     defined PARALLEL || defined HAVE_USB_H
+
+#define LOADER_SIZE       32768
+
+#define CMD_WRITEDATA     0x06          // write data to RAM/ROM(USB)/SRAM
+#define CMD_READDATA      0x07          // read data from RAM/ROM(USB)/SRAM
+#define MAGIC_NUMBER      0xa46e5b91    // needs to be properly set for almost all commands
 
 enum
 {
@@ -187,35 +192,27 @@ enum
   UPLOAD_ROM
 };
 
+static time_t starttime = 0;
 static const char *f2a_msg[] = {
   "ERROR: Upload failed\n",
   "ERROR: Can't determine size of file \"%s\"\n",
   "Uploading %s, %d kB, padded to %d kB\n",
   NULL
 };
+#endif
 
 
 #ifdef  HAVE_USB_H
 
-static int f2a_init_usb (void);
-static int usb_connect (void);
-static int f2a_info (recvmsg *rm);
-static int f2a_boot_usb (const char *ilclient_fname);
-static int f2a_read_usb (int address, int size, const char *filename);
-static int f2a_write_usb (int n_files, char **files, int address);
-
-static usb_dev_handle *f2ahandle;
-
-
 static int
 f2a_init_usb (void)
 {
-  recvmsg rm;
+  f2a_recvmsg_t rm;
   char iclientu_fname[FILENAME_MAX];
 
   memset (&rm, 0, sizeof (rm));
 
-  if (usb_connect ())
+  if (f2a_connect_usb ())
     {
       fprintf (stderr, "ERROR: Unable to connect to F2A USB linker\n");
       exit (1);                                 // fatal
@@ -239,7 +236,7 @@ f2a_init_usb (void)
 
 
 static int
-usb_connect (void)
+f2a_connect_usb (void)
 {
   int fp, result, firmware_loaded = 0;
   unsigned char f2afirmware[F2A_FIRM_SIZE];
@@ -317,20 +314,20 @@ find_f2a:
 
 
 static int
-f2a_info (recvmsg *rm)
+f2a_info (f2a_recvmsg_t *rm)
 {
   f2a_sendmsg_t sm;
   unsigned int i;
 
   memset (&sm, 0, SENDMSG_SIZE);
-  memset (rm, 0, sizeof (recvmsg));
+  memset (rm, 0, sizeof (f2a_recvmsg_t));
 
   sm.command = CMD_GETINF;
 
 /*
   if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
     return -1;
-  if (misc_usb_read (f2ahandle, (char *) rm, sizeof (recvmsg)) == -1)
+  if (misc_usb_read (f2ahandle, (char *) rm, sizeof (f2a_recvmsg_t)) == -1)
     return -1;
 */
 
@@ -468,6 +465,11 @@ f2a_write_usb (int n_files, char **files, int address)
           fprintf (stderr, "ERROR: Unable to load loader binary (%s)\n", loader_fname);
           return -1;
         }
+#if 1 // Overwriting the start address makes sense for some files... - dbjh
+      ((int *) loader)[0] = me2le_32 (0x2e0000ea); // start address
+#endif
+      for (j = 1; j < GBA_LOGODATA_LEN / 4 + 1; j++) // + 1 for start address
+        ((int *) loader)[j] = bswap_32 (((int *) gba_logodata)[j - 1]);
 
       sm.size = LOADER_SIZE;
       sm.address = address;
@@ -539,6 +541,8 @@ f2a_write_usb (int n_files, char **files, int address)
 #endif // HAVE_USB_H
 
 
+#ifdef  PARALLEL
+
 static int
 f2a_init_par (int parport, int parport_delay)
 {
@@ -570,7 +574,7 @@ parport_init (int port, int target_delay)
   f2a_pport = port;
   parport_nop_cntr = parport_init_delay (target_delay);
 
-  printf ("Using I/O port 0x%x\n", f2a_pport);
+  misc_parport_print_info ();
 
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x04);
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
@@ -737,7 +741,7 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
           fprintf (stderr, "ERROR: Unable to load logo file (%s)\n", ilogo_fname);
           return -1;
         }
-      if (f2a_send_buffer_par (PP_CMD_WRITEDATA, LOGO_ADDR, LOGO_SIZE, ilogo,
+      if (f2a_send_buffer_par (CMD_WRITEDATA, LOGO_ADDR, LOGO_SIZE, ilogo,
                                0, 0, 0, 0))
         {
           fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
@@ -751,7 +755,7 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
       fprintf (stderr, "ERROR: Unable to load GBA client binary (%s)\n", iclientp_fname);
       return -1;
     }
-  if (f2a_send_buffer_par (PP_CMD_WRITEDATA, EXEC_STUB, BOOT_SIZE, iclientp,
+  if (f2a_send_buffer_par (CMD_WRITEDATA, EXEC_STUB, BOOT_SIZE, iclientp,
                            HEAD, FLIP, EXEC, 0))
     {
       fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
@@ -778,7 +782,7 @@ f2a_write_par (int n_files, char **files, unsigned int address)
           return -1;
         }
       if (f2a_send_buffer_par (PP_CMD_WRITEROM, address, LOADER_SIZE, loader,
-                               HEAD, FLIP, 0, 0))
+                               HEAD, 0, 0, 0))
         {
           fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
           return -1;
@@ -815,7 +819,7 @@ f2a_erase_par (unsigned int start, unsigned int size)
 {
   int end, address;
 
-  f2a_exec_cmd_par (PP_CMD_READDATA, ERASE_STUB, 1024);
+  f2a_exec_cmd_par (CMD_READDATA, ERASE_STUB, 1024);
   end = start + (size);
 
   printf ("Erase cart start=0x%08x end=0x%08x\n", start, end);
@@ -828,9 +832,9 @@ f2a_erase_par (unsigned int start, unsigned int size)
 int
 f2a_read_par (unsigned int start, unsigned int size, const char *filename)
 {
-  f2a_exec_cmd_par (PP_CMD_READDATA, ERASE_STUB, 1024);
+  f2a_exec_cmd_par (CMD_READDATA, ERASE_STUB, 1024);
   printf ("Reading from cart start=0x%08x size=0x%08x\n", start, size);
-  f2a_receive_data_par (PP_CMD_READDATA, start, size, filename, FLIP);
+  f2a_receive_data_par (CMD_READDATA, start, size, filename, FLIP);
   return 0;
 }
 
@@ -838,7 +842,7 @@ f2a_read_par (unsigned int start, unsigned int size, const char *filename)
 #if 0
 typedef struct
 {
-  unsigned char head[16];
+  unsigned char header[16];
   unsigned char command;
   unsigned char unknown;
   unsigned int size;
@@ -849,21 +853,23 @@ typedef struct
 static int
 f2a_send_head_par (int cmd, int size)
 {
-  unsigned char trans[] = { 0xa, 0x8, 0xe, 0xc, 0x2, 0x0, 0x6, 0x4 }, msg_head[80];
-//  f2a_msg_head_t msg_head;                    // Don't use structs with misaligned
+  unsigned char trans[] = { 0xa, 0x8, 0xe, 0xc, 0x2, 0x0, 0x6, 0x4 },
+                msg_header[80] = { 0x49, 0x2d, 0x4c, 0x69, 0x6e, 0x6b, 0x65, 0x72,
+                                   0x2e, 0x31, 0x30, 0x30, 0x00, 0x00, 0x01, 0xe8 };
+//  f2a_msg_head_t msg_header;                  // Don't use structs with misaligned
   unsigned short int s;                         //  members for data streams (we don't
                                                 //  want compiler-specific stuff)
-  memcpy (&msg_head, header, 16);               // .head
-  msg_head[16] = cmd;                           // .command
+//  memcpy (&msg_head, header, 16);             // .head
+  msg_header[16] = cmd;                         // .command
   s = size / 1024;
-  msg_head[17] =                                // .unknown
+  msg_header[17] =                              // .unknown
     (trans[((s & 255) / 32)] << 4) | (((1023 - (s & 1023)) / 256) & 0x0f);
-// msg_head.unkown = 0x82;
-  msg_head[18] = (unsigned char) s;             // .size
-  msg_head[19] = (unsigned char) (s >> 8);
-  memset (&msg_head[20], 0, 80 - 20);
+// msg_header.unknown = 0x82;
+  msg_header[18] = (unsigned char) s;           // .size
+  msg_header[19] = (unsigned char) (s >> 8);
+  memset (&msg_header[20], 0, 80 - 20);
 
-  if (f2a_send_raw_par (msg_head, 80))
+  if (f2a_send_raw_par (msg_header, 80))
     return -1;
   return 0;
 }
@@ -876,14 +882,14 @@ f2a_exec_cmd_par (int cmd, int address, int size)
   f2a_msg_cmd_t msg_cmd;
 
   memset (&msg_cmd, 0, sizeof (f2a_msg_cmd_t));
-  msg_cmd.magic = me2be_32 (PP_MAGIC_NUMBER);
+  msg_cmd.magic = me2be_32 (MAGIC_NUMBER);
   msg_cmd.command = me2be_32 (cmd);
   msg_cmd.address = me2be_32 (address);
   msg_cmd.sizekb = me2be_32 (size / 1024);
 
   msg_cmd.exec_stub = me2be_32 (EXEC_STUB);
   msg_cmd.exec = me2be_32 (0x08);
-  f2a_send_head_par (PP_HEAD_READ, size);
+  f2a_send_head_par (CMD_READDATA, size);
   f2a_wait_par ();
 
   if (parport_debug)
@@ -916,12 +922,12 @@ f2a_receive_data_par (int cmd, int address, int size, const char *filename, int 
   FILE *file;
 
   memset (&msg_cmd, 0, sizeof (f2a_msg_cmd_t));
-  msg_cmd.magic = me2be_32 (PP_MAGIC_NUMBER);
+  msg_cmd.magic = me2be_32 (MAGIC_NUMBER);
   msg_cmd.command = me2be_32 (cmd);
   msg_cmd.address = me2be_32 (address);
   msg_cmd.sizekb = me2be_32 (size / 1024);
 
-  if (f2a_send_head_par (PP_HEAD_READ, size))
+  if (f2a_send_head_par (CMD_READDATA, size))
     return -1;
 
   if (f2a_receive_raw_par (recv, 4))
@@ -999,12 +1005,12 @@ f2a_send_cmd_par (int cmd, int address, int size)
   f2a_msg_cmd_t msg_cmd;
 
   memset (&msg_cmd, 0, sizeof (f2a_msg_cmd_t));
-  msg_cmd.magic = me2be_32 (PP_MAGIC_NUMBER);
+  msg_cmd.magic = me2be_32 (MAGIC_NUMBER);
   msg_cmd.command = me2be_32 (cmd);
   msg_cmd.address = me2be_32 (address);
   msg_cmd.sizekb = me2be_32 (size / 1024);
 
-  if (f2a_send_head_par (PP_HEAD_WRITE, size))
+  if (f2a_send_head_par (CMD_WRITEDATA, size))
     return -1;
 
   if (f2a_receive_raw_par (recv, 4))
@@ -1032,7 +1038,7 @@ f2a_send_buffer_par (int cmd, int address, int size, const unsigned char *resour
   FILE *file = NULL;
 
   memset (&msg_cmd, 0, sizeof (f2a_msg_cmd_t));
-  msg_cmd.magic = me2be_32 (PP_MAGIC_NUMBER);
+  msg_cmd.magic = me2be_32 (MAGIC_NUMBER);
   msg_cmd.command = me2be_32 (cmd);
   msg_cmd.address = me2be_32 (address);
   msg_cmd.sizekb = me2be_32 (size / 1024);
@@ -1041,7 +1047,7 @@ f2a_send_buffer_par (int cmd, int address, int size, const unsigned char *resour
       msg_cmd.exec_stub = me2be_32 (EXEC_STUB);
       msg_cmd.exec = me2be_32 (0x08);
     }
-  if (f2a_send_head_par (PP_HEAD_WRITE, size))
+  if (f2a_send_head_par (CMD_WRITEDATA, size))
     return -1;
   if (f2a_receive_raw_par (recv, 4))
     return -1;
@@ -1238,8 +1244,10 @@ f2a_wait_par (void)
     }
   return 0;
 }
+#endif // PARALLEL
 
 
+#if     defined PARALLEL || defined HAVE_USB_H
 int
 f2a_read_rom (const char *filename, unsigned int parport, int size)
 {
@@ -1247,18 +1255,23 @@ f2a_read_rom (const char *filename, unsigned int parport, int size)
 
   starttime = time (NULL);
 #ifdef  HAVE_USB_H
+  (void) parport;                               // warning remover if only HAVE_USB_H
   if (ucon64.usbport)
     {
       f2a_init_usb ();
       f2a_read_usb (0x8000000 + offset * MBIT, size * MBIT, filename);
       misc_usb_close (f2ahandle);
     }
+#endif
+#if     defined PARALLEL && defined HAVE_USB_H
   else
 #endif
+#ifdef  PARALLEL
     {
       f2a_init_par (parport, 10);
       f2a_read_par (0x08000000 + offset * MBIT, size * MBIT, filename);
     }
+#endif
   return 0;
 }
 
@@ -1317,19 +1330,24 @@ f2a_write_rom (const char *filename, unsigned int parport, int size)
 
   starttime = time (NULL);
 #ifdef  HAVE_USB_H
+  (void) parport;                               // warning remover if only HAVE_USB_H
   if (ucon64.usbport)
     {
       f2a_init_usb ();
       f2a_write_usb (n_files, files, 0x8000000 + offset * MBIT);
       misc_usb_close (f2ahandle);
     }
+#endif
+#if     defined PARALLEL && defined HAVE_USB_H
   else
 #endif
+#ifdef  PARALLEL
     {
       f2a_init_par (parport, 10);
       //f2a_erase_par (0x08000000, size * MBIT);
       f2a_write_par (n_files, files, 0x8000000 + offset * MBIT);
     }
+#endif
 
   if (!filename)
     free (files);
@@ -1361,18 +1379,23 @@ f2a_read_sram (const char *filename, unsigned int parport, int bank)
 
   starttime = time (NULL);
 #ifdef  HAVE_USB_H
+  (void) parport;                               // warning remover if only HAVE_USB_H
   if (ucon64.usbport)
     {
       f2a_init_usb ();
       f2a_read_usb (0xe000000 + bank * 64 * 1024, size, filename);
       misc_usb_close (f2ahandle);
     }
+#endif
+#if     defined PARALLEL && defined HAVE_USB_H
   else
 #endif
+#ifdef  PARALLEL
     {
       f2a_init_par (parport, 10);
       f2a_read_par (0xe000000 + bank * 64 * 1024, size, filename);
     }
+#endif
   return 0;
 }
 
@@ -1395,20 +1418,25 @@ f2a_write_sram (const char *filename, unsigned int parport, int bank)
 
   starttime = time (NULL);
 #ifdef  HAVE_USB_H
+  (void) parport;                               // warning remover if only HAVE_USB_H
   if (ucon64.usbport)
     {
       f2a_init_usb ();
       f2a_write_usb (1, files, 0xe000000 + bank * 64 * 1024);
       misc_usb_close (f2ahandle);
     }
+#endif
+#if     defined PARALLEL && defined HAVE_USB_H
   else
 #endif
+#ifdef  PARALLEL
     {
       f2a_init_par (parport, 10);
       //f2a_erase_par (0xe000000, size * MBIT);
       f2a_write_par (1, files, 0xe000000 + bank * 64 * 1024);
     }
+#endif
   return 0;
 }
 
-#endif  // (defined PARALLEL || defined HAVE_USB_H)
+#endif // defined PARALLEL || defined HAVE_USB_H

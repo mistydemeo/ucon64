@@ -49,12 +49,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ufo.h"
 #include "yoko.h"
 #include "z64.h"
-#include "f2a.h"
 #endif // PARALLEL
-
-#ifdef  HAVE_USB_H
+#if     defined PARALLEL || defined HAVE_USB_H
 #include "f2a.h"
-#endif  // HAVE_USB_H
+#endif
 
 #ifdef  SERIAL
 #endif  // SERIAL

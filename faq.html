@@ -146,6 +146,9 @@ Q50: <a href="#50">I configured uCON64 to use ppdev and tried to send a file to
    my backup unit as a regular user. I got an error message that the parallel
    port device could not be opened. What did I do wrong?</a><br>
 <br>
+Q51: <a href="#51">What do I need before I can upload files to my Flash 2
+   Advance?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -540,7 +543,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
   </tr>
   <tr>
     <td><tt>f2afirmware</tt></td>
-    <td><tt>path to F2A firmware</tt></td>
+    <td><tt>path to F2A USB firmware</tt></td>
   </tr>
   <tr>
     <td><tt>iclientu</tt></td>
@@ -1788,6 +1791,34 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    <b>sed "s/ /,/g"</b> replaces all spaces with commas.<br>
 <br>
 <p>
+<a name="51"><b>Q51</b>: What do I need before I can upload files to my Flash 2
+   Advance?</a><br>
+<b>A</b>: Download the package that contains the support files from
+   <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>.
+   Extract the package and update the configuration file. See
+   <a href="#configbin">"How to configure the uCON64 executable"</a>.
+   If you want to use the parallel port version, you should set at least the variable
+   iclientp. If you want to send multiple files to your F2A, also set gbaloader.
+   If you want to see a different background while uploading, set ilogo.<br>
+   The USB version of the F2A is currently only supported under GNU/Linux. If
+   you want to use the USB version, you should set at least the variables
+   f2afirmware and iclientu. If you want to send multiple files to your F2A, set
+   gbaloader. Additional requirements are:<br>
+   - <a href="http://libusb.sourceforge.net/" target="_blank">libusb</a> (included in recent
+   GNU/Linux distributions)<br>
+   - usbdevfs has to be mounted (most (?) distributions have usbdevfs mounted by
+   default, but you can do it manually with "mount -t usbdevfs none /proc/bus/usb")<br>
+   - the EZUSB2131 firmware upload driver has to be loaded, see
+     <a href="http://ezusb2131.sourceforge.net/" target="_blank">http://ezusb2131.sourceforge.net/</a><br>
+   - you need to have read/write access to /proc/ezusb and /proc/bus/usb, so you
+   have to run uCON64 as root for the USB version of the F2A<br>
+<br>
+   By default, uCON64 tries to access a parallel port to communicate with an
+   F2A. In order to make uCON64 communicate with an F2A connected to a USB port,
+   specify one. For example:<br>
+   &nbsp;&nbsp;ucon64 -xf2a "Wario Ware Inc.zip" -port=usb0<br>
+<br>
+<p>
 <br>
 <br>
 <br>
@@ -1824,4 +1855,3 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <br>
 <br>
 </tt></body></html>
-

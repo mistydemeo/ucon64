@@ -384,10 +384,10 @@ const st_usage_t ucon64_options_usage[] = {
 #else
   {"e", NULL, "emulate/run ROM (check .ucon64rc for more)"},
 #endif
-  {"crc", NULL, "show CRC32 value of FILE"  //; this will also force calculation for\n"
+  {"crc", NULL, "show CRC32 value of ROM"  //; this will also force calculation for\n"
              /* "files bigger than %d Bytes (%.4f Mb)" */},
-  {"sha1", NULL, "show SHA1 value of FILE"},
-  {"md5", NULL, "show MD5 value of FILE"},
+  {"sha1", NULL, "show SHA1 value of ROM"},
+  {"md5", NULL, "show MD5 value of ROM"},
   {"ls", NULL, "generate ROM list for all recognized ROMs"},
   {"lsv", NULL, "like " OPTION_LONG_S "ls but more verbose"},
 #ifdef  __MSDOS__
@@ -514,16 +514,12 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_UNIF, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_USMS, UCON64_N64, n64_usage,         WF_DEFAULT},
   {UCON64_V64, UCON64_N64, n64_usage,          WF_DEFAULT},
+
 #ifdef  PARALLEL
   // We have to add |WF_NO_ROM to the copier options workflow parameter in
   //  order to support dumping of cartridges or copier SRAM.
   {UCON64_XDEX, UCON64_N64, dex_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_XDJR, UCON64_N64, doctor64jr_usage,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_XF2A, UCON64_GBA, f2a_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_XF2AB, UCON64_GBA, f2a_usage,        WF_STOP|WF_NO_ROM},
-  {UCON64_XF2AC, UCON64_GBA, f2a_usage,        WF_STOP|WF_NO_ROM},
-  {UCON64_XF2AMULTI, UCON64_GBA, f2a_usage,    WF_DEFAULT|WF_STOP}, // send only
-  {UCON64_XF2AS, UCON64_GBA, f2a_usage,        WF_STOP|WF_NO_ROM},
   {UCON64_XFAL, UCON64_GBA, fal_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_XFALB, UCON64_GBA, fal_usage,        WF_STOP|WF_NO_ROM},
   {UCON64_XFALC, UCON64_GBA, fal_usage,        WF_STOP|WF_NO_ROM},
@@ -561,6 +557,13 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XSWCS, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XSWCC, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XV64, UCON64_N64, doctor64_usage,    WF_DEFAULT|WF_STOP|WF_NO_ROM},
+#endif // PARALLEL
+#if     defined PARALLEL || defined HAVE_USB_H
+  {UCON64_XF2A, UCON64_GBA, f2a_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM},
+  {UCON64_XF2AB, UCON64_GBA, f2a_usage,        WF_STOP|WF_NO_ROM},
+  {UCON64_XF2AC, UCON64_GBA, f2a_usage,        WF_STOP|WF_NO_ROM},
+  {UCON64_XF2AMULTI, UCON64_GBA, f2a_usage,    WF_DEFAULT|WF_STOP}, // send only
+  {UCON64_XF2AS, UCON64_GBA, f2a_usage,        WF_STOP|WF_NO_ROM},
 #endif
   {UCON64_Z64, UCON64_N64, n64_usage,          WF_DEFAULT},
 /*
@@ -713,7 +716,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_O, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_PAL, UCON64_NES, nes_usage,          WF_SWITCH},
   {UCON64_PATCH, UCON64_UNKNOWN, ucon64_patching_usage, WF_SWITCH},
-#ifdef  PARALLEL
+#if     defined PARALLEL || defined HAVE_USB_H
   {UCON64_PORT, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
 #endif
   {UCON64_Q, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},

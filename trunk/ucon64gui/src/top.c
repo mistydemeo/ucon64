@@ -24,7 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "html2gui/src/html2gui.h"
 #include "top.h"
 #include "misc.h"
-#include "backup/cdrw.h"
 
 void
 ucon64gui_top (void)
@@ -34,6 +33,10 @@ ucon64gui_top (void)
 #include "xpm/emulate.xpm"
 #include "xpm/icon.xpm"
 #include "xpm/back.xpm"
+#ifdef BACKUP_CD
+#include "xpm/cdrw.xpm"
+#include "xpm/cdrw2.xpm"
+#endif // BACKUP_CD
 
   char buf[FILENAME_MAX];
 
@@ -83,6 +86,26 @@ ucon64gui_top (void)
 
   h2g_ (" ");
 
+  if (ucon64gui.sub && ucon64gui.console)
+    {
+      char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
+      const char *p = NULL;
+
+      p = ucon64gui.console;
+
+      while (*p == '-') p++;
+      
+      sprintf (buf, "--emulate_%s", p);
+      h2g_input_text (buf,
+                  getProperty (ucon64gui.configfile, &buf[2], buf2, ""),
+                  45, 0, FALSE,
+                  "uCON64 can operate as frontend for many Emulators\n"
+                  "Enter here the commandline used for the emulator the name of the ROM will be attached to it");
+
+    }
+
+  ucon64gui_spacer ();
+
   h2g_input_submit ("CRC32", "--crc", "(--crc) show CRC32 value of ROM");
 
   h2g_ (" ");
@@ -96,8 +119,6 @@ ucon64gui_top (void)
   h2g_input_submit ("Truncate", "--strip",
                     "(--strip) strip Bytes from end of ROM; $FILE=VALUE");
 
-  ucon64gui_spacer ();
-
   h2g_input_submit ("Hexdump", "--hex", "(--hex) show ROM as hexdump");
 
   h2g_ (" ");
@@ -106,7 +127,7 @@ ucon64gui_top (void)
 
   h2g_ (" ");
 
-  h2g_input_submit ("Swap/(De)Interleave ROM", "--swap",
+  h2g_input_submit ("De-/Interleave", "--swap",
                     "(--swap) swap/(de)interleave ALL Bytes in ROM (1234<->2143)");
 
   ucon64gui_spacer ();
@@ -170,7 +191,28 @@ ucon64gui_top (void)
 
   ucon64gui_spacer();
 
-  ucon64gui_cdrw ();
+  h2g_img (cdrw_xpm, 0, 0, 0, NULL);
+
+  h2g_ (" Read/Write CD: ");
+  
+  h2g_input_image ("CD -> Image -> CD", "--xcdrw", cdrw2_xpm, 0, 0,
+                   "(--xcdrw) read/write IMAGE from/to CD-Writer; $ROM=CD_IMAGE\nreads automatically when $ROM does not exist");
+
+  ucon64gui_spacer ();
+ 
+  h2g_ ("Track Mode: ");
+
+  h2g_select ("file", 0, 0, "Choose the desired Track Mode here",
+    "MODE2_RAW (2352 Bytes; default)",
+    "MODE2_RAW",
+    "MODE1 (2048 Bytes; standard ISO9660)",
+    "MODE1",
+    "MODE1_RAW (2352 Bytes)",
+    "MODE1_RAW",
+    "MODE2 (2336 Bytes)",
+    "MODE2"
+    ,0);
+
 #endif // BACKUP_CD
 
 
@@ -245,3 +287,6 @@ ucon64gui_top (void)
 
   h2g_br ();
 }
+
+
+

@@ -35,9 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "nes/nes.h"
 #include "gb/gb.h"
 
-#include "backup/swc.h"
-#include "backup/cdrw.h"
-
 const char *ucon64gui_title = "uCON64gui " UCON64GUI_VERSION " (for uCON64 " UCON64_VERSION_S ") 2002 by NoisyB ";
 
 
@@ -268,7 +265,8 @@ html2gui_request (const char *uri, const char *query)
   argc = cmd2args (argv, cmdline);
 
   sprintf (buf, "%s %s", cmdline,
-           ucon64gui.console);
+           NULL_TO_EMPTY (ucon64gui.console));
+
 
   if (ucon64gui.rom[0])
     {
@@ -290,15 +288,16 @@ html2gui_request (const char *uri, const char *query)
     {
       switch (c)
         {
-#if 0
           case UCON64_ROM:
-            ucon64gui.rom = optind;
+            strcpy (ucon64gui.rom, optindex);
+            ucon64gui_root ();
             return;
             
           case UCON64_FILE:
-            ucon64gui.file = optind;
+            strcpy (ucon64gui.file, optindex);
+            ucon64gui_root ();
             return;
-#endif
+
           case UCON64_SNES:
             ucon64gui.sub = 1;
             ucon64gui.console =  "--snes";

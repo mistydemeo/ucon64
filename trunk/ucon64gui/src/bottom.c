@@ -30,27 +30,6 @@ ucon64gui_bottom (void)
 {
 #include "xpm/icon_16x16.xpm"
 
-  if (ucon64gui.sub && ucon64gui.console)
-    {
-      char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
-      const char *p = NULL;
-
-      ucon64gui_divider ();
-
-      p = ucon64gui.console;
-
-      while (*p == '-') p++;
-      
-      sprintf (buf, "--emulate_%s", p);
-      h2g_ (&buf[2]);
-      h2g_ (" = ");
-      h2g_input_text (buf,
-                  getProperty (ucon64gui.configfile, &buf[2], buf2, ""),
-                  50, 0, FALSE,
-                  "uCON64 can operate as frontend for many Emulators\n"
-                  "Enter here the commandline used for the emulator the name of the ROM will be attached to it");
-
-    }
   ucon64gui_spacer ();
   
   h2g_img (icon_16x16_xpm, 0, 0, 0, "uCON64gui");

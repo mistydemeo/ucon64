@@ -186,6 +186,7 @@ remove_mgd_id (char *name, const char *id)
 
 void
 mgd_make_name (const char *filename, const char *prefix, int size, char *name)
+// these characters are also valid in MGD file names: !@#$%^&_
 {
   char *p, *fname, *size_str = 0, *suffix = 0;
   int n;
@@ -267,10 +268,20 @@ mgd_make_name (const char *filename, const char *prefix, int size, char *name)
           size_str = "2";
           suffix = ".040";
         }
+      else if (size <= 3 * MBIT)
+        {
+          size_str = "3";
+          suffix = ".030";
+        }
       else if (size <= 4 * MBIT)
         {
           size_str = "4";
           suffix = ".048";
+        }
+      else if (size <= 6 * MBIT)
+        {
+          size_str = "6";
+          suffix = ".058";
         }
       else // MGD supports PC-Engine games with sizes up to 8 Mbit
         {

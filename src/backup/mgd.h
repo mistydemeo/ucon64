@@ -81,7 +81,9 @@ game size       # of files      names           MULTI-GD
 ================================================================
 1M              1               PC1XXX.040      PC1XXX
 2M              1               PC2XXX.040      PC2XXX
+3M              1               PC2XXX.030      PC3XXX
 4M              1               PC4XXX.048      PC4XXX
+6M              1               PC2XXX.058      PC6XXX
 8M              1               PC8XXX.058      PC8XXX
 
 Game Gear:

@@ -20,7 +20,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <a name="1"><b>Q1</b>: Who develops uCON64?</a><br>
 <b>A</b>: Written/modified by:<br>
    1999 - 2002 NoisyB (Dirk) <a href="mailto:noisyb@gmx.net">noisyb@gmx.net</a><br>
-   2001 - 2002 dbjh<br>
+   2001 - 2003 dbjh<br>
 <br>
    Uses code (or at least ideas) from:
 <br>
@@ -126,7 +126,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <tr>
   <td><tt>John&nbsp;Weidman</tt></td>
   <td><a href="mailto:jweidman@sonic.net"><tt>jweidman@sonic.net</tt></a></td>
-  <td><tt>Game Doctor ROM file support (SNES), new BS detection, SNES cracks
+  <td><tt>Game Doctor support (SNES), new BS detection, SNES cracks
           &amp; NTSC/PAL fixes</tt></td>
 </tr>
 <tr>
@@ -381,7 +381,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    type based on a <i>struct</i> should have the same prefix and the suffix
    "_t". Example:<br>
 <pre>
- typedef struct
+ typedef struct st_unif_chunk
  {
    unsigned long id;
    unsigned long length;

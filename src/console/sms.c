@@ -536,14 +536,21 @@ sms_header_len (void)
         {
           ptr = buffer;
           /*
-            A few games contain the search string twice (Alien 3 (UE) [!],
-            Back to the Future 3 (UE) [!]), with the last occurrence being the
-            correct one. It's probably best to search for the last occurrence
-            (instead of searching twice).
+            A few games contain several copies of the identification string
+            (Alien 3 (UE) [!] (2 copies), Back to the Future 3 (UE) [!] (2
+            copies), Sonic Spinball (UE) [!] (7 copies)). The "correct" one is
+            the last where the corresponding check sum bytes are non-zero...
+            However, finding *a* occurence is more important than the check sum
+            bytes being non-zero.
           */
           while ((ptr = (char *) memmem2 (ptr, SEARCHBUFSIZE - (ptr - buffer),
                    search_str[n], 8, 0)) != NULL)
-            ptr2 = ptr++;
+            {
+              if (!ptr2 ||
+                  (ptr - buffer >= 12 && ptr[10] != 0 && ptr[11] != 0))
+                ptr2 = ptr;
+              ptr++;
+            }
           if (ptr2)
             {
               n = ptr2 - buffer - SMS_HEADER_START;
@@ -599,7 +606,7 @@ sms_init (st_rominfo_t *rominfo)
   //  The init function for Genesis files is called before this function so it
   //  is alright to set result to 0
   if ((buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 6) ||
-      !(memcmp (sms_header.signature, "TMR SEGA", 8) &&
+      !(memcmp (sms_header.signature, "TMR SEGA", 8) &&  // SMS or GG
         memcmp (sms_header.signature, "TMR ALVS", 8) &&  // SMS
         memcmp (sms_header.signature, "TMR SMSC", 8) &&  // SMS (unofficial)
         memcmp (sms_header.signature, "TMG SEGA", 8)) || // GG
@@ -668,7 +675,7 @@ sms_init (st_rominfo_t *rominfo)
   strcat (rominfo->misc, (char *) buf);
 
   rominfo->console_usage = sms_usage[0].help;
-  rominfo->copier_usage = rominfo->buheader_len ? smd_usage[0].help : mgd_usage[0].help;
+  rominfo->copier_usage = rominfo->interleaved ? smd_usage[0].help : mgd_usage[0].help;
 
   return result;
 }

@@ -24,6 +24,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "backup/swc.h"
 
+#include "xpm/trans_1x3.xpm"
+#include "xpm/icon_16x16.xpm"
+#include "xpm/icon.xpm"
+#include "xpm/open.xpm"
+
 void
 ucon64_bottom (void)
 {

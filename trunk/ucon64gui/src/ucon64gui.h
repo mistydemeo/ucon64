@@ -25,18 +25,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "html2gui/src/html2gui.h"
 
-//#include "xpm/snes.xpm"
-//#include "xpm/snes2.xpm"
-//#include "xpm/snes3.xpm"
-#include "xpm/snes_96.xpm"
-#include "xpm/snes2_96.xpm"
-#include "xpm/snes3_96.xpm"
-#include "xpm/back.xpm"
-#include "xpm/open.xpm"
-#include "xpm/icon.xpm"
-#include "xpm/trans_1x3.xpm"
-#include "xpm/icon_16x16.xpm"
-
 #ifndef MAXBUFSIZE
 #define MAXBUFSIZE 32768
 #endif

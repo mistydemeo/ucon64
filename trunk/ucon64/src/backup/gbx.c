@@ -786,7 +786,7 @@ set_sram_bank (unsigned char bank)
         {
         case MBC1:
           set_bank (0x6000, 1);
-          set_bank (0x4000, bank & 3);
+          set_bank (0x4000, (unsigned char) (bank & 3));
           break;
         case MBC3:
         case MBC5:
@@ -807,9 +807,9 @@ set_bank2 (unsigned int bank)
     case BUNG:
     case UNKNOWN_MBC:
     case MBC5:
-      set_bank (0x2000, bank);
+      set_bank (0x2000, (unsigned char) bank);
       if (eeprom_type != WINBOND)
-        set_bank (0x3000, bank >> 8);
+        set_bank (0x3000, (unsigned char) (bank >> 8));
       break;
     case MBC1:
       set_bank (0x6000, 0);

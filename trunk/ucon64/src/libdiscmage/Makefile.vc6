@@ -1,5 +1,5 @@
 DLOPEN=1
-#USE_ZLIB=1
+USE_ZLIB=1
 
 CC=cl.exe
 CFLAGS=/nologo /W3 /O2 /DHAVE_CONFIG_H /DDLL

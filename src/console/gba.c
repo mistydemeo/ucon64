@@ -290,7 +290,7 @@ gba_chk (st_rominfo_t *rominfo)
 
 int
 gba_sram (void)
-// This function is based on Omar Kilani's gbautil 1.1
+// This function is based on Omar Kilani's gbautil 1.1
 {
   unsigned char st_orig[2][10] =
     {
@@ -386,7 +386,7 @@ gba_sram (void)
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
-  if (!(buffer = (unsigned char *) calloc (1, fsize + 1)))
+  if (!(buffer = (unsigned char *) malloc (fsize)))
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], fsize);
       fclose (destfile);
@@ -417,7 +417,7 @@ gba_sram (void)
     printf ("version: %d.%d.%d; offset: 0x%08x\n", major, minor, micro, ptr - buffer);
   if (minor > 2)
     {
-      fputs ("ERROR: ROMs with an EEPROM minor version higher than 2 are not yet supported\n", stderr);
+      fputs ("ERROR: ROMs with an EEPROM minor version higher than 2 are not supported\n", stderr);
       free (buffer);
       fclose (destfile);
       return -1;
@@ -478,7 +478,7 @@ gba_sram (void)
       p_repl[minor - 1][184] = (unsigned char) (st_off + 0x21);
       p_repl[minor - 1][186] = (unsigned char) (st_off >> 16);
 
-      if (*--bufferptr == 0xff)
+      if (*(bufferptr - 1) == 0xff)
         p_repl[minor - 1][185] = (unsigned char) (st_off >> 8);
       else
         {
@@ -489,7 +489,6 @@ gba_sram (void)
       // tell the calling function where the SRAM function is (p_off)
       st_repl[minor - 1][5] = (unsigned char) (p_off >> 8);
       st_repl[minor - 1][6] = (unsigned char) (p_off >> 16);
-      bufferptr++;
       break;
     case 2:
       // offsets to the caller function
@@ -497,7 +496,7 @@ gba_sram (void)
       p_repl[minor - 1][165] = (unsigned char) (st_off >> 8);
       p_repl[minor - 1][166] = (unsigned char) (st_off >> 16);
 
-      // tell the calling function where the SRAM function is (p_off)
+      // tell the calling function where the SRAM function is
       st_repl[minor - 1][7] = (unsigned char) (p_off >> 8);
       st_repl[minor - 1][8] = (unsigned char) (p_off >> 16);
       break;

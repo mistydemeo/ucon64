@@ -72,8 +72,8 @@ const st_usage_t n64_usage[] =
                        "the SRAM must have a size of 512 Bytes\n"
                        "this option generates a ROM which can be used to transfer\n"
                        "SRAMs to your console"},
-    {"usms", "SMSROM", "Jos Kwanten's ultraSMS (Sega Master System/GameGear emulator);\n"
-                       "ROM should be Jos Kwanten's ultraSMS ROM image\n"
+    {"usms", "SMSROM", "Jos Kwanten's UltraSMS (Sega Master System/GameGear emulator);\n"
+                       "ROM should be Jos Kwanten's UltraSMS ROM image\n"
                        "works only for SMSROMs which are <= 4 Mb in size"},
     {"chk", NULL, "fix ROM checksum\n"
               "supports only 6101 and 6102 boot codes"},
@@ -330,26 +330,31 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
       int size = q_fsize (smsrom);
       // must be smaller than 4 Mbit, 524288 bytes will be inserted
       //  from 1b410 to 9b40f (7ffff)
-      if (size > ((4 * MBIT) - 1))
+      if (size > 4 * MBIT)
         {
-          fprintf (stderr, "ERROR: The Sega Master System/GameGear ROM must be smaller than 524288 Bytes\n");
+          fprintf (stderr, "ERROR: The Sega Master System/GameGear ROM must be 524288 Bytes or less\n");
           return -1;
         }
 
-      if (!(usmsbuf = (char *) malloc ((size + 2) * sizeof (char))))
+      if (!(usmsbuf = (char *) malloc (size + 2)))
         return -1;
       q_fread (usmsbuf, 0, size, smsrom);
 
       if (rominfo->interleaved != 0)
         mem_swap (usmsbuf, size);
 
-      strcpy (dest_name, "patched.v64");
+      strcpy (dest_name, "Patched.v64");
       ucon64_file_handler (dest_name, NULL, 0);
+      q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len,
+        ucon64.file_size, dest_name, "wb");
       q_fwrite (usmsbuf, N64_HEADER_START + rominfo->buheader_len + 0x01b410,
         size, dest_name, "r+b");
 
       free (usmsbuf);
+      printf (ucon64_msg[WROTE], dest_name);
     }
+#if 0
+// What is this code? - dbjh
   else
     {
       strcpy (dest_name, ucon64.rom);
@@ -360,9 +365,11 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
         0x01000 - 0x040, dest_name, "wb");
       if (rominfo->interleaved != 0)
         q_fswap (dest_name, 0, q_fsize (dest_name));
-    }
 
-  printf (ucon64_msg[WROTE], dest_name);
+      printf (ucon64_msg[WROTE], dest_name);
+    }
+#endif
+
   return 0;
 }
 

@@ -658,10 +658,10 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
 
       strcpy (fname_index, fname_dat);
       set_suffix (fname_index, ".idx");
+      if (access (fname_index, F_OK) != 0)      // for a "bad" DAT file
+        continue;
       fsize = q_fsize (fname_index);
 
-      if (access (fname_index, F_OK) != 0)      // for a bad DAT file
-        continue;
       if (!(p = (unsigned char *) malloc (fsize)))
         {
           fprintf (stderr, ucon64_msg[BUFFER_ERROR], fsize);

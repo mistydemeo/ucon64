@@ -322,7 +322,9 @@ main (int argc, char **argv)
   st_rominfo_t rom;
 
 #ifdef  ANSI_COLOR
+#ifndef __MSDOS__                               // TODO: colors for DOS port _via DOS_
   ucon64_ansi_color = isatty (STDOUT_FILENO);
+#endif
 #endif
 
   printf ("%s\n"

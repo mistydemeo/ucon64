@@ -1040,6 +1040,8 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
       if (surplus != 0)
         strcpy (names[n_names++], dest_name);
     }
+  if (n_names == 1)
+    names[0][7] = ' ';                          // has to be a space, '_' does not work
   return n_names;
 }
 

@@ -4981,7 +4981,14 @@ static FILE *nes_destfile;
 static int
 nes_compare (const void *key, const void *found)
 {
-  return ((st_nes_data_t *) key)->crc32 - ((st_nes_data_t *) found)->crc32;
+  /*
+    The return statement looks overly complicated, but is really necessary.
+    This contruct:
+      return ((st_nes_data_t *) key)->crc32 - ((st_nes_data_t *) found)->crc32;
+    does *not* work correctly for all cases.
+  */
+  return ((int64_t) ((st_nes_data_t *) key)->crc32 -
+          (int64_t) ((st_nes_data_t *) found)->crc32) / 2;
 }
 
 
@@ -7167,7 +7174,7 @@ nes_init (st_rominfo_t *rominfo)
 
   // additional info
   key.crc32 = ucon64.crc32;
-  info = bsearch (&key, &nes_data, sizeof nes_data / sizeof (st_nes_data_t) - 1,
+  info = bsearch (&key, nes_data, sizeof nes_data / sizeof (st_nes_data_t),
                   sizeof (st_nes_data_t), nes_compare);
   if (info)
       {

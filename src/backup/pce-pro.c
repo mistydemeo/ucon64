@@ -176,7 +176,7 @@ pce_write_rom (const char *filename, unsigned int parport)
         }
     }
   else
-    fprintf (stderr, "ERROR: PCE-PRO flash card (programmer) not detected\n");
+    fputs ("ERROR: PCE-PRO flash card (programmer) not detected\n", stderr);
 
   fclose (file);
   ttt_deinit_io ();

@@ -29,8 +29,9 @@ OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
         backup/yoko.obj backup/ssc.obj backup/interceptor.obj \
         backup/z64.obj backup/cd64.obj backup/doctor64.obj backup/doctor64jr.obj \
         backup/fal.obj backup/fig.obj backup/fpl.obj backup/gbx.obj backup/gd.obj \
-        backup/mgd.obj backup/smd.obj backup/swc.obj backup/ufo.obj backup/dex.obj \
-        backup/psxpblib.obj backup/mccl.obj backup/lynxit.obj backup/ffe.obj
+        backup/md.obj backup/mgd.obj backup/smd.obj backup/swc.obj backup/ufo.obj \
+        backup/dex.obj backup/psxpblib.obj backup/mccl.obj backup/lynxit.obj \
+        backup/ffe.obj
 !ifdef ZLIB
 LDFLAGS=$(LDFLAGS) zlib.lib
 OBJECTS=$(OBJECTS) unzip.obj map.obj miscz.obj
@@ -157,6 +158,7 @@ backup/fig.obj: backup/fig.h console/snes.h $(UCON64_STD_H)
 backup/fpl.obj: backup/fpl.h $(UCON64_STD_H)
 backup/gbx.obj: backup/gbx.h $(UCON64_STD_H)
 backup/gd.obj: backup/gd.h console/snes.h $(UCON64_STD_H)
+backup/md.o: backup/md.h $(UCON64_STD_H)
 backup/mgd.obj: backup/mgd.h $(UCON64_STD_H)
 backup/smd.obj: backup/smd.h backup/ffe.h $(UCON64_STD_H)
 backup/swc.obj: backup/swc.h backup/ffe.h console/snes.h $(UCON64_STD_H)

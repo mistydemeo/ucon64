@@ -326,7 +326,7 @@ callibrate (const char *s, int len, FILE *fh)
   size = ftell (fh);
   fseek (fh, pos, SEEK_SET);
 
-  for (; pos < size - len && tries < 100000; pos++, tries++)
+  for (; pos < size - len && tries < 32768; pos++, tries++)
     {
       fseek (fh, pos, SEEK_SET);
       fread (&buf, len, 1, fh);
@@ -347,6 +347,7 @@ callibrate (const char *s, int len, FILE *fh)
 
 const dm_track_t *
 dm_track_init (dm_track_t *track, FILE *fh)
+#if 0
 {
   int x = 0, identified = 0;
   const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
@@ -416,6 +417,80 @@ dm_track_init (dm_track_t *track, FILE *fh)
 
   return track;
 }
+#else
+{
+  int x = 0, identified = 0;
+  const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff, 0};
+  char value_s[32];
+
+  fseek (fh, track->track_start, SEEK_SET);
+#if 0
+  fread (value_s, 1, 16, fh);
+#else
+// callibrate
+  fseek (fh, -15, SEEK_CUR);
+  for (x = 0; x < 64; x++)
+    {
+      if (fread (&value_s, 1, 16, fh) != 16)
+        return NULL;
+      fseek (fh, -16, SEEK_CUR);
+      if (!memcmp (sync_data, value_s, 12))
+        break;
+      fseek (fh, 1, SEEK_CUR);
+    }
+#endif
+
+  if (!memcmp (sync_data, value_s, 12))
+    for (x = 0; track_probe[x].sector_size; x++)
+      if (track_probe[x].mode == value_s[15])
+        {
+          // search for valid PVD in sector 16 of source image
+          fseek (fh, (track_probe[x].sector_size * 16) +
+                 track_probe[x].seek_header + track->track_start, SEEK_SET);
+          fread (value_s, 1, 16, fh);
+
+          if (!memcmp (pvd_magic, &value_s, 8))
+            {
+              identified = 1;
+              break;
+            }
+        }
+
+  // no sync_data found? probably MODE1/2048
+  if (!identified)
+    {
+      x = 0;
+      if (track_probe[x].sector_size != 2048)
+        fprintf (stderr, "ERROR: dm_track_init()\n");
+
+      fseek (fh, (track_probe[x].sector_size * 16) +
+             track_probe[x].seek_header + track->track_start, SEEK_SET);
+      fread (value_s, 1, 16, fh);
+
+      if (!memcmp (pvd_magic, &value_s, 8))
+        identified = 1;
+    }
+
+  if (!identified)
+    {
+      fprintf (stderr, "ERROR: could not find iso header of current track\n");
+      return NULL;
+    }
+
+  track->sector_size = track_probe[x].sector_size;
+  track->mode = track_probe[x].mode;
+  track->seek_header = track_probe[x].seek_header;
+  track->seek_ecc = track_probe[x].seek_ecc;
+  track->iso_header_start = (track_probe[x].sector_size * 16) + track_probe[x].seek_header;
+  track->desc = dm_get_track_desc (track->mode, track->sector_size, TRUE);
+
+  return track;
+}
+#endif
 
 
 dm_image_t *
@@ -499,9 +574,10 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
       fflush (stdout);
 #endif
         
+#if 0
       if (dm_track_init (&track2, fh) != NULL)
         track->iso_header_start = (track2.sector_size * 16) + track2.seek_header;
-
+#endif
       track->desc = dm_get_track_desc (track->mode, track->sector_size, TRUE);
     }
 

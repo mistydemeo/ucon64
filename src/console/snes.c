@@ -1850,9 +1850,9 @@ snes_init (st_rominfo_t *rominfo)
     type = SMC;
 
   /*
-    x can be better trusted than fig_rom, but x being 0xffff is definitely not
-    a guarantee that rominfo->buheader_len already has the right value (e.g.
-    Earthworm Jim (U), Alfred Chicken (U|E), Soldiers of Fortune (U)).
+    x can be better trusted than type == FIG, but x being 0xffff is definitely
+    not a guarantee that rominfo->buheader_len already has the right value
+    (e.g. Earthworm Jim (U), Alfred Chicken (U|E), Soldiers of Fortune (U)).
   */
   if (type != MGD && type != SMC)
     {
@@ -2066,14 +2066,14 @@ snes_init (st_rominfo_t *rominfo)
   strcat (rominfo->misc, buf);
 
   if (!bs_dump)
-  {
-    snes_sramsize = snes_header.sram_size ? (1 << (snes_header.sram_size + 3)) * 128 : 0;
-    if (!snes_sramsize)
-      sprintf (buf, "Save RAM: No\n");
-    else
-      sprintf (buf, "Save RAM: Yes, %d kBytes\n", snes_sramsize / 1024);
-    strcat (rominfo->misc, buf);
-  }
+    {
+      snes_sramsize = snes_header.sram_size ? (1 << (snes_header.sram_size + 3)) * 128 : 0;
+      if (!snes_sramsize)
+        sprintf (buf, "Save RAM: No\n");
+      else
+        sprintf (buf, "Save RAM: Yes, %d kBytes\n", snes_sramsize / 1024);
+      strcat (rominfo->misc, buf);
+    }
 
   sprintf (buf, "Version: 1.%d", snes_header.version);
   strcat (rominfo->misc, buf);

@@ -1,5 +1,5 @@
 /*
-gbx.c - Gameboy Xchanger support for uCON64
+gbx.c - Gameboy Xchanger/GBDoctor support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh

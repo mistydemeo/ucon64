@@ -34,7 +34,7 @@ Q12: <a href="#12">Which backup devices are supported by uCON64?</a><br>
 Q13: <a href="#13">I use Windows XP (NT/2000). When I try to run ucon64.exe under command.com (start -> Run...
    -> command) uCON64 crashes. What do I do wrong?</a><br>
 <br>
-Q14: <a href="#14">I don't like the commandline.. are there graphical frontends available?</a><br>
+Q14: <a href="#14">I don't like the command line. Are there graphical frontends available?</a><br>
 <br>
 Q15: <a href="#15">Where do I get PPF, APS or IPS patches?</a><br>
 <br>
@@ -57,6 +57,10 @@ Q23: <a href="#23">What is the meaning of the -col option (Super Nintendo)?</a><
 <br>
 Q24: <a href="#24">Why does uCON64 create ucon64.cfg (DOS executable) or .ucon64rc (Win32 executable)
                    files all over the place under DOS and Windows 9x (command.com)?</a><br>
+<br>
+Q25: <a href="#25">When I try to create a multirom under Windows I get the message
+                   "The system cannot execute the specified program." (or something like that).
+                   What does that mean?</a><br>
 <br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
@@ -205,7 +209,7 @@ Q24: <a href="#24">Why does uCON64 create ucon64.cfg (DOS executable) or .ucon64
 <b>A</b>: You shouldn't use command, use cmd instead.<br>
 <br>
 <p>
-<a name="14"><a name="frontend"><b>Q14</b>: I don't like the commandline.. are there graphical frontends available?</a><br>
+<a name="14"><a name="frontend"><b>Q14</b>: I don't like the command line. Are there graphical frontends available?</a><br>
 <b>A</b>: Yes, have a look at <a href="http://ucon64.sourceforge.net/index2.html#ucon64gui" target="_blank">http://ucon64.sourceforge.net/index2.html#ucon64gui</a><br>
 <br>
 <p>
@@ -255,10 +259,12 @@ Q24: <a href="#24">Why does uCON64 create ucon64.cfg (DOS executable) or .ucon64
 <a name="21"><b>Q21</b>: uCON64 exits with the message "Flash cart erase failed!" when I try
    to write a multirom to my flash card. What's wrong?</a><br>
 <b>A</b>: The multirom file you created is too large for your flash card. When you make a multirom
-   file don't forget that the loader or "game pack" file also needs some space (32kB) on the
-   flash card. Use -multi1 or -multi2 to create a multirom that is truncated to 64Mb (8MB) or
-   128Mb (16MB) respectively. Note that uCON64 always truncates multirom files to 256Mb
-   (32MB).<br>
+   file don't forget that the loader or "game pack" file also needs some space (32 kB) on the
+   flash card. Use -multi1 or -multi2 to create a multirom that is truncated to 64 Mb (8 MB) or
+   128 Mb (16 MB) respectively. Note that uCON64 always truncates multirom files to 256 Mb
+   (32 MB).<br>
+   Just like Visoly's tool it is possible to get the same message when the multirom is
+   small enough. It will probably work when you try again (with the same multirom).<br>
 <br>
 <p>
 <a name="22"><b>Q22</b>: Where can I get that loader or "game pack" file?</a><br>
@@ -288,7 +294,16 @@ Q24: <a href="#24">Why does uCON64 create ucon64.cfg (DOS executable) or .ucon64
    c:\autoexec.bat:<br>
    set HOME=c:\ucon64<br>
    and reboot. You can also type that line on the command line. The directory c:\ucon64 must exist, of course.
-   If you want uCON64 to use another directory you should change c:\ucon64 to a directory of your choice.
+   If you want uCON64 to use another directory you should change c:\ucon64 to a directory of your choice.<br>
+<br>
+<p>
+<a name="25"><b>Q25</b>: When I try to create a multirom under Windows I get the message
+                   "The system cannot execute the specified program." (or something like that).
+                   What does that mean?</a><br>
+<b>A</b>: You can get that message with the DOS executable if you pass more than 127
+   characters as argument to uCON64. There are two solutions:<br>
+   1.) Use the Win32 binary (download it from the uCON64 homepage).<br>
+   2.) Rename the ROMs so that their combined names are short enough to fit into 127 characters.<br>
 <br>
 <br>
 <br>

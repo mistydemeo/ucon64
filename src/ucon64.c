@@ -171,6 +171,7 @@ const struct option long_options[] = {
     {"lnx", 0, 0, UCON64_LNX},
     {"logo", 0, 0, UCON64_LOGO},
     {"ls", 0, 0, UCON64_LS},
+    {"lsfid", 0, 0, UCON64_LSFID},
     {"lsv", 0, 0, UCON64_LSV},
     {"lynx", 0, 0, UCON64_LYNX},
     {"lyx", 0, 0, UCON64_LYX},
@@ -835,6 +836,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
+    "  " OPTION_LONG_S "lsfid       generate ROM list in FILE_ID.DIZ format; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
     "                  this is often used by people who lose control of their ROMs\n"
     "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"

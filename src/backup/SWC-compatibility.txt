@@ -1,7 +1,7 @@
 A Super Wild Card compatibility list
-Version: 1.9
+Version: 1.10
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 19 january 2003
+Date: 20 january 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
 Software: uCON64 1.9.8beta7
 
@@ -31,13 +31,14 @@ the copy protection, but not the NTSC/PAL protection.
 Non-playing music seems to be a BS-specific problem.
 For some games I put an extra comment after the character sequence "<=". In
 some comments I mention the so-called emulation mode select byte. This is the
-byte at offset 2 in the header.
+byte at offset 2 in the header. You can check the value of the emulation mode
+select byte by passing the command line option -dbuh to uCON64.
 I have sent all games to the Super Wild Card via a parallel cable. Note that
 for LoROM games that don't use SRAM uCON64 adjusts the emulation mode select
 byte before sending the game. This causes that some games don't have code 3,
 because uCON64 already makes the required modification. For example, if Addams
 Family Values is loaded from diskette the emulation mode select byte should
-have the value 0x2c instead of the value 0x0c.
+have the value 0x2c instead of the value 0x0c (before the file is split).
 
 
 Code    Game
@@ -93,6 +94,7 @@ Code    Game
 0 -     BS Wario (J)
 0 -     BS Yoshi No Panepon (J)
 0 -     BS Zelda no Densetsu - Kamigami no Triforce (J)
+0 -     BS Zootte Mahjong! IVT (J)
 0 -     Bubsy II (U)
 0 -     Bubsy in Claws Encounters of the Furred Kind (E)
 0 -     Castlevania - Vampire's Kiss (E)

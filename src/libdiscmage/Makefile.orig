@@ -17,7 +17,7 @@ endif
 LDFLAGS=-s
 
 LIBNAME=discmage
-OBJECTS=libdiscmage.o cdi.o nero.o sheets.o dllinit.o misc.o
+OBJECTS=libdm_misc.o cdi.o nero.o sheets.o dllinit.o misc.o
 
 
 # The test for Cygwin should be done before the test for DJGPP, because the
@@ -49,8 +49,8 @@ ifdef DJGPP
 
 OBJECTS+=dxe_misc.o
 # This file is only really necessary when zlib support is/should be enabled, 
-#  but it's wise to use as little conditionally compiled code as possible. 
-#  Besides it currently gets used even if zlib support is disabled.
+# but it's wise to use as little conditionally compiled code as possible.
+# Besides it currently gets used even if zlib support is disabled.
 
 GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/2.953
 LIBS+=-L$(GCCA_DIR) -lgcc
@@ -185,13 +185,9 @@ endif                                   # cygwin
 #endif
 
 # Dependencies
-libdiscmage/libdiscmage.o: libdiscmage/libdiscmage.h \
-                           libdiscmage/libdiscmage_cfg.h \
-                           libdiscmage/dxedll_priv.h
-libdiscmage/nero.o: libdiscmage/libdiscmage.h libdiscmage/nero.h \
-                    libdiscmage/cdi.h config.h libdiscmage/dxedll_priv.h
-libdiscmage/cdi.o: libdiscmage/libdiscmage.h libdiscmage/cdi.h \
-                   libdiscmage/dxedll_priv.h
-libdiscmage/sheets.o: libdiscmage/libdiscmage.h libdiscmage/dxedll_priv.h
-libdiscmage/dllinit.o: libdiscmage/libdiscmage.h libdiscmage/dxedll_priv.h
-libdiscmage/misc.o: libdiscmage/dxedll_priv.h
+libdiscmage.o: libdiscmage.h misc.h dxedll_priv.h
+nero.o: libdiscmage.h misc.h ../config.h nero.h cdi.h dxedll_priv.h
+cdi.o: libdiscmage.h misc.h cdi.h dxedll_priv.h
+sheets.o: libdiscmage.h misc.h dxedll_priv.h
+dllinit.o: libdiscmage.h misc.h dxedll_priv.h
+misc.o: misc.h dxedll_priv.h

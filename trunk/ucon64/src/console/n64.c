@@ -68,7 +68,7 @@ const st_usage_t n64_usage[] =
 #endif
     {"bot", "BOOTCODE", "add/extract BOOTCODE (4032 Bytes) to/from ROM;\n"
                         "extracts automatically if BOOTCODE does not exist"},
-    {"lsram", "SRAM", "LAC's Makesram; ROM should be LAC's ROM image\n"
+    {"lsram", "SRAM", "LaC's SRAM upload tool; ROM should be LaC's ROM image\n"
                        "the SRAM must have a size of 512 Bytes\n"
                        "this option generates a ROM which can be used to transfer\n"
                        "SRAMs to your console"},
@@ -144,7 +144,7 @@ static int n64_chksum (st_rominfo_t *rominfo);
 
 
 // This is the support of LaC's makesram routine for uploading
-//  SRAM files to a Cart SRAM. The .v64 file is his work, not mine
+//  SRAM files to a cartridge's SRAM. The .v64 file is his work, not mine
 int
 n64_sram (st_rominfo_t *rominfo, const char *sramfile)
 {
@@ -160,7 +160,7 @@ n64_sram (st_rominfo_t *rominfo, const char *sramfile)
 
   q_fread (sram, 0, N64_SRAM_SIZE, sramfile);
 
-  if (rominfo->interleaved != 0)
+  if (rominfo->interleaved)
     mem_swap (sram, N64_SRAM_SIZE);
 
   strcpy (dest_name, ucon64.rom);
@@ -226,7 +226,7 @@ n64_n (st_rominfo_t *rominfo, const char *name)
   strncpy (buf, name, strlen (name) > N64_NAME_LEN ?
                         N64_NAME_LEN : strlen (name));
 
-  if (rominfo->interleaved != 0)
+  if (rominfo->interleaved)
     mem_swap (buf, N64_NAME_LEN);
 
   strcpy (dest_name, ucon64.rom);
@@ -259,7 +259,7 @@ n64_chk (st_rominfo_t *rominfo)
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
-  // n64crc is set by n64_checksum() when called from n64_init()
+  // n64crc is set by n64_chksum() when called from n64_init()
   for (x = 0; x < 4; x++)
     {
       q_fputc (dest_name,
@@ -289,14 +289,14 @@ n64_chk (st_rominfo_t *rominfo)
 int
 n64_bot (st_rominfo_t *rominfo, const char *bootfile)
 {
-  char buf[FILENAME_MAX], dest_name[FILENAME_MAX];
+  char buf[N64_BOT_SIZE], dest_name[FILENAME_MAX];
 
   strcpy (dest_name, ucon64.rom);
   if (!access (bootfile, F_OK))
     {
       q_fread (buf, 0, N64_BOT_SIZE, bootfile);
 
-      if (rominfo->interleaved != 0)
+      if (rominfo->interleaved)
         mem_swap (buf, N64_BOT_SIZE);
 
       ucon64_file_handler (dest_name, NULL, 0);
@@ -311,7 +311,7 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
       q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len + 0x040,
         N64_BOT_SIZE, dest_name, "wb");
 
-      if (rominfo->interleaved != 0)
+      if (rominfo->interleaved)
         q_fswap (dest_name, 0, q_fsize (dest_name));
     }
 
@@ -341,7 +341,7 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
       memset (usmsbuf, 0xff, 4 * MBIT);
       q_fread (usmsbuf, 0, size, smsrom);
 
-      if (rominfo->interleaved != 0)
+      if (rominfo->interleaved)
         mem_swap (usmsbuf, size);
 
       strcpy (dest_name, "Patched.v64");
@@ -364,7 +364,7 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
 
       q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len + 0x040,
         0x01000 - 0x040, dest_name, "wb");
-      if (rominfo->interleaved != 0)
+      if (rominfo->interleaved)
         q_fswap (dest_name, 0, q_fsize (dest_name));
 
       printf (ucon64_msg[WROTE], dest_name);

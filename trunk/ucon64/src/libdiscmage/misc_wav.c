@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "misc.h"
 
 void
-writewavheader (FILE * fh, int track_length)
+writewavheader (FILE *fh, int track_length)
 {
   typedef struct
     {

@@ -10,9 +10,9 @@ INSTALL = install -c
 LIBTOOL = libtool
 
 CC=gcc
-CFLAGS=-I. -I.. -Wall -O3 @DEFS@
-# The order of . and .. is important if the header files are specified
-# between angle brackets
+CFLAGS=-I. -I.. -Wall -O3 -DDLL @DEFS@
+# The order of . and .. is important if header files are specified between
+# angle brackets
 ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
@@ -62,7 +62,6 @@ OBJECTS+=dxe_misc.o
 GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/2.953
 LIBS+=-L$(GCCA_DIR) -lgcc
 
-CFLAGS+=-DDXE
 DLLFLAGS=$(OBJECTS) $(LIBS) $(LDFLAGS)  
 # $(LDFLAGS) must come after $(OBJECTS)
 FULLLIBNAME=$(LIBNAME).dxe

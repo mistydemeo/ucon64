@@ -1,6 +1,7 @@
 # Currently none of these codes are active, because they are all built in
-# uCON64. The have been put here for your convenience and as a reference
-# so that you don't have to look at the source code.
+# uCON64. They have been put here for your convenience and as a reference
+# so that you don't have to look at the source code. Read the FAQ for the
+# format.
 #
 # Of the following two groups of three only one should be enabled at one time
 # 02 01 01 70 02 01 01 70 d0 : 01:  02: ea ea : 0:   8f 9f : cf df

@@ -19,12 +19,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef DXE
+#ifndef DLL
 #include <stdio.h>
 #include <stdlib.h>
 #endif
 #include "map.h"
-#if     defined DJGPP && defined DXE
+#if     defined DJGPP && defined DLL
 #include "dxedll_priv.h"
 #endif
 

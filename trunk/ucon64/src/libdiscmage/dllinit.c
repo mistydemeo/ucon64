@@ -61,10 +61,6 @@ DllMain (HINSTANCE h, DWORD reason, LPVOID ptr)
                                                 //  of external libraries!
 #include "map.h"
 
-#if 0 // misc.c already includes map.c
-#define DXE                                     // signal that we include map.c from a DXE
-#include "map.c"
-#endif
 
 int dxe_init (void);
 void *dxe_symbol (char *symbol_name);

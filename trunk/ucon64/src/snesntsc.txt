@@ -1,7 +1,8 @@
 # Currently none of these codes are active, because they are all built in
-# uCON64. The have been put here for your convenience and as a reference
+# uCON64. They have been put here for your convenience and as a reference
 # so that you don't have to look at the source code. See the document
-# "NTSC-PAL notes.txt" for more detailed information.
+# "NTSC-PAL notes.txt" for more detailed information. Read the FAQ for the
+# format.
 #
 # 3f 21 02 10 f0:                   01: 02:  80:        0: 29 89
 # ad 3f 21 29 10 d0:                01: 02:  ea ea:     0

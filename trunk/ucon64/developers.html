@@ -144,10 +144,8 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
   <td><a href="mailto:joecool22us@yahoo.com"><tt>joecool22us@yahoo.com</tt></a><br>
       <a href="http://www.geocities.com/joecool22us/nsrt.htm" target="_blank">
         <tt>http://www.geocities.com/joecool22us/nsrt.htm</tt></a></td>
-  <td><tt>checksum algorithm for Momotaro Dentetsu Happy of NSRT, the BASIC
-          SNES ROM tool (BASIC also as in S-t-n's own foul language ;-) )
-          , their SNES add-on chip information page, SNES cracks and some other
-          info</tt></td>
+  <td><tt>checksum algorithm for Momotaro Dentetsu Happy of NSRT, their SNES
+          add-on chip information page, SNES cracks and some other info</tt></td>
 </tr>
 <tr>
   <td><tt>Gilles&nbsp;Vollant</tt></td>
@@ -235,7 +233,9 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <br>
 <p>
 <a name="6"><b>Q6</b>: How is the source of uCON64 organized?</a><br>
-<b>A</b>: The heart of uCON64 is ucon64.c/main()/rom. This <i>struct</i> is
+<b>A</b>: Note that the following information is "under construction". It will
+   soon be updated.<br>
+   The heart of uCON64 is ucon64.c/ucon64.rominfo. This <i>struct</i> is
    designed to hold all information you could get from a ROM.<br>
    uCON64 starts with the name of a ROM and possibly some arguments. Then it
    checks if a configuration file exists and creates one if that is not the
@@ -248,11 +248,13 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    arguments that will not result in an action by themselves, but they
    influence the other type of command line arguments, options. uCON64
    initializes ucon64.c/ucon64, based on the switches. This code can be found
-   in switches.c. This is also the place where ucon64.show_nfo is set. This
-   variable determines whether or not uCON64 displays ROM information.<br>
-   Then uCON64 calls ucon64.c/ucon64_init() which calls
-   ucon64.c/ucon64_console_probe(). The latter calls the init function for all
-   the supported console types if the user didn't use a force console switch.
+   in ucon64_opts.c/ucon64_switches(). This is also the place where
+   ucon64.c/ucon64.quiet is set. This variable determines whether or not uCON64
+   displays ROM information.<br>
+<!--
+   The latter calls the init function for all the supported console types if
+   the user didn't use a force console switch.
+-->
    For example the init function for SNES is console/snes.c/snes_init(), for
    NES console/nes.c/nes_init(). Each init function tries to determine if the
    ROM file belongs to its console type. If that is the case it returns 0,
@@ -261,21 +263,22 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    and creator of the game that can be used to fill ucon64.c/main()/rom. SNES
    ROM files are an example of this type of file. For other ROM file types this
    information is not present inside the ROM file. NES ROMs are an example of
-   that type. In that case uCON64 uses a large database in db.c to make it
-   possible to display the country, creator and full name of the game.
-   ucon64.c/ucon64_init() calls the function ucon64_db.c/ucon64_dbsearch() that
-   uses the CRC32 of the ROM file data to find the required information in the
-   database. If the information could be found ucon64_db.c/ucon64_dbsearch()
-   fills ucon64.c/main()/rom with it.<br>
-   After that if ucon64.show_nfo has the value UCON64_YES uCON64 will call
-   ucon64.c/ucon64_nfo() which displays the values and strings of
-   ucon64.c/main()/rom. For some options it doesn't make sense to display ROM
-   info. If one of those options has been specified on the command line
-   ucon64.show_nfo will be set to UCON64_NO.<br>
+   that type. In that case uCON64 uses the DAT files in the data file
+   directory. That makes it possible to display the full name of the game.
+   ucon64.c/ucon64_rom_handling() calls the function
+   ucon64_dat.c/ucon64_dat_search() that uses the CRC32 of the ROM file data to
+   find the required information in the DAT files. If the information could be
+   found ucon64_dat.c/ucon64_dat_search() fills ucon64.c/ucon64.dat with it.
+   ucon64.c/ucon64_rom_handling() copies the name to ucon64.rominfo->name.<br>
+   After that if ucon64.c/ucon64.quiet has a value smaller tan 1 uCON64 will
+   call ucon64.c/ucon64_nfo() which displays the values and strings of ucon64.
+   For some options it doesn't make sense to display ROM info. If one of those
+   options has been specified on the command line
+   (ucon64.c/ucon64.flags & WF_NFO) will be zero.<br>
    Then uCON64 starts scanning the command line for options. This code can be
-   found in options.c. From this code almost all operations of uCON64 are
-   executed. Under Unix this is also the point where root privileges are given
-   up with a call to misc.c/drop_privileges().<br>
+   found in ucon64_opts.c/ucon64_options(). From this code almost all
+   operations of uCON64 are executed. Under Unix this is also the point where
+   root privileges are given up with a call to misc.c/drop_privileges().<br>
 <br>
 <p>
 <a name="7"><b>Q7</b>: What coding style is preferred?</a><br>

@@ -2716,7 +2716,6 @@ argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
   fprintf (stderr, "argc:     %d\n", argc);
   for (pos = 0; pos < argc; pos++)
     fprintf (stderr, "argv[%d]:  %s\n", pos, argv[pos]);
-  fprintf (stderr, "\n");
 
   fflush (stderr);
 //#endif
@@ -2797,7 +2796,7 @@ stresc (char *dest, const char *src)
 }
 
 
-//#ifdef  DEBUG
+#ifdef  DEBUG
 static void
 strurl_test (st_strurl_t *url)
 {
@@ -2811,7 +2810,7 @@ strurl_test (st_strurl_t *url)
 
   fflush (stderr);
 }
-//#endif
+#endif
 
 
 st_strurl_t *
@@ -2829,9 +2828,9 @@ strurl (st_strurl_t *url, const char *url_s)
   if (!url_s[0])
     return NULL;
 
-//#ifdef  DEBUG
+#ifdef  DEBUG
   fprintf (stderr, "%s\n\n", url_s);
-//#endif
+#endif
 
   memset (url, 0, sizeof (st_strurl_t));
   strcpy (url->url_s, url_s);
@@ -2923,9 +2922,9 @@ strurl (st_strurl_t *url, const char *url_s)
     strcpy (url->file, "/");
 #endif
 
-//#ifdef  DEBUG
+#ifdef  DEBUG
   strurl_test (url);
-//#endif
+#endif
 
   return url;
 }

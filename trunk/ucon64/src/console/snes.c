@@ -2880,19 +2880,31 @@ snes_init (st_rominfo_t *rominfo)
   st_dump = 0;                                  // idem
 
   q_fread (&header, UNKNOWN_HEADER_START, UNKNOWN_HEADER_LEN, ucon64.rom);
-  if (header.id1 == 0xaa && header.id2 == 0xbb && header.type == 5)
+  if (header.id1 == 0xaa && header.id2 == 0xbb)
     {
-      rominfo->buheader_len = SWC_HEADER_LEN;
-      strcpy (rominfo->name, "Name: N/A");
-      rominfo->console_usage = NULL;
-      rominfo->copier_usage = swc_usage;
-      rominfo->maker = "Publisher: You?";
-      rominfo->country = "Country: Your country?";
-      rominfo->has_internal_crc = 0;
-      strcat (rominfo->misc, "Type: Super Wild Card SRAM file\n");
-      ucon64.split = 0;                         // SRAM files are never split
-      type = SWC;
-      return 0;                                 // rest is nonsense for SRAM file
+      if (header.type == 5 || header.type == 8)
+        {
+          rominfo->buheader_len = SWC_HEADER_LEN;
+          strcpy (rominfo->name, "Name: N/A");
+          rominfo->console_usage = NULL;
+          rominfo->copier_usage = swc_usage;
+          rominfo->maker = "Publisher: You?";
+          rominfo->country = "Country: Your country?";
+          rominfo->has_internal_crc = 0;
+          ucon64.split = 0;                     // SRAM & RTS files are never split
+          type = SWC;
+        }
+
+      if (header.type == 5)
+        {
+          strcat (rominfo->misc, "Type: Super Wild Card SRAM file\n");
+          return 0;                             // rest is nonsense for SRAM file
+        }
+      else if (header.type == 8)
+        {
+          strcat (rominfo->misc, "Type: Super Wild Card RTS file\n");
+          return 0;                             // rest is nonsense for RTS file
+        }
     }
 
   /*

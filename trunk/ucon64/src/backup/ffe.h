@@ -1,7 +1,7 @@
 /*
 ffe.h - General Front Far East copier routines for uCON64
 
-written by 2002 dbjh
+written by 2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -53,9 +53,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
              2 : Magic Griffin program (PC Engine)
              3 : Magic Griffin SRAM data
              4 : SNES program
-             5 : SWC & SMC password, SRAM data, saver data
+             5 : SWC & SMC password, SRAM data
              6 : Mega Drive program
              7 : SMD SRAM data
+             8 : SWC & SMC saver data
     11-511 - 0, reserved
 */
 
@@ -67,6 +68,7 @@ extern void ffe_init_io (unsigned int port);
 extern void ffe_deinit_io (void);
 extern void ffe_send_block (unsigned short address, unsigned char *buffer, int len);
 extern void ffe_send_command0 (unsigned short address, unsigned char byte);
+extern unsigned char ffe_send_command1 (unsigned short address);
 extern void ffe_send_command (unsigned char command_code, unsigned short a, unsigned short l);
 extern void ffe_receive_block (unsigned short address, unsigned char *buffer, int len);
 extern unsigned char ffe_receiveb (void);

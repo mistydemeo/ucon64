@@ -1,5 +1,5 @@
-A Super Wild Card Card compatibility list
-Version: 1.2
+A Super Wild Card compatibility list
+Version: 1.3
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
 Date: 10 december 2002
 Hardware: Super Wild Card 2.8cc 32 MBit PAL
@@ -29,7 +29,7 @@ Of course I tried to crack or fix the games that displayed a copy protection
 screen. The games that have that code can't be cracked with uCON64. I didn't
 bother to test other tools for these games, because the times I tried those
 tools in the past they were not better than uCON64. Besides, I mainly use
-GNU/Linux but those tools are all DOS programs. However most can only fix
+GNU/Linux but those tools are all DOS programs. However, most can only fix
 NTSC/PAL and SlowROM protections so by using them not much would be gained.
 The codes also indicate how "far" I could get with uCON64. For example, Diddy's
 Kong Quest (V1.1) (U) has code 7 instead of 6, because uCON64 is able to crack
@@ -46,7 +46,7 @@ Code    Game
 0 -     7th Saga, The (U)
 0 -     AAAHH!!! Real Monsters (U)
 0 -     Act Raiser 2 (E)
-4 -     Act Raiser 2 (U)
+4 -     Act Raiser 2 (U) <= level(s?) (Industen) can't be entered
 0 -     Act Raiser (U)
 0 -     Addams Family, The (E)
 0 -     Addams Family, The - Pugsley's Scavenger Hunt (Beta)
@@ -163,7 +163,8 @@ Code    Game
 0 -     Gradius III (U) [!]
 0 -     Harvest Moon (U)
 9 -     Hoshi no Kirby 3 (J)
-2 -     Illusion of Gaia (U).swc
+2 -     Illusion of Gaia (U)
+0 -     Illusion of Time (E)
 0 -     International Superstar Soccer Deluxe (E)
 0 -     International Superstar Soccer (E)
 2* + 9 - Jikkyou Oshaberi Parodius (J)

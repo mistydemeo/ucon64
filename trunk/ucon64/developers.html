@@ -255,6 +255,32 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    <b>Indentation</b><br>
    Two spaces instead of a real tab. The curly braces of functions should not
    be indented.<br>
+   If an <i>if</i> statement has an <i>else</i> part, that part should be
+   aligned with the <i>if</i> part. For a <i>do-while</i> compound statement,
+   <i>do</i> and <i>while</i> should also be aligned.<br>
+   If <i>else</i> is immediately followed by an <i>if</i> statement, the
+   <i>if</i> keyword together with the condition statement should be put on the
+   same line as the <i>else</i> keyword. Example: <br>
+<pre>
+   if (...)
+     {
+       ...
+     }
+   else if (...)
+     {
+       ...
+     }
+   else
+     {
+       ...
+     }
+</pre>
+   Note that this doesn't apply to the case where <i>else</i> is followed by a
+   curly brace.<br>
+<br>
+   <b>New lines</b><br>
+   The statement(s) for <i>if</i>, <i>while</i> and <i>for</i> should always
+   start on a new line. That also applies to a one-line statement.<br>
 <br>
    <b>Compound statements</b><br>
    The curly braces should be indented and the code of the compound statement

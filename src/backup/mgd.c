@@ -21,16 +21,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
+char *mgd_title = "Multi Game Doctor(2)/Multi Game Hunter/MGH/RAW\n"
+                  "19XX Bung Enterprises Ltd http://www.bung.com.hk\n"
+                  "?Makko Toys Co., Ltd.?";
+
 #ifdef BACKUP 
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "mgd.h"
-
-char *mgd_title = "Multi Game Doctor(2)/Multi Game Hunter/MGH/RAW\n"
-                  "19XX Bung Enterprises Ltd http://www.bung.com.hk\n"
-                  "?Makko Toys Co., Ltd.?";
 
 
 void

@@ -24,15 +24,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <time.h>
 #include "config.h"
+char *gbx_title = "GameBoy Xchanger/GBDoctor\n"
+                  "19XX Bung Enterprises Ltd http://www.bung.com.hk";
+
 #ifdef BACKUP
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "gbx.h"
-
-char *gbx_title = "GameBoy Xchanger/GBDoctor\n"
-                  "19XX Bung Enterprises Ltd http://www.bung.com.hk";
 
 
 /* Modified version of gbt15.c - (C) Bung Enterprises */

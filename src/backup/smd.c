@@ -48,6 +48,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <time.h>
 #include "config.h"
+char *smd_title = "Super Com Pro (HK)/Super Magic Drive/SMD\n"
+                  "19XX Front Far East/FFE http://www.front.com.tw";
+
 #ifdef BACKUP
 #ifdef  __unix__
 #include <unistd.h>                             // usleep(), microseconds
@@ -61,9 +64,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "smd.h"
-
-char *smd_title = "Super Com Pro (HK)/Super Magic Drive/SMD\n"
-                  "19XX Front Far East/FFE http://www.front.com.tw";
 
 
 #ifndef __BEOS__

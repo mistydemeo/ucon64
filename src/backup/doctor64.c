@@ -26,15 +26,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #include "config.h"
 
+char *doctor64_title = "Doctor V64\n"
+                       "19XX Bung Enterprises Ltd http://www.bung.com.hk";
+
 #ifdef BACKUP
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "doctor64.h"
-
-char *doctor64_title = "Doctor V64\n"
-                       "19XX Bung Enterprises Ltd http://www.bung.com.hk";
 
 
 #define SYNC_MAX_CNT 8192

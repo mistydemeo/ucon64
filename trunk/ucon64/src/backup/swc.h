@@ -47,7 +47,7 @@ typedef struct st_swc_header
 
 #ifdef BACKUP
 extern int swc_read_rom (const char *filename, unsigned int parport);
-extern int swc_write_rom (const char *filename, unsigned int parport);
+extern int swc_write_rom (const char *filename, unsigned int parport, int enableRTS);
 extern int swc_read_sram (const char *filename, unsigned int parport);
 extern int swc_write_sram (const char *filename, unsigned int parport);
 extern void swc_unlock (unsigned int parport);

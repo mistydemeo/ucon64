@@ -268,6 +268,7 @@ const struct option long_options[] = {
     {"xsmd", 0, 0, UCON64_XSMD},
     {"xsmds", 0, 0, UCON64_XSMDS},
     {"xswc", 0, 0, UCON64_XSWC},
+    {"xswc2", 0, 0, UCON64_XSWC2},
     {"xswcs", 0, 0, UCON64_XSWCS},
     {"xv64", 0, 0, UCON64_XV64},
 #endif // BACKUP
@@ -415,7 +416,7 @@ main (int argc, char **argv)
 #ifdef  DJGPP
   {
     /*
-      The follwoing piece of code makes the DLL "search" behaviour a bit like
+      The following piece of code makes the DLL "search" behaviour a bit like
       the search behaviour for Windows programs. A bit, because the import
       library just opens the file with the name that is stored in
       djimport_path. It won't search for the DXE in the Windows system
@@ -426,7 +427,7 @@ main (int argc, char **argv)
     char *p;
 
     strcpy (buf, argv[0]);
-    // the next statement is not necessary, but will cause less confusion
+    // the next statement is not necessary, but will avoid confusion
     change_string ("/", 1, 0, 0, FILE_SEPARATOR_S, 1, buf, strlen (buf), 0);
     if ((p = strrchr (buf, FILE_SEPARATOR)))
       *p = 0;
@@ -1252,7 +1253,7 @@ ucon64_usage (int argc, char *argv[])
       UCON64_USAGE (snes_usage);
 #ifdef BACKUP
       UCON64_USAGE (swc_usage);
-        UCON64_USAGE (gd_usage);
+      UCON64_USAGE (gd_usage);
 //      UCON64_USAGE (fig_usage);
 //      UCON64_USAGE (smc_usage);
 //      UCON64_USAGE (mgd_usage);

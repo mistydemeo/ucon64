@@ -41,11 +41,12 @@ const char *swc_usage[] =
 #ifdef BACKUP
     "  " OPTION_LONG_S "xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when ROM does not exist\n"
-    "                  Press q to abort ^C will cause invalid state of backup unit\n"
+    "                  Press q to abort; ^C will cause invalid state of backup unit\n"
+    "  " OPTION_LONG_S "xswc2       same as " OPTION_LONG_S "xswc but enables RTS mode\n"
     "  " OPTION_LONG_S "xswcs       send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
     "                  " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when SRAM does not exist\n"
-    "                  Press q to abort ^C will cause invalid state of backup unit\n"
+    "                  Press q to abort; ^C will cause invalid state of backup unit\n"
     "                  You only need to specify PORT if uCON64 doesn't detect the\n"
     "                  (right) parallel port. If that is the case give a hardware\n"
     "                  address: ucon64 " OPTION_LONG_S "xswc \"rom.swc\" 0x378\n"
@@ -364,7 +365,7 @@ swc_read_rom (const char *filename, unsigned int parport)
 
 
 int
-swc_write_rom (const char *filename, unsigned int parport)
+swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
 {
   FILE *file;
   unsigned char *buffer;
@@ -438,8 +439,8 @@ swc_write_rom (const char *filename, unsigned int parport)
   ffe_send_command (5, 0, 0);
   totalblocks = (fsize - SWC_HEADER_LEN + BUFFERSIZE - 1) / BUFFERSIZE; // round up
   ffe_send_command (6, 5 | (totalblocks << 8), totalblocks >> 8); // bytes: 6, 5, #8 K L, #8 K H, 0
-  ffe_send_command (6, 1 | (emu_mode_select << 8), 0);
-
+  ffe_send_command (6, 1 | (emu_mode_select << 8), enableRTS); // last arg = 1 enables RTS
+                                                               //  mode, 0 disables it
   ffe_wait_for_ready ();
   outportb (parport + PARPORT_DATA, 0);
   outportb (parport + PARPORT_CONTROL, inportb (parport + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe

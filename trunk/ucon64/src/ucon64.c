@@ -330,6 +330,7 @@ const struct option options[] = {
     {"xswc", 0, 0, UCON64_XSWC},
     {"xswc2", 0, 0, UCON64_XSWC2},
     {"xswcs", 0, 0, UCON64_XSWCS},
+    {"xswc-superhi", 0, 0, UCON64_XSWC_SUPERHI},
     {"xv64", 0, 0, UCON64_XV64},
 #endif // PARALLEL
     {"z64", 0, 0, UCON64_Z64},
@@ -781,6 +782,7 @@ ucon64_execute_options (void)
   ucon64.part_size =
   ucon64.snes_header_base =
   ucon64.snes_hirom =
+  ucon64.snes_superhi =
   ucon64.bs_dump =
   ucon64.controller =
   ucon64.controller2 =

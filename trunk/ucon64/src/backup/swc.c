@@ -44,6 +44,10 @@ const st_usage_t swc_usage[] =
 #ifdef PARALLEL
     {"xswc", NULL, "send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically when ROM does not exist"},
+#if 0 // Hidden
+    {"xswc-superhi", NULL, "Super HiROM (forced 32Mb) send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "port=PORT\n"
+                  "receives automatically when ROM does not exist"},
+#endif
     {"xswc2", NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)"},
     {"xswcs", NULL, "send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
                  OPTION_LONG_S "port=PORT\n"
@@ -117,7 +121,14 @@ receive_rom_info (unsigned char *buffer)
       address++;
     }
 
-  size = get_rom_size (buffer);
+  if ( ucon64.snes_superhi != 0 )
+  {
+    size = 0x10;	// 32Mb after hirom shift
+    hirom = 1;
+  }
+  else
+    size = get_rom_size (buffer);
+
   if (hirom)
     size <<= 1;
 

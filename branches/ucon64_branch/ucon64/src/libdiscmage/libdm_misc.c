@@ -40,10 +40,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "misc.h"
 #include "libdiscmage.h"
 #include "libdm_misc.h"
-#include "cdi.h"
-#include "nero.h"
-#include "sheets.h"
-#include "other.h"
+#include "format/format.h"
 #ifdef  DJGPP                                   // DXE's are specific to DJGPP
 #include "dxedll_priv.h"
 #endif
@@ -455,7 +452,8 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
       {DM_CDI, cdi_init, cdi_track_init},
       {DM_NRG, nrg_init, nrg_track_init},
 //      {DM_CCD, ccd_init, ccd_track_init},
-      {DM_SHEET, sheet_init, dm_track_init},
+      {DM_TOC, toc_init, dm_track_init},
+      {DM_CUE, cue_init, dm_track_init},
       {DM_OTHER, other_init, dm_track_init},
       {0, NULL, NULL}
     };

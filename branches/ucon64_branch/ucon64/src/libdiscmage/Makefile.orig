@@ -18,7 +18,8 @@ endif
 LDFLAGS=-s
 
 LIBNAME=discmage
-OBJECTS=libdm_misc.o cdi.o nero.o sheets.o other.o dllinit.o misc.o
+OBJECTS=libdm_misc.o dllinit.o misc.o format/format.o format/cdi.o\
+	format/nero.o format/cue.o format/toc.o format/other.o
 ifdef ZLIB
 LIBS=-lz
 OBJECTS+=unzip.o map.o miscz.o
@@ -237,13 +238,16 @@ endif                                   # cygwin
 #endif
 
 # Dependencies
+LIBDM_STD_H=libdiscmage.h misc.h dxedll_priv.h format/format.h
 
-libdm_misc.o: libdiscmage.h misc.h dxedll_priv.h
-cdi.o: libdiscmage.h misc.h cdi.h dxedll_priv.h
-nero.o: libdiscmage.h misc.h nero.h dxedll_priv.h
-sheets.o: libdiscmage.h misc.h sheets.h dxedll_priv.h
-other.o: libdiscmage.h misc.h other.h dxedll_priv.h
-dllinit.o: libdiscmage.h misc.h dxedll_priv.h
+libdm_misc.o: $(LIBDM_STD_H)
+format/format.o: $(LIBDM_STD_H)
+format/cdi.o: format/cdi.h $(LIBDM_STD_H)
+format/nero.o: format/nero.h $(LIBDM_STD_H)
+format/cue.o: format/cue.h $(LIBDM_STD_H)
+format/toc.o: format/toc.h $(LIBDM_STD_H)
+format/other.o: format/other.h $(LIBDM_STD_H)
+dllinit.o: $(LIBDM_STD_H)
 misc.o: misc.h dxedll_priv.h
 miscz.o: miscz.h misc.h dxedll_priv.h
 dxe_misc.o: dxedll_pub.h

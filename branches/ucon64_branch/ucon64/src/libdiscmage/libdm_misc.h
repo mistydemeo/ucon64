@@ -47,27 +47,26 @@ typedef struct
 extern const st_track_probe_t track_probe[];
 
 
-#define DM_UNKNOWN (-1)
-
-#define DM_SHEET (1)
-#define DM_CUE (DM_SHEET)
-#define DM_TOC (DM_SHEET)
-#define DM_CDI (2)
-#define DM_NRG (3)
-#define DM_CCD (4)
-#define DM_OTHER (5)
-
+enum {
+  DM_UNKNOWN = -1,
+  DM_CUE = 1,
+  DM_TOC,
+  DM_CDI,
+  DM_NRG,
+//  DM_CCD,
+  DM_OTHER
+};
 
 /*
   dm_track_init()     fillup current dm_track_t
   dm_free()           free all dm_track_t, dm_session_t and dm_image_t recursively
   writewavheader()    write header for a wav file
   dm_get_track_desc() returns a string like "MODE1/2352" depending on the 
-                        mode and sector_size specified; if cue == FALSE
-                        it will return the string in TOC format
+                      mode and sector_size specified; if cue == FALSE
+                      it will return the string in TOC format
   callibrate()        a brute force function that tries to find a iso header
-                        or anything else that could identify a file as an
-                        image (can be very slow)
+                      or anything else that could identify a file as an
+                      image (can be very slow)
 */
 extern int dm_track_init (dm_track_t *track, FILE *fh);
 extern int dm_free (dm_image_t *image);

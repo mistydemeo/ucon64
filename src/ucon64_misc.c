@@ -259,7 +259,11 @@ inportb (unsigned short port)
 #else
   unsigned char byte;
 
-  __asm__ __volatile__ ("inb %1, %0":"=a" (byte):"d" (port));
+  __asm__ __volatile__
+  ("inb %1, %0"
+    : "=a" (byte)
+    : "d" (port)
+  );
 
   return byte;
 #endif
@@ -278,7 +282,11 @@ inportw (unsigned short port)
 #else
   unsigned short word;
 
-  __asm__ __volatile__ ("inw %1, %0":"=a" (word):"d" (port));
+  __asm__ __volatile__
+  ("inw %1, %0"
+    : "=a" (word)
+    : "d" (port)
+  );
 
   return word;
 #endif
@@ -295,7 +303,11 @@ outportb (unsigned short port, unsigned char byte)
   temp.Data = byte;
   ioctl (ucon64_io_fd, DRV_WRITE_IO_8, &temp, 0);
 #else
-  __asm__ __volatile__ ("outb %1, %0"::"d" (port), "a" (byte));
+  __asm__ __volatile__
+  ("outb %1, %0"
+    :
+    : "d" (port), "a" (byte)
+  );
 #endif
 }
 
@@ -310,7 +322,11 @@ outportw (unsigned short port, unsigned short word)
   temp.Data16 = word;
   ioctl (ucon64_io_fd, DRV_WRITE_IO_16, &temp, 0);
 #else
-  __asm__ __volatile__ ("outw %1, %0"::"d" (port), "a" (word));
+  __asm__ __volatile__
+  ("outw %1, %0"
+    :
+    : "d" (port), "a" (word)
+  );
 #endif
 }
 #endif // defined __unix__ || defined __BEOS__
@@ -1010,7 +1026,6 @@ ucon64_configfile (void)
                  "backups=1\n"
                  "#\n"
                  "# parallel port\n"
-//                 "# before processing a ROM uCON64 will make a backup of it\n"
                  "#\n"
                  "#parport=378\n"
                  "#\n"

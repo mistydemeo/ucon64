@@ -161,10 +161,6 @@ ucon64_switches (int c, const char *optarg)
               PARALLEL_STATUS,
               USB_STATUS);
 
-#if     defined AMIGA && defined PARALLEL
-      printf ("parallel port device:              %s\n", ucon64.parport_dev);
-#endif
-
       printf ("ANSI colors enabled:               %s\n"
               "gzip and zip support:              %s\n"
               "configuration file %s  %s\n",

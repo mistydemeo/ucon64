@@ -479,14 +479,18 @@ int
 gba_multi (int truncate_size, char *fname)
 // TODO: Check if 1024 Mbit multiroms are supported by the FAL code
 {
-// Visual C++ doesn't handle non-constant expression for array definitions...
 #define BUFSIZE (32 * 1024)
-  int n, n_files, file_no, bytestowrite, byteswritten, bufsize = BUFSIZE,
-      totalsize = 0, done, truncated = 0, size_pow2_lesser = 1, size_pow2 = 1,
-      truncate_size_ispow2 = 0;
+  int n, n_files, file_no, bytestowrite, byteswritten, totalsize = 0, done,
+      truncated = 0, size_pow2_lesser = 1, size_pow2 = 1, truncate_size_ispow2 = 0;
   struct stat fstate;
   FILE *srcfile, *destfile;
   char buffer[BUFSIZE], *destname;
+
+  if (truncate_size == 0)
+    {
+      fprintf (stderr, "ERROR: Can't make multirom of 0 bytes\n");
+      return -1;
+    }
 
 #if 0
   if (truncate_size != 64 * MBIT && truncate_size != 128 * MBIT &&
@@ -523,49 +527,49 @@ gba_multi (int truncate_size, char *fname)
       if (access (ucon64.argv[n], F_OK))
         continue;                               // "file" does not exist (option)
       stat (ucon64.argv[n], &fstate);
-      if (S_ISREG (fstate.st_mode))
-        {
-          if (file_no == 0)
-            {
-              printf ("Loader: %s\n", ucon64.argv[n]);
-              if (q_fsize (ucon64.argv[n]) > 64 * 1024)
-                printf ("WARNING: Are you sure %s is a loader binary?\n",
-                        ucon64.argv[n]);
-            }
-          else
-            printf ("ROM%d: %s\n", file_no, ucon64.argv[n]);
+      if (!S_ISREG (fstate.st_mode))
+        continue;
 
-          if ((srcfile = fopen (ucon64.argv[n], "rb")) == NULL)
-            {
-              fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.argv[n]);
-              continue;
-            }
-          done = 0;
-          byteswritten = 0;
-          while (!done)
-            {
-              bytestowrite = fread (buffer, 1, bufsize, srcfile);
-              if (totalsize + bytestowrite > truncate_size)
-                {
-                  bytestowrite = truncate_size - totalsize;
-                  done = 1;
-                  truncated = 1;
-                  printf ("Output file is %d Mbit, truncating %s, skipping %d bytes\n",
-                          truncate_size / MBIT, ucon64.argv[n],
-                          q_fsize (ucon64.argv[n]) - (byteswritten + bytestowrite));
-                  // DON'T use fstate.st_size, because file could be compressed
-                }
-              totalsize += bytestowrite;
-              if (bytestowrite == 0)
-                done = 1;
-              fwrite (buffer, 1, bytestowrite, destfile);
-              byteswritten += bytestowrite;
-            }
-          fclose (srcfile);
-          if (truncated)
-            break;
-          file_no++;
+      if (file_no == 0)
+        {
+          printf ("Loader: %s\n", ucon64.argv[n]);
+          if (q_fsize (ucon64.argv[n]) > 64 * 1024)
+            printf ("WARNING: Are you sure %s is a loader binary?\n",
+                    ucon64.argv[n]);
         }
+      else
+        printf ("ROM%d: %s\n", file_no, ucon64.argv[n]);
+
+      if ((srcfile = fopen (ucon64.argv[n], "rb")) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.argv[n]);
+          continue;
+        }
+      done = 0;
+      byteswritten = 0;                         // # of bytes written per file
+      while (!done)
+        {
+          bytestowrite = fread (buffer, 1, BUFSIZE, srcfile);
+          if (totalsize + bytestowrite > truncate_size)
+            {
+              bytestowrite = truncate_size - totalsize;
+              done = 1;
+              truncated = 1;
+              printf ("Output file is %d Mbit, truncating %s, skipping %d bytes\n",
+                      truncate_size / MBIT, ucon64.argv[n],
+                      q_fsize (ucon64.argv[n]) - (byteswritten + bytestowrite));
+              // DON'T use fstate.st_size, because file could be compressed
+            }
+          totalsize += bytestowrite;
+          if (bytestowrite == 0)
+            done = 1;
+          fwrite (buffer, 1, bytestowrite, destfile);
+          byteswritten += bytestowrite;
+        }
+      fclose (srcfile);
+      if (truncated)
+        break;
+      file_no++;
     }
   fclose (destfile);
 

@@ -1584,12 +1584,16 @@ ucon64_parport_init (int port)
       exit (1);
     }
 
-  x = OpenDevice (ucon64.parport_dev, ucon64.parport,
-                  (struct IORequest *) ucon64_io_req, (ULONG) 0);
+  // Is it possible to probe for the correct port?
+  if (port == UCON64_UNKNOWN)
+    port = 0;
+
+  x = OpenDevice (ucon64.parport_dev, port, (struct IORequest *) ucon64_io_req,
+                  (ULONG) 0);
   if (x != NULL)
     {
       fprintf (stderr, "ERROR: Could not open parallel port (%s, %x)\n",
-               ucon64.parport_dev, ucon64.parport);
+               ucon64.parport_dev, port);
       DeleteExtIO ((struct IOExtPar *) ucon64_io_req);
       DeletePort (ucon64_parport);
       exit (1);

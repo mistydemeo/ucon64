@@ -1410,8 +1410,12 @@ ucon64_usage (int argc, char *argv[])
   };
   char *name_exe = basename (argv[0]), *name_discmage;
 
-  printf (
-    "Usage: %s [OPTION(s)]... [ROM(s)|SRAM(s)|FILE(s)|ARCHIVE(s)|DIR(s)]...\n\n", name_exe);
+#ifdef  HAVE_ZLIB_H
+#define USAGE_S "Usage: %s [OPTION]... [ROM|IMAGE|SRAM|FILE|DIR|ARCHIVE]...\n\n"
+#else
+#define USAGE_S "Usage: %s [OPTION]... [ROM|IMAGE|SRAM|FILE|DIR]...\n\n"
+#endif
+  printf (USAGE_S, name_exe);
 
   ucon64_render_usage (ucon64_options_usage);
 

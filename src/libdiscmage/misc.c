@@ -765,16 +765,45 @@ int access (const char *fname, void *mode)
 int
 change_mem (char *buf, int bufsize, char *searchstr, int strsize,
             char wc, char esc, char *newstr, int newsize, int offset, ...)
+// convenience wrapper for change_mem2()
+{
+  va_list argptr;
+  int i, n_esc = 0, retval;
+  st_cm_set_t *sets;
+
+  va_start (argptr, offset);
+  for (i = 0; i < strsize; i++)
+    if (searchstr[i] == esc)
+      n_esc++;
+
+  sets = (st_cm_set_t *) malloc (n_esc * sizeof (st_cm_set_t));
+  va_start (argptr, offset);
+  for (i = 0; i < n_esc; i++)
+    {
+      sets[i].data = va_arg (argptr, char *);   // get next set of characters
+      sets[i].size = va_arg (argptr, int);      // get set size
+    }
+  va_end (argptr);
+  retval = change_mem2 (buf, bufsize, searchstr, strsize, wc, esc, newstr,
+                        newsize, offset, sets);
+  free (sets);
+  return retval;
+}
+
+
+int
+change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
+             char esc, char *newstr, int newsize, int offset, st_cm_set_t *sets)
 /*
   Search for all occurrences of string searchstr in buf and replace newsize
   bytes in buf by copying string newstr to the end of the found search string
   in buf plus offset.
   If searchstr contains wildcard characters wc, then n wildcard characters in
   searchstr match any n characters in buf.
-  If searchstr contains escape characters esc, change_mem() must be called with
-  two extra arguments for each escape character, set, which must be a string
-  (char *) and setsize, which must be an int. searchstr matches for an escape
-  character if one of the characters in set matches.
+  If searchstr contains escape characters esc, sets must point to an array of
+  sets. sets must contain as many elements as there are escape characters in
+  searchstr. searchstr matches for an escape character if one of the characters
+  in sets[i]->data matches.
   Note that searchstr is not necessarily a C string; it may contain one or more
   zero bytes as strsize indicates the length.
   offset is the relative offset from the last character in searchstring and may
@@ -790,22 +819,20 @@ change_mem (char *buf, int bufsize, char *searchstr, int strsize,
   in searchstr. This makes change_mem() behave a bit more intuitive. For
   example
     char str[] = "f foobar means...";
-    change_mem (str, strlen (str), "f**bar", 6, '*', '!', "XXXXXXXX", 8, 2);
+    change_mem (str, strlen (str), "f**bar", 6, '*', '!', "XXXXXXXX", 8, 2, NULL);
   finds and changes "foobar means..." into "foobar XXXXXXXX", while with uCON's
   algorithm it would not (but does the job good enough for patching SNES ROMs).
 
   One example of using sets:
     char str[] = "fu-bar     is the same as foobar    ";
-    change_mem (str, strlen (str), "f!!", 3, '*', '!', "fighter", 7, 1,
-                "uo", 2, "o-", 2);
+    st_cm_set_t sets[] = {{"o-", 2}, {"uo", 2}};
+    change_mem (str, strlen (str), "f!!", 3, '*', '!', "fighter", 7, 1, sets);
   This changes str into "fu-fighter is the same as foofighter".
 */
 {
-  va_list argptr;
   char *set;
-  int bufpos, strpos = 0, pos_1st_esc = -1, setsize, i, n_wc, n_matches = 0;
-
-  va_start (argptr, offset);
+  int bufpos, strpos = 0, pos_1st_esc = -1, setsize, i, n_wc, n_matches = 0,
+      setindex = 0;
 
   for (bufpos = 0; bufpos < bufsize; bufpos++)
     {
@@ -817,12 +844,13 @@ change_mem (char *buf, int bufsize, char *searchstr, int strsize,
       while (searchstr[strpos] == esc && bufpos < bufsize)
         {
           if (strpos == pos_1st_esc)
-            va_start (argptr, offset);          // reset argument pointer
+            setindex = 0;                       // reset argument pointer
           if (pos_1st_esc == -1)
             pos_1st_esc = strpos;
 
-          set = va_arg (argptr, char *);        // get next set of characters
-          setsize = va_arg (argptr, int);       // get set size
+          set = sets[setindex].data;            // get next set of characters
+          setsize = sets[setindex].size;        // get set size
+          setindex++;
           i = 0;
           // see if buf[bufpos] matches with any character in current set
           while (i < setsize && buf[bufpos] != set[i])
@@ -898,7 +926,6 @@ change_mem (char *buf, int bufsize, char *searchstr, int strsize,
         }
     }
 
-  va_end (argptr);
   return n_matches;
 }
 

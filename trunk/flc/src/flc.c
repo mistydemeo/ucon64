@@ -220,7 +220,7 @@ main (int argc, char *argv[])
     }
   (void) closedir (dp);
   chdir (cwd);
-//  rmdir_R (temp);
+  rmdir_R (temp);
   file_p->next = NULL;
   file_p = &file;
 

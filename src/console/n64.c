@@ -50,7 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define N64_HEADER_LEN (sizeof (st_n64_header_t))
 #define N64_SRAM_SIZE  512
 #define N64_NAME_LEN   20
-#define N64_BOT_SIZE   4032
+#define N64_BC_SIZE    (0x1000 - N64_HEADER_LEN)
 #define LAC_ROM_SIZE   1310720
 
 const st_getopt2_t n64_usage[] =
@@ -274,7 +274,7 @@ n64_update_chksum (st_rominfo_t *rominfo, const char *filename, char *buf)
     }
   if (rominfo->interleaved)
     ucon64_bswap16_n (buf, 8);
-  ucon64_fwrite (buf, rominfo->buheader_len + 0x10, 8, filename, "r+b");
+  ucon64_fwrite (buf, rominfo->buheader_len + 16, 8, filename, "r+b");
 }
 
 
@@ -288,7 +288,7 @@ n64_chk (st_rominfo_t *rominfo)
   fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
   n64_update_chksum (rominfo, dest_name, buf);
-  dumper (stdout, buf, 8, 0x10 + rominfo->buheader_len, DUMPER_HEX);
+  dumper (stdout, buf, 8, rominfo->buheader_len + 16, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -335,26 +335,28 @@ n64_sram (st_rominfo_t *rominfo, const char *sramfile)
 int
 n64_bot (st_rominfo_t *rominfo, const char *bootfile)
 {
-  char buf[N64_BOT_SIZE], dest_name[FILENAME_MAX];
+  char buf[N64_BC_SIZE], dest_name[FILENAME_MAX];
 
   if (!access (bootfile, F_OK))
     {
       strcpy (dest_name, ucon64.rom);
-      ucon64_fread (buf, 0, N64_BOT_SIZE, bootfile);
+      ucon64_fread (buf, 0, N64_BC_SIZE, bootfile);
 
       if (rominfo->interleaved)
-        ucon64_bswap16_n (buf, N64_BOT_SIZE);
+        ucon64_bswap16_n (buf, N64_BC_SIZE);
 
       ucon64_file_handler (dest_name, NULL, 0);
       fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-      ucon64_fwrite (buf, rominfo->buheader_len + 0x40, N64_BOT_SIZE, dest_name, "r+b");
+      ucon64_fwrite (buf, rominfo->buheader_len + N64_HEADER_LEN, N64_BC_SIZE,
+                     dest_name, "r+b");
     }
   else
     {
       strcpy (dest_name, bootfile);
 //      set_suffix (dest_name, ".bot");
-      ucon64_file_handler (dest_name, NULL, 0); // OF_FORCE_BASENAME | OF_FORCE_SUFFIX
-      fcopy (ucon64.rom, rominfo->buheader_len + 0x040, N64_BOT_SIZE, dest_name, "wb");
+      ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+      fcopy (ucon64.rom, rominfo->buheader_len + N64_HEADER_LEN, N64_BC_SIZE,
+             dest_name, "wb");
 
       if (rominfo->interleaved)
         ucon64_fbswap16 (dest_name, 0, fsizeof (dest_name));
@@ -415,7 +417,6 @@ n64_init (st_rominfo_t *rominfo)
 {
   int result = -1, x;
   unsigned int value = 0;
-  char buf[MAXBUFSIZE];
 #define N64_MAKER_MAX 0x50
   const char *n64_maker[N64_MAKER_MAX] = {
     NULL, NULL, NULL, NULL, NULL,
@@ -510,7 +511,7 @@ n64_init (st_rominfo_t *rominfo)
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
       rominfo->has_internal_crc = 1;
-      rominfo->internal_crc_len = rominfo->internal_crc2_len = 4;
+      rominfo->internal_crc_len = 4;
 
       n64_chksum (rominfo, ucon64.rom);
       rominfo->current_internal_crc = n64crc.crc1;
@@ -518,21 +519,17 @@ n64_init (st_rominfo_t *rominfo)
       for (x = 0; x < 4; x++)
         {
           rominfo->internal_crc <<= 8;
-          rominfo->internal_crc += OFFSET (n64_header, 0x10 + (x ^ rominfo->interleaved));
+          rominfo->internal_crc += OFFSET (n64_header, 16 + (x ^ rominfo->interleaved));
         }
       value = 0;
       for (x = 0; x < 4; x++)
         {
           value <<= 8;
-          value += OFFSET (n64_header, 0x14 + (x ^ rominfo->interleaved));
+          value += OFFSET (n64_header, 20 + (x ^ rominfo->interleaved));
         }
 
-      sprintf (buf,
-               "2nd Checksum: %%s, 0x%%0%dlx (calculated) %%c= 0x%%0%dlx (internal)\n"
-               "NOTE: The checksum routine supports only 6101 and 6102 boot codes",
-               rominfo->internal_crc2_len * 2, rominfo->internal_crc2_len * 2);
-
-      sprintf (rominfo->internal_crc2, buf,
+      sprintf (rominfo->internal_crc2,
+               "2nd Checksum: %s, 0x%08lx (calculated) %c= 0x%08x (internal)%s",
 #ifdef  USE_ANSI_COLOR
                ucon64.ansi_color ?
                  ((n64crc.crc2 == value) ?
@@ -543,7 +540,10 @@ n64_init (st_rominfo_t *rominfo)
                (n64crc.crc2 == value) ? "Ok" : "Bad",
 #endif
                n64crc.crc2,
-               (n64crc.crc2 == value) ? '=' : '!', value);
+               (n64crc.crc2 == value) ? '=' : '!', value,
+               (n64crc.crc2 != value) ?
+                 "\nNOTE: The checksum routine supports only 6102 and 6105 boot codes" :
+                 "");
     }
 
   rominfo->console_usage = n64_usage[0].help;
@@ -554,44 +554,38 @@ n64_init (st_rominfo_t *rominfo)
 }
 
 
-// ROM checksum routine courtesy of:
-//  chksum64 V1.2, a program to calculate the ROM checksum of Nintendo64 ROMs.
-//  Copyright (C) 1997  Andreas Sterbenz (stan@sbox.tu-graz.ac.at)
-
-#define ROL(i, b) (((i)<<(b)) | ((i)>>(32-(b))))
+/*
+  ROM check sum routine is based on chksum64 V1.2 by Andreas Sterbenz
+  <stan@sbox.tu-graz.ac.at>, a program to calculate the ROM checksum of
+  Nintendo64 ROMs.
+*/
+#define ROL(i, b) (((i) << (b)) | ((i) >> (32 - (b))))
 #define BYTES2LONG(b, s) ( (b)[0^(s)] << 24 | \
                            (b)[1^(s)] << 16 | \
                            (b)[2^(s)] <<  8 | \
                            (b)[3^(s)] )
 
-#define CHECKSUM_START 0x1000
-#define CHECKSUM_LENGTH 0x100000L
-#define CHECKSUM_HEADERPOS 0x10
-#define CHECKSUM_STARTVALUE 0xf8ca4ddc
+#define CHECKSUM_START       0x1000 //(N64_HEADER_LEN + N64_BC_SIZE)
+#define CHECKSUM_LENGTH      0x100000
+#define CHECKSUM_STARTVALUE1 0xf8ca4ddc
+#define CHECKSUM_STARTVALUE2 0xdf26f436
 #define CALC_CRC32                              // see this as a marker, don't disable
 
 int
 n64_chksum (st_rominfo_t *rominfo, const char *filename)
 {
-  unsigned char chunk[MAXBUFSIZE];
+  unsigned char bootcode_buf[CHECKSUM_START], chunk[MAXBUFSIZE & ~3]; // size must be a multiple of 4
   unsigned long i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,
                 rlen = (ucon64.file_size - rominfo->buheader_len) - CHECKSUM_START;
                 // using ucon64.file_size is ok for n64_init() & n64_sram()
-  unsigned int n = 0;
+  unsigned int n = 0, bootcode;
   FILE *file;
 #ifdef  CALC_CRC32
   unsigned int scrc32 = 0, fcrc32 = 0;          // search CRC32 & file CRC32
   unsigned char *crc32_mem;
 #endif
 
-  t1 = CHECKSUM_STARTVALUE;
-  t2 = CHECKSUM_STARTVALUE;
-  t3 = CHECKSUM_STARTVALUE;
-  t4 = CHECKSUM_STARTVALUE;
-  t5 = CHECKSUM_STARTVALUE;
-  t6 = CHECKSUM_STARTVALUE;
-
-  if (rlen < 0x0100000)                         // 0x0101000
+  if (rlen < CHECKSUM_START + CHECKSUM_LENGTH)
     {
 #ifdef  CALC_CRC32
       n = ucon64.file_size - rominfo->buheader_len;
@@ -633,12 +627,36 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
   if (!rominfo->interleaved)
     {
       fcrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
+      memcpy (bootcode_buf, crc32_mem + N64_HEADER_LEN, N64_BC_SIZE);
       ucon64_bswap16_n (crc32_mem, CHECKSUM_START);
+    }
+  else
+    {
+      memcpy (bootcode_buf, crc32_mem + N64_HEADER_LEN, N64_BC_SIZE);
+      ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
     }
   scrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
 #else
-  fseek (file, CHECKSUM_START + rominfo->buheader_len, SEEK_SET);
+  fseek (file, rominfo->buheader_len + N64_HEADER_LEN, SEEK_SET);
+  fread (bootcode_buf, 1, N64_BC_SIZE, file);
 #endif
+  if (crc32 (0, bootcode_buf, N64_BC_SIZE) == 0x98bc2c86)
+    {
+      bootcode = 6105;
+      i = CHECKSUM_STARTVALUE2;
+    }
+  else
+    {
+      bootcode = 0;                             // everything else
+      i = CHECKSUM_STARTVALUE1;
+    }
+
+  t1 = i;
+  t2 = i;
+  t3 = i;
+  t4 = i;
+  t5 = i;
+  t6 = i;
 
   for (;;)
     {
@@ -646,8 +664,6 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
         {
           if ((n = fread (chunk, 1, MIN (sizeof (chunk), clen), file)))
             {
-              if ((n & 3) != 0)
-                n += fread (chunk + n, 1, 4 - (n & 3), file);
 #ifdef  CALC_CRC32
               if (!rominfo->interleaved)
                 {
@@ -662,12 +678,9 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
       else
         n = MIN (sizeof (chunk), clen);
 
-      if ((n == 0) || ((n & 3) != 0))
-        {
-          if ((clen != 0) || (n != 0))
-            printf ("WARNING: Short read, checksum may be incorrect\n");
-          break;
-        }
+      n &= ~3;
+      if (n == 0)
+        break;
       for (i = 0; i < n; i += 4)
         {
           c1 = BYTES2LONG (&chunk[i], rominfo->interleaved);
@@ -683,7 +696,11 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
             t2 ^= k1;
           else
             t2 ^= t6 ^ c1;
-          t1 += c1 ^ t5;
+
+          if (bootcode == 6105)
+            t1 += BYTES2LONG (&bootcode_buf[0x710 + (i & 0xff)], 0) ^ c1;
+          else
+            t1 += c1 ^ t5;
         }
       if (rlen > 0)
         {

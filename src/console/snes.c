@@ -3313,17 +3313,15 @@ snes_init (st_rominfo_t *rominfo)
     {
       // internal ROM crc
       rominfo->has_internal_crc = 1;
-      rominfo->internal_crc_len = rominfo->internal_crc2_len = 2;
+      rominfo->internal_crc_len = 2;
       rominfo->current_internal_crc = snes_chksum (rominfo, &rom_buffer, size);
       rominfo->internal_crc = snes_header.checksum_low;
       rominfo->internal_crc += snes_header.checksum_high << 8;
       x = snes_header.inverse_checksum_low;
       x += snes_header.inverse_checksum_high << 8;
       y = ~rominfo->current_internal_crc & 0xffff;
-      sprintf (buf,
-               "Inverse checksum: %%s, 0x%%0%dlx (calculated) %%c= 0x%%0%dlx (internal)",
-               rominfo->internal_crc2_len * 2, rominfo->internal_crc2_len * 2);
-      sprintf (rominfo->internal_crc2, buf,
+      sprintf (rominfo->internal_crc2,
+               "Inverse checksum: %s, 0x%04x (calculated) %c= 0x%04x (internal)",
 #ifdef  USE_ANSI_COLOR
                ucon64.ansi_color ?
                  ((y == x) ? "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")

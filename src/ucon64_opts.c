@@ -244,6 +244,13 @@ ucon64_switches (st_ucon64_t *p)
             ucon64.usbport = strtol (optarg + 3, NULL, 10) + 1; // usb0 => ucon64.usbport = 1
           else                                  // we automatically detect the
             ucon64.usbport = 1;                 //  USB port in the F2A code
+
+          /*
+            We don't want to make uCON64 behave different if --port=USB{n} is
+            specified *after* a transfer option (instead of before one), so we
+            have to reset ucon64.parport_needed here.
+          */
+          ucon64.parport_needed = 0;
         }
       else
 #endif

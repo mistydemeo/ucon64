@@ -177,11 +177,22 @@ static void parport_nop ();
 
 static int parport_nop_cntr;
 
-const unsigned char header[] = {
+static const unsigned char header[] = {
   0x49, 0x2d, 0x4c, 0x69, 0x6e, 0x6b, 0x65, 0x72,
   0x2e, 0x31, 0x30, 0x30, 0x00, 0x00, 0x01, 0xe8
 };
 
+enum
+{
+  UPLOAD_FAILED = 0,
+  CANNOT_GET_FILE_SIZE
+};
+
+static const char *f2a_msg[] = {
+  "ERROR: Upload failed\n",
+  "ERROR: Can't determine size of file \"%s\"\n",
+  NULL
+};
 
 
 #ifdef  HAVE_USB_H
@@ -203,7 +214,7 @@ usb_connect (void)
   if (q_fread (f2afirmware, 0, F2A_FIRM_SIZE, f2afirmware_fname) == -1)
     {
       fprintf (stderr, "ERROR: Unable to load F2A firmware (%s)\n", f2afirmware_fname);
-      return -1;
+      exit (1);                                 // fatal
     }
 
   usb_init ();
@@ -290,6 +301,7 @@ f2a_info (recvmsg *rm)
 
   return 0;
 
+#if 0 // unreachable code
   if (ucon64.quiet < 0)
     {
       printf ("info:");
@@ -299,6 +311,7 @@ f2a_info (recvmsg *rm)
     }
 
   return 0;
+#endif
 }
 
 
@@ -309,6 +322,8 @@ f2a_boot_usb (const char *ilclient_fname)
   unsigned int ack[16], i;
   char ilclient[16 * 1024];
 
+  printf ("Booting GBA\n"
+          "Uploading iLinker client\n");
   if (q_fread (ilclient, 0, 16 * 1024, ilclient_fname) == -1)
     {
       fprintf (stderr, "ERROR: Unable to load GBA client binary (%s)\n", ilclient_fname);
@@ -325,7 +340,10 @@ f2a_boot_usb (const char *ilclient_fname)
 
   // send the multiboot image
   if (usb_write (f2ahandle, ilclient, 16 * 1024) == -1)
-    return -1;
+    {
+      fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
+      return -1;
+    }
 
   if (usb_read (f2ahandle, (char *) ack, 16 * 4) == -1)
     return -1;
@@ -411,7 +429,7 @@ f2a_write_usb (int numfiles, char **files, int address)
 
       if ((fsize = q_fsize (files[j])) == -1)
         {
-          fprintf (stderr, "ERROR: Can't determine size of file \"%s\"\n", files[j]);
+          fprintf (stderr, f2a_msg[CANNOT_GET_FILE_SIZE], files[j]);
           return -1;
         }
 
@@ -468,7 +486,7 @@ f2a_init_usb (void)
   if (usb_connect ())
     {
       fprintf (stderr, "ERROR: Unable to connect to F2A USB linker\n");
-      return -1;
+      exit (1);                                 // fatal
     }
   f2a_info (&rm);
   if (rm.data[0] == 0)
@@ -477,7 +495,11 @@ f2a_init_usb (void)
         printf ("Please turn on GBA with SELECT and START held down\n");
 
       get_property_fname (ucon64.configfile, "ilclient", ilclient_fname, "ilclient.bin");
-      f2a_boot_usb (ilclient_fname);
+      if (f2a_boot_usb (ilclient_fname))
+        {
+          fprintf (stderr, "ERROR: Booting GBA client binary was not successful\n");
+          exit (1);                             // fatal
+        }
       f2a_info (&rm);
     }
   return 0;
@@ -494,7 +516,7 @@ f2a_init_par (int parport, int parport_delay)
   if (parport_init (parport, parport_delay))
     {
       fprintf (stderr, "ERROR: Unable to connect to F2A parport linker\n");
-      return -1;
+      exit (1);                                 // fatal
     }
 
   if (ucon64.quiet < 0)
@@ -503,7 +525,10 @@ f2a_init_par (int parport, int parport_delay)
   get_property_fname (ucon64.configfile, "ilclient2", ilclient2_fname, "ilclient2.bin");
   get_property_fname (ucon64.configfile, "illogo", illogo_fname, "illogo.bin");
   if (f2a_boot_par (ilclient2_fname, illogo_fname))
-    return -1;
+    {
+      fprintf (stderr, "ERROR: Booting GBA client binary was not successful\n");
+      exit (1);                                 // fatal
+    }
   return 0;
 }
 
@@ -520,7 +545,9 @@ parport_init (int port, int target_delay)
   printf ("Using I/O port 0x%x\n", f2a_pport);
 
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x04);
+#if 0 // Don't write to the _STATUS_ register
   outportb ((unsigned short) (f2a_pport + PARPORT_STATUS), 0x01);
+#endif
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
   outportb ((unsigned short) (f2a_pport + PARPORT_DATA), 0x04);
 
@@ -553,7 +580,9 @@ parport_init (int port, int target_delay)
     }
 #endif
 
+#if 0 // Don't write to the _STATUS_ register
   outportb ((unsigned short) (f2a_pport + PARPORT_STATUS), 0x01);
+#endif
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
   outportb ((unsigned short) (f2a_pport + PARPORT_EADDRESS), 0x04);
   outportb ((unsigned short) (f2a_pport + PARPORT_EDATA), 0x07);
@@ -598,6 +627,7 @@ f2a_boot_par (const char *ilclient2_fname, const char *illogo_fname)
     {
       unsigned char illogo[LOGO_SIZE];
 
+      printf ("Uploading iLinker logo\n");
       if (q_fread (illogo, 0, LOGO_SIZE, illogo_fname) == -1)
         {
           fprintf (stderr, "ERROR: Unable to load logo file (%s)\n", illogo_fname);
@@ -605,7 +635,10 @@ f2a_boot_par (const char *ilclient2_fname, const char *illogo_fname)
         }
       if (f2a_send_buffer_par (PP_CMD_WRITEDATA, LOGO_ADDR, LOGO_SIZE, illogo,
                                0, 0, 0, 0))
-        return -1;
+        {
+          fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
+          return -1;
+        }
     }
 
   printf ("Uploading iLinker client\n");
@@ -617,7 +650,7 @@ f2a_boot_par (const char *ilclient2_fname, const char *illogo_fname)
   if (f2a_send_buffer_par (PP_CMD_WRITEDATA, EXEC_STUB, BOOT_SIZE, ilclient2,
                            HEAD, FLIP, EXEC, 0))
     {
-      fprintf (stderr, "ERROR: Upload failed\n");
+      fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
       return -1;
     }
   return 0;
@@ -642,14 +675,17 @@ f2a_write_par (int files_cnt, char **files, unsigned int addr)
         }
       if (f2a_send_buffer_par (PP_CMD_WRITEROM, addr, LOADER_SIZE, loader, HEAD,
                                FLIP, 0, 0))
-        return -1;
+        {
+          fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
+          return -1;
+        }
       addr += LOADER_SIZE;
     }
   for (j = 0; j < files_cnt; j++)
     {
       if ((fsize = q_fsize (files[j])) == -1)
         {
-          fprintf (stderr, "ERROR: Can't determine size of file \"%s\"\n", files[j]);
+          fprintf (stderr, f2a_msg[CANNOT_GET_FILE_SIZE], files[j]);
           return -1;
         }
       size = fsize;
@@ -660,7 +696,10 @@ f2a_write_par (int files_cnt, char **files, unsigned int addr)
                files[j], (int) (fsize / 1024), (int) (size / 1024));
       if (f2a_send_buffer_par (PP_CMD_WRITEROM, addr, size,
                                (unsigned char *) files[j], HEAD, FLIP, 0, 1))
-        return -1;
+        {
+          fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
+          return -1;
+        }
 
       addr += size;
     }
@@ -1107,7 +1146,7 @@ f2a_send_raw_par (unsigned char *buffer, int len)
       pc++;
       if (timeout < 0)
         {
-          printf ("\nTime-out\n");
+          fprintf (stderr, "\nERROR: Time-out\n");
           return -1;
         }
     }

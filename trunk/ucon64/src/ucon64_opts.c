@@ -258,6 +258,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XFALB:
     case UCON64_XFIG:
     case UCON64_XFIGS:
+    case UCON64_XFIGC:
     case UCON64_XGBX:
     case UCON64_XGBXS:
     case UCON64_XGBXB:
@@ -794,7 +795,7 @@ ucon64_options (int c, const char *optarg)
               track--; // decrement for libdm_rip()
 
               printf ("Writing track: %d\n\n", track + 1);
-              
+
               libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
               libdm_rip (ucon64.image, track, flags);
               fputc ('\n', stdout);
@@ -813,7 +814,7 @@ ucon64_options (int c, const char *optarg)
             {
               char buf[FILENAME_MAX];
               strcpy (buf, ucon64.image->fname);
-              
+
               if (c == UCON64_MKTOC || c == UCON64_MKSHEET)
                 {
                   set_suffix (buf, ".TOC");
@@ -1462,6 +1463,14 @@ ucon64_options (int c, const char *optarg)
         fig_read_sram (ucon64.rom, ucon64.parport);
       else
         fig_write_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XFIGC:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cart SRAM contents
+        fig_read_cart_sram (ucon64.rom, ucon64.parport);
+      else
+        fig_write_cart_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
       fputc ('\n', stdout);
       break;
 

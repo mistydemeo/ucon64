@@ -247,6 +247,7 @@ enum {
   UCON64_XFALM,                                 // actually only necessary for the Windows
   UCON64_XFIG,                                  //  ports, but might be useful for others too
   UCON64_XFIGS,
+  UCON64_XFIGC,
   UCON64_XGBX,
   UCON64_XGBXB,
   UCON64_XGBXS,

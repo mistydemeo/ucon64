@@ -531,6 +531,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XFALS, UCON64_GBA, fal_usage,        WF_STOP|WF_NO_ROM},
   {UCON64_XFIG, UCON64_SNES, fig_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XFIGS, UCON64_SNES, fig_usage,       WF_STOP|WF_NO_ROM},
+  {UCON64_XFIGC, UCON64_SNES, fig_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XGBX, UCON64_GB, gbx_usage,          WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_XGBXB, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_ROM},
   {UCON64_XGBXS, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_ROM},
@@ -1451,7 +1452,7 @@ inportw (unsigned short port)
 #elif   defined AMIGA
   ULONG wait_mask;
   (void) port;                                  // warning remover
-  
+
   ucon64_io_req->io_Length = 2;
   ucon64_io_req->io_Command = CMD_READ;
 
@@ -1487,7 +1488,7 @@ outportb (unsigned short port, unsigned char byte)
 #elif   defined AMIGA
   ULONG wait_mask;
   (void) port;                                  // warning remover
-  
+
   ucon64_io_req->io_Length = 1;
   ucon64_io_req->io_Data = byte;
   ucon64_io_req->io_Command = CMD_WRITE;
@@ -1522,7 +1523,7 @@ outportw (unsigned short port, unsigned short word)
 #elif   defined AMIGA
   ULONG wait_mask;
   (void) port;                                  // warning remover
-  
+
   ucon64_io_req->io_Length = 2;
   ucon64_io_req->io_Data = word;
   ucon64_io_req->io_Command = CMD_WRITE;

@@ -43,13 +43,12 @@ const st_usage_t swc_usage[] =
     {NULL, NULL, "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
 #ifdef PARALLEL
     {"xswc", NULL, "send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when ROM does not exist\n"
-                "Press q to abort; ^C will cause invalid state of backup unit"},
+                "receives automatically when ROM does not exist"},
     {"xswc2", NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)"},
     {"xswcs", NULL, "send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
                  OPTION_LONG_S "port=PORT\n"
                  "receives automatically when SRAM does not exist\n"
-                 "Press q to abort; ^C will cause invalid state of backup unit"},
+                 "Press q to abort; ^C might cause invalid state of backup unit"},
 #endif // PARALLEL
     {NULL, NULL, NULL}
   };

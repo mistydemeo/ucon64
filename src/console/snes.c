@@ -410,8 +410,10 @@ snes_convert_sramfile (const void *header)
 
   blocksize = fread (buf, 1, 32 * 1024, srcfile); // read 32 kB at max
   while (byteswritten < 32 * 1024 + SWC_HEADER_LEN)
-    {                                           // pad sram to 32.5 kB by
-      fwrite (buf, 1, blocksize, destfile);     //  repeating the SRAM data
+    {
+      // Pad SRAM to 32.5 kB by repeating the SRAM data. At least the SWC DX2
+      //  does something similar.
+      fwrite (buf, 1, blocksize, destfile);
       byteswritten += blocksize;
     }
 
@@ -431,8 +433,8 @@ snes_swcs (void)
   memset (&header, 0, SWC_HEADER_LEN);
   header.id1 = 0xaa;
   header.id2 = 0xbb;
-  header.type = 5;                              // size doesn't need to be set for the SWC
-
+  header.type = 5;                              // size needn't be set for the SWC
+                                                //  (SWC itself doesn't set it either)
   return snes_convert_sramfile (&header);
 }
 

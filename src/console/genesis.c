@@ -871,16 +871,16 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
                         int totalsize)
 {
   static int sram_page = 0, file_no_sram = 0;
-  int m;
-  unsigned char flags = 0; // SRAM/region flags: F, D (reserved), E, P, V, T, S1, S0
+  int n;
+  unsigned char name[0x1c], flags = 0; // SRAM/region flags: F, D (reserved), E, P, V, T, S1, S0
 
   fseek (destfile, 0x8000 + (file_no - 1) * 0x20, SEEK_SET);
-  if (rominfo->name[0] == 0)
-    rominfo->name[0] = 'D';                     // if table[0] == 0 => no next game
-  for (m = 0; m < 0x1d; m++)
-    if (!isprint ((int) rominfo->name[m]))
-      rominfo->name[m] = '.';
-  fwrite (rominfo->name, 1, 0x1d, destfile);    // 0x0 - 0x1c = name
+  memcpy (name, rominfo->name, 0x1c);
+  fputc (0xff, destfile);                       // 0x0 = 0xff (non-zero)
+  for (n = 0; n < 0x1c; n++)
+    if (!isprint ((int) name[n]))
+      name[n] = '.';
+  fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
   fputc (0, destfile);                          // 0x1d = 0
   fputc (totalsize / (2 * MBIT), destfile);     // 0x1e = bank code
 
@@ -900,6 +900,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
     }
   else
     flags |= 4;                                 // set T (no SRAM)
+//    flags |= 84;                                // set F & T (no SRAM)
 
   if (genesis_tv_standard == 1)
     flags |= 0x10;                              // set P(AL)
@@ -908,6 +909,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
     flags |= 0x20;                              // set E(uro)
 
   if (genesis_tv_standard == 0 && ucon64.tv_standard == 1)
+//  if (OFFSET (genesis_header, 240 + x) == 'J' && ucon64.tv_standard == 1)
     {
       flags |= 8;                               // set V (Euro console & NTSC game)
       flags &= ~0x30;                           // clear E(uro) & P(AL)

@@ -6,7 +6,7 @@ CFLAGS=@CFLAGS@
 LDFLAGS=@LDFLAGS@
 
 LIB=libdiscmage/libdiscmage.o libdiscmage/cdi.o libdiscmage/nero.o \
-	libdiscmage/sheets.o libdiscmage/buffer.o libdiscmage/audio.o
+	libdiscmage/sheets.o
 
 OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \

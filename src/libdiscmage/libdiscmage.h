@@ -25,8 +25,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <inttypes.h>
 #include "config.h"
-#include "audio.h"
-#include "buffer.h"
 #include "quick_io.h"
 #include "misc.h"
 #include "sheets.h"
@@ -214,12 +212,10 @@ typedef struct
 }
 st_image_t;
 
-extern void lba2msf (uint32_t lba, struct cdrom_msf *msf);
 extern int32_t bcd_conv (int32_t value);
-extern int32_t frame2bcd (int32_t frame);
-extern void frame2msf (int32_t frame, struct cdrom_msf *msf);
-extern int32_t msf2frame (struct cdrom_msf *msf);
-extern int32_t msf2lba (struct cdrom_msf *msf);
+
+int lba_to_msf (uint32_t lba, struct cdrom_msf * mp);
+uint32_t msf_to_lba (int m, int s, int f, int force_positive);
               
 
 extern int32_t trackmode_probe (const char *image);

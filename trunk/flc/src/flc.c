@@ -1,3 +1,4 @@
+
 /*
 flc
 shows the FILE_ID.DIZ of archives/files
@@ -40,8 +41,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 static void flc_exit (void);
 static int flc_configfile (void);
-static void flc_usage (int argc, char *argv[]);
-static const char *flc_title = "flc " FLC_VERSION_S " " CURRENT_OS_S " 1999-2004 by NoisyB (noisyb@gmx.net)";
 
 st_flc_t flc; // workflow
 
@@ -66,33 +65,45 @@ main (int argc, char *argv[])
 #else
   char path[MAXBUFSIZE];
 #endif
-  st_file_t file[FLC_MAX_FILES];
+  st_file_t file[ARGS_MAX];
+  char short_options[ARGS_MAX];
+  struct option long_options[ARGS_MAX];
   int x = 0, c;
   FILE *fh = NULL;
   int option_index = 0;
-  static const struct option long_options[] = {
-    {"frontend", 0, 0, 1},
-    {"o", 1, 0, 'o'},
-    {"t", 0, 0, 't'},
-    {"X", 0, 0, 'X'},
-    {"S", 0, 0, 'S'},
-    {"fr", 0, 0, 2},
-    {"k", 0, 0, 'k'},
-    {"html", 0, 0, 3},
-    {"c", 0, 0, 'c'},
-    {"h", 0, 0, 'h'},
-    {"help", 0, 0, 'h'},
-    {"bbs", 0, 0, 4},
-    {"?", 0, 0, 'h'},
-    {"version", 0, 0, 'v'},
-    {0, 0, 0, 0}
+  const st_getopt2_t options[] = {
+    {NULL,      0, 0, 0, NULL,
+      "flc " FLC_VERSION_S " " CURRENT_OS_S " 1999-2004 by NoisyB (noisyb@gmx.net)\n"
+      "This may be freely redistributed under the terms of the GNU Public License\n\n"
+      "Usage: flc [OPTION]... [FILE]...\n", NULL},
+    {"c",       0, 0, 'c', NULL,   "also test every possible archive in DIRECTORY for errors\n"
+                                   "return flags: N=not checked (default), P=passed, F=failed",
+                                   NULL},
+    {"html",    0, 0, 3,   NULL,   "output as HTML document with links to the files", NULL},
+    {"bbs",     0, 0, 4,   NULL,   "output as BBS style filelisting (default)", NULL},
+    {"o",       1, 0, 'o', "FILE", "write output into FILE", NULL},
+    {"t",       0, 0, 't', NULL,   "sort by modification time", NULL},
+    {"X",       0, 0, 'X', NULL,   "sort alphabetical", NULL},
+    {"S",       0, 0, 'S', NULL,   "sort by byte size", NULL},
+    {"fr",      0, 0, 2,   NULL,   "sort reverse", NULL},
+    {"k",       0, 0, 'k', NULL,   "show sizes in kilobytes", NULL},
+    {"version", 0, 0, 'v', NULL,   "output version information and exit", NULL},
+    {"help",    0, 0, 'h', NULL,   "display this help and exit", NULL},
+    {"h",       0, 0, 'h', NULL,   NULL, NULL},
+    {NULL,      0, 0, 0,   NULL,
+      "\nAmiga version: noC-flc Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
+      "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n", NULL},
+    {NULL,      0, 0, 0,   NULL,   NULL, NULL}
   };
 
   memset (&flc, 0, sizeof (st_flc_t));
   
   flc_configfile ();
 
-  while ((c = getopt_long (argc, argv, "o:tXSkchv", long_options, &option_index)) != -1)
+  getopt2_short (short_options, options, ARGS_MAX);
+  getopt2_long (long_options, options, ARGS_MAX);
+  
+  while ((c = getopt_long_only (argc, argv, short_options, long_options, &option_index)) != -1)
     switch (c)
       {
         case 1:
@@ -141,7 +152,7 @@ main (int argc, char *argv[])
           break;
 
         case 'h':
-          flc_usage (argc, argv);
+          getopt2_usage (options);
           return 0;
 
         case 'v':
@@ -155,7 +166,7 @@ main (int argc, char *argv[])
 
   if (argc < 2 || !optind)
     {
-      flc_usage (argc, argv);
+      getopt2_usage (options);
       return -1;
     }
 
@@ -241,37 +252,6 @@ main (int argc, char *argv[])
     fclose (fh);
 
   return 0;
-}
-
-
-void
-flc_usage (int argc, char *argv[])
-{
-  (void) argc;
-  st_usage_t flc_usage[] = {
-    {"c", 0, NULL, "also test every possible archive in DIRECTORY for errors\n"
-                   "return flags: N=not checked (default), P=passed, F=failed", NULL},
-    {"html", 0, NULL, "output as HTML document with links to the files", NULL},
-    {"bbs", 0, NULL, "output as BBS style filelisting (default)", NULL},
-    {"o", 1, "FILE", "write output into FILE", NULL},
-    {"t", 0, NULL, "sort by modification time", NULL},
-    {"X", 0, NULL, "sort alphabetical", NULL},
-    {"S", 0, NULL, "sort by byte size", NULL},
-    {"fr", 0, NULL, "sort reverse", NULL},
-    {"k", 0, NULL, "show sizes in kilobytes", NULL},
-    {"help", 0, NULL, "display this help and exit", NULL},
-    {"version", 0, NULL, "output version information and exit", NULL},
-    {NULL, 0, NULL, NULL, NULL}
-  };
-
-  printf ("\n%s\n"
-          "This may be freely redistributed under the terms of the GNU Public License\n\n"
-          "Usage: %s [OPTION]... [FILE]...\n\n", flc_title, argv[0]);
-          
-  render_usage (flc_usage, 0);
-
-  printf ("\nAmiga version: noC-flc Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
-          "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n");
 }
 
 

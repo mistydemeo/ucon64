@@ -86,7 +86,7 @@ OBJECTS+=dxe_misc.o
 # but it's wise to have as little conditionally compiled code as possible.
 # Besides it currently gets used even if zlib support is disabled.
 
-GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/2.953
+GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/3.31
 LIBS+=-L$(GCCA_DIR) -lgcc
 
 DLLFLAGS=$(OBJECTS) $(LIBS) $(LDFLAGS)  

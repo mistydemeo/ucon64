@@ -637,13 +637,13 @@ get_suffix (const char *filename)
 }
 
 
+static int
+strtrimr (char *str)
 /*
   Removes all trailing blanks from a string.
   Blanks are defined with isspace (blank, tab, newline, return, formfeed,
   vertical tab = 0x09 - 0x0D + 0x20)
 */
-static int
-strtrimr (char *str)
 {
   int i, j;
 
@@ -656,13 +656,13 @@ strtrimr (char *str)
 }
 
 
+static int
+strtriml (char *str)
 /*
   Removes all leading blanks from a string.
   Blanks are defined with isspace (blank, tab, newline, return, formfeed,
   vertical tab = 0x09 - 0x0D + 0x20)
 */
-static int
-strtriml (char *str)
 {
   int i = 0, j;
 
@@ -678,13 +678,13 @@ strtriml (char *str)
 }
 
 
+char *
+strtrim (char *str)
 /*
   Removes all leading and trailing blanks in a string.
   Blanks are defined with isspace (blank, tab, newline, return, formfeed,
   vertical tab = 0x09 - 0x0D + 0x20)
 */
-char *
-strtrim (char *str)
 {
   strtrimr (str);
   strtriml (str);
@@ -694,41 +694,29 @@ strtrim (char *str)
 
 
 int
-memwcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildcard)
+memwcmp (const void *data, const void *search, uint32_t searchlen, int wildcard)
 {
-  const unsigned char *a = (const unsigned char *) add,
-                      *a_w = (const unsigned char *) add_with_wildcards;
+  uint32_t n;
 
-  while (n)
-    {
-      if (/* *a != wildcard &&*/ *a_w != wildcard && *a != *a_w)
-        return -1;
-
-      a++;
-      a_w++;
-      n--;
-    }
+  for (n = 0; n < searchlen; n++)
+    if (((uint8_t *) search)[n] != wildcard &&
+        ((uint8_t *) data)[n] != ((uint8_t *) search)[n])
+      return -1;
 
   return 0;
 }
 
 
 int
-memwrcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildcard)
-// like memwcmp() but looks also for shifted/relative similarities
+memwrcmp (const void *data, const void *search, uint32_t searchlen, int wildcard)
+// TODO: make it like memwcmp() that looks also for shifted/relative similarities
 {
-  const unsigned char *a = (const unsigned char *) add,
-                      *a_w = (const unsigned char *) add_with_wildcards;
+  uint32_t n;
 
-  while (n)
-    {
-      if (/* *a != wildcard &&*/ *a_w != wildcard && *a != *a_w)
-        return -1;
-
-      a++;
-      a_w++;
-      n--;
-    }
+  for (n = 0; n < searchlen; n++)
+    if (((uint8_t *) search)[n] != wildcard &&
+        ((uint8_t *) data)[n] != ((uint8_t *) search)[n])
+      return -1;
 
   return 0;
 }
@@ -762,7 +750,7 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
   for (pos = 0; pos < n; pos++, p++)
     {
       if (!(pos & 15))
-        printf ("%08x  ", pos + virtual_start);
+        printf ("%08x  ", (unsigned int) (pos + virtual_start));
       printf ((pos + 1) & 3 ? "%02x " : "%02x  ", *p);
 
       *(buf + (pos & 15)) = isprint (*p) ? *p : '.';
@@ -993,7 +981,12 @@ realpath (const char *path, char *full_path)
       getcwd (new_path, FILENAME_MAX - 1);
 #ifdef  DJGPP
       // DJGPP's getcwd() returns a path with forward slashes
-      change_mem (new_path, strlen (new_path), "/", 1, 0, 0, FILE_SEPARATOR_S, 1, 0);
+      {
+        int l = strlen (new_path);
+        for (n = 0; n < l; n++)
+          if (new_path[n] == '/')
+            new_path[n] = FILE_SEPARATOR;
+      }
 #endif
       new_path += strlen (new_path);
       if (*(new_path - 1) != FILE_SEPARATOR)
@@ -2612,9 +2605,6 @@ q_fncmp (const char *filename, int start, int len, const char *search,
   FILE *fh;
   int seglen, maxsearchlen, searchpos, filepos = 0, matchlen = 0;
 
-  if (start >= len)
-    return -1;
-
   if (!(fh = fopen (filename, "rb")))
     {
       errno = ENOENT;
@@ -2623,8 +2613,8 @@ q_fncmp (const char *filename, int start, int len, const char *search,
   fseek (fh, start, SEEK_SET);
   filepos = start;
 
-  while ((seglen = fread (buf, 1, BUFSIZE + filepos >= len ?
-                            len - filepos : BUFSIZE, fh)))
+  while ((seglen = fread (buf, 1, BUFSIZE + filepos > start + len ?
+                            start + len - filepos : BUFSIZE, fh)))
     {
       maxsearchlen = searchlen - matchlen;
       for (searchpos = 0; searchpos <= seglen; searchpos++)

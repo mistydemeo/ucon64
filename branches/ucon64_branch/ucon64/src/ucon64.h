@@ -146,7 +146,7 @@ typedef struct
 #endif
   unsigned int parport;                         // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
-  
+
 #ifdef  ANSI_COLOR
   int ansi_color;
 #endif

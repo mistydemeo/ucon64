@@ -90,7 +90,7 @@ const st_usage_t snes_usage[] =
     {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
     {"fig", NULL, "convert to *Pro Fighter*/(all)FIG"},
     {"figs", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG"},
-    {"gd3", NULL, "convert to Professor SF(2) Game Doctor SF3/6/7"},
+    {"gd3", NULL, "convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
     {"smc", NULL, "convert to Super Magicom/SMC"},
     {"swc", NULL, "convert to Super Wild Card*/(all)SWC"},
@@ -248,7 +248,6 @@ snes_get_file_type (void)
 
 int
 snes_col (const char *color)
-{
 /*
 The Nintendo Super Famicom is capable of displaying 256 colours from a
 palette of 32,768. These 256 colours are split into 8 palettes of 32 colours
@@ -282,6 +281,7 @@ Examples:
 
 Remember to load the lowest 8 bits first, then the top 7 bits.
 */
+{
   int r, g, b;
   unsigned int col;
 
@@ -1092,7 +1092,6 @@ snes_ufo (st_rominfo_t *rominfo)
 
 int
 snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
-// This function assumes file with name filename is in GD3 format
 {
   char dest_name[FILENAME_MAX];
   int nparts, surplus, n, n_names = 0, size = ucon64.file_size - rominfo->buheader_len;
@@ -1489,7 +1488,6 @@ snes_j (st_rominfo_t *rominfo)
 
 int
 snes_k (st_rominfo_t *rominfo)
-{
 /*
 See the document "src/backup/SWC-compatibility.txt".
 Don't touch this code if you don't know what you're doing!
@@ -1622,6 +1620,7 @@ Same here.
    a9 c3 80 dd ff ff f0 6c
 => a9 c3 f0 cc ff ff 80 7d
 */
+{
   char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[32 * 1024];
   FILE *srcfile, *destfile;
@@ -1759,7 +1758,6 @@ Same here.
 
 static int
 snes_fix_pal_protection (st_rominfo_t *rominfo)
-{
 /*
 This function searches for PAL protection codes. If it finds one it will
 fix the code so that the game will run on an NTSC SNES.
@@ -1775,6 +1773,7 @@ af 3f 21 00 29 10 00 d0               af 3f 21 00 29 10 00 ea ea
 af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Secret of Mana E
 a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country E
 */
+{
   char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[32 * 1024];
   FILE *srcfile, *destfile;
@@ -1847,7 +1846,6 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 
 static int
 snes_fix_ntsc_protection (st_rominfo_t *rominfo)
-{
 /*
 This function searches for NTSC protection codes. If it finds one it will
 fix the code so that the game will run on a PAL SNES.
@@ -1879,6 +1877,7 @@ af 3f 21 ea 89 10 00 d0               a9 00 00 ea 89 10 00 d0          - Super F
 a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country U
 29 10 00 a2 00 00 c9 10 00 d0         29 10 00 a2 00 00 c9 10 00 80    - Wolfenstein 3D U
 */
+{
   char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[32 * 1024];
   FILE *srcfile, *destfile;
@@ -1977,8 +1976,8 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 
 int
 snes_f (st_rominfo_t *rominfo)
-{
 // See the document "src/backup/NTSC-PAL notes.txt".
+{
   switch (snes_header.country)
     {
     // In the Philipines the television standard is NTSC, but do games made
@@ -1994,7 +1993,6 @@ snes_f (st_rominfo_t *rominfo)
 
 int
 snes_l (st_rominfo_t *rominfo)
-{
 /*
 The order is important. Don't touch this code if you don't know what you're doing!
 
@@ -2011,6 +2009,7 @@ a9/a2 01 8d/8e 0d 42            a9/a2 00 8d/8e 0d 42
 a9 01 00 8d 0d 42               a9 00 00 8d 0d 42
 a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
 */
+{
   char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[32 * 1024];
   FILE *srcfile, *destfile;

@@ -89,8 +89,7 @@ const st_usage_t genesis_usage[] =
     {"multi", "SIZE", "make multi-game file for use with MD-PRO flash card,\n"
                       "truncated to SIZE Mbit; file with loader must be specified\n"
                       "first, then all the ROMs, multi-game file to create last"},
-    {"pal", NULL, "specify console to use multi-game file on is a\n"
-                  "European Mega Drive (PAL); use in combination with -multi"},
+    {"pal", NULL, "enable region function (PAL/NTSC); use with -multi"},
     {NULL, NULL, NULL}
   };
 
@@ -682,11 +681,11 @@ genesis_chk (st_rominfo_t *rominfo)
 
 static int
 genesis_fix_pal_protection (st_rominfo_t *rominfo)
-{
 /*
   This function searches for PAL protection codes. If it finds one it will
   fix the code so that the game will run on a Genesis (NTSC).
 */
+{
   char fname[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
   int offset = 0, block_size, n = 0, n_extra_patterns, n2;
@@ -732,11 +731,11 @@ genesis_fix_pal_protection (st_rominfo_t *rominfo)
 
 static int
 genesis_fix_ntsc_protection (st_rominfo_t *rominfo)
-{
 /*
   This function searches for NTSC protection codes. If it finds one it will
   fix the code so that the game will run on a Mega Drive (PAL).
 */
+{
   char fname[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
   int offset = 0, block_size, n = 0, n_extra_patterns, n2;
@@ -789,7 +788,7 @@ genesis_f (st_rominfo_t *rominfo)
     Just like with SNES we don't guarantee anything for files that needn't be
     fixed/cracked/patched.
   */
-  if (genesis_tv_standard == 0)               // NTSC (Japan or U.S.A.)
+  if (genesis_tv_standard == 0)               // NTSC (Japan, U.S.A. or Brazil)
     return genesis_fix_ntsc_protection (rominfo);
   else
     return genesis_fix_pal_protection (rominfo);
@@ -871,22 +870,25 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
                         int totalsize)
 {
   static int sram_page = 0, file_no_sram = 0;
-  int m;
-  unsigned char flags = 0; // SRAM/region flags: F, D (reserved), E, P, V, T, S1, S0
+  int n;
+  unsigned char name[0x1c], flags = 0; // SRAM/region flags: F, D (reserved), E, P, V, T, S1, S0
 
   fseek (destfile, 0x8000 + (file_no - 1) * 0x20, SEEK_SET);
-  if (rominfo->name[0] == 0)
-    rominfo->name[0] = 'D';                     // if table[0] == 0 => no next game
-  for (m = 0; m < 0x1d; m++)
-    if (!isprint ((int) rominfo->name[m]))
-      rominfo->name[m] = '.';
-  fwrite (rominfo->name, 1, 0x1d, destfile);    // 0x0 - 0x1c = name
+  fputc (0xff, destfile);                       // 0x0 = 0xff
+  memcpy (name, rominfo->name, 0x1c);
+  for (n = 0; n < 0x1c; n++)
+    {
+      if (!isprint ((int) name[n]))
+        name[n] = '.';
+      else
+        name[n] = toupper (name[n]);            // according to Leo, MDPACKU4.BIN
+    }                                           //  only supports upper case characters
+  fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
   fputc (0, destfile);                          // 0x1d = 0
   fputc (totalsize / (2 * MBIT), destfile);     // 0x1e = bank code
 
   if (genesis_has_ram)
     {
-      // TODO: ask Leo if this is correct use of S1 & S0
       flags = sram_page++;
       if (sram_page == 3)
         file_no_sram = file_no;
@@ -901,16 +903,19 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
   else
     flags |= 4;                                 // set T (no SRAM)
 
+  // AAAHH!!! E, P and V are driving me NUTS! I'll just wait for bug reports...
   if (genesis_tv_standard == 1)
     flags |= 0x10;                              // set P(AL)
 
-  if (ucon64.tv_standard == 1)
-    flags |= 0x20;                              // set E(uro)
-
-  if (genesis_tv_standard == 0 && ucon64.tv_standard == 1)
+  // I (dbjh) don't know if the next compound statement is correct when -pal
+  //  is specified
+  if (UCON64_ISSET (ucon64.tv_standard))
     {
-      flags |= 8;                               // set V (Euro console & NTSC game)
-      flags &= ~0x30;                           // clear E(uro) & P(AL)
+      flags |= 8;                               // set V (enable region function)
+      if (genesis_tv_standard == 0)
+        flags &= ~0x30;                         // clear E(uro) & P(AL)
+      else // genesis_tv_standard == 1
+        flags |= 0x30;                          // set E(uro) & P(AL)
     }
 
   fputc (flags, destfile);                      // 0x1f = flags
@@ -1068,7 +1073,7 @@ genesis_multi (int truncate_size, char *fname)
       file_no++;
     }
   // fill the next game table entry
-  fseek (destfile, 0x8000 + file_no * 0x20, SEEK_SET);
+  fseek (destfile, 0x8000 + (file_no - 1) * 0x20, SEEK_SET);
   fputc (0, destfile);                          // indicate no next game
   fclose (destfile);
   ucon64.console = UCON64_GEN;
@@ -1286,8 +1291,8 @@ genesis_init (st_rominfo_t *rominfo)
     }
   else
     {
-      // Don't use genesis_maker here. If it would be corrected an incorrect
-      //  publisher name would be displayed.
+      // Don't use genesis_maker here. If it would be corrected/updated an
+      //  incorrect publisher name would be displayed.
       rominfo->maker =
         (!strncmp (maker, "(C)ACLD", 7)) ? "Ballistic" :
         (!strncmp (maker, "(C)AESI", 7)) ? "ASCII" :
@@ -1316,8 +1321,8 @@ genesis_init (st_rominfo_t *rominfo)
 
       if ((x > 0 && country_code == 0) || country_code == ' ')
         continue;
-      if (country_code == 'J' || country_code == 'U') // Japan or U.S.A.
-        genesis_tv_standard = 0;
+      if (country_code == 'J' || country_code == 'U' || country_code == 'B')
+        genesis_tv_standard = 0;        // Japan, the U.S.A. and Brazil use NTSC
       strcat (country, NULL_TO_UNKNOWN_S
                (genesis_country[MIN (country_code, GENESIS_COUNTRY_MAX - 1)]));
       strcat (country, ", ");

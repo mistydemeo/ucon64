@@ -448,13 +448,13 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     strcpy (dat->fname, dat_field[4]);
 
   if (dat_field[5])
-    sscanf (dat_field[5], "%x", &dat->crc32);
+    sscanf (dat_field[5], "%x", (unsigned int *) &dat->crc32);
 
   if (dat_field[6][0] == 'N' && dat_field[7][0] == 'O')
     // e.g. GoodSNES bad crc & Nintendo FDS DAT
-    sscanf (dat_field[8], "%d", &dat->fsize);
+    sscanf (dat_field[8], "%d", (int *) &dat->fsize);
   else
-    sscanf (dat_field[6], "%d", &dat->fsize);
+    sscanf (dat_field[6], "%d", (int *) &dat->fsize);
 
   *buf = 0;
   for (x = 0, p = buf; dat_flags[x][0]; x++, p += strlen (p))
@@ -498,7 +498,7 @@ line_to_crc (const char *dat_entry)
   argz_extract2 (dat_field, buf, DAT_FIELD_SEPARATOR_S, MAX_FIELDS_IN_DAT);
 
   if (dat_field[5])
-    sscanf (dat_field[5], "%x", &crc32);
+    sscanf (dat_field[5], "%x", (unsigned int *) &crc32);
 
   return crc32;
 }
@@ -594,7 +594,7 @@ ucon64_dat_view (int console, int verbose)
           for (n = 0; n < n_entries; n++)
             {
               idx_entry = &((st_idx_entry_t *) p)[n];
-              printf ("Checksum (CRC32): 0x%08x\n", idx_entry->crc32);
+              printf ("Checksum (CRC32): 0x%08x\n", (unsigned int) idx_entry->crc32);
               if (get_dat_entry (fname_dat, &dat, idx_entry->crc32, idx_entry->filepos))
                 ucon64_dat_nfo (&dat, 0);
               puts ("");
@@ -808,7 +808,7 @@ ucon64_dat_indexer (void)
                        "WARNING: DAT file contains a duplicate CRC32 (0x%x)!\n"
                        "  First game with this CRC32: \"%s\"\n"
                        "  Ignoring game:              \"%s\"\n",
-                       dat.crc32, dat.name, current_name);
+                       (unsigned int) dat.crc32, dat.name, current_name);
 
               n_duplicates++;
               fseek (fdat, current_filepos, SEEK_SET);
@@ -881,6 +881,9 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   if (dat->console_usage != NULL)
     {
       strcpy (buf, dat->console_usage[0].desc);
+      // fix ugly multi-line console "usages" (PC Engine)
+      if ((p = strchr (buf, '\n')) != NULL)
+        *p = 0;
       printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
@@ -922,7 +925,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   if (stricmp (dat->name, dat->fname) != 0)
     printf ("  Filename: %s\n", dat->fname);
 
-  printf ("  %d Bytes (%.4f Mb)\n", dat->fsize, TOMBIT_F (dat->fsize));
+  printf ("  %d Bytes (%.4f Mb)\n", (int) dat->fsize, TOMBIT_F (dat->fsize));
 
   if (dat->misc[0])
     printf ("  %s\n", dat->misc);

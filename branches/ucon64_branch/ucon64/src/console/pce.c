@@ -49,12 +49,20 @@ const st_usage_t pcengine_usage[] =
     {NULL, NULL, "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\nSuper Grafx/Turbo (Grafx(16)/CD/DUO/Express)"},
     {NULL, NULL, "1987/19XX/19XX NEC"},
     {"pce", NULL, "force recognition"},
+    {"int", NULL, "force ROM is in interleaved format"},
+    {"nint", NULL, "force ROM is not in interleaved format"},
     {"smg", NULL, "convert to Super Magic Griffin/SMG"},
     {"mgd", NULL, "convert to Multi Game Doctor*/MGD2/RAW"},
-    {"invert", NULL, "invert bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)"},
+    {"swap", NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)"},
     {NULL, NULL, NULL}
 };
 
+const st_usage_t smg_usage[] =
+  {
+    {NULL, NULL, "Super Magic Griffin"},
+    {NULL, NULL, "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
+    {NULL, NULL, NULL}
+  };
 
 #define PCE_MAKER_MAX 86
 static const char *pce_maker[PCE_MAKER_MAX] = {
@@ -613,13 +621,37 @@ pce_compare (const void *key, const void *found)
 }
 
 
+static void
+swapbits (unsigned char *buffer, int size)
+{
+  int n, byte, bit;
+
+  for (n = 0; n < size; n++)
+    {
+      byte = 0;
+      for (bit = 0; bit < 8; bit++)
+        if (buffer[n] & (1 << bit))
+          byte |= 1 << (7 - bit);
+      buffer[n] = byte;
+    }
+}
+
+
 // header format is specified in src/backup/ffe.h
 int
 pcengine_smg (st_rominfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  unsigned char *rom_buffer = NULL;
   st_unknown_header_t header;
   int size = ucon64.file_size - rominfo->buheader_len;
+
+  if (!rominfo->interleaved)
+    if (!(rom_buffer = (unsigned char *) malloc (size)))
+      {
+        fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+        return -1;
+      }
 
   memset (&header, 0, UNKNOWN_HEADER_LEN);
   header.size_low = size / 8192;
@@ -634,7 +666,16 @@ pcengine_smg (st_rominfo_t *rominfo)
   ucon64_file_handler (dest_name, src_name, 0);
 
   q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
-  q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
+  if (!rominfo->interleaved)
+    {
+      // That Super Magic Griffin files should be interleaved is just a guess - dbjh
+      q_fread (rom_buffer, rominfo->buheader_len, size, src_name);
+      swapbits (rom_buffer, size);
+      q_fwrite (rom_buffer, UNKNOWN_HEADER_LEN, size, dest_name, "ab");
+      free (rom_buffer);
+    }
+  else
+    q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -647,13 +688,29 @@ int
 pcengine_mgd (st_rominfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  unsigned char *rom_buffer = NULL;
   int size = ucon64.file_size - rominfo->buheader_len;
+
+  if (rominfo->interleaved)
+    if (!(rom_buffer = (unsigned char *) malloc (size)))
+      {
+        fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+        return -1;
+      }
 
   strcpy (src_name, ucon64.rom);
   mgd_make_name (ucon64.rom, "PC", size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
-  q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "wb");
+  if (rominfo->interleaved)
+    {
+      q_fread (rom_buffer, rominfo->buheader_len, size, src_name);
+      swapbits (rom_buffer, size);
+      q_fwrite (rom_buffer, 0, size, dest_name, "wb");
+      free (rom_buffer);
+    }
+  else
+    q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "wb");
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -662,51 +719,96 @@ pcengine_mgd (st_rominfo_t *rominfo)
 
 
 int
-pcengine_invert (st_rominfo_t *rominfo)
+pcengine_swap (st_rominfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  unsigned char buffer[MAXBUFSIZE], byte;
-  FILE *srcfile, *destfile;
-  int bytesread, n, bit;
+  unsigned char *rom_buffer;
+  int size = ucon64.file_size - rominfo->buheader_len;
+
+  if (!(rom_buffer = (unsigned char *) malloc (size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+      return -1;
+    }
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, src_name, 0);
-  if ((srcfile = fopen (src_name, "rb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
-      return -1;
-    }
-  if ((destfile = fopen (dest_name, "wb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
-      return -1;
-    }
+
   if (rominfo->buheader_len)                    // copy header (if present)
-    {
-      fread (buffer, 1, UNKNOWN_HEADER_LEN, srcfile);
-      fseek (srcfile, rominfo->buheader_len, SEEK_SET);
-      fwrite (buffer, 1, UNKNOWN_HEADER_LEN, destfile);
-    }
+    q_fcpy (src_name, 0, rominfo->buheader_len, dest_name, "wb");
 
-  while ((bytesread = fread (buffer, 1, MAXBUFSIZE, srcfile)))
-    {
-      for (n = 0; n < bytesread; n++)
-        {
-          byte = 0;
-          for (bit = 0; bit < 8; bit++)
-            if (buffer[n] & (1 << bit))
-              byte |= 1 << (7 - bit);
-          buffer[n] = byte;
-        }
-      fwrite (buffer, 1, bytesread, destfile);
-    }
-
-  fclose (srcfile);
-  fclose (destfile);
+  q_fread (rom_buffer, rominfo->buheader_len, size, src_name);
+  swapbits (rom_buffer, size);
+  q_fwrite (rom_buffer, rominfo->buheader_len, size, dest_name,
+            rominfo->buheader_len ? "ab" : "wb");
+  free (rom_buffer);
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
+  return 0;
+}
+
+
+int
+pcengine_check (unsigned char *buf, unsigned int len)
+// This function was contributed by Cowering. Comments are his unless stated
+//  otherwise.
+{
+  int i, f1 = 0, f2 = 0, f3 = 0, f4 = 0, f5 = 0;
+
+  // Directly look for swapped dead moon (U). Lots of zeroes at file start
+  //  fakes out header detector.
+  // We probably don't need this (no "header detector") - dbjh
+  if (buf[0] == 0x1e && buf[1] == 0x2a && buf[2] == 0x95)
+    return 1;
+  if (buf[0] == 0x12 && buf[1] == 0xe0 && buf[16] == 0x4a) // F-1 Pilot
+    return 1;
+  if (buf[0] == 0x20 && buf[1] == 0x81 && buf[16] == 0x81) // Cyber Knight
+    return 1;
+  if (buf[0] == 0x03 && buf[1] == 0x03 && buf[16] == 0x02) // Gaia no monsho
+    return 1;
+#if 0 // no reason to not recognise this dump - dbjh
+  if (len == 0x40400) // BIOS with 2 headers on front, deleted from database now
+    return 0;
+#endif
+/*
+  // two headers on a CD-ROM BIOS (bad dump)
+  if (len == 0x40200 && buf[0x200] == 0x32 && buf[0x210] == 0xa0 && buf[0x220] == 0xf7)
+    return 1;
+*/
+  // super mario pirate conversion
+  if (len > 65000 && !strncmp ((const char*) &buf[0x77f0], "JGGKGKGGGGGGJGJG", 16))
+    return 1;
+  if (buf[0x20] == 0x7c && buf[0x21] == 0xe3 && buf[0x22] == 0xe6) // 5 in 1
+    return 1;
+  if (buf[0x10] == 0xc7 && buf[0x30] == 0xe9 && buf[0x50] == 0xa1) // Sekikehara
+    return 1;
+  if (!strncmp ((const char *) &buf[0], "!BM FORMAT!", 11)) // boxy boy (U)
+    return 1;
+  if (!strncmp ((const char *) &buf[0], "PUSH RUN BUTTON", 15)) // boxy boy (J)
+    return 1;
+  // US CD sys 2.01
+  if (len > 0x3ffc7 && !strncmp ((const char *) &buf[0x3ffb6], "PC Engine CD-ROM", 16))
+    return 1;
+
+  for (i = 0 ; i < 0x200; i++)
+    {
+      if (buf[i] == 0x00)
+        f1++;
+      if (buf[i] == 0xff)
+        f4++;
+      if (buf[i] == 0x78)
+        f2 = 1;
+      if (buf[i] == 0xa9)
+        f3 = 1;
+      if (buf[i] == 0x85 || buf[i] == 0x8d)
+        f5 = 1;
+    }
+  if ((f4 > 200) || ((f1 > 200) && (f2 + f3 != 2)))
+    return 0;
+  if (f2 + f3 + f5 >= 2)
+    return 1;
   return 0;
 }
 
@@ -714,155 +816,124 @@ pcengine_invert (st_rominfo_t *rominfo)
 int
 pcengine_init (st_rominfo_t *rominfo)
 {
-  int result = -1;
-  char buf[MAXBUFSIZE];
+  int result = -1, size, swapped;
+  unsigned char *rom_buffer;
   st_pce_data_t *info, key;
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-    ucon64.buheader_len : 0;
+    ucon64.buheader_len : ucon64.file_size % (16 * 1024);
 
-  q_fread (&pce_header, PCENGINE_HEADER_START +
-      rominfo->buheader_len, PCENGINE_HEADER_LEN, ucon64.rom);
+  size = ucon64.file_size - rominfo->buheader_len;
+  if (!(rom_buffer = (unsigned char *) malloc (size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+      return -1;
+    }
+  q_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
+
+  if (pcengine_check (rom_buffer, size) == 1)
+    result = 0;
+
+  swapped = -1;
+  /*
+    29 40 f0 => unhacked
+    29 40 80 => U.S.A. -> Jap hack
+    94 02 0f => bit-swapped and unhacked
+    94 02 01 => bit-swapped and hacked
+
+    According to Cowering 2 or 3 games don't use these opcodes to check if a
+    Japanese game is running on an American console. If they are present then
+    it is in the first 500 bytes.
+  */
+#if 1
+  // I don't feel like writing a new memory search function at the moment...
+  if (q_fncmp (ucon64.rom, rominfo->buheader_len, 32768, "\x94\x02\x0f", 3, 0) != -1 ||
+      q_fncmp (ucon64.rom, rominfo->buheader_len, 32768, "\x94\x02\x01", 3, 0) != -1)
+#else
+  if (change_mem ((char *) rom_buffer, 32768, "\x94\x02\x0f", 3, 0, 0, "\x0f", 1, 0) > 0 ||
+      change_mem ((char *) rom_buffer, 32768, "\x94\x02\x01", 3, 0, 0, "\x01", 1, 0) > 0)
+#endif
+    swapped = 1;
+  if (UCON64_ISSET (ucon64.interleaved))
+    swapped = ucon64.interleaved;
+
+  if ((result == -1 && swapped != 0) || swapped == 1)
+    {                                   // don't swap the bits if -nint is specified
+      if (!UCON64_ISSET (ucon64.do_not_calc_crc) || swapped == 1)
+        ucon64.fcrc32 = crc32 (0, rom_buffer, size);
+      swapbits (rom_buffer, size);
+      if (pcengine_check (rom_buffer, size) == 1)
+        {
+          swapped = 1;
+          result = 0;
+        }
+      if (swapped != 1)
+        {
+          ucon64.crc32 = ucon64.fcrc32;
+          ucon64.fcrc32 = 0;
+        }
+    }
+  if (swapped != -1)
+    rominfo->interleaved = swapped;
+
+  if (ucon64.console == UCON64_PCE)
+    result = 0;
+
+  memcpy (&pce_header, rom_buffer + PCENGINE_HEADER_START, PCENGINE_HEADER_LEN);
 
   rominfo->header_start = PCENGINE_HEADER_START;
   rominfo->header_len = PCENGINE_HEADER_LEN;
   rominfo->header = &pce_header;
-
-#if 0
-  // PCE dumps don't have an internal CRC. The code below is debug/test code.
-  rominfo->has_internal_crc = 1;
-  rominfo->internal_crc_len = 4;
-  rominfo->current_internal_crc = pcengine_chksum (rominfo);
-  rominfo->internal_crc = rominfo->current_internal_crc;
-  rominfo->internal_crc2[0] = 0;
-#endif
-
   rominfo->console_usage = pcengine_usage;
-  rominfo->copier_usage = (!rominfo->buheader_len ? mgd_usage : unknown_usage);
+  rominfo->copier_usage = rominfo->buheader_len ? smg_usage : mgd_usage;
 
-  ucon64.crc32 = q_fcrc32 (ucon64.rom, rominfo->buheader_len);
-  // additional info
-  key.crc32 = ucon64.crc32;
-  info = (st_pce_data_t *) bsearch (&key, pce_data, sizeof pce_data / sizeof (st_pce_data_t),
-                                    sizeof (st_pce_data_t), pce_compare);
-  if (info)
+  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
-      if (info->maker)
-        rominfo->maker = NULL_TO_UNKNOWN_S (pce_maker[MIN (info->maker, PCE_MAKER_MAX - 1)]);
-
-      if (info->serial)
-        if (info->serial[0])
-          {
-            strcat (rominfo->misc, "\nSerial: ");
-            strcat (rominfo->misc, info->serial);
-          }
-
-      if (info->date)
+      if (!ucon64.crc32)
+        ucon64.crc32 = crc32 (0, rom_buffer, size);
+      // additional info
+      key.crc32 = ucon64.crc32;
+      info = (st_pce_data_t *) bsearch (&key, pce_data,
+                                        sizeof pce_data / sizeof (st_pce_data_t),
+                                        sizeof (st_pce_data_t), pce_compare);
+      if (info)
         {
-          int day = info->date / 10000, month = (info->date % 10000) / 100,
-              year = info->date % 100;
+          if (info->maker)
+            rominfo->maker = NULL_TO_UNKNOWN_S (pce_maker[MIN (info->maker,
+                                                               PCE_MAKER_MAX - 1)]);
 
-          buf[0] = 0;
-          if (day)
-            sprintf (buf, "\nDate: %d/%d/19%d", day, month, year);
-          else if (month)
-            sprintf (buf, "\nDate: %d/19%d", month, year);
-          else if (year)
-            sprintf (buf, "\nDate: 19%d", year);
-          strcat (rominfo->misc, buf);
+          if (info->serial)
+            if (info->serial[0])
+              {
+                strcat (rominfo->misc, "\nSerial: ");
+                strcat (rominfo->misc, info->serial);
+              }
+
+          if (info->date)
+            {
+              int day = info->date / 10000, month = (info->date % 10000) / 100,
+                  year = info->date % 100;
+              char date[80];
+
+              date[0] = 0;
+              if (day)
+                sprintf (date, "\nDate: %d/%d/19%d", day, month, year);
+              else if (month)
+                sprintf (date, "\nDate: %d/19%d", month, year);
+              else if (year)
+                sprintf (date, "\nDate: 19%d", year);
+              strcat (rominfo->misc, date);
+            }
+
+          if (info->comment)
+            if (info->comment[0])
+              {
+                strcat (rominfo->misc, "\nComment: ");
+                strcat (rominfo->misc, info->comment);
+              }
         }
-
-      if (info->comment)
-        if (info->comment[0])
-          {
-            strcat (rominfo->misc, "\nComment: ");
-            strcat (rominfo->misc, info->comment);
-          }
     }
 
+  free (rom_buffer);
   return result;
 }
-
-
-#if 0
-unsigned int
-pcengine_chksum (st_rominfo_t *rominfo)
-{
-  unsigned int chksumconst[] = {
-    0x0,        0x77073096, 0xee0e612c, 0x990951ba, 0x76dc419,  0x706af48f,
-    0xe963a535, 0x9e6495a3, 0xedb8832,  0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
-    0x9b64c2b,  0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2,
-    0xf3b97148, 0x84be41de, 0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7,
-    0x136c9856, 0x646ba8c0, 0xfd62f97a, 0x8a65c9ec, 0x14015c4f, 0x63066cd9,
-    0xfa0f3d63, 0x8d080df5, 0x3b6e20c8, 0x4c69105e, 0xd56041e4, 0xa2677172,
-    0x3c03e4d1, 0x4b04d447, 0xd20d85fd, 0xa50ab56b, 0x35b5a8fa, 0x42b2986c,
-    0xdbbbc9d6, 0xacbcf940, 0x32d86ce3, 0x45df5c75, 0xdcd60dcf, 0xabd13d59,
-    0x26d930ac, 0x51de003a, 0xc8d75180, 0xbfd06116, 0x21b4f4b5, 0x56b3c423,
-    0xcfba9599, 0xb8bda50f, 0x2802b89e, 0x5f058808, 0xc60cd9b2, 0xb10be924,
-    0x2f6f7c87, 0x58684c11, 0xc1611dab, 0xb6662d3d, 0x76dc4190, 0x1db7106,
-    0x98d220bc, 0xefd5102a, 0x71b18589, 0x6b6b51f,  0x9fbfe4a5, 0xe8b8d433,
-    0x7807c9a2, 0xf00f934,  0x9609a88e, 0xe10e9818, 0x7f6a0dbb, 0x86d3d2d,
-    0x91646c97, 0xe6635c01, 0x6b6b51f4, 0x1c6c6162, 0x856530d8, 0xf262004e,
-    0x6c0695ed, 0x1b01a57b, 0x8208f4c1, 0xf50fc457, 0x65b0d9c6, 0x12b7e950,
-    0x8bbeb8ea, 0xfcb9887c, 0x62dd1ddf, 0x15da2d49, 0x8cd37cf3, 0xfbd44c65,
-    0x4db26158, 0x3ab551ce, 0xa3bc0074, 0xd4bb30e2, 0x4adfa541, 0x3dd895d7,
-    0xa4d1c46d, 0xd3d6f4fb, 0x4369e96a, 0x346ed9fc, 0xad678846, 0xda60b8d0,
-    0x44042d73, 0x33031de5, 0xaa0a4c5f, 0xdd0d7cc9, 0x5005713c, 0x270241aa,
-    0xbe0b1010, 0xc90c2086, 0x5768b525, 0x206f85b3, 0xb966d409, 0xce61e49f,
-    0x5edef90e, 0x29d9c998, 0xb0d09822, 0xc7d7a8b4, 0x59b33d17, 0x2eb40d81,
-    0xb7bd5c3b, 0xc0ba6cad, 0xedb88320, 0x9abfb3b6, 0x3b6e20c,  0x74b1d29a,
-    0xead54739, 0x9dd277af, 0x4db2615,  0x73dc1683, 0xe3630b12, 0x94643b84,
-    0xd6d6a3e,  0x7a6a5aa8, 0xe40ecf0b, 0x9309ff9d, 0xa00ae27,  0x7d079eb1,
-    0xf00f9344, 0x8708a3d2, 0x1e01f268, 0x6906c2fe, 0xf762575d, 0x806567cb,
-    0x196c3671, 0x6e6b06e7, 0xfed41b76, 0x89d32be0, 0x10da7a5a, 0x67dd4acc,
-    0xf9b9df6f, 0x8ebeeff9, 0x17b7be43, 0x60b08ed5, 0xd6d6a3e8, 0xa1d1937e,
-    0x38d8c2c4, 0x4fdff252, 0xd1bb67f1, 0xa6bc5767, 0x3fb506dd, 0x48b2364b,
-    0xd80d2bda, 0xaf0a1b4c, 0x36034af6, 0x41047a60, 0xdf60efc3, 0xa867df55,
-    0x316e8eef, 0x4669be79, 0xcb61b38c, 0xbc66831a, 0x256fd2a0, 0x5268e236,
-    0xcc0c7795, 0xbb0b4703, 0x220216b9, 0x5505262f, 0xc5ba3bbe, 0xb2bd0b28,
-    0x2bb45a92, 0x5cb36a04, 0xc2d7ffa7, 0xb5d0cf31, 0x2cd99e8b, 0x5bdeae1d,
-    0x9b64c2b0, 0xec63f226, 0x756aa39c, 0x26d930a,  0x9c0906a9, 0xeb0e363f,
-    0x72076785, 0x5005713,  0x95bf4a82, 0xe2b87a14, 0x7bb12bae, 0xcb61b38,
-    0x92d28e9b, 0xe5d5be0d, 0x7cdcefb7, 0xbdbdf21,  0x86d3d2d4, 0xf1d4e242,
-    0x68ddb3f8, 0x1fda836e, 0x81be16cd, 0xf6b9265b, 0x6fb077e1, 0x18b74777,
-    0x88085ae6, 0xff0f6a70, 0x66063bca, 0x11010b5c, 0x8f659eff, 0xf862ae69,
-    0x616bffd3, 0x166ccf45, 0xa00ae278, 0xd70dd2ee, 0x4e048354, 0x3903b3c2,
-    0xa7672661, 0xd06016f7, 0x4969474d, 0x3e6e77db, 0xaed16a4a, 0xd9d65adc,
-    0x40df0b66, 0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9,
-    0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693,
-    0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
-    0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
-  };
-  unsigned char *buf;
-  unsigned int x, crc = -1, size, taille;
-  FILE *fh;
-
-  if (!(fh = fopen (ucon64.rom, "rb")))
-    return -1;
-
-  taille = ucon64.file_size - rominfo->buheader_len;
-  size = taille & 0xfffff000;
-//  if ((taille & 0x0fff) == 0)
-//    rominfo->buheader_len = 0;
-  fseek (fh, taille & 0x0fff, SEEK_SET);
-  if (!(buf = (unsigned char *) (malloc (size))))
-    {
-      fclose (fh);
-      return -1;
-    }
-
-  fread (buf, size, 1, fh);
-
-  for (x = 0; x < size; x++)
-    {
-      buf[x] ^= crc;
-      crc >>= 8;
-      crc ^= chksumconst[buf[x]];
-      crc ^= buf[x];
-    }
-  free (buf);
-  crc = ~crc;
-  fclose (fh);
-  return crc;
-}
-#endif

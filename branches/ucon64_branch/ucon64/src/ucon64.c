@@ -187,7 +187,6 @@ const struct option options[] = {
     {"int", 0, 0, UCON64_INT},
     {"int2", 0, 0, UCON64_INT2},
     {"intelli", 0, 0, UCON64_INTELLI},
-    {"invert", 0, 0, UCON64_INVERT},
 //    {"ip", 0, 0, UCON64_IP},
 #ifdef  DISCMAGE
     {"isofix", 1, 0, UCON64_ISOFIX},
@@ -755,6 +754,18 @@ ucon64_process_rom (char *fname)
            unzip_current_file_nr++)
         {
           ucon64_fname_arch (fname);
+          /*
+            There seems to be no other way to detect directories in ZIP files
+            than by looking at the file name. Paths in ZIP files should contain
+            forward slashes. ucon64_fname_arch() changes forward slashes into
+            backslashes (FILE_SEPARATORs) when uCON64 is compiled with Visual
+            C++ or MinGW so that basename2() always produces a correct base
+            name. So, if the entry in the ZIP file is a directory
+            ucon64.fname_arch will be an empty string.
+          */
+          if (strlen (ucon64.fname_arch) == 0)
+            continue;
+
           ucon64.rom = fname;
 
           ucon64_execute_options();
@@ -1146,8 +1157,8 @@ ucon64_probe (st_rominfo_t * rominfo)
       {UCON64_NGP, ngp_init, AUTO},
       {UCON64_SWAN, swan_init, AUTO},
       {UCON64_JAG, jaguar_init, AUTO},
+      {UCON64_PCE, pcengine_init, AUTO},
       {UCON64_NG, neogeo_init, 0},
-      {UCON64_PCE, pcengine_init, 0},
       {UCON64_SWAN, swan_init, 0},
       {UCON64_DC, dc_init, 0},
       {UCON64_PSX, psx_init, 0},
@@ -1416,6 +1427,14 @@ ucon64_fname_arch (const char *fname)
   unzip_goto_file (file, unzip_current_file_nr);
   unzGetCurrentFileInfo (file, NULL, name, FILENAME_MAX, NULL, 0, NULL, 0);
   unzClose (file);
+#if     defined _WIN32 || defined __MSDOS__
+  {
+    int n, l = strlen (name);
+    for (n = 0; n < l; n++)
+      if (name[n] == '/')
+        name[n] = FILE_SEPARATOR;
+  }
+#endif
   strncpy (ucon64.fname_arch, basename2 (name), FILENAME_MAX);
 }
 #endif

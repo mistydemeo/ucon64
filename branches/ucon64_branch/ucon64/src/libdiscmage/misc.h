@@ -292,6 +292,7 @@ extern int mkdir2 (const char *name);
 extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, int size);
 extern int argz_extract2 (char **argv, char *str, const char *separator_s, int max_args);
+#define argz_extract3(a,c,m) argz_extract2(a,c," ",m)
 
 
 /*
@@ -305,8 +306,8 @@ TODO:  memwrcmp()   like memwcmp() but looks also for shifted/relative similarit
   crc16()      calculate the crc16 of buffer for size bytes
   crc32()      calculate the crc32 of buffer for size bytes
 */
-extern int memwcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildcard);
-extern int memwrcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildcard);
+extern int memwcmp (const void *data, const void *search, uint32_t searchlen, int wildcard);
+extern int memwrcmp (const void *data, const void *search, uint32_t searchlen, int wildcard);
 extern void mem_hexdump (const void *add, uint32_t n, int virtual_start);
 //#ifdef  DEBUG
 // only for development

@@ -291,15 +291,33 @@ mgd_make_name (const char *filename, const char *prefix, int size, char *name)
     }
   else if (prefix[0] == 'G' && prefix[1] == 'G')
     {
-      if (size <= 2 * MBIT)
+      if (size <= MBIT)
         {
-          size_str = "2";
           suffix = ".000";
+          if (size <= MBIT / 4)
+            size_str = "04";
+          else if (size <= MBIT / 2)
+            size_str = "05";
+          else
+            size_str = "1";
         }
-      else // MGD supports Game Gear games with sizes up to 4 Mbit
+      else
         {
-          size_str = "4";
-          suffix = ".018";
+          if (size <= 2 * MBIT)
+            {
+              size_str = "2";
+              suffix = ".024";
+            }
+          else if (size <= 4 * MBIT)
+            {
+              size_str = "4";
+              suffix = ".058";
+            }
+          else // MGD supports Game Gear/Sega Master System games with sizes up to 6 Mbit
+            {
+              size_str = "6";
+              suffix = ".078";
+            }
         }
     }
   else if (prefix[0] == 'G' && prefix[1] == 'B')
@@ -334,14 +352,15 @@ mgd_make_name (const char *filename, const char *prefix, int size, char *name)
 
   // Do NOT mess with prefix (strupr()/strlwr()). See below (remove_mgd_id()).
   sprintf (name, "%s%s%s", prefix, size_str, fname);
-  if (size < 10 * MBIT)
+  if (size >= 10 * MBIT ||
+      (prefix[0] == 'G' && prefix[1] == 'G' && size < MBIT))
     {
-      if (!strnicmp (name, fname, 3))
+      if (!strnicmp (name, fname, 4))
         strcpy (name, fname);
     }
   else
     {
-      if (!strnicmp (name, fname, 4))
+      if (!strnicmp (name, fname, 3))
         strcpy (name, fname);
     }
   if ((p = strchr (name, '.')))
@@ -349,7 +368,7 @@ mgd_make_name (const char *filename, const char *prefix, int size, char *name)
   n = strlen (name);
   if (n > 7)
     n = 7;
-  name[n] = '0';                                // last character must be a number
+  name[n] = 'X';
   name[n + 1] = 0;
   for (n = 3; n < 7; n++)                       // we can skip the prefix
     if (name[n] == ' ')

@@ -790,9 +790,8 @@ ucon64_options (int c, const char *optarg)
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
       else
         fputc ('\n', stdout);
-       
-      printf ("Searching: \"%s\"\n\n", optarg); // TODO: display "b?a" as "b" "a"
 
+      printf ("Searching: \"%s\"\n\n", optarg); // TODO: display "b?a" as "b" "a"
       while ((value = q_fncmp (ucon64.rom, value, ucon64.file_size, optarg,
                                strlen (optarg), '?')) != -1)
         {
@@ -1252,7 +1251,7 @@ ucon64_options (int c, const char *optarg)
       snes_buheader_info (ucon64.rominfo);
       break;
 
-    case UCON64_SWAP:                           // deprecated
+    case UCON64_SWAP:
     case UCON64_DINT:
       switch (ucon64.console)
         {
@@ -1261,6 +1260,9 @@ ucon64_options (int c, const char *optarg)
           break;
         case UCON64_NES:
           nes_dint ();
+          break;
+        case UCON64_PCE:
+          pcengine_swap (ucon64.rominfo);
           break;
         default:                                // Nintendo 64
           puts ("Converting to deinterleaved format...");
@@ -1364,10 +1366,6 @@ ucon64_options (int c, const char *optarg)
         case UCON64_VMS:
           break;
 #endif
-
-    case UCON64_INVERT:
-      pcengine_invert (ucon64.rominfo);
-      break;
 
     case UCON64_J:
       switch (ucon64.console)
@@ -1747,9 +1745,9 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_XMD:
-      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump flash card
         md_read_rom (ucon64.rom, ucon64.parport, 32 * MBIT);
-      else                                      // file exists -> send it to the copier
+      else                                      // file exists -> send it to the MD-PRO
         {
           if (genesis_get_file_type () != BIN)
             fprintf (stderr,

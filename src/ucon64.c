@@ -93,6 +93,7 @@ st_ucon64_t ucon64;               // containes ptr to image, dat and rominfo
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
 //static int ucon64_fsize = 0;
 const struct option options[] =   {
+    {"83", 0, 0, UCON64_83},
     {"1991", 0, 0, UCON64_1991},
     {"3do", 0, 0, UCON64_3DO},
     {"?", 0, 0, UCON64_HELP},
@@ -146,7 +147,7 @@ const struct option options[] =   {
     {"ggd", 1, 0, UCON64_GGD},
     {"gge", 1, 0, UCON64_GGE},
     {"gp32", 0, 0, UCON64_GP32},
-    {"good", 0, 0, UCON64_GOOD},
+//    {"good", 0, 0, UCON64_GOOD},
     {"h", 0, 0, UCON64_HELP},
     {"hd", 0, 0, UCON64_HD},
     {"hdn", 1, 0, UCON64_HDN},
@@ -1338,7 +1339,7 @@ ucon64_usage (int argc, char *argv[])
   char *name_exe = basename (argv[0]), *name_discmage;
 
   printf (
-    "Usage: %s [OPTION(S)]... [ROM(S)|SRAM(S)|FILE(S)]...\n\n", name_exe);
+    "Usage: %s [OPTION(S)]... [ROM(S)|SRAM(S)|FILE(S)|ARCHIVE(S)|DIR(S)]...\n\n", name_exe);
 
   ucon64_render_usage (ucon64_options_usage);
 

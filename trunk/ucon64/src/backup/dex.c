@@ -34,7 +34,7 @@ const st_usage_t dex_usage[] =
     {NULL, NULL, "DexDrive"},
     {NULL, NULL, "19XX InterAct http://www.dexdrive.de"},
     {"xdex", "N", "send/receive Block N to/from DexDrive; " OPTION_LONG_S "port=PORT\n"
-                 "receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist"},
+                 "receives automatically when SRAM does not exist"},
     {NULL, NULL, NULL}
   };
 

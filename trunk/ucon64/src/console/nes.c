@@ -6849,7 +6849,7 @@ nes_init (st_rominfo_t *rominfo)
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
-          exit (1);
+          return -1; //exit (1); please don't use exit () in init
         }
       q_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, ucon64.rom);
       ucon64.split = 0;                         // UNIF files are never split

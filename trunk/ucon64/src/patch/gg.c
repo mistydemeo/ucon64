@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.31 2003-03-04 15:14:58 dbjh Exp $
+ * $Id: gg.c,v 1.32 2003-03-15 16:02:25 noisyb Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -91,7 +91,7 @@ const st_usage_t gg_usage[] = {
                   OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "snes\n"
                   "GG_CODE" OPTARG_S "'XXXX-XXXX'"},
   {"gg", "GG_CODE", "apply Game Genie code (permanently)\n"
-                   "example: like above but " OPTION_LONG_S "rom is required"},
+                   "example: like above but a ROM is required"},
   {NULL, NULL, NULL}
 };
 

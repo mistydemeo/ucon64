@@ -11,18 +11,6 @@ AC_PROG_CC(gcc egcs cc)
 AC_PROG_GCC_TRADITIONAL
 
 
-AC_MSG_CHECKING(whether todo output is enabled)
-AC_ARG_ENABLE(todo,
-              AC_HELP_STRING([--enable-todo],
-                             [enable todo output (default: no)]),
-              enable_todo=$enableval,
-              enable_todo=no)
-if test $enable_todo = yes; then
-  AC_DEFINE(TODO,1,[enable todo output (default: no)])
-fi
-AC_MSG_RESULT($enable_todo)
-
-
 AC_MSG_CHECKING(whether debug output is enabled)
 AC_ARG_ENABLE(debug,
               AC_HELP_STRING([--enable-debug],

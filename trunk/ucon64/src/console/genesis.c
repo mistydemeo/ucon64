@@ -53,8 +53,7 @@ const st_usage_t genesis_usage[] =
     {NULL, NULL, "1989/19XX/19XX SEGA http://www.sega.com"},
     {"gen", NULL, "force recognition"},
     {"smd", NULL, "convert to Super Magic Drive/SMD"},
-    {"smds", NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD\n"
-                 OPTION_LONG_S "rom" OPTARG_S "SRAM"},
+    {"smds", NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"},
     {"stp", NULL, "convert SRAM from backup unit for use with an emulator\n"
                OPTION_LONG_S "stp just strips the first 512 bytes"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
@@ -143,6 +142,7 @@ genesis_smd (st_rominfo_t *rominfo)
   header.id1 = 0xaa;
   header.id2 = 0xbb;
   header.type = 6;
+
 
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".SMD");

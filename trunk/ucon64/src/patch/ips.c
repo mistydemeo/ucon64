@@ -47,7 +47,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 const st_usage_t ips_usage[] =
 {
   {"i", NULL, "apply IPS PATCH to ROM (IPS<=v1.2)"},
-  {"mki", "ORG_ROM", "create IPS patch; " OPTION_LONG_S "rom=MOD_ROM"},
+  {"mki", "ORG_ROM", "create IPS patch; ROM(S) will be the modified ROM(S)"},
   {NULL, NULL, NULL}
 };
 

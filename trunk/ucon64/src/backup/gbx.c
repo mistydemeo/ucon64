@@ -273,12 +273,12 @@ set_adr_long (unsigned int adr, int ignore_xh)  // real address
         m |= 0x40;                              // > bank 0
       set_adr (0x3000);                         // write 3000:xh
       set_data_write
-      write_data (xh);                          // set rom bank extend value
+      write_data (xh);                          // set ROM bank extend value
     }
 
   set_adr (0x2000);                             // write 2000:h
   set_data_write
-  write_data (h);                               // set rom bank value
+  write_data (h);                               // set ROM bank value
   set_ai_data ((unsigned char) 1, m);           // a[15..8]
   set_ai_data ((unsigned char) 0, l);           // a[7..0]
 }
@@ -330,7 +330,7 @@ out_data (unsigned char h, unsigned char m, unsigned char l, unsigned char data)
 
   set_adr (0x2000);                             // write 2000:h
   set_data_write
-  write_data (h);                               // set rom bank value
+  write_data (h);                               // set ROM bank value
   set_ai_data ((unsigned char) 1, m);           // a[15..8]
   set_ai_data ((unsigned char) 0, l);           // a[7..0]
   out_byte_eeprom (data);                       // write data to EEPROM
@@ -380,6 +380,7 @@ enable_protection (void)
 }
 
 
+/*
 static void
 disable_protection (void)
 {
@@ -391,8 +392,10 @@ disable_protection (void)
   out_data (0, 0x55, 0x55, 0x20);
   delay_us (20000);
 }
+*/
 
 
+#if 0
 static int
 data_polling_data (unsigned char last_data)
 {
@@ -403,6 +406,7 @@ data_polling_data (unsigned char last_data)
       return 0;
   return 1;                                  // ready to exit the while loop
 }
+#endif
 
 
 static int
@@ -432,6 +436,7 @@ reset_to_read (void)                            // return to read mode
 }
 
 
+/*
 static void
 read_status_reg_cmd (void)
 {
@@ -439,6 +444,7 @@ read_status_reg_cmd (void)
   out_adr2_data (0x2aaa, 0x55);                 // 2aaa:55
   out_adr2_data (0x5555, 0x70);                 // 5555:70
 }
+*/
 
 
 static int
@@ -681,8 +687,8 @@ check_eeprom (void)
 static void
 set_sram_bank (unsigned char bank)
 {
-  set_adr (0x4000);                             // set sram adr
-  out_byte (bank);                              // sram bank 0
+  set_adr (0x4000);                             // set SRAM adr
+  out_byte (bank);                              // SRAM bank 0
 }
 
 
@@ -695,7 +701,7 @@ read_eeprom_16k (unsigned int bank_16k)
     {
       set_bank (0x6000, 0);                     // for MCB1 expand bank
       if ((bank_16k & 0x1f) == 0)
-        set_sram_bank ((unsigned char) ((bank_16k >> 5) & 0x3)); // use sram bank intend rom bank
+        set_sram_bank ((unsigned char) ((bank_16k >> 5) & 0x3)); // use SRAM bank intend ROM bank
       bank_16k &= 0x1f;
     }
   set_bank (0x2000, (unsigned char) bank_16k);  // for MCB1 16k bank
@@ -725,7 +731,7 @@ verify_eeprom_16k (unsigned int bank_16k)
     {
       set_bank (0x6000, (unsigned char) 0);     // for MCB1 expand bank
       if ((bank_16k & 0x1f) == 0)
-        set_sram_bank ((unsigned char) ((bank_16k >> 5) & 0x3)); // use sram bank intend rom bank
+        set_sram_bank ((unsigned char) ((bank_16k >> 5) & 0x3)); // use SRAM bank intend ROM bank
       bank_16k &= 0x1f;
     }
 
@@ -1099,8 +1105,8 @@ enable_sram_bank (void)
 {
   init_port ();
   set_adr (0x0);                                // write 0000:0x0a default read mode
-  out_byte (0x0a);                              // enable sram
-  out_byte (0xc0);                              // disable sram
+  out_byte (0x0a);                              // enable SRAM
+  out_byte (0xc0);                              // disable SRAM
   set_adr (0xa000);
   out_byte (0xa0);                              // ctr index
   set_adr (0xa100);
@@ -1108,7 +1114,7 @@ enable_sram_bank (void)
   out_byte (0xc0);                              // ram_on,ram_bank_enable,MBC1
 
   set_adr (0x0);                                // write 0000:0x0a
-  out_byte (0x0a);                              // enable sram
+  out_byte (0x0a);                              // enable SRAM
 }
 
 
@@ -1281,7 +1287,7 @@ test_sram_v (int n_banks)
       gen_pat (bank);
       for (j = 0; j < 0x20; j++)
         {                                       // 32 x 256 = 8192 (8 kbytes)
-          set_ai_data ((unsigned char) 1, (unsigned char) (0xa0 + j)); // sram at 0xa000-0xbfff
+          set_ai_data ((unsigned char) 1, (unsigned char) (0xa0 + j)); // SRAM at 0xa000-0xbfff
           set_ai_data ((unsigned char) 0, 0);   // a[7..0]=0
           set_ai_data ((unsigned char) 2, 0x81); // enable inc
           set_ai (3);                           // point to data r/w port
@@ -1316,7 +1322,7 @@ test_sram_wv (int n_banks)
 //      mem_hexdump (buffer, 0x10, 0);
       for (j = 0; j < 0x20; j++)
         {                                       // 32 x 256 = 8192(8kbytes)
-          set_ai_data ((unsigned char) 1, (unsigned char) (0xa0 + j)); // sram at 0xa000-0xbfff
+          set_ai_data ((unsigned char) 1, (unsigned char) (0xa0 + j)); // SRAM at 0xa000-0xbfff
           set_ai_data ((unsigned char) 0, 0); // a[7..0]=0
           set_ai_data ((unsigned char) 2, 0x81); // enable inc
           set_ai (3);                           // point to data r/w port
@@ -1621,7 +1627,7 @@ gbx_write_rom (const char *filename, unsigned int parport)
           end_port ();
           exit (1);
         }
-      n_bytes += 16 * 1024;
+      n_bytes += 0x4000;
       ucon64_gauge (starttime, n_bytes, filesize);
     }
 #endif
@@ -1719,10 +1725,10 @@ gbx_read_sram (const char *filename, unsigned int parport, int bank_no)
   for (bank = start_bank; bank < n_banks; bank++)
     {
       idx = 0;
-      set_sram_bank (bank);
+      set_sram_bank ((unsigned char) bank);
       for (j = 0; j < 32; j++)
         {                                       // 32 x 256 = 8192 (8 kbytes)
-          set_ai_data ((unsigned char) 1, (unsigned char) (0xa0 + j)); // sram at 0xa000-0xbfff
+          set_ai_data ((unsigned char) 1, (unsigned char) (0xa0 + j)); // SRAM at 0xa000-0xbfff
           set_ai_data ((unsigned char) 0, 0); // a[7..0]=0
           set_ai_data ((unsigned char) 2, 0x81); // enable inc
           set_ai (3);                           // point to data r/w port
@@ -1810,10 +1816,10 @@ gbx_write_sram (const char *filename, unsigned int parport, int bank_no)
           end_port ();
           exit (1);
         }
-      set_sram_bank (bank);
+      set_sram_bank ((unsigned char) bank);
       for (j = 0; j < 0x20; j++)
         {                                       // 32 x 256 = 8192 (8 kbytes)
-          set_ai_data ((unsigned char) 1, (unsigned char) (0xa0 + j)); // sram at 0xa000-0xbfff
+          set_ai_data ((unsigned char) 1, (unsigned char) (0xa0 + j)); // SRAM at 0xa000-0xbfff
           set_ai_data ((unsigned char) 0, 0);   // a[7..0]=0
           set_ai_data ((unsigned char) 2, 0x81); // enable inc
           set_ai (3);                           // point to data r/w port

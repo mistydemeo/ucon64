@@ -658,7 +658,8 @@ dump_rom (FILE *file, int size, int numblocks, unsigned int mask1,
 void
 dump_bios (FILE *file)
 {
-  int address, bytesreceived = 0;
+  unsigned short int address;
+  int bytesreceived = 0;
   unsigned char *buffer;
   time_t starttime;
 

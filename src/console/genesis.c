@@ -1367,7 +1367,7 @@ genesis_init (st_rominfo_t *rominfo)
           (OFFSET (genesis_header, 186) << 8) +
            OFFSET (genesis_header, 187);
       sprintf ((char *) buf, "Cartridge RAM: Yes, %d kBytes (%s)\n",
-               y - x + 1 >> 10,
+               (y - x + 1) >> 10,
                OFFSET (genesis_header, 178) & 0x40 ? "backup" : "non-backup");
       strcat (rominfo->misc, (char *) buf);
 

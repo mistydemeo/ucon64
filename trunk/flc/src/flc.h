@@ -1,9 +1,9 @@
 /*
-    flc 1999/2000/2001 by NoisyB (noisyb@gmx.net)
+    flc 1999-2002 by NoisyB (noisyb@gmx.net)
     flc lists information about the FILEs (the current directory by default)
     But most important it shows the FILE_ID.DIZ of every file (if present)
     Very useful for FTP Admins or people who have a lot to do with FILE_ID.DIZ
-    Copyright (C) 1999/2000/2001 by NoisyB (noisyb@gmx.net)
+    Copyright (C) 1999-2002 by NoisyB (noisyb@gmx.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 
 int flc_usage(int argc, char *argv[]);
 
-#define flc_TITLE "flc 1.0.0 1999/2000/2001 by NoisyB (noisyb@gmx.net)"
+#define flc_TITLE "flc 1.0.0 1999-2002 by NoisyB (noisyb@gmx.net)"
 
 struct flc_
 {

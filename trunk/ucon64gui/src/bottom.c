@@ -19,7 +19,7 @@ ucon64gui_bottom (void)
 #ifdef __GTK__
              "(GTK) "
 #endif
-             "0.1.0 2002 by NoisyB ");
-  h2g_input_image ("http://ucon64.sf.net", "http://ucon64.sf.net", NULL, 0, 0, "http://ucon64.sf.net");
+             "0.1.0alpha 2002 by NoisyB ");
+  h2g_input_image (/*"@uCON64"*/ "ucon64.sf.net", "http://ucon64.sf.net", NULL, 0, 0, "Surf to uCON64 and uCON64gui homepage");
 
 }

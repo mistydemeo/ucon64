@@ -32,6 +32,7 @@ void h2g_system(char *query)
 {
 int len;
 char buf[MAXBUFSIZE];
+char buf2[MAXBUFSIZE];
 
 #ifdef DEBUG
   printf ("%s\n", query);
@@ -42,10 +43,16 @@ len = findlast(query,"=");
 strcpy(buf,query);
 buf[len]=0;
 
-//printf("%s\n", buf);
-//fflush (stdout);
-
-
+if(!strncmp(query,"rom=",4))
+{
+  strcpy(ucon64gui.rom,&query[4]);
+  return;
+}
+if(!strncmp(query,"file=",5))
+{
+  strcpy(ucon64gui.file,&query[5]);
+  return;
+}
 if(!strdcmp(buf,"ucon64gui_snes"))
 {
   ucon64gui_snes();
@@ -92,12 +99,15 @@ if(!strdcmp(buf,"-ns"))
   options
 */
 
-  sprintf(buf,"xterm -e \"ucon64 %s %s %s\" &", buf
+  sprintf(buf2,"ucon64 %s %s %s", buf
   , (ucon64gui.rom != NULL) ? ucon64gui.rom : ""
   , (ucon64gui.file != NULL) ? ucon64gui.file : ""
   );
 
-//  system (buf);
+  printf ("%s\n",buf2);
+  fflush (stdout);
+
+  system (buf2);
 
 /*
   if (!(fh = popen (buf, "r")))

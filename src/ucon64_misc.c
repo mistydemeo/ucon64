@@ -227,7 +227,7 @@ filepad (const char *filename, int start, int size)
 
 #if 1
 long
-filetestpad (const char *filename, st_rominfo_t *rominfo)
+file_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
   long size = rominfo->file_size, pos = size - 2;
@@ -251,7 +251,7 @@ filetestpad (const char *filename, st_rominfo_t *rominfo)
 
 
 long
-filetestpad (const char *filename, st_rominfo_t *rominfo)
+file_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
   long pos = rominfo->file_size - 2;

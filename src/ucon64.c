@@ -705,7 +705,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
     }
   else if (UCON64_TYPE_ISROM (ucon64.type))
     {
-      unsigned long padded = filetestpad (ucon64.rom, (st_rominfo_t *) rominfo);
+      unsigned long padded = file_testpad (ucon64.rom, (st_rominfo_t *) rominfo);
       unsigned long intro = ((rominfo->file_size - rominfo->buheader_len) > MBIT) ?
         ((rominfo->file_size - rominfo->buheader_len) % MBIT) : 0;
       int split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :

@@ -1204,7 +1204,7 @@ ucon64_e (const char *romfile)
 }
 
 
-int
+static int
 ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console)
 {
   int result;
@@ -1245,21 +1245,26 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
           if (ucon64.good_enabled)
             strcpy (buf, ucon64_dat ? ucon64_dat->fname : "");
           else
-            strcpy (buf, strtrim (ucon64_dat ? ucon64_dat->fname : rominfo.name));
+            strcpy (buf, ucon64_dat ? ucon64_dat->fname : rominfo.name);
+          
+          strcpy (buf2, strtrim (buf));
 
-          if (buf[0])
+          if (buf2[0])
             {
-              strcpy (buf2, to_func (buf, strlen (buf), tofname)); // replace chars the fs might not like
+              strcpy (buf, to_func (buf2, strlen (buf2), tofname)); // replace chars the fs might not like
               if (mode == UCON64_RR83)
-                buf2[8] = 0;
-              strcat (buf2, getext (ucon64.rom));
+                buf[8] = 0;
+              strcat (buf, getext (ucon64.rom));
               if (mode == UCON64_RR83)
-                buf2[12] = 0;
-              if (!strcmp (ucon64.rom, buf2))
-                break;
-              printf ("Renaming %s to %s\n", ucon64.rom, buf2);
-              remove (buf2);
-              rename (ucon64.rom, buf2);
+                buf[12] = 0;
+              if (!strcmp (ucon64.rom, buf))
+                {
+                  printf ("Found %s\n", ucon64.rom);
+                  return 0;
+                }
+              printf ("Renaming %s to %s\n", ucon64.rom, buf);
+              remove (buf);
+              rename (ucon64.rom, buf);
             }
         }
       break;

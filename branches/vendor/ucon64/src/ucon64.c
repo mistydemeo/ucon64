@@ -38,7 +38,9 @@ write programs in C
 #include <sys/perm.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
 #include "include.h"
+#include "defines.h"
 
 #define ucon64_UNKNOWN		-1
 #define ucon64_GB		1
@@ -62,14 +64,6 @@ write programs in C
 #define ucon64_NEOGEOPOCKET	19
 #define ucon64_KNOWN		9999
 
-#define MBIT	131072
-
-#define ucon64_VERSION "1.9.5"
-#define ucon64_TITLE "uCON64 1.9.5 GNU/Linux 1999/2000/2001 by NoisyB (noisyb@gmx.net)"
-
-#define ucon64_NAME	0
-#define ucon64_ROM	1
-#define ucon64_FILE	2
 #define ucon64_name() (getarg(argc,argv,ucon64_NAME))
 #define ucon64_rom() (getarg(argc,argv,ucon64_ROM))
 #define ucon64_file() (getarg(argc,argv,ucon64_FILE))
@@ -79,8 +73,8 @@ int ucon64_backup(char *name);
 int ucon64_argc;
 char *ucon64_argv[128];
 
-#include "stolen/nes/fam2fds.h"
-#include "stolen/nes/fdslist.h"
+//#include "stolen/nes/fam2fds.h"
+//#include "stolen/nes/fdslist.h"
 #include "stolen/n64aps.h"
 #include "stolen/n64caps.h"
 #include "stolen/cips.h"
@@ -88,13 +82,13 @@ char *ucon64_argv[128];
 #include "stolen/applyppf.h"
 #include "stolen/makeppf.h"
 #include "stolen/cdinfo.h"
-#include "stolen/psx/xadump.h"
-#include "stolen/psx/xa2wav.h"
+//#include "stolen/psx/xadump.h"
+//#include "stolen/psx/xa2wav.h"
 
 #include "usage.h"
 //#include "unzip.h"
-#include "gamecodes.h"
-#include "transfer/transfer.h"
+//#include "gamecodes.h"
+//#include "transfer/transfer.h"
 #include "snes.h"
 #include "gb.h"
 #include "jaguar.h"
@@ -163,13 +157,13 @@ if(!ucon64_rom()[0])
 
 if(argcmp(argc,argv,"-rn"))
 {
-	n_renlwr(ucon64_rom());
+	renlwr(ucon64_rom());
 	return(0);
 }
 
 if(argcmp(argc,argv,"-hex"))
 {
-	n_hexdump(ucon64_rom(),0,n_size(ucon64_rom()));
+	filehexdump(ucon64_rom(),0,filesize(ucon64_rom()));
 	return(0);
 }
 
@@ -183,14 +177,14 @@ if(argcmp(argc,argv,"-ls"))
 
 if(argcmp(argc,argv,"-c"))
 {
-	if(n_cmp(ucon64_rom(),0,ucon64_file(),0,n_cmp_DIFF)!=0)
+//	if(n_cmp(ucon64_rom(),0,ucon64_file(),0,n_cmp_DIFF)!=0)
 		printf("ERROR: file not found/out of memory\n");
 	return(0);
 }
 
 if(argcmp(argc,argv,"-cs"))
 {
-	if(n_cmp(ucon64_rom(),0,ucon64_file(),0,n_cmp_SIMI)!=0)
+//	if(n_cmp(ucon64_rom(),0,ucon64_file(),0,n_cmp_SIMI)!=0)
                        printf("ERROR: file not found/out of memory\n");
 	return(0);
 }
@@ -198,9 +192,9 @@ if(argcmp(argc,argv,"-cs"))
 if(argcmp(argc,argv,"-find"))
 {
 	x=0;
-	while((x=n_strstr(ucon64_rom(),ucon64_file(),x,strlen(ucon64_file())))!=-1)
+	while((x=filegrep(ucon64_rom(),ucon64_file(),x,strlen(ucon64_file())))!=-1)
 	{
-		n_hexdump(ucon64_rom(),x,strlen(ucon64_file()));
+		filehexdump(ucon64_rom(),x,strlen(ucon64_file()));
 		x++;
 		printf("\n");
 	}
@@ -209,7 +203,7 @@ if(argcmp(argc,argv,"-find"))
 
 if(argcmp(argc,argv,"-cdrom"))
 {
-//	n_cdrom_nfo(ucon64_rom(),ucon64_rom());
+//	cdromnfo(ucon64_rom(),ucon64_rom());
 	ucon64_argv[0]=ucon64_name();
 	ucon64_argv[1]=ucon64_rom();
 	ucon64_argc=2;
@@ -218,35 +212,27 @@ if(argcmp(argc,argv,"-cdrom"))
 	return(0);
 }
 
-
-
-if(argcmp(argc,argv,"-b2i"))
-{
-	bin2iso(ucon64_rom());
-	return(0);
-}
-
 if(argcmp(argc,argv,"-swap"))
 {
 /*
 	strcpy(buf,romname);
 	buf[strcspn(buf,".")+1]=0;
-	strcat(buf,isstrlwr(buf)?"rom":"ROM");
+	strcat(buf,findlwr(buf)?"rom":"ROM");
 
-	n_copy(romname,0,n_size(romname),buf,"wb");
-//	if(!swapped)fswap(buf,0,(n_size(buf)-hsize));
-	n_swap(buf,0,(n_size(buf)-hsize));
+	filecopy(romname,0,filesize(romname),buf,"wb");
+//	if(!swapped)fswap(buf,0,(filesize(buf)-hsize));
+	fileswap(buf,0,(filesize(buf)-hsize));
 
 
 */
 
-	n_swap(ucon64_rom(),0,n_size(ucon64_rom()));
+	fileswap(ucon64_rom(),0,filesize(ucon64_rom()));
 	return(0);
 }
 
 if(argcmp(argc,argv,"-pad"))
 {
-	n_pad(ucon64_rom(),0,"ab");
+	filepad(ucon64_rom(),0,"ab");
 	return(0);
 }
 
@@ -254,7 +240,7 @@ if(argcmp(argc,argv,"-ispad"))
 {
 	unsigned long padded;
 	
-	if((padded=n_pad(ucon64_rom(),0,"rb"))!=-1)
+	if((padded=filepad(ucon64_rom(),0,"rb"))!=-1)
 	{
 		if(!padded)printf("Padded: No\n");
 		else printf("Padded: Maybe, %ld Bytes (%.4f Mb)\n",padded,(float)padded/MBIT);
@@ -266,9 +252,9 @@ if(argcmp(argc,argv,"-stp"))
 {
 	strcpy(buf,ucon64_rom());
 	buf[strcspn(buf,".")+1]=0;
-	strcat(buf,isstrlwr(buf)?"tmp":"TMP");
+	strcat(buf,findlwr(buf)?"tmp":"TMP");
 	rename(ucon64_rom(),buf);
-	n_copy(buf,512,n_size(buf),ucon64_rom(),"wb");
+	filecopy(buf,512,filesize(buf),ucon64_rom(),"wb");
 
 	remove(buf);
 	return(0);
@@ -277,7 +263,7 @@ if(argcmp(argc,argv,"-ins"))
 {
 	strcpy(buf,ucon64_rom());
 	buf[strcspn(buf,".")+1]=0;
-	strcat(buf,isstrlwr(buf)?"tmp":"TMP");
+	strcat(buf,findlwr(buf)?"tmp":"TMP");
 	rename(ucon64_rom(),buf);
 
 	if((fh=fopen(ucon64_rom(),"wb"))!=0)
@@ -286,7 +272,7 @@ if(argcmp(argc,argv,"-ins"))
 		fwrite(buf2,512,1,fh);
 		fclose(fh);
 	}
-	n_copy(buf,0,n_size(buf),ucon64_rom(),"ab");
+	filecopy(buf,0,filesize(buf),ucon64_rom(),"ab");
 	remove(buf);
 	return(0);
 }
@@ -333,7 +319,7 @@ if(argcmp(argc,argv,"-ppf"))
 
 if(argcmp(argc,argv,"-mki"))
 {
-	cips(ucon64_rom(),ucon64_file());
+//	cips_main(ucon64_rom(),ucon64_file());
 /*
 	ucon64_argv[0]=ucon64_name();
 	ucon64_argv[1]=ucon64_file();
@@ -364,7 +350,7 @@ if(argcmp(argc,argv,"-na"))
 strcat(buf2,"\
                                                             ");
                                                             
-                n_strncpy(ucon64_rom(),buf2,7,50);
+                fileinsert(ucon64_rom(),buf2,7,50);
                 
 		return(0);
 }
@@ -387,7 +373,7 @@ if(argcmp(argc,argv,"-nppf"))
 strcat(buf2,"\
                                                             ");
                                                             
-               n_strncpy(ucon64_rom(),buf2,6,50);
+               fileinsert(ucon64_rom(),buf2,6,50);
                 
 	return(0);
 }
@@ -437,7 +423,7 @@ if(argcmp(argc,argv,"-xv64"))console=ucon64_N64;
 if(argcmp(argc,argv,"-bot"))console=ucon64_N64;
 
 strcpy(buf,ucon64_rom());
-if(!strcmp(strupr(&buf[strlen(buf)-4]),".FDS")&&(n_size(ucon64_rom())%65500)==0)
+if(!strcmp(strupr(&buf[strlen(buf)-4]),".FDS")&&(filesize(ucon64_rom())%65500)==0)
 	console=ucon64_NES;
 
 
@@ -512,7 +498,7 @@ case ucon64_NEOGEOPOCKET:
 break;
 case ucon64_UNKNOWN:
 default:
-	n_hexdump(ucon64_rom(),0,n_hexdump_EOF);
+	filehexdump(ucon64_rom(),0,filehexdump_EOF);
 	printf("\nUnknown (try to force: -snes, -gen, ...)\n\n");
 //	usage_main(argc,argv);
 break;

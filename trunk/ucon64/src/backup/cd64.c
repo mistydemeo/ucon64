@@ -185,7 +185,6 @@ b. Check the IO port setting as following.
 /*
 #include <iostream.h>
 #include <stdio.h>
-#include <malloc.h>
 #include <dos.h>
 #include <process.h>
 #include <conio.h>

@@ -1,9 +1,9 @@
 /*
 aps.c - Advanced Patch System support for uCON64
 
-Copyright (c) 1998        Silo/BlackBag
+Copyright (c)        1998 Silo/BlackBag
 Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
-Copyright (c) 2002 - 2003 dbjh
+Copyright (c) 2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -278,12 +278,12 @@ aps_apply (const char *mod, const char *apsname)
   if ((n64aps_modfile = fopen (modname, "r+b")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], modname);
-      return -1;
+      exit (1);
     }
   if ((n64aps_apsfile = fopen (apsname, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], apsname);
-      return -1;
+      exit (1);
     }
 
   readstdheader ();
@@ -462,13 +462,12 @@ aps_create (const char *orgname, const char *modname)
   if ((n64aps_orgfile = fopen (orgname, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], orgname);
-      return -1;
+      exit (1);
     }
   if ((n64aps_modfile = fopen (modname, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], modname);
-      fclose (n64aps_orgfile);
-      return -1;
+      exit (1);
     }
   strcpy (apsname, modname);
   set_suffix (apsname, ".aps");
@@ -476,19 +475,13 @@ aps_create (const char *orgname, const char *modname)
   if ((n64aps_apsfile = fopen (apsname, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], apsname);
-      fclose (n64aps_modfile);
-      fclose (n64aps_orgfile);
-      return -1;
+      exit (1);
     }
 
   if (!n64caps_checkfile (n64aps_orgfile, orgname) ||
       !n64caps_checkfile (n64aps_modfile, modname))
-    {
-      fclose (n64aps_orgfile);
-      fclose (n64aps_modfile);
-      return -1;
-    }
-
+    exit (1);                                   // n64caps_checkfile() already
+                                                //  displayed an error message
   n64aps_changefound = FALSE;
 
   writestdheader ();
@@ -506,8 +499,10 @@ aps_create (const char *orgname, const char *modname)
 
   if (!n64aps_changefound)
     {
-      printf ("No differences found\n");
+      printf ("%s and %s are identical\n"
+              "Removing: %s\n", orgname, modname, apsname);
       remove (apsname);
+      return -1;
     }
   else
     printf (ucon64_msg[WROTE], apsname);

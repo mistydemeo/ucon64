@@ -31,6 +31,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#ifdef  DEBUG
+#ifdef  __GNUC__
+#warning DEBUG active
+#else
+#pragma message ("DEBUG active")
+#endif
+#endif
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,13 +59,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _WIN32
 #include <windows.h>
 #endif
-
-#ifdef  DEBUG
-#ifdef  __GNUC__
-#warning DEBUG active
-#else
-#pragma message ("DEBUG active")
-#endif
+#ifdef  DISCMAGE
+#include "libdiscmage/libdiscmage.h"
 #endif
 #include "misc.h"
 #include "getopt.h"
@@ -67,15 +69,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "ucon64_opts.h"
+#include "console/console.h"
+#include "patch/patch.h"
+#include "backup/backup.h"
 #ifdef  DISCMAGE
 #include "ucon64_dm.h"
 #endif
 #ifdef  GUI
 #include "ucon64_ng.h"
 #endif
-#include "console/console.h"
-#include "patch/patch.h"
-#include "backup/backup.h"
 
 
 static void ucon64_exit (void);

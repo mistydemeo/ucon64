@@ -73,7 +73,6 @@ typedef signed __int64 int64_t;
 // a CD can have max. 99 tracks; this value might change in the future
 #define DM_MAX_TRACKS (99)
 
-
 typedef struct
 {
 // TODO?: replace those uint32_t with uint64_t or so...

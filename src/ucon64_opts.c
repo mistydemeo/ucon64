@@ -449,7 +449,7 @@ ucon64_switches (int c, const char *optarg)
 static int
 ucon64_rename (int mode)
 {
-  char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1], suffix[80], *p = NULL;
+  char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1], suffix[80], *p, *p2;
   int good_name;
 
   buf[0] = 0;
@@ -548,9 +548,12 @@ ucon64_rename (int mode)
 
   ucon64_output_fname (buf2, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
 
-  if (one_file (ucon64.rom, buf2))
-    {
-      printf ("Skipping \"%s\"\n", basename2 (ucon64.rom));
+  p = basename2 (ucon64.rom);
+  p2 = basename2 (buf2);
+
+  if (one_file (ucon64.rom, buf2) && !strcmp (p, p2))
+    {                                           // skip only if the letter case
+      printf ("Skipping \"%s\"\n", p);          //  also matches (Windows...)
       return 0;
     }
 
@@ -568,9 +571,9 @@ ucon64_rename (int mode)
       ucon64_file_handler (buf2, NULL, OF_FORCE_BASENAME);
 
   if (!good_name)
-    printf ("Renaming \"%s\" to \"%s\"\n", basename2 (ucon64.rom), basename2 (buf2));
+    printf ("Renaming \"%s\" to \"%s\"\n", p, p2);
   else
-    printf ("Moving \"%s\"\n", basename2 (ucon64.rom));
+    printf ("Moving \"%s\"\n", p);
 #ifndef DEBUG
   rename2 (ucon64.rom, buf2);                   // rename2() must be used!
 #endif

@@ -163,4 +163,27 @@ int cd64_download_header(struct cd64_t *cd64, n64header_t *head, uint32_t locati
 }
 #endif
 
+#define BIOS_TEMP_RAM 0xa0300000
+
+#define BIOS_DUMP_N64 'D'
+#define BIOS_TRANSFER_N64 'B'
+
+#define BIOS_DUMP_PI 'G'
+#define BIOS_TRANSFER_PI 'T'
+#define BIOS_EXECUTE_PI 'X'
+
+#define GHEMOR_RESTORE_MEMPAK 1
+#define GHEMOR_RESTORE_EEPROM 2
+#define GHEMOR_RESTORE_SRAM 3
+#define GHEMOR_RESTORE_FLASHRAM 4
+#define GHEMOR_EXECUTE_BOOTEMU 5
+#define GHEMOR_TRANSFER_PROGRAM 6
+#define GHEMOR_DUMP_CART 7
+#define GHEMOR_DUMP_MEMPAK 8
+#define GHEMOR_DUMP_EEPROM 9
+#define GHEMOR_DUMP_SRAM 10
+#define GHEMOR_DUMP_FLASH 11
+#define GHEMOR_RESET_DRAM 12
+#define GHEMOR_RESET_CART 13
+
 #endif

@@ -44,7 +44,7 @@ const st_getopt2_t cd64_usage[] =
     {
       "xcd64", 0, 0, UCON64_XCD64,
       NULL, "send/receive ROM to/from CD64; " OPTION_LONG_S "port=PORT\n"
-      "receives automatically (8 Mbits) when ROM does not exist",
+      "receives automatically (64 Mbits) when ROM does not exist",
       (void *) (UCON64_N64|WF_DEFAULT|WF_STOP|WF_NO_ROM)
     },
     {
@@ -93,7 +93,7 @@ const st_getopt2_t cd64_usage[] =
       "PROT=2 UltraLink",
       (void *) (UCON64_N64|WF_SWITCH)
     },
-#endif // USE_PARALLEL
+#endif // USE_PARALLEL && USE_LIBCD64
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
@@ -246,8 +246,8 @@ cd64_read_rom (const char *filename, int size)
   FILE *file;
   struct cd64_t *cd64 = cd64_init ();
 
-  if ((file = fopen (filename, "wb")) == NULL)
-    {
+  if ((file = fopen (filename, "w+b")) == NULL) // cd64_download_cart() also
+    {                                           //  reads from file
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
       exit (1);
     }

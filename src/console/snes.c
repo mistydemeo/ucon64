@@ -66,6 +66,7 @@ static int snes_isprint (int c);
 static int check_banktype (unsigned char *rom_buffer, int header_offset);
 static void reset_header (void *header);
 static void set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header);
+static void get_nsrt_info (unsigned char *rom_buffer, int header_start, unsigned char *header);
 static void handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
                                 const char **snes_country);
 
@@ -122,12 +123,6 @@ const st_usage_t snes_usage[] =
     {"col", "0xCOLOR", "convert 0xRRGGBB (HTML) <-> 0xXXXX (SNES)"},
 //                       "this routine was used to find green colors in games and\n"
 //                       "to replace them with red colors (blood mode)"},
-#if 0 // TODO
-    {"sx", "convert to Snes9X (emulator)/S9X save state; " OPTION_LONG_S "rom=SAVESTATE"},
-    {"zs", "convert to ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE"},
-    {"xzs", "extract GFX from ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE"},
-    {"spc", "convert SPC sound to WAV; " OPTION_LONG_S "rom=SPCFILE"},
-#endif
     {"j", NULL, "join split ROM"},
     {"s", NULL, "split ROM; default part size is 8 Mb"},
     {"ssize", "SIZE", "specify split part size in Mbit (not for Game Doctor SF3)"},
@@ -139,6 +134,7 @@ const st_usage_t snes_usage[] =
     {"l", NULL, "remove SlowROM checks"},
     {"chk", NULL, "fix ROM checksum"},
     {"dmirr", NULL, "\"de-mirror\" ROM (strip mirrored block from end of ROM)"},
+    {"dnsrt", NULL, "\"de-NSRT\" ROM (restore name and checksum from NSRT header)"},
     {NULL, NULL, NULL}
   };
 
@@ -2811,6 +2807,11 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
       if (type == MGD_SNES && rominfo->buheader_len)
         type = SMC;
     }
+
+  if (rominfo->buheader_len && !memcmp ((unsigned char *) header + 0x1e8, "NSRT", 4))
+    nsrt_header = 1;
+  else
+    nsrt_header = 0;
 }
 
 
@@ -3107,11 +3108,15 @@ snes_init (st_rominfo_t *rominfo)
             Why 42? It's the answer to life, the universe and everything :-)
           */
           *bs_date_ptr = me2le_16 (0x0042);
+          get_nsrt_info (rom_buffer, rominfo->header_start, (unsigned char *) &header);
           ucon64.crc32 = crc32 (0, rom_buffer, size);
           *bs_date_ptr = bs_date;
         }
-      else if (rominfo->interleaved)
-        ucon64.crc32 = crc32 (0, rom_buffer, size);
+      else if (rominfo->interleaved || nsrt_header)
+        {
+          get_nsrt_info (rom_buffer, rominfo->header_start, (unsigned char *) &header);
+          ucon64.crc32 = crc32 (0, rom_buffer, size);
+        }
       else
         {
           ucon64.crc32 = ucon64.fcrc32;
@@ -3296,7 +3301,7 @@ snes_init (st_rominfo_t *rominfo)
 */
       x = snes_header.bs_type >> 4;
       sprintf (buf, "ROM type: (%x) %s\n", snes_header.bs_type,
-        x > 3 ? "Unknown" : snes_bs_type[x]);
+               x > 3 ? "Unknown" : snes_bs_type[x]);
       strcat (rominfo->misc, buf);
 
       /*
@@ -3312,7 +3317,8 @@ snes_init (st_rominfo_t *rominfo)
   sprintf (buf, "Version: 1.%d", snes_header.version);
   strcat (rominfo->misc, buf);
 
-  handle_nsrt_header (rominfo, (unsigned char *) &header, snes_country);
+  if (nsrt_header)
+    handle_nsrt_header (rominfo, (unsigned char *) &header, snes_country);
 
   free (rom_buffer);
   return result;
@@ -3654,6 +3660,105 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
 }
 
 
+int
+snes_demirror (st_rominfo_t *rominfo)           // nice verb :-)
+{
+  int fixed = 0, size = ucon64.file_size - rominfo->buheader_len, mirror_size;
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  unsigned char *buffer;
+
+  if (!(buffer = (unsigned char *) malloc (size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+      exit (1);
+    }
+  q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
+  if (rominfo->interleaved)
+    {
+      printf ("NOTE: ROM is interleaved -- deinterleaving\n");
+      snes_deinterleave (rominfo, &buffer, size);
+    }
+
+  if (size % (12 * MBIT) == 0)                  // 12, 24 or 48 Mbit dumps can be mirrored
+    {
+      mirror_size = size / 12 * 2;
+      if (memcmp (buffer + size - mirror_size, buffer + size - 2 * mirror_size,
+                  mirror_size) == 0)
+        {
+          if (ucon64.quiet == -1)
+            printf ("Mirrored: %d - %d == %d - %d\n",
+                    (size - 2 * mirror_size) / MBIT, (size - mirror_size) / MBIT,
+                    (size - mirror_size) / MBIT, size / MBIT);
+          size -= mirror_size;
+          fixed = 1;
+        }
+    }
+
+  if (!fixed)
+    {
+      if (ucon64.quiet < 1)
+        printf ("NOTE: Did not detect a mirrored block -- no file has been written\n");
+      free (buffer);
+      return 1;
+    }
+
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, src_name, 0);
+  q_fcpy (src_name, 0, rominfo->buheader_len, dest_name, "wb");
+  q_fwrite (buffer, rominfo->buheader_len, size, dest_name, "ab");
+  printf (ucon64_msg[WROTE], dest_name);
+
+  remove_temp_file ();
+  free (buffer);
+  return 0;
+}
+
+
+int
+snes_densrt (st_rominfo_t *rominfo)
+{
+  int size = ucon64.file_size - rominfo->buheader_len;
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  unsigned char header[512], *buffer;
+
+  if (!nsrt_header)
+    {
+      printf ("NOTE: ROM has no NSRT header -- no file has been written\n");
+      return 1;
+    }
+
+  q_fread (header, 0, 512, ucon64.rom);
+  if (!(buffer = (unsigned char *) malloc (size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+      exit (1);
+    }
+  q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
+
+  get_nsrt_info (buffer,
+                 rominfo->interleaved ?
+                   rominfo->header_start - SNES_HIROM :
+                   rominfo->header_start,
+                 header);
+  memset (header + 0x1d0, 0, 32);               // remove NSRT header
+
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, src_name, 0);
+
+  q_fwrite (header, 0, 512, dest_name, "wb");
+  if (rominfo->buheader_len > 512)
+    q_fcpy (src_name, 512, rominfo->buheader_len - 512, dest_name, "ab");
+  q_fwrite (buffer, rominfo->buheader_len, size, dest_name, "ab");
+
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+  free (buffer);
+  return 1;
+}
+
+
 static void
 set_nsrt_checksum (unsigned char *header)
 {
@@ -3761,6 +3866,19 @@ set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header)
 
 
 static void
+get_nsrt_info (unsigned char *rom_buffer, int header_start, unsigned char *header)
+{
+  if (nsrt_header)
+    {
+      memcpy (rom_buffer + header_start + 16, header + 0x1d1, SNES_NAME_LEN); // name
+      rom_buffer[header_start + 41] = header[0x1d0] & 0x0f; // region
+      rom_buffer[header_start + 46] = header[0x1e6]; // checksum low
+      rom_buffer[header_start + 47] = header[0x1e7]; // checksum high
+    }
+}
+
+
+static void
 reset_header (void *header)
 {
   // preserve possible NSRT header
@@ -3780,100 +3898,36 @@ static void
 handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
                     const char **snes_country)
 {
-  char buf[800];
-
-  if (rominfo->buheader_len && !memcmp (header + 0x1e8, "NSRT", 4))
+  char buf[800], name[SNES_NAME_LEN + 1], *str_list[9] =
     {
-      char name[SNES_NAME_LEN + 1], *str_list[9] =
-        {
-          "Gamepad", "Mouse", "Mouse / Gamepad", "Super Scope",
-          "Super Scope / Gamepad", "Konami's Justifier", "Multitap",
-          "Mouse / Super Scope / Gamepad", "Unknown"
-        };
-      int x = header[0x1ed], ctrl1 = x >> 4, ctrl2 = x & 0xf;
+      "Gamepad", "Mouse", "Mouse / Gamepad", "Super Scope",
+      "Super Scope / Gamepad", "Konami's Justifier", "Multitap",
+      "Mouse / Super Scope / Gamepad", "Unknown"
+    };
+  int x = header[0x1ed], ctrl1 = x >> 4, ctrl2 = x & 0xf;
 
-      memcpy (name, header + 0x1d1, SNES_NAME_LEN);
-      name[SNES_NAME_LEN] = 0;
-      for (x = 0; x < SNES_NAME_LEN; x++)
-        if (!isprint ((int) name[x]))
-          name[x] = '.';
+  memcpy (name, header + 0x1d1, SNES_NAME_LEN);
+  name[SNES_NAME_LEN] = 0;
+  for (x = 0; x < SNES_NAME_LEN; x++)
+    if (!isprint ((int) name[x]))
+      name[x] = '.';
 
-      if (ctrl1 > 8)
-        ctrl1 = 8;
-      if (ctrl2 > 8)
-        ctrl2 = 8;
-      sprintf (buf, "\nNSRT info:\n"
-                      "  Original country: %s\n"
-                      "  Original game name: \"%s\"\n"
-                      "  Original checksum: 0x%04x\n"
-                      "  Port 1 controller type: %s\n"
-                      "  Port 2 controller type: %s\n"
-                      "  Header version: %.1f",
-               NULL_TO_UNKNOWN_S (snes_country[MIN (header[0x1d0] & 0xf, SNES_COUNTRY_MAX - 1)]),
-               name,
-               header[0x1e6] + (header[0x1e7] << 8),
-               str_list[ctrl1],
-               str_list[ctrl2],
-               header[0x1ec] / 10.f);
-      strcat (rominfo->misc, buf);
-
-      nsrt_header = 1;
-    }
-  else
-    nsrt_header = 0;
-}
-
-
-int
-snes_demirror (st_rominfo_t *rominfo)           // nice verb :-)
-{
-  int fixed = 0, size = ucon64.file_size - rominfo->buheader_len, mirror_size;
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  unsigned char *buffer;
-
-  if (!(buffer = (unsigned char *) malloc (size)))
-    {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
-      exit (1);
-    }
-  q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
-  if (rominfo->interleaved)
-    {
-      printf ("NOTE: ROM is interleaved -- deinterleaving\n");
-      snes_deinterleave (rominfo, &buffer, size);
-    }
-
-  if (size % (12 * MBIT) == 0)                  // 12, 24 or 48 Mbit dumps can be mirrored
-    {
-      mirror_size = size / 12 * 2;
-      if (memcmp (buffer + size - mirror_size, buffer + size - 2 * mirror_size,
-                  mirror_size) == 0)
-        {
-          if (ucon64.quiet == -1)
-            printf ("Mirrored: %d - %d == %d - %d\n",
-                    (size - 2 * mirror_size) / MBIT, (size - mirror_size) / MBIT,
-                    (size - mirror_size) / MBIT, size / MBIT);
-          size -= mirror_size;
-          fixed = 1;
-        }
-    }
-
-  if (!fixed)
-    {
-      if (ucon64.quiet < 1)
-        printf ("NOTE: Did not detect a mirrored block -- no file has been written\n");
-      free (buffer);
-      return 0;
-    }
-
-  strcpy (src_name, ucon64.rom);
-  strcpy (dest_name, ucon64.rom);
-  ucon64_file_handler (dest_name, src_name, 0);
-  q_fcpy (src_name, 0, rominfo->buheader_len, dest_name, "wb");
-  q_fwrite (buffer, rominfo->buheader_len, size, dest_name, "ab");
-  printf (ucon64_msg[WROTE], dest_name);
-
-  remove_temp_file ();
-  free (buffer);
-  return 1;
+  if (ctrl1 > 8)
+    ctrl1 = 8;
+  if (ctrl2 > 8)
+    ctrl2 = 8;
+  sprintf (buf, "\nNSRT info:\n"
+                  "  Original country: %s\n"
+                  "  Original game name: \"%s\"\n"
+                  "  Original checksum: 0x%04x\n"
+                  "  Port 1 controller type: %s\n"
+                  "  Port 2 controller type: %s\n"
+                  "  Header version: %.1f",
+           NULL_TO_UNKNOWN_S (snes_country[MIN (header[0x1d0] & 0xf, SNES_COUNTRY_MAX - 1)]),
+           name,
+           header[0x1e6] + (header[0x1e7] << 8),
+           str_list[ctrl1],
+           str_list[ctrl2],
+           header[0x1ec] / 10.f);
+  strcat (rominfo->misc, buf);
 }

@@ -1245,7 +1245,7 @@ static void
 snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
 {
   char header[512], dest_name[FILENAME_MAX];
-  int nparts, surplus, n;
+  int nparts, surplus, n, nbytesdone;
 
   if (snes_hirom)
     {
@@ -1312,6 +1312,7 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
       if (!size_to_flags_ptr)
         size_to_flags_ptr = &size_to_flags[6];
 
+      nbytesdone = rominfo->buheader_len;
       for (n = 0; n < nparts; n++)
         {
           part_size = size_to_partsizes_ptr->list[n] * MBIT;
@@ -1324,9 +1325,10 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
 
           ucon64_output_fname (dest_name, 0);
           q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
-          q_fcpy (ucon64.rom, n * part_size + rominfo->buheader_len, part_size, dest_name, "ab");
+          q_fcpy (ucon64.rom, nbytesdone, part_size, dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
 
+          nbytesdone += part_size;
           (*(strrchr (dest_name, '.') + 1))++;
         }
     }
@@ -1339,6 +1341,7 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
       header[1] = part_size / 8192 >> 8;
       header[2] |= 0x40;
 
+      nbytesdone = rominfo->buheader_len;
       for (n = 0; n < nparts; n++)
         {
           if (surplus == 0 && n == nparts - 1)
@@ -1346,9 +1349,10 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
 
           ucon64_output_fname (dest_name, 0);
           q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
-          q_fcpy (ucon64.rom, n * part_size + rominfo->buheader_len, part_size, dest_name, "ab");
+          q_fcpy (ucon64.rom, nbytesdone, part_size, dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
 
+          nbytesdone += part_size;
           (*(strrchr (dest_name, '.') + 1))++;
         }
     }
@@ -1361,7 +1365,7 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
 
       ucon64_output_fname (dest_name, 0);
       q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
-      q_fcpy (ucon64.rom, n * part_size + rominfo->buheader_len, surplus, dest_name, "ab");
+      q_fcpy (ucon64.rom, nbytesdone, surplus, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);
     }
 }

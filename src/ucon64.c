@@ -1459,7 +1459,7 @@ ucon64_usage (int argc, char *argv[])
   if (!ucon64.discmage_enabled)
     printf (ucon64_msg[NO_LIB], name_discmage);
   else
-    ucon64_render_usage (libdm_get_usage ());
+    ucon64_render_usage (libdm_usage);
   printf ("\n");
 
   optind = 0;

@@ -864,9 +864,8 @@ ucon64_options (int c, const char *optarg)
     case UCON64_BIN2ISO:
       if (ucon64.discmage_enabled)
         {
-          ucon64.image = libdm_open (ucon64.rom);
+          libdm_set_gauge ((void *) &libdm_gauge);
           libdm_bin2iso (ucon64.image);
-          libdm_close (ucon64.image);
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
@@ -875,9 +874,8 @@ ucon64_options (int c, const char *optarg)
     case UCON64_ISOFIX:
       if (ucon64.discmage_enabled)
         {
-          ucon64.image = libdm_open (ucon64.rom);
+          libdm_set_gauge ((void *) &libdm_gauge);
           libdm_isofix (ucon64.image, strtol (optarg, NULL, 10));
-          libdm_close (ucon64.image);
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
@@ -886,56 +884,39 @@ ucon64_options (int c, const char *optarg)
     case UCON64_RIP:
       if (ucon64.discmage_enabled)
         {
-          ucon64.image = libdm_open (ucon64.rom);
+          libdm_set_gauge ((void *) &libdm_gauge);
           libdm_rip (ucon64.image);
-          libdm_close (ucon64.image);
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
       break;
 
     case UCON64_MKTOC:
-      if (ucon64.discmage_enabled)
-        {
-          ucon64.image = libdm_open (ucon64.rom);
-          strcpy (buf, ucon64.rom);
-          set_suffix (buf, ".TOC");
-          if (!libdm_mktoc (ucon64.image))
-            printf (ucon64_msg[WROTE], buf);
-          libdm_close (ucon64.image);
-        }
-      else
-        printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
-      break;
-
     case UCON64_MKCUE:
-      if (ucon64.discmage_enabled)
-        {
-          ucon64.image = libdm_open (ucon64.rom);
-          strcpy (buf, ucon64.rom);
-          set_suffix (buf, ".CUE");
-          if (!libdm_mkcue (ucon64.image))
-            printf (ucon64_msg[WROTE], buf);
-          libdm_close (ucon64.image);
-        }
-      else
-        printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
-      break;
-
     case UCON64_MKSHEET:
       if (ucon64.discmage_enabled)
         {
-          ucon64.image = libdm_open (ucon64.rom);
-          if (!libdm_mksheet (ucon64.image))
+          if (ucon64.image && (c == UCON64_MKTOC || c == UCON64_MKSHEET))
             {
               strcpy (buf, ucon64.rom);
               set_suffix (buf, ".TOC");
-              printf (ucon64_msg[WROTE], buf);
+            
+              if (!libdm_mktoc (ucon64.image))
+                printf (ucon64_msg[WROTE], buf);
+              else
+                fprintf (stderr, "ERROR: could not generate %s\n", buf);
+            }
+
+          if (ucon64.image && (c == UCON64_MKCUE || c == UCON64_MKSHEET))
+            {
               strcpy (buf, ucon64.rom);
               set_suffix (buf, ".CUE");
-              printf (ucon64_msg[WROTE], buf);
+
+              if (!libdm_mkcue (ucon64.image))
+                printf (ucon64_msg[WROTE], buf);
+              else
+                fprintf (stderr, "ERROR: could not generate %s\n", buf);
             }
-          libdm_close (ucon64.image);
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
@@ -944,12 +925,11 @@ ucon64_options (int c, const char *optarg)
     case UCON64_XCDRW:
       if (ucon64.discmage_enabled)
         {
-          ucon64.image = libdm_open (ucon64.rom);
+//          libdm_set_gauge ((void *) &libdm_gauge);
           if (!access (ucon64.rom, F_OK))
             libdm_disc_write (ucon64.image);
           else
             libdm_disc_read (ucon64.image);
-          libdm_close (ucon64.image);
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);

@@ -1404,30 +1404,29 @@ inportb (unsigned short port)
 #elif   defined AMIGA
   ULONG wait_mask;
   (void) port;                                  // warning remover
-/*
-  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
-*/
+
   ucon64_io_req->io_Length = 1;
   ucon64_io_req->io_Command = CMD_READ;
+
 /*
   SendIO ((struct IORequest *) ucon64_io_req);
 
+  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
   if (Wait (wait_mask) & (SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F))
     AbortIO ((struct IORequest *) ucon64_io_req);
   WaitIO ((struct IORequest *) ucon64_io_req);
 */
 
-/*
-  the diffrence between using SendIO and DoIO, is that DoIO handles messages etc. by itself
-  but it will not return until the IO is done.
+  /*
+    The difference between using SendIO() and DoIO(), is that DoIO() handles
+    messages etc. by itself but it will not return until the IO is done.
 
-  probably must do some more error handling here :-)
+    Probably have to do more error handling here :-)
 
-  can one CTRL-C a DoIO request? (or for that matter a SendIO)
+    Can one CTRL-C a DoIO() request? (Or for that matter a SendIO().)
+  */
 
-*/
-
-	DoIO ((struct IORequest *) ucon64_io_req);
+  DoIO ((struct IORequest *) ucon64_io_req);
 
   return (unsigned char) ucon64_io_req->io_Data;
 #elif   defined _WIN32 || defined __CYGWIN__
@@ -1451,14 +1450,14 @@ inportw (unsigned short port)
 #elif   defined AMIGA
   ULONG wait_mask;
   (void) port;                                  // warning remover
-/*
-  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
-*/
+  
   ucon64_io_req->io_Length = 2;
   ucon64_io_req->io_Command = CMD_READ;
+
 /*
   SendIO ((struct IORequest *) ucon64_io_req);
 
+  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
   if (Wait (wait_mask) & (SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F))
     AbortIO ((struct IORequest *) ucon64_io_req);
   WaitIO ((struct IORequest *) ucon64_io_req);
@@ -1487,15 +1486,15 @@ outportb (unsigned short port, unsigned char byte)
 #elif   defined AMIGA
   ULONG wait_mask;
   (void) port;                                  // warning remover
-/*
-  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
-*/
+  
   ucon64_io_req->io_Length = 1;
   ucon64_io_req->io_Data = byte;
   ucon64_io_req->io_Command = CMD_WRITE;
+
 /*
   SendIO ((struct IORequest *) ucon64_io_req);
 
+  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
   if (Wait (wait_mask) & (SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F))
     AbortIO ((struct IORequest *) ucon64_io_req);
   WaitIO ((struct IORequest *) ucon64_io_req);
@@ -1522,21 +1521,21 @@ outportw (unsigned short port, unsigned short word)
 #elif   defined AMIGA
   ULONG wait_mask;
   (void) port;                                  // warning remover
-/*
-  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
-*/
+  
   ucon64_io_req->io_Length = 2;
   ucon64_io_req->io_Data = word;
   ucon64_io_req->io_Command = CMD_WRITE;
+
 /*
   SendIO ((struct IORequest *) ucon64_io_req);
 
+  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
   if (Wait (wait_mask) & (SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F) )
     AbortIO ((struct IORequest *) ucon64_io_req);
   WaitIO ((struct IORequest *) ucon64_io_req);
 */
 
-	DoIO ((struct IORequest *) ucon64_io_req);
+  DoIO ((struct IORequest *) ucon64_io_req);
 #elif   defined _WIN32 || defined __CYGWIN__
   output_word (port, word);
 #elif   defined __i386__

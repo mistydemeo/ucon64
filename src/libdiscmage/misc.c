@@ -52,7 +52,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <fcntl.h>
 #include <dos/dos.h>
 #include <dos/var.h>
-#include <libraries/lowlevel.h>                 //GetKey()
+#include <libraries/lowlevel.h>                 // GetKey()
 #include <proto/dos.h>
 #include <proto/lowlevel.h>
 #elif   defined _WIN32
@@ -2199,14 +2199,7 @@ kbhit (void)
 int
 kbhit (void)
 {
-  char key_pressed;
-
-	if(0xFF != GetKey() )
-		key_pressed = 1;
-	else
-		key_pressed = 0;
-
-  return key_pressed;
+  return GetKey () != 0xff ? 1 : 0;
 }
 #endif                                          // AMIGA
 
@@ -2735,15 +2728,15 @@ int
 chmod (const char *path, mode_t mode)
 {
   if (!SetProtection ((STRPTR) path,
-                        ((mode & S_IRUSR ? 0 : FIBF_READ) |
-                         (mode & S_IWUSR ? 0 : FIBF_WRITE | FIBF_DELETE) |
-                         (mode & S_IXUSR ? 0 : FIBF_EXECUTE) |
-                         (mode & S_IRGRP ? FIBF_GRP_READ : 0) |
-                         (mode & S_IWGRP ? FIBF_GRP_WRITE | FIBF_GRP_DELETE: 0) |
-                         (mode & S_IXGRP ? FIBF_GRP_EXECUTE : 0) |
-                         (mode & S_IROTH ? FIBF_OTR_READ : 0) |
-                         (mode & S_IWOTH ? FIBF_OTR_WRITE | FIBF_OTR_DELETE : 0) |
-                         (mode & S_IXOTH ? FIBF_OTR_EXECUTE : 0))))
+                      ((mode & S_IRUSR ? 0 : FIBF_READ) |
+                       (mode & S_IWUSR ? 0 : FIBF_WRITE | FIBF_DELETE) |
+                       (mode & S_IXUSR ? 0 : FIBF_EXECUTE) |
+                       (mode & S_IRGRP ? FIBF_GRP_READ : 0) |
+                       (mode & S_IWGRP ? FIBF_GRP_WRITE | FIBF_GRP_DELETE: 0) |
+                       (mode & S_IXGRP ? FIBF_GRP_EXECUTE : 0) |
+                       (mode & S_IROTH ? FIBF_OTR_READ : 0) |
+                       (mode & S_IWOTH ? FIBF_OTR_WRITE | FIBF_OTR_DELETE : 0) |
+                       (mode & S_IXOTH ? FIBF_OTR_EXECUTE : 0))))
     return -1;
   else
     return 0;
@@ -2762,6 +2755,7 @@ readlink (const char *path, char *buf, int bufsize)
   // always return -1 as if anything passed to it isn't a soft link
   return -1;
 }
+
 
 // custom _popen() and _pclose(), because the standard ones (named popen() and
 //  pclose()) are buggy
@@ -2793,7 +2787,7 @@ _popen (const char *path, const char *mode)
   if (!(fh = Open (apipe, fhflags)))
     return NULL;
 
-  return (fdopen (fd, mode));
+  return fdopen (fd, mode);
 }
 
 

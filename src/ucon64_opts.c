@@ -498,14 +498,14 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_NTSC:
       if (!UCON64_ISSET (ucon64.tv_standard))
         ucon64.tv_standard = 0;
-      else
+      else if (ucon64.tv_standard == 1)
         ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF)
       break;
 
     case UCON64_PAL:
       if (!UCON64_ISSET (ucon64.tv_standard))
         ucon64.tv_standard = 1;
-      else
+      else if (ucon64.tv_standard == 0)
         ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF)
       break;
 

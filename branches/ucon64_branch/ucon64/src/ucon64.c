@@ -70,9 +70,6 @@ write programs in C
 #ifdef  DISCMAGE
 #include "ucon64_dm.h"
 #endif
-#ifdef  GUI
-#include "ucon64_ng.h"
-#endif
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
@@ -166,9 +163,6 @@ const struct option options[] = {
     {"ggd", 1, 0, UCON64_GGD},
     {"gge", 1, 0, UCON64_GGE},
     {"gp32", 0, 0, UCON64_GP32},
-#ifdef  GUI
-    {"gui", 1, 0, UCON64_GUI},
-#endif
     {"h", 0, 0, UCON64_HELP},
     {"hd", 0, 0, UCON64_HD},
     {"hdn", 1, 0, UCON64_HDN},
@@ -215,7 +209,7 @@ const struct option options[] = {
 #ifdef  DISCMAGE
     {"mksheet", 0, 0, UCON64_MKSHEET},
     {"mktoc", 0, 0, UCON64_MKTOC},
-#endif    
+#endif
     {"multi", 1, 0, UCON64_MULTI},
 //    {"mvs", 0, 0, UCON64_MVS},
     {"n", 1, 0, UCON64_N},
@@ -459,12 +453,6 @@ ucon64_exit (void)
       libdm_close (ucon64.image);
 #endif
 
-#ifdef  GUI
-  if (ucon64.netgui_enabled)
-    if (ucon64.netgui)
-      libng_close (ucon64.netgui);
-#endif
-
   handle_registered_funcs ();
   fflush (stdout);
 }
@@ -541,15 +529,6 @@ main (int argc, char **argv)
   strcpy (buf, ucon64.configdir);
   realpath2 (buf, ucon64.configdir);
 
-#ifdef  GUI
-  strcpy (ucon64.skindir, get_property (ucon64.configfile, "ucon64_skindir", buf, ""));
-#ifdef  __CYGWIN__
-  strcpy (ucon64.skindir, fix_character_set (ucon64.skindir));
-#endif
-  strcpy (buf, ucon64.skindir);
-  realpath2 (buf, ucon64.skindir);
-#endif
-
   // DAT file handling
   ucon64.dat_enabled = 0;
   strcpy (ucon64.datdir, get_property (ucon64.configfile, "ucon64_datdir", buf, ""));
@@ -590,11 +569,6 @@ main (int argc, char **argv)
 #ifdef  DISCMAGE
   // load libdiscmage
   ucon64.discmage_enabled = ucon64_load_discmage ();
-#endif
-
-#ifdef  GUI
-  // load libnetgui
-  ucon64.netgui_enabled = ucon64_load_netgui ();
 #endif
 
   // ucon64.dat_enabled and ucon64.discmage_enabled can affect the usage output
@@ -1012,42 +986,6 @@ ucon64_rom_handling (void)
           return -1;
         }
 
-  if (!(ucon64.flags & WF_INIT))
-    return 0;
-
-  // "walk through" <console>_init()
-  if (ucon64.flags & WF_PROBE)
-    {
-      ucon64.rominfo = ucon64_probe (&rominfo); // returns console type
-
-      if (ucon64.rominfo)
-        {
-          // restore any overrides from st_ucon64_t
-          if (UCON64_ISSET (ucon64.buheader_len))
-            rominfo.buheader_len = ucon64.buheader_len;
-
-          if (UCON64_ISSET (ucon64.snes_header_base))
-            rominfo.snes_header_base = ucon64.snes_header_base;
-
-          if (UCON64_ISSET (ucon64.snes_hirom))
-            rominfo.snes_hirom = ucon64.snes_hirom;
-
-          if (UCON64_ISSET (ucon64.interleaved))
-            rominfo.interleaved = ucon64.interleaved;
-
-//          ucon64.rominfo = (st_rominfo_t *) &rominfo;
-        }
-
-#ifdef  DISCMAGE
-      // check for disc image only if ucon64_probe() failed or --disc was used
-      if (ucon64.discmage_enabled)
-//        if (!ucon64.rominfo || ucon64.force_disc)
-        if (ucon64.force_disc)
-          ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
-#endif
-    }
-  // end of WF_PROBE
-
 
   /*
     CRC32
@@ -1095,14 +1033,26 @@ ucon64_rom_handling (void)
               break;
 
             default:
-              // Use dat instead of ucon64.dat_enabled in case the index
+              // Use ucon64.dat instead of ucon64.dat_enabled in case the index
               //  file could not be created/opened -> no segmentation fault
-              if (ucon64.dat && ucon64.rominfo && ucon64.console == UCON64_NES &&
-                  (nes_get_file_type () == UNIF ||
-                   nes_get_file_type () == INES ||
-                   nes_get_file_type () == PASOFAMI ||
-                   nes_get_file_type () == FDS))
-                strcpy ((char *) ucon64.rominfo->name, NULL_TO_EMPTY (ucon64.dat->name));
+              if (ucon64.dat && ucon64.rominfo)
+                {
+                  if (ucon64.console == UCON64_NES)
+                    {
+                      int t = nes_get_file_type ();
+                      if (t == UNIF || t == INES || t == PASOFAMI || t == FDS)
+                        strcpy ((char *) ucon64.rominfo->name,
+                                NULL_TO_EMPTY (ucon64.dat->name));
+                      if (!ucon64.rominfo->country)
+                        ucon64.rominfo->country = NULL_TO_EMPTY (ucon64.dat->country);
+                    }
+                  else if (ucon64.console == UCON64_SMS)
+                    {
+                      strcpy ((char *) ucon64.rominfo->name,
+                              NULL_TO_EMPTY (ucon64.dat->name));
+                      ucon64.rominfo->country = NULL_TO_EMPTY (ucon64.dat->country);
+                    }
+                }
               break;
           }
     }
@@ -1131,17 +1081,24 @@ ucon64_probe (st_rominfo_t * rominfo)
   int x = 0;
   st_probe_t probe[] =
     {
+      /*
+        The order of the init functions is important. snes_init() must be
+        called before nes_init(), but after gameboy_init() and sms_init().
+        sms_init() must be called before snes_init(), but after genesis_init().
+        There may be more dependencies, so don't change the order unless you
+        can verify it won't break anything.
+      */
       {UCON64_GBA, gba_init, AUTO},
       {UCON64_N64, n64_init, AUTO},
       {UCON64_GEN, genesis_init, AUTO},
       {UCON64_LYNX, lynx_init, AUTO},
       {UCON64_GB, gameboy_init, AUTO},
+      {UCON64_SMS, sms_init, AUTO},
       {UCON64_SNES, snes_init, AUTO},
       {UCON64_NES, nes_init, AUTO},
       {UCON64_NGP, ngp_init, AUTO},
       {UCON64_SWAN, swan_init, AUTO},
       {UCON64_JAG, jaguar_init, AUTO},
-      {UCON64_SMS, sms_init, 0},
       {UCON64_NG, neogeo_init, 0},
       {UCON64_PCE, pcengine_init, 0},
       {UCON64_SWAN, swan_init, 0},
@@ -1161,7 +1118,7 @@ ucon64_probe (st_rominfo_t * rominfo)
       {0, NULL, 0}
     };
 
-  if (ucon64.console != UCON64_UNKNOWN) //  force recognition option was used
+  if (ucon64.console != UCON64_UNKNOWN)         // force recognition option was used
     {
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].console == ucon64.console)
@@ -1173,7 +1130,7 @@ ucon64_probe (st_rominfo_t * rominfo)
             return rominfo;
           }
     }
-  else if (ucon64.file_size < MAXROMSIZE) // give auto_recognition a try
+  else if (ucon64.file_size < MAXROMSIZE)       // give auto_recognition a try
     {
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].flags & AUTO)
@@ -1195,7 +1152,7 @@ ucon64_probe (st_rominfo_t * rominfo)
 int
 ucon64_nfo (void)
 {
-  printf ("%s\n", ucon64.rom);
+  puts (ucon64.rom);
   if (ucon64.fname_arch[0])
     printf ("  (%s)\n", ucon64.fname_arch);
   fputc ('\n', stdout);
@@ -1203,21 +1160,21 @@ ucon64_nfo (void)
   if (ucon64.console == UCON64_UNKNOWN && !ucon64.image)
 #else
   if (ucon64.console == UCON64_UNKNOWN)
-#endif     
+#endif
     {
       fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
-      printf ("\n");
+      fputc ('\n', stdout);
     }
 
   if (ucon64.rominfo && ucon64.console != UCON64_UNKNOWN && !ucon64.force_disc)
     ucon64_rom_nfo (ucon64.rominfo);
-  
+
 #ifdef  DISCMAGE
   if (ucon64.discmage_enabled)
     if (ucon64.image)
       {
         libdm_nfo (ucon64.image);
-        printf ("\n");
+        fputc ('\n', stdout);
 
         return 0; // no crc calc. for disc images and therefore no dat entry either
       }
@@ -1236,7 +1193,7 @@ ucon64_nfo (void)
     if (ucon64.dat)
       ucon64_dat_nfo (ucon64.dat, 1);
 
-  printf ("\n");
+  fputc ('\n', stdout);
 
   return 0;
 }
@@ -1253,24 +1210,23 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   char buf[MAXBUFSIZE];
 
   // backup unit header
-
   if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != UNKNOWN_HEADER_LEN)
     {
       mem_hexdump (rominfo->buheader, rominfo->buheader_len, rominfo->buheader_start);
-      printf ("\n");
+      fputc ('\n', stdout);
     }
   else
     if (rominfo->buheader_len && ucon64.quiet < 0)
       {
         ucon64_fhexdump (ucon64.rom, rominfo->buheader_start, rominfo->buheader_len);
-        printf ("\n");
+        fputc ('\n', stdout);
       }
 
   // backup unit type?
   if (rominfo->copier_usage != NULL)
     {
       strcpy (buf, rominfo->copier_usage[0].desc);
-      printf ("%s\n", to_func (buf, strlen (buf), toprint2));
+      printf ("%s\n\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
       if (rominfo->copier_usage[1].desc)
@@ -1286,14 +1242,14 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
     {
       mem_hexdump (rominfo->header, rominfo->header_len,
         rominfo->header_start + rominfo->buheader_len);
-      printf ("\n");
+      fputc ('\n', stdout);
     }
 
   // console type
   if (rominfo->console_usage != NULL)
     {
       strcpy (buf, rominfo->console_usage[0].desc);
-      printf ("%s\n", to_func (buf, strlen (buf), toprint2));
+      puts (to_func (buf, strlen (buf), toprint2));
 
 #if 0
       if (rominfo->console_usage[1].desc)
@@ -1335,9 +1291,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
     //  nonsense for others
     printf ("Interleaved/Swapped: %s\n",
       rominfo->interleaved ?
-        (rominfo->interleaved > 1 ?
-          "Yes (2)" :
-          "Yes") :
+        (rominfo->interleaved > 1 ? "Yes (2)" : "Yes") :
         "No");
 
   // backup unit header?
@@ -1414,7 +1368,7 @@ void
 ucon64_fname_arch (const char *fname)
 {
   char name[FILENAME_MAX];
-  
+
   unzFile file = unzOpen (fname);
   unzip_goto_file (file, unzip_current_file_nr);
   unzGetCurrentFileInfo (file, NULL, name, FILENAME_MAX, NULL, 0, NULL, 0);
@@ -1445,7 +1399,7 @@ ucon64_render_usage (const st_usage_t *usage)
       if (!usage[x].option_s) // title
         {
           if (!x) // do not show date, manufacturer, etc..
-            printf ("%s\n", usage[x].desc);
+            puts (usage[x].desc);
         }
       else  // options
         {
@@ -1492,7 +1446,7 @@ ucon64_render_usage (const st_usage_t *usage)
                   printf ("%s                  ", buf);
                 }
 #endif
-              printf ("\n");
+              fputc ('\n', stdout);
             }
         }
     }
@@ -1614,55 +1568,6 @@ ucon64_usage (int argc, char *argv[])
 #endif
   printf (USAGE_S, name_exe);
 
-#ifdef  GUI
-  if (ucon64.netgui_enabled)
-    {
-      ucon64_render_usage (libng_usage);
-      printf ("\n");
-    }
-#endif
-
-  ucon64_render_usage (ucon64_options_usage);
-
-  printf ("\n");
-
-  ucon64_render_usage (ucon64_padding_usage);
-
-  printf ("\n");
-
-//  if (ucon64.dat_enabled)
-  ucon64_render_usage (ucon64_dat_usage);
-
-  printf ("\n");
-
-  ucon64_render_usage (ucon64_patching_usage);
-
-  ucon64_render_usage (bsl_usage);
-  ucon64_render_usage (ips_usage);
-  ucon64_render_usage (aps_usage);
-  ucon64_render_usage (pal4u_usage);
-  ucon64_render_usage (ppf_usage);
-  ucon64_render_usage (xps_usage);
-  ucon64_render_usage (gg_usage);
-
-  printf ("                  supported are:\n"
-    "                  %s,\n"
-    "                  %s,\n"
-//    "                  %s,\n"
-    "                  %s,\n"
-    "                  %s\n\n",
-    gameboy_usage[0].desc, sms_usage[0].desc,
-//    genesis_usage[0].desc,
-    nes_usage[0].desc, snes_usage[0].desc);
-
-#ifdef  DISCMAGE
-  if (ucon64.discmage_enabled)
-    {
-      ucon64_render_usage (libdm_usage);
-      printf ("\n");
-    }
-#endif
-
   // getopt()?
   for (c = 0; arg[c].val; c++)
     for (x = 0; usage_array[x].console != 0; x++)
@@ -1671,27 +1576,63 @@ ucon64_usage (int argc, char *argv[])
           int y = 0;
           for (; usage_array[x].usage[y]; y++)
             ucon64_render_usage (usage_array[x].usage[y]);
-           single = 1; // we show only the usage for the specified console(s)
+          single = 1; // we show only the usage for the specified console(s)
 
-          printf ("\n");
+          fputc ('\n', stdout);
         }
 
   if (!single)
     {
+      ucon64_render_usage (ucon64_options_usage);
+      fputc ('\n', stdout);
+    
+      ucon64_render_usage (ucon64_padding_usage);
+      fputc ('\n', stdout);
+    
+//      if (ucon64.dat_enabled)
+      ucon64_render_usage (ucon64_dat_usage);
+      fputc ('\n', stdout);
+    
+      ucon64_render_usage (ucon64_patching_usage);
+    
+      ucon64_render_usage (bsl_usage);
+      ucon64_render_usage (ips_usage);
+      ucon64_render_usage (aps_usage);
+      ucon64_render_usage (pal4u_usage);
+      ucon64_render_usage (ppf_usage);
+      ucon64_render_usage (xps_usage);
+      ucon64_render_usage (gg_usage);
+    
+      printf ("                  supported are:\n"
+        "                  %s,\n"
+        "                  %s,\n"
+//        "                  %s,\n"
+        "                  %s,\n"
+        "                  %s\n\n",
+        gameboy_usage[0].desc, sms_usage[0].desc,
+//        genesis_usage[0].desc,
+        nes_usage[0].desc, snes_usage[0].desc);
+    
+#ifdef  DISCMAGE
+      if (ucon64.discmage_enabled)
+        {
+          ucon64_render_usage (libdm_usage);
+          fputc ('\n', stdout);
+        }
+#endif
+    
       for (x = 0; usage_array[x].console != 0; x++)
         {
           int y = 0;
           for (; usage_array[x].usage[y]; y++)
             ucon64_render_usage (usage_array[x].usage[y]);
 
-          printf ("\n");
+          fputc ('\n', stdout);
         }
-  }
+    }
 
-  printf (
-     "DATabase: %d known ROMs (DAT files: %s)\n\n",
-       ucon64_dat_total_entries (),
-       ucon64.datdir);
+  printf ("DATabase: %d known ROMs (DAT files: %s)\n\n",
+          ucon64_dat_total_entries (), ucon64.datdir);
 
 #ifdef  DISCMAGE          
   name_discmage =
@@ -1712,7 +1653,7 @@ ucon64_usage (int argc, char *argv[])
   if (!ucon64.discmage_enabled)
     {
       printf (ucon64_msg[NO_LIB], name_discmage);
-      printf ("\n");
+      fputc ('\n', stdout);
     }
 #endif
     
@@ -1728,21 +1669,22 @@ ucon64_usage (int argc, char *argv[])
 #define PARALLEL_MSG ""
 #endif
 
-#ifdef  __MSDOS__
+#if     defined __MSDOS__ || defined _WIN32
 #define MORE_MSG "     %s " OPTION_LONG_S "help|more (to see everything in more)\n"
 #else
 #define MORE_MSG "     %s " OPTION_LONG_S "help|less (to see everything in less)\n" // less is more ;-)
 #endif
 
-  printf (
-     PARALLEL_MSG
-     "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
-     MORE_MSG
-     "     Give the force recognition switch a try if something went wrong\n"
-     "\n"
-     "Please report any problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
-     "\n",
-     name_exe, name_exe);
+  if (!single)
+    printf (
+      PARALLEL_MSG
+      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
+      MORE_MSG
+      "     Give the force recognition switch a try if something went wrong\n"
+      "\n"
+      "Please report any problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
+      "\n",
+      name_exe, name_exe);
 }
 
 

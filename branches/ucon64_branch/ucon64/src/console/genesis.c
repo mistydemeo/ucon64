@@ -177,7 +177,7 @@ genesis_smds (void)
   set_suffix (dest_name, ".SAV");
   ucon64_file_handler (dest_name, NULL, 0);
 
-  save_smd (dest_name, buf, &header, 32768);   // SMD SRAM files are interleaved
+  save_smd (dest_name, buf, &header, 32768);    // SMD SRAM files are interleaved
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;

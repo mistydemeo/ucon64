@@ -679,7 +679,7 @@ ucon64_e (void)
 
   sprintf (buf, "%s \"%s\"", buf2, ucon64.rom);
 
-  printf ("%s\n", buf);
+  puts (buf);
   fflush (stdout);
   sync ();
 
@@ -731,7 +731,7 @@ ucon64_options (int c, const char *optarg)
     case UCON64_CRC:
       if (!value)
         value = ucon64.rominfo ? ucon64.rominfo->buheader_len : ucon64.buheader_len;
-      printf ("%s", basename2 (ucon64.rom));
+      fputs (basename2 (ucon64.rom), stdout);
       if (ucon64.fname_arch[0])
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
       else
@@ -786,7 +786,7 @@ ucon64_options (int c, const char *optarg)
                                strlen (optarg), '?')) != -1)
         {
           ucon64_fhexdump (ucon64.rom, value, strlen (optarg) + 16);
-          printf ("\n");                        // + 16 gives a bit of context
+          fputc ('\n', stdout);                  // + 16 gives a bit of context
           value += strlen (optarg);
         }
       break;
@@ -938,7 +938,7 @@ ucon64_options (int c, const char *optarg)
         {
           if (ucon64.crc32)
             {
-              printf ("%s", basename2 (ucon64.rom));
+              fputs (basename2 (ucon64.rom), stdout);
               if (ucon64.fname_arch[0])
                 printf (" (%s)\n", basename2 (ucon64.fname_arch));
               else
@@ -947,7 +947,7 @@ ucon64_options (int c, const char *optarg)
               printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32 ?
                       ucon64.fcrc32 : ucon64.crc32);
               ucon64_dat_nfo (ucon64.dat, 1);
-              printf ("\n");
+              fputc ('\n', stdout);
             }
         }
       else
@@ -1033,7 +1033,7 @@ ucon64_options (int c, const char *optarg)
               
               libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
               libdm_rip (ucon64.image, track, flags);
-              printf ("\n");
+              fputc ('\n', stdout);
             }
         }
       else
@@ -1239,7 +1239,7 @@ ucon64_options (int c, const char *optarg)
     case UCON64_DMIRR:
       snes_demirror (ucon64.rominfo);
       break;
-       
+
     case UCON64_F:
       switch (ucon64.console)
         {
@@ -1275,7 +1275,7 @@ ucon64_options (int c, const char *optarg)
     case UCON64_FIGS:
       snes_figs ();
       break;
-      
+
     case UCON64_GBX:
       gameboy_gbx (ucon64.rominfo);
       break;
@@ -1374,6 +1374,9 @@ ucon64_options (int c, const char *optarg)
         case UCON64_NG:
           neogeo_mgd ();
           break;
+        case UCON64_SMS:
+          sms_mgd (ucon64.rominfo);
+          break;
         case UCON64_SNES:
           snes_mgd (ucon64.rominfo);
           break;
@@ -1449,7 +1452,7 @@ ucon64_options (int c, const char *optarg)
           remove (dest_name);
           break;
         }
-      printf ("\n");
+      fputc ('\n', stdout);
       buf[0] = q_fgetc (dest_name, x);
       mem_hexdump (buf, 1, x);
 
@@ -1457,7 +1460,7 @@ ucon64_options (int c, const char *optarg)
 
       buf[0] = value;
       mem_hexdump (buf, 1, x);
-      printf ("\n");
+      fputc ('\n', stdout);
 
       printf (ucon64_msg[WROTE], dest_name);
       remove_temp_file ();
@@ -1507,11 +1510,31 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_SMD:
-      genesis_smd (ucon64.rominfo);
+      switch (ucon64.console)
+        {
+        case UCON64_GEN:
+          genesis_smd (ucon64.rominfo);
+          break;
+        case UCON64_SMS:
+          sms_smd (ucon64.rominfo);
+          break;
+        default:
+          return -1;
+        }
       break;
 
     case UCON64_SMDS:
-      genesis_smds ();
+      switch (ucon64.console)
+        {
+        case UCON64_GEN:
+          genesis_smds ();
+          break;
+        case UCON64_SMS:
+          sms_smds ();
+          break;
+        default:
+          return -1;
+        }
       break;
 
     case UCON64_SMG:
@@ -1575,7 +1598,7 @@ ucon64_options (int c, const char *optarg)
           if (dex_read_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XDJR:
@@ -1589,7 +1612,7 @@ ucon64_options (int c, const char *optarg)
           if (doctor64jr_read (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XFIG:
@@ -1607,7 +1630,7 @@ ucon64_options (int c, const char *optarg)
           else // file exists -> send it to the copier
             fig_write_rom (ucon64.rom, ucon64.parport);
         }
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XFIGS:
@@ -1615,7 +1638,7 @@ ucon64_options (int c, const char *optarg)
         fig_read_sram (ucon64.rom, ucon64.parport);
       else
         fig_write_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XGD3:
@@ -1629,7 +1652,7 @@ ucon64_options (int c, const char *optarg)
           else
             gd_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo); // file exists -> send it to the copier
         }
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XSMD:
@@ -1647,7 +1670,7 @@ ucon64_options (int c, const char *optarg)
           else
             smd_write_rom (ucon64.rom, ucon64.parport);
         }
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XSMDS:
@@ -1655,7 +1678,7 @@ ucon64_options (int c, const char *optarg)
         smd_read_sram (ucon64.rom, ucon64.parport);
       else                                      // file exists -> restore SRAM
         smd_write_sram (ucon64.rom, ucon64.parport);
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XSWC:
@@ -1680,7 +1703,7 @@ ucon64_options (int c, const char *optarg)
               swc_write_rom (ucon64.rom, ucon64.parport, enableRTS);
             }
         }
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XSWCS:
@@ -1688,7 +1711,7 @@ ucon64_options (int c, const char *optarg)
         swc_read_sram (ucon64.rom, ucon64.parport);
       else
         swc_write_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XV64:
@@ -1703,7 +1726,7 @@ ucon64_options (int c, const char *optarg)
           if (doctor64_read (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XLIT:
@@ -1720,7 +1743,7 @@ ucon64_options (int c, const char *optarg)
           if (lynxit_read_rom (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
 //        }
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XFAL:
@@ -1728,7 +1751,7 @@ ucon64_options (int c, const char *optarg)
         fal_read_rom (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
       else
         fal_write_rom (ucon64.rom, ucon64.parport);
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XFALMULTI:
@@ -1749,12 +1772,12 @@ ucon64_options (int c, const char *optarg)
       fal_write_rom (src_name, ucon64.parport);
       unregister_func (remove_temp_file);
       remove_temp_file ();
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XFALC:
       fal_read_rom (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XFALS:
@@ -1762,7 +1785,7 @@ ucon64_options (int c, const char *optarg)
         fal_read_sram (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
       else
         fal_write_sram (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XFALB:
@@ -1770,12 +1793,12 @@ ucon64_options (int c, const char *optarg)
         fal_read_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
       else
         fal_write_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XMCCL:
       mccl_read (ucon64.rom, ucon64.parport);
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XGBX:
@@ -1783,7 +1806,7 @@ ucon64_options (int c, const char *optarg)
         gbx_read_rom (ucon64.rom, ucon64.parport);
       else                                      // file exists -> send it to the copier
         gbx_write_rom (ucon64.rom, ucon64.parport);
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XGBXS:
@@ -1791,7 +1814,7 @@ ucon64_options (int c, const char *optarg)
         gbx_read_sram (ucon64.rom, ucon64.parport, -1);
       else
         gbx_write_sram (ucon64.rom, ucon64.parport, -1);
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
     case UCON64_XGBXB:
@@ -1799,7 +1822,7 @@ ucon64_options (int c, const char *optarg)
         gbx_read_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
       else
         gbx_write_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
-      printf ("\n");
+      fputc ('\n', stdout);
       break;
 
 #endif // PARALLEL

@@ -1198,7 +1198,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
         }
     }
 
-  printf ("%s", filename);
+  fputs (filename, stdout);
   if (ucon64.quiet == -1)                       // -v was specified
     if (ucon64.fname_arch[0])
       printf (" (%s)", ucon64.fname_arch);

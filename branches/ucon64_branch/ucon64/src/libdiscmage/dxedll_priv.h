@@ -35,6 +35,7 @@ extern st_symbol_t import_export;
 #define vfprintf import_export.vfprintf
 #define sprintf import_export.sprintf
 #define vsprintf import_export.vsprintf
+#define puts import_export.puts
 #define fputs import_export.fputs
 #define sscanf import_export.sscanf
 

@@ -182,7 +182,7 @@ disp_buffer (int disp_len)
               else
                 printf ("%c", mix.buffer[(i & 0xfff0) + j]);
             }
-          printf ("\n");
+          fputc ('\n', stdout);
         }
     }
 
@@ -205,7 +205,7 @@ disp_buffer (int disp_len)
                   else
                     printf ("%c", mix.buffer[(i & 0xfff0) + j]);
                 }
-              printf ("\n");
+              fputc ('\n', stdout);
             }
         }
     }

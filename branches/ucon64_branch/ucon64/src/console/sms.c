@@ -2,6 +2,7 @@
 sms.c - Sega Master System/GameGear support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+                  2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -106,8 +107,14 @@ systems in Asia.
 
 e.g. The first 16Mbit file of Donkey Kong Country (assuming it
   is cat. no. 475) would look like:  SF16475A.078
+
+NOTE: Can anyone explain to me (dbjh) what the relationship is between the
+      comment above and the code below? This question applies to all source
+      files that contain similar info about the Game Doctor file naming
+      scheme...
 */
-  char buf[FILENAME_MAX], buf2[FILENAME_MAX], *p = NULL;
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL, suffix[5];
+  int size = ucon64.file_size - rominfo->buheader_len;
 
   if (!rominfo->buheader_len)
     {
@@ -115,20 +122,22 @@ e.g. The first 16Mbit file of Donkey Kong Country (assuming it
       return -1;
     }
 
+  strcpy (src_name, ucon64.rom);
   p = basename (ucon64.rom);
-  strcpy (buf, is_func (p, strlen (p), isupper) ? "GG" : "gg");
-  strcat (buf, p);
-  if ((p = strrchr (buf, '.')))
+  sprintf (dest_name, "%s%s", is_func (dest_name, strlen (p), isupper) ? "GG" : "gg", p);
+  if ((p = strrchr (dest_name, '.')))
     *p = 0;
-  strcat (buf, "________");
-  buf[7] = '_';
-  buf[8] = 0;
-  sprintf (buf2, "%s.%03u", buf, (ucon64.file_size - rominfo->buheader_len) / MBIT);
+  strcat (dest_name, "_____");
+  dest_name[7] = '_';
+  dest_name[8] = 0;
+  sprintf (suffix, ".%03u", size / MBIT);
+  set_suffix (dest_name, suffix);
 
-  ucon64_file_handler (buf2, NULL, 0);
-  q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, buf2, "wb");
+  ucon64_file_handler (dest_name, src_name, 0);
+  q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "wb");
 
-  printf (ucon64_msg[WROTE], buf2);
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }
 
@@ -137,7 +146,7 @@ int
 sms_smd (st_rominfo_t *rominfo)
 {
   st_smd_header_t header;
-  char dest_name[FILENAME_MAX];
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   int size = ucon64.file_size - rominfo->buheader_len;
 
   if (rominfo->buheader_len != 0)
@@ -153,14 +162,16 @@ sms_smd (st_rominfo_t *rominfo)
   header.id2 = 0xbb;
   header.type = 6;
 
+  strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".SMD");
 
-  ucon64_file_handler (dest_name, NULL, 0);
+  ucon64_file_handler (dest_name, src_name, 0);
   q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
-  q_fcpy (ucon64.rom, 0, size, dest_name, "ab");
+  q_fcpy (src_name, 0, size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }
 
@@ -194,12 +205,22 @@ int
 sms_init (st_rominfo_t *rominfo)
 {
   int result = -1;
+  unsigned char buf[11];
 
-  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-    ucon64.buheader_len : 0;
+  q_fread (&buf, 0, 11, ucon64.rom);
+  // Note that the identification bytes are the same as for Genesis SMD files
+  //  The init function for Genesis files is called before this function so it
+  //  is alright to set result to 0
+  if (buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 6)
+    {
+      result = 0;
+      rominfo->buheader_len = SMD_HEADER_LEN;
+    }
+  if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
+    rominfo->buheader_len = ucon64.buheader_len;
 
   rominfo->console_usage = sms_usage;
-  rominfo->copier_usage = (ucon64.buheader_len ? mgd_usage : smd_usage);
+  rominfo->copier_usage = rominfo->buheader_len ? smd_usage : mgd_usage;
 
   return result;
 }

@@ -597,7 +597,7 @@ ReadStatusRegister (int addr)   // 402dd8
 //         printf ("%x ", v);
 //         }
 //      }
-//   printf("\n");
+//   fputc ('\n', stdout);
 //   }
 
 // StartOffSet: 1 = 0, 2 = 64k, 3 = 128k, 4 = 192k
@@ -770,8 +770,7 @@ dump (u8 BaseAdr)
       if ((i & 7) == 7)
         {
           First = 1;
-          printf ("   %3s", (&Display[0]));
-          printf ("\n");
+          printf ("   %3s\n", (&Display[0]));
         }
     }
 }
@@ -828,7 +827,7 @@ CheckForFC (void)
       printf ("Unknown");
       break;
     }
-  printf ("\n");
+  fputc ('\n', stdout);
 }
 
 int
@@ -929,7 +928,7 @@ GetFileSize2 (FILE * fp)
         printf ("Fixing complement check.");
 
       if ((FileHeader[0xbd] != Complement) || HeaderBad)
-        printf ("\n");
+        fputc ('\n', stdout);
       rewind (fp);
     }
   else
@@ -1498,7 +1497,7 @@ fal_main (int argc, char **argv)
               fname);
 
       BackupSRAM (fp, BackupMemOffset, BackupMemSize);
-      printf ("\n");
+      fputc ('\n', stdout);
       fclose (fp);
     }
 
@@ -1526,7 +1525,7 @@ fal_main (int argc, char **argv)
               fname);
 
       RestoreSRAM (fp, BackupMemOffset);        //, BackupMemSize);
-      printf ("\n");
+      fputc ('\n', stdout);
       fclose (fp);
     }
 
@@ -1561,7 +1560,7 @@ fal_main (int argc, char **argv)
           else
             ProgramNonTurboIntelFlash (fp);
         }
-      printf ("\n");
+      fputc ('\n', stdout);
       fclose (fp);
     }
 
@@ -1580,7 +1579,7 @@ fal_main (int argc, char **argv)
               ChipSize, fname);
 
       BackupROM (fp, ChipSize << 16);
-      printf ("\n");
+      fputc ('\n', stdout);
       fclose (fp);
     }
 

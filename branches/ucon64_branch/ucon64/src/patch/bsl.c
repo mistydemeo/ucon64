@@ -3,6 +3,7 @@ bsl.c - Baseline patcher support for uCON64
 
 written by ???? - ???? The White Knight
            1999 - 2001 NoisyB (noisyb@gmx.net)
+                  2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -44,8 +45,8 @@ bsl_apply (const char *mod, const char *bslname)
 {
   FILE *modfile, *bslfile;
   unsigned char byte;
-  char addstr[10], datstr[10], buf[4096], modname[FILENAME_MAX];
-  int dat, numdat, i, done = 0, add;
+  char buf[4096], modname[FILENAME_MAX];
+  int data, nbytes, offset;
 
   strcpy (modname, mod);
   ucon64_file_handler (modname, NULL, 0);
@@ -63,49 +64,30 @@ bsl_apply (const char *mod, const char *bslname)
     }
 
   printf ("Applying BSL/Baseline patch...\n");
-
-  while (!done)
+  
+  while (!feof (bslfile))                       // we could use 1, but feof() makes it fail-safe
     {
-      memset (addstr, ' ', sizeof (addstr));
-      fscanf (bslfile, "%[-1234567890]\n", addstr);
-      fgetc (bslfile);
-      add = atoi (addstr);
+      fscanf (bslfile, "%d\n", &offset);
+      fscanf (bslfile, "%d\n", &data);
+      if ((offset == -1) && (data == -1))
+        break;
 
-      memset (datstr, ' ', sizeof (datstr));
-      fscanf (bslfile, "%[-1234567890]\n", datstr);
-      fgetc (bslfile);
-      dat = atoi (datstr);
-
-      if ((add == -1) && (dat == -1))
-        done = 1;
-      else
-        {
-          fseek (modfile, add, SEEK_SET);
-          fputc (dat, modfile);
-        }
+      fseek (modfile, offset, SEEK_SET);
+      fputc (data, modfile);
     }
 
-  memset (addstr, ' ', sizeof (addstr));
-  fscanf (bslfile, "%[-1234567890]\n", addstr);
-  fgetc (bslfile);
-  add = atoi (addstr);
-
-  memset (datstr, ' ', sizeof (datstr));
-  fscanf (bslfile, "%[-1234567890]\n", datstr);
-  fgetc (bslfile);
-  numdat = atoi (datstr);
-
-  fseek (modfile, add, SEEK_SET);
-
-  if (numdat > 0)
+  fscanf (bslfile, "%d\n", &offset);
+  fscanf (bslfile, "%d\n", &nbytes);
+  fseek (modfile, offset, SEEK_SET);
+  if (nbytes > 0)
     {
-      while (numdat > 4096)
+      while (nbytes > 4096)
         {
           fread (buf, 4096, 1, bslfile);
           fwrite (buf, 4096, 1, modfile);
-          numdat -= 4096;
+          nbytes -= 4096;
         }
-      for (i = 0; i <= numdat; i++)
+      while (nbytes-- >= 0)
         {
           byte = fgetc (bslfile);
           fputc (byte, modfile);
@@ -124,5 +106,3 @@ bsl_apply (const char *mod, const char *bslname)
 
   return 0;
 }
-
-// TODO: make bsl patch

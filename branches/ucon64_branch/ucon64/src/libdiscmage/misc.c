@@ -649,7 +649,7 @@ strtrimr (char *str)
 
   j = i = strlen (str) - 1;
 
-  while (isspace (str[i]) && (i >= 0))
+  while (isspace ((int) str[i]) && (i >= 0))
     str[i--] = 0;
 
   return j - i;
@@ -668,7 +668,7 @@ strtriml (char *str)
 
   j = strlen (str) - 1;
 
-  while (isspace (str[i]) && (i <= j))
+  while (isspace ((int) str[i]) && (i <= j))
     i++;
 
   if (0 < i)
@@ -733,22 +733,26 @@ void
 mem_hexdump (const void *mem, uint32_t n, int virtual_start)
 // hexdump something
 {
-  uint32_t pos = 0;
-  char buf[32];
+  uint32_t pos;
+  char buf[17];
   const unsigned char *p = (const unsigned char *) mem;
 
-  *buf = 0;
-  while (pos < n)
+  buf[16] = 0;
+  for (pos = 0; pos < n; pos++, p++)
     {
       if (!(pos & 15))
-        printf ("%s\n%08x  ", buf, (uint32_t) pos + virtual_start);
+        printf ("%08x  ", pos + virtual_start);
+      printf ((pos + 1) & 3 ? "%02x " : "%02x  ", *p);
 
       *(buf + (pos & 15)) = isprint (*p) ? *p : '.';
-      *(buf + (pos & 15) + 1) = 0;
-
-      printf (++pos & 3 ? "%02x " : "%02x  ", *(p++));
+      if (!((pos + 1) & 15))
+        puts (buf);
     }
-  printf ("%s\n", buf);
+  if (pos & 15)
+    {
+      *(buf + (pos & 15)) = 0;
+      puts (buf);
+    }
 }
 
 

@@ -95,97 +95,20 @@ ucon64_wrote (const char *filename)
   printf ("Wrote output to: %s\n", filename);
 }
 
-#define DETECT_MAX_CNT 1000
-#define CRC32_POLYNOMIAL     0xEDB88320L
-
-static unsigned long crc_table[256];
-static int crc_table_built = 0;
 
 #if     defined BACKUP && defined __BEOS__
 static int ucon64_io_fd;
 #endif
 
-static void build_crc_table ();
-static unsigned long calculate_file_crc (FILE * file);
+#define DETECT_MAX_CNT 1000
+
+
 
 const char *unknown_usage[] =
   {
     "Unknown backup unit/Emulator",
     NULL
   };
-
-void
-build_crc_table ()
-{
-  int i, j;
-  unsigned long crc;
-
-  for (i = 0; i <= 255; i++)
-    {
-      crc = i;
-      for (j = 8; j > 0; j--)
-        {
-          if (crc & 1)
-            crc = (crc >> 1) ^ CRC32_POLYNOMIAL;
-          else
-            crc >>= 1;
-        }
-      crc_table[i] = crc;
-    }
-  crc_table_built = 1;
-}
-
-
-unsigned long
-calculate_buffer_crc (unsigned int size, unsigned long crc, void *buffer)
-// zlib: crc32 (crc, buffer, size);
-{
-  unsigned char *p;
-  unsigned long temp1, temp2;
-
-  if (!crc_table_built)
-    build_crc_table ();
-
-  crc ^= 0xFFFFFFFFL;
-  p = (unsigned char *) buffer;
-  while (size-- != 0)
-    {
-      temp1 = (crc >> 8) & 0x00FFFFFFL;
-      temp2 = crc_table[((int) crc ^ *p++) & 0xff];
-      crc = temp1 ^ temp2;
-    }
-  return crc ^ 0xFFFFFFFFL;
-}
-
-
-unsigned long
-calculate_file_crc (FILE * file)
-{
-  unsigned long count, crc = 0;
-  unsigned char buffer[512];
-
-  while ((count = fread (buffer, 1, 512, file)))
-    crc = calculate_buffer_crc (count, crc, buffer); // zlib: crc32 (crc, buffer, count);
-  return crc;
-}
-
-
-unsigned long
-file_crc32 (const char *filename, long start)
-{
-  unsigned long val;
-  FILE *fh;
-
-  build_crc_table ();
-
-  if (!(fh = fopen (filename, "rb")))
-    return -1;
-  fseek (fh, start, SEEK_SET);
-  val = calculate_file_crc (fh);
-  fclose (fh);
-
-  return val;
-}
 
 
 const char *

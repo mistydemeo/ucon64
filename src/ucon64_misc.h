@@ -91,12 +91,6 @@ typedef struct st_unknown_header // uses SWC header layout ("hirom" is a FIG fie
 #define UNKNOWN_HEADER_LEN (sizeof (st_unknown_header_t))
 extern const char *unknown_usage[];
 
-/*
-  CRC32 routines
-*/
-extern unsigned long calculate_buffer_crc (unsigned int size, unsigned long crc,
-  void *buffer);
-extern unsigned long file_crc32 (const char *filename, long start);   // calculate CRC32 of filename beginning from start
 
 /*
   wrapper for misc.c/filebackup()

@@ -56,10 +56,7 @@ static int snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer);
 static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer,
                               int rom_size);
 static unsigned short int get_internal_sums (st_rominfo_t *rominfo);
-//static int snes_special_bs (void);
-static int snes_bs_name(void);
 static int snes_check_bs (void);
-static int check_char (unsigned char c);
 static int check_banktype (unsigned char *rom_buffer, int header_offset);
 static void reset_header (void *header);
 static void set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header);
@@ -2607,7 +2604,7 @@ snes_init (st_rominfo_t *rominfo)
 #endif
                rominfo->current_internal_crc, x, rominfo->current_internal_crc + x,
                (rominfo->current_internal_crc + x == 0xffff) ? "" : "~0xffff");
-      if (bs_dump)
+      if (bs_dump == 1)                         // bs_dump == 2 for BS add-on dumps
         {
           unsigned short int *bs_date_ptr = (unsigned short int *)
             (rom_buffer + snes_header_base + SNES_HEADER_START + snes_hirom + 38);
@@ -2619,6 +2616,8 @@ snes_init (st_rominfo_t *rominfo)
             (overwritten with a constant number), because the date is variable.
             When a BS dump is made the BSX fills in the date. Otherwise two
             dumps of the same memory card would have a different CRC32.
+            For BS add-on cartridge dumps we don't do anything special as they
+            come from cartridges (with a constant date).
             Why 42? It's the answer to life, the universe and everything :-)
           */
 #ifdef  WORDS_BIGENDIAN
@@ -2764,7 +2763,10 @@ snes_init (st_rominfo_t *rominfo)
       // ROM country
       rominfo->country = "Japan";
       // misc stuff
-      sprintf (buf, "\nBroadcast Satellaview dump\n");  // new line is intentional
+      if (bs_dump == 2)
+        sprintf (buf, "\nBroadcast Satellaview add-on cartridge dump\n");
+      else
+        sprintf (buf, "\nBroadcast Satellaview dump\n"); // new line is intentional
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
@@ -2816,42 +2818,33 @@ snes_init (st_rominfo_t *rominfo)
 int
 snes_check_bs (void)
 {
-  unsigned int value;
-
-  if (snes_header.bs_type & 0x4f)
-    return 0;
-
-  if (snes_header.maker != 0x33 && snes_header.maker != 0xff)
-    return 0;
-
-  value = ((unsigned char *) &snes_header)[39] << 8 |
-          ((unsigned char *) &snes_header)[38];
-  if (value != 0x0000 && value != 0xffff)
+  if ((snes_header.maker == 0x33 || snes_header.maker == 0xff) &&
+      (snes_header.map_type == 0 || (snes_header.map_type & 0x83) == 0x80))
     {
-      if ((value & 0x040f) != 0)
-        return 0;
-      if ((value & 0xff) > 0xc0)
-        return 0;
+      int date = (snes_header.bs_day << 8) | snes_header.bs_month;
+      if (date == 0)
+        return 2;                               // BS add-on cartridge dump
+      else if (date == 0xffff ||
+               ((snes_header.bs_month & 0xf) == 0 && (snes_header.bs_month >> 4) <= 12))
+        return 1;                               // BS dump (via BSX)
     }
-
-  if (snes_header.bs_map_type & 0xce || ((snes_header.bs_map_type & 0x30) == 0))
+  return 0;
+}
+#else
+static int
+check_char (unsigned char c)
+{
+  if ((c & 0x80) == 0)
     return 0;
 
-  if ((snes_header.map_type & 0x03) != 0)
+  if ((c - 0x20) & 0x40)
+    return 1;
+  else
     return 0;
-
-  value = ((unsigned char *) &snes_header)[35];
-  if (value != 0x00 && value != 0xff)
-    return 0;
-
-  if (((unsigned char *) &snes_header)[36] != 0x00)
-    return 0;
-
-  return snes_bs_name ();
 }
 
 
-int
+static int
 snes_bs_name (void)
 {
   unsigned int value;
@@ -2894,90 +2887,39 @@ snes_bs_name (void)
 
 
 int
-check_char (unsigned char c)
-{
-  if ((c & 0x80) == 0)
-    return 0;
-
-  if ((c - 0x20) & 0x40)
-    return 1;
-  else
-    return 0;
-}
-#else
-int
-snes_special_bs (void)
-{
-  if (!strncmp ("BS DRAGON QUEST", snes_header.name, 15))
-    return 1;
-  if (!strncmp ("BUSTERS BS", snes_header.name, 10))
-    return 1;
-  if (!strncmp ("Mario Excite Bike", snes_header.name, 17))
-    return 1;
-  if (!strncmp ("BS_Dr Mario", snes_header.name, 11))
-    return 1;
-  if (!strncmp ("BS_SuperFam", snes_header.name, 11))
-    return 1;
-  if (!strncmp ("BS_Legend", snes_header.name, 9))
-    return 1;
-  if (!strncmp ("KARBYCOL", ((char *) &snes_header) + 7, 8))
-    return 1;
-  if (snes_header.name[0] == 0xdc && snes_header.name[1] == 0xb2 &&
-      snes_header.name[5] == 0xaa)
-    return 1;                                   // bs wai wai
-  if (snes_header.name[0] == 0x8c && snes_header.name[1] == 0x8e &&
-      snes_header.name[5] == 0xb2)
-    return 1;                                   // bs coin deck
-  if (snes_header.name[0] == 0x82 && snes_header.name[1] == 0xb3 &&
-      snes_header.name[5] == 0xaa)
-    return 1;                                   // bs same game koma data
-  if (snes_header.name[0] == 0xbb && snes_header.name[1] == 0xc3 &&
-      snes_header.name[5] == 0x2d)
-    return 1;                                   // ?, not bs zelda 3 (checked
-                                                //  remix, 1 & 3)
-  return 0;
-}
-
-
-int
 snes_check_bs (void)
 {
-  unsigned char byte;
-  int i;
+  unsigned int value;
 
-  if (snes_special_bs ())
-    return 1;
-  if (snes_header.name[SNES_NAME_LEN - 1])      // 36
+  if (snes_header.bs_type & 0x4f)
     return 0;
-  if (snes_header.maker != 0x33 && snes_header.maker != 0 && snes_header.maker != 0xff)
+
+  if (snes_header.maker != 0x33 && snes_header.maker != 0xff)
     return 0;
-  if (snes_header.bs_map_type & 0x8e)
-    return 0;
-  if (!(snes_header.bs_map_type & 0x70))
-    return 0;
-  byte = ((char *) &snes_header)[32];           // 32
-  if (byte != 0x01 && byte != 0x03 && byte != 0x07 && byte != 0x0f && byte != 0xff)
-    return 0;
-//  if (byte != 0 && byte != 0x01 && byte != 0x20 && byte != 0x21 && byte != 0x30 && byte != 0x31)
-//    return 0;
-  if (snes_header.bs_size != 0 && snes_header.bs_size != 0x10 &&
-      snes_header.bs_size != 0x20 && snes_header.bs_size != 0x30 &&
-      snes_header.bs_size != 0x80)
-    return 0;
-//  if (!isalnum (snes_header.maker_high) return 0;
-//  if (!isalnum (snes_header.maker_low) return 0;
-  for (i = 0; i < 12; i++)
-    if (snes_header.name[i] == 0xff)
-      return 0;
-  if (snes_header.bs_month != 0 && snes_header.bs_month != 0xff)
+
+  value = (snes_header.bs_day << 8) | snes_header.bs_month;
+  if (value != 0x0000 && value != 0xffff)
     {
-      if (snes_header.bs_month & 0x0f)
+      if ((value & 0x040f) != 0)
         return 0;
-      if ((snes_header.bs_month >> 4) > 12)
+      if ((value & 0xff) > 0xc0)
         return 0;
     }
 
-  return 1;
+  if (snes_header.bs_map_type & 0xce || ((snes_header.bs_map_type & 0x30) == 0))
+    return 0;
+
+  if ((snes_header.map_type & 0x03) != 0)
+    return 0;
+
+  value = ((unsigned char *) &snes_header)[35];
+  if (value != 0x00 && value != 0xff)
+    return 0;
+
+  if (((unsigned char *) &snes_header)[36] != 0x00)
+    return 0;
+
+  return snes_bs_name ();
 }
 #endif
 

@@ -625,7 +625,7 @@ gameboy_chksum (st_rominfo_t *rominfo)
 
   if (!(fh = fopen (ucon64.rom, "rb")))
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", ucon64.rom);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.rom);
       exit (1);
     }
 

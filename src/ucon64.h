@@ -43,8 +43,8 @@ typedef struct st_ucon64
   int argc;
   char **argv;
 
-  const char *rom;                              // rom (cmdline) with path
-  char rom_in_archive[FILENAME_MAX];            // filename holder if the rom comes from an archive
+  const char *rom;                              // ROM (cmdline) with path
+  char rom_in_archive[FILENAME_MAX];            // filename holder if the ROM comes from an archive
 
   const char *file;                             // file (cmdline) with path
 
@@ -66,8 +66,8 @@ typedef struct st_ucon64
   int show_nfo;                                 // show or skip info output for ROM
 
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
-  int buheader_len;                            // length of backup unit header 0 == no bu hdr
-  int split;                                    // rom is split
+  int buheader_len;                             // length of backup unit header 0 == no bu hdr
+  int split;                                    // ROM is split
   int snes_hirom;                               // SNES ROM is HiROM
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
   int controller;                               // NES UNIF & SNES NSRT
@@ -79,13 +79,13 @@ typedef struct st_ucon64
   const char *mapr;                             // NES UNIF board name or iNES mapper number
   int use_dump_info;                            // NES UNIF
   const char *comment;                          // NES UNIF
-  int interleaved;                              // rom is interleaved (swapped)
+  int interleaved;                              // ROM is interleaved (swapped)
   int console;                                  // the detected console system
   int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
 
 #define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
 #define UCON64_TYPE_ISCD(x) (x == UCON64_CD)
-  int type;                                     // rom type ROM or CD image
+  int type;                                     // ROM type ROM or CD image
 } st_ucon64_t;
 
 extern st_ucon64_t ucon64;

@@ -80,7 +80,12 @@ enum
 {
   PARPORT_ERROR = 0,
   CONSOLE_ERROR,
-  WROTE
+  WROTE,
+  OPEN_READ_ERROR,
+  OPEN_WRITE_ERROR,
+  BUFFER_ERROR,                                 // not enough memory
+  ROM_BUFFER_ERROR,
+  FILE_BUFFER_ERROR
 };
 
 extern const char *ucon64_msg[]; 

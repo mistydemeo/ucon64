@@ -151,7 +151,7 @@ genesis_smd (st_rominfo_t *rominfo)
 
   if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
     {
-      fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n", genesis_rom_size);
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], genesis_rom_size);
       return -1;
     }
   load_rom (rominfo, ucon64.rom, rom_buffer);
@@ -341,7 +341,7 @@ genesis_mgd (st_rominfo_t *rominfo)
 
   if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
     {
-      fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n", genesis_rom_size);
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], genesis_rom_size);
       return -1;
     }
   load_rom (rominfo, ucon64.rom, rom_buffer);
@@ -551,7 +551,7 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
 
   if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
     {
-      fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n", genesis_rom_size);
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], genesis_rom_size);
       return -1;
     }
   load_rom (rominfo, ucon64.rom, rom_buffer);
@@ -616,7 +616,7 @@ genesis_chk (st_rominfo_t *rominfo)
 
   if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
     {
-      fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n", genesis_rom_size);
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], genesis_rom_size);
       return -1;
     }
   load_rom (rominfo, ucon64.rom, rom_buffer);
@@ -993,8 +993,7 @@ genesis_init (st_rominfo_t *rominfo)
     {
       if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
         {
-          fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n",
-            genesis_rom_size);
+          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], genesis_rom_size);
           return -1;
         }
       load_rom (rominfo, ucon64.rom, rom_buffer);

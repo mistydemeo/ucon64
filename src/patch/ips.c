@@ -93,12 +93,12 @@ ips_apply (const char *modname, const char *ipsname)
 
   if ((modfile = fopen (modname, "rb+")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", modname);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], modname);
       exit (1);
     }
   if ((ipsfile = fopen (ipsname, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", ipsname);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ipsname);
       exit (1);
     }
 
@@ -348,12 +348,12 @@ ips_create (const char *orgname, const char *modname)
 
   if ((orgfile = fopen (orgname, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", orgname);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], orgname);
       exit (1);
     }
   if ((modfile = fopen (modname, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", modname);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], modname);
       exit (1);
     }
   strcpy (ipsname, orgname);
@@ -361,7 +361,7 @@ ips_create (const char *orgname, const char *modname)
   ucon64_fbackup (NULL, ipsname);
   if ((ipsfile = fopen (ipsname, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", ipsname);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], ipsname);
       exit (1);
     }
 

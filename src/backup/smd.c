@@ -4,6 +4,7 @@ smd.c - Super Magic Drive support for uCON64
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh
 
+           
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -64,12 +65,12 @@ smd_read_rom (const char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
       exit (1);
     }
 
@@ -137,12 +138,12 @@ smd_write_rom (const char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", filename);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
       exit (1);
     }
 
@@ -193,12 +194,12 @@ smd_read_sram (const char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
       exit (1);
     }
 
@@ -249,12 +250,12 @@ smd_write_sram (const char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Can't open %s for reading\n", filename);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
       exit (1);
     }
 

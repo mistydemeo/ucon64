@@ -462,7 +462,7 @@ ucon64_rename (int mode)
       return 0;
     }
 
-  if (access (buf2, F_OK))
+//  if (access (buf2, F_OK))
     { // file with name buf doesn't exist
       printf ("Renaming \"%s\" to \"%s\"\n", basename2 (ucon64.rom),
               basename2 (buf2));
@@ -470,13 +470,16 @@ ucon64_rename (int mode)
       rename (ucon64.rom, buf2);
 #endif
     }
+#if 0
+  // nb: we already do this with the strcmp() above...
   else
     {
       // TODO: here should come some code that checks if buf is really
       //       the file that its name suggests
       //       DON'T remove file with name buf! That would be stupid.
-      printf ("File \"%s\" already exists, skipping \"%s\"\n", buf2, ucon64.rom);
+      printf ("File \"%s\" already exists, skipping\n", buf2);
     }
+#endif
 
   return 0;
 }

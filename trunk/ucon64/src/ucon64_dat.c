@@ -178,7 +178,7 @@ get_next_file (char *fname)
       }
 
   while ((ep = readdir (ddat)) != NULL)
-    if (!stricmp (getext (ep->d_name), ".dat"))
+    if (!stricmp (get_suffix (ep->d_name), ".dat"))
       {
         sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir,
                  ep->d_name);
@@ -483,7 +483,7 @@ ucon64_dat_view (int console, int verbose)
 
       get_dat_header (fname_dat, &dat);
       strcpy (fname_index, fname_dat);
-      setext (fname_index, ".idx");
+      set_suffix (fname_index, ".idx");
 
       fsize = q_fsize (fname_index);
       n_entries = fsize / sizeof (st_idx_entry_t);
@@ -554,7 +554,7 @@ ucon64_dat_total_entries (int console)
 
   while (get_next_file (fname))
     {
-      setext (fname, ".idx");
+      set_suffix (fname, ".idx");
       fsize = q_fsize (fname);
       entries += (fsize < 0 ? 0 : fsize / sizeof (st_idx_entry_t));
     }
@@ -596,7 +596,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
           continue;
 
       strcpy (fname_index, fname_dat);
-      setext (fname_index, ".idx");
+      set_suffix (fname_index, ".idx");
       fsize = q_fsize (fname_index);
 
       if (!(p = (unsigned char *) malloc (fsize)))
@@ -667,7 +667,7 @@ ucon64_dat_indexer (void)
   while (get_next_file (fname_dat))
     {
       strcpy (fname_index, fname_dat);
-      setext (fname_index, ".idx");
+      set_suffix (fname_index, ".idx");
 
       if (!stat (fname_dat, &fstate_dat) && !stat (fname_index, &fstate_index))
         {
@@ -717,7 +717,7 @@ ucon64_dat_indexer (void)
               if (!errorfile)
                 {
                   strcpy (errorfname, fname_index);
-                  setext (errorfname, ".err");
+                  set_suffix (errorfname, ".err");
                   if (!(errorfile = fopen (errorfname, "w"))) // text file for WinDOS
                     {
                       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], errorfname);
@@ -824,7 +824,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
     suffix).
   */
   n = strlen (dat->fname);
-  p = (char *) getext (dat->fname);
+  p = (char *) get_suffix (dat->fname);
   if (stricmp (p, ".nes") &&                    // NES
       stricmp (p, ".fds") &&                    // NES FDS
       stricmp (p, ".gb") &&                     // Game Boy

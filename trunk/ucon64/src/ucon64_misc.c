@@ -956,7 +956,11 @@ int ucon64_e (const char *romfile)
   fflush (stdout);
   sync ();
 
-  result = system2 (stderr, buf, TRUE);
+  result = system (buf)
+#ifndef __MSDOS__
+      >> 8                                      // the exit code is coded in bits 8-15
+#endif                                          //  (that is, under non-DOS)
+  ;
 
 #if 1
   // Snes9x (Linux) for example returns a non-zero value on a normal exit

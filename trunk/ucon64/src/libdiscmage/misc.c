@@ -406,12 +406,12 @@ clear_line (void)
   line. A solution is using SetConsoleTextAttribute().
   The problem doesn't occur if ANSI.SYS is loaded. It also doesn't occur under
   Windows XP, even if ANSI.SYS isn't loaded.
-  We display 79 spaces (not 80), because under command.com the cursor advances
-  to the next line if we display something on the 80th column (in 80 column
-  mode). This doesn't happen under xterm.
+  We print 79 spaces (not 80), because under command.com the cursor advances to
+  the next line if we print something on the 80th column (in 80 column mode).
+  This doesn't happen under xterm.
 */
 {
-#ifndef _WIN32
+#if     !defined _WIN32 || !defined USE_ANSI_COLOR
   fputs ("\r                                                                               \r", stdout);
 #else
   WORD org_attr;
@@ -2725,14 +2725,14 @@ quick_io (void *buffer, size_t start, size_t len, const char *filename,
       fprintf (stderr, "ERROR: Could not open \"%s\" in mode \"%s\"\n"
                        "CAUSE: %s\n", filename, mode, strerror (errno));
 #endif
-      return -1; // TODO: 0?
+      return -1;
     }
 
 #ifdef DEBUG
   fprintf (stderr, "\"%s\": \"%s\"\n", filename, (char *) mode);
 #endif
 
-  fseek (fh, start, SEEK_SET);                  // TODO: what if fseek fails?
+  fseek (fh, start, SEEK_SET);
 
   // Note the order of arguments of fread() and fwrite(). Now quick_io()
   //  returns the number of characters read or written. Some code relies on
@@ -2760,14 +2760,14 @@ quick_io_c (int value, size_t start, const char *filename, const char *mode)
       fprintf (stderr, "ERROR: Could not open \"%s\" in mode \"%s\"\n"
                        "CAUSE: %s\n", filename, mode, strerror (errno));
 #endif
-      return -1; // TODO: 0?
+      return -1;
     }
 
 #ifdef DEBUG
   fprintf (stderr, "\"%s\": \"%s\"\n", filename, (char *) mode);
 #endif
 
-  fseek (fh, start, SEEK_SET);                  // TODO: what if fseek fails?
+  fseek (fh, start, SEEK_SET);
 
   if (*mode == 'r' && mode[1] != '+')           // "r+b" always writes
     result = fgetc (fh);

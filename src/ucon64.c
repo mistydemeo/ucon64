@@ -184,7 +184,7 @@ int ucon64_main(int argc,char *argv[])
     exit(1);
   }
   gid = getgid();                               // This shouldn't be necessary if `make install'
-  if (setgid(uid) == -1)                        //  was used, but just in case (root did `chmod +s')
+  if (setgid(gid) == -1)                        //  was used, but just in case (root did `chmod +s')
   {
     fprintf(stderr, "Could not set gid\n");
     exit(1);

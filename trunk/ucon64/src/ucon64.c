@@ -342,7 +342,10 @@ while((ep=readdir(dp))!=0)
 	{
 		if(S_ISREG(puffer.st_mode)==1)
 		{
-
+/*
+TODO this completely sucks.. its a dirty hack and i'll have to make some
+changes to uCON64 to fix this..
+*/
 			strftime(buf,13,"%b %d %H:%M",localtime(&puffer.st_mtime));
 
 	ucon64_argv[0]=ucon64_name();

@@ -88,7 +88,7 @@ write programs in C
 #include "backup/smc.h"
 #include "backup/fpl.h"
 #include "backup/mgd.h"
-#include "backup/gbcamera.h"
+#include "backup/mccl.h"
 
 static void ucon64_exit (void);
 static void usage (const char **usage);
@@ -242,7 +242,7 @@ const struct option long_options[] = {
     {"xfalb", 1, 0, UCON64_XFALB},
     {"xfalc", 1, 0, UCON64_XFALC},
     {"xfals", 0, 0, UCON64_XFALS},
-    {"xgbcam", 0, 0, UCON64_XGBCAM},
+    {"xmccl", 0, 0, UCON64_XMCCL},
     {"xgbx", 0, 0, UCON64_XGBX},
     {"xgbxb", 1, 0, UCON64_XGBXB},
     {"xgbxs", 0, 0, UCON64_XGBXS},
@@ -868,7 +868,7 @@ ucon64_usage (int argc, char *argv[])
         usage (gameboy_usage);
 #ifdef BACKUP
         usage (gbx_usage);
-        usage (gbcamera_usage);
+        usage (mccl_usage);
 #endif // BACKUP
         single = 1;
         break;
@@ -978,7 +978,7 @@ ucon64_usage (int argc, char *argv[])
       usage (gameboy_usage);
 #ifdef BACKUP
       usage (gbx_usage);
-      usage (gbcamera_usage);
+      usage (mccl_usage);
 #endif // BACKUP
       printf ("\n");
 

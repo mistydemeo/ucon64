@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern "C" {
 #endif
 
-st_symbol_t import_export;
+extern st_symbol_t import_export;
 
 #define printf import_export.printf
 #define fprintf import_export.fprintf
@@ -36,6 +36,8 @@ st_symbol_t import_export;
 #define fputs import_export.fputs
 
 #ifndef HAVE_ZLIB_H
+#if 0
+// These are now defined in dxe_misc.c
 #define fopen import_export.fopen
 #define fclose import_export.fclose
 #define fseek import_export.fseek
@@ -45,17 +47,7 @@ st_symbol_t import_export;
 #define feof import_export.feof
 #define fwrite import_export.fwrite
 #define fputc import_export.fputc
-#else
-#error currently libdiscmage must be compiled without zlib support
-#define fopen2 import_export.fopen
-#define fclose2 import_export.fclose
-#define fseek2 import_export.fseek
-#define fread2 import_export.fread
-#define fgetc2 import_export.fgetc
-#define fgets2 import_export.fgets
-#define feof2 import_export.feof
-#define fwrite2 import_export.fwrite
-#define fputc2 import_export.fputc
+#endif
 #endif
 
 #define ftell import_export.ftell
@@ -83,6 +75,7 @@ st_symbol_t import_export;
 #define strpbrk import_export.strpbrk
 #define strspn import_export.strspn
 #define strcspn import_export.strcspn
+#define strlen import_export.strlen
 
 // We have to do this, because there's also a struct stat
 // TODO?: do this for all #defines in this file.
@@ -103,6 +96,32 @@ st_symbol_t import_export;
 #define chdir import_export.chdir
 #define getcwd import_export.getcwd
 
+// zlib functions
+#define gzopen import_export.gzopen
+#define gzclose import_export.gzclose
+#define gzwrite import_export.gzwrite
+#define gzgets import_export.gzgets
+#define gzeof import_export.gzeof
+#define gzseek import_export.gzseek
+#define gzputc import_export.gzputc
+#define gzread import_export.gzread
+#define gzgetc import_export.gzgetc
+#define gzrewind import_export.gzrewind
+
+// unzip functions
+#define unzOpen import_export.unzOpen
+#define unzOpenCurrentFile import_export.unzOpenCurrentFile
+#define unzGoToFirstFile import_export.unzGoToFirstFile
+#define unzClose import_export.unzClose
+#define unzGetGlobalInfo import_export.unzGetGlobalInfo
+#define unzGoToNextFile import_export.unzGoToNextFile
+#define unzCloseCurrentFile import_export.unzCloseCurrentFile
+#define unzeof import_export.unzeof
+#define unzReadCurrentFile import_export.unzReadCurrentFile
+#define unztell import_export.unztell
+#define unzGetCurrentFileInfo import_export.unzGetCurrentFileInfo
+
+// variables
 #define __dj_stdin import_export.__dj_stdin
 #define __dj_stdout import_export.__dj_stdout
 #define __dj_stderr import_export.__dj_stderr

@@ -1,6 +1,7 @@
 .PHONY: all clean install
 
 DLOPEN=1
+ZLIB=1
 
 libdir = ${exec_prefix}/lib
 #INSTALL = @INSTALL@
@@ -28,7 +29,6 @@ ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/
 LIBS=-lcygwin -lkernel32 -L$(GCCA_DIR) -lgcc
 # kernel32 for DLOPEN and DisableThreadLibraryCalls()
-#ZLIB=1
 ifdef ZLIB
 LIBS+=-lz
 OBJECTS+=unzip.o
@@ -47,12 +47,30 @@ DLLTOOLFLAGS=--dllname $(LIBNAME).dll --def tmp.def
 else
 ifdef DJGPP
 
+OBJECTS+=dxe_misc.o
+# This file is only really necessary when zlib support is/should be enabled, 
+#  but it's wise to use as little conditionally compiled code as possible. 
+#  Besides it currently gets used even if zlib support is disabled.
+
+GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/2.953
+LIBS+=-L$(GCCA_DIR) -lgcc
+
+#ifdef ZLIB
+#LIBS=-lz
+#OBJECTS+=unzip.o
+#endif
+# All that doesn't work... So, we just improve the grand DXE hack
+
 CFLAGS+=-DDXE
-GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/2.81
-DLLFLAGS=-L$(GCCA_DIR) -lgcc
+DLLFLAGS=$(OBJECTS) $(LIBS)
 FULLLIBNAME=$(LIBNAME).dxe
 
 else                                    # Unix or BeOS
+
+ifdef ZLIB
+LIBS=-lz
+OBJECTS+=unzip.o
+endif
 
 CFLAGS+=-fPIC
 ifdef DLOPEN
@@ -62,11 +80,11 @@ FULLLIBNAME=lib$(LIBNAME).so
 endif
 
 ifeq ($(OSTYPE),beos)
-DLLFLAGS=$(LDFLAGS) -nostart
+LDFLAGS+=-nostart
 else
-DLLFLAGS=$(LDFLAGS) -shared
+LDFLAGS+=-shared
 endif
-DLLFLAGS+=-o $(FULLLIBNAME) $(OBJECTS)
+DLLFLAGS+=$(LDFLAGS) -o $(FULLLIBNAME) $(OBJECTS) $(LIBS)
 
 endif                                   # DJGPP
 endif                                   # cygwin
@@ -146,7 +164,7 @@ $(LIBNAME).dxe: $(OBJECTS)
 endif
 	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
 	@echo "      symbols, read faq.html question 2"
-	dxegen $(LIBNAME).dxe _import_export $(OBJECTS) $(DLLFLAGS)
+	dxegen $(LIBNAME).dxe _import_export $(DLLFLAGS)
 ifndef DLOPEN
 	ar rs $(LIBNAME).a djimport.o dlopen.o
 endif

@@ -1,4 +1,3 @@
-
 #!/bin/sh
 
 echo Give root\'s password:

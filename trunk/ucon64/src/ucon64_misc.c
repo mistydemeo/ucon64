@@ -739,7 +739,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
   NULL,                                         // 9Z
   "Telenet", "Hori", NULL, NULL, "Konami",
   "K.Amusement Leasing Co.", "Kawada", "Takara", NULL, "Technos Japan Corp.",
-  "JVC (Europe/Japan)/Victor Musical Indutries", NULL, "Toei Animation", "Toho", NULL,
+  "JVC (Europe/Japan)/Victor Musical Industries", NULL, "Toei Animation", "Toho", NULL,
   "Namco", "Media Rings Corp.", "J-Wing", NULL, "Pioneer LDC",
   "KID", "Mediafactory", NULL, NULL, NULL,
   "Infogrames Hudson", NULL, NULL, NULL, NULL,

@@ -264,6 +264,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XGD3:
     case UCON64_XGD3S:
     case UCON64_XGD6:
+    case UCON64_XGD6R:
     case UCON64_XGD6S:
     case UCON64_XLIT:
     case UCON64_XMCCL:
@@ -1474,6 +1475,14 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
+    case UCON64_XGD3R:
+      if (access (ucon64.rom, F_OK) != 0)
+        gd3_read_saver (ucon64.rom, ucon64.parport);
+      else
+        gd3_write_saver (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
     case UCON64_XGD6:
       if (access (ucon64.rom, F_OK) != 0)
         gd6_read_rom (ucon64.rom, ucon64.parport); // dumping is not yet supported
@@ -1493,6 +1502,14 @@ ucon64_options (int c, const char *optarg)
         gd6_read_sram (ucon64.rom, ucon64.parport);
       else
         gd6_write_sram (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGD6R:
+      if (access (ucon64.rom, F_OK) != 0)
+        gd6_read_saver (ucon64.rom, ucon64.parport);
+      else
+        gd6_write_saver (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;
 

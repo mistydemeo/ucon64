@@ -40,6 +40,10 @@ extern int gd3_read_sram (const char *filename, unsigned int parport);
 extern int gd3_write_sram (const char *filename, unsigned int parport);
 extern int gd6_read_sram (const char *filename, unsigned int parport);
 extern int gd6_write_sram (const char *filename, unsigned int parport);
+extern int gd3_read_saver (const char *filename, unsigned int parport);
+extern int gd3_write_saver (const char *filename, unsigned int parport);
+extern int gd6_read_saver (const char *filename, unsigned int parport);
+extern int gd6_write_saver (const char *filename, unsigned int parport);
 #endif // PARALLEL
 
 #endif // MGD_H

@@ -946,7 +946,7 @@ ucon64_rom_handling (void)
       if (ucon64.rominfo)
         {
           // Restore any overrides from st_ucon64_t
-          // We have to this *before* calling ucon64_probe(), *not* afterwards
+          // We have to do this *before* calling ucon64_probe(), *not* afterwards
           if (UCON64_ISSET (ucon64.buheader_len))
             rominfo.buheader_len = ucon64.buheader_len;
 

@@ -855,10 +855,10 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
 
   result = ucon64_init (ucon64.rom, &rominfo);
 
-  if (!result)
-    switch (mode)
-      {
+  switch (mode)
+    {
     case UCON64_LSV:
+      if (!result)
         ucon64_nfo (&rominfo);
         break;
 

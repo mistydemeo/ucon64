@@ -169,7 +169,6 @@ const char *nes_boardtypes = {
 
 
 #define NES_MAKER_MAX 203
-//TODO replace with ucon64_misc.c/nintendo_maker[]
   static const char *nes_maker[NES_MAKER_MAX] = {
     NULL, "A-Wave", "ASCII", "Absolute Entertainment", "Acclaim",
     "Active Enterprises", "Activision", "Activision/Bullet Proof", "Akujin", "Altron",
@@ -7154,10 +7153,6 @@ nes_init (st_rominfo_t *rominfo)
     }
 
   ucon64.crc32 = q_fcrc32 (ucon64.rom, rominfo->buheader_len);
-
-//  for (n = 0; nes_data[n].crc; n++)
-//    if (nes_data[n].country > 2)
-//      printf ("{%08x, %d, %d, \"%s\"},\n", nes_data[n].crc, nes_data[n].maker, nes_data[n].country, nes_data[n].misc);
 
   for (n = 0; nes_data[n].crc; n++) // additional info
     if ((uint32_t) nes_data[n].crc == (uint32_t) ucon64.crc32)

@@ -631,7 +631,7 @@ snes_mgd (st_rominfo_t *rominfo)
   memcpy (mgh + 16, rominfo->name, 15);         // copy first 15 bytes (don't use strlen() or strcpy())
   mgh[31] = (unsigned char) 0xff;
 
-  strcpy (dest_name, "MULTI-GD.MGH"); // uCON does "set_suffix (dest_name, ".MGH");" instead
+  strcpy (dest_name, "MULTI-GD" /*.MGH"*/); // uCON does "set_suffix (dest_name, ".MGH");" instead
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
   q_fwrite (&mgh, 0, sizeof (mgh), dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);

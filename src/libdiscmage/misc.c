@@ -770,7 +770,10 @@ realpath (const char *path, char *full_path)
 {
 #define MAX_READLINKS 32
   char copy_path[FILENAME_MAX], got_path[FILENAME_MAX], *new_path = got_path,
-       *max_path, c;
+       *max_path;
+#if     defined __MSDOS__ || defined _WIN32
+  char c;
+#endif
 #ifdef  S_IFLNK
   char link_path[FILENAME_MAX];
   int readlinks = 0;
@@ -787,10 +790,13 @@ realpath (const char *path, char *full_path)
   strcpy (copy_path, path);
   path = copy_path;
   max_path = copy_path + FILENAME_MAX - 2;
+#if     defined __MSDOS__ || defined _WIN32
   c = toupper (*path);
   if (c >= 'A' && c <= 'Z' && path[1] == ':')
     ;
-  else if (*path != FILE_SEPARATOR)
+  else
+#endif
+  if (*path != FILE_SEPARATOR)
     {
       getcwd (new_path, FILENAME_MAX - 1);
       new_path += strlen (new_path);
@@ -829,7 +835,8 @@ realpath (const char *path, char *full_path)
                   if (new_path == got_path + 1)
                     continue;
                   // Handle ".." by backing up
-                  while ((--new_path)[-1] != FILE_SEPARATOR);
+                  while ((--new_path)[-1] != FILE_SEPARATOR)
+                    ;
                   continue;
                 }
             }
@@ -853,7 +860,12 @@ realpath (const char *path, char *full_path)
       if (n < 0)
         {
           // EINVAL means the file exists but isn't a symlink
-          if (errno != EINVAL)
+          if (errno != EINVAL
+#ifdef  __BEOS__
+              // make this function work for a mounted ext2 fs ("/:")
+              && errno != B_NAME_TOO_LONG
+#endif
+             )
             {
               // Make sure it's null terminated
               *new_path = 0;

@@ -487,3 +487,66 @@ while(	!access(buf,F_OK) &&
 
 return( ( x != 0 ) ? ( x + 1 ) : 0 );
 }
+
+
+int raw2iso(char *filename)
+{
+	int   seek_header, seek_ecc, sector_size;
+	long  i, source_length;
+	char  buf[2352], destfilename[4096];
+	const char SYNC_HEADER[12] = { 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0 };
+	FILE  *fdest, *fsource;
+
+
+   	strcpy(destfilename, filename);
+	newext(destfilename,".ISO");
+
+fsource = fopen(filename,"rb");
+//fdest = fopen(filebackup(destfilename),"wb");
+fdest = fopen(destfilename,"wb");
+
+fread(buf, sizeof(char), 16, fsource);
+
+if (memcmp(SYNC_HEADER, buf, 12))
+   {
+	seek_header = 8;		// Mode2/2336    // ** Mac: change to 0
+	seek_ecc = 280;
+	sector_size = 2336;
+   }
+else
+   {
+	switch(buf[15])
+	   {
+	   case 2:
+		seek_header = 24;	// Mode2/2352    // ** Mac: change to 16
+		seek_ecc = 280;
+		sector_size = 2352;
+		break;
+	   case 1:
+		seek_header = 16;	// Mode1/2352
+		seek_ecc = 288;
+		sector_size = 2352;
+		break;
+	   default:
+		printf("Error: Unsupported track mode");
+		return(-1);
+	   }
+   }
+
+fseek(fsource, 0L, SEEK_END);
+source_length = ftell(fsource)/sector_size;
+fseek(fsource, 0L, SEEK_SET);
+
+for(i = 0; i < source_length; i++)
+   {
+	fseek(fsource, seek_header, SEEK_CUR);
+	fread(buf, sizeof(char), 2048, fsource);    // ** Mac: change to 2056 for Mode2
+	fwrite(buf, sizeof(char), 2048, fdest);     // ** same as above
+	fseek(fsource, seek_ecc, SEEK_CUR);
+   }
+
+fclose(fdest);
+fclose(fsource);
+
+return(0);
+}

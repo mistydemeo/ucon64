@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SNES_HIROM 0x8000
 #define SNES_EROM 0x400000                      // "Extended" ROM, Hi or Lo
 
-typedef enum { SWC, GD3, UFO, FIG, MGD_SNES, SMC } snes_file_t;
+typedef enum { SWC = 1, GD3, UFO, FIG, MGD_SNES, SMC } snes_file_t;
 
 extern const st_getopt2_t snes_usage[];
 

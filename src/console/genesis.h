@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef GENESIS_H
 #define GENESIS_H
 
-typedef enum { SMD, BIN, MGD_GEN } genesis_file_t;
+typedef enum { SMD = 1, BIN, MGD_GEN } genesis_file_t;
 
 extern const st_getopt2_t genesis_usage[];
 

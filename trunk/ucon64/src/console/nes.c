@@ -7158,8 +7158,16 @@ nes_init (st_rominfo_t *rominfo)
   if (ucon64.crc32 == 0)
     ucon64.crc32 = q_fcrc32 (ucon64.rom, rominfo->buheader_len);
 
-  for (n = 0; nes_data[n].crc; n++)             // additional info
+  // additional info
+#if 1
+  n = binary_search ((unsigned char *) &nes_data, sizeof (nes_data_t),
+                     (unsigned char *) &(nes_data[0].crc) - (unsigned char *) &nes_data[0],
+                     0, sizeof nes_data / sizeof (nes_data_t) - 1, ucon64.crc32);
+  if (n != -1)
+#else
+  for (n = 0; nes_data[n].crc; n++)
     if (nes_data[n].crc == ucon64.crc32)
+#endif
       {
         if (nes_data[n].maker)
           rominfo->maker = NULL_TO_UNKNOWN_S (nes_maker[MIN (nes_data[n].maker, NES_MAKER_MAX - 1)]);

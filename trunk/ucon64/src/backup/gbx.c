@@ -2636,7 +2636,7 @@ gbx_usage (void)
           "                receives automatically when " OPTION_LONG_S "rom does not exist\n"
           "  " OPTION_LONG_S "xgbxs       send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "file=PORT\n"
           "                receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n"
-          "  " OPTION_LONG_S "xgbxb=<n>   send/receive 64kbits SRAM to/from GB Xchanger bank n\n"
+          "  " OPTION_LONG_S "xgbxb=n     send/receive 64kbits SRAM to/from GB Xchanger bank n\n"
           "                n can be a number from 0 to 15\n"
           "                " OPTION_LONG_S "file=PORT; receives automatically when " OPTION_LONG_S "rom does not exist\n"
 "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"

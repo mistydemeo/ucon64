@@ -1916,8 +1916,8 @@ ucon64_usage (int argc, char *argv[])
 
   printf ("USAGE: %s [OPTION(S)] [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE]\n\n"
            "  " OPTION_LONG_S "nbak        prevents backup files (*.bak)\n"
-           "  " OPTION_LONG_S "hd[=n]      force ROM has backup unit/emulator header with n Bytes size\n"
-           "                (default 512 Bytes)\n"
+           "  " OPTION_LONG_S "hd=n        force ROM has backup unit/emulator header with n Bytes size\n"
+           "NOTE: most backup units use a header with 512 Bytes size\n"
            "  " OPTION_LONG_S "nhd         force ROM has no backup unit/emulator header\n"
            "  " OPTION_LONG_S "int         force ROM is interleaved (2143)\n"
            "  " OPTION_LONG_S "nint        force ROM is not interleaved (1234)\n"

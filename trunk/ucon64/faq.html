@@ -280,6 +280,13 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    Now read the relevant section for the compiler you are using.<br>
 <br>
    <b>GCC</b> (including DJGPP and Cygwin)<br>
+   If you use Bash you may have to take one extra step before running make.
+   Because of a strange design decision by the authors of Bash, the environment
+   variable OSTYPE is not exported on all platforms. Because of that, on several
+   platforms (like FreeBSD and Mac OS X), you have to export it manually before
+   running make. You can do that with the following command:<br>
+   &nbsp;&nbsp; export OSTYPE<br>
+<br>
    If you have compiled uCON64 in the same directory before, first type:<br>
    &nbsp;&nbsp; make clean<br>
 <br>

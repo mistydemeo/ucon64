@@ -24,8 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
-#include "libdm_cfg.h"
 
 #if     defined __linux__ || defined __FreeBSD__ || \
         defined __BEOS__ || defined __solaris__ || HAVE_INTTYPES_H
@@ -129,6 +127,9 @@ typedef struct
 */
 extern dm_image_t *dm_open (const char *image_filename);
 extern int dm_close (dm_image_t *image);
+extern int dm_fread (dm_image_t *image);
+//extern int dm_fwrite (dm_image_t *image);
+extern int dm_fseek (dm_image_t *image);
 
 
 /*

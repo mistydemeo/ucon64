@@ -769,7 +769,7 @@ ucon64_console_probe (st_rominfo_t *rominfo)
 
   if (ucon64.console != UCON64_UNKNOWN)
     {
-      for (x = 0; probe[x].init != NULL; x++)
+      for (x = 0; probe[x].console != NULL; x++)
         if (probe[x].console == ucon64.console)
           {
             ucon64_flush (rominfo);
@@ -779,7 +779,7 @@ ucon64_console_probe (st_rominfo_t *rominfo)
     }
   else
     if (UCON64_TYPE_ISROM (ucon64.type))
-      for (x = 0; probe[x].init != NULL; x++)
+      for (x = 0; probe[x].console != NULL; x++)
         if (probe[x].auto_recognition)
           {
             ucon64_flush (rominfo);

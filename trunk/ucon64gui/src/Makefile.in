@@ -36,7 +36,7 @@ UCON64GUI_STD_H=ucon64_defines.h misc.h config.h ucon64gui.h configmenu.h
 
 misc.o: misc.h
 ucon64_gui.o: switches.c options.c $(UCON64GUI_STD_H)
-libhtmltk/libhtmltk.o: libhtmltk/libhtmltk.h libhtmltk/gtk.c libhtmltk/sdl.c libhtmltk/curses.c $(UCON64GUI_STD_H)
+libhtmltk/libhtmltk.o: libhtmltk/libhtmltk.h libhtmltk/libhtmltk_cfg.h libhtmltk/libhtmltk_defines.h libhtmltk/gtk.c libhtmltk/curses.c $(UCON64GUI_STD_H)
 configmenu.o: $(UCON64GUI_STD_H)
 console/gb.o: console/gb.h $(UCON64GUI_STD_H)
 console/n64.o: console/n64.h $(UCON64GUI_STD_H)

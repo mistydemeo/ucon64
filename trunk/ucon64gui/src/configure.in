@@ -58,7 +58,7 @@ AC_CHECK_FUNCS(getcwd mkdir rmdir socket strcspn strspn strstr strtol)
 
 AC_SUBST(DEFINE_DEBUG)
 AC_SUBST(DEFINE_ANSI_COLOR)
-AC_OUTPUT(Makefile config.h)
+AC_OUTPUT(Makefile config.h libhtmltk/libhtmltk_cfg.h)
 
 echo
 echo NOTE: On non-Linux systems you might need to use gmake instead of make

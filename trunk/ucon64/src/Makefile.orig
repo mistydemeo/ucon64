@@ -3,7 +3,8 @@
 CC=gcc
 
 CFLAGS=-I. -Wall -O3 -DHAVE_CONFIG_H
-LDFLAGS=-s -lz
+LDFLAGS=-s
+#LDFLAGS+=-lz
 
 OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
@@ -17,7 +18,7 @@ OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
         backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/mgd.o \
         backup/smc.o backup/smd.o backup/swc.o backup/dex.o backup/psxpblib.o \
         backup/mccl.o backup/lynxit.o backup/ffe.o
-ZLIB=1
+#ZLIB=1
 ifdef ZLIB
 OBJECTS+=unzip.o
 endif

@@ -109,18 +109,22 @@ Q33: <a href="#33">How do I enable or disable colors in the display output of
    Pass the option --without-zlib to the configure script if you don't want to
    enable gzip &amp; zip support. zlib is available from
    <a href="http://www.gzip.org/zlib/" target="_blank">http://www.gzip.org/zlib/</a>.<br>
-   If you use a Bash incompatible shell (like command.com or cmd.exe), copy 
-   Makefile.orig to Makefile and
-   config.h.orig to config.h.<br>
-   Now you can optionally open Makefile or config.h in an editor and 
-   change the defines. Then enter the following lines:<br>
+   If you use a Bash incompatible shell (like command.com or cmd.exe), copy
+   Makefile.orig to Makefile and config.h.orig to config.h.<br>
+   Now you can optionally open Makefile and config.h in an editor and
+   change the defines.<br>
+   Note that if you want to enable zlib support under DOS you must define the
+   constant ZLIB in config.h (remove the "//" in front of the line that defines
+   it) <i>and</i> in Makefile. In config.h you must also define HAVE_ZLIB_H
+   (remove the "//" in front of the line that defines it).<br>
+   Then enter the following lines:<br>
    &nbsp;&nbsp; make clean<br>
    &nbsp;&nbsp; make<br>
    &nbsp;&nbsp; make install<br>
 <br>
-   Under Unix the last command will ask for root's password, because uCON64 
-   needs to be setuid root for parallel port access. Under BeOS the last command 
-   will open a dialog window. Just follow the instructions. Under DOS and 
+   Under Unix the last command will ask for root's password, because uCON64
+   needs to be setuid root for parallel port access. Under BeOS the last command
+   will open a dialog window. Just follow the instructions. Under DOS and
    Windows (but also under Unix and BeOS) you can find the executable in the 
    directory where you ran make.<br>
    You could use UPX to compress the executable. UPX is available from

@@ -14,17 +14,17 @@
 /* #undef DEBUG */
 
 /* Define to 1 if you have the `basename' function. */
-#define HAVE_BASENAME 1
+/* #undef HAVE_BASENAME */
 
 /* Define to 1 if you have the <byteswap.h> header file. */
-#define HAVE_BYTESWAP_H 1
+/* #undef HAVE_BYTESWAP_H */
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #define HAVE_DIRENT_H 1
 
 /* Define to 1 if you have the `dirname' function. */
-#define HAVE_DIRNAME 1
+/* #undef HAVE_DIRNAME */
 
 /* Define to 1 if you don't have `vprintf' but do have `_doprnt.' */
 /* #undef HAVE_DOPRNT */
@@ -36,7 +36,7 @@
 #define HAVE_GETCWD 1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
-#define HAVE_INTTYPES_H 1
+/* #undef HAVE_INTTYPES_H */
 
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
@@ -54,7 +54,7 @@
 #define HAVE_RMDIR 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#define HAVE_STDINT_H 1
+/* #undef HAVE_STDINT_H */
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
@@ -95,7 +95,7 @@
 #define HAVE_VPRINTF 1
 
 /* Define to 1 if you have the <zlib.h> header file. */
-#define HAVE_ZLIB_H 1
+//#define HAVE_ZLIB_H 1
 
 /* enable support for DISC-based consoles (default: yes) */
 #define LIBDISCMAGE 1
@@ -122,7 +122,7 @@
 /* #undef TODO */
 
 /* build with gzip and zip support (default: yes) */
-#define ZLIB 1
+//#define ZLIB 1
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */

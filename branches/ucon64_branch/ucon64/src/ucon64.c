@@ -472,12 +472,6 @@ ucon64_exit (void)
       libng_close (ucon64.netgui);
 #endif
 
-#ifdef  GUI
-  if (ucon64.netgui_enabled)
-    if (ucon64.netgui)
-      libng_close (ucon64.netgui);
-#endif
-
   handle_registered_funcs ();
   fflush (stdout);
 }
@@ -608,17 +602,23 @@ main (int argc, char **argv)
 #ifdef  GUI
   // load libnetgui
   ucon64.netgui_enabled = ucon64_load_netgui ();
-
-  if (!stricmp (ucon64.argv[0], "ucon64gui") ||
-      !stricmp (ucon64.argv[0], "gucon64"))
-    libng_gui ("gtk");
 #endif
 
   // ucon64.dat_enabled and ucon64.discmage_enabled can affect the usage output
   if (argc < 2)
     {
-      ucon64_usage (argc, argv);
-      return 0;
+#ifdef  GUI
+      if (!stricmp (ucon64.argv[0], "ucon64gui") ||
+          !stricmp (ucon64.argv[0], "gucon64"))
+        libng_gui ("gtk");
+      else
+        {
+#endif
+          ucon64_usage (argc, argv);
+          return 0;
+#ifdef  GUI
+        }
+#endif
     }
 
   // getopt() is utilized to make uCON64 handle/parse cmdlines in a sane
@@ -1627,6 +1627,11 @@ ucon64_usage (int argc, char *argv[])
 
   if (!single)
     {
+#ifdef  GUI
+      ucon64_render_usage (libng_usage);
+      fputc ('\n', stdout);
+#endif
+
       ucon64_render_usage (ucon64_options_usage);
       fputc ('\n', stdout);
     

@@ -111,8 +111,6 @@ getarg (int argc, char *argv[], int pos)
 
 long
 getarg_intval (int argc, char **argv, char *argname)
-// get the integer value of a command line argument, for example the 4 in -xfalb4
-// TODO: make this work for integers larger than 9 (more than 1 digit)
 {
   int n, len = strlen (argname);
 
@@ -125,7 +123,7 @@ getarg_intval (int argc, char **argv, char *argname)
 
 int
 findlwr (char *str)
-// searches the string for ANY lowercase char
+//searches the string for ANY lowercase char
 {
   char *str2;
 

@@ -189,7 +189,7 @@ sf_write_rom (const char *filename, unsigned int parport)
   int game_no, romsize, size, address = 0, bytesread, bytessend = 0;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
-//  (void) write_rom_by_byte;
+  (void) write_rom_by_byte;
 
   if ((file = fopen (filename, "rb")) == NULL)
     {

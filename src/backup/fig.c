@@ -19,11 +19,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include <stdio.h>
-#include <stdlib.h>
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <stdio.h>
+#include <stdlib.h>
+
 #ifdef PARALLEL
 #include "misc.h"
 #include "ucon64.h"

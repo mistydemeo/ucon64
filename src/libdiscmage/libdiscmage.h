@@ -21,11 +21,39 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef LIBDISCMAGE_H
 #define LIBDISCMAGE_H
-#include <stdio.h>
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <stdio.h>
 #include "libdm_cfg.h"
+
+#if     defined __linux__ || defined __FreeBSD__ || \
+        defined __BEOS__ || defined __solaris__ || HAVE_INTTYPES_H
+#include <inttypes.h>
+#elif   defined __CYGWIN__
+#include <sys/types.h>
+#ifndef OWN_INTTYPES
+#define OWN_INTTYPES                            // signal that these are defined
+typedef u_int8_t uint8_t;
+typedef u_int16_t uint16_t;
+typedef u_int32_t uint32_t;
+typedef u_int64_t uint64_t;
+#endif // OWN_INTTYPES
+#else
+#ifndef OWN_INTTYPES
+#define OWN_INTTYPES                            // signal that these are defined
+typedef unsigned char uint8_t;
+typedef uint16_t int uint16_t;
+typedef unsigned int uint32_t;
+typedef unsigned long long int uint64_t;
+
+typedef signed char int8_t;
+typedef signed short int int16_t;
+typedef signed int int32_t;
+typedef signed long long int int64_t;
+#endif // OWN_INTTYPES
+#endif
+
 
 //  version of this libdiscmage
 extern const char *dm_version;
@@ -36,17 +64,17 @@ extern const char *dm_version;
 */
 typedef struct
 {
-  unsigned short global_current_track;  // current track
-  unsigned short number;
-  unsigned int position;
-  unsigned int mode;
-  unsigned int sector_size;
-  unsigned int sector_size_value;
-  unsigned int track_length;
-  unsigned int pregap_length;
-  unsigned int total_length;
-  unsigned int start_lba;
-  unsigned int filename_length;
+  uint16_t global_current_track;  // current track
+  uint16_t number;
+  uint32_t position;
+  uint32_t mode;
+  uint32_t sector_size;
+  uint32_t sector_size_value;
+  uint32_t track_length;
+  uint32_t pregap_length;
+  uint32_t total_length;
+  uint32_t start_lba;
+  uint32_t filename_length;
 } dm_track_t;
 
 
@@ -56,15 +84,15 @@ typedef struct
 /*
   image nfo
 */
-  unsigned int header_offset;
-  unsigned int header_position;
-  unsigned int image_length;
-  unsigned int version;
-  unsigned short sessions;      // # of sessions
-  unsigned short tracks;        // # of tracks
-  unsigned short remaining_sessions;    // sessions left
-  unsigned short remaining_tracks;      // tracks left
-  unsigned short global_current_session;        // current session
+  uint32_t header_offset;
+  uint32_t header_position;
+  uint32_t image_length;
+  uint32_t version;
+  uint16_t sessions;      // # of sessions
+  uint16_t tracks;        // # of tracks
+  uint16_t remaining_sessions;    // sessions left
+  uint16_t remaining_tracks;      // tracks left
+  uint16_t global_current_session;        // current session
 
 //  dm_track_t **track; // TODO make an array of this
   dm_track_t *track;
@@ -79,9 +107,9 @@ typedef struct
   int track_type, save_as_iso, pregap,convert, fulldata, cutall, cutfirst;
   char do_convert, do_cut;
 
-  unsigned int seek_header;
+  uint32_t seek_header;
   int type;
-  unsigned int seek_ecc;
+  uint32_t seek_ecc;
   char *common;
   char *cdrdao;
 } dm_image_t;
@@ -124,7 +152,7 @@ TODO:  dm_cdifix()   fix a cdi image
   dm_mktoc()  automagically generates toc sheets
   dm_mkcue()  automagically generates cue sheets
 */
-extern int dm_set_gauge (int (*gauge) (unsigned int, unsigned int));
+extern int dm_set_gauge (int (*gauge) (uint32_t, uint32_t));
 extern int dm_bin2iso (dm_image_t *image);
 extern int dm_cdirip (dm_image_t *image);
 extern int dm_nrgrip (dm_image_t *image);

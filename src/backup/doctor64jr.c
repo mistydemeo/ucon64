@@ -18,13 +18,13 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
 #include "misc.h"
 #include "quick_io.h"
 #include "ucon64.h"
@@ -182,7 +182,9 @@ void mainproc(void *arg) {
 // The following include-block should be moved to the other includes when the SRAM
 // code is finished. misc.h should be included after OS.h to avoid a warning.
 #ifdef  __unix__
+#ifdef  HAVE_UNISTD_H
 #include <unistd.h>             // usleep(), microseconds
+#endif
 #elif   defined __MSDOS__
 #include <dos.h>                // delay(), milliseconds
 #elif   defined __BEOS__

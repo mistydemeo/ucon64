@@ -20,13 +20,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
 #include "misc.h"
 #include "quick_io.h"
 #include "ucon64.h"

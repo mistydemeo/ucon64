@@ -58,10 +58,10 @@ Data Read Procedure:
 12. Wait for bit 5 of status port to become 0
 13. Go to step 1
 */
-#include <stdio.h>
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <stdio.h>
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"

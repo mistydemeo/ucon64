@@ -223,7 +223,7 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
     {
       printf ("WARNING: \"%s\" is meant for a console unknown to uCON64\n\n", fname);
       dat->console = UCON64_UNKNOWN;
-      dat->console_usage[0] = 0;
+      dat->console_usage = NULL;
     }
 
   return dat->console;

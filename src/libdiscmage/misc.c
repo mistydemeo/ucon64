@@ -20,24 +20,29 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifdef  HAVE_CONFIG_H
+#include "config.h"                             // HAVE_ZLIB_H
+#endif
 #include <stddef.h>
 #include <stdlib.h>
 #include <ctype.h>
+#ifdef  HAVE_DIRENT_H
 #include <dirent.h>
+#endif
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
 #include <sys/stat.h>
-#ifdef  HAVE_CONFIG_H
-#include "config.h"                             // HAVE_ZLIB_H
-#endif
 
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds
-#elif   defined __unix__
-#include <unistd.h>                             // usleep(), microseconds
+//#elif   defined __unix__
+//#include <unistd.h>                             // usleep(), microseconds
 #elif   defined __BEOS__
 #include <OS.h>                                 // snooze(), microseconds
 // Include OS.h before misc.h, because OS.h includes StorageDefs.h which
@@ -46,10 +51,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "misc.h"
 #include "map.h"
-
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #ifdef  __CYGWIN__                              // under Cygwin (gcc for Windows) we
 #define USE_POLL                                //  need poll() for kbhit(). poll()
@@ -202,7 +203,11 @@ mem_crc32 (unsigned int size, unsigned int crc32, const void *buffer)
 int
 ansi_init (void)
 {
+#ifndef WIN32
   int result = isatty (STDOUT_FILENO);
+#else
+  int result = 0; // no ANSI for WIN32
+#endif
 
   if (result)
     {
@@ -348,6 +353,7 @@ to_func (unsigned char *s, int size, int (*func) (int))
 }
 
 
+//#ifndef HAVE_STRCASESTR
 char *
 strcasestr2 (const char *str, const char *search)
 {
@@ -363,6 +369,7 @@ strcasestr2 (const char *str, const char *search)
 
   return NULL;
 }
+//#endif
 
 
 char *
@@ -617,6 +624,20 @@ strargv (int *argc, char ***argv, char *cmdline, int separator_char)
 #endif
   return NULL;
 }
+
+
+#ifdef  WIN32
+//  VC++ support
+int access (const char *fname, void *mode)
+{
+  struct stat fstate;
+  
+  if (!stat (fname, &fstate))
+    return 0;
+  
+  return -1;
+}
+#endif  // WIN32
 
 
 void
@@ -980,12 +1001,11 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
 
 
 int
-get_property_bool (const char *filename, const char *propname)
+get_property_bool (const char *filename, const char *propname, char divider)
 {
   char buf[MAXBUFSIZE];
   
-  if (!get_property2 (filename, propname, '=', buf, NULL))
-    get_property2 (filename, propname, ':', buf, NULL);
+  get_property2 (filename, propname, divider, buf, NULL);
 
   if (buf[0])
     switch (tolower (buf[0]))
@@ -1792,8 +1812,8 @@ ftell2 (FILE *file)
 
 
 #ifndef HAVE_BYTESWAP_H
-unsigned short int
-bswap_16 (unsigned short int x)
+uint16_t
+bswap_16 (uint16_t x)
 {
 #if 1
   unsigned char *ptr = (unsigned char *) &x, tmp;
@@ -1807,8 +1827,8 @@ bswap_16 (unsigned short int x)
 }
 
 
-unsigned int
-bswap_32 (unsigned int x)
+uint32_t
+bswap_32 (uint32_t x)
 {
 #if 1
   unsigned char *ptr = (unsigned char *) &x, tmp;
@@ -1826,8 +1846,8 @@ bswap_32 (unsigned int x)
 }
 
 
-unsigned long long int
-bswap_64 (unsigned long long int x)
+uint64_t 
+bswap_64 (uint64_t x)
 {
   unsigned char *ptr = (unsigned char *) &x, tmp;
   tmp = ptr[0];

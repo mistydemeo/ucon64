@@ -12,17 +12,21 @@
  * see psxpblib.h for details.
  *
  */
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <fcntl.h>
 #include <ctype.h>
+#ifdef  HAVE_DIRENT_H
 #include <dirent.h>
+#endif
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifdef  HAVE_UNISTD_H
 #include <unistd.h>             // ioperm() (libc5)
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
 #endif
 #include "ucon64.h"
 #include "misc.h"

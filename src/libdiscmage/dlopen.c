@@ -20,6 +20,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #ifdef  DJGPP
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sys/dxe.h>
 #elif   defined __unix__                       // also defined under Cygwin (and DJGPP)
 #include <dlfcn.h>
@@ -36,9 +40,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 #ifdef  DJGPP
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
 #ifdef  HAVE_ZLIB_H
 #include <zlib.h>
 #include "unzip.h"

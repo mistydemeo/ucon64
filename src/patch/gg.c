@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.21 2003-01-24 13:09:17 noisyb Exp $
+ * $Id: gg.c,v 1.22 2003-02-11 19:01:44 noisyb Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -49,16 +49,15 @@
 modified by 2001 - 2002 NoisyB (noisyb@gmx.net)
                    2002 dbjh
 */
-
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include "misc.h"
 #include "quick_io.h"
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "patch/gg.h"

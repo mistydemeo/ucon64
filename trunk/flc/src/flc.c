@@ -235,7 +235,7 @@ main (int argc, char *argv[])
     }
   (void) closedir (dp);
   chdir (cwd);
-  rmdir_r (temp);
+  rmdir2 (temp);
   if (file_p) file_p->next = NULL;
   file_p = file_0;
 

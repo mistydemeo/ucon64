@@ -97,7 +97,7 @@ receive_rom_info (unsigned char *buffer)
   hirom = byte & 1;                             // Caz (vgs '96) does (byte & 0x21) == 0x21 ? 1 : 0;
 
   address = 0x200;
-  for (n = 0; n < SWC_HEADER_LEN; n++)
+  for (n = 0; n < (int) SWC_HEADER_LEN; n++)
     {
 #ifdef  _WIN32
       /*

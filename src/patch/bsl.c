@@ -43,8 +43,8 @@ int
 bsl_apply (const char *mod, const char *bslname)
 {
   FILE *modfile, *bslfile;
-  unsigned char byte, addstr[10], datstr[10], buf[4096];
-  char modname[FILENAME_MAX];
+  unsigned char byte;
+  char addstr[10], datstr[10], buf[4096], modname[FILENAME_MAX];
   int dat, numdat, i, done = 0, add;
 
   strcpy (modname, mod);

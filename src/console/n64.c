@@ -456,7 +456,7 @@ n64_init (st_rominfo_t *rominfo)
   rominfo->header = &n64_header;
 
   // internal ROM name
-  strncpy (rominfo->name, &OFFSET (n64_header, 32), N64_NAME_LEN);
+  strncpy (rominfo->name, (char *) &OFFSET (n64_header, 32), N64_NAME_LEN);
   if (rominfo->interleaved)
     mem_swap (rominfo->name, N64_NAME_LEN);
   rominfo->name[N64_NAME_LEN] = 0;
@@ -518,7 +518,7 @@ doctor64jr_usage
 cd64_usage
 #endif
     ) : unknown_usage);
-    
+
   return result;
 }
 

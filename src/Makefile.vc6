@@ -29,7 +29,7 @@ OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
         backup/psxpblib.obj backup/mccl.obj backup/lynxit.obj backup/ffe.obj
 !ifdef ZLIB
 LDFLAGS=$(LDFLAGS) zlib.lib
-OBJECTS=$(OBJECTS) unzip.obj miscz.obj
+OBJECTS=$(OBJECTS) unzip.obj map.obj miscz.obj
 !endif
 
 
@@ -90,7 +90,8 @@ UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
 getopt.obj: getopt.h
 unzip.obj: unzip.h
 misc.obj: misc.h miscz.h config.h
-miscz.obj: map.c map.h miscz.h config.h
+map.obj: map.h
+miscz.obj: miscz.h map.h config.h
 quick_io.obj: quick_io.h misc.h config.h
 dlopen.obj: dlopen.h dxedll_pub.h config.h
 ucon64.obj: ucon64_opts.h ucon64_dat.h ucon64_lib.h dlopen.h getopt.h \

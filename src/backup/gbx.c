@@ -123,10 +123,10 @@ static void end_port (void);
 #define retry_time 3;
 static unsigned int time_out;
 static unsigned int port_8, port_9, port_a, port_b, port_c;
-static unsigned int bank_size;
+static int bank_size;
 static unsigned char bank;
 
-static unsigned int maxfilesize;
+static int maxfilesize;
 static const char *file_name = NULL;
 static unsigned char cmd, eeprom_type; // command
 static FILE *fptr;
@@ -138,7 +138,7 @@ static union mix_buffer
 mix;
 static unsigned int i, j, idx, gcrc;
 static unsigned char temp, mbc1_exp;
-static unsigned int filesize;
+static int filesize;
 
 static unsigned char header_ok, cart_type, rom_size, ram_size, sram_bank_num;
 static char port_type = 0;             // 0=epp, 1=spp
@@ -1744,7 +1744,7 @@ char
 check_card (void)
 {
   unsigned int sum = 0xd3;      // magic code = 0xd3
-  unsigned char cts[64];        // cart type string
+  char cts[64];                 // cart type string
   unsigned char check_header[48] = {
     0xce, 0xed, 0x66, 0x66, 0xcc, 0x0d, 0x00, 0x0b,
     0x03, 0x73, 0x00, 0x83, 0x00, 0x0c, 0x00, 0x0d,

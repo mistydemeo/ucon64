@@ -287,8 +287,9 @@ int
 gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
 {
   FILE *file = NULL;
-  unsigned char *buffer, *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12],
-                filenames[GD3_MAX_UNITS][8 + 1 + 3 + 1]; // +1 for period, +1 for ASCII-z;
+  unsigned char *buffer;
+  char *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12],
+       filenames[GD3_MAX_UNITS][8 + 1 + 3 + 1]; // +1 for period, +1 for ASCII-z;
   int num_units, i, send_header, x, split = 1, hirom = snes_get_snes_hirom();
 
   init_io (parport);
@@ -318,7 +319,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
       gd3_dram_unit[i].name[11] = 0;            // terminate string so we can print it (debug)
       // Use memcpy() instead of strcpy() so that the string terminator in
       //  names[i] won't be copied.
-      memcpy (gd3_dram_unit[i].name, strupr(names[i]), strlen (names[i]));
+      memcpy (gd3_dram_unit[i].name, strupr (names[i]), strlen ((const char *) names[i]));
 
       sprintf (filenames[i], "%s.078", names[i]); // should match with what code of -s does
       if (split)
@@ -358,7 +359,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
   gd_starttime = time (NULL);
 
   // Send the ROM to the hardware
-  if (gd3_send_prolog_bytes (4, "DSF3") == GD_ERROR)
+  if (gd3_send_prolog_bytes (4, (unsigned char *) "DSF3") == GD_ERROR)
     io_error ();
   if (gd3_send_prolog_byte ((unsigned char) num_units) == GD_ERROR)
     io_error ();
@@ -393,7 +394,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
       send_header = (i == 0) ? 1 : 0;
       if (gd3_send_unit_prolog (send_header, gd3_dram_unit[i].size) == GD_ERROR)
         io_error ();
-      if (gd3_send_prolog_bytes (11, gd3_dram_unit[i].name) == GD_ERROR)
+      if (gd3_send_prolog_bytes (11, (unsigned char *) gd3_dram_unit[i].name) == GD_ERROR)
         io_error ();
       if (send_header)
         {

@@ -138,14 +138,14 @@ sam2wav (const char *filename)
   if (!(fh = fopen (filename, "rb")))
     return -1;
 
-  strcpy (buf, filename);
-  set_suffix (buf, ".WAV");
+  strcpy ((char *) buf, filename);
+  set_suffix ((char *) buf, ".WAV");
 
-  if (!(fh2 = fopen (buf, "wb")))
+  if (!(fh2 = fopen ((char *) buf, "wb")))
     return -1;
   fread (buf, 1, 4, fh);
 
-  if (strncmp (buf, "MAME", 4) != 0)
+  if (strncmp ((char *) buf, "MAME", 4) != 0)
     return -1;
   fread (buf, 1, 4, fh);
 

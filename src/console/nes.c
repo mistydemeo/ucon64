@@ -4938,7 +4938,7 @@ static const st_nes_data_t nes_data[] = {
   {0xffef86c8, 126, 0, 0}
 };
 
-nes_file_t type;
+static nes_file_t type;
 
 static const st_usage_t ines_usage[] = {
     {NULL, NULL, "iNES header"},
@@ -5107,7 +5107,7 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
       if (chunk_header.id != id)
         {
           // (fseek (file, chunk_header.length, SEEK_CUR) != 0) // fseek() clears EOF indicator
-          if ((signed int) (pos + chunk_header.length) >= rom_size)
+          if ((int) (pos + chunk_header.length) >= rom_size)
             break;
           else
             pos += chunk_header.length;
@@ -5184,7 +5184,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
 {
 #define SIZE_INFO (99 + 10 + 99 + 3 * 2)        // possibly 3 lines in DOS text format
   int n, prev_n;
-  unsigned char buf[SIZE_INFO], number[80];     // 4 should be enough, but don't
+  char buf[SIZE_INFO], number[80];              // 4 should be enough, but don't
                                                 //  be too sensitive to errors
   memset (info, 0, sizeof (st_dumper_info_t));
   if (q_fread (buf, 0, SIZE_INFO, fname) == -1)
@@ -5514,7 +5514,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       // find uCON64 WRTR chunk and modify it if it is present
       do
         {
-          if (!strncmp (unif_chunk1->data, ucon64_name, strlen (ucon64_name)))
+          if (!strncmp ((const char *) unif_chunk1->data, ucon64_name, strlen (ucon64_name)))
             {
               unif_chunk1->length = strlen (unif_ucon64_sig) + 1;
               unif_chunk1->data = (char *) unif_ucon64_sig;
@@ -5643,7 +5643,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
         {
           if ((unif_chunk3 = read_chunk (unif_pck_ids[n], rom_buffer, 0)) == NULL)
             {
-              x = crc32 (0, unif_chunk1->data, unif_chunk1->length);
+              x = crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
               unif_chunk2.id = unif_pck_ids[n];
               unif_chunk2.length = 4;
 #ifdef  WORDS_BIGENDIAN
@@ -5654,7 +5654,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
             }
           else
             {
-              x = crc32 (0, unif_chunk1->data, unif_chunk1->length);
+              x = crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
 #ifdef  WORDS_BIGENDIAN
               x = bswap_32 (x);
 #endif
@@ -5677,7 +5677,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
         {
           if ((unif_chunk3 = read_chunk (unif_cck_ids[n], rom_buffer, 0)) == NULL)
             {
-              x = crc32 (0, unif_chunk1->data, unif_chunk1->length);
+              x = crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
               unif_chunk2.id = unif_cck_ids[n];
               unif_chunk2.length = 4;
 #ifdef  WORDS_BIGENDIAN
@@ -5688,7 +5688,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
             }
           else
             {
-              x = crc32 (0, unif_chunk1->data, unif_chunk1->length);
+              x = crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
 #ifdef  WORDS_BIGENDIAN
               x = bswap_32 (x);
 #endif
@@ -5768,7 +5768,8 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
 int
 nes_unif (st_rominfo_t *rominfo)
 {
-  unsigned char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *rom_buffer;
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  unsigned char *rom_buffer;
   FILE *srcfile, *destfile;
 
   if (type != INES && type != UNIF)
@@ -6048,7 +6049,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
     {                                           // no mapper specified, try autodetection
       if ((unif_chunk = read_chunk (MAPR_ID, rom_buffer, 0)) != NULL)
         {
-          if ((x = nes_mapper_number (unif_chunk->data)) == -1)
+          if ((x = nes_mapper_number ((const char *) unif_chunk->data)) == -1)
             {
               printf ("WARNING: Couldn't determine mapper number, writing \"0\"\n");
               x = 0;
@@ -6157,7 +6158,8 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
 int
 nes_ines (st_rominfo_t *rominfo)
 {
-  unsigned char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *rom_buffer;
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  unsigned char *rom_buffer;
   FILE *srcfile, *destfile;
 
   if (type == FFE)
@@ -6291,7 +6293,7 @@ nes_ineshd (st_rominfo_t *rominfo)
 int
 nes_dint (st_rominfo_t *rominfo)
 {
-  unsigned char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
 
   if (type != INES)
@@ -6403,7 +6405,8 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
   - .CHR: VROM data (optional)
 */
 {
-  unsigned char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *buffer;
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  unsigned char *buffer;
   int prg_size = 0, chr_size = 0, write_file = 0, size, bytes_read = 0, nparts = 0;
 
   if (type != PASOFAMI)
@@ -6544,7 +6547,7 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
 static int
 write_prm (st_ines_header_t *header, const char *fname)
 {
-  unsigned char prm[71] =                       // .PRM files are 71 bytes in size
+  unsigned char prm[72] =                       // .PRM files are 71 bytes in size (ASCII-z)
     "          SLR   S          X022A\r\n"
     "1234567890123456789012345678901234\r\n\x1a";
   int mapper;
@@ -6610,8 +6613,8 @@ write_prm (st_ines_header_t *header, const char *fname)
 int
 nes_s (st_rominfo_t *rominfo)
 {
-  unsigned char dest_name[FILENAME_MAX], *trainer_data = NULL,
-                *prg_data = NULL, *chr_data = NULL;
+  char dest_name[FILENAME_MAX];
+  unsigned char *trainer_data = NULL, *prg_data = NULL, *chr_data = NULL;
   int prg_size = 0, chr_size = 0, x;
   FILE *srcfile;
 
@@ -6888,9 +6891,9 @@ nes_init (st_rominfo_t *rominfo)
                 but other tools needn't use the same format. We can only be
                 sure that the string starts with the tool name.
               */
-              y = strlen (unif_chunk->data);
+              y = strlen ((const char *) unif_chunk->data);
               x = 0;
-              if (!strncmp (unif_chunk->data, ucon64_name, strlen (ucon64_name)))
+              if (!strncmp ((const char *) unif_chunk->data, ucon64_name, strlen (ucon64_name)))
                 {
                   while (x < y)
                     {
@@ -6911,7 +6914,7 @@ nes_init (st_rominfo_t *rominfo)
                       x++;
                     }
                 }
-              strcat (rominfo->misc, unif_chunk->data);
+              strcat (rominfo->misc, (const char *) unif_chunk->data);
               y = 1;
               free (unif_chunk);
             }
@@ -6986,25 +6989,25 @@ nes_init (st_rominfo_t *rominfo)
         {
           if ((unif_chunk = read_chunk (unif_prg_ids[n], rom_buffer, 0)) != NULL)
             {
-              crc = crc32 (crc, unif_chunk->data, unif_chunk->length);
+              crc = crc32 (crc, (unsigned char *) unif_chunk->data, unif_chunk->length);
               size += unif_chunk->length;
               if ((unif_chunk2 = read_chunk (unif_pck_ids[n], rom_buffer, 0)) == NULL)
                 str = "not available";
               else
                 {
-                  x = crc32 (0, unif_chunk->data, unif_chunk->length);
+                  x = crc32 (0, (unsigned char *) unif_chunk->data, unif_chunk->length);
 #ifdef  WORDS_BIGENDIAN
                   x = bswap_32 (x);
 #endif
-                  str =
+                  str = (char *)
 #ifdef  ANSI_COLOR
-                    ucon64.ansi_color ?
+                    (ucon64.ansi_color ?
                       ((x == *((int *) unif_chunk2->data)) ?
                         "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
                       :
-                      ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad");
+                      ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad"));
 #else
-                      (x == *((int *) unif_chunk2->data)) ? "ok" : "bad";
+                      ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad");
 #endif
                 }
               sprintf (buf, "PRG%X: %.4f Mb, checksum %s\n", n,
@@ -7020,25 +7023,25 @@ nes_init (st_rominfo_t *rominfo)
         {
           if ((unif_chunk = read_chunk (unif_chr_ids[n], rom_buffer, 0)) != NULL)
             {
-              crc = crc32 (crc, unif_chunk->data, unif_chunk->length);
+              crc = crc32 (crc, (unsigned char *) unif_chunk->data, unif_chunk->length);
               size += unif_chunk->length;
               if ((unif_chunk2 = read_chunk (unif_cck_ids[n], rom_buffer, 0)) == NULL)
                 str = "not available";
               else
                 {
-                  x = crc32 (0, unif_chunk->data, unif_chunk->length);
+                  x = crc32 (0, (unsigned char *) unif_chunk->data, unif_chunk->length);
 #ifdef  WORDS_BIGENDIAN
                   x = bswap_32 (x);
 #endif
-                  str =
+                  str = (char *)
 #ifdef  ANSI_COLOR
-                    ucon64.ansi_color ?
+                    (ucon64.ansi_color ?
                       ((x == *((int *) unif_chunk2->data)) ?
                         "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
                       :
-                      ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad");
+                      ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad"));
 #else
-                      (x == *((int *) unif_chunk2->data)) ? "ok" : "bad";
+                      ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad");
 #endif
                 }
               sprintf (buf, "CHR%X: %.4f Mb, checksum %s\n", n,
@@ -7199,8 +7202,8 @@ nes_init (st_rominfo_t *rominfo)
 
   // additional info
   key.crc32 = ucon64.crc32;
-  info = bsearch (&key, nes_data, sizeof nes_data / sizeof (st_nes_data_t),
-                  sizeof (st_nes_data_t), nes_compare);
+  info = (st_nes_data_t *) bsearch (&key, nes_data, sizeof nes_data / sizeof (st_nes_data_t),
+                                    sizeof (st_nes_data_t), nes_compare);
   if (info)
       {
         if (info->maker)
@@ -7244,8 +7247,8 @@ nes_fdsl (st_rominfo_t *rominfo, char *output_str)
 */
 {
   FILE *srcfile;
-  unsigned char buffer[58], name[16], str_list_mem[6], *str_list[4],
-                info_mem[MAXBUFSIZE], *info, line[80];
+  unsigned char buffer[58];
+  char name[16], str_list_mem[6], *str_list[4], info_mem[MAXBUFSIZE], *info, line[80];
   int disk, n_disks, file, n_files, start, size, x, header_len = 0;
 
   if (output_str == NULL)
@@ -7316,7 +7319,7 @@ nes_fdsl (st_rominfo_t *rominfo, char *output_str)
             }
 
           // get name, data location, and size
-          strncpy (name, buffer + 3, 8);
+          strncpy (name, (const char *) buffer + 3, 8);
           name[8] = 0;
           start = buffer[11] + 256 * buffer[12];
           size = buffer[13] + 256 * buffer[14];

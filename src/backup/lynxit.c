@@ -81,14 +81,8 @@ const st_usage_t lynxit_usage[] = {
 #define    DATA_LOAD   0x20
 #define    PAGE_STB    0x40
 
-unsigned int printer_port = 1;
-
-unsigned int print_data = 0;
-unsigned int print_ctrl = 0;
-unsigned int print_stat = 0;
-
-unsigned char cartname[32];
-unsigned char manufname[16];
+unsigned int printer_port = 1, print_data = 0, print_ctrl = 0, print_stat = 0;
+char cartname[32], manufname[16];
 
 //
 // CONTROL REGISTER DEFINITIONS
@@ -114,11 +108,7 @@ static void lynxit_write_control (unsigned char data);
 // Global control vars
 //
 
-int debug = FALSE;
-int quiet = FALSE;
-int verify = TRUE;
-
-
+static int debug = FALSE, quiet = FALSE, verify = TRUE;
 
 
 #define  MESSAGE(body) printf body
@@ -141,6 +131,7 @@ usage (void)
   MESSAGE (("        -h  = Print this text\n"));
 }
 #endif
+
 
 int
 ptr_port_init (unsigned int port)
@@ -402,7 +393,7 @@ cart_write_page (unsigned int cart, unsigned int page_number,
 
 
 int
-cart_analyse (cart)
+cart_analyse (int cart)
 {
   unsigned char image[MAX_PAGE_SIZE];
   unsigned int page = 0;
@@ -523,16 +514,14 @@ cart_analyse (cart)
 #define  MAX_ERRORS    16
 
 int
-cart_verify (unsigned char *filename)
+cart_verify (char *filename)
 {
-  unsigned char image1[MAX_PAGE_SIZE];
-  unsigned char image2[MAX_PAGE_SIZE];
-  unsigned int offset = 0;
+  unsigned char image1[MAX_PAGE_SIZE], image2[MAX_PAGE_SIZE];
+  int offset = 0;
   unsigned int loop = 0;
   FILE *fp;
   st_lnx_header_t header;
-  unsigned int result0 = MAX_ERRORS;
-  unsigned int result1 = MAX_ERRORS;
+  unsigned int result0 = MAX_ERRORS, result1 = MAX_ERRORS;
 
 
 #if 0
@@ -589,9 +578,8 @@ cart_verify (unsigned char *filename)
           MESSAGE (("Verifying BANK0: Page <%03d> of <256>", loop + 1));
           cart_read_page (BANK0, loop, header.page_size_bank0, image1);
           MESSAGE (("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"));
-          if (fread
-              (image2, sizeof (unsigned char), header.page_size_bank0,
-               fp) != header.page_size_bank0)
+          if (fread (image2, sizeof (unsigned char), header.page_size_bank0, fp)
+              != (size_t) header.page_size_bank0)
             {
               MESSAGE (("\nERROR    : Disk read operation failed on %s\n",
                         filename));
@@ -622,9 +610,8 @@ cart_verify (unsigned char *filename)
           MESSAGE (("Verifying BANK1: Page <%03d> of <256>", loop + 1));
           cart_read_page (BANK1, loop, header.page_size_bank1, image1);
           MESSAGE (("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"));
-          if (fread
-              (image2, sizeof (unsigned char), header.page_size_bank1,
-               fp) != header.page_size_bank1)
+          if (fread (image2, sizeof (unsigned char), header.page_size_bank1, fp)
+              != (size_t) header.page_size_bank1)
             {
               MESSAGE (("\nERROR    : Disk read operation failed on %s\n",
                         filename));
@@ -663,7 +650,7 @@ cart_verify (unsigned char *filename)
 
 
 int
-cart_read (unsigned char *filename)
+cart_read (char *filename)
 {
   unsigned char image[MAX_PAGE_SIZE];
 //  unsigned int page = 0;
@@ -700,9 +687,8 @@ cart_read (unsigned char *filename)
           MESSAGE (("Reading BANK0: Page <%03d> of <256>", loop + 1));
           cart_read_page (BANK0, loop, header.page_size_bank0, image);
           MESSAGE (("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"));
-          if (fwrite
-              (image, sizeof (unsigned char), header.page_size_bank0,
-               fp) != header.page_size_bank0)
+          if (fwrite (image, sizeof (unsigned char), header.page_size_bank0, fp)
+              != (size_t) header.page_size_bank0)
             {
               MESSAGE (("\nERROR    : Disk write operation failed on %s\n",
                         filename));
@@ -719,9 +705,8 @@ cart_read (unsigned char *filename)
           MESSAGE (("Reading BANK1: Page <%03d> of <256>", loop + 1));
           cart_read_page (BANK1, loop, header.page_size_bank1, image);
           MESSAGE (("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"));
-          if (fwrite
-              (image, sizeof (unsigned char), header.page_size_bank1,
-               fp) != header.page_size_bank1)
+          if (fwrite (image, sizeof (unsigned char), header.page_size_bank1, fp)
+              != (size_t) header.page_size_bank1)
             {
               MESSAGE (("\nERROR    : Disk write operation failed on %s\n",
                         filename));
@@ -743,7 +728,7 @@ cart_read (unsigned char *filename)
 
 
 int
-cart_write (unsigned char *filename)
+cart_write (char *filename)
 {
 #if 0
   DEBUG (("write_cart() called with <%s>\n\n", filename));
@@ -752,9 +737,8 @@ cart_write (unsigned char *filename)
 }
 
 
-
 int
-perform_test (unsigned char *testname)
+perform_test (char *testname)
 {
   if (strcmp (testname, "LOOPBACK") == 0)
     {
@@ -1049,6 +1033,7 @@ lynxit_read_rom (const char *filename, unsigned int parport)
   return lynxit_main (lynxit_argc, lynxit_argv);
 }
 
+
 #if 0
 int
 lynxit_write_rom (const char *filename, unsigned int parport)
@@ -1064,4 +1049,4 @@ lynxit_write_rom (const char *filename, unsigned int parport)
   return lynxit_main (lynxit_argc, lynxit_argv);
 }
 #endif
-#endif // PARALLEL 
+#endif // PARALLEL

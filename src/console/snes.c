@@ -177,7 +177,7 @@ static int snes_split, force_interleaved, bs_dump, rom_is_top,  // flag for inte
   called from snes_dint().
 */
 
-snes_file_t type;
+static snes_file_t type;
 
 static unsigned char gd3_hirom_8mb_map[GD3_HEADER_MAPSIZE] = {
   0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
@@ -388,7 +388,7 @@ snes_convert_sramfile (const void *header)
 {
   FILE *srcfile, *destfile;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], buf[32 * 1024];
-  int blocksize, byteswritten;
+  unsigned int blocksize, byteswritten;
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
@@ -577,7 +577,7 @@ reset_header (void *header)
       memset (header, 0, 0x1d0);
       memset ((unsigned char *) header + 0x1f0, 0, 16);
       ((unsigned char *) header)[0x1ec] = NSRT_HEADER_VERSION;
-      set_nsrt_checksum (header);
+      set_nsrt_checksum ((unsigned char *) header);
     }
   else
     memset (header, 0, SWC_HEADER_LEN);
@@ -591,7 +591,7 @@ snes_ffe (st_rominfo_t *rominfo, char *ext)
   int size;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
-  q_fread (&header, 0, rominfo->buheader_len > SWC_HEADER_LEN ?
+  q_fread (&header, 0, rominfo->buheader_len > (int) SWC_HEADER_LEN ?
                          SWC_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
   size = ucon64.file_size - rominfo->buheader_len;
@@ -655,7 +655,7 @@ snes_fig (st_rominfo_t *rominfo)
   int size, uses_DSP;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
-  q_fread (&header, 0, rominfo->buheader_len > FIG_HEADER_LEN ?
+  q_fread (&header, 0, rominfo->buheader_len > (int) FIG_HEADER_LEN ?
                          FIG_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
   size = ucon64.file_size - rominfo->buheader_len;
@@ -2099,7 +2099,7 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_siz
 }
 
 
-static char *
+static const char *
 matches_deviates (int equal)
 {
   return
@@ -3036,9 +3036,9 @@ score_hirom (unsigned char *rom_buffer, int rom_size)
 #endif
   if ((1 << (rom_buffer[0xff00 + 0xd7] - 7)) > 48)
     score -= 1;
-  if (!is_func (rom_buffer + 0xff00 + 0xb0, 6, isprint))
+  if (!is_func ((char *) rom_buffer + 0xff00 + 0xb0, 6, isprint))
     score -= 1;
-  if (!is_func (rom_buffer + 0xff00 + 0xc0, SNES_NAME_LEN, isprint))
+  if (!is_func ((char *) rom_buffer + 0xff00 + 0xc0, SNES_NAME_LEN, isprint))
     score -= 1;
 
   return score;
@@ -3068,9 +3068,9 @@ score_lorom (unsigned char *rom_buffer, int rom_size)
     score -= 4;
   if ((1 << (rom_buffer[0x7f00 + 0xd7] - 7)) > 48)
     score -= 1;
-  if (!is_func (rom_buffer + 0x7f00 + 0xb0, 6, isprint))
+  if (!is_func ((char *) rom_buffer + 0x7f00 + 0xb0, 6, isprint))
     score -= 1;
-  if (!is_func (rom_buffer + 0x7f00 + 0xc0, SNES_NAME_LEN, isprint))
+  if (!is_func ((char *) rom_buffer + 0x7f00 + 0xc0, SNES_NAME_LEN, isprint))
     score -= 1;
 
   return score;

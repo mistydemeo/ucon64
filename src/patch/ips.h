@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef IPS_H
 #define IPS_H
+extern const st_usage_t ips_usage[];
 extern int ips_apply (const char *destname, const char *ipsname);
 extern int ips_create (const char *orgname, const char *modname);
-extern const st_usage_t ips_usage[];
 #endif /* IPS_H */

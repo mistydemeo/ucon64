@@ -31,7 +31,7 @@ extern const st_usage_t ucon64_dat_usage[];
 typedef struct
 {
   uint32_t crc32;                               // "official" CRC32 checksum of the ROM
-  uint8_t console;                              // integer for the console system
+  int8_t console;                               // integer for the console system
   char name[2 * 80];                            // name of the ROM
   const char *maker;                            // maker of the ROM
   const char *country;                          // country of the ROM

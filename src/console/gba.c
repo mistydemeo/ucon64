@@ -39,7 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/fal.h"
 
 static int gba_chksum (st_rominfo_t *rominfo);
-static int gbautil (const unsigned char *filein, const unsigned char *fileout);
+static int gbautil (const char *filein, const char *fileout);
 
 const st_usage_t gba_usage[] =
   {
@@ -255,7 +255,7 @@ gba_sram (void)
   set_suffix (buf, ".TMP");
   rename (dest_name, buf);
 
-  gbautil (buf, dest_name);
+  gbautil ((const char *) buf, (const char *) dest_name);
 
   if (access (dest_name, F_OK) != 0)
     rename (buf, dest_name);
@@ -358,12 +358,12 @@ gba_init (st_rominfo_t *rominfo)
   rominfo->header = &gba_header;
 
   // internal ROM name
-  strncpy (rominfo->name, &OFFSET (gba_header, 0xa0), 0x10);
+  strncpy (rominfo->name, (const char *) &OFFSET (gba_header, 0xa0), 0x10);
   rominfo->name[0x10] = 0;
 
   //ROM maker
 //  sprintf (rominfo->maker, "%c%c", OFFSET (gba_header, 0xb0), OFFSET (gba_header, 0xb1));
-  rominfo->maker = &OFFSET (gba_header, 0xb0);
+  rominfo->maker = (const char *) &OFFSET (gba_header, 0xb0);
 
   // ROM country
   value = OFFSET (gba_header, 0xaf);
@@ -572,7 +572,7 @@ gba_multi (int truncate_size, char *fname)
 
 
 int
-gbautil (const unsigned char *filein, const unsigned char *fileout)
+gbautil (const char *filein, const char *fileout)
 /* gbautil version 1.1
  * SRAM, Wait State Patch, and FF Trimming Utility for Game Boy Advance
  *
@@ -817,11 +817,11 @@ static waitstate waitstates[] = {
 
   bufferptr = buffer;
   bufferptr += 160;
-  strncpy (title, bufferptr, 12);
+  strncpy ((char *) title, (const char *) bufferptr, 12);
   title[12] = 0;
 //    printf("title = %s\n", title);
   bufferptr += 12;
-  strncpy (mkcode, bufferptr, 4);
+  strncpy ((char *) mkcode, (const char *) bufferptr, 4);
   mkcode[4] = 0;
 //    printf("gamecode = %s\n", mkcode);
   bufferptr += 4;

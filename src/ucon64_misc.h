@@ -193,7 +193,7 @@ extern void remove_temp_file (void);
 extern char *ucon64_output_fname (char *requested_fname, int flags);
 
 extern int ucon64_fhexdump (const char *filename, int start, int len);
-extern unsigned int ucon64_filefile (const char *filename1, int start1, const char *filename2, int start2, int similar);
+extern int ucon64_filefile (const char *filename1, int start1, const char *filename2, int start2, int similar);
 
 //  wrapper for misc.c/gauge()
 extern int ucon64_gauge (time_t init_time, int pos, int size);

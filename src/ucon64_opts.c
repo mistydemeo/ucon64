@@ -115,9 +115,7 @@ ucon64_switches (int c, const char *optarg)
 #else
 #if     defined __MSDOS__
         "discmage.dxe";
-#elif   defined __CYGWIN__
-        "discmage.dll";
-#elif   defined _WIN32
+#elif   defined __CYGWIN__ || defined _WIN32
         "discmage.dll";
 #elif   defined __unix__ || defined __BEOS__
         "libdiscmage.so";
@@ -589,8 +587,7 @@ ucon64_options (int c, const char *optarg)
 #ifdef  PARALLEL
   int enableRTS = -1;                           // for UCON64_XSWC & UCON64_XSWC2
 #endif
-  int value = 0, x = 0, result = 0;
-  unsigned int padded;
+  int value = 0, x = 0, result = 0, padded;
   char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        *p = NULL;
   struct stat fstate;
@@ -876,7 +873,7 @@ ucon64_options (int c, const char *optarg)
     case UCON64_BIN2ISO:
       if (ucon64.discmage_enabled)
         {
-          libdm_set_gauge ((void *) &libdm_gauge);
+          libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
           libdm_bin2iso (ucon64.image);
         }
       else
@@ -886,7 +883,7 @@ ucon64_options (int c, const char *optarg)
     case UCON64_ISOFIX:
       if (ucon64.discmage_enabled)
         {
-          libdm_set_gauge ((void *) &libdm_gauge);
+          libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
           libdm_isofix (ucon64.image, strtol (optarg, NULL, 10));
         }
       else
@@ -896,7 +893,7 @@ ucon64_options (int c, const char *optarg)
     case UCON64_RIP:
       if (ucon64.discmage_enabled)
         {
-          libdm_set_gauge ((void *) &libdm_gauge);
+          libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
           libdm_rip (ucon64.image);
         }
       else

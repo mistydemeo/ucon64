@@ -61,9 +61,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/poll.h>                           //  is available on Linux, not on
 #endif                                          //  BeOS. DOS already has kbhit()
 
-// map code should be included unconditionally (needed by gz/zip & DLL (DXE) code)
-#include "map.c"
-
 #if     (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
 #include <termios.h>
 typedef struct termios tty_t;
@@ -261,17 +258,17 @@ vprintf2 (const char *format, va_list argptr)
             }
           else if (memcmp (ptr, "\x1b[01;31m", 8) == 0)
             {
-              new_attr = FOREGROUND_RED | FOREGROUND_INTENSITY;
+              new_attr = FOREGROUND_INTENSITY | FOREGROUND_RED;
               n_ctrl = 8;
             }
           else if (memcmp (ptr, "\x1b[01;32m", 8) == 0)
             {
-              new_attr = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+              new_attr = FOREGROUND_INTENSITY | FOREGROUND_GREEN;
               n_ctrl = 8;
             }
           else if (memcmp (ptr, "\x1b[01;33m", 8) == 0) // bright yellow
             {
-              new_attr = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+              new_attr = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN;
               n_ctrl = 8;
             }
           else if (memcmp (ptr, "\x1b[31;41m", 8) == 0)
@@ -327,7 +324,7 @@ printf2 (const char *format, ...)
 
   va_start (argptr, format);
   n_chars = vprintf2 (format, argptr);
-  va_end (argptr);      
+  va_end (argptr);
   return n_chars;
 #define printf  printf2
 }
@@ -472,9 +469,9 @@ toprint2 (int c)
 
 
 int
-is_func (unsigned char *s, int size, int (*func) (int))
+is_func (char *s, int size, int (*func) (int))
 {
-  unsigned char *p = s;
+  char *p = s;
 
   for (; size >= 0; p++, size--)
     if (!func (*p))
@@ -485,9 +482,9 @@ is_func (unsigned char *s, int size, int (*func) (int))
 
 
 char *
-to_func (unsigned char *s, int size, int (*func) (int))
+to_func (char *s, int size, int (*func) (int))
 {
-  unsigned char *p = s;
+  char *p = s;
 
   for (; size > 0; p++, size--)
     *p = func (*p);
@@ -568,7 +565,8 @@ strtrim (char *str)
 int
 memwcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildcard)
 {
-  const unsigned char *a = add, *a_w = add_with_wildcards;
+  const unsigned char *a = (const unsigned char *) add,
+                      *a_w = (const unsigned char *) add_with_wildcards;
 
   while (n)
     {
@@ -587,7 +585,7 @@ memwcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildca
 void *
 mem_swap (void *add, uint32_t n)
 {
-  unsigned char *a = add, c;
+  unsigned char *a = (unsigned char *) add, c;
 
   for (; n > 1; a += 2, n -= 2)
     {
@@ -606,7 +604,7 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
 {
   uint32_t pos;
   char buf[MAXBUFSIZE];
-  const unsigned char *p = mem;
+  const unsigned char *p = (const unsigned char *) mem;
 
   *buf = 0;
   for (pos = 0; pos < n; pos++, p++)
@@ -1392,28 +1390,25 @@ gauge (time_t init_time, int pos, int size)
 }
 
 
-#if     defined __CYGWIN__
+#ifdef  __CYGWIN__
 /*
   Weird problem with combination Cygwin uCON64 exe and cmd.exe (Bash is ok):
   When a string with "e (e with diaeresis, one character) is read from an
   environment variable, the character isn't the right character for accessing
   the file system. We fix this.
   TODO: fix the same problem for other non-ASCII characters (> 127).
-  UPDATE: The problem seems to occur also when reading from files instead of
-          the environment. Cygwin probably uses a different character set than
-          Windows. This problem is present under cmd.exe *and* Bash.
 */
 char *
 fix_character_set (char *value)
 {
   int l = strlen (value);
-    
+
   change_mem (value, l, "\x89", 1, 0, 0, "\xeb", 1, 0); // e diaeresis
   change_mem (value, l, "\x84", 1, 0, 0, "\xe4", 1, 0); // a diaeresis
   change_mem (value, l, "\x8b", 1, 0, 0, "\xef", 1, 0); // i diaeresis
   change_mem (value, l, "\x94", 1, 0, 0, "\xf6", 1, 0); // o diaeresis
   change_mem (value, l, "\x81", 1, 0, 0, "\xfc", 1, 0); // u diaeresis
-  
+
   return value;
 }
 #endif
@@ -1506,7 +1501,7 @@ getenv2 (const char *variable)
         }
     }
 
-#ifdef __CYGWIN__
+#ifdef  __CYGWIN__
   /*
     Under certain circumstances Cygwin's runtime system returns "/" as value of
     HOME while that var has not been set. To specify a root dir a path like
@@ -1514,9 +1509,7 @@ getenv2 (const char *variable)
   */
   if (!strcmp (variable, "HOME") && !strcmp (value, "/"))
     getcwd (value, FILENAME_MAX);
-#endif
 
-#if     defined __CYGWIN__
   return fix_character_set (value);
 #else
   return value;
@@ -1742,10 +1735,8 @@ set_tty (tty_t *param)
       exit (100);
     }
 }
-#endif
 
 
-#ifndef __MSDOS__
 /*
   This code compiles with DJGPP, but is not neccesary. Our kbhit() conflicts
   with DJGPP's one, so it won't be used for that function. Perhaps it works
@@ -1792,13 +1783,12 @@ deinit_conio (void)
       oldtty_set = 0;
     }
 }
-#endif // #ifndef __MSDOS__
 
 
 #if     defined __CYGWIN__ && !defined USE_POLL
 #warning kbhit() does not work properly in Cygwin executable if USE_POLL is not defined
 #endif
-#ifndef __MSDOS__                               // this kbhit() conflicts with DJGPP's one
+// this kbhit() conflicts with DJGPP's one
 int
 kbhit (void)
 {
@@ -1831,7 +1821,7 @@ kbhit (void)
 #endif
 }
 #endif                                          // !__MSDOS__
-#endif                                          // __unix__ || __BEOS__
+#endif                                          // __unix__ || __BEOS__ || AMIGA
 
 
 #if     defined __unix__ && !defined __MSDOS__
@@ -2043,7 +2033,7 @@ q_fbackup (const char *filename, int mode)
 }
 
 
-unsigned int
+int
 q_fcrc32 (const char *filename, int start)
 {
   unsigned int count, crc = 0;                  // don't name it crc32 to avoid

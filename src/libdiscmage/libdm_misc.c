@@ -100,10 +100,10 @@ writewavheader (FILE * fdest, int track_length)
 
   memset (&wav_header, 0, sizeof (wav_header_t));
 
-  strcpy (wav_header.magic, "RIFF");
-  strcpy (wav_header.type, "WAVE");
-  strcpy (wav_header.fmt, "fmt ");
-  strcpy (wav_header.data, "data");
+  strcpy ((char *) wav_header.magic, "RIFF");
+  strcpy ((char *) wav_header.type, "WAVE");
+  strcpy ((char *) wav_header.fmt, "fmt ");
+  strcpy ((char *) wav_header.data, "data");
 
   wav_header.header_length = me2le_32 (16);
   wav_header.format = me2le_16 (1);
@@ -183,9 +183,9 @@ lba_to_msf (int lba, dm_msf_t *mp)
     }
   else
     {
-      mp->cdmsf_min0 = -1;
-      mp->cdmsf_sec0 = -1;
-      mp->cdmsf_frame0 = -1;
+      mp->cdmsf_min0 = (uint8_t) -1;
+      mp->cdmsf_sec0 = (uint8_t) -1;
+      mp->cdmsf_frame0 = (uint8_t) -1;
 
       return (FALSE);
     }
@@ -604,7 +604,7 @@ dm_isofix (const dm_image_t * image, int start_lba)
   fclose (header);
 
   // add padding data to iso image
-  if (last_pos > (signed int) (start_lba * track->sector_size))
+  if (last_pos > (int) (start_lba * track->sector_size))
     {
       fprintf (stderr, "ERROR: LBA value is too small\n"
                "       It should be at least %d for current ISO image (probably greater)",

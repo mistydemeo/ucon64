@@ -106,9 +106,9 @@ swan_init (st_rominfo_t *rominfo)
     SWAN_MAKER_MAX - 1)]);
 
   // misc stuff
-  sprintf (buf, "Minimum supported system: %s",
+  sprintf ((char *) buf, "Minimum supported system: %s",
            (!OFFSET (swan_header, 1) ? "WS Monochrome" : "WS Color"));
-  strcat (rominfo->misc, buf);
+  strcat (rominfo->misc, (const char *) buf);
 
 /*
 Byte2 - Cartridge ID number for this developer

@@ -503,7 +503,7 @@ gameboy_init (st_rominfo_t *rominfo)
   rominfo->header = &gameboy_header;
 
   // internal ROM name
-  strncpy (rominfo->name, &OFFSET (gameboy_header, 0x34), 20);
+  strncpy (rominfo->name, (const char *) &OFFSET (gameboy_header, 0x34), 20);
   rominfo->name[20] = 0;                        // terminate string
 
   // ROM maker

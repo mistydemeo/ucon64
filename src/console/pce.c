@@ -729,8 +729,8 @@ pcengine_init (st_rominfo_t *rominfo)
   ucon64.crc32 = q_fcrc32 (ucon64.rom, rominfo->buheader_len);
   // additional info
   key.crc32 = ucon64.crc32;
-  info = bsearch (&key, pce_data, sizeof pce_data / sizeof (st_pce_data_t),
-                  sizeof (st_pce_data_t), pce_compare);
+  info = (st_pce_data_t *) bsearch (&key, pce_data, sizeof pce_data / sizeof (st_pce_data_t),
+                                    sizeof (st_pce_data_t), pce_compare);
   if (info)
     {
       if (info->maker)

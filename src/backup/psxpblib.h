@@ -119,8 +119,7 @@ typedef struct
   unsigned char type;
   unsigned char length;
   unsigned char data[PSX_MAX_DATA];
-}
-PSX_CON_BUF;
+} PSX_CON_BUF;
 
 typedef struct
 {
@@ -132,8 +131,7 @@ typedef struct
   unsigned char state;          /* PSX_MCB_STAT_* or unknown */
   unsigned char linktype;       /* PSX_MCB_LTYPE_* or unknowm */
   unsigned char next;           /* 0 to 14 */
-}
-PSX_MCB_INFO_DIR;
+} PSX_MCB_INFO_DIR;
 
 typedef struct
 {
@@ -142,8 +140,7 @@ typedef struct
   unsigned char blocks;
   unsigned char icon_valid;
   unsigned char icon_frames;
-}
-PSX_MCB_INFO_DAT;
+} PSX_MCB_INFO_DAT;
 
 typedef struct
 {
@@ -160,8 +157,7 @@ typedef struct
   unsigned char next;
   unsigned char icon_valid;
   unsigned char icon_frames;
-}
-PSX_MCB_INFO;
+} PSX_MCB_INFO;
 
 
 /* sets clock for conport connected to parallel port base */
@@ -204,17 +200,17 @@ void psx_controller_vshock (int base, int conport, int tap, int delay,
                             int shock, int rumble);
 
 /* Reads a single frame (128 bytes) from Memory Card on conport base:tap */
-char *psx_memcard_read_frame (int base, int conport, int tap, int delay,
-                              int frame);
+unsigned char *psx_memcard_read_frame (int base, int conport, int tap, int delay,
+                                       int frame);
 /* Writes a single frame (128 bytes) to Memory Card on conport base:tap */
 int psx_memcard_write_frame (int base, int conport, int tap, int delay,
-                             int frame, char *data_f);
+                             int frame, unsigned char *data_f);
 /* Reads a single block (64 frames) from Memory Card on conport base:tap */
-char *psx_memcard_read_block (int base, int conport, int tap, int delay,
-                              int block);
+unsigned char *psx_memcard_read_block (int base, int conport, int tap, int delay,
+                                       int block);
 /* Writes a single block (64 frames) to Memory Card on conport base:tap */
 int psx_memcard_write_block (int base, int conport, int tap, int delay,
-                             int block, char *data_b);
+                             int block, unsigned char *data_b);
 
 /* Reads the info associated with block from the directory */
 PSX_MCB_INFO_DIR *psx_mcb_read_dir (int base, int conport, int tap, int delay,

@@ -441,7 +441,22 @@ snes_ufos (st_rominfo_t *rominfo)
 
 
 static void
-set_nsrt_info (st_rominfo_t *rominfo, void *header)
+set_nsrt_checksum (unsigned char *header)
+{
+  int n;
+  char checksum = -1;                           // byte => no need to take the modulus of 256
+
+  header[0x1ee] = 0;
+  header[0x1ef] = 0;
+  for (n = 0x1d0; n <= 0x1ef; n++)
+    checksum += header[n];
+  header[0x1ee] = checksum;
+  header[0x1ef] = ~checksum;
+}
+
+
+static void
+set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header)
 /*
   This function will write an NSRT header if the user specified a controller
   type, but only if the checksum is correct. We write a complete NSRT header
@@ -476,7 +491,6 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
 */
 {
   int x;
-  char checksum = -1;                           // byte => no need to take the modulus of 256
 
   if ((UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
       && !nsrt_header)                          // don't overwrite these values
@@ -487,12 +501,12 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
           return;
         }
 
-      ((unsigned char *) header)[0x1d0] = snes_header.country | (snes_hirom ? 0x20 : 0x10);
-      memcpy (((unsigned char *) header) + 0x1d1, &snes_header.name, SNES_NAME_LEN);
-      ((unsigned char *) header)[0x1e6] = snes_header.checksum_low;
-      ((unsigned char *) header)[0x1e7] = snes_header.checksum_high;
-      memcpy (((unsigned char *) header) + 0x1e8, "NSRT", 4);
-      ((unsigned char *) header)[0x1ec] = NSRT_HEADER_VERSION;
+      header[0x1d0] = snes_header.country | (snes_hirom ? 0x20 : 0x10);
+      memcpy (header + 0x1d1, &snes_header.name, SNES_NAME_LEN);
+      header[0x1e6] = snes_header.checksum_low;
+      header[0x1e7] = snes_header.checksum_high;
+      memcpy (header + 0x1e8, "NSRT", 4);
+      header[0x1ec] = NSRT_HEADER_VERSION;
     }
 
   if (UCON64_ISSET (ucon64.controller))
@@ -505,7 +519,7 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
           printf ("WARNING: Invalid value for controller in port 1, using \"0\"\n");
           x = 0;
         }
-      ((unsigned char *) header)[0x1ed] = (unsigned char) (x << 4);
+      header[0x1ed] = x << 4;
     }
   if (UCON64_ISSET (ucon64.controller2))
     {
@@ -517,20 +531,12 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
           printf ("WARNING: Invalid value for controller in port 2, using \"0\"\n");
           x = 0;
         }
-      ((unsigned char *) header)[0x1ed] |= x;
+      header[0x1ed] |= x;
     }
 
   // set the checksum bytes
   if (UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
-    {
-      ((unsigned char *) header)[0x1ee] = 0;
-      ((unsigned char *) header)[0x1ef] = 0;
-
-      for (x = 0x1d0; x <= 0x1ef; x++)
-        checksum += ((unsigned char *) header)[x];
-      ((unsigned char *) header)[0x1ee] = checksum;
-      ((unsigned char *) header)[0x1ef] = ~checksum;
-    }
+    set_nsrt_checksum (header);
 }
 
 
@@ -543,6 +549,7 @@ reset_header (void *header)
       memset (header, 0, 0x1d0);
       memset (header + 0x1f0, 0, 16);
       ((unsigned char *) header)[0x1ec] = NSRT_HEADER_VERSION;
+      set_nsrt_checksum (header);
     }
   else
     memset (header, 0, SMC_HEADER_LEN);
@@ -579,7 +586,7 @@ snes_ffe (st_rominfo_t *rominfo, char *ext, int smc)
   header.id2 = 0xbb;
   header.type = 4;
 
-  set_nsrt_info (rominfo, &header);
+  set_nsrt_info (rominfo, (unsigned char *) &header);
 
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ext);
@@ -665,7 +672,7 @@ snes_fig (st_rominfo_t *rominfo)
         }
     }
 
-  set_nsrt_info (rominfo, &header);
+  set_nsrt_info (rominfo, (unsigned char *) &header);
 
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".FIG");
@@ -971,7 +978,7 @@ snes_gd3 (st_rominfo_t *rominfo)
             }
         }
 
-      set_nsrt_info (rominfo, &header);
+      set_nsrt_info (rominfo, (unsigned char *) &header);
 
       ucon64_fbackup (NULL, dest_name);
       q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
@@ -1018,7 +1025,7 @@ snes_gd3 (st_rominfo_t *rominfo)
           header[0x28] = 0x40;
         }
 
-      set_nsrt_info (rominfo, &header);
+      set_nsrt_info (rominfo, (unsigned char *) &header);
 
       ucon64_fbackup (NULL, dest_name);
       q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
@@ -1813,10 +1820,6 @@ snes_init (st_rominfo_t *rominfo)
             }
         }
     }
-  /*
-    TODO: Test how unreliable bit 0 of snes_header.map_type really is for
-    determining if the ROM is HiROM (bit 0 == 1 => HiROM).
-  */
 
   if (header.id1 == 0xaa && header.id2 == 0xbb && header.type == 4)
     type = SWC;
@@ -2053,7 +2056,13 @@ snes_init (st_rominfo_t *rominfo)
 
   // do the following after the call to snes_chksum() which might call
   //  snes_deinterleave() which might change the value of snes_hirom
-  sprintf (buf, "HiROM: %s\n", !snes_hirom ? "No" : "Yes");
+#ifndef DEBUG
+  sprintf (buf, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
+#else
+  sprintf (buf, "HiROM: %s (internal header: %s)\n",
+                snes_hirom ? "Yes" : "No",
+                snes_header.map_type & 1 ? "Yes" : "No");
+#endif
   strcat (rominfo->misc, buf);
 
   if (!bs_dump)

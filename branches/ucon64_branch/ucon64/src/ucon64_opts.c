@@ -76,7 +76,11 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_GUI:
       if (ucon64.netgui_enabled)
         if (optarg)
-          ucon64.netgui = libng_open (optarg, NG_SERVER);
+          {
+            ucon64.netgui = libng_open (optarg, NG_SERVER);
+            libng_gui (ucon64.netgui);
+            libng_close (ucon64.netgui);
+          }
       exit (0);
 #endif
     /*

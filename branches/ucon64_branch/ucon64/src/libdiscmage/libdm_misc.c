@@ -561,7 +561,7 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
   // verify header or sheet informations
   for (t = 0; t < image->tracks; t++)
     {
-      dm_track_t track2;
+//      dm_track_t track2;
       dm_track_t *track = (dm_track_t *) &image->track[t];
 
       fseek (fh, track->track_start +

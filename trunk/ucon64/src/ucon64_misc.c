@@ -126,6 +126,7 @@ BuildCRCTable ()
     }
 }
 
+
 unsigned long
 CalculateBufferCRC (unsigned int count, unsigned long crc, void *buffer)
 {
@@ -142,6 +143,7 @@ CalculateBufferCRC (unsigned int count, unsigned long crc, void *buffer)
   return crc;
 }
 
+
 unsigned long
 CalculateFileCRC (FILE * file)
 {
@@ -156,6 +158,7 @@ CalculateFileCRC (FILE * file)
 
   return crc ^= 0xFFFFFFFFL;
 }
+
 
 unsigned long
 fileCRC32 (const char *filename, long start)
@@ -174,6 +177,7 @@ fileCRC32 (const char *filename, long start)
   return val;
 }
 
+
 /*
   like zlib/crc32(); uCON64 has it's own crc calc. stuff
   this is just a wrapper
@@ -187,6 +191,7 @@ unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size)
   return CalculateBufferCRC ((unsigned int) size, crc, (void *) prg_code);
 }
 */
+
 
 const char *
 ucon64_fbackup (char *move_name, const char *filename)
@@ -202,6 +207,7 @@ ucon64_fbackup (char *move_name, const char *filename)
 
   return filebackup (move_name, filename);
 }
+
 
 size_t
 filepad (const char *filename, long start, long unit)
@@ -223,6 +229,7 @@ filepad (const char *filename, long start, long unit)
     }
   return size;
 }
+
 
 long
 filetestpad (const char *filename)
@@ -299,6 +306,7 @@ inportw (unsigned short port)
 #endif
 }
 
+
 void
 outportb (unsigned short port, unsigned char byte)
 {
@@ -312,6 +320,7 @@ outportb (unsigned short port, unsigned char byte)
   __asm__ __volatile__ ("outb %1, %0"::"d" (port), "a" (byte));
 #endif
 }
+
 
 void
 outportw (unsigned short port, unsigned short word)
@@ -514,14 +523,14 @@ ucon64_gauge (time_t init_time, long pos, long size)
     return gauge (init_time, pos, size);
   else
     {
-      int percentage;
+      int percentage = (100 * (pos >> 10)) / (size >> 10);
 
-      percentage = 100 * pos / size;
       printf ("%u\n", percentage);
       fflush (stdout);
       return 0;
     }
 }
+
 
 int
 ucon64_testsplit (const char *filename)
@@ -531,10 +540,10 @@ ucon64_testsplit (const char *filename)
   char buf[4096];
 
   strcpy (buf, filename);
-  buf[findlast (buf, ".") - 1]++;
-  while (!access (buf, F_OK) && strdcmp (buf, filename) != 0)
+  buf[strrcspn (buf, ".") - 1]++;
+  while (!access (buf, F_OK) && STRDCMP (buf, filename) != 0)
     {
-      buf[findlast (buf, ".") - 1]++;
+      buf[strrcspn (buf, ".") - 1]++;
       x++;
     }
 
@@ -542,10 +551,10 @@ ucon64_testsplit (const char *filename)
     return x + 1;
 
   strcpy (buf, filename);
-  buf[findlast (buf, ".") + 1]++;
-  while (!access (buf, F_OK) && strdcmp (buf, filename) != 0)
+  buf[strrcspn (buf, ".") + 1]++;
+  while (!access (buf, F_OK) && STRDCMP (buf, filename) != 0)
     {
-      buf[findlast (buf, ".") + 1]++;
+      buf[strrcspn (buf, ".") + 1]++;
       x++;
     }
 
@@ -600,7 +609,7 @@ ucon64_bin2iso (const char *image, int track_mode)
         return -1;
     }
 
-  strcpy (buf, filenameonly(image));
+  strcpy (buf, FILENAME_ONLY(image));
   setext (buf, ".ISO");
   size = quickftell (image) / sector_size;
 
@@ -698,7 +707,7 @@ ucon64_trackmode_probe (const char *image)
   quickfread (buf, 0, 16, image);
 
 #ifdef DEBUG
-  strhexdump(buf, 0, 0, 16);
+  memhexdump(buf, 16, 0);
 #endif
 
   if (!memcmp (SYNC_HEADER, buf, 12))
@@ -886,25 +895,17 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
           break;
 
         case UCON64_RROM:
-          if (ucon64.console != UCON64_UNKNOWN)
-            {
-              sprintf (buf, "%s.%s", (!strlen(strtrim (rominfo.name))) ? UCON64_UNKNOWN_S : strtrim (rominfo.name) , getext (ucon64.rom));
-              printf ("Renaming %s to %s\n", ucon64.rom, mkfile (strlwr (buf), '_'));
-              rename (ucon64.rom, strlwr (buf));
-            }
-          break;
-
         case UCON64_RR83:
           if (ucon64.console != UCON64_UNKNOWN)
             {
-              strcpy (buf, strtrim (rominfo.name));
-              if (!strlen (buf)) strcpy (buf, UCON64_UNKNOWN_S);
-              buf[8] = 0;
-              strcat (buf, ".");
-              strcat (buf, getext (ucon64.rom));
-              buf[12] = 0;
-              printf ("Renaming %s to %s\n", ucon64.rom, mkfile (strlwr (buf), '_'));
-              rename (ucon64.rom, strlwr (buf));
+              strcpy (buf, mkfile (strtrim (rominfo.name), '_'));
+              if (!buf[0]) strcpy (buf, mkfile (UCON64_UNKNOWN_S, '_'));
+              if (mode == UCON64_RR83) buf[8] = 0;
+              strcat (buf, mkfile (GETEXT (ucon64.rom), '_'));
+              if (mode == UCON64_RR83) buf[12] = 0;
+              printf ("Renaming %s to %s\n", ucon64.rom, buf);
+              remove (buf);
+              rename (ucon64.rom, buf);
             }
           break;
 
@@ -919,7 +920,9 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
   return 0;
 }
 
-int ucon64_ls (const char *path, int mode)
+
+int
+ucon64_ls (const char *path, int mode)
 {
   struct dirent *ep;
   struct stat puffer;
@@ -1075,14 +1078,13 @@ ucon64_configfile (void)
       setProperty (ucon64.configfile, "cdrw_write",
         getProperty (ucon64.configfile, "cdrw_raw_write", buf2, "cdrdao write --device 0,0,0 --driver generic-mmc "));
 
-      deleteProperty (ucon64.configfile, "cdrw_raw_read");
-      deleteProperty (ucon64.configfile, "cdrw_raw_write");
-      deleteProperty (ucon64.configfile, "cdrw_iso_read");
-      deleteProperty (ucon64.configfile, "cdrw_iso_write");
+      DELETEPROPERTY (ucon64.configfile, "cdrw_raw_read");
+      DELETEPROPERTY (ucon64.configfile, "cdrw_raw_write");
+      DELETEPROPERTY (ucon64.configfile, "cdrw_iso_read");
+      DELETEPROPERTY (ucon64.configfile, "cdrw_iso_write");
 
       sync ();
       printf ("OK\n\n");
     }
   return 0;
 }
-

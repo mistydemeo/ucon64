@@ -1,5 +1,5 @@
 /*
-doctor64jr.h - Bung Doctor 64jr support for uCON64
+doctor64jr.h - Bung Doctor V64 Junior support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
 

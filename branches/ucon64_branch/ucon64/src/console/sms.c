@@ -114,13 +114,8 @@ NOTE: Can anyone explain to me (dbjh) what the relationship is between the
       scheme...
 */
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL, suffix[5];
+  unsigned char *buffer;
   int size = ucon64.file_size - rominfo->buheader_len;
-
-  if (!rominfo->buheader_len)
-    {
-      fprintf (stderr, "ERROR: Already in MGD format\n");
-      return -1;
-    }
 
   strcpy (src_name, ucon64.rom);
   p = basename (ucon64.rom);
@@ -133,8 +128,19 @@ NOTE: Can anyone explain to me (dbjh) what the relationship is between the
   sprintf (suffix, ".%03u", size / MBIT);
   set_suffix (dest_name, suffix);
 
-  ucon64_file_handler (dest_name, src_name, 0);
-  q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "wb");
+  ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
+
+  if (!(buffer = (unsigned char *) malloc (size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+      exit (1);
+    }
+  q_fread (buffer, rominfo->buheader_len, size, src_name);
+  if (rominfo->interleaved)
+    smd_deinterleave (buffer, size);
+
+  q_fwrite (buffer, 0, size, dest_name, "wb");
+  free (buffer);
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -147,15 +153,10 @@ sms_smd (st_rominfo_t *rominfo)
 {
   st_smd_header_t header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  unsigned char *buffer;
   int size = ucon64.file_size - rominfo->buheader_len;
 
-  if (rominfo->buheader_len != 0)
-    {
-      fprintf (stderr, "ERROR: Already in SMD format\n");
-      return -1;
-    }
-
-  memset (&header, 0, UNKNOWN_HEADER_LEN);
+  memset (&header, 0, SMD_HEADER_LEN);
   header.size = size / 8192 >> 8;
   header.id0 = 3; //size / 8192;
   header.id1 = 0xaa;
@@ -165,10 +166,20 @@ sms_smd (st_rominfo_t *rominfo)
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".SMD");
-
   ucon64_file_handler (dest_name, src_name, 0);
-  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
-  q_fcpy (src_name, 0, size, dest_name, "ab");
+
+  if (!(buffer = (unsigned char *) malloc (size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+      exit (1);
+    }
+  q_fread (buffer, rominfo->buheader_len, size, src_name);
+  if (!rominfo->interleaved)
+    smd_interleave (buffer, size);
+
+  q_fwrite (&header, 0, SMD_HEADER_LEN, dest_name, "wb");
+  q_fwrite (buffer, rominfo->buheader_len, size, dest_name, "ab");
+  free (buffer);
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -205,19 +216,42 @@ int
 sms_init (st_rominfo_t *rominfo)
 {
   int result = -1;
-  unsigned char buf[11];
+  unsigned char magic[11], *buffer;
 
-  q_fread (&buf, 0, 11, ucon64.rom);
+  if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
+    rominfo->buheader_len = ucon64.buheader_len;
+
+  q_fread (&magic, 0, 11, ucon64.rom);
   // Note that the identification bytes are the same as for Genesis SMD files
   //  The init function for Genesis files is called before this function so it
   //  is alright to set result to 0
-  if (buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 6)
+  if (magic[8] == 0xaa && magic[9] == 0xbb && magic[10] == 6)
     {
+      if (!UCON64_ISSET (ucon64.buheader_len))
+        rominfo->buheader_len = SMD_HEADER_LEN;
+
+      if (!(UCON64_ISSET (ucon64.interleaved) && !ucon64.interleaved) &&
+          !UCON64_ISSET (ucon64.do_not_calc_crc))
+        {
+          int size = ucon64.file_size - rominfo->buheader_len;
+
+          if (!(buffer = (unsigned char *) malloc (size)))
+            {
+              fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+              return -1;
+            }
+          q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
+
+          ucon64.fcrc32 = crc32 (0, buffer, size);
+          smd_deinterleave (buffer, size);
+          ucon64.crc32 = crc32 (0, buffer, size);
+
+          free (buffer);
+        }
       result = 0;
-      rominfo->buheader_len = SMD_HEADER_LEN;
     }
-  if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
-    rominfo->buheader_len = ucon64.buheader_len;
+  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+    ucon64.interleaved : (result == 0 ? 1 : 0);
 
   rominfo->console_usage = sms_usage;
   rominfo->copier_usage = rominfo->buheader_len ? smd_usage : mgd_usage;

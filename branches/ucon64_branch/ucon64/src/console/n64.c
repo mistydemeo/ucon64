@@ -73,7 +73,7 @@ const st_usage_t n64_usage[] =
                        "SRAMs to your cartridge's SRAM (EEPROM)"},
     {"usms", "SMSROM", "Jos Kwanten's UltraSMS (Sega Master System/GameGear emulator);\n"
                        "ROM should be Jos Kwanten's UltraSMS ROM image\n"
-                       "works only for SMSROMs which are <= 4 Mb in size"},
+                       "works only for SMS ROMs which are <= 4 Mb in size"},
     {"chk", NULL, "fix ROM checksum\n"
               "supports only 6101 and 6102 boot codes"},
 #if 0

@@ -74,12 +74,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   It's also handy in order to be consistent with messages.
 */
 const char *ucon64_msg[] = {
-  "ERROR: Please check cables and connection\n"
+  "ERROR: Communication with backup unit failed\n"
+  "TIP:   Check cables and connection\n"
   "       Turn the backup unit off and on\n"
-  "       Split ROMs must be joined first\n"
-  "       Use " OPTION_LONG_S "port={3bc, 378, 278, ...} to specify your port\n"
-  "       Set the port to SPP (Standard, Normal) mode in your BIOS\n"
-  "       Some backup units do not support EPP and ECP style parports\n"
+//  "       Split ROMs must be joined first\n" // handled with WF_NO_SPLIT
+  "       Use " OPTION_LONG_S "port={3bc, 378, 278, ...} to specify a parallel port address\n"
+  "       Set the port to SPP (standard, normal) mode in your BIOS as some backup\n"
+  "         units do not support EPP and ECP style parallel ports\n"
   "       Read the backup unit's manual\n",
 
   "ERROR: Could not auto detect the right ROM/IMAGE/console type\n"
@@ -102,6 +103,7 @@ const char *ucon64_msg[] = {
   "NOTE: %s not found or too old, support for discmage disabled\n",
   NULL
 };
+
 
 const st_usage_t unknown_usage[] =
   {
@@ -1308,7 +1310,7 @@ void io_output_word (unsigned short port, unsigned short word) { PortWordOut (po
 
 #if     defined __CYGWIN__ || defined __MINGW32__
 // default to functions which are always available (but which generate an
-//  exception without a "driver" such as UserPort)
+//  exception under Windows NT/2000/XP without a "driver" such as UserPort)
 unsigned char (*input_byte) (unsigned short) = i386_input_byte;
 unsigned short (*input_word) (unsigned short) = i386_input_word;
 void (*output_byte) (unsigned short, unsigned char) = i386_output_byte;
@@ -1322,7 +1324,7 @@ void outp_func (unsigned short port, unsigned char byte) { outp (port, byte); }
 void outpw_func (unsigned short port, unsigned short word) { outpw (port, word); }
 
 // default to functions which are always available (but which generate an
-//  exception without a "driver" such as UserPort)
+//  exception under Windows NT/2000/XP without a "driver" such as UserPort)
 unsigned char (*input_byte) (unsigned short) = inp_func;
 unsigned short (*input_word) (unsigned short) = inpw_func;
 void (*output_byte) (unsigned short, unsigned char) = outp_func;
@@ -1715,121 +1717,122 @@ ucon64_configfile (void)
         }
       else
         {
-          fprintf (fh, "# uCON64 config\n"
-                 "#\n"
-                 "version=%d\n"
-                 "#\n"
-                 "# create backups of files? (1=yes; 0=no)\n"
-//                 "# before processing a ROM uCON64 will make a backup of it\n"
-                 "#\n"
-                 "backups=1\n"
+          fprintf (fh,
+                   "# uCON64 configuration\n"
+                   "#\n"
+                   "version=%d\n"
+                   "#\n"
+                   "# create backups of files? (1=yes; 0=no)\n"
+//                   "# before processing a ROM uCON64 will make a backup of it\n"
+                   "#\n"
+                   "backups=1\n"
 #ifdef  ANSI_COLOR
-                 "#\n"
-                 "# use ANSI colors in output? (1=yes; 0=no)\n"
-                 "#\n"
-                 "ansi_color=1\n"
+                   "#\n"
+                   "# use ANSI colors in output? (1=yes; 0=no)\n"
+                   "#\n"
+                   "ansi_color=1\n"
 #endif
-                 "#\n"
-                 "# parallel port\n"
-                 "#\n"
-                 "#parport=378\n"
-                 "#\n"
+                   "#\n"
+                   "# parallel port\n"
+                   "#\n"
+                   "#parport=378\n"
+                   "#\n"
 #if     defined __MSDOS__
-                 "discmage_path=~\\discmage.dxe\n" // realpath2() expands the tilde
-                 "netgui_path=~\\netgui.dxe\n"
-                 "ucon64_configdir=~\n"
-                 "ucon64_datdir=~\n"
-                 "ucon64_skindir=~\n"
+                   "discmage_path=~\\discmage.dxe\n" // realpath2() expands the tilde
+                   "netgui_path=~\\netgui.dxe\n"
+                   "ucon64_configdir=~\n"
+                   "ucon64_datdir=~\n"
+                   "ucon64_skindir=~\n"
 #elif   defined __CYGWIN__
-                 "discmage_path=~/discmage.dll\n"
-                 "netgui_path=~/netgui.dll\n"
-                 "ucon64_configdir=~\n"
-                 "ucon64_datdir=~\n"
-                 "ucon64_skindir=~\n"
+                   "discmage_path=~/discmage.dll\n"
+                   "netgui_path=~/netgui.dll\n"
+                   "ucon64_configdir=~\n"
+                   "ucon64_datdir=~\n"
+                   "ucon64_skindir=~\n"
 #elif   defined _WIN32
-                 "discmage_path=~\\discmage.dll\n"
-                 "netgui_path=~/netgui.dll\n"
-                 "ucon64_configdir=~\n"
-                 "ucon64_datdir=~\n"
-                 "ucon64_skindir=~\n"
+                   "discmage_path=~\\discmage.dll\n"
+                   "netgui_path=~/netgui.dll\n"
+                   "ucon64_configdir=~\n"
+                   "ucon64_datdir=~\n"
+                   "ucon64_skindir=~\n"
 #elif   defined __unix__ || defined __BEOS__
-                 "discmage_path=~/.ucon64/discmage.so\n"
-                 "netgui_path=~/.ucon64/netgui.so\n"
-                 "ucon64_configdir=~/.ucon64\n"
-                 "ucon64_datdir=~/.ucon64/dat\n"
-                 "ucon64_skindir=~/.ucon64/skin\n"
+                   "discmage_path=~/.ucon64/discmage.so\n"
+                   "netgui_path=~/.ucon64/netgui.so\n"
+                   "ucon64_configdir=~/.ucon64\n"
+                   "ucon64_datdir=~/.ucon64/dat\n"
+                   "ucon64_skindir=~/.ucon64/skin\n"
 #endif
-                 "#\n"
-                 "# emulate_<console shortcut>=<emulator with options>\n"
-                 "#\n"
-                 "# You can also use CRC32 values for ROM specific emulation options:\n"
-                 "#\n"
-                 "# emulate_0x<crc32>=<emulator with options>\n"
-                 "# emulate_<crc32>=<emulator with options>\n"
-                 "#\n"
-                 "emulate_gb=vgb -sound -sync 50 -sgb -scale 2\n"
-                 "emulate_gen=dgen -f -S 2\n"
-                 "emulate_sms=\n"
-                 "emulate_jag=\n"
-                 "emulate_lynx=\n"
-                 "emulate_n64=\n"
-                 "emulate_ng=\n"
-                 "emulate_nes=tuxnes -E2 -rx11 -v -s/dev/dsp -R44100\n"
-                 "emulate_pce=\n"
-                 "emulate_snes=snes9x -tr -fs -sc -hires -dfr -r 7 -is -j\n"
-                 "emulate_ngp=\n"
-                 "emulate_ata=\n"
-                 "emulate_s16=\n"
-                 "emulate_gba=vgba -scale 2 -uperiod 6\n"
-                 "emulate_vec=\n"
-                 "emulate_vboy=\n"
-                 "emulate_swan=\n"
-                 "emulate_coleco=\n"
-                 "emulate_intelli=\n"
-                 "emulate_psx=pcsx\n"
-                 "emulate_ps2=\n"
-                 "emulate_sat=\n"
-                 "emulate_dc=\n"
-                 "emulate_cd32=\n"
-                 "emulate_cdi=\n"
-                 "emulate_3do=\n"
-                 "emulate_gp32=\n"
+                   "#\n"
+                   "# emulate_<console shortcut>=<emulator with options>\n"
+                   "#\n"
+                   "# You can also use CRC32 values for ROM specific emulation options:\n"
+                   "#\n"
+                   "# emulate_0x<crc32>=<emulator with options>\n"
+                   "# emulate_<crc32>=<emulator with options>\n"
+                   "#\n"
+                   "emulate_gb=vgb -sound -sync 50 -sgb -scale 2\n"
+                   "emulate_gen=dgen -f -S 2\n"
+                   "emulate_sms=\n"
+                   "emulate_jag=\n"
+                   "emulate_lynx=\n"
+                   "emulate_n64=\n"
+                   "emulate_ng=\n"
+                   "emulate_nes=tuxnes -E2 -rx11 -v -s/dev/dsp -R44100\n"
+                   "emulate_pce=\n"
+                   "emulate_snes=snes9x -tr -fs -sc -hires -dfr -r 7 -is -j\n"
+                   "emulate_ngp=\n"
+                   "emulate_ata=\n"
+                   "emulate_s16=\n"
+                   "emulate_gba=vgba -scale 2 -uperiod 6\n"
+                   "emulate_vec=\n"
+                   "emulate_vboy=\n"
+                   "emulate_swan=\n"
+                   "emulate_coleco=\n"
+                   "emulate_intelli=\n"
+                   "emulate_psx=pcsx\n"
+                   "emulate_ps2=\n"
+                   "emulate_sat=\n"
+                   "emulate_dc=\n"
+                   "emulate_cd32=\n"
+                   "emulate_cdi=\n"
+                   "emulate_3do=\n"
+                   "emulate_gp32=\n"
 #if 0
 #ifndef __MSDOS__
-                 "#\n"
-                 "# LHA support\n"
-                 "#\n"
-                 "lha_extract=lha efi \"%%s\"\n"
-                 "#\n"
-                 "# LZH support\n"
-                 "#\n"
-                 "lzh_extract=lha efi \"%%s\"\n"
-                 "#\n"
-                 "# ZIP support\n"
-                 "#\n"
-                 "zip_extract=unzip -xojC \"%%s\"\n"
-                 "#\n"
-                 "# RAR support\n"
-                 "#\n"
-                 "rar_extract=unrar x \"%%s\"\n"
-                 "#\n"
-                 "# ACE support\n"
-                 "#\n"
-                 "ace_extract=unace e \"%%s\"\n"
+                   "#\n"
+                   "# LHA support\n"
+                   "#\n"
+                   "lha_extract=lha efi \"%%s\"\n"
+                   "#\n"
+                   "# LZH support\n"
+                   "#\n"
+                   "lzh_extract=lha efi \"%%s\"\n"
+                   "#\n"
+                   "# ZIP support\n"
+                   "#\n"
+                   "zip_extract=unzip -xojC \"%%s\"\n"
+                   "#\n"
+                   "# RAR support\n"
+                   "#\n"
+                   "rar_extract=unrar x \"%%s\"\n"
+                   "#\n"
+                   "# ACE support\n"
+                   "#\n"
+                   "ace_extract=unace e \"%%s\"\n"
 #endif
-                 "#\n"
-                 "# uCON64 can operate as frontend for CD burning software to make backups\n"
-                 "# for CD-based consoles \n"
-                 "#\n"
-                 "# We suggest cdrdao (http://cdrdao.sourceforge.net) as burn engine for uCON64\n"
-                 "# Make sure you check this configfile for the right settings\n"
-                 "#\n"
-                 "# --device [bus,id,lun] (cdrdao)\n"
-                 "#\n"
-                 "cdrw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
-                 "cdrw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
+                   "#\n"
+                   "# uCON64 can operate as frontend for CD burning software to make backups\n"
+                   "# for CD-based consoles \n"
+                   "#\n"
+                   "# We suggest cdrdao (http://cdrdao.sourceforge.net) as burn engine for uCON64\n"
+                   "# Make sure you check this configfile for the right settings\n"
+                   "#\n"
+                   "# --device [bus,id,lun] (cdrdao)\n"
+                   "#\n"
+                   "cdrw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
+                   "cdrw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
 #endif
-                 , UCON64_CONFIG_VERSION);
+                   , UCON64_CONFIG_VERSION);
           fclose (fh);
           printf ("OK\n\n");
         }
@@ -1877,12 +1880,8 @@ ucon64_configfile (void)
       );
 
       set_property (ucon64.configfile, "ucon64_configdir",
-#if     defined __MSDOS__
+#if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
         "~"                                     // realpath2() expands the tilde
-#elif   defined __CYGWIN__
-        "~"
-#elif   defined _WIN32
-        "~"
 #elif   defined __unix__ || defined __BEOS__
         "~/.ucon64"
 #else
@@ -1891,12 +1890,8 @@ ucon64_configfile (void)
       );
 
       set_property (ucon64.configfile, "ucon64_datdir",
-#if     defined __MSDOS__
+#if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
         "~"                                     // realpath2() expands the tilde
-#elif   defined __CYGWIN__
-        "~"
-#elif   defined _WIN32
-        "~"
 #elif   defined __unix__ || defined __BEOS__
         "~/.ucon64/dat"
 #else
@@ -1905,12 +1900,8 @@ ucon64_configfile (void)
       );
 
       set_property (ucon64.configfile, "ucon64_skindir",
-#if     defined __MSDOS__
+#if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
         "~"                                     // realpath2() expands the tilde
-#elif   defined __CYGWIN__
-        "~"
-#elif   defined _WIN32
-        "~"
 #elif   defined __unix__ || defined __BEOS__
         "~/.ucon64/skin"
 #else

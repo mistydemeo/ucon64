@@ -1,5 +1,5 @@
 /*
-doctor64jr.c - Bung Doctor 64jr support for uCON64
+doctor64jr.c - Bung Doctor V64 Junior support for uCON64
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
 
@@ -33,10 +33,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "doctor64jr.h"
 
 const st_usage_t doctor64jr_usage[] = {
-  {NULL, NULL, "Doctor64 Jr"},
+  {NULL, NULL, "Doctor V64 Junior"},
   {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef PARALLEL
-  {"xdjr", NULL, "send/receive ROM to/from Doctor64 Jr; " OPTION_LONG_S "port=PORT\n"
+  {"xdjr", NULL, "send/receive ROM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
 //          "                receives automatically when ROM does not exist\n"
               "currently only sending is supported"},
 #if 0
@@ -545,17 +545,18 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
             }
           set_ai (0);
           set_data_read         // ninit=0, nwrite=1
-            if (inportb (port_c) != 0x00)
+          if (inportb (port_c) != 0x00)
             {
               unpass--;
-//          printf("counter=%x ",inportb(data));
+//              printf("counter=%x ",inportb(data));
               outportb (port_a, 0x0b);  // set all pin=0 for debug
-//          if (disp_on) printf("*");
+//              if (disp_on) printf("*")
+//                ;
               init_port ();
               set_ai_data (3, (unsigned char) (0x10 | (hi_word >> 8)));
               set_ai_data (2, (unsigned char) hi_word);
               if (unpass == 0)
-                return (1);
+                return 1;
             }
           else
             unpass = 0;
@@ -566,7 +567,7 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
 //   outportb(ai,1);
 //   printf("a[15..8]=%02x\n",inportb(data));
 //   end_port();
-  return (0);
+  return 0;
 }
 
 char
@@ -595,7 +596,7 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
               temp = inportw (port_c);
               if (temp != mix.bufferx[j + fix])
                 {
-//             printf("verify error!!!\07\n");
+//             printf("verify error!\07\n");
 //             printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
                   outportb (port_a, 0x0b);      // all pin=0 for debug
 //             if (disp_on) printf("#");
@@ -604,7 +605,7 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
                   set_ai_data (2, (unsigned char) hi_word);
                   unpass--;
                   if (unpass == 0)
-                    return (1);
+                    return 1;
                   else
                     break;
                 }
@@ -618,7 +619,7 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
 //   outportb(ai,1);
 //   printf("a[15..8]=%02x\n",inportb(data));
 //   end_port();
-  return (0);
+  return 0;
 }
 
 void
@@ -629,16 +630,16 @@ read_adr (void)
   printf ("\na[31..0]=");
   set_ai (3);
   set_data_read                 // ninit=0, nwrite=1
-    printf ("%02x", inportb (port_c));
+  printf ("%02x", inportb (port_c));
   set_ai (2);
   set_data_read                 // ninit=0, nwrite=1
-    printf ("%02x", inportb (port_c));
+  printf ("%02x", inportb (port_c));
   set_ai (1);
   set_data_read                 // ninit=0, nwrite=1
-    printf ("%02x", inportb (port_c));
+  printf ("%02x", inportb (port_c));
   set_ai (0);
   set_data_read                 // ninit=0, nwrite=1
-    printf ("%02x\n", inportb (port_c));
+  printf ("%02x\n", inportb (port_c));
   end_port ();
 }
 
@@ -670,32 +671,31 @@ check_card (void)
   set_ai_data (0, 0x78);
   set_ai (3);
   set_data_read                 // ninit=0, nwrite=1
-    if ((inportb (port_c) & 0x1f) != 0x12)
-    return (1);
+  if ((inportb (port_c) & 0x1f) != 0x12)
+    return 1;
   set_ai (2);
   set_data_read                 // ninit=0, nwrite=1
-    if (inportb (port_c) != 0x34)
-    return (1);
+  if (inportb (port_c) != 0x34)
+    return 1;
   set_ai (1);
   set_data_read                 // ninit=0, nwrite=1
-    if (inportb (port_c) != 0x56)
-    return (1);
+  if (inportb (port_c) != 0x56)
+    return 1;
   set_ai (0);
   set_data_read                 // ninit=0, nwrite=1
-    if (inportb (port_c) != 0x78)
-    return (1);
+  if (inportb (port_c) != 0x78)
+    return 1;
   end_port ();
-  return (0);
+  return 0;
 }
 
 short int
 read_file (void)
 {
-  if (fread ((char *) mix.buffer, sizeof (char), trans_size, fptr) !=
-      trans_size)
+  if (fread ((char *) mix.buffer, sizeof (char), trans_size, fptr) != trans_size)
     {
       fclose (fptr);            /* read data error */
-      return (-1);
+      return -1;
     }
 #if 0
   printf (".");
@@ -704,7 +704,7 @@ read_file (void)
   pos += trans_size;
   if (!(pos % (trans_size * 2)))
     ucon64_gauge (init_time, pos, size);
-  return (0);
+  return 0;
 }
 
 short int
@@ -712,8 +712,8 @@ download_n64 ()
 {
   if ((fptr = fopen (file_name, "rb")) == NULL)
     {                           /* open error */
-      printf ("open error !!!\07\n");
-      return (-1);
+      printf ("open error!\07\n");
+      return -1;
     }
   size = q_fsize (file_name);
 
@@ -727,7 +727,7 @@ download_n64 ()
         {
           /*fclose(fptr); */
           fputc ('\n', stdout);
-          return (0);
+          return 0;
         }
       if (sel == 0)
         {
@@ -735,7 +735,7 @@ download_n64 ()
             {
               read_adr ();
               /*fclose(fptr); */
-              return (-1);
+              return -1;
             }
         }
       else
@@ -744,13 +744,13 @@ download_n64 ()
             {
               read_adr ();
               /*fclose(fptr); */
-              return (-1);
+              return -1;
             }
         }
       if (read_file () != 0)
         {
           /*fclose(fptr); */
-          return (-1);
+          return -1;
         }
       if (sel == 0)
         {
@@ -758,7 +758,7 @@ download_n64 ()
             {
               read_adr ();
               /*fclose(fptr); */
-              return (-1);
+              return -1;
             }
         }
       else
@@ -767,7 +767,7 @@ download_n64 ()
             {
               read_adr ();
               /*fclose(fptr); */
-              return (-1);
+              return -1;
             }
         }
 
@@ -775,7 +775,7 @@ download_n64 ()
   fputc ('\n', stdout);
   /*fclose(fptr); */
   end_port ();
-  return (0);
+  return 0;
 }
 
 void
@@ -814,13 +814,13 @@ test_dram (void)
     {
       gen_pat_32k ((unsigned short int) (page * 2));
       if (write_32k (page, 0))
-        return (0);
+        return 0;
       else
         printf ("w");
       fflush (stdout);
       gen_pat_32k ((unsigned short int) (page * 2 + 1));
       if (write_32k (page, 0x80))
-        return (0);
+        return 0;
       else
         printf ("w");
       fflush (stdout);
@@ -829,18 +829,18 @@ test_dram (void)
     {
       gen_pat_32k ((unsigned short int) (page * 2));
       if (verify_32k (page, 0))
-        return (0);
+        return 0;
       else
         printf ("v");
       fflush (stdout);
       gen_pat_32k ((unsigned short int) (page * 2 + 1));
       if (verify_32k (page, 0x80))
-        return (0);
+        return 0;
       else
         printf ("v");
       fflush (stdout);
     }
-  return (pages);
+  return pages;
 }
 
 #if 0
@@ -874,7 +874,7 @@ doctor64jr_main (int argc, char *argv[])
    port[1]=peek(0x40,10);		// lpt2 base address
    if (port[0]==0){
       printf("No Printer Port Avialable!\07\n");
-      return(-1);
+      return -1;
    }
 */
 
@@ -964,15 +964,15 @@ doctor64jr_main (int argc, char *argv[])
 
   if (card_present == 0)
     {
-      printf ("\nNo V64jr card present!!!\07\n\n");
-      return (-1);
+      printf ("\nNo V64jr card present!\07\n\n");
+      return -1;
     }
   else
     printf ("V64jr card found at port%d\n", port_no);
   init_port ();
   set_ai (3);
-  set_data_read printf ("control(rst,wdf,rcf) = %x\n", inportb (port_c));
-
+  set_data_read
+  printf ("control(rst,wdf,rcf) = %x\n", inportb (port_c));
 
   if (test_en)
     {
@@ -983,14 +983,14 @@ doctor64jr_main (int argc, char *argv[])
         }
       else
         {
-          printf ("Error!!!\07\n");
+          printf ("Error!\07\n");
         }
     }
   disp_on = 1;                  // display #/*
   if (file_name != NULL)
     {
       if (download_n64 () != 0)
-        printf ("download error !!!\n");
+        printf ("download error!\n");
     }
   if (write_en)
     printf ("dram write protect disable\n");
@@ -999,7 +999,7 @@ doctor64jr_main (int argc, char *argv[])
 
 //   set_ai_data(5,write_en);           // d0=0 is write protect mode
   end_port ();
-  return (0);
+  return 0;
 }
 
 /*

@@ -129,6 +129,8 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
 <br>
 Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
 <br>
+Q45: <a href="#45">What is an interleaved ROM?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -1300,7 +1302,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
     <td><tt>GoodPCE or PCE</tt></td>
   </tr>
   <tr>
-    <td><tt>Sega Master System</tt></td>
+    <td><tt>Sega Master System and GameGear</tt></td>
     <td><tt>GoodSMS, GoodGG, SMS or GG</tt></td>
   </tr>
   <tr>
@@ -1395,6 +1397,57 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    similar to the one in NSRT. See <a href="#43">question 43</a>. Another
    advantage NSRT has over uCON64 (as seen from a SNES user's viewpoint) is
    that it is written only for SNES.<br>
+<br>
+<p>
+<a name="45"><b>Q45</b>: What is an interleaved ROM?</a><br>
+<b>A</b>: Strictly speaking, interleaved ROMs do not exist. Interleaved ROM
+   dumps do. Or perhaps it is better to say ROM dumps in interleaved format.
+   It depends on the console type what "interleaved" means. Interleaved formats
+   exist for NES, Sega Master System, GameGear, Genesis, SNES and Nintendo 64.<br>
+   Interleaved NES files have the PRG data stored at the even offsets in the
+   file and the CHR data at the odd offsets.<br>
+   Interleaved Sega Master System, GameGear and Genesis files are produced by
+   the Super Magic Drive. For each block of 16384 bytes of the ROM all bytes at
+   even offsets are stored in the upper half of the dumped block. The bytes at
+   odd offsets are stored in the lower half. So, each dumped block first
+   contains 8192 "odd bytes" then 8192 "even bytes".<br>
+   Interleaved SNES dumps are produced by the Game Doctor and the Super UFO
+   when dumping a HiROM cartridge. The simplest interleaved format first
+   contains all upper halfs of each 64 kB block of the ROM (HiROM "banks"),
+   then all lower halfs.<br>
+   SNES ROMs contain a block of 48 bytes, some call it the internal SNES
+   header, that contains information about the ROM. Information like game name,
+   check sum, size and the bank type of the ROM. There are two bank types,
+   HiROM and LoROM (as far as we know these are terms not used by Nintendo).
+   HiROM ROMs have banks of 64 kB, LoROM ROMs have banks of 32 kB. The first
+   bank contains the internal SNES header at a fixed offset relative to the end
+   of the bank. However, because the bank sizes differ for HiROM and LoROM,
+   this location differs for the two in a non-interleaved file. If a dump is
+   interleaved the location is constant.<br>
+   The interleaved format was probably introduced so that a copier <i>can</i>
+   (the Game Doctor does only if the dump has no header) always check the same
+   location in a dump to tell whether it should handle it as a LoROM or a HiROM
+   dump.<br>
+   Interleaved Nintendo 64 dumps are produced by the Doctor V64 and the Doctor
+   V64 Junior. Perhaps "byte-swapped" is a better term for Nintendo 64 dumps.
+   For each two bytes the first and the second byte are swapped.<br>
+<br>
+   ROM dumps in non-interleaved format can be interleaved with uCON64. Sega
+   Master System, GameGear and Genesis dumps can be interleaved with the option
+   -smd. SNES dumps can be interleaved with -gd3 or -ufo. Nintendo 64 dumps can
+   be interleaved with -v64. NES dumps cannot be interleaved with uCON64.<br>
+<br>
+   Deinterleaving is the process of converting the data to "binary" format.
+   Binary in the sense as how the data is presented to the CPU. Interleaved NES
+   dumps can be deinterleaved with the option -dint. Interleaved SNES and
+   Nintendo 64 dumps can be deinterleaved with -dint too, but it is better to
+   use the regular conversion options. For Nintendo 64 dumps that means you
+   should use the option -z64. For SNES dumps it means you should use -smc,
+   -swc, -fig or -mgd. Some SNES tools erroneously interleave LoROM dumps.
+   These dumps can be deinterleaved with the options -gd3 and -ufo as well as
+   with the aformentioned options.<br>
+   Sega Master System, GameGear and Genesis dumps can be deinterleaved with the
+   option -mgd.<br
 <br>
 <br>
 <br>

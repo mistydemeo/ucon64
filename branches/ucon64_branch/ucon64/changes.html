@@ -1,7 +1,7 @@
 <html><head>
 <link rel="icon" href="images/icon.png" type="image/png">
 <title>uCON64 - Changes</title></head><body bgcolor="#ffffff"><tt><br>
-The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
+The original uCON for SNES and Genesis was written by Chicken & chp in ~1995<br>
 <br>
 <p>
 <a name="190">1.9.0</a><br>
@@ -19,7 +19,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 <a name="192">1.9.2</a><br>
 - started to add missing Sega System16(A/B)/System 18/dual 68000 support<br>
 - -xv64 shows now the filename on the Doctor instead of "UCON64" (sorry)<br>
-- removed -xmp3 option for SongBoy (latest informations say that it will
+- removed -xmp3 option for SongBoy (latest information says that it will
   be a USB device with copyprotected MPE standard instead of MP3.. HAHAHAHA!!!)<br>
 - TODO:  -xmp3 send MP3 file(s) to SongBoy (MP3 player for Game Boy)<br>
 - removed options which were added by mistake (like parallel transfer for Z64)<br>
@@ -123,10 +123,10 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - changed the whole internal ROM database code (by NoisyB)<br>
 - added -dbs search ROM database (all entries) by CRC32; --rom=0xCRC32 (by NoisyB)<br>
 - added (Virtual Boy) show info (by NoisyB)<br>
-- added (Wonder Swan) show info (by NoisyB)<br>
+- added (WonderSwan) show info (by NoisyB)<br>
 - added (ColecoVision) show info (by NoisyB)<br>
 - added (Vectrex) show info (by NoisyB)<br>
-- added ROMs to database for Virtual Boy, Wonder Swan, ColecoVision and Vectrex
+- added ROMs to database for Virtual Boy, WonderSwan, ColecoVision and Vectrex
   (by NoisyB)<br>
 - added (Intellivision) show info (by NoisyB)<br>
 - made the internal ROM Database optional; compiled without DB uCON64 will be
@@ -168,7 +168,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - added -r2i convert RAW to ISO9660; --rom=RAW_IMAGE (by NoisyB)<br>
 <p>
 <a name="198-1">1.9.8-1</a><br>
-- added more verbose WonderSwan ROM nfo (by NoisyB; thanks to dox)<br>
+- added more verbose WonderSwan ROM info (by NoisyB; thanks to dox)<br>
 - updated (GBA) used Jeff Frohwein's Flash Advance Linker code V1.72 (by dbjh)<br>
 - added (GBA) -xfals send/receive SRAM to/from Flash Advance Linker; --file=PORT (by dbjh)<br>
 - added (GBA) -xfalb&#60;n&#62; send/receive SRAM to/from Flash Advance Linker bank n; --file=PORT (by dbjh)<br>
@@ -433,6 +433,18 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 <a name="198-2">1.9.8-2</a><br>
 - updated (SNES) -gd3 produces a more logical format for Daikaijuu Monogatari 2
   (by dbjh, thanks to Nach for the idea)<br>
+- updated (SMS) -smd interleaves SMS files (by dbjh, thanks to nori-p for
+  testing and feedback)<br>
+- updated (GBA) fixed stupid bug introduced in 1.9.8beta8 that caused
+  -xfalmulti to hang (-multi and -xfal still worked) (by dbjh)<br>
+- updated (SNES) hopefully fixed last problem with splitting GD3 files (by
+  dbjh)<br>
+- updated (SNES) added crack for Dixie Kong's Double Trouble (by dbjh, based on
+  IPS patch by Black Hole of Infernal Affairs)<br>
+- files of 0 bytes won't be detected as WonderSwan files anymore (by dbjh)<br>
+- removed (NES) support for bad FDS DAT files. If you really want to use FDS
+  DAT files created by tools that erroneously include the header in the CRC32
+  calculation, use the switch -nhd (by dbjh)<br>
 <br>
 <br>
 <br>

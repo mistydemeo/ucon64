@@ -1600,7 +1600,11 @@ ucon64_options (int c, const char *optarg)
     case UCON64_XDJR:
       if (!access (ucon64.rom, F_OK))
         {
-          if (doctor64jr_write (ucon64.rom, ucon64.parport) != 0)
+          if (!ucon64.rominfo->interleaved)
+            fprintf (stderr,
+                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor64 Jr. only\n"
+                     "       supports interleaved ROMs. Convert to a Doctor64 Jr. compatible format.\n");
+          else if (doctor64jr_write (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       else
@@ -1713,8 +1717,12 @@ ucon64_options (int c, const char *optarg)
     case UCON64_XV64:
       if (!access (ucon64.rom, F_OK))
         {
-          if (doctor64_write (ucon64.rom, ucon64.rominfo->buheader_len,
-                              ucon64.file_size, ucon64.parport) != 0)
+          if (!ucon64.rominfo->interleaved)
+            fprintf (stderr,
+                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 only\n"
+                     "       supports interleaved ROMs. Convert to a Doctor V64 compatible format.\n");
+          else if (doctor64_write (ucon64.rom, ucon64.rominfo->buheader_len,
+                                   ucon64.file_size, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       else
@@ -1765,7 +1773,10 @@ ucon64_options (int c, const char *optarg)
           free (dir);
         }
       gba_multi (strtol (optarg, NULL, 10) * MBIT, src_name);
+
+      ucon64.file_size = q_fsize (src_name);
       fal_write_rom (src_name, ucon64.parport);
+
       unregister_func (remove_temp_file);
       remove_temp_file ();
       fputc ('\n', stdout);

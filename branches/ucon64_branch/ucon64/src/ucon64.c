@@ -25,8 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
-first I want to thank SiGMA SEVEN! who was my mentor and taught me how to
-write programs in C
+  first I want to thank SiGMA SEVEN! who was my mentor and taught me how to
+  write programs in C
 */
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
@@ -954,7 +954,7 @@ ucon64_rom_handling (void)
   else if (S_ISREG (fstate.st_mode) != TRUE)
     no_rom = 1;
 #if 0
-  // printing an error message for files of 0 bytes only confuses people
+  // printing the no_rom error message for files of 0 bytes only confuses people
   else if (!fstate.st_size)
     no_rom = 1;
 #endif
@@ -991,7 +991,8 @@ ucon64_rom_handling (void)
 
       if (ucon64.rominfo)
         {
-          // restore any overrides from st_ucon64_t
+          // Restore any overrides from st_ucon64_t
+          // We have to this *before* calling ucon64_probe(), *not* afterwards
           if (UCON64_ISSET (ucon64.buheader_len))
             rominfo.buheader_len = ucon64.buheader_len;
 
@@ -1006,6 +1007,7 @@ ucon64_rom_handling (void)
 
 //          ucon64.rominfo = (st_rominfo_t *) &rominfo;
         }
+      ucon64.rominfo = ucon64_probe (&rominfo); // returns console type
 
 #ifdef  DISCMAGE
       // check for disc image only if ucon64_probe() failed or --disc was used
@@ -1139,7 +1141,7 @@ ucon64_probe (st_rominfo_t * rominfo)
       {UCON64_GEN, genesis_init, AUTO},
       {UCON64_LYNX, lynx_init, AUTO},
       {UCON64_GB, gameboy_init, AUTO},
-      {UCON64_SMS, sms_init, AUTO},
+      {UCON64_SMS, sms_init, AUTO},             // only auto for SMD files
       {UCON64_SNES, snes_init, AUTO},
       {UCON64_NES, nes_init, AUTO},
       {UCON64_NGP, ngp_init, AUTO},

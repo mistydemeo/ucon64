@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "ucon64_db.h"
 
-#define ucon64_KNOWN		-1
+//#define ucon64_KNOWN		-1
 #define ucon64_UNKNOWN		0
 #define ucon64_GB		1
 #define ucon64_GENESIS		2
@@ -144,7 +144,6 @@ struct ucon64_
 #define ucon64_FILE	2
 
 int ucon64_usage(int argc,char *argv[]);
-int ucon64_init_(struct ucon64_ *rom);
 int ucon64_init(struct ucon64_ *rom);
 int ucon64_main(int argc,char *argv[]);
 int ucon64_nfo(struct ucon64_ *rom);

@@ -124,7 +124,7 @@ main (int argc, char *argv[])
   struct option long_options[] = {
     {"1991", 0, 0, 168},
     {"3do", 0, 0, 252},
-    {"?", 0, 0, 129},
+    {"?", 0, 0, 'h'},
     {"a", 0, 0, 'a'},
     {"ata", 0, 0, 233},
     {"b", 0, 0, 'b'},
@@ -166,9 +166,9 @@ main (int argc, char *argv[])
     {"gg", 0, 0, 185},
     {"ggd", 0, 0, 186},
     {"gge", 0, 0, 187},
-    {"gp32", 0, 0, 256},
-    {"h", 0, 0, 129},
-    {"help", 0, 0, 129},
+    {"gp32", 0, 0, 129},
+    {"h", 0, 0, 'h'},
+    {"help", 0, 0, 'h'},
     {"hex", 0, 0, 136},
     {"i", 0, 0, 'i'},
     {"idppf", 0, 0, 152},
@@ -305,7 +305,7 @@ while ((c =
   {
     switch (c)
       {
-      case 129:                //help
+      case 'h':                //help
         return ucon64_usage (argc, argv);
         break;
 
@@ -1219,7 +1219,7 @@ while ((c =
         rom.console = ucon64_GAMECUBE;
         break;
 
-      case 256:                //gp32
+      case 129:                //gp32
         rom.console = ucon64_GP32;
         break;
 

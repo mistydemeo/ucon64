@@ -1344,12 +1344,14 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
                 buf[12] = 0;
               if (!strcmp (ucon64.rom, buf))
                 {
+#ifdef  DEBUG
                   printf ("Found %s\n", ucon64.rom);
+#endif                  
                   return 0;
                 }
               printf ("Renaming %s to %s\n", ucon64.rom, buf);
-//              remove (buf);
-//              rename (ucon64.rom, buf);
+              remove (buf);
+              rename (ucon64.rom, buf);
             }
         }
       break;

@@ -702,116 +702,95 @@ ucon64_flush (st_rominfo_t *rominfo)
 }
 
 
+static int
+unknown_init (st_rominfo_t *rominfo)
+{
+  ucon64_flush (rominfo);
+  return 0;
+}
+
+
+static int
+disc_init (st_rominfo_t *rominfo)
+{
+// TODO: dm_init()
+  return -1;
+}
+
+
 int
 ucon64_console_probe (st_rominfo_t *rominfo)
 {
-  ucon64_flush (rominfo);
-
-  switch (ucon64.console)
+  typedef struct
     {
-    case UCON64_GB:
-      gameboy_init (rominfo);
-      break;
-
-    case UCON64_GBA:
-      gba_init (rominfo);
-      break;
-
-    case UCON64_GENESIS:
-      genesis_init (rominfo);
-      break;
-
-    case UCON64_N64:
-      n64_init (rominfo);
-      break;
-
-    case UCON64_SNES:
-      snes_init (rominfo);
-      break;
-
-    case UCON64_SMS:
-      sms_init (rominfo);
-      break;
-
-    case UCON64_LYNX:
-      lynx_init (rominfo);
-      break;
-
-    case UCON64_NEOGEO:
-      neogeo_init (rominfo);
-      break;
-
-    case UCON64_NES:
-      nes_init (rominfo);
-      break;
-
-    case UCON64_PCE:
-      pcengine_init (rominfo);
-      break;
-
-    case UCON64_NEOGEOPOCKET:
-      ngp_init (rominfo);
-      break;
-
-    case UCON64_WONDERSWAN:
-      swan_init (rominfo);
-      break;
-
-    case UCON64_DC:
-      dc_init (rominfo);
-      break;
-
-    case UCON64_JAGUAR:
-      jaguar_init (rominfo);
-      break;
-
-    case UCON64_PSX:
-      psx_init (rominfo);
-      break;
-
+      int console;
+      int (*init) (st_rominfo_t *);
+      uint8_t auto_recognition;
+    } st_probe_t;
+  
+  int x = 0;
+  st_probe_t probe[] =
+    {
+      {UCON64_GBA, gba_init, 1},
+      {UCON64_N64, n64_init, 1},
+      {UCON64_GENESIS, genesis_init, 1},
+      {UCON64_LYNX, lynx_init, 1},
+      {UCON64_GB, gameboy_init, 1},
+      {UCON64_SNES, snes_init, 1},
+      {UCON64_NES, nes_init, 1},
+      {UCON64_NEOGEOPOCKET, ngp_init, 1},
+      {UCON64_SWAN, swan_init, 1},
+      {UCON64_JAGUAR, jaguar_init, 1},
+      {UCON64_SMS, sms_init, 0},
+      {UCON64_NEOGEO, neogeo_init, 0},
+      {UCON64_PCE, pcengine_init, 0},
+      {UCON64_WONDERSWAN, swan_init, 0},
+      {UCON64_DC, dc_init, 0},
+      {UCON64_PSX, psx_init, 0},
+      {UCON64_SATURN, disc_init, 0},
+      {UCON64_CDI, disc_init, 0},
+      {UCON64_CD32, disc_init, 0},
+      {UCON64_REAL3DO, disc_init, 0},
+      {UCON64_PS2, disc_init, 0},
+      {UCON64_XBOX, disc_init, 0},
 #if 0
-    case UCON64_SATURN:
-    case UCON64_CDI:
-    case UCON64_CD32:
-    case UCON64_GAMECUBE:
-    case UCON64_XBOX:
-    case UCON64_GP32:
-    case UCON64_REAL3DO:
-    case UCON64_COLECO:
-    case UCON64_INTELLI:
-    case UCON64_PS2:
-    case UCON64_SYSTEM16:
-    case UCON64_ATARI:
-    case UCON64_VECTREX:
-    case UCON64_VIRTUALBOY:
-      break;
+      {UCON64_GAMECUBE, NULL, 0},
+      {UCON64_GP32, NULL, 0},
+      {UCON64_COLECO, NULL, 0},
+      {UCON64_INTELLI, NULL, 0},
+      {UCON64_SYSTEM16, NULL, 0},
+      {UCON64_ATARI, NULL, 0},
+      {UCON64_VECTREX, NULL, 0},
+      {UCON64_VIRTUALBOY, NULL, 0},
 #endif
+      {UCON64_UNKNOWN, unknown_init, 0},
+      {0, NULL}
+    };
 
-    case UCON64_UNKNOWN:
-      if (UCON64_TYPE_ISROM (ucon64.type))
-        ucon64.console =
-          (!gba_init (ucon64_flush (rominfo))) ? UCON64_GBA :
-          (!n64_init (ucon64_flush (rominfo))) ? UCON64_N64 :
-          (!genesis_init (ucon64_flush (rominfo))) ? UCON64_GENESIS :
-          (!lynx_init (ucon64_flush (rominfo))) ? UCON64_LYNX :
-          (!gameboy_init (ucon64_flush (rominfo))) ? UCON64_GB :
-          (!snes_init (ucon64_flush (rominfo))) ? UCON64_SNES :
-          (!nes_init (ucon64_flush (rominfo))) ? UCON64_NES :
-          (!ngp_init (ucon64_flush (rominfo))) ? UCON64_NEOGEOPOCKET :
-          (!swan_init (ucon64_flush (rominfo))) ? UCON64_WONDERSWAN :
-          (!jaguar_init (ucon64_flush (rominfo))) ? UCON64_JAGUAR :
-          UCON64_UNKNOWN;
-
-      if (ucon64.console == UCON64_UNKNOWN)
-        ucon64_flush (rominfo);
-
-      return (ucon64.console == UCON64_UNKNOWN) ? (-1) : 0;
-
-    default:
-      ucon64.console = UCON64_UNKNOWN;
-      return -1;
+  if (ucon64.console != UCON64_UNKNOWN)
+    {
+      for (x = 0; probe[x].init != NULL; x++)
+        if (probe[x].console == ucon64.console)
+          {
+            ucon64_flush (rominfo);
+            probe[x].init (rominfo);
+            break;
+          }
     }
-  return 0;
+  else
+    if (UCON64_TYPE_ISROM (ucon64.type))
+      for (x = 0; probe[x].init != NULL; x++)
+        if (probe[x].auto_recognition)
+          {
+            ucon64_flush (rominfo);
+            if (!probe[x].init (rominfo)) 
+              {
+                ucon64.console = probe[x].console;
+                break;
+              }
+          }
+
+  return (ucon64.console == UCON64_UNKNOWN) ? (-1) : 0;
 }
 
 

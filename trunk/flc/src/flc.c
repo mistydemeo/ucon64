@@ -285,6 +285,7 @@ int
 flc_configfile (void)
 {
   char buf[FILENAME_MAX + 1];
+  FILE *fh;
 /*
    configfile handling
 */
@@ -305,77 +306,72 @@ flc_configfile (void)
            , getenv2 ("HOME"));
 
 
-  if (access (flc.configfile, F_OK) == -1)
-    printf ("ERROR: %s not found: creating...", flc.configfile);
-  else if (strtol (getProperty (flc.configfile, "version", buf, "0"), NULL, 10) < FLC_VERSION)
+  if (!access (flc.configfile, F_OK))
     {
-      strcpy (buf, flc.configfile);
-      setext (buf, ".OLD");
+      if (strtol (getProperty (flc.configfile, "version", buf, "0"), NULL, 10) < FLC_VERSION)
+        {
+          strcpy (buf, flc.configfile);
+          setext (buf, ".OLD");
 
-      printf ("NOTE: updating config: will be renamed to %s...", buf);
+          printf ("NOTE: updating config: will be renamed to %s...", buf);
 
-      rename (flc.configfile, buf);
+          rename (flc.configfile, buf);
 
-      sync ();
+          sync ();
+        }
+      else return 0;
+    }
+  else printf ("WARNING: %s not found: creating...", flc.configfile);
+
+
+  if (!(fh = fopen (flc.configfile, "wb")))
+    {
+      printf ("FAILED\n\n");
+      return -1;
     }
 
-  if (access (flc.configfile, F_OK) == -1)
-    {
-      FILE *fh;
+  fprintf (fh, "# flc config\n"
+         "#\n"
+         "version=%d\n"
+         "#\n"
+         "# LHA support\n"
+         "#\n"
+         "lha_test=lha t \"%%s\"\n"
+         "lha_extract=lha efi \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
+         "#\n"
+         "# LZH support\n"
+         "#\n"
+         "lzh_test=lha t \"%%s\"\n"
+         "lzh_extract=lha efi \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
+         "#\n"
+         "# ZIP support\n"
+         "#\n"
+         "zip_test=unzip -t \"%%s\"\n"
+         "zip_extract=unzip -xojC \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
+         "#\n"
+         "# RAR support\n"
+         "#\n"
+         "rar_test=unrar t \"%%s\"\n"
+         "rar_extract=unrar x \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
+         "#\n"
+         "# ACE support\n"
+         "#\n"
+         "ace_test=unace t \"%%s\"\n"
+         "ace_extract=unace e \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
+         "#\n"
+         "# TXT/NFO/FAQ support\n"
+         "#\n"
+         "txt_extract=txtextract \"%%s\"\n"
+         "nfo_extract=txtextract \"%%s\"\n"
+         "faq_extract=txtextract \"%%s\"\n"
+         "#\n"
+         "# MP3 (ID3) support\n"
+         "#\n"
+         "mp3_extract=id3extract \"%%s\"\n",
+         FLC_VERSION);
 
-      if (!(fh = fopen (flc.configfile, "wb")))
-        {
-          printf ("FAILED\n\n");
+  fclose (fh);
+  printf ("OK\n\n");
 
-          return -1;
-        }
-      else
-        {
-          fprintf (fh, "# flc config\n"
-                 "#\n"
-                 "version=%d\n"
-                 "#\n"
-                 "# LHA support\n"
-                 "#\n"
-                 "lha_test=lha t \"%%s\"\n"
-                 "lha_extract=lha efi \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
-                 "#\n"
-                 "# LZH support\n"
-                 "#\n"
-                 "lzh_test=lha t \"%%s\"\n"
-                 "lzh_extract=lha efi \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
-                 "#\n"
-                 "# ZIP support\n"
-                 "#\n"
-                 "zip_test=unzip -t \"%%s\"\n"
-                 "zip_extract=unzip -xojC \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
-                 "#\n"
-                 "# RAR support\n"
-                 "#\n"
-                 "rar_test=unrar t \"%%s\"\n"
-                 "rar_extract=unrar x \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
-                 "#\n"
-                 "# ACE support\n"
-                 "#\n"
-                 "ace_test=unace t \"%%s\"\n"
-                 "ace_extract=unace e \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
-                 "#\n"
-                 "# TXT/NFO/FAQ support\n"
-                 "#\n"
-                 "txt_extract=txtextract \"%%s\"\n"
-                 "nfo_extract=txtextract \"%%s\"\n"
-                 "faq_extract=txtextract \"%%s\"\n"
-                 "#\n"
-                 "# MP3 (ID3) support\n"
-                 "#\n"
-                 "mp3_extract=id3extract \"%%s\"\n",
-                 FLC_VERSION);
-
-          fclose (fh);
-          printf ("OK\n\n");
-        }
-
-      return 0;
-    }
   return 0;
 }

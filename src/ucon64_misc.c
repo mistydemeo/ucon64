@@ -33,19 +33,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <dirent.h>
 #endif
 #include <sys/stat.h>
-#if     defined __unix__ || defined __BEOS__ || defined AMIGA || HAVE_UNISTD_H
-  #include <unistd.h>                           // ioperm() (libc5)
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>                             // ioperm() (libc5)
 #endif
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #ifdef  PARALLEL
-  #ifdef  __FreeBSD__
-    #include <machine/sysarch.h>
-  #elif   defined __linux__
-    #ifdef  __GLIBC__
-      #include <sys/io.h>                       // ioperm() (glibc)
-    #endif
-  #elif   defined __BEOS__ || defined AMIGA
-    #include <fcntl.h>
-  #endif
+#ifdef  __FreeBSD__
+#include <machine/sysarch.h>
+#elif   defined __linux__ && defined __GLIBC__
+#include <sys/io.h>                             // ioperm() (glibc)
+#elif   defined __BEOS__ || defined AMIGA
+#include <fcntl.h>
+#elif   defined _WIN32
+#include <conio.h>                              // inp{w}() & outp{w}()
+#include "dlopen.h"
+#elif   defined __CYGWIN__
+#include "dlopen.h"
+#endif
 #endif // PARALLEL
 
 #include "misc.h"
@@ -982,6 +989,9 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 #ifndef _WIN32
   struct stat finfo1, finfo2;
 
+  if (access (filename1, R_OK) != 0 || access (filename2, R_OK) != 0)
+    return -1;
+
   // Not the name, but the combination inode & device identify a file.
   stat (filename1, &finfo1);
   stat (filename2, &finfo2);
@@ -1006,9 +1016,6 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
       (finfo2.nFileIndexHigh << 16 | finfo2.nFileIndexLow))
     return -2;                                  // one file
 #endif
-
-  if (access (filename1, R_OK) != 0 || access (filename2, R_OK) != 0)
-    return -1;
 
   fsize1 = q_fsize (filename1);                 // q_fsize() returns size in bytes
   fsize2 = q_fsize (filename2);
@@ -1226,9 +1233,6 @@ i386_output_word (unsigned short port, unsigned short word)
 
 
 #if     defined _WIN32
-#include <conio.h>
-#include "dlopen.h"
-
 // The following four functions are needed because inp{w} and outp{w} seem to be macros
 // __stdcall is used, because the functions in inpout32.dll also use that attribute
 unsigned char __stdcall inp_func (unsigned short port) { return (unsigned char) inp (port); }
@@ -1243,8 +1247,6 @@ void (__stdcall *output_byte) (unsigned short, unsigned char) = outp_func;
 void (*output_word) (unsigned short, unsigned short) = outpw_func;
 
 #elif   defined __CYGWIN__
-#include "dlopen.h"
-
 void *inpout32;
 unsigned char (__stdcall *input_byte) (unsigned short) = i386_input_byte;
 unsigned short (*input_word) (unsigned short) = i386_input_word;

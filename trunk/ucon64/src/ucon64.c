@@ -294,7 +294,7 @@ main (int argc, char **argv)
 
   ucon64_configfile ();
 
-  ucon64.show_nfo = UCON64_SHOW_NFO_BEFORE;
+  ucon64.show_nfo = UCON64_YES;
 
   ucon64.buheader_len =
   ucon64.interleaved =
@@ -338,38 +338,18 @@ main (int argc, char **argv)
 #endif
 
   if (!ucon64_init (ucon64.rom, &rom))
-    switch (ucon64.show_nfo)
-      {
-         case UCON64_SHOW_NFO_BEFORE:
-         case UCON64_SHOW_NFO_BEFORE_AND_AFTER:
-           ucon64_nfo (&rom);
-           break;
-    
-         case UCON64_SHOW_NFO_AFTER:
-         case UCON64_SHOW_NFO_NEVER:
-         default:
-           break;
-      }
+    if (ucon64.show_nfo == UCON64_YES) ucon64_nfo (&rom);
+  ucon64.show_nfo = UCON64_NO;
 
-  optind = option_index = 0;//TODO is there a better way to "reset"?
+  optind = option_index = 0;
 
   while ((c = getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
     {
 #include "options.h"
     }
 
-  switch (ucon64.show_nfo)
-    {
-       case UCON64_SHOW_NFO_BEFORE_AND_AFTER:
-       case UCON64_SHOW_NFO_AFTER:
-         if (!ucon64_init (ucon64.rom, &rom)) ucon64_nfo (&rom);
-         break;
-
-       case UCON64_SHOW_NFO_BEFORE:
-       case UCON64_SHOW_NFO_NEVER:
-       default:
-         break;
-    }
+  if (ucon64.show_nfo == UCON64_YES)
+    if (!ucon64_init (ucon64.rom, &rom)) ucon64_nfo (&rom);
 
   return 0;
 }

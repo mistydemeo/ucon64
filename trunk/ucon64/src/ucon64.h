@@ -260,10 +260,6 @@ typedef struct st_ucon64
   int backup;			//flag if backups files (*.bak) should be created
   int frontend;			//flag if uCON64 was started by a frontend
 
-#define UCON64_SHOW_NFO_NEVER -1
-#define UCON64_SHOW_NFO_BEFORE 0
-#define UCON64_SHOW_NFO_AFTER 1
-#define UCON64_SHOW_NFO_BEFORE_AND_AFTER 2
   int show_nfo;                 //show or skip info output for ROM
 
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)

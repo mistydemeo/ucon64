@@ -520,6 +520,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XGD3, UCON64_SNES, gd_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM}, // supports split files
   {UCON64_XLIT, UCON64_GB, lynxit_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XMCCL, UCON64_LYNX, mccl_usage,      WF_DEFAULT|WF_STOP|WF_NO_ROM},
+  {UCON64_XMD, UCON64_GEN, md_usage,           WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XMDS, UCON64_GEN, md_usage,          WF_STOP|WF_NO_ROM},
 #if 0
   {UCON64_XSMD, UCON64_UNKNOWN, smd_usage,     WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XSMDS, UCON64_UNKNOWN, smd_usage,    WF_STOP|WF_NO_ROM},

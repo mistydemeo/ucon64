@@ -318,6 +318,8 @@ const struct option options[] = {
     {"xgd3", 0, 0, UCON64_XGD3},
     {"xlit", 0, 0, UCON64_XLIT},
     {"xmccl", 0, 0, UCON64_XMCCL},
+    {"xmd", 0, 0, UCON64_XMD},
+    {"xmds", 0, 0, UCON64_XMDS},
     {"xsmd", 0, 0, UCON64_XSMD},
     {"xsmds", 0, 0, UCON64_XSMDS},
     {"xswc", 0, 0, UCON64_XSWC},
@@ -1502,11 +1504,12 @@ ucon64_usage (int argc, char *argv[])
     {UCON64_GEN, {genesis_usage,
 #ifdef  PARALLEL
         smd_usage,
+        md_usage,
 //        mgd_usage,
 #else
-      0,
+      0, 0,
 #endif // PARALLEL
-      0, 0, 0, 0}},
+      0, 0, 0}},
     {UCON64_GB, {gameboy_usage,
 #ifdef  PARALLEL
         gbx_usage,

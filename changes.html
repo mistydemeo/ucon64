@@ -158,7 +158,8 @@ The original uCON for SNES and Genesis was written by Chicken & chp in ~1995<br>
   (by dbjh)<br>
 - added (SNES) -dint convert ROM to non-interleaved format (by dbjh)<br>
 - added 2830 new ROMs to internal ROM database (by NoisyB)<br>
-- added (Genesis) -xsmd send/receive ROM to/from Super Magic Drive/SMD; --file=PORT (by NoisyB)<br>
+- added (Genesis) -xsmd send/receive ROM to/from Super Magic Drive/SMD;
+  --file=PORT (by NoisyB)<br>
 - added (Genesis) -xsmds send/receive SRAM to/from Super Magic Drive/SMD;
   --file=PORT (by NoisyB)<br>
 - added support for CD based consoles again; uCON64 now uses cdrdao as burn
@@ -421,7 +422,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - added (SNES) support for native Super UFO file format (by John and dbjh) Use
   -ufo to convert a file to Super UFO format, use -s to split the resulting
   file (required for HiROM games)<br>
-- updated (SMS) -mgd is recognised again, -sms won't crash uCON64 anymore and
+- updated (SMS) -mgd is recognised again, -smd won't crash uCON64 anymore and
   -smds calls the SMS function when -sms is specified (by dbjh)<br>
 - updated (SMS) -sms in no longer required for SMD files, they are
   automatically detected (by dbjh)<br>
@@ -445,6 +446,11 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - removed (NES) support for bad FDS DAT files. If you really want to use FDS
   DAT files created by tools that erroneously include the header in the CRC32
   calculation, use the switch -nhd (by dbjh)<br>
+<!--
+- added (Genesis) -xmd &amp; -xmds send ROM/SRAM to MD-PRO flash card
+  programmer (by dbjh and NoisyB with many thanks to timofonic and of course
+  ToToTEK Multi Media for providing us with the necessary information) <br>
+-->
 <br>
 <br>
 <br>

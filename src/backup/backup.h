@@ -38,6 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "interceptor.h"
 #include "lynxit.h"
 #include "mccl.h"
+#include "md.h"
 #include "mgd.h"
 //#include "psxpblib.h"
 #include "smd.h"

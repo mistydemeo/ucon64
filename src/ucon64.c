@@ -458,7 +458,8 @@ main (int argc, char **argv)
   ucon64.mirror =
   ucon64.use_dump_info =
   ucon64.console =
-  ucon64.do_not_calc_crc = UCON64_UNKNOWN;
+  ucon64.do_not_calc_crc =
+  ucon64.crc_big_files = UCON64_UNKNOWN;
 
   ucon64.rom =
   ucon64.file =
@@ -804,6 +805,9 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       // Calculating the CRC for the ROM data of a UNIF file (NES) shouldn't
       //  be done with q_fcrc32(). nes_init() uses mem_crc32().
       if (ucon64.crc32 == 0)
+//        if (ucon64.do_not_calc_crc != UCON64_UNKNOWN)
+          if (ucon64.crc_big_files != UCON64_UNKNOWN ||
+            UCON64_TYPE_ISROM (ucon64.type))
         ucon64.crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
 
       if (ucon64.dat_enabled)

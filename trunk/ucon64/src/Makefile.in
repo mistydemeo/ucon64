@@ -185,7 +185,18 @@ unzip.o: unzip.h
 misc.o: map.c map.h misc.h config.h
 quick_io.o: quick_io.h misc.h config.h
 dlopen.o: dlopen.h dxedll_pub.h config.h
-ucon64.o: switches.c options.c dlopen.h $(UCON64_STD_H)
+ucon64.o: switches.c options.c dlopen.h getopt.h ucon64_dat.h \
+          libdiscmage/libdiscmage.h \
+          console/snes.h console/gb.h console/gba.h console/n64.h \
+          console/lynx.h console/sms.h console/nes.h console/genesis.h \
+          console/pce.h console/neogeo.h console/ngp.h console/swan.h \
+          console/dc.h console/jaguar.h console/psx.h \
+          patch/ppf.h patch/xps.h patch/pal4u.h patch/aps.h patch/ips.h \
+          patch/bsl.h patch/gg.h \
+          backup/fig.h backup/swc.h backup/doctor64jr.h backup/doctor64.h \
+          backup/smd.h backup/fal.h backup/gbx.h backup/cd64.h backup/dex.h \
+          backup/fpl.h backup/mgd.h backup/gd.h backup/mccl.h backup/lynxit.h \
+          $(UCON64_STD_H)
 ucon64_misc.o: libdiscmage/libdiscmage.h $(UCON64_STD_H)
 ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)
 console/gb.o: console/gb.h $(UCON64_STD_H)
@@ -218,8 +229,8 @@ backup/fpl.o: backup/fpl.h $(UCON64_STD_H)
 backup/gbx.o: backup/gbx.h $(UCON64_STD_H)
 backup/gd.o: backup/gd.h console/snes.h $(UCON64_STD_H)
 backup/mgd.o: backup/mgd.h $(UCON64_STD_H)
-backup/smd.o: backup/smd.h $(UCON64_STD_H)
-backup/swc.o: backup/swc.h $(UCON64_STD_H)
+backup/smd.o: backup/smd.h backup/ffe.h $(UCON64_STD_H)
+backup/swc.o: backup/swc.h backup/ffe.h console/snes.h $(UCON64_STD_H)
 backup/cd64.o: backup/cd64.h $(UCON64_STD_H)
 backup/dex.o: backup/dex.h backup/psxpblib.h $(UCON64_STD_H)
 backup/mccl.o: backup/mccl.h $(UCON64_STD_H)

@@ -22,11 +22,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define FFE_H
 
 /*
-    0      - Low byte of 8kB page count
-             SMD: 16kB page count
-    1      - High byte of 8kB page count
-             SMD: File ID code 0 (3, not: high byte of 16kB page count)
-    2      - Emulation Mode Select
+    0      - Low byte of 8 kB page count
+             SMD: 16 kB page count
+    1      - High byte of 8 kB page count
+             SMD: File ID code 0 (3, not: high byte of 16 kB page count)
+    2      - Emulation mode select
              Bit 7 6 5 4 3 2 1 0
                  x               : 0 = Run program in mode 1 (JMP RESET Vector)
                                  : 1 = Run in mode 0 (JMP $8000)
@@ -39,12 +39,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                                      0 = DRAM mapping mode 20 (LoROM)
                                      1 = mode 21 (HiROM)
                          x x     : SWC & SMC:
-                                     00 = 256kb SRAM, 01 = 64kb, 10 = 16kb, 11 = no SRAM
+                                     00 = 256 kb SRAM, 01 = 64 kb, 10 = 16 kb, 11 = no SRAM
                                    PCE (bit 2):
                                      0 = Run in mode 3
                                      1 = Run in mode 2 (JMP Reset)
                              x   : 0 = Disable, 1 = Enable external cartridge memory
-                                   image at bank 205F,A0 System Mode 2/3)
+                                   image at bank 205F,A0 system mode 2/3)
                                x : reserved
     3-7    - 0, reserved
     8      - File ID code 1 (0xaa)
@@ -53,7 +53,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
              2 : Magic Griffin program (PC Engine)
              3 : Magic Griffin SRAM data
              4 : SNES program
-             5 : SWC & SMC password, SRAM data, Saver data
+             5 : SWC & SMC password, SRAM data, saver data
              6 : Megadrive program
              7 : SMD SRAM data
     11-511 - 0, reserved

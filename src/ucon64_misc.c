@@ -217,23 +217,6 @@ long filetestpad(	char *filename
 }
 
 #ifdef BACKUP
-/*
-void out1byte(unsigned int port, unsigned char c)
-{
-  __asm__ volatile ("outb %0,%1"
-		    ::"a" ((char) c), "d"((unsigned short) port));
-}
-
-unsigned char in1byte(unsigned int port)
-{
-  char _v;
-  __asm__ volatile ("inb %1,%0"
-		    :"=a" (_v):"d"((unsigned short) port));
-
-  return _v;
-}
-*/
-
 unsigned char inportb(unsigned short port)
 {
   unsigned char byte;
@@ -316,10 +299,6 @@ int detectParPort(unsigned int port)
 #define getParPort(x) parport_probe(x)
 unsigned int parport_probe(unsigned int port)
 {
-#ifdef	__UNIX__
-  uid_t uid;
-  gid_t gid;
-#endif
   unsigned int parPortAddresses[] = {0x3bc, 0x378, 0x278};
   int i;
 
@@ -357,22 +336,7 @@ unsigned int parport_probe(unsigned int port)
     }                                           //  causes core dump
 #endif
     outportb(port + PARPORT_CONTROL, inportb(port + PARPORT_CONTROL) & 0x0f);
-                                                // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
-#ifdef __UNIX__
-    uid = getuid();
-    if (setuid(uid) == -1)
-    {
-      fprintf(stderr, "Could not set uid\n");
-      exit(1);
-    }
-    gid = getgid();                             // This shouldn't be necessary if `make install'
-    if (setgid(uid) == -1)                      //  was used, but just in case (root did `chmod +s')
-    {
-      fprintf(stderr, "Could not set gid\n");
-      exit(1);
-    }
-#endif
-  }
+  }                                             // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 
   return port;
 }

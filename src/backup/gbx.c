@@ -21,14 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "gbx.h"
 #include <stdio.h>
 
-#ifdef __linux__
-#ifdef __GLIBC__
-#include <sys/io.h>				// ioperm() (glibc)
-#else
-#include <unistd.h>				// ioperm() (libc5)
-#endif
-#endif
-
 extern char *file_name;
 extern char pocket_camera;
 extern unsigned long maxfilesize;
@@ -171,25 +163,7 @@ void init_xchanger(void)
 //#include <zlib.h>
 #include <sys/stat.h>
 /*
-#ifndef WIN32
-
-#include <sys/io.h>
-#include <unistd.h>
-static void outportb(unsigned short int port, unsigned char val)
-{
-	__asm__ volatile ("outb %0,%1\n"::"a" (val), "d"(port)
-		);
-}
-
-static int inportb(short port)
-{
-	unsigned char val;
-	__asm__ volatile ("inb %1,%0":"=a" (val)
-					  :"d"((unsigned short) port)
-		);
-	return val;
-}
-#else
+#ifdef WIN32
 
 #include <dos.h>
 #include <io.h>

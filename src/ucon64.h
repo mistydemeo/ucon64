@@ -23,6 +23,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifndef UCON64_H
+#define UCON64_H
+
 #include "ucon64_misc.h"
 
 #define ucon64_KNOWN		-1
@@ -77,3 +80,5 @@ int ucon64_usage(int argc,char *argv[]);
 int ucon64_probe(int argc,char *argv[]);
 
 unsigned int ucon64_parport;
+
+#endif                                          // #ifndef UCON64_H

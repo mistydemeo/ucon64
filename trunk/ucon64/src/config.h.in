@@ -99,6 +99,9 @@
 /* enable support for parallel port backup units (default: yes) */
 #undef PARALLEL
 
+/* use ppdev for parallel port I/O (default: no) */
+#undef PPDEV
+
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 

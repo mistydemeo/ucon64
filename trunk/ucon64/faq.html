@@ -201,13 +201,15 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    - whether uCON64 will produce debug output (default: no)<br>
    - whether uCON64 will have support for parallel port backup units (default:
    yes)<br>
+   - whether uCON64 will use the ppdev interface for parallel port I/O (default:
+   no)<br>
    - whether uCON64 will be able to use color in its display output (default:
    yes)<br>
-   - whether uCON64 will be able to read .gz and .zip files (default: not if a
-   Makefile "template" is used, see below)<br>
-   - whether uCON64 will be able to use the discmage library (default: yes)<br>
    - whether add-on libraries will be dynamically loaded or linked (default:
    loaded)<br>
+   - whether uCON64 will be able to use the discmage library (default: yes)<br>
+   - whether uCON64 will be able to read .gz and .zip files (default: not if a
+   Makefile "template" is used, see below)<br>
 <br>
    The presence or settings of these features is controlled by the header file
    config.h in combination with the makefiles. There are two ways to create a
@@ -307,11 +309,11 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    &nbsp;&nbsp; make install<br>
 <br>
    Under Unix this command will ask for root's password, because uCON64 needs
-   to be setuid root for parallel port access. If you configured uCON64 without
-   support for parallel port backup units, uCON64 need not be setuid root. Just
-   copy ucon64 to any directory you like. However, by default "make install"
-   will try to copy ucon64 to the directory /usr/local/bin, which also requires
-   root access.<br>
+   to be setuid root for parallel port access and because regular users usually
+   do not have write access in the default installation directory,
+   /usr/local/bin. If you configured uCON64 without support for parallel port
+   backup units or if you configured it to use ppdev, uCON64 need not be setuid
+   root. Just copy ucon64 to any directory you like.<br>
    Under Mac OS X it is usual to install programs in /usr/bin. You can override
    the default destination directory /usr/local/bin by setting the environment
    variable DESTDIR. So, in order to install uCON64 in the directory /usr/bin
@@ -502,7 +504,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
   </tr>
   <tr>
     <td><tt>parport_dev</tt></td>
-    <td><tt>name of parallel port device (only used on AmigaOS)</tt></td>
+    <td><tt>name of parallel port device (AmigaOS or Unix with ppdev)</tt></td>
   </tr>
   <tr>
     <td><tt>parport</tt></td>

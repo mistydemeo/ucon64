@@ -41,15 +41,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 #ifdef  PARALLEL
-#if     defined __linux__ && defined __GLIBC__
+#ifdef  PPDEV
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/time.h>
+#ifdef  __linux__
+#include <linux/ppdev.h>
+#include <linux/parport.h>
+#endif
+#elif   defined __linux__ && defined __GLIBC__  // PPDEV
 #ifdef  HAVE_SYS_IO_H                           // necessary for some Linux/PPC configs
 #include <sys/io.h>                             // ioperm() (glibc), in{b, w}(), out{b, w}()
 #else
 #error No sys/io.h; configure with --disable-parallel
 #endif
-#elif   defined __BEOS__ || defined __FreeBSD__
+#elif   defined __BEOS__ || defined __FreeBSD__ // __linux__ && __GLIBC__
 #include <fcntl.h>
-#elif   defined AMIGA
+#elif   defined AMIGA                           // __BEOS__ || __FreeBSD__
 #include <fcntl.h>
 #include <exec/types.h>
 #include <exec/io.h>
@@ -57,10 +65,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <dos/dos.h>
 #include <dos/var.h>
 #include <devices/parallel.h>
-#elif   defined _WIN32
+#elif   defined _WIN32                          // AMIGA
 #include <conio.h>                              // inp{w}() & outp{w}()
 #include "dlopen.h"
-#elif   defined __CYGWIN__
+#elif   defined __CYGWIN__                      // _WIN32
 #include <windows.h>                            // definition of WINAPI
 #undef  _WIN32
 #include "dlopen.h"
@@ -906,17 +914,21 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
 
 #ifdef   PARALLEL
 
-#if     defined __BEOS__ || defined __FreeBSD__
+#if     defined PPDEV || defined __BEOS__ || defined __FreeBSD__
 static int ucon64_io_fd;
+static int ucon64_io_direction;
+#endif
 
+#ifdef  __BEOS__
 typedef struct st_ioport
 {
   unsigned int port;
   unsigned char data8;
   unsigned short data16;
 } st_ioport_t;
+#endif
 
-#elif   defined AMIGA
+#ifdef  AMIGA
 static struct IOStdReq *ucon64_io_req;
 static struct MsgPort *ucon64_parport;
 #endif
@@ -1382,7 +1394,7 @@ void (*output_word) (unsigned short, unsigned short) = outpw_func;
 #endif // defined _WIN32 || defined __CYGWIN__
 
 
-#if     defined __BEOS__ || defined AMIGA || defined __FreeBSD__
+#if     defined PPDEV || defined __BEOS__ || defined __FreeBSD__ || defined AMIGA
 void
 close_io_port (void)
 {
@@ -1392,6 +1404,9 @@ close_io_port (void)
   DeletePort (ucon64_parport);
   ucon64_io_req = NULL;
 #else
+#ifdef  PPDEV
+  ioctl (ucon64_io_fd, PPRELEASE);
+#endif
   close (ucon64_io_fd);
 #endif
 }
@@ -1401,7 +1416,34 @@ close_io_port (void)
 unsigned char
 inportb (unsigned short port)
 {
-#if     defined __BEOS__
+#ifdef  PPDEV
+  int ppreg = port - ucon64.parport;
+  unsigned char byte;
+
+  switch (ppreg)
+    {
+    case 0:                                     // data
+      if (ucon64_io_direction == 0)             // dir is forward?
+        {
+          ucon64_io_direction = 1;              // change it to reverse
+          ioctl (ucon64_io_fd, PPDATADIR, &ucon64_io_direction);
+        }
+      ioctl (ucon64_io_fd, PPRDATA, &byte);
+      break;
+    case 1:                                     // status
+      ioctl (ucon64_io_fd, PPRSTATUS, &byte);
+      break;
+    case 2:                                     // control
+      ioctl (ucon64_io_fd, PPRCONTROL, &byte);
+      break;
+    default:
+      fprintf (stderr,
+               "ERROR: inportb() tried to read from an unsupported port (0x%x)\n",
+               port);
+      exit (1);
+    }
+  return byte;
+#elif   defined __BEOS__
   st_ioport_t temp;
 
   temp.port = port;
@@ -1454,7 +1496,35 @@ inportb (unsigned short port)
 unsigned short
 inportw (unsigned short port)
 {
-#if     defined __BEOS__
+#ifdef  PPDEV
+  // TODO: Find out if it is even possible to read words via ppdev
+  int ppreg = port - ucon64.parport;
+  unsigned short word;
+
+  switch (ppreg)
+    {
+    case 0:                                     // data
+      if (ucon64_io_direction == 0)             // dir is forward?
+        {
+          ucon64_io_direction = 1;              // change it to reverse
+          ioctl (ucon64_io_fd, PPDATADIR, &ucon64_io_direction);
+        }
+      ioctl (ucon64_io_fd, PPRDATA, &word);
+      break;
+    case 1:                                     // status
+      ioctl (ucon64_io_fd, PPRSTATUS, &word);
+      break;
+    case 2:                                     // control
+      ioctl (ucon64_io_fd, PPRCONTROL, &word);
+      break;
+    default:
+      fprintf (stderr,
+               "ERROR: inportw() tried to read from an unsupported port (0x%x)\n",
+               port);
+      exit (1);
+    }
+  return word;
+#elif   defined __BEOS__
   st_ioport_t temp;
 
   temp.port = port;
@@ -1498,7 +1568,29 @@ inportw (unsigned short port)
 void
 outportb (unsigned short port, unsigned char byte)
 {
-#if     defined __BEOS__
+#ifdef  PPDEV
+  int ppreg = port - ucon64.parport;
+
+  switch (ppreg)
+    {
+    case 0:                                     // data
+      if (ucon64_io_direction == 1)             // dir is reverse?
+        {
+          ucon64_io_direction = 0;              // change it to forward
+          ioctl (ucon64_io_fd, PPDATADIR, &ucon64_io_direction);
+        }
+      ioctl (ucon64_io_fd, PPWDATA, &byte);
+      break;
+    case 2:                                     // control
+      ioctl (ucon64_io_fd, PPWCONTROL, &byte);
+      break;
+    default:
+      fprintf (stderr,
+               "ERROR: outportb() tried to write to an unsupported port (0x%x)\n",
+               port);
+      exit (1);
+    }
+#elif   defined __BEOS__
   st_ioport_t temp;
 
   temp.port = port;
@@ -1541,7 +1633,30 @@ outportb (unsigned short port, unsigned char byte)
 void
 outportw (unsigned short port, unsigned short word)
 {
-#if     defined __BEOS__
+#ifdef  PPDEV
+  // TODO: Find out if it is even possible to write words via ppdev
+  int ppreg = port - ucon64.parport;
+
+  switch (ppreg)
+    {
+    case 0:                                     // data
+      if (ucon64_io_direction == 1)             // dir is reverse?
+        {
+          ucon64_io_direction = 0;              // change it to forward
+          ioctl (ucon64_io_fd, PPDATADIR, &ucon64_io_direction);
+        }
+      ioctl (ucon64_io_fd, PPWDATA, &word);
+      break;
+    case 2:                                     // control
+      ioctl (ucon64_io_fd, PPWCONTROL, &word);
+      break;
+    default:
+      fprintf (stderr,
+               "ERROR: outportw() tried to write to an unsupported port (0x%x)\n",
+               port);
+      exit (1);
+    }
+#elif   defined __BEOS__
   st_ioport_t temp;
 
   temp.port = port;
@@ -1610,7 +1725,44 @@ ucon64_parport_probe (unsigned int port)
 int
 ucon64_parport_init (int port)
 {
-#if     defined __BEOS__
+#ifdef  PPDEV
+  struct timeval t;
+  int capabilities = 0, ucon64_parport;
+
+  if (port == UCON64_UNKNOWN)
+    port = 0;
+
+  ucon64_io_fd = open (ucon64.parport_dev, O_RDWR | O_NONBLOCK);
+  if (ucon64_io_fd == -1)
+    {
+      fprintf (stderr, "ERROR: Could not open parallel port device (%s)\n"
+                       "       Check if you have the required privileges\n",
+                       ucon64.parport_dev);
+      exit (1);
+    }
+
+  ioctl (ucon64_io_fd, PPEXCL);                 // disable sharing
+  ioctl (ucon64_io_fd, PPCLAIM);
+  t.tv_sec = 0;
+  t.tv_usec = 500 * 1000;                       // set time-out to 500 milliseconds
+  ioctl (ucon64_io_fd, PPSETTIME, &t);
+/*
+  ioctl (ucon64_io_fd, PPGETTIME, &t);
+  printf ("Current time-out value: %ld micro seconds\n", t.tv_usec);
+
+  ioctl (ucon64_io_fd, PPGETMODES, &capabilities);
+  printf ("Capabilities: %x\n", capabilities);
+*/
+  if (capabilities & PARPORT_MODE_ECP)
+    ioctl (ucon64_io_fd, PPSETMODE, IEEE1284_MODE_ECP);
+  else if (capabilities & PARPORT_MODE_EPP)
+    ioctl (ucon64_io_fd, PPSETMODE, IEEE1284_MODE_EPP);
+  else
+    ioctl (ucon64_io_fd, PPSETMODE, IEEE1284_MODE_BYTE);
+
+  ucon64_io_direction = 0;                      // set forward direction as default
+  ioctl (ucon64_io_fd, PPDATADIR, &ucon64_io_direction);
+#elif   defined __BEOS__
   ucon64_io_fd = open ("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
   if (ucon64_io_fd == -1)
     {
@@ -1682,7 +1834,8 @@ ucon64_parport_init (int port)
       exit (1);
     }
 #endif
-#if     defined __BEOS__ || defined __FreeBSD__
+
+#if     defined PPDEV || defined __BEOS__ || defined __FreeBSD__
   if (atexit (close_io_port) == -1)
     {
       close (ucon64_io_fd);
@@ -1691,9 +1844,8 @@ ucon64_parport_init (int port)
     }
 #endif
 
-#if     defined __linux__ && !defined __powerpc__
+#if     defined __linux__ && !defined __powerpc__ && !defined PPDEV
   /*
-    TODO: find out requirements for Linux/PPC
     Some code needs us to switch to the real uid and gid. However, other code
     needs access to I/O ports other than the standard printer port registers.
     We just do an iopl(3) and all code should be happy. Using iopl(3) enables
@@ -1711,9 +1863,9 @@ ucon64_parport_init (int port)
                        "       (This program needs root privileges for the requested action)\n");
       exit (1);                                 // Don't return, if iopl() fails port access
     }                                           //  causes core dump
-#endif // __linux__ && !__powerpc__
+#endif // __linux__ && !__powerpc__ && !PPDEV
 
-#if     defined __i386__ || defined _WIN32
+#if     (defined __i386__ || defined _WIN32) && !defined PPDEV
 
 #if     defined _WIN32 || defined __CYGWIN__
   /*
@@ -1815,11 +1967,19 @@ ucon64_parport_init (int port)
           exit (1);
         }
     }
-#endif // __i386__ || _WIN32
+#endif // (__i386__ || _WIN32) && !PPDEV
 
+#ifdef  PPDEV
+  // the following two calls need a valid value for ucon64.parport
+  ucon64_parport = ucon64.parport;
+  ucon64.parport = port;
+#endif
   outportb ((unsigned short) (port + PARPORT_CONTROL),
             (unsigned char) (inportb ((unsigned short) (port + PARPORT_CONTROL)) & 0x0f));
   // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
+#ifdef  PPDEV
+  ucon64.parport = ucon64_parport;
+#endif
 
   return port;
 }
@@ -1938,7 +2098,9 @@ ucon64_configfile (void)
                    "#\n"
                    "# parallel port\n"
                    "#\n"
-#ifdef  AMIGA
+#ifdef  PPDEV
+                   "#parport_dev=/dev/parport0\n"
+#elif   defined AMIGA
                    "#parport_dev=parallel.device\n"
                    "#parport=0\n"
 #else
@@ -2121,43 +2283,43 @@ ucon64_rename (int mode)
 
   switch (mode)
     {
-      case UCON64_RROM:
-        if (ucon64.rominfo)
-          if (ucon64.rominfo->name)
-            {
-              strcpy (buf, ucon64.rominfo->name);
-              strtrim (buf);
-            }
-        break;
+    case UCON64_RROM:
+      if (ucon64.rominfo)
+        if (ucon64.rominfo->name)
+          {
+            strcpy (buf, ucon64.rominfo->name);
+            strtrim (buf);
+          }
+      break;
 
-      case UCON64_RENAME:                       // GoodXXXX style rename
-        if (ucon64.dat)
-          if (ucon64.dat->fname)
-            {
-              p = (char *) get_suffix (ucon64.dat->fname);
-              strcpy (buf, ucon64.dat->fname);
+    case UCON64_RENAME:                         // GoodXXXX style rename
+      if (ucon64.dat)
+        if (ucon64.dat->fname)
+          {
+            p = (char *) get_suffix (ucon64.dat->fname);
+            strcpy (buf, ucon64.dat->fname);
 
-              // get_suffix() never returns NULL
-              if (p[0])
-                if (strlen (p) < 5)
-                  if (!(stricmp (p, ".nes") &&  // NES
-                        stricmp (p, ".fds") &&  // NES FDS
-                        stricmp (p, ".gb") &&   // Game Boy
-                        stricmp (p, ".gbc") &&  // Game Boy Color
-                        stricmp (p, ".gba") &&  // Game Boy Advance
-                        stricmp (p, ".smc") &&  // SNES
-                        stricmp (p, ".sc") &&   // Sega Master System
-                        stricmp (p, ".sg") &&   // Sega Master System
-                        stricmp (p, ".sms") &&  // Sega Master System
-                        stricmp (p, ".gg") &&   // Game Gear
-//                      stricmp (p, ".smd") &&  // Genesis
-                        stricmp (p, ".v64")))   // Nintendo 64
-                    buf[strlen (buf) - strlen (p)] = 0;
-            }
-        break;
+            // get_suffix() never returns NULL
+            if (p[0])
+              if (strlen (p) < 5)
+                if (!(stricmp (p, ".nes") &&    // NES
+                      stricmp (p, ".fds") &&    // NES FDS
+                      stricmp (p, ".gb") &&     // Game Boy
+                      stricmp (p, ".gbc") &&    // Game Boy Color
+                      stricmp (p, ".gba") &&    // Game Boy Advance
+                      stricmp (p, ".smc") &&    // SNES
+                      stricmp (p, ".sc") &&     // Sega Master System
+                      stricmp (p, ".sg") &&     // Sega Master System
+                      stricmp (p, ".sms") &&    // Sega Master System
+                      stricmp (p, ".gg") &&     // Game Gear
+//                    stricmp (p, ".smd") &&    // Genesis
+                      stricmp (p, ".v64")))     // Nintendo 64
+                  buf[strlen (buf) - strlen (p)] = 0;
+          }
+      break;
 
-      default:
-        return 0;                               // invalid mode
+    default:
+      return 0;                                 // invalid mode
     }
 
   if (!buf[0])

@@ -828,10 +828,11 @@ Optional Features:
   --enable-debug          enable debug output (default: no)
   --enable-parallel       enable support for parallel port backup units
                           (default: yes)
-  --enable-discmage       enable libdiscmage (default: yes)
+  --enable-ppdev          use ppdev for parallel port I/O (default: no)
+  --enable-ansi-color     enable usage of color (default: yes)
   --enable-dload          enable dynamic loading of add-on libraries (default:
                           yes)
-  --enable-ansi-color     enable usage of color (default: yes)
+  --enable-discmage       enable libdiscmage (default: yes)
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -2051,26 +2052,44 @@ echo "${ECHO_T}$enable_parallel" >&6
 
 
 
-echo "$as_me:$LINENO: checking whether libdiscmage is enabled" >&5
-echo $ECHO_N "checking whether libdiscmage is enabled... $ECHO_C" >&6
-# Check whether --enable-discmage or --disable-discmage was given.
-if test "${enable_discmage+set}" = set; then
-  enableval="$enable_discmage"
-  enable_discmage=$enableval
+echo "$as_me:$LINENO: checking whether to use ppdev" >&5
+echo $ECHO_N "checking whether to use ppdev... $ECHO_C" >&6
+# Check whether --enable-ppdev or --disable-ppdev was given.
+if test "${enable_ppdev+set}" = set; then
+  enableval="$enable_ppdev"
+  enable_ppdev=$enableval
 else
-  enable_discmage=yes
+  enable_ppdev=no
 fi;
-if test $enable_discmage = yes; then
+if test $enable_ppdev = yes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define DISCMAGE 1
+#define PPDEV 1
 _ACEOF
 
-  DEFINE_DISCMAGE_MAKE="DISCMAGE=1"
 fi
-echo "$as_me:$LINENO: result: $enable_discmage" >&5
-echo "${ECHO_T}$enable_discmage" >&6
+echo "$as_me:$LINENO: result: $enable_ppdev" >&5
+echo "${ECHO_T}$enable_ppdev" >&6
 
+
+echo "$as_me:$LINENO: checking whether the use of color is enabled" >&5
+echo $ECHO_N "checking whether the use of color is enabled... $ECHO_C" >&6
+# Check whether --enable-ansi_color or --disable-ansi_color was given.
+if test "${enable_ansi_color+set}" = set; then
+  enableval="$enable_ansi_color"
+  enable_ansi_color=$enableval
+else
+  enable_ansi_color=yes
+fi;
+if test $enable_ansi_color = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define ANSI_COLOR 1
+_ACEOF
+
+fi
+echo "$as_me:$LINENO: result: $enable_ansi_color" >&5
+echo "${ECHO_T}$enable_ansi_color" >&6
 
 
 echo "$as_me:$LINENO: checking whether add-on libraries are dynamically loaded" >&5
@@ -2095,24 +2114,26 @@ echo "${ECHO_T}$enable_dload" >&6
 
 
 
-echo "$as_me:$LINENO: checking whether the use of color is enabled" >&5
-echo $ECHO_N "checking whether the use of color is enabled... $ECHO_C" >&6
-# Check whether --enable-ansi_color or --disable-ansi_color was given.
-if test "${enable_ansi_color+set}" = set; then
-  enableval="$enable_ansi_color"
-  enable_ansi_color=$enableval
+echo "$as_me:$LINENO: checking whether libdiscmage is enabled" >&5
+echo $ECHO_N "checking whether libdiscmage is enabled... $ECHO_C" >&6
+# Check whether --enable-discmage or --disable-discmage was given.
+if test "${enable_discmage+set}" = set; then
+  enableval="$enable_discmage"
+  enable_discmage=$enableval
 else
-  enable_ansi_color=yes
+  enable_discmage=yes
 fi;
-if test $enable_ansi_color = yes; then
+if test $enable_discmage = yes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define ANSI_COLOR 1
+#define DISCMAGE 1
 _ACEOF
 
+  DEFINE_DISCMAGE_MAKE="DISCMAGE=1"
 fi
-echo "$as_me:$LINENO: result: $enable_ansi_color" >&5
-echo "${ECHO_T}$enable_ansi_color" >&6
+echo "$as_me:$LINENO: result: $enable_discmage" >&5
+echo "${ECHO_T}$enable_discmage" >&6
+
 
 
 echo "$as_me:$LINENO: checking for zlib" >&5
@@ -4372,8 +4393,8 @@ s,@ac_ct_CC@,$ac_ct_CC,;t t
 s,@EXEEXT@,$EXEEXT,;t t
 s,@OBJEXT@,$OBJEXT,;t t
 s,@CPP@,$CPP,;t t
-s,@DEFINE_DISCMAGE_MAKE@,$DEFINE_DISCMAGE_MAKE,;t t
 s,@DEFINE_DLOPEN_MAKE@,$DEFINE_DLOPEN_MAKE,;t t
+s,@DEFINE_DISCMAGE_MAKE@,$DEFINE_DISCMAGE_MAKE,;t t
 s,@DEFINE_ZLIB_MAKE@,$DEFINE_ZLIB_MAKE,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@RANLIB@,$RANLIB,;t t

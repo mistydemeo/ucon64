@@ -141,7 +141,6 @@ main (int argc, char *argv[])
                     
   if (flc.html)
     printf ("<html><head><title></title></head><body><pre><tt>");
-
   if (optind < argc)
     {
       while (optind < argc)

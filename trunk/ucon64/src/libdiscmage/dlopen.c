@@ -95,9 +95,12 @@ open_module (char *module_name)
   // initialize functions
   sym->printf = printf;
   sym->fprintf = fprintf;
+  sym->vfprintf = vfprintf;
   sym->sprintf = sprintf;
+  sym->vsprintf = vsprintf;
   sym->fputs = fputs;
   sym->fopen = fopen;
+  sym->fdopen = fdopen;
   sym->fclose = fclose;
   sym->fseek = fseek;
   sym->fread = fread;
@@ -112,6 +115,7 @@ open_module (char *module_name)
 
   sym->free = free;
   sym->malloc = malloc;
+  sym->calloc = calloc;
   sym->exit = exit;
   sym->strtol = strtol;
   sym->getenv = getenv;
@@ -133,12 +137,10 @@ open_module (char *module_name)
   sym->strcspn = strcspn;
   sym->strlen = strlen;
 
-  sym->stat = stat;
-  sym->time = time;
-  sym->delay = delay;
-  sym->__dpmi_int = __dpmi_int;
   sym->tolower = tolower;
-  
+  sym->toupper = toupper;
+  sym->isupper = isupper;
+
   sym->opendir = opendir;
   sym->readdir = readdir;
   sym->closedir = closedir;
@@ -149,7 +151,14 @@ open_module (char *module_name)
   sym->chdir = chdir;
   sym->getcwd = getcwd;
   
+  sym->stat = stat;
+  sym->mkdir = mkdir;
+  sym->time = time;
+  sym->delay = delay;
+  sym->__dpmi_int = __dpmi_int;
+
 #ifdef  HAVE_ZLIB_H
+#if 0
   // zlib functions
   sym->gzopen = gzopen;
   sym->gzclose = gzclose;
@@ -174,6 +183,7 @@ open_module (char *module_name)
   sym->unzReadCurrentFile = unzReadCurrentFile;
   sym->unztell = unztell;
   sym->unzGetCurrentFileInfo = unzGetCurrentFileInfo;
+#endif
 #endif
 
   // initialize variables

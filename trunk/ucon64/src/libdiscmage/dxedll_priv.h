@@ -32,7 +32,9 @@ extern st_symbol_t import_export;
 
 #define printf import_export.printf
 #define fprintf import_export.fprintf
+#define vfprintf import_export.vfprintf
 #define sprintf import_export.sprintf
+#define vsprintf import_export.vsprintf
 #define fputs import_export.fputs
 
 #ifndef HAVE_ZLIB_H
@@ -50,12 +52,16 @@ extern st_symbol_t import_export;
 #endif
 #endif
 
+#define fdopen import_export.fdopen
 #define ftell import_export.ftell
+#define rewind import_export.rewind
 #define fflush import_export.fflush
+#define ferror import_export.ferror
 #define rename import_export.rename
 
 #define free import_export.free
 #define malloc import_export.malloc
+#define calloc import_export.calloc
 #define exit import_export.exit
 #define strtol import_export.strtol
 #define getenv import_export.getenv
@@ -77,14 +83,12 @@ extern st_symbol_t import_export;
 #define strcspn import_export.strcspn
 #define strlen import_export.strlen
 
-// We have to do this, because there's also a struct stat
-// TODO?: do this for all #defines in this file.
-#define stat(FILE, STATBUF) import_export.stat(FILE, STATBUF)
-#define time import_export.time
-#define delay import_export.delay
-#define __dpmi_int import_export.__dpmi_int
 #undef  tolower
 #define tolower import_export.tolower
+#undef  toupper
+#define toupper import_export.toupper
+#undef  isupper
+#define isupper import_export.isupper
 
 #define opendir import_export.opendir
 #define readdir import_export.readdir
@@ -95,8 +99,18 @@ extern st_symbol_t import_export;
 #define isatty import_export.isatty
 #define chdir import_export.chdir
 #define getcwd import_export.getcwd
+#define getuid import_export.getuid
+
+// We have to do this, because there's also a struct stat
+// TODO?: do this for all #defines in this file.
+#define stat(FILE, STATBUF) import_export.stat(FILE, STATBUF)
+#define mkdir import_export.mkdir
+#define time import_export.time
+#define delay import_export.delay
+#define __dpmi_int import_export.__dpmi_int
 
 // zlib functions
+#if 0
 #define gzopen import_export.gzopen
 #define gzclose import_export.gzclose
 #define gzwrite import_export.gzwrite
@@ -120,6 +134,7 @@ extern st_symbol_t import_export;
 #define unzReadCurrentFile import_export.unzReadCurrentFile
 #define unztell import_export.unztell
 #define unzGetCurrentFileInfo import_export.unzGetCurrentFileInfo
+#endif
 
 // variables
 #define __dj_stdin import_export.__dj_stdin
@@ -128,7 +143,7 @@ extern st_symbol_t import_export;
 #define __dj_ctype_flags import_export.__dj_ctype_flags
 #define __dj_ctype_tolower import_export.__dj_ctype_tolower
 #define __dj_ctype_toupper import_export.__dj_ctype_toupper
-#define errno import_export.errno
+//#define errno import_export.errno
 
 #ifdef __cplusplus
 }

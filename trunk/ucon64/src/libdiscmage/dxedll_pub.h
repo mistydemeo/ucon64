@@ -29,8 +29,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <dirent.h>
 #include <unistd.h>
-#include <dos.h>
+#include <stdarg.h>
 #include <ctype.h>
+#include <dos.h>
 #include <dpmi.h>
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
@@ -59,12 +60,16 @@ typedef struct st_symbol
   */
   int (*printf) (const char *, ...);
   int (*fprintf) (FILE *, const char *, ...);
+  int (*vfprintf) (FILE *, const char *, va_list);
   int (*sprintf) (char *, const char *, ...);
+  int (*vsprintf) (char *, const char *, va_list);
   int (*fputs) (const char *, FILE *);
   FILE *(*fopen) (const char *, const char *);
+  FILE *(*fdopen) (int, const char *);
   int (*fclose) (FILE *);
   int (*fseek) (FILE *, long, int);
   long (*ftell) (FILE *);
+  void (*rewind) (FILE *);
   size_t (*fread) (void *, size_t, size_t, FILE *);
   size_t (*fwrite) (const void *, size_t, size_t, FILE *);
   int (*fgetc) (FILE *file);
@@ -72,10 +77,12 @@ typedef struct st_symbol
   int (*feof) (FILE *file);
   int (*fputc) (int character, FILE *file);
   int (*fflush) (FILE *);
+  int (*ferror) (FILE *);
   int (*rename) (const char *, const char *);
 
   void (*free) (void *);
   void *(*malloc) (size_t);
+  void *(*calloc) (size_t, size_t);
   void (*exit) (int);
   long (*strtol) (const char *, char **, int);
   char *(*getenv) (const char *);
@@ -97,23 +104,31 @@ typedef struct st_symbol
   size_t (*strcspn) (const char *, const char *);
   size_t (*strlen) (const char *);
 
-  int (*stat) (const char *, struct stat *);
-  time_t (*time) (time_t *);
-  void (*delay) (unsigned);
-  int (*__dpmi_int) (int, __dpmi_regs *);
   int (*tolower) (int);
+  int (*toupper) (int);
+  int (*isupper) (int);
   
   DIR *(*opendir) (const char *);
   struct dirent *(*readdir) (DIR *);
   int (*closedir) (DIR *);
+  
+  // va_start(), va_arg() and va_end() are macros
   
   int (*access) (const char *, int);
   int (*rmdir) (const char *);
   int (*isatty) (int);
   int (*chdir) (const char *);
   char *(*getcwd) (char *, size_t);
+  int (*getuid) (void);
+
+  int (*stat) (const char *, struct stat *);
+  int (*mkdir) (const char *, mode_t);
+  time_t (*time) (time_t *);
+  void (*delay) (unsigned);
+  int (*__dpmi_int) (int, __dpmi_regs *);
 
 #ifdef  HAVE_ZLIB_H
+#if 0
   // zlib functions
   gzFile (*gzopen) (const char *path, const char *mode);
   int (*gzclose) (gzFile file);
@@ -141,6 +156,7 @@ typedef struct st_symbol
                                 char *szFileName, uLong fileNameBufferSize,
                                 void *extraField, uLong extraFieldBufferSize,
                                 char *szComment, uLong commentBufferSize);
+#endif
 #endif // HAVE_ZLIB_H
 
   // Put all variables AFTER the functions. This makes it easy to catch

@@ -1174,6 +1174,9 @@ int ucon64_usage(int argc,char *argv[])
 	"  -c            compare ROMs for differencies; $FILE=OTHER_ROM\n"
 	"  -cs           compare ROMs for similarities; $FILE=OTHER_ROM\n"
 	"  -swap         swap/(de)interleave ALL Bytes in ROM (1234<->2143)\n"
+#ifdef CD
+	"  -r2i          convert RAW to ISO9660; $ROM=RAW_IMAGE\n"
+#endif
 	"  -ispad        check if ROM is padded\n"
 	"  -pad          pad ROM to full Mb\n"
 	"  -padhd        pad ROM to full Mb (regarding to +512 Bytes header)\n"
@@ -1240,7 +1243,6 @@ else
 	"  -iso		force image is ISO9660 (2048 Bytes/Sector)\n"
 	"  -raw		force image is RAW (2352 Bytes/Sector)\n"
 	"  *		show info (default); ONLY $ROM=RAW_IMAGE\n"
-	"  -r2i		convert RAW to ISO9660; $ROM=RAW_IMAGE\n"
   ,dc_TITLE
   ,ps2_TITLE
   ,saturn_TITLE
@@ -1287,7 +1289,9 @@ printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 #ifndef DB
 "; NEEDED"
 #endif
-	"\n  *		show info (default)\n\n"
+	"\n  -hd           force ROM has header (+512 Bytes)\n"
+	"  -nhd          force ROM has no header\n"
+    	"  *		show info (default)\n\n"
 ,system16_TITLE
 ,atari_TITLE
 ,coleco_TITLE

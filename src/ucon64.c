@@ -1613,6 +1613,9 @@ ucon64_console_probe (st_rom_t *rominfo)
 /*
   these <console>_init() functions can detect the ROM and the correct console
   by significant bytes
+  NOTE: if a <console>_init() function returns -1, it should leave rominfo
+        in the same state as when it received it (force options)
+        use ucon64_save_rominfo() & ucon64_restore_rominfo()
 */
             (!nes_init (rominfo)) ? UCON64_NES :
             (!gameboy_init (rominfo)) ? UCON64_GB :

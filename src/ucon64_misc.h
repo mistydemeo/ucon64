@@ -120,4 +120,7 @@ extern unsigned int ucon64_parport_probe (unsigned int parport);
 extern int ucon64_bin2iso (const char *image, int track_mode);
 extern int ucon64_trackmode_probe (const char *image);
 
+extern void ucon64_save_rominfo (st_rom_t *rominfo);
+extern int ucon64_restore_rominfo (int result, st_rom_t *rominfo);
+
 #endif // #ifndef UCON64_MISC_H

@@ -939,8 +939,7 @@ ucon64_rom_handling (void)
       all. However we only know the console type after probing.
     */
     if (ucon64.console == UCON64_NES || ucon64.console == UCON64_SNES ||
-        ucon64.console == UCON64_GEN || /* ucon64.console == UCON64_SMS || TODO: Think about this - dbjh */
-        ucon64.console == UCON64_NG)
+        ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG)
       if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.rom))
         {
           fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n",

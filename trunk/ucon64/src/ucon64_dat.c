@@ -149,12 +149,12 @@ const st_getopt2_t ucon64_dat_usage[] =
     },
     {
       "rl", 0, 0, UCON64_RL,
-      NULL, "rename all ROMs to lowercase",
+      NULL, "rename ROMs to lowercase",
       NULL
     },
     {
       "ru", 0, 0, UCON64_RU,
-      NULL, "rename all ROMs to uppercase",
+      NULL, "rename ROMs to uppercase",
       NULL
     },
 #if 0

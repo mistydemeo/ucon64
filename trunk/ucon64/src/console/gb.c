@@ -232,7 +232,7 @@ gameboy_n2gb (st_rominfo_t *rominfo, const char *nesrom)
     }
   ucon64_fread (buf, 0, ucon64.file_size, ucon64.rom);
   ucon64_fread (rominfo->buheader_len + buf + 0x4000, INES_HEADER_LEN,
-           0x4000 + 0x2000, nesrom);            // read PRG & CHR data
+                0x4000 + 0x2000, nesrom);       // read PRG & CHR data
 
   for (n = 0; n < ucon64.file_size - rominfo->buheader_len; n++)
     {
@@ -284,7 +284,7 @@ gameboy_convert_data (st_rominfo_t *rominfo, unsigned char *conversion_table,
 int
 gameboy_gbx (st_rominfo_t *rominfo)
 {
-  unsigned char gbx2gbc[] = 
+  unsigned char gbx2gbc[] =
     {
       0xB4, 0xBC, 0xA4, 0xAC, 0x94, 0x9C, 0x84, 0x8C,
       0xF4, 0xFC, 0xE4, 0xEC, 0xD4, 0xDC, 0xC4, 0xCC,
@@ -380,7 +380,7 @@ gameboy_n (st_rominfo_t *rominfo, const char *name)
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   ucon64_fwrite (buf, rominfo->buheader_len + GAMEBOY_HEADER_START + 0x34,
-            GB_NAME_LEN, dest_name, "r+b");
+                 GB_NAME_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -400,7 +400,7 @@ gameboy_chk (st_rominfo_t *rominfo)
   buf[1] = rominfo->current_internal_crc >> 8;
   buf[2] = rominfo->current_internal_crc;
   ucon64_fwrite (buf, rominfo->buheader_len + GAMEBOY_HEADER_START + 0x4d, 3,
-            dest_name, "r+b");
+                 dest_name, "r+b");
 
   dumper (stdout, buf, 3, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d, DUMPER_HEX);
 
@@ -525,7 +525,7 @@ gameboy_init (st_rominfo_t *rominfo)
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
   ucon64_fread (&gameboy_header, rominfo->buheader_len + GAMEBOY_HEADER_START,
-           GAMEBOY_HEADER_LEN, ucon64.rom);
+                GAMEBOY_HEADER_LEN, ucon64.rom);
   if (gameboy_header.opcode1 == 0x00 && gameboy_header.opcode2 == 0xc3)
     result = 0;
   else
@@ -534,7 +534,7 @@ gameboy_init (st_rominfo_t *rominfo)
         ucon64.buheader_len : (int) SSC_HEADER_LEN;
 
       ucon64_fread (&gameboy_header, rominfo->buheader_len + GAMEBOY_HEADER_START,
-               GAMEBOY_HEADER_LEN, ucon64.rom);
+                    GAMEBOY_HEADER_LEN, ucon64.rom);
       if (gameboy_header.opcode1 == 0x00 && gameboy_header.opcode2 == 0xc3)
         result = 0;
       else
@@ -693,12 +693,13 @@ gameboy_chksum (st_rominfo_t *rominfo)
     }
   ucon64_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
 
-  for (i = 0; i < size; i++)
-    sum.value += rom_buffer[i];
-  sum.value -= rom_buffer[GAMEBOY_HEADER_START + 0x4e] +
-               rom_buffer[GAMEBOY_HEADER_START + 0x4f];
   for (i = GAMEBOY_HEADER_START + 0x34; i < GAMEBOY_HEADER_START + 0x4d; i++)
     sum.header += ~rom_buffer[i];
+  for (i = 0; i < size; i++)
+    sum.value += rom_buffer[i];
+  sum.value -= (rom_buffer[GAMEBOY_HEADER_START + 0x4d] - sum.header) +
+               rom_buffer[GAMEBOY_HEADER_START + 0x4e] +
+               rom_buffer[GAMEBOY_HEADER_START + 0x4f];
 
   free (rom_buffer);
 

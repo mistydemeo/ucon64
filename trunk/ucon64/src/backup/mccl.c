@@ -87,8 +87,7 @@ const st_getopt2_t mccl_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xmccl", 0, 0, UCON64_XMCCL,
-      NULL, "send/receive BYTES to/from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT\n"
-      "currently only receiving is supported",
+      NULL, "receives from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT",
       &ucon64_wf[WF_OBJ_GB_DEFAULT_STOP_NO_ROM]
     },
 #endif

@@ -105,7 +105,7 @@ const st_getopt2_t genesis_usage[] =
     },
     {
       "bin", 0, 0, UCON64_BIN,
-      NULL, "convert to binary format/BIN/RAW",
+      NULL, "convert to Magicom/BIN/RAW",
       &ucon64_wf[WF_OBJ_GEN_DEFAULT_NO_SPLIT]
     },
     {
@@ -148,7 +148,7 @@ const st_getopt2_t genesis_usage[] =
     },
     {
       "s", 0, 0, UCON64_S,
-      NULL, "split ROM; default part size is 4 Mb",
+      NULL, "split ROM; default part size is 8 Mb (4 Mb for SMD)",
       &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
     },
     {
@@ -195,7 +195,7 @@ const st_getopt2_t bin_usage[] =
   {
     {
       NULL, 0, 0, 0,
-      NULL, "Binary file/BIN/RAW"/*"Emulator format?"*/,
+      NULL, "Magicom/BIN/RAW",
       NULL
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -506,7 +506,6 @@ genesis_mgd (st_rominfo_t *rominfo)
 }
 
 
-#define PARTSIZE  (4 * MBIT)                    // default split part size
 int
 genesis_s (st_rominfo_t *rominfo)
 {
@@ -514,12 +513,6 @@ genesis_s (st_rominfo_t *rominfo)
   char dest_name[FILENAME_MAX], *p;
   int x, nparts, surplus, size = ucon64.file_size - rominfo->buheader_len,
       part_size;
-
-  if (type == BIN)
-    {
-      fprintf (stderr, "ERROR: Splitting binary files is not supported\n");
-      return -1;
-    }
 
   if (UCON64_ISSET (ucon64.part_size))
     {
@@ -533,7 +526,12 @@ genesis_s (st_rominfo_t *rominfo)
         }
     }
   else
-    part_size = PARTSIZE;
+    {
+      if (type == SMD)
+        part_size = 4 * MBIT;                   // SMD uses 4 Mb parts
+      else
+        part_size = 8 * MBIT;                   // MGD and Magicom ("BIN") use
+    }                                           //  8 Mb parts
 
   if (size <= part_size)
     {
@@ -562,7 +560,7 @@ genesis_s (st_rominfo_t *rominfo)
       for (x = 0; x < nparts; x++)
         {
           if (surplus == 0 && x == nparts - 1)
-            smd_header.split = 0;               // last file -> clear bit 6
+            smd_header.split &= ~0x40;          // last file -> clear bit 6
 
           // don't write backups of parts, because one name is used
           ucon64_fwrite (&smd_header, 0, SMD_HEADER_LEN, dest_name, "wb");
@@ -575,7 +573,7 @@ genesis_s (st_rominfo_t *rominfo)
       if (surplus != 0)
         {
           smd_header.size = surplus / 16384;
-          smd_header.split = 0;                 // last file -> clear bit 6
+          smd_header.split &= ~0x40;            // last file -> clear bit 6
 
           // don't write backups of parts, because one name is used
           ucon64_fwrite (&smd_header, 0, SMD_HEADER_LEN, dest_name, "wb");
@@ -583,7 +581,7 @@ genesis_s (st_rominfo_t *rominfo)
           printf (ucon64_msg[WROTE], dest_name);
         }
     }
-  else // type == MGD_GEN
+  else if (type == MGD_GEN)
     {
       char suffix[5], *p_index, name[9], *names[16], names_mem[16][9];
       int n, offset, size, name_i = 0;
@@ -631,6 +629,30 @@ genesis_s (st_rominfo_t *rominfo)
         }
       mgd_write_index_file (names, name_i);
     }
+  else // type == BIN
+    {
+      strcpy (dest_name, ucon64.rom);
+      set_suffix (dest_name, ".r01");
+      ucon64_output_fname (dest_name, 0);
+      p = strrchr (dest_name, '.') + 3;
+
+      for (x = 0; x < nparts; x++)
+        {
+          if (surplus == 0 && x == nparts - 1)
+            *p = '0';                           // last file should have suffix ".r00"
+          fcopy (ucon64.rom, x * part_size + rominfo->buheader_len, part_size, dest_name, "wb");
+          printf (ucon64_msg[WROTE], dest_name);
+          (*p)++;
+        }
+
+      if (surplus != 0)
+        {
+          *p = '0';
+          fcopy (ucon64.rom, x * part_size + rominfo->buheader_len, surplus, dest_name, "wb");
+          printf (ucon64_msg[WROTE], dest_name);
+        }
+    }
+
   return 0;
 }
 
@@ -641,22 +663,16 @@ genesis_j (st_rominfo_t *rominfo)
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *p;
   int block_size, total_size = 0;
 
-  if (type == BIN)
-    {
-      fprintf (stderr, "ERROR: Joining binary files is not supported\n");
-      return -1;
-    }
-
   if (type == SMD)
     {
       unsigned char buf[3];
 
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".smd");
-      strcpy (src_name, ucon64.rom);
       ucon64_file_handler (dest_name, NULL, 0);
-      p = strrchr (src_name, '.') + 1;
 
+      strcpy (src_name, ucon64.rom);
+      p = strrchr (src_name, '.') + 1;
       fcopy (src_name, 0, rominfo->buheader_len, dest_name, "wb");
       block_size = ucon64.file_size - rominfo->buheader_len;
       while (fcopy (src_name, rominfo->buheader_len, block_size, dest_name, "ab") != -1)
@@ -669,7 +685,7 @@ genesis_j (st_rominfo_t *rominfo)
 
       if (rominfo->buheader_len)
         {                                       // fix header
-          buf[0] = total_size / 16384;          // # 16K blocks
+          buf[0] = total_size / 16384;          // # 16 kB blocks
           buf[1] = 3;                           // ID 0
           buf[2] = 0;                           // last file -> clear bit 6
           ucon64_fwrite (buf, 0, 3, dest_name, "r+b");
@@ -681,7 +697,7 @@ genesis_j (st_rominfo_t *rominfo)
 
       printf (ucon64_msg[WROTE], dest_name);
     }
-  else // type == MGD_GEN
+  else if (type == MGD_GEN)
     {
       /*
         file1 file2 file3 file4
@@ -714,6 +730,36 @@ genesis_j (st_rominfo_t *rominfo)
           (*p)++;                               //  previous loop
           // BUG ALERT: Assume all parts have the same header length
           block_size = (fsizeof (src_name) - rominfo->buheader_len) / 2;
+        }
+
+      printf (ucon64_msg[WROTE], dest_name);
+    }
+  else if (type == BIN)
+    {
+      int tried_r00 = 0;
+
+      strcpy (dest_name, ucon64.rom);
+      set_suffix (dest_name, ".bin");
+      ucon64_file_handler (dest_name, NULL, 0);
+      remove (dest_name);
+
+      strcpy (src_name, ucon64.rom);
+      p = strrchr (src_name, '.') + 3;
+      *(p - 1) = '0';                           // be user friendly and avoid confusion
+      *p = '1';                                 //  (.r01 is first file, not .r00)
+      block_size = ucon64.file_size - rominfo->buheader_len;
+      while (fcopy (src_name, rominfo->buheader_len, block_size, dest_name, "ab") != -1)
+        {
+          printf ("Joined: %s\n", src_name);
+          if (tried_r00)
+            break;                              // quit after joining last file
+          (*p)++;
+          if (!tried_r00 && access (src_name, F_OK) != 0)
+            {                                   // file does not exist -> try .r00
+              *p = '0';
+              tried_r00 = 1;
+            }
+          block_size = fsizeof (src_name) - rominfo->buheader_len;
         }
 
       printf (ucon64_msg[WROTE], dest_name);
@@ -957,7 +1003,7 @@ load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
         mgd_deinterleave (&rom_buffer, bytesread, genesis_rom_size);
     }
 
-  if (ucon64.crc32 == 0)                        // Calculate the CRC32 only once
+  if (ucon64.crc32 == 0)                        // calculate the CRC32 only once
     ucon64.crc32 = crc32 (0, rom_buffer, bytesread);
 
   fclose (file);
@@ -1282,103 +1328,112 @@ int
 genesis_init (st_rominfo_t *rominfo)
 {
   int result = -1, value = 0, x, y;
-  unsigned char *rom_buffer = NULL, buf[MAXBUFSIZE], name[GENESIS_NAME_LEN + 1];
+  unsigned char *rom_buffer = NULL, buf[MAXBUFSIZE], name[GENESIS_NAME_LEN + 1],
+                smd_header_split;
   static char maker[9], country[200]; // 200 characters should be enough for 5 country names
-  static const char *genesis_maker[0x100] = {
-    NULL, "Accolade/Infogrames", "Virgin Games", "Parker Brothers", "Westone",
-    NULL, NULL, NULL, NULL, "Westone",
-    "Takara", "Taito/Accolade", "Capcom", "Data East", "Namco/Tengen",
-    "Sunsoft", "Bandai", "Dempa", "Technosoft", "Technosoft",
-    "Asmik", NULL, "Extreme/Micronet", "Vic Tokai", "American Sammy",
-    "NCS", "Sigma Enterprises", "Toho", NULL, "Kyugo",
-    NULL, NULL, "Wolfteam", "Kaneko", NULL,
-    "Toaplan", "Tecmo", NULL, NULL, NULL,
-    "Toaplan", "Unipac", "UFL Company Ltd.", "Human", NULL,
-    "Game Arts", "Hot-B", "Sage's Creation", "Tengen/Time Warner", "Renovation/Telenet",
-    "Electronic Arts", NULL, NULL, NULL, NULL,
-    "Psygnosis", "Razorsoft", NULL, "Mentrix", NULL,
-    "JVC/Victor Musical Industries", NULL, NULL, NULL, "IGS Corp.",
-    NULL, NULL, "CRI/Home Data", "Arena", "Virgin Games",
-    NULL, "Nichibutsu", NULL, "Soft Vision", "Palsoft",
-    NULL, "KOEI", NULL, NULL, "U.S. Gold",
-    NULL, "Acclaim/Flying Edge", NULL, "Gametek", NULL,
-    NULL, "Absolute", "Mindscape", "Domark", "Parker Brothers",
-    NULL, NULL, NULL, "Sony Imagesoft", "Sony Imagesoft",
-    "Konami", NULL, "Tradewest/Williams", NULL, "Codemasters",
-    "T*HQ Software", "TecMagik", NULL, "Takara", NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, "Hi Tech Entertainment/Designer Software", "Psygnosis", NULL,
-    NULL, NULL, NULL, NULL, "Accolade",
-    "Code Masters", NULL, NULL, NULL, "Spectrum HoloByte",
-    "Interplay", NULL, NULL, NULL, NULL,
-    "Activision", NULL, "Shiny & Playmates", NULL, NULL,
-    NULL, NULL, NULL, NULL, "Viacom International",
-    NULL, NULL, NULL, NULL, "Atlus",
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, "Infogrames", NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, "Fox Interactive", NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, "Psygnosis",
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, "Disney Interactive",
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL},
+  static const char *genesis_maker[0x100] =
+    {
+      NULL, "Accolade/Infogrames", "Virgin Games", "Parker Brothers", "Westone",
+      NULL, NULL, NULL, NULL, "Westone",
+      "Takara", "Taito/Accolade", "Capcom", "Data East", "Namco/Tengen",
+      "Sunsoft", "Bandai", "Dempa", "Technosoft", "Technosoft",
+      "Asmik", NULL, "Extreme/Micronet", "Vic Tokai", "American Sammy",
+      "NCS", "Sigma Enterprises", "Toho", NULL, "Kyugo",
+      NULL, NULL, "Wolfteam", "Kaneko", NULL,
+      "Toaplan", "Tecmo", NULL, NULL, NULL,
+      "Toaplan", "Unipac", "UFL Company Ltd.", "Human", NULL,
+      "Game Arts", "Hot-B", "Sage's Creation", "Tengen/Time Warner",
+        "Renovation/Telenet",
+      "Electronic Arts", NULL, NULL, NULL, NULL,
+      "Psygnosis", "Razorsoft", NULL, "Mentrix", NULL,
+      "JVC/Victor Musical Industries", NULL, NULL, NULL, "IGS Corp.",
+      NULL, NULL, "CRI/Home Data", "Arena", "Virgin Games",
+      NULL, "Nichibutsu", NULL, "Soft Vision", "Palsoft",
+      NULL, "KOEI", NULL, NULL, "U.S. Gold",
+      NULL, "Acclaim/Flying Edge", NULL, "Gametek", NULL,
+      NULL, "Absolute", "Mindscape", "Domark", "Parker Brothers",
+      NULL, NULL, NULL, "Sony Imagesoft", "Sony Imagesoft",
+      "Konami", NULL, "Tradewest/Williams", NULL, "Codemasters",
+      "T*HQ Software", "TecMagik", NULL, "Takara", NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, "Hi Tech Entertainment/Designer Software", "Psygnosis", NULL,
+      NULL, NULL, NULL, NULL, "Accolade",
+      "Code Masters", NULL, NULL, NULL, "Spectrum HoloByte",
+      "Interplay", NULL, NULL, NULL, NULL,
+      "Activision", NULL, "Shiny & Playmates", NULL, NULL,
+      NULL, NULL, NULL, NULL, "Viacom International",
+      NULL, NULL, NULL, NULL, "Atlus",
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, "Infogrames", NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, "Fox Interactive", NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, "Psygnosis",
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, "Disney Interactive",
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL
+    },
 #define GENESIS_COUNTRY_MAX 0x57
-      *genesis_country[GENESIS_COUNTRY_MAX] = {
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, "Brazil", NULL, NULL,           // Brazil NTSC
-    NULL, "Hong Kong", NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    "Asia", "Brazil", NULL, NULL, "Europe",     // Brazil PAL
-    "France", NULL, NULL, NULL, "Japan",
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    "U.S.A.", NULL},
+    *genesis_country[GENESIS_COUNTRY_MAX] =
+    {
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, "Brazil", NULL, NULL,         // Brazil NTSC
+      NULL, "Hong Kong", NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      "Asia", "Brazil", NULL, NULL, "Europe",   // Brazil PAL
+      "France", NULL, NULL, NULL, "Japan",
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      "U.S.A.", NULL
+    },
 #define GENESIS_IO_MAX 0x58
-      *genesis_io[GENESIS_IO_MAX] = {
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, "Joystick for MS", NULL,
-    NULL, NULL, "Team Play", NULL, "6 Button Pad",
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, "Control Ball", "CD-ROM", NULL, NULL,
-    "Floppy Disk Drive", NULL, NULL, NULL, "3 Button Pad",
-    "Keyboard", "Activator", "Mega Mouse", NULL, NULL,
-    "Printer", NULL, "Serial RS232C", NULL, "Tablet",
-    NULL, "Paddle Controller", NULL};
+    *genesis_io[GENESIS_IO_MAX] =
+    {
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, "Joystick for MS", NULL,
+      NULL, NULL, "Team Play", NULL, "6 Button Pad",
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, "Control Ball", "CD-ROM", NULL, NULL,
+      "Floppy Disk Drive", NULL, NULL, NULL, "3 Button Pad",
+      "Keyboard", "Activator", "Mega Mouse", NULL, NULL,
+      "Printer", NULL, "Serial RS232C", NULL, "Tablet",
+      NULL, "Paddle Controller", NULL
+    };
 
   ucon64_fread (buf, 0, 11, ucon64.rom);
+  smd_header_split = buf[2];
   if (buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 7)
     {
       rominfo->buheader_len = SMD_HEADER_LEN;
@@ -1439,6 +1494,44 @@ genesis_init (st_rominfo_t *rominfo)
       genesis_rom_size = ucon64.file_size - rominfo->buheader_len;
       ucon64_fread (&genesis_header, rominfo->buheader_len + GENESIS_HEADER_START,
         GENESIS_HEADER_LEN, ucon64.rom);
+    }
+
+  if (!UCON64_ISSET (ucon64.split))
+    {
+      if (type == SMD)
+        {
+          // This code does not work for the last part of a file
+          int split = 0;
+          if (smd_header_split & 0x40)
+            split = ucon64_testsplit (ucon64.rom);
+          ucon64.split = split;                 // force displayed info to be correct
+        }                                       //  if not split (see ucon64.c)
+      else if (type == BIN)
+        {
+          // This code isn't fool-proof, but it's not that important
+          const char *ptr = get_suffix (ucon64.rom);
+          if (strlen (ptr) == 4 && ptr[1] == 'r' &&
+              ptr[2] >= '0' && ptr[2] <= '9' && ptr[3] >= '0' && ptr[3] <= '9')
+            {
+              int n_parts = 0;
+              char fname[FILENAME_MAX], *digits;
+
+              strcpy (fname, ucon64.rom);
+              digits = fname + strlen (fname) - 2;
+              do
+                {
+                  sprintf (digits, "%02d", n_parts);
+                  if (access (fname, F_OK) == 0)
+                    n_parts++;
+                  else
+                    break;
+                }
+              while (n_parts < 100);
+
+              if (n_parts)
+                ucon64.split = n_parts;
+            }
+        }
     }
 
   if (!memcmp (&OFFSET (genesis_header, 0), "SEGA", 4) ||

@@ -219,7 +219,7 @@ ppf_apply (const char *mod, const char *ppfname)
 
   if (method == 0)                              // PPF 1.0
     {
-      printf ("File_id.diz     : No\n\n");
+      printf ("FILE_ID.DIZ     : No\n\n");
       x = 56;                                   // file pointer is at right position (56)
     }
   else // method == 1                           // PPF 2.0
@@ -229,16 +229,16 @@ ppf_apply (const char *mod, const char *ppfname)
 
       // Is there a file id?
       if (strncmp (".DIZ", buffer, 4))
-        printf ("File_id.diz     : No\n\n");
+        printf ("FILE_ID.DIZ     : No\n\n");
       else
         {
-          printf ("File_id.diz     : Yes, showing...\n");
+          printf ("FILE_ID.DIZ     : Yes, showing...\n");
           fread (&dizlen, 4, 1, ppffile);
 #ifdef  WORDS_BIGENDIAN
-          dizlen = bswap_32 (dizlen);           // file_id.diz size is in little-endian format
+          dizlen = bswap_32 (dizlen);           // FILE_ID.DIZ size is in little-endian format
 #endif
           fseek (ppffile, ppfsize - dizlen - (16 + 4), SEEK_SET);
-          bytes_to_skip = dizlen + 18 + 16 + 4; // +4 for file_id.diz size integer
+          bytes_to_skip = dizlen + 18 + 16 + 4; // +4 for FILE_ID.DIZ size integer
           if (dizlen > MAX_ID_SIZE)
             dizlen = MAX_ID_SIZE;               // do this after setting bytes_to_skip!
           fread (diz, dizlen, 1, ppffile);
@@ -430,7 +430,7 @@ ppf_create (const char *orgname, const char *modname)
       int fsize = fsizeof (fidname);
       if (fsize > MAX_ID_SIZE)
         fsize = MAX_ID_SIZE;                    // File id only up to 3072 bytes!
-      printf ("Adding file_id.diz (%s)...\n", fidname);
+      printf ("Adding FILE_ID.DIZ (%s)...\n", fidname);
       ucon64_fread (buffer, 0, fsize, fidname);
       fwrite ("@BEGIN_FILE_ID.DIZ", 18, 1, ppffile);
       fwrite (buffer, fsize, 1, ppffile);
@@ -479,12 +479,13 @@ ppf_set_fid (const char *ppf, const char *fidname)
   ucon64_file_handler (ppfname, NULL, 0);
   fcopy (ppf, 0, fsizeof (ppf), ppfname, "wb"); // no copy if one file
 
-  printf ("Adding file_id.diz (%s)...\n", fidname);
+  printf ("Adding FILE_ID.DIZ (%s)...\n", fidname);
   fidsize = ucon64_fread (fidbuf + 18, 0, MAX_ID_SIZE, fidname);
   memcpy (fidbuf + 18 + fidsize, "@END_FILE_ID.DIZ", 16);
 
   ppfsize = fsizeof (ppfname);
-  pos = ucon64_find (ppfname, 0, ppfsize, "@BEGIN_FILE_ID.DIZ", 18, MEMMEM2_CASE);
+  pos = ucon64_find (ppfname, 0, ppfsize, "@BEGIN_FILE_ID.DIZ", 18,
+    MEMCMP2_CASE | UCON64_FIND_QUIET);
   if (pos == -1)
     pos = ppfsize;
   truncate (ppfname, pos);

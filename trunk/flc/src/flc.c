@@ -230,7 +230,7 @@ main (int argc, char *argv[])
       file_p->sub.size = puffer.st_size;
       file_p->sub.checked = 'N';
       strcpy (file_p->sub.fullpath, buf);
-      strcpy (file_p->sub.name, FILENAME_ONLY (buf));
+      strcpy (file_p->sub.name, filename_only (buf));
       extract (&file_p->sub);
     }
   (void) closedir (dp);
@@ -307,7 +307,7 @@ flc_configfile (void)
 
   if (!access (flc.configfile, F_OK))
     {
-      if (strtol (getProperty (flc.configfile, "version", buf, "0"), NULL, 10) < FLC_VERSION)
+      if (strtol (get_property (flc.configfile, "version", buf, "0"), NULL, 10) < FLC_VERSION)
         {
           strcpy (buf, flc.configfile);
           setext (buf, ".OLD");

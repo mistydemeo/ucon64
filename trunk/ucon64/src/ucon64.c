@@ -354,7 +354,7 @@ changes to uCON64 to fix this..
         db.name = "";
         ucon64_probe(ucon64_argc, ucon64_argv, &db);
         strftime(buf, 13, "%b %d %H:%M", localtime(&puffer.st_mtime));
-        printf("%-31.31s %10ld %s %s\n", db.name, puffer.st_size, buf, ep->d_name);
+        printf("%-31.31s %10d %s %s\n", db.name, (int) puffer.st_size, buf, ep->d_name);
       }
     }
   }

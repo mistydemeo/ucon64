@@ -70,6 +70,12 @@ write programs in C
 #ifdef  DISCMAGE
 #include "ucon64_dm.h"
 #endif
+#ifdef  GUI
+#include "ucon64_ng.h"
+#endif
+#ifdef  GUI
+#include "ucon64_ng.h"
+#endif
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
@@ -163,6 +169,9 @@ const struct option options[] = {
     {"ggd", 1, 0, UCON64_GGD},
     {"gge", 1, 0, UCON64_GGE},
     {"gp32", 0, 0, UCON64_GP32},
+#ifdef  GUI
+    {"gui", 1, 0, UCON64_GUI},
+#endif
     {"h", 0, 0, UCON64_HELP},
     {"hd", 0, 0, UCON64_HD},
     {"hdn", 1, 0, UCON64_HDN},
@@ -209,7 +218,7 @@ const struct option options[] = {
 #ifdef  DISCMAGE
     {"mksheet", 0, 0, UCON64_MKSHEET},
     {"mktoc", 0, 0, UCON64_MKTOC},
-#endif
+#endif    
     {"multi", 1, 0, UCON64_MULTI},
 //    {"mvs", 0, 0, UCON64_MVS},
     {"n", 1, 0, UCON64_N},
@@ -453,6 +462,18 @@ ucon64_exit (void)
       libdm_close (ucon64.image);
 #endif
 
+#ifdef  GUI
+  if (ucon64.netgui_enabled)
+    if (ucon64.netgui)
+      libng_close (ucon64.netgui);
+#endif
+
+#ifdef  GUI
+  if (ucon64.netgui_enabled)
+    if (ucon64.netgui)
+      libng_close (ucon64.netgui);
+#endif
+
   handle_registered_funcs ();
   fflush (stdout);
 }
@@ -529,6 +550,24 @@ main (int argc, char **argv)
   strcpy (buf, ucon64.configdir);
   realpath2 (buf, ucon64.configdir);
 
+#ifdef  GUI
+  strcpy (ucon64.skindir, get_property (ucon64.configfile, "ucon64_skindir", buf, ""));
+#ifdef  __CYGWIN__
+  strcpy (ucon64.skindir, fix_character_set (ucon64.skindir));
+#endif
+  strcpy (buf, ucon64.skindir);
+  realpath2 (buf, ucon64.skindir);
+#endif
+
+#ifdef  GUI
+  strcpy (ucon64.skindir, get_property (ucon64.configfile, "ucon64_skindir", buf, ""));
+#ifdef  __CYGWIN__
+  strcpy (ucon64.skindir, fix_character_set (ucon64.skindir));
+#endif
+  strcpy (buf, ucon64.skindir);
+  realpath2 (buf, ucon64.skindir);
+#endif
+
   // DAT file handling
   ucon64.dat_enabled = 0;
   strcpy (ucon64.datdir, get_property (ucon64.configfile, "ucon64_datdir", buf, ""));
@@ -569,6 +608,16 @@ main (int argc, char **argv)
 #ifdef  DISCMAGE
   // load libdiscmage
   ucon64.discmage_enabled = ucon64_load_discmage ();
+#endif
+
+#ifdef  GUI
+  // load libnetgui
+  ucon64.netgui_enabled = ucon64_load_netgui ();
+#endif
+
+#ifdef  GUI
+  // load libnetgui
+  ucon64.netgui_enabled = ucon64_load_netgui ();
 #endif
 
   // ucon64.dat_enabled and ucon64.discmage_enabled can affect the usage output
@@ -985,6 +1034,82 @@ ucon64_rom_handling (void)
                    basename2 (ucon64.rom));
           return -1;
         }
+
+#if 0 
+  if (!(ucon64.flags & WF_INIT))
+    return 0;
+
+  // "walk through" <console>_init()
+  if (ucon64.flags & WF_PROBE)
+    {
+      ucon64.rominfo = ucon64_probe (&rominfo); // returns console type
+
+      if (ucon64.rominfo)
+        {
+          // restore any overrides from st_ucon64_t
+          if (UCON64_ISSET (ucon64.buheader_len))
+            rominfo.buheader_len = ucon64.buheader_len;
+
+          if (UCON64_ISSET (ucon64.snes_header_base))
+            rominfo.snes_header_base = ucon64.snes_header_base;
+
+          if (UCON64_ISSET (ucon64.snes_hirom))
+            rominfo.snes_hirom = ucon64.snes_hirom;
+
+          if (UCON64_ISSET (ucon64.interleaved))
+            rominfo.interleaved = ucon64.interleaved;
+
+//          ucon64.rominfo = (st_rominfo_t *) &rominfo;
+        }
+
+#ifdef  DISCMAGE
+      // check for disc image only if ucon64_probe() failed or --disc was used
+      if (ucon64.discmage_enabled)
+//        if (!ucon64.rominfo || ucon64.force_disc)
+        if (ucon64.force_disc)
+          ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
+#endif
+    }
+  // end of WF_PROBE
+#endif
+
+#if 0 
+  if (!(ucon64.flags & WF_INIT))
+    return 0;
+
+  // "walk through" <console>_init()
+  if (ucon64.flags & WF_PROBE)
+    {
+      ucon64.rominfo = ucon64_probe (&rominfo); // returns console type
+
+      if (ucon64.rominfo)
+        {
+          // restore any overrides from st_ucon64_t
+          if (UCON64_ISSET (ucon64.buheader_len))
+            rominfo.buheader_len = ucon64.buheader_len;
+
+          if (UCON64_ISSET (ucon64.snes_header_base))
+            rominfo.snes_header_base = ucon64.snes_header_base;
+
+          if (UCON64_ISSET (ucon64.snes_hirom))
+            rominfo.snes_hirom = ucon64.snes_hirom;
+
+          if (UCON64_ISSET (ucon64.interleaved))
+            rominfo.interleaved = ucon64.interleaved;
+
+//          ucon64.rominfo = (st_rominfo_t *) &rominfo;
+        }
+
+#ifdef  DISCMAGE
+      // check for disc image only if ucon64_probe() failed or --disc was used
+      if (ucon64.discmage_enabled)
+//        if (!ucon64.rominfo || ucon64.force_disc)
+        if (ucon64.force_disc)
+          ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
+#endif
+    }
+  // end of WF_PROBE
+#endif
 
 
   /*

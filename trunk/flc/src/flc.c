@@ -25,12 +25,10 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
+#include "config.h"
 #include "getopt.h"
-
 #include "misc.h"
 #include "flc.h"
-
 #include "extract.h"
 #include "sort.h"
 #include "output.h"
@@ -39,7 +37,7 @@ static void flc_exit(void);
 
 
 
-static void flc_exit(void)
+void flc_exit(void)
 {
   printf("+++EOF");
   fflush(stdout);
@@ -283,10 +281,7 @@ if(flc.html)printf(
 return 0;
 }
 
-
-
-
-extern int flc_usage(int argc, char *argv[])
+int flc_usage(int argc, char *argv[])
 {
 printf(
   "\n%s\n"

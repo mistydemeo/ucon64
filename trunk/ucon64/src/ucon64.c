@@ -845,17 +845,37 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
   return(0);
 }
 
+int ucon64_init_(struct ucon64_ *rom)
+{
+/*    (atari_init(rom)==-1) &&
+    (nes_init(rom)==-1) &&
+    (lynx_init(rom)==-1) &&
+    (jaguar_init(rom)==-1) &&
+    (pcengine_init(rom)==-1) &&
+    (coleco_init(rom)==-1) &&
+    (intelli_init(rom)==-1) &&
+    (neogeo_init(rom)==-1) &&
+    (neogeopocket_init(rom)==-1) &&
+    (sms_init(rom)==-1) &&
+    (system16_init(rom)==-1) &&
+    (virtualboy_init(rom)==-1) &&
+    (vectrex_init(rom)==-1) &&
+    (wonderswan_init(rom)==-1)
+*/	return(0);
+}
+
 int ucon64_init(struct ucon64_ *rom)
 {
   if(
     (supernintendo_init(rom)==-1) &&
     (genesis_init(rom)==-1) &&
     (nintendo64_init(rom)==-1) &&
+    (gameboy_init(rom)==-1) &&
+    (gbadvance_init(rom)==-1) &&
+
     (atari_init(rom)==-1) &&
     (nes_init(rom)==-1) &&
     (lynx_init(rom)==-1) &&
-    (gameboy_init(rom)==-1) &&
-    (gbadvance_init(rom)==-1) &&
     (jaguar_init(rom)==-1) &&
     (pcengine_init(rom)==-1) &&
     (coleco_init(rom)==-1) &&
@@ -910,6 +930,7 @@ int ucon64_usage(int argc,char *argv[])
 	"  -ls           generate ROM list for all ROMs; $ROM=DIRECTORY\n"
 	"  -lsv          like -ls but more verbose; $ROM=DIRECTORY\n"
 //	"TODO:  -rrom    rename all ROMs in DIRECTORY to their internal names; $ROM=DIR\n"
+	"TODO:  -rr83    like -rrom but with 8.3 filenames; $ROM=DIR\n"
 //	"                this is often used by people who loose control of their ROMs\n"
 	"  -rl           rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
 	"  -ru           rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"

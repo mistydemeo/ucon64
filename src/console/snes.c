@@ -2407,13 +2407,13 @@ snes_init (st_rominfo_t *rominfo)
   rominfo->header = &snes_header;
 
   bs_dump = snes_check_bs ();
-  if ( !bs_dump )
+  if (!bs_dump)
   {
     // Might have to check the other header location
-    if ( rominfo->header_start < (SNES_HIROM + SWC_HEADER_LEN) )
+    if (!snes_hirom)
     {
       memcpy (&snes_header, rom_buffer + rominfo->header_start + SNES_HIROM, rominfo->header_len);
-      if ( snes_check_bs () )
+      if (snes_check_bs ())
       {
         bs_dump = 1;
         snes_hirom = SNES_HIROM;

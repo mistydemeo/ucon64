@@ -80,10 +80,10 @@ const st_usage_t gameboy_usage[] =
 */
 typedef struct st_gameboy_header
 {
-  unsigned char id1;                            // 0x00
-  unsigned char id2;                            // 0x01
-  unsigned char start_low;                      // 0x02
-  unsigned char start_high;                     // 0x03
+  unsigned char opcode1;                        // 0x00 usually 0x00, NOP
+  unsigned char opcode2;                        // 0x01 usually 0xc3, JP
+  unsigned char start_low;                      // 0x02 first byte of parameter of JP
+  unsigned char start_high;                     // 0x03 second byte
   unsigned char logo[GB_LOGODATA_LEN];          // 0x04
   unsigned char name[GB_NAME_LEN];              // 0x34
   unsigned char gb_type;                        // 0x43
@@ -458,7 +458,7 @@ gameboy_init (st_rominfo_t *rominfo)
 
   q_fread (&gameboy_header, rominfo->buheader_len + GAMEBOY_HEADER_START,
            GAMEBOY_HEADER_LEN, ucon64.rom);
-  if (gameboy_header.id1 == 0x00 && gameboy_header.id2 == 0xc3)
+  if (gameboy_header.opcode1 == 0x00 && gameboy_header.opcode2 == 0xc3)
     result = 0;
   else
     {
@@ -467,7 +467,7 @@ gameboy_init (st_rominfo_t *rominfo)
 
       q_fread (&gameboy_header, rominfo->buheader_len + GAMEBOY_HEADER_START,
                GAMEBOY_HEADER_LEN, ucon64.rom);
-      if (gameboy_header.id1 == 0x00 && gameboy_header.id2 == 0xc3)
+      if (gameboy_header.opcode1 == 0x00 && gameboy_header.opcode2 == 0xc3)
         result = 0;
       else
         result = -1;

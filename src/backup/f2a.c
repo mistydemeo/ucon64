@@ -116,7 +116,7 @@ static int f2a_boot_usb (const char *ilclient_fname);
 static int f2a_read_usb (int address, int size, const char *filename);
 static int f2a_write_usb (int n_files, char **files, int address);
 
-static usb_dev_handle *f2ahandle;
+static usb_dev_handle *f2a_handle;
 #endif // USE_USB
 
 
@@ -321,16 +321,16 @@ find_f2a:
       return -1;
     }
 
-  f2ahandle = misc_usb_open (f2adev);
+  f2a_handle = misc_usb_open (f2adev);
 
-  result = usb_claim_interface (f2ahandle, 0x4);
+  result = usb_claim_interface (f2a_handle, 0x4);
   if (result == -1)
     {
       fprintf (stderr, "ERROR: Could not claim USB interface\n"
                        "       %s\n", usb_strerror ());
       return -1;
     }
-  result = usb_claim_interface (f2ahandle, 0x83);
+  result = usb_claim_interface (f2a_handle, 0x83);
   if (result == -1)
     {
       fprintf (stderr, "ERROR: Could not claim USB interface\n"
@@ -352,12 +352,12 @@ f2a_info (f2a_recvmsg_t *rm)
 
   sm.command = me2le_32 (CMD_GETINF);
 
-  if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
+  if (misc_usb_write (f2a_handle, (char *) &sm, SENDMSG_SIZE) == -1)
     {
       fprintf (stderr, "ERROR: Could not send info request\n");
       exit (1);
     }
-  if (misc_usb_read (f2ahandle, (char *) rm, sizeof (f2a_recvmsg_t)) == -1)
+  if (misc_usb_read (f2a_handle, (char *) rm, sizeof (f2a_recvmsg_t)) == -1)
     {
       fprintf (stderr, "ERROR: Did not receive info request\n");
       exit (1);
@@ -403,19 +403,19 @@ f2a_boot_usb (const char *ilclient_fname)
   // boot the GBA
   memset (&sm, 0, sizeof (f2a_sendmsg_t));
   sm.command = me2le_32 (CMD_MULTIBOOT1);
-  misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE);
+  misc_usb_write (f2a_handle, (char *) &sm, SENDMSG_SIZE);
   sm.command = me2le_32 (CMD_MULTIBOOT2);
   sm.size = me2le_32 (16 * 1024);
-  misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE);
+  misc_usb_write (f2a_handle, (char *) &sm, SENDMSG_SIZE);
 
   // send the multiboot image
-  if (misc_usb_write (f2ahandle, ilclient, 16 * 1024) == -1)
+  if (misc_usb_write (f2a_handle, ilclient, 16 * 1024) == -1)
     {
       fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
       return -1;
     }
 
-  if (misc_usb_read (f2ahandle, (char *) ack, 16 * 4) == -1)
+  if (misc_usb_read (f2a_handle, (char *) ack, 16 * 4) == -1)
     return -1;
 
   if (ucon64.quiet < 0)
@@ -453,12 +453,12 @@ f2a_read_usb (int address, int size, const char *filename)
   sm.address = me2le_32 (address);
   sm.size = me2le_32 (size);
   sm.sizekb = me2le_32 (size / 1024);
-  if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
+  if (misc_usb_write (f2a_handle, (char *) &sm, SENDMSG_SIZE) == -1)
     return -1;
 
   for (i = 0; i < size; i += 1024)
     {
-      if (misc_usb_read (f2ahandle, buffer, 1024) == -1)
+      if (misc_usb_read (f2a_handle, buffer, 1024) == -1)
         {
           fclose (file);
           return -1;
@@ -500,7 +500,7 @@ f2a_write_usb (int n_files, char **files, int address)
           fprintf (stderr, "ERROR: Unable to load loader binary (%s)\n", loader_fname);
           return -1;
         }
-#if 1 // Overwriting the start address makes sense for some files... - dbjh
+#if 0 // just use a correct loader file - dbjh
       ((int *) loader)[0] = me2be_32 (0x2e0000ea); // start address
 #endif
       memcpy (loader + 4, gba_logodata, GBA_LOGODATA_LEN); // + 4 for start address
@@ -509,10 +509,10 @@ f2a_write_usb (int n_files, char **files, int address)
       sm.address = me2le_32 (address);
       sm.sizekb = me2le_32 (LOADER_SIZE / 1024);
 
-      if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
+      if (misc_usb_write (f2a_handle, (char *) &sm, SENDMSG_SIZE) == -1)
         return -1;
 
-      if (misc_usb_write (f2ahandle, (char *) loader, LOADER_SIZE) == -1)
+      if (misc_usb_write (f2a_handle, (char *) loader, LOADER_SIZE) == -1)
         {
           fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
           return -1;
@@ -545,7 +545,7 @@ f2a_write_usb (int n_files, char **files, int address)
       sm.address = me2le_32 (address);
       sm.sizekb = me2le_32 (size / 1024);
 
-      if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
+      if (misc_usb_write (f2a_handle, (char *) &sm, SENDMSG_SIZE) == -1)
         return -1;
 
       for (i = 0; i < size; i += 1024)
@@ -560,7 +560,7 @@ f2a_write_usb (int n_files, char **files, int address)
               fclose (file);
               return -1;                        // see comment for fopen() call
             }
-          if (misc_usb_write (f2ahandle, buffer, 1024) == -1)
+          if (misc_usb_write (f2a_handle, buffer, 1024) == -1)
             return -1;
           ucon64_gauge (starttime, i + 1024, size);
         }
@@ -838,6 +838,9 @@ f2a_write_par (int n_files, char **files, unsigned int address)
           fprintf (stderr, "ERROR: Unable to load loader binary (%s)\n", loader_fname);
           return -1;
         }
+#if 0 // just use a correct loader file - dbjh
+      ((int *) loader)[0] = me2le_32 (0x2e0000ea); // start address
+#endif
       if (f2a_send_buffer_par (PP_CMD_WRITEROM, address, LOADER_SIZE, loader,
                                HEAD, FLIP, 0, 0))
         {
@@ -1151,13 +1154,9 @@ f2a_send_buffer_par (int cmd, int address, int size, const unsigned char *resour
           ((int *) buffer)[j] = bswap_32 (((int *) buffer)[j]);
 
       if (!i && head)
-        {
-#if 1 // Overwriting the start address makes sense for some files... - dbjh
-          ((int *) buffer)[0] = me2le_32 (0x2e0000ea); // start address
-#endif
-          for (j = 1; j < GBA_LOGODATA_LEN / 4 + 1; j++) // + 1 for start address
-            ((int *) buffer)[j] = bswap_32 (((int *) gba_logodata)[j - 1]);
-        }
+        for (j = 1; j < GBA_LOGODATA_LEN / 4 + 1; j++) // + 1 for start address
+          ((int *) buffer)[j] = bswap_32 (((int *) gba_logodata)[j - 1]);
+
       if (parport_debug)
         fprintf (stderr, "sending chunk %d of %d\n", (int) (i / 1024) + 1,
                  (int) (size / 1024));
@@ -1320,7 +1319,7 @@ f2a_read_rom (const char *filename, unsigned int parport, int size)
     {
       f2a_init_usb ();
       f2a_read_usb (0x8000000 + offset * MBIT, size * MBIT, filename);
-      misc_usb_close (f2ahandle);
+      misc_usb_close (f2a_handle);
     }
 #endif
 #if     defined USE_PARALLEL && defined USE_USB
@@ -1395,7 +1394,7 @@ f2a_write_rom (const char *filename, unsigned int parport, int size)
     {
       f2a_init_usb ();
       f2a_write_usb (n_files, files, 0x8000000 + offset * MBIT);
-      misc_usb_close (f2ahandle);
+      misc_usb_close (f2a_handle);
     }
 #endif
 #if     defined USE_PARALLEL && defined USE_USB
@@ -1444,7 +1443,7 @@ f2a_read_sram (const char *filename, unsigned int parport, int bank)
     {
       f2a_init_usb ();
       f2a_read_usb (0xe000000 + bank * 64 * 1024, size, filename);
-      misc_usb_close (f2ahandle);
+      misc_usb_close (f2a_handle);
     }
 #endif
 #if     defined USE_PARALLEL && defined USE_USB
@@ -1483,7 +1482,7 @@ f2a_write_sram (const char *filename, unsigned int parport, int bank)
     {
       f2a_init_usb ();
       f2a_write_usb (1, files, 0xe000000 + bank * 64 * 1024);
-      misc_usb_close (f2ahandle);
+      misc_usb_close (f2a_handle);
     }
 #endif
 #if     defined USE_PARALLEL && defined USE_USB

@@ -538,8 +538,14 @@ is_func (char *s, int size, int (*func) (int))
 {
   char *p = s;
 
+  /*
+    Casting to unsigned char * is necessary to avoid differences between the
+    different compilers' run-time environments. At least for isprint(). Without
+    the cast the isprint() of (older versions of) DJGPP, MinGW, Cygwin and
+    Visual C++ returns nonzero values for ASCII characters > 126.
+  */
   for (; size >= 0; p++, size--)
-    if (!func (*p))
+    if (!func (*(unsigned char *) p))
       return FALSE;
 
   return TRUE;

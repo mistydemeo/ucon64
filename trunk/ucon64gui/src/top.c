@@ -23,6 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64gui.h"
 #include "html2gui/src/html2gui.h"
 #include "top.h"
+#include "misc.h"
 
 void
 ucon64gui_top (void)
@@ -30,12 +31,25 @@ ucon64gui_top (void)
 #include "xpm/trans.xpm"
 #include "xpm/open.xpm"
 #include "xpm/emulate.xpm"
+#include "xpm/icon.xpm"
+#include "xpm/back.xpm"
 
   char buf[FILENAME_MAX];
 
   sprintf (buf, "Configure uCON64 (%s)", ucon64gui.configfile);
 
-//<html>
+  h2g_html (0, 0, 0);
+
+  h2g_head ();
+  h2g_title (ucon64gui_title, icon_xpm);
+  h2g_head_end ();
+
+  h2g_body (NULL, "#c0c0c0");
+
+  h2g_form (UCON64GUI_FORMTARGET);
+
+  if (ucon64gui.sub)
+    h2g_input_image ("Back",  OPTION_LONG_S "root", back_xpm, 0, 0, "Back");
 
   h2g_input_submit ("Config", "--config", buf);
   h2g_br ();

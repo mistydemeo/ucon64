@@ -38,6 +38,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/swc.h"
 #include "backup/cdrw.h"
 
+const char *ucon64gui_title = "uCON64gui " UCON64GUI_VERSION " (for uCON64 " UCON64_VERSION_S ") 2002 by NoisyB ";
+
 
 static void ucon64gui_root (void);
 //static void ucon64gui_system (void);
@@ -298,67 +300,80 @@ html2gui_request (const char *uri, const char *query)
             return;
 #endif
           case UCON64_SNES:
+            ucon64gui.sub = 1;
             ucon64gui.console =  "--snes";
             snes_gui ();
             return;
 
           case UCON64_GB:
+            ucon64gui.sub = 1;
             ucon64gui.console =  "--gb";
             ucon64gui_gb ();
             return;
 
           case UCON64_N64:
+            ucon64gui.sub = 1;
             ucon64gui.console =  "--n64";
             ucon64gui_n64 ();
             return;
 
           case UCON64_NES:
+            ucon64gui.sub = 1;
             ucon64gui.console =  "--nes";
             ucon64gui_nes ();
             return;
 
           case UCON64_XCDRW:
-            ucon64gui.console =  "";
+            ucon64gui.sub = 1;
+            ucon64gui.console = NULL;
             ucon64gui_cdrw ();
             return;
 
           case UCON64_XSWC:
-            ucon64gui.console =  "";
+            ucon64gui.sub = 1;
+            ucon64gui.console = NULL;
             ucon64gui_swc ();
             return;
 #if 0
           case UCON64_XSMD:
-            ucon64gui.console =  "";
+            ucon64gui.sub = 1;
+            ucon64gui.console = NULL;
             ucon64gui_smd ();
             return;
 
           case UCON64_XFAL:
-            ucon64gui.console =  "";
+            ucon64gui.sub = 1;
+            ucon64gui.console = NULL;
             ucon64gui_fal ();
             return;
 
           case UCON64_XGBX:
-            ucon64gui.console =  "";
+            ucon64gui.sub = 1;
+            ucon64gui.console = NULL;
             ucon64gui_gbx ();
             return;
 
           case UCON64_XD64:
-            ucon64gui.console =  "";
+            ucon64gui.sub = 1;
+            ucon64gui.console = NULL;
             ucon64gui_doctor64 ();
             return;
 
           case UCON64_X64JR:
-            ucon64gui.console =  "";
+            ucon64gui.sub = 1;
+            ucon64gui.console = NULL;
             ucon64gui_doctor64jr ();
             return;
 #endif
           case UCON64_ROOT:
-            ucon64gui.console = "";
+            ucon64gui.sub = 0;
+            ucon64gui.console = NULL;
             ucon64gui_root ();
             return;
             
           case UCON64_CONFIG:
-            ucon64gui.console = "";
+            ucon64gui.sub = 1;
+            ucon64gui.console = NULL;
             ucon64gui_config ();
             return;
 
@@ -455,6 +470,7 @@ ucon64gui_root (void)
 
   h2g_ ("Console specific options");
   h2g_br ();
+#if 0
   h2g_input_submit ("NES", "--nes",
                     "(--nes) options for Nintendo Entertainment System/NES\n1983 Nintendo http://www.nintendo.com");
   h2g_input_submit ("GameBoy", "--gb",
@@ -497,64 +513,44 @@ ucon64gui_root (void)
 
   h2g_input_submit ("WonderSwan", "--wswan",
                     "(--swan) options for WonderSwan/WonderSwan Color\n19XX/19XX Bandai");
-
-#if defined BACKUP || defined BACKUP_CD
-  ucon64gui_divider();
-
-  h2g_ ("Backup unit specific options");
-  h2g_br ();
-#endif // BACKUP || BACKUP_CD
+#else
+  h2g_select ("page", 0, 0, "Choose your console system here",
+    "NES",
+    "--nes", 
+    "GameBoy",
+    "--gb", 
+    "Super Nintendo",
+    "--snes",
+    "Nintendo 64",
+    "--n64", 
+    "GameBoy Advance", 
+    "--gba", 
+    "Sega Master System/Game Gear",
+    "--sms",
+    "Genesis",
+    "--gen",
+    "Dreamcast",
+    "--dc",
+    "Lynx",
+    "--lynx",
+    "Jaguar",
+    "--jag",
+    "PC-Engine",
+    "--pce",
+    "Neo Geo",
+    "--ng",
+    "Neo Geo Pocket",
+    "--ngp",
+    "WonderSwan",
+    "--wswan",
+    0);
+#endif
 
 #ifdef BACKUP_CD
-  h2g_ ("CD's: ");
+  ucon64gui_divider();
 
-  h2g_input_submit ("CD-Writer", "--xcdrw",
-//  h2g_input_image ("CD-Writer", "--xcdrw", ccd_xpm, 0, 0,
-                    "options for CD-Writer\nhttp://cdrdao.sourceforge.net/ (recommended burn engine)");
-
+  ucon64gui_cdrw ();
 #endif // BACKUP_CD
-
-#ifdef BACKUP
-#if 1
-  h2g_ (" Cartridges: ");
-
-  h2g_select ("page", 0, 0, "Choose the desired backup unit here",
-    "Flash Advance Linker", 
-    "--xfal", 
-    "Doctor V64", 
-    "--xd64", 
-    "Doctor64 Jr",
-    "--xdjr",
-    "Super Wild Card",
-    "--xswc", 
-    "Super Magic Drive", 
-    "--xsmd", 
-    "GameBoy Xchanger",
-    "--xgbx",
-    0);
-
-#else
-  h2g_input_submit ("Flash Advance Linker", "--xfal",
-                    "options for Flash Advance Linker\n2001 Visoly http://www.visoly.com");
-  h2g_ (" ");
-  h2g_input_submit ("Doctor V64", "--xd64",
-                    "options for Doctor V64\n19XX Bung Enterprises Ltd http://www.bung.com.hk");
-  h2g_ (" ");
-  h2g_input_submit ("Doctor64 Jr", "--xdjr",
-                    "options for Doctor64 Jr\n19XX Bung Enterprises Ltd http://www.bung.com.hk");
-  h2g_ (" ");
-  h2g_input_submit ("Super Wild Card", "--xswc",
-                    "options for Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw");
-
-  ucon64gui_spacer ();
-
-  h2g_input_submit ("Super Magic Drive", "--xsmd",
-                    "options for Super Com Pro (HK)/Super Magic Drive/SMD\n19XX Front Far East/FFE http://www.front.com.tw");
-  h2g_ (" ");
-  h2g_input_submit ("GameBoy Xchanger", "--xgbx",
-                    "options for GameBoy Xchanger");
-#endif
-#endif // BACKUP
 
   ucon64gui_bottom ();
 

@@ -26,7 +26,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64GUI_HTMLTITLE "uCON64gui"
 #define UCON64GUI_FORMTARGET "file://ucon64"
 #define UCON64GUI_VERSION "0.1.0alpha2"
-#define UCON64GUI_TITLE "uCON64gui " UCON64GUI_VERSION " (for uCON64 " UCON64_VERSION ") 2002 by NoisyB "
+
+extern const char *ucon64gui_title;
 
 #ifndef MAXBUFSIZE
 #define MAXBUFSIZE 32768
@@ -47,7 +48,7 @@ typedef struct
 
   char ucon64_output[MAXBUFSIZE];
 
-  int sub;
+  int sub;                      //sub screen insert back button, etc.
 
   int page;                     //current "html page"
 

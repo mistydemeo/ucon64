@@ -2032,9 +2032,11 @@ gauge (time_t init_time, int pos, int size)
       "\r%10d Bytes [%s] %d%%, BPS=%d, ", pos, progress, percentage, bps);
 
   if (pos == size)
-    printf ("TOTAL=%03d:%02d", curr / 60, curr % 60); // DON'T print a newline
-  else                                                //  -> gauge can be cleared
-    printf ("ETA=%03d:%02d  ", left / 60, left % 60);
+    printf ("TOTAL=%02d:%02d", curr / 60, curr % 60); // DON'T print a newline
+  else if (pos)                                       //  -> gauge can be cleared
+    printf ("ETA=%02d:%02d  ", left / 60, left % 60);
+  else                                          // don't display a nonsense ETA
+    fputs ("ETA=?  ", stdout);
 
   fflush (stdout);
 

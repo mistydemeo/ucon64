@@ -92,6 +92,8 @@ write programs in C
 #include "backup/swc.h"
 #include "backup/cdrw.h"
 
+#define DEBUG
+
 static int ucon64_init (char *romfile, struct rom_ *rombuf);
 static int ucon64_console_probe (struct rom_ *rombuf);
 static int ucon64_nfo (struct rom_ *rombuf);
@@ -1416,8 +1418,10 @@ ucon64_init (char *romfile, struct rom_ *rombuf)
   rombuf->bytes = quickftell (rombuf->rom);
 
   result = ucon64_console_probe (rombuf);
-printf ("!!%d!!", result);
+#ifdef DEBUG
+printf ("DEBUG: %d", result);
 fflush (stdout);
+#endif
 
   if (rombuf->console == ucon64_UNKNOWN)
     {
@@ -1586,16 +1590,25 @@ ucon64_console_probe (struct rom_ *rombuf)
       case ucon64_UNKNOWN:
         if(rombuf->bytes <= MAXROMSIZE)
           rombuf->console =
-            (!genesis_init (rombuf)) ? ucon64_GENESIS ://TODO correct defines assigned?
+#ifdef CONSOLE_PROBE
+/*
+  these <console>_init() functions can detect the ROM and the correct console
+  by significant bytes
+*/
 //            (!snes_init (rombuf)) ? ucon64_SNES :
-            (!nintendo64_init (rombuf)) ? ucon64_N64 :
 //            (!gameboy_init (rombuf)) ? ucon64_GB :
             (!gbadvance_init (rombuf)) ? ucon64_GBA :
             (!nes_init (rombuf)) ? ucon64_NES :
+            (!nintendo64_init (rombuf)) ? ucon64_N64 :
+            (!genesis_init (rombuf)) ? ucon64_GENESIS :
+            (!psx_init (rombuf)) ? ucon64_PSX ://TODO (rombuf->bytes <= MAXROMSIZE)
             (!jaguar_init (rombuf)) ? ucon64_JAGUAR :
-#ifdef DB
-            (!atari_init (rombuf)) ? ucon64_ATARI :
             (!lynx_init (rombuf)) ? ucon64_LYNX :
+#if 0
+/*
+  these <console>_init() still contain no auto-detection or probe code
+*/
+            (!atari_init (rombuf)) ? ucon64_ATARI :
             (!pcengine_init (rombuf)) ? ucon64_PCE :
             (!neogeo_init (rombuf)) ? ucon64_NEOGEO :
             (!neogeopocket_init (rombuf)) ? ucon64_NEOGEOPOCKET :
@@ -1606,7 +1619,6 @@ ucon64_console_probe (struct rom_ *rombuf)
             (!coleco_init (rombuf)) ? ucon64_COLECO :
             (!intelli_init (rombuf)) ? ucon64_INTELLI :
             (!wonderswan_init (rombuf)) ? ucon64_WONDERSWAN :
-#endif // DB
             (!gamecube_init (rombuf)) ? ucon64_GAMECUBE :
             (!xbox_init (rombuf)) ? ucon64_XBOX :
             (!gp32_init (rombuf)) ? ucon64_GP32 :
@@ -1614,19 +1626,19 @@ ucon64_console_probe (struct rom_ *rombuf)
             (!cdi_init (rombuf)) ? ucon64_CDI :
             (!dc_init (rombuf)) ? ucon64_DC :
             (!ps2_init (rombuf)) ? ucon64_PS2 :
-            (!psx_init (rombuf)) ? ucon64_PSX :
             (!real3do_init (rombuf)) ? ucon64_REAL3DO :
-            (!saturn_init (rombuf)) ? ucon64_SATURN : ucon64_UNKNOWN;
+            (!saturn_init (rombuf)) ? ucon64_SATURN :
+#endif
+#endif // CONSOLE_PROBE
+                ucon64_UNKNOWN;
+
+#ifdef DEBUG
 if (rombuf->console == ucon64_UNKNOWN)
-{
-  printf ("SHIT");
-  fflush (stdout);
-}
+  printf ("DEBUG1");
 else
-{
-  printf ("NOSHIT");
-  fflush (stdout);
-}
+  printf ("DEBUG0");
+fflush (stdout);
+#endif // DEBUG
             return (rombuf->console == ucon64_UNKNOWN) ? -1 : 0;
           
         default:

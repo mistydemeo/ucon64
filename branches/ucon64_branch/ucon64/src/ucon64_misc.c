@@ -497,6 +497,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   these options do not (need to) know the console or work for more than one
 */
+#ifdef  DISCMAGE
   {UCON64_BIN2ISO, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
   {UCON64_MKSHEET, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
   {UCON64_MKTOC, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
@@ -504,6 +505,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_MKCUE, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
   {UCON64_RIP, UCON64_UNKNOWN, libdm_usage,    WF_DEFAULT},
   {UCON64_XCDRW, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
+#endif
 
 #ifdef  GUI
   {UCON64_GUI, UCON64_UNKNOWN, libng_usage,    WF_STOP},
@@ -566,8 +568,9 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   force recognition switches
 */
+#ifdef  DISCMAGE
   {UCON64_DISC, UCON64_UNKNOWN, libdm_usage,   WF_SWITCH},
-
+#endif
   {UCON64_3DO, UCON64_3DO, real3do_usage,      WF_SWITCH},
   {UCON64_ATA, UCON64_ATA, atari_usage,        WF_SWITCH},
 //  {UCON64_CD32, UCON64_CD32, cd32_usage,       WF_SWITCH},

@@ -186,14 +186,14 @@ endif                                   # cygwin
 #endif
 
 # Dependencies
-CONFIG_H=../config.h
-
 libdm_misc.o: libdiscmage.h misc.h dxedll_priv.h
 cdi.o: libdiscmage.h misc.h cdi.h dxedll_priv.h
-nero.o: libdiscmage.h misc.h $(CONFIG_H) nero.h cdi.h dxedll_priv.h
+nero.o: libdiscmage.h misc.h nero.h cdi.h dxedll_priv.h
 sheets.o: libdiscmage.h misc.h dxedll_priv.h
 dllinit.o: libdiscmage.h misc.h dxedll_priv.h
 misc.o: misc.h dxedll_priv.h
-dxe_misc.o: $(CONFIG_H) dxedll_pub.h
+miscz.o: miscz.h unzip.h dxedll_priv.h
+dxe_misc.o: dxedll_pub.h
 djimport.o: libdiscmage.h dlopen.h dxedll_pub.h
-dlopen.o: $(CONFIG_H) dlopen.h dxedll_pub.h
+dlopen.o: dlopen.h dxedll_pub.h
+unzip.o: unzip.h dxedll_priv.h

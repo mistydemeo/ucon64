@@ -2,13 +2,19 @@
 
 @DEFINE_DLOPEN_MAKE@
 @DEFINE_ZLIB_MAKE@
+@DEFINE_DISCMAGE_MAKE@
+@DEFINE_GUI_MAKE@
 
 CC=@CC@
 CFLAGS=-I../src/ @CFLAGS@ @DEFS@
 LDFLAGS=@LDFLAGS@
 
-LIBNAME=discmage
-LIBNAME2=netgui
+ifdef DISCMAGE
+LIBNAME_DM=discmage
+endif
+ifdef GUI
+LIBNAME_NG=netgui
+endif
 
 # The test for Cygwin should be done before the test for DJGPP, because the
 # environment variable DJGPP can be set under Bash for people who have
@@ -16,26 +22,48 @@ LIBNAME2=netgui
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
-FULLLIBNAME=$(LIBNAME).dll
-FULLLIBNAME2=$(LIBNAME2).dll
+ifdef DISCMAGE
+FULLLIBNAME_DM=$(LIBNAME_DM).dll
 ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME).a libnetgui/$(LIBNAME2).a
+LDFLAGS+=libdiscmage/$(LIBNAME_DM).a 
+endif
+endif
+
+ifdef GUI
+FULLLIBNAME_NG=$(LIBNAME_NG).dll
+ifndef DLOPEN
+LDFLAGS+=libnetgui/$(LIBNAME_NG).a 
+endif
 endif
 
 else
 ifdef DJGPP
 
-FULLLIBNAME=$(LIBNAME).dxe
-FULLLIBNAME2=$(LIBNAME2).dxe
+ifdef DISCMAGE
+FULLLIBNAME_DM=$(LIBNAME_DM).dxe
 ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME).a libnetgui/$(LIBNAME2).a
+LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
+endif
+endif
+
+ifdef GUI
+FULLLIBNAME_NG=$(LIBNAME_NG).dxe
+ifndef DLOPEN
+LDFLAGS+=libnetgui/$(LIBNAME_NG).a
+endif
 endif
 
 else                                    # Unix or BeOS
 
 ifdef DLOPEN
-FULLLIBNAME=$(LIBNAME).so
-FULLLIBNAME2=$(LIBNAME2).so
+
+ifdef DISCMAGE
+FULLLIBNAME_DM=$(LIBNAME_DM).so
+endif
+
+ifdef GUI
+FULLLIBNAME_NG=$(LIBNAME_NG).so
+endif
 
 ifneq ($(OSTYPE),beos)
 ifneq ($(OSTYPE),FreeBSD)
@@ -44,10 +72,16 @@ endif
 endif
 
 else
-FULLLIBNAME=lib$(LIBNAME).so
-FULLLIBNAME2=lib$(LIBNAME2).so
+ifdef DISCMAGE
+FULLLIBNAME_DM=lib$(LIBNAME_DM).so
+LDFLAGS+=-Llibdiscmage -l$(LIBNAME_DM)
+endif
 
-LDFLAGS+=-Llibdiscmage -l$(LIBNAME) -Llibnetgui -l$(LIBNAME2)
+ifdef GUI
+FULLLIBNAME_NG=lib$(LIBNAME_NG).so
+LDFLAGS+=-Llibnetgui -l$(LIBNAME_NG)
+endif
+
 endif
 
 endif                                   # DJGPP
@@ -55,7 +89,7 @@ endif                                   # cygwin
 
 
 OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
-        ucon64_lib.o ucon64_libng.o misc.o getopt.o quick_io.o \
+        misc.o getopt.o quick_io.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
@@ -69,6 +103,12 @@ OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
         backup/psxpblib.o backup/mccl.o backup/lynxit.o backup/ffe.o
 ifdef ZLIB
 OBJECTS+=unzip.o map.o miscz.o
+endif
+ifdef DISCMAGE
+OBJECTS+=ucon64_lib.o
+endif
+ifdef GUI
+OBJECTS+=ucon64_libng.o
 endif
 
 ifdef DLOPEN
@@ -97,7 +137,7 @@ TARGET:=$(addsuffix .exe, $(TARGET))
 endif                                   # DJGPP
 endif                                   # cygwin
 
-all: libdiscmage/$(FULLLIBNAME) libnetgui/$(FULLLIBNAME2) $(TARGET)
+all: libdiscmage/$(FULLLIBNAME_DM) libnetgui/$(FULLLIBNAME_NG) $(TARGET)
 
 
 clean:
@@ -158,7 +198,8 @@ endif                                   # cygwin
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
-libdiscmage/$(FULLLIBNAME):
+ifdef DISCMAGE
+libdiscmage/$(FULLLIBNAME_DM):
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	cd libdiscmage && $(MAKE)
 else
@@ -170,9 +211,10 @@ else
 	cd libdiscmage && $(MAKE)
 endif                                   # DJGPP
 endif                                   # cygwin
+endif                                   # DISCMAGE
 
-
-libnetgui/$(FULLLIBNAME2):
+ifdef GUI
+libnetgui/$(FULLLIBNAME_NG):
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	cd libnetgui && $(MAKE)
 else
@@ -184,7 +226,7 @@ else
 	cd libnetgui && $(MAKE)
 endif                                   # DJGPP
 endif                                   # cygwin
-
+endif                                   # GUI
 
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)

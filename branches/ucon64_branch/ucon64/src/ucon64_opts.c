@@ -146,7 +146,11 @@ ucon64_switches (int c, const char *optarg)
 #endif // DLOPEN
       if (ucon64.discmage_enabled)
         {
+#ifdef  DISCMAGE
           x = libdm_get_version();
+#else
+          x = 0;
+#endif                    
           sprintf (buf, "%d.%d.%d", x >> 16, x >> 8, x);
         }
       else
@@ -976,6 +980,7 @@ ucon64_options (int c, const char *optarg)
       ucon64_rename (UCON64_RROM);
       break;
 
+#ifdef  DISCMAGE
     case UCON64_BIN2ISO:
     case UCON64_ISOFIX:
     case UCON64_RIP:
@@ -1050,6 +1055,7 @@ ucon64_options (int c, const char *optarg)
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
       break;
+#endif  // DISCMAGE
 
     case UCON64_DB:
       if (ucon64.quiet > -1) // -db + -v == -dbv

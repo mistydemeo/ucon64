@@ -355,11 +355,11 @@ if(argcmp(argc,argv,"-c"))
 	return(0);
 }
 
-if(argcmp(argc,argv,"-cs"))
+if (argcmp(argc, argv, "-cs"))
 {
-	if(filefile(ucon64_rom(),0,ucon64_file(),0,TRUE)==-1)
-                       printf("ERROR: file not found/out of memory\n");
-	return(0);
+  if (filefile(ucon64_rom(), 0, ucon64_file(), 0, TRUE) == -1)
+    printf("ERROR: file not found/out of memory\n");
+  return 0;
 }
 
 if(argcmp(argc,argv,"-find"))

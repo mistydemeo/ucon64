@@ -98,7 +98,7 @@ the original uCON for snes and genesis was written by chicken & chp in ~1995
 
 1.9.7	added (NES) -fdsl list Famicon DiskSystem/FDS (diskimage) contents (by NoisyB)
 	updated (GBA) -xfal send/receive ROM to/from Flash Advance Linker; $FILE=PORT (by dbjh)
-	added (GBA) -xfalc<n> specify chip size in mbits of ROM in Flash Advance Linker when (by dbjh)
+	added (GBA) -xfalc<n> specify chip size in mbits of ROM in Flash Advance Linker when receiving (by dbjh)
 	added (GBA) -xfalm use SPP mode, default is EPP (by dbjh)
 	added (NEOGEO) -bios convert NeoCd Bios to work with NeoCD emulator (by NoisyB; thanks to Caz)
 	changed the whole internal ROM database code (by NoisyB)
@@ -110,4 +110,11 @@ the original uCON for snes and genesis was written by chicken & chp in ~1995
 	added ROMs to database for Virtual Boy, Wonder Swan, ColecoVision and Vectrex  (by NoisyB)
 	added (Intellivision) show info (by NoisyB)
 	made the internal ROM Database optional; compiled without DB uCON64 will have only ~250kB in size! (by NoisyB)
+	updated (all) fixed -cs (by dbjh)
+	updated (SNES) fixed dumping of `special' SNES cartridges (for the meaning of special,
+	  see src/backup/swc.c) (by dbjh; thanks to Caz)
+	updated (SNES) fixed -k (by dbjh)
+	updated (SNES) fixed -f (by dbjh)
+
+	
 </pre></tt></body></html>

@@ -474,6 +474,7 @@ if (argcmp(argc, argv, "-ls") || argcmp(argc, argv, "-lsv"))
           printf("%-31.31s %10d %s %s\n", rom.name, (int) puffer.st_size, buf, rom.rom);
         }
         else ucon64_nfo(&rom);
+	fflush(stdout);
       }
     }
   }

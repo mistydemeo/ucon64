@@ -1,7 +1,7 @@
 /*
 libdm_misc.c - libdiscmage miscellaneous
 
-written by 2002 NoisyB (noisyb@gmx.net)
+written by 2002 - 2004 NoisyB (noisyb@gmx.net)
 
 
 This library is free software; you can redistribute it and/or
@@ -772,10 +772,10 @@ void
 dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
 {
 #define COLS 80
-  int t = 0, s = 0, x = 0, min = 0, sec = 0, frames = 0;
+  int t = 0, s = 0, x = 0, min = 0, sec = 0, frames = 0,
+      filesize = q_fsize (image->fname);
   char buf[MAXBUFSIZE];
   st_iso_header_t iso_header;
-  uint32_t filesize = q_fsize (image->fname);
   FILE *fh = NULL;
 
 #if 0
@@ -794,10 +794,7 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
     }
 #endif
 
-  printf ("%d Bytes (%.4f Mb)\n\n",
-          filesize,
-          TOMBIT_F (filesize));
-
+  printf ("%d Bytes (%.4f Mb)\n\n", filesize, TOMBIT_F (filesize));
   printf ("Type: %s\n", image->desc);
 
   if (image->misc[0])

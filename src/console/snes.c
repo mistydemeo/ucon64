@@ -2138,7 +2138,8 @@ snes_n (st_rominfo_t *rominfo, const char *name)
       name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN;
 
   memset (buf, ' ', name_len);
-  strncpy (buf, name, strlen (name) > (unsigned int) name_len ? name_len : strlen (name));
+  strncpy (buf, name, strlen (name) > (unsigned int) name_len ?
+             (unsigned int) name_len : strlen (name));
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
 

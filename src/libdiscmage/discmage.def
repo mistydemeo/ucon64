@@ -2,7 +2,6 @@ EXPORTS
 dm_close
 dm_disc_read
 dm_disc_write
-dm_fseek
 dm_get_version
 dm_get_version_s
 dm_open

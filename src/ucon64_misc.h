@@ -51,13 +51,10 @@ IO_Tuple;
 #endif // defined __unix__ || defined __BEOS__
 #endif // BACKUP
 
-enum
-{
-  MODE1_2048,
-  MODE1_2352,
-  MODE2_2336,
-  MODE2_2352
-};
+#define MODE1_2048 0
+#define MODE1_2352 1
+#define MODE2_2336 2
+#define MODE2_2352 3
 extern const char *track_modes[];
 
 #define MBIT 131072
@@ -69,7 +66,7 @@ extern const char *track_modes[];
   defines for unknown backup units/emulators
 */
 #define UNKNOWN_HEADER_START 0
-#define unknown_HEADER_LEN 512
+#define UNKNOWN_HEADER_LEN 512
 extern const char *unknown_title;
 
 // GameGenie "codec" routines
@@ -87,10 +84,10 @@ extern unsigned long CalculateBufferCRC (unsigned int count, unsigned long crc,
   this is just a wrapper
 */
 //extern unsigned long unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size);
-extern unsigned long fileCRC32 (char *filename, long start);   // calculate CRC32 of filename beginning from start
+extern unsigned long fileCRC32 (const char *filename, long start);   // calculate CRC32 of filename beginning from start
 
 //ucon64 specific wrapper for misc.c/filebackup()
-extern char *ucon64_fbackup (char *filename);
+extern const char *ucon64_fbackup (const char *filename);
 
 extern size_t filepad (const char *filename, long start, long unit);//pad a ROM in Mb
 extern long filetestpad (const char *filename); //test if a ROM is padded

@@ -42,7 +42,7 @@ ips_usage (void)
 
 */
 int
-ips_main (int argc, char *argv[])
+ips_main (int argc, const char *argv[])
 {
   FILE *ipsfile, *patchee;
   char patch[5];
@@ -157,7 +157,7 @@ ips_main (int argc, char *argv[])
 /*
 #define ips_TOP 4542278 //tales of phantasia had 6291968 (incl 512bytes header)
 
-int ips(char *name, char *option2)
+int ips(const char *name, const char *option2)
 {
 	FILE *ipsfile, *patchee;
 	char patch[5];
@@ -254,7 +254,7 @@ int ips(char *name, char *option2)
 
 
 int
-cips (char *name, char *option2)
+cips (const char *name, const char *option2)
 {
   FILE *fp, *fp2, *fp3;
 //      FILE *ORGFile, *NEWFile;
@@ -276,7 +276,7 @@ cips (char *name, char *option2)
     }
 
   strcpy (buf, name);
-  newext (buf, ".IPS");
+  setext (buf, ".IPS");
 
   if (!(fp3 = fopen (buf, "wb")))
     {

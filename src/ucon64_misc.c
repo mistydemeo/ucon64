@@ -215,7 +215,7 @@ CalculateFileCRC (FILE * file)
 }
 
 unsigned long
-fileCRC32 (char *filename, long start)
+fileCRC32 (const char *filename, long start)
 {
   unsigned long val;
   FILE *fh;
@@ -245,8 +245,8 @@ unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size)
 }
 */
 
-char *
-ucon64_fbackup (char *filename)
+const char *
+ucon64_fbackup (const char *filename)
 {
   if (!ucon64.backup)
     return filename;
@@ -655,7 +655,7 @@ ucon64_bin2iso (const char *image, int track_mode)
     }
 
   strcpy (buf, image);
-  newext (buf, ".ISO");
+  setext (buf, ".ISO");
   size = quickftell (image) / sector_size;
 
   if (!(src = fopen (image, "rb"))) return -1;

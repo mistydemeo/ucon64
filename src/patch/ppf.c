@@ -120,7 +120,7 @@ ID AREA, because it is located after the PATCH DATA!
  */
 
 int
-makeppf_main (int argc, char *argv[])
+makeppf_main (int argc, const char *argv[])
 {
 #define null 0
 
@@ -325,7 +325,7 @@ makeppf_main (int argc, char *argv[])
 
 
 int
-applyppf_main (int argc, char *argv[])
+applyppf_main (int argc, const char *argv[])
 {
 #define null 0
 
@@ -508,7 +508,7 @@ applyppf_main (int argc, char *argv[])
 
 #include "ucon64.h"
 int
-addppfid (char *filename)
+addppfid (const char *filename)
 {
   long fsize;
   long pos = 0;

@@ -36,7 +36,7 @@ bsl_usage (void)
 
 
 int
-bsl (char *name, char *option2)
+bsl (const char *name, const char *option2)
 {
   FILE *fh;
   FILE *fh2;

@@ -636,11 +636,7 @@ char *ucon64_temp_file = NULL;
 int (*ucon64_testsplit_callback) (const char *filename) = NULL;
 
 
-/*
-  _publisher_ strings for SNES, GB, GBC and GBA games
-  There are probably also some creator strings in here, but they will be
-  removed as soon as they are spotted as such.
-*/
+// _publisher_ strings for SNES, GB, GBC and GBA games
 const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
   NULL, "Nintendo", "Rocket Games/Ajinomoto", "Imagineer-Zoom", "Gray Matter",
   "Zamuse", "Falcom", NULL, "Capcom", "Hot B Co.",
@@ -651,7 +647,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
   "Game Village", NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // 0Z
-  NULL, "Starfish", "Infocom/Gremlin Graphics", "Electronic Arts Japan", NULL,
+  NULL, "Starfish", "Infocom", "Electronic Arts Japan", NULL,
   "Cobra Team", "Human/Field", "KOEI", "Hudson Soft", "S.C.P./Game Village",
   "Yanoman", NULL, "Tecmo Products", "Japan Glary Business", "Forum/OpenSystem",
   "Virgin Games (Japan)", "SMDE", NULL, NULL, "Daikokudenki",
@@ -683,7 +679,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
   NULL, "Raya Systems", "Renovation Products", "Malibu Games", NULL,
   "Eidos/U.S. Gold", "Playmates Interactive", NULL, NULL, "Fox Interactive",
   "Time Warner Interactive", NULL, NULL, NULL, NULL,
-  NULL, "Disney Interactive", "Time Warner Interactive/Bitmasters", "Black Pearl", NULL,
+  NULL, "Disney Interactive", NULL, "Black Pearl", NULL,
   "Advanced Productions", NULL, NULL, "GT Interactive", "RARE",
   "Crave Entertainment",                        // 4Z
   "Absolute Entertainment", "Acclaim", "Activision", "American Sammy", "Take 2/GameTek",
@@ -776,7 +772,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
     "TecMagik",
   NULL, NULL, NULL, NULL, "Cybersoft",
   NULL, "Psygnosis", NULL, NULL, "Davidson/Western Tech.",
-  "Hudson Soft", NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
@@ -789,15 +785,15 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // GZ
-  NULL, NULL, NULL, NULL, "Konami",
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, "JVC", NULL, NULL,
-  NULL, NULL, "Namco Ltd.", NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, "Sachen",
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // HZ
-  NULL, "ASCII", NULL, NULL, "Enix",
+  NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, "Yojigen", NULL, NULL,

@@ -857,10 +857,17 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       if (snes_sramsize != 0)
         {
-          header[0x29] = 0x0c;
-          header[0x2a] = 0x0c;
+          if (snes_header_base == SNES_EROM)
+            {
+              header[0x29] = 0x00;
+              header[0x2a] = 0x0f;
+            }
+          else
+            {
+              header[0x29] = 0x0c;
+              header[0x2a] = 0x0c;
+            }
         }
-
       // Adjust sram map for exceptions - a couple of 10-12 Mb HiROM games
       //  (Liberty or Death, Brandish). May not be necessary
 

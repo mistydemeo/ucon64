@@ -512,13 +512,22 @@ main (int argc, char **argv)
   realpath2 (buf, ucon64.datdir);
 
   // we use ucon64.datdir as path to the dats
-  if (!access (ucon64.datdir, R_OK | W_OK | X_OK))
+  if (!access (ucon64.datdir,
+  // !W_OK doesn't mean that files can't be written to dir for Win32 exe's
+#if     !defined __CYGWIN__ && !defined _WIN32
+                              W_OK |
+#endif
+                              R_OK | X_OK))
     if (!stat (ucon64.datdir, &fstate))
       if (S_ISDIR (fstate.st_mode))
         ucon64.dat_enabled = 1;
 
   if (!ucon64.dat_enabled)
-    if (!access (ucon64.configdir, R_OK | W_OK | X_OK))
+    if (!access (ucon64.configdir,
+#if     !defined __CYGWIN__ && !defined _WIN32
+                                   W_OK |
+#endif
+                                   R_OK | X_OK))
       if (!stat (ucon64.configdir, &fstate))
         if (S_ISDIR (fstate.st_mode))
           {
@@ -596,9 +605,26 @@ main (int argc, char **argv)
 #ifndef _WIN32
                 if ((dp = opendir (buf)))
                   {
+                    char *p;
+#if     defined __MSDOS__ || defined __CYGWIN__
+                    /*
+                      Note that this code doesn't make much sense for Cygwin,
+                      because at least the version I use (1.3.6, dbjh) doesn't
+                      support current directories for drives.
+                    */
+                    c = toupper (buf[0]);
+                    if (buf[strlen (buf) - 1] == FILE_SEPARATOR ||
+                        (c >= 'A' && c <= 'Z' && buf[1] == ':' && buf[2] == 0))
+#else
+                    if (buf[strlen (buf) - 1] == FILE_SEPARATOR)
+#endif
+                      p = "";
+                    else
+                      p = FILE_SEPARATOR_S;
+
                     while ((ep = readdir (dp)))
                       {
-                        sprintf (buf2, "%s" FILE_SEPARATOR_S "%s", buf, ep->d_name);
+                        sprintf (buf2, "%s%s%s", buf, p, ep->d_name);
                         if (stat (buf2, &fstate) != -1)
                           if (S_ISREG (fstate.st_mode))
                             {

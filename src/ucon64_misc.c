@@ -992,7 +992,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
   if (access (filename1, R_OK) != 0 || access (filename2, R_OK) != 0)
     return -1;
 
-  // Not the name, but the combination inode & device identify a file.
+  // Not the name, but the combination inode & device identify a file
   stat (filename1, &finfo1);
   stat (filename2, &finfo2);
   if (finfo1.st_dev == finfo2.st_dev && finfo1.st_ino == finfo2.st_ino)
@@ -1421,11 +1421,11 @@ ucon64_parport_init (unsigned int port)
       exit(1);
     }
 #endif
-#if     defined __i386__ || defined _WIN32      // 0x3bc, 0x378, 0x278
+#if     defined __i386__ || defined _WIN32
 
 #if     defined _WIN32 || defined __CYGWIN__
   /*
-    We support the device driver inpout32.dll, because using that file is way
+    We support the I/O port driver inpout32.dll, because using that file is way
     easier than using UserPort or GiveIO. inpout32.dll is also more reliable
     and seems to enable access to all I/O ports (at least it's *very* easy to
     crash Windows XP ;-) The only downside is that it's almost two times slower
@@ -1438,12 +1438,11 @@ ucon64_parport_init (unsigned int port)
 #endif
   if (access (fname, F_OK) == 0)
     {
-      printf ("Using %s!\n", fname);
+      printf ("Using %s\n", fname);
       inpout32 = open_module (fname);
       // note that inport_word and output_word keep their default value...
       input_byte = 
 #ifdef  __cplusplus // this is really nice: gcc wants something else than g++...
-      
                    (unsigned char (__stdcall *) (unsigned short))
 #endif
                    get_symbol (inpout32, "Inp32");

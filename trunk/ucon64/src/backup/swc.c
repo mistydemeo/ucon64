@@ -55,9 +55,10 @@ const st_usage_t swc_usage[] =
                         "MODE=0x04 Super FX\n"
                         "MODE=0x08 S-DD1\n"
                         "MODE=0x10 SA-1\n"
-                        "MODE=0x20 DX2 trick (might work with other SWC models)\n"
-                        "MODE=0x40 Mega Man X 2\n"
-                        "It is possible to combine flags. MODE=0x24 makes it possible\n"
+                        "MODE=0x20 SPC7110\n"
+                        "MODE=0x40 DX2 trick (might work with other SWC models)\n"
+                        "MODE=0x80 Mega Man X 2\n"
+                        "It is possible to combine flags. MODE=0x44 makes it possible\n"
                         "to dump for example Yoshi's Island"},
 #endif
     {"xswcs", NULL, "send/receive SRAM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"

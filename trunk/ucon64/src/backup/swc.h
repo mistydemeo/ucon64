@@ -27,10 +27,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SWC_DM_SUPER_FX     0x04
 #define SWC_DM_SDD1         0x08
 #define SWC_DM_SA1          0x10
-#define SWC_DM_DX2_TRICK    0x20
-#define SWC_DM_MMX2         0x40
+#define SWC_DM_SPC7110      0x20
+#define SWC_DM_DX2_TRICK    0x40
+#define SWC_DM_MMX2         0x80
 
-#define SWC_DM_MAX          0x7f                // highest valid dumping mode value
+#define SWC_DM_MAX          0xff                // highest valid dumping mode value
 
 extern const st_usage_t swc_usage[];
 

@@ -152,7 +152,7 @@ cd64lib.o: cd64lib.c
 	$(CC) $(CFLAGS) $^ -c -o $@
 
 libcd64.a: cd64lib.o cd64io.o
-	ld -i $^ $(LIBS) -o $*.o
+	ld -r $^ $(LIBS) -o $*.o
 #	rm -f $@
 	ar crs $@ $*.o
 

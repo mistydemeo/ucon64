@@ -738,8 +738,7 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_STPN:
       ucon64_file_handler (dest_name, src_name, 0);
-      q_fcpy (src_name, strtol (optarg, NULL, 10), ucon64.file_size,
-                      dest_name, "wb");
+      q_fcpy (src_name, strtol (optarg, NULL, 10), ucon64.file_size, dest_name, "wb");
       printf (ucon64_msg[WROTE], dest_name);
       remove_temp_file ();
       break;

@@ -37,7 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <errno.h>
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
-#include <sys/stat.h>			/* for S_IFLNK */
+#include <sys/stat.h>			                      // for S_IFLNK
 
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds
@@ -156,7 +156,7 @@ static unsigned int crc32_table[256];
 static int crc32_table_built = 0;
 
 void
-build_crc32_table ()
+build_crc32_table (void)
 {
   unsigned int crc32, i, j;
 
@@ -1008,9 +1008,11 @@ one_file (const char *filename1, const char *filename2)
 
   file1 = CreateFile (filename1, GENERIC_READ, FILE_SHARE_READ, NULL,
                       OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (file1 == INVALID_HANDLE_VALUE)
+    return 0;
   file2 = CreateFile (filename2, GENERIC_READ, FILE_SHARE_READ, NULL,
                       OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-  if (file1 == INVALID_HANDLE_VALUE || file2 == INVALID_HANDLE_VALUE)
+  if (file2 == INVALID_HANDLE_VALUE)
     return 0;
   GetFileInformationByHandle (file1, &finfo1);
   GetFileInformationByHandle (file2, &finfo2);

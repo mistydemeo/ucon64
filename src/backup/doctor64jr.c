@@ -175,6 +175,277 @@ void mainproc(void *arg) {
 
 #ifdef BACKUP
 
+#if 0
+#ifdef TODO
+#warning TODO doctor64jr.c sram routines
+#endif
+#include <stdio.h>
+//#include <process.h>
+#ifdef WIN32
+#include <windows.h>
+#define WaitASec() Sleep(1000)
+#else
+#define WaitASec() sleep(1)
+#endif
+
+
+typedef unsigned short u16;     /* unsigned 16-bit */
+//void docmd(jr_command cmd);
+int saveram_pc_main (int argc, char *argv[], char *envp[]);
+#define CART_BASE	0xB0000000U
+#define CART_BASE2	0xB4000000U
+#define SRAM_BASE	0xA8000000U
+#define SRAM_LEN	0x8000
+
+#define RAMROM_SRAM_ADDY 0x00200000U
+
+enum _jr_command
+{
+	ReadSram	= 0x4001,		// Copy SRAM from DS1/Cart to designated address
+	WriteSram	= 0x4002,		// Copy SRAM from designated address to DS1/Cart
+	ReadEeprom	= 0x4004,		// Ditto for DX256/Cart EEPROM
+	WriteEeprom	= 0x4008,		//
+	ReadPfs		= 0x4010,		// Ditto for Mempak
+	WritePfs	= 0x4020,		//
+
+	NoCmd		= 0x8037,		// Do nothing for now
+	ColdBoot	= 0xABCD		// Game is loaded, now cold boot.
+};
+typedef enum _jr_command jr_command;
+
+#define EPP_PORT 0x378
+
+unsigned char buffer[SRAM_LEN * 8];
+
+
+FILE *fp;
+
+int
+saveram_pc_main (int argc, char *argv[], char *envp[])
+{
+#if 0
+#if defined(WIN32)
+  HANDLE h;
+  OSVERSIONINFO windows_version;
+#endif
+#endif
+  unsigned long i, j, temp;
+#if 0
+#if defined(__linux__)          // need to secure access rights to the I/O ports for Linux
+
+  if (ioperm (EPP_PORT, 8, 1) != 0)
+    {
+      fprintf (stderr, "No permission for I/O port access.\n");
+      exit (5);
+    }
+
+  // these lines make us revert back to a normal user when running a suid root app
+
+  setgid (getgid ());
+  setuid (getuid ());
+
+#elif defined (WIN32)
+
+  windows_version.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
+  GetVersionEx (&windows_version);
+
+  if (windows_version.dwPlatformId == VER_PLATFORM_WIN32_NT)
+    {
+      printf ("Attempting to get port I/O access... ");
+      h = CreateFile ("\\\\.\\giveio", GENERIC_READ, 0, NULL,
+                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+      if (h == INVALID_HANDLE_VALUE)
+        {
+          printf ("Couldn't access giveio device\n");
+          return -1;
+        }
+      else
+        printf ("done.\n");
+      CloseHandle (h);
+    }
+
+#endif
+#endif
+
+//      signal(SIGINT, userbreak);
+
+
+
+
+//      return 1000;
+
+
+  i = v64jr_status ();          // get v64jr status (or 0 if no v64jr detected)
+  do
+    i = v64jr_quickstatus ();
+  while (1);
+
+  if (!i)
+    {
+      fprintf (stderr, "v64jr not found at EPP 0x%x\n", EPP_PORT);
+      exit (5);
+    }
+
+  printf
+    ("v64jr status: N64 power %s, v64jr RAM %saltered, ROM @ 0xB%s000000\n",
+     i & V64JR_N64POWER ? "ON" : "OFF", i & V64JR_RAMALTERED ? "was " : "un",
+     i & V64JR_ROMSELECT ? "0" : "4");
+
+  printf ("\nSending N64 Agent...\n");
+
+  _spawnl (_P_WAIT, "c:\\n64\\src\\sendpatch2\\release\\elim.exe",
+           "elim.exe",
+           "c:\\n64\\src\\saveram\\saveram_n64\\saveram_n64.rom", NULL);
+
+  if ((i & V64JR_N64POWER))
+    {
+      printf ("\nTurn off n64...");
+      fflush (stdout);
+      while (i & V64JR_N64POWER)
+        i = v64jr_status ();
+    }
+  printf ("Turn ON n64...\n");
+  fflush (stdout);
+  while (!(i & V64JR_N64POWER))
+    i = v64jr_status ();
+
+
+  Sleep (2000);
+
+//      printf("\nPower N64 and press any key to continue...");
+//      fflush(stdout);
+//      fgetc(stdin);
+//      printf("ok.\n");
+//      fflush(stdout);
+
+
+#define FILENAME "c:\\n64\\src\\saveram\\saveram2.sav"
+#define FILENAME2 "c:\\n64\\roms\\Patched\\zelda64.ram"
+
+/*    if ((fp = fopen("saveram.sav", "w")) == NULL)
+	{
+		fprintf(stderr, "Can't open %s for writing\n", FILENAME);
+		exit(5);
+	}
+*/
+
+#define OP2LONG(x) ((long)x | 0x12400000)
+
+
+
+  if ((fp = fopen (FILENAME, "wb")) == NULL)
+    {
+      fprintf (stderr, "Can't open %s for writing\n", FILENAME);
+      exit (5);
+    }
+
+  printf ("Reading SRAM...\n");
+  docmd (ReadSram);             // buffer is is motorola format
+
+  i = fwrite (buffer, SRAM_LEN, 1, fp); // buffer is is motorola format
+
+  fclose (fp);
+
+
+  if ((fp = fopen (FILENAME2, "rb")) == NULL)
+    {
+      fprintf (stderr, "Can't open %s for reading\n", FILENAME2);
+      exit (6);
+    }
+
+
+  i = fread (buffer, 0x8000, 1, fp);
+
+  printf ("Writing SRAM...\n");
+  docmd (WriteSram);            // buffer is is motorola format
+
+
+  printf ("Sending ROM...\n");
+  _spawnl (_P_WAIT, "c:\\n64\\src\\sendpatch2\\release\\elim.exe",
+           "elim.exe",
+           "c:\\n64\\roms\\zelda64.rom",
+           "-p", "c:\\n64\\roms\\patched\\zelda64.APS", NULL);
+
+  docmd (ColdBoot);
+
+
+
+  fclose (fp);
+
+  return 0;
+}
+
+void
+docmd (jr_command cmd)
+{
+  long fatcmd, i, j;
+  fatcmd = cmd | 0x12400000;
+
+  switch (cmd)
+    {
+    case ReadSram:
+      v64jr_open ();            // PC control of v64jr
+      v64jr_io (V64JR_WRITE, (unsigned char *) (&fatcmd), 0x0, 4);
+      v64jr_close (V64JR_WRITEENABLE | V64JR_ROMENABLE);
+
+      do
+        i = v64jr_quickstatus ();
+      while (!(i & V64JR_ROMSELECT));
+
+      v64jr_open ();
+      v64jr_io (V64JR_READ, buffer, RAMROM_SRAM_ADDY, SRAM_LEN);
+      v64jr_close (V64JR_WRITEENABLE | V64JR_ROMENABLE);
+
+      for (j = 0; j < SRAM_LEN >> 1; j++)
+        ((unsigned short *) buffer)[j] =
+          ((unsigned short *) buffer)[j] >> 8 | ((unsigned short *) buffer)[j] << 8;
+
+      break;
+
+    case WriteSram:
+      for (j = 0; j < SRAM_LEN >> 1; j++)
+        ((unsigned short *) buffer)[j] =
+          ((unsigned short *) buffer)[j] >> 8 | ((unsigned short *) buffer)[j] << 8;
+
+      v64jr_open ();
+      v64jr_io (V64JR_WRITE, buffer, RAMROM_SRAM_ADDY, SRAM_LEN);
+      v64jr_io (V64JR_WRITE, (unsigned char *) (&fatcmd), 0x0, 4);
+      v64jr_close (V64JR_WRITEENABLE | V64JR_ROMENABLE);
+
+      for (j = 0; j < SRAM_LEN >> 1; j++)
+        ((unsigned short *) buffer)[j] =
+          ((unsigned short *) buffer)[j] >> 8 | ((unsigned short *) buffer)[j] << 8;
+
+      do
+        i = v64jr_quickstatus ();
+      while (!(i & V64JR_ROMSELECT));
+
+      break;
+
+    case ColdBoot:
+      v64jr_open ();
+      v64jr_io (V64JR_WRITE, (unsigned char *) (&fatcmd), 0x0, 4);
+      v64jr_close (V64JR_WRITEENABLE | V64JR_ROMENABLE);
+
+      do
+        i = v64jr_quickstatus ();
+      while (!(i & V64JR_ROMSELECT));
+
+      fatcmd = NoCmd | 0x12400000;
+      v64jr_open ();
+      v64jr_io (V64JR_WRITE, (unsigned char *) (&fatcmd), 0x0, 4);
+      v64jr_close (0);
+
+
+    default:;
+    }
+
+
+}
+
+
+#endif
+
 /**************************************
 *        program name: v64jr.c          *
 *  N64 cart emulator transfer program *

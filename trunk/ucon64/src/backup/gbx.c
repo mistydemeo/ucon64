@@ -120,28 +120,28 @@ static void end_port (void);
 //#define set_data_read outportb(port_a,0);     // ninit=0, nwrite=1
 #define set_normal outportb(port_a,4);  // ninit=1, nwrite=1
 #define retry_time 3;
-unsigned long time_out;
-unsigned int port_8, port_9, port_a, port_b, port_c;
-unsigned int bank, bank_size;
+static unsigned long time_out;
+static unsigned int port_8, port_9, port_a, port_b, port_c;
+static unsigned int bank, bank_size;
 
-unsigned long maxfilesize;
-const char *file_name = NULL;
-unsigned char cmd, eeprom_type; // command
-FILE *fptr;
-union mix_buffer
+static unsigned long maxfilesize;
+static const char *file_name = NULL;
+static unsigned char cmd, eeprom_type; // command
+static FILE *fptr;
+static union mix_buffer
 {
   unsigned char buffer[32768];
   unsigned int bufferx[16384];
 }
 mix;
-unsigned int i, j, idx, gcrc;
-unsigned char temp, mbc1_exp;
+static unsigned int i, j, idx, gcrc;
+static unsigned char temp, mbc1_exp;
 static unsigned long filesize;
 
-unsigned char header_ok, cart_type, rom_size, ram_size, sram_bank_num;
-char port_type = 0;             // 0=epp, 1=spp
-char epp_spp = 0;
-char pocket_camera = 0;         // 0=not pocket camera sram(1Mbits)
+static unsigned char header_ok, cart_type, rom_size, ram_size, sram_bank_num;
+static char port_type = 0;             // 0=epp, 1=spp
+static char epp_spp = 0;
+static char pocket_camera = 0;         // 0=not pocket camera sram(1Mbits)
 /**************************************
 *               Subroutine            *
 **************************************/

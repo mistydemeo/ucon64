@@ -184,7 +184,7 @@ void mainproc(void *arg) {
 #include <OS.h>                 // snooze(), microseconds
 #endif
 
-typedef unsigned short u16;     // unsigned 16-bit
+//typedef unsigned short u16;     // unsigned 16-bit
 //void docmd(jr_command cmd);
 int saveram_pc_main (int argc, char *argv[], char *envp[]);
 
@@ -373,42 +373,42 @@ docmd (jr_command cmd)
 #define set_normal outportb(port_a,4);  // ninit=1, nwrite=1
 
 static char *file_name = NULL;
-char write_en = 0;
-char test_en = 0;
-char verify_en = 0;
-char disp_on = 1;
-FILE *fptr;
-union mix_buffer
+static char write_en = 0;
+static char test_en = 0;
+static char verify_en = 0;
+static char disp_on = 1;
+static FILE *fptr;
+static union mix_buffer
 {
   unsigned char buffer[32768];
   unsigned short int bufferx[16384];
 }
 mix;
-unsigned short int port[2];
-unsigned char port_no;
-unsigned short int port_8, port_9, port_a, port_b, port_c;
-unsigned char disp_buf[16];
-short int i, j, page, sel, err, wv_mode;
-char ch = ' ';
+static unsigned short int port[2];
+static unsigned char port_no;
+static unsigned short int port_8, port_9, port_a, port_b, port_c;
+static unsigned char disp_buf[16];
+static short int i, j, page, sel, wv_mode;
+//static char ch = ' ';
 static unsigned long init_time = 0, size = 0, pos = 0;
 
-void drjr_set_ai (unsigned char _ai);
-void drjr_set_ai_data (unsigned char _ai, unsigned char _data);
-void drjr_init_port (void);
-void drjr_end_port (void);
+//static void drjr_set_ai (unsigned char _ai);
+//static void drjr_set_ai_data (unsigned char _ai, unsigned char _data);
+//static void drjr_init_port (void);
+//static void drjr_end_port (void);
 static void dump_buffer (void);
 static char write_32k (unsigned short int hi_word,
                        unsigned short int lo_word);
 static char verify_32k (unsigned short int hi_word,
                         unsigned short int lo_word);
 static void read_adr (void);
-void read_some (void);
-unsigned char drjr_check_card (void);
+//static void read_some (void);
+//static unsigned char drjr_check_card (void);
 static short int read_file (void);
 static short int download_n64 ();
 static void gen_pat_32k (unsigned short int offset);
 static unsigned short int test_dram (void);
-void d64jr_usage (char *progname);
+//static void d64jr_usage (char *progname);
 
 /**************************************
 *               Subroutine            *

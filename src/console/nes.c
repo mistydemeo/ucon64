@@ -5343,7 +5343,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
       break;
   strncpy (number, &buf[prev_n], n - prev_n);
   number[n - prev_n] = 0;
-  info->year = (unsigned char) strtol (number, NULL, 10);
+  info->year = (unsigned short) strtol (number, NULL, 10);
 
   // handle newline, possibly in DOS format
   prev_n = n;
@@ -5704,7 +5704,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
 /*
               printf ("Dump info:\n"
                       "  Dumper: %s\n"
-                      "  Date: %d-%d-%d\n"
+                      "  Date: %d-%d-%02d\n"
                       "  Agent: %s\n",
                       info.dumper_name,
                       info.day, info.month, info.year,
@@ -7193,7 +7193,7 @@ nes_init (st_rominfo_t *rominfo)
           st_dumper_info_t *info = (st_dumper_info_t *) unif_chunk->data;
           sprintf (buf, "Dump info:\n"
                         "  Dumper: %s\n"
-                        "  Date: %d-%d-%d\n"
+                        "  Date: %d-%d-%02d\n"
                         "  Agent: %s\n",
                         info->dumper_name,
                         info->day, info->month, le2me_16 (info->year),

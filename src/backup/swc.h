@@ -36,17 +36,17 @@ extern const char *swc_usage[];
                          x x     : 00 = 256kb SRAM, 01 = 64kb, 10 = 16kb, 11 = no SRAM
                              x   : 0 = Disable, 1 = Enable external cartridge
                                x : reserved
-    3-7    - 00, reserved
-    8      - File ID code 1 (0xAA)
-    9      - File ID code 2 (0xBB)
+    3-7    - 0, reserved
+    8      - File ID code 1 (0xaa)
+    9      - File ID code 2 (0xbb)
     10     - File type; check this byte only if ID 1 & 2 match
-             02 : Magic Griffin program (PC Engine)
-             03 : Magic Griffin SRAM data
-             04 : SNES program
-             05 : SWC & SMC password, SRAM data
-             06 : Megadrive program
-             07 : SMD SRAM data
-    11-511 - 00, reserved
+             2 : Magic Griffin program (PC Engine)
+             3 : Magic Griffin SRAM data
+             4 : SNES program
+             5 : SWC & SMC password, SRAM data
+             6 : Megadrive program
+             7 : SMD SRAM data
+    11-511 - 0, reserved
 */
 typedef struct st_swc_header
 {

@@ -23,21 +23,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern const char *smd_usage[];
 
 /*
-        Important SMD Header Bytes:
-
-        Offset 00h:     Number of 16KB blocks. This number may be incorrect in
-                        some files, it is recommended you calculate it
-                        manually: num_blocks = (sizeof(file) - 512) div 16384
-        Offset 02h:     Indicates wether ROM is a part of a series of a split
-                        ROM (1, or possibly just non-zero,) or wether it is
-                        a standalone ROM or the last ROM in a split series (0)
-        Offset 08h:     AAh
-        Offset 09h:     BBh
-
-        * Note: Some documentation claims that byte 1 is always 3 and all
-          other bytes besides those mentioned as important are 0. This is not
-          always the case. The header information in this document should be
-          considered fairly accurate.
+    0      - Low byte of 16kB page count
+    1      - 3 (not: High byte of 16kB page count)
+    2      - Multi
+             Bit 7 6 5 4 3 2 1 0
+                   x             : 0 = Last file of the ROM dump (multi-file)
+                                 : 1 = Multi-file (there is another file to follow)
+                 x   x x x x x x : reserved (meaning for other FFE copier types)
+    3-7    - 0, reserved
+    8      - File ID code 1 (0xaa)
+    9      - File ID code 2 (0xbb)
+    10     - File type; check this byte only if ID 1 & 2 match
+             6 : Megadrive program
+             7 : SMD SRAM data
+    11-511 - 0, reserved
 */
 typedef struct st_smd_header
 {

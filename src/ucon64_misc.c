@@ -112,11 +112,15 @@ const char *unknown_usage[] =
   };
 
 
-const char *
+/*
+  Return type is not const char *, because it may return move_name (indirectly
+  via filebackup()), which is not a pointer to constant characters.
+*/
+char *
 ucon64_fbackup (char *move_name, const char *filename)
 {
   if (!ucon64.backup)
-    return filename;
+    return (char *) filename;
 
   if (!access (filename, F_OK))
     {
@@ -184,34 +188,49 @@ remove_temp_file (void)
 }
 
 
-size_t
-filepad (const char *filename, long start, long unit)
+int
+filepad (const char *filename, int start, int size)
 /*
-  pad file (if necessary) from start size_t size;
-  ignore start bytes (if file has header or something)
-  unit is size of block (example: MBIT)
+  Pad file (if necessary) to start + size bytes;
+  Ignore start bytes (if file has header or something)
 */
 {
-  size_t size = quickftell (filename) - start;
+  FILE *file;
+  int oldsize = quickftell (filename) - start, sizeleft;
+  unsigned char padbuffer[MAXBUFSIZE];
 
-  if ((size % unit) != 0)
+  // Now we can also "pad" to smaller sizes
+  if (oldsize > size)
+    truncate (filename, size + start);
+  else if (oldsize < size)
     {
-      size /= unit;
-      size += 1;
-      size *= unit;
-
-      truncate (filename, size + start);
+      // Don't use truncate() to enlarge files, because the result is undefined (by POSIX)
+      if ((file = fopen (filename, "ab")) == NULL)
+        {
+          fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
+          exit (1);
+        }
+      sizeleft = size - oldsize;
+      memset (padbuffer, 0, MAXBUFSIZE);
+      while (sizeleft >= MAXBUFSIZE)
+        {
+          fwrite (padbuffer, 1, MAXBUFSIZE, file);
+          sizeleft -= MAXBUFSIZE;
+        }
+      if (sizeleft)
+        fwrite (padbuffer, 1, sizeleft, file);
+      fclose (file);
     }
   return size;
 }
+
 
 #if 1
 long
 filetestpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
-  long size = rominfo->file_size;
-  long pos = size - 2;
+  long size = rominfo->file_size, pos = size - 2;
   int c = quickfgetc (filename, size - 1);
   char *buf;
 
@@ -220,7 +239,8 @@ filetestpad (const char *filename, st_rominfo_t *rominfo)
 
   quickfread (buf, 0, size, filename);
 
-  while (c == (buf[pos] & 0xff)) pos--;
+  while (c == (buf[pos] & 0xff))
+    pos--;
 
   free (buf);
 
@@ -250,9 +270,10 @@ filetestpad (const char *filename, st_rominfo_t *rominfo)
        }
    }
 
-  return 0;   
+  return 0;
 }
 #endif
+
 
 #ifdef  BACKUP
 #ifdef  __BEOS__
@@ -287,6 +308,7 @@ inportb (unsigned short port)
   return byte;
 #endif
 }
+
 
 unsigned short
 inportw (unsigned short port)

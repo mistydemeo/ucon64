@@ -44,9 +44,9 @@ For games marked with an asterisk uCON64 1.9.8-2 is required.
 
 
 Code    Game
-8 + 9 - Ace wo Nerae! (J) <= it does work with Super Mario Kart (E) plugged in
 0 -     7th Saga, The (U)
 0 -     AAAHH!!! Real Monsters (U)
+8 + 9 - Ace wo Nerae! (J) <= it does work with Super Mario Kart (E) plugged in
 0 -     ActRaiser 2 (E)
 4 -     ActRaiser 2 (U) <= level(s?) (Industen) can't be entered
 0 -     ActRaiser (U)

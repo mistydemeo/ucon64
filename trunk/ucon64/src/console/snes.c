@@ -144,12 +144,13 @@ typedef struct st_snes_header
   unsigned char name[SNES_NAME_LEN];            // 16
   unsigned char map_type;                       // 37, a.k.a. ROM makeup
   unsigned char rom_type;                       // 38
-#define bs_month rom_type
+#define bs_month rom_type                       // release date, month
   unsigned char rom_size;                       // 39
+#define bs_day rom_size                         // release date, day
   unsigned char sram_size;                      // 40
-#define bs_makeup sram_size
+#define bs_makeup sram_size                     // "ROM" speed
   unsigned char country;                        // 41
-#define bs_size country
+#define bs_type country
   unsigned char maker;                          // 42
   unsigned char version;                        // 43
   /*
@@ -2318,7 +2319,12 @@ snes_init (st_rominfo_t *rominfo)
     *snes_romtype[3] = {
     "ROM",                                      // NOT ROM only, ROM + other chip is possible
     "ROM + RAM",
-    "ROM + Save RAM"};
+    "ROM + Save RAM"},
+    *snes_bstype[4] = {
+    "Full size + Sound link",
+    "Full size",
+    "Part size + Sound link",
+    "Part size"};
 
   rom_is_top = 0;                               // init these vars here, for -lsv
   snes_hirom_changed = 0;                       // idem
@@ -2531,7 +2537,7 @@ snes_init (st_rominfo_t *rominfo)
   for (x = 0; x < SNES_NAME_LEN; x++)
     if (!isprint ((int) rominfo->name[x]))      // we can't use mkprint(), because it skips \n
       rominfo->name[x] = '.';
-  rominfo->name[SNES_NAME_LEN] = 0;             // terminate string (at 1st byte _after_ string)
+  rominfo->name[bs_dump ? 16 : SNES_NAME_LEN] = 0; // terminate string (at 1st byte _after_ string)
 
   rominfo->console_usage = snes_usage;
   if (!rominfo->buheader_len)
@@ -2621,6 +2627,10 @@ snes_init (st_rominfo_t *rominfo)
           strcat (rominfo->misc, buf);
         }
       strcat (rominfo->misc, "\n");
+
+      sprintf (buf, "ROM speed: %s\n",
+              snes_header.map_type & 0x10 ? "120ns (FastROM)" : "200ns (SlowROM)");
+      strcat (rominfo->misc, buf);
     }
   else                                          // BS info
     {
@@ -2629,13 +2639,29 @@ snes_init (st_rominfo_t *rominfo)
       // misc stuff
       sprintf (buf, "\nBroadcast Satellaview dump\n");  // new line is intentional
       strcat (rominfo->misc, buf);
-      sprintf (buf, "Size: 0x%x\n", snes_header.bs_size);
+
+      x = snes_header.bs_day & 0x0f;
+      if (x <= 3)
+        y = (snes_header.bs_day >> 4) * 2;
+      else if (x >= 8 && x <= 0xb)
+        y = (snes_header.bs_day >> 4) * 2 + 1;
+      else // incorrect data
+        y = 0;
+      sprintf (buf, "Release date: %d/%d\n", y, snes_header.bs_month >> 4);
       strcat (rominfo->misc, buf);
-      // TODO: reverse engineering SMC.COM ;-)
+
+      // misc stuff
+      sprintf (buf, "Internal size: %d Mb\n", 8 - (snes_header.bs_type >> 4 + 1) * 4);
+      strcat (rominfo->misc, buf);
+
+      sprintf (buf, "ROM type: (%x) %s\n", snes_header.bs_type,
+        snes_bstype[(snes_header.bs_type >> 4) & 3]);
+      strcat (rominfo->misc, buf);
+
+      sprintf (buf, "ROM speed: %s\n",
+        ((snes_header.bs_makeup >> 4) & 3) == 3 ? "120ns (FastROM)" : "200ns (SlowROM)");
+      strcat (rominfo->misc, buf);
     }
-  sprintf (buf, "ROM speed: %s\n",
-           snes_header.map_type & 0x10 ? "120ns (FastROM)" : "200ns (SlowROM)");
-  strcat (rominfo->misc, buf);
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
@@ -2734,7 +2760,7 @@ snes_check_bs (void)
 {
   unsigned int value;
 
-  if (snes_header.bs_size & 0x4f)
+  if (snes_header.bs_type & 0x4f)
     return 0;
 
   if (snes_header.maker != 0x33 && snes_header.maker != 0xff)

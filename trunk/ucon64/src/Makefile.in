@@ -47,7 +47,7 @@ endif                                   # cygwin
 
 
 OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
-	ucon64_lib.o misc.o getopt.o quick_io.o \
+	ucon64_lib.o misc.o miscz.o getopt.o quick_io.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
@@ -183,7 +183,8 @@ UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
 
 getopt.o: getopt.h
 unzip.o: unzip.h
-misc.o: map.c map.h misc.h config.h
+misc.o: map.c map.h misc.h miscz.h config.h
+miscz.o: map.c map.h misc.h miscz.h config.h
 quick_io.o: quick_io.h misc.h config.h
 dlopen.o: dlopen.h dxedll_pub.h config.h
 ucon64.o: ucon64_opts.h dlopen.h getopt.h ucon64_dat.h \

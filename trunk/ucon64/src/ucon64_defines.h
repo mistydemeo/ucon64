@@ -37,9 +37,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_CONSOLE 0
 /*
   UCON64_CONSOLE must be small enough so that every console type can be
-  specified with a number smaller than 256. In this way some space is saved in
-  the executable (if the internal database is enabled), because one byte can be
-  used for the console type instead of four. See ucon64_db.c.
+  specified with a number smaller than 256. In this way some space is saved
+  the executable, because one byte can be
+  used for the console type instead of four. See ucon64_dat.c.
 */
 
 #define UCON64_GETOPT_ERROR ('?')               // getopt() returns 0x3f when a unknown option was given

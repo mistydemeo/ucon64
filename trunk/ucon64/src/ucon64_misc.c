@@ -504,6 +504,7 @@ ucon64_parport_probe (unsigned int port)
 #endif // BACKUP
   return port;
 }
+#endif // BACKUP
 
 
 int
@@ -521,7 +522,6 @@ ucon64_gauge (time_t init_time, long pos, long size)
       return 0;
     }
 }
-#endif // BACKUP
 
 int
 ucon64_testsplit (const char *filename)

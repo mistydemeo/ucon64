@@ -26,6 +26,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_H
 #define UCON64_H
 
+#include "getopt.h"                      // for struct option
+
 #define UCON64_YES 1
 #define UCON64_NO 0
 

@@ -1,4 +1,3 @@
-
 /*
 uCON64 - a tool to modify video game ROMs and to transfer ROMs to the
 different backup units/emulators that exist. It is based on the old uCON but
@@ -225,7 +224,6 @@ const struct option options[] = {
     {"psx", 0, 0, UCON64_PSX},
     {"q", 0, 0, UCON64_Q},
     {"qq", 0, 0, UCON64_QQ},
-    {"rdat", 0, 0, UCON64_RDAT},
     {"rrom", 0, 0, UCON64_RROM},
     {"rr83", 0, 0, UCON64_RR83},
     {"rl", 0, 0, UCON64_RL},
@@ -909,13 +907,13 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   if (rominfo->copier_usage != NULL)
     {
       strcpy (buf, rominfo->copier_usage[0]);
-      printf ("%s\n", mkprint (buf, '.'));
+      printf ("%s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
       if (rominfo->copier_usage[1])
         {
           strcpy (buf, rominfo->copier_usage[1]);
-          printf ("  %s\n", mkprint (buf, '.'));
+          printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
         }
 #endif
       printf ("\n");
@@ -933,13 +931,13 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   if (rominfo->console_usage != NULL)
     {
       strcpy (buf, rominfo->console_usage[0]);
-      printf ("%s\n", mkprint (buf, '.'));
+      printf ("%s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
       if (rominfo->console_usage[1])
         {
           strcpy (buf, rominfo->console_usage[1]);
-          printf ("  %s\n", mkprint (buf, '.'));
+          printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
         }
 #endif
     }
@@ -951,7 +949,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
     ucon64.file_size - rominfo->buheader_len;
   printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
           // some ROMs have a name with control chars in it -> replace control chars
-          mkprint (buf, '.'),
+          to_func (buf, strlen (buf), toprint2),
           NULL_TO_EMPTY (rominfo->maker),
           NULL_TO_EMPTY (rominfo->country),
           x,
@@ -1005,7 +1003,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   if (rominfo->misc[0])
     {
       strcpy (buf, rominfo->misc);
-      printf ("%s\n", mkprint (buf, '.'));
+      printf ("%s\n", to_func (buf, strlen (buf), toprint2));
     }
 
 // internal checksums?
@@ -1035,7 +1033,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
           if (rominfo->internal_crc2[0])
             {
               strcpy (buf, rominfo->internal_crc2);
-              printf ("%s\n", mkprint (buf, '.'));
+              printf ("%s\n", to_func (buf, strlen (buf), toprint2));
             }
         }
 
@@ -1078,6 +1076,12 @@ ucon64_usage (int argc, char *argv[])
 #define HEXDUMP_MSG "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\"\n"       // less is more ;-)
 #endif
 
+#ifdef  __MSDOS__
+#define GOOD_EXAMPLE  "                  Example: %s " OPTION_LONG_S "rrom " OPTION_LONG_S "good C:\\MAME_ROMS\\\n"
+#else
+#define GOOD_EXAMPLE  "                  Example: %s " OPTION_LONG_S "rrom " OPTION_LONG_S "good /home/joe/mame/\n"
+#endif
+
   printf (
     "Usage: %s [OPTION]... [" OPTION_LONG_S "rom=][ROM]... [[" OPTION_LONG_S "file=]FILE]" /* [-o=OUTPUT_PATH] */ "\n\n"
     "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
@@ -1097,9 +1101,7 @@ ucon64_usage (int argc, char *argv[])
 
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
-    "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
-    "                  this is often used by people who lose control of their ROMs\n"
-    "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"
+
 /*
     "  " OPTION_LONG_S "rl          rename all files in DIRECTORY to lowercase; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "ru          rename all files in DIRECTORY to uppercase; " OPTION_LONG_S "rom=DIRECTORY\n"
@@ -1108,6 +1110,14 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "find        find string in ROM; " OPTION_LONG_S "file=STRING (wildcard: '?')\n"
     "  " OPTION_S "c           compare ROMs for differencies; " OPTION_LONG_S "file=OTHER_ROM\n"
     "  " OPTION_LONG_S "cs          compare ROMs for similarities; " OPTION_LONG_S "file=OTHER_ROM\n"
+    "  " OPTION_LONG_S "help        display this help and exit\n"
+    "  " OPTION_LONG_S "version     output version information and exit\n"
+    "  " OPTION_S "q           be quiet (don't show ROM info)\n"
+//    "  " OPTION_LONG_S "qq          be even more quiet\n"
+    "\n",
+    argv[0], ucon64.configfile, MAXROMSIZE, TOMBIT_F (MAXROMSIZE));
+
+  printf ("Padding\n"
     "  " OPTION_LONG_S "stpn=N      strip N Bytes from ROM beginning\n"
     "  " OPTION_LONG_S "stp         same as " OPTION_LONG_S "stpn=512\n"
     "                  most backup units use a header with 512 Bytes size\n"
@@ -1118,24 +1128,31 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_S "p, " OPTION_LONG_S "pad    pad ROM to full Mb\n"
     "  " OPTION_LONG_S "padn=N      pad ROM to N Bytes (put Bytes with value 0x00 after end)\n"
     "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
-    "  " OPTION_LONG_S "help        display this help and exit\n"
-    "  " OPTION_LONG_S "version     output version information and exit\n"
-    "  " OPTION_S "q           be quiet (don't show ROM info)\n"
-//    "  " OPTION_LONG_S "qq          be even more quiet\n"
-    "\n",
-    argv[0], ucon64.configfile, MAXROMSIZE, TOMBIT_F (MAXROMSIZE));
+    "\n");
 
-  if (ucon64.dat_enabled)
-    printf ("DATabase\n"
-//      "NOTE: This is the support for all DAT files available\n"
+//  if (ucon64.dat_enabled)
+    printf ("DATabase (support for DAT files)\n"
       "  " OPTION_LONG_S "dbs         search ROM in DATabase by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
       "  " OPTION_LONG_S "db          DATabase statistics\n"
       "  " OPTION_LONG_S "dbv         like " OPTION_LONG_S "db but more verbose\n"
       "  " OPTION_LONG_S "lsd         generate ROM list for all ROMs using DATabase info; " OPTION_LONG_S "rom=DIR\n"
-      "  " OPTION_LONG_S "rdat        rename all ROMs in DIRECTORY to their DATabase names; " OPTION_LONG_S "rom=DIR\n"
-      "                  this is often used by people who lose control of their ROMs\n"
-      "TODO: " OPTION_LONG_S "good        like " OPTION_LONG_S "rdat but sorts recognized ROMs into sub-dirs;\n"
-      "                  " OPTION_LONG_S "rom=DIRECTORY\n\n");
+      "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
+      "                  with " OPTION_LONG_S "good you will use DATabase instead of internal names\n"
+      "                  and sort the ROMs into subdirs (DAT files: %s)\n"
+      GOOD_EXAMPLE
+      "                  Only ROMs of these consoles use to have internal names:\n"
+      "                  %s,\n"
+      "                  %s,\n"
+      "                  %s,\n"
+      "                  %s, and %s\n"
+      "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n\n",
+      ucon64.configdir,
+      argv[0],
+      snes_usage[0],
+      genesis_usage[0],
+      gameboy_usage[0],
+      gba_usage[0],
+      n64_usage[0]);
 
   printf ("Patching\n");
 

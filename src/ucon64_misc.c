@@ -1238,20 +1238,18 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
 
     case UCON64_RROM:
     case UCON64_RR83:
-    case UCON64_RDAT:
-    case UCON64_GOOD:
       if (ucon64.console != UCON64_UNKNOWN && !ucon64_testsplit (filename))
         {
           char buf2[FILENAME_MAX];
 
-          if (mode == UCON64_RDAT || mode == UCON64_RDAT)
+          if (ucon64.good_enabled)
             strcpy (buf, ucon64_dat ? ucon64_dat->fname : "");
           else
             strcpy (buf, strtrim (ucon64_dat ? ucon64_dat->fname : rominfo.name));
 
           if (buf[0])
             {
-              strcpy (buf2, mkfile (buf, '_')); // replace chars the fs might not like
+              strcpy (buf2, to_func (buf, strlen (buf), tofname)); // replace chars the fs might not like
               if (mode == UCON64_RR83)
                 buf2[8] = 0;
               strcat (buf2, getext (ucon64.rom));
@@ -1269,7 +1267,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
     case UCON64_LS:
     default:
       strftime (buf, 13, "%b %d %H:%M", localtime (&fstate->st_mtime));
-      printf ("%-31.31s %10d %s %s\n", mkprint (rominfo.name, ' '),
+      printf ("%-31.31s %10d %s %s\n", to_func (rominfo.name, strlen (rominfo.name), toprint2),
               ucon64.file_size, buf, ucon64.rom);
       fflush (stdout);
       break;

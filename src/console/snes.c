@@ -773,7 +773,7 @@ snes_mgd (st_rominfo_t *rominfo)
   int n, len;
 
   fname = basename (ucon64.rom);
-  sprintf (dest_name, "%s%d", areupper (fname) ? "SF" : "sf",
+  sprintf (dest_name, "%s%d", is_func (fname, strlen (fname), isupper) ? "SF" : "sf",
     (ucon64.file_size - rominfo->buheader_len) / MBIT);
   strncat (dest_name, fname, 5);
   dest_name[8] = 0;
@@ -805,7 +805,8 @@ snes_mgd (st_rominfo_t *rominfo)
 #else
   char mgh[32], buf[FILENAME_MAX], buf2[FILENAME_MAX], *p = NULL;
 
-  strcpy (buf, areupper (basename (ucon64.rom)) ? "SF" : "sf");
+  p = basename (ucon64.rom);
+  strcpy (buf, is_func (p, strlen (p), isupper) ? "SF" : "sf");
   strcpy (buf2, ucon64.rom);
   strcat (buf, basename (buf2));
   if ((p = strrchr (buf, '.')))
@@ -902,7 +903,7 @@ snes_gd3 (st_rominfo_t *rominfo)
   total4Mbparts = n4Mbparts + (surplus4Mb > 0 ? 1 : 0);
 
   p = basename (ucon64.rom);
-  sprintf (dest_name, "%s%d", areupper (p) ? "SF" : "sf", total4Mbparts * 4);
+  sprintf (dest_name, "%s%d", is_func (p, strlen (p), isupper) ? "SF" : "sf", total4Mbparts * 4);
   strcat (dest_name, p);
   // avoid trouble with filenames containing spaces
   len = strlen (dest_name);
@@ -2907,9 +2908,9 @@ score_hirom (unsigned char *rom_buffer, int rom_size)
 #endif
   if ((1 << (rom_buffer[0xff00 + 0xd7] - 7)) > 48)
     score -= 1;
-  if (!areprint (rom_buffer + 0xff00 + 0xb0, 6))
+  if (!is_func (rom_buffer + 0xff00 + 0xb0, 6, isprint))
     score -= 1;
-  if (!areprint (rom_buffer + 0xff00 + 0xc0, SNES_NAME_LEN))
+  if (!is_func (rom_buffer + 0xff00 + 0xc0, SNES_NAME_LEN, isprint))
     score -= 1;
 
   return score;
@@ -2939,9 +2940,9 @@ score_lorom (unsigned char *rom_buffer, int rom_size)
     score -= 4;
   if ((1 << (rom_buffer[0x7f00 + 0xd7] - 7)) > 48)
     score -= 1;
-  if (!areprint (rom_buffer + 0x7f00 + 0xb0, 6))
+  if (!is_func (rom_buffer + 0x7f00 + 0xb0, 6, isprint))
     score -= 1;
-  if (!areprint (rom_buffer + 0x7f00 + 0xc0, SNES_NAME_LEN))
+  if (!is_func (rom_buffer + 0x7f00 + 0xc0, SNES_NAME_LEN, isprint))
     score -= 1;
 
   return score;

@@ -80,6 +80,7 @@ fclose_fdat (void)
 }
 
 
+#if 0
 static uint32_t
 get_uint32 (const void *buf)
 {
@@ -93,6 +94,14 @@ get_uint32 (const void *buf)
               
   return ret;
 }
+#else
+static uint32_t
+get_uint32 (const void *buf)
+{
+  unsigned char *tmp = (unsigned char *) buf;
+  return (uint32_t) (tmp[3] << 24) + (tmp[2] << 16) + (tmp[1] << 8) + tmp[0];
+}
+#endif
                 
 
 static char *
@@ -545,7 +554,7 @@ ucon64_dat_indexer (void)
 void
 ucon64_dat_nfo (const ucon64_dat_t *dat)
 {
-  char buf[MAXBUFSIZE];
+  char buf[MAXBUFSIZE], *p = NULL;
 
   if (!dat)
     {
@@ -553,39 +562,52 @@ ucon64_dat_nfo (const ucon64_dat_t *dat)
       return;
     }
 
-  printf ("DAT info:\n" "  %s\n", dat->name);
-
-  if (dat->misc[0])
-    printf ("  %s\n", dat->misc);
-  
+  printf ("DAT info:\n");
 // console type?
    if (dat->console_usage != NULL)
     {
       strcpy (buf, dat->console_usage[0]);
-      printf ("  Console: %s\n", mkprint (buf, '.'));
+      printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
       if (dat->console_usage[1])
         {
           strcpy (buf, dat->console_usage[1]);
-          printf ("  %s\n", mkprint (buf, '.'));
+          printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
         }
 #endif
     }
 
-//  if (dat->country)
-//    printf ("  Country: %s\n", dat->country);
+  printf ("  %s\n", dat->name);
+
+  if (dat->country)
+    {
+      if (!(p = strchr (dat->country, ' '))) // sttart after the (country)
+        p = (char *)dat->country;
+      else p++;
+      
+      printf ("  %s\n", p);
+    }
 
   if (stricmp (dat->name, dat->fname) != 0)
     printf ("  Filename: %s\n", dat->fname);
 
-  printf ("  Size: %d Bytes (%.4f Mb)\n"
-          "  %s\n"
-          "  Version: %s (%s, %s)\n",
+  printf ("  %d Bytes (%.4f Mb)\n",
           dat->fsize,
-          TOMBIT_F (dat->fsize),
-          dat->datfile,
-          dat->version,
-          dat->date,
-          dat->refname);
+          TOMBIT_F (dat->fsize));
+
+  if (stristr (dat->datfile, dat->version))
+    printf ("  %s (%s, %s)\n",
+      dat->datfile,
+      dat->date,
+      dat->refname);
+  else
+    printf ("  %s (%s, %s, %s)\n",
+      dat->datfile,
+      dat->version,
+      dat->date,
+      dat->refname);
+
+  if (dat->misc[0])
+    printf ("  %s\n", dat->misc);
 }

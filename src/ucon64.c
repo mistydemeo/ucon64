@@ -908,7 +908,7 @@ ucon64_rom_handling (void)
   else if (S_ISREG (fstate.st_mode) != TRUE)
     no_rom = 1;
 #if 0
-  // printing an error message for files of 0 bytes only confuses people
+  // printing the no_rom error message for files of 0 bytes only confuses people
   else if (!fstate.st_size)
     no_rom = 1;
 #endif
@@ -1093,7 +1093,7 @@ ucon64_probe (st_rominfo_t * rominfo)
       {UCON64_GEN, genesis_init, AUTO},
       {UCON64_LYNX, lynx_init, AUTO},
       {UCON64_GB, gameboy_init, AUTO},
-      {UCON64_SMS, sms_init, AUTO},
+      {UCON64_SMS, sms_init, AUTO},             // only auto for SMD files
       {UCON64_SNES, snes_init, AUTO},
       {UCON64_NES, nes_init, AUTO},
       {UCON64_NGP, ngp_init, AUTO},

@@ -561,15 +561,26 @@ parport_init (int port, int target_delay)
   parport_out91 (0x34);
   parport_out31 (0x00);
   parport_out91 (0x56);
-  parport_out31 (0x02);
-  parport_out91 (0x00);
 
+  // not parport_out31 (0x02), because extra write to control register
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x03);
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
+  outportb ((unsigned short) (f2a_pport + PARPORT_DATA), 0x02);
+
+  // not parport_out91 (0x00), because no write to data register
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x09);
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x00);
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x00);
+
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x02);
   inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x06);
-  
   inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x00);
+
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
   outportb ((unsigned short) (f2a_pport + PARPORT_EADDRESS), 0x04);
   outportb ((unsigned short) (f2a_pport + PARPORT_EDATA), 0x07);
@@ -587,9 +598,11 @@ parport_init (int port, int target_delay)
   outportb ((unsigned short) (f2a_pport + PARPORT_EDATA), 0x56);
 
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
   outportb ((unsigned short) (f2a_pport + PARPORT_EADDRESS), 0x02);
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x00);
-  
+  inportb ((unsigned short) (f2a_pport + PARPORT_EDATA));
+
   return 0;
 }
 

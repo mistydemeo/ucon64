@@ -2167,9 +2167,9 @@ LDFLAGS="-s \`gtk-config --cflags --libs\`"
 
 echo "$as_me:$LINENO: checking whether todo output is enabled" >&5
 echo $ECHO_N "checking whether todo output is enabled... $ECHO_C" >&6
-# Check whether --enable-debug or --disable-debug was given.
-if test "${enable_debug+set}" = set; then
-  enableval="$enable_debug"
+# Check whether --enable-todo or --disable-todo was given.
+if test "${enable_todo+set}" = set; then
+  enableval="$enable_todo"
   enable_todo=$enableval
 else
   enable_todo=no

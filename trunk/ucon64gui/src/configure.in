@@ -12,7 +12,7 @@ LDFLAGS="-s \`gtk-config --cflags --libs\`"
 
 
 AC_MSG_CHECKING(whether todo output is enabled)
-AC_ARG_ENABLE(debug,
+AC_ARG_ENABLE(todo,
               AC_HELP_STRING([--enable-todo],
                              [enable todo output (default: no)]),
               enable_todo=$enableval,

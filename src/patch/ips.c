@@ -36,8 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 // for some strange reason 6 seems to be a general optimum value for RLE_START_TRESHOLD
 #define RLE_START_TRESHOLD 6                    // must be smaller than RLE_RESTART_TRESHOLD!
 #define RLE_RESTART_TRESHOLD 13
-// 6 seems to be better than 5 for BRIDGE_LEN
-#define BRIDGE_LEN 6
+#define BRIDGE_LEN 5
 //#define DEBUG_IPS
 
 const char *ips_usage[] =
@@ -314,8 +313,8 @@ check_for_rle (unsigned char byte, unsigned char *buf)
         i + 5  length high byte
         i + 6  length low byte
         i + 7  new byte
-        The value 7 (instead of 2) is to compensate for normal blocks that
-        immediately follow the RLE block.
+        The value 7 for RLE_START_TRESHOLD (instead of 2) is to compensate for
+        normal blocks that immediately follow the RLE block.
       */
       else if (ndiffs > RLE_START_TRESHOLD)
         {
@@ -433,12 +432,12 @@ next_byte:
         // TODO: convert this monstrosity into decent code
         {
           int n, n2, n_compare;
-          unsigned char bridge[BRIDGE_LEN];
+          unsigned char bridge[BRIDGE_LEN + 1];
 
           bridge[0] = byte;
           buf[ndiffs] = byte2;
-          n = fread (bridge + 1, 1, BRIDGE_LEN - 1, orgfile);
-          n2 = fread (&buf[ndiffs + 1], 1, MIN (BRIDGE_LEN - 1, 65535 - ndiffs), modfile);
+          n = fread (bridge + 1, 1, BRIDGE_LEN, orgfile);
+          n2 = fread (&buf[ndiffs + 1], 1, MIN (BRIDGE_LEN, 65535 - ndiffs), modfile);
           n_compare = 1 + MIN (n, n2);
 
           for (i = 0; i < n_compare; i++)

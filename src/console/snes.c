@@ -134,11 +134,11 @@ const char *snes_usage[] =
 
 typedef struct st_snes_header
 {
-  unsigned char maker_x;                        // 0
-  unsigned char maker_y;                        // 1
+  unsigned char maker_high;                     // 0
+  unsigned char maker_low;                      // 1
   unsigned char pad[14];                        // 2
   unsigned char name[SNES_NAME_LEN];            // 16
-  unsigned char map_type;                       // 37, AKA ROM makeup
+  unsigned char map_type;                       // 37, a.k.a. ROM makeup
   unsigned char rom_type;                       // 38
 #define bs_month rom_type
   unsigned char size;                           // 39
@@ -1713,7 +1713,7 @@ snes_init (st_rominfo_t *rominfo)
     "Jaleco", "Coconuts", "Rage Software", NULL, "Technos",
     "Mebio Software", NULL, "Starfish", "Gremlin Graphics", "Electronic Arts",
     NULL, "COBRA Team", "Human/Field", "KOEI", "Hudson Soft",
-    "Yanoman", "Yanoman", NULL, "Tecmo", NULL,
+    "Game Village", "Yanoman", NULL, "Tecmo", NULL,
     "Open System", "Virgin Games", "KSS", "Sunsoft", "POW",
     "Micro World", NULL, NULL, "Enix", "Loriciel/Electro Brain",
     "Kemco", "Seta Co., Ltd.", NULL, NULL, NULL,
@@ -1721,12 +1721,13 @@ snes_init (st_rominfo_t *rominfo)
     "Dynamic", "Nintendo", "Magifact", "Hect", NULL,
     NULL, "Capcom", NULL, NULL, "Arcade Zone",
     "Empire Software", "Loriciel", NULL, NULL, "Seika Corp.",
-    "UBI Soft", NULL, NULL, NULL, NULL,
+    "UBI SOFT Entertainment Software", NULL, NULL, NULL, NULL,
     "System 3", "Spectrum Holobyte", NULL, "Irem", NULL,
     "Raya Systems/Sculptured Software", "Renovation Products", "Malibu Games/Black Pearl",
         NULL, "U.S. Gold",
-    "Absolute Entertainment", "Acclaim", "Activision", "American Sammy", "GameTek",
-    "Hi Tech Expressions", "LJN Toys", NULL, NULL, NULL,
+    "Absolute Entertainment", "Acclaim", "Activision", "American Sammy",
+      "Time Warner Interactive/Bitmasters" /*"GameTek"*/,
+    "Hi Tech Expressions", "LJN Ltd.", NULL, NULL, NULL,
     "Mindscape", NULL, NULL, "Tradewest", NULL,
     "American Softworks Corp.", "Titus", "Virgin Interactive Entertainment",
         "Maxis", "Origin/FCI/Pony Canyon",
@@ -1750,12 +1751,12 @@ snes_init (st_rominfo_t *rominfo)
     NULL, "Culture Brain", "Sunsoft", "Toshiba EMI", "Sony/Imagesoft",
     NULL, "Sammy", "Taito", NULL, "Kemco",
     "Square", "Tokuma Soft", "Data East", "Tonkin House", NULL,
-    "KOEI", NULL, "Konami USA", "NTVIC", NULL,
+    "Falcom" /*"KOEI"*/, NULL, "Konami USA", "NTVIC", NULL,
     "Meldac", "Pony Canyon", "Sotsu Agency/Sunrise", "Disco/Taito", "Sofel",
     "Quest Corp.", "Sigma", NULL, NULL, "Naxat",
     NULL, "Capcom", "Banpresto", "Tomy", "Acclaim",
     NULL, "NCS", "Human Entertainment", "Altron", "Jaleco",
-    NULL, "Yutaka", NULL, "T&Esoft", "EPOCH Co., Ltd.",
+    NULL, "Yutaka", NULL, "T&Esoft", "Epoch Co., Ltd.",
     NULL, "Athena", "Asmik", "Natsume", "King Records",
     "Atlus", "Sony Music Entertainment", NULL, "IGS", NULL,
     NULL, "Motown Software", "Left Field Entertainment", "Beam Software/Extreme",
@@ -1842,14 +1843,14 @@ snes_init (st_rominfo_t *rominfo)
     type = SWC;
   else if (!strncmp ((char *) &header, "GAME DOCTOR SF 3", 0x10))
     type = GD3;
-  else if ((header.hirom == 0x80 &&            // HiROM
+  else if ((header.hirom == 0x80 &&             // HiROM
              ((header.emulation1 == 0x77 && header.emulation2 == 0x83) ||
               (header.emulation1 == 0xdd && header.emulation2 == 0x82) ||
               (header.emulation1 == 0xdd && header.emulation2 == 0x02) ||
               (header.emulation1 == 0xf7 && header.emulation2 == 0x83) ||
               (header.emulation1 == 0xfd && header.emulation2 == 0x82)))
             ||
-           (header.hirom == 0x00 &&            // LoROM
+           (header.hirom == 0x00 &&             // LoROM
              ((header.emulation1 == 0x77 && header.emulation2 == 0x83) ||
               (header.emulation1 == 0x00 && header.emulation2 == 0x80) ||
 #if 1
@@ -2001,14 +2002,21 @@ snes_init (st_rominfo_t *rominfo)
   // ROM maker
   if (snes_header.maker == 0x33)
     {
-      x = (snes_header.maker_x < 0x3a ?
-            (snes_header.maker_x - 0x30) * 16 :
-            (snes_header.maker_x - 0x37) * 16) + (snes_header.maker_y < 0x3a ?
-                                                   snes_header.maker_y - 0x30 :
-                                                   snes_header.maker_y - 0x37);
+#if 1
+      x = (snes_header.maker_high - '0') * 36 + snes_header.maker_low - '0';
+      if (x < 0 || x > 791)
+        x = 0;
+      rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[x]);
+#else
+      x = (snes_header.maker_high < 0x3a ?
+            (snes_header.maker_high - 0x30) * 16 :
+            (snes_header.maker_high - 0x37) * 16) + (snes_header.maker_low < 0x3a ?
+                                                      snes_header.maker_low - 0x30 :
+                                                      snes_header.maker_low - 0x37);
       if (x < 0 || x > 255)
         x = 0;
       rominfo->maker = NULL_TO_UNKNOWN_S (snes_maker[x]);
+#endif
     }
   else
     rominfo->maker = (snes_header.maker == 0) ? "Demo or Beta ROM?" :

@@ -339,7 +339,7 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
 }
 
 
-#if 0
+#if 1
 char
 verify_32k (unsigned short int hi_word, unsigned short int lo_word)
 {
@@ -401,7 +401,7 @@ gen_pat_32k (unsigned short int offset)
 unsigned short int
 test_dram (void)
 {
-  int pages = 0, page;
+  int n_pages = 0, page;
 
   gen_pat_32k (0x0000);
   write_32k (0, 0);
@@ -411,21 +411,21 @@ test_dram (void)
 
   gen_pat_32k (0x0000);
   if (verify_32k (0, 0) == 0)                   // find lower 128 Mbits
-    pages = 0x100;
+    n_pages = 0x100;
   gen_pat_32k (0x8000);
   if (verify_32k (0x100, 0) == 0)               // find upper 128 Mbits
-    pages = 0x200;
+    n_pages = 0x200;
 
   printf ("Testing DRAM...\n");
 
-  for (page = 0; page < pages; page++)
+  for (page = 0; page < n_pages; page++)
     {
       gen_pat_32k ((unsigned short int) (page * 2));
       if (write_32k (page, 0))
         return 0;
       else
         {
-          printf ("w");
+          fputc ('w', stdout);
           fflush (stdout);
         }
 
@@ -434,20 +434,20 @@ test_dram (void)
         return 0;
       else
         {
-          printf ("w");
+          fputc ('w', stdout);
           fflush (stdout);
         }
     }
 
   fputc ('\n', stdout);
-  for (page = 0; page < pages; page++)
+  for (page = 0; page < n_pages; page++)
     {
       gen_pat_32k ((unsigned short int) (page * 2));
       if (verify_32k (page, 0))
         return 0;
       else
         {
-          printf ("v");
+          fputc ('v', stdout);
           fflush (stdout);
         }
       gen_pat_32k ((unsigned short int) (page * 2 + 1));
@@ -455,12 +455,12 @@ test_dram (void)
         return 0;
       else
         {
-          printf ("v");
+          fputc ('v', stdout);
           fflush (stdout);
         }
     }
 
-  return pages;
+  return n_pages;
 }
 #endif
 
@@ -521,7 +521,8 @@ doctor64jr_read (const char *filename, unsigned int parport)
 int
 doctor64jr_write (const char *filename, unsigned int parport)
 {
-  unsigned int enable_write = 0, init_time, size, bytesread, bytessend = 0;
+  unsigned int enable_write = 0, init_time, size, bytesread, bytessend = 0,
+               n_pages;
   unsigned short int page;
   FILE *file;
 
@@ -537,7 +538,7 @@ doctor64jr_write (const char *filename, unsigned int parport)
 
   if (check_card () != 0)
     {
-      fprintf (stderr, "ERROR: No V64jr card present\n");
+      fprintf (stderr, "ERROR: No Doctor V64 Junior card present\n");
       end_port (enable_write);
       exit (1);
     }
@@ -574,8 +575,9 @@ doctor64jr_write (const char *filename, unsigned int parport)
     }
 #endif
 
+  n_pages = (size + (64 * 1024 - 1)) / (64 * 1024); // "+ (64 * 1024 - 1)" to round up
   init_time = time (0);
-  for (page = 0; page < 0x400; page++)
+  for (page = 0; page < n_pages; page++)
     {
       bytesread = fread ((unsigned char *) buffer, 1, BUFFERSIZE, file);
       if (write_32k (page, 0))
@@ -585,7 +587,7 @@ doctor64jr_write (const char *filename, unsigned int parport)
         }
 
       bytesread += fread ((unsigned char *) buffer, 1, BUFFERSIZE, file);
-      if (write_32k (page, 0))
+      if (write_32k (page, 0x80))
         {
           fprintf (stderr, "ERROR: Transfer failed at address 0x%8lx", get_address ());
           break;

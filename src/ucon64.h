@@ -26,6 +26,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_H
 #define UCON64_H
 
+//#include "config.h"
+
 #include "ucon64_misc.h"
 #include "ucon64_db.h"
 

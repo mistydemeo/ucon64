@@ -1329,7 +1329,19 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_LOGO:
-      gba_logo (ucon64.rominfo);
+      switch (ucon64.console)
+        {
+          case UCON64_GB:
+            gameboy_logo (ucon64.rominfo);
+            break;
+          case UCON64_GBA:
+            gba_logo (ucon64.rominfo);
+            break;
+          default:
+// The next msg has already been printed
+//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+            return -1;
+        }
       break;
 
     case UCON64_LYX:

@@ -481,7 +481,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_K, UCON64_SNES, snes_usage,          WF_DEFAULT},
   {UCON64_L, UCON64_SNES, snes_usage,          WF_DEFAULT},
   {UCON64_LNX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
-  {UCON64_LOGO, UCON64_GBA, gba_usage,         WF_DEFAULT},
   {UCON64_LSRAM, UCON64_N64, n64_usage,        WF_INIT|WF_PROBE},
   {UCON64_LYX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
 #if 1 // -multi is now used for GBA *and* Genesis
@@ -584,6 +583,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_INSN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_ISPAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_INIT|WF_NO_SPLIT},
   {UCON64_J, UCON64_UNKNOWN, NULL,             WF_INIT|WF_PROBE},
+  {UCON64_LOGO, UCON64_UNKNOWN, NULL,          WF_DEFAULT},
   {UCON64_LS, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
   {UCON64_LSD, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE},
   {UCON64_LSV, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},

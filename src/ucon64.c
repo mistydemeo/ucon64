@@ -317,7 +317,7 @@ main (int argc, char **argv)
 
   if (atexit (ucon64_exit) == -1)
     {
-      fprintf (stderr, "Could not register function with atexit()\n");
+      fprintf (stderr, "ERROR: Could not register function with atexit()\n");
       exit (1);
     }
 
@@ -338,7 +338,6 @@ main (int argc, char **argv)
   ucon64.split =
   ucon64.snes_hirom =
   ucon64.bs_dump =
-  ucon64.fal_size =
   ucon64.controller =
   ucon64.tv_standard =
   ucon64.battery =

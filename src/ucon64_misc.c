@@ -386,25 +386,24 @@ parport_probe (unsigned int port)
       ucon64_io_fd = open ("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
       if (ucon64_io_fd == -1)
         {
-          fprintf (stderr,
-                   "Could not open I/O port device (no driver)\n"
-                   "You can download the latest ioport driver from\n"
-                   "http://www.infernal.currantbun.com or http://ucon64.sourceforge.net\n");
+          fprintf (stderr, "ERROR: Could not open I/O port device (no driver)\n"
+                           "       You can download the latest ioport driver from\n"
+                           "       http://www.infernal.currantbun.com or http://ucon64.sourceforge.net\n");
           exit (1);
         }
       else
         {                                       // print warning, but continue
-          fprintf (stderr,
-                   "Support for the driver parnew is deprecated. Future versions of uCON64 might\n"
-                   "not support this driver. You can download the latest ioport driver from\n"
-                   "http://www.infernal.currantbun.com or http://ucon64.sourceforge.net\n\n");
+          printf ("WARNING: Support for the driver parnew is deprecated. Future versions of uCON64\n"
+                  "         might not support this driver. You can download the latest ioport\n"
+                  "         driver from http://www.infernal.currantbun.com or\n"
+                  "         http://ucon64.sourceforge.net\n\n");
         }
     }
 
   if (atexit (close_io_port) == -1)
     {
       close (ucon64_io_fd);
-      fprintf (stderr, "Could not register function with atexit()\n");
+      fprintf (stderr, "ERROR: Could not register function with atexit()\n");
       exit (1);
     }
 #endif // __BEOS__
@@ -438,8 +437,8 @@ parport_probe (unsigned int port)
 #endif // __linux__
         {
           fprintf (stderr,
-                   "Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
-                   "(This program needs root privileges for the requested action)\n",
+                   "ERROR: Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
+                   "       (This program needs root privileges for the requested action)\n",
                    port + PARPORT_DATA, port + PARPORT_STATUS, port + PARPORT_CONTROL);
           exit (1);                             // Don't return, if ioperm() fails port access
         }                                       //  causes core dump
@@ -478,17 +477,11 @@ ucon64_parport_probe (unsigned int port)
   if (i386_iopl (3) == -1)
 #endif
     {
-      fprintf (stderr, "Could not set the I/O privilege level to 3\n"
-                       "(This program needs root privileges for the requested action)\n");
+      fprintf (stderr, "ERROR: Could not set the I/O privilege level to 3\n"
+                       "       (This program needs root privileges for the requested action)\n");
       return 1;
     }
-#endif
-  {
-    // now we can drop privileges
-    int val = drop_privileges ();
-    if (val != 0)
-      return val;
-  }
+#endif // __linux__ || __FreeBSD__
 #endif // __unix__
   return port;
 }

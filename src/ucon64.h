@@ -65,7 +65,6 @@ typedef struct st_ucon64
   int split;                                    // rom is split
   int snes_hirom;                               // Super Nintendo ROM is HiROM
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
-  int fal_size;                                 // Flash Advance Linker cart size
   int controller;                               // NES UNIF
   int tv_standard;                              // NES UNIF
   int battery;                                  // NES UNIF/iNES/Pasofami

@@ -39,8 +39,8 @@ const char *fal_usage[] =
 #ifdef BACKUP
     "  " OPTION_LONG_S "xfal        send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when ROM does not exist\n"
-    "  " OPTION_LONG_S "xfalc=SIZE  specify chip SIZE in mbits of ROM in Flash Advance Linker when\n"
-    "                  receiving. SIZE can be 8,16,32,64,128 or 256. default is 32\n"
+    "  " OPTION_LONG_S "xfalc=N     receive N mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
+    "                  N can be 8, 16, 32, 64, 128 or 256. default is 32\n"
 #if 0
     "  " OPTION_LONG_S "xfalm       use SPP mode, default is EPP\n"
 #endif
@@ -547,7 +547,7 @@ LinkerInit (void)               // 4027c4
         }
       else
         {
-          fprintf (stdout,              // stdout for frontend
+          fprintf (stderr,
                    "ERROR: Flash Advance Linker not found or not turned on.\n");
           ProgramExit (1);
         }
@@ -1471,7 +1471,7 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname, "wb")) == NULL)
         {
-          fprintf (stdout, "ERROR trying to open file '%s'\n", fname); // stdout for frontend
+          fprintf (stderr, "ERROR trying to open file '%s'\n", fname);
           ProgramExit (1);
         }
       printf ("Backing up backup SRAM to file '%s'. Please wait...\n\n",
@@ -1487,7 +1487,7 @@ fal_main (int argc, char **argv)
 
   if ((OptP) && ((Device == 0) || (Device == 0x2e) || (Device == 0xff)))
     {
-      fprintf (stdout, "ERROR: Device type not recognized as programmable\n"); // stdout for frontend
+      fprintf (stderr, "ERROR: Device type not recognized as programmable\n");
       ProgramExit (1);
     }
 
@@ -1499,7 +1499,7 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname, "rb")) == NULL)
         {
-          fprintf (stdout, "ERROR trying to open file '%s'\n", fname); // stdout for frontend
+          fprintf (stderr, "ERROR trying to open file '%s'\n", fname);
           ProgramExit (1);
         }
       printf ("Restoring backup SRAM from file '%s'. Please wait...\n\n",
@@ -1527,7 +1527,7 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname, "rb")) == NULL)
         {
-          fprintf (stdout, "ERROR trying to open file '%s'\n", fname); // stdout for frontend
+          fprintf (stderr, "ERROR trying to open file '%s'\n", fname);
           ProgramExit (1);
         }
       printf ("Programming flash with file '%s'.\n", fname);
@@ -1552,7 +1552,7 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname, "wb")) == NULL)
         {
-          fprintf (stdout, "ERROR trying to open file '%s'\n", fname); // stdout for frontend
+          fprintf (stderr, "ERROR trying to open file '%s'\n", fname);
           ProgramExit (1);
         }
       printf ("Backing up %d mbits of ROM to file '%s'. Please wait...\n\n",
@@ -1603,7 +1603,7 @@ fal_args (unsigned int parport)
   fal_argv[0] = "fl";
   if (parport != 0x3bc && parport != 0x378 && parport != 0x278)
     {
-      printf ("PORT must be 0x3bc, 0x378 or 0x278\n"); // stdout for frontend
+      fprintf (stderr, "ERROR: PORT must be 0x3bc, 0x378 or 0x278\n");
       exit (1);
     }
   fal_argv[1] = "-l";
@@ -1640,8 +1640,8 @@ fal_read_rom (const char *filename, unsigned int parport, int size)
         fal_argv[4] = "256";
       else
         {
-          fprintf (stderr, "Invalid argument for -xfalc=n\n"
-                   "n can be 8, 16, 32, 64, 128 or 256; default is 32\n");
+          fprintf (stderr, "ERROR: Invalid argument for -xfalc=n\n"
+                           "       n can be 8, 16, 32, 64, 128 or 256; default is 32\n");
           exit (1);
         }
     }
@@ -1667,18 +1667,12 @@ fal_read_rom (const char *filename, unsigned int parport, int size)
 }
 
 int
-fal_write_rom (const char *filename, unsigned int parport, int size)
+fal_write_rom (const char *filename, unsigned int parport)
 {
   char buf[MAXBUFSIZE];
   strcpy (buf, filename);
-    
-  fal_args (parport);
 
-  if (size != UCON64_UNKNOWN)
-    {
-      printf ("-xfalc=n can only be used when receiving a ROM\n"); // stdout for frontend
-      exit (1);
-    }
+  fal_args (parport);
 
   fal_argv[3] = "-p";
   fal_argv[4] = buf;
@@ -1708,7 +1702,7 @@ fal_read_sram (const char *filename, unsigned int parport, int bank)
   fal_args (parport);
 
   fal_argv[3] = "-b";
-  if (bank == -1)
+  if (bank == UCON64_UNKNOWN)
     {
       fal_argv[4] = "1";
       fal_argv[5] = "4";        // 256 kB
@@ -1717,7 +1711,7 @@ fal_read_sram (const char *filename, unsigned int parport, int bank)
     {
       if (bank < 1 || bank > 4)
         {
-          fprintf (stderr, "bank must be 1, 2, 3 or 4\n");
+          fprintf (stderr, "ERROR: Bank must be 1, 2, 3 or 4\n");
           exit (1);
         }
       bank_str[0] = '0' + bank;
@@ -1744,13 +1738,13 @@ fal_write_sram (const char *filename, unsigned int parport, int bank)
   fal_args (parport);
 
   fal_argv[3] = "-r";
-  if (bank == -1)
+  if (bank == UCON64_UNKNOWN)
     fal_argv[4] = "1";
   else
     {
       if (bank < 1 || bank > 4)
         {
-          fprintf (stderr, "bank must be 1, 2, 3 or 4\n");
+          fprintf (stderr, "ERROR: Bank must be 1, 2, 3 or 4\n");
           exit (1);
         }
       bank_str[0] = '0' + bank;

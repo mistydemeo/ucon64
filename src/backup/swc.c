@@ -102,7 +102,7 @@ init_io (unsigned int port)
   swc_port = port;
   if (swc_port != 0x3bc && swc_port != 0x378 && swc_port != 0x278)
     {
-      printf ("PORT must be 0x3bc, 0x378 or 0x278\n"); // stdout for frontend
+      fprintf (stderr, "ERROR: PORT must be 0x3bc, 0x378 or 0x278\n");
       exit (1);
     }
 
@@ -387,8 +387,8 @@ wait_while_busy (void)
 */
   if (n_try >= N_TRY_MAX)
     {
-      fprintf (STDERR, "The Super Wild Card is not ready\n" // yes, "ready" :-)
-               "Turn it off for a few seconds then turn it on and try again\n");
+      fprintf (stderr, "ERROR: The Super Wild Card is not ready\n" // yes, "ready" :-)
+                       "       Turn it off for a few seconds then turn it on and try again\n");
       exit (1);
     }
 #endif
@@ -412,8 +412,8 @@ wait_for_ready (void)
 #if 0
   if (n_try >= N_TRY_MAX)
     {
-      fprintf (STDERR, "The Super Wild Card is not ready\n"
-               "Turn it off for a few seconds then turn it on and try again\n");
+      fprintf (stderr, "ERROR: The Super Wild Card is not ready\n"
+                       "       Turn it off for a few seconds then turn it on and try again\n");
       exit (1);
     }
 #endif
@@ -455,19 +455,19 @@ swc_read_rom (const char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
-      printf ("Can't open %s for writing\n", filename); // stdout for frontend
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
+      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
       exit (1);
     }
 
   size = receive_rom_info (buffer);
   if (size == 0)
     {
-      printf ("There is no cartridge present in the Super Wild Card\n"); // stdout for frontend
+      fprintf (stderr, "ERROR: There is no cartridge present in the Super Wild Card\n");
       fclose (file);
       remove (filename);
       exit (1);
@@ -547,12 +547,12 @@ swc_write_rom (const char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "rb")) == NULL)
     {
-      printf ("Can't open %s for reading\n", filename); // stdout for frontend
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", filename);
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
+      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
       exit (1);
     }
 
@@ -624,12 +624,12 @@ swc_read_sram (const char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
-      printf ("Can't open %s for writing\n", filename); // stdout for frontend
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
+      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
       exit (1);
     }
 
@@ -682,12 +682,12 @@ swc_write_sram (const char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "rb")) == NULL)
     {
-      printf ("Can't open %s for reading\n", filename); // stdout for frontend
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", filename);
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
+      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
       exit (1);
     }
 

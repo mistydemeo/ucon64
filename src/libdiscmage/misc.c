@@ -41,8 +41,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds
-//#elif   defined __unix__
-//#include <unistd.h>                             // usleep(), microseconds
+#elif   defined __unix__
+#include <unistd.h>                             // usleep(), microseconds
 #elif   defined __BEOS__
 #include <OS.h>                                 // snooze(), microseconds
 // Include OS.h before misc.h, because OS.h includes StorageDefs.h which
@@ -564,14 +564,18 @@ basename2 (const char *str)
 
 
 char *
-dirname2 (char *str)
+dirname2 (const char *str)
 // dirname() clone
 {
-  char *p = strrchr (str, FILE_SEPARATOR);
+  static char path[FILENAME_MAX];
+  char *p;
+  
+  strcpy (path, str);
+  p = strrchr (path, FILE_SEPARATOR);
   if (p)
     *(++p) = 0;
 
-  return str;
+  return path;
 }
 
 
@@ -640,48 +644,48 @@ int access (const char *fname, void *mode)
 #endif  // WIN32
 
 
-void
-change_string (char *searchstr, int strsize, char wc, char esc,
-               char *newstr, int newsize, char *buf, int bufsize, int offset,
-               ...)
+int
+change_mem (char *buf, int bufsize, char *searchstr, int strsize,
+            char wc, char esc, char *newstr, int newsize, int offset, ...)
 /*
   Search for all occurrences of string searchstr in buf and replace newsize
   bytes in buf by copying string newstr to the end of the found search string
   in buf plus offset.
   If searchstr contains wildcard characters wc, then n wildcard characters in
   searchstr match any n characters in buf.
-  If searchstr contains escape characters esc, change_string() must be called
-  with two extra arguments for each escape character, set, which must be a
-  string (char *) and setsize, which must be an int. searchstr matches for an
-  escape character if one of the characters in set matches.
+  If searchstr contains escape characters esc, change_mem() must be called with
+  two extra arguments for each escape character, set, which must be a string
+  (char *) and setsize, which must be an int. searchstr matches for an escape
+  character if one of the characters in set matches.
   Note that searchstr is not necessarily a C string; it may contain one or more
   zero bytes as strsize indicates the length.
   offset is the relative offset from the last character in searchstring and may
   have a negative value.
+  The return value is the number of times a match was found.
   This function was written to patch SNES ROM dumps. It does basically the same
   as the old uCON does, with one exception, the line with:
-    bufpos -= nwc;
+    bufpos -= n_wc;
 
   As stated in the comment, this causes the search to restart at the first
   wildcard character of the sequence of wildcards that was most recently
   skipped if the current character in buf didn't match the current character
-  in searchstr. This makes change_string() behave a bit more intuitive. For
+  in searchstr. This makes change_mem() behave a bit more intuitive. For
   example
     char str[] = "f foobar means...";
-    change_string ("f**bar", 6, '*', '!', "XXXXXXXX", 8, str, strlen (str), 2);
+    change_mem ("f**bar", 6, '*', '!', "XXXXXXXX", 8, str, strlen (str), 2);
   finds and changes "foobar means..." into "foobar XXXXXXXX", while with uCON's
   algorithm it would not (but does the job good enough for patching SNES ROMs).
 
   One example of using sets:
     char str[] = "fu-bar     is the same as foobar    ";
-    change_string ("f!!", 3, '*', '!', "fighter", 7, str, strlen (str), 1,
-                   "uo", 2, "o-", 2);
+    change_mem ("f!!", 3, '*', '!', "fighter", 7, str, strlen (str), 1,
+                "uo", 2, "o-", 2);
   This changes str into "fu-fighter is the same as foofighter".
 */
 {
   va_list argptr;
   char *set;
-  int bufpos, strpos = 0, pos_1st_esc = -1, setsize, i, nwc;
+  int bufpos, strpos = 0, pos_1st_esc = -1, setsize, i, n_wc, n_matches = 0;
 
   va_start (argptr, offset);
 
@@ -711,6 +715,7 @@ change_string (char *searchstr, int strsize, char wc, char esc,
           if (strpos == strsize - 1)            // check if we are at the end of searchstr
             {
               memcpy (buf + bufpos + offset, newstr, newsize);
+              n_matches++;
               break;
             }
 
@@ -724,18 +729,19 @@ change_string (char *searchstr, int strsize, char wc, char esc,
         }
 
       // skip wildcards in searchstr
-      nwc = 0;
+      n_wc = 0;
       while (searchstr[strpos] == wc && bufpos < bufsize)
         {
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
               memcpy (buf + bufpos + offset, newstr, newsize);
+              n_matches++;
               break;
             }
 
           strpos++;
           bufpos++;
-          nwc++;
+          n_wc++;
         }
       if (bufpos == bufsize)
         break;
@@ -757,6 +763,7 @@ change_string (char *searchstr, int strsize, char wc, char esc,
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
               memcpy (buf + bufpos + offset, newstr, newsize);
+              n_matches++;
               strpos = 0;
             }
           else
@@ -764,7 +771,7 @@ change_string (char *searchstr, int strsize, char wc, char esc,
         }
       else
         {
-          bufpos -= nwc;                        // scan the most recent wildcards too if
+          bufpos -= n_wc;                       // scan the most recent wildcards too if
           if (strpos > 0)                       //  the character didn't match
             {
               bufpos--;                         // current char has to be checked, but `for'
@@ -774,6 +781,7 @@ change_string (char *searchstr, int strsize, char wc, char esc,
     }
 
   va_end (argptr);
+  return n_matches;
 }
 
 
@@ -840,11 +848,11 @@ cygwin_fix (char *value)
 {
   int l = strlen (value);
 
-  change_string ("\x89", 1, 0, 0, "\xeb", 1, value, l, 0); // e diaeresis
-  change_string ("\x84", 1, 0, 0, "\xe4", 1, value, l, 0); // a diaeresis
-  change_string ("\x8b", 1, 0, 0, "\xef", 1, value, l, 0); // i diaeresis
-  change_string ("\x94", 1, 0, 0, "\xf6", 1, value, l, 0); // o diaeresis
-  change_string ("\x81", 1, 0, 0, "\xfc", 1, value, l, 0); // u diaeresis
+  change_mem (value, l, "\x89", 1, 0, 0, "\xeb", 1, 0); // e diaeresis
+  change_mem (value, l, "\x84", 1, 0, 0, "\xe4", 1, 0); // a diaeresis
+  change_mem (value, l, "\x8b", 1, 0, 0, "\xef", 1, 0); // i diaeresis
+  change_mem (value, l, "\x94", 1, 0, 0, "\xf6", 1, 0); // o diaeresis
+  change_mem (value, l, "\x81", 1, 0, 0, "\xfc", 1, 0); // u diaeresis
 
   return value;
 }

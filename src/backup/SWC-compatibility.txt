@@ -1,7 +1,7 @@
 A Super Wild Card compatibility list
-Version: 1.11
+Version: 1.12
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 11 february 2003
+Date: 18 february 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
 Software: uCON64 1.9.8beta8
 
@@ -25,9 +25,6 @@ or so. Even for games that I played from the beginning till the end I can't be
 sure if they run as they do from a cartridge.
 Of course I tried to crack or fix the games that displayed a copy protection
 screen. The games that have that code can't be cracked with uCON64.
-The codes also indicate how "far" I could get with uCON64. For example, Diddy's
-Kong Quest (V1.1) (U) has code 7 instead of 6, because uCON64 is able to crack
-the copy protection, but not the NTSC/PAL protection.
 Non-playing music seems to be a BS-specific problem.
 For some games I put an extra comment after the character sequence "<=". In
 some comments I mention the so-called emulation mode select byte. This is the
@@ -118,7 +115,7 @@ Code    Game
 0 -     Der Langrisser (V1.1) (J)
 0 -     Desert Strike - Return to the Gulf (U)
 1 -     Diddy's Kong Quest (E)
-7 -     Diddy's Kong Quest (V1.1) (U)
+1 + 2 + 4* - Diddy's Kong Quest (V1.1) (U) <= can't get past the first level
 0 -     Digital Devil Story (V1.0) (J)
 9 -     Dirt Trax FX (E)
 6 -     Dixie Kong's Double Trouble (E) <= works on an SWC DX2 64 Mbit PAL
@@ -137,9 +134,9 @@ Code    Game
 0 -     Dragon's Lair (Beta)
 0 -     Dragon's Lair (E)
 0 -     Dragon - The Bruce Lee Story (E) [a1]
-7 -     Dragon - The Bruce Lee Story (U)
-7 -     Dr. Mario (J) (NP)
-7 -     Dual Orb 2 (J)
+2* -    Dragon - The Bruce Lee Story (U)
+2* -    Dr. Mario (J) (NP)
+2* -    Dual Orb 2 (J)
 1 + 2 - Earthbound (U)
 0 -     Earthworm Jim 2 (U)
 0 -     Earthworm Jim (U)
@@ -358,7 +355,7 @@ Code    Game
 0 -     Wario's Woods (U)
 0 -     Williams Arcade's Greatest Hits (E)
 0 -     Wolfenstein 3D (E)
-7 -     Wolfenstein 3D (U)
+2* -    Wolfenstein 3D (U)
 0 -     Wolverine - Adamantium Rage (U)
 0 -     Worms (E)
 0 -     WWF Super Wrestlemania (E)

@@ -35,6 +35,15 @@ extern "C" {
 #endif
 #endif
 
+#if     defined _WIN32 || defined WIN32
+#ifndef WIN32
+#define WIN32
+#endif
+//#ifndef _WIN32
+//#define _WIN32
+//#endif
+#endif
+
 #include <string.h>
 #include <limits.h>
 #include <time.h>                               // gauge() prototype contains time_t
@@ -102,12 +111,9 @@ typedef signed long long int int64_t;
 #endif // OWN_INTTYPES
 #endif
 
-#ifndef FALSE
+#if     (!defined TRUE || !defined FALSE)
 #define FALSE 0
-#endif
-
-#ifndef TRUE
-#define TRUE 1
+#define TRUE (!FALSE)
 #endif
 
 #ifndef MIN
@@ -278,7 +284,7 @@ extern char *basename2 (const char *str);
 #define basename basename2
 //#endif
 //#ifndef HAVE_DIRNAME
-extern char *dirname2 (char *str);
+extern char *dirname2 (const char *str);
 #define dirname dirname2
 //#endif
 extern char *realpath2 (const char *src, char *full_path);
@@ -357,7 +363,7 @@ extern uint64_t bswap_64 (uint64_t x);
 /*
   Misc stuff
 
-  change_string() see header of implementation for usage
+  change_mem()    see header of implementation for usage
   ansi_init ()    initialize ANSI output
   ansi_strip ()   strip ANSI codes from a string
   gauge()         init_time == time when gauge() was first started or when
@@ -380,9 +386,8 @@ extern uint64_t bswap_64 (uint64_t x);
   handle_registered_funcs() calls all the registered functions
   wait2           wait (sleep) a specified number of milliseconds
 */
-extern void change_string (char *searchstr, int strsize, char wc, char esc,
-                           char *newstr, int newsize, char *buf, int bufsize,
-                           int offset, ...);
+extern int change_mem (char *buf, int bufsize, char *searchstr, int strsize,
+                       char wc, char esc, char *newstr, int newsize, int offset, ...);
 extern int ansi_init (void);
 extern char *ansi_strip (char *str);
 extern int gauge (time_t init_time, int pos, int size);

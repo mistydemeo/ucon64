@@ -36,10 +36,13 @@ N21 = af 3f 21 00 29/89 10 00 f0            af 3f 21 00 29/89 10 00 80
 P22 = af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Secret of Mana E
 N23 = af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Seiken Densetsu 3
 N24 = af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken Densetsu 2/Secret of Mana U
-N25 = af 3f 21 00 XX YY 29 10 00 d0         af 3f 21 00 XX YY 29 10 00 ea ea - Fatal Fury Special ?
-N26 = af 3f 21 ea 89 10 00 d0               a9 00 00 ea 89 10 00 d0          - Super Famista 3 ?
-P27 = a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country E
-N28 = a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country U
+N25 =    3f 21 00 89 10 c2 XX f0               3f 21 00 89 10 c2 XX 80       - Dragon - The Bruce Lee Story U
+N26 = af 3f 21 00 XX YY 29 10 00 d0         af 3f 21 00 XX YY 29 10 00 ea ea - Fatal Fury Special ?
+N27 =    3f 21 c2 XX 29 10 00 d0               3f 21 c2 XX 29 10 00 ea ea    - Dual Orb 2
+N28 = af 3f 21 ea 89 10 00 d0               a9 00 00 ea 89 10 00 d0          - Super Famista 3 ?
+P29 = a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country E
+N30 = a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country U
+N31 = 29 10 00 a2 00 00 c9 10 00 d0         29 10 00 a2 00 00 c9 10 00 80    - Wolfenstein 3D U
 
 
 Comment:
@@ -53,10 +56,13 @@ on a PAL SNES and vice versa.
 
 Code1   Code2   Game
 2       N5      Clock Tower (J) <= 0x29
-1       P27     Donkey Kong Country (V1.0) (E)
-1 + 2   N28     Donkey Kong Country (V1.0) (U)
-1       P27     Donkey Kong Country (V1.1) (E)
-1 + 2   N28     Donkey Kong Country (V1.1) (U)
+1       P29     Donkey Kong Country (V1.0) (E)
+1 + 2   N30     Donkey Kong Country (V1.0) (U)
+1       P29     Donkey Kong Country (V1.1) (E)
+1 + 2   N30     Donkey Kong Country (V1.1) (U)
+2       N25     Dragon - The Bruce Lee Story (U)
+2       4       Dr. Mario (J) (NP) <= 0xea 0xea
+2       N27     Dual Orb 2 (J)
 1 + 2   N17     Earthbound (U) <= 0x29
 2 + 3   N1      Final Fight 3 (U) <= emulation mode select byte: 0x1c; (0xad) 0x29
 2       N19     Final Fight Guy (U) <= 0x89
@@ -92,6 +98,7 @@ Code1   Code2   Game
 1 + 2   N1      Super Metroid (JU) <= (0xad) 0x89
 0       P3      Terranigma (E)
 2 + 8 + 9  N15  Tokimeki Memorial (V1.1) (J) <= the game halts after a while; 0xad 0xff
+2       N31     Wolfenstein 3D (U)
 2       N1      Yoshi's Safari (U) <= I don't have a Super Scope...; (0xad) 0x29
 2       N2      Ys 5 Expert (J)
 

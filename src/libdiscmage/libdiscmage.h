@@ -41,7 +41,7 @@ typedef u_int64_t uint64_t;
 #ifndef OWN_INTTYPES
 #define OWN_INTTYPES                            // signal that these are defined
 typedef unsigned char uint8_t;
-typedef uint16_t int uint16_t;
+typedef unsigned short int uint16_t;
 typedef unsigned int uint32_t;
 typedef unsigned long long int uint64_t;
 

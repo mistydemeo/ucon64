@@ -75,7 +75,7 @@ init_io (unsigned int port)
       exit (1);
     }
 
-#if     (__UNIX__ || __BEOS__)
+#if     defined __UNIX__ || defined __BEOS__
   init_conio ();
 #endif
 

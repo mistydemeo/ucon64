@@ -29,10 +29,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 unsigned long CRCTable[256];
 
-#ifdef  BACKUP
-#ifdef  __BEOS__
+#if     defined BACKUP && defined __BEOS__
 static int ucon64_io_fd;
-#endif
 #endif
 
 char
@@ -172,14 +170,9 @@ CalculateFileCRC (FILE * file)
 
   crc = 0xFFFFFFFFL;
   i = 0;
-  for (;;)
-    {
-      count = fread (buffer, 1, 512, file);
-      if ((i++ % 32) == 0)
-        if (count == 0)
-          break;
-      crc = CalculateBufferCRC (count, crc, buffer);
-    }
+  while ((count = fread (buffer, 1, 512, file)))
+    crc = CalculateBufferCRC (count, crc, buffer);
+
   return crc ^= 0xFFFFFFFFL;
 }
 
@@ -269,7 +262,7 @@ filetestpad (char *filename)
 }
 
 #ifdef  BACKUP
-#if     (__UNIX__ || __BEOS__)  // DJGPP (DOS) has outportX() & inportX()
+#if     defined __UNIX__ || defined __BEOS__ // DJGPP (DOS) has outportX() & inportX()
 unsigned char
 inportb (unsigned short port)
 {
@@ -335,7 +328,7 @@ outportw (unsigned short port, unsigned short word)
   __asm__ __volatile__ ("outw %1, %0"::"d" (port), "a" (word));
 #endif
 }
-#endif // (__UNIX__ || __BEOS__)
+#endif // defined __UNIX__ || defined __BEOS__
 
 int
 detect_parport (unsigned int port)

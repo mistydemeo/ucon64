@@ -52,7 +52,7 @@ write programs in C
 #include "wswan/wswan.h"
 #include "intelli/intelli.h"
 
-#ifdef	CD
+#ifdef  CD
 #include "cd32/cd32.h"
 #include "ps2/ps2.h"
 #include "saturn/saturn.h"
@@ -571,12 +571,9 @@ if(argcmp(argc, argv, "-sh"))
 
 #endif
 
-  if (argcmp (argc, argv, "-ls") || argcmp (argc, argv, "-lsv") /*||
-                                                                   argcmp(argc,argv,  "-rrom") ||
-                                                                   argcmp(argc,argv,  "-rr83") */
-    )
+  if (argcmp (argc, argv, "-ls") || argcmp (argc, argv, "-lsv"))
+//    || argcmp (argc, argv, "-rrom") || argcmp(argc,argv, "-rr83")
     {
-
       char current_dir[FILENAME_MAX];
 
       if (access (rom.rom, R_OK) == -1 || (dp = opendir (rom.rom)) == NULL)
@@ -584,7 +581,6 @@ if(argcmp(argc, argv, "-sh"))
 
       getcwd (current_dir, FILENAME_MAX);
       chdir (rom.rom);
-
 
       while ((ep = readdir (dp)) != 0)
         {
@@ -609,11 +605,14 @@ if(argcmp(argc, argv, "-sh"))
                     }
                   else if (argcmp (argc, argv, "-lsv"))
                     ucon64_nfo (&rom);
-/*        else if (argcmp(argc, argv, "-rrom") && rom.console != ucon64_UNKNOWN )// && rom.console != ucon64_KNOWN
-        {
-          strcpy(buf,&rom.rom[findlast(rom.rom,".")+1]);
-          printf("%s.%s\n",rom.name,buf);
-        }
+/*        
+                  else if (argcmp (argc, argv, "-rrom") && 
+                           rom.console != ucon64_UNKNOWN)
+                           // && rom.console != ucon64_KNOWN)
+                    {
+                      strcpy (buf, &rom.rom[findlast (rom.rom, ".") + 1]);
+                      printf ("%s.%s\n", rom.name, buf);
+                    }
 */
                   fflush (stdout);
                 }
@@ -660,7 +659,6 @@ if(argcmp(argc, argv, "-sh"))
     (argcmp (argc, argv, "-col")) ? ucon64_SNES :
     (argcmp (argc, argv, "-n2gb")) ? ucon64_GB :
     (argcmp (argc, argv, "-sam")) ? ucon64_NEOGEO : ucon64_UNKNOWN;
-
 
 
 /*
@@ -712,11 +710,11 @@ if(argcmp(argc, argv, "-sh"))
       skip_init_nfo = 1;
     }
 
-/*
-  Do the following outside the if that checks for existence of rom.rom
-  (necessary for headerless SRAM files, which can't be detected without
-  looking at the command line options)
-*/
+  /*
+    Do the following outside the if that checks for existence of rom.rom
+    (necessary for headerless SRAM files, which can't be detected without
+    looking at the command line options)
+  */
   rom.console =
     (argcmp (argc, argv, "-xdjr") ||
      argcmp (argc, argv, "-xv64")) ? ucon64_N64 :
@@ -795,13 +793,13 @@ if(argcmp(argc, argv, "-sh"))
       x = system (buf);
 #ifndef __DOS__
       x >>= 8;                  // the exit code is coded in bits 8-15
-#endif //  (that is, under Linux & BeOS)
+#endif                          //  (that is, under Linux & BeOS)
 
 #if 1
       // Snes9x (Linux) for example returns a non-zero value on a normal exit (3)...
 
       // under WinDOS, system() immediately returns with exit code 0 when starting
-      //  a Windows executable (as if a fork() happened) it also returns 0 when the
+      //  a Windows executable (as if fork() was called) it also returns 0 when the
       //  exe could not be started
       if (x != 127 && x != -1 && x != 0)        // 127 && -1 are system() errors, rest are exit codes
         {
@@ -843,15 +841,9 @@ if(argcmp(argc, argv, "-sh"))
               (argcmp (argc, argv, "-logo")) ? gbadvance_logo (&rom) :
               (argcmp (argc, argv, "-n")) ? gbadvance_n (&rom) :
               (argcmp (argc, argv, "-sram")) ? gbadvance_sram (&rom) :
-              (argcmp (argc, argv, "-multi")) ? gbadvance_multi (&rom,
-                                                                 256 *
-                                                                 MBIT)
-              : (argcmp (argc, argv, "-multi1")) ? gbadvance_multi (&rom,
-                                                                    64 *
-                                                                    MBIT)
-              : (argcmp (argc, argv, "-multi2")) ? gbadvance_multi (&rom,
-                                                                    128 *
-                                                                    MBIT) :
+              (argcmp (argc, argv, "-multi")) ? gbadvance_multi (&rom, 256 * MBIT) :
+              (argcmp (argc, argv, "-multi1")) ? gbadvance_multi (&rom, 64 * MBIT) :
+              (argcmp (argc, argv, "-multi2")) ? gbadvance_multi (&rom, 128 * MBIT) :
 #ifdef  BACKUP
               (argcmp (argc, argv, "-xfal")) ? gbadvance_xfal (&rom) :
               (argncmp (argc, argv, "-xfalc", 6)) ? gbadvance_xfal (&rom) :
@@ -1089,16 +1081,152 @@ if(argcmp(argc, argv, "-sh"))
 }
 
 
-
-
-
 int
 ucon64_init (struct ucon64_ *rom)
 {
   long bytes = 0;
+  int other_console = 0;
 
   bytes = quickftell (rom->rom);
 
+  // call testsplit() before any <CONSOLE>_init() function to provide for a
+  // possible override in those functions
+  rom->splitted[0] = testsplit (rom->rom);
+  if (argcmp (rom->argc, rom->argv, "-ns"))
+    rom->splitted[0] = 0;
+
+  if (rom->console != ucon64_UNKNOWN)
+    {
+      if (bytes <= MAXROMSIZE)
+        {
+          switch (rom->console)
+            {
+            case ucon64_GB:
+              gameboy_init (rom);
+              break;
+            case ucon64_GBA:
+              gbadvance_init (rom);
+              break;
+            case ucon64_GENESIS:
+              genesis_init (rom);
+              break;
+            case ucon64_N64:
+              nintendo64_init (rom);
+              break;
+            case ucon64_SNES:
+              snes_init (rom);
+              break;
+// ROMs for the following consoles can be only detected by their CRC32
+            case ucon64_SMS:
+              sms_init (rom);
+              break;
+            case ucon64_JAGUAR:
+              jaguar_init (rom);
+              break;
+            case ucon64_LYNX:
+              lynx_init (rom);
+              break;
+            case ucon64_NEOGEO:
+              neogeo_init (rom);
+              break;
+            case ucon64_NES:
+              nes_init (rom);
+              break;
+            case ucon64_PCE:
+              pcengine_init (rom);
+              break;
+            case ucon64_SYSTEM16:
+              system16_init (rom);
+              break;
+            case ucon64_ATARI:
+              atari_init (rom);
+              break;
+            case ucon64_NEOGEOPOCKET:
+              neogeopocket_init (rom);
+              break;
+            case ucon64_VECTREX:
+              vectrex_init (rom);
+              break;
+            case ucon64_VIRTUALBOY:
+              virtualboy_init (rom);
+              break;
+            case ucon64_WONDERSWAN:
+              wonderswan_init (rom);
+              break;
+            case ucon64_COLECO:
+              coleco_init (rom);
+              break;
+            case ucon64_INTELLI:
+              intelli_init (rom);
+              break;
+            default:
+              other_console = 1;
+            }
+        }
+      // now check if it's one of the CD based consoles
+      switch (rom->console)
+        {
+#ifdef	CD
+        case ucon64_PS2:
+          ps2_init (rom);
+          break;
+        case ucon64_DC:
+          dc_init (rom);
+          break;
+        case ucon64_SATURN:
+          saturn_init (rom);
+          break;
+        case ucon64_CDI:
+          cdi_init (rom);
+          break;
+        case ucon64_CD32:
+          cd32_init (rom);
+          break;
+        case ucon64_PSX:
+          psx_init (rom);
+          break;
+        case ucon64_GAMECUBE:
+          gamecube_init (rom);
+          break;
+        case ucon64_XBOX:
+          xbox_init (rom);
+          break;
+#endif
+        default:
+          if (other_console)
+            rom->console = ucon64_UNKNOWN;
+        }
+    }
+
+  if (rom->console == ucon64_UNKNOWN && bytes <= MAXROMSIZE)
+    if ((snes_init (rom) == -1) &&
+        (genesis_init (rom) == -1) &&
+        (nintendo64_init (rom) == -1) &&
+        (gameboy_init (rom) == -1) &&
+        (gbadvance_init (rom) == -1) &&
+        (atari_init (rom) == -1) &&
+        (lynx_init (rom) == -1) &&
+        (nes_init (rom) == -1) &&
+        (jaguar_init (rom) == -1) &&
+        (pcengine_init (rom) == -1) &&
+        (neogeo_init (rom) == -1) &&
+        (neogeopocket_init (rom) == -1) &&
+        (sms_init (rom) == -1) &&
+        (system16_init (rom) == -1) &&
+        (virtualboy_init (rom) == -1) &&
+        (vectrex_init (rom) == -1) &&
+        (coleco_init (rom) == -1) &&
+        (intelli_init (rom) == -1) &&
+        (wonderswan_init (rom) == -1))
+      rom->console = ucon64_UNKNOWN;
+
+  /*
+    Calculate the CRC32 after rom->buheader_len has been initialized.
+    In this way we can call fileCRC32() with the right value for `start'
+    so that we disregard the header (if there is one).
+    Under BeOS fileCRC32() is EXTREMELY slow (at least for me, dbjh),
+    so we definitely don't want to call it twice.
+  */
   if (bytes <= MAXROMSIZE &&
       rom->console != ucon64_PS2 &&
       rom->console != ucon64_DC &&
@@ -1106,106 +1234,16 @@ ucon64_init (struct ucon64_ *rom)
       rom->console != ucon64_CDI &&
       rom->console != ucon64_CD32 &&
       rom->console != ucon64_PSX &&
-      rom->console != ucon64_GAMECUBE && rom->console != ucon64_XBOX)
-    rom->current_crc32 = fileCRC32 (rom->rom, 0);
+      rom->console != ucon64_GAMECUBE &&
+      rom->console != ucon64_XBOX)
+    rom->current_crc32 = fileCRC32 (rom->rom, rom->buheader_len);
 
-// call testsplit() before any <CONSOLE>_init() function to provide for a
-//  possible override in those functions
-  rom->splitted[0] = testsplit (rom->rom);
-  if (argcmp (rom->argc, rom->argv, "-ns"))
-    rom->splitted[0] = 0;
-
-  if (rom->console != ucon64_UNKNOWN)
-    {
-      (rom->console == ucon64_GB &&
-       bytes <= MAXROMSIZE) ? gameboy_init (rom) :
-(rom->console == ucon64_GBA &&
-bytes <= MAXROMSIZE) ? gbadvance_init (rom) :
-(rom->console == ucon64_GENESIS &&
-bytes <= MAXROMSIZE) ? genesis_init (rom) :
-(rom->console == ucon64_N64 &&
-bytes <= MAXROMSIZE) ? nintendo64_init (rom) :
-(rom->console == ucon64_SNES && bytes <= MAXROMSIZE) ? snes_init (rom) :
-/*                                  (rom->console = ucon64_UNKNOWN);
-}
-    ROMs for the following consoles can be only detected by their CRC32
-
-  if( bytes <= MAXROMSIZE )
-    rom->current_crc32=fileCRC32(rom->rom,0);
-
-if(rom->console != ucon64_UNKNOWN)
-{*/
-        (rom->console == ucon64_SMS &&
-         bytes <= MAXROMSIZE) ? sms_init (rom) :
-        (rom->console == ucon64_JAGUAR &&
-         bytes <= MAXROMSIZE) ? jaguar_init (rom) :
-        (rom->console == ucon64_LYNX &&
-         bytes <= MAXROMSIZE) ? lynx_init (rom) :
-        (rom->console == ucon64_NEOGEO &&
-         bytes <= MAXROMSIZE) ? neogeo_init (rom) :
-        (rom->console == ucon64_NES &&
-         bytes <= MAXROMSIZE) ? nes_init (rom) :
-        (rom->console == ucon64_PCE &&
-         bytes <= MAXROMSIZE) ? pcengine_init (rom) :
-        (rom->console == ucon64_SYSTEM16 &&
-         bytes <= MAXROMSIZE) ? system16_init (rom) :
-        (rom->console == ucon64_ATARI &&
-         bytes <= MAXROMSIZE) ? atari_init (rom) :
-        (rom->console == ucon64_NEOGEOPOCKET &&
-         bytes <= MAXROMSIZE) ? neogeopocket_init (rom) :
-        (rom->console == ucon64_VECTREX &&
-         bytes <= MAXROMSIZE) ? vectrex_init (rom) :
-        (rom->console == ucon64_VIRTUALBOY &&
-         bytes <= MAXROMSIZE) ? virtualboy_init (rom) :
-        (rom->console == ucon64_WONDERSWAN &&
-         bytes <= MAXROMSIZE) ? wonderswan_init (rom) :
-        (rom->console == ucon64_COLECO &&
-         bytes <= MAXROMSIZE) ? coleco_init (rom) :
-        (rom->console == ucon64_INTELLI &&
-         bytes <= MAXROMSIZE) ? intelli_init (rom) :
-#ifdef	CD
-        (rom->console == ucon64_PS2) ? ps2_init (rom) :
-        (rom->console == ucon64_DC) ? dc_init (rom) :
-        (rom->console == ucon64_SATURN) ? saturn_init (rom) :
-        (rom->console == ucon64_CDI) ? cdi_init (rom) :
-        (rom->console == ucon64_CD32) ? cd32_init (rom) :
-        (rom->console == ucon64_PSX) ? psx_init (rom) :
-        (rom->console == ucon64_GAMECUBE) ? gamecube_init (rom) :
-        (rom->console == ucon64_XBOX) ? xbox_init (rom) :
-#endif
-        (rom->console = ucon64_UNKNOWN);
-    }
-
-  if (rom->console == ucon64_UNKNOWN && bytes <= MAXROMSIZE)
-    {
-
-      if ((snes_init (rom) == -1) &&
-          (genesis_init (rom) == -1) &&
-          (nintendo64_init (rom) == -1) &&
-          (gameboy_init (rom) == -1) &&
-          (gbadvance_init (rom) == -1) &&
-          (atari_init (rom) == -1) &&
-          (lynx_init (rom) == -1) &&
-          (nes_init (rom) == -1) &&
-          (jaguar_init (rom) == -1) &&
-          (pcengine_init (rom) == -1) &&
-          (neogeo_init (rom) == -1) &&
-          (neogeopocket_init (rom) == -1) &&
-          (sms_init (rom) == -1) &&
-          (system16_init (rom) == -1) &&
-          (virtualboy_init (rom) == -1) &&
-          (vectrex_init (rom) == -1) &&
-          (coleco_init (rom) == -1) &&
-          (intelli_init (rom) == -1) && (wonderswan_init (rom) == -1))
-        {
-          rom->console = ucon64_UNKNOWN;
-          return (-1);
-        }
-    }
+  if (rom->console == ucon64_UNKNOWN)
+    return -1;
 
   quickfread (rom->buheader, rom->buheader_start, rom->buheader_len,
               rom->rom);
-//  quickfread(rom->header,rom->header_start,rom->header_len,rom->rom);
+//  quickfread(rom->header, rom->header_start, rom->header_len, rom->rom);
 
   rom->bytes = quickftell (rom->rom);
   rom->mbit = (rom->bytes - rom->buheader_len) / (float) MBIT;
@@ -1219,9 +1257,11 @@ if(rom->console != ucon64_UNKNOWN)
       rom->console == ucon64_CD32 ||
       rom->console == ucon64_REAL3DO ||
       rom->console == ucon64_XBOX ||
-      rom->console == ucon64_GAMECUBE || rom->bytes > MAXROMSIZE)
+      rom->console == ucon64_GAMECUBE ||
+      rom->bytes > MAXROMSIZE)
     {
-/*this doesn't work really..
+/*
+  this doesn't work really..
 
     strcat(rom->misc,"\nTrackmode: ");
     strcat(rom->misc,
@@ -1230,7 +1270,8 @@ if(rom->console != ucon64_UNKNOWN)
       (!(rom->bytes%2336)) ? "MODE2 or MODE2_FORM_MIX (2336 Bytes)" :
       (!(rom->bytes%2352)) ? "AUDIO, MODE1_RAW or MODE2_RAW (2352 Bytes)" :
                              "Unknown"
-    );*/
+    );
+*/
       return (0);
     }
 #endif
@@ -1239,16 +1280,8 @@ if(rom->console != ucon64_UNKNOWN)
   rom->intro = ((rom->bytes - rom->buheader_len) > MBIT) ?
     ((rom->bytes - rom->buheader_len) % MBIT) : 0;
 
-//  if(!rom->current_crc32)rom->current_crc32=fileCRC32(rom->rom,rom->buheader_len);
-
   return (0);
 }
-
-
-
-
-
-
 
 
 int
@@ -1257,10 +1290,13 @@ ucon64_usage (int argc, char *argv[])
   printf ("USAGE: %s [OPTION(S)] ROM [FILE]\n\n",
           getarg (argc, argv, ucon64_NAME));
 
-  printf (                      /*"TODO: $ROM could also be the name of a *.ZIP archive\n"
-                                   "      it will automatically find and extract the ROM\n"
-                                   "\n" */
-//      "TODO:  -sh      use uCON64 in shell modus\n"
+  printf (
+         /*
+           "TODO: $ROM could also be the name of a *.ZIP archive\n"
+           "      it will automatically find and extract the ROM\n"
+           "\n"
+         */
+//         "TODO:  -sh      use uCON64 in shell modus\n"
 #ifdef	__DOS__
            "  -e            emulate/run ROM (see ucon64.cfg for more)\n"
 #else
@@ -1273,9 +1309,9 @@ ucon64_usage (int argc, char *argv[])
            "  -dbv          view ROM database (all entries)\n"
            "  -ls           generate ROM list for all ROMs; $ROM=DIRECTORY\n"
            "  -lsv          like -ls but more verbose; $ROM=DIRECTORY\n"
-//      "TODO:  -rrom    rename all ROMs in DIRECTORY to their internal names; $ROM=DIR\n"
-//      "TODO:  -rr83    like -rrom but with 8.3 filenames; $ROM=DIR\n"
-//      "                this is often used by people who loose control of their ROMs\n"
+//         "TODO:  -rrom    rename all ROMs in DIRECTORY to their internal names; $ROM=DIR\n"
+//         "TODO:  -rr83    like -rrom but with 8.3 filenames; $ROM=DIR\n"
+//         "                this is often used by people who loose control of their ROMs\n"
            "  -rl           rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
            "  -ru           rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"
 #ifdef	__DOS__
@@ -1376,15 +1412,15 @@ ucon64_usage (int argc, char *argv[])
   cdi_usage(argc,argv);
 */
       printf ("%s\n%s\n%s\n%s\n%s\n"
-//      "  -xbox, -ps2, -sat, -3do, -cd32, -cdi\n"
+//            "  -xbox, -ps2, -sat, -3do, -cd32, -cdi\n"
               "  -ps2, -sat, -3do, -cd32, -cdi\n"
               "                force recognition; NEEDED\n"
-//      "  -iso         force image is ISO9660\n"
-//      "  -raw         force image is MODE2_RAW/BIN\n"
+//            "  -iso          force image is ISO9660\n"
+//            "  -raw          force image is MODE2_RAW/BIN\n"
               "  *             show info (default); ONLY $ROM=RAW_IMAGE\n"
-              "  -iso          convert RAW/BIN to ISO9660; $ROM=RAW_IMAGE\n"
-//  ,xbox_TITLE
-              , ps2_TITLE, saturn_TITLE, real3do_TITLE, cd32_TITLE,
+              "  -iso          convert RAW/BIN to ISO9660; $ROM=RAW_IMAGE\n",
+//            xbox_TITLE,
+              ps2_TITLE, saturn_TITLE, real3do_TITLE, cd32_TITLE,
               cdi_TITLE);
 
       ppf_usage (argc, argv);
@@ -1409,13 +1445,13 @@ ucon64_usage (int argc, char *argv[])
       nes_usage (argc, argv);
       wonderswan_usage (argc, argv);
 /*
-	sys16_usage(argc,argv);
-	atari_usage(argc,argv);
-	coleco_usage(argc,argv);
-	virtualboy_usage(argc,argv);
-	wonderswan_usage(argc,argv);
-	vectrex_usage(argc,argv);
-	intelli_usage(argc,argv);
+      sys16_usage(argc,argv);
+      atari_usage(argc,argv);
+      coleco_usage(argc,argv);
+      virtualboy_usage(argc,argv);
+      wonderswan_usage(argc,argv);
+      vectrex_usage(argc,argv);
+      intelli_usage(argc,argv);
 */
 
       printf ("%s\n%s\n%s\n%s\n%s\n%s\n"
@@ -1447,8 +1483,7 @@ ucon64_usage (int argc, char *argv[])
      "     give the force recognition option a try if something went wrong\n"
      "\n"
      "Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
-     "\n", getarg (argc, argv, ucon64_NAME), getarg (argc, argv,
-                                                     ucon64_NAME));
+     "\n", getarg (argc, argv, ucon64_NAME), getarg (argc, argv, ucon64_NAME));
 
   return (0);
 /*
@@ -1477,8 +1512,6 @@ sys2064.com
 logiqx.com
 romcenter.com
 emuchina.net
-
-
 */
 }
 
@@ -1507,7 +1540,7 @@ ucon64_nfo (struct ucon64_ *rom)
   buf[n] = 0;                   // terminate string
 
   printf ("%s\n%s\n%s%s%s\n%s\n%ld bytes (%.4f Mb)\n\n", rom->title, buf,
-//         rom->name2, (rom->name2[0]) ? "\n": "",
+//        rom->name2, (rom->name2[0]) ? "\n": "",
           "", "",
           rom->manufacturer,
           rom->country, rom->bytes - rom->buheader_len, rom->mbit);
@@ -1526,7 +1559,7 @@ ucon64_nfo (struct ucon64_ *rom)
       if (rom->intro)
         printf ("Intro/Trainer: Maybe, %ld Bytes\n", rom->intro);
 
-// noisyb: in the case that you don't wan't the "Backup Unit Header: No", don't print
+// noisyb: in case you don't wan't the "Backup Unit Header: No", don't print
 // "Backup Unit Header:" when there is a header, because that makes people like me (dbjh)
 // search for "Backup Unit Header: No" when there is no header
       if (!rom->buheader_len)
@@ -1564,11 +1597,8 @@ ucon64_nfo (struct ucon64_ *rom)
   if (rom->splitted[0])
     printf ("NOTE: to get the correct checksum the ROM must be joined\n");
 
-
   if (rom->current_crc32 != 0)
-//    printf("Checksum (CRC32): 0x%08lx\n", rom->current_crc32);
-    printf ("Checksum (CRC32): 0x%08lx\n",
-            fileCRC32 (rom->rom, rom->buheader_len));
+    printf ("Checksum (CRC32): 0x%08lx\n", rom->current_crc32);
 
   printf ("\n");
 
@@ -1616,7 +1646,7 @@ ucon64_flush (int argc, char *argv[], struct ucon64_ *rom)
   rom->intro = 0;
 
   rom->db_crc32 = 0;
-  rom->current_crc32 = 0;       //standart current_crc32 checksum of the rom
+  rom->current_crc32 = 0;       //standard current_crc32 checksum of the rom
 
   rom->has_internal_crc = 0;
   rom->current_internal_crc = 0;        //current custom crc

@@ -64,15 +64,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define ucon64_VERSION "1.9.8beta2"
 
-#ifdef __UNIX__
-#ifdef __SOLARIS__                              // Hmmm, Solaris *is* a UNIX
+#ifdef  __UNIX__
+#ifdef  __SOLARIS__                             // Hmmm, Solaris *is* a UNIX
 #define ucon64_TITLE "uCON64 1.9.8beta2 Solaris 1999-2002 by (various)"
 #else
 #define ucon64_TITLE "uCON64 1.9.8beta2 UNIX 1999-2002 by (various)"
 #endif
-#elif __DOS__
+#elif   defined __DOS__
 #define ucon64_TITLE "uCON64 1.9.8beta2 DOS 1999-2002 by (various)"
-#elif __BEOS__
+#elif   defined __BEOS__
 #define ucon64_TITLE "uCON64 1.9.8beta2 BeOS 1999-2002 by (various)"
 #else
 #define ucon64_TITLE "uCON64 1.9.8beta2 1999-2002 by (various)"

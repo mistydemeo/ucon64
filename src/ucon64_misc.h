@@ -23,7 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_MISC_H
 #define UCON64_MISC_H
 
-#include <unistd.h>
 #include <fcntl.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -42,10 +41,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/io.h>             // ioperm() (glibc)
 #endif
 
-#elif   __DOS__
+#elif   defined __DOS__
 #include <pc.h>                 // inportb(), inportw()
 
-#elif   __BEOS__
+#elif   defined __BEOS__
 #include <fcntl.h>
 
 #define DRV_READ_IO_8 'r'
@@ -71,7 +70,6 @@ IO_Tuple;
 
 #define out1byte(p,x)   outportb(p,x)
 #define in1byte(p)      inportb(p)
-// DJGPP (DOS) has outportX() & inportX()
 
 // GameGenie "codec" routines
 char hexDigit (int value);
@@ -93,7 +91,8 @@ long filetestpad (char *filename);
 
 int testsplit (char *filename);
 
-#if     (__UNIX__ || __BEOS__)
+// DJGPP (DOS) has outportX() & inportX()
+#if     defined __UNIX__ || defined __BEOS__
 unsigned char inportb (unsigned short port);
 unsigned short inportw (unsigned short port);
 void outportb (unsigned short port, unsigned char byte);

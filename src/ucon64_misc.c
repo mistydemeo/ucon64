@@ -77,7 +77,7 @@ const char *ucon64_parport_error =
   "        turn off/on the backup unit\n"
   "        split ROMs must be joined first\n"
   "        use " OPTION_LONG_S "file={3bc,378,278,...} to specify your port\n"
-  "        set the port to SPP (Standard, Normal) mode in your bios\n"
+  "        set the port to SPP (Standard, Normal) mode in your BIOS\n"
   "        some backup units do not support EPP and ECP style parports\n"
   "        read the backup units manual\n";
 

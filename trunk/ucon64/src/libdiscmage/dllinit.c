@@ -103,9 +103,9 @@ dxe_init (void)
     int (*function1) (int);
 
     handle = open_module (MODULE_NAME);
-    function1 = ((st_func_t *) handle)->function1;
+    function1 = ((st_symbol_t *) handle)->function1;
 
-  However, by adding a symbol loading function, st_func_t doesn't have to be
+  However, by adding a symbol loading function, st_symbol_t doesn't have to be
   updated if the DXE should export more or other symbols, which makes using a
   DXE less error prone. Changing st_symbol_t would also require a recompile of
   the code that uses the DXE (which is a *bad* thing).

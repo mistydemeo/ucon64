@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -26,7 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include "misc.h"                               // kbhit(), getch()
+#include "misc.h"
 #include "quick_io.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"

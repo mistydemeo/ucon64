@@ -20,7 +20,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -28,7 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include "misc.h"                               // kbhit(), getch()
+#include "misc.h"
 #include "quick_io.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -86,7 +85,7 @@ static int hirom;                               // `hirom' was `special'
 int
 receive_rom_info (unsigned char *buffer, int superdump)
 /*
-  - returns size of ROM in Mb (128 KB) units
+  - returns size of ROM in Mb (128 kB) units
   - returns ROM header in buffer (index 2 (emulation mode select) is not yet
     filled in)
   - sets global `hirom'
@@ -96,11 +95,33 @@ receive_rom_info (unsigned char *buffer, int superdump)
   unsigned short address;
   unsigned char byte;
 
+//#define DUMP_MMX2
+#ifdef  DUMP_MMX2
+  address = 0x7f52;
+  ffe_send_command0 (0xe00c, 0);
+
+  ffe_send_command (5, address / 0x2000, 0);
+  ffe_receive_block (address, buffer, 8);
+  mem_hexdump (buffer, 8, address);
+
+  ffe_send_command (5, address / 0x2000, 0);
+  ffe_send_command0 (address, 0);
+
+  ffe_send_command (5, address / 0x2000, 0);
+  ffe_receive_block (address, buffer, 8);
+  mem_hexdump (buffer, 8, address);
+#endif
+
   ffe_send_command0 (0xe00c, 0);
   ffe_send_command (5, 3, 0);
 
   byte = ffe_send_command1 (0xbfd5);
-  hirom = byte & 1;                             // Caz (vgs '96) does (byte & 0x21) == 0x21 ? 1 : 0;
+  // I don't know if it's okay to skip the above call to ffe_send_command1() if
+  //  ucon64.snes_hirom is set - dbjh
+  if (UCON64_ISSET (ucon64.snes_hirom))
+    hirom = ucon64.snes_hirom ? 1 : 0;
+  else if ((byte & 1 && byte != 0x23) || byte == 0x3a) // & 1 => 0x21, 0x31, 0x35
+    hirom = 1;
 
   address = 0x200;
   for (n = 0; n < (int) SWC_HEADER_LEN; n++)
@@ -124,8 +145,8 @@ receive_rom_info (unsigned char *buffer, int superdump)
 
   if (superdump)
     {
-      // default to super HiROM dump
-      hirom = UCON64_ISSET (ucon64.snes_hirom) ? (ucon64.snes_hirom ? 1 : 0) : 1;
+      if (!UCON64_ISSET (ucon64.snes_hirom))
+        hirom = 1;                              // default to super HiROM dump
       size = 32;                                // dump 32 Mbit
     }
   else
@@ -136,8 +157,8 @@ receive_rom_info (unsigned char *buffer, int superdump)
     }
 
   memset (buffer, 0, SWC_HEADER_LEN);
-  buffer[0] = size << 4 & 0xff;                 // *16 for 8 KB units; low byte
-  buffer[1] = size >> 4;                        // *16 for 8 KB units /256 for high byte
+  buffer[0] = size << 4 & 0xff;                 // *16 for 8 kB units; low byte
+  buffer[1] = size >> 4;                        // *16 for 8 kB units /256 for high byte
   buffer[8] = 0xaa;
   buffer[9] = 0xbb;
   buffer[10] = 4;
@@ -348,7 +369,7 @@ swc_read_rom (const char *filename, unsigned int parport, int superdump)
       remove (filename);
       exit (1);
     }
-  blocksleft = size * 16;                       // 1 Mb (128 KB) unit == 16 8 KB units
+  blocksleft = size * 16;                       // 1 Mb (128 kB) unit == 16 8 kB units
   printf ("Receive: %d Bytes (%.4f Mb)\n", size * MBIT, (float) size);
   size *= MBIT;                                 // size in bytes for ucon64_gauge() below
 
@@ -370,19 +391,17 @@ swc_read_rom (const char *filename, unsigned int parport, int superdump)
   while (blocksleft > 0)
     {
       if (hirom)
-        {
-          for (n = 0; n < 4; n++)
-            {
-              ffe_send_command (5, address1, 0);
-              ffe_receive_block (0x2000, buffer, BUFFERSIZE);
-              address1++;
-              fwrite (buffer, 1, BUFFERSIZE, file);
+        for (n = 0; n < 4; n++)
+          {
+            ffe_send_command (5, address1, 0);
+            ffe_receive_block (0x2000, buffer, BUFFERSIZE);
+            address1++;
+            fwrite (buffer, 1, BUFFERSIZE, file);
 
-              bytesreceived += BUFFERSIZE;
-              ucon64_gauge (starttime, bytesreceived, size);
-              ffe_checkabort (2);
-            }
-        }
+            bytesreceived += BUFFERSIZE;
+            ucon64_gauge (starttime, bytesreceived, size);
+            ffe_checkabort (2);
+          }
 
       for (n = 0; n < 4; n++)
         {
@@ -434,30 +453,33 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
 
   ffe_send_command0 (0xc008, 0);
   fread (buffer, 1, SWC_HEADER_LEN, file);
-  ffe_send_command (5, 0, 0);
-  ffe_send_block (0x400, buffer, SWC_HEADER_LEN); // send header
-  bytessend = SWC_HEADER_LEN;
 
   if (snes_get_file_type () == FIG)
     handle_fig_header (buffer);
-  emu_mode_select = buffer[2];                  // this byte is needed later
 #if 1
   /*
     0x0c == no SRAM & LoROM; we use the header, so that the user can override this
     bit 4 == 0 => DRAM mode 20 (LoROM); disable SRAM by setting SRAM mem map mode 21
   */
-  if ((emu_mode_select & 0x1c) == 0x0c)
-    emu_mode_select |= 0x20;
+  if ((buffer[2] & 0x1c) == 0x0c)
+    buffer[2] |= 0x20;
 #else
   // The code below doesn't work for some HiROM games that don't use SRAM.
-  if ((emu_mode_select & 0x0c) == 0x0c)         // 0x0c == no SRAM; we use the header, so
+  if ((buffer[2] & 0x0c) == 0x0c)               // 0x0c == no SRAM; we use the header, so
     {                                           //  that the user can override this
-      if (emu_mode_select & 0x10)               // bit 4 == 1 => DRAM mode 21 (HiROM)
-        emu_mode_select &= ~0x20;               // disable SRAM by setting SRAM mem map mode 20
+      if (buffer[2] & 0x10)                     // bit 4 == 1 => DRAM mode 21 (HiROM)
+        buffer[2] &= ~0x20;                     // disable SRAM by setting SRAM mem map mode 20
       else                                      // bit 4 == 0 => DRAM mode 20 (LoROM)
-        emu_mode_select |= 0x20;                // disable SRAM by setting SRAM mem map mode 21
+        buffer[2] |= 0x20;                      // disable SRAM by setting SRAM mem map mode 21
     }
 #endif
+  emu_mode_select = buffer[2];                  // this byte is needed later
+
+#if 1                                           // sending the header is not required
+  ffe_send_command (5, 0, 0);
+  ffe_send_block (0x400, buffer, SWC_HEADER_LEN); // send header
+#endif
+  bytessend = SWC_HEADER_LEN;
 
   printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
@@ -476,7 +498,7 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
       ffe_checkabort (2);
     }
 
-  if (blocksdone > 0x200)                       // ROM dump > 512 8 KB blocks (=32 Mb (=4 MB))
+  if (blocksdone > 0x200)                       // ROM dump > 512 8 kB blocks (=32 Mb (=4 MB))
     ffe_send_command0 (0xc010, 2);
 
   ffe_send_command (5, 0, 0);
@@ -532,7 +554,7 @@ swc_read_sram (const char *filename, unsigned int parport)
 
   printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
-  blocksleft = 4;                               // SRAM is 4*8 KB
+  blocksleft = 4;                               // SRAM is 4*8 kB
   address = 0x100;
   starttime = time (NULL);
   while (blocksleft > 0)
@@ -578,7 +600,7 @@ swc_write_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  size = q_fsize (filename) - SWC_HEADER_LEN;   // SWC SRAM is 4*8 KB, emu SRAM often not
+  size = q_fsize (filename) - SWC_HEADER_LEN;   // SWC SRAM is 4*8 kB, emu SRAM often not
   printf ("Send: %d Bytes\n", size);
   fseek (file, SWC_HEADER_LEN, SEEK_SET);       // skip the header
 
@@ -684,7 +706,7 @@ swc_read_rts (const char *filename, unsigned int parport)
   fwrite (buffer, 1, SWC_HEADER_LEN, file);
 
   printf ("Press q to abort\n\n");
-  blocksleft = 32;                              // RTS data is 32*8 KB
+  blocksleft = 32;                              // RTS data is 32*8 kB
 
   if (sub ())
     {

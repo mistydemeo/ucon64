@@ -531,8 +531,16 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #endif // !__MINGW32__
 
 #elif   defined AMIGA                           // _WIN32
-extern FILE *popen (const char *path, const char *mode);
-extern int pclose (FILE *stream);
+// custom _popen() and _pclose(), because the standard ones (named popen() and
+//  pclose()) are buggy
+#ifndef pclose                                  // miscz.h's definition gets higher "precedence"
+#define pclose  _pclose
+#endif
+#ifndef popen                                   // idem
+#define popen   _popen
+#endif
+extern FILE *_popen (const char *path, const char *mode);
+extern int _pclose (FILE *stream);
 #endif                                          // AMIGA
 
 #ifdef  __cplusplus

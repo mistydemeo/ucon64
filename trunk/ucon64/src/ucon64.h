@@ -63,6 +63,7 @@ typedef struct
   const st_usage_t *copier_usage;               // backup unit usage
 
   int interleaved;                              // ROM is interleaved (swapped)
+  int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
   int snes_hirom;                               // SNES ROM is HiROM
 
   int data_size;                                // ROM data size without "red tape"
@@ -159,6 +160,7 @@ typedef struct
     too.
   */
   int buheader_len;                             // length of backup unit header 0 == no bu hdr
+  int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
   int snes_hirom;                               // SNES ROM is HiROM
   int interleaved;                              // ROM is interleaved (swapped)
 

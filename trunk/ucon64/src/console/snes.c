@@ -53,7 +53,7 @@ static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, 
 static int snes_convert_sramfile (const void *header);
 static int snes_fix_pal_protection (st_rominfo_t *rominfo);
 static int snes_fix_ntsc_protection (st_rominfo_t *rominfo);
-static int get_internal_sums (st_rominfo_t *rominfo);
+static unsigned short int get_internal_sums (st_rominfo_t *rominfo);
 //static int snes_special_bs (void);
 static int snes_bs_name(void);
 static int snes_check_bs (void);
@@ -61,6 +61,10 @@ static int check_char (unsigned char c);
 #ifdef  ALT_HILO
 static int check_banktype (unsigned char *rom_buffer, int header_offset);
 #endif
+static void reset_header (void *header);
+static void set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header);
+static void handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
+                                const char **snes_country);
 
 
 const st_usage_t snes_usage[] =
@@ -69,8 +73,8 @@ const st_usage_t snes_usage[] =
     {NULL, NULL, "1990 Nintendo http://www.nintendo.com"},
     {"snes", NULL, "force recognition"},
     {"hi", NULL, "force ROM is HiROM"},
-    {"ehi", NULL, "force ROM is Extended HiROM"},
     {"nhi", NULL, "force ROM is not HiROM"},
+    {"erom", NULL, "force ROM is \"Extended\" (combine with -hi for Extended HiROM)"},
 #if 0
     {"hd", NULL, "force ROM has SMC/FIG/SWC header (+512 Bytes)"},
     {"nhd", NULL, "force ROM has no SMC/FIG/SWC header (MGD2/MGH/RAW)"},
@@ -168,7 +172,7 @@ st_snes_header_t snes_header;
 
 static int snes_split, force_interleaved, bs_dump, rom_is_top,  // flag for interleaved ROM dump
            snes_sramsize, snes_hirom, snes_hirom_changed,       //  of "Tales of Phantasia"
-           nsrt_header;
+           nsrt_header, snes_header_base;
 /*
   The flag `snes_hirom_changed' is necessary for ROMs that are in the normal
   interleaved format (type 1). The variable `snes_hirom' changes the first time
@@ -463,128 +467,6 @@ snes_ufos (void)
   memcpy (&header[8], "SUPERUFO", 8);
 
   return snes_convert_sramfile (&header);
-}
-
-
-static void
-set_nsrt_checksum (unsigned char *header)
-{
-  int n;
-  char checksum = -1;
-
-  for (n = 0x1d0; n <= 0x1ed; n++)
-    checksum += header[n];
-  header[0x1ee] = checksum;
-  header[0x1ef] = ~checksum;
-}
-
-
-static void
-set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header)
-/*
-  This function will write an NSRT header if the user specified a controller
-  type, but only if the checksum is correct. We write a complete NSRT header
-  only to be 100% compatible with NSRT. We are only interested in the
-  controller type feature, though.
-  NSRT is a SNES ROM tool. See developers.html.
-
-  NSRT header format (0x1d0 - 0x1ef, offsets in _copier header_):
-  0x1d0                 low nibble = original country value
-                        high nibble = bank type
-                        1 = LoROM
-                        2 = HiROM
-                        3 = "Extended" HiROM
-  0x1d1 - 0x1e5         original game name
-  0x1e6                 low byte of original SNES checksum
-  0x1e7                 high byte of original SNES checksum
-  0x1e8 - 0x1eb         "NSRT"
-  0x1ec                 header version; a value of for example 15 should be
-                        interpreted as 1.5
-  0x1ed                 low nibble = port 2 controller type
-                        high nibble = port 1 controller type
-                        0 = gamepad
-                        1 = mouse
-                        2 = mouse / gamepad
-                        3 = super scope
-                        4 = super scope / gamepad
-                        5 = Konami's justifier
-                        6 = multitap
-                        7 = mouse / super scope / gamepad
-  0x1ee                 NSRT header checksum
-                        the checksum is calculated by adding all bytes of the
-                        NSRT header (except the checksum bytes themselves)
-                        and then subtracting 1
-  0x1ef                 inverse NSRT header checksum
-*/
-{
-  int x;
-
-  if ((UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
-      && !nsrt_header)                          // don't overwrite these values
-    {
-      if (rominfo->current_internal_crc != rominfo->internal_crc)
-        {
-          printf ("WARNING: The controller type info will be discarded (checksum is bad)\n");
-          return;
-        }
-
-      header[0x1d0] = bs_dump ? 0 : snes_header.country;
-      if (rominfo->header_start == SNES_HEADER_START + SNES_EHIROM)
-        header[0x1d0] |= 0x30;
-      else
-        header[0x1d0] |= snes_hirom ? 0x20 : 0x10;
-
-      memcpy (header + 0x1d1, &snes_header.name, SNES_NAME_LEN);
-      header[0x1e6] = snes_header.checksum_low;
-      header[0x1e7] = snes_header.checksum_high;
-      memcpy (header + 0x1e8, "NSRT", 4);
-      header[0x1ec] = NSRT_HEADER_VERSION;
-    }
-
-  if (UCON64_ISSET (ucon64.controller))
-    {
-      for (x = 0; x < 8; x++)
-        if ((ucon64.controller >> x) & 1)
-          break;
-      if (x != 0 && x != 1 && x != 2 && x != 6)
-        {
-          printf ("WARNING: Invalid value for controller in port 1, using \"0\"\n");
-          x = 0;
-        }
-      header[0x1ed] = x << 4;
-    }
-  if (UCON64_ISSET (ucon64.controller2))
-    {
-      for (x = 0; x < 8; x++)
-        if ((ucon64.controller2 >> x) & 1)
-          break;
-      if (x >= 8)
-        {
-          printf ("WARNING: Invalid value for controller in port 2, using \"0\"\n");
-          x = 0;
-        }
-      header[0x1ed] |= x;
-    }
-
-  // set the checksum bytes
-  if (UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
-    set_nsrt_checksum (header);
-}
-
-
-static void
-reset_header (void *header)
-{
-  // preserve possible NSRT header
-  if (nsrt_header)
-    {
-      memset (header, 0, 0x1d0);
-      memset ((unsigned char *) header + 0x1f0, 0, 16);
-      ((unsigned char *) header)[0x1ec] = NSRT_HEADER_VERSION;
-      set_nsrt_checksum ((unsigned char *) header);
-    }
-  else
-    memset (header, 0, SWC_HEADER_LEN);
 }
 
 
@@ -1940,7 +1822,7 @@ snes_n (st_rominfo_t *rominfo, const char *name)
 int
 snes_chk (st_rominfo_t *rominfo)
 {
-  char buf[10], dest_name[FILENAME_MAX];
+  char buf[4], dest_name[FILENAME_MAX];
   int image = rominfo->header_start + rominfo->buheader_len;
 
   strcpy (dest_name, ucon64.rom);
@@ -2107,8 +1989,8 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_siz
     }
 
 #ifdef  ALT_HILO
-  hi_score = check_banktype (rom_buffer, SNES_HIROM);
-  lo_score = check_banktype (rom_buffer, 0);
+  hi_score = check_banktype (rom_buffer, snes_header_base + SNES_HIROM);
+  lo_score = check_banktype (rom_buffer, snes_header_base + 0);
 
   if (!force_interleaved &&
        ((snes_hirom && (lo_score >= hi_score || hi_score < 0)) ||
@@ -2272,7 +2154,7 @@ snes_buheader_info (st_rominfo_t *rominfo)
 }
 
 
-int
+unsigned short int
 get_internal_sums (st_rominfo_t *rominfo)
 /*
   Returns the sum of the internal checksum and the internal inverse checksum
@@ -2282,15 +2164,173 @@ get_internal_sums (st_rominfo_t *rominfo)
   bytes and doesn't do anything with the real, i.e. calculated, checksum.
 */
 {
-  int image = SNES_HEADER_START + snes_hirom + rominfo->buheader_len;
+  int image = SNES_HEADER_START + snes_header_base + snes_hirom +
+              rominfo->buheader_len;
   // don't use rominfo->header_start here!
-  unsigned short int internal_sums =
-                   q_fgetc (ucon64.rom, image + 44);      // low byte
-  internal_sums += q_fgetc (ucon64.rom, image + 45) << 8; // high byte
-  internal_sums += q_fgetc (ucon64.rom, image + 46);      // low byte
-  internal_sums += q_fgetc (ucon64.rom, image + 47) << 8; // high byte
+  unsigned char buf[4];
 
-  return internal_sums;
+  q_fread (buf, image + 44, 4, ucon64.rom);
+  return buf[0] + (buf[1] << 8) + buf[2] + (buf[3] << 8);
+}
+
+
+static void
+snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
+/*
+  Determine the size of a possible backup unit header. This function also tries
+  to determine the bank type in the process. However, snes_set_hirom() has the
+  final word about that.
+*/
+{
+  int x = 0, y;
+  /*
+    Check for "Extended" ROM dumps first, because at least one of them
+    (Tales of Phantasia (J)) has two headers; an incorrect one at the normal
+    location and a correct one at the Extended HiROM location.
+  */
+  if (ucon64.file_size >= (int) (SNES_HEADER_START + SNES_EROM + SNES_HEADER_LEN))
+    {
+      snes_header_base = SNES_EROM;
+      snes_hirom = SNES_HIROM;
+      rominfo->buheader_len = 0;
+      if ((x = get_internal_sums (rominfo)) != 0xffff)
+        {
+          rominfo->buheader_len = SWC_HEADER_LEN;
+          if ((x = get_internal_sums (rominfo)) != 0xffff)
+            {
+              snes_hirom = 0;
+              rominfo->buheader_len = 0;
+              if ((x = get_internal_sums (rominfo)) != 0xffff)
+                {
+                  rominfo->buheader_len = SWC_HEADER_LEN;
+                  x = get_internal_sums (rominfo);
+                }
+            }
+        }
+    }
+  if (x != 0xffff)
+    {
+      snes_header_base = 0;
+      snes_hirom = 0;
+      rominfo->buheader_len = 0;
+      if ((x = get_internal_sums (rominfo)) != 0xffff)
+        {
+          rominfo->buheader_len = SWC_HEADER_LEN;
+          if ((x = get_internal_sums (rominfo)) != 0xffff)
+            {
+              snes_hirom = SNES_HIROM;
+              rominfo->buheader_len = 0;
+              if ((x = get_internal_sums (rominfo)) != 0xffff)
+                {
+                  rominfo->buheader_len = SWC_HEADER_LEN;
+                  x = get_internal_sums (rominfo);
+                }
+            }
+        }
+      }
+
+  if (header->id1 == 0xaa && header->id2 == 0xbb && header->type == 4)
+    type = SWC;
+  else if (!strncmp ((char *) header, "GAME DOCTOR SF 3", 0x10))
+    type = GD3;
+  else if ((header->hirom == 0x80 &&            // HiROM
+             ((header->emulation1 == 0x77 && header->emulation2 == 0x83) ||
+              (header->emulation1 == 0xdd && header->emulation2 == 0x82) ||
+              (header->emulation1 == 0xdd && header->emulation2 == 0x02) ||
+              (header->emulation1 == 0xf7 && header->emulation2 == 0x83) ||
+              (header->emulation1 == 0xfd && header->emulation2 == 0x82)))
+            ||
+           (header->hirom == 0x00 &&            // LoROM
+             ((header->emulation1 == 0x77 && header->emulation2 == 0x83) ||
+              (header->emulation1 == 0x00 && header->emulation2 == 0x80) ||
+#if 1
+              // This makes NES FFE ROMs & Game Boy ROMs be detected as SNES
+              //  ROMs, see src/console/nes.c & src/console/gb.c
+              (header->emulation1 == 0x00 && header->emulation2 == 0x00) ||
+#endif
+              (header->emulation1 == 0x47 && header->emulation2 == 0x83) ||
+              (header->emulation1 == 0x11 && header->emulation2 == 0x02)))
+          )
+    type = FIG;
+  else if (rominfo->buheader_len == 0 && x == 0xffff)
+    type = MGD;
+
+  /*
+    x can be better trusted than type == FIG, but x being 0xffff is definitely
+    not a guarantee that rominfo->buheader_len already has the right value
+    (e.g. Earthworm Jim (U), Alfred Chicken (U|E), Soldiers of Fortune (U)).
+  */
+  if (type != MGD && type != SMC)
+    {
+      y = ((header->size_high << 8) + header->size_low) * 8 * 1024;
+      y += SWC_HEADER_LEN;                      // if SWC-like header -> hdr[1] high byte,
+      if (y == ucon64.file_size)                //  hdr[0] low byte of # 8 kB blocks in ROM
+        rominfo->buheader_len = SWC_HEADER_LEN;
+      else
+        {
+          int surplus = ucon64.file_size % MBIT;
+          if (surplus == 0)
+            // most likely we guessed the copier type wrong
+            {
+              rominfo->buheader_len = 0;
+              type = MGD;
+            }
+          else if ((surplus % SWC_HEADER_LEN) == 0 && surplus < MAXBUFSIZE)
+            rominfo->buheader_len = surplus;
+        }
+    }
+  if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn switch was specified
+    {
+      rominfo->buheader_len = ucon64.buheader_len;
+      if (type == MGD && rominfo->buheader_len)
+        type = SMC;
+    }
+}
+
+
+static void
+snes_set_hirom (unsigned char *rom_buffer, int size)
+{
+  int x;
+
+  if (size >= (int) (8 * MBIT + SNES_HEADER_START + SNES_HIROM + SNES_HEADER_LEN) &&
+      !strncmp ((char *) rom_buffer + SNES_HEADER_START + 16, "ADD-ON BASE CASSETE", 19))
+    { // A Sufami Turbo dump contains 4 copies of the ST BIOS, which is 2 Mbit.
+      //  After the BIOS comes the game data.
+      snes_header_base = 8 * MBIT;
+      x = 8 * MBIT + SNES_HIROM;
+    }
+#ifdef  ALT_HILO
+  else if (snes_header_base == SNES_EROM)
+    x = SNES_EROM + SNES_HIROM;
+  else
+    {
+      snes_header_base = 0;
+      x = SNES_HIROM;
+    }
+  snes_hirom = check_banktype (rom_buffer, x) >
+               check_banktype (rom_buffer, snes_header_base) ? SNES_HIROM : 0;
+#endif
+  /*
+    It would be nice if snes_header.map_type & 1 could be used to verify that
+    snes_hirom has the correct value, but it doesn't help much. For games like
+    Batman Revenge of the Joker (U) it matches what score_hirom() finds.
+    snes_hirom must be 0x8000 for that game in order to display correct
+    information. However it should be 0 when writing a copier header.
+    So, snes_header.map_type can't be used to recognize such cases.
+  */
+
+  // step 3.
+  if (UCON64_ISSET (ucon64.snes_hirom))         // -hi or -nhi switch was specified
+    snes_hirom = ucon64.snes_hirom;
+
+  if (UCON64_ISSET (ucon64.snes_header_base))   // -erom switch was specified
+    {
+      snes_header_base = ucon64.snes_header_base;
+      if (snes_header_base &&
+          size < (int) (snes_header_base + SNES_HEADER_START + snes_hirom + SNES_HEADER_LEN))
+        snes_header_base = 0;                   // Don't let -erom crash on a too small ROM
+    }
 }
 
 
@@ -2360,102 +2400,9 @@ snes_init (st_rominfo_t *rominfo)
     2. - snes_hirom
     3. - check for -hi/-nhi
     4. - snes_testinterleaved()
-
-    step 1. & first part of step 2.
   */
 
-  /*
-    Check for "Extended" HiROM dumps first, because at least one of them
-    (Tales of Phantasia (J)) has two headers; an incorrect one at the normal
-    location and a correct one at the Extended HiROM location.
-  */
-  x = 0;
-  if (ucon64.file_size >= (int) (SNES_HEADER_START + SNES_EHIROM + SNES_HEADER_LEN))
-    {
-      snes_hirom = SNES_EHIROM;
-      rominfo->buheader_len = 0;
-      if ((x = get_internal_sums (rominfo)) != 0xffff)
-        {
-          rominfo->buheader_len = SWC_HEADER_LEN;
-          x = get_internal_sums (rominfo);
-        }
-    }
-  if (x != 0xffff)
-    {
-      snes_hirom = 0;
-      rominfo->buheader_len = 0;
-      if ((x = get_internal_sums (rominfo)) != 0xffff)
-        {
-          rominfo->buheader_len = SWC_HEADER_LEN;
-          if ((x = get_internal_sums (rominfo)) != 0xffff)
-            {
-              snes_hirom = SNES_HIROM;
-              rominfo->buheader_len = 0;
-              if ((x = get_internal_sums (rominfo)) != 0xffff)
-                {
-                  rominfo->buheader_len = SWC_HEADER_LEN;
-                  x = get_internal_sums (rominfo);
-                }
-            }
-        }
-      }
-
-  if (header.id1 == 0xaa && header.id2 == 0xbb && header.type == 4)
-    type = SWC;
-  else if (!strncmp ((char *) &header, "GAME DOCTOR SF 3", 0x10))
-    type = GD3;
-  else if ((header.hirom == 0x80 &&             // HiROM
-             ((header.emulation1 == 0x77 && header.emulation2 == 0x83) ||
-              (header.emulation1 == 0xdd && header.emulation2 == 0x82) ||
-              (header.emulation1 == 0xdd && header.emulation2 == 0x02) ||
-              (header.emulation1 == 0xf7 && header.emulation2 == 0x83) ||
-              (header.emulation1 == 0xfd && header.emulation2 == 0x82)))
-            ||
-           (header.hirom == 0x00 &&             // LoROM
-             ((header.emulation1 == 0x77 && header.emulation2 == 0x83) ||
-              (header.emulation1 == 0x00 && header.emulation2 == 0x80) ||
-#if 1
-              // This makes NES FFE ROMs & Game Boy ROMs be detected as SNES
-              //  ROMs, see src/console/nes.c & src/console/gb.c
-              (header.emulation1 == 0x00 && header.emulation2 == 0x00) ||
-#endif
-              (header.emulation1 == 0x47 && header.emulation2 == 0x83) ||
-              (header.emulation1 == 0x11 && header.emulation2 == 0x02)))
-          )
-    type = FIG;
-  else if (rominfo->buheader_len == 0 && x == 0xffff)
-    type = MGD;
-
-  /*
-    x can be better trusted than type == FIG, but x being 0xffff is definitely
-    not a guarantee that rominfo->buheader_len already has the right value
-    (e.g. Earthworm Jim (U), Alfred Chicken (U|E), Soldiers of Fortune (U)).
-  */
-  if (type != MGD && type != SMC)
-    {
-      y = ((header.size_high << 8) + header.size_low) * 8 * 1024;
-      y += SWC_HEADER_LEN;                      // if SWC-like header -> hdr[1] high byte,
-      if (y == ucon64.file_size)                //  hdr[0] low byte of # 8 kB blocks in ROM
-        rominfo->buheader_len = SWC_HEADER_LEN;
-      else
-        {
-          int surplus = ucon64.file_size % MBIT;
-          if (surplus == 0)
-            // most likely we guessed the copier type wrong
-            {
-              rominfo->buheader_len = 0;
-              type = MGD;
-            }
-          else if ((surplus % SWC_HEADER_LEN) == 0 && surplus < MAXBUFSIZE)
-            rominfo->buheader_len = surplus;
-        }
-    }
-  if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
-    {
-      rominfo->buheader_len = ucon64.buheader_len;
-      if (type == MGD && rominfo->buheader_len)
-        type = SMC;
-    }
+  snes_handle_buheader (rominfo, &header);      // step 1. & first part of step 2.
 
   if (UCON64_ISSET (ucon64.split))
     snes_split = ucon64.split;
@@ -2486,46 +2433,16 @@ snes_init (st_rominfo_t *rominfo)
     }                                           //  called with -lsv
   q_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
 
-#ifdef  ALT_HILO
-  // second part of step 2.
-  if (snes_hirom > SNES_HIROM)
-    {
-      x = SNES_EHIROM;
-      y = SNES_EHIROM - SNES_HIROM;
-    }
-  else
-    {
-      x = SNES_HIROM;
-      y = 0;
-    }
-  snes_hirom = check_banktype (rom_buffer, x) > check_banktype (rom_buffer, y) ?
-                  y + SNES_HIROM : y;
-#endif
-  /*
-    It would be nice if snes_header.map_type & 1 could be used to verify that
-    snes_hirom has the correct value, but it doesn't help much. For games like
-    Batman Revenge of the Joker (U) it matches what score_hirom() finds.
-    snes_hirom must be 0x8000 for that game in order to display correct
-    information. However it should be 0 when writing a copier header.
-    So, snes_header.map_type can't be used to recognize such cases.
-  */
+  snes_set_hirom (rom_buffer, size);            // second part of step 2. (#ifdef ALT_HILO)
 
-  // step 3.
-  if (UCON64_ISSET (ucon64.snes_hirom))         // -hi, -ehi or -nhi option was specified
-    {
-      snes_hirom = ucon64.snes_hirom;
-      if (snes_hirom && size < (int) (SNES_HEADER_START + snes_hirom + SNES_HEADER_LEN))
-        snes_hirom = SNES_HIROM;                // Don't let -ehi crash on a too small ROM
-    }
-
-  rominfo->header_start = SNES_HEADER_START + snes_hirom;
+  rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
   rominfo->header_len = SNES_HEADER_LEN;
   // set snes_header before calling snes_testinterleaved()
   memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
   rominfo->header = &snes_header;
 
   bs_dump = snes_check_bs ();
-  if (UCON64_ISSET (ucon64.bs_dump))            // -bs or -nbs option was specified
+  if (UCON64_ISSET (ucon64.bs_dump))            // -bs or -nbs switch was specified
     bs_dump = ucon64.bs_dump;
 
   // step 4.
@@ -2711,45 +2628,7 @@ snes_init (st_rominfo_t *rominfo)
   sprintf (buf, "Version: 1.%d", snes_header.version);
   strcat (rominfo->misc, buf);
 
-  if (rominfo->buheader_len && !memcmp (&OFFSET (header, 0x1e8), "NSRT", 4))
-    {
-      char name[SNES_NAME_LEN + 1], *str_list[9] =
-        {
-          "Gamepad", "Mouse", "Mouse / Gamepad", "Super Scope",
-          "Super Scope / Gamepad", "Konami's Justifier", "Multitap",
-          "Mouse / Super Scope / Gamepad", "Unknown"
-        };
-      int x = OFFSET (header, 0x1ed), ctrl1 = x >> 4, ctrl2 = x & 0xf;
-
-      memcpy (name, &OFFSET (header, 0x1d1), SNES_NAME_LEN);
-      name[SNES_NAME_LEN] = 0;
-      for (x = 0; x < SNES_NAME_LEN; x++)
-        if (!isprint ((int) name[x]))
-          name[x] = '.';
-
-      if (ctrl1 > 8)
-        ctrl1 = 8;
-      if (ctrl2 > 8)
-        ctrl2 = 8;
-      sprintf (buf, "\nNSRT info:\n"
-                      "  Original country: %s\n"
-                      "  Original game name: \"%s\"\n"
-                      "  Original checksum: 0x%04x\n"
-                      "  Port 1 controller type: %s\n"
-                      "  Port 2 controller type: %s\n"
-                      "  Header version: %.1f",
-               NULL_TO_UNKNOWN_S (snes_country[MIN (OFFSET (header, 0x1d0) & 0xf, SNES_COUNTRY_MAX - 1)]),
-               name,
-               OFFSET (header, 0x1e6) + (OFFSET (header, 0x1e7) << 8),
-               str_list[ctrl1],
-               str_list[ctrl2],
-               OFFSET (header, 0x1ec) / 10.f);
-      strcat (rominfo->misc, buf);
-
-      nsrt_header = 1;
-    }
-  else
-    nsrt_header = 0;
+  handle_nsrt_header (rominfo, (unsigned char *) &header, snes_country);
 
   free (rom_buffer);
   return result;
@@ -2970,16 +2849,19 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
       // Handle split files. Don't make this dependent of ucon64.split as
       //  the last file doesn't get detected as being split. Besides, we don't
       //  want to crash on *any* input data.
-      int i_max = half_internal_rom_size > rom_size ? rom_size : half_internal_rom_size;
-      for (i = 0; i < i_max; i++)               // normal ROM
+      int i_start = snes_header_base == 8 * MBIT ? 8 * MBIT : 0,
+          i_end = i_start +
+                  (half_internal_rom_size > rom_size ? rom_size : half_internal_rom_size);
+
+      for (i = i_start; i < i_end; i++)         // normal ROM
         sum1 += (*rom_buffer)[i];
 
-      remainder = rom_size - half_internal_rom_size;
+      remainder = rom_size - i_start - half_internal_rom_size;
       if (!remainder)                           // don't divide by zero below
         remainder = half_internal_rom_size;
 
       sum2 = 0;
-      for (i = half_internal_rom_size; i < rom_size; i++)
+      for (i = i_start + half_internal_rom_size; i < rom_size; i++)
         sum2 += (*rom_buffer)[i];
       sum1 += sum2 * (half_internal_rom_size / remainder);
 //      printf ("DEBUG internal_rom_size: %d; half_internal_rom_size: %d; remainder: %d\n",
@@ -3010,7 +2892,7 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
 #else
 int
 snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
-// Calculate the checksum of a SNES ROM.
+// Calculate the checksum of a SNES ROM
 {
   int i, rom_size, internal_rom_size;
   unsigned short int sum;
@@ -3072,8 +2954,11 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
           sum -= (*rom_buffer)[i];
     }
   else
-    for (i = 0; i < internal_rom_size; i++)
-      sum += (*rom_buffer)[i];
+    {
+      int i_start = snes_header_base == 8 * MBIT ? 8 * MBIT : 0;
+      for (i = i_start; i < internal_rom_size; i++)
+        sum += (*rom_buffer)[i];
+    }
 
   if (force_interleaved || rominfo->interleaved)
     q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
@@ -3144,3 +3029,173 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
   return score;
 }
 #endif
+
+
+static void
+set_nsrt_checksum (unsigned char *header)
+{
+  int n;
+  char checksum = -1;
+
+  for (n = 0x1d0; n <= 0x1ed; n++)
+    checksum += header[n];
+  header[0x1ee] = checksum;
+  header[0x1ef] = ~checksum;
+}
+
+
+static void
+set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header)
+/*
+  This function will write an NSRT header if the user specified a controller
+  type, but only if the checksum is correct. We write a complete NSRT header
+  only to be 100% compatible with NSRT. We are only interested in the
+  controller type feature, though.
+  NSRT is a SNES ROM tool. See developers.html.
+
+  NSRT header format (0x1d0 - 0x1ef, offsets in _copier header_):
+  0x1d0                 low nibble = original country value
+                        high nibble = bank type
+                        1 = LoROM
+                        2 = HiROM
+                        3 = "Extended" HiROM
+  0x1d1 - 0x1e5         original game name
+  0x1e6                 low byte of original SNES checksum
+  0x1e7                 high byte of original SNES checksum
+  0x1e8 - 0x1eb         "NSRT"
+  0x1ec                 header version; a value of for example 15 should be
+                        interpreted as 1.5
+  0x1ed                 low nibble = port 2 controller type
+                        high nibble = port 1 controller type
+                        0 = gamepad
+                        1 = mouse
+                        2 = mouse / gamepad
+                        3 = super scope
+                        4 = super scope / gamepad
+                        5 = Konami's justifier
+                        6 = multitap
+                        7 = mouse / super scope / gamepad
+  0x1ee                 NSRT header checksum
+                        the checksum is calculated by adding all bytes of the
+                        NSRT header (except the checksum bytes themselves)
+                        and then subtracting 1
+  0x1ef                 inverse NSRT header checksum
+*/
+{
+  int x;
+
+  if ((UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
+      && !nsrt_header)                          // don't overwrite these values
+    {
+      if (rominfo->current_internal_crc != rominfo->internal_crc)
+        {
+          printf ("WARNING: The controller type info will be discarded (checksum is bad)\n");
+          return;
+        }
+
+      header[0x1d0] = bs_dump ? 0 : snes_header.country;
+      if (rominfo->header_start == SNES_EROM + SNES_HEADER_START + SNES_HIROM)
+        header[0x1d0] |= 0x30;                  // Note: Extended LoROM is not supported
+      else
+        header[0x1d0] |= snes_hirom ? 0x20 : 0x10;
+
+      memcpy (header + 0x1d1, &snes_header.name, SNES_NAME_LEN);
+      header[0x1e6] = snes_header.checksum_low;
+      header[0x1e7] = snes_header.checksum_high;
+      memcpy (header + 0x1e8, "NSRT", 4);
+      header[0x1ec] = NSRT_HEADER_VERSION;
+    }
+
+  if (UCON64_ISSET (ucon64.controller))
+    {
+      for (x = 0; x < 8; x++)
+        if ((ucon64.controller >> x) & 1)
+          break;
+      if (x != 0 && x != 1 && x != 2 && x != 6)
+        {
+          printf ("WARNING: Invalid value for controller in port 1, using \"0\"\n");
+          x = 0;
+        }
+      header[0x1ed] = x << 4;
+    }
+  if (UCON64_ISSET (ucon64.controller2))
+    {
+      for (x = 0; x < 8; x++)
+        if ((ucon64.controller2 >> x) & 1)
+          break;
+      if (x >= 8)
+        {
+          printf ("WARNING: Invalid value for controller in port 2, using \"0\"\n");
+          x = 0;
+        }
+      header[0x1ed] |= x;
+    }
+
+  // set the checksum bytes
+  if (UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
+    set_nsrt_checksum (header);
+}
+
+
+static void
+reset_header (void *header)
+{
+  // preserve possible NSRT header
+  if (nsrt_header)
+    {
+      memset (header, 0, 0x1d0);
+      memset ((unsigned char *) header + 0x1f0, 0, 16);
+      ((unsigned char *) header)[0x1ec] = NSRT_HEADER_VERSION;
+      set_nsrt_checksum ((unsigned char *) header);
+    }
+  else
+    memset (header, 0, SWC_HEADER_LEN);
+}
+
+
+static void
+handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
+                    const char **snes_country)
+{
+  char buf[800];
+
+  if (rominfo->buheader_len && !memcmp (header + 0x1e8, "NSRT", 4))
+    {
+      char name[SNES_NAME_LEN + 1], *str_list[9] =
+        {
+          "Gamepad", "Mouse", "Mouse / Gamepad", "Super Scope",
+          "Super Scope / Gamepad", "Konami's Justifier", "Multitap",
+          "Mouse / Super Scope / Gamepad", "Unknown"
+        };
+      int x = OFFSET (header, 0x1ed), ctrl1 = x >> 4, ctrl2 = x & 0xf;
+
+      memcpy (name, &OFFSET (header, 0x1d1), SNES_NAME_LEN);
+      name[SNES_NAME_LEN] = 0;
+      for (x = 0; x < SNES_NAME_LEN; x++)
+        if (!isprint ((int) name[x]))
+          name[x] = '.';
+
+      if (ctrl1 > 8)
+        ctrl1 = 8;
+      if (ctrl2 > 8)
+        ctrl2 = 8;
+      sprintf (buf, "\nNSRT info:\n"
+                      "  Original country: %s\n"
+                      "  Original game name: \"%s\"\n"
+                      "  Original checksum: 0x%04x\n"
+                      "  Port 1 controller type: %s\n"
+                      "  Port 2 controller type: %s\n"
+                      "  Header version: %.1f",
+               NULL_TO_UNKNOWN_S (snes_country[MIN (OFFSET (header, 0x1d0) & 0xf, SNES_COUNTRY_MAX - 1)]),
+               name,
+               OFFSET (header, 0x1e6) + (OFFSET (header, 0x1e7) << 8),
+               str_list[ctrl1],
+               str_list[ctrl2],
+               OFFSET (header, 0x1ec) / 10.f);
+      strcat (rominfo->misc, buf);
+
+      nsrt_header = 1;
+    }
+  else
+    nsrt_header = 0;
+}

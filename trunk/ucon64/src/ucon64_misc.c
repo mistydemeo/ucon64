@@ -602,7 +602,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_CTRL, UCON64_UNKNOWN, NULL,          WF_SWITCH}, // for NES & SNES
   {UCON64_CTRL2, UCON64_SNES, snes_usage,      WF_SWITCH},
   {UCON64_DUMPINFO, UCON64_NES, nes_usage,     WF_SWITCH},
-  {UCON64_EHI, UCON64_SNES, snes_usage,        WF_SWITCH},
+  {UCON64_EROM, UCON64_SNES, snes_usage,       WF_SWITCH},
   {UCON64_FILE, UCON64_UNKNOWN, NULL,          WF_SWITCH},
   {UCON64_FORCE63, UCON64_UNKNOWN, ucon64_dat_usage, WF_SWITCH},
   {UCON64_FRONTEND, UCON64_UNKNOWN, NULL,      WF_SWITCH},

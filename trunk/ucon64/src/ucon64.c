@@ -1436,13 +1436,13 @@ ucon64_usage (int argc, char *argv[])
     cd32_usage (argc, argv);
   else if (argcmp (argc, argv, "-cdi"))
     cdi_usage (argc, argv);
-//  else if (argcmp (argc, argv, "-gc"))
-//    gamecube_usage (argc, argv);
+  else if (argcmp (argc, argv, "-gc"))
+    gamecube_usage (argc, argv);
   else if (argcmp (argc, argv, "-xbox"))
     xbox_usage (argc, argv);
   else
     {
-//      gamecube_usage (argc, argv);
+      gamecube_usage (argc, argv);
       dc_usage (argc, argv);
       psx_usage (argc, argv);
 /*
@@ -1452,15 +1452,15 @@ ucon64_usage (int argc, char *argv[])
       cd32_usage(argc,argv);
       cdi_usage(argc,argv);
 */
-      printf ("%s\n%s\n%s\n%s\n%s\n"
+      printf ("%s\n%s\n%s\n%s\n%s\n%s\n"
 //            "  -xbox, -ps2, -sat, -3do, -cd32, -cdi\n"
-              "  -ps2, -sat, -3do, -cd32, -cdi\n"
+              "  -xbox, -ps2, -sat, -3do, -cd32, -cdi\n"
               "                force recognition; NEEDED\n"
 //            "  -iso          force image is ISO9660\n"
 //            "  -raw          force image is MODE2_RAW/BIN\n"
               "  *             show info (default); ONLY $ROM=RAW_IMAGE\n"
               "  -iso          convert RAW/BIN to ISO9660; $ROM=RAW_IMAGE\n",
-//            xbox_TITLE,
+              xbox_TITLE,
               ps2_TITLE, saturn_TITLE, real3do_TITLE, cd32_TITLE,
               cdi_TITLE);
 

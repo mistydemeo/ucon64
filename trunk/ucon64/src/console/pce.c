@@ -53,7 +53,9 @@ const char *pcengine_usage[] =
     "  " OPTION_LONG_S "nhd         force ROM has no SMG header (MGD2/RAW)\n"
 #endif
     "  " OPTION_LONG_S "smg         convert to Super Magic Griffin/SMG\n"
-    "  " OPTION_LONG_S "mgd         convert to Multi Game Doctor*/MGD2/RAW\n",
+    "  " OPTION_LONG_S "mgd         convert to Multi Game Doctor*/MGD2/RAW\n"
+    "INFO: for more options check the support for DISC-based consoles\n"
+    ,
     NULL
 };
 

@@ -40,6 +40,8 @@ const char *dc_usage[] =
     "1998 SEGA http://www.sega.com",
     "  " OPTION_LONG_S "dc          force recognition; NEEDED\n"
     "TODO: " OPTION_LONG_S "ip      extract IP.BIN; --rom=CD_IMAGE\n"
+    "INFO: for more options check the support for DISC-based consoles\n"
+    
       ,
       NULL
 };

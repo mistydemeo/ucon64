@@ -29,14 +29,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "psx.h"
 
+
 const char *psx_usage[] =
   {
     "Playstation (One)/Playstation 2 (CD only)",
     "1994/(2000) Sony http://www.playstation.com",
     "  " OPTION_LONG_S "psx         force recognition; NEEDED\n"
+    "INFO: for more options check the support for DISC-based consoles\n"
       ,
       NULL
 };
+
 
 int
 psx_init (st_rominfo_t *rominfo)

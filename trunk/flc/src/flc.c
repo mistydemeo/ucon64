@@ -21,6 +21,7 @@
 */
 
 #include <stdlib.h>
+#include <string.h>
 #include <dirent.h>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -134,6 +135,18 @@ main (int argc, char *argv[])
         }
     }
 
+#if 0
+#ifdef TODO
+#warning TODO tempdir for *_extract
+#endif // TODO
+  if (!mktmpdir (temp))
+    {
+      fprintf (stderr, "ERROR: could not create temp dir");
+      return -1;
+    }
+
+#endif
+
   if (flc.html)
     printf ("<html><head><title></title></head><body><pre><tt>");
 
@@ -163,6 +176,7 @@ main (int argc, char *argv[])
 
       return 0;
     }
+  else path[strlen (path) - strlen (FILENAME_ONLY (path))] = 0;
 
 /*
   multiple file handling
@@ -205,6 +219,7 @@ main (int argc, char *argv[])
     }
 
   (void) closedir (dp);
+//  remove_Rf (temp);
   file_p->next = NULL;
   file_p = &file;
 

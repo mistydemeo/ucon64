@@ -44,9 +44,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifdef  DJGPP                                   // DXE's are specific to DJGPP
 #include "dxedll_priv.h"
 #endif
-#if 0 // SHAME ON YOU!
 #include "misc_wav.h"
-#endif
 
 #ifndef CD_MINS
 #define CD_MINS              74 /* max. minutes per CD, not really a limit */
@@ -505,10 +503,8 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
       return -1;
     }
 
-#if 0 // SHAME ON YOU!
   if (!track->mode && flags & DM_WAV)
     writewavheader (fh2, track->track_len);
-#endif
 
   fseek (fh, track->track_start, SEEK_SET); // start of track
   // skip pregap (always?)

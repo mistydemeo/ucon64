@@ -117,7 +117,6 @@ init_port (void)                                // original name: init_port
 #ifndef USE_PPDEV
   outportb ((unsigned short) (port_8 + 0x402),
             (unsigned char) ((inportb ((unsigned short) (port_8 + 0x402)) & 0x1f) | 0x80));
-  // probably #if 0, but first test if this works with ppdev - dbjh
   outportb (port_9, 1);                         // clear EPP time flag
 #endif
   ttt_set_ai_data (6, 0);                       // rst=0, wei=0(dis.), rdi=0(dis.)

@@ -8,11 +8,8 @@ CFLAGS=$(CFLAGS) /DDLOPEN
 !endif
 
 LIBNAME=discmage
-# SHAME ON YOU!
-#OBJECTS=libdm_misc.obj dllinit.obj misc.obj misc_wav.obj format/format.obj format/cdi.obj \
-#        format/nero.obj format/cue.obj format/toc.obj format/other.obj
-OBJECTS=libdm_misc.obj dllinit.obj misc.obj format/format.obj format/cdi.obj \
-        format/nero.obj format/cue.obj format/toc.obj format/other.obj
+OBJECTS=libdm_misc.obj dllinit.obj misc.obj misc_wav.obj format/format.obj \
+        format/cdi.obj format/nero.obj format/cue.obj format/toc.obj format/other.obj
 !ifdef USE_ZLIB
 LIBS=zlib.lib
 OBJECTS=$(OBJECTS) unzip.obj map.obj misc_z.obj

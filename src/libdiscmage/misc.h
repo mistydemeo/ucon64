@@ -332,6 +332,7 @@ extern uint64_t bswap_64 (uint64_t x);
                   memory allocated for a (list of) st_pattern_t structure(s)
   render_usage()  a renderer for a nice usage output
                     takes an st_usage_t array
+  clear_line ()   clear the current line (79 spaces)
   ansi_init()     initialize ANSI output
   ansi_strip()    strip ANSI codes from a string
   gauge()         init_time == time when gauge() was first started or when
@@ -392,6 +393,7 @@ extern void render_usage (const st_usage_t *usage, int more);
 #ifdef  DEBUG
 extern void parse_usage_code (const char *usage_output);
 #endif
+extern void clear_line (void);
 extern int ansi_init (void);
 extern char *ansi_strip (char *str);
 extern int gauge (time_t init_time, int pos, int size);

@@ -40,10 +40,7 @@ GCC_WIN=1
 endif
 
 LIBNAME=discmage
-# SHAME ON YOU!
-#OBJECTS=libdm_misc.o dllinit.o misc.o misc_wav.o format/format.o format/cdi.o \
-#        format/nero.o format/cue.o format/toc.o format/other.o
-OBJECTS=libdm_misc.o dllinit.o misc.o format/format.o format/cdi.o \
+OBJECTS=libdm_misc.o dllinit.o misc.o misc_wav.o format/format.o format/cdi.o \
         format/nero.o format/cue.o format/toc.o format/other.o
 ifdef USE_ZLIB
 LIBS=-lz

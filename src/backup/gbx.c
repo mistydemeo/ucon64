@@ -242,7 +242,7 @@ read_data (void)
 static void
 init_port (void)
 {
-#if 0
+#ifndef USE_PPDEV
   outportb (port_9, 1);                         // clear EPP time flag
 #endif
   set_ai_data ((unsigned char) 2, 0);           // rst=0, wei=0(dis.), rdi=0(dis.)
@@ -898,8 +898,7 @@ read_rom_16k (unsigned int bank)                // ROM or EEPROM
                     idx += 256;
                   }
 
-                // remove last gauge
-                fputs ("\r                                                                              \r", stdout);
+                clear_line ();                  // remove last gauge
                 memcpy (game_name, buffer + 0x134, 15);
                 game_name[15] = 0;
                 for (i = 0; i < 15; i++)
@@ -1752,9 +1751,8 @@ gbx_write_rom (const char *filename, unsigned int parport)
     }
 
 #if 0 // write_eeprom_16k() already calls verify_rom_16k() (indirectly)...
-  // remove last gauge
-  fputs ("\r                                                                              \r", stdout);
-  puts ("Verifying card...");
+  clear_line ();                                // remove last gauge
+  puts ("Verifying card...\n");
   fseek (file, 0, SEEK_SET);
   n_bytes = 0;
   starttime = time (NULL);

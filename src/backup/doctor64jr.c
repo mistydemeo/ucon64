@@ -189,7 +189,7 @@ set_ai_data (unsigned char ai, unsigned char data)
 static void
 init_port (int enable_write)
 {
-#if 0 // not necessary *and* not correct (read-only register) - dbjh
+#ifndef USE_PPDEV
   outportb (port_9, 1);                         // clear EPP time flag
 #endif
   set_ai_data (6, 0x0a);
@@ -490,10 +490,10 @@ doctor64jr_write (const char *filename, unsigned int parport)
   misc_parport_print_info ();
 
   port_8 = parport;
-  port_9 = port_8 + 1;
-  port_a = port_9 + 1;
-  port_b = port_a + 1;
-  port_c = port_b + 1;
+  port_9 = parport + 1;
+  port_a = parport + 2;
+  port_b = parport + 3;
+  port_c = parport + 4;
 
   init_port (enable_write);
 

@@ -79,9 +79,9 @@ const st_usage_t ucon64_dat_usage[] = {
   {"db", NULL, "DATabase statistics"},
   {"dbv", NULL, "like " OPTION_LONG_S "db but more verbose"},
   {"dbs", "CRC32", "search ROM with CRC32 in DATabase"},
-  {"lsd", NULL, "generate ROM list for all ROMs using DATabase; " OPTION_LONG_S "rom=ROM or DIR"},
-  {"rrom", NULL, "rename ROMs in DIR to their internal names; " OPTION_LONG_S "rom=ROM or DIR"},
-  {"rr83", NULL, "like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=ROM or DIR"},
+  {"lsd", NULL, "generate ROM list for all ROMs using DATabase; " OPTION_LONG_S "rom" OPTARG_S "ROM or DIR"},
+  {"rrom", NULL, "rename ROMs in DIR to their internal names; " OPTION_LONG_S "rom" OPTARG_S "ROM or DIR"},
+  {"rr83", NULL, "like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom" OPTARG_S "ROM or DIR"},
   {"good", NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed and sorted\n"
               "into subdirs according to the DATabase (\"ROM manager\")"},
 /*

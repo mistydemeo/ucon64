@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.24 2003-02-28 12:15:50 noisyb Exp $
+ * $Id: gg.c,v 1.25 2003-02-28 12:42:14 noisyb Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -73,23 +73,23 @@ modified by 2001 - 2002 NoisyB (noisyb@gmx.net)
 
 const st_usage_t gg_usage[] = {
   {"gge", "CODE", "encode and display Game Genie code\n"
-                  "example: " OPTION_LONG_S "gge=CODE " OPTION_LONG_S "sms or " OPTION_LONG_S "gge=CODE " OPTION_LONG_S "gb\n"
-                  "CODE='AAAA:VV' or CODE='AAAA:VV:CC'\n"
-                  OPTION_LONG_S "gge=CODE " OPTION_LONG_S "gen\n"
-                  "CODE='AAAAAA:VVVV'\n"
-                  OPTION_LONG_S "gge=CODE " OPTION_LONG_S "nes\n"
-                  "CODE='AAAA:VV' or CODE='AAAA:VV:CC'\n"
-                  OPTION_LONG_S "gge=CODE " OPTION_LONG_S "snes\n"
-                  "CODE='AAAAAA:VV'"},
+                  "example: " OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "sms or " OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "gb\n"
+                  "CODE" OPTARG_S "'AAAA:VV' or CODE" OPTARG_S "'AAAA:VV:CC'\n"
+                  OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "gen\n"
+                  "CODE" OPTARG_S "'AAAAAA:VVVV'\n"
+                  OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "nes\n"
+                  "CODE" OPTARG_S "'AAAA:VV' or CODE" OPTARG_S "'AAAA:VV:CC'\n"
+                  OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "snes\n"
+                  "CODE" OPTARG_S "'AAAAAA:VV'"},
   {"ggd", "GG_CODE", "decode Game Genie code\n"
-                  "example: " OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "sms or " OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "gb\n"
-                  "GG_CODE='XXX-XXX' or GG_CODE='XXX-XXX-XXX'\n"
-                  OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "gen\n"
-                  "GG_CODE='XXXX-XXXX'\n"
-                  OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "nes\n"
-                  "GG_CODE='XXXXXX' or GG_CODE='XXXXXXXX'\n"
-                  OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "snes\n"
-                  "GG_CODE='XXXX-XXXX'"},
+                  "example: " OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "sms or " OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "gb\n"
+                  "GG_CODE" OPTARG_S "'XXX-XXX' or GG_CODE" OPTARG_S "'XXX-XXX-XXX'\n"
+                  OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "gen\n"
+                  "GG_CODE" OPTARG_S "'XXXX-XXXX'\n"
+                  OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "nes\n"
+                  "GG_CODE" OPTARG_S "'XXXXXX' or GG_CODE" OPTARG_S "'XXXXXXXX'\n"
+                  OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "snes\n"
+                  "GG_CODE" OPTARG_S "'XXXX-XXXX'"},
   {"gg", "GG_CODE", "apply Game Genie code (permanently)\n"
                    "example: like above but " OPTION_LONG_S "rom is required"},
   {NULL, NULL, NULL}

@@ -56,18 +56,15 @@ const st_usage_t n64_usage[] =
     {NULL, NULL, "1996 Nintendo http://www.nintendo.com"},
     {"n64", NULL, "force recognition"},
 #if 0   // unlike for SNES ROMs we can't make a mistake about this
-    "  " OPTION_LONG_S "int         force ROM is in interleaved format\n"
-    "  " OPTION_LONG_S "int2        force ROM is in interleaved format 2\n"
-    "  " OPTION_LONG_S "nint        force ROM is not in interleaved format\n"
+    {"int", NULL, "force ROM is in interleaved format"},
+    {"int2", NULL, "force ROM is in interleaved format 2"},
+    {"nint", NULL, "force ROM is not in interleaved format"},
 #endif
     {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
     {"v64", NULL, "convert to Doctor V64 (and compatibles/interleaved)"},
     {"z64", NULL, "convert to Z64 (Zip Drive/not interleaved)"},
-#ifdef TODO
-#warning TODO  --f      remove NTSC/PAL protection
-#endif // TODO
 #if 0
-    "TODO:  " OPTION_S "f      remove NTSC/PAL protection\n"
+    {"f", NULL, "remove NTSC/PAL protection"},
 #endif
     {"bot", "BOOTCODE", "add/extract BOOTCODE (4032 Bytes) to/from ROM;\n"
                         "extracts automatically if BOOTCODE does not exist"},
@@ -80,14 +77,8 @@ const st_usage_t n64_usage[] =
                        "works only for SMSROMs which are <= 4 Mb in size"},
     {"chk", NULL, "fix ROM checksum\n"
               "supports only 6101 and 6102 boot codes"},
-#ifdef TODO
-#warning TODO  --bios   enable backup in Doctor V64 BIOS
-#warning TODO  --gs     apply GameShark code (permanent)
-#endif // TODO
 #if 0
-    "TODO:  " OPTION_LONG_S "bios   enable backup in Doctor V64 BIOS; " OPTION_LONG_S "rom=BIOS\n"
-    "  " OPTION_S "p           pad ROM to full Mb\n"
-    "TODO:  " OPTION_LONG_S "gs     apply GameShark code (permanent); " OPTION_LONG_S "file=CODE\n"
+    {"bios", "BIOS", "enable backup in Doctor V64 BIOS"},
 #endif
     {NULL, NULL, NULL}
 };

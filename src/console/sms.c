@@ -40,20 +40,9 @@ const st_usage_t sms_usage[] =
     {NULL, NULL, "Sega Master System(II/III)/GameGear (Handheld)"},
     {NULL, NULL, "1986/19XX SEGA http://www.sega.com"},
     {"sms", NULL, "force recognition"},
-#if 0
-    "  " OPTION_LONG_S "hd          force ROM has header (+512 Bytes)\n"
-    "  " OPTION_LONG_S "nhd         force ROM has no header (MGD2/MGH/RAW)\n"
-    "TODO: show more detailed ROM info\n"
-#endif
     {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
     {"smd", NULL, "convert to Super Magic Drive/SMD (+512 Bytes)"},
     {"smds", NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"},
-#if 0
-    "TODO:  " OPTION_LONG_S "chk   fix ROM checksum\n"
-    "  " OPTION_LONG_S "gge         encode GameGenie code; " OPTION_LONG_S "rom=AAAA:VV or " OPTION_LONG_S "rom=AAAA:VV:CC\n"
-    "  " OPTION_LONG_S "ggd         decode GameGenie code; " OPTION_LONG_S "rom=XXX-XXX or " OPTION_LONG_S "rom=XXX-XXX-XXX\n"
-    "  " OPTION_LONG_S "gg          apply GameGenie code (permanent); " OPTION_LONG_S "file=CODE-CODE\n"
-#endif
     {NULL, NULL, NULL}
   };
 

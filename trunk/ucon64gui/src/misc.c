@@ -1152,12 +1152,6 @@ getLinks (char *filename, char *buffer)
   return (buffer);
 }
 
-char *
-url2cmd (char *cmd, char *url)
-{
-  return(cmd);
-}
-
 #if     defined __UNIX__ || defined __BEOS__
 static int stdin_tty = 1;                       // 1 => stdin is a tty, 0 => it's not
 static tty_t oldtty, newtty;

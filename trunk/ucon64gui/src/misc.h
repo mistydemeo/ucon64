@@ -177,6 +177,4 @@ int setProperty (char *filename, char *propname, char *value); //set propname wi
 // extract only the links from ugly HTML pages for wget -m --input-file=FILE
 char *getLinks (char *filename, char *buffer);
 
-char *url2cmd (char *cmd, char *url);  //convert an url into a commandline
-
 #endif // #ifndef MISC_H

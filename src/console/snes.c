@@ -1000,16 +1000,17 @@ snes_ufo (st_rominfo_t *rominfo)
   reset_header (&header);
   header.multi = snes_split ? 0x40 : 0; // TODO
   memcpy (header.id, "SUPERUFO", 8);
+  header.isrom = 0x01;
   header.size = size / MBIT; // Should this byte match the padded ROM size?
   header.banktype = snes_hirom ? 0 : 1;
 
-  if (snes_sramsize == 128 * 1024)
+  if (snes_sramsize > 32 * 1024)
     header.sram_size = 8;
-  else if (snes_sramsize == 32 * 1024)
+  else if (snes_sramsize > 8 * 1024)   // 64Kb < size <= 256Kb
     header.sram_size = 3;
-  else if (snes_sramsize == 8 * 1024)
+  else if (snes_sramsize > 2 * 1024)   // 16Kb < size <= 64Kb
     header.sram_size = 2;
-  else if (snes_sramsize == 2 * 1024)
+  else if (snes_sramsize > 0)          // 1 - 16Kb
     header.sram_size = 1;
   // header.sram_size is already ok for snes_sramsize == 0
 
@@ -1038,14 +1039,14 @@ snes_ufo (st_rominfo_t *rominfo)
       if (snes_sramsize == 0)
         {
           // header.sram_a15 = 0; already ok
-          header.sram_a20_a21 = 2;
-          // header.sram_a22_a23 = 0; already ok
+          // header.sram_a20_a21 = 0; already ok
+          header.sram_a22_a23 = 2;
         }
       else // cartridge contains SRAM
         {
-          header.sram_a15 = 0x0c; // 3 if the game is protected
-          header.sram_a20_a21 = 2;
-          // header.sram_a22_a23 = 0; already ok
+          // header.sram_a15 = 0x00; // already ok
+          header.sram_a20_a21 = 0x0c;  // Try 3 if game gives protection message
+          header.sram_a22_a23 = 0x02;
           // Tales of Phantasia (J) & Dai Kaiju Monogatari 2 (J): 0 0x0e 0
         }
 
@@ -1095,23 +1096,25 @@ snes_ufo (st_rominfo_t *rominfo)
           if (snes_header.rom_type == 3 || snes_header.rom_type == 4 ||
               snes_header.rom_type == 5 || snes_header.rom_type == 0xf6)
             {
-              header.sram_size = 1;     // TODO: verify this
-              header.sram_a15 = 0x0c;   // TODO: verify this
-              // header.sram_a20_a21 = 0; already ok
-              header.sram_a22_a23 = 3;
+              // header.sram_size = 0;     // already OK
+              header.sram_a15 = 0x01;
+              header.sram_a20_a21 = 0x0c;
+              // header.sram_a22_a23 = 0;
+              header.sram_type = 0x03;    // type=skip
             }
           else // no SRAM & doesn't use a DSP chip
             {
-              header.sram_a15 = 0x0c;   // TODO: verify this
-              header.sram_a20_a21 = 2;
-              // header.sram_a22_a23 = 0; already ok
+              // header.sram_a15 = 0x00;  // already ok
+              // header.sram_a20_a21 = 0x00;  // already ok
+              header.sram_a22_a23 = 0x02;
             }
         }
       else // cartridge contains SRAM
         {
-          header.sram_a15 = 0x0f;
-          header.sram_a20_a21 = 3;
-          header.sram_a22_a23 = 3;
+          header.sram_a15 = 2;  // may need to try 1 if game gives protection error
+          header.sram_a20_a21 = 0x0f;
+          header.sram_a22_a23 = 0x03;
+          header.sram_type = 3;  // type=skip
         }
 
       q_fwrite (&header, 0, UFO_HEADER_LEN, dest_name, "wb");

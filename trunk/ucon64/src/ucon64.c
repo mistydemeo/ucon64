@@ -1105,7 +1105,8 @@ int ucon64_nfo(struct ucon64_ *rom)
 if(rom->intro)printf("Intro/Trainer: Maybe, %ld Bytes\n",rom->intro);
 
 //  if(!rom->buheader_len)printf("Backup Unit Header: No\n");
-//  else if(rom->buheader_len)printf("Backup Unit Header: Yes, %ld Bytes\n",rom->buheader_len);
+//  else 
+if(rom->buheader_len)printf("Backup Unit Header: Yes, %ld Bytes (use -nhd to override)\n",rom->buheader_len);
 
 //  if(!rom->splitted[0])printf("Splitted: No\n");
 //  else 
@@ -1115,15 +1116,19 @@ if(rom->splitted[0])printf("Splitted: Yes, %d parts (Note: for most options the 
 
   if(rom->has_internal_crc)
   {
-    printf("Checksum: %s, %04lx %s= %04lx\n",
-           (rom->current_internal_crc == rom->internal_crc) ? "ok" : "bad",
+//TODO rom->current_internal_crc_len!!!!
+    printf("Checksum: %s, %04lx (calculated) %s= %04lx (internal)\n",
+           (rom->current_internal_crc == rom->internal_crc) ? "ok" : "bad (use -chk to fix)",
            rom->current_internal_crc,
-           (rom->current_internal_crc == rom->internal_crc) ? "" : "!",
+           (rom->current_internal_crc == rom->internal_crc) ? "=" : "!",
            rom->internal_crc);
+/*nb: this would work only for snes, not for n64, pce, nes, gb and gba
     printf("Inverse checksum: %s, %04lx + %04lx = %04lx %s\n",
            (rom->current_internal_crc + rom->internal_inverse_crc == 0xffff) ? "ok" : "bad",
            rom->current_internal_crc, rom->internal_inverse_crc, rom->current_internal_crc + rom->internal_inverse_crc,
            (rom->current_internal_crc + rom->internal_inverse_crc == 0xffff) ? "" : "~0xffff");
+*/
+    printf("Inverse checksum: %04lx\n",rom->internal_inverse_crc);
   }
   printf("Checksum (CRC32): %08lx\n",rom->current_crc32);
 

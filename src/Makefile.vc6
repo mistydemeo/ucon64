@@ -31,6 +31,7 @@ TARGETS=$(TARGETS) backup/libcd64/cd64.lib
 
 OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
         misc/chksum.obj misc/getopt.obj misc/misc.obj misc/parallel.obj \
+        misc/dlopen.obj \
         patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj \
         patch/pal4u.obj patch/ppf.obj patch/xps.obj \
         console/dc.obj console/gb.obj console/gba.obj console/genesis.obj \

@@ -29,7 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <getopt.h>                             // struct option
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -61,6 +60,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "archive.h"
 #endif
 #include "misc.h"
+#include "getopt.h"                             // struct option
 
 #ifdef  __CYGWIN__                              // under Cygwin (gcc for Windows) we
 #define USE_POLL                                //  need poll() for kbhit(). poll()

@@ -469,7 +469,7 @@ main (int argc, char **argv)
 
   ucon64_flush (&rom);
 
-  ucon64.show_nfo = UCON64_YES;
+  ucon64.show_nfo = TRUE;
   while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
       for (x = 0; options2[x].option != 0 && options2[x].console != 0; x++)
@@ -478,10 +478,10 @@ main (int argc, char **argv)
             // a specific console takes precedence over unknown
             if (options2[x].console != UCON64_UNKNOWN)
               ucon64.console = options2[x].console;
-            // no takes precedence over yes
-            if (options2[x].show_nfo == UCON64_NO)
-              ucon64.show_nfo = UCON64_NO;
-//            ucon64.show_nfo = ((options2[x].flags & WF_SHOW_NFO) ? TRUE : FALSE);
+            // FALSE takes precedence over TRUE
+            if ((options2[x].flags & WF_SHOW_NFO) == 0)
+              ucon64.show_nfo = FALSE;
+            break;
           }
 
 #include "switches.c"
@@ -546,11 +546,9 @@ int
 ucon64_libdiscmage (void)
 {
   uint32_t version;
-#if     defined DLOPEN || defined DJGPP
-  char buf[MAXBUFSIZE];
-#endif
-
 #ifdef  DLOPEN
+  char buf[MAXBUFSIZE];
+
   strcpy (ucon64.discmage_path, get_property (ucon64.configfile, "discmage_path", buf, ""));
 #ifdef  __CYGWIN__
   strcpy (ucon64.discmage_path, cygwin_fix (ucon64.discmage_path));
@@ -609,13 +607,10 @@ ucon64_libdiscmage (void)
       variable.
     */
     extern char djimport_path[FILENAME_MAX];
-    char *p;
+    char *p = dirname (ucon64.argv[0]);
 
-    strcpy (buf, ucon64.argv[0]);
-    change_mem (buf, strlen (buf), "/", 1, 0, 0, FILE_SEPARATOR_S, 1, 0);
-    if ((p = strrchr (buf, FILE_SEPARATOR)))
-      *p = 0;
-    sprintf (djimport_path, "%s"FILE_SEPARATOR_S"%s", buf, "discmage.dxe");
+    sprintf (djimport_path, "%s"FILE_SEPARATOR_S"%s", p, "discmage.dxe");
+    free (p);
   }
 #endif // DJGPP
   version = dm_get_version ();

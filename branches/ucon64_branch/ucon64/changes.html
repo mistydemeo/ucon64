@@ -138,7 +138,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - updated (SNES) fixed -f (NTSC/PAL fix) (by dbjh)<br>
 - uCON64 will recognize *ANY* kind of ROM or Console System via DB now...<br>
   give it a Atari2600 ROM and it will just recognize it :) (by NoisyB)<br>
-- updated the internal DB; it can recognize now 12387 different ROMs (by NoisyB)<br>
+- updated the internal DB; it can recognize 12387 different ROMs (by NoisyB)<br>
 - updated (SNES) fixed -s (split ROM) (by dbjh)<br>
 - updated (Genesis) fixed -s (by NoisyB)<br>
 - updated (all) fixed -swc & -ins (and others) for files with a size a
@@ -161,7 +161,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - added (Genesis) -xsmd send/receive ROM to/from Super Magic Drive/SMD; --file=PORT (by NoisyB)<br>
 - added (Genesis) -xsmds send/receive SRAM to/from Super Magic Drive/SMD;
   --file=PORT (by NoisyB)<br>
-- added support for CD based consoles again; uCON64 uses now cdrdao as burn
+- added support for CD based consoles again; uCON64 now uses cdrdao as burn
   engine (by NoisyB)<br>
 - added Dreamcast, PSX (one), PS2, Real3DO, CD-i, CD32 and Saturn support (by NoisyB)<br>
 - added (Genesis) -smds convert emulator (*.srm) SRAM to Super Magic Drive/SMD (by NoisyB)<br>
@@ -227,7 +227,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - added (NES) -mapr=NAME specify board name or mapper number for conversion options (by dbjh)<br>
 - added (NES) -dumpinfo use dumper info when converting to UNIF (by dbjh)<br>
 <!-- beta3 -->
-- updated (NES) UNIF code works also on big endian machines now (by dbjh)<br>
+- updated (NES) UNIF code works also on big endian machines (by dbjh)<br>
 - updated (GBA) changed meaning of -xfalc. In order to dump N megabits of a
   cartridge specifying -xfalc=N &#60;filename&#62; is enough (by dbjh)<br>
 - updated (NES) fixed some minor format conversion problems (by dbjh)<br>
@@ -241,7 +241,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
   if switch -nbak is active, -smd/-mgd if already in SMD/MGD format, -lsv) (by dbjh)<br>
 - added --padn=N pad ROM to N Bytes (put Bytes with value 0x00 after end) (by dbjh)<br>
 <!-- beta4 -->
-- updated (NES) FDS images are now recognized without -fdsl (by dbjh)<br>
+- updated (NES) FDS images are recognized without -fdsl (by dbjh)<br>
 - added (GBA) -xfalmulti send multiple ROMs to Flash Advance Linker (by dbjh)<br>
 - updated (GBA) changed -multi so that it takes a size argument (by dbjh)<br>
 - removed (GBA) -multi{1,2,3}, -multi can be used instead (by dbjh)<br>
@@ -250,8 +250,8 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
   archive will be looked at. Use -ls{v} to see info about all files in the zip archive<br>
 - added (SNES) NSRT header support (by dbjh)<br>
 - updated (SNES) fixed an SWC problem for HiROM games without SRAM (by dbjh)<br>
-- updated (SNES) -k now also cracks Killer Instinct (by dbjh)<br>
-- updated (SNES) -smc now writes a correct SMC header (by dbjh)<br>
+- updated (SNES) -k also cracks Killer Instinct (by dbjh)<br>
+- updated (SNES) -smc writes a correct SMC header (by dbjh)<br>
 - added (SNES) -ctrl{2} specify type of controller in port 1/2 for emu when
   converting (by dbjh)<br>
 - updated (Genesis) replaced Charles MacDonald's SMD code with our own (by dbjh)<br>
@@ -260,7 +260,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - updated (SNES) replaced Cowering's BS detection code with John Weidman's (by dbjh)<br>
 <!-- beta5 -->
 - updated (all) fixed two bugs in IPS creation code (by dbjh)<br>
-- updated (all) -mki now generates RLE compressed IPS files (by dbjh)<br>
+- updated (all) -mki generates RLE compressed IPS files (by dbjh)<br>
 - updated (SNES) fixed split file detection for SWC and FIG dumps (by dbjh)<br>
 - updated (Genesis) fixed -s for RAW images (by dbjh)<br>
 - updated (SNES) added crack for Donkey Kong Country, Diddy's Kong Quest &
@@ -274,7 +274,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - updated (SNES) added crack for at least the following games: Breath of Fire II,
   Kirby's Dream Course (many thanks to John Weidman), Lufia II - Rise of the
   Sinistrals and Earthbound (thanks to CL) (by dbjh)<br>
-- updated (SNES) crack for Mega Man X should work (better) now (by dbjh)<br>
+- updated (SNES) crack for Mega Man X should work (better) (by dbjh)<br>
 - updated (SNES) added NTSC/PAL fix for at least the following games:
   Final Fight Guy, Gokujyou Parodius, Kirby No Kira Kizzu, Robotrek and
   Seiken Densetsu 3 (by dbjh)<br>
@@ -282,8 +282,8 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
   Seiken Densetsu 2 and Secret of Mana (by dbjh, thanks to John Weidman)<br>
 - updated (all) fixed problem with reading environment variables under DOS and
   Windows (by dbjh)<br>
-- updated (all) environment variables now take precedence over configuration
-  file variables (by dbjh)<br>
+- updated (all) environment variables take precedence over configuration file
+  variables (by dbjh)<br>
 - updated (SNES) fixed some problems with joining GD3 files (by dbjh)<br>
 - added (SNES) -xgd3 send ROM to Game Doctor SF3(SF6/SF7); --file=PORT
   (by John Weidman and dbjh)<br>
@@ -293,17 +293,17 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - removed (SNES) -gdf (fix Game Doctor savegame problems) because -gd3 already
   provides this functionality (by dbjh)<br>
 - updated (SNES) fixed some -xgd3 problems, uppercase filenames sent to unit,
-  buffer data now correct for all files, transfer file size fixed (by John)<br>
+  buffer data correct for all files, transfer file size fixed (by John)<br>
 - updated (SNES) checksums and deinterleaves for HiROM 24 Mbit Game Doctor
-  format should now work (by John)<br>
+  format should work (by John)<br>
 - added (SNES) -xswc2 send ROM to Super Wild Card and enable Real Time Save
   mode (by dbjh)<br>
 - updated (SNES) added NTSC/PAL fix for Live-a-Live (by dbjh)<br>
 - updated (all) added full wildcard support ("ucon64 -fig *.swc"). Don't forget
   to read the FAQ (by dbjh)<br>
 - added (all) -q be quiet (don't show ROM info) (by dbjh)<br>
-- updated (all) uCON64 now handles multiple options on the same command line
-  (by dbjh)<br>
+- updated (all) uCON64 handles multiple options on the same command line (by
+  dbjh)<br>
 - added (SNES) --ssize=SIZE specify split part size in Mbit (not for Game
   Doctor SF3) (by dbjh)<br>
 <!-- beta 7 -->
@@ -316,20 +316,20 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
   NoisyB)<br>
 - updated (all) improved support for zip files that contain more than one file
   (by dbjh)<br>
-- updated (SNES) added NTSC/PAL fix and crack for Mario no Super Picross
-  (by dbjh, thanks to John)<br>
+- updated (SNES) added NTSC/PAL fix and crack for Mario no Super Picross (by
+  dbjh, thanks to John)<br>
 - renamed (N64) --sram to --lsram (by NoisyB)<br>
 - replaced --file with option arguments for the following options: --strip,
   --find, -c, --cs, --dbs, -b, -i, --mki, -a, --mka, --na, --ppf, --mkppf,
   --nppf, --idppf, --crp, -n, --bot, --lsram, --usms, --n2, --n2gb, --b0, --b1,
   --sam, --bios and --dumpinfo (by NoisyB)<br>
-- fixed (PSX) now PPF code works correctly and generates correct patches on
+- fixed (PSX) PPF code works correctly and generates correct patches on
   big-endian machines (by dbjh)<br>
 - added (patch) --patch option to specify the patch file for APS, IPS, BSL
   and PPF (by NoisyB)<br>
 - updated (SNES) added NTSC/PAL fix for Dual Orb 2 (thanks to John), Dr. Mario,
   Dragon - The Bruce Lee Story (U) and Wolfenstein 3D (U) (by dbjh)<br>
-- fixed (N64) now APS code works correctly and generates correct patches on
+- fixed (N64) APS code works correctly and generates correct patches on
   big-endian machines (by dbjh)<br>
 - added (all) -o specify output directory. Note that now uCON64 by default
   writes its output files to the current directory (by NoisyB and dbjh)<br>
@@ -343,7 +343,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   ROM with the option -chk, before the checksum was really fixed (by dbjh)<br>
 - added (all) --rename (by NoisyB and dbjh)<br>
 - added (all) --scan like: GoodXXXX scan ... (by NoisyB)<br>
-- added (SNES) uCON64 is now able to use an "addendum file" for the options -k
+- added (SNES) uCON64 is able to use an "addendum file" for the options -k
   (snescopy.txt), -f (snesntsc.txt or snespal.txt) and -l (snesslow.txt). You
   can add new search patterns to those files if the latest binary doesn't
   support them yet. See the FAQ for a more elaborate explanation (by dbjh)<br>
@@ -356,10 +356,10 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   (by dbjh)<br>
 - added support for the I/O port driver inpout32.dll to the Windows ports. See
   the FAQ for more information (by dbjh)<br>
-- uCON64 can now also be compiled with g++; configure with "CC=g++ ./configure"
+- uCON64 can also be compiled with g++; configure with "CC=g++ ./configure"
   (by dbjh)<br>
-- updated (SNES) uCON64 now uses one maker/publisher list for all SNES games
-  (by dbjh, thanks to FluBBa for the help)<br>
+- updated (SNES) uCON64 uses one maker/publisher list for all SNES games (by
+  dbjh, thanks to FluBBa for the help)<br>
 - updated (GB & GBA) fixed maker info (by dbjh, thanks to FluBBa for the info)<br>
 - updated (SNES, GB & GBA) fixed huge mistake in the way the Nintendo publisher
   list was used (resulting in incorrect maker info) (by dbjh)<br>
@@ -372,7 +372,7 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 <!-- beta 8 -->
 - updated (all) fixed problems with -rename & -rrom for files without a suffix
   (by dbjh)<br>
-- updated (all) links (including symbolic links) are now handled correctly for
+- updated (all) links (including symbolic links) are handled correctly for
   -rename & -rrom (by dbjh)<br>
 - added support for I/O port driver io.dll to the Windows ports. See the FAQ
   for more information (by dbjh)<br>
@@ -386,8 +386,8 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (all) fixed problem with -rename when output directory is on another
   file system (M$ speak: drive) (by dbjh)<br>
 - added MinGW build support (including libdiscmage) (by dbjh)<br>
-- changed name of two property variables: configdir is now named
-  ucon64_configdir and datdir is now named ucon64_datdir (by dbjh)<br>
+- changed name of two property variables: now configdir is named
+  ucon64_configdir and datdir is named ucon64_datdir (by dbjh)<br>
 - updated (SNES) changed checksum calculation function so that it is stricter
   (by dbjh, thanks to Nach)<br>
 - updated (SNES) added more verbose BS info (by dbjh, based on info of Derrick
@@ -400,17 +400,17 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - added support for GameCube images to libdiscmage (by NoisyB, thanks to
   gc-nfo.com)<br>
 - updated (SNES) improved detection of interleaved ROMs (by dbjh)<br>
-- updated (SNES) -smc, -swc, -fig, -mgd & -gd3 (if it's a LoROM dump) now
+- updated (SNES) -smc, -swc, -fig, -mgd & -gd3 (if it's a LoROM dump)
   automatically deinterleave the ROM data if the ROM is detected as interleaved
   (by dbjh)<br>
-- updated (SNES) -gd3 can now convert Tales of Phantasia and Dai Kaiju
-  Monogatari 2 (by dbjh)<br>
-- updated (SNES) interleaved extended HiROM dumps now are handled correctly
+- updated (SNES) -gd3 can convert Tales of Phantasia and Dai Kaiju Monogatari 2
   (by dbjh)<br>
-- updated (SNES) uCON64 now follows the "uCONRST standard" for calculating the
+- updated (SNES) interleaved extended HiROM dumps are handled correctly (by
+  dbjh)<br>
+- updated (SNES) uCON64 follows the "uCONRST standard" for calculating the
   "search CRC32" of BS dumps (by dbjh)<br>
-- updated (all) now both the search CRC32 and the "data CRC32" are displayed
-  if they differ (by dbjh)<br>
+- updated (all) both the search CRC32 and the "data CRC32" are displayed if
+  they differ (by dbjh)<br>
 - updated (SNES) applied anomie's GD patch which solved a problem with one-part
   split files (by dbjh)<br>
 - updated (SNES) replaced John Weidman's BS detection code with Nach's (by
@@ -418,9 +418,14 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (SNES) uCON64 now recognises a complete GoodSNES 0.999.5 set (by
   JohnDie and dbjh)<br>
 - added (SNES) -dmirr strip mirrored block from end of ROM (by dbjh)<br>
-- added (SNES) support for native Super UFO file format (by jw and dbjh) Use
+- added (SNES) support for native Super UFO file format (by John and dbjh) Use
   -ufo to convert a file to Super UFO format, use -s to split the resulting
   file (required for HiROM games)<br>
+- updated (SMS) -mgd is recognised again, -sms won't crash uCON64 anymore and
+  -smds calls the SMS function when -sms is specified (by dbjh)<br>
+- updated (SMS) -sms in no longer required for SMD files, they are
+  automatically detected (by dbjh)<br>
+- updated (SNES) fixed -b (apply Baseline patch) (by dbjh)<br>
 <br>
 <br>
 <br>

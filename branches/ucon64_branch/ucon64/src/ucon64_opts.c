@@ -786,7 +786,7 @@ ucon64_options (int c, const char *optarg)
                                strlen (optarg), '?')) != -1)
         {
           ucon64_fhexdump (ucon64.rom, value, strlen (optarg) + 16);
-          fputc ('\n', stdout);                  // + 16 gives a bit of context
+          fputc ('\n', stdout);                 // + 16 gives a bit of context
           value += strlen (optarg);
         }
       break;

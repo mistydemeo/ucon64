@@ -270,7 +270,6 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    Now read the relevant section for the compiler you are using.<br>
 <br>
    <b>GCC</b> (including DJGPP and Cygwin)<br>
-<br>
    If you have compiled uCON64 in the same directory before, first type:<br>
    &nbsp;&nbsp; make clean<br>
 <br>
@@ -300,7 +299,6 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    instructions.<br>
 <br>
    <b>Visual C++</b><br>
-<br>
    Start a command shell or "prompt" and go to the correct directory. If you
    have compiled uCON64 in the same directory before, first type:<br>
    &nbsp;&nbsp; nmake -f Makefile.vc6 clean<br>
@@ -317,44 +315,82 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
 <br>
 <p>
 <a name="4"><b>Q4</b>: How do I install uCON64?</a><br>
-<b>A</b>: You already did (for Unix and BeOS) if you followed the directions in
-   the previous answer (you downloaded the source package). If you downloaded
-   the binary package you can ignore the previous question. If you do not use
-   WinDOS (DOS under Windows or Windows in general) run install.sh (Unix) or
-   install_beos.sh (BeOS) and edit $HOME/.ucon64rc. If you use WinDOS you may
-   want to copy ucon64.exe to a directory in your PATH and maybe edit
-   ucon64.cfg (DOS version) or .ucon64rc (Win32 version). uCON64 will create a
-   configuration file if it cannot find one. If you use DOS or Windows&nbsp;9x
-   and do not want uCON64 to create ucon64.cfg or .ucon64rc files all over the
-   place (current directories) see <a href="#25">question 25</a>.<br>
-   You might also want to make use of DAT files. See
-   <a href="#36">question 36</a> for more information.<br>
+<b>A</b>: It depends on what operating system you use. First read the
+   information specific for your operating system. Then continue to the section
+   <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
+<br>
+   <b>Unix (GNU/Linux, FreeBSD, Solaris) &amp; BeOS</b><br>
+   Start a command line shell like Bash. Then extract the binary package.
+   To extract or unpack a package in .tar.gz format use a command line like
+   this:<br>
+   &nbsp;&nbsp; tar xvzf ucon64-1.9.8-1-linux-bin.tar.gz<br>
+   Old versions of tar might not support the option z. In that case use a
+   command line like:<br>
+   &nbsp;&nbsp; gunzip -c ucon64-1.9.8-1-linux-bin.tar.gz | tar xvf -<br>
+   To unzip a .zip file use a command line like this:<br>
+   &nbsp;&nbsp; unzip ucon64-1.9.8-1-beos-bin.zip<br>
+   You should replace the file name with the name of the file you downloaded
+   for your operating system. Unpacking or extracting a package does not have
+   to be done on the command line. You could also use a program with a GUI
+   (Graphical User Interface) like KDE's ark or a similar program.<br>
+   After you have extracted the package install uCON64 by running the install
+   script. If you do not have root access on Unix, copy the uCON64 executable
+   to a directory in your PATH. If you do have root access, run the shell
+   script install.sh on Unix or install_beos.sh on BeOS. So, for Unix do
+   something like this:<br>
+   &nbsp;&nbsp; cd ucon64-1.9.8-1-linux-bin<br>
+   &nbsp;&nbsp; ./install.sh<br>
 <br>
    For copier I/O BeOS users will need Caz's driver inside ioport.zip or
    available at <a href="http://www.infernal.currantbun.com" target="_blank">
-   http://www.infernal.currantbun.com</a>.<br>
-   Windows&nbsp;NT/2000/XP users might also need a driver (only necessary for
-   copier I/O). You could use GiveIO, UserPort, io.dll or inpout32.dll. At
-   <a href="http://www.devrs.com/gba/files/mbv2faqs.php" target="_blank">
-   http://www.devrs.com/gba/files/mbv2faqs.php</a> you can find links to GiveIO
-   and UserPort. You can find io.dll in a file named io.zip at
+   http://www.infernal.currantbun.com</a>. You only need this driver if you
+   will use uCON64 for communication with a backup unit. After you have decided
+   whether to download ioport.zip continue on BeOS with:<br>
+   &nbsp;&nbsp; cd ucon64-1.9.8-1-beos-bin<br>
+   &nbsp;&nbsp; ./install_beos.sh<br>
+   After the last command a dialog window will come up. Simply follow the
+   instructions.<br>
+<br>
+   Now continue to the section
+   <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
+<br>
+   <b>Windows (95/98/ME/NT/2000/XP) &amp; DOS</b><br>
+   On Windows, unpack the package with a program like
+   <a href="http://www.winzip.com/" target="_blank">WinZip</a>,
+   <a href="http://www.rarlab.com/" target="_blank">WinRAR</a> or
+   <a href="http://www.powerarchiver.com/" target="_blank">Power Archiver</a>.
+   On plain DOS (DOS without Windows) use a program like
+   <a href="http://www.pkware.com/" target="_blank">PKUNZIP</a>.<br>
+   We recommend to extract the package to a directory (or folder) of its own.
+   The zip file contains a directory, but you need not use that directory.<br>
+   Windows&nbsp;NT/2000/XP users might need a driver for copier I/O. You do not
+   need a driver if you use Windows&nbsp;95, 98 or ME. A driver is also not needed
+   when you will not use uCON64 to communicate with a backup unit.<br>
+   You could use a driver like GiveIO, UserPort, io.dll or inpout32.dll. At
+   <a href="http://www.devrs.com/gba/files/mbv2faqs.php#WinXP" target="_blank">
+   http://www.devrs.com/gba/files/mbv2faqs.php#WinXP</a> you can find links to
+   GiveIO and UserPort.
+<!--
+I admit that it's a bit strange to include this link, but UserPort doesn't seem
+to have an official homepage. GiveIO should be available from the site of
+Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
+-->
+   You can find io.dll in a file named io.zip at
    <a href="http://www.geekhideout.com/iodll.shtml" target="_blank">
    http://www.geekhideout.com/iodll.shtml</a> and you can find inpout32.dll in
-   a file named parport.zip at
-   <a href="http://www.logix4u.cjb.net" target="_blank">
-   http://www.logix4u.cjb.net</a> or
-   <a href="http://www.geocities.com/logix4u/" target="_blank">
-   http://www.geocities.com/logix4u/</a>. GiveIO is plainly horrible to
-   configure. We recommend UserPort, io.dll and inpout32.dll. They are also
-   included with the binary release. With GiveIO sending ROMs seems to go
-   faster than with UserPort, but UserPort is much easier to use. To install
-   io.dll or inpout32.dll, put it in uCON64's configuration directory. Use the
-   option -version to see which directory that is. You can change the directory
-   by editing the configuration file or by setting an environment variable with
-   the name ucon64_configdir. Note however, that although inpout32.dll is even
-   easier to use than UserPort the transfer speed is much lower (about half as
-   fast compared to the transfer speed in combination with UserPort). io.dll
-   does not have this limitation, but its source code is not freely available.
+   a file named inpout32_source_and_bins.zip at
+   <a href="http://www.logix4u.net" target="_blank">http://www.logix4u.net</a>.
+   GiveIO is plainly horrible to configure. We recommend UserPort, io.dll and
+   inpout32.dll. They are also included with the binary release. With GiveIO
+   sending ROMs seems to go a bit faster than with UserPort, but UserPort is
+   much easier to use. To install io.dll or inpout32.dll, put it in uCON64's
+   configuration directory. See the section
+   <a href="#configbin">"How to configure the uCON64 executable"</a> for more
+   information about the configuration directory.<br>
+   Note that although inpout32.dll is even easier to use than UserPort, the
+   transfer speed is much lower (about half as fast compared to the transfer
+   speed in combination with UserPort). io.dll does not have this limitation,
+   but its source code is not freely available.<br>
    uCON64 will display a message if it finds io.dll or inpout32.dll before
    communicating with a copier. It displays this message before it displays
    file information, so you might want to use the command line switch -q. Only
@@ -363,9 +399,120 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    uCON64 will first try to load io.dll. If that fails it will try to load
    inpout32.dll.<br>
    It <i>is</i> possible to use the DOS version of uCON64 as a transfer tool
-   under Windows&nbsp;XP without GiveIO or UserPort. We have had reports from
-   people who were able to send and receive ROMs under Windows&nbsp;XP as a
-   regular user (no Administrator rights and not "Power Users").<br>
+   under Windows&nbsp;XP without GiveIO or UserPort. We have received reports
+   from people who were able to send and receive ROMs under Windows&nbsp;XP as
+   a regular user (no Administrator rights and not "Power Users").<br>
+<br>
+   The command line environment<br>
+   uCON64 is a command line program and is usually started from a program like
+   command.com (Windows&nbsp;9x/ME) or cmd.exe (Windows&nbsp;NT/2000/XP). You
+   can start command.com or cmd.exe by choosing the option "Run..." from the
+   start menu. You have to type the word command.com or cmd.exe yourself.
+   Command.com and cmd.exe are command line interpreters. That means that they
+   will try to interpret any command you type followed by a press on the enter
+   or return key. When you type a command, the command line interpreter will
+   first look in the current directory and if it cannot find a program file
+   with the correct name it will search the so-called "path". This means that
+   the program file of uCON64 (ucon64.exe) must either be present in the
+   current directory or in one of the directories of your path. It is really
+   comfortable to have ucon64.exe present in your path, because you can simply
+   use the name ucon64 from any directory without first having to copy
+   ucon64.exe to that directory.<br>
+   The path is defined by the environment variable PATH. You can check the
+   current value of that variable with the command:<br>
+   &nbsp;&nbsp; echo %PATH%<br>
+   You could copy uCON64 to one of those directories. However, we recommend
+   putting ucon64.exe in a directory of its own (on Windows). So, you should
+   modify the value of PATH. On Windows&nbsp;9x/ME you should do that in the
+   following way. Edit the file c:\autoexec.bat and add a line like:<br>
+   &nbsp;&nbsp; set PATH=%PATH%;c:\ucon64<br>
+   Replace c:\ucon64 with the drive and directory where you extracted the
+   uCON64 files to. Save the modified c:\autoexec.bat and reboot.
+   On Windows&nbsp;XP (NT/2000?) you should press the buttons or icons start
+   -&#62; Control Panel -&#62; System -&#62; Advanced -&#62; Environment
+   Variables and edit the value of path in the section System variables or
+   else in the section User variables.
+   After you have made your changes (and have rebooted your PC if you are using
+   Windows&nbsp;9x/ME or DOS) check the value of PATH again. It should now list
+   the directory you just added.<br>
+<br>
+<a name="configbin"><b>How to configure the uCON64 executable</b></a><br>
+   First run uCON64 once. Use a command like:<br>
+   &nbsp;&nbsp; ucon64 -version<br>
+   If you have not run uCON64 before you should see a message that it created
+   a file with a name like ucon64.cfg (DOS version) or .ucon64rc (all other
+   versions). Search for the line that starts with "configuration file". It
+   should say "present" between the parentheses. The file name after the colon
+   is the name of the configuration file. The configuration file may contain
+   names of variables that influence the behaviour of uCON64. Here follows a
+   table of the variable names uCON64 recognises:<br>
+<br>
+<table border="1">
+  <tr>
+    <th><tt>variable name<tt></th>
+    <th><tt>meaning</tt></th>
+  </tr>
+  <tr>
+    <td><tt>version</tt></td>
+    <td><tt>version of configuration file</tt></td>
+  </tr>
+  <tr>
+    <td><tt>backups</tt></td>
+    <td><tt>uCON64 will create backups of the files it modifies if it is 1</tt></td>
+  </tr>
+  <tr>
+    <td><tt>ansi_color</tt></td>
+    <td><tt>uCON64 will use color in its display output if it is 1</tt></td>
+  </tr>
+  <tr>
+    <td><tt>parport</tt></td>
+    <td><tt>hardware address of parallel port</tt></td>
+  </tr>
+  <tr>
+    <td><tt>discmage_path</tt></td>
+    <td><tt>full path of discmage DLL</tt></td>
+  </tr>
+  <tr>
+    <td><tt>ucon64_configdir</tt></td>
+    <td><tt>name of configuration directory of uCON64</tt></td>
+  </tr>
+  <tr>
+    <td><tt>ucon64_datdir</tt></td>
+    <td><tt>name of DAT file directory of uCON64</tt></td>
+  </tr>
+  <tr>
+    <td><tt>emulate_&#60;console&#62;</tt></td>
+    <td><tt>command line to use to start emulator for &#60;console&#62;</tt></td>
+  </tr>
+  <tr>
+    <td><tt>emulate_&#60;CRC32&#62;</tt></td>
+    <td><tt>command line to use to start emulator for file with that CRC32</tt></td>
+  </tr>
+  <tr>
+    <td><tt>emulate_0x&#60;CRC32&#62;</tt></td>
+    <td><tt>command line to use to start emulator for file with that CRC32</tt></td>
+  </tr>
+</table><br>
+   Each of these variables can also be set in the command line environment. If
+   they are they take precedence over the values set in the configuration file.
+   For example, if you set the environment variable ansi_color to 0 while the
+   configuration file sets it to 1 uCON64 will not use color. In command.com or
+   cmd.exe you can set an environment variable with the command "set", in Bash
+   you should do it with the command "export". For example:<br>
+   &nbsp;&nbsp; export ansi_color=0<br>
+   Some variables can be overruled with command line switches. For example, to
+   disable the use of color even if both the configuration file and the
+   environment have the variable ansi_color set to 1, use the switch -ncol:<br>
+   &nbsp;&nbsp; ucon64 "Rock Fall (PD).zip" -ncol<br>
+   The variable ucon64_configdir is only really important for the Windows
+   versions of uCON64. To install the I/O port driver io.dll or inpout32.dll
+   place it (or both) in the directory that uCON64 lists as its configuration
+   directory.<br>
+   If you use DOS or Windows&nbsp;9x and do not want uCON64 to create
+   ucon64.cfg or .ucon64rc files all over the place (current directories) see
+   <a href="#25">question 25</a>.<br>
+   You might also want to make use of DAT files. See
+   <a href="#36">question 36</a> for more information.<br>
 <br>
 <p>
 <a name="5"><b>Q5</b>: Sometimes my terminal seems to be locked after "ucon64
@@ -659,18 +806,18 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    Windows&nbsp;9x (command.com)?</a><br>
 <b>A</b>: uCON64 needs to know where it can find the configuration file or a
    directory where it can create one. It checks the environment for a variable
-   with the name HOME, USERPROFILE or HOMEDRIVE and HOMEPATH (in that order).
-   Under Unix HOME is normally set. Under Windows&nbsp;XP and 2000 (NT?)
-   USERPROFILE, HOMEDRIVE and HOMEPATH are usually set. If uCON64 cannot find
-   one of those environment variables it will look for the configuration file
-   in the current directory. If it cannot find a configuration file it will
-   create one. Under DOS and Windows&nbsp;9x none of those environment
+   with the name UCON64_HOME, HOME, USERPROFILE or HOMEDRIVE and HOMEPATH (in
+   that order). Under Unix HOME is normally set. Under Windows&nbsp;XP and 2000
+   (NT?) USERPROFILE, HOMEDRIVE and HOMEPATH are usually set. If uCON64 cannot
+   find one of those environment variables it will look for the configuration
+   file in the current directory. If it cannot find a configuration file it
+   will create one. Under DOS and Windows&nbsp;9x none of those environment
    variables are usually set. So, if you run uCON64 under DOS or
    Windows&nbsp;9x in a directory where no configuration file exists it will
    create one there. If you do not like this behaviour you should set one of
    the mentioned environment variables yourself. You can do that by adding the
    following line to the end of the file c:\autoexec.bat:<br>
-   &nbsp;&nbsp; set HOME=c:\ucon64<br>
+   &nbsp;&nbsp; set UCON64_HOME=c:\ucon64<br>
    and reboot. You can also type that line on the command line. The directory
    c:\ucon64 must exist, of course. If you want uCON64 to use another directory
    you should change c:\ucon64 to a directory of your choice. You should not
@@ -679,7 +826,8 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    If you have Cygwin installed, the Cygwin runtime system will create an
    internal environment for the uCON64 executable with HOME set to Cygwin's
    home directory if it has not already been set. You can override this value
-   with the method mentioned earlier.<br>
+   with the method mentioned earlier. However, if you set UCON64_HOME this does
+   not matter as the value of HOME will not be checked if UCON64_HOME is set.<br>
    You can check which configuration file uCON64 uses by specifying the option
    -version on the command line.<br>
 <br>

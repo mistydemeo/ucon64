@@ -500,13 +500,12 @@ if(console==ucon64_UNKNOWN)
 
 if(argcmp(argc,argv,"-e"))
 {
-#ifdef __UNIX__
-	#define CONFIGFILE ".ucon64rc"
-#else
-	#define CONFIGFILE "ucon64.cfg"
+#ifdef __DOS__
+	strcpy(buf,"ucon64.cfg");
+#else 
+	sprintf(buf,"%s%c.ucon64rc",getenv("HOME"),FILE_SEPARATOR);
 #endif
 
-	sprintf(buf,"%s%c%s",getenv("HOME"),FILE_SEPARATOR,CONFIGFILE);
 
 	if( console!=ucon64_UNKNOWN && console!=ucon64_KNOWN )
 	{

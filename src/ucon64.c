@@ -103,8 +103,6 @@ static void ucon64_exit (void);
 static void ucon64_usage (int argc, char *argv[]);
 
 st_ucon64_t ucon64;
-dm_image_t *image = NULL; // libdiscmage
-
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2002";
 static int ucon64_fsize = 0;
 
@@ -300,6 +298,37 @@ const struct option long_options[] = {
     {0, 0, 0, 0}
   };
 
+#ifdef  DLOPEN
+// libdiscmage schijt
+dm_image_t *image = NULL;
+void *libdm;
+
+#define dm_init dm_init_ptr
+#define dm_close dm_close_ptr
+dm_image_t *(*dm_init_ptr) (const char *) = NULL;
+int (*dm_close_ptr) (dm_image_t *) = NULL;
+
+#define dm_bin2iso dm_bin2iso_ptr
+#define dm_cdirip dm_cdirip_ptr
+#define dm_cdi2nero dm_cdi2nero_ptr
+int32_t (*dm_bin2iso_ptr) (dm_image_t *) = NULL;
+int32_t (*dm_cdirip_ptr) (dm_image_t *) = NULL;
+int32_t (*dm_cdi2nero_ptr) (dm_image_t *) = NULL;
+
+#define dm_disc_read dm_disc_read_ptr
+#define dm_disc_write dm_disc_write_ptr
+int (*dm_disc_read_ptr) (dm_image_t *) = NULL;
+int (*dm_disc_write_ptr) (dm_image_t *) = NULL;
+
+#define dm_mksheets dm_mksheets_ptr
+int32_t (*dm_mksheets_ptr) (dm_image_t *) = NULL;
+
+#define dm_mktoc dm_mktoc_ptr
+#define dm_mkcue dm_mkcue_ptr
+int32_t (*dm_mktoc_ptr) (dm_image_t *) = NULL;
+int32_t (*dm_mkcue_ptr) (dm_image_t *) = NULL;
+#endif
+
 
 void
 ucon64_exit (void)
@@ -317,24 +346,6 @@ main (int argc, char **argv)
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], src_name[FILENAME_MAX];
   const char *ucon64_argv[128];
   st_rominfo_t rom;
-#ifdef  DLOPEN
-  void *libdm;
-
-  dm_image_t *(*dm_init) (const char *) = NULL;
-  int (*dm_close) (dm_image_t *) = NULL;
-    
-  int32_t (*dm_bin2iso) (dm_image_t *) = NULL;
-  int32_t (*dm_cdirip) (dm_image_t *) = NULL;
-  int32_t (*dm_cdi2nero) (dm_image_t *) = NULL;
-    
-  int (*dm_disc_read) (dm_image_t *) = NULL;
-  int (*dm_disc_write) (dm_image_t *) = NULL;
-    
-  int32_t (*dm_mksheets) (dm_image_t *) = NULL;
-   
-  int32_t (*dm_mktoc) (dm_image_t *) = NULL;
-  int32_t (*dm_mkcue) (dm_image_t *) = NULL;
-#endif        
 
   printf ("%s\n"
     "Uses code from various people. See 'developers.html' for more!\n"
@@ -361,40 +372,55 @@ main (int argc, char **argv)
 
 #ifdef  DLOPEN
 
-#if     defined __CYGWIN__ || defined _WIN32
-#define MODULE_NAME     "libdiscmage.dll"
-#elif   defined DJGPP
-#define MODULE_NAME     "libdiscmage.dxe"
-#elif   defined __unix__ || defined __BEOS__
-#define MODULE_NAME     "libdiscmage.so"
-#endif
-  sprintf (buf, "%s" MODULE_NAME, ucon64.configdir);
-
 #ifdef  DEBUG
   fprintf (stderr, "DLOPEN code is active\n\n%s\n\n", buf);
   fflush (stderr);
 #endif
 
-  if ((libdm = open_module (buf)) != NULL)
+  strcpy (ucon64.discmage_path, get_property (ucon64.configfile, "discmage_path", buf2, ""));
+  if (strlen (ucon64.discmage_path) >= 3)
+    // There should be some standard C library function that does this...
+    //  (filename expansion)
     {
-      ucon64.have_libdiscmage = 1;
-          
-      dm_init = load_symbol (libdm, "dm_init");
-      dm_close = load_symbol (libdm, "dm_close");
+      char path1[FILENAME_MAX], path2[FILENAME_MAX];
+      if (ucon64.discmage_path[0] == '~' && ucon64.discmage_path[1] == FILE_SEPARATOR)
+        {
+          strcpy (path1, getenv2 ("HOME"));
+          strcpy (path2, &ucon64.discmage_path[2]);
+          sprintf (ucon64.discmage_path, "%s/%s", path1, path2);
+        }
+      if (ucon64.discmage_path[0] == '.' && ucon64.discmage_path[1] == FILE_SEPARATOR)
+        {
+          getcwd (path1, FILENAME_MAX);
+          strcpy (path2, &ucon64.discmage_path[2]);
+          sprintf (ucon64.discmage_path, "%s/%s", path1, path2);
+        }
+    }
+  // if ucon64.discmage_path points to an existing file then load it
+  if (!access (ucon64.discmage_path, F_OK))
+    {
+      if ((libdm = open_module (ucon64.discmage_path)) != NULL)
+        {
+          ucon64.discmage_enabled = 1;
 
-      dm_bin2iso = load_symbol (libdm, "dm_bin2iso");
-      dm_cdirip = load_symbol (libdm, "dm_cdirip");
-      dm_cdi2nero = load_symbol (libdm, "dm_cdi2nero");
+          dm_init = get_symbol (libdm, "dm_init");
+          dm_close = get_symbol (libdm, "dm_close");
 
-      dm_disc_read = load_symbol (libdm, "dm_disc_read");
-      dm_disc_write = load_symbol (libdm, "dm_disc_write");
+          dm_bin2iso = get_symbol (libdm, "dm_bin2iso");
+          dm_cdirip = get_symbol (libdm, "dm_cdirip");
+          dm_cdi2nero = get_symbol (libdm, "dm_cdi2nero");
 
-      dm_mksheets = load_symbol (libdm, "dm_mksheets");
-      dm_mktoc = load_symbol (libdm, "dm_mktoc");
-      dm_mkcue = load_symbol (libdm, "dm_mkcue");
+          dm_disc_read = get_symbol (libdm, "dm_disc_read");
+          dm_disc_write = get_symbol (libdm, "dm_disc_write");
+
+          dm_mksheets = get_symbol (libdm, "dm_mksheets");
+          dm_mktoc = get_symbol (libdm, "dm_mktoc");
+          dm_mkcue = get_symbol (libdm, "dm_mkcue");
+        }
     }
   else
-    ucon64.have_libdiscmage = 0;
+    ucon64.discmage_enabled = 0;
+
 #elif   DEBUG
   fprintf (stderr, "DLOPEN code is not active\n\n");
 #endif
@@ -430,6 +456,7 @@ main (int argc, char **argv)
   getcwd (ucon64.output_path, FILENAME_MAX); // default output path
   if (OFFSET (ucon64.output_path, strlen (ucon64.output_path) - 1) != FILE_SEPARATOR)
     strcat (ucon64.output_path, FILE_SEPARATOR_S);
+  strcpy (ucon64.cache_path, get_property (ucon64.configfile, "cache_path", buf2, ""));
 
   // if the config file doesn't contain a parport line use "0" to force probing
   sscanf (get_property (ucon64.configfile, "parport", buf2, "0"), "%x", &ucon64.parport);
@@ -657,7 +684,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 #if 1
   ucon64.type = (rominfo->file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
 #else
-  if (ucon64.have_libdiscmage)
+  if (ucon64.discmage_enabled)
     if (ucon64.type == UCON64_UNKNOWN)
       {
         image = dm_init (romfile);
@@ -959,9 +986,11 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "db          ROM database statistics (# of entries)\n"
     "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
 #ifdef  DB
+#if 0 // NoisyB: this is a T O D O! (dbjh)
     "TODO: " OPTION_LONG_S "dat     import DAT files into ROM database; " OPTION_LONG_S "rom=DAT_FILE\n"
     "                  parses all Romcenter, Goodxxxx, etc. DAT files and updates\n"
     "                  the database cache in %scache\n"
+#endif
 #endif  // DB
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
@@ -994,7 +1023,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "version     output version information and exit\n"
 //    "  " OPTION_LONG_S "quiet       don't show output\n"
     "\n"
-    , argv[0], ucon64.configfile, ucon64.configdir);
+    , argv[0], ucon64.configfile);
 
   printf ("Patching\n");
 
@@ -1016,7 +1045,7 @@ ucon64_usage (int argc, char *argv[])
 //    genesis_usage[0],
     nes_usage[0], snes_usage[0]);
 
-  if (ucon64.have_libdiscmage)
+  if (ucon64.discmage_enabled)
     printf (
       "\n"
       "All DISC-based consoles (using libdiscmage)\n"
@@ -1277,7 +1306,7 @@ ucon64_usage (int argc, char *argv[])
 
   printf (
 #ifdef DB
-     "Database: %d known ROMs in %scache (%+d)\n"
+     "Database: %d known ROMs in cache (%+d)\n"
 #endif // DB
      "\n"
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
@@ -1292,7 +1321,6 @@ ucon64_usage (int argc, char *argv[])
      "\n"
 #ifdef DB
      , ucon64_dbsize (UCON64_UNKNOWN)
-     , ucon64.configdir
      , ucon64_dbsize (UCON64_UNKNOWN) - UCON64_DBSIZE
 #endif // DB
      , argv[0], argv[0]);

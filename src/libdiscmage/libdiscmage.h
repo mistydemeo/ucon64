@@ -2,6 +2,8 @@
 libdiscmage.h - libdiscmage
 
 written by 2002 NoisyB (noisyb@gmx.net)
+           2002 dbjh
+
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -27,6 +29,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_INTTYPES_H
 #include <inttypes.h>
 #else
+#ifndef OWN_INTTYPES
+#define OWN_INTTYPES                            // signal that these are defined
 typedef unsigned char uint8_t;
 typedef unsigned short int uint16_t;
 typedef unsigned int uint32_t;
@@ -36,7 +40,8 @@ typedef signed char int8_t;
 typedef signed short int int16_t;
 typedef signed int int32_t;
 typedef signed long long int int64_t;
-#endif
+#endif // OWN_INTTYPES
+#endif // HAVE_INTTYPES_H
 
 #ifdef __MSDOS__
 #define FILE_SEPARATOR '\\'
@@ -116,7 +121,7 @@ extern char *basename2 (const char *str);
  *******************************************************/
 
 /* Address in MSF format */
-struct cdrom_msf0		
+struct cdrom_msf0
 {
 	unsigned char	minute;
 	unsigned char	second;
@@ -124,14 +129,14 @@ struct cdrom_msf0
 };
 
 /* Address in either MSF or logical format */
-union cdrom_addr		
+union cdrom_addr
 {
 	struct cdrom_msf0	msf;
 	int			lba;
 };
 
-/* This struct is used by the CDROMPLAYMSF ioctl */ 
-struct cdrom_msf 
+/* This struct is used by the CDROMPLAYMSF ioctl */
+struct cdrom_msf
 {
 	unsigned char	cdmsf_min0;	/* start minute */
 	unsigned char	cdmsf_sec0;	/* start second */
@@ -143,8 +148,8 @@ struct cdrom_msf
 
 
 /*
- * A CD-ROM physical sector size is 2048, 2052, 2056, 2324, 2332, 2336, 
- * 2340, or 2352 bytes long.  
+ * A CD-ROM physical sector size is 2048, 2052, 2056, 2324, 2332, 2336,
+ * 2340, or 2352 bytes long.
 
 *         Sector types of the standard CD-ROM data formats:
  *
@@ -192,7 +197,7 @@ struct cdrom_msf
 #define CD_ECC_SIZE         276 /* bytes ECC per most raw data frame types */
 #define CD_FRAMESIZE       2048 /* bytes per frame, "cooked" mode */
 #define CD_FRAMESIZE_RAW   2352 /* bytes per frame, "raw" mode */
-#define CD_FRAMESIZE_RAWER 2646 /* The maximum possible returned bytes */ 
+#define CD_FRAMESIZE_RAWER 2646 /* The maximum possible returned bytes */
 /* most drives don't deliver everything: */
 #define CD_FRAMESIZE_RAW1 (CD_FRAMESIZE_RAW-CD_SYNC_SIZE) /*2340*/
 #define CD_FRAMESIZE_RAW0 (CD_FRAMESIZE_RAW-CD_SYNC_SIZE-CD_HEAD_SIZE) /*2336*/
@@ -210,45 +215,7 @@ struct cdrom_msf
 
 /* The leadout track is always 0xAA, regardless of # of tracks on disc */
 #define	CDROM_LEADOUT		0xAA
-#endif
-
-#if 0 
-//disabled.. linux FIRST
-#ifdef  DJGPP
-typedef struct st_symbol
-{
-  // functions exported by the DXE module
-  int (*dxe_init) (void);
-  void *(*dxe_symbol) (char *symbol_name);
-
-  /*
-     functions imported by the DXE module
-     Note that _every_ function used by the DXE module and not defined in it
-     should be listed here. That includes standard C library functions and 
-     variables.
-  */
-  int (*printf) (const char *, ...);
-  int (*fprintf) (FILE *, const char *, ...);
-
-  void (*free) (void *);
-  void *(*malloc) (size_t);
-  void (*exit) (int);
-
-  void *(*memcpy) (void *, const void *, size_t);
-  void *(*memset) (void *, int, size_t);
-
-  int (*strcmp) (const char *, const char *);
-
-  // Put all variables AFTER the functions. This makes it easy to catch 
-  //  uninitialized function pointers.
-  FILE __dj_stdin, __dj_stdout, __dj_stderr;
-} st_symbol_t;
-#elif   defined __BEOS__ && !defined DLOPEN
-// Strangely enough this doesn't seem to be necessary
-__declspec(dllimport) int function1(int);
-__declspec(dllimport) int function2(int);
-#endif
-#endif
+#endif // defined __linux__ || defined HAVE_LINUX_CDROM_H
 
 #if 0
 #define MODE1_2048 0
@@ -365,7 +332,7 @@ extern int dm_close (dm_image_t *image);
   dm_cdirip()   rip tracks from cdi image
 TODO:  dm_nerorip()  rip tracks from nero image
 TODO:  dm_cdi2nero() <- this will become dm_neroadd()
-TODO:  dm_cdiadd() 
+TODO:  dm_cdiadd()
 TODO:  dm_isofix()   fix an iso image
 TODO:  dm_cdifix()   fix a cdi image
 */

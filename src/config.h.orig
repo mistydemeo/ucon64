@@ -13,6 +13,9 @@
 /* enable debug output (default: no) */
 /* #undef DEBUG */
 
+/* enable support for dlopen() (default: yes) */
+#define DLOPEN 1
+
 /* Define to 1 if you have the `basename' function. */
 /* #undef HAVE_BASENAME */
 
@@ -97,9 +100,6 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 //#define HAVE_ZLIB_H 1
 
-/* enable support for DISC-based consoles (default: yes) */
-#define LIBDISCMAGE 1
-
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT "noisyb@gmx.net"
 
@@ -120,9 +120,6 @@
 
 /* enable todo output (default: no) */
 /* #undef TODO */
-
-/* build with gzip and zip support (default: yes) */
-//#define ZLIB 1
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */

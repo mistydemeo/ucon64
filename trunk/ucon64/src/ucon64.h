@@ -90,4 +90,64 @@ int ucon64_main(int argc,char *argv[]);
 unsigned int ucon64_parport;
 long ucon64_hsize;
 
+
+struct ucon64_
+{
+	int argc;
+	char *argv[128];
+	int parport;
+
+	char file[4096];	//filename with path
+
+	unsigned long mbit;
+	unsigned long bytes;
+
+	long console;	//integer for the console system
+
+	int swapped;
+	int splitted[128];
+	unsigned long padded;
+	unsigned long intro;
+	unsigned long crc32;	//standart crc32 checksum of the rom
+
+	unsigned long intern_crc;	//custom crc (if not crc32)
+	long intern_crc_start;
+	int intern_crc_len;	//size in bytes
+
+	unsigned long current_crc;	//current custom crc
+
+	unsigned long intern_crccmp;	//crc complement
+	long intern_crccmp_start;
+	int intern_crccmp_len;		//size in bytes
+	
+	char buheader[512];	//default is 512
+	long buheader_start
+	long buheader_len;	//header of backup unit
+
+	char header[4096];
+	long header_start;
+	long header_len;	//header of rom itself (if present)
+
+	char name[4096];	//name of the ROM
+	long name_start;
+	long name_len;
+	
+	char manufacturer[4096];	//maker of the ROM as integer
+	long manufacturer_start;
+	long manufacturer_len;
+	
+	char country[4096];	//country of the ROM as integer
+	long country_start;
+	long country_len;
+	
+	char misc[4096];	//some miscellaneous information about the ROM
+
+	unsigned long db_crc32;
+	char *db_name;
+	char *db_manufacturer;
+	char *db_country;
+	char *db_misc;
+};
+ 
+
 #endif                                          // #ifndef UCON64_H

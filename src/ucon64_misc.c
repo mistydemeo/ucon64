@@ -1739,12 +1739,10 @@ ucon64_configfile (void)
 //                   "# before processing a ROM uCON64 will make a backup of it\n"
                    "#\n"
                    "backups=1\n"
-#ifdef  ANSI_COLOR
                    "#\n"
                    "# use ANSI colors in output? (1=yes; 0=no)\n"
                    "#\n"
                    "ansi_color=1\n"
-#endif
                    "#\n"
                    "# parallel port\n"
                    "#\n"

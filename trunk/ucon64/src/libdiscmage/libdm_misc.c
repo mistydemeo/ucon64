@@ -60,7 +60,6 @@ static const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
 static const char vdt_magic[] = {(const char) 0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
 
 
-
 typedef struct
 {
   int mode;
@@ -160,6 +159,43 @@ const st_track_probe_t track_probe[] =
     {0, 0,  2352, 0},  // AUDIO/2352, AUDIO
     {0, 0, 0, 0}
   };
+
+
+const char *
+dm_get_track_desc (int mode, int sector_size, int cue)
+// if cue == TRUE return track_desc[x].cue
+{
+  typedef struct
+    {
+      int mode;
+      int sector_size;
+//      int multiple_sessions;
+      const char *cue;
+      const char *toc;
+    } st_track_desc_t;
+
+  int x = 0;
+  static const st_track_desc_t track_desc[] = {
+      {1, 2048, "MODE1/2048", "MODE1"}, // MODE2_FORM1
+      {1, 2352, "MODE1/2352", "MODE1_RAW"},
+      {2, 2336, "MODE2/2336", "MODE2"}, // MODE2_FORM_MIX
+      {2, 2352, "MODE2/2352", "MODE2_RAW"},
+      {0, 2352, "AUDIO",      "AUDIO"},
+#if 0
+      {0, 0,    NULL,         "MODE0"},
+      {0, 0,    NULL,         "MODE2_FORM2"},
+#endif
+      {0, 0,    NULL,         NULL}
+    };
+
+  for (x = 0; track_desc[x].sector_size; x++)
+    if (track_desc[x].mode == mode &&
+        track_desc[x].sector_size == sector_size)
+      return (cue ? track_desc[x].cue : track_desc[x].toc);
+
+  return NULL;
+}
+
 
 static void (* dm_ext_gauge) (int, int);
 
@@ -376,23 +412,39 @@ dm_track_init (dm_track_t *track, FILE *fh)
                             (const char) 0xff, (const char) 0xff,
                             (const char) 0xff, (const char) 0xff,
                             (const char) 0xff, (const char) 0xff, 0};
-  char buf[32];
+  char value_s[32];
 
-//TODO?: callibration?
-  fread (buf, 1, 16, fh);
-  if (!memcmp (sync_data, buf, 12))
+  fseek (fh, track->track_start, SEEK_SET);
+#if 0
+  fread (value_s, 1, 16, fh);
+#else
+// callibrate
+  fseek (fh, -15, SEEK_CUR);
+  for (x = 0; x < 64; x++)
+    {
+      if (fread (&value_s, 1, 16, fh) != 16)
+        return NULL;
+      fseek (fh, -16, SEEK_CUR);
+      if (!memcmp (sync_data, value_s, 12))
+        break;
+      fseek (fh, 1, SEEK_CUR);
+    }
+#endif
+
+  if (!memcmp (sync_data, value_s, 12))
     for (x = 0; track_probe[x].sector_size; x++)
-      if (track_probe[x].mode == buf[15])
+      if (track_probe[x].mode == value_s[15])
         {
-            // search for valid PVD in sector 16 of source image
-            fseek (fh, (track_probe[x].sector_size * 16) + track_probe[x].seek_header, SEEK_SET);
-            fread (buf, 1, 16, fh);
+          // search for valid PVD in sector 16 of source image
+          fseek (fh, (track_probe[x].sector_size * 16) +
+                 track_probe[x].seek_header + track->track_start, SEEK_SET);
+          fread (value_s, 1, 16, fh);
 
-            if (!memcmp (pvd_magic, &buf, 8))
-              {
-                identified = 1;
-                break;
-              }
+          if (!memcmp (pvd_magic, &value_s, 8))
+            {
+              identified = 1;
+              break;
+            }
         }
 
   // no sync_data found? probably MODE1/2048
@@ -402,21 +454,26 @@ dm_track_init (dm_track_t *track, FILE *fh)
       if (track_probe[x].sector_size != 2048)
         fprintf (stderr, "ERROR: dm_track_init()\n");
 
-      fseek (fh, (track_probe[x].sector_size * 16) + track_probe[x].seek_header, SEEK_SET);
-      fread (buf, 1, 16, fh);
+      fseek (fh, (track_probe[x].sector_size * 16) +
+             track_probe[x].seek_header + track->track_start, SEEK_SET);
+      fread (value_s, 1, 16, fh);
 
-      if (!memcmp (pvd_magic, &buf, 8))
+      if (!memcmp (pvd_magic, &value_s, 8))
         identified = 1;
     }
 
   if (!identified)
-    return NULL;
+    {
+      fprintf (stderr, "ERROR: could not find iso header of current track\n");
+      return NULL;
+    }
 
   track->sector_size = track_probe[x].sector_size;
   track->mode = track_probe[x].mode;
   track->seek_header = track_probe[x].seek_header;
   track->seek_ecc = track_probe[x].seek_ecc;
   track->iso_header_start = (track_probe[x].sector_size * 16) + track_probe[x].seek_header;
+  track->desc = dm_get_track_desc (track->mode, track->sector_size, TRUE);
 
   return track;
 }
@@ -437,9 +494,9 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
       {DM_SHEET, sheet_init},
       {DM_CDI, cdi_init},
 #if 0
-      {DM_NRG, nrg_init}, // Nero/NRG Image
-      {DM_CCD, ccd_init}, // CloneCD/CCD Image
-      {DM_UNKNOWN, NULL}, // Unknown Image
+      {DM_NRG, nrg_init},
+      {DM_CCD, ccd_init},
+      {DM_UNKNOWN, NULL},
 #endif
       {0, NULL}
     };

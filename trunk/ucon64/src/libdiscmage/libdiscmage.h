@@ -64,7 +64,7 @@ typedef signed __int64 int64_t;
 #endif // OWN_INTTYPES
 #endif
 
-// a cd can have max. 99 tracks
+// a cd can have max. 99 tracks; this value might change in the future
 #define DM_MAX_TRACKS (99)
 
 
@@ -103,7 +103,8 @@ typedef struct
   int16_t seek_header; // in bytes
   int16_t seek_ecc;    // in bytes
 
-
+  const char *desc;
+//  const char *desc_toc;
 #if 0
 // from mplayer sources
    uint16_t mode;

@@ -1,3 +1,24 @@
+/*
+swc.c - Super Wild Card support for uCON64
+
+written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+                  2001 dbjh
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
 #define INPUT_MASK      0x78
 #define IBUSY_BIT       0x80
 #define STROBE_BIT      1
@@ -663,10 +684,10 @@ int swc_usage(int argc,char *argv[])
 //  if (argcmp(argc,argv, "-help"))
   {
     printf("\n%s\n", swc_TITLE);
-    printf("  -xswc    send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
-           "           receives automatically when $ROM does not exist\n"
-           "  -xswcs   send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
-           "           receives automatically when $ROM does not exist\n"
+    printf("  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
+           "                receives automatically when $ROM does not exist\n"
+           "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
+           "                receives automatically when $ROM does not exist\n"
 #if 1
            "\n"
            "Press q to abort sending or receiving. Don't press Ctrl-C. If you do the copier\n"

@@ -211,14 +211,14 @@ enum
 
 #ifdef  __MSDOS__                               // __MSDOS__ must come before __unix__, because DJGPP defines both
   #define ucon64_OS "MSDOS"
-#elif  __unix__
+#elif   defined __unix__
   #ifdef  __CYGWIN__
     #define ucon64_OS "Win32"
-  #elif __FreeBSD__
+  #elif   defined __FreeBSD__
     #define ucon64_OS "Unix (FreeBSD)"
-  #elif __linux__
+  #elif   defined __linux__
     #define ucon64_OS "Unix (Linux)"
-  #elif sun
+  #elif   defined sun
     #define ucon64_OS "Unix (Solaris)"
   #else
     #define ucon64_OS "Unix"

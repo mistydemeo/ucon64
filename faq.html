@@ -31,7 +31,7 @@ Q11: <a href="#11">Some SNES games don't work on my Super Wild Card. What can I 
 <br>
 Q12: <a href="#12">Which backup devices are supported by uCON64?</a><br>
 <br>
-Q13: <a href="#13">I use Windows XP (NT/2000). When I try to run ucon64.exe under command.com (start -> Run...
+Q13: <a href="#13">I use Windows&nbsp;XP (NT/2000). When I try to run ucon64.exe under command.com (start -> Run...
    -> command) uCON64 crashes. What do I do wrong?</a><br>
 <br>
 Q14: <a href="#14">I don't like the command line. Are there graphical frontends available?</a><br>
@@ -56,7 +56,7 @@ Q22: <a href="#22">Where can I get that loader or "game pack" file?</a><br>
 Q23: <a href="#23">What is the meaning of the -col option (Super Nintendo)?</a><br>
 <br>
 Q24: <a href="#24">Why does uCON64 create ucon64.cfg (DOS executable) or .ucon64rc (Win32 executable)
-   files all over the place under DOS and Windows 9x (command.com)?</a><br>
+   files all over the place under DOS and Windows&nbsp;9x (command.com)?</a><br>
 <br>
 Q25: <a href="#25">When I try to create a multirom under Windows I get the message
    "The system cannot execute the specified program." (or something like that).
@@ -81,8 +81,8 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
    Under Windows you'll need <a href="http://www.cygwin.com" target="_blank">Cygwin</a>,
    a Windows port of gcc and many other GNU tools and libraries. If you want to compile
    uCON64 with Cygwin you should use Makefile.unix. Note that Cygwin's make executable is
-   named make.exe, but Makefile.unix calls gmake. Just make a symbolic link (NT/2000/XP)
-   or a copy with the name gmake.exe.<br>
+   named make.exe, but Makefile.unix calls gmake. Just make a symbolic link or a copy with
+   the name gmake.exe.<br>
 <br>
    Then enter the following lines:<br>
 <br>
@@ -96,7 +96,7 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
    instructions.<br>
    The last command won't work with Cygwin, but isn't needed under Windows anyway. You can
    find the binary in the directory "src".<br>
-   On non-Linux systems you might need to use 'gmake' instead of 'make'<br>
+   On Unix systems other than Linux you might need to use 'gmake' instead of 'make'.<br>
 <br>
 <p>
 <a name="3"><b>Q3</b>: How do I install uCON64?</a><br>
@@ -104,18 +104,18 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
    downloaded the source package). If you don't use WinDOS run install.sh (Unix) or
    install_beos.sh (BeOS) and edit $HOME/.ucon64rc. If you use WinDOS you may
    want to copy ucon64.exe to a directory in your PATH and maybe edit ucon64.cfg.<br>
-   If you use DOS or Windows 9x and don't want uCON64 to create ucon64.cfg or .ucon64rc files
+   If you use DOS or Windows&nbsp;9x and don't want uCON64 to create ucon64.cfg or .ucon64rc files
    all over the place (current directories) see <a href="#24">question 24</a>.<br>
 <br>
    BeOS users will also need Caz's driver inside ioport.zip or available at
    <a href="http://www.infernal.currantbun.com" target="_blank">http://www.infernal.currantbun.com</a>.<br>
-   Under Windows NT/2000/XP you might need a driver if you want to use uCON64 for
+   Under Windows&nbsp;NT/2000/XP you might need a driver if you want to use uCON64 for
    sending/receiving ROMs to/from a copier. You could use giveio or UserPort. At
    <a href="http://www.devrs.com/gba/files/mbv2faqs.php" target="_blank">http://www.devrs.com/gba/files/mbv2faqs.php</a>
    you can find links to those programs. They are also included with the binary release. With giveio sending
    ROMs goes faster than with UserPort, but UserPort is a bit easier to use.<br>
-   It <i>is</i> possible to use uCON64 as a transfer tool without giveio or UserPort under Windows XP. We
-   have had reports from people who were able to send and receive ROMs under Windows XP as a
+   It <i>is</i> possible to use uCON64 as a transfer tool without giveio or UserPort under Windows&nbsp;XP. We
+   have had reports from people who were able to send and receive ROMs under Windows&nbsp;XP as a
    regular user (no Administrator rights and not "Power Users").<br>
 <br>
 <p>
@@ -225,7 +225,7 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
 <b>A</b>: See <a href="hardware.html" target="_blank">hardware.html</a>.<br>
 <br>
 <p>
-<a name="13"><b>Q13</b>: I use Windows XP (NT/2000). When I try to run ucon64.exe under command.com (start -> Run...
+<a name="13"><b>Q13</b>: I use Windows&nbsp;XP (NT/2000). When I try to run ucon64.exe under command.com (start -> Run...
    -> command) uCON64 crashes. What do I do wrong?</a><br>
 <b>A</b>: You shouldn't use command, use cmd instead.<br>
 <br>
@@ -302,14 +302,14 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
 <br>
 <p>
 <a name="24"><b>Q24</b>: Why does uCON64 create ucon64.cfg (DOS executable) or .ucon64rc (Win32 executable)
-   files all over the place under DOS and Windows 9x (command.com)?</a><br>
+   files all over the place under DOS and Windows&nbsp;9x (command.com)?</a><br>
 <b>A</b>: uCON64 needs to know where it can find the configuration file or a directory where it can create one.
    It checks the environment for a variable with the name HOME, USERPROFILE or HOMEDRIVE and HOMEPATH
-   (in that order). Under Unix HOME is normally set. Under Windows XP and 2000 (NT?) USERPROFILE,
+   (in that order). Under Unix HOME is normally set. Under Windows&nbsp;XP and 2000 (NT?) USERPROFILE,
    HOMEDRIVE and HOMEPATH are usually set. If uCON64 can't find one of those environment variables
    it will look for the configuration file in the current directory. If it can't find a configuration
-   file it will create one. Under DOS and Windows 9x none of those environment variables are usually set.
-   So, if you run uCON64 under DOS or Windows 9x in a directory where no configuration file exists
+   file it will create one. Under DOS and Windows&nbsp;9x none of those environment variables are usually set.
+   So, if you run uCON64 under DOS or Windows&nbsp;9x in a directory where no configuration file exists
    it will create one there. If you don't like this behaviour you should set one of the mentioned
    environment variables yourself. You can do that by adding the following line to the end of the file
    c:\autoexec.bat:<br>
@@ -323,7 +323,7 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
    What does that mean?</a><br>
 <b>A</b>: You can get that message with the DOS executable if you pass more than 127
    characters as argument to uCON64. There are two solutions:<br>
-   1.) Use the Win32 binary (download it from the uCON64 homepage).<br>
+   1.) Use the Win32 binary (download it from <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>).<br>
    2.) Rename the ROMs so that their combined names are short enough to fit into 127 characters.<br>
 <br>
 <br>

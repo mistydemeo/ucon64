@@ -73,7 +73,6 @@ extern unsigned char ffe_receiveb (void);
 extern void ffe_wait_for_ready (void);
 extern void ffe_checkabort (int status);
 
-extern int ffe_port;
 #endif // BACKUP
 
 #endif // FFE_H

@@ -41,7 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static void ffe_sendb (unsigned char byte);
 static unsigned char ffe_wait_while_busy (void);
 
-int ffe_port;
+static int ffe_port;
 
 
 void

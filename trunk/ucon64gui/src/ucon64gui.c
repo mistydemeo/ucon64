@@ -24,9 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "backup/swc.h"
 
-
-
-
 void
 ucon64_bottom (void)
 {
@@ -48,7 +45,7 @@ ucon64_bottom (void)
              "(GTK) "
 #endif
              "0.1.0 2002 by NoisyB ");
-  html2gui_a ("http://ucon64.sf.net", _blank);
+  html2gui_a ("http://ucon64.sf.net", "_blank");
 
 }
 
@@ -130,7 +127,7 @@ ucon64_root (void)
 //<html>
   html2gui_html (640, 400, 0);
 
-  html2gui_title ("ucon64gui", icon_xpm);
+  html2gui_title ("uCON64gui", icon_xpm);
 
 
   html2gui_input_submit (ucon64_rom, "Open ROM", "Open ROM", 100, 50,

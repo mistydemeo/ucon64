@@ -71,7 +71,7 @@ const st_usage_t n64_usage[] =
                        "the SRAM must have a size of 512 Bytes\n"
                        "this option generates a ROM which can be used to transfer\n"
                        "SRAMs to your cartridge's SRAM (EEPROM)"},
-    {"usms", "SMSROM", "Jos Kwanten's UltraSMS (Sega Master System/GameGear emulator);\n"
+    {"usms", "SMSROM", "Jos Kwanten's UltraSMS (Sega Master System/Game Gear emulator);\n"
                        "ROM should be Jos Kwanten's UltraSMS ROM image\n"
                        "works only for SMS ROMs which are <= 4 Mb in size"},
     {"chk", NULL, "fix ROM checksum\n"
@@ -328,7 +328,7 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
       //  from 1b410 to 9b40f (7ffff)
       if (size > 4 * MBIT)
         {
-          fprintf (stderr, "ERROR: The Sega Master System/GameGear ROM must be 524288 Bytes or less\n");
+          fprintf (stderr, "ERROR: The Sega Master System/Game Gear ROM must be 524288 Bytes or less\n");
           return -1;
         }
 

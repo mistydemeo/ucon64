@@ -914,7 +914,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
         stricmp (p, ".sc") &&                   // Sega Master System
         stricmp (p, ".sg") &&                   // Sega Master System
         stricmp (p, ".sms") &&                  // Sega Master System
-        stricmp (p, ".gg") &&                   // GameGear
+        stricmp (p, ".gg") &&                   // Game Gear
 //      stricmp (p, ".smd") &&                  // Genesis
         stricmp (p, ".v64")))                   // Nintendo 64
     ((char *) dat->fname)[strlen (dat->fname) - strlen (p)] = 0;
@@ -1014,7 +1014,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
             console_name = "Game Cube";
             break;
           case UCON64_GEN:
-            console_name = "Genesis/Megadrive";
+            console_name = "Genesis/Mega Drive";
             plugin = "genesis.dll";
             break;
           case UCON64_INTELLI:
@@ -1060,7 +1060,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
             console_name = "Saturn";
             break;
           case UCON64_SMS:
-            console_name = "SMS";
+            console_name = "SMS/Game Gear";
             break;
           case UCON64_SNES:
             console_name = "SNES";

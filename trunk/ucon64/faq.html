@@ -1267,7 +1267,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
     <td><tt>GoodGBX or GBX</tt></td>
   </tr>
   <tr>
-    <td><tt>Genesis or Megadrive</tt></td>
+    <td><tt>Genesis or Mega Drive</tt></td>
     <td><tt>GoodGEN or GEN</tt></td>
   </tr>
   <tr>
@@ -1307,7 +1307,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
     <td><tt>GoodPCE or PCE</tt></td>
   </tr>
   <tr>
-    <td><tt>Sega Master System and GameGear</tt></td>
+    <td><tt>Sega Master System and Game Gear</tt></td>
     <td><tt>GoodSMS, GoodGG, SMS or GG</tt></td>
   </tr>
   <tr>
@@ -1408,10 +1408,10 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <b>A</b>: Strictly speaking, interleaved ROMs do not exist. Interleaved ROM
    dumps do. Or perhaps it is better to say ROM dumps in interleaved format.
    It depends on the console type what "interleaved" means. Interleaved formats
-   exist for NES, Sega Master System, GameGear, Genesis, SNES and Nintendo 64.<br>
+   exist for NES, Sega Master System, Game Gear, Genesis, SNES and Nintendo 64.<br>
    Interleaved NES files have the "PRG data" stored at the even offsets in the
    file and the "CHR data" at the odd offsets.<br>
-   Interleaved Sega Master System, GameGear and Genesis files are produced by
+   Interleaved Sega Master System, Game Gear and Genesis files are produced by
    the Super Magic Drive. For each block of 16384 bytes of the ROM all bytes at
    even offsets are stored in the upper half of the dumped block. The bytes at
    odd offsets are stored in the lower half. So, each dumped block first
@@ -1438,9 +1438,10 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    For each two bytes the first and the second byte are swapped.<br>
 <br>
    ROM dumps in non-interleaved format can be interleaved with uCON64. Sega
-   Master System, GameGear and Genesis dumps can be interleaved with the option
-   -smd. SNES dumps can be interleaved with -gd3 or -ufo. Nintendo 64 dumps can
-   be interleaved with -v64. NES dumps cannot be interleaved with uCON64.<br>
+   Master System, Game Gear and Genesis dumps can be interleaved with the
+   option -smd. SNES dumps can be interleaved with -gd3 or -ufo. Nintendo 64
+   dumps can be interleaved with -v64. NES dumps cannot be interleaved with
+   uCON64.<br>
 <br>
    Deinterleaving is the process of converting the data to "binary" format.
    Binary in the sense as how the data is presented to the CPU. Deinterleaving
@@ -1452,8 +1453,8 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    -mgd. Some SNES tools erroneously interleave LoROM dumps. These dumps can be
    deinterleaved with the options -gd3 and -ufo as well as with the
    aformentioned (SNES) options.<br>
-   Sega Master System, GameGear and Genesis dumps can be deinterleaved with the
-   option -mgd.<br>
+   Sega Master System, Game Gear and Genesis dumps can be deinterleaved with
+   the option -mgd.<br>
 <br>
 <p>
 <a name="46"><b>Q46</b>: The pre-compiled GNU/Linux binary does not work on my

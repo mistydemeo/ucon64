@@ -1,5 +1,5 @@
 /*
-sms.c - Sega Master System/GameGear support for uCON64
+sms.c - Sega Master System/Game Gear support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
                   2003 dbjh
@@ -38,7 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t sms_usage[] =
   {
-    {NULL, NULL, "Sega Master System(II/III)/GameGear (Handheld)"},
+    {NULL, NULL, "Sega Master System(II/III)/Game Gear (Handheld)"},
     {NULL, NULL, "1986/19XX SEGA http://www.sega.com"},
     {"sms", NULL, "force recognition"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},

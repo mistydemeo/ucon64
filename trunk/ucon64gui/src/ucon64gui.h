@@ -25,7 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define UCON64GUI_HTMLTITLE "uCON64gui"
 #define UCON64GUI_FORMTARGET "file://ucon64"
-#define UCON64GUI_VERSION "0.1.0alpha2"
+#define UCON64GUI_VERSION "1.0.0"
 
 extern const char *ucon64gui_title;
 

@@ -21,12 +21,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64GUI_H
 #define UCON64GUI_H
 
-#define ucon64gui_VERSION "0.1.0alpha2"
-
-#define ucon64gui_TITLE "uCON64gui"
-#define ucon64gui_TITLE2 "uCON64gui " ucon64gui_VERSION " (for uCON64 " ucon64_VERSION ") 2002 by NoisyB "
+#define ucon64gui_HTMLTITLE "uCON64gui"
 
 #define ucon64gui_FORMTARGET "http://ucon64"
+
+
+#define ucon64gui_VERSION "0.1.0alpha2"
+
+#define ucon64gui_TITLE "uCON64gui " ucon64gui_VERSION " (for uCON64 " ucon64_VERSION ") 2002 by NoisyB "
 
 #ifndef MAXBUFSIZE
   #define MAXBUFSIZE 32768

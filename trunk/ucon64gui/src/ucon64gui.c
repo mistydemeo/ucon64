@@ -416,11 +416,19 @@ NULL
                     "(-jag) options for Panther(32bit prototype)/Jaguar64/Jaguar64 CD\n1989 Flare2/1993 Atari/1995 Atari");
 
   h2g_br();
-  h2g_("Others: ");
+
+  h2g_img (trans_xpm, 0, 3, 0, NULL);
+  h2g_br ();
+
+  h2g_ ("Others: ");
 
   h2g_select ("page", console_options, console_values, 0, 0,
 "Choose the desired console here"//\n"
  );
+
+//  h2g_br ();
+//  h2g_img (trans_xpm, 0, 3, 0, NULL);
+//  h2g_br ();
 
 
 /*

@@ -2902,6 +2902,7 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 
 
 
+
 echo "$as_me:$LINENO: checking for main in -lsocket" >&5
 echo $ECHO_N "checking for main in -lsocket... $ECHO_C" >&6
 if test "${ac_cv_lib_socket_main+set}" = set; then

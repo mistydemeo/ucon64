@@ -81,8 +81,12 @@ if test $enable_gui = yes; then
   AM_PATH_GDK_PIXBUF(0.8.0, AC_SUBST(DEFINE_GDK_PIXBUF_MAKE))
 
   dnl check for WXW
-  dnl DEFINE_WXW_MAKE="GTK=1"
+  dnl DEFINE_WXW_MAKE="WXW=1"
   dnl AM_PATH_WXW(1.2.10, AC_SUBST(DEFINE_WXW_MAKE))
+
+  dnl check for SDL
+  dnl DEFINE_SDL_MAKE="SDL=1"
+  dnl AM_PATH_SDL(1.2.4, AC_SUBST(DEFINE_SDL_MAKE))
 
   AC_HAVE_LIBRARY(socket)
   AC_HAVE_LIBRARY(nsl)

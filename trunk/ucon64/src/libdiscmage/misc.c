@@ -49,8 +49,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //  includes param.h which unconditionally defines MIN and MAX.
 #endif
 
+#ifdef  HAVE_ZLIB_H
+#include "miscz.h"
+#endif
 #include "misc.h"
-#include "map.h"
 
 #ifdef  __CYGWIN__                              // under Cygwin (gcc for Windows) we
 #define USE_POLL                                //  need poll() for kbhit(). poll()
@@ -62,10 +64,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 typedef struct termios tty_t;
 #endif
 
-#ifdef  HAVE_ZLIB_H
-#include <zlib.h>
-#include "unzip.h"
-#endif
 
 #ifdef  DJGPP
 #include <dpmi.h>                               // needed for __dpmi_int() by ansi_init()
@@ -91,114 +89,6 @@ static void set_tty (tty_t *param);
 #endif
 
 void deinit_conio (void);
-
-#if 0                                           // currently not used
-/*
-  crc16 routine
-*/
-unsigned short
-mem_crc16 (unsigned int size, unsigned short crc16, const void *buf)
-{
-  static const short crc_table[] = {
-    0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
-    0xC601, 0x06C0, 0x0780, 0xC741, 0x0500, 0xC5C1, 0xC481, 0x0440,
-    0xCC01, 0x0CC0, 0x0D80, 0xCD41, 0x0F00, 0xCFC1, 0xCE81, 0x0E40,
-    0x0A00, 0xCAC1, 0xCB81, 0x0B40, 0xC901, 0x09C0, 0x0880, 0xC841,
-    0xD801, 0x18C0, 0x1980, 0xD941, 0x1B00, 0xDBC1, 0xDA81, 0x1A40,
-    0x1E00, 0xDEC1, 0xDF81, 0x1F40, 0xDD01, 0x1DC0, 0x1C80, 0xDC41,
-    0x1400, 0xD4C1, 0xD581, 0x1540, 0xD701, 0x17C0, 0x1680, 0xD641,
-    0xD201, 0x12C0, 0x1380, 0xD341, 0x1100, 0xD1C1, 0xD081, 0x1040,
-    0xF001, 0x30C0, 0x3180, 0xF141, 0x3300, 0xF3C1, 0xF281, 0x3240,
-    0x3600, 0xF6C1, 0xF781, 0x3740, 0xF501, 0x35C0, 0x3480, 0xF441,
-    0x3C00, 0xFCC1, 0xFD81, 0x3D40, 0xFF01, 0x3FC0, 0x3E80, 0xFE41,
-    0xFA01, 0x3AC0, 0x3B80, 0xFB41, 0x3900, 0xF9C1, 0xF881, 0x3840,
-    0x2800, 0xE8C1, 0xE981, 0x2940, 0xEB01, 0x2BC0, 0x2A80, 0xEA41,
-    0xEE01, 0x2EC0, 0x2F80, 0xEF41, 0x2D00, 0xEDC1, 0xEC81, 0x2C40,
-    0xE401, 0x24C0, 0x2580, 0xE541, 0x2700, 0xE7C1, 0xE681, 0x2640,
-    0x2200, 0xE2C1, 0xE381, 0x2340, 0xE101, 0x21C0, 0x2080, 0xE041,
-    0xA001, 0x60C0, 0x6180, 0xA141, 0x6300, 0xA3C1, 0xA281, 0x6240,
-    0x6600, 0xA6C1, 0xA781, 0x6740, 0xA501, 0x65C0, 0x6480, 0xA441,
-    0x6C00, 0xACC1, 0xAD81, 0x6D40, 0xAF01, 0x6FC0, 0x6E80, 0xAE41,
-    0xAA01, 0x6AC0, 0x6B80, 0xAB41, 0x6900, 0xA9C1, 0xA881, 0x6840,
-    0x7800, 0xB8C1, 0xB981, 0x7940, 0xBB01, 0x7BC0, 0x7A80, 0xBA41,
-    0xBE01, 0x7EC0, 0x7F80, 0xBF41, 0x7D00, 0xBDC1, 0xBC81, 0x7C40,
-    0xB401, 0x74C0, 0x7580, 0xB541, 0x7700, 0xB7C1, 0xB681, 0x7640,
-    0x7200, 0xB2C1, 0xB381, 0x7340, 0xB101, 0x71C0, 0x7080, 0xB041,
-    0x5000, 0x90C1, 0x9181, 0x5140, 0x9301, 0x53C0, 0x5280, 0x9241,
-    0x9601, 0x56C0, 0x5780, 0x9741, 0x5500, 0x95C1, 0x9481, 0x5440,
-    0x9C01, 0x5CC0, 0x5D80, 0x9D41, 0x5F00, 0x9FC1, 0x9E81, 0x5E40,
-    0x5A00, 0x9AC1, 0x9B81, 0x5B40, 0x9901, 0x59C0, 0x5880, 0x9841,
-    0x8801, 0x48C0, 0x4980, 0x8941, 0x4B00, 0x8BC1, 0x8A81, 0x4A40,
-    0x4E00, 0x8EC1, 0x8F81, 0x4F40, 0x8D01, 0x4DC0, 0x4C80, 0x8C41,
-    0x4400, 0x84C1, 0x8581, 0x4540, 0x8701, 0x47C0, 0x4680, 0x8641,
-    0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040
-  };
-  unsigned char *p = (unsigned char *) buf;
-
-  while (size)
-    {
-      crc16 = ((crc16 >> 8) & 0xff) ^ crc_table[(crc16 ^ *p++) & 0xff];
-      size--;
-    }
-  return crc16 /* & 0xffff */;
-}
-#endif
-
-
-#ifndef HAVE_ZLIB_H
-/*
-  crc32 routines
-
-  replacement for zlib's crc32() stuff
-*/
-#define CRC32_POLYNOMIAL     0xedb88320L
-
-static unsigned int crc32_table[256];
-static int crc32_table_built = 0;
-
-void
-build_crc32_table ()
-{
-  unsigned int crc32, i, j;
-
-  for (i = 0; i <= 255; i++)
-    {
-      crc32 = i;
-      for (j = 8; j > 0; j--)
-        {
-          if (crc32 & 1)
-            crc32 = (crc32 >> 1) ^ CRC32_POLYNOMIAL;
-          else
-            crc32 >>= 1;
-        }
-      crc32_table[i] = crc32;
-    }
-  crc32_table_built = 1;
-}
-
-
-unsigned int
-mem_crc32 (unsigned int size, unsigned int crc32, const void *buffer)
-// zlib: crc32 (crc, buffer, size);
-{
-  unsigned char *p;
-  unsigned int temp1, temp2;
-
-  if (!crc32_table_built)
-    build_crc32_table ();
-
-  crc32 ^= 0xffffffffL;
-  p = (unsigned char *) buffer;
-  while (size-- != 0)
-    {
-      temp1 = (crc32 >> 8) & 0x00ffffffL;
-      temp2 = crc32_table[((int) crc32 ^ *p++) & 0xff];
-      crc32 = temp1 ^ temp2;
-    }
-  return crc32 ^ 0xffffffffL;
-}
-#endif
-
 
 int
 ansi_init (void)
@@ -272,10 +162,7 @@ isfname (int c)
 
   switch (c)
     {
-// characters that are also allowed in filenames
-#ifdef  __unix__
-#else
-#endif
+      // characters that are also allowed in filenames
       case '.':
       case ',':
       case '-':
@@ -300,10 +187,7 @@ isprint2 (int c)
 
   switch (c)
     {
-// characters that also work with printf
-#ifdef  __unix__
-#else
-#endif
+      // characters that also work with printf
       case '\x1b':
         return (misc_ansi_color) ? TRUE : FALSE;
 
@@ -480,6 +364,7 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
 }
 
 
+#if 0
 int
 renlwr (const char *path)
 {
@@ -508,8 +393,10 @@ renlwr (const char *path)
   closedir (dp);
   return 0;
 }
+#endif
 
 
+#if 0                                           // currently not used
 int
 mkdir2 (const char *name)
 // create a directory and check its permissions
@@ -553,6 +440,7 @@ mkdir2 (const char *name)
 
   return 0;
 }
+#endif
 
 
 char *
@@ -678,27 +566,64 @@ realpath2 (const char *src, char *full_path)
       else if (src[1] == 0)
         getcwd (full_path, FILENAME_MAX);       // callers should always pass
     }                                           //  arrays that are large enough
-   else
-     strcpy (full_path, src);
+  else
+    strcpy (full_path, src);
 
   return full_path;
 }
 
 
+int
+truncate2 (const char *filename, int new_size)
+{
+  int size = q_fsize (filename);
+  struct stat fstate;
+
+  stat (filename, &fstate);
+  if (chmod (filename, fstate.st_mode | S_IWUSR))
+    return -1;
+        
+  if (size < new_size)
+    {
+      FILE *file;
+      unsigned char padbuffer[MAXBUFSIZE];
+      int n_bytes;
+      
+      if ((file = fopen (filename, "ab")) == NULL)
+        return -1;
+        
+      memset (padbuffer, 0, MAXBUFSIZE);
+
+      while (size < new_size)
+        {
+          n_bytes = new_size - size > MAXBUFSIZE ? MAXBUFSIZE : new_size - size;
+          fwrite (padbuffer, 1, n_bytes, file);
+          size += n_bytes;
+        }
+
+      fclose (file);
+    }
+  else
+    truncate (filename, new_size);
+
+  return 0;                                     // success
+}
+
+
+#if 0                                           // currently not used
 char ***
 strargv (int *argc, char ***argv, char *cmdline, int separator_char)
 {
 //this will be replaced by argz_extract() soon
-#if 0
   int i = 0;
   char buf[MAXBUFSIZE];
 
   if (*cmd)
     for (; (argv[i] = strtok (!i?cmd:NULL, " ")) && i < (argc - 1); i++)
       ;
-#endif
   return NULL;
 }
+#endif
 
 
 #ifdef  WIN32
@@ -910,7 +835,7 @@ gauge (time_t init_time, int pos, int size)
   environment variable, the character isn't the right character for accessing
   the file system. We fix this.
   TODO: fix the same problem for other non-ASCII characters (> 127).
-  UPDATE: The problem seems to also occur when reading from files instead of
+  UPDATE: The problem seems to occur also when reading from files instead of
           the environment. Cygwin probably uses a different character set than
           Windows. This problem is present under cmd.exe *and* Bash.
 */
@@ -1424,488 +1349,6 @@ handle_registered_funcs (void)
 }
 
 
-// map code should be included unconditionally (needed by gz/zip & DLL (DXE) code)
-#include "map.c"
-
-#ifdef  HAVE_ZLIB_H
-
-/*
-  The zlib functions gzwrite() and gzputc() write compressed data if the file
-  was opened with a "w" in the mode string, but we want to control whether we
-  write compressed data. Note that for the mode string "w+", zlib ignores the
-  '+'. zlib does the same for "r+".
-  Currently we never write compressed data. That is, no code fopen()s files
-  with a mode string containing 'f', 'h' or a number, but writing compressed
-  output does work.
-*/
-st_map_t *fh_map = NULL;                        // associative array: file handle -> file mode
-
-typedef enum { FM_NORMAL, FM_GZIP, FM_ZIP, FM_UNDEF } fmode2_t;
-
-typedef struct st_finfo
-{
-  fmode2_t fmode;
-  int compressed;
-} st_finfo_t;
-
-static st_finfo_t finfo_list[6] = { {FM_NORMAL, 0},
-                                    {FM_NORMAL, 1},     // should never be used
-                                    {FM_GZIP, 0},
-                                    {FM_GZIP, 1},
-                                    {FM_ZIP, 0},        // should never be used
-                                    {FM_ZIP, 1} };
-
-int unzip_current_file_nr = 0;
-
-
-static st_finfo_t *
-get_finfo (FILE *file)
-{
-  st_finfo_t *finfo = (st_finfo_t *) map_get (fh_map, file);
-
-  if (finfo == NULL)
-    {
-      fprintf (stderr, "\nINTERNAL ERROR: File pointer was not present in map (%p)\n", file);
-      map_dump (fh_map);
-      exit (1);
-    }
-  return finfo;
-}
-
-
-static fmode2_t
-get_fmode (FILE *file)
-{
-  return get_finfo (file)->fmode;
-}
-
-
-int
-unzip_get_number_entries (const char *filename)
-{
-  FILE *file;
-  unsigned char magic[4] = { 0 };
-
-#undef  fopen
-#undef  fread
-#undef  fclose
-  if ((file = fopen (filename, "rb")) == NULL)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-  fread (magic, 1, sizeof (magic), file);
-  fclose (file);
-#define fopen   fopen2
-#define fclose  fclose2
-#define fread   fread2
-
-  if (magic[0] == 'P' && magic[1] == 'K' && magic[2] == 0x03 && magic[3] == 0x04)
-    {
-      unz_global_info info;
-
-      file = unzOpen (filename);
-      unzGetGlobalInfo (file, &info);
-      unzClose (file);
-      return info.number_entry;
-    }
-  else
-    return -1;
-}
-
-
-int
-unzip_goto_file (unzFile file, int file_index)
-{
-  int retval = unzGoToFirstFile (file), n = 0;
-
-  if (file_index > 0)
-    while (n < file_index)
-      {
-        retval = unzGoToNextFile (file);
-        n++;
-      }
-  return retval;
-}
-
-
-static void
-unzip_seek_helper (FILE *file, int offset)
-{
-  char buffer[MAXBUFSIZE];
-  int n, pos = unztell (file);                  // returns ftell() of the "current file"
-
-  if (pos == offset)
-    return;
-  else if (pos > offset)
-    {
-      unzCloseCurrentFile (file);
-      unzip_goto_file (file, unzip_current_file_nr);
-      unzOpenCurrentFile (file);
-      pos = 0;
-    }
-  n = offset - pos;
-  while (n > 0 && !unzeof (file))
-    n -= unzReadCurrentFile (file, buffer, n > MAXBUFSIZE ? MAXBUFSIZE : n);
-}
-
-
-FILE *
-fopen2 (const char *filename, const char *mode)
-{
-#undef  fopen
-  int n, len = strlen (mode), read = 0, compressed = 0;
-  fmode2_t fmode = FM_UNDEF;
-  st_finfo_t *finfo;
-  FILE *file = NULL;
-
-//  printf ("opening %s", filename);
-  if (fh_map == NULL)
-    {
-      fh_map = map_create (20);                 // 20 simultaneous open files
-      map_put (fh_map, stdin, &finfo_list[0]);  //  should be enough to start with
-      map_put (fh_map, stdout, &finfo_list[0]);
-      map_put (fh_map, stderr, &finfo_list[0]);
-    }
-
-  for (n = 0; n < len; n++)
-    {
-      switch (mode[n])
-        {
-        case 'r':
-          read = 1;
-          break;
-        case 'f':
-        case 'h':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-          fmode = FM_GZIP;
-          break;
-        case 'w':
-        case 'a':
-          fmode = FM_NORMAL;
-          break;
-        case '+':
-          if (fmode == FM_UNDEF)
-            fmode = FM_NORMAL;
-          break;
-        }
-      }
-
-  if (read)
-    {
-#undef  fread
-#undef  fclose
-      unsigned char magic[4] = { 0 };
-      FILE *fh;
-
-      // TODO: check if mode is valid for fopen(), i.e., no 'f', 'h' or number
-      if ((fh = fopen (filename, mode)) != NULL)
-        {
-          fread (magic, sizeof (magic), 1, fh);
-          if (magic[0] == 0x1f && magic[1] == 0x8b && magic[2] == 0x08)
-            {                           // ID1, ID2 and CM. gzip uses Compression Method 8
-              fmode = FM_GZIP;
-              compressed = 1;
-            }
-          else if (magic[0] == 'P' && magic[1] == 'K' &&
-                   magic[2] == 0x03 && magic[3] == 0x04)
-            {
-              fmode = FM_ZIP;
-              compressed = 1;
-            }
-          else
-            /*
-              Files that are opened with mode "r+" will probably be written to.
-              zlib doesn't support mode "r+", so we have to use FM_NORMAL.
-              Mode "r" doesn't require FM_NORMAL and FM_GZIP works, but we
-              shouldn't introduce needless overhead.
-            */
-            fmode = FM_NORMAL;
-          fclose (fh);
-        }
-#define fread   fread2
-#define fclose  fclose2
-    }
-
-  if (fmode == FM_NORMAL)
-    file = fopen (filename, mode);
-  else if (fmode == FM_GZIP)
-    file = gzopen (filename, mode);
-  else if (fmode == FM_ZIP)
-    {
-      file = unzOpen (filename);
-      if (file != NULL)
-        {
-          unzip_goto_file (file, unzip_current_file_nr);
-          unzOpenCurrentFile (file);
-        }
-    }
-
-  if (file == NULL)
-    return NULL;
-
-  finfo = &finfo_list[fmode * 2 + compressed];
-  fh_map = map_put (fh_map, file, finfo);
-
-/*
-  printf (", ptr = %p, mode = %s, fmode = %s\n", file, mode,
-    fmode == FM_NORMAL ? "FM_NORMAL" :
-      (fmode == FM_GZIP ? "FM_GZIP" :
-        (fmode == FM_ZIP ? "FM_ZIP" : "FM_UNDEF")));
-  map_dump (fh_map);
-*/
-  return file;
-#define fopen   fopen2
-}
-
-
-int
-fclose2 (FILE *file)
-{
-#undef  fclose
-  fmode2_t fmode = get_fmode (file);
-
-  map_del (fh_map, file);
-  if (fmode == FM_NORMAL)
-    return fclose (file);
-  else if (fmode == FM_GZIP)
-    return gzclose (file);
-  else if (fmode == FM_ZIP)
-    {
-      unzCloseCurrentFile (file);
-      return unzClose (file);
-    }
-  else
-    return EOF;
-#define fclose  fclose2
-}
-
-
-int
-fseek2 (FILE *file, long offset, int mode)
-{
-#undef  fseek
-  st_finfo_t *finfo = get_finfo (file);
-
-/*
-//  if (fmode != FM_NORMAL)
-  printf ("fmode = %s\n", finfo->fmode == FM_NORMAL ? "FM_NORMAL" :
-                            (finfo->fmode == FM_GZIP ? "FM_GZIP" :
-                              (finfo->fmode == FM_ZIP ? "FM_ZIP" : "FM_UNDEF")));
-*/
-
-  if (finfo->fmode == FM_NORMAL)
-    return fseek (file, offset, mode);
-  else if (finfo->fmode == FM_GZIP)
-    {
-      /*
-        FUCKING zlib documentation! It took me around 4 hours of debugging time
-        to find out that the doc is wrong! From the doc:
-          gzrewind(file) is equivalent to (int)gzseek(file, 0L, SEEK_SET)
-        That is not true for uncompressed files. gzrewind() doesn't change the
-        file pointer for uncompressed files in the ports I tested (zlib 1.1.3,
-        DJGPP, Cygwin & GNU/Linux). It clears the EOF indicator.
-      */
-      if (!finfo->compressed)
-        gzrewind (file);
-      gzseek (file, offset, mode);
-      return gzeof (file);
-    }
-  else if (finfo->fmode == FM_ZIP)
-    {
-      int base;
-      if (mode != SEEK_SET && mode != SEEK_CUR && mode != SEEK_END)
-        {
-          errno = EINVAL;
-          return -1;
-        }
-      if (mode == SEEK_SET)
-        base = 0;
-      else if (mode == SEEK_CUR)
-        base = unztell (file);
-      else // mode == SEEK_END
-        {
-          unz_file_info info;
-
-          unzip_goto_file (file, unzip_current_file_nr);
-          unzGetCurrentFileInfo (file, &info, NULL, 0, NULL, 0, NULL, 0);
-          base = info.uncompressed_size;
-        }
-      unzip_seek_helper (file, base + offset);
-      return unzeof (file);
-    }
-  return -1;
-#define fseek   fseek2
-}
-
-
-size_t
-fread2 (void *buffer, size_t size, size_t number, FILE *file)
-{
-#undef  fread
-  fmode2_t fmode = get_fmode (file);
-
-  if (size == 0 || number == 0)
-    return 0;
-
-  if (fmode == FM_NORMAL)
-    return fread (buffer, size, number, file);
-  else if (fmode == FM_GZIP)
-    {
-      int n = gzread (file, buffer, number * size);
-      return n / size;
-    }
-  else if (fmode == FM_ZIP)
-    {
-      int n = unzReadCurrentFile (file, buffer, number * size);
-      return n / size;
-    }
-  return 0;
-#define fread   fread2
-}
-
-
-int
-fgetc2 (FILE *file)
-{
-#undef  fgetc
-  fmode2_t fmode = get_fmode (file);
-
-  if (fmode == FM_NORMAL)
-    return fgetc (file);
-  else if (fmode == FM_GZIP)
-    return gzgetc (file);
-  else if (fmode == FM_ZIP)
-    {
-      char c;
-      int retval = unzReadCurrentFile (file, &c, 1);
-      return retval <= 0 ? EOF : c & 0xff;      // avoid sign bit extension
-    }
-  else
-    return EOF;
-#define fgetc   fgetc2
-}
-
-
-char *
-fgets2 (char *buffer, int maxlength, FILE *file)
-{
-#undef  fgets
-  fmode2_t fmode = get_fmode (file);
-
-  if (fmode == FM_NORMAL)
-    return fgets (buffer, maxlength, file);
-  else if (fmode == FM_GZIP)
-    {
-      char *retval = gzgets (file, buffer, maxlength);
-      return retval == Z_NULL ? NULL : retval;
-    }
-  else if (fmode == FM_ZIP)
-    {
-      int n = 0, c = 0;
-      while (n < maxlength - 1 && (c = fgetc (file)) != EOF)
-        {
-          buffer[n] = c;                        // '\n' must also be stored in buffer
-          n++;
-          if (c == '\n')
-            {
-              buffer[n] = 0;
-              break;
-            }
-        }
-      if (n >= maxlength - 1 || c == EOF)
-        buffer[n] = 0;
-      return n > 0 ? buffer : NULL;
-    }
-  else
-    return NULL;
-#define fgets   fgets2
-}
-
-
-int
-feof2 (FILE *file)
-{
-#undef  feof
-  fmode2_t fmode = get_fmode (file);
-
-  if (fmode == FM_NORMAL)
-    return feof (file);
-  else if (fmode == FM_GZIP)
-    return gzeof (file);
-  else if (fmode == FM_ZIP)
-    return unzeof (file);                       // returns feof() of the "current file"
-  else
-    return -1;
-#define feof    feof2
-}
-
-
-size_t
-fwrite2 (const void *buffer, size_t size, size_t number, FILE *file)
-{
-#undef  fwrite
-  fmode2_t fmode = get_fmode (file);
-
-  if (size == 0 || number == 0)
-    return 0;
-
-  if (fmode == FM_NORMAL)
-    return fwrite (buffer, size, number, file);
-  else if (fmode == FM_GZIP)
-    {
-      int n = gzwrite (file, (void *) buffer, number * size);
-      return n / size;
-    }
-  else
-    return 0;                                   // writing to zip files is not supported
-#define fwrite  fwrite2
-}
-
-
-int
-fputc2 (int character, FILE *file)
-{
-#undef  fputc
-  fmode2_t fmode = get_fmode (file);
-
-  if (fmode == FM_NORMAL)
-    return fputc (character, file);
-  else if (fmode == FM_GZIP)
-    return gzputc (file, character);
-  else
-    return EOF;                                 // writing to zip files is not supported
-#define fputc   fputc2
-}
-
-
-long
-ftell2 (FILE *file)
-{
-#undef  ftell
-  fmode2_t fmode = get_fmode (file);
-
-  if (fmode == FM_NORMAL)
-    return ftell (file);
-  else if (fmode == FM_GZIP)
-    return gztell (file);
-  else if (fmode == FM_ZIP)
-    return unztell (file);                      // returns ftell() of the "current file"
-  else
-    return -1;
-#define ftell   ftell2
-}
-#endif // HAVE_ZLIB_H
-
-
 #ifndef HAVE_BYTESWAP_H
 uint16_t
 bswap_16 (uint16_t x)
@@ -1972,4 +1415,205 @@ wait2 (int nmillis)
 #elif   defined __BEOS__
   snooze (nmillis * 1000);
 #endif
+}
+
+
+char *
+q_fbackup (const char *filename, int mode)
+{
+  static char buf[FILENAME_MAX];
+
+  if (access (filename, R_OK) != 0)
+    return (char *) filename;
+
+  strcpy (buf, filename);
+  set_suffix (buf, ".BAK");
+  if (strcmp (filename, buf) != 0)
+    {
+      remove (buf);                             // *try* to remove or rename will fail
+      if (rename (filename, buf))               // keep file attributes like date, etc.
+        {
+          fprintf (stderr, "ERROR: Can't rename %s to %s\n", filename, buf);
+          exit (1);
+        }
+    }
+  else
+    // handle the case where filename has the suffix ".BAK".
+    {
+      strcpy (buf, basename (tmpnam2 (buf)));
+      if (rename (filename, buf))
+        {
+          fprintf (stderr, "ERROR: Can't rename %s to %s\n", filename, buf);
+          exit (1);
+        }
+    }
+
+  switch (mode)
+    {
+      case BAK_MOVE:
+        return buf;
+
+      case BAK_DUPE:
+      default:
+        if (q_fcpy (buf, 0, q_fsize (buf), filename, "wb"))
+          {
+            fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
+            exit (1);
+          }
+        sync ();
+        return buf;
+    }
+}
+
+
+unsigned int
+q_fcrc32 (const char *filename, int start)
+{
+  unsigned int count, crc = 0;                  // don't name it crc32 to avoid
+  unsigned char buffer[512];                    //  name clash with zlib's func
+  FILE *fh = fopen (filename, "rb");
+
+  if (!fh)
+    return -1;
+
+  fseek (fh, start, SEEK_SET);
+
+  while ((count = fread (buffer, 1, 512, fh)))
+    crc = mem_crc32 (count, crc, buffer);       // zlib: crc32 (crc32, buffer, count);
+
+  fclose (fh);
+
+  return crc;
+}
+
+
+int
+q_fcpy (const char *src, int start, int len, const char *dest, const char *mode)
+{
+  int seg_len = 0, size = q_fsize (src);
+  char buf[MAXBUFSIZE];
+  FILE *fh, *fh2;
+
+  if (!strcmp (dest, src))
+    return -1;
+
+  if (!(fh = fopen (src, "rb")))
+    {
+      errno = ENOENT;
+      return -1;
+    }
+
+  if (!(fh2 = fopen (dest, mode)))
+    {
+      errno = ENOENT;
+      fclose (fh);
+      return -1;
+    }
+
+  fseek (fh, start, SEEK_SET);
+  fseek (fh2, 0, SEEK_END);
+
+  len = MIN (len, size - start);
+
+  for (; ; len -= seg_len)
+    {
+      seg_len = MIN (len, MAXBUFSIZE);
+      if (!fread (buf, seg_len, 1, fh))
+        break;
+      fwrite (buf, seg_len, 1, fh2);
+    }
+
+  fclose (fh);
+  fclose (fh2);
+
+  sync ();
+  return 0;
+}
+
+
+int
+q_fswap (const char *filename, int start, int len)
+{
+  int seg_len = 0, size = q_fsize (filename);
+  FILE *fh;
+  char buf[MAXBUFSIZE];
+  struct stat fstate;
+
+  // First (try to) change the file mode or we won't be able to write to it if
+  //  it's a read-only file.
+  stat (filename, &fstate);
+  if (chmod (filename, fstate.st_mode | S_IWUSR))
+    {
+      errno = EACCES;
+      return -1;
+    }
+
+  if (!(fh = fopen (filename, "r+b")))
+    {
+      errno = ENOENT;
+      return -1;
+    }
+
+  fseek (fh, start, SEEK_SET);
+
+  len = MIN (len, size - start);
+
+  for (; ; len -= seg_len)
+    {
+      seg_len = MIN (len, MAXBUFSIZE);
+
+      if (!fread (buf, 1, seg_len, fh))
+        break;
+
+      mem_swap (buf, seg_len);
+
+      fseek (fh, -seg_len, SEEK_CUR);
+      fwrite (buf, 1, seg_len, fh);
+    }
+
+  fclose (fh);
+  sync ();
+
+  return 0;
+}
+
+
+int
+q_fncmp (const char *filename, int start, int len, const char *search,
+         int searchlen, int wildcard)
+{
+  int seg_len = 0, seg_pos = 0 // position in segment
+      /*, size = q_fsize (filename) */;
+  char buf[MAXBUFSIZE];
+  FILE *fh;
+
+  if (searchlen >= MAXBUFSIZE)
+    return -1;
+
+  if (!(fh = fopen (filename, "rb")))
+    {
+      errno = ENOENT;
+      return -1;
+    }
+
+//  len = MIN (len, size - start);
+
+  for (; ; start += seg_len, len -= seg_len)
+    {
+      seg_len = MIN (len, MAXBUFSIZE);
+
+      fseek (fh, start, SEEK_SET); // obsolete?
+      if (!fread (buf, 1, seg_len, fh))
+        break;
+
+      for (seg_pos = 0; seg_pos < seg_len; seg_pos++)
+        if (!memwcmp (&buf[seg_pos], search, searchlen, wildcard))
+          {
+            fclose (fh);
+            return start + seg_pos;
+          }
+    }
+
+  fclose (fh);
+  return -1;
 }

@@ -1,7 +1,7 @@
 .PHONY: all clean distclean install flc txtextract id3extract metextract uninstall
 CC=@CC@
 
-CFLAGS=@CFLAGS@
+CFLAGS=@CFLAGS@ @DEFS@
 LDFLAGS=@LDFLAGS@
 
 OBJECTS=flc.o getopt.o misc.o flc_misc.o

@@ -1052,6 +1052,13 @@ snes_gd3 (st_rominfo_t *rominfo)
 
 
 int
+snes_get_snes_hirom(void)
+{
+  return snes_hirom;
+}
+
+
+int
 snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
 // This function assumes file with name filename is in GD3 format
 {

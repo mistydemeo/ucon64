@@ -308,6 +308,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
   unsigned char *buffer, *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12],
                 filenames[GD3_MAX_UNITS][8 + 1 + 3 + 1]; // +1 for period, +1 for ASCII-z;
   int num_units, i, send_header, x, split = 1;
+  int gd_hirom = snes_get_snes_hirom();
 
   init_io (parport);
 
@@ -339,7 +340,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
       gd3_dram_unit[i].name[11] = 0;            // terminate string so we can print it (debug)
       // Use memcpy() instead of strcpy() so that the string terminator in
       //  names[i] won't be copied.
-      memcpy (gd3_dram_unit[i].name, names[i], strlen (names[i]));
+      memcpy (gd3_dram_unit[i].name, strupr(names[i]), strlen (names[i]));
 
       sprintf (filenames[i], "%s.078", names[i]); // should match with what code of -s does
       if (split)
@@ -355,7 +356,17 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
         {
           if (!gd_fsize)                        // Don't call q_fsize() more
             gd_fsize = q_fsize (filename);      //  often than necessary
-          gd3_dram_unit[i].size = (gd_fsize - GD_HEADER_LEN) / num_units;
+          if ( gd_hirom )
+            {
+              gd3_dram_unit[i].size = (gd_fsize - GD_HEADER_LEN) / num_units;
+            }
+          else
+            {
+              if ( ((i+1) * 8 * MBIT) <= (gd_fsize - GD_HEADER_LEN) )
+                gd3_dram_unit[i].size = 8 * MBIT;
+              else
+                gd3_dram_unit[i].size = (gd_fsize - GD_HEADER_LEN) - (i * 8 * MBIT);
+            }
         }
     }
 
@@ -413,6 +424,13 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
           if (gd3_send_prolog_bytes (GD_HEADER_LEN, buffer) == ERROR)
             io_error ();
           gd_bytessend += GD_HEADER_LEN;
+        }
+      if ( split == 0 )                         // Not pre-split -- have to split it ourself
+        {
+          if ( gd_hirom )
+            fseek (file, i * gd3_dram_unit[0].size + GD_HEADER_LEN, SEEK_SET );
+          else
+            fseek (file, i * 0x100000 + GD_HEADER_LEN, SEEK_SET );
         }
       fread (buffer, 1, gd3_dram_unit[i].size, file);
       // Should we just remove the field "data" and use buffer instead?

@@ -4,7 +4,7 @@ config.h - config file for uCON64
 written by 2002 NoisyB (noisyb@gmx.net)
            2002 dbjh
 
-           
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -32,12 +32,14 @@ it is a good start to add support for a new console
 */
 //#define SAMPLE
 
+
 /*
   enables/disables support for gzip files
 
   comment this to disable it even if the configure script found zlib
 */
 @DEFINE_ZLIB@
+
 
 /*
   enables/disables probing in <console>_init()

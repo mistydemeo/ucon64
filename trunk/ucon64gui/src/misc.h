@@ -38,6 +38,7 @@ extern "C" {
 
 #ifdef  ZLIB
 #include <zlib.h>
+#include "unzip.h"
 
 extern FILE *fopen2 (const char *filename, const char *mode);
 extern int fclose2 (FILE *file);
@@ -79,7 +80,6 @@ extern int fputc2 (int character, FILE *file);
 #define ARGS_MAX 128
 #endif // ARGS_MAX
 
-// BeOS already has these (included from param.h via OS.h)
 #ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
@@ -87,7 +87,7 @@ extern int fputc2 (int character, FILE *file);
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #endif
 
-#define NULL_TO_EMPTY(str) ((str) ? (str) : "")
+#define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
 
 //#define RANDOM(min, max) ((rand () % max) + min)
 
@@ -102,9 +102,7 @@ extern int fputc2 (int character, FILE *file);
   #if __BYTE_ORDER == __BIG_ENDIAN
     #define WORDS_BIGENDIAN 1
   #endif
-#elif   defined AMIGA
-  #define WORDS_BIGENDIAN 1
-#elif   defined __sparc__
+#elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || defined __APPLE__
   #define WORDS_BIGENDIAN 1
 #endif
 
@@ -128,6 +126,12 @@ extern int fputc2 (int character, FILE *file);
   #endif
 #elif   defined AMIGA
   #define CURRENT_OS_S "Amiga"
+#elif   defined __APPLE__
+  #if   defined __POWERPC__ || defined __ppc__
+    #define CURRENT_OS_S "Apple (ppc)"
+  #else
+    #define CURRENT_OS_S "Apple"
+  #endif
 #elif   defined __BEOS__
   #define CURRENT_OS_S "BeOS"
 #else
@@ -163,20 +167,6 @@ extern void deinit_conio (void);
 
 
 /*
-  File extension handling
-
-  setext() set/replace extension of filename with ext
-  getext() get extension of filename
-    extension means in this case the extension INCLUDING the dot '.'
-  basename2() GNU basename() clone
-*/
-extern char *setext (char *filename, const char *ext);
-extern const char *getext (const char *filename);
-#define EXTCMP(filename, ext) (strcasecmp (getext (filename), ext))
-extern char *basename2 (const char *str);
-
-
-/*
   String manipulation
 
   areprint() like isprint() but for a whole string
@@ -186,6 +176,12 @@ extern char *basename2 (const char *str);
   mkprint()  convert all chars to isprint()'s
   mkfile()   convert string into a correct file name
   strtrim()  trim isspace()'s from start and end of string
+
+  setext() set/replace extension of filename with ext
+  getext() get extension of filename
+    extension means in this case the extension INCLUDING the dot '.'
+
+  basename2() GNU basename() clone
 */
 extern int areupper (const char *str);
 extern int areprint (const char *str, int size);
@@ -196,7 +192,11 @@ extern char *mkprint (char *str, const unsigned char replacement);
 extern char *mkfile (char *str, const unsigned char replacement);
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
-
+extern char *setext (char *filename, const char *ext);
+extern const char *getext (const char *filename);
+#define EXTCMP(filename, ext) (strcasecmp (getext (filename), ext))
+extern char *basename2 (const char *str);
+//extern char *abs_dirname (const char *str);
 
 /*
   mem functions
@@ -208,7 +208,7 @@ extern char *mkfile (char *str, const unsigned char replacement);
   mem_crc32()  calculate the crc32 of buffer for size bytes
 */
 extern int memwcmp (const void *add, const void *add_with_wildcards, size_t n, int wildcard);
-extern void mem_hexdump (const void *add, size_t n, long virtual_start);
+extern void mem_hexdump (const void *add, size_t n, int virtual_start);
 extern unsigned short mem_crc16 (unsigned int size, unsigned short crc16, const void *buffer);
 #ifdef  ZLIB
 #define mem_crc32(SIZE, CRC, BUF)       crc32(CRC, BUF, SIZE)
@@ -220,7 +220,7 @@ extern void *mem_swap (void *add, size_t n);
 #define bswap_16(x) ((unsigned short int)mem_swap(x,2,2))
 #define bswap_32(x) ((unsigned int)mem_swap(x,4,4))
 #define bswap_64(x) ((unsigned long long int)mem_swap(x,8,8))
-#else
+//#else
 extern unsigned short int bswap_16 (unsigned short int x);
 extern unsigned int bswap_32 (unsigned int x);
 extern unsigned long long int bswap_64 (unsigned long long int x);
@@ -244,6 +244,8 @@ extern unsigned long long int bswap_64 (unsigned long long int x);
   getenv2()       getenv() clone for enviroments w/o HOME, TMP or TEMP variables
   rmdir2()        like rmdir but removes non-empty directories recursively
   tmpnam2()       replacement for tmpnam() temp must have the size of FILENAME_MAX
+  tmpnam3()       like tmpnam2() but creates file or dir at the same time to
+                  prevent double usage
   renlwr()        rename all files in dir to lowercase
   drop_privileges() switch to the real user and group id (leave "root mode")
   register_func() atexit() replacement
@@ -261,8 +263,11 @@ extern char *ansi_strip (char *str);
 #endif
 extern int gauge (time_t init_time, int pos, int size);
 extern char *getenv2 (const char *variable);
-#define getenv getenv2
+//#define getenv getenv2
 extern char *tmpnam2 (char *temp);
+#define TYPE_FILE 0
+#define TYPE_DIR 1
+extern char *tmpnam3 (char *temp, int type);
 extern int rmdir2 (const char *path);
 extern int renlwr (const char *dir);
 #if     defined __unix__ && !defined __MSDOS__
@@ -338,6 +343,15 @@ extern void map_dump (st_map_t *map);
 extern const char *get_property (const char *filename, const char *propname, char *value, const char *def);
 extern int set_property (const char *filename, const char *propname, const char *value);
 #define DELETE_PROPERTY(a, b) (set_property(a, b, NULL))
+
+
+#ifdef  ZLIB
+// Returns the number of files in the "central dir of this disk" or -1 if
+//  filename is not a ZIP file or an error occured.
+extern int unzip_get_number_entries (const char *filename);
+extern int unzip_goto_file (unzFile file, int file_index);
+extern int unzip_current_file_nr;
+#endif
 
 
 #ifdef __cplusplus

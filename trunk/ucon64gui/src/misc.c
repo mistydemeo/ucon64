@@ -494,7 +494,7 @@ mem_swap (void *add, size_t n)
 
 
 void
-mem_hexdump (const void *mem, size_t n, long virtual_start)
+mem_hexdump (const void *mem, size_t n, int virtual_start)
 //hexdump something
 {
   size_t pos;
@@ -505,7 +505,7 @@ mem_hexdump (const void *mem, size_t n, long virtual_start)
   for (pos = 0; pos < n; pos++, p++)
     {
       if (!(pos % 16))
-        printf ("%s%s%08lx  ", pos ? buf : "",
+        printf ("%s%s%08x  ", pos ? buf : "",
                                pos ? "\n" : "",
                                pos + virtual_start);
       printf ("%02x %s", *p, !((pos + 1) % 4) ? " ": "");
@@ -831,6 +831,14 @@ getenv2 (const char *variable)
     }
 
 #ifdef __CYGWIN__
+  /*
+    Under certain circumstances Cygwin's runtime system returns "/" as value of HOME
+    while that var has not been set. To specify the root dir a drive letter should be
+    used.
+  */
+  if (!strcmp (variable, "HOME") && !strcmp (value, "/"))
+    getcwd (value, FILENAME_MAX);
+
   return cygwin_fix (value);
 #else
   return value;
@@ -987,6 +995,30 @@ tmpnam2 (char *temp)
   return temp;
 }
 
+
+char *
+tmpnam3 (char *temp, int type)
+// tmpnam() clone
+{
+  FILE *fh;
+  tmpnam2 (temp);
+
+// create file or dir in the same moment to prevent double usage
+  switch (type)
+    {
+      case TYPE_DIR:
+        mkdir (temp, S_IRUSR|S_IWUSR);
+        break;
+      
+      case TYPE_FILE:
+      default: // a file is the default
+        if ((fh = fopen (temp, "wb+")) != 0)
+          fclose (fh);
+        break;
+    }
+    
+  return temp;
+}
 
 
 #if     defined __unix__ || defined __BEOS__
@@ -1297,6 +1329,8 @@ static st_finfo_t finfo_list[6] = { {FM_NORMAL, 0},
                                     {FM_ZIP, 0},        // should never be used
                                     {FM_ZIP, 1} };
 
+int unzip_current_file_nr = 0;
+
 
 static st_finfo_t *
 get_finfo (FILE *file)
@@ -1317,6 +1351,79 @@ static fmode2_t
 get_fmode (FILE *file)
 {
   return get_finfo (file)->fmode;
+}
+
+
+int
+unzip_get_number_entries (const char *filename)
+{
+  FILE *file;
+  unsigned char magic[4] = { 0 };
+
+#undef  fopen
+#undef  fread
+#undef  fclose
+  if ((file = fopen (filename, "rb")) == NULL)
+    {
+      errno = ENOENT;
+      return -1;
+    }
+  fread (magic, 1, sizeof (magic), file);
+  fclose (file);
+#define fopen   fopen2
+#define fclose  fclose2
+#define fread   fread2
+
+  if (magic[0] == 'P' && magic[1] == 'K' && magic[2] == 0x03 && magic[3] == 0x04)
+    {
+      unz_global_info info;
+
+      file = unzOpen (filename);
+      unzGetGlobalInfo (file, &info);
+      unzClose (file);
+      return info.number_entry;
+    }
+  else
+    return -1;
+}
+
+
+int
+unzip_goto_file (unzFile file, int file_index)
+{
+  if (file_index == 0)
+    return unzGoToFirstFile (file);
+  else
+    {
+      int n = 0, retval = 0;
+      while (n < file_index)
+        {
+          retval = unzGoToNextFile (file);
+          n++;
+        }
+      return retval;
+    }
+}
+
+
+static void
+unzip_seek_helper (FILE *file, int offset)
+{
+  char buffer[MAXBUFSIZE];
+  int n, pos = unztell (file);                  // returns ftell() of the "current file"
+
+  if (pos == offset)
+    return;
+  else if (pos > offset)
+    {
+      unzCloseCurrentFile (file);
+      unzip_goto_file (file, unzip_current_file_nr);
+      unzOpenCurrentFile (file);
+      pos = 0;
+    }
+  n = offset - pos;
+  while (n > 0 && !unzeof (file))
+    n -= unzReadCurrentFile (file, buffer, n > MAXBUFSIZE ? MAXBUFSIZE : n);
 }
 
 
@@ -1414,7 +1521,7 @@ fopen2 (const char *filename, const char *mode)
       file = unzOpen (filename);
       if (file != NULL)
         {
-          unzGoToFirstFile (file);
+          unzip_goto_file (file, unzip_current_file_nr);
           unzOpenCurrentFile (file);
         }
     }
@@ -1456,27 +1563,6 @@ fclose2 (FILE *file)
   else
     return EOF;
 #define fclose  fclose2
-}
-
-
-static void
-unzip_seek_helper (FILE *file, int offset)
-{
-  char buffer[MAXBUFSIZE];
-  int n, pos = unztell (file);                  // returns ftell() of the "current file"
-
-  if (pos == offset)
-    return;
-  else if (pos > offset)
-    {
-      unzCloseCurrentFile (file);
-      unzGoToFirstFile (file);
-      unzOpenCurrentFile (file);
-      pos = 0;
-    }
-  n = offset - pos;
-  while (n > 0 && !unzeof (file))
-    n -= unzReadCurrentFile (file, buffer, n > MAXBUFSIZE ? MAXBUFSIZE : n);
 }
 
 
@@ -1526,7 +1612,7 @@ fseek2 (FILE *file, long offset, int mode)
         {
           unz_file_info info;
 
-          unzGoToFirstFile (file);
+          unzip_goto_file (file, unzip_current_file_nr);
           unzGetCurrentFileInfo (file, &info, NULL, 0, NULL, 0, NULL, 0);
           base = info.uncompressed_size;
         }
@@ -1543,6 +1629,9 @@ fread2 (void *buffer, size_t size, size_t number, FILE *file)
 {
 #undef  fread
   fmode2_t fmode = get_fmode (file);
+
+  if (size == 0 || number == 0)
+    return 0;
 
   if (fmode == FM_NORMAL)
     return fread (buffer, size, number, file);
@@ -1601,7 +1690,7 @@ fgets2 (char *buffer, int maxlength, FILE *file)
       int n = 0, c = 0;
       while (n < maxlength - 1 && (c = fgetc (file)) != EOF)
         {
-          buffer[n] = c;                        // '\n' should also be stored in buffer
+          buffer[n] = c;                        // '\n' must also be stored in buffer
           n++;
           if (c == '\n')
             {
@@ -1642,6 +1731,9 @@ fwrite2 (const void *buffer, size_t size, size_t number, FILE *file)
 {
 #undef  fwrite
   fmode2_t fmode = get_fmode (file);
+
+  if (size == 0 || number == 0)
+    return 0;
 
   if (fmode == FM_NORMAL)
     return fwrite (buffer, size, number, file);

@@ -16,6 +16,9 @@
 
 
 #include"psxpblib.h"
+static unsigned char psx_parallel_out_0 = 0xff;
+static unsigned char psx_parallel_out_2 = 0x00;
+
 
 
 

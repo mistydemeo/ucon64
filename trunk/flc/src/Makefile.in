@@ -18,7 +18,7 @@ CC=@CC@
 CFLAGS=-I. -Wall -W -O3 @DEFS@
 LDFLAGS=-s
 
-OBJECTS=flc.o getopt.o misc.o flc_misc.o format/format.o \
+OBJECTS=flc.o getopt.o misc.o flc_misc.o rmdir2.o format/format.o \
 	format/f_txt.o format/f_met.o format/f_id3.o format/f_other.o
 
 all: flc
@@ -55,3 +55,4 @@ format/f_txt.o: format/f_txt.h $(FLC_STD_H)
 format/f_met.o: format/f_met.h $(FLC_STD_H)
 format/f_id3.o: format/f_id3.h $(FLC_STD_H)
 format/f_other.o: format/f_other.h $(FLC_STD_H)
+rmdir2.o: rmdir2.h

@@ -162,7 +162,10 @@ output (FILE *fp, const st_file_t *file)
   strcat (buf, "                                            ");
   fprintf (fp, "%-9.9s", buf);
 
-  strftime (buf, 11, "%m-%d-%y   ", localtime ((const time_t *)&file->date));
+  strftime (buf, 11, "%m-%d-%Y   ", localtime ((const time_t *)&file->date));
+  buf[6] = buf[8];
+  buf[7] = buf[9];
+  buf[8] = 0;
   fprintf (fp, "%-10.10s", buf);
 
   for (x = 0; file->file_id[x][0]; x++)

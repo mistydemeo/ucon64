@@ -36,7 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc.h"
 #include "flc.h"
 #include "flc_misc.h"
-
+#include "rmdir2.h"  
 
 static void flc_exit (void);
 static int flc_configfile (void);

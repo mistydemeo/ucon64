@@ -62,8 +62,9 @@ typedef struct
   unsigned long size;
   int date;
   int checked;
-#define FLC_MAX_ID_LINES 20
-  char file_id[FLC_MAX_ID_LINES + 1][49];
+#define FLC_MAX_ID_ROWS 20
+#define FLC_MAX_ID_COLS 49
+  char file_id[FLC_MAX_ID_ROWS + 1][FLC_MAX_ID_COLS + 1];
 } st_file_t;
 
 #endif

@@ -168,10 +168,11 @@ void
 ffe_receive_block (unsigned short address, unsigned char *buffer, int len)
 {
   int n, n_try = 0;
-  unsigned char checksum1 = 0x81, checksum2;
+  unsigned char checksum1, checksum2;
 
   do
     {
+      checksum1 = 0x81;
       ffe_send_command (1, address, (unsigned short) len);
       for (n = 0; n < len; n++)
         {
@@ -196,10 +197,11 @@ void
 ffe_receive_block2 (unsigned short address, unsigned char *buffer, int len)
 {
   int n, n_try = 0;
-  unsigned char checksum1 = 0x81, checksum2;
+  unsigned char checksum1, checksum2;
 
   do
     {
+      checksum1 = 0x81;
       ffe_send_command (3, address, (unsigned short) len);
       for (n = 0; n < len; n++)
         {

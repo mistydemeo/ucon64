@@ -83,6 +83,7 @@ const st_usage_t gbx_usage[] =
     {"xgbxb", "BANK", "send/receive 64 kbits SRAM to/from GB Xchanger BANK\n"
                      "BANK can be a number from 0 to 15; " OPTION_LONG_S "port=PORT\n"
                      "receives automatically when ROM does not exist"},
+    {"xgbxm", NULL, "try to enable EPP mode, default is SPP mode"},
 #endif // USE_PARALLEL
     {NULL, NULL, NULL}
   };
@@ -619,14 +620,13 @@ erase (void)
 {
   if (eeprom_type == WINBOND)
     return win_erase ();
-  if (eeprom_type == MX)
+  else if (eeprom_type == MX)
     return mx_erase ();
-  if (eeprom_type == INTEL)
+  else if (eeprom_type == INTEL)
     return intel_erase ();
 
   fputs ("ERROR: Unknown EEPROM type\n", stderr);
   return -1;
-
 }
 */
 
@@ -756,7 +756,7 @@ check_card (void)
   memcpy (game_name, buffer + 0x34, 15);
   game_name[15] = 0;
   for (i = 0; i < 15; i++)
-    if (!isprint ((int) game_name[i]))
+    if (!isprint ((int) game_name[i]) && game_name[i] != 0)
       game_name[i] = '.';
   printf ("Game name: \"%s\"\n", game_name);
 
@@ -847,7 +847,7 @@ set_bank2 (unsigned int bank)
 
 
 static void
-read_eeprom_16k (unsigned int bank)
+read_rom_16k (unsigned int bank)                // ROM or EEPROM
 {
   int idx = 0, i, j;
   char game_name[16];
@@ -904,7 +904,7 @@ read_eeprom_16k (unsigned int bank)
                 memcpy (game_name, buffer + 0x134, 15);
                 game_name[15] = 0;
                 for (i = 0; i < 15; i++)
-                  if (!isprint ((int) game_name[i]))
+                  if (!isprint ((int) game_name[i]) && game_name[i] != 0)
                     game_name[i] = '.';
                 printf ("Found another game: \"%s\"\n\n", game_name);
               }
@@ -914,7 +914,7 @@ read_eeprom_16k (unsigned int bank)
 
 
 static int
-verify_eeprom_16k (unsigned int bank)
+verify_rom_16k (unsigned int bank)              // ROM or EEPROM
 {
   int idx = 0, i, j;
 
@@ -1004,7 +1004,7 @@ win_write_eeprom_16k (unsigned int bank)
   disable_protection();
   delay_us (20000);
 */
-  return verify_eeprom_16k (bank);
+  return verify_rom_16k (bank);
 }
 
 
@@ -1037,7 +1037,7 @@ page_write_128 (unsigned int bank, unsigned char hi_lo, int j, int idx)
       for (i = 0; i < 128; i++)
         write_data (buffer[idx + i]);           // write data to EEPROM
       set_ai_data ((unsigned char) 2, 0x80);    // disable wr/rd inc.
-      delay_us (10);
+      delay_us (10);                            // delay is large enough? - dbjh
       if (wait_status ())
         return -1;                              // wait_status() prints error message
 
@@ -1091,7 +1091,7 @@ mx_write_eeprom_16k (unsigned int bank)
       idx += 128;
     }
   reset_to_read ();                             // return to read mode
-  return verify_eeprom_16k (bank);
+  return verify_rom_16k (bank);
 }
 
 
@@ -1212,7 +1212,7 @@ intel_write_eeprom_16k (unsigned int bank)
 
   out_adr_data (0, 0xff);                       // read array
   set_data_read
-  return verify_eeprom_16k (bank);
+  return verify_rom_16k (bank);
 }
 
 
@@ -1233,7 +1233,7 @@ static void
 enable_sram_bank (void)
 {
   init_port ();
-  set_adr (0x0);                                // write 0000:0x0a default read mode
+  set_adr (0x0000);                             // write 0x0000:0x0a default read mode
   out_byte (0x0a);                              // enable SRAM
   out_byte (0xc0);                              // disable SRAM
   set_adr (0xa000);
@@ -1242,7 +1242,7 @@ enable_sram_bank (void)
 //  out_byte(0x00);                               // ram_off,ram_bank_disable,MBC1
   out_byte (0xc0);                              // ram_on,ram_bank_enable,MBC1
 
-  set_adr (0x0);                                // write 0000:0x0a
+  set_adr (0x0000);                             // write 0x0000:0x0a
   out_byte (0x0a);                              // enable SRAM
 }
 
@@ -1293,10 +1293,10 @@ check_port_mode (void)
 static int
 check_port (void)
 {
-  if (port_8 == 0x3bc)                          // if port == 0x3bc skip EPP test
-    port_mode = UCON64_SPP;
+  if (ucon64.parport_mode == UCON64_EPP && port_8 != 0x3bc)
+    port_mode = UCON64_EPP;                     // if port == 0x3bc => no EPP available
   else
-    port_mode = UCON64_EPP;
+    port_mode = UCON64_SPP;
 
   if (check_port_mode ())
     {
@@ -1305,7 +1305,7 @@ check_port (void)
         return 1;
       else
         {
-          fputs ("GBX found. EPP not found - SPP used\n", stdout);
+          fputs ("GBX found. EPP not found or not enabled - SPP used\n", stdout);
           end_port ();
         }
     }
@@ -1673,8 +1673,8 @@ gbx_read_rom (const char *filename, unsigned int parport)
   starttime = time (NULL);
   for (bank = 0; bank < n_banks; bank++)
     {
-      read_eeprom_16k (bank);
-      if (verify_eeprom_16k (bank))
+      read_rom_16k (bank);
+      if (verify_rom_16k (bank))
         printf ("Verify card error at bank 0x%x\n", bank);
 
       fwrite (buffer, 1, 0x4000, file);
@@ -1751,7 +1751,7 @@ gbx_write_rom (const char *filename, unsigned int parport)
       ucon64_gauge (starttime, n_bytes, filesize);
     }
 
-#if 0 // write_eeprom_16k() already calls verify_eeprom_16k() (indirectly)...
+#if 0 // write_eeprom_16k() already calls verify_rom_16k() (indirectly)...
   // remove last gauge
   fputs ("\r                                                                              \r", stdout);
   fputs ("Verifying card...\n", stdout);
@@ -1767,7 +1767,7 @@ gbx_write_rom (const char *filename, unsigned int parport)
           end_port ();
           exit (1);
         }
-      if (verify_eeprom_16k (bank))
+      if (verify_rom_16k (bank))
         {
           fprintf (stderr, "ERROR: Verify card error at bank 0x%x\n", bank);
           fclose (file);

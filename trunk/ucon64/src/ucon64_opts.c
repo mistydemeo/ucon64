@@ -336,6 +336,7 @@ ucon64_switches (int c, const char *optarg)
       break;
 
     case UCON64_XFALM:
+    case UCON64_XGBXM:
       ucon64.parport_mode = UCON64_EPP;
       break;
 

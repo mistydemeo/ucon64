@@ -567,14 +567,19 @@ LinkerInit (void)               // 4027c4
   */
   if (EPPMode)
     {
+      /*
+        Writing to the ECP register seems to have no effect on my PC (which
+        supports ECP, used appropriate BIOS setting). Tested under Windows XP
+        with Windows executables (Cygwin, VC++ and MinGW) - dbjh
+      */
 #ifndef USE_PPDEV
-      outpb (ECPRegECR, 4);     // Set EPP mode for ECP chipsets
+      outpb (ECPRegECR, 4);                     // Set EPP mode for ECP chipsets
 #endif
       if (LookForLinker ())
         {
           // Linker found using EPP mode.
           linker_found = 1;
-          printf ("Linker found. EPP found.\n");
+          printf ("Linker found. EPP found\n");
 
           if (SPPDataPort == 0x3bc)
             return;
@@ -586,16 +591,16 @@ LinkerInit (void)               // 4027c4
       // Look for linker in SPP mode.
 #ifndef USE_PPDEV
       if (EPPMode)
-        outpb (ECPRegECR, 0);   // Set SPP mode for ECP chipsets
+        outpb (ECPRegECR, 0);                   // Set SPP mode for ECP chipsets
 #endif
 
       EPPMode = 0;
       if (LookForLinker ())
-        printf ("Linker found. EPP not found or not enabled - SPP used.\n");
+        printf ("Linker found. EPP not found or not enabled - SPP used\n");
       else
         {
           fprintf (stderr,
-                   "ERROR: Flash Advance Linker not found or not turned on.\n");
+                   "ERROR: Flash Advance Linker not found or not turned on\n");
           ProgramExit (1);
         }
     }
@@ -827,7 +832,7 @@ CheckForFC (void)
   LinkerInit ();
 //   if (LinkerInit () == 0)
 //      {
-//      fprintf (stderr, "ERROR: Flash Advance Linker not found or not turned on.\n");
+//      fprintf (stderr, "ERROR: Flash Advance Linker not found or not turned on\n");
 //      ProgramExit (1);
 //      }
 
@@ -961,7 +966,7 @@ GetFileSize2 (FILE * fp)
           i++;
         }
       if (HeaderBad)
-        printf ("Fixing logo area.");
+        printf ("Fixing logo area\n");
 
       Complement = 0;
       FileHeader[0xb2] = 0x96;  // Required
@@ -971,10 +976,8 @@ GetFileSize2 (FILE * fp)
       //printf("[Complement = 0x%x]", (int)Complement);
       //printf("[HeaderComp = 0x%x]", (int)FileHeader[0xbd]);
       if (FileHeader[0xbd] != Complement)
-        printf ("Fixing complement check.");
+        printf ("Fixing complement check\n");
 
-      if ((FileHeader[0xbd] != Complement) || HeaderBad)
-        fputc ('\n', stdout);
       rewind (fp);
     }
   else
@@ -1106,7 +1109,7 @@ ProgramNonTurboIntelFlash (FILE * fp)
       outpb (SPPCtrlPort, 0);
 
       if (Ready)
-        ; //printf ("\n\nDone.\n");
+        ; //printf ("\n\nDone\n");
       else
         printf ("\nFlash card write failed!\n");
     }
@@ -1224,7 +1227,7 @@ ProgramTurboIntelFlash (FILE * fp)
       outpb (SPPCtrlPort, 0);
 
       if (Ready)
-        ; //printf ("\n\nDone.\n");
+        ; //printf ("\n\nDone\n");
       else
         {
           WriteFlash (0, INTEL28F_CLEARSR);
@@ -1288,7 +1291,7 @@ ProgramSharpFlash (FILE * fp)
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
-      //printf ("\n\nDone.\n");
+      //printf ("\n\nDone\n");
     }
   else
     printf ("\nFlash card erase failed!\n");
@@ -1345,7 +1348,7 @@ VerifyFlash (FILE * fp)
     addr--;
 
   if (CompareFail == 0)
-    printf ("%d bytes compared ok.\n", addr);
+    printf ("%d bytes compared OK\n", addr);
 }
 
 
@@ -1436,7 +1439,7 @@ fal_main (int argc, char **argv)
               (ChipSize != 64) && (ChipSize != 128) && (ChipSize != 256))
             {
               fprintf (stderr,
-                       "ERROR: Chip size must be 8,16,32,64,128 or 256.\n");
+                       "ERROR: Chip size must be 8,16,32,64,128 or 256\n");
               ProgramExit (1);
             }
           break;
@@ -1595,7 +1598,7 @@ fal_main (int argc, char **argv)
           fprintf (stderr, "ERROR: Can't open file \"%s\"\n", fname);
           ProgramExit (1);
         }
-      printf ("Programming flash with file \"%s\".\n", fname);
+      printf ("Programming flash with file \"%s\"\n", fname);
 
       if (Device == 0xe2)
         ProgramSharpFlash (fp);
@@ -1640,7 +1643,7 @@ fal_main (int argc, char **argv)
           fprintf (stderr, "ERROR: Can't open file \"%s\"\n", fname2);
           ProgramExit (1);
         }
-      printf ("Comparing flash with file \"%s\".\n", fname2);
+      printf ("Comparing flash with file \"%s\"\n", fname2);
 
       VerifyFlash (fp);
       fclose (fp);

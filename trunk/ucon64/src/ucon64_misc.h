@@ -110,7 +110,7 @@ extern long ucon64_testpad (const char *filename, st_rominfo_t *rominfo); //test
 
 extern int ucon64_testsplit (const char *filename);//test if a ROM is split
 
-extern unsigned int ucon64_parport_probe (unsigned int parport);
+extern unsigned int ucon64_parport_init (unsigned int parport);
 extern const char *ucon64_parport_error; //std. error message for parport
 extern const char *ucon64_console_error; //std. error message if the correct console couldn't be found
 

@@ -627,11 +627,11 @@ get_suffix (const char *filename)
   if (!(p = basename (filename)))
     p = (char *) filename;
   if (!(p2 = strrchr (p, '.')))
-    p = "";
+    p2 = "";
   if (p2 == p)
-    p = "";                                     // files can start with '.'; be
+    p2 = "";                                    // files can start with '.'; be
                                                 //  consistent with set_suffix[_i]()
-  return p;
+  return p2;
 }
 
 

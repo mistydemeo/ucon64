@@ -18,8 +18,6 @@ endif
 LDFLAGS=-s
 # On Mac OS X using -s gives the following warning:
 # /usr/bin/libtool: -static not specified, -s invalid
-# However, if we don't use -s we get a host of warning messages when linking to
-# the lib (DLOPEN not defined).
 
 # The test for Cygwin should be done before the test for DJGPP, because the
 # environment variable DJGPP can be set under Bash for people who have

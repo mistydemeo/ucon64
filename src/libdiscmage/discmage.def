@@ -10,7 +10,6 @@ dm_fdopen
 dm_read
 dm_write
 dm_set_gauge
-dm_track_init
 dm_cue_read
 dm_cue_write
 dm_toc_read

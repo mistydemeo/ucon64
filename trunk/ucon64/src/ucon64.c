@@ -1031,7 +1031,7 @@ int ucon64_nfo(struct ucon64_ *rom)
   {
      strhexdump(rom->header,0,rom->header_start+rom->buheader_len,rom->header_len);
      printf("\n");
-  }	
+  }
 
   printf("%s\n%s%s%s\n%s\n%ld bytes (%.4f Mb)\n\n"
     ,rom->name

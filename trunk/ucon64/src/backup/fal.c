@@ -1736,17 +1736,17 @@ fal_usage (void)
 {
   printf ("%s\n"
           "  " OPTION_LONG_S "xfal        send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
-          "                receives automatically when " OPTION_LONG_S "rom does not exist\n"
+          "                  receives automatically when " OPTION_LONG_S "rom does not exist\n"
           "  " OPTION_LONG_S "xfalc=SIZE  specify chip SIZE in mbits of ROM in Flash Advance Linker when\n"
-          "                receiving. SIZE can be 8,16,32,64,128 or 256. default is 32\n"
+          "                  receiving. SIZE can be 8,16,32,64,128 or 256. default is 32\n"
 #if 0
           "  " OPTION_LONG_S "xfalm       use SPP mode, default is EPP\n"
 #endif
           "  " OPTION_LONG_S "xfals       send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
-          "                receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n"
+          "                  receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n"
           "  " OPTION_LONG_S "xfalb=BANK  send/receive SRAM to/from Flash Advance Linker BANK\n"
-          "                BANK can be 1, 2, 3 or 4;  " OPTION_LONG_S "file=PORT\n"
-          "                receives automatically when SRAM does not exist\n"
+          "                  BANK can be 1, 2, 3 or 4;  " OPTION_LONG_S "file=PORT\n"
+          "                  receives automatically when SRAM does not exist\n"
           "                  You only need to specify PORT if uCON64 doesn't detect the\n"
           "                  (right) parallel port. If that is the case give a hardware\n"
           "                  address: ucon64 " OPTION_LONG_S "xfal \"rom.gba\" 0x378\n"

@@ -53,10 +53,8 @@ int
 main (int argc, char *argv[])
 {
   char buf[FILENAME_MAX + 1];
-#if 0
   char temp[FILENAME_MAX];
   char cwd[FILENAME_MAX];
-#endif
   st_file_t file, *file_p = NULL;
   char path[FILENAME_MAX];
   struct dirent *ep;
@@ -141,17 +139,6 @@ main (int argc, char *argv[])
         }
     }
 
-#if 0
-  if (!tmpnam2 (temp))
-    {
-      fprintf (stderr, "ERROR: could not create temp dir");
-      return -1;
-    }
-  mkdir (temp, 0777);
-  getcwd (cwd, FILENAME_MAX);
-  chdir (temp);
-#endif
-
   if (flc.html)
     printf ("<html><head><title></title></head><body><pre><tt>");
 
@@ -179,12 +166,18 @@ main (int argc, char *argv[])
 
       output (&file.sub);
 
-//      chdir (cwd);
-//      remove (temp);
-
       return 0;
     }
   else path[strlen (path) - strlen (FILENAME_ONLY (path))] = 0;
+
+  if (!tmpnam2 (temp))
+    {
+      fprintf (stderr, "ERROR: could not create temp dir");
+      return -1;
+    }
+  mkdir (temp, S_IRUSR|S_IWUSR);
+  getcwd (cwd, FILENAME_MAX);
+  chdir (temp);
 
 /*
   multiple file handling
@@ -225,25 +218,21 @@ main (int argc, char *argv[])
       strcpy (file_p->sub.name, buf);
       extract (&file_p->sub);
     }
-
   (void) closedir (dp);
-//  chdir (cwd);
-//  remove (temp);
+  chdir (cwd);
+//  rmdir_R (temp);
   file_p->next = NULL;
   file_p = &file;
 
-  if (flc.sort)
-    {
-      sort (file_p);
-    }
-      while (file_p)
-        {
-          output (&file_p->sub);
-          file_p = file_p->next;
-        }
+  if (flc.sort) sort (file_p);
 
-      free (file.next);
-//    }
+  while (file_p)
+    {
+      output (&file_p->sub);
+      file_p = file_p->next;
+    }
+
+  free (file.next);
 
   if (flc.html)
     printf ("</pre></tt></body></html>\n");

@@ -101,7 +101,7 @@ extern unsigned long CalculateBufferCRC (unsigned int count, unsigned long crc,
   this is just a wrapper
 */
 #ifndef UNZIP
-//extern unsigned long unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size);
+extern unsigned long crc32 (unsigned long dummy, unsigned char *prg_code, size_t size);
 #endif
 extern unsigned long fileCRC32 (const char *filename, long start);   // calculate CRC32 of filename beginning from start
 

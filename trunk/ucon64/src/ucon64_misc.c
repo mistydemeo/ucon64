@@ -147,6 +147,16 @@ CalculateBufferCRC (unsigned int count, unsigned long crc, void *buffer)
   return crc;
 }
 
+#ifndef UNZIP
+unsigned long
+crc32 (unsigned long dummy, unsigned char *prg_code, size_t size)
+{
+  unsigned long crc = 0;
+
+  return CalculateBufferCRC ((unsigned int) size, crc, (void *) prg_code);
+}
+#endif
+
 
 unsigned long
 CalculateFileCRC (FILE * file)

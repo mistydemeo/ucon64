@@ -38,6 +38,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "patch/ips.h"
 #include "backup/fal.h"
 
+
+#define GBA_NAME_LEN 12
+#define LOGODATA_LEN 156
+#define GBA_HEADER_START 0
+#define GBA_HEADER_LEN (sizeof (st_gba_header_t))
+
+
 static int gba_chksum (st_rominfo_t *rominfo);
 static int gbautil (const char *filein, const char *fileout);
 
@@ -157,14 +164,26 @@ Offset beh-bfh - Reserved  area  -  Fixed,  00h filled area without any useful
 */
 typedef struct st_gba_header
 {
-  char pad[0xc0];
+  unsigned char start[4];                       // 0x00
+  unsigned char logo[LOGODATA_LEN];             // 0x04
+  unsigned char name[GBA_NAME_LEN];             // 0xa0
+  unsigned char game_id_prefix;                 // 0xac
+  unsigned char game_id_low;                    // 0xad
+  unsigned char game_id_high;                   // 0xae
+  unsigned char game_id_country;                // 0xaf
+  unsigned char maker_high;                     // 0xb0
+  unsigned char maker_low;                      // 0xb1
+  unsigned char pad1;
+  unsigned char gba_type;                       // 0xb3
+  unsigned char device_type;                    // 0xb4
+  unsigned char pad2[7];
+  unsigned char version;                        // 0xbc
+  unsigned char checksum;                       // 0xbd
+  unsigned char pad3[2];
 } st_gba_header_t;
-#define GBA_HEADER_START 0
-#define GBA_HEADER_LEN (sizeof (st_gba_header_t))
 
 static st_gba_header_t gba_header;
 #define CC (const char)
-#define LOGODATA_LEN 156
 static const char logodata[] = {
   0x24, CC 0xff, CC 0xae, 0x51,
   0x69, CC 0x9a, CC 0xa2, 0x21, 0x3d, CC 0x84, CC 0x82, 0x0a,
@@ -192,19 +211,20 @@ static const char logodata[] = {
 int
 gba_n (st_rominfo_t *rominfo, const char *name)
 {
-  char buf[0x0b], dest_name[FILENAME_MAX];
+  char buf[GBA_NAME_LEN], dest_name[FILENAME_MAX];
 
-  memset (buf, 0, 0x0b);
-  strncpy (buf, name, 0x0b);
+  memset (buf, 0, GBA_NAME_LEN);
+  strncpy (buf, name, GBA_NAME_LEN);
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fwrite (buf, GBA_HEADER_START + rominfo->buheader_len + 0xa0, 0x0b,
+  q_fwrite (buf, GBA_HEADER_START + rominfo->buheader_len + 0xa0, GBA_NAME_LEN,
             dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
+
 
 int
 gba_logo (st_rominfo_t *rominfo)
@@ -334,7 +354,7 @@ gba_init (st_rominfo_t *rominfo)
 
   q_fread (&gba_header, GBA_HEADER_START +
            rominfo->buheader_len, GBA_HEADER_LEN, ucon64.rom);
-  if (OFFSET (gba_header, 0xac) == 'A' && OFFSET (gba_header, 0xb3) == 0)
+  if (gba_header.game_id_prefix == 'A' && gba_header.gba_type == 0)
     result = 0;
   else
     {
@@ -344,7 +364,7 @@ gba_init (st_rominfo_t *rominfo)
 
       q_fread (&gba_header, GBA_HEADER_START +
                rominfo->buheader_len, GBA_HEADER_LEN, ucon64.rom);
-      if (OFFSET (gba_header, 0xac) == 'A' && OFFSET (gba_header, 0xb3) == 0)
+      if (gba_header.game_id_prefix == 'A' && gba_header.gba_type == 0)
         result = 0;
       else
 #endif
@@ -358,37 +378,38 @@ gba_init (st_rominfo_t *rominfo)
   rominfo->header = &gba_header;
 
   // internal ROM name
-  strncpy (rominfo->name, (const char *) &OFFSET (gba_header, 0xa0), 0x10);
-  rominfo->name[0x10] = 0;
+  strncpy (rominfo->name, (const char *) gba_header.name, GBA_NAME_LEN);
+  rominfo->name[GBA_NAME_LEN] = 0;
 
   //ROM maker
-//  sprintf (rominfo->maker, "%c%c", OFFSET (gba_header, 0xb0), OFFSET (gba_header, 0xb1));
-  rominfo->maker = (const char *) &OFFSET (gba_header, 0xb0);
+  value = (gba_header.maker_high - '0') * 36 + gba_header.maker_low - '0';
+  if (value < 0 || value >= NINTENDO_MAKER_LEN)
+    value = 0;
+  rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[value]);
 
   // ROM country
-  value = OFFSET (gba_header, 0xaf);
   rominfo->country =
-    (value == 'J') ? "Japan/Asia" :
-    (value == 'E') ? "U.S.A." :
-    (value == 'P') ? "Europe, Australia and Africa" :
+    (gba_header.game_id_country == 'J') ? "Japan/Asia" :
+    (gba_header.game_id_country == 'E') ? "U.S.A." :
+    (gba_header.game_id_country == 'P') ? "Europe, Australia and Africa" :
     "Unknown country";
 
   // misc stuff
-  sprintf (buf, "Version: %02x\n", OFFSET (gba_header, 0xbc));
+  sprintf (buf, "Version: %02x\n", gba_header.version);
   strcat (rominfo->misc, buf);
 
-  sprintf (buf, "Device type: %02x\n", OFFSET (gba_header, 0xb4));
+  sprintf (buf, "Device type: %02x\n", gba_header.device_type);
   strcat (rominfo->misc, buf);
 
-  value = OFFSET (gba_header, 0) << 24;
-  value += OFFSET (gba_header, 1) << 16;
-  value += OFFSET (gba_header, 2) << 8;
-  value += OFFSET (gba_header, 3);
+  value = gba_header.start[0] << 24;
+  value += gba_header.start[1] << 16;
+  value += gba_header.start[2] << 8;
+  value += gba_header.start[3];
   sprintf (buf, "Start address: %08x\n", value);
   strcat (rominfo->misc, buf);
 
   strcat (rominfo->misc, "Logo data: ");
-  if (memcmp (&OFFSET (gba_header, 4), logodata, LOGODATA_LEN) == 0)
+  if (memcmp (gba_header.logo, logodata, LOGODATA_LEN) == 0)
     {
 #ifdef  ANSI_COLOR
       if (ucon64.ansi_color)
@@ -414,7 +435,7 @@ gba_init (st_rominfo_t *rominfo)
       rominfo->internal_crc_len = 1;
       rominfo->current_internal_crc = gba_chksum (rominfo);
 
-      rominfo->internal_crc = OFFSET (gba_header, 0xbd);
+      rominfo->internal_crc = gba_header.checksum;
       rominfo->internal_crc2[0] = 0;
     }
 

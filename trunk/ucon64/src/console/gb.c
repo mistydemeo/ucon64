@@ -22,10 +22,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -36,16 +36,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "gb.h"
-
 #include "console/nes.h"
-
 #include "backup/gbx.h"
 #include "backup/mgd.h"
 #include "backup/ssc.h"
-
 #include "patch/ips.h"
 #include "patch/bsl.h"
 
+
+#define GAMEBOY_HEADER_START 0x100
+#define GAMEBOY_HEADER_LEN (sizeof (st_gameboy_header_t))
+#define GB_NAME_LEN 15
 
 const st_usage_t gameboy_usage[] =
   {
@@ -78,10 +79,26 @@ const st_usage_t gameboy_usage[] =
 */
 typedef struct st_gameboy_header
 {
-  char pad[80];
+  unsigned char id1;                            // 0x00
+  unsigned char id2;                            // 0x01
+  unsigned char start_low;                      // 0x02
+  unsigned char start_high;                     // 0x03
+  unsigned char pad1[0x30];
+  unsigned char name[GB_NAME_LEN];              // 0x34
+  unsigned char gb_type;                        // 0x43
+  unsigned char maker_high;                     // 0x44
+  unsigned char maker_low;                      // 0x45
+  unsigned char pad2;
+  unsigned char rom_type;                       // 0x47
+  unsigned char rom_size;                       // 0x48
+  unsigned char sram_size;                      // 0x49
+  unsigned char country;                        // 0x4a
+  unsigned char maker;                          // 0x4b
+  unsigned char version;                        // 0x4c
+  unsigned char complement_checksum;            // 0x4d
+  unsigned char checksum_high;                  // 0x4e
+  unsigned char checksum_low;                   // 0x4f
 } st_gameboy_header_t;
-#define GAMEBOY_HEADER_START 0x100
-#define GAMEBOY_HEADER_LEN (sizeof (st_gameboy_header_t))
 
 st_gameboy_header_t gameboy_header;
 
@@ -258,15 +275,15 @@ gameboy_sgb (st_rominfo_t *rominfo)
 int
 gameboy_n (st_rominfo_t *rominfo, const char *name)
 {
-  char buf[16], dest_name[FILENAME_MAX];
+  char buf[GB_NAME_LEN], dest_name[FILENAME_MAX];
 
-  memset (buf, 0, 16);
-  strncpy (buf, name, 16);
+  memset (buf, 0, GB_NAME_LEN);
+  strncpy (buf, name, GB_NAME_LEN);
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fwrite (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x034, 16,
-            dest_name, "r+b");
+  q_fwrite (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x34,
+            GB_NAME_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -282,14 +299,12 @@ gameboy_chk (st_rominfo_t *rominfo)
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
-  q_fputc (dest_name,
-              GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d,
-              checksum.complement, "r+b");
-  q_fputc (dest_name,
-              GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4e,
-              (rominfo->current_internal_crc & 0xff00) >> 8, "r+b");
+  q_fputc (dest_name, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d,
+           checksum.complement, "r+b");
+  q_fputc (dest_name, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4e,
+           (rominfo->current_internal_crc & 0xff00) >> 8, "r+b");
   q_fputc (dest_name, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4f,
-              rominfo->current_internal_crc & 0xff, "r+b");
+           rominfo->current_internal_crc & 0xff, "r+b");
 
   q_fread (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d, 3, dest_name);
   mem_hexdump (buf, 3, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d);
@@ -355,60 +370,7 @@ gameboy_init (st_rominfo_t *rominfo)
 {
   int result = -1, value, x;
   char buf[MAXBUFSIZE];
-  static const char *gameboy_maker[0x100] = {
-    NULL, "Nintendo", NULL, NULL, NULL,
-    NULL, NULL, NULL, "Capcom", NULL,
-    "Jaleco", "Coconuts", NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, "Hudson Soft",
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, "Nintendo", NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, "Spectrum Holobyte", NULL, "Irem", NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    "Absolute Entertainment", "Acclaim", "Activision", "American Sammy", "Gametek",
-    "Park Place", "LJN", NULL, NULL, NULL,
-    "Bitmap Brothers/Mindscape", NULL, NULL, "Tradewest", NULL,
-    NULL, "Titus", "Virgin", NULL, NULL,
-    NULL, NULL, NULL, "Ocean", NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, "ElectroBrain", "Infogrames", NULL, "Broderbund",
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, "Accolade", "Triffix Entertainment", NULL, NULL,
-    NULL, NULL, "Kemco", NULL, NULL,
-    NULL, "Lozc", NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, "Bullet-Proof Software",
-    "Vic Tokai", NULL, NULL, NULL, NULL,
-    NULL, NULL, "Tsuburava", NULL, NULL,
-    NULL, NULL, NULL, "ARC", NULL,
-    NULL, "Imagineer", NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, "Konami",
-    NULL, "Kawada", "Takara", NULL, "Technos Japan",
-    "Broderbund", "Namcot", NULL, NULL, NULL,
-    NULL, NULL, "ASCII/Nexoft", NULL, NULL,
-    "Enix", NULL, "HAL", NULL, NULL,
-    NULL, NULL, "SunSoft", NULL, "Imagesoft",
-    NULL, "Sammy", "Taito", NULL, "Kemco",
-    "SquareSoft", NULL, "Data East", "Tonkin House", NULL,
-    NULL, NULL, "Palcom/Ultra", "VAP", NULL,
-    NULL, "FCI/Pony Canyon", NULL, NULL, "Sofel",
-    "Quest", NULL, NULL, NULL, NULL,
-    NULL, NULL, "Banpresto", "Tomy", NULL,
-    NULL, "NCS", NULL, "Altron", NULL,
-    "Towachiki", NULL, NULL, NULL, "Epoch",
-    NULL, NULL, "Asmik", NULL, "King Records",
-    "Atlus", NULL, NULL, "IGS", NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
-    NULL},
-  *gameboy_romtype[0x100] = {
+  static const char *gameboy_romtype[0x100] = {
     "ROM only",
     "ROM and MBC1",
     "ROM, MBC1 and RAM",
@@ -481,7 +443,7 @@ gameboy_init (st_rominfo_t *rominfo)
 
   q_fread (&gameboy_header, GAMEBOY_HEADER_START +
     rominfo->buheader_len, GAMEBOY_HEADER_LEN, ucon64.rom);
-  if (OFFSET (gameboy_header, 0) == 0x00 && OFFSET (gameboy_header, 1) == 0xc3)
+  if (gameboy_header.id1 == 0x00 && gameboy_header.id2 == 0xc3)
     result = 0;
   else
     {
@@ -490,7 +452,7 @@ gameboy_init (st_rominfo_t *rominfo)
 
       q_fread (&gameboy_header, GAMEBOY_HEADER_START +
         rominfo->buheader_len, GAMEBOY_HEADER_LEN, ucon64.rom);
-      if (OFFSET (gameboy_header, 0) == 0x00 && OFFSET (gameboy_header, 1) == 0xc3)
+      if (gameboy_header.id1 == 0x00 && gameboy_header.id2 == 0xc3)
         result = 0;
       else
         result = -1;
@@ -503,43 +465,49 @@ gameboy_init (st_rominfo_t *rominfo)
   rominfo->header = &gameboy_header;
 
   // internal ROM name
-  strncpy (rominfo->name, (const char *) &OFFSET (gameboy_header, 0x34), 20);
-  rominfo->name[20] = 0;                        // terminate string
+  strncpy (rominfo->name, (const char *) gameboy_header.name, GB_NAME_LEN);
+  rominfo->name[GB_NAME_LEN] = 0;               // terminate string
 
   // ROM maker
-  rominfo->maker = NULL_TO_UNKNOWN_S (gameboy_maker[OFFSET (gameboy_header, 0x4b)]);
+  if (gameboy_header.maker == 0x33)
+    x = (gameboy_header.maker_high - '0') * 36 + gameboy_header.maker_low - '0';
+  else
+    x = (gameboy_header.maker >> 4) * 36 + (gameboy_header.maker & 0x0f);
+
+  if (x < 0 || x >= NINTENDO_MAKER_LEN)
+    x = 0;
+  rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[x]);
 
   // ROM country
-  rominfo->country = (OFFSET (gameboy_header, 0x4a) == 0) ? "Japan" : "U.S.A./Europe";
+  rominfo->country = gameboy_header.country == 0 ? "Japan" : "U.S.A./Europe";
 
   // misc stuff
-  sprintf (buf, "ROM type: %s\n", NULL_TO_UNKNOWN_S (gameboy_romtype[OFFSET (gameboy_header, 0x47)]));
+  sprintf (buf, "ROM type: %s\n",
+    NULL_TO_UNKNOWN_S (gameboy_romtype[gameboy_header.rom_type]));
   strcat (rominfo->misc, buf);
 
-  value = OFFSET (gameboy_header, 0x49);
-  if (!value)
+  if (!gameboy_header.sram_size)
     sprintf (buf, "Save RAM: No\n");
   else
     {
-      value = (value & 0x03) * 2;
+      value = (gameboy_header.sram_size & 0x03) * 2;
       value = (value ? (1 << (value - 1)) : 0);
 
       sprintf (buf, "Save RAM: Yes, %d kBytes\n", value);
     }
   strcat (rominfo->misc, buf);
 
-  sprintf (buf, "Version: 1.%d\n", OFFSET (gameboy_header, 0x4c));
+  sprintf (buf, "Version: 1.%d\n", gameboy_header.version);
   strcat (rominfo->misc, buf);
 
   sprintf (buf, "Game Boy type: %s\n",
-    (OFFSET (gameboy_header, 0x43) == 0x80) ? "Color" :
+    (gameboy_header.gb_type == 0x80) ? "Color" :
 //    (OFFSET (gameboy_header, 0x46) == 0x3) ? "Super" :
-    "Standard (4 Colors)");
+    "Standard (4 colors)");
   strcat (rominfo->misc, buf);
 
-  value = 0;
-  value += OFFSET (gameboy_header, 0x03) << 8;
-  value += OFFSET (gameboy_header, 0x02);
+  value = gameboy_header.start_high << 8;
+  value += gameboy_header.start_low;
 
   sprintf (buf, "Start address: %04x", value);
   strcat (rominfo->misc, buf);
@@ -555,15 +523,14 @@ gameboy_init (st_rominfo_t *rominfo)
       checksum = gameboy_chksum (rominfo);
       rominfo->current_internal_crc = checksum.value;
 
-      rominfo->internal_crc =
-        (q_fgetc (ucon64.rom, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4e) << 8) +
-         q_fgetc (ucon64.rom, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4f);
+      rominfo->internal_crc = (gameboy_header.checksum_high << 8) +
+                              gameboy_header.checksum_low;
 
       sprintf (buf,
                "Complement checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)",
                rominfo->internal_crc2_len * 2, rominfo->internal_crc2_len * 2);
 
-      x = q_fgetc (ucon64.rom, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d);
+      x = gameboy_header.complement_checksum;
       sprintf (rominfo->internal_crc2, buf,
 #ifdef  ANSI_COLOR
                ucon64.ansi_color ?
@@ -574,8 +541,7 @@ gameboy_init (st_rominfo_t *rominfo)
 #else
                (checksum.complement == x) ? "Ok" : "Bad",
 #endif
-               checksum.complement,
-               (checksum.complement == x) ? "=" : "!", x);
+               checksum.complement, (checksum.complement == x) ? "=" : "!", x);
     }
   return result;
 }

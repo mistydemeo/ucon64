@@ -146,7 +146,7 @@ typedef struct st_snes_header
   unsigned char map_type;                       // 37, a.k.a. ROM makeup
   unsigned char rom_type;                       // 38
 #define bs_month rom_type
-  unsigned char size;                           // 39
+  unsigned char rom_size;                       // 39
   unsigned char sram_size;                      // 40
 #define bs_makeup sram_size
   unsigned char country;                        // 41
@@ -2275,66 +2275,8 @@ snes_init (st_rominfo_t *rominfo)
   unsigned char *rom_buffer;
   st_unknown_header_t header;
   char buf[MAXBUFSIZE], *str;
-  static const char *snes_maker[0x100] = {
-    NULL, "Nintendo", NULL, "Imagineer-Zoom", NULL,
-    "Zamuse", "Falcom", NULL, "Capcom", "HOT-B",
-    "Jaleco", "Coconuts", "Rage Software", NULL, "Technos",
-    "Mebio Software", NULL, "Starfish", "Gremlin Graphics", "Electronic Arts",
-    NULL, "COBRA Team", "Human/Field", "KOEI", "Hudson Soft",
-    "Game Village", "Yanoman", NULL, "Tecmo", NULL,
-    "Open System", "Virgin Games", "KSS", "Sunsoft", "POW",
-    "Micro World", NULL, NULL, "Enix", "Loriciel/Electro Brain",
-    "Kemco", "Seta Co., Ltd.", NULL, NULL, NULL,
-    "Visit Co., Ltd.", NULL, NULL, "Viacom New Media", "Carrozzeria",
-    "Dynamic", "Nintendo", "Magifact", "Hect", NULL,
-    NULL, "Capcom", NULL, NULL, "Arcade Zone",
-    "Empire Software", "Loriciel", NULL, NULL, "Seika Corp.",
-    "UBI SOFT Entertainment Software", NULL, NULL, NULL, NULL,
-    "System 3", "Spectrum Holobyte", NULL, "Irem", NULL,
-    "Raya Systems/Sculptured Software", "Renovation Products", "Malibu Games/Black Pearl",
-      NULL, "U.S. Gold",
-    "Absolute Entertainment", "Acclaim/LJN Ltd.", "Activision", "American Sammy",
-      "Time Warner Interactive/Bitmasters" /*"GameTek"*/,
-    "Hi Tech Expressions", "LJN Ltd.", NULL, NULL, NULL,
-    "Mindscape", NULL, NULL, "Tradewest", NULL,
-    "American Softworks Corp.", "Titus", "Virgin Interactive Entertainment",
-      "Maxis", "Origin/FCI/Pony Canyon",
-    NULL, NULL, NULL, "Ocean", NULL,
-    "Electronic Arts", NULL, "Laser Beam", NULL, NULL,
-    "Elite", "Electro Brain", "Infogrames", "Interplay", "LucasArts Entertainment",
-    "Parker Brothers", "Konami", "STORM", NULL, NULL,
-    "THQ Software", "Accolade Inc.", "Triffix Entertainment", NULL, "Microprose",
-    NULL, NULL, "Kemco", "Misawa", "Teichio",
-    "Namco Ltd.", "Lozc", "KOEI", NULL, "Tokuma Shoten Intermedia",
-    NULL, "DATAM-Polystar", NULL, NULL, "Bullet-Proof Software",
-    "Vic Tokai", NULL, "Character Soft", "I'Max", "Takara",
-    "CHUN Soft", "Video System Co., Ltd.", "BEC", NULL, "Varie",
-    NULL, "Kaneco", NULL, "Pack In Video", "Nichibutsu",
-    "Tecmo", "Imagineer", NULL, NULL, NULL,
-    "Telenet", "Hori", NULL, NULL, "Konami",
-    "K. Amusement Leasing Co.", NULL, "Takara", NULL, "Technos",
-    "JVC", NULL, "Toei Animation", "Toho", NULL,
-    "Namco Ltd.", NULL, "ASCII Co./Activision", "BanDai America", NULL,
-    "Enix", NULL, "Halken", NULL, NULL,
-    NULL, "Culture Brain", "Sunsoft", "Toshiba EMI", "Sony/Imagesoft",
-    NULL, "Sammy", "Taito", NULL, "Kemco",
-    "Square", "Tokuma Soft", "Data East", "Tonkin House", NULL,
-    "Falcom" /*"KOEI"*/, NULL, "Konami USA", "NTVIC", NULL,
-    "Meldac", "Origin/FCI/Pony Canyon", "Angel/Sotsu Agency/Sunrise", "Disco/Taito",
-      "Sofel",
-    "Quest Corp.", "Sigma", NULL, NULL, "Naxat",
-    NULL, "Capcom", "Banpresto", "Tomy", "Acclaim",
-    NULL, "NCS", "Human Entertainment", "Altron", "Jaleco",
-    NULL, "Yutaka", NULL, "T&Esoft", "Epoch Co., Ltd.",
-    NULL, "Athena", "Asmik", "Natsume", "King Records",
-    "Atlus", "Sony Music Entertainment", NULL, "IGS", NULL,
-    NULL, "Motown Software", "Left Field Entertainment",
-      "Beam Software/Extreme Ent. Grp.", "Tec Magik",
-    NULL, NULL, NULL, NULL, "Cybersoft",
-    NULL, NULL, NULL, NULL, "Davidson",
-    "Hudson Soft"},
 #define SNES_COUNTRY_MAX 0xe
-      *snes_country[SNES_COUNTRY_MAX] = {
+  static const char *snes_country[SNES_COUNTRY_MAX] = {
     "Japan",
     "U.S.A.",
     "Europe, Oceania and Asia",                 // Australia is part of Oceania
@@ -2349,7 +2291,7 @@ snes_init (st_rominfo_t *rominfo)
     "Hong Kong and China",
     "Indonesia",
     "South Korea"},
-      *snes_romtype[3] = {
+    *snes_romtype[3] = {
     "ROM",                                      // NOT ROM only, ROM + other chip is possible
     "ROM and RAM",
     "ROM and Save RAM"};
@@ -2588,26 +2530,14 @@ snes_init (st_rominfo_t *rominfo)
 
   // ROM maker
   if (snes_header.maker == 0x33 || bs_dump)
-    {
-#if 1
-      x = (snes_header.maker_high - '0') * 36 + snes_header.maker_low - '0';
-      if (x < 0 || x > 791)
-        x = 0;
-      rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[x]);
-#else
-      x = (snes_header.maker_high < 0x3a ?
-            (snes_header.maker_high - 0x30) * 16 :
-            (snes_header.maker_high - 0x37) * 16) + (snes_header.maker_low < 0x3a ?
-                                                      snes_header.maker_low - 0x30 :
-                                                      snes_header.maker_low - 0x37);
-      if (x < 0 || x > 255)
-        x = 0;
-      rominfo->maker = NULL_TO_UNKNOWN_S (snes_maker[x]);
-#endif
-    }
-  else
-    rominfo->maker = snes_header.maker == 0 ? "Demo or Beta ROM?" :
-      NULL_TO_UNKNOWN_S (snes_maker[snes_header.maker]);
+    x = (snes_header.maker_high - '0') * 36 + snes_header.maker_low - '0';
+  else if (snes_header.maker != 0)
+    x = (snes_header.maker >> 4) * 36 + (snes_header.maker & 0x0f);
+
+  if (x < 0 || x >= NINTENDO_MAKER_LEN)
+    x = 0;
+  rominfo->maker = snes_header.maker == 0 ? "Demo or Beta ROM?" :
+    NULL_TO_UNKNOWN_S (nintendo_maker[x]);
 
   if (!bs_dump)
     {
@@ -2615,7 +2545,7 @@ snes_init (st_rominfo_t *rominfo)
       rominfo->country = NULL_TO_UNKNOWN_S (snes_country[MIN (snes_header.country, SNES_COUNTRY_MAX - 1)]);
 
       // misc stuff
-      sprintf (buf, "Internal size: %.4f Mb\n", (float) (1 << (snes_header.size - 7)));
+      sprintf (buf, "Internal size: %.4f Mb\n", (float) (1 << (snes_header.rom_size - 7)));
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "ROM type: (%x) %s", snes_header.rom_type,

@@ -110,8 +110,9 @@ const st_getopt2_t gg_usage[] =
       "supported are:\n"
       "Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance),\n"
       "Sega Master System(II/III)/Game Gear (Handheld),\n"
+      "Genesis/Sega Mega Drive/Sega CD/32X/Nomad,\n"
       "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant),\n"
-      "Super Nintendo Entertainment System/SNES/Super Famicom" ,
+      "Super Nintendo Entertainment System/SNES/Super Famicom",
       &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -1047,7 +1048,7 @@ gg_display (st_rominfo_t *rominfo, const char *code)
   gg_argv[2] = code;
   gg_argc = 3;
 
-  if (ucon64.file_size > 0)                   // check if rominfo contains valid ROM info
+  if (ucon64.file_size > 0)                     // check if rominfo contains valid ROM info
     gg_rominfo = rominfo;
   else
     gg_rominfo = 0;
@@ -1065,7 +1066,7 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
       result = -1;
   char buf[MAXBUFSIZE], dest_name[FILENAME_MAX];
 
-  if (ucon64.file_size > 0)                   // check if rominfo contains valid ROM info
+  if (ucon64.file_size > 0)                     // check if rominfo contains valid ROM info
     gg_rominfo = rominfo;
   else
     {

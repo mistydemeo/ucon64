@@ -2347,18 +2347,15 @@ ucon64_find_func (void *buffer, int n, void *object)
                      o->search, o->searchlen, o->flags);
       if (p)
         {
-
           o->found = o->pos + (int) (p - ((const unsigned char *) buffer));
 
-          dumper (stdout, p, o->searchlen + 16 - (o->searchlen % 16), // + 16 gives a bit of context
-                  o->found, DUMPER_HEX);
-          fputc ('\n', stdout);
-
-#if 0
-          p += o->searchlen;
-#else
-          p++; // slower
-#endif
+          if (!(o->flags & UCON64_FIND_QUIET))
+            {
+              dumper (stdout, p, o->searchlen + 16 - (o->searchlen % 16),
+                      o->found, DUMPER_HEX);    // + 16 gives a bit of context
+              fputc ('\n', stdout);
+            }
+          p++;
         }
       else
         break;
@@ -2375,28 +2372,30 @@ ucon64_find (const char *filename, size_t start, size_t len,
              const char *search, int searchlen, uint32_t flags)
 {
   int result = 0;
-  st_ucon64_find_t o = {search, flags, searchlen, start, -1};
+  st_ucon64_find_t o = { search, flags, searchlen, start, -1 };
 
-  fputs (basename2 (filename), stdout);
-  if (ucon64.fname_arch[0])
-    printf (" (%s)\n", basename2 (ucon64.fname_arch));
-  else
-    fputc ('\n', stdout);
-
-  // TODO: display "b?a" as "b" "a"
-  if (!(flags & (MEMCMP2_CASE|MEMCMP2_REL)))
-    printf ("Searching: \"%s\"\n\n", search);
-  else if (flags & MEMCMP2_CASE)
-    printf ("Case insensitive searching: \"%s\"\n\n", search);
-  else if (flags & MEMCMP2_REL)
+  if (!(flags & UCON64_FIND_QUIET))
     {
-      char *p = (char *) search;
+      fputs (basename2 (filename), stdout);
+      if (ucon64.fname_arch[0])
+        printf (" (%s)\n", basename2 (ucon64.fname_arch));
+      else
+        fputc ('\n', stdout);
 
-      printf ("Relative searching: \"%s\"\n\n", search);
+    // TODO: display "b?a" as "b" "a"
+    if (!(flags & (MEMCMP2_CASE | MEMCMP2_REL)))
+      printf ("Searching: \"%s\"\n\n", search);
+    else if (flags & MEMCMP2_CASE)
+      printf ("Case insensitive searching: \"%s\"\n\n", search);
+    else if (flags & MEMCMP2_REL)
+      {
+        char *p = (char *) search;
 
-      for (; *(p + 1); p++)
-        printf ("'%c' - '%c' = %d\n", *p, *(p + 1), *p - *(p + 1));
-      printf ("\n");
+        printf ("Relative searching: \"%s\"\n\n", search);
+        for (; *(p + 1); p++)
+          printf ("'%c' - '%c' = %d\n", *p, *(p + 1), *p - *(p + 1));
+        printf ("\n");
+      }
     }
 
   result = quick_io_func (ucon64_find_func, MAXBUFSIZE, // suggested func_maxlen

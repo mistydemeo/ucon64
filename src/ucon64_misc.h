@@ -2,7 +2,7 @@
 ucon64_misc.h - miscellaneous functions for uCON64
 
 Copyright (c) 1999 - 2004 NoisyB <noisyb@gmx.net>
-Copyright (c) 2001 - 2003 dbjh
+Copyright (c) 2001 - 2004 dbjh
 Copyright (c) 2001        Caz
 
 
@@ -48,7 +48,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern const st_getopt2_t libdm_usage[];
 extern int ucon64_load_discmage (void);
 extern int libdm_gauge (int pos, int size);
-#endif // USE_DISCMAGE
+#endif
+
 
 /*
   defines for unknown backup units/emulators
@@ -115,7 +116,7 @@ extern const char *nintendo_maker[];
 
 /*
   uCON64 "workflow" objects
-  
+
   We want to do things compile-time. Using ucon64_wf is necessary for VC 6. GCC
   (3) accepts casts in struct initialisations.
 */
@@ -189,7 +190,7 @@ enum
   WF_OBJ_NES_DEFAULT_STOP_NO_SPLIT,
   WF_OBJ_SMS_STOP_NO_ROM,
   WF_OBJ_SMS_DEFAULT_STOP_NO_SPLIT_NO_ROM,
-  
+
   WF_OBJ_GC_SWITCH,
   WF_OBJ_S16_SWITCH,
   WF_OBJ_ATA_SWITCH,
@@ -291,6 +292,8 @@ extern void ucon64_fbswap16 (const char *fname, size_t start, size_t len);
 extern void ucon64_fwswap32 (const char *fname, size_t start, size_t len);
 extern void ucon64_dump (FILE *output, const char *filename, size_t start,
                          size_t len, uint32_t flags);
+// Be sure the following constant doesn't conflict with the MEMCMP2_* constants
+#define UCON64_FIND_QUIET (1 << 31)
 extern int ucon64_find (const char *filename, size_t start, size_t len,
                         const char *search, int searchlen, uint32_t flags);
 extern int ucon64_chksum (char *sha1, char *md5, unsigned int *crc32, // uint16_t *crc16,

@@ -667,14 +667,18 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_RL:
       strcpy (buf, basename2 (ucon64.rom));
+      printf ("Renaming \"%s\" to ", buf);
       strlwr (buf);
+      printf ("\"%s\"\n", buf);
       rename (ucon64.rom, buf);
       strcpy ((char *) ucon64.rom, buf);
       break;
 
     case UCON64_RU:
       strcpy (buf, basename2 (ucon64.rom));
+      printf ("Renaming \"%s\" to ", buf);
       strupr (buf);
+      printf ("\"%s\"\n", buf);
       rename (ucon64.rom, buf);
       strcpy ((char *) ucon64.rom, buf);
       break;

@@ -338,6 +338,56 @@ while((ep=readdir(dp))!=0)
 	{
 		if(S_ISREG(puffer.st_mode)==1)
 		{
+			strftime(buf,13,"%b %d %H:%M",localtime(&puffer.st_ctime));
+			printf("%-31s %10ld %s %s\n","ROMNAME",puffer.st_size,buf,ep->d_name);
+		}
+	}
+}
+(void)closedir(dp);
+
+	return(0);
+}
+
+if(argcmp(argc,argv,"-lsv"))
+{
+//TODO change and optimize
+
+if(access( ucon64_rom() ,R_OK)==-1 ||
+(dp=opendir( ucon64_rom() ))==NULL)return(-1);
+
+chdir( ucon64_rom() );
+
+while((ep=readdir(dp))!=0)
+{
+	if(!stat(ep->d_name,&puffer))
+	{
+		if(S_ISREG(puffer.st_mode)==1)
+		{
+			sprintf(buf,"%s %s",argv[0],ep->d_name);
+			system(buf);
+		}
+	}
+}
+(void)closedir(dp);
+
+	return(0);
+}
+
+if(argcmp(argc,argv,"-rrom"))
+{
+//TODO change and optimize
+
+if(access( ucon64_rom() ,R_OK)==-1 ||
+(dp=opendir( ucon64_rom() ))==NULL)return(-1);
+
+chdir( ucon64_rom() );
+
+while((ep=readdir(dp))!=0)
+{
+	if(!stat(ep->d_name,&puffer))
+	{
+		if(S_ISREG(puffer.st_mode)==1)
+		{
 			sprintf(buf,"%s %s",argv[0],ep->d_name);
 			system(buf);
 		}
@@ -768,15 +818,18 @@ printf(/*"TODO: $ROM could also be the name of a *.ZIP archive\n"
 	"\n"*/
 	"TODO:  -sh	use uCON64 in shell modus\n"
 	"  -e		emulate/run ROM (check INSTALL and $HOME/.ucon64rc for more)\n"
-	"  -db		ROM database statistics (# of entries)\n"
-	"  -dbv		view ROM database (all entries)\n"
 	"  -crc		show CRC32 value of ROM\n"
 	"  -crchd	show CRC32 value of ROM (regarding to +512 Bytes header)\n"
 	"  -dbs		search ROM database (all entries) by CRC32; $ROM=0xCRC32\n"
+	"  -db		ROM database statistics (# of entries)\n"
+	"  -dbv		view ROM database (all entries)\n"
+	"TODO:  -ls	generate ROM list for all ROMs; $ROM=DIRECTORY\n"
+	"  -lsv		like -ls but more verbose; $ROM=DIRECTORY\n"
+	"TODO:  -rrom	rename all ROMs in DIRECTORY to their internal names; $ROM=DIR\n"
+	"		this is often used by people who loose control of their ROMs\n"
 	"  -rl		rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
 	"  -ru		rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"
 	"  -hex		show ROM as hexdump; use \"ucon64 -hex $ROM|less\"\n"
-	"  -ls		generate ROM list for all ROMs; $ROM=DIRECTORY\n"
 	"  -find		find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)\n"
 	"  -c		compare ROMs for differencies; $FILE=OTHER_ROM\n"
 	"  -cs		compare ROMs for similarities; $FILE=OTHER_ROM\n"

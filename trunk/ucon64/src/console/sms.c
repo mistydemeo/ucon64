@@ -319,10 +319,11 @@ sms_init (st_rominfo_t *rominfo)
     }
 
   sprintf ((char *) buf, "Part number: 0x%04x\n",
-    sms_header.partno_low + (sms_header.partno_high << 8));
+    sms_header.partno_low + (sms_header.partno_high << 8) +
+    ((sms_header.version & 0xf0) << 12));
   strcat (rominfo->misc, (char *) buf);
 
-  sprintf ((char *) buf, "Version: %x", sms_header.version >> 4);
+  sprintf ((char *) buf, "Version: %x", sms_header.version & 0xf);
   strcat (rominfo->misc, (char *) buf);
 
   rominfo->console_usage = sms_usage;

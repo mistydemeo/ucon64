@@ -48,8 +48,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <time.h>
 #include "config.h"
-const char *smd_title = "Super Com Pro (HK)/Super Magic Drive/SMD\n"
-                  "  19XX Front Far East/FFE http://www.front.com.tw";
+#include "misc.h"
+#include "ucon64.h"
+#include "ucon64_db.h"
+#include "ucon64_misc.h"
+#include "smd.h"
+const char *smd_usage[] =
+  {
+    "Super Com Pro (HK)/Super Magic Drive/SMD",
+    "19XX Front Far East/FFE http://www.front.com.tw",
+#ifdef BACKUP 
+    "  " OPTION_LONG_S "xsmd        send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when ROM does not exist\n"
+    "  " OPTION_LONG_S "xsmds       send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when SRAM does not exist\n",
+#endif // BACKUP
+    NULL
+};
+
 
 #ifdef BACKUP
 #ifdef  __unix__
@@ -59,11 +75,6 @@ const char *smd_title = "Super Com Pro (HK)/Super Magic Drive/SMD\n"
 #elif   defined __BEOS__
 #include <OS.h>                                 // snooze(), microseconds
 #endif
-#include "misc.h"
-#include "ucon64.h"
-#include "ucon64_db.h"
-#include "ucon64_misc.h"
-#include "smd.h"
 
 
 #ifndef __BEOS__
@@ -72,12 +83,12 @@ typedef unsigned short int uint16;
 typedef unsigned long int uint32;
 #endif
 
-static int smd_argc;
-static char *smd_argv[128];
 static uint16 lpt;
 static uint8 block[0x4000];
+#if 0
 static char *opts[] =
   { "-bc", "-lc", "-bs", "-ls", "-ci", "-db", "-rc", NULL };
+#endif 
 
 /* from loader.asm */
 static unsigned char loader[0x100] = {
@@ -123,13 +134,14 @@ static uint8 smd_recieve_block (uint32 length, uint8 * buffer);
 static void smd_send_block (uint32 length, uint8 * buffer);
 static void smd_poke (uint16 address, uint8 data);
 static uint8 smd_peek (uint16 address);
-static int save_smd (char *filename);
-static int load_smd (char *filename);
+static int save_smd (const char *filename);
+static int load_smd (const char *filename);
 static void interleave_buffer (uint8 * buffer, int size);
-static int load_sram (char *filename);
-static int save_sram (char *filename);
-static int dump_bios (char *filename);
+static int load_sram (const char *filename);
+static int save_sram (const char *filename);
+//static int dump_bios (char *filename);
 
+#if 0
 int
 smd_main (int argc, char **argv)
 {
@@ -215,6 +227,7 @@ smd_main (int argc, char **argv)
 
   return 0;
 }
+#endif 
 
 /*--------------------------------------------------------------------------*/
 /*                                                                          */
@@ -403,7 +416,7 @@ interleave_buffer (uint8 * buffer, int size)
 }
 
 int
-load_smd (char *filename)
+load_smd (const char *filename)
 {
   uint8 header[0x200];
   uint8 count;
@@ -517,7 +530,7 @@ load_smd (char *filename)
 /*--------------------------------------------------------------------------*/
 
 int
-save_smd (char *filename)
+save_smd (const char *filename)
 {
   uint8 header[0x200];
   int count;
@@ -567,7 +580,7 @@ save_smd (char *filename)
 /*--------------------------------------------------------------------------*/
 
 int
-load_sram (char *filename)
+load_sram (const char *filename)
 {
   uint8 header[0x200];
   FILE *fd = NULL;
@@ -613,7 +626,7 @@ load_sram (char *filename)
 
 
 int
-save_sram (char *filename)
+save_sram (const char *filename)
 {
   uint8 header[0x200];
   FILE *fd = NULL;
@@ -697,80 +710,44 @@ dump_bios (char *filename)
   return 1;
 }
 
-void
-smd_usage (void)
-{
-
-    printf ("%s\n"
-    "  " OPTION_LONG_S "xsmd        send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "file=PORT\n"
-     "                  receives automatically when ROM does not exist\n"
-     "  " OPTION_LONG_S "xsmds       send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "file=PORT\n"
-     "                  receives automatically when SRAM does not exist\n", smd_title);
-}
-
 int
-smd_read_rom (char *filename, unsigned int parport)
+smd_read_rom (const char *filename, unsigned int parport)
 {
   lpt = parport;
 
-  smd_argv[0] = "ucon64";
-  smd_argv[1] = "-bc";
-  smd_argv[2] = filename;
-  smd_argc = 3;
-
-  smd_main (smd_argc, smd_argv);
+  save_smd (filename);
 
   return 0;
 }
 
 int
-smd_write_rom (char *filename, unsigned int parport)
+smd_write_rom (const char *filename, unsigned int parport)
 {
   lpt = parport;
 
-  smd_argv[0] = "ucon64";
-  smd_argv[1] = "-lc";
-  smd_argv[2] = filename;
-  smd_argc = 3;
-
-  smd_main (smd_argc, smd_argv);
-
-  smd_argv[0] = "ucon64";
-  smd_argv[1] = "-rc";
-  smd_argc = 2;
-
-  smd_main (smd_argc, smd_argv);
+  load_smd (filename);
+  smd_poke (0x2001, 0x02);
 
   return 0;
 }
 
 int
-smd_read_sram (char *filename, unsigned int parport)
+smd_read_sram (const char *filename, unsigned int parport)
 {
   lpt = parport;
 
-  smd_argv[0] = "ucon64";
-  smd_argv[1] = "-bs";
-  smd_argv[2] = filename;
-  smd_argc = 3;
-
-  smd_main (smd_argc, smd_argv);
+  save_sram (filename);
 
   return 0;
 }
 
 int
-smd_write_sram (char *filename, unsigned int parport)
+smd_write_sram (const char *filename, unsigned int parport)
 {
   lpt = parport;
 
-  smd_argv[0] = "ucon64";
-  smd_argv[1] = "-ls";
-  smd_argv[2] = filename;
-  smd_argc = 3;
-
-  smd_main (smd_argc, smd_argv);
-
+  load_sram (filename);
+                
   return 0;
 }
 #endif // BACKUP

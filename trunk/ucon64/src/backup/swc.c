@@ -28,16 +28,40 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include "config.h"
-const char *swc_title = "Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n"
-                  "  1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw";
-
-
-#ifdef BACKUP
-
 #include "misc.h"                               // kbhit(), getch()
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "swc.h"
+
+
+const char *swc_usage[] = 
+  {
+    "Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC",
+    "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw",
+#ifdef BACKUP
+    "  " OPTION_LONG_S "xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when ROM does not exist\n"
+    "                  Press q to abort ^C will cause invalid state of backup unit\n"
+    "  " OPTION_LONG_S "xswcs       send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
+    "                  " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when SRAM does not exist\n"
+    "                  Press q to abort ^C will cause invalid state of backup unit\n"
+    "                  You only need to specify PORT if uCON64 doesn't detect the\n"
+    "                  (right) parallel port. If that is the case give a hardware\n"
+    "                  address: ucon64 " OPTION_LONG_S "xswc \"rom.swc\" 0x378\n"
+    "                  In order to connect the Super Wild Card to a PC's parallel\n"
+    "                  port you need a standard bidirectional parallel cable like\n"
+    "                  for the most backup units\n"
+#else
+    ""
+#endif // BACKUP    
+    ,
+    NULL
+  };
+
+
+#ifdef BACKUP
+
 
 
 #define INPUT_MASK      0x78
@@ -421,7 +445,7 @@ swc_unlock (unsigned int parport)
 }
 
 int
-swc_read_rom (char *filename, unsigned int parport)
+swc_read_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer, byte;
@@ -512,7 +536,7 @@ swc_read_rom (char *filename, unsigned int parport)
 }
 
 int
-swc_write_rom (char *filename, unsigned int parport)
+swc_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
@@ -590,7 +614,7 @@ swc_write_rom (char *filename, unsigned int parport)
 }
 
 int
-swc_read_sram (char *filename, unsigned int parport)
+swc_read_sram (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
@@ -647,7 +671,7 @@ swc_read_sram (char *filename, unsigned int parport)
 }
 
 int
-swc_write_sram (char *filename, unsigned int parport)
+swc_write_sram (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
@@ -697,25 +721,6 @@ swc_write_sram (char *filename, unsigned int parport)
   fclose (file);
 
   return 0;
-}
-
-void
-swc_usage (void)
-{
-  printf ("%s\n"
-          "  " OPTION_LONG_S "xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "file=PORT\n"
-          "                  receives automatically when ROM does not exist\n"
-          "                  Press q to abort ^C will cause invalid state of backup unit\n"
-          "  " OPTION_LONG_S "xswcs       send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
-          "                  " OPTION_LONG_S "file=PORT\n"
-          "                  receives automatically when SRAM does not exist\n"
-          "                  Press q to abort ^C will cause invalid state of backup unit\n"
-          "                  You only need to specify PORT if uCON64 doesn't detect the\n"
-          "                  (right) parallel port. If that is the case give a hardware\n"
-          "                  address: ucon64 " OPTION_LONG_S "xswc \"rom.swc\" 0x378\n"
-          "                  In order to connect the Super Wild Card to a PC's parallel\n"
-          "                  port you need a standard bidirectional parallel cable like\n"
-          "                  for the most backup units\n", swc_title);
 }
 
 #endif // BACKUP

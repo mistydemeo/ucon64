@@ -28,12 +28,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ips.h"
 
-void
-ips_usage (void)
+
+const char *ips_usage[] =
 {
-  printf ("  " OPTION_S "i           apply IPS patch (<=1.2); " OPTION_LONG_S "file=PATCHFILE\n"
-           "  "OPTION_LONG_S "mki         create IPS patch; " OPTION_LONG_S "file=CHANGED_ROM\n");
-}
+  NULL,
+  NULL,
+  "  " OPTION_S "i           apply IPS patch (<=v1.2); " OPTION_LONG_S "file=PATCHFILE\n"
+  "  "OPTION_LONG_S "mki         create IPS patch; " OPTION_LONG_S "file=CHANGED_ROM\n",
+  NULL
+};
 
 
 /*

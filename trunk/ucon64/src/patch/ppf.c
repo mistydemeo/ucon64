@@ -29,6 +29,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 
+
+const char *ppf_usage[] =
+{
+    NULL,
+    NULL,
+    "  " OPTION_LONG_S "ppf         apply PPF patch (<=v2.0); " OPTION_LONG_S "rom=RAW_IMAGE " OPTION_LONG_S "file=PATCHFILE\n"
+    "  " OPTION_LONG_S "mkppf       create PPF patch; " OPTION_LONG_S "rom=RAW_IMAGE " OPTION_LONG_S "file=CHANGED_IMAGE\n"
+    "  " OPTION_LONG_S "nppf        change PPF description; " OPTION_LONG_S "rom=PATCHFILE " OPTION_LONG_S "file=DESCRIPTION\n"
+    "  " OPTION_LONG_S "idppf       change PPF FILE_ID.DIZ (v2.0); " OPTION_LONG_S "rom=PATCHFILE\n"
+    "                  " OPTION_LONG_S "file=FILE_ID.DIZ\n",
+    NULL
+};
+
 /*
 
 .-----------------------------------------------------------------.
@@ -166,7 +179,7 @@ makeppf_main (int argc, const char *argv[])
   psize = ftell (patchedbin);
   if (osize != psize)
     {
-      printf ("Error: Filesize does not match - byebye..\n");
+      fprintf (stderr, "ERROR: Filesize does not match\n");
       fclose (originalbin);
       fclose (patchedbin);
       exit (0);
@@ -176,7 +189,7 @@ makeppf_main (int argc, const char *argv[])
       fileid = fopen (argv[4], "rb");
       if (fileid == null)
         {
-          printf ("File %s does not exist. (File_id.diz)\n", argv[4]);
+          fprintf (stderr, "ERROR: File %s does not exist. (File_id.diz)\n", argv[4]);
           fclose (patchedbin);
           fclose (originalbin);
           exit (0);
@@ -185,7 +198,7 @@ makeppf_main (int argc, const char *argv[])
   ppffile = fopen (argv[3], "wb+");
   if (ppffile == null)
     {
-      printf ("Could not create file %s\n", argv[3]);
+      fprintf (stderr, "ERROR: Could not create file %s\n", argv[3]);
       if (argc >= 5)
         fclose (fileid);
       fclose (patchedbin);
@@ -345,8 +358,11 @@ applyppf_main (int argc, const char *argv[])
 //        printf("ApplyPPF v2.0 for Linux/Unix (c) Icarus/Paradox\n");
   if (argc == 1)
     {
-//        printf("Usage: ApplyPPF <Binfile> <PPF-File>\n");
+#if 0
+      printf("Usage: ApplyPPF <Binfile> <PPF-File>\n");
       exit (0);
+#endif      
+      return -1;
     }
 
   /* Open the bin and ppf file */
@@ -435,7 +451,7 @@ applyppf_main (int argc, const char *argv[])
       binlen = ftell (binfile);
       if (dizlen != binlen)
         {
-          printf ("ERROR: the size of the IMAGE is not %d Bytes\n", dizlen);
+          fprintf (stderr, "ERROR: the size of the IMAGE is not %d Bytes\n", dizlen);
           fclose (ppffile);
           fclose (binfile);
           return -1;
@@ -449,7 +465,7 @@ applyppf_main (int argc, const char *argv[])
       in = memcmp (ppfblock, binblock, 1024);
       if (in != 0)
         {
-          printf ("ERROR: this patch does not belong to this IMAGE\n");
+          fprintf (stderr, "ERROR: this patch does not belong to this IMAGE\n");
           fclose (ppffile);
           fclose (binfile);
           return -1;
@@ -506,7 +522,7 @@ applyppf_main (int argc, const char *argv[])
   return 0;
 }
 
-#include "ucon64.h"
+
 int
 addppfid (const char *filename)
 {
@@ -518,9 +534,7 @@ addppfid (const char *filename)
 
   printf ("Adding file_id.diz .. ");
   fsize = quickftell (filename);
-  if (fsize > 3072)
-    fsize = 3072;               /* File id only up to 3072 bytes! */
-  quickfread (fileidbuf, 0, fsize, ucon64.file);
+  quickfread (fileidbuf, 0, (fsize > 3072)?3072:fsize, ucon64.file);
   fileidbuf[fsize] = 0;
   sprintf (buf, "@BEGIN_FILE_ID.DIZ%s@END_FILE_ID.DIZ", fileidbuf);
 
@@ -535,18 +549,4 @@ addppfid (const char *filename)
   quickfwrite (&fsize, quickftell (filename), 4, filename, "r+b");
   printf ("done!\n");
   return 0;
-}
-
-
-void
-ppf_usage (void)
-{
-
-  printf
-    ("  " OPTION_LONG_S "ppf         apply PPF patch (<=2.0); " OPTION_LONG_S "rom=RAW_IMAGE " OPTION_LONG_S "file=PATCHFILE\n"
-     "  " OPTION_LONG_S "mkppf       create PPF patch; " OPTION_LONG_S "rom=RAW_IMAGE " OPTION_LONG_S "file=CHANGED_IMAGE\n"
-     "  " OPTION_LONG_S "nppf        change PPF description; " OPTION_LONG_S "rom=PATCHFILE " OPTION_LONG_S "file=DESCRIPTION\n"
-     "  " OPTION_LONG_S "idppf       change PPF FILE_ID.DIZ (2.0); " OPTION_LONG_S "rom=PATCHFILE\n"
-     "                  " OPTION_LONG_S "file=FILE_ID.DIZ\n"
-);
 }

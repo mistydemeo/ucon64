@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef YOKO_H
 #define YOKO_H
-extern const char *yoko_title;
+extern const char *yoko_usage[];
 
 #define YOKO_HEADER_START 0
 #define YOKO_HEADER_LEN 0

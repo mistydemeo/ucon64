@@ -25,16 +25,39 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include "config.h"
-const char *fal_title = "Flash Advance Linker\n"
-                  "  2001 Visoly http://www.visoly.com";
-
-
-#ifdef BACKUP
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "fal.h"
+
+
+const char *fal_usage[] =
+  {
+    "Flash Advance Linker",
+    "2001 Visoly http://www.visoly.com",
+#ifdef BACKUP
+    "  " OPTION_LONG_S "xfal        send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when ROM does not exist\n"
+    "  " OPTION_LONG_S "xfalc=SIZE  specify chip SIZE in mbits of ROM in Flash Advance Linker when\n"
+    "                  receiving. SIZE can be 8,16,32,64,128 or 256. default is 32\n"
+#if 0
+    "  " OPTION_LONG_S "xfalm       use SPP mode, default is EPP\n"
+#endif
+    "  " OPTION_LONG_S "xfals       send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when SRAM does not exist\n"
+    "  " OPTION_LONG_S "xfalb=BANK  send/receive SRAM to/from Flash Advance Linker BANK\n"
+    "                  BANK can be 1, 2, 3 or 4;  " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when SRAM does not exist\n"
+    "                  You only need to specify PORT if uCON64 doesn't detect the\n"
+    "                  (right) parallel port. If that is the case give a hardware\n"
+    "                  address: ucon64 " OPTION_LONG_S "xfal \"rom.gba\" 0x378\n",
+#endif // BACKUP
+    NULL
+};
+
+
+#ifdef BACKUP
 
 /********************************************************/
 /* Flash Linker Advance                                 */
@@ -186,6 +209,7 @@ ProgramExit (int code)
   exit (code);
 }
 
+#if 0
 void
 usage (char *name)
 {
@@ -240,6 +264,7 @@ usage (char *name)
   fprintf (stderr, "\t-v file Verify flash cart with file\n");
   fprintf (stderr, "\t-w n    Add delay to make transfer more reliable\n");
 }
+#endif
 
 void
 InitPort (int port)
@@ -1299,7 +1324,7 @@ fal_main (int argc, char **argv)
 
   if (argc < 2)
     {
-      usage (argv[0]);
+//      usage (argv[0]);
       ProgramExit (1);
     }
 
@@ -1315,7 +1340,7 @@ fal_main (int argc, char **argv)
     {
       if (argv[arg][0] != '-')
         {
-          usage (argv[0]);
+//          usage (argv[0]);
           ProgramExit (1);
         }
 
@@ -1428,7 +1453,7 @@ fal_main (int argc, char **argv)
           OptZ = 1;
           break;
         default:
-          usage (argv[0]);
+//          usage (argv[0]);
           ProgramExit (1);
         }
     }
@@ -1591,8 +1616,11 @@ fal_args (unsigned int parport)
 }
 
 int
-fal_read_rom (char *filename, unsigned int parport, int size)
+fal_read_rom (const char *filename, unsigned int parport, int size)
 {
+  char buf[MAXBUFSIZE];
+  strcpy (buf, filename);
+
   fal_args (parport);
 
   fal_argv[3] = "-c";
@@ -1621,7 +1649,7 @@ fal_read_rom (char *filename, unsigned int parport, int size)
     fal_argv[4] = "32";
 
   fal_argv[5] = "-s";
-  fal_argv[6] = filename;
+  fal_argv[6] = buf;
   fal_argc = 7;
 
 #if 0
@@ -1639,8 +1667,11 @@ fal_read_rom (char *filename, unsigned int parport, int size)
 }
 
 int
-fal_write_rom (char *filename, unsigned int parport, int size)
+fal_write_rom (const char *filename, unsigned int parport, int size)
 {
+  char buf[MAXBUFSIZE];
+  strcpy (buf, filename);
+    
   fal_args (parport);
 
   if (size != -1)
@@ -1650,7 +1681,7 @@ fal_write_rom (char *filename, unsigned int parport, int size)
     }
 
   fal_argv[3] = "-p";
-  fal_argv[4] = filename;
+  fal_argv[4] = buf;
   fal_argc = 5;
 
 #if 0
@@ -1668,9 +1699,11 @@ fal_write_rom (char *filename, unsigned int parport, int size)
 }
 
 int
-fal_read_sram (char *filename, unsigned int parport, int bank)
+fal_read_sram (const char *filename, unsigned int parport, int bank)
 {
   char bank_str[2];
+  char buf[MAXBUFSIZE];
+  strcpy (buf, filename);
 
   fal_args (parport);
 
@@ -1692,7 +1725,7 @@ fal_read_sram (char *filename, unsigned int parport, int bank)
       fal_argv[4] = bank_str;
       fal_argv[5] = "2";        // 64 kB
     }
-  fal_argv[6] = filename;
+  fal_argv[6] = buf;
   fal_argc = 7;
 
   if (!fal_main (fal_argc, fal_argv))
@@ -1702,9 +1735,11 @@ fal_read_sram (char *filename, unsigned int parport, int bank)
 }
 
 int
-fal_write_sram (char *filename, unsigned int parport, int bank)
+fal_write_sram (const char *filename, unsigned int parport, int bank)
 {
   char bank_str[2];
+  char buf[MAXBUFSIZE];
+  strcpy (buf, filename);
 
   fal_args (parport);
 
@@ -1722,7 +1757,7 @@ fal_write_sram (char *filename, unsigned int parport, int bank)
       bank_str[1] = 0;          // terminate string
       fal_argv[4] = bank_str;
     }
-  fal_argv[5] = filename;
+  fal_argv[5] = buf;
   fal_argc = 6;
 
   if (!fal_main (fal_argc, fal_argv))
@@ -1731,25 +1766,4 @@ fal_write_sram (char *filename, unsigned int parport, int bank)
   return -1;
 }
 
-void
-fal_usage (void)
-{
-  printf ("%s\n"
-          "  " OPTION_LONG_S "xfal        send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
-          "                  receives automatically when ROM does not exist\n"
-          "  " OPTION_LONG_S "xfalc=SIZE  specify chip SIZE in mbits of ROM in Flash Advance Linker when\n"
-          "                  receiving. SIZE can be 8,16,32,64,128 or 256. default is 32\n"
-#if 0
-          "  " OPTION_LONG_S "xfalm       use SPP mode, default is EPP\n"
-#endif
-          "  " OPTION_LONG_S "xfals       send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
-          "                  receives automatically when SRAM does not exist\n"
-          "  " OPTION_LONG_S "xfalb=BANK  send/receive SRAM to/from Flash Advance Linker BANK\n"
-          "                  BANK can be 1, 2, 3 or 4;  " OPTION_LONG_S "file=PORT\n"
-          "                  receives automatically when SRAM does not exist\n"
-          "                  You only need to specify PORT if uCON64 doesn't detect the\n"
-          "                  (right) parallel port. If that is the case give a hardware\n"
-          "                  address: ucon64 " OPTION_LONG_S "xfal \"rom.gba\" 0x378\n"
-          , fal_title);
-}
 #endif // BACKUP

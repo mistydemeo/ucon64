@@ -28,11 +28,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "bsl.h"
 
 
-void
-bsl_usage (void)
-{
-  printf("  " OPTION_S "b           apply Baseline/BSL patch (<=x.x); " OPTION_LONG_S "file=PATCHFILE\n");
-}
+const char *bsl_usage[] =
+  {
+    NULL,
+    NULL,
+    "  " OPTION_S "b           apply Baseline/BSL patch (<=vx.x); " OPTION_LONG_S "file=PATCHFILE\n",
+    NULL
+  };
 
 
 int

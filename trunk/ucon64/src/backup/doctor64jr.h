@@ -22,14 +22,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define DOCTOR64JR_H
 
 #ifdef BACKUP
-extern int doctor64jr_read (char *filename, unsigned int parport);
+extern int doctor64jr_read (const char *filename, unsigned int parport);
 
-extern int doctor64jr_write (char *filename, long start, long len,
+extern int doctor64jr_write (const char *filename, long start, long len,
                       unsigned int parport);
-extern void doctor64jr_usage (void);
 #endif // BACKUP
 
-extern const char *doctor64jr_title;
+extern const char *doctor64jr_usage[];
 
 #define DOCTOR64JR_HEADER_START 0
 #define DOCTOR64JR_HEADER_LEN 0

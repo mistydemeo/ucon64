@@ -21,9 +21,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
-const char *cd64_title = "CD64\n"
-                   "  19XX UFO http://www.cd64.com";
-
+const char *cd64_usage[] =
+  {
+    "CD64",
+    "19XX UFO http://www.cd64.com",
+#ifdef BACKUP
+#if 0
+    "TODO:  -xcd64        send/receive ROM to/from CD64; " OPTION_LONG_S "file=PORT\n"
+    "             receives automatically when " OPTION_LONG_S "rom does not exist\n",
+#endif
+#endif // BACKUP
+    NULL
+  };
 
 #ifdef BACKUP
 #include "misc.h"
@@ -205,8 +214,8 @@ b. Check the IO port setting as following.
 #include <signal.h>
 #include <graph.h>
 
-static int cd64_argc;
-static char *cd64_argv[128];
+int cd64_argc;
+char *cd64_argv[128];
 
 int data_reg=0x310;
 int status_reg=0x312;
@@ -1200,16 +1209,6 @@ main (int argc, char *argv[])
                 else usage_message();
 }
 */
-void
-cd64_usage (void)
-{
-#if 0
-
-    printf ("%s\n", cd64_title);
-  printf ("TODO:  -xcd64	send/receive ROM to/from CD64; " OPTION_LONG_S "file=PORT\n"
-          "		receives automatically when " OPTION_LONG_S "rom does not exist\n");
-#endif
-}
 
 /*
 int cd64_read_rom(char *filename, unsigned int parport)

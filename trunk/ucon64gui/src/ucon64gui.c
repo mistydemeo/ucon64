@@ -337,12 +337,12 @@ NULL
 */
   char *console_options[]={
 "PC-Engine","Neo Geo","Neo Geo Pocket","WonderSwan", "Real3DO","CD32","CD-i",
-"Vectrex","ColecoVision","Intellivision",NULL
+"Vectrex","ColecoVision","Intellivision","GP32 Game System",NULL
 };
   char *console_values[]={
 "ucon64gui_pce","ucon64gui_ng","ucon64gui_ngp","ucon64gui_wswan",
 "ucon64gui_3do","ucon64gui_cd32","ucon64gui_cdi","ucon64gui_vectrex","ucon64gui_coleco",
-"ucon64gui_intelli",NULL
+"ucon64gui_intelli","ucon64gui_gp32",NULL
 
 };
 

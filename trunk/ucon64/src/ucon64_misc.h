@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_MISC_H
 
 #include "ucon64.h"                             // st_rominfo_t
+#include "ucon64_defines.h"                     // MBIT
 
 #ifdef  PARALLEL
 #define out1byte(p,x)   outportb(p,x)
@@ -35,8 +36,6 @@ extern unsigned short inportw (unsigned short port);
 extern void outportb (unsigned short port, unsigned char byte);
 extern void outportw (unsigned short port, unsigned short word);
 #endif // PARALLEL
-
-#define MBIT 131072
 
 #define PARPORT_DATA    0                       // output
 #define PARPORT_STATUS  1                       // input
@@ -101,6 +100,7 @@ extern const st_usage_t ucon64_patching_usage[];
 #define WF_SHOW_NFO 1
 #define WF_SHOW_NFO_AFTER 2
 #define WF_ROM_REQUIRED 4
+#define WF_SPECIAL_OPT 8
 typedef struct
 // more workflow related stuff
 {

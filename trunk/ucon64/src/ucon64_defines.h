@@ -21,32 +21,28 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef UCON64_DEFINES_H
 #define UCON64_DEFINES_H
-
-
-#define UCON64_YES 1
-#define UCON64_NO 0
+//  please make sure that NO definition except FALSE has 0 as value
 
 #define UCON64_UNKNOWN_S "Unknown"
 
 #define NULL_TO_UNKNOWN_S(str) ((str) ? (str) : (UCON64_UNKNOWN_S))
 
-//#define UCON64_KNOWN (-1)
 #define UCON64_UNKNOWN (-1)
 
 //definitions for file types
 #define UCON64_TYPE_UNKNOWN (UCON64_UNKNOWN)
-#define UCON64_TYPE_ROM 1
-#define UCON64_TYPE_DISC 2
-#define UCON64_TYPE_PATCH 3
-#define UCON64_TYPE_SRAM 4
+#define UCON64_TYPE_ROM (1)
+#define UCON64_TYPE_DISC (2)
+#define UCON64_TYPE_PATCH (4)
+#define UCON64_TYPE_SRAM (8)
 
-#define UCON64_OPTION 1000
-#define UCON64_CONSOLE 0
+#define UCON64_OPTION (1000)
+#define UCON64_CONSOLE (0)
 /*
   UCON64_CONSOLE must be small enough so that every console type can be
   specified with a number smaller than 256. In this way some space is saved
-  the executable, because one byte can be
-  used for the console type instead of four. See ucon64_dat.c.
+  the executable, because one byte can be used for the console type instead
+  of four. See ucon64_dat.c.
 */
 
 #define UCON64_GETOPT_ERROR ('?')               // getopt() returns 0x3f when a unknown option was given
@@ -262,12 +258,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_VERSION_S "1.9.8beta8"
 
 /* program version counter */
-//#define UCON64_VERSION 198
+//#define UCON64_VERSION (198)
 
 /* version of config file layout */
-#define UCON64_CONFIG_VERSION 203
+#define UCON64_CONFIG_VERSION (203)
 
-#define MBIT 131072
+#define MBIT (131072)
 #define TOMBIT(x) ((int)(x) / MBIT)
 #define TOMBIT_F(x) ((float)(x) / MBIT)
 

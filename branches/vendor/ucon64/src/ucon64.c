@@ -26,67 +26,13 @@ first i want to thank SiGMA SEVEN! who was my mentor and teached me how to
 write programs in C
 */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stddef.h>
-#include <fcntl.h>
-#include <time.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/perm.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-
-#include "include.h"
 #include "ucon64.h"
 
-#define ucon64_UNKNOWN		-1
-#define ucon64_GB		1
-#define ucon64_GENESIS		2
-#define ucon64_SMS		3
-#define ucon64_JAGUAR		4
-#define ucon64_LYNX		5
-#define ucon64_N64		6
-#define ucon64_NEOGEO		7
-#define ucon64_NES		8
-#define ucon64_PCE		9
-#define ucon64_PSX		10
-#define ucon64_SNES		11
-#define ucon64_SATURN		12
-#define ucon64_DC		13
-#define ucon64_CD32		14
-#define ucon64_CDI		15
-#define ucon64_REAL3DO		16
-#define ucon64_ATARI		17
-#define ucon64_SYSTEM16		18
-#define ucon64_NEOGEOPOCKET	19
-#define ucon64_KNOWN		9999
-
-
-#define ucon64_VERSION "1.9.5"
-#define ucon64_TITLE "uCON64 1.9.5 GNU/Linux 1999/2000/2001 by NoisyB (noisyb@gmx.net)"
-
-
-int ucon64_backup(char *name);
-
-int ucon64_argc;
-char *ucon64_argv[128];
-
-//#include "stolen/nes/fam2fds.h"
-//#include "stolen/nes/fdslist.h"
 #include "aps.h"
 #include "ips.h"
 #include "ppf.h"
-//#include "cdinfo.h"
-//#include "stolen/psx/xadump.h"
-//#include "stolen/psx/xa2wav.h"
-
 #include "usage.h"
 //#include "unzip.h"
-//#include "gamecodes.h"
-//#include "transfer/transfer.h"
 #include "snes/snes.h"
 #include "gb/gb.h"
 #include "jaguar/jaguar.h"
@@ -103,14 +49,20 @@ char *ucon64_argv[128];
 #include "atari/atari.h"
 #include "ngp/ngp.h"
 
+
+int ucon64_probe(int argc,char *argv[]);
+
 int main(int argc,char *argv[])
 {
 register long x;
 char buf[4096],buf2[4096];
 long console=ucon64_UNKNOWN;
 FILE *fh;
+int ucon64_argc;
+char *ucon64_argv[128];
 
 printf("%s\n",ucon64_TITLE);
+printf("Uses code from various people. See 'DEVELOPERS' for more!\n");
 printf("This may be freely redistributed under the terms of the GNU Public License\n\n");
 
 if(	argc<2 ||
@@ -151,36 +103,43 @@ if(!ucon64_rom()[0])
 	return(0);
 }
 
-if(argcmp(argc,argv,"-rn"))
+if(argcmp(argc,argv,"-rl"))
 {
-	renlwr(ucon64_rom());
+	rencase(ucon64_rom(),"lwr");
+	return(0);
+}
+
+if(argcmp(argc,argv,"-ru"))
+{
+	rencase(ucon64_rom(),"upr");
 	return(0);
 }
 
 if(argcmp(argc,argv,"-hex"))
 {
-	filehexdump(ucon64_rom(),0,filesize(ucon64_rom()));
+	hexdump(ucon64_rom(),0,quickftell(ucon64_rom()));
 	return(0);
 }
 
-/*
 if(argcmp(argc,argv,"-ls"))
 {
-	mkfid(ucon64_rom());
+//TODO read dir and then while file ucon64_probe und <con>_nfo
+
+//	mkfid(ucon64_rom());
+
 	return(0);
 }
-*/
 
 if(argcmp(argc,argv,"-c"))
 {
-//	if(n_cmp(ucon64_rom(),0,ucon64_file(),0,n_cmp_DIFF)!=0)
+//	if(n_cmp(ucon64_rom(),0,ucon64_file(),0,filecmp_DIFF)!=0)
 		printf("ERROR: file not found/out of memory\n");
 	return(0);
 }
 
 if(argcmp(argc,argv,"-cs"))
 {
-//	if(n_cmp(ucon64_rom(),0,ucon64_file(),0,n_cmp_SIMI)!=0)
+//	if(n_cmp(ucon64_rom(),0,ucon64_file(),0,filecmp_SIMI)!=0)
                        printf("ERROR: file not found/out of memory\n");
 	return(0);
 }
@@ -190,7 +149,7 @@ if(argcmp(argc,argv,"-find"))
 	x=0;
 	while((x=filegrep(ucon64_rom(),ucon64_file(),x,strlen(ucon64_file())))!=-1)
 	{
-		filehexdump(ucon64_rom(),x,strlen(ucon64_file()));
+		hexdump(ucon64_rom(),x,strlen(ucon64_file()));
 		x++;
 		printf("\n");
 	}
@@ -217,14 +176,14 @@ if(argcmp(argc,argv,"-swap"))
 	buf[strcspn(buf,".")+1]=0;
 	strcat(buf,findlwr(buf)?"rom":"ROM");
 
-	filecopy(romname,0,filesize(romname),buf,"wb");
-//	if(!swapped)fswap(buf,0,(filesize(buf)-hsize));
-	fileswap(buf,0,(filesize(buf)-hsize));
+	filecopy(romname,0,quickftell(romname),buf,"wb");
+//	if(!swapped)fswap(buf,0,(quickftell(buf)-hsize));
+	fileswap(buf,0,(quickftell(buf)-hsize));
 
 
 */
 
-	fileswap(ucon64_rom(),0,filesize(ucon64_rom()));
+	fileswap(ucon64_rom(),0,quickftell(ucon64_rom()));
 	return(0);
 }
 
@@ -252,7 +211,7 @@ if(argcmp(argc,argv,"-stp"))
 	buf[strcspn(buf,".")+1]=0;
 	strcat(buf,findlwr(buf)?"tmp":"TMP");
 	rename(ucon64_rom(),buf);
-	filecopy(buf,512,filesize(buf),ucon64_rom(),"wb");
+	filecopy(buf,512,quickftell(buf),ucon64_rom(),"wb");
 
 	remove(buf);
 	return(0);
@@ -270,7 +229,7 @@ if(argcmp(argc,argv,"-ins"))
 		fwrite(buf2,512,1,fh);
 		fclose(fh);
 	}
-	filecopy(buf,0,filesize(buf),ucon64_rom(),"ab");
+	filecopy(buf,0,quickftell(buf),ucon64_rom(),"ab");
 	remove(buf);
 	return(0);
 }
@@ -348,7 +307,7 @@ if(argcmp(argc,argv,"-na"))
 strcat(buf2,"\
                                                             ");
                                                             
-                fileinsert(ucon64_rom(),buf2,7,50);
+                quickfwrite(buf2,7,50,filebackup(ucon64_rom()));
                 
 		return(0);
 }
@@ -371,7 +330,7 @@ if(argcmp(argc,argv,"-nppf"))
 strcat(buf2,"\
                                                             ");
                                                             
-               fileinsert(ucon64_rom(),buf2,6,50);
+               quickfwrite(buf2,6,50,filebackup(ucon64_rom()));
                 
 	return(0);
 }
@@ -419,9 +378,10 @@ if(argcmp(argc,argv,"-b2i"))console=ucon64_KNOWN;
 if(argcmp(argc,argv,"-hex"))console=ucon64_KNOWN;
 if(argcmp(argc,argv,"-xv64"))console=ucon64_N64;
 if(argcmp(argc,argv,"-bot"))console=ucon64_N64;
+if(argcmp(argc,argv,"-n2gb"))console=ucon64_GB;
 
 strcpy(buf,ucon64_rom());
-if(!strcmp(strupr(&buf[strlen(buf)-4]),".FDS")&&(filesize(ucon64_rom())%65500)==0)
+if(!strcmp(strupr(&buf[strlen(buf)-4]),".FDS")&&(quickftell(ucon64_rom())%65500)==0)
 	console=ucon64_NES;
 
 
@@ -429,15 +389,7 @@ if(!strcmp(strupr(&buf[strlen(buf)-4]),".FDS")&&(filesize(ucon64_rom())%65500)==
 if(console==ucon64_UNKNOWN)
 {
 //the same but automatic
-
-	if(supernintendo_probe(argc,argv)!=-1)console=ucon64_SNES;
-	else if(genesis_probe(argc,argv)!=-1)console=ucon64_GENESIS;
-	else if(nintendo64_probe(argc,argv)!=-1)console=ucon64_N64;
-	else if(nes_probe(argc,argv)!=-1)console=ucon64_NES;
-	else if(gameboy_probe(argc,argv)!=-1)console=ucon64_GB;
-	else if(jaguar_probe(argc,argv)!=-1)console=ucon64_JAGUAR;
-	else if(pcengine_probe(argc,argv)!=-1)console=ucon64_PCE;
-	else console=ucon64_UNKNOWN;
+	console=ucon64_probe(argc,argv);
 }
 
 //here could be global overrides
@@ -500,13 +452,30 @@ case ucon64_NEOGEOPOCKET:
 break;
 case ucon64_UNKNOWN:
 default:
-	filehexdump(ucon64_rom(),0,filehexdump_EOF);
-	printf("\nUnknown (try to force: -snes, -gen, ...)\n\n");
+	hexdump(ucon64_rom(),0,hexdump_EOF);
+	printf("\nERROR: unknown file %s\n       USE -<CONSOLE> force recognition OPTION\n\n",ucon64_rom());
 //	usage_main(argc,argv);
 break;
 }
 
 return(0);
+}
+
+
+int ucon64_probe(int argc,char *argv[])
+{
+	int console=ucon64_UNKNOWN;
+	
+	if(supernintendo_probe(argc,argv)!=-1)console=ucon64_SNES;
+	else if(genesis_probe(argc,argv)!=-1)console=ucon64_GENESIS;
+	else if(nintendo64_probe(argc,argv)!=-1)console=ucon64_N64;
+	else if(nes_probe(argc,argv)!=-1)console=ucon64_NES;
+	else if(gameboy_probe(argc,argv)!=-1)console=ucon64_GB;
+	else if(jaguar_probe(argc,argv)!=-1)console=ucon64_JAGUAR;
+	else if(pcengine_probe(argc,argv)!=-1)console=ucon64_PCE;
+	else console=ucon64_UNKNOWN;
+
+	return(console);
 }
 
 

@@ -476,7 +476,7 @@ genesis_s (st_rominfo_t *rominfo)
   else // type == MGD_GEN
     {
       char suffix[5], *p;
-      int n;
+      int n, offset, size;
 
       mgd_make_name (ucon64.rom, "MD", genesis_rom_size, dest_name);
       strcpy (suffix, (char *) get_suffix (dest_name));
@@ -494,12 +494,15 @@ genesis_s (st_rominfo_t *rominfo)
         nparts++;
       for (x = 0; x < nparts; x++)
         {
+          offset = x * (part_size / 2);
+          size = part_size / 2;
+          if (offset + size > ucon64.file_size / 2)
+            size = ucon64.file_size / 2 - offset;
           // don't write backups of parts, because one name is used
           // write first half of file
-          q_fcpy (ucon64.rom, x * (part_size / 2), part_size / 2, dest_name, "wb");
+          q_fcpy (ucon64.rom, offset, size, dest_name, "wb");
           // write second half of file; don't do: "(nparts / 2) * part_size"!
-          q_fcpy (ucon64.rom, nparts * (part_size / 2) + x * (part_size / 2),
-            part_size / 2, dest_name, "ab");
+          q_fcpy (ucon64.rom, ucon64.file_size / 2 + offset, size, dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
           (*(strrchr (dest_name, '.') - 1))++;
         }
@@ -569,14 +572,21 @@ genesis_j (st_rominfo_t *rominfo)
       strcpy (src_name, ucon64.rom);
       block_size = (ucon64.file_size - rominfo->buheader_len) / 2;
       while (q_fcpy (src_name, rominfo->buheader_len, block_size, dest_name, "ab") != -1)
-        (*(strrchr (src_name, '.') - 1))++;
+        {
+          (*(strrchr (src_name, '.') - 1))++;
+          // BUG ALERT: Assume all parts have the same header length
+          block_size = (q_fsize (src_name) - rominfo->buheader_len) / 2;
+        }
 
       strcpy (src_name, ucon64.rom);
+      block_size = (ucon64.file_size - rominfo->buheader_len) / 2;
       while (q_fcpy (src_name, rominfo->buheader_len + block_size,
              block_size, dest_name, "ab") != -1)
         {
           printf ("Joined: %s\n", src_name);    // print this here, not in the
           (*(strrchr (src_name, '.') - 1))++;   //  previous loop
+          // BUG ALERT: Assume all parts have the same header length
+          block_size = (q_fsize (src_name) - rominfo->buheader_len) / 2;
         }
 
       printf (ucon64_msg[WROTE], dest_name);

@@ -855,7 +855,10 @@ ucon64_file_handler (char *dest, char *src, int flags)
 
   ucon64_output_fname (dest, flags);            // call this function unconditionally
 
+#if 0
+  // ucon64_temp_file will be reset in remove_temp_file()
   ucon64_temp_file = NULL;
+#endif
   if (!access (dest, F_OK))
     {
       stat (dest, &dest_info);

@@ -186,11 +186,8 @@ typedef signed __int64 int64_t;
 #define le2me_64(x) (x)
 #endif
 
-#if     ((defined __unix__ || defined __BEOS__) && !defined __MSDOS__)
-// Cygwin, GNU/Linux, Solaris, FreeBSD, BeOS
-#define FILE_SEPARATOR '/'
-#define FILE_SEPARATOR_S "/"
-#elif   defined AMIGA // just for safety in case it will have to be changed later on
+#if     (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
+// Cygwin, GNU/Linux, Solaris, FreeBSD, BeOS, Amiga
 #define FILE_SEPARATOR '/'
 #define FILE_SEPARATOR_S "/"
 #else // DJGPP, Win32

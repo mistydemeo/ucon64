@@ -1593,7 +1593,7 @@ ucon64_parport_init (int port)
 
   x = OpenDevice (ucon64.parport_dev, port, (struct IORequest *) ucon64_io_req,
                   (ULONG) 0);
-  if (x != NULL)
+  if (x != 0)
     {
       fprintf (stderr, "ERROR: Could not open parallel port (%s, %x)\n",
                ucon64.parport_dev, port);

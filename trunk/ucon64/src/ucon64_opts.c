@@ -49,7 +49,8 @@ int ucon64_parport_needed = 0;
 int
 ucon64_switches (int c, const char *optarg)
 {
-  char *ptr = NULL, buf[MAXBUFSIZE];
+  char *ptr = NULL, *ptr2 = NULL, buf[MAXBUFSIZE];
+  char buf2[MAXBUFSIZE];
   int x = 0;
 
   /*
@@ -127,11 +128,16 @@ ucon64_switches (int c, const char *optarg)
 #endif // DLOPEN
       if (ucon64.discmage_enabled)
         {
+#ifdef  DISCMAGE
           x = libdm_get_version();
+#else
+          x = 0;
+#endif                    
           sprintf (buf, "%d.%d.%d", x >> 16, x >> 8, x);
         }
       else
         strcpy (buf, "not available");
+
 
       printf ("version:                           %s (%s)\n"
               "platform:                          %s\n"
@@ -194,6 +200,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_ISOFIX:
     case UCON64_XCDRW:
     case UCON64_DISC:
+    case UCON64_CDMAGE:
       ucon64.force_disc = 1;
       break;
 
@@ -448,7 +455,10 @@ ucon64_rename (int mode)
       case UCON64_RROM:
         if (ucon64.rominfo)
           if (ucon64.rominfo->name)
-            strcpy (buf, strtrim (ucon64.rominfo->name));
+            {
+              strcpy (buf, ucon64.rominfo->name);
+              strtrim (buf);
+            }
         break;
 
       case UCON64_RENAME:                       // GoodXXXX style rename
@@ -928,9 +938,11 @@ ucon64_options (int c, const char *optarg)
       ucon64_rename (UCON64_RROM);
       break;
 
+#ifdef  DISCMAGE
     case UCON64_BIN2ISO:
     case UCON64_ISOFIX:
     case UCON64_RIP:
+    case UCON64_CDMAGE:
       if (ucon64.discmage_enabled)
         {
           uint32_t flags = 0;
@@ -944,6 +956,10 @@ ucon64_options (int c, const char *optarg)
               case UCON64_ISOFIX:
                 flags |= DM_FIX; // DM_RDONLY|DM_FIX read sectors and fix (if needed/possbile)
                 break;
+
+              case UCON64_CDMAGE:
+                flags |= DM_CDMAGE;
+                break;
             }
 
           ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
@@ -952,7 +968,10 @@ ucon64_options (int c, const char *optarg)
               int track = strtol (optarg, NULL, 10);
               if (track < 1)
                 track = 1;
+              track--; // decrement for libdm_rip()
 
+              printf ("Writing track: %d\n\n", track + 1);
+              
               libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
               libdm_rip (ucon64.image, track, flags);
               printf ("\n");
@@ -969,18 +988,27 @@ ucon64_options (int c, const char *optarg)
         {
           if (ucon64.image)
             {
+              char buf[FILENAME_MAX];
+              strcpy (buf, ucon64.image->fname);
+              
               if (c == UCON64_MKTOC || c == UCON64_MKSHEET)
                 {
+                  set_suffix (buf, ".TOC");
+                  ucon64_file_handler (buf, NULL, 0);
+
                   if (!libdm_toc_write (ucon64.image))
-                    printf (ucon64_msg[WROTE], "toc sheet");
+                    printf (ucon64_msg[WROTE], basename2 (buf));
                   else
                     fprintf (stderr, "ERROR: Could not generate toc sheet\n");
                 }
 
               if (c == UCON64_MKCUE || c == UCON64_MKSHEET)
                 {
+                  set_suffix (buf, ".CUE");
+                  ucon64_file_handler (buf, NULL, 0);
+
                   if (!libdm_cue_write (ucon64.image))
-                    printf (ucon64_msg[WROTE], "cue sheet");
+                    printf (ucon64_msg[WROTE], basename2 (buf));
                   else
                     fprintf (stderr, "ERROR: Could not generate cue sheet\n");
                 }
@@ -1002,6 +1030,7 @@ ucon64_options (int c, const char *optarg)
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
       break;
+#endif  // DISCMAGE
 
     case UCON64_DB:
       if (ucon64.quiet > -1) // -db + -v == -dbv

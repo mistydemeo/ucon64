@@ -9,6 +9,8 @@ Q4: <a href="#4">How do I connect to CVS as anonymous?</a><br>
 <br>
 Q5: <a href="#5">How do I connect to CVS as developer with read/write access?</a><br>
 <br>
+Q5b: <a href="#5b">How do I create a patch from CVS?</a><br>
+<br>
 Q6: <a href="#6">How is the source of uCON64 organized?</a><br>
 <br>
 Q7: <a href="#7">What syntax style is preferred?</a><br>
@@ -167,6 +169,18 @@ Q7: <a href="#7">What syntax style is preferred?</a><br>
 <br>
    because -d:ext:&#60;name&#62;@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 is stored
    in the CVS directories then.<br>
+<br>
+<p>
+<a name="5b"><b>Q5b</b>: How do I create a patch from CVS?</a><br>
+<b>A</b>: as developer with r/w access:<br>
+   cvs -d:ext:&#60;name&#62;@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 diff -u >mychanges.patch<br>
+   &#60;enter password at prompt&#62;<br>
+<br>
+   as anonymous w/o r/w access:<br>
+   cvs -d:pserver:anonymous@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 login<br>
+   &#60;just press enter at password prompt&#62;<br>
+   cvs -d:pserver:anonymous@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 diff -u >mychanges.patch<br>
+<br>
 <br>
 <p>
 <a name="6"><b>Q6</b>: How is the source of uCON64 organized?</a><br>

@@ -23,6 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define gbx_TITLE "GameBoy Xchanger"
 
-int gbx_read(char *filename, unsigned int parport);
-int gbx_write(char *filename, unsigned int parport);
-int gbx_usage(int argc,char *argv[]);
+int gbx_read_rom(char *filename, unsigned int parport);
+int gbx_write_rom(char *filename, unsigned int parport);
+int gbx_read_sram(char *filename, unsigned int parport, int bank);
+int gbx_write_sram(char *filename, unsigned int parport, int bank);
+int gbx_usage(int argc, char *argv[]);

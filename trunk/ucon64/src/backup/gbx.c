@@ -2236,52 +2236,6 @@ void test_intel(void)
   uCON64 code below
 */
 
-int backup_cart(char *fname, int (*progress)(int), void (status)(char *status))
-{
-	int rc = 0;
-	file_name = fname;
-	port_type = 0;
-	if(check_port() == 0) {
-		init_port();
-		check_eeprom();
-		report_progress = progress;
-		report_status = status;
-		backup();
-		report_progress = NULL;
-		report_status = NULL;
-		end_port();
-		return rc;
-	} else
-		return -3;
-}
-
-
-int send_file(char *fname, int (*progress)(int), void (status)(char *status))
-{
-	int rc;
-	file_name = fname;
-	port_type = 0;
-	if(check_port() == 0) {
-		init_port();
-		check_eeprom();
-		printf("XChanger with %dMbit cart present!\n", eeprom_type);
-		if(eeprom_type != 0) {
-			report_progress = progress;
-			report_status = status;
-			rc = write_cart_from_file();
-			report_progress = NULL;
-			report_status = NULL;
-			end_port();
-			return rc;
-		} else {
-			end_port();
-			return -4;
-		}
-	} else
-		return -3;
-
-}
-
 int xchanger_status(void)
 {
 	port_type = 0;
@@ -2297,56 +2251,143 @@ int xchanger_status(void)
 		}
 	} else
 		return 0;
-	
+
 }
 
 int prog_func(int p)
 {
-	putchar('.');
-	return 0;
+  putchar('.');
+  return 0;
 }
 
 void status_func(char *line)
 {
-	printf("%s\n", line);
+  printf("%s\n", line);
 }
 
-void gbx_init(unsigned int parport)
+void gbx_init(unsigned int parport, char *filename)
 {
-	pocket_camera = 0;
-	mbc1_exp = 0;
-	eeprom_type = 0;
-	maxfilesize = 524288*16;
-	file_name = "";
+  pocket_camera = 0;
+  mbc1_exp = 0;
+  eeprom_type = 0;
+  maxfilesize = 8*1024*1024;                // 64Mb
+  file_name = filename;
 
-	port_8 = parport;
-	port_9 = parport + 1;
-	port_a = parport + 2;
-	port_b = parport + 3;
-	port_c = parport + 4;
+  port_8 = parport;
+  port_9 = parport + 1;
+  port_a = parport + 2;
+  port_b = parport + 3;
+  port_c = parport + 4;
+
+// TODO: make use of parport_gauge()
+  report_progress = prog_func;
+  report_status = status_func;
+
+  if (check_port() != 0)
+  {
+    printf("\nNo GBX card present!!!\07\n\n");
+    exit(1);
+  }
+  init_port();
+  check_eeprom();
+  if (eeprom_type == 4)
+    maxfilesize = 512*1024;                     // 4Mb
+  if (eeprom_type == 16)
+    maxfilesize = 2*1024*1024;                  // 16Mb
+  if (eeprom_type == 64)
+    maxfilesize = 8*1024*1024;                  // 64Mb
 }
 
-int gbx_read(char *filename, unsigned int parport)
+int gbx_read_rom(char *filename, unsigned int parport)
 {
-  gbx_init(parport);
-  return backup_cart(filename, prog_func, status_func);
-}
-                        
-int gbx_write(char *filename, unsigned int parport)
-{
-  gbx_init(parport);
-  return send_file(filename, prog_func, status_func);
+  gbx_init(parport, filename);
+
+  cmd = 'B';
+  backup();
+  end_port();
+
+  return 0;
 }
 
-int gbx_usage(int argc,char *argv[])
+int gbx_write_rom(char *filename, unsigned int parport)
+{
+  gbx_init(parport, filename);
+
+  if (eeprom_type != 0)
+  {
+    int rc;
+
+    rc = write_cart_from_file();
+    end_port();
+    return rc;
+  }
+  else
+  {
+    end_port();
+    return -1;
+  }
+}
+
+int gbx_read_sram(char *filename, unsigned int parport, int bank)
+{
+  gbx_init(parport, filename);
+  if (bank == -1)
+  {
+    sram_bank_num = 0;
+    read_all_sram_to_file();
+  }
+  else
+  {
+    sram_bank_num = bank;
+    read_8k_sram_to_file();
+  }
+
+  end_port();
+  return 0;
+}
+
+int gbx_write_sram(char *filename, unsigned int parport, int bank)
+{
+  struct stat fstat;
+
+  gbx_init(parport, filename);
+  if (bank == -1)
+    sram_bank_num = 0;
+  else
+    sram_bank_num = bank;
+
+  if (check_eeprom() != 0)
+    bank_size = 4;                              // no flash card -> 4*8kB = 32kB sram
+  else
+    SetSramBank();                              // set bank_size = 4/16 banks of 8kB
+
+  stat(filename, &fstat);
+  if (fstat.st_size == 8*1024 || bank != -1)
+  {
+    cmd = 'l';
+    write_8k_sram_from_file();
+  }
+  else
+  {
+    cmd = 'L';
+    write_all_sram_from_file();
+  }
+
+  end_port();
+  return 0;
+}
+
+int gbx_usage(int argc, char *argv[])
 {
   if (argcmp(argc, argv, "-help"))
     printf("\n%s\n", gbx_TITLE);
 
   printf("  -xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
          "                receives automatically when $ROM does not exist\n"
-         "TODO:  -xgbxs   send/receive SRAM to/from GB Xchanger; $FILE=PORT\n"
-         "                receives automatically when $ROM does not exist\n");
+         "  -xgbxs        send/receive SRAM to/from GB Xchanger; $FILE=PORT\n"
+         "                receives automatically when $ROM does not exist\n"
+         "  -xgbxb<n>     send/receive 64kbits SRAM to/from GB Xchanger bank n\n"
+         "                $FILE=PORT; receives automatically when $ROM does not exist\n");
 
   if (argcmp(argc, argv, "-help"))
   {

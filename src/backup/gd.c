@@ -1070,7 +1070,7 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
       || toupper (p[0]) != 'S' || toupper (p[1]) != 'F'
       || p[fn_length - 4] != '.' || toupper (p[fn_length - 3]) != 'S')
     {
-      fprintf (stderr, "Error: Filename (%s) is not a saver filename (SF*.S##)\n", p);
+      fprintf (stderr, "ERROR: Filename (%s) is not a saver filename (SF*.S##)\n", p);
       exit (1);
     }
 

@@ -59,7 +59,7 @@ const char *swc_usage[] =
     NULL
   };
 
-#if 0
+/*
 Super Wild card 1.6xc
 Comment 1: This is an OLD copier unit for the SNES from 1993. Blow off the 
 dust, and power on! This baby uses those big old 5.25 disks, which don't hold
@@ -132,7 +132,7 @@ buttons. This gets annoying if you forget a disk is in the drive though!
 Comment about the '96 upgrade ROM:  This replacement ROM will upgrade the SWC 
 DX's ROM BIOS and add a new DX96 logo and background tiles. Its the latest ROM
 for the SWC DX. 
-#endif
+*/
 
 #ifdef BACKUP
 

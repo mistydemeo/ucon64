@@ -42,7 +42,7 @@ const char *doctor64_usage[] =
     NULL
   };
 
-#if 0
+/*
 Doctor V64
 Comment 1:  Bung Enterprises introduce the first ever N64 copier, the Doctor 
 V64! As standard, each unit comes with 128Mbits (16Mbytes) of RAM, and can be 
@@ -72,7 +72,7 @@ upgraded. Doctor V64 has a MPEG chipset built-in, which makes it a VCD, and
 Music CD player. It also has a 3D Spatializer chip built-in which will produce
 3D surround sound effect for all audio that are emitted from it, which includes
 videogames and VCD.
-#endif
+*/
 
 
 #ifdef BACKUP

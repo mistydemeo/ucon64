@@ -26,7 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <limits.h>
 #ifdef  HAVE_DIRENT_H
 #include <dirent.h>
 #endif

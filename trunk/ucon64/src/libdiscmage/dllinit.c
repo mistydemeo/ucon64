@@ -72,7 +72,7 @@ st_map_t *symbol;
 int
 dxe_init (void)
 {
-  symbol = map_create (12);                     // Read comment in map.h!
+  symbol = map_create (14);                     // Read comment in map.h!
   symbol->cmp_key = (int (*) (void *, void *)) strcmp; // How beautiful! ;-)
 
   symbol = map_put (symbol, "dm_get_version", dm_get_version);
@@ -88,7 +88,6 @@ dxe_init (void)
   symbol = map_put (symbol, "dm_disc_read", dm_disc_read);
   symbol = map_put (symbol, "dm_disc_write", dm_disc_write);
 
-  symbol = map_put (symbol, "dm_mksheets", dm_mksheets);
   symbol = map_put (symbol, "dm_mktoc", dm_mktoc);
   symbol = map_put (symbol, "dm_mkcue", dm_mkcue);
 

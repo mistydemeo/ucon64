@@ -282,7 +282,9 @@ const struct option long_options[] = {
 void
 ucon64_exit (void)
 {
-  printf ("+++EOF");
+  if (ucon64.frontend == 1)
+    printf ("+++EOF");
+  handle_registered_funcs ();
   fflush (stdout);
 }
 
@@ -304,6 +306,12 @@ main (int argc, char **argv)
     "Uses code from various people. See 'developers.html' for more!\n"
     "This may be freely redistributed under the terms of the GNU Public License\n\n",
     ucon64_title);
+
+  if (atexit (ucon64_exit) == -1)
+    {
+      fprintf (stderr, "Could not register function with atexit()\n");
+      exit (1);
+    }
 
   memset (&ucon64, 0L, sizeof (st_ucon64_t));
 

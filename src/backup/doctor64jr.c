@@ -36,7 +36,7 @@ const char *doctor64jr_usage[] =
 #ifdef BACKUP
     "  " OPTION_LONG_S "xdjr        send/receive ROM to/from Doctor64 Jr; " OPTION_LONG_S "file=PORT\n"
 //          "                receives automatically when ROM does not exist\n"
-    "                  currently only sending is supported\n"
+    "                  currently only sending is supported\n",
 #ifdef TODO
 #warning TODO --xdjrs send/receive SRAM to/from Doctor64 Jr
 #endif
@@ -45,14 +45,11 @@ const char *doctor64jr_usage[] =
     "                  receives automatically when SRAM does not exist\n"
 #endif
 #endif // BACKUP
-    ,NULL
+    NULL
   };
 
-static unsigned long init_time = 0, size = 0, pos = 0;
 
-
-
-#if 0
+/*
 drjr transfer protocol
 
 
@@ -71,19 +68,19 @@ ai[]=3  r (rst,wdf,wcf,a[28..24])
 ai[]=4	r/w data
 ai[]=5	w mode
 ai[]=6	w en_1
-ai[]=7	w en_0 
-*remark 
-	a[8..1] support page count up
+ai[]=7	w en_0
+*remark
+        a[8..1] support page count up
 
-	ai[3]d7:0=N64 power off, 1=N64 power on
+        ai[3]d7:0=N64 power off, 1=N64 power on
              d6:0=no dram data written, 1=dram data written
              d5:0=no data write in b4000000~b7ffffff, 1=some data written in b4000000~b7ffffff
 
-	mode d0:0=dram read only and clear wdf, 1=dram write enable
-	     d1:0=disable cartridge read and clear wcf flag,
+        mode d0:0=dram read only and clear wdf, 1=dram write enable
+             d1:0=disable cartridge read and clear wcf flag,
                 1=enable cartridge read(write b4000000~b7ffffff will switch off dram and cartridge will present at b0000000~b3ffffff)
 
-	en_0=05 and en_1=0a is enable port control
+        en_0=05 and en_1=0a is enable port control
 
 
 
@@ -108,7 +105,7 @@ p2~p9 pd[7:0]  XXXXXXXXXXX 07 XX 05 XXXX 06 XX 0a XXXXXXXXXXXX
 p1    nwrite   ~~~~~~~~~|_____________________________|~~~~~~~
 p14   ndstb    ~~~~~~~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~
 p17   nastb    ~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~~~~~~
-                            en_0=05       en_1=0a  
+                            en_0=05       en_1=0a
 
 
 
@@ -119,7 +116,7 @@ p2~p9 pd[7:0]  XXXXXXXXXXX 00 XX 56 XXXX 01 XX 34 XXXX 02 XX 12 XXXX 03 XX b0 XX
 p1    nwrite   ~~~~~~~~~|_______________________________________________________________________________________|~~~~~~~~~~
 p14   ndstb    ~~~~~~~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~|_|~~~|_|~~~|_|~~~|_|~~~~~~~~~~~
 p17   nastb    ~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~|_|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                              set adr word low            set adr word high                wdata a55a  wdata 1234 (after write adr=b012345a) 
+                              set adr word low            set adr word high                wdata a55a  wdata 1234 (after write adr=b012345a)
 
 
 
@@ -130,7 +127,7 @@ p2~p9 pd[7:0]  XXXXXXXXXXX 00 XX 00 XXXX 01 XX 34 XXXX 02 XX 12 XXXX 03 XX b0 XX
 p1    nwrite   ~~~~~~~~~|________________________________________________________________~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 p14   ndstb    ~~~~~~~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~~|_|~~~~~~|_|~~~ ~~~ ~~~~|_|~~~~~~~~|_|~~~~~~~~
 p17   nastb    ~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~|_|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                              set adr word low            set adr word high                (after 512 read adr=b0123400) 
+                              set adr word low            set adr word high                (after 512 read adr=b0123400)
 
 
 eg:dram write protect, disable N64 access to cartridge and disable port control
@@ -140,7 +137,7 @@ p2~p9 pd[7:0]  XXXXXXXXXXX 05 XX 00 XXXX 07 XX 00 XXXX 06 XX 00 XXXXXXXXXXXX
 p1    nwrite   ~~~~~~~~~|________________________________________|~~~~~~~~~~
 p14   ndstb    ~~~~~~~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~
 p17   nastb    ~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~~~~~~
-                            mode=00       en_0=00       en_1=00  
+                            mode=00       en_0=00       en_1=00
 
 
 
@@ -149,131 +146,76 @@ simple backup rountine for N64
 
 void writePI(unsigned long addr, unsigned long value)
 {
-	do {} while (*(volatile unsigned long *) (0xa4600010) & 3);     // check parallel interface not busy
-	addr &=0xbffffffc;
-	*(unsigned long *)(addr)=value;
+  do {} while (*(volatile unsigned long *) (0xa4600010) & 3);     // check parallel interface not busy
+  addr &=0xbffffffc;
+  *(unsigned long *)(addr)=value;
 }
 
 unsigned long readPI(unsigned long addr)
 {
-	do {} while (*(volatile unsigned long *) (0xa4600010) & 3);     // check parallel interface not busy
-	addr &=0xbffffffc;
-	return *(unsigned long *)(addr);
+  do {} while (*(volatile unsigned long *) (0xa4600010) & 3);     // check parallel interface not busy
+  addr &=0xbffffffc;
+  return *(unsigned long *)(addr);
 }
 
-/*-------------------------
-MAIN -- START OF USER CODE
---------------------------*/
+// MAIN -- START OF USER CODE
 void mainproc(void *arg) {
     u32 base_adr;
-    for (base_adr=0;base_adr<0x1000000;base_adr++){			// backup 128Mbits
-       writePI(0xb0000000+base_adr,readPI(0xb4000000 + base_adr));       // write data
+    for (base_adr=0;base_adr<0x1000000;base_adr++){                     // backup 128Mbits
+       writePI(0xb0000000+base_adr,readPI(0xb4000000 + base_adr));      // write data
     }
 }
-#endif
-
+*/
 
 #ifdef BACKUP
 
-#if 0
 #ifdef TODO
 #warning TODO doctor64jr.c sram routines
 #endif
-#include <stdio.h>
-//#include <process.h>
-#ifdef WIN32
-#include <windows.h>
-#define WaitASec() Sleep(1000)
-#else
-#define WaitASec() sleep(1)
-#endif
 
+#if 0
 
-typedef unsigned short u16;     /* unsigned 16-bit */
+// The following include-block should be moved to the other includes when the SRAM
+// code is finished. misc.h should be included after OS.h to avoid a warning.
+#ifdef  __unix__
+#include <unistd.h>                             // usleep(), microseconds
+#elif   defined __MSDOS__
+#include <dos.h>                                // delay(), milliseconds
+#elif   defined __BEOS__
+#include <OS.h>                                 // snooze(), microseconds
+ #endif
+
+typedef unsigned short u16;                     // unsigned 16-bit
 //void docmd(jr_command cmd);
 int saveram_pc_main (int argc, char *argv[], char *envp[]);
-#define CART_BASE	0xB0000000U
-#define CART_BASE2	0xB4000000U
-#define SRAM_BASE	0xA8000000U
-#define SRAM_LEN	0x8000
 
+#define CART_BASE       0xB0000000U
+#define CART_BASE2      0xB4000000U
+#define SRAM_BASE       0xA8000000U
+#define SRAM_LEN        0x8000
 #define RAMROM_SRAM_ADDY 0x00200000U
-
-enum _jr_command
-{
-	ReadSram	= 0x4001,		// Copy SRAM from DS1/Cart to designated address
-	WriteSram	= 0x4002,		// Copy SRAM from designated address to DS1/Cart
-	ReadEeprom	= 0x4004,		// Ditto for DX256/Cart EEPROM
-	WriteEeprom	= 0x4008,		//
-	ReadPfs		= 0x4010,		// Ditto for Mempak
-	WritePfs	= 0x4020,		//
-
-	NoCmd		= 0x8037,		// Do nothing for now
-	ColdBoot	= 0xABCD		// Game is loaded, now cold boot.
-};
-typedef enum _jr_command jr_command;
-
 #define EPP_PORT 0x378
 
-unsigned char buffer[SRAM_LEN * 8];
+typedef enum _jr_command
+{
+  ReadSram      = 0x4001,                       // Copy SRAM from DS1/Cart to designated address
+  WriteSram     = 0x4002,                       // Copy SRAM from designated address to DS1/Cart
+  ReadEeprom    = 0x4004,                       // Ditto for DX256/Cart EEPROM
+  WriteEeprom   = 0x4008,                       //
+  ReadPfs       = 0x4010,                       // Ditto for Mempak
+  WritePfs      = 0x4020,
 
+  NoCmd         = 0x8037,                       // Do nothing for now
+  ColdBoot      = 0xABCD                        // Game is loaded, now cold boot.
+} jr_command;
 
-FILE *fp;
+static unsigned char buffer[SRAM_LEN * 8];
+static FILE *fp;
 
 int
 saveram_pc_main (int argc, char *argv[], char *envp[])
 {
-#if 0
-#if defined(WIN32)
-  HANDLE h;
-  OSVERSIONINFO windows_version;
-#endif
-#endif
   unsigned long i, j, temp;
-#if 0
-#if defined(__linux__)          // need to secure access rights to the I/O ports for Linux
-
-  if (ioperm (EPP_PORT, 8, 1) != 0)
-    {
-      fprintf (stderr, "No permission for I/O port access.\n");
-      exit (5);
-    }
-
-  // these lines make us revert back to a normal user when running a suid root app
-
-  setgid (getgid ());
-  setuid (getuid ());
-
-#elif defined (WIN32)
-
-  windows_version.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
-  GetVersionEx (&windows_version);
-
-  if (windows_version.dwPlatformId == VER_PLATFORM_WIN32_NT)
-    {
-      printf ("Attempting to get port I/O access... ");
-      h = CreateFile ("\\\\.\\giveio", GENERIC_READ, 0, NULL,
-                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-      if (h == INVALID_HANDLE_VALUE)
-        {
-          printf ("Couldn't access giveio device\n");
-          return -1;
-        }
-      else
-        printf ("done.\n");
-      CloseHandle (h);
-    }
-
-#endif
-#endif
-
-//      signal(SIGINT, userbreak);
-
-
-
-
-//      return 1000;
-
 
   i = v64jr_status ();          // get v64jr status (or 0 if no v64jr detected)
   do
@@ -291,12 +233,7 @@ saveram_pc_main (int argc, char *argv[], char *envp[])
      i & V64JR_N64POWER ? "ON" : "OFF", i & V64JR_RAMALTERED ? "was " : "un",
      i & V64JR_ROMSELECT ? "0" : "4");
 
-  printf ("\nSending N64 Agent...\n");
-
-  _spawnl (_P_WAIT, "c:\\n64\\src\\sendpatch2\\release\\elim.exe",
-           "elim.exe",
-           "c:\\n64\\src\\saveram\\saveram_n64\\saveram_n64.rom", NULL);
-
+/*
   if ((i & V64JR_N64POWER))
     {
       printf ("\nTurn off n64...");
@@ -309,69 +246,46 @@ saveram_pc_main (int argc, char *argv[], char *envp[])
   while (!(i & V64JR_N64POWER))
     i = v64jr_status ();
 
+#ifdef  __unix__                                // wait 2000 milliseconds
+  usleep (2000);
+#elif   defined __MSDOS__
+  delay (2);
+#elif   defined __BEOS__
+  snooze (2000);
+ #endif
 
-  Sleep (2000);
-
-//      printf("\nPower N64 and press any key to continue...");
-//      fflush(stdout);
-//      fgetc(stdin);
-//      printf("ok.\n");
-//      fflush(stdout);
-
-
-#define FILENAME "c:\\n64\\src\\saveram\\saveram2.sav"
-#define FILENAME2 "c:\\n64\\roms\\Patched\\zelda64.ram"
-
-/*    if ((fp = fopen("saveram.sav", "w")) == NULL)
-	{
-		fprintf(stderr, "Can't open %s for writing\n", FILENAME);
-		exit(5);
-	}
+  printf("\nPower N64 and press any key to continue...");
+  fflush(stdout);
+  fgetc(stdin);
+  printf("ok.\n");
+  fflush(stdout);
 */
 
-#define OP2LONG(x) ((long)x | 0x12400000)
-
-
-
+/*
   if ((fp = fopen (FILENAME, "wb")) == NULL)
     {
       fprintf (stderr, "Can't open %s for writing\n", FILENAME);
       exit (5);
     }
-
+*/
   printf ("Reading SRAM...\n");
-  docmd (ReadSram);             // buffer is is motorola format
-
+  docmd (ReadSram);                     // buffer is is motorola format
   i = fwrite (buffer, SRAM_LEN, 1, fp); // buffer is is motorola format
-
   fclose (fp);
-
 
   if ((fp = fopen (FILENAME2, "rb")) == NULL)
     {
       fprintf (stderr, "Can't open %s for reading\n", FILENAME2);
       exit (6);
     }
-
-
   i = fread (buffer, 0x8000, 1, fp);
-
   printf ("Writing SRAM...\n");
-  docmd (WriteSram);            // buffer is is motorola format
-
+  docmd (WriteSram);                    // buffer is is motorola format
 
   printf ("Sending ROM...\n");
-  _spawnl (_P_WAIT, "c:\\n64\\src\\sendpatch2\\release\\elim.exe",
-           "elim.exe",
-           "c:\\n64\\roms\\zelda64.rom",
-           "-p", "c:\\n64\\roms\\patched\\zelda64.APS", NULL);
-
   docmd (ColdBoot);
 
-
-
   fclose (fp);
-
   return 0;
 }
 
@@ -436,34 +350,21 @@ docmd (jr_command cmd)
       v64jr_io (V64JR_WRITE, (unsigned char *) (&fatcmd), 0x0, 4);
       v64jr_close (0);
 
-
-    default:;
+    default:
+      ;
     }
-
-
 }
-
-
-#endif
+#endif // #if 0
 
 /**************************************
 *        program name: v64jr.c          *
 *  N64 cart emulator transfer program *
 **************************************/
 
-#if 0
-/*#include <dos.h>*/
-#include <stdio.h>
-#include <stdlib.h>
-/*#include <io.h>*/
-/*#include <dir.h>*/
-#include <unistd.h>
-#endif
-
 //#define ai 0x37b
 //#define data 0x37c
 #define trans_size 32768
-#define set_ai_write outportb(port_a,5);		// ninit=1, nwrite=0
+#define set_ai_write outportb(port_a,5);	// ninit=1, nwrite=0
 #define set_data_write outportb(port_a,1);	// ninit=0, nwrite=0
 #define set_data_read outportb(port_a,0);	// ninit=0, nwrite=1
 #define set_normal outportb(port_a,4);		// ninit=1, nwrite=1
@@ -475,53 +376,16 @@ char verify_en=0;
 char disp_on=1;
 FILE *fptr;
 union mix_buffer {
-unsigned char buffer[32768];
-unsigned short int bufferx[16384];
-}mix;
+  unsigned char buffer[32768];
+  unsigned short int bufferx[16384];
+} mix;
 unsigned short int port[2];
 unsigned char port_no;
 unsigned short int port_8,port_9,port_a,port_b,port_c;
 unsigned char disp_buf[16];
 short int i,j,page,sel,err,wv_mode;
 char ch=' ';
-
-
-#if 0
-unsigned char inportb(arg1)
-{
-  __asm__("
-  movl    8(%ebp),%edx
-  inb     %dx,%al
-  movzbl  %al,%eax                  
-  ");
-}
-
-unsigned char outportb(arg1,arg2)
-{
-  __asm__("
-  movl    0x8(%ebp),%edx
-  movl    0xc(%ebp),%eax
-  outb    %al,%dx
-  ");
-}
-
-unsigned short int inport(unsigned int arg1)
-{
-  __asm__("
-  movl    8(%ebp),%edx
-  inw     %dx,%ax
-  ");
-}
-
-unsigned short int outport(unsigned int arg1,unsigned int arg2)
-{
-  __asm__("
-  movl    0x8(%ebp),%edx
-  movl    0xc(%ebp),%eax
-  outw    %ax,%dx
-  ");
-}
-#endif
+static unsigned long init_time = 0, size = 0, pos = 0;
 
 void drjr_set_ai (unsigned char _ai);
 void drjr_set_ai_data (unsigned char _ai, unsigned char _data);
@@ -538,6 +402,7 @@ static short int download_n64 ();
 static void gen_pat_32k (unsigned short int offset);
 static unsigned short int test_dram (void);
 void d64jr_usage (char *progname);
+
 /**************************************
 *               Subroutine            *
 **************************************/
@@ -1073,7 +938,7 @@ doctor64jr_read (const char *filename, unsigned int parport)
 
   port[0] = parport;
   port[1] = 0;
-  
+
   strcpy (buf, filename);
 
   doctor64jr_argv[0] = "jrsend";

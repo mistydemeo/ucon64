@@ -96,8 +96,11 @@ static void ucon64_usage (int argc, char *argv[]);
 
 st_ucon64_t ucon64;
 
-static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS
-                              " 1999-2002 by (various)";
+static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S
+#if 0
+                             "/" CURRENT_ENDIAN_S 
+#endif
+                             " 1999-2002 by (various)";
 
 const struct option long_options[] = {
     {"1991", 0, 0, UCON64_1991},

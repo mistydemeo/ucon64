@@ -50,16 +50,8 @@ endif
 ifdef GUI
 FULLLIBNAME_NG=$(LIBNAME_NG).dll
 ifndef DLOPEN
-LDFLAGS+=libnetgui/$(LIBNAME_NG).a
+LDFLAGS+=libnetgui/$(LIBNAME_NG).a 
 endif
-endif
-
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
-
-FULLLIBNAME=$(LIBNAME).dll
-ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME).a
 endif
 
 else
@@ -221,10 +213,6 @@ ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 	rm -f Makefile config.log config.status config.cache config.h
 	cd libdiscmage && $(MAKE) distclean
         cd libnetgui && $(MAKE) distclean
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
-	rm -f Makefile config.log config.status config.cache config.h
-	cd libdiscmage && $(MAKE) distclean
 else
 ifdef DJGPP
 	del Makefile

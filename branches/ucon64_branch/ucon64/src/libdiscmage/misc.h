@@ -295,6 +295,7 @@ extern char *realpath2 (const char *src, char *full_path);
 extern int mkdir2 (const char *name);
 extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, int size);
+     
 
 
 /*

@@ -33,8 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
 #include "misc.h"
-#include "libdiscmage/libdiscmage.h"            // dm_image_t
-#include "libnetgui/libnetgui.h"
 
 typedef struct
 {
@@ -45,6 +43,14 @@ typedef struct
 //  int status;                                   // development status of option
                                                   // 0 = OK, 1 = TODO, 2 = TEST
 } st_usage_t;
+
+
+#ifdef  DISCMAGE
+#include "ucon64_lib.h"
+#endif
+#ifdef  GUI
+#include "ucon64_libng.h"
+#endif
 
 
 /*
@@ -181,9 +187,12 @@ typedef struct
   const char *dump_info;                        // NES UNIF
   const char *comment;                          // NES UNIF
 
+#ifdef  GUI
   netgui_t *netgui;                             // pointer to netgui GUI
-
+#endif
+#ifdef  DISCMAGE
   dm_image_t *image;                            // info from libdiscmage
+#endif
   st_ucon64_dat_t *dat;                         // info from DATabase
   st_rominfo_t *rominfo;                        // info from <console>_init()
 } st_ucon64_t;

@@ -26,8 +26,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include "misc/misc.h"
+#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_misc.h"
 #include "yoko.h"
 
 
@@ -40,6 +44,3 @@ const st_getopt2_t yoko_usage[] =
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
-
-#ifdef USE_PARALLEL
-#endif // USE_PARALLEL

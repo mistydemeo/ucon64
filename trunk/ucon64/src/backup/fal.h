@@ -25,9 +25,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const st_getopt2_t fal_usage[];
 
-#define FAL_HEADER_START 0
-#define FAL_HEADER_LEN 0
-
 #ifdef USE_PARALLEL
 extern int fal_read_rom (const char *filename, unsigned int parport, int size);
 extern int fal_write_rom (const char *filename, unsigned int parport);

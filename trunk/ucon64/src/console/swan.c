@@ -25,10 +25,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include "misc/misc.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "swan.h"
+
 
 static int swan_chksum (unsigned char *rom_buffer);
 
@@ -42,12 +47,12 @@ const st_getopt2_t swan_usage[] =
     {
       "swan", 0, 0, UCON64_SWAN,
       NULL, "force recognition",
-      (void *) (UCON64_SWAN|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_SWAN_SWITCH]
     },
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum",
-      (void *) WF_DEFAULT
+      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
@@ -70,13 +75,13 @@ swan_chk (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
-  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
-  q_fputc (dest_name, SWAN_HEADER_START + 8, rominfo->current_internal_crc, "r+b"); // low byte
-  q_fputc (dest_name, SWAN_HEADER_START + 9, rominfo->current_internal_crc >> 8, "r+b"); // high byte
+  ucon64_fputc (dest_name, SWAN_HEADER_START + 8, rominfo->current_internal_crc, "r+b"); // low byte
+  ucon64_fputc (dest_name, SWAN_HEADER_START + 9, rominfo->current_internal_crc >> 8, "r+b"); // high byte
 
-  q_fread (buf, SWAN_HEADER_START + 8, 2, dest_name);
-  mem_hexdump (buf, 2, SWAN_HEADER_START + 8);
+  ucon64_fread (buf, SWAN_HEADER_START + 8, 2, dest_name);
+  dumper (stdout, buf, 2, SWAN_HEADER_START + 8, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -84,37 +89,37 @@ swan_chk (st_rominfo_t *rominfo)
 
 
 /*
-Byte2 - Cartridge ID number for this developer
+  Byte2 - Cartridge ID number for this developer
 
-Byte3 - ?Unknown?
-00 - most roms
-01 - Dig2/BAN032 & soro/KGT007
-02 - Chocobo/BAN002
-03 - sdej/BAN006
-04 - srv2/BPR006
+  Byte3 - ?Unknown?
+  00 - most roms
+  01 - Dig2/BAN032 & soro/KGT007
+  02 - Chocobo/BAN002
+  03 - sdej/BAN006
+  04 - srv2/BPR006
 
-Byte4 - ROM Size:
-01 - ?
-02 - 4Mbit
-03 - 8Mbit
-04 - 16Mbit
-05 - ?
-06 - 32Mbit
-07 - ?
-08 - ?
-09 - 128Mbit
+  Byte4 - ROM Size:
+  01 - ?
+  02 - 4Mbit
+  03 - 8Mbit
+  04 - 16Mbit
+  05 - ?
+  06 - 32Mbit
+  07 - ?
+  08 - ?
+  09 - 128Mbit
 
-Byte5 - SRAM/EEPROM Size:
-00 - 0k
-01 - 64k SRAM
-02 - 256k SRAM
-10 - 1k EEPROM (MGH001/NAP001)
-20 - 16k EEPROM
+  Byte5 - SRAM/EEPROM Size:
+  00 - 0k
+  01 - 64k SRAM
+  02 - 256k SRAM
+  10 - 1k EEPROM (MGH001/NAP001)
+  20 - 16k EEPROM
 
-Byte6 - Additional capabilities(?)
-04 - ?? game played in "horizontal" position (most roms)
-05 - ?? game played in "vertical" position
-10 - ?? (SUN003)
+  Byte6 - Additional capabilities(?)
+  04 - ?? game played in "horizontal" position (most roms)
+  05 - ?? game played in "vertical" position
+  10 - ?? (SUN003)
 */
 int
 swan_init (st_rominfo_t *rominfo)
@@ -122,21 +127,23 @@ swan_init (st_rominfo_t *rominfo)
   int result = -1;
   unsigned char *rom_buffer, buf[MAXBUFSIZE];
 #define SWAN_MAKER_MAX 0x30
-  const char *swan_maker[SWAN_MAKER_MAX] = {
-    "BAN", "BAN", NULL, NULL, NULL,
-    "DTE", NULL, NULL, NULL, NULL,
-    NULL, "SUM", "SUM", NULL, "BPR",
-    NULL, NULL, NULL, "KNM", NULL,
-    NULL, NULL, "KGT", NULL, NULL,
-    NULL, NULL, "MGH", NULL, "BEC",
-    "NAP", "BVL", NULL, NULL, NULL,
-    NULL, NULL, NULL, "KDK", NULL,
-    "SQR", NULL, NULL, NULL, NULL,
-    "NMC", NULL, NULL};
+  const char *swan_maker[SWAN_MAKER_MAX] =
+    {
+      "BAN", "BAN", NULL, NULL, NULL,
+      "DTE", NULL, NULL, NULL, NULL,
+      NULL, "SUM", "SUM", NULL, "BPR",
+      NULL, NULL, NULL, "KNM", NULL,
+      NULL, NULL, "KGT", NULL, NULL,
+      NULL, NULL, "MGH", NULL, "BEC",
+      "NAP", "BVL", NULL, NULL, NULL,
+      NULL, NULL, NULL, "KDK", NULL,
+      "SQR", NULL, NULL, NULL, NULL,
+      "NMC", NULL, NULL
+    };
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
-  q_fread (&swan_header, SWAN_HEADER_START + rominfo->buheader_len,
+  ucon64_fread (&swan_header, SWAN_HEADER_START + rominfo->buheader_len,
            SWAN_HEADER_LEN, ucon64.rom);
 
   rominfo->header = &swan_header;
@@ -157,7 +164,7 @@ swan_init (st_rominfo_t *rominfo)
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], ucon64.file_size);
       return -1;
     }
-  q_fread (rom_buffer, 0, ucon64.file_size, ucon64.rom);
+  ucon64_fread (rom_buffer, 0, ucon64.file_size, ucon64.rom);
 
   rominfo->has_internal_crc = 1;
   rominfo->internal_crc_len = rominfo->internal_crc2_len = 2;
@@ -175,8 +182,8 @@ swan_init (st_rominfo_t *rominfo)
   if (ucon64.console == UCON64_SWAN)
     result = 0;
 
-  rominfo->console_usage = swan_usage;
-  rominfo->copier_usage = unknown_usage;
+  rominfo->console_usage = swan_usage[0].help;
+  rominfo->copier_usage = unknown_usage[0].help;
 
   free (rom_buffer);
   return result;

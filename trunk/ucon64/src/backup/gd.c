@@ -26,9 +26,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
+#include "misc/string.h"
 #include "misc/misc.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "gd.h"
 #include "console/snes.h"                       // for snes_make_gd_names() &
@@ -47,45 +53,46 @@ const st_getopt2_t gd_usage[] =
       "xgd3", 0, 0, UCON64_XGD3, // supports split files
       NULL, "send ROM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
       "this option uses the Game Doctor SF3 protocol",
-      (void *) (UCON64_SNES|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_DEFAULT_STOP_NO_ROM]
     },
     {
       "xgd6", 0, 0, UCON64_XGD6,
-#if 1 // dumping is not yet supported (might happen soon)
+#if 1 // dumping is not yet supported
       NULL, "send ROM to Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n" // supports split files
 #else
       NULL, "send/receive ROM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist\n"
 #endif
       "this option uses the Game Doctor SF6 protocol",
-      (void *) (UCON64_SNES|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_DEFAULT_STOP_NO_ROM]
     },
     {
       "xgd3s", 0, 0, UCON64_XGD3S,
       NULL, "send SRAM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT",
-      (void *) (UCON64_SNES|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
     },
     // --xgd3r should remain hidden until receiving works
     {
       "xgd3r", 0, 0, UCON64_XGD3R,
       NULL, NULL,
-      (void *) (UCON64_SNES|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
     },
     {
       "xgd6s", 0, 0, UCON64_XGD6S,
       NULL, "send/receive SRAM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      (void *) (UCON64_SNES|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
     },
     {
       "xgd6r", 0, 0, UCON64_XGD6R,
       NULL, "send/receive saver (RTS) data to/from Game Doctor SF6/SF7;\n" OPTION_LONG_S "port=PORT\n"
       "receives automatically when saver file does not exist",
-      (void *) (UCON64_SNES|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
     },
 #endif // USE_PARALLEL
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
+
 
 #ifdef  USE_PARALLEL
 
@@ -170,7 +177,7 @@ init_io (unsigned int port)
   init_conio ();
 #endif
 
-  misc_parport_print_info ();
+  parport_print_info ();
 }
 
 
@@ -582,7 +589,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
   FILE *file = NULL;
   unsigned char *buffer;
   char *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12],
-       *filenames[GD3_MAX_UNITS], *dir;
+       *filenames[GD3_MAX_UNITS], dir[FILENAME_MAX];
   int num_units, i, send_header, x, split = 1, hirom = snes_get_snes_hirom();
 
   init_io (parport);
@@ -601,7 +608,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
       num_units = snes_make_gd_names (filename, rominfo, (char **) names);
     }
 
-  dir = dirname2 (filename);
+  dirname2 (filename, dir);
   gd_fsize = 0;
   for (i = 0; i < num_units; i++)
     {
@@ -623,7 +630,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
 
       if (split)
         {
-          x = q_fsize (filenames[i]);
+          x = fsizeof (filenames[i]);
           gd_fsize += x;
           gd3_dram_unit[i].size = x;
           if (i == 0)                           // Correct for header of first file
@@ -631,8 +638,8 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
         }
       else
         {
-          if (!gd_fsize)                        // Don't call q_fsize() more
-            gd_fsize = q_fsize (filename);      //  often than necessary
+          if (!gd_fsize)                        // Don't call fsizeof() more
+            gd_fsize = fsizeof (filename);      //  often than necessary
           if (hirom)
             gd3_dram_unit[i].size = (gd_fsize - GD_HEADER_LEN) / num_units;
           else
@@ -644,7 +651,6 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
             }
         }
     }
-  free (dir);
 
   if ((buffer = (unsigned char *) malloc (8 * MBIT)) == NULL)
     { // a DRAM unit can hold 8 Mbit at maximum
@@ -859,7 +865,7 @@ gd_write_sram (const char *filename, unsigned int parport, const char *prolog_st
       exit (1);
     }
 
-  size = q_fsize (filename);                    // GD SRAM is 4*8 KB, emu SRAM often not
+  size = fsizeof (filename);                    // GD SRAM is 4*8 KB, emu SRAM often not
 
   if (size == 0x8000)
     header_size = 0;
@@ -1041,7 +1047,7 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
 {
   FILE *file;
   unsigned char *buffer, gdfilename[12];
-  char *p;
+  const char *p;
   int bytesread, bytessend = 0, size, fn_length;
   time_t starttime;
 
@@ -1079,7 +1085,7 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
       exit (1);
     }
 
-  size = q_fsize (filename);
+  size = fsizeof (filename);
   if (size != 0x38000)                  // GD saver size is always 0x38000 bytes -- no header
     {
       fputs ("ERROR: GD saver file size must be 229376 bytes\n", stderr);

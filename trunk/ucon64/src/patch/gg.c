@@ -44,8 +44,8 @@
  * or the equivalent for your platform.
  */
 /*
-Portions copyright (c) 2001 - 2002 NoisyB (noisyb@gmx.net)
-Portions copyright (c)        2002 dbjh
+Portions copyright (c) 2001 - 2002 NoisyB <noisyb@gmx.net>
+Portions copyright (c) 2002        dbjh
 */
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
@@ -54,62 +54,68 @@ Portions copyright (c)        2002 dbjh
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "misc/file.h"
 #include "misc/misc.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
-#include "patch/gg.h"
 #include "console/snes.h"
 #include "console/genesis.h"
 #include "console/nes.h"
 #include "console/sms.h"
 #include "console/gb.h"
+#include "gg.h"
 
 
 #define GAME_GENIE_MAX_STRLEN 12
 
 
-const st_getopt2_t gg_usage[] = {
+const st_getopt2_t gg_usage[] =
   {
-    "gge", 1, 0, UCON64_GGE,
-    "CODE", "encode and display Game Genie code\n"
-    "example: " OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "sms or "
-    OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "gb\n"
-    "CODE" OPTARG_S "'AAAA:VV' or CODE" OPTARG_S "'AAAA:VV:CC'\n"
-    OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "gen\n"
-    "CODE" OPTARG_S "'AAAAAA:VVVV'\n"
-    OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "nes\n"
-    "CODE" OPTARG_S "'AAAA:VV' or CODE" OPTARG_S "'AAAA:VV:CC'\n"
-    OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "snes\n"
-    "CODE" OPTARG_S "'AAAAAA:VV'",
-    (void *) (WF_INIT|WF_PROBE|WF_NO_ROM)
-  },
-  {
-    "ggd", 1, 0, UCON64_GGD,
-    "GG_CODE", "decode Game Genie code\n"
-    "example: " OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "sms or "
-    OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "gb\n"
-    "GG_CODE" OPTARG_S "'XXX-XXX' or GG_CODE" OPTARG_S "'XXX-XXX-XXX'\n"
-    OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "gen\n"
-    "GG_CODE" OPTARG_S "'XXXX-XXXX'\n"
-    OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "nes\n"
-    "GG_CODE" OPTARG_S "'XXXXXX' or GG_CODE" OPTARG_S "'XXXXXXXX'\n"
-    OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "snes\n"
-    "GG_CODE" OPTARG_S "'XXXX-XXXX'",
-    (void *) (WF_INIT|WF_PROBE|WF_NO_ROM)
-  },
-  {
-    "gg", 1, 0, UCON64_GG,
-    "GG_CODE", "apply Game Genie code (permanently)\n"
-    "example: like above but a ROM is required\n"
-    "supported are:\n"
-    "Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance),\n"
-    "Sega Master System(II/III)/Game Gear (Handheld),\n"
-    "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant),\n"
-    "Super Nintendo Entertainment System/SNES/Super Famicom" ,
-    (void *) (WF_INIT|WF_PROBE)
-  },
-  {NULL, 0, 0, 0, NULL, NULL, NULL}
-};
+    {
+      "gge", 1, 0, UCON64_GGE,
+      "CODE", "encode and display Game Genie code\n"
+      "example: " OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "sms or "
+      OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "gb\n"
+      "CODE" OPTARG_S "'AAAA:VV' or CODE" OPTARG_S "'AAAA:VV:CC'\n"
+      OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "gen\n"
+      "CODE" OPTARG_S "'AAAAAA:VVVV'\n"
+      OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "nes\n"
+      "CODE" OPTARG_S "'AAAA:VV' or CODE" OPTARG_S "'AAAA:VV:CC'\n"
+      OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "snes\n"
+      "CODE" OPTARG_S "'AAAAAA:VV'",
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_ROM]
+    },
+    {
+      "ggd", 1, 0, UCON64_GGD,
+      "GG_CODE", "decode Game Genie code\n"
+      "example: " OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "sms or "
+      OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "gb\n"
+      "GG_CODE" OPTARG_S "'XXX-XXX' or GG_CODE" OPTARG_S "'XXX-XXX-XXX'\n"
+      OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "gen\n"
+      "GG_CODE" OPTARG_S "'XXXX-XXXX'\n"
+      OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "nes\n"
+      "GG_CODE" OPTARG_S "'XXXXXX' or GG_CODE" OPTARG_S "'XXXXXXXX'\n"
+      OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "snes\n"
+      "GG_CODE" OPTARG_S "'XXXX-XXXX'",
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_ROM]
+    },
+    {
+      "gg", 1, 0, UCON64_GG,
+      "GG_CODE", "apply Game Genie code (permanently)\n"
+      "example: like above but a ROM is required\n"
+      "supported are:\n"
+      "Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance),\n"
+      "Sega Master System(II/III)/Game Gear (Handheld),\n"
+      "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant),\n"
+      "Super Nintendo Entertainment System/SNES/Super Famicom" ,
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
+  };
 
 
 static st_rominfo_t *gg_rominfo;
@@ -1109,16 +1115,16 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
-  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
+  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
 
   fputc ('\n', stdout);
-  buf[0] = q_fgetc (dest_name, address + rominfo->buheader_len);
-  mem_hexdump (buf, 1, address + rominfo->buheader_len);
+  buf[0] = ucon64_fgetc (dest_name, address + rominfo->buheader_len);
+  dumper (stdout, buf, 1, address + rominfo->buheader_len, DUMPER_HEX);
 
-  q_fputc (dest_name, address + rominfo->buheader_len, value, "r+b");
+  ucon64_fputc (dest_name, address + rominfo->buheader_len, value, "r+b");
 
   buf[0] = value;
-  mem_hexdump (buf, 1, address + rominfo->buheader_len);
+  dumper (stdout, buf, 1, address + rominfo->buheader_len, DUMPER_HEX);
   fputc ('\n', stdout);
 
   printf (ucon64_msg[WROTE], dest_name);

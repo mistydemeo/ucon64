@@ -28,8 +28,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include "misc/misc.h"
+#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "fal.h"
 #include "misc/parallel.h"
@@ -43,43 +47,43 @@ const st_getopt2_t fal_usage[] =
       NULL, "Flash Advance Linker"/*"2001 Visoly http://www.visoly.com"*/,
       NULL
     },
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
     {
       "xfal", 0, 0, UCON64_XFAL,
       NULL, "send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
       "receives automatically (32 Mbits) when ROM does not exist",
-      (void *) (UCON64_GBA|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_GBA_DEFAULT_STOP_NO_ROM]
     },
     {
       "xfalmulti", 1, 0, UCON64_XFALMULTI, // send only
       "SIZE", "send multiple ROMs to Flash Advance Linker (makes temporary\n"
       "multi-game file truncated to SIZE Mbit); specify a loader in\n"
       "the configuration file; " OPTION_LONG_S "port=PORT",
-      (void *) (UCON64_GBA|WF_DEFAULT|WF_STOP)
+      &ucon64_wf[WF_OBJ_GBA_DEFAULT_STOP]
     },
     {
       "xfalc", 1, 0, UCON64_XFALC,
       "N", "receive N Mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
       "N can be 8, 16, 32, 64, 128 or 256",
-      (void *) (UCON64_GBA|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_GBA_STOP_NO_ROM]
     },
     {
       "xfals", 0, 0, UCON64_XFALS,
       NULL, "send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      (void *) (UCON64_GBA|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_GBA_STOP_NO_ROM]
     },
     {
       "xfalb", 1, 0, UCON64_XFALB,
       "BANK", "send/receive SRAM to/from Flash Advance Linker BANK\n"
       "BANK can be 1, 2, 3 or 4; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      (void *) (UCON64_GBA|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_GBA_STOP_NO_ROM]
     },
     {
       "xfalm", 0, 0, UCON64_XFALM,
       NULL, "try to enable EPP mode, default is SPP mode",
-      (void *) (UCON64_GBA|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_GBA_SWITCH]
     },
 #endif // USE_PARALLEL
     {NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -1547,7 +1551,7 @@ fal_args (unsigned int parport)
 {
   char parport_str[80];
 
-  misc_parport_print_info ();
+  parport_print_info ();
 
   fal_argv[fal_argc++] = "fl";
   fal_argv[fal_argc++] = "-l";

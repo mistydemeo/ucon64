@@ -34,11 +34,51 @@ MD5  - Copyright (C) 1990, RSA Data Security, Inc. All rights reserved.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+//#ifdef HAVE_BYTESWAP_H
+//#include <byteswap.h>
+//#else
+#include "bswap.h"
+//#endif
 #ifdef  USE_ZLIB
-#include "archive.h"
+#include <zlib.h>
+#include "unzip.h"
 #endif
 #include "misc.h"
 #include "chksum.h"
+
+
+#if     (!defined TRUE || !defined FALSE)
+#define FALSE 0
+#define TRUE (!FALSE)
+#endif
+
+#ifndef MIN
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef MAX
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
+#ifdef  WORDS_BIGENDIAN
+#undef  WORDS_BIGENDIAN
+#endif
+
+
+#if     defined _LIBC || defined __GLIBC__
+  #include <endian.h>
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    #define WORDS_BIGENDIAN 1
+  #endif
+#elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || \
+        defined __APPLE__
+  #define WORDS_BIGENDIAN 1
+#endif
+
+
+#ifndef MAXBUFSIZE
+#define MAXBUFSIZE 32768
+#endif // MAXBUFSIZE
+
 
 #define ROTL32(x,n) (((x) << (n)) | ((x) >> (32 - (n))))
 
@@ -48,13 +88,6 @@ MD5  - Copyright (C) 1990, RSA Data Security, Inc. All rights reserved.
 #define SHA2_BAD          1
 #define SHA1_MASK (SHA1_BLOCK_SIZE - 1)
 
-typedef struct
-{
-  uint32_t count[2];
-  uint32_t hash[5];
-  uint32_t wbuf[16];
-} s_sha1_ctx_t;
-
 
 void
 sha1_compile (s_sha1_ctx_t ctx[1])
@@ -62,6 +95,7 @@ sha1_compile (s_sha1_ctx_t ctx[1])
 #define CH(x,y,z) (((x) & (y)) ^ (~(x) & (z)))
 #define PARITY(x,y,z) ((x) ^ (y) ^ (z))
 #define MAJ(x,y,z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+
   uint32_t w[80], i, a, b, c, d, e, t;
 
   /*
@@ -198,33 +232,21 @@ sha1_end (unsigned char hval[], s_sha1_ctx_t ctx[1])
 
 
 // MD5
-// data structure for MD5 (Message Digest) computation
-typedef struct
-{
-  uint32_t i[2];                        // number of _bits_ handled mod 2^64
-  uint32_t buf[4];                      // scratch buffer
-  unsigned char in[64];                 // input buffer
-  unsigned char digest[16];             // actual digest after md5_final call
-} s_md5_ctx_t;
-
 static void md5_transform (uint32_t *buf, uint32_t *in);
-
-static void md5_init (s_md5_ctx_t *mdContext, unsigned long pseudoRandomNumber);
-static void md5_update (s_md5_ctx_t *mdContext, unsigned char *inBuf, unsigned int inLen);
-static void md5_final (s_md5_ctx_t *mdContext);
 
 
 // Padding
-static unsigned char md5_padding[64] = {
-  0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
+static unsigned char md5_padding[64] =
+  {
+    0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+  };
 
 // MD5_F, MD5_G and MD5_H are basic MD5 functions: selection, majority, parity
 #define MD5_F(x, y, z) (((x) & (y)) | ((~x) & (z)))
@@ -445,6 +467,7 @@ md5_final (s_md5_ctx_t *mdContext)
 
 void
 init_crc_table (void *table, unsigned int polynomial)
+// works for crc16 and crc32
 {
   unsigned int crc, i, j;
 
@@ -480,7 +503,7 @@ free_crc16_table (void)
 
 
 unsigned short
-crc16 (unsigned short crc, const void *buffer, unsigned int size)
+chksum_crc16 (unsigned short crc, const void *buffer, unsigned int size)
 {
   unsigned char *p = (unsigned char *) buffer;
 
@@ -514,7 +537,7 @@ free_crc32_table (void)
 
 
 unsigned int
-crc32_2 (unsigned int crc, const void *buffer, unsigned int size)
+crc32 (unsigned int crc, const void *buffer, unsigned int size)
 {
   unsigned char *p = (unsigned char *) buffer;
 
@@ -531,129 +554,3 @@ crc32_2 (unsigned int crc, const void *buffer, unsigned int size)
   return ~crc;
 }
 #endif
-
-
-int
-q_fsha1 (char *buf, const char *filename, int start)
-{
-  char *p = buf;
-  unsigned char buffer[MAXBUFSIZE];
-  int n = 0;
-  s_sha1_ctx_t m_sha1;
-  FILE *fh = fopen (filename, "rb");
-
-  if (!fh)
-    return -1;
-
-  fseek (fh, start, SEEK_SET);
-
-  sha1_begin (&m_sha1);
-
-  while ((n = fread (buffer, 1, MAXBUFSIZE, fh)))
-    sha1 (&m_sha1, buffer, n);
-
-  fclose (fh);
-
-  sha1_end (buffer, &m_sha1);
-
-  if (p)
-    for (n = 0; n < 20; n++, p += strlen (p))
-      sprintf (p, "%02x", buffer[n] & 0xff);
-
-  return 0;
-}
-
-
-int
-q_fmd5 (char *buf, const char *filename, int start)
-{
-  char *p = buf;
-  unsigned char buffer[MAXBUFSIZE];
-  int n = 0;
-  s_md5_ctx_t m_md5;
-  FILE *fh = fopen (filename, "rb");
-
-  if (!fh)
-    return -1;
-
-  fseek (fh, start, SEEK_SET);
-
-  md5_init (&m_md5, 0);
-
-  while ((n = fread (buffer, 1, MAXBUFSIZE, fh)))
-    md5_update (&m_md5, buffer, n);
-
-  fclose (fh);
-
-  md5_final (&m_md5);
-
-  if (p)
-    for (n = 0; n < 16; n++, p += strlen (p))
-      sprintf (p, "%02x", m_md5.digest[n]);
-
-  return 0;
-}
-
-
-int
-q_fcrc32 (const char *filename, int start)
-{
-  unsigned int n, crc = 0;                      // don't name it crc32 to avoid
-  unsigned char buffer[MAXBUFSIZE];             //  name clash with zlib's func
-  FILE *fh = fopen (filename, "rb");
-
-  if (!fh)
-    return -1;
-
-  fseek (fh, start, SEEK_SET);
-
-  while ((n = fread (buffer, 1, MAXBUFSIZE, fh)))
-    crc = crc32 (crc, buffer, n);
-
-  fclose (fh);
-
-  return crc;
-}
-
-
-int
-q_fchk (st_q_fchk_t *chksums, const char *filename, int start)
-{
-  unsigned int n = 0;
-  char *p = NULL;
-  unsigned char buffer[MAXBUFSIZE];
-  s_sha1_ctx_t m_sha1;
-  s_md5_ctx_t m_md5;
-  FILE *fh = fopen (filename, "rb");
-
-  if (!fh)
-    return -1;
-
-  fseek (fh, start, SEEK_SET);
-
-  sha1_begin (&m_sha1);
-  md5_init (&m_md5, 0);
-  chksums->crc32 = 0;
-
-  while ((n = fread (buffer, 1, MAXBUFSIZE, fh)))
-    {
-      chksums->crc32 = crc32 (chksums->crc32, buffer, n);
-      sha1 (&m_sha1, buffer, n);
-      md5_update(&m_md5, buffer, n);
-    }
-  fclose (fh);
-
-  sha1_end (buffer, &m_sha1);
-  p = chksums->sha1;
-  if (p)
-    for (n = 0; n < 20; n++, p += strlen (p))
-      sprintf (p, "%02x", buffer[n] & 0xff);
-
-  md5_final (&m_md5);
-  p = chksums->md5;
-  if (p)
-    for (n = 0; n < 16; n++, p += strlen (p))
-      sprintf (p, "%02x", m_md5.digest[n]);
-
-  return 0;
-}

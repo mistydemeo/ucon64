@@ -27,14 +27,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "misc/file.h"
 #include "misc/misc.h"
+#include "misc/property.h"
+#include "misc/string.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "dc.h"
 
 
-const st_getopt2_t dc_usage[] = {
+const st_getopt2_t dc_usage[] =
+  {
     {
       NULL, 0, 0, 0,
       NULL, "Dreamcast" /* "1998 SEGA http://www.sega.com" */,
@@ -43,7 +50,7 @@ const st_getopt2_t dc_usage[] = {
     {
       "dc", 0, 0, UCON64_DC,
       NULL, "force recognition",
-      (void *) (UCON64_DC|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_DC_SWITCH]
     },
 #if 0
     {
@@ -55,12 +62,12 @@ const st_getopt2_t dc_usage[] = {
     {
       "scr", 0, 0, UCON64_SCR,
       NULL, "scramble 1ST_READ.BIN for selfboot CDs",
-      (void *) (UCON64_DC|WF_DEFAULT)
+      &ucon64_wf[WF_OBJ_DC_DEFAULT]
     },
     {
       "unscr", 0, 0, UCON64_UNSCR,
       NULL, "unscramble 1ST_READ.BIN for non-selfboot CDs",
-      (void *) (UCON64_DC|WF_DEFAULT)
+      &ucon64_wf[WF_OBJ_DC_DEFAULT]
     },
 #if 0
     {
@@ -72,13 +79,13 @@ const st_getopt2_t dc_usage[] = {
     {
       "mkip", 0, 0, UCON64_MKIP,
       NULL, "generate IP.BIN file with default values",
-      (void *) (UCON64_DC|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_DC_NO_ROM]
     },
     {
       "parse", 1, 0, UCON64_PARSE,
       "TEMPLATE", "parse TEMPLATE file into a IP.BIN;\n"
       "creates an empty template when TEMPLATE does not exist",
-      (void *) (UCON64_DC|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_DC_NO_ROM]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
@@ -88,6 +95,7 @@ static int
 calc_crc (const unsigned char *buf, int size)
 {
   int i, c, n = 0xffff;
+
   for (i = 0; i < size; i++)
     {
       n ^= (buf[i] << 8);
@@ -106,6 +114,7 @@ update_crc (char *ip)
 {
   int n = calc_crc ((unsigned char *) (ip + 0x40), 16);
   char buf[5];
+
   sprintf (buf, "%04X", n);
   if (memcmp (buf, ip + 0x20, 4))
     {
@@ -133,7 +142,7 @@ dc_rand ()
 
 
 #if 0
-// header for SAV -> VMS conversion 
+// header for SAV -> VMS conversion
 static const uint8_t nstrsave_bin[1024] = {
   0x4e, 0x45, 0x53, 0x52, 0x4f, 0x4d, 0x2e, 0x4e, // 0x8 (8)
   0x45, 0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // 0x10 (16)
@@ -271,7 +280,8 @@ int
 dc_init (st_rominfo_t *rominfo)
 {
   int result = -1;
-  rominfo->console_usage = dc_usage;
+
+  rominfo->console_usage = dc_usage[0].help;
 
   return result;
 }
@@ -281,6 +291,7 @@ static int
 check_areasym (char *ptr, int len)
 {
   int i, a = 0;
+
   for (i = 0; i < len; i++)
     switch (ptr[i])
       {
@@ -320,20 +331,21 @@ typedef struct
 } st_templ_t;
 
 
-st_templ_t templ[] = {
-  {"hardware_id",   0x0, 0x10,  NULL,          "SEGA SEGAKATANA",        "Hardware ID (always \"SEGA SEGAKATANA\")"},
-  {"maker_id",      0x10, 0x10, NULL,          "SEGA ENTERPRISES",       "Maker ID (always \"SEGA ENTERPRISES\")"},
-  {"device_info",   0x20, 0x10, NULL,          "0000 CD-ROM1/1",         "Device Information"},
-  {"area_symbols",  0x30, 0x8,  check_areasym, "JUE",                    "Area Symbols"},
-  {"peripherals",   0x38, 0x8,  NULL,          "E000F10",                "Peripherals"},
-  {"product_no",    0x40, 0xa,  NULL,          "T0000",                  "Product number (\"HDR-nnnn\" etc.)"},
-  {"version",       0x4a, 0x6,  NULL,          "V1.000",                 "Product version"},
-  {"release_date",  0x50, 0x10, NULL,          "20000627",               "Release date (YYYYMMDD)"},
-  {"boot_filename", 0x60, 0x10, NULL,          "1ST_READ.BIN",           "Boot filename (usually \"1ST_READ.BIN\")"},
-  {"sw_maker_name", 0x70, 0x10, NULL,          "YOUR NAME HERE",         "Name of the company that produced the disc"},
-  {"game_title",    0x80, 0x80, NULL,          "TITLE OF THE SOFTWARE",  "Name of the software"},
-  {NULL,            0,    0,    NULL,          NULL,                     NULL}
-};
+st_templ_t templ[] =
+  {
+    {"hardware_id",   0x0, 0x10,  NULL,          "SEGA SEGAKATANA",        "Hardware ID (always \"SEGA SEGAKATANA\")"},
+    {"maker_id",      0x10, 0x10, NULL,          "SEGA ENTERPRISES",       "Maker ID (always \"SEGA ENTERPRISES\")"},
+    {"device_info",   0x20, 0x10, NULL,          "0000 CD-ROM1/1",         "Device Information"},
+    {"area_symbols",  0x30, 0x8,  check_areasym, "JUE",                    "Area Symbols"},
+    {"peripherals",   0x38, 0x8,  NULL,          "E000F10",                "Peripherals"},
+    {"product_no",    0x40, 0xa,  NULL,          "T0000",                  "Product number (\"HDR-nnnn\" etc.)"},
+    {"version",       0x4a, 0x6,  NULL,          "V1.000",                 "Product version"},
+    {"release_date",  0x50, 0x10, NULL,          "20000627",               "Release date (YYYYMMDD)"},
+    {"boot_filename", 0x60, 0x10, NULL,          "1ST_READ.BIN",           "Boot filename (usually \"1ST_READ.BIN\")"},
+    {"sw_maker_name", 0x70, 0x10, NULL,          "YOUR NAME HERE",         "Name of the company that produced the disc"},
+    {"game_title",    0x80, 0x80, NULL,          "TITLE OF THE SOFTWARE",  "Name of the software"},
+    {NULL,            0,    0,    NULL,          NULL,                     NULL}
+  };
 
 
 static int
@@ -349,7 +361,7 @@ parse_templ (const char *templ_file, char *ip)
       char *p = buf;
       get_property (templ_file, templ[i].name, p, templ[i].def);
 
-      strtrim (p);
+      strtriml (strtrimr (p));
 
       if (!(*p))
         continue;
@@ -408,7 +420,7 @@ dc_parse (const char *templ_file)
   strcpy (dest_name, "ip.bin");
   ucon64_file_handler (dest_name, NULL, 0);
 
-  q_fwrite (ip, 0, 0x8000, dest_name, "wb");
+  ucon64_fwrite (ip, 0, 0x8000, dest_name, "wb");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -552,7 +564,7 @@ descramble (const char *src, char *dst)
   if (!(fh = fopen (src, "rb")))
     return -1;
 
-  sz = q_fsize (src);
+  sz = fsizeof (src);
   if (!(ptr = (unsigned char *) malloc (sz)))
     return -1;
 
@@ -581,7 +593,7 @@ scramble (const char *src, char *dst)
   if (!(fh = fopen (src, "rb")))
     return -1;
 
-  sz = q_fsize (src);
+  sz = fsizeof (src);
 
   if (!(ptr = (unsigned char *) malloc (sz)))
     return -1;
@@ -609,7 +621,7 @@ dc_scramble (void)
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
-                        
+
   if (!scramble (ucon64.rom, dest_name))
     printf (ucon64_msg[WROTE], dest_name);
   else
@@ -625,7 +637,7 @@ dc_unscramble (void)
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
-                        
+
   if (!descramble (ucon64.rom, dest_name))
     printf (ucon64_msg[WROTE], dest_name);
   else

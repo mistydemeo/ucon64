@@ -25,9 +25,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include "misc/itypes.h"
 #include "misc/misc.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_misc.h"
 #include "ssc.h"
 
 
@@ -40,6 +44,3 @@ const st_getopt2_t ssc_usage[] =
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
-
-#ifdef USE_PARALLEL
-#endif // USE_PARALLEL

@@ -28,12 +28,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include "misc/misc.h"
+#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/parallel.h"
+#include "misc/file.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "ffe.h"
 #include "fig.h"
 #include "console/snes.h"                       // for snes_get_snes_hirom()
-#include "misc/parallel.h"
 
 
 const st_getopt2_t fig_usage[] =
@@ -49,24 +55,25 @@ const st_getopt2_t fig_usage[] =
       "xfig", 0, 0, UCON64_XFIG,
       NULL, "send/receive ROM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist",
-      (void *) (UCON64_SNES|WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_DEFAULT_STOP_NO_SPLIT_NO_ROM]
     },
     {
       "xfigs", 0, 0, UCON64_XFIGS,
       NULL, "send/receive SRAM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      (void *) (UCON64_SNES|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
     },
     {
       "xfigc", 0, 0, UCON64_XFIGC, NULL,
       "send/receive SRAM to/from cartridge in *Pro Fighter*/FIG;\n" OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
 //      "Press q to abort; ^C might cause invalid state of backup unit"
-      (void *) (UCON64_SNES|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
     },
 #endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
+
 
 #ifdef USE_PARALLEL
 
@@ -397,7 +404,7 @@ fig_write_rom (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  fsize = q_fsize (filename);
+  fsize = fsizeof (filename);
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   ffe_send_command0 (0xc008, 0);
@@ -557,7 +564,7 @@ fig_write_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  size = q_fsize (filename) - FIG_HEADER_LEN;   // FIG SRAM is 4*8 kB, emu SRAM often not
+  size = fsizeof (filename) - FIG_HEADER_LEN;   // FIG SRAM is 4*8 kB, emu SRAM often not
   printf ("Send: %d Bytes\n", size);
   fseek (file, FIG_HEADER_LEN, SEEK_SET);       // skip the header
 
@@ -696,7 +703,7 @@ fig_write_cart_sram (const char *filename, unsigned int parport)
   ffe_send_command0 (0xe00c, 0);                //  want to write more data than necessary
   byte = ffe_send_command1 (0xbfd8);
 
-  size = q_fsize (filename) - FIG_HEADER_LEN;   // FIG SRAM is 4*8 kB, emu SRAM often not
+  size = fsizeof (filename) - FIG_HEADER_LEN;   // FIG SRAM is 4*8 kB, emu SRAM often not
   size = MIN ((byte ? 1 << (byte + 10) : 0), size);
 
   printf ("Send: %d Bytes\n", size);

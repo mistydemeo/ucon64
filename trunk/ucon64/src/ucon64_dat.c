@@ -1,7 +1,7 @@
 /*
 ucon64_dat.c - support for DAT files as known from RomCenter, GoodXXXX, etc.
 
-Copyright (c) 1999 - 2003 NoisyB (noisyb@gmx.net)
+Copyright (c) 1999 - 2004 NoisyB <noisyb@gmx.net>
 Copyright (c) 2002 - 2004 dbjh
 
 
@@ -23,10 +23,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <stdlib.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -37,9 +37,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <windows.h>
 #endif
 #include "misc/misc.h"
+#include "misc/getopt2.h"
+#include "misc/property.h"
+#include "misc/string.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
+#include "ucon64_dat.h"
 #include "console/console.h"
 
 #define MAX_FIELDS_IN_DAT 32
@@ -79,126 +86,91 @@ static FILE *ucon64_datfile;                                  // only once when 
 static char ucon64_dat_fname[FILENAME_MAX];
 static st_mkdat_entry_t *ucon64_mkdat_entries = NULL;
 
-const st_getopt2_t ucon64_dat_usage[] = {
+const st_getopt2_t ucon64_dat_usage[] =
   {
-    NULL, 0, 0, 0,
-    NULL, "DATabase (support for DAT files)",
-    NULL
-  },
-  {
-    "db", 0, 0, UCON64_DB,
-    NULL, "DATabase statistics",
-    (void *) WF_NO_ROM
-  },
-  {
-    "dbv", 0, 0, UCON64_DBV,
-    NULL, "like " OPTION_LONG_S "db but more verbose",
-    (void *) WF_NO_ROM
-  },
-  {
-    "dbs", 1, 0, UCON64_DBS,
-    "CRC32", "search ROM with CRC32 in DATabase",
-    (void *) WF_NO_ROM
-  },
-  {
-    "scan", 0, 0, UCON64_SCAN,
-    NULL, "generate ROM list for all ROMs using DATabase\n"
-    "like: GoodXXXX scan ...",
-    (void *) (WF_INIT|WF_PROBE|WF_NO_SPLIT)
-  },
-  {
-    "lsd", 0, 0, UCON64_LSD,
-    NULL, "same as " OPTION_LONG_S "scan",
-    (void *) (WF_INIT|WF_PROBE)
-  },
-  {
-    "mkdat", 1, 0, UCON64_MKDAT,
-    "DATFILE", "create DAT file; use -o to specify an output directory",
-    (void *) (WF_INIT|WF_PROBE)
-  },
-  {
-    "rrom", 0, 0, UCON64_RROM,
-    NULL, "rename ROMs to their internal names",
-    (void *) (WF_INIT|WF_PROBE|WF_NO_SPLIT)
-  },
-  {
-    "rename", 0, 0, UCON64_RENAME,
-    NULL, "rename ROMs to their DATabase names\n"
-    "use -o to specify an output directory",
-    (void *) (WF_INIT|WF_PROBE|WF_NO_SPLIT)
-  },
-  {
-    "rr83", 0, 0, UCON64_RR83,
-    NULL, "force to rename to 8.3 filenames",
-    (void *) (WF_INIT|WF_PROBE|WF_NO_SPLIT)
-  },
-  {
-    "force63", 0, 0, UCON64_FORCE63,
-    NULL, "force to rename all filenames into Joliet CD format\n"
-    "like: GoodXXXX rename inplace force63 ...\n"
-    "TIP: using " OPTION_LONG_S "nes would process only NES ROMs",
-    (void *) WF_SWITCH
-  },
-  {
-    "rl", 0, 0, UCON64_RL,
-    NULL, "rename all ROMs to lowercase",
-    NULL
-  },
-  {
-    "ru", 0, 0, UCON64_RU,
-    NULL, "rename all ROMs to uppercase",
-    NULL
-  },
+    {
+      NULL, 0, 0, 0,
+      NULL, "DATabase (support for DAT files)",
+      NULL
+    },
+    {
+      "db", 0, 0, UCON64_DB,
+      NULL, "DATabase statistics",
+      &ucon64_wf[WF_OBJ_ALL_NO_ROM]
+    },
+    {
+      "dbv", 0, 0, UCON64_DBV,
+      NULL, "like " OPTION_LONG_S "db but more verbose",
+      &ucon64_wf[WF_OBJ_ALL_NO_ROM]
+    },
+    {
+      "dbs", 1, 0, UCON64_DBS,
+      "CRC32", "search ROM with CRC32 in DATabase",
+      &ucon64_wf[WF_OBJ_ALL_NO_ROM]
+    },
+    {
+      "scan", 0, 0, UCON64_SCAN,
+      NULL, "generate ROM list for all ROMs using DATabase\n"
+      "like: GoodXXXX scan ...",
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
+    },
+    {
+      "lsd", 0, 0, UCON64_LSD,
+      NULL, "same as " OPTION_LONG_S "scan",
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
+    },
+    {
+      "mkdat", 1, 0, UCON64_MKDAT,
+      "DATFILE", "create DAT file; use -o to specify an output directory",
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
+    },
+    {
+      "rrom", 0, 0, UCON64_RROM,
+      NULL, "rename ROMs to their internal names",
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
+    },
+    {
+      "rename", 0, 0, UCON64_RENAME,
+      NULL, "rename ROMs to their DATabase names\n"
+      "use -o to specify an output directory",
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
+    },
+    {
+      "rr83", 0, 0, UCON64_RR83,
+      NULL, "force to rename to 8.3 filenames",
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
+    },
+    {
+      "force63", 0, 0, UCON64_FORCE63,
+      NULL, "force to rename all filenames into Joliet CD format\n"
+      "like: GoodXXXX rename inplace force63 ...\n"
+      "TIP: using " OPTION_LONG_S "nes would process only NES ROMs",
+      &ucon64_wf[WF_OBJ_ALL_SWITCH]
+    },
+    {
+      "rl", 0, 0, UCON64_RL,
+      NULL, "rename all ROMs to lowercase",
+      NULL
+    },
+    {
+      "ru", 0, 0, UCON64_RU,
+      NULL, "rename all ROMs to uppercase",
+      NULL
+    },
 #if 0
-  {
-    "good", 0, 0, UCON64_GOOD,
-    NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed using\n"
-    "the DATabase",
-    NULL
-  },
+    {
+      "good", 0, 0, UCON64_GOOD,
+      NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed using\n"
+      "the DATabase",
+      NULL
+    },
 #endif
-/*
-GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
-*visit NEWNet #rareroms*
-
-Usage: GoodSNES [rename|move|scan[d]|scannew[d]|list[d]|audit[2]
-              [changes[-]][changesnew[-]][quiet][dirs|inplace][deep][sepX]
-
-rename     = Rename files
-renamebad  = Rename bad checksummed files
-move       = Move files
-move       = Move bad checksummed files
-scan       = Generate listing of all files [w/dirs]
-scannew    = Generate listing of unknown files [w/dirs]
-list       = Lists files you have/need without renaming [w/dirs]
-audit      = Prints names not matching any line in Goodinfo.cfg
-inplace    = Renames files in same dir, not making 'Ren' dir
-changes    = Log rename/move operations (- reverses)
-changesnew = Log rename/move operations that change a filename
-dirs       = Move to dirs using Goodinfo.cfg info
-quiet      = Suppress most non-error messages
-sepX       = Replaces space in filenames with char X ('nosep' removes spaces)
-deep       = Adds more detail to scanfiles (where applicable)
-force63    = Force all filenames into Joliet CD format
-Hit ENTER to continue
-Several output files are created depending on selected options:
-
-GoodSNES.db  = database of scanned ROMs
-SNESMiss     = ROMs missing (if in rename/move/list mode)
-SNESHave     = ROMS present (if in rename/move/list mode)
-SNESScan     = log of 'scan' and 'scannew'
-SNESLog      = log of 'changes' and 'changesnew'
-Good_ZIP     = log of ZIP errors
-Good_RAR     = log of RAR errors
-
-Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
-*/
-  {
-    NULL, 0, 0, 0,
-    NULL, NULL,
-    NULL
-  }
-};
+    {
+      NULL, 0, 0, 0,
+      NULL, NULL,
+      NULL
+    }
+  };
 
 
 static void
@@ -305,15 +277,11 @@ get_dat_header (char *fname, st_ucon64_dat_t *dat)
   char buf[50 * 80];                            // should be enough
 
   // Hell yes! I (NoisyB) use get_property() here...
-  strncpy (dat->author, get_property (fname, "author", buf, "Unknown"), sizeof (dat->author));
-  dat->author[sizeof (dat->author) - 1] = 0;
-  strncpy (dat->version, get_property (fname, "version", buf, "?"), sizeof (dat->version));
-  dat->version[sizeof (dat->version) - 1] = 0;
-  strncpy (dat->refname, get_property (fname, "refname", buf, ""), sizeof (dat->refname));
-  dat->refname[sizeof (dat->refname) - 1] = 0;
+  strncpy (dat->author, get_property (fname, "author", buf, "Unknown"), sizeof (dat->author))[sizeof (dat->author) - 1] = 0;
+  strncpy (dat->version, get_property (fname, "version", buf, "?"), sizeof (dat->version))[sizeof (dat->version) - 1] = 0;
+  strncpy (dat->refname, get_property (fname, "refname", buf, ""), sizeof (dat->refname))[sizeof (dat->refname) - 1] = 0;
   strcpy (dat->comment, get_property (fname, "comment", buf, ""));
-  strncpy (dat->date, get_property (fname, "date", buf, "?"), sizeof (dat->date));
-  dat->date[sizeof (dat->date) - 1] = 0;
+  strncpy (dat->date, get_property (fname, "date", buf, "?"), sizeof (dat->date))[sizeof (dat->date) - 1] = 0;
 
   return dat;
 }
@@ -409,7 +377,7 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
       if (!console_type[pos].compare (fname, console_type[pos].id))
         {
           dat->console = console_type[pos].console;
-          dat->console_usage = (console_type[pos].console_usage);
+          dat->console_usage = (console_type[pos].console_usage[0].help);
           break;
         }
     }
@@ -433,57 +401,59 @@ static st_ucon64_dat_t *
 line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 // parse a dat entry into st_ucon64_dat_t
 {
-  static const char *dat_country[28][2] = {
-    {"(FC)", "French Canada"},
-    {"(FN)", "Finland"},
-    {"(G)", "Germany"},
-    {"(GR)", "Greece"},
-    {"(H)", "Holland"}, // other (incorrect) name for The Netherlands
-    {"(HK)", "Hong Kong"},
-    {"(I)", "Italy"},
-    {"(J)", "Japan"},
-    {"(JE)", "Japan & Europe"},
-    {"(JU)", "Japan & U.S.A."},
-    {"(JUE)", "Japan, U.S.A. & Europe"},
-    {"(K)", "Korea"},
-    {"(NL)", "Netherlands"},
-    {"(PD)", "Public Domain"},
-    {"(S)", "Spain"},
-    {"(SW)", "Sweden"},
-    {"(U)", "U.S.A."},
-    {"(UE)", "U.S.A. & Europe"},
-    {"(UK)", "England"},
-    {"(Unk)", "Unknown country"},
-    /*
-      At least (A), (B), (C), (E) and (F) have to come after the other
-      countries, because some games have (A), (B) etc. in their name (the
-      non-country part). For example, the SNES games
-      "SD Gundam Generations (A) 1 Nen Sensouki (J) (ST)" or
-      "SD Gundam Generations (B) Guripus Senki (J) (ST)".
-    */
-    {"(1)", "Japan & Korea"},
-    {"(4)", "U.S.A. & Brazil NTSC"},
-    {"(A)", "Australia"},
-    {"(B)", "non U.S.A. (Genesis)"},
-    {"(C)", "China"},
-    {"(E)", "Europe"},
-    {"(F)", "France"},
-    {NULL, NULL}
-  };
-  static const char *dat_flags[][2] = {
-    // Often flags contain numbers, so don't search for the closing bracket
-    {"[a", "Alternate"},
-    {"[p", "Pirate"},
-    {"[b", "Bad dump"},
-    {"[t", "Trained"},
-    {"[f", "Fixed"},
-    {"[T", "Translation"},
-    {"[h", "Hack"},
-    {"[x", "Bad checksum"},
-    {"[o", "Overdump"},
-    {"[!]", "Verified good dump"}, // [!] is ok
-    {NULL, NULL}
-  };
+  static const char *dat_country[28][2] =
+    {
+      {"(FC)", "French Canada"},
+      {"(FN)", "Finland"},
+      {"(G)", "Germany"},
+      {"(GR)", "Greece"},
+      {"(H)", "Holland"}, // other (incorrect) name for The Netherlands
+      {"(HK)", "Hong Kong"},
+      {"(I)", "Italy"},
+      {"(J)", "Japan"},
+      {"(JE)", "Japan & Europe"},
+      {"(JU)", "Japan & U.S.A."},
+      {"(JUE)", "Japan, U.S.A. & Europe"},
+      {"(K)", "Korea"},
+      {"(NL)", "Netherlands"},
+      {"(PD)", "Public Domain"},
+      {"(S)", "Spain"},
+      {"(SW)", "Sweden"},
+      {"(U)", "U.S.A."},
+      {"(UE)", "U.S.A. & Europe"},
+      {"(UK)", "England"},
+      {"(Unk)", "Unknown country"},
+      /*
+        At least (A), (B), (C), (E) and (F) have to come after the other
+        countries, because some games have (A), (B) etc. in their name (the
+        non-country part). For example, the SNES games
+        "SD Gundam Generations (A) 1 Nen Sensouki (J) (ST)" or
+        "SD Gundam Generations (B) Guripus Senki (J) (ST)".
+      */
+      {"(1)", "Japan & Korea"},
+      {"(4)", "U.S.A. & Brazil NTSC"},
+      {"(A)", "Australia"},
+      {"(B)", "non U.S.A. (Genesis)"},
+      {"(C)", "China"},
+      {"(E)", "Europe"},
+      {"(F)", "France"},
+      {NULL, NULL}
+    };
+  static const char *dat_flags[][2] =
+    {
+      // Often flags contain numbers, so don't search for the closing bracket
+      {"[a", "Alternate"},
+      {"[p", "Pirate"},
+      {"[b", "Bad dump"},
+      {"[t", "Trained"},
+      {"[f", "Fixed"},
+      {"[T", "Translation"},
+      {"[h", "Hack"},
+      {"[x", "Bad checksum"},
+      {"[o", "Overdump"},
+      {"[!]", "Verified good dump"}, // [!] is ok
+      {NULL, NULL}
+    };
   char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE], *p = NULL;
   uint32_t pos = 0;
   int x = 0;
@@ -535,7 +505,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
       }
 
   fname_to_console (dat->datfile, dat);
-  dat->copier_usage = unknown_usage;
+  dat->copier_usage = unknown_usage[0].help;
 
   return dat;
 }
@@ -600,7 +570,8 @@ get_dat_entry (char *fname, st_ucon64_dat_t *dat, uint32_t crc32, long start)
 int
 ucon64_dat_view (int console, int verbose)
 {
-  char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX], *fname;
+  char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX];
+  const char *fname;
   unsigned char *p;
   static st_ucon64_dat_t dat;
   int n, fsize, n_entries, n_entries_sum = 0, n_datfiles = 0;
@@ -617,7 +588,7 @@ ucon64_dat_view (int console, int verbose)
       strcpy (fname_index, fname_dat);
       set_suffix (fname_index, ".idx");
 
-      fsize = q_fsize (fname_index);
+      fsize = fsizeof (fname_index);
       n_entries = fsize / sizeof (st_idx_entry_t);
       n_entries_sum += n_entries;
       n_datfiles++;
@@ -644,7 +615,7 @@ ucon64_dat_view (int console, int verbose)
           continue;
         }
 
-      if (q_fread (p, 0, fsize, fname_index) != fsize)
+      if (ucon64_fread (p, 0, fsize, fname_index) != fsize)
         {
           fprintf (stderr, ucon64_msg[READ_ERROR], fname_index);
           free (p);
@@ -687,7 +658,7 @@ ucon64_dat_total_entries (void)
   while (get_next_file (fname))
     {
       set_suffix (fname, ".idx");
-      fsize = q_fsize (fname);
+      fsize = fsizeof (fname);
       entries += (fsize < 0 ? 0 : fsize / sizeof (st_idx_entry_t));
     }
 
@@ -712,7 +683,8 @@ idx_compare (const void *key, const void *found)
 st_ucon64_dat_t *
 ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
 {
-  char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX], *fname;
+  char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX];
+  const char *fname;
   unsigned char *p = NULL;
   int32_t fsize = 0;
   st_idx_entry_t *idx_entry, key;
@@ -736,7 +708,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
       set_suffix (fname_index, ".idx");
       if (access (fname_index, F_OK) != 0)      // for a "bad" DAT file
         continue;
-      fsize = q_fsize (fname_index);
+      fsize = fsizeof (fname_index);
 
       if (!(p = (unsigned char *) malloc (fsize)))
         {
@@ -746,7 +718,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
         }
 
       // load the index for the current dat file
-      if (q_fread (p, 0, fsize, fname_index) != fsize)
+      if (ucon64_fread (p, 0, fsize, fname_index) != fsize)
         {
           fprintf (stderr, ucon64_msg[READ_ERROR], fname_index);
           closedir_ddat ();
@@ -820,7 +792,7 @@ ucon64_dat_indexer (void)
         }
 
       start_time = time (0);
-      size = q_fsize (fname_dat);
+      size = fsizeof (fname_dat);
 
       printf ("%s: %s\n", (update ? "Update" : "Create"), basename2 (fname_index));
       pos = 0;
@@ -890,7 +862,7 @@ ucon64_dat_indexer (void)
       if (pos > 0)
         {
           qsort (idx_entries, pos, sizeof (st_idx_entry_t), idx_compare);
-          if (q_fwrite (idx_entries, 0, pos * sizeof (st_idx_entry_t), fname_index, "wb")
+          if (ucon64_fwrite (idx_entries, 0, pos * sizeof (st_idx_entry_t), fname_index, "wb")
               != (int) (pos * sizeof (st_idx_entry_t)))
             {
               fputc ('\n', stderr);
@@ -918,6 +890,7 @@ ucon64_dat_indexer (void)
 }
 
 
+#if 0
 st_ucon64_dat_t *
 ucon64_dat_flush (st_ucon64_dat_t *dat)
 {
@@ -925,6 +898,7 @@ ucon64_dat_flush (st_ucon64_dat_t *dat)
   ucon64.dat = NULL;
   return NULL;
 }
+#endif
 
 
 void
@@ -943,11 +917,11 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   // console type?
   if (dat->console_usage != NULL)
     {
-      strcpy (buf, dat->console_usage[0].help);
+      strcpy (buf, dat->console_usage);
       // fix ugly multi-line console "usages" (PC-Engine)
       if ((p = strchr (buf, '\n')) != NULL)
         *p = 0;
-      printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
+      printf ("  %s\n", buf);
     }
 
   printf ("  %s\n", dat->name);
@@ -1025,7 +999,7 @@ ucon64_close_datfile (void)
 
 int
 ucon64_create_dat (const char *dat_file_name, const char *filename,
-                   st_rominfo_t *rominfo)
+                   int buheader_len)
 {
   static int first_file = 1, console;
   int n, x;
@@ -1273,7 +1247,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                            fname,
                            fname,
                            ucon64.crc32,
-                           ucon64.file_size - (rominfo ? rominfo->buheader_len : 0));
+                           ucon64.file_size - buheader_len);
   ucon64_n_files++;
   return 0;
 }

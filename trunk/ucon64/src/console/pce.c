@@ -30,10 +30,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
-#include "misc/misc.h"
 #include "misc/chksum.h"
+#include "misc/misc.h"
+#include "misc/string.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "pce.h"
 #include "backup/mgd.h"
@@ -57,69 +62,70 @@ const st_getopt2_t pcengine_usage[] =
     {
       "pce", 0, 0, UCON64_PCE,
       NULL, "force recognition",
-      (void *) (UCON64_PCE|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_PCE_SWITCH]
     },
     {
       "int", 0, 0, UCON64_INT,
       NULL, "force ROM is in interleaved (bit-swapped) format",
-      (void *) WF_SWITCH
+      &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
     {
       "nint", 0, 0, UCON64_NINT,
       NULL, "force ROM is not in interleaved (bit-swapped) format",
-      (void *) WF_SWITCH
+      &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
     {
       "msg", 0, 0, UCON64_MSG,
       NULL, "convert to Magic Super Griffin/MSG",
-      (void *) (UCON64_PCE|WF_DEFAULT)
+      &ucon64_wf[WF_OBJ_PCE_DEFAULT]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
       NULL, "convert to Multi Game Doctor*/MGD2/RAW",
-      (void *) (WF_DEFAULT|WF_NO_SPLIT)
+      &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
     },
     {
       "swap", 0, 0, UCON64_SWAP,
       NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)",
-      (void *) (WF_INIT|WF_PROBE)
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
     },
     {
       "f", 0, 0, UCON64_F,
       NULL, "fix region protection",
-      (void *) WF_DEFAULT
+      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
     },
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with PCE-PRO flash card, truncated\n"
       "to SIZE Mbit; file with loader must be specified first, then\n"
       "all the ROMs, multi-game file to create last",
-      (void *) (WF_INIT|WF_PROBE|WF_STOP)
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_STOP]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 #define PCE_MAKER_MAX 86
-static const char *pce_maker[PCE_MAKER_MAX] = {
-  NULL, "ACCOLADE", "AICOM", "ARTMIC", "ASK KODANSHA",
-  "ASMIK", "ATLUS", "AZUMA", "BIG DON", "BIGCLUB",
-  "BIT2", "BULLET PROOF", "CAPCOM", "CINEMAWARE", "COCONUTS",
-  "CREAM", "DATA EAST", "DEKA", "DISNEY", "FACE",
-  "FUJITV", "FUN PROJECT", "GAMES EXPRESS", "HOMEDATA", "HUDSON",
-  "HUDSON V1", "HUDSON V2", "HUMAN", "ICOM", "IGS",
-  "IMAGE", "IMAX", "INTEC", "IREM", "KANEKO",
-  "KONAMI", "KSS", "LASER SOFT", "LORICIEL", "MAGAE CHIP VERSION",
-  "MANLEY & ASSOCIATES", "MASYNYA & NCS", "MASYNYA", "MEDIA RINGS", "NAMCO",
-  "NATSUME", "NATSUME", "NAXAT SOFT", "NAXAT", "NCS",
-  "NEC / HUDSON", "NEC AVENUE & TAITO", "NEC AVENUE", "NEC HOME ELECTRONICS", "NEC",
-  "NHK", "NICHIBUTSU", "NIHON BUSSAN", "PACK-IN-VIDEO", "PALSOFT",
-  "PSYGNOSYS", "RANDOM HOUSE", "SALIO", "SEGA", "SEIBU KAIHATSU",
-  "SGX", "SPECTRUM HOLOBYTE", "SSL", "SUMMER PROJECT", "SUNRISE",
-  "SUNSOFT", "TAISANG VERSION", "TAITO 384K STYLE", "TAITO", "TAKARA",
-  "TECHNOS", "TELENET", "TENGEN", "THE HU62680 TEAM", "TITUS",
-  "TONKIN HOUSE", "UNI POST", "UPL", "VICTOR", "VIDEO SYSTEM",
-  "WOLF TEAM"
-};
+static const char *pce_maker[PCE_MAKER_MAX] =
+  {
+    NULL, "ACCOLADE", "AICOM", "ARTMIC", "ASK KODANSHA",
+    "ASMIK", "ATLUS", "AZUMA", "BIG DON", "BIGCLUB",
+    "BIT2", "BULLET PROOF", "CAPCOM", "CINEMAWARE", "COCONUTS",
+    "CREAM", "DATA EAST", "DEKA", "DISNEY", "FACE",
+    "FUJITV", "FUN PROJECT", "GAMES EXPRESS", "HOMEDATA", "HUDSON",
+    "HUDSON V1", "HUDSON V2", "HUMAN", "ICOM", "IGS",
+    "IMAGE", "IMAX", "INTEC", "IREM", "KANEKO",
+    "KONAMI", "KSS", "LASER SOFT", "LORICIEL", "MAGAE CHIP VERSION",
+    "MANLEY & ASSOCIATES", "MASYNYA & NCS", "MASYNYA", "MEDIA RINGS", "NAMCO",
+    "NATSUME", "NATSUME", "NAXAT SOFT", "NAXAT", "NCS",
+    "NEC / HUDSON", "NEC AVENUE & TAITO", "NEC AVENUE", "NEC HOME ELECTRONICS", "NEC",
+    "NHK", "NICHIBUTSU", "NIHON BUSSAN", "PACK-IN-VIDEO", "PALSOFT",
+    "PSYGNOSYS", "RANDOM HOUSE", "SALIO", "SEGA", "SEIBU KAIHATSU",
+    "SGX", "SPECTRUM HOLOBYTE", "SSL", "SUMMER PROJECT", "SUNRISE",
+    "SUNSOFT", "TAISANG VERSION", "TAITO 384K STYLE", "TAITO", "TAKARA",
+    "TECHNOS", "TELENET", "TENGEN", "THE HU62680 TEAM", "TITUS",
+    "TONKIN HOUSE", "UNI POST", "UPL", "VICTOR", "VIDEO SYSTEM",
+    "WOLF TEAM"
+  };
 
 
 typedef struct
@@ -132,7 +138,8 @@ typedef struct
 } st_pce_data_t;
 
 
-static const st_pce_data_t pce_data[] = {
+static const st_pce_data_t pce_data[] =
+{
   {0x0038b5b5, 70, "SS90002", 100890, NULL},
   {0x00c38e69, 73, "TP02012", 60790, NULL},
   {0x00f83029, 42, NULL, 0, NULL},
@@ -697,20 +704,20 @@ pcengine_msg (st_rominfo_t *rominfo)
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".MSG");
+  set_suffix (dest_name, ".msg");
   ucon64_file_handler (dest_name, src_name, 0);
 
-  q_fwrite (&header, 0, MSG_HEADER_LEN, dest_name, "wb");
+  ucon64_fwrite (&header, 0, MSG_HEADER_LEN, dest_name, "wb");
   if (rominfo->interleaved)
     {
       // Magic Super Griffin files should not be "interleaved"
-      q_fread (rom_buffer, rominfo->buheader_len, size, src_name);
+      ucon64_fread (rom_buffer, rominfo->buheader_len, size, src_name);
       swapbits (rom_buffer, size);
-      q_fwrite (rom_buffer, MSG_HEADER_LEN, size, dest_name, "ab");
+      ucon64_fwrite (rom_buffer, MSG_HEADER_LEN, size, dest_name, "ab");
       free (rom_buffer);
     }
   else
-    q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
+    fcopy (src_name, rominfo->buheader_len, size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -741,18 +748,18 @@ pcengine_mgd (st_rominfo_t *rominfo)
   //  (American version of the PCE)
   if (!rominfo->interleaved)
     {
-      q_fread (rom_buffer, rominfo->buheader_len, size, src_name);
+      ucon64_fread (rom_buffer, rominfo->buheader_len, size, src_name);
       swapbits (rom_buffer, size);
-      q_fwrite (rom_buffer, 0, size, dest_name, "wb");
+      ucon64_fwrite (rom_buffer, 0, size, dest_name, "wb");
       free (rom_buffer);
     }
   else
-    q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "wb");
+    fcopy (src_name, rominfo->buheader_len, size, dest_name, "wb");
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
 
-  mgd_write_index_file (basename2 (dest_name), 1);
+  mgd_write_index_file ((char *) basename2 (dest_name), 1);
   return 0;
 }
 
@@ -775,11 +782,11 @@ pcengine_swap (st_rominfo_t *rominfo)
   ucon64_file_handler (dest_name, src_name, 0);
 
   if (rominfo->buheader_len)                    // copy header (if present)
-    q_fcpy (src_name, 0, rominfo->buheader_len, dest_name, "wb");
+    fcopy (src_name, 0, rominfo->buheader_len, dest_name, "wb");
 
-  q_fread (rom_buffer, rominfo->buheader_len, size, src_name);
+  ucon64_fread (rom_buffer, rominfo->buheader_len, size, src_name);
   swapbits (rom_buffer, size);
-  q_fwrite (rom_buffer, rominfo->buheader_len, size, dest_name,
+  ucon64_fwrite (rom_buffer, rominfo->buheader_len, size, dest_name,
             rominfo->buheader_len ? "ab" : "wb");
   free (rom_buffer);
 
@@ -806,9 +813,9 @@ pcengine_f (st_rominfo_t *rominfo)
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, src_name, 0);
-  q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
+  fcopy (src_name, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
 
-  if ((bytesread = q_fread (buffer, rominfo->buheader_len, 32 * 1024, src_name)) <= 0)
+  if ((bytesread = ucon64_fread (buffer, rominfo->buheader_len, 32 * 1024, src_name)) <= 0)
     return -1;
 
   // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
@@ -817,7 +824,7 @@ pcengine_f (st_rominfo_t *rominfo)
   else
     n = change_mem (buffer, bytesread, "\x29\x40\xf0", 3, '*', '!', "\x80", 1, 0);
 
-  q_fwrite (buffer, rominfo->buheader_len, 32 * 1024, dest_name, "r+b");
+  ucon64_fwrite (buffer, rominfo->buheader_len, 32 * 1024, dest_name, "r+b");
 
   printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
   printf (ucon64_msg[WROTE], dest_name);
@@ -831,7 +838,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize)
 {
   int n;
   unsigned char name[0x1c];
-  char *p;
+  const char *p;
 
   fseek (destfile, 0xb000 + (file_no - 1) * 0x20, SEEK_SET);
   fputc (0xff, destfile);                       // 0x0 = 0xff
@@ -910,7 +917,7 @@ pcengine_multi (int truncate_size, char *fname)
 
       ucon64.console = UCON64_UNKNOWN;
       ucon64.rom = ucon64.argv[n];
-      ucon64.file_size = q_fsize (ucon64.rom);
+      ucon64.file_size = fsizeof (ucon64.rom);
       // DON'T use fstate.st_size, because file could be compressed
       ucon64.rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
                                        ucon64.buheader_len : 0;
@@ -1085,7 +1092,7 @@ pcengine_init (st_rominfo_t *rominfo)
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       return -1;
     }
-  q_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
+  ucon64_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
 
   if (pcengine_check (rom_buffer, size) == 1)
     result = 0;
@@ -1106,9 +1113,9 @@ pcengine_init (st_rominfo_t *rominfo)
     Fire Pro Wrestling 3 - Legend Bout Sounds
   */
   x = size > 32768 ? 32768 : size;
-  if ((mem_search (rom_buffer, x, "\x94\x02\x0f", 3) ||
-       mem_search (rom_buffer, x, "\x94\x02\x01", 3)) &&
-       mem_search (rom_buffer, x, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 26) == 0 &&
+  if ((memmem2 (rom_buffer, x, "\x94\x02\x0f", 3, 0) ||
+       memmem2 (rom_buffer, x, "\x94\x02\x01", 3, 0)) &&
+       memmem2 (rom_buffer, x, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 26, 0) == 0 &&
        memcmp (rom_buffer, "HESM", 4))
     swapped = 1;
   if (UCON64_ISSET (ucon64.interleaved))
@@ -1138,8 +1145,8 @@ pcengine_init (st_rominfo_t *rominfo)
 
   rominfo->header_start = PCENGINE_HEADER_START;
   rominfo->header_len = PCENGINE_HEADER_LEN;
-  rominfo->console_usage = pcengine_usage;
-  rominfo->copier_usage = rominfo->buheader_len ? msg_usage : mgd_usage;
+  rominfo->console_usage = pcengine_usage[0].help;
+  rominfo->copier_usage = rominfo->buheader_len ? msg_usage[0].help : mgd_usage[0].help;
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {

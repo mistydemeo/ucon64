@@ -30,10 +30,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
-#include "misc/misc.h"
 #include "misc/chksum.h"
+#include "misc/misc.h"
+#include "misc/string.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "sms.h"
 #include "backup/mgd.h"
@@ -56,32 +61,32 @@ const st_getopt2_t sms_usage[] =
     {
       "sms", 0, 0, UCON64_SMS,
       NULL, "force recognition",
-      (void *) (UCON64_SMS|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_SMS_SWITCH]
     },
     {
       "int", 0, 0, UCON64_INT,
       NULL, "force ROM is in interleaved format (SMD)",
-      (void *) WF_SWITCH
+      &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
     {
       "nint", 0, 0, UCON64_NINT,
       NULL, "force ROM is not in interleaved format (RAW)",
-      (void *) WF_SWITCH
+      &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
       NULL, "convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)",
-      (void *) (WF_DEFAULT|WF_NO_SPLIT)
+      &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
     },
     {
       "mgdgg", 0, 0, UCON64_MGDGG,
       NULL, "same as " OPTION_LONG_S "mgd, but gives GG name",
-      (void *) (UCON64_SMS|WF_DEFAULT|WF_NO_SPLIT)
+      &ucon64_wf[WF_OBJ_SMS_DEFAULT_NO_SPLIT]
     },
     {
       "smd", 0, 0, UCON64_SMD,
       NULL, "convert to Super Magic Drive/SMD",
-      (void *) (WF_DEFAULT|WF_NO_SPLIT)
+      &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
     },
     {
       "smds", 0, 0, UCON64_SMDS,
@@ -91,14 +96,14 @@ const st_getopt2_t sms_usage[] =
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM checksum (SMS only)",
-      (void *) WF_DEFAULT
+      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
     },
     {
       "multi", 1, 0, UCON64_MULTI,
       "SIZE", "make multi-game file for use with SMS-PRO/GG-PRO flash card,\n"
       "truncated to SIZE Mbit; file with loader must be specified\n"
       "first, then all the ROMs, multi-game file to create last",
-      (void *) (WF_INIT|WF_PROBE|WF_STOP)
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_STOP]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
@@ -136,17 +141,17 @@ sms_mgd (st_rominfo_t *rominfo, int console)
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       exit (1);
     }
-  q_fread (buffer, rominfo->buheader_len, size, src_name);
+  ucon64_fread (buffer, rominfo->buheader_len, size, src_name);
   if (rominfo->interleaved)
     smd_deinterleave (buffer, size);
 
-  q_fwrite (buffer, 0, size, dest_name, "wb");
+  ucon64_fwrite (buffer, 0, size, dest_name, "wb");
   free (buffer);
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
 
-  mgd_write_index_file (basename2 (dest_name), 1);
+  mgd_write_index_file ((char *) basename2 (dest_name), 1);
 
   if (size <= 4 * MBIT)
     printf ("NOTE: It may be necessary to change the suffix in order to make the game work\n"
@@ -172,7 +177,7 @@ sms_smd (st_rominfo_t *rominfo)
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".SMD");
+  set_suffix (dest_name, ".smd");
   ucon64_file_handler (dest_name, src_name, 0);
 
   if (!(buffer = (unsigned char *) malloc (size)))
@@ -180,12 +185,12 @@ sms_smd (st_rominfo_t *rominfo)
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       exit (1);
     }
-  q_fread (buffer, rominfo->buheader_len, size, src_name);
+  ucon64_fread (buffer, rominfo->buheader_len, size, src_name);
   if (!rominfo->interleaved)
     smd_interleave (buffer, size);
 
-  q_fwrite (&header, 0, SMD_HEADER_LEN, dest_name, "wb");
-  q_fwrite (buffer, rominfo->buheader_len, size, dest_name, "ab");
+  ucon64_fwrite (&header, 0, SMD_HEADER_LEN, dest_name, "wb");
+  ucon64_fwrite (buffer, rominfo->buheader_len, size, dest_name, "ab");
   free (buffer);
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -207,11 +212,11 @@ sms_smds (void)
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".SAV");
+  set_suffix (dest_name, ".sav");
   ucon64_file_handler (dest_name, src_name, 0);
 
-  q_fwrite (&header, 0, SMD_HEADER_LEN, dest_name, "wb");
-  q_fcpy (src_name, 0, q_fsize (src_name), dest_name, "ab");
+  ucon64_fwrite (&header, 0, SMD_HEADER_LEN, dest_name, "wb");
+  fcopy (src_name, 0, fsizeof (src_name), dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -233,22 +238,22 @@ sms_chk (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
-  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
   buf[0] = rominfo->current_internal_crc;       // low byte
   buf[1] = rominfo->current_internal_crc >> 8;  // high byte
   // change checksum
   if (rominfo->interleaved)
     {
-      q_fputc (dest_name, rominfo->buheader_len +
+      ucon64_fputc (dest_name, rominfo->buheader_len +
         (offset & ~0x3fff) + 0x2000 + (offset & 0x3fff) / 2, buf[0], "r+b");
-      q_fputc (dest_name, rominfo->buheader_len +
+      ucon64_fputc (dest_name, rominfo->buheader_len +
         (offset & ~0x3fff) + (offset & 0x3fff) / 2, buf[1], "r+b");
     }
   else
-    q_fwrite (buf, rominfo->buheader_len + offset, 2, dest_name, "r+b");
+    ucon64_fwrite (buf, rominfo->buheader_len + offset, 2, dest_name, "r+b");
 
-  mem_hexdump (buf, 2, rominfo->buheader_len + offset);
+  dumper (stdout, buf, 2, rominfo->buheader_len + offset, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -261,7 +266,7 @@ write_game_table_entry (FILE *destfile, int file_no, int totalsize)
   static int sram_page = 0, sram_msg_printed = 0;
   int n;
   unsigned char name[0x0c], flags = 0;  // x, D (reserved), x, x, x, x, S1, S0
-  char *p;
+  const char *p;
 
   fseek (destfile, 0x2000 + (file_no - 1) * 0x10, SEEK_SET);
   fputc (0xff, destfile);                       // 0x0 = 0xff
@@ -359,7 +364,7 @@ sms_multi (int truncate_size, char *fname)
 
       ucon64.console = UCON64_UNKNOWN;
       ucon64.rom = ucon64.argv[n];
-      ucon64.file_size = q_fsize (ucon64.rom);
+      ucon64.file_size = fsizeof (ucon64.rom);
       // DON'T use fstate.st_size, because file could be compressed
       ucon64.rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
                                        ucon64.buheader_len : 0;
@@ -479,7 +484,7 @@ sms_testinterleaved (st_rominfo_t *rominfo)
 {
   unsigned char buf[0x4000] = { 0 };
 
-  q_fread (buf, rominfo->buheader_len + 0x4000, // header in 2nd 16 kB block
+  ucon64_fread (buf, rominfo->buheader_len + 0x4000, // header in 2nd 16 kB block
            0x2000 + (SMS_HEADER_START - 0x4000 + 8) / 2, ucon64.rom);
   if (!(memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SEGA", 8) &&
         memcmp (buf + SMS_HEADER_START - 0x4000, "TMR ALVS", 8) && // SMS
@@ -524,11 +529,11 @@ sms_header_len (void)
              { "TMR SEGA", "TMR ALVS", "TMR SMSC", "TMG SEGA" };
       int n;
 
-      q_fread (buffer, 0, SEARCHBUFSIZE, ucon64.rom);
+      ucon64_fread (buffer, 0, SEARCHBUFSIZE, ucon64.rom);
 
       for (n = 0; n < N_SEARCH_STR; n++)
         if ((ptr = (char *)
-               mem_search (buffer, SEARCHBUFSIZE, search_str[n], 8)) != NULL)
+               memmem2 (buffer, SEARCHBUFSIZE, search_str[n], 8, 0)) != NULL)
           return ptr - buffer - SMS_HEADER_START;
 
       n = ucon64.file_size % (16 * 1024);       // SMD_HEADER_LEN
@@ -561,20 +566,20 @@ sms_init (st_rominfo_t *rominfo)
 
   if (rominfo->interleaved)
     {
-      q_fread (buf, rominfo->buheader_len + 0x4000, // header in 2nd 16 kB block
+      ucon64_fread (buf, rominfo->buheader_len + 0x4000, // header in 2nd 16 kB block
         0x2000 + (SMS_HEADER_START - 0x4000 + SMS_HEADER_LEN) / 2, ucon64.rom);
       smd_deinterleave (buf, 0x4000);
       memcpy (&sms_header, buf + SMS_HEADER_START - 0x4000, SMS_HEADER_LEN);
     }
   else
-    q_fread (&sms_header, rominfo->buheader_len + SMS_HEADER_START,
+    ucon64_fread (&sms_header, rominfo->buheader_len + SMS_HEADER_START,
       SMS_HEADER_LEN, ucon64.rom);
 
   rominfo->header_start = SMS_HEADER_START;
   rominfo->header_len = SMS_HEADER_LEN;
   rominfo->header = &sms_header;
 
-  q_fread (buf, 0, 11, ucon64.rom);
+  ucon64_fread (buf, 0, 11, ucon64.rom);
   // Note that the identification bytes are the same as for Genesis SMD files
   //  The init function for Genesis files is called before this function so it
   //  is alright to set result to 0
@@ -618,7 +623,7 @@ sms_init (st_rominfo_t *rominfo)
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
           return -1;
         }
-      q_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
+      ucon64_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
 
       if (rominfo->interleaved)
         {
@@ -647,8 +652,8 @@ sms_init (st_rominfo_t *rominfo)
   sprintf ((char *) buf, "Version: %d", sms_header.version & 0xf);
   strcat (rominfo->misc, (char *) buf);
 
-  rominfo->console_usage = sms_usage;
-  rominfo->copier_usage = rominfo->buheader_len ? smd_usage : mgd_usage;
+  rominfo->console_usage = sms_usage[0].help;
+  rominfo->copier_usage = rominfo->buheader_len ? smd_usage[0].help : mgd_usage[0].help;
 
   return result;
 }

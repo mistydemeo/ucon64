@@ -25,6 +25,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/file.h"
 #include "misc/misc.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
@@ -39,18 +45,19 @@ const st_getopt2_t msg_usage[] =
       NULL, "Magic Super Griffin/MSG"/*"1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"*/,
       NULL
     },
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
     {
       "xmsg", 0, 0, UCON64_XMSG,
       NULL, "send/receive ROM to/from Magic Super Griffin/MSG; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist",
-      (void *) (UCON64_PCE|WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_PCE_DEFAULT_STOP_NO_SPLIT_NO_ROM]
     },
-#endif // USE_PARALLEL
+#endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-#ifdef USE_PARALLEL
+
+#ifdef  USE_PARALLEL
 
 #define BUFFERSIZE 8192                         // don't change, only 8192 works!
 
@@ -207,7 +214,7 @@ msg_write_rom (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  size = q_fsize (filename) - MSG_HEADER_LEN;
+  size = fsizeof (filename) - MSG_HEADER_LEN;
   printf ("Send: %d Bytes (%.4f Mb)\n", size, (float) size / MBIT);
 
   fread (buffer, 1, MSG_HEADER_LEN, file);

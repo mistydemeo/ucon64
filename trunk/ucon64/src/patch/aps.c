@@ -1,7 +1,7 @@
 /*
 aps.c - Advanced Patch System support for uCON64
 
-Copyright (c)        1998 Silo/BlackBag
+Copyright (c) 1998        Silo/BlackBag
 Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 Copyright (c) 2002 - 2003 dbjh
 
@@ -30,7 +30,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "misc/file.h"
 #include "misc/misc.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "aps.h"
@@ -45,12 +50,12 @@ const st_getopt2_t aps_usage[] =
     {
       "a", 0, 0, UCON64_A,
       NULL, "apply APS PATCH to ROM (APS<=v1.2)",
-      (void *) WF_STOP
+      &ucon64_wf[WF_OBJ_ALL_STOP]
     },
     {
       "mka", 1, 0, UCON64_MKA,
       "ORG_ROM", "create APS patch; ROM should be the modified ROM",
-      (void *) WF_STOP
+      &ucon64_wf[WF_OBJ_ALL_STOP]
     },
     {
       "na", 1, 0, UCON64_NA,
@@ -165,7 +170,7 @@ readN64header (void)
   fread (buffer, 1, 8, n64aps_modfile);
   fread (APSbuffer, 1, 8, n64aps_apsfile);
   if (n64aps_magictest == 0x12408037)
-    mem_swap_b (buffer, 8);
+    ucon64_bswap16_n (buffer, 8);
   if (memcmp (APSbuffer, buffer, 8))
     {
       printf ("WARNING: Incorrect image\n");
@@ -263,11 +268,11 @@ int
 aps_apply (const char *mod, const char *apsname)
 {
   char modname[FILENAME_MAX];
-  int size = q_fsize (mod);
+  int size = fsizeof (mod);
 
   strcpy (modname, mod);
   ucon64_file_handler (modname, NULL, 0);
-  q_fcpy (mod, 0, size, modname, "wb");         // no copy if one file
+  fcopy (mod, 0, size, modname, "wb");          // no copy if one file
 
   if ((n64aps_modfile = fopen (modname, "r+b")) == NULL)
     {
@@ -365,7 +370,7 @@ writeN64header (void)
   fseek (n64aps_orgfile, 0x10, SEEK_SET);       // CRC header position
   fread (buffer, 1, 8, n64aps_orgfile);
   if (n64aps_magictest == 0x12408037)
-    mem_swap_b (buffer, 8);
+    ucon64_bswap16_n (buffer, 8);
 
   fwrite (buffer, 1, 8, n64aps_apsfile);
   memset (buffer, 0, 5);
@@ -465,7 +470,7 @@ aps_create (const char *orgname, const char *modname)
       return -1;
     }
   strcpy (apsname, modname);
-  set_suffix (apsname, ".APS");
+  set_suffix (apsname, ".aps");
   ucon64_file_handler (apsname, NULL, 0);
   if ((n64aps_apsfile = fopen (apsname, "wb")) == NULL)
     {
@@ -487,7 +492,7 @@ aps_create (const char *orgname, const char *modname)
 
   writestdheader ();
   writeN64header ();
-  writesizeheader (q_fsize (orgname), q_fsize (modname));
+  writesizeheader (fsizeof (orgname), fsizeof (modname));
 
   printf ("Searching differences...");
   fflush (stdout);
@@ -519,8 +524,8 @@ aps_set_desc (const char *aps, const char *description)
   memset (desc, ' ', 50);
   strncpy (desc, description, strlen (description));
   ucon64_file_handler (apsname, NULL, 0);
-  q_fcpy (aps, 0, q_fsize (aps), apsname, "wb"); // no copy if one file
-  q_fwrite (desc, 7, 50, apsname, "r+b");
+  fcopy (aps, 0, fsizeof (aps), apsname, "wb"); // no copy if one file
+  ucon64_fwrite (desc, 7, 50, apsname, "r+b");
 
   printf (ucon64_msg[WROTE], apsname);
   return 0;

@@ -24,11 +24,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 #include "misc/misc.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
+#include "misc/string.h"
 #include "mgd.h"
 
 
@@ -106,7 +112,7 @@ fread_mgd (void *buffer, size_t size, size_t number, FILE *fh)
 */
 {
   int n = 0, bpos = 0, fpos, fpos_org, block_size, bytesread = 0,
-      len = number * size, fsize = ucon64.file_size /* q_fsize (filename) */;
+      len = number * size, fsize = ucon64.file_size /* fsizeof (filename) */;
   unsigned char tmp1[MAXBUFSIZE], tmp2[MAXBUFSIZE];
 
   fpos = fpos_org = ftell (fh);
@@ -194,7 +200,8 @@ void
 mgd_make_name (const char *filename, int console, int size, char *name)
 // these characters are also valid in MGD file names: !@#$%^&_
 {
-  char *prefix = 0, *p, *fname, *size_str = 0, *suffix = 0;
+  char *prefix = 0, *p, *size_str = 0, *suffix = 0;
+  const char *fname;
   int n;
 
   switch (console)
@@ -454,9 +461,6 @@ mgd_write_index_file (void *ptr, int n_names)
 
   strcpy (dest_name, "MULTI-GD");
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
-  q_fwrite (buf, 0, strlen (buf), dest_name, "wb");
+  ucon64_fwrite (buf, 0, strlen (buf), dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
 }
-
-#ifdef USE_PARALLEL
-#endif // USE_PARALLEL

@@ -63,27 +63,37 @@ Data Read Procedure:
 #include "config.h"
 #endif
 #include <stdio.h>
+#include <string.h>
+#include <time.h>
 #include "misc/misc.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "mccl.h"
 #include "misc/parallel.h"
 
 
-const st_getopt2_t mccl_usage[] = {
+const st_getopt2_t mccl_usage[] =
   {
-    NULL, 0, 0, 0,
-    NULL, "Mad Catz Camera Link (Game Boy Camera)"/*"XXXX Mad Catz Inc. http://www.madcatz.com"*/,
-    NULL
-  },
-  {
-    "xmccl", 0, 0, UCON64_XMCCL,
-    NULL, "send/receive BYTES to/from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT\n"
-    "currently only receiving is supported",
-    (void *) (UCON64_GB|WF_DEFAULT|WF_STOP|WF_NO_ROM)
-  },
-  {NULL, 0, 0, 0, NULL, NULL, NULL}
-};
+    {
+      NULL, 0, 0, 0,
+      NULL, "Mad Catz Camera Link (Game Boy Camera)"/*"XXXX Mad Catz Inc. http://www.madcatz.com"*/,
+      NULL
+    },
+#ifdef  USE_PARALLEL
+    {
+      "xmccl", 0, 0, UCON64_XMCCL,
+      NULL, "send/receive BYTES to/from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT\n"
+      "currently only receiving is supported",
+      &ucon64_wf[WF_OBJ_GB_DEFAULT_STOP_NO_ROM]
+    },
+#endif
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
+  };
 
 
 #ifdef USE_PARALLEL
@@ -101,7 +111,7 @@ mccl_read (const char *filename, unsigned int parport)
   int inbyte, count = 0;
   time_t starttime;
 
-  misc_parport_print_info ();
+  parport_print_info ();
   puts ("Resetting device");
   do
     {
@@ -141,7 +151,7 @@ mccl_read (const char *filename, unsigned int parport)
 
   strcpy (dest_name, filename);
   ucon64_file_handler (dest_name, NULL, 0);
-  q_fwrite (buffer, 0, count, dest_name, "wb");
+  ucon64_fwrite (buffer, 0, count, dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }

@@ -30,10 +30,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "misc/bswap.h"
 #include "misc/misc.h"
+#include "misc/string.h"
 #include "misc/chksum.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "nes.h"
 #include "backup/smc.h"
@@ -53,59 +59,59 @@ const st_getopt2_t nes_usage[] =
     {
       "nes", 0, 0, UCON64_NES,
       NULL, "force recognition",
-      (void *) (UCON64_NES|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NES_SWITCH]
     },
     {
       "n", 1, 0, UCON64_N,
       "NEW_NAME", "change internal ROM name to NEW_NAME (UNIF only)",
-      (void *) WF_DEFAULT
+      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
     },
     {
       "unif", 0, 0, UCON64_UNIF,
       NULL, "convert to UNIF format/UNF (uses default values)",
-      (void *) (UCON64_NES|WF_DEFAULT)
+      &ucon64_wf[WF_OBJ_NES_DEFAULT]
     },
     {
       "ines", 0, 0, UCON64_INES,
       NULL, "convert to iNES format/NES (uses default values)",
-      (void *) (UCON64_NES|WF_DEFAULT)
+      &ucon64_wf[WF_OBJ_NES_DEFAULT]
     },
     {
       "ineshd", 0, 0, UCON64_INESHD,
       NULL, "extract iNES header from ROM (16 Bytes)",
-      (void *) (UCON64_NES|WF_DEFAULT)
+      &ucon64_wf[WF_OBJ_NES_DEFAULT]
     },
     {
       "j", 0, 0, UCON64_J,
       NULL, "join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)",
-      (void *) (WF_INIT|WF_PROBE)
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE]
     },
     {
       "pasofami", 0, 0, UCON64_PASOFAMI,
       NULL, "convert to Pasofami/PRM/700/PRG/CHR",
-      (void *) (UCON64_NES|WF_DEFAULT)
+      &ucon64_wf[WF_OBJ_NES_DEFAULT]
     },
     {
       "s", 0, 0, UCON64_S,
       NULL, "convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)",
-      (void *) (WF_DEFAULT|WF_NO_SPLIT)
+      &ucon64_wf[WF_OBJ_ALL_DEFAULT_NO_SPLIT]
     },
     {
       "ffe", 0, 0, UCON64_FFE,
       NULL, "convert to FFE format (Super Magic Card)",
-      (void *) (UCON64_NES|WF_DEFAULT)
+      &ucon64_wf[WF_OBJ_NES_DEFAULT]
     },
     {
       "mapr", 1, 0, UCON64_MAPR,
       "MAPR", "specify board name or mapper number for conversion options\n"
       "MAPR must be a board name for UNIF or a number for Pasofami\n"
       "and iNES",
-      (void *) (UCON64_NES|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NES_SWITCH]
     },
     {
       "dint", 0, 0, UCON64_DINT,
       NULL, "convert to non-interleaved format",
-      (void *) (WF_INIT|WF_PROBE|WF_NO_SPLIT)
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
     },
     {
       "ctrl", 1, 0, UCON64_CTRL,
@@ -116,37 +122,37 @@ const st_getopt2_t nes_usage[] =
       "TYPE=3 Arkanoid controller\n"
       "TYPE=4 powerpad\n"
       "TYPE=5 four-score adapter",
-      (void *) WF_SWITCH
+      &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
     {
       "ntsc", 0, 0, UCON64_NTSC,
       NULL, "specify TV standard is NTSC (UNIF only)",
-      (void *) (UCON64_NES|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NES_SWITCH]
     },
     {
       "pal", 0, 0, UCON64_PAL,
       NULL, "specify TV standard is PAL (UNIF only)",
-      (void *) (UCON64_NES|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NES_SWITCH]
     },
     {
       "bat", 0, 0, UCON64_BAT,
       NULL, "specify battery is present",
-      (void *) (UCON64_NES|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NES_SWITCH]
     },
     {
       "nbat", 0, 0, UCON64_NBAT,
       NULL, "specify battery is not present",
-      (void *) (UCON64_NES|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NES_SWITCH]
     },
     {
       "vram", 0, 0, UCON64_VRAM,
       NULL, "specify VRAM override (UNIF only)",
-      (void *) (UCON64_NES|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NES_SWITCH]
     },
     {
       "nvram", 0, 0, UCON64_NVRAM,
       NULL, "specify no VRAM override (UNIF only)",
-      (void *) (UCON64_NES|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NES_SWITCH]
     },
     {
       "mirr", 1, 0, UCON64_MIRR,
@@ -157,29 +163,29 @@ const st_getopt2_t nes_usage[] =
       "MTYPE=3 mirror all pages from $2400 (UNIF only)\n"
       "MTYPE=4 four screens of VRAM\n"
       "MTYPE=5 mirroring controlled by mapper hardware (UNIF only)",
-      (void *) (UCON64_NES|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NES_SWITCH]
     },
 #if     UNIF_REVISION > 7
     {
       "cmnt", 1, 0, UCON64_CMNT,
       "TEXT", "specify that TEXT should be used as comment (UNIF only)",
-      (void *) (UCON64_NES|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NES_SWITCH]
     },
 #endif
     {
       "dumpinfo", 1, 0, UCON64_DUMPINFO,
       "FILE", "use dumper info from FILE when converting to UNIF",
-      (void *) (UCON64_NES|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NES_SWITCH]
     },
     {
       "fds", 0, 0, UCON64_FDS,
       NULL, "convert Famicom Disk System file (diskimage) from FAM to FDS",
-      (void *) (UCON64_NES|WF_DEFAULT)
+      &ucon64_wf[WF_OBJ_NES_DEFAULT]
     },
     {
       "fdsl", 0, 0, UCON64_FDSL,
       NULL, "list Famicom Disk System/FDS (diskimage) contents",
-      (void *) (UCON64_NES|WF_DEFAULT)
+      &ucon64_wf[WF_OBJ_NES_DEFAULT]
     },
 #if 0
     {
@@ -202,7 +208,8 @@ const st_getopt2_t nes_usage[] =
   };
 
 #if 0
-const char *nes_boardtypes = {
+const char *nes_boardtypes =
+  {
     "351258: UNROM\n"
     "351298: UNROM\n"
     "351908\n"
@@ -267,11 +274,13 @@ const char *nes_boardtypes = {
     "TSROM: MMC3A, PRG ROM, CHR ROM, 8k optionnal RAM\n"
     "TVROM: MMC3B, PRG ROM, CHR ROM, 4K of Nametable RAM (4-screen)\n"
     "UNROM: 74LS32+74LS161 mapper, 128k PRG, 8k CHR-RAM\n"
-    "UOROM\n"};
+    "UOROM\n"
+  };
 #endif
 
 #define NES_MAKER_MAX 203
-  static const char *nes_maker[NES_MAKER_MAX] = {
+static const char *nes_maker[NES_MAKER_MAX] =
+  {
     NULL, "A-Wave", "ASCII", "Absolute Entertainment", "Acclaim",
     "Active Enterprises", "Activision", "Activision/Bullet Proof", "Akujin", "Altron",
     "American Game Carts", "American Sammy Corp.", "American Sammy", "American Softworks",
@@ -317,7 +326,8 @@ const char *nes_boardtypes = {
   };
 
 #define NES_COUNTRY_MAX 4
-  static const char *nes_country[NES_COUNTRY_MAX] = {
+static const char *nes_country[NES_COUNTRY_MAX] =
+  {
     "Japan",
     "U.S.A.",
     "Europe, Oceania & Asia",                   // Australia is part of Oceania
@@ -332,7 +342,8 @@ typedef struct
   uint16_t date;
 } st_nes_data_t;
 
-static const st_nes_data_t nes_data[] = {
+static const st_nes_data_t nes_data[] =
+{
   {0x00161afd, 195, 0, 0},
   {0x0021ed29, 133, 0, 0},
   {0x003a1bd1, 133, 0, 0},
@@ -5051,22 +5062,26 @@ static const st_nes_data_t nes_data[] = {
 
 static nes_file_t type;
 
-static const st_getopt2_t ines_usage[] = {
+static const st_getopt2_t ines_usage[] =
+  {
     {NULL, 0, 0, 0, NULL, "iNES header", NULL},
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-static const st_getopt2_t unif_usage[] = {
+static const st_getopt2_t unif_usage[] =
+  {
     {NULL, 0, 0, 0, NULL, "UNIF header", NULL},
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-static const st_getopt2_t pasofami_usage[] = {
+static const st_getopt2_t pasofami_usage[] =
+  {
     {NULL, 0, 0, 0, NULL, "Pasofami file", NULL},
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-static const st_getopt2_t fds_usage[] = {
+static const st_getopt2_t fds_usage[] =
+  {
     {NULL, 0, 0, 0, NULL, "Famicom Disk System file (diskimage)", NULL},
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
@@ -5289,7 +5304,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
   char buf[SIZE_INFO], number[80];              // 4 should be enough, but don't
                                                 //  be too sensitive to errors
   memset (info, 0, sizeof (st_dumper_info_t));
-  if (q_fread (buf, 0, SIZE_INFO, fname) == -1)
+  if (ucon64_fread (buf, 0, SIZE_INFO, fname) == -1)
     return -1;
 
   for (n = 0; n < 99; n++)
@@ -5880,7 +5895,7 @@ nes_unif (void)
     }
 
   strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".UNF");
+  set_suffix (dest_name, ".unf");
   strcpy (src_name, ucon64.rom);
   ucon64_file_handler (dest_name, src_name, 0);
   if ((destfile = fopen (dest_name, "wb")) == NULL)
@@ -5921,7 +5936,7 @@ nes_unif (void)
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
           exit (1);
         }
-      q_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, src_name);
+      ucon64_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, src_name);
 
       if (nes_unif_unif (rom_buffer, destfile) == -1) // -1 == error
         exit (1);
@@ -6275,7 +6290,7 @@ nes_ines (void)
     return nes_j (NULL);
 
   strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".NES");
+  set_suffix (dest_name, ".nes");
   strcpy (src_name, ucon64.rom);
   ucon64_file_handler (dest_name, src_name, 0);
   if ((destfile = fopen (dest_name, "wb")) == NULL)
@@ -6308,7 +6323,7 @@ nes_ines (void)
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
           exit (1);
         }
-      q_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, src_name);
+      ucon64_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, src_name);
 
       if (nes_unif_ines (rom_buffer, destfile) == -1) // -1 == error
         exit (1);                       // calls remove_temp_file() & remove_destfile()
@@ -6347,7 +6362,7 @@ nes_ffe (st_rominfo_t *rominfo)
       return -1;
     }
 
-  q_fread (&ines_header, 0, INES_HEADER_LEN, ucon64.rom);
+  ucon64_fread (&ines_header, 0, INES_HEADER_LEN, ucon64.rom);
 
   mapper = ines_header.ctrl1 >> 4 | (ines_header.ctrl2 & 0xf0);
   prg_size = ines_header.prg_size << 14;
@@ -6452,13 +6467,13 @@ nes_ffe (st_rominfo_t *rominfo)
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".FFE");
+  set_suffix (dest_name, ".ffe");
   ucon64_file_handler (dest_name, src_name, 0);
 
   if (new_prg_size == -1)                       // don't resize PRG block
     {
-      q_fwrite (&smc_header, 0, SMC_HEADER_LEN, dest_name, "wb");
-      q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
+      ucon64_fwrite (&smc_header, 0, SMC_HEADER_LEN, dest_name, "wb");
+      fcopy (src_name, rominfo->buheader_len, size, dest_name, "ab");
     }
   else
     {
@@ -6471,25 +6486,25 @@ nes_ffe (st_rominfo_t *rominfo)
           exit (1);
         }
       memset (prg_data, 0, new_prg_size);       // pad with zeroes
-      q_fread (prg_data, rominfo->buheader_len, prg_size, src_name);
+      ucon64_fread (prg_data, rominfo->buheader_len, prg_size, src_name);
 
       // write header
-      q_fwrite (&smc_header, 0, SMC_HEADER_LEN, dest_name, "wb");
+      ucon64_fwrite (&smc_header, 0, SMC_HEADER_LEN, dest_name, "wb");
 
       // copy trainer data if present
       if (ines_header.ctrl1 & INES_TRAINER)
         {
-          q_fcpy (src_name, rominfo->buheader_len, 512, dest_name, "ab");
+          fcopy (src_name, rominfo->buheader_len, 512, dest_name, "ab");
           offset = 512;
         }
       else
         offset = 0;
 
       // write resized PRG block
-      q_fwrite (prg_data, SMC_HEADER_LEN + offset, new_prg_size, dest_name, "ab");
+      ucon64_fwrite (prg_data, SMC_HEADER_LEN + offset, new_prg_size, dest_name, "ab");
 
       // copy CHR block
-      q_fcpy (src_name, rominfo->buheader_len + offset + prg_size,
+      fcopy (src_name, rominfo->buheader_len + offset + prg_size,
               size - offset - prg_size, dest_name, "ab");
 
       free (prg_data);
@@ -6513,9 +6528,9 @@ nes_ineshd (st_rominfo_t *rominfo)
     }
 
   strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".HDR");
+  set_suffix (dest_name, ".hdr");
   ucon64_file_handler (dest_name, NULL, 0);
-  q_fcpy (ucon64.rom, rominfo->buheader_start, 16, dest_name, "wb");
+  fcopy (ucon64.rom, rominfo->buheader_start, 16, dest_name, "wb");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -6536,7 +6551,7 @@ nes_dint (void)
     }
 
   strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".NES");
+  set_suffix (dest_name, ".nes");
   strcpy (src_name, ucon64.rom);
   ucon64_file_handler (dest_name, src_name, 0);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
@@ -6579,7 +6594,7 @@ parse_prm (st_ines_header_t *header, const char *fname)
 {
   unsigned char prm[71];                        // .PRM files are 71 bytes in size
 
-  q_fread (prm, 0, 71, fname);
+  ucon64_fread (prm, 0, 71, fname);
 
   if (prm[0] == 'V')                            // mirroring
     header->ctrl1 |= INES_MIRROR;
@@ -6651,7 +6666,7 @@ nes_j (unsigned char **mem_image)
     write_file = 1;
 
   strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".NES");
+  set_suffix (dest_name, ".nes");
   if (write_file)
     ucon64_file_handler (dest_name, NULL, 0);
 
@@ -6660,7 +6675,7 @@ nes_j (unsigned char **mem_image)
   memcpy (&ines_header.signature, INES_SIG_S, 4);
 
   strcpy (src_name, ucon64.rom);
-  set_suffix (src_name, ".PRM");
+  set_suffix (src_name, ".prm");
   if (access (src_name, F_OK) == 0)
     {
       parse_prm (&ines_header, src_name);
@@ -6693,13 +6708,13 @@ nes_j (unsigned char **mem_image)
 
   strcpy (src_name, ucon64.rom);
   set_suffix (src_name, ".700");
-  if (access (src_name, F_OK) == 0 && q_fsize (src_name) >= 512)
+  if (access (src_name, F_OK) == 0 && fsizeof (src_name) >= 512)
     {
       ines_header.ctrl1 |= INES_TRAINER;
       nparts++;
     }
 
-  set_suffix (src_name, ".PRG");
+  set_suffix (src_name, ".prg");
   if (access (src_name, F_OK) != 0)             // .PRG file must exist, but
     {                                           //  not for nes_init()
       if (write_file)
@@ -6710,15 +6725,15 @@ nes_j (unsigned char **mem_image)
     }
   else
     {
-      prg_size = q_fsize (src_name);
+      prg_size = fsizeof (src_name);
       nparts++;
     }
   ines_header.prg_size = prg_size >> 14;
 
-  set_suffix (src_name, ".CHR");
+  set_suffix (src_name, ".chr");
   if (access (src_name, F_OK) == 0)
     {
-      chr_size = q_fsize (src_name);
+      chr_size = fsizeof (src_name);
       nparts++;
     }
   ines_header.chr_size = chr_size >> 13;
@@ -6742,27 +6757,27 @@ nes_j (unsigned char **mem_image)
   if (ines_header.ctrl1 & INES_TRAINER)
     {
       set_suffix (src_name, ".700");
-      q_fread (buffer, 0, 512, src_name);       // use 512 bytes at max
+      ucon64_fread (buffer, 0, 512, src_name);  // use 512 bytes at max
       bytes_read = 512;
     }
 
   if (prg_size > 0)
     {
-      set_suffix (src_name, ".PRG");
-      q_fread (buffer + bytes_read, 0, prg_size, src_name);
+      set_suffix (src_name, ".prg");
+      ucon64_fread (buffer + bytes_read, 0, prg_size, src_name);
       bytes_read += prg_size;
     }
 
   if (chr_size > 0)
     {
-      set_suffix (src_name, ".CHR");
-      q_fread (buffer + bytes_read, 0, chr_size, src_name);
+      set_suffix (src_name, ".chr");
+      ucon64_fread (buffer + bytes_read, 0, chr_size, src_name);
     }
 
   if (write_file)
     {
-      q_fwrite (&ines_header, 0, INES_HEADER_LEN, dest_name, "wb");
-      q_fwrite (buffer, INES_HEADER_LEN, size, dest_name, "ab");
+      ucon64_fwrite (&ines_header, 0, INES_HEADER_LEN, dest_name, "wb");
+      ucon64_fwrite (buffer, INES_HEADER_LEN, size, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);
       free (buffer);
     }
@@ -6830,7 +6845,7 @@ write_prm (st_ines_header_t *header, const char *fname)
     prm[17] = 'M';
 
   // don't write backups of parts, because one name is used
-  if (q_fwrite (prm, 0, sizeof (prm), fname, "wb") == -1)
+  if (ucon64_fwrite (prm, 0, sizeof (prm), fname, "wb") == -1)
     {
       fprintf (stderr, ucon64_msg[WRITE_ERROR], fname);
       return -1;                                // try to continue
@@ -6891,7 +6906,7 @@ nes_s (void)
     }
 
   strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".PRM");
+  set_suffix (dest_name, ".prm");
   ucon64_output_fname (dest_name, 0);
   write_prm (&ines_header, dest_name);
 
@@ -6899,7 +6914,7 @@ nes_s (void)
     {
       set_suffix (dest_name, ".700");
       // don't write backups of parts, because one name is used
-      if (q_fwrite (trainer_data, 0, 512, dest_name, "wb") == -1)
+      if (ucon64_fwrite (trainer_data, 0, 512, dest_name, "wb") == -1)
         fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name); // try to continue
       else
         printf (ucon64_msg[WROTE], dest_name);
@@ -6907,9 +6922,9 @@ nes_s (void)
 
   if (prg_size > 0)
     {
-      set_suffix (dest_name, ".PRG");
+      set_suffix (dest_name, ".prg");
       // don't write backups of parts, because one name is used
-      if (q_fwrite (prg_data, 0, prg_size, dest_name, "wb") == -1)
+      if (ucon64_fwrite (prg_data, 0, prg_size, dest_name, "wb") == -1)
         fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name); // try to continue
       else
         printf (ucon64_msg[WROTE], dest_name);
@@ -6919,9 +6934,9 @@ nes_s (void)
 
   if (chr_size > 0)
     {
-      set_suffix (dest_name, ".CHR");
+      set_suffix (dest_name, ".chr");
       // don't write backups of parts, because one name is used
-      if (q_fwrite (chr_data, 0, chr_size, dest_name, "wb") == -1)
+      if (ucon64_fwrite (chr_data, 0, chr_size, dest_name, "wb") == -1)
         fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name); // try to continue
       else
         printf (ucon64_msg[WROTE], dest_name);
@@ -6967,7 +6982,7 @@ nes_init (st_rominfo_t *rominfo)
   internal_name = NULL;                         // reset this var, see nes_n()
   type = PASOFAMI;                              // reset type, see below
 
-  q_fread (magic, 0, 15, ucon64.rom);
+  ucon64_fread (magic, 0, 15, ucon64.rom);
   if (memcmp (magic, "NES", 3) == 0)
     /*
       Check for "NES" and not for INES_SIG_S ("NES\x1a"), because there are two
@@ -6992,7 +7007,7 @@ nes_init (st_rominfo_t *rominfo)
       rominfo->buheader_start = FDS_HEADER_START;
       rominfo->buheader_len = FDS_HEADER_LEN;
       // we use ffe_header to save some space in the exe
-      q_fread (&ffe_header, FDS_HEADER_START, FDS_HEADER_LEN, ucon64.rom);
+      ucon64_fread (&ffe_header, FDS_HEADER_START, FDS_HEADER_LEN, ucon64.rom);
       rominfo->buheader = &ffe_header;
     }
   else if (memcmp (magic, "\x01*NINTENDO-HVC*", 15) == 0) // "headerless" FDS/FAM file
@@ -7027,10 +7042,10 @@ nes_init (st_rominfo_t *rominfo)
   switch (type)
     {
     case INES:
-      rominfo->copier_usage = ines_usage;
+      rominfo->copier_usage = ines_usage[0].help;
       rominfo->buheader_start = INES_HEADER_START;
       rominfo->buheader_len = INES_HEADER_LEN;
-      q_fread (&ines_header, INES_HEADER_START, INES_HEADER_LEN, ucon64.rom);
+      ucon64_fread (&ines_header, INES_HEADER_START, INES_HEADER_LEN, ucon64.rom);
       rominfo->buheader = &ines_header;
       ucon64.split = 0;                         // iNES files are never split
 
@@ -7074,10 +7089,10 @@ nes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, buf);
       break;
     case UNIF:
-      rominfo->copier_usage = unif_usage;
+      rominfo->copier_usage = unif_usage[0].help;
       rominfo->buheader_start = UNIF_HEADER_START;
       rominfo->buheader_len = UNIF_HEADER_LEN;
-      q_fread (&unif_header, UNIF_HEADER_START, UNIF_HEADER_LEN, ucon64.rom);
+      ucon64_fread (&unif_header, UNIF_HEADER_START, UNIF_HEADER_LEN, ucon64.rom);
       rominfo->buheader = &unif_header;
 
       rom_size = ucon64.file_size - UNIF_HEADER_LEN;
@@ -7086,7 +7101,7 @@ nes_init (st_rominfo_t *rominfo)
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
           return -1; //exit (1); please don't use exit () in init
         }
-      q_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, ucon64.rom);
+      ucon64_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, ucon64.rom);
       ucon64.split = 0;                         // UNIF files are never split
 
       x = me2le_32 (unif_header.revision);      // Don't modify header data
@@ -7322,15 +7337,15 @@ nes_init (st_rominfo_t *rominfo)
         Either a *.PRM header file, a 512-byte *.700 trainer file, a *.PRG
         ROM data file or a *.CHR VROM data file.
       */
-      rominfo->copier_usage = pasofami_usage;
+      rominfo->copier_usage = pasofami_usage[0].help;
       rominfo->buheader_start = 0;
       strcpy (buf, ucon64.rom);
-      set_suffix (buf, ".PRM");
+      set_suffix (buf, ".prm");
       if (access (buf, F_OK) == 0)
         {
-          rominfo->buheader_len = q_fsize (buf);
+          rominfo->buheader_len = fsizeof (buf);
           // we use ffe_header to save some space
-          q_fread (&ffe_header, 0, rominfo->buheader_len, buf);
+          ucon64_fread (&ffe_header, 0, rominfo->buheader_len, buf);
           rominfo->buheader = &ffe_header;
         }
       else
@@ -7342,7 +7357,7 @@ nes_init (st_rominfo_t *rominfo)
         files on read-only filesystems WITHOUT messing with/finding temporary
         storage somewhere. We also want to calculate the CRC and it's handy to
         have the data in memory for that.
-        Note that nes_j() wouldn't be much different if q_fcrc32() would be
+        Note that nes_j() wouldn't be much different if ucon64_chksum() would be
         used. This function wouldn't be much different either.
       */
       x = nes_j (&rom_buffer);
@@ -7387,7 +7402,7 @@ nes_init (st_rominfo_t *rominfo)
           rominfo->buheader_len = SMC_HEADER_LEN;
           strcpy (rominfo->name, "Name: N/A");
           rominfo->console_usage = NULL;
-          rominfo->copier_usage = smc_usage;
+          rominfo->copier_usage = smc_usage[0].help;
           rominfo->maker = "Publisher: You?";
           rominfo->country = "Country: Your country?";
           rominfo->has_internal_crc = 0;
@@ -7406,10 +7421,10 @@ nes_init (st_rominfo_t *rominfo)
         for Pasofami, because there might be a .PRM file and because there is
         still other information about the image structure.
       */
-      rominfo->copier_usage = smc_usage;
+      rominfo->copier_usage = smc_usage[0].help;
       rominfo->buheader_start = SMC_HEADER_START;
       rominfo->buheader_len = SMC_HEADER_LEN;
-      q_fread (&ffe_header, SMC_HEADER_START, SMC_HEADER_LEN, ucon64.rom);
+      ucon64_fread (&ffe_header, SMC_HEADER_START, SMC_HEADER_LEN, ucon64.rom);
       rominfo->buheader = &ffe_header;
 
       sprintf (buf, "512-byte trainer: %s",
@@ -7417,13 +7432,13 @@ nes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, buf);
       break;
     case FDS:
-      rominfo->copier_usage = fds_usage;
+      rominfo->copier_usage = fds_usage[0].help;
       rominfo->country = "Japan";
       strcat (rominfo->misc, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
       break;
     case FAM:
-      rominfo->copier_usage = fds_usage;
+      rominfo->copier_usage = fds_usage[0].help;
       rominfo->country = "Japan";
 
       // FAM files don't have a header. Instead they seem to have a 192 byte trailer.
@@ -7431,7 +7446,7 @@ nes_init (st_rominfo_t *rominfo)
       rominfo->buheader_len = FAM_HEADER_LEN;
 
       // we use ffe_header to save some space
-      q_fread (&ffe_header, rominfo->buheader_start, FAM_HEADER_LEN, ucon64.rom);
+      ucon64_fread (&ffe_header, rominfo->buheader_start, FAM_HEADER_LEN, ucon64.rom);
       rominfo->buheader = &ffe_header;
       strcat (rominfo->misc, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
@@ -7442,7 +7457,7 @@ nes_init (st_rominfo_t *rominfo)
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
           return -1;
         }
-      q_fread (rom_buffer, 0, rom_size, ucon64.rom);
+      ucon64_fread (rom_buffer, 0, rom_size, ucon64.rom);
       ucon64.crc32 = crc32 (0, rom_buffer, rom_size);
       free (rom_buffer);
       break;
@@ -7452,7 +7467,7 @@ nes_init (st_rominfo_t *rominfo)
     rominfo->buheader_len = ucon64.buheader_len;
 
   if (ucon64.crc32 == 0)
-    ucon64.crc32 = q_fcrc32 (ucon64.rom, rominfo->buheader_len);
+    ucon64_chksum (NULL, NULL, &ucon64.crc32, ucon64.rom, rominfo->buheader_len);
 
   // additional info
   key.crc32 = ucon64.crc32;
@@ -7486,9 +7501,21 @@ nes_init (st_rominfo_t *rominfo)
         }
     }
 
-  rominfo->console_usage = nes_usage;
+  rominfo->console_usage = nes_usage[0].help;
 
   return result;
+}
+
+
+static inline char *
+to_func (char *s, int len, int (*func) (int))
+{
+  char *p = s;
+
+  for (; len > 0; p++, len--)
+    *p = func (*p);
+
+  return s;
 }
 
 
@@ -7644,13 +7671,13 @@ nes_fds (void)
     }
 
   strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".FDS");
+  set_suffix (dest_name, ".fds");
   strcpy (src_name, ucon64.rom);
   ucon64_file_handler (dest_name, src_name, 0);
 
   for (n = 0; n < 4; n++)
     {
-      if (q_fread (buffer, n * 65500, 65500, src_name) != 65500)
+      if (ucon64_fread (buffer, n * 65500, 65500, src_name) != 65500)
         break;
 
       // check disk image for validity
@@ -7664,7 +7691,7 @@ nes_fds (void)
       //  2 - if not, check if buffer[21] (side bit) differs from least significant bit of n
       //  3 - if that is the case _print_ (but don't do anything else) "WRONG" else "OK"
 
-      if (q_fwrite (buffer, n * 65500, 65500, dest_name, n ? "ab" : "wb") != 65500)
+      if (ucon64_fwrite (buffer, n * 65500, 65500, dest_name, n ? "ab" : "wb") != 65500)
         break;
     }
   /*

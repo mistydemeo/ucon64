@@ -166,4 +166,4 @@ endif
 	$(CC) $^ $(LDFLAGS) -o $@
 
 clean:
-	rm -f *.o *.so *.a a.out
+	rm -f *.o *.so *.dll *.a a.out

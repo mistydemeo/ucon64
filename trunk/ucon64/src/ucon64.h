@@ -5,7 +5,7 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-Copyright (c) 1999 - 2002 NoisyB <noisyb@gmx.net>
+Copyright (c) 1999 - 2004 NoisyB <noisyb@gmx.net>
 Copyright (c) 2001 - 2004 dbjh
 
 
@@ -27,44 +27,39 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_H
 
 #ifdef  HAVE_CONFIG_H
-#include "config.h"                             // USE_ANSI_COLOR
+#include "config.h"
 #endif
-
-#include "misc/getopt.h"                        // for struct option
-#include "ucon64_defines.h"
-#include "misc/misc.h"
+#include "ucon64_defines.h"                     // MAXBUFSIZE, etc..
 
 
-#ifdef  USE_DISCMAGE
-#include "ucon64_dm.h"
-#endif
+#define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
 
+
+typedef enum { UCON64_SPP, UCON64_EPP, UCON64_ECP } parport_mode_t;
 
 /*
-  This struct contains very specific informations only <console>_init() can
-  supply after the correct console type was identified.
-
-  file_size and current_crc32 are not console specific and were moved
-  to st_ucon64_t.
-
-  If all <console>_init()'s failed just ucon64_flush() this and ucon64_rom_nfo()
-  won't be shown.
+  st_rominfo_t    this struct contains very specific informations only
+                    <console>_init() can supply after the correct console
+                    type was identified.
+  st_ucon64_t     this struct containes st_rominfo_t and unspecific
+                    informations and some workflow stuff
+  st_ucon64_obj_t ucon64 object for use in st_getopt2_t
 */
 typedef struct
 {
-  const st_getopt2_t *console_usage;            // console system usage
-  const st_getopt2_t *copier_usage;             // backup unit usage
+  const char *console_usage;                    // console system of the ROM
+  const char *copier_usage;                     // backup unit of the ROM
 
   int interleaved;                              // ROM is interleaved (swapped)
   int data_size;                                // ROM data size without "red tape"
 
+  const void *buheader;                         // (possible) header of backup unit
   int buheader_start;                           // start of backup unit header (mostly 0)
   int buheader_len;                             // length of backup unit header 0 == no bu hdr
-  const void *buheader;                         // (possible) header of backup unit
 
+  const void *header;                           // (possible) internal ROM header
   int header_start;                             // start of internal ROM header
   int header_len;                               // length of internal ROM header 0 == no hdr
-  const void *header;                           // (possible) internal ROM header
 
   char name[MAXBUFSIZE];                        // internal ROM name
   const char *maker;                            // maker name of the ROM
@@ -83,29 +78,23 @@ typedef struct
   int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal checksum
 } st_rominfo_t;
 
-
-#include "ucon64_dat.h"
-
-
-typedef enum { UCON64_SPP, UCON64_EPP, UCON64_ECP } parport_mode_t;
-
-/*
-  this struct holds workflow relevant information
-*/
 typedef struct
 {
   int argc;
   char **argv;
 
-// TODO?: rename to fname
+  int option;                                   // current option (UCON64_HEX, UCON64_FIND, ...)
+  const char *optarg;                           // ptr to current options optarg
+
+  // TODO?: rename to fname
   const char *rom;                              // ROM (cmdline) with path
 
   int fname_len;                                // force fname output format for --rrom, --rename, etc...
   // fname_len can be UCON64_RR83 (8.3) or UCON64_FORCE63 (63.x)
   char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
-  int file_size;                                // (uncompressed) ROM file size
-  unsigned int crc32;                           // crc32 value of ROM (used for DAT files)
-  unsigned int fcrc32;                          // if non-zero: crc32 of ROM as it is on disk
+  int file_size;                                // (uncompressed) ROM file size (NOT console specific)
+  unsigned int crc32;                           // crc32 value of ROM (used for DAT files) (NOT console specific)
+  unsigned int fcrc32;                          // if non-zero: crc32 of ROM as it is on disk (NOT console specific)
 
   /*
     if console == UCON64_UNKNOWN or st_rominfo_t == NULL ucon64_rom_nfo() won't
@@ -125,6 +114,7 @@ typedef struct
 #if     defined USE_PPDEV || defined AMIGA
   char parport_dev[80];                         // parallel port device (e.g.
 #endif                                          //  /dev/parport0 or parallel.device)
+  int parport_needed;
   int parport;                                  // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
 #ifdef  USE_USB
@@ -148,14 +138,19 @@ typedef struct
 
   int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
 
-#define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
   /*
     These values override values in st_rominfo_t. Use UCON64_ISSET()
-    to check them. When adding new ones don't forget to update ucon64_execute_options()
-    too.
+    to check them. When adding new ones don't forget to update
+    ucon64_execute_options() too.
   */
+#if 1
   int buheader_len;                             // length of backup unit header 0 == no bu hdr
   int interleaved;                              // ROM is interleaved (swapped)
+#else
+  st_rominfo_t *override;                       // overrides values in (st_rominfo_t *) rominfo
+#endif
+
+#if 1
   int id;                                       // generate unique name (currently
                                                 //  only used by snes_gd3())
   // the following values are for SNES, NES, Genesis and Nintendo 64
@@ -176,34 +171,48 @@ typedef struct
   int tv_standard;                              // NES UNIF
   int use_dump_info;                            // NES UNIF
   int vram;                                     // NES UNIF
+#else
+  void *console_workflow;                       // ptr to a console specific workflow
+#endif
 
 #ifdef  USE_DISCMAGE
-  dm_image_t *image;                            // info from libdiscmage
+  void *image;                                  // info from libdiscmage (dm_image_t *)
 #endif
-  st_ucon64_dat_t *dat;                         // info from DATabase
-  st_rominfo_t *rominfo;                        // info from <console>_init()
+  void *dat;                                    // info from DATabase (st_ucon64_dat_t *)
+  st_rominfo_t *rominfo;                        // info from <console>_init() (st_rominfo_t *)
+  const st_getopt2_t *options;                        // all options with help (st_getopt2_t)
 } st_ucon64_t;
 
+typedef struct
+{
+  int console;                                  // UCON64_SNES, etc...
+  uint32_t flags;                               // WF_INIT, etc..
+//  const char *optarg;                           // pointer to optarg
+                                                 // initiated with NULL and used later
+//  int (* func) (st_ucon64_t *);                 // the belonging function
+//  int (* func[2]) (st_ucon64_t *);              // an array of functions?
+// TODO: replacing ucon64_options() and ucon64_switches()
+// TODO: and turning st_ucon64_t from global into a local variable?
+} st_ucon64_obj_t;
+
 /*
-  ucon64_init()      init st_rominfo_t, st_ucon64_dat_t and st_dm_image_t
-  ucon64_nfo()       display contents of st_rominfo_t, st_ucon64_dat_t and
-                       st_dm_image_t
-  ucon64_flush()     flush contents of st_rominfo_t, st_ucon64_dat_t and
-                       st_dm_image_t
-  ucon64_flush_rom() flush only st_rominfo_t
+  ucon64_init()         init st_rominfo_t, st_ucon64_dat_t and dm_image_t
+  ucon64_nfo()          display contents of st_rominfo_t, st_ucon64_dat_t and
+                          dm_image_t
+  ucon64_flush_rom()    flush only st_rominfo_t
+  ucon64_usage()        print usage
+  ucon64_fname_arch()
+
+  ucon64                global (st_ucon64_t *)
+TODO: make (st_ucon64_t *) ucon64 local
 */
 extern int ucon64_init (void);
 extern int ucon64_nfo (void);
-//extern void ucon64_flush (void);
 extern st_rominfo_t *ucon64_flush_rom (st_rominfo_t *);
-
 extern void ucon64_usage (int argc, char *argv[]);
 #ifdef  USE_ZLIB
 extern void ucon64_fname_arch (const char *fname);
 #endif
 
 extern st_ucon64_t ucon64;
-extern int ucon64_parport_needed;
-extern st_getopt2_t options[UCON64_MAX_ARGS];
-
 #endif // UCON64_H

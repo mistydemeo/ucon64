@@ -26,6 +26,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include "misc/misc.h"
 #include "misc/parallel.h"
+#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
 #include "ucon64_misc.h"
 #include "mcd.h"
 
@@ -37,18 +43,18 @@ const st_getopt2_t mcd_usage[] =
       NULL, "Mike Pavone's Genesis/Sega CD transfer cable",
       NULL
     },
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
     {
       "xmcd", 0, 0, UCON64_XMCD,
       NULL, "receive ROM from Genesis/Sega CD; " OPTION_LONG_S "port=PORT",
-      (void *) (UCON64_GEN|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_GEN_DEFAULT_STOP_NO_SPLIT_NO_ROM]
     },
-#endif // USE_PARALLEL
+#endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
 
 #define BUFFERSIZE 8192
 
@@ -104,7 +110,7 @@ mcd_read_rom (const char *filename, unsigned int parport)
 #if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   init_conio ();
 #endif
-  misc_parport_print_info ();
+  parport_print_info ();
 
   if ((file = fopen (filename, "wb")) == NULL)
     {

@@ -27,11 +27,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  USE_USB
 #include <usb.h>
 
-extern struct usb_device *misc_usb_probe (int vendor_id, int product_id);
-extern usb_dev_handle *misc_usb_open (struct usb_device *device);
-extern int misc_usb_close (usb_dev_handle *handle);
-extern int misc_usb_read (usb_dev_handle *handle, char *buffer, int buffer_size);
-extern int misc_usb_write (usb_dev_handle *handle, char *buffer, int buffer_size);
+extern struct usb_device *usbport_probe (int vendor_id, int product_id);
+extern usb_dev_handle *usbport_open (struct usb_device *device);
+extern int usbport_close (usb_dev_handle *handle);
+extern int usbport_read (usb_dev_handle *handle, char *buffer, int buffer_size);
+extern int usbport_write (usb_dev_handle *handle, char *buffer, int buffer_size);
 
 #endif // USE_USB
 #endif // MISC_USB_H

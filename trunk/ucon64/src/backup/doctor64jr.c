@@ -136,36 +136,42 @@ void mainproc(void *arg) {
 #include <string.h>
 #include <time.h>
 #include "misc/misc.h"
+#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/parallel.h"
+#include "misc/file.h"
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "doctor64jr.h"
-#include "misc/parallel.h"
 
 
-const st_getopt2_t doctor64jr_usage[] = {
+const st_getopt2_t doctor64jr_usage[] =
   {
-    NULL, 0, 0, 0,
-    NULL, "Doctor V64 Junior"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/,
-    NULL
-  },
+    {
+      NULL, 0, 0, 0,
+      NULL, "Doctor V64 Junior"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/,
+      NULL
+    },
 #ifdef  USE_PARALLEL
-  {
-    "xdjr", 0, 0, UCON64_XDJR,
-    NULL, "send ROM to Doctor V64 Junior; " OPTION_LONG_S "port=PORT",
-    (void *) (UCON64_N64|WF_DEFAULT|WF_STOP|WF_NO_ROM)
-  },
+    {
+      "xdjr", 0, 0, UCON64_XDJR,
+      NULL, "send ROM to Doctor V64 Junior; " OPTION_LONG_S "port=PORT",
+      &ucon64_wf[WF_OBJ_N64_DEFAULT_STOP_NO_ROM]
+    },
 #if 0
-  {
-    "xdjrs", 0, 0, UCON64_XDJRS,
-    NULL, "send/receive SRAM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
-    "receives automatically when SRAM does not exist",
-    (void *) (UCON64_N64|WF_DEFAULT|WF_STOP|WF_NO_ROM)
-  },
+    {
+      "xdjrs", 0, 0, UCON64_XDJRS,
+      NULL, "send/receive SRAM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when SRAM does not exist",
+      &ucon64_wf[WF_OBJ_N64_DEFAULT_STOP_NO_ROM]
+    },
 #endif
 #endif // USE_PARALLEL
-  {NULL, 0, 0, 0, NULL, NULL, NULL}
-};
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
+  };
 
 
 #ifdef USE_PARALLEL
@@ -499,7 +505,7 @@ doctor64jr_write (const char *filename, unsigned int parport)
   unsigned short int page;
   FILE *file;
 
-  misc_parport_print_info ();
+  parport_print_info ();
 
   port_8 = parport;
   port_9 = parport + 1;
@@ -529,7 +535,7 @@ doctor64jr_write (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  size = q_fsize (filename);
+  size = fsizeof (filename);
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
 #if 0

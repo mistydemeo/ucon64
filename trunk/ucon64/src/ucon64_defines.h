@@ -23,18 +23,29 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_DEFINES_H
 
 // Please make sure that NO definition except FALSE has 0 as value!
+#if     (!defined TRUE || !defined FALSE)
+#define FALSE 0
+#define TRUE (!FALSE)
+#endif
 
-// maximum number of arguments uCON64 takes
-#define UCON64_MAX_ARGS 512
+#if     (!defined MIN || !defined MAX)
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
+#define LIB_VERSION(ver, rel, seq) (((ver) << 16) | ((rel) << 8) | (seq))
+#define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
+//#define RANDOM(min, max) ((rand () % (max - min)) + min)
+#define OFFSET(a, offset) ((((unsigned char *) &(a)) + (offset))[0])
 
 #define UCON64_UNKNOWN (-1)
 #define UCON64_UNKNOWN_S "Unknown"
 #define NULL_TO_UNKNOWN_S(str) ((str) ? (str) : (UCON64_UNKNOWN_S))
 
-#define UCON64_VERSION_S "1.9.8-5"
+#define UCON64_VERSION_S "2.0.0"
 
 /* program version counter */
-//#define UCON64_VERSION (198)
+//#define UCON64_VERSION (200)
 
 /* version of config file layout */
 #define UCON64_CONFIG_VERSION (207)
@@ -45,13 +56,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define MAXROMSIZE (512 * MBIT)
 
+#ifndef MAXBUFSIZE
+#define MAXBUFSIZE 32768
+#endif // MAXBUFSIZE
+
+// maximum number of arguments uCON64 takes from the cmdline
+#define UCON64_MAX_ARGS 512
+
 #define UCON64_OPTION (1000)
 #define UCON64_CONSOLE (0)
 
 // options (consoles)
 // these defines shall not exceed 0xffff since they share the same integer
 // with the workflow flags (below) in st_getopt2_t
-enum {
+enum
+{
   UCON64_3DO = UCON64_CONSOLE + 1,
   UCON64_ATA,
   UCON64_CD32,
@@ -87,7 +106,8 @@ enum {
 };
 
 // options
-enum {
+enum
+{
   UCON64_1991 = UCON64_OPTION + 1,
   UCON64_A,
   UCON64_B,
@@ -100,6 +120,7 @@ enum {
   UCON64_BS,
   UCON64_C,
   UCON64_CHK,
+  UCON64_CODE,
   UCON64_COL,
   UCON64_CRC,
   UCON64_CRCHD,
@@ -115,6 +136,7 @@ enum {
   UCON64_DINT,
   UCON64_DMIRR,
   UCON64_DNSRT,
+  UCON64_DUAL,
   UCON64_DUMPINFO,
   UCON64_E,
   UCON64_EROM,
@@ -126,6 +148,8 @@ enum {
   UCON64_FIGS,
   UCON64_FILE,
   UCON64_FIND,
+  UCON64_FINDI,
+  UCON64_FINDR,
   UCON64_FRONTEND,
   UCON64_GBX,
   UCON64_GD3,
@@ -202,6 +226,7 @@ enum {
   UCON64_POKE,
   UCON64_PORT,
   UCON64_PPF,
+  UCON64_PRINT,
   UCON64_Q,
   UCON64_QQ,                                    // already reserved ;-)
   UCON64_REGION,
@@ -323,7 +348,6 @@ enum {
   UCON64_CDMAGE
 };
 
-
 /*
   uCON64 workflow flags
 
@@ -334,7 +358,7 @@ enum {
   WF_NFO            show info output before processing rom
   WF_NFO_AFTER      show info output AFTER processing rom
   WF_NO_ROM         for this option no ROM is required
-  WF_NOCRC32        no CRC32 calculation necessary for this option; this
+  WF_NO_CRC32       no CRC32 calculation necessary for this option; this
                       overrides even WF_INIT, WF_NFO and WF_NFO_AFTER
   WF_STOP           a "stop" option:
                     - -multi (and -xfalmulti) takes more than one file as
@@ -346,10 +370,10 @@ enum {
   WF_USB            this option requires a USB port
   WF_SERIAL         this option requires a serial port
   WF_NO_SPLIT       this option does not work with split ROMs
-  WF_DEFAULT        same as WF_INIT|WF_PROBE|WF_NFO
+  WF_DEFAULT        same as WF_INIT | WF_PROBE | WF_NFO
 
   example:
-  WF_NFO|WF_MFO_AFTER
+  WF_NFO | WF_MFO_AFTER
                     a ROM is required and info will be shown before and
                     after it has been processed
 
@@ -357,18 +381,18 @@ enum {
     we shift these flags 16 bit because they share the same integer with
     those UCON64_<console> defines in st_getopt2_t
 */
-#define WF_DEFAULT (WF_PROBE|WF_INIT|WF_NFO)
-#define WF_PROBE (1<<16)
-#define WF_INIT (2<<16)
-#define WF_NFO (4<<16)
-#define WF_STOP (8<<16)
-#define WF_NFO_AFTER (16<<16)
-#define WF_NO_ROM (32<<16)
-#define WF_PAR (64<<16)
-#define WF_USB (128<<16)
-#define WF_SERIAL (256<<16)
-#define WF_NOCRC32 (512<<16)
-#define WF_NO_SPLIT (1024<<16)
-#define WF_SWITCH (2048<<16)
+#define WF_DEFAULT   (WF_PROBE | WF_INIT | WF_NFO)
+#define WF_PROBE     (1)
+#define WF_INIT      (1 << 1)
+#define WF_NFO       (1 << 2)
+#define WF_STOP      (1 << 3)
+#define WF_NFO_AFTER (1 << 4)
+#define WF_NO_ROM    (1 << 5)
+#define WF_PAR       (1 << 6)
+#define WF_USB       (1 << 7)
+#define WF_SERIAL    (1 << 8)
+#define WF_NO_CRC32  (1 << 9)
+#define WF_NO_SPLIT  (1 << 10)
+#define WF_SWITCH    (1 << 11)
 
 #endif // UCON64_DEFINES_H

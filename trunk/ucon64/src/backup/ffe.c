@@ -2,7 +2,7 @@
 ffe.c - General Front Far East copier routines for uCON64
 
 Copyright (c) 2002 - 2004 dbjh
-Copyright (c)        2003 JohnDie
+Copyright (c) 2003        JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -28,13 +27,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include "misc/misc.h"                          // kbhit(), getch()
+#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
 #include "ucon64_misc.h"
 #include "ffe.h"
 #include "misc/parallel.h"
 
 
-#ifdef USE_PARALLEL
-
+#ifdef  USE_PARALLEL
 
 #define N_TRY_MAX          65536                // # times to test if copier ready
 
@@ -66,7 +70,7 @@ ffe_init_io (unsigned int port)
   init_conio ();
 #endif
 
-  misc_parport_print_info ();
+  parport_print_info ();
 }
 
 

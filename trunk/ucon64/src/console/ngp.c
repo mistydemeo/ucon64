@@ -2,7 +2,7 @@
 ngp.c - NeoGeo Pocket support for uCON64
 
 Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
-Copyright (c)        2001 Gulliver
+Copyright (c) 2001        Gulliver
 
 
 This program is free software; you can redistribute it and/or modify
@@ -26,8 +26,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include "misc/misc.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "ngp.h"
 #include "backup/pl.h"
@@ -43,7 +47,7 @@ const st_getopt2_t ngp_usage[] =
     {
       "ngp", 0, 0, UCON64_NGP,
       NULL, "force recognition",
-      (void *) (UCON64_NGP|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NGP_SWITCH]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
@@ -70,7 +74,7 @@ ngp_init (st_rominfo_t *rominfo)
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
                             ucon64.buheader_len : 0;
 
-  q_fread (&ngp_header, NGP_HEADER_START +
+  ucon64_fread (&ngp_header, NGP_HEADER_START +
       rominfo->buheader_start, NGP_HEADER_LEN, ucon64.rom);
 
   if (!strncmp ((const char *) &OFFSET (ngp_header, 0), snk_code, strlen (snk_code)) ||
@@ -101,8 +105,8 @@ ngp_init (st_rominfo_t *rominfo)
            "Unknown");
   strcat (rominfo->misc, buf);
 
-  rominfo->console_usage = ngp_usage;
-  rominfo->copier_usage = (!rominfo->buheader_len ? pl_usage : unknown_usage);
+  rominfo->console_usage = ngp_usage[0].help;
+  rominfo->copier_usage = (!rominfo->buheader_len ? pl_usage[0].help : unknown_usage[0].help);
 
   return result;
 }

@@ -1,5 +1,6 @@
 /*
 chksum.h - miscellaneous checksum functions
+           SHA1, MD5, CRC16 and CRC32
 
 Copyright (c) 1999 - 2004 NoisyB <noisyb@gmx.net>
 Copyright (c) 2001 - 2004 dbjh
@@ -32,119 +33,70 @@ MD5  - Copyright (C) 1990, RSA Data Security, Inc. All rights reserved.
 #define MISC_CHKSUM_H
 
 #ifdef  HAVE_CONFIG_H
-#include "config.h"
+#include "config.h"                             // USE_ZLIB
 #endif
-
 #ifdef  __cplusplus
 extern "C" {
 #endif
-
-#include <string.h>
-#include <stdio.h>
-#ifdef  USE_ZLIB
-#include "archive.h"
-#endif                                          // USE_ZLIB
-
-#ifdef __sun
-#ifdef __SVR4
-#define __solaris__
-#endif
-#endif
-
 #ifdef  HAVE_INTTYPES_H
 #include <inttypes.h>
 #else                                           // __MSDOS__, _WIN32 (VC++)
-#ifndef OWN_INTTYPES
-#define OWN_INTTYPES                            // signal that these are defined
-typedef unsigned char uint8_t;
-typedef unsigned short int uint16_t;
-typedef unsigned int uint32_t;
-#ifndef _WIN32
-typedef unsigned long long int uint64_t;
-#else
-typedef unsigned __int64 uint64_t;
-#endif
-typedef signed char int8_t;
-typedef signed short int int16_t;
-typedef signed int int32_t;
-#ifndef _WIN32
-typedef signed long long int int64_t;
-#else
-typedef signed __int64 int64_t;
-#endif
-#endif                                          // OWN_INTTYPES
-#endif
-
-#if     (!defined TRUE || !defined FALSE)
-#define FALSE 0
-#define TRUE (!FALSE)
-#endif
-
-#ifndef MIN
-#define MIN(a,b) ((a)<(b)?(a):(b))
-#endif
-#ifndef MAX
-#define MAX(a,b) ((a)>(b)?(a):(b))
-#endif
-#define LIB_VERSION(ver, rel, seq) (((ver) << 16) | ((rel) << 8) | (seq))
-#define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
-//#define RANDOM(min, max) ((rand () % (max - min)) + min)
-#define OFFSET(a, offset) ((((unsigned char *)&(a))+(offset))[0])
-
-#ifdef  WORDS_BIGENDIAN
-#undef WORDS_BIGENDIAN
-#endif
-
-#if     defined _LIBC || defined __GLIBC__
-  #include <endian.h>
-  #if __BYTE_ORDER == __BIG_ENDIAN
-    #define WORDS_BIGENDIAN 1
-  #endif
-#elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || \
-        defined __APPLE__
-  #define WORDS_BIGENDIAN 1
+#include "itypes.h"
 #endif
 
 
-#ifndef MAXBUFSIZE
-#define MAXBUFSIZE 32768
-#endif // MAXBUFSIZE
+/*
+  s_sha1_ctx_t
+  sha1_begin() start sha1
+  sha1()       process data
+  sha1_end()   stop sha1
 
+  s_md5_ctx_t
+  md5_init()   start md5
+  md5_update() process data
+  md5_final()  stop md5
 
+  chksum_crc16()
+
+  crc32()      a crc32() clone (if no ZLIB is used)
+                 use zlib's crc32() if USE_ZLIB is defined...
+                 ... but make it possible to link against a library
+                 that uses zlib while this code does not use it
+*/
 typedef struct
 {
-  int crc32;
-  char sha1[30];
-  char md5[30];
-} st_q_fchk_t;
+  uint32_t count[2];
+  uint32_t hash[5];
+  uint32_t wbuf[16];
+} s_sha1_ctx_t;
+
+extern void sha1_begin (s_sha1_ctx_t ctx[1]);
+extern void sha1 (s_sha1_ctx_t ctx[1], const unsigned char data[], unsigned int len);
+extern void sha1_end (unsigned char hval[], s_sha1_ctx_t ctx[1]);
 
 
-/*
-  crc16()      calculate the crc16 of buffer for size bytes
-  crc32()      calculate the crc32 of buffer for size bytes
-*/
-extern unsigned short crc16 (unsigned short crc, const void *buffer, unsigned int size);
-#ifndef  USE_ZLIB
-// use zlib's crc32() if USE_ZLIB is defined...
-#define crc32(C, B, S) crc32_2(C, B, S)
-// ... but make it possible to link against a library that uses zlib while this
-//  code does not use it
-extern unsigned int crc32_2 (unsigned int crc, const void *buffer, unsigned int size);
+// data structure for MD5 (Message Digest) computation
+typedef struct
+{
+  uint32_t i[2];                        // number of _bits_ handled mod 2^64
+  uint32_t buf[4];                      // scratch buffer
+  unsigned char in[64];                 // input buffer
+  unsigned char digest[16];             // actual digest after md5_final call
+} s_md5_ctx_t;
+
+extern void md5_init (s_md5_ctx_t *mdContext, unsigned long pseudoRandomNumber);
+extern void md5_update (s_md5_ctx_t *mdContext, unsigned char *inBuf, unsigned int inLen);
+extern void md5_final (s_md5_ctx_t *mdContext);
+
+
+#ifdef  WITH_CRC16
+extern unsigned short chksum_crc16 (unsigned short crc, const void *buffer, unsigned int size);
 #endif
 
+#ifndef  USE_ZLIB
+extern unsigned int crc32 (unsigned int crc, const void *buffer, unsigned int size);
+#endif
 
-/*
-  q_fcrc32()   calculate the crc32 of filename from start
-  q_fsha1()    calculate the sha1 of filename from start and store in buf as string
-  q_fmd5()     calculate the md5 of filename from start and store in buf as string
-
-  q_chk()      calculate everything at once
-*/
-extern int q_fcrc32 (const char *filename, int start);
-extern int q_fsha1 (char *buf, const char *filename, int start);
-extern int q_fmd5 (char *buf, const char *filename, int start);
-
-extern int q_fchk (st_q_fchk_t *chksums, const char *filename, int start);
 
 #ifdef  __cplusplus
 }

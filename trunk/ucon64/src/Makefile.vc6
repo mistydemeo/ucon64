@@ -30,7 +30,8 @@ TARGETS=$(TARGETS) backup/libcd64/cd64.lib
 
 
 OBJECTS=ucon64.obj ucon64_dat.obj ucon64_misc.obj ucon64_opts.obj \
-        misc/chksum.obj misc/getopt.obj misc/misc.obj misc/parallel.obj \
+        misc/chksum.obj misc/file.obj misc/getopt.obj misc/getopt2.obj \
+        misc/misc.obj misc/parallel.obj misc/property.obj misc/string.obj \
         misc/dlopen.obj \
         patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj \
         patch/pal4u.obj patch/ppf.obj patch/xps.obj \
@@ -49,9 +50,6 @@ OBJECTS=ucon64.obj ucon64_dat.obj ucon64_misc.obj ucon64_opts.obj \
 !ifdef USE_ZLIB
 LDFLAGS=$(LDFLAGS) zlib.lib
 OBJECTS=$(OBJECTS) misc/map.obj misc/archive.obj misc/unzip.obj
-!endif
-!ifdef USE_DISCMAGE
-OBJECTS=$(OBJECTS) ucon64_dm.obj
 !endif
 !ifdef USE_USB
 LDFLAGS=$(LDFLAGS) usb.lib
@@ -141,7 +139,7 @@ misc/misc.obj: misc/misc.h misc/archive.h config.h
 misc/parallel.obj: misc/parallel.h config.h
 misc/usb.obj: misc/usb.h config.h
 misc/unzip.obj: misc/unzip.h config.h
-ucon64.obj: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
+ucon64.obj: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
             console/dc.h console/gb.h console/gba.h console/genesis.h \
             console/jaguar.h console/lynx.h console/n64.h console/neogeo.h \
             console/nes.h console/ngp.h console/pce.h console/psx.h \
@@ -156,9 +154,8 @@ ucon64.obj: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
             patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/pal4u.h \
             patch/ppf.h patch/xps.h $(UCON64_STD_H)
 ucon64_dat.obj: ucon64_dat.h $(UCON64_STD_H)
-ucon64_dm.obj: ucon64_dm.h misc/dlopen.h $(UCON64_STD_H)
 ucon64_misc.obj: misc/dlopen.h $(UCON64_STD_H)
-ucon64_opts.obj: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
+ucon64_opts.obj: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
                  console/dc.h console/gb.h console/gba.h console/genesis.h \
                  console/jaguar.h console/lynx.h console/n64.h \
                  console/neogeo.h console/nes.h console/ngp.h console/pce.h \

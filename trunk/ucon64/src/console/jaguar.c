@@ -28,10 +28,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <string.h>
 #include "misc/misc.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "jaguar.h"
+
 
 const st_getopt2_t jaguar_usage[] =
   {
@@ -43,10 +48,11 @@ const st_getopt2_t jaguar_usage[] =
     {
       "jag", 0, 0, UCON64_JAG,
       NULL, "force recognition",
-      (void *) (UCON64_JAG|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_JAG_SWITCH]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
+
 
 typedef struct st_jaguar
 {
@@ -66,7 +72,7 @@ jaguar_init (st_rominfo_t *rominfo)
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
     ucon64.buheader_len : 0;
 
-  q_fread (&jaguar_header, JAGUAR_HEADER_START +
+  ucon64_fread (&jaguar_header, JAGUAR_HEADER_START +
     rominfo->buheader_len, JAGUAR_HEADER_LEN, ucon64.rom);
   value = 0;
   for (x = 0; x < 12; x++)
@@ -78,7 +84,7 @@ jaguar_init (st_rominfo_t *rominfo)
       rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
         ucon64.buheader_len : (int) UNKNOWN_HEADER_LEN;
 
-      q_fread (&jaguar_header, JAGUAR_HEADER_START +
+      ucon64_fread (&jaguar_header, JAGUAR_HEADER_START +
           rominfo->buheader_len, JAGUAR_HEADER_LEN, ucon64.rom);
       value = 0;
       for (x = 0; x < 12; x++)
@@ -96,8 +102,8 @@ jaguar_init (st_rominfo_t *rominfo)
   rominfo->header_len = JAGUAR_HEADER_LEN;
   rominfo->header = &jaguar_header;
 
-  rominfo->console_usage = jaguar_usage;
-  rominfo->copier_usage = unknown_usage;
+  rominfo->console_usage = jaguar_usage[0].help;
+  rominfo->copier_usage = unknown_usage[0].help;
 
   return result;
 }

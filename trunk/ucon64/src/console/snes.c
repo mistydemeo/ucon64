@@ -105,19 +105,19 @@ const st_usage_t snes_usage[] =
     {"dbuh", NULL, "display (relevant part of) backup unit header"},
     {"dint", NULL, "convert ROM to non-interleaved format"},
     {"ctrl", "TYPE", "specify type of controller in port 1 for emu when converting\n"
-                     "TYPE='0' gamepad\n"
-                     "TYPE='1' mouse\n"
-                     "TYPE='2' mouse / gamepad\n"
-                     "TYPE='6' multitap"},
+                     "TYPE=0 gamepad\n"
+                     "TYPE=1 mouse\n"
+                     "TYPE=2 mouse / gamepad\n"
+                     "TYPE=6 multitap"},
     {"ctrl2", "TYPE", "specify type of controller in port 2 for emu when converting\n"
-                      "TYPE='0' gamepad\n"
-                      "TYPE='1' mouse\n"
-                      "TYPE='2' mouse / gamepad\n"
-                      "TYPE='3' super scope\n"
-                      "TYPE='4' super scope / gamepad\n"
-                      "TYPE='5' Konami's justifier\n"
-                      "TYPE='6' multitap\n"
-                      "TYPE='7' mouse / super scope / gamepad"},
+                      "TYPE=0 gamepad\n"
+                      "TYPE=1 mouse\n"
+                      "TYPE=2 mouse / gamepad\n"
+                      "TYPE=3 super scope\n"
+                      "TYPE=4 super scope / gamepad\n"
+                      "TYPE=5 Konami's justifier\n"
+                      "TYPE=6 multitap\n"
+                      "TYPE=7 mouse / super scope / gamepad"},
     {"col", "0xCOLOR", "convert 0xRRGGBB (HTML) <-> 0xXXXX (SNES)"},
 //                       "this routine was used to find green colors in games and\n"
 //                       "to replace them with red colors (blood mode)"},

@@ -48,8 +48,17 @@ const st_usage_t swc_usage[] =
     {"xswc2", NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)"},
 #if 0
 // hidden, undocumented option because we don't want people to "accidentally"
-//  create overdumps
-    {"xswc-super", NULL, "receive ROM (forced 32 Mb) from Super Wild Card*/SWC"},
+//  create overdumps, bad dumps or report bugs that aren't bugs (SA-1)
+    {"xswc-dm", "MODE", "specify SWC dump mode; use with -xswc\n"
+                        "MODE=0x01 force 32 Mbit\n"
+                        "MODE=0x02 use alternative method for determining ROM size\n"
+                        "MODE=0x04 Super FX\n"
+                        "MODE=0x08 S-DD1\n"
+                        "MODE=0x10 SA-1\n"
+                        "MODE=0x20 DX2 trick (might work with other SWC models)\n"
+                        "MODE=0x40 Mega Man X 2\n"
+                        "It is possible to combine flags. MODE=0x24 makes it possible\n"
+                        "to dump for example Yoshi's Island"},
 #endif
     {"xswcs", NULL, "send/receive SRAM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
                     "receives automatically when SRAM does not exist"},
@@ -70,7 +79,7 @@ const st_usage_t swc_usage[] =
 //#define DUMP_SA1
 //#define DUMP_SDD1
 
-static int receive_rom_info (unsigned char *buffer, int superdump);
+static int receive_rom_info (unsigned char *buffer, int dumping_mode);
 static int get_rom_size (unsigned char *info_block);
 static int check1 (unsigned char *info_block, int index);
 static int check2 (unsigned char *info_block, int index, unsigned char value);
@@ -85,11 +94,11 @@ static int hirom;                               // `hirom' was `special'
 
 #ifdef  DUMP_SA1
 static void set_sa1_map (unsigned short chunk);
-/*extern*/ int snes_sa1 = 0;            // change to non-zero to dump SA-1 cartridges
+static int snes_sa1 = 0;                        // change to non-zero to dump SA-1 cartridges
 #endif
 #ifdef  DUMP_SDD1
 static void set_sdd1_map (unsigned short chunk);
-/*extern*/ int snes_sdd1 = 0;           // change to non-zero to dump S-DD1 cartridges
+static int snes_sdd1 = 0;                       // change to non-zero to dump S-DD1 cartridges
 #endif
 
 
@@ -98,7 +107,7 @@ static void set_sdd1_map (unsigned short chunk);
        512 bytes.
 #endif
 int
-receive_rom_info (unsigned char *buffer, int superdump)
+receive_rom_info (unsigned char *buffer, int dumping_mode)
 /*
   - returns size of ROM in Mb (128 kB) units
   - returns ROM header in buffer (index 2 (emulation mode select) is not yet
@@ -111,28 +120,31 @@ receive_rom_info (unsigned char *buffer, int superdump)
   unsigned char byte;
 
 #ifdef  DUMP_MMX2
-  /*
-    MMX2 can be dumped after writing a 0 to SNES register 0x7f52. Before we can
-    write to that register we have to enable cartridge page mapping. That is
-    done by writing to SWC register 0xe00c. When cartridge page mapping is
-    enabled we can access SNES registers by reading or writing to the SWC
-    address range 0x2000-0x3fff. Before reading or writing to an address in that
-    range we have to "announce" the address to the SWC (via command 5). Because
-    we access a SNES register we only set the page number bits (0-1).
-  */
-  address = 0x7f52;
-  ffe_send_command0 (0xe00c, 0);
+  if (dumping_mode & SWC_DM_MMX2)
+    {
+      /*
+        MMX2 can be dumped after writing a 0 to SNES register 0x7f52. Before we can
+        write to that register we have to enable cartridge page mapping. That is
+        done by writing to SWC register 0xe00c. When cartridge page mapping is
+        enabled we can access SNES registers by reading or writing to the SWC
+        address range 0x2000-0x3fff. Before reading or writing to an address in that
+        range we have to "announce" the address to the SWC (via command 5). Because
+        we access a SNES register we only set the page number bits (0-1).
+      */
+      address = 0x7f52;
+      ffe_send_command0 (0xe00c, 0);
 
-  ffe_send_command (5, address / 0x2000, 0);
-  ffe_receive_block ((address & 0x1fff) + 0x2000, buffer, 8);
-  mem_hexdump (buffer, 8, address);
+      ffe_send_command (5, address / 0x2000, 0);
+      ffe_receive_block ((address & 0x1fff) + 0x2000, buffer, 8);
+      mem_hexdump (buffer, 8, address);
 
-  ffe_send_command (5, address / 0x2000, 0);
-  ffe_send_command0 ((address & 0x1fff) + 0x2000, 0);
+      ffe_send_command (5, address / 0x2000, 0);
+      ffe_send_command0 ((address & 0x1fff) + 0x2000, 0);
 
-  ffe_send_command (5, address / 0x2000, 0);
-  ffe_receive_block ((address & 0x1fff) + 0x2000, buffer, 8);
-  mem_hexdump (buffer, 8, address);
+      ffe_send_command (5, address / 0x2000, 0);
+      ffe_receive_block ((address & 0x1fff) + 0x2000, buffer, 8);
+      mem_hexdump (buffer, 8, address);
+    }
 #endif
 
   ffe_send_command0 (0xe00c, 0);
@@ -166,7 +178,7 @@ receive_rom_info (unsigned char *buffer, int superdump)
       address++;
     }
 
-  if (superdump)
+  if (dumping_mode & SWC_DM_FORCE_32MBIT)
     {
       if (!UCON64_ISSET (ucon64.snes_hirom))
         hirom = 1;                              // default to super HiROM dump
@@ -437,7 +449,7 @@ set_sdd1_map (unsigned short chunk)
 
 
 int
-swc_read_rom (const char *filename, unsigned int parport, int superdump)
+swc_read_rom (const char *filename, unsigned int parport, int dumping_mode)
 {
   FILE *file;
   unsigned char *buffer, byte;
@@ -450,9 +462,13 @@ swc_read_rom (const char *filename, unsigned int parport, int superdump)
 #endif
 
 #ifdef  DUMP_SA1
+  if (dumping_mode & SWC_DM_SA1)
+    snes_sa1 = 1;
   s_chip = snes_sa1;
 #endif
 #ifdef  DUMP_SDD1
+  if (dumping_mode & SWC_DM_SDD1)
+    snes_sdd1 = 1;
   if (!s_chip)
     s_chip = snes_sdd1;
 #endif
@@ -470,7 +486,7 @@ swc_read_rom (const char *filename, unsigned int parport, int superdump)
       exit (1);
     }
 
-  size = receive_rom_info (buffer, superdump);
+  size = receive_rom_info (buffer, dumping_mode);
   if (size == 0)
     {
       fprintf (stderr, "ERROR: There is no cartridge present in the Super Wild Card\n");

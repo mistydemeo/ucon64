@@ -113,11 +113,6 @@ dm_get_version (void)
 
 const char *
 dm_get_version_s (void)
-/*
-  Our DXE code can export (pointers to) variables. However, Windows DLLs can
-  only export (pointers to) functions. To avoid platform-specific code we
-  let all code use these functions in libdiscmage (dm_get_version()).
-*/
 {
   CHECK
   return dm_get_version_s_ptr ();

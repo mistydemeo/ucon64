@@ -561,7 +561,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
 #endif
   {UCON64_XSWC, UCON64_SNES, swc_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XSWC2, UCON64_SNES, swc_usage,       WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
-  {UCON64_XSWC_SUPER, UCON64_SNES, swc_usage,  WF_STOP|WF_NO_SPLIT|WF_NO_ROM}, // receive only
   {UCON64_XSWCR, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XSWCS, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XSWCC, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
@@ -728,6 +727,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_VRAM, UCON64_NES, nes_usage,         WF_SWITCH},
 #ifdef  PARALLEL
   {UCON64_XFALM, UCON64_GBA, fal_usage,        WF_SWITCH},
+  {UCON64_XSWC_DM, UCON64_SNES, swc_usage,     WF_SWITCH},
 #endif
   {0, 0, NULL, 0}
 };

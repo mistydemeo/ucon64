@@ -2,7 +2,7 @@
 gba.c - Game Boy Advance support for uCON64
 
 written by 2001        NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
+           2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -58,14 +58,14 @@ const st_usage_t gba_usage[] =
     {"chk", NULL, "fix ROM header checksum"},
     {"sram", NULL, "patch ROM for SRAM saving"},
     {"crp", "WAIT_TIME", "slow down Flash Advance Linker access for ROM (crash patch);\n"
-                         "WAIT_TIME='0'  (default in most crash patches)\n"
-                         "WAIT_TIME='4'  (faster than 0, slower than 8)\n"
-                         "WAIT_TIME='8'  (faster than 4, slower than 28)\n"
-                         "WAIT_TIME='12' (slowest cartridge access speed)\n"
-                         "WAIT_TIME='16' (faster than 28, but slower than 20)\n"
-                         "WAIT_TIME='20' (default in most original carts)\n"
-                         "WAIT_TIME='24' (fastest cartridge access speed)\n"
-                         "WAIT_TIME='28' (faster than 8 but slower than 16)"},
+                         "WAIT_TIME=0  default in most crash patches\n"
+                         "WAIT_TIME=4  faster than 0, slower than 8\n"
+                         "WAIT_TIME=8  faster than 4, slower than 28\n"
+                         "WAIT_TIME=12 slowest cartridge access speed\n"
+                         "WAIT_TIME=16 faster than 28, but slower than 20\n"
+                         "WAIT_TIME=20 default in most original carts\n"
+                         "WAIT_TIME=24 fastest cartridge access speed\n"
+                         "WAIT_TIME=28 faster than 8 but slower than 16"},
 //  "n 0 and 28, with a stepping of 4. I.e. 0, 4, 8, 12 ...\n"
     {"multi", "SIZE", "make multirom for Flash Advance Linker, truncated to SIZE Mbit;\n"
                       "file with loader must be specified first, then all the ROMs,\n"

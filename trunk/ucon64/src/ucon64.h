@@ -6,7 +6,7 @@ handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
+           2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -40,9 +40,10 @@ typedef struct
   const char *option_s;                         // "chk", ...
   const char *optarg;
   const char *desc;                             // "fix checksum", ...
-//  const char *desc_long;                        // long description
-//  int status;                                   // development status of option
-                                                  // 0 = OK, 1 = TODO, 2 = TEST
+#if 0
+  const char *desc_long;                        // long description
+  int status;                                   // development status of option
+#endif                                          //  0 = OK, 1 = TODO, 2 = TEST
 } st_usage_t;
 
 
@@ -179,6 +180,7 @@ typedef struct
   int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
   int snes_hirom;                               // SNES ROM is HiROM
   int split;                                    // ROM is split
+  int swc_dumping_mode;                         // SNES SWC
   int tv_standard;                              // NES UNIF
   int use_dump_info;                            // NES UNIF
   int vram;                                     // NES UNIF
@@ -213,4 +215,5 @@ extern int ucon64_parport_needed;
 extern const struct option options[];
 
 #endif // #ifndef UCON64_H
+
 

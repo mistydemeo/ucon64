@@ -79,8 +79,8 @@ const st_usage_t genesis_usage[] =
     {"stp", NULL, "convert SRAM from backup unit for use with an emulator\n"
                OPTION_LONG_S "stp just strips the first 512 bytes"},
     {"j", NULL, "join split ROM"},
-    {"s", NULL, "split ROM into 4 Mb parts (for backup unit(s) with fdd)"},
-// NOTE: part size number should match with size actually used
+    {"s", NULL, "split ROM; default part size is 4 Mb"},
+    {"ssize", "SIZE", "specify split part size in Mbit"},
 #if 0
     {"p", NULL, "pad ROM to full Mb"},
 #endif
@@ -391,30 +391,45 @@ genesis_mgd (st_rominfo_t *rominfo)
 }
 
 
-#define PARTSIZE  (4 * MBIT)
+#define PARTSIZE  (4 * MBIT)                    // default split part size
 int
 genesis_s (st_rominfo_t *rominfo)
 {
   st_smd_header_t smd_header;
   char buf[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL;
-  int x, nparts, surplus, size;
-
-  size = (ucon64.file_size - rominfo->buheader_len);
-  nparts = size / PARTSIZE;
-  surplus = size % PARTSIZE;
+  int x, nparts, surplus, size = ucon64.file_size - rominfo->buheader_len,
+      part_size;
 
   if (type == BIN)
     {
       fprintf (stderr, "ERROR: Splitting binary files is not supported\n");
       return -1;
     }
-  if (size <= PARTSIZE)
+
+  if (UCON64_ISSET (ucon64.part_size))
+    {
+      part_size = ucon64.part_size;
+      // Don't allow too small part sizes, see src/console/snes.c (snes_s())
+      if (part_size < 4 * MBIT)
+        {
+          fprintf (stderr,
+            "ERROR: Split part size must be larger than or equal to 4 Mbit\n");
+          return -1;
+        }
+    }
+  else
+    part_size = PARTSIZE;
+
+  if (size <= part_size)
     {
       printf (
         "NOTE: ROM size is smaller than or equal to %d Mbit -- won't be split\n",
-        PARTSIZE / MBIT);
+        part_size / MBIT);
       return -1;
     }
+
+  nparts = size / part_size;
+  surplus = size % part_size;
 
   if (type == SMD)
     {
@@ -424,7 +439,7 @@ genesis_s (st_rominfo_t *rominfo)
       set_suffix (dest_name, ".1");
       ucon64_output_fname (dest_name, 0);
 
-      smd_header.size = PARTSIZE / 16384;
+      smd_header.size = part_size / 16384;
       smd_header.id0 = 3;
       // if smd_header.split bit 6 == 0 -> last file of the ROM
       smd_header.split |= 0x40;
@@ -435,7 +450,7 @@ genesis_s (st_rominfo_t *rominfo)
 
           // don't write backups of parts, because one name is used
           q_fwrite (&smd_header, 0, SMD_HEADER_LEN, dest_name, "wb");
-          q_fcpy (ucon64.rom, x * PARTSIZE + rominfo->buheader_len, PARTSIZE, dest_name, "ab");
+          q_fcpy (ucon64.rom, x * part_size + rominfo->buheader_len, part_size, dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
 
           (*(strrchr (dest_name, '.') + 1))++;
@@ -448,7 +463,7 @@ genesis_s (st_rominfo_t *rominfo)
 
           // don't write backups of parts, because one name is used
           q_fwrite (&smd_header, 0, SMD_HEADER_LEN, dest_name, "wb");
-          q_fcpy (ucon64.rom, x * PARTSIZE + rominfo->buheader_len, surplus, dest_name, "ab");
+          q_fcpy (ucon64.rom, x * part_size + rominfo->buheader_len, surplus, dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
         }
     }
@@ -475,10 +490,10 @@ genesis_s (st_rominfo_t *rominfo)
         {
           // don't write backups of parts, because one name is used
           // write first half of file
-          q_fcpy (ucon64.rom, x * (PARTSIZE / 2), PARTSIZE / 2, dest_name, "wb");
-          // write second half of file; don't do: "(nparts / 2) * PARTSIZE"!
-          q_fcpy (ucon64.rom, nparts * (PARTSIZE / 2) + x * (PARTSIZE / 2),
-            PARTSIZE / 2, dest_name, "ab");
+          q_fcpy (ucon64.rom, x * (part_size / 2), part_size / 2, dest_name, "wb");
+          // write second half of file; don't do: "(nparts / 2) * part_size"!
+          q_fcpy (ucon64.rom, nparts * (part_size / 2) + x * (part_size / 2),
+            part_size / 2, dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
           (*(strrchr (dest_name, '.') - 1))++;
         }
@@ -1288,7 +1303,7 @@ genesis_init (st_rominfo_t *rominfo)
   rominfo->header = &genesis_header;
 
   // internal ROM name
-  memcpy (rominfo->name, &OFFSET (genesis_header, 32), GENESIS_NAME_LEN);
+  memcpy (rominfo->name, &OFFSET (genesis_header, 80), GENESIS_NAME_LEN);
   rominfo->name[GENESIS_NAME_LEN] = 0;
 
   // ROM maker
@@ -1342,9 +1357,9 @@ genesis_init (st_rominfo_t *rominfo)
   rominfo->country = country;
 
   // misc stuff
-  memcpy (name, &OFFSET (genesis_header, 80), GENESIS_NAME_LEN);
+  memcpy (name, &OFFSET (genesis_header, 32), GENESIS_NAME_LEN);
   name[GENESIS_NAME_LEN] = 0;
-  sprintf ((char *) buf, "Overseas game name: %s\n", name);
+  sprintf ((char *) buf, "Japanese game name: %s\n", name);
   strcat (rominfo->misc, (char *) buf);
 
   sprintf ((char *) buf, "Date: %.8s\n", &OFFSET (genesis_header, 24));
@@ -1386,7 +1401,7 @@ genesis_init (st_rominfo_t *rominfo)
 
       sprintf ((char *) buf, "RAM start: %08x\n", x);
       strcat (rominfo->misc, (char *) buf);
-    
+
       sprintf ((char *) buf, "RAM end: %08x\n", y);
       strcat (rominfo->misc, (char *) buf);
     }

@@ -1,0 +1,160 @@
+/*
+mccl.c - Mad Catz Camera Link (GameBoy Camera) support for uCON64
+
+written by 2002 NoisyB (noisyb@gmx.net)
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+/*
+Mad Catz Camera Link Communications Protocol
+
+Printer IO Ports:
+Base+0: Data Port
+Base+1: Status Port
+Base+2: Control
+
+Reset Procedure:
+1. Output 0x24 to control (tristate data and set control to 0100)
+2. Wait for bit 5 of status port to become 1
+3. Read lower 4 bits of data port
+4. If read data != 4, then go to step 1.
+5. (Useless read of control port?)
+6. Output 0x22 to control (tristate data and set control to 0010)
+7. Wait for bit 5 of status port to become 0 
+8. Output 0x26 to control (tristate data and set control to 0110)
+
+Data Read Procedure:
+1. Output 0x26 to control (tristate data and set control to 0110)
+2. Wait for bit 5 of status port to become 1
+3. Read lower 4 bits of data port, store to lower 4 bits of received byte
+4. (Useless read of control port?)
+5. Output 0x22 to control (tristate data and set control to 0010) 
+6. Wait for bit 5 of status port to become 0
+7. Output 0x26 to control (tristate data and set control to 0110)
+8. Wait for bit 5 of status port to become 1
+9. Read lower 4 bits of data port, store to upper 4 bits of received byte
+10. (Useless read of control port?)
+11. Output 0x22 to control (tristate data and set control to 0010) 
+12. Wait for bit 5 of status port to become 0
+13. Go to step 1
+
+
+*/
+#include <stdio.h>
+#include "config.h"
+#include "misc.h"
+#include "ucon64.h"
+#include "ucon64_misc.h"
+
+const char *mccl_usage[] = {
+  "Mad Catz Camera Link (GameBoy Camera)",
+  "XXXX Mad Catz Inc. http://www.madcatz.com",
+  "TEST: " OPTION_LONG_S "xmccl  send/receive BYTES to/from Mad Catz Camera Link; " OPTION_LONG_S "file=PORT\n"
+  "                  currently only receiving is supported\n",
+  NULL
+};
+
+
+#ifdef BACKUP
+
+static int mccl_argc;
+static char *mccl_argv[128];
+
+#if 0
+#define lptbase 0x378
+#endif
+static int lptbase;
+
+#define DATA	lptbase+0
+#define STATUS	lptbase+1
+#define CONTROL lptbase+2
+
+unsigned char buffer[0x1760];
+
+
+int
+mccl_main (int argc, char *argv[])
+{
+  int inbyte, count = 0;
+
+  fprintf (stderr, "Resetting device.\n");
+  fflush (stderr);
+  do
+    {
+      outportb (CONTROL, 0x24);
+      while ((inportb (STATUS) & 0x20) == 0)
+        {
+        }
+      inbyte = inportw (DATA) & 0xF;
+      printf ("%x\n", inbyte);
+    }
+  while (inbyte != 4);
+  outportb (CONTROL, 0x22);
+  while ((inportb (STATUS) & 0x20) != 0)
+    {
+    }
+  outportb (CONTROL, 0x26);
+  fprintf (stderr, "Receiving data:\n");
+  fflush (stderr);
+  do
+    {
+      outportb (CONTROL, 0x26);
+      while ((inportb (STATUS) & 0x20) == 0)
+        {
+        }
+      inbyte = inportw (DATA) & 0xF;
+      outportb (CONTROL, 0x22);
+      while ((inportb (STATUS) & 0x20) != 0)
+        {
+        }
+      outportb (CONTROL, 0x26);
+      while ((inportb (STATUS) & 0x20) == 0)
+        {
+        }
+      inbyte |= (inportw (DATA) & 0xF) << 4;
+      printf ("%2x  ", inbyte);
+      outportb (CONTROL, 0x22);
+      while ((inportb (STATUS) & 0x20) != 0)
+        {
+        }
+      buffer[count++] = inbyte;
+    }
+#if 0
+  while (count < 40);
+#else
+  while (1);
+#endif
+
+  printf ("\n");
+  for (count = 0; count < 40; count++)
+    printf ("%2x  ", buffer[count]);
+  printf ("\n");
+
+  return 0;
+}
+
+
+int
+mccl_read (const char *filename, unsigned int parport)
+{
+  mccl_argv[0] = "ucon64";
+  mccl_argc = 1;
+
+  lptbase = parport;
+  return mccl_main (mccl_argc, mccl_argv);
+}
+
+#endif // BACKUP

@@ -71,6 +71,11 @@ unsigned char inportb (unsigned short port);
 unsigned short inportw (unsigned short port);
 void outportb (unsigned short port, unsigned char byte);
 void outportw (unsigned short port, unsigned short word);
+
+#ifdef __FreeBSD__
+  #define ioperm(p,x,y) (i386_set_ioperm(p,x,y))
+#endif // __FreeBSD__
+
 #endif
 
 #endif // BACKUP

@@ -228,17 +228,6 @@ filepad (char *filename, long start, long unit)
 {
   size_t size = quickftell (filename) - start;
 
-/*
-  if (!(size%unit))
-    return size;
-
-  size = (size_t) size/unit;
-  size = size + 1;
-  size = size*unit;
-
-  truncate(filename, size + start);
-*/
-
   if ((size % unit) != 0)
     {
       size /= unit;
@@ -269,10 +258,7 @@ filetestpad (char *filename)
   x = size - 2;
   while (y == (buf[x] & 0xff))
     x--;
-/*
-  if (y != (buf[x+1]&0xff))
-    x++;
-*/
+
   free (buf);
 
   return (size - x - 1 == 1) ? 0 : size - x - 1;
@@ -293,7 +279,11 @@ inportb (unsigned short port)
 #else
   unsigned char byte;
 
+#ifdef __FreeBSD__
+  __asm__ __volatile__ ("inb %w1,%0":"=a" (byte):"Nd" (port));
+#else
   __asm__ __volatile__ ("inb %1, %0":"=a" (byte):"d" (port));
+#endif // __FreeBSD__
 
   return byte;
 #endif
@@ -312,7 +302,11 @@ inportw (unsigned short port)
 #else
   unsigned short word;
 
+#ifdef __FreeBSD__
+  __asm__ __volatile__ ("inw %w1, %0":"=a" (word):"Nd" (port));
+#else
   __asm__ __volatile__ ("inw %1, %0":"=a" (word):"d" (port));
+#endif // __FreeBSD__
 
   return word;
 #endif
@@ -327,6 +321,8 @@ outportb (unsigned short port, unsigned char byte)
   temp.Port = port;
   temp.Data = byte;
   ioctl (ucon64_io_fd, DRV_WRITE_IO_8, &temp, 0);
+#elif __FreeBSD__
+//  __asm__ __volatile__ ("outb %b0,%w1"::"a" (byte), "Nd" (port));
 #else
   __asm__ __volatile__ ("outb %1, %0"::"d" (port), "a" (byte));
 #endif
@@ -341,6 +337,8 @@ outportw (unsigned short port, unsigned short word)
   temp.Port = port;
   temp.Data16 = word;
   ioctl (ucon64_io_fd, DRV_WRITE_IO_16, &temp, 0);
+#elif __FreeBSD__
+//  __asm__ __volatile__ ("outw %b0,%w1"::"a" (word), "Nd" (port));
 #else
   __asm__ __volatile__ ("outw %1, %0"::"d" (port), "a" (word));
 #endif

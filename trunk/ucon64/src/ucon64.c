@@ -1368,160 +1368,156 @@ ucon64_init (struct ucon64_ *rom)
         ((rom->bytes - rom->buheader_len) % MBIT) : 0;
     }
 
-  if (rom->console != ucon64_UNKNOWN)
+  switch (rom->console)
     {
-      switch (rom->console)
-        {
-        case ucon64_GB:
-          gameboy_init (rom);
-          break;
+      case ucon64_GB:
+        gameboy_init (rom);
+        break;
 
-        case ucon64_GBA:
-          gbadvance_init (rom);
-          break;
+      case ucon64_GBA:
+        gbadvance_init (rom);
+        break;
 
-        case ucon64_GENESIS:
-          genesis_init (rom);
-          break;
+      case ucon64_GENESIS:
+        genesis_init (rom);
+        break;
 
-        case ucon64_N64:
-          nintendo64_init (rom);
-          break;
+      case ucon64_N64:
+        nintendo64_init (rom);
+        break;
 
-        case ucon64_SNES:
-          snes_init (rom);
-          break;
+      case ucon64_SNES:
+        snes_init (rom);
+        break;
 
-        case ucon64_SMS:
-          sms_init (rom);
-          break;
+      case ucon64_SMS:
+        sms_init (rom);
+        break;
 
-        case ucon64_JAGUAR:
-          jaguar_init (rom);
-          break;
+      case ucon64_JAGUAR:
+        jaguar_init (rom);
+        break;
 
-        case ucon64_LYNX:
-          lynx_init (rom);
-          break;
+      case ucon64_LYNX:
+        lynx_init (rom);
+        break;
 
-        case ucon64_NEOGEO:
-          neogeo_init (rom);
-          break;
+      case ucon64_NEOGEO:
+        neogeo_init (rom);
+        break;
 
-        case ucon64_NES:
-          nes_init (rom);
-          break;
+      case ucon64_NES:
+        nes_init (rom);
+        break;
 
-        case ucon64_PCE:
-          pcengine_init (rom);
-          break;
+      case ucon64_PCE:
+        pcengine_init (rom);
+        break;
 
-        case ucon64_SYSTEM16:
-          system16_init (rom);
-          break;
+      case ucon64_SYSTEM16:
+        system16_init (rom);
+        break;
 
-        case ucon64_ATARI:
-          atari_init (rom);
-          break;
+      case ucon64_ATARI:
+        atari_init (rom);
+        break;
 
-        case ucon64_NEOGEOPOCKET:
-          neogeopocket_init (rom);
-          break;
+      case ucon64_NEOGEOPOCKET:
+        neogeopocket_init (rom);
+        break;
 
-        case ucon64_VECTREX:
-          vectrex_init (rom);
-          break;
+      case ucon64_VECTREX:
+        vectrex_init (rom);
+        break;
 
-        case ucon64_VIRTUALBOY:
-          virtualboy_init (rom);
-          break;
+      case ucon64_VIRTUALBOY:
+        virtualboy_init (rom);
+        break;
 
-        case ucon64_WONDERSWAN:
-          wonderswan_init (rom);
-          break;
+      case ucon64_WONDERSWAN:
+        wonderswan_init (rom);
+        break;
 
-        case ucon64_COLECO:
-          coleco_init (rom);
-          break;
+      case ucon64_COLECO:
+        coleco_init (rom);
+        break;
 
-        case ucon64_INTELLI:
-          intelli_init (rom);
-          break;
+      case ucon64_INTELLI:
+        intelli_init (rom);
+        break;
 
-        case ucon64_PS2:
-          ps2_init (rom);
-          break;
+      case ucon64_PS2:
+        ps2_init (rom);
+        break;
 
-        case ucon64_DC:
-          dc_init (rom);
-          break;
+      case ucon64_DC:
+        dc_init (rom);
+        break;
 
-        case ucon64_SATURN:
-          saturn_init (rom);
-          break;
+      case ucon64_SATURN:
+        saturn_init (rom);
+        break;
 
-        case ucon64_CDI:
-          cdi_init (rom);
-          break;
+      case ucon64_CDI:
+        cdi_init (rom);
+        break;
 
-        case ucon64_CD32:
-          cd32_init (rom);
-          break;
+      case ucon64_CD32:
+        cd32_init (rom);
+        break;
 
-        case ucon64_PSX:
-          psx_init (rom);
-          break;
+      case ucon64_PSX:
+        psx_init (rom);
+        break;
 
-        case ucon64_GAMECUBE:
-          gamecube_init (rom);
-          break;
+      case ucon64_GAMECUBE:
+        gamecube_init (rom);
+        break;
 
-        case ucon64_XBOX:
-          xbox_init (rom);
-          break;
+      case ucon64_XBOX:
+        xbox_init (rom);
+        break;
 
-        case ucon64_UNKNOWN:
-          if(rom->bytes <= MAXROMSIZE)
-            rom->console =
-              (!(snes_init (rom))) ? ucon64_SNES :
-              (!(genesis_init (rom))) ? ucon64_GENESIS :
-              (!(nintendo64_init (rom))) ? ucon64_N64 :
-              (!(gameboy_init (rom))) ? ucon64_GB :
-              (!(gbadvance_init (rom))) ? ucon64_GBA :
-              (!(nes_init (rom))) ? ucon64_NES :
-              (!(jaguar_init (rom))) ? ucon64_JAG :
+      case ucon64_UNKNOWN:
+        if(rom->bytes <= MAXROMSIZE)
+          rom->console =
+            (!(snes_init (rom))) ? ucon64_SNES :
+            (!(genesis_init (rom))) ? ucon64_GENESIS :
+            (!(nintendo64_init (rom))) ? ucon64_N64 :
+            (!(gameboy_init (rom))) ? ucon64_GB :
+            (!(gbadvance_init (rom))) ? ucon64_GBA :
+            (!(nes_init (rom))) ? ucon64_NES :
+            (!(jaguar_init (rom))) ? ucon64_JAG :
 #ifdef DB
-              (!(atari_init (rom))) ? ucon64_ATARI :
-              (!(lynx_init (rom))) ? ucon64_LYNX :
-              (!(pcengine_init (rom))) ? ucon64_PCE :
-              (!(neogeo_init (rom))) ? ucon64_NEOGEO :
-              (!(neogeopocket_init (rom))) ? ucon64_NGP :
-              (!(sms_init (rom))) ? ucon64_SMS :
-              (!(system16_init (rom))) ? ucon64_SYSTEM16 :
-              (!(virtualboy_init (rom))) ? ucon64_VBOY :
-              (!(vectrex_init (rom))) ? ucon64_VECTREX :
-              (!(coleco_init (rom))) ? ucon64_COLECO :
-              (!(intelli_init (rom))) ? ucon64_INTELLI :
-              (!(wonderswan_init (rom))) ? ucon64_WONDERSWAN :
+            (!(atari_init (rom))) ? ucon64_ATARI :
+            (!(lynx_init (rom))) ? ucon64_LYNX :
+            (!(pcengine_init (rom))) ? ucon64_PCE :
+            (!(neogeo_init (rom))) ? ucon64_NEOGEO :
+            (!(neogeopocket_init (rom))) ? ucon64_NGP :
+            (!(sms_init (rom))) ? ucon64_SMS :
+            (!(system16_init (rom))) ? ucon64_SYSTEM16 :
+            (!(virtualboy_init (rom))) ? ucon64_VBOY :
+            (!(vectrex_init (rom))) ? ucon64_VECTREX :
+            (!(coleco_init (rom))) ? ucon64_COLECO :
+            (!(intelli_init (rom))) ? ucon64_INTELLI :
+            (!(wonderswan_init (rom))) ? ucon64_WONDERSWAN :
 #endif // DB
-          //detection for the these consoles is not implemented yet
-              (!(gamecube_init (rom))) ? ucon64_GAMECUBE :
-              (!(xbox_init (rom))) ? ucon64_XBOX :
-              (!(gp32_init (rom))) ? ucon64_GP32 :
-              (!(cd32_init (rom))) ? ucon64_CD32 :
-              (!(cdi_init (rom))) ? ucon64_CDI :
-              (!(dc_init (rom))) ? ucon64_DC :
-              (!(ps2_init (rom))) ? ucon64_PS2 :
-              (!(psx_init (rom))) ? ucon64_PSX :
-              (!(real3do_init (rom))) ? ucon64_REAL3DO :
-              (!(saturn_init (rom))) ? ucon64_SAT : ucon64_UNKNOWN;
+            (!(gamecube_init (rom))) ? ucon64_GAMECUBE :
+            (!(xbox_init (rom))) ? ucon64_XBOX :
+            (!(gp32_init (rom))) ? ucon64_GP32 :
+            (!(cd32_init (rom))) ? ucon64_CD32 :
+            (!(cdi_init (rom))) ? ucon64_CDI :
+            (!(dc_init (rom))) ? ucon64_DC :
+            (!(ps2_init (rom))) ? ucon64_PS2 :
+            (!(psx_init (rom))) ? ucon64_PSX :
+            (!(real3do_init (rom))) ? ucon64_REAL3DO :
+            (!(saturn_init (rom))) ? ucon64_SAT : ucon64_UNKNOWN;
           break;
           
         default:
             rom->console = ucon64_UNKNOWN;
           break;
         }
-      }
 
   return (rom->console == ucon64_UNKNOWN) ? -1 : 0;
 }

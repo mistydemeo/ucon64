@@ -73,104 +73,32 @@ game size       # of files      names           MUTLI-GD
 8M              1               PC8XXX.058      PC8XXX
 
 
-The Game Doctor does not use a 512 byte header like the SWC,
-instead it uses specially designed filenames to distinguish
-between multi files. I'm not sure if it used the filename for
-information about the size of the image though.
-<p>
+Contrary to popular belief the Game Doctor *does* use a 512
+byte header like the SWC, but it also accepts headerless files.
+A header is necessary when things like SRAM size must be made
+known to the Game Doctor. The Game Doctor also uses specially
+designed filenames to distinguish between multi files.
+
 Usually, the filename is in the format of: SFXXYYYZ.078
-<p>
+
 Where SF means Super Famicom, XX refers to the size of the
 image in Mbit. If the size is only one character (i.e. 2, 4 or
 8 Mbit) then no leading "0" is inserted.
-<p>
+
 YYY refers to a catalogue number in Hong Kong shops
 identifying the game title. (0 is Super Mario World, 1 is F-
 Zero, etc). I was told that the Game Doctor copier produces a
 random number when backing up games.
-<p>
+
 Z indicates a multi file. Like XX, if it isn't used it's
 ignored.
-<p>
+
 A would indicate the first file, B the second, etc. I am told
 078 is not needed, but is placed on the end of the filename by
 systems in Asia.
-<p>
-e.g. The first 16Mbit file of Donkey Kong Country (assuming it
-  is cat. no. 475) would look like:  SF16475A.078
 
-
-Offset
-Size
-Section
-   Description
-   H100
-  16 bytes
-  File Identifier
- 'SEGA MEGA DRIVE' or 'SEGA GENESIS'
-   H110
-  16 bytes
-  Copyright notice
- See Below
-   H120
-  48 bytes
-  Domestic game name
- Original Name [48 bytes]
-   H150
-  48 bytes
-  Overseas game name
- Worldwide Name [48 bytes]
-   H180
-  14 bytes
-  Product Code
- 'PT XXXXXXXXXXX'// PT=Product type X=Product Code after '-' is the version number
-   H18E
-  02 bytes
-  Checksum
- Checksum of ROM
-   H190
-  16 bytes
-  I/O Support
- Can contain up to 16. Unused need to be filled with spaces. See Below
-   H1A0
-  08 bytes
-  ROM capacity
- Start Address [4 bytes; most cases 0] End Address [4 bytes]
-   H1A8
-  08 bytes
-  RAM capacity
- Start Address [4 bytes] End Address [4 bytes]
-   H1B0
-  12 bytes
-  External RAM
- Unknown
-   H1BC
-  12 bytes
-  MODEM Support
- If not supported filled with spaces otherwise 'MOxxxxyy.z' //x=Company Code y=MODEM NO. z=Version
-   H1C8
-  40 bytes
-  MEMO
- Seems just to be reserved for Memos.
-   H1F0
-  03 bytes
-  Countries
- Can contain up to 3. Unused need to be filled with spaces. See Below
-
-
-   Copyright Notice
-
-Standard Format: (C)XXXX yyyy.mmm //XXXX=Company Code
-2 Char Code Format: (C)T-XX yyyy.mmm //XX=Company Code
-3 Char Code Format: (C)T-XXX yyyy.mmm //XXX=Company Code
-Wrong Copyrights found:
-
-The year is written as '199X' or '19XX', or doen't include the millenium and the century.
-The company name is '00' or 'XX'
-Some companies that use a number for company code overwrite the hyphen, not the space.
-Some companies don't include the '(C)' in the beginning and others include just their name; some just include the the year
-Some copyrights have the year and month separated by ',','/', '-', space, null character (H00) or no separator at all.
-Wrong Abbreviations for Months= APL, 08 and SEPT.
+e.g. The first 16 Mbit file of Donkey Kong Country (assuming it
+is cat. no. 475) would look like: SF16475A.078
 */
 
 #ifdef BACKUP

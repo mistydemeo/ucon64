@@ -1026,10 +1026,8 @@ ucon64_nfo (void)
        && ucon64.rominfo && ucon64.console != UCON64_UNKNOWN)
     ucon64_rom_nfo (ucon64.rominfo);
 
-  if (ucon64.fcrc32)                    // SNES & Genesis interleaved/N64 non-interleaved
-    printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32);
-  else if (ucon64.crc32)
-    printf ("Checksum (CRC32): 0x%08x\n", ucon64.crc32);
+  // Use ucon64.fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
+  printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32 ? ucon64.fcrc32 : ucon64.crc32);
 
   // The check for the size of the file is made, so that uCON64 won't display a
   //  (nonsense) DAT info line when dumping a ROM (file doesn't exist, so

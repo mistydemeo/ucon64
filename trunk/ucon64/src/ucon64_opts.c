@@ -798,17 +798,16 @@ ucon64_options (int c, const char *optarg)
     case UCON64_LSD:
       if (ucon64.dat_enabled)
         {
-          if (ucon64.crc32 || ucon64.fcrc32)
+          if (ucon64.crc32)
             {
               printf ("%s", basename2 (ucon64.rom));
               if (ucon64.fname_arch[0])
                 printf (" (%s)\n", basename2 (ucon64.fname_arch));
               else
                 fputc ('\n', stdout);
-              if (ucon64.fcrc32)        // SNES & Genesis interleaved/N64 non-interleaved
-                printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32);
-              else
-                printf ("Checksum (CRC32): 0x%08x\n", ucon64.crc32);
+              // Use ucon64.fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
+              printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32 ?
+                      ucon64.fcrc32 : ucon64.crc32);
               ucon64_dat_nfo (ucon64.dat, 1);
               printf ("\n");
             }
@@ -904,7 +903,7 @@ ucon64_options (int c, const char *optarg)
               if (!libdm_mktoc (ucon64.image))
                 printf (ucon64_msg[WROTE], buf);
               else
-                fprintf (stderr, "ERROR: could not generate %s\n", buf);
+                fprintf (stderr, "ERROR: Could not generate %s\n", buf);
             }
 
           if (ucon64.image && (c == UCON64_MKCUE || c == UCON64_MKSHEET))
@@ -915,7 +914,7 @@ ucon64_options (int c, const char *optarg)
               if (!libdm_mkcue (ucon64.image))
                 printf (ucon64_msg[WROTE], buf);
               else
-                fprintf (stderr, "ERROR: could not generate %s\n", buf);
+                fprintf (stderr, "ERROR: Could not generate %s\n", buf);
             }
         }
       else

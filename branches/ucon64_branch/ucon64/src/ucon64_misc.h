@@ -197,6 +197,13 @@ extern char *ucon64_output_fname (char *requested_fname, int flags);
 extern int ucon64_fhexdump (const char *filename, int start, int len);
 extern int ucon64_filefile (const char *filename1, int start1, const char *filename2, int start2, int similar);
 
+#ifdef  __linux__
+/*
+  ucon64_jstest() terst gamepad events
+*/
+extern int ucon64_jstest (const char *device);
+#endif
+
 //  wrapper for misc.c/gauge()
 extern int ucon64_gauge (time_t init_time, int pos, int size);
 extern int ucon64_testpad (const char *filename); // test if ROM is padded

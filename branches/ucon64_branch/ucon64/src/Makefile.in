@@ -84,7 +84,7 @@ FULLLIBNAME_NG=$(LIBNAME_NG).so
 endif
 
 ifneq ($(OSTYPE),beos)
-ifneq ($(OSTYPE),FreeBSD)
+ifneq ($(OSTYPE),freebsd4.6)
 LDFLAGS+=-ldl
 endif
 endif

@@ -1386,6 +1386,12 @@ ucon64_options (int c, const char *optarg)
         }
       break;
 
+#ifdef  __linux__
+    case UCON64_JS:
+      ucon64_jstest (optarg);
+      break;
+#endif
+
     case UCON64_K:
       snes_k (ucon64.rominfo);
       break;

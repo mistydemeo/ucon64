@@ -194,6 +194,9 @@ const struct option options[] = {
     {"ispad", 0, 0, UCON64_ISPAD},
     {"j", 0, 0, UCON64_J},
     {"jag", 0, 0, UCON64_JAG},
+#ifdef  __linux__
+    {"js", 2, 0, UCON64_JS},
+#endif
     {"k", 0, 0, UCON64_K},
     {"l", 0, 0, UCON64_L},
     {"lnx", 0, 0, UCON64_LNX},

@@ -5,7 +5,7 @@ written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2003 dbjh
                   2001 Caz
                   2002 Jan-Erik Karlsson (Amiga)
-
+                  2003 Vojtech Pavlik (some code from jstest.c  Version 1.2)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,6 +38,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #ifdef _WIN32
 #include <windows.h>
+#endif
+#ifdef  __linux__
+#include <fcntl.h>
+#include <linux/joystick.h>
 #endif
 
 #ifdef  PARALLEL
@@ -396,6 +400,9 @@ const st_usage_t ucon64_options_usage[] = {
   {"findr", "STR", "like " OPTION_LONG_S "find but looks also for shifted/relative similarities"},
   {"c", "FILE", "compare FILE with ROM for differences"},
   {"cs" ,"FILE", "compare FILE with ROM for similarities"},
+#ifdef  __linux__
+  {"js", "DEVICE", "test Joystick/Gamepad on DEVICE (default: /dev/input/js0)"},
+#endif
   {"help", NULL, "display this help and exit"},
   {"version", NULL, "output version information and exit"},
   {"q", NULL, "be quiet (don't show ROM info)"},
@@ -561,7 +568,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XCDRW, UCON64_UNKNOWN, NULL,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_CDMAGE, UCON64_UNKNOWN, NULL,  WF_DEFAULT},
 #endif
-
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},
   {UCON64_A, UCON64_UNKNOWN, aps_usage,        WF_STOP},
   {UCON64_B, UCON64_UNKNOWN, bsl_usage,        WF_STOP},
@@ -588,6 +594,9 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_INSN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_ISPAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_INIT|WF_NO_SPLIT},
   {UCON64_J, UCON64_UNKNOWN, NULL,             WF_INIT|WF_PROBE},
+#ifdef  __linux__
+  {UCON64_JS, UCON64_UNKNOWN, ucon64_options_usage, WF_STOP|WF_NO_ROM},
+#endif
   {UCON64_LOGO, UCON64_UNKNOWN, NULL,          WF_DEFAULT},
   {UCON64_LS, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
   {UCON64_LSD, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE},
@@ -1248,6 +1257,223 @@ ucon64_testpad (const char *filename)
   fclose (fh);
 
   return ucon64.file_size;                      // the whole file is "padded"
+}
+#endif
+
+
+#ifdef __linux__
+int
+ucon64_jstest (const char *device)
+{
+#define NAME_LENGTH 128
+  int fd;
+  unsigned char axes = 2;
+  unsigned char buttons = 2;
+  int version = 0x000800;
+  char name[NAME_LENGTH] = "Unknown";
+
+  if (!device)
+    device = "/dev/input/js0";
+
+  if ((fd = open (device, O_RDONLY)) < 0)
+    return -1;
+
+  ioctl (fd, JSIOCGVERSION, &version);
+  ioctl (fd, JSIOCGAXES, &axes);
+  ioctl (fd, JSIOCGBUTTONS, &buttons);
+  ioctl (fd, JSIOCGNAME (NAME_LENGTH), name);
+
+  printf
+    ("Joystick (%s) has %d axes and %d buttons. Driver version is %d.%d.%d.\n",
+     name, axes, buttons, version >> 16, (version >> 8) & 0xff,
+     version & 0xff);
+
+  // Old (0.x) interface.
+  if (version < 0x010000)
+    {
+      struct JS_DATA_TYPE js;
+
+      while (1)
+        {
+          if (read (fd, &js, JS_RETURN) != JS_RETURN)
+            return -1;
+
+          printf ("Axes: X:%3d Y:%3d Buttons: A:%s B:%s\r",
+                  js.x, js.y, (js.buttons & 1) ? "on " : "off",
+                  (js.buttons & 2) ? "on " : "off");
+
+          fflush (stdout);
+
+          wait2 (10000);
+        }
+    }
+
+  // Event interface, single line readout.
+//  if (argc == 2 || !strcmp ("--normal", argv[1]))
+    {
+      int *axis;
+      int *button;
+      int i;
+      struct js_event js;
+
+      axis = calloc (axes, sizeof (int));
+      button = calloc (buttons, sizeof (char));
+
+      while (1)
+        {
+          if (read (fd, &js, sizeof (struct js_event)) !=
+              sizeof (struct js_event))
+            return -1;
+
+          switch (js.type & ~JS_EVENT_INIT)
+            {
+            case JS_EVENT_BUTTON:
+              button[js.number] = js.value;
+              break;
+            case JS_EVENT_AXIS:
+              axis[js.number] = js.value;
+              break;
+            }
+
+          printf ("\r");
+
+          if (axes)
+            {
+              printf ("Axes: ");
+              for (i = 0; i < axes; i++)
+                {
+                  if (ucon64.quiet < 0)
+                    printf ("%2d:%6d ", i, axis[i]);
+                  else
+                    {
+#ifdef  ANSI_COLOR
+                      if (ucon64.ansi_color)
+                        {
+                          if (!axis[i])
+                            printf ("\x1b[30;41m%2d\x1b[0m ", i);
+                          else
+                            printf ("\x1b[30;42m%2d\x1b[0m ", i);
+                        }
+                      else
+#endif
+                        {
+                          if (!axis[i])
+                            printf ("   ");
+                          else
+                            printf ("%2d ", i);
+                        }
+                    }
+                }
+            }
+
+          if (buttons)
+            {
+              printf ("Buttons: ");
+              for (i = 0; i < buttons; i++)
+#if 0
+                printf ("%2d:%s ", i, button[i] ? "on " : "off");
+#else
+                if (button[i])
+                  {
+#ifdef  ANSI_COLOR
+                    if (ucon64.ansi_color)
+                      printf ("\x1b[30;42m%2d\x1b[0m ", i);
+                    else
+#endif
+                      printf ("%2d ", i);
+                  }
+                else
+#ifdef  ANSI_COLOR
+                  if (ucon64.ansi_color)
+                    printf ("\x1b[30;41m%2d\x1b[0m ", i);
+                  else
+#endif
+                    printf ("   ");
+#endif
+            }
+
+          fflush (stdout);
+        }
+    }
+
+
+#if 0
+  // Event interface, events being printed.
+  if (!strcmp ("--event", argv[1]))
+    {
+
+      struct js_event js;
+
+      while (1)
+        {
+          if (read (fd, &js, sizeof (struct js_event)) !=
+              sizeof (struct js_event))
+            return -1;
+
+          printf ("Event: type %d, time %d, number %d, value %d\n",
+                  js.type, js.time, js.number, js.value);
+
+        }
+    }
+
+  // Reading in nonblocking mode.
+  if (!strcmp ("--nonblock", argv[1]))
+    {
+
+      struct js_event js;
+
+      fcntl (fd, F_SETFL, O_NONBLOCK);
+
+      while (1)
+        {
+
+          while (read (fd, &js, sizeof (struct js_event)) ==
+                 sizeof (struct js_event))
+            {
+              printf ("Event: type %d, time %d, number %d, value %d\n",
+                      js.type, js.time, js.number, js.value);
+            }
+
+          if (errno != EAGAIN)
+            return -1;
+
+          wait2 (10000);
+        }
+    }
+
+  // Using select() on joystick fd.
+  if (!strcmp ("--select", argv[1]))
+    {
+
+      struct js_event js;
+      struct timeval tv;
+      fd_set set;
+
+      tv.tv_sec = 1;
+      tv.tv_usec = 0;
+
+      while (1)
+        {
+
+          FD_ZERO (&set);
+          FD_SET (fd, &set);
+
+          if (select (fd + 1, &set, NULL, NULL, &tv))
+            {
+
+              if (read (fd, &js, sizeof (struct js_event)) !=
+                  sizeof (struct js_event))
+                return -1;
+
+              printf ("Event: type %d, time %d, number %d, value %d\n",
+                      js.type, js.time, js.number, js.value);
+
+            }
+
+        }
+    }
+#endif
+  return -1;
 }
 #endif
 

@@ -264,6 +264,11 @@ enum {
   UCON64_FORCE63,
   UCON64_FINDR,
   UCON64_VMS,
+#ifdef  __linux__
+  UCON64_JS,
+#endif
+
+  // Keep this (libnetgui) option separate
   UCON64_GUI,
 
   // Keep these (libdiscmage) options separate

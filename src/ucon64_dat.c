@@ -75,7 +75,7 @@ const st_usage_t ucon64_dat_usage[] = {
   {"lsd", NULL, "same as " OPTION_LONG_S "scan"},
   {"rrom", NULL, "rename ROMs to their internal names"},
   {"rename", NULL, "rename ROMs to their DATabase names\n"
-                    "same as: GoodXXXX rename inplace ..."},
+                    "use -o to specify an output directory"},
   {"83", NULL, "force to rename to 8.3 filenames"},
   {"force63", NULL, "force to rename all filenames into Joliet CD format\n"
               "same as: GoodXXXX rename inplace force63 ...\n"

@@ -425,6 +425,7 @@ ucon64_rename (int mode)
 {
   char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1],
        *suffix = (char *) get_suffix (ucon64.rom), *p = NULL;
+  int good_name;
 
   buf[0] = 0;
 
@@ -435,29 +436,29 @@ ucon64_rename (int mode)
           if (ucon64.rominfo->name)
             strcpy (buf, strtrim (ucon64.rominfo->name));
         break;
-        
+
       case UCON64_RENAME: // GoodXXXX style rename
         if (ucon64.dat)
           if (ucon64.dat->fname)
             {
               p = (char *) get_suffix (ucon64.dat->fname);
               strcpy (buf, ucon64.dat->fname);
- 
+
               // get_suffix() never returns NULL
               if (p[0])
                 if (strlen (p) < 5)
-                  if (!(stricmp (p, ".nes") &&      // NES
-                      stricmp (p, ".fds") &&      // NES FDS
-//                      stricmp (p, ".smd") &&    // Genesis
-                      stricmp (p, ".gb") &&       // Game Boy
-                      stricmp (p, ".gbc") &&      // Game Boy Color
-                      stricmp (p, ".gba") &&      // Game Boy Advance
-                      stricmp (p, ".smc") &&      // SNES
-                      stricmp (p, ".v64")))       // Nintendo 64
+                  if (!(stricmp (p, ".nes") &&  // NES
+                        stricmp (p, ".fds") &&  // NES FDS
+//                        stricmp (p, ".smd") &&  // Genesis
+                        stricmp (p, ".gb") &&   // Game Boy
+                        stricmp (p, ".gbc") &&  // Game Boy Color
+                        stricmp (p, ".gba") &&  // Game Boy Advance
+                        stricmp (p, ".smc") &&  // SNES
+                        stricmp (p, ".v64")))   // Nintendo 64
                     buf[strlen (buf) - strlen (p)] = 0;
             }
         break;
-      
+
       default:
         return 0; // invalid mode
     }
@@ -485,12 +486,12 @@ ucon64_rename (int mode)
 //  printf ("buf: \"%s\"; buf2: \"%s\"\n", buf, buf2);
 #endif
   if (!strcmp (buf, buf2))
-    {
-#ifdef  DEBUG
-      printf ("Found \"%s\"\n", ucon64.rom);
-#endif
-      return 0;
-    }
+    // also process files with a correct name, so that -rename can be used to
+    //  "weed" out good dumps when -o is used (like GoodXXXX without inplace
+    //  command)
+    good_name = 1;
+  else
+    good_name = 0;
 
   // DON'T use set_suffix()! Consider file names like
   //  "Final Fantasy III (V1.1) (U) [!]". The suffix is ".1) (U) [!]"...
@@ -499,14 +500,23 @@ ucon64_rename (int mode)
   if (ucon64.fname_len == UCON64_83)
     buf2[12] = 0;
 
-  if (!access (buf2, F_OK)) // a file with that name exists already?
-    {
-      strcpy (buf, ucon64.rom);
-      ucon64_file_handler (buf2, buf, 0);
-    }
+  ucon64_output_fname (buf2, OF_FORCE_SUFFIX);
+  if (!good_name)
+    /*
+      Note that the previous statement causes whatever file is present in the
+      dir specified with -o (or the current dir) to be overwritten. This seems
+      bad, but is actually better than making a backup. It isn't so bad,
+      because the file that gets overwritten doesn't deserve its name anyway.
+      Without this statement repeating a rename action for already renamed
+      files would result in a real mess. And I (dbjh) mean a *real* mess...
+    */
+    if (!access (buf2, F_OK))                   // a file with that name exists already?
+      ucon64_file_handler (buf2, NULL, OF_FORCE_SUFFIX);
 
-  printf ("Renaming \"%s\" to \"%s\"\n", basename2 (ucon64.rom),
-          basename2 (buf2));
+  if (!good_name)
+    printf ("Renaming \"%s\" to \"%s\"\n", basename2 (ucon64.rom), basename2 (buf2));
+  else
+    printf ("Moving \"%s\"\n", basename2 (ucon64.rom));
 #ifndef DEBUG
   rename (ucon64.rom, buf2);
 #endif

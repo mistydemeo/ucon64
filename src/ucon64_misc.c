@@ -907,7 +907,8 @@ ucon64_output_fname (char *requested_fname, int flags)
 
   // We have to make a copy, because get_suffix() returns a pointer to a
   //  location in the original string
-  strcpy (suffix, get_suffix (requested_fname));
+  strncpy (suffix, get_suffix (requested_fname), 80);
+  suffix[80] = 0;                               // in case suffix is >= 80 chars
 
   // OF_FORCE_BASENAME is necessary for options like -gd3. Of course that
   //  code should handle archives and come up with unique filenames for

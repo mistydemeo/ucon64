@@ -94,9 +94,9 @@ extern const char *unknown_usage[];
 /*
   CRC32 routines
 */
-extern unsigned long CalculateBufferCRC (unsigned int size, unsigned long crc,
-                                  void *buffer);
-extern unsigned long fileCRC32 (const char *filename, long start);   // calculate CRC32 of filename beginning from start
+extern unsigned long calculate_buffer_crc (unsigned int size, unsigned long crc,
+  void *buffer);
+extern unsigned long file_crc32 (const char *filename, long start);   // calculate CRC32 of filename beginning from start
 
 /*
   wrapper for misc.c/filebackup()

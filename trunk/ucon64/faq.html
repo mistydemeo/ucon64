@@ -62,6 +62,9 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
    "The system cannot execute the specified program." (or something like that).
    What does that mean?</a><br>
 <br>
+Q26: <a href="#26">I tried to run the Win32 executable of uCON64 but Windows gave an
+   error message that cygwin1.dll could not be found.</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -95,7 +98,7 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
    Under BeOS the last command will open a dialog window. Just follow the
    instructions.<br>
    The last command won't work with Cygwin, but isn't needed under Windows anyway. You can
-   find the binary in the directory "src".<br>
+   find the executable in the directory "src".<br>
    On Unix systems other than Linux you might need to use 'gmake' instead of 'make'.<br>
 <br>
 <p>
@@ -323,10 +326,15 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
    What does that mean?</a><br>
 <b>A</b>: You can get that message with the DOS executable if you pass more than 127
    characters as argument to uCON64. There are two solutions:<br>
-   1.) Use the Win32 binary (download it from <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>).<br>
+   1.) Use the Win32 executable (download it from <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>).<br>
    2.) Rename the ROMs so that their combined names are short enough to fit into 127 characters.<br>
 <br>
-<br>
+<p>
+<a name="26"><b>Q26</b>: I tried to run the Win32 executable of uCON64 but Windows gave an
+   error message that cygwin1.dll could not be found.</a><br>
+<b>A</b>: The Win32 executable of uCON64 needs that DLL in order to run. You can download
+   it from <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>.
+   Copy the file to the same directory as the uCON64 executable or to a directory in your PATH.<br>
 <br>
 <br>
 <br>

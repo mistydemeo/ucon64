@@ -151,8 +151,8 @@ initCommunication (unsigned int port)
         break;
     }
   if (i >= SYNC_MAX_TRY)
-    return (-1);
-  return (0);
+    return -1;
+  return 0;
 }
 
 int
@@ -254,7 +254,7 @@ sendDownloadHeader (unsigned int baseport, char name[], long *len)
     return 1;
   if (recbuffer[0] != 1)
     {
-      return (-1);
+      return -1;
     }
   if (parport_read ((char *) recbuffer, 15, baseport) != 0)
     return 1;
@@ -263,7 +263,7 @@ sendDownloadHeader (unsigned int baseport, char name[], long *len)
                                                         16) | ((long)
                                                                recbuffer[3] <<
                                                                24);
-  return (0);
+  return 0;
 }
 
 
@@ -275,13 +275,13 @@ doctor64_read (char *filename, unsigned int parport)
   unsigned long size, inittime;
 
   if (initCommunication (parport) == -1)
-    return (-1);
+    return -1;
 
   inittime = time (0);
   if (sendDownloadHeader (parport, filename, &size) != 0)
-    return (-1);
+    return -1;
   if (!(fh = fopen (filename, "wb")))
-    return (-1);
+    return -1;
   printf ("Receive: %ld Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   for (;;)
@@ -289,14 +289,14 @@ doctor64_read (char *filename, unsigned int parport)
       if (parport_read (buf, sizeof (buf), parport) != 0)
         {
           fclose (fh);
-          return (0);
+          return 0;
         }
       fwrite (buf, 1, sizeof (buf), fh);
       ucon64_gauge (&rom, inittime, quickftell (filename), size);
     }
   sync ();
   fclose (fh);
-  return (0);
+  return 0;
 }
 
 
@@ -309,16 +309,16 @@ doctor64_write (char *filename, long start, long len, unsigned int parport)
   unsigned long size, inittime, pos;
 
   if (initCommunication (parport) == -1)
-    return (-1);
+    return -1;
   inittime = time (0);
 
 
   if (sendUploadHeader (parport, filename, (quickftell (filename) - start)) !=
       0)
-    return (-1);
+    return -1;
 
   if (!(fh = fopen (filename, "rb")))
-    return (-1);
+    return -1;
 
   printf ("Send: %ld Bytes (%.4f Mb)\n\n", (quickftell (filename) - start),
           (float) (quickftell (filename) - start) / MBIT);
@@ -335,7 +335,7 @@ doctor64_write (char *filename, long start, long len, unsigned int parport)
                      (quickftell (filename) - start));
     }
   fclose (fh);
-  return (0);
+  return 0;
 }
 
 
@@ -350,5 +350,5 @@ doctor64_usage (int argc, char *argv[])
 
 //TODO more info like technical info about cabeling and stuff for the copier
 
-  return (0);
+  return 0;
 }

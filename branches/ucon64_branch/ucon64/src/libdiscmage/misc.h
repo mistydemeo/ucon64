@@ -254,8 +254,10 @@ char *fix_character_set (char *value);
               on one file system
   truncate2() don't use truncate() to enlarge files, because the result is
               undefined (by POSIX) use truncate2() instead which does both
-  strargv()   wapper for argz_* to convert a cmdline into an argv[]
-              like array
+  argz_extract2() simplified argz_extract() replacement
+  argz_extract3() like argz_extract2() but for spaces only
+  strunesc()      replace %xx escape sequences with the char
+  stresc()        replace chars with %xx escape sequences
 */
 extern int isfname (int c);
 extern int isprint2 (int c);
@@ -295,42 +297,10 @@ extern char *realpath2 (const char *src, char *full_path);
 extern int mkdir2 (const char *name);
 extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, int size);
-     
-
-
-/*
-  URL's (use URL's as commandline options)
-
-  url_unescape_string() replace %xx escape sequences with the char
-  url_escape_string()   replace chars with %xx escape sequences
-  strurl()  parse an url [protocol://][username][:password]hostname[:port][/...]
-              into st_url_t
-
-  url_to_cmd() convert a url into something like a cmdline
-              with this you can turn an url into argc and argv
-              by doing this http request's could be handled with getopt()(!)
-
-TODO:  strargv() wapper for argz_* to convert a cmdline into an argv[] like array
-TODO:  cmd_to_argv() wapper for argz_* to convert a cmdline into an argv[] like array
-*/
-extern char *url_unescape_string (char *ostr, const char *str); 
-extern int url_escape_string (char *ostr, const char *str);
-typedef struct
-{
-  char *url;       // default: "http://localhost:80/"
-  char *protocol;    // default: "http"
-
-  char *user;        // default: NULL
-  char *pass;        // default: NULL
-
-  char *host;        // default: localhost
-  unsigned int port; // default: 80
-  char *file;        // default: "/"
-} st_url_t;
-extern st_url_t *strurl (st_url_t *url, const char *url_s);
-extern char *url_to_cmd (const char *url_s);
-extern int cmd_to_argv (const char *cmd, char ***argv_p, int max_args);
-//extern char ***strargv (int *argc, char ***argv, char *cmdline, int separator_char);
+extern int argz_extract2 (char **argv, char *cmdline, int sep, int max_args);
+#define argz_extract3(a,c,m) argz_extract2(a,c,' ',m)
+extern int stresc (char *dest, const char *src);
+extern char *strunesc (char *dest, const char *src); 
 
 
 /*
@@ -391,6 +361,10 @@ extern unsigned int crc32 (unsigned int crc32, const void *buffer, unsigned int 
                   returns -1 if it fails, 0 if it was successful
   handle_registered_funcs() calls all the registered functions
   wait2           wait (sleep) a specified number of milliseconds
+  strurl()        a general routine to parse commandlines into urls and the
+                  other direction. strurl() returns st_strurl_t with all further
+                  informations that came with the url like protocol, host,
+                  port, etc..
 */
 typedef struct st_cm_set
 {
@@ -429,6 +403,25 @@ extern int register_func (void (*func) (void));
 extern int unregister_func (void (*func) (void));
 extern void handle_registered_funcs (void);
 extern void wait2 (int nmillis);
+typedef struct
+{
+  char *url_s;       // default: "http://localhost:80/"
+
+  char *protocol;    // default: "http"
+  char *user;        // default: NULL
+  char *pass;        // default: NULL
+  char *host;        // default: localhost
+  unsigned int port; // default: 80
+  char *file;        // default: "/"
+
+// special
+  char *cmd_s;       // transform the url into a shell cmdline
+                       // if url_s is already a cmd it will be transformed
+                       // into a url
+  int argc;          // transform the cmdline into argc and 
+  char **argv;         // argv
+} st_strurl_t;
+extern st_strurl_t *strurl (st_strurl_t *url, const char *url_s);
 
 
 /*
@@ -472,6 +465,7 @@ extern char *q_fbackup (char *move_name, const char *filename);
 #ifndef  HAVE_ZLIB_H
 extern int q_fsize (const char *filename);
 #endif
+
 
 /*
   Configuration file handling

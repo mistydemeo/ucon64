@@ -2697,20 +2697,26 @@ fdopen (int fd, const char *mode)
 #endif // _WIN32
   
 
-#if 0                                           // currently not used
-char ***
-strargv (int *argc, char ***argv, char *cmdline, int separator_char)
+int
+argz_extract2 (char **argv, char *cmdline, int sep, int max_args)
 {
 //this will be replaced by argz_extract() soon
-  int i = 0;
-  char buf[MAXBUFSIZE];
+  char buf[2];
+  int argc = 0;
 
-  if (*cmd)
-    for (; (argv[i] = strtok (!i?cmd:NULL, " ")) && i < (argc - 1); i++)
-      ;
-  return NULL;
+  if (!cmdline)
+    return 0;
+
+  if (!(*cmdline))
+    return 0;
+
+  buf[0] = sep;
+  buf[1] = 0;
+  for (; (argv[argc] = (char *) strtok (!argc?cmdline:NULL, buf)) &&
+    argc < (max_args - 1); argc++);
+
+  return argc;
 }
-#endif
 
 
 static char
@@ -2721,16 +2727,16 @@ from_hex (char c)
 
 
 char *
-url_unescape_string (char *outbuf, const char *inbuf)
+strunesc (char *dest, const char *src)
 #if 0
 {
   unsigned char c;
 
-  for (; ((c = *inbuf++)); *outbuf++ = c)
+  for (; ((c = *src++)); *dest++ = c)
     if (c == '%')
       {
-        unsigned char c1 = *inbuf++;
-        unsigned char c2 = *inbuf++;
+        unsigned char c1 = *src++;
+        unsigned char c2 = *src++;
 
         if (((c1 >= '0' && c1 <= '9') || (c1 >= 'A' && c1 <= 'F')) &&
             ((c2 >= '0' && c2 <= '9') || (c2 >= 'A' && c2 <= 'F')))
@@ -2742,20 +2748,19 @@ url_unescape_string (char *outbuf, const char *inbuf)
             c = (c1 << 4) + c2;
           }
       }
-  return outbuf;
+  return dest;
 }
 #else
 {
   char *p = NULL;
   char *q = NULL;
-  static char blank[] = "";
 
-  strcpy (outbuf, inbuf);
-  p = (char *) outbuf;
-  q = (char *) outbuf;
+  strcpy (dest, src);
+  p = (char *) dest;
+  q = (char *) dest;
 
-  if (!outbuf)
-    return (blank);
+  if (!dest)
+    return "";
   while (*p)
     {
       if (*p == '%')
@@ -2782,13 +2787,13 @@ url_unescape_string (char *outbuf, const char *inbuf)
     }
 
   *q++ = 0;
-  return outbuf;
+  return dest;
 }
 #endif
 
 
 int
-url_escape_string (char *outbuf, const char *inbuf)
+stresc (char *dest, const char *src)
 #if 0
 {
   unsigned char c;
@@ -2799,9 +2804,9 @@ url_escape_string (char *outbuf, const char *inbuf)
 //  "\x7f ... \xff"    fareast laurluages(Chinese, Korean, Japanese)
     "\x00";                     // \0 too
 
-  while ((c = *inbuf++))
+  while ((c = *src++))
     if (strchr (positiv, c) != NULL || c >= 0x7f)
-      *outbuf++ = c;
+      *dest++ = c;
     else
       {
         /* all others will be escaped */
@@ -2811,18 +2816,18 @@ url_escape_string (char *outbuf, const char *inbuf)
         c1 += (c1 < 10) ? '0' : 'A';
         c2 += (c2 < 10) ? '0' : 'A';
 
-        *outbuf++ = '%';
-        *outbuf++ = c1;
-        *outbuf++ = c2;
+        *dest++ = '%';
+        *dest++ = c1;
+        *dest++ = c2;
       }
-  return outbuf;
+  return dest;
 }
 #else
 {
-  char *bufcoded = (char *) inbuf;
-  char *bufplain = outbuf;
+  char *bufcoded = (char *) src;
+  char *bufplain = dest;
 //TODO: replace MAXBUFSIZE
-  int outbufsize = MAXBUFSIZE;
+  int destsize = MAXBUFSIZE;
   static char six2pr[64] = {
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -2871,9 +2876,9 @@ url_escape_string (char *outbuf, const char *inbuf)
   while (pr2six[(int) *(bufin++)] <= _DECODE_MAXVAL);
   nprbytes = bufin - bufcoded - 1;
   nbytesdecoded = ((nprbytes + 3) / 4) * 3;
-  if (nbytesdecoded > outbufsize)
+  if (nbytesdecoded > destsize)
     {
-      nprbytes = (outbufsize * 4) / 3;
+      nprbytes = (destsize * 4) / 3;
     }
   bufin = bufcoded;
 
@@ -2903,8 +2908,8 @@ url_escape_string (char *outbuf, const char *inbuf)
 #endif
 
 
-st_url_t *
-strurl (st_url_t *url, const char *url_s)
+st_strurl_t *
+strurl (st_strurl_t *url, const char *url_s)
 {
 #define ANONYMOUS_S "anonymous"
   int pos, pos2;
@@ -2919,14 +2924,14 @@ strurl (st_url_t *url, const char *url_s)
     return NULL;
 
   // Initialisation of the URL container members
-  memset (url, 0, sizeof (st_url_t));
+  memset (url, 0, sizeof (st_strurl_t));
 
-  url_unescape_string (buf, url_s);
+  strunesc (buf, url_s);
   url_s = (const char *) &buf;
   printf ("%s\n\n", url_s);
 
   // Copy the url in the URL container
-  if (!(url->url = strdup (url_s)))
+  if (!(url->url_s = strdup (url_s)))
     {
       fprintf (stderr, "ERROR: Memory allocation failed\n");
       return NULL;
@@ -3068,7 +3073,7 @@ strurl (st_url_t *url, const char *url_s)
     }
 
 //#ifdef  DEBUG
-  fprintf (stderr, "url_s:      %s\n", url->url);
+  fprintf (stderr, "url_s:    %s\n", url->url_s);
   fprintf (stderr, "protocol: %s\n", url->protocol);
   fprintf (stderr, "hostname: %s\n", url->host);
   fprintf (stderr, "file:     %s\n", url->file);
@@ -3088,7 +3093,7 @@ url_to_cmd (const char *url_s)
   int x = 0, c = 0;
   char buf[6];
   static char buf2[MAXBUFSIZE];
-  st_url_t url;
+  st_strurl_t url;
   char *p = NULL;
   
   if (!strurl (&url, url_s))
@@ -3123,26 +3128,4 @@ url_to_cmd (const char *url_s)
 }
 
 
-int
-cmd_to_argv (const char *cmd, char ***argv_p, int max_args)
-// argz_extract clone
-{
-  int argc;
-  static char *argv[4096 + 1]; // 4096 cmdline options should be sufficient
-  char buf[MAXBUFSIZE];
-
-  if (!cmd)
-    return -1;
-
-  strcpy (buf, cmd);
-  max_args = MIN (4096, max_args);
-
-  for (argc = 0;
-       (argv[argc] = strtok (!argc ? buf : NULL, " ")) && argc < max_args;
-       argc++);
-
-  argv_p = &argv;
-
-  return argc;
-}
 #endif

@@ -500,6 +500,8 @@ main (int argc, char **argv)
 
   if (!strlen (ucon64.rom) && optind < argc)
     ucon64.rom = argv[optind];
+  if (!strlen (ucon64.rom))
+    return 1;                                   // options or switches but no file or dir
 
   rom_index = optind;                           // save index of first file
 

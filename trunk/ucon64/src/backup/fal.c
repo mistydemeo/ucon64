@@ -1268,7 +1268,12 @@ int fal_write(char *filename, long start, long len, unsigned int parport, int ar
 
 int fal_usage(int argc, char *argv[])
 {
+  int verbose = 0;
+
   if (argcmp(argc, argv, "-help"))
+    verbose = 1;
+
+  if (verbose)
     printf("\n%s\n", fal_TITLE);
 
   printf("  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
@@ -1277,9 +1282,33 @@ int fal_usage(int argc, char *argv[])
          "                receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32\n"
          "  -xfalm        use SPP mode, default is EPP\n");
 
-  if (argcmp(argc, argv, "-help"))
+  if (verbose)
   {
-  //TODO more info like technical info about cabeling and stuff for the copier
+    printf("\n"
+           "                You only need to specify PORT if uCON64 doesn't detect the\n"
+           "                (right) parallel port. If this is the case give a hardware\n"
+           "                address, for example:\n"
+           "                ucon64 -xfal \"0087 - Mario Kart Super Circuit (U).gba\" 0x378\n");
+    printf("\n"
+           "                In order to connect the Flash Advance Linker to a PC's parallel\n"
+           "                port you need a parallel cable, i.e. a cable with male DB-25\n"
+           "                connectors at both ends where the pins are connected in the\n"
+           "                following way:\n"
+           "                pin 2  <-> pin 15\n"
+           "                pin 3  <-> pin 13\n"
+           "                pin 4  <-> pin 12\n"
+           "                pin 5  <-> pin 10\n"
+           "                pin 6  <-> pin 11\n"
+           "                pin 7  <-> pin 7\n"
+           "                pin 8  <-> pin 8\n"
+           "                pin 9  <-> pin 9\n"
+           "                pin 15 <-> pin 2\n"
+           "                pin 13 <-> pin 3\n"
+           "                pin 12 <-> pin 4\n"
+           "                pin 10 <-> pin 5\n"
+           "                pin 11 <-> pin 6\n"
+           "                pin 25 <-> pin 25\n"
+           "                Pin 25 is ground. The other pins may be left unconnected.\n");
   }
 
   return 0;

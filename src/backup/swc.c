@@ -2,7 +2,7 @@
 swc.c - Super Wild Card support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2002 dbjh
+           2001 - 2003 dbjh
                   2001 Caz
 
 
@@ -275,8 +275,8 @@ handle_fig_header (unsigned char *header)
       the first place.
     */
     header[2] = 0x04;
-  else if ((header[4] == 0xdd && header[5] == 0x02) ||
-           (header[4] == 0x00 && header[5] == 0x00))
+  else // if ((header[4] == 0xdd && header[5] == 0x02) ||
+       //     (header[4] == 0x00 && header[5] == 0x00))
     header[2] = 0;                              // 32 kB
 
   if (header[3] & 0x80)                         // Pro Fighter (FIG) HiROM dump
@@ -432,7 +432,7 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
   if ((emu_mode_select & 0x1c) == 0x0c)
     emu_mode_select |= 0x20;
 #else
-  // TODO: The code below doesn't seem to work for HiROM games. This has to be verified.
+  // TODO: The code below doesn't seem to work for some HiROM games. This has to be verified.
   if ((emu_mode_select & 0x0c) == 0x0c)         // 0x0c == no SRAM; we use the header, so
     {                                           //  that the user can override this
       if (emu_mode_select & 0x10)               // bit 4 == 1 => DRAM mode 21 (HiROM)

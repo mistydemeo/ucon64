@@ -315,8 +315,7 @@ main (int argc, char **argv)
 {
   int ucon64_argc, c = 0, result = 0, value = 0, option_index = 0;
   unsigned long padded;
-  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE],
-       src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], src_name[FILENAME_MAX];
   const char *ucon64_argv[128];
   st_rominfo_t rom;
 

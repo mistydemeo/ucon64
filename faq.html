@@ -130,6 +130,9 @@ Q36: <a href="#36">Some SNES games don't work on my Super Pro Fighter Q(+).
    and config.h.orig to config.h.<br>
    Now you can optionally open Makefile and config.h in an editor and
    change the defines.<br>
+   For DJGPP and Cygwin you should either copy the file libgcc.a to the
+   standard library directory or edit libdiscmage/Makefile so that the 
+   variable GCCA_DIR points to the directory that contains libgcc.a.<br>
    Note that if you want to enable zlib support under DOS you must define the
    constant HAVE_ZLIB_H in config.h (remove the "//" in front of the line that
    defines it) <i>and</i> ZLIB in Makefile.<br>

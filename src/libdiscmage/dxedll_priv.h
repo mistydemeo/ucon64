@@ -46,6 +46,7 @@ st_symbol_t import_export;
 #define fwrite import_export.fwrite
 #define fputc import_export.fputc
 #else
+#error currently libdiscmage must be compiled without zlib support
 #define fopen2 import_export.fopen
 #define fclose2 import_export.fclose
 #define fseek2 import_export.fseek
@@ -59,32 +60,56 @@ st_symbol_t import_export;
 
 #define ftell import_export.ftell
 #define fflush import_export.fflush
+#define rename import_export.rename
 
 #define free import_export.free
 #define malloc import_export.malloc
 #define exit import_export.exit
 #define strtol import_export.strtol
+#define getenv import_export.getenv
+#define srand import_export.srand
+#define rand import_export.rand
 
 #define memcpy import_export.memcpy
 #define memset import_export.memset
 #define strcmp import_export.strcmp
 #define strcpy import_export.strcpy
 #define strcat import_export.strcat
+#define strncat import_export.strncat
 #define strcasecmp import_export.strcasecmp
 #define strncasecmp import_export.strncasecmp
+#define strchr import_export.strchr
 #define strrchr import_export.strrchr
+#define strpbrk import_export.strpbrk
+#define strspn import_export.strspn
+#define strcspn import_export.strcspn
 
 // We have to do this, because there's also a struct stat
 // TODO?: do this for all #defines in this file.
 #define stat(FILE, STATBUF) import_export.stat(FILE, STATBUF)
 #define time import_export.time
+#define delay import_export.delay
+#define __dpmi_int import_export.__dpmi_int
+#undef  tolower
+#define tolower import_export.tolower
 
-#define basename2 import_export.basename2
-#define setext import_export.setext
+#define opendir import_export.opendir
+#define readdir import_export.readdir
+#define closedir import_export.closedir
+
+#define access import_export.access
+#define rmdir import_export.rmdir
+#define isatty import_export.isatty
+#define chdir import_export.chdir
+#define getcwd import_export.getcwd
 
 #define __dj_stdin import_export.__dj_stdin
 #define __dj_stdout import_export.__dj_stdout
 #define __dj_stderr import_export.__dj_stderr
+#define __dj_ctype_flags import_export.__dj_ctype_flags
+#define __dj_ctype_tolower import_export.__dj_ctype_tolower
+#define __dj_ctype_toupper import_export.__dj_ctype_toupper
+#define errno import_export.errno
 
 #ifdef __cplusplus
 }

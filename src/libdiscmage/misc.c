@@ -68,9 +68,14 @@ typedef struct termios tty_t;
 
 #ifdef  DJGPP
 #include <dpmi.h>                               // needed for __dpmi_int() by ansi_init()
+#ifdef  DXE
+#include "dxedll_priv.h"
+#endif
 #endif
 
+#ifndef DXE
 extern int errno;
+#endif
 
 typedef struct st_func_node
 {
@@ -86,7 +91,7 @@ static int misc_ansi_color = 0;
 static void set_tty (tty_t *param);
 #endif
 
-void deinit_conio(void);
+void deinit_conio (void);
 
 #if 0                                           // currently not used
 /*

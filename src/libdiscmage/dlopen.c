@@ -38,7 +38,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  DJGPP
 #include "dxedll_pub.h"
 #include "map.h"
-#include "misc.h"                               // basename2() and setext()
 
 
 #define INITIAL_HANDLE 1
@@ -100,31 +99,53 @@ open_module (char *module_name)
   sym->fputc = fputc;
   sym->ftell = ftell;
   sym->fflush = fflush;
+  sym->rename = rename;
 
   sym->free = free;
   sym->malloc = malloc;
   sym->exit = exit;
   sym->strtol = strtol;
+  sym->getenv = getenv;
+  sym->srand = srand;
+  sym->rand = rand;
 
   sym->memcpy = memcpy;
   sym->memset = memset;
   sym->strcmp = strcmp;
   sym->strcpy = strcpy;
   sym->strcat = strcat;
+  sym->strncat = strncat;
   sym->strcasecmp = strcasecmp;
   sym->strncasecmp = strncasecmp;
+  sym->strchr = strchr;
   sym->strrchr = strrchr;
+  sym->strpbrk = strpbrk;
+  sym->strspn = strspn;
+  sym->strcspn = strcspn;
 
   sym->stat = stat;
   sym->time = time;
+  sym->delay = delay;
+  sym->__dpmi_int = __dpmi_int;
+  sym->tolower = tolower;
   
-  sym->basename2 = basename2;
-  sym->setext = setext;
+  sym->opendir = opendir;
+  sym->readdir = readdir;
+  sym->closedir = closedir;
 
+  sym->access = access;
+  sym->rmdir = rmdir;
+  sym->isatty = isatty;  
+  sym->chdir = chdir;
+  sym->getcwd = getcwd;
+  
   // initialize variables
   sym->__dj_stdin = __dj_stdin;
   sym->__dj_stdout = __dj_stdout;
   sym->__dj_stderr = __dj_stderr;
+  sym->__dj_ctype_flags = __dj_ctype_flags;
+  sym->__dj_ctype_tolower = __dj_ctype_tolower;
+  sym->__dj_ctype_toupper = __dj_ctype_toupper;
 
   // initialize the DXE module
   sym->dxe_init ();

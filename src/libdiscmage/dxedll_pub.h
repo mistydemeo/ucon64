@@ -1,7 +1,7 @@
 /*
 dxedll_pub.h - DXE client support code
 
-written by 2002 dbjh
+written by 2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <dos.h>
+#include <ctype.h>
+#include <dpmi.h>
 
 
 #ifdef __cplusplus
@@ -60,30 +65,53 @@ typedef struct st_symbol
   int (*feof) (FILE *file);
   int (*fputc) (int character, FILE *file);
   int (*fflush) (FILE *);
+  int (*rename) (const char *, const char *);
 
   void (*free) (void *);
   void *(*malloc) (size_t);
   void (*exit) (int);
   long (*strtol) (const char *, char **, int);
+  char *(*getenv) (const char *);
+  void (*srand) (unsigned);
+  int (*rand) (void);
 
   void *(*memcpy) (void *, const void *, size_t);
   void *(*memset) (void *, int, size_t);
   int (*strcmp) (const char *, const char *);
   char *(*strcpy) (char *, const char *);
   char *(*strcat) (char *, const char *);
+  char *(*strncat) (char *, const char *, size_t);
   int (*strcasecmp) (const char *, const char *);
   int (*strncasecmp) (const char *, const char *, size_t);
+  char *(*strchr) (const char *, int);
   char *(*strrchr) (const char *, int);
+  char *(*strpbrk) (const char *, const char *);
+  size_t (*strspn) (const char *, const char *);
+  size_t (*strcspn) (const char *, const char *);
 
   int (*stat) (const char *, struct stat *);
   time_t (*time) (time_t *);
+  void (*delay) (unsigned);
+  int (*__dpmi_int) (int, __dpmi_regs *);
+  int (*tolower) (int);
   
-  char *(*basename2) (const char *);
-  char *(*setext) (char *, const char *);
+  DIR *(*opendir) (const char *);
+  struct dirent *(*readdir) (DIR *);
+  int (*closedir) (DIR *);
+  
+  int (*access) (const char *, int);
+  int (*rmdir) (const char *);
+  int (*isatty) (int);
+  int (*chdir) (const char *);
+  char *(*getcwd) (char *, size_t);
 
   // Put all variables AFTER the functions. This makes it easy to catch
   //  uninitialized function pointers.
   FILE __dj_stdin, __dj_stdout, __dj_stderr;
+  // WARNING: actually the __dj_ctype_X variables are arrays
+  unsigned short *__dj_ctype_flags;
+  unsigned char *__dj_ctype_tolower, *__dj_ctype_toupper;
+  int errno;
 } st_symbol_t;
 
 #ifdef __cplusplus

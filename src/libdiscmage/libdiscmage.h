@@ -52,9 +52,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 /* Address in MSF libdiscmage */
 struct cdrom_msf0		
 {
-	__u8	minute;
-	__u8	second;
-	__u8	frame;
+	unsigned char	minute;
+	unsigned char	second;
+	unsigned char	frame;
 };
 
 /* Address in either MSF or logical libdiscmage */
@@ -67,12 +67,12 @@ union cdrom_addr
 /* This struct is used by the CDROMPLAYMSF ioctl */ 
 struct cdrom_msf 
 {
-	__u8	cdmsf_min0;	/* start minute */
-	__u8	cdmsf_sec0;	/* start second */
-	__u8	cdmsf_frame0;	/* start frame */
-	__u8	cdmsf_min1;	/* end minute */
-	__u8	cdmsf_sec1;	/* end second */
-	__u8	cdmsf_frame1;	/* end frame */
+	unsigned char	cdmsf_min0;	/* start minute */
+	unsigned char	cdmsf_sec0;	/* start second */
+	unsigned char	cdmsf_frame0;	/* start frame */
+	unsigned char	cdmsf_min1;	/* end minute */
+	unsigned char	cdmsf_sec1;	/* end second */
+	unsigned char	cdmsf_frame1;	/* end frame */
 };
 
 

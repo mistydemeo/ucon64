@@ -53,7 +53,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 /*
-  enables/disables support for disc backups 
+  enables/disables support for DISC-based consoles
 */
 @DEFINE_LIBDISCMAGE@
 

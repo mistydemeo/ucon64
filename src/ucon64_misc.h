@@ -45,8 +45,7 @@ extern void outportw (unsigned short port, unsigned short word);
 /*
   defines for unknown backup units/emulators
 */
-typedef struct st_unknown_header
-// uses SWC/FIG header layout ("hirom", "emulation1" and "emulation2" are FIG fields)
+typedef struct //st_unknown_header
 {
 /*
   Don't create fields that are larger than one byte! For example size_low and size_high
@@ -69,11 +68,23 @@ typedef struct st_unknown_header
 #define UNKNOWN_HEADER_START 0
 #define UNKNOWN_HEADER_LEN (sizeof (st_unknown_header_t))
 extern const char *unknown_usage[];
-
-
 extern char *ucon64_temp_file;
-
 extern const char *nintendo_maker[];
+
+#if 0
+enum
+{
+  PARPORT_ERROR,
+  CONSOLE_ERROR,
+  WROTE
+};
+
+extern void ucon64_msg(int msg, ...);
+#else
+extern const char *ucon64_parport_error; // std. error message for parport
+extern const char *ucon64_console_error; // std. error message if the correct console couldn't be found
+extern void ucon64_wrote (const char *filename);
+#endif
 
 
 /*
@@ -94,16 +105,13 @@ extern unsigned int ucon64_filefile (const char *filename1, int start1, const ch
 */
 extern int ucon64_gauge (time_t init_time, int pos, int size);
 
-extern int ucon64_pad (const char *filename, int start, int size); // pad a ROM to a certain size
-extern int ucon64_testpad (const char *filename, st_rominfo_t *rominfo); // test if a ROM is padded
+extern int ucon64_pad (const char *filename, int start, int size); // pad ROM to a certain size
+extern int ucon64_testpad (const char *filename, st_rominfo_t *rominfo); // test if ROM is padded
 
-extern int ucon64_testsplit (const char *filename); // test if a ROM is split
+extern int ucon64_testsplit (const char *filename); // test if ROM is split
 
 extern unsigned int ucon64_parport_init (unsigned int parport);
-extern const char *ucon64_parport_error; // std. error message for parport
-extern const char *ucon64_console_error; // std. error message if the correct console couldn't be found
 
-extern void ucon64_wrote (const char *filename);
 
 /*
   open an archive and look for a rom; if rom found return romname else

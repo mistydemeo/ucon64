@@ -2668,7 +2668,7 @@ gbx_usage (int argc, char *argv[])
           "  -xgbxs        send/receive SRAM to/from GB Xchanger; $FILE=PORT\n"
           "                receives automatically when $ROM(=SRAM) does not exist\n"
           "  -xgbxb<n>     send/receive 64kbits SRAM to/from GB Xchanger bank n\n"
-          "                n can be a number from 1 to 16\n"
+          "                n can be a number from 0 to 15\n"
           "                $FILE=PORT; receives automatically when $ROM does not exist\n");
 
   if (verbose)

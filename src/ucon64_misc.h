@@ -84,12 +84,13 @@ unsigned long CalculateBufferCRC (unsigned int count, unsigned long crc,
 unsigned long CalculateFileCRC (FILE * file);
 unsigned long fileCRC32 (char *filename, long start);   // calculate CRC32 of filename beginning from start
 
+//ucon64 specific wrapper for misc.c/filebackup()
 char *ucon64_fbackup (char *filename);
 
-size_t filepad (char *filename, long start, long unit);
-long filetestpad (char *filename);
+size_t filepad (char *filename, long start, long unit);//pad a ROM in Mb
+long filetestpad (char *filename); //test if a ROM is padded
 
-int testsplit (char *filename);
+int testsplit (char *filename);//test if a ROM is splitted
 
 // DJGPP (DOS) has outportX() & inportX()
 #if     defined __UNIX__ || defined __BEOS__
@@ -100,7 +101,10 @@ void outportw (unsigned short port, unsigned short word);
 #endif
 
 unsigned int parport_probe (unsigned int parport);
-int parport_gauge (time_t init_time, long pos, long size);
+
+int fparport_gauge (FILE *output, time_t init_time, long pos, long size);
+#define parport_gauge(a, b, c) (fparport_gauge(frontend_file, a, b, c))
+
 int raw2iso (char *filename);
 int trackmode (long imagesize);
 

@@ -81,18 +81,18 @@ write programs in C
 #include "patch/ips.h"
 #include "patch/bsl.h"
 
-int frontend = 0;
 FILE *frontend_file;
+struct ucon64_ rom;
 
 void
 ucon64_exit (void)
 {
   printf ("+++EOF");
   fflush (stdout);
-  if (frontend)
+  if (frontend_file != stdout)
     {
       fclose (frontend_file);
-//      remove (FRONTEND_FILENAME);
+      remove (FRONTEND_FILENAME);
     }
 }
 
@@ -204,23 +204,25 @@ main (int argc, char *argv[])
       fprintf (stderr, "Could not set gid\n");
       return (1);
     }
-#endif
-
-#endif
-
+#endif // __UNIX__
+#endif // BACKUP
 
 /*
     support for frontends
 */
+
+  frontend_file = stdout;
   if (argcmp (argc, argv, "-frontend"))
     {
+/*
+  this must disappear before 1.9.8
+*/
       atexit (ucon64_exit);
 #ifndef __BEOS__ // keep behaviour like 1.9.7 under BeOS until BeOS frontend is updated
-      frontend = 1;
       // if we can't create a file to write the parport_gauge() status to, set
       // frontend to 0, so we won't accidentily write to frontend_file
       if ((frontend_file = fopen (FRONTEND_FILENAME, "wt")) == NULL)
-        frontend = 0;
+        frontend_file = stdout;
 #endif
     }
 
@@ -240,6 +242,7 @@ main (int argc, char *argv[])
     {
 /*
       strcpy (buf2, buf);
+
       newext (buf2, ".OLD");
 
       printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
@@ -263,6 +266,7 @@ main (int argc, char *argv[])
       printf ("OK\n\n");
 */
       printf("ERROR: old config file (<1.9.8) found (%s), please remove it\n", buf);
+
       return 0;
     }
 

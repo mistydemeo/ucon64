@@ -100,9 +100,11 @@ write programs in C
 static void ucon64_exit (void);
 static void ucon64_usage (int argc, char *argv[]);
 static int ucon64_execute_options (void);
+static void ucon64_dat_nfo (const ucon64_dat_t *dat);
 
 st_ucon64_t ucon64;
 static st_rominfo_t rom;
+static ucon64_dat_t ucon64_dat;
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
 static int ucon64_fsize = 0, ucon64_option = 0;
 
@@ -781,7 +783,8 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       if (rominfo->current_crc32 == 0)
         rominfo->current_crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
 
-#if 0
+      rominfo->dat = ucon64_dbsearch (rominfo->current_crc32, &ucon64_dat);
+
       switch (ucon64.console)
         {
           case UCON64_SNES:
@@ -793,12 +796,15 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
             break;
 
           default:
-            ucon64_dbsearch (rominfo);
+            if (rominfo->dat)
+              {
+                strcpy (rominfo->name, rominfo->dat->name);
+                strcpy (rominfo->fname, rominfo->dat->fname);
+                if (ucon64.console == UCON64_UNKNOWN)
+                  ucon64.console = rominfo->dat->console;
+              }
             break;
         }
-#else
-      ucon64_dbsearch (rominfo);
-#endif        
     }
   else if (UCON64_TYPE_ISCD (ucon64.type))
     {
@@ -841,6 +847,18 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 #endif
    }
   return result;
+}
+
+
+void
+ucon64_dat_nfo (const ucon64_dat_t *dat)
+{
+  printf ("DAT: %s\nDAT: %s\nDAT: Filename: %s\nDAT: Size: %d Bytes (%.4f Mb)\n",
+          dat->datfile,
+          dat->name,
+          dat->fname,
+          dat->fsize,
+          TOMBIT_F (dat->fsize));
 }
 
 
@@ -997,6 +1015,9 @@ ucon64_nfo (const st_rominfo_t *rominfo)
               printf ("%s\n", mkprint (buf, '.'));
             }
         }
+
+      if (rominfo->dat) // a dat file entry was found
+        ucon64_dat_nfo (rominfo->dat);
 
       if (rominfo->current_crc32)
         printf ("Checksum (CRC32): 0x%08x\n", rominfo->current_crc32);

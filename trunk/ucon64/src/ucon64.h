@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"                             // ANSI_COLOR
 #include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
+#include "ucon64_db.h"
 #include "misc.h"
 #include "libdiscmage/libdiscmage.h"            // dm_image_t
 
@@ -129,6 +130,7 @@ typedef struct st_rominfo
   int internal_crc2_start;                      // start of 2nd/inverse internal checksum
   int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal checksum
 //  dm_image_t *image;                         // DISC image
+  ucon64_dat_t *dat;                            // info from dat
 } st_rominfo_t;
 
 extern dm_image_t *image;

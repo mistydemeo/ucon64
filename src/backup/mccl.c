@@ -63,11 +63,11 @@ Data Read Procedure:
 #include "config.h"
 #endif
 #include <stdio.h>
-#include "misc.h"
+#include "misc/misc.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "mccl.h"
-#include "misc_par.h"
+#include "misc/parallel.h"
 
 
 const st_getopt2_t mccl_usage[] = {

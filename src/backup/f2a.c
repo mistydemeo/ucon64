@@ -40,7 +40,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <errno.h>
-#include "misc.h"
+#include "misc/misc.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
@@ -50,10 +50,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdarg.h>
 #include <sys/wait.h>
 #include <sys/utsname.h>
-#include "misc_usb.h"
+#include "misc/usb.h"
 #endif
 #ifdef  USE_PARALLEL
-#include "misc_par.h"
+#include "misc/parallel.h"
 #endif
 
 

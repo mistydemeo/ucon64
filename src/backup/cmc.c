@@ -127,8 +127,8 @@ respective owners.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include "misc.h"
-#include "misc_par.h"
+#include "misc/misc.h"
+#include "misc/parallel.h"
 #include "ucon64_misc.h"
 #include "cmc.h"
 
@@ -815,7 +815,7 @@ cyan_copy_rom (const char *filename, int speed, unsigned int parport)
 
   romsize = cyan_calculate_rom_size (buffer, 0);
 
-  printf ("Writing ROM to disk... ");
+  fputs ("Writing ROM to disk... ", stdout);
   fflush (stdout);
   if ((f = fopen (filename, "wb")) == NULL)
     {
@@ -870,7 +870,7 @@ const st_getopt2_t cmc_usage[] =
       NULL, "Cyan's Megadrive ROM copier"/*"1999-2004 Cyan Helkaraxe"*/,
       NULL
     },
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
     {
       "xcmc", 0, 0, UCON64_XCMC,
       NULL, "receive ROM from Cyan's Megadrive ROM copier; " OPTION_LONG_S "port=PORT",

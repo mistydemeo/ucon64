@@ -26,13 +26,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "misc.h"
+#include "misc/misc.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "gd.h"
 #include "console/snes.h"                       // for snes_make_gd_names() &
-#include "misc_par.h"                           //  snes_get_snes_hirom()
+#include "misc/parallel.h"                      //  snes_get_snes_hirom()
 
 
 const st_getopt2_t gd_usage[] =
@@ -42,7 +42,7 @@ const st_getopt2_t gd_usage[] =
       NULL, "Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/,
       NULL
     },
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
     {
       "xgd3", 0, 0, UCON64_XGD3, // supports split files
       NULL, "send ROM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
@@ -87,7 +87,7 @@ const st_getopt2_t gd_usage[] =
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
 
 #define BUFFERSIZE 8192
 #define GD_OK 0
@@ -266,7 +266,7 @@ gd_send_unit_prolog (int header, unsigned size)
     return GD_ERROR;
   if (gd_send_prolog_byte ((unsigned char) ((header != 0) ? 0x02 : 0x00)) == GD_ERROR)
     return GD_ERROR;
-  if (gd_send_prolog_byte ((unsigned char) (size >> 16)) == GD_ERROR) // 0x10 = 8Mbit
+  if (gd_send_prolog_byte ((unsigned char) (size >> 16)) == GD_ERROR) // 0x10 = 8 Mbit
     return GD_ERROR;
   if (gd_send_prolog_byte (0x00) == GD_ERROR)
     return GD_ERROR;
@@ -570,10 +570,10 @@ gd6_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo
 
 
 /*
-Note: On most Game Doctor's the way you enter link mode to be able to upload
-      the ROM to the unit is to hold down the R key on the controller while
-      resetting the SNES. You will see the Game Doctor menu has a message that
-      says "LINKING..."
+  Note: On most Game Doctor's the way you enter link mode to be able to upload
+        the ROM to the unit is to hold down the R key on the controller while
+        resetting the SNES. You will see the Game Doctor menu has a message that
+        says "LINKING..."
 */
 int
 gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
@@ -605,10 +605,8 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
   gd_fsize = 0;
   for (i = 0; i < num_units; i++)
     {
-      /*
-        No suffix is necessary but the name entry must be upper case and
-        MUST be 11 characters long, padded at the end with spaces if necessary.
-      */
+      // No suffix is necessary but the name entry must be upper case and MUST
+      //  be 11 characters long, padded at the end with spaces if necessary.
       memset (gd3_dram_unit[i].name, ' ', 11);  // "pad" with spaces
       gd3_dram_unit[i].name[11] = 0;            // terminate string so we can print it (debug)
       // Use memcpy() instead of strcpy() so that the string terminator in
@@ -649,7 +647,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
   free (dir);
 
   if ((buffer = (unsigned char *) malloc (8 * MBIT)) == NULL)
-    { // a DRAM unit can hold 8 MBit at maximum
+    { // a DRAM unit can hold 8 Mbit at maximum
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], 8 * MBIT);
       exit (1);
     }
@@ -685,16 +683,12 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
             }
         }
       else
-        {
-          if (file == NULL)                     // don't open the file more than once
+        if (file == NULL)                     // don't open the file more than once
+          if ((file = fopen (filename, "rb")) == NULL)
             {
-              if ((file = fopen (filename, "rb")) == NULL)
-                {
-                  fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
-                  exit (1);
-                }
+              fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
+              exit (1);
             }
-        }
 
       send_header = i == 0 ? 1 : 0;
       if (gd_send_unit_prolog (send_header, gd3_dram_unit[i].size) == GD_ERROR)
@@ -709,7 +703,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
             io_error ();
           gd_bytessend += GD_HEADER_LEN;
         }
-      if (split == 0)                           // Not pre-split -- have to split it ourself
+      if (split == 0)                           // Not pre-split -- have to split it ourselves
         {
           if (hirom)
             fseek (file, i * gd3_dram_unit[0].size + GD_HEADER_LEN, SEEK_SET);
@@ -722,7 +716,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
 
       if (split || i == num_units - 1)
         fclose (file);
-   }
+    }
 
   for (i = 0; i < num_units; i++)
     free (filenames[i]);
@@ -778,7 +772,7 @@ gd6_read_sram (const char *filename, unsigned int parport)
     the SF7. It needs to match any valid Game Doctor file name AND have an
     extension of .B## (where # is a digit from 0-9)
   */
-  strcpy ((char *) gdfilename, "SF16497 B00"); // TODO: we might need to make a GD file name from the real one
+  strcpy ((char *) gdfilename, "SF16497 B00"); // TODO: We might need to make a GD file name from the real one
   if (gd6_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
     io_error ();
 
@@ -791,7 +785,7 @@ gd6_read_sram (const char *filename, unsigned int parport)
   transfer_size = buffer[1] | (buffer[2] << 8) | (buffer[3] << 16) | (buffer[4] << 24);
   if (transfer_size != 0x8000)
     {
-      fprintf (stderr, "ERROR: SRAM transfer size from Game Doctor != 32768 bytes\n");
+      fprintf (stderr, "ERROR: SRAM transfer size from Game Doctor != 0x8000 bytes\n");
       exit (1);
     }
 
@@ -881,7 +875,7 @@ gd_write_sram (const char *filename, unsigned int parport, const char *prolog_st
     }
 
   printf ("Send: %d Bytes\n", size);
-  fseek (file, (size_t) header_size, SEEK_SET); // skip the header
+  fseek (file, header_size, SEEK_SET);          // skip the header
 
   if (memcmp (prolog_str, GD6_READ_PROLOG_STRING, 4) == 0)
     if (gd6_sync_hardware () == GD_ERROR)
@@ -903,7 +897,7 @@ gd_write_sram (const char *filename, unsigned int parport, const char *prolog_st
     the SF7. It needs to match any valid Game Doctor file name AND have an
     extension of .B## (where # is a digit from 0-9)
   */
-  strcpy ((char *) gdfilename, "SF8123  B00"); // TODO: we might need to make a GD file name from the real one
+  strcpy ((char *) gdfilename, "SF8123  B00"); // TODO: We might need to make a GD file name from the real one
   if (gd_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
     io_error ();
 
@@ -1088,7 +1082,7 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
   size = q_fsize (filename);
   if (size != 0x38000)                  // GD saver size is always 0x38000 bytes -- no header
     {
-      fputs ("ERROR: GD saver file size must be 0x38000 bytes\n", stderr);
+      fputs ("ERROR: GD saver file size must be 229376 bytes\n", stderr);
       exit (1);
     }
 
@@ -1100,7 +1094,7 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
   strupr ((char *) gdfilename);
 
   printf ("Send: %d Bytes\n", size);
-  fseek (file, (size_t) 0, SEEK_SET);
+  fseek (file, 0, SEEK_SET);
 
   if (memcmp (prolog_str, GD6_READ_PROLOG_STRING, 4) == 0)
     if (gd6_sync_hardware () == GD_ERROR)

@@ -54,7 +54,7 @@ Portions copyright (c)        2002 dbjh
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "misc.h"
+#include "misc/misc.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "patch/gg.h"

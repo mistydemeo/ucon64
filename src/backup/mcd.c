@@ -24,8 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "misc.h"
-#include "misc_par.h"
+#include "misc/misc.h"
+#include "misc/parallel.h"
 #include "ucon64_misc.h"
 #include "mcd.h"
 

@@ -30,9 +30,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"                             // USE_ANSI_COLOR
 #endif
 
-#include "getopt.h"                             // for struct option
+#include "misc/getopt.h"                        // for struct option
 #include "ucon64_defines.h"
-#include "misc.h"
+#include "misc/misc.h"
 
 
 #ifdef  USE_DISCMAGE

@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include "misc.h"
+#include "misc/misc.h"
 #include "ucon64.h"
 #ifdef  USE_DISCMAGE
 #include "ucon64_dm.h"

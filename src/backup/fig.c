@@ -27,13 +27,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include "misc.h"
+#include "misc/misc.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "ffe.h"
 #include "fig.h"
 #include "console/snes.h"                       // for snes_get_snes_hirom()
-#include "misc_par.h"
+#include "misc/parallel.h"
 
 
 const st_getopt2_t fig_usage[] =

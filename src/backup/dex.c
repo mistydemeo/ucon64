@@ -24,13 +24,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdio.h>
 #include <stdlib.h>
-#include "misc.h"
+#include "misc/misc.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "dex.h"
 #include "psxpblib.h"
-#include "misc_par.h"
+#include "misc/parallel.h"
 
 
 const st_getopt2_t dex_usage[] =

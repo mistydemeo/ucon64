@@ -40,7 +40,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
-#include "misc_chk.h"
+#include "misc/chksum.h"
 
 
 int ucon64_parport_needed = 0;

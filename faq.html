@@ -219,7 +219,7 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    &amp; zip support)<br>
    1.) Run the configure script "configure".<br>
    If you want default settings type:<br>
-  &nbsp;&nbsp; ./configure<br>
+   &nbsp;&nbsp; ./configure<br>
    Otherwise you have to pass options to the configure script. To see which
    features can be controlled with the configure script, type:<br>
    &nbsp;&nbsp; ./configure --help<br>
@@ -961,7 +961,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <p>
 <a name="33"><b>Q33</b>: How do I specify that a NES game in UNIF format
    supports multiple controller types?</a><br>
-<b>A</b>: Use the -ctrl switch multiple times on the <b>same</b> command line.
+<b>A</b>: Use the -ctrl switch multiple times on the <i>same</i> command line.
    For example, to specify that a game supports the controller types "regular
    joypad" and "power pad" you should use a command line like this:<br>
    &nbsp;&nbsp; ucon64 -unif smb.nes -mapr NROM -ctrl 0 -ctrl 4<br>
@@ -1506,7 +1506,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <b>A</b>: If you see lines in the display output of uCON64 that look like
    these:<br>
    &nbsp;&nbsp;Create: ntuser.idx<br>
-   &nbsp;&nbsp;ERROR: Can't open "C:\Documents and Settings\Daniï¿½\ntuser.dat" for reading<br>
+   &nbsp;&nbsp;ERROR: Can't open "C:\Documents and Settings\Daniël\ntuser.dat" for reading<br>
    you should modify the configuration file so that ucon64_datdir points to
    another directory.<br>
    By default uCON64 will use the home directory as the directory where it
@@ -1581,8 +1581,8 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    Afterwards you can find a file in Game Doctor format in the directory
    convert and the split parts in the directory split. Modify the scripts above
    if you want them to make uCON64 write its output to other directories. Do
-   *not* make GD3DIR or SPLITDIR point to the current directory or to your SNES
-   ROM directory as the scripts will remove all files in the directories
+   <i>not</i> make GD3DIR or SPLITDIR point to the current directory or to your
+   SNES ROM directory as the scripts will remove all files in the directories
    pointed to by GD3DIR or SPLITDIR. Starting with empty directories is the
    main reason why the scripts work (actually, this is only true for GD3DIR).<br>
 <br>

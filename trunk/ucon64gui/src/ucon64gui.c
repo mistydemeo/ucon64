@@ -73,7 +73,7 @@ ucon64_system (void)
       break;
     }
 
-  sprintf(buf2,"xterm -bg black -fg white -rightbar -title \"%s\" -e",ucon64gui.cmd);
+  sprintf(buf2,"xterm -title \"%s\" -e",ucon64gui.cmd);
 
   sprintf(buf,"%s %s",buf2,ucon64gui.cmd);
 

@@ -3,15 +3,15 @@
 @DEFINE_DLOPEN_MAKE@
 @DEFINE_ZLIB_MAKE@
 
-# Top level hierarchy
 prefix = @prefix@
 exec_prefix = @exec_prefix@
-# Pathname of directory to install the include files
 includedir = @includedir@
-# Pathname of directory to install the library
 libdir =  @libdir@
-# Pathname of directory to install the man page
-mandir = @mandir@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+#RANLIB = @RANLIB@
 
 CC=@CC@
 CFLAGS0=@CFLAGS@ @DEFS@
@@ -20,10 +20,6 @@ ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
 LDFLAGS=-s
-
-INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA = @INSTALL_DATA@
 
 LIBNAME=discmage
 OBJECTS=libdm_misc.o dllinit.o misc.o format/format.o format/cdi.o\
@@ -43,7 +39,6 @@ endif                                   # DJGPP
 endif                                   # msys
 endif                                   # cygwin
 endif                                   # ZLIB
-
 
 # The test for Cygwin should be done before the test for DJGPP, because the
 # environment variable DJGPP can be set under Bash for people who have
@@ -242,8 +237,22 @@ endif                                   # cygwin
 
 ifndef DLOPEN
 install:
-	$(LIBTOOL) --mode=install $(INSTALL) $(FULLLIBNAME) $(libdir)/$(FULLLIBNAME)
+	[ -d $(DESTDIR)$(libdir) ] || \
+	    (mkdir -p $(DESTDIR)$(libdir); chmod 755 $(DESTDIR)$(libdir))
+	$(INSTALL_DATA) $(FULLLIBNAME) $(DESTDIR)$(libdir)/$(FULLLIBNAME)
+#	$(RANLIB) $(DESTDIR)$(libdir)/$(FULLLIBNAME)
+#	$(LIBTOOL) --mode=install $(INSTALL) $(FULLLIBNAME) $(libdir)/$(FULLLIBNAME)
+	[ -d $(DESTDIR)$(includedir) ] || \
+	    (mkdir -p $(DESTDIR)$(includedir); chmod 755 $(DESTDIR)$(includedir))
+	$(INSTALL_DATA) lib$(LIBNAME).h $(DESTDIR)$(includedir)/$(LIBNAME).h
 endif
+
+ifndef DLOPEN
+uninstall:
+	rm -f $(DESTDIR)$(libdir)/$(FULLLIBNAME)
+	rm -f $(DESTDIR)$(includedir)/$(LIBNAME).h
+endif
+
 
 # Dependencies
 LIBDM_STD_H=libdiscmage.h misc.h dxedll_priv.h format/format.h

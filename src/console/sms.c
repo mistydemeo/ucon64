@@ -226,19 +226,22 @@ sms_init (st_rominfo_t *rominfo)
     {
       int size = ucon64.file_size - SMD_HEADER_LEN;
 
-      rominfo->buheader_len = SMD_HEADER_LEN;
       if (!(buffer = (unsigned char *) malloc (size)))
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
           return -1;
         }
-      q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
-      if (!(UCON64_ISSET (ucon64.interleaved) && !ucon64.interleaved))
+      q_fread (buffer, SMD_HEADER_LEN, size, ucon64.rom);
+      if (!(UCON64_ISSET (ucon64.interleaved) && !ucon64.interleaved) &&
+          !UCON64_ISSET (ucon64.do_not_calc_crc))
         {
           ucon64.fcrc32 = crc32 (0, buffer, size);
           smd_deinterleave (buffer, size);
           ucon64.crc32 = crc32 (0, buffer, size);
         }
+
+      free (buffer);
+      rominfo->buheader_len = SMD_HEADER_LEN;
       result = 0;
     }
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified

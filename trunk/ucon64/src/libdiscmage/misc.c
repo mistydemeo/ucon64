@@ -217,6 +217,10 @@ ansi_init (void)
 {
   int result = isatty (STDOUT_FILENO);
 
+#ifdef  _WIN32
+  // TODO: find out how to enable ANSI colors for the Visual C++ port
+  result = 0;
+#endif
 #ifdef  DJGPP
   if (result)
     {
@@ -1014,7 +1018,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
                   line_num);
           continue;
         }
-      (*patterns)[n_codes].wildcard = strtol (token, NULL, 16);
+      (*patterns)[n_codes].wildcard = (char) strtol (token, NULL, 16);
 
       strcpy (buffer, line);
       token = strtok (last, ":");
@@ -1027,7 +1031,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
                   line_num);
           continue;
         }
-      (*patterns)[n_codes].escape = strtol (token, NULL, 16);
+      (*patterns)[n_codes].escape = (char) strtol (token, NULL, 16);
 
       strcpy (buffer, line);
       token = strtok (last, ":");
@@ -1251,7 +1255,7 @@ gauge (time_t init_time, int pos, int size)
 }
 
 
-#ifdef __CYGWIN__
+#if     defined __CYGWIN__
 /*
   Weird problem with combination Cygwin uCON64 exe and cmd.exe (Bash is ok):
   When a string with "e (e with diaeresis, one character) is read from an
@@ -1263,16 +1267,16 @@ gauge (time_t init_time, int pos, int size)
           Windows. This problem is present under cmd.exe *and* Bash.
 */
 char *
-cygwin_fix (char *value)
+fix_character_set (char *value)
 {
   int l = strlen (value);
-
+    
   change_mem (value, l, "\x89", 1, 0, 0, "\xeb", 1, 0); // e diaeresis
   change_mem (value, l, "\x84", 1, 0, 0, "\xe4", 1, 0); // a diaeresis
   change_mem (value, l, "\x8b", 1, 0, 0, "\xef", 1, 0); // i diaeresis
   change_mem (value, l, "\x94", 1, 0, 0, "\xf6", 1, 0); // o diaeresis
   change_mem (value, l, "\x81", 1, 0, 0, "\xfc", 1, 0); // u diaeresis
-
+  
   return value;
 }
 #endif
@@ -1373,8 +1377,10 @@ getenv2 (const char *variable)
   */
   if (!strcmp (variable, "HOME") && !strcmp (value, "/"))
     getcwd (value, FILENAME_MAX);
+#endif
 
-  return cygwin_fix (value);
+#if     defined __CYGWIN__
+  return fix_character_set (value);
 #else
   return value;
 #endif
@@ -2057,10 +2063,10 @@ truncate (const char *path, off_t size)
     return -1;
 
   SetFilePointer (file, size, 0, FILE_BEGIN);
-  retval = SetEndOfFile (file); // returns nonzero on success
+  retval = SetEndOfFile (file);                 // returns nonzero on success
   CloseHandle (file);
 
-  return !retval;               // truncate returns zero on success
+  return retval ? 0 : -1;                       // truncate returns zero on success
 }
 
 

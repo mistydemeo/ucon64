@@ -112,7 +112,7 @@ typedef signed __int64 int64_t;
   #define CURRENT_OS_S "MSDOS"                  //  because DJGPP defines both
 #elif   defined __unix__
   #ifdef  __CYGWIN__
-    #define CURRENT_OS_S "Win32"
+    #define CURRENT_OS_S "Win32 (Cygwin)"
   #elif   defined __FreeBSD__
     #define CURRENT_OS_S "Unix (FreeBSD)"
   #elif   defined __linux__
@@ -199,8 +199,8 @@ extern void init_conio (void);
 extern void deinit_conio (void);
 #endif
 
-#ifdef  __CYGWIN__
-char *cygwin_fix (char *value);
+#if     defined __CYGWIN__
+char *fix_character_set (char *value);
 #endif
 
 
@@ -426,15 +426,23 @@ extern int set_property (const char *filename, const char *propname, const char 
 //  are defined in header files.
 
 #include <io.h>
+#include <direct.h>
 #include <sys/types.h>
 #include <sys/stat.h>                           // According to MSDN <sys/stat.h> must
-#include <direct.h>                             //  come after <sys/types.h>. Yep, that's M$.
-
+                                                //  come after <sys/types.h>. Yep, that's M$.
 #define S_IWUSR _S_IWRITE
 #define S_IRUSR _S_IREAD
+
+// Note that there is no space between the macro name and the opening brace.
+//  Visual C++ doesn't recognise it as a macro when a space is used...
+#define S_ISDIR(mode) ((mode) & _S_IFDIR ? 1 : 0)
+#define S_ISREG(mode) ((mode) & _S_IFREG ? 1 : 0)
+
 #define F_OK 00
 #define W_OK 02
 #define R_OK 04
+#define X_OK R_OK                               // this is correct for dirs, but not for exes
+
 #define STDIN_FILENO (fileno (stdin))
 #define STDOUT_FILENO (fileno (stdout))
 #define STDERR_FILENO (fileno (stderr))

@@ -2,7 +2,7 @@ DLOPEN=1
 #ZLIB=1
 
 CC=cl.exe
-CFLAGS=/I. /I.. /nologo /W3 /O2 /DDLL /DHAVE_CONFIG_H
+CFLAGS=/nologo /I. /I.. /W3 /O2 /DDLL /DHAVE_CONFIG_H
 # The order of . and .. is important if header files are specified between
 # angle brackets
 !ifdef DLOPEN
@@ -20,7 +20,7 @@ LIBS=
 
 
 FULLLIBNAME=$(LIBNAME).dll
-DLLFLAGS=/DLL /OUT:$(LIBNAME).dll $(OBJECTS) $(LIBS) /DEF:discmage.def
+DLLFLAGS=/NOLOGO /DLL /OUT:$(LIBNAME).dll $(OBJECTS) $(LIBS) /DEF:discmage.def
 
 
 all: $(FULLLIBNAME)
@@ -38,7 +38,7 @@ distclean: clean
 
 
 .c.obj:
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) /c $< /Fo$@
 
 
 $(LIBNAME).dll: $(OBJECTS)
@@ -51,12 +51,12 @@ $(LIBNAME).dll: $(OBJECTS)
 # Dependencies
 CONFIG_H=../config.h
 
-libdm_misc.o: libdiscmage.h misc.h dxedll_priv.h
-cdi.o: libdiscmage.h misc.h cdi.h dxedll_priv.h
-nero.o: libdiscmage.h misc.h $(CONFIG_H) nero.h cdi.h dxedll_priv.h
-sheets.o: libdiscmage.h misc.h dxedll_priv.h
-dllinit.o: libdiscmage.h misc.h dxedll_priv.h
-misc.o: misc.h dxedll_priv.h
-dxe_misc.o: $(CONFIG_H) dxedll_pub.h
-djimport.o: libdiscmage.h dlopen.h dxedll_pub.h
-dlopen.o: $(CONFIG_H) dlopen.h dxedll_pub.h
+libdm_misc.obj: libdiscmage.h misc.h dxedll_priv.h
+cdi.obj: libdiscmage.h misc.h cdi.h dxedll_priv.h
+nero.obj: libdiscmage.h misc.h $(CONFIG_H) nero.h cdi.h dxedll_priv.h
+sheets.obj: libdiscmage.h misc.h dxedll_priv.h
+dllinit.obj: libdiscmage.h misc.h dxedll_priv.h
+misc.obj: misc.h dxedll_priv.h
+dxe_misc.obj: $(CONFIG_H) dxedll_pub.h
+djimport.obj: libdiscmage.h dlopen.h dxedll_pub.h
+dlopen.obj: $(CONFIG_H) dlopen.h dxedll_pub.h

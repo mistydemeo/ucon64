@@ -291,7 +291,7 @@ CartTypeDetect (void)
       type = 0xdc;
       break;
     case 0x2e:                 // Standard ROM
-      type = Manuf;
+      type = (u8) Manuf;
       break;
     case 0x89:                 // Intel chips
       switch (Device)
@@ -299,7 +299,7 @@ CartTypeDetect (void)
         case 0x16:             // i28F320J3A
         case 0x17:             // i28F640J3A
         case 0x18:             // i28F128J3A
-          type = Device;
+          type = (u8) Device;
           break;
         default:
           // Check to see if this is a Visoly "Turbo" cart
@@ -318,7 +318,7 @@ CartTypeDetect (void)
       switch (Device)
         {
         case 0xe2:
-          type = Device;
+          type = (u8) Device;
           break;
         }
       break;
@@ -339,7 +339,7 @@ EraseNintendoFlashBlocks (u32 StartAddr, u32 BlockCount)
   int j, k;
   time_t starttime = time (NULL);
 
-  for (k = 0; k < BlockCount; k++)
+  for (k = 0; k < (int) BlockCount; k++)
     {
       i = StartAddr + (k * 32768 * _MEM_INC);
 
@@ -554,7 +554,7 @@ WriteNintendoFlashCart (u32 SrcAddr, u32 FlashAddr, u32 Length)
   int j;
   int LoopCount = 0;
 
-  while (LoopCount < Length)
+  while (LoopCount < (int) Length)
     {
       do
         {
@@ -592,7 +592,7 @@ WriteNonTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
   int Timeout = 0;
   int LoopCount = 0;
 
-  while (LoopCount < Length)
+  while (LoopCount < (int) Length)
     {
       Ready = 0;
       Timeout = FP_TIMEOUT1;
@@ -678,7 +678,7 @@ WriteTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
   int Ready = 0;
   int LoopCount = 0;
 
-  while (LoopCount < Length)
+  while (LoopCount < (int) Length)
     {
       done1 = 0;
       done2 = 0;

@@ -448,7 +448,7 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
   starttime = time (NULL);                      //  but then some ROMs don't work
   while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
     {
-      ffe_send_command0 (0xc010, blocksdone >> 9);
+      ffe_send_command0 ((unsigned short) 0xc010, (unsigned char) (blocksdone >> 9));
       ffe_send_command (5, address, 0);
       ffe_send_block (0x8000, buffer, bytesread);
       address++;
@@ -464,12 +464,13 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
 
   ffe_send_command (5, 0, 0);
   totalblocks = (fsize - SWC_HEADER_LEN + BUFFERSIZE - 1) / BUFFERSIZE; // round up
-  ffe_send_command (6, 5 | (totalblocks << 8), totalblocks >> 8); // bytes: 6, 5, #8 K L, #8 K H, 0
-  ffe_send_command (6, 1 | (emu_mode_select << 8), enableRTS); // last arg = 1 enables RTS
+  ffe_send_command (6, (unsigned short) (5 | (totalblocks << 8)), (unsigned short) (totalblocks >> 8)); // bytes: 6, 5, #8 K L, #8 K H, 0
+  ffe_send_command (6, (unsigned short) (1 | (emu_mode_select << 8)), (unsigned short) enableRTS); // last arg = 1 enables RTS
                                                                //  mode, 0 disables it
   ffe_wait_for_ready ();
-  outportb (parport + PARPORT_DATA, 0);
-  outportb (parport + PARPORT_CONTROL, inportb (parport + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
+  outportb ((unsigned short) (parport + PARPORT_DATA), 0);
+  outportb ((unsigned short) (parport + PARPORT_CONTROL),
+            inportb ((unsigned short) (parport + PARPORT_CONTROL)) ^ STROBE_BIT); // invert strobe
 
   free (buffer);
   fclose (file);

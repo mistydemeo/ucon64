@@ -575,7 +575,7 @@ reset_header (void *header)
   if (nsrt_header)
     {
       memset (header, 0, 0x1d0);
-      memset (header + 0x1f0, 0, 16);
+      memset ((unsigned char *) header + 0x1f0, 0, 16);
       ((unsigned char *) header)[0x1ec] = NSRT_HEADER_VERSION;
       set_nsrt_checksum (header);
     }
@@ -793,7 +793,7 @@ snes_mgd (st_rominfo_t *rominfo)
   mgh[1] = 'G';
   mgh[2] = 'H';
   mgh[3] = 0x1a;
-  mgh[31] = 0xff;
+  mgh[31] = (unsigned char) 0xff;
   memcpy (&mgh[16], dest_name, strlen (dest_name));
 
   set_suffix (dest_name, ".078");
@@ -940,11 +940,11 @@ snes_gd3 (st_rominfo_t *rominfo)
       memcpy (header, "GAME DOCTOR SF 3", 0x10);
 
       if (snes_sramsize == 8 * 1024)
-        header[0x10] = 0x81;                    // 64 kb
+        header[0x10] = (unsigned char) 0x81;    // 64 kb
       else if (snes_sramsize == 2 * 1024)
-        header[0x10] = 0x82;                    // 16 kb
+        header[0x10] = (unsigned char) 0x82;    // 16 kb
       else
-        header[0x10] = 0x80;                    // 0 kb or 256 kb
+        header[0x10] = (unsigned char) 0x80;    // 0 kb or 256 kb
 
       if (total4Mbparts == 5)
         total4Mbparts = 6;                      // 20 Mbit HiROMs get padded to 24 Mbit
@@ -1037,11 +1037,11 @@ snes_gd3 (st_rominfo_t *rominfo)
       memcpy (header, "GAME DOCTOR SF 3", 0x10);
 
       if (snes_sramsize == 8 * 1024)
-        header[0x10] = 0x81;                    // 64 kb
+        header[0x10] = (unsigned char) 0x81;    // 64 kb
       else if (snes_sramsize == 2 * 1024)
-        header[0x10] = 0x82;                    // 16 kb
+        header[0x10] = (unsigned char) 0x82;    // 16 kb
       else
-        header[0x10] = 0x80;                    // 0 kb or 256 kb
+        header[0x10] = (unsigned char) 0x80;    // 0 kb or 256 kb
 
       if (total4Mbparts <= 1)
         memcpy (&header[0x11], gd3_lorom_4mb_map, GD3_HEADER_MAPSIZE);
@@ -2519,7 +2519,7 @@ snes_init (st_rominfo_t *rominfo)
     name (including DeJap's ToP patch).
   */
   x = SNES_HEADER_START + SNES_HIROM + 0x400000;
-  if (size > x + SNES_HEADER_LEN)
+  if (size > x + (int) SNES_HEADER_LEN)
     if (!memcmp(rom_buffer + x + 16, "DAIKAIJYUMONOGATARI2", 20) || // yes, kaijYu
         !memcmp(rom_buffer + x + 16, "TALES OF PHANTASIA", 18) ||
         !memcmp(rom_buffer + x + 16, "ToP ", 4))
@@ -2807,7 +2807,7 @@ snes_bs_name (void)
   for (n = 0; n < 16; n++)
     {
       value = snes_header.name[n];
-      if (check_char (value) != 0)
+      if (check_char ((unsigned char) value) != 0)
         {
           value = snes_header.name[n + 1];
           if (value < 0x20)

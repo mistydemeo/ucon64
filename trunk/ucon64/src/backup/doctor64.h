@@ -22,10 +22,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define DOCTOR64_H
 
 #ifdef PARALLEL
-extern int doctor64_read (const char *filename, unsigned int parport);
 
-extern int doctor64_write (const char *filename, long start, long len,
-                    unsigned int parport);
+extern int doctor64_read (const char *filename, unsigned int parport);
+extern int doctor64_write (const char *filename, int start, int len, unsigned int parport);
 
 #endif // PARALLEL
 

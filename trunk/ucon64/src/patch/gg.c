@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.33 2003-03-25 18:04:22 noisyb Exp $
+ * $Id: gg.c,v 1.34 2003-03-29 01:42:26 dbjh Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -273,7 +273,7 @@ gameGenieDecodeGameBoy (const char *in, char *out)
     haveCheck = 0;
   else
     return -1;
-  for (i = 0; i < strlen (in); ++i)
+  for (i = 0; i < (int) strlen (in); ++i)
     if (in[i] != '-' && !isxdigit ((int) in[i]))
       return -1;
   if (hexValue (in[6]) < 8)
@@ -312,7 +312,7 @@ gameGenieEncodeGameBoy (const char *in, char *out)
     haveCheck = 0;
   else
     return -1;
-  for (i = 0; i < strlen (in); ++i)
+  for (i = 0; i < (int) strlen (in); ++i)
     if (in[i] != ':' && !isxdigit ((int) in[i]))
       return -1;
   if (hexValue (in[0]) > 7)
@@ -572,7 +572,7 @@ gameGenieDecodeNES (const char *in, char *out)
     haveCheck = 0;
   else
     return -1;
-  for (i = 0; i < strlen (in); ++i)
+  for (i = 0; i < (int) strlen (in); ++i)
     if (!isNesChar (in[i]))
       return -1;
 
@@ -636,7 +636,7 @@ gameGenieEncodeNES (const char *in, char *out)
     haveCheck = 0;
   else
     return -1;
-  for (i = 0; i < strlen (in); ++i)
+  for (i = 0; i < (int) strlen (in); ++i)
     if (in[i] != ':' && !isxdigit ((int) in[i]))
       return -1;
 

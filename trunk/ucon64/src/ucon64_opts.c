@@ -117,6 +117,8 @@ ucon64_switches (int c, const char *optarg)
         "discmage.dxe";
 #elif   defined __CYGWIN__
         "discmage.dll";
+#elif   defined _WIN32
+        "discmage.dll";
 #elif   defined __unix__ || defined __BEOS__
         "libdiscmage.so";
 #else
@@ -128,9 +130,9 @@ ucon64_switches (int c, const char *optarg)
               "endianess:                         %s\n"
               "debug:                             %s\n"
               "parallel port backup unit support: %s\n"
-              "ANSI color enabled:                %s\n"
+              "ANSI colors enabled:               %s\n"
               "gzip and zip support:              %s\n"
-              "configuration file:                %s\n"
+              "configuration file %s   %s\n"
               DISCMAGE_STATUS_MSG
               "discmage enabled:                  %s\n"
               "configuration directory:           %s\n"
@@ -144,7 +146,8 @@ ucon64_switches (int c, const char *optarg)
               PARALLEL_STATUS,
               ANSI_COLOR_STATUS,
               ZLIB_STATUS,
-              ucon64.configfile,
+              // display the existence only for the config file (really helps solving problems)
+              access (ucon64.configfile, F_OK) ? "(exists not):" : "(exists):    ", ucon64.configfile,
               ptr,
               ucon64.discmage_enabled ? "yes" : "no",
               ucon64.configdir,
@@ -153,6 +156,7 @@ ucon64_switches (int c, const char *optarg)
               ucon64.dat_enabled ? "yes" : "no"
       );
       exit (0);
+      break;
 
     case UCON64_FRONTEND:
       ucon64.frontend = 1;                      // used by ucon64_gauge()
@@ -666,7 +670,6 @@ ucon64_options (int c, const char *optarg)
       ucon64_file_handler (dest_name, src_name, 0);
 
       q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb");
-
       if (truncate2 (dest_name, ucon64.file_size + (MBIT - ((ucon64.file_size - value) % MBIT))) == -1)
         {
           fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
@@ -822,9 +825,8 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_LSV:
       if (ucon64.rominfo)
-        ucon64_nfo();
+        ucon64_nfo ();
       break;
-
 
     case UCON64_LS:
       if (ucon64.rominfo)
@@ -952,6 +954,7 @@ ucon64_options (int c, const char *optarg)
             printf (ucon64_msg[DAT_NOT_ENABLED]);
           break;
         }
+
     case UCON64_DBV:
       if (ucon64.dat_enabled)
         {

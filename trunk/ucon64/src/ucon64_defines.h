@@ -27,7 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   maximum # of arguments uCON64 takes
   (DEBUG checks this against struct option)
 */
-#define UCON64_MAX_ARGS (0xff)
+#define UCON64_MAX_ARGS (255)
 
 #define UCON64_UNKNOWN (-1)
 #define UCON64_UNKNOWN_S "Unknown"
@@ -47,19 +47,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define MAXROMSIZE ((512 * MBIT) + 1)
 
-
 #define UCON64_OPTION (1000)
 #define UCON64_CONSOLE (0)
-
-// Keep these (libdiscmage) options separate
-#define UCON64_DISC (UCON64_OPTION + 269)
-#define UCON64_MKCUE (UCON64_OPTION + 272)
-#define UCON64_MKSHEET (UCON64_OPTION + 273)
-#define UCON64_MKTOC (UCON64_OPTION + 274)
-#define UCON64_RIP (UCON64_OPTION + 275)
-#define UCON64_BIN2ISO (UCON64_OPTION + 276)
-#define UCON64_ISOFIX (UCON64_OPTION + 277)
-#define UCON64_XCDRW (UCON64_OPTION + 278)
 
 // options (consoles)
 #define UCON64_3DO (UCON64_CONSOLE + 1)
@@ -91,7 +80,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_VBOY (UCON64_CONSOLE + 27)
 #define UCON64_VEC (UCON64_CONSOLE + 28)
 #define UCON64_XBOX (UCON64_CONSOLE + 29)
-
 
 // options
 #define UCON64_1991 (UCON64_OPTION + 1)
@@ -257,5 +245,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define UCON64_83 (UCON64_OPTION + 173)
 #define UCON64_FORCE63 (UCON64_OPTION + 174)
+
+// Keep these (libdiscmage) options separate
+#define UCON64_DISC (UCON64_OPTION + 269)
+#define UCON64_MKCUE (UCON64_OPTION + 272)
+#define UCON64_MKSHEET (UCON64_OPTION + 273)
+#define UCON64_MKTOC (UCON64_OPTION + 274)
+#define UCON64_RIP (UCON64_OPTION + 275)
+#define UCON64_BIN2ISO (UCON64_OPTION + 276)
+#define UCON64_ISOFIX (UCON64_OPTION + 277)
+#define UCON64_XCDRW (UCON64_OPTION + 278)
 
 #endif // UCON64_DEFINES_H

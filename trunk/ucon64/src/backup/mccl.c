@@ -85,9 +85,9 @@ static char *mccl_argv[128];
 #endif
 static int lptbase;
 
-#define DATA	lptbase+0
-#define STATUS	lptbase+1
-#define CONTROL lptbase+2
+#define DATA ((unsigned short) (lptbase + 0))
+#define STATUS ((unsigned short) (lptbase + 1))
+#define CONTROL ((unsigned short) (lptbase + 2))
 
 unsigned char buffer[0x1760];
 

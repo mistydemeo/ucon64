@@ -158,7 +158,7 @@ parse_input (FILE *fh, char *ip)
               memset (ip + fields[i].pos, ' ', fields[i].len);
               while (*p == ' ' || *p == '\t')
                 p++;
-              if (strlen (p) > fields[i].len)
+              if ((int) strlen (p) > fields[i].len)
                 {
                   fprintf (stderr, "Data for field \"%s\" is too long.\n",
                            fields[i].name);

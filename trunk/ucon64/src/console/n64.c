@@ -369,8 +369,8 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
 int
 n64_init (st_rominfo_t *rominfo)
 {
-  int result = -1;
-  long x, value = 0;
+  int result = -1, x;
+  unsigned int value = 0;
   char buf[MAXBUFSIZE];
 #define N64_MAKER_MAX 0x50
   const char *n64_maker[N64_MAKER_MAX] = {

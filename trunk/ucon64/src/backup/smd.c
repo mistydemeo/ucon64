@@ -110,7 +110,7 @@ smd_read_rom (const char *filename, unsigned int parport)
   starttime = time (NULL);
   while (blocksleft > 0)
     {
-      ffe_send_command (5, blocksdone, 0);
+      ffe_send_command (5, (unsigned short) blocksdone, 0);
       ffe_receive_block (0x4000, buffer, BUFFERSIZE);
       blocksdone++;
       blocksleft--;
@@ -164,7 +164,7 @@ smd_write_rom (const char *filename, unsigned int parport)
   starttime = time (NULL);
   while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
     {
-      ffe_send_command (5, blocksdone, 0);
+      ffe_send_command (5, (unsigned short) blocksdone, 0);
       ffe_send_block (0x8000, buffer, bytesread);
       blocksdone++;
 
@@ -174,7 +174,7 @@ smd_write_rom (const char *filename, unsigned int parport)
     }
 
   // ROM dump > 128 16 KB blocks? (=16 Mb (=2 MB))
-  ffe_send_command0 (0x2001, blocksdone > 0x80 ? 7 : 3);
+  ffe_send_command0 (0x2001, (unsigned char) (blocksdone > 0x80 ? 7 : 3));
 
   free (buffer);
   fclose (file);

@@ -27,6 +27,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/stat.h>
 #include <time.h>
 #include <stdlib.h>
+#ifdef  _WIN32
+#include <windows.h>
+#endif
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
@@ -40,10 +43,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 typedef struct
 {
-  const char *id;                              // string to detect console from datfile name
+  const char *id;                               // string to detect console from datfile name
   int (*compare) (const void *a, const void *b); // the function which compares the id with the filename
-     // compare() == 0 means success
-  int8_t console;                              // UCON64_SNES, UCON64_NES, etc.
+                                                // compare() == 0 means success
+  int8_t console;                               // UCON64_SNES, UCON64_NES, etc.
   const st_usage_t *console_usage;
 } st_console_t;
 
@@ -53,7 +56,11 @@ typedef struct
   long filepos;
 } st_idx_entry_t;
 
+#ifndef _WIN32
 static DIR *ddat = NULL;
+#else
+static HANDLE ddat = NULL;
+#endif
 static FILE *fdat = NULL;
 static long filepos_line = 0;
 static int warning = 0;                         // show the warning only once when indexing
@@ -122,7 +129,11 @@ static void
 closedir_ddat (void)
 {
   if (ddat)
+#ifndef _WIN32
     closedir (ddat);
+#else
+    FindClose (ddat);
+#endif  
   ddat = NULL;
 }
 
@@ -162,6 +173,7 @@ custom_stricmp (const void *a, const void *b)
 static char *
 get_next_file (char *fname)
 {
+#ifndef _WIN32
   struct dirent *ep;
 
   if (!ddat)
@@ -170,15 +182,39 @@ get_next_file (char *fname)
         fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.datdir);
         return NULL;
       }
-
   while ((ep = readdir (ddat)) != NULL)
     if (!stricmp (get_suffix (ep->d_name), ".dat"))
       {
-        sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir,
-                 ep->d_name);
+        sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, ep->d_name);
         return fname;
       }
+#else
+  char search_pattern[FILENAME_MAX];
+  WIN32_FIND_DATA find_data;
 
+  if (!ddat)
+    {
+      sprintf (search_pattern, "%s" FILE_SEPARATOR_S "*", ucon64.datdir);
+      if ((ddat = FindFirstFile (search_pattern, &find_data)) == INVALID_HANDLE_VALUE)
+        {
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.datdir);
+          return NULL;
+        }
+      else if (!stricmp (get_suffix (find_data.cFileName), ".dat"))
+        {
+          sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
+          return fname;
+        }
+    }
+  while (FindNextFile (ddat, &find_data))
+    {
+      if (!stricmp (get_suffix (find_data.cFileName), ".dat"))
+        {
+          sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
+          return fname;
+        }
+    }
+#endif
   closedir_ddat ();
   return NULL;
 }
@@ -309,6 +345,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 {
   static const char *dat_country[] = {
     "(1) Japan & Korea",
+    "(4) U.S.A. & Brazil NTSC",
     "(A) Australia",
     "(B) non U.S.A. (Genesis)",
     "(C) China",
@@ -319,21 +356,20 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     "(G) Germany",
     "(GR) Greece",
     "(HK) Hong Kong",
-    "(4) U.S.A. & Brazil NTSC",
+    "(I) Italy",
     "(J) Japan",
+    "(JE) Japan & Europe",
+    "(JU) Japan & U.S.A.",
+    "(JUE) Japan, U.S.A. & Europe",
     "(K) Korea",
     "(NL) Netherlands",
     "(PD) Public Domain",
     "(S) Spain",
     "(SW) Sweden",
     "(U) U.S.A.",
+    "(UE) U.S.A. & Europe",
     "(UK) England",
     "(Unk) Unknown Country",
-    "(I) Italy",
-    "(JE) Japan & Europe",
-    "(JU) Japan & U.S.A.",
-    "(JUE) Japan, U.S.A. & Europe",
-    "(UE) U.S.A. & Europe",
     NULL
   };
   unsigned char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE],
@@ -470,8 +506,7 @@ ucon64_dat_view (int console, int verbose)
 {
   char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX], *fname, *p;
   static st_ucon64_dat_t dat;
-  uint32_t n_entries, n_entries_sum = 0, n_datfiles = 0;
-  int n, fsize;
+  int n, fsize, n_entries, n_entries_sum = 0, n_datfiles = 0;
   st_idx_entry_t *idx_entry;
 
   while (get_next_file (fname_dat))
@@ -572,8 +607,8 @@ idx_compare (const void *key, const void *found)
       return ((st_idx_entry_t *) key)->crc32 - ((st_idx_entry_t *) found)->crc32;
     does *not* work correctly for all cases.
   */
-  return ((int64_t) ((st_idx_entry_t *) key)->crc32 -
-          (int64_t) ((st_idx_entry_t *) found)->crc32) / 2;
+  return (int) (((int64_t) ((st_idx_entry_t *) key)->crc32 -
+                 (int64_t) ((st_idx_entry_t *) found)->crc32) / 2);
 }
 
 
@@ -582,7 +617,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
 {
   char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX], *fname;
   unsigned char *p = NULL;
-  uint32_t fsize = 0;
+  int32_t fsize = 0;
   st_idx_entry_t *idx_entry, key;
   static st_ucon64_dat_t dat;
   st_ucon64_dat_t *dat_p = NULL;
@@ -660,9 +695,8 @@ ucon64_dat_indexer (void)
   struct stat fstate_dat, fstate_index;
   st_ucon64_dat_t dat;
   FILE *errorfile;
-  uint32_t size = 0, pos;
   time_t start_time = 0;
-  int update = 0, n_duplicates, n;
+  int update = 0, n_duplicates, n, size = 0, pos;
   st_idx_entry_t *idx_entries, *idx_entry;
 
   warning = 0; // enable warning again for DATs with unrecognized console systems
@@ -759,15 +793,18 @@ ucon64_dat_indexer (void)
         }
       fclose_fdat ();
 
-      qsort (idx_entries, pos, sizeof (st_idx_entry_t), idx_compare);
-      if (q_fwrite (idx_entries, 0, pos * sizeof (st_idx_entry_t), fname_index, "wb")
-          != pos * sizeof (st_idx_entry_t))
+      if (pos > 0)
         {
-          fputc ('\n', stderr);
-          fprintf (stderr, ucon64_msg[WRITE_ERROR], fname_index);
+          qsort (idx_entries, pos, sizeof (st_idx_entry_t), idx_compare);
+          if (q_fwrite (idx_entries, 0, pos * sizeof (st_idx_entry_t), fname_index, "wb")
+              != (int) (pos * sizeof (st_idx_entry_t)))
+            {
+              fputc ('\n', stderr);
+              fprintf (stderr, ucon64_msg[WRITE_ERROR], fname_index);
+            }
+          ucon64_gauge (start_time, size, size);
         }
 
-      ucon64_gauge (start_time, size, size);
       if (n_duplicates > 0)
         printf ("\n"
                 "\n"
@@ -781,7 +818,6 @@ ucon64_dat_indexer (void)
         }
       printf ("\n\n");
     }
-// stats
   free (idx_entries);
 
   return 0;

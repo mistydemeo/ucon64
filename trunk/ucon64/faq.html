@@ -140,6 +140,8 @@ Q47: <a href="#47">I use Windows XP (NT/2000) and every time I run uCON64 I get
 Q48: <a href="#48">Is there any way to make uCON64 convert a ROM dump to Game
    Doctor SF3/SF6/SF7 format and split it, in one command?</a><br>
 <br>
+Q49: <a href="#49">How do I use the command line?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -414,7 +416,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    from people who were able to send and receive ROMs under Windows&nbsp;XP as
    a regular user (no Administrator rights and not "Power Users").<br>
 <br>
-   The command line environment<br>
+<a name="cmdline">The command line environment<br></a>
    uCON64 is a command line program and is usually started from a program like
    command.com (Windows&nbsp;9x/ME) or cmd.exe (Windows&nbsp;NT/2000/XP). You
    can start command.com or cmd.exe by choosing the option "Run..." from the
@@ -442,10 +444,13 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    On Windows&nbsp;XP (NT/2000?) you should press the buttons or icons start
    -&#62; Control Panel -&#62; System -&#62; Advanced -&#62; Environment
    Variables and edit the value of path in the section System variables or
-   else in the section User variables.
+   else in the section User variables. You have to start a new instance of
+   cmd.exe before the changes take effect.
    After you have made your changes (and have rebooted your PC if you are using
    Windows&nbsp;9x/ME or DOS) check the value of PATH again. It should now list
    the directory you just added.<br>
+   For information on how to use the command line see
+   <a href="#49">question 49</a>.<br>
 <br>
 <a name="configbin"><b>How to configure the uCON64 executable</b></a><br>
    First run uCON64 once. Use a command like:<br>
@@ -1581,6 +1586,138 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    ROM directory as the scripts will remove all files in the directories
    pointed to by GD3DIR or SPLITDIR. Starting with empty directories is the
    main reason why the scripts work (actually, this is only true for GD3DIR).<br>
+<br>
+<p>
+<a name="49"><b>Q49</b>: How do I use the command line?</a><br>
+<b>A</b>: There are some commands that are very common when using uCON64. I
+   will only explain how to use those. Search the internet if you want to know
+   more.<br>
+   First read the section <a href="#cmdline">"The command line
+   environment"</a>.
+   The first principle you should understand is how the space on your
+   harddisk(s) is organised. Before an operating system is able to use the
+   harddisk it needs to have a <i>file system</i>. A harddisk can contain
+   several file systems. When you are using DOS or Windows each file system is
+   called a "<i>drive</i>" and gets assigned a drive letter. A file system can
+   store files and <i>directories</i>. Directories can be seen as special files
+   that themselves "contain" files and directories. By using directories it is
+   possible to quickly oversee the structure of a file system and keep it
+   organised. Under GNU/Linux file systems are visible in the directory
+   structure (e.g. /mnt/windows). With Windows XP it is possible to make
+   file systems visible/accessible in the same manner.<br>
+   When using the command line there is something called the <i>current
+   directory</i>.
+   The current directory is like an implicit directory. Several commands and
+   programs use the current directory when a directory is not explicitly
+   specified. For example, the command <b>dir</b> (Unix: <b>ls</b>) lists the
+   contents of a directory. When you do not specify a directory it will list
+   the contents of the current directory. You can change the current directory
+   with the command <b>cd</b>. For example, to change the current directory to
+   "roms" on drive C: type:<br>
+   &nbsp;&nbsp;cd c:\roms<br>
+   On DOS and Windows there is also a <i>current drive</i>. You can change the
+   current drive by specifying the drive letter followed by a colon. For
+   example to change the current drive to D: type:<br>
+   &nbsp;&nbsp;d:<br>
+   Under DOS and Windows the current directory is a bit different than it is on
+   Unix: each drive has its own current directory. It is possible to change the
+   current directory of a drive while the current directory of the current
+   drive is not changed. The first example with <b>cd</b> does just that when
+   C: is not the current drive. When C: was the current drive you would not
+   have to specify the drive letter as the command line interpreter would
+   assume you intended to change the current directory of C:. When a text
+   refers to the current directory under DOS and Windows the author usually
+   means the combination of current drive and current directory. In other
+   words, when directed to change the current directory to c:\ucon64 you
+   actually have to change the current drive to C: and the current directory on
+   C: to ucon64.<br>
+   Lets assume you have the following directory structure:<br>
+   &nbsp;&nbsp;C:<br>
+   &nbsp;&nbsp;+--roms<br>
+   &nbsp;&nbsp;|&nbsp;+--snes<br>
+   &nbsp;&nbsp;|&nbsp;|&nbsp;+--gd3<br>
+   &nbsp;&nbsp;|&nbsp;+--n64<br>
+   &nbsp;&nbsp;+--tmp<br>
+   &nbsp;&nbsp;D:<br>
+   &nbsp;&nbsp;+--roms<br>
+   &nbsp;&nbsp;&nbsp;&nbsp;+--sms<br>
+   To change the current directory (of drive C:) to c:\roms\snes\gd3 type:<br>
+   &nbsp;&nbsp;cd c:\roms\snes\gd3<br>
+   You can see that each directory is separated from its parent by a backslash
+   ('\'). Under Unix (or Bash under Windows) you would refer to the same
+   directory by replacing the backslashes with forward slashes and perhaps
+   replacing "c:" with the appropriate mount point (e.g.,
+   /mnt/windows/roms/snes/gd3). Note that "c:" is a valid directory name on a
+   GNU/Linux file system.<br>
+   You can refer to the other directories (and files) in a relative manner. Say
+   c:\roms\snes contains the file
+   Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc. You can make uCON64 display
+   information about that file with:<br>
+   &nbsp;&nbsp;ucon64 "c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc"<br>
+   but also with:<br>
+   &nbsp;&nbsp;ucon64 "..\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc"<br>
+   The quotes are necessary or else uCON64 would handle Secret, of, Mana and
+   (U).swc as separate files. This is usual behaviour for command line
+   programs, it is not specific to uCON64.<br>
+   ".." is a special directory. Each directory contains two special
+   directories, "." and "..". "." refers to the current directory, ".." to the
+   directory one level higher in the directory structure. For example, to see
+   the contents of the directory "roms" you could type:<br>
+   &nbsp;&nbsp;dir c:\roms<br>
+   but also:<br>
+   &nbsp;&nbsp;dir ..\..<br>
+   Or on Unix:<br>
+   &nbsp;&nbsp;ls ../..<br>
+   c:\roms\snes is called a <i>path</i>. To be more specific an <i>absolute
+   path</i>. It is the path to follow in the directory structure to get to the
+   file Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc. "..\.." is a <i>relative
+   path</i>. In c:\roms\snes "..\.." refers to another directory than in
+   c:\roms\snes\gd3 (c:\ and c:\roms repectively). To change the current
+   directory to c:\roms\snes type:<br>
+   &nbsp;&nbsp;cd ..<br>
+   Say you want to convert Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc to
+   Game Doctor format, place the converted file in c:\roms\snes\gd3, split that
+   file in pieces, place those pieces in c:\tmp and transfer the pieces to a
+   Game Doctor SF7. You could type the following commands:<br>
+   &nbsp;&nbsp;ucon64 -gd3 "Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc" -o .\gd3<br>
+   &nbsp;&nbsp;ucon64 -s gd3\sf16Sec -o c:\tmp<br>
+   &nbsp;&nbsp;ucon64 -xgd3 ..\..\tmp\SF16SECA.078<br>
+<br>
+   Besides <b>dir</b> (Unix: <b>ls</b>) and <b>cd</b> there are some other
+   commands that you may find useful:<br>
+   <b>del</b> (Unix: <b>rm</b>) to delete or remove a file<br>
+   <b>xcopy</b> (Unix: <b>cp</b>) to copy a file<br>
+   <b>md</b> (Unix (and Windows): <b>mkdir</b>) to create a directory<br>
+   <b>rd</b> (Unix (and Windows): <b>rmdir</b>) to remove a directory<br>
+   <b>set</b> (Unix (Bash): export) to set (and export) an environment
+   variable<br>
+   <b>rmdir</b> cannot remove a directory if there are still files (or
+   directories) in it. Under DOS and Windows you can get more information about
+   these commands by using the option /?. Under Unix the equivalent is --help.
+   For example, if you want to get more information about <b>del</b> you could
+   type:<br>
+   &nbsp;&nbsp;del /?<br>
+<br>
+   Here follows a final example that uses the commands mentioned above:<br>
+   &nbsp;&nbsp;cd \<br>
+   &nbsp;&nbsp;md test<br>
+   &nbsp;&nbsp;cd test<br>
+   &nbsp;&nbsp;xcopy "c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc" mana.swc<br>
+   &nbsp;&nbsp;set parport=378<br>
+   &nbsp;&nbsp;ucon64 -xswc mana.swc<br>
+   &nbsp;&nbsp;del mana.swc<br>
+   &nbsp;&nbsp;cd ..<br>
+   &nbsp;&nbsp;rd test<br>
+<br>
+   First the current directory is changed to c:\. Then the directory "test" is
+   created. Then the current directory is changed to "test". Then the file
+   c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc is copied to the file
+   mana.swc. Then an evironment variable with the name parport is set to the
+   value 378. Then uCON64 is used to transfer mana.swc to a Super Wild Card
+   while using parallel port address 0x378. Then the file mana.swc is removed.
+   Finally the directory "test" is removed.
+<br>
+<p>
 <br>
 <br>
 <br>

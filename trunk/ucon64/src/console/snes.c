@@ -90,7 +90,7 @@ const st_usage_t snes_usage[] =
     {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
     {"fig", NULL, "convert to *Pro Fighter*/(all)FIG"},
     {"figs", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG"},
-    {"gd3", NULL, "convert to Professor SF(2) Game Doctor SF3/6/7"},
+    {"gd3", NULL, "convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
     {"smc", NULL, "convert to Super Magicom/SMC"},
     {"swc", NULL, "convert to Super Wild Card*/(all)SWC"},
@@ -1092,7 +1092,6 @@ snes_ufo (st_rominfo_t *rominfo)
 
 int
 snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
-// This function assumes file with name filename is in GD3 format
 {
   char dest_name[FILENAME_MAX];
   int nparts, surplus, n, n_names = 0, size = ucon64.file_size - rominfo->buheader_len;

@@ -556,7 +556,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
   FILE *file = NULL;
   unsigned char *buffer;
   char *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12],
-       filenames[GD3_MAX_UNITS][8 + 1 + 3 + 1]; // +1 for period, +1 for ASCII-z
+       *filenames[GD3_MAX_UNITS], *dir;
   int num_units, i, send_header, x, split = 1, hirom = snes_get_snes_hirom();
 
   init_io (parport);
@@ -575,6 +575,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
       num_units = snes_make_gd_names (filename, rominfo, (char **) names);
     }
 
+  dir = dirname2 (filename);
   gd_fsize = 0;
   for (i = 0; i < num_units; i++)
     {
@@ -588,7 +589,14 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
       //  names[i] won't be copied.
       memcpy (gd3_dram_unit[i].name, strupr (names[i]), strlen (names[i]));
 
-      sprintf (filenames[i], "%s.078", names[i]); // should match with what code of -s does
+      x = strlen (dir) + strlen (names[i]) + 6; // file sep., suffix, ASCII-z => 6
+      if ((filenames[i] = (char *) malloc (x)) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[BUFFER_ERROR], x);
+          exit (1);
+        }
+      sprintf (filenames[i], "%s" FILE_SEPARATOR_S "%s.078", dir, names[i]); // should match with what code of -s does
+
       if (split)
         {
           x = q_fsize (filenames[i]);
@@ -612,6 +620,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
             }
         }
     }
+  free (dir);
 
   if ((buffer = (unsigned char *) malloc (8 * MBIT)) == NULL)
     { // a DRAM unit can hold 8 MBit at maximum
@@ -689,6 +698,8 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
         fclose (file);
    }
 
+  for (i = 0; i < num_units; i++)
+    free (filenames[i]);
   free (buffer);
   deinit_io ();
 

@@ -296,10 +296,15 @@ mgd_make_name (const char *filename, const char *prefix, int size, char *name)
           size_str = "2";
           suffix = ".000";
         }
-      else // MGD supports Game Gear games with sizes up to 4 Mbit
+      else if (size <= 4 * MBIT)
         {
           size_str = "4";
           suffix = ".018";
+        }
+      else // MGD supports Game Gear/Sega Master System games with sizes up to 6 Mbit
+        {
+          size_str = "6";
+          suffix = ".078";
         }
     }
   else if (prefix[0] == 'G' && prefix[1] == 'B')

@@ -88,6 +88,9 @@ sms_mgd (st_rominfo_t *rominfo)
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
+  if (size <= 4 * MBIT)
+    printf ("NOTE: It may be necessary to change the suffix in order to make the game work\n"
+            "      on an MGD2. You could try suffixes like .010, .024, .040, .048 or .078.\n");
   return 0;
 }
 
@@ -160,7 +163,7 @@ int
 sms_init (st_rominfo_t *rominfo)
 {
   int result = -1;
-  unsigned char magic[11], *buffer;
+  unsigned char magic[11] = "", *buffer;
 
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
     rominfo->buheader_len = ucon64.buheader_len;
@@ -174,6 +177,7 @@ sms_init (st_rominfo_t *rominfo)
       if (!UCON64_ISSET (ucon64.buheader_len))
         rominfo->buheader_len = SMD_HEADER_LEN;
 
+      // don't deinterleave if -nint was specified
       if (!(UCON64_ISSET (ucon64.interleaved) && !ucon64.interleaved) &&
           !UCON64_ISSET (ucon64.do_not_calc_crc))
         {
@@ -194,6 +198,8 @@ sms_init (st_rominfo_t *rominfo)
         }
       result = 0;
     }
+  else if (!UCON64_ISSET (ucon64.buheader_len))
+    rominfo->buheader_len = ucon64.file_size % (16 * 1024);
   rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
     ucon64.interleaved : (result == 0 ? 1 : 0);
 

@@ -56,7 +56,7 @@ The original uCON for SNES and Genesis was written by Chicken & chp in ~1995<br>
 <a name="194">1.9.4</a><br>
 - included all databases for every console system that has ROMs without a
   header with text<br>
-- added 324 entries to sms database<br>
+- added 324 entries to SMS database<br>
 - added -sam convert SAM/M.A.M.E. sound to WAV; --rom=SAMFILE<br>
 - added -b2i convert BIN/RAW(2352)/Mode2(2336) to ISO; --rom=BIN_IMAGE<br>
 - added -ppf apply PPF patch (&#60;=2.0); --rom=ISO_IMAGE --file=PATCHFILE<br>
@@ -444,9 +444,10 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (SNES) added crack for Dixie Kong's Double Trouble (by dbjh, based on
   IPS patch by Black Hole of Infernal Affairs)<br>
 - files of 0 bytes won't be detected as WonderSwan files anymore (by dbjh)<br>
-- removed (NES) support for bad FDS DAT files. If you really want to use FDS
-  DAT files created by tools that erroneously include the header in the CRC32
-  calculation, use the switch -nhd (by dbjh)<br>
+- removed (NES) support for bad FDS DAT files (by dbjh) If you really want to
+  use FDS DAT files created by tools that erroneously include the header in the
+  CRC32 calculation, use the switch -nhd. Someone with a complete FDS
+  collection should create a new DAT file<br>
 - updated (SNES) fixed crashing on first split file of Tales of Phantasia and
   Daikaijuu Monogatari 2 (by dbjh)<br>
 - added (SNES) -xgd6 send ROM to Game Doctor SF6/SF7. This probably solves the
@@ -485,6 +486,13 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - added (PC-Engine) -invert invert/swap bits of all bytes of a file. This
   effectively converts PC-Engine games between Japan and U.S.A. "mode" (by
   dbjh, thanks to acem77 for the information)<br>
+- added (SMS) backup unit header length detection (by dbjh, thanks to acem77
+  for pointing this out) This made a problem with the current SMS DAT file
+  surface: some CRC32 values are the result of including a backup unit header
+  in the calculation. Someone with a complete GoodSMS collection should create
+  a new DAT file<br>
+<br>
+<br>
 <br>
 <br>
 <br>

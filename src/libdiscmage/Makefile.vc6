@@ -37,7 +37,7 @@ distclean: clean
 	del config.h
 
 
-.c.o:
+.c.obj:
 	$(CC) $(CFLAGS) -c $< -o $@
 
 

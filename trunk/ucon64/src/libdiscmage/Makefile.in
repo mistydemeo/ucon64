@@ -40,7 +40,7 @@ OBJECTS=libdm_misc.o dllinit.o misc.o format/format.o format/cdi.o \
         format/nero.o format/cue.o format/toc.o format/other.o
 ifdef ZLIB
 LIBS=-lz
-OBJECTS+=unzip.o map.o miscz.o
+OBJECTS+=unzip.o map.o misc_z.o
 else
 LIBS=
 ifeq ($(GCC_WIN),1)
@@ -256,7 +256,7 @@ format/toc.o: format/toc.h $(LIBDM_STD_H)
 format/other.o: format/other.h $(LIBDM_STD_H)
 dllinit.o: $(LIBDM_STD_H)
 misc.o: misc.h dxedll_priv.h
-miscz.o: miscz.h misc.h dxedll_priv.h
+misc_z.o: misc_z.h misc.h dxedll_priv.h
 dxe_misc.o: dxedll_pub.h
 djimport.o: libdiscmage.h dlopen.h dxedll_pub.h
 dlopen.o: dlopen.h dxedll_pub.h

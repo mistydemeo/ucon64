@@ -12,7 +12,7 @@ OBJECTS=libdm_misc.obj dllinit.obj misc.obj format/format.obj format/cdi.obj \
         format/nero.obj format/cue.obj format/toc.obj format/other.obj
 !ifdef ZLIB
 LIBS=zlib.lib
-OBJECTS=$(OBJECTS) unzip.obj map.obj miscz.obj
+OBJECTS=$(OBJECTS) unzip.obj map.obj misc_z.obj
 !else
 LIBS=
 !endif
@@ -64,7 +64,7 @@ format/toc.obj: format/toc.h $(LIBDM_STD_H)
 format/other.obj: format/other.h $(LIBDM_STD_H)
 dllinit.obj: $(LIBDM_STD_H)
 misc.obj: misc.h dxedll_priv.h
-miscz.obj: miscz.h misc.h dxedll_priv.h
+misc_z.obj: misc_z.h misc.h dxedll_priv.h
 dxe_misc.obj: dxedll_pub.h
 djimport.obj: libdiscmage.h dlopen.h dxedll_pub.h
 dlopen.obj: dlopen.h dxedll_pub.h

@@ -1,5 +1,5 @@
 /*
-format.c
+format.c - support of different image formats for libdiscmage
 
 written by 2004 NoisyB (noisyb@gmx.net)
 

@@ -202,6 +202,7 @@ const struct option long_options[] = {
     {"pad", 0, 0, UCON64_PAD},
     {"padhd", 0, 0, UCON64_PADHD},
     {"pas", 0, 0, UCON64_PAS},
+    {"pasofami", 0, 0, UCON64_PASOFAMI},
     {"pce", 0, 0, UCON64_PCE},
     {"port", 1, 0, UCON64_PORT},
     {"ppf", 0, 0, UCON64_PPF},
@@ -274,6 +275,16 @@ const struct option long_options[] = {
     {"nhi", 0, 0, UCON64_NHI},
     {"bs", 0, 0, UCON64_BS},
     {"nbs", 0, 0, UCON64_NBS},
+    {"ctrl", 1, 0, UCON64_CTRL},
+    {"ntsc", 0, 0, UCON64_NTSC},
+    {"pal", 0, 0, UCON64_PAL},
+    {"bat", 0, 0, UCON64_BAT},
+    {"nbat", 0, 0, UCON64_NBAT},
+    {"vram", 0, 0, UCON64_VRAM},
+    {"nvram", 0, 0, UCON64_NVRAM},
+    {"mirr", 1, 0, UCON64_MIRR},
+    {"mapr", 1, 0, UCON64_MAPR},
+    {"dumpinfo", 0, 0, UCON64_DUMPINFO},
     {"version", 0, 0, UCON64_VERSION},
     {0, 0, 0, 0}
   };
@@ -327,11 +338,19 @@ main (int argc, char **argv)
   ucon64.snes_hirom =
   ucon64.bs_dump =
   ucon64.fal_size =
+  ucon64.data_size =
+  ucon64.controller =
+  ucon64.tv_standard =
+  ucon64.battery =
+  ucon64.vram =
+  ucon64.mirror =
+  ucon64.use_dump_info =
   ucon64.console =
   ucon64.do_not_calc_crc = UCON64_UNKNOWN;
 
   ucon64.rom =
-  ucon64.file = "";
+  ucon64.file =
+  ucon64.mapr = "";
 
   sscanf (getProperty (ucon64.configfile, "parport", buf2, "0x378"), "%x", &ucon64.parport);
 
@@ -482,11 +501,11 @@ ucon64_console_probe (st_rominfo_t *rominfo)
       if (UCON64_TYPE_ISROM (ucon64.type))
         ucon64.console =
 #ifdef CONSOLE_PROBE
-          (!nes_init (ucon64_flush (rominfo))) ? UCON64_NES :
           (!gba_init (ucon64_flush (rominfo))) ? UCON64_GBA :
           (!n64_init (ucon64_flush (rominfo))) ? UCON64_N64 :
           (!genesis_init (ucon64_flush (rominfo))) ? UCON64_GENESIS :
           (!snes_init (ucon64_flush (rominfo))) ? UCON64_SNES :
+          (!nes_init (ucon64_flush (rominfo))) ? UCON64_NES :
           (!gameboy_init (ucon64_flush (rominfo))) ? UCON64_GB :
           (!lynx_init (ucon64_flush (rominfo))) ? UCON64_LYNX :
           (!ngp_init (ucon64_flush (rominfo))) ? UCON64_NEOGEOPOCKET :
@@ -538,7 +557,10 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
         ucon64.buheader_len : rominfo->buheader_len;
 #endif
 
-      rominfo->current_crc32 = file_crc32 (romfile, rominfo->buheader_len);
+      // Calculating the CRC for the ROM data of a UNIF file (NES) shouldn't
+      // be done with file_crc32(). nes_init() uses calculate_buffer_crc().
+      if (rominfo->current_crc32 == 0)
+        rominfo->current_crc32 = file_crc32 (romfile, rominfo->buheader_len);
 
 #ifdef DB
       switch (ucon64.console)
@@ -548,7 +570,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
           case UCON64_GB:
           case UCON64_GBA:
           case UCON64_N64:
-//These ROMs have internal headers with name, country, maker, etc.
+// These ROMs have internal headers with name, country, maker, etc.
             break;
 
           default:
@@ -600,7 +622,7 @@ int
 ucon64_nfo (const st_rominfo_t *rominfo)
 {
   char buf[MAXBUFSIZE];
-  int size = quickftell (ucon64.rom);
+  int size = quickftell (ucon64.rom), x;
 
   printf ("%s\n\n", ucon64.rom);
 
@@ -647,13 +669,14 @@ ucon64_nfo (const st_rominfo_t *rominfo)
     }
 
   strcpy (buf, NULL_TO_EMPTY (rominfo->name));
-  printf ("%s\n%s\n%s\n%ld Bytes (%.4f Mb)\n\n",
+  x = UCON64_ISSET (ucon64.data_size) ? ucon64.data_size : size - rominfo->buheader_len,
+  printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
           // some ROMs have a name with control chars in it -> replace control chars
           mkprint (buf, '.'),
           NULL_TO_EMPTY (rominfo->maker),
           NULL_TO_EMPTY (rominfo->country),
-          quickftell (ucon64.rom) - rominfo->buheader_len,
-          TOMBIT_F (quickftell (ucon64.rom) - rominfo->buheader_len));
+          x,
+          TOMBIT_F (x));
 
   if (UCON64_TYPE_ISCD (ucon64.type))
     {
@@ -676,12 +699,14 @@ ucon64_nfo (const st_rominfo_t *rominfo)
       if (intro)
         printf ("Intro/Trainer: Maybe, %ld Bytes\n", intro);
 
-      printf ("Interleaved/Swapped: %s\n",
-        rominfo->interleaved ?
-          (rominfo->interleaved > 1 ?
-            "Yes (2)" :                         // printing this is handy for SNES ROMs
-            "Yes") :
-          "No");
+      if (rominfo->interleaved != UCON64_UNKNOWN)
+        // printing this is handy for SNES ROMs, but maybe nonsense for others
+        printf ("Interleaved/Swapped: %s\n",
+          rominfo->interleaved ?
+            (rominfo->interleaved > 1 ?
+              "Yes (2)" :
+              "Yes") :
+            "No");
 
       if (rominfo->buheader_len)
         printf ("Backup unit/Emulator header: Yes, %ld Bytes\n",
@@ -782,7 +807,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "int         force ROM is interleaved (2143)\n"
     "  " OPTION_LONG_S "nint        force ROM is not interleaved (1234)\n"
     "  " OPTION_LONG_S "dint        convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
-    "                  this differs from the Super Nintendo " OPTION_LONG_S "dint option\n"
+    "                  this differs from the Super Nintendo & NES " OPTION_LONG_S "dint option\n"
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
 #ifdef	__MSDOS__
     "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"

@@ -204,7 +204,25 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
   thanks to JohnDie for the information)<br>
 - updated (all) parallel port is only accessed for copier I/O (by dbjh)<br>
 - added (SNES) -bs & -nbs force ROM is a Broadcast Satellaview dump/regular cartridge dump (by dbjh)<br>
-- added (NES) -unif convert to UNIF format/UNF (by dbjh)<br>
+- added (NES) -unif convert to UNIF format/UNF {iNES, UNIF}->UNIF (by dbjh)<br>
+- updated (NES) -ines (convert to iNES format) {iNES, UNIF, Pasofami}->iNES (by dbjh)<br>
+- added (NES) -dint (convert ROM to non-interleaved format) (by dbjh)<br>
+- added (NES) -pasofami convert to Pasofami format iNES->Pasofami (by dbjh)<br>
+- updated (NES) ROM information for iNES, UNIF, FFE and Pasofami (by dbjh)<br>
+- updated (NES) fixed -j so that it converts properly from Pasofami to iNES (by dbjh)<br>
+- updated (NES) fixed -s so that it converts properly from iNES to Pasofami (by dbjh)<br>
+- updated (NES) fixed -ineshd (extract iNES header to .hdr file) (by dbjh)<br>
+- added (NES) -ctrl set controller type for ROM (UNIF only) (by dbjh)<br>
+- added (NES) -ntsc set TV compatibility to NTSC (UNIF only) (by dbjh)<br>
+- added (NES) -pal set TV compatibility to PAL (UNIF only) (by dbjh)<br>
+- added (NES) -bat set battery backup (by dbjh)<br>
+- added (NES) -nbat set no battery backup (by dbjh)<br>
+- added (NES) -vram set VRAM override (UNIF only) (by dbjh)<br>
+- added (NES) -nvram set no VRAM override (UNIF only) (by dbjh)<br>
+- added (NES) -mirr set mirroring type (by dbjh)<br>
+- added (NES) -n change internal ROM name (UNIF only) (by dbjh)<br>
+- added (NES) -mapr=NAME specify board name or mapper number for conversion options (by dbjh)<br>
+- added (NES) -dumpinfo use dumper info when converting to UNIF (by dbjh)<br>
 <br>
 <br>
 <br>

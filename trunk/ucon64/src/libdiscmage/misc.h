@@ -208,7 +208,7 @@ typedef signed long long int int64_t;
 #endif
 
 #define OPTION '-'
-#define OPTION_S " -"
+#define OPTION_S "-"
 #define OPTION_LONG_S "--"
 
 #ifndef MAXBUFSIZE

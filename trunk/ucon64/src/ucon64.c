@@ -1153,6 +1153,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
 static void
 ucon64_render_usage (const st_usage_t *usage)
 {
+// TODO speed up
   int x, pos = 0;
   char buf[MAXBUFSIZE];
 
@@ -1167,35 +1168,37 @@ ucon64_render_usage (const st_usage_t *usage)
         {
           if (usage[x].option_s)
             {
-              sprintf (buf,
-                (strlen (usage[x].option_s) < 12 ?
-                 "  %s%s                             " :
-                 "  %s%s "),
-                (!usage[x].option_s[1] ||
-                 usage[x].option_s[1] == '=' ||
-                 usage[x].option_s[1] == ' ' ? OPTION_S : OPTION_LONG_S),
-                usage[x].option_s);
+              int len = strlen (usage[x].option_s);
 
-#if 1
-              if (buf[15] == ' ') buf[16] = 0;
-              printf ("%s", buf);
-#else
-              if (buf[15] != ' ')
-                printf ("%s\n", buf);
+// adjust tabs for OPTION_S and OPTION_LONG_S here not in the OPTION_S definition
+              if (MAX (1, MIN (len, strcspn (usage[x].option_s, "= "))) == 1)
+                printf ("   %s", OPTION_S);
               else
-                printf ("%s", buf);
-#endif
+                printf ("  %s", OPTION_LONG_S);
+
+              sprintf (buf, "%s                          ", usage[x].option_s);
+              buf[len < 12 ? 12 : len + 1] = 0;
+
+              printf ("%s", buf);
             }
 
           if (usage[x].desc)
             {
+#if 1
               for (pos = 0; usage[x].desc[pos]; pos++)
                 {
-                  printf ("%c", usage[x].desc[pos]);
+                  printf ("%c", usage[x].desc[pos]); // TODO speed this up
 
                   if (usage[x].desc[pos] == '\n')
                     printf ("                  ");
                 }
+#else
+              for (pos = 0; ;)
+                {
+                  strncpy (buf, usage[x].desc[pos], strcspn (usage[x].desc[pos], '\n') + 1);
+                  printf ("%s                  ", buf);
+                }
+#endif                
               printf ("\n");
             }
         }

@@ -39,21 +39,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 static void init_io (unsigned int port);
 static void checkabort (int status);
-static void send_block (unsigned short address, unsigned char *buffer,
-                        int len);
+static void send_block (unsigned short address, unsigned char *buffer, int len);
 static void send_command0 (unsigned short address, unsigned char byte);
-static void send_command (unsigned char command_code, unsigned short a,
-                          unsigned short l);
+static void send_command (unsigned char command_code, unsigned short a, unsigned short l);
 static void sendb (unsigned char byte);
 static int receive_rom_info (unsigned char *buffer);
 static int get_rom_size (unsigned char *info_block);
 static int check1 (unsigned char *info_block, int index);
 static int check2 (unsigned char *info_block, int index, unsigned char value);
-static int check3 (unsigned char *info_block, int index1, int index2,
-                   int size);
+static int check3 (unsigned char *info_block, int index1, int index2, int size);
 static unsigned char get_emu_mode_select (unsigned char byte, int size);
-static void receive_block (unsigned short address, unsigned char *buffer,
-                           int len);
+static void receive_block (unsigned short address, unsigned char *buffer, int len);
 static unsigned char receiveb (void);
 static inline unsigned char wait_while_busy (void);
 static inline void wait_for_ready (void);
@@ -71,8 +67,7 @@ init_io (unsigned int port)
   swc_port = port;
   if (swc_port != 0x3bc && swc_port != 0x378 && swc_port != 0x278)
     {
-      fprintf (STDERR, "PORT must be 0x3bc, 0x378 or 0x278\n");
-      fflush (stdout);
+      printf ("PORT must be 0x3bc, 0x378 or 0x278\n"); // stdout for frontend
       exit (1);
     }
 
@@ -97,12 +92,12 @@ swc_write_rom (char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "rb")) == NULL)
     {
-      fprintf (STDERR, "Can't open %s for reading\n", filename);
+      printf ("Can't open %s for reading\n", filename); // stdout for frontend
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (STDERR, "Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
       exit (1);
     }
 
@@ -174,12 +169,12 @@ swc_write_sram (char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "rb")) == NULL)
     {
-      fprintf (STDERR, "Can't open %s for reading\n", filename);
+      printf ("Can't open %s for reading\n", filename); // stdout for frontend
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (STDERR, "Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
       exit (1);
     }
 
@@ -271,19 +266,19 @@ swc_read_rom (char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
-      fprintf (STDERR, "Can't open %s for writing\n", filename);
+      printf ("Can't open %s for writing\n", filename); // stdout for frontend
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (STDERR, "Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
       exit (1);
     }
 
   size = receive_rom_info (buffer);
   if (size == 0)
     {
-      fprintf (STDERR, "There is no cartridge present in the Super Wild Card\n");
+      printf ("There is no cartridge present in the Super Wild Card\n"); // stdout for frontend
       fclose (file);
       remove (filename);
       exit (1);
@@ -538,12 +533,12 @@ swc_read_sram (char *filename, unsigned int parport)
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
-      fprintf (STDERR, "Can't open %s for writing\n", filename);
+      printf ("Can't open %s for writing\n", filename); // stdout for frontend
       exit (1);
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (STDERR, "Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
       exit (1);
     }
 

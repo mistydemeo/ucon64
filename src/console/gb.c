@@ -56,7 +56,7 @@ const char *gameboy_usage[] =
     "  " OPTION_LONG_S "hd          force ROM has SSC header (+512 Bytes)\n"
     "  " OPTION_LONG_S "nhd         force ROM has no SSC header\n"
 #endif
-    "  " OPTION_S "n=NEWNAME   change ROM name to NEWNAME\n"
+    "  " OPTION_S "n=NEWNAME   change internal ROM name to NEWNAME\n"
     "  " OPTION_LONG_S "mgd         convert to Multi Game*/MGD2/RAW\n"
     "  " OPTION_LONG_S "ssc         convert to Super Smart Card/SSC (+512 Bytes)\n"
     "  " OPTION_LONG_S "sgb         convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX\n"
@@ -280,15 +280,15 @@ gameboy_sgb (st_rominfo_t *rominfo)
 
 
 int
-gameboy_n (st_rominfo_t *rominfo, const char *newname)
+gameboy_n (st_rominfo_t *rominfo, const char *name)
 {
   char buf[MAXBUFSIZE];
 
-  memset (buf, 0L, MAXBUFSIZE);
-  strcpy (buf, newname);
+  memset (buf, 0, MAXBUFSIZE);
+  strcpy (buf, name);
   ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x034, 16,
-               ucon64.rom, "r+b");
+            ucon64.rom, "r+b");
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   return 0;

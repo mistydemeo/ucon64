@@ -85,7 +85,7 @@ const char *nes_usage[] =
     "  " OPTION_LONG_S "cmnt=TEXT   specify that TEXT should be used as comment (UNIF only)\n"
 #endif
     "  " OPTION_LONG_S "dumpinfo=FILE use dumper info from FILE when converting to UNIF\n"
-    "  " OPTION_S "n=NEWNAME   change ROM name to NEWNAME (UNIF only)\n"
+    "  " OPTION_S "n=NEWNAME   change internal ROM name to NEWNAME (UNIF only)\n"
     "  " OPTION_LONG_S "fds         convert Famicom Disk System file (diskimage) from FAM to FDS\n"
     "  " OPTION_LONG_S "fdsl        list Famicom Disk System/FDS (diskimage) contents\n"
 #if 0
@@ -6698,7 +6698,7 @@ nes_s (st_rominfo_t *rominfo)
 
 
 int
-nes_n (st_rominfo_t *rominfo, const char *newname)
+nes_n (st_rominfo_t *rominfo, const char *name)
 {
   if (type != UNIF)
     {
@@ -6706,8 +6706,8 @@ nes_n (st_rominfo_t *rominfo, const char *newname)
       return -1;
     }
 
-  if (newname != NULL && strlen (newname) > 0)
-    internal_name = newname;
+  if (name != NULL && strlen (name) > 0)
+    internal_name = name;
   else
     internal_name = NULL;
 

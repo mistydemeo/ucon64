@@ -2,7 +2,7 @@
 lynx.c - Atari Lynx support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2002 dbjh
+           2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -46,7 +46,7 @@ const char *lynx_usage[] =
     "  " OPTION_LONG_S "lyx         convert to LYX/RAW (strip 64 Bytes LNX header)\n"
     "  " OPTION_LONG_S "lnx         convert to LNX (uses default values for the header);\n"
     "                  adjust the LNX header with the following options\n"
-    "  " OPTION_S "n=NEWNAME   change ROM name to NEWNAME (LNX only)\n"
+    "  " OPTION_S "n=NEWNAME   change internal ROM name to NEWNAME (LNX only)\n"
     "  " OPTION_LONG_S "nrot        set no rotation (LNX only)\n"
     "  " OPTION_LONG_S "rotl        set rotation left (LNX only)\n"
     "  " OPTION_LONG_S "rotr        set rotation right (LNX only)\n"
@@ -179,7 +179,7 @@ lynx_rotr (st_rominfo_t *rominfo)
 
 
 int
-lynx_n (st_rominfo_t *rominfo, const char *newname)
+lynx_n (st_rominfo_t *rominfo, const char *name)
 {
   st_lnx_header_t header;
 
@@ -192,7 +192,7 @@ lynx_n (st_rominfo_t *rominfo, const char *newname)
   q_fread (&header, 0, sizeof (st_lnx_header_t), ucon64.rom);
 
   memset (header.cartname, 0, sizeof (header.cartname));
-  strncpy (header.cartname, newname, sizeof (header.cartname));
+  strncpy (header.cartname, name, sizeof (header.cartname));
 
   ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom, "r+b");

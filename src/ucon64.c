@@ -610,7 +610,7 @@ main (int argc, char **argv)
           if ((stop = ucon64_process_rom (argv[rom_index], console, show_nfo)))
             break;
           for (unzip_current_file_nr = 1; unzip_current_file_nr < n_entries;
-              unzip_current_file_nr++)
+               unzip_current_file_nr++)
             {
               ucon64_fname_arch (argv[rom_index]);
               if ((stop = ucon64_process_rom (argv[rom_index], console, show_nfo)))

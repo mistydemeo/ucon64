@@ -460,6 +460,8 @@ extern int set_property (const char *filename, const char *propname, const char 
 // Note that _WIN32 is defined by cl.exe while the other constants (like WIN32)
 //  are defined in header files. MinGW's gcc.exe defines all constants.
 
+#include <sys/types.h>
+
 int truncate (const char *path, off_t size);
 int sync (void);
 
@@ -477,7 +479,6 @@ int fprintf2 (FILE *file, const char *format, ...);
 #ifndef __MINGW32__
 #include <io.h>
 #include <direct.h>
-#include <sys/types.h>
 #include <sys/stat.h>                           // According to MSDN <sys/stat.h> must
                                                 //  come after <sys/types.h>. Yep, that's M$.
 #define S_IWUSR _S_IWRITE

@@ -1179,13 +1179,13 @@ ucon64_configfile (void)
                  "#\n"
 #if     defined __MSDOS__
                  "discmage_path=discmage.dxe\n"
-                 "cache_path=\n"
+                 "configdir=\n"
 #elif   defined __CYGWIN__
                  "discmage_path=discmage.dll\n"
-                 "cache_path=\n"
+                 "configdir=\n"
 #elif   defined __unix__ || defined __BEOS__
                  "discmage_path=~/.ucon64/discmage.so\n"
-                 "cache_path=~/.ucon64\n"
+                 "configdir=~/.ucon64\n"
 #endif
                  "#\n"
                  "# emulate_<console shortcut>=<emulator with options>\n"
@@ -1283,7 +1283,7 @@ ucon64_configfile (void)
 #endif
       );
 
-      set_property (ucon64.configfile, "cache_path",
+      set_property (ucon64.configfile, "configdir",
 #if     defined __MSDOS__
         ""
 #elif   defined __CYGWIN__

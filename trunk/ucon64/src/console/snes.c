@@ -1991,6 +1991,7 @@ snes_buheader_info (st_rominfo_t *rominfo)
 {
   unsigned char header[512];
   int x, y;
+  snes_copier_t org_type = type;
 
   if (rominfo->buheader_len == 0) // type == MGD
     {
@@ -1998,11 +1999,15 @@ snes_buheader_info (st_rominfo_t *rominfo)
       return -1;
     }
   else
-    printf ("Backup unit header info (%s)\n\n",
-      type == SWC ? "SWC" :
-      type == FIG ? "FIG" :
-      type == GD3 ? "GD3" :
-      "unknown header type, but interpreted as SWC");
+    {
+      printf ("Backup unit header info (%s)\n\n",
+        type == SWC ? "SWC" :
+        type == FIG ? "FIG" :
+        type == GD3 ? "GD3" :
+        "unknown header type, but interpreted as SWC");
+      if (type == SMC)
+        type = SWC;
+    }
 
   q_fread (&header, 0, rominfo->buheader_len, ucon64.rom);
   mem_hexdump (header, 48, 0);                  // show only the part that is
@@ -2107,6 +2112,8 @@ snes_buheader_info (st_rominfo_t *rominfo)
         printf ("[10]    SRAM size: %d kB => %s\n",
           y / 1024, matches_deviates (snes_sramsize == y));
     }
+
+  type = org_type;
 
   return 0;
 }
@@ -2325,7 +2332,11 @@ snes_init (st_rominfo_t *rominfo)
         }
     }
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
-    rominfo->buheader_len = ucon64.buheader_len;
+    {
+      rominfo->buheader_len = ucon64.buheader_len;
+      if (type == MGD)
+        type = SMC;
+    }
 
   if (UCON64_ISSET (ucon64.split))
     snes_split = ucon64.split;

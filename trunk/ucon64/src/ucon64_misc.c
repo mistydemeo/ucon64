@@ -529,7 +529,9 @@ char buf[4096];
 
 strcpy(buf,filename);
 buf[findlast(buf,".")-1]++;
-while(!access(buf,F_OK))
+while(	!access(buf,F_OK) &&
+	strdcmp(buf,filename)!=0
+)
 {
 	buf[findlast(buf,".")-1]++;
 	x++;
@@ -539,7 +541,9 @@ if(x!=0)return(x);
 
 strcpy(buf,filename);
 buf[findlast(buf,".")+1]++;
-while(!access(buf,F_OK))
+while(	!access(buf,F_OK) &&
+	strdcmp(buf,filename)!=0
+)
 {
 	buf[findlast(buf,".")+1]++;
 	x++;

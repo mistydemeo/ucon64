@@ -49,8 +49,7 @@ int ucon64_parport_needed = 0;
 int
 ucon64_switches (int c, const char *optarg)
 {
-  char *ptr = NULL, *ptr2 = NULL, buf[MAXBUFSIZE];
-  char buf2[MAXBUFSIZE];
+  char *ptr = NULL, buf[MAXBUFSIZE];
   int x = 0;
 
   /*

@@ -246,14 +246,11 @@ ucon64_switches (int c, const char *optarg)
 
     case UCON64_PORT:
 #ifdef  HAVE_USB_H
-      if (!stristr (optarg, "usb"))
-        {
-          ucon64.parport = -1;
-          ucon64.usbport = 1;
-        }
+      if (strlen (optarg) == 4 && !strnicmp (optarg, "usb", 3))
+        ucon64.usbport = strtol (optarg + 3, NULL, 10) + 1; // usb0 => ucon64.usbport = 1
       else
 #endif
-        sscanf (optarg, "%x", &ucon64.parport);
+        ucon64.parport = strtol (optarg, NULL, 16);
       break;
 
 #ifdef  PARALLEL
@@ -325,7 +322,6 @@ ucon64_switches (int c, const char *optarg)
 #endif
       break;
 
-    case UCON64_XF2AM:
     case UCON64_XFALM:
       ucon64.parport_mode = UCON64_EPP;
       break;

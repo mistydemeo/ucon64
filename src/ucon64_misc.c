@@ -357,14 +357,14 @@ const st_usage_t ucon64_options_usage[] = {
 #if     (defined PARALLEL || defined HAVE_USB_H)
   {"port", "PORT", "specify "
 #ifdef  HAVE_USB_H
-                   "usb"
+                   "USB"
 #endif
 #if     (defined PARALLEL && defined HAVE_USB_H)
                    " or "
 #endif
 #ifdef  PARALLEL
                    "parallel"
-#endif                   
+#endif
                    " PORT={"
 #ifdef  HAVE_USB_H
                    "USB0, USB1, "
@@ -720,7 +720,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_V, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_VRAM, UCON64_NES, nes_usage,         WF_SWITCH},
 #ifdef  PARALLEL
-  {UCON64_XF2AM, UCON64_GBA, f2a_usage,        WF_SWITCH},
   {UCON64_XFALM, UCON64_GBA, fal_usage,        WF_SWITCH},
   {UCON64_XSWC_DM, UCON64_SNES, swc_usage,     WF_SWITCH},
 #endif

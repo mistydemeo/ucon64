@@ -140,7 +140,7 @@ typedef struct
   int parport;                                  // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
 #ifdef  HAVE_USB_H
-  int usbport;                                  // if (usbport != 0) use usbport
+  int usbport;                                  // non-zero => use usbport, 1 = USB0, 2 = USB1
   char usbport_dev[80];                         // usb port device (e.g. /dev/usb/hiddev0)
 #endif
 

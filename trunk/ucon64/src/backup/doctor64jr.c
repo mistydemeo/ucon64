@@ -2,6 +2,7 @@
 doctor64jr.c - Bung Doctor V64 Junior support for uCON64
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
+           2004        dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -18,36 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "misc.h"
-#include "quick_io.h"
-#include "ucon64.h"
-#include "ucon64_dat.h"
-#include "ucon64_misc.h"
-#include "doctor64jr.h"
-#include "misc_par.h"
-
-const st_usage_t doctor64jr_usage[] = {
-  {NULL, NULL, "Doctor V64 Junior"},
-  {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
-#ifdef PARALLEL
-  {"xdjr", NULL, "send/receive ROM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
-//                "receives automatically when ROM does not exist\n"
-                "currently only sending is supported"},
-#if 0
-  {"xdjrs", NULL, "send/receive SRAM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when SRAM does not exist"},
-#endif
-#endif                          // PARALLEL
-  {NULL, NULL, NULL}
-};
-
 
 /*
 drjr transfer protocol
@@ -83,11 +54,6 @@ ai[]=7	w en_0
         en_0=05 and en_1=0a is enable port control
 
 
-
-
-
-
-
 mode:q0              0                   1                  0                    1
 mode:q1              0                   0                  1                    1
 b7ff ffff
@@ -95,7 +61,6 @@ b400 0000      dram read only         dram r/w        cartridge read     cartrid
 
 b3ff ffff
 b000 0000      dram read only         dram r/w        dram read only        dram r/w
-
 
 
 eg:enable port control
@@ -108,7 +73,6 @@ p17   nastb    ~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~~~~~~
                             en_0=05       en_1=0a
 
 
-
 eg:write adr $b0123456, data $a55a,$1234..
 
 DB25  pin name
@@ -117,7 +81,6 @@ p1    nwrite   ~~~~~~~~~|_______________________________________________________
 p14   ndstb    ~~~~~~~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~|_|~~~|_|~~~|_|~~~|_|~~~~~~~~~~~
 p17   nastb    ~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~|_|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                               set adr word low            set adr word high                wdata a55a  wdata 1234 (after write adr=b012345a)
-
 
 
 eg:read adr $b0123400~$b01235ff, 512 data
@@ -138,8 +101,6 @@ p1    nwrite   ~~~~~~~~~|________________________________________|~~~~~~~~~~
 p14   ndstb    ~~~~~~~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~
 p17   nastb    ~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~~~~~~
                             mode=00       en_0=00       en_1=00
-
-
 
 
 simple backup rountine for N64
@@ -167,307 +128,107 @@ void mainproc(void *arg) {
 }
 */
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include "misc.h"
+#include "quick_io.h"
+#include "ucon64.h"
+#include "ucon64_dat.h"
+#include "ucon64_misc.h"
+#include "doctor64jr.h"
+#include "misc_par.h"
+
+
+const st_usage_t doctor64jr_usage[] = {
+  {NULL, NULL, "Doctor V64 Junior"},
+  {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
+#ifdef PARALLEL
+  {"xdjr", NULL, "send ROM to Doctor V64 Junior; " OPTION_LONG_S "port=PORT"},
+#if 0
+  {"xdjrs", NULL, "send/receive SRAM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
+                "receives automatically when SRAM does not exist"},
+#endif
+#endif                          // PARALLEL
+  {NULL, NULL, NULL}
+};
+
+
 #ifdef PARALLEL
 
-// TODO: doctor64jr.c sram routines
+#define BUFFERSIZE 32768
+#define set_ai_write outportb(port_a, 5);       // ninit=1, nwrite=0
+#define set_data_write outportb(port_a, 1);     // ninit=0, nwrite=0
+#define set_data_read outportb(port_a, 0);      // ninit=0, nwrite=1
+#define set_normal outportb(port_a, 4);         // ninit=1, nwrite=1
 
-#if 0
+static unsigned short int port_8, port_9, port_a, port_b, port_c,
+                          *buffer;
+int wv_mode;
 
-//typedef unsigned short u16;     // unsigned 16-bit
-//void docmd(jr_command cmd);
-int saveram_pc_main (int argc, char *argv[], char *envp[]);
-
-#define CART_BASE       0xB0000000U
-#define CART_BASE2      0xB4000000U
-#define SRAM_BASE       0xA8000000U
-#define SRAM_LEN        0x8000
-#define RAMROM_SRAM_ADDY 0x00200000U
-#define EPP_PORT 0x378
-
-typedef enum _jr_command
-{
-  ReadSram = 0x4001,            // Copy SRAM from DS1/Cart to designated address
-  WriteSram = 0x4002,           // Copy SRAM from designated address to DS1/Cart
-  ReadEeprom = 0x4004,          // Ditto for DX256/Cart EEPROM
-  WriteEeprom = 0x4008,         //
-  ReadPfs = 0x4010,             // Ditto for Mempak
-  WritePfs = 0x4020,
-
-  NoCmd = 0x8037,               // Do nothing for now
-  ColdBoot = 0xABCD             // Game is loaded, now cold boot.
-}
-jr_command;
-
-static unsigned char buffer[SRAM_LEN * 8];
-static FILE *fp;
-
-int
-saveram_pc_main (int argc, char *argv[], char *envp[])
-{
-  unsigned long i, j, temp;
-
-  i = v64jr_status ();          // get v64jr status (or 0 if no v64jr detected)
-  do
-    i = v64jr_quickstatus ();
-  while (1);
-
-  if (!i)
-    {
-      fprintf (stderr, "v64jr not found at EPP 0x%x\n", EPP_PORT);
-      exit (5);
-    }
-
-  printf
-    ("v64jr status: N64 power %s, v64jr RAM %saltered, ROM @ 0xB%s000000\n",
-     i & V64JR_N64POWER ? "ON" : "OFF", i & V64JR_RAMALTERED ? "was " : "un",
-     i & V64JR_ROMSELECT ? "0" : "4");
-
-/*
-  if ((i & V64JR_N64POWER))
-    {
-      printf ("\nTurn off n64...");
-      fflush (stdout);
-      while (i & V64JR_N64POWER)
-        i = v64jr_status ();
-    }
-  printf ("Turn ON n64...\n");
-  fflush (stdout);
-  while (!(i & V64JR_N64POWER))
-    i = v64jr_status ();
-
-  wait2 (2);                                    // wait 2000 milliseconds
-
-  printf("\nPower N64 and press any key to continue...");
-  fflush(stdout);
-  fgetc(stdin);
-  printf("ok.\n");
-  fflush(stdout);
-*/
-
-/*
-  if ((fp = fopen (FILENAME, "wb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], FILENAME);
-      exit (5);
-    }
-*/
-  printf ("Reading SRAM...\n");
-  docmd (ReadSram);             // buffer is is motorola format
-  i = fwrite (buffer, SRAM_LEN, 1, fp); // buffer is is motorola format
-  fclose (fp);
-
-  if ((fp = fopen (FILENAME2, "rb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], FILENAME2);
-      exit (6);
-    }
-  i = fread (buffer, 0x8000, 1, fp);
-  printf ("Writing SRAM...\n");
-  docmd (WriteSram);            // buffer is is motorola format
-
-  printf ("Sending ROM...\n");
-  docmd (ColdBoot);
-
-  fclose (fp);
-  return 0;
-}
-
-void
-docmd (jr_command cmd)
-{
-  long fatcmd, i, j;
-  fatcmd = cmd | 0x12400000;
-
-  switch (cmd)
-    {
-    case ReadSram:
-      v64jr_open ();            // PC control of v64jr
-      v64jr_io (V64JR_WRITE, (unsigned char *) (&fatcmd), 0x0, 4);
-      v64jr_close (V64JR_WRITEENABLE | V64JR_ROMENABLE);
-
-      do
-        i = v64jr_quickstatus ();
-      while (!(i & V64JR_ROMSELECT));
-
-      v64jr_open ();
-      v64jr_io (V64JR_READ, buffer, RAMROM_SRAM_ADDY, SRAM_LEN);
-      v64jr_close (V64JR_WRITEENABLE | V64JR_ROMENABLE);
-
-      for (j = 0; j < SRAM_LEN >> 1; j++)
-        ((unsigned short *) buffer)[j] =
-          ((unsigned short *) buffer)[j] >> 8 | ((unsigned short *) buffer)[j]
-          << 8;
-
-      break;
-
-    case WriteSram:
-      for (j = 0; j < SRAM_LEN >> 1; j++)
-        ((unsigned short *) buffer)[j] =
-          ((unsigned short *) buffer)[j] >> 8 | ((unsigned short *) buffer)[j]
-          << 8;
-
-      v64jr_open ();
-      v64jr_io (V64JR_WRITE, buffer, RAMROM_SRAM_ADDY, SRAM_LEN);
-      v64jr_io (V64JR_WRITE, (unsigned char *) (&fatcmd), 0x0, 4);
-      v64jr_close (V64JR_WRITEENABLE | V64JR_ROMENABLE);
-
-      for (j = 0; j < SRAM_LEN >> 1; j++)
-        ((unsigned short *) buffer)[j] =
-          ((unsigned short *) buffer)[j] >> 8 | ((unsigned short *) buffer)[j]
-          << 8;
-
-      do
-        i = v64jr_quickstatus ();
-      while (!(i & V64JR_ROMSELECT));
-
-      break;
-
-    case ColdBoot:
-      v64jr_open ();
-      v64jr_io (V64JR_WRITE, (unsigned char *) (&fatcmd), 0x0, 4);
-      v64jr_close (V64JR_WRITEENABLE | V64JR_ROMENABLE);
-
-      do
-        i = v64jr_quickstatus ();
-      while (!(i & V64JR_ROMSELECT));
-
-      fatcmd = NoCmd | 0x12400000;
-      v64jr_open ();
-      v64jr_io (V64JR_WRITE, (unsigned char *) (&fatcmd), 0x0, 4);
-      v64jr_close (0);
-
-    default:
-      ;
-    }
-}
-#endif // #if 0
-
-/**************************************
-*        program name: v64jr.c          *
-*  N64 cart emulator transfer program *
-**************************************/
-
-//#define ai 0x37b
-//#define data 0x37c
-#define trans_size 32768
-#define set_ai_write outportb(port_a,5);        // ninit=1, nwrite=0
-#define set_data_write outportb(port_a,1);      // ninit=0, nwrite=0
-#define set_data_read outportb(port_a,0);       // ninit=0, nwrite=1
-#define set_normal outportb(port_a,4);  // ninit=1, nwrite=1
-
-static char *file_name = NULL;
-static char write_en = 0;
-static char test_en = 0;
-static char verify_en = 0;
-static char disp_on = 1;
-static FILE *fptr;
-static union mix_buffer
-{
-  unsigned char buffer[32768];
-  unsigned short int bufferx[16384];
-}
-mix;
-static unsigned short int port[2];
-static unsigned char port_no;
-static unsigned short int port_8, port_9, port_a, port_b, port_c;
-static unsigned char disp_buf[16];
-static short int i, j, page, sel, wv_mode;
-//static char ch = ' ';
-static unsigned long init_time = 0, size = 0, pos = 0;
-
-//static void drjr_set_ai (unsigned char _ai);
-//static void drjr_set_ai_data (unsigned char _ai, unsigned char _data);
-//static void drjr_init_port (void);
-//static void drjr_end_port (void);
-static void dump_buffer (void);
+static void set_ai (unsigned char ai);
+static void set_ai_data (unsigned char ai, unsigned char data);
+static void init_port (int enable_write);
+static void end_port (int enable_write);
 static char write_32k (unsigned short int hi_word, unsigned short int lo_word);
 static char verify_32k (unsigned short int hi_word, unsigned short int lo_word);
-static void read_adr (void);
-//static void read_some (void);
-//static unsigned char drjr_check_card (void);
-static short int read_file (void);
-static short int download_n64 ();
+static unsigned long int get_address (void);
 static void gen_pat_32k (unsigned short int offset);
 static unsigned short int test_dram (void);
-//static void d64jr_usage (char *progname);
 
-/**************************************
-*               Subroutine            *
-**************************************/
+
 void
-dump_buffer (void)
+set_ai (unsigned char ai)
 {
-  for (i = 0; i < 128; i++)
-    {
-      j = i & 0x0f;
-      disp_buf[j] = mix.buffer[i];
-      if (j == 15)
-        {
-          printf ("%04x : ", i & 0xfff0);
-          for (j = 0; j < 16; j++)
-            {
-              if (j == 8)
-                printf ("- ");
-              printf ("%02x ", disp_buf[j]);
-            }
-          printf ("-> ");
-          for (j = 0; j < 16; j++)
-            {
-              if (disp_buf[j] < 0x20 || disp_buf[j] > 0x80)
-                printf (".");
-              else
-                printf ("%c", disp_buf[j]);
-            }
-          fputc ('\n', stdout);
-        }
-    }
+  set_ai_write                                  // ninit=1, nwrite=0
+  outportb (port_b, ai);
 }
 
-void
-set_ai (unsigned char _ai)
-{
-  set_ai_write                  // ninit=1, nwrite=0
-  outportb (port_b, _ai);
-}
 
 void
-set_ai_data (unsigned char _ai, unsigned char _data)
+set_ai_data (unsigned char ai, unsigned char data)
 {
-  set_ai (_ai);
-  set_data_write                // ninit=0, nwrite=0
-  outportb (port_c, _data);
+  set_ai (ai);
+  set_data_write                                // ninit=0, nwrite=0
+  outportb (port_c, data);
 }
 
+
 void
-init_port (void)
+init_port (int enable_write)
 {
 #ifndef PPDEV // probably #if 0, but first test if this works with ppdev - dbjh
-  outportb (port_9, 1);         // clear EPP time flag
+  outportb (port_9, 1);                         // clear EPP time flag
 #endif
   set_ai_data (6, 0x0a);
-  set_ai_data (7, 0x05);        // 6==0x0a, 7==0x05 is pc_control mode
-//   set_ai(5);
-//   set_data_read
-//   write_en=inportb(port_c);
-  set_ai_data (5, write_en);    // d0=0 is write protect mode
+  set_ai_data (7, 0x05);                        // 6==0x0a, 7==0x05 is pc_control mode
+//  set_ai (5);
+//  set_data_read
+//  enable_write = inportb (port_c);
+  set_ai_data (5, enable_write);                // d0=0 is write protect mode
 }
 
+
 void
-end_port (void)
+end_port (int enable_write)
 {
-  set_ai_data (5, write_en);    // d0=0 is write protect mode
-  set_ai_data (7, 0);           // release pc mode
-  set_ai_data (6, 0);           // 6==0x0a, 7==0x05 is pc_control mode
-  set_normal                    // ninit=1, nWrite=1
+  set_ai_data (5, enable_write);                // d0=0 is write protect mode
+  set_ai_data (7, 0);                           // release pc mode
+  set_ai_data (6, 0);                           // 6==0x0a, 7==0x05 is pc_control mode
+  set_normal                                    // ninit=1, nWrite=1
 }
+
 
 char
 write_32k (unsigned short int hi_word, unsigned short int lo_word)
 {
   unsigned char unpass, pass1;
-  unsigned short int i, j;
-  unsigned short int fix, temp;
-  init_port ();
+  unsigned short int i, j, fix, temp;
+
   set_ai_data (3, (unsigned char) (0x10 | (hi_word >> 8)));
   set_ai_data (2, (unsigned char) hi_word);
   for (i = 0; i < 0x40; i++)
@@ -477,24 +238,19 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
         {
           set_ai_data (1, (unsigned char) ((i << 1) | lo_word));
           set_ai_data (0, 0);
-          set_ai (4);           // set address index=4
-          set_data_write        // ninit=0, nWrite=0
+          set_ai (4);                           // set address index=4
+          set_data_write                        // ninit=0, nWrite=0
           fix = i << 8;
           for (j = 0; j < 256; j++)
-            {
-              outportw (port_c, mix.bufferx[j + fix]);
-            }
-          set_data_read         // ninit=0, nWrite=1
+            outportw (port_c, buffer[j + fix]);
+          set_data_read                         // ninit=0, nWrite=1
           if (wv_mode)
             {
               for (j = 0; j < 256; j++)
                 {
                   temp = inportw (port_c);
-                  if (mix.bufferx[j + fix] != temp)
-                    {
-//                printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
-                      break;
-                    }
+                  if (buffer[j + fix] != temp)
+                    break;
                 }
             }
           else
@@ -503,41 +259,32 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
               for (j = 0; j < 4; j++)
                 {
                   temp = inportw (port_c);
-                  if (mix.bufferx[j + fix] != temp)
+                  if (buffer[j + fix] != temp)
                     {
-//                printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
                       pass1 = 0;
                       break;
                     }
                 }
               if (pass1)
                 {
-//             printf("@");
                   set_ai_data (1, (unsigned char) ((i << 1) | lo_word | 1));
                   set_ai_data (0, 0xf8);
                   set_ai (4);
-                  set_data_read // ninit=0, nWrite=1
+                  set_data_read                 // ninit=0, nWrite=1
                   for (j = 252; j < 256; j++)
                     {
                       temp = inportw (port_c);
-                      if (mix.bufferx[j + fix] != temp)
-                        {
-//                   printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
-                          break;
-                        }
+                      if (buffer[j + fix] != temp)
+                        break;
                     }
                 }
             }
           set_ai (0);
-          set_data_read         // ninit=0, nwrite=1
-          if (inportb (port_c) != 0x00)
+          set_data_read                         // ninit=0, nwrite=1
+          if (inportb (port_c) != 0)
             {
               unpass--;
-//              printf("counter=%x ",inportb(data));
-              outportb (port_a, 0x0b);  // set all pin=0 for debug
-//              if (disp_on) printf("*")
-//                ;
-              init_port ();
+              outportb (port_a, 0x0b);          // set all pin=0 for debug
               set_ai_data (3, (unsigned char) (0x10 | (hi_word >> 8)));
               set_ai_data (2, (unsigned char) hi_word);
               if (unpass == 0)
@@ -547,25 +294,25 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
             unpass = 0;
         }
     }
-//   outportb(ai,0);
-//   printf("\na[7..0]=%02x\n",inportb(data));
-//   outportb(ai,1);
-//   printf("a[15..8]=%02x\n",inportb(data));
-//   end_port();
+
+/*
+  outportb (ai, 0);
+  printf ("\na[7..0]=%02x\n", inportb (data));
+  outportb (ai, 1);
+  printf ("a[15..8]=%02x\n", inportb (data));
+*/
   return 0;
 }
+
 
 char
 verify_32k (unsigned short int hi_word, unsigned short int lo_word)
 {
   char unpass;
-  unsigned short int i, j, temp;
-  unsigned short int fix;
-  init_port ();
+  unsigned short int i, j, temp, fix;
+
   set_ai_data (3, (unsigned char) (0x10 | (hi_word >> 8)));
   set_ai_data (2, (unsigned char) hi_word);
-//   set_ai_data (3, 0x10);
-//   set_ai_data (2, (unsigned char) hi_word);
   for (i = 0; i < 0x40; i++)
     {
       unpass = 3;
@@ -574,18 +321,14 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
           set_ai_data (1, (unsigned char) ((i << 1) | lo_word));
           set_ai_data (0, 0);
           set_ai (4);
-          set_data_read         // ninit=0, nwrite=1
+          set_data_read                         // ninit=0, nwrite=1
           fix = i << 8;
           for (j = 0; j < 256; j++)
             {
               temp = inportw (port_c);
-              if (temp != mix.bufferx[j + fix])
+              if (temp != buffer[j + fix])
                 {
-//             printf("verify error!\07\n");
-//             printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
                   outportb (port_a, 0x0b);      // all pin=0 for debug
-//             if (disp_on) printf("#");
-                  init_port ();
                   set_ai_data (3, (unsigned char) (0x10 | (hi_word >> 8)));
                   set_ai_data (2, (unsigned char) hi_word);
                   unpass--;
@@ -599,234 +342,152 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
             break;
         }
     }
-//   outportb(ai,0);
-//   printf("\na[7..0]=%02x\n",inportb(data));
-//   outportb(ai,1);
-//   printf("a[15..8]=%02x\n",inportb(data));
-//   end_port();
+
+/*
+  outportb (ai,0);
+  printf ("\na[7..0]=%02x\n", inportb (data));
+  outportb(ai, 1);
+  printf("a[15..8]=%02x\n", inportb (data));
+*/
   return 0;
 }
 
-void
-read_adr (void)
+
+unsigned long int
+get_address (void)
 {
-  set_ai_data (6, 0x0a);        // enable pc mode
-  set_ai_data (7, 0x05);        // enable pc mode
-  printf ("\na[31..0]=");
+  unsigned long int address;
+
+  set_ai_data (6, 0x0a);                        // enable pc mode
+  set_ai_data (7, 0x05);                        // enable pc mode
+
   set_ai (3);
-  set_data_read                 // ninit=0, nwrite=1
-  printf ("%02x", inportb (port_c));
+  set_data_read                                 // ninit=0, nwrite=1
+  address = inportb (port_c) << 24;
+
   set_ai (2);
-  set_data_read                 // ninit=0, nwrite=1
-  printf ("%02x", inportb (port_c));
+  set_data_read
+  address |= inportb (port_c) << 16;
+
   set_ai (1);
-  set_data_read                 // ninit=0, nwrite=1
-  printf ("%02x", inportb (port_c));
+  set_data_read
+  address |= inportb (port_c) << 8;
+
   set_ai (0);
-  set_data_read                 // ninit=0, nwrite=1
-  printf ("%02x\n", inportb (port_c));
-  end_port ();
+  set_data_read
+  address |= inportb (port_c);
+
+  return address;
 }
 
-void
-read_some (void)
-{
-  init_port ();
-  set_ai_data (0, 0);
-  set_ai_data (1, 0);
-  set_ai_data (2, 0);
-  set_ai_data (3, 0x10);
-  set_ai (4);
-  set_data_read                 // ninit=0, nWrite=1
-  for (i = 0; i < 64; i++)
-    {
-      mix.bufferx[i] = inportw (port_c);
-    }
-  dump_buffer ();
-  read_adr ();
-}
 
 unsigned char
 check_card (void)
 {
-  init_port ();
   set_ai_data (3, 0x12);
   set_ai_data (2, 0x34);
   set_ai_data (1, 0x56);
   set_ai_data (0, 0x78);
+
   set_ai (3);
-  set_data_read                 // ninit=0, nwrite=1
+  set_data_read                                 // ninit=0, nwrite=1
   if ((inportb (port_c) & 0x1f) != 0x12)
     return 1;
+
   set_ai (2);
-  set_data_read                 // ninit=0, nwrite=1
+  set_data_read
   if (inportb (port_c) != 0x34)
     return 1;
+
   set_ai (1);
-  set_data_read                 // ninit=0, nwrite=1
+  set_data_read
   if (inportb (port_c) != 0x56)
     return 1;
+
   set_ai (0);
-  set_data_read                 // ninit=0, nwrite=1
+  set_data_read
   if (inportb (port_c) != 0x78)
     return 1;
-  end_port ();
+
   return 0;
 }
 
-short int
-read_file (void)
-{
-  if (fread ((char *) mix.buffer, sizeof (char), trans_size, fptr) != trans_size)
-    {
-      fclose (fptr);            /* read data error */
-      return -1;
-    }
-#if 0
-  printf (".");
-  fflush (stdout);
-#endif
-  pos += trans_size;
-  if (!(pos % (trans_size * 2)))
-    ucon64_gauge (init_time, pos, size);
-  return 0;
-}
-
-short int
-download_n64 ()
-{
-  if ((fptr = fopen (file_name, "rb")) == NULL)
-    {                           /* open error */
-      printf ("open error!\07\n");
-      return -1;
-    }
-  size = q_fsize (file_name);
-
-  if (sel == 0)
-    printf ("Downloading");
-  else
-    printf ("Verifying");
-  for (page = 0; page < 0x400; page++)
-    {
-      if (read_file () != 0)
-        {
-          /*fclose(fptr); */
-          fputc ('\n', stdout);
-          return 0;
-        }
-      if (sel == 0)
-        {
-          if (write_32k (page, 0))
-            {
-              read_adr ();
-              /*fclose(fptr); */
-              return -1;
-            }
-        }
-      else
-        {
-          if (verify_32k (page, 0))
-            {
-              read_adr ();
-              /*fclose(fptr); */
-              return -1;
-            }
-        }
-      if (read_file () != 0)
-        {
-          /*fclose(fptr); */
-          return -1;
-        }
-      if (sel == 0)
-        {
-          if (write_32k (page, 0x80))
-            {
-              read_adr ();
-              /*fclose(fptr); */
-              return -1;
-            }
-        }
-      else
-        {
-          if (verify_32k (page, 0x80))
-            {
-              read_adr ();
-              /*fclose(fptr); */
-              return -1;
-            }
-        }
-
-    }
-  fputc ('\n', stdout);
-  /*fclose(fptr); */
-  end_port ();
-  return 0;
-}
 
 void
 gen_pat_32k (unsigned short int offset)
 {
+  int i;
+
   for (i = 0; i < 0x4000; i++)
-    {
-      mix.bufferx[i] = i + offset;
-    }
+    buffer[i] = i + offset;
 }
 
 
 unsigned short int
 test_dram (void)
 {
-  unsigned short int pages;
-  disp_on = 0;                  // display off
-  sel = 0;                      //write 32k dram data
+  int pages = 0, page;
+
   gen_pat_32k (0x0000);
   write_32k (0, 0);
+
   gen_pat_32k (0x8000);
   write_32k (0x100, 0);
+
   gen_pat_32k (0x0000);
-  pages = 0;
-  if (verify_32k (0, 0) == 0)
-    {                           // find lower 128Mbits
-      pages = 0x100;
-    }
+  if (verify_32k (0, 0) == 0)                   // find lower 128 Mbits
+    pages = 0x100;
   gen_pat_32k (0x8000);
-  if (verify_32k (0x100, 0) == 0)
-    {                           // find upper 128Mbits
-      pages = 0x200;
-    }
-  printf ("DRAM testing...");
+  if (verify_32k (0x100, 0) == 0)               // find upper 128 Mbits
+    pages = 0x200;
+
+  printf ("Testing DRAM...\n");
+
   for (page = 0; page < pages; page++)
     {
       gen_pat_32k ((unsigned short int) (page * 2));
       if (write_32k (page, 0))
         return 0;
       else
-        printf ("w");
-      fflush (stdout);
+        {
+          printf ("w");
+          fflush (stdout);
+        }
+
       gen_pat_32k ((unsigned short int) (page * 2 + 1));
       if (write_32k (page, 0x80))
         return 0;
       else
-        printf ("w");
-      fflush (stdout);
+        {
+          printf ("w");
+          fflush (stdout);
+        }
     }
+
+  fputc ('\n', stdout);
   for (page = 0; page < pages; page++)
     {
       gen_pat_32k ((unsigned short int) (page * 2));
       if (verify_32k (page, 0))
         return 0;
       else
-        printf ("v");
-      fflush (stdout);
+        {
+          printf ("v");
+          fflush (stdout);
+        }
       gen_pat_32k ((unsigned short int) (page * 2 + 1));
       if (verify_32k (page, 0x80))
         return 0;
       else
-        printf ("v");
-      fflush (stdout);
+        {
+          printf ("v");
+          fflush (stdout);
+        }
     }
+
   return pages;
 }
+
 
 #if 0
 static void
@@ -837,203 +498,106 @@ usage (char *progname)
   fprintf (stderr, "-v : verify File data vs DRAM data.\n");
   fprintf (stderr, "-t : test DRAM.\n");
   fprintf (stderr, "-a : enable cartridge and unprotect.\n");
-  /*end_port(); */
   exit (2);
   return;
 }
 #endif
 
-/*************************************************
-*                  MAIN ENTRY                    *
-*************************************************/
-int
-doctor64jr_main (int argc, char *argv[])
-{
-  char card_present;
-//  char *progname = argv[0];
-  unsigned short int dram_size;
-#if 0
-  printf ("---------- DrJr pc-download EPP version 1.0 ----------\n");
-/*
-   port[0]=peek(0x40,8); 		// lpt1 base address
-   port[1]=peek(0x40,10);		// lpt2 base address
-   if (port[0]==0){
-      printf("No Printer Port Avialable!\07\n");
-      return -1;
-   }
-*/
-
-  port[0] = 0x378;
-  port[1] = 0;
-  ioperm (0x378, 6, 1);
-#endif
-  if (argc == 1)
-    return -1; //usage (progname);
-  for (i = 1; i < argc; i++)
-    {
-      if (argv[i][0] == '-')
-        {
-          char *c = argv[i] + 1;
-          if (*(c + 1) != '\0')
-            return -1; //usage (progname);
-          switch (*c)
-            {
-            case 'w':
-              write_en = 1;
-              break;
-            case 'v':
-              verify_en = 1;
-              break;
-            case 't':
-              test_en = 1;
-              break;
-            case 'W':
-              write_en = 1;
-              break;
-            case 'V':
-              verify_en = 1;
-              break;
-            case 'T':
-              test_en = 1;
-              break;
-            case 'a':
-              write_en = 3;
-              break;
-            default:
-              return -1; //usage (progname);
-            }
-        }
-      else
-        {
-          if (file_name == NULL)
-            {
-              file_name = argv[i];
-            }
-          else
-            {
-              return -1; //usage (progname);
-            }
-        }
-    }
-//   printf("program name=%s\n",progname);
-//   printf("write_en=%x, verify=%x, test=%x\n",write_en,verify_en,test_en);
-//   printf("filename=%s\n",file_name);
-
-  wv_mode = 0;
-  if (verify_en)
-    {                           // if sel=2 for write/verify
-      sel = 1;                  // sel=1 for verify
-    }
-  else
-    {
-      sel = 0;                  // sel=0 for write
-    }
-  if (port[1] == 0)
-    port_no = 1;                // only one printer port
-  else
-    port_no = 2;                // two printer port
-  card_present = 0;
-  for (i = 0; i < port_no; i++)
-    {
-      port_8 = port[i];
-      port_9 = port_8 + 1;
-      port_a = port_9 + 1;
-      port_b = port_a + 1;
-      port_c = port_b + 1;
-      if (check_card () == 0)
-        {
-          card_present = 1;
-          break;
-        }
-    }
-
-  if (card_present == 0)
-    {
-      printf ("\nNo V64jr card present!\07\n\n");
-      return -1;
-    }
-  else
-    printf ("V64jr card found at port%d\n", port_no);
-  init_port ();
-  set_ai (3);
-  set_data_read
-  printf ("control(rst,wdf,rcf) = %x\n", inportb (port_c));
-
-  if (test_en)
-    {
-      dram_size = test_dram ();
-      if (dram_size)
-        {
-          printf ("\nDRAM size=%dMbits\n", (dram_size / 2));
-        }
-      else
-        {
-          printf ("Error!\07\n");
-        }
-    }
-  disp_on = 1;                  // display #/*
-  if (file_name != NULL)
-    {
-      if (download_n64 () != 0)
-        printf ("download error!\n");
-    }
-  if (write_en)
-    printf ("dram write protect disable\n");
-  if (write_en & 2)
-    printf ("run cart enable\n");
-
-//   set_ai_data(5,write_en);           // d0=0 is write protect mode
-  end_port ();
-  return 0;
-}
-
-/*
-  It will save you some work if you don't fully integrate the code above with
-  uCON64's code, because it is a project separate from the uCON64 project.
-*/
-int doctor64jr_argc;
-char *doctor64jr_argv[128];
 
 int
 doctor64jr_read (const char *filename, unsigned int parport)
 {
-  char buf[MAXBUFSIZE];
-
-  misc_parport_print_info ();
-  init_time = time (0);
-
-  port[0] = parport;
-  port[1] = 0;
-
-  strcpy (buf, filename);
-
-  doctor64jr_argv[0] = "jrsend";
-  doctor64jr_argv[1] = buf;
-  doctor64jr_argc = 2;
-
-  doctor64jr_main (doctor64jr_argc, doctor64jr_argv);
-
-  return 0;
+  (void) filename;
+  (void) parport;
+  return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented for the\n"
+                          "       Doctor V64 Junior\n");
 }
 
 
 int
 doctor64jr_write (const char *filename, unsigned int parport)
 {
-  char buf[MAXBUFSIZE];
+  unsigned int enable_write = 0, init_time, size, bytesread, bytessend = 0, page;
+  FILE *file;
 
   misc_parport_print_info ();
+
+  port_8 = parport;
+  port_9 = port_8 + 1;
+  port_a = port_9 + 1;
+  port_b = port_a + 1;
+  port_c = port_b + 1;
+
+  init_port (enable_write);
+
+  if (check_card () != 0)
+    {
+      fprintf (stderr, "ERROR: No V64jr card present\n");
+      end_port (enable_write);
+      exit (1);
+    }
+
+  set_ai (3);
+  set_data_read
+  inportb (port_c);                             // required? - dbjh
+
+  wv_mode = 0;
+
+  if ((file = fopen (filename, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned short int *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
+      exit (1);
+    }
+
+  size = q_fsize (filename);
+  printf ("Send: %d Bytes (%.4f Mb)\n", size, (float) size / MBIT);
+
+#if 0
+  if (dram_test)
+    {
+      dram_size = test_dram ();
+      if (dram_size)
+        printf ("\nDRAM size=%dMbits\n", (dram_size / 2));
+      else
+        fprintf (stderr, "\nERROR: DRAM test failed\n");
+      return 0;
+    }
+#endif
+
   init_time = time (0);
+  for (page = 0; page < 0x400; page++)
+    {
+      bytesread = fread ((unsigned char *) buffer, 1, BUFFERSIZE, file);
+      if (write_32k (page, 0))
+        {
+          fprintf (stderr, "ERROR: Transfer failed at address 0x%8lx", get_address ());
+          break;
+        }
 
-  port[0] = parport;
-  port[1] = 0;
-  strcpy (buf, filename);
+      bytesread += fread ((unsigned char *) buffer, 1, BUFFERSIZE, file);
+      if (write_32k (page, 0))
+        {
+          fprintf (stderr, "ERROR: Transfer failed at address 0x%8lx", get_address ());
+          break;
+        }
 
-  doctor64jr_argv[0] = "jrsend";
-  doctor64jr_argv[1] = buf;
-  doctor64jr_argc = 2;
+      bytessend += bytesread;
+      ucon64_gauge (init_time, bytessend, size);
+    }
+  fputc ('\n', stdout);
 
-  doctor64jr_main (doctor64jr_argc, doctor64jr_argv);
+  if (enable_write)                             // 1 or 3
+    printf ("DRAM write protect disabled\n");
+  if (enable_write & 2)                         // 3
+    printf ("Run cartridge enabled\n");
+
+//  set_ai_data(5, enable_write);                 // d0=0 is write protect mode
+  end_port (enable_write);
 
   return 0;
 }

@@ -26,7 +26,6 @@ extern const st_usage_t lynxit_usage[];
 
 #ifdef PARALLEL
 extern int lynxit_read_rom (const char *filename, unsigned int parport);
-extern int lynxit_write_rom (const char *filename, unsigned int parport);
 #endif // PARALLEL
 
 #define LYNXIT_HEADER_START 0

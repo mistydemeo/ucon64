@@ -3,11 +3,15 @@
 @DEFINE_DLOPEN_MAKE@
 @DEFINE_ZLIB_MAKE@
 
-libdir = @libdir@
-#INSTALL = @INSTALL@
-#LIBTOOL = @LIBTOOL@
-INSTALL = install -c
-LIBTOOL = libtool
+# Top level hierarchy
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+# Pathname of directory to install the include files
+includedir = @includedir@
+# Pathname of directory to install the library
+libdir =  @libdir@
+# Pathname of directory to install the man page
+mandir = @mandir@
 
 CC=@CC@
 CFLAGS0=@CFLAGS@ @DEFS@
@@ -16,6 +20,10 @@ ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
 LDFLAGS=-s
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
 
 LIBNAME=discmage
 OBJECTS=libdm_misc.o dllinit.o misc.o format/format.o format/cdi.o\
@@ -232,10 +240,10 @@ endif                                   # msys
 endif                                   # cygwin
 
 
-#ifndef DLOPEN
-#install:
-#	$(LIBTOOL) --mode=install $(INSTALL) $(FULLLIBNAME) $(libdir)/$(FULLLIBNAME)
-#endif
+ifndef DLOPEN
+install:
+	$(LIBTOOL) --mode=install $(INSTALL) $(FULLLIBNAME) $(libdir)/$(FULLLIBNAME)
+endif
 
 # Dependencies
 LIBDM_STD_H=libdiscmage.h misc.h dxedll_priv.h format/format.h

@@ -21,6 +21,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifdef  HAVE_CONFIG_H
 #include "../config.h"
 #endif
+#include "../misc.h"
+#include "../libdiscmage.h"
+#include "../libdm_misc.h"
 #include "format.h"
 #ifdef  DJGPP
 #include "../dxedll_priv.h"
@@ -166,7 +169,7 @@ cue_init (dm_image_t *image)
     {
       dm_track_t *track = (dm_track_t *) &image->track[t];
       
-      if (!dm_track_init (track, fh))
+      if (!format_track_init (track, fh))
         {
           track->track_len =
           track->total_len = q_fsize (image->fname) / track->sector_size;

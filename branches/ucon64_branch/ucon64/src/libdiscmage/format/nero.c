@@ -25,6 +25,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../misc.h"
+#include "../libdiscmage.h"
+#include "../libdm_misc.h"
 #include "format.h"
 #ifdef  DJGPP
 #include "../dxedll_priv.h"

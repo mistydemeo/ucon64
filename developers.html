@@ -161,8 +161,8 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <p>
 <a name="3"><b>Q3</b>: How do I get the source of uCON64, using CVS as an anonymous user?</a><br>
 <b>A</b>: For read-only access you must have CVS installed. If you have never logged in on
-   the CVS server you will first have to do that. You only have to login once in your life.
-   So, if you have already logged in before in your life you can skip this step.<br>
+   the CVS server you will first have to do that. You only have to login once. So, if you
+   have already logged in before you can skip this step.<br>
    To login, type:<br>
 <br>
    cvs -d:pserver:anonymous@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 login<br>
@@ -238,16 +238,16 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    nes/nes.c/nes_init(). Each init function tries to determine if the ROM file
    belongs to its console type. If that is the case it returns 0, otherwise
    -1.<br>
-   Some ROM file types contain much information such as the internal name,
-   country and creator of the game that can be used to fill
-   ucon64.c/main()/rom. SNES ROM files are an example of this type of file. For
-   other ROM file types this information is not present inside the ROM file.
-   NES ROMs are an example of that type. In that case uCON64 uses a large
-   database in db.h to make it possible to display the country, creator and
-   full name of the game. ucon64.c/ucon64_init() calls the function
-   ucon64_db.c/ucon64_dbsearch() that uses the CRC32 of the ROM file data to
-   find the required information in the database. If the information could be
-   found ucon64_db.c/ucon64_dbsearch() fills ucon64.c/main()/rom with it.<br>
+   Some ROM file types contain information such as the internal name, country
+   and creator of the game that can be used to fill ucon64.c/main()/rom. SNES
+   ROM files are an example of this type of file. For other ROM file types this
+   information is not present inside the ROM file. NES ROMs are an example of
+   that type. In that case uCON64 uses a large database in db.h to make it
+   possible to display the country, creator and full name of the game.
+   ucon64.c/ucon64_init() calls the function ucon64_db.c/ucon64_dbsearch() that
+   uses the CRC32 of the ROM file data to find the required information in the
+   database. If the information could be found ucon64_db.c/ucon64_dbsearch()
+   fills ucon64.c/main()/rom with it.<br>
    After that if ucon64.show_nfo has the value UCON64_YES uCON64 will call
    ucon64.c/ucon64_nfo() which displays the values and strings of
    ucon64.c/main()/rom. For some options it doesn't make sense to display ROM

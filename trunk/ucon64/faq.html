@@ -138,8 +138,8 @@ Q24: <a href="#24">Why does uCON64 create ucon64.cfg (DOS executable) or .ucon64
 <p>
 <a name="7"><b>Q7</b>: I tried to dump a SNES cartridge using a Super Wild Card connected to my PC with an
    interlink cable, but it didn't work. What's wrong?</a><br>
-<b>A</b>: You shouldn't use an interlink cable, but an ordinary parallel cable. Use the options
-   "-snes -help | more" to see how the pins of the connectors should be connected.<br>
+<b>A</b>: You shouldn't use an interlink cable, but an ordinary parallel cable. Look at the end of
+   the source file src/backup/swc.c to see how the pins of the connectors should be connected.<br>
 <br>
 <p>
 <a name="8"><b>Q8</b>: I have a SNES ROM of which GoodSNES says it's good, but uCON64 says it's bad.

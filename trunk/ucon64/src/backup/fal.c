@@ -1726,7 +1726,7 @@ fal_write_sram (char *filename, unsigned int parport, int bank)
 int
 fal_usage (int argc, char *argv[])
 {
-    printf ("%s\n", fal_TITLE);
+  printf ("%s\n", fal_TITLE);
 
   printf
     ("  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"

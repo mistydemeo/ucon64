@@ -53,6 +53,7 @@ ifdef DJGPP
 	del patch\*.o
 	del console\*.o
 	del backup\*.o
+	del libdis~1\*.o
 	del $(TARGET)
 else                                    # Unix or BeOS
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \

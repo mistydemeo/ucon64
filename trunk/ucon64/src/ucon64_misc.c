@@ -421,7 +421,7 @@ int parport_gauge(time_t init_time, long pos, long size)
   if (pos > size)                               //  by zero below)
     return -1;
 
-  cps = pos/curr;				// # bytes/second
+  cps = pos/curr;				// # bytes/second (average transfer speed)
   left = (size - pos)/cps;
 
   buf[0] = 0;
@@ -432,7 +432,7 @@ int parport_gauge(time_t init_time, long pos, long size)
   printf("\r%10lu Bytes [%s] %lu%%, CPS=%lu, ",
          pos, buf, (unsigned long) 100*pos/size, (unsigned long) cps);
 
-  if (pos == size)                              // last printed CPS is average transfer speed
+  if (pos == size)
     printf("TOTAL=%03ld:%02ld\n", (long) curr/60, (long) curr%60);
   else
     printf("ETA=%03ld:%02ld   ", (long) left/60, (long) left%60);
@@ -440,74 +440,6 @@ int parport_gauge(time_t init_time, long pos, long size)
   fflush(stdout);
 
   return 0;
-}
-
-
-#define SEND_MAX_WAIT 0x300000
-
-int parport_write(	char src[]
-			,unsigned int len
-			,unsigned int parport
-)
-{
-long maxwait;
-unsigned int i;
-
-for( i=0; i<len; i++ )
-{
-	maxwait = SEND_MAX_WAIT;
-	if( (in1byte(parport+2) & 1) == 0 )       /* check ~strobe */
-	{
-		while( ((in1byte(parport+2) & 2) != 0) && maxwait-- ) ;  /* wait for */
-		if( maxwait <= 0 ) return 1;                        /* auto feed == 0 */
-		out1byte(parport, src[i]);         /* write data    */
-		out1byte(parport+2, 5);                  /* ~strobe = 1   */
-	}
-	else
-	{
-		while( ((in1byte(parport+2) & 2) == 0) && maxwait-- ) ;  /* wait for */
-		if( maxwait <= 0 ) return 1;                        /* auto feed == 1 */
-		out1byte(parport, src[i]);         /* write data    */
-		out1byte(parport+2, 4);                  /* ~strobe = 0   */
-	}
-}
-return 0;
-}
-
-
-
-
-#define REC_HIGH_NIBBLE 0x80
-#define REC_LOW_NIBBLE 0x00
-#define REC_MAX_WAIT SEND_MAX_WAIT
-
-int parport_read(	char dest[]
-			,unsigned int len
-			,unsigned int parport
-)
-{
-int i;
-long maxwait;
-unsigned char c;
-
-for( i=0; i<len; i++ )
-{
-	out1byte(parport, REC_HIGH_NIBBLE);
-	maxwait = REC_MAX_WAIT;
-	while( ((in1byte(parport+1) & 0x80) == 0) && maxwait-- ) ; /* wait for ~busy=1 */
-	if( maxwait <= 0 ) return len-i;
-	c = (in1byte(parport+1) >> 3) & 0x0f; /* ~ack, pe, slct, ~error */
-
-	out1byte(parport, REC_LOW_NIBBLE);
-	maxwait = REC_MAX_WAIT;
-	while( ((in1byte(parport+1) & 0x80) != 0) && maxwait-- ) ; /* wait for ~busy=0 */
-	if( maxwait <= 0 ) return len-i;
-	c |= (in1byte(parport+1) << 1) & 0xf0; /* ~ack, pe, slct, ~error */
-
-	dest[i] = c;
-}
-out1byte(parport, REC_HIGH_NIBBLE);
-return 0;
 }
 
 #endif

@@ -20,9 +20,65 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "doctor64.h"
 
-
 #define SYNC_MAX_CNT 8192
 #define SYNC_MAX_TRY 32
+#define SEND_MAX_WAIT 0x300000
+#define REC_HIGH_NIBBLE 0x80
+#define REC_LOW_NIBBLE 0x00
+#define REC_MAX_WAIT SEND_MAX_WAIT
+
+
+int parport_write(char src[], unsigned int len, unsigned int parport)
+{
+long maxwait;
+unsigned int i;
+
+for( i=0; i<len; i++ )
+{
+	maxwait = SEND_MAX_WAIT;
+	if( (in1byte(parport+2) & 1) == 0 )       /* check ~strobe */
+	{
+		while( ((in1byte(parport+2) & 2) != 0) && maxwait-- ) ;  /* wait for */
+		if( maxwait <= 0 ) return 1;                        /* auto feed == 0 */
+		out1byte(parport, src[i]);         /* write data    */
+		out1byte(parport+2, 5);                  /* ~strobe = 1   */
+	}
+	else
+	{
+		while( ((in1byte(parport+2) & 2) == 0) && maxwait-- ) ;  /* wait for */
+		if( maxwait <= 0 ) return 1;                        /* auto feed == 1 */
+		out1byte(parport, src[i]);         /* write data    */
+		out1byte(parport+2, 4);                  /* ~strobe = 0   */
+	}
+}
+return 0;
+}
+
+int parport_read(char dest[], unsigned int len, unsigned int parport)
+{
+int i;
+long maxwait;
+unsigned char c;
+
+for( i=0; i<len; i++ )
+{
+	out1byte(parport, REC_HIGH_NIBBLE);
+	maxwait = REC_MAX_WAIT;
+	while( ((in1byte(parport+1) & 0x80) == 0) && maxwait-- ) ; /* wait for ~busy=1 */
+	if( maxwait <= 0 ) return len-i;
+	c = (in1byte(parport+1) >> 3) & 0x0f; /* ~ack, pe, slct, ~error */
+
+	out1byte(parport, REC_LOW_NIBBLE);
+	maxwait = REC_MAX_WAIT;
+	while( ((in1byte(parport+1) & 0x80) != 0) && maxwait-- ) ; /* wait for ~busy=0 */
+	if( maxwait <= 0 ) return len-i;
+	c |= (in1byte(parport+1) << 1) & 0xf0; /* ~ack, pe, slct, ~error */
+
+	dest[i] = c;
+}
+out1byte(parport, REC_HIGH_NIBBLE);
+return 0;
+}
 
 int syncHeader(unsigned int baseport)
 {
@@ -30,18 +86,18 @@ int i=0;
 
 out1byte(baseport, 0);                        /* data = 00000000    */
 out1byte(baseport+2, 4);                      /* ~strobe=0          */
-while( i<SYNC_MAX_CNT ) 
+while( i<SYNC_MAX_CNT )
 {
 	if( (in1byte(baseport+2) & 8) == 0 )      /* wait for select=0  */
 	{
       		out1byte(baseport, 0xaa);                 /* data = 10101010    */
       		out1byte(baseport+2, 0);                  /* ~strobe=0, ~init=0 */
-      		while( i<SYNC_MAX_CNT ) 
+      		while( i<SYNC_MAX_CNT )
       		{
         		if( (in1byte(baseport+2) & 8) != 0 )  /* wait for select=1  */
         		{
 				out1byte(baseport+2, 4);              /* ~strobe=0          */
-          			while( i<SYNC_MAX_CNT ) 
+          			while( i<SYNC_MAX_CNT )
           			{
             				if( (in1byte(baseport+2) & 8) == 0 ) /* w for select=0  */
             				{
@@ -92,9 +148,9 @@ int checkSync(unsigned int baseport)
 {
   int i, j;
 
-for( i=0; i<SYNC_MAX_CNT; i++ ) 
+for( i=0; i<SYNC_MAX_CNT; i++ )
 {
-    	if( ((in1byte(baseport+2) & 3) == 3) || ((in1byte(baseport+2) & 3) == 0) ) 
+    	if( ((in1byte(baseport+2) & 3) == 3) || ((in1byte(baseport+2) & 3) == 0) )
     	{
       		out1byte(baseport, 0);                        /* ~strobe, auto feed */
       		for( j=0; j<SYNC_MAX_CNT; j++ ) 

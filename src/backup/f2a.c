@@ -216,6 +216,19 @@ f2a_init_usb (void)
   f2a_recvmsg_t rm;
   char iclientu_fname[FILENAME_MAX];
 
+  if (sizeof (f2a_recvmsg_t) != 64)
+    {
+      fprintf (stderr, "ERROR: The size of f2a_recvmsg_t is not 64 bytes.\n"
+                       "       Please correct the source code or send a bug report\n");
+      exit (1);
+    }
+  if (sizeof (f2a_sendmsg_t) != 64)
+    {
+      fprintf (stderr, "ERROR: The size of f2a_sendmsg_t is not 64 bytes.\n"
+                       "       Please correct the source code or send a bug report\n");
+      exit (1);
+    }
+
   memset (&rm, 0, sizeof (rm));
 
   if (f2a_connect_usb ())
@@ -274,11 +287,20 @@ find_f2a:
             {
               if ((fp = open (EZDEV, O_WRONLY)) != -1)
                 {
-                  if (write (fp, f2afirmware, F2A_FIRM_SIZE) == -1)
+                  // The EZUSB2131 driver (version 1.0) only accepts one line of
+                  //  an Intel hex record file at a time...
+                  int wrote, w;
+                  for (wrote = 0; wrote < F2A_FIRM_SIZE; wrote += w)
                     {
-                      fprintf (stderr, "ERROR: Unable to upload F2A firmware (writing "
-                                         EZDEV": %s)\n", strerror (errno));
-                      return -1;
+                      if ((w = write (fp, f2afirmware + wrote, F2A_FIRM_SIZE - wrote)) == -1)
+                        {
+                          fprintf (stderr, "ERROR: Unable to upload F2A firmware (writing "
+                                             EZDEV": %s)\n", strerror (errno));
+                          return -1;
+                        }
+                      if (ucon64.quiet < 0)
+                        printf ("Wrote %d bytes (%d-%d of %d) to "EZDEV"\n",
+                                w, wrote, wrote + w, F2A_FIRM_SIZE);
                     }
                   close (fp);
                 }
@@ -327,7 +349,7 @@ f2a_info (f2a_recvmsg_t *rm)
 {
   f2a_sendmsg_t sm;
 
-  memset (&sm, 0, SENDMSG_SIZE);
+  memset (&sm, 0, sizeof (f2a_sendmsg_t));
   memset (rm, 0, sizeof (f2a_recvmsg_t));
 
   sm.command = me2le_32 (CMD_GETINF);
@@ -346,13 +368,13 @@ f2a_info (f2a_recvmsg_t *rm)
 #if 0
   {
     unsigned int i;
-    for (i = 0; i < (SENDMSG_SIZE / 4); i++)
+    for (i = 0; i < (sizeof (f2a_sendmsg_t) / 4); i++)
       printf ("%-2x %08X\n", i, *(((unsigned int *) (&sm)) + i));
 
     if (ucon64.quiet < 0)
       {
         printf ("info:");
-        for (i = 0; i < (SENDMSG_SIZE / 4); i++)
+        for (i = 0; i < (sizeof (f2a_sendmsg_t) / 4); i++)
           printf (" %08X", *(((unsigned int *) (rm)) + i));
         fputc ('\n', stdout);
       }
@@ -381,7 +403,7 @@ f2a_boot_usb (const char *ilclient_fname)
     }
 
   // boot the GBA
-  memset (&sm, 0, SENDMSG_SIZE);
+  memset (&sm, 0, sizeof (f2a_sendmsg_t));
   sm.command = me2le_32 (CMD_MULTIBOOT1);
   misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE);
   sm.command = me2le_32 (CMD_MULTIBOOT2);
@@ -418,7 +440,7 @@ f2a_read_usb (int address, int size, const char *filename)
   f2a_sendmsg_t sm;
   char buffer[1024];
 
-  memset (&sm, 0, SENDMSG_SIZE);
+  memset (&sm, 0, sizeof (f2a_sendmsg_t));
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
@@ -466,10 +488,9 @@ f2a_write_usb (int n_files, char **files, int address)
   FILE *file;
 
   // initialize command buffer
-  memset (&sm, 0, SENDMSG_SIZE);
+  memset (&sm, 0, sizeof (f2a_sendmsg_t));
   sm.command = me2le_32 (CMD_WRITEDATA);
   sm.magic = me2le_32 (MAGIC_NUMBER);
-//  sm.unknown = me2le_32 (0xa);                  // no idea what this is...
   sm.unknown = me2le_32 (is_sram_data ? 0x06 : 0x0a); // SRAM => 0x06, ROM => 0x0a
 
   if (n_files > 1 && !is_sram_data)

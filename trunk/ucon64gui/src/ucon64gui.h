@@ -39,6 +39,8 @@ struct ucon64gui_
   char ucon64_output[MAXBUFSIZE];
 
   int console;
+
+  char configfile[NAME_MAX];
 }
 ucon64gui;
 

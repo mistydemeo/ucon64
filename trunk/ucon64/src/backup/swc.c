@@ -666,8 +666,11 @@ int swc_usage(int argc, char *argv[])
 
   printf("  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
          "                receives automatically when $ROM does not exist\n"
+         "                Press q to abort ^C will cause invalid state of backup unit\n"
          "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
          "                receives automatically when $ROM does not exist\n"
+         "                Press q to abort ^C will cause invalid state of backup unit\n"
+/*
 #if 1
          "\n"
          "Press q to abort sending or receiving. Don't press Ctrl-C. If you do the copier\n"
@@ -675,6 +678,7 @@ int swc_usage(int argc, char *argv[])
          "hang. The program can appear to hang if you selected the wrong port for your\n"
          "copier or if the copier is in a wrong state.\n"
 #endif
+*/
         );
   //TODO more info like technical info about cabeling and stuff for the copier
 

@@ -98,7 +98,7 @@ smd_read_rom (const char *filename, unsigned int parport)
   size = blocksleft * 16384;                    // size in bytes for ucon64_gauge() below
   printf ("Receive: %d Bytes (%.4f Mb)\n", size, (float) size / MBIT);
 
-  wait (32);
+  wait2 (32);
   ffe_send_command0 (0x2001, 0);
 
   printf ("Press q to abort\n\n");

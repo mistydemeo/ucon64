@@ -186,12 +186,14 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
 <br>
    <b>Configuring uCON64</b><br>
    Some features of uCON64 are configurable (only) at compile time. They are:<br>
-   - whether uCON64 will produce debug output (default: off)<br>
+   - whether uCON64 will produce debug output (default: no)<br>
    - whether uCON64 will have support for parallel port backup units (default:
-   on)<br>
-   - whether uCON64 will use color in its display output (default: on)<br>
-   - whether uCON64 will be able to read .gz and .zip files (default: off if a
+   yes)<br>
+   - whether uCON64 will be able to use color in its display output (default:
+   yes)<br>
+   - whether uCON64 will be able to read .gz and .zip files (default: not if a
    Makefile "template" is used, see below)<br>
+   - whether uCON64 will be able to use the discmage library (default: yes)<br>
    - whether add-on libraries will be dynamically loaded or linked (default:
    loaded)<br>
 <br>
@@ -430,15 +432,14 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    There may be several reasons why uCON64 reports that the check sum is bad.
    It could have made a mistake while determining if the ROM is a HiROM or a
    LoROM dump. Try the switches -hi and -nhi and see if uCON64 reports the
-   check sum differently. A bigger problem is that the interleave detection
-   code (stolen from Snes9x ;-) is not reliable. Especially BS ROMs are often
-   detected as not being interleaved while they actually are. Try the switches
-   -int and -int2 and see if you get better results. If the check sum is
-   reported as good it is very likely that the ROM is really good.
-   Alternatively, you may want to convert the ROM to a non-interleaved format
-   with -dint and run uCON64 on the converted ROM. That gives the best results.
-   Luckily you wil not find many interleaved ROM dumps that uCON64 cannot
-   handle, probably because Snes9x and ZSNES often cannot handle them either.<br>
+   check sum differently. Sometimes ROM dumps are detected as not being
+   interleaved while they actually are. Try the switches -int and -int2 and see
+   if you get better results. If the check sum is reported as good it is likely
+   that the ROM is really good. Alternatively, you may want to convert the ROM
+   to a non-interleaved format with -dint and run uCON64 on the converted ROM.
+   That gives the best results. Luckily you wil not find many interleaved ROM
+   dumps that uCON64 cannot handle, probably because Snes9x and ZSNES often
+   cannot handle them either.<br>
 <br>
 <p>
 <a name="10"><b>Q10</b>: I have a SNES ROM of which Snes9x and ZSNES say it is

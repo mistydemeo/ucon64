@@ -99,7 +99,7 @@ const st_getopt2_t gd_usage[] =
 #define GD6_RX_SYNC_TIMEOUT_ATTEMPTS 0x2000
 #define GD6_SYNC_RETRIES 16
 
-#if     defined _WIN32 && !defined __MINGW32__
+#ifdef  _MSC_VER
 // Visual C++ doesn't allow inline in C source code
 #define inline __inline
 #endif

@@ -504,7 +504,7 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
     }
 
   if (!track->mode && flags & DM_WAV)
-    writewavheader (fh2, track->track_len);
+    misc_wav_write_header_v3 (fh2, track->track_len * 2352); //TODO: get that 2352 value from somewhere
 
   fseek (fh, track->track_start, SEEK_SET); // start of track
   // skip pregap (always?)
@@ -773,7 +773,7 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
     }
 #endif
 
-  printf ("%d Bytes (%.4f Mb)\n\n", filesize, TOMBIT_F (filesize));
+  printf ("%d Bytes (%.4f MB)\n\n", filesize, (float) filesize / (1024 * 1024));
   printf ("Type: %s\n", image->desc);
 
   if (image->misc[0])
@@ -831,11 +831,11 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
       printf ("Track: %d %s", t + 1, buf);
 
       dm_lba_to_msf (track->track_len, &min, &sec, &frames);
-      printf ("\n  %d Sectors, %d:%02d/%02d MSF, %d Bytes (%.4f Mb)",
+      printf ("\n  %d Sectors, %d:%02d/%02d MSF, %d Bytes (%.4f MB)",
         (int) track->total_len,
         min, sec, frames,
         (int) (track->total_len * track->sector_size),
-        TOMBIT_F (track->total_len * track->sector_size));
+        (float) (track->total_len * track->sector_size) / (1024 * 1024));
 
       fputc ('\n', stdout);
 

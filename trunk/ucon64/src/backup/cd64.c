@@ -466,9 +466,7 @@ cd64_write_mempack (const char *filename, int index)
   if (ucon64.io_mode == CD64BIOS)
     index = -1;
   cd64_starttime = time (NULL);
-//  cd64_upload_mempak (cd64, file, index);
-  fputs ("ERROR: The function for uploading memory pack data is not yet implemented for\n"
-         "       the CD64\n", stderr);
+  cd64_upload_mempak (cd64, file, index);
 
   cd64->devclose (cd64);
   fclose (file);

@@ -1,12 +1,10 @@
 CC=cl.exe
 
 !ifdef DEBUG
-CFLAGS=/nologo /Zi /Oi /GZ /W3 /DDEBUG
+CFLAGS=/nologo /I. /Zi /Oi /GZ /W3 /DDEBUG
 !else
-CFLAGS=/nologo /W3 /O2
+CFLAGS=/nologo /I. /W3 /O2
 !endif
-
-INC=/I.
 
 DEFAULT_BUILD = 1
 
@@ -42,19 +40,19 @@ default: all
 
 all:	cd64.lib cd64.dll
 
-# Libcd64 stuff
+# libcd64 stuff
 
 cd64io.obj: cd64io.c
-	$(CC) $(CFLAGS) $** /c /Fo$@ $(INC)
+	$(CC) $(CFLAGS) $** /c /Fo$@
 
 cd64lib.obj: cd64lib.c
-	$(CC) $(CFLAGS) $** /c /Fo$@ $(INC)
+	$(CC) $(CFLAGS) $** /c /Fo$@
 
 cd64.lib: cd64lib.obj cd64io.obj
-	lib.exe /NOLOGO $** /OUT:$@
+	lib.exe /NOLOGO $** $(LIBS) /OUT:$@
 
 cd64.dll: cd64lib.obj cd64io.obj
-	link.exe /NOLOGO /DLL $** /DEF:cd64.def /IMPLIB:cd64dll.lib /OUT:$@
+	link.exe /NOLOGO /DLL $** $(LIBS) /DEF:cd64.def /IMPLIB:cd64dll.lib /OUT:$@
 
 clean:
 	del *.obj

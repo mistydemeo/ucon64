@@ -15,10 +15,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
-#include <stdarg.h>                             /* va_arg() */
+#include <stdarg.h>
+#include <string.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#if defined __unix__ || defined __BEOS__        /* ioctl() */
+#if defined __unix__ || defined __BEOS__ /* ioctl() */
 #include <unistd.h>
 #endif
 
@@ -145,7 +147,7 @@ int cd64_open_ieee1284(struct cd64_t *cd64) {
 	else {
 		/* Search for the ppdev matching its base address. */
 		for (i = 0; i < pplist.portc; i++) {
-			if (cd64->port == pplist.portv[i]->base_addr) {
+			if (cd64->port == (int) pplist.portv[i]->base_addr) {
 				cd64->ppdev = pplist.portv[i];
 			}
 		}
@@ -271,20 +273,20 @@ int cd64_open_ppdev(struct cd64_t *cd64) {
 	realdev[128] = 0;
 
 	if ((cd64->ppdevfd = open(realdev, O_RDWR)) == -1) {
+		cd64->notice_callback2("open: %s", strerror(errno));
 		cd64->ppdevfd = 0;
-		perror("open");
 		return 0;
 	}
 
 	if (ioctl(cd64->ppdevfd, PPEXCL) != 0) {
-		perror("PPEXCL");
+		cd64->notice_callback2("PPEXCL: %s", strerror(errno));
 		close(cd64->ppdevfd);
 		cd64->ppdevfd = 0;
 		return 0;
 	}
 
 	if (ioctl(cd64->ppdevfd, PPCLAIM) != 0) {
-		perror("PPCLAIM");
+		cd64->notice_callback2("PPCLAIM: %s", strerror(errno));
 		close(cd64->ppdevfd);
 		cd64->ppdevfd = 0;
 		return 0;
@@ -300,7 +302,7 @@ int cd64_close_ppdev(struct cd64_t *cd64) {
 	if (cd64->ppdevfd == 0) return 1;
 
 	if (ioctl(cd64->ppdevfd, PPRELEASE) != 0) {
-		perror("PPRELEASE");
+		cd64->notice_callback2("PPRELEASE: %s", strerror(errno));
 		ret = 0;
 	}
 
@@ -320,26 +322,26 @@ static INLINE int cd64_wait_ppdev(struct cd64_t *cd64) {
 	int dir;
 	i = 0;
 
-	if (ioctl(cd64->ppdevfd, PPRSTATUS, &status) != 0) perror("PPRSTATUS");
-
+	if (ioctl(cd64->ppdevfd, PPRSTATUS, &status) != 0) cd64->notice_callback2("PPRSTATUS: %s", strerror(errno));
+  
 	while(status & 0x80) {
 		i++;
 		if (i >= BUSY_THRESHOLD) {
 			/* The PPA is in a weird state.
 			 * Try to knock some sense into it. */
 			dir = 1;
-			if (ioctl(cd64->ppdevfd, PPDATADIR, &dir) != 0) perror("PPDATADIR");
+			if (ioctl(cd64->ppdevfd, PPDATADIR, &dir) != 0) cd64->notice_callback2("PPDATADIR: %s", strerror(errno));
 			status = PARPORT_CONTROL_INIT | PARPORT_CONTROL_AUTOFD; /* 0x26 */
-			if (ioctl(cd64->ppdevfd, PPWCONTROL, &status) != 0) perror ("PPWCONTROL");
+			if (ioctl(cd64->ppdevfd, PPWCONTROL, &status) != 0) cd64->notice_callback2("PPWCONTROL: %s", strerror(errno));
 
 			dir = 0;
-			if (ioctl(cd64->ppdevfd, PPDATADIR, &dir) != 0) perror("PPDATADIR");
+			if (ioctl(cd64->ppdevfd, PPDATADIR, &dir) != 0) cd64->notice_callback2("PPDATADIR: %s", strerror(errno));
 			status = PARPORT_CONTROL_INIT; /* 0x04 */
-			if (ioctl(cd64->ppdevfd, PPWCONTROL, &status) != 0) perror("PPWCONTROL");
+			if (ioctl(cd64->ppdevfd, PPWCONTROL, &status) != 0) cd64->notice_callback2("PPWCONTROL: %s", strerror(errno));
 			status = PARPORT_CONTROL_INIT | PARPORT_CONTROL_STROBE; /* 0x05 */
-			if (ioctl(cd64->ppdevfd, PPWCONTROL, &status) != 0) perror("PPWCONTROL");
+			if (ioctl(cd64->ppdevfd, PPWCONTROL, &status) != 0) cd64->notice_callback2("PPWCONTROL: %s", strerror(errno));
 			status = PARPORT_CONTROL_INIT; /* 0x04 */
-			if (ioctl(cd64->ppdevfd, PPWCONTROL, &status) != 0) perror("PPWCONTROL");
+			if (ioctl(cd64->ppdevfd, PPWCONTROL, &status) != 0) cd64->notice_callback2("PPWCONTROL: %s", strerror(errno));
 			reset_tries++;
 			i = 0;
 			USLEEP(1);
@@ -347,7 +349,7 @@ static INLINE int cd64_wait_ppdev(struct cd64_t *cd64) {
 		if (cd64->abort) return 0;
 		if (reset_tries > MAX_TRIES) break;
 
-		if (ioctl(cd64->ppdevfd, PPRSTATUS, &status) != 0) perror("PPRSTATUS");
+		if (ioctl(cd64->ppdevfd, PPRSTATUS, &status) != 0) cd64->notice_callback2("PPRSTATUS: %s", strerror(errno));
 	}
 
 	return (reset_tries < MAX_TRIES);
@@ -362,13 +364,13 @@ int cd64_xfer_ppdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 
 	if (delayms) USLEEP(delayms);
 	dir = 1;
-	if (ioctl(cd64->ppdevfd, PPDATADIR, &dir) != 0) perror("PPDATADIR");
+	if (ioctl(cd64->ppdevfd, PPDATADIR, &dir) != 0) cd64->notice_callback2("PPDATADIR: %s", strerror(errno));
 	if (delayms) USLEEP(delayms);
 	ctl = PARPORT_CONTROL_INIT | PARPORT_CONTROL_AUTOFD;
-	if (ioctl(cd64->ppdevfd, PPWCONTROL, &ctl) != 0) perror("PPWCONTROL");
+	if (ioctl(cd64->ppdevfd, PPWCONTROL, &ctl) != 0) cd64->notice_callback2("PPWCONTROL: %s", strerror(errno));
 	if (delayms) USLEEP(delayms);
 	if (rd) {
-		if (ioctl(cd64->ppdevfd, PPRDATA, rd) != 0) perror("PPRDATA");
+		if (ioctl(cd64->ppdevfd, PPRDATA, rd) != 0) cd64->notice_callback2("PPRDATA: %s", strerror(errno));
 #if DEBUG_LOWLEVEL
 		printf("got %xh", *rd);
 		if (*rd > 0x20) printf(" (%c)", *rd);
@@ -378,13 +380,13 @@ int cd64_xfer_ppdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 
 	if (delayms) USLEEP(delayms);
 	dir = 0;
-	if (ioctl(cd64->ppdevfd, PPDATADIR, &dir) != 0) perror("PPDATADIR");
+	if (ioctl(cd64->ppdevfd, PPDATADIR, &dir) != 0) cd64->notice_callback2("PPDATADIR: %s", strerror(errno));
 	if (delayms) USLEEP(delayms);
 	ctl = PARPORT_CONTROL_INIT;
-	if (ioctl(cd64->ppdevfd, PPWCONTROL, &ctl) != 0) perror("PPWCONTROL");
+	if (ioctl(cd64->ppdevfd, PPWCONTROL, &ctl) != 0) cd64->notice_callback2("PPWCONTROL: %s", strerror(errno));
 	if (delayms) USLEEP(delayms);
 	if (wr) {
-		if (ioctl(cd64->ppdevfd, PPWDATA, wr) != 0) perror("PPWDATA");
+		if (ioctl(cd64->ppdevfd, PPWDATA, wr) != 0) cd64->notice_callback2("PPWDATA: %s", strerror(errno));
 #if DEBUG_LOWLEVEL
 		printf("put %xh", *wr);
 		if (*wr > 0x20) printf(" (%c)", *wr);
@@ -393,10 +395,10 @@ int cd64_xfer_ppdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms) 
 	}
 	if (delayms) USLEEP(delayms);
 	ctl = PARPORT_CONTROL_INIT | PARPORT_CONTROL_STROBE;
-	if (ioctl(cd64->ppdevfd, PPWCONTROL, &ctl) != 0) perror("PPWCONTROL");
+	if (ioctl(cd64->ppdevfd, PPWCONTROL, &ctl) != 0) cd64->notice_callback2("PPWCONTROL: %s", strerror(errno));
 	if (delayms) USLEEP(delayms);
 	ctl = PARPORT_CONTROL_INIT;
-	if (ioctl(cd64->ppdevfd, PPWCONTROL, &ctl) != 0) perror("PPWCONTROL");
+	if (ioctl(cd64->ppdevfd, PPWCONTROL, &ctl) != 0) cd64->notice_callback2("PPWCONTROL: %s", strerror(errno));
 
 	return 1;
 }
@@ -410,9 +412,9 @@ int cd64_open_portdev(struct cd64_t *cd64) {
 	if (cd64->portdevfd || cd64->port == 0) return 0;
 
 	if ((cd64->portdevfd = open("/dev/port", O_RDWR)) == -1) {
+		cd64->notice_callback2("open: %s", strerror(errno));
+		cd64->notice_callback2("portdev requires CAP_SYS_RAWIO capability");
 		cd64->portdevfd = 0;
-		perror("open");
-		fprintf(stderr, "portdev requires CAP_SYS_RAWIO capability\n");
 		return 0;
 	}
 
@@ -424,7 +426,7 @@ int cd64_close_portdev(struct cd64_t *cd64) {
 	if (cd64->portdevfd == 0) return 1;
 
 	if (close(cd64->portdevfd) == -1) {
-		perror("close");
+		cd64->notice_callback2("close: %s", strerror(errno));
 		return 0;
 	}
 	cd64->portdevfd = 0;
@@ -557,58 +559,58 @@ int cd64_xfer_portdev(struct cd64_t *cd64, uint8_t *wr, uint8_t *rd, int delayms
 
 #if defined _WIN32 || defined __CYGWIN__
 
-static void *open_module(char *module_name) {
+static void *open_module(char *module_name, struct cd64_t *cd64) {
 
 	void *handle = LoadLibrary(module_name);
 	if (handle == NULL) {
 		LPTSTR strptr;
 
-		perror("LoadLibrary");
+		cd64->notice_callback2("LoadLibrary: %s", strerror(errno));
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
 		              FORMAT_MESSAGE_FROM_SYSTEM |
 		              FORMAT_MESSAGE_IGNORE_INSERTS,
 		              NULL, GetLastError(),
 		              MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
 		              (LPTSTR) &strptr, 0, NULL);
-		fputs(strptr, stderr);
+		cd64->notice_callback2(strptr);
 		LocalFree(strptr);
 		exit(1);
 	}
 	return handle;
 }
 
-static void close_module(void *handle) {
+static void close_module(void *handle, struct cd64_t *cd64) {
 
 	if (!FreeLibrary((HINSTANCE) handle)) {
 		LPTSTR strptr;
 
-		perror("FreeLibrary");
+		cd64->notice_callback2("FreeLibrary: %s", strerror(errno));
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
 		              FORMAT_MESSAGE_FROM_SYSTEM |
 		              FORMAT_MESSAGE_IGNORE_INSERTS,
 		              NULL, GetLastError(),
 		              MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
 		              (LPTSTR) &strptr, 0, NULL);
-		fputs(strptr, stderr);
+		cd64->notice_callback2(strptr);
 		LocalFree(strptr);
 		exit(1);
 	}
 }
 
-static void *get_symbol(void *handle, char *symbol_name) {
+static void *get_symbol(void *handle, char *symbol_name, struct cd64_t *cd64) {
 
 	void *symptr = (void *) GetProcAddress((HINSTANCE) handle, symbol_name);
 	if (symptr == NULL) {
 		LPTSTR strptr;
 
-		perror("GetProcAddress");
+		cd64->notice_callback2("GetProcAddress: %s", strerror(errno));
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
 		              FORMAT_MESSAGE_FROM_SYSTEM |
 		              FORMAT_MESSAGE_IGNORE_INSERTS,
 		              NULL, GetLastError(),
 		              MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
 		              (LPTSTR) &strptr, 0, NULL);
-		fputs(strptr, stderr);
+		cd64->notice_callback2(strptr);
 		LocalFree(strptr);
 		exit(1);
 	}
@@ -662,7 +664,8 @@ static LONG new_exception_filter(LPEXCEPTION_POINTERS exception_pointers) {
 #endif /* _WIN32 || __CYGWIN__ */
 
 #if ((defined _WIN32 || defined __CYGWIN__ || defined __BEOS__ || \
-     defined __MSDOS__) && defined __i386__) || defined _MSC_VER
+     defined __MSDOS__) && \
+    (defined __i386__ || defined __x86_64__)) || defined _MSC_VER
 INLINE uint8_t inb(uint16_t port) {
 
 #ifdef __MSDOS__
@@ -732,7 +735,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 	 * 16-bit port range.  Find out what Linux kernels support it. */
 
 	if (cd64->port < 0x200) {
-		fprintf(stderr, "Erroneous port %xh\n", cd64->port);
+		cd64->notice_callback2("Erroneous port %xh", cd64->port);
 		return 0;
 	}
 
@@ -747,16 +750,16 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		}
 
 		if (ret == -1) {
-			perror("ioperm");
-			fputs("rawio requires CAP_SYS_RAWIO capability\n", stderr);
+			cd64->notice_callback2("ioperm: %s", strerror(errno));
+			cd64->notice_callback2("rawio requires CAP_SYS_RAWIO capability");
 			return 0;
 		}
 	}
 	else {
 		ret = iopl(3);
 		if (ret == -1) {
-			perror("iopl");
-			fputs("rawio requires CAP_SYS_RAWIO capability\n", stderr);
+			cd64->notice_callback2("iopl: %s", strerror(errno));
+			cd64->notice_callback2("rawio requires CAP_SYS_RAWIO capability");
 			return 0;
 		}
 	}
@@ -764,23 +767,23 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 	/* I cannot test i386_set_ioperm(), so I only use i386_iopl() */
 	ret = i386_iopl(3);
 	if (ret == -1) {
-		perror("i386_iopl");
+		cd64->notice_callback2("i386_iopl: %s", strerror(errno));
 		return 0;
 	}
 #elif defined __FreeBSD__
 	cd64->portdevfd = open("/dev/io", O_RDWR);
 	if (cd64->portdevfd == -1) {
 		cd64->portdevfd = 0;
-		perror("open");
-		fputs("Could not open I/O port device (/dev/io)\n", stderr);
+		cd64->notice_callback2("open: %s", strerror(errno));
+		cd64->notice_callback2("Could not open I/O port device (/dev/io)");
 		return 0;
 	}
 #elif defined __BEOS__
 	io_portfd = open("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
 	if (io_portfd == -1) {
 		io_portfd = 0;
-		perror("open");
-		fputs("Could not open I/O port device (no driver)\n", stderr);
+		cd64->notice_callback2("open: %s", strerror(errno));
+		cd64->notice_callback2("Could not open I/O port device (no driver)";
 		exit(1);
 	}
 #elif defined _WIN32 || defined __CYGWIN__
@@ -792,13 +795,13 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 		snprintf (fname, FILENAME_MAX, "%s" FILE_SEPARATOR_S "%s",
 		          cd64->io_driver_dir, "dlportio.dll");
 		if (access(fname, F_OK) == 0) {
-			io_driver = open_module(fname);
+			io_driver = open_module(fname, cd64);
 
 			io_driver_found = 1;
 			DlPortReadPortUchar = (unsigned char (__stdcall *) (unsigned long))
-			                      get_symbol(io_driver, "DlPortReadPortUchar");
+			                      get_symbol(io_driver, "DlPortReadPortUchar", cd64);
 			DlPortWritePortUchar = (void (__stdcall *) (unsigned long, unsigned char))
-			                       get_symbol(io_driver, "DlPortWritePortUchar");
+			                       get_symbol(io_driver, "DlPortWritePortUchar", cd64);
 			input_byte = dlportio_input_byte;
 			output_byte = dlportio_output_byte;
 		}
@@ -807,16 +810,16 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 			snprintf (fname, FILENAME_MAX, "%s" FILE_SEPARATOR_S "%s",
 			          cd64->io_driver_dir, "io.dll");
 			if (access(fname, F_OK) == 0) {
-				io_driver = open_module(fname);
+				io_driver = open_module(fname, cd64);
 
 				IsDriverInstalled = (short int (WINAPI *) ())
-				                    get_symbol(io_driver, "IsDriverInstalled");
+				                    get_symbol(io_driver, "IsDriverInstalled", cd64);
 				if (IsDriverInstalled()) {
 					io_driver_found = 1;
 					PortIn = (char (WINAPI *) (short int))
-					         get_symbol(io_driver, "PortIn");
+					         get_symbol(io_driver, "PortIn", cd64);
 					PortOut = (void (WINAPI *) (short int, char))
-					          get_symbol(io_driver, "PortOut");
+					          get_symbol(io_driver, "PortOut", cd64);
 					input_byte = io_input_byte;
 					output_byte = io_output_byte;
 				}
@@ -868,14 +871,14 @@ int cd64_close_rawio(struct cd64_t *cd64) {
 		}
 
 		if (ret == -1) {
-			perror("ioperm");
+			cd64->notice_callback2("ioperm: %s", strerror(errno));
 			return 0;
 		}
 	}
 	else {
 		ret = iopl(0);
 		if (ret == -1) {
-			perror("iopl");
+			cd64->notice_callback2("iopl: %s", strerror(errno));
 			return 0;
 		}
 	}
@@ -883,23 +886,23 @@ int cd64_close_rawio(struct cd64_t *cd64) {
 	/* I cannot test i386_set_ioperm(), so I only use i386_iopl() */
 	ret = i386_iopl(0);
 	if (ret == -1) {
-		perror("i386_iopl");
+		cd64->notice_callback2("i386_iopl: %s", strerror(errno));
 		return 0;
 	}
 #elif defined __FreeBSD__
 	if (close(cd64->portdevfd) == -1) {
-		perror("close");
+		cd64->notice_callback2("close: %s", strerror(errno));
 		return 0;
 	}
 	cd64->portdevfd = 0;
 #elif defined __BEOS__
 	if (close(io_portfd) == -1) {
-		perror("close");
+		cd64->notice_callback2("close: %s", strerror(errno));
 		return 0;
 	}
 	io_portfd = 0;
 #elif defined _WIN32 || defined __CYGWIN__
-	close_module(io_driver);
+	close_module(io_driver, cd64);
 	io_driver = NULL;
 	io_driver_found = 0;
 	input_byte = inb;

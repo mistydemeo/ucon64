@@ -38,6 +38,7 @@ extern "C" {
 #include "misc_z.h"
 #endif                                          // USE_ZLIB
 
+
 #ifdef __sun
 #ifdef __SVR4
 #define __solaris__
@@ -67,6 +68,24 @@ typedef signed __int64 int64_t;
 #endif
 #endif                                          // OWN_INTTYPES
 #endif
+
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined AMIGA || defined __APPLE__      // Mac OS X actually
+// GNU/Linux, Solaris, FreeBSD, Cygwin, BeOS, Amiga, Mac (OS X)
+#define FILE_SEPARATOR '/'
+#define FILE_SEPARATOR_S "/"
+#else // DJGPP, Win32
+#define FILE_SEPARATOR '\\'
+#define FILE_SEPARATOR_S "\\"
+#endif
+
+#ifndef MAXBUFSIZE
+#define MAXBUFSIZE 32768
+#endif // MAXBUFSIZE
+
+#ifndef ARGS_MAX
+#define ARGS_MAX 128
+#endif // ARGS_MAX
 
 #if     (!defined TRUE || !defined FALSE)
 #define FALSE 0
@@ -105,6 +124,8 @@ typedef signed __int64 int64_t;
     #define CURRENT_OS_S "Win32 (Cygwin)"
   #elif   defined __FreeBSD__
     #define CURRENT_OS_S "Unix (FreeBSD)"
+  #elif   defined __OpenBSD__
+    #define CURRENT_OS_S "Unix (OpenBSD)"
   #elif   defined __linux__
     #define CURRENT_OS_S "Unix (Linux)"
   #elif   defined __solaris__
@@ -140,6 +161,23 @@ typedef signed __int64 int64_t;
   #define CURRENT_OS_S "?"
 #endif
 
+
+/*
+  mem functions
+
+  memwcmp()    memcmp with wildcard support
+  mem_search() search for a byte sequence
+  mem_swap_b() swap n bytes of buffer
+  mem_swap_w() swap n/2 words of buffer
+  mem_hexdump() hexdump n bytes of buffer; you can use here a virtual_start for the displayed counter
+*/
+#ifdef  HAVE_BYTESWAP_H
+#include <byteswap.h>
+#else
+extern uint16_t bswap_16 (uint16_t x);
+extern uint32_t bswap_32 (uint32_t x);
+extern uint64_t bswap_64 (uint64_t x);
+#endif
 #ifdef  WORDS_BIGENDIAN
 #define me2be_16(x) (x)
 #define me2be_32(x) (x)
@@ -167,61 +205,12 @@ typedef signed __int64 int64_t;
 #define le2me_32(x) (x)
 #define le2me_64(x) (x)
 #endif
+extern int memwcmp (const void *buffer, const void *search, uint32_t searchlen, int wildcard);
+extern void *mem_search (const void *buffer, uint32_t buflen, const void *search, uint32_t searchlen);
+extern void *mem_swap_b (void *buffer, uint32_t n);
+extern void *mem_swap_w (void *buffer, uint32_t n);
+extern void mem_hexdump (const void *buffer, uint32_t n, int virtual_start);
 
-#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
-        defined AMIGA || defined __APPLE__      // Mac OS X actually
-// GNU/Linux, Solaris, FreeBSD, Cygwin, BeOS, Amiga, Mac (OS X)
-#define FILE_SEPARATOR '/'
-#define FILE_SEPARATOR_S "/"
-#else // DJGPP, Win32
-#define FILE_SEPARATOR '\\'
-#define FILE_SEPARATOR_S "\\"
-#endif
-
-#define PROPERTY_SEPARATOR '='
-#define PROPERTY_SEPARATOR_S "="
-#define PROPERTY_COMMENT '#'
-#define PROPERTY_COMMENT_S "#"
-
-
-#define OPTION '-'
-#define OPTION_S "-"
-#define OPTION_LONG_S "--"
-#define OPTARG '='
-#define OPTARG_S "="
-
-#ifndef MAXBUFSIZE
-#define MAXBUFSIZE 32768
-#endif // MAXBUFSIZE
-
-#ifndef ARGS_MAX
-#define ARGS_MAX 128
-#endif // ARGS_MAX
-
-#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
-        defined __APPLE__                       // Mac OS X actually
-extern void init_conio (void);
-extern void deinit_conio (void);
-#define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
-extern int kbhit (void);                        // may only be used after init_conio()!
-
-#elif   defined __MSDOS__
-#include <conio.h>                              // getch()
-#include <pc.h>                                 // kbhit()
-
-#elif   defined _WIN32
-#include <conio.h>                              // kbhit() & getch()
-
-#elif   defined AMIGA
-extern int kbhit (void);
-//#define getch           getchar
-// Gonna use my (Jan-Erik) fake one. Might work better and more like the real
-//  getch().
-#endif
-
-#ifdef  __CYGWIN__
-extern char *fix_character_set (char *value);
-#endif
 
 /*
   String manipulation
@@ -297,32 +286,6 @@ extern int strarg (char **argv, char *str, const char *separator_s, int max_args
 
 
 /*
-  mem functions
-
-  memwcmp()    memcmp with wildcard support
-  mem_search() search for a byte sequence
-  mem_swap_b() swap n bytes of buffer
-  mem_swap_w() swap n/2 words of buffer
-  mem_hexdump() hexdump n bytes of buffer; you can use here a virtual_start for the displayed counter
-*/
-extern int memwcmp (const void *buffer, const void *search, uint32_t searchlen, int wildcard);
-extern void *mem_search (const void *buffer, uint32_t buflen, const void *search, uint32_t searchlen);
-extern void *mem_swap_b (void *buffer, uint32_t n);
-extern void *mem_swap_w (void *buffer, uint32_t n);
-extern void mem_hexdump (const void *buffer, uint32_t n, int virtual_start);
-#ifdef  HAVE_BYTESWAP_H
-#include <byteswap.h>
-#else
-#ifndef OWN_BYTESWAP
-#define OWN_BYTESWAP                            // signal that these are defined
-extern uint16_t bswap_16 (uint16_t x);
-extern uint32_t bswap_32 (uint32_t x);
-extern uint64_t bswap_64 (uint64_t x);
-#endif // OWN_BYTESWAP
-#endif
-
-
-/*
   Misc stuff
 
   change_mem{2}() see header of implementation for usage
@@ -330,8 +293,6 @@ extern uint64_t bswap_64 (uint64_t x);
                   from a file
   cleanup_cm_patterns() helper function for build_cm_patterns() to free all
                   memory allocated for a (list of) st_pattern_t structure(s)
-  render_usage()  a renderer for a nice usage output
-                    takes an st_usage_t array
   clear_line ()   clear the current line (79 spaces)
   ansi_init()     initialize ANSI output
   ansi_strip()    strip ANSI codes from a string
@@ -375,24 +336,6 @@ extern int change_mem2 (char *buf, int bufsize, char *searchstr, int strsize,
 extern int build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose);
 extern void cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns);
 
-typedef struct
-{
-  const char *option_s;                         // the NAME
-  int has_arg;
-  /*
-    has_arg is identical to getopt()'s has_arg meaning that a value of 2 will
-    result in --NAME[=VALUE] instead of --NAME=VALUE. All other values are
-    ignored, currently.
-  */
-  const char *optarg;                           // the VALUE
-  const char *desc;                             // description
-  const char *desc_more;                        // attach desc_more to desc (if more != 0)
-} st_usage_t;
-
-extern void render_usage (const st_usage_t *usage, int more);
-#ifdef  DEBUG
-extern void parse_usage_code (const char *usage_output);
-#endif
 extern void clear_line (void);
 extern int ansi_init (void);
 extern char *ansi_strip (char *str);
@@ -410,6 +353,68 @@ extern void wait2 (int nmillis);
 
 
 /*
+  Extended getopt(), usage and workflow handling
+
+  getopt2_usage()      a renderer for a nice usage output
+                         takes an st_getopt2_t array
+  getop2_parse_usage() parse usage output into st_getopt2_t
+                         array (for development)
+  getopt2_long()       turn st_getopt2_t into struct option for getopt1()
+  getopt2_short()      turn st_getopt2_t shortoptions string for getopt1()
+
+  getopt2_get_index_by_val()
+*/
+#include "getopt.h"           // getopt2 needs struct option from getopt1
+
+#define OPTION '-'
+#define OPTION_S "-"
+#define OPTION_LONG_S "--"
+#define OPTARG '='
+#define OPTARG_S "="
+
+typedef struct
+{
+  const char *name;           // see getopt()
+  int has_arg;                // see getopt()
+  int *flag;                  // see getopt()
+  int val;                    // see getopt()
+  const char *arg_name;       // name of the options arg as it should be
+                              // displayed in the --help output
+                              // "--name=arg_name" if has_arg == 1
+                              // "--name[=arg_name]" if has_arg == 2
+  const char *help;           // --help, -h, -? output for the current option
+  void *object;               // could be used for workflow objects
+} st_getopt2_t;
+
+extern void getopt2_usage (const st_getopt2_t *option);
+#ifdef  DEBUG
+extern void getopt2_parse_usage (const char *usage_output);
+#endif
+extern int getopt2_long (struct option *long_option, const st_getopt2_t *option, int n);
+extern int getopt2_short (char *short_option, const st_getopt2_t *option, int n);
+extern const st_getopt2_t *getopt2_get_index_by_val (const st_getopt2_t *option, int val);
+
+
+/*
+  Quick I/O
+
+  mode
+    "r", "rb", "w", "wb", "a", "ab"
+
+  quick_io_c() returns byte read or fputc()'s status
+  quick_io()   returns number of bytes read or written
+
+  Macros
+
+  q_fread()    same as fread but takes start and src is a filename
+  q_fwrite()   same as fwrite but takes start and dest is a filename; mode
+               is the same as fopen() modes
+  q_fgetc()    same as fgetc but takes filename instead of FILE and a pos
+  q_fputc()    same as fputc but takes filename instead of FILE and a pos
+               b,s,l,f,m == buffer,start,len,filename,mode
+
+  Misc
+
   q_fncmp()    search in filename from start len bytes for the first appearance
                of search which has searchlen
                wildcard could be one character or -1 (wildcard off)
@@ -432,7 +437,12 @@ extern void wait2 (int nmillis);
 
       filename -> rename() -> buf -> return buf
 */
-// TODO: give non-q_* names
+extern int quick_io (void *buffer, size_t start, size_t len, const char *fname, const char *mode);
+extern int quick_io_c (int value, size_t start, const char *fname, const char *mode);
+#define q_fread(b,s,l,f) (quick_io(b,s,l,f,"rb"))
+#define q_fwrite(b,s,l,f,m) (quick_io((void *)b,s,l,f,m))
+#define q_fgetc(f,s) (quick_io_c(0,s,f,"rb"))
+#define q_fputc(f,s,b,m) (quick_io_c(b,s,f,m))
 typedef enum { SWAP_BYTE, SWAP_WORD } swap_t;
 
 extern int q_fncmp (const char *filename, int start, int len,
@@ -455,36 +465,6 @@ extern int q_fsize (const char *filename);
 
 
 /*
-  Quick IO
-
-  mode
-    "r", "rb", "w", "wb", "a", "ab"
-
-  quick_io_c() returns byte read or fputc()'s status
-  quick_io() returns number of bytes read or written
-*/
-extern int quick_io (void *buffer, size_t start, size_t len, const char *fname, const char *mode);
-extern int quick_io_c (int value, size_t start, const char *fname, const char *mode);
-
-
-/*
-  Macros
-
-  q_fread()  same as fread but takes start and src is a filename
-  q_fwrite() same as fwrite but takes start and dest is a filename; mode
-             is the same as fopen() modes
-  q_fgetc()  same as fgetc but takes filename instead of FILE and a pos
-  q_fputc()  same as fputc but takes filename instead of FILE and a pos
-
-  b,s,l,f,m == buffer,start,len,filename,mode
-*/
-#define q_fread(b,s,l,f) (quick_io(b,s,l,f,"rb"))
-#define q_fwrite(b,s,l,f,m) (quick_io((void *)b,s,l,f,m))
-#define q_fgetc(f,s) (quick_io_c(0,s,f,"rb"))
-#define q_fputc(f,s,b,m) (quick_io_c(b,s,f,m))
-
-
-/*
   Configuration file handling
 
   get_property()  get value of propname from filename or return value of env
@@ -499,6 +479,10 @@ extern int quick_io_c (int value, size_t start, const char *fname, const char *m
   DELETE_PROPERTY() like set_property but when value of propname is NULL the
                   whole property will disappear from filename
 */
+#define PROPERTY_SEPARATOR '='
+#define PROPERTY_SEPARATOR_S "="
+#define PROPERTY_COMMENT '#'
+#define PROPERTY_COMMENT_S "#"
 extern char *get_property (const char *filename, const char *propname, char *value,
                            const char *def);
 extern int32_t get_property_int (const char *filename, const char *propname);
@@ -506,6 +490,48 @@ extern char *get_property_fname (const char *filename, const char *propname,
                                  char *buffer, const char *def);
 extern int set_property (const char *filename, const char *propname, const char *value, const char *comment);
 #define DELETE_PROPERTY(a, b) (set_property(a, b, NULL, NULL))
+
+
+/*
+  Portability (conio.h, etc...)
+  
+  init_conio()         init console I/O
+  deinit_conio()       stop console I/O
+  getch()
+  kbhit()
+  fix_character_set()  fixes some Cygwin problems with filenames
+  truncate()
+  sync()
+  popen()
+  pclose()
+  vprintf2()
+  printf2()
+  fprintf2()
+*/
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined __APPLE__                       // Mac OS X actually
+extern void init_conio (void);
+extern void deinit_conio (void);
+#define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
+extern int kbhit (void);                        // may only be used after init_conio()!
+
+#elif   defined __MSDOS__
+#include <conio.h>                              // getch()
+#include <pc.h>                                 // kbhit()
+
+#elif   defined _WIN32
+#include <conio.h>                              // kbhit() & getch()
+
+#elif   defined AMIGA
+extern int kbhit (void);
+//#define getch           getchar
+// Gonna use my (Jan-Erik) fake one. Might work better and more like the real
+//  getch().
+#endif
+
+#ifdef  __CYGWIN__
+extern char *fix_character_set (char *value);
+#endif
 
 
 #ifdef  _WIN32

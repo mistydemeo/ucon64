@@ -22,11 +22,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef LIBDISCMAGE_H
 #define LIBDISCMAGE_H
 
-#include <stdio.h>                              // FILENAME_MAX
-
 #ifdef  __cplusplus
 extern "C" {
 #endif
+
+#include <stdio.h>                              // FILENAME_MAX
 
 #if     defined __linux__ || defined __FreeBSD__ || defined __OpenBSD__ || \
         defined __solaris__ || defined __MINGW32__ || defined __CYGWIN__ || \
@@ -198,4 +198,5 @@ extern int dm_rip (const dm_image_t *image, int track_num, uint32_t flags);
 #ifdef  __cplusplus
 }
 #endif
-#endif  // LIBDISCMAGE_H
+
+#endif // LIBDISCMAGE_H

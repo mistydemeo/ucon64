@@ -2550,6 +2550,11 @@ q_fswap (const char *filename, int start, int len, swap_t type)
         mem_swap_w (buf, seg_len);
       fseek (fh, -seg_len, SEEK_CUR);
       fwrite (buf, 1, seg_len, fh);
+#ifdef  DJGPP
+      // This appears to be a bug in DJGPP. Without an extra call to fseek()
+      //  the part of the file after 8 MB won't be swapped.
+      fseek (fh, 0, SEEK_CUR);
+#endif
     }
 
   fclose (fh);

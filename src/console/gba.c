@@ -46,7 +46,7 @@ const char *gba_usage[] =
 //    "  " OPTION_LONG_S "nhd         force ROM has no header\n"
     "  " OPTION_S "n           change ROM name; " OPTION_LONG_S "file=NEWNAME\n"
     "  " OPTION_LONG_S "logo        restore ROM logo character data; Offset: 0x04-0x9F\n"
-//    "  " OPTION_LONG_S "chk         fix ROM checksum\n"
+//    "  " OPTION_LONG_S "chk         fix ROM header checksum\n"
     "  " OPTION_LONG_S "sram        patch ROM for SRAM saving\n"
     "  " OPTION_LONG_S "crp         slow down Flash Advance Linker access for ROM (crash patch);\n"
     "                  " OPTION_LONG_S "file=WAIT_TIME\n"
@@ -218,8 +218,7 @@ gba_logo (st_rominfo_t *rominfo)
 int
 gba_chk (st_rominfo_t *rominfo)
 {
-  char buf[2];
-  char chksum = gba_chksum (rominfo) & 0xff;
+  char buf[2], chksum = gba_chksum (rominfo) & 0xff;
 
   ucon64_fbackup (NULL, ucon64.rom);
 
@@ -362,7 +361,7 @@ gba_init (st_rominfo_t *rominfo)
   value = OFFSET (gba_header, 0xaf);
   rominfo->country =
     (value == 'J') ? "Japan/Asia" :
-    (value == 'E') ? "American" :
+    (value == 'E') ? "U.S.A." :
     (value == 'P') ? "Europe, Australia and Africa" :
     "Unknown Country";
 

@@ -203,6 +203,7 @@ int ucon64_main(int argc,char *argv[])
 
 #ifdef BACKUP
   if (!(ucon64_parport = parport_probe(ucon64_parport)))
+    ;
 /*
     printf("ERROR: no parallel port 0x%s found\n\n",strupr(buf));
   else

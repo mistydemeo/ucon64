@@ -52,11 +52,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   #else
     #ifdef __linux__
       #ifdef __GLIBC__
-        #include <sys/io.h>                       // ioperm() (glibc)
+        #include <sys/io.h>                     // ioperm() (glibc)
       #endif
     #endif
     #ifndef __UNIX__
-      #include <pc.h>				// inportb(), inportw()
+      #include <pc.h>                           // inportb(), inportw()
     #endif
   #endif
 #endif

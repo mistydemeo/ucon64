@@ -23,9 +23,9 @@ Mimic GCS
 Nebula Driver
 -->
 - Support for 10+ different backup units to backup/restore ROM(s), disc(s) and
-  SRAM(s) like: Flash Advance Linker, Doctor V64 (Junior), Super Wild Card,
-  Game Doctor, Dexdrive, Super Magic Drive, Game Boy Xchanger, Mad Catz Camera
-  Link, Lynxit, MD-PRO and your CD-Writer.
+  SRAM(s) like: Flash Advance Linker, Flash 2 Advance, Doctor V64 (Junior),
+  Super Wild Card, Game Doctor, Dexdrive, Super Magic Drive, Game Boy Xchanger,
+  Mad Catz Camera Link, Lynxit, MD-PRO and your CD-Writer.
 - Finally 150+(!) different options/features for every kind of ROM
   handling/management known to man :-)
 <!-- 120 options, 62 switches last time I counted them -->
@@ -50,7 +50,7 @@ Options
    -o=DIRECTORY specify output directory
   --nbak        prevents backup files (*.BAK)
   --ncol        disable ANSI colors in output
-  --port=PORT   specify parallel PORT={3bc, 378, 278, ...}
+  --port=PORT   specify USB or parallel PORT={USB0, USB1, 3bc, 378, 278, ...}
   --hdn=N       force ROM has backup unit/emulator header with size of N Bytes
   --hd          same as --hdn=512
                   most backup units use a header with a size of 512 Bytes
@@ -58,6 +58,8 @@ Options
   --ns          force ROM is not split
    -e           emulate/run ROM (check .ucon64rc for more)
   --crc         show CRC32 value of ROM
+  --sha1        show SHA1 value of ROM
+  --md5         show MD5 value of ROM
   --ls          generate ROM list for all recognized ROMs
   --lsv         like --ls but more verbose
   --hex         show ROM as hexdump; use "ucon64 --hex ...|less"
@@ -170,14 +172,14 @@ Game Boy Advance
   --chk         fix ROM header checksum
   --sram        patch ROM for SRAM saving
   --crp=WAIT_TIME slow down Flash Advance Linker access for ROM (crash patch);
-                  WAIT_TIME='0'  (default in most crash patches)
-                  WAIT_TIME='4'  (faster than 0, slower than 8)
-                  WAIT_TIME='8'  (faster than 4, slower than 28)
-                  WAIT_TIME='12' (slowest cartridge access speed)
-                  WAIT_TIME='16' (faster than 28, but slower than 20)
-                  WAIT_TIME='20' (default in most original carts)
-                  WAIT_TIME='24' (fastest cartridge access speed)
-                  WAIT_TIME='28' (faster than 8 but slower than 16)
+                  WAIT_TIME=0  default in most crash patches
+                  WAIT_TIME=4  faster than 0, slower than 8
+                  WAIT_TIME=8  faster than 4, slower than 28
+                  WAIT_TIME=12 slowest cartridge access speed
+                  WAIT_TIME=16 faster than 28, but slower than 20
+                  WAIT_TIME=20 default in most original carts
+                  WAIT_TIME=24 fastest cartridge access speed
+                  WAIT_TIME=28 faster than 8 but slower than 16
   --multi=SIZE  make multirom for Flash Advance Linker, truncated to SIZE Mbit;
                   file with loader must be specified first, then all the ROMs,
                   multirom to create last; use -o to specify output directory
@@ -185,8 +187,8 @@ Flash Advance Linker
   --xfal        send/receive ROM to/from Flash Advance Linker; --port=PORT
                   receives automatically (32 Mbits) when ROM does not exist
   --xfalmulti=SIZE send multiple ROMs to Flash Advance Linker (makes temporary
-                  multirom truncated to SIZE Mbit); file with loader must be
-                  specified first, then all the ROMs; --port=PORT
+                  multirom truncated to SIZE Mbit); specify a loader in the
+                  configuration file; --port=PORT
   --xfalc=N     receive N Mbits of ROM from Flash Advance Linker; --port=PORT
                   N can be 8, 16, 32, 64, 128 or 256
   --xfals       send/receive SRAM to/from Flash Advance Linker; --port=PORT
@@ -195,6 +197,18 @@ Flash Advance Linker
                   BANK can be 1, 2, 3 or 4; --port=PORT
                   receives automatically when SRAM does not exist
   --xfalm       try to enable EPP mode, default is SPP mode
+Flash 2 Advance (Ultra)
+  --xf2a        send/receive ROM to/from Flash 2 Advance (Ultra); --port=PORT
+                  receives automatically (32 Mbits) when ROM does not exist
+  --xf2amulti=SIZE send multiple ROMs to Flash 2 Advance (Ultra); specify a
+                  loader in the configuration file; --port=PORT
+  --xf2ac=N     receive N Mbits of ROM from Flash 2 Advance (Ultra);
+                  --port=PORT
+  --xf2as       send/receive SRAM to/from Flash 2 Advance (Ultra); --port=PORT
+                  receives automatically when SRAM does not exist
+  --xf2ab=BANK  send/receive SRAM to/from Flash 2 Advance (Ultra) BANK
+                  BANK should be a number &#62;= 1; --port=PORT
+                  receives automatically when SRAM does not exist
 
 Nintendo 64
   --n64         force recognition
@@ -253,19 +267,19 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --dbuh        display (relevant part of) backup unit header
   --dint        convert ROM to non-interleaved format
   --ctrl=TYPE   specify type of controller in port 1 for emu when converting
-                  TYPE='0' gamepad
-                  TYPE='1' mouse
-                  TYPE='2' mouse / gamepad
-                  TYPE='6' multitap
+                  TYPE=0 gamepad
+                  TYPE=1 mouse
+                  TYPE=2 mouse / gamepad
+                  TYPE=6 multitap
   --ctrl2=TYPE  specify type of controller in port 2 for emu when converting
-                  TYPE='0' gamepad
-                  TYPE='1' mouse
-                  TYPE='2' mouse / gamepad
-                  TYPE='3' super scope
-                  TYPE='4' super scope / gamepad
-                  TYPE='5' Konami's justifier
-                  TYPE='6' multitap
-                  TYPE='7' mouse / super scope / gamepad
+                  TYPE=0 gamepad
+                  TYPE=1 mouse
+                  TYPE=2 mouse / gamepad
+                  TYPE=3 super scope
+                  TYPE=4 super scope / gamepad
+                  TYPE=5 Konami's justifier
+                  TYPE=6 multitap
+                  TYPE=7 mouse / super scope / gamepad
   --col=0xCOLOR convert 0xRRGGBB (HTML) &#60;-&#62; 0xXXXX (SNES)
    -j           join split ROM
    -s           split ROM; default part size is 8 Mb
@@ -275,10 +289,22 @@ Super Nintendo Entertainment System/SNES/Super Famicom
    -l           remove SlowROM checks
   --chk         fix ROM checksum
   --dmirr       "de-mirror" ROM (strip mirrored block from end of ROM)
+  --dnsrt       "de-NSRT" ROM (restore name and checksum from NSRT header)
 Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC
   --xswc        send/receive ROM to/from Super Wild Card*/SWC; --port=PORT
                   receives automatically when ROM does not exist
   --xswc2       same as --xswc, but enables Real Time Save mode (SWC only)
+  --xswc-io=MODE specify SWC I/O mode; use with -xswc or -xswcc
+                  MODE=0x01 force 32 Mbit dump
+                  MODE=0x02 use alternative method for determining ROM size
+                  MODE=0x04 Super FX
+                  MODE=0x08 S-DD1
+                  MODE=0x10 SA-1
+                  MODE=0x20 SPC7110
+                  MODE=0x40 DX2 trick (might work with other SWC models)
+                  MODE=0x80 Mega Man X 2
+                  It is possible to combine flags. MODE=0x44 makes it possible
+                  to dump for example Yoshi's Island
   --xswcs       send/receive SRAM to/from Super Wild Card*/SWC; --port=PORT
                   receives automatically when SRAM does not exist
   --xswcc       send/receive SRAM to/from cartridge in Super Wild Card*/SWC;
@@ -335,10 +361,10 @@ Genesis/Sega Mega Drive/Sega CD/32X/Nomad
                   truncated to SIZE Mbit; file with loader must be specified
                   first, then all the ROMs, multi-game file to create last
   --region=CODE enable region function; use with -multi
-                  CODE='0' force NTSC/Japan for all games
-                  CODE='1' force NTSC/U.S.A. for all games
-                  CODE='2' force PAL for all games
-                  CODE='x' use whatever setting games expect
+                  CODE=0 force NTSC/Japan for all games
+                  CODE=1 force NTSC/U.S.A. for all games
+                  CODE=2 force PAL for all games
+                  CODE=x use whatever setting games expect
 Super Com Pro/Super Magic Drive/SMD
   --xsmd        send/receive ROM to/from Super Magic Drive/SMD; --port=PORT
                   receives automatically when ROM does not exist
@@ -362,7 +388,7 @@ Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)
   --gbx         convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC
   --n2gb=NESROM KAMI's FC EMUlator (NES emulator);
                   ROM should be KAMI's FC Emulator ROM image
-                  NESROM should contain 16 KB of PRG data and 8 KB of CHR data
+                  NESROM should contain 16 kB of PRG data and 8 kB of CHR data
   --chk         fix ROM checksum
 Game Boy Xchanger/GBDoctor
   --xgbx        send/receive ROM to/from GB Xchanger; --port=PORT
@@ -418,12 +444,12 @@ Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)
                   and iNES
   --dint        convert to non-interleaved format
   --ctrl=TYPE   specify controller type (UNIF only)
-                  TYPE='0' regular joypad
-                  TYPE='1' zapper
-                  TYPE='2' R.O.B.
-                  TYPE='3' Arkanoid controller
-                  TYPE='4' powerpad
-                  TYPE='5' four-score adapter
+                  TYPE=0 regular joypad
+                  TYPE=1 zapper
+                  TYPE=2 R.O.B.
+                  TYPE=3 Arkanoid controller
+                  TYPE=4 powerpad
+                  TYPE=5 four-score adapter
   --ntsc        specify TV standard is NTSC (UNIF only)
   --pal         specify TV standard is PAL (UNIF only)
   --bat         specify battery is present
@@ -431,12 +457,12 @@ Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)
   --vram        specify VRAM override (UNIF only)
   --nvram       specify no VRAM override (UNIF only)
   --mirr=MTYPE  specify mirroring type
-                  MTYPE='0' horizontal mirroring
-                  MTYPE='1' vertical mirroring
-                  MTYPE='2' mirror all pages from $2000 (UNIF only)
-                  MTYPE='3' mirror all pages from $2400 (UNIF only)
-                  MTYPE='4' four screens of VRAM
-                  MTYPE='5' mirroring controlled by mapper hardware (UNIF only)
+                  MTYPE=0 horizontal mirroring
+                  MTYPE=1 vertical mirroring
+                  MTYPE=2 mirror all pages from $2000 (UNIF only)
+                  MTYPE=3 mirror all pages from $2400 (UNIF only)
+                  MTYPE=4 four screens of VRAM
+                  MTYPE=5 mirroring controlled by mapper hardware (UNIF only)
   --cmnt=TEXT   specify that TEXT should be used as comment (UNIF only)
   --dumpinfo=FILE use dumper info from FILE when converting to UNIF
   --fds         convert Famicom Disk System file (diskimage) from FAM to FDS
@@ -478,7 +504,7 @@ TIP: ucon64 --help --snes (would show only SNES related help)
      ucon64 --help|less (to see everything in less)
      Give the force recognition switch a try if something went wrong
 
-Please report any problems/ideas/fixes to noisyb@gmx.net or go to
-http://ucon64.sf.net
+Please report any problems/ideas/fixes to noisyb@gmx.net or
+ucon64-announce@lists.sf.net or visit http://ucon64.sf.net
 
 </pre></tt></body></html>

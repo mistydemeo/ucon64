@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "pce.h"
 #include "backup/mgd.h"
+#include "backup/msg.h"
 
 
 #define PCENGINE_HEADER_START 0x448
@@ -51,18 +52,11 @@ const st_usage_t pcengine_usage[] =
     {"pce", NULL, "force recognition"},
     {"int", NULL, "force ROM is in interleaved (bit-swapped) format"},
     {"nint", NULL, "force ROM is not in interleaved (bit-swapped) format"},
-    {"smg", NULL, "convert to Super Magic Griffin/SMG"},
+    {"msg", NULL, "convert to Magic Super Griffin/MSG"},
     {"mgd", NULL, "convert to Multi Game Doctor*/MGD2/RAW"},
     {"swap", NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)"},
     {NULL, NULL, NULL}
 };
-
-const st_usage_t smg_usage[] =
-  {
-    {NULL, NULL, "Super Magic Griffin"},
-    {NULL, NULL, "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
-    {NULL, NULL, NULL}
-  };
 
 #define PCE_MAKER_MAX 86
 static const char *pce_maker[PCE_MAKER_MAX] = {
@@ -639,11 +633,11 @@ swapbits (unsigned char *buffer, int size)
 
 // header format is specified in src/backup/ffe.h
 int
-pcengine_smg (st_rominfo_t *rominfo)
+pcengine_msg (st_rominfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
-  st_unknown_header_t header;
+  st_msg_header_t header;
   int size = ucon64.file_size - rominfo->buheader_len;
 
   if (rominfo->interleaved)
@@ -653,25 +647,24 @@ pcengine_smg (st_rominfo_t *rominfo)
         return -1;
       }
 
-  memset (&header, 0, UNKNOWN_HEADER_LEN);
-  header.size_low = size / 8192;
-  header.size_high = size / 8192 >> 8;
+  memset (&header, 0, MSG_HEADER_LEN);
+  header.size = size / 8192;
   header.id1 = 0xaa;
   header.id2 = 0xbb;
   header.type = 2;
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".SMG");
+  set_suffix (dest_name, ".MSG");
   ucon64_file_handler (dest_name, src_name, 0);
 
-  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
+  q_fwrite (&header, 0, MSG_HEADER_LEN, dest_name, "wb");
   if (rominfo->interleaved)
     {
-      // Super Magic Griffin files should not be "interleaved"
+      // Magic Super Griffin files should not be "interleaved"
       q_fread (rom_buffer, rominfo->buheader_len, size, src_name);
       swapbits (rom_buffer, size);
-      q_fwrite (rom_buffer, UNKNOWN_HEADER_LEN, size, dest_name, "ab");
+      q_fwrite (rom_buffer, MSG_HEADER_LEN, size, dest_name, "ab");
       free (rom_buffer);
     }
   else
@@ -887,7 +880,7 @@ pcengine_init (st_rominfo_t *rominfo)
   rominfo->header_len = PCENGINE_HEADER_LEN;
   rominfo->header = &pce_header;
   rominfo->console_usage = pcengine_usage;
-  rominfo->copier_usage = rominfo->buheader_len ? smg_usage : mgd_usage;
+  rominfo->copier_usage = rominfo->buheader_len ? msg_usage : mgd_usage;
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
@@ -939,3 +932,4 @@ pcengine_init (st_rominfo_t *rominfo)
   free (rom_buffer);
   return result;
 }
+

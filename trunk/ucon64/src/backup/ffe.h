@@ -26,7 +26,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
              SMD: 16 kB page count
     1      - High byte of 8 kB page count
              SMD: File ID code 0 (3, not: high byte of 16 kB page count)
-    2      - Emulation mode select
+             Magic Griffin: Emulation mode select, first byte?
+    2      - Emulation mode select (SWC/SMC/Magic Griffin, second byte?)
              Bit 7 6 5 4 3 2 1 0
                  x               : 0 = Run program in mode 1 (JMP RESET Vector)
                                  : 1 = Run in mode 0 (JMP $8000)
@@ -40,7 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                                      1 = mode 21 (HiROM)
                          x x     : SWC & SMC:
                                      00 = 256 kb SRAM, 01 = 64 kb, 10 = 16 kb, 11 = no SRAM
-                                   PCE (bit 2):
+                                   Magic Griffin (bit 2):
                                      0 = Run in mode 3
                                      1 = Run in mode 2 (JMP Reset)
                              x   : 0 = Disable, 1 = Enable external cartridge memory

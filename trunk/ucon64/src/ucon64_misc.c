@@ -1126,7 +1126,18 @@ ucon64_testpad (const char *filename)
           if (buffer[i] != c)
             break;
           else
-            n++;
+            {
+              /*
+                A file is either padded with 2 or more bytes or it isn't
+                padded at all. It can't be detected that a file is padded with
+                1 byte.
+              */
+              if (i == blocksize - 2)
+                n += 2;
+              else if (i < blocksize - 2)
+                n++;
+              // NOT else, because i == blocksize - 1 must initially be skipped
+            }
         }
     }
 

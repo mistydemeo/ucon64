@@ -97,11 +97,14 @@ A: You already did if you followed the directions in the previous answer (you
 <br>
    BeOS users will also need Caz's driver inside ioport.zip or available at
    <a href="http://www.infernal.currantbun.com" target="_blank">http://www.infernal.currantbun.com</a>.<br>
-   Under Windows NT/2000/XP you will need a driver only if you want to use uCON64 for
+   Under Windows NT/2000/XP you might need a driver if you want to use uCON64 for
    sending/receiving ROMs to/from a copier. You could use giveio or UserPort. At
    <a href="http://www.devrs.com/gba/files/mbv2faqs.php" target="_blank">http://www.devrs.com/gba/files/mbv2faqs.php</a>
-   you can find links to those programs. With giveio sending ROMs goes faster than with
-   UserPort, but UserPort is a bit easier to use.<br>
+   you can find links to those programs. They are also included with the binary release. With giveio sending
+   ROMs goes faster than with UserPort, but UserPort is a bit easier to use.<br>
+   It <i>is</i> possible to use uCON64 as a transfer tool without giveio or UserPort under Windows XP. We
+   have had reports from people who were able to send and receive ROMs under Windows XP as a
+   regular user (no Administrator rights and not "Power Users").<br>
 <br>
 <p>
 <a name="4">Q4: Sometimes my terminal seems to be locked after "ucon64 -xswc &#60;file&#62; | more"</a><br>
@@ -255,8 +258,7 @@ A: The multirom file you created is too large for your flash card. When you make
 <p>
 <a name="22">Q22: Where can I get that loader or "game pack" file?</a><br>
 A: You can get it from <a href="http://www.visoly.com" target="_blank">Visoly's site</a>.
-   It's in a file with a name like <a href="http://www.visoly.com/download/preboot32.zip">preboot32.zip</a>
-   or something like that.<br>
+   It's in a file with a name like <a href="http://www.visoly.com/download/preboot32.zip">preboot32.zip</a>.<br>
 <br>
 <p>
 <a name="23">Q23: What is the meaning of the -col option (Super Nintendo)?</a><br>
@@ -264,7 +266,7 @@ A: Back in the days stupid people released games with green blood.
    You can use a graphics or HTML editor to find an identical green color and
    write down the color values in HTML style (#RRGGBB). Now you run
    "ucon64 -col #RRGGBB" and it will calculate the hex value for the corresponding
-   Super Nintendo color. Ok? No? - Then you don't need this option :-)
+   Super Nintendo color. Ok? No? Then you don't need this option :-)
 <br>
 <br>
 <br>

@@ -710,9 +710,12 @@ main (int argc, char *argv[])
       return (0);
     }
 
-  if (argcmp (argc, argv, "-multi") ||  // This gets rid of nonsense GBA info
-      argcmp (argc, argv, "-multi1") || //  on a GBA multirom loader binary
-      argcmp (argc, argv, "-multi2"))
+  if (argcmp (argc, argv, "-multi") ||          // This gets rid of nonsense GBA info
+      argcmp (argc, argv, "-multi1") ||         //  on a GBA multirom loader binary
+      argcmp (argc, argv, "-multi2") ||
+      argcmp (argc, argv, "-swcs") ||
+      argcmp (argc, argv, "-figs") ||
+      argcmp (argc, argv, "-ufos"))
     {
       skip_init_nfo = 1;
     }
@@ -729,7 +732,10 @@ main (int argc, char *argv[])
      argncmp (argc, argv, "-xgbxb", 6) ||
      argcmp (argc, argv, "-xgbxs")) ? ucon64_GB :
      (argcmp (argc, argv, "-xswc") ||
-     argcmp (argc, argv, "-xswcs")) ? ucon64_SNES :
+     argcmp (argc, argv, "-xswcs") ||
+     argcmp (argc, argv, "-swcs") ||
+     argcmp (argc, argv, "-figs") ||
+     argcmp (argc, argv, "-ufos")) ? ucon64_SNES :
      (argcmp (argc, argv, "-multi") ||
      argcmp (argc, argv, "-multi1") ||
      argcmp (argc, argv, "-multi2") ||

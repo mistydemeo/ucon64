@@ -40,7 +40,7 @@ int single_file=0;
 DIR *dp;
 
 if (
-//    argcmp(argc, argv, "-h") ||
+    argcmp(argc, argv, "-h") ||
     argcmp(argc, argv, "-help") ||
     argcmp(argc, argv, "-?"))
   {
@@ -56,9 +56,9 @@ if(
 )
 {
   flc.sort=1;
-//  if(argcmp(argc,argv,"-d"))
-//  if(argcmp(argc,argv,"-a"))
-//  if(argcmp(argc,argv,"-b"))
+  flc.bydate = (argcmp(argc,argv,"-d")) ? 1 : 0;
+  flc.byname = (argcmp(argc,argv,"-a")) ? 1 : 0;
+  flc.bysize = (argcmp(argc,argv,"-b")) ? 1 : 0;
   flc.fr = (argcmp(argc,argv,"-fr")) ? 1 : 0 ;
 }
 
@@ -66,7 +66,7 @@ flc.argc=argc;
 for( x = 0 ; x < argc ; x++ )flc.argv[x]=argv[x];
 
 flc.kb = (argcmp(argc,argv,"-k")) ? 1 : 0;
-flc.html = (argcmp(argc,argv,"-h")) ? 1 : 0 ;
+flc.html = (argcmp(argc,argv,"-html")) ? 1 : 0 ;
 flc.files = 0;
 
 strcpy(flc.path,getarg(argc,argv,flc_FILE));
@@ -178,14 +178,14 @@ printf(
   "USAGE: %s [OPTION]... [FILE]...\n\n"
   "  -t		also check/test every archive/file in DIRECTORY\n"
   "		flags: N=not checked (default), P=passed, F=failed\n"
-  "  -h		output as HTML document with links to the files\n"
-//  "  -d		sort chronological\n"
-//  "  -a		sort alphabetical\n"
-//  "  -b		sort by byte size\n"
-//  "  -fr		sort reverse\n"
+  "  -html		output as HTML document with links to the files\n"
+  "  -d		sort chronological\n"
+  "  -a		sort alphabetical\n"
+  "  -b		sort by byte size\n"
+  "  -fr		sort reverse\n"
   "  -k		show sizes in kilobytes\n"
   "\n"
-  "Report problems to noisyb@gmx.net\n\n"
+  "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n"
   ,flc_TITLE
   ,getarg(argc,argv,flc_NAME)
 );

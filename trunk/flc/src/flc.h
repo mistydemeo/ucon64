@@ -37,11 +37,16 @@ struct flc_
   //  char argv[128][4096];
   char *argv[128];
 
-  int kb;
   int files;
-  int sort;
-  int fr;
+
+  int kb;
   int html;
+
+  int sort;
+  int bydate;
+  int bysize;
+  int byname;
+  int fr;
   
   char path[4096];
 };

@@ -788,8 +788,13 @@ static int ucon64_io_fd;
 #endif
 
 
+#if 1
 void
 handle_existing_file (const char *dest, char *src)
+#else
+void
+handle_existing_file (char *dest, char *src, int flags)
+#endif
 /*
   We have to handle the following cases (for example -swc and rom.swc exists):
   1) ucon64 -swc rom.swc
@@ -809,6 +814,10 @@ handle_existing_file (const char *dest, char *src)
 */
 {
   struct stat src_info, dest_info;
+
+#if 0
+  ucon64_output_fname (dest_name, flags);       // call this function unconditionally
+#endif
 
   ucon64_temp_file = NULL;
   if (!access (dest, F_OK))
@@ -863,7 +872,7 @@ remove_temp_file (void)
 
 
 char *
-ucon64_output_fname (char *requested_fname, int force_flags)
+ucon64_output_fname (char *requested_fname, int flags)
 {
   char ext[80], fname[FILENAME_MAX];
 
@@ -874,7 +883,7 @@ ucon64_output_fname (char *requested_fname, int force_flags)
   // force_requested_fname is necessary for options like -gd3. Of course that
   //  code should handle archives and come up with unique filenames for
   //  archives with more than one file.
-  if (!ucon64.fname_arch[0] || (force_flags & OF_FORCE_BASENAME))
+  if (!ucon64.fname_arch[0] || (flags & OF_FORCE_BASENAME))
     {
       strcpy (fname, basename (requested_fname));
       sprintf (requested_fname, "%s%s", ucon64.output_path, fname);
@@ -892,7 +901,7 @@ ucon64_output_fname (char *requested_fname, int force_flags)
     ".zip". Now ucon64_output_fname() can be used when renaming/moving
     files.
   */
-  if (!(force_flags & OF_FORCE_SUFFIX) && !stricmp (ext, ".zip"))
+  if (!(flags & OF_FORCE_SUFFIX) && !stricmp (ext, ".zip"))
     strcpy (ext, ".tmp");
   set_suffix (requested_fname, ext);
 

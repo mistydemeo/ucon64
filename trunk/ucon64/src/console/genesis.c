@@ -146,6 +146,8 @@ genesis_smd (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".SMD");
+  ucon64_output_fname (dest_name, 0);
+  handle_existing_file (dest_name, NULL);
 
   save_smd (dest_name, rom_buffer, &header, genesis_rom_size);
   fprintf (stdout, ucon64_msg[WROTE], dest_name);

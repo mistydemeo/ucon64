@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc.h"
 #include "quick_io.h"
 #include "ucon64.h"
+#include "ucon64_misc.h"
 #include "bsl.h"
 
 
@@ -39,16 +40,24 @@ const st_usage_t bsl_usage[] =
 
 
 int
-bsl (const char *modname, const char *bslname)
+bsl_apply (const char *modname, const char *bslname)
 {
   FILE *modfile, *bslfile;
   unsigned char byte, addstr[10], datstr[10], buf[4096];
   int dat, numdat, i, done = 0, add;
 
-  if (!(modfile = fopen (modname, "r+b")))
-    return -1;
-  if (!(bslfile = fopen (bslname, "rb")))
-    return -1;
+  handle_existing_file (modname, NULL);
+
+  if ((modfile = fopen (modname, "r+b")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], modname);
+      return -1;
+    }
+  if ((bslfile = fopen (bslname, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], bslname);
+      return -1;
+    }
 
   printf ("Applying BSL/Baseline patch...\n");
 

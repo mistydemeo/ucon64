@@ -826,6 +826,7 @@ snes_mgd (st_rominfo_t *rominfo)
   buf[8] = 0;
   sprintf (buf2, "%s.%03u", buf, (ucon64.file_size - rominfo->buheader_len) / MBIT);
 
+  ucon64_output_fname (buf2, OF_FORCE_BASENAME);
   handle_existing_file (buf2, NULL);
   q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, buf2, "wb");
   fprintf (stdout, ucon64_msg[WROTE], buf2);
@@ -925,7 +926,6 @@ snes_gd3 (st_rominfo_t *rominfo)
     dest_name[6] = 0;
   else
     dest_name[7] = 0;
-  ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
 
   if (snes_hirom)
     {
@@ -1019,6 +1019,7 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       set_nsrt_info (rominfo, (unsigned char *) &header);
 
+      ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
       handle_existing_file (dest_name, NULL);
       q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
       q_fwrite (dstbuf, SWC_HEADER_LEN, newsize, dest_name, "ab");
@@ -1067,6 +1068,7 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       set_nsrt_info (rominfo, (unsigned char *) &header);
 
+      ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
       handle_existing_file (dest_name, NULL);
       q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
       q_fcpy (ucon64.rom, rominfo->buheader_len, size, dest_name, "ab");

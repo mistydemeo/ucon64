@@ -26,6 +26,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include "ucon64.h"
 #include "ucon64_defines.h"
 #include "ucon64_dat.h"
@@ -269,7 +272,7 @@ switch (c)
 #if 0
     if (optarg)
       ucon64.rom = optarg;
-#endif      
+#endif
     break;
 
   case UCON64_O:
@@ -410,7 +413,7 @@ ucon64_rename (int mode)
     if (ucon64.rominfo)
       if (ucon64.rominfo->name)
         strcpy (buf, strtrim (ucon64.rominfo->name));
-        
+
 
   if (!buf[0] || mode == UCON64_RENAME) // GoodXXXX mode
     if (ucon64.dat)
@@ -445,7 +448,7 @@ ucon64_rename (int mode)
     buf[8] = 0;
 
   set_suffix (buf, suffix);
-  
+
   if (ucon64.fname_len == 1)
     buf[12] = 0;
 
@@ -465,7 +468,7 @@ ucon64_rename (int mode)
               basename2 (buf2));
 #ifndef DEBUG
       rename (ucon64.rom, buf2);
-#endif      
+#endif
     }
   else
     {
@@ -571,7 +574,7 @@ ucon64_options (int c, const char *optarg)
       strcpy (src_name, ucon64.rom);
       strcpy (dest_name, ucon64.rom);
     }
-  
+
 switch (c)
   {
   case UCON64_CRCHD:                            // deprecated
@@ -613,7 +616,7 @@ switch (c)
       {
         printf ("The files are different.\n");
       }
-#endif      
+#endif
     break;
 
   case UCON64_FIND:

@@ -26,7 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-extern int errno;
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
 #include <sys/stat.h>
@@ -49,6 +48,7 @@ typedef struct termios tty_t;
 //#include "config.h"
 #include "misc.h"
 
+extern int errno;
 static st_func_node_t func_list = { NULL, NULL };
 
 #if     defined __unix__ || defined __BEOS__
@@ -60,15 +60,18 @@ static void set_tty (tty_t param);
 static char *cygwin_fix (char *value);
 #endif
 
+#define CRC32_POLYNOMIAL     0xEDB88320L
+
 static unsigned long crc_table[256];
 static int crc_table_built = 0;
+static void build_crc_table ();
+static unsigned long calculate_file_crc (FILE * file);
 
-static void
-build_crc_table (void)
+void
+build_crc_table ()
 {
   int i, j;
   unsigned long crc;
-#define CRC32_POLYNOMIAL     0xEDB88320L
 
   for (i = 0; i <= 255; i++)
     {
@@ -86,7 +89,7 @@ build_crc_table (void)
 }
 
 
-static unsigned long
+unsigned long
 calculate_buffer_crc (unsigned int size, unsigned long crc, void *buffer)
 // zlib: crc32 (crc, buffer, size);
 {
@@ -96,19 +99,19 @@ calculate_buffer_crc (unsigned int size, unsigned long crc, void *buffer)
   if (!crc_table_built)
     build_crc_table ();
 
-  crc ^= 0xFFFFFFFFL;
+  crc ^= 0xffffffffL;
   p = (unsigned char *) buffer;
   while (size-- != 0)
     {
-      temp1 = (crc >> 8) & 0x00FFFFFFL;
+      temp1 = (crc >> 8) & 0x00ffffffL;
       temp2 = crc_table[((int) crc ^ *p++) & 0xff];
       crc = temp1 ^ temp2;
     }
-  return crc ^ 0xFFFFFFFFL;
+  return crc ^ 0xffffffffL;
 }
 
 
-static unsigned long
+unsigned long
 calculate_file_crc (FILE * file)
 {
   unsigned long count, crc = 0;
@@ -427,7 +430,7 @@ memswap (void *add, size_t n)
       c = (int) a[pos];
       a[pos] = a[pos + 1];
       a[pos + 1] = c;
-      
+
       pos += 2;
     }
 
@@ -436,18 +439,21 @@ memswap (void *add, size_t n)
 
 
 void
-memhexdump (const void *add, size_t n, long virtual_start)
+memhexdump (const void *mem, size_t n, long virtual_start)
 {
-  register size_t x;
+  size_t x;
   char buf[MAXBUFSIZE];
-  const unsigned char *a = add;
+  const unsigned char *a = mem;
 
   for (x = 0; x < n; x++)
     {
       if (!(x % 16))
-        printf ("%s%s%08lx  ", x?buf:"", x?"\n":"", x + virtual_start);
-      printf ("%02x %s", ((char)a[x]) & 0xff, !((x + 1) % 4)?" ":"");
-      sprintf (&buf[x % 16], "%c", isprint ((char)a[x])?((char)a[x]):'.');
+        printf ("%s%s%08lx  ", x ? buf : "",
+                               x ? "\n" : "",
+                               x + virtual_start);
+      printf ("%02x %s", ((char) a[x]) & 0xff,
+                         !((x + 1) % 4) ? " ": "");
+      sprintf (&buf[x % 16], "%c", isprint ((char) a[x]) ? ((char) a[x]) : '.');
     }
   printf ("%s\n", buf);
 }
@@ -505,7 +511,8 @@ file_crc32 (const char *filename, long start)
   unsigned long val;
   FILE *fh;
 
-  build_crc_table ();
+  if (!crc_table_built)
+    build_crc_table ();
 
   if (!(fh = fopen (filename, "rb")))
     return -1;
@@ -607,7 +614,7 @@ filencmp (const char *filename, long start, long len, const char *search, long s
 
 
 size_t
-quickfread (const void *dest, size_t start, size_t len, const char *src)
+quickfread (void *dest, size_t start, size_t len, const char *src)
 {
   size_t result = 0;
   long size = quickftell (src);
@@ -622,13 +629,13 @@ quickfread (const void *dest, size_t start, size_t len, const char *src)
 #if 1
   if ((size - start) < len)
     {
-      memset ((void *) dest, 0, len);
+      memset (dest, 0, len);
       len = size - start;
     }
 #endif
 
   fseek (fh, start, SEEK_SET);
-  result = fread ((void *) dest, 1, len, fh);
+  result = fread (dest, 1, len, fh);
   fclose (fh);
 #if 0
   dest[len]=0;

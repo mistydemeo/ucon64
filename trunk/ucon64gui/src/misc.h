@@ -246,7 +246,7 @@ extern unsigned long memcrc32 (const void *add, size_t n);
   quickfputc()  same as fputc but takes filename instead of FILE and a pos
   quickftell()  return size of file
 */
-extern size_t quickfread (const void *dest, size_t start, size_t len, const char *src);
+extern size_t quickfread (void *dest, size_t start, size_t len, const char *src);
 extern size_t quickfwrite (const void *src, size_t start, size_t len, const char *dest, const char *mode);
 extern int quickfgetc (const char *filename, long pos);
 extern int quickfputc (const char *filename, long pos, int c, const char *mode);
@@ -326,7 +326,7 @@ extern int closedir2 (DIR *p);
 #endif
 int rmdir_R (const char *path);
 extern int fsystem (FILE *output, const char *cmdline);
-//extern unsigned long calculate_buffer_crc (unsigned int size, unsigned long crc, void *buffer);
+extern unsigned long calculate_buffer_crc (unsigned int size, unsigned long crc, void *buffer);
 #ifdef  __unix__
 extern int drop_privileges (void);
 #endif

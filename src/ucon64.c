@@ -850,13 +850,8 @@ else
 	intelli_usage(argc,argv);
 */
 printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
-	"  -s16		force recognition; NEEDED\n"
-	"  -ata		force recognition; NEEDED\n"
-	"  -coleco	force recognition; NEEDED\n"
-	"  -vboy		force recognition; NEEDED\n"
-	"  -swan		force recognition; NEEDED\n"
-	"  -vec		force recognition; NEEDED\n"
-	"  -int		force recognition; NEEDED\n"
+	"  -s16, -ata, -coleco, -vboy, -swan, -vec, -int\n"
+	"		force recognition\n"
 	"  *		show info (default)\n\n"
 ,system16_TITLE
 ,atari_TITLE

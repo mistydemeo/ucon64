@@ -279,6 +279,7 @@ main (int argc, char *argv[])
   unsigned long padded;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], *ucon64_argv[128];
   int option_index = 0;
+  struct stat puffer;
 
   printf ("%s\n", ucon64_TITLE);
   printf ("Uses code from various people. See 'developers.html' for more!\n");
@@ -603,7 +604,7 @@ main (int argc, char *argv[])
           break;
 
         default:
-          fprintf (STDERR, "Try '%s --help' for more information.\n", argv[0]);
+          fprintf (STDERR, "Try '%s " OPTION_LONG_S "help' for more information.\n", argv[0]);
           return -1;
       }
     }
@@ -618,8 +619,11 @@ main (int argc, char *argv[])
   ucon64_parport_probe ();
 
   if (!access (rom.rom, F_OK|R_OK))
-    ucon64_init (&rom);
-
+    {
+      if (!stat (rom.rom, &puffer))
+        if (S_ISREG (puffer.st_mode))  
+          {
+            ucon64_init (&rom);
 #if 0
   int show_nfo;                 //show or skip info output for ROM
                                 //values:
@@ -628,10 +632,10 @@ main (int argc, char *argv[])
                                 //2 show after processing of ROM
                                 //3 show before and after processing of ROM
 #endif
-  if (!access (rom.rom, F_OK|R_OK) &&
-    (!ucon64.show_nfo || ucon64.show_nfo == 3))
-      ucon64_nfo (&rom);
-
+            if (!ucon64.show_nfo || ucon64.show_nfo == 3)
+              ucon64_nfo (&rom);
+          }
+    }
 /*
   getopt_long_only() - options
 */
@@ -850,7 +854,7 @@ main (int argc, char *argv[])
   
         case ucon64_DB:
           printf ("Database: %ld known ROMs in db.h (%+ld)\n\n"
-                  "TIP: %s -db -nes would show only the number of known NES ROMs\n\n",
+                  "TIP: %s " OPTION_LONG_S "db " OPTION_LONG_S "nes would show only the number of known NES ROMs\n\n",
                   ucon64_dbsize (rom.console),
                   ucon64_dbsize (rom.console) - ucon64_DBSIZE,
                   getarg (argc, argv, ucon64_NAME));
@@ -862,7 +866,7 @@ main (int argc, char *argv[])
           ucon64_dbsearch (&rom);
           ucon64_nfo (&rom);
 //          ucon64_dbview (rom.console);
-          printf ("TIP: %s -dbs -nes would search only for a NES ROM\n\n",
+          printf ("TIP: %s "OPTION_LONG_S "dbs "OPTION_LONG_S "nes would search only for a NES ROM\n\n",
                   getarg (argc, argv, ucon64_NAME));
   
           break;
@@ -870,7 +874,7 @@ main (int argc, char *argv[])
         case ucon64_DBV:
           ucon64_dbview (rom.console);
   
-          printf ("\nTIP: %s -db -nes would view only NES ROMs\n\n",
+          printf ("\nTIP: %s " OPTION_LONG_S "db " OPTION_LONG_S "nes would view only NES ROMs\n\n",
                   getarg (argc, argv, ucon64_NAME));
           break;
   
@@ -1284,11 +1288,10 @@ main (int argc, char *argv[])
           break;
 
         default:
-          fprintf (STDERR, "Try '%s --help' for more information.\n", argv[0]);
+          fprintf (STDERR, "Try '%s " OPTION_LONG_S "help' for more information.\n", argv[0]);
           return -1;
       }
     }
-
 
 #if 0
   int show_nfo;                 //show or skip info output for ROM
@@ -1298,10 +1301,24 @@ main (int argc, char *argv[])
                                 //2 show after processing of ROM
                                 //3 show before and after processing of ROM
 #endif
+
   if (!access (rom.rom, F_OK|R_OK) && ucon64.show_nfo >= 2)
     {
+      if (!stat (rom.rom, &puffer))
+        if (S_ISREG (puffer.st_mode))  
+          {
+#if 0
+  int show_nfo;                 //show or skip info output for ROM
+                                //values:
+                                //0 show before processing of ROM (default)
+                                //1 skip before and after processing of ROM
+                                //2 show after processing of ROM
+                                //3 show before and after processing of ROM
+#endif
 //          if (rom.console == ucon64_UNKNOWN) ucon64_init (&rom);
-          ucon64_nfo (&rom);
+            if (!ucon64.show_nfo || ucon64.show_nfo == 3)
+              ucon64_nfo (&rom);
+          }
     }
 
   return 0;
@@ -1576,7 +1593,7 @@ ucon64_nfo (struct ucon64_ *rom)
                rom->internal_crc_len * 2, rom->internal_crc_len * 2);
       printf (buf,
               (rom->current_internal_crc ==
-               rom->internal_crc) ? "ok" : "bad (use -chk to fix)",
+               rom->internal_crc) ? "ok" : "bad",
               rom->current_internal_crc,
               (rom->current_internal_crc == rom->internal_crc) ? "=" : "!",
               rom->internal_crc);
@@ -1634,7 +1651,7 @@ int ucon64_e(struct ucon64_ *rom)
       printf ("ERROR: could not find the correct settings (%s) in\n"
               "       %s\n"
               "TIP:   If the wrong console was detected you might try to force recognition\n"
-              "       The force recognition option for Super Nintendo would be -snes\n",
+              "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n",
               buf3, ucon64.configfile);
       return -1;
     }
@@ -1668,62 +1685,67 @@ int ucon64_e(struct ucon64_ *rom)
   return result;
 }
 
-int ucon64_ls(int verbose)
+int ucon64_ls (int verbose)
 {
   int ucon64_argc;
   struct dirent *ep;
   struct stat puffer;
-  DIR *dp;
   char current_dir[FILENAME_MAX];
+  DIR *dp;
   char buf[MAXBUFSIZE], *ucon64_argv[128];
 
-        if (access (rom.rom, R_OK) != 0 || (dp = opendir (rom.rom)) == NULL)
-          return -1;
+  if (stat (rom.rom, &puffer) == -1)
+    getcwd (rom.rom, FILENAME_MAX);
+  else if (S_ISDIR (puffer.st_mode) != TRUE)
+    getcwd (rom.rom, FILENAME_MAX);
 
-        getcwd (current_dir, FILENAME_MAX);
-        chdir (rom.rom);
+  if ((dp = opendir (rom.rom)) == NULL)
+    return -1;
 
-        while ((ep = readdir (dp)) != 0)
-          {
-            if (!stat (ep->d_name, &puffer))
-              {
-                if (S_ISREG (puffer.st_mode))
-                  {
-                    ucon64_argv[0] = "ucon64";
-                    ucon64_argv[1] = ep->d_name;
-                    ucon64_argc = 2;
+  getcwd (current_dir,FILENAME_MAX);
+  chdir (rom.rom);
 
-                    ucon64_flush (ucon64_argc, ucon64_argv, &rom);
-                    strcpy (rom.rom, ep->d_name);
-                    ucon64_init (&rom);
+  while ((ep = readdir (dp)) != 0)
+    {
+      if (!stat (ep->d_name, &puffer))
+        {
+          if (S_ISREG (puffer.st_mode))
+            {
+              ucon64_argv[0] = "ucon64";
+              ucon64_argv[1] = ep->d_name;
+              ucon64_argc = 2;
 
-                    if (verbose == 0)
-                      {
-                        strftime (buf, 13, "%b %d %H:%M",
-                                  localtime (&puffer.st_mtime));
-                        printf ("%-31.31s %10d %s %s\n", rom.name,
-                                (int) puffer.st_size, buf, rom.rom);
-                      }
-                    else if (verbose == 1)
-                      ucon64_nfo (&rom);
+              ucon64_flush (ucon64_argc, ucon64_argv, &rom);
+              strcpy (rom.rom, ep->d_name);
+              ucon64_init (&rom);
+
+              if (verbose == 0)
+                {
+                  strftime (buf, 13, "%b %d %H:%M",
+                            localtime (&puffer.st_mtime));
+                  printf ("%-31.31s %10d %s %s\n", rom.name,
+                          (int) puffer.st_size, buf, rom.rom);
+                }
+              else if (verbose == 1)
+                ucon64_nfo (&rom);
 /*TODO renamer!
-                    else if (argcmp (argc, argv, "-rrom") &&
-                             rom.console != ucon64_UNKNOWN)
-                             // && rom.console != ucon64_KNOWN)
-                      {
-                        strcpy (buf, &rom.rom[findlast (rom.rom, ".") + 1]);
-                        printf ("%s.%s\n", rom.name, buf);
-                      }
+              else if (argcmp (argc, argv, "-rrom") &&
+                       rom.console != ucon64_UNKNOWN)
+                       // && rom.console != ucon64_KNOWN)
+                {
+                  strcpy (buf, &rom.rom[findlast (rom.rom, ".") + 1]);
+                  printf ("%s.%s\n", rom.name, buf);
+                }
 */
-                    fflush (stdout);
-                  }
-              }
-          }
-        closedir (dp);
-        chdir (current_dir);
+              fflush (stdout);
+            }
+        }
+    }
+  closedir (dp);
 
-        return 0;
-
+  chdir (current_dir);
+  
+  return 0;
 }
 
 int
@@ -1953,16 +1975,16 @@ ucon64_usage (int argc, char *argv[])
            "  " OPTION_LONG_S "db           ROM database statistics (# of entries)\n"
            "  " OPTION_LONG_S "dbv          view ROM database (all entries)\n"
            "  " OPTION_LONG_S "ls           generate ROM list for all ROMs; $ROM=DIRECTORY\n"
-           "  " OPTION_LONG_S "lsv          like -ls but more verbose; $ROM=DIRECTORY\n"
+           "  " OPTION_LONG_S "lsv          like " OPTION_LONG_S "ls but more verbose; $ROM=DIRECTORY\n"
 //         "TODO:  " OPTION_LONG_S "rrom    rename all ROMs in DIRECTORY to their internal names; $ROM=DIR\n"
-//         "TODO:  " OPTION_LONG_S "rr83    like -rrom but with 8.3 filenames; $ROM=DIR\n"
+//         "TODO:  " OPTION_LONG_S "rr83    like " OPTION_LONG_S "rrom but with 8.3 filenames; $ROM=DIR\n"
 //         "                this is often used by people who loose control of their ROMs\n"
            "  " OPTION_LONG_S "rl           rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
            "  " OPTION_LONG_S "ru           rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"
 #ifdef	__MSDOS__
-           "  " OPTION_LONG_S "hex          show ROM as hexdump; use \"ucon64 -hex $ROM|more\"\n"
+           "  " OPTION_LONG_S "hex          show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex $ROM|more\"\n"
 #else
-           "  " OPTION_LONG_S "hex          show ROM as hexdump; use \"ucon64 -hex $ROM|less\"\n"       // less is better ;-)
+           "  " OPTION_LONG_S "hex          show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex $ROM|less\"\n"       // less is better ;-)
 #endif
            "  " OPTION_LONG_S "find         find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)\n"
            "  " OPTION_S "c            compare ROMs for differencies; $FILE=OTHER_ROM\n"

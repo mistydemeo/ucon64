@@ -2567,12 +2567,12 @@ int
 q_fncmp (const char *filename, int start, int len, const void *search,
          int searchlen, int wildcard)
 {
-  int seg_len = 0, seg_pos = 0 // position in segment
-      /*, size = q_fsize (filename) */;
-  char buf[MAXBUFSIZE];
+#define BUFSIZE 8192
+  char buf[BUFSIZE];
   FILE *fh;
+  int seglen, maxsearchlen, searchpos, filepos = 0, matchlen = 0;
 
-  if (searchlen >= MAXBUFSIZE)
+  if (start >= len)
     return -1;
 
   if (!(fh = fopen (filename, "rb")))
@@ -2580,23 +2580,34 @@ q_fncmp (const char *filename, int start, int len, const void *search,
       errno = ENOENT;
       return -1;
     }
+  fseek (fh, start, SEEK_SET);
+  filepos = start;
 
-//  len = MIN (len, size - start);
-
-  for (; ; start += seg_len, len -= seg_len)
+  while ((seglen = fread (buf, 1, BUFSIZE + filepos >= len ?
+                            len - filepos : BUFSIZE, fh)))
     {
-      seg_len = MIN (len, MAXBUFSIZE);
-
-      fseek (fh, start, SEEK_SET); // obsolete?
-      if (!fread (buf, 1, seg_len, fh))
-        break;
-
-      for (seg_pos = 0; seg_pos < seg_len; seg_pos++)
-        if (!memwcmp (&buf[seg_pos], search, searchlen, wildcard))
-          {
-            fclose (fh);
-            return start + seg_pos;
-          }
+      maxsearchlen = searchlen - matchlen;
+      for (searchpos = 0; searchpos <= seglen; searchpos++)
+        {
+          if (searchpos + maxsearchlen >= seglen)
+            maxsearchlen = seglen - searchpos;
+          if (!memwcmp (buf + searchpos, search + matchlen, maxsearchlen, wildcard))
+            {
+              if (matchlen + maxsearchlen < searchlen)
+                {
+                  matchlen += maxsearchlen;
+                  break;
+                }
+              else
+                {
+                  fclose (fh);
+                  return filepos + searchpos - matchlen;
+                }
+            }
+          else
+            matchlen = 0;
+        }
+      filepos += seglen;
     }
 
   fclose (fh);

@@ -217,7 +217,7 @@ long filetestpad(	char *filename
 }
 
 #ifdef BACKUP
-int ucon64_io_fd;
+static int ucon64_io_fd;
 
 unsigned char inportb(unsigned short port)
 {
@@ -335,7 +335,7 @@ int detectParPort(unsigned int port)
   return 1;
 }
 
-void close_io_port(void)
+static void close_io_port(void)
 {
   close(ucon64_io_fd);
 }
@@ -343,23 +343,22 @@ void close_io_port(void)
 #define getParPort(x) parport_probe(x)
 unsigned int parport_probe(unsigned int port)
 {
-#ifdef __BEOS__
-//TODO uhm..
-  ucon64_io_fd = open("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
-  if (ucon64_io_fd != -1)
-  {
-    if (atexit(close_io_port) == -1)
-    {
-      fprintf(stderr, "Could not register function with atexit()\n");
-      exit(1);
-    }
-    return BEOS_PARPORT;
-  }
-  else
-    return 0;
-#else
   unsigned int parPortAddresses[] = {0x3bc, 0x378, 0x278};
   int i;
+
+#ifdef __BEOS__
+  ucon64_io_fd = open("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
+  if (ucon64_io_fd == -1)
+  {
+    fprintf(stderr, "Could not open /dev/misc/parnew\n");
+    exit(1);
+  }
+  if (atexit(close_io_port) == -1)
+  {
+    fprintf(stderr, "Could not register function with atexit()\n");
+    exit(1);
+  }
+#endif
 
   if (port == 0)
     port = 1;
@@ -398,7 +397,6 @@ unsigned int parport_probe(unsigned int port)
   }                                             // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 
   return port;
-#endif
 }
 
 int parport_gauge(time_t init_time, long pos, long size)

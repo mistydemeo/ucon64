@@ -295,8 +295,6 @@ main (int argc, char *argv[])
   ucon64.backup = ((!strcmp (getProperty (ucon64.configfile, "backups", buf2, "1"), "1")) ?
                1 : 0);
 
-  ucon64.parport = 0x378;
-  ucon64_parport_probe ();
 
   ucon64.argc = argc;
   for (x = 0; x < argc; x++)ucon64.argv[x] = argv[x];
@@ -616,6 +614,9 @@ main (int argc, char *argv[])
   if (optind < argc)
     strcpy(ucon64.file, argv[optind++]);
                                     
+  ucon64.parport = atoi (ucon64.file);
+  ucon64_parport_probe ();
+
   if (!access (rom.rom, F_OK|R_OK))
     ucon64_init (&rom);
 

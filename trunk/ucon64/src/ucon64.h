@@ -222,14 +222,10 @@ enum
 #define MAXROMSIZE ( ( 512+1 ) * MBIT )
 #define MAXBUFSIZE 32768
 
-#define ucon64_NAME	0
-#define ucon64_ROM	1
-#define ucon64_FILE	2
-
 /*
   this struct holds only workflow relevant informations
 */
-extern struct ucon64__
+extern struct ucon64_
 {
 //TODO get rid of argc and argv here
   int argc;
@@ -260,7 +256,7 @@ extern struct ucon64__
 /*
   this struct holds only ROM relevant informations
 */
-extern struct ucon64_//TODO rom_
+extern struct rom_
 {
   char rom[FILENAME_MAX];               //$ROM (cmdline) with path
 //  char file[FILENAME_MAX];              //$FILE (cmdline) with path

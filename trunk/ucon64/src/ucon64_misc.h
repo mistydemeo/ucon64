@@ -94,15 +94,8 @@ extern const char *unknown_usage[];
 /*
   CRC32 routines
 */
-extern unsigned long CalculateBufferCRC (unsigned int count, unsigned long crc,
+extern unsigned long CalculateBufferCRC (unsigned int size, unsigned long crc,
                                   void *buffer);
-/*
-  like zlib/crc32(); uCON64 has it's own crc calc. stuff
-  this is just a wrapper
-*/
-#ifndef UNZIP
-extern unsigned long crc32 (unsigned long dummy, unsigned char *prg_code, size_t size);
-#endif
 extern unsigned long fileCRC32 (const char *filename, long start);   // calculate CRC32 of filename beginning from start
 
 /*

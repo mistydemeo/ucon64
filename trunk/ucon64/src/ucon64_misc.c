@@ -136,13 +136,13 @@ BuildCRCTable ()
 
 
 unsigned long
-CalculateBufferCRC (unsigned int count, unsigned long crc, void *buffer)
+CalculateBufferCRC (unsigned int size, unsigned long crc, void *buffer)
 {
   unsigned char *p;
   unsigned long temp1, temp2;
 
   p = (unsigned char *) buffer;
-  while (count-- != 0)
+  while (size-- != 0)
     {
       temp1 = (crc >> 8) & 0x00FFFFFFL;
       temp2 = CRCTable[((int) crc ^ *p++) & 0xff];
@@ -150,16 +150,6 @@ CalculateBufferCRC (unsigned int count, unsigned long crc, void *buffer)
     }
   return crc;
 }
-
-#ifndef UNZIP
-unsigned long
-crc32 (unsigned long dummy, unsigned char *prg_code, size_t size)
-{
-  unsigned long crc = 0;
-
-  return CalculateBufferCRC ((unsigned int) size, crc, (void *) prg_code);
-}
-#endif
 
 
 unsigned long

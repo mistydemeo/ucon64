@@ -1766,6 +1766,7 @@ fal_usage (int argc, char *argv[])
      "  -xfals        send/receive SRAM to/from Flash Advance Linker; $FILE=PORT\n"
      "                receives automatically when $ROM(=SRAM) does not exist\n"
      "  -xfalb<n>     send/receive SRAM to/from Flash Advance Linker bank n\n"
+     "                n can be 1, 2, 3 or 4\n"
      "                $FILE=PORT; receives automatically when SRAM does not exist\n");
 
   if (verbose)

@@ -28,21 +28,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "psx.h"
-#include "backup/cdrw.h"
-#if 0
-//#include "patch/ppf.h"
-//#include "patch/xps.h"
-#endif
 
 const char *psx_usage[] =
   {
     "Playstation (One)/Playstation 2 (CD only)",
     "1994/(2000) Sony http://www.playstation.com",
     "  " OPTION_LONG_S "psx         force recognition; NEEDED\n"
-#ifdef  BACKUP_CD
+#ifdef  LIBDISCMAGE
     "                  " OPTION_LONG_S "xcdrw combined with MODE2_RAW (default) will most likely\n"
     "                  do the job\n"
-#endif  // BACKUP_CD                      
+#endif  // LIBDISCMAGE                      
       ,
       NULL
 };
@@ -53,7 +48,7 @@ psx_init (st_rominfo_t *rominfo)
   int result = -1;
 
   rominfo->console_usage = psx_usage;
-  rominfo->copier_usage = cdrw_usage;
+//  rominfo->copier_usage = cdrw_usage;
 
   return result;
 }

@@ -29,10 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "dc.h"
-#include "backup/cdrw.h"
 #if 0
-//#include "patch/ppf.h"
-//#include "patch/xps.h"
 
 static int dc_ip(char *dev,char *name)
 #endif
@@ -45,10 +42,10 @@ const char *dc_usage[] =
 #warning TODO  --ip  extract IP.BIN; --rom=RAW_IMAGE
 #endif // TODO
     "  " OPTION_LONG_S "dc          force recognition; NEEDED\n"
-#ifdef BACKUP_CD
+#ifdef LIBDISCMAGE
       "                  " OPTION_LONG_S "xcdrw works currently only for MODE1/2048 backups which\n"
       "                  need the Utopia BootCD\n"
-#endif // BACKUP_CD
+#endif // LIBDISCMAGE
 #if 0
     "TEST: " OPTION_LONG_S "cdirip  rip/split track(s) from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
     "TODO: " OPTION_LONG_S "nero    convert DiscJuggler/CDI IMAGE for use with Nero;\n"
@@ -67,7 +64,7 @@ dc_init (st_rominfo_t *rominfo)
 //  printf ("%d\n", sizeof (dc_ip0000_header_t));
 
   rominfo->console_usage = dc_usage;
-  rominfo->copier_usage = cdrw_usage;
+//  rominfo->copier_usage = cdrw_usage;
 
   return result;
 }

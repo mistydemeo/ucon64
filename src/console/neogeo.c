@@ -29,7 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "neogeo.h"
-#include "backup/cdrw.h"
 
 const char *neogeo_usage[] =
   {

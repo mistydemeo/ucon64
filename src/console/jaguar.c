@@ -29,8 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "jaguar.h"
-#include "backup/cdrw.h"
-
 
 const char *jaguar_usage[] =
   {

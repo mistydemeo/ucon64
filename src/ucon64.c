@@ -38,6 +38,10 @@ write programs in C
 #include <time.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <limits.h>
+#if     defined __CYGWIN__ || defined DJGPP
+#define ARG_MAX _POSIX_ARG_MAX
+#endif
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -88,7 +92,7 @@ ucon64_rom_flush (st_rominfo_t * rominfo)
 }
 
 
-st_ucon64_t ucon64;               // containes ptr to image, dat and rominfo
+st_ucon64_t ucon64;                             // containes ptr to image, dat and rominfo
 
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
 
@@ -439,7 +443,7 @@ main (int argc, char **argv)
 
   ucon64.argc = argc;
   ucon64.argv = argv;                           // must be set prior to calling
-
+                                                //  ucon64_load_discmage() (for DOS)
 #ifdef  __unix__
   // We need to modify the umask, because the configfile is made while we are
   //  still running in root mode. Maybe 0 is even better (in case root did
@@ -509,7 +513,7 @@ main (int argc, char **argv)
     }
 
   // getopt() is utilized to make uCON64 handle/parse cmdlines in a sane
-  // and expected way
+  //  and expected way
   x = optind = 0;
   memset (&arg, 0, sizeof (st_args_t) * UCON64_MAX_ARGS);
   while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
@@ -535,33 +539,28 @@ main (int argc, char **argv)
     }
 
 #ifdef  DEBUG
-  for (x = 0; arg[x].val; x++) 
+  for (x = 0; arg[x].val; x++)
     printf ("%d %s\n\n", arg[x].val, arg[x].optarg ? arg[x].optarg : "(null)");
 #endif
-    
+
   rom_index = optind;                           // save index of first file
-#if 1
   if (rom_index == argc)
     ucon64_execute_options();
-  else 
+  else
     for (; rom_index < argc; rom_index++)
-#else
-    for (; rom_index < argc; rom_index++)
-#endif
-    {
-      int result = 0;
-      struct dirent *ep;
-      DIR *dp;
-      char *path = argv[rom_index];
+      {
+        int result = 0;
+        struct dirent *ep;
+        DIR *dp;
+        char *path = argv[rom_index];
 
-      if (stat (path, &fstate) != -1)
-        {
-          if (S_ISREG (fstate.st_mode))
-            result = ucon64_process_rom (argv[rom_index]);
-          else if (S_ISDIR (fstate.st_mode))    // a dir!?
-            {
-              if ((dp = opendir (path)))
-                {
+        if (stat (path, &fstate) != -1)
+          {
+            if (S_ISREG (fstate.st_mode))
+              result = ucon64_process_rom (argv[rom_index]);
+            else if (S_ISDIR (fstate.st_mode))    // a dir!?
+              {
+                if ((dp = opendir (path)))
                   while ((ep = readdir (dp)))
                     {
                       sprintf (buf, "%s" FILE_SEPARATOR_S "%s", path, ep->d_name);
@@ -574,17 +573,16 @@ main (int argc, char **argv)
                           }
                     }
                   closedir (dp);
-                }
-            }
-          else
-            result = ucon64_process_rom(argv[rom_index]);
-        }
-      else
-        result = ucon64_process_rom(argv[rom_index]);
-        
-      if (result == 1) 
-        break;
-    }
+              }
+            else
+              result = ucon64_process_rom(argv[rom_index]);
+          }
+        else
+          result = ucon64_process_rom(argv[rom_index]);
+
+        if (result == 1)
+          break;
+      }
 
   return 0;
 }
@@ -595,7 +593,12 @@ ucon64_process_rom (char *fname)
 {
 #ifdef  HAVE_ZLIB_H
   int n_entries = unzip_get_number_entries (fname);
+<<<<<<< ucon64.c
+
+  if (n_entries != -1)                          // it's a zip file
+=======
   if (n_entries != -1)                      // it's a zip file
+>>>>>>> 1.523
     {
       for (unzip_current_file_nr = 0; unzip_current_file_nr < n_entries;
            unzip_current_file_nr++)
@@ -681,7 +684,7 @@ ucon64_execute_options (void)
     {
 #endif
 
-      if ((wf = ucon64_get_wf (arg[x].val)))             // get workflow for that option
+      if ((wf = ucon64_get_wf (arg[x].val)))    // get workflow for that option
         {
           if (wf->console != UCON64_UNKNOWN)
             ucon64.console = wf->console;
@@ -705,7 +708,7 @@ ucon64_execute_options (void)
       {
         // now we can drop privileges
         drop_privileges ();
-        privileges_droppped = 1; 		// call drop_privileges() only once
+        privileges_droppped = 1;                // call drop_privileges() only once
       }
 #endif
 
@@ -741,7 +744,7 @@ ucon64_execute_options (void)
       if (result == -1) // no_rom but WF_NO_ROM
         return -1;
 
-      if (ucon64_options (arg[x].val, arg[x].optarg) == -1) // because we have more than 180 options
+      if (ucon64_options (arg[x].val, arg[x].optarg) == -1) // because we have more than 150 options
         {
 //          const st_usage_t *p = (ucon64_get_wf (c))->usage;
           const char *opt = (ucon64_get_opt (c))->name;

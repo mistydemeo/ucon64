@@ -46,7 +46,8 @@ endif                                   # DJGPP
 endif                                   # cygwin
 
 
-OBJECTS=ucon64.o ucon64_misc.o ucon64_dat.o misc.o getopt.o quick_io.o \
+OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
+        ucon64_lib.o misc.o getopt.o quick_io.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
@@ -187,7 +188,7 @@ misc.o: misc.h miscz.h config.h
 miscz.o: map.c map.h miscz.h config.h
 quick_io.o: quick_io.h misc.h config.h
 dlopen.o: dlopen.h dxedll_pub.h config.h
-ucon64.o: switches.c options.c dlopen.h getopt.h ucon64_dat.h \
+ucon64.o: ucon64_opts.h dlopen.h getopt.h ucon64_dat.h \
           libdiscmage/libdiscmage.h \
           console/snes.h console/gb.h console/gba.h console/n64.h \
           console/lynx.h console/sms.h console/nes.h console/genesis.h \
@@ -199,8 +200,10 @@ ucon64.o: switches.c options.c dlopen.h getopt.h ucon64_dat.h \
           backup/smd.h backup/fal.h backup/gbx.h backup/cd64.h backup/dex.h \
           backup/fpl.h backup/mgd.h backup/gd.h backup/mccl.h backup/lynxit.h \
           $(UCON64_STD_H)
+ucon64_opts.o: ucon64_opts.h $(UCON64_STD_H)
 ucon64_misc.o: libdiscmage/libdiscmage.h $(UCON64_STD_H)
 ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)
+ucon64_lib.o: dlopen.h $(UCON64_STD_H)
 console/gb.o: console/gb.h $(UCON64_STD_H)
 console/gba.o: console/gba.h $(UCON64_STD_H)
 console/genesis.o: console/genesis.h $(UCON64_STD_H)

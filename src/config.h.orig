@@ -56,6 +56,9 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
 
+/* Define to 1 if you have the `strcasestr' function. */
+/* #undef HAVE_STRCASESTR */
+
 /* Define to 1 if you have the `strcspn' function. */
 #define HAVE_STRCSPN 1
 
@@ -114,9 +117,6 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
-
-/* enable todo output (default: no) */
-/* #undef TODO */
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */

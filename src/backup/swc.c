@@ -87,7 +87,7 @@ int swc_write_rom(char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend, totalblocks, emu_mode_select, hdr_4th_byte, blocksdone = 0;
+  int bytesread, bytessend, totalblocks, blocksdone = 0, emu_mode_select, hdr_4th_byte;
   unsigned short address;
   struct stat fstate;
   time_t starttime;
@@ -112,12 +112,11 @@ int swc_write_rom(char *filename, unsigned int parport)
   fread(buffer, 1, HEADERSIZE, file);
   emu_mode_select = buffer[2];                  // these bytes are needed later
   hdr_4th_byte = buffer[3];
-
   send_command(5, 0, 0);
   send_block(0x400, buffer, HEADERSIZE);        // send header
   bytessend = HEADERSIZE;
 
-  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O
+  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O,
                                                 //  because if we get here q works ;)
   address = 0x200;                              // vgs '00 uses 0x200, vgs '96 uses 0,
   starttime = time(NULL);                       //  but then some ROMs don't work
@@ -134,13 +133,6 @@ int swc_write_rom(char *filename, unsigned int parport)
     checkabort(2);
   }
 
-/*
-  vgs '00 has the following code here:
-  if (emu_mode_select & 0x40)
-    goto <line with first fread() in this function>
-
-  since emu_mode_select does not change within this loop (eternal loop) I consider that a bug
-*/
   if (hdr_4th_byte & 0x80)
     emu_mode_select = 0x30;
   if (blocksdone > 0x200)                       // ROM dump > 512 8KB blocks (=32Mb (=4MB))
@@ -300,7 +292,7 @@ int swc_read_rom(char *filename, unsigned int parport)
   if (special)
     blocksleft >>= 1;                           // this must come _after_ get_emu_mode_select()!
 
-  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O
+  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O,
                                                 //  because if we get here q works ;)
   address1 = 0x300;                             // address1 = 0x100, address2 = 0 should
   address2 = 0x200;                             //  also work
@@ -369,14 +361,14 @@ int receive_rom_info(unsigned char *buffer)
   address = 0x200;
   for (n = 0; n < HEADERSIZE; n++)
   {
+    for (m = 0; m < 65536; m++)                 // a delay is necessary here
+      ;
     send_command(5, address, 0);
     send_command(1, 0xa0a0, 1);
     buffer[n] = receiveb();
     if ((0x81^buffer[n]) != receiveb())
       printf("received data is corrupt\n");
 
-    for (m = 0; m < 65536; m++)                 // a delay is necessary here
-      ;
     address++;
   }
 
@@ -545,7 +537,7 @@ int swc_read_sram(char *filename, unsigned int parport)
   send_command0(0xe00d, 0);
   send_command0(0xc008, 0);
 
-  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O
+  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O,
                                                 //  because if we get here q works ;)
   blocksleft = 4;                               // SRAM is 4*8KB
   address = 0x100;

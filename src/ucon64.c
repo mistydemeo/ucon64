@@ -120,8 +120,8 @@ int ucon64_main(int argc,char *argv[])
   struct dirent *ep;
   struct stat puffer;
   DIR *dp;
-struct ucon64_ ucon64;
-	struct ucon64_DB db;
+//  struct ucon64_ ucon64;
+  struct ucon64_DB db;
   char buf[MAXBUFSIZE], buf2[4096], buf3[4096], *ucon64_argv[128], *forceargs[] =
   {
     "",

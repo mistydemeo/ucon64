@@ -1,5 +1,5 @@
 /*
-fal.c - Flash Linker Advance support for uCON64
+fal.c - Flash Advance Linker support for uCON64
 
 written by 2001 Jeff Frohwein
            2001 NoisyB (noisyb@gmx.net)
@@ -1156,15 +1156,14 @@ int fal_main(int argc, char **argv)
 
 
 /*
-  It will save you some work if you don't fully integrate the code above with ucon64's code,
-  because it is a project separate from the ucon64 project.
+  It will save you some work if you don't fully integrate the code above with uCON64's code,
+  because it is a project separate from the uCON64 project.
 */
 int fal_argc;
 char *fal_argv[128];
 
 int fal_read(char *filename, unsigned int parport, int argc, char *argv[])
 {
-//TODO more options
   fal_argv[0] = "fal";
 
   fal_argv[1] = "-c";
@@ -1227,7 +1226,6 @@ int fal_read(char *filename, unsigned int parport, int argc, char *argv[])
 
 int fal_write(char *filename, long start, long len, unsigned int parport, int argc, char *argv[])
 {
-//TODO more options
   fal_argv[0] = "fal";
 
   if (argncmp(argc, argv, "-xfalc", 6))		// strlen("-xfalc") == 6
@@ -1273,11 +1271,11 @@ int fal_usage(int argc, char *argv[])
   if (argcmp(argc, argv, "-help"))
     printf("\n%s\n", fal_TITLE);
 
-  printf("  -xfal		send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
-         "		receives automatically when $ROM does not exist\n"
-         "  -xfalc<n>	specify chip size in mbits of ROM in Flash Advance Linker when\n"
-         "		receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32\n"
-         "  -xfalm	use SPP mode, default is EPP\n");
+  printf("  -xfal       send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
+         "              receives automatically when $ROM does not exist\n"
+         "  -xfalc<n>   specify chip size in mbits of ROM in Flash Advance Linker when\n"
+         "              receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32\n"
+         "  -xfalm      use SPP mode, default is EPP\n");
 
   if (argcmp(argc, argv, "-help"))
   {

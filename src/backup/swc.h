@@ -18,8 +18,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
 #include "../ucon64.h"
+
+#define swc_TITLE "Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n" \
+                  "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"
 
 int swc_read_rom(char *filename, unsigned int parport);
 int swc_write_rom(char *filename, unsigned int parport);
@@ -27,6 +29,3 @@ int swc_read_sram(char *filename, unsigned int parport);
 int swc_write_sram(char *filename, unsigned int parport);
 void swc_unlock(unsigned int parport);
 int swc_usage(int argc, char *argv[]);
-
-#define swc_TITLE "Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n" \
-                  "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"

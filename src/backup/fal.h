@@ -19,11 +19,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
 #include "../ucon64.h"
+
+#define fal_TITLE "Flash Advance Linker\n2001 Visoly http://www.visoly.com"
 
 int fal_read(char *filename, unsigned int parport, int argc, char *argv[]);
 int fal_write(char *filename, long start, long len, unsigned int parport, int argc, char *argv[]);
 int fal_usage(int argc, char *argv[]);
-
-#define fal_TITLE "Flash Advance Linker\n2001 Visoly http://www.visoly.com"

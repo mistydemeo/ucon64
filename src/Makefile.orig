@@ -15,7 +15,7 @@ OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
         console/n64.o console/neogeo.o console/nes.o console/ngp.o \
         console/pce.o console/sms.o console/psx.o console/snes.o \
-        console/swan.o console/dc.o console/jaguar.o console/other.o \
+        console/swan.o console/dc.o console/jaguar.o \
         backup/yoko.o backup/ssc.o backup/interceptor.o \
         backup/z64.o backup/cd64.o backup/doctor64.o backup/doctor64jr.o \
         backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/mgd.o \

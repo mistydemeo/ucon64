@@ -1,5 +1,5 @@
 /*
-psx.h - Dreamcast support for uCON64
+psx.h - Playstation support for uCON64
 
 written by 2001 NoisyB (noisyb@gmx.net)
 

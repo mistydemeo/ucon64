@@ -1,5 +1,5 @@
 /*
-n64.c - Nintendo64 support for uCON64
+n64.c - Nintendo 64 support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
            2002 - 2003 dbjh

@@ -2,7 +2,7 @@
 swc.h - Super Wild Card support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2001 dbjh
+           2001 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

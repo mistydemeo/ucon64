@@ -2406,14 +2406,30 @@ snes_init (st_rominfo_t *rominfo)
   memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
   rominfo->header = &snes_header;
 
+  bs_dump = snes_check_bs ();
+  if ( !bs_dump )
+  {
+    // Might have to check the other header location
+    if ( rominfo->header_start < (SNES_HIROM + SWC_HEADER_LEN) )
+    {
+      memcpy (&snes_header, rom_buffer + rominfo->header_start + SNES_HIROM, rominfo->header_len);
+      if ( snes_check_bs () )
+      {
+        bs_dump = 1;
+        snes_hirom = SNES_HIROM;
+        rominfo->header_start += SNES_HIROM;
+      }
+      else
+        memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
+    }
+  }
+  if (UCON64_ISSET (ucon64.bs_dump))            // -bs or -nbs option was specified
+    bs_dump = ucon64.bs_dump;
+
   // step 4.
   force_interleaved = UCON64_ISSET (ucon64.interleaved) ? 1 : 0;
   rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
     ucon64.interleaved : snes_testinterleaved (rominfo);
-
-  bs_dump = snes_check_bs ();
-  if (UCON64_ISSET (ucon64.bs_dump))            // -bs or -nbs option was specified
-    bs_dump = ucon64.bs_dump;
 
   // internal ROM name
   memcpy (rominfo->name, snes_header.name, SNES_NAME_LEN);

@@ -24,10 +24,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define IBUSY_BIT       0x80
 #define STROBE_BIT      1
 
-#define N_TRY_MAX       65536                   // # times to test if swc ready
+#define N_TRY_MAX       65536                   // # times to test if SWC ready
 
 #define BUFFERSIZE      8192                    // don't change, only 8192 works!
-#define HEADERSIZE      512                     // swc header is 512 bytes
+#define HEADERSIZE      512                     // SWC header is 512 bytes
 
 #ifndef __DOS__
 #define STDERR          stderr
@@ -83,7 +83,7 @@ void init_io(unsigned int port)
   printf("Using I/O port 0x%x\n", swc_port);
 }
 
-int swc_write_rom(char *filename, unsigned int parport)
+int swc_write_rom(char *filename, unsigned int parport, int sram_size)
 {
   FILE *file;
   unsigned char *buffer;
@@ -116,7 +116,7 @@ int swc_write_rom(char *filename, unsigned int parport)
   send_block(0x400, buffer, HEADERSIZE);        // send header
   bytessend = HEADERSIZE;
 
-  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O,
+  printf("Press q to abort\n\n");               // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;)
   address = 0x200;                              // vgs '00 uses 0x200, vgs '96 uses 0,
   starttime = time(NULL);                       //  but then some ROMs don't work
@@ -133,10 +133,18 @@ int swc_write_rom(char *filename, unsigned int parport)
     checkabort(2);
   }
 
-  if (hdr_4th_byte & 0x80)
-    emu_mode_select = 0x30;
+  if (hdr_4th_byte & 0x80)                      // Pro Fighter (FIG) HiROM dump
+    emu_mode_select = 0x30;                     // set bit 5&4 (SRAM & DRAM mem map mode 21)
   if (blocksdone > 0x200)                       // ROM dump > 512 8KB blocks (=32Mb (=4MB))
     send_command0(0xc010, 2);
+
+  if (sram_size == 0)
+  {
+    if (emu_mode_select & 0x10)                 // bit 4 == 1 => DRAM mode 21 (HiROM)
+      emu_mode_select &= ~0x20;                 // disable SRAM by setting SRAM mem map mode 20
+    else                                        // bit 4 == 0 => DRAM mode 20 (LoROM)
+      emu_mode_select |= 0x20;                  // disable SRAM by setting SRAM mem map mode 21
+  }
 
   send_command(5, 0, 0);
   totalblocks = (fstate.st_size - HEADERSIZE + BUFFERSIZE - 1) / BUFFERSIZE; // round up
@@ -174,7 +182,7 @@ int swc_write_sram(char *filename, unsigned int parport)
     exit(1);
   }
 
-  stat(filename, &fstate);                      // swc SRAM is 4*8KB, emu SRAM often not
+  stat(filename, &fstate);                      // SWC SRAM is 4*8KB, emu SRAM often not
   size = fstate.st_size - HEADERSIZE;
   printf("Send: %d Bytes\n", size);
   fseek(file, HEADERSIZE, SEEK_SET);            // skip the header
@@ -183,7 +191,7 @@ int swc_write_sram(char *filename, unsigned int parport)
   send_command0(0xe00d, 0);
   send_command0(0xc008, 0);
 
-  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O,
+  printf("Press q to abort\n\n");               // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;)
   address = 0x100;
   starttime = time(NULL);
@@ -292,7 +300,7 @@ int swc_read_rom(char *filename, unsigned int parport)
   if (special)
     blocksleft >>= 1;                           // this must come _after_ get_emu_mode_select()!
 
-  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O,
+  printf("Press q to abort\n\n");               // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;)
   address1 = 0x300;                             // address1 = 0x100, address2 = 0 should
   address2 = 0x200;                             //  also work
@@ -537,7 +545,7 @@ int swc_read_sram(char *filename, unsigned int parport)
   send_command0(0xe00d, 0);
   send_command0(0xc008, 0);
 
-  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O,
+  printf("Press q to abort\n\n");               // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;)
   blocksleft = 4;                               // SRAM is 4*8KB
   address = 0x100;
@@ -644,12 +652,12 @@ void checkabort(int status)
     puts("\nProgram aborted");
     exit(status);
   }
-//  send_command(5, 0, 0);                      // vgs: when sending/receiving a rom
+//  send_command(5, 0, 0);                      // vgs: when sending/receiving a ROM
 }
 
 void swc_unlock(unsigned int parport)
 /*
-  "Unlock" the swc. However, just starting to send, then stopping with ^C,
+  "Unlock" the SWC. However, just starting to send, then stopping with ^C,
   gives the same result.
 */
 {

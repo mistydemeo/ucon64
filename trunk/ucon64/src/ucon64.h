@@ -60,10 +60,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define ucon64_VERSION "1.9.7"
 
-#ifdef __DOS__
-	#define ucon64_TITLE "uCON64 1.9.7 DOS 1999-2001 by (various)"
-#elif __UNIX__
+#ifdef __UNIX__
 	#define ucon64_TITLE "uCON64 1.9.7 Unix 1999-2001 by (various)"
+#elif __DOS__
+	#define ucon64_TITLE "uCON64 1.9.7 DOS 1999-2001 by (various)"
 #elif __BEOS__
 	#define ucon64_TITLE "uCON64 1.9.7 BeOS 1999-2001 by (various)"
 #else
@@ -133,7 +133,7 @@ struct ucon64_
 	
   char misc[MAXBUFSIZE];	//some miscellaneous information about the ROM in one single string
 };
- 
+
 
 
 
@@ -144,9 +144,7 @@ struct ucon64_
 //#define ucon64_rom() (getarg(argc,argv,ucon64_ROM))
 //#define ucon64_file() (getarg(argc,argv,ucon64_FILE))
 
-struct ucon64_;                               // avoids a warning when included from ucon64_db.h
-                                                //  (#include "ucon64.h" in ucon64_db.h could also
-int ucon64_usage(int argc,char *argv[]);        //  come after definition of struct...)
+int ucon64_usage(int argc,char *argv[]);
 int ucon64_init(struct ucon64_ *rom);
 int ucon64_main(int argc,char *argv[]);
 int ucon64_nfo(struct ucon64_ *rom);

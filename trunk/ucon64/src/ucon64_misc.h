@@ -90,6 +90,9 @@ extern char *ucon64_fbackup (char *move_name, const char *filename);
 extern void handle_existing_file (const char *dest, char *src);
 extern void remove_temp_file (void); // possible temp file created by handle_existing_file()
 
+extern int ucon64_fhexdump (const char *filename, long start, long len);
+
+
 /*
   wrapper for misc.c/gauge()
 */

@@ -244,6 +244,35 @@ remove_temp_file (void)
 
 
 int
+ucon64_fhexdump (const char *filename, long start, long len)
+{
+  int x, size = q_fsize (filename), dump;
+  char buf[MAXBUFSIZE];
+  FILE *fh = fopen (filename, "rb");
+
+  if (!fh) return -1;
+  
+  if ((size - start) < len)
+    len = size - start;
+
+  fseek (fh, start, SEEK_SET);
+  for (x = 0; x < len; x++)
+    {
+      if (!(x % 16))
+        printf ("%s%s%08lx  ", x?buf:"", x?"\n":"", x + start);
+
+      dump = fgetc (fh);
+      printf ("%02x %s", dump & 0xff, !((x + 1) % 4) ? " " : "");
+      sprintf (&buf[x % 16], "%c", isprint (dump) ? ((char) dump) : '.');
+    }
+  printf ("%s\n", buf);
+  fclose (fh);
+
+  return 0;
+}
+
+
+int
 ucon64_pad (const char *filename, int start, int size)
 /*
   Pad file (if necessary) to start + size bytes;

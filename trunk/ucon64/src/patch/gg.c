@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.11 2002-09-11 10:19:40 noisyb Exp $
+ * $Id: gg.c,v 1.12 2002-09-12 18:43:40 noisyb Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.  
  * All rights reserved. Distributed under the BSD Software License.
@@ -1110,11 +1110,14 @@ gg_gg (st_rominfo_t *rominfo)
     }
 
   printf ("\n");
-  q_fhexdump (ucon64.rom, add + rominfo->buheader_len, 1);
+  buf[0] = q_fgetc (ucon64.rom, add + rominfo->buheader_len);
+  mem_hexdump (buf, 1, add + rominfo->buheader_len);
 
   q_fputc (q_fbackup(NULL, ucon64.rom), add + rominfo->buheader_len, (unsigned char) value, "r+b");
 
-  q_fhexdump (ucon64.rom, add + rominfo->buheader_len, 1);
+  buf[0] = q_fgetc (ucon64.rom, add + rominfo->buheader_len);
+  mem_hexdump (buf, 1, add + rominfo->buheader_len);
+
   printf ("\n");
 
   return 0;

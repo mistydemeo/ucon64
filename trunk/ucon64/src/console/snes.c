@@ -1329,9 +1329,9 @@ snes_n (st_rominfo_t *rominfo)
 int
 snes_chk (st_rominfo_t *rominfo)
 {
+  char buf[10];
   int image = rominfo->header_start + rominfo->buheader_len;
 
-  q_fhexdump (ucon64.rom, image + 44, 4);
   ucon64_fbackup (NULL, ucon64.rom);
 
   // change inverse checksum
@@ -1341,7 +1341,9 @@ snes_chk (st_rominfo_t *rominfo)
   q_fputc (ucon64.rom, image + 46, rominfo->current_internal_crc, "r+b");      // low byte
   q_fputc (ucon64.rom, image + 47, rominfo->current_internal_crc >> 8, "r+b"); // high byte
 
-  q_fhexdump (ucon64.rom, image + 44, 4);
+  q_fread (buf, image + 44, 4, ucon64.rom);
+  mem_hexdump (buf, 4, image + 44);
+
   ucon64_wrote (ucon64.rom);
 
   return 0;

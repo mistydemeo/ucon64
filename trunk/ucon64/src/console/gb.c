@@ -369,8 +369,8 @@ gameboy_n (st_rominfo_t *rominfo)
 int
 gameboy_chk (st_rominfo_t *rominfo)
 {
-  q_fhexdump (ucon64.rom, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d,
-               3);
+  char buf[4];
+
   ucon64_fbackup (NULL, ucon64.rom);
   gameboy_chksum (rominfo);
 
@@ -383,9 +383,10 @@ gameboy_chk (st_rominfo_t *rominfo)
   q_fputc (ucon64.rom, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4f,
               (gbcrc.calc & 0xff), "r+b");
 
+  q_fread (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d, 3, ucon64.rom);
 
-  q_fhexdump (ucon64.rom, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d,
-               3);
+  mem_hexdump (buf, 3, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d);
+
   ucon64_wrote (ucon64.rom);
   return 0;
 }

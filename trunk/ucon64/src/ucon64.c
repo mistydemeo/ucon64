@@ -475,9 +475,9 @@ main (int argc, char **argv)
     }
 
   if (!access (ucon64.configdir, F_OK))
-    ucon64.cache_enabled = 1;
+    ucon64.dat_enabled = 1;
   else
-    ucon64.cache_enabled = 0;
+    ucon64.dat_enabled = 0;
 
   // if the config file doesn't contain a parport line use "0" to force probing
   sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
@@ -1027,8 +1027,13 @@ ucon64_nfo (const st_rominfo_t *rominfo)
             }
         }
 
-      if (rominfo->dat) // a dat file entry was found
-        ucon64_dat_nfo (rominfo->dat);
+      if (ucon64.dat_enabled)
+        {
+          if (rominfo->dat) // a dat file entry was found
+            ucon64_dat_nfo (rominfo->dat);
+          else
+            printf ("DAT: ROM not found\n");
+        }
 
       if (rominfo->current_crc32)
         printf ("Checksum (CRC32): 0x%08x\n", rominfo->current_crc32);

@@ -62,7 +62,7 @@ typedef struct st_ucon64
   int backup;                                   // flag if backups files should be created
   int frontend;                                 // flag if uCON64 was started by a frontend
   int discmage_enabled;                         // flag if discmage DLL is loaded
-  int cache_enabled;                            // flag if cache file(s) are usable/enabled
+  int dat_enabled;                            // flag if cache file(s) are usable/enabled
 
   int show_nfo;                                 // show or skip info output for ROM
 

@@ -1820,11 +1820,32 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
 */
 {
   int interleaved = 0, check_map_type = 1;
+  unsigned int crc1 = crc32 (0, rom_buffer, 512),
+               crc2 = crc32 (0, rom_buffer + size / 2, 512);
 
-  // Mortal Kombat (Beta) doesn't have an internal header...
-  //  By coincidence the second if statement works for the interleaved dump
-  if (crc32 (0, rom_buffer, 512) == 0xfa83b519)
+  /*
+    0xfa83b519: Mortal Kombat (Beta) doesn't have an internal header...
+    By coincidence no special if statement is needed for the interleaved dump
+
+    0x4a54adc7: Super Aleste (J) [t1] has its header overwritten with the
+    trainer. The CRC is the same as for Super Aleste (J) (1st 512 bytes)
+
+    0xe43491b8: Street Fighter Alpha 2 (E) {[b1]}
+    0x44ca1045: Street Fighter Alpha 2 (U)
+    0x0c0bc8c5: Street Fighter Zero 2 (J)
+    These games have two nearly identical headers which can't be used to
+    determine whether the dump is interleaved or not.
+  */
+  if (crc1 == 0xfa83b519 || crc1 == 0x4a54adc7)
     check_map_type = 0;                         // not interleaved
+  else if (crc2 == 0x4a54adc7 || crc2 == 0xe43491b8 || crc2 == 0x44ca1045 ||
+           crc2 == 0x0c0bc8c5)
+    {
+      interleaved = 1;
+      snes_hirom = 0;
+      snes_hirom_ok = 1;
+      check_map_type = 0;                       // interleaved
+    }
   else
     {
       int org_snes_header_base = snes_header_base;

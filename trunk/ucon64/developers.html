@@ -27,7 +27,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <br>
 <table>
 <tr>
-  <td><tt>Chicken&nbsp;&&nbsp;chp</tt></td>
+  <td><tt>Chicken&nbsp;&amp;&nbsp;chp</tt></td>
   <td><a href="mailto:ronaldm@netcom.com"><tt>ronaldm@netcom.com (chp)</tt></a></td>
   <td><tt>original uCON</tt></td>
 </tr>
@@ -188,7 +188,6 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
   <td><tt>some info from his Genesis ROM format document</tt></td>
 </tr>
 </table><br>
-</tt><tt><br>
    and others...<br>
 <br>
 <p>
@@ -205,44 +204,44 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    anonymous user?</a><br>
 <b>A</b>: For read-only access you must have CVS installed. First you have to
    login. To login, type:<br>
-   &nbsp;&nbsp; cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/ucon64 login<br>
+   &nbsp;&nbsp; cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/ucon64 login<br>
    Then CVS will ask you for a password. Since you are logged in as anonymous
    you do not have a password, so just press the enter key at the password
    prompt. To download the uCON64 source, type:<br>
-   &nbsp;&nbsp; cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/ucon64 checkout -PR ucon64<br>
+   &nbsp;&nbsp; cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/ucon64 checkout -PR ucon64<br>
    The uCON64 source will then be downloaded to the directory ./ucon64.<br>
    It can be very busy at SourceForge which may result in a message like:<br>
-   &nbsp;&nbsp; cvs [login aborted]: recv() from server cvs.sourceforge.net: EOF<br>
+   &nbsp;&nbsp; cvs [login aborted]: recv() from server cvs.sourceforge.net: EOF<br>
    or<br>
-   &nbsp;&nbsp; cvs [checkout aborted]: recv() from server cvs.sourceforge.net: EOF<br>
+   &nbsp;&nbsp; cvs [checkout aborted]: recv() from server cvs.sourceforge.net: EOF<br>
    If you get that message simply try again.<br>
    You can speed up the download by using the option -z with a compression level
    parameter. For example:<br>
-   &nbsp;&nbsp; cvs -z 9 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/ucon64 checkout -PR ucon64<br>
+   &nbsp;&nbsp; cvs -z 9 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/ucon64 checkout -PR ucon64<br>
    If you want to get up to date with the newest source code later, enter the
    directory ucon64 and type:<br>
-   &nbsp;&nbsp; cvs update -PRd<br>
+   &nbsp;&nbsp; cvs update -PRd<br>
 <br>
 <p>
 <a name="4"><b>Q4</b>: How do I connect to the CVS repository as developer with
    read/write access?</a><br>
 <b>A</b>: For read/write access you must have CVS and SSH installed and set the
    environment variable CVS_RSH=ssh. To download the source code, type:<br>
-   &nbsp;&nbsp; cvs -z 9 -d:ext:&#60;name&#62;@cvs.sourceforge.net:/cvsroot/ucon64 checkout -PR ucon64<br>
+   &nbsp;&nbsp; cvs -z 9 -d:ext:&#60;name&#62;@cvs.sourceforge.net:/cvsroot/ucon64 checkout -PR ucon64<br>
    &#60;enter password at prompt&#62;<br>
    If you never logged on to cvs.sourceforge.net before you may get a message
    (from ssh) like:<br>
-   &nbsp;&nbsp; The authenticity of host 'cvs.sourceforge.net (66.35.250.207)' can't be established.<br>
-   &nbsp;&nbsp; DSA key fingerprint is 02:ab:7c:aa:49:ed:0b:a8:50:13:10:c2:3e:92:0f:42.<br>
-   &nbsp;&nbsp; Are you sure you want to continue connecting (yes/no)?<br>
+   &nbsp;&nbsp; The authenticity of host 'cvs.sourceforge.net (66.35.250.207)' can't be established.<br>
+   &nbsp;&nbsp; DSA key fingerprint is 02:ab:7c:aa:49:ed:0b:a8:50:13:10:c2:3e:92:0f:42.<br>
+   &nbsp;&nbsp; Are you sure you want to continue connecting (yes/no)?<br>
    Type yes (the whole word). Ssh will respond with a message like:<br>
-   &nbsp;&nbsp; Warning: Permanently added 'cvs.sourceforge.net' (DSA) to the list of known hosts.<br>
+   &nbsp;&nbsp; Warning: Permanently added 'cvs.sourceforge.net' (DSA) to the list of known hosts.<br>
    Now all files will be downloaded. Afterwards you can simply cd into the top
    level directory and continue by just typing:<br>
-   &nbsp;&nbsp; cvs update -PRd<br>
-   &nbsp;&nbsp; cvs commit -R<br>
-   &nbsp;&nbsp; cvs add &#60;file&#62;<br>
-   &nbsp;&nbsp; cvs remove -f &#60;file&#62;<br>
+   &nbsp;&nbsp; cvs update -PRd<br>
+   &nbsp;&nbsp; cvs commit -R<br>
+   &nbsp;&nbsp; cvs add &#60;file&#62;<br>
+   &nbsp;&nbsp; cvs remove -f &#60;file&#62;<br>
    You don't need to specify
    -d:ext:&#60;name&#62;@cvs.sourceforge.net:/cvsroot/ucon64 anymore, because
    that information is stored in the CVS directories then.<br>
@@ -255,9 +254,9 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    cvs -d:ext:&#60;name&#62;@cvs.sourceforge.net:/cvsroot/ucon64 diff -u &#62;mychanges.patch<br>
    &#60;enter password at prompt&#62;<br>
    As anonymous:<br>
-   &nbsp;&nbsp; cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/ucon64 login<br>
+   &nbsp;&nbsp; cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/ucon64 login<br>
    &#60;just press enter at password prompt&#62;<br>
-   &nbsp;&nbsp; cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/ucon64 diff -u &#62;mychanges.patch<br>
+   &nbsp;&nbsp; cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/ucon64 diff -u &#62;mychanges.patch<br>
 <br>
 <p>
 <a name="6"><b>Q6</b>: How is the source of uCON64 organized?</a><br>
@@ -412,12 +411,12 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    type based on a <i>struct</i> should have the same prefix and the suffix
    "_t". Example:<br>
 <pre>
- typedef struct st_unif_chunk
- {
-   unsigned long id;
-   unsigned long length;
-   void *data;
- } st_unif_chunk_t;
+   typedef struct st_unif_chunk
+   {
+     unsigned long id;
+     unsigned long length;
+     void *data;
+   } st_unif_chunk_t;
 </pre>
 <br>
    <b>Line length</b><br>
@@ -443,15 +442,15 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 </pre>
    Long comments should use the same indentation as the code that follows it:<br>
 <pre>
-  if (deinterleave)
-    /*
-      This is a bit of a hack, i.e., putting the following code in this
-      ...
-    */
-    {
-      unsigned char *data;
-      int size, n = 0, prg = 0, chr = 0;
-      ...
+   if (deinterleave)
+     /*
+       This is a bit of a hack, i.e., putting the following code in this
+       ...
+     */
+     {
+       unsigned char *data;
+       int size, n = 0, prg = 0, chr = 0;
+       ...
 </pre>
 <br>
    <b>Preprocessor directives</b><br>

@@ -1087,7 +1087,7 @@ genesis_multi (int truncate_size, char *fname)
 static int
 genesis_testinterleaved (st_rominfo_t *rominfo)
 {
-  unsigned char buf[16384];
+  unsigned char buf[16384] = { 0 };
 
   q_fread (buf, rominfo->buheader_len, 8192 + (GENESIS_HEADER_START + 4) / 2, ucon64.rom);
   if (!memcmp (buf + GENESIS_HEADER_START, "SEGA", 4))
@@ -1205,7 +1205,7 @@ genesis_init (st_rominfo_t *rominfo)
     "Printer", NULL, "Serial RS232C", NULL, "Tablet",
     NULL, "Paddle Controller", NULL};
 
-  q_fread (&buf, 0, 11, ucon64.rom);
+  q_fread (buf, 0, 11, ucon64.rom);
   if (buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 7)
     {
       rominfo->buheader_len = SMD_HEADER_LEN;
@@ -1230,7 +1230,7 @@ genesis_init (st_rominfo_t *rominfo)
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
     rominfo->buheader_len = ucon64.buheader_len;
 
-  rominfo->interleaved = (UCON64_ISSET (ucon64.interleaved)) ?
+  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
     ucon64.interleaved : genesis_testinterleaved (rominfo);
 
   if (rominfo->interleaved == 0)
@@ -1246,6 +1246,7 @@ genesis_init (st_rominfo_t *rominfo)
       if (genesis_rom_size != ucon64.file_size - rominfo->buheader_len)
         rominfo->data_size = genesis_rom_size;
 
+      memset (buf, 0, 16384);
       q_fread (buf, rominfo->buheader_len,
         8192 + (GENESIS_HEADER_START + GENESIS_HEADER_LEN) / 2, ucon64.rom);
       smd_deinterleave (buf, 16384);            // buf will contain the deinterleaved data
@@ -1267,13 +1268,11 @@ genesis_init (st_rominfo_t *rominfo)
         GENESIS_HEADER_LEN, ucon64.rom);
     }
 
-  if (!memcmp (&OFFSET (genesis_header, 0), "SEGA", 4))
+  if (!memcmp (&OFFSET (genesis_header, 0), "SEGA", 4) ||
+      ucon64.console == UCON64_GEN)
     result = 0;
   else
     result = -1;
-
-  if (ucon64.console == UCON64_GEN)
-    result = 0;
 
   rominfo->header_start = GENESIS_HEADER_START;
   rominfo->header_len = GENESIS_HEADER_LEN;

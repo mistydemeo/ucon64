@@ -2246,13 +2246,13 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
      )
     check_map_type = 0;                         // not interleaved
   else if (crc == 0x4a70ad38 || crc == 0x0b34ddad || crc == 0x348b5357 ||
-           crc == 0xc39b8d3a || crc == 0x9b4638d0 || crc == 0x0085b742 ||
-           crc == 0x30cbf83c || crc == 0x7039388a || crc == 0xdbc88ebf ||
-           crc == 0x2a4c6a9b
+            crc == 0xc39b8d3a || crc == 0x9b4638d0 || crc == 0x0085b742 ||
+            crc == 0x30cbf83c || crc == 0x7039388a || crc == 0xdbc88ebf ||
+            crc == 0x2a4c6a9b
 #ifdef  DETECT_NOTGOOD_DUMPS
-           ||
-           crc == 0x65485afb || crc == 0x5ee74558 || crc == 0x92180571 ||
-           crc == 0x9ca5ed58
+            ||
+            crc == 0x65485afb || crc == 0x5ee74558 || crc == 0x92180571 ||
+            crc == 0x9ca5ed58
 #endif
           )
     {

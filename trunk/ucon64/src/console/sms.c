@@ -36,6 +36,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/smd.h"
 
 
+#define SMS_HEADER_START 0x7ff0
+#define SMS_HEADER_LEN (sizeof (st_sms_header_t))
+
+static int sms_chksum (unsigned char *rom_buffer, int rom_size);
+
+
 const st_usage_t sms_usage[] =
   {
     {NULL, NULL, "Sega Master System(II/III)/Game Gear (Handheld)"},
@@ -47,20 +53,23 @@ const st_usage_t sms_usage[] =
     {"mgdgg", NULL, "same as " OPTION_LONG_S "mgd, but gives GG name"},
     {"smd", NULL, "convert to Super Magic Drive/SMD (+512 Bytes)"},
     {"smds", NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"},
+    {"chk", NULL, "fix ROM checksum; use with care!"},
     {NULL, NULL, NULL}
   };
 
-
-#if 0
 typedef struct st_sms_header
 {
-  char pad[64];
+  char signature[8];                            // "TMR SEGA"
+  unsigned char pad[2];                         // 8
+  unsigned char checksum_low;                   // 10
+  unsigned char checksum_high;                  // 11
+  unsigned char partno_high;                    // 12
+  unsigned char partno_low;                     // 13
+  unsigned char version;                        // 14
+  unsigned char checksum_range;                 // 15, and country info
 } st_sms_header_t;
-#define SMS_HEADER_START 0
-#define SMS_HEADER_LEN (sizeof (st_sms_header_t))
 
-st_sms_header_t sms_header;
-#endif
+static st_sms_header_t sms_header;
 
 
 // see src/backup/mgd.h for the file naming scheme
@@ -161,51 +170,178 @@ sms_smds (void)
 
 
 int
+sms_chk (st_rominfo_t *rominfo)
+{
+  char buf[2], dest_name[FILENAME_MAX];
+  int offset = rominfo->header_start + 10;
+
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+
+  buf[0] = rominfo->current_internal_crc;       // low byte
+  buf[1] = rominfo->current_internal_crc >> 8;  // high byte
+  // change checksum
+  if (rominfo->interleaved)
+    {
+      q_fputc (dest_name, rominfo->buheader_len +
+        (offset & ~0x3fff) + 0x2000 + (offset & 0x3fff) / 2, buf[0], "r+b");
+      q_fputc (dest_name, rominfo->buheader_len +
+        (offset & ~0x3fff) + (offset & 0x3fff) / 2, buf[1], "r+b");
+    }
+  else
+    q_fwrite (buf, offset, 2, dest_name, "r+b");
+
+  mem_hexdump (buf, 2, rominfo->buheader_len + offset);
+
+  printf (ucon64_msg[WROTE], dest_name);
+  return 0;
+}
+
+
+static int
+sms_testinterleaved (st_rominfo_t *rominfo)
+{
+  unsigned char buf[0x4000] = { 0 };
+
+  q_fread (buf, rominfo->buheader_len + 0x4000, // header in 2nd 16 kB block
+           0x2000 + (SMS_HEADER_START - 0x4000 + 8) / 2, ucon64.rom);
+  if (!memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SEGA", 8))
+    return 0;
+
+  smd_deinterleave (buf, 0x4000);
+  if (!memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SEGA", 8))
+    return 1;
+
+  return 0;                                     // unknown, act as if it's not interleaved
+}
+
+
+int
 sms_init (st_rominfo_t *rominfo)
 {
   int result = -1;
-  unsigned char magic[11] = "", *buffer;
+  unsigned char buf[16384] = { 0 }, *rom_buffer;
+
+  memset (&sms_header, 0, SMS_HEADER_LEN);
 
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
     rominfo->buheader_len = ucon64.buheader_len;
+  else
+    rominfo->buheader_len = ucon64.file_size % (16 * 1024); // SMD_HEADER_LEN
 
-  q_fread (&magic, 0, 11, ucon64.rom);
+  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+    ucon64.interleaved : sms_testinterleaved (rominfo);
+
+  if (rominfo->interleaved)
+    {
+      q_fread (buf, rominfo->buheader_len + 0x4000, // header in 2nd 16 kB block
+        0x2000 + (SMS_HEADER_START - 0x4000 + SMS_HEADER_LEN) / 2, ucon64.rom);
+      smd_deinterleave (buf, 0x4000);
+      memcpy (&sms_header, buf + SMS_HEADER_START - 0x4000, SMS_HEADER_LEN);
+    }
+  else
+    q_fread (&sms_header, rominfo->buheader_len + SMS_HEADER_START,
+      SMS_HEADER_LEN, ucon64.rom);
+
+  rominfo->header_start = SMS_HEADER_START;
+  rominfo->header_len = SMS_HEADER_LEN;
+  rominfo->header = &sms_header;
+
+  q_fread (buf, 0, 11, ucon64.rom);
   // Note that the identification bytes are the same as for Genesis SMD files
   //  The init function for Genesis files is called before this function so it
   //  is alright to set result to 0
-  if (magic[8] == 0xaa && magic[9] == 0xbb && magic[10] == 6)
+  if ((buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 6) ||
+      !memcmp (sms_header.signature, "TMR SEGA", 8) ||
+      ucon64.console == UCON64_SMS)
+    result = 0;
+  else
+    result = -1;
+
+  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
-      if (!UCON64_ISSET (ucon64.buheader_len))
-        rominfo->buheader_len = SMD_HEADER_LEN;
-
-      // don't deinterleave if -nint was specified
-      if (!(UCON64_ISSET (ucon64.interleaved) && !ucon64.interleaved) &&
-          !UCON64_ISSET (ucon64.do_not_calc_crc))
+      int size = ucon64.file_size - rominfo->buheader_len;
+      if (!(rom_buffer = (unsigned char *) malloc (size)))
         {
-          int size = ucon64.file_size - rominfo->buheader_len;
-
-          if (!(buffer = (unsigned char *) malloc (size)))
-            {
-              fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
-              return -1;
-            }
-          q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
-
-          ucon64.fcrc32 = crc32 (0, buffer, size);
-          smd_deinterleave (buffer, size);
-          ucon64.crc32 = crc32 (0, buffer, size);
-
-          free (buffer);
+          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+          return -1;
         }
-      result = 0;
+      q_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
+
+      if (rominfo->interleaved)
+        {
+          ucon64.fcrc32 = crc32 (0, rom_buffer, size);
+          smd_deinterleave (rom_buffer, size);
+        }
+      ucon64.crc32 = crc32 (0, rom_buffer, size);
+
+      rominfo->has_internal_crc = 1;
+      rominfo->internal_crc_len = 2;
+      rominfo->current_internal_crc = sms_chksum (rom_buffer, size);
+      rominfo->internal_crc = sms_header.checksum_low;
+      rominfo->internal_crc += sms_header.checksum_high << 8;
+
+      free (rom_buffer);
     }
-  else if (!UCON64_ISSET (ucon64.buheader_len))
-    rominfo->buheader_len = ucon64.file_size % (16 * 1024);
-  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
-    ucon64.interleaved : (result == 0 ? 1 : 0);
 
   rominfo->console_usage = sms_usage;
   rominfo->copier_usage = rominfo->buheader_len ? smd_usage : mgd_usage;
 
+  switch (sms_header.checksum_range & 0xf0)
+    {
+    case 0x30:                                  // SMS, falling through
+    case 0x50:                                  // GG
+      rominfo->country = "Japan";
+      break;
+    case 0x40:                                  // SMS, falling through
+    case 0x70:                                  // GG
+      rominfo->country = "U.S.A. & Europe";
+      break;
+    case 0x60:                                  // GG
+      rominfo->country = "Japan, U.S.A. & Europe";
+      break;
+    default:
+      rominfo->country = "Unknown";
+      break;
+    }
+
   return result;
+}
+
+
+int
+sms_chksum (unsigned char *rom_buffer, int rom_size)
+{
+  unsigned short int sum;
+  int i, i_end;
+
+  switch (sms_header.checksum_range & 0xf)
+    {
+    case 0xc:
+      i_end = 0x7ff0;
+      break;
+    case 0xe:                                   // falling through
+    case 0xf:
+      i_end = 0x20000;
+      break;
+    case 0x0:
+      i_end = 0x40000;
+      break;
+    default:
+      i_end = rom_size;
+      break;
+    }
+  if (i_end > rom_size)
+    i_end = rom_size;
+
+  sum = 0;
+  for (i = 0; i < i_end; i++)
+    sum += rom_buffer[i];
+
+  if (i_end >= (int) (SMS_HEADER_START + SMS_HEADER_LEN))
+    for (i = SMS_HEADER_START; i < (int) (SMS_HEADER_START + SMS_HEADER_LEN); i++)
+      sum -= rom_buffer[i];
+
+  return sum;
 }

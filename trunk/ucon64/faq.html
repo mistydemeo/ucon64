@@ -30,12 +30,12 @@ Q8: <a href="#8">I tried to dump a SNES cartridge using a Super Wild Card connec
 Q9: <a href="#9">I have a SNES ROM of which GoodSNES says it is good, but uCON64 says it is bad.
    Who is right?</a><br>
 <br>
-Q10: <a href="#10">I have a SNES ROM of which Snes9x and ZSNES say it is bad, but uCON64 says it is good.
-   Who is right?</a><br>
+Q10: <a href="#10">I have a SNES ROM of which Snes9x and ZSNES say it is bad,
+   but uCON64 says it is good. Who is right?</a><br>
 <br>
-Q11: <a href="#11">I have a SNES ROM of which uCON64 said it was bad, so I used the -chk option. Now
-   uCON64, Snes9x and ZSNES all say the ROM is good, but GoodSNES still says it is bad. How
-   can that be, I did fix the ROM, right?</a><br>
+Q11: <a href="#11">I have a SNES ROM of which uCON64 said it was bad, so I used
+   the -chk option. Now uCON64, Snes9x and ZSNES all say the ROM is good, but
+   GoodSNES still says it is bad. How can that be, I did fix the ROM, right?</a><br>
 <br>
 Q12: <a href="#12">Some SNES games do not work on my Super Wild Card. What can I
    do about that?</a><br>
@@ -119,6 +119,10 @@ Q40: <a href="#40">What is the format of the snes*.txt files?</a><br>
 <br>
 Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    (file) instead of that it depends on whether the file exists?</a><br>
+<br>
+Q42: <a href="#42">Why does uCON64 support DAT files?</a><br>
+<br>
+Q43: <a href="#43">How should the option --mkdat be used?</a><br>
 <br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
@@ -416,13 +420,13 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
 <a name="9"><b>Q9</b>: I have a SNES ROM of which GoodSNES says it is good, but
    uCON64 says it is bad. Who is right?</a><br>
 <b>A</b>: GoodSNES.<br>
-   There may be several reasons why uCON64 reports that the checksum is bad.
+   There may be several reasons why uCON64 reports that the check sum is bad.
    It could have made a mistake while determining if the ROM is a HiROM or a
    LoROM dump. Try the switches -hi and -nhi and see if uCON64 reports the
-   checksum differently. A bigger problem is that the interleave detection code
-   (stolen from Snes9x ;-) is not reliable. Especially BS ROMs are often
+   check sum differently. A bigger problem is that the interleave detection
+   code (stolen from Snes9x ;-) is not reliable. Especially BS ROMs are often
    detected as not being interleaved while they actually are. Try the switches
-   -int and -int2 and see if you get better results. If the checksum is
+   -int and -int2 and see if you get better results. If the check sum is
    reported as good it is very likely that the ROM is really good.
    Alternatively, you may want to convert the ROM to a non-interleaved format
    with -dint and run uCON64 on the converted ROM. That gives the best results.
@@ -430,11 +434,12 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    handle, probably because Snes9x and ZSNES often cannot handle them either.<br>
 <br>
 <p>
-<a name="10"><b>Q10</b>: I have a SNES ROM of which Snes9x and ZSNES say it is bad, but uCON64 says it is good.
-   Who is right?</a><br>
+<a name="10"><b>Q10</b>: I have a SNES ROM of which Snes9x and ZSNES say it is
+   bad, but uCON64 says it is good. Who is right?</a><br>
 <b>A</b>: uCON64, probably :-)<br>
-   Neither Snes9x 1.39 nor ZSNES 1.36 calculate the checksum correctly for BS ROMs, so you
-   can be pretty sure the ROM is good if it is a BS ROM. See previous answer.<br>
+   Neither Snes9x 1.39 nor ZSNES 1.36 calculate the check sum correctly for BS
+   ROMs, so you can be pretty sure the ROM is good if it is a BS ROM. See
+   previous answer.<br>
 <br>
 <p>
 <a name="11"><b>Q11</b>: I have a SNES ROM of which uCON64 said it was bad, so
@@ -442,12 +447,16 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    good, but GoodSNES still says it is bad. How can that be, I did fix the ROM,
    right?</a><br>
 <b>A</b>: No, you did not. When you use -chk uCON64 changes four bytes in the
-   ROM dump, so that they match with the calculated checksum. However, the ROM
+   ROM dump, so that they match with the calculated check sum. However, the ROM
    stays just as bad as it was.<br>
    Use -chk with care. -chk might be useful if you want to store a ROM
-   somewhere without using a database with its checksum. You can then later
+   somewhere without using a database with its check sum. You can then later
    check if the ROM is still the same as it was when you stored it by using the
-   checksum that is stored in the ROM.<br>
+   check sum that is stored in the ROM.<br>
+   That said, it is a <i>much</i> better idea to create a DAT file from your
+   ROM collection if you plan to store it somewhere. See
+   <a href="#42">question 42</a> for reasons and <a href="#43">question 43</a>
+   for information on how to create a DAT file.<br>
 <br>
 <p>
 <a name="12"><b>Q12</b>: Some SNES games do not work on my Super Wild Card.
@@ -458,7 +467,7 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    trying to upload a game like Super Mario Kart (which uses a DSP chip) your
    Super Wild Card should have an extension with the correct DSP chip (or have
    the right cartridge with that chip plugged in your SWC). Then, make sure you
-   are using a good dump (look at the checksum information). Also verify that
+   are using a good dump (look at the check sum information). Also verify that
    the backup header is correct. The option -dbuh can be helpful for that. You
    can make uCON64 rewrite the header with -swc. uCON64 uses the information in
    the ROM dump's header, so this is important! You can also try to rewrite the
@@ -967,6 +976,201 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    &nbsp;&nbsp;chmod +x dumpsram<br>
    Now you can dump the SRAM with:<br>
    &nbsp;&nbsp;./dumpsram save1.sav<br>
+<br>
+<p>
+<a name="42"><b>Q42</b>: Why does uCON64 support DAT files?</a><br>
+<b>A</b>: uCON64 supports DAT files for two reasons:<br>
+   1.) In order to reliably identify ROM dumps.<br>
+   2.) In order to rename ROM dumps to their "official" name.<br>
+   Some ROM dump formats contain enough information to identify them, but none
+   of the formats supported by uCON64 can be <i>reliably</i> identified.<br>
+   The check sum algorithms that are used to calculate the internal check sum
+   of the files that have one is a simple addition of a range of bytes. So,
+   several bytes can be swapped and still yield the same check sum. Even the
+   range can be different and produce the same check sum. The latter case often
+   occurs with overdumps. Some ROM dump formats do not even use the entire file
+   for the check sum calculation...<br>
+   uCON64 solves these problems as it uses the CRC32 algorithm for file
+   identification. The CRC32 algorithm will produce a different check sum if
+   bytes are swapped or if the range is different. When uCON64 is run on a ROM
+   dump it first calculates the CRC32 of that file and then searches in its DAT
+   files for that CRC32. If the CRC32 is present uCON64 will display the
+   information it found in the DAT file. If uCON64 could not find the CRC32 it
+   will not display DAT information.<br>
+   At the risk of labouring the obvious I might add that even if all formats
+   used a check sum algorithm like CRC32, DAT files would still be necessary as
+   it is not possible to reliably identify a file without an external reference.<br>
+<br>
+<p>
+<a name="43"><b>Q43</b>: How should the option --mkdat be used?</a><br>
+<b>A</b>: With care ;-)<br>
+   Seriously, let me first state that it would not be helpful if people would
+   start creating DAT files from their ROM collections and publish them without
+   some form of coordination. At the time of this writing (2 June 2003)
+   Cowering's GoodXXXX utilities are the standard for most consoles.
+   Unfortunately, for SNES ROMs he uses the SNES check sum calculation
+   algorithm which is unreliable. There are a few known cases of dumps which
+   are bad but which are identified by GoodSNES as good.<br>
+   In order to create a DAT file first make sure that all the ROMs you want to
+   create a DAT file from, have the name you want them to have. This is
+   important as DAT files are used not only for identification, but also for
+   renaming files (when using the option --rename). Also make sure all the
+   files have a suffix (or "extension"). Then start uCON64 with the --mkdat
+   option. For example, to create a DAT file from all the SNES ROM dumps in the
+   directory c:\snesrom use a command line like:<br>
+   &nbsp;&nbsp;ucon64 --mkdat=snes-02062003.dat c:\snesrom<br>
+   In this case a DAT file named snes-02062003.dat will be created. When you
+   copy this file to uCON64's DAT directory uCON64 will use it to identify SNES
+   ROMs. Note that the name ends with ".dat". uCON64 will only see DAT files if
+   they have a name that ends with ".dat". Note also that the name starts with
+   "snes". uCON64 will use all DAT files (in its DAT directory) that start with
+   "snes" to identify SNES ROM dumps. The letter case is not important, so you
+   could also "SNES" or "Snes". If you use an incorrect name uCON64 will not
+   use the DAT file, but will print a warning message each time you run uCON64
+   on a ROM dump. Here follows a table to see which name uCON64 uses for what
+   console:<br>
+<br>
+<table border="1">
+  <tr>
+    <th><tt>console<tt></th>
+    <th><tt>DAT file name prefix</tt></th>
+  </tr>
+  <tr>
+    <td><tt>"Atari hardware"</tt></td>
+    <td><tt>Good2600, Good5200, Good7800, 2600, 5200 or 7800</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Coleco</tt></td>
+    <td><tt>GoodCOL or Coleco</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Game Boy Advance</tt></td>
+    <td><tt>GoodGBA or GBA</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Game Boy (Color)</tt></td>
+    <td><tt>GoodGBX or GBX</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Genesis or Megadrive</tt></td>
+    <td><tt>GoodGEN or GEN</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Intellivision</tt></td>
+    <td><tt>GoodINTV or Intelli</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Jaguar</tt></td>
+    <td><tt>GoodJAG or JAG</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Lynx</tt></td>
+    <td><tt>GoodLynx or Lynx</tt></td>
+  </tr>
+  <tr>
+    <td><tt>"M.A.M.E. hardware"</tt></td>
+    <td><tt>MAME</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Neo Geo</tt></td>
+    <td><tt>Neo-Geo</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Neo Geo Pocket</tt></td>
+    <td><tt>GoodNGPX</tt></td>
+  </tr>
+  <tr>
+    <td><tt>NES</tt></td>
+    <td><tt>GoodNES, NES or FDS</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Nintendo 64</tt></td>
+    <td><tt>GoodN64 or N64</tt></td>
+  </tr>
+  <tr>
+    <td><tt>PC-Engine</tt></td>
+    <td><tt>GoodPCE or PCE</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Sega Master System</tt></td>
+    <td><tt>GoodSMS, GoodGG, SMS or GG</tt></td>
+  </tr>
+  <tr>
+    <td><tt>SNES</tt></td>
+    <td><tt>GoodSNES or SNES</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Vectrex</tt></td>
+    <td><tt>GoodVECT or Vectrex</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Virtual Boy</tt></td>
+    <td><tt>GoodVBOY</tt></td>
+  </tr>
+  <tr>
+    <td><tt>WonderSwan</tt></td>
+    <td><tt>GoodWSX or swan</tt></td>
+  </tr>
+<!--
+  <tr>
+    <td><tt>3DO</tt></td>
+    <td><tt>3do</tt></td>
+  </tr>
+  <tr>
+    <td><tt>CD32</tt></td>
+    <td><tt>CD32</tt></td>
+  </tr>
+  <tr>
+    <td><tt>CDi</tt></td>
+    <td><tt>CDi</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Dreamcast</tt></td>
+    <td><tt>Dreamcast</tt></td>
+  </tr>
+  <tr>
+    <td><tt>Saturn</tt></td>
+    <td><tt>Saturn</tt></td>
+  </tr>
+  <tr>
+    <td><tt>XBox</tt></td>
+    <td><tt>XBox</tt></td>
+  </tr>
+-->
+</table>
+</tt><tt> <!-- browser bug? -->
+<br>
+   You can create a DAT file from a subset of the files in a directory by
+   explicitly specifying them on the command line:<br>
+   &nbsp;&nbsp;ucon64 --mkdat=snes-02062003.dat c:\snesrom\*.swc<br>
+   uCON64 uses the first file to determine for which console a DAT file is
+   meant. So, if you want to create a DAT file from a set of ROMs of several
+   consoles, the first file uCON64 encounters will determine the DAT file type.
+   You can do two things in such a case to be sure for which console the
+   resulting DAT file will meant:<br>
+   1.) Specify one extra ROM dump as first file on the command line. For
+   example:<br>
+   &nbsp;&nbsp;ucon64 --mkdat=n64-02062003.dat c:\rom\mario64.v64 c:\rom<br>
+   2.) Use a force recognition option. For example:<br>
+   &nbsp;&nbsp;ucon64 --mkdat=sms-02062003.dat c:\rom -sms<br>
+<br>
+   The second option should only be used when you are sure all the files are
+   for a certain console and uCON64 fails to recognise some.<br>
+   You can control what information uCON64 displays when creating a DAT file
+   with the switches -v and -q. --mkdat uses three levels of verbosity:<br>
+   1.) When the switch -v is specified uCON64 will display a warning if it
+   could not determine the console type for a file. uCON64 will also display a
+   warning if it encounters a file that has the same CRC32 as a file uCON64
+   already processed (a "duplicate").<br>
+   2.) When neither -v nor -q is specified uCON64 will display a warning only
+   it finds a duplicate or if the console type of the first file could not be
+   determined.<br>
+   3.) When -q is specified uCON64 will display a warning only if the console
+   type of the first file could not be determined.<br>
+<br>
+   If you had to specify a first file you could suppress the warning about a
+   duplicate by using the switch -q. For example:<br>
+   &nbsp;&nbsp;ucon64 --mkdat=n64-02062003.dat c:\rom\mario64.v64 c:\rom -q<br>
 <br>
 <br>
 <br>

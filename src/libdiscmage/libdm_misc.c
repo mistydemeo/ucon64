@@ -26,12 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include <sys/stat.h>
-#ifdef  HAVE_DIRENT_H
-#include <dirent.h>
-#endif
-#ifdef  HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include "misc.h"
 #include "libdiscmage.h"
 #include "libdm_misc.h"
@@ -47,7 +41,7 @@ static const char pvd_magic[] = {0x01, 'C', 'D', '0', '0', '1', 0x01, 0};
 static const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
 static const char vdt_magic[] = {0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
 
-static void (* ext_gauge) (int, int);
+static void (* dm_ext_gauge) (int, int);
 
 const char *dm_msg[] = {
   "ERROR: %s has been deprecated\n",
@@ -444,12 +438,12 @@ dm_bin2iso (dm_image_t *image)
 
       fseek (src, track->seek_ecc, SEEK_CUR);
 
-      if (!(i % 100) && ext_gauge)
-        ext_gauge (i * track->sector_size, size * track->sector_size);
+      if (!(i % 100) && dm_ext_gauge)
+        dm_ext_gauge (i * track->sector_size, size * track->sector_size);
     }
 
-  if (ext_gauge)
-    ext_gauge (i * track->sector_size, size * track->sector_size);
+  if (dm_ext_gauge)
+    dm_ext_gauge (i * track->sector_size, size * track->sector_size);
 
   fclose (dest);
   fclose (src);
@@ -704,5 +698,5 @@ dm_get_version (void)
 void
 dm_set_gauge (void (* gauge) (int, int))
 {
-  ext_gauge = gauge;
+  dm_ext_gauge = gauge;
 }

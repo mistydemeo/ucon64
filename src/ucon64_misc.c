@@ -50,6 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "misc.h"
 #include "ucon64.h"
+#include "ucon64_lib.h"
 #include "quick_io.h"
 #include "ucon64_misc.h"
 #include "console/console.h"
@@ -481,12 +482,20 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   these options do not (need to) know the console or work for more than one
 */
+  {UCON64_BIN2ISO, UCON64_UNKNOWN, libdm_usage,       WF_DEFAULT},
+  {UCON64_MKSHEET, UCON64_UNKNOWN, libdm_usage,       0},
+  {UCON64_MKTOC, UCON64_UNKNOWN, libdm_usage,  0},
+//  {UCON64_CDIRIP, UCON64_UNKNOWN, libdm_usage,        WF_DEFAULT},
+//  {UCON64_NRGRIP, UCON64_UNKNOWN, libdm_usage,        WF_DEFAULT},
+  {UCON64_ISOFIX, UCON64_UNKNOWN, libdm_usage,        WF_DEFAULT},
+  {UCON64_MKCUE, UCON64_UNKNOWN, libdm_usage,         0},
+  {UCON64_RIP, UCON64_UNKNOWN, libdm_usage,        0},
+  {UCON64_XCDRW, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT|WF_STOP|WF_NO_ROM},
+
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},
   {UCON64_A, UCON64_UNKNOWN, aps_usage,        WF_STOP},
   {UCON64_B, UCON64_UNKNOWN, bsl_usage,        WF_STOP},
-  {UCON64_BIN2ISO, UCON64_UNKNOWN, NULL,       WF_DEFAULT},
   {UCON64_C, UCON64_UNKNOWN, ucon64_options_usage, 0},
-//  {UCON64_CDIRIP, UCON64_UNKNOWN, NULL,        WF_DEFAULT},
   {UCON64_CHK, UCON64_UNKNOWN, NULL,           WF_DEFAULT},
   {UCON64_CRC, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
   {UCON64_CRCHD, UCON64_UNKNOWN, NULL,         WF_INIT|WF_PROBE},
@@ -505,7 +514,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_IDPPF, UCON64_UNKNOWN, ppf_usage,    0},
   {UCON64_INS, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_INSN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
-  {UCON64_ISOFIX, UCON64_UNKNOWN, NULL,        WF_DEFAULT},
   {UCON64_ISPAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_INIT|WF_NO_SPLIT},
   {UCON64_J, UCON64_UNKNOWN, NULL,             WF_INIT|WF_PROBE},
   {UCON64_LS, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
@@ -514,15 +522,11 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_MGD, UCON64_UNKNOWN, NULL,           WF_DEFAULT},
 //  {UCON64_MGH, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
   {UCON64_MKA, UCON64_UNKNOWN, aps_usage,      WF_STOP},
-  {UCON64_MKCUE, UCON64_UNKNOWN, NULL,         0},
   {UCON64_MKI, UCON64_UNKNOWN, ips_usage,      WF_STOP},
   {UCON64_MKPPF, UCON64_UNKNOWN, ppf_usage,    WF_STOP},
-  {UCON64_MKSHEET, UCON64_UNKNOWN, NULL,       0},
-  {UCON64_MKTOC, UCON64_UNKNOWN, NULL,         0},
   {UCON64_N, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
   {UCON64_NA, UCON64_UNKNOWN, aps_usage,       0},
   {UCON64_NPPF, UCON64_UNKNOWN, ppf_usage,     0},
-//  {UCON64_NRGRIP, UCON64_UNKNOWN, NULL,        WF_DEFAULT},
   {UCON64_P, UCON64_UNKNOWN, ucon64_padding_usage, WF_DEFAULT},
   {UCON64_PAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_DEFAULT},
   {UCON64_PADHD, UCON64_UNKNOWN, NULL,         WF_DEFAULT},
@@ -530,7 +534,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_POKE, UCON64_UNKNOWN, ucon64_patching_usage, 0},
   {UCON64_PPF, UCON64_UNKNOWN, ppf_usage,      WF_STOP},
   {UCON64_RENAME, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
-  {UCON64_RIP, UCON64_UNKNOWN, NULL,        0},
   {UCON64_RROM, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
   {UCON64_RR83, UCON64_UNKNOWN, NULL,          WF_INIT|WF_PROBE|WF_NO_SPLIT},
   {UCON64_RL, UCON64_UNKNOWN, NULL,            0},
@@ -544,7 +547,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_STRIP, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_SWAP, UCON64_UNKNOWN, NULL,          WF_INIT|WF_PROBE},
   {UCON64_VER, UCON64_UNKNOWN, ucon64_options_usage, WF_STOP},
-  {UCON64_XCDRW, UCON64_UNKNOWN, NULL, WF_DEFAULT|WF_STOP|WF_NO_ROM},
 /*
   force recognition switches
 */

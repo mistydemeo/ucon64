@@ -792,7 +792,8 @@ ucon64_extract (const char *archive)
   char path[FILENAME_MAX];
   char property_name[MAXBUFSIZE], buf2[MAXBUFSIZE];
 
-  if (!archive) return NULL;
+  if (!archive) return archive;
+  if (!archive[0]) return archive;
 
   getcwd (cwd, FILENAME_MAX);
 

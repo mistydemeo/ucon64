@@ -502,6 +502,7 @@ mx_erase (void)
 }
 
 
+/*
 static int
 win_erase (void)
 {
@@ -521,6 +522,7 @@ win_erase (void)
   else
     return 0;
 }
+*/
 
 
 static unsigned char
@@ -597,6 +599,7 @@ intel_block_erase (unsigned int block)
 }
 
 
+/*
 static int
 intel_erase (void)
 {
@@ -622,6 +625,7 @@ erase (void)
   return -1;
 
 }
+*/
 
 
 static int

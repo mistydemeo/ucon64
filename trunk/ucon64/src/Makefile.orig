@@ -2,12 +2,8 @@
 
 CC=gcc
 
-CFLAGS=-I. -Wall -O3
-LDFLAGS=-s
-#LDFLAGS+=-lz
-
-LIB=libdiscmage/libdiscmage.o libdiscmage/cdi.o libdiscmage/nero.o \
-    libdiscmage/sheets.o
+CFLAGS=-I. -Wall -O3 -DHAVE_CONFIG_H
+LDFLAGS=-s -lz
 
 OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
@@ -21,12 +17,14 @@ OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
         backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/mgd.o \
         backup/smc.o backup/smd.o backup/swc.o backup/dex.o backup/psxpblib.o \
         backup/mccl.o backup/lynxit.o backup/ffe.o
-#ZLIB=1
+ZLIB=1
 ifdef ZLIB
 OBJECTS+=unzip.o
 endif
-
-OBJECTS+=$(LIB)
+LIBDISCMAGE=1
+ifdef LIBDISCMAGE
+OBJECTS+=libdiscmage/libdiscmage.o libdiscmage/cdi.o libdiscmage/nero.o libdiscmage/sheets.o
+endif
 
 TARGET=ucon64
 ifeq ($(TERM),cygwin)                   # OSTYPE is not a real env var on Cygwin
@@ -64,8 +62,7 @@ endif                                   # cygwin
 
 distclean: clean
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f Makefile config.log config.status config.cache config.h \
-	      ucon64_cfg.h libdiscmage/libdiscmage_cfg.h libdiscmage/config.h
+	rm -f Makefile config.log config.status config.cache config.h
 else
 ifdef DJGPP
 	del Makefile
@@ -73,12 +70,8 @@ ifdef DJGPP
 	del config.status
 	del config.cache
 	del config.h
-	del ucon64_cfg.h
-	del libdis~1\libdis~2.h
-	del libdis~1\config.h
 else
-	rm -f Makefile config.log config.status config.cache config.h \
-	      ucon64_cfg.h libdiscmage/libdiscmage_cfg.h libdiscmage/config.h
+	rm -f Makefile config.log config.status config.cache config.h
 endif                                   # DJGPP
 endif                                   # cygwin
 

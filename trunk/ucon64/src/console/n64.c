@@ -170,7 +170,7 @@ n64_sram (st_rominfo_t *rominfo)
 
   ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (sram, 0x286C0, N64_SRAM_SIZE, ucon64.rom, "r+b");
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
 
   return 0;
 }
@@ -195,7 +195,7 @@ n64_v64 (st_rominfo_t *rominfo)
   q_fcpy (ucon64.rom, 0, size, buf, "wb");
   q_fswap (buf, 0, size);
 
-  fprintf (stderr, ucon64_msg[WROTE], buf);
+  fprintf (stdout, ucon64_msg[WROTE], buf);
   return 0;
 }
 
@@ -219,7 +219,7 @@ n64_z64 (st_rominfo_t *rominfo)
   q_fcpy (ucon64.rom, 0, size, buf, "wb");
   q_fswap (buf, 0, size);
 
-  fprintf (stderr, ucon64_msg[WROTE], buf);
+  fprintf (stdout, ucon64_msg[WROTE], buf);
   return 0;
 }
 
@@ -240,7 +240,7 @@ n64_n (st_rominfo_t *rominfo)
   q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 32, 20,
                ucon64.rom, "r+b");
 
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 
@@ -316,7 +316,7 @@ n64_bot (st_rominfo_t *rominfo)
         q_fswap (buf, 0, q_fsize (buf));
     }
 
-  fprintf (stderr, ucon64_msg[WROTE], buf);
+  fprintf (stdout, ucon64_msg[WROTE], buf);
   return 0;
 }
 
@@ -347,7 +347,7 @@ n64_usms (st_rominfo_t *rominfo)
       ucon64_fbackup (NULL, "patched.v64");
       q_fwrite (usmsbuf, N64_HEADER_START + rominfo->buheader_len + 0x01b410,
         size, "patched.v64", "r+b");
-      fprintf (stderr, ucon64_msg[WROTE], "patched.v64");
+      fprintf (stdout, ucon64_msg[WROTE], "patched.v64");
 
       free (usmsbuf);
     }
@@ -362,7 +362,7 @@ n64_usms (st_rominfo_t *rominfo)
       if (rominfo->interleaved != 0)
         q_fswap (buf, 0, q_fsize (buf));
 
-      fprintf (stderr, ucon64_msg[WROTE], buf);
+      fprintf (stdout, ucon64_msg[WROTE], buf);
     }
 
   return 0;

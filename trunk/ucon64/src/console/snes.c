@@ -279,7 +279,7 @@ snes_dint (st_rominfo_t *rominfo)
   fclose (srcfile);
   fclose (destfile);
 
-  fprintf (stderr, ucon64_msg[WROTE], dest_name);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
 
   return 0;
@@ -402,7 +402,7 @@ snes_convert_sramfile (const void *header)
 
   fclose (srcfile);
   fclose (destfile);
-  fprintf (stderr, ucon64_msg[WROTE], dest_name);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -603,7 +603,7 @@ snes_ffe (st_rominfo_t *rominfo, char *ext)
   handle_existing_file (dest_name, src_name);
   q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
   q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
-  fprintf (stderr, ucon64_msg[WROTE], dest_name);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
 
   return 0;
@@ -692,7 +692,7 @@ snes_fig (st_rominfo_t *rominfo)
   handle_existing_file (dest_name, src_name);
   q_fwrite (&header, 0, FIG_HEADER_LEN, dest_name, "wb");
   q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
-  fprintf (stderr, ucon64_msg[WROTE], dest_name);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
 
   return 0;
@@ -779,11 +779,11 @@ snes_mgd (st_rominfo_t *rominfo)
   setext (dest_name, ".078");
   ucon64_fbackup (NULL, dest_name);
   q_fcpy (ucon64.rom, rominfo->buheader_len, rominfo->file_size, dest_name, "wb");
-  fprintf (stderr, ucon64_msg[WROTE], dest_name);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
   strcpy (dest_name, "MULTI-GD.MGH");
   q_fwrite (&mgh, 0, sizeof (mgh), dest_name, "wb");
-  fprintf (stderr, ucon64_msg[WROTE], dest_name);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
   return 0;
 #else
@@ -801,7 +801,7 @@ snes_mgd (st_rominfo_t *rominfo)
 
   ucon64_fbackup (NULL, buf2);
   q_fcpy (ucon64.rom, rominfo->buheader_len, rominfo->file_size, buf2, "wb");
-  fprintf (stderr, ucon64_msg[WROTE], buf2);
+  fprintf (stdout, ucon64_msg[WROTE], buf2);
 
   // create MGH name file
   memset (mgh, 0, sizeof (mgh));
@@ -816,7 +816,7 @@ snes_mgd (st_rominfo_t *rominfo)
   setext (buf, ".MGH");
 
   q_fwrite (&mgh, 0, sizeof (mgh), buf, "wb");
-  fprintf (stderr, ucon64_msg[WROTE], buf);
+  fprintf (stdout, ucon64_msg[WROTE], buf);
 
   return 0;
 #endif
@@ -995,7 +995,7 @@ snes_gd3 (st_rominfo_t *rominfo)
       ucon64_fbackup (NULL, dest_name);
       q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
       q_fwrite (dstbuf, SMC_HEADER_LEN, newsize, dest_name, "ab");
-      fprintf (stderr, ucon64_msg[WROTE], dest_name);
+      fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
       free (srcbuf);
       free (dstbuf);
@@ -1042,7 +1042,7 @@ snes_gd3 (st_rominfo_t *rominfo)
       ucon64_fbackup (NULL, dest_name);
       q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
       q_fcpy (ucon64.rom, rominfo->buheader_len, size, dest_name, "ab");
-      fprintf (stderr, ucon64_msg[WROTE], dest_name);
+      fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
       rominfo->buheader_len = SMC_HEADER_LEN;
       rominfo->interleaved = 1;
@@ -1117,11 +1117,11 @@ snes_s (st_rominfo_t *rominfo)
 
           // don't write backups of parts, because one name is used
           q_fcpy (ucon64.rom, 0, half_size + rominfo->buheader_len, dest_name, "wb");
-          fprintf (stderr, ucon64_msg[WROTE], dest_name);
+          fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
           (*(strrchr (dest_name, '.') - 1))++;
           q_fcpy (ucon64.rom, half_size + rominfo->buheader_len, size - half_size, dest_name, "wb");
-          fprintf (stderr, ucon64_msg[WROTE], dest_name);
+          fprintf (stdout, ucon64_msg[WROTE], dest_name);
         }
       else
         {
@@ -1130,7 +1130,7 @@ snes_s (st_rominfo_t *rominfo)
               // don't write backups of parts, because one name is used
               q_fcpy (ucon64.rom, x * 8 * MBIT + (x ? rominfo->buheader_len : 0),
                         8 * MBIT + (x ? 0 : rominfo->buheader_len), dest_name, "wb");
-              fprintf (stderr, ucon64_msg[WROTE], dest_name);
+              fprintf (stdout, ucon64_msg[WROTE], dest_name);
               (*(strrchr (dest_name, '.') - 1))++;
             }
 
@@ -1139,7 +1139,7 @@ snes_s (st_rominfo_t *rominfo)
               // don't write backups of parts, because one name is used
               q_fcpy (ucon64.rom, x * 8 * MBIT + (x ? rominfo->buheader_len : 0),
                         surplus + (x ? 0 : rominfo->buheader_len), dest_name, "wb");
-              fprintf (stderr, ucon64_msg[WROTE], dest_name);
+              fprintf (stdout, ucon64_msg[WROTE], dest_name);
             }
         }
 
@@ -1166,7 +1166,7 @@ snes_s (st_rominfo_t *rominfo)
           // don't write backups of parts, because one name is used
           q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
           q_fcpy (ucon64.rom, x * PARTSIZE + rominfo->buheader_len, PARTSIZE, dest_name, "ab");
-          fprintf (stderr, ucon64_msg[WROTE], dest_name);
+          fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
           (*(strrchr (dest_name, '.') + 1))++;
         }
@@ -1180,7 +1180,7 @@ snes_s (st_rominfo_t *rominfo)
           // don't write backups of parts, because one name is used
           q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
           q_fcpy (ucon64.rom, x * PARTSIZE + rominfo->buheader_len, surplus, dest_name, "ab");
-          fprintf (stderr, ucon64_msg[WROTE], dest_name);
+          fprintf (stdout, ucon64_msg[WROTE], dest_name);
         }
 
       return 0;
@@ -1218,7 +1218,7 @@ snes_j (st_rominfo_t *rominfo)
       q_fputc (dest_name, 1, total_size / 8192 >> 8, "r+b"); // # 8K blocks high byte
       q_fputc (dest_name, 2, q_fgetc (dest_name, 2) & ~0x40, "r+b"); // last file -> clear bit 6
     }
-  fprintf (stderr, ucon64_msg[WROTE], dest_name);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -1438,7 +1438,7 @@ Same here.
   fclose (srcfile);
   fclose (destfile);
 
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   remove_temp_file ();
 
   return 0;
@@ -1564,7 +1564,7 @@ af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken 
   fclose (srcfile);
   fclose (destfile);
 
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   remove_temp_file ();
 
   return 0;
@@ -1635,7 +1635,7 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
   fclose (srcfile);
   fclose (destfile);
 
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   remove_temp_file ();
 
   return 0;
@@ -1654,7 +1654,7 @@ snes_n (st_rominfo_t *rominfo)
   q_fwrite (buf, rominfo->header_start + rominfo->buheader_len + 16, SNES_NAME_LEN,
                ucon64.rom, "r+b");
 
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
 
   return 0;
 }
@@ -1678,7 +1678,7 @@ snes_chk (st_rominfo_t *rominfo)
   q_fread (buf, image + 44, 4, ucon64.rom);
   mem_hexdump (buf, 4, image + 44);
 
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
 
   return 0;
 }

@@ -168,7 +168,7 @@ genesis_smd (st_rominfo_t *rominfo)
   ucon64_fbackup (NULL, dest_name);
 
   save_smd (dest_name, rom_buffer, &header, genesis_rom_size);
-  fprintf (stderr, ucon64_msg[WROTE], dest_name);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
   free (rom_buffer);
 
   return 0;
@@ -196,7 +196,7 @@ genesis_smds (st_rominfo_t *rominfo)
   q_fwrite (&header, 0, SMD_HEADER_LEN, buf, "wb");
   q_fcpy (ucon64.rom, 0, rominfo->file_size, buf, "ab");
 
-  fprintf (stderr, ucon64_msg[WROTE], buf);
+  fprintf (stdout, ucon64_msg[WROTE], buf);
 
   return 0;
 }
@@ -357,7 +357,7 @@ genesis_mgd (st_rominfo_t *rominfo)
   ucon64_fbackup (NULL, dest_name);
 
   save_bin (dest_name, rom_buffer, genesis_rom_size);
-  fprintf (stderr, ucon64_msg[WROTE], dest_name);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
   free (rom_buffer);
 
   // automatically create MGH name file
@@ -385,7 +385,7 @@ genesis_mgd (st_rominfo_t *rominfo)
     ROM backup is more important, so we don't write a backup of the MGH file.
   */
   q_fwrite (mgh, 0, sizeof (mgh), dest_name, "wb");
-  fprintf (stderr, ucon64_msg[WROTE], dest_name);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -426,7 +426,7 @@ genesis_s (st_rominfo_t *rominfo)
           // write second half of file; don't do: "(nparts / 2) * PARTSIZE"!
           q_fcpy (ucon64.rom, nparts * (PARTSIZE / 2) + x * (PARTSIZE / 2),
             PARTSIZE / 2, dest_name, "ab");
-          fprintf (stderr, ucon64_msg[WROTE], dest_name);
+          fprintf (stdout, ucon64_msg[WROTE], dest_name);
           (*(strrchr (dest_name, '.') - 1))++;
         }
 
@@ -440,7 +440,7 @@ genesis_s (st_rominfo_t *rominfo)
           // write the rest
           q_fcpy (ucon64.rom, nparts * (PARTSIZE / 2) + x * (PARTSIZE / 2),
             surplus - (PARTSIZE / 2), dest_name, "ab");
-          fprintf (stderr, ucon64_msg[WROTE], dest_name);
+          fprintf (stdout, ucon64_msg[WROTE], dest_name);
         }
 #endif
     }
@@ -463,7 +463,7 @@ genesis_s (st_rominfo_t *rominfo)
           // don't write backups of parts, because one name is used
           q_fwrite (&smd_header, 0, SMD_HEADER_LEN, buf, "wb");
           q_fcpy (ucon64.rom, x * PARTSIZE + rominfo->buheader_len, PARTSIZE, buf, "ab");
-          fprintf (stderr, ucon64_msg[WROTE], buf);
+          fprintf (stdout, ucon64_msg[WROTE], buf);
 
           (*(strrchr (buf, '.') + 1))++;
         }
@@ -476,7 +476,7 @@ genesis_s (st_rominfo_t *rominfo)
           // don't write backups of parts, because one name is used
           q_fwrite (&smd_header, 0, SMD_HEADER_LEN, buf, "wb");
           q_fcpy (ucon64.rom, x * PARTSIZE + rominfo->buheader_len, surplus, buf, "ab");
-          fprintf (stderr, ucon64_msg[WROTE], buf);
+          fprintf (stdout, ucon64_msg[WROTE], buf);
         }
     }
   return 0;
@@ -512,7 +512,7 @@ genesis_j (st_rominfo_t *rominfo)
              block_size, dest_name, "ab") != -1)
         (*(strrchr (src_name, '.') - 1))++;
 
-      fprintf (stderr, ucon64_msg[WROTE], dest_name);
+      fprintf (stdout, ucon64_msg[WROTE], dest_name);
     }
   else
     {
@@ -537,7 +537,7 @@ genesis_j (st_rominfo_t *rominfo)
       q_fputc (dest_name, 9, 0xbb, "r+b");      // ID 2
       q_fputc (dest_name, 10, 6, "r+b");        // type Genesis
 
-      fprintf (stderr, ucon64_msg[WROTE], dest_name);
+      fprintf (stdout, ucon64_msg[WROTE], dest_name);
     }
 
   return 0;
@@ -580,7 +580,7 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
   else
     save_bin (ucon64.rom, rom_buffer, genesis_rom_size);
 
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   free (rom_buffer);
 
   return 0;
@@ -640,7 +640,7 @@ genesis_chk (st_rominfo_t *rominfo)
   else
     save_bin (ucon64.rom, rom_buffer, genesis_rom_size);
 
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   free (rom_buffer);
 
   return 0;

@@ -175,7 +175,7 @@ gba_n (st_rominfo_t *rominfo)
   q_fwrite (buf, GBA_HEADER_START + rominfo->buheader_len + 0xa0,
                0x0b, ucon64.rom, "r+b");
 
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 
@@ -210,7 +210,7 @@ gba_logo (st_rominfo_t *rominfo)
                GBA_HEADER_START + rominfo->buheader_len + 0x04,
                LOGODATA_LEN, ucon64.rom, "r+b");
 
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 
@@ -229,7 +229,7 @@ gba_chk (st_rominfo_t *rominfo)
 
   mem_hexdump (buf, 1, GBA_HEADER_START + rominfo->buheader_len + 0xbd);
 
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 
@@ -251,7 +251,7 @@ gba_sram (st_rominfo_t *rominfo)
   else
     remove (buf);
 
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 
@@ -312,7 +312,7 @@ gba_crp (st_rominfo_t *rominfo)
   fclose (destfile);
 
   puts ("Done\n\n");
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 

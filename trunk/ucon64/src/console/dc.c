@@ -245,7 +245,7 @@ Game Title    : TITLE OF THE SOFTWARE
   ucon64_fbackup (NULL, ucon64.file);
   q_fwrite (ip, 0, 0x8000, ucon64.file, "wb");
 
-  fprintf (stderr, ucon64_msg[WROTE], ucon64.file);
+  fprintf (stdout, ucon64_msg[WROTE], ucon64.file);
 
   return 0;
 }

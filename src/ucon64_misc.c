@@ -2,7 +2,7 @@
 ucon64_misc.c - miscellaneous functions for uCON64
 
 written by 1999 - 2003 NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
+           2001 - 2004 dbjh
                   2001 Caz
            2002 - 2003 Jan-Erik Karlsson (Amiga)
 
@@ -1957,8 +1957,10 @@ ucon64_configfile (void)
                    "discmage_path=~\\discmage.dll\n"
                    "ucon64_configdir=~\n"
                    "ucon64_datdir=~\n"
-#elif   defined __unix__ || defined __BEOS__
+#elif   defined __unix__ || defined __BEOS__ || defined __APPLE__ // Mac OS X actually
+#ifndef __APPLE__ // TODO: find out if discmage compiles on Mac OS X
                    "discmage_path=~/.ucon64/discmage.so\n"
+#endif
                    "ucon64_configdir=~/.ucon64\n"
                    "ucon64_datdir=~/.ucon64/dat\n"
 #endif
@@ -2058,7 +2060,7 @@ ucon64_configfile (void)
         "~/discmage.dll"
 #elif   defined _WIN32
         "~\\discmage.dll"
-#elif   defined __unix__ || defined __BEOS__
+#elif   defined __unix__ || defined __BEOS__ // || defined __APPLE__ // Mac OS X actually
         "~/.ucon64/discmage.so"
 #else
         ""
@@ -2068,7 +2070,7 @@ ucon64_configfile (void)
       set_property (ucon64.configfile, "ucon64_configdir",
 #if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
         "~"                                     // realpath2() expands the tilde
-#elif   defined __unix__ || defined __BEOS__
+#elif   defined __unix__ || defined __BEOS__ || defined __APPLE__ // Mac OS X actually
         "~/.ucon64"
 #else
         ""
@@ -2078,7 +2080,7 @@ ucon64_configfile (void)
       set_property (ucon64.configfile, "ucon64_datdir",
 #if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
         "~"                                     // realpath2() expands the tilde
-#elif   defined __unix__ || defined __BEOS__
+#elif   defined __unix__ || defined __BEOS__ || defined __APPLE__ // Mac OS X actually
         "~/.ucon64/dat"
 #else
         ""

@@ -2,7 +2,7 @@
 misc.c - miscellaneous functions
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
+           2001 - 2004 dbjh
            2002 - 2003 Jan-Erik Karlsson (Amiga)
 
 
@@ -69,7 +69,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/poll.h>                           //  is available on Linux, not on
 #endif                                          //  BeOS. DOS already has kbhit()
 
-#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined __APPLE__                       // Mac OS X actually
 #include <termios.h>
 typedef struct termios tty_t;
 #endif
@@ -94,11 +95,10 @@ static st_func_node_t func_list = { NULL, NULL };
 static int func_list_locked = 0;
 static int misc_ansi_color = 0;
 
-#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined __APPLE__                       // Mac OS X actually
 static void set_tty (tty_t *param);
 #endif
-
-void deinit_conio (void);
 
 
 #if 0                                           // currently not used
@@ -2096,7 +2096,8 @@ tmpnam2 (char *temp)
 }
 
 
-#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined __APPLE__                       // Mac OS X actually
 static int oldtty_set = 0, stdin_tty = 1;       // 1 => stdin is a tty, 0 => it's not
 static tty_t oldtty, newtty;
 
@@ -2195,8 +2196,8 @@ kbhit (void)
   return key_pressed;
 #endif
 }
-#elif   defined AMIGA                           // (__unix__ && !__MSDOS__) || __BEOS__
-int
+#elif   defined AMIGA                           // (__unix__ && !__MSDOS__) ||
+int                                             //  __BEOS__ ||__APPLE__
 kbhit (void)
 {
   return GetKey () != 0xff ? 1 : 0;

@@ -29,8 +29,6 @@ extern const st_usage_t pcepro_usage[];
 #ifdef USE_PARALLEL
 extern int pce_read_rom (const char *filename, unsigned int parport, int size);
 extern int pce_write_rom (const char *filename, unsigned int parport);
-extern int pce_read_sram (const char *filename, unsigned int parport);
-extern int pce_write_sram (const char *filename, unsigned int parport);
 #endif // USE_PARALLEL
 
 #endif // PCE_PRO_H

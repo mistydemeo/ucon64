@@ -297,7 +297,6 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XMDS:
     case UCON64_XMSG:
     case UCON64_XPCE:
-    case UCON64_XPCES:
     case UCON64_XSMC:
     case UCON64_XSMCR:
     case UCON64_XSMD:
@@ -1739,14 +1738,6 @@ ucon64_options (int c, const char *optarg)
         pce_read_rom (ucon64.rom, ucon64.parport, 32 * MBIT);
       else
         pce_write_rom (ucon64.rom, ucon64.parport);
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XPCES:
-      if (access (ucon64.rom, F_OK) != 0)
-        pce_read_sram (ucon64.rom, ucon64.parport);
-      else
-        pce_write_sram (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;
 

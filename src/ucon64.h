@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"                             // ANSI_COLOR
 #include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
+#include "misc.h"
 #include "libdiscmage/libdiscmage.h"            // dm_image_t
 
 /*
@@ -43,10 +44,12 @@ typedef struct st_ucon64
   const char *file;                             // file (cmdline) with path
 
 //  char temp_file[FILENAME_MAX];
+
   char configfile[FILENAME_MAX];                // path and name of the config file
+  char configdir[FILENAME_MAX];                 // directory for config
+  
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
   char discmage_path[FILENAME_MAX];             // path to the discmage DLL
-  char cache_path[FILENAME_MAX];                // path to the cache file
 
 #ifdef  ANSI_COLOR
   int ansi_color;
@@ -129,7 +132,8 @@ typedef struct st_rominfo
 
 extern dm_image_t *image;
 
-extern const struct option long_options[];
+//extern const option_t options[];
+extern const struct option options[];
 
 extern int ucon64_nfo (const st_rominfo_t *);
 extern int ucon64_init (const char *romfile, st_rominfo_t *);

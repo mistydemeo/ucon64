@@ -107,7 +107,8 @@ static st_rominfo_t rom;
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
 static int ucon64_fsize = 0, ucon64_option = 0;
 
-const struct option long_options[] = {
+//const option_t options[] = {
+const struct option options[] = {
     {"1991", 0, 0, UCON64_1991},
     {"3do", 0, 0, UCON64_3DO},
     {"?", 0, 0, UCON64_HELP},
@@ -462,23 +463,20 @@ main (int argc, char **argv)
   if (OFFSET (ucon64.output_path, strlen (ucon64.output_path) - 1) != FILE_SEPARATOR)
     strcat (ucon64.output_path, FILE_SEPARATOR_S);
 
-  strcpy (ucon64.cache_path, get_property (ucon64.configfile, "cache_path", buf, ""));
+  strcpy (ucon64.configdir, get_property (ucon64.configfile, "configdir", buf, ""));
 #ifdef  __CYGWIN__
-  strcpy (ucon64.cache_path, cygwin_fix (ucon64.cache_path));
+  strcpy (ucon64.configdir, cygwin_fix (ucon64.configdir));
 #endif
-  if (strlen (ucon64.cache_path) >= 3)
+  if (strlen (ucon64.configdir) >= 3)
     {
-      strcpy (buf, ucon64.cache_path);
-      realpath2 (buf, ucon64.cache_path);
+      strcpy (buf, ucon64.configdir);
+      realpath2 (buf, ucon64.configdir);
     }
-#ifdef  HAVE_ZLIB_H
-  if (!access (ucon64.cache_path, F_OK))
+
+  if (!access (ucon64.configdir, F_OK))
     ucon64.cache_enabled = 1;
   else
     ucon64.cache_enabled = 0;
-#else
-    ucon64.cache_enabled = 0;
-#endif
 
   // if the config file doesn't contain a parport line use "0" to force probing
   sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
@@ -495,13 +493,11 @@ main (int argc, char **argv)
   ucon64.argc = argc;
   ucon64.argv = argv;
 
-#ifdef HAVE_ZLIB_H
   ucon64_index_cache (); // update cache index file (eventually)
-#endif
 
   ucon64_flush (&rom);
 
-  while ((c = getopt_long_only (argc, argv, "", long_options, NULL)) != -1)
+  while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
 #include "switches.c"
     }
@@ -611,7 +607,7 @@ ucon64_execute_options (void)
 
   optind = 0;                                   // start with first option
   while ((ucon64_option = c =
-            getopt_long_only (ucon64.argc, ucon64.argv, "", long_options, NULL)) != -1)
+            getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
     {
 #include "options.c"
     }
@@ -786,7 +782,6 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       if (rominfo->current_crc32 == 0)
         rominfo->current_crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
 
-#ifdef  HAVE_ZLIB_H
       switch (ucon64.console)
         {
           case UCON64_SNES:
@@ -801,7 +796,6 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
             ucon64_dbsearch (rominfo);
             break;
         }
-#endif // HAVE_ZLIB_H
     }
   else if (UCON64_TYPE_ISCD (ucon64.type))
     {
@@ -1064,13 +1058,6 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "dbs         search ROM database (all entries) by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
     "  " OPTION_LONG_S "db          ROM database statistics (# of entries)\n"
     "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
-#ifdef  HAVE_ZLIB_H
-#if 0
-    "TODO: " OPTION_LONG_S "dat     import DAT files into ROM database; " OPTION_LONG_S "rom=DAT_FILE\n"
-    "                  parses all Romcenter, Goodxxxx, etc. DAT files and updates\n"
-    "                  the database cache\n"
-#endif
-#endif  // HAVE_ZLIB_H
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
@@ -1151,7 +1138,7 @@ ucon64_usage (int argc, char *argv[])
   optind = 0;
   single = 0;
 
-  while (!single && (c = getopt_long_only (argc, argv, "", long_options, NULL)) != -1)
+  while (!single && (c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
 //      if (single) break;
 
@@ -1388,9 +1375,7 @@ ucon64_usage (int argc, char *argv[])
   }
 
   printf (
-#ifdef  HAVE_ZLIB_H
-     "Database: %d known ROMs in cache\n"
-#endif // HAVE_ZLIB_H
+     "Database: %d known ROMs\n"
      "\n"
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
 #ifdef  __MSDOS__
@@ -1402,9 +1387,7 @@ ucon64_usage (int argc, char *argv[])
      "\n"
      "Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
      "\n"
-#ifdef  HAVE_ZLIB_H
      , ucon64_dbsize (UCON64_UNKNOWN)
-#endif // HAVE_ZLIB_H
      , argv[0], argv[0]);
 }
 

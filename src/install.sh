@@ -12,4 +12,3 @@ if ! test -x $HOME/.ucon64; then
 mkdir $HOME/.ucon64
 fi
 cp libdiscmage/discmage.so $HOME/.ucon64
-cp cache.zip $HOME/.ucon64

@@ -38,7 +38,10 @@ extern int lynxer_main(const char *FileName);
 extern int lynx_b0 (st_rominfo_t *rominfo);
 extern int lynx_b1 (st_rominfo_t *rominfo);
 extern int lynx_lnx (st_rominfo_t *rominfo);
+
 extern int lynx_lyx (st_rominfo_t *rominfo);
+extern const char *lynx_lyx_desc;
+
 extern int lynx_n (st_rominfo_t *rominfo);
 extern int lynx_nrot (st_rominfo_t *rominfo);
 extern int lynx_rotl (st_rominfo_t *rominfo);

@@ -660,7 +660,7 @@ void checkabort(int status)
 
 int swc_usage(int argc,char *argv[])
 {
-  if (argcmp(argc,argv, "-help"))
+//  if (argcmp(argc,argv, "-help"))
   {
     printf("\n%s\n", swc_TITLE);
     printf("  -xswc    send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"

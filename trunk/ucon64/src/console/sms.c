@@ -107,8 +107,7 @@ systems in Asia.
 e.g. The first 16Mbit file of Donkey Kong Country (assuming it
   is cat. no. 475) would look like:  SF16475A.078
 */
-  char buf[MAXBUFSIZE];
-  char buf2[MAXBUFSIZE], *p = NULL;
+  char buf[FILENAME_MAX], buf2[FILENAME_MAX], *p = NULL;
 
   if (!rominfo->buheader_len)
     {
@@ -124,13 +123,10 @@ e.g. The first 16Mbit file of Donkey Kong Country (assuming it
   strcat (buf, "________");
   buf[7] = '_';
   buf[8] = 0;
-  sprintf (buf2, "%s.%03lu", buf,
-           (unsigned long) ((q_fsize (ucon64.rom) - rominfo->buheader_len) /
-                            MBIT));
+  sprintf (buf2, "%s.%03u", buf, (ucon64.file_size - rominfo->buheader_len) / MBIT);
 
   ucon64_file_handler (buf2, NULL, 0);
-  q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom),
-            buf2, "wb");
+  q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), buf2, "wb");
 
   printf (ucon64_msg[WROTE], buf2);
   return 0;
@@ -141,8 +137,8 @@ int
 sms_smd (st_rominfo_t *rominfo)
 {
   st_smd_header_t header;
-  char buf[MAXBUFSIZE];
-  long size = q_fsize (ucon64.rom) - rominfo->buheader_len;
+  char dest_name[FILENAME_MAX];
+  int size = ucon64.file_size - rominfo->buheader_len;
 
   if (rominfo->buheader_len != 0)
     {
@@ -157,15 +153,14 @@ sms_smd (st_rominfo_t *rominfo)
   header.id2 = 0xbb;
   header.type = 6;
 
-  strcpy (buf, ucon64.rom);
-  set_suffix (buf, ".SMD");
+  strcpy (dest_name, ucon64.rom);
+  set_suffix (dest_name, ".SMD");
 
-  ucon64_file_handler (buf, NULL, 0);
-  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
+  q_fcpy (ucon64.rom, 0, size, dest_name, "ab");
 
-  q_fcpy (ucon64.rom, 0, size, buf, "ab");
-
-  printf (ucon64_msg[WROTE], buf);
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -192,6 +187,7 @@ sms_smds (st_rominfo_t *rominfo)
 
   q_fwrite (&header, 0, SMD_HEADER_LEN, dest_name, "wb");
   q_fcpy (src_name, 0, q_fsize (src_name), dest_name, "ab");
+
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
   return 0;

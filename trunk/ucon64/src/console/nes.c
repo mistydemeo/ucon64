@@ -5833,8 +5833,8 @@ nes_unif (st_rominfo_t *rominfo)
   fclose (destfile);
   unregister_func (remove_temp_file);
   remove_temp_file ();
-  printf (ucon64_msg[WROTE], dest_name);
 
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -6219,8 +6219,8 @@ nes_ines (st_rominfo_t *rominfo)
   fclose (destfile);
   unregister_func (remove_temp_file);
   remove_temp_file ();
-  printf (ucon64_msg[WROTE], dest_name);
 
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -6237,8 +6237,8 @@ int
 nes_ffe (st_rominfo_t *rominfo)
 {
   st_unknown_header_t header;
-  char buf[MAXBUFSIZE];
-  long size = ucon64.file_size - rominfo->buheader_len;
+  char dest_name[MAXBUFSIZE];
+  int size = ucon64.file_size - rominfo->buheader_len;
 
   if (type != INES)
     {
@@ -6246,8 +6246,8 @@ nes_ffe (st_rominfo_t *rominfo)
       return -1;
     }
 
-  strcpy (buf, ucon64.rom);
-  set_suffix (buf, ".FFE");
+  strcpy (dest_name, ucon64.rom);
+  set_suffix (dest_name, ".FFE");
 
   memset (&header, 0, UNKNOWN_HEADER_LEN);
   header.size_low = size / 8192;
@@ -6257,11 +6257,11 @@ nes_ffe (st_rominfo_t *rominfo)
   header.id1 = 0xaa;
   header.id2 = 0xbb;
 #endif
-  ucon64_file_handler (buf, NULL, 0);
-  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
-  q_fcpy (ucon64.rom, rominfo->buheader_len, size, buf, "ab");
-  printf (ucon64_msg[WROTE], buf);
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
+  q_fcpy (ucon64.rom, rominfo->buheader_len, size, dest_name, "ab");
 
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -6281,8 +6281,8 @@ nes_ineshd (st_rominfo_t *rominfo)
   set_suffix (dest_name, ".HDR");
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, rominfo->buheader_start, 16, dest_name, "wb");
-  printf (ucon64_msg[WROTE], dest_name);
 
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -6328,8 +6328,8 @@ nes_dint (st_rominfo_t *rominfo)
   fclose (destfile);
   unregister_func (remove_temp_file);
   remove_temp_file ();
-  printf (ucon64_msg[WROTE], dest_name);
 
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -7417,7 +7417,7 @@ nes_fds (st_rominfo_t *rominfo)
 
   free (buffer);
   remove_temp_file ();
-  printf (ucon64_msg[WROTE], dest_name);
 
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }

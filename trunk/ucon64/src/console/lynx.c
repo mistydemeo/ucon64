@@ -66,7 +66,7 @@ st_lnx_header_t lnx_header;
 int
 lynx_lyx (st_rominfo_t *rominfo)
 {
-  char buf[MAXBUFSIZE];
+  char dest_name[FILENAME_MAX];
 
   if (!rominfo->buheader_len)
     {
@@ -74,13 +74,13 @@ lynx_lyx (st_rominfo_t *rominfo)
       return -1;
     }
 
-  strcpy (buf, ucon64.rom);
-  set_suffix (buf, ".LYX");
+  strcpy (dest_name, ucon64.rom);
+  set_suffix (dest_name, ".LYX");
 
-  ucon64_file_handler (buf, NULL, 0);
-  q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), buf, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
 
-  printf (ucon64_msg[WROTE], buf);
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -89,7 +89,7 @@ int
 lynx_lnx (st_rominfo_t *rominfo)
 {
   st_lnx_header_t header;
-  char buf[MAXBUFSIZE];
+  char dest_name[FILENAME_MAX];
   int size = q_fsize (ucon64.rom);
 
   if (rominfo->buheader_len != 0)
@@ -120,14 +120,14 @@ lynx_lnx (st_rominfo_t *rominfo)
   strncpy (header.cartname, ucon64.rom, sizeof (header.cartname));
   strcpy (header.manufname, "Atari");
 
-  strcpy (buf, ucon64.rom);
-  set_suffix (buf, ".LNX");
+  strcpy (dest_name, ucon64.rom);
+  set_suffix (dest_name, ".LNX");
 
-  ucon64_file_handler (buf, NULL, 0);
-  q_fwrite (&header, 0, sizeof (st_lnx_header_t), buf, "wb");
-  q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), buf, "ab");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "wb");
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "ab");
 
-  printf (ucon64_msg[WROTE], buf);
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -150,7 +150,7 @@ lynx_rot (st_rominfo_t *rominfo, int rotation)
 
   strcpy (dest_name, ucon64.rom);
   if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
+    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -198,7 +198,7 @@ lynx_n (st_rominfo_t *rominfo, const char *name)
 
   strcpy (dest_name, ucon64.rom);
   if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
+    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -233,7 +233,7 @@ lynx_b (st_rominfo_t *rominfo, int bank, const char *value)
 
   strcpy (dest_name, ucon64.rom);
   if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
+    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);

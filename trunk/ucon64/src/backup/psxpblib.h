@@ -19,7 +19,7 @@
 */
 #include "../ucon64_misc.h"
 
-#ifdef  __DOS__
+#ifdef  __MSDOS__
 #define _PSXPB_DJGPP_
 #elif   defined __UNIX__
 #define _PSXPB_LINUX_

@@ -79,8 +79,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #else
 #define ucon64_TITLE "uCON64 " ucon64_VERSION " Unix 1999-2002 by (various)"
 #endif
-#elif   defined __DOS__
-#define ucon64_TITLE "uCON64 " ucon64_VERSION " DOS 1999-2002 by (various)"
+#elif   defined __MSDOS__
+#define ucon64_TITLE "uCON64 " ucon64_VERSION " MSDOS 1999-2002 by (various)"
 #elif   defined __BEOS__
 #define ucon64_TITLE "uCON64 " ucon64_VERSION " BeOS 1999-2002 by (various)"
 #else

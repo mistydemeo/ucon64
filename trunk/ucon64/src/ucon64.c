@@ -226,7 +226,7 @@ main (int argc, char *argv[])
    configfile handling
 */
   sprintf (rom.config_file, "%s%c"
-#ifdef  __DOS__
+#ifdef  __MSDOS__
   "ucon64.cfg"
 #else
   /*
@@ -803,7 +803,7 @@ main (int argc, char *argv[])
       sync ();
 
       x = system (buf);
-#ifndef __DOS__
+#ifndef __MSDOS__
       x >>= 8;                  // the exit code is coded in bits 8-15
 #endif                          //  (that is, under Linux & BeOS)
 
@@ -1323,7 +1323,7 @@ ucon64_usage (int argc, char *argv[])
          */
 //         "TODO:  -sh      use uCON64 in shell modus\n"
            "  -nbak         prevents backup files (*.bak)\n"
-#ifdef	__DOS__
+#ifdef	__MSDOS__
            "  -e            emulate/run ROM (see ucon64.cfg for more)\n"
 #else
            "  -e            emulate/run ROM (see $HOME/.ucon64rc for more)\n"
@@ -1340,7 +1340,7 @@ ucon64_usage (int argc, char *argv[])
 //         "                this is often used by people who loose control of their ROMs\n"
            "  -rl           rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
            "  -ru           rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"
-#ifdef	__DOS__
+#ifdef	__MSDOS__
            "  -hex          show ROM as hexdump; use \"ucon64 -hex $ROM|more\"\n"
 #else
            "  -hex          show ROM as hexdump; use \"ucon64 -hex $ROM|less\"\n"       // less is better ;-)
@@ -1500,7 +1500,7 @@ ucon64_usage (int argc, char *argv[])
 
   printf
     ("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
-#ifdef	__DOS__
+#ifdef	__MSDOS__
      "     %s -help|more (to see everything in more)\n"
 #else
      "     %s -help|less (to see everything in less)\n" // less is better ;-)

@@ -42,7 +42,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/io.h>             // ioperm() (glibc)
 #endif
 
-#elif   defined __DOS__
+#elif   defined __MSDOS__
 #include <pc.h>                 // inportb(), inportw()
 
 #elif   defined __BEOS__

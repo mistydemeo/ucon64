@@ -108,11 +108,9 @@ if test $with_zlib = yes; then
   AC_TRY_COMPILE([#include <zlib.h>], , with_zlib=yes, with_zlib=no)
 fi
 if test $with_zlib = yes; then
-  AC_DEFINE(ZLIB,1,[build with gzip and zip support (default: yes)])
+  AC_DEFINE(HAVE_ZLIB_H,1,[build with gzip and zip support (default: yes)])
   LDFLAGS="$LDFLAGS -lz"
   DEFINE_ZLIB_MAKE="ZLIB=1"
-else
-  AC_DEFINE(ZLIB,0,[build with gzip and zip support (default: yes)])
 fi
 AC_MSG_RESULT($with_zlib)
 AC_SUBST(DEFINE_ZLIB_MAKE)

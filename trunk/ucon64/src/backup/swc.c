@@ -73,6 +73,7 @@ const char *swc_usage[] =
 
 
 static void init_io (unsigned int port);
+static void deinit_io (void);
 static void checkabort (int status);
 static void send_block (unsigned short address, unsigned char *buffer, int len);
 static void send_command0 (unsigned short address, unsigned char byte);
@@ -90,6 +91,7 @@ static inline unsigned char wait_while_busy (void);
 static inline void wait_for_ready (void);
 
 static int swc_port, hirom;                     // `hirom' was `special'
+
 
 void
 init_io (unsigned int port)
@@ -113,6 +115,16 @@ init_io (unsigned int port)
   printf ("Using I/O port 0x%x\n", swc_port);
 }
 
+
+void
+deinit_io (void)
+{
+#if     defined __unix__ || defined __BEOS__
+  deinit_conio ();
+#endif
+}
+
+
 void
 send_block (unsigned short address, unsigned char *buffer, int len)
 {
@@ -127,6 +139,7 @@ send_block (unsigned short address, unsigned char *buffer, int len)
   sendb (checksum);
 }
 
+
 void
 send_command0 (unsigned short address, unsigned char byte)
 // command 0 for 1 byte
@@ -135,6 +148,7 @@ send_command0 (unsigned short address, unsigned char byte)
   sendb (byte);
   sendb (0x81 ^ byte);
 }
+
 
 void
 send_command (unsigned char command_code, unsigned short a, unsigned short l)
@@ -150,6 +164,7 @@ send_command (unsigned char command_code, unsigned short a, unsigned short l)
   sendb (0x81 ^ command_code ^ a ^ (a >> 8) ^ l ^ (l >> 8)); // checksum
 }
 
+
 void
 sendb (unsigned char byte)
 {
@@ -158,6 +173,7 @@ sendb (unsigned char byte)
   outportb (swc_port + PARPORT_CONTROL, inportb (swc_port + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
   wait_for_ready ();                            // necessary if followed by receiveb()
 }
+
 
 #if BUFFERSIZE < HEADERSIZE
 #error receive_rom_info() and swc_read_sram() expect BUFFERSIZE to be at least \
@@ -212,6 +228,7 @@ receive_rom_info (unsigned char *buffer)
   return size;
 }
 
+
 int
 get_rom_size (unsigned char *info_block)
 // returns size of ROM in Mb units
@@ -264,6 +281,7 @@ get_rom_size (unsigned char *info_block)
   return 0;
 }
 
+
 int
 check1 (unsigned char *info_block, int index)
 {
@@ -275,6 +293,7 @@ check1 (unsigned char *info_block, int index)
 
   return 1;
 }
+
 
 int
 check2 (unsigned char *info_block, int index, unsigned char value)
@@ -288,6 +307,7 @@ check2 (unsigned char *info_block, int index, unsigned char value)
   return 1;
 }
 
+
 int
 check3 (unsigned char *info_block, int index1, int index2, int size)
 {
@@ -299,6 +319,7 @@ check3 (unsigned char *info_block, int index1, int index2, int size)
 
   return 1;
 }
+
 
 unsigned char
 get_emu_mode_select (unsigned char byte, int size)
@@ -336,6 +357,7 @@ get_emu_mode_select (unsigned char byte, int size)
   return ems;
 }
 
+
 void
 receive_block (unsigned short address, unsigned char *buffer, int len)
 {
@@ -354,6 +376,7 @@ receive_block (unsigned short address, unsigned char *buffer, int len)
     ;
 }
 
+
 unsigned char
 receiveb (void)
 {
@@ -366,6 +389,7 @@ receiveb (void)
 
   return byte;
 }
+
 
 unsigned char
 wait_while_busy (void)
@@ -396,6 +420,7 @@ wait_while_busy (void)
   return input;
 }
 
+
 void
 wait_for_ready (void)
 {
@@ -419,6 +444,7 @@ wait_for_ready (void)
 #endif
 }
 
+
 void
 checkabort (int status)
 {
@@ -430,6 +456,7 @@ checkabort (int status)
     }
 }
 
+
 void
 swc_unlock (unsigned int parport)
 /*
@@ -438,9 +465,10 @@ swc_unlock (unsigned int parport)
 */
 {
   init_io (parport);
-
   send_command (6, 0, 0);
+  deinit_io ();
 }
+
 
 int
 swc_read_rom (const char *filename, unsigned int parport)
@@ -529,9 +557,11 @@ swc_read_rom (const char *filename, unsigned int parport)
 
   free (buffer);
   fclose (file);
+  deinit_io ();
 
   return 0;
 }
+
 
 int
 swc_write_rom (const char *filename, unsigned int parport)
@@ -607,9 +637,11 @@ swc_write_rom (const char *filename, unsigned int parport)
 
   free (buffer);
   fclose (file);
+  deinit_io ();
 
   return 0;
 }
+
 
 int
 swc_read_sram (const char *filename, unsigned int parport)
@@ -664,9 +696,11 @@ swc_read_sram (const char *filename, unsigned int parport)
 
   free (buffer);
   fclose (file);
+  deinit_io ();
 
   return 0;
 }
+
 
 int
 swc_write_sram (const char *filename, unsigned int parport)
@@ -717,6 +751,7 @@ swc_write_sram (const char *filename, unsigned int parport)
 
   free (buffer);
   fclose (file);
+  deinit_io ();
 
   return 0;
 }

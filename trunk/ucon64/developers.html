@@ -278,7 +278,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <br>
    <b>New lines</b><br>
    The statement(s) for <i>if</i>, <i>while</i> and <i>for</i> should always
-   start on a new line. That also applies to a one-line statement.<br>
+   start on a new line. That also applies to one-line statements.<br>
 <br>
    <b>Compound statements</b><br>
    The curly braces should be indented and the code of the compound statement
@@ -370,15 +370,15 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    Single or two-line comments should use //. Comments that need more lines
    should use the pair /* and */. A two-line comment should signify that it is
    one two-line comment instead of two one-line comments by putting one extra
-   space behind the //. Single or two-line comments should start at column 49
-   if that's possible. Example:<br>
+   space after the //. Single or two-line comments should start at column 49 if
+   that's possible. Example:<br>
 <pre>
-   unsigned char buf[SIZE186], number[80];       // 4 should be enough, but don't
+   unsigned char buf[SIZE_INFO], number[80];     // 4 should be enough, but don't
                                                  //  be too sensitive to errors
 </pre>
    Long comments should use the same indentation as the code that follows it:<br>
 <pre>
-  if (interleaved)
+  if (deinterleave)
     /*
       This is a bit of a hack, i.e., putting the following code in this
       ...

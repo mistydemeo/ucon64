@@ -1648,6 +1648,12 @@ Same here.
 - Dixie Kong's Double Trouble E. U version looks like it already has been "patched"
    a9 c3 80 dd ff ff f0 6c
 => a9 c3 f0 cc ff ff 80 7d
+
+- Front Mission - Gun Hazard
+   d0 f4 ab cf ae ff 00 d0 01
+=> d0 f4 ab cf ae ff 00 d0 00
+Modification protection. Not needed to play the game on an NTSC SNES. Needed
+when it has been patched with -f.
 */
 {
   char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
@@ -1769,6 +1775,7 @@ Same here.
 
       n += change_mem (buffer, bytesread, "\xc2\x30\xad\xfc\x1f\xc9\x50\x44\xd0", 9, '*', '!', "\x4c\xd1\x80", 3, -6);
       n += change_mem (buffer, bytesread, "\xa9\xc3\x80\xdd\xff\xff\xf0\x6c", 8, '*', '!', "\xf0\xcc\xff\xff\x80\x7d", 6, -5);
+      n += change_mem (buffer, bytesread, "\xd0\xf4\xab\xcf\xae\xff\x00\xd0\x01", 9, '*', '!', "\x00", 1, 0);
 
       fwrite (buffer, 1, bytesread, destfile);
     }
@@ -1884,6 +1891,7 @@ ad 3f 21 29 10 d0                     ad 3f 21 29 10 ea ea
 ad 3f 21 89 10 d0                     ad 3f 21 89 10 80/(ea ea)        - Live-a-Live (ea ea)
 3f 21 29/89 10 00 f0                  3f 21 29/89 10 00 80             - Clock Tower (29)
 3f 21 29/89 10 00 d0                  3f 21 29/89 10 00 ea ea          - Mario no Super Picross (89)
+   3f 21 89 10 c2 XX f0                  3f 21 89 10 c2 XX 80          - Front Mission - Gun Hazard
    3f 21 89 10 c2 XX d0                  3f 21 89 10 c2 XX ea ea       - Robotrek
 3f 21 29/89 10 c9 10 f0               3f 21 29/89 10 c9 10 80
 ad 3f 21 29 10 c9 00 f0               ad 3f 21 29 10 c9 00 80/(ea ea) <= original uCON used 80
@@ -1964,6 +1972,7 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
                        "\x29\x89", 2);
       n += change_mem (buffer, bytesread, "\x3f\x21\x02\x10\x00\xd0", 6, '\x01', '\x02', "\xea\xea", 2, 0,
                        "\x29\x89", 2);
+      n += change_mem (buffer, bytesread, "\x3f\x21\x89\x10\xc2\x01\xf0", 7, '\x01', '\x02', "\x80", 1, 0);
       n += change_mem (buffer, bytesread, "\x3f\x21\x89\x10\xc2\x01\xd0", 7, '\x01', '\x02', "\xea\xea", 2, 0);
       n += change_mem (buffer, bytesread, "\x3f\x21\x02\x10\xc9\x10\xf0", 7, '\x01', '\x02', "\x80", 1, 0,
                        "\x29\x89", 2);

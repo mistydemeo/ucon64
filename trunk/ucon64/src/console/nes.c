@@ -560,7 +560,6 @@ static const nes_data_t nes_data[] = {
   {0x10d20915, 6, 1, "Date: 4/90"},
   {0x112140a4, 100, 0, NULL},
   {0x11469ce3, 54, 0, NULL},
-  {0x115703bb, 0, 0, "Date: (null)"},
   {0x116ccd44, 32, 0, NULL},
   {0x1170392a, 202, 0, NULL},
   {0x119dacf3, 99, 0, NULL},

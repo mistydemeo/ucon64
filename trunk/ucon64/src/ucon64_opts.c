@@ -799,6 +799,12 @@ ucon64_options (int c, const char *optarg)
         printf (ucon64_msg[DAT_NOT_ENABLED]);
       break;
 
+    case UCON64_LSV:
+      if (ucon64.rominfo)
+        ucon64_nfo();
+      break;
+
+
     case UCON64_LS:
       if (ucon64.rominfo)
         p = ucon64.rominfo->name;
@@ -1190,7 +1196,6 @@ ucon64_options (int c, const char *optarg)
       lynx_lyx (ucon64.rominfo);
       break;
 
-#if 0
     case UCON64_MGD:
       switch (ucon64.console)
         {
@@ -1214,7 +1219,6 @@ ucon64_options (int c, const char *optarg)
           return -1;
         }
       break;
-#endif
 
     case UCON64_N:
 //      if (strlen (optarg) == 0)

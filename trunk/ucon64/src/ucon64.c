@@ -1411,7 +1411,7 @@ ucon64_usage (int argc, char *argv[])
   char *name_exe = basename (argv[0]), *name_discmage;
 
   printf (
-    "Usage: %s [OPTION(S)]... [ROM(S)|SRAM(S)|FILE(S)|ARCHIVE(S)|DIR(S)]...\n\n", name_exe);
+    "Usage: %s [OPTION(s)]... [ROM(s)|SRAM(s)|FILE(s)|ARCHIVE(s)|DIR(s)]...\n\n", name_exe);
 
   ucon64_render_usage (ucon64_options_usage);
 

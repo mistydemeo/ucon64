@@ -73,7 +73,7 @@ const st_usage_t n64_usage[] =
                        "this option generates a ROM which can be used to transfer\n"
                        "SRAMs to your console"},
     {"usms", "SMSROM", "Jos Kwanten's ultraSMS (Sega Master System/GameGear emulator);\n"
-                       "ROM(S) will be Jos Kwanten's ultraSMS ROM image\n"
+                       "ROMs will be Jos Kwanten's ultraSMS ROM image\n"
                        "works only for SMSROMs which are <= 4 Mb in size"},
     {"chk", NULL, "fix ROM checksum\n"
               "supports only 6101 and 6102 boot codes"},

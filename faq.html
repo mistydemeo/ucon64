@@ -98,11 +98,17 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
    Under Windows you'll need <a href="http://www.cygwin.com" target="_blank">Cygwin</a>,
    a Windows port of gcc and many other GNU tools and libraries.<br>
 <br>
-   Then enter the following lines:<br>
+   If you have autoconf installed enter the following lines:<br>
+   &nbsp;&nbsp; ./configure<br>
+   &nbsp;&nbsp; make clean<br>
+   &nbsp;&nbsp; make<br>
+   &nbsp;&nbsp; make install<br>
 <br>
-   make clean<br>
-   make<br>
-   make install<br>
+   If you don't have autoconf installed, copy config.h.orig to config.h and enter
+   the following lines:<br>
+   &nbsp;&nbsp; make -f Makefile.orig clean<br>
+   &nbsp;&nbsp; make -f Makefile.orig<br>
+   &nbsp;&nbsp; make -f Makefile.orig install<br>
 <br>
    Under Unix the last command will ask for root's password, because
    uCON64 needs to be setuid root for parallel port access.

@@ -23,7 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include <sys/stat.h>
 #include "config.h"
 #include "misc.h"
 #include "ucon64.h"
@@ -644,9 +643,9 @@ RestoreSRAM (FILE * fp, int StartOS)
   int m = ((StartOS - 1) << 1);
   int byteswritten = 0;
   time_t starttime;
-  struct stat fstate;
+  int fsize;
 
-  fstat (fileno (fp), &fstate);
+  fsize = quickftell (ucon64.rom);
   starttime = time (NULL);
 
   i = fgetc (fp);
@@ -674,7 +673,7 @@ RestoreSRAM (FILE * fp, int StartOS)
             }
           byteswritten += 256;
           if ((byteswritten & 0x1fff) == 0)     // call ucon64_gauge() after sending 8kB
-            ucon64_gauge (starttime, byteswritten, fstate.st_size);
+            ucon64_gauge (starttime, byteswritten, fsize);
         }
       m++;
     }

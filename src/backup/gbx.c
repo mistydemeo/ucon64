@@ -2623,7 +2623,7 @@ gbx_read_sram (const char *filename, unsigned int parport, int bank)
 int
 gbx_write_sram (const char *filename, unsigned int parport, int bank)
 {
-  struct stat fstat;
+  int fsize;
 
   gbx_init (parport, filename);
   if (bank == -1)
@@ -2636,8 +2636,8 @@ gbx_write_sram (const char *filename, unsigned int parport, int bank)
   else
     SetSramBank ();                             // set bank_size = 4/16 banks of 8kB
 
-  stat (filename, &fstat);
-  if (fstat.st_size == 8 * 1024 || bank != -1)
+  fsize = quickftell (filename);
+  if (fsize == 8 * 1024 || bank != -1)
     {
       cmd = 'l';
       write_8k_sram_from_file ();

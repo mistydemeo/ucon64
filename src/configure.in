@@ -6,7 +6,29 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
+CFLAGS="-I. -Wall -O3"
+LDFLAGS=-s
+
 dnl Checks for libraries.
+AC_ARG_WITH(zlib,[  --with-zlib             build with zlib support],with_zlib=$withval)
+AC_MSG_CHECKING(for zlib)
+if test x$with_zlib = xyes; then
+  with_zlib=no
+  AC_TRY_COMPILE([
+  #include <zlib.h>
+  ],[
+  ],[
+  with_zlib=yes
+  ])
+  AC_MSG_RESULT($with_zlib)
+  if test x$with_zlib = xyes; then
+    LDFLAGS="$LDFLAGS -lz"
+    DEFINE_ZLIB="#define ZLIB"
+# We could also do CFLAGS="$CFLAGS -DZLIB" instead.
+  fi
+else
+  AC_MSG_RESULT(not enabled by user)
+fi
 
 dnl Checks for header files.
 AC_PATH_X
@@ -28,6 +50,7 @@ AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(getcwd mkdir rmdir strcspn strdup strerror strstr strtol)
 
+AC_SUBST(DEFINE_ZLIB)
 AC_OUTPUT(Makefile config.h)
 
 echo

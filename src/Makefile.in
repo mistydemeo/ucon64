@@ -254,9 +254,9 @@ endif                                   # cygwin
 UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
 
 getopt.o: getopt.h
-unzip.o: unzip.h
+unzip.o: unzip.h config.h
 misc.o: misc.h miscz.h config.h
-map.o: map.h
+map.o: map.h config.h
 miscz.o: miscz.h map.h config.h
 quick_io.o: quick_io.h misc.h config.h
 dlopen.o: dlopen.h dxedll_pub.h config.h

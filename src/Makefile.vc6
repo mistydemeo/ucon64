@@ -98,9 +98,9 @@ uninstall:
 UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
 
 getopt.obj: getopt.h
-unzip.obj: unzip.h
+unzip.obj: unzip.h config.h
 misc.obj: misc.h miscz.h config.h
-map.obj: map.h
+map.obj: map.h config.h
 miscz.obj: miscz.h map.h config.h
 quick_io.obj: quick_io.h misc.h config.h
 dlopen.obj: dlopen.h dxedll_pub.h config.h

@@ -299,14 +299,16 @@ extern int argz_extract2 (char **argv, char *str, const char *separator_s, int m
   mem functions
 
   memwcmp()    memcmp with wildcard support
+  mem_search() search for a byte sequence
   mem_swap()   swap n Bytes from add on
   mem_hexdump() hexdump n Bytes from add on; you can use here a virtual_start for the displayed counter
   crc16()      calculate the crc16 of buffer for size bytes
   crc32()      calculate the crc32 of buffer for size bytes
 */
 extern int memwcmp (const void *data, const void *search, uint32_t searchlen, int wildcard);
-extern void mem_hexdump (const void *add, uint32_t n, int virtual_start);
+extern void *mem_search (const void *buffer, uint32_t buflen, const void *search, uint32_t searchlen);
 extern void *mem_swap (void *add, uint32_t size);
+extern void mem_hexdump (const void *add, uint32_t n, int virtual_start);
 #ifdef  HAVE_BYTESWAP_H
 #include <byteswap.h>
 #else

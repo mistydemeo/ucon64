@@ -81,7 +81,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 struct ucon64_
 {
 //TODO get rid of argc and argv here
-
   int argc;
   char *argv[128];
 
@@ -90,6 +89,8 @@ struct ucon64_
   unsigned int parport;
 
 //  int is_a_cd_image;    //obsolete is_a_cd_image = (rom->bytes > MAXROMSIZE) ? 1 : 0;
+//  int raw_cd_image;	//obsolete raw_cd_image = ( rom->header_start != 0x8000 ) ? 1 : 0;
+//                              or just raw_cd_image = rom->header_start
 
   long console;	//integer for the detected console system
 //  long console_forced;

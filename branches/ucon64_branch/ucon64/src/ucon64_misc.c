@@ -398,6 +398,7 @@ const st_usage_t ucon64_options_usage[] = {
   {"hex", NULL, "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex ...|less\""}, // less is more ;-)
 #endif
   {"find", "STRING", "find STRING in ROM (wildcard: '?')"},
+  {"findr", "STR", "like " OPTION_LONG_S "find but looks also for shifted/relative similarities"},
   {"c", "FILE", "compare FILE with ROM for differences"},
   {"cs" ,"FILE", "compare FILE with ROM for similarities"},
   {"help", NULL, "display this help and exit"},
@@ -479,7 +480,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_K, UCON64_SNES, snes_usage,          WF_DEFAULT},
   {UCON64_L, UCON64_SNES, snes_usage,          WF_DEFAULT},
   {UCON64_LNX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
-  {UCON64_LOGO, UCON64_GBA, gba_usage,         WF_DEFAULT},
   {UCON64_LSRAM, UCON64_N64, n64_usage,        WF_INIT|WF_PROBE},
   {UCON64_LYX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
   {UCON64_MULTI, UCON64_GBA, gba_usage,        WF_STOP},
@@ -503,6 +503,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_UNIF, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_USMS, UCON64_N64, n64_usage,         WF_DEFAULT},
   {UCON64_V64, UCON64_N64, n64_usage,          WF_DEFAULT},
+  {UCON64_VMS, UCON64_DC, dc_usage,            0},
 #ifdef  PARALLEL
   // We have to add |WF_NO_ROM to the copier options workflow parameter in
   //  order to support dumping of cartridges or copier SRAM.
@@ -521,6 +522,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XGD3, UCON64_SNES, gd_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM}, // supports split files
   {UCON64_XLIT, UCON64_GB, lynxit_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XMCCL, UCON64_LYNX, mccl_usage,      WF_DEFAULT|WF_STOP|WF_NO_ROM},
+  {UCON64_XMD, UCON64_GEN, md_usage,           WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XMDS, UCON64_GEN, md_usage,          WF_STOP|WF_NO_ROM},
 #if 0
   {UCON64_XSMD, UCON64_UNKNOWN, smd_usage,     WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XSMDS, UCON64_UNKNOWN, smd_usage,    WF_STOP|WF_NO_ROM},
@@ -562,6 +565,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_DINT, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
   {UCON64_E, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
   {UCON64_FIND, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT},
+  {UCON64_FINDR, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT},
   {UCON64_GG, UCON64_UNKNOWN, gg_usage,        WF_INIT|WF_PROBE},
   {UCON64_GGD, UCON64_UNKNOWN, gg_usage,       WF_INIT|WF_PROBE|WF_NO_ROM},
   {UCON64_GGE, UCON64_UNKNOWN, gg_usage,       WF_INIT|WF_PROBE|WF_NO_ROM},
@@ -572,6 +576,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_INSN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_ISPAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_INIT|WF_NO_SPLIT},
   {UCON64_J, UCON64_UNKNOWN, NULL,             WF_INIT|WF_PROBE},
+  {UCON64_LOGO, UCON64_UNKNOWN, NULL,          WF_DEFAULT},
   {UCON64_LS, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
   {UCON64_LSD, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE},
   {UCON64_LSV, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},

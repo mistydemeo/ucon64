@@ -713,6 +713,27 @@ memwcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildca
 }
 
 
+int
+memwrcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildcard)
+// like memwcmp() but looks also for shifted/relative similarities
+{
+  const unsigned char *a = (const unsigned char *) add,
+                      *a_w = (const unsigned char *) add_with_wildcards;
+
+  while (n)
+    {
+      if (/* *a != wildcard &&*/ *a_w != wildcard && *a != *a_w)
+        return -1;
+
+      a++;
+      a_w++;
+      n--;
+    }
+
+  return 0;
+}
+
+
 void *
 mem_swap (void *add, uint32_t n)
 {
@@ -754,6 +775,25 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
       puts (buf);
     }
 }
+
+
+#ifdef  DEBUG
+void
+mem_hexdump_code (const void *mem, uint32_t n, int virtual_start)
+// hexdump something into C code (for development)
+{
+  uint32_t pos;
+  const unsigned char *p = (const unsigned char *) mem;
+
+  for (pos = 0; pos < n; pos++, p++)
+    {
+      printf ("0x%02x, ", *p);
+
+      if (!((pos + 1) & 7))
+        fprintf (stdout, "// 0x%x (%d)\n", pos + virtual_start + 1, pos + virtual_start + 1);
+    }
+}
+#endif
 
 
 #if 0                                           // currently not used

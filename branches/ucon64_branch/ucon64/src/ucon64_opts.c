@@ -315,6 +315,8 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XGD3:
     case UCON64_XLIT:
     case UCON64_XMCCL:
+    case UCON64_XMD:
+    case UCON64_XMDS:
     case UCON64_XSMD:
     case UCON64_XSMDS:
     case UCON64_XSWC:
@@ -790,6 +792,23 @@ ucon64_options (int c, const char *optarg)
           value += strlen (optarg);
         }
       break;
+
+#if 0
+    case UCON64_FINDR:
+      if (optarg)
+        printf ("Searching: \"%s\"\n\n", optarg); // TODO: display "b?a" as "b" "a"
+      else
+        break; // empty search string
+
+      while ((value = q_fncmp (ucon64.rom, value, ucon64.file_size, optarg,
+                               strlen (optarg), '?')) != -1)
+        {
+          ucon64_fhexdump (ucon64.rom, value, strlen (optarg) + 16);
+          fputc ('\n', stdout);                 // + 16 gives a bit of context
+          value += strlen (optarg);
+        }
+      break;
+#endif
 
     case UCON64_PADHD:                          // deprecated
       value = UNKNOWN_HEADER_LEN;
@@ -1317,6 +1336,9 @@ ucon64_options (int c, const char *optarg)
 #if 0
         case UCON64_IP:
           break;
+          
+        case UCON64_VMS:
+          break;
 #endif
 
     case UCON64_J:
@@ -1351,7 +1373,19 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_LOGO:
-      gba_logo (ucon64.rominfo);
+      switch (ucon64.console)
+        {
+          case UCON64_GB:
+            gameboy_logo (ucon64.rominfo);
+
+          case UCON64_GBA:
+            gba_logo (ucon64.rominfo);
+
+          default:
+// The next msg has already been printed
+//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+            return -1;
+        }
       break;
 
     case UCON64_LYX:
@@ -1602,8 +1636,8 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->interleaved)
             fprintf (stderr,
-                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor64 Jr. only\n"
-                     "       supports interleaved ROMs. Convert to a Doctor64 Jr. compatible format.\n");
+                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 Junior only\n"
+                     "       supports interleaved ROMs. Convert to a Doctor V64 compatible format.\n");
           else if (doctor64jr_write (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
@@ -1652,6 +1686,33 @@ ucon64_options (int c, const char *optarg)
           else
             gd_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo); // file exists -> send it to the copier
         }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XMD:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
+        md_read_rom (ucon64.rom, ucon64.parport);
+      else                                      // file exists -> send it to the copier
+        {
+          // TODO: I (dbjh) don't know yet what format the MD-PRO uses
+          if (!ucon64.rominfo->buheader_len)
+            fprintf (stderr,
+                    "ERROR: This ROM has no header. Convert to an MD compatible format.\n");
+          else if (!ucon64.rominfo->interleaved)
+            fprintf (stderr,
+                    "ERROR: This ROM doesn't seem to be interleaved but the MDonly supports\n"
+                    "       interleaved ROMs. Convert to an MD compatible format.\n");
+          else
+            md_write_rom (ucon64.rom, ucon64.parport);
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XMDS:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        md_read_sram (ucon64.rom, ucon64.parport);
+      else                                      // file exists -> restore SRAM
+        md_write_sram (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;
 

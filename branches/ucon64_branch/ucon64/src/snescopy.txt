@@ -57,3 +57,6 @@
 # Tetris Attack (the two below)
 # c2 30 ad fc 1f c9 50 44 d0 :   01: 02: 4c d1 80 : -6
 # 8f 01 01 70 af 01 01 70 c9 01 01 d0 : 01: 02: 80 : 0
+#
+# Dixie Kong's Double Trouble E. U version looks like it already has been "patched"
+a9 c3 80 dd ff ff f0 6c :      01:  02: f0 cc ff ff 80 7d : -5

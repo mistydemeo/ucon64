@@ -31,5 +31,6 @@ extern int gameboy_n2gb (st_rominfo_t *rominfo, const char *emu_rom);
 extern int gameboy_sgb (st_rominfo_t *rominfo);
 extern int gameboy_ssc (st_rominfo_t *rominfo);
 extern int gameboy_init (st_rominfo_t *rominfo);
+extern int gameboy_logo (st_rominfo_t *rominfo);
 
 #endif // GB_H

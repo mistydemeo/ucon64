@@ -154,6 +154,7 @@ const struct option options[] = {
     {"figs", 0, 0, UCON64_FIGS},
     {"file", 1, 0, UCON64_FILE},
     {"find", 1, 0, UCON64_FIND},
+    {"findr", 1, 0, UCON64_FINDR},
     {"force63", 0, 0, UCON64_FORCE63},
     {"frontend", 0, 0, UCON64_FRONTEND},
     {"gb", 0, 0, UCON64_GB},
@@ -303,6 +304,7 @@ const struct option options[] = {
     {"vec", 0, 0, UCON64_VEC},
     {"version", 0, 0, UCON64_VER},
     {"vram", 0, 0, UCON64_VRAM},
+    {"vms", 1, 0, UCON64_VMS},
     {"xbox", 0, 0, UCON64_XBOX},
 #ifdef  DISCMAGE
     {"xcdrw", 0, 0, UCON64_XCDRW},
@@ -324,6 +326,8 @@ const struct option options[] = {
     {"xgd3", 0, 0, UCON64_XGD3},
     {"xlit", 0, 0, UCON64_XLIT},
     {"xmccl", 0, 0, UCON64_XMCCL},
+    {"xmd", 0, 0, UCON64_XMD},
+    {"xmds", 0, 0, UCON64_XMDS},
     {"xsmd", 0, 0, UCON64_XSMD},
     {"xsmds", 0, 0, UCON64_XSMDS},
     {"xswc", 0, 0, UCON64_XSWC},
@@ -556,15 +560,6 @@ main (int argc, char **argv)
   realpath2 (buf, ucon64.skindir);
 #endif
 
-#ifdef  GUI
-  strcpy (ucon64.skindir, get_property (ucon64.configfile, "ucon64_skindir", buf, ""));
-#ifdef  __CYGWIN__
-  strcpy (ucon64.skindir, fix_character_set (ucon64.skindir));
-#endif
-  strcpy (buf, ucon64.skindir);
-  realpath2 (buf, ucon64.skindir);
-#endif
-
   // DAT file handling
   ucon64.dat_enabled = 0;
   strcpy (ucon64.datdir, get_property (ucon64.configfile, "ucon64_datdir", buf, ""));
@@ -605,11 +600,6 @@ main (int argc, char **argv)
 #ifdef  DISCMAGE
   // load libdiscmage
   ucon64.discmage_enabled = ucon64_load_discmage ();
-#endif
-
-#ifdef  GUI
-  // load libnetgui
-  ucon64.netgui_enabled = ucon64_load_netgui ();
 #endif
 
 #ifdef  GUI
@@ -987,12 +977,10 @@ ucon64_rom_handling (void)
   // "walk through" <console>_init()
   if (ucon64.flags & WF_PROBE)
     {
-      ucon64.rominfo = ucon64_probe (&rominfo); // returns console type
-
       if (ucon64.rominfo)
         {
           // Restore any overrides from st_ucon64_t
-          // We have to this *before* calling ucon64_probe(), *not* afterwards
+          // We have to do this *before* calling ucon64_probe(), *not* afterwards
           if (UCON64_ISSET (ucon64.buheader_len))
             rominfo.buheader_len = ucon64.buheader_len;
 
@@ -1550,11 +1538,12 @@ ucon64_usage (int argc, char *argv[])
     {UCON64_GEN, {genesis_usage,
 #ifdef  PARALLEL
         smd_usage,
+        md_usage,
 //        mgd_usage,
 #else
-      0,
+      0, 0,
 #endif // PARALLEL
-      0, 0, 0, 0}},
+      0, 0, 0}},
     {UCON64_GB, {gameboy_usage,
 #ifdef  PARALLEL
         gbx_usage,

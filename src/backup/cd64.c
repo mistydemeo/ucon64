@@ -466,7 +466,7 @@ cd64_write_mempack (const char *filename, int index)
   if (ucon64.io_mode == CD64BIOS)
     index = -1;
   cd64_starttime = time (NULL);
-  cd64_upload_mempak (cd64, file, index);
+  cd64_upload_mempak (cd64, file, (int8_t) index);
 
   cd64->devclose (cd64);
   fclose (file);

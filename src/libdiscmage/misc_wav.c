@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef M_PI
 #define M_PI 3.1415926535
 #endif
-//TODO: replace ceil(), floor() and sin()
+// TODO: replace ceil(), floor() and sin()
 
 unsigned char wav_header[3][80] = { 
   {
@@ -91,13 +91,9 @@ typedef struct
 
 
 int
-misc_wav_write_header (FILE *fh,
-                       int channels,
-                       int freq,
-                       int bytespersecond,
-                       int blockalign,
-                       int bitspersample,
-                       int data_length)
+misc_wav_write_header (FILE *fh, int channels, int freq,
+                       int bytespersecond, int blockalign,
+                       int bitspersample, int data_length)
 {
   st_wav_header_t wav_header;
   memset (&wav_header, 0, sizeof (st_wav_header_t));
@@ -129,8 +125,8 @@ misc_wav_generator (unsigned char *bit, int bitLength, float volume, int wavType
   (void) wavType;
 #else
   if (wavType == SQUARE_WAVE)
+#endif // USE_LIBMATH
     {
-#endif  // USE_LIBMATH
       int halfBitLength = (int) (floor ((float) bitLength) / 2.0);
       int isOdd = (int) (ceil ((float) bitLength / 2.0) - halfBitLength);
 
@@ -142,11 +138,11 @@ misc_wav_generator (unsigned char *bit, int bitLength, float volume, int wavType
 
       for (; i < bitLength; i++)
         bit[i] = (unsigned char) floor (0x06 * volume);
-#ifdef  USE_LIBMATH
     }
+#ifdef  USE_LIBMATH
   else // SINE_WAV
     for (i = 0; i < bitLength; i++)
       bit[i] = (unsigned char) floor
         (((sin ((((double) 2 * (double) M_PI) / (double) bitLength) * (double) i) * volume + 1) * 128));
-#endif  // USE_LIBMATH
+#endif // USE_LIBMATH
 }

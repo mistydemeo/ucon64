@@ -14,7 +14,7 @@ INSTALL_DATA=${INSTALL} -m 644
 #RANLIB=ranlib
 
 CC=gcc
-CFLAGS0=-Wall -W -O3 -DHAVE_CONFIG_H
+CFLAGS0=-I. -Wall -W -O3 -DHAVE_CONFIG_H
 CFLAGS=$(CFLAGS0) -DDLL
 ifdef DLOPEN
 CFLAGS+=-DDLOPEN
@@ -42,11 +42,11 @@ endif
 LIBNAME=discmage
 OBJECTS=libdm_misc.o dllinit.o misc.o misc_wav.o format/format.o format/cdi.o \
         format/nero.o format/cue.o format/toc.o format/other.o
+LIBS=-lm
 ifdef USE_ZLIB
-LIBS=-lz
+LIBS+=-lz
 OBJECTS+=unzip.o map.o misc_z.o
 else
-LIBS=
 ifeq ($(GCC_WIN),1)
 else
 ifdef DJGPP                             # DJGPP code in dllinit needs map code

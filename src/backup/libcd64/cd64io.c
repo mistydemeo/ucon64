@@ -783,7 +783,7 @@ int cd64_open_rawio(struct cd64_t *cd64) {
 	if (io_portfd == -1) {
 		io_portfd = 0;
 		cd64->notice_callback2("open: %s", strerror(errno));
-		cd64->notice_callback2("Could not open I/O port device (no driver)";
+		cd64->notice_callback2("Could not open I/O port device (no driver)");
 		exit(1);
 	}
 #elif defined _WIN32 || defined __CYGWIN__

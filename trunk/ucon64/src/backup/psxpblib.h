@@ -14,7 +14,9 @@
  *
  */
 
-#include "../config.h"
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
 #ifdef PARALLEL
 
 /*
@@ -42,7 +44,9 @@
 
 #if     defined _PSXPB_LINUX_ || defined _PSXPB_BEOS_
 #include <string.h>
+#ifdef  HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #endif
 
 

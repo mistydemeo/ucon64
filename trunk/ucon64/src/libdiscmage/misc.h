@@ -25,6 +25,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifdef  HAVE_CONFIG_H
+#include "config.h"                             // HAVE_ZLIB_H, ANSI_COLOR support
+#endif
 
 #ifdef __sun
 #ifdef __SVR4
@@ -36,11 +39,9 @@ extern "C" {
 #include <limits.h>
 #include <time.h>                               // gauge() prototype contains time_t
 #include <stdio.h>
+#ifdef  HAVE_DIRENT_H
 #include <dirent.h>
-#ifdef  HAVE_CONFIG_H
-#include "config.h"                             // HAVE_ZLIB_H, ANSI_COLOR support
 #endif
-
 #ifdef  HAVE_ZLIB_H
 #include <zlib.h>
 #include "unzip.h"
@@ -89,12 +90,15 @@ typedef u_int64_t uint64_t;
 typedef unsigned char uint8_t;
 typedef unsigned short int uint16_t;
 typedef unsigned int uint32_t;
+#ifndef WIN32
 typedef unsigned long long int uint64_t;
-
+#endif
 typedef signed char int8_t;
 typedef signed short int int16_t;
 typedef signed int int32_t;
+#ifndef WIN32
 typedef signed long long int int64_t;
+#endif
 #endif // OWN_INTTYPES
 #endif
 
@@ -150,6 +154,8 @@ typedef signed long long int int64_t;
   #else
     #define CURRENT_OS_S "Unix"
   #endif
+#elif   defined WIN32
+    #define CURRENT_OS_S "Win32"
 #elif   defined __APPLE__
   #if   defined __POWERPC__ || defined __ppc__
     #define CURRENT_OS_S "Apple (ppc)"
@@ -184,7 +190,7 @@ typedef signed long long int int64_t;
 #define me2le_64(x) (x)
 #endif
 
-#ifdef __MSDOS__
+#if     (defined __MSDOS__ || defined WIN32)
 #define FILE_SEPARATOR '\\'
 #define FILE_SEPARATOR_S "\\"
 #else
@@ -254,23 +260,68 @@ extern int is_func (unsigned char *s, int size, int (*func) (int));
 extern char *to_func (unsigned char *s, int size, int (*func) (int));
 #define strupr(s) (to_func(s, strlen(s), toupper))
 #define strlwr(s) (to_func(s, strlen(s), tolower))
+//#ifndef HAVE_STRCASESTR
+// strcasestr is GNU only
+extern char *strcasestr2 (const char *str, const char *search);
+#define stristr strcasestr2
+//#else
+//#define stristr strcasestr
+//#endif
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
 extern char *strtrim (char *str);
-extern char *strcasestr2 (const char *str, const char *search);
-#define stristr strcasestr2
 extern char *setext (char *filename, const char *ext);
 extern const char *getext (const char *filename);
+//#ifndef HAVE_BASENAME
 extern char *basename2 (const char *str);
-/*
-  the following define *IS* important since it's said that XPG basename()
-  alters the src - and I (NoisyB) don't like my basename() to do that
-*/
+//  the following define will override a possible XPG basename() which mods. the src
 #define basename basename2
+//#endif
+//#ifndef HAVE_DIRNAME
 extern char *dirname2 (char *str);
+#define dirname dirname2
+//#endif
 extern char *realpath2 (const char *src, char *full_path);
 extern int mkdir2 (const char *name);
 extern char ***strargv (int *argc, char ***argv, char *cmdline, int separator_char);
+
+
+#ifdef  WIN32
+/*
+  VC++ support (MinGW lite; mainly unistd.h and dirent.h)
+  
+  access()  see libc documentation
+*/
+#ifndef R_OK
+#define R_OK
+#define W_OK
+#define F_OK
+#define X_OK
+#endif
+typedef struct
+{
+  char pad;
+} DIR;
+
+
+struct dirent
+{
+  char d_name[FILENAME_MAX + 1];
+};
+
+
+extern DIR *opendir (const char *path);
+extern struct dirent *readdir (DIR *p);
+void rewinddir (DIR *p);
+extern int closedir (DIR *p);
+extern int access (const char *fname, void *mode);
+extern void sync (void);
+extern char *getcwd (char *p, size_t p_size);
+extern int chdir (const char *path);
+extern int mkdir (const char *path, void *mode);
+extern int rmdir (const char *path);
+//extern int isatty
+#endif  // WIN32
 
 
 /*
@@ -291,18 +342,14 @@ extern unsigned int mem_crc32 (unsigned int size, unsigned int crc32, const void
 #define mem_crc32(SIZE, CRC, BUF)       (crc32(CRC, BUF, SIZE))
 #endif
 extern void *mem_swap (void *add, uint32_t size);
-#if 0
-extern void *mem_swap_32 (void *add, uint32_t size);
-extern void *mem_swap_64 (void *add, uint32_t size);
-#endif
 #ifdef  HAVE_BYTESWAP_H
 #include <byteswap.h>
 #else
 #ifndef OWN_BYTESWAP
 #define OWN_BYTESWAP                            // signal that these are defined
-extern unsigned short int bswap_16 (unsigned short int x);
-extern unsigned int bswap_32 (unsigned int x);
-extern unsigned long long int bswap_64 (unsigned long long int x);
+extern uint16_t bswap_16 (uint16_t x);
+extern uint32_t bswap_32 (uint32_t x);
+extern uint64_t bswap_64 (uint64_t x);
 #endif // OWN_BYTESWAP
 #endif
 
@@ -365,7 +412,7 @@ extern void wait2 (int nmillis);
                   whole property will disappear from filename
 */
 extern const char *get_property (const char *filename, const char *propname, char *value, const char *def);
-extern int get_property_bool (const char *filename, const char *propname);
+extern int get_property_bool (const char *filename, const char *propname, char divider);
 extern int set_property (const char *filename, const char *propname, const char *value);
 #define DELETE_PROPERTY(a, b) (set_property(a, b, NULL))
 

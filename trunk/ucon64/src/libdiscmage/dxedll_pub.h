@@ -22,20 +22,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef DXEDLL_PUB_H
 #define DXEDLL_PUB_H
 
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#ifdef  HAVE_DIRENT_H
 #include <dirent.h>
+#endif
+#ifdef  HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <stdarg.h>
 #include <ctype.h>
 #include <dos.h>
 #include <dpmi.h>
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
 #ifdef  HAVE_ZLIB_H
 #include <zlib.h>
 #include "unzip.h"

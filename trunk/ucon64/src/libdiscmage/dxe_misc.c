@@ -28,11 +28,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   functions in misc.c.
 */
 
-#include <stdio.h>
-#include "dxedll_pub.h"
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <stdio.h>
+#include "dxedll_pub.h"
 #ifdef  HAVE_ZLIB_H
 #include <zlib.h>
 #include "unzip.h"

@@ -18,14 +18,17 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#ifdef  HAVE_DIRENT_H
 #include <dirent.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
+
 const char *yoko_usage[] =
   {
     "YOKO backup unit",

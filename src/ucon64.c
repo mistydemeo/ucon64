@@ -470,10 +470,10 @@ main (int argc, char **argv)
   ucon64_configfile ();
 
 #ifdef  ANSI_COLOR
-  // ansi colors?
+  // ANSI colors?
   ucon64.ansi_color = get_property_int (ucon64.configfile, "ansi_color", '=');
-  if (ucon64.ansi_color)
-    ucon64.ansi_color = ansi_init ();
+  // the conditional call to ansi_init() has to be done *after* the check for
+  //  the switch -ncol
 #endif
 
   // parallel port?
@@ -679,9 +679,7 @@ ucon64_execute_options (void)
 */
 {
   int c = 0, result = 0, x = 0, opts = 0;
-#if     defined __unix__ && !defined __MSDOS__
-  static int privileges_droppped = 0;
-#endif
+  static int first_call = 1;                    // first call to this function
   const st_ucon64_wf_t *wf = NULL;
 
   ucon64.console = UCON64_UNKNOWN;
@@ -723,26 +721,25 @@ ucon64_execute_options (void)
 //      if (wf->flags & WF_SWITCH)
         ucon64_switches (arg[x].val, arg[x].optarg);
     }
+  if (ucon64.ansi_color && first_call)
+    ucon64.ansi_color = ansi_init ();
 
 #ifdef  PARALLEL
-    /*
-      The copier options need root privileges for ucon64_parport_init()
-      We can't use ucon64.flags & WF_PAR to detect whether a (parallel port)
-      copier option has been specified, because another switch might've been
-      specified after -port.
-    */
-    if (ucon64_parport_needed)
-      ucon64.parport = ucon64_parport_init (ucon64.parport);
+  /*
+    The copier options need root privileges for ucon64_parport_init()
+    We can't use ucon64.flags & WF_PAR to detect whether a (parallel port)
+    copier option has been specified, because another switch might've been
+    specified after -port.
+  */
+  if (ucon64_parport_needed)
+    ucon64.parport = ucon64_parport_init (ucon64.parport);
 #endif
 #if     defined __unix__ && !defined __MSDOS__
-    if (!privileges_droppped)
-      {
-        // now we can drop privileges
-        drop_privileges ();
-        privileges_droppped = 1;                // call drop_privileges() only once
-      }
+  if (first_call)
+    drop_privileges ();                         // now we can drop privileges
 #endif
-
+  first_call = 0;
+  
   for (x = 0; arg[x].val; x++)
     {
       if ((wf = ucon64_get_wf (arg[x].val)))    // get workflow for that option

@@ -47,6 +47,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <OS.h>                                 // snooze(), microseconds
 // Include OS.h before misc.h, because OS.h includes StorageDefs.h which
 //  includes param.h which unconditionally defines MIN and MAX.
+#elif   defined _WIN32
+#include <windows.h>                            // Sleep(), milliseconds
 #endif
 
 #ifdef  HAVE_ZLIB_H
@@ -212,15 +214,148 @@ q_fsize (const char *filename)
 #endif
 
 
+#if     defined _WIN32 && defined ANSI_COLOR
+int
+vprintf2 (const char *format, va_list argptr)
+// Cheap hack to get the Visual C++ port support "ANSI colors". Cheap,
+//  because it only supports the ANSI escape sequences uCON64 uses.
+{
+#undef  vprintf
+#undef  printf
+#undef  fprintf
+  int n_chars = 0, n_ctrl, n_print, done = 0;
+  char output[MAXBUFSIZE], *ptr, *ptr2;
+  HANDLE stdout_handle;
+  CONSOLE_SCREEN_BUFFER_INFO info;
+  WORD org_attr, new_attr;
+
+  n_chars = vsprintf (output, format, argptr);
+  if (n_chars > MAXBUFSIZE)
+    {
+      fprintf (stderr, "INTERNAL ERROR: Output buffer in fprintf2() is too small (%d bytes).\n"
+                       "                %d bytes were needed.\n", MAXBUFSIZE, n_chars);
+      exit (1);
+    }
+
+  if ((ptr = strchr (output, 0x1b)) == NULL)
+    printf (output);
+  else
+    {
+      stdout_handle = GetStdHandle (STD_OUTPUT_HANDLE);
+      GetConsoleScreenBufferInfo (stdout_handle, &info);
+      org_attr = info.wAttributes;
+
+      if (ptr > output)
+        {
+          *ptr = 0;
+          printf (output);
+          *ptr = 0x1b;
+        }
+      while (!done)
+        {
+          if (memcmp (ptr, "\x1b[0m", 4) == 0)
+            {
+              new_attr = org_attr;
+              n_ctrl = 4;
+            }
+          else if (memcmp (ptr, "\x1b[01;31m", 8) == 0)
+            {
+              new_attr = FOREGROUND_RED | FOREGROUND_INTENSITY;
+              n_ctrl = 8;
+            }
+          else if (memcmp (ptr, "\x1b[01;32m", 8) == 0)
+            {
+              new_attr = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+              n_ctrl = 8;
+            }
+          else if (memcmp (ptr, "\x1b[01;33m", 8) == 0) // bright yellow
+            {
+              new_attr = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+              n_ctrl = 8;
+            }
+          else if (memcmp (ptr, "\x1b[31;41m", 8) == 0)
+            {
+              new_attr = FOREGROUND_RED | BACKGROUND_RED;
+              n_ctrl = 8;
+            }
+          else if (memcmp (ptr, "\x1b[32;42m", 8) == 0)
+            {
+              new_attr = FOREGROUND_GREEN | BACKGROUND_GREEN;
+              n_ctrl = 8;
+            }
+          else if (*ptr == 0x1b)
+            {
+              new_attr = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
+              SetConsoleTextAttribute (stdout_handle, new_attr);
+              printf ("\n"
+                      "INTERNAL WARNING: vprintf2() encountered an unsupported ANSI escape sequence\n"
+                      "                  Please send a bug report\n");
+              n_ctrl = 0;
+            }
+          SetConsoleTextAttribute (stdout_handle, new_attr);
+
+          ptr2 = strchr (ptr + 1, 0x1b);
+          if (ptr2)
+            n_print = ptr2 - ptr;
+          else
+            {
+              n_print = strlen (ptr);
+              done = 1;
+            }
+
+          ptr[n_print] = 0;
+          ptr += n_ctrl;
+          printf (ptr);
+          (ptr - n_ctrl)[n_print] = 0x1b;
+          ptr = ptr2;
+        }
+    }
+  return n_chars;
+#define vprintf vprintf2
+#define printf  printf2
+#define fprintf fprintf2
+}
+
+
+int
+printf2 (const char *format, ...)
+{
+#undef  printf
+  va_list argptr;
+  int n_chars;
+
+  va_start (argptr, format);
+  n_chars = vprintf2 (format, argptr);
+  va_end (argptr);      
+  return n_chars;
+#define printf  printf2
+}
+
+
+int
+fprintf2 (FILE *file, const char *format, ...)
+{
+#undef  fprintf
+  va_list argptr;
+  int n_chars;
+
+  va_start (argptr, format);
+  if (file != stdout)
+    n_chars = vfprintf (file, format, argptr);
+  else
+    n_chars = vprintf2 (format, argptr);
+  va_end (argptr);      
+  return n_chars;
+#define fprintf fprintf2
+}
+#endif // defined _WIN32 && defined ANSI_COLOR
+
+
 int
 ansi_init (void)
 {
   int result = isatty (STDOUT_FILENO);
 
-#ifdef  _WIN32
-  // TODO: find out how to enable ANSI colors for the Visual C++ port
-  result = 0;
-#endif
 #ifdef  DJGPP
   if (result)
     {
@@ -1233,7 +1368,7 @@ gauge (time_t init_time, int pos, int size)
     {
       progress[p] = 0;
       if (p < GAUGE_LENGTH)
-        strcat(progress, "\x1b[31;41m");
+        strcat (progress, "\x1b[31;41m");
     }
 
   strncat (&progress[p], "------------------------", (int) (GAUGE_LENGTH - p));
@@ -2062,8 +2197,6 @@ q_fncmp (const char *filename, int start, int len, const char *search,
 
 
 #ifdef  _WIN32
-#include <windows.h>
-
 int
 truncate (const char *path, off_t size)
 {

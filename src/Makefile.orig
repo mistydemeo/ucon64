@@ -56,6 +56,7 @@ ifdef DJGPP
 	del gba\*.o
 	del dc\*.o
 	del swan\*.o
+	del psx\*.o
 	del sample\*.o
 	del backup\*.o
 	del $(TARGET)

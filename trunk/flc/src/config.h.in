@@ -25,8 +25,7 @@
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
 
-/* Define to 1 if your system has a working `malloc' function, and to 0
-   otherwise. */
+/* Define to 1 if your system has a working `malloc' function. */
 #undef HAVE_MALLOC
 
 /* Define to 1 if you have the <memory.h> header file. */
@@ -140,9 +139,6 @@
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef gid_t
-
-/* Define to rpl_malloc if the replacement function should be used. */
-#undef malloc
 
 /* Define to `long' if <sys/types.h> does not define. */
 #undef off_t

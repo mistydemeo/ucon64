@@ -376,36 +376,12 @@ outportw (unsigned short port, unsigned short word)
 #endif // defined __unix__ || defined __BEOS__
 
 
-
-
-#if 0
-  unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };
-  int i;
-  if (port <= 3)
-    {
-      for (i = 0; i < 3; i++)
-        {
-          if (detect_parport (parport_addresses[i]) == 1)
-            {
-              port = parport_addresses[i];
-              break;
-            }
-        }
-      if (i >= 3)
-        port = 0;
-    }
-  else
-    if ((port != parport_addresses[0]) &&
-        (port != parport_addresses[1]) &&
-        (port != parport_addresses[2]))
-    port = 0;
-#endif
-unsigned int
-ucon64_parport_probe (unsigned int port)
+int
+detect_parport (unsigned int port)
 {
   int i;
 
-#if     defined __linux__
+#if     defined  __linux__
   if (ioperm (port, 1, 1) == -1)
     return -1;
 #elif   defined __FreeBSD__
@@ -425,7 +401,7 @@ ucon64_parport_probe (unsigned int port)
           break;
     }
 
-#if     defined __linux__
+#if     defined  __linux__
   if (ioperm (port, 1, 0) == -1)
     return -1;
 #elif   defined __FreeBSD__
@@ -441,9 +417,11 @@ ucon64_parport_probe (unsigned int port)
 
 
 unsigned int
-ucon64_parport_init (unsigned int port)
+parport_probe (unsigned int port)
+// detect parallel port
 {
-//  port = ucon64_parport_probe (port);
+  unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };
+  int i;
 
 #ifdef  __BEOS__
   ucon64_io_fd = open ("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
@@ -459,10 +437,10 @@ ucon64_parport_init (unsigned int port)
         }
       else
         {                                       // print warning, but continue
-          fprintf (stderr, "WARNING: Support for the driver parnew is deprecated. Future versions of uCON64\n"
-                           "         might not support this driver. You can download the latest ioport\n"
-                           "         driver from http://www.infernal.currantbun.com or\n"
-                           "         http://ucon64.sourceforge.net\n\n");
+          printf ("WARNING: Support for the driver parnew is deprecated. Future versions of uCON64\n"
+                  "         might not support this driver. You can download the latest ioport\n"
+                  "         driver from http://www.infernal.currantbun.com or\n"
+                  "         http://ucon64.sourceforge.net\n\n");
         }
     }
 
@@ -474,10 +452,28 @@ ucon64_parport_init (unsigned int port)
     }
 #endif // __BEOS__
 
+  if (port <= 3)
+    {
+      for (i = 0; i < 3; i++)
+        {
+          if (detect_parport (parport_addresses[i]) == 1)
+            {
+              port = parport_addresses[i];
+              break;
+            }
+        }
+      if (i >= 3)
+        return 0;
+    }
+  else
+    if ((port != parport_addresses[0]) &&
+        (port != parport_addresses[1]) &&
+        (port != parport_addresses[2]))
+    return 0;
 
   if (port != 0)
     {
-#if     defined __linux__ || defined __FreeBSD__
+#if     defined  __linux__ || defined __FreeBSD__
 #ifdef  __linux__
       if (ioperm (port, 3, 1) == -1)            // data, status & control
 #else
@@ -491,9 +487,19 @@ ucon64_parport_init (unsigned int port)
           exit (1);                             // Don't return, if ioperm() fails port access
         }                                       //  causes core dump
 #endif
-      outportb (port + PARPORT_CONTROL, inportb (port + PARPORT_CONTROL) & 0x0f);
+      outportb (port + PARPORT_CONTROL,
+                inportb (port + PARPORT_CONTROL) & 0x0f);
     }                                           // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 
+  return port;
+}
+
+
+unsigned int
+ucon64_parport_probe (unsigned int port)
+{
+  if (!(port = parport_probe (port)))
+    ;
 /*
     fprintf (stderr, "ERROR: no parallel port 0x%s found\n\n", strupr (buf));
   else
@@ -508,7 +514,7 @@ ucon64_parport_init (unsigned int port)
     users to run all code without being root (of course with the uCON64
     executable setuid root). Anyone a better idea?
   */
-#if     defined __linux__ || defined __FreeBSD__
+#if     defined  __linux__ || defined __FreeBSD__
 #ifdef  __linux__
   if (iopl (3) == -1)
 #else

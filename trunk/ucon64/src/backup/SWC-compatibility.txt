@@ -1,7 +1,7 @@
 A Super Wild Card compatibility list
-Version: 1.13
+Version: 1.14
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 18 february 2003
+Date: 10 march 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
 Software: uCON64 1.9.8beta8
 
@@ -145,6 +145,7 @@ Code    Game
 0 -     Earthworm Jim 2 (U)
 0 -     Earthworm Jim (U)
 0 -     Eek! the Cat (E)
+0 -     F-1 Grand Prix (J)
 9 -     Far East of Eden Zero (J)
 9 -     Far East of Eden Zero - Shounen Jump no Shou (J)
 0 -     Final Fantasy III (V1.0) (U)

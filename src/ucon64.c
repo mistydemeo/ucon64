@@ -345,7 +345,10 @@ main (int argc, char **argv)
   ucon64.show_nfo = UCON64_YES;
 
 #ifdef  ANSI_COLOR
-  ucon64.ansi_color = ansi_init ();
+  ucon64.ansi_color = ((!strcmp (get_property (ucon64.configfile, "ansi_color", buf2, "1"), "1")) ?
+               1 : 0);
+  if (ucon64.ansi_color)
+    ucon64.ansi_color = ansi_init ();
 #endif
 
   ucon64.type =
@@ -562,7 +565,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   if (S_ISREG (fstate.st_mode) != TRUE)
     return result;
 
-  ucon64_fsize = file_size (ucon64.rom);       // save size in ucon64_fsize
+  ucon64_fsize = q_fsize (ucon64.rom);       // save size in ucon64_fsize
   rominfo->file_size = ucon64_fsize;
 
 /*
@@ -578,9 +581,9 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   if (UCON64_TYPE_ISROM (ucon64.type))
     {
       // Calculating the CRC for the ROM data of a UNIF file (NES) shouldn't
-      //  be done with file_crc32(). nes_init() uses mem_crc32().
+      //  be done with q_fcrc32(). nes_init() uses mem_crc32().
       if (rominfo->current_crc32 == 0)
-        rominfo->current_crc32 = file_crc32 (romfile, rominfo->buheader_len);
+        rominfo->current_crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
 
 #ifdef DB
       switch (ucon64.console)
@@ -608,7 +611,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 
       result = 0;
 
-      quick_fread (&iso_header, ISO_HEADER_START +
+      q_fread (&iso_header, ISO_HEADER_START +
           UCON64_ISSET (ucon64.buheader_len) ?
             ucon64.buheader_len :
             CDRW_HEADER_START (ucon64_trackmode_probe (romfile)),
@@ -706,7 +709,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
     }
   else if (UCON64_TYPE_ISROM (ucon64.type))
     {
-      unsigned long padded = file_testpad (ucon64.rom, (st_rominfo_t *) rominfo);
+      unsigned long padded = ucon64_testpad (ucon64.rom, (st_rominfo_t *) rominfo);
       unsigned long intro = ((rominfo->file_size - rominfo->buheader_len) > MBIT) ?
         ((rominfo->file_size - rominfo->buheader_len) % MBIT) : 0;
       int split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
@@ -843,6 +846,9 @@ ucon64_usage (int argc, char *argv[])
   printf (
     "Usage: %s [OPTION]... [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE]\n\n"
     "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
+#ifdef ANSI_COLOR
+    "  " OPTION_LONG_S "ncol        disable ANSI colors in output\n"
+#endif
     "  " OPTION_LONG_S "hdn=N       force ROM has backup unit/emulator header with N Bytes size\n"
     "  " OPTION_LONG_S "hd          same as " OPTION_LONG_S "hdn=512\n"
     "                  most backup units use a header with 512 Bytes size\n"

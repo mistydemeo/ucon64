@@ -256,7 +256,7 @@ ReadSizeHeader (char *File1)
   long OrigSize, APSOrigSize, i;
   unsigned char t;
 
-  OrigSize = file_size (File1);
+  OrigSize = q_fsize (File1);
   fread (&APSOrigSize, sizeof (APSOrigSize), 1, n64aps_APSFile);
 
   if (OrigSize != APSOrigSize)  // Do File Resize
@@ -657,7 +657,7 @@ n64caps_main (int argc, const char *argv[])
 
   WriteStdHeader (Description);
   WriteN64Header ();
-  WriteSizeHeader (file_size (File1), file_size (File2));
+  WriteSizeHeader (q_fsize (File1), q_fsize (File2));
 
   if (!n64caps_Quiet)
     {

@@ -355,8 +355,8 @@ typedef struct st_snes_header
 } st_snes_header_t;
 
 static st_snes_header_t snes_header;
-static int snes_split, snes_sramsize, snes_sfx_sramsize, snes_header_base, snes_hirom,
-           snes_hirom_ok, nsrt_header, bs_dump, st_dump;
+static int snes_split, snes_sramsize, snes_sfx_sramsize, snes_header_base,
+           snes_hirom, snes_hirom_ok, nsrt_header, bs_dump, st_dump;
 static snes_file_t type;
 
 static unsigned char gd3_hirom_8mb_map[GD3_HEADER_MAPSIZE] =
@@ -2534,13 +2534,14 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   else
     {
 #ifdef  DETECT_SMC_COM_FUCKED_UP_LOROM
-      if (check_banktype (rom_buffer, size / 2) > banktype_score)
-        {
-          interleaved = 1;
-          snes_hirom = 0;
-          snes_hirom_ok = 1;                    // keep snes_deinterleave()
-          check_map_type = 0;                   //  from changing snes_hirom
-        }
+      if (size > (int) (SNES_HEADER_START + SNES_HIROM + 0x4d))
+        if (check_banktype (rom_buffer, size / 2) > banktype_score)
+          {
+            interleaved = 1;
+            snes_hirom = 0;
+            snes_hirom_ok = 1;                  // keep snes_deinterleave()
+            check_map_type = 0;                 //  from changing snes_hirom
+          }
 #endif
 #ifdef  DETECT_INSNEST_FUCKED_UP_LOROM
       /*
@@ -3042,7 +3043,7 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
   chance the bank type is correct.
 */
 {
-  int x, score_hi, score_lo;
+  int x, score_hi = 0, score_lo = 0;
 
   if (size >= (int) (8 * MBIT + SNES_HEADER_START + SNES_HIROM + SNES_HEADER_LEN) &&
       !strncmp ((char *) rom_buffer + SNES_HEADER_START + 16, "ADD-ON BASE CASSETE", 19))
@@ -3060,8 +3061,11 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
       x = SNES_HIROM;
     }
 
-  score_hi = check_banktype (rom_buffer, x);
-  score_lo = check_banktype (rom_buffer, snes_header_base);
+  if (size > (int) (SNES_HEADER_START + SNES_HIROM + 0x4d))
+    {
+      score_hi = check_banktype (rom_buffer, x);
+      score_lo = check_banktype (rom_buffer, snes_header_base);
+    }
   if (score_hi > score_lo)                      // yes, a preference for LoROM
     {                                           //  (">" vs. ">=")
       snes_hirom = SNES_HIROM;
@@ -3086,6 +3090,8 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
     {
       snes_hirom = ucon64.snes_hirom;
       snes_hirom_ok = 1;                        // keep snes_deinterleave()
+      if (size < (int) (SNES_HEADER_START + snes_hirom + SNES_HEADER_LEN))
+        snes_hirom = 0;
     }                                           //  from changing snes_hirom
 
   if (UCON64_ISSET (ucon64.snes_header_base))   // -erom switch was specified
@@ -3240,13 +3246,12 @@ snes_init (st_rominfo_t *rominfo)
     }
 
   size = ucon64.file_size - rominfo->buheader_len;
-  if (size < 0xfffd)
+  if (size < (int) (SNES_HEADER_START + SNES_HEADER_LEN))
     {
+      snes_hirom = 0;
       if (UCON64_ISSET (ucon64.snes_hirom))     // see snes_set_hirom()
-        {
-          snes_hirom = ucon64.snes_hirom;
-          snes_hirom_ok = 1;
-        }
+        snes_hirom = ucon64.snes_hirom;
+      snes_hirom_ok = 1;
       if (UCON64_ISSET (ucon64.interleaved))
         rominfo->interleaved = ucon64.interleaved;
       return -1;                                // don't continue (seg faults!)
@@ -3261,7 +3266,7 @@ snes_init (st_rominfo_t *rominfo)
     }                                           //  called with -lsv
   ucon64_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
 
-  x = snes_set_hirom (rom_buffer, size);        // second part of step 2.
+  x = snes_set_hirom (rom_buffer, size);        // second part of step 2. & step 3.
 
   rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
   rominfo->header_len = SNES_HEADER_LEN;
@@ -4105,7 +4110,8 @@ snes_multi (int truncate_size, char *fname)
       else
         {
           printf ("ROM%d: %s\n", file_no, ucon64.rom);
-          write_game_table_entry (destfile, file_no, ucon64.rominfo, ucon64.file_size - ucon64.rominfo->buheader_len);
+          write_game_table_entry (destfile, file_no, ucon64.rominfo,
+                                  ucon64.file_size - ucon64.rominfo->buheader_len);
           fseek (destfile, totalsize_disk, SEEK_SET); // restore file pointer
         }
 
@@ -4123,9 +4129,15 @@ snes_multi (int truncate_size, char *fname)
                       truncate_size / MBIT, ucon64.rom, ucon64.file_size -
                         ucon64.rominfo->buheader_len - (byteswritten + bytestowrite));
             }
-          else if (totalsize_card + bytestowrite > 64 * MBIT)
+          else if (totalsize_card + bytestowrite > 64 * MBIT - 32 * 1024)
             {
-              bytestowrite = 64 * MBIT - totalsize_card;
+              /*
+                Note that it is correct to check for any size larger than 64
+                Mbit - 32 kB, as we always overwrite the last 32 kB of the flash
+                card. Note also that this means it's useless to write a smaller
+                loader.
+              */
+              bytestowrite = 64 * MBIT - 32 * 1024 - totalsize_card;
               done = 1;
               truncated = 1;
               printf ("Output file needs 64 Mbit on flash card, truncating %s, skipping %d bytes\n",

@@ -548,9 +548,9 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XMCCL, UCON64_LYNX, mccl_usage,      WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_XMD, UCON64_GEN, md_usage,           WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XMDS, UCON64_GEN, md_usage,          WF_STOP|WF_NO_ROM},
-  {UCON64_XMSG, UCON64_PCE, pcengine_usage,    WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
-  {UCON64_XSMC, UCON64_NES, nes_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT}, // send only
-  {UCON64_XSMCR, UCON64_NES, nes_usage,        WF_STOP|WF_NO_ROM},
+  {UCON64_XMSG, UCON64_PCE, msg_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XSMC, UCON64_NES, smc_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT}, // send only
+  {UCON64_XSMCR, UCON64_NES, smc_usage,        WF_STOP|WF_NO_ROM},
 #if 1
   {UCON64_XSMD, UCON64_GEN, smd_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XSMDS, UCON64_GEN, smd_usage,        WF_STOP|WF_NO_ROM},
@@ -2320,15 +2320,22 @@ ucon64_e (void)
 
 
 #define PATTERN_BUFSIZE (64 * 1024)
-// TODO: handle more exotic cases like large (negative) offsets, replacements in
-//       the overlap area, etc.
+/*
+  In order for this function to be really useful for general purposes
+  change_mem2() should be changed so that it will return detailed status
+  information. Since we don't use it for general purposes, this has not a high
+  priority. It will be updated as soon as there is a need.
+  The thing that currently goes wrong is that offsets that fall outside the
+  buffer (either positive or negative) won't result in a change. It will result
+  in memory corruption...
+*/
 int
 ucon64_pattern (st_rominfo_t *rominfo, const char *pattern_fname)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[PATTERN_BUFSIZE];
   FILE *srcfile, *destfile;
-  int bytesread, n, n_found = 0, n_patterns, overlap = 0;
+  int bytesread = 0, n, n_found = 0, n_patterns, overlap = 0;
   st_cm_pattern_t *patterns = NULL;
 
   n_patterns = build_cm_patterns (&patterns, pattern_fname, src_name);
@@ -2342,16 +2349,27 @@ ucon64_pattern (st_rominfo_t *rominfo, const char *pattern_fname)
   printf ("Found %d pattern%s in %s\n", n_patterns, n_patterns != 1 ? "s" : "", src_name);
 
   for (n = 0; n < n_patterns; n++)
-    if (patterns[n].search_size > overlap)
-      {
-        overlap = patterns[n].search_size;
-        if (overlap > PATTERN_BUFSIZE)
-          {
-            fprintf (stderr, "ERROR: Pattern %d is too large, specify a shorter pattern\n", n);
-            cleanup_cm_patterns (&patterns, n_patterns);
-            return -1;
-          }
-      }
+    {
+      if (patterns[n].search_size > overlap)
+        {
+          overlap = patterns[n].search_size;
+          if (overlap > PATTERN_BUFSIZE)
+            {
+              fprintf (stderr,
+                       "ERROR: Pattern %d is too large, specify a shorter pattern\n",
+                       n + 1);
+              cleanup_cm_patterns (&patterns, n_patterns);
+              return -1;
+            }
+        }
+
+      if ((patterns[n].offset < 0 && patterns[n].offset <= -patterns[n].search_size) ||
+           patterns[n].offset > 0)
+        printf ("WARNING: The offset of pattern %d falls outside the search pattern.\n"
+                "         This can cause problems with the current implementation of --pattern.\n"
+                "         Please consider enlarging the search pattern.\n",
+                n + 1);
+    }
   overlap--;
 
   puts ("Searching for patterns...");
@@ -2379,29 +2397,39 @@ ucon64_pattern (st_rominfo_t *rominfo, const char *pattern_fname)
         }
     }
 
-  bytesread = fread (buffer, 1, overlap, srcfile);
-//  if (feof (srcfile)
-    fwrite (buffer, 1, bytesread, destfile);
-  while ((bytesread = fread (buffer + overlap, 1, PATTERN_BUFSIZE - overlap, srcfile)))
+  n = fread (buffer, 1, overlap, srcfile);      // keep bytesread set to 0
+  if (n < overlap)                              // DAMN special cases!
     {
-      for (n = 0; n < n_patterns; n++)
-        {
-          int x = overlap + 1 - patterns[n].search_size;
-          n_found += change_mem2 (buffer + x,
-                                  bytesread + overlap - x,
-                                  patterns[n].search,
-                                  patterns[n].search_size,
-                                  patterns[n].wildcard,
-                                  patterns[n].escape,
-                                  patterns[n].replace,
-                                  patterns[n].replace_size,
-                                  patterns[n].offset,
-                                  patterns[n].sets);
-        }
-
-      fwrite (buffer + overlap, 1, bytesread, destfile);
-      memmove (buffer, buffer + PATTERN_BUFSIZE - overlap, overlap);
+      n_found += change_mem2 (buffer, n, patterns[n].search,
+                              patterns[n].search_size, patterns[n].wildcard,
+                              patterns[n].escape, patterns[n].replace,
+                              patterns[n].replace_size, patterns[n].offset,
+                              patterns[n].sets);
+      fwrite (buffer, 1, n, destfile);
+      n = -1;
     }
+  else
+    do
+      {
+        if (bytesread)                          // the code also works without this if
+          {
+            for (n = 0; n < n_patterns; n++)
+              {
+                int x = 1 - patterns[n].search_size;
+                n_found += change_mem2 (buffer + overlap + x, bytesread + x,
+                                        patterns[n].search, patterns[n].search_size,
+                                        patterns[n].wildcard, patterns[n].escape,
+                                        patterns[n].replace, patterns[n].replace_size,
+                                        patterns[n].offset, patterns[n].sets);
+              }
+            fwrite (buffer, 1, bytesread, destfile);
+            memmove (buffer, buffer + bytesread, overlap);
+          }
+      }
+    while ((bytesread = fread (buffer + overlap, 1, PATTERN_BUFSIZE - overlap, srcfile)));
+  if (n != -1)
+    fwrite (buffer, 1, overlap, destfile);
+
   fclose (srcfile);
   fclose (destfile);
   cleanup_cm_patterns (&patterns, n_patterns);

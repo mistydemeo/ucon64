@@ -278,7 +278,7 @@ endif                                   # cygwin
 endif                                   # GUI
 
 $(TARGET): $(OBJECTS)
-	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
 
 install:

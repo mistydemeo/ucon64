@@ -1197,7 +1197,7 @@ ucon64_probe (st_rominfo_t * rominfo)
             return rominfo;
           }
     }
-  else if (ucon64.file_size <= MAXROMSIZE)       // give auto_recognition a try
+  else if (ucon64.file_size <= MAXROMSIZE)      // give auto_recognition a try
     {
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].flags & AUTO)

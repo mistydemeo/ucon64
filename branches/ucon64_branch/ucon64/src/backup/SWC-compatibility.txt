@@ -1,9 +1,9 @@
 A Super Wild Card compatibility list
-Version: 1.26
+Version: 1.27
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 15 November 2003
+Date: 30 November 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
-Software: uCON64 1.9.8-2
+Software: uCON64 1.9.8-3
 
 
 Legend:
@@ -40,7 +40,8 @@ byte before sending the game. This causes that some games don't have code 3,
 because uCON64 already makes the required modification. For example, if Addams
 Family Values is loaded from diskette the emulation mode select byte should
 have the value 0x2c instead of the value 0x0c (before the file is split).
-For games marked with an asterisk uCON64 1.9.8-2 is required.
+For games marked with an asterisk uCON64 1.9.8-3 is required (or an updated
+version of snescopy.txt and/or snesntsc.txt/snespal.txt).
 
 
 Code    Game
@@ -56,6 +57,7 @@ Code    Game
 0 -     Addams Family Values (E)
 0 -     Adventures of Batman & Robin, The (E)
 0 -     Aladdin (E)
+0 -     Alcahest (J)
 0 -     Alfred Chicken (E) (4285)
 0 -     Alfred Chicken (E) (6937)
 0 -     Alfred Chicken (U)
@@ -130,7 +132,7 @@ Code    Game
 0 -     Donald Duck Mahou no Boushi (J)
 1 -     Donkey Kong Country 2 - Diddy's Kong Quest (E)
 1+2+4 - Donkey Kong Country 2 - Diddy's Kong Quest (U) (V1.1) <= can't get past the first level
-1* -    Donkey Kong Country 3 - Dixie Kong's Double Trouble (E)
+1 -     Donkey Kong Country 3 - Dixie Kong's Double Trouble (E)
 0 -     Donkey Kong Country - Competition Cartridge (U)
 1 -     Donkey Kong Country (E) (V1.0)
 1 -     Donkey Kong Country (E) (V1.1)
@@ -169,6 +171,7 @@ Code    Game
 0 -     Final Fight (U)
 0 -     Flashback (E) (M2)
 0 -     Frogger (U)
+1*+2* - Front Mission - Gun Hazard (J) <= modification protection; code 0 for NTSC SNES
 0 -     Front Mission (J) (V1.0)
 0 -     F-Zero (E)
 0 -     Ganbare Goemon - Yuki hime Kyuushuutsu emaki (J) (V1.2)
@@ -213,23 +216,24 @@ Code    Game
 1 -     Lufia II - Rise of the Sinistrals (U)
 0 -     Lufia & The Fortress of Doom (U)
 0 -     Magical Drop (J)
-2* -    Magical Pop'n (J)
+2 -     Magical Pop'n (J)
 0 -     Magical Quest Starring Mickey Mouse, The (Beta)
 0 -     Magical Quest Starring Mickey Mouse, The (E)
 0 -     Magical Quest Starring Mickey Mouse, The (U)
 1 + 2 - Mario no Super Picross (J)
-0 -     Mario Paint (E) <= idem
-0 -     Mario & Wario (J) <= I don't have a SNES mouse...
+0 -     Mario Paint (E) <= I don't have a SNES mouse...
+0 -     Mario & Wario (J) <= idem
 9 -     Masou Kishin - Super Robot Taisen Gaiden - The Lord of Elemental (J)
 2 -     Mega Man's Soccer (U)
 2 -     Mega Man VII (U)
-2 + 9 - Mega Man X 2 (U) <= the intro can be viewed
+9 -     Mega Man X 2 (E) <= the intro can be viewed
+2 + 9 - Mega Man X 2 (U) <= idem
 8 + 9 - Mega Man X 3 (U) <= game can be started, but sprites are not visible
 1 -     Mega Man X (E)
 1 + 2 - Mega Man X (U) (V1.0)
 1 + 2 - Mega Man X (U) (V1.1)
 8 + 9 - Metal Combat - Falcon's Revenge (U) <= sprites are not visible
-2* -    Metal Warriors (U)
+2 -     Metal Warriors (U)
 2 + 3 - Mickey to Donald Magical Adventure 3 (J) <= emulation mode select byte: 0x1c
 0 -     Micro Machines 2 - Turbo Tournament (E)
 0 -     Micro Machines (U)

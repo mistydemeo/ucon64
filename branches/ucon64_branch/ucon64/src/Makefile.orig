@@ -282,7 +282,6 @@ $(TARGET): $(OBJECTS)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
 
-
 install:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 else

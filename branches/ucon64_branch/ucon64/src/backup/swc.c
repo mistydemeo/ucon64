@@ -82,11 +82,11 @@ static int hirom;                               // `hirom' was `special'
 
 #ifdef  DUMP_SA1
 static void set_sa1_map (unsigned short chunk);
-/*extern*/ int snes_sa1;
+/*extern*/ int snes_sa1 = 0;            // change to non-zero to dump SA-1 cartridges
 #endif
 #ifdef  DUMP_SDD1
 static void set_sdd1_map (unsigned short chunk);
-/*extern*/ int snes_sdd1;
+/*extern*/ int snes_sdd1 = 0;           // change to non-zero to dump S-DD1 cartridges
 #endif
 
 
@@ -409,7 +409,7 @@ set_sa1_map (unsigned short chunk)
 
   // map the 8 Mbit ROM chunk specified by chunk into the F0 bank
   ffe_send_command (5, 1, 0);
-  ffe_send_command0 (0x2223, (unsigned char) chunk);            // $00:2223
+  ffe_send_command0 (0x2223, (unsigned char) chunk); // $00:2223
   for (m = 0; m < 65536; m++)
     ;
 }
@@ -426,7 +426,7 @@ set_sdd1_map (unsigned short chunk)
 
   // map the 8 Mbit ROM chunk specified by chunk into the F0 bank
   ffe_send_command (5, 2, 0);
-  ffe_send_command0 (0x2807, (unsigned char) chunk);            // $00:4807
+  ffe_send_command0 (0x2807, (unsigned char) chunk); // $00:4807
   for (m = 0; m < 65536; m++)
     ;
 }
@@ -443,7 +443,7 @@ swc_read_rom (const char *filename, unsigned int parport, int superdump)
   time_t starttime;
 #if     defined DUMP_SA1 || defined DUMP_SDD1
   int s_chip = 0;
-  unsigned short chunk_num = 0;         // 0 = 1st 8Mb ROM chunk, 1 = 2nd 8Mb, ...
+  unsigned short chunk_num = 0;         // 0 = 1st 8 Mb ROM chunk, 1 = 2nd 8 Mb, ...
 #endif
 
 #ifdef  DUMP_SA1
@@ -824,7 +824,7 @@ mram_helper (int x)
   ffe_send_command (5, (unsigned short) x, 0);
   x = ffe_send_command1 (0x8000);
   ffe_send_command0 (0x8000, (unsigned char) (x ^ 0xff));
-  if (ffe_send_command1 (0x8000) != (x ^ 0xff))
+  if (ffe_send_command1 (0x8000) != (unsigned char) (x ^ 0xff))
     return 0;
 
   ffe_send_command0 (0x8000, (unsigned char) x);

@@ -46,6 +46,10 @@ write programs in C
 #include "sys16/sys16.h"
 #include "atari/atari.h"
 #include "ngp/ngp.h"
+#include "coleco/coleco.h"
+#include "vboy/vboy.h"
+#include "vectrex/vectrex.h"
+#include "wswan/wswan.h"
 
 #include "backup/fig.h"
 #include "backup/swc.h"
@@ -778,30 +782,63 @@ else if(argcmp(argc,argv,"-pce"))pcengine_usage(argc,argv);
 else if(argcmp(argc,argv,"-sms"))sms_usage(argc,argv);
 //else if(argcmp(argc,argv,"-c64"))commodore_usage(argc,argv);
 else if(argcmp(argc,argv,"-nes"))nes_usage(argc,argv);
+/*
 else if(argcmp(argc,argv,"-s16"))sys16_usage(argc,argv);
 else if(argcmp(argc,argv,"-ata"))atari_usage(argc,argv);
+else if(argcmp(argc,argv,"-coleco"))coleco_usage(argc,argv);
+else if(argcmp(argc,argv,"-vboy"))vboy_usage(argc,argv);
+else if(argcmp(argc,argv,"-swan"))wswan_usage(argc,argv);
+else if(argcmp(argc,argv,"-vec"))vectrex_usage(argc,argv);
+*/
 else 
 {
 	gbadvance_usage(argc,argv);
 	nintendo64_usage(argc,argv);
-	jaguar_usage(argc,argv);
 	supernintendo_usage(argc,argv);
-	neogeo_usage(argc,argv);
 	neogeopocket_usage(argc,argv);
+	neogeo_usage(argc,argv);
 	genesis_usage(argc,argv);
 	gameboy_usage(argc,argv);
 	lynx_usage(argc,argv);
 	pcengine_usage(argc,argv);
 	sms_usage(argc,argv);
 	nes_usage(argc,argv);
+
+/*
+	jaguar_usage(argc,argv);
 	sys16_usage(argc,argv);
 	atari_usage(argc,argv);
+	coleco_usage(argc,argv);
+	vboy_usage(argc,argv);
+	wswan_usage(argc,argv);
+	vectrex_usage(argc,argv);
+*/
+printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
+	"  -jag		force recognition; NEEDED\n"
+	"  -s16		force recognition; NEEDED\n"
+	"  -ata		force recognition; NEEDED\n"
+	"  -coleco	force recognition; NEEDED\n"
+	"  -vboy		force recognition; NEEDED\n"
+	"  -swan		force recognition; NEEDED\n"
+	"  -vec		force recognition; NEEDED\n"
+	"  -hd		force ROM has header (+512 Bytes)\n"
+	"  -nhd		force ROM has no header\n"
+	"  *		show info (default)\n\n"
+,jaguar_TITLE
+,system16_TITLE
+,atari_TITLE
+,coleco_TITLE
+,virtualboy_TITLE
+,wonderswan_TITLE
+,vectrex_TITLE
+);
 }
 
 printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
 	"     %s -help|less (to see everything in less)\n"
 	"     give the force recognition option a try if something went wrong\n"
 	"\n"
+	"All CD-based consoles are supported by uCONCD; go to http://ucon64.sf.net\n"
 	"Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
 	"\n"
 ,ucon64_name(),ucon64_name()

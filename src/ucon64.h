@@ -52,7 +52,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_SYSTEM16		19
 #define ucon64_NEOGEOPOCKET	20
 #define ucon64_GBA		21
-
+#define ucon64_VECTREX		22
+#define ucon64_VIRTUALBOY	23
+#define ucon64_WONDERSWAN	24
+#define ucon64_COLECO		25
 
 #define ucon64_VERSION "1.9.7"
 

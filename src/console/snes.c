@@ -1380,17 +1380,15 @@ Same here.
       // First use the extra patterns, so that their precedence is higher than
       //  the built-in patterns
       for (n2 = 0; n2 < n_extra_patterns; n2++)
-        {
-          n += change_mem2 (buffer, bytesread,
-                            patterns[n2].search,
-                            patterns[n2].search_size,
-                            patterns[n2].wildcard,
-                            patterns[n2].escape,
-                            patterns[n2].replace,
-                            patterns[n2].replace_size,
-                            patterns[n2].offset,
-                            patterns[n2].sets);
-        }
+        n += change_mem2 (buffer, bytesread,
+                          patterns[n2].search,
+                          patterns[n2].search_size,
+                          patterns[n2].wildcard,
+                          patterns[n2].escape,
+                          patterns[n2].replace,
+                          patterns[n2].replace_size,
+                          patterns[n2].offset,
+                          patterns[n2].sets);
 
       // SRAM
       if (snes_sramsize == 8 * 1024)            // 8 kB == 64 kb
@@ -1855,10 +1853,9 @@ snes_chk (st_rominfo_t *rominfo)
 
 
 static int
-snes_testinterleaved (st_rominfo_t *rominfo)
+snes_testinterleaved (void)
 {
   int interleaved = 0;
-  char name[22];                                // NOT SNES_NAME_LEN
 
   if (snes_hirom)
     {
@@ -1880,7 +1877,7 @@ snes_testinterleaved (st_rominfo_t *rominfo)
           switch (snes_header.map_type & 0xf)
             {
             case 1:
-              if (strncmp (rominfo->name, "TREASURE HUNTER G", 17))
+              if (strncmp ((char *) snes_header.name, "TREASURE HUNTER G", 17))
                 interleaved = 1;
               break;
             case 5:
@@ -1890,10 +1887,9 @@ snes_testinterleaved (st_rominfo_t *rominfo)
             }
         }
 
-      q_fread (name, SNES_HEADER_START + rominfo->buheader_len + 16, 22, ucon64.rom);
-      if (!strncmp (name, "YUYU NO QUIZ DE GO!GO!", 22))
+      if (!strncmp ((char *) snes_header.name, "YUYU NO QUIZ DE GO!GO!", 22))
         interleaved = 0;
-      else if (!strncmp (name, "SP MOMOTAROU DENTETSU2", 22))
+      else if (!strncmp ((char *) snes_header.name, "SP MOMOTAROU DENTETSU2", 22))
         interleaved = 0;
     }
 
@@ -2323,7 +2319,10 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
 
   // step 3.
   if (UCON64_ISSET (ucon64.snes_hirom))         // -hi or -nhi switch was specified
-    snes_hirom = ucon64.snes_hirom;
+    {
+      snes_hirom = ucon64.snes_hirom;
+      snes_hirom_changed = 1;                   // keep snes_deinterleave() from
+    }                                           //  changing snes_hirom
 
   if (UCON64_ISSET (ucon64.snes_header_base))   // -erom switch was specified
     {
@@ -2443,14 +2442,49 @@ snes_init (st_rominfo_t *rominfo)
   memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
   rominfo->header = &snes_header;
 
+  // step 4.
+  force_interleaved = UCON64_ISSET (ucon64.interleaved) ? 1 : 0;
+  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+    ucon64.interleaved : snes_testinterleaved ();
+
   bs_dump = snes_check_bs ();
   if (UCON64_ISSET (ucon64.bs_dump))            // -bs or -nbs switch was specified
     bs_dump = ucon64.bs_dump;
 
-  // step 4.
-  force_interleaved = UCON64_ISSET (ucon64.interleaved) ? 1 : 0;
-  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
-    ucon64.interleaved : snes_testinterleaved (rominfo);
+  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
+    {
+      // internal ROM crc
+      rominfo->has_internal_crc = 1;
+      rominfo->internal_crc_len = rominfo->internal_crc2_len = 2;
+      rominfo->current_internal_crc = snes_chksum (rominfo, &rom_buffer);
+      rominfo->internal_crc = snes_header.checksum_low;
+      rominfo->internal_crc += snes_header.checksum_high << 8;
+      x = snes_header.inverse_checksum_low;
+      x += snes_header.inverse_checksum_high << 8;
+      sprintf (buf,
+               "Inverse checksum: %%s, 0x%%0%dlx + 0x%%0%dlx = 0x%%0%dlx %%s",
+               rominfo->internal_crc2_len * 2, rominfo->internal_crc2_len * 2,
+               rominfo->internal_crc2_len * 2);
+      sprintf (rominfo->internal_crc2, buf,
+#ifdef  ANSI_COLOR
+               ucon64.ansi_color ?
+                 ((rominfo->current_internal_crc + x == 0xffff) ?
+                   "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
+                 :
+                 ((rominfo->current_internal_crc + x == 0xffff) ? "Ok" : "Bad"),
+#else
+               (rominfo->current_internal_crc + x == 0xffff) ? "Ok" : "Bad",
+#endif
+               rominfo->current_internal_crc, x, rominfo->current_internal_crc + x,
+               (rominfo->current_internal_crc + x == 0xffff) ? "" : "~0xffff");
+    }
+  else if (rominfo->interleaved)
+    {
+      snes_deinterleave (rominfo, rom_buffer, size);
+      snes_set_hirom (rom_buffer, size);
+      rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
+      memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
+    }
 
   // internal ROM name
   if (!bs_dump && st_dump)
@@ -2510,6 +2544,9 @@ snes_init (st_rominfo_t *rominfo)
       rominfo->country = NULL_TO_UNKNOWN_S (snes_country[MIN (snes_header.country, SNES_COUNTRY_MAX - 1)]);
 
       // misc stuff
+      sprintf (buf, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
+      strcat (rominfo->misc, buf);
+
       sprintf (buf, "Internal size: %d Mb\n", 1 << (snes_header.rom_size - 7));
       strcat (rominfo->misc, buf);
 
@@ -2559,6 +2596,13 @@ snes_init (st_rominfo_t *rominfo)
       sprintf (buf, "ROM speed: %s\n",
               snes_header.map_type & 0x10 ? "120ns (FastROM)" : "200ns (SlowROM)");
       strcat (rominfo->misc, buf);
+
+      snes_sramsize = snes_header.sram_size ? 1 << (snes_header.sram_size + 10) : 0;
+      if (!snes_sramsize)
+        sprintf (buf, "Save RAM: No\n");
+      else
+        sprintf (buf, "Save RAM: Yes, %d kBytes\n", snes_sramsize / 1024);
+      strcat (rominfo->misc, buf);
     }
   else                                          // BS info
     {
@@ -2566,6 +2610,9 @@ snes_init (st_rominfo_t *rominfo)
       rominfo->country = "Japan";
       // misc stuff
       sprintf (buf, "\nBroadcast Satellaview dump\n");  // new line is intentional
+      strcat (rominfo->misc, buf);
+
+      sprintf (buf, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
       strcat (rominfo->misc, buf);
 
       x = snes_header.bs_day & 0x0f;
@@ -2589,49 +2636,6 @@ snes_init (st_rominfo_t *rominfo)
 
       sprintf (buf, "ROM speed: %s\n",
         (snes_header.bs_makeup >> 4) > 2 ? "120ns (FastROM)" : "200ns (SlowROM)");
-      strcat (rominfo->misc, buf);
-    }
-
-  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
-    {
-      // internal ROM crc
-      rominfo->has_internal_crc = 1;
-      rominfo->internal_crc_len = rominfo->internal_crc2_len = 2;
-      rominfo->current_internal_crc = snes_chksum (rominfo, &rom_buffer);
-      rominfo->internal_crc = snes_header.checksum_low;
-      rominfo->internal_crc += snes_header.checksum_high << 8;
-      x = snes_header.inverse_checksum_low;
-      x += snes_header.inverse_checksum_high << 8;
-      sprintf (buf,
-               "Inverse checksum: %%s, 0x%%0%dlx + 0x%%0%dlx = 0x%%0%dlx %%s",
-               rominfo->internal_crc2_len * 2, rominfo->internal_crc2_len * 2,
-               rominfo->internal_crc2_len * 2);
-      sprintf (rominfo->internal_crc2, buf,
-#ifdef  ANSI_COLOR
-               ucon64.ansi_color ?
-                 ((rominfo->current_internal_crc + x == 0xffff) ?
-                   "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
-                 :
-                 ((rominfo->current_internal_crc + x == 0xffff) ? "Ok" : "Bad"),
-#else
-               (rominfo->current_internal_crc + x == 0xffff) ? "Ok" : "Bad",
-#endif
-               rominfo->current_internal_crc, x, rominfo->current_internal_crc + x,
-               (rominfo->current_internal_crc + x == 0xffff) ? "" : "~0xffff");
-    }
-
-  // do the following after the call to snes_chksum() which might call
-  //  snes_deinterleave() which might change the value of snes_hirom
-  sprintf (buf, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
-  strcat (rominfo->misc, buf);
-
-  if (!bs_dump)
-    {
-      snes_sramsize = snes_header.sram_size ? 1 << (snes_header.sram_size + 10) : 0;
-      if (!snes_sramsize)
-        sprintf (buf, "Save RAM: No\n");
-      else
-        sprintf (buf, "Save RAM: Yes, %d kBytes\n", snes_sramsize / 1024);
       strcat (rominfo->misc, buf);
     }
 
@@ -2831,6 +2835,9 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
     {
       ucon64.fcrc32 = crc32 (0, *rom_buffer, rom_size);
       snes_deinterleave (rominfo, *rom_buffer, rom_size);
+      snes_set_hirom (*rom_buffer, rom_size);
+      rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
+      memcpy (&snes_header, *rom_buffer + rominfo->header_start, rominfo->header_len);
     }
   ucon64.crc32 = crc32 (0, *rom_buffer, rom_size);
 
@@ -2879,6 +2886,7 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
 //              internal_rom_size, half_internal_rom_size, remainder);
     }
 
+#if 0 // We *want* rom_buffer to contain deinterleaved data
   /*
     Load rom_buffer with the ROM again if uCON64 detected it as interleaved or
     if uCON64 was forced to handle it as being interleaved, so that rom_buffer
@@ -2897,6 +2905,7 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
   */
   if (force_interleaved || rominfo->interleaved)
     q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
+#endif
 
   return sum1;
 }
@@ -2913,6 +2922,9 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
     {
       ucon64.fcrc32 = crc32 (0, *rom_buffer, rom_size);
       snes_deinterleave (rominfo, *rom_buffer, rom_size);
+      snes_set_hirom (*rom_buffer, rom_size);
+      rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
+      memcpy (&snes_header, *rom_buffer + rominfo->header_start, rominfo->header_len);
     }
   ucon64.crc32 = crc32 (0, *rom_buffer, rom_size);
 
@@ -2971,8 +2983,10 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
         sum += (*rom_buffer)[i];
     }
 
+#if 0
   if (force_interleaved || rominfo->interleaved)
     q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
+#endif
 
   return sum;
 }
@@ -3003,15 +3017,14 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
       // map type
       if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0xf) < 4)
         score += 2;
+      // map type, HiROM flag
+      if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0x01) ==
+          (header_offset >= snes_header_base + SNES_HIROM) ? 0x01 : 0x00)
+        score += 1;
       // country
       if (rom_buffer[SNES_HEADER_START + header_offset + 41] <= 13)
         score += 1;
     }
-
-  // HiROM flag
-  if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0x01) ==
-      (header_offset >= snes_header_base + SNES_HIROM) ? 0x01 : 0x00)
-    score += 1;
 
   // ROM size
   if (1 << (rom_buffer[SNES_HEADER_START + header_offset + 39] - 7) <= 64)

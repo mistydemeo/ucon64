@@ -1200,7 +1200,6 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
           printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
         }
 #endif
-      printf ("\n");
     }
 
   // ROM header

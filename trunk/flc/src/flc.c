@@ -55,7 +55,7 @@ if(argcmp(argc, argv, "-frontend"))atexit(flc_exit);
 /*
    configfile handling
 */
-  sprintf (buf, "%s%c"
+  sprintf (flc.configfile, "%s%c"
 #ifdef  __DOS__
   "flc.cfg"
 #else
@@ -72,24 +72,24 @@ if(argcmp(argc, argv, "-frontend"))atexit(flc_exit);
   , getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
 
 
-if(access(buf,F_OK)==-1)printf("ERROR: %s not found: creating...",buf);
-else if(getProperty(buf, "version", buf2, NULL) == NULL)
+if(access(flc.configfile,F_OK)==-1)printf("ERROR: %s not found: creating...",flc.configfile);
+else if(getProperty(flc.configfile, "version", buf2, NULL) == NULL)
 {
   strcpy(buf2,buf);
   newext(buf2,".OLD");
 
   printf("NOTE: updating config: will be renamed to %s...",buf2);
 
-  rename(buf,buf2);
+  rename(flc.configfile,buf2);
 
   sync();
 }
 
-if(access(buf,F_OK)==-1)
+if(access(flc.configfile,F_OK)==-1)
 {
   FILE *fh;
 
-  if(!(fh=fopen(buf,"wb")))
+  if(!(fh=fopen(flc.configfile,"wb")))
   {
     printf("FAILED\n\n");
 
@@ -178,11 +178,6 @@ flc.kb = (argcmp(argc,argv,"-k")) ? 1 : 0;
 flc.html = (argcmp(argc,argv,"-html")) ? 1 : 0 ;
 
 strcpy(flc.path,getarg(argc,argv,flc_FILE));
-#ifdef __DOS__
-  strcpy(flc.configfile, "flc.cfg");
-#else
-  sprintf(flc.configfile, "%s%c.flcrc", getenv("HOME"), FILE_SEPARATOR);
-#endif
 getProperty(flc.configfile,"file_id_diz",flc.config,"file_id.diz");
 
 if(flc.html)  printf("<html><head><title></title></head><body><pre><tt>");

@@ -1,64 +1,69 @@
-dnl Process this file with autoconf to produce a configure script.
-AC_INIT(ucon64gui.c)
-dnl AM_CONFIG_HEADER(config.h)
+# Process this file with autoconf to produce a configure script.
+AC_INIT([ucon64gui],[1.0.0],[noisyb@gmx.net])
+AC_CONFIG_SRCDIR([bottom.c])
+AC_CONFIG_HEADER([config.h])
 
-dnl Checks for programs.
+# Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
-AC_ISC_POSIX
-AC_STDC_HEADERS
-AC_ARG_PROGRAM
 
 CFLAGS="-I. -Wall -O3 \`gtk-config --cflags\`"
 LDFLAGS="-s \`gtk-config --cflags --libs\`"
-dnl sdl-config --cflags --libs
 
-AC_MSG_CHECKING(whether debugging output is enabled)
+
+AC_MSG_CHECKING(whether todo output is enabled)
+AC_ARG_ENABLE(debug,
+              AC_HELP_STRING([--enable-todo],
+                             [enable todo output (default: no)]),
+              enable_todo=$enableval,
+              enable_todo=no)
+if test $enable_todo = yes; then
+  AC_DEFINE(TODO,1,[enable todo output (default: no)])
+fi
+AC_MSG_RESULT($enable_todo)
+
+
+AC_MSG_CHECKING(whether debug output is enabled)
 AC_ARG_ENABLE(debug,
               AC_HELP_STRING([--enable-debug],
-                             [enable support for debugging output (default is NO)]),
+                             [enable debug output (default: no)]),
               enable_debug=$enableval,
               enable_debug=no)
-if test x$enable_debug = xyes; then
-  DEFINE_DEBUG="#define DEBUG"
-else
-  DEFINE_DEBUG="//#define DEBUG"
+if test $enable_debug = yes; then
+  AC_DEFINE(DEBUG,1,[enable debug output (default: no)])
 fi
 AC_MSG_RESULT($enable_debug)
+
 
 AC_MSG_CHECKING(whether the use of color is enabled)
 AC_ARG_ENABLE(ansi_color,
               AC_HELP_STRING([--enable-ansi-color],
-                             [enable usage of color (default is YES)]),
+                             [enable usage of color (default: yes)]),
               enable_ansi_color=$enableval,
               enable_ansi_color=yes)
-if test x$enable_ansi_color = xyes; then
-  DEFINE_ANSI_COLOR="#define ANSI_COLOR"
-else
-  DEFINE_ANSI_COLOR="//#define ANSI_COLOR"
+if test $enable_ansi_color = yes; then
+  AC_DEFINE(ANSI_COLOR,1,[enable usage of color (default: yes)])
 fi
 AC_MSG_RESULT($enable_ansi_color)
 
-dnl Checks for libraries.
-dnl Replace `main' with a function in -libs:
-AC_CHECK_LIB(ibs, main)
 
-dnl Checks for header files.
+
+# Checks for libraries.
+
+# Checks for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STDC
-AC_CHECK_HEADERS(limits.h unistd.h)
+AC_CHECK_HEADERS([OS.h inttypes.h stdlib.h string.h unistd.h])
 
-dnl Checks for typedefs, structures, and compiler characteristics.
+# Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_UID_T
 AC_TYPE_SIZE_T
 
-dnl Checks for library functions.
-AC_CHECK_FUNCS(getcwd mkdir rmdir socket strcspn strspn strstr strtol)
+# Checks for library functions.
+AC_FUNC_MALLOC
+AC_FUNC_STAT
+AC_CHECK_FUNCS([getcwd memset mkdir rmdir strcasecmp strchr strcspn strdup strncasecmp strpbrk strrchr strspn strstr strtol])
 
-AC_SUBST(DEFINE_DEBUG)
-AC_SUBST(DEFINE_ANSI_COLOR)
-AC_OUTPUT(Makefile config.h libhtmltk/libhtmltk_cfg.h)
-
-echo
-echo NOTE: On non-Linux systems you might need to use gmake instead of make
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT

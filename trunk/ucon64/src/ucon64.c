@@ -780,6 +780,7 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
   rom->internal_crc=0;	//custom crc (if not current_crc32)
   rom->internal_crc_start=0;
   rom->internal_crc_len=0;	//size in bytes
+  rom->has_internal_inverse_crc=0;
   rom->internal_inverse_crc=0;	//crc complement
   rom->internal_inverse_crc_start=0;
   rom->internal_inverse_crc_len=0;		//size in bytes
@@ -897,8 +898,8 @@ if(rom->console == ucon64_UNKNOWN)
     (gameboy_init(rom)==-1) &&
     (gbadvance_init(rom)==-1) &&
     (atari_init(rom)==-1) &&
-    (nes_init(rom)==-1) &&
     (lynx_init(rom)==-1) &&
+    (nes_init(rom)==-1) &&
     (jaguar_init(rom)==-1) &&
     (pcengine_init(rom)==-1) &&
     (neogeo_init(rom)==-1) &&
@@ -1127,14 +1128,24 @@ if(rom->splitted[0])printf("Splitted: Yes, %d parts (recommended: use -j to join
            rom->current_internal_crc,
            (rom->current_internal_crc == rom->internal_crc) ? "=" : "!",
            rom->internal_crc);
-/*nb: this would work only for snes, not for n64, pce, nes, gb and gba
-    printf("Inverse checksum: %s, %04lx + %04lx = %04lx %s\n",
+
+    if(rom->has_internal_inverse_crc)
+    {
+	if(rom->internal_inverse_crc_len==2)/* Super Nintendo */
+	{
+      sprintf(buf,"Inverse checksum: %%s, %%0%dlx + %%0%dlx = %%0%dlx %%s\n"
+           ,rom->internal_inverse_crc_len*2,rom->internal_inverse_crc_len*2,rom->internal_inverse_crc_len*2);
+      printf(buf,
            (rom->current_internal_crc + rom->internal_inverse_crc == 0xffff) ? "ok" : "bad",
            rom->current_internal_crc, rom->internal_inverse_crc, rom->current_internal_crc + rom->internal_inverse_crc,
            (rom->current_internal_crc + rom->internal_inverse_crc == 0xffff) ? "" : "~0xffff");
-*/
-    sprintf(buf,"Inverse checksum: %%0%dlx\n",rom->internal_inverse_crc_len*2);
-      printf(buf,rom->internal_inverse_crc);
+        }
+        else
+        { 
+          sprintf(buf,"2nd/inverse checksum: %%0%dlx\n",rom->internal_inverse_crc_len*2);
+          printf(buf,rom->internal_inverse_crc);
+        }
+    }
   }
   printf("Checksum (CRC32): %08lx\n",rom->current_crc32);
 

@@ -397,8 +397,11 @@ sms_chksum (unsigned char *rom_buffer, int rom_size)
     case 0xf:
       i_end = 0x20000;
       break;
-    case 0x0:
+    case 0:
       i_end = 0x40000;
+      break;
+    case 1:
+      i_end = 0x80000;
       break;
     default:
       i_end = rom_size;

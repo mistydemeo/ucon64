@@ -54,8 +54,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 typedef struct
 {
-  const char *id; // strings to detect console from refname or datfile
-  uint8_t console; // UCON64_SNES, UCON64_NES, etc.
+  const char *id;   // strings to detect console from refname or datfile
+  uint8_t console;  // UCON64_SNES, UCON64_NES, etc.
   const char **console_usage;
 } console_t;
 
@@ -80,29 +80,12 @@ fclose_fdat (void)
 }
 
 
-#if 0
 static uint32_t
-get_uint32 (const void *buf)
+get_uint32 (unsigned char *buf)
 {
-  uint32_t ret;
-  unsigned char *tmp = (unsigned char *) buf;
-      
-  ret = tmp[3] & 0xff;
-  ret = (ret << 8) + (tmp[2] & 0xff);
-  ret = (ret << 8) + (tmp[1] & 0xff);
-  ret = (ret << 8) + (tmp[0] & 0xff);
-              
-  return ret;
+  return (uint32_t) (buf[3] << 24) + (buf[2] << 16) + (buf[1] << 8) + buf[0];
 }
-#else
-static uint32_t
-get_uint32 (const void *buf)
-{
-  unsigned char *tmp = (unsigned char *) buf;
-  return (uint32_t) (tmp[3] << 24) + (tmp[2] << 16) + (tmp[1] << 8) + tmp[0];
-}
-#endif
-                
+
 
 static char *
 get_next_file (char *fname)
@@ -131,7 +114,7 @@ get_next_file (char *fname)
 
 
 static ucon64_dat_t *
-get_dat_header (char *fname, ucon64_dat_t * dat)
+get_dat_header (char *fname, ucon64_dat_t *dat)
 {
 #if     (MAXBUFSIZE < FILENAME_MAX)
   char buf[FILENAME_MAX];
@@ -156,7 +139,7 @@ get_dat_header (char *fname, ucon64_dat_t * dat)
 
 
 static ucon64_dat_t *
-line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t * dat)
+line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t *dat)
 {
 // parse a dat entry into ucon64_dat_t
   static const char *dat_country[] = {
@@ -239,8 +222,8 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t * dat)
   if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
     return NULL;
 
-  strcpy (buf, dat_entry); 
-    
+  strcpy (buf, dat_entry);
+
   for (pos = 0;
        (dat_field[pos] = strtok (!pos ? buf : NULL, DAT_FIELD_SEPARATOR_S))
        && pos < (MAX_FIELDS_IN_DAT - 1); pos++);
@@ -300,7 +283,7 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t * dat)
   if (ucon64.console != UCON64_UNKNOWN)
     dat->console = (uint8_t) ucon64.console;  // important
   else
-#endif  
+#endif
     {
       for (pos = 0; console_type[pos].id; pos++)
       {
@@ -331,8 +314,8 @@ line_to_crc (const char *dat_entry)
   if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
     return 0;
 
-  strcpy (buf, dat_entry); 
-    
+  strcpy (buf, dat_entry);
+
   for (pos = 0;
        (dat_field[pos] = strtok (!pos ? buf : NULL, DAT_FIELD_SEPARATOR_S))
        && pos < (MAX_FIELDS_IN_DAT - 1); pos++);
@@ -345,7 +328,7 @@ line_to_crc (const char *dat_entry)
 
 
 static ucon64_dat_t *
-get_dat_entry (char *fname, ucon64_dat_t * dat, uint32_t crc32)
+get_dat_entry (char *fname, ucon64_dat_t *dat, uint32_t crc32)
 {
   char buf[MAXBUFSIZE];
 
@@ -424,7 +407,7 @@ ucon64_dat_total_entries (int console)
     {
       setext (buf, ".idx");
       fsize = q_fsize (buf);
-      entries += (fsize < 0 ? 0 : fsize);        // TODO: handle this case gracefully
+      entries += (fsize < 0 ? 0 : fsize);       // TODO: handle this case gracefully
     }
 
   return (entries / sizeof (uint32_t));
@@ -432,7 +415,7 @@ ucon64_dat_total_entries (int console)
 
 
 ucon64_dat_t *
-ucon64_dat_search (uint32_t crc32, ucon64_dat_t * dat)
+ucon64_dat_search (uint32_t crc32, ucon64_dat_t *dat)
 {
   uint32_t pos = 0;
   char buf[FILENAME_MAX];
@@ -542,7 +525,8 @@ ucon64_dat_indexer (void)
      while (get_dat_entry (buf, &dat, 0))
        {
          fwrite (&dat.current_crc32, sizeof (uint32_t), 1, fh);
-         if (!(pos % 20)) ucon64_gauge (start_time, ftell (fdat), size);
+         if (!(pos % 20))
+           ucon64_gauge (start_time, ftell (fdat), size);
          pos++;
        }
      ucon64_gauge (start_time, size, size);

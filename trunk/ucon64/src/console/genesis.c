@@ -971,7 +971,7 @@ genesis_init (st_rominfo_t *rominfo)
   strcat (rominfo->misc, buf);
 
 #if 1
-// This code seems to give better results that the old code.
+// This code seems to give better results than the old code.
   sprintf (buf, "RomType: %s\n",
            (OFFSET (genesis_header, 128) == 'G') ? "Game" : "Education");
   strcat (rominfo->misc, buf);

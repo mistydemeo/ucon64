@@ -537,6 +537,10 @@ main (int argc, char **argv)
     sscanf (ucon64.file, "%x", &ucon64.parport);
 #endif
 
+  // no ROM or FILE argument (for example -dbv)
+  if (rom_index == argc)
+    ucon64_execute_options ();
+
   console = ucon64.console;
   show_nfo = ucon64.show_nfo;
   while (rom_index < argc)                      // use argc, NOT ucon64.argc!

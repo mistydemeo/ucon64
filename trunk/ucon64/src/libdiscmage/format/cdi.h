@@ -1,8 +1,8 @@
 /*
 cdi.h - DiscJuggler/CDI image support for libdiscmage
 
+Copyright (c) 2002 NoisyB (noisyb@gmx.net)
 based on specs and code by Dext
-written by    2002 NoisyB (noisyb@gmx.net)
 
 
 This library is free software; you can redistribute it and/or
@@ -25,4 +25,3 @@ extern int cdi_init (dm_image_t *image);
 extern int cdi_track_init (dm_track_t *track, FILE *fh);
 
 #endif // CDI_H
-

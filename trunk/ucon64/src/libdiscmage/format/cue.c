@@ -1,7 +1,7 @@
 /*
 cue.c - CUE support for libdiscmage
 
-written by 2002 - 2003 NoisyB (noisyb@gmx.net)
+Copyright (c) 2002 - 2003 NoisyB (noisyb@gmx.net)
 
 
 This library is free software; you can redistribute it and/or

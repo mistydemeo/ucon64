@@ -1,7 +1,7 @@
 /*
 dlopen.h - DLL support code
 
-written by 2002 dbjh
+Copyright (c) 2002 dbjh
 
 
 This library is free software; you can redistribute it and/or

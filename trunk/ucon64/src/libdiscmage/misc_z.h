@@ -1,7 +1,7 @@
 /*
 misc_z.h - miscellaneous zlib functions
 
-written by 2001 - 2003 dbjh
+Copyright (c) 2001 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef MISCZ_H
-#define MISCZ_H
+#ifndef MISC_Z_H
+#define MISC_Z_H
 
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // USE_ZLIB
@@ -83,4 +83,4 @@ extern int unzip_current_file_nr;
 }
 #endif
 
-#endif // #ifndef MISCZ_H
+#endif // MISC_Z_H

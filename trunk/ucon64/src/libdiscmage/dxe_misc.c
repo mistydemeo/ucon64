@@ -1,7 +1,7 @@
 /*
 dxe_misc.c - miscellaneous functions for the grand libdiscmage DXE hack
 
-written by 2003 - 2004 dbjh
+Copyright 2003 - 2004 dbjh
 
 
 This library is free software; you can redistribute it and/or

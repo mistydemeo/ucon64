@@ -1,8 +1,8 @@
 /*
 nero.h - Nero image support for libdiscmage
 
+Copyright (c) 2003 NoisyB (noisyb@gmx.net)
 based on specs and code by Dext
-written by        2003 NoisyB (noisyb@gmx.net)
 
 
 This library is free software; you can redistribute it and/or

@@ -1,7 +1,7 @@
 /*
 format.h - support of different image formats for libdiscmage
 
-written by 2004 NoisyB (noisyb@gmx.net)
+Copyright (c) 2004 NoisyB (noisyb@gmx.net)
 
 
 This library is free software; you can redistribute it and/or
@@ -21,4 +21,4 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef FORMAT_H
 #define FORMAT_H
 extern int dm_track_init (dm_track_t *track, FILE *fh);
-#endif  // FORMAT_H
+#endif // FORMAT_H

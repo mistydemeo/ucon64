@@ -1,7 +1,7 @@
 /*
 misc_wav.c
 
-written by 2004 NoisyB (noisyb@gmx.net)
+Copyright (c) 2004 NoisyB (noisyb@gmx.net)
 
 
 This library is free software; you can redistribute it and/or

@@ -1,7 +1,7 @@
 /*
 djimport.c - discmage import library for DJGPP
 
-written by 2002 - 2004 dbjh
+Copyright (c) 2002 - 2004 dbjh
 
 
 This library is free software; you can redistribute it and/or

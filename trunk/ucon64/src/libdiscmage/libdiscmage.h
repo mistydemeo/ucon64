@@ -1,8 +1,8 @@
 /*
 libdiscmage.h - libdiscmage
 
-written by 2002 - 2004 NoisyB (noisyb@gmx.net)
-           2002 - 2004 dbjh
+Copyright (c) 2002 - 2004 NoisyB (noisyb@gmx.net)
+Copyright (c) 2002 - 2004 dbjh
 
 
 This library is free software; you can redistribute it and/or

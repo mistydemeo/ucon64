@@ -83,6 +83,10 @@ char *strupr (char *str);
 
 char *strlwr (char *str);
 
+char *cmd2url (char *cmd, char *url);	//converts a commandline into an url(!)
+
+char *url2cmd (char *url, char *cmd);	//converts an url into a commandline(!)
+
 char *newext (char *filename	//replace extension of str with ext
 	      , char *ext);
 
@@ -154,9 +158,6 @@ char *filenameonly (char *str);
 unsigned long filefile (char *filename	//compare filename from start with filename2 from start2
 			, long start, char *filename2, long start2, int similar	//TRUE==find similarities; FALSE==find differences
   );
-
-
-
 
 int filereplace (char *filename	//search filename from start for search which has slen and replace with replace which has rlen
 		 , long start, char *search, long slen, char *replace,

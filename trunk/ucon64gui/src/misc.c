@@ -216,6 +216,26 @@ extcmp (char *filename, char *ext)
 }
 
 char *
+cmd2url (char *cmd, char *url)
+{
+/*
+  TODO convert a command string into an url(!)
+*/
+
+  return (url);
+}
+
+char *
+url2cmd (char *url, char *cmd)
+{
+/*
+  TODO convert an url into a command string(!)
+*/
+
+  return (cmd);
+}
+
+char *
 stpblk (char *str)
 {
   while (*str == '\t' || *str == 32)

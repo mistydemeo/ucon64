@@ -125,15 +125,14 @@ const struct option options[] = {
     {"1991", 0, 0, UCON64_1991},
     {"3do", 0, 0, UCON64_3DO},
     {"?", 0, 0, UCON64_HELP},
-    {"a", 1, 0, UCON64_A},
+    {"a", 0, 0, UCON64_A},
     {"ata", 0, 0, UCON64_ATA},
-    {"b", 1, 0, UCON64_B},
+    {"b", 0, 0, UCON64_B},
     {"b0", 1, 0, UCON64_B0},
     {"b1", 1, 0, UCON64_B1},
     {"bios", 0, 0, UCON64_BIOS},
     {"bot", 1, 0, UCON64_BOT},
     {"c", 1, 0, UCON64_C},
-    {"disc", 0, 0, UCON64_DISC},
 //    {"cd32", 0, 0, UCON64_CD32},
 //    {"cdi", 0, 0, UCON64_CDI},
     {"cdirip", 0, 0, UCON64_CDIRIP},
@@ -174,7 +173,7 @@ const struct option options[] = {
     {"h", 0, 0, UCON64_HELP},
     {"help", 0, 0, UCON64_HELP},
     {"hex", 0, 0, UCON64_HEX},
-    {"i", 1, 0, UCON64_I},
+    {"i", 0, 0, UCON64_I},
     {"idppf", 1, 0, UCON64_IDPPF},
     {"ines", 0, 0, UCON64_INES},
     {"ineshd", 0, 0, UCON64_INESHD},
@@ -226,9 +225,10 @@ const struct option options[] = {
     {"padhd", 0, 0, UCON64_PADHD},
     {"padn", 1, 0, UCON64_PADN},
     {"pasofami", 0, 0, UCON64_PASOFAMI},
+    {"patch", 1, 0, UCON64_PATCH},
     {"pce", 0, 0, UCON64_PCE},
     {"port", 1, 0, UCON64_PORT},
-    {"ppf", 1, 0, UCON64_PPF},
+    {"ppf", 0, 0, UCON64_PPF},
     {"ps2", 0, 0, UCON64_PS2},
     {"psx", 0, 0, UCON64_PSX},
     {"q", 0, 0, UCON64_Q},
@@ -361,9 +361,6 @@ int
 main (int argc, char **argv)
 {
   int c = 0, console, show_nfo, rom_index;
-#if 0
-  int file_message = 0;
-#endif
   char buf[MAXBUFSIZE], *ptr;
 
   printf ("%s\n"
@@ -473,7 +470,7 @@ main (int argc, char **argv)
   ucon64.fname_arch[0] = 0;
 
   ucon64.rom =
-//  ucon64.file =
+  ucon64.patch_file =
   ucon64.mapr =
   ucon64.comment = "";
 
@@ -537,39 +534,6 @@ main (int argc, char **argv)
 //  ucon64.rom = ucon64_extract (ucon64.rom);
 
   rom_index = optind;                           // save index of first file
-  /*
-    We want to make it as easy as possible to use uCON64. Therefore don't
-    require that --file is specified when only two non-switch non-option
-    arguments are specified on the command line. Of course this introduces the
-    problem that when only two files match with a wildcard, the second file
-    will be interpreted as the --file argument. I (dbjh) think it's better to
-    display a message in that case instead of always having to use --file. Now
-    we can do the following:
-      ucon64 -swc *.fig
-      ucon64 -i mario.swc mario.ips
-      ucon64 -xswc2 mario.swc 0x378
-      ucon64 -ls /usr/local/snesrom /mnt/xp/snesrom --file=0
-    In the first case a message will be displayed if only two files match with
-    *.fig. In the second case a message will be displayed. In the third case a
-    message will be displayed in the unlikely situation that the file 0x378
-    exists. In the fourth case no message will be displayed.
-    Note that getopt[_long_only]() sorts argv so that all switches and options
-    come before all non-switches and non-options.
-  */
-#if 0
-  if (argc - rom_index == 2 && !strlen (ucon64.file))
-    {
-      ucon64.file = argv[argc - 1];
-      if (!access (ucon64.file, F_OK))
-        file_message = 1;
-      argc--;                                   // use argc, NOT ucon64.argc!
-    }
-
-#ifdef  PARALLEL
-  if (ucon64.file)
-    sscanf (ucon64.file, "%x", &ucon64.parport);
-#endif
-#endif
 
   // no ROM or FILE argument (for example -dbv)
   if (rom_index == argc)
@@ -581,6 +545,13 @@ main (int argc, char **argv)
     {
 #ifdef  HAVE_ZLIB_H
       int process_multizips, n_entries;
+
+      /*
+        was the last argument the name of a (the) patch file?
+      */
+      if (rom_index == argc - 1)
+        if (!strcmp (argv[rom_index], ucon64.patch_file))
+          break;
 
       /*
         See the comment in ucon64_process_rom(). I (dbjh) prefer the GBA
@@ -629,11 +600,6 @@ main (int argc, char **argv)
       rom_index++;
     }
 
-#if 0
-  if (file_message)
-    printf ("NOTE: Use --file=0 if \"%s\"\n"
-            "      should NOT be interpreted as --file argument\n", ucon64.file);
-#endif
   return 0;
 }
 
@@ -868,13 +834,13 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   ucon64.file_size = ucon64_fsize;
 
   // What media type? Do not calculate CRC32 checksum and stuff for DISC images (speed!)
-  ucon64.type = (ucon64.file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_DISC;
+  ucon64.type = (ucon64.file_size <= MAXROMSIZE) ? UCON64_TYPE_ROM : UCON64_TYPE_DISC;
 
   if (ucon64.discmage_enabled)
     {
 #if 0
       image = dm_open (ucon64.rom);
-      ucon64.type = (image ? UCON64_DISC : UCON64_ROM);
+      ucon64.type = (image ? UCON64_TYPE_DISC : UCON64_TYPE_ROM);
       dm_close (image);
 #endif
       image = NULL;
@@ -1151,24 +1117,23 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
 }
 
 
-#if 1
-#define UCON64_USAGE(s) printf("%s%s%s", \
-                          NULL_TO_EMPTY (s[0]), \
-                          s[0]?"\n":"", \
-                          NULL_TO_EMPTY (s[2]))
-#else
-void
-usage (const char **s)
+static void
+ucon64_render_usage (const char **s)
 {
+#if 1
+  printf("%s%s%s",
+    NULL_TO_EMPTY (s[0]),
+    s[0]?"\n":"",
+    NULL_TO_EMPTY (s[2]));
+#else                          
   printf("%s%s%s%s%s",
     NULL_TO_EMPTY (s[0]),
     s[0]?s[1]?"\n  ":"\n":"",
     NULL_TO_EMPTY (s[1]),
     s[1]?"\n":"",
     NULL_TO_EMPTY (s[2]));
-}
-#define UCON64_USAGE usage
 #endif
+}
 
 
 void
@@ -1186,12 +1151,6 @@ ucon64_usage (int argc, char *argv[])
 #define HEXDUMP_MSG "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\"\n"
 #else
 #define HEXDUMP_MSG "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\"\n"       // less is more ;-)
-#endif
-
-#ifdef  __MSDOS__
-#define GOOD_EXAMPLE  "                    %s " OPTION_LONG_S "rrom " OPTION_LONG_S "good C:\\MAME_ROMS\\\n\n"
-#else
-#define GOOD_EXAMPLE  "                    %s " OPTION_LONG_S "rrom " OPTION_LONG_S "good /home/joe/mame/\n\n"
 #endif
 
 #ifdef  PARALLEL
@@ -1251,30 +1210,27 @@ ucon64_usage (int argc, char *argv[])
     "\n");
 
 //  if (ucon64.dat_enabled)
-    printf ("DATabase (support for DAT files and ROM managing)\n"
+    printf ("DATabase (support of DAT files)\n"
       "  " OPTION_LONG_S "db          DATabase statistics (DAT files: %s)\n"
       "  " OPTION_LONG_S "dbv         like " OPTION_LONG_S "db but more verbose\n"
       "  " OPTION_LONG_S "dbs=CRC32   search ROM with CRC32 in DATabase\n"
       "  " OPTION_LONG_S "lsd         generate ROM list for all ROMs using DATabase info; " OPTION_LONG_S "rom=DIR\n"
       "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
-      "                  Only ROMs of these consoles have internal names:\n"
+/*      "                  Only ROMs of these consoles have internal names:\n"
       "                  %s,\n"
       "                  %s,\n"
       "                  %s,\n"
       "                  %s and\n"
-      "                  %s\n"
+      "                  %s\n" */
       "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"
-      "                  combined with " OPTION_LONG_S "good, " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 use the filenames\n"
-      "                  from the DATabase instead of internal names and sort the ROMs\n"
-      "                  into subdirs. For example:\n"
-      GOOD_EXAMPLE,
-      ucon64.configdir,
-      snes_usage[0],
+      "  " OPTION_LONG_S "good        used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed and sorted\n"
+      "                  into subdirs according to the DATabase (\"ROM manager\")\n\n",
+      ucon64.configdir
+/*      snes_usage[0],
       genesis_usage[0],
       gameboy_usage[0],
       gba_usage[0],
-      n64_usage[0],
-      argv[0]);
+      n64_usage[0]*/);
 
 /*
 GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
@@ -1313,15 +1269,18 @@ Good_RAR     = log of RAR errors
 Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 */
 
-  printf ("Patching\n");
+  printf ("Patching\n"
+    "  " OPTION_LONG_S "patch=PATCH specify the PATCH for the following options\n"
+    "                  use this option or uCON64 expects the last commandline\n"
+    "                  argument to be the name of the PATCH file\n");
 
-  UCON64_USAGE (bsl_usage);
-  UCON64_USAGE (ips_usage);
-  UCON64_USAGE (aps_usage);
-  UCON64_USAGE (pal4u_usage);
-  UCON64_USAGE (ppf_usage);
-  UCON64_USAGE (xps_usage);
-  UCON64_USAGE (gg_usage);
+  ucon64_render_usage (bsl_usage);
+  ucon64_render_usage (ips_usage);
+  ucon64_render_usage (aps_usage);
+  ucon64_render_usage (pal4u_usage);
+  ucon64_render_usage (ppf_usage);
+  ucon64_render_usage (xps_usage);
+  ucon64_render_usage (gg_usage);
 
   printf ("                  supported are:\n"
     "                  %s,\n"
@@ -1366,114 +1325,114 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
       switch (c)
         {
       case UCON64_GBA:
-        UCON64_USAGE (gba_usage);
+        ucon64_render_usage (gba_usage);
 #ifdef  PARALLEL
-        UCON64_USAGE (fal_usage);
+        ucon64_render_usage (fal_usage);
 #endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_N64:
-        UCON64_USAGE (n64_usage);
+        ucon64_render_usage (n64_usage);
 #ifdef  PARALLEL
-        UCON64_USAGE (doctor64_usage);
-        UCON64_USAGE (doctor64jr_usage);
-//        UCON64_USAGE (cd64_usage);
-        UCON64_USAGE (dex_usage);
+        ucon64_render_usage (doctor64_usage);
+        ucon64_render_usage (doctor64jr_usage);
+//        ucon64_render_usage (cd64_usage);
+        ucon64_render_usage (dex_usage);
 #endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_JAG:
-        UCON64_USAGE (jaguar_usage);
+        ucon64_render_usage (jaguar_usage);
         single = 1;
         break;
 
       case UCON64_SNES:
-        UCON64_USAGE (snes_usage);
+        ucon64_render_usage (snes_usage);
 #ifdef  PARALLEL
-        UCON64_USAGE (swc_usage);
-        UCON64_USAGE (gd_usage);
-//        UCON64_USAGE (fig_usage);
-//        UCON64_USAGE (mgd_usage);
+        ucon64_render_usage (swc_usage);
+        ucon64_render_usage (gd_usage);
+//        ucon64_render_usage (fig_usage);
+//        ucon64_render_usage (mgd_usage);
 #endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_NG:
-        UCON64_USAGE (neogeo_usage);
+        ucon64_render_usage (neogeo_usage);
         single = 1;
         break;
 
       case UCON64_NGP:
-        UCON64_USAGE (ngp_usage);
+        ucon64_render_usage (ngp_usage);
 #ifdef  PARALLEL
-//        UCON64_USAGE (fpl_usage);
+//        ucon64_render_usage (fpl_usage);
 #endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_GEN:
-        UCON64_USAGE (genesis_usage);
+        ucon64_render_usage (genesis_usage);
 #ifdef  PARALLEL
-        UCON64_USAGE (smd_usage);
-//        UCON64_USAGE (mgd_usage);
+        ucon64_render_usage (smd_usage);
+//        ucon64_render_usage (mgd_usage);
 #endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_GB:
-        UCON64_USAGE (gameboy_usage);
+        ucon64_render_usage (gameboy_usage);
 #ifdef  PARALLEL
-        UCON64_USAGE (gbx_usage);
-        UCON64_USAGE (mccl_usage);
+        ucon64_render_usage (gbx_usage);
+        ucon64_render_usage (mccl_usage);
 #endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_LYNX:
-        UCON64_USAGE (lynx_usage);
+        ucon64_render_usage (lynx_usage);
 #ifdef  PARALLEL
-        UCON64_USAGE (lynxit_usage);
+        ucon64_render_usage (lynxit_usage);
 #endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_PCE:
-        UCON64_USAGE (pcengine_usage);
+        ucon64_render_usage (pcengine_usage);
 #ifdef  PARALLEL
-//        UCON64_USAGE (mgd_usage);
+//        ucon64_render_usage (mgd_usage);
 #endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_SMS:
-        UCON64_USAGE (sms_usage);
+        ucon64_render_usage (sms_usage);
 #ifdef  PARALLEL
-//        UCON64_USAGE (smd_usage);
+//        ucon64_render_usage (smd_usage);
 #endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_NES:
-        UCON64_USAGE (nes_usage);
+        ucon64_render_usage (nes_usage);
         single = 1;
         break;
 
       case UCON64_SWAN:
-        UCON64_USAGE (swan_usage);
+        ucon64_render_usage (swan_usage);
         single = 1;
         break;
 
       case UCON64_DC:
-        UCON64_USAGE (dc_usage);
+        ucon64_render_usage (dc_usage);
         single = 1;
         break;
 
       case UCON64_PSX:
-        UCON64_USAGE (psx_usage);
+        ucon64_render_usage (psx_usage);
 #ifdef  PARALLEL
-        UCON64_USAGE (dex_usage);
+        ucon64_render_usage (dex_usage);
 #endif // PARALLEL
         single = 1;
         break;
@@ -1504,91 +1463,91 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 
   if (!single)
     {
-      UCON64_USAGE (dc_usage);
+      ucon64_render_usage (dc_usage);
       printf("\n");
 
-      UCON64_USAGE (psx_usage);
+      ucon64_render_usage (psx_usage);
 #ifdef  PARALLEL
-      UCON64_USAGE (dex_usage);
+      ucon64_render_usage (dex_usage);
 #endif // PARALLEL
       printf ("\n");
 
-      UCON64_USAGE (gba_usage);
+      ucon64_render_usage (gba_usage);
 #ifdef  PARALLEL
-      UCON64_USAGE (fal_usage);
+      ucon64_render_usage (fal_usage);
 #endif // PARALLEL
       printf ("\n");
 
-      UCON64_USAGE (n64_usage);
+      ucon64_render_usage (n64_usage);
 #ifdef  PARALLEL
-      UCON64_USAGE (doctor64_usage);
-      UCON64_USAGE (doctor64jr_usage);
-//      UCON64_USAGE (cd64_usage);
-      UCON64_USAGE (dex_usage);
+      ucon64_render_usage (doctor64_usage);
+      ucon64_render_usage (doctor64jr_usage);
+//      ucon64_render_usage (cd64_usage);
+      ucon64_render_usage (dex_usage);
 #endif // PARALLEL
       printf ("\n");
 
-      UCON64_USAGE (snes_usage);
+      ucon64_render_usage (snes_usage);
 #ifdef  PARALLEL
-      UCON64_USAGE (swc_usage);
-      UCON64_USAGE (gd_usage);
-//      UCON64_USAGE (fig_usage);
-//      UCON64_USAGE (mgd_usage);
+      ucon64_render_usage (swc_usage);
+      ucon64_render_usage (gd_usage);
+//      ucon64_render_usage (fig_usage);
+//      ucon64_render_usage (mgd_usage);
 #endif // PARALLEL
       printf ("\n");
 
-      UCON64_USAGE (neogeo_usage);
+      ucon64_render_usage (neogeo_usage);
       printf ("\n");
 
-      UCON64_USAGE (genesis_usage);
+      ucon64_render_usage (genesis_usage);
 #ifdef  PARALLEL
-      UCON64_USAGE (smd_usage);
-//      UCON64_USAGE (mgd_usage);
+      ucon64_render_usage (smd_usage);
+//      ucon64_render_usage (mgd_usage);
 #endif // PARALLEL
       printf ("\n");
 
-      UCON64_USAGE (gameboy_usage);
+      ucon64_render_usage (gameboy_usage);
 #ifdef  PARALLEL
-      UCON64_USAGE (gbx_usage);
-      UCON64_USAGE (mccl_usage);
+      ucon64_render_usage (gbx_usage);
+      ucon64_render_usage (mccl_usage);
 #endif // PARALLEL
       printf ("\n");
 
-      UCON64_USAGE (lynx_usage);
+      ucon64_render_usage (lynx_usage);
 #ifdef  PARALLEL
-      UCON64_USAGE (lynxit_usage);
+      ucon64_render_usage (lynxit_usage);
 #endif // PARALLEL
       printf ("\n");
 
-      UCON64_USAGE (pcengine_usage);
+      ucon64_render_usage (pcengine_usage);
 #ifdef  PARALLEL
-//      UCON64_USAGE (mgd_usage);
+//      ucon64_render_usage (mgd_usage);
 #endif // PARALLEL
       printf ("\n");
 
-      UCON64_USAGE (sms_usage);
+      ucon64_render_usage (sms_usage);
 #ifdef  PARALLEL
-//      UCON64_USAGE (smd_usage);
+//      ucon64_render_usage (smd_usage);
 #endif // PARALLEL
       printf ("\n");
 
-      UCON64_USAGE (nes_usage);
+      ucon64_render_usage (nes_usage);
       printf ("\n");
 
-      UCON64_USAGE (swan_usage);
+      ucon64_render_usage (swan_usage);
       printf ("\n");
 
-      UCON64_USAGE (jaguar_usage);
+      ucon64_render_usage (jaguar_usage);
       printf ("\n");
 
-      UCON64_USAGE (ngp_usage);
+      ucon64_render_usage (ngp_usage);
 #ifdef  PARALLEL
-//      UCON64_USAGE (fpl_usage);
+//      ucon64_render_usage (fpl_usage);
 #endif // PARALLEL
       printf ("\n");
 
 #ifdef  SAMPLE
-      UCON64_USAGE (sample_usage);
+      ucon64_render_usage (sample_usage);
       printf ("\n");
 #endif // SAMPLE
   }
@@ -1618,7 +1577,7 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
      MORE_MSG
      "     Give the force recognition switch a try if something went wrong\n"
      "\n"
-     "Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
+     "Please report any problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
      "\n",
      ucon64_dat_total_entries (UCON64_UNKNOWN),
      ucon64.configdir,

@@ -46,7 +46,7 @@ const char *lynx_usage[] =
     "  " OPTION_LONG_S "lyx         convert to LYX/RAW (strip 64 Bytes LNX header)\n"
     "  " OPTION_LONG_S "lnx         convert to LNX (uses default values for the header);\n"
     "                  adjust the LNX header with the following options\n"
-    "  " OPTION_S "n=NEWNAME   change internal ROM name to NEWNAME (LNX only)\n"
+    "  " OPTION_S "n=NEW_NAME  change internal ROM name to NEW_NAME (LNX only)\n"
     "  " OPTION_LONG_S "nrot        set no rotation (LNX only)\n"
     "  " OPTION_LONG_S "rotl        set rotation left (LNX only)\n"
     "  " OPTION_LONG_S "rotr        set rotation right (LNX only)\n"

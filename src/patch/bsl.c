@@ -35,7 +35,7 @@ const char *bsl_usage[] =
   {
     NULL,
     NULL,
-    "  " OPTION_S "b=PATCH     apply Baseline/BSL PATCH to ROM\n",
+    "  " OPTION_S "b           apply Baseline/BSL PATCH to ROM\n",
     NULL
   };
 

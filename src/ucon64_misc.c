@@ -280,6 +280,15 @@ const char *gamecom_usage[] =
     NULL
   };
 
+const char *mame_usage[] =
+  {
+    "M.A.M.E. (Multiple Arcade Machine Emulator)",
+    NULL,
+    NULL,
+    NULL,
+    NULL
+  };
+
 #if 0
 Indrema
 Nuon
@@ -1278,7 +1287,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
   ucon64_dat = NULL;
   result = ucon64_init (ucon64.rom, &rominfo);
 
-  ucon64.type = (ucon64.file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_DISC;
+  ucon64.type = (ucon64.file_size <= MAXROMSIZE) ? UCON64_TYPE_ROM : UCON64_TYPE_DISC;
 
   switch (mode)
     {

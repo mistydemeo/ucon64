@@ -56,7 +56,7 @@ const char *gameboy_usage[] =
     "  " OPTION_LONG_S "hd          force ROM has SSC header (+512 Bytes)\n"
     "  " OPTION_LONG_S "nhd         force ROM has no SSC header\n"
 #endif
-    "  " OPTION_S "n=NEWNAME   change internal ROM name to NEWNAME\n"
+    "  " OPTION_S "n=NEW_NAME  change internal ROM name to NEW_NAME\n"
     "  " OPTION_LONG_S "mgd         convert to Multi Game*/MGD2/RAW\n"
     "  " OPTION_LONG_S "ssc         convert to Super Smart Card/SSC (+512 Bytes)\n"
     "  " OPTION_LONG_S "sgb         convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX\n"

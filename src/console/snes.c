@@ -83,7 +83,7 @@ const char *snes_usage[] =
     "  " OPTION_LONG_S "nint        force ROM is not in interleaved format\n"
     "  " OPTION_LONG_S "bs          force ROM is a Broadcast Satellaview dump\n"
     "  " OPTION_LONG_S "nbs         force ROM is a regular cartridge dump\n"
-    "  " OPTION_S "n=NEWNAME   change internal ROM name to NEWNAME\n"
+    "  " OPTION_S "n=NEW_NAME  change internal ROM name to NEW_NAME\n"
     "  " OPTION_LONG_S "smc         convert to Super Magicom/SMC\n"
     "  " OPTION_LONG_S "fig         convert to *Pro Fighter*/(all)FIG\n"
     "  " OPTION_LONG_S "figs        convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG;\n"

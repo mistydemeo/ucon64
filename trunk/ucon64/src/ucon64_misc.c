@@ -69,20 +69,209 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 const char *ucon64_parport_error =
-  "ERROR: please check cables and connection\n"
-  "       turn the backup unit off and on\n"
-  "       split ROMs must be joined first\n"
-  "       use " OPTION_LONG_S "file={3bc,378,278,...} to specify your port\n"
-  "       set the port to SPP (Standard, Normal) mode in your BIOS\n"
-  "       some backup units do not support EPP and ECP style parports\n"
-  "       read the backup unit's manual\n";
+  "ERROR: Please check cables and connection\n"
+  "       Turn the backup unit off and on\n"
+  "       Split ROMs must be joined first\n"
+  "       Use " OPTION_LONG_S "file={3bc, 378, 278, ...} to specify your port\n"
+  "       Set the port to SPP (Standard, Normal) mode in your BIOS\n"
+  "       Some backup units do not support EPP and ECP style parports\n"
+  "       Read the backup unit's manual\n";
 
 const char *ucon64_console_error =
-  "ERROR: could not auto detect the right ROM/IMAGE/console type\n"
+  "ERROR: Could not auto detect the right ROM/IMAGE/console type\n"
   "TIP:   If this is a ROM or CD IMAGE you might try to force the recognition\n"
   "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n";
 
 char *ucon64_temp_file = NULL;
+
+// maker strings for SNES, GB, GBC and GBA games
+const char *nintendo_maker[792] = {
+  NULL, "Nintendo", "Rocket Games/Ajinomoto", "Imagineer-Zoom", "Gray Matter",
+  "Zamuse", "Falcom", NULL, "Capcom", "Hot B Co.",
+  "Jaleco", "Coconuts Japan", "Coconuts Japan/G.X.Media", "Micronet", "Technos",
+  "Mebio Software", "Shouei System", "Starfish", NULL, "Mitsui Fudosan/Dentsu",
+  NULL, "Warashi Inc.", NULL, NULL, NULL,
+  "Game Village", NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // 0Z
+  NULL, NULL, "Infocom", "Electronic Arts Japan", NULL,
+  "Cobra Team", "Human/Field", "KOEI", "Hudson Soft", "S.C.P.",
+  "Yanoman", NULL, "Tecmo Products", "Japan Glary Business", "Forum/OpenSystem",
+  "Virgin Games (Japan)", "SMDE", NULL, NULL, "Daikokudenki",
+  NULL, NULL, NULL, NULL, NULL,
+  "Creatures Inc.", "TDK Deep Impresion", NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // 1Z
+  "Destination Software/KSS", "Sunsoft/Tokai Engineering",
+    "POW (Planning Office Wada)/VR 1 Japan", "Micro World", NULL,
+  "San-X", "Enix", "Loriciel/Electro Brain", "Kemco Japan", "Seta",
+  "Culture Brain", NULL, "Palsoft", "Visit Co., Ltd.", "Intec",
+  "System Sacom", "Poppo", NULL, NULL, "Media Works",
+  "NEC InterChannel", "Tam", "Gajin/Jordan", "Smilesoft", NULL,
+  NULL, "Mediakite", NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // 2Z
+  "Viacom", "Carrozzeria", "Dynamic", NULL, "Magifact",
+  "Hect", "Codemasters", "Taito/GAGA Communications", "Laguna",
+    "Telstar Fun & Games/Event/Taito",
+  NULL, "Arcade Zone Ltd.", "Entertainment International/Empire Software", "Loriciel",
+    "Gremlin Graphics",
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // 3Z
+  "Seika Corp.", "UBI SOFT Entertainment Software", "Sunsoft US", NULL, "Life Fitness",
+  NULL, "System 3", "Spectrum Holobyte", NULL, "IREM",
+  NULL, "Raya Systems", "Renovation Products", "Malibu Games", NULL,
+  "Eidos/U.S. Gold", "Playmates Interactive", NULL, NULL, "Fox Interactive",
+  "Time Warner Interactive", NULL, NULL, "Playmates Interactive", NULL,
+  NULL, "Disney Interactive", "Time Warner Interactive/Bitmasters", "Black Pearl", NULL,
+  "Advanced Productions", NULL, NULL, "GT Interactive", "RARE",
+  "Crave Entertainment",                        // 4Z
+  "Absolute Entertainment", "Acclaim", "Activision", "American Sammy", "Take 2/GameTek",
+  "Hi Tech", "LJN Ltd.", NULL, "Mattel", NULL,
+  "Mindscape/Red Orb Entertainment", "Romstar", "Taxan", "Midway/Tradewest", NULL,
+  "American Softworks", "Majesco Sales Inc.", "3DO", NULL, NULL,
+  "Williams Entertainment Inc." /*"Hasbro"*/, "NewKidCo", "Telegames", "Metro3D", NULL,
+  "Vatical Entertainment", "LEGO Media", NULL, "Xicat Interactive", "Cryo Interactive",
+  NULL, NULL, "Red Storm Entertainment", "Microids", NULL,
+  "Conspiracy/Swing",                           // 5Z
+  "Titus", "Virgin Interactive", "Maxis", NULL, "LucasArts Entertainment",
+  NULL, NULL, "Ocean", NULL, "Electronic Arts",
+  NULL, "Laser Beam", NULL, NULL, "Elite Systems",
+  "Electro Brain", "The Learning Company", "BBC", NULL, "Software 2000",
+  NULL, "BAM! Entertainment", "Electro Brain" /*"Studio 3"*/, NULL, NULL,
+  NULL, "Classified Games", NULL, "TDK Mediactive", NULL,
+  "DreamCatcher", "JoWood Produtions", "SEGA", "Wannado Edition",
+    "LSP (Light & Shadow Prod.)",
+  "ITE Media",                                  // 6Z
+  "Infogrames", "Interplay", "JVC (US)", "Parker Brothers", NULL,
+  "Sales Curve/Storm/SCI", NULL, NULL, "THQ", "Accolade",
+  "Triffix Entertainment", NULL, "Microprose Software",
+    "Universal Interactive/Sierra/Simon & Schuster", NULL,
+  "Kemco", "Rage Software", NULL, NULL, NULL,
+  "BVM", "Simon & Schuster Interactive", "Asmik Ace Entertainment Inc./AIA",
+    "Empire Interactive", NULL,
+  NULL, "Jester Interactive", NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // 7Z
+  "Misawa", "Teichiku", "Namco Ltd.", "LOZC", "KOEI",
+  NULL, "Tokuma Shoten Intermedia", "Tsukuda Original", "DATAM-Polystar", NULL,
+  NULL, "Bulletproof Software", "Vic Tokai Inc.", NULL, "Character Soft",
+  "I'Max", "Saurus", NULL, NULL, "General Entertainment",
+  NULL, NULL, NULL, "Success", NULL,
+  "SEGA Japan", NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // 8Z
+  "Takara", "Chun Soft", "Video System/McO'River", "BEC", NULL,
+  "Varie", "Yonezawa/S'pal", "Kaneko", NULL, "Victor Interactive Software/Pack in Video",
+  "Nichibutsu/Nihon Bussan", "Tecmo", "Imagineer", NULL, NULL,
+  "Nova", "Den'Z", "Bottom Up", "Tecmo", "TGL (Technical Group Laboratory)",
+  NULL, "Hasbro Japan", NULL, "Marvelous Entertainment", NULL,
+  "Keynet Inc.", "Hands-On Entertainment", NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // 9Z
+  "Telenet", "Hori", NULL, NULL, "Konami",
+  "K.Amusement Leasing Co.", "Kawada", "Takara", NULL, "Technos Japan Corp.",
+  "JVC (Europe/Japan)/Victor Musical Indutries", NULL, "Toei Animation", "Toho", NULL,
+  "Namco", "Media Rings Corporation", "J-Wing", NULL, "Pioneer LDC",
+  "KID", "Mediafactory", NULL, NULL, NULL,
+  "Infogrames Hudson", NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // AZ
+  "Acclaim Japan", "ASCII/Nexoft", "Bandai", NULL, "Enix",
+  NULL, "HAL Laboratory", "SNK", NULL, "Pony Canyon Hanbai",
+  "Culture Brain", "Sunsoft", "Toshiba EMI", "Sony Imagesoft", NULL,
+  "Sammy", "Magical", "Visco", NULL, "Compile",
+  NULL, "MTO Inc.", NULL, "Sunrise Interactive", NULL,
+  "Global A Entertainment", "Fuuki", NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // BZ
+  "Taito", NULL, "Kemco", "Square", "Tokuma Shoten",
+  "Data East", "Tonkin House", NULL, "Koei", NULL,
+  "Konami/Ultra/Palcom", "NTVIC/VAP", "Use Co., Ltd.", "Meldac", "Pony Canyon (J)/FCI (U)",
+  "Angel/Sotsu Agency/Sunrise", "Yumedia/Aroma Co., Ltd.", NULL, NULL, "Boss",
+  "Axela/Crea-Tech", "Sekaibunka-Sha/Sumire kobo/Marigul Management Inc.",
+    "Konami Computer Entertainment Osaka", NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // CZ
+  "Taito/Disco", "Sofel", "Quest", "Sigma", "Ask Kodansha",
+  NULL, "Naxat", "Copya System", "Capcom Co., Ltd.", "Banpresto",
+  "TOMY", "Acclaim/LJN Japan", NULL, "NCS", "Human Entertainment",
+  "Altron", "Jaleco", "Gaps Inc.", NULL, NULL,
+  NULL, NULL, NULL, "Elf", NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // DZ
+  "Jaleco", NULL, "Yutaka", "Varie", "T&ESoft",
+  "Epoch", NULL, "Athena", "Asmik", "Natsume",
+  "King Records", "Atlus", "Epic/Sony Records (J)", NULL,
+    "IGS (Information Global Service)",
+  NULL, "Chatnoir", "Right Stuff", NULL, NULL,
+  NULL, "Spike", "Konami Computer Entertainment Tokyo", "Alphadream Corporation", NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // EZ
+  "A Wave", "Motown Software", "Left Field Entertainment", "Extreme Ent. Grp.",
+    "TecMagik",
+  NULL, NULL, NULL, NULL, "Cybersoft",
+  NULL, "Psygnosis", NULL, NULL, "Davidson/Western Tech.",
+  "Hudson Soft", NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // FZ
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // GZ
+  NULL, NULL, NULL, NULL, "Konami",
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, "JVC", NULL, NULL,
+  NULL, NULL, "Namco Ltd.", NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, "Sachen",
+  NULL,                                         // HZ
+  NULL, NULL, NULL, NULL, "Enix",
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, "Yojigen", NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // IZ
+  NULL, NULL, NULL, "Square", NULL,
+  "Data East", NULL, NULL, "Falcom", NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // JZ
+  NULL, NULL, "Quest", NULL, NULL,
+  NULL, NULL, NULL, NULL, "Banpresto",
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  "NCS", "Human Entertainment", NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL,                                         // KZ
+  NULL, NULL, NULL, NULL, NULL,
+  "Epoch Co., Ltd.", NULL, NULL, NULL, "Natsume",
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
+  NULL};                                        // LZ
+
 
 void
 ucon64_wrote (const char *filename)

@@ -73,6 +73,9 @@ extern const char *unknown_usage[];
 
 extern char *ucon64_temp_file;
 
+extern const char *nintendo_maker[];
+
+
 /*
   wrapper for misc.c/q_fbackup()
 

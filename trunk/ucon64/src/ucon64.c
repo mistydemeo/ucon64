@@ -1302,7 +1302,6 @@ ucon64_usage (int argc, char *argv[])
            "      it will automatically find and extract the ROM\n"
            "\n"
          */
-//         "TODO:  -sh      use uCON64 in shell modus\n"
            "  -nbak         prevents backup files (*.bak)\n"
 #ifdef	__MSDOS__
            "  -e            emulate/run ROM (see ucon64.cfg for more)\n"

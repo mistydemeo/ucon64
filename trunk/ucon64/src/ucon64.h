@@ -31,6 +31,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
+
+
+/*
+  the usage type
+*/
+typedef struct
+{
+  const char *option_s;                         // "chk", ..
+  const char *desc;                             // "fix checksum", ...
+//  const char *desc_long;                      // long description
+//  int status;                                  // development status of option
+                                              // 0 = OK, 1 = TODO, 2 = TEST
+} st_usage_t;
+
+
 #include "ucon64_dat.h"
 #include "misc.h"
 #include "libdiscmage/libdiscmage.h"            // dm_image_t
@@ -119,6 +134,7 @@ typedef struct
 
 extern st_ucon64_t ucon64;
 
+
 /*
   This struct contains very specific informations only <console>_init() can
   supply after the correct console type was identified.
@@ -131,8 +147,8 @@ extern st_ucon64_t ucon64;
 */
 typedef struct
 {
-  const char **console_usage;                   // console system usage
-  const char **copier_usage;                    // backup unit usage
+  const st_usage_t **console_usage;                    // console system usage
+  const st_usage_t **copier_usage;                     // backup unit usage
 
   int interleaved;                              // ROM is interleaved (swapped)
   int snes_hirom;                               // SNES ROM is HiROM
@@ -164,10 +180,10 @@ typedef struct
   int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal checksum
 } st_rominfo_t;
 
+
 extern dm_image_t *image;                       // DISC image (libdiscmage)
 extern st_ucon64_dat_t *ucon64_dat;             // info from DAT
 
-//extern const option_t options[];
 extern const struct option options[];
 
 extern int ucon64_nfo (const st_rominfo_t *);

@@ -36,19 +36,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "lynxit.h"
 
 
-const char *lynxit_usage[] = {
-    "Lynxit (Lynx Cartridge Backup Board)",
-    "1997 K.Wilkins (selfmade)",
+const st_usage_t lynxit_usage[] = {
+    {NULL, "Lynxit (Lynx Cartridge Backup Board)"},
+    {NULL, "1997 K.Wilkins (selfmade)"},
 #ifdef PARALLEL
-    "TEST: " OPTION_LONG_S "xlit    receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT\n"
+    {"xlit", "(TEST) receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT"},
 //    "                  receives automatically when ROM does not exist\n"
-#else
-    ""
 #endif // PARALLEL
-    ,
-    NULL,
-    NULL,
-    NULL
+    {NULL, NULL}
   };
 
 #ifdef PARALLEL

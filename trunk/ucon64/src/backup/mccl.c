@@ -66,12 +66,12 @@ Data Read Procedure:
 #include "ucon64.h"
 #include "ucon64_misc.h"
 
-const char *mccl_usage[] = {
-  "Mad Catz Camera Link (Game Boy Camera)",
-  "XXXX Mad Catz Inc. http://www.madcatz.com",
-  "TEST: " OPTION_LONG_S "xmccl   send/receive BYTES to/from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT\n"
-  "                  currently only receiving is supported\n",
-  NULL
+const st_usage_t mccl_usage[] = {
+  {NULL, "Mad Catz Camera Link (Game Boy Camera)"},
+  {NULL, "XXXX Mad Catz Inc. http://www.madcatz.com"},
+  {"xmccl", "(TEST) send/receive BYTES to/from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT\n"
+              "currently only receiving is supported"},
+  {NULL, NULL}
 };
 
 

@@ -21,6 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef NGP_H
 #define NGP_H
 
-extern const char *ngp_usage[];
+extern const st_usage_t ngp_usage[];
 extern int ngp_init (st_rominfo_t *rominfo);
 #endif /* NGP_H */

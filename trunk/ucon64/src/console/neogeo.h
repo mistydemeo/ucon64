@@ -28,6 +28,6 @@ extern int neogeo_mvs (st_rominfo_t *rominfo);
 extern int neogeo_s (st_rominfo_t *rominfo);
 extern int neogeo_sam (st_rominfo_t *rominfo);
 
-extern const char *neogeo_usage[];
+extern const st_usage_t neogeo_usage[];
 
 #endif /* NEOGEO_H */

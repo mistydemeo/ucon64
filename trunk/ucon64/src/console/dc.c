@@ -38,14 +38,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int dc_ip(char *dev,char *name)
 #endif
 
-const char *dc_usage[] =
-  {
-    "Dreamcast",
-    "1998 SEGA http://www.sega.com",
-    "  " OPTION_LONG_S "dc          force recognition\n"
-    "TODO: " OPTION_LONG_S "ip=FILE add/extract ip.bin FILE to/from IMAGE; --rom=IMAGE\n",
-    NULL
-};
+
+const st_usage_t dc_usage[] = {
+    {NULL, "Dreamcast"},
+    {NULL, "1998 SEGA http://www.sega.com"},
+    {"dc", "force recognition"},
+    {"ip=FILE", "(TEST) extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE"},
+    {NULL, NULL}
+  };
 
 
 int
@@ -56,8 +56,8 @@ dc_init (st_rominfo_t *rominfo)
 
 //  printf ("%d\n", sizeof (dc_ip0000_header_t));
 
-  rominfo->console_usage = dc_usage;
-//  rominfo->copier_usage = cdrw_usage;
+  rominfo->console_usage = (const st_usage_t **)dc_usage;
+//  rominfo->copier_usage = (const st_usage_t **)cdrw_usage;
 
   return result;
 }

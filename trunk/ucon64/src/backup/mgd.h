@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef MGD_H
 #define MGD_H
 
-extern const char *mgd_usage[];
+extern const st_usage_t mgd_usage[];
 
 /*
 The MGD2 only accepts certain filenames, and these filenames

@@ -35,23 +35,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/snes.h"                       // for snes_make_gd_names() &
                                                 //  snes_get_snes_hirom()
 
-const char *gd_usage[] =
+const st_usage_t gd_usage[] =
   {
-    "Game Doctor SF3(SF6/SF7)",
-    "19XX Bung Enterprises Ltd http://www.bung.com.hk",
+    {NULL, "Game Doctor SF3(SF6/SF7)"},
+    {NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef PARALLEL
-
 #if 1 // dumping is not yet supported
-    "  " OPTION_LONG_S "xgd3        send ROM to Game Doctor SF3(SF6/SF7); " OPTION_LONG_S "port=PORT\n",
+    {"xgd3", "send ROM to Game Doctor SF3(SF6/SF7); " OPTION_LONG_S "port=PORT"},
 #else
-    "  " OPTION_LONG_S "xgd3        send/receive ROM to/from Game Doctor SF3(SF6/SF7); " OPTION_LONG_S "port=PORT\n"
-    "                  receives automatically when " OPTION_LONG_S "ROM does not exist\n",
+    {"xgd3", "send/receive ROM to/from Game Doctor SF3(SF6/SF7); " OPTION_LONG_S "port=PORT\n"
+                "receives automatically when " OPTION_LONG_S "ROM does not exist"},
 #endif
-
-#else
-    "",
 #endif // PARALLEL
-    NULL
+    {NULL, NULL}
   };
 
 #ifdef PARALLEL

@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef SMD_H
 #define SMD_H
-extern const char *smd_usage[];
+extern const st_usage_t smd_usage[];
 
 // For the header format, see ffe.h
 typedef struct st_smd_header

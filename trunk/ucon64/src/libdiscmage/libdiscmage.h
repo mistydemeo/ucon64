@@ -54,8 +54,10 @@ typedef signed long long int int64_t;
 
 
 //  version of this libdiscmage
-extern const char *dm_version;
+extern const uint32_t dm_version;
 
+//  usage (example) of libdiscmage
+extern const char dm_usage[];
 
 /*
   track nfo
@@ -127,9 +129,17 @@ typedef struct
 */
 extern dm_image_t *dm_open (const char *image_filename);
 extern int dm_close (dm_image_t *image);
-extern int dm_fread (dm_image_t *image);
-//extern int dm_fwrite (dm_image_t *image);
-extern int dm_fseek (dm_image_t *image);
+#if 1
+extern int dm_fseek (dm_image_t *image, int session, int track);
+#else
+extern int dm_fseek (dm_image_t *image, long offset, int how);
+#endif
+extern int dm_fgetc (dm_image_t *image);
+extern size_t dm_fread (void *buffer, size_t blk_size, size_t blk_num, dm_image_t *image);
+#if 0
+extern int dm_fputc (dm_image_t *image);
+extern size_t dm_fwrite (const void *buffer, size_t blk_size, size_t blk_num, dm_image_t *image);
+#endif
 
 
 /*

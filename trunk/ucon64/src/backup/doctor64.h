@@ -29,7 +29,7 @@ extern int doctor64_write (const char *filename, long start, long len,
 
 #endif // PARALLEL
 
-extern const char *doctor64_usage[];
+extern const st_usage_t doctor64_usage[];
 
 #define DOCTOR64_HEADER_START 0
 #define DOCTOR64_HEADER_LEN 0

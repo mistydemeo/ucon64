@@ -32,20 +32,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "gbx.h"
-const char *gbx_usage[] =
+const st_usage_t gbx_usage[] =
   {
-    "Game Boy Xchanger/GBDoctor",
-    "19XX Bung Enterprises Ltd http://www.bung.com.hk",
+    {NULL, "Game Boy Xchanger/GBDoctor"},
+    {NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef PARALLEL
-    "  " OPTION_LONG_S "xgbx        send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
-    "                  receives automatically when ROM does not exist\n"
-    "  " OPTION_LONG_S "xgbxs       send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
-    "                  receives automatically when SRAM does not exist\n"
-    "  " OPTION_LONG_S "xgbxb=BANK  send/receive 64kbits SRAM to/from GB Xchanger BANK\n"
-    "                  BANK can be a number from 0 to 15; " OPTION_LONG_S "port=PORT\n"
-    "                  receives automatically when ROM does not exist\n",
+    {"xgbx", "send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
+                "receives automatically when ROM does not exist"},
+    {"xgbxs", "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"  
+                "receives automatically when SRAM does not exist"},
+    {"xgbxb=BANK", "send/receive 64kbits SRAM to/from GB Xchanger BANK\n"
+                     "BANK can be a number from 0 to 15; " OPTION_LONG_S "port=PORT\n"
+                     "receives automatically when ROM does not exist"},
 #endif // PARALLEL
-    NULL
+    {NULL, NULL}
   };
   
 #ifdef PARALLEL

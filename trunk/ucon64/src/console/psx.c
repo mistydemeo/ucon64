@@ -34,13 +34,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "psx.h"
 
 
-const char *psx_usage[] =
+const st_usage_t psx_usage[] =
   {
-    "Playstation (One)/Playstation 2 (CD only)",
-    "1994/(2000) Sony http://www.playstation.com",
-    "  " OPTION_LONG_S "psx         force recognition\n"
-      ,
-      NULL
+    {NULL, "Playstation (One)/Playstation 2 (CD only)"},
+    {NULL, "1994/(2000) Sony http://www.playstation.com"},
+    {"psx", "force recognition"},
+    {NULL, NULL}
 };
 
 
@@ -49,8 +48,8 @@ psx_init (st_rominfo_t *rominfo)
 {
   int result = -1;
 
-  rominfo->console_usage = psx_usage;
-//  rominfo->copier_usage = cdrw_usage;
+  rominfo->console_usage = (const st_usage_t **)psx_usage;
+//  rominfo->copier_usage = (const st_usage_t **)cdrw_usage;
 
   return result;
 }

@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define WSWAN_H
 
 extern int swan_init (st_rominfo_t *rominfo);
-extern const char *swan_usage[];
+extern const st_usage_t swan_usage[];
 extern int swan_chk (st_rominfo_t *rominfo);
 
 #endif /* WSWAN_H */

@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef GD_H
 #define GD_H
 
-extern const char *gd_usage[];
+extern const st_usage_t gd_usage[];
 
 #define GD_HEADER_START 0
 #define GD_HEADER_LEN 512

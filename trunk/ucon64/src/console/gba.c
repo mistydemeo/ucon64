@@ -41,33 +41,32 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static int gba_chksum (st_rominfo_t *rominfo);
 static int gbautil (const unsigned char *filein, const unsigned char *fileout);
 
-const char *gba_usage[] =
+const st_usage_t gba_usage[] =
   {
-    "Game Boy Advance",
-    "2001 Nintendo http://www.nintendo.com",
-    "  " OPTION_LONG_S "gba         force recognition\n"
-//    "  " OPTION_LONG_S "hd          force ROM has header (+512 Bytes)\n"
+    {NULL, "Game Boy Advance"},
+    {NULL, "2001 Nintendo http://www.nintendo.com"},
+    {"gba", "force recognition"},
+    {"hd",  "force ROM has header (+512 Bytes)"},
 //    "  " OPTION_LONG_S "nhd         force ROM has no header\n"
-    "  " OPTION_S "n=NEW_NAME  change internal ROM name to NEW_NAME\n"
-    "  " OPTION_LONG_S "logo        restore ROM logo character data (offset: 0x04-0x9F)\n"
+    {"n=NEW_NAME", "change internal ROM name to NEW_NAME"},
+    {"logo", "restore ROM logo character data (offset: 0x04-0x9F)"},
 //    "  " OPTION_LONG_S "chk         fix ROM header checksum\n"
-    "  " OPTION_LONG_S "sram        patch ROM for SRAM saving\n"
-    "  " OPTION_LONG_S "crp=WAIT_TIME slow down Flash Advance Linker access for ROM (crash patch);\n"
-    "                  WAIT_TIME='0'  (default in most crash patches)\n"
-    "                  WAIT_TIME='4'  (faster than 0, slower than 8)\n"
-    "                  WAIT_TIME='8'  (faster than 4, slower than 28)\n"
-    "                  WAIT_TIME='12' (slowest cartridge access speed)\n"
-    "                  WAIT_TIME='16' (faster than 28, but slower than 20)\n"
-    "                  WAIT_TIME='20' (default in most original carts)\n"
-    "                  WAIT_TIME='24' (fastest cartridge access speed)\n"
-    "                  WAIT_TIME='28' (faster than 8 but slower than 16)\n"
+    {"sram", "patch ROM for SRAM saving"},
+    {"crp=WAIT_TIME", "slow down Flash Advance Linker access for ROM (crash patch);\n"
+                         "WAIT_TIME='0'  (default in most crash patches)\n"
+                         "WAIT_TIME='4'  (faster than 0, slower than 8)\n"
+                         "WAIT_TIME='8'  (faster than 4, slower than 28)\n"
+                         "WAIT_TIME='12' (slowest cartridge access speed)\n"
+                         "WAIT_TIME='16' (faster than 28, but slower than 20)\n"
+                         "WAIT_TIME='20' (default in most original carts)\n"
+                         "WAIT_TIME='24' (fastest cartridge access speed)\n"
+                         "WAIT_TIME='28' (faster than 8 but slower than 16)"},
 //  "n 0 and 28, with a stepping of 4. I.e 0, 4, 8, 12 ...\n"
-    "  " OPTION_LONG_S "strip=N     strip N Bytes from end of ROM (use " OPTION_LONG_S "ispad before)\n"
-    "  " OPTION_LONG_S "multi=SIZE  make multirom for Flash Advance Linker, truncated to SIZE Mbit;\n"
-    "                  file with loader must be specified first, then all the ROMs,\n"
-    "                  multirom to create last\n"
-    ,
-    NULL
+    {"strip=N", "strip N Bytes from end of ROM (use " OPTION_LONG_S "ispad before)"},
+    {"multi=SIZE", "make multirom for Flash Advance Linker, truncated to SIZE Mbit;\n"
+                      "file with loader must be specified first, then all the ROMs,\n"
+                      "multirom to create last"},
+    {NULL, NULL}
   };
 
 
@@ -390,8 +389,8 @@ gba_init (st_rominfo_t *rominfo)
       rominfo->internal_crc2[0] = 0;
     }
 
-  rominfo->console_usage = gba_usage;
-  rominfo->copier_usage = (!rominfo->buheader_len) ? fal_usage : unknown_usage;
+  rominfo->console_usage = (const st_usage_t **)gba_usage;
+  rominfo->copier_usage = (const st_usage_t **)(!rominfo->buheader_len ? fal_usage : unknown_usage);
 
   return result;
 }

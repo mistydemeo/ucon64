@@ -28,12 +28,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include "ucon64.h"
 
-const char *interceptor_usage[] =
+
+const st_usage_t interceptor_usage[] =
   {
-    "Mega Disk/Super Disk (Interceptor),"
-    "  19XX Taiwan Sang Ting Co. Ltd.",
-    NULL
+    {NULL, "Mega Disk/Super Disk (Interceptor),"},
+    {NULL, "  19XX Taiwan Sang Ting Co. Ltd."},
+    {NULL, NULL}
   };
 
 #ifdef PARALLEL

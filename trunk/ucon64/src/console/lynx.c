@@ -37,22 +37,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "lynx.h"
 
 
-const char *lynx_usage[] =
+const st_usage_t lynx_usage[] =
   {
-    "Handy (prototype)/Lynx/Lynx II",
-    "1987 Epyx/1989 Atari/1991 Atari",
-    "  " OPTION_LONG_S "lynx        force recognition"
-    "\n"
-    "  " OPTION_LONG_S "lyx         convert to LYX/RAW (strip 64 Bytes LNX header)\n"
-    "  " OPTION_LONG_S "lnx         convert to LNX (uses default values for the header);\n"
-    "                  adjust the LNX header with the following options\n"
-    "  " OPTION_S "n=NEW_NAME  change internal ROM name to NEW_NAME (LNX only)\n"
-    "  " OPTION_LONG_S "nrot        set no rotation (LNX only)\n"
-    "  " OPTION_LONG_S "rotl        set rotation left (LNX only)\n"
-    "  " OPTION_LONG_S "rotr        set rotation right (LNX only)\n"
-    "  " OPTION_LONG_S "b0=N        change Bank0 kBytes size to N={0,64,128,256,512} (LNX only)\n"
-    "  " OPTION_LONG_S "b1=N        change Bank1 kBytes size to N={0,64,128,256,512} (LNX only)\n",
-    NULL
+    {NULL, "Handy (prototype)/Lynx/Lynx II"},
+    {NULL, "1987 Epyx/1989 Atari/1991 Atari"},
+    {"lynx", "force recognition"},
+    {"lyx", "convert to LYX/RAW (strip 64 Bytes LNX header)"},
+    {"lnx", "convert to LNX (uses default values for the header);\n"
+              "adjust the LNX header with the following options"},
+    {"n=NEW_NAME", "change internal ROM name to NEW_NAME (LNX only)"},
+    {"nrot", "set no rotation (LNX only)"},
+    {"rotl", "set rotation left (LNX only)"},
+    {"rotr", "set rotation right (LNX only)"},
+    {"b0=N", "change Bank0 kBytes size to N={0,64,128,256,512} (LNX only)"},
+    {"b1=N", "change Bank1 kBytes size to N={0,64,128,256,512} (LNX only)"},
+    {NULL, NULL}
 };
 
 const char *lynx_lyx_desc = "convert to LYX/RAW (strip 64 Bytes LNX header)";
@@ -253,8 +252,8 @@ lynx_init (st_rominfo_t *rominfo)
 {
   int result = -1;
 
-  rominfo->console_usage = lynx_usage;
-  rominfo->copier_usage = unknown_usage;
+  rominfo->console_usage = (const st_usage_t **)lynx_usage;
+  rominfo->copier_usage = (const st_usage_t **)unknown_usage;
 
   q_fread (&lnx_header, 0, LNX_HEADER_LEN, ucon64.rom);
   if (!strncmp (lnx_header.magic, "LYNX", 4))

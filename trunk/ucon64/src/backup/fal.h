@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef FAL_H
 #define FAL_H
-extern const char *fal_usage[];
+extern const st_usage_t fal_usage[];
 
 #define FAL_HEADER_START 0
 #define FAL_HEADER_LEN 0

@@ -31,12 +31,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "bsl.h"
 
 
-const char *bsl_usage[] =
+const st_usage_t bsl_usage[] =
   {
-    NULL,
-    NULL,
-    "  " OPTION_S "b           apply Baseline/BSL PATCH to ROM\n",
-    NULL
+    {"b", "apply Baseline/BSL PATCH to ROM"},
+    {NULL, NULL}
   };
 
 

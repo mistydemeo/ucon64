@@ -103,6 +103,15 @@ write programs in C
 #include "backup/mccl.h"
 #include "backup/lynxit.h"
 
+typedef struct
+{
+  int option;
+  int console;                                // UCON64_SNES, ...
+  const st_usage_t **usage;
+  uint8_t show_nfo;
+  uint8_t show_nfo_after;
+} st_option2_t;
+
 static void ucon64_exit (void);
 static void ucon64_usage (int argc, char *argv[]);
 static int ucon64_process_rom (const char *fname, int console, int show_nfo);
@@ -116,9 +125,7 @@ st_ucon64_dat_t *ucon64_dat = NULL;
 dm_image_t *image = NULL;
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
 static int ucon64_fsize = 0, ucon64_option = 0;
-
-//const option_t options[] = {
-const struct option options[] = {
+const struct option options[] =   {
     {"1991", 0, 0, UCON64_1991},
     {"3do", 0, 0, UCON64_3DO},
     {"?", 0, 0, UCON64_HELP},
@@ -134,7 +141,7 @@ const struct option options[] = {
 //    {"cdi", 0, 0, UCON64_CDI},
     {"cdirip", 0, 0, UCON64_CDIRIP},
     {"chk", 0, 0, UCON64_CHK},
-    {"col", 0, 0, UCON64_COL},
+    {"col", 1, 0, UCON64_COL},
     {"coleco", 0, 0, UCON64_COLECO},
     {"crc", 0, 0, UCON64_CRC},
     {"crchd", 0, 0, UCON64_CRCHD},
@@ -316,8 +323,12 @@ const struct option options[] = {
     {0, 0, 0, 0}
   };
 
+
 #ifdef  DLOPEN
 void *libdm;
+
+#define dm_version dm_version_ptr
+const uint32_t (*dm_version_ptr) = 0;
 
 #define dm_open dm_open_ptr
 #define dm_close dm_close_ptr
@@ -357,8 +368,182 @@ ucon64_exit (void)
 int
 main (int argc, char **argv)
 {
-  int c = 0, console, show_nfo, rom_index;
-  char buf[MAXBUFSIZE], *ptr;
+  int x = 0, c = 0, console, show_nfo, rom_index;
+  char buf[MAXBUFSIZE], *ptr = NULL;
+  static const st_option2_t options2[] = {
+//    {option, console, usage, show_nfo, show_nfo_after},
+    {UCON64_1991, UCON64_GENESIS, (const st_usage_t **)genesis_usage, 1, 0},
+    {UCON64_3DO, UCON64_REAL3DO, (const st_usage_t **)real3do_usage, 1, 0},
+    {UCON64_HELP, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_A, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_ATA, UCON64_ATARI, (const st_usage_t **)atari_usage, 1, 0},
+    {UCON64_B, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_B0, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
+    {UCON64_B1, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
+    {UCON64_BIOS, UCON64_NEOGEO, (const st_usage_t **)neogeo_usage, 1, 0},
+    {UCON64_BOT, UCON64_N64, (const st_usage_t **)n64_usage, 1, 0},
+    {UCON64_C, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_CD32, UCON64_CD32, (const st_usage_t **)cd32_usage, 1, 0},
+    {UCON64_CDI, UCON64_CDI, (const st_usage_t **)cdi_usage, 1, 0},
+    {UCON64_CDIRIP, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_CHK, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_COL, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_COLECO, UCON64_COLECO, (const st_usage_t **)coleco_usage, 1, 0},
+    {UCON64_CRC, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_CRCHD, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_CRP, UCON64_GBA, (const st_usage_t **)gba_usage, 1, 0},
+    {UCON64_CS, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_DB, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_DBS, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_DBUH, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
+    {UCON64_DBV, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_DC, UCON64_DC, (const st_usage_t **)dc_usage, 1, 0},
+    {UCON64_DINT, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_E, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_F, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
+    {UCON64_FDS, UCON64_NES, (const st_usage_t **)nes_usage, 0, 0},
+    {UCON64_FDSL, UCON64_NES, (const st_usage_t **)nes_usage, 0, 0},
+    {UCON64_FFE, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_FIG, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
+    {UCON64_FIGS, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_FILE, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_FIND, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_FRONTEND, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_GB, UCON64_GB, (const st_usage_t **)gameboy_usage, 1, 0},
+    {UCON64_GBA, UCON64_GBA, (const st_usage_t **)gba_usage, 1, 0},
+    {UCON64_GBX, UCON64_GB, (const st_usage_t **)gameboy_usage, 1, 0},
+    {UCON64_GC, UCON64_GAMECUBE, (const st_usage_t **)gc_usage, 1, 0},
+    {UCON64_GD3, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
+    {UCON64_GEN, UCON64_GENESIS, (const st_usage_t **)genesis_usage, 1, 0},
+    {UCON64_GG, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_GGD, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_GGE, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_GP32, UCON64_GP32, (const st_usage_t **)gp32_usage, 1, 0},
+    {UCON64_GOOD, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_HELP, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_HELP, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_HEX, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_I, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_IDPPF, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_INES, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_INESHD, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_INS, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_INSN, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_INTELLI, UCON64_INTELLI, (const st_usage_t **)intelli_usage, 1, 0},
+    {UCON64_IP, UCON64_DC, (const st_usage_t **)dc_usage, 1, 0},
+    {UCON64_ISO, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_ISPAD, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_J, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_JAG, UCON64_JAGUAR, (const st_usage_t **)jaguar_usage, 1, 0},
+    {UCON64_K, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
+    {UCON64_L, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
+    {UCON64_LNX, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
+    {UCON64_LOGO, UCON64_GBA, (const st_usage_t **)gba_usage, 1, 0},
+    {UCON64_LS, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_LSD, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_LSRAM, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_LSV, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_LYNX, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
+    {UCON64_LYX, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
+    {UCON64_MGD, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_MGH, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_MKA, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_MKCUE, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_MKI, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_MKPPF, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_MKSHEET, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_MKTOC, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_MULTI, UCON64_GBA, (const st_usage_t **)gba_usage, 0, 0},
+    {UCON64_MVS, UCON64_NEOGEO, (const st_usage_t **)neogeo_usage, 1, 0},
+    {UCON64_N, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_N2, UCON64_GENESIS, (const st_usage_t **)genesis_usage, 1, 0},
+    {UCON64_N2GB, UCON64_GB, (const st_usage_t **)gameboy_usage, 1, 0},
+    {UCON64_N64, UCON64_N64, (const st_usage_t **)n64_usage, 1, 0},
+    {UCON64_NA, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_NBAK, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_NCOL, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_NRGRIP, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_NES, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_NG, UCON64_NEOGEO, (const st_usage_t **)neogeo_usage, 1, 0},
+    {UCON64_NGP, UCON64_NEOGEOPOCKET, (const st_usage_t **)ngp_usage , 1, 0},
+    {UCON64_NPPF, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_NROT, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
+    {UCON64_NS, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_O, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_P, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_PAD, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_PADHD, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_PADN, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_PASOFAMI, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_PATCH, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_PCE, UCON64_PCE, (const st_usage_t **)pcengine_usage, 1, 0},
+    {UCON64_PORT, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_PPF, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_PS2, UCON64_PS2, (const st_usage_t **)ps2_usage, 1, 0},
+    {UCON64_PSX, UCON64_PSX, (const st_usage_t **)psx_usage, 1, 0},
+    {UCON64_Q, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_QQ, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_RROM, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_RR83, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_RL, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_ROM, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_ROTL, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
+    {UCON64_ROTR, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
+    {UCON64_S, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_S16, UCON64_SYSTEM16, (const st_usage_t **)s16_usage, 1, 0},
+    {UCON64_SAM, UCON64_NEOGEO, (const st_usage_t **)neogeo_usage, 1, 0},
+    {UCON64_SAT, UCON64_SATURN, (const st_usage_t **)sat_usage, 1, 0},
+    {UCON64_SGB, UCON64_GB, (const st_usage_t **)gameboy_usage, 1, 0},
+    {UCON64_SMC, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
+    {UCON64_SMD, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_SMDS, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_SMG, UCON64_PCE, (const st_usage_t **)pcengine_usage, 1, 0},
+    {UCON64_SMS, UCON64_SMS, (const st_usage_t **)sms_usage, 1, 0},
+    {UCON64_SNES, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
+    {UCON64_SRAM, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_SSC, UCON64_GB, (const st_usage_t **)gameboy_usage, 1, 0},
+    {UCON64_SSIZE, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
+    {UCON64_STP, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_STPN, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_STRIP, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_SWAN, UCON64_WONDERSWAN, (const st_usage_t **)swan_usage, 1, 0},
+    {UCON64_SWAP, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_SWC, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
+    {UCON64_SWCS, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_UFOS, UCON64_UNKNOWN, NULL, 0, 0},
+    {UCON64_UNIF, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_USMS, UCON64_N64, (const st_usage_t **)n64_usage, 1, 0},
+    {UCON64_V64, UCON64_N64, (const st_usage_t **)n64_usage, 1, 0},
+    {UCON64_VBOY, UCON64_VIRTUALBOY, (const st_usage_t **)vboy_usage, 1, 0},
+    {UCON64_VEC, UCON64_VECTREX, (const st_usage_t **)vectrex_usage, 1, 0},
+    {UCON64_XBOX, UCON64_XBOX, (const st_usage_t **)xbox_usage, 1, 0},
+    {UCON64_XCDRW, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_Z64, UCON64_N64, (const st_usage_t **)n64_usage, 1, 0},
+    {UCON64_HD, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_HDN, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_NHD, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_INT, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_INT2, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_NINT, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_HI, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_NHI, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_BS, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_NBS, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_CTRL, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_CTRL2, UCON64_UNKNOWN, NULL, 1, 0},
+    {UCON64_NTSC, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_PAL, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_BAT, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_NBAT, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_VRAM, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_NVRAM, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_MIRR, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_MAPR, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_CMNT, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_DUMPINFO, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
+    {UCON64_VER, UCON64_UNKNOWN, NULL, 0, 0},
+    {0, 0, NULL, 0, 0}
+  };
 
   printf ("%s\n"
     "Uses code from various people. See 'developers.html' for more!\n"
@@ -394,6 +579,16 @@ main (int argc, char **argv)
   if (!access (ucon64.discmage_path, F_OK))
     {
       libdm = open_module (ucon64.discmage_path);
+
+      dm_version = get_symbol (libdm, "dm_version");
+      
+#if 0
+      if (dm_version < LINUX_VERSION(0,0,1))
+        {
+//          fprintf (stderr, "ERROR: Your libdiscmage is too old\n\n");
+            ucon64.discmage_enabled = 0;
+        }
+#endif
 
       dm_open = get_symbol (libdm, "dm_open");
       dm_close = get_symbol (libdm, "dm_close");
@@ -497,8 +692,7 @@ main (int argc, char **argv)
   // Use "0" to force probing if the config file doesn't contain a parport line
   sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
 
-  ucon64.backup = ((!strcmp (get_property (ucon64.configfile, "backups", buf, "1"), "1")) ?
-               1 : 0);
+  ucon64.backup = get_property_int (ucon64.configfile, "backups", '=');
 
   if (argc < 2)
     {
@@ -522,12 +716,18 @@ main (int argc, char **argv)
   while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
 #include "switches.c"
+
+      for (x = 0; options2[x].option != 0 && options2[x].console != 0; x++)
+        if (options2[x].option == c)
+          { 
+            ucon64.console = options2[x].console;
+            ucon64.show_nfo = (options2[x].show_nfo ? UCON64_YES : UCON64_NO);
+            break;
+          }
     }
 
   if (!strlen (ucon64.rom) && optind < argc)
     ucon64.rom = argv[optind];
-
-//  ucon64.rom = ucon64_extract (ucon64.rom);
 
   rom_index = optind;                           // save index of first file
 
@@ -935,13 +1135,14 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   // backup unit type?
   if (rominfo->copier_usage != NULL)
     {
-      strcpy (buf, rominfo->copier_usage[0]);
+//      strcpy (buf, rominfo->copier_usage[0]->desc);
+      strcpy (buf, "");
       printf ("%s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
-      if (rominfo->copier_usage[1])
+      if (rominfo->copier_usage[1]->desc)
         {
-          strcpy (buf, rominfo->copier_usage[1]);
+          strcpy (buf, rominfo->copier_usage[1]->desc);
           printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
         }
 #endif
@@ -959,13 +1160,14 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   // console type
   if (rominfo->console_usage != NULL)
     {
-      strcpy (buf, rominfo->console_usage[0]);
+//      strcpy (buf, rominfo->console_usage[0]->desc);
+      strcpy (buf, "");
       printf ("%s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
-      if (rominfo->console_usage[1])
+      if (rominfo->console_usage[1]->desc)
         {
-          strcpy (buf, rominfo->console_usage[1]);
+          strcpy (buf, rominfo->console_usage[1]->desc);
           printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
         }
 #endif
@@ -1077,21 +1279,48 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
 
 
 static void
-ucon64_render_usage (const char **s)
+ucon64_render_usage (const st_usage_t *usage)
 {
-#if 1
-  printf("%s%s%s",
-    NULL_TO_EMPTY (s[0]),
-    s[0]?"\n":"",
-    NULL_TO_EMPTY (s[2]));
-#else
-  printf("%s%s%s%s%s",
-    NULL_TO_EMPTY (s[0]),
-    s[0]?s[1]?"\n  ":"\n":"",
-    NULL_TO_EMPTY (s[1]),
-    s[1]?"\n":"",
-    NULL_TO_EMPTY (s[2]));
-#endif
+  register int x, pos = 0;
+  char buf[128];
+  
+  for (x = 0; usage[x].option_s || usage[x].desc; x++)
+    {
+      if (!usage[x].option_s) // title
+        {
+          if (!x) // do not show date, manufacturer, etc..
+            printf ("%s\n", usage[x].desc);
+        }
+      else  // options
+        {
+          if (usage[x].option_s)
+            {
+              sprintf (buf, 
+                (strlen (usage[x].option_s) < 12 ? 
+                 "  %s%s                             " :
+                 "  %s%s "),
+                (!usage[x].option_s[1] || 
+                 usage[x].option_s[1] == '=' ||
+                 usage[x].option_s[1] == ' ' ? OPTION_S : OPTION_LONG_S),
+                usage[x].option_s);
+
+              if (buf[15] == ' ') buf[16] = 0;
+              printf ("%s", buf);
+            }
+
+          if (usage[x].desc)
+            {
+              for (pos = 0; usage[x].desc[pos]; pos++)
+                {
+                  printf ("%c", usage[x].desc[pos]);
+
+                  if (usage[x].desc[pos] == '\n')
+                    printf ("                  ");
+                }
+              printf ("\n");
+            }
+        }
+    }
 }
 
 
@@ -1099,108 +1328,88 @@ void
 ucon64_usage (int argc, char *argv[])
 {
   int c = 0, single = 0;
-#if     defined __unix__ || defined __BEOS__ // DJGPP, Cygwin, GNU/Linux, Solaris, FreeBSD, BeOS
-  char *name_exe = strrchr (argv[0], '/') + 1;
-#else // Windows
-  char *name_exe = strrchr (argv[0], '\\') + 1;
-#endif
-  // Don't use basename[2](), because it searches for FILE_SEPARATOR, which is
-  //  '\' on DOS. DJGPP's runtime system expands argv[0] to the full path, but
-  //  with forward slashes...
-
-  if (name_exe == (char *) 1)                   // argv[0] doesn't contain a
-    name_exe = argv[0];                         //  file separator
-
+  char *name_exe = basename2 (argv[0]);
+  st_usage_t options_usage[] = {
+    {NULL, "Options"},
+    {"nbak", "prevents backup files (*.BAK)"},
 #ifdef  ANSI_COLOR
-#define ANSI_COLOR_MSG "  " OPTION_LONG_S "ncol        disable ANSI colors in output\n"
-#else
-#define ANSI_COLOR_MSG ""
+    {"ncol", "disable ANSI colors in output"},
 #endif
-
-#ifdef  __MSDOS__
-#define HEXDUMP_MSG "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\"\n"
-#else
-#define HEXDUMP_MSG "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\"\n"       // less is more ;-)
-#endif
-
 #ifdef  PARALLEL
-#define PARALLEL_MSG "  " OPTION_LONG_S "port=PORT   specify parallel PORT={3bc, 378, 278, ...}\n"
-#else
-#define PARALLEL_MSG ""
+    {"port=PORT", "specify parallel PORT={3bc, 378, 278, ...}"},
 #endif
-
-  printf (
-    "Usage: %s [OPTION(S)]... [[" OPTION_LONG_S "rom=]ROM(S)]... " /* [-o=OUTPUT_PATH] */ "\n\n"
-    "Options\n"
-    "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
-    ANSI_COLOR_MSG
-    PARALLEL_MSG
-    "  " OPTION_LONG_S "hdn=N       force ROM has backup unit/emulator header with N Bytes size\n"
-    "  " OPTION_LONG_S "hd          same as " OPTION_LONG_S "hdn=512\n"
-    "                  most backup units use a header with 512 Bytes size\n"
-    "  " OPTION_LONG_S "nhd         force ROM has no backup unit/emulator header\n"
-    "  " OPTION_LONG_S "int         force ROM is interleaved (2143)\n"
-    "  " OPTION_LONG_S "nint        force ROM is not interleaved (1234)\n"
-    "  " OPTION_LONG_S "dint        convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
-    "                  this differs from the SNES & NES " OPTION_LONG_S "dint option\n"
-    "  " OPTION_LONG_S "ns          force ROM is not split\n"
-    "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
-    "  " OPTION_LONG_S "crc         show CRC32 value of ROM\n" //; this will also force calculation for\n"
-//    "                  files bigger than %d Bytes (%.4f Mb)\n"
-
-    "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
-    "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
-
+    {"hdn=N", "force ROM has backup unit/emulator header with N Bytes size"},
+    {"hd", "same as " OPTION_LONG_S "hdn=512\n"
+                     "most backup units use a header with 512 Bytes size"},
+    {"nhd", "force ROM has no backup unit/emulator header"},
+    {"int", "force ROM is interleaved (2143)"},
+    {"nint", "force ROM is not interleaved (1234)"},
+    {"dint", "convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
+               "this differs from the SNES & NES " OPTION_LONG_S "dint option"},
+    {"ns", "force ROM is not split"},
+#ifdef  __MSDOS__
+    {"e", "emulate/run ROM (check ucon64.cfg for more)"},
+#else
+    {"e", "emulate/run ROM (see $HOME/.ucon64rc for more)"},
+#endif
+    {"crc", "show CRC32 value of ROM"  //; this will also force calculation for\n"
+               /* "files bigger than %d Bytes (%.4f Mb)" */},
+    {"ls", "generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY"},
+    {"lsv", "like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY"},
 /*
     "  " OPTION_LONG_S "rl          rename all files in DIRECTORY to lowercase; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "ru          rename all files in DIRECTORY to uppercase; " OPTION_LONG_S "rom=DIRECTORY\n"
 */
-    HEXDUMP_MSG
-    "  " OPTION_LONG_S "find=STRING find STRING in ROM (wildcard: '?')\n"
-    "  " OPTION_S "c=FILE      compare FILE with ROM for differences\n"
-    "  " OPTION_LONG_S "cs=FILE     compare FILE with ROM for similarities\n"
-    "  " OPTION_LONG_S "help        display this help and exit\n"
-    "  " OPTION_LONG_S "version     output version information and exit\n"
-    "  " OPTION_S "q           be quiet (don't show ROM info)\n"
-//    "  " OPTION_LONG_S "qq          be even more quiet\n"
-    "\n",
-    name_exe, ucon64.configfile /*, MAXROMSIZE, TOMBIT_F (MAXROMSIZE) */);
+#ifdef  __MSDOS__
+    {"hex", "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\""},
+#else
+    {"hex", "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\""},       // less is more ;-)
+#endif
+    {"find=STRING", "find STRING in ROM (wildcard: '?')"},
+    {"c=FILE", "compare FILE with ROM for differences"},
+    {"cs=FILE", "compare FILE with ROM for similarities"},
+    {"help", "display this help and exit"},
+    {"version", "output version information and exit"},
+    {"q", "be quiet (don't show ROM info)"},
+//  {"qq", "be even more quiet"},
+    {NULL, NULL}
+  };
+// ucon64.config_file
 
-  printf ("Padding\n"
-    "  " OPTION_LONG_S "ispad       check if ROM is padded\n"
-    "  " OPTION_S "p, " OPTION_LONG_S "pad    pad ROM to full Mb\n"
-    "  " OPTION_LONG_S "padn=N      pad ROM to N Bytes (put Bytes with value 0x00 after end)\n"
-    "  " OPTION_LONG_S "strip=N     strip N Bytes from end of ROM\n"
-    "  " OPTION_LONG_S "stpn=N      strip N Bytes from ROM beginning\n"
-    "  " OPTION_LONG_S "stp         same as " OPTION_LONG_S "stpn=512\n"
-    "                  most backup units use a header with 512 Bytes size\n"
-    "  " OPTION_LONG_S "insn=N      insert N Bytes (0x00) before ROM\n"
-    "  " OPTION_LONG_S "ins         same as " OPTION_LONG_S "insn=512\n"
-    "                  most backup units use a header with 512 Bytes size\n"
-    "\n");
+  st_usage_t padding_usage[] = {
+    {NULL, "Padding"},
+    {"ispad", "check if ROM is padded"},
+    {"pad", "pad ROM to full Mb"},
+    {"p", "same as " OPTION_LONG_S "pad"},
+    {"padn=N", "pad ROM to N Bytes (put Bytes with value 0x00 after end)"},
+    {"strip=N", "strip N Bytes from end of ROM"},
+    {"stpn=N", "strip N Bytes from ROM beginning"},
+    {"stp", "same as " OPTION_LONG_S "stpn=512\n"
+              "most backup units use a header with 512 Bytes size"},
+    {"insn=N", "insert N Bytes (0x00) before ROM"},
+    {"ins", "same as " OPTION_LONG_S "insn=512\n"
+               "most backup units use a header with 512 Bytes size"},
+    {NULL, NULL}
+  };
+    
 
-//  if (ucon64.dat_enabled)
-    printf ("DATabase (support of DAT files)\n"
-      "  " OPTION_LONG_S "db          DATabase statistics (DAT files: %s)\n"
-      "  " OPTION_LONG_S "dbv         like " OPTION_LONG_S "db but more verbose\n"
-      "  " OPTION_LONG_S "dbs=CRC32   search ROM with CRC32 in DATabase\n"
-      "  " OPTION_LONG_S "lsd         generate ROM list for all ROMs using DATabase info; " OPTION_LONG_S "rom=DIR\n"
-      "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
-/*      "                  Only ROMs of these consoles have internal names:\n"
-      "                  %s,\n"
-      "                  %s,\n"
-      "                  %s,\n"
-      "                  %s and\n"
-      "                  %s\n" */
-      "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"
-      "  " OPTION_LONG_S "good        used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed and sorted\n"
-      "                  into subdirs according to the DATabase (\"ROM manager\")\n\n",
-      ucon64.configdir
-/*      snes_usage[0],
-      genesis_usage[0],
-      gameboy_usage[0],
-      gba_usage[0],
-      n64_usage[0]*/);
+  st_usage_t dat_usage[] = {
+    {NULL, "DATabase (support of DAT files)"},
+#ifdef  __MSDOS__
+    {"db", "DATabase statistics (DAT files: ucon64/)"},
+#else    
+    {"db", "DATabase statistics (DAT files: $HOME/.ucon64/)"},
+#endif
+    {"dbv", "like " OPTION_LONG_S "db but more verbose"},
+    {"dbs=CRC32", "search ROM with CRC32 in DATabase"},
+    {"lsd", "generate ROM list for all ROMs using DATabase info; " OPTION_LONG_S "rom=DIR"},
+    {"rrom", "rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR"},
+    {"rr83", "like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY"},
+    {"good", "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed and sorted\n"
+                "into subdirs according to the DATabase (\"ROM manager\")"},
+    {NULL, NULL}
+  };
+// ucon64.config_dir
 
 /*
 GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
@@ -1239,7 +1448,22 @@ Good_RAR     = log of RAR errors
 Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 */
 
-  printf ("Patching\n"
+
+  printf (
+    "Usage: %s [OPTION(S)]... [[" OPTION_LONG_S "rom=]ROM(S)]... " /* [-o=OUTPUT_PATH] */ "\n\n", name_exe);
+
+  ucon64_render_usage (options_usage);
+
+  printf ("\n");
+
+  ucon64_render_usage (padding_usage);
+
+  printf ("\n");
+
+//  if (ucon64.dat_enabled)
+    ucon64_render_usage (dat_usage);
+
+  printf ("\nPatching\n"
     "  " OPTION_LONG_S "patch=PATCH specify the PATCH for the following options\n"
     "                  use this option or uCON64 expects the last commandline\n"
     "                  argument to be the name of the PATCH file\n");
@@ -1257,33 +1481,11 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
     "                  %s,\n"
 //    "                  %s,\n"
     "                  %s,\n"
-    "                  %s\n",
-    gameboy_usage[0], sms_usage[0],
-//    genesis_usage[0],
-    nes_usage[0], snes_usage[0]);
+    "                  %s\n\n",
+    gameboy_usage[0].desc, sms_usage[0].desc,
+//    genesis_usage[0].desc,
+    nes_usage[0].desc, snes_usage[0].desc);
 
-    printf (
-      "\n"
-      "All DISC-based consoles (using libdiscmage)\n");
-  if (ucon64.discmage_enabled)
-    printf (
-      "  " OPTION_LONG_S "mksheet     generate TOC and CUE sheet files for IMAGE; " OPTION_LONG_S "rom=IMAGE\n"
-//      "                  " OPTION_LONG_S "rom could also be an existing TOC or CUE file\n"
-      "TODO: " OPTION_LONG_S "cdirip=Nrip/dump track N from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
-      "TODO: " OPTION_LONG_S "nrgrip=Nrip/dump track N from Nero/NRG IMAGE; " OPTION_LONG_S "rom=NRG_IMAGE\n"
-      "TODO: " OPTION_LONG_S "rip     rip/dump file(s) from a track; " OPTION_LONG_S "rom=TRACK\n"
-/*
-    OPTION_LONG_S "file=SECTOR_SIZE\n"
-      "TODO: " OPTION_LONG_S "iso     strip SECTOR_SIZE of any CD_IMAGE to MODE1/2048; " OPTION_LONG_S "rom=CD_IMAGE\n"
-      "                  " OPTION_LONG_S "file=SECTOR_SIZE\n"
-      "                  " OPTION_LONG_S "file=SECTOR_SIZE is optional, uCON64 will always try to\n"
-      "                  detect the correct SECTOR_SIZE from the CD_IMAGE itself\n"
-      "                  SECTOR_SIZE can be 2048, 2052, 2056, 2324, 2332, 2336, 2340,\n"
-      "                  2352 (default), or custom values\n"
-*/
-      "\n");
-  else
-    printf ("                %s not found; support disabled\n\n", ucon64.discmage_path);
 
   optind = 0;
   single = 0;
@@ -1291,6 +1493,7 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
   while (!single && (c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
 //      if (single) break;
+      single = 1;
 
       switch (c)
         {
@@ -1299,7 +1502,6 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 #ifdef  PARALLEL
         ucon64_render_usage (fal_usage);
 #endif // PARALLEL
-        single = 1;
         break;
 
       case UCON64_N64:
@@ -1310,12 +1512,10 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 //        ucon64_render_usage (cd64_usage);
         ucon64_render_usage (dex_usage);
 #endif // PARALLEL
-        single = 1;
         break;
 
       case UCON64_JAG:
         ucon64_render_usage (jaguar_usage);
-        single = 1;
         break;
 
       case UCON64_SNES:
@@ -1326,12 +1526,10 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 //        ucon64_render_usage (fig_usage);
 //        ucon64_render_usage (mgd_usage);
 #endif // PARALLEL
-        single = 1;
         break;
 
       case UCON64_NG:
         ucon64_render_usage (neogeo_usage);
-        single = 1;
         break;
 
       case UCON64_NGP:
@@ -1339,7 +1537,6 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 #ifdef  PARALLEL
 //        ucon64_render_usage (fpl_usage);
 #endif // PARALLEL
-        single = 1;
         break;
 
       case UCON64_GEN:
@@ -1348,7 +1545,6 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
         ucon64_render_usage (smd_usage);
 //        ucon64_render_usage (mgd_usage);
 #endif // PARALLEL
-        single = 1;
         break;
 
       case UCON64_GB:
@@ -1357,7 +1553,6 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
         ucon64_render_usage (gbx_usage);
         ucon64_render_usage (mccl_usage);
 #endif // PARALLEL
-        single = 1;
         break;
 
       case UCON64_LYNX:
@@ -1365,7 +1560,6 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 #ifdef  PARALLEL
         ucon64_render_usage (lynxit_usage);
 #endif // PARALLEL
-        single = 1;
         break;
 
       case UCON64_PCE:
@@ -1373,7 +1567,6 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 #ifdef  PARALLEL
 //        ucon64_render_usage (mgd_usage);
 #endif // PARALLEL
-        single = 1;
         break;
 
       case UCON64_SMS:
@@ -1381,22 +1574,18 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 #ifdef  PARALLEL
 //        ucon64_render_usage (smd_usage);
 #endif // PARALLEL
-        single = 1;
         break;
 
       case UCON64_NES:
         ucon64_render_usage (nes_usage);
-        single = 1;
         break;
 
       case UCON64_SWAN:
         ucon64_render_usage (swan_usage);
-        single = 1;
         break;
 
       case UCON64_DC:
         ucon64_render_usage (dc_usage);
-        single = 1;
         break;
 
       case UCON64_PSX:
@@ -1404,7 +1593,6 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 #ifdef  PARALLEL
         ucon64_render_usage (dex_usage);
 #endif // PARALLEL
-        single = 1;
         break;
 
 #if 0
@@ -1426,6 +1614,7 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 #endif
 
       default:
+        single = 0;
         break;
       }
       printf ("\n");
@@ -1575,124 +1764,4 @@ _ __ ________________________________________________________________ __ _
 4 Nodes USRobotics & Isdn Power     All Releases Since Day 0 Are Available
  SNES/Sega/Game Boy/GameGear/Ultra 64/PSX/Jaguar/Saturn/Engine/Lynx/NeoGeo
 - -- ---------------------------------------------------------------- -- -
-*/
-
-/*
-Nintendo Game Cube/Panasonic Gamecube Q
-2001/2002 Nintendo http://www.nintendo.com
-gc
-Sega System 16(A/B)/Sega System 18/dual 68000
-1987/19XX/19XX SEGA http://www.sega.com
-s16
-Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr
-1977/1982/1984/1986 Atari
-ata
-ColecoVision
-1982
-coleco
-Nintendo Virtual Boy
-19XX Nintendo http://www.nintendo.com
-vboy
-Vectrex
-1982
-vec
-Intellivision
-1979 Mattel
-intelli
-GP32 Game System
-2002 Gamepark http://www.gamepark.co.kr
-gp32
-Playstation 2
-2000 Sony http://www.playstation.com
-ps2
-XBox
-2001 Microsoft http://www.xbox.com
-xbox
-Saturn
-1994 SEGA http://www.sega.com
-sat
-Real3DO
-1993
-3do
-CD32
-1993 Commodore
-cd32
-CD-i
-1991
-cdi
-
-Vectrex (1982)
-Colecovision (1982)
-Interton VC4000 (~1980)
-Intellivision (1979)
-G7400+/Odyssey² (1978)
-Channel F (1976)
-Odyssey (Ralph Baer/USA/1972)
-Virtual Boy
-Real 3DO 1993 Panasonic/Goldstar/Philips?
-Game.com ? Tiger
-CD-i (1991) 1991
-Vectrex 1982
-Colecovision 1982
-Interton VC4000 ~1980
-Intellivision 1979
-G7400+/Odyssey² 1978
-Channel F 1976
-Odyssey 1972 Ralph Baer
-
-X-Box
-Game Cube
-Indrema
-Nuon
-GB Advance
-Playstation 2
-Dreamcast
-Nintendo 64
-Playstation
-Virtual Boy
-Saturn
-Sega 32X
-Jaguar
-3DO
-Sega CD
-Philips CDI
-Super Nintendo
-Neo·Geo
-Game Gear
-Lynx
-GameBoy
-Turbo Grafx 16
-Genesis
-XE System
-Master System
-Atari 7800
-Nintendo
-Commodore 64
-Coleco Vision
-Atari 5200
-Arcadia
-Vectrex
-Microvision
-Adv. Vision
-RDI Halcyon
-Intellivision
-Odyssey 2
-Astrocade
-Home Arcade
-Atari 2600
-RCA Studio 2
-FC Channel F
-Telstar
-Atari Pong
-PONG
-Odyssey
-
-gametz.com
-gameaxe.com
-sys2064.com
-logiqx.com
-romcenter.com
-emuchina.net
-
-Bandai announced that a new version of the system, the SwanCrystal, will debut in Japan this July.
 */

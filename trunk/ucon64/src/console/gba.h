@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef GBA_H
 #define GBA_H
-extern const char *gba_usage[];
+extern const st_usage_t gba_usage[];
 
 extern int gba_chk (st_rominfo_t *rominfo);
 extern int gba_crp (st_rominfo_t *rominfo, const char *value);

@@ -36,17 +36,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "smd.h"
 
 
-const char *smd_usage[] =
+const st_usage_t smd_usage[] =
   {
-    "Super Com Pro (HK)/Super Magic Drive/SMD",
-    "19XX Front Far East/FFE http://www.front.com.tw",
+    {NULL, "Super Com Pro (HK)/Super Magic Drive/SMD"},
+    {NULL, "19XX Front Far East/FFE http://www.front.com.tw"},
 #ifdef PARALLEL
-    "TEST: " OPTION_LONG_S "xsmd    send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
-    "                  receives automatically when ROM does not exist\n"
-    "TEST: " OPTION_LONG_S "xsmds   send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
-    "                  receives automatically when SRAM does not exist\n",
+    {"xsmd", "(TEST) send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
+                 "receives automatically when ROM does not exist"},
+    {"xsmds", "(TEST) send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
+                 "receives automatically when SRAM does not exist"},
 #endif // PARALLEL
-    NULL};
+    {NULL, NULL}
+  };
 
 
 #ifdef PARALLEL

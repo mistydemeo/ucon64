@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef GB_H
 #define GB_H
-extern const char *gameboy_usage[];
+extern const st_usage_t gameboy_usage[];
 
 extern int gameboy_chk (st_rominfo_t *rominfo);
 extern int gameboy_gbx (st_rominfo_t *rominfo);

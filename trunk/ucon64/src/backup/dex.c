@@ -29,13 +29,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "quick_io.h"
 
-const char *dex_usage[] =
+const st_usage_t dex_usage[] =
   {
-    "DexDrive",
-    "19XX InterAct http://www.dexdrive.de",
-    "TEST: " OPTION_LONG_S "xdex=N  send/receive Block N to/from DexDrive; " OPTION_LONG_S "port=PORT\n"
-    "                  receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n",
-    NULL
+    {NULL, "DexDrive"},
+    {NULL, "19XX InterAct http://www.dexdrive.de"},
+    {"xdex=N", "(TEST) send/receive Block N to/from DexDrive; " OPTION_LONG_S "port=PORT\n"
+                 "receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist"},
+    {NULL, NULL}
   };
 
 

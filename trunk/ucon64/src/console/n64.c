@@ -50,36 +50,36 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define N64_BOT_SIZE 4032
 #define LAC_ROM_SIZE  1310720
 
-const char *n64_usage[] =
+const st_usage_t n64_usage[] =
   {
-    "Nintendo 64",
-    "1996 Nintendo http://www.nintendo.com",
-    "  " OPTION_LONG_S "n64         force recognition\n"
+    {NULL, "Nintendo 64"},
+    {NULL, "1996 Nintendo http://www.nintendo.com"},
+    {"n64", "force recognition"},
 #if 0   // unlike for SNES ROMs we can't make a mistake about this
     "  " OPTION_LONG_S "int         force ROM is in interleaved format\n"
     "  " OPTION_LONG_S "int2        force ROM is in interleaved format 2\n"
     "  " OPTION_LONG_S "nint        force ROM is not in interleaved format\n"
 #endif
-    "  " OPTION_S "n=NEW_NAME  change internal ROM name to NEW_NAME\n"
-    "  " OPTION_LONG_S "v64         convert to Doctor V64 (and compatibles/interleaved)\n"
-    "  " OPTION_LONG_S "z64         convert to Z64 (Zip Drive/not interleaved)\n"
+    {"n=NEW_NAME", "change internal ROM name to NEW_NAME"},
+    {"v64", "convert to Doctor V64 (and compatibles/interleaved)"},
+    {"z64", "convert to Z64 (Zip Drive/not interleaved)"},
 #ifdef TODO
 #warning TODO  --f      remove NTSC/PAL protection
 #endif // TODO
 #if 0
     "TODO:  " OPTION_S "f      remove NTSC/PAL protection\n"
 #endif
-    "  " OPTION_LONG_S "bot=BOOTCODE add/extract BOOTCODE (4032 Bytes) to/from ROM;\n"
-    "                  extracts automatically if BOOTCODE does not exist\n"
-    "  " OPTION_LONG_S "lsram=SRAM  LAC's Makesram; " OPTION_LONG_S "rom=(LAC's SRAM ROM image);\n"
-    "                  the SRAM must have a size of 512 Bytes\n"
-    "                  this option generates a ROM which can be used to transfer\n"
-    "                  SRAMs to your console\n"
-    "  " OPTION_LONG_S "usms=SMSROM Jos Kwanten's ultraSMS (Sega Master System/GameGear emulator);\n"
-    "                  " OPTION_LONG_S "rom=(Jos Kwanten's ultraSMS ROM image)\n"
-    "                  works only for SMSROMs which are <= 4 Mb in size\n"
-    "  " OPTION_LONG_S "chk         fix ROM checksum\n"
-    "                  supports only 6101 and 6102 boot codes\n"
+    {"bot=BOOTCODE", "add/extract BOOTCODE (4032 Bytes) to/from ROM;\n"
+                        "extracts automatically if BOOTCODE does not exist"},
+    {"lsram=SRAM", "LAC's Makesram; " OPTION_LONG_S "rom=(LAC's SRAM ROM image);\n"
+                       "the SRAM must have a size of 512 Bytes\n"
+                       "this option generates a ROM which can be used to transfer\n"
+                       "SRAMs to your console"},
+    {"usms=SMSROM", "Jos Kwanten's ultraSMS (Sega Master System/GameGear emulator);\n"
+                       OPTION_LONG_S "rom=(Jos Kwanten's ultraSMS ROM image)\n"
+                       "works only for SMSROMs which are <= 4 Mb in size"},
+    {"chk", "fix ROM checksum\n"
+              "supports only 6101 and 6102 boot codes"},
 #ifdef TODO
 #warning TODO  --bios   enable backup in Doctor V64 BIOS
 #warning TODO  --gs     apply GameShark code (permanent)
@@ -89,8 +89,7 @@ const char *n64_usage[] =
     "  " OPTION_S "p           pad ROM to full Mb\n"
     "TODO:  " OPTION_LONG_S "gs     apply GameShark code (permanent); " OPTION_LONG_S "file=CODE\n"
 #endif
-    ,
-    NULL
+    {NULL, NULL}
 };
 
 
@@ -519,14 +518,15 @@ n64_init (st_rominfo_t *rominfo)
                (n64crc.crc2 == value) ? "=" : "!", value);
     }
 
-  rominfo->console_usage = n64_usage;
-  rominfo->copier_usage = (!rominfo->buheader_len) ?
+  rominfo->console_usage = (const st_usage_t **)n64_usage;
+  rominfo->copier_usage = (const st_usage_t **)(!rominfo->buheader_len ?
     ((!rominfo->interleaved) ? z64_usage : doctor64_usage
 #if 0
 doctor64jr_usage
 cd64_usage
 #endif
-    ) : unknown_usage;
+    ) : unknown_usage);
+    
   return result;
 }
 

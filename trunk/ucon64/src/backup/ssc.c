@@ -28,11 +28,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include "ucon64.h"
 
-const char *ssc_usage[] =
+
+const st_usage_t ssc_usage[] =
   { 
-    "Super Smart Card/SSC",
-    NULL
+    {NULL, "Super Smart Card/SSC"},
+    {NULL, NULL}
   };
 
 

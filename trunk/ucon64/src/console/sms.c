@@ -35,28 +35,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/smd.h"
 
 
-const char *sms_usage[] =
+const st_usage_t sms_usage[] =
   {
-    "Sega Master System(II/III)/GameGear (Handheld)",
-    "1986/19XX SEGA http://www.sega.com",
-    "  " OPTION_LONG_S "sms         force recognition"
-    "\n"
+    {NULL, "Sega Master System(II/III)/GameGear (Handheld)"},
+    {NULL, "1986/19XX SEGA http://www.sega.com"},
+    {"sms", "force recognition"},
 #if 0
     "  " OPTION_LONG_S "hd          force ROM has header (+512 Bytes)\n"
     "  " OPTION_LONG_S "nhd         force ROM has no header (MGD2/MGH/RAW)\n"
     "TODO: show more detailed ROM info\n"
 #endif
-    "  " OPTION_LONG_S "mgd         convert to Multi Game*/MGD2/MGH/RAW\n"
-    "  " OPTION_LONG_S "smd         convert to Super Magic Drive/SMD (+512 Bytes)\n"
-    "  " OPTION_LONG_S "smds        convert emulator (*.srm) SRAM to Super Magic Drive/SMD\n"
+    {"mgd", "convert to Multi Game*/MGD2/MGH/RAW"},
+    {"smd", "convert to Super Magic Drive/SMD (+512 Bytes)"},
+    {"smds", "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"},
 #if 0
     "TODO:  " OPTION_LONG_S "chk   fix ROM checksum\n"
     "  " OPTION_LONG_S "gge         encode GameGenie code; " OPTION_LONG_S "rom=AAAA:VV or " OPTION_LONG_S "rom=AAAA:VV:CC\n"
     "  " OPTION_LONG_S "ggd         decode GameGenie code; " OPTION_LONG_S "rom=XXX-XXX or " OPTION_LONG_S "rom=XXX-XXX-XXX\n"
     "  " OPTION_LONG_S "gg          apply GameGenie code (permanent); " OPTION_LONG_S "file=CODE-CODE\n"
 #endif
-    ,
-    NULL
+    {NULL, NULL}
   };
 
 
@@ -220,8 +218,8 @@ sms_init (st_rominfo_t *rominfo)
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
     ucon64.buheader_len : 0;
 
-  rominfo->console_usage = sms_usage;
-  rominfo->copier_usage = (ucon64.buheader_len) ? mgd_usage : smd_usage;
+  rominfo->console_usage = (const st_usage_t **)sms_usage;
+  rominfo->copier_usage = (const st_usage_t **)(ucon64.buheader_len ? mgd_usage : smd_usage);
 
   return result;
 }

@@ -36,15 +36,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 
 
-const char *ppf_usage[] =
+const st_usage_t ppf_usage[] =
 {
-    NULL,
-    NULL,
-    "  " OPTION_LONG_S "ppf         apply PPF PATCH to IMAGE (PPF<=v2.0); " OPTION_LONG_S "rom=IMAGE\n"
-    "  " OPTION_LONG_S "mkppf=ORG_IMG create PPF patch; " OPTION_LONG_S "rom=MOD_IMAGE\n"
-    "  " OPTION_LONG_S "nppf=DESC   change PPF single line DESCRIPTION\n"
-    "  " OPTION_LONG_S "idppf=FILE_ID.DIZ change FILE_ID.DIZ of PPF PATCH (PPF v2.0)\n",
-    NULL
+    {"ppf", "apply PPF PATCH to IMAGE (PPF<=v2.0); " OPTION_LONG_S "rom=IMAGE"},
+    {"mkppf=ORG_IMG", "create PPF patch; " OPTION_LONG_S "rom=MOD_IMAGE"},
+    {"nppf=DESC", "change PPF single line DESCRIPTION"},
+    {"idppf=FILE_ID.DIZ", "change FILE_ID.DIZ of PPF PATCH (PPF v2.0)"},
+    {NULL, NULL}
 };
 
 /*

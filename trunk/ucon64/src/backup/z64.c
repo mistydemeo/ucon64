@@ -28,11 +28,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include "ucon64.h"
 
-const char *z64_usage[] =
+
+const st_usage_t z64_usage[] =
   {
-    "Z64",
-    NULL
+    {NULL, "Z64"},
+    {NULL, NULL}
   };
 
 #ifdef PARALLEL

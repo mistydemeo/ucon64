@@ -31,5 +31,5 @@ extern int genesis_smd (st_rominfo_t *rominfo);
 extern int genesis_smds (st_rominfo_t *rominfo);
 extern int genesis_init (st_rominfo_t *rominfo);
 
-extern const char *genesis_usage[];
+extern const st_usage_t genesis_usage[];
 #endif // GENESIS_H

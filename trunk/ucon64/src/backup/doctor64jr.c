@@ -32,14 +32,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "doctor64jr.h"
 
-const char *doctor64jr_usage[] = {
-  "Doctor64 Jr",
-  "19XX Bung Enterprises Ltd http://www.bung.com.hk",
+const st_usage_t doctor64jr_usage[] = {
+  {NULL, "Doctor64 Jr"},
+  {NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef PARALLEL
-  "  " OPTION_LONG_S "xdjr        send/receive ROM to/from Doctor64 Jr; "
-    OPTION_LONG_S "port=PORT\n"
+  {"xdjr", "send/receive ROM to/from Doctor64 Jr; " OPTION_LONG_S "port=PORT\n"
 //          "                receives automatically when ROM does not exist\n"
-    "                  currently only sending is supported\n",
+              "currently only sending is supported"},
 #ifdef TODO
 #warning TODO --xdjrs send/receive SRAM to/from Doctor64 Jr
 #endif
@@ -49,7 +48,7 @@ const char *doctor64jr_usage[] = {
     "                  receives automatically when SRAM does not exist\n"
 #endif
 #endif                          // PARALLEL
-  NULL
+  {NULL, NULL}
 };
 
 

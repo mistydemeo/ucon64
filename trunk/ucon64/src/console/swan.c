@@ -33,15 +33,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 static int swan_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
 
-const char *swan_usage[] =
+const st_usage_t swan_usage[] =
   {
-    "WonderSwan/WonderSwan Color/SwanCrystal",
-    "19XX/19XX/2002 Bandai",
-    "  " OPTION_LONG_S "swan        force recognition"
-    "\n"
-    "  " OPTION_LONG_S "chk         fix ROM checksum\n"
-    ,
-    NULL
+    {NULL, "WonderSwan/WonderSwan Color/SwanCrystal"},
+    {NULL, "19XX/19XX/2002 Bandai"},
+    {"swan", "force recognition"},
+    {"chk", "fix ROM checksum"},
+    {NULL, NULL}
 };
 
 
@@ -165,8 +163,8 @@ Byte6 - Additional capabilities(?)
   if (ucon64.console == UCON64_SWAN)
     result = 0;
 
-  rominfo->console_usage = swan_usage;
-  rominfo->copier_usage = unknown_usage;
+  rominfo->console_usage = (const st_usage_t **)swan_usage;
+  rominfo->copier_usage = (const st_usage_t **)unknown_usage;
 
   free (rom_buffer);
   return result;

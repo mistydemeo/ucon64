@@ -49,6 +49,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define INITIAL_HANDLE 1
 static st_map_t *dxe_map;
+extern int errno;
+
 
 void
 uninit_func (void)

@@ -70,7 +70,7 @@ dm_image_t *
 dm_open (const char *a)
 {
   CHECK
-  return dm_init_ptr (a);
+  return dm_open_ptr (a);
 }
 
 

@@ -1041,18 +1041,19 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
       if (ucon64.console != UCON64_UNKNOWN && !ucon64_testsplit (filename))
         {
           strcpy (buf, mkfile (strtrim (ucon64_dat ? ucon64_dat->fname : rominfo.name), '_'));
-          if (!buf[0])
-            strcpy (buf, mkfile (UCON64_UNKNOWN_S, '_'));
-          if (mode == UCON64_RR83)
-            buf[8] = 0;
-          strcat (buf, getext (ucon64.rom));
-          if (mode == UCON64_RR83)
-            buf[12] = 0;
-          if (!strcmp (ucon64.rom, buf))
-            break;
-          printf ("Renaming %s to %s\n", ucon64.rom, buf);
-//          remove (buf);
-//          rename (ucon64.rom, buf);
+          if (buf[0])
+            {
+              if (mode == UCON64_RR83)
+                buf[8] = 0;
+              strcat (buf, getext (ucon64.rom));
+              if (mode == UCON64_RR83)
+                buf[12] = 0;
+              if (!strcmp (ucon64.rom, buf))
+                break;
+              printf ("Renaming %s to %s\n", ucon64.rom, buf);
+              remove (buf);
+              rename (ucon64.rom, buf);
+            }
         }
       break;
 

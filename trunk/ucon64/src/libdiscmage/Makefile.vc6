@@ -18,7 +18,7 @@ LIBS=
 
 
 FULLLIBNAME=$(LIBNAME).dll
-DLLFLAGS=/NOLOGO /DLL /OUT:$(LIBNAME).dll $(OBJECTS) $(LIBS) /DEF:discmage.def
+DLLFLAGS=/NOLOGO /DLL /OUT:$(LIBNAME).dll $(OBJECTS) $(LIBS) /DEF:$(LIBNAME).def
 
 
 all: $(FULLLIBNAME)
@@ -28,7 +28,7 @@ clean:
 	del $(LIBNAME).dll
 	del $(LIBNAME).lib
 	del *.obj
-	del discmage.exp
+	del $(LIBNAME).exp
 
 
 distclean: clean

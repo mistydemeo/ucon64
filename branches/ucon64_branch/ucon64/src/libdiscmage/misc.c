@@ -2635,7 +2635,7 @@ url_escape_string (char *outbuf, const char *inbuf)
   const unsigned char *positiv = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "abcdefghijklmnopqrstuvwxyz" "0123456789" "-_.!~" // mark characters
     "*\\()%"                    // do not touch escape character
     ";/?:@"                     // reserved characters
-    "&=+$,"                     // see RFC 2396 
+    "&=+$,"                     // see RFC 2396
 //  "\x7f ... \xff"    fareast laurluages(Chinese, Korean, Japanese)
     "\x00";                     // \0 too
 
@@ -2662,7 +2662,7 @@ url_escape_string (char *outbuf, const char *inbuf)
   char *bufcoded = (char *) inbuf;
   char *bufplain = outbuf;
 //TODO: replace MAXBUFSIZE
-  int outbufsize = MAXBUFSIZE; 
+  int outbufsize = MAXBUFSIZE;
   static char six2pr[64] = {
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -2680,9 +2680,9 @@ url_escape_string (char *outbuf, const char *inbuf)
   static int first = 1;
 
   int nbytesdecoded, j;
-  register char *bufin = bufcoded;
-  register unsigned char *bufout = bufplain;
-  register int nprbytes;
+  char *bufin = bufcoded;
+  unsigned char *bufout = (unsigned char *) bufplain;
+  int nprbytes;
 
   /*
      ** If this is the first call, initialize the mappiurl table.

@@ -36,6 +36,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define DAT_FIELD_SEPARATOR (0xac)
 #define DAT_FIELD_SEPARATOR_S ("\xac")
 
+typedef struct
+{
+  uint8_t console; // UCON64_SNES, UCON64_NES, etc.
+  const char *id; // strings to detect console from refname or fname
+} console_t;
 
 static DIR *dptr = NULL;
 static FILE *fdat = NULL;
@@ -152,123 +157,42 @@ line_to_dat (const char *dat_entry, ucon64_dat_t * dat)
     NULL
   };
 
+  static const console_t console_type[] = {
+    {UCON64_SNES, "snes"},
+    {UCON64_SNES, "super nintendo"},
+    {UCON64_NES, "goodnes"},
+    {UCON64_NES, " nes"},
 #if 0
-      fclose_fdat ();
-      while (get_next_dat_entry (buf, &dat))
-        {
-          switch (dat.console)
-            {
-            case UCON64_GB:
-              p = "UCON64_GB";
-              break;
-
-            case UCON64_GENESIS:
-              p = "UCON64_GENESIS";
-              break;
-
-            case UCON64_SMS:
-              p = "UCON64_SMS";
-              break;
-
-            case UCON64_JAGUAR:
-              p = "UCON64_JAGUAR";
-              break;
-
-            case UCON64_LYNX:
-              p = "UCON64_LYNX";
-              break;
-
-            case UCON64_N64:
-              p = "UCON64_N64";
-              break;
-
-            case UCON64_NEOGEO:
-              p = "UCON64_NEOGEO";
-              break;
-
-            case UCON64_NES:
-              p = "UCON64_NES";
-              break;
-
-            case UCON64_PCE:
-              p = "UCON64_PCE";
-              break;
-#if 0
-            case UCON64_PSX:
-              p = "UCON64_PSX";
-              break;
-
-            case UCON64_PS2:
-              p = "UCON64_PS2";
-              break;
-
-            case UCON64_SATURN:
-              p = "UCON64_SATURN";
-              break;
-
-            case UCON64_DC:
-              p = "UCON64_DC";
-              break;
-
-            case UCON64_CD32:
-              p = "UCON64_CD32";
-              break;
-
-            case UCON64_CDI:
-              p = "UCON64_CDI";
-              break;
-
-            case UCON64_REAL3DO:
-              p = "UCON64_REAL3DO";
-              break;
+    {UCON64_GB, "gb"},
+    {UCON64_GENESIS, ""},
+    {UCON64_SMS, ""},
+    {UCON64_JAGUAR, ""},
+    {UCON64_LYNX, ""},
+    {UCON64_N64, ""},
+    {UCON64_NEOGEO, ""},
+    {UCON64_NES, ""},
+    {UCON64_PCE, ""},
+    {UCON64_PSX, ""},
+    {UCON64_PS2, ""},
+    {UCON64_SATURN, ""},
+    {UCON64_DC, ""},
+    {UCON64_CD32, ""},
+    {UCON64_CDI, ""},
+    {UCON64_REAL3DO, ""},
+    {UCON64_SNES, ""},
+    {UCON64_ATARI, ""},
+    {UCON64_SYSTEM16, ""},
+    {UCON64_NEOGEOPOCKET, ""},
+    {UCON64_GBA, ""},
+    {UCON64_VECTREX, ""},
+    {UCON64_VIRTUALBOY, ""},
+    {UCON64_WONDERSWAN, ""},
+    {UCON64_COLECO, ""},
+    {UCON64_INTELLI, ""},
 #endif
-            case UCON64_SNES:
-              p = "UCON64_SNES";
-              break;
+    {0, 0}
+  };
 
-            case UCON64_ATARI:
-              p = "UCON64_ATARI";
-              break;
-
-            case UCON64_SYSTEM16:
-              p = "UCON64_SYSTEM16";
-              break;
-
-            case UCON64_NEOGEOPOCKET:
-              p = "UCON64_NEOGEOPOCKET";
-              break;
-
-            case UCON64_GBA:
-              p = "UCON64_GBA";
-              break;
-
-            case UCON64_VECTREX:
-              p = "UCON64_VECTREX";
-              break;
-
-            case UCON64_VIRTUALBOY:
-              p = "UCON64_VIRTUALBOY";
-              break;
-
-            case UCON64_WONDERSWAN:
-              p = "UCON64_WONDERSWAN";
-              break;
-
-            case UCON64_COLECO:
-              p = "UCON64_COLECO";
-              break;
-
-            case UCON64_INTELLI:
-              p = "UCON64_INTELLI";
-              break;
-
-            default:
-              p = "UCON64_UNKNOWN";
-              break;
-            }
-        }
-#endif
-  
   unsigned char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL };
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], *p = NULL;
   uint32_t pos = 0;
@@ -329,10 +253,19 @@ line_to_dat (const char *dat_entry, ucon64_dat_t * dat)
         }
     }
 
-  dat->console = (uint8_t) ucon64.console;  // important
-
-//  dat->console = UCON64_UNKNOWN;
-
+  dat->console = UCON64_UNKNOWN;
+  if (ucon64.console != UCON64_UNKNOWN)
+    dat->console = (uint8_t) ucon64.console;  // important
+  else
+    {
+      for (pos = 0; console_type[pos].console; pos++)
+        if (!stristr (dat->fname, console_type[pos].id) ||
+          !stristr (dat->refname, console_type[pos].id))
+          {
+            dat->console = console_type[pos].console;
+            break;
+          }
+    }
   return dat;
 }
 
@@ -569,16 +502,132 @@ ucon64_dat_indexer (void)
 void
 ucon64_dat_nfo (const ucon64_dat_t *dat)
 {
- if (!dat)
-   {
-     fprintf (stdout, ucon64_msg[DAT_ERROR], ucon64.crc32);
-     return;
-   }
+  char *p = NULL;
+
+  if (!dat)
+    {
+      fprintf (stdout, ucon64_msg[DAT_ERROR], ucon64.crc32);
+      return;
+    }
 
   printf ("DAT info:\n" "  %s\n", dat->name);
 
   if (dat->misc[0])
     printf ("  %s\n", dat->misc);
+  
+  switch (dat->console) //TODO this "mess" will be replaced by a nice array soon
+    {
+    case UCON64_GB:
+      p = "UCON64_GB";
+      break;
+
+    case UCON64_GENESIS:
+      p = "UCON64_GENESIS";
+      break;
+
+    case UCON64_SMS:
+      p = "UCON64_SMS";
+      break;
+
+    case UCON64_JAGUAR:
+      p = "UCON64_JAGUAR";
+      break;
+
+    case UCON64_LYNX:
+      p = "UCON64_LYNX";
+      break;
+
+    case UCON64_N64:
+      p = "UCON64_N64";
+      break;
+
+    case UCON64_NEOGEO:
+      p = "UCON64_NEOGEO";
+      break;
+
+    case UCON64_NES:
+      p = "UCON64_NES";
+      break;
+
+    case UCON64_PCE:
+      p = "UCON64_PCE";
+      break;
+
+    case UCON64_PSX:
+      p = "UCON64_PSX";
+      break;
+
+    case UCON64_PS2:
+      p = "UCON64_PS2";
+      break;
+
+    case UCON64_SATURN:
+      p = "UCON64_SATURN";
+      break;
+
+    case UCON64_DC:
+      p = "UCON64_DC";
+      break;
+
+    case UCON64_CD32:
+      p = "UCON64_CD32";
+      break;
+
+    case UCON64_CDI:
+      p = "UCON64_CDI";
+      break;
+
+    case UCON64_REAL3DO:
+      p = "UCON64_REAL3DO";
+      break;
+
+    case UCON64_SNES:
+      p = "UCON64_SNES";
+      break;
+
+    case UCON64_ATARI:
+      p = "UCON64_ATARI";
+      break;
+
+    case UCON64_SYSTEM16:
+      p = "UCON64_SYSTEM16";
+      break;
+
+    case UCON64_NEOGEOPOCKET:
+      p = "UCON64_NEOGEOPOCKET";
+      break;
+
+    case UCON64_GBA:
+      p = "UCON64_GBA";
+      break;
+
+    case UCON64_VECTREX:
+      p = "UCON64_VECTREX";
+      break;
+
+    case UCON64_VIRTUALBOY:
+      p = "UCON64_VIRTUALBOY";
+      break;
+
+    case UCON64_WONDERSWAN:
+      p = "UCON64_WONDERSWAN";
+      break;
+
+    case UCON64_COLECO:
+      p = "UCON64_COLECO";
+      break;
+
+    case UCON64_INTELLI:
+      p = "UCON64_INTELLI";
+      break;
+
+    default:
+      p = "UCON64_UNKNOWN";
+      break;
+    }
+
+  if (p)
+    printf ("  Console: %s\n", p); //TODO this will look better soon
 
 //  if (dat->country)
 //    printf ("  Country: %s\n", dat->country);
@@ -595,5 +644,4 @@ ucon64_dat_nfo (const ucon64_dat_t *dat)
           dat->version,
           dat->date,
           dat->refname);
-
 }

@@ -1562,7 +1562,12 @@ af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken 
       change_string ("\xaf\x3f\x21\x00\x29\x10\x00\xd0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\xad\x3f\x21\x29\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\xad\x3f\x21\x29\x10\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+
+      if (snes_sramsize == 8 * 1024)            // actually Live-a-Live
+        change_string ("\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      else
+        change_string ("\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+
       change_string ("\xad\x3f\x21\x29\x10\xc9\x00\xf0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
       change_string ("\xaf\x3f\x21\x00\x02\x10\x00\xf0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
                      "\x29\x89", 2);

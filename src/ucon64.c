@@ -6,7 +6,7 @@ handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2002 dbjh
+           2001 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -44,7 +44,7 @@ write programs in C
 #endif
 
 #include "config.h"
-#ifdef DEBUG
+#ifdef  DEBUG
 #warning DEBUG active
 #endif
 #include "getopt.h"
@@ -103,7 +103,7 @@ static void ucon64_exit (void);
 static void ucon64_usage (int argc, char *argv[]);
 
 st_ucon64_t ucon64;
-static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2002";
+static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
 static int ucon64_fsize = 0;
 
 const struct option long_options[] = {
@@ -240,7 +240,7 @@ const struct option long_options[] = {
     {"swap", 0, 0, UCON64_SWAP},
     {"swc", 0, 0, UCON64_SWC},
     {"swcs", 0, 0, UCON64_SWCS},
-#ifdef DEBUG
+#ifdef  DEBUG
     {"test", 0, 0, UCON64_TEST},
 #endif // DEBUG
     {"ufos", 0, 0, UCON64_UFOS},
@@ -251,7 +251,7 @@ const struct option long_options[] = {
     {"vec", 0, 0, UCON64_VEC},
     {"xbox", 0, 0, UCON64_XBOX},
     {"xcdrw", 0, 0, UCON64_XCDRW},
-#ifdef BACKUP
+#ifdef  BACKUP
     {"xdex", 1, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
     {"xfal", 0, 0, UCON64_XFAL},
@@ -505,7 +505,7 @@ main (int argc, char **argv)
   if (!strlen (ucon64.file) && optind < argc)
     ucon64.file = argv[optind++];
 
-#ifdef BACKUP
+#ifdef  BACKUP
   if (ucon64.file)
     sscanf (ucon64.file, "%x", &ucon64.parport);
 #endif
@@ -717,7 +717,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       if (rominfo->current_crc32 == 0)
         rominfo->current_crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
 
-#ifdef DB
+#ifdef  DB
       switch (ucon64.console)
         {
           case UCON64_SNES:
@@ -1088,7 +1088,7 @@ ucon64_usage (int argc, char *argv[])
         {
       case UCON64_GBA:
         UCON64_USAGE (gba_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
         UCON64_USAGE (fal_usage);
 #endif // BACKUP
         single = 1;
@@ -1096,7 +1096,7 @@ ucon64_usage (int argc, char *argv[])
 
       case UCON64_N64:
         UCON64_USAGE (n64_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
         UCON64_USAGE (doctor64_usage);
         UCON64_USAGE (doctor64jr_usage);
 //        UCON64_USAGE (cd64_usage);
@@ -1112,7 +1112,7 @@ ucon64_usage (int argc, char *argv[])
 
       case UCON64_SNES:
         UCON64_USAGE (snes_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
         UCON64_USAGE (swc_usage);
         UCON64_USAGE (gd_usage);
 //        UCON64_USAGE (fig_usage);
@@ -1129,7 +1129,7 @@ ucon64_usage (int argc, char *argv[])
 
       case UCON64_NGP:
         UCON64_USAGE (ngp_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
 //        UCON64_USAGE (fpl_usage);
 #endif // BACKUP
         single = 1;
@@ -1137,7 +1137,7 @@ ucon64_usage (int argc, char *argv[])
 
       case UCON64_GEN:
         UCON64_USAGE (genesis_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
         UCON64_USAGE (smd_usage);
 //        UCON64_USAGE (mgd_usage);
 #endif // BACKUP
@@ -1146,7 +1146,7 @@ ucon64_usage (int argc, char *argv[])
 
       case UCON64_GB:
         UCON64_USAGE (gameboy_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
         UCON64_USAGE (gbx_usage);
         UCON64_USAGE (mccl_usage);
 #endif // BACKUP
@@ -1155,7 +1155,7 @@ ucon64_usage (int argc, char *argv[])
 
       case UCON64_LYNX:
         UCON64_USAGE (lynx_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
         UCON64_USAGE (lynxit_usage);
 #endif // BACKUP
         single = 1;
@@ -1163,7 +1163,7 @@ ucon64_usage (int argc, char *argv[])
 
       case UCON64_PCE:
         UCON64_USAGE (pcengine_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
 //        UCON64_USAGE (mgd_usage);
 #endif // BACKUP
         single = 1;
@@ -1171,7 +1171,7 @@ ucon64_usage (int argc, char *argv[])
 
       case UCON64_SMS:
         UCON64_USAGE (sms_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
 //        UCON64_USAGE (smd_usage);
 #endif // BACKUP
         single = 1;
@@ -1194,7 +1194,7 @@ ucon64_usage (int argc, char *argv[])
 
       case UCON64_PSX:
         UCON64_USAGE (psx_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
         UCON64_USAGE (dex_usage);
 #endif // BACKUP
         single = 1;
@@ -1230,19 +1230,19 @@ ucon64_usage (int argc, char *argv[])
       printf("\n");
 
       UCON64_USAGE (psx_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
       UCON64_USAGE (dex_usage);
 #endif // BACKUP
       printf ("\n");
 
       UCON64_USAGE (gba_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
       UCON64_USAGE (fal_usage);
 #endif // BACKUP
       printf ("\n");
 
       UCON64_USAGE (n64_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
       UCON64_USAGE (doctor64_usage);
       UCON64_USAGE (doctor64jr_usage);
 //      UCON64_USAGE (cd64_usage);
@@ -1251,7 +1251,7 @@ ucon64_usage (int argc, char *argv[])
       printf ("\n");
 
       UCON64_USAGE (snes_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
       UCON64_USAGE (swc_usage);
       UCON64_USAGE (gd_usage);
 //      UCON64_USAGE (fig_usage);
@@ -1264,33 +1264,33 @@ ucon64_usage (int argc, char *argv[])
       printf ("\n");
 
       UCON64_USAGE (genesis_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
       UCON64_USAGE (smd_usage);
 //      UCON64_USAGE (mgd_usage);
 #endif // BACKUP
       printf ("\n");
 
       UCON64_USAGE (gameboy_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
       UCON64_USAGE (gbx_usage);
       UCON64_USAGE (mccl_usage);
 #endif // BACKUP
       printf ("\n");
 
       UCON64_USAGE (lynx_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
       UCON64_USAGE (lynxit_usage);
 #endif // BACKUP
       printf ("\n");
 
       UCON64_USAGE (pcengine_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
 //      UCON64_USAGE (mgd_usage);
 #endif // BACKUP
       printf ("\n");
 
       UCON64_USAGE (sms_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
 //      UCON64_USAGE (smd_usage);
 #endif // BACKUP
       printf ("\n");
@@ -1305,24 +1305,24 @@ ucon64_usage (int argc, char *argv[])
       printf ("\n");
 
       UCON64_USAGE (ngp_usage);
-#ifdef BACKUP
+#ifdef  BACKUP
 //      UCON64_USAGE (fpl_usage);
 #endif // BACKUP
       printf ("\n");
 
-#ifdef SAMPLE
+#ifdef  SAMPLE
       UCON64_USAGE (sample_usage);
       printf ("\n");
 #endif // SAMPLE
   }
 
   printf (
-#ifdef DB
+#ifdef  DB
      "Database: %d known ROMs in cache (%+d)\n"
 #endif // DB
      "\n"
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
-#ifdef	__MSDOS__
+#ifdef  __MSDOS__
      "     %s " OPTION_LONG_S "help|more (to see everything in more)\n"
 #else
      "     %s " OPTION_LONG_S "help|less (to see everything in less)\n" // less is more ;-)
@@ -1331,7 +1331,7 @@ ucon64_usage (int argc, char *argv[])
      "\n"
      "Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
      "\n"
-#ifdef DB
+#ifdef  DB
      , ucon64_dbsize (UCON64_UNKNOWN)
      , ucon64_dbsize (UCON64_UNKNOWN) - UCON64_DBSIZE
 #endif // DB

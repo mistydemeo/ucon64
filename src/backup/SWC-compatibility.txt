@@ -1,9 +1,9 @@
 A Super Wild Card compatibility list
-Version: 1.5
+Version: 1.6
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 25 december 2002
+Date: 2 january 2003
 Hardware: Super Wild Card 2.8cc 32 MBit PAL
-Software: uCON64 1.9.8beta7 (in CVS repository as of 10 december 2002)
+Software: uCON64 1.9.8beta7 (in CVS repository as of 2 january 2003)
 
 
 Legend:
@@ -190,6 +190,7 @@ Code    Game
 0 -     Lemmings (E)
 0 -     Lost Vikings 2, The (E)
 0 -     Lost Vikings, The (U)
+2 -     Live-a-Live (J)
 1* -    Lufia II - Rise of the Sinistrals (H)
 1* -    Lufia II - Rise of the Sinistrals (U)
 0 -     Lufia & The Fortress of Doom (U)

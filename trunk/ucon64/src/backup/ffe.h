@@ -51,7 +51,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
     8      - File ID code 1 (0xaa)
     9      - File ID code 2 (0xbb)
     10     - File type; check this byte only if ID 1 & 2 match
-             2 : Magic Griffin program (PC Engine)
+             1 : Super Magic Card saver data
+             2 : Magic Griffin program (PC-Engine)
              3 : Magic Griffin SRAM data
              4 : SNES program
              5 : SWC & SMC password, SRAM data
@@ -68,10 +69,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern void ffe_init_io (unsigned int port);
 extern void ffe_deinit_io (void);
 extern void ffe_send_block (unsigned short address, unsigned char *buffer, int len);
+extern void ffe_send_block2 (unsigned short address, unsigned char *buffer, int len);
 extern void ffe_send_command0 (unsigned short address, unsigned char byte);
 extern unsigned char ffe_send_command1 (unsigned short address);
 extern void ffe_send_command (unsigned char command_code, unsigned short a, unsigned short l);
 extern void ffe_receive_block (unsigned short address, unsigned char *buffer, int len);
+extern void ffe_receive_block2 (unsigned short address, unsigned char *buffer, int len);
 extern unsigned char ffe_receiveb (void);
 extern void ffe_wait_for_ready (void);
 extern void ffe_checkabort (int status);

@@ -57,7 +57,7 @@ ENTRY=_DllMain@12
 endif
 
 FULLLIBNAME=$(LIBNAME).dll
-DLLFLAGS=$(LDFLAGS) --dll -o $(LIBNAME).dll $(OBJECTS) $(LIBS) -e $(ENTRY)
+DLLFLAGS=$(LDFLAGS) --dll $(OBJECTS) $(LIBS) -e $(ENTRY) -o $(LIBNAME).dll
 DLLTOOLFLAGS=-d tmp.def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
 ifndef DLOPEN
 DLLTOOLFLAGS+=-l $(LIBNAME).a
@@ -72,7 +72,7 @@ LIBS+=-L/mingw/lib -lkernel32 -lmsvcrt -L$(GCCA_DIR) -lgcc
 # a different filesystem than the filesystem that MinGW is installed on.
 
 FULLLIBNAME=$(LIBNAME).dll
-DLLFLAGS=$(LDFLAGS) --dll -o $(LIBNAME).dll $(OBJECTS) $(LIBS) -e _DllMain@12
+DLLFLAGS=$(LDFLAGS) --dll $(OBJECTS) $(LIBS) -e _DllMain@12 -o $(LIBNAME).dll
 DLLTOOLFLAGS=-d tmp.def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
 ifndef DLOPEN
 DLLTOOLFLAGS+=-l $(LIBNAME).a
@@ -89,7 +89,7 @@ OBJECTS+=dxe_misc.o
 GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/3.31
 LIBS+=-L$(GCCA_DIR) -lgcc
 
-DLLFLAGS=$(OBJECTS) $(LIBS) $(LDFLAGS)  
+DLLFLAGS=$(OBJECTS) $(LIBS) $(LDFLAGS)
 # $(LDFLAGS) must come after $(OBJECTS)
 FULLLIBNAME=$(LIBNAME).dxe
 
@@ -107,7 +107,7 @@ LDFLAGS+=-nostart
 else
 LDFLAGS+=-shared
 endif
-DLLFLAGS+=$(LDFLAGS) -o $(FULLLIBNAME) $(OBJECTS) $(LIBS)
+DLLFLAGS+=$(LDFLAGS) $(OBJECTS) $(LIBS) -o $(FULLLIBNAME)
 
 endif                                   # DJGPP
 endif                                   # msys

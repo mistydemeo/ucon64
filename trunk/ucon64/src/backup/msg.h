@@ -1,5 +1,5 @@
 /*
-swc.h - Magic Super Griffin support for uCON64
+msg.h - Magic Super Griffin support for uCON64
 
 written by 2003 dbjh
 

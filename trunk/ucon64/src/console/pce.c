@@ -697,7 +697,7 @@ pcengine_mgd (st_rominfo_t *rominfo)
   mgd_make_name (ucon64.rom, UCON64_PCE, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
-  // bit-swapping images for the MGD2 only makes sense for onwners of a TG-16
+  // bit-swapping images for the MGD2 only makes sense for owners of a TG-16
   //  (American version of the PCE)
   if (!rominfo->interleaved)
     {
@@ -784,7 +784,7 @@ pcengine_f (st_rominfo_t *rominfo)
 }
 
 
-int
+static int
 pcengine_check (unsigned char *buf, unsigned int len)
 // This function was contributed by Cowering. Comments are his unless stated
 //  otherwise.
@@ -913,11 +913,13 @@ pcengine_init (st_rominfo_t *rominfo)
   if (ucon64.console == UCON64_PCE)
     result = 0;
 
+#if 0 // TODO: more info is needed about this
   memcpy (&pce_header, rom_buffer + PCENGINE_HEADER_START, PCENGINE_HEADER_LEN);
+  rominfo->header = &pce_header;
+#endif
 
   rominfo->header_start = PCENGINE_HEADER_START;
   rominfo->header_len = PCENGINE_HEADER_LEN;
-  rominfo->header = &pce_header;
   rominfo->console_usage = pcengine_usage;
   rominfo->copier_usage = rominfo->buheader_len ? msg_usage : mgd_usage;
 
@@ -971,4 +973,3 @@ pcengine_init (st_rominfo_t *rominfo)
   free (rom_buffer);
   return result;
 }
-

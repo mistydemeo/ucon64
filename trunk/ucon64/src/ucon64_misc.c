@@ -533,6 +533,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XMD, UCON64_GEN, md_usage,           WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XMDS, UCON64_GEN, md_usage,          WF_STOP|WF_NO_ROM},
   {UCON64_XMSG, UCON64_PCE, pcengine_usage,    WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XSMC, UCON64_NES, nes_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT}, // send only
+  {UCON64_XSMCR, UCON64_NES, nes_usage,        WF_STOP|WF_NO_ROM},
 #if 1
   {UCON64_XSMD, UCON64_GEN, smd_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XSMDS, UCON64_GEN, smd_usage,        WF_STOP|WF_NO_ROM},

@@ -270,6 +270,8 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XMD:
     case UCON64_XMDS:
     case UCON64_XMSG:
+    case UCON64_XSMC:
+    case UCON64_XSMCR:
     case UCON64_XSMD:
     case UCON64_XSMDS:
     case UCON64_XSWC:
@@ -1730,6 +1732,23 @@ ucon64_options (int c, const char *optarg)
           else
             msg_write_rom (ucon64.rom, ucon64.parport);
         }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSMC: // we don't use WF_NO_ROM => no need to check for file
+      if (!ucon64.rominfo->buheader_len)
+        fprintf (stderr,
+                "ERROR: This ROM has no header. Convert to an SMC compatible format with -ffe\n");
+      else
+        smc_write_rom (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSMCR:
+      if (access (ucon64.rom, F_OK) != 0)
+        smc_read_rts (ucon64.rom, ucon64.parport);
+      else
+        smc_write_rts (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;
 

@@ -56,7 +56,7 @@ const st_usage_t gameboy_usage[] =
     {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
     {"logo", NULL, "restore ROM logo character data (offset: 0x104-0x134)"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/RAW"},
-    {"ssc", NULL, "convert to Super Smart Card/SSC (+512 Bytes)"},
+    {"ssc", NULL, "convert to Super Smart Card/SSC"},
     {"sgb", NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX"},
     {"gbx", NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC"},
     {"n2gb", "NESROM", "KAMI's FC EMUlator (NES emulator);\n"
@@ -113,6 +113,30 @@ typedef struct st_gameboy_chksum
 
 static st_gameboy_chksum_t checksum;
 static st_gameboy_chksum_t gameboy_chksum (st_rominfo_t *rominfo);
+
+
+int
+gameboy_logo (st_rominfo_t *rominfo)
+{
+  static const uint8_t gb_logo[] = {
+    0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B,
+    0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
+    0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E,
+    0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
+    0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC,
+    0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E
+  };
+  char dest_name[FILENAME_MAX];
+
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  q_fwrite (gb_logo, rominfo->buheader_len + 0x104,
+            48, dest_name, "r+b");
+
+  printf (ucon64_msg[WROTE], dest_name);
+  return 0;
+}
 
 
 int
@@ -595,28 +619,4 @@ gameboy_chksum (st_rominfo_t *rominfo)
   sum.value += sum.complement;
 
   return sum;
-}
-
-
-int
-gameboy_logo (st_rominfo_t *rominfo)
-{
-  static const uint8_t gb_logo[] = {
-    0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B,
-    0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
-    0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E,
-    0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
-    0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC,
-    0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E
-  };
-  char dest_name[FILENAME_MAX];
-
-  strcpy (dest_name, ucon64.rom);
-  ucon64_file_handler (dest_name, NULL, 0);
-  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fwrite (gb_logo, rominfo->buheader_len + 0x104,
-            48, dest_name, "r+b");
-
-  printf (ucon64_msg[WROTE], dest_name);
-  return 0;
 }

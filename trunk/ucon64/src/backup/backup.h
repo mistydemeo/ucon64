@@ -42,6 +42,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "mgd.h"
 #include "msg.h"
 //#include "psxpblib.h"
+#include "smc.h"
 #include "smd.h"
 #include "ssc.h"
 #include "swc.h"

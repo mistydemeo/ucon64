@@ -881,7 +881,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   if (dat->console_usage != NULL)
     {
       strcpy (buf, dat->console_usage[0].desc);
-      // fix ugly multi-line console "usages" (PC Engine)
+      // fix ugly multi-line console "usages" (PC-Engine)
       if ((p = strchr (buf, '\n')) != NULL)
         *p = 0;
       printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
@@ -1047,7 +1047,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
             console_name = "Neo Geo Pocket";
             break;
           case UCON64_PCE:
-            console_name = "PC Engine";
+            console_name = "PC-Engine";
             break;
           case UCON64_PS2:
             console_name = "Playstation 2";

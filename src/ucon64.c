@@ -392,7 +392,7 @@ main (int argc, char **argv)
   ucon64_configfile ();
   ucon64.discmage_enabled = ucon64_libdiscmage ();
 
-  ucon64.show_nfo = UCON64_YES;
+  ucon64.show_nfo = TRUE;
 
 #ifdef  ANSI_COLOR
   ucon64.ansi_color = get_property_int (ucon64.configfile, "ansi_color", '=');
@@ -475,7 +475,7 @@ main (int argc, char **argv)
         if (options2[x].option == c)
           { 
             ucon64.console = options2[x].console;
-            ucon64.show_nfo = ((options2[x].flags & WF_SHOW_NFO) ? UCON64_YES : UCON64_NO);
+            ucon64.show_nfo = ((options2[x].flags & WF_SHOW_NFO) ? TRUE : FALSE);
             break;
           }
 
@@ -652,13 +652,13 @@ ucon64_process_rom (const char *fname, int console, int show_nfo)
   ucon64.show_nfo = show_nfo;
 
   ucon64_init (ucon64.rom, &rom);
-  if (ucon64.show_nfo == UCON64_YES)
+  if (ucon64.show_nfo == TRUE)
     ucon64_nfo (&rom);
-  ucon64.show_nfo = UCON64_NO;
+  ucon64.show_nfo = FALSE;
 
   special_option = ucon64_execute_options ();
 
-  if (ucon64.show_nfo == UCON64_YES)
+  if (ucon64.show_nfo == TRUE)
     {
       ucon64_init (ucon64.rom, &rom);
       ucon64_nfo (&rom);
@@ -672,7 +672,7 @@ int
 ucon64_execute_options (void)
 // execute all options for a single file
 {
-  int ucon64_argc, c, result = 0, value = 0, special_option = 0;
+  int ucon64_argc, c, result = 0, value = 0, special_option = 0, x = 0;
   unsigned int padded;
   char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   const char *ucon64_argv[128];
@@ -682,7 +682,17 @@ ucon64_execute_options (void)
             getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
     {
 #include "options.c"
+
+#if 1
       // "special" options
+      for (x = 0; options2[x].option != 0; x++)
+        if (options2[x].option == ucon64_option)
+          {
+            if (options2[x].flags & WF_SPECIAL_OPT) // is "WF_SPECIAL_OPT" ok?
+              special_option = 1;
+            break;
+          }
+#else
       switch (ucon64_option)
         {
         // -multi (and -xfalmulti) takes more than one file as argument, but
@@ -712,6 +722,7 @@ ucon64_execute_options (void)
         default:
           ;
         }
+#endif
     }
   return special_option;
 }

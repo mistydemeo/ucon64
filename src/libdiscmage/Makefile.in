@@ -42,7 +42,7 @@ endif
 LIBNAME=discmage
 OBJECTS=libdm_misc.o dllinit.o misc.o format/format.o format/cdi.o \
         format/nero.o format/cue.o format/toc.o format/other.o
-ifdef ZLIB
+ifdef USE_ZLIB
 LIBS=-lz
 OBJECTS+=unzip.o map.o misc_z.o
 else
@@ -53,7 +53,7 @@ ifdef DJGPP                             # DJGPP code in dllinit needs map code
 OBJECTS+=map.o
 endif                                   # DJGPP
 endif                                   # GCC_WIN
-endif                                   # ZLIB
+endif                                   # USE_ZLIB
 
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP

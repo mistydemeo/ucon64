@@ -1602,7 +1602,8 @@ ucon64_usage (int argc, char *argv[])
      "DATabase: %d known ROMs (DAT files: %s)\n\n",
        ucon64_dat_total_entries (),
        ucon64.datdir);
-          
+
+#ifdef  DISCMAGE          
   name_discmage =
 #ifdef  DLOPEN
     ucon64.discmage_path;
@@ -1623,6 +1624,7 @@ ucon64_usage (int argc, char *argv[])
       printf (ucon64_msg[NO_LIB], name_discmage);
       printf ("\n");
     }
+#endif
     
 #undef  PARALLEL_MSG
 #ifdef  PARALLEL

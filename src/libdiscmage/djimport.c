@@ -34,6 +34,8 @@ static int dxe_loaded = 0;
 char djimport_path[FILENAME_MAX] = "discmage.dxe"; // default value
 
 static void *libdm;
+static const uint32_t *dm_version_ptr;
+static const st_dm_usage_t *dm_usage_ptr;
 static dm_image_t *(*dm_open_ptr) (const char *);
 static int (*dm_close_ptr) (dm_image_t *);
 static int32_t (*dm_rip_ptr) (dm_image_t *);

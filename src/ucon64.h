@@ -33,9 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_defines.h"
 
 
-/*
-  the usage type
-*/
 typedef struct
 {
   const char *option_s;                         // "chk", ..

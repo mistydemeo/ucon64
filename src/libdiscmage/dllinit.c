@@ -79,6 +79,9 @@ dxe_init (void)
   symbol = map_create (10);                     // Read comment in map.h!
   symbol->cmp_key = (int (*) (void *, void *)) strcmp; // How beautiful! ;-)
 
+  symbol = map_put (symbol, "dm_version", dm_version);
+  symbol = map_put (symbol, "dm_usage", dm_usage);
+
   symbol = map_put (symbol, "dm_open", dm_open);
   symbol = map_put (symbol, "dm_close", dm_close);
 

@@ -320,7 +320,10 @@ const struct option options[] =   {
 void *libdm;
 
 #define dm_version dm_version_ptr
-const uint32_t (*dm_version_ptr) = 0;
+const uint32_t *dm_version_ptr = 0;
+
+#define dm_usage dm_usage_ptr
+const st_dm_usage_t *dm_usage_ptr = NULL;
 
 #define dm_open dm_open_ptr
 #define dm_close dm_close_ptr
@@ -403,10 +406,12 @@ main (int argc, char **argv)
 #if 0
       if (dm_version < LINUX_VERSION(0,0,1))
         {
-//          fprintf (stderr, "ERROR: Your libdiscmage is too old\n\n");
-            ucon64.discmage_enabled = 0;
+          fprintf (stderr, "ERROR: Your libdiscmage is too old\n\n");
+          ucon64.discmage_enabled = 0;
         }
 #endif
+
+      dm_usage = get_symbol (libdm, "dm_usage");
 
       dm_open = get_symbol (libdm, "dm_open");
       dm_close = get_symbol (libdm, "dm_close");
@@ -1326,7 +1331,7 @@ ucon64_usage (int argc, char *argv[])
 #endif
     {"dbv", "like " OPTION_LONG_S "db but more verbose"},
     {"dbs=CRC32", "search ROM with CRC32 in DATabase"},
-    {"lsd", "generate ROM list for all ROMs using DATabase info; " OPTION_LONG_S "rom=ROM|DIR"},
+    {"lsd", "generate ROM list for all ROMs using DATabase; " OPTION_LONG_S "rom=ROM|DIR"},
     {"rrom", "rename all ROMs in DIR to their internal names; " OPTION_LONG_S "rom=ROM|DIR"},
     {"rr83", "like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=ROM|DIR"},
     {"good", "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed and sorted\n"
@@ -1417,6 +1422,12 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 //    genesis_usage[0].desc,
     nes_usage[0].desc, snes_usage[0].desc);
 
+  printf ("All DISC-based consoles (using libdiscmage)\n");
+  if (!ucon64.discmage_enabled)
+    printf ("                %s not found; support disabled\n", ucon64.discmage_path);
+  else
+    ucon64_render_usage ((const st_usage_t *)dm_usage);
+  printf ("\n");
 
   optind = 0;
   single = 0;

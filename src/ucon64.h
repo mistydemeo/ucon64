@@ -56,6 +56,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_VIRTUALBOY	23
 #define ucon64_WONDERSWAN	24
 #define ucon64_COLECO		25
+#define ucon64_INTELLI		26
 
 #define ucon64_VERSION "1.9.7"
 

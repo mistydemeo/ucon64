@@ -1,9 +1,9 @@
 /*
 ips.c - IPS support for uCON64
 
-written by ???? - ???? madman
-           1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2002 dbjh
+Copyright (c) ???? - ???? madman
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c)        2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

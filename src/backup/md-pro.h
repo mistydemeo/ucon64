@@ -1,7 +1,7 @@
 /*
 md-pro.h - MD-PRO flash card programmer support for uCON64
 
-written by 2003 dbjh
+Copyright (c) 2003 dbjh
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
 code has been used with permission. However, ToToTEK Multi Media explicitly
@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef MD_PRO_H
 #define MD_PRO_H
+
 extern const st_getopt2_t mdpro_usage[];
 
 #ifdef USE_PARALLEL
@@ -31,6 +32,6 @@ extern int md_read_rom (const char *filename, unsigned int parport, int size);
 extern int md_write_rom (const char *filename, unsigned int parport);
 extern int md_read_sram (const char *filename, unsigned int parport, int start_bank);
 extern int md_write_sram (const char *filename, unsigned int parport, int start_bank);
-#endif // USE_PARALLEL
+#endif
 
-#endif // MD_PRO_H
+#endif

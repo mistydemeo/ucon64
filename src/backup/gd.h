@@ -1,8 +1,8 @@
 /*
 gd.h - Game Doctor support for uCON64
 
-written by 2002 John Weidman
-           2002 dbjh
+Copyright (c) 2002 John Weidman
+Copyright (c) 2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@ extern const st_getopt2_t gd_usage[];
 #define GD_HEADER_START 0
 #define GD_HEADER_LEN 512
 #define GD3_MAX_UNITS 16                        // Maximum that the hardware supports
-// Each logical memory unit is 8Mbit in size (internally it's 2*4Mbit)
+// Each logical memory unit is 8 Mbit in size (internally it's 2*4 Mbit)
 
 #ifdef USE_PARALLEL
 extern int gd3_read_rom (const char *filename, unsigned int parport);
@@ -46,4 +46,4 @@ extern int gd6_read_saver (const char *filename, unsigned int parport);
 extern int gd6_write_saver (const char *filename, unsigned int parport);
 #endif // USE_PARALLEL
 
-#endif // MGD_H
+#endif // GD_H

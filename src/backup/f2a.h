@@ -1,8 +1,8 @@
 /*
 f2a.h - Flash 2 Advance support for uCON64
 
-written by 2003 Ulrich Hecht (uli@emulinks.de)
-           2004 NoisyB (noisyb@gmx.net)
+Copyright (c) 2003 Ulrich Hecht <uli@emulinks.de>
+Copyright (c) 2004 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -21,15 +21,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef F2A_H
 #define F2A_H
-extern const st_getopt2_t f2a_usage[];
 
-#define F2A_HEADER_START 0
-#define F2A_HEADER_LEN 0
+extern const st_getopt2_t f2a_usage[];
 
 #if     defined USE_PARALLEL || defined USE_USB
 extern int f2a_read_rom (const char *filename, int size);
 extern int f2a_write_rom (const char *filename, int size);
 extern int f2a_read_sram (const char *filename, int bank);
 extern int f2a_write_sram (const char *filename, int bank);
-#endif // USE_PARALLEL
+#endif
+
 #endif

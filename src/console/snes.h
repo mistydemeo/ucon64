@@ -1,9 +1,9 @@
 /*
 snes.h - Super NES support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
-           2002 - 2003 John Weidman
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 2001 - 2003 dbjh
+Copyright (c) 2002 - 2003 John Weidman
 
 
 This program is free software; you can redistribute it and/or modify
@@ -61,4 +61,4 @@ extern int snes_swc (st_rominfo_t *rominfo);
 extern int snes_swcs (void);
 extern int snes_ufo (st_rominfo_t *rominfo);
 extern int snes_ufos (void);
-#endif /* SNES_H */
+#endif // SNES_H

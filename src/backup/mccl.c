@@ -1,7 +1,8 @@
 /*
 mccl.c - Mad Catz Camera Link (Game Boy Camera) support for uCON64
 
-written by 2002 NoisyB (noisyb@gmx.net)
+Copyright (c) 2002 NoisyB <noisyb@gmx.net>
+
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -34,10 +34,10 @@ endif
 
 ifeq ($(findstring DJGPP,$(OSTYPE)),)
 ifneq ($(GCC_WIN),1)
-CFLAGS += -fPIC
+CFLAGS+=-fPIC
 else
 # Cygwin and MinGW need an import library for a DLL
-LDFLAGS += -Wl,--out-implib,libcd64dll.a
+LDFLAGS+=-Wl,--out-implib,libcd64dll.a
 endif
 endif
 
@@ -45,26 +45,26 @@ endif
 #  gcc I use is just old.
 ifeq ($(findstring FreeBSD,$(OSTYPE)),)
 ifeq ($(findstring OpenBSD,$(OSTYPE)),)
-CFLAGS += -std=gnu99
+CFLAGS+=-std=gnu99
 endif
 endif
 
 
-DEFAULT_BUILD = 1
+DEFAULT_BUILD=1
 
 # If the user passed anything, we are not a default build.
 
 ifdef LIBIEEE1284
-DEFAULT_BUILD = 0
+DEFAULT_BUILD=0
 else
 ifdef PPDEV
-DEFAULT_BUILD = 0
+DEFAULT_BUILD=0
 else
 ifdef PORTDEV
-DEFAULT_BUILD = 0
+DEFAULT_BUILD=0
 else
 ifdef RAWIO
-DEFAULT_BUILD = 0
+DEFAULT_BUILD=0
 endif
 endif
 endif
@@ -74,40 +74,40 @@ ifeq ($(DEFAULT_BUILD),1)
 # Put default build options for each OS here
 
 ifeq ($(findstring DJGPP,$(OSTYPE)),DJGPP)
-RAWIO = 1
+RAWIO=1
 endif
 
 ifeq ($(findstring MINGW,$(OSTYPE)),MINGW)
-RAWIO = 1
+RAWIO=1
 endif
 
 ifeq ($(findstring CYGWIN,$(OSTYPE)),CYGWIN)
-RAWIO = 1
+RAWIO=1
 endif
 
 ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
-RAWIO = 1
+RAWIO=1
 endif
 
 ifeq ($(findstring OpenBSD,$(OSTYPE)),OpenBSD)
 # i386_iopl() is located in libi386.a (note the .a)
-LIBS += -li386
-RAWIO = 1
+LIBS+=-L/usr/lib -li386
+RAWIO=1
 endif
 
 ifeq ($(findstring FreeBSD,$(OSTYPE)),FreeBSD)
-RAWIO = 1
+RAWIO=1
 endif
 
 ifeq ($(findstring Linux,$(OSTYPE)),Linux)
 ifeq ($(shell if test -r /usr/include/ieee1284.h; then echo 1; else echo 0; fi),1)
-LIBIEEE1284 = 1
+LIBIEEE1284=1
 endif
 ifeq ($(shell if test -r /usr/include/linux/ppdev.h; then echo 1; else echo 0; fi),1)
-PPDEV = 1
+PPDEV=1
 endif
-PORTDEV = 1
-RAWIO = 1
+PORTDEV=1
+RAWIO=1
 endif
 
 endif # DEFAULT_BUILD = 1
@@ -115,20 +115,20 @@ endif # DEFAULT_BUILD = 1
 # Now for backend-specific defs
 
 ifdef LIBIEEE1284
-CFLAGS += -DCD64_USE_LIBIEEE1284
-LIBS += -lieee1284
+CFLAGS+=-DCD64_USE_LIBIEEE1284
+LIBS+=-lieee1284
 endif
 
 ifdef PPDEV
-CFLAGS += -DCD64_USE_PPDEV
+CFLAGS+=-DCD64_USE_PPDEV
 endif
 
 ifdef PORTDEV
-CFLAGS += -DCD64_USE_PORTDEV
+CFLAGS+=-DCD64_USE_PORTDEV
 endif
 
 ifdef RAWIO
-CFLAGS += -DCD64_USE_RAWIO
+CFLAGS+=-DCD64_USE_RAWIO
 endif
 
 default: all

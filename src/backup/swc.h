@@ -1,8 +1,8 @@
 /*
 swc.h - Super Wild Card support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2004 dbjh
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -67,6 +67,6 @@ extern int swc_write_rts (const char *filename, unsigned int parport);
 extern int swc_read_cart_sram (const char *filename, unsigned int parport, int io_mode);
 extern int swc_write_cart_sram (const char *filename, unsigned int parport, int io_mode);
 extern void swc_unlock (unsigned int parport);
-#endif // USE_PARALLEL
+#endif
 
 #endif // SWC_H

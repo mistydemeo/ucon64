@@ -1,7 +1,7 @@
 /*
 z64.h - Z64 support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef Z64_H
 #define Z64_H
+
 extern const st_getopt2_t z64_usage[];
 
-#define Z64_HEADER_START 0
-#define Z64_HEADER_LEN 0
-#endif // Z64_H
+#endif

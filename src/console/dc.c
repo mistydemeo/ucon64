@@ -1,7 +1,7 @@
 /*
 dc.c - Dreamcast support for uCON64
 
-written by 2004 NoisyB (noisyb@gmx.net)
+Copyright (c) 2004 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify

@@ -1,9 +1,9 @@
 /*
 fig.c - Super PRO Fighter support for uCON64
 
-written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2004 dbjh
-           2003 - 2004 JohnDie
+Copyright (c) 1999 - 2002 NoisyB <noisyb@gmx.net>
+Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 2003 - 2004 JohnDie
 
 
 This program is free software; you can redistribute it and/or modify

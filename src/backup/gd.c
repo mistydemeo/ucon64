@@ -1,8 +1,8 @@
 /*
 gd.c - Game Doctor support for uCON64
 
-written by 2002 - 2003 John Weidman
-           2002 - 2004 dbjh
+Copyright (c) 2002 - 2003 John Weidman
+Copyright (c) 2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -222,14 +222,14 @@ remove_destfile (void)
 }
 
 
+int
+gd3_send_prolog_byte (unsigned char data)
 /*
   Prolog specific data output routine
   We could probably get away with using the general routine but the
   transfer program I (JW) traced to analyze the protocol did this for
   the bytes used to set up the transfer so here it is.
 */
-int
-gd3_send_prolog_byte (unsigned char data)
 {
   // Wait until SF3 is not busy
   do
@@ -274,13 +274,13 @@ gd_send_unit_prolog (int header, unsigned size)
 }
 
 
+void
+gd3_send_byte (unsigned char data)
 /*
   General data output routine
   Use this routine for sending ROM data bytes to the Game Doctor SF3 (SF6/SF7
   too).
 */
-void
-gd3_send_byte (unsigned char data)
 {
   // Wait until SF3 is not busy
   while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0)

@@ -1,7 +1,8 @@
 /*
 mccl.h - Mad Catz Camera Link (Game Boy Camera) support for uCON64
 
-written by 2002 NoisyB (noisyb@gmx.net)
+Copyright (c) 2002 NoisyB <noisyb@gmx.net>
+
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,9 +20,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef MCCL_H
 #define MCCL_H
+
 extern const st_getopt2_t mccl_usage[];
 
 #ifdef USE_PARALLEL
 extern int mccl_read (const char *filename, unsigned int parport);
-#endif // USE_PARALLEL
+#endif
+
 #endif // MCCL_H

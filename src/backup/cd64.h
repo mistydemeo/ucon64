@@ -1,8 +1,8 @@
 /*
 cd64.h - CD64 support for uCON64
 
-written by 2001 NoisyB (noisyb@gmx.net)
-           2004 dbjh
+Copyright (c) 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -36,6 +36,6 @@ extern int cd64_read_eeprom(const char *filename);
 extern int cd64_write_eeprom(const char *filename);
 extern int cd64_read_mempack(const char *filename, int index);
 extern int cd64_write_mempack(const char *filename, int index);
-#endif // USE_PARALLEL
+#endif // USE_PARALLEL && USE_LIBCD64
 
 #endif // CD64_H

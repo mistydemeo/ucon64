@@ -1,7 +1,7 @@
 /*
 msg.c - Magic Super Griffin support for uCON64
 
-written by 2003 dbjh
+Copyright (c) 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

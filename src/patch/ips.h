@@ -1,9 +1,9 @@
 /*
 ips.h - IPS support for uCON64
 
-written by ???? - ???? madman
-           1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2002 dbjh
+Copyright (c) ???? - ???? madman
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c)        2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -25,4 +25,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern const st_getopt2_t ips_usage[];
 extern int ips_apply (const char *destname, const char *ipsname);
 extern int ips_create (const char *orgname, const char *modname);
-#endif /* IPS_H */
+#endif

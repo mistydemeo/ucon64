@@ -1,8 +1,8 @@
 /*
 sms.c - Sega Master System/Game Gear support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2003 - 2004 dbjh
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 2003 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

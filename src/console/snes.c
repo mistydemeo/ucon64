@@ -1,10 +1,10 @@
 /*
 snes.c - Super NES support for uCON64
 
-written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2004 dbjh
-           2002 - 2003 John Weidman
-           2004        JohnDie
+Copyright (c) 1999 - 2002 NoisyB <noisyb@gmx.net>
+Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 2002 - 2003 John Weidman
+Copyright (c) 2004        JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -217,7 +217,7 @@ const st_getopt2_t snes_usage[] =
     },
     {
       "dint", 0, 0, UCON64_DINT,
-      NULL, "convert ROM to non-interleaved format",
+      NULL, "deinterleave ROM (regardless whether the ROM is interleaved)",
       (void *) (WF_INIT|WF_PROBE|WF_NO_SPLIT)
     },
     {
@@ -985,7 +985,9 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       if (total4Mbparts == 5)
         total4Mbparts = 6;                      // 20 Mbit HiROMs get padded to 24 Mbit
-#ifdef  PAD_40MBIT_GD3_DUMPS
+      else if (total4Mbparts == 7)
+        total4Mbparts = 8;                      // 28 Mbit HiROMs get padded to 32 Mbit
+#ifdef  PAD_40MBIT_GD3_DUMPS                    //  (a 28 Mbit ROM needs 40 Mbit of GD DRAM)
       else if (total4Mbparts == 10)
         {
           total4Mbparts = 12;                   // 40 Mbit HiROMs get padded to 48 Mbit
@@ -1040,7 +1042,13 @@ snes_gd3 (st_rominfo_t *rominfo)
         newsize = 4 * total4Mbparts * MBIT;
       else
         newsize = ((size + MBIT - 1) / MBIT) * MBIT;
-      pad = (newsize - size) / 2;
+
+      // special pad code should only be executed for 10, 20 and if
+      //  PAD_40MBIT_GD3_DUMPS is defined, 40 Mbit ROMs
+      if (total4Mbparts == 3 || total4Mbparts == 6 || total4Mbparts == 12)
+        pad = (newsize - size) / 2;
+      else
+        pad = 0;
 
       if (!(dstbuf = (unsigned char *) malloc (newsize)))
         {
@@ -1048,7 +1056,16 @@ snes_gd3 (st_rominfo_t *rominfo)
           exit (1);
         }
       if (newsize > size)
-        memset (dstbuf + size, 0, newsize - size);
+        {
+          if (!(srcbuf = (unsigned char *) realloc (srcbuf, newsize)))
+            {
+              fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], newsize);
+              exit (1);
+            }
+          memset (srcbuf + size, 0, newsize - size);
+          memset (dstbuf + size, 0, newsize - size);
+        }
+	  
 
       if (snes_header_base == SNES_EROM)
         {
@@ -1070,7 +1087,7 @@ snes_gd3 (st_rominfo_t *rominfo)
           snes_int_blocks (srcbuf, dstbuf + 16 * MBIT, dstbuf, 16 * MBIT / 0x10000);
           snes_int_blocks (srcbuf + 16 * MBIT, dstbuf + 12 * MBIT,
                            dstbuf + 8 * MBIT, (size - 16 * MBIT) / 0x10000);
-          if (size <= 20 * MBIT)
+          if (pad > 0)
             {
               snes_mirror (dstbuf, 8 * MBIT, 10 * MBIT, 12 * MBIT);
               snes_mirror (dstbuf, 12 * MBIT, 14 * MBIT, 16 * MBIT);
@@ -1079,7 +1096,7 @@ snes_gd3 (st_rominfo_t *rominfo)
       else
         {
           n = newsize / 2;
-          snes_int_blocks (srcbuf, dstbuf + n, dstbuf, size / 0x10000);
+          snes_int_blocks (srcbuf, dstbuf + n, dstbuf, newsize / 0x10000);
           if (pad > 0)
             {
               half_size_4Mb = (size / 2) & ~(4 * MBIT - 1);

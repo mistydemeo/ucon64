@@ -1,8 +1,8 @@
 /*
 cartlib.c - Flash Linker Advance support for uCON64
 
-written by 2001        Jeff Frohwein
-           2002 - 2004 dbjh
+Copyright (c) 2001        Jeff Frohwein
+Copyright (c) 2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

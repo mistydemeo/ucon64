@@ -1,11 +1,11 @@
 /*
 swc.c - Super Wild Card support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2004 dbjh
-                  2001 Caz
-                  2003 John Weidman
-                  2004 JohnDie
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 2001 - 2004 dbjh
+Copyright (c)        2001 Caz
+Copyright (c)        2003 John Weidman
+Copyright (c)        2004 JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -60,10 +60,10 @@ const st_getopt2_t swc_usage[] =
     },
 #if 1
 /*
-  The following help used to be hidden because we wanted to avoid people to
-  "accidentally" create overdumps, bad dumps or report bugs that aren't bugs
-  (SA-1). However, now that ucon64.swc_io_mode is useful for -xswcc I guess the
-  help should be complete - dbjh
+  The following help text used to be hidden, because we wanted to avoid people
+  to "accidentally" create overdumps, bad dumps or report bugs that aren't bugs
+  (SA-1). However, now that ucon64.io_mode is useful for -xswcc I guess the
+  help should be complete. - dbjh
 */
     {
       "xswc-io", 1, 0, UCON64_XSWC_IO,
@@ -105,7 +105,7 @@ const st_getopt2_t swc_usage[] =
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
 
 #define BUFFERSIZE 8192                         // don't change, only 8192 works!
 
@@ -737,7 +737,7 @@ swc_read_rom (const char *filename, unsigned int parport, int io_mode)
 
   if (io_mode & SWC_IO_DUMP_BIOS)
     {
-      printf ("Press q to abort\n\n");
+      puts ("Press q to abort\n");
 
       dump_bios (file);
 
@@ -749,7 +749,7 @@ swc_read_rom (const char *filename, unsigned int parport, int io_mode)
   size = receive_rom_info (buffer, io_mode);
   if (size == 0)
     {
-      fprintf (stderr, "ERROR: There is no cartridge present in the Super Wild Card\n");
+      fputs ("ERROR: There is no cartridge present in the Super Wild Card\n", stderr);
       fclose (file);
       remove (filename);
       exit (1);
@@ -777,7 +777,7 @@ swc_read_rom (const char *filename, unsigned int parport, int io_mode)
   fwrite (buffer, 1, SWC_HEADER_LEN, file);     // write header (other necessary fields are
                                                 //  filled in by receive_rom_info())
 
-  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
 #ifdef  DUMP_SA1
   if (snes_sa1)
@@ -879,7 +879,7 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
 #endif
   bytessend = SWC_HEADER_LEN;
 
-  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
   address = 0x200;                              // VGS '00 uses 0x200, VGS '96 uses 0,
   starttime = time (NULL);                      //  but then some ROMs don't work
@@ -951,7 +951,7 @@ swc_read_sram (const char *filename, unsigned int parport)
   ffe_send_command0 (0xe00d, 0);
   ffe_send_command0 (0xc008, 0);
 
-  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
   blocksleft = 4;                               // SRAM is 4*8 kB
   address = 0x100;
@@ -1007,7 +1007,7 @@ swc_write_sram (const char *filename, unsigned int parport)
   ffe_send_command0 (0xe00d, 0);
   ffe_send_command0 (0xc008, 0);
 
-  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
   address = 0x100;
   starttime = time (NULL);
@@ -1104,7 +1104,7 @@ swc_read_rts (const char *filename, unsigned int parport)
   buffer[10] = 8;
   fwrite (buffer, 1, SWC_HEADER_LEN, file);
 
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
   blocksleft = 32;                              // RTS data is 32*8 kB
 
   if (sub ())
@@ -1170,7 +1170,7 @@ swc_write_rts (const char *filename, unsigned int parport)
   printf ("Send: %d Bytes\n", size);
   fseek (file, SWC_HEADER_LEN, SEEK_SET);       // skip the header
 
-  printf ("Press q to abort\n\n");
+  puts ("Press q to abort\n");
   if (sub ())
     {
       address1 = 0;
@@ -1233,7 +1233,7 @@ swc_read_cart_sram (const char *filename, unsigned int parport, int io_mode)
   size = receive_rom_info (buffer, io_mode);
   if (size == 0)
     {
-      fprintf (stderr, "ERROR: There is no cartridge present in the Super Wild Card\n");
+      fputs ("ERROR: There is no cartridge present in the Super Wild Card\n", stderr);
       fclose (file);
       remove (filename);
       exit (1);
@@ -1255,7 +1255,7 @@ swc_read_cart_sram (const char *filename, unsigned int parport, int io_mode)
   ffe_send_command0 (0xe00c, 0);
 //  ffe_send_command0 (0xc008, 0);
 
-  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
   address = hirom ? 0x2c3 : 0x1c0;
 
@@ -1308,7 +1308,7 @@ swc_write_cart_sram (const char *filename, unsigned int parport, int io_mode)
   size = receive_rom_info (buffer, io_mode);
   if (size == 0)
     {
-      fprintf (stderr, "ERROR: There is no cartridge present in the Super Wild Card\n");
+      fputs ("ERROR: There is no cartridge present in the Super Wild Card\n", stderr);
       fclose (file);
       exit (1);
     }
@@ -1326,7 +1326,7 @@ swc_write_cart_sram (const char *filename, unsigned int parport, int io_mode)
   ffe_send_command0 (0xe00c, 0);
 //  ffe_send_command0 (0xc008, 0);
 
-  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+  puts ("Press q to abort\n");                  // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
   address = hirom ? 0x2c3 : 0x1c0;
 

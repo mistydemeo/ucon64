@@ -1,8 +1,8 @@
 /*
 doctor64jr.c - Bung Doctor V64 Junior support for uCON64
 
-written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2004        dbjh
+Copyright (c) 1999 - 2002 NoisyB <noisyb@gmx.net>
+Copyright (c) 2004        dbjh
 
 
 This program is free software; you can redistribute it and/or modify

@@ -1,7 +1,7 @@
 /*
 smc.h - Super Magic Card support for uCON64
 
-written by 2003 dbjh
+Copyright (c) 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -42,6 +42,6 @@ typedef struct st_smc_header
 extern int smc_write_rom (const char *filename, unsigned int parport);
 extern int smc_read_rts (const char *filename, unsigned int parport);
 extern int smc_write_rts (const char *filename, unsigned int parport);
-#endif // USE_PARALLEL
+#endif
 
 #endif // SMC_H

@@ -1,7 +1,7 @@
 /*
 gb.h - Game Boy support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -36,4 +36,4 @@ extern int gameboy_ssc (st_rominfo_t *rominfo);
 extern int gameboy_init (st_rominfo_t *rominfo);
 extern int gameboy_logo (st_rominfo_t *rominfo);
 
-#endif // GB_H
+#endif

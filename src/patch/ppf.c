@@ -1,9 +1,9 @@
 /*
 ppf.c - Playstation Patch File support for uCON64
 
-written by ???? - ???? Icarus/Paradox
-                  2001 NoisyB (noisyb@gmx.net)
-           2002 - 2003 dbjh
+Copyright (c) ???? - ???? Icarus/Paradox
+Copyright (c)        2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

@@ -1,7 +1,7 @@
 /*
-backup.h - single header file for all backup unit dependent functions
+backup.h - single header file for all backup unit functions
 
-written by 2003 NoisyB (noisyb@gmx.net)
+Copyright (c) 2003 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef  USE_PARALLEL
 #include "cd64.h"
+#include "cmc.h"
 #include "dex.h"
 #include "doctor64.h"
 #include "doctor64jr.h"
@@ -57,6 +58,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "f2a.h"
 #endif
 
-#ifdef  SERIAL
-#endif  // SERIAL
 #endif // BACKUP_H

@@ -1,8 +1,9 @@
 /*
 gg.h - GameGenie support for uCON64
 
-written by 2002 NoisyB (noisyb@gmx.net)
-           2001 WyrmCorp <http://wyrmcorp.com>.
+Copyright (c) 2001 WyrmCorp <http://wyrmcorp.com>.
+Copyright (c) 2002 NoisyB <noisyb@gmx.net>
+
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,4 +24,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern const st_getopt2_t gg_usage[];
 extern int gg_apply (st_rominfo_t *rominfo, const char *code);
 extern int gg_display (st_rominfo_t *rominfo, const char *code);
-#endif // GG_H
+#endif

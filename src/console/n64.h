@@ -1,7 +1,7 @@
 /*
 n64.h - Nintendo 64 support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -34,5 +34,4 @@ extern int n64_usms (st_rominfo_t *rominfo, const char *smsrom);
 extern int n64_v64 (st_rominfo_t *rominfo);
 extern int n64_z64 (st_rominfo_t *rominfo);
 
-
-#endif // N64_H
+#endif

@@ -1,10 +1,10 @@
 /*
 f2a.c - Flash 2 Advance support for uCON64
 
-written by 2003        Ulrich Hecht (uli@emulinks.de)
-           2003 - 2004 David Voswinkel (d.voswinkel@netcologne.de)
-           2004        NoisyB (noisyb@gmx.net)
-           2004        dbjh
+Copyright (c) 2003        Ulrich Hecht <uli@emulinks.de>
+Copyright (c) 2003 - 2004 David Voswinkel <d.voswinkel@netcologne.de>
+Copyright (c) 2004        NoisyB <noisyb@gmx.net>
+Copyright (c) 2004        dbjh
 
 
 This program is free software; you can redistribute it and/or modify

@@ -7,6 +7,9 @@
 /* enable debug output (default: no) */
 /* #undef DEBUG */
 
+/* enable libdiscmage (default: yes) */
+#define DISCMAGE 1
+
 /* enable dynamic loading of add-on libraries (default: yes) */
 #define DLOPEN 1
 
@@ -34,6 +37,12 @@
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 /* #undef HAVE_INTTYPES_H */
+
+/* Define to 1 if you have the `nsl' library (-lnsl). */
+/* #undef HAVE_LIBNSL */
+
+/* Define to 1 if you have the `socket' library (-lsocket). */
+/* #undef HAVE_LIBSOCKET */
 
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1

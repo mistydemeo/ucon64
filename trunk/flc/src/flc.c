@@ -37,6 +37,9 @@
 static void flc_exit (void);
 static int flc_configfile (void);
 
+static const char *flc_title = "flc " FLC_VERSION_S " " CURRENT_OS_S
+                       " 1999-2002 by NoisyB (noisyb@gmx.net)";
+
 st_flc_t flc;
 
 void
@@ -50,9 +53,12 @@ int
 main (int argc, char *argv[])
 {
   char buf[FILENAME_MAX + 1];
-  st_file_t file;
-  st_file_t *file_p = NULL;
-  char path[MAXBUFSIZE];
+#if 0
+  char temp[FILENAME_MAX];
+  char cwd[FILENAME_MAX];
+#endif
+  st_file_t file, *file_p = NULL;
+  char path[FILENAME_MAX];
   struct dirent *ep;
   struct stat puffer;
   DIR *dp;
@@ -126,7 +132,7 @@ main (int argc, char *argv[])
           return 0;
 
         case 'v':
-          printf ("%s\n", flc_VERSION);
+          printf ("%s\n", FLC_VERSION_S);
           return 0;
 
         default:
@@ -136,15 +142,14 @@ main (int argc, char *argv[])
     }
 
 #if 0
-#ifdef TODO
-#warning TODO tempdir for *_extract
-#endif // TODO
-  if (!mktmpdir (temp))
+  if (!tmpnam2 (temp))
     {
       fprintf (stderr, "ERROR: could not create temp dir");
       return -1;
     }
-
+  mkdir (temp, 0777);
+  getcwd (cwd, FILENAME_MAX);
+  chdir (temp);
 #endif
 
   if (flc.html)
@@ -157,7 +162,7 @@ main (int argc, char *argv[])
     }
 
   if (!path[0])
-    getcwd (path, (size_t) sizeof (path));
+    getcwd (path, FILENAME_MAX);
   else 
     if (stat (path, &puffer) != -1 && S_ISREG (puffer.st_mode) == TRUE)
     {
@@ -173,6 +178,9 @@ main (int argc, char *argv[])
       extract (&file.sub);
 
       output (&file.sub);
+
+//      chdir (cwd);
+//      remove (temp);
 
       return 0;
     }
@@ -219,19 +227,23 @@ main (int argc, char *argv[])
     }
 
   (void) closedir (dp);
-//  remove_Rf (temp);
+//  chdir (cwd);
+//  remove (temp);
   file_p->next = NULL;
   file_p = &file;
 
-  if (flc.sort) sort (file_p);
-
-  while (file_p)
+  if (flc.sort)
     {
-      output (&file_p->sub);
-      file_p = file_p->next;
+      sort (file_p);
     }
+      while (file_p)
+        {
+          output (&file_p->sub);
+          file_p = file_p->next;
+        }
 
-  free (file.next);
+      free (file.next);
+//    }
 
   if (flc.html)
     printf ("</pre></tt></body></html>\n");
@@ -260,7 +272,7 @@ flc_usage (int argc, char *argv[])
           "version     output version information and exit\n" "\n"
           "Amiga version: noC-flc Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
           "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n",
-          flc_TITLE, argv[0]);
+          flc_title, argv[0]);
 }
 
 

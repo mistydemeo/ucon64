@@ -233,7 +233,7 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - updated (SNES) fixed checksum function for Momotaro Dentetsu Happy (J) (by dbjh)<br>
 - updated (SNES) fixed SNES info for Dai Kaiju Monogatari 2 (J) (by dbjh)<br>
 - updated (SNES) improved SNES chip type info (by dbjh)<br>
-- added (read-only) gzip support (by dbjh)<br>
+- added gzip support (by dbjh)<br>
 - updated (GENESIS) fixed several bugs (header is correct after -j/-s, correct behaviour
   if switch -nbak is active, -smd/-mgd if already in SMD/MGD format, -lsv) (by dbjh)<br>
 - added --padn=N pad ROM to N Bytes (put Bytes with value 0x00 after end) (by dbjh)<br>
@@ -243,6 +243,8 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - updated (GBA) changed -multi so that it takes a size argument (by dbjh)<br>
 - removed (GBA) -multi{1,2,3}, -multi can be used instead (by dbjh)<br>
 - some code clean ups (by NoisyB)<br>
+- added (read-only) zip support (by dbjh) Note that only the first file inside the zip
+  archive will be looked at<br>
 <!-- - added (PSX/N64) --xdex send/receive SRAM to/from DexDrive (by NoisyB)<br-->
 <br>
 <br>

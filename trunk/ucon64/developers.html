@@ -173,13 +173,13 @@ Q7: <a href="#7">What syntax style is preferred?</a><br>
 <p>
 <a name="5b"><b>Q5b</b>: How do I create a patch from CVS?</a><br>
 <b>A</b>: as developer with r/w access:<br>
-   cvs -d:ext:&#60;name&#62;@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 diff -u >mychanges.patch<br>
+   cvs -d:ext:&#60;name&#62;@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 diff -u &#62;mychanges.patch<br>
    &#60;enter password at prompt&#62;<br>
 <br>
    as anonymous w/o r/w access:<br>
    cvs -d:pserver:anonymous@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 login<br>
    &#60;just press enter at password prompt&#62;<br>
-   cvs -d:pserver:anonymous@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 diff -u >mychanges.patch<br>
+   cvs -d:pserver:anonymous@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 diff -u &#62;mychanges.patch<br>
 <br>
 <br>
 <p>

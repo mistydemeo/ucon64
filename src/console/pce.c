@@ -650,6 +650,7 @@ pcengine_msg (st_rominfo_t *rominfo)
 
   memset (&header, 0, MSG_HEADER_LEN);
   header.size = size / 8192;
+  header.emulation = size == 3 * MBIT ? 1 : 0;
   header.id1 = 0xaa;
   header.id2 = 0xbb;
   header.type = 2;

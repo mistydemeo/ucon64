@@ -1,28 +1,52 @@
 .PHONY: all clean distclean install uninstall
 
+DLOPEN=1
+
 CC=gcc
 
 CFLAGS=-I. -Wall -O3 -DHAVE_CONFIG_H
-LDFLAGS=-s
+LDFLAGS=-s -lz
+
+LIBNAME=discmage
 
 # The test for Cygwin should be done before the test for DJGPP, because the
 # environment variable DJGPP can be set under Bash for people who have
 # installed both gcc (and friends) ports.
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+
+ifndef  DLOPEN
+LDFLAGS+=libdiscmage/$(LIBNAME).a
+endif
+
 else
 ifdef DJGPP
-else                                    # Unix or BeOS
-ifeq ($(TERM),be)                       # BeOS (untested!)
-else                                    # Unix
-LDFLAGS+=-ldl
+
+ifndef  DLOPEN
+LDFLAGS+=libdiscmage/$(LIBNAME).a
 endif
+
+else                                    # Unix or BeOS
+ifeq ($(OSTYPE),beos)                   # BeOS
+
+ifndef  DLOPEN
+LDFLAGS+=-Llibdiscmage -l$(LIBNAME)
+endif
+
+else                                    # Unix
+
+ifdef   DLOPEN
+LDFLAGS+=-ldl
+else
+LDFLAGS+=-Llibdiscmage -l$(LIBNAME)
+endif
+
+endif                                   # BeOS
 endif                                   # DJGPP
 endif                                   # cygwin
 
 
 OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
-        dlopen.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
@@ -34,11 +58,14 @@ OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
         backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/gd.o \
         backup/mgd.o backup/smc.o backup/smd.o backup/swc.o backup/dex.o \
         backup/psxpblib.o backup/mccl.o backup/lynxit.o backup/ffe.o
-#ZLIB=1
+ZLIB=1
 ifdef ZLIB
-LDFLAGS+=-lz
 OBJECTS+=unzip.o
 endif
+ifdef DLOPEN
+OBJECTS+=dlopen.o
+endif
+
 
 TARGET=ucon64
 ifeq ($(TERM),cygwin)                   # OSTYPE is not a real env var on Cygwin
@@ -66,6 +93,7 @@ ifdef DJGPP
 	del $(TARGET)
 	cd libdiscmage
 	$(MAKE) clean
+	cd ..
 else                                    # Unix or BeOS
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
               DEADJOE */DEADJOE *~ */*~ */*/*~
@@ -87,6 +115,7 @@ ifdef DJGPP
 	del config.h
 	cd libdiscmage
 	$(MAKE) distclean
+	cd ..
 else
 	rm -f Makefile config.log config.status config.cache config.h
 	cd libdiscmage && $(MAKE) distclean
@@ -99,17 +128,18 @@ endif                                   # cygwin
 
 
 $(TARGET): $(OBJECTS)
-	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	cd libdiscmage && $(MAKE)
 else
 ifdef DJGPP
 	cd libdiscmage
 	$(MAKE)
+	cd ..
 else
 	cd libdiscmage && $(MAKE)
 endif                                   # DJGPP
 endif                                   # cygwin
+	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
 
 
 install:
@@ -124,6 +154,7 @@ else
 endif                                   # beos
 endif                                   # DJGPP
 endif                                   # cygwin
+#	cd libdiscmage && $(MAKE) install
 
 
 uninstall:
@@ -138,6 +169,7 @@ else
 endif                                   # beos
 endif                                   # DJGPP
 endif                                   # cygwin
+#	cd libdiscmage && $(MAKE) uninstall
 
 
 # Dependencies

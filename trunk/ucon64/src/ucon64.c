@@ -298,9 +298,8 @@ const struct option long_options[] = {
     {0, 0, 0, 0}
   };
 
-#ifdef  DLOPEN
-// libdiscmage schijt
 dm_image_t *image = NULL;
+#ifdef  DLOPEN
 void *libdm;
 
 #define dm_init dm_init_ptr
@@ -338,6 +337,11 @@ ucon64_exit (void)
 }
 
 
+#if     !defined DLOPEN && defined DJGPP
+extern char djimport_path[FILENAME_MAX];
+#endif
+
+
 int
 main (int argc, char **argv)
 {
@@ -369,14 +373,7 @@ main (int argc, char **argv)
 
   ucon64_configfile ();
 
-
 #ifdef  DLOPEN
-
-#ifdef  DEBUG
-  fprintf (stderr, "DLOPEN code is active\n\n%s\n\n", buf);
-  fflush (stderr);
-#endif
-
   strcpy (ucon64.discmage_path, get_property (ucon64.configfile, "discmage_path", buf2, ""));
   if (strlen (ucon64.discmage_path) >= 3)
     // There should be some standard C library function that does this...
@@ -387,42 +384,51 @@ main (int argc, char **argv)
         {
           strcpy (path1, getenv2 ("HOME"));
           strcpy (path2, &ucon64.discmage_path[2]);
-          sprintf (ucon64.discmage_path, "%s/%s", path1, path2);
+          sprintf (ucon64.discmage_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
         }
       if (ucon64.discmage_path[0] == '.' && ucon64.discmage_path[1] == FILE_SEPARATOR)
         {
           getcwd (path1, FILENAME_MAX);
           strcpy (path2, &ucon64.discmage_path[2]);
-          sprintf (ucon64.discmage_path, "%s/%s", path1, path2);
+          sprintf (ucon64.discmage_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
         }
     }
   // if ucon64.discmage_path points to an existing file then load it
   if (!access (ucon64.discmage_path, F_OK))
     {
-      if ((libdm = open_module (ucon64.discmage_path)) != NULL)
-        {
-          ucon64.discmage_enabled = 1;
+      libdm = open_module (ucon64.discmage_path);
 
-          dm_init = get_symbol (libdm, "dm_init");
-          dm_close = get_symbol (libdm, "dm_close");
+      dm_init = get_symbol (libdm, "dm_init");
+      dm_close = get_symbol (libdm, "dm_close");
 
-          dm_bin2iso = get_symbol (libdm, "dm_bin2iso");
-          dm_cdirip = get_symbol (libdm, "dm_cdirip");
-          dm_cdi2nero = get_symbol (libdm, "dm_cdi2nero");
+      dm_bin2iso = get_symbol (libdm, "dm_bin2iso");
+      dm_cdirip = get_symbol (libdm, "dm_cdirip");
+      dm_cdi2nero = get_symbol (libdm, "dm_cdi2nero");
 
-          dm_disc_read = get_symbol (libdm, "dm_disc_read");
-          dm_disc_write = get_symbol (libdm, "dm_disc_write");
+      dm_disc_read = get_symbol (libdm, "dm_disc_read");
+      dm_disc_write = get_symbol (libdm, "dm_disc_write");
 
-          dm_mksheets = get_symbol (libdm, "dm_mksheets");
-          dm_mktoc = get_symbol (libdm, "dm_mktoc");
-          dm_mkcue = get_symbol (libdm, "dm_mkcue");
-        }
+      dm_mksheets = get_symbol (libdm, "dm_mksheets");
+      dm_mktoc = get_symbol (libdm, "dm_mktoc");
+      dm_mkcue = get_symbol (libdm, "dm_mkcue");
+
+      ucon64.discmage_enabled = 1;
     }
   else
     ucon64.discmage_enabled = 0;
-
-#elif   DEBUG
-  fprintf (stderr, "DLOPEN code is not active\n\n");
+#else
+#ifdef DJGPP
+  strcpy (buf, argv[0]);     
+  // this is DJGPP specific - not necessary, but causes less confusion
+  change_string ("/", 1, 0, 0, FILE_SEPARATOR_S, 1, buf, strlen (buf), 0);
+  {
+    char *p = strrchr (buf, FILE_SEPARATOR);
+    if (p)
+      *p = 0;
+  }
+  sprintf (djimport_path, "%s"FILE_SEPARATOR_S"%s", buf, "discmage.dxe");
+#endif
+  ucon64.discmage_enabled = 1;
 #endif
 
   ucon64.show_nfo = UCON64_YES;

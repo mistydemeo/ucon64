@@ -28,6 +28,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "libdiscmage_cfg.h"
 #ifdef  HAVE_INTTYPES_H
 #include <inttypes.h>
+#elif   defined __CYGWIN__
+#include <sys/types.h>
+#ifndef OWN_INTTYPES
+#define OWN_INTTYPES                            // signal that these are defined
+typedef u_int8_t uint8_t;
+typedef u_int16_t uint16_t;
+typedef u_int32_t uint32_t;
+typedef u_int64_t uint64_t;
+#endif // OWN_INTTYPES
 #else
 #ifndef OWN_INTTYPES
 #define OWN_INTTYPES                            // signal that these are defined

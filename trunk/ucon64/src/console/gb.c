@@ -533,8 +533,9 @@ gameboy_init (st_rominfo_t *rominfo)
     sprintf (buf, "Save RAM: No\n");
   else
     {
-      value = (gameboy_header.sram_size & 0x03) * 2;
-      value = (value ? (1 << (value - 1)) : 0);
+      value = (gameboy_header.sram_size & 7) << 1; // 0/1/2/4
+      if (value)
+        value = 1 << (value - 1);
 
       sprintf (buf, "Save RAM: Yes, %d kBytes\n", value);
     }

@@ -42,9 +42,9 @@ const char *gd_usage[] =
 #ifdef PARALLEL
 
 #if 1 // dumping is not yet supported
-    "  " OPTION_LONG_S "xgd3        send ROM to Game Doctor SF3(SF6/SF7); " OPTION_LONG_S "file=PORT\n",
+    "  " OPTION_LONG_S "xgd3        send ROM to Game Doctor SF3(SF6/SF7); " OPTION_LONG_S "port=PORT\n",
 #else
-    "  " OPTION_LONG_S "xgd3        send/receive ROM to/from Game Doctor SF3(SF6/SF7); " OPTION_LONG_S "file=PORT\n"
+    "  " OPTION_LONG_S "xgd3        send/receive ROM to/from Game Doctor SF3(SF6/SF7); " OPTION_LONG_S "port=PORT\n"
     "                  receives automatically when " OPTION_LONG_S "ROM does not exist\n",
 #endif
 

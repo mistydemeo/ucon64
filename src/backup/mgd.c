@@ -39,7 +39,7 @@ const char *mgd_usage[] =
 #ifdef TODO
 #warning TODO  --xmgd    send/receive ROM to/from Multi Game* /MGD2/MGH/RAW
 #endif // TODO
-    "TODO:  " OPTION_LONG_S "xmgd   send/receive ROM to/from Multi Game* /MGD2/MGH/RAW; " OPTION_LONG_S "file=PORT\n"
+    "TODO:  " OPTION_LONG_S "xmgd   send/receive ROM to/from Multi Game* /MGD2/MGH/RAW; " OPTION_LONG_S "port=PORT\n"
     "                  receives automatically when " OPTION_LONG_S "rom does not exist\n",
     NULL
   };

@@ -42,7 +42,7 @@ const char *fig_usage[] =
 #warning TODO --xfig        send/receive ROM to/from *Pro Fighter* /(all)FIG
 #endif // TODO
 #if 0
-    "TODO:  " OPTION_LONG_S "xfig        send/receive ROM to/from *Pro Fighter* /(all)FIG; " OPTION_LONG_S "file=PORT\n"
+    "TODO:  " OPTION_LONG_S "xfig        send/receive ROM to/from *Pro Fighter* /(all)FIG; " OPTION_LONG_S "port=PORT\n"
     "                  receives automatically when " OPTION_LONG_S "rom does not exist\n",
 #endif
     NULL

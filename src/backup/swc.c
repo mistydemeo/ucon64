@@ -42,12 +42,12 @@ const char *swc_usage[] =
     "Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC)/SWC DX(2)",
     "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw",
 #ifdef PARALLEL
-    "  " OPTION_LONG_S "xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "file=PORT\n"
+    "  " OPTION_LONG_S "xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "port=PORT\n"
     "                  receives automatically when ROM does not exist\n"
     "                  Press q to abort; ^C will cause invalid state of backup unit\n"
     "  " OPTION_LONG_S "xswc2       same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)\n"
     "  " OPTION_LONG_S "xswcs       send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
-    "                  " OPTION_LONG_S "file=PORT\n"
+    "                  " OPTION_LONG_S "port=PORT\n"
     "                  receives automatically when SRAM does not exist\n"
     "                  Press q to abort; ^C will cause invalid state of backup unit\n",
 #else

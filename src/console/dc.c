@@ -216,7 +216,7 @@ update_crc (char *ip)
 
 
 int
-dc_mkip (st_rominfo_t * rominfo)  /* make ip */
+dc_mkip (st_rominfo_t * rominfo, const char *ip_file)  /* make ip */
 {
 /* in
 Hardware ID   : SEGA SEGAKATANA
@@ -245,10 +245,10 @@ Game Title    : TITLE OF THE SOFTWARE
 
   update_crc (ip);
 
-  ucon64_fbackup (NULL, ucon64.file);
-  q_fwrite (ip, 0, 0x8000, ucon64.file, "wb");
+  ucon64_fbackup (NULL, ip_file);
+  q_fwrite (ip, 0, 0x8000, ip_file, "wb");
 
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.file);
+  fprintf (stdout, ucon64_msg[WROTE], ip_file);
 
   return 0;
 }

@@ -33,7 +33,7 @@ const char *cd64_usage[] =
 #endif // TODO
 #ifdef PARALLEL
 #if 0
-    "TODO:  -xcd64        send/receive ROM to/from CD64; " OPTION_LONG_S "file=PORT\n"
+    "TODO:  -xcd64        send/receive ROM to/from CD64; " OPTION_LONG_S "port=PORT\n"
     "             receives automatically when " OPTION_LONG_S "rom does not exist\n",
 #endif
 #endif // PARALLEL

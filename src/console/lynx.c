@@ -46,12 +46,12 @@ const char *lynx_usage[] =
     "  " OPTION_LONG_S "lyx         convert to LYX/RAW (strip 64 Bytes LNX header)\n"
     "  " OPTION_LONG_S "lnx         convert to LNX (uses default values for the header);\n"
     "                  adjust the LNX header with the following options\n"
-    "  " OPTION_S "n           change ROM name (LNX only); " OPTION_LONG_S "file=NEWNAME\n"
+    "  " OPTION_S "n=NEWNAME   change ROM name to NEWNAME (LNX only)\n"
     "  " OPTION_LONG_S "nrot        set no rotation (LNX only)\n"
     "  " OPTION_LONG_S "rotl        set rotation left (LNX only)\n"
     "  " OPTION_LONG_S "rotr        set rotation right (LNX only)\n"
-    "  " OPTION_LONG_S "b0          change Bank0 kBytes size (LNX only); " OPTION_LONG_S "file={0,64,128,256,512}\n"
-    "  " OPTION_LONG_S "b1          change Bank1 kBytes size (LNX only); " OPTION_LONG_S "file={0,64,128,256,512}\n",
+    "  " OPTION_LONG_S "b0=N        change Bank0 kBytes size to N={0,64,128,256,512} (LNX only)\n"
+    "  " OPTION_LONG_S "b1=N        change Bank1 kBytes size to N={0,64,128,256,512} (LNX only)\n",
     NULL
 };
 
@@ -179,7 +179,7 @@ lynx_rotr (st_rominfo_t *rominfo)
 
 
 int
-lynx_n (st_rominfo_t *rominfo)
+lynx_n (st_rominfo_t *rominfo, const char *newname)
 {
   st_lnx_header_t header;
 
@@ -192,7 +192,7 @@ lynx_n (st_rominfo_t *rominfo)
   q_fread (&header, 0, sizeof (st_lnx_header_t), ucon64.rom);
 
   memset (header.cartname, 0, sizeof (header.cartname));
-  strncpy (header.cartname, ucon64.file, sizeof (header.cartname));
+  strncpy (header.cartname, newname, sizeof (header.cartname));
 
   ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom, "r+b");
@@ -203,7 +203,7 @@ lynx_n (st_rominfo_t *rominfo)
 
 
 static int
-lynx_b (st_rominfo_t *rominfo, int bank)
+lynx_b (st_rominfo_t *rominfo, int bank, const char *value)
 {
   st_lnx_header_t header;
   short int *bankvar;
@@ -217,17 +217,17 @@ lynx_b (st_rominfo_t *rominfo, int bank)
   q_fread (&header, 0, sizeof (st_lnx_header_t), ucon64.rom);
 
   bankvar = (bank == 0 ? &header.page_size_bank0 : &header.page_size_bank1);
-  if ((atol (ucon64.file) % 64) != 0 || (atol (ucon64.file) > 512))
+  if ((atol (value) % 64) != 0 || (atol (value) > 512))
     *bankvar = 0;
   else
 #ifdef  WORDS_BIGENDIAN
 #ifdef  AMIGA
-    *bankvar = atol (ucon64.file) >> 8;
+    *bankvar = atol (value) >> 8;
 #else
-    *bankvar = bswap_16 (atol (ucon64.file) * 4);
+    *bankvar = bswap_16 (atol (value) * 4);
 #endif
 #else
-    *bankvar = atol (ucon64.file) * 4;
+    *bankvar = atol (value) * 4;
 #endif
 
   ucon64_fbackup (NULL, ucon64.rom);
@@ -239,16 +239,16 @@ lynx_b (st_rominfo_t *rominfo, int bank)
 
 
 int
-lynx_b0 (st_rominfo_t *rominfo)
+lynx_b0 (st_rominfo_t *rominfo, const char *value)
 {
-  return lynx_b (rominfo, 0);
+  return lynx_b (rominfo, 0, value);
 }
 
 
 int
-lynx_b1 (st_rominfo_t *rominfo)
+lynx_b1 (st_rominfo_t *rominfo, const char *value)
 {
-  return lynx_b (rominfo, 1);
+  return lynx_b (rominfo, 1, value);
 }
 
 

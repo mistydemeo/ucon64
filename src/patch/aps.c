@@ -40,9 +40,9 @@ const char *aps_usage[] =
   {
     NULL,
     NULL,
-    "  " OPTION_S "a           apply APS patch (<=v1.2); " OPTION_LONG_S "file=PATCHFILE\n"
-    "  " OPTION_LONG_S "mka         create APS patch; " OPTION_LONG_S "file=CHANGED_ROM\n"
-    "  " OPTION_LONG_S "na          change APS description; " OPTION_LONG_S "rom=PATCHFILE " OPTION_LONG_S "file=DESCRIPTION\n",
+    "  " OPTION_S "a=PATCH     apply APS PATCH against ROM (APS version <= 1.2)\n"
+    "  " OPTION_LONG_S "mka=MOD_ROM create APS patch from MOD_ROM; " OPTION_LONG_S "rom=ORIGINAL_ROM\n"
+    "  " OPTION_LONG_S "na=DESC     change APS single line DESCription; " OPTION_LONG_S "rom=PATCH\n",
     NULL
   };
   

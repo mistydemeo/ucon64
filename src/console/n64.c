@@ -1,4 +1,4 @@
-/*
+#/*
 n64.c - Nintendo 64 support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
@@ -60,7 +60,7 @@ const char *n64_usage[] =
     "  " OPTION_LONG_S "int2        force ROM is in interleaved format 2\n"
     "  " OPTION_LONG_S "nint        force ROM is not in interleaved format\n"
 #endif
-    "  " OPTION_S "n           change ROM name; " OPTION_LONG_S "file=NEWNAME\n"
+    "  " OPTION_S "n=NEWNAME   change ROM name to NEWNAME\n"
     "  " OPTION_LONG_S "v64         convert to Doctor V64 (and compatibles/interleaved)\n"
     "  " OPTION_LONG_S "z64         convert to Z64 (Zip Drive/not interleaved)\n"
 #ifdef TODO
@@ -69,13 +69,15 @@ const char *n64_usage[] =
 #if 0
     "TODO:  " OPTION_S "f      remove NTSC/PAL protection\n"
 #endif
-    "  " OPTION_LONG_S "bot         add/extract boot code to/from ROM; " OPTION_LONG_S "file=BOOTCODE (4032 Bytes)\n"
+    "  " OPTION_LONG_S "bot=BOOTCODE add/extract BOOTCODE (4032 Bytes) to/from ROM;\n"
     "                  extracts automatically if BOOTCODE does not exist\n"
-    "  " OPTION_LONG_S "sram        LAC's Makesram; " OPTION_LONG_S "rom=(LAC's SRAM ROM image) " OPTION_LONG_S "file=SRAMFILE\n"
-    "                  the SRAMFILE must have a size of 512 Bytes\n"
-    "  " OPTION_LONG_S "usms        Jos Kwanten's ultraSMS (Sega Master System/GameGear emulator);\n"
-    "                  " OPTION_LONG_S "rom=(Jos Kwanten's ultraSMS ROM image) " OPTION_LONG_S "file=SMSROM\n"
-    "                  works only for ROMs which are <= 4 Mb in size\n"
+    "  " OPTION_LONG_S "lsram=SRAM  LAC's Makesram; " OPTION_LONG_S "rom=(LAC's SRAM ROM image);\n"
+    "                  the SRAM must have a size of 512 Bytes\n"
+    "                  this option generates a ROM which can be used to transfer\n"
+    "                  SRAMs to/from your console\n"
+    "  " OPTION_LONG_S "usms=SMSROM Jos Kwanten's ultraSMS (Sega Master System/GameGear emulator);\n"
+    "                  " OPTION_LONG_S "rom=(Jos Kwanten's ultraSMS ROM image)\n"
+    "                  works only for SMSROMs which are <= 4 Mb in size\n"
     "  " OPTION_LONG_S "chk         fix ROM checksum\n"
     "                  supports only 6101 and 6102 boot codes\n"
 #ifdef TODO
@@ -154,11 +156,11 @@ static int n64_chksum (st_rominfo_t *rominfo);
 // This is the support of LaC's makesram routine for uploading
 //  SRAM files to a Cart SRAM. The .v64 file is his work, not mine
 int
-n64_sram (st_rominfo_t *rominfo)
+n64_sram (st_rominfo_t *rominfo, const char *sramfile)
 {
   char sram[N64_SRAM_SIZE];
 
-  if (q_fsize (ucon64.file) != N64_SRAM_SIZE ||
+  if (q_fsize (sramfile) != N64_SRAM_SIZE ||
       q_fsize (ucon64.rom) != LAC_ROM_SIZE)
     {
       fprintf (stderr,
@@ -167,7 +169,7 @@ n64_sram (st_rominfo_t *rominfo)
       return -1;
     }
 
-  q_fread (sram, 0, N64_SRAM_SIZE, ucon64.file);
+  q_fread (sram, 0, N64_SRAM_SIZE, sramfile);
 
   if (rominfo->interleaved != 0)
     mem_swap (sram, N64_SRAM_SIZE);
@@ -229,13 +231,13 @@ n64_z64 (st_rominfo_t *rominfo)
 
 
 int
-n64_n (st_rominfo_t *rominfo)
+n64_n (st_rominfo_t *rominfo, const char *newname)
 {
   char buf[N64_NAME_LEN];
 
   memset (buf, ' ', N64_NAME_LEN);
-  strncpy (buf, ucon64.file, strlen (ucon64.file) > N64_NAME_LEN ?
-           N64_NAME_LEN : strlen (ucon64.file));
+  strncpy (buf, newname, strlen (newname) > N64_NAME_LEN ?
+           N64_NAME_LEN : strlen (newname));
 
   if (rominfo->interleaved != 0)
     mem_swap (buf, N64_NAME_LEN);
@@ -292,13 +294,13 @@ n64_chk (st_rominfo_t *rominfo)
 
 
 int
-n64_bot (st_rominfo_t *rominfo)
+n64_bot (st_rominfo_t *rominfo, const char *bootfile)
 {
   char buf[FILENAME_MAX];
 
-  if (!access (ucon64.file, F_OK))
+  if (!access (bootfile, F_OK))
     {
-      q_fread (buf, 0, N64_BOT_SIZE, ucon64.file);
+      q_fread (buf, 0, N64_BOT_SIZE, bootfile);
 
       if (rominfo->interleaved != 0)
         mem_swap (buf, N64_BOT_SIZE);
@@ -326,13 +328,13 @@ n64_bot (st_rominfo_t *rominfo)
 
 
 int
-n64_usms (st_rominfo_t *rominfo)
+n64_usms (st_rominfo_t *rominfo, const char *smsrom)
 {
   char *usmsbuf, buf[FILENAME_MAX];
 
-  if (!access (ucon64.file, F_OK))
+  if (!access (smsrom, F_OK))
     {
-      long size = q_fsize (ucon64.file);
+      long size = q_fsize (smsrom);
       // must be smaller than 4 Mbit, 524288 bytes will be inserted
       //  from 1b410 to 9b40f (7ffff)
       if (size > ((4 * MBIT) - 1))
@@ -343,7 +345,7 @@ n64_usms (st_rominfo_t *rominfo)
 
       if (!(usmsbuf = (char *) malloc ((size + 2) * sizeof (char))))
         return -1;
-      q_fread (usmsbuf, 0, size, ucon64.file);
+      q_fread (usmsbuf, 0, size, smsrom);
 
       if (rominfo->interleaved != 0)
         mem_swap (usmsbuf, size);

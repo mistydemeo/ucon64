@@ -40,7 +40,7 @@ const char *lynxit_usage[] = {
     "Lynxit (Lynx Cartridge Backup Board)",
     "1997 K.Wilkins (selfmade)",
 #ifdef PARALLEL
-    "TEST: " OPTION_LONG_S "xlit    receive ROM from Lynxit interface; " OPTION_LONG_S "file=PORT\n"
+    "TEST: " OPTION_LONG_S "xlit    receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT\n"
 //    "                  receives automatically when ROM does not exist\n"
 #else
     ""

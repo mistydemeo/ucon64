@@ -37,7 +37,7 @@ const char *doctor64jr_usage[] = {
   "19XX Bung Enterprises Ltd http://www.bung.com.hk",
 #ifdef PARALLEL
   "  " OPTION_LONG_S "xdjr        send/receive ROM to/from Doctor64 Jr; "
-    OPTION_LONG_S "file=PORT\n"
+    OPTION_LONG_S "port=PORT\n"
 //          "                receives automatically when ROM does not exist\n"
     "                  currently only sending is supported\n",
 #ifdef TODO
@@ -45,7 +45,7 @@ const char *doctor64jr_usage[] = {
 #endif
 #if 0
   "  " OPTION_LONG_S "xdjrs       send/receive SRAM to/from Doctor64 Jr; "
-    OPTION_LONG_S "file=PORT\n"
+    OPTION_LONG_S "port=PORT\n"
     "                  receives automatically when SRAM does not exist\n"
 #endif
 #endif                          // PARALLEL

@@ -40,11 +40,10 @@ const char *ppf_usage[] =
 {
     NULL,
     NULL,
-    "  " OPTION_LONG_S "ppf         apply PPF patch (<=v2.0); " OPTION_LONG_S "rom=RAW_IMAGE " OPTION_LONG_S "file=PATCHFILE\n"
-    "  " OPTION_LONG_S "mkppf       create PPF patch; " OPTION_LONG_S "rom=RAW_IMAGE " OPTION_LONG_S "file=CHANGED_IMAGE\n"
-    "  " OPTION_LONG_S "nppf        change PPF description; " OPTION_LONG_S "rom=PATCHFILE " OPTION_LONG_S "file=DESCRIPTION\n"
-    "  " OPTION_LONG_S "idppf       change PPF FILE_ID.DIZ (v2.0); " OPTION_LONG_S "rom=PATCHFILE\n"
-    "                  " OPTION_LONG_S "file=FILE_ID.DIZ\n",
+    "  " OPTION_LONG_S "ppf=PATCH   apply PPF PATCH against IMAGE (PPF version <= 2.0); " OPTION_LONG_S "rom=IMAGE\n"
+    "  " OPTION_LONG_S "mkppf=IMAGE create PPF patch; " OPTION_LONG_S "rom=ORIGINAL_IMAGE\n"
+    "  " OPTION_LONG_S "nppf=DESC   change PPF single line DESCription; " OPTION_LONG_S "rom=PATCH\n"
+    "  " OPTION_LONG_S "idppf=FILE_ID.DIZ change FILE_ID.DIZ of PPF PATCH (PPF v2.0); " OPTION_LONG_S "rom=PATCH\n",
     NULL
 };
 
@@ -496,14 +495,14 @@ applyppf_main (int argc, const char *argv[])
 
 
 int
-addppfid (const char *filename)
+ppf_add_fid (const char *filename, const char *fid)
 {
   long fsize, pos = 0;
   char fileidbuf[3072], buf[4095];
 
   printf ("Adding file_id.diz .. ");
   fsize = q_fsize (filename);
-  q_fread (fileidbuf, 0, (fsize > 3072) ? 3072 : fsize, ucon64.file);
+  q_fread (fileidbuf, 0, (fsize > 3072) ? 3072 : fsize, fid);
   fileidbuf[(fsize > 3071) ? 3071 : fsize] = 0;
   sprintf (buf, "@BEGIN_FILE_ID.DIZ%s@END_FILE_ID.DIZ", fileidbuf);
 

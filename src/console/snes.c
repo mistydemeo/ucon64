@@ -83,7 +83,7 @@ const char *snes_usage[] =
     "  " OPTION_LONG_S "nint        force ROM is not in interleaved format\n"
     "  " OPTION_LONG_S "bs          force ROM is a Broadcast Satellaview dump\n"
     "  " OPTION_LONG_S "nbs         force ROM is a regular cartridge dump\n"
-    "  " OPTION_S "n           change internal ROM name; " OPTION_LONG_S "file=NEWNAME\n"
+    "  " OPTION_S "n=NEWNAME   change ROM name to NEWNAME\n"
     "  " OPTION_LONG_S "smc         convert to Super Magicom/SMC\n"
     "  " OPTION_LONG_S "fig         convert to *Pro Fighter*/(all)FIG\n"
     "  " OPTION_LONG_S "figs        convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG;\n"
@@ -1809,13 +1809,13 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
 
 
 int
-snes_n (st_rominfo_t *rominfo)
+snes_n (st_rominfo_t *rominfo, const char *newname)
 {
   char buf[SNES_NAME_LEN];
 
   memset (buf, ' ', SNES_NAME_LEN);
-  strncpy (buf, ucon64.file, strlen (ucon64.file) > SNES_NAME_LEN ?
-           SNES_NAME_LEN : strlen (ucon64.file));
+  strncpy (buf, newname, strlen (newname) > SNES_NAME_LEN ?
+           SNES_NAME_LEN : strlen (newname));
   ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (buf, rominfo->header_start + rominfo->buheader_len + 16, SNES_NAME_LEN,
             ucon64.rom, "r+b");

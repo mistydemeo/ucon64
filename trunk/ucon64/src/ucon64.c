@@ -346,7 +346,6 @@ while((ep=readdir(dp))!=0)
 TODO this completely sucks.. its a dirty hack and i'll have to make some
 changes to uCON64 to fix this..
 */
-			strftime(buf,13,"%b %d %H:%M",localtime(&puffer.st_mtime));
 
 	ucon64_argv[0]=ucon64_name();
 	ucon64_argv[1]="-ls";
@@ -354,6 +353,7 @@ changes to uCON64 to fix this..
 	ucon64_argc=3;
 			db.name="";
 			ucon64_probe(ucon64_argc,ucon64_argv,&db);
+			strftime(buf,13,"%b %d %H:%M",localtime(&puffer.st_mtime));
 			printf("%-31.31s %10ld %s %s\n",db.name,puffer.st_size,buf,ep->d_name);
 		}
 	}

@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.4 2002-06-11 23:11:49 noisyb Exp $
+ * $Id: gg.c,v 1.5 2002-07-15 08:17:15 noisyb Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.  
  * All rights reserved. Distributed under the BSD Software License.
@@ -54,6 +54,11 @@
 #include "config.h"
 #include "ucon64.h"
 #include "patch/gg.h"
+#include "snes/snes.h"
+#include "genesis/genesis.h"
+#include "nes/nes.h"
+#include "sms/sms.h"
+#inckude "gb/gb.h"
 
 const char *gg_usage[] = {
   NULL,

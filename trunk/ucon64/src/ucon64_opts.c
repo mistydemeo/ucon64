@@ -1664,9 +1664,9 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_XMD:
-      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump flash card
         md_read_rom (ucon64.rom, ucon64.parport, 32 * MBIT);
-      else                                      // file exists -> send it to the copier
+      else                                      // file exists -> send it to the MD-PRO
         {
           if (genesis_get_file_type () != BIN)
             fprintf (stderr,

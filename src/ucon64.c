@@ -414,7 +414,12 @@ main (int argc, char **argv)
   do
     {
       if (!ucon64_init (ucon64.rom, &rom))
-        ucon64_nfo (&rom);
+        {
+          if (ucon64.show_nfo == UCON64_YES)
+            ucon64_nfo (&rom);
+          else
+            break;
+        }
       // wildcard support ("ucon64 *.swc --file=0")
       if (optind < argc)
         {

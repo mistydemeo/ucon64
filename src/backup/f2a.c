@@ -39,6 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <errno.h>
 #include "misc.h"
 #include "quick_io.h"
 #include "ucon64.h"
@@ -77,12 +78,13 @@ const st_usage_t f2a_usage[] =
 
 #ifdef  HAVE_USB_H
 
+#define EZDEV             "/proc/ezusb/dev0"
 #define F2A_FIRM_SIZE     23053
 #define CMD_GETINF        0x05          // get info on the system status
 #define CMD_MULTIBOOT1    0xff          // boot up the GBA stage 1, no parameters
 #define CMD_MULTIBOOT2    0             // boot up the GBA stage 2, f2a_sendmsg_t.size has to be set
 
-#define SENDMSG_SIZE (sizeof (f2a_sendmsg_t) - 1)
+#define SENDMSG_SIZE      63            // (sizeof (f2a_sendmsg_t) - 1)
 
 typedef struct
 {
@@ -224,9 +226,6 @@ f2a_init_usb (void)
   f2a_info (&rm);
   if (rm.data[0] == 0)
     {
-      if (ucon64.quiet < 0)
-        printf ("Please turn on GBA with SELECT and START held down\n");
-
       get_property_fname (ucon64.configfile, "iclientu", iclientu_fname, "iclientu.bin");
       if (f2a_boot_usb (iclientu_fname))
         {
@@ -273,14 +272,20 @@ find_f2a:
           if ((dev->descriptor.idVendor == 0x547) &&
               (dev->descriptor.idProduct == 0x2131) && !firmware_loaded)
             {
-              if ((fp = open ("/proc/ezusb/dev0", O_WRONLY)) != -1)
+              if ((fp = open (EZDEV, O_WRONLY)) != -1)
                 {
-                  write (fp, f2afirmware, F2A_FIRM_SIZE);
+                  if (write (fp, f2afirmware, F2A_FIRM_SIZE) == -1)
+                    {
+                      fprintf (stderr, "ERROR: Unable to upload F2A firmware (writing "
+                                         EZDEV": %s)\n", strerror (errno));
+                      return -1;
+                    }
                   close (fp);
                 }
               else
                 {
-                  fprintf (stderr, "ERROR: Unable to upload F2A firmware\n"); // was: "[...] EZUSB firmware"
+                  fprintf (stderr, "ERROR: Unable to upload F2A firmware (opening "
+                                     EZDEV": %s)\n", strerror (errno)); // was: "[...] EZUSB firmware"
                   return -1;
                 }
               firmware_loaded = 1;
@@ -321,36 +326,40 @@ static int
 f2a_info (f2a_recvmsg_t *rm)
 {
   f2a_sendmsg_t sm;
-  unsigned int i;
 
   memset (&sm, 0, SENDMSG_SIZE);
   memset (rm, 0, sizeof (f2a_recvmsg_t));
 
   sm.command = me2le_32 (CMD_GETINF);
 
-/*
   if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
-    return -1;
-  if (misc_usb_read (f2ahandle, (char *) rm, sizeof (f2a_recvmsg_t)) == -1)
-    return -1;
-*/
-
-  for (i = 0; i < (SENDMSG_SIZE / 4); i++)
-    printf ("%-2x %08X\n", i, *(((unsigned int *) (&sm)) + i));
-
-  return 0;
-
-#if 0 // unreachable code
-  if (ucon64.quiet < 0)
     {
-      printf ("info:");
-      for (i = 0; i < (SENDMSG_SIZE / 4); i++)
-        printf (" %08X", *(((unsigned int *) (rm)) + i));
-      fputc ('\n', stdout);
+      fprintf (stderr, "ERROR: Could not send info request\n");
+      exit (1);
+    }
+  if (misc_usb_read (f2ahandle, (char *) rm, sizeof (f2a_recvmsg_t)) == -1)
+    {
+      fprintf (stderr, "ERROR: Did not receive info request\n");
+      exit (1);
     }
 
-  return 0;
+#if 0
+  {
+    unsigned int i;
+    for (i = 0; i < (SENDMSG_SIZE / 4); i++)
+      printf ("%-2x %08X\n", i, *(((unsigned int *) (&sm)) + i));
+
+    if (ucon64.quiet < 0)
+      {
+        printf ("info:");
+        for (i = 0; i < (SENDMSG_SIZE / 4); i++)
+          printf (" %08X", *(((unsigned int *) (rm)) + i));
+        fputc ('\n', stdout);
+      }
+  }
 #endif
+
+  return 0;
 }
 
 
@@ -362,7 +371,9 @@ f2a_boot_usb (const char *ilclient_fname)
   char ilclient[16 * 1024];
 
   printf ("Booting GBA\n"
-          "Uploading iLinker client\n");
+          "Uploading iLinker client\n"
+          "Please turn on GBA with SELECT and START held down\n");
+
   if (q_fread (ilclient, 0, 16 * 1024, ilclient_fname) == -1)
     {
       fprintf (stderr, "ERROR: Unable to load GBA client binary (%s)\n", ilclient_fname);
@@ -558,9 +569,6 @@ f2a_init_par (int parport, int parport_delay)
       exit (1);                                 // fatal
     }
 
-  if (ucon64.quiet < 0)
-    printf ("Please turn on GBA with SELECT and START held down\n");
-
   get_property_fname (ucon64.configfile, "iclientp", iclientp_fname, "iclientp.bin");
   get_property_fname (ucon64.configfile, "ilogo", ilogo_fname, ""); // "ilogo.bin"
   if (f2a_boot_par (iclientp_fname, ilogo_fname))
@@ -748,7 +756,9 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
 {
   unsigned char recv[4], iclientp[BOOT_SIZE];
 
-  printf ("Booting GBA\n");
+  printf ("Booting GBA\n"
+          "Please turn on GBA with SELECT and START held down\n");
+
   if (f2a_send_head_par (PP_HEAD_BOOT, 1))
     return -1;
   if (f2a_receive_raw_par (recv, 4))

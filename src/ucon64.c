@@ -84,7 +84,7 @@ write programs in C
 
 
 struct ucon64_ rom;
-  
+
 void
 ucon64_exit (void)
 {
@@ -164,9 +164,7 @@ main (int argc, char *argv[])
 
 #ifdef  BACKUP
   if (rom.file[0])
-    {
-      sscanf (rom.file, "%x", &rom.parport);
-    }
+    sscanf (rom.file, "%x", &rom.parport);
 
   if (!(rom.parport = parport_probe (rom.parport)))
     ;
@@ -178,10 +176,11 @@ main (int argc, char *argv[])
 
 #ifdef  __UNIX__
   /*
-    Some code needs us to switch to the real uid and gid. However, other code needs access to
-    I/O ports other than the standard printer port registers. We just do an iopl(3) and all
-    code should be happy. Using iopl(3) enables users to run all code without being root (of
-    course with the uCON64 executable setuid root). Anyone a better idea?
+    Some code needs us to switch to the real uid and gid. However, other code
+    needs access to I/O ports other than the standard printer port registers.
+    We just do an iopl(3) and all code should be happy. Using iopl(3) enables
+    users to run all code without being root (of course with the uCON64
+    executable setuid root). Anyone a better idea?
   */
 #ifdef  __linux__
   if (iopl (3) == -1)
@@ -199,10 +198,10 @@ main (int argc, char *argv[])
       fprintf (stderr, "Could not set uid\n");
       return 1;
     }
-  gid = getgid ();                              // This shouldn't be necessary if `make install'
-  if (setgid (gid) == -1)                       //  was used, but just in case (root did `chmod +s')
-    {
-      fprintf (stderr, "Could not set gid\n");
+  gid = getgid ();                              // This shouldn't be necessary
+  if (setgid (gid) == -1)                       //  if `make install' was
+    {                                           //  used, but just in case
+      fprintf (stderr, "Could not set gid\n");  //  (root did `chmod +s')
       return 1;
     }
 #endif // __UNIX__
@@ -211,11 +210,10 @@ main (int argc, char *argv[])
 /*
     support for frontends
 */
-
   if (argcmp (argc, argv, "-frontend"))
     {
       atexit (ucon64_exit);
-      rom.frontend = 1;                             // used by ucon64_gauge()
+      rom.frontend = 1;                         // used by ucon64_gauge()
     }
 
 /*
@@ -226,12 +224,13 @@ main (int argc, char *argv[])
   "ucon64.cfg"
 #else
   /*
-    Use getchd() here too. If this code gets compiled under Windows the compiler has to be
-    Cygwin. So, uCON64 will be a Win32 executable which will run only in an environment
-    where long filenames are available and where files can have more than three characters
-    as "extension". Under Bash HOME will be set, but most Windows people will propably run
-    uCON64 under cmd or command where HOME is not set by default. Under Windows XP/2000
-    (/NT?) USERPROFILE and/or HOMEDRIVE+HOMEPATH will be set which getchd() will "detect".
+    Use getchd() here. If this code gets compiled under Windows the compiler
+    has to be Cygwin. So, uCON64 will be a Win32 executable which will run only
+    in an environment where long filenames are available and where files can
+    have more than three characters as "extension". Under Bash HOME will be
+    set, but most Windows people will propably run uCON64 under cmd or command
+    where HOME is not set by default. Under Windows XP/2000 (/NT?) USERPROFILE
+    and/or HOMEDRIVE+HOMEPATH will be set which getchd() will "detect".
   */
   ".ucon64rc"
 #endif
@@ -615,7 +614,7 @@ main (int argc, char *argv[])
                   else if (argcmp (argc, argv, "-lsv"))
                     ucon64_nfo (&rom);
 /*        
-                  else if (argcmp (argc, argv, "-rrom") && 
+                  else if (argcmp (argc, argv, "-rrom") &&
                            rom.console != ucon64_UNKNOWN)
                            // && rom.console != ucon64_KNOWN)
                     {
@@ -710,9 +709,9 @@ main (int argc, char *argv[])
       return 0;
     }
 
-  if (argcmp (argc, argv, "-multi") ||          // This gets rid of nonsense GBA info
-      argcmp (argc, argv, "-multi1") ||         //  on a GBA multirom loader binary
-      argcmp (argc, argv, "-multi2") ||
+  if (argcmp (argc, argv, "-multi") ||          // This gets rid of nonsense
+      argcmp (argc, argv, "-multi1") ||         //  GBA info on a GBA multirom
+      argcmp (argc, argv, "-multi2") ||         //  loader binary
       argcmp (argc, argv, "-swcs") ||
       argcmp (argc, argv, "-figs") ||
       argcmp (argc, argv, "-ufos"))
@@ -801,14 +800,14 @@ main (int argc, char *argv[])
       x = system (buf);
 #ifndef __MSDOS__
       x >>= 8;                  // the exit code is coded in bits 8-15
-#endif                          //  (that is, under Linux & BeOS)
+#endif                          //  (that is, under Unix & BeOS)
 
 #if 1
-      // Snes9x (Linux) for example returns a non-zero value on a normal exit (3)...
-
-      // under WinDOS, system() immediately returns with exit code 0 when starting
-      //  a Windows executable (as if fork() was called) it also returns 0 when the
-      //  exe could not be started
+      // Snes9x (Linux) for example returns a non-zero value on a normal exit
+      //  (3)...
+      // under WinDOS, system() immediately returns with exit code 0 when
+      //  starting a Windows executable (as if fork() was called) it also
+      //  returns 0 when the exe could not be started
       if (x != 127 && x != -1 && x != 0)        // 127 && -1 are system() errors, rest are exit codes
         {
           printf ("ERROR: the Emulator returned an error code (%d)\n"
@@ -1090,11 +1089,11 @@ main (int argc, char *argv[])
           return (!access (rom.rom, F_OK)) ? cdrw_write (&rom) : cdrw_read (&rom);
         }
 #endif
-      if (!access (rom.rom, F_OK) || argcmp (argc, argv, "-xsmd") ||    //the SMD made backups for Genesis and Sega Master System
+      if (!access (rom.rom, F_OK) || argcmp (argc, argv, "-xsmd") ||    // the SMD made backups for Genesis and Sega Master System
           argcmp (argc, argv, "-xsmds")
         )
         {
-//    filehexdump(rom.rom,0,512);//show possible header or maybe the internal rom header
+//    filehexdump (rom.rom, 0, 512); // show possible header or maybe the internal rom header
           printf
             ("\nERROR: Unknown ROM: %s not found (in internal database)\n"
              "TIP:   If this is a ROM you might try to force the recognition\n"
@@ -1257,8 +1256,6 @@ ucon64_init (struct ucon64_ *rom)
     Calculate the CRC32 after rom->buheader_len has been initialized.
     In this way we can call fileCRC32() with the right value for `start'
     so that we disregard the header (if there is one).
-    Under BeOS fileCRC32() is EXTREMELY slow (at least for me, dbjh),
-    so we definitely don't want to call it twice.
   */
   if (bytes <= MAXROMSIZE &&
       rom->console != ucon64_PS2 &&
@@ -1548,7 +1545,7 @@ emuchina.net
 
 
 /*
-  this is the now centralized nfo output for all kinds of ROMs
+    this is the now centralized nfo output for all kinds of ROMs
 */
 int
 ucon64_nfo (struct ucon64_ *rom)
@@ -1590,12 +1587,9 @@ ucon64_nfo (struct ucon64_ *rom)
       if (rom->intro)
         printf ("Intro/Trainer: Maybe, %ld Bytes\n", rom->intro);
 
-// noisyb: in case you don't wan't the "Backup Unit Header: No", don't print
-// "Backup Unit Header:" when there is a header, because that makes people like me (dbjh)
-// search for "Backup Unit Header: No" when there is no header
       if (!rom->buheader_len)
-        printf ("Backup Unit Header: No\n");
-      else if (rom->buheader_len)
+        printf ("Backup Unit Header: No\n");    // printing this is handy for
+      else if (rom->buheader_len)               //  SNES ROMs
         printf ("Backup Unit Header: Yes, %ld Bytes\n"
                 /* (use -nhd to override)\n" */ ,
                 rom->buheader_len);
@@ -1638,7 +1632,7 @@ ucon64_nfo (struct ucon64_ *rom)
 
 
 /*
-	flush the ucon64 struct with default values
+    flush the ucon64 struct with default values
 */
 int
 ucon64_flush (int argc, char *argv[], struct ucon64_ *rom)

@@ -25,8 +25,64 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <inttypes.h>
 #include "config.h"
+#if 0
 #include "quick_io.h"
 #include "misc.h"
+#else
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef MAXBUFSIZE
+#define MAXBUFSIZE 32768
+#endif // MAXBUFSIZE
+
+#ifdef WORDS_BIGENDIAN
+#undef WORDS_BIGENDIAN
+#endif
+
+#ifdef __MSDOS__
+#define FILE_SEPARATOR '\\'
+#define FILE_SEPARATOR_S "\\"
+#else
+#define FILE_SEPARATOR '/'
+#define FILE_SEPARATOR_S "/"
+#endif
+
+#if     defined _LIBC || defined __GLIBC__
+  #include <endian.h>
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    #define WORDS_BIGENDIAN 1
+  #endif
+#elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || defined __APPLE__
+  #define WORDS_BIGENDIAN 1
+#endif
+
+#ifdef WORDS_BIGENDIAN
+#define me2be_16(x) (x)
+#define me2be_32(x) (x)
+#define me2be_64(x) (x)
+#define me2be_n(x,n) 
+#define me2le_16(x) (bswap_16(x))
+#define me2le_32(x) (bswap_32(x))
+#define me2le_64(x) (bswap_64(x))
+#define me2le_n(x,n) (mem_swap(x,n))
+#else
+#define me2be_16(x) (bswap_16(x))
+#define me2be_32(x) (bswap_32(x))
+#define me2be_64(x) (bswap_64(x))
+#define me2be_n(x,n) (mem_swap(x,n))
+#define me2le_16(x) (x)
+#define me2le_32(x) (x)
+#define me2le_64(x) (x)
+#define me2le_n(x,n) 
+#endif
+
+#endif
 #include "sheets.h"
 #include "unzip.h"
 #ifdef  __linux__
@@ -145,18 +201,7 @@ struct cdrom_msf
 
 /* The leadout track is always 0xAA, regardless of # of tracks on disc */
 #define	CDROM_LEADOUT		0xAA
-#endif // <linux/cdrom.h>
-
-#if 0
-typedef struct
-  {
-    char *extension;
-    char *magic;                // magic bytes in file?
-    int32_t (*play) (const char *, int32_t, int32_t);
-  } libdiscmage_t;
-  
-extern const libdiscmage_t libdiscmage[];
-#endif
+#endif // #ifndef __linux__
 
 #define MODE1_2048 0
 #define MODE1_2352 1
@@ -169,9 +214,22 @@ extern const libdiscmage_t libdiscmage[];
 #define ISO_FORMAT       1
 #define BIN_FORMAT       2
 
-
 #define READ_BUF_SIZE  (1024*1024)
 #define WRITE_BUF_SIZE (1024*1024)
+
+
+typedef struct
+{
+  uint32_t mode;
+  uint32_t sector_size;
+  uint32_t seek_header;
+  uint32_t seek_ecc;
+  char *common;
+  char *cdrdao;
+}
+st_track_modes_t;
+
+extern const st_track_modes_t track_modes[];
 
 
 typedef struct
@@ -212,37 +270,41 @@ typedef struct
 }
 st_image_t;
 
-extern int32_t bcd_conv (int32_t value);
-
-int lba_to_msf (uint32_t lba, struct cdrom_msf * mp);
-uint32_t msf_to_lba (int m, int s, int f, int force_positive);
-              
-
-extern int32_t trackmode_probe (const char *image);
-
-extern int32_t bin2iso (const char *image, int32_t track_mode);
-extern int32_t cdirip (const char *image);
-//extern int32_t nerorip (const char *image);
-extern int32_t cdi2nero (const char *image);
-//extern int32_t isofix (const char *image);
-
-typedef struct
-{
-  uint32_t mode;
-  uint32_t sector_size;
-  uint32_t seek_header;
-  uint32_t seek_ecc;
-  char *common;
-  char *cdrdao;
-}
-st_track_modes_t;
-
-extern const st_track_modes_t track_modes[];
 
 #include "cdi.h"
+#include "ccd.h"
 #include "bin.h"
 #include "iso.h"
 #include "nero.h"
 
 
+/*
+  some support routines
+*/
+extern int lba_to_msf (uint32_t lba, struct cdrom_msf * mp);
+extern uint32_t msf_to_lba (int m, int s, int f, int force_positive);
+extern int from_bcd (int b);
+extern int to_bcd (int i);
+
+
+/*
+  dm_init()  this will init libdiscmage and try to recognize the image format
+*/
+extern int32_t dm_init (const char *image);
+
+
+/*
+  dm_bin2iso()  convert Mx/>2048 image to M1/2048
+  dm_cdirip()   rip tracks from cdi image
+TODO:  dm_nerorip()  rip tracks from nero image
+TODO:  dm_cdi2nero() <- this will become dm_neroadd()
+TODO:  dm_cdiadd() 
+TODO:  dm_isofix()   fix an iso image
+TODO:  dm_cdifix()   fix a cdi image
+*/
+extern int32_t dm_bin2iso (const char *image);
+extern int32_t dm_cdirip (const char *image);
+//extern int32_t dm_nerorip (const char *image);
+extern int32_t dm_cdi2nero (const char *image);
+//extern int32_t dm_isofix (const char *image);
 #endif  // LIBDISCMAGE_H

@@ -616,7 +616,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       q_fread (&iso_header, ISO_HEADER_START +
           UCON64_ISSET (ucon64.buheader_len) ?
             ucon64.buheader_len :
-            CDRW_HEADER_START (trackmode_probe (romfile)),
+            CDRW_HEADER_START (dm_init (romfile)),
               ISO_HEADER_LEN, romfile);
       rominfo->header_start = ISO_HEADER_START;
       rominfo->header_len = ISO_HEADER_LEN;
@@ -629,7 +629,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       rominfo->maker = iso_header.publisher_id;
 
 //misc stuff
-      value = trackmode_probe (romfile);
+      value = dm_init (romfile);
       if (value == -1)
         strcpy (rominfo->misc, "Track Mode: Unknown (Maybe CDI or NRG?)\n");
       else

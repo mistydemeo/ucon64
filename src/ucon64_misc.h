@@ -68,7 +68,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define PARPORT_DATA    0                       // output
 #define PARPORT_STATUS  1                       // input
 #define PARPORT_CONTROL 2
+#define BEOS_PARPORT	0xff
+/*
+  BEOS_PARPORT is the value of ucon64_parport under BeOS. This is not an I/O
+  port. Use the function inportb()/inportw()/outportb()/outportw() in
+  ucon64_misc.c to access the parallel port under BeOS.
+*/
 
+extern int ucon64_io_fd;
+/*
+  By default this is a file descriptor for the parallel port under BeOS.
+  This variable is used in the I/O functions. If another device than the the
+  parallel should be accessed via the I/O functions, close() ucon64_io_fd, 
+  open() the other device and assign the file descriptor to this var.
+*/
 
 char hexDigit(	int value	//GameGenie "codec" routine
 );
@@ -126,7 +139,7 @@ unsigned short int outport(	unsigned int arg1	//write a word to the p.p.
 #define in1byte(p)	inportb(p)
 // DJGPP has outportX() & inportX()
 
-#ifdef	__UNIX__
+#if     (__UNIX__ || __BEOS__)
 inline unsigned char inportb(unsigned short port);
 inline unsigned short inportw(unsigned short port);
 inline void outportb(unsigned short port, unsigned char byte);

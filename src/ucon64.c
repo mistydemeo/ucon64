@@ -62,7 +62,8 @@ write programs in C
 
 int main(int argc,char *argv[])
 {
-/*  long x, y = 0, console=ucon64_UNKNOWN;
+/*
+  long x, y = 0, console=ucon64_UNKNOWN;
   int ucon64_argc;
   struct dirent *ep;
   struct stat puffer;
@@ -96,7 +97,7 @@ int main(int argc,char *argv[])
   uid_t uid;
   gid_t gid;
 #endif
-*/
+
   printf("%s\n",ucon64_TITLE);
   printf("Uses code from various people. See 'DEVELOPERS' for more!\n");
   printf("This may be freely redistributed under the terms of the GNU Public License\n\n");
@@ -110,7 +111,6 @@ int main(int argc,char *argv[])
     return 0;
   }
 
-/*
 if(argcmp(argc, argv, "-sh"))
 {
 //TODO shell modus

@@ -217,13 +217,15 @@ long filetestpad(	char *filename
 }
 
 #ifdef BACKUP
+int ucon64_io_fd;
+
 unsigned char inportb(unsigned short port)
 {
 #ifdef __BEOS__
   IO_Tuple temp;
 
   temp.Port = port;
-  ioctl(fd, DRV_READ_IO_8, &temp, 0);
+  ioctl(ucon64_io_fd, DRV_READ_IO_8, &temp, 0);
 
   return (temp.Data);
 #else
@@ -245,7 +247,7 @@ unsigned short inportw(unsigned short port)
   IO_Tuple temp;
 
   temp.Port = port;
-  ioctl(fd, DRV_READ_IO_16, &temp, 0);
+  ioctl(ucon64_io_fd, DRV_READ_IO_16, &temp, 0);
 
   return (temp.Data16);
 #else
@@ -268,7 +270,7 @@ void outportb(unsigned short port, unsigned char byte)
 
   temp.Port = port;
   temp.Data = byte;
-  ioctl(fd, DRV_WRITE_IO_8, &temp, 0);
+  ioctl(ucon64_io_fd, DRV_WRITE_IO_8, &temp, 0);
 
   return;
 #else
@@ -287,7 +289,7 @@ void outportw(unsigned short port, unsigned short word)
 
   temp.Port = port;
   temp.Data16 = word;
-  ioctl(fd, DRV_WRITE_IO_16, &temp, 0);
+  ioctl(ucon64_io_fd, DRV_WRITE_IO_16, &temp, 0);
 
   return;
 #else
@@ -333,13 +335,28 @@ int detectParPort(unsigned int port)
   return 1;
 }
 
+void close_io_port(void)
+{
+  close(ucon64_io_fd);
+}
 
 #define getParPort(x) parport_probe(x)
 unsigned int parport_probe(unsigned int port)
 {
 #ifdef __BEOS__
 //TODO uhm..
-  fd = open("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
+  ucon64_io_fd = open("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
+  if (ucon64_io_fd != -1)
+  {
+    if (atexit(close_io_port) == -1)
+    {
+      fprintf(stderr, "Could not register function with atexit()\n");
+      exit(1);
+    }
+    return BEOS_PARPORT;
+  }
+  else
+    return 0;
 #else
   unsigned int parPortAddresses[] = {0x3bc, 0x378, 0x278};
   int i;

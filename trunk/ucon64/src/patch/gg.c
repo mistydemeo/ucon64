@@ -1,0 +1,1056 @@
+/********************************************************************
+ * $Id: gg.c,v 1.1 2002-05-29 15:45:48 noisyb Exp $
+ *
+ * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.  
+ * All rights reserved. Distributed under the BSD Software License.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions 
+ * are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright 
+ * notice, this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above 
+ * copyright notice, this list of conditions and the following 
+ * disclaimer in the documentation and/or other materials provided 
+ * with the distribution.
+ *
+ * 3. Neither the name of the <ORGANIZATION> nor the names of its
+ *    contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *
+ *
+ * uggconv - Universal Game Genie (tm) Code Convertor
+ *
+ * Game Genie (tm) is a trademark of Galoob and is used for
+ * purely informational purposes.  No endorsement of this
+ * utility by Galoob is implied.
+ *
+ * This application is 100% ANSI C.  Compile with
+ *   gcc uggconv.c -o uggconv
+ * or the equivalent for your platform.  
+ */
+
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include "misc.h"
+#include "config.h"
+#include "ucon64.h"
+#include "patch/gg.h"
+
+const char *gg_usage[] = {
+  NULL,
+  NULL,
+  "  " OPTION_LONG_S "gge         encode GameGenie code; " OPTION_LONG_S "rom=CODE\n"
+  "                  example: " OPTION_LONG_S "sms " OPTION_LONG_S "rom=CODE or " OPTION_LONG_S "gb " OPTION_LONG_S "rom=CODE\n"
+  "                    CODE='AAAA:VV' or CODE='AAAA:VV:CC'\n"
+  "                  " OPTION_LONG_S "gen " OPTION_LONG_S "rom=CODE\n"
+  "                    CODE='AAAAAA:VVVV'\n"
+  "                  " OPTION_LONG_S "nes " OPTION_LONG_S "rom=CODE\n"
+  "                    CODE='AAAA:VV' or CODE='AAAA:VV:CC'\n"
+  "                  " OPTION_LONG_S "snes " OPTION_LONG_S "rom=CODE\n"
+  "                    CODE='AAAAAA:VV'\n"
+  "  " OPTION_LONG_S "ggd         decode GameGenie code; " OPTION_LONG_S "rom=GG_CODE\n"
+  "                  example: " OPTION_LONG_S "sms " OPTION_LONG_S "rom=GG_CODE or " OPTION_LONG_S "gb " OPTION_LONG_S "rom=GG_CODE\n"
+  "                    GG_CODE='XXX-XXX' or GG_CODE='XXX-XXX-XXX'\n"
+  "                  " OPTION_LONG_S "gen " OPTION_LONG_S "rom=GG_CODE\n"
+  "                    GG_CODE='XXXX-XXXX'\n"
+  "                  " OPTION_LONG_S "nes " OPTION_LONG_S "rom=GG_CODE\n"
+  "                    GG_CODE='XXXXXX' or GG_CODE='XXXXXXXX'\n"
+  "                  " OPTION_LONG_S "snes " OPTION_LONG_S "rom=GG_CODE\n"
+  "                    GG_CODE='XXXX-XXXX'\n"
+  "TODO:  " OPTION_LONG_S "gg          apply GameGenie code (permanent); " OPTION_LONG_S "file=GG_CODE\n"
+  "                  example: (like above but " OPTION_LONG_S "file=GG_CODE instead of\n"
+  "                  " OPTION_LONG_S "rom=GG_CODE) " OPTION_LONG_S "rom=ROM " OPTION_LONG_S "file=GG_CODE\n",
+  NULL
+};
+
+#define GAME_GENIE_MAX_STRLEN 12
+
+/*********************************************************************
+ *
+ * GAME BOY / GAME GEAR  ROUTINES
+ *
+ *********************************************************************/
+
+extern int gameGenieDecodeGameBoy (const char *in, char *out);
+extern int gameGenieEncodeGameBoy (const char *in, char *out);
+
+/*********************************************************************
+ *
+ * MEGADRIVE  ROUTINES
+ *
+ *********************************************************************/
+
+extern int isGenesisChar (char c);
+extern int genesisValue (char c);
+extern int gameGenieDecodeMegadrive (const char *in, char *out);
+extern int gameGenieEncodeMegadrive (const char *in, char *out);
+
+/*********************************************************************
+ *
+ * NES ROUTINES
+ *
+ ********************************************************************/
+
+#define encodeNES(v, n, m, s) data[n] |= (v >> s) & m
+#define decodeNES(v, n, m, s) v |= (data[n] & m) << s
+
+extern char mapNesChar (char hex);
+extern char unmapNesChar (char genie);
+extern int isNesChar (char c);
+extern int gameGenieDecodeNES (const char *in, char *out);
+extern int gameGenieEncodeNES (const char *in, char *out);
+
+/*********************************************************************
+ *
+ * SNES ROUTINES
+ *
+ ********************************************************************/
+
+#define encodeSNES(x, y) transposed |= (((address & (0xc00000 >> (2*y))) << (2*y)) >> (2*x))
+#define decodeSNES(x, y) address |= (((transposed & (0xc00000 >> (2*x))) << (2*x)) >> (2*y))
+
+extern char mapSnesChar (char hex);
+extern char unmapSnesChar (char genie);
+extern int gameGenieDecodeSNES (const char *in, char *out);
+extern int gameGenieEncodeSNES (const char *in, char *out);
+
+/*********************************************************************
+ *
+ * UTILITY ROUTINES
+ *
+ ********************************************************************/
+
+char
+hexDigit (int value)
+{
+  switch (toupper (value))
+    {
+    case 0:
+      return '0';
+    case 1:
+      return '1';
+    case 2:
+      return '2';
+    case 3:
+      return '3';
+    case 4:
+      return '4';
+    case 5:
+      return '5';
+    case 6:
+      return '6';
+    case 7:
+      return '7';
+    case 8:
+      return '8';
+    case 9:
+      return '9';
+    case 10:
+      return 'A';
+    case 11:
+      return 'B';
+    case 12:
+      return 'C';
+    case 13:
+      return 'D';
+    case 14:
+      return 'E';
+    case 15:
+      return 'F';
+    default:
+      break;
+    }
+  return '?';
+
+}
+
+int
+hexValue (char digit)
+{
+  switch (toupper (digit))
+    {
+    case '0':
+      return 0;
+    case '1':
+      return 1;
+    case '2':
+      return 2;
+    case '3':
+      return 3;
+    case '4':
+      return 4;
+    case '5':
+      return 5;
+    case '6':
+      return 6;
+    case '7':
+      return 7;
+    case '8':
+      return 8;
+    case '9':
+      return 9;
+    case 'A':
+      return 10;
+    case 'B':
+      return 11;
+    case 'C':
+      return 12;
+    case 'D':
+      return 13;
+    case 'E':
+      return 14;
+    case 'F':
+      return 15;
+    default:
+      break;
+    }
+  return 0;
+}
+
+int
+hexByteValue (char x, char y)
+{
+  return (hexValue (x) << 4) + hexValue (y);
+}
+
+/*********************************************************************
+ *
+ * GAME BOY / GAME GEAR  ROUTINES
+ *
+ *********************************************************************/
+
+int
+gameGenieDecodeGameBoy (const char *in, char *out)
+{
+  int address = 0;
+  int value = 0;
+  int check = 0;
+  int haveCheck = 0;
+  int i;
+
+  if (strlen (in) == 11 && in[3] == '-' && in[7] == '-')
+    {
+      haveCheck = 1;
+    }
+  else if (strlen (in) == 7 && in[3] == '-')
+    {
+      haveCheck = 0;
+    }
+  else
+    {
+      return -1;
+    }
+  for (i = 0; i < strlen (in); ++i)
+    if (in[i] != '-' && !isxdigit (in[i]))
+      return -1;
+  if (hexValue (in[6]) < 8)
+    return -1;
+
+  value = hexByteValue (in[0], in[1]);
+
+  address =
+    (hexValue (in[2]) << 8) | (hexValue (in[4]) << 4) | hexValue (in[5]) |
+    ((~hexValue (in[6]) & 0xf) << 12);
+
+  if (haveCheck)
+    {
+      check = hexByteValue (in[8], in[10]);
+      check = ~check;
+      check = (((check & 0xfc) >> 2) | ((check & 0x03) << 6)) ^ 0x45;
+      sprintf (out, "%04X:%02X:%02X", address, value, check);
+    }
+  else
+    {
+      sprintf (out, "%04X:%02X", address, value);
+    }
+
+  return 0;
+}
+
+int
+gameGenieEncodeGameBoy (const char *in, char *out)
+{
+//  int address = 0;
+//  int value = 0;
+  int check = 0;
+  int haveCheck = 0;
+  int i;
+
+  if (strlen (in) == 10 && in[4] == ':' && in[7] == ':')
+    {
+      haveCheck = 1;
+    }
+  else if (strlen (in) == 7 && in[4] == ':')
+    {
+      haveCheck = 0;
+    }
+  else
+    {
+      return -1;
+    }
+  for (i = 0; i < strlen (in); ++i)
+    if (in[i] != ':' && !isxdigit (in[i]))
+      return -1;
+  if (hexValue (in[0]) > 7)
+    return -1;
+
+  out[0] = toupper (in[5]);
+  out[1] = toupper (in[6]);
+  out[2] = toupper (in[1]);
+  out[3] = '-';
+  out[4] = toupper (in[2]);
+  out[5] = toupper (in[3]);
+  out[6] = hexDigit (~hexValue (in[0]) & 0xf);
+  out[7] = 0;
+
+  if (haveCheck)
+    {
+      check = hexByteValue (in[8], in[10]);
+      check = ~check;
+      check = (((check & 0xfc) >> 2) | ((check & 0x03) << 6)) ^ 0x45;
+
+      check = hexByteValue (in[8], in[9]);
+      check ^= 0x45;
+      check = ~(((check & 0xc0) >> 6) | ((check & 0x3f) << 2));
+      i = (check & 0xf0) >> 4;
+      out[7] = '-';
+      out[8] = hexDigit (i & 0xf);
+      out[9] = hexDigit ((i ^ 8) & 0xf);
+      out[10] = hexDigit (check & 0xf);
+      out[11] = 0;
+    }
+
+  return 0;
+}
+
+/*********************************************************************
+ *
+ * MEGADRIVE  ROUTINES
+ *
+ *********************************************************************/
+
+static const char genesisChars[] = "ABCDEFGHJKLMNPRSTVWXYZ0123456789";
+
+int
+isGenesisChar (char c)
+{
+  return strchr (genesisChars, toupper (c)) != 0;
+}
+
+int
+genesisValue (char c)
+{
+  return strchr (genesisChars, toupper (c)) - genesisChars;
+}
+
+int
+gameGenieDecodeMegadrive (const char *in, char *out)
+{
+  int address = 0;
+  int value = 0;
+  int data[8];
+  int i;
+
+  if (strlen (in) != 9 || in[4] != '-')
+    return -1;
+  for (i = 0; i < 9; ++i)
+    if (in[i] != '-' && !isGenesisChar (in[i]))
+      return -1;
+
+  for (i = 0; i < 4; ++i)
+    data[i] = genesisValue (in[i]);
+  for (i = 5; i < 9; ++i)
+    data[i - 1] = genesisValue (in[i]);
+
+  address = 0;
+  address |= (data[3] & 0x0f) << 20;
+  address |= (data[4] & 0x1e) << 15;
+  address |= (data[1] & 0x03) << 14;
+  address |= (data[2] & 0x1f) << 9;
+  address |= (data[3] & 0x10) << 4;
+  address |= (data[6] & 0x07) << 5;
+  address |= (data[7] & 0x1f);
+
+  value = 0;
+  value |= (data[5] & 0x01) << 15;
+  value |= (data[6] & 0x18) << 10;
+  value |= (data[4] & 0x01) << 12;
+  value |= (data[5] & 0x1e) << 7;
+  value |= (data[0] & 0x1f) << 3;
+  value |= (data[1] & 0x16) >> 2;
+
+  sprintf (out, "%06X:%04X", address, value);
+
+  return 0;
+}
+
+int
+gameGenieEncodeMegadrive (const char *in, char *out)
+{
+  int address = 0;
+  int value = 0;
+  int data[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+  int i;
+
+  if (strlen (in) != 11 || in[6] != ':')
+    return -1;
+  for (i = 0; i < 11; ++i)
+    if (in[i] != ':' && !isxdigit (in[i]))
+      return -1;
+
+  sscanf (in, "%x:%x", &address, &value);
+
+  data[3] |= (address >> 20) & 0x0f;
+  data[4] |= (address >> 15) & 0x1e;
+  data[1] |= (address >> 14) & 0x03;
+  data[2] |= (address >> 9) & 0x1f;
+  data[3] |= (address >> 4) & 0x10;
+  data[6] |= (address >> 5) & 0x07;
+  data[7] |= (address & 0x1f);
+
+  data[5] |= (value >> 15) & 0x01;
+  data[6] |= (value >> 10) & 0x18;
+  data[4] |= (value >> 12) & 0x01;
+  data[5] |= (value >> 7) & 0x1e;
+  data[0] |= (value >> 3) & 0x1f;
+  data[1] |= (value << 2) & 0x16;
+
+  for (i = 0; i < 4; ++i)
+    out[i] = genesisChars[data[i]];
+  out[4] = '-';
+  for (i = 5; i < 9; ++i)
+    out[i] = genesisChars[data[i - 1]];
+  out[9] = 0;
+
+  return 0;
+}
+
+/*********************************************************************
+ *
+ * NES ROUTINES
+ *
+ ********************************************************************/
+
+char
+mapNesChar (char hex)
+{
+  switch (toupper (hex))
+    {
+    case '0':
+      return 'A';
+    case '1':
+      return 'P';
+    case '2':
+      return 'Z';
+    case '3':
+      return 'L';
+    case '4':
+      return 'G';
+    case '5':
+      return 'I';
+    case '6':
+      return 'T';
+    case '7':
+      return 'Y';
+    case '8':
+      return 'E';
+    case '9':
+      return 'O';
+    case 'A':
+      return 'X';
+    case 'B':
+      return 'U';
+    case 'C':
+      return 'K';
+    case 'D':
+      return 'S';
+    case 'E':
+      return 'V';
+    case 'F':
+      return 'N';
+    default:
+      break;
+    }
+  return '?';
+}
+
+char
+unmapNesChar (char genie)
+{
+  switch (toupper (genie))
+    {
+    case 'A':
+      return '0';
+    case 'P':
+      return '1';
+    case 'Z':
+      return '2';
+    case 'L':
+      return '3';
+    case 'G':
+      return '4';
+    case 'I':
+      return '5';
+    case 'T':
+      return '6';
+    case 'Y':
+      return '7';
+    case 'E':
+      return '8';
+    case 'O':
+      return '9';
+    case 'X':
+      return 'A';
+    case 'U':
+      return 'B';
+    case 'K':
+      return 'C';
+    case 'S':
+      return 'D';
+    case 'V':
+      return 'E';
+    case 'N':
+      return 'F';
+    default:
+      break;
+    }
+  return '0';
+}
+
+int
+isNesChar (char c)
+{
+  return strchr ("APZLGITYEOXUKSVN-", toupper (c)) != 0;
+}
+
+int
+gameGenieDecodeNES (const char *in, char *out)
+{
+  int address = 0;
+  int value = 0;
+  int check = 0;
+  int haveCheck = 0;
+  int data[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+  int i;
+
+  if (strlen (in) == 8)
+    {
+      haveCheck = 1;
+    }
+  else if (strlen (in) == 6)
+    {
+      haveCheck = 0;
+    }
+  else
+    {
+      return -1;
+    }
+  for (i = 0; i < strlen (in); ++i)
+    if (!isNesChar (in[i]))
+      return -1;
+
+  for (i = 0; i < 6; ++i)
+    data[i] = hexValue (unmapNesChar (in[i]));
+  if (haveCheck)
+    {
+      data[6] = hexValue (unmapNesChar (in[6]));
+      data[7] = hexValue (unmapNesChar (in[7]));
+    }
+
+  address = 0x8000;             /* force high bit on */
+  decodeNES (address, 1, 8, 4);
+  decodeNES (address, 2, 7, 4);
+  decodeNES (address, 3, 7, 12);
+  decodeNES (address, 3, 8, 0);
+  decodeNES (address, 4, 7, 0);
+  decodeNES (address, 4, 8, 8);
+  decodeNES (address, 5, 7, 8);
+  if (haveCheck)
+    {
+      decodeNES (value, 0, 7, 0);
+      decodeNES (value, 0, 8, 4);
+      decodeNES (value, 1, 7, 4);
+      decodeNES (value, 7, 8, 0);
+      decodeNES (check, 6, 7, 0);
+      decodeNES (check, 6, 8, 0);
+      decodeNES (check, 6, 8, 4);
+      decodeNES (check, 7, 7, 4);
+    }
+  else
+    {
+      decodeNES (value, 0, 7, 0);
+      decodeNES (value, 0, 8, 4);
+      decodeNES (value, 1, 7, 4);
+      decodeNES (value, 5, 8, 0);
+    }
+
+  if (haveCheck)
+    {
+      sprintf (out, "%04X:%02X:%02X", address, value, check);
+    }
+  else
+    {
+      sprintf (out, "%04X:%02X", address, value);
+    }
+
+  return 0;
+}
+
+int
+gameGenieEncodeNES (const char *in, char *out)
+{
+  int address = 0x8000;
+  int value = 0;
+  int check = 0;
+  int haveCheck = 0;
+  int data[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+  int i;
+
+  if (strlen (in) == 10 && in[4] == ':' && in[7] == ':')
+    {
+      haveCheck = 1;
+    }
+  else if (strlen (in) == 7 && in[4] == ':')
+    {
+      haveCheck = 0;
+    }
+  else
+    {
+      return -1;
+    }
+  for (i = 0; i < strlen (in); ++i)
+    if (in[i] != ':' && !isxdigit (in[i]))
+      return -1;
+
+  if (haveCheck)
+    {
+      sscanf (in, "%x:%x:%x", &address, &value, &check);
+    }
+  else
+    {
+      sscanf (in, "%x:%x", &address, &value);
+    }
+
+  /* Encode address with transposition cipher. 
+   * Do not encode the high address bit (optional, Galoob isn't
+   * consistent but usually doesn't.
+   */
+  encodeNES (address, 1, 8, 4);
+  encodeNES (address, 2, 7, 4);
+  encodeNES (address, 3, 7, 12);
+  encodeNES (address, 3, 8, 0);
+  encodeNES (address, 4, 7, 0);
+  encodeNES (address, 4, 8, 8);
+  encodeNES (address, 5, 7, 8);
+  if (haveCheck)
+    {
+      encodeNES (value, 0, 7, 0);
+      encodeNES (value, 0, 8, 4);
+      encodeNES (value, 1, 7, 4);
+      encodeNES (value, 7, 8, 0);
+      encodeNES (check, 6, 7, 0);
+      encodeNES (check, 6, 8, 0);
+      encodeNES (check, 6, 8, 4);
+      encodeNES (check, 7, 7, 4);
+    }
+  else
+    {
+      encodeNES (value, 0, 7, 0);
+      encodeNES (value, 0, 8, 4);
+      encodeNES (value, 1, 7, 4);
+      encodeNES (value, 5, 8, 0);
+    }
+
+  if (haveCheck)
+    {
+      sprintf (out, "%c%c%c%c%c%c%c%c",
+               mapNesChar (hexDigit (data[0])),
+               mapNesChar (hexDigit (data[1])),
+               mapNesChar (hexDigit (data[2])),
+               mapNesChar (hexDigit (data[3])),
+               mapNesChar (hexDigit (data[4])),
+               mapNesChar (hexDigit (data[5])),
+               mapNesChar (hexDigit (data[6])),
+               mapNesChar (hexDigit (data[7])));
+    }
+  else
+    {
+      sprintf (out, "%c%c%c%c%c%c",
+               mapNesChar (hexDigit (data[0])),
+               mapNesChar (hexDigit (data[1])),
+               mapNesChar (hexDigit (data[2])),
+               mapNesChar (hexDigit (data[3])),
+               mapNesChar (hexDigit (data[4])),
+               mapNesChar (hexDigit (data[5])));
+    }
+
+  return 0;
+}
+
+/*********************************************************************
+ *
+ * SNES ROUTINES
+ *
+ ********************************************************************/
+
+char
+mapSnesChar (char hex)
+{
+  switch (toupper (hex))
+    {
+    case '0':
+      return 'D';
+    case '1':
+      return 'F';
+    case '2':
+      return '4';
+    case '3':
+      return '7';
+    case '4':
+      return '0';
+    case '5':
+      return '9';
+    case '6':
+      return '1';
+    case '7':
+      return '5';
+    case '8':
+      return '6';
+    case '9':
+      return 'B';
+    case 'A':
+      return 'C';
+    case 'B':
+      return '8';
+    case 'C':
+      return 'A';
+    case 'D':
+      return '2';
+    case 'E':
+      return '3';
+    case 'F':
+      return 'E';
+    default:
+      break;
+    }
+  return ' ';
+}
+
+char
+unmapSnesChar (char genie)
+{
+  switch (toupper (genie))
+    {
+    case 'D':
+      return '0';
+    case 'F':
+      return '1';
+    case '4':
+      return '2';
+    case '7':
+      return '3';
+    case '0':
+      return '4';
+    case '9':
+      return '5';
+    case '1':
+      return '6';
+    case '5':
+      return '7';
+    case '6':
+      return '8';
+    case 'B':
+      return '9';
+    case 'C':
+      return 'A';
+    case '8':
+      return 'B';
+    case 'A':
+      return 'C';
+    case '2':
+      return 'D';
+    case '3':
+      return 'E';
+    case 'E':
+      return 'F';
+    default:
+      break;
+    }
+  return ' ';
+}
+
+int
+gameGenieDecodeSNES (const char *in, char *out)
+{
+  int value;
+  long address;
+  long transposed;
+//  int i;
+//  int b;
+
+  if (!isxdigit (in[0]) || !isxdigit (in[1]) ||
+      !isxdigit (in[2]) || !isxdigit (in[3]) ||
+      in[4] != '-' ||
+      !isxdigit (in[5]) || !isxdigit (in[6]) ||
+      !isxdigit (in[7]) || !isxdigit (in[8]) || in[9] != 0)
+    return -1;
+
+  value = hexByteValue (unmapSnesChar (in[0]), unmapSnesChar (in[1]));
+
+  transposed = hexValue (unmapSnesChar (in[8])) +
+    (hexValue (unmapSnesChar (in[7])) << 4) +
+    (hexValue (unmapSnesChar (in[6])) << 8) +
+    (hexValue (unmapSnesChar (in[5])) << 12) +
+    (hexValue (unmapSnesChar (in[3])) << 16) +
+    (hexValue (unmapSnesChar (in[2])) << 20);
+
+  address = 0;
+  decodeSNES (0, 4);
+  decodeSNES (1, 5);
+  decodeSNES (2, 8);
+  decodeSNES (3, 9);
+  decodeSNES (4, 7);
+  decodeSNES (5, 0);
+  decodeSNES (6, 1);
+  decodeSNES (7, 10);
+  decodeSNES (8, 11);
+  decodeSNES (9, 2);
+  decodeSNES (10, 3);
+  decodeSNES (11, 6);
+
+  sprintf (out, "%06lX:%02X", address, value);
+
+  return 0;
+}
+
+int
+gameGenieEncodeSNES (const char *in, char *out)
+{
+  int value;
+  long address;
+  long transposed;
+//  int i;
+//  int b;
+
+  if (!isxdigit (in[0]) || !isxdigit (in[1]) ||
+      !isxdigit (in[2]) || !isxdigit (in[3]) ||
+      !isxdigit (in[4]) || !isxdigit (in[5]) ||
+      in[6] != ':' || !isxdigit (in[7]) || !isxdigit (in[8]) || in[9] != 0)
+    return -1;
+
+  value = hexByteValue (mapSnesChar (in[7]), mapSnesChar (in[8]));
+  sscanf (in, "%lx", &address);
+
+  transposed = 0;
+  encodeSNES (0, 4);
+  encodeSNES (1, 5);
+  encodeSNES (2, 8);
+  encodeSNES (3, 9);
+  encodeSNES (4, 7);
+  encodeSNES (5, 0);
+  encodeSNES (6, 1);
+  encodeSNES (7, 10);
+  encodeSNES (8, 11);
+  encodeSNES (9, 2);
+  encodeSNES (10, 3);
+  encodeSNES (11, 6);
+
+  sprintf (out, "%02X%c%c-%c%c%c%c", value,
+           mapSnesChar (hexDigit ((transposed & 0xf00000) >> 20)),
+           mapSnesChar (hexDigit ((transposed & 0x0f0000) >> 16)),
+           mapSnesChar (hexDigit ((transposed & 0x00f000) >> 12)),
+           mapSnesChar (hexDigit ((transposed & 0x000f00) >> 8)),
+           mapSnesChar (hexDigit ((transposed & 0x0000f0) >> 4)),
+           mapSnesChar (hexDigit ((transposed & 0x00000f))));
+
+  return 0;
+}
+
+
+static void
+usage (void)
+{
+//#if 0
+  puts ("uggconv v1.0 - Universal Game Genie (tm) Convertor");
+  puts ("Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>");
+  puts ("\nUsage:");
+  puts
+    ("GameBoy/Gear: uggconv -g [XXX-XXX] [XXX-XXX-XXX] [AAAA:VV] [AAAA:VV:CC] ...");
+  puts ("Megadrive:    uggconv -m [XXXX-XXXX] [AAAAAA:VVVV] ...");
+  puts
+    ("NES:          uggconv -n [XXXXXX] [XXXXXXXX] [AAAA:VV] [AAAA:VV:CC] ...");
+  puts ("SNES:         uggconv -s [XXXX-XXXX] [AAAAAA:VV] ...");
+  exit (1);
+//#endif  
+}
+
+int
+gg_main (int argc, const char **argv)
+{
+  char buffer[GAME_GENIE_MAX_STRLEN];
+  int i;
+  int result = 0;
+
+  if (argc < 3 || strlen (argv[1]) != 2 || argv[1][0] != '-')
+    usage ();
+  if (strchr ("gmns", argv[1][1]) == 0)
+    usage ();
+
+  for (i = 2; i < argc; ++i)
+    {
+      if (strchr (argv[i], ':') == 0)
+        {
+          printf ("SHIT!");
+          fflush (stdout);
+
+          switch (argv[1][1])
+            {
+            case 'g':
+              result = gameGenieDecodeGameBoy (argv[i], buffer);
+              break;
+            case 'm':
+              result = gameGenieDecodeMegadrive (argv[i], buffer);
+              break;
+            case 'n':
+              result = gameGenieDecodeNES (argv[i], buffer);
+              break;
+            case 's':
+              result = gameGenieDecodeSNES (argv[i], buffer);
+              break;
+            }
+        }
+      else
+        {
+          switch (argv[1][1])
+            {
+            case 'g':
+              result = gameGenieEncodeGameBoy (argv[i], buffer);
+              break;
+            case 'm':
+              result = gameGenieEncodeMegadrive (argv[i], buffer);
+              break;
+            case 'n':
+              result = gameGenieEncodeNES (argv[i], buffer);
+              break;
+            case 's':
+              result = gameGenieEncodeSNES (argv[i], buffer);
+              break;
+            }
+        }
+      if (result != 0)
+        {
+          printf ("%-12s is badly formed\n", argv[i]);
+        }
+      else
+        {
+          printf ("%-12s = %s\n", argv[i], buffer);
+        }
+    }
+  return 0;
+}
+
+
+/*
+  It will save you some work if you don't fully integrate the code above with uCON64's code,
+  because it is a project separate from the uCON64 project.
+*/
+int gg_argc;
+const char *gg_argv[128];
+
+
+int
+gg_gge (void)
+{
+  gg_argv[0] = "uggconv";
+
+  switch (ucon64.console)
+    {
+    case UCON64_SNES:
+      gg_argv[1] = "-s";
+      break;
+
+    case UCON64_GENESIS:
+      gg_argv[1] = "-m";
+      break;
+
+    case UCON64_NES:
+      gg_argv[1] = "-n";
+      break;
+
+    case UCON64_GB:
+    case UCON64_SMS:
+      gg_argv[1] = "-g";
+      break;
+
+    default:
+      fprintf (stderr, 
+           "ERROR: You must specify the console via force recognition\n"
+           "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n");
+      return -1;
+    }
+  gg_argv[2] = ucon64.rom;
+
+  gg_argc = 3;
+
+  gg_main (gg_argc, gg_argv);
+
+  return 0;
+}
+
+
+int
+gg_ggd (void)
+{
+  gg_argv[0] = "uggconv";
+
+  switch (ucon64.console)
+    {
+    case UCON64_SNES:
+      gg_argv[1] = "-s";
+      break;
+
+    case UCON64_GENESIS:
+      gg_argv[1] = "-m";
+      break;
+
+    case UCON64_NES:
+      gg_argv[1] = "-n";
+      break;
+
+    case UCON64_GB:
+    case UCON64_SMS:
+      gg_argv[1] = "-g";
+      break;
+
+    default:
+      fprintf (stderr, 
+           "ERROR: You must specify the console via force recognition\n"
+           "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n");
+      return -1;
+    }
+  gg_argv[2] = ucon64.rom;
+
+  gg_argc = 3;
+
+  gg_main (gg_argc, gg_argv);
+
+  return 0;
+}

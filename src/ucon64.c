@@ -117,7 +117,7 @@ int
 main (int argc, char *argv[])
 {
   long x, y = 0;
-  int ucon64_argc, skip_init_nfo = 0, c = 0;
+  int ucon64_argc, skip_init_nfo = 0, c = 0, result = 0;
   unsigned long padded;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], *ucon64_argv[128];
   int option_index = 0;
@@ -276,9 +276,9 @@ main (int argc, char *argv[])
   printf ("This may be freely redistributed under the terms of the GNU Public License\n\n");
 
   rom.console = ucon64_UNKNOWN;
-
   ucon64_flush (argc, argv, &rom);
-  if (!strlen (rom.rom))
+
+  if (!strlen (rom.rom))//no $ROM? then just use current working dir
     getcwd (rom.rom, sizeof (rom.rom));
 
   ucon64_configfile ();
@@ -306,8 +306,7 @@ while ((c =
     switch (c)
       {
       case 129:                //help
-        ucon64_usage (argc, argv);
-        return 0;
+        return ucon64_usage (argc, argv);
         break;
 
       case 130:                //frontend
@@ -330,13 +329,11 @@ while ((c =
         break;
 
       case 134:                //rl
-        renlwr (rom.rom);
-        return 0;
+        return renlwr (rom.rom);
         break;
 
       case 135:                //ru
-        renupr (rom.rom);
-        return 0;
+        return renupr (rom.rom);
         break;
 
       case 136:                //hex
@@ -387,15 +384,13 @@ while ((c =
       case 140:                //pad
         ucon64_fbackup (&rom, rom.rom);
 
-        filepad (rom.rom, 0, MBIT);
-        return 0;
+        return filepad (rom.rom, 0, MBIT);
         break;
 
       case 141:                //padhd
         ucon64_fbackup (&rom, rom.rom);
 
-        filepad (rom.rom, 512, MBIT);
-        return 0;
+        return filepad (rom.rom, 512, MBIT);
         break;
 
       case 142:                //ispad
@@ -414,8 +409,7 @@ while ((c =
       case 143:                //strip
         ucon64_fbackup (&rom, rom.rom);
 
-        truncate (rom.rom, quickftell (rom.rom) - atol (rom.file));
-        return 0;
+        return truncate (rom.rom, quickftell (rom.rom) - atol (rom.file));
         break;
 
       case 144:                //stp
@@ -424,8 +418,7 @@ while ((c =
         remove (buf);           // try to remove or rename will fail
         rename (rom.rom, buf);
 
-        filecopy (buf, 512, quickftell (buf), rom.rom, "wb");
-        return 0;
+        return filecopy (buf, 512, quickftell (buf), rom.rom, "wb");
         break;
 
       case 145:                //ins
@@ -437,16 +430,15 @@ while ((c =
         memset (buf2, 0, 512);
         quickfwrite (buf2, 0, 512, rom.rom, "wb");
 
-        filecopy (buf, 0, quickftell (buf), rom.rom, "ab");
-        return 0;
+        return filecopy (buf, 0, quickftell (buf), rom.rom, "ab");
         break;
 
       case 'b':
         ucon64_fbackup (&rom, rom.rom);
 
-        if (bsl (rom.rom, rom.file) != 0)
+        if ((result = bsl (rom.rom, rom.file)) != 0)
           printf ("ERROR: failed\n");
-        return 0;
+        return result;
         break;
 
       case 'i':
@@ -469,13 +461,11 @@ while ((c =
 
         ucon64_fbackup (&rom, rom.rom);
 
-        n64aps_main (ucon64_argc, ucon64_argv);
-        return 0;
+        return n64aps_main (ucon64_argc, ucon64_argv);
         break;
 
       case 146:                //mki
-        cips (rom.rom, rom.file);
-        return 0;
+        return cips (rom.rom, rom.file);
         break;
 
       case 147:                //mka
@@ -489,16 +479,13 @@ while ((c =
         ucon64_argv[4] = buf;
         ucon64_argc = 5;
 
-        n64caps_main (ucon64_argc, ucon64_argv);
-        return 0;
+        return n64caps_main (ucon64_argc, ucon64_argv);
         break;
 
       case 148:                //na
         memset (buf2, ' ', 50);
         strncpy (buf2, rom.file, strlen (rom.file));
-        quickfwrite (buf2, 7, 50, ucon64_fbackup (&rom, rom.rom), "r+b");
-
-        return 0;
+        return quickfwrite (buf2, 7, 50, ucon64_fbackup (&rom, rom.rom), "r+b");
         break;
 
       case 149:                //ppf
@@ -507,8 +494,7 @@ while ((c =
         ucon64_argv[2] = rom.file;
         ucon64_argc = 3;
 
-        applyppf_main (ucon64_argc, ucon64_argv);
-        return 0;
+        return applyppf_main (ucon64_argc, ucon64_argv);
         break;
 
       case 150:                //mkppf
@@ -522,21 +508,17 @@ while ((c =
         ucon64_argv[3] = buf;
         ucon64_argc = 4;
 
-        makeppf_main (ucon64_argc, ucon64_argv);
-        return 0;
+        return makeppf_main (ucon64_argc, ucon64_argv);
         break;
 
       case 151:                //nppf
         memset (buf2, ' ', 50);
         strncpy (buf2, rom.file, strlen (rom.file));
-        quickfwrite (buf2, 6, 50, ucon64_fbackup (&rom, rom.rom), "r+b");
-
-        return 0;
+        return quickfwrite (buf2, 6, 50, ucon64_fbackup (&rom, rom.rom), "r+b");
         break;
 
       case 152:                //idppf
-        addppfid (argc, argv);
-        return 0;
+        return addppfid (argc, argv);
         break;
 
       case 153:                //ls

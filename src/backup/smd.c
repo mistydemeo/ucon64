@@ -37,15 +37,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t smd_usage[] =
   {
-    {NULL, NULL, "Super Com Pro/Super Magic Drive/SMD"},
-    {NULL, NULL, "19XX Front Far East/FFE http://www.front.com.tw"},
+    {NULL, 0, NULL, "Super Com Pro/Super Magic Drive/SMD", "19XX Front Far East/FFE http://www.front.com.tw"},
 #ifdef USE_PARALLEL
-    {"xsmd", NULL, "send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
-                 "receives automatically when ROM does not exist"},
-    {"xsmds", NULL, "send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
-                 "receives automatically when SRAM does not exist"},
+    {"xsmd", 0, NULL, "send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
+                 "receives automatically when ROM does not exist", NULL},
+    {"xsmds", 0, NULL, "send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
+                 "receives automatically when SRAM does not exist", NULL},
 #endif // USE_PARALLEL
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 

@@ -37,26 +37,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t gd_usage[] =
   {
-    {NULL, NULL, "Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"},
-    {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
+    {NULL, 0, NULL, "Game Doctor SF3(SF6/SF7)/Professor SF(SF II)", "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef USE_PARALLEL
-    {"xgd3", NULL, "send ROM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
-                   "this option uses the Game Doctor SF3 protocol"},
+    {"xgd3", 0, NULL, "send ROM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
+                   "this option uses the Game Doctor SF3 protocol", NULL},
 #if 1 // dumping is not yet supported (might happen soon)
-    {"xgd6", NULL, "send ROM to Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
+    {"xgd6", 0, NULL, "send ROM to Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
 #else
-    {"xgd6", NULL, "send/receive ROM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
+    {"xgd6", 0, NULL, "send/receive ROM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
                    "receives automatically when ROM does not exist\n"
 #endif
-                   "this option uses the Game Doctor SF6 protocol"},
-    {"xgd3s", NULL, "send SRAM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT"},
-    {"xgd6s", NULL, "send/receive SRAM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when SRAM does not exist"},
-    {"xgd6r", NULL, "send/receive saver (RTS) data to/from Game Doctor SF6/SF7;\n"
+                   "this option uses the Game Doctor SF6 protocol", NULL},
+    {"xgd3s", 0, NULL, "send SRAM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT", NULL},
+    {"xgd6s", 0, NULL, "send/receive SRAM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when SRAM does not exist", NULL},
+    {"xgd6r", 0, NULL, "send/receive saver (RTS) data to/from Game Doctor SF6/SF7;\n"
                     OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when saver file does not exist"},
+                    "receives automatically when saver file does not exist", NULL},
 #endif // USE_PARALLEL
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 #ifdef USE_PARALLEL

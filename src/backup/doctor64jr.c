@@ -144,16 +144,15 @@ void mainproc(void *arg) {
 
 
 const st_usage_t doctor64jr_usage[] = {
-  {NULL, NULL, "Doctor V64 Junior"},
-  {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
+  {NULL, 0, NULL, "Doctor V64 Junior", "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef  USE_PARALLEL
-  {"xdjr", NULL, "send ROM to Doctor V64 Junior; " OPTION_LONG_S "port=PORT"},
+  {"xdjr", 0, NULL, "send ROM to Doctor V64 Junior; " OPTION_LONG_S "port=PORT", NULL},
 #if 0
-  {"xdjrs", NULL, "send/receive SRAM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when SRAM does not exist"},
+  {"xdjrs", 0, NULL, "send/receive SRAM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
+                "receives automatically when SRAM does not exist", NULL},
 #endif
 #endif // USE_PARALLEL
-  {NULL, NULL, NULL}
+  {NULL, 0, NULL, NULL, NULL}
 };
 
 

@@ -25,7 +25,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t ufo_usage[] =
   {
-    {NULL, NULL, "Super UFO Pro 8"},
-    {NULL, NULL, "UFO Enterprises"},
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, "Super UFO Pro 8", "UFO Enterprises"},
+    {NULL, 0, NULL, NULL, NULL}
   };

@@ -69,7 +69,7 @@ modified by 2001 - 2002 NoisyB (noisyb@gmx.net)
 
 
 const st_usage_t gg_usage[] = {
-  {"gge", "CODE", "encode and display Game Genie code\n"
+  {"gge", 1, "CODE", "encode and display Game Genie code\n"
                   "example: " OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "sms or " OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "gb\n"
                   "CODE" OPTARG_S "'AAAA:VV' or CODE" OPTARG_S "'AAAA:VV:CC'\n"
                   OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "gen\n"
@@ -77,8 +77,8 @@ const st_usage_t gg_usage[] = {
                   OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "nes\n"
                   "CODE" OPTARG_S "'AAAA:VV' or CODE" OPTARG_S "'AAAA:VV:CC'\n"
                   OPTION_LONG_S "gge" OPTARG_S "CODE " OPTION_LONG_S "snes\n"
-                  "CODE" OPTARG_S "'AAAAAA:VV'"},
-  {"ggd", "GG_CODE", "decode Game Genie code\n"
+                  "CODE" OPTARG_S "'AAAAAA:VV'", NULL},
+  {"ggd", 1, "GG_CODE", "decode Game Genie code\n"
                   "example: " OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "sms or " OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "gb\n"
                   "GG_CODE" OPTARG_S "'XXX-XXX' or GG_CODE" OPTARG_S "'XXX-XXX-XXX'\n"
                   OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "gen\n"
@@ -86,10 +86,10 @@ const st_usage_t gg_usage[] = {
                   OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "nes\n"
                   "GG_CODE" OPTARG_S "'XXXXXX' or GG_CODE" OPTARG_S "'XXXXXXXX'\n"
                   OPTION_LONG_S "ggd" OPTARG_S "GG_CODE " OPTION_LONG_S "snes\n"
-                  "GG_CODE" OPTARG_S "'XXXX-XXXX'"},
-  {"gg", "GG_CODE", "apply Game Genie code (permanently)\n"
-                   "example: like above but a ROM is required"},
-  {NULL, NULL, NULL}
+                  "GG_CODE" OPTARG_S "'XXXX-XXXX'", NULL},
+  {"gg", 1, "GG_CODE", "apply Game Genie code (permanently)\n"
+                   "example: like above but a ROM is required", NULL},
+  {NULL, 0, NULL, NULL, NULL}
 };
 
 

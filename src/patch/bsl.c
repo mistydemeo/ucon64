@@ -34,8 +34,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t bsl_usage[] =
   {
-    {"b", NULL, "apply Baseline/BSL PATCH to ROM"},
-    {NULL, NULL, NULL}
+    {"b", 0, NULL, "apply Baseline/BSL PATCH to ROM", NULL},
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 

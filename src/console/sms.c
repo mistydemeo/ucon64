@@ -44,17 +44,16 @@ static int sms_chksum (unsigned char *rom_buffer, int rom_size);
 
 const st_usage_t sms_usage[] =
   {
-    {NULL, NULL, "Sega Master System(II/III)/Game Gear (Handheld)"},
-    {NULL, NULL, "1986/19XX SEGA http://www.sega.com"},
-    {"sms", NULL, "force recognition"},
-    {"int", NULL, "force ROM is in interleaved format (SMD)"},
-    {"nint", NULL, "force ROM is not in interleaved format (RAW)"},
-    {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)"},
-    {"mgdgg", NULL, "same as " OPTION_LONG_S "mgd, but gives GG name"},
-    {"smd", NULL, "convert to Super Magic Drive/SMD"},
-    {"smds", NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"},
-    {"chk", NULL, "fix ROM checksum (SMS only)"},
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, "Sega Master System(II/III)/Game Gear (Handheld)", "1986/19XX SEGA http://www.sega.com"},
+    {"sms", 0, NULL, "force recognition", NULL},
+    {"int", 0, NULL, "force ROM is in interleaved format (SMD)", NULL},
+    {"nint", 0, NULL, "force ROM is not in interleaved format (RAW)", NULL},
+    {"mgd", 0, NULL, "convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)", NULL},
+    {"mgdgg", 0, NULL, "same as " OPTION_LONG_S "mgd, but gives GG name", NULL},
+    {"smd", 0, NULL, "convert to Super Magic Drive/SMD", NULL},
+    {"smds", 0, NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD", NULL},
+    {"chk", 0, NULL, "fix ROM checksum (SMS only)", NULL},
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 typedef struct st_sms_header

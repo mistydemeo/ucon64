@@ -49,20 +49,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t gameboy_usage[] =
   {
-    {NULL, NULL, "Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)"},
-    {NULL, NULL, "1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com"},
-    {"gb", NULL, "force recognition"},
-    {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
-    {"logo", NULL, "restore ROM logo character data (offset: 0x104-0x134)"},
-    {"mgd", NULL, "convert to Multi Game*/MGD2/RAW"},
-    {"ssc", NULL, "convert to Super Smart Card/SSC"},
-    {"sgb", NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX"},
-    {"gbx", NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC"},
-    {"n2gb", "NESROM", "KAMI's FC EMUlator (NES emulator);\n"
+    {NULL, 0, NULL, "Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)", "1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com"},
+    {"gb", 0, NULL, "force recognition", NULL},
+    {"n", 1, "NEW_NAME", "change internal ROM name to NEW_NAME", NULL},
+    {"logo", 0, NULL, "restore ROM logo character data (offset: 0x104-0x134)", NULL},
+    {"mgd", 0, NULL, "convert to Multi Game*/MGD2/RAW", NULL},
+    {"ssc", 0, NULL, "convert to Super Smart Card/SSC", NULL},
+    {"sgb", 0, NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX", NULL},
+    {"gbx", 0, NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC", NULL},
+    {"n2gb", 1, "NESROM", "KAMI's FC EMUlator (NES emulator);\n"
                        "ROM should be KAMI's FC Emulator ROM image\n"
-                       "NESROM should contain 16 kB of PRG data and 8 kB of CHR data"},
-    {"chk", NULL, "fix ROM checksum"},
-    {NULL, NULL, NULL}
+                       "NESROM should contain 16 kB of PRG data and 8 kB of CHR data", NULL},
+    {"chk", 0, NULL, "fix ROM checksum", NULL},
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 

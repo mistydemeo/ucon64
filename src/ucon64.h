@@ -35,18 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc.h"
 
 
-typedef struct
-{
-  const char *option_s;                         // "chk", ...
-  const char *optarg;
-  const char *desc;                             // "fix checksum", ...
-#if 0
-  const char *desc_long;                        // long description
-  int status;                                   // development status of option
-#endif                                          //  0 = OK, 1 = TODO, 2 = TEST
-} st_usage_t;
-
-
 #ifdef  USE_DISCMAGE
 #include "ucon64_dm.h"
 #endif

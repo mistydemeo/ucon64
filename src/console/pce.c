@@ -47,16 +47,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t pcengine_usage[] =
   {
-    {NULL, NULL, "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\nSuper Grafx/Turbo (Grafx(16)/CD/DUO/Express)"},
-    {NULL, NULL, "1987/19XX/19XX NEC"},
-    {"pce", NULL, "force recognition"},
-    {"int", NULL, "force ROM is in interleaved (bit-swapped) format"},
-    {"nint", NULL, "force ROM is not in interleaved (bit-swapped) format"},
-    {"msg", NULL, "convert to Magic Super Griffin/MSG"},
-    {"mgd", NULL, "convert to Multi Game Doctor*/MGD2/RAW"},
-    {"swap", NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)"},
-    {"f", NULL, "fix region protection"},
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\n"
+                    "Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)",
+                    "1987/19XX/19XX NEC"},
+    {"pce", 0, NULL, "force recognition", NULL},
+    {"int", 0, NULL, "force ROM is in interleaved (bit-swapped) format", NULL},
+    {"nint", 0, NULL, "force ROM is not in interleaved (bit-swapped) format", NULL},
+    {"msg", 0, NULL, "convert to Magic Super Griffin/MSG", NULL},
+    {"mgd", 0, NULL, "convert to Multi Game Doctor*/MGD2/RAW", NULL},
+    {"swap", 0, NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)", NULL},
+    {"f", 0, NULL, "fix region protection", NULL},
+    {NULL, 0, NULL, NULL, NULL}
 };
 
 #define PCE_MAKER_MAX 86

@@ -56,22 +56,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t f2a_usage[] =
   {
-    {NULL, NULL, "Flash 2 Advance (Ultra)"},
-    {NULL, NULL, "2003 Flash2Advance http://www.flash2advance.com"},
+    {NULL, 0, NULL, "Flash 2 Advance (Ultra)", "2003 Flash2Advance http://www.flash2advance.com"},
 #if     defined USE_PARALLEL || defined USE_USB
-    {"xf2a", NULL, "send/receive ROM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
-                   "receives automatically (32 Mbits) when ROM does not exist"},
-    {"xf2amulti", "SIZE", "send multiple ROMs to Flash 2 Advance (Ultra); specify a\n"
-                          "loader in the configuration file; " OPTION_LONG_S "port=PORT"},
-    {"xf2ac", "N", "receive N Mbits of ROM from Flash 2 Advance (Ultra);\n"
-                   OPTION_LONG_S "port=PORT"},
-    {"xf2as", NULL, "send/receive SRAM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when SRAM does not exist"},
-    {"xf2ab", "BANK", "send/receive SRAM to/from Flash 2 Advance (Ultra) BANK\n"
+    {"xf2a", 0, NULL, "send/receive ROM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
+                   "receives automatically (32 Mbits) when ROM does not exist", NULL},
+    {"xf2amulti", 1, "SIZE", "send multiple ROMs to Flash 2 Advance (Ultra); specify a\n"
+                          "loader in the configuration file; " OPTION_LONG_S "port=PORT", NULL},
+    {"xf2ac", 1, "N", "receive N Mbits of ROM from Flash 2 Advance (Ultra);\n"
+                   OPTION_LONG_S "port=PORT", NULL},
+    {"xf2as", 1, NULL, "send/receive SRAM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when SRAM does not exist", NULL},
+    {"xf2ab", 1, "BANK", "send/receive SRAM to/from Flash 2 Advance (Ultra) BANK\n"
                       "BANK should be a number >= 1; " OPTION_LONG_S "port=PORT\n"
-                      "receives automatically when SRAM does not exist"},
+                      "receives automatically when SRAM does not exist", NULL},
 #endif // USE_PARALLEL || USE_USB
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, NULL, NULL}
 };
 
 

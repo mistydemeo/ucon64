@@ -73,19 +73,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t gbx_usage[] =
   {
-    {NULL, NULL, "Game Boy Xchanger/GBDoctor"},
-    {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
+    {NULL, 0, NULL, "Game Boy Xchanger/GBDoctor", "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef USE_PARALLEL
-    {"xgbx", NULL, "send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when ROM does not exist"},
-    {"xgbxs", NULL, "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when SRAM does not exist"},
-    {"xgbxb", "BANK", "send/receive 64 kbits SRAM to/from GB Xchanger BANK\n"
-                     "BANK can be a number from 0 to 15; " OPTION_LONG_S "port=PORT\n"
-                     "receives automatically when ROM does not exist"},
-    {"xgbxm", NULL, "try to enable EPP mode, default is SPP mode"},
+    {"xgbx", 0, NULL, "send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
+                      "receives automatically when ROM does not exist", NULL},
+    {"xgbxs", 0, NULL, "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
+                       "receives automatically when SRAM does not exist", NULL},
+    {"xgbxb", 1, "BANK", "send/receive 64 kbits SRAM to/from GB Xchanger BANK\n"
+                         "BANK can be a number from 0 to 15; " OPTION_LONG_S "port=PORT\n"
+                         "receives automatically when ROM does not exist", NULL},
+    {"xgbxm", 0, NULL, "try to enable EPP mode, default is SPP mode", NULL},
 #endif // USE_PARALLEL
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 #ifdef USE_PARALLEL

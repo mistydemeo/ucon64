@@ -42,10 +42,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t aps_usage[] =
   {
-    {"a", NULL, "apply APS PATCH to ROM (APS<=v1.2)"},
-    {"mka", "ORG_ROM", "create APS patch; ROM should be the modified ROM"},
-    {"na", "DESC", "change APS single line DESCRIPTION"},
-    {NULL, NULL, NULL}
+    {"a", 0, NULL, "apply APS PATCH to ROM (APS<=v1.2)", NULL},
+    {"mka", 1, "ORG_ROM", "create APS patch; ROM should be the modified ROM", NULL},
+    {"na", 1, "DESC", "change APS single line DESCRIPTION", NULL},
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 char n64aps_magic[] = "APS10";

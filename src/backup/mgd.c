@@ -34,14 +34,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t mgd_usage[] =
   {
-    {NULL, NULL, "Multi Game Doctor (2)/Multi Game Hunter/MGH"},
-    {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
-    {NULL, NULL, "?Makko Toys Co., Ltd.?"},
+    {NULL, 0, NULL, "Multi Game Doctor (2)/Multi Game Hunter/MGH",
+                    "19XX Bung Enterprises Ltd http://www.bung.com.hk\n"
+                    "?Makko Toys Co., Ltd.?"},
 #if 0
-    {"xmgd", "(TODO) send/receive ROM to/from Multi Game* /MGD2/MGH; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when " OPTION_LONG_S "rom does not exist"},
+    {"xmgd", 0, NULL, "(TODO) send/receive ROM to/from Multi Game* /MGD2/MGH; " OPTION_LONG_S "port=PORT\n"
+                "receives automatically when " OPTION_LONG_S "rom does not exist", NULL},
 #endif
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 

@@ -33,8 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t yoko_usage[] =
   {
-    {NULL, NULL, "YOKO backup unit"},
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, "YOKO backup unit", NULL},
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 #ifdef USE_PARALLEL

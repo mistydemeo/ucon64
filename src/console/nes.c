@@ -44,53 +44,52 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t nes_usage[] =
   {
-    {NULL, NULL, "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)"},
-    {NULL, NULL, "1983 Nintendo http://www.nintendo.com"},
-    {"nes", NULL, "force recognition"},
-    {"n", "NEW_NAME", "change internal ROM name to NEW_NAME (UNIF only)"},
-    {"unif", NULL, "convert to UNIF format/UNF (uses default values)"},
-    {"ines", NULL, "convert to iNES format/NES (uses default values)"},
-    {"ineshd", NULL, "extract iNES header from ROM (16 Bytes)"},
-    {"j", NULL, "join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)"},
-    {"pasofami", NULL, "convert to Pasofami/PRM/700/PRG/CHR"},
-    {"s", NULL, "convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)"},
-    {"ffe", NULL, "convert to FFE format (Super Magic Card)"},
-    {"mapr", "MAPR", "specify board name or mapper number for conversion options\n"
+    {NULL, 0, NULL, "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)", "1983 Nintendo http://www.nintendo.com"},
+    {"nes", 0, NULL, "force recognition", NULL},
+    {"n", 1, "NEW_NAME", "change internal ROM name to NEW_NAME (UNIF only)", NULL},
+    {"unif", 0, NULL, "convert to UNIF format/UNF (uses default values)", NULL},
+    {"ines", 0, NULL, "convert to iNES format/NES (uses default values)", NULL},
+    {"ineshd", 0, NULL, "extract iNES header from ROM (16 Bytes)", NULL},
+    {"j", 0, NULL, "join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)", NULL},
+    {"pasofami", 0, NULL, "convert to Pasofami/PRM/700/PRG/CHR", NULL},
+    {"s", 0, NULL, "convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)", NULL},
+    {"ffe", 0, NULL, "convert to FFE format (Super Magic Card)", NULL},
+    {"mapr", 1, "MAPR", "specify board name or mapper number for conversion options\n"
                      "MAPR must be a board name for UNIF or a number for Pasofami\n"
-                     "and iNES"},
-    {"dint", NULL, "convert to non-interleaved format"},
-    {"ctrl", "TYPE", "specify controller type (UNIF only)\n"
+                     "and iNES", NULL},
+    {"dint", 0, NULL, "convert to non-interleaved format", NULL},
+    {"ctrl", 1, "TYPE", "specify controller type (UNIF only)\n"
                      "TYPE=0 regular joypad\n"
                      "TYPE=1 zapper\n"
                      "TYPE=2 R.O.B.\n"
                      "TYPE=3 Arkanoid controller\n"
                      "TYPE=4 powerpad\n"
-                     "TYPE=5 four-score adapter"},
-    {"ntsc", NULL, "specify TV standard is NTSC (UNIF only)"},
-    {"pal", NULL, "specify TV standard is PAL (UNIF only)"},
-    {"bat", NULL, "specify battery is present"},
-    {"nbat", NULL, "specify battery is not present"},
-    {"vram", NULL, "specify VRAM override (UNIF only)"},
-    {"nvram", NULL, "specify no VRAM override (UNIF only)"},
-    {"mirr", "MTYPE", "specify mirroring type\n"
+                     "TYPE=5 four-score adapter", NULL},
+    {"ntsc", 0, NULL, "specify TV standard is NTSC (UNIF only)", NULL},
+    {"pal", 0, NULL, "specify TV standard is PAL (UNIF only)", NULL},
+    {"bat", 0, NULL, "specify battery is present", NULL},
+    {"nbat", 0, NULL, "specify battery is not present", NULL},
+    {"vram", 0, NULL, "specify VRAM override (UNIF only)", NULL},
+    {"nvram", 0, NULL, "specify no VRAM override (UNIF only)", NULL},
+    {"mirr", 1, "MTYPE", "specify mirroring type\n"
                       "MTYPE=0 horizontal mirroring\n"
                       "MTYPE=1 vertical mirroring\n"
                       "MTYPE=2 mirror all pages from $2000 (UNIF only)\n"
                       "MTYPE=3 mirror all pages from $2400 (UNIF only)\n"
                       "MTYPE=4 four screens of VRAM\n"
-                      "MTYPE=5 mirroring controlled by mapper hardware (UNIF only)"},
+                      "MTYPE=5 mirroring controlled by mapper hardware (UNIF only)", NULL},
 #if     UNIF_REVISION > 7
-    {"cmnt", "TEXT", "specify that TEXT should be used as comment (UNIF only)"},
+    {"cmnt", 1, "TEXT", "specify that TEXT should be used as comment (UNIF only)", NULL},
 #endif
-    {"dumpinfo", "FILE", "use dumper info from FILE when converting to UNIF"},
-    {"fds", NULL, "convert Famicom Disk System file (diskimage) from FAM to FDS"},
-    {"fdsl", NULL, "list Famicom Disk System/FDS (diskimage) contents"},
+    {"dumpinfo", 1, "FILE", "use dumper info from FILE when converting to UNIF", NULL},
+    {"fds", 0, NULL, "convert Famicom Disk System file (diskimage) from FAM to FDS", NULL},
+    {"fdsl", 0, NULL, "list Famicom Disk System/FDS (diskimage) contents", NULL},
 #if 0
-    {"fam", NULL, "convert Famicom Disk System file (diskimage) from FDS to FAM"},
-    {"tr", NULL, "truncate doubled PRG/CHR"},
-    {"nfs", NULL, "convert NFS sound to WAV; " OPTION_LONG_S "rom=NFSFILE"},
+    {"fam", 0, NULL, "convert Famicom Disk System file (diskimage) from FDS to FAM", NULL},
+    {"tr", 0, NULL, "truncate doubled PRG/CHR", NULL},
+    {"nfs", 0, NULL, "convert NFS sound to WAV; " OPTION_LONG_S "rom=NFSFILE", NULL},
 #endif
-      {NULL, NULL, NULL}
+      {NULL, 0, NULL, NULL, NULL}
   };
 
 #if 0
@@ -4944,23 +4943,23 @@ static const st_nes_data_t nes_data[] = {
 static nes_file_t type;
 
 static const st_usage_t ines_usage[] = {
-    {NULL, NULL, "iNES header"},
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, "iNES header", NULL},
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 static const st_usage_t unif_usage[] = {
-    {NULL, NULL, "UNIF header"},
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, "UNIF header", NULL},
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 static const st_usage_t pasofami_usage[] = {
-    {NULL, NULL, "Pasofami file"},
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, "Pasofami file", NULL},
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 static const st_usage_t fds_usage[] = {
-    {NULL, NULL, "Famicom Disk System file (diskimage)"},
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, "Famicom Disk System file (diskimage)", NULL},
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 static st_ines_header_t ines_header;

@@ -51,35 +51,34 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t n64_usage[] =
   {
-    {NULL, NULL, "Nintendo 64"},
-    {NULL, NULL, "1996 Nintendo http://www.nintendo.com"},
-    {"n64", NULL, "force recognition"},
-    {"int", NULL, "force ROM is in interleaved format (2143, V64)"},
-    {"nint", NULL, "force ROM is not in interleaved format (1234, Z64)"},
-    {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
-    {"v64", NULL, "convert to Doctor V64 (and compatibles/interleaved)"},
-    {"z64", NULL, "convert to Mr. Backup Z64 (not interleaved)"},
-    {"dint", NULL, "convert ROM to (non-)interleaved format (1234 <-> 2143)"},
-    {"swap", NULL, "same as " OPTION_LONG_S "dint, byte-swap ROM"},
-    {"swap2", NULL, "word-swap ROM (1234 <-> 3412)"},
+    {NULL, 0, NULL, "Nintendo 64", "1996 Nintendo http://www.nintendo.com"},
+    {"n64", 0, NULL, "force recognition", NULL},
+    {"int", 0, NULL, "force ROM is in interleaved format (2143, V64)", NULL},
+    {"nint", 0, NULL, "force ROM is not in interleaved format (1234, Z64)", NULL},
+    {"n", 1, "NEW_NAME", "change internal ROM name to NEW_NAME", NULL},
+    {"v64", 0, NULL, "convert to Doctor V64 (and compatibles/interleaved)", NULL},
+    {"z64", 0, NULL, "convert to Mr. Backup Z64 (not interleaved)", NULL},
+    {"dint", 0, NULL, "convert ROM to (non-)interleaved format (1234 <-> 2143)", NULL},
+    {"swap", 0, NULL, "same as " OPTION_LONG_S "dint, byte-swap ROM", NULL},
+    {"swap2", 0, NULL, "word-swap ROM (1234 <-> 3412)", NULL},
 #if 0
-    {"f", NULL, "remove NTSC/PAL protection"},
+    {"f", 0, NULL, "remove NTSC/PAL protection", NULL},
 #endif
-    {"bot", "BOOTCODE", "add/extract BOOTCODE (4032 Bytes) to/from ROM;\n"
-                        "extracts automatically if BOOTCODE does not exist"},
-    {"lsram", "SRAM", "LaC's SRAM upload tool; ROM should be LaC's ROM image\n"
+    {"bot", 1, "BOOTCODE", "add/extract BOOTCODE (4032 Bytes) to/from ROM;\n"
+                        "extracts automatically if BOOTCODE does not exist", NULL},
+    {"lsram", 1, "SRAM", "LaC's SRAM upload tool; ROM should be LaC's ROM image\n"
                        "the SRAM must have a size of 512 Bytes\n"
                        "this option generates a ROM which can be used to transfer\n"
-                       "SRAMs to your cartridge's SRAM (EEPROM)"},
-    {"usms", "SMSROM", "Jos Kwanten's UltraSMS (Sega Master System/Game Gear emulator);\n"
+                       "SRAMs to your cartridge's SRAM (EEPROM)", NULL},
+    {"usms", 1, "SMSROM", "Jos Kwanten's UltraSMS (Sega Master System/Game Gear emulator);\n"
                        "ROM should be Jos Kwanten's UltraSMS ROM image\n"
-                       "works only for SMS ROMs which are <= 4 Mb in size"},
-    {"chk", NULL, "fix ROM checksum\n"
-              "supports only 6101 and 6102 boot codes"},
+                       "works only for SMS ROMs which are <= 4 Mb in size", NULL},
+    {"chk", 0, NULL, "fix ROM checksum\n"
+              "supports only 6101 and 6102 boot codes", NULL},
 #if 0
-    {"bios", "BIOS", "enable backup in Doctor V64 BIOS"},
+    {"bios", 1, "BIOS", "enable backup in Doctor V64 BIOS", NULL},
 #endif
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, NULL, NULL}
 };
 
 

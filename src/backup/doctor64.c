@@ -37,13 +37,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc_par.h"
 
 const st_usage_t doctor64_usage[] = {
-  {NULL, NULL, "Doctor V64"},
-  {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
+  {NULL, 0, NULL, "Doctor V64", "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef USE_PARALLEL
-  {"xv64", NULL, "send/receive ROM to/from Doctor V64; " OPTION_LONG_S "port=PORT\n"
-              "receives automatically when ROM does not exist"},
+  {"xv64", 0, NULL, "send/receive ROM to/from Doctor V64; " OPTION_LONG_S "port=PORT\n"
+              "receives automatically when ROM does not exist", NULL},
 #endif // USE_PARALLEL
-  {NULL, NULL, NULL}
+  {NULL, 0, NULL, NULL, NULL}
 };
 
 

@@ -45,9 +45,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t ips_usage[] =
 {
-  {"i", NULL, "apply IPS PATCH to ROM (IPS<=v1.2)"},
-  {"mki", "ORG_ROM", "create IPS patch; ROM should be the modified ROM"},
-  {NULL, NULL, NULL}
+  {"i", 0, NULL, "apply IPS PATCH to ROM (IPS<=v1.2)", NULL},
+  {"mki", 1, "ORG_ROM", "create IPS patch; ROM should be the modified ROM", NULL},
+  {NULL, 0, NULL, NULL, NULL}
 };
 
 static FILE *orgfile, *modfile, *ipsfile, *destfile;

@@ -38,19 +38,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t fig_usage[] =
   {
-    {NULL, NULL, "Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)"},
-    {NULL, NULL, "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw"},
+    {NULL, 0, NULL, "Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)",
+                    "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw"},
 #ifdef  USE_PARALLEL
-    {"xfig", NULL, "send/receive ROM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
-                   "receives automatically when ROM does not exist"},
-    {"xfigs", NULL, "send/receive SRAM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when SRAM does not exist"},
-    {"xfigc", NULL, "send/receive SRAM to/from cartridge in *Pro Fighter*/FIG;\n"
-                    OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when SRAM does not exist"},
+    {"xfig", 0, NULL, "send/receive ROM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
+                      "receives automatically when ROM does not exist", NULL},
+    {"xfigs", 0, NULL, "send/receive SRAM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
+                       "receives automatically when SRAM does not exist", NULL},
+    {"xfigc", 0, NULL, "send/receive SRAM to/from cartridge in *Pro Fighter*/FIG;\n"
+                       OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when SRAM does not exist", NULL},
 //                    "Press q to abort; ^C might cause invalid state of backup unit"},
 #endif
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 #ifdef USE_PARALLEL

@@ -80,25 +80,25 @@ static char ucon64_dat_fname[FILENAME_MAX];
 static st_mkdat_entry_t *ucon64_mkdat_entries = NULL;
 
 const st_usage_t ucon64_dat_usage[] = {
-  {NULL, NULL, "DATabase (support for DAT files)"},
-  {"db", NULL, "DATabase statistics"},
-  {"dbv", NULL, "like " OPTION_LONG_S "db but more verbose"},
-  {"dbs", "CRC32", "search ROM with CRC32 in DATabase"},
-  {"scan", NULL, "generate ROM list for all ROMs using DATabase\n"
-              "like: GoodXXXX scan ..."},
-  {"lsd", NULL, "same as " OPTION_LONG_S "scan"},
-  {"mkdat", "DATFILE", "create DAT file; use -o to specify an output directory"},
-  {"rrom", NULL, "rename ROMs to their internal names"},
-  {"rename", NULL, "rename ROMs to their DATabase names\n"
-                    "use -o to specify an output directory"},
-  {"83", NULL, "force to rename to 8.3 filenames"},
-  {"force63", NULL, "force to rename all filenames into Joliet CD format\n"
+  {NULL, 0, NULL, "DATabase (support for DAT files)", NULL},
+  {"db", 0, NULL, "DATabase statistics", NULL},
+  {"dbv", 0, NULL, "like " OPTION_LONG_S "db but more verbose", NULL},
+  {"dbs", 1, "CRC32", "search ROM with CRC32 in DATabase", NULL},
+  {"scan", 0, NULL, "generate ROM list for all ROMs using DATabase\n"
+              "like: GoodXXXX scan ...", NULL},
+  {"lsd", 0, NULL, "same as " OPTION_LONG_S "scan", NULL},
+  {"mkdat", 1, "DATFILE", "create DAT file; use -o to specify an output directory", NULL},
+  {"rrom", 0, NULL, "rename ROMs to their internal names", NULL},
+  {"rename", 0, NULL, "rename ROMs to their DATabase names\n"
+                    "use -o to specify an output directory", NULL},
+  {"83", 0, NULL, "force to rename to 8.3 filenames", NULL},
+  {"force63", 0, NULL, "force to rename all filenames into Joliet CD format\n"
               "like: GoodXXXX rename inplace force63 ...\n"
-              "TIP: using " OPTION_LONG_S "nes would process only NES ROMs"},
-  {"rl", NULL, "rename all ROMs to lowercase"},
-  {"ru", NULL, "rename all ROMs to uppercase"},
-//  {"good", NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed using\n"
-//              "the DATabase"},
+              "TIP: using " OPTION_LONG_S "nes would process only NES ROMs", NULL},
+  {"rl", 0, NULL, "rename all ROMs to lowercase", NULL},
+  {"ru", 0, NULL, "rename all ROMs to uppercase", NULL},
+//  {"good", 0, NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed using\n"
+//              "the DATabase", NULL},
 
 /*
 GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
@@ -136,7 +136,7 @@ Good_RAR     = log of RAR errors
 
 Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 */
-  {NULL, NULL, NULL}
+  {NULL, 0, NULL, NULL, NULL}
 };
 
 

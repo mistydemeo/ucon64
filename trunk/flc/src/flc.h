@@ -76,5 +76,4 @@ struct file_
   struct sub_ sub;
 };
 
-
 #endif

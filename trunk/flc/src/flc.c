@@ -1,15 +1,4 @@
 /*
-  if (optind < argc)
-    {
-      printf (" non - option ARGV - elements : ");
-      while (optind < argc)
-        printf ("%s ", argv[optind++]);
-      printf ("\n");
-    }
-  exit (0);
-}
-*/
-/*
     flc 1999-2002 by NoisyB (noisyb@gmx.net)
     flc lists information about the FILEs (the current directory by default)
     But most important it shows the FILE_ID.DIZ of every file (if present)
@@ -83,8 +72,9 @@ main (int argc, char *argv[])
     {0, 0, 0, 0}
   };
 
-  flc_configfile ();
+  memset (&flc, 0, sizeof (struct flc_));
 
+  flc_configfile ();
 
   while ((c =
           getopt_long_only (argc, argv, "", long_options,
@@ -95,7 +85,6 @@ main (int argc, char *argv[])
         {
         case 1:
           atexit (flc_exit);
-//        return 0;
           break;
 
         case 't':
@@ -133,19 +122,27 @@ main (int argc, char *argv[])
         case 'h':
           flc_usage (argc, argv);
           return 0;
-          break;
 
         default:
           printf ("Try '%s --help' for more information.\n", argv[0]);
-          return 0;
-          break;
+          return -1;
         }
     }
+/*
+  if (optind < argc)
+    {
+      printf (" non - option ARGV - elements : ");
+      while (optind < argc)
+        printf ("%s ", argv[optind++]);
+      printf ("\n");
+    }
+  exit (0);
+}
+*/
 
   flc.argc = argc;
   for (x = 0; x < argc; x++)
     flc.argv[x] = argv[x];
-
 
   strcpy (flc.path, getarg (argc, argv, flc_FILE));
   getProperty (flc.configfile, "file_id_diz", flc.config, "file_id.diz");
@@ -256,14 +253,14 @@ flc_usage (int argc, char *argv[])
   printf ("\n%s\n"
           "This may be freely redistributed under the terms of the GNU Public License\n\n"
           "USAGE: %s [OPTION]... [FILE]...\n\n"
-          "  -c            also test every possible archive in DIRECTORY for errors\n"
+          "  " OPTION_S "c            also test every possible archive in DIRECTORY for errors\n"
           "                return flags: N=not checked (default), P=passed, F=failed\n"
-          "  --html        output as HTML document with links to the files\n"
-          "  -t            sort by modification time\n"
-          "  -X            sort alphabetical\n"
-          "  -S            sort by byte size\n"
-          "  --fr          sort reverse\n"
-          "  -k            show sizes in kilobytes\n"
+          "  " OPTION_LONG_S "html        output as HTML document with links to the files\n"
+          "  " OPTION_S "t            sort by modification time\n"
+          "  " OPTION_S "X            sort alphabetical\n"
+          "  " OPTION_S "S            sort by byte size\n"
+          "  " OPTION_LONG_S "fr          sort reverse\n"
+          "  " OPTION_S "k            show sizes in kilobytes\n"
           "\n"
           "Amiga version: noC-FLC Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
           "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n",

@@ -338,7 +338,7 @@ Q34: <a href="#34">When I try to convert a large number of files using
 <p>
 <a name="17"><b>Q17</b>: Usage: What does --rom and --file stand for?</a><br>
 <b>A</b>: Enter "ucon64 -help | more" and look at the top where it says:<br>
-   Usage: ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]<br>
+   Usage: ucon64 [OPTION]... [--rom=][ROM]... [[--file=]FILE]<br>
    --rom and --file take an argument, --file is mostly optional.<br>
 <br>
 <p>
@@ -537,7 +537,7 @@ Q34: <a href="#34">When I try to convert a large number of files using
 <p>
 <a name="34"><b>Q34</b>: When I try to convert a large number of files using
    wildcards, uCON64 will only convert the first file. Is this a bug?</a><br>
-<b>A</b>: No, it isn't. uCON64 1.9.8beta6 just doesn't supports wildcards. For
+<b>A</b>: No, it isn't. uCON64 1.9.8beta6 just doesn't support wildcards. For
    example, to convert all files with the suffix (M$ speak: extension) .mgd
    to Super Wild Card format, try this in Bash:<br>
    &nbsp;&nbsp; find -name \*.mgd -exec ucon64 --snes --swc {} \;<br>

@@ -1,6 +1,6 @@
 .PHONY: all clean install
 
-DLOPEN=1
+@DEFINE_DLOPEN_MAKE@
 
 libdir = @libdir@
 #INSTALL = @INSTALL@
@@ -34,38 +34,32 @@ else
 ENTRY=_DllMain@12
 endif
 
-LIBSUFFIX=.dll
+FULLLIBNAME=$(LIBNAME).dll
 DLLFLAGS=$(LDFLAGS) --dll -o $(LIBNAME).dll $(OBJECTS) $(LIBS) -e $(ENTRY)
 DLLTOOLFLAGS=--dllname $(LIBNAME).dll --def tmp.def
 
 else
 ifdef DJGPP
-LIBSUFFIX=.dxe
+FULLLIBNAME=$(LIBNAME).dxe
 else                                    # Unix or BeOS
-LIBSUFFIX=.so
 CFLAGS+=-fPIC
 
-ifeq ($(TERM),be)                       # BeOS (untested!)
+ifeq ($(OSTYPE),beos)                   # BeOS
 DLLFLAGS=-nostart
 else                                    # Unix
 DLLFLAGS=-shared
-ifdef   DLOPEN
-LIBS=-ldl
-else
-# for DLL clients:
-#LDFLAGS+=-L.
-#LIBS=-l$(LIBNAME)
 endif
 
+ifdef  DLOPEN
+FULLLIBNAME=$(LIBNAME).so
+else
+FULLLIBNAME=lib$(LIBNAME).so
+endif
 endif                                   # DJGPP
 endif                                   # cygwin
 
 
-ifndef  DLOPEN
-all: lib$(LIBNAME)$(LIBSUFFIX)
-else
-all: $(LIBNAME)$(LIBSUFFIX)
-endif
+all: $(FULLLIBNAME)
 
 
 clean:
@@ -79,8 +73,23 @@ ifndef  DLOPEN
 endif
 	del *.o
 else                                    # Unix or BeOS
-	rm -f *$(LIBSUFFIX) $(OBJECTS) *.core *.stackdump *.o
-endif
+	rm -f *.so $(OBJECTS) *.core *.stackdump *.o
+endif                                   # DJGPP
+endif                                   # cygwin
+
+
+distclean: clean
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	rm -f Makefile config.log config.status config.cache config.h
+else
+ifdef DJGPP
+	del Makefile
+	del config.log
+	del config.status
+	del config.cache
+	del config.h
+else
+	rm -f Makefile config.log config.status config.cache config.h
 endif                                   # DJGPP
 endif                                   # cygwin
 
@@ -115,15 +124,13 @@ else
 ifdef DJGPP
 
 ifndef  DLOPEN
-# TODO: write an import library for DJGPP
-$(LIBNAME).dxe $(LIBNAME).a: $(OBJECTS) dlopen.o
+$(LIBNAME).dxe $(LIBNAME).a: $(OBJECTS) djimport.o dlopen.o
 else
 $(LIBNAME).dxe: $(OBJECTS)
 endif
 	dxegen $(LIBNAME).dxe _import_export $(OBJECTS)
 ifndef  DLOPEN
-# TODO: write an import library for DJGPP
-	ar rs $(LIBNAME).a dlopen.o
+	ar rs $(LIBNAME).a djimport.o dlopen.o
 endif
 
 else                                    # Unix or BeOS
@@ -141,12 +148,14 @@ endif                                   # DJGPP
 endif                                   # cygwin
 
 
-ifndef  DLOPEN
-install:
-	$(LIBTOOL) --mode=install $(INSTALL) lib$(LIBNAME).so $(libdir)/lib$(LIBNAME).so
-endif
+#ifndef  DLOPEN
+#install:
+#	$(LIBTOOL) --mode=install $(INSTALL) lib$(LIBNAME).so $(libdir)/lib$(LIBNAME).so
+#endif
 
 # Dependencies
-libdiscmage/libdiscmage.o: libdiscmage/libdiscmage_cfg.h libdiscmage/dxedll_priv.h
-libdiscmage/nero.o: libdiscmage/nero.h libdiscmage/cdi.h config.h libdiscmage/dxedll_priv.h
-libdiscmage/cdi.o: libdiscmage/cdi.h libdiscmage/dxedll_priv.h
+libdiscmage/libdiscmage.o: libdiscmage/libdiscmage.h libdiscmage/libdiscmage_cfg.h libdiscmage/dxedll_priv.h
+libdiscmage/nero.o: libdiscmage/libdiscmage.h libdiscmage/nero.h libdiscmage/cdi.h config.h libdiscmage/dxedll_priv.h
+libdiscmage/cdi.o: libdiscmage/libdiscmage.h libdiscmage/cdi.h libdiscmage/dxedll_priv.h
+libdiscmage/sheets.o: libdiscmage/libdiscmage.h libdiscmage/dxedll_priv.h
+libdiscmage/dllinit.o: libdiscmage/libdiscmage.h libdiscmage/dxedll_priv.h

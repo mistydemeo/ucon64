@@ -1141,7 +1141,7 @@ ucon64_configfile (void)
     , dirname);
 #ifdef  DJGPP
   // this is DJGPP specific - not necessary, but causes less confusion
-  change_string ("/", 1, 0, 0, "\\", 1, ucon64.configfile,
+  change_string ("/", 1, 0, 0, FILE_SEPARATOR_S, 1, ucon64.configfile,
     strlen (ucon64.configfile), 0);
 #endif
 
@@ -1269,6 +1269,18 @@ ucon64_configfile (void)
       set_property (ucon64.configfile, "version", buf);
 
       set_property (ucon64.configfile, "ansi_color", "1");
+
+      set_property (ucon64.configfile, "discmage_path",
+#if     defined __MSDOS__
+        "discmage.dxe"
+#elif   defined __CYGWIN__
+        "discmage.dll"
+#elif   defined __unix__ || defined __BEOS__
+        "~/discmage.so"
+#else
+        ""
+#endif
+      );
 
 #if 0
       DELETE_PROPERTY (ucon64.configfile, "cdrw_read");

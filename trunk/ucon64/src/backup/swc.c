@@ -21,20 +21,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "../config.h"
 #include <dirent.h>
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "../misc.h"
-#include "../ucon64.h"
-#include "../ucon64_db.h"
-#include "../ucon64_misc.h"
+#include <string.h>
+#include <sys/stat.h>
+#include "config.h"
+#include "misc.h"                               // kbhit(), getch()
+#include "ucon64.h"
+#include "ucon64_misc.h"
 #include "swc.h"
 
 #ifdef BACKUP
-
 
 #define INPUT_MASK      0x78
 #define IBUSY_BIT       0x80
@@ -85,7 +84,6 @@ init_io (unsigned int port)
 
   printf ("Using I/O port 0x%x\n", swc_port);
 }
-
 
 void
 send_block (unsigned short address, unsigned char *buffer, int len)
@@ -403,7 +401,6 @@ checkabort (int status)
     }
 //  send_command (5, 0, 0);                       // vgs: when sending/receiving a ROM
 }
-
 #endif // BACKUP
 
 void
@@ -419,7 +416,6 @@ swc_unlock (unsigned int parport)
   send_command (6, 0, 0);
 #endif // BACKUP
 }
-
 
 int
 swc_read_rom (char *filename, unsigned int parport)
@@ -511,7 +507,6 @@ swc_read_rom (char *filename, unsigned int parport)
   fclose (file);
 #else
   printf("NOTE: this version was compiled without backup support\n\n");
-  
 #endif // BACKUP
 
   return 0;
@@ -594,14 +589,10 @@ swc_write_rom (char *filename, unsigned int parport)
   fclose (file);
 #else
   printf("NOTE: this version was compiled without backup support\n\n");
-  
-
 #endif // BACKUP
 
   return 0;
 }
-
-
 
 int
 swc_read_sram (char *filename, unsigned int parport)
@@ -664,8 +655,6 @@ swc_read_sram (char *filename, unsigned int parport)
   return 0;
 }
 
-
-
 int
 swc_write_sram (char *filename, unsigned int parport)
 {
@@ -722,13 +711,10 @@ swc_write_sram (char *filename, unsigned int parport)
   return 0;
 }
 
-
-
 int
 swc_usage (int argc, char *argv[])
 {
 #ifdef BACKUP
-
   printf ( swc_TITLE "\n"
 
     "  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"

@@ -22,11 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
-#include "../misc.h"
-#include "../ucon64.h"
-#include "../ucon64_db.h"
-#include "../ucon64_misc.h"
+#include "misc.h"
+#include "ucon64.h"
+#include "ucon64_db.h"
+#include "ucon64_misc.h"
 #include "gbx.h"
 
 #ifdef BACKUP

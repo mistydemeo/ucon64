@@ -29,24 +29,24 @@ first I want to thank SiGMA SEVEN! who was my mentor and taught me how to
 write programs in C
 */
 
-#include "config.h"
 #include <ctype.h>
 #include <dirent.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <time.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <unistd.h>
-#include <stdlib.h>
+#include <sys/stat.h>
 #ifdef __linux__
-  #include <sys/io.h>
+#include <sys/io.h>
 #endif
 #ifndef __FreeBSD__
-  #include <getopt.h>           // __FreeBSD__ problems
+#include <getopt.h>           // __FreeBSD__ problems
 #endif // __FreeBSD__
 
+#include "config.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
@@ -93,7 +93,6 @@ write programs in C
 #include "backup/swc.h"
 #include "backup/unknown_bu.h"
 #include "backup/unknown_bu512.h"
-
 #include "backup/cdrw.h"
 
 struct ucon64_ rom;
@@ -447,7 +446,7 @@ while ((c =
   if (argcmp (argc, argv, "-pad"))
     {
       ucon64_fbackup (&rom, rom.rom);
-      
+
       filepad (rom.rom, 0, MBIT);
       return 0;
     }
@@ -1007,15 +1006,14 @@ while ((c =
       break;
 
     case ucon64_JAGUAR:
-      return (
-               0);
+      return 0;
       break;
 
     case ucon64_WONDERSWAN:
       return ((argcmp (argc, argv, "-chk")) ? wonderswan_chk (&rom) :
               0);
       break;
-      
+
     case ucon64_SYSTEM16:
     case ucon64_ATARI:
     case ucon64_SMS:
@@ -1031,13 +1029,12 @@ while ((c =
               /* ip0000(char *dev,char *name) */ 0 :
               (argcmp (argc, argv, "-iso")) ? /* cdi2iso(rom.rom) */ :
               (argcmp (argc, argv, "-mktoc")) ? dc_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? dc_xcdrw (&rom) : 
+              (argcmp (argc, argv, "-xcdrw")) ? dc_xcdrw (&rom) :
               0);
       break;
 
     case ucon64_PSX:
-      return (
-              (argcmp (argc, argv, "-iso")) ? bin2iso (rom.rom) :
+      return ((argcmp (argc, argv, "-iso")) ? bin2iso (rom.rom) :
               0);
       break;
 
@@ -1362,7 +1359,6 @@ ucon64_usage (int argc, char *argv[])
   pal4u_usage (argc, argv);
   ppf_usage (argc, argv);
   xps_usage (argc, argv);
-
 
   printf ("\n");
 

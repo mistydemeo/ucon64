@@ -22,28 +22,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "config.h"
 #include <ctype.h>
-//#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include <unistd.h>             // ioperm() (libc5)
+#ifdef  BACKUP
+#ifdef  __FreeBSD__
+#include <machine/sysarch.h>
+#elif   defined __linux__ // __FreeBSD__
+#ifdef  __GLIBC__
+#include <sys/io.h>             // ioperm() (glibc)
+#endif // __GLIBC__
+#elif   defined __MSDOS__ // __linux__
+#include <pc.h>                 // inportb(), inportw()
+#elif   defined __BEOS__ // __MSDOS__
+#include <fcntl.h>
+#endif // __BEOS__
+#endif // BACKUP
 #include "ucon64.h"
 #include "misc.h"
 #include "ucon64_misc.h"
-#ifdef  BACKUP
-  #ifdef __FreeBSD__
-    #include <machine/sysarch.h>
-  #endif // __FreeBSD__
-  #ifdef  __linux__
-    #ifdef  __GLIBC__
-      #include <sys/io.h>             // ioperm() (glibc)
-    #endif // __GLIBC__
-  #elif   defined __MSDOS__
-    #include <pc.h>                 // inportb(), inportw()
-  #elif   defined __BEOS__
-    #include <fcntl.h>
-  #endif // __BEOS__
-#endif // BACKUP
 
 #define MAXBUFSIZE 32768
 #define DETECT_MAX_CNT 1000
@@ -363,14 +362,14 @@ detect_parport (unsigned int port)
 {
   int i;
 
-#if defined  __linux__ || defined __FreeBSD__
+#if     defined  __linux__ || defined __FreeBSD__
   if (
-#ifdef __linux__
-  ioperm
+#ifdef  __linux__
+      ioperm
 #else
-  i386_set_ioperm
+      i386_set_ioperm
 #endif // __linux__
-   (port, 1, 1) == -1)
+      (port, 1, 1) == -1)
     return -1;
 #endif
 
@@ -386,14 +385,14 @@ detect_parport (unsigned int port)
           break;
     }
 
-#if defined  __linux__ || defined __FreeBSD__
+#if     defined  __linux__ || defined __FreeBSD__
   if (
-#ifdef __linux__
-  ioperm
+#ifdef  __linux__
+      ioperm
 #else
-  i386_set_ioperm
+      i386_set_ioperm
 #endif // __linux__
-   (port, 1, 0) == -1)
+      (port, 1, 0) == -1)
     return -1;
 #endif
 
@@ -469,14 +468,14 @@ parport_probe (unsigned int port)
 
   if (port != 0)
     {
-#if defined  __linux__ || defined __FreeBSD__
+#if     defined  __linux__ || defined __FreeBSD__
   if (
 #ifdef __linux__
-  ioperm
+      ioperm
 #else
-  i386_set_ioperm
+      i386_set_ioperm
 #endif // __linux__
-   (port, 3, 1) == -1)            // data, status & control
+      (port, 3, 1) == -1)                       // data, status & control
         {
           fprintf (stderr,
                    "Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
@@ -496,11 +495,9 @@ int
 ucon64_gauge (struct ucon64_ *rom, time_t init_time, long pos, long size)
 {
   int percentage;
-  
-//  size = rom->bytes;//quickftell (rom->rom);
 
   if (!rom->frontend)
-    return gauge(init_time, pos, size);
+    return gauge (init_time, pos, size);
 
   percentage = 100 * pos / size;
   printf ("%u\n", percentage);
@@ -549,5 +546,3 @@ trackmode_probe (long imagesize)
          -1                    // unknown
     ;
 }
-
-

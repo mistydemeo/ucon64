@@ -1,6 +1,6 @@
 /*
  *
- * PSX Peripheral Bus Library v1.4 17/01/00 Richard Davies 
+ * PSX Peripheral Bus Library v1.4 17/01/00 Richard Davies
  * <mailto:richard@debaser.force9.co.uk>
  *
  * Revision History:
@@ -23,9 +23,9 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>             // ioperm() (libc5)
-#include "../ucon64.h"
-#include "../misc.h"
-#include "../ucon64_misc.h"
+#include "ucon64.h"
+#include "misc.h"
+#include "ucon64_misc.h"
 #include "psxpblib.h"
 
 #ifdef BACKUP

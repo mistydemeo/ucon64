@@ -328,7 +328,11 @@ ucon64_switches (int c, const char *optarg)
       break;
 
     case UCON64_HI:
-      ucon64.snes_hirom = 1;
+      ucon64.snes_hirom = SNES_HIROM;
+      break;
+
+    case UCON64_EHI:
+      ucon64.snes_hirom = SNES_EHIROM;
       break;
 
     case UCON64_BS:

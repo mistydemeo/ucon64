@@ -132,6 +132,7 @@ const struct option options[] = {
     {"disc", 0, 0, UCON64_DISC},
     {"dumpinfo", 1, 0, UCON64_DUMPINFO},
     {"e", 0, 0, UCON64_E},
+    {"ehi", 0, 0, UCON64_EHI},
     {"f", 0, 0, UCON64_F},
     {"fds", 0, 0, UCON64_FDS},
     {"fdsl", 0, 0, UCON64_FDSL},

@@ -43,9 +43,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 #define SNES_HEADER_LEN (sizeof (st_snes_header_t))
-#define SNES_HIROM 0x8000
 #define SNES_NAME_LEN 21
-#define ALT_HILO                                // use Snes9x' Hi/LoROM detection method
+#define ALT_HILO                                // use alternative Hi/LoROM detection method
 #define GD3_HEADER_MAPSIZE 0x18
 #define NSRT_HEADER_VERSION 22                  // version 2.2 header
 
@@ -60,8 +59,7 @@ static int snes_bs_name(void);
 static int snes_check_bs (void);
 static int check_char (unsigned char c);
 #ifdef  ALT_HILO
-static int score_lorom (unsigned char *rom_buffer, int rom_size);
-static int score_hirom (unsigned char *rom_buffer, int rom_size);
+static int check_banktype (unsigned char *rom_buffer, int header_offset);
 #endif
 
 
@@ -71,6 +69,7 @@ const st_usage_t snes_usage[] =
     {NULL, NULL, "1990 Nintendo http://www.nintendo.com"},
     {"snes", NULL, "force recognition"},
     {"hi", NULL, "force ROM is HiROM"},
+    {"ehi", NULL, "force ROM is Extended HiROM"},
     {"nhi", NULL, "force ROM is not HiROM"},
 #if 0
     {"hd", NULL, "force ROM has SMC/FIG/SWC header (+512 Bytes)"},
@@ -2096,8 +2095,8 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_siz
     }
 
 #ifdef  ALT_HILO
-  hi_score = score_hirom (rom_buffer, rom_size);
-  lo_score = score_lorom (rom_buffer, rom_size);
+  hi_score = check_banktype (rom_buffer, SNES_HIROM);
+  lo_score = check_banktype (rom_buffer, 0);
 
   if (!force_interleaved &&
        ((snes_hirom && (lo_score >= hi_score || hi_score < 0)) ||
@@ -2315,6 +2314,7 @@ snes_init (st_rominfo_t *rominfo)
   snes_hirom_changed = 0;                       // idem
   snes_sramsize = 0;                            // idem
   type = SMC;                                   // idem, SMC indicates unknown copier type
+  bs_dump = 0;                                  // for -lsv, but also just to init it
 
   q_fread (&header, UNKNOWN_HEADER_START, UNKNOWN_HEADER_LEN, ucon64.rom);
   if (header.id1 == 0xaa && header.id2 == 0xbb && header.type == 5)
@@ -2346,24 +2346,42 @@ snes_init (st_rominfo_t *rominfo)
 
     step 1. & first part of step 2.
   */
-  snes_hirom = 0;
-  rominfo->buheader_len = 0;
-  if ((x = get_internal_sums (rominfo)) != 0xffff)
+
+  /*
+    Check for "Extended" HiROM dumps first, because at least one of them
+    (Tales of Phantasia (J)) has two headers; an incorrect one at the normal
+    location and a correct one at the Extended HiROM location.
+  */
+  x = 0;
+  if (ucon64.file_size >= (int) (SNES_HEADER_START + SNES_EHIROM + SNES_HEADER_LEN))
     {
-      snes_hirom = 0;
-      rominfo->buheader_len = SWC_HEADER_LEN;
+      snes_hirom = SNES_EHIROM;
+      rominfo->buheader_len = 0;
       if ((x = get_internal_sums (rominfo)) != 0xffff)
         {
-          snes_hirom = SNES_HIROM;
-          rominfo->buheader_len = 0;
+          rominfo->buheader_len = SWC_HEADER_LEN;
+          x = get_internal_sums (rominfo);
+        }
+    }
+  if (x != 0xffff)
+    {
+      snes_hirom = 0;
+      rominfo->buheader_len = 0;
+      if ((x = get_internal_sums (rominfo)) != 0xffff)
+        {
+          rominfo->buheader_len = SWC_HEADER_LEN;
           if ((x = get_internal_sums (rominfo)) != 0xffff)
             {
               snes_hirom = SNES_HIROM;
-              rominfo->buheader_len = SWC_HEADER_LEN;
-              x = get_internal_sums (rominfo);
+              rominfo->buheader_len = 0;
+              if ((x = get_internal_sums (rominfo)) != 0xffff)
+                {
+                  rominfo->buheader_len = SWC_HEADER_LEN;
+                  x = get_internal_sums (rominfo);
+                }
             }
         }
-    }
+      }
 
   if (header.id1 == 0xaa && header.id2 == 0xbb && header.type == 4)
     type = SWC;
@@ -2453,8 +2471,18 @@ snes_init (st_rominfo_t *rominfo)
 
 #ifdef  ALT_HILO
   // second part of step 2.
-  snes_hirom = score_hirom (rom_buffer, size) > score_lorom (rom_buffer, size) ?
-    SNES_HIROM : 0;
+  if (snes_hirom > SNES_HIROM)
+    {
+      x = SNES_EHIROM;
+      y = SNES_EHIROM - SNES_HIROM;
+    }
+  else
+    {
+      x = SNES_HIROM;
+      y = 0;
+    }
+  snes_hirom = check_banktype (rom_buffer, x) > check_banktype (rom_buffer, y) ?
+                  y + SNES_HIROM : y;
 #endif
   /*
     It would be nice if snes_header.map_type & 1 could be used to verify that
@@ -2466,48 +2494,18 @@ snes_init (st_rominfo_t *rominfo)
   */
 
   // step 3.
-  if (UCON64_ISSET (ucon64.snes_hirom))          // -hi or -nhi option was specified
-    snes_hirom = ucon64.snes_hirom ? SNES_HIROM : 0;
+  if (UCON64_ISSET (ucon64.snes_hirom))         // -hi, -ehi or -nhi option was specified
+    snes_hirom = ucon64.snes_hirom;
+  if (snes_hirom && size < (int) (SNES_HEADER_START + snes_hirom + SNES_HEADER_LEN))
+    snes_hirom = SNES_HIROM;                    // Don't let -ehi crash on a too small ROM
 
   rominfo->header_start = SNES_HEADER_START + snes_hirom;
-  /*
-    Dai Kaiju Monogatari 2 (J) and Tales of Phantasia (J) have their SNES
-    header at an odd location. We identify those ROM dumps by their internal
-    name (including DeJap's ToP patch).
-  */
-  x = SNES_HEADER_START + SNES_HIROM + 0x400000;
-  if (size > x + (int) SNES_HEADER_LEN)
-    if (!memcmp(rom_buffer + x + 16, "DAIKAIJYUMONOGATARI2", 20) || // yes, kaijYu
-        !memcmp(rom_buffer + x + 16, "TALES OF PHANTASIA", 18) ||
-        !memcmp(rom_buffer + x + 16, "ToP ", 4))
-      {
-        rominfo->header_start = x;
-        // -hi/-nhi has no effect so we better give snes_hirom the right value
-        snes_hirom = SNES_HIROM;
-      }
   rominfo->header_len = SNES_HEADER_LEN;
   // set snes_header before calling snes_testinterleaved()
   memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
   rominfo->header = &snes_header;
 
   bs_dump = snes_check_bs ();
-  if (!bs_dump)
-    {
-      // we might have to check the other header location
-      if (!snes_hirom)
-        {
-          memcpy (&snes_header, rom_buffer + rominfo->header_start + SNES_HIROM,
-                  rominfo->header_len);
-          if (snes_check_bs ())
-            {
-              bs_dump = 1;
-              snes_hirom = SNES_HIROM;
-              rominfo->header_start += SNES_HIROM;
-            }
-          else
-            memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
-        }
-    }
   if (UCON64_ISSET (ucon64.bs_dump))            // -bs or -nbs option was specified
     bs_dump = ucon64.bs_dump;
 
@@ -2566,7 +2564,7 @@ snes_init (st_rominfo_t *rominfo)
       rominfo->country = NULL_TO_UNKNOWN_S (snes_country[MIN (snes_header.country, SNES_COUNTRY_MAX - 1)]);
 
       // misc stuff
-      sprintf (buf, "Internal size: %.4f Mb\n", (float) (1 << (snes_header.rom_size - 7)));
+      sprintf (buf, "Internal size: %d Mb\n", 1 << (snes_header.rom_size - 7));
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "ROM type: (%x) %s", snes_header.rom_type,
@@ -2662,7 +2660,7 @@ snes_init (st_rominfo_t *rominfo)
 
   if (!bs_dump)
     {
-      snes_sramsize = snes_header.sram_size ? (1 << (snes_header.sram_size + 3)) * 128 : 0;
+      snes_sramsize = snes_header.sram_size ? 1 << snes_header.sram_size + 10 : 0;
       if (!snes_sramsize)
         sprintf (buf, "Save RAM: No\n");
       else
@@ -2972,67 +2970,61 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer)
 
 #ifdef  ALT_HILO
 int
-score_hirom (unsigned char *rom_buffer, int rom_size)
+check_banktype (unsigned char *rom_buffer, int header_offset)
+/*
+  This function is used to check if the value of header_offset is a good guess
+  for the location of the internal SNES header (and thus of the bank type
+  (LoROM, HiROM or Extended HiROM)). The higher the returned value, the higher
+  the chance the guess was correct.
+*/
 {
   int score = 0;
 
-  if ((rom_buffer[0xff00 + 0xdc] + (rom_buffer[0xff00 + 0xdd] << 8) +
-       rom_buffer[0xff00 + 0xde] + (rom_buffer[0xff00 + 0xdf] << 8)) ==
-      0xffff)
+  // game ID info (many games don't have useful info here)
+  if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset + 2, 4, isprint))
+    score += 1;
+
+  if (!bs_dump)
+    {
+      if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset + 16,
+                   SNES_NAME_LEN, isprint))
+        score += 1;
+      // map type
+      if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0xf) < 4)
+        score += 2;
+      // country
+      if (rom_buffer[SNES_HEADER_START + header_offset + 41] <= 13)
+        score += 1;
+    }
+
+  // ROM size
+  if (1 << (rom_buffer[SNES_HEADER_START + header_offset + 39] - 7) <= 64)
+    score += 1;
+  // SRAM size
+  if (1 << rom_buffer[SNES_HEADER_START + header_offset + 40] <= 256)
+    score += 1;
+
+  // publisher "escape code"
+  if (rom_buffer[SNES_HEADER_START + header_offset + 42] == 0x33)
+    score += 2;
+  else // publisher code
+    if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset, 2, isprint))
+      score += 2;
+
+  // version
+  if (rom_buffer[SNES_HEADER_START + header_offset + 43] <= 2)
     score += 2;
 
-  if (rom_buffer[0xff00 + 0xda] == 0x33)
-    score += 2;
-  if ((rom_buffer[0xff00 + 0xd5] & 0xf) < 4)
-    score += 2;
-  if (!(rom_buffer[0xff00 + 0xfd] & 0x80))
-    score -= 4;
-#if 0
-  // This seems to work by accident for Snes9x (letting rom_size (CalculatedSize)
-  // be 0 for first call).
-  if (rom_size > 1024 * 1024 * 3)
+  // checksum bytes
+  if ((rom_buffer[SNES_HEADER_START + header_offset + 44] +
+       (rom_buffer[SNES_HEADER_START + header_offset + 45] << 8) +
+       rom_buffer[SNES_HEADER_START + header_offset + 46] +
+       (rom_buffer[SNES_HEADER_START + header_offset + 47] << 8)) == 0xffff)
+    score += 3;
+
+  // ? (comes from original Snes9x code)
+  if (rom_buffer[SNES_HEADER_START + header_offset + 0x4d] & 0x80)
     score += 4;
-#else
-  (void) rom_size;                              // warning remover
-#endif
-  if ((1 << (rom_buffer[0xff00 + 0xd7] - 7)) > 48)
-    score -= 1;
-  if (!is_func ((char *) rom_buffer + 0xff00 + 0xb0, 6, isprint))
-    score -= 1;
-  if (!is_func ((char *) rom_buffer + 0xff00 + 0xc0, SNES_NAME_LEN, isprint))
-    score -= 1;
-
-  return score;
-}
-
-
-int
-score_lorom (unsigned char *rom_buffer, int rom_size)
-{
-  int score = 0;
-
-  if ((rom_buffer[0x7f00 + 0xdc] + (rom_buffer[0x7f00 + 0xdd] << 8) +
-       rom_buffer[0x7f00 + 0xde] + (rom_buffer[0x7f00 + 0xdf] << 8)) ==
-      0xffff)
-    score += 2;
-
-  if (rom_buffer[0x7f00 + 0xda] == 0x33)
-    score += 2;
-  if ((rom_buffer[0x7f00 + 0xd5] & 0xf) < 4)
-    score += 2;
-#if 1
-  // This also seems strange, ROMs are always less than 16 MB.
-  if (rom_size <= 1024 * 1024 * 16)
-    score += 2;
-#endif
-  if (!(rom_buffer[0x7f00 + 0xfd] & 0x80))
-    score -= 4;
-  if ((1 << (rom_buffer[0x7f00 + 0xd7] - 7)) > 48)
-    score -= 1;
-  if (!is_func ((char *) rom_buffer + 0x7f00 + 0xb0, 6, isprint))
-    score -= 1;
-  if (!is_func ((char *) rom_buffer + 0x7f00 + 0xc0, SNES_NAME_LEN, isprint))
-    score -= 1;
 
   return score;
 }

@@ -30,6 +30,7 @@ write programs in C
 */
 
 #include "ucon64.h"
+#include "ucon64_misc.h"
 
 //#include "unzip.h"
 #include "snes/snes.h"
@@ -82,7 +83,6 @@ write programs in C
 #include "patch/bsl.h"
 
 FILE *frontend_file;
-struct ucon64_ rom;
 
 void
 ucon64_exit (void)
@@ -331,6 +331,8 @@ main (int argc, char *argv[])
 //      return 0;
     }
 
+  rom.backup = (argcmp (argc, argv, "-nbak")) ? 0 : 1;
+
   if (argcmp (argc, argv, "-crc"))
     {
       printf ("Checksum: %08lx\n\n", fileCRC32 (rom.rom, 0));
@@ -392,7 +394,7 @@ main (int argc, char *argv[])
 
   if (argcmp (argc, argv, "-swap"))
     {
-      fileswap (filebackup (rom.rom), 0, quickftell (rom.rom));
+      fileswap (ucon64_fbackup (&rom, rom.rom), 0, quickftell (rom.rom));
       return (0);
     }
 
@@ -432,7 +434,7 @@ main (int argc, char *argv[])
 
   if (argcmp (argc, argv, "-stp"))
     {
-      strcpy (buf, filebackup (rom.rom));
+      strcpy (buf, ucon64_fbackup (&rom, rom.rom));
       newext (buf, ".TMP");
       rename (rom.rom, buf);
 
@@ -443,7 +445,7 @@ main (int argc, char *argv[])
 
   if (argcmp (argc, argv, "-ins"))
     {
-      strcpy (buf, filebackup (rom.rom));
+      strcpy (buf, ucon64_fbackup (&rom, rom.rom));
       newext (buf, ".TMP");
       rename (rom.rom, buf);
 
@@ -514,7 +516,7 @@ main (int argc, char *argv[])
     {
       memset (buf2, ' ', 50);
       strncpy (buf2, rom.file, strlen (rom.file));
-      quickfwrite (buf2, 7, 50, filebackup (rom.rom), "r+b");
+      quickfwrite (buf2, 7, 50, ucon64_fbackup (&rom, rom.rom), "r+b");
 
       return (0);
     }
@@ -550,7 +552,7 @@ main (int argc, char *argv[])
     {
       memset (buf2, ' ', 50);
       strncpy (buf2, rom.file, strlen (rom.file));
-      quickfwrite (buf2, 6, 50, filebackup (rom.rom), "r+b");
+      quickfwrite (buf2, 6, 50, ucon64_fbackup (&rom, rom.rom), "r+b");
 
       return (0);
     }
@@ -1297,6 +1299,7 @@ ucon64_usage (int argc, char *argv[])
            "\n"
          */
 //         "TODO:  -sh      use uCON64 in shell modus\n"
+           "TODO:  -nbak    prevents backup files (*.bak)\n"
 #ifdef	__DOS__
            "  -e            emulate/run ROM (see ucon64.cfg for more)\n"
 #else

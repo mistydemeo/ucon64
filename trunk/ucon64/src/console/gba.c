@@ -46,7 +46,7 @@ const st_usage_t gba_usage[] =
     {NULL, "Game Boy Advance"},
     {NULL, "2001 Nintendo http://www.nintendo.com"},
     {"gba", "force recognition"},
-    {"hd",  "force ROM has header (+512 Bytes)"},
+//    {"hd",  "force ROM has header (+512 Bytes)"},
 //    "  " OPTION_LONG_S "nhd         force ROM has no header\n"
     {"n=NEW_NAME", "change internal ROM name to NEW_NAME"},
     {"logo", "restore ROM logo character data (offset: 0x04-0x9F)"},

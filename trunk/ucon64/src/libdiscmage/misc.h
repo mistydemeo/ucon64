@@ -282,12 +282,12 @@ extern char *strtrim (char *str);
 extern char *setext (char *filename, const char *ext);
 extern const char *getext (const char *filename);
 //#ifndef HAVE_BASENAME
-extern char *basename2 (const char *str);
+extern char *basename2 (const char *path);
 //  the following define will override a possible XPG basename() which mods. the src
 #define basename basename2
 //#endif
 //#ifndef HAVE_DIRNAME
-extern char *dirname2 (const char *str);
+extern char *dirname2 (const char *path);
 #define dirname dirname2
 //#endif
 extern char *realpath2 (const char *src, char *full_path);

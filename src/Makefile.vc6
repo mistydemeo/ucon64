@@ -81,15 +81,15 @@ $(TARGET): $(OBJECTS)
 
 
 install:
-#	cd libdiscmage
-#	$(MAKE) /NOLOGO /f Makefile.vc6 install
-#	cd ..
+	cd libdiscmage
+	$(MAKE) /NOLOGO /f Makefile.vc6 install
+	cd ..
 
 
 uninstall:
-#	cd libdiscmage
-#	$(MAKE) /NOLOGO /f Makefile.vc6 uninstall
-#	cd ..
+	cd libdiscmage
+	$(MAKE) /NOLOGO /f Makefile.vc6 uninstall
+	cd ..
 
 
 # Dependencies

@@ -65,6 +65,7 @@ typedef struct st_symbol
   int (*vfprintf) (FILE *, const char *, va_list);
   int (*sprintf) (char *, const char *, ...);
   int (*vsprintf) (char *, const char *, va_list);
+  int (*puts) (const char *);
   int (*fputs) (const char *, FILE *);
   int (*sscanf) (const char *, const char *, ...);
   FILE *(*fopen) (const char *, const char *);

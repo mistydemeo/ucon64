@@ -346,6 +346,7 @@ const struct option options[] = {
     {"xswc-super", 0, 0, UCON64_XSWC_SUPER},
     {"xswcr", 0, 0, UCON64_XSWCR},
     {"xswcs", 0, 0, UCON64_XSWCS},
+    {"xswcc", 0, 0, UCON64_XSWCC},
     {"xv64", 0, 0, UCON64_XV64},
 #endif // PARALLEL
     {"z64", 0, 0, UCON64_Z64},

@@ -586,8 +586,8 @@ int
 fig_read_cart_sram (const char *filename, unsigned int parport)
 {
   FILE *file;
-  unsigned char *buffer;
-  int blocksleft, bytesreceived = 0, size;
+  unsigned char *buffer, byte;
+  int bytesreceived = 0, size;
   unsigned short address;
   time_t starttime;
 
@@ -613,7 +613,13 @@ fig_read_cart_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  printf ("Receive: %d Bytes\n", 32 * 1024);
+  ffe_send_command (5, 3, 0);                   // detect cartridge SRAM size because we don't
+  ffe_send_command0 (0xe00c, 0);                //  want to read too less data
+  byte = ffe_send_command1 (0xbfd8);
+
+  size = MAX ((byte ? 1 << (byte + 10) : 0), 32*1024);
+
+  printf ("Receive: %d Bytes\n", size);
   memset (buffer, 0, FIG_HEADER_LEN);
 #if 0 // Not needed for FIG, as size is always 4 blocks
   buffer[0] = 4;                                // 32 kB == 4*8 kB, "size_high" is already 0
@@ -626,40 +632,20 @@ fig_read_cart_sram (const char *filename, unsigned int parport)
 
   printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
                                                 //  because if we get here q works ;-)
-  blocksleft = 4;                               // SRAM is 4*8 kB
   starttime = time (NULL);
 
-  if (hirom)
-    {
-      address = 0x0c0;
-      while (blocksleft > 0)
-        {
-          ffe_send_command (5, address, 0);
-          ffe_receive_block (0x6000, buffer, BUFFERSIZE);
-          blocksleft--;
-          address += 4;
-          fwrite (buffer, 1, BUFFERSIZE, file);
+  address = hirom ? 0x2c3 : 0x1c0;
 
-          bytesreceived += BUFFERSIZE;
-          ucon64_gauge (starttime, bytesreceived, 32 * 1024);
-          ffe_checkabort (2);
-        }
-    }
-  else
+  while (bytesreceived < size)
     {
-      address = 0x1c0;
-      while (blocksleft > 0)
-        {
-          ffe_send_command (5, address, 0);
-          ffe_receive_block (0x2000, buffer, BUFFERSIZE);
-          blocksleft--;
-          address++;
-          fwrite (buffer, 1, BUFFERSIZE, file);
+      ffe_send_command (5, address, 0);
+      ffe_receive_block (hirom ? 0x6000 : 0x2000, buffer, BUFFERSIZE);
+      fwrite (buffer, 1, BUFFERSIZE, file);
+      address += hirom ? 4 : 1;
 
-          bytesreceived += BUFFERSIZE;
-          ucon64_gauge (starttime, bytesreceived, 32 * 1024);
-          ffe_checkabort (2);
-        }
+      bytesreceived += BUFFERSIZE;
+      ucon64_gauge (starttime, bytesreceived, size);
+      ffe_checkabort (2);
     }
 
   free (buffer);
@@ -674,7 +660,7 @@ int
 fig_write_cart_sram (const char *filename, unsigned int parport)
 {
   FILE *file;
-  unsigned char *buffer;
+  unsigned char *buffer, byte;
   int bytesread, bytessend = 0, size;
   unsigned short address;
   time_t starttime;
@@ -701,7 +687,13 @@ fig_write_cart_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
+  ffe_send_command (5, 3, 0);                   // detect cartridge SRAM size because we don't
+  ffe_send_command0 (0xe00c, 0);                //  want to write more data than necessary
+  byte = ffe_send_command1 (0xbfd8);
+
   size = q_fsize (filename) - FIG_HEADER_LEN;   // FIG SRAM is 4*8 kB, emu SRAM often not
+  size = MIN ((byte ? 1 << (byte + 10) : 0), size);
+
   printf ("Send: %d Bytes\n", size);
   fseek (file, FIG_HEADER_LEN, SEEK_SET);       // skip the header
 
@@ -713,33 +705,17 @@ fig_write_cart_sram (const char *filename, unsigned int parport)
                                                 //  because if we get here q works ;-)
   starttime = time (NULL);
 
-  if (hirom)
-    {
-      address = 0x0c0;
-      while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
-        {
-          ffe_send_command (5, address, 0);
-          ffe_send_block (0x6000, buffer, bytesread);
-          address += 4;
+  address = hirom ? 0x2c3 : 0x1c0;
 
-          bytessend += bytesread;
-          ucon64_gauge (starttime, bytessend, size);
-          ffe_checkabort (2);
-        }
-    }
-  else
+  while ((bytessend < size) && (bytesread = fread (buffer, 1, MIN (size, BUFFERSIZE), file)))
     {
-      address = 0x1c0;
-      while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
-        {
-          ffe_send_command (5, address, 0);
-          ffe_send_block (0x2000, buffer, bytesread);
-          address++;
+      ffe_send_command (5, address, 0);
+      ffe_send_block (hirom ? 0x6000 : 0x2000, buffer, bytesread);
+      address += hirom ? 4 : 1;
 
-          bytessend += bytesread;
-          ucon64_gauge (starttime, bytessend, size);
-          ffe_checkabort (2);
-        }
+      bytessend += bytesread;
+      ucon64_gauge (starttime, bytessend, size);
+      ffe_checkabort (2);
     }
 
   free (buffer);

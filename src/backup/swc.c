@@ -52,6 +52,9 @@ const st_usage_t swc_usage[] =
     {"xswcs", NULL, "send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
                     OPTION_LONG_S "port=PORT\n"
                     "receives automatically when SRAM does not exist"},
+    {"xswcc", NULL, "send/receive SRAM to/from cartridge in Super Wild Card*/(all)SWC;\n"
+                    OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when SRAM does not exist"},
     {"xswcr", NULL, "send/receive RTS data to/from Super Wild Card*/(all)SWC;\n"
                     OPTION_LONG_S "port=PORT\n"
                     "receives automatically when RTS file does not exist"},
@@ -348,8 +351,8 @@ get_emu_mode_select (unsigned char byte, int size)
       else
         ems = x;
 
-      if (size <= 8)
-        ems++;
+//      if (size <= 8)       // JohnDie: This bit should always be 0
+//        ems++;
     }
 
   return ems;
@@ -966,6 +969,149 @@ swc_write_rts (const char *filename, unsigned int parport)
       ffe_checkabort (2);
     }
   ffe_send_command (6, 3, 0);
+
+  free (buffer);
+  fclose (file);
+  ffe_deinit_io ();
+
+  return 0;
+}
+
+int
+swc_read_cart_sram (const char *filename, unsigned int parport)
+{
+  FILE *file;
+  unsigned char *buffer, byte;
+  int bytesreceived = 0, size;
+  unsigned short address;
+  time_t starttime;
+
+  ffe_init_io (parport);
+
+  if ((file = fopen (filename, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
+      exit (1);
+    }
+
+  size = receive_rom_info (buffer, 0);
+  if (size == 0)
+    {
+      fprintf (stderr, "ERROR: There is no cartridge present in the Super Wild Card\n");
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
+
+  ffe_send_command (5, 3, 0);                   // detect cartridge SRAM size because we don't
+  ffe_send_command0 (0xe00c, 0);                //  want to read too less data
+  byte = ffe_send_command1 (0xbfd8);
+
+  size = MAX ((byte ? 1 << (byte + 10) : 0), 32*1024);
+
+  printf ("Receive: %d Bytes\n", size);
+  memset (buffer, 0, SWC_HEADER_LEN);
+  buffer[8] = 0xaa;
+  buffer[9] = 0xbb;
+  buffer[10] = 5;
+  fwrite (buffer, 1, SWC_HEADER_LEN, file);
+
+  ffe_send_command (5, 0, 0);
+  ffe_send_command0 (0xe00c, 0);
+//  ffe_send_command0 (0xc008, 0);
+
+  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+                                                //  because if we get here q works ;-)
+  starttime = time (NULL);
+
+  address = hirom ? 0x2c3 : 0x1c0;
+
+  while (bytesreceived < size)
+    {
+      ffe_send_command (5, address, 0);
+      ffe_receive_block (hirom ? 0x6000 : 0x2000, buffer, BUFFERSIZE);
+      fwrite (buffer, 1, BUFFERSIZE, file);
+      address += hirom ? 4 : 1;
+
+      bytesreceived += BUFFERSIZE;
+      ucon64_gauge (starttime, bytesreceived, size);
+      ffe_checkabort (2);
+    }
+
+  free (buffer);
+  fclose (file);
+  ffe_deinit_io ();
+
+  return 0;
+}
+
+
+int
+swc_write_cart_sram (const char *filename, unsigned int parport)
+{
+  FILE *file;
+  unsigned char *buffer, byte;
+  int bytesread, bytessend = 0, size;
+  unsigned short address;
+  time_t starttime;
+
+  ffe_init_io (parport);
+
+  if ((file = fopen (filename, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
+      exit (1);
+    }
+
+  size = receive_rom_info (buffer, 0);
+  if (size == 0)
+    {
+      fprintf (stderr, "ERROR: There is no cartridge present in the Super Wild Card\n");
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
+
+  ffe_send_command (5, 3, 0);                   // detect cartridge SRAM size because we don't
+  ffe_send_command0 (0xe00c, 0);                //  want to write more data than necessary
+  byte = ffe_send_command1 (0xbfd8);
+
+  size = q_fsize (filename) - SWC_HEADER_LEN;   // SWC SRAM is 4*8 kB, emu SRAM often not
+  size = MIN ((byte ? 1 << (byte + 10) : 0), size);
+
+  printf ("Send: %d Bytes\n", size);
+  fseek (file, SWC_HEADER_LEN, SEEK_SET);       // skip the header
+
+  ffe_send_command (5, 0, 0);
+  ffe_send_command0 (0xe00c, 0);
+//  ffe_send_command0 (0xc008, 0);
+
+  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+                                                //  because if we get here q works ;-)
+  starttime = time (NULL);
+
+  address = hirom ? 0x2c3 : 0x1c0;
+
+  while ((bytessend < size) && (bytesread = fread (buffer, 1, MIN (size, BUFFERSIZE), file)))
+    {
+      ffe_send_command (5, address, 0);
+      ffe_send_block (hirom ? 0x6000 : 0x2000, buffer, bytesread);
+      address += hirom ? 4 : 1;
+
+      bytessend += bytesread;
+      ucon64_gauge (starttime, bytessend, size);
+      ffe_checkabort (2);
+    }
 
   free (buffer);
   fclose (file);

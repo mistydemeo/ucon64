@@ -24,10 +24,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include "libdiscmage_cfg.h"
 #include "config.h"
+#if     defined HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #if     defined HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif
-
 #if     defined __linux__ || defined HAVE_LINUX_CDROM_H
 #include <linux/cdrom.h>
 #else

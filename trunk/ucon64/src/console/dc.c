@@ -38,10 +38,8 @@ const char *dc_usage[] =
   {
     "Dreamcast",
     "1998 SEGA http://www.sega.com",
-#ifdef TODO
-#warning TODO  --ip  extract IP.BIN; --rom=RAW_IMAGE
-#endif // TODO
     "  " OPTION_LONG_S "dc          force recognition; NEEDED\n"
+    "TODO: " OPTION_LONG_S "ip      extract IP.BIN; --rom=CD_IMAGE\n"
       ,
       NULL
 };

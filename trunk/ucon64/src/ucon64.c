@@ -181,9 +181,11 @@ const struct option long_options[] = {
     {"mgd", 0, 0, UCON64_MGD},
 //    {"mgh", 0, 0, UCON64_MGH},
     {"mka", 0, 0, UCON64_MKA},
+    {"mkcue", 0, 0, UCON64_MKCUE},
     {"mki", 0, 0, UCON64_MKI},
     {"mkppf", 0, 0, UCON64_MKPPF},
     {"mksheet", 0, 0, UCON64_MKSHEET},
+    {"mktoc", 0, 0, UCON64_MKTOC},
     {"multi", 1, 0, UCON64_MULTI},
     {"mvs", 0, 0, UCON64_MVS},
     {"n", 0, 0, UCON64_N},
@@ -193,7 +195,7 @@ const struct option long_options[] = {
     {"na", 0, 0, UCON64_NA},
     {"nbak", 0, 0, UCON64_NBAK},
     {"ncol", 0, 0, UCON64_NCOL},
-    {"nero", 0, 0, UCON64_NERO},
+    {"nrgrip", 0, 0, UCON64_NRGRIP},
     {"nes", 0, 0, UCON64_NES},
     {"ng", 0, 0, UCON64_NG},
     {"ngp", 0, 0, UCON64_NGP},
@@ -929,12 +931,8 @@ ucon64_usage (int argc, char *argv[])
   printf (
     "\n"
     "Support for DISC-based consoles (libdiscmage)\n"
-    "TODO: " OPTION_LONG_S "mksheet generate TOC and CUE sheet files for CD_IMAGE; " OPTION_LONG_S "rom=CD_IMAGE\n"
-    "                  " OPTION_LONG_S "rom could also be an existing TOC or CUE file\n"
-    "TODO: " OPTION_LONG_S "iso     convert BIN/RAW CD_IMAGE to MODE1 (2048 Bytes); " OPTION_LONG_S "rom=CD_IMAGE\n"
-    "TODO: " OPTION_LONG_S "cdirip  rip/split track(s) from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
-    "TODO: " OPTION_LONG_S "nero    convert DiscJuggler/CDI IMAGE for use with Nero;\n"
-    "                  " OPTION_LONG_S "rom=CDI_IMAGE\n"
+    "  " OPTION_LONG_S "mksheet     generate TOC and CUE sheet files for CD_IMAGE; " OPTION_LONG_S "rom=CD_IMAGE\n"
+//    "                  " OPTION_LONG_S "rom could also be an existing TOC or CUE file\n"
 //    "                TRACK_MODE='CD_DA'     (2352 Bytes; AUDIO)\n"
     "                  TRACK_MODE='MODE2_RAW' (2352 Bytes; default)\n"
     "                  TRACK_MODE='MODE1'     (2048 Bytes; standard ISO9660)\n"
@@ -945,6 +943,9 @@ ucon64_usage (int argc, char *argv[])
 //    "                TRACK_MODE='MODE2_FORM_MIX' (2336 Bytes)\n"
     "                  " OPTION_LONG_S "file=TRACK_MODE is optional, uCON64 will always try to\n"
     "                  detect the correct TRACK_MODE from the CD_IMAGE itself\n"
+    "TODO: " OPTION_LONG_S "cdirip  rip track(s) from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
+    "TODO: " OPTION_LONG_S "nrgrip  rip track(s) from Nero/NRG IMAGE; " OPTION_LONG_S "rom=NRG_IMAGE\n"
+    "TODO: " OPTION_LONG_S "iso     convert BIN/RAW CD_IMAGE to MODE1 (2048 Bytes); " OPTION_LONG_S "rom=CD_IMAGE\n"
     "\n");
 #endif // LIBDISCMAGE
 

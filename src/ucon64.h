@@ -5,7 +5,7 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh
 
 
@@ -60,6 +60,7 @@ enum
   ucon64_FFE,
   ucon64_FIG,
   ucon64_FIGS,
+  ucon64_FILE, 
   ucon64_FIND,
   ucon64_FRONTEND,
   ucon64_GAMECUBE,
@@ -137,11 +138,13 @@ enum
   ucon64_PADHD,
   ucon64_PAS,
   ucon64_PCE,
+  ucon64_PORT,
   ucon64_PPF,
   ucon64_PS2,
   ucon64_PSX,
   ucon64_REAL3DO,
   ucon64_RL,
+  ucon64_ROM,
   ucon64_ROTL,
   ucon64_ROTR,
   ucon64_RU,
@@ -232,8 +235,8 @@ extern struct ucon64_
   int argc;
   char *argv[128];
 
-//  char rom[FILENAME_MAX];               //$ROM (cmdline) with path
-  char file[FILENAME_MAX];              //$FILE (cmdline) with path
+//  char rom[FILENAME_MAX];               //" OPTION_LONG_S "rom (cmdline) with path
+  char file[FILENAME_MAX];              //" OPTION_LONG_S "file (cmdline) with path
 
   unsigned int parport;         //parallel port address
   int parport_mode;             //parallel port mode: ECP, EPP, SPP, other
@@ -256,7 +259,7 @@ extern struct ucon64_
 */
 extern struct rom_
 {
-  char rom[FILENAME_MAX];               //$ROM (cmdline) with path
+  char rom[FILENAME_MAX];               //" OPTION_LONG_S "rom (cmdline) with path
 
   long console;                 //integer for the detected console system
   char title[4096];             //console system name

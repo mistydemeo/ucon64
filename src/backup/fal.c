@@ -1735,18 +1735,18 @@ void
 fal_usage (void)
 {
   printf ("%s\n"
-          "  " OPTION_LONG_S "xfal        send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
-          "                receives automatically when $ROM does not exist\n"
-          "  " OPTION_LONG_S "xfalc <n>   specify chip size in mbits of ROM in Flash Advance Linker when\n"
+          "  " OPTION_LONG_S "xfal        send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
+          "                receives automatically when " OPTION_LONG_S "rom does not exist\n"
+          "  " OPTION_LONG_S "xfalc=<n>   specify chip size in mbits of ROM in Flash Advance Linker when\n"
           "                receiving. n can be 8,16,32,64,128 or 256. default is 32\n"
 #if 0
           "  " OPTION_LONG_S "xfalm       use SPP mode, default is EPP\n"
 #endif
-          "  " OPTION_LONG_S "xfals       send/receive SRAM to/from Flash Advance Linker; $FILE=PORT\n"
-          "                receives automatically when $ROM(=SRAM) does not exist\n"
-          "  " OPTION_LONG_S "xfalb <n>   send/receive SRAM to/from Flash Advance Linker bank n\n"
+          "  " OPTION_LONG_S "xfals       send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
+          "                receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n"
+          "  " OPTION_LONG_S "xfalb=<n>   send/receive SRAM to/from Flash Advance Linker bank n\n"
           "                n can be 1, 2, 3 or 4\n"
-          "                $FILE=PORT; receives automatically when SRAM does not exist\n"
+          "                " OPTION_LONG_S "file=PORT; receives automatically when SRAM does not exist\n"
           "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
           "      parallel port. If that is the case give a hardware address:\n"
           "      ucon64 " OPTION_LONG_S "xfal \"0087 - Mario Kart Super Circuit (U).gba\" 0x378\n"

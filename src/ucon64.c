@@ -140,6 +140,7 @@ static struct option long_options[] = {
     {"ffe", 0, 0, ucon64_FFE},
     {"fig", 0, 0, ucon64_FIG},
     {"figs", 0, 0, ucon64_FIGS},
+    {"file", 1, 0, ucon64_FILE},
     {"find", 0, 0, ucon64_FIND},
     {"frontend", 0, 0, ucon64_FRONTEND},
     {"gb", 0, 0, ucon64_GB},
@@ -203,10 +204,12 @@ static struct option long_options[] = {
     {"padhd", 0, 0, ucon64_PADHD},
     {"pas", 0, 0, ucon64_PAS},
     {"pce", 0, 0, ucon64_PCE},
+    {"port", 1, 0, ucon64_PORT},
     {"ppf", 0, 0, ucon64_PPF},
     {"ps2", 0, 0, ucon64_PS2},
     {"psx", 0, 0, ucon64_PSX},
     {"rl", 0, 0, ucon64_RL},
+    {"rom", 1, 0, ucon64_ROM},
     {"rotl", 0, 0, ucon64_ROTL},
     {"rotr", 0, 0, ucon64_ROTR},
     {"ru", 0, 0, ucon64_RU},
@@ -292,6 +295,9 @@ main (int argc, char *argv[])
        return 0;
     }
 
+
+  memset (&ucon64, 0L, sizeof (struct ucon64_));
+
   ucon64_configfile ();
 
   ucon64.backup = ((!strcmp (getProperty (ucon64.configfile, "backups", buf2, "1"), "1")) ?
@@ -344,6 +350,21 @@ main (int argc, char *argv[])
 
         case ucon64_NINT:
           rom.interleaved = 0;
+          break;
+
+        case ucon64_PORT:
+          if(optarg)
+            sscanf (optarg, "%x", &ucon64.parport);
+          break;
+        
+        case ucon64_FILE:
+          if(optarg)
+            strcpy (ucon64.file, optarg);
+          break;
+        
+        case ucon64_ROM:
+          if(optarg)
+            strcpy (rom.rom, optarg);
           break;
 
         case ucon64_A:
@@ -600,8 +621,9 @@ main (int argc, char *argv[])
 
         case ucon64_GETOPT_ERROR:
         default:
-          fprintf (STDERR, "Try '%s " OPTION_LONG_S "help' for more information.\n", argv[0]);
-          return -1;
+//          fprintf (STDERR, "Try '%s " OPTION_LONG_S "help' for more information.\n", argv[0]);
+//          return -1;
+          break;
       }
     }
 
@@ -610,11 +632,9 @@ main (int argc, char *argv[])
     strcpy(rom.rom, argv[optind++]);
   if (optind < argc)
     strcpy(ucon64.file, argv[optind++]);
-#if 0                                    
-  if (ucon64.file[0])
+
+  if (ucon64.file[0] && !ucon64.parport)
     sscanf (ucon64.file, "%x", &ucon64.parport);
-#endif
-  ucon64.parport = atoi (ucon64.file);
   ucon64_parport_probe (ucon64.parport);
 
   if (!access (rom.rom, F_OK|R_OK))
@@ -1291,6 +1311,9 @@ main (int argc, char *argv[])
         case ucon64_NHI:
         case ucon64_FRONTEND:
         case ucon64_NBAK:
+        case ucon64_PORT:
+        case ucon64_FILE:
+        case ucon64_ROM:
           break;
 
         case ucon64_GETOPT_ERROR:
@@ -1482,6 +1505,14 @@ ucon64_init (char *romfile, struct rom_ *rom)
         xbox_init (rom);
         break;
 
+      case ucon64_GP32:
+        gp32_init (rom);
+        break;
+
+      case ucon64_REAL3DO:
+        real3do_init (rom);
+        break;
+
       case ucon64_UNKNOWN:
         if(rom->bytes <= MAXROMSIZE)
           rom->console =
@@ -1491,16 +1522,16 @@ ucon64_init (char *romfile, struct rom_ *rom)
 //            (!gameboy_init (rom)) ? ucon64_GB :
             (!gbadvance_init (rom)) ? ucon64_GBA :
             (!nes_init (rom)) ? ucon64_NES :
-            (!jaguar_init (rom)) ? ucon64_JAG :
+            (!jaguar_init (rom)) ? ucon64_JAGUAR :
 #ifdef DB
             (!atari_init (rom)) ? ucon64_ATARI :
             (!lynx_init (rom)) ? ucon64_LYNX :
             (!pcengine_init (rom)) ? ucon64_PCE :
             (!neogeo_init (rom)) ? ucon64_NEOGEO :
-            (!neogeopocket_init (rom)) ? ucon64_NGP :
+            (!neogeopocket_init (rom)) ? ucon64_NEOGEOPOCKET :
             (!sms_init (rom)) ? ucon64_SMS :
             (!system16_init (rom)) ? ucon64_SYSTEM16 :
-            (!virtualboy_init (rom)) ? ucon64_VBOY :
+            (!virtualboy_init (rom)) ? ucon64_VIRTUALBOY :
             (!vectrex_init (rom)) ? ucon64_VECTREX :
             (!coleco_init (rom)) ? ucon64_COLECO :
             (!intelli_init (rom)) ? ucon64_INTELLI :
@@ -1515,7 +1546,7 @@ ucon64_init (char *romfile, struct rom_ *rom)
             (!ps2_init (rom)) ? ucon64_PS2 :
             (!psx_init (rom)) ? ucon64_PSX :
             (!real3do_init (rom)) ? ucon64_REAL3DO :
-            (!saturn_init (rom)) ? ucon64_SAT : ucon64_UNKNOWN;
+            (!saturn_init (rom)) ? ucon64_SATURN : ucon64_UNKNOWN;
           break;
           
         default:
@@ -1883,7 +1914,7 @@ ucon64_usage (int argc, char *argv[])
   int option_index = 0;
   int single = 0;
 
-  printf ("USAGE: %s [OPTION(S)] ROM [FILE]\n\n"
+  printf ("USAGE: %s [OPTION(S)] [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE]\n\n"
            "  " OPTION_LONG_S "nbak        prevents backup files (*.bak)\n"
 #ifdef	__MSDOS__
            "  " OPTION_S "e           emulate/run ROM (see ucon64.cfg for more)\n"
@@ -1892,31 +1923,31 @@ ucon64_usage (int argc, char *argv[])
 #endif
            "  " OPTION_LONG_S "crc         show CRC32 value of ROM\n"
            "  " OPTION_LONG_S "crchd       show CRC32 value of ROM (regarding to +512 Bytes header)\n"
-           "  " OPTION_LONG_S "dbs         search ROM database (all entries) by CRC32; $ROM=0xCRC32\n"
+           "  " OPTION_LONG_S "dbs         search ROM database (all entries) by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
            "  " OPTION_LONG_S "db          ROM database statistics (# of entries)\n"
            "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
-           "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; $ROM=DIRECTORY\n"
-           "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; $ROM=DIRECTORY\n"
-//         "TODO:  " OPTION_LONG_S "rrom   rename all ROMs in DIRECTORY to their internal names; $ROM=DIR\n"
-//         "TODO:  " OPTION_LONG_S "rr83   like " OPTION_LONG_S "rrom but with 8.3 filenames; $ROM=DIR\n"
+           "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
+           "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
+//         "TODO:  " OPTION_LONG_S "rrom   rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
+//         "TODO:  " OPTION_LONG_S "rr83   like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIR\n"
 //         "               this is often used by people who loose control of their ROMs\n"
-           "  " OPTION_LONG_S "rl          rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
-           "  " OPTION_LONG_S "ru          rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"
+           "  " OPTION_LONG_S "rl          rename all files in DIRECTORY to lowercase; " OPTION_LONG_S "rom=DIRECTORY\n"
+           "  " OPTION_LONG_S "ru          rename all files in DIRECTORY to uppercase; " OPTION_LONG_S "rom=DIRECTORY\n"
 #ifdef	__MSDOS__
-           "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex $ROM|more\"\n"
+           "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom|more\"\n"
 #else
-           "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex $ROM|less\"\n"       // less is better ;-)
+           "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom|less\"\n"       // less is better ;-)
 #endif
-           "  " OPTION_LONG_S "find        find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)\n"
-           "  " OPTION_S "c           compare ROMs for differencies; $FILE=OTHER_ROM\n"
-           "  " OPTION_LONG_S "cs          compare ROMs for similarities; $FILE=OTHER_ROM\n"
+           "  " OPTION_LONG_S "find        find string in ROM; " OPTION_LONG_S "file=STRING ('?'==wildcard for ONE char!)\n"
+           "  " OPTION_S "c           compare ROMs for differencies; " OPTION_LONG_S "file=OTHER_ROM\n"
+           "  " OPTION_LONG_S "cs          compare ROMs for similarities; " OPTION_LONG_S "file=OTHER_ROM\n"
            "  " OPTION_LONG_S "swap        swap/(de)interleave ALL Bytes in ROM (1234<->2143)\n"
            "  " OPTION_LONG_S "ispad       check if ROM is padded\n"
            "  " OPTION_LONG_S "pad         pad ROM to full Mb\n"
            "  " OPTION_LONG_S "padhd       pad ROM to full Mb (regarding to +512 Bytes header)\n"
            "  " OPTION_LONG_S "stp         strip first 512 Bytes (possible header) from ROM\n"
            "  " OPTION_LONG_S "ins         insert 512 Bytes (0x00) before ROM\n"
-           "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; $FILE=VALUE\n"
+           "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
            ,argv[0]);
 
   bsl_usage ();
@@ -2049,7 +2080,7 @@ ucon64_usage (int argc, char *argv[])
               "                force recognition; NEEDED\n"
 //            "  " OPTION_LONG_S "iso         force image is ISO9660\n"
 //            "  " OPTION_LONG_S "raw         force image is MODE2_RAW/BIN\n"
-              "  " OPTION_LONG_S "iso         convert RAW/BIN to ISO9660; $ROM=RAW_IMAGE\n",
+              "  " OPTION_LONG_S "iso         convert RAW/BIN to ISO9660; " OPTION_LONG_S "rom=RAW_IMAGE\n",
               xbox_title,
               ps2_title, saturn_title, real3do_title, cd32_title,
               cdi_title);

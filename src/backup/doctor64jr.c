@@ -722,8 +722,8 @@ doctor64jr_usage (void)
 {
     printf ("%s\n"
 
-  "  " OPTION_LONG_S "xdjr        send/receive ROM to/from Doctor64 Jr; $FILE=PORT\n"
-          "                receives automatically when $ROM does not exist\n"
+  "  " OPTION_LONG_S "xdjr        send/receive ROM to/from Doctor64 Jr; " OPTION_LONG_S "file=PORT\n"
+          "                receives automatically when " OPTION_LONG_S "rom does not exist\n"
           "NOTE: currently only sending is supported\n"
           , doctor64jr_title);
 

@@ -37,8 +37,8 @@ fig_usage (void)
 {
 #if 0
     printf (fig_title "\n"
-    "TODO:  -xfig	send/receive ROM to/from *Pro Fighter* /(all)FIG; $FILE=PORT\n"
-     "		receives automatically when $ROM does not exist\n");
+    "TODO:  -xfig	send/receive ROM to/from *Pro Fighter* /(all)FIG; " OPTION_LONG_S "file=PORT\n"
+     "		receives automatically when " OPTION_LONG_S "rom does not exist\n");
 #endif
 }
 #endif // BACKUP

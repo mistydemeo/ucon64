@@ -543,9 +543,10 @@ ppf_usage (void)
 {
 
   printf
-    ("  " OPTION_LONG_S "ppf         apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE\n"
-     "  " OPTION_LONG_S "mkppf       create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE\n"
-     "  " OPTION_LONG_S "nppf        change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION\n"
-     "  " OPTION_LONG_S "idppf       change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ\n"
+    ("  " OPTION_LONG_S "ppf         apply PPF patch (<=2.0); " OPTION_LONG_S "rom=RAW_IMAGE " OPTION_LONG_S "file=PATCHFILE\n"
+     "  " OPTION_LONG_S "mkppf       create PPF patch; " OPTION_LONG_S "rom=RAW_IMAGE " OPTION_LONG_S "file=CHANGED_IMAGE\n"
+     "  " OPTION_LONG_S "nppf        change PPF description; " OPTION_LONG_S "rom=PATCHFILE " OPTION_LONG_S "file=DESCRIPTION\n"
+     "  " OPTION_LONG_S "idppf       change PPF FILE_ID.DIZ (2.0); " OPTION_LONG_S "rom=PATCHFILE\n"
+     "                " OPTION_LONG_S "file=FILE_ID.DIZ\n"
 );
 }

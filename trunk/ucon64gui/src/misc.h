@@ -71,15 +71,6 @@ int stricmp(const char *s1, const char *s2);
 
 int strnicmp(const char *s1, const char *s2, size_t n);
 
-/*
-  don't use _splitpath() and or _makepath()
-*/
-void _makepath (char *path, const char *node, const char *dir,
-                const char *fname, const char *ext);//do not use
-
-void _splitpath (const char *path,
-                 char *node, char *dir, char *fname, char *ext);//do not use
-
 int argcmp (int argc, char *argv[], char *str); // check the cmdline options for str
 
 int argncmp (int argc, char *argv[], char *str, size_t len); // same as argcmp() but with length
@@ -166,6 +157,21 @@ void change_string (char *searchstr, int strsize, char wc, char esc,
                     int offset, ...);
 
 int fileswap (char *filename, long start, long len); // bytesswap filename from start for len
+
+/*
+  gauge()
+  
+  init_time == time when gauge() was first started or when the transfer did start
+  pos == current position
+  size == full size
+
+  gauge given these three values will calculate many informative things like
+  time, status bar, cps, etc.
+  
+  it can be used for procedures which take some time to inform the user about
+  the actual progress
+*/
+int gauge (time_t init_time, long pos, long size); 
 
 char *getchd (char *buffer, size_t buffer_size);// getenv("HOME") for stupid DOS
                                                 // acts like getcwd()

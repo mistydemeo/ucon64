@@ -62,8 +62,8 @@ int
 strdcmp (char *str, char *str1)
 // compares length and case
 {
-  return (((strlen (str) == strlen (str1)) &&
-           (!strncmp (str, str1, strlen (str)))) ? 0 : (-1));
+  return ((strlen (str) == strlen (str1)) &&
+           (!strncmp (str, str1, strlen (str)))) ? 0 : (-1);
 }
 
 /*
@@ -92,13 +92,13 @@ strnicmp (const char *s1, const char *s2, size_t n)
 
   if (!(sb1 = (char *) malloc (strlen(s1) * sizeof (char))))
     {
-      return (-1);
+      return -1;
     }
 
   if (!(sb2 = (char *) malloc (strlen(s2) * sizeof (char))))
     {
       free (sb1);
-      return (-1);
+      return -1;
     }
 
   strcpy(sb1, s1);
@@ -109,7 +109,7 @@ strnicmp (const char *s1, const char *s2, size_t n)
   free (sb1);
   free (sb2);
 
-  return (result);
+  return result;
 }
 
 int
@@ -120,52 +120,7 @@ stricmp (const char *s1, const char *s2)
   l1 = strlen (s1);
   l2 = strlen (s2);
 
-  return (strnicmp (s1, s2, (l1 > l2) ? l1 : l2));
-}
-
-/*
-  Full path is: //0/home/fred/h/stdio.h
-
-  Components after _splitpath or before _makepath
-  node:  //0
-  dir:   /home/fred/h/
-  fname: stdio
-  ext:   .h
-*/
-void
-_makepath (char *path,
-           const char *node,
-           const char *dir, const char *fname, const char *ext)
-{
-  sprintf (path, "%s%s%s.%s", node, dir, fname, ext);
-}
-
-void
-_splitpath (const char *path, char *node, char *dir, char *fname, char *ext)
-{
-  int pos = 0;
-  char path_[FILENAME_MAX];
-
-  sscanf (path,
-#ifdef __MSDOS__
-          "%s:"
-#endif
-          FILE_SEPARATOR_S
-#ifndef __MSDOS__
-          FILE_SEPARATOR_S "%s" FILE_SEPARATOR_S
-#endif
-          "%s" FILE_SEPARATOR_S "%s.%s", node, dir, fname, ext);
-
-  pos = ((strchr (&path[1], FILE_SEPARATOR) == NULL) ||
-         (findlast (path, ".") > (findlast (path, FILE_SEPARATOR_S) + 1))) ?
-    findlast (path, ".") : strlen (path);
-
-  strncpy (path_, path, pos);
-  path_[pos] = 0;
-
-  strcpy (fname, filenameonly (path_));
-
-  strcpy (ext, &path[pos + 1]);
+  return strnicmp (s1, s2, (l1 > l2) ? l1 : l2);
 }
 
 int
@@ -176,7 +131,7 @@ argcmp (int argc, char *argv[], char *str)
       argc--;
       if (argv[argc][0] == '-' &&
           (!strdcmp (argv[argc], str) || !strdcmp (&argv[argc][1], str))) //'--' also!
-        return (argc);
+        return argc;
     }
   return 0;                                   // not found
 }
@@ -189,9 +144,9 @@ argncmp (int argc, char *argv[], char *str, size_t len)
       argc--;
       if (argv[argc][0] == '-' &&
           (!strncmp (argv[argc], str, len) || !strncmp (&argv[argc][1], str, len)))
-        return (argc);
+        return argc;
     }
-  return (0);                                   // not found
+  return 0;                                   // not found
 }
 
 char *
@@ -207,11 +162,11 @@ getarg (int argc, char *argv[], int pos)
           if (y != pos)
             y++;
           else
-            return (argv[x]);
+            return argv[x];
         }
     }
 
-  return ("");                                  // not found
+  return "";                                  // not found
 }
 
 long
@@ -266,7 +221,7 @@ findlast (const char *str, const char *str2)
       pos = (strncmp (&str[x], str2, strlen (str2)) == 0) ? x : pos;
       x++;
     }
-  return ((pos != 0) ? pos : x);
+  return (pos != 0) ? pos : x;
 }
 
 char *
@@ -280,7 +235,7 @@ strupr (char *str)
       str++;
     }
 
-  return (str1);
+  return str1;
 }
 
 char *
@@ -294,7 +249,7 @@ strlwr (char *str)
       str++;
     }
 
-  return (str1);
+  return str1;
 }
 
 char *
@@ -314,7 +269,7 @@ newext (char *filename, char *ext)
   strcat (filename, (findlwr (filename) == TRUE) ?
           strlwr (ext2) : strupr (ext2));
 
-  return (filename);
+  return filename;
 }
 
 int
@@ -324,7 +279,7 @@ extcmp (char *filename, char *ext)
 
   strcpy (ext2, ext);
   strcpy (ext3, &filename[findlast (filename, ".") + 1]);
-  return (strcmp (strupr (ext2), strupr (ext3)));
+  return strcmp (strupr (ext2), strupr (ext3));
 }
 
 char *
@@ -332,7 +287,7 @@ stpblk (char *str)
 {
   while (*str == '\t' || *str == 32)
     str++;
-  return (str);
+  return str;
 }
 
 char *
@@ -345,7 +300,7 @@ strtrim (char *dest, char *str)
   while (x >= 0 && str[x] == 32)
     x--;
 
-  return (strncat (dest, stpblk (str), x + 1));
+  return strncat (dest, stpblk (str), x + 1);
 }
 
 char *
@@ -354,7 +309,7 @@ stplcr (char *str)
   while (*str != 0x00 && *str != 0x0a && *str != 0x0d)
     str++;
   *str = 0;
-  return (str);
+  return str;
 }
 
 char *
@@ -377,10 +332,11 @@ strswap (char *str, long start, long len)
       c = str[start];
       str[start] = str[start + 1];
       str[start + 1] = c;
+
       start += 2;
     }
 
-  return (str);
+  return str;
 }
 
 int
@@ -407,7 +363,7 @@ strhexdump (char *str, long start, long virtual_start, long len)
       buf[(x % 16) + 1] = 0;
     }
   printf ("%s\n", buf);
-  return (0);
+  return 0;
 }
 
 int
@@ -419,7 +375,7 @@ rencase (char *dir, char *mode)
   char buf[MAXBUFSIZE];
 
   if (access (dir, R_OK) != 0 || (dp = opendir (dir)) == NULL)
-    return (-1);
+    return -1;
 
   chdir (dir);
 
@@ -436,19 +392,19 @@ rencase (char *dir, char *mode)
         }
     }
   (void) closedir (dp);
-  return (0);
+  return 0;
 }
 
 int
 renlwr (char *dir)
 {
-  return (rencase (dir, "lwr"));
+  return rencase (dir, "lwr");
 }
 
 int
 renupr (char *dir)
 {
-  return (rencase (dir, "upr"));
+  return rencase (dir, "upr");
 }
 
 long
@@ -456,7 +412,7 @@ quickftell (char *filename)
 {
   struct stat puffer;
 
-  return ((!stat (filename, &puffer)) ? ((long) puffer.st_size) : (-1L));
+  return (!stat (filename, &puffer)) ? ((long) puffer.st_size) : (-1L);
 }
 
 long
@@ -468,20 +424,20 @@ filencmp (char *filename, long start, long len, char *search, long searchlen)
   char *buf;
 
   if (access (filename, R_OK) != 0)
-    return (-1);
+    return -1;
 
   x = 0;
   size = quickftell (filename);
 
   if (!(buf = (char *) malloc ((size - start + 2) * sizeof (char))))
     {
-      return (-1);
+      return -1;
     }
 
   if (!quickfread (buf, start, size, filename))
     {
       free (buf);
-      return (-1);
+      return -1;
     }
 
   while ((x + searchlen + start) < size)
@@ -493,13 +449,13 @@ filencmp (char *filename, long start, long len, char *search, long searchlen)
           if (y == searchlen - 1)
             {
               free (buf);
-              return (x + start);
+              return x + start;
             }
         }
       x++;
     }
   free (buf);
-  return (-1);
+  return -1;
 }
 
 long
@@ -511,20 +467,20 @@ filencmp2 (char *filename, long start, long len, char *search, long searchlen, c
   char *buf;
 
   if (access (filename, R_OK) != 0)
-    return (-1);
+    return -1;
 
   x = 0;
   size = quickftell (filename);
 
   if (!(buf = (char *) malloc ((size - start + 2) * sizeof (char))))
     {
-      return (-1);
+      return -1;
     }
 
   if (!quickfread (buf, start, size, filename))
     {
       free (buf);
-      return (-1);
+      return -1;
     }
 
   while ((x + searchlen + start) < size)
@@ -537,13 +493,13 @@ filencmp2 (char *filename, long start, long len, char *search, long searchlen, c
             if (y == searchlen - 1)
               {
                 free (buf);
-                return (x + start);
+                return x + start;
               }
           }
       x++;
     }
   free (buf);
-  return (-1);
+  return -1;
 }
 
 size_t
@@ -555,12 +511,12 @@ quickfread (void *dest, size_t start, size_t len, char *src)
   len = (((quickftell (src) - start) < len) ? (quickftell (src) - start) : len);
 
   if (!(fh = fopen (src, "rb")))
-    return (-1);
+    return -1;
   fseek (fh, start, SEEK_SET);
   result = fread ((void *) dest, 1, len, fh);
 //  dest[len]=0;
   fclose (fh);
-  return (result);
+  return result;
 }
 
 size_t
@@ -570,11 +526,11 @@ quickfwrite (const void *src, size_t start, size_t len, char *dest, char *mode)
   FILE *fh;
 
   if (!(fh = fopen (dest, mode)))
-    return (-1);
+    return -1;
   fseek (fh, start, SEEK_SET);
   result = fwrite (src, 1, len, fh);
   fclose (fh);
-  return (result);
+  return result;
 }
 
 int
@@ -584,11 +540,11 @@ quickfgetc (char *filename, long pos)
   FILE *fh;
 
   if ((!(fh = fopen (filename, "rb"))) || fseek (fh, pos, SEEK_SET) != 0)
-    return (-1);
+    return -1;
   c = fgetc (fh);
   fclose (fh);
 
-  return (c);
+  return c;
 }
 
 int
@@ -598,11 +554,11 @@ quickfputc (char *filename, long pos, int c, char *mode)
   FILE *fh;
 
   if ((!(fh = fopen (filename, mode))) || fseek (fh, pos, SEEK_SET) != 0)
-    return (-1);
+    return -1;
   result = fputc (c, fh);
   fclose (fh);
 
-  return (result);
+  return result;
 }
 
 int
@@ -614,14 +570,14 @@ filehexdump (char *filename, long start, long len)
   FILE *fh;
 
   if (access (filename, R_OK) != 0)
-    return (-1);
+    return -1;
 
   size = quickftell (filename);
 
   len = (((size - start) < len) ? (size - start) : len);
 
   if (!(fh = fopen (filename, "rb")))
-    return (-1);
+    return -1;
   fseek (fh, start, SEEK_SET);
 
   buf[16] = 0;
@@ -643,7 +599,7 @@ filehexdump (char *filename, long start, long len)
   printf ("%s\n", buf);
   fclose (fh);
 
-  return (0);
+  return 0;
 }
 
 int
@@ -654,7 +610,7 @@ filecopy (char *src, long start, long len, char *dest, char *mode)
   FILE *fh, *fh2;
 
   if (access (src, R_OK) != 0)
-    return (-1);
+    return -1;
 
   len = (((quickftell (src) - start) < len) ? (quickftell (src) - start) : len);
 
@@ -698,7 +654,7 @@ filebackup (char *filename)
   char buf[MAXBUFSIZE];
 
   if (access (filename, R_OK) != 0)
-    return (filename);
+    return filename;
 
   strcpy (buf, filename);
 #ifdef __MSDOS__
@@ -710,7 +666,7 @@ filebackup (char *filename)
   filecopy (buf, 0, quickftell (buf), filename, "wb");
 
   sync ();
-  return (filename);
+  return filename;
 }
 
 char *
@@ -723,7 +679,7 @@ filenameonly (char *str)
   else
     str2++;
 
-  return (str2);
+  return str2;
 }
 
 unsigned long
@@ -838,7 +794,7 @@ filereplace (char *filename, long start, char *search, long slen,
   unsigned long pos, size;
 
   if (access (filename, R_OK) != 0)
-    return (-1);
+    return -1;
 
   pos = start;
   size = quickftell (filename);
@@ -846,7 +802,7 @@ filereplace (char *filename, long start, char *search, long slen,
   for (;;)
     {
       if ((pos = filencmp (filename, pos, size, search, slen)) == -1)
-        return (0);
+        return 0;
       filehexdump (filename, pos, slen);
       quickfwrite (replace, pos, rlen, filename, "r+b");
       filehexdump (filename, pos, rlen);
@@ -994,13 +950,13 @@ fileswap (char *filename, long start, long len)
   char buf[MAXBUFSIZE], buf2[3], buf3;
 
   if (access (filename, R_OK) != 0)
-    return (-1);
+    return -1;
 
   len = (((quickftell (filename) - start) < len) ?
           (quickftell (filename) - start) : len);
 
   if (!(in = fopen (filename, "rb")))
-    return (-1);
+    return -1;
   fseek (in, start, SEEK_SET);
 
   strcpy (buf, filename);
@@ -1008,7 +964,7 @@ fileswap (char *filename, long start, long len)
   if (!(out = fopen (buf, "wb")))
     {
       fclose (in);
-      return (-1);
+      return -1;
     }
 
   for (x = 0; x < (len - start); x += 2)
@@ -1030,8 +986,44 @@ fileswap (char *filename, long start, long len)
   remove (filename);
   rename (buf, filename);
 
-  return (0);
+  return 0;
 }
+
+int
+gauge (time_t init_time, long pos, long size)
+{
+  long bps;
+  int p, percentage;
+  time_t curr, left;
+  char progress[24 + 1];
+
+  percentage = 100 * pos / size;
+  if ((curr = time (0) - init_time) == 0)
+    curr = 1;                               // `round up' to at least 1 sec (no division
+  if (pos > size)                           //  by zero below)
+    return -1;
+
+  bps = pos / curr;                         // # bytes/second (average transfer speed)
+  left = (size - pos) / bps;
+
+  p = 24 * pos / size;
+  progress[0] = 0;
+  strncat (progress, "========================", p);
+  strncat (&progress[p], "------------------------", 24 - p);
+
+  printf ("\r%10lu Bytes [%s] %u%%, BPS=%lu, ",
+          pos, progress, percentage, (unsigned long) bps);
+
+  if (pos == size)
+    printf ("TOTAL=%03ld:%02ld", (long) curr / 60, (long) curr % 60); // DON'T print a newline
+  else                                                                //  -> gauge can be cleared
+    printf ("ETA=%03ld:%02ld   ", (long) left / 60, (long) left % 60);
+
+  fflush (stdout);
+
+  return 0;
+}
+
 
 /*
   getchd() GetCurrentHomeDir the usage is like getcwd()
@@ -1124,7 +1116,7 @@ setProperty (char *filename, char *propname, char *value)
   if (!(buf2 = (char *) malloc ((quickftell(filename)
                                          + MAXBUFSIZE) * sizeof (char))))
     {
-      return (-1);
+      return -1;
     }
 
   buf2[0]=0;
@@ -1217,7 +1209,7 @@ getLinks (char *filename, char *buffer)
         }
       fclose (fh);
     }
-  return (buffer);
+  return buffer;
 }
 
 #if     defined __UNIX__ || defined __BEOS__
@@ -1288,7 +1280,7 @@ kbhit (void)
   tty_t tmptty = newtty;
   int ch, key_pressed;
 
-  if (frontend_file != stdout)
+  if (frontend)
     return 0;
 
   tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected under

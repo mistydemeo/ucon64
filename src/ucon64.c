@@ -1059,6 +1059,7 @@ usage (const char **s)
 #define UCON64_USAGE usage
 #endif
 
+
 void
 ucon64_usage (int argc, char *argv[])
 {
@@ -1080,19 +1081,16 @@ ucon64_usage (int argc, char *argv[])
     "                  this differs from the SNES & NES " OPTION_LONG_S "dint option\n"
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
     "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
-    "  " OPTION_LONG_S "crc         show CRC32 value of ROM; this will also force\n"
-    "                  calculation for files bigger than %d Bytes (%.4f Mb)\n"
-    "  " OPTION_LONG_S "dbs         search ROM in all DAT files by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
-    "  " OPTION_LONG_S "db          DAT file statistics (DAT files: %s)\n"
-    "  " OPTION_LONG_S "dbv         like " OPTION_LONG_S "db but more verbose\n"
+    "  " OPTION_LONG_S "crc         show CRC32 value of ROM; this will also force calculation for\n"
+    "                  files bigger than %d Bytes (%.4f Mb)\n"
+
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
-    "  " OPTION_LONG_S "lsd         like " OPTION_LONG_S "ls but uses only DAT info; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
     "                  this is often used by people who lose control of their ROMs\n"
     "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"
-    "  " OPTION_LONG_S "rdat        like " OPTION_LONG_S "rrom but uses only DAT info; " OPTION_LONG_S "rom=DIRECTORY\n"
-    "  " OPTION_LONG_S "good        same as " OPTION_LONG_S "rdat\n"
+
+
 #if 0
     "  " OPTION_LONG_S "rl          rename all files in DIRECTORY to lowercase; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "ru          rename all files in DIRECTORY to uppercase; " OPTION_LONG_S "rom=DIRECTORY\n"
@@ -1120,7 +1118,19 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_S "q           be quiet (don't show ROM info)\n"
 //    "  " OPTION_LONG_S "qq          be even more quiet\n"
     "\n"
-    , argv[0], ucon64.configfile, MAXROMSIZE, TOMBIT_F (MAXROMSIZE), ucon64.configdir);
+    , argv[0], ucon64.configfile, MAXROMSIZE, TOMBIT_F (MAXROMSIZE));
+
+  if (ucon64.dat_enabled)
+    printf ("DATabase\n"
+//      "NOTE: This is the support for all DAT files available\n"
+      "  " OPTION_LONG_S "dbs         search ROM in DATabase by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
+      "  " OPTION_LONG_S "db          DATabase statistics\n"
+      "  " OPTION_LONG_S "dbv         like " OPTION_LONG_S "db but more verbose\n"
+      "  " OPTION_LONG_S "lsd         generate ROM list for all ROMs using DATabase info; " OPTION_LONG_S "rom=DIR\n"
+      "  " OPTION_LONG_S "rdat        rename all ROMs in DIRECTORY to their DATabase names; " OPTION_LONG_S "rom=DIR\n"
+      "                  this is often used by people who lose control of their ROMs\n"
+      "TODO: " OPTION_LONG_S "good        like " OPTION_LONG_S "rdat but sorts recognized ROMs into sub-dirs;\n"
+      "                  " OPTION_LONG_S "rom=DIRECTORY\n\n");
 
   printf ("Patching\n");
 
@@ -1404,7 +1414,7 @@ ucon64_usage (int argc, char *argv[])
 
 // TODO: change DB-specific "HAVE_ZLIB_H"'s to "DB"
   printf (
-     "DATabase: %d known ROMs\n"
+     "DATabase: %d known ROMs (DAT files: %s)\n"
      "\n"
 #ifdef  PARALLEL
      "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
@@ -1425,6 +1435,7 @@ ucon64_usage (int argc, char *argv[])
      "Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
      "\n"
      , ucon64_dat_total_entries (UCON64_UNKNOWN)
+     , ucon64.configdir
      , argv[0], argv[0]);
 }
 

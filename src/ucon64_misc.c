@@ -190,7 +190,7 @@ const char *ps2_usage[] =
 const char *xbox_usage[] =
   {
     "XBox\n",
-    "  2001 Microsoft http://www.xbox.com\n",
+    "2001 Microsoft http://www.xbox.com\n",
     "  " OPTION_LONG_S "xbox        force recognition\n",
     NULL,
     NULL
@@ -199,7 +199,7 @@ const char *xbox_usage[] =
 const char *sat_usage[] =
   {
     "Saturn\n",
-    "  1994 SEGA http://www.sega.com\n",
+    "1994 SEGA http://www.sega.com\n",
     "  " OPTION_LONG_S "sat      force recognition\n",
     NULL,
     NULL
@@ -208,7 +208,7 @@ const char *sat_usage[] =
 const char *real3do_usage[] =
   {
     "Real3DO\n",
-    "1993\n",
+    "1993 Panasonic/Goldstar/Philips\n",
     "  " OPTION_LONG_S "3do        force recognition\n",
     NULL,
     NULL
@@ -226,78 +226,76 @@ const char *cd32_usage[] =
 const char *cdi_usage[] =
   {
     "CD-i",
-    "  1991",
+    "1991 Philips",
     "  " OPTION_LONG_S "cdi       force recognition\n",
     NULL,
     NULL
   };
 
-#if 0
-Vectrex (1982)
-Colecovision (1982)
-Interton VC4000 (~1980)
-Intellivision (1979)
-G7400+/Odyssey² (1978)
-Channel F (1976)
-Odyssey (Ralph Baer/USA/1972)
-Virtual Boy
-Real 3DO 1993 Panasonic/Goldstar/Philips?
-Game.com ? Tiger
-CD-i (1991) 1991
-Vectrex 1982
-Colecovision 1982
-Interton VC4000 ~1980
-Intellivision 1979
-G7400+/Odyssey² 1978
-Channel F 1976
-Odyssey 1972 Ralph Baer
+const char *vc4000_usage[] =
+  {
+    "Interton VC4000",
+    "~1980",
+    NULL,
+    NULL,
+    NULL
+  };
 
-X-Box
-Game Cube
+const char *odyssey2_usage[] =
+  {
+    "G7400+/Odyssey²",
+    "1978",
+    NULL,
+    NULL,
+    NULL
+  };
+
+const char *channelf_usage[] =
+  {
+    "FC Channel F",
+    "1976",
+    NULL,
+    NULL,
+    NULL
+  };
+
+const char *odyssey_usage[] =
+  {
+    "Odyssey",
+    "1972 Ralph Baer (USA)",
+    NULL,
+    NULL,
+    NULL
+  };
+
+const char *gamecom_usage[] =
+  {
+    "Game.com",
+    "? Tiger",
+    NULL,
+    NULL,
+    NULL
+  };
+
+#if 0
 Indrema
 Nuon
-GB Advance
-Playstation 2
-Dreamcast
-Nintendo 64
-Playstation
-Virtual Boy
 Saturn
 Sega 32X
-Jaguar
-3DO
 Sega CD
 Philips CDI
 Super Nintendo
-Neo·Geo
-Game Gear
-Lynx
-GameBoy
-Turbo Grafx 16
-Genesis
 XE System
-Master System
-Atari 7800
-Nintendo
-Commodore 64
-Coleco Vision
-Atari 5200
 Arcadia
-Vectrex
 Microvision
 Adv. Vision
 RDI Halcyon
-Intellivision
-Odyssey 2
 Astrocade
 Home Arcade
-Atari 2600
 RCA Studio 2
-FC Channel F
 Telstar
 Atari Pong
 PONG
-Odyssey
 
 gametz.com
 gameaxe.com
@@ -305,8 +303,6 @@ sys2064.com
 logiqx.com
 romcenter.com
 emuchina.net
-
-Bandai announced that a new version of the system, the SwanCrystal, will debut in Japan this July.
 #endif
 
 

@@ -192,12 +192,15 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    tell you how to compile uCON64 with the settings you just made.<br>
    By default the library discmage will also be compiled. Discmage is used for
    several CD-related functions in uCON64, but is not required for non
-   CD-related functions. For example, you won't need discmage for any of the
-   SNES functions. So, if you do not have a reason to not compile discmage do
-   the following for DJGPP and Cygwin. Either:<br>
-   - copy the file libgcc.a to the standard library directory<br>
-   or:<br>
-   - edit the file libdiscmage/Makefile so that the variable GCCA_DIR points
+   CD-related functions. For example, you will not need discmage for any of the
+   SNES functions.<br>
+   If you want uCON64 to use discmage and are using DJGPP or Cygwin you need
+   the library libgcc.a. This library comes with those compilers but is
+   usually not located in the standard library directory. However, the compiler
+   needs to know where it can find it. There are two possible ways to solve
+   this problem:<br>
+   1.) Copy the file libgcc.a to the standard library directory.<br>
+   2.) Edit the file libdiscmage/Makefile so that the variable GCCA_DIR points
    to the directory containing libgcc.a<br>
    The first technique (copying the file) is preferred.<br>
    If you do not intend to use the functionality that libdiscmage provides you
@@ -371,7 +374,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    reported as good it is very likely that the ROM is really good.
    Alternatively, you may want to convert the ROM to a non-interleaved format
    with -dint and run uCON64 on the converted ROM. That gives the best results.
-   Luckily you won't find many interleaved ROM dumps that uCON64 cannot
+   Luckily you wil not find many interleaved ROM dumps that uCON64 cannot
    handle, probably because Snes9x and ZSNES often cannot handle them either.<br>
 <br>
 <p>
@@ -806,7 +809,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    =&#62; af/bf XX 80 00 cf/df XX 80 40 80<br>
    Then you could search for the sequence \x80\x40\xf0. It is just a subset of
    the search pattern with each element prefixed with "\x". Searching for
-   \xaf/\xbf won't bring you far. Searching for \xXX\x80 neither. It takes a
+   \xaf/\xbf will not bring you far. Searching for \xXX\x80 neither. It takes a
    bit too much text to explain all the details, so just follow the directions.
    Note that I did not advise to search for \x80\x40\x80, because that is what
    the sequence should be after uCON64 has cracked or fixed the game.<br>
@@ -866,8 +869,8 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    across several lines. All values should be specified in hexadecimal, except
    the offset.<br>
    If the search pattern does not contain any escape bytes, you need not specify
-   a set as it won't be used. If it does contain escape bytes you will have to
-   specify a set for each one of them. Take for example the pattern:<br>
+   a set as it will not be used. If it does contain escape bytes you will have
+   to specify a set for each one of them. Take for example the pattern:<br>
    &nbsp;&nbsp; 01 00 01 00 42 84 ff 75 : ff : 00 : 02 03 : -6 : 22 11 : 19 75<br>
    This will match amongst 1020 others with the following byte sequences:<br>
    &nbsp;&nbsp; 01 22 01 19 42 84 19 75<br>

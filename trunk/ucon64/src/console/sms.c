@@ -303,9 +303,9 @@ sms_multi (int truncate_size, char *fname)
       stat (ucon64.argv[n], &fstate);
       if (!S_ISREG (fstate.st_mode))
         continue;
-      if (file_no == 256)                        // loader + 255 games
+      if (file_no == 32)                        // loader + 31 games
         {
-          printf ("WARNING: A multi-game file can contain a maximum of 255 games. The other files\n"
+          printf ("WARNING: A multi-game file can contain a maximum of 31 games. The other files\n"
                   "         are ignored.\n");
           break;
         }

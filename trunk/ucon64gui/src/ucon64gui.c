@@ -151,7 +151,7 @@ main (int argc, char *argv[])
    configfile handling
 */
   sprintf (ucon64gui.configfile, "%s%c"
-#ifdef  __DOS__
+#ifdef  __MSDOS__
            "ucon64.cfg"
 #else
            /*

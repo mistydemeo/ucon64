@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <unistd.h>
 
-#ifdef __DOS__
+#ifdef __MSDOS__
 #include <conio.h>                              // getch()
 #include <pc.h>                                 // kbhit()
 #endif
@@ -46,7 +46,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define TRUE 1
 #endif
 
-#ifndef __DOS__
+#ifndef __MSDOS__
 #define STDERR          stderr
 #define FILE_SEPARATOR '/'
 #define FILE_SEPARATOR_S "/"
@@ -175,6 +175,6 @@ int setProperty (char *filename, char *propname, char *value); //set propname wi
 #define deleteProperty(a, b) (setProperty(a, b, NULL))//like setProperty but when value of propname is NULL the whole property will disappear from filename
 
 // extract only the links from ugly HTML pages for wget -m --input-file=FILE
-char *getLinks (char *filename, char *buffer);
+char *getLinks (char *filename, char *buffer); //do not use!
 
 #endif // #ifndef MISC_H

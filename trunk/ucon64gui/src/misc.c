@@ -20,6 +20,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "misc.h"
+#include "ucon64.h"
 #include <stdarg.h>                             // va_arg()
 #include <string.h>                             // strncpy(), strstr()
 
@@ -37,7 +38,6 @@ typedef struct termios tty_t;
 #define USE_POLL                                //  need poll() for kbhit(). poll()
 #include <sys/poll.h>                           //  is available under Linux, but not
 #endif                                          //  under BeOS. DOS already has kbhit()
-
 
 #if     defined __UNIX__ || defined __BEOS__
 static void deinit_conio (void);
@@ -147,11 +147,11 @@ _splitpath (const char *path, char *node, char *dir, char *fname, char *ext)
   char path_[FILENAME_MAX];
 
   sscanf (path,
-#ifdef __DOS__
+#ifdef __MSDOS__
           "%s:"
 #endif
           FILE_SEPARATOR_S
-#ifndef __DOS__
+#ifndef __MSDOS__
           FILE_SEPARATOR_S "%s" FILE_SEPARATOR_S
 #endif
           "%s" FILE_SEPARATOR_S "%s.%s", node, dir, fname, ext);
@@ -701,7 +701,7 @@ filebackup (char *filename)
     return (filename);
 
   strcpy (buf, filename);
-#ifdef __DOS__
+#ifdef __MSDOS__
   newext (buf, ".BAK");
 #else
   strcat (buf, (findlwr (buf) ? ".bak" : ".BAK"));
@@ -727,70 +727,108 @@ filenameonly (char *str)
 }
 
 unsigned long
-filefile (char *filename, long start, char *filename2, long start2, int similar)
+filefile (char *filename1, long start1, char *filename2, long start2, int similar)
 {
-  unsigned long x;
-  long size, size2, minsize, len;
-  unsigned char *buf, *buf2;
+  int base, fsize1, fsize2, len, chunksize1, chunksize2, readok = 1,
+      bytesread1, bytesread2, bytesleft1, bytesleft2, bufsize = 1024 * 1024;
+  unsigned char *buf1, *buf2;
+  FILE *file1, *file2;
 
-  if (!strdcmp (filename, filename2))
+  if (!strdcmp (filename1, filename2))
     return 0;
-
-  if (access (filename, R_OK) != 0 || access (filename2, R_OK) != 0)
+  if (access (filename1, R_OK) != 0 || access (filename2, R_OK) != 0)
     return -1;
 
-  size = quickftell (filename);                 // quickftell() returns size in bytes
-  size2 = quickftell (filename2);
-
-  if (size < start || size2 < start2)
+  fsize1 = quickftell (filename1);              // quickftell() returns size in bytes
+  fsize2 = quickftell (filename2);
+  if (fsize1 < start1 || fsize2 < start2)
     return -1;
 
-  // TODO not reading the entire files into memory, but in smaller chunks
-  if (!(buf = (char *) malloc (size + 2)))
+  if (!(buf1 = (unsigned char *) malloc (bufsize)))
     return -1;
-
-  if (!(buf2 = (char *) malloc (size2 + 2)))
+  if (!(buf2 = (unsigned char *) malloc (bufsize)))
     {
-      free (buf);
+      free (buf1);
       return -1;
     }
 
-  if (!quickfread (buf, 0, size, filename)
-      || !quickfread (buf2, 0, size2, filename2))
+  if (!(file1 = fopen (filename1, "rb")))
     {
-      free (buf);
+      free (buf1);
+      free (buf2);
+      return -1;
+    }
+  if (!(file2 = fopen (filename2, "rb")))
+    {
+      fclose (file1);
+      free (buf1);
       free (buf2);
       return -1;
     }
 
-  minsize = size - start < size2 - start2 ? size - start : size2 - start2;
-  for (x = 0; x <= minsize; x++)
-    {
-      if ((similar == FALSE && buf[x + start] != buf2[x + start2]) ||
-          (similar == TRUE && buf[x + start] == buf2[x + start2]))
-        {
-          len = 0;
-          while ((similar == TRUE) ?
-                 (buf[x + start + len] == buf2[x + start2 + len]) :
-                 (buf[x + start + len] != buf2[x + start2 + len]))
-            {
-              len++;
-              if (x + start + len >= size || x + start2 + len >= size2)
-                break;
-            }
+  fseek (file1, start1, SEEK_SET);
+  fseek (file2, start2, SEEK_SET);
+  bytesleft1 = fsize1;
+  bytesread1 = 0;
+  bytesleft2 = fsize2;
+  bytesread2 = 0;
 
-          printf ("%s:\n", filename);
-          strhexdump (buf, x + start, x + start, len);
-          printf ("%s:\n", filename2);
-          strhexdump (buf2, x + start, x + start, len);
-          printf ("\n");
-          x += len;
+  while (bytesleft1 > 0 && bytesread1 < fsize2 && readok)
+    {
+      chunksize1 = fread (buf1, 1, bufsize, file1);
+      if (chunksize1 == 0)
+        readok = 0;
+      else
+        {
+          bytesread1 += chunksize1;
+          bytesleft1 -= chunksize1;
+        }
+
+      while (bytesleft2 > 0 && bytesread2 < bytesread1 && readok)
+        {
+          chunksize2 = fread (buf2, 1, chunksize1, file2);
+          if (chunksize2 == 0)
+            readok = 0;
+          else
+            {
+              base = 0;
+              while (base < chunksize2)
+                {
+                  if ((similar == FALSE && buf1[base] != buf2[base]) ||
+                      (similar == TRUE && buf1[base] == buf2[base]))
+                    {
+                      len = 0;
+                      while ((similar == TRUE) ?
+                             (buf1[base + len] == buf2[base + len]) :
+                             (buf1[base + len] != buf2[base + len]))
+                        {
+                          len++;
+                          if (base + len >= chunksize2)
+                            break;
+                        }
+
+                      printf ("%s:\n", filename1);
+                      strhexdump (buf1, base, start1 + base + bytesread2, len);
+                      printf ("%s:\n", filename2);
+                      strhexdump (buf2, base, start2 + base + bytesread2, len);
+                      printf ("\n");
+                      base += len;
+                    }
+                  else
+                    base++;
+                }
+
+              bytesread2 += chunksize2;
+              bytesleft2 -= chunksize2;
+            }
         }
     }
 
-  free (buf);
+  fclose (file1);
+  fclose (file2);
+  free (buf1);
   free (buf2);
-  return x;
+  return 0;
 }
 
 int
@@ -1121,6 +1159,7 @@ setProperty (char *filename, char *propname, char *value)
 char *
 getLinks (char *filename, char *buffer)
 {
+  int plain_text=1;
   char c[2];
   FILE *fh;
 
@@ -1129,9 +1168,20 @@ getLinks (char *filename, char *buffer)
     {
       while ((c[0] = fgetc (fh)) != EOF)
         {
+          if (c[0] == '>')
+          {
+             plain_text = 1;
+             c[0] = fgetc (fh);
+          }
+          
+          if (c[0] == '\n')strcat (buffer, "<BR>");
+
           if (c[0] == '<')
             {
+              plain_text = 0;
+
               c[0] = fgetc (fh);
+
               if (tolower (c[0]) == 'a')
                 {
                   strcat (buffer, "<A");
@@ -1139,13 +1189,31 @@ getLinks (char *filename, char *buffer)
                     {
                       if (c[0] == '<')
                         {
-                          strcat (buffer, "</A><BR>");
+                          strcat (buffer, "</A><BR>\n");
                           break;
                         }
                       strcat (buffer, c);
                     }
                 }
+
+              if (tolower (c[0]) == 'i' && tolower(fgetc (fh)) == 'm' && tolower(fgetc (fh)) == 'g')
+                {
+                  strcat (buffer, "<IMG");
+                  while ((c[0] = fgetc (fh)) != EOF)
+                    {
+                      if (c[0] == '>')
+                        {
+                          strcat (buffer, ">\n");
+                          break;
+                        }
+                      strcat (buffer, c);
+                    }
+                }
+
             }
+
+          if (plain_text == 1) strcat (buffer, c);
+
         }
       fclose (fh);
     }
@@ -1219,6 +1287,9 @@ kbhit (void)
 #else
   tty_t tmptty = newtty;
   int ch, key_pressed;
+
+  if (frontend_file != stdout)
+    return 0;
 
   tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected under
   set_tty(tmptty);                              //   Cygwin (define USE_POLL)

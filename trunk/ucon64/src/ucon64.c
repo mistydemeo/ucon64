@@ -92,14 +92,15 @@ write programs in C
 #include "backup/swc.h"
 #include "backup/cdrw.h"
 
-static void ucon64_usage (int argc, char *argv[]);
 static int ucon64_init (char *romfile, struct rom_ *rombuf);
-static int ucon64_nfo (struct rom_ *rombuf);
-static void ucon64_exit (void);
-static int ucon64_ls (char *path, int mode);
-static int ucon64_e (struct rom_ *rombuf);
-static int ucon64_configfile (void);
 static int ucon64_console_probe (struct rom_ *rombuf);
+static int ucon64_nfo (struct rom_ *rombuf);
+
+static int ucon64_e (struct rom_ *rombuf);
+static int ucon64_ls (char *path, int mode);
+static int ucon64_configfile (void);
+static void ucon64_exit (void);
+static void ucon64_usage (int argc, char *argv[]);
 
 struct ucon64_ ucon64;
 
@@ -1365,14 +1366,36 @@ ucon64_init (char *romfile, struct rom_ *rombuf)
 //  flush struct rombuf_
     {
       memset (rombuf, 0L, sizeof (struct rom_));
-    
       rombuf->console = ucon64_UNKNOWN;
+
       return 0;
     }
 
   strcpy(rombuf->rom, romfile);
 
   rombuf->bytes = quickftell (rombuf->rom);
+
+  ucon64_console_probe(rombuf);
+
+  if (rombuf->console == ucon64_UNKNOWN)
+    {
+       printf ("ERROR: could not auto detect the right ROM/console type\n"
+               "TIP:   If this is a ROM you might try to force the recognition\n"
+               "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n");
+       return -1;
+    }
+
+  if (ucon64.buheader_len != -1)
+    rombuf->buheader_len = ucon64.buheader_len;
+
+  if (ucon64.interleaved != -1)
+    rombuf->interleaved = ucon64.interleaved;
+    
+  if (ucon64.splitted != -1)
+    rombuf->splitted = ucon64.splitted;
+
+  if (ucon64.snes_hirom != -1)
+    rombuf->snes_hirom = ucon64.snes_hirom;
 
   quickfread (rombuf->buheader, rombuf->buheader_start, rombuf->buheader_len,
               rombuf->rom);
@@ -1393,27 +1416,6 @@ ucon64_init (char *romfile, struct rom_ *rombuf)
       ucon64_dbsearch (rombuf);
     }
 
-  ucon64_console_probe(rombuf);
-
-  if (ucon64.buheader_len != -1)
-    rombuf->buheader_len = ucon64.buheader_len;
-
-  if (ucon64.interleaved != -1)
-    rombuf->interleaved = ucon64.interleaved;
-    
-  if (ucon64.splitted != -1)
-    rombuf->splitted = ucon64.splitted;
-
-  if (ucon64.snes_hirom != -1)
-    rombuf->snes_hirom = ucon64.snes_hirom;
-
-  if (rombuf->console == ucon64_UNKNOWN)
-    {
-       printf ("ERROR: could not auto detect the right ROM/console type\n"
-               "TIP:   If this is a ROM you might try to force the recognition\n"
-               "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n");
-       return -1;
-    }
   return 0;
 }
 

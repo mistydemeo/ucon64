@@ -113,7 +113,7 @@ const char *nintendo_maker[792] = {
   NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // 2Z
   "Viacom", "Carrozzeria", "Dynamic", NULL, "Magifact",
-  "Hect", "Codemasters", "Taito/GAGA Communications", "Laguna",
+  "Hect", "Codemasters", "Taito/GAGA Communications", "Capcom/Laguna",
     "Telstar Fun & Games/Event/Taito",
   NULL, "Arcade Zone Ltd.", "Entertainment International/Empire Software", "Loriciel",
     "Gremlin Graphics",
@@ -134,7 +134,8 @@ const char *nintendo_maker[792] = {
   "Hi Tech", "LJN Ltd.", NULL, "Mattel", NULL,
   "Mindscape/Red Orb Entertainment", "Romstar", "Taxan", "Midway/Tradewest", NULL,
   "American Softworks", "Majesco Sales Inc.", "3DO", NULL, NULL,
-  "Williams Entertainment Inc." /*"Hasbro"*/, "NewKidCo", "Telegames", "Metro3D", NULL,
+  "Williams Entertainment Inc." /*"Hasbro"*/, "NewKidCo", "Telegames",
+    "Metro3D/Majesco Sales Inc.", NULL,
   "Vatical Entertainment", "LEGO Media", NULL, "Xicat Interactive", "Cryo Interactive",
   NULL, NULL, "Red Storm Entertainment", "Microids", NULL,
   "Conspiracy/Swing",                           // 5Z
@@ -190,7 +191,7 @@ const char *nintendo_maker[792] = {
   NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // BZ
   "Taito", NULL, "Kemco", "Square", "Tokuma Shoten",
-  "Data East", "Tonkin House", NULL, "Koei", NULL,
+  "Data East", "Tonkin House", NULL, "KOEI", NULL,
   "Konami/Ultra/Palcom", "NTVIC/VAP", "Use Co., Ltd.", "Meldac", "Pony Canyon (J)/FCI (U)",
   "Angel/Sotsu Agency/Sunrise", "Yumedia/Aroma Co., Ltd.", NULL, NULL, "Boss",
   "Axela/Crea-Tech", "Sekaibunka-Sha/Sumire kobo/Marigul Management Inc.",
@@ -249,7 +250,7 @@ const char *nintendo_maker[792] = {
   NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // IZ
   NULL, NULL, NULL, "Square", NULL,
-  "Data East", NULL, NULL, "Falcom", NULL,
+  "Data East", NULL, NULL, "Falcom/KOEI", NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
@@ -329,6 +330,11 @@ handle_existing_file (const char *dest, char *src)
   ucon64_temp_file = NULL;
   if (!access (dest, F_OK))
     {
+      stat (dest, &dest_info);
+      // *Trying* to make dest writable here avoids having to change all code
+      //  that might (try to) operate on a read-only file
+      chmod (dest, dest_info.st_mode | S_IWUSR);
+
       if (src == NULL)
         {
           if (ucon64.backup)
@@ -339,7 +345,6 @@ handle_existing_file (const char *dest, char *src)
       // Check if src and dest are the same file based on the inode and device info,
       //  not the filenames
       stat (src, &src_info);
-      stat (dest, &dest_info);
       if (src_info.st_dev == dest_info.st_dev && src_info.st_ino == dest_info.st_ino)
         {                                       // case 1
           if (ucon64.backup)
@@ -541,7 +546,7 @@ ucon64_pad (const char *filename, int start, int size)
       stat (filename, &fstate);
       if (chmod (filename, fstate.st_mode | S_IWUSR))
         {
-          fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
+          fprintf (stderr, "ERROR: Can't open %s for writing\n", filename); // msg is not a typo
           exit (1);
         }
       truncate (filename, size + start);

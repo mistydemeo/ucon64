@@ -52,8 +52,7 @@ const st_usage_t swc_usage[] =
 #endif
     {"xswcs", NULL, "send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
                  OPTION_LONG_S "port=PORT\n"
-                 "receives automatically when SRAM does not exist\n"
-                 "Press q to abort; ^C might cause invalid state of backup unit"},
+                 "receives automatically when SRAM does not exist"},
     {"xswcr", NULL, "send/receive RTS data to/from Super Wild Card*/(all)SWC;\n"
                  OPTION_LONG_S "port=PORT\n"
                  "receives automatically when RTS file does not exist\n"

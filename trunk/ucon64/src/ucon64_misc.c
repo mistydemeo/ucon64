@@ -516,7 +516,6 @@ return 0;
 
 int testsplit(char *filename)
 {
-//TODO ignore paths
 long x=0;
 char buf[4096];
 

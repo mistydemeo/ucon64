@@ -6039,10 +6039,14 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
   ines_header.prg_size = prg_size >> 14;
   ines_header.chr_size = chr_size >> 13;
 
-  ines_header.ctrl3 = 0;                        // clear undefined bits
+  ines_header.ctrl3 &= INES_TVID;               // clear undefined bits
   if (UCON64_ISSET (ucon64.tv_standard))
-    if (ucon64.tv_standard == 1)                // value can be 0, 1 or 2
-      ines_header.ctrl3 |= INES_TVID;
+    {
+      if (ucon64.tv_standard == 1)              // value can be 0, 1 or 2
+        ines_header.ctrl3 |= INES_TVID;
+      else
+        ines_header.ctrl3 &= ~INES_TVID;
+    }
 
   if (UCON64_ISSET (ucon64.battery))
     {

@@ -40,9 +40,6 @@ const char *lynx_usage[] =
     "Handy (prototype)/Lynx/Lynx II",
     "1987 Epyx/1989 Atari/1991 Atari",
     "  " OPTION_LONG_S "lynx        force recognition"
-#ifndef HAVE_ZLIB_H
-    "; NEEDED"
-#endif
     "\n"
     "  " OPTION_LONG_S "lyx         convert to LYX/RAW (strip 64 Bytes LNX header)\n"
     "  " OPTION_LONG_S "lnx         convert to LNX (uses default values for the header);\n"

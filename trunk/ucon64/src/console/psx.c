@@ -36,8 +36,7 @@ const char *psx_usage[] =
   {
     "Playstation (One)/Playstation 2 (CD only)",
     "1994/(2000) Sony http://www.playstation.com",
-    "  " OPTION_LONG_S "psx         force recognition; NEEDED\n"
-    "                  for more options check the support for DISC-based consoles\n"
+    "  " OPTION_LONG_S "psx         force recognition\n"
       ,
       NULL
 };

@@ -46,9 +46,6 @@ const char *pcengine_usage[] =
     "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\nSuper Grafx/Turbo (Grafx(16)/CD/DUO/Express)",
     "1987/19XX/19XX NEC",
     "  " OPTION_LONG_S "pce         force recognition"
-#ifndef HAVE_ZLIB_H
-    "; NEEDED"
-#endif
     "\n"
 #if 0
     "  " OPTION_LONG_S "hd          force ROM has SMG header (+512 Bytes)\n"
@@ -56,7 +53,6 @@ const char *pcengine_usage[] =
 #endif
     "  " OPTION_LONG_S "smg         convert to Super Magic Griffin/SMG\n"
     "  " OPTION_LONG_S "mgd         convert to Multi Game Doctor*/MGD2/RAW\n"
-    "                  for more options check the support for DISC-based consoles\n"
     ,
     NULL
 };

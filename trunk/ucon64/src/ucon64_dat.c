@@ -369,14 +369,14 @@ ucon64_dat_view (int console)
       dat_counter++;
 
       printf ("DAT info:\n"
-//        "  %s\n"
-        "  Console: %s\n"
+        "  %s\n"
+//        "  Console: %s\n"
         "  Version: %s (%s, %s)\n"
         "  Author: %s\n"
         "  Comment: %s\n"
         "  Entries: %d\n\n",
         basename2 (buf),
-//        dat.console,
+//        dat.console_usage[0],
         dat.version,
         dat.date,
         dat.refname,

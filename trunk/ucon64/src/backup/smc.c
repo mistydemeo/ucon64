@@ -168,7 +168,7 @@ smc_write_rom (const char *filename, unsigned int parport)
 
   for (n = 0; n < n_blocks1; n++)
     {
-      ffe_send_command0 (0x4507, n + offset);
+      ffe_send_command0 (0x4507, (unsigned char) (n + offset));
       if ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) == 0)
         break;
       ffe_send_block (0x6000, buffer, bytesread);
@@ -180,7 +180,7 @@ smc_write_rom (const char *filename, unsigned int parport)
 
   for (n = 0; n < n_blocks2; n++)
     {
-      ffe_send_command0 (0x4507, n + 32);
+      ffe_send_command0 (0x4507, (unsigned char) (n + 32));
       if ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) == 0)
         break;
       ffe_send_block (0x6000, buffer, bytesread);
@@ -208,7 +208,7 @@ smc_write_rom (const char *filename, unsigned int parport)
 
           ffe_send_command0 (0x4500, 7);
           for (m = 0; m < 8; m++)
-            ffe_send_command0 (0x4510 + m, n * 8 + m);
+            ffe_send_command0 ((unsigned short) (0x4510 + m), (unsigned char) (n * 8 + m));
           if ((bytesread = fread (buffer, 1, BUFFERSIZE, file)) == 0)
             break;
           ffe_send_block2 (0, buffer, bytesread);
@@ -220,9 +220,9 @@ smc_write_rom (const char *filename, unsigned int parport)
     }
 
   for (n = 0x4504; n < 0x4508; n++)
-    ffe_send_command0 (n, 0);
+    ffe_send_command0 ((unsigned short) n, 0);
   for (n = 0x4510; n < 0x451c; n++)
-    ffe_send_command0 (n, 0);
+    ffe_send_command0 ((unsigned short) n, 0);
 
   ffe_send_command (5, 1, 0);
 
@@ -281,7 +281,7 @@ smc_read_rts (const char *filename, unsigned int parport)
 
   for (n = 2; n <= 0x22; n += 0x20)
     {
-      ffe_send_command0 (0x4500, n);
+      ffe_send_command0 (0x4500, (unsigned char) n);
       ffe_receive_block (0x6000, buffer, BUFFERSIZE); // 0x2000
       fwrite (buffer, 1, BUFFERSIZE, file);
 
@@ -292,7 +292,7 @@ smc_read_rts (const char *filename, unsigned int parport)
 
   for (n = 1; n <= 3; n++)
     {
-      ffe_send_command0 (0x43fc, n);
+      ffe_send_command0 (0x43fc, (unsigned char) n);
       if (n == 1)
         ffe_send_command0 (0x2001, 0);
       ffe_receive_block2 (0, buffer, BUFFERSIZE); // 0x2000
@@ -357,7 +357,7 @@ smc_write_rts (const char *filename, unsigned int parport)
 
   for (n = 2; n <= 0x22; n += 0x20)
     {
-      ffe_send_command0 (0x4500, n);
+      ffe_send_command0 (0x4500, (unsigned char) n);
       fread (buffer, 1, BUFFERSIZE, file);
       ffe_send_block (0x6000, buffer, BUFFERSIZE); // 0x2000
 
@@ -368,7 +368,7 @@ smc_write_rts (const char *filename, unsigned int parport)
 
   for (n = 1; n <= 3; n++)
     {
-      ffe_send_command0 (0x43fc, n);
+      ffe_send_command0 (0x43fc, (unsigned char) n);
       if (n == 1)
         ffe_send_command0 (0x2001, 0);
       fread (buffer, 1, BUFFERSIZE, file);

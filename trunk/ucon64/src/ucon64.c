@@ -699,8 +699,10 @@ if (argcmp(argc, argv, "-e"))
     sprintf(buf3, "emulate_%s", &forceargs[rom.console][1]);
   else
   {
-    printf("ERROR: could not auto detect the right ROM/console type; please try the\n"
-	   "\"-<CONSOLE> force recognition\" option next time\n");
+    printf("ERROR: could not auto detect the right ROM/console type\n"
+      "TIP:   If this is a ROM you might try to force the recognition\n"
+      "       The force recognition option for Super Nintendo would be -snes\n"
+    );
 
     return(-1);
         
@@ -717,9 +719,9 @@ if (argcmp(argc, argv, "-e"))
   {
     printf("ERROR: could not find the correct settings (%s) in\n"
            "       %s\n"
-           "       please fix that or use the \"-<CONSOLE> force recognition\" option next\n"
-           "       time if the wrong ROM/console type was detected\n",
-           buf3, buf);
+       "TIP:   If the wrong console was detected you might try to force recognition\n"
+      "       The force recognition option for Super Nintendo would be -snes\n"
+     ,buf3, buf);
     return(-1);
   }
 
@@ -752,9 +754,9 @@ if (argcmp(argc, argv, "-e"))
   if (x != 127 && x != -1 && x != 0)    // 127 && -1 are system() errors, rest are exit codes
   {
     printf("ERROR: the Emulator returned an error code (%d)\n"
-           "       maybe %s is corrupt...\n"
-           "       or use the \"-<CONSOLE> force recognition\" option next time\n",
-           (int) x, rom.rom);
+       "TIP:   If the wrong emulator was used you might try to force recognition\n"
+      "       The force recognition option for Super Nintendo would be -snes\n"
+          , (int) x);
     return(x);
   }
 #endif

@@ -6,7 +6,7 @@ Copyright (c) 1999 - 2004 Cyan Helkaraxe
 Special thanks to dbjh for helping with the uCON64 integration
 of this software, and providing the wrapping code.
 
-CMC Version: 2.1
+CMC Version: 2.2
 For hardware version 1.x
 
 Copies Sega Megadrive/Genesis cartridges into .BIN format ROM files.
@@ -117,7 +117,7 @@ respective owners.
   confusion.
 */
 #define INTRO_TEXT "Cyan's Megadrive Copier             (c) 1999-2004 Cyan Helkaraxe\n" \
-                   "Software version 2.1, designed for hardware version 1.x\n\n"
+                   "Software version 2.2, designed for hardware version 1.x\n\n"
 
 
 #ifdef  HAVE_CONFIG_H
@@ -586,14 +586,10 @@ cyan_test_parport (unsigned int parport)
 }
 
 
-/*******************************
- *  End of internal functions  *
- *******************************/
-
 static int
 cyan_test_copier (int test, int speed, unsigned int parport)
 {
-  unsigned char *buffer1, *buffer2 = NULL;
+  unsigned char *buffer1, *buffer2;
   int count = 1;
 
   fputs (INTRO_TEXT, stdout);
@@ -625,10 +621,11 @@ cyan_test_copier (int test, int speed, unsigned int parport)
         {
           count++;
           clear_line ();                        // remove last gauge
+          printf ("Pass %2d OK\n", count);
           printf ("                                                                          P %2d",
                   count);
           fflush (stdout);
-          buffer2 = cyan_read_rom (speed, parport, buffer2);
+          buffer2 = cyan_read_rom (speed, parport, NULL);
           if (!buffer2)
             {
               free (buffer1);

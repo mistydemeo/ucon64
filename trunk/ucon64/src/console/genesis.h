@@ -29,6 +29,7 @@ extern int genesis_n2 (st_rominfo_t *rominfo, const char *name);
 extern int genesis_s (st_rominfo_t *rominfo);
 extern int genesis_smd (st_rominfo_t *rominfo);
 extern int genesis_smds (void);
+extern int genesis_multi (int truncate_size, char *fname);
 extern int genesis_init (st_rominfo_t *rominfo);
 
 extern const st_usage_t genesis_usage[];

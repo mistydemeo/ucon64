@@ -166,6 +166,9 @@ io_error (void)
 //  error. Or take an integer code that we can interpret here.
 {
   fprintf (stderr, "ERROR: Communication with Game Doctor failed\n");
+  fflush (stderr);
+  // calling fflush() seems to be necessary under Msys in order to make the
+  //  error message be displayed before the "Removing: <filename>" message
   exit (1);
 }
 
@@ -745,7 +748,7 @@ gd6_read_sram (const char *filename, unsigned int parport)
   if (gd6_sync_receive_start () == GD_ERROR)
     io_error ();
 
-  if (gd6_receive_bytes (buffer, 16) == GD_ERROR )
+  if (gd6_receive_bytes (buffer, 16) == GD_ERROR)
     io_error ();
 
   transfer_size = buffer[1] | (buffer[2] << 8) | (buffer[3] << 16) | (buffer[4] << 24);

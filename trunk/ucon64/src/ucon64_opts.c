@@ -1097,7 +1097,17 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_MULTI:
-      gba_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+      switch (ucon64.console)
+        {
+        case UCON64_GBA:
+          gba_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          break;
+        case UCON64_GEN:
+          genesis_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          break;
+        default:
+          return -1;
+        }
       break;
 
     case UCON64_E:

@@ -706,7 +706,7 @@ random number when backing up games.
 int
 pcengine_init (st_rominfo_t *rominfo)
 {
-  int result = -1; //, n;
+  int result = -1;
   char buf[MAXBUFSIZE];
   st_pce_data_t *info, key;
 

@@ -830,6 +830,12 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
             break;
 
           default:
+            if (ucon64.dat_enabled && ucon64.console == UCON64_NES &&
+                (nes_get_file_type () == UNIF ||
+                 nes_get_file_type () == INES ||
+                 nes_get_file_type () == PASOFAMI))
+              strcpy ((char *) rominfo->name, NULL_TO_EMPTY (ucon64_dat->name));
+
             if (ucon64_dat)
               {
 //                strcpy (rominfo->name, ucon64_dat->name);
@@ -944,13 +950,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
     }
 
 // maker, country and size
-  if (ucon64.dat_enabled && ucon64.console == UCON64_NES &&
-      (nes_get_file_type () == UNIF ||
-       nes_get_file_type () == INES ||
-       nes_get_file_type () == PASOFAMI))
-    strcpy (buf, NULL_TO_EMPTY (ucon64_dat->name));
-  else
-    strcpy (buf, NULL_TO_EMPTY (rominfo->name));
+  strcpy (buf, NULL_TO_EMPTY (rominfo->name));
   x = UCON64_ISSET (rominfo->data_size) ?
     rominfo->data_size :
     ucon64.file_size - rominfo->buheader_len;

@@ -878,10 +878,16 @@ pcengine_init (st_rominfo_t *rominfo)
     According to Cowering 2 or 3 games don't use these opcodes to check if a
     Japanese game is running on an American console. If they are present then
     it is in the first 500 (or so) bytes.
+    The check for "A..Z" is a fix for Puzznic (J). The check for "HESM" a fix
+    for:
+    Fire Pro Wrestling - 2nd Bout Sounds
+    Fire Pro Wrestling 3 - Legend Bout Sounds
   */
   x = size > 32768 ? 32768 : size;
-  if (mem_search (rom_buffer, x, "\x94\x02\x0f", 3) ||
-      mem_search (rom_buffer, x, "\x94\x02\x01", 3))
+  if ((mem_search (rom_buffer, x, "\x94\x02\x0f", 3) ||
+       mem_search (rom_buffer, x, "\x94\x02\x01", 3)) &&
+       mem_search (rom_buffer, x, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 26) == 0 &&
+       memcmp (rom_buffer, "HESM", 4))
     swapped = 1;
   if (UCON64_ISSET (ucon64.interleaved))
     swapped = ucon64.interleaved;
@@ -963,3 +969,4 @@ pcengine_init (st_rominfo_t *rominfo)
   free (rom_buffer);
   return result;
 }
+

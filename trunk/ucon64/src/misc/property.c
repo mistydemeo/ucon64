@@ -169,7 +169,7 @@ set_property (const char *filename, const char *propname, const char *value,
   if (stat (filename, &fstate) != 0)
     file_size = fstate.st_size;
 
-  if (!(str = (char *) malloc ((file_size + MAXBUFSIZE) * sizeof (char))))
+  if (!(str = (char *) malloc (file_size + MAXBUFSIZE)))
     return -1;
   *str = 0;
 

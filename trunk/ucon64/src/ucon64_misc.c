@@ -252,7 +252,7 @@ const char *ucon64_msg[] =
     "ERROR: Communication with backup unit failed\n"                    // PARPORT_ERROR
     "TIP:   Check cables and connection\n"
     "       Turn the backup unit off and on\n"
-  //  "       Split ROMs must be joined first\n" // handled with WF_NO_SPLIT
+//    "       Split ROMs must be joined first\n" // handled with WF_NO_SPLIT
     "       Use " OPTION_LONG_S "port={3bc, 378, 278, ...} to specify a parallel port address\n"
     "       Set the port to SPP (standard, normal) mode in your BIOS as some backup\n"
     "         units do not support EPP and ECP style parallel ports\n"
@@ -2280,16 +2280,14 @@ ucon64_fwswap32_func (void *buffer, int n, void *object)
 void
 ucon64_fbswap16 (const char *fname, size_t start, size_t len)
 {
-  quick_io_func (ucon64_fbswap16_func, MAXBUFSIZE, // suggested func_maxlen
-                 NULL, start, len, fname, "r+b");
+  quick_io_func (ucon64_fbswap16_func, MAXBUFSIZE, NULL, start, len, fname, "r+b");
 }
 
 
 void
 ucon64_fwswap32 (const char *fname, size_t start, size_t len)
 {
-  quick_io_func (ucon64_fwswap32_func, MAXBUFSIZE, // suggested func_maxlen
-                 NULL, start, len, fname, "r+b");
+  quick_io_func (ucon64_fwswap32_func, MAXBUFSIZE, NULL, start, len, fname, "r+b");
 }
 
 
@@ -2307,7 +2305,6 @@ ucon64_dump_func (void *buffer, int n, void *object)
   st_ucon64_dump_t *o = (st_ucon64_dump_t *) object;
 
   dumper (o->output, buffer, n, o->virtual_pos, o->flags);
-
   o->virtual_pos += n;
 
   return n;
@@ -2316,12 +2313,11 @@ ucon64_dump_func (void *buffer, int n, void *object)
 
 void
 ucon64_dump (FILE *output, const char *filename, size_t start, size_t len,
-         uint32_t flags)
+             uint32_t flags)
 {
   st_ucon64_dump_t o = {output, start, flags};
 
-  quick_io_func (ucon64_dump_func, MAXBUFSIZE, // suggested func_maxlen
-                 (void *) &o, start, len, filename, "rb");
+  quick_io_func (ucon64_dump_func, MAXBUFSIZE, &o, start, len, filename, "rb");
 }
 
 
@@ -2338,32 +2334,70 @@ typedef struct
 static inline int
 ucon64_find_func (void *buffer, int n, void *object)
 {
-  const unsigned char *p = (const unsigned char *) buffer;
   st_ucon64_find_t *o = (st_ucon64_find_t *) object;
+  char *ptr0 = (char *) buffer, *ptr1 = (char *) buffer;
+  int m;
+  static char match[MAXBUFSIZE - 1], compare[MAXBUFSIZE + 16 + 1];
+  static int matchlen;
 
-  while ((int) (p - ((const unsigned char *) buffer)) < n)
+  // reset matchlen if this is the first call for a new file
+  if (o->found == -2)
     {
-      p = (const unsigned char *)
-            memmem2 (p, n - (int) (p - ((const unsigned char *) buffer)),
-                     o->search, o->searchlen, o->flags);
-      if (p)
-        {
-          o->found = o->pos + (int) (p - ((const unsigned char *) buffer));
+      o->found = -1;                            // -1 is default (return) value
+      matchlen = 0;
+    }
 
+  // check if we can match the search string across the buffer boundary
+  for (m = 0; matchlen; matchlen--)
+    {
+      memcpy (compare, match + m++, matchlen);
+      memcpy (compare + matchlen, ptr1, (o->searchlen + 0x0f & ~0x0f) - matchlen);
+      if (memcmp2 (compare, o->search, o->searchlen, o->flags) == 0)
+        {
+          o->found = o->pos - matchlen;
           if (!(o->flags & UCON64_FIND_QUIET))
             {
-              dumper (stdout, p, o->searchlen + 16 - (o->searchlen % 16),
-                      o->found, DUMPER_HEX);    // + 16 gives a bit of context
+              dumper (stdout, compare, o->searchlen + 0x0f & ~0x0f, o->found, DUMPER_HEX);
               fputc ('\n', stdout);
             }
-          p++;
+        }
+    }
+
+  while (ptr1 - ptr0 < n)
+    {
+      ptr1 = (char *) memmem2 (ptr1, n - (ptr1 - ptr0), o->search, o->searchlen,
+                               o->flags);
+      if (ptr1)
+        {
+          o->found = o->pos + ptr1 - ptr0;
+          if (!(o->flags & UCON64_FIND_QUIET))
+            {
+              dumper (stdout, ptr1, o->searchlen + 0x0f & ~0x0f, o->found, DUMPER_HEX);
+              fputc ('\n', stdout);
+            }
+          ptr1++;
         }
       else
-        break;
+        {
+          // try to find a partial match at the end of buffer
+          ptr1 = ptr0 + n - o->searchlen;
+          for (m = 1; m < o->searchlen; m++)
+            if (memcmp2 (ptr1 + m, o->search, o->searchlen - m, o->flags) == 0)
+              {
+                memcpy (match, ptr1 + m, o->searchlen - m);
+                matchlen = o->searchlen - m;
+                break;
+              }
+          if (!matchlen)                          // && o->flags & MEMMEM2_REL
+            {
+              match[0] = ptr0[n - 1];             // we must not split the string
+              matchlen = 1;                       //  for a relative search
+            }
+          break;
+        }
     }
 
   o->pos += n;
-
   return n;
 }
 
@@ -2373,7 +2407,25 @@ ucon64_find (const char *filename, size_t start, size_t len,
              const char *search, int searchlen, uint32_t flags)
 {
   int result = 0;
-  st_ucon64_find_t o = { search, flags, searchlen, start, -1 };
+  st_ucon64_find_t o = { search, flags, searchlen, start, -2 };
+  // o.found == -2 signifies a new find operation (usually for a new file)
+
+  if (searchlen < 1)
+    {
+      fprintf (stderr, "ERROR: No search string specified\n");
+      exit (1);
+    }
+  else if (flags & MEMCMP2_REL)
+    if (searchlen < 2)
+      {
+        fprintf (stderr, "ERROR: Search string must be longer than 1 character for a relative search\n");
+        exit (1);
+      }
+  if (searchlen > MAXBUFSIZE)
+    {
+      fprintf (stderr, "ERROR: Search string must be <= %d characters\n", MAXBUFSIZE);
+      exit (1);                                 // see ucon64_find_func() for why
+    }
 
   if (!(flags & UCON64_FIND_QUIET))
     {
@@ -2399,10 +2451,10 @@ ucon64_find (const char *filename, size_t start, size_t len,
       }
     }
 
-  result = quick_io_func (ucon64_find_func, MAXBUFSIZE, // suggested func_maxlen
-                          (void *) &o, start, len, filename, "rb");
+  result = quick_io_func (ucon64_find_func, MAXBUFSIZE, &o, start, len,
+                          filename, "rb");
 
-  return o.found; // return last occurence or -1
+  return o.found;                               // return last occurrence or -1
 }
 
 
@@ -2459,9 +2511,8 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, // uint16_t *cr
   if (crc32_i)
     o.crc32 = crc32_i;
 
-  result = quick_io_func (ucon64_chksum_func, MAXBUFSIZE, // suggested func_maxlen
-                          (void *) &o, start, fsizeof (filename) - start,
-                          filename, "rb");
+  result = quick_io_func (ucon64_chksum_func, MAXBUFSIZE, &o, start,
+                          fsizeof (filename) - start, filename, "rb");
   if (sha1_s)
     {
       unsigned char buf[MAXBUFSIZE];
@@ -2577,8 +2628,8 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 
   o.found = 0;
 
-  quick_io_func (ucon64_filefile_func, FILEFILE_LARGE_BUF, // suggested func_maxlen
-                 (void *) &o, start1, fsizeof (filename1), filename1, "rb");
+  quick_io_func (ucon64_filefile_func, FILEFILE_LARGE_BUF, &o, start1,
+                 fsizeof (filename1), filename1, "rb");
 
   if (o.found)
     printf ("Found %d %s\n",

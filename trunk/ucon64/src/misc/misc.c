@@ -303,7 +303,8 @@ ansi_init (void)
 
 
 void
-dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start, unsigned int flags)
+dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start,
+        unsigned int flags)
 // Do NOT use DUMPER_PRINT in uCON64 code - dbjh
 {
 #define DUMPER_REPLACER ('.')
@@ -337,7 +338,7 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start, u
                          ((*p >> 2) & 1) * 100 +
                          ((*p >> 1) & 1) * 10 +
                          (*p & 1));
-        
+
         *(buf + (pos & 3)) = isprint (*p) ? *p : DUMPER_REPLACER;
         if (!((pos + 1) & 3))
           fprintf (output, "%s\n", buf);
@@ -358,7 +359,7 @@ dumper (FILE *output, const void *buffer, size_t bufferlen, int virtual_start, u
             (int) (pos + virtual_start));
 
         fprintf (output, (pos + 1) & 3 ? "%02x " : "%02x  ", *p);
-    
+
         *(buf + (pos & 15)) = isprint (*p) ? *p : DUMPER_REPLACER;
         if (!((pos + 1) & 15))
           fprintf (output, "%s\n", buf);
@@ -836,7 +837,6 @@ cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns)
 
 
 #if 1
-// TODO: show average speed as progress too
 int
 gauge (FILE *output, time_t start_time, int pos, int size, unsigned int flags)
 {
@@ -945,7 +945,6 @@ gauge (time_t init_time, int pos, int size, unsigned int flags)
   return 0;
 }
 #endif
-
 
 
 #ifdef  __CYGWIN__
@@ -1359,7 +1358,7 @@ sync (void)
 
 
 #if     defined __MINGW32__ && defined DLL
-// Ugly hack in order to fix something in zlib (yep, it's that bad)
+// Ugly hack in order to fix something in zlib
 FILE *
 fdopen (int fd, const char *mode)
 {

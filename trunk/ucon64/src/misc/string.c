@@ -174,18 +174,23 @@ memcmp2 (const void *buffer, const void *search, size_t searchlen, unsigned int 
   if (!flags)
     return memcmp (buffer, search, searchlen);
 
+  if (flags & MEMMEM2_REL)
+    {
+      searchlen--;
+      if (searchlen < 1)
+        return -1;
+    }
+
   for (i = 0; i < searchlen; i++)
     {
-      if (flags & MEMMEM2_WCARD(0))
+      if (flags & MEMMEM2_WCARD (0))
         if (*(s + i) == (flags & 0xff))
           continue;
 
       if (flags & MEMMEM2_REL)
         {
-          if (i < searchlen - 1)
-            if ((*(b + i) - *(b + i + 1)) !=
-                (*(s + i) - *(s + i + 1)))
-              break;
+          if ((*(b + i) - *(b + i + 1)) != (*(s + i) - *(s + i + 1)))
+            break;
         }
       else
         {
@@ -197,10 +202,10 @@ memcmp2 (const void *buffer, const void *search, size_t searchlen, unsigned int 
           else
             if (*(b + i) != *(s + i))
               break;
-        }                                            
+        }
     }
-    
-  return i == searchlen ? 0 : (-1);
+
+  return i == searchlen ? 0 : -1;
 }
 
 
@@ -208,10 +213,10 @@ const void *
 memmem2 (const void *buffer, size_t bufferlen,
          const void *search, size_t searchlen, unsigned int flags)
 {
-  size_t i = 0;
+  size_t i;
 
-  if (bufferlen > searchlen)
-    for (; i <= bufferlen - searchlen; i++)
+  if (bufferlen >= searchlen)
+    for (i = 0; i <= bufferlen - searchlen; i++)
       if (!memcmp2 ((const unsigned char *) buffer + i, search, searchlen, flags))
         return (const unsigned char *) buffer + i;
 
@@ -229,20 +234,6 @@ memwcmp (const void *buffer, const void *search, unsigned int searchlen, int wil
     if (((unsigned char *) search)[n] != wildcard &&
         ((unsigned char *) buffer)[n] != ((unsigned char *) search)[n])
       return -1;
-
-  return 0;
-}
-
-
-void *
-mem_search (const void *buffer, unsigned int buflen,
-            const void *search, unsigned int searchlen)
-{
-  unsigned int n;
-
-  for (n = 0; n <= (unsigned int) (buflen - searchlen); n++)
-    if (memcmp ((unsigned char *) buffer + n, search, searchlen) == 0)
-      return (unsigned char *) buffer + n;
 
   return 0;
 }

@@ -88,8 +88,18 @@ extern char *basename2 (const char *str);
   #if __BYTE_ORDER == __BIG_ENDIAN
     #define WORDS_BIGENDIAN 1
   #endif
-#elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || defined __APPLE__
+#elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || \
+        defined __APPLE__
   #define WORDS_BIGENDIAN 1
+#endif
+
+#ifdef  HAVE_BYTESWAP_H
+#include <byteswap.h>
+#else
+#define OWN_BYTESWAP
+extern unsigned short int bswap_16 (unsigned short int x);
+extern unsigned int bswap_32 (unsigned int x);
+extern unsigned long long int bswap_64 (unsigned long long int x);
 #endif
 
 #ifdef WORDS_BIGENDIAN

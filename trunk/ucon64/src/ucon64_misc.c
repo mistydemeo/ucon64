@@ -123,7 +123,7 @@ ucon64_fbackup (char *move_name, const char *filename)
 
   if (!access (filename, F_OK))
     {
-      printf ("Writing backup of: %s\n", filename);//verbose
+      printf ("Writing backup of: %s\n", filename); // verbose
       fflush (stdout);
     }
 

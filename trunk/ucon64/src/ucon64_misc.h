@@ -126,6 +126,8 @@ extern unsigned int ucon64_parport_probe (unsigned int parport);
 extern const char *ucon64_parport_error; //std. error message for parport
 extern const char *ucon64_console_error; //std. error message if the correct console couldn't be found
 
+extern void ucon64_wrote (char *filename);
+
 extern int ucon64_bin2iso (const char *image, int track_mode);
 extern int ucon64_trackmode_probe (const char *image);
 extern int ucon64_mktoc (st_rominfo_t *rominfo);

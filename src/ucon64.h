@@ -62,20 +62,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_GAMECUBE		27
 #define ucon64_XBOX		28
 
-#define ucon64_VERSION "1.9.8"
+#define ucon64_VERSION "1.9.8beta2"
 
 #ifdef __UNIX__
 #ifdef __SOLARIS__		// Hmmm, Solaris *is* a UNIX
-#define ucon64_TITLE "uCON64 1.9.8 Solaris 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 1.9.8beta2 Solaris 1999-2002 by (various)"
 #else
-#define ucon64_TITLE "uCON64 1.9.8 UNIX 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 1.9.8beta2 UNIX 1999-2002 by (various)"
 #endif
 #elif __DOS__
-#define ucon64_TITLE "uCON64 1.9.8 DOS 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 1.9.8beta2 DOS 1999-2002 by (various)"
 #elif __BEOS__
-#define ucon64_TITLE "uCON64 1.9.8 BeOS 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 1.9.8beta2 BeOS 1999-2002 by (various)"
 #else
-#define ucon64_TITLE "uCON64 1.9.8 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 1.9.8beta2 1999-2002 by (various)"
 #endif
 
 #define MBIT	131072

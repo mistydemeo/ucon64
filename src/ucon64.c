@@ -1803,8 +1803,10 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
     "  " OPTION_LONG_S "hdn=BYTES   force ROM has backup unit/emulator header with BYTES size\n"
     "  " OPTION_LONG_S "hd          same as " OPTION_LONG_S "hdn=512\n"
-//    "TODO: " OPTION_LONG_S "hdn=TYPE     force ROM has TYPE backup unit/emulator header:\n"
-//    "                  FFE, SMC, FIG, SWC, SMD, SMG, SSC or LNX\n"
+#if 0
+    "TODO: " OPTION_LONG_S "hdn=TYPE     force ROM has TYPE backup unit/emulator header:\n"
+    "                  FFE, SMC, FIG, SWC, SMD, SMG, SSC or LNX\n"
+#endif
     "                  most backup units use a header with 512 Bytes size\n"
     "  " OPTION_LONG_S "nhd         force ROM has no backup unit/emulator header\n"
     "  " OPTION_LONG_S "stp         strip 512 Bytes (header) from ROM beginning\n"

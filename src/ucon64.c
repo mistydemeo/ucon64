@@ -93,9 +93,13 @@ write programs in C
 #include "backup/cdrw.h"
 
 static int ucon64_usage (int argc, char *argv[]);
-static int ucon64_init (struct rom_ *rom);
+
+//static int ucon64_flush (struct rom_ *rom);
+
+static int ucon64_init (char *romfile, struct rom_ *rom);
+#define ucon64_flush(a) ucon64_init(NULL, a)
+
 static int ucon64_nfo (struct rom_ *rom);
-static int ucon64_flush (int argc, char *argv[], struct rom_ *rom);
 static void ucon64_exit (void);
 static int ucon64_ls (int verbose);
 static int ucon64_e (struct rom_ *rom);
@@ -300,7 +304,7 @@ main (int argc, char *argv[])
   ucon64.argc = argc;
   for (x = 0; x < argc; x++)ucon64.argv[x] = argv[x];
 
-  ucon64_flush (argc, argv, &rom);
+  ucon64_flush (&rom);
 
 /*
   getopt_long_only() - switches and overrides
@@ -623,7 +627,7 @@ main (int argc, char *argv[])
       if (!stat (rom.rom, &puffer))
         if (S_ISREG (puffer.st_mode))  
           {
-            ucon64_init (&rom);
+            ucon64_init (rom.rom, &rom);
 #if 0
   int show_nfo;                 //show or skip info output for ROM
                                 //values:
@@ -861,7 +865,7 @@ main (int argc, char *argv[])
           break;
 
         case ucon64_DBS:
-          ucon64_flush (argc, argv, &rom);
+          ucon64_flush (&rom);
           sscanf (rom.rom, "%lx", &rom.current_crc32);
           ucon64_dbsearch (&rom);
           ucon64_nfo (&rom);
@@ -1321,7 +1325,7 @@ main (int argc, char *argv[])
                                 //2 show after processing of ROM
                                 //3 show before and after processing of ROM
 #endif
-//          if (rom.console == ucon64_UNKNOWN) ucon64_init (&rom);
+//          if (rom.console == ucon64_UNKNOWN) ucon64_init (rom.rom, &rom);
             if (!ucon64.show_nfo || ucon64.show_nfo == 3)
               ucon64_nfo (&rom);
           }
@@ -1331,31 +1335,28 @@ main (int argc, char *argv[])
 }
 
 
+int
+ucon64_init (char *romfile, struct rom_ *rom)
+{
+  if (romfile == NULL)
 /*
     flush the ucon64 struct with default values
 */
-int
-ucon64_flush (int argc, char *argv[], struct rom_ *rom)
-{
-  memset (rom, 0L, sizeof (struct ucon64_));
+    {
+      memset (rom, 0L, sizeof (struct rom_));
+    
+      rom->console = ucon64_UNKNOWN;
+      strcpy (rom->name, "?");
+      strcpy (rom->manufacturer, "Unknown Manufacturer");
+      strcpy (rom->country, "Unknown Country");
+    
+      return 0;
+    }
 
-//  strcpy (rom->rom, getarg (argc, argv, ucon64_ROM));
+  strcpy(rom->rom, romfile);
+
   rom->bytes = quickftell (rom->rom);
   rom->splitted[0] = ucon64_testsplit (rom->rom);
-
-  rom->console = ucon64_UNKNOWN;        //integer for the console system
-
-  strcpy (rom->name, "?");
-  strcpy (rom->manufacturer, "Unknown Manufacturer");
-  strcpy (rom->country, "Unknown Country");
-
-  return 0;
-}
-
-int
-ucon64_init (struct rom_ *rom)
-{
-  rom->bytes = quickftell (rom->rom);
 
   rom->current_crc32 = (rom->bytes <= MAXROMSIZE) ? 
     fileCRC32 (rom->rom, rom->buheader_len) : 0;
@@ -1718,9 +1719,8 @@ int ucon64_ls (int verbose)
               ucon64_argv[1] = ep->d_name;
               ucon64_argc = 2;
 
-              ucon64_flush (ucon64_argc, ucon64_argv, &rom);
-              strcpy (rom.rom, ep->d_name);
-              result = ucon64_init (&rom);
+              ucon64_flush (&rom);
+              result = ucon64_init (ep->d_name, &rom);
 
               if (verbose == 0)
                 {

@@ -1440,7 +1440,7 @@ Same here.
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
-  int bytesread;
+  int bytesread, n = 0;
 
   puts ("Attempting crack...");
 
@@ -1469,78 +1469,79 @@ Same here.
       if (snes_sramsize == 8 * 1024)            // 8 kB == 64 kb
         {
           // unknown
-          change_string ("!**\x70!**\x70\xd0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
-                         "\x8f\x9f", 2, "\xcf\xdf", 2);
+          n += change_mem (buffer, bytesread, "!**\x70!**\x70\xd0", 9, '*', '!', "\xea\xea", 2, 0,
+                           "\x8f\x9f", 2, "\xcf\xdf", 2);
           // actually Kirby's Dream Course, Lufia II - Rise of the Sinistrals
-          change_string ("!**\x70!**\x70\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                         "\x8f\x9f", 2, "\xcf\xdf", 2);
+          n += change_mem (buffer, bytesread, "!**\x70!**\x70\xf0", 9, '*', '!', "\x80", 1, 0,
+                           "\x8f\x9f", 2, "\xcf\xdf", 2);
           // actually Earthbound
-          change_string ("!**!!**!\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                         "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
+          n += change_mem (buffer, bytesread, "!**!!**!\xf0", 9, '*', '!', "\x80", 1, 0,
+                           "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
         }
       else
         {
           // unknown
-          change_string ("!**\x70!**\x70\xd0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                         "\x8f\x9f", 2, "\xcf\xdf", 2);
+          n += change_mem (buffer, bytesread, "!**\x70!**\x70\xd0", 9, '*', '!', "\x80", 1, 0,
+                           "\x8f\x9f", 2, "\xcf\xdf", 2);
           // Mega Man X
-          change_string ("!**\x70!**\x70\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
-                         "\x8f\x9f", 2, "\xcf\xdf", 2);
+          n += change_mem (buffer, bytesread, "!**\x70!**\x70\xf0", 9, '*', '!', "\xea\xea", 2, 0,
+                           "\x8f\x9f", 2, "\xcf\xdf", 2);
 
-          change_string ("!**!!**!\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
-                         "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
+          n += change_mem (buffer, bytesread, "!**!!**!\xf0", 9, '*', '!', "\xea\xea", 2, 0,
+                           "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
         }
 
-      change_string ("\x8f**\x77\xe2*\xaf**\x77\xc9*\xf0", 13, '*', '!', "\x80", 1, buffer, bytesread, 0);
-      change_string ("!!!!!!\x60!\xd0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
-                     "\x8f\x9f", 2, "\x57\x59", 2, "\x60\x68", 2, "\x30\x31\x32\x33", 4,
-                     "\xcf\xdf", 2, "\x57\x59", 2, "\x30\x31\x32\x33", 4);
+      n += change_mem (buffer, bytesread, "\x8f**\x77\xe2*\xaf**\x77\xc9*\xf0", 13, '*', '!', "\x80", 1, 0);
+      n += change_mem (buffer, bytesread, "!!!!!!\x60!\xd0", 9, '*', '!', "\xea\xea", 2, 0,
+                       "\x8f\x9f", 2, "\x57\x59", 2, "\x60\x68", 2, "\x30\x31\x32\x33", 4,
+                       "\xcf\xdf", 2, "\x57\x59", 2, "\x30\x31\x32\x33", 4);
 
-      change_string ("!**!!**!\xd0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                     "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
-      change_string ("!**\xb0\xcf**\xb1\xd0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
-                     "\x8f\xaf", 2);
-      change_string ("!**!\xaf**!\xc9**\xd0", 12, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                     "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\x30\x31\x32\x33", 4);
-      change_string ("\xa9\x00\x00\xa2\xfe\x1f\xdf\x00\x00\x70\xd0", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, 0);
-      change_string ("!**!!**!\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                     "\xaf\xbf", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
+      n += change_mem (buffer, bytesread, "!**!!**!\xd0", 9, '*', '!', "\x80", 1, 0,
+                       "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
+      n += change_mem (buffer, bytesread, "!**\xb0\xcf**\xb1\xd0", 9, '*', '!', "\xea\xea", 2, 0,
+                       "\x8f\xaf", 2);
+      n += change_mem (buffer, bytesread, "!**!\xaf**!\xc9**\xd0", 12, '*', '!', "\x80", 1, 0,
+                       "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\x30\x31\x32\x33", 4);
+      n += change_mem (buffer, bytesread, "\xa9\x00\x00\xa2\xfe\x1f\xdf\x00\x00\x70\xd0", 11, '*', '!', "\xea\xea", 2, 0);
+      n += change_mem (buffer, bytesread, "!**!!**!\xf0", 9, '*', '!', "\x80", 1, 0,
+                       "\xaf\xbf", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
 
       // mirroring
-      change_string ("!*\x80\x00!*\x80\x40\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                     "\xaf\xbf", 2, "\xcf\xdf", 2);
-      change_string ("!*\xff!!*\xff\x40\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                     "\xaf\xbf", 2, "\x80\xc0", 2, "\xcf\xdf", 2);
+      n += change_mem (buffer, bytesread, "!*\x80\x00!*\x80\x40\xf0", 9, '*', '!', "\x80", 1, 0,
+                       "\xaf\xbf", 2, "\xcf\xdf", 2);
+      n += change_mem (buffer, bytesread, "!*\xff!!*\xff\x40\xf0", 9, '*', '!', "\x80", 1, 0,
+                       "\xaf\xbf", 2, "\x80\xc0", 2, "\xcf\xdf", 2);
 
       // game specific
-      change_string ("\x5c\x7f\xd0\x83\x18\xfb\x78\xc2\x30", 9, '*', '!',
-                     "\xea\xea\xea\xea\xea\xea\xea\xea\xea", 9, buffer, bytesread, -8);
+      n += change_mem (buffer, bytesread, "\x5c\x7f\xd0\x83\x18\xfb\x78\xc2\x30", 9, '*', '!',
+                                          "\xea\xea\xea\xea\xea\xea\xea\xea\xea", 9, -8);
 
-      change_string ("KONG\x00\xf8\xf7", 7, '*', '!', "\xf8", 1, buffer, bytesread, 0);
-      change_string ("\x26\x38\xe9\x48\x12\xc9\xaf\x71\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xa0\x5c\x2f\x77\x32\xe9\xc7\x04\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0);
+      n += change_mem (buffer, bytesread, "KONG\x00\xf8\xf7", 7, '*', '!', "\xf8", 1, 0);
+      n += change_mem (buffer, bytesread, "\x26\x38\xe9\x48\x12\xc9\xaf\x71\xf0", 9, '*', '!', "\x80", 1, 0);
+      n += change_mem (buffer, bytesread, "\xa0\x5c\x2f\x77\x32\xe9\xc7\x04\xf0", 9, '*', '!', "\x80", 1, 0);
 
-      change_string ("\x22\x08\x5c\x10\xb0\x28", 6, '*', '!',
-                     "\xea\xea\xea\xea\xea\xea", 6, buffer, bytesread, -5);
-      change_string ("\xda\xe2\x30\xc9\x01\xf0\x18\xc9\x02", 9, '*', '!',
-                                     "\x09\xf0\x18\xc9\x07", 5, buffer, bytesread, -4);
-      change_string ("\x29\xff\x00\xc9\x07\x00\x90\x16", 8, '*', '!', "\x00", 1, buffer, bytesread, -3);
+      n += change_mem (buffer, bytesread, "\x22\x08\x5c\x10\xb0\x28", 6, '*', '!',
+                                          "\xea\xea\xea\xea\xea\xea", 6, -5);
+      n += change_mem (buffer, bytesread, "\xda\xe2\x30\xc9\x01\xf0\x18\xc9\x02", 9, '*', '!',
+                                          "\x09\xf0\x18\xc9\x07", 5, -4);
+      n += change_mem (buffer, bytesread, "\x29\xff\x00\xc9\x07\x00\x90\x16", 8, '*', '!', "\x00", 1, -3);
 
-      change_string ("\xca\x10\xf8\x38\xef\x1a\x80\x81\x8d", 9, '*', '!', "\x9c", 1, buffer, bytesread, 0);
-      change_string ("\x81\xca\x10\xf8\xcf\x39\x80\x87\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0);
+      n += change_mem (buffer, bytesread, "\xca\x10\xf8\x38\xef\x1a\x80\x81\x8d", 9, '*', '!', "\x9c", 1, 0);
+      n += change_mem (buffer, bytesread, "\x81\xca\x10\xf8\xcf\x39\x80\x87\xf0", 9, '*', '!', "\x80", 1, 0);
 
-      change_string ("\x84\x26\xad\x39\xb5\xd0\x1a", 7, '*', '!', "\xea\xea", 2, buffer, bytesread, -1);
-      change_string ("\x10\xf8\x38\xef\xef\xff\xc1", 7, '*', '!',
-                                 "\xea\xa9\x00\x00", 4, buffer, bytesread, -3);
-      change_string ("\x10\xf8\x38\xef\xf2\xfd\xc3\xf0", 8, '*', '!',
-                                 "\xea\xa9\x00\x00\x80", 5, buffer, bytesread, -4);
+      n += change_mem (buffer, bytesread, "\x84\x26\xad\x39\xb5\xd0\x1a", 7, '*', '!', "\xea\xea", 2, -1);
+      n += change_mem (buffer, bytesread, "\x10\xf8\x38\xef\xef\xff\xc1", 7, '*', '!',
+                                                      "\xea\xa9\x00\x00", 4, -3);
+      n += change_mem (buffer, bytesread, "\x10\xf8\x38\xef\xf2\xfd\xc3\xf0", 8, '*', '!',
+                                                      "\xea\xa9\x00\x00\x80", 5, -4);
 
       fwrite (buffer, 1, bytesread, destfile);
     }
   fclose (srcfile);
   fclose (destfile);
 
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
+  printf (ucon64_msg[WROTE], ucon64.rom);
   remove_temp_file ();
   return 0;
 }
@@ -1566,7 +1567,7 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
-  int bytesread;
+  int bytesread, n = 0;
 
   puts ("Attempting to fix PAL protection code...");
 
@@ -1591,23 +1592,24 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
     {
-      change_string ("\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xad\x3f\x21\x29\x10\x00\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xad\x3f\x21\x89\x10\x00\xd0", 7, '\x01', '\x02', "\xa9\x10\x00", 3, buffer, bytesread, -6);
-      change_string ("\xad\x3f\x21\x29\x10\xcf\xbd\xff\x00\xf0", 10, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xaf\x3f\x21\x00\x29\x10\x00\xd0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-      change_string ("\xaf\x3f\x21\x00\x29\x01\xc9\x01\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xa2\x18\x01\xbd\x27\x20\x89\x10\x00\xf0\x01", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, -1);
+      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, 0);
+      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x29\x10\x00\xd0", 7, '\x01', '\x02', "\x80", 1, 0);
+      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x89\x10\x00\xd0", 7, '\x01', '\x02', "\xa9\x10\x00", 3, -6);
+      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x29\x10\xcf\xbd\xff\x00\xf0", 10, '\x01', '\x02', "\x80", 1, 0);
+      n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\x80", 1, 0);
+      n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x29\x10\x00\xd0", 8, '\x01', '\x02', "\xea\xea", 2, 0);
+      n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x29\x01\xc9\x01\xf0", 9, '\x01', '\x02', "\x80", 1, 0);
+      n += change_mem (buffer, bytesread, "\xa2\x18\x01\xbd\x27\x20\x89\x10\x00\xf0\x01", 11, '*', '!', "\xea\xea", 2, -1);
 
       fwrite (buffer, 1, bytesread, destfile);
     }
   fclose (srcfile);
   fclose (destfile);
 
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
+  printf (ucon64_msg[WROTE], ucon64.rom);
   remove_temp_file ();
-  return 0;
+  return n;
 }
 
 
@@ -1632,18 +1634,21 @@ ad 3f 21 29 10 c9 00 d0               ad 3f 21 29 10 c9 00 80
 ad 3f 21 29 10 c9 10 d0               ad 3f 21 29 10 c9 10 ea ea
    3f 21 29 10 cf XX YY 80 f0            3f 21 29 10 cf XX YY 80 80    - Gokujyou Parodius/Tokimeki Memorial
 ad 3f 21 8d XX YY 29 10 8d            ad 3f 21 8d XX YY 29 00 8d       - Dragon Ball Z - Super Butoden 2 ?
-3f 21 00 29/89 10 f0                  3f 21 00 29/89 10 80             - Kirby's Dream Course U (29)
+   3f 21 00 29/89 10 f0                  3f 21 00 29/89 10 80          - Kirby's Dream Course U (29)
 af 3f 21 00 29/89 10 d0               af 3f 21 00 29/89 10 ea ea       - Kirby No Kira Kizzu (29)/Final Fight Guy (89)
 af 3f 21 00 29/89 10 00 f0            af 3f 21 00 29/89 10 00 80
 af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Seiken Densetsu 3
 af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken Densetsu 2/Secret of Mana U
+   3f 21 00 89 10 c2 XX f0               3f 21 00 89 10 c2 XX 80       - Dragon - The Bruce Lee Story U
 af 3f 21 00 XX YY 29 10 00 d0         af 3f 21 00 XX YY 29 10 00 ea ea - Fatal Fury Special ?
+   3f 21 c2 XX 29 10 00 d0               3f 21 c2 XX 29 10 00 ea ea    - Dual Orb 2
 af 3f 21 ea 89 10 00 d0               a9 00 00 ea 89 10 00 d0          - Super Famista 3 ?
 a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country U
+29 10 00 a2 00 00 c9 10 00 d0         29 10 00 a2 00 00 c9 10 00 80    - Wolfenstein 3D U
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
-  int bytesread;
+  int bytesread, n = 0;
 
   puts ("Attempting to fix NTSC protection code...");
 
@@ -1668,47 +1673,48 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
     {
-      change_string ("\x3f\x21\x02\x10\xf0", 5, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
-                     "\x29\x89", 2);
-      change_string ("\xad\x3f\x21\x29\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-
-      if (snes_sramsize == 8 * 1024)            // actually Live-a-Live
-        change_string ("\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-      else
-        change_string ("\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-
-      change_string ("\x3f\x21\x02\x10\x00\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
-                     "\x29\x89", 2);
-      change_string ("\x3f\x21\x02\x10\x00\xd0", 6, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0,
-                     "\x29\x89", 2);
-      change_string ("\x3f\x21\x89\x10\xc2\x01\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-      change_string ("\x3f\x21\x02\x10\xc9\x10\xf0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
-                     "\x29\x89", 2);
-      change_string ("\xad\x3f\x21\x29\x10\xc9\x00\xf0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-      change_string ("\xad\x3f\x21\x29\x10\xc9\x00\xd0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xad\x3f\x21\x29\x10\xc9\x10\xd0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-      change_string ("\x3f\x21\x29\x10\xcf\x01\x01\x80\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xad\x3f\x21\x8d\x01\x01\x29\x10\x8d", 9, '\x01', '\x02', "\x00", 1, buffer, bytesread, -1);
-      change_string ("\x3f\x21\x00\x02\x10\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
-                     "\x29\x89", 2);
-      change_string ("\xaf\x3f\x21\x00\x02\x10\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0,
-                     "\x29\x89", 2);
-      change_string ("\xaf\x3f\x21\x00\x02\x10\x00\xf0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
-                     "\x29\x89", 2);
-      change_string ("\xaf\x3f\x21\x00\x29\x01\xc9\x01\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xaf\x3f\x21\x00\x29\x10\x80\x2d\x00\x1b", 10, '\x01', '\x02', "\x00", 1, buffer, bytesread, -4);
-      change_string ("\xaf\x3f\x21\x00\x01\x01\x29\x10\x00\xd0", 10, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-      change_string ("\xaf\x3f\x21\xea\x89\x10\x00\xd0", 8, '\x01', '\x02', "\xa9\x00\x00", 3, buffer, bytesread, -7);
-      change_string ("\xa2\x18\x01\xbd\x27\x20\x89\x10\x00\xd0\x01", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, -1);
-
+      n += change_mem (buffer, bytesread, "\x3f\x21\x02\x10\xf0", 5, '\x01', '\x02', "\x80", 1, 0,
+                       "\x29\x89", 2);
+      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x29\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, 0);
+      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, 0);
+// The next statement could be the alternative for the previous one. Leave it
+//  disabled until we find a game that needs it.
+//      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, 0); 
+      n += change_mem (buffer, bytesread, "\x3f\x21\x02\x10\x00\xf0", 6, '\x01', '\x02', "\x80", 1, 0,
+                       "\x29\x89", 2);
+      n += change_mem (buffer, bytesread, "\x3f\x21\x02\x10\x00\xd0", 6, '\x01', '\x02', "\xea\xea", 2, 0,
+                       "\x29\x89", 2);
+      n += change_mem (buffer, bytesread, "\x3f\x21\x89\x10\xc2\x01\xd0", 7, '\x01', '\x02', "\xea\xea", 2, 0);
+      n += change_mem (buffer, bytesread, "\x3f\x21\x02\x10\xc9\x10\xf0", 7, '\x01', '\x02', "\x80", 1, 0,
+                       "\x29\x89", 2);
+      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x29\x10\xc9\x00\xf0", 8, '\x01', '\x02', "\xea\xea", 2, 0);
+      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x29\x10\xc9\x00\xd0", 8, '\x01', '\x02', "\x80", 1, 0);
+      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x29\x10\xc9\x10\xd0", 8, '\x01', '\x02', "\xea\xea", 2, 0);
+      n += change_mem (buffer, bytesread, "\x3f\x21\x29\x10\xcf\x01\x01\x80\xf0", 9, '\x01', '\x02', "\x80", 1, 0);
+      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x8d\x01\x01\x29\x10\x8d", 9, '\x01', '\x02', "\x00", 1, -1);
+      n += change_mem (buffer, bytesread, "\x3f\x21\x00\x02\x10\xf0", 6, '\x01', '\x02', "\x80", 1, 0,
+                       "\x29\x89", 2);
+      n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x02\x10\xd0", 7, '\x01', '\x02', "\xea\xea", 2, 0,
+                       "\x29\x89", 2);
+      n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x02\x10\x00\xf0", 8, '\x01', '\x02', "\x80", 1, 0,
+                       "\x29\x89", 2);
+      n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x29\x01\xc9\x01\xf0", 9, '\x01', '\x02', "\x80", 1, 0);
+      n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x29\x10\x80\x2d\x00\x1b", 10, '\x01', '\x02', "\x00", 1, -4);
+      n += change_mem (buffer, bytesread, "\x3f\x21\x00\x89\x10\xc2\x01\xf0", 8, '\x01', '\x02', "\x80", 1, 0);
+      n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x01\x01\x29\x10\x00\xd0", 10, '\x01', '\x02', "\xea\xea", 2, 0);
+      n += change_mem (buffer, bytesread, "\x3f\x21\xc2\x01\x29\x10\x00\xd0", 8, '\x01', '\x02', "\xea\xea", 2, 0);
+      n += change_mem (buffer, bytesread, "\xaf\x3f\x21\xea\x89\x10\x00\xd0", 8, '\x01', '\x02', "\xa9\x00\x00", 3, -7);
+      n += change_mem (buffer, bytesread, "\xa2\x18\x01\xbd\x27\x20\x89\x10\x00\xd0\x01", 11, '*', '!', "\xea\xea", 2, -1);
+      n += change_mem (buffer, bytesread, "\x29\x10\x00\xa2\x00\x00\xc9\x10\x00\xd0", 10, '\x01', '\x02', "\x80", 1, 0);
       fwrite (buffer, 1, bytesread, destfile);
     }
   fclose (srcfile);
   fclose (destfile);
 
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
+  printf (ucon64_msg[WROTE], ucon64.rom);
   remove_temp_file ();
-  return 0;
+  return n;
 }
 
 
@@ -1750,7 +1756,7 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
-  int bytesread;
+  int bytesread, n = 0;
 
   puts ("Attempting SlowROM fix...");
 
@@ -1775,25 +1781,26 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
     {                                           // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
-      change_string ("!\x0d\x42", 3, '*', '!', "\x9c", 1, buffer, bytesread, -2,
-                     "\x8c\x8d\x8e\x8f", 4);
-      change_string ("\x01\x0d\x42", 3, '*', '!', "\x00", 1, buffer, bytesread, -2);
-      change_string ("\xa9\x01\x85\x0d", 4, '*', '!', "\x00", 1, buffer, bytesread, -2);
-      change_string ("\xa2\x01\x86\x0d", 4, '*', '!', "\x00", 1, buffer, bytesread, -2);
-      change_string ("\xa0\x01\x84\x0d", 4, '*', '!', "\x00", 1, buffer, bytesread, -2);
+      n += change_mem (buffer, bytesread, "!\x0d\x42", 3, '*', '!', "\x9c", 1, -2,
+                       "\x8c\x8d\x8e\x8f", 4);
+      n += change_mem (buffer, bytesread, "\x01\x0d\x42", 3, '*', '!', "\x00", 1, -2);
+      n += change_mem (buffer, bytesread, "\xa9\x01\x85\x0d", 4, '*', '!', "\x00", 1, -2);
+      n += change_mem (buffer, bytesread, "\xa2\x01\x86\x0d", 4, '*', '!', "\x00", 1, -2);
+      n += change_mem (buffer, bytesread, "\xa0\x01\x84\x0d", 4, '*', '!', "\x00", 1, -2);
 
       // original uCON
-      change_string ("!\x01!\x0d\x42", 5, '*', '!', "\x00", 1, buffer, bytesread, -3,
-                     "\xa9\xa2", 2, "\x8d\x8e", 2);
-      change_string ("\xa9\x01\x00\x8d\x0d\x42", 6, '*', '!', "\x00", 1, buffer, bytesread, -4);
-      change_string ("\xa9\x01\x8f\x0d\x42\x00", 6, '*', '!', "\x00", 1, buffer, bytesread, -4);
+      n += change_mem (buffer, bytesread, "!\x01!\x0d\x42", 5, '*', '!', "\x00", 1, -3,
+                       "\xa9\xa2", 2, "\x8d\x8e", 2);
+      n += change_mem (buffer, bytesread, "\xa9\x01\x00\x8d\x0d\x42", 6, '*', '!', "\x00", 1, -4);
+      n += change_mem (buffer, bytesread, "\xa9\x01\x8f\x0d\x42\x00", 6, '*', '!', "\x00", 1, -4);
 
       fwrite (buffer, 1, bytesread, destfile);
     }
   fclose (srcfile);
   fclose (destfile);
 
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
+  printf (ucon64_msg[WROTE], ucon64.rom);
   remove_temp_file ();
   return 0;
 }

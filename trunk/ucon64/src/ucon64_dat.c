@@ -176,6 +176,7 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
   static const st_console_t console_type[] = {
     {"GoodSNES", custom_strnicmp, UCON64_SNES, snes_usage},
     {"GoodNES", custom_strnicmp, UCON64_NES, nes_usage},
+    {"FDS", custom_stristr, UCON64_NES, nes_usage},
     {"GoodGBA", custom_strnicmp, UCON64_GBA, gba_usage},
     {"GoodGBX", custom_strnicmp, UCON64_GB, gameboy_usage},
     {"GoodGEN", custom_strnicmp, UCON64_GENESIS, genesis_usage},
@@ -775,6 +776,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   n = strlen (dat->fname);
   p = (char *) getext (dat->fname);
   if (stricmp (p, ".nes") &&                    // NES
+      stricmp (p, ".fds") &&                    // NES FDS
       stricmp (p, ".gb") &&                     // Game Boy
       stricmp (p, ".gbc") &&                    // Game Boy Color
       stricmp (p, ".smc") &&                    // SNES

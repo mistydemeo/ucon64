@@ -870,7 +870,8 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
             if (ucon64_dat && ucon64.console == UCON64_NES &&
                 (nes_get_file_type () == UNIF ||
                  nes_get_file_type () == INES ||
-                 nes_get_file_type () == PASOFAMI))
+                 nes_get_file_type () == PASOFAMI ||
+                 nes_get_file_type () == FDS))
               strcpy ((char *) rominfo->name, NULL_TO_EMPTY (ucon64_dat->name));
 
             if (ucon64_dat)
@@ -1117,6 +1118,14 @@ void
 ucon64_usage (int argc, char *argv[])
 {
   int c = 0, single = 0;
+#if     defined __unix__ || defined __BEOS__ // DJGPP, Cygwin, GNU/Linux, Solaris, FreeBSD, BeOS
+  char *name_exe = strrchr (argv[0], '/') + 1;
+#else // Windows
+  char *name_exe = strrchr (argv[0], '\\') + 1;
+#endif
+  // Don't use basename[2](), because it searches for FILE_SEPARATOR, which is
+  //  '\' on DOS. DJGPP's runtime system expands argv[0] to the full path, but with forward
+  //  slashes...
 
 #ifdef  ANSI_COLOR
 #define ANSI_COLOR_MSG "  " OPTION_LONG_S "ncol        disable ANSI colors in output\n"
@@ -1171,7 +1180,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_S "q           be quiet (don't show ROM info)\n"
 //    "  " OPTION_LONG_S "qq          be even more quiet\n"
     "\n",
-    argv[0], ucon64.configfile /*, MAXROMSIZE, TOMBIT_F (MAXROMSIZE) */);
+    name_exe, ucon64.configfile /*, MAXROMSIZE, TOMBIT_F (MAXROMSIZE) */);
 
   printf ("Padding\n"
     "  " OPTION_LONG_S "ispad       check if ROM is padded\n"
@@ -1559,7 +1568,7 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
      "\n",
      ucon64_dat_total_entries (UCON64_UNKNOWN),
      ucon64.configdir,
-     argv[0], argv[0]);
+     name_exe, name_exe);
 }
 
 

@@ -7170,6 +7170,10 @@ nes_init (st_rominfo_t *rominfo)
       rominfo->country = "Japan";
       strcat (rominfo->misc, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
+
+      // The current DAT file (2.2A as of Febrary 18 2003) contains only CRC32
+      //  checksums where the emulator header was also used in the calculation!
+      ucon64.crc32 = q_fcrc32 (ucon64.rom, 0);
       break;
     case FAM:
       rominfo->copier_usage = fds_usage;

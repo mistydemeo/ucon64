@@ -263,7 +263,7 @@ int
 gba_crp (st_rominfo_t *rominfo, const char *value)
 {
   FILE *srcfile, *destfile;
-  int bytesread;
+  int bytesread, n = 0;
   char buffer[32 * 1024], backup_name[FILENAME_MAX], replace[2],
        wait_time = atoi (value);
 
@@ -298,24 +298,19 @@ gba_crp (st_rominfo_t *rominfo, const char *value)
   replace[1] = 0x40;
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
     {                           // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
-      change_string ("\x04\x02\x00\x04\x14\x40", 6, '*', '!', replace, 1,
-                     buffer, bytesread, -1);
-      change_string ("\x02\x00\x04\x14\x40\x00", 6, '*', '!', replace, 1,
-                     buffer, bytesread, -2);
-      change_string ("\x04\x02\x00\x04\xB4\x45", 6, '*', '!', replace, 2,
-                     buffer, bytesread, -1);
-      change_string ("\x3E\xE0\x00\x00\xB4\x45", 6, '*', '!', replace, 2,
-                     buffer, bytesread, -1);
-      change_string ("\x04\x02\x00\x04\x94\x44", 6, '*', '!', replace, 2,
-                     buffer, bytesread, -1);
+      n += change_mem (buffer, bytesread, "\x04\x02\x00\x04\x14\x40", 6, '*', '!', replace, 1, -1);
+      n += change_mem (buffer, bytesread, "\x02\x00\x04\x14\x40\x00", 6, '*', '!', replace, 1, -2);
+      n += change_mem (buffer, bytesread, "\x04\x02\x00\x04\xB4\x45", 6, '*', '!', replace, 2, -1);
+      n += change_mem (buffer, bytesread, "\x3E\xE0\x00\x00\xB4\x45", 6, '*', '!', replace, 2, -1);
+      n += change_mem (buffer, bytesread, "\x04\x02\x00\x04\x94\x44", 6, '*', '!', replace, 2, -1);
 
       fwrite (buffer, 1, bytesread, destfile);
     }
   fclose (srcfile);
   fclose (destfile);
 
-  puts ("Done\n\n");
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
+  printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
+  printf (ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 

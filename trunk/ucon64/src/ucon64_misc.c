@@ -1440,8 +1440,8 @@ ucon64_configfile (void)
     , dirname);
 #ifdef  DJGPP
   // this is DJGPP specific - not necessary, but causes less confusion
-  change_string ("/", 1, 0, 0, FILE_SEPARATOR_S, 1, ucon64.configfile,
-    strlen (ucon64.configfile), 0);
+  change_mem (ucon64.configfile, strlen (ucon64.configfile), "/", 1, 0, 0,
+              FILE_SEPARATOR_S, 1, 0);
 #endif
 
   if (access (ucon64.configfile, F_OK) != 0)

@@ -20,6 +20,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "gbx.h"
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -79,8 +80,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #endif
 */
-int (*report_progress) (int) = NULL;
-void (*report_status) (char *status) = NULL;
 
 #define ai port_b
 #define data port_c
@@ -1349,61 +1348,58 @@ char write_cart_from_file(void)
 {
 	//unsigned long filesize;
 //	struct stat buf;
-	unsigned int page, num_page;
+	unsigned int page, num_page, nbytes;
+        time_t starttime;
 //   printf("Input filename : ");
 //   scanf("%s",file_name);
 
 	filesize = newfsize(file_name);
-	if(filesize == -1) {
+	if (filesize == -1) {
 		perror("file not found");
 		return -1;
 	}
 
-	//filesize = 524288;
-
-	if((filesize < 0x8000) || (filesize & 0x7fff)
-		|| (filesize > maxfilesize)) {
+	if ((filesize < 0x8000) || (filesize & 0x7fff) || (filesize > maxfilesize)) {
 		printf("filesize error\n");
 		return -1;
 	}
 
 	num_page = (filesize / 0x8000) * 2;	// how many 16k banks
 //   printf("num_page=%d\n",num_page);
-	if((fptr = fopen(file_name, "rb")) == NULL) {	/* open error */
+	if ((fptr = fopen(file_name, "rb")) == NULL) {	/* open error */
 		printf("open error\n");
 		return -1;
 	}
 
-	if(eeprom_type == 16) {	// erase 16M flash
-		if(erase()) {			// erase error
+	if (eeprom_type == 16) {                // erase 16M flash
+		if (erase()) {			// erase error
 			fclose(fptr);		// close file handle
 			return -1;
 		}
 	}
 
-	if(report_status)
-		report_status("Writing Cart...");
-
-	for(page = 0; page < num_page; page++) {
-		if(read_16k_file() != 0) {
-			printf("load file error\n");
+	printf("Writing Cart...\n");
+        nbytes = 0;
+        starttime = time(NULL);
+	for (page = 0; page < num_page; page++) {
+		if (read_16k_file() != 0) {
+			printf("\nload file error\n");
 			fclose(fptr);
 			return -1;
 		}
-		if(page == 0)
-			chk_dsp_name(0);	// display game name only
-		if(write_eeprom_16k(page)) {
-			printf("write cart error at bank = %x\n", page);
+		if (page == 0)
+                {
+                        chk_dsp_name(0);	// display game name only
+                        fputc('\n', stdout);
+                }
+		if (write_eeprom_16k(page)) {
+			printf("\nwrite cart error at bank = %x\n", page);
 			fclose(fptr);
 			return -1;
 		}
-		if(report_progress)
-			if(report_progress((page + 1) * 80 / (num_page))) {
-				/* Asked to cancel */
-				fclose(fptr);
-				return -2;
-			}
-	}
+                nbytes += 16*1024;
+                parport_gauge(starttime, nbytes, filesize);
+        }
 	//printf("write cart ok\n");
 	fclose(fptr);
 	if((fptr = fopen(file_name, "rb")) == NULL) {	/* open error */
@@ -1411,31 +1407,27 @@ char write_cart_from_file(void)
 		return -1;
 	}
 
-	if(report_status)
-		report_status("Verifying Cart...");
-	for(page = 0; page < num_page; page++) {
-		if(read_16k_file() != 0) {
-			printf("load file error\n");
+        printf("\nVerifying Cart...\n\n");
+        nbytes = 0;
+        starttime = time(NULL);
+	for (page = 0; page < num_page; page++) {
+		if (read_16k_file() != 0) {
+			printf("\nload file error\n");
 			fclose(fptr);
 			return -1;
 		}
-		if(verify_eeprom_16k(page)) {
-			printf("verify cart error at bank = %x\n", page);
+		if (verify_eeprom_16k(page)) {
+			printf("\nverify cart error at bank = %x\n", page);
 			fclose(fptr);
 			return -1;
 		}
-		if(report_progress)
-			if(report_progress((page + 1) * 20 / (num_page) + 80)) {
-				/* Asked to cancel */
-				fclose(fptr);
-				return -2;
-			}
+                nbytes += 16*1024;
+                parport_gauge(starttime, nbytes, filesize);
 	}
 	// printf("verify cart ok\n");
 	fclose(fptr);
 
-	if(report_status)
-		report_status("Cart sent successfully");
+        printf("\nCart sent successfully\n");
 
 	return 0;
 }
@@ -1450,44 +1442,42 @@ char backup_rom(void)			//no_page=how many 32K
 // 6    "16MBit = 2MB = 128 banks",
 {
 	unsigned int max_bank_define[] = { 2, 4, 8, 16, 32, 64, 128, 256, 512 };
-	unsigned int max_bank, rom_bank;
-	max_bank = max_bank_define[rom_size];
-	if(cmd == 'B') {
-		if(eeprom_type == 4)
+	unsigned int max_bank, rom_bank, nbytes, totalbytes;
+        time_t starttime;
+
+        max_bank = max_bank_define[rom_size];
+	if (cmd == 'B') {
+		if (eeprom_type == 4)
 			max_bank = 32;		// backup 4M
-		if(eeprom_type == 16)
+		if (eeprom_type == 16)
 			max_bank = 128;		// backup 16M
-		if(eeprom_type == 64)
+		if (eeprom_type == 64)
 			max_bank = 512;		// backup 64M
 	}
 //   printf("max_bank=%d\n",max_bank);
 
-	if(report_status)
-		report_status("Backing up Cart...");
-
-	for(rom_bank = 0; rom_bank < max_bank; rom_bank++) {
+        printf("Backing up Cart...\n\n");
+        totalbytes = max_bank*16*1024;
+        nbytes = 0;
+        starttime = time(NULL);
+	for (rom_bank = 0; rom_bank < max_bank; rom_bank++) {
 		read_eeprom_16k(rom_bank);
-		if(verify_eeprom_16k(rom_bank) != 0)
-			printf("X");
+		if (verify_eeprom_16k(rom_bank)) {
+			printf("\nverify cart error at bank = %x\n", rom_bank);
+//			fclose(fptr);
+//			return -1;              // dbjh: why not return?
+		}
 
-		if(write_file_xxk(0x4000) != 0) {
+		if (write_file_xxk(0x4000) != 0) {
 			fclose(fptr);
 			return -1;
 		}
-
-		if(report_progress)
-			if(report_progress((rom_bank + 1) * 100 / (max_bank))) {
-				/* Asked to cancel */
-				fclose(fptr);
-				return -2;
-			}
-
-
+                nbytes += 16*1024;
+                parport_gauge(starttime, nbytes, totalbytes);
 	}
 	fclose(fptr);
 
-	if(report_status)
-		report_status("Backup Successful");
+        printf("\nBackup Successful\n");
 
 	return 0;
 }
@@ -2008,48 +1998,60 @@ char write_sram_xxk(unsigned int length)
 
 char read_all_sram_to_file(void)
 {
-	enable_sram_bank();
+	unsigned int nbytes, totalbytes;
+        time_t starttime;
+
+        enable_sram_bank();
 	if((fptr = fopen(file_name, "w+b")) == NULL) {	/* open error */
 		printf("open error\n");
 		return -1;
 	}
 
-	for(bank = 0; bank < bank_size; bank++) {
-		if((bank & 3) == 0)
+        totalbytes = bank_size*8*1024;
+        nbytes = 0;
+        starttime = time(NULL);
+	for (bank = 0; bank < bank_size; bank++) {
+		if ((bank & 3) == 0)
 			idx = 0;
 		set_sram_bank(bank);
-		for(j = 0; j < 0x20; j++) {	// 32 x 256 = 8192(8kbytes)
+		for (j = 0; j < 0x20; j++) {	// 32 x 256 = 8192(8kbytes)
 			set_ai_data(1, (0xa0 + j));	// sram at 0xa000~bfff
 			set_ai_data(0, 0);	// a[7..0]=0
 			set_ai_data(2, 0x81);	// enable inc
 			set_ai(3);			// point to data r/w port
-			set_data_read for(i = 0; i < 256; i++) {
+			set_data_read
+                        for(i = 0; i < 256; i++) {
 				mix.buffer[i + idx] = read_data();
 //          mix.buffer[i+idx]=inportb(data);
 			}
 			set_ai_data(2, 0x80);	// disable inc
 			idx = idx + 256;
 		}
-		if((bank & 3) == 3) {
-			if(write_file_xxk(0x8000) != 0) {
-				printf("write file error\n");
+		if ((bank & 3) == 3) {
+			if (write_file_xxk(0x8000) != 0) {
+				printf("\nwrite file error\n");
 				fclose(fptr);
 				return -1;
 			}
 		}
+                nbytes += 8*1024;
+                parport_gauge(starttime, nbytes, totalbytes);
 	}
 	fclose(fptr);
 
-	if(bank_size == 4)
-		printf("sram 256kbits saved\n");
-	if(bank_size == 16)
-		printf("sram 1Mbits saved\n");
+        if (bank_size == 4)
+		printf("\nsram 256kbits saved\n");
+	if (bank_size == 16)
+		printf("\nsram 1Mbits saved\n");
 
 	return 0;
 }
 
 char read_8k_sram_to_file(void)
 {
+	unsigned int nbytes;
+        time_t starttime;
+
 	if(bank_size == 4) {
 		if(sram_bank_num > 3) {
 			printf("bank number error\n");
@@ -2064,6 +2066,8 @@ char read_8k_sram_to_file(void)
 
 	enable_sram_bank();
 
+        nbytes = 0;
+        starttime = time(NULL);
 	idx = 0;
 	bank = sram_bank_num;
 	{
@@ -2073,7 +2077,8 @@ char read_8k_sram_to_file(void)
 			set_ai_data(0, 0);	// a[7..0]=0
 			set_ai_data(2, 0x81);	// enable inc
 			set_ai(3);			// point to data r/w port
-			set_data_read for(i = 0; i < 256; i++) {
+			set_data_read
+                        for(i = 0; i < 256; i++) {
 				mix.buffer[i + idx] = read_data();
 //          mix.buffer[i+idx]=inportb(data);
 			}
@@ -2081,25 +2086,36 @@ char read_8k_sram_to_file(void)
 			idx = idx + 256;
 		}
 	}
+        nbytes += 8*1024;                       // dbjh: should this be in loop?
+        parport_gauge(starttime, nbytes, 8*1024);
 
-	if(write_sram_xxk(0x2000) != 0) {
-		printf("write file 64kbits error\n");
+	if (write_sram_xxk(0x2000) != 0) {
+		printf("\nwrite file 64kbits error\n");
 		return -1;
-	} else
-		printf("sram 64kbits saved from bank %d\n", sram_bank_num);
+	}
+        else
+		printf("\nsram 64kbits saved from bank %d\n", sram_bank_num);
+
 	return 0;
 }
 
 
 char write_all_sram_from_file(void)
 {
-	enable_sram_bank();
-	if(open_read_sram() != 0)	// read sram data from file to buffer
+	unsigned int nbytes, totalbytes;
+        time_t starttime;
+
+        enable_sram_bank();
+	if (open_read_sram() != 0)	// read sram data from file to buffer
 		return -1;
-	for(bank = 0; bank < bank_size; bank++) {
-		if((bank & 3) == 0) {
+
+        totalbytes = bank_size*8*1024;
+        nbytes = 0;
+        starttime = time(NULL);
+	for (bank = 0; bank < bank_size; bank++) {
+		if ((bank & 3) == 0) {
 			idx = 0;
-			if(read_32k_file() != 0) {
+			if (read_32k_file() != 0) {
 				printf("load file error\n");
 				fclose(fptr);
 				return -1;
@@ -2109,69 +2125,82 @@ char write_all_sram_from_file(void)
 //      printf("w");
 		set_sram_bank(bank);
 //      disp_buffer(0x10);
-		for(j = 0; j < 0x20; j++) {	// 32 x 256 = 8192(8kbytes)
+		for (j = 0; j < 0x20; j++) {	// 32 x 256 = 8192(8kbytes)
 			set_ai_data(1, (0xa0 + j));	// sram at 0xa000~bfff
 			set_ai_data(0, 0);	// a[7..0]=0
 			set_ai_data(2, 0x81);	// enable inc
 			set_ai(3);			// point to data r/w port
-			set_data_write for(i = 0; i < 256; i++) {
+			set_data_write
+                        for (i = 0; i < 256; i++) {
 				write_data(mix.buffer[i + idx]);
 //          outportb(data,mix.buffer[i+idx]);
 			}
 			set_ai_data(2, 0x80);	// disable inc
 			idx = idx + 256;
 		}
+                nbytes += 8*1024;
+                parport_gauge(starttime, nbytes, totalbytes);
 	}
 	fclose(fptr);
 
-	if(bank_size == 4)
-		printf("write sram 256kbits ok\n");
-	if(bank_size == 16)
-		printf("write sram 1Mbits ok\n");
+        if (bank_size == 4)
+		printf("\nwrite sram 256kbits ok\n");
+	if (bank_size == 16)
+		printf("\nwrite sram 1Mbits ok\n");
+
 	return 0;
 }
 
 char write_8k_sram_from_file(void)
 {
-	if(bank_size == 4) {
-		if(sram_bank_num > 3) {
+	unsigned int nbytes;
+        time_t starttime;
+
+	if (bank_size == 4) {
+		if (sram_bank_num > 3) {
 			printf("bank number error\n");
 			return -1;
 		}
-
-	} else {
-		if(sram_bank_num > 15) {
+	}
+        else {
+		if (sram_bank_num > 15) {
 			printf("bank number error\n");
 			return -1;
 		}
-
 	}
 
 	enable_sram_bank();
-	if(open_read_sram() != 0)	// read sram data from file to buffer
+	if (open_read_sram() != 0)	// read sram data from file to buffer
 		return -1;
 
+        nbytes = 0;
+        starttime = time(NULL);
 	idx = 0;
 	bank = sram_bank_num;
 	{
 //      printf("w");
 		set_sram_bank(bank);
 //      disp_buffer(0x10);
-		for(j = 0; j < 0x20; j++) {	// 32 x 256 = 8192(8kbytes)
+		for (j = 0; j < 0x20; j++) {	// 32 x 256 = 8192(8kbytes)
 			set_ai_data(1, (0xa0 + j));	// sram at 0xa000~bfff
 			set_ai_data(0, 0);	// a[7..0]=0
 			set_ai_data(2, 0x81);	// enable inc
 			set_ai(3);			// point to data r/w port
-			set_data_write for(i = 0; i < 256; i++) {
-			write_data(mix.buffer[i + idx]);
+			set_data_write
+                        for (i = 0; i < 256; i++) {
+			        write_data(mix.buffer[i + idx]);
 //          outportb(data,mix.buffer[i+idx]);
 			}
 			set_ai_data(2, 0x80);	// disable inc
 			idx = idx + 256;
 		}
 	}
-	printf("write sram 64kbits at bank %d ok\n", sram_bank_num);
-	return 0;
+        nbytes += 8*1024;                       // dbjh: should this be in loop?
+        parport_gauge(starttime, nbytes, 8*1024);
+
+        printf("\nwrite sram 64kbits at bank %d ok\n", sram_bank_num);
+
+        return 0;
 }
 
 void try_read(void)
@@ -2230,24 +2259,6 @@ void test_intel(void)
   uCON64 code below
 */
 
-int xchanger_status(void)
-{
-	port_type = 0;
-	if(check_port() == 0) {
-		init_port();
-		check_eeprom();
-		if(eeprom_type != 0) {
-			end_port();
-			return 2;
-		} else {
-			end_port();
-			return 1;
-		}
-	} else
-		return 0;
-
-}
-
 int prog_func(int p)
 {
   putchar('.');
@@ -2278,10 +2289,6 @@ void gbx_init(unsigned int parport, char *filename)
     exit(1);
   }
   printf("Using I/O port 0x%x\n", port_8);
-
-// TODO: make use of parport_gauge()
-  report_progress = prog_func;
-  report_status = status_func;
 
   if (check_port() != 0)
   {
@@ -2379,7 +2386,12 @@ int gbx_write_sram(char *filename, unsigned int parport, int bank)
 
 int gbx_usage(int argc, char *argv[])
 {
+  int verbose = 0;
+
   if (argcmp(argc, argv, "-help"))
+    verbose = 1;
+
+  if (verbose)
     printf("\n%s\n", gbx_TITLE);
 
   printf("  -xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
@@ -2389,10 +2401,13 @@ int gbx_usage(int argc, char *argv[])
          "  -xgbxb<n>     send/receive 64kbits SRAM to/from GB Xchanger bank n\n"
          "                $FILE=PORT; receives automatically when $ROM does not exist\n");
 
-  if (argcmp(argc, argv, "-help"))
-  {
+  if (verbose)
+    printf("\n"
+           "                You only need to specify PORT if uCON64 doesn't detect the\n"
+           "                (right) parallel port. If this is the case give a hardware\n"
+           "                address, for example:\n"
+           "                ucon64 -xgbx \"Pokemon (Green).gb\" 0x378\n");
   //TODO more info like technical info about cabeling and stuff for the copier
-  }
 
   return 0;
 }

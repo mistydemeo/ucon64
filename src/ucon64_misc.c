@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <dirent.h>
 #include <sys/stat.h>
 
-#ifdef  __unix__
+#if     defined __unix__ || defined __BEOS__
 #include <unistd.h>                             // ioperm() (libc5)
 #endif
 
@@ -687,7 +687,8 @@ ucon64_parport_init (unsigned int port)
       fprintf (stderr, "ERROR: Could not register function with atexit()\n");
       exit (1);
     }
-#elif   defined __i386__                        // 0x3bc, 0x378, 0x278
+#endif
+#ifdef  __i386__                                // 0x3bc, 0x378, 0x278
   if (!port)                                    // no port specified or forced?
     {
       unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };

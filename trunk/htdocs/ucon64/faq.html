@@ -19,7 +19,7 @@ Q4: <a href="#4">How do I install uCON64?</a><br>
 Q5: <a href="#5">Sometimes my terminal seems to be locked after "ucon64 -xswc
    &#60;file&#62; | more"</a><br>
 <br>
-Q6: <a href="#6">How do I make uCON64 display only information about a ROM?</a><br>
+Q6: <a href="#6">How do I make uCON64 only display information about a ROM?</a><br>
 <br>
 Q7: <a href="#7">I have two parallel ports in my PC and my Flash Advance Linker
    is connected to the second. However, when I try to use uCON64 to send a demo
@@ -129,6 +129,19 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
 <br>
 Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
 <br>
+Q45: <a href="#45">What is an interleaved ROM?</a><br>
+<br>
+Q46: <a href="#46">The pre-compiled GNU/Linux binary does not work on my
+   system, while a binary compiled by me works fine. How can that be?</a><br>
+<br>
+Q47: <a href="#47">I use Windows XP (NT/2000) and every time I run uCON64 I get
+   this error message about ntuser.dat. What does it mean?</a><br>
+<br>
+Q48: <a href="#48">Is there any way to make uCON64 convert a ROM dump to Game
+   Doctor SF3/SF6/SF7 format and split it, in one command?</a><br>
+<br>
+Q49: <a href="#49">How do I use the command line?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -152,11 +165,11 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    Choose a binary package for your system. GNU/Linux users should choose a
    package with "linux" in its name, BeOS users a package with "beos" in its
    name and DOS users a package with "dos" in its name. Windows users can
-   choose any or all of the packages with "win32", "dos" or "cygwin" in their
-   name. Normally, they should choose a package with "win32" in its name. The
-   DOS version also runs under Windows, but has some limitations. For example,
-   the DOS version cannot handle long command lines. The Cygwin version does
-   not have any serious limitations compared to the "normal" Win32 version, but
+   choose any or all of the packages with "win32" or "dos" in their name.
+   Normally, they should choose a package with "win32" in its name. The DOS
+   version also runs under Windows, but has some limitations. For example, the
+   DOS version cannot handle long command lines. The Cygwin version does not
+   have any serious limitations compared to the "normal" Win32 version, but
    behaves a bit more Unix-like than Windows users might want. Users accustomed
    to Unix might prefer the Cygwin version. The Cygwin version needs some
    additional files, though. See <a href="#27">question 27</a>.<br>
@@ -403,7 +416,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    from people who were able to send and receive ROMs under Windows&nbsp;XP as
    a regular user (no Administrator rights and not "Power Users").<br>
 <br>
-   The command line environment<br>
+<a name="cmdline">The command line environment<br></a>
    uCON64 is a command line program and is usually started from a program like
    command.com (Windows&nbsp;9x/ME) or cmd.exe (Windows&nbsp;NT/2000/XP). You
    can start command.com or cmd.exe by choosing the option "Run..." from the
@@ -431,21 +444,26 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    On Windows&nbsp;XP (NT/2000?) you should press the buttons or icons start
    -&#62; Control Panel -&#62; System -&#62; Advanced -&#62; Environment
    Variables and edit the value of path in the section System variables or
-   else in the section User variables.
+   else in the section User variables. You have to start a new instance of
+   cmd.exe before the changes take effect.
    After you have made your changes (and have rebooted your PC if you are using
    Windows&nbsp;9x/ME or DOS) check the value of PATH again. It should now list
    the directory you just added.<br>
+   For information on how to use the command line see
+   <a href="#49">question 49</a>.<br>
 <br>
 <a name="configbin"><b>How to configure the uCON64 executable</b></a><br>
    First run uCON64 once. Use a command like:<br>
    &nbsp;&nbsp; ucon64 -version<br>
    If you have not run uCON64 before you should see a message that it created
    a file with a name like ucon64.cfg (DOS version) or .ucon64rc (all other
-   versions). Search for the line that starts with "configuration file". It
-   should say "present" between the parentheses. The file name after the colon
-   is the name of the configuration file. The configuration file may contain
-   names of variables that influence the behaviour of uCON64. Here follows a
-   table of the variable names uCON64 recognises:<br>
+   versions). If you are using GNU/Linux and uCON64 crashes see
+   <a href="#46">question 46</a>.<br>
+   Then search for the line that starts with "configuration file". It should
+   say "present" between the parentheses. The file name after the colon is the
+   name of the configuration file. The configuration file may contain names of
+   variables that influence the behaviour of uCON64. Here follows a table of
+   the variable names uCON64 recognises:<br>
 <br>
 <table border="1">
   <tr>
@@ -522,7 +540,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    Just do not do that ;-)<br>
 <br>
 <p>
-<a name="6"><b>Q6</b>: How do I make uCON64 display only information about a
+<a name="6"><b>Q6</b>: How do I make uCON64 only display information about a
    ROM?</a><br>
 <b>A</b>: If you want to display information about a ROM just run uCON64 with
    the name of the ROM as the only argument. Sometimes you will have to specify
@@ -541,7 +559,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    &nbsp;&nbsp; ucon64 -xfal demo.gba -port 0x278<br>
 <br>
    The I/O address of the parallel port could be 0x3bc, 0x378 or 0x278. If you
-   do not want to type the address of the parallel port everytime you want to
+   do not want to type the address of the parallel port every time you want to
    transfer something to your FAL (or another copier) edit .ucon64rc or
    ucon64.cfg (for the DOS version) and remove the hash symbol in front of the
    line that starts with "parport=" (without the quotes). If that line is not
@@ -779,7 +797,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    -multi that is larger than your flash card. Passing a smaller size is
    correct though. For example, to create a multirom that fits on a 128 Mb (16
    MB) card use a command line like this:<br>
-   &nbsp;&nbsp; ucon64 -multi=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba multi.bin<br>
+   &nbsp;&nbsp; ucon64 -gba -multi=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba multi.bin<br>
    You can also send it directly by using -xfalmulti:<br>
    &nbsp;&nbsp; ucon64 -xfalmulti=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba<br>
    Just like sometimes happens with Visoly's tool it is possible to get the
@@ -790,7 +808,8 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <a name="23"><b>Q23</b>: Where can I get that loader or "game pack" file?</a><br>
 <b>A</b>: You can get it from <a href="http://www.visoly.com" target="_blank">
    Visoly's site</a>. It is in a file with a name like
-   <a href="http://www.visoly.com/download/preboot32.zip">preboot32.zip</a>.<br>
+   <a href="http://www.visoly.com/download/preboot32.zip">preboot32.zip</a>.
+   You can find it also on the uCON64 homepage.<br>
 <br>
 <p>
 <a name="24"><b>Q24</b>: What is the meaning of the -col option (SNES)?</a><br>
@@ -1005,12 +1024,16 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    Then copy all DAT files you have into that directory. You can download DAT
    files from sites like
    <a href="http://gooddat.emu-france.com/" target="_blank">
-   http://gooddat.emu-france.com/</a> or
+   http://gooddat.emu-france.com/</a>,
    <a href="http://www.romcenter.com/" target="_blank">
-   http://www.romcenter.com/</a>. uCON64 will automatically create index files
-   which speed up the access to the DAT files dramatically. Now uCON64 uses the
-   information inside the DAT files to identify or rename ROMs without an
-   internal header.<br>
+   http://www.romcenter.com/</a> or
+   <a href="http://www.rommanager.com/" target="_blank">
+   http://www.rommanager.com/</a>. You can also find some DAT files on
+   <a href="http://ucon64.sourceforge.net/index.html#ucon64dat" target="_blank">
+   the uCON64 homepage</a>.<br>
+   uCON64 will automatically create index files which speed up the access to
+   the DAT files dramatically. Now uCON64 uses the information inside the DAT
+   files to identify or rename ROMs without an internal header.<br>
    Starting with version 1.9.8beta8 uCON64 does not have an internal database
    anymore, so you will <b>need</b> DAT files for files like NES ROM dumps.<br>
    You can check which DAT files are used by uCON64 with the option -db. You
@@ -1260,7 +1283,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
     <td><tt>GoodGBX or GBX</tt></td>
   </tr>
   <tr>
-    <td><tt>Genesis or Megadrive</tt></td>
+    <td><tt>Genesis or Mega Drive</tt></td>
     <td><tt>GoodGEN or GEN</tt></td>
   </tr>
   <tr>
@@ -1300,7 +1323,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
     <td><tt>GoodPCE or PCE</tt></td>
   </tr>
   <tr>
-    <td><tt>Sega Master System</tt></td>
+    <td><tt>Sega Master System and Game Gear</tt></td>
     <td><tt>GoodSMS, GoodGG, SMS or GG</tt></td>
   </tr>
   <tr>
@@ -1396,6 +1419,306 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    advantage NSRT has over uCON64 (as seen from a SNES user's viewpoint) is
    that it is written only for SNES.<br>
 <br>
+<p>
+<a name="45"><b>Q45</b>: What is an interleaved ROM?</a><br>
+<b>A</b>: Strictly speaking, interleaved ROMs do not exist. Interleaved ROM
+   dumps do. Or perhaps it is better to say ROM dumps in interleaved format.
+   The meaning of "interleaved" depends on the console type. Interleaved
+   formats exist for NES, Sega Master System, Game Gear, Genesis, SNES and
+   Nintendo 64.<br>
+   Deinterleaving is the opposite of interleaving a ROM dump. It is the process
+   of converting the data to "binary" format. Binary in the sense as how the
+   data (in a cartridge) is presented to the CPU.<br>
+   ROM dumps can be interleaved (not for NES) and deinterleaved with uCON64.<br>
+<br>
+   NES<br>
+   NES dumps can contain two types of data, "PRG data" and "CHR data".
+   Interleaved NES dumps have the PRG data stored at the even offsets in the
+   file and the CHR data at the odd offsets. Non-interleaved dumps first
+   contain all the PRG data followed by the CHR data (if present).<br>
+   Cannot be interleaved with uCON64.<br>
+   Can be deinterleaved with uCON64 using the option -dint.<br>
+<br>
+   Sega Master System, Game Gear and Genesis<br>
+   Interleaved Sega Master System, Game Gear and Genesis dumps are produced by
+   the Super Magic Drive and the Multi Game Doctor 2.<br>
+   For the SMD: for each block of 16384 bytes of the ROM all bytes at even
+   offsets are stored in the upper half of the dumped block. The bytes at odd
+   offsets are stored in the lower half. So, each dumped block first contains
+   8192 "odd bytes" then 8192 "even bytes".<br>
+   For the MGD2: all odd bytes of the file are stored in the first half of the
+   file, all even bytes in the second half.<br>
+   Can be interleaved with uCON64 using the option -smd or -mgd.<br>
+   Can be deinterleaved with uCON64 using the option -bin.<br>
+<br>
+   SNES<br>
+   Interleaved SNES dumps are produced by the Game Doctor and the Super UFO
+   when dumping a HiROM cartridge. The simplest interleaved format first
+   contains all upper halfs of each 64 kB block of the ROM (HiROM "banks"),
+   then all lower halfs. There are several interleaved formats, but except for
+   one they all share the principle of dividing each 64 kB block in two.<br>
+   SNES ROMs contain a block of 48 bytes, some call it the internal SNES
+   header, that contains information about the ROM. Information like game name,
+   check sum, size and the bank type. There are two bank types, HiROM and LoROM
+   (as far as we know these are terms not used by Nintendo). HiROM ROMs have
+   banks of 64 kB, LoROM ROMs have banks of 32 kB. The first bank contains the
+   internal SNES header at a fixed offset relative to the end of the bank.
+   However, because the bank sizes differ for HiROM and LoROM the absolute
+   locations differ for the two in non-interleaved dumps. If dumps are
+   interleaved the absolute locations are te same.<br>
+   The interleaved format was probably introduced so that a copier <i>can</i>
+   (the Game Doctor does only if the dump has no header) always check the same
+   location in a dump to tell whether it should handle it as a LoROM or a HiROM
+   dump.<br>
+   Can be interleaved with uCON64 using the option -gd3 or -ufo.<br>
+   Can be deinterleaved with uCON64 using the option -dint, but it is
+   better to use one of the regular conversion options -smc, -swc, -fig or
+   -mgd. Some SNES tools erroneously interleave LoROM dumps. These dumps
+   can be deinterleaved with the options -gd3 and -ufo as well as with the
+   aformentioned (SNES) options.<br>
+<br>
+   Nintendo 64<br>
+   Interleaved Nintendo 64 dumps are produced by the Doctor V64 and the Doctor
+   V64 Junior. Perhaps "byte-swapped" is a better term for Nintendo 64 dumps.
+   For each two bytes the first and the second byte are swapped.<br>
+   Can be interleaved with uCON64 using the option -v64.<br>
+   Can be deinterleaved with uCON64 using the option -dint, but it is better to
+   use the regular conversion option -z64.<br>
+<br>
+<p>
+<a name="46"><b>Q46</b>: The pre-compiled GNU/Linux binary does not work on my
+   system, while a binary compiled by me works fine. How can that be?</a><br>
+<b>A</b>: If you get this output on the command line:<br>
+   &nbsp;&nbsp;libgcc_s.so.1: cannot open shared object file: No such file or directory<br>
+   Or when the command "ldd discmage.so" gives output that looks like this:<br>
+   &nbsp;&nbsp;libz.so.1 => /usr/lib/libz.so.1 (0x4002b000)<br>
+   &nbsp;&nbsp;libgcc_s.so.1 => not found<br>
+   &nbsp;&nbsp;libc.so.6 => /lib/libc.so.6 (0x40039000)<br>
+   &nbsp;&nbsp;/lib/ld-linux.so.2 => /lib/ld-linux.so.2 (0x80000000)<br>
+   (note the text "not found") then you are experiencing a binary
+   incompatibility problem with the add-on discmage library. You can either
+   remove the discmage library from the directory where uCON64 looks for it
+   (see <a href="#4">question 4</a>) or compile the library yourself (see
+   <a href="#3">question 3</a>).<br>
+<br>
+<p>
+<a name="47"><b>Q47</b>: I use Windows XP (NT/2000) and every time I run uCON64
+   I get this error message about ntuser.dat. What does it mean?</a><br>
+<b>A</b>: If you see lines in the display output of uCON64 that look like
+   these:<br>
+   &nbsp;&nbsp;Create: ntuser.idx<br>
+   &nbsp;&nbsp;ERROR: Can't open "C:\Documents and Settings\Daniël\ntuser.dat" for reading<br>
+   you should modify the configuration file so that ucon64_datdir points to
+   another directory.<br>
+   By default uCON64 will use the home directory as the directory where it
+   searches for DAT files (the "DAT file directory"). uCON64 handles all files
+   in the DAT file directory that have a name that ends with ".dat" as DAT
+   files. ntuser.dat seems to be a standard file in a Windows XP user's home
+   directory (and should not be removed), but it is not a DAT file for use with
+   uCON64. See <a href="#36">question 36</a> for more information on how to
+   configure uCON64 so that it uses "real" DAT files. If you only want to get
+   rid of that error message either make ucon64_datdir in the configuration
+   file point to an existing directory that does not contain any files with a
+   name that ends with ".dat" or make an environment variable with the name
+   ucon64_datdir point to such a directory. Do not forget that the environment
+   variable will not be set the next time you start a DOS session.<br>
+<br>
+<p>
+<a name="48"><b>Q48</b>: Is there any way to make uCON64 convert a ROM dump to
+   Game Doctor SF3/SF6/SF7 format and split it, in one command?</a><br>
+<b>A</b>: Not directly, but it can be done with the help of a shell script or
+   batch file. See <a href="#41">question 41</a> for some information on how to
+   make a shell script or batch file run. Here is a Bash script:<br>
+   &nbsp;&nbsp;#! /bin/bash<br>
+<br>
+   &nbsp;&nbsp;usage ()<br>
+   &nbsp;&nbsp;{<br>
+   &nbsp;&nbsp;  echo "Usage: $0 file_to_convert_and_split"<br>
+   &nbsp;&nbsp;  exit<br>
+   &nbsp;&nbsp;}<br>
+<br>
+   &nbsp;&nbsp;GD3DIR="convert"<br>
+   &nbsp;&nbsp;SPLITDIR="split"<br>
+<br>
+   &nbsp;&nbsp;if [ ! -n "$1" ]; then usage; fi<br>
+   &nbsp;&nbsp;if [ ! -e "$1" ]; then usage; fi<br>
+<br>
+   &nbsp;&nbsp;if [ ! -e "$GD3DIR" ]; then mkdir "$GD3DIR"; fi<br>
+   &nbsp;&nbsp;if [ ! -e "$SPLITDIR" ]; then mkdir "$SPLITDIR"; fi<br>
+<br>
+   &nbsp;&nbsp;rm -f "$GD3DIR"/*<br>
+   &nbsp;&nbsp;rm -f "$SPLITDIR"/*<br>
+<br>
+   &nbsp;&nbsp;ucon64 -q -gd3 "$1" -o "$GD3DIR"<br>
+   &nbsp;&nbsp;ucon64 -q -s "$GD3DIR"/* -o "$SPLITDIR"<br>
+   <br>
+   And here is a batch file:<br>
+   &nbsp;&nbsp;@echo off<br>
+<br>
+   &nbsp;&nbsp;set GD3DIR="convert"<br>
+   &nbsp;&nbsp;set SPLITDIR="split"<br>
+<br>
+   &nbsp;&nbsp;if .==.%1 goto usage<br>
+   &nbsp;&nbsp;if not exist %1 goto usage<br>
+<br>
+   &nbsp;&nbsp;if not exist %GD3DIR% mkdir %GD3DIR%<br>
+   &nbsp;&nbsp;if not exist %SPLITDIR% mkdir %SPLITDIR%<br>
+<br>
+   &nbsp;&nbsp;del /q %GD3DIR%\*<br>
+   &nbsp;&nbsp;del /q %SPLITDIR%\*<br>
+<br>
+   &nbsp;&nbsp;ucon64 -q -gd3 %1 -o %GD3DIR%<br>
+   &nbsp;&nbsp;ucon64 -q -s %GD3DIR%\* -o %SPLITDIR%<br>
+   &nbsp;&nbsp;goto exit<br>
+<br>
+   &nbsp;&nbsp;:usage<br>
+   &nbsp;&nbsp;echo Usage: %0 file_to_convert_and_split<br>
+<br>
+   &nbsp;&nbsp;:exit<br>
+<br>
+   Say you saved the batch file to the name cs.bat, then you can convert a
+   file to Game Doctor format and split it with:<br>
+   &nbsp;&nbsp;cs somegame.swc<br>
+   Afterwards you can find a file in Game Doctor format in the directory
+   convert and the split parts in the directory split. Modify the scripts above
+   if you want them to make uCON64 write its output to other directories. Do
+   *not* make GD3DIR or SPLITDIR point to the current directory or to your SNES
+   ROM directory as the scripts will remove all files in the directories
+   pointed to by GD3DIR or SPLITDIR. Starting with empty directories is the
+   main reason why the scripts work (actually, this is only true for GD3DIR).<br>
+<br>
+<p>
+<a name="49"><b>Q49</b>: How do I use the command line?</a><br>
+<b>A</b>: There are some commands that are very common when using uCON64. I
+   will only explain how to use those. Search the internet if you want to know
+   more.<br>
+   First read the section <a href="#cmdline">"The command line
+   environment"</a>.
+   The first principle you should understand is how the space on your
+   harddisk(s) is organised. Before an operating system is able to use the
+   harddisk it needs to have a <i>file system</i>. A harddisk can contain
+   several file systems. When you are using DOS or Windows each file system is
+   called a "<i>drive</i>" and gets assigned a drive letter. A file system can
+   store files and <i>directories</i>. Directories can be seen as special files
+   that themselves "contain" files and directories. By using directories it is
+   possible to quickly oversee the structure of a file system and keep it
+   organised. Under GNU/Linux file systems are visible in the directory
+   structure (e.g. /mnt/windows). With Windows XP it is possible to make
+   file systems visible/accessible in the same manner.<br>
+   When using the command line there is something called the <i>current
+   directory</i>.
+   The current directory is like an implicit directory. Several commands and
+   programs use the current directory when a directory is not explicitly
+   specified. For example, the command <b>dir</b> (Unix: <b>ls</b>) lists the
+   contents of a directory. When you do not specify a directory it will list
+   the contents of the current directory. You can change the current directory
+   with the command <b>cd</b>. For example, to change the current directory to
+   "roms" on drive C: type:<br>
+   &nbsp;&nbsp;cd c:\roms<br>
+   On DOS and Windows there is also a <i>current drive</i>. You can change the
+   current drive by specifying the drive letter followed by a colon. For
+   example to change the current drive to D: type:<br>
+   &nbsp;&nbsp;d:<br>
+   Under DOS and Windows the current directory is a bit different than it is on
+   Unix: each drive has its own current directory. It is possible to change the
+   current directory of a drive while the current directory of the current
+   drive is not changed. The first example with <b>cd</b> does just that when
+   C: is not the current drive. When C: was the current drive you would not
+   have to specify the drive letter as the command line interpreter would
+   assume you intended to change the current directory of C:. When a text
+   refers to the current directory under DOS and Windows the author usually
+   means the combination of current drive and current directory. In other
+   words, when directed to change the current directory to c:\ucon64 you
+   actually have to change the current drive to C: and the current directory on
+   C: to ucon64.<br>
+   Lets assume you have the following directory structure:<br>
+   &nbsp;&nbsp;C:<br>
+   &nbsp;&nbsp;+--roms<br>
+   &nbsp;&nbsp;|&nbsp;+--snes<br>
+   &nbsp;&nbsp;|&nbsp;|&nbsp;+--gd3<br>
+   &nbsp;&nbsp;|&nbsp;+--n64<br>
+   &nbsp;&nbsp;+--tmp<br>
+   &nbsp;&nbsp;D:<br>
+   &nbsp;&nbsp;+--roms<br>
+   &nbsp;&nbsp;&nbsp;&nbsp;+--sms<br>
+<br>
+   To change the current directory (of drive C:) to c:\roms\snes\gd3 type:<br>
+   &nbsp;&nbsp;cd c:\roms\snes\gd3<br>
+   You can see that each directory is separated from its parent by a backslash
+   ('\'). Under Unix (or Bash under Windows) you would refer to the same
+   directory by replacing the backslashes with forward slashes and perhaps
+   replacing "c:" with the appropriate mount point (e.g.,
+   /mnt/windows/roms/snes/gd3). Note that "c:" is a valid directory name on a
+   GNU/Linux file system.<br>
+   You can refer to the other directories (and files) in a relative manner. Say
+   c:\roms\snes contains the file
+   Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc. You can make uCON64 display
+   information about that file with:<br>
+   &nbsp;&nbsp;ucon64 "c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc"<br>
+   but also with:<br>
+   &nbsp;&nbsp;ucon64 "..\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc"<br>
+   The quotes are necessary or else uCON64 would handle Secret, of, Mana and
+   (U).swc as separate files. This is usual behaviour for command line
+   programs, it is not specific to uCON64.<br>
+   ".." is a special directory. Each directory contains two special
+   directories, "." and "..". "." refers to the current directory, ".." to the
+   directory one level higher in the directory structure. For example, to see
+   the contents of the directory "roms" you could type:<br>
+   &nbsp;&nbsp;dir c:\roms<br>
+   but also:<br>
+   &nbsp;&nbsp;dir ..\..<br>
+   Or on Unix:<br>
+   &nbsp;&nbsp;ls ../..<br>
+   c:\roms\snes is called a <i>path</i>. To be more specific an <i>absolute
+   path</i>. It is the path to follow in the directory structure to get to the
+   file Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc. "..\.." is a <i>relative
+   path</i>. In c:\roms\snes "..\.." refers to another directory than in
+   c:\roms\snes\gd3 (c:\ and c:\roms repectively). To change the current
+   directory to c:\roms\snes type:<br>
+   &nbsp;&nbsp;cd ..<br>
+   Say you want to convert Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc to
+   Game Doctor format, place the converted file in c:\roms\snes\gd3, split that
+   file in pieces, place those pieces in c:\tmp and transfer the pieces to a
+   Game Doctor SF7. You could type the following commands:<br>
+   &nbsp;&nbsp;ucon64 -gd3 "Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc" -o .\gd3<br>
+   &nbsp;&nbsp;ucon64 -s gd3\sf16Sec -o c:\tmp<br>
+   &nbsp;&nbsp;ucon64 -xgd3 ..\..\tmp\SF16SECA.078<br>
+<br>
+   Besides <b>dir</b> (Unix: <b>ls</b>) and <b>cd</b> there are some other
+   commands that you may find useful:<br>
+   <b>del</b> (Unix: <b>rm</b>) to delete or remove a file<br>
+   <b>xcopy</b> (Unix: <b>cp</b>) to copy a file<br>
+   <b>md</b> (Unix (and Windows): <b>mkdir</b>) to create a directory<br>
+   <b>rd</b> (Unix (and Windows): <b>rmdir</b>) to remove a directory<br>
+   <b>set</b> (Unix (Bash): <b>export</b>) to set (and export) an environment
+   variable<br>
+   <b>rmdir</b> cannot remove a directory if there are still files (or
+   directories) in it. Under DOS and Windows you can get more information about
+   these commands by using the option /?. Under Unix the equivalent is --help.
+   For example, if you want to get more information about <b>del</b> you could
+   type:<br>
+   &nbsp;&nbsp;del /?<br>
+<br>
+   Here follows a final example that uses the commands mentioned above:<br>
+   &nbsp;&nbsp;cd \<br>
+   &nbsp;&nbsp;md test<br>
+   &nbsp;&nbsp;cd test<br>
+   &nbsp;&nbsp;xcopy "c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc" mana.swc<br>
+   &nbsp;&nbsp;set parport=378<br>
+   &nbsp;&nbsp;ucon64 -xswc mana.swc<br>
+   &nbsp;&nbsp;del mana.swc<br>
+   &nbsp;&nbsp;cd ..<br>
+   &nbsp;&nbsp;rd test<br>
+<br>
+   First the current directory is changed to c:\. Then the directory "test" is
+   created. Then the current directory is changed to "test". Then the file
+   c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc is copied to the file
+   mana.swc. Then an evironment variable with the name parport is set to the
+   value 378. Then uCON64 is used to transfer mana.swc to a Super Wild Card
+   while using parallel port address 0x378. Then the file mana.swc is removed.
+   Finally the directory "test" is removed.<br>
+<br>
+<p>
 <br>
 <br>
 <br>

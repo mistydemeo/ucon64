@@ -1,7 +1,7 @@
 <html><head>
 <link rel="icon" href="images/icon.png" type="image/png">
 <title>uCON64 - Changes</title></head><body bgcolor="#ffffff"><tt><br>
-The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
+The original uCON for SNES and Genesis was written by Chicken & chp in ~1995<br>
 <br>
 <p>
 <a name="190">1.9.0</a><br>
@@ -19,20 +19,20 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 <a name="192">1.9.2</a><br>
 - started to add missing Sega System16(A/B)/System 18/dual 68000 support<br>
 - -xv64 shows now the filename on the Doctor instead of "UCON64" (sorry)<br>
-- removed -xmp3 option for SongBoy (latest informations say that it will
+- removed -xmp3 option for SongBoy (latest information says that it will
   be a USB device with copyprotected MPE standard instead of MP3.. HAHAHAHA!!!)<br>
 - TODO:  -xmp3 send MP3 file(s) to SongBoy (MP3 player for Game Boy)<br>
 - removed options which were added by mistake (like parallel transfer for Z64)<br>
 - added -ispad (looks for repeating bytes at the end of a probably padded ROM)<br>
 - added -rn (some people might find it useful)<br>
 - added -mg, -bin and 'show ROM' support for PC-Engine<br>
-- added -usms for Jos Kwanten's ultraSMS an Sega Master System/GameGear
+- added -usms for Jos Kwanten's ultraSMS an Sega Master System/Game Gear
   emulator for the Nintendo64<br>
 - fixed aps (GRRNNNNN!!!)<br>
 - added an universal frontend (in Java) for all platforms and all programs that
   need a filename<br>
 - added CD32, CD-i and Real 3DO support<br>
-- added -bin and -ffe option for Sega Master System/GameGear<br>
+- added -bin and -ffe option for Sega Master System/Game Gear<br>
 - added database for NES roms (that enlarged the ucon64 executable by 190kb
   grnnn...) "You gotta do what you gotta do." (Futurama)<br>
 - added -db and -dbv database commands... now everyone can check if the
@@ -41,7 +41,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 <a name="193">1.9.3</a><br>
 - added -mka create APS patch support<br>
 - added -na change APS description<br>
-- added -hd, -nhd switches for SMS/GameGear<br>
+- added -hd, -nhd switches for SMS/Game Gear<br>
 - added auto-detection and some information for Jaguar ROMs<br>
 - added -ssc convert to Super Smart Card (Game Boy)<br>
 - fixed/added -chk fix checksum (Game Boy)<br>
@@ -56,7 +56,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 <a name="194">1.9.4</a><br>
 - included all databases for every console system that has ROMs without a
   header with text<br>
-- added 324 entries to sms database<br>
+- added 324 entries to SMS database<br>
 - added -sam convert SAM/M.A.M.E. sound to WAV; --rom=SAMFILE<br>
 - added -b2i convert BIN/RAW(2352)/Mode2(2336) to ISO; --rom=BIN_IMAGE<br>
 - added -ppf apply PPF patch (&#60;=2.0); --rom=ISO_IMAGE --file=PATCHFILE<br>
@@ -78,9 +78,9 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - added (GBA) -n change ROM name; --file=NEWNAME<br>
 - added (GBA) -logo restore ROM logo character data 0x04-0x9F<br>
 - added (GBA) -chk fix ROM checksum<br>
-- added (GB/GameGear/NES) -gg apply Game Genie code (permanent)<br>
-- added (GB/GameGear/NES/GEN/SNES) -gge encode Game Genie code<br>
-- added (GB/GameGear/NES/GEN/SNES) -ggd decode Game Genie code<br>
+- added (GB/Game Gear/NES) -gg apply Game Genie code (permanent)<br>
+- added (GB/Game Gear/NES/GEN/SNES) -gge encode Game Genie code<br>
+- added (GB/Game Gear/NES/GEN/SNES) -ggd decode Game Genie code<br>
 - added (LYNX) -lyx convert to LYX/RAW (strip 64 Bytes LNX header)<br>
 - added (LYNX) -lnx convert to LNX (uses default values for the header)<br>
 - added (LYNX) -n change ROM name (LNX only); --file=NEWNAME<br>
@@ -123,10 +123,10 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - changed the whole internal ROM database code (by NoisyB)<br>
 - added -dbs search ROM database (all entries) by CRC32; --rom=0xCRC32 (by NoisyB)<br>
 - added (Virtual Boy) show info (by NoisyB)<br>
-- added (Wonder Swan) show info (by NoisyB)<br>
+- added (WonderSwan) show info (by NoisyB)<br>
 - added (ColecoVision) show info (by NoisyB)<br>
 - added (Vectrex) show info (by NoisyB)<br>
-- added ROMs to database for Virtual Boy, Wonder Swan, ColecoVision and Vectrex
+- added ROMs to database for Virtual Boy, WonderSwan, ColecoVision and Vectrex
   (by NoisyB)<br>
 - added (Intellivision) show info (by NoisyB)<br>
 - made the internal ROM Database optional; compiled without DB uCON64 will be
@@ -158,7 +158,8 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
   (by dbjh)<br>
 - added (SNES) -dint convert ROM to non-interleaved format (by dbjh)<br>
 - added 2830 new ROMs to internal ROM database (by NoisyB)<br>
-- added (Genesis) -xsmd send/receive ROM to/from Super Magic Drive/SMD; --file=PORT (by NoisyB)<br>
+- added (Genesis) -xsmd send/receive ROM to/from Super Magic Drive/SMD;
+  --file=PORT (by NoisyB)<br>
 - added (Genesis) -xsmds send/receive SRAM to/from Super Magic Drive/SMD;
   --file=PORT (by NoisyB)<br>
 - added support for CD based consoles again; uCON64 now uses cdrdao as burn
@@ -167,8 +168,8 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - added (Genesis) -smds convert emulator (*.srm) SRAM to Super Magic Drive/SMD (by NoisyB)<br>
 - added -r2i convert RAW to ISO9660; --rom=RAW_IMAGE (by NoisyB)<br>
 <p>
-<a name="198">1.9.8</a><br>
-- added more verbose WonderSwan ROM nfo (by NoisyB; thanks to dox)<br>
+<a name="198-1">1.9.8-1</a><br>
+- added more verbose WonderSwan ROM info (by NoisyB; thanks to dox)<br>
 - updated (GBA) used Jeff Frohwein's Flash Advance Linker code V1.72 (by dbjh)<br>
 - added (GBA) -xfals send/receive SRAM to/from Flash Advance Linker; --file=PORT (by dbjh)<br>
 - added (GBA) -xfalb&#60;n&#62; send/receive SRAM to/from Flash Advance Linker bank n; --file=PORT (by dbjh)<br>
@@ -199,10 +200,11 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - added --rr83 like --rrom but with 8.3 filenames; --rom=DIR (by NoisyB)<br>
 - added --stpn=N strip N Bytes from ROM beginning (by NoisyB)<br>
 - added --insn=N insert N Bytes (0x00) before ROM (by NoisyB)<br>
-- added --xmccl send/receive BYTES to/from Mad Catz Camera Link (experimental) (by NoisyB)<br>
+- added --xmccl send/receive BYTES to/from Mad Catz Camera Link (experimental)
+  (by NoisyB)<br>
 - speed --rrom, --rr83 and --ls have been sped up significantly<br>
-- updated (N64) added 512 Mb ROMs support for transfers to Doctor64Jr (by NoisyB; thanks to
-  TenOfTen (tenoften@jahej.com))<br>
+- updated (N64) added 512 Mb ROM support for transfers to Doctor V64 Junior
+  (by NoisyB; thanks to TenOfTen (tenoften@jahej.com))<br>
 - updated (SNES) fixed -fig to give the same output as a Super Pro Fighter (by dbjh;
   thanks to JohnDie for the information)<br>
 - updated (all) parallel port is only accessed for copier I/O (by dbjh)<br>
@@ -323,13 +325,13 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
   --find, -c, --cs, --dbs, -b, -i, --mki, -a, --mka, --na, --ppf, --mkppf,
   --nppf, --idppf, --crp, -n, --bot, --lsram, --usms, --n2, --n2gb, --b0, --b1,
   --sam, --bios and --dumpinfo (by NoisyB)<br>
-- fixed (PSX) PPF code works correctly and generates correct patches on
+- updated (PSX) PPF code works correctly and generates correct patches on
   big-endian machines (by dbjh)<br>
 - added (patch) --patch option to specify the patch file for APS, IPS, BSL
   and PPF (by NoisyB)<br>
 - updated (SNES) added NTSC/PAL fix for Dual Orb 2 (thanks to John), Dr. Mario,
   Dragon - The Bruce Lee Story (U) and Wolfenstein 3D (U) (by dbjh)<br>
-- fixed (N64) APS code works correctly and generates correct patches on
+- updated (N64) APS code works correctly and generates correct patches on
   big-endian machines (by dbjh)<br>
 - added (all) -o specify output directory. Note that now uCON64 by default
   writes its output files to the current directory (by NoisyB and dbjh)<br>
@@ -421,13 +423,86 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - added (SNES) support for native Super UFO file format (by John and dbjh) Use
   -ufo to convert a file to Super UFO format, use -s to split the resulting
   file (required for HiROM games)<br>
-- updated (SMS) -mgd is recognised again, -sms won't crash uCON64 anymore and
+- updated (SMS) -mgd is recognised again, -smd won't crash uCON64 anymore and
   -smds calls the SMS function when -sms is specified (by dbjh)<br>
 - updated (SMS) -sms in no longer required for SMD files, they are
   automatically detected (by dbjh)<br>
 - updated (SNES) fixed -b (apply Baseline patch) (by dbjh)<br>
 - updated (all) added support for non-standard parallel port addresses (by
   dbjh)<br>
+- updated (SNES) added crack for Tetris Attack (by dbjh, thanks to CL)<br>
+<p>
+<a name="198-2">1.9.8-2</a><br>
+- updated (SNES) -gd3 produces a more logical format for Daikaijuu Monogatari 2
+  (by dbjh, thanks to Nach for the idea)<br>
+- updated (SMS) -smd interleaves SMS files (by dbjh, thanks to nori-p for
+  testing and feedback)<br>
+- updated (GBA) fixed stupid bug introduced in 1.9.8beta8 that caused
+  -xfalmulti to hang (-multi and -xfal still worked) (by dbjh)<br>
+- updated (SNES) hopefully fixed last problem with splitting GD3 files (by
+  dbjh)<br>
+- updated (SNES) added crack for Dixie Kong's Double Trouble (by dbjh, based on
+  IPS patch by Black Hole of Infernal Affairs)<br>
+- files of 0 bytes won't be detected as WonderSwan files anymore (by dbjh)<br>
+- removed (NES) support for bad FDS DAT files (by dbjh) If you really want to
+  use FDS DAT files created by tools that erroneously include the header in the
+  CRC32 calculation, use the switch -nhd. Someone with a complete FDS
+  collection should create a new DAT file<br>
+- updated (SNES) fixed crashing on first split file of Tales of Phantasia and
+  Daikaijuu Monogatari 2 (by dbjh)<br>
+- added (SNES) -xgd6 send ROM to Game Doctor SF6/SF7. This probably solves the
+  problems people are having with -xgd3 (by John)<br>
+- added (SNES) -xgd6s send/receive SRAM to/from Game Doctor SF6/SF7 (by John)<br>
+- added (SNES) -xgd3s send SRAM to Game Doctor SF3/SF6/SF7 (by John)<br>
+- added (Genesis) -multi can create a multi-game file for use on the MD-PRO
+  flash card. The downside: creating a multirom for the FAL doesn't work
+  without -gba anymore (by dbjh, thanks to Enemy and acem77 for testing)<br>
+- added (Genesis) -f can fix region protections, addendum files are genpal.txt
+  and mdntsc.txt (by dbjh)<br>
+- added (SNES) -id force -gd3 to produce a unique file name. This switch
+  doesn't show in the help, because it "fails" for 130 dumps of the GoodSNES
+  "0.999.6--" set. 128 IDs are each shared by 2 games, 2 IDs are shared by 3
+  games (by dbjh)<br>
+- updated (all) the patch generation options (-mka, -mki, -mkppf) use the
+  modified ROM name for the patch to create. They used to use the name of the
+  original ROM (by dbjh)<br>
+- updated (N64) fixed major bug in APS creation code (by dbjh)<br>
+- updated (SNES) added NTSC/PAL fix for Magical Pop'n (J) and Metal Warriors
+  (U) (by dbjh)<br>
+- added (Genesis) recognition of <i>real</i> MGD files (by dbjh, thanks to
+  acem77 for the feedback)<br>
+- updated (Genesis) -mgd now produces proper MGD files (by dbjh)<br>
+- added (Genesis) -bin convert to binary format. This option produces files in
+  the format that uCON64 1.9.8-1 produces with the option -mgd (by dbjh)<br>
+- added (Genesis) -xmd &amp; -xmds send/receive ROM/SRAM to/from MD-PRO flash
+  card programmer (by dbjh and NoisyB with many thanks to timofonic and of
+  course ToToTEK Multi Media for providing us with the necessary information.
+  Special thanks go to Leo of ToToTEK for being very helpful and willing to
+  answer our questions)<br>
+- added (Genesis) -ssize=SIZE specify split part size in Mbit (by dbjh)<br>
+- updated (SNES, SMS, PC-Engine & Genesis) -mgd produces correct file names (by
+  dbjh, thanks to acem77 for testing and feedback)<br>
+- updated (Genesis) -mgd automatically pads files to the right size (by dbjh)<br>
+- added (PC-Engine) -swap invert/swap bits of all bytes of a file. This
+  effectively converts PC-Engine games between Japan and U.S.A. "mode" (by
+  dbjh, thanks to acem77 for the information)<br>
+- added (SMS) backup unit header length detection (by dbjh, thanks to acem77
+  for pointing this out) This made a problem with the current SMS DAT file
+  surface: some CRC32 values are the result of including a backup unit header
+  in the calculation. Someone with a complete GoodSMS collection should create
+  a new DAT file<br>
+- updated (PC-Engine) auto-detection of bit-swapped files (by dbjh, thanks to
+  Cowering for the info)<br>
+- updated (PC-Engine) -mgd automatically bit-swaps the file if it detected as
+  being in Japan "mode" (by dbjh)<br>
+- updated (PC-Engine) -smg automatically bit-swaps the file if it detected as
+  being in U.S.A. "mode" (by dbjh) I don't know if this correct. Please give
+  feedback<br>
+- added (Game Boy) -logo restore ROM logo character data (offset: 0x104-0x134)
+  (by NoisyB)<br>
+
+<br>
+<br>
 <br>
 <br>
 <br>

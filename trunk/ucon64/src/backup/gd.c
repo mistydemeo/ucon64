@@ -2,7 +2,7 @@
 gd.c - Game Doctor support for uCON64
 
 written by 2002 - 2003 John Weidman
-           2002 - 2003 dbjh
+           2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -287,7 +287,8 @@ int
 gd6_sync_hardware (void)
 // Sets the SF7 up for an SF6/SF7 protocol transfer
 {
-  int timeout, retries, delay;
+  int timeout, retries;
+  volatile int delay;
 
   for (retries = GD6_SYNC_RETRIES; retries > 0; retries--)
     {

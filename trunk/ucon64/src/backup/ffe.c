@@ -166,7 +166,8 @@ ffe_sendb (unsigned char byte)
 void
 ffe_receive_block (unsigned short address, unsigned char *buffer, int len)
 {
-  int n, n_try = 0;
+  volatile int n;
+  int n_try = 0;
   unsigned char checksum1, checksum2;
 
   do
@@ -195,7 +196,8 @@ ffe_receive_block (unsigned short address, unsigned char *buffer, int len)
 void
 ffe_receive_block2 (unsigned short address, unsigned char *buffer, int len)
 {
-  int n, n_try = 0;
+  volatile int n;
+  int n_try = 0;
   unsigned char checksum1, checksum2;
 
   do
@@ -254,7 +256,7 @@ ffe_wait_while_busy (void)
 
 #if 0
 /*
-  vgs doesn't check for this, and it seems to happen quite regularly, so it
+  VGS doesn't check for this, and it seems to happen quite regularly, so it
   is currently commented out
 */
   if (n_try >= N_TRY_MAX)
@@ -299,7 +301,7 @@ ffe_checkabort (int status)
 {
   if (((!ucon64.frontend) ? kbhit () : 0) && getch () == 'q')
     {
-//      ffe_send_command (5, 0, 0);               // vgs: when sending/receiving a SNES ROM
+//      ffe_send_command (5, 0, 0);               // VGS: when sending/receiving a SNES ROM
       puts ("\nProgram aborted");
       exit (status);
     }

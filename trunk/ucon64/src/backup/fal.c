@@ -195,7 +195,7 @@ const u8 GoodHeader[] = {
 void
 iodelay (void)
 {
-  int i;
+  volatile int i;
   for (i = 0; i < WaitDelay; i++)
     {
       i++;

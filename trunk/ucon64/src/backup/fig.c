@@ -79,7 +79,8 @@ receive_rom_info (unsigned char *buffer)
   - sets global `hirom'
 */
 {
-  int n, m, size;
+  int n, size;
+  volatile int m;
   unsigned char byte;
 
   ffe_send_command0 (0xe00c, 0);
@@ -96,15 +97,6 @@ receive_rom_info (unsigned char *buffer)
 
   for (n = 0; n < (int) FIG_HEADER_LEN; n++)
     {
-#ifdef  _WIN32
-      /*
-        Talk about strange. Somehow this loop takes unusually long (like 1
-        minute) if no Windows function is called. As a side effect (?) an
-        incorrect size value will be obtained, resulting in an overdump. For
-        example calling kbhit() or printf() solves the problem...
-      */
-      kbhit ();
-#endif
       for (m = 0; m < 65536; m++)               // a delay is necessary here
         ;
       ffe_send_command (5, (unsigned short) (0x200 + n), 0);

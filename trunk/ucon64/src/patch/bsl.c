@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include "config.h"
 #include "misc.h"
+#include "quick_io.h"
 #include "ucon64.h"
 #include "bsl.h"
 

@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #include "config.h"
 #include "misc.h"
+#include "quick_io.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"

@@ -1,5 +1,5 @@
 A Super Wild Card compatibility list
-Version: 1.12
+Version: 1.13
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
 Date: 18 february 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
@@ -29,7 +29,11 @@ Non-playing music seems to be a BS-specific problem.
 For some games I put an extra comment after the character sequence "<=". In
 some comments I mention the so-called emulation mode select byte. This is the
 byte at offset 2 in the header. You can check the value of the emulation mode
-select byte by passing the command line option -dbuh to uCON64.
+select byte by passing the command line option -dbuh to uCON64. You can change
+it with a hex(adecimal) editor or by using the uCON64 option -poke (new in
+version 1.9.8beta8). For example, to change the emulation mode select byte for
+Mickey & Donald 3 (J).swc you would type:
+  ucon64 -poke=2:1c "Mickey & Donald 3 (J).swc"
 I have sent all games to the Super Wild Card via a parallel cable. Note that
 for LoROM games that don't use SRAM uCON64 adjusts the emulation mode select
 byte before sending the game. This causes that some games don't have code 3,

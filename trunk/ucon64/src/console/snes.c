@@ -1542,7 +1542,7 @@ Same here.
   printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
-  return 0;
+  return n;
 }
 
 
@@ -1808,7 +1808,7 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
   printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
-  return 0;
+  return n;
 }
 
 

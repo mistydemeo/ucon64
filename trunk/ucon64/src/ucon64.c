@@ -245,6 +245,7 @@ const struct option options[] =   {
     {"pasofami", 0, 0, UCON64_PASOFAMI},
     {"patch", 1, 0, UCON64_PATCH},
     {"pce", 0, 0, UCON64_PCE},
+    {"poke", 1, 0, UCON64_POKE},
     {"port", 1, 0, UCON64_PORT},
     {"ppf", 0, 0, UCON64_PPF},
     {"ps2", 0, 0, UCON64_PS2},

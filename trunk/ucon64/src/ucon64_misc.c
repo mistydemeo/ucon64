@@ -381,6 +381,7 @@ const st_usage_t ucon64_padding_usage[] = {
 const st_usage_t ucon64_patching_usage[] =
   {
     {NULL, NULL, "Patching"},
+    {"poke", "OFF:V", "change byte at file offset OFF to value V"},
     {"patch", "PATCH", "specify the PATCH for the following options\n"
                       "use this option or uCON64 expects the last commandline\n"
                       "argument to be the name of the PATCH file"},
@@ -516,6 +517,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_PASOFAMI, UCON64_NES, nes_usage,     WF_SHOW_NFO|WF_ROM_REQUIRED},
   {UCON64_PATCH, UCON64_UNKNOWN, NULL,         WF_SHOW_NFO|WF_ROM_REQUIRED},
   {UCON64_PCE, UCON64_PCE, pcengine_usage,     WF_SHOW_NFO|WF_ROM_REQUIRED},
+  {UCON64_POKE, UCON64_UNKNOWN, NULL,          WF_ROM_REQUIRED},
   {UCON64_PORT, UCON64_UNKNOWN, NULL,          WF_SHOW_NFO|WF_ROM_REQUIRED},
   {UCON64_PPF, UCON64_UNKNOWN, NULL,           WF_SPECIAL_OPT},
   {UCON64_PS2, UCON64_PS2, ps2_usage,          WF_SHOW_NFO|WF_ROM_REQUIRED},

@@ -2508,7 +2508,7 @@ gbx_init (unsigned int parport, char *filename)
   pocket_camera = 0;
   mbc1_exp = 0;
   eeprom_type = 0;
-  maxfilesize = 8 * 1024 * 1024;        // 64Mb
+  maxfilesize = 8 * 1024 * 1024;                // 64Mb
   file_name = filename;
 
   port_8 = parport;
@@ -2531,11 +2531,11 @@ gbx_init (unsigned int parport, char *filename)
   init_port ();
   check_eeprom ();
   if (eeprom_type == 4)
-    maxfilesize = 512 * 1024;   // 4Mb
+    maxfilesize = 512 * 1024;                   // 4Mb
   if (eeprom_type == 16)
-    maxfilesize = 2 * 1024 * 1024;      // 16Mb
+    maxfilesize = 2 * 1024 * 1024;              // 16Mb
   if (eeprom_type == 64)
-    maxfilesize = 8 * 1024 * 1024;      // 64Mb
+    maxfilesize = 8 * 1024 * 1024;              // 64Mb
 }
 
 
@@ -2603,9 +2603,9 @@ gbx_write_sram (char *filename, unsigned int parport, int bank)
     sram_bank_num = bank;
 
   if (check_eeprom () != 0)
-    bank_size = 4;              // no flash card -> 4*8kB = 32kB sram
+    bank_size = 4;                              // no flash card -> 4*8kB = 32kB sram
   else
-    SetSramBank ();             // set bank_size = 4/16 banks of 8kB
+    SetSramBank ();                             // set bank_size = 4/16 banks of 8kB
 
   stat (filename, &fstat);
   if (fstat.st_size == 8 * 1024 || bank != -1)
@@ -2627,20 +2627,19 @@ gbx_write_sram (char *filename, unsigned int parport, int bank)
 int
 gbx_usage (int argc, char *argv[])
 {
-  printf ( gbx_TITLE "\n"
-
-     "  -xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
+  printf (gbx_TITLE "\n"
+          "  -xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
           "                receives automatically when $ROM does not exist\n"
           "  -xgbxs        send/receive SRAM to/from GB Xchanger; $FILE=PORT\n"
           "                receives automatically when $ROM(=SRAM) does not exist\n"
-          "  -xgbxb<n>     send/receive 64kbits SRAM to/from GB Xchanger bank n\n"
+          "  -xgbxb <n>    send/receive 64kbits SRAM to/from GB Xchanger bank n\n"
           "                n can be a number from 0 to 15\n"
           "                $FILE=PORT; receives automatically when $ROM does not exist\n"
-
-            "                You only need to specify PORT if uCON64 doesn't detect the\n"
-            "                (right) parallel port. If that is the case give a hardware\n"
-            "                address, for example:\n"
-            "                ucon64 -xgbx \"Pokemon (Green).gb\" 0x378\n");
+          "\n"
+          "                You only need to specify PORT if uCON64 doesn't detect the\n"
+          "                (right) parallel port. If that is the case give a hardware\n"
+          "                address, for example:\n"
+          "                ucon64 -xgbx \"Pokemon (Green).gb\" 0x378\n");
   return 0;
 }
 #endif // BACKUP

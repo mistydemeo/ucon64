@@ -361,8 +361,8 @@ doctor64_usage (void)
 {
     printf ("%s\n"
 
-    "  " OPTION_LONG_S "xv64        send/receive ROM to/from Doctor V64; $FILE=PORT\n"
-     "                receives automatically when $ROM does not exist\n"
+    "  " OPTION_LONG_S "xv64        send/receive ROM to/from Doctor V64; " OPTION_LONG_S "file=PORT\n"
+     "                receives automatically when " OPTION_LONG_S "rom does not exist\n"
      , doctor64_title);
 
 }

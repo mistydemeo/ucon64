@@ -1206,8 +1206,8 @@ cd64_usage (void)
 #if 0
 
     printf ("%s\n", cd64_title);
-  printf ("TODO:  -xcd64	send/receive ROM to/from CD64; $FILE=PORT\n"
-          "		receives automatically when $ROM does not exist\n");
+  printf ("TODO:  -xcd64	send/receive ROM to/from CD64; " OPTION_LONG_S "file=PORT\n"
+          "		receives automatically when " OPTION_LONG_S "rom does not exist\n");
 #endif
 }
 

@@ -703,11 +703,12 @@ void
 swc_usage (void)
 {
   printf ("%s\n"
-          "  " OPTION_LONG_S "xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
-          "                receives automatically when $ROM does not exist\n"
+          "  " OPTION_LONG_S "xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "file=PORT\n"
+          "                receives automatically when " OPTION_LONG_S "rom does not exist\n"
           "                Press q to abort ^C will cause invalid state of backup unit\n"
-          "  " OPTION_LONG_S "xswcs       send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
-          "                receives automatically when $ROM(=SRAM) does not exist\n"
+          "  " OPTION_LONG_S "xswcs       send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
+          "                " OPTION_LONG_S "file=PORT\n"
+          "                receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n"
           "                Press q to abort ^C will cause invalid state of backup unit\n"
           "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
           "      parallel port. If that is the case give a hardware address:\n"

@@ -81,8 +81,8 @@ dex_usage (void)
 
 
   printf
-    ("TODO:  -xdex    send/receive SRAM to/from DexDrive; $FILE=PORT\n"
-     "		receives automatically when $ROM(=SRAM) does not exist\n");
+    ("TODO:  -xdex    send/receive SRAM to/from DexDrive; " OPTION_LONG_S "file=PORT\n"
+     "		receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n");
 #endif
 }
 #endif // BACKUP

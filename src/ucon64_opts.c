@@ -320,7 +320,7 @@ ucon64_switches (int c, const char *optarg)
       ucon64.swc_dumping_mode = strtol (optarg, NULL, 16);
 
       if (ucon64.swc_dumping_mode &
-          (SWC_DM_ALT_ROM_SIZE | SWC_DM_SUPER_FX | SWC_DM_DX2_TRICK))
+          (SWC_DM_ALT_ROM_SIZE | SWC_DM_SUPER_FX | SWC_DM_SPC7110 | SWC_DM_DX2_TRICK))
         printf ("WARNING: Dumping mode(s) not yet implemented\n");
       if (ucon64.swc_dumping_mode & (SWC_DM_SDD1 | SWC_DM_SA1 | SWC_DM_MMX2))
         printf ("WARNING: Be sure to compile swc.c with the appropriate constants defined\n");

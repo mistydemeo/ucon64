@@ -67,17 +67,16 @@ endif                                   # cygwin
 
 distclean: clean
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f ../bin/$(TARGET) Makefile config.log config.status config.cache config.h
+	rm -f Makefile config.log config.status config.cache config.h
 else
 ifdef DJGPP
-	del ..\bin\$(TARGET)
 	del Makefile
 	del config.log
 	del config.status
 	del config.cache
 	del config.h
 else
-	rm -f ../bin/$(TARGET) Makefile config.log config.status config.cache config.h
+	rm -f Makefile config.log config.status config.cache config.h
 endif                                   # DJGPP
 endif                                   # cygwin
 
@@ -88,22 +87,11 @@ endif                                   # cygwin
 
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	cp $(TARGET) ../bin
-else
-ifdef DJGPP
-	copy $(TARGET) ..\bin
-else
-	cp $(TARGET) ../bin
-endif                                   # DJGPP
-endif                                   # cygwin
 
 install:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	cp $(TARGET) ../bin
 else
 ifdef DJGPP
-	copy $(TARGET) ..\bin
 else
 ifeq ($(OSTYPE),beos)
 	./install_beos.sh
@@ -116,10 +104,8 @@ endif                                   # cygwin
 
 uninstall:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f ../bin/$(TARGET)
 else
 ifdef DJGPP
-	del ..\bin\$(TARGET)
 else
 ifeq ($(OSTYPE),beos)
 	rm -f $(HOME)/config/bin/$(TARGET)

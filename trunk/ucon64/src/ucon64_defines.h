@@ -26,11 +26,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_NO 0
 
 #define UCON64_UNKNOWN_S "Unknown"
-#ifdef __GNUC__
-#define NULL_TO_UNKNOWN_S(str) ((str)?:UCON64_UNKNOWN_S)
-#else
+
 #define NULL_TO_UNKNOWN_S(str) ((str)?(str):UCON64_UNKNOWN_S)
-#endif // __GNUC__
 
 //#define UCON64_KNOWN -1
 #define UCON64_UNKNOWN -1

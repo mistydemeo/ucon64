@@ -128,7 +128,7 @@ ifdef DISCMAGE
 OBJECTS+=ucon64_dm.o
 endif
 ifdef GUI
-OBJECTS+=ucon64_ng.o url.o
+OBJECTS+=ucon64_ng.o
 endif
 
 ifdef DLOPEN

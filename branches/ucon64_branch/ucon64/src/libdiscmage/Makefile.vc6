@@ -2,9 +2,7 @@ DLOPEN=1
 #ZLIB=1
 
 CC=cl.exe
-CFLAGS=/nologo /I. /W3 /O2 /DHAVE_CONFIG_H /I.. /DDLL
-# The order of . and .. is important if header files are specified between
-# angle brackets
+CFLAGS=/nologo /W3 /O2 /DHAVE_CONFIG_H /DDLL
 !ifdef DLOPEN
 CFLAGS=$(CFLAGS) /DDLOPEN
 !endif
@@ -20,7 +18,7 @@ LIBS=
 
 
 FULLLIBNAME=$(LIBNAME).dll
-DLLFLAGS=/NOLOGO /DLL /OUT:$(LIBNAME).dll $(OBJECTS) $(LIBS) /DEF:discmage.def
+DLLFLAGS=/NOLOGO /DLL /OUT:$(LIBNAME).dll $(OBJECTS) $(LIBS) /DEF:$(LIBNAME).def
 
 
 all: $(FULLLIBNAME)
@@ -30,7 +28,7 @@ clean:
 	del $(LIBNAME).dll
 	del $(LIBNAME).lib
 	del *.obj
-	del discmage.exp
+	del $(LIBNAME).exp
 
 
 distclean: clean

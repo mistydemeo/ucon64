@@ -80,8 +80,7 @@ ucon64_switches (int c, const char *optarg)
 #ifdef  GUI
     case UCON64_GUI:
       if (ucon64.netgui_enabled)
-        if (optarg)
-          libng_gui (optarg);
+        libng_gui (optarg);
       exit (0);
 #endif
     /*
@@ -294,8 +293,7 @@ ucon64_switches (int c, const char *optarg)
       break;
 
     case UCON64_PORT:
-      if (optarg)
-        sscanf (optarg, "%x", &ucon64.parport);
+      sscanf (optarg, "%x", &ucon64.parport);
       break;
 
 #ifdef  PARALLEL
@@ -348,13 +346,11 @@ ucon64_switches (int c, const char *optarg)
 
     case UCON64_PATCH:
 #if 0 // falling through, so --patch is an alias for --file
-      if (optarg)
-        ucon64.file = optarg;
+      ucon64.file = optarg;
       break;
 #endif
     case UCON64_FILE:
-      if (optarg)
-        ucon64.file = optarg;
+      ucon64.file = optarg;
       break;
 
     case UCON64_I:
@@ -376,24 +372,23 @@ ucon64_switches (int c, const char *optarg)
       break;
 
     case UCON64_O:
-      if (optarg)
-        {
-          struct stat fstate;
-          int dir = 0;
+      {
+        struct stat fstate;
+        int dir = 0;
 
-          if (!stat (optarg, &fstate))
-            if (S_ISDIR (fstate.st_mode))
-              {
-                strcpy (ucon64.output_path, optarg);
-                if (ucon64.output_path[strlen (ucon64.output_path) - 1] != FILE_SEPARATOR)
-                  strcat (ucon64.output_path, FILE_SEPARATOR_S);
-                dir = 1;
-              }
+        if (!stat (optarg, &fstate))
+          if (S_ISDIR (fstate.st_mode))
+            {
+              strcpy (ucon64.output_path, optarg);
+              if (ucon64.output_path[strlen (ucon64.output_path) - 1] != FILE_SEPARATOR)
+                strcat (ucon64.output_path, FILE_SEPARATOR_S);
+              dir = 1;
+            }
 
-          if (!dir)
-            printf ("WARNING: Argument for -o must be a directory\n"
-                    "         Using current directory instead\n");
-        }
+        if (!dir)
+          printf ("WARNING: Argument for -o must be a directory\n"
+                  "         Using current directory instead\n");
+      }
       break;
 
     case UCON64_NHI:
@@ -467,11 +462,8 @@ ucon64_switches (int c, const char *optarg)
       break;
 
     case UCON64_DUMPINFO:
-      if (optarg)
-        {
-          ucon64.use_dump_info = 1;
-          ucon64.dump_info = optarg;
-        }
+      ucon64.use_dump_info = 1;
+      ucon64.dump_info = optarg;
       break;
 
     case UCON64_83:
@@ -496,6 +488,10 @@ ucon64_switches (int c, const char *optarg)
       ucon64.part_size = strtol (optarg, NULL, 10) * MBIT;
       break;
 
+    case UCON64_ID:
+      ucon64.id = 1;
+      break;
+
     default:
       break;
     }
@@ -507,7 +503,7 @@ ucon64_switches (int c, const char *optarg)
 static int
 ucon64_rename (int mode)
 {
-  char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1], suffix[80], *p = NULL;
+  char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1], suffix[80], *p, *p2;
   int good_name;
 
   buf[0] = 0;
@@ -606,9 +602,12 @@ ucon64_rename (int mode)
 
   ucon64_output_fname (buf2, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
 
-  if (one_file (ucon64.rom, buf2))
-    {
-      printf ("Skipping \"%s\"\n", basename2 (ucon64.rom));
+  p = basename2 (ucon64.rom);
+  p2 = basename2 (buf2);
+
+  if (one_file (ucon64.rom, buf2) && !strcmp (p, p2))
+    {                                           // skip only if the letter case
+      printf ("Skipping \"%s\"\n", p);          //  also matches (Windows...)
       return 0;
     }
 
@@ -626,9 +625,9 @@ ucon64_rename (int mode)
       ucon64_file_handler (buf2, NULL, OF_FORCE_BASENAME);
 
   if (!good_name)
-    printf ("Renaming \"%s\" to \"%s\"\n", basename2 (ucon64.rom), basename2 (buf2));
+    printf ("Renaming \"%s\" to \"%s\"\n", p, p2);
   else
-    printf ("Moving \"%s\"\n", basename2 (ucon64.rom));
+    printf ("Moving \"%s\"\n", p);
 #ifndef DEBUG
   rename2 (ucon64.rom, buf2);                   // rename2() must be used!
 #endif
@@ -764,10 +763,13 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_C:
     case UCON64_CS:
-      result = -1;
-      x = (c == UCON64_C ? FALSE : TRUE);
-      if (optarg)
-        result = ucon64_filefile (optarg, 0, ucon64.rom, 0, x);
+      printf ("Comparing %s", basename2 (ucon64.rom));
+      if (ucon64.fname_arch[0])
+        printf (" (%s)", basename2 (ucon64.fname_arch));
+      printf (" with %s\n", optarg);
+
+      x = c == UCON64_C ? FALSE : TRUE;
+      result = ucon64_filefile (optarg, 0, ucon64.rom, 0, x);
 
       if (result == -1)
         {
@@ -779,13 +781,17 @@ ucon64_options (int c, const char *optarg)
       else if (result >= 0)
         printf ("Found %d %s\n", result, x ? (result == 1 ? "similarity" : "similarities") :
                                              (result == 1 ? "difference" : "differences"));
+      fputc ('\n', stdout);
       break;
 
     case UCON64_FIND:
-      if (optarg)
-        printf ("Searching: \"%s\"\n\n", optarg); // TODO: display "b?a" as "b" "a"
+      fputs (basename2 (ucon64.rom), stdout);
+      if (ucon64.fname_arch[0])
+        printf (" (%s)\n", basename2 (ucon64.fname_arch));
       else
-        break; // empty search string
+        fputc ('\n', stdout);
+       
+      printf ("Searching: \"%s\"\n\n", optarg); // TODO: display "b?a" as "b" "a"
 
       while ((value = q_fncmp (ucon64.rom, value, ucon64.file_size, optarg,
                                strlen (optarg), '?')) != -1)
@@ -1194,9 +1200,12 @@ ucon64_options (int c, const char *optarg)
       lynx_b1 (ucon64.rominfo, optarg);
       break;
 
+    case UCON64_BIN:
+      genesis_bin (ucon64.rominfo);
+      break;
+
     case UCON64_BIOS:
-      if (optarg)
-        neogeo_bios (optarg);
+      neogeo_bios (optarg);
       break;
 
     case UCON64_BOT:
@@ -1232,8 +1241,7 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_COL:
-      if (optarg)
-        snes_col (optarg);
+      snes_col (optarg);
       break;
 
     case UCON64_CRP:
@@ -1254,7 +1262,7 @@ ucon64_options (int c, const char *optarg)
         case UCON64_NES:
           nes_dint ();
           break;
-        default:
+        default:                                // Nintendo 64
           puts ("Converting to deinterleaved format...");
           ucon64_file_handler (dest_name, NULL, 0);
           q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb");
@@ -1356,6 +1364,10 @@ ucon64_options (int c, const char *optarg)
         case UCON64_VMS:
           break;
 #endif
+
+    case UCON64_INVERT:
+      pcengine_invert (ucon64.rominfo);
+      break;
 
     case UCON64_J:
       switch (ucon64.console)
@@ -1543,8 +1555,7 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_SAM:
-      if (optarg)
-        neogeo_sam (optarg);
+      neogeo_sam (optarg);
       break;
 
     case UCON64_SGB:
@@ -1737,19 +1748,14 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_XMD:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
-        md_read_rom (ucon64.rom, ucon64.parport);
+        md_read_rom (ucon64.rom, ucon64.parport, 32 * MBIT);
       else                                      // file exists -> send it to the copier
         {
-#if 0
-          if (!ucon64.rominfo->buheader_len)
+          if (genesis_get_file_type () != BIN)
             fprintf (stderr,
-                    "ERROR: This ROM has no header. Convert to an MD compatible format.\n");
-          else if (!ucon64.rominfo->interleaved)
-            fprintf (stderr,
-                    "ERROR: This ROM doesn't seem to be interleaved but the MD only supports\n"
-                    "       interleaved ROMs. Convert to an MD compatible format.\n");
+                     "ERROR: This ROM is not in binary/BIN/RAW format. uCON64 only supports sending\n"
+                     "       binary files to the MD-PRO. Convert ROM with -bin.\n");
           else
-#endif
             md_write_rom (ucon64.rom, ucon64.parport);
         }
       fputc ('\n', stdout);

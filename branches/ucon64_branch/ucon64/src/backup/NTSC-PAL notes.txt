@@ -38,11 +38,12 @@ N23 = af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - S
 N24 = af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken Densetsu 2/Secret of Mana U
 N25 =    3f 21 00 89 10 c2 XX f0               3f 21 00 89 10 c2 XX 80       - Dragon - The Bruce Lee Story U
 N26 = af 3f 21 00 XX YY 29 10 00 d0         af 3f 21 00 XX YY 29 10 00 ea ea - Fatal Fury Special ?
-N27 =    3f 21 c2 XX 29 10 00 d0               3f 21 c2 XX 29 10 00 ea ea    - Dual Orb II
-N28 = af 3f 21 ea 89 10 00 d0               a9 00 00 ea 89 10 00 d0          - Super Famista 3 ?
-P29 = a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country E
-N30 = a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country U
-N31 = 29 10 00 a2 00 00 c9 10 00 d0         29 10 00 a2 00 00 c9 10 00 80    - Wolfenstein 3D U
+N27 =    3f 21 c2 XX 29 10 00 f0               3f 21 c2 XX 29 10 00 80       - Metal Warriors
+N28 =    3f 21 c2 XX 29 10 00 d0               3f 21 c2 XX 29 10 00 ea ea    - Dual Orb II
+N29 = af 3f 21 ea 89 10 00 d0               a9 00 00 ea 89 10 00 d0          - Super Famista 3 ?
+P30 = a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country E
+N31 = a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country U
+N32 = 29 10 00 a2 00 00 c9 10 00 d0         29 10 00 a2 00 00 c9 10 00 80    - Wolfenstein 3D U
 
 
 Comment:
@@ -58,13 +59,13 @@ Code1   Code2   Game
 2       N5      Clock Tower (J) <= 0x29
 1 + 2   N1      Demon's Crest (U) <= (0xad) 0x29
 1 + 2 + 4  N6   Donkey Kong Country 2 - Diddy's Kong Quest (U) (V1.1) <= can't get past the first level; 0x29
-1       P29     Donkey Kong Country (E) (V1.0)
-1       P29     Donkey Kong Country (E) (V1.1)
-1 + 2   N30     Donkey Kong Country (U) (V1.0)
-1 + 2   N30     Donkey Kong Country (U) (V1.1)
+1       P30     Donkey Kong Country (E) (V1.0)
+1       P30     Donkey Kong Country (E) (V1.1)
+1 + 2   N31     Donkey Kong Country (U) (V1.0)
+1 + 2   N31     Donkey Kong Country (U) (V1.1)
 2       N25     Dragon - The Bruce Lee Story (U)
 2       N4      Dr. Mario (J) (NP) <= 0xea 0xea
-2       N27     Dual Orb II (J)
+2       N28     Dual Orb II (J)
 1 + 2   N17     Earthbound (U) <= 0x29
 2 + 3   N1      Final Fight 3 (U) <= emulation mode select byte: 0x1c; (0xad) 0x29
 2       N19     Final Fight Guy (U) <= 0x89
@@ -78,12 +79,14 @@ Code1   Code2   Game
 2       N19     Kirby no Kirakira Kids (J) (NP) <= 0x29
 1 + 2   N17     Kirby's Dream Course (U) <= 0x29
 2       N4      Live A Live (J) <= 0xea 0xea
+2       N27     Magical Pop'n (J)
 1 + 2   N6      Mario no Super Picross (J) <= 0x89
 2       N1      Mega Man's Soccer (U) <= (0xad) 0x89
 2       N1      Mega Man VII (U) <= (0xad) 0x29
 2 + 9   N1      Mega Man X 2 (U) <= the intro can be viewed; (0xad) 0x89
 1 + 2   N1      Mega Man X (U) (V1.0) <= (0xad) 0x89
 1 + 2   N1      Mega Man X (U) (V1.1) <= (0xad) 0x89
+2       N27     Metal Warriors (U)
 2 + 3   N1 + N2 Mickey to Donald Magical Adventure 3 (J) <= emulation mode select byte: 0x1c; (0xad) 0x29
 2       N2      Ninja Gaiden Trilogy (U)
 2       N9      Robotrek (U) <= 0x20
@@ -104,7 +107,7 @@ Code1   Code2   Game
 1       P3      Tetris Attack (E)
 1 + 2   N1      Tetris Attack (U) <= (0xad) 0x89
 2 + 8 + 9  N15  Tokimeki Memorial - Densetsu no Ki no Shita de (J) (V1.1) <= the game halts after a while; 0xad 0xff
-2       N31     Wolfenstein 3D (U)
+2       N32     Wolfenstein 3D (U)
 2       N1      Yoshi's Safari (U) <= I don't have a Super Scope...; (0xad) 0x29
 2       N2      Ys V - Expert (J)
 

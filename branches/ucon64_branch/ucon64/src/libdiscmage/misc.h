@@ -292,6 +292,8 @@ extern int mkdir2 (const char *name);
 extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, int size);
 extern int argz_extract2 (char **argv, char *str, const char *separator_s, int max_args);
+#define AZ_CMD 1
+#define AZ_URL 2
 #define argz_extract3(a,c,m) argz_extract2(a,c," ",m)
 
 

@@ -103,6 +103,7 @@ open_module (char *module_name)
   sym->puts = puts;
   sym->fputs = fputs;
   sym->sscanf = sscanf;
+  sym->vsscanf = vsscanf;
   sym->fopen = fopen;
   sym->fdopen = fdopen;
   sym->popen = popen;

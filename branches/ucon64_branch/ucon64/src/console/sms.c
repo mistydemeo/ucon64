@@ -41,6 +41,8 @@ const st_usage_t sms_usage[] =
     {NULL, NULL, "Sega Master System(II/III)/Game Gear (Handheld)"},
     {NULL, NULL, "1986/19XX SEGA http://www.sega.com"},
     {"sms", NULL, "force recognition"},
+    {"int", NULL, "force ROM is in interleaved format (SMD)"},
+    {"nint", NULL, "force ROM is not in interleaved format (RAW)"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
     {"smd", NULL, "convert to Super Magic Drive/SMD (+512 Bytes)"},
     {"smds", NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"},
@@ -60,76 +62,16 @@ st_sms_header_t sms_header;
 #endif
 
 
+// see src/backup/mgd.h for the file naming scheme
 int
 sms_mgd (st_rominfo_t *rominfo)
 {
-/*
-The MGD2 only accepts certain filenames, and these filenames
-must be specified in an index file, "MULTI-GD", otherwise the
-MGD2 will not recognize the file.  In the case of multiple games
-being stored in a single disk, simply enter its corresponding
-MULTI-GD index into the "MULTI-GD" file.
-
-Mega Drive:
-
-game size       # of files      names           MUTLI-GD
-================================================================
-1M              1               MD1XXX.000      MD1XXX
-2M              1               MD2XXX.000      MD2XXX
-4M              1               MD4XXX.000      MD4XXX
-8M              1               MD8XXX.008      MD8XXX
-16M             2               MD16XXXA.018    MD16XXXA
-                                MD16XXXB.018    MD16XXXB
-24M             3               MD24XXXA.038    MD24XXXA
-                                MD24XXXB.038    MD24XXXB
-                                MD24XXXC.038    MD24XXXC
-32M             4               MD32XXXA.038    MD32XXXA
-                                MD32XXXB.038    MD32XXXB
-                                MD32XXXC.038    MD32XXXC
-                                MD32XXXD.038    MD32XXXD
-
-Usually, the filename is in the format of: SFXXYYYZ.078
-Where SF means Super Famicom, XX refers to the size of the
-image in Mbit. If the size is only one character (i.e. 2, 4 or
-8 Mbit) then no leading "0" is inserted.
-
-YYY refers to a catalogue number in Hong Kong shops
-identifying the game title. (0 is Super Mario World, 1 is F-
-Zero, etc). I was told that the Game Doctor copier produces a
-random number when backing up games.
-
-Z indicates a multi file. Like XX, if it isn't used it's
-ignored.
-
-A would indicate the first file, B the second, etc. I am told
-078 is not needed, but is placed on the end of the filename by
-systems in Asia.
-
-e.g. The first 16Mbit file of Donkey Kong Country (assuming it
-  is cat. no. 475) would look like:  SF16475A.078
-
-NOTE: Can anyone explain to me (dbjh) what the relationship is between the
-      comment above and the code below? This question applies to all source
-      files that contain similar info about the Game Doctor file naming
-      scheme...
-*/
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL, suffix[5];
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
   int size = ucon64.file_size - rominfo->buheader_len;
 
   strcpy (src_name, ucon64.rom);
-  p = basename (ucon64.rom);
-  if ((p[0] == 'G' || p[0] == 'g') && (p[1] == 'G' || p[1] == 'g'))
-    strcpy (dest_name, p);
-  else
-    sprintf (dest_name, "%s%s", is_func (p, strlen (p), isupper) ? "GG" : "gg", p);
-  if ((p = strrchr (dest_name, '.')))
-    *p = 0;
-  strcat (dest_name, "______");
-  dest_name[8] = 0;
-  sprintf (suffix, ".%03u", size / MBIT);
-  set_suffix (dest_name, suffix);
-
+  mgd_make_name (ucon64.rom, "GG", size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   if (!(buffer = (unsigned char *) malloc (size)))

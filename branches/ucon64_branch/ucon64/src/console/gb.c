@@ -329,24 +329,17 @@ int
 gameboy_mgd (st_rominfo_t *rominfo)
 // TODO: convert the ROM data
 {
-  char buf[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL;
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  int size = ucon64.file_size - rominfo->buheader_len;
 
-  p = basename (ucon64.rom);
-  if ((p[0] == 'G' || p[0] == 'g') && (p[1] == 'B' || p[1] == 'b'))
-    strcpy (buf, p);
-  else
-    sprintf (buf, "%s%s", is_func (p, strlen (p), isupper) ? "GB" : "gb", p);
-  if ((p = strrchr (buf, '.')))
-    *p = 0;
-  strcat (buf, "______");
-  buf[8] = 0;
+  strcpy (src_name, ucon64.rom);
+  mgd_make_name (ucon64.rom, "GB", size, dest_name);
+  ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
-  sprintf (dest_name, "%s.%03u", buf, (ucon64.file_size - rominfo->buheader_len) / MBIT);
-  ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
-  q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size - rominfo->buheader_len,
-          dest_name, "wb");
+  q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "wb");
 
   printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }
 
@@ -356,7 +349,7 @@ gameboy_ssc (st_rominfo_t *rominfo)
 // TODO: convert the ROM data
 {
   st_unknown_header_t unknown_header;
-  char dest_name[FILENAME_MAX], *p = NULL;
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL;
   int size = ucon64.file_size - rominfo->buheader_len;
 
   memset (&unknown_header, 0, UNKNOWN_HEADER_LEN);
@@ -367,19 +360,21 @@ gameboy_ssc (st_rominfo_t *rominfo)
   unknown_header.id2 = 0xbb;
   unknown_header.type = 2;
 
+  strcpy (src_name, ucon64.rom);
   p = basename (ucon64.rom);
-  // TODO: find out if this is correct (the file name prefix)
+  // TODO: find out if this is correct (giving the file name a prefix)
   if ((p[0] == 'G' || p[0] == 'g') && (p[1] == 'B' || p[1] == 'b'))
     strcpy (dest_name, p);
   else
     sprintf (dest_name, "%s%s", is_func (p, strlen (p), isupper) ? "GB" : "gb", p);
   set_suffix (dest_name, ".GB");
 
-  ucon64_file_handler (dest_name, NULL, 0);
+  ucon64_file_handler (dest_name, src_name, 0);
   q_fwrite (&unknown_header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
-  q_fcpy (ucon64.rom, rominfo->buheader_len, size, dest_name, "ab");
+  q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }
 
@@ -574,26 +569,25 @@ gameboy_init (st_rominfo_t *rominfo)
 st_gameboy_chksum_t
 gameboy_chksum (st_rominfo_t *rominfo)
 {
-  FILE *fh;
   st_gameboy_chksum_t sum = {0, 0};
-  int ch, i = 0;
+  unsigned char *rom_buffer;
+  int size = ucon64.file_size - rominfo->buheader_len, i;
 
-  if (!(fh = fopen (ucon64.rom, "rb")))
+  if (!(rom_buffer = (unsigned char *) malloc (size)))
     {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.rom);
-      exit (1);
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+      return sum;
     }
+  q_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
 
-  fseek (fh, rominfo->buheader_len, SEEK_SET);
-  while ((ch = fgetc (fh)) != EOF)
+  for (i = 0; i < size; i++)
     {
       if (i != 0x014d && i != 0x014e && i != 0x014f)
-        sum.value += ch;
+        sum.value += rom_buffer[i];
       if (i >= 0x0134 && i < 0x014d)
-        sum.complement += ch;
-      i++;
+        sum.complement += rom_buffer[i];
     }
-  fclose (fh);
+  free (rom_buffer);
 
   sum.complement = 0xe7 - sum.complement;
   sum.value += sum.complement;
@@ -624,3 +618,4 @@ gameboy_logo (st_rominfo_t *rominfo)
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
+ 

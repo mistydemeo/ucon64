@@ -45,6 +45,7 @@ const st_usage_t nes_usage[] =
     {NULL, NULL, "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)"},
     {NULL, NULL, "1983 Nintendo http://www.nintendo.com"},
     {"nes", NULL, "force recognition"},
+    {"n", "NEW_NAME", "change internal ROM name to NEW_NAME (UNIF only)"},
     {"unif", NULL, "convert to UNIF format/UNF (uses default values)"},
     {"ines", NULL, "convert to iNES format/NES (uses default values)"},
     {"ineshd", NULL, "extract iNES header from ROM (16 Bytes)"},
@@ -80,7 +81,6 @@ const st_usage_t nes_usage[] =
     {"cmnt", "TEXT", "specify that TEXT should be used as comment (UNIF only)"},
 #endif
     {"dumpinfo", "FILE", "use dumper info from FILE when converting to UNIF"},
-    {"n", "NEW_NAME", "change internal ROM name to NEW_NAME (UNIF only)"},
     {"fds", NULL, "convert Famicom Disk System file (diskimage) from FAM to FDS"},
     {"fdsl", NULL, "list Famicom Disk System/FDS (diskimage) contents"},
 #if 0

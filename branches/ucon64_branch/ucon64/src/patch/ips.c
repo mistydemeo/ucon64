@@ -96,7 +96,7 @@ ips_apply (const char *mod, const char *ipsname)
   ucon64_file_handler (modname, NULL, 0);
   q_fcpy (mod, 0, q_fsize (mod), modname, "wb"); // no copy if one file
 
-  if ((modfile = fopen (modname, "rb+")) == NULL)
+  if ((modfile = fopen (modname, "r+b")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], modname);
       exit (1);
@@ -365,7 +365,7 @@ ips_create (const char *orgname, const char *modname)
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], modname);
       exit (1);
     }
-  strcpy (ipsname, orgname);
+  strcpy (ipsname, modname);
   set_suffix (ipsname, ".IPS");
   ucon64_file_handler (ipsname, NULL, 0);
   if ((ipsfile = fopen (ipsname, "wb")) == NULL)

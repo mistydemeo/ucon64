@@ -12,8 +12,6 @@ LIBTOOL = libtool
 CC=gcc
 CFLAGS0=-Wall -W -O3 -DHAVE_CONFIG_H
 CFLAGS=$(CFLAGS0) -DDLL
-# The order of . and .. is important if header files are specified between
-# angle brackets
 ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
@@ -69,7 +67,9 @@ else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 
 GCCA_DIR=/mingw/lib/gcc-lib/mingw32/3.2.3/
-LIBS+=-lkernel32 -lmsvcrt -L$(GCCA_DIR) -lgcc
+LIBS+=-L/mingw/lib -lkernel32 -lmsvcrt -L$(GCCA_DIR) -lgcc
+# Msys problem: Specifying the library directory is necessary when compiling on
+# a different filesystem than the filesystem that MinGW is installed on.
 
 FULLLIBNAME=$(LIBNAME).dll
 DLLFLAGS=$(LDFLAGS) --dll -o $(LIBNAME).dll $(OBJECTS) $(LIBS) -e _DllMain@12

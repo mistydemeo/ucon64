@@ -111,6 +111,7 @@ const struct option options[] = {
     {"b0", 1, 0, UCON64_B0},
     {"b1", 1, 0, UCON64_B1},
     {"bat", 0, 0, UCON64_BAT},
+    {"bin", 0, 0, UCON64_BIN},
 #ifdef  DISCMAGE
     {"bin2iso", 1, 0, UCON64_BIN2ISO},
 #endif
@@ -120,7 +121,7 @@ const struct option options[] = {
     {"c", 1, 0, UCON64_C},
 #ifdef  DISCMAGE
     {"cdmage", 1, 0, UCON64_CDMAGE},
-#endif    
+#endif
 //    {"cd32", 0, 0, UCON64_CD32},
 //    {"cdi", 0, 0, UCON64_CDI},
     {"chk", 0, 0, UCON64_CHK},
@@ -177,6 +178,7 @@ const struct option options[] = {
     {"hex", 0, 0, UCON64_HEX},
     {"hi", 0, 0, UCON64_HI},
     {"i", 0, 0, UCON64_I},
+    {"id", 0, 0, UCON64_ID},
     {"idppf", 1, 0, UCON64_IDPPF},
     {"ines", 0, 0, UCON64_INES},
     {"ineshd", 0, 0, UCON64_INESHD},
@@ -185,6 +187,7 @@ const struct option options[] = {
     {"int", 0, 0, UCON64_INT},
     {"int2", 0, 0, UCON64_INT2},
     {"intelli", 0, 0, UCON64_INTELLI},
+    {"invert", 0, 0, UCON64_INVERT},
 //    {"ip", 0, 0, UCON64_IP},
 #ifdef  DISCMAGE
     {"isofix", 1, 0, UCON64_ISOFIX},
@@ -216,7 +219,7 @@ const struct option options[] = {
 #ifdef  DISCMAGE
     {"mksheet", 0, 0, UCON64_MKSHEET},
     {"mktoc", 0, 0, UCON64_MKTOC},
-#endif    
+#endif
     {"multi", 1, 0, UCON64_MULTI},
 //    {"mvs", 0, 0, UCON64_MVS},
     {"n", 1, 0, UCON64_N},
@@ -262,7 +265,7 @@ const struct option options[] = {
     {"rename", 0, 0, UCON64_RENAME},
 #ifdef  DISCMAGE
     {"rip", 1, 0, UCON64_RIP},
-#endif    
+#endif
     {"rr83", 0, 0, UCON64_RR83},
     {"rrom", 0, 0, UCON64_RROM},
     {"rl", 0, 0, UCON64_RL},
@@ -815,7 +818,8 @@ ucon64_execute_options (void)
   ucon64.use_dump_info =
   ucon64.console =
   ucon64.do_not_calc_crc =
-  ucon64.crc_big_files = UCON64_UNKNOWN;
+  ucon64.crc_big_files =
+  ucon64.id = UCON64_UNKNOWN;
 
   ucon64.file_size =
   ucon64.crc32 =
@@ -1204,10 +1208,7 @@ ucon64_nfo (void)
 #else
   if (ucon64.console == UCON64_UNKNOWN)
 #endif
-    {
-      fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
-      fputc ('\n', stdout);
-    }
+    fprintf (stderr, "%s\n", ucon64_msg[CONSOLE_ERROR]);
 
   if (ucon64.rominfo && ucon64.console != UCON64_UNKNOWN && !ucon64.force_disc)
     ucon64_rom_nfo (ucon64.rominfo);
@@ -1318,10 +1319,9 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
 
   // padded?
   if (!padded)
-    printf ("Padded: No\n");
+    puts ("Padded: No");
   else
-    printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n", padded,
-            TOMBIT_F (padded));
+    printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n", padded, TOMBIT_F (padded));
 
   // intro, trainer?
   // nes.c determines itself whether or not there is a trainer
@@ -1343,7 +1343,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
       rominfo->buheader_len);
   else
 // for NoisyB: <read only mode ON>
-    printf ("Backup unit/emulator header: No\n"); // printing No is handy for SNES ROMs
+    puts ("Backup unit/emulator header: No"); // printing No is handy for SNES ROMs
 // for NoisyB: <read only mode OFF>
 
   // split?
@@ -1353,7 +1353,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
       // nes.c calculates the correct checksum for split ROMs (=Pasofami
       // format), so there is no need to join the files
       if (ucon64.console != UCON64_NES)
-        printf ("NOTE: To get the correct checksum the ROM parts must be joined\n");
+        puts ("NOTE: To get the correct checksum the ROM parts must be joined");
     }
 
   // miscellaneous info
@@ -1425,7 +1425,7 @@ void
 ucon64_render_usage (const st_usage_t *usage)
 {
   // TODO: speed up
-  int x, pos = 0;
+  int x;
   char buf[MAXBUFSIZE];
 
 #ifdef  DEBUG
@@ -1469,24 +1469,37 @@ ucon64_render_usage (const st_usage_t *usage)
                   strcat (buf, "                             ");
                   buf[16] = 0;
                 }
-              printf (buf);
+              fputs (buf, stdout);
             }
 
           if (usage[x].desc)
             {
 #if 1
-              for (pos = 0; usage[x].desc[pos]; pos++)
+              // this code is slightly faster, because usage of fputc() is avoided
+              if (strchr (usage[x].desc, '\n') == NULL)
+                fputs (usage[x].desc, stdout);
+              else
                 {
-                  printf ("%c", usage[x].desc[pos]); // TODO: speed this up
+                  char c, *ptr = buf, *ptr2;
 
-                  if (usage[x].desc[pos] == '\n')
-                    printf ("                  ");
+                  strcpy (buf, usage[x].desc);
+                  for (; (ptr2 = strchr (ptr, '\n')); ptr = ptr2 + 1)
+                    {
+                      c = ptr2[1];
+                      ptr2[1] = 0;
+                      fputs (ptr, stdout);
+                      fputs ("                  ", stdout);
+                      ptr2[1] = c;
+                    }
+                  fputs (ptr, stdout);
                 }
 #else
-              for (pos = 0; ;)
+              int pos = 0;
+              for (pos = 0; usage[x].desc[pos]; pos++)
                 {
-                  strncpy (buf, usage[x].desc[pos], strcspn (usage[x].desc[pos], '\n') + 1);
-                  printf ("%s                  ", buf);
+                  fputc (usage[x].desc[pos], stdout);
+                  if (usage[x].desc[pos] == '\n')
+                    fputs ("                  ", stdout);
                 }
 #endif
               fputc ('\n', stdout);
@@ -1634,16 +1647,16 @@ ucon64_usage (int argc, char *argv[])
 
       ucon64_render_usage (ucon64_options_usage);
       fputc ('\n', stdout);
-    
+
       ucon64_render_usage (ucon64_padding_usage);
       fputc ('\n', stdout);
-    
+
 //      if (ucon64.dat_enabled)
       ucon64_render_usage (ucon64_dat_usage);
       fputc ('\n', stdout);
-    
+
       ucon64_render_usage (ucon64_patching_usage);
-    
+
       ucon64_render_usage (bsl_usage);
       ucon64_render_usage (ips_usage);
       ucon64_render_usage (aps_usage);
@@ -1651,7 +1664,7 @@ ucon64_usage (int argc, char *argv[])
       ucon64_render_usage (ppf_usage);
       ucon64_render_usage (xps_usage);
       ucon64_render_usage (gg_usage);
-    
+
       printf ("                  supported are:\n"
         "                  %s,\n"
         "                  %s,\n"
@@ -1661,7 +1674,7 @@ ucon64_usage (int argc, char *argv[])
         gameboy_usage[0].desc, sms_usage[0].desc,
 //        genesis_usage[0].desc,
         nes_usage[0].desc, snes_usage[0].desc);
-    
+
 #ifdef  DISCMAGE
       if (ucon64.discmage_enabled)
         {
@@ -1669,7 +1682,7 @@ ucon64_usage (int argc, char *argv[])
           fputc ('\n', stdout);
         }
 #endif
-    
+
       for (x = 0; usage_array[x].console != 0; x++)
         {
           int y = 0;
@@ -1683,7 +1696,7 @@ ucon64_usage (int argc, char *argv[])
   printf ("DATabase: %d known ROMs (DAT files: %s)\n\n",
           ucon64_dat_total_entries (), ucon64.datdir);
 
-#ifdef  DISCMAGE          
+#ifdef  DISCMAGE
   name_discmage =
 #ifdef  DLOPEN
     ucon64.discmage_path;
@@ -1705,7 +1718,7 @@ ucon64_usage (int argc, char *argv[])
       fputc ('\n', stdout);
     }
 #endif
-    
+
 #undef  PARALLEL_MSG
 #ifdef  PARALLEL
 #define PARALLEL_MSG "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n" \

@@ -80,8 +80,10 @@ const st_usage_t snes_usage[] =
     {"nhd", NULL, "force ROM has no SMC/FIG/SWC header (MGD2/MGH/RAW)"},
     {"ns", NULL, "force ROM is not split"},
 #endif
-    {"int", NULL, "force ROM is in interleaved format"},
-    {"int2", NULL, "force ROM is in interleaved format 2"},
+// the next switch remains undocumented until we know of a good checksum algorithm
+//    {"id", NULL, "force -gd3 to produce a unique file name"},
+    {"int", NULL, "force ROM is in interleaved format (GD3/UFO)"},
+    {"int2", NULL, "force ROM is in interleaved format 2 (SFX)"},
     {"nint", NULL, "force ROM is not in interleaved format"},
     {"bs", NULL, "force ROM is a Broadcast Satellaview dump"},
     {"nbs", NULL, "force ROM is a regular cartridge dump"},
@@ -599,68 +601,26 @@ snes_fig (st_rominfo_t *rominfo)
 }
 
 
-/*
-The MGD2 only accepts certain filenames, and these filenames
-must be specified in an index file, "MULTI-GD", otherwise the
-MGD2 will not recognize the file. In the case of multiple games
-being stored in a single disk, simply enter its corresponding
-MULTI-GD index into the "MULTI-GD" file.
-
-game size       # of files      names           MULTI-GD
-================================================================
-4M              1               SF4XXX.048      SF4XXX
-4M              2               SF4XXXxA.078    SF4XXXxA
-                                SF4XXXxB.078    SF4XXXxB
-8M              1               SF8XXX.058      SF8XXX
-                2               SF8XXXxA.078    SF8XXXxA
-                                SF8XXXxB.078    SF8xxxxB
-16M             2               SF16XXXA.078    SF16XXXA
-                                SF16XXXB.078    SF16XXXB
-24M             3               SF24XXXA.078    SF24XXXA
-                                SF24XXXB.078    SF24XXXB
-                                SF24XXXC.078    SF24XXXC
-
-Contrary to popular belief the Game Doctor *does* use a 512
-byte header like the SWC, but it also accepts headerless files.
-A header is necessary when things like SRAM size must be made
-known to the Game Doctor. The Game Doctor also uses specially
-designed filenames to distinguish between multi files.
-
-Usually, the filename is in the format of: SFXXYYYZ.078
-
-Where SF means Super Famicom, XX refers to the size of the
-image in Mbit. If the size is only one character (i.e. 2, 4 or
-8 Mbit) then no leading "0" is inserted.
-
-YYY refers to a catalogue number in Hong Kong shops
-identifying the game title. (0 is Super Mario World, 1 is F-
-Zero, etc). I was told that the Game Doctor copier produces a
-random number when backing up games.
-
-Z indicates a multi file. Like XX, if it isn't used it's
-ignored.
-
-A would indicate the first file, B the second, etc. I am told
-078 is not needed, but is placed on the end of the filename by
-systems in Asia.
-
-e.g. The first 16 Mbit file of Donkey Kong Country (assuming it
-is cat. no. 475) would look like: SF16475A.078
-*/
+// see src/backup/mgd.h for the file naming scheme
 int
 snes_mgd (st_rominfo_t *rominfo)
 {
-  char mgh[32], src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *fname;
-  int n, size = ucon64.file_size - rominfo->buheader_len;
+  char mgh[32], src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  int size = ucon64.file_size - rominfo->buheader_len;
+
+  if (snes_hirom)
+    printf ("NOTE: This game might not work with a MGD because it's a HiROM game\n");
 
   strcpy (src_name, ucon64.rom);
-  fname = basename (ucon64.rom);
-  sprintf (dest_name, "%s%d", is_func (fname, strlen (fname), isupper) ? "SF" : "sf", size / MBIT);
-  strncat (dest_name, fname, 5);
-  dest_name[8] = 0;
-  for (n = 3; n < 8; n++)
-    if (dest_name[n] == ' ')
-      dest_name[n] = '_';
+  mgd_make_name (ucon64.rom, "SF", size, dest_name);
+  ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
+
+  if (rominfo->interleaved)
+    write_deinterleaved_data (rominfo, src_name, dest_name, size, 0);
+  else
+    q_fcpy (src_name, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
 
   // What is the format of this MULTI-GD file?
   mgh[0] = 'M';
@@ -671,16 +631,7 @@ snes_mgd (st_rominfo_t *rominfo)
   memcpy (mgh + 16, rominfo->name, 15);         // copy first 15 bytes (don't use strlen() or strcpy())
   mgh[31] = (unsigned char) 0xff;
 
-  set_suffix (dest_name, ".078");
-  ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
-  if (rominfo->interleaved)
-    write_deinterleaved_data (rominfo, src_name, dest_name, size, 0);
-  else
-    q_fcpy (src_name, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
-  printf (ucon64_msg[WROTE], dest_name);
-  remove_temp_file ();
-
-  strcpy (dest_name, "MULTI-GD.MGH"); // uCON does "set_suffix (dest_name, ".MGH");" instead
+  strcpy (dest_name, "MULTI-GD" /*.MGH"*/); // uCON does "set_suffix (dest_name, ".MGH");" instead
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
   q_fwrite (&mgh, 0, sizeof (mgh), dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
@@ -690,12 +641,12 @@ snes_mgd (st_rominfo_t *rominfo)
 
 
 void
-snes_int_blocks (unsigned char *deintptr, unsigned char *ipl,
+snes_int_blocks (const unsigned char *deintptr, unsigned char *ipl,
                  unsigned char *iph, int nblocks)
 {
   int i;
 
-  // interleave 64K blocks
+  // interleave 64 K blocks
   for (i = nblocks; i > 0; i--)
     {
       memmove (ipl, deintptr, 0x8000);
@@ -731,11 +682,90 @@ snes_mirror (unsigned char *dstbuf, unsigned int start, unsigned int data_end,
 }
 
 
+static void
+make_gd_name (const char *filename, st_rominfo_t *rominfo, char *name,
+              unsigned char *buffer, int newsize)
+{
+  char *p, id_str[3];
+  int n, size = ucon64.file_size - rominfo->buheader_len;
+
+  if (UCON64_ISSET (ucon64.id))
+    {
+      /*
+        We include the underscore so that we can encode a base 37 number (10
+        digits + 26 characters in alphabet + underscore = 37). The ID is 3
+        characters long which makes it possible to have 37^3 = 50653 different
+        IDs. If we wouldn't include the underscore we would have 46656
+        different IDs.
+        We can't use the SNES checksum because several ROM dumps have the same
+        checksum (not only PD files!). Nor can we use the internal SNES
+        checksum, because several beta ROM dumps have an internal checksum of
+        0 or 0xffff.
+      */
+      unsigned int local_buffer = !buffer, d2, d1, d0, id = 0;
+
+      if (local_buffer)
+        {
+          if (!(buffer = (unsigned char *) malloc (size)))
+            {
+              fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+              exit (1);
+            }
+          q_fread (buffer, ucon64.rominfo->buheader_len, size, filename);
+          if (rominfo->interleaved)
+            snes_deinterleave (rominfo, &buffer, size);
+        }
+
+      for (n = 0; n < size; n++)
+        id += buffer[n] ^ (n & 0xff);
+      id %= 37 * 37 * 37;               // ensure value can be encoded with 3 base 37 digits
+
+      if (local_buffer)
+        free (buffer);
+
+      d2 = id / (37 * 37);
+      d1 = (id % (37 * 37)) / 37;
+      d0 = id % 37;
+      id_str[0] = d2 == 36 ? '_' : (d2 <= 9 ? d2 + '0' : d2 + 'A' - 10);
+      id_str[1] = d1 == 36 ? '_' : (d1 <= 9 ? d1 + '0' : d1 + 'A' - 10);
+      id_str[2] = d0 == 36 ? '_' : (d0 <= 9 ? d0 + '0' : d0 + 'A' - 10);
+
+      p = id_str;
+    }
+  else
+    p = basename (filename);
+
+  sprintf (name, "%s%d%s", is_func (p, strlen (p), isupper) ? "SF" : "sf",
+           newsize / MBIT, p);
+  if (newsize < 10 * MBIT)
+    {
+      if (!strnicmp (name, p, 3))
+        strcpy (name, p);
+    }
+  else
+    {
+      if (!strnicmp (name, p, 4))
+        strcpy (name, p);
+    }
+
+  if ((p = strrchr (name, '.')))
+    *p = 0;
+  strcat (name, "___");
+  if (newsize < 10 * MBIT)
+    name[6] = 0;
+  else
+    name[7] = 0;
+  // avoid trouble with filenames containing spaces
+  for (n = 3; n < 7; n++)                       // skip "sf" and first digit
+    if (name[n] == ' ')
+      name[n] = '_';
+}
+
+
 int
 snes_gd3 (st_rominfo_t *rominfo)
 {
-  char header[GD_HEADER_LEN], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
-       *p;
+  char header[GD_HEADER_LEN], src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *srcbuf, *dstbuf;
   int n, n4Mbparts, surplus4Mb, total4Mbparts, size, newsize, pad,
       half_size_4Mb, half_size_1Mb;
@@ -746,31 +776,14 @@ snes_gd3 (st_rominfo_t *rominfo)
   total4Mbparts = n4Mbparts + (surplus4Mb > 0 ? 1 : 0);
 
   strcpy (src_name, ucon64.rom);
-  p = basename (ucon64.rom);
-  n = ((size + MBIT - 1) / MBIT);
-  if (n == 20)
-    n = 24;
-#ifdef  PAD_40MBIT_GD3_DUMPS
-  else if (n > 32 && n < 48)
-    n = 48;
-#else
-  else if (n > 32 && n < 40)
-    n = 40;
-  else if (n > 40 && n < 48)
-    n = 48;
-#endif
-  sprintf (dest_name, "%s%d%s", is_func (p, strlen (p), isupper) ? "SF" : "sf", n, p);
-  if ((p = strrchr (dest_name, '.')))
-    *p = 0;
-  strcat (dest_name, "_____");
-  if (total4Mbparts * 4 < 10)
-    dest_name[6] = 0;
-  else
-    dest_name[7] = 0;
-  // avoid trouble with filenames containing spaces
-  for (n = 3; n < 7; n++)                       // skip "sf" and first digit
-    if (dest_name[n] == ' ')
-      dest_name[n] = '_';
+  if (!(srcbuf = (unsigned char *) malloc (size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], (int) size);
+      exit (1);
+    }
+  q_fread (srcbuf, rominfo->buheader_len, size, ucon64.rom);
+  if (rominfo->interleaved)
+    snes_deinterleave (rominfo, &srcbuf, size);
 
   if (snes_hirom)
     {
@@ -846,20 +859,11 @@ snes_gd3 (st_rominfo_t *rominfo)
         newsize = ((size + MBIT - 1) / MBIT) * MBIT;
       pad = (newsize - size) / 2;
 
-      if (!(srcbuf = (unsigned char *) malloc (size)))
-        {
-          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], (int) size);
-          exit (1);
-        }
       if (!(dstbuf = (unsigned char *) malloc (newsize)))
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], (int) newsize);
           exit (1);
         }
-
-      q_fread (srcbuf, rominfo->buheader_len, size, ucon64.rom);
-      if (rominfo->interleaved)
-        snes_deinterleave (rominfo, &srcbuf, size);
       if (newsize > size)
         memset (dstbuf + size, 0, newsize - size);
 
@@ -901,22 +905,6 @@ snes_gd3 (st_rominfo_t *rominfo)
               snes_mirror (dstbuf, n + half_size_4Mb, n + half_size_1Mb, newsize);
             }
         }
-
-      set_nsrt_info (rominfo, (unsigned char *) &header);
-
-      // here we could also use NULL as second argument for
-      //  ucon64_file_handler(), because we've already loaded the data
-      ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
-      q_fwrite (header, 0, GD_HEADER_LEN, dest_name, "wb");
-      q_fwrite (dstbuf, GD_HEADER_LEN, newsize, dest_name, "ab");
-      printf (ucon64_msg[WROTE], dest_name);
-      remove_temp_file ();
-
-      free (srcbuf);
-      free (dstbuf);
-
-      rominfo->buheader_len = GD_HEADER_LEN;
-      rominfo->interleaved = 1;
     }
   else
     {
@@ -953,20 +941,24 @@ snes_gd3 (st_rominfo_t *rominfo)
           header[0x28] = 0x40;
         }
 
-      set_nsrt_info (rominfo, (unsigned char *) &header);
-
-      ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
-      q_fwrite (header, 0, GD_HEADER_LEN, dest_name, "wb");
-      if (rominfo->interleaved)
-        write_deinterleaved_data (rominfo, src_name, dest_name, size, GD_HEADER_LEN);
-      else
-        q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
-      printf (ucon64_msg[WROTE], dest_name);
-      remove_temp_file ();
-
-      rominfo->buheader_len = GD_HEADER_LEN;
-      rominfo->interleaved = 1;
+      dstbuf = srcbuf;
+      newsize = size;
     }
+
+  set_nsrt_info (rominfo, (unsigned char *) &header);
+
+  make_gd_name (ucon64.rom, rominfo, dest_name, srcbuf, newsize);
+  // here we could also use NULL as second argument for
+  //  ucon64_file_handler(), because we've already loaded the data
+  ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
+  q_fwrite (header, 0, GD_HEADER_LEN, dest_name, "wb");
+  q_fwrite (dstbuf, GD_HEADER_LEN, newsize, dest_name, "ab");
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+
+  free (srcbuf);
+  if (snes_hirom)
+    free (dstbuf);
 
   return 0;
 }
@@ -1020,7 +1012,7 @@ snes_ufo (st_rominfo_t *rominfo)
       header.size = newsize / MBIT;
 
       if (snes_sramsize != 0)
-        header.sram_a20_a21 = 0x0c;             // Try 3 if game gives protection message
+        header.sram_a20_a21 = 0x0c;             // try 3 if game gives protection message
       header.sram_a22_a23 = 2;
       // Tales of Phantasia (J) & Dai Kaiju Monogatari 2 (J) [14-17]: 0 0x0e 0 0
 
@@ -1080,7 +1072,7 @@ snes_ufo (st_rominfo_t *rominfo)
         }
       else // cartridge contains SRAM
         {
-          header.sram_a15 = 2;                  // Try 1 if game gives protection error
+          header.sram_a15 = 2;                  // try 1 if game gives protection error
           header.sram_a20_a21 = 0x0f;
           header.sram_a22_a23 = 3;
         }
@@ -1102,25 +1094,16 @@ int
 snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
 // This function assumes file with name filename is in GD3 format
 {
-  char dest_name[FILENAME_MAX], *p;
-  int nparts, surplus, n, size, n_names = 0;
-
-  size = ucon64.file_size - rominfo->buheader_len;
-  p = basename (filename);
+  char dest_name[FILENAME_MAX];
+  int nparts, surplus, n, n_names = 0, size = ucon64.file_size - rominfo->buheader_len;
 
   // Don't use PARTSIZE here, because the Game Doctor doesn't support
   //  arbitrary part sizes
   nparts = size / (8 * MBIT);
   surplus = size % (8 * MBIT);
 
-  if ((p[0] == 'S' || p[0] == 's') && (p[1] == 'F' || p[1] == 'f'))
-    sprintf (dest_name, "SF%d%s", size / MBIT, p + 2);
-  else
-    sprintf (dest_name, "SF%d%s", size / MBIT, p);
+  make_gd_name (filename, rominfo, dest_name, NULL, size);
   strupr (dest_name);
-  if ((p = strrchr (dest_name, '.')))
-    *p = 0;
-  strcat (dest_name, "______");
   dest_name[7] = 'A';
   dest_name[8] = 0;
   // avoid trouble with filenames containing spaces
@@ -1477,7 +1460,7 @@ snes_j (st_rominfo_t *rominfo)
   if (p == NULL)                                // filename doesn't contain a period
     p = src_name + strlen (src_name) - 1;
   else
-    (type == GD3 || type == MGD) ? p-- : p++;
+    (type == GD3 || type == MGD_SNES) ? p-- : p++;
 
   // Split GD3 files don't have a header _except_ the first one
   block_size = q_fsize (src_name) - header_len;
@@ -1890,6 +1873,7 @@ af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Seiken 
 af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken Densetsu 2/Secret of Mana U
    3f 21 00 89 10 c2 XX f0               3f 21 00 89 10 c2 XX 80       - Dragon - The Bruce Lee Story U
 af 3f 21 00 XX YY 29 10 00 d0         af 3f 21 00 XX YY 29 10 00 ea ea - Fatal Fury Special ?
+   3f 21 c2 XX 29 10 00 f0               3f 21 c2 XX 29 10 00 80       - Metal Warriors
    3f 21 c2 XX 29 10 00 d0               3f 21 c2 XX 29 10 00 ea ea    - Dual Orb 2
 af 3f 21 ea 89 10 00 d0               a9 00 00 ea 89 10 00 d0          - Super Famista 3 ?
 a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country U
@@ -1972,6 +1956,7 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
       n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x29\x10\x80\x2d\x00\x1b", 10, '\x01', '\x02', "\x00", 1, -4);
       n += change_mem (buffer, bytesread, "\x3f\x21\x00\x89\x10\xc2\x01\xf0", 8, '\x01', '\x02', "\x80", 1, 0);
       n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x01\x01\x29\x10\x00\xd0", 10, '\x01', '\x02', "\xea\xea", 2, 0);
+      n += change_mem (buffer, bytesread, "\x3f\x21\xc2\x01\x29\x10\x00\xf0", 8, '\x01', '\x02', "\x80", 1, 0);
       n += change_mem (buffer, bytesread, "\x3f\x21\xc2\x01\x29\x10\x00\xd0", 8, '\x01', '\x02', "\xea\xea", 2, 0);
       n += change_mem (buffer, bytesread, "\xaf\x3f\x21\xea\x89\x10\x00\xd0", 8, '\x01', '\x02', "\xa9\x00\x00", 3, -7);
       n += change_mem (buffer, bytesread, "\xa2\x18\x01\xbd\x27\x20\x89\x10\x00\xd0\x01", 11, '*', '!', "\xea\xea", 2, -1);
@@ -2190,7 +2175,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     uCON64 detects as the interleaved dump of Shin Syogi Club (J) are identical
     to the first 512 bytes of what we detect as the uninterleaved dump of
     Kakinoki Shogi (J). We prefer uninterleaved dumps. Besides, concluding a
-    dump is interleaved if the first 512 byte have CRC32 0xbd7bc39f would mess
+    dump is interleaved if the first 512 bytes have CRC32 0xbd7bc39f would mess
     up the detection of some BS dumps. See below.
 
     0x7039388a: Ys 3 - Wanderers from Ys (J)
@@ -2202,7 +2187,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     another way, but DKM2 (40 Mbit) can't. The CRC32's are checked for below.
 
     0xdbc88ebf: BS Satella2 1 (J)
-    This game has a LoROM map type byte while it is a HiROM game
+    This game has a LoROM map type byte while it is a HiROM game.
 
     0x29226b62: BS Busters - Digital Magazine 5-24-98 (J),
                 BS Do-Re-Mi No.2 5-10 (J),
@@ -2347,7 +2332,7 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_si
   if (nblocks * 2 > 256)
     return -1;                                  // file > 8 MB
 
-  if (rominfo->interleaved == 2)                // SFX2 games (Doom, Yoshi's Island)
+  if (rominfo->interleaved == 2)                // SFX(2) games (Doom, Yoshi's Island)
     {
       for (i = 0; i < nblocks * 2; i++)
         {
@@ -2444,7 +2429,7 @@ snes_buheader_info (st_rominfo_t *rominfo)
   int x, y;
   snes_file_t org_type = type;
 
-  if (rominfo->buheader_len == 0) // type == MGD
+  if (rominfo->buheader_len == 0) // type == MGD_SNES
     {
       printf ("This ROM has no backup unit header\n");
       return -1;
@@ -2717,14 +2702,14 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
           )
     type = FIG;
   else if (rominfo->buheader_len == 0 && x == 0xffff)
-    type = MGD;
+    type = MGD_SNES;
 
   /*
     x can be better trusted than type == FIG, but x being 0xffff is definitely
     not a guarantee that rominfo->buheader_len already has the right value
     (e.g. Earthworm Jim (U), Alfred Chicken (U|E), Soldiers of Fortune (U)).
   */
-  if (type != MGD) // don't do "&& type != SMC" or we'll miss a lot of PD ROMs
+  if (type != MGD_SNES) // don't do "&& type != SMC" or we'll miss a lot of PD ROMs
     {
       y = ((header->size_high << 8) + header->size_low) * 8 * 1024;
       y += SWC_HEADER_LEN;                      // if SWC-like header -> hdr[1] high byte,
@@ -2737,7 +2722,7 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
             // most likely we guessed the copier type wrong
             {
               rominfo->buheader_len = 0;
-              type = MGD;
+              type = MGD_SNES;
             }
           /*
             16384 instead of MAXBUFSIZE (32768) to detect "Joystick Sampler
@@ -2755,7 +2740,7 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn switch was specified
     {
       rominfo->buheader_len = ucon64.buheader_len;
-      if (type == MGD && rominfo->buheader_len)
+      if (type == MGD_SNES && rominfo->buheader_len)
         type = SMC;
     }
 }
@@ -3166,7 +3151,7 @@ snes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, "\n");
 
       sprintf (buf, "ROM speed: %s\n",
-               snes_header.map_type & 0x10 ? "120ns (FastROM)" : "200ns (SlowROM)");
+               snes_header.map_type & 0x10 ? "120 ns (FastROM)" : "200 ns (SlowROM)");
       strcat (rominfo->misc, buf);
 
       snes_sramsize = snes_header.sram_size ? 1 << (snes_header.sram_size + 10) : 0;
@@ -3218,7 +3203,7 @@ snes_init (st_rominfo_t *rominfo)
         "(snes_header.bs_map_type >> 4) > 2".
       */
       sprintf (buf, "ROM speed: %s\n",
-               snes_header.bs_map_type & 0x10 ? "120ns (FastROM)" : "200ns (SlowROM)");
+               snes_header.bs_map_type & 0x10 ? "120 ns (FastROM)" : "200 ns (SlowROM)");
       strcat (rominfo->misc, buf);
     }
 

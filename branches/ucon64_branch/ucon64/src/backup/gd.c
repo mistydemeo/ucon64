@@ -439,7 +439,7 @@ gd6_receive_bytes (unsigned char *buffer, int len)
   unsigned char nibble1, nibble2;
   unsigned int timeout = 0x1e0000;
 
-  outportb ((unsigned short) gd_port, 0x80);	// Signal the SF6/SF7 to send the next nibble
+  outportb ((unsigned short) gd_port, 0x80);    // Signal the SF6/SF7 to send the next nibble
   for (i = 0; i < len; i++)
     {
       while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0)
@@ -661,7 +661,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
             }
         }
 
-      send_header = (i == 0) ? 1 : 0;
+      send_header = i == 0 ? 1 : 0;
       if (gd_send_unit_prolog (send_header, gd3_dram_unit[i].size) == GD_ERROR)
         io_error ();
       if (gd_send_prolog_bytes ((unsigned char *) gd3_dram_unit[i].name, 11) == GD_ERROR)

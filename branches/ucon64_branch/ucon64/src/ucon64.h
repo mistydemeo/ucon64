@@ -173,13 +173,16 @@ typedef struct
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
   /*
     These values override values in st_rominfo_t. Use UCON64_ISSET()
-    to check them. When adding new ones don't forget to update ucon64_flush()
+    to check them. When adding new ones don't forget to update ucon64_execute_options()
     too.
   */
   int buheader_len;                             // length of backup unit header 0 == no bu hdr
+  int interleaved;                              // ROM is interleaved (swapped)
+  int id;                                       // generate unique name (currently
+                                                  //  only used by snes_gd3())
+  // the following values are for the SNES, NES and the Genesis
   int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
   int snes_hirom;                               // SNES ROM is HiROM
-  int interleaved;                              // ROM is interleaved (swapped)
 
   // the following values are for the SNES, NES and the Genesis
   int part_size;                                // SNES split part size
@@ -187,7 +190,7 @@ typedef struct
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
   int controller;                               // NES UNIF & SNES NSRT
   int controller2;                              // SNES NSRT
-  int tv_standard;                              // NES UNIF
+  int tv_standard;                              // NES UNIF/Genesis
   int battery;                                  // NES UNIF/iNES/Pasofami
   int vram;                                     // NES UNIF
   int mirror;                                   // NES UNIF/iNES/Pasofami

@@ -38,6 +38,93 @@ extern st_symbol_t import_export;
 int errno = 0; // TODO: verify how dangerous this is (is it?)
 
 
+int
+printf (const char *format, ...)
+{
+  va_list argptr;
+  int n_chars;
+
+  va_start (argptr, format);
+  n_chars = import_export.vfprintf (&import_export.__dj_stdout, format, argptr);
+  va_end (argptr);
+  return n_chars;
+}
+
+
+int
+fprintf (FILE *file, const char *format, ...)
+{
+  va_list argptr;
+  int n_chars;
+
+  va_start (argptr, format);
+  n_chars = import_export.vfprintf (file, format, argptr);
+  va_end (argptr);
+  return n_chars;
+}
+
+
+int
+vfprintf (FILE *file, const char *format, va_list argptr)
+{
+  return import_export.vfprintf (file, format, argptr);
+}
+
+
+int
+sprintf (char *buffer, const char *format, ...)
+{
+  va_list argptr;
+  int n_chars;
+
+  va_start (argptr, format);
+  n_chars = import_export.vsprintf (buffer, format, argptr);
+  va_end (argptr);
+  return n_chars;
+}
+
+
+int
+vsprintf (char *buffer, const char *format, va_list argptr)
+{
+  return import_export.vsprintf (buffer, format, argptr);
+}
+
+
+int
+puts (const char *str)
+{
+  return import_export.puts (str);
+}
+
+
+int
+fputs (const char *str, FILE *file)
+{
+  return import_export.fputs (str, file);
+}
+
+
+int
+sscanf (const char *buffer, const char *format, ...)
+{
+  va_list argptr;
+  int n_chars;
+
+  va_start (argptr, format);
+  n_chars = import_export.vsscanf (buffer, format, argptr);
+  va_end (argptr);
+  return n_chars;
+}
+
+
+int
+vsscanf (const char *buffer, const char *format, va_list argptr)
+{
+  return import_export.vsscanf (buffer, format, argptr);
+}
+
+
 FILE *
 fopen (const char *filename, const char *mode)
 {
@@ -45,10 +132,10 @@ fopen (const char *filename, const char *mode)
 }
 
 
-int
-fclose (FILE *file)
+FILE *
+fdopen (int fd, const char *mode)
 {
-  return import_export.fclose (file);
+  return import_export.fdopen (fd, mode);
 }
 
 
@@ -56,6 +143,13 @@ FILE *
 popen (const char *command, const char *mode)
 {
   return import_export.popen (command, mode);
+}
+
+
+int
+fclose (FILE *file)
+{
+  return import_export.fclose (file);
 }
 
 
@@ -73,10 +167,31 @@ fseek (FILE *file, long offset, int mode)
 }
 
 
+long
+ftell (FILE *file)
+{
+  return import_export.ftell (file);
+}
+
+
+void
+rewind (FILE *file)
+{
+  return import_export.rewind (file);
+}
+
+
 size_t
 fread (void *buffer, size_t size, size_t number, FILE *file)
 {
   return import_export.fread (buffer, size, number, file);
+}
+
+
+size_t
+fwrite (const void *buffer, size_t size, size_t number, FILE *file)
+{
+  return import_export.fwrite (buffer, size, number, file);
 }
 
 
@@ -101,13 +216,6 @@ feof (FILE *file)
 }
 
 
-size_t
-fwrite (const void *buffer, size_t size, size_t number, FILE *file)
-{
-  return import_export.fwrite (buffer, size, number, file);
-}
-
-
 int
 fputc (int character, FILE *file)
 {
@@ -115,22 +223,34 @@ fputc (int character, FILE *file)
 }
 
 
-long
-ftell (FILE *file)
+int
+fflush (FILE *file)
 {
-  return import_export.ftell (file);
+  return import_export.fflush (file);
 }
 
 
-void
-rewind (FILE *file)
+int
+ferror (FILE *file)
 {
-  return import_export.rewind (file);
+  return import_export.ferror (file);
 }
 
 
-// The functions below are only necessary if zlib support is enabled. They are
-//  used by zlib and/or unzip.c.
+int
+rename (const char *oldname, const char *newname)
+{
+  return import_export.rename (oldname, newname);
+}
+
+
+int
+remove (const char *filename)
+{
+  return import_export.remove (filename);
+}
+
+
 void
 free (void *mem)
 {
@@ -149,6 +269,46 @@ void *
 calloc (size_t n_elements, size_t size)
 {
   return import_export.calloc (n_elements, size);
+}
+
+
+void
+exit (int code)
+{
+  import_export.exit (code);
+}
+
+
+long
+strtol (const char *str, char **endptr, int base)
+{
+  return import_export.strtol (str, endptr, base);
+}
+
+
+char *
+getenv (const char *name)
+{
+  return import_export.getenv (name);
+}
+
+
+void
+srand (unsigned seed)
+{
+  return import_export.srand (seed);
+}
+
+
+int rand (void)
+{
+  return import_export.rand ();
+}
+
+
+int atoi (const char *str)
+{
+  return import_export.atoi (str);
 }
 
 
@@ -181,63 +341,215 @@ strcpy (char *dest, const char *src)
 
 
 char *
+strncpy (char *dest, const char *src, size_t n)
+{
+  return import_export.strncpy (dest, src, n);
+}
+
+
+char *
 strcat (char *s1, const char *s2)
 {
   return import_export.strcat (s1, s2);
 }
 
 
-int
-fprintf (FILE *file, const char *format, ...)
+char *
+strncat (char *s1, const char *s2, size_t n)
 {
-  va_list argptr;
-  int n_chars;
-
-  va_start (argptr, format);
-  n_chars = import_export.vfprintf (file, format, argptr);
-  va_end (argptr);
-  return n_chars;
+  return import_export.strncat (s1, s2, n);
 }
 
 
 int
-sprintf (char *buffer, const char *format, ...)
+strcasecmp (const char *s1, const char *s2)
 {
-  va_list argptr;
-  int n_chars;
-
-  va_start (argptr, format);
-  n_chars = import_export.vsprintf (buffer, format, argptr);
-  va_end (argptr);
-  return n_chars;
+  return import_export.strcasecmp (s1, s2);
 }
 
 
 int
-vsprintf (char *buffer, const char *format, va_list argptr)
+strncasecmp (const char *s1, const char *s2, size_t n)
 {
-  return import_export.vsprintf (buffer, format, argptr);
+  return import_export.strncasecmp (s1, s2, n);
+}
+
+
+char *
+strchr (const char *str, int c)
+{
+  return import_export.strchr (str, c);
+}
+
+
+char *
+strrchr (const char *str, int c)
+{
+  return import_export.strrchr (str, c);
+}
+
+
+char *
+strpbrk (const char *str, const char *set)
+{
+  return import_export.strpbrk (str, set);
+}
+
+
+size_t
+strspn (const char *str, const char *set)
+{
+  return import_export.strspn (str, set);
+}
+
+
+size_t
+strcspn (const char *str, const char *set)
+{
+  return import_export.strcspn (str, set);
+}
+
+
+size_t
+strlen (const char *str)
+{
+  return import_export.strlen (str);
+}
+
+
+char *
+strstr (const char *s1, const char *s2)
+{
+  return import_export.strstr (s1, s2);
+}
+
+
+char *
+strdup (const char *str)
+{
+  return import_export.strdup (str);
+}
+
+
+char *
+strtok (char *s1, const char *s2)
+{
+  return import_export.strtok (s1, s2);
+}
+
+
+#undef  tolower
+int
+tolower (int c)
+{
+  return import_export.tolower (c);
+}
+
+
+#undef  toupper
+int
+toupper (int c)
+{
+  return import_export.toupper (c);
+}
+
+
+#undef  isupper
+int
+isupper (int c)
+{
+  return import_export.isupper (c);
+}
+
+
+DIR *
+opendir (const char *dirname)
+{
+  return import_export.opendir (dirname);
+}
+
+
+struct dirent *
+readdir (DIR *dir)
+{
+  return import_export.readdir (dir);
 }
 
 
 int
-fflush (FILE *file)
+closedir (DIR *dir)
 {
-  return import_export.fflush (file);
+  return import_export.closedir (dir);
 }
 
 
 int
-ferror (FILE *file)
+access (const char *filename, int mode)
 {
-  return import_export.ferror (file);
+  return import_export.access (filename, mode);
 }
 
 
-FILE *
-fdopen (int fd, const char *mode)
+int
+rmdir (const char *dirname)
 {
-  return import_export.fdopen (fd, mode);
+  return import_export.rmdir (dirname);
+}
+
+
+int
+isatty (int fd)
+{
+  return import_export.isatty (fd);
+}
+
+
+int
+chdir (const char *dirname)
+{
+  return import_export.chdir (dirname);
+}
+
+
+char *
+getcwd (char *buffer, size_t size)
+{
+  return import_export.getcwd (buffer, size);
+}
+
+
+int
+getuid (void)
+{
+  return import_export.getuid ();
+}
+
+
+int
+sync (void)
+{
+  return import_export.sync ();
+}
+
+
+int
+truncate (const char *filename, off_t size)
+{
+  return import_export.truncate (filename, size);
+}
+
+
+int
+stat (const char *filename, struct stat *statbuf)
+{
+  return import_export.stat (filename, statbuf);
+}
+
+
+int
+chmod (const char *filename, mode_t mode)
+{
+  return import_export.chmod (filename, mode);
 }
 
 
@@ -248,8 +560,22 @@ mkdir (const char *path, mode_t mode)
 }
 
 
-int
-getuid (void)
+time_t
+time (time_t *t)
 {
-  return import_export.getuid ();
+  return import_export.time (t);
+}
+
+
+void
+delay (unsigned nmillis)
+{
+  return import_export.delay (nmillis);
+}
+
+
+int
+__dpmi_int (int vector, __dpmi_regs *regs)
+{
+  return import_export.__dpmi_int (vector, regs);
 }

@@ -62,6 +62,21 @@ ucon64_ls (void)
   ucon64_system ();
 }
 
+void
+ucon64_snes (void)
+{
+#include "xpm/icon.xpm"
+
+//<html>
+  html2gui_html (&snes_html, 640, 400, 0);
+
+  html2gui_title (&snes_html, "ucon64gui_snes", icon_xpm);
+
+  html2gui_button (&snes_html, ucon64_nfo, "NFO", "Click here to see ROM info", 10, 10, icon_xpm);
+
+  html2gui_html_end (&snes_html);
+//</html>
+}
 
 int
 main (int argc, char *argv[])
@@ -82,19 +97,9 @@ main (int argc, char *argv[])
 
   html2gui_br (&index_html);
 
-  html2gui_button (&index_html, ucon64_ls, "ROM list", "Click here to see romlist of current dir", 10, 10, icon_xpm);
+  html2gui_button (&index_html, ucon64_snes, "ROM list", "Click here to see romlist of current dir", 10, 10, icon_xpm);
 
   html2gui_html_end (&index_html);
-//</html>
-
-//<html>
-  html2gui_html (&snes_html, 640, 400, 0);
-
-  html2gui_title (&snes_html, "ucon64gui_snes", icon_xpm);
-
-  html2gui_button (&snes_html, ucon64_nfo, "NFO", "Click here to see ROM info", 10, 10, icon_xpm);
-
-  html2gui_html_end (&snes_html);
 //</html>
 
   html2gui_end();

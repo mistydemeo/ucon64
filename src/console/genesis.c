@@ -972,6 +972,12 @@ genesis_multi (int truncate_size, char *fname)
       stat (ucon64.argv[n], &fstate);
       if (!S_ISREG (fstate.st_mode))
         continue;
+      if (file_no == 32)                        // loader + 31 games
+        {
+          printf ("WARNING: A multi-game file can contain a maximum of 31 games. The other files\n"
+                  "         are ignored.\n");
+          break;
+        }
 
       ucon64.console = UCON64_UNKNOWN;
       ucon64.rom = ucon64.argv[n];

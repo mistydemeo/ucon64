@@ -1,5 +1,5 @@
 A Super Wild Card compatibility list
-Version: 1.6
+Version: 1.7
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
 Date: 2 january 2003
 Hardware: Super Wild Card 2.8cc 32 MBit PAL
@@ -110,7 +110,7 @@ Code    Game
 0 -     Contra III - The Alien Wars (U) [!]
 0 -     Cybernator (U)
 0 -     Daffy Duck - The Marvin Missions (U)
-9 -     Dai Kaiju Monogatari 2 (J) [!] <= according to The Dumper on an SWC with more memory it works
+9 -     Dai Kaiju Monogatari 2 (J) [!] <= works on an SWC DX2 64 Mbit PAL
 0 -     Darius Twin (U)
 1 -     Demon's Crest (U)
 0 -     Der Langrisser (V1.1) (J)
@@ -119,7 +119,7 @@ Code    Game
 7 -     Diddy's Kong Quest (V1.1) (U)
 0 -     Digital Devil Story (V1.0) (J)
 9 -     Dirt Trax FX (E)
-6 -     Dixie Kong's Double Trouble (E) [!]
+6 -     Dixie Kong's Double Trouble (E) [!] <= works on an SWC DX2 64 Mbit PAL
 0 -     Donald Duck Mahou No Boushi (J)
 0 -     Donkey Kong Country (Competition) (U)
 1 -     Donkey Kong Country (V1.0) (E) [!]
@@ -190,7 +190,7 @@ Code    Game
 0 -     Lemmings (E)
 0 -     Lost Vikings 2, The (E)
 0 -     Lost Vikings, The (U)
-2 -     Live-a-Live (J)
+2* -    Live-a-Live (J)
 1* -    Lufia II - Rise of the Sinistrals (H)
 1* -    Lufia II - Rise of the Sinistrals (U)
 0 -     Lufia & The Fortress of Doom (U)
@@ -331,7 +331,7 @@ Code    Game
 0 -     Super Turrican (E)
 0 -     T2 - The Arcade Game (U)
 0 -     Tactics Ogre (V1.2) (J)
-9 -     Tales of Phantasia (J) <= according to The Dumper on an SWC with more memory it works
+9 -     Tales of Phantasia (J) <= works on an SWC DX2 64 Mbit PAL
 0 -     Teenage Mutant Hero Turtles IV - Turtles in Time (E)
 0 -     Teenage Mutant Hero Turtles - Tournament Fighters (E)
 0 -     Teenage Mutant Ninja Turtles IV - Turtles in Time (U) (Beta)

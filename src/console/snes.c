@@ -1294,10 +1294,14 @@ int
 snes_k (st_rominfo_t *rominfo)
 {
 /*
+Don't touch this code if you don't know what you're doing!
+
 Some SNES games check to see how much SRAM is connected to the SNES as a form
 of copy protection. As most copiers have 256 kbits standard, the game will
 know it's running on a backup unit and stop to prevent people copying the
-games. However, the newer copiers get around this detection somehow.
+games. However, newer copiers like the SWC DX2 get around this detection by
+limiting the SRAM size for the game to the size specified in the backup unit
+header.
 
 (original uCON)
    8f/9f XX YY 70 cf/df XX YY 70 d0
@@ -1515,37 +1519,33 @@ int
 snes_f (st_rominfo_t *rominfo)
 {
 /*
-The order is important. Don't touch this code if you don't know what you're doing!
+Don't touch this code if you don't know what you're doing!
 
-Search for                      Replace with
-(original uCON)
-3f 21 29/89 10 c9 10 f0         3f 21 29/89 10 c9 10 80
-3f 21 29/89 10 f0               3f 21 29/89 10 80
-3f 21 00 29/89 10 f0            3f 21 00 29/89 10 80
-3f 21 29/89 10 00 f0            3f 21 29/89 10 00 80
-ad 3f 21 29 10 00 d0            ad 3f 21 29 10 00 80            - NTSC
-ad 3f 21 89 10 00 d0            a9 10 00 89 10 00 d0            - NTSC Eric Cantona Football Challenge
-af 3f 21 00 29 10 00 d0         af 3f 21 00 29 10 00 ea ea      - NTSC
-ad 3f 21 29 10 d0               ad 3f 21 29 10 ea ea            - PAL
-ad 3f 21 29 10 c9 00 f0         ad 3f 21 29 10 c9 00 80         - PAL
-af 3f 21 00 29/89 10 00 f0      af 3f 21 00 29/89 10 00 80      - PAL
-af 3f 21 ea 89 10 00 d0         a9 00 00 ea 89 10 00 d0         - PAL Super Famista 3
-ad 3f 21 8d XX YY 29 10 8d      ad 3f 21 8d XX YY 29 00 8d      - PAL DragonBallZ 2
-af 3f 21 00 XX YY 29 10 00 d0   af 3f 21 00 XX YY 29 10 00 ea ea- PAL Fatal Fury Special J
-ad 3f 21 29 10 cf bd ff 00 f0   ad 3f 21 29 10 cf bd ff 00 80   - NTSC Tiny Toons Wacky Sports
-
-(uCON64)
-af 3f 21 00 29 10 d0                  af 3f 21 00 29 10 80/(ea ea)     - Kirby No Kira Kizzu (ea ea)
+Search for                            Replace with
+3f 21 29/89 10 f0                     3f 21 29/89 10 80
+ad 3f 21 29 10 d0                     ad 3f 21 29 10 ea ea
 ad 3f 21 89 10 d0                     ad 3f 21 89 10 80/(ea ea)        - Live-a-Live (ea ea)
-ad 3f 21 29 10 c9 00 f0               ad 3f 21 29 10 c9 00 ea ea
+3f 21 29/89 10 00 f0                  3f 21 29/89 10 00 80
+ad 3f 21 29 10 00 d0                  ad 3f 21 29 10 00 80
+ad 3f 21 89 10 00 d0                  a9 10 00 89 10 00 d0             - Eric Cantona Football ?
+   3f 21 89 10 c2 XX d0                  3f 21 89 10 c2 XX ea ea       - Robotrek
+3f 21 29/89 10 c9 10 f0               3f 21 29/89 10 c9 10 80
+ad 3f 21 29 10 c9 00 f0               ad 3f 21 29 10 c9 00 80/(ea ea) <= original uCON used 80
 ad 3f 21 29 10 c9 00 d0               ad 3f 21 29 10 c9 00 80
 ad 3f 21 29 10 c9 10 d0               ad 3f 21 29 10 c9 10 ea ea
-a2 18 01 bd 27 20 89 10 00 f0/d0 01   a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country E/U
-3f 21 00 29/89 10 d0                  3f 21 00 29/89 10 ea ea          - Final Fight Guy (89)
-3f 21 29 10 cf XX YY 80 f0            3f 21 29 10 cf XX YY 80 80       - Gokujyou Parodius/Tokimeki Memorial
-3f 21 89 10 c2 XX d0                  3f 21 89 10 c2 XX ea ea          - Robotrek
+ad 3f 21 29 10 cf bd ff 00 f0         ad 3f 21 29 10 cf bd ff 00 80    - Tiny Toons - Wild and Wacky Sports ?
+   3f 21 29 10 cf XX YY 80 f0            3f 21 29 10 cf XX YY 80 80    - Gokujyou Parodius/Tokimeki Memorial
+ad 3f 21 8d XX YY 29 10 8d            ad 3f 21 8d XX YY 29 00 8d       - Dragon Ball Z - Super Butoden 2 ?
+3f 21 00 29/89 10 f0                  3f 21 00 29/89 10 80             - Kirby's Dream Course U (29)
+af 3f 21 00 29 10 d0                  af 3f 21 00 29 10 80/(ea ea)     - Kirby No Kira Kizzu (ea ea)
+af 3f 21 00 89 10 d0                  af 3f 21 00 89 10 ea ea          - Final Fight Guy
+af 3f 21 00 29 10 00 d0               af 3f 21 00 29 10 00 ea ea
+af 3f 21 00 29/89 10 00 f0            af 3f 21 00 29/89 10 00 80
 af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Seiken Densetsu 3/Secret of Mana E
 af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken Densetsu 2/Secret of Mana U
+af 3f 21 00 XX YY 29 10 00 d0         af 3f 21 00 XX YY 29 10 00 ea ea - Fatal Fury Special ?
+af 3f 21 ea 89 10 00 d0               a9 00 00 ea 89 10 00 d0          - Super Famista 3 ?
+a2 18 01 bd 27 20 89 10 00 f0/d0 01   a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country E/U
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
@@ -1574,49 +1574,46 @@ af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken 
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
     {
-      change_string ("\x3f\x21\x02\x10\xc9\x10\xf0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
-                     "\x29\x89", 2);
       change_string ("\x3f\x21\x02\x10\xf0", 5, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
                      "\x29\x89", 2);
-      change_string ("\x3f\x21\x00\x02\x10\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
-                     "\x29\x89", 2);
-      change_string ("\x3f\x21\x02\x10\x00\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
-                     "\x29\x89", 2);
-      change_string ("\xad\x3f\x21\x29\x10\x00\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xad\x3f\x21\x89\x10\x00\xd0", 7, '\x01', '\x02', "\xa9\x10\x00", 3, buffer, bytesread, -6);
-      change_string ("\xaf\x3f\x21\x00\x29\x10\x00\xd0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\xad\x3f\x21\x29\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-      change_string ("\xad\x3f\x21\x29\x10\xc9\x00\xf0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xaf\x3f\x21\x00\x02\x10\x00\xf0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
-                     "\x29\x89", 2);
-      change_string ("\xaf\x3f\x21\xea\x89\x10\x00\xd0", 8, '\x01', '\x02', "\xa9\x00\x00", 3, buffer, bytesread, -7);
-      change_string ("\xad\x3f\x21\x8d\x01\x01\x29\x10\x8d", 9, '\x01', '\x02', "\x00", 1, buffer, bytesread, -1);
-      change_string ("\xaf\x3f\x21\x00\x01\x01\x29\x10\x00\xd0", 10, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-      change_string ("\xad\x3f\x21\x29\x10\xcf\xbd\xff\x00\xf0", 10, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-
-      // uCON64
-      if (snes_sramsize == 2 * 1024)            // actually Kirby No Kira Kizzu
-        change_string ("\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-      else
-        change_string ("\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
 
       if (snes_sramsize == 8 * 1024)            // actually Live-a-Live
         change_string ("\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
       else
         change_string ("\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
 
+      change_string ("\x3f\x21\x02\x10\x00\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
+                     "\x29\x89", 2);
+      change_string ("\xad\x3f\x21\x29\x10\x00\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xad\x3f\x21\x89\x10\x00\xd0", 7, '\x01', '\x02', "\xa9\x10\x00", 3, buffer, bytesread, -6);
+      change_string ("\x3f\x21\x89\x10\xc2\x01\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("\x3f\x21\x02\x10\xc9\x10\xf0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
+                     "\x29\x89", 2);
       change_string ("\xad\x3f\x21\x29\x10\xc9\x00\xf0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\xad\x3f\x21\x29\x10\xc9\x00\xd0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
       change_string ("\xad\x3f\x21\x29\x10\xc9\x10\xd0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("\xad\x3f\x21\x29\x10\xcf\xbd\xff\x00\xf0", 10, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\x3f\x21\x29\x10\xcf\x01\x01\x80\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xad\x3f\x21\x8d\x01\x01\x29\x10\x8d", 9, '\x01', '\x02', "\x00", 1, buffer, bytesread, -1);
+      change_string ("\x3f\x21\x00\x02\x10\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
+                     "\x29\x89", 2);
+
+      if (snes_sramsize == 2 * 1024)            // actually Kirby No Kira Kizzu
+        change_string ("\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      else
+        change_string ("\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+
+      change_string ("\xaf\x3f\x21\x00\x89\x10\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("\xaf\x3f\x21\x00\x29\x10\x00\xd0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("\xaf\x3f\x21\x00\x02\x10\x00\xf0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
+                     "\x29\x89", 2);
+      change_string ("\xaf\x3f\x21\x00\x29\x01\xc9\x01\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xaf\x3f\x21\x00\x29\x10\x80\x2d\x00\x1b", 10, '\x01', '\x02', "\x00", 1, buffer, bytesread, -4);
+      change_string ("\xaf\x3f\x21\x00\x01\x01\x29\x10\x00\xd0", 10, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("\xaf\x3f\x21\xea\x89\x10\x00\xd0", 8, '\x01', '\x02', "\xa9\x00\x00", 3, buffer, bytesread, -7);
       change_string ("\xa2\x18\x01\xbd\x27\x20\x89\x10\x00!\x01", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, -1,
                      "\xf0\xd0", 2);
-      change_string ("\x3f\x21\x00\x02\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0,
-                     "\x29\x89", 2);
-      change_string ("\x3f\x21\x29\x10\xcf\x01\x01\x80\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\x3f\x21\x89\x10\xc2\x01\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
-      change_string ("\xaf\x3f\x21\x00\x29\x01\xc9\x01\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-
-      change_string ("\xaf\x3f\x21\x00\x29\x10\x80\x2d\x00\x1b", 10, '\x01', '\x02', "\x00", 1, buffer, bytesread, -4);
 
       fwrite (buffer, 1, bytesread, destfile);
     }

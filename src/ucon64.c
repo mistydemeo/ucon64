@@ -58,7 +58,7 @@ void ucon64_exit(void)
 #include "wswan/wswan.h"
 #include "intelli/intelli.h"
 
-#ifdef CD
+#ifdef	CD
   #include "cd32/cd32.h"
   #include "ps2/ps2.h"
   #include "saturn/saturn.h"
@@ -73,12 +73,12 @@ void ucon64_exit(void)
   #include "patch/ciso.h"
 #endif
 
-#ifdef BACKUP
+#ifdef	BACKUP
 #include "backup/fig.h"
 #include "backup/swc.h"
 #include "backup/unknown_bu.h"
 #include "backup/unknown_bu512.h"
-  #ifdef CD
+  #ifdef	CD
     #include "backup/cdrecord.h"
     #include "backup/cdrdao.h"
   #endif
@@ -127,7 +127,7 @@ char *forceargs[] =
   "-intelli"
   };
 
-#ifdef BACKUP
+#ifdef	BACKUP
   #ifdef	__UNIX__
     uid_t uid;
     gid_t gid;
@@ -152,7 +152,7 @@ ucon64_flush(argc,argv,&rom);
     return(0);
   }
 
-#ifdef BACKUP
+#ifdef	BACKUP
 if ( rom.file[0] )
 {
 //  strcpy(buf, rom.file);
@@ -167,14 +167,14 @@ else
   printf("0x%x\n\n",rom.parport);
 */
 
-#ifdef __UNIX__
+#ifdef	__UNIX__
 /*
   Some code needs us to switch to the real uid and gid. However, other code needs access to
   I/O ports other than the standard printer port registers. We just do an iopl(3) and all
   code should be happy. Using iopl(3) enables users to run all code without being root (of
   course with the uCON64 executable setuid root). Anyone a better idea?
 */
-#ifdef __linux__
+#ifdef	__linux__
 if (iopl(3) == -1)
 {
   fprintf(stderr, "Could not set the I/O privilege level to 3\n"
@@ -396,7 +396,7 @@ if (argcmp(argc, argv, "-na"))
   return(0);
 }
 
-#ifdef CD
+#ifdef	CD
 
 if(argcmp(argc,argv,"-ppf"))
 {
@@ -506,7 +506,7 @@ rom.console=
 (argcmp(argc,argv,"-snes")) ? ucon64_SNES :
 (argcmp(argc,argv,"-gba")) ? ucon64_GBA :
 (argcmp(argc,argv,"-gb")) ? ucon64_GB :
-#ifdef CD
+#ifdef	CD
   (argcmp(argc,argv,"-sat")) ? ucon64_SATURN :
   (argcmp(argc,argv,"-psx")) ? ucon64_PSX :
   (argcmp(argc,argv,"-ps2")) ? ucon64_PS2 :
@@ -599,10 +599,12 @@ case ucon64_GB:
     (argcmp(argc,argv,"-sgb")) ? gameboy_sgb(&rom) :
     (argcmp(argc,argv,"-ssc")) ? gameboy_ssc(&rom) :
     (argcmp(argc,argv,"-n2gb")) ? gameboy_n2gb(&rom) :
-/*  backup */
+#ifdef	BACKUP
     (argcmp(argc,argv,"-xgbx")) ? gameboy_xgbx(&rom) :
     (argncmp(argc,argv,"-xgbxb",6)) ? gameboy_xgbxb(&rom) :
-    (argcmp(argc,argv,"-xgbxs")) ? gameboy_xgbxs(&rom) : 0
+    (argcmp(argc,argv,"-xgbxs")) ? gameboy_xgbxs(&rom) :
+#endif
+    0
   );
 break;
 
@@ -613,9 +615,11 @@ case ucon64_GBA:
     (argcmp(argc,argv,"-logo")) ? gbadvance_logo(&rom) :
     (argcmp(argc,argv,"-n")) ? gbadvance_n(&rom) :
     (argcmp(argc,argv,"-sram")) ? gbadvance_sram(&rom) :
-/*  backup */
+#ifdef	BACKUP
     (argcmp(argc,argv,"-xfal")) ? gbadvance_xfal(&rom) :
-    (argncmp(argc,argv,"-xfalc",6)) ? gbadvance_xfal(&rom) : 0
+    (argncmp(argc,argv,"-xfalc",6)) ? gbadvance_xfal(&rom) :
+#endif
+    0
   );
 break;
 
@@ -633,11 +637,15 @@ case ucon64_GENESIS:
     (argcmp(argc,argv,"-s")) ? genesis_s(&rom) :
     (argcmp(argc,argv,"-smd")) ? genesis_smd(&rom) :
     (argcmp(argc,argv,"-smds")) ? genesis_smds(&rom) :
-/*  backup */
+#ifdef	BACKUP
     (argcmp(argc,argv,"-xsmd")) ? genesis_xsmd(&rom) :
     (argcmp(argc,argv,"-xsmds")) ? genesis_xsmds(&rom) :
+#endif
+#ifdef	CD
     (argcmp(argc,argv,"-cdaot")) ? genesis_cdaot(&rom) :
-    (argcmp(argc,argv,"-xcdao")) ? genesis_xcdao(&rom) : 0
+    (argcmp(argc,argv,"-xcdao")) ? genesis_xcdao(&rom) :
+#endif
+    0
   );
 break;
 
@@ -666,9 +674,11 @@ case ucon64_N64:
     (argcmp(argc,argv,"-usms")) ? nintendo64_usms(&rom) :
     (argcmp(argc,argv,"-v64")) ? nintendo64_v64(&rom) :
     (argcmp(argc,argv,"-z64")) ? nintendo64_z64(&rom) :
-/*  backup */
+#ifdef	BACKUP
     (argcmp(argc,argv,"-xdjr")) ? nintendo64_xdjr(&rom) :
-    (argcmp(argc,argv,"-xv64")) ? nintendo64_xv64(&rom) : 0
+    (argcmp(argc,argv,"-xv64")) ? nintendo64_xv64(&rom) :
+#endif
+    0
   );
 break;
 
@@ -679,9 +689,11 @@ case ucon64_NEOGEO:
     (argcmp(argc,argv,"-mvs")) ? neogeo_mvs(&rom) :
     (argcmp(argc,argv,"-s")) ? neogeo_s(&rom) :
     (argcmp(argc,argv,"-sam")) ? neogeo_sam(&rom) :
-/*  backup */
+#ifdef	CD
     (argcmp(argc,argv,"-cdaot")) ? neogeo_cdaot(&rom) :
-    (argcmp(argc,argv,"-xcdao")) ? neogeo_xcdao(&rom) : 0
+    (argcmp(argc,argv,"-xcdao")) ? neogeo_xcdao(&rom) :
+#endif
+    0
   );
 break;
 
@@ -726,9 +738,11 @@ case ucon64_SNES:
     (argcmp(argc,argv,"-swc")) ? snes_swc(&rom) :
     (argcmp(argc,argv,"-swcs")) ? snes_swcs(&rom) :
     (argcmp(argc,argv,"-ufos")) ? snes_ufos(&rom) :
-/*  backup */
+#ifdef	BACKUP
     (argcmp(argc,argv,"-xswc")) ? snes_xswc(&rom) :
-    (argcmp(argc,argv,"-xswcs")) ? snes_xswcs(&rom) : 0
+    (argcmp(argc,argv,"-xswcs")) ? snes_xswcs(&rom) :
+#endif
+    0
   );
 break;
 
@@ -736,16 +750,21 @@ case ucon64_PCE:
   return(
     (argcmp(argc,argv,"-mgd")) ? pcengine_mgd(&rom) :
     (argcmp(argc,argv,"-smg")) ? pcengine_smg(&rom) :
-/*  backup */
+#ifdef	CD
     (argcmp(argc,argv,"-cdaot")) ? pcengine_cdaot(&rom) :
-    (argcmp(argc,argv,"-xcdao")) ? pcengine_xcdao(&rom) : 0
+    (argcmp(argc,argv,"-xcdao")) ? pcengine_xcdao(&rom) :
+#endif
+    0
   );
 break;
 
 case ucon64_JAGUAR:
   return(
+#ifdef	CD
     (argcmp(argc,argv,"-cdaot")) ? jaguar_cdaot(&rom) :
-    (argcmp(argc,argv,"-xcdao")) ? jaguar_xcdao(&rom) : 0
+    (argcmp(argc,argv,"-xcdao")) ? jaguar_xcdao(&rom) :
+#endif
+    0
   );
 break;
 
@@ -760,13 +779,15 @@ case ucon64_COLECO:
 case ucon64_INTELLI:
 break;
 
-#ifdef CD
+#ifdef	CD
   case ucon64_DC:
     return(
       (argcmp(argc,argv,"-ip")) ? /* ip0000(char *dev,char *name) */ 0 :
-/*  backup */
+#ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? dc_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? dc_xcdao(&rom) : 0
+      (argcmp(argc,argv,"-xcdao")) ? dc_xcdao(&rom) :
+#endif
+      0
 
 
     );
@@ -774,49 +795,61 @@ break;
 
   case ucon64_PSX:
     return(
-/*  backup */
+#ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? psx_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? psx_xcdao(&rom) : 0
+      (argcmp(argc,argv,"-xcdao")) ? psx_xcdao(&rom) :
+#endif
+      0
     );
   break;
 
   case ucon64_PS2:
     return(
-/*  backup */
+#ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? ps2_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? ps2_xcdao(&rom) : 0
+      (argcmp(argc,argv,"-xcdao")) ? ps2_xcdao(&rom) :
+#endif
+      0
     );
   break;
 
   case ucon64_SATURN:
     return(
-/*  backup */
+#ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? saturn_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? saturn_xcdao(&rom) : 0
+      (argcmp(argc,argv,"-xcdao")) ? saturn_xcdao(&rom) :
+#endif
+      0
     );
   break;
 
   case ucon64_CDI:
     return(
-/*  backup */
+#ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? cdi_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? cdi_xcdao(&rom) : 0
+      (argcmp(argc,argv,"-xcdao")) ? cdi_xcdao(&rom) :
+#endif
+      0
     );
   break;
 
   case ucon64_CD32:
     return(
-/*  backup */
+#ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? cd32_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? cd32_xcdao(&rom) : 0
+      (argcmp(argc,argv,"-xcdao")) ? cd32_xcdao(&rom) :
+#endif
+      0
     );
   break;
 
   case ucon64_REAL3DO:
     return(
-/*  backup */
+#ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? real3do_cdaot(&rom) :
-      (argcmp(argc,argv,"-xcdao")) ? real3do_xcdao(&rom) : 0 
+      (argcmp(argc,argv,"-xcdao")) ? real3do_xcdao(&rom) :
+#endif
+      0
     );
   break;
 
@@ -851,7 +884,7 @@ break;
 if (argcmp(argc, argv, "-e"))
 {
   char *property;
-#ifdef __DOS__
+#ifdef	__DOS__
   strcpy(buf, "ucon64.cfg");
 #else
   sprintf(buf, "%s%c.ucon64rc", getenv("HOME"), FILE_SEPARATOR);
@@ -1023,7 +1056,7 @@ if(rom->console != ucon64_UNKNOWN)
   }
   else
   {  
-#ifdef CD
+#ifdef	CD
     (rom->console == ucon64_PS2) ? ps2_init(rom) :
     (rom->console == ucon64_DC) ? dc_init(rom) :
     (rom->console == ucon64_SATURN) ? saturn_init(rom) :
@@ -1069,7 +1102,7 @@ if(rom->console == ucon64_UNKNOWN)
   rom->bytes=quickftell(rom->rom);
   rom->mbit=(rom->bytes-rom->buheader_len)/(float) MBIT;
 
-#ifdef CD
+#ifdef	CD
   if( rom->console == ucon64_PS2 ||
       rom->console == ucon64_PSX ||
       rom->console == ucon64_DC ||
@@ -1121,7 +1154,7 @@ int ucon64_usage(int argc,char *argv[])
 //	"                this is often used by people who loose control of their ROMs\n"
 	"  -rl           rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
 	"  -ru           rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"
-#ifdef  __DOS__
+#ifdef	__DOS__
         "  -hex          show ROM as hexdump; use \"ucon64 -hex $ROM|more\"\n"
 #else
         "  -hex          show ROM as hexdump; use \"ucon64 -hex $ROM|less\"\n"   // less is better ;-)
@@ -1141,7 +1174,7 @@ int ucon64_usage(int argc,char *argv[])
 bsl_usage( argc, argv );
 ips_usage( argc, argv );
 aps_usage( argc, argv );
-#ifdef CD
+#ifdef	CD
   ciso_usage( argc, argv );
   pal4u_usage( argc, argv );
   ppf_usage( argc, argv );
@@ -1169,7 +1202,7 @@ else if(argcmp(argc,argv,"-vboy"))virtualboy_usage(argc,argv);
 else if(argcmp(argc,argv,"-swan"))wonderswan_usage(argc,argv);
 else if(argcmp(argc,argv,"-vec"))vectrex_usage(argc,argv);
 else if(argcmp(argc,argv,"-intelli"))intelli_usage(argc,argv);
-#ifdef CD
+#ifdef	CD
   else if(argcmp(argc,argv,"-dc"))dc_usage(argc,argv);
   else if(argcmp(argc,argv,"-psx"))psx_usage(argc,argv);
   else if(argcmp(argc,argv,"-ps2"))ps2_usage(argc,argv);
@@ -1180,7 +1213,7 @@ else if(argcmp(argc,argv,"-intelli"))intelli_usage(argc,argv);
 #endif
 else
 {
-#ifdef CD
+#ifdef	CD
   dc_usage(argc,argv);
   psx_usage(argc,argv);
 /*
@@ -1204,7 +1237,7 @@ else
 //  ppf_usage( argc, argv );
 //  xps_usage( argc, argv );
 
-  #ifdef BACKUP
+  #ifdef	BACKUP
     cdrdao_usage(argc,argv);
     cdrecord_usage(argc,argv);
   #endif
@@ -1256,7 +1289,7 @@ printf("Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n",
        ucon64_dbsize(ucon64_UNKNOWN)-ucon64_DBSIZE);
 
 printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
-#ifdef  __DOS__
+#ifdef	__DOS__
         "     %s -help|more (to see everything in more)\n"
 #else
         "     %s -help|less (to see everything in less)\n"      // less is better ;-)

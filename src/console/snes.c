@@ -38,9 +38,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/fig.h"
 
 
-#define SNES_HEADER_START 32688
+#define SNES_HEADER_START 0x7fb0
 #define SNES_HEADER_LEN (sizeof (st_snes_header_t))
-#define SNES_HIROM 32768
+#define SNES_HIROM 0x8000
 #define SNES_NAME_LEN 21
 #define ALT_HILO                                // use Snes9x' Hi/LoROM detection method
 #define GD3_HEADER_MAPSIZE 0x18
@@ -1224,27 +1224,35 @@ unit and stop to prevent people copying the games. However,
 the newer copiers get around this detection somehow.
 
 (original uCON)
-        8F/9F xx xx 70 CF/DF xx xx 70 D0
-becomes:8F/9F xx xx 70 CF/DF xx xx 70 EA EA     // if snes_sramsize == 64 kbits
-becomes:8F/9F xx xx 70 CF/DF xx xx 70 80
+   8F/9F xx xx 70 CF/DF xx xx 70 D0
+=> 8F/9F xx xx 70 CF/DF xx xx 70 EA EA          if snes_sramsize == 64 kbits
+=> 8F/9F xx xx 70 CF/DF xx xx 70 80
 
-        8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 D0
-becomes:8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 80
+TODO: The following three codes should be verfied for many games. For example,
+the first code replaces D0 (bne) with 80 (bra), but for some games (like Donkey
+Kong Country (U|E)) it should do the opposite, i.e., writing EA EA (nop nop).
+   8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 D0
+=> 8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 80
 
-        8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 F0
-becomes:8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 EA EA
+   8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 F0
+=> 8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 EA EA
 
-        8F/9F xx xx 30/31/32/33 AF xx xx 30/31/32/33 C9 xx xx D0
-becomes:8F/9F xx xx 30/31/32/33 AF xx xx 30/31/32/33 C9 xx xx 80
+   8F/9F xx xx 30/31/32/33 AF xx xx 30/31/32/33 C9 xx xx D0
+=> 8F/9F xx xx 30/31/32/33 AF xx xx 30/31/32/33 C9 xx xx 80
 
 (uCON64)
-                                                - Super Metroid
-        a9 00 00 a2 fe 1f df 00 00 70 d0        // lda #$0000; ldx #$1ffe; cmp $700000,x; bne ...
-becomes:a9 00 00 a2 fe 1f df 00 00 70 ea ea     // lda #$0000; ldx #$1ffe; cmp $700000,x; nop; nop
+- Super Metroid
+   a9 00 00 a2 fe 1f df 00 00 70 d0     lda #$0000; ldx #$1ffe; cmp $700000,x; bne ...
+=> a9 00 00 a2 fe 1f df 00 00 70 ea ea  lda #$0000; ldx #$1ffe; cmp $700000,x; nop; nop
 
-                                                - Killer Instinct
-        5c 7f d0 83 18 fb 78 c2 30              // jmp $83d07f; clc; xce; sei; rep #$30
-becomes:ea ea ea ea ea ea ea ea ea              // nop; nop; nop; nop; nop; nop; nop; nop; nop
+- Killer Instinct
+   5c 7f d0 83 18 fb 78 c2 30           jmp $83d07f; clc; xce; sei; rep #$30
+=> ea ea ea ea ea ea ea ea ea           nop; nop; nop; nop; nop; nop; nop; nop; nop
+
+- most probably only Donkey Kong Country (8f, 30, cf, 30)
+Note that this code must be searched for before the less specific uCON code.
+   8f/9f 57/59 60/68 30/31/32/33 cf/df 57/59 60 30/31/32/33 d0
+=> 8f/9f 57/59 60/68 30/31/32/33 cf/df 57/59 60 30/31/32/33 ea ea
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
@@ -1280,6 +1288,12 @@ becomes:ea ea ea ea ea ea ea ea ea              // nop; nop; nop; nop; nop; nop;
         change_string ("!**\x70!**\x70\xd0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
                        "\x8f\x9f", 2, "\xcf\xdf", 2);
 
+      // uCON64
+      change_string ("!!!!!!\x60!\xd0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
+                     "\x8f\x9f", 2, "\x57\x59", 2, "\x60\x68", 2, "\x30\x31\x32\x33", 4,
+                     "\xcf\xdf", 2, "\x57\x59", 2, "\x30\x31\x32\x33", 4);
+
+      // uCON
       change_string ("!**!!**!\xd0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
                      "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
       change_string ("!**!!**!\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
@@ -1328,16 +1342,17 @@ AF 3F 21 00 29/89 10 00 F0      AF 3F 21 00 29/89 10 00 80      - PAL
 AD 3F 21 29 10 CF BD FF 80 F0   AD 3F 21 29 10 CF BD FF 80 80   - PAL Konami Ganbare Goemon 2
 AF 3F 21 EA 89 10 00 D0         A9 00 00 EA 89 10 00 D0         - PAL Super Famista 3
 AD 3F 21 8D xx xx 29 10 8D      AD 3F 21 8D xx xx 29 00 8D      - PAL DragonBallZ 2
-AF 3F 21 00 xx xx 29 10 00 D0   AF 3F 21 00 xx xx 29 10 00 EA EA- PAL Fatal Fury Special (Jap)
+AF 3F 21 00 xx xx 29 10 00 D0   AF 3F 21 00 xx xx 29 10 00 EA EA- PAL Fatal Fury Special J
 AD 3F 21 29 10 CF BD FF 00 F0   AD 3F 21 29 10 CF BD FF 00 80   - NTSC Tiny Toons Wacky Sports
 
 (uCON64)
-ad 3f 21 89 10 d0               ad 3f 21 89 10 ea ea
-ad 3f 21 89 10 f0               ad 3f 21 89 10 80
-ad 3f 21 29 10 c9 00 f0         ad 3f 21 29 10 c9 00 ea ea
-ad 3f 21 29 10 c9 00 d0         ad 3f 21 29 10 c9 00 80
-ad 3f 21 29 10 c9 10 f0         ad 3f 21 29 10 c9 10 80
-ad 3f 21 29 10 c9 10 d0         ad 3f 21 29 10 c9 10 ea ea
+ad 3f 21 89 10 d0                     ad 3f 21 89 10 ea ea
+ad 3f 21 89 10 f0                     ad 3f 21 89 10 80
+ad 3f 21 29 10 c9 00 f0               ad 3f 21 29 10 c9 00 ea ea
+ad 3f 21 29 10 c9 00 d0               ad 3f 21 29 10 c9 00 80
+ad 3f 21 29 10 c9 10 f0               ad 3f 21 29 10 c9 10 80
+ad 3f 21 29 10 c9 10 d0               ad 3f 21 29 10 c9 10 ea ea
+a2 18 01 bd 27 20 89 10 00 f0/d0 01   a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country E/U
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
@@ -1397,6 +1412,8 @@ ad 3f 21 29 10 c9 10 d0         ad 3f 21 29 10 c9 10 ea ea
       change_string ("\xad\x3f\x21\x29\x10\xc9\x00\xd0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
       change_string ("\xad\x3f\x21\x29\x10\xc9\x10\xf0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
       change_string ("\xad\x3f\x21\x29\x10\xc9\x10\xd0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("\xa2\x18\x01\xbd\x27\x20\x89\x10\x00!\x01", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, -1,
+                     "\xf0\xd0", 2);
 
       fwrite (buffer, 1, bytesread, destfile);
     }
@@ -1749,7 +1766,7 @@ snes_init (st_rominfo_t *rominfo)
       *snes_country[SNES_COUNTRY_MAX] = {
     "Japan",
     "U.S.A.",
-    "Europe, Australia, Oceania and Asia",
+    "Europe, Oceania and Asia",                 // Australia is part of Oceania
     "Sweden",
     "Finland",
     "Denmark",
@@ -1909,6 +1926,15 @@ snes_init (st_rominfo_t *rominfo)
   snes_hirom = score_hirom (rom_buffer, size) > score_lorom (rom_buffer, size) ?
     SNES_HIROM : 0;
 #endif
+  /*
+    It should be possible to use snes_header.map_type & 1 to verify that
+    snes_hirom has the correct value, but that method is less trustworthy.
+    For games like Batman Revenge of the Joker (U) it matches what
+    score_hirom() finds. snes_hirom must be 0x8000 for that game in order to
+    display correct information. However it should be 0 when writing a copier
+    header.
+  */
+
   // step 3.
   if (UCON64_ISSET (ucon64.snes_hirom))          // -hi or -nhi option was specified
     snes_hirom = (ucon64.snes_hirom) ? SNES_HIROM : 0;
@@ -2076,13 +2102,7 @@ snes_init (st_rominfo_t *rominfo)
 
   // do the following after the call to snes_chksum() which might call
   //  snes_deinterleave() which might change the value of snes_hirom
-#ifndef DEBUG
   sprintf (buf, "HiROM: %s\n", snes_hirom ? "Yes" : "No");
-#else
-  sprintf (buf, "HiROM: %s (internal header: %s)\n",
-                snes_hirom ? "Yes" : "No",
-                snes_header.map_type & 1 ? "Yes" : "No");
-#endif
   strcat (rominfo->misc, buf);
 
   if (!bs_dump)

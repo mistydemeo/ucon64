@@ -181,7 +181,7 @@ main (int argc, char *argv[])
     {
       fprintf (stderr, "Could not set the I/O privilege level to 3\n"
                        "(This program needs root privileges)\n");
-      return (1);
+      return 1;
     }
 #endif
 
@@ -190,13 +190,13 @@ main (int argc, char *argv[])
   if (setuid (uid) == -1)
     {
       fprintf (stderr, "Could not set uid\n");
-      return (1);
+      return 1;
     }
   gid = getgid ();                              // This shouldn't be necessary if `make install'
   if (setgid (gid) == -1)                       //  was used, but just in case (root did `chmod +s')
     {
       fprintf (stderr, "Could not set gid\n");
-      return (1);
+      return 1;
     }
 #endif // __UNIX__
 #endif // BACKUP
@@ -808,7 +808,7 @@ main (int argc, char *argv[])
                   "TIP:   If the wrong emulator was used you might try to force recognition\n"
                   "       The force recognition option for Super Nintendo would be -snes\n",
                   (int) x);
-          return (x);
+          return x;
         }
 #endif
 
@@ -1075,12 +1075,12 @@ main (int argc, char *argv[])
 #ifdef	BACKUP_CD
       if(argcmp (argc, argv, "-mktoc"))
         {
-          return (cdrw_mktoc (&rom));
+          return cdrw_mktoc (&rom);
         }
         
       if (argcmp (argc, argv, "-xcdrw"))
         {
-          return ((!access (rom.rom, F_OK)) ? cdrw_write (&rom) : cdrw_read (&rom));
+          return (!access (rom.rom, F_OK)) ? cdrw_write (&rom) : cdrw_read (&rom);
         }
 #endif
       if (!access (rom.rom, F_OK) || argcmp (argc, argv, "-xsmd") ||    //the SMD made backups for Genesis and Sega Master System
@@ -1100,7 +1100,7 @@ main (int argc, char *argv[])
           return -1;
         }
       else
-        return (ucon64_usage (argc, argv));
+        return ucon64_usage (argc, argv);
       break;
     }
 

@@ -22,8 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SWC_H
 
 extern const char *swc_usage[];
-
-#if 0
+/*
     0      - Low byte of 8kB page count
     1      - High byte of 8kB page count
     2      - Emulation Mode Select
@@ -48,7 +47,7 @@ extern const char *swc_usage[];
              06 : Megadrive program
              07 : SMD SRAM data
     11-511 - 00, reserved
-#endif
+*/
 typedef struct st_swc_header
 {
 /*

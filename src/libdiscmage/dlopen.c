@@ -147,10 +147,10 @@ open_module (char *module_name)
 
   sym->access = access;
   sym->rmdir = rmdir;
-  sym->isatty = isatty;  
+  sym->isatty = isatty;
   sym->chdir = chdir;
   sym->getcwd = getcwd;
-  
+
   sym->stat = stat;
   sym->mkdir = mkdir;
   sym->time = time;
@@ -170,6 +170,7 @@ open_module (char *module_name)
   sym->gzread = gzread;
   sym->gzgetc = gzgetc;
   sym->gzrewind = gzrewind;
+  sym->gztell = gztell;
 
   // unzip functions
   sym->unzOpen = unzOpen;

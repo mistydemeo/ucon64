@@ -90,7 +90,7 @@ feof (FILE *file)
   return import_export.feof (file);
 }
 
-     
+
 size_t
 fwrite (const void *buffer, size_t size, size_t number, FILE *file)
 {
@@ -105,7 +105,14 @@ fputc (int character, FILE *file)
 }
 
 
-// The functions below are only necessary if zlib support is enabled. They are 
+long
+ftell (FILE *file)
+{
+  return import_export.ftell (file);
+}
+
+
+// The functions below are only necessary if zlib support is enabled. They are
 //  used by zlib and/or unzip.c.
 void
 free (void *mem)

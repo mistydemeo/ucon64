@@ -1730,6 +1730,24 @@ fputc2 (int character, FILE *file)
     return EOF;                                 // writing to zip files is not supported
 #define fputc   fputc2
 }
+
+
+long
+ftell2 (FILE *file)
+{
+#undef  ftell
+  fmode2_t fmode = get_fmode (file);
+
+  if (fmode == FM_NORMAL)
+    return ftell (file);
+  else if (fmode == FM_GZIP)
+    return gztell (file);
+  else if (fmode == FM_ZIP)
+    return unztell (file);                      // returns ftell() of the "current file"
+  else
+    return -1;
+#define ftell   ftell2
+}
 #endif // HAVE_ZLIB_H
 
 
@@ -1799,4 +1817,84 @@ wait2 (int nmillis)
 #elif   defined __BEOS__
   snooze (nmillis * 1000);
 #endif
+}
+
+
+int
+binary_search (unsigned char *data, int element_size, int key_offset,
+               int minpos, int maxpos, unsigned int search_value)
+/*
+  "Generic" implementation of the binary search algorithm.
+  TODO: add usage information and do thorough tests.
+  Warning: this function has not undergone that much testing. It should work
+  correctly for both packed and padded structs.
+*/
+{
+//#define DEBUG_BS
+  int pos, range;
+  unsigned int current_value;
+
+#ifdef DEBUG_BS
+  printf ("element size: %d\n"
+          "key offset:   %d\n"
+          "min pos:      %d\n"
+          "max pos:      %d\n"
+          "search value: %x\n\n",
+          element_size, key_offset, minpos, maxpos, search_value);
+#endif
+
+  if (minpos >= maxpos)
+    return -1;
+
+  pos = range = (maxpos - minpos) >> 1;
+  while (1)
+    {
+      current_value = *((unsigned int *) (data + pos * element_size + key_offset));
+      if (current_value == search_value)
+#ifdef DEBUG_BS
+        {
+          printf ("current value: %x ==\n"
+                  "range:         [%d - %d] %d %d\n"
+                  "pos:           %d\n",
+                  current_value, minpos, maxpos, maxpos - minpos + 1, range, pos);
+          return pos;
+        }
+#else
+        return pos;
+#endif
+      else if (current_value < search_value)
+        {
+#ifdef DEBUG_BS
+          printf ("current value: %x <\n"
+                  "range:         [%d - %d] %d %d\n"
+                  "pos:           %d\n",
+                  current_value, minpos, maxpos, maxpos - minpos + 1, range, pos);
+#endif
+          minpos = pos + 1;
+          if (range > 1)
+            range >>= 1;
+          pos += range;
+          if (pos > maxpos)
+            break;
+        }
+      else // if (current_value > search_value)
+        {
+#ifdef DEBUG_BS
+          printf ("current value: %x >\n"
+                  "range:         [%d - %d] %d %d\n"
+                  "pos:           %d\n",
+                  current_value, minpos, maxpos, maxpos - minpos + 1, range, pos);
+#endif
+          maxpos = pos - 1;
+          if (range > 1)
+            range >>= 1;
+          pos -= range;
+          if (pos < minpos)
+            break;
+        }
+    }
+#ifdef DEBUG_BS
+  printf ("value not found\n");
+#endif
+  return -1;
 }

@@ -107,13 +107,13 @@ typedef struct st_symbol
   int (*tolower) (int);
   int (*toupper) (int);
   int (*isupper) (int);
-  
+
   DIR *(*opendir) (const char *);
   struct dirent *(*readdir) (DIR *);
   int (*closedir) (DIR *);
-  
+
   // va_start(), va_arg() and va_end() are macros
-  
+
   int (*access) (const char *, int);
   int (*rmdir) (const char *);
   int (*isatty) (int);
@@ -140,6 +140,7 @@ typedef struct st_symbol
   int (*gzread) (gzFile file, voidp buf, unsigned len);
   int (*gzgetc) (gzFile file);
   int (*gzrewind) (gzFile file);
+  z_off_t (*gztell) (gzFile file);
 
   // unzip functions
   unzFile (*unzOpen) (const char *path);

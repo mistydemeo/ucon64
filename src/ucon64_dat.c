@@ -665,16 +665,6 @@ ucon64_dat_indexer (void)
       if (duplicates > 0)
         printf ("\n\nWarning: DAT file contains %d duplicate CRC32%s",
                 duplicates, duplicates != 1 ? "s" : "");
-#else
-      fclose_fdat ();
-      while (get_dat_entry (buf, &dat, 0, -1))
-        {
-          fwrite (&dat.current_crc32, sizeof (uint32_t), 1, fh);
-          if (!(pos % 20))
-            ucon64_gauge (start_time, ftell (fdat), size);
-          pos++;
-        }
-      ucon64_gauge (start_time, size, size);
 #endif
      fprintf (stdout, "\n\n");
      fclose (fh);

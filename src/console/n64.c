@@ -54,14 +54,13 @@ const st_usage_t n64_usage[] =
     {NULL, NULL, "Nintendo 64"},
     {NULL, NULL, "1996 Nintendo http://www.nintendo.com"},
     {"n64", NULL, "force recognition"},
-#if 0   // unlike for SNES ROMs we can't make a mistake about this
-    {"int", NULL, "force ROM is in interleaved format"},
-    {"int2", NULL, "force ROM is in interleaved format 2"},
-    {"nint", NULL, "force ROM is not in interleaved format"},
-#endif
+    // unlike for SNES ROMs we can't make a mistake about this, but we support it anyway
+    {"int", NULL, "force ROM is in interleaved format (2143, V64)"},
+    {"nint", NULL, "force ROM is not in interleaved format (1234, Z64)"},
     {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
     {"v64", NULL, "convert to Doctor V64 (and compatibles/interleaved)"},
     {"z64", NULL, "convert to Z64 (Zip Drive/not interleaved)"},
+    {"dint", NULL, "convert ROM to (non-)interleaved format (1234 <-> 2143)"},
 #if 0
     {"f", NULL, "remove NTSC/PAL protection"},
 #endif

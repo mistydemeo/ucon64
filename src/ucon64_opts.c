@@ -1130,6 +1130,10 @@ ucon64_options (int c, const char *optarg)
       lynx_b1 (ucon64.rominfo, optarg);
       break;
 
+    case UCON64_BIN:
+      genesis_bin (ucon64.rominfo);
+      break;
+
     case UCON64_BIOS:
       if (optarg)
         neogeo_bios (optarg);
@@ -1190,7 +1194,7 @@ ucon64_options (int c, const char *optarg)
         case UCON64_NES:
           nes_dint ();
           break;
-        default:
+        default:                                // Nintendo 64
           puts ("Converting to deinterleaved format...");
           ucon64_file_handler (dest_name, NULL, 0);
           q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb");

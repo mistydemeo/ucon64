@@ -108,6 +108,7 @@ const struct option options[] = {
     {"b0", 1, 0, UCON64_B0},
     {"b1", 1, 0, UCON64_B1},
     {"bat", 0, 0, UCON64_BAT},
+    {"bin", 0, 0, UCON64_BIN},
 #ifdef  DISCMAGE
     {"bin2iso", 1, 0, UCON64_BIN2ISO},
 #endif

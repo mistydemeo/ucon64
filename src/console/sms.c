@@ -41,6 +41,8 @@ const st_usage_t sms_usage[] =
     {NULL, NULL, "Sega Master System(II/III)/Game Gear (Handheld)"},
     {NULL, NULL, "1986/19XX SEGA http://www.sega.com"},
     {"sms", NULL, "force recognition"},
+    {"int", NULL, "force ROM is in interleaved format (SMD)"},
+    {"nint", NULL, "force ROM is not in interleaved format (RAW)"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
     {"smd", NULL, "convert to Super Magic Drive/SMD (+512 Bytes)"},
     {"smds", NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"},

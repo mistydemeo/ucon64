@@ -95,15 +95,14 @@ fclose_fdat (void)
 static int
 custom_stristr (const void *a, const void *b)
 {
-  return (!stristr ((const char *) a, (const char *) b)) ? 1 : 0;
+  return !stristr (a, b);
 }
 
 
 static int
 custom_strnicmp (const void *a, const void *b)
 {
-  return strnicmp ((const char *) a, (const char *) b,
-           MIN (strlen ((const char *) a), strlen ((const char *) b)));
+  return strnicmp (a, b, MIN (strlen (a), strlen (b)));
 }
 
 
@@ -111,7 +110,7 @@ custom_strnicmp (const void *a, const void *b)
 static int
 custom_stricmp (const void *a, const void *b)
 {
-  return stricmp ((const char *) a, (const char *) b);
+  return stricmp (a, b);
 }
 #endif
 
@@ -171,8 +170,6 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
   int pos;
   // We use the filename to find out for what console a DAT file is meant.
   //  The field "refname" seems too unreliable.
-  // TODO: update this list to contain only strings that real DAT filenames
-  //  start with
   static const st_console_t console_type[] = {
     {"GoodSNES", custom_strnicmp, UCON64_SNES, snes_usage},
     {"GoodNES", custom_strnicmp, UCON64_NES, nes_usage},
@@ -307,17 +304,20 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
   strcpy (dat->datfile, basename (fname));
 
-  if (dat_field[5])
-    sscanf (dat_field[5], "%x", &dat->current_crc32);
-
   if (dat_field[3])
     strcpy (dat->name, dat_field[3]);
 
-  if (dat_field[6])
-    sscanf (dat_field[6], "%d", &dat->fsize);
-
   if (dat_field[4])
     strcpy (dat->fname, dat_field[4]);
+
+  if (dat_field[5])
+    sscanf (dat_field[5], "%x", &dat->current_crc32);
+
+  if (dat_field[6][0] == 'N' && dat_field[7][0] == 'O')
+    // e.g. GoodSNES bad crc & Nintendo FDS DAT
+    sscanf (dat_field[8], "%d", &dat->fsize);
+  else
+    sscanf (dat_field[6], "%d", &dat->fsize);
 
   p = dat->name;
   // Often flags contain numbers, so don't search for the closing bracket
@@ -781,7 +781,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
       stricmp (p, ".gbc") &&                    // Game Boy Color
       stricmp (p, ".gba") &&                    // Game Boy Advance
       stricmp (p, ".smc") &&                    // SNES
-      stricmp (p, ".smd") &&                    // Genesis
+//    stricmp (p, ".smd") &&                    // Genesis
       stricmp (p, ".v64"))                      // Nintendo 64
     {
       if (stricmp (dat->name, dat->fname) != 0)

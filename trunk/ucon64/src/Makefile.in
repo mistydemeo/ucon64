@@ -14,9 +14,9 @@ OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
         console/swan.o console/dc.o console/jaguar.o \
         backup/yoko.o backup/ssc.o backup/interceptor.o \
         backup/z64.o backup/cd64.o backup/doctor64.o backup/doctor64jr.o \
-        backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/mgd.o \
-        backup/smc.o backup/smd.o backup/swc.o backup/dex.o backup/psxpblib.o \
-        backup/mccl.o backup/lynxit.o backup/ffe.o
+        backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/gd.o \
+        backup/mgd.o backup/smc.o backup/smd.o backup/swc.o backup/dex.o \
+        backup/psxpblib.o backup/mccl.o backup/lynxit.o backup/ffe.o
 @DEFINE_ZLIB_MAKE@
 ifdef ZLIB
 OBJECTS+=unzip.o
@@ -154,6 +154,7 @@ backup/fal.o: backup/fal.h backup/cartlib.c $(UCON64_STD_H)
 backup/fig.o: backup/fig.h $(UCON64_STD_H)
 backup/fpl.o: backup/fpl.h $(UCON64_STD_H)
 backup/gbx.o: backup/gbx.h $(UCON64_STD_H)
+backup/gd.o: backup/gd.h console/snes.h $(UCON64_STD_H)
 backup/mgd.o: backup/mgd.h $(UCON64_STD_H)
 backup/smc.o: backup/smc.h $(UCON64_STD_H)
 backup/smd.o: backup/smd.h $(UCON64_STD_H)

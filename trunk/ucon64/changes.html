@@ -57,12 +57,12 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - included all databases for every console system that has ROMs without a
   header with text<br>
 - added 324 entries to sms database<br>
-- added -sam convert SAM/M.A.M.E. sound to WAV; $ROM=SAMFILE<br>
-- added -b2i convert BIN/RAW(2352)/Mode2(2336) to ISO; $ROM=BIN_IMAGE<br>
-- added -ppf apply PPF patch (&#60;=2.0); $ROM=ISO_IMAGE $FILE=PATCHFILE<br>
-- added -nppf change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION<br>
-- added -mkppf create PPF patch; $ROM=ISO_IMAGE $FILE=CHANGED_IMAGE<br>
-- added -ip extract ip0000.bin (GD-ROM header/256 bytes); $ROM=/dev/&#60;cdrom&#62;<br>
+- added -sam convert SAM/M.A.M.E. sound to WAV; --rom=SAMFILE<br>
+- added -b2i convert BIN/RAW(2352)/Mode2(2336) to ISO; --rom=BIN_IMAGE<br>
+- added -ppf apply PPF patch (&#60;=2.0); --rom=ISO_IMAGE --file=PATCHFILE<br>
+- added -nppf change PPF description; --rom=PATCHFILE --file=DESCRIPTION<br>
+- added -mkppf create PPF patch; --rom=ISO_IMAGE --file=CHANGED_IMAGE<br>
+- added -ip extract ip0000.bin (GD-ROM header/256 bytes); --rom=/dev/&#60;cdrom&#62;<br>
 - added -fds convert Famicom Disk System file (diskimage) from FAM to FDS<br>
 - changed the FAQ a bit<br>
 - overworked the whole tool to make it easier to develop<br>
@@ -75,7 +75,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - Gilligan wrote a nice routine to read out NeoGeo Pocket roms (added)<br>
 - reorganized the whole source<br>
 - added Game Boy Advance support<br>
-- added (GBA) -n change ROM name; $FILE=NEWNAME<br>
+- added (GBA) -n change ROM name; --file=NEWNAME<br>
 - added (GBA) -logo restore ROM logo character data 0x04-0x9F<br>
 - added (GBA) -chk fix ROM checksum<br>
 - added (GB/GameGear/NES) -gg apply Game Genie code (permanent)<br>
@@ -83,24 +83,24 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - added (GB/GameGear/NES/GEN/SNES) -ggd decode Game Genie code<br>
 - added (LYNX) -lyx convert to LYX/RAW (strip 64 Bytes LNX header)<br>
 - added (LYNX) -lnx convert to LNX (uses default values for the header)<br>
-- added (LYNX) -n change ROM name (LNX only); $FILE=NEWNAME<br>
+- added (LYNX) -n change ROM name (LNX only); --file=NEWNAME<br>
 - added (LYNX) -nrot set no rotation (LNX only)<br>
 - added (LYNX) -rotl set rotation left (LNX only)<br>
 - added (LYNX) -rotr set rotation right (LNX only)<br>
-- added (LYNX) -b0 change Bank0 kBytes size (LNX only); $FILE={0,64,128,256,512}<br>
-- added (LYNX) -b1 change Bank1 kBytes size (LNX only); $FILE={0,64,128,256,512}<br>
-- added -idppf change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ<br>
-- added -strip strip Bytes from end of ROM; $FILE=VALUE<br>
+- added (LYNX) -b0 change Bank0 kBytes size (LNX only); --file={0,64,128,256,512}<br>
+- added (LYNX) -b1 change Bank1 kBytes size (LNX only); --file={0,64,128,256,512}<br>
+- added -idppf change PPF FILE_ID.DIZ (2.0); --rom=PATCHFILE --file=FILE_ID.DIZ<br>
+- added -strip strip Bytes from end of ROM; --file=VALUE<br>
 - added -e emulate/run ROM (check INSTALL and $HOME/.ucon64rc for more)<br>
 - added (GBA) -sram patch ROM for SRAM saving<br>
 - added (GBA) -crp slow down Flash Advance Linker access for ROM (crash patch)<br>
-- added (GBA) -strip strip Bytes from end of ROM (use -ispad before); $FILE=VALUE<br>
-- added (GBA) -xfal send/receive to/from Flash Advance Linker; $FILE=PORT<br>
+- added (GBA) -strip strip Bytes from end of ROM (use -ispad before); --file=VALUE<br>
+- added (GBA) -xfal send/receive to/from Flash Advance Linker; --file=PORT<br>
 <p>
 <a name="196">1.9.6</a><br>
 - this release brings you full support for the Super Wild Card<br>
-- added (SNES) -xswc send/receive to/from Super Wild Card*/(all)SWC; $FILE=PORT (by dbjh)<br>
-- added (SNES) -xswcs send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT (by dbjh)<br>
+- added (SNES) -xswc send/receive to/from Super Wild Card*/(all)SWC; --file=PORT (by dbjh)<br>
+- added (SNES) -xswcs send/receive SRAM to/from Super Wild Card*/(all)SWC; --file=PORT (by dbjh)<br>
 - added (Game Boy) -sgb convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX
   (by NoisyB)<br>
 - added (Game Boy) -gbx convert from Super Backup Card/GX/GBX to
@@ -114,14 +114,14 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 <p>
 <a name="197">1.9.7</a><br>
 - added (NES) -fdsl list Famicom Disk System/FDS (diskimage) contents (by NoisyB)<br>
-- updated (GBA) -xfal send/receive ROM to/from Flash Advance Linker; $FILE=PORT (by dbjh)<br>
+- updated (GBA) -xfal send/receive ROM to/from Flash Advance Linker; --file=PORT (by dbjh)<br>
 - added (GBA) -xfalc&#60;n&#62; specify chip size in mbits of ROM in Flash
   Advance Linker when receiving (by dbjh)<br>
 - added (GBA) -xfalm use SPP mode, default is EPP (by dbjh)<br>
 - added (Neo Geo) -bios convert NeoCD Bios to work with NeoCD emulator (by
   NoisyB; thanks to Caz)<br>
 - changed the whole internal ROM database code (by NoisyB)<br>
-- added -dbs search ROM database (all entries) by CRC32; $ROM=0xCRC32 (by NoisyB)<br>
+- added -dbs search ROM database (all entries) by CRC32; --rom=0xCRC32 (by NoisyB)<br>
 - added (Virtual Boy) show info (by NoisyB)<br>
 - added (Wonder Swan) show info (by NoisyB)<br>
 - added (ColecoVision) show info (by NoisyB)<br>
@@ -145,7 +145,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
   multiple of 32kB (by dbjh)<br>
 - updated (SNES) fixed -swc when ROM file has a name that already has the
   extension .swc fixed the same problem for -smc and -fig (by dbjh)<br>
-- added -lsv like -ls but more verbose; $ROM=DIRECTORY (by NoisyB)<br>
+- added -lsv like -ls but more verbose; --rom=DIRECTORY (by NoisyB)<br>
 - updated (SNES) fixed checksum output (by NoisyB)<br>
 - updated (SNES) fixed -j (join multi files) (by dbjh)<br>
 - updated (SNES) fixed checksum output for Broadcast Satellaview ROMs (by
@@ -158,20 +158,20 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
   (by dbjh)<br>
 - added (SNES) -dint convert ROM to non-interleaved format (by dbjh)<br>
 - added 2830 new ROMs to internal ROM database (by NoisyB)<br>
-- added (Genesis) -xsmd send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT (by NoisyB)<br>
+- added (Genesis) -xsmd send/receive ROM to/from Super Magic Drive/SMD; --file=PORT (by NoisyB)<br>
 - added (Genesis) -xsmds send/receive SRAM to/from Super Magic Drive/SMD;
-  $FILE=PORT (by NoisyB)<br>
+  --file=PORT (by NoisyB)<br>
 - added support for CD based consoles again; uCON64 uses now cdrdao as burn
   engine (by NoisyB)<br>
 - added Dreamcast, PSX (one), PS2, Real3DO, CD-i, CD32 and Saturn support (by NoisyB)<br>
 - added (Genesis) -smds convert emulator (*.srm) SRAM to Super Magic Drive/SMD (by NoisyB)<br>
-- added -r2i convert RAW to ISO9660; $ROM=RAW_IMAGE (by NoisyB)<br>
+- added -r2i convert RAW to ISO9660; --rom=RAW_IMAGE (by NoisyB)<br>
 <p>
 <a name="198">1.9.8</a><br>
 - added more verbose WonderSwan ROM nfo (by NoisyB; thanks to dox)<br>
 - updated (GBA) used Jeff Frohwein's Flash Advance Linker code V1.72 (by dbjh)<br>
-- added (GBA) -xfals send/receive SRAM to/from Flash Advance Linker; $FILE=PORT (by dbjh)<br>
-- added (GBA) -xfalb&#60;n&#62; send/receive SRAM to/from Flash Advance Linker bank n; $FILE=PORT (by dbjh)<br>
+- added (GBA) -xfals send/receive SRAM to/from Flash Advance Linker; --file=PORT (by dbjh)<br>
+- added (GBA) -xfalb&#60;n&#62; send/receive SRAM to/from Flash Advance Linker bank n; --file=PORT (by dbjh)<br>
 - removed (GBA) -xfalm (use SPP mode), because it is not needed anymore (by dbjh)<br>
 - updated (SNES) fixed checksum function for Far East of Eden Zero (J) (by dbjh)<br>
 - added (GBA) -multi{1,2,3} make multirom for Flash Advance Linker (by dbjh)<br>
@@ -185,7 +185,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - updated (SNES) changed -swcs, -figs and -ufos to always create a file of 32.5 kB. This solves
   some problems where SRAM files created with an emulator would not work on a copier. (by dbjh;
   thanks to Caz for investigating the problem and providing a solution)<br>
-- added -mkcue generate CUE file; $ROM=CD_IMAGE $FILE=TRACK_MODE (by NoisyB)<br>
+- added -mkcue generate CUE file; --rom=CD_IMAGE --file=TRACK_MODE (by NoisyB)<br>
 - ported the whole project to FreeBSD (by NoisyB)<br>
 <!-- beta2 -->
 - updated (GBA) changed -xfalb&#60;n&#62; to -xfalb &#60;n&#62; (space between option and argument)
@@ -292,6 +292,10 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - updated (all) environment variables now take precedence over configuration
   file variables (by dbjh)<br>
 - updated (SNES) fixed some problems with joining GD3 files (by dbjh)<br>
+- added (SNES) -xgd3 send ROM to Game Doctor SF3(SF6/SF7); --file=PORT
+  (by John Weidman and dbjh)<br>
+- added (SNES) -dbuh display backup unit header and see if it matches with what
+  uCON64 found while analyzing the ROM data (by dbjh, based on an idea by JohnDie)<br>
 <br>
 <br>
 <br>

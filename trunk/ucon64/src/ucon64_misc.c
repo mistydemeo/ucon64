@@ -102,6 +102,7 @@ const char *unknown_usage[] =
 };
 
 char *ucon64_temp_file = NULL;
+int (*ucon64_testsplit_callback) (const char *filename) = 0;
 
 // maker strings for SNES, GB, GBC and GBA games
 const char *nintendo_maker[792] = {
@@ -958,6 +959,8 @@ ucon64_testsplit (const char *filename)
 
       while (!access (buf, F_OK))               // count split parts
         {
+          if (ucon64_testsplit_callback)
+            ucon64_testsplit_callback (buf);
           (*p)++;
           parts++;
         }

@@ -567,11 +567,11 @@ ucon64_dat_indexer (void)
 void
 ucon64_dat_nfo (const ucon64_dat_t *dat)
 {
-   if (!dat)
-     {
-       fprintf (stdout, "DAT info: ROM not found\n");
-       return;
-     }
+ if (!dat)
+   {
+     fprintf (stdout, ucon64_msg[DAT_ERROR], ucon64.crc32);
+     return;
+   }
 
   printf ("DAT info:\n" "  %s\n", dat->name);
 

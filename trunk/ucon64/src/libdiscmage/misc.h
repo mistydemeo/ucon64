@@ -247,15 +247,14 @@ extern char *mkprint (char *str, const unsigned char replacement);
 extern char *mkfile (char *str, const unsigned char replacement);
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
-#define stristr strcasestr
+extern const char *strcasestr2 (const char *haystack, const char *needle);
+#define stristr strcasestr2
 extern char *setext (char *filename, const char *ext);
 extern const char *getext (const char *filename);
 #define EXTCMP(filename, ext) (strcasecmp (getext (filename), ext))
 extern char *basename2 (const char *str);
 #define basename basename2
 extern char *dirname2 (char *str);
-// DON'T DO THIS! Then misc.h must be included after unistd.h ...
-// #define dirname dirname2 
 extern char *realpath2 (const char *src, char *full_path);
 extern void argz_extract2 (char *cmd, size_t argc, char ***argv);
 

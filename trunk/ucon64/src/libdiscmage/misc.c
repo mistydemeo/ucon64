@@ -773,12 +773,11 @@ dirname2 (const char *path)
 #else
          (*(p1 - 1) == FILE_SEPARATOR && *p1 == FILE_SEPARATOR))
 #endif
-         
     p1--;
 
   if (p1 == dir)
     p1++;                                       // don't overwrite single separator (root dir)
-#if     defined DJGPP || defined __CYGWIN__
+#if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
   else if (p1 > dir)
     if (*(p1 - 1) == ':')
       p1++;                                     // we must not overwrite the last separator if

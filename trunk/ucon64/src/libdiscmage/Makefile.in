@@ -19,7 +19,7 @@ endif
 LDFLAGS=-s
 
 LIBNAME=discmage
-OBJECTS=libdm_misc.o cdi.o nero.o toc.o cue.o sheets.o dllinit.o misc.o
+OBJECTS=libdm_misc.o cdi.o nero.o sheets.o dllinit.o misc.o
 ifdef ZLIB
 LIBS=-lz
 OBJECTS+=unzip.o miscz.o
@@ -181,8 +181,6 @@ CONFIG_H=../config.h
 libdm_misc.o: libdiscmage.h misc.h dxedll_priv.h
 cdi.o: libdiscmage.h misc.h cdi.h dxedll_priv.h
 nero.o: libdiscmage.h misc.h $(CONFIG_H) nero.h cdi.h dxedll_priv.h
-toc.o: libdiscmage.h misc.h $(CONFIG_H) nero.h cdi.h dxedll_priv.h
-cue.o: libdiscmage.h misc.h $(CONFIG_H) nero.h cdi.h dxedll_priv.h
 sheets.o: libdiscmage.h misc.h dxedll_priv.h
 dllinit.o: libdiscmage.h misc.h dxedll_priv.h
 misc.o: misc.h dxedll_priv.h

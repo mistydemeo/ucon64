@@ -82,8 +82,6 @@ dxe_init (void)
   symbol = map_put (symbol, "dm_close", dm_close);
 
   symbol = map_put (symbol, "dm_rip", dm_rip);
-  symbol = map_put (symbol, "dm_cdirip", dm_cdirip);
-  symbol = map_put (symbol, "dm_nrgrip", dm_nrgrip);
 
   symbol = map_put (symbol, "dm_disc_read", dm_disc_read);
   symbol = map_put (symbol, "dm_disc_write", dm_disc_write);

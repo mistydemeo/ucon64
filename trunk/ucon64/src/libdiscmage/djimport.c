@@ -38,16 +38,14 @@ static uint32_t (*dm_get_version_ptr) (void);
 static dm_image_t *(*dm_open_ptr) (const char *);
 static dm_image_t *(*dm_reopen_ptr) (const char *, dm_image_t *);
 static int (*dm_close_ptr) (dm_image_t *);
-static int32_t (*dm_rip_ptr) (dm_image_t *);
-static int32_t (*dm_cdirip_ptr) (dm_image_t *);
-static int32_t (*dm_nrgrip_ptr) (dm_image_t *);
-static int (*dm_disc_read_ptr) (dm_image_t *);
-static int (*dm_disc_write_ptr) (dm_image_t *);
-static int32_t (*dm_mktoc_ptr) (dm_image_t *);
-static int32_t (*dm_mkcue_ptr) (dm_image_t *);
-static int32_t (*dm_bin2iso_ptr) (dm_image_t *);
+static int (*dm_rip_ptr) (const dm_image_t *);
+static int (*dm_disc_read_ptr) (const dm_image_t *);
+static int (*dm_disc_write_ptr) (const dm_image_t *);
+static int (*dm_mktoc_ptr) (const dm_image_t *);
+static int (*dm_mkcue_ptr) (const dm_image_t *);
+static int (*dm_bin2iso_ptr) (const dm_image_t *);
 static void (*dm_set_gauge_ptr) (void (*) (int, int));
-static int (*dm_isofix_ptr) (dm_image_t *, int);
+static int (*dm_isofix_ptr) (const dm_image_t *, int);
 
 void
 load_dxe (void)
@@ -61,8 +59,6 @@ load_dxe (void)
   dm_close_ptr = get_symbol (libdm, "dm_close");
 
   dm_rip_ptr = get_symbol (libdm, "dm_rip");
-  dm_cdirip_ptr = get_symbol (libdm, "dm_cdirip");
-  dm_nrgrip_ptr = get_symbol (libdm, "dm_nrgrip");
 
   dm_disc_read_ptr = get_symbol (libdm, "dm_disc_read");
   dm_disc_write_ptr = get_symbol (libdm, "dm_disc_write");
@@ -113,32 +109,16 @@ dm_close (dm_image_t *a)
 }
 
 
-int32_t
-dm_rip (dm_image_t *a)
+int
+dm_rip (const dm_image_t *a)
 {
   CHECK
   return dm_rip_ptr (a);
 }
 
 
-int32_t
-dm_cdirip (dm_image_t *a)
-{
-  CHECK
-  return dm_cdirip_ptr (a);
-}
-
-
-int32_t
-dm_nrgrip (dm_image_t *a)
-{
-  CHECK
-  return dm_nrgrip_ptr (a);
-}
-
-
 int
-dm_disc_read (dm_image_t *a)
+dm_disc_read (const dm_image_t *a)
 {
   CHECK
   return dm_disc_read_ptr (a);
@@ -146,31 +126,31 @@ dm_disc_read (dm_image_t *a)
 
 
 int
-dm_disc_write (dm_image_t *a)
+dm_disc_write (const dm_image_t *a)
 {
   CHECK
   return dm_disc_write_ptr (a);
 }
 
 
-int32_t
-dm_mktoc (dm_image_t *a)
+int
+dm_mktoc (const dm_image_t *a)
 {
   CHECK
   return dm_mktoc_ptr (a);
 }
 
 
-int32_t
-dm_mkcue (dm_image_t *a)
+int
+dm_mkcue (const dm_image_t *a)
 {
   CHECK
   return dm_mkcue_ptr (a);
 }
 
 
-int32_t
-dm_bin2iso (dm_image_t *a)
+int
+dm_bin2iso (const dm_image_t *a)
 {
   CHECK
   return dm_bin2iso_ptr (a);
@@ -185,8 +165,8 @@ dm_set_gauge (void (*a) (int, int))
 }
 
 
-int32_t
-dm_isofix (dm_image_t *a, int b)
+int
+dm_isofix (const dm_image_t *a, int b)
 {
   CHECK
   return dm_isofix_ptr (a, b);

@@ -582,7 +582,7 @@ download_n64 ()
         {
           if (write_32k (page, 0))
             {
-              read_adr ();
+//              read_adr ();
               /*fclose(fptr); */
               return (-1);
             }

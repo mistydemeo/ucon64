@@ -325,19 +325,21 @@ gba_init (st_rominfo_t *rominfo)
     ucon64.buheader_len : 0;
 
   q_fread (&gba_header, GBA_HEADER_START +
-    rominfo->buheader_len, GBA_HEADER_LEN, ucon64.rom);
+           rominfo->buheader_len, GBA_HEADER_LEN, ucon64.rom);
   if (OFFSET (gba_header, 0xac) == 'A' && OFFSET (gba_header, 0xb3) == 0)
     result = 0;
   else
     {
+#if 0 // AFAIK (dbjh) GBA ROMs never have a header
       rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
         ucon64.buheader_len : UNKNOWN_HEADER_LEN;
 
       q_fread (&gba_header, GBA_HEADER_START +
-        rominfo->buheader_len, GBA_HEADER_LEN, ucon64.rom);
+               rominfo->buheader_len, GBA_HEADER_LEN, ucon64.rom);
       if (OFFSET (gba_header, 0xac) == 'A' && OFFSET (gba_header, 0xb3) == 0)
         result = 0;
       else
+#endif
         result = -1;
     }
   if (ucon64.console == UCON64_GBA)

@@ -543,13 +543,14 @@ main (int argc, char **argv)
   while (rom_index < argc)                      // use argc, NOT ucon64.argc!
     {
 #ifdef  HAVE_ZLIB_H
-      int process_multizips, n_entries;
+      int process_multizips = 1, n_entries;
 
       // Was the last argument the name of a (the) patch file?
       if (rom_index == argc - 1)
         if (!strcmp (argv[rom_index], ucon64.patch_file))
           break;
 
+#if 0 // TODO: think of a way to set ucon64_option
       /*
         See the comment in ucon64_process_rom(). I (dbjh) prefer the GBA
         multirom creation code to handle several zip files instead of stopping
@@ -567,6 +568,7 @@ main (int argc, char **argv)
         default:
           process_multizips = 1;
         }
+#endif
 
       n_entries = unzip_get_number_entries (argv[rom_index]);
       if (n_entries != -1)                      // it's a zip file
@@ -617,6 +619,8 @@ ucon64_fname_arch (const char *fname)
 int
 ucon64_process_rom (const char *fname, int console, int show_nfo)
 {
+  int special_option;
+
   ucon64.rom = fname;
   ucon64.console = console;
   ucon64.show_nfo = show_nfo;
@@ -626,7 +630,7 @@ ucon64_process_rom (const char *fname, int console, int show_nfo)
     ucon64_nfo (&rom);
   ucon64.show_nfo = UCON64_NO;
 
-  ucon64_execute_options ();
+  special_option = ucon64_execute_options ();
 
   if (ucon64.show_nfo == UCON64_YES)
     {
@@ -634,23 +638,7 @@ ucon64_process_rom (const char *fname, int console, int show_nfo)
       ucon64_nfo (&rom);
     }
 
-  /*
-    Some options take more than one file as argument, but should be
-    executed only once. Options that use the --file argument, needn't be
-    specified here, because argc has already been decremented. See the code
-    that sets ucon64.file (in main()).
-  */
-  switch (ucon64_option)
-    {
-    case UCON64_MULTI:                      // falling through
-    case UCON64_XFALMULTI:
-      return 1;
-      break;
-    default:
-      ;
-    }
-
-  return 0;
+  return special_option;
 }
 
 
@@ -658,7 +646,7 @@ int
 ucon64_execute_options (void)
 // execute all options for a single file
 {
-  int ucon64_argc, c, result = 0, value = 0;
+  int ucon64_argc, c, result = 0, value = 0, special_option = 0;
   unsigned int padded;
   char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   const char *ucon64_argv[128];
@@ -668,9 +656,22 @@ ucon64_execute_options (void)
             getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
     {
 #include "options.c"
+      /*
+        Some options take more than one file as argument, but should be
+        executed only once.
+      */
+      switch (ucon64_option)
+        {
+        case UCON64_MULTI:                      // falling through
+        case UCON64_XFALMULTI:
+          special_option = 1;
+          break;
+        default:
+          ;
+        }
     }
 
-  return result;
+  return special_option;
 }
 
 
@@ -1129,7 +1130,7 @@ ucon64_usage (int argc, char *argv[])
   //  with forward slashes...
 
   if (name_exe == (char *) 1)                   // argv[0] doesn't contain a
-    name_exe = argv[0];                         //  file seprarator
+    name_exe = argv[0];                         //  file separator
 
 #ifdef  ANSI_COLOR
 #define ANSI_COLOR_MSG "  " OPTION_LONG_S "ncol        disable ANSI colors in output\n"

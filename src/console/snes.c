@@ -1679,7 +1679,7 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
       n += change_mem (buffer, bytesread, "\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, 0);
 // The next statement could be the alternative for the previous one. Leave it
 //  disabled until we find a game that needs it.
-//      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, 0); 
+//      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, 0);
       n += change_mem (buffer, bytesread, "\x3f\x21\x02\x10\x00\xf0", 6, '\x01', '\x02', "\x80", 1, 0,
                        "\x29\x89", 2);
       n += change_mem (buffer, bytesread, "\x3f\x21\x02\x10\x00\xd0", 6, '\x01', '\x02', "\xea\xea", 2, 0,
@@ -1706,6 +1706,7 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
       n += change_mem (buffer, bytesread, "\xaf\x3f\x21\xea\x89\x10\x00\xd0", 8, '\x01', '\x02', "\xa9\x00\x00", 3, -7);
       n += change_mem (buffer, bytesread, "\xa2\x18\x01\xbd\x27\x20\x89\x10\x00\xd0\x01", 11, '*', '!', "\xea\xea", 2, -1);
       n += change_mem (buffer, bytesread, "\x29\x10\x00\xa2\x00\x00\xc9\x10\x00\xd0", 10, '\x01', '\x02', "\x80", 1, 0);
+
       fwrite (buffer, 1, bytesread, destfile);
     }
   fclose (srcfile);

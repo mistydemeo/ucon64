@@ -1276,8 +1276,8 @@ ucon64_e (const char *romfile)
 static int
 ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console)
 {
-  int result;
-  char buf[MAXBUFSIZE];
+  int result, n;
+  char buf[MAXBUFSIZE], *p;
   st_rominfo_t rominfo;
 
 //  ucon64.dat_enabled = 0;
@@ -1317,19 +1317,34 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
           char buf2[FILENAME_MAX];
 
           buf[0] = 0;
-
           if (ucon64.good_enabled)
             {
               if (ucon64_dat)
                 if (ucon64_dat->fname)
-                  if (ucon64_dat->fname[0])
-                    strcpy (buf, ucon64_dat->fname);
+                  {
+                    n = strlen (ucon64_dat->fname);
+                    p = (char *) getext (ucon64_dat->fname);
+                    if (stricmp (p, ".nes") &&                    // NES
+                        stricmp (p, ".fds") &&                    // NES FDS
+                        stricmp (p, ".gb") &&                     // Game Boy
+                        stricmp (p, ".gbc") &&                    // Game Boy Color
+                        stricmp (p, ".gba") &&                    // Game Boy Advance
+                        stricmp (p, ".smc") &&                    // SNES
+//                      stricmp (p, ".smd") &&                    // Genesis
+                        stricmp (p, ".v64"))                      // Nintendo 64
+                      strcpy (buf, ucon64_dat->fname);
+                    else
+                      {
+                        n -= strlen (p);
+                        strncpy (buf, ucon64_dat->fname, n);
+                        buf[n] = 0;
+                      }
+                  }
             }
           else
             {
               if (rominfo.name)
-                if (rominfo.name[0])
-                  strcpy (buf, rominfo.name);
+                strcpy (buf, rominfo.name);
             }
 
           strcpy (buf2, strtrim (buf));
@@ -1346,12 +1361,19 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
                 {
 #ifdef  DEBUG
                   printf ("Found %s\n", ucon64.rom);
-#endif                  
+#endif
                   return 0;
                 }
-              printf ("Renaming %s to %s\n", ucon64.rom, buf);
-              remove (buf);
-              rename (ucon64.rom, buf);
+              if (access (buf, F_OK))
+                { // file with name buf doesn't exist
+                  printf ("Renaming \"%s\" to \"%s\"\n", ucon64.rom, buf);
+                  rename (ucon64.rom, buf);
+                }
+              else
+                // TODO: here should come some code that checks if buf is really
+                //       the file that its name suggests
+                //       DON'T remove buf! That would be stupid.
+                printf ("File \"%s\" aleady exists, skipping \"%s\"\n", buf, ucon64.rom);
             }
         }
       break;

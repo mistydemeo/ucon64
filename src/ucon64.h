@@ -30,11 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"                             // ANSI_COLOR
 #include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
-#ifdef  ANSI_COLOR
-#ifdef  DJGPP
-#include <dpmi.h>
-#endif
-#endif
 
 /*
   this struct holds only workflow relevant information

@@ -33,10 +33,9 @@ it is a good start to add support for a new console
 //#define SAMPLE
 
 /*
-  enables/disables support for zip files
+  enables/disables support for gzip files
 
-  comment this if there is no zlib for your platform
-  NOTE: work in progress, not yet finished
+  comment this to disable it even if the configure script found zlib
 */
 @DEFINE_ZLIB@
 

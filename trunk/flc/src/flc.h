@@ -32,7 +32,9 @@
 
 int flc_usage(int argc, char *argv[]);
 
-#define flc_TITLE "flc 1.0.0 1999-2002 by NoisyB (noisyb@gmx.net)"
+#define flc_VERSION "1.0.1"
+
+#define flc_TITLE "flc " flc_VERSION " 1999-2002 by NoisyB (noisyb@gmx.net)"
 
 struct flc_
 {

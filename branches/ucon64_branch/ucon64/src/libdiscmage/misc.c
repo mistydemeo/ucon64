@@ -2698,10 +2698,9 @@ fdopen (int fd, const char *mode)
   
 
 int
-argz_extract2 (char **argv, char *cmdline, int sep, int max_args)
+argz_extract2 (char **argv, char *cmdline, const char *separator_s, int max_args)
 {
 //this will be replaced by argz_extract() soon
-  char buf[2];
   int argc = 0;
 
   if (!cmdline)
@@ -2710,202 +2709,72 @@ argz_extract2 (char **argv, char *cmdline, int sep, int max_args)
   if (!(*cmdline))
     return 0;
 
-  buf[0] = sep;
-  buf[1] = 0;
-  for (; (argv[argc] = (char *) strtok (!argc?cmdline:NULL, buf)) &&
+  for (; (argv[argc] = (char *) strtok (!argc?cmdline:NULL, separator_s)) &&
     argc < (max_args - 1); argc++);
 
   return argc;
 }
 
 
-static char
-from_hex (char c)
+char *
+strunesc (char *dest, const char *src)
 {
-  return c >= '0' && c <= '9' ? c - '0' : c >= 'A' && c <= 'F' ? c - 'A' + 10 : c - 'a' + 10;   /* accept small letters just in case */
+  unsigned int c;
+  char *p = dest;
+
+  while ((c = *src++))
+    {
+      if (c == '%')
+        {
+          unsigned char buf[4], *p2 = buf;
+
+          *p2++ = *src++;
+          *p2++ = *src++;
+          *p2 = 0;
+        
+          sscanf (buf, "%x", &c);
+        }
+
+       *p++ = c;
+     }
+  *p = 0;
+  
+  return dest;
 }
 
 
 char *
-strunesc (char *dest, const char *src)
-#if 0
-{
-  unsigned char c;
-
-  for (; ((c = *src++)); *dest++ = c)
-    if (c == '%')
-      {
-        unsigned char c1 = *src++;
-        unsigned char c2 = *src++;
-
-        if (((c1 >= '0' && c1 <= '9') || (c1 >= 'A' && c1 <= 'F')) &&
-            ((c2 >= '0' && c2 <= '9') || (c2 >= 'A' && c2 <= 'F')))
-          {
-            c1 -= (c1 >= '0' && c1 <= '9') ? '0' : 'A';
-
-            c2 -= (c2 >= '0' && c2 <= '9') ? '0' : 'A';
-
-            c = (c1 << 4) + c2;
-          }
-      }
-  return dest;
-}
-#else
-{
-  char *p = NULL;
-  char *q = NULL;
-
-  strcpy (dest, src);
-  p = (char *) dest;
-  q = (char *) dest;
-
-  if (!dest)
-    return "";
-  while (*p)
-    {
-      if (*p == '%')
-        {
-          p++;
-          if (*p)
-            *q = from_hex (*p++) * 16;
-          if (*p)
-            *q = (*q + from_hex (*p++));
-          q++;
-        }
-      else
-        {
-          if (*p == '+')
-            {
-              *q++ = ' ';
-              p++;
-            }
-          else
-            {
-              *q++ = *p++;
-            }
-        }
-    }
-
-  *q++ = 0;
-  return dest;
-}
-#endif
-
-
-int
 stresc (char *dest, const char *src)
-#if 0
 {
   unsigned char c;
-  const unsigned char *positiv = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "abcdefghijklmnopqrstuvwxyz" "0123456789" "-_.!~" // mark characters
+  char *p = dest;
+  const unsigned char *positiv =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ" 
+    "abcdefghijklmnopqrstuvwxyz"
+    "0123456789"
+#if 1
+    "+/"
+#else
+    "-_.!~"                     // mark characters
     "*\\()%"                    // do not touch escape character
     ";/?:@"                     // reserved characters
     "&=+$,"                     // see RFC 2396
-//  "\x7f ... \xff"    fareast laurluages(Chinese, Korean, Japanese)
-    "\x00";                     // \0 too
+//  "\x7f ... \xff"    far east languages(Chinese, Korean, Japanese)
+#endif
+    ;
 
   while ((c = *src++))
     if (strchr (positiv, c) != NULL || c >= 0x7f)
-      *dest++ = c;
+      *p++ = c;
     else
       {
-        /* all others will be escaped */
-        unsigned char c1 = ((c & 0xf0) >> 4);
-        unsigned char c2 = (c & 0x0f);
-
-        c1 += (c1 < 10) ? '0' : 'A';
-        c2 += (c2 < 10) ? '0' : 'A';
-
-        *dest++ = '%';
-        *dest++ = c1;
-        *dest++ = c2;
+        sprintf (p, "%%%02X", c);
+        p += 3;
       }
+  *p = 0;
+
   return dest;
 }
-#else
-{
-  char *bufcoded = (char *) src;
-  char *bufplain = dest;
-//TODO: replace MAXBUFSIZE
-  int destsize = MAXBUFSIZE;
-  static char six2pr[64] = {
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
-  };
-
-  static unsigned char pr2six[256];
-
-  /* siurlle character decode */
-#define DEC(c) pr2six[(int)c]
-#define _DECODE_MAXVAL 63
-
-  static int first = 1;
-
-  int nbytesdecoded, j;
-  char *bufin = bufcoded;
-  unsigned char *bufout = (unsigned char *) bufplain;
-  int nprbytes;
-
-  /*
-     ** If this is the first call, initialize the mappiurl table.
-     ** This code should work even on non-ASCII machines.
-   */
-  if (first)
-    {
-      first = 0;
-      for (j = 0; j < 256; j++)
-        pr2six[j] = _DECODE_MAXVAL + 1;
-      for (j = 0; j < 64; j++)
-        pr2six[(int) six2pr[j]] = (unsigned char) j;
-    }
-
-  /* Strip leadiurl whitespace. */
-
-  while (*bufcoded == ' ' || *bufcoded == '\t')
-    bufcoded++;
-
-  /*
-     ** Figure out how many characters are in the input buffer.
-     ** If this would decode into more bytes than would fit into
-     ** the output buffer, adjust the number of input bytes downwards.
-   */
-  bufin = bufcoded;
-  while (pr2six[(int) *(bufin++)] <= _DECODE_MAXVAL);
-  nprbytes = bufin - bufcoded - 1;
-  nbytesdecoded = ((nprbytes + 3) / 4) * 3;
-  if (nbytesdecoded > destsize)
-    {
-      nprbytes = (destsize * 4) / 3;
-    }
-  bufin = bufcoded;
-
-  while (nprbytes > 0)
-    {
-      *(bufout++) = (unsigned char) (DEC (*bufin) << 2 | DEC (bufin[1]) >> 4);
-      *(bufout++) =
-        (unsigned char) (DEC (bufin[1]) << 4 | DEC (bufin[2]) >> 2);
-      *(bufout++) = (unsigned char) (DEC (bufin[2]) << 6 | DEC (bufin[3]));
-      bufin += 4;
-      nprbytes -= 4;
-    }
-  if (nprbytes & 03)
-    {
-      if (pr2six[(int) bufin[-2]] > _DECODE_MAXVAL)
-        {
-          nbytesdecoded -= 2;
-        }
-      else
-        {
-          nbytesdecoded -= 1;
-        }
-    }
-  bufplain[nbytesdecoded] = 0;
-  return (nbytesdecoded);
-}
-#endif
 
 
 st_strurl_t *

@@ -297,9 +297,9 @@ extern char *realpath2 (const char *src, char *full_path);
 extern int mkdir2 (const char *name);
 extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, int size);
-extern int argz_extract2 (char **argv, char *cmdline, int sep, int max_args);
-#define argz_extract3(a,c,m) argz_extract2(a,c,' ',m)
-extern int stresc (char *dest, const char *src);
+extern int argz_extract2 (char **argv, char *cmdline, const char *separator_s, int max_args);
+#define argz_extract3(a,c,m) argz_extract2(a,c," ",m)
+extern char *stresc (char *dest, const char *src);
 extern char *strunesc (char *dest, const char *src); 
 
 

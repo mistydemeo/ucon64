@@ -81,7 +81,7 @@ else
 {
   if(!flc.path[0])
     getcwd(flc.path,(size_t)sizeof(flc.path));
-  if(flc.path[strlen(flc.path)-1]==FILE_SEPARATOR)
+  if(flc.path[strlen(flc.path)-1]==FILE_SEPARATOR && strlen(flc.path) != 1)
     flc.path[strlen(flc.path)-1]=0;
 
   if(!(dp=opendir(flc.path)))

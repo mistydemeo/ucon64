@@ -75,7 +75,7 @@ const st_track_modes_t track_modes[] = {
 const char *ucon64_parport_error =
   "ERROR:  please check cables and connection\n"
   "        turn off/on the backup unit\n"
-  "        splitted ROMs must be joined first\n"
+  "        split ROMs must be joined first\n"
   "        use " OPTION_LONG_S "file={3bc,378,278,...} to specify your port\n"
   "        set the port to SPP (Standard, Normal) mode in your bios\n";
 
@@ -530,7 +530,7 @@ ucon64_gauge (time_t init_time, long pos, long size)
 
 int
 ucon64_testsplit (const char *filename)
-// test if ROM is splitted into parts
+// test if ROM is split into parts
 {
   long x = 0;
   char buf[4096];

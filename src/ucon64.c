@@ -165,8 +165,8 @@ const struct option long_options[] = {
     {"l", 0, 0, UCON64_L},
     {"lnx", 0, 0, UCON64_LNX},
     {"logo", 0, 0, UCON64_LOGO},
-    {"ls", 0, 0, UCON64_LS},
-    {"lsv", 0, 0, UCON64_LSV},
+    {"ls", 1, 0, UCON64_LS},
+    {"lsv", 1, 0, UCON64_LSV},
     {"lynx", 0, 0, UCON64_LYNX},
     {"lyx", 0, 0, UCON64_LYX},
     {"mgd", 0, 0, UCON64_MGD},
@@ -301,7 +301,7 @@ main (int argc, char **argv)
 
   ucon64.buheader_len =
   ucon64.interleaved =
-  ucon64.splitted =
+  ucon64.split =
   ucon64.snes_hirom = 
   ucon64.console = UCON64_UNKNOWN;
 
@@ -617,7 +617,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
       unsigned long padded = filetestpad (ucon64.rom);
       unsigned long intro = ((size - rominfo->buheader_len) > MBIT) ?
         ((size - rominfo->buheader_len) % MBIT) : 0;
-      int splitted = (UCON64_ISSET (ucon64.splitted)) ? ucon64.splitted :
+      int split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
         ucon64_testsplit (ucon64.rom);
 
       if (!padded)
@@ -629,16 +629,24 @@ ucon64_nfo (const st_rominfo_t *rominfo)
       if (intro)
         printf ("Intro/Trainer: Maybe, %ld Bytes\n", intro);
 
-      printf ("Interleaved/Swapped: %s\n", (rominfo->interleaved) ? "Yes" : "No");
+      printf ("Interleaved/Swapped: %s\n",
+        rominfo->interleaved ?
+          (rominfo->interleaved > 1 ?
+            "Yes (2)" :                         // printing this is handy for SNES ROMs
+            "Yes") :
+          "No");
 
       if (rominfo->buheader_len)
         printf ("Backup unit/Emulator header: Yes, %ld Bytes\n",
           rominfo->buheader_len);
+      else
+// for NoisyB: <read only mode ON>
+        printf ("Backup unit/Emulator header: No\n"); // printing No is handy for SNES ROMs
+// for NoisyB: <read only mode OFF>
 
-      if (splitted)
-        printf ("Splitted: Yes, %d parts\n"
-          "NOTE: to get the correct checksum the ROM must be joined\n",
-          splitted);
+      if (split)
+        printf ("Split: Yes, %d parts\n"
+          "NOTE: to get the correct checksum the ROM must be joined\n", split);
     }
 
   if (rominfo->misc[0])
@@ -713,7 +721,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "nint        force ROM is not interleaved (1234)\n"
     "  " OPTION_LONG_S "dint        convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
     "                  this differs from the Super Nintendo " OPTION_LONG_S "dint option\n"
-    "  " OPTION_LONG_S "ns          force ROM is not splitted\n"
+    "  " OPTION_LONG_S "ns          force ROM is not split\n"
 #ifdef	__MSDOS__
     "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
 #else

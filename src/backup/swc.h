@@ -51,15 +51,19 @@ extern const char *swc_usage[];
 #endif
 typedef struct st_swc_header
 {
-  unsigned char low;
-  unsigned char high;
+/*
+  Don't create fields that are larger than one byte! For example size_low and size_high
+  could be combined in one unsigned short int. However, this gives problems with little
+  endian vs. big endian machines (e.g. writing the header to disk).
+*/
+  unsigned char size_low;
+  unsigned char size_high;
   unsigned char emulation;
-  unsigned char hirom;
-  char pad[4];
-  unsigned char code1; // 0xAA
-  unsigned char code2; // 0xBB
+  unsigned char pad[5];
+  unsigned char id_code1;
+  unsigned char id_code2;
   unsigned char type;
-  char pad2[501];
+  unsigned char pad2[501];
 } st_swc_header_t;
 
 #define SWC_HEADER_START 0

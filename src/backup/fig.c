@@ -1,7 +1,8 @@
 /*
 fig.c - Super PRO Fighter support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+written by 1999 - 2002 NoisyB (noisyb@gmx.net)
+           2001 - 2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -21,23 +22,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
-
-const char *fig_usage[] =
-  {
-    "Super Pro Fighter (Q)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)/FIG",
-    "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw",
-#if 0
-    "TODO:  -xfig	send/receive ROM to/from *Pro Fighter* /(all)FIG; " OPTION_LONG_S "file=PORT\n"
-    "		receives automatically when " OPTION_LONG_S "rom does not exist\n",
-#endif
-    NULL
-  };
-
 #ifdef BACKUP
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "fig.h"
-
 #endif // BACKUP
+
+const char *fig_usage[] =
+  {
+    "Super Pro Fighter (Q)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)/FIG",
+    "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw",
+#if 0
+    "TODO:  " OPTION_LONG_S "xfig        send/receive ROM to/from *Pro Fighter* /(all)FIG; " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when " OPTION_LONG_S "rom does not exist\n",
+#endif
+    NULL
+  };

@@ -35,8 +35,7 @@ typedef struct IO_Tuple
   unsigned long Port;
   unsigned char Data;
   unsigned short Data16;
-}
-IO_Tuple;
+} IO_Tuple;
 #endif // __BEOS__
 
 #define out1byte(p,x)   outportb(p,x)
@@ -44,10 +43,10 @@ IO_Tuple;
 
 // DJGPP (DOS) has outportX() & inportX()
 #if     defined __unix__ || defined __BEOS__
-  extern unsigned char inportb (unsigned short port);
-  extern unsigned short inportw (unsigned short port);
-  extern void outportb (unsigned short port, unsigned char byte);
-  extern void outportw (unsigned short port, unsigned short word);
+extern unsigned char inportb (unsigned short port);
+extern unsigned short inportw (unsigned short port);
+extern void outportb (unsigned short port, unsigned char byte);
+extern void outportw (unsigned short port, unsigned short word);
 #endif // defined __unix__ || defined __BEOS__
 #endif // BACKUP
 
@@ -70,17 +69,24 @@ extern const st_track_modes_t track_modes[];
 /*
   defines for unknown backup units/emulators
 */
-typedef struct st_unknown_header //uses swc header layout
+typedef struct st_unknown_header // uses SWC header layout ("hirom" is a FIG field)
 {
-  unsigned char low;
-  unsigned char high;
+/*
+  Don't create fields that are larger than one byte! For example size_low and size_high
+  could be combined in one unsigned short int. However, this gives problems with little
+  endian vs. big endian machines (e.g. writing the header to disk).
+*/
+  unsigned char size_low;
+  unsigned char size_high;
   unsigned char emulation;
-  char pad[5];
-  unsigned char code1; // 0xAA
-  unsigned char code2; // 0xBB
+  unsigned char hirom;
+  unsigned char pad[4];
+  unsigned char id_code1;
+  unsigned char id_code2;
   unsigned char type;
-  char pad2[501];
+  unsigned char pad2[501];
 } st_unknown_header_t;
+
 #define UNKNOWN_HEADER_START 0
 #define UNKNOWN_HEADER_LEN (sizeof (st_unknown_header_t))
 extern const char *unknown_usage[];
@@ -114,7 +120,7 @@ extern int ucon64_gauge (time_t init_time, long pos, long size);
 extern size_t filepad (const char *filename, long start, long unit);//pad a ROM in Mb
 extern long filetestpad (const char *filename); //test if a ROM is padded
 
-extern int ucon64_testsplit (const char *filename);//test if a ROM is splitted
+extern int ucon64_testsplit (const char *filename);//test if a ROM is split
 
 extern unsigned int ucon64_parport_probe (unsigned int parport); 
 extern const char *ucon64_parport_error; //std. error message for parport

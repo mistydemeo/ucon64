@@ -34,7 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "swc.h"
 
 
-const char *swc_usage[] = 
+const char *swc_usage[] =
   {
     "Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC",
     "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw",
@@ -54,14 +54,13 @@ const char *swc_usage[] =
     "                  for the most backup units\n"
 #else
     ""
-#endif // BACKUP    
+#endif // BACKUP
     ,
     NULL
   };
 
 
 #ifdef BACKUP
-
 
 
 #define INPUT_MASK      0x78

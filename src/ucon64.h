@@ -253,51 +253,51 @@ typedef struct st_ucon64
   int argc;
   char **argv;
 
-  const char *rom;               //rom (cmdline) with path
-  const char *file;              //file (cmdline) with path
+  const char *rom;              //rom (cmdline) with path
+  const char *file;             //file (cmdline) with path
 
   unsigned int parport;         //parallel port address
   int parport_mode;             //parallel port mode: ECP, EPP, SPP, other
   char configfile[FILENAME_MAX]; //path and name of the config file
 
-  int backup;			//flag if backups files (*.bak) should be created
-  int frontend;			//flag if uCON64 was started by a frontend
+  int backup;                   //flag if backups files (*.bak) should be created
+  int frontend;                 //flag if uCON64 was started by a frontend
 
   int show_nfo;                 //show or skip info output for ROM
 
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
   long buheader_len;            //length of backup unit header (==0)?no bu head
-  int splitted;                 //rom is splitted
+  int split;                    //rom is split
   int snes_hirom;               //super nintendo ROM is a HiROM
   int interleaved;              //rom is interleaved (swapped)
-  int console;                 //integer for the detected console system
+  int console;                  //integer for the detected console system
 
 #define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
 #define UCON64_TYPE_ISCD(x) (x == UCON64_CD)
-  int type;                   //rom type ROM or CD image
+  int type;                     //rom type ROM or CD image
 } st_ucon64_t;
 
 extern st_ucon64_t ucon64;
 
 typedef struct st_rominfo
 {
-  const char **console_usage;                  //console system usage
-  const char **copier_usage;                 //backup unit usage
+  const char **console_usage;   //console system usage
+  const char **copier_usage;    //backup unit usage
 
   int interleaved;              //rom is interleaved (swapped)
   int snes_hirom;               //super nintendo ROM is a HiROM
 
   long buheader_start;          //start of backup unit header (mostly 0)
   long buheader_len;            //length of backup unit header (==0)?no bu header
-  const void *buheader;  //(possible) header of backup unit
+  const void *buheader;         //(possible) header of backup unit
 
   long header_start;            //start of internal ROM header
   long header_len;              //length of internal ROM header (==0)?no header
-  const void *header;     //(possible) internal ROM header
+  const void *header;           //(possible) internal ROM header
 
-  char name[MAXBUFSIZE];              //ROM name
-  const char *maker;      //maker name of the ROM
-  const char *country;           //country name of the ROM
+  char name[MAXBUFSIZE];        //ROM name
+  const char *maker;            //maker name of the ROM
+  const char *country;          //country name of the ROM
   char misc[MAXBUFSIZE];        //some miscellaneous information about the ROM in one single string
 
   unsigned long current_crc32;  //current crc32 value of ROM

@@ -20,6 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "config.h"
 #include "misc.h"
 #include "ucon64.h"
@@ -35,7 +36,7 @@ const char *doctor64jr_usage[] =
     "  " OPTION_LONG_S "xdjr        send/receive ROM to/from Doctor64 Jr; " OPTION_LONG_S "file=PORT\n"
 //          "                receives automatically when ROM does not exist\n"
     "                  currently only sending is supported\n",
-#endif BACKUP
+#endif // BACKUP
     NULL
   };
 

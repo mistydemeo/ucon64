@@ -207,4 +207,13 @@ extern unsigned int ucon64_parport_init (unsigned int parport);
 
 extern int ucon64_configfile (void);
 
+/*
+  ucon64_get_options_s() returns option name
+                         ucon64_get_option_s(UCON64_HELP) == "help"
+  ucon64_get_desc()      returns option description
+                         ucon64_get_desc(UCON64_HELP) == "to get more information"
+*/
+extern const char *ucon64_get_option_s (int option);
+extern const char *ucon64_get_desc (int option);
+
 #endif // #ifndef UCON64_MISC_H

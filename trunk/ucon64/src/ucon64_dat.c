@@ -321,7 +321,7 @@ line_to_dat (const char *dat_entry, ucon64_dat_t * dat)
     {
       strcpy (buf, dat_country[pos]);
       *(strchr (buf, ' ')) = 0;
-      if (strstr (p, buf))
+      if (stristr (p, buf))
         {
           dat->country = dat_country[pos];
           break;

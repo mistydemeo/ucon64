@@ -317,7 +317,6 @@ genesis_mgd (st_rominfo_t *rominfo)
   // In addition to the above, uCON also does "memcpy (mgh + 16, "MGH By uCON/chp", 15);"
 
   memcpy (buf, rominfo->name, 15);              // copy first 15 bytes (don't use strlen() or strcpy())
-  printf ("rominfo->name: %s\n", rominfo->name);
   for (x = 0; x < 15; x++)
     {
       for (y = 0; y < 4; y++)

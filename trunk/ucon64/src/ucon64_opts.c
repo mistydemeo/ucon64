@@ -1633,7 +1633,7 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_XGD6S:
       if (access (ucon64.rom, F_OK) != 0)
-        gd6_read_sram (ucon64.rom, ucon64.parport); // dumping is not yet supported
+        gd6_read_sram (ucon64.rom, ucon64.parport);
       else
         gd6_write_sram (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);

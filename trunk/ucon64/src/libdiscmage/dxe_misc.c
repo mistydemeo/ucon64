@@ -1,7 +1,7 @@
 /*
 dxe_misc.c - miscellaneous functions for the grand libdiscmage DXE hack
 
-written by 2003 dbjh
+written by 2003 - 2004 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -269,6 +269,13 @@ void *
 calloc (size_t n_elements, size_t size)
 {
   return import_export.calloc (n_elements, size);
+}
+
+
+void *
+realloc (void *mem, size_t size)
+{
+  return import_export.realloc (mem, size);
 }
 
 

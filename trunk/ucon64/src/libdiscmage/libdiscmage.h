@@ -62,13 +62,13 @@ typedef signed __int64 int64_t;
 #endif                                          // OWN_INTTYPES
 #endif
 
-#define DM_VERSION_MAJOR (0)
-#define DM_VERSION_MINOR (0)
-#define DM_VERSION_STEP (5)
+#define DM_VERSION_MAJOR 0
+#define DM_VERSION_MINOR 0
+#define DM_VERSION_STEP 6
 
 
 // a CD can have max. 99 tracks; this value might change in the future
-#define DM_MAX_TRACKS (99)
+#define DM_MAX_TRACKS 99
 
 typedef struct
 {
@@ -95,8 +95,8 @@ typedef struct
   int16_t seek_header; // in bytes
   int16_t seek_ecc;    // in bytes
 
-  const char *desc;
-//  const char *desc_toc;
+  const char *desc;    // deprecated
+  int id;              // DM_AUDIO, DM_MODE1_2048, ...
 } dm_track_t;
 
 
@@ -146,17 +146,17 @@ TODO: dm_write()     write single sector to track (in image)
   dm_cue_write() write dm_image_t as CUE sheet
   dm_disc_read() deprecated reading or writing images is done
                    by those scripts in contrib/
-  dm_disc_write()deprecated reading or writing images is done
+  dm_disc_write() deprecated reading or writing images is done
                    by those scripts in contrib/
 */
 extern uint32_t dm_get_version (void);
 extern const char *dm_get_version_s (void);
 extern void dm_set_gauge (void (*gauge) (int, int));
 
-#define DM_RDONLY (1)
-#define DM_WRONLY (2)
-#define DM_RDWR (4)
-#define DM_CREAT (8)
+#define DM_RDONLY 1
+#define DM_WRONLY 2
+#define DM_RDWR 4
+#define DM_CREAT 8
 extern dm_image_t *dm_open (const char *fname, uint32_t flags);
 extern dm_image_t *dm_reopen (const char *fname, uint32_t flags, dm_image_t *image);
 extern int dm_close (dm_image_t *image);
@@ -192,11 +192,11 @@ TODO: DM_FIX     (isofix) takes an ISO image with PVD pointing
                    converted to 2048 bytes per sector when writing
                    excluding 2056 image which is needed by Mac users.
 */
-#define DM_FILES (1)
-#define DM_WAV (2)
-#define DM_2048 (4)
-#define DM_FIX (8)
-//#define DM_CDMAGE (16)
+#define DM_FILES 1
+#define DM_WAV 2
+#define DM_2048 4
+#define DM_FIX 8
+//#define DM_CDMAGE 16
 extern int dm_rip (const dm_image_t *image, int track_num, uint32_t flags);
 
 

@@ -194,6 +194,9 @@ typedef signed __int64 int64_t;
 #define FILE_SEPARATOR_S "\\"
 #endif
 
+#define PROPERTY_SEPARATOR '='
+#define PROPERTY_SEPARATOR_S "="
+
 #define OPTION '-'
 #define OPTION_S "-"
 #define OPTION_LONG_S "--"
@@ -263,8 +266,7 @@ extern char *fix_character_set (char *value);
               on one file system
   truncate2() don't use truncate() to enlarge files, because the result is
               undefined (by POSIX) use truncate2() instead which does both
-  argz_extract2() simplified argz_extract() replacement
-  argz_extract3() like argz_extract2() but for spaces only
+  strarg()    break a string into tokens
 */
 extern int isfname (int c);
 extern int isprint2 (int c);
@@ -300,8 +302,7 @@ extern char *realpath2 (const char *src, char *full_path);
 extern int mkdir2 (const char *name);
 extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, int size);
-extern int argz_extract2 (char **argv, char *str, const char *separator_s, int max_args);
-#define argz_extract3(a,c,m) argz_extract2(a,c," ",m)
+extern int strarg (char **argv, char *str, const char *separator_s, int max_args);
 
 
 /*
@@ -312,8 +313,6 @@ extern int argz_extract2 (char **argv, char *str, const char *separator_s, int m
   mem_swap_b() swap n bytes of buffer
   mem_swap_w() swap n/2 words of buffer
   mem_hexdump() hexdump n bytes of buffer; you can use here a virtual_start for the displayed counter
-  crc16()      calculate the crc16 of buffer for size bytes
-  crc32()      calculate the crc32 of buffer for size bytes
 */
 extern int memwcmp (const void *buffer, const void *search, uint32_t searchlen, int wildcard);
 extern void *mem_search (const void *buffer, uint32_t buflen, const void *search, uint32_t searchlen);
@@ -329,14 +328,6 @@ extern uint16_t bswap_16 (uint16_t x);
 extern uint32_t bswap_32 (uint32_t x);
 extern uint64_t bswap_64 (uint64_t x);
 #endif // OWN_BYTESWAP
-#endif
-extern unsigned short crc16 (unsigned short crc, const void *buffer, unsigned int size);
-#ifndef  HAVE_ZLIB_H
-// use zlib's crc32() if HAVE_ZLIB_H is defined...
-#define crc32(C, B, S) crc32_2(C, B, S)
-// ... but make it possible to link against a library that uses zlib while this
-//  code does not use it
-extern unsigned int crc32_2 (unsigned int crc, const void *buffer, unsigned int size);
 #endif
 
 
@@ -388,10 +379,7 @@ extern int change_mem (char *buf, int bufsize, char *searchstr, int strsize,
 extern int change_mem2 (char *buf, int bufsize, char *searchstr, int strsize,
                         char wc, char esc, char *newstr, int newsize,
                         int offset, st_cm_set_t *sets);
-#if     defined UCON64 && !defined DLL
-extern int build_cm_patterns (st_cm_pattern_t **patterns, const char *filename,
-                              char *fullfilename);
-#endif
+extern int build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose);
 extern void cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns);
 extern int ansi_init (void);
 extern char *ansi_strip (char *str);
@@ -417,7 +405,6 @@ extern void wait2 (int nmillis);
   q_rfcpy()    copy src to dest without looking at the file data (no
                decompression like with q_fcpy())
   q_fswap()    swap len bytes of file starting from start
-  q_fcrc32()   calculate the crc32 of filename from start
   q_fbackup()
 
   modes
@@ -443,7 +430,6 @@ extern int q_rfcpy (const char *src, const char *dest);
 extern int q_fswap (const char *filename, int start, int len, swap_t type);
 #define q_fswap_b(f, s, l) q_fswap(f, s, l, SWAP_BYTE)
 #define q_fswap_w(f, s, l) q_fswap(f, s, l, SWAP_WORD)
-extern int q_fcrc32 (const char *filename, int start);
 #if 1
 #define BAK_DUPE 0
 #define BAK_MOVE 1
@@ -473,8 +459,7 @@ extern int q_fsize (const char *filename);
 */
 extern char *get_property (const char *filename, const char *propname, char *value,
                            const char *def);
-extern int32_t get_property_int (const char *filename, const char *propname,
-                                 char divider);
+extern int32_t get_property_int (const char *filename, const char *propname);
 extern char *get_property_fname (const char *filename, const char *propname,
                                  char *buffer, const char *def);
 extern int set_property (const char *filename, const char *propname, const char *value);

@@ -42,13 +42,19 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "../libdiscmage.h"
 #include "../libdm_misc.h"
 #include "format.h"
+#include "cdi.h"
+#include "cue.h"
+#include "nero.h"
+#include "other.h"
+#include "toc.h"
+#include "ccd.h"
 #ifdef  DJGPP                                   // DXE's are specific to DJGPP
 #include "../dxedll_priv.h"
 #endif
 
 
 int
-format_free (dm_image_t *image)
+dm_free (dm_image_t *image)
 {
 #if 1
   memset (image, 0, sizeof (dm_image_t));
@@ -94,7 +100,7 @@ callibrate (const char *s, int len, FILE *fh)
 
 
 int
-format_track_init (dm_track_t *track, FILE *fh)
+dm_track_init (dm_track_t *track, FILE *fh)
 {
   int pos = 0; 
   int x = 0, identified = 0;
@@ -150,7 +156,7 @@ format_track_init (dm_track_t *track, FILE *fh)
     {
       x = 0;
       if (track_probe[x].sector_size != 2048)
-        fprintf (stderr, "ERROR: format_track_init()\n");
+        fprintf (stderr, "ERROR: dm_track_init()\n");
 
       fseek (fh, (track_probe[x].sector_size * 16) +
              track_probe[x].seek_header + track->track_start, SEEK_SET);
@@ -173,9 +179,169 @@ format_track_init (dm_track_t *track, FILE *fh)
   track->seek_header = track_probe[x].seek_header;
   track->seek_ecc = track_probe[x].seek_ecc;
   track->iso_header_start = (track_probe[x].sector_size * 16) + track_probe[x].seek_header;
-  track->desc = dm_get_track_desc (track->mode, track->sector_size, TRUE);
+  track->id = dm_get_track_id (track->mode, track->sector_size);
 
   return 0;
 }
 
 
+dm_image_t *
+dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
+// recurses through all <image_type>_init functions to find correct image type
+{
+  typedef struct
+    {
+      int type;
+      int (* init) (dm_image_t *);
+      int (* track_init) (dm_track_t *, FILE *);
+    } st_probe_t;
+
+  static st_probe_t probe[] =
+    {
+      {DM_CDI, cdi_init, cdi_track_init},
+      {DM_NRG, nrg_init, nrg_track_init},
+//      {DM_CCD, ccd_init, ccd_track_init},
+      {DM_TOC, toc_init, dm_track_init},
+      {DM_CUE, cue_init, dm_track_init},
+      {DM_OTHER, other_init, dm_track_init},
+      {0, NULL, NULL}
+    };
+  int x = 0, identified = 0;
+  int t = 0;
+  static dm_image_t image2;
+  FILE *fh = NULL;
+
+#ifdef  DEBUG
+  printf ("sizeof (dm_track_t) == %d\n", sizeof (dm_track_t));
+  printf ("sizeof (dm_image_t) == %d\n", sizeof (dm_image_t));
+  fflush (stdout);
+#endif
+
+  if (image)
+    dm_free (image);
+
+  if (access (fname, F_OK) != 0)
+    return NULL;
+
+  if (!image)
+//    image = (dm_image_t *) malloc (sizeof (dm_image_t));
+    image = (dm_image_t *) &image2;
+  memset (image, 0, sizeof (dm_image_t));
+  if (!image)
+    return NULL;
+
+  image->desc = ""; // deprecated
+
+  for (x = 0; probe[x].type; x++)
+    if (probe[x].init)
+      {
+        dm_clean (image);
+        image->flags = flags;
+        strcpy (image->fname, fname);
+
+        if (!probe[x].init (image))
+          {
+            identified = 1;
+            break;
+          }
+      }
+
+  if (!identified) // unknown image
+    return NULL;
+
+  image->type = probe[x].type;
+
+  if (!(fh = fopen (image->fname, "rb")))
+    return image;
+
+  // verify header or sheet informations
+  for (t = 0; t < image->tracks; t++)
+    {
+      dm_track_t *track = (dm_track_t *) &image->track[t];
+
+      if (track->mode != 0) // AUDIO/2352 has no iso header
+        track->iso_header_start = track->track_start + (track->sector_size * (16 + track->pregap_len)) + track->seek_header;
+
+#ifdef  DEBUG
+      printf ("iso header offset: %d\n\n", (int) track->iso_header_start);
+      fflush (stdout);
+#endif
+
+      track->id = dm_get_track_id (track->mode, track->sector_size);
+    }
+
+  fclose (fh);
+
+  return image;
+}
+
+
+dm_image_t *
+dm_open (const char *fname, uint32_t flags)
+{
+  return dm_reopen (fname, flags, NULL);
+}
+
+
+int
+dm_close (dm_image_t *image)
+{
+//  dm_clean (image);
+  dm_free (image);
+  return 0;
+}
+
+
+int
+dm_disc_read (const dm_image_t *image)
+{
+  fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_read()");
+  (void) image;                                 // warning remover
+  return 0;
+}
+
+
+int
+dm_disc_write (const dm_image_t *image)
+{
+  fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_write()");
+  (void) image;                                 // warning remover
+  return 0;
+}
+
+
+int
+dm_read (char *buffer, int track_num, int sector, const dm_image_t *image)
+{
+  dm_track_t *track = (dm_track_t *) &image->track[track_num];
+  FILE *fh;
+  
+  if (!(fh = fopen (image->fname, "rb")))
+    return 0;
+
+  if (fseek (fh, track->track_start + (track->sector_size * sector), SEEK_SET) != 0)
+    {
+      fclose (fh);
+      return 0;
+    }
+  
+  if (fread (buffer, track->sector_size, 1, fh) != track->sector_size)
+    {
+      fclose (fh);
+      return 0;
+    }
+
+  fclose (fh);
+  return track->sector_size;
+}
+
+
+int
+dm_write (const char *buffer, int track_num, int sector, const dm_image_t *image)
+{
+  (void) buffer;
+  (void) track_num;
+  (void) sector;
+  (void) image;
+  return 0;
+}

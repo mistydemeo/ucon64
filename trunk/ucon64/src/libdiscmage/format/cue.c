@@ -29,21 +29,29 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "../dxedll_priv.h"
 #endif
 
-#if 0
-#define SIZERAW 2352
-#define SIZEISO_MODE1 2048
-#define SIZEISO_MODE2_RAW 2352
-#define SIZEISO_MODE2_FORM1 2048
-#define SIZEISO_MODE2_FORM2 2336
-#define AUDIO 0
-#define MODE1 1
-#define MODE2 2
-#define MODE1_2352 10
-#define MODE2_2352 20
-#define MODE1_2048 30
-#define MODE2_2336 40
-#define UNKNOWN -1
-#endif
+
+const st_track_desc_t cue_desc[] = 
+  {
+    {DM_MODE1_2048, "MODE1/2048"}, // MODE2_FORM1
+    {DM_MODE1_2352, "MODE1/2352"},
+    {DM_MODE2_2336, "MODE2/2336"}, // MODE2_FORM_MIX
+    {DM_MODE2_2352, "MODE2/2352"},
+    {DM_AUDIO, "AUDIO"},
+    {0, NULL}
+  };
+
+
+static const char *
+cue_get_desc (int id)
+{
+  int x = 0;
+  
+  for (x = 0; cue_desc[x].desc; x++)
+    if (id == cue_desc[x].id)
+      return cue_desc[x].desc;
+  return "";
+}
+
 
 #if 0
 static struct cue_track_pos
@@ -90,10 +98,9 @@ dm_cue_read (dm_image_t *image, const char *cue_cue)
           track->sector_size = track->mode = 0;
             
           for (x = 0; track_probe[x].sector_size; x++)
-            if (strstr (buf, track_probe[x].cue))
+            if (strstr (buf, cue_desc[x].desc))
               {
-                track->mode = track_probe[x].mode;
-                track->sector_size = track_probe[x].sector_size;
+                dm_get_track_by_id (cue_desc[x].id, &track->mode, &track->sector_size);
                 break;
               }       
 
@@ -169,7 +176,7 @@ cue_init (dm_image_t *image)
     {
       dm_track_t *track = (dm_track_t *) &image->track[t];
       
-      if (!format_track_init (track, fh))
+      if (!dm_track_init (track, fh))
         {
           track->track_len =
           track->total_len = q_fsize (image->fname) / track->sector_size;
@@ -240,7 +247,7 @@ dm_cue_write (const dm_image_t *image)
                      "FILE \"%s\" WAVE\r\n"
                      "  TRACK %02d %s\r\n",
                      image->fname, t + 1,
-                     dm_get_track_desc (track->mode, track->sector_size, TRUE));
+                     cue_get_desc (track->id));
 
 #if 0
             if (/* t + 1 > 1 && */
@@ -254,7 +261,7 @@ dm_cue_write (const dm_image_t *image)
                    "FILE \"%s\" BINARY\r\n"
                    "  TRACK %02d %s\r\n",
                    image->fname, t + 1,
-                   dm_get_track_desc (track->mode, track->sector_size, TRUE));
+                   cue_get_desc (track->id));
             break;
 
           default: // bin
@@ -262,7 +269,7 @@ dm_cue_write (const dm_image_t *image)
                    "FILE \"%s\" BINARY\r\n"
                    "  TRACK %02d %s\r\n",
                    image->fname, t + 1,
-                   dm_get_track_desc (track->mode, track->sector_size, TRUE));
+                   cue_get_desc (track->id));
             break;
         }
 

@@ -35,16 +35,43 @@ enum
 };
 extern const char *dm_msg[];
 
+
 typedef struct
 {
   int mode;
   int seek_header; // sync, head, sub
   int sector_size; // data
   int seek_ecc;    // EDC, zero, ECC, spare
-  const char *cue;
-  const char *toc;
+
+  int id;
 } st_track_probe_t;
 extern const st_track_probe_t track_probe[];
+
+
+typedef struct
+{
+  int id;
+  const char *desc;
+} st_track_desc_t; // used in toc.c and cue.c
+
+
+
+enum {
+  DM_AUDIO = 1,
+#if 0
+  DM_SIZERAW,
+  DM_SIZEISO_MODE1,
+  DM_SIZEISO_MODE2_RAW,
+  DM_SIZEISO_MODE2_FORM1,
+  DM_SIZEISO_MODE2_FORM2,
+  DM_MODE1,
+  DM_MODE2,
+#endif
+  DM_MODE1_2352,
+  DM_MODE2_2352,
+  DM_MODE1_2048,
+  DM_MODE2_2336
+};
 
 
 enum {
@@ -57,6 +84,7 @@ enum {
   DM_OTHER
 };
 
+
 /*
   writewavheader()    write header for a wav file
   dm_get_track_desc() returns a string like "MODE1/2352" depending on the 
@@ -64,7 +92,10 @@ enum {
                       it will return the string in TOC format
 */
 //extern void writewavheader (FILE * fdest, int track_length);
-extern const char *dm_get_track_desc (int mode, int sector_size, int cue);
+extern int dm_get_track_id (int mode, int sector_size);
+extern void dm_get_track_by_id (int id, int8_t *mode, uint16_t *sector_size);
+extern void (* dm_ext_gauge) (int, int);
+extern void dm_clean (dm_image_t *image);
 
 extern const char pvd_magic[];
 extern const char svd_magic[];

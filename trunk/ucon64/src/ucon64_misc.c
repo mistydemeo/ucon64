@@ -49,7 +49,7 @@ char hexDigit(	int value
 }
 
 int hexValue(	char digit
-) 
+)
 {
   switch(toupper(digit)) {
     case '0': return 0;
@@ -217,7 +217,7 @@ long filetestpad(	char *filename
 }
 
 #ifdef BACKUP
-
+/*
 void out1byte(unsigned int port, unsigned char c)
 {
   __asm__ volatile ("outb %0,%1"
@@ -232,7 +232,51 @@ unsigned char in1byte(unsigned int port)
 
   return _v;
 }
+*/
 
+unsigned char inportb(unsigned short port)
+{
+  unsigned char byte;
+
+  __asm__ __volatile__
+  ("inb %1, %0"
+    : "=a" (byte)
+    : "d" (port)
+  );
+
+  return byte;
+}
+
+unsigned short inportw(unsigned short port)
+{
+  unsigned short word;
+
+  __asm__ __volatile__
+  ("inw %1, %0"
+    : "=a" (word)
+    : "d" (port)
+  );
+
+  return word;
+}
+
+void outportb(unsigned short port, unsigned char byte)
+{
+  __asm__ __volatile__
+  ("outb %1, %0"
+    :
+    : "d" (port), "a" (byte)
+  );
+}
+
+void outportw(unsigned short port, unsigned short word)
+{
+  __asm__ __volatile__
+  ("outw %1, %0"
+    :
+    : "d" (port), "a" (word)
+  );
+}
 
 #define DETECT_MAX_CNT 1000
 
@@ -240,21 +284,31 @@ int detectParPort(unsigned int port)
 {
   int i;
 
-  if(ioperm(port, 1, 1)==-1)return(-1);
-  out1byte(port, 0xaa);
-  for( i=0; i<DETECT_MAX_CNT; i++ )
-   {
-    if( in1byte(port) == 0xaa ) break;
+#ifdef	__linux__
+  if (ioperm(port, 1, 1) == -1)
+    return -1;
+#endif
+
+  outportb(port, 0xaa);
+  for (i = 0; i < DETECT_MAX_CNT; i++)
+    if (inportb(port) == 0xaa)
+      break;
+  if (i < DETECT_MAX_CNT)
+  {
+    outportb(port, 0x55);
+    for (i = 0; i < DETECT_MAX_CNT; i++)
+      if (inportb(port) == 0x55)
+        break;
   }
-  if( i < DETECT_MAX_CNT ) {
-    out1byte(port, 0x55);
-    for( i=0; i<DETECT_MAX_CNT; i++ ) {
-      if( in1byte(port) == 0x55 ) break;
-    }
-  }
-  if(ioperm(port, 1, 0)==-1)return(-1);
-  
-  if( i >= DETECT_MAX_CNT ) return 0;
+
+#ifdef	__linux__
+  if (ioperm(port, 1, 0) == -1)
+    return -1;
+#endif
+
+  if (i >= DETECT_MAX_CNT)
+    return 0;
+
   return 1;
 }
 
@@ -262,83 +316,99 @@ int detectParPort(unsigned int port)
 #define getParPort(x) parport_probe(x)
 unsigned int parport_probe(unsigned int port)
 {
+#ifdef	__UNIX__
   uid_t uid;
-  unsigned int parPortAddresses[] = { 0x3bc, 0x378, 0x278 };
+  gid_t gid;
+#endif
+  unsigned int parPortAddresses[] = {0x3bc, 0x378, 0x278};
   int i;
-  
-  if( port == 0 ) port = 1;
-  if( port <= 3 ) {
-    for( i=0; i<3; i++ ) {
+
+  if (port == 0)
+    port = 1;
+  if (port <= 3)
+  {
+    for (i = 0; i < 3; i++)
+    {
       port -= detectParPort(parPortAddresses[i]);
-      if( port == 0 ) {
+      if (port == 0)
+      {
         port = parPortAddresses[i];
         break;
       }
     }
-    if( i >= 3 ) return (0);
-  } else {
-    if( (port != parPortAddresses[0]) && (port != parPortAddresses[1]) && (port != parPortAddresses[2]) ) {
-	return(0);
-    }
+    if (i >= 3)
+      return 0;
   }
-  if( port != 0 ) {
-    if(ioperm(port, 3, 1)==-1)return(0);
+  else
+    if ((port != parPortAddresses[0]) &&
+        (port != parPortAddresses[1]) &&
+        (port != parPortAddresses[2]))
+      return 0;
+
+  if (port != 0)
+  {
+#ifdef	__linux__
+    if (ioperm(port, 3, 1) == -1)		// data, status & control
+    {
+      fprintf(stderr, "Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
+                      "(This program needs root privileges)\n",
+              port + PARPORT_DATA, port + PARPORT_STATUS, port + PARPORT_CONTROL);
+      exit(1);                                  // Don't return, if ioperm() fails port access
+    }                                           //  causes core dump
+#endif
+    outportb(port + PARPORT_CONTROL, inportb(port + PARPORT_CONTROL) & 0x0f);
+                                                // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
+#ifdef __UNIX__
     uid = getuid();
-    seteuid(uid);
+    if (setuid(uid) == -1)
+    {
+      fprintf(stderr, "Could not set uid\n");
+      exit(1);
+    }
+    gid = getgid();                             // This shouldn't be necessary if `make install'
+    if (setgid(uid) == -1)                      //  was used, but just in case (root did `chmod +s')
+    {
+      fprintf(stderr, "Could not set gid\n");
+      exit(1);
+    }
+#endif
   }
+
   return port;
 }
 
-
-
-int parport_gauge(	time_t init_time
-		,long pos
-		,long size
-)
+int parport_gauge(time_t init_time, long pos, long size)
 {
-	long cps=0;
-	time_t curr,left;
-	char buf[256];
-	
-	if( !( curr=( time(0)-init_time ) ) )return(0);
+  long cps;
+  time_t curr, left;
+  char buf[2*24+1];
 
-	cps=pos/curr;
-	left=(size-pos)/cps;
+  if ((curr = time(0) - init_time) == 0)	// if called less then 1 second ago return
+    if (pos < size)				//  (but print at least once)
+      return 0;
+  if (pos > size)
+    return -1;
 
-	buf[0]=0;
-	strncat(buf,"===============================",(size_t)((long)24*pos/size));
-	strcat(buf,"-------------------------------");
-	buf[24]=0;
+  cps = pos/curr;				// # bytes/second
+  left = (size - pos)/cps;
 
-	printf("\r%10lu Bytes [%s] %lu%% ,CPS=%lu ,"
-	,pos
-	,buf
-	,(unsigned int)100*pos/size
-	,(unsigned long)cps
-	);
+  buf[0] = 0;
+  strncat(buf, "========================", (size_t) (24L*pos/size));
+  strcat(buf, "------------------------");
+  buf[24] = 0;
 
-//TODO show average speed after transfer
+  printf("\r%10lu Bytes [%s] %lu%% ,CPS=%lu ,",
+         pos, buf, (unsigned long) 100*pos/size, (unsigned long) cps);
 
-	if(pos==size)
-	{
-		printf("TOTAL=%03ld:%02ld "
-		,(long)(curr/60)
-		,((long)curr)%60
-		);
-	}
-	else
-	{
-		printf("ETA=%03ld:%02ld   "
-		,(long)(left/60)
-		,((long)left)%60
-		);
-	}
-	fflush(stdout);
+  if (pos == size)                              // last printed CPS is average transfer speed
+    printf("TOTAL=%03ld:%02ld\n", (long) curr/60, (long) curr%60);
+  else
+    printf("ETA=%03ld:%02ld   ", (long) left/60, (long) left%60);
 
-	return(0);
+  fflush(stdout);
+
+  return 0;
 }
-
-
 
 
 #define SEND_MAX_WAIT 0x300000
@@ -415,9 +485,6 @@ int testsplit(char *filename)
 //TODO ignore paths
 long x=0;
 char buf[4096];
-
-strcpy(buf,filenameonly(filename));
-if(!strchr(buf,'.'))return(0);
 
 strcpy(buf,filename);
 buf[findlast(buf,".")-1]++;

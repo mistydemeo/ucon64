@@ -24,18 +24,29 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <sys/ioctl.h>
 #ifdef BACKUP
-	#include <sys/perm.h>
+  #ifdef __linux__
+    #ifdef __GLIBC__
+      #include <sys/io.h>                       // ioperm() (glibc)
+    #endif
+  #endif
+  #ifndef __UNIX__
+    #include <pc.h>				// inportb(), inportw()
+  #endif
 #endif
 #include <sys/stat.h>
 //#include <sys/types.h>
 #include <time.h>
-#include <unistd.h>
+#include <unistd.h>				// ioperm() (libc5)
 
 #include "misc.h"
 
 #define MBIT 131072
+
+#define PARPORT_DATA    0                       // output
+#define PARPORT_STATUS  1                       // input
+#define PARPORT_CONTROL 2
+
 
 char hexDigit(	int value	//GameGenie "codec" routine
 );
@@ -89,18 +100,16 @@ unsigned short int outport(	unsigned int arg1	//write a word to the p.p.
 );
 */
 
-#define outportb(p,x)	out1byte(p,x)
-#define inportb(p)	in1byte(p)
+#define out1byte(p,x)	outportb(p,x)
+#define in1byte(p)	inportb(p)
+// DJGPP has outportX() & inportX()
 
-
-void out1byte(	unsigned int port		//read a byte from the p.p.
-		,unsigned char c
-);
-
-unsigned char in1byte(	unsigned int port	//write a byte to the p.p.
-);
-
-
+#ifdef	__UNIX__
+inline unsigned char inportb(unsigned short port);
+inline unsigned short inportw(unsigned short port);
+inline void outportb(unsigned short port, unsigned char byte);
+inline void outportw(unsigned short port, unsigned short word);
+#endif
 
 unsigned int parport_probe(	unsigned int parport	//detect parallel port
 );

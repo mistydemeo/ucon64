@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo Give root\'s password:
+su -c "
 chown root ucon64
 chmod 4775 ucon64
 cp ucon64 /usr/local/bin
@@ -8,3 +10,4 @@ then
 	cp $HOME/.ucon64rc $HOME/.ucon64rc.old
 fi
 cp .ucon64rc $HOME
+"

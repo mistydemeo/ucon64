@@ -19,11 +19,15 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "gbx.h"
-
 #include <stdio.h>
 
-#include <unistd.h>
-#include <sys/io.h>
+#ifdef __linux__
+#ifdef __GLIBC__
+#include <sys/io.h>				// ioperm() (glibc)
+#else
+#include <unistd.h>				// ioperm() (libc5)
+#endif
+#endif
 
 extern char *file_name;
 extern char pocket_camera;
@@ -164,7 +168,7 @@ void init_xchanger(void)
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <zlib.h>
+//#include <zlib.h>
 #include <sys/stat.h>
 /*
 #ifndef WIN32
@@ -2360,39 +2364,28 @@ void status_func(char *line)
 	printf("%s\n", line);
 }
 
-
-
 int gbx_usage(int argc,char *argv[])
 {
-if(argcmp(argc,argv,"-help"))printf("\n%s\n",gbx_TITLE);
+  if (argcmp(argc,argv,"-help"))
+    printf("\n%s\n",gbx_TITLE);
 
+  printf("TODO:  -xgbx    send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
+         "                receives automatically when $ROM does not exist\n");
 
-printf("TODO:  -xgbx    send/receive ROM to/from GB Xchanger; $FILE=PORT\n\
-		receives automatically when $ROM does not exist\n\
-");
+  if (argcmp(argc,argv,"-help"))
+  {
+  //TODO more info like technical info about cabeling and stuff for the copier
+  }
 
-if(argcmp(argc,argv,"-help"))
-{
-//TODO more info like technical info about cabeling and stuff for the copier
-
+  return 0;
 }
-	return(0);
-}
 
-int gbx_read(	char *filename
-			,unsigned int parport
-)
+int gbx_read(char *filename, unsigned int parport)
 {
-
-backup_cart(filename, prog_func, status_func);
+  return backup_cart(filename, prog_func, status_func);
 }
                         
-int gbx_write(	char *filename
-			,long start
-			,long len
-			,unsigned int parport
-)
+int gbx_write(char *filename, long start, long len, unsigned int parport)
 {
-send_file(filename, prog_func, status_func);
-
+  return send_file(filename, prog_func, status_func);
 }

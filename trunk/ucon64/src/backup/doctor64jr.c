@@ -20,13 +20,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "doctor64jr.h"
 
-
 /*#include <dos.h>*/
 #include <stdio.h>
 #include <stdlib.h>
 /*#include <io.h>*/
 /*#include <dir.h>*/
-#include <unistd.h>
+#ifdef __linux__
+#ifdef __GLIBC__
+#include <sys/io.h>				// ioperm() (glibc)
+#else
+#include <unistd.h>				// ioperm() (libc5)
+#endif
+#endif
 
 
 //#define ai 0x37b
@@ -105,7 +110,7 @@ unsigned char outportb(arg1,arg2)
   outb    %al,%dx
   ");
 }
-*/
+
 unsigned short int inport(unsigned int arg1)
 {
   __asm__("
@@ -122,6 +127,7 @@ unsigned short int outport(unsigned int arg1,unsigned int arg2)
   outw    %ax,%dx
   ");
 }
+*/
 
 /**************************************
 *               Subroutine            *
@@ -171,12 +177,12 @@ char write_32k(unsigned short int hi_word, unsigned short int lo_word)
 	 set_data_write		// ninit=0, nWrite=0
 	 fix=i<<8;
 	 for (j=0;j<256;j++){
-	    outport(port_c,mix.bufferx[j+fix]);
+	    outportw(port_c,mix.bufferx[j+fix]);
 	 }
 	 set_data_read		// ninit=0, nWrite=1
 	 if (wv_mode){
 	    for (j=0;j<256;j++){
-	       temp=inport(port_c);
+	       temp=inportw(port_c);
 	       if(mix.bufferx[j+fix]!=temp){
 //		  printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
 		  break;
@@ -186,7 +192,7 @@ char write_32k(unsigned short int hi_word, unsigned short int lo_word)
 	 else{
 	    pass1=1;
 	    for (j=0;j<4;j++){
-	       temp=inport(port_c);
+	       temp=inportw(port_c);
 	       if(mix.bufferx[j+fix]!=temp){
 //		  printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
 		  pass1=0;
@@ -200,7 +206,7 @@ char write_32k(unsigned short int hi_word, unsigned short int lo_word)
 	       drjr_set_ai(4);
 	       set_data_read		// ninit=0, nWrite=1
 	       for (j=252;j<256;j++){
-		  temp=inport(port_c);
+		  temp=inportw(port_c);
 		  if(mix.bufferx[j+fix]!=temp){
 //		     printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
 		     break;
@@ -252,7 +258,7 @@ char verify_32k(unsigned short int hi_word, unsigned short int lo_word)
 	 set_data_read			// ninit=0, nwrite=1
 	 fix=i<<8;
 	 for (j=0;j<256;j++){
-	    temp=inport(port_c);
+	    temp=inportw(port_c);
 	    if (temp!=mix.bufferx[j+fix]){
 //	       printf("verify error!!!\07\n");
 //	       printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
@@ -309,7 +315,7 @@ void read_some(void)
    drjr_set_ai(4);
    set_data_read		// ninit=0, nWrite=1
    for (i=0;i<64;i++) {
-      mix.bufferx[i]=inport(port_c);
+      mix.bufferx[i]=inportw(port_c);
    }
    dump_buffer();
    read_adr();
@@ -531,7 +537,10 @@ int d64jr_main(int argc, char *argv[])
 */
    port[0]=0x378;
    port[1]=0;
+
+#ifdef __linux__
    ioperm(0x378, 6, 1);
+#endif
 
     if (argc==1) d64jr_usage(progname);
     for( i=1; i<argc; i++ ) {

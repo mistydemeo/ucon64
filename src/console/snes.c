@@ -1028,7 +1028,7 @@ snes_ufo (st_rominfo_t *rominfo)
   if (snes_hirom)
     {
       unsigned char *srcbuf, *dstbuf;
-      int newsize;
+      int newsize, half_newsize, half_size_4Mb, half_size_1Mb, pad;
 
       // TODO: wait for a newer revision of John's UFO header spec as it
       //       is way too unclear
@@ -1046,13 +1046,15 @@ snes_ufo (st_rominfo_t *rominfo)
           // Tales of Phantasia (J) & Dai Kaiju Monogatari 2 (J): 0 0x0e 0
         }
 
+      newsize = size >= 10 * MBIT && size <= 12 * MBIT ?
+                  12 * MBIT : ((size + MBIT - 1) & ~(MBIT - 1));
+      pad = (newsize - size) / 2;
+
       if (!(srcbuf = (unsigned char *) malloc (size)))
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], (int) size);
           exit (1);
         }
-      newsize = size >= 10 * MBIT && size <= 12 * MBIT ?
-                  12 * MBIT : ((size + MBIT - 1) & ~(MBIT - 1));
       if (!(dstbuf = (unsigned char *) malloc (newsize)))
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], (int) newsize);
@@ -1064,7 +1066,17 @@ snes_ufo (st_rominfo_t *rominfo)
         snes_deinterleave (rominfo, &srcbuf, size);
       if (newsize > size)
         memset (dstbuf + size, 0, newsize - size);
-      snes_int_blocks (srcbuf, dstbuf + newsize / 2, dstbuf, newsize / 0x10000);
+
+      half_newsize = newsize / 2;
+      snes_int_blocks (srcbuf, dstbuf + half_newsize, dstbuf, size / 0x10000);
+      if (pad > 0)
+        {
+          half_size_4Mb = (size / 2) & ~(4 * MBIT - 1);
+          half_size_1Mb = (size / 2 + MBIT - 1) & ~(MBIT - 1);
+          snes_mirror (dstbuf, half_size_4Mb, half_size_1Mb, half_newsize);
+          snes_mirror (dstbuf, half_newsize + half_size_4Mb,
+                       half_newsize + half_size_1Mb, newsize);
+        }
 
       q_fwrite (dstbuf, UFO_HEADER_LEN, newsize, dest_name, "ab");
 

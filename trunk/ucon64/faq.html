@@ -95,6 +95,8 @@ Q33: <a href="#33">How do I enable or disable colors in the display output of
 Q34: <a href="#34">When I try to convert a large number of files using
    wildcards, uCON64 will only convert the first file. Is this a bug?</a><br>
 <br>
+Q35: <a href="#35">How does uCON64 support DAT (Goodxxxx, Romcenter, etc.) files?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -555,6 +557,15 @@ Q34: <a href="#34">When I try to convert a large number of files using
    option if you don't want uCON64 to do this. You could use a dummy argument
    like 0. For example:<br>
    &nbsp;&nbsp; ucon64 --snes --swc *.mgd --file=0<br>
+<br>
+<p>
+<a name="35"><b>Q35</b>: How does uCON64 support DAT (Goodxxxx, Romcenter, etc.) files?</a><br>
+<b>A</b>: Very simple. Just have a look in the uCON64 configfile and see which
+is the configdir property. If not set yet you can enter any dir there
+(default for unix would be ~/.ucon64). Then copy all DAT files you have into that
+dir. uCON64 will automatically create index files which speed up the DAT
+access dramatically. Now uCON64 uses the informations inside the DAT files to
+identify or rename ROMs without an internal header :)
 <br>
 <p>
 <br>

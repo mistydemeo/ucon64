@@ -54,6 +54,7 @@ const char *lynx_usage[] =
     NULL
 };
 
+const char *lynx_lyx_desc = "convert to LYX/RAW (strip 64 Bytes LNX header)";
 
 //static const char *lnx_usage[] = "LNX header";
 #define LNX_HEADER_START 0

@@ -2,7 +2,7 @@
 misc.c - miscellaneous functions
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2002 dbjh
+           2001 - 2003 dbjh
                   2002 Jan-Erik Karlsson (Amiga)
 
 
@@ -68,7 +68,6 @@ typedef struct termios tty_t;
 
 #ifdef  DJGPP
 #include <dpmi.h>                               // needed for __dpmi_int() by ansi_init()
-//#include "dxedll_priv.h"
 #endif
 
 extern int errno;
@@ -997,6 +996,7 @@ set_property (const char *filename, const char *propname, const char *value)
 int
 rmdir2 (const char *path)
 {
+#if 0
   char cwd[FILENAME_MAX];
   struct dirent *ep;
   struct stat fstate;
@@ -1025,6 +1025,7 @@ rmdir2 (const char *path)
   closedir (dp);
   chdir (cwd);
 
+#endif
   return rmdir (path);
 }
 
@@ -1241,7 +1242,6 @@ handle_registered_funcs (void)
 
 
 // map code should be included unconditionally (needed by gz/zip & DLL (DXE) code)
-#define DXE                                     // signal that we include map.c from a DXE
 #include "map.c"
 
 #ifdef  HAVE_ZLIB_H

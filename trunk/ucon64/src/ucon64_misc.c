@@ -942,11 +942,11 @@ ucon64_e (const char *romfile)
   const char *property;
 
   x = 0;
-  while (long_options[x].name)
+  while (options[x].name)
     {
-      if (long_options[x].val == ucon64.console)
+      if (options[x].val == ucon64.console)
       {
-        sprintf (buf3, "emulate_%s", long_options[x].name);
+        sprintf (buf3, "emulate_%s", options[x].name);
         break;
       }
       x++;

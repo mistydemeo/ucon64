@@ -9,7 +9,7 @@ uCON64 will be installed in $HOME/config/bin.
 Do you want to continue?" "Cancel" "Install")
 if [ "$areply" ==  "Install" ]; then
 	cp $(pwd)/ucon64 $HOME/config/bin
-    cp $(pwd)/libdiscmage/discmage.so $HOME
+	cp $(pwd)/libdiscmage/discmage.so $HOME
 	# ask for ioport driver installation
 	drreply=$(alert "uCON64 needs the BeOS ioport driver by Caz Jones.
 

@@ -64,7 +64,7 @@ set_header (unsigned char *buffer)
 
   for (n = 0; n < 128; n++)
     {
-      ffe_send_command (5, n, 0);
+      ffe_send_command (5, (unsigned short) n, 0);
       buffer[n] = ffe_send_command1 (0xa0a0);
       wait2 (1);
       if (buffer[n] != 0xff)
@@ -158,9 +158,9 @@ msg_read_rom (const char *filename, unsigned int parport)
   starttime = time (NULL);
   while (blocksleft > 0)
     {
-      ffe_send_command (5, blocksdone, 0);
+      ffe_send_command (5, (unsigned short) blocksdone, 0);
       if (emu_mode_select && blocksdone >= 32)
-        ffe_send_command (5, blocksdone + 32, 0);
+        ffe_send_command (5, (unsigned short) (blocksdone + 32), 0);
       ffe_receive_block (0xa000, buffer, BUFFERSIZE);
       // vgs aborts if the checksum doesn't match the data, we let the user decide
       blocksleft--;
@@ -213,7 +213,7 @@ msg_write_rom (const char *filename, unsigned int parport)
   starttime = time (NULL);
   while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
     {
-      ffe_send_command (5, blocksdone, 0);
+      ffe_send_command (5, (unsigned short) blocksdone, 0);
       ffe_send_block (0x8000, buffer, bytesread);
       blocksdone++;
 

@@ -1,0 +1,226 @@
+<html><head><title>CHANGES</title></head><body bgcolor="#c0c0c0" background="images/bg.jpg"><tt><br>
+The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
+<br>
+<a name="190">1.9.0<br>
+- completely re-written<br>
+- this is the first real version with support for the most consoles<br>
+<br>
+<a name="191">1.9.1<br>
+- bug fixes<br>
+- fixed the -xv64 routine for receive and emulation on N64<br>
+- cosmetical changes<br>
+- removed the stupid curses GUI<br>
+- optimized noisette.h for speed<br>
+- added more OPTIONS and CONSOLE SYSTEMS<br>
+<br>
+<a name="192">1.9.2<br>
+- started to add missing Sega System16(A/B)/System 18/dual 68000 support<br>
+- -xv64 shows now the filename on the Doctor instead of "UCON64" (sorry)<br>
+- removed -xmp3 option for Songboy (latest informations say that it will<br>
+  be a USB device with copyprotected MPE standard instead of MP3.. HAHAHAHA!!!)<br>
+- TODO:  -xmp3    send MP3 file(s) to SongBoy (MP3 player for Gameboy)<br>
+- removed options which were added by mistake (like parallel transfer for Z64)<br>
+- added -ispad (looks for repeating bytes at the end of a probably padded ROM)<br>
+- added -rn (some people might find it useful)<br>
+- added -mg, -bin and 'show ROM' support for PC-Engine<br>
+- added -usms for Jos Kwanten's ultraSMS an Sega Master System/GameGear<br>
+  Emulator for the Nintendo 64<br>
+- fixed aps (GRRNNNNN!!!)<br>
+- added an universal frontend (in java) for all platforms and all programs that<br>
+  need a filename<br>
+- added CD32, CD-i and Real 3DO support<br>
+- added -bin and -ffe option for Sega Master System/GameGear<br>
+- added database for NES roms (that enlarged the ucon64 executable by 190kb<br>
+  grnnn...) "You gotta do what you gotta do." (Futurama)<br>
+- added -db and -dbv database commands... now everyone can check if the<br>
+- uCON64 version he uses has new database entries for a console system<br>
+<br>
+<a name="193">1.9.3<br>
+- added -mka create APS patch support<br>
+- added -na change APS description<br>
+- added -hd, -nhd switches for SMS/Gamegear<br>
+- added auto-detection and some information for Jaguar ROMs<br>
+- added -ssc convert to Super Smart Card (GameBoy)<br>
+- fixed/added -chk fix checksum (GameBoy)<br>
+- added -gg gamegenie support for Super Nintendo<br>
+- cleaned up the usage output<br>
+- added -chk fix checksum for Super Nintendo/Super Famicon<br>
+- removed most CDROM based consoles from usage since uCON64 could support<br>
+  them only by showing some informations about the CDROM itself (option -cdrom)<br>
+- added -gd3 convert to Professor SF(2) Game Doctor SF3/6/7 (autojoin)<br>
+- added -gdf fix Professor SF(2) Game Doctor SF3/6/7 savegame problems<br>
+<br>
+<a name="194">1.9.4<br>
+- included all databases for every console system that has ROMs without a<br>
+  header with text<br>
+- added 324 entries to sms database<br>
+- added -sam convert SAM/M.A.M.E. sound to WAV; $ROM=SAMFILE<br>
+- added -b2i convert BIN/RAW(2352)/Mode2(2336) to ISO; $ROM=BIN_IMAGE<br>
+- added -ppf apply PPF patch (&#60;=2.0); $ROM=ISO_IMAGE $FILE=PATCHFILE<br>
+- added -nppf change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION<br>
+- added -mkppf create PPF patch; $ROM=ISO_IMAGE $FILE=CHANGED_IMAGE<br>
+- added -ip extract ip0000.bin (GD-ROM header/256 bytes); $ROM=/dev/&#60;cdrom&#62;<br>
+- added -fds convert FAM to Famicon DiskSystem/FDS (diskimage)<br>
+- changed the faq a bit<br>
+- overworked the whole tool to make it easier to develop<br>
+- searched a new site for it (<a href="http://ucon64.sourceforge.net" target="_blank">http://ucon64.sourceforge.net</a>)<br>
+<br>
+<a name="195">1.9.5<br>
+- after the update release of 1.9.4 I had a closer look at my sources<br>
+  and realized that my style heavily changed since 1.9.3 the result is<br>
+  that I had to make more changes in the source starting from ucon64.c<br>
+- Gilligan wrote a nice routine to read out NeoGeo Pocket roms (added)<br>
+- reorganized the whole source<br>
+- uCON64 is from now on cartridge only/CD based console systems will be supported<br>
+  in another project (see: <a href="http://ucon64.sourceforge.net" target="_blank">http://ucon64.sourceforge.net</a>)<br>
+- added Gameboy Advance support<br>
+- added (GBA) -n change ROM name; $FILE=NEWNAME<br>
+- added (GBA) -logo restore ROM logo character data 0x04-0x9F<br>
+- added (GBA) -chk fix ROM checksum<br>
+- added (GB/GameGear/NES) -gg apply GameGenie code (permanent)<br>
+- added (GB/GameGear/NES/GEN/SNES) -gge encode GameGenie code<br>
+- added (GB/GameGear/NES/GEN/SNES) -gge decode GameGenie code<br>
+- added (LYNX) -lyx convert to LYX/RAW (strip 64 Bytes LNX header)<br>
+- added (LYNX) -lnx convert to LNX (uses default values for the header)<br>
+- added (LYNX) -n change ROM name (LNX only); $FILE=NEWNAME<br>
+- added (LYNX) -nrot set no rotation (LNX only)<br>
+- added (LYNX) -rotl set rotation left (LNX only)<br>
+- added (LYNX) -rotr set rotation right (LNX only)<br>
+- added (LYNX) -b0 change Bank0 kBytes size (LNX only); $FILE={0,64,128,256,512}<br>
+- added (LYNX) -b1 change Bank1 kBytes size (LNX only); $FILE={0,64,128,256,512}<br>
+- added -idppf change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ<br>
+- added -strip strip Bytes from end of ROM; $FILE=VALUE<br>
+- added -e emulate/run ROM (check INSTALL and $HOME/.ucon64rc for more)<br>
+- added (GBA) -sram patch ROM for SRAM saving<br>
+- added (GBA) -crp slow down Flash Advance Linker access for ROM (crash patch)<br>
+- added (GBA) -strip strip Bytes from end of ROM (use -ispad before); $FILE=VALUE<br>
+- added (GBA) -xfal send/receive to/from Flash Advance Linker; $FILE=PORT<br>
+<br>
+<a name="196">1.9.6<br>
+- this release brings you full support for the Super Wildcard<br>
+- added (SNES) -xswc send/receive to/from Super Wild Card*/(all)SWC; <br>
+  $FILE=PORT (by dbjh)<br>
+- added (SNES) -xswcs send/receive SRAM to/from Super Wild Card*/(all)SWC; <br>
+  $FILE=PORT (by dbjh)<br>
+- added (GameBoy) -sgb convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX<br>
+  (by NoisyB)<br>
+- added (GameBoy) -gbx convert from Super Backup Card/GX/GBX to <br>
+  GB Xchanger/GB/GBC (by NoisyB)<br>
+- made a few small bug fixes and code cleanups (by NoisyB; thanks to dbjh)<br>
+- DOS port of uCON64 available (by dbjh)<br>
+- BeOS port of uCON64 available (by dbjh)<br>
+- added wildcard support to -find find string in ROM (by NoisyB)<br>
+- added (SNES) some new ntsc/pal and slowrom fix codes (by NoisyB)<br>
+- added (SNES) -swcs convert Snes9x *.srm to Super Wild Card*/(all)SWC (by NoisyB)<br>
+<br>
+<a name="197">1.9.7<br>
+- added (NES) -fdsl list Famicon DiskSystem/FDS (diskimage) contents (by NoisyB)<br>
+- updated (GBA) -xfal send/receive ROM to/from Flash Advance Linker;<br>
+  $FILE=PORT (by dbjh)<br>
+- added (GBA) -xfalc&#60;n&#62; specify chip size in mbits of ROM in Flash<br>
+  Advance Linker when receiving (by dbjh)<br>
+- added (GBA) -xfalm use SPP mode, default is EPP (by dbjh)<br>
+- added (NEOGEO) -bios convert NeoCd Bios to work with NeoCD emulator (by<br>
+  NoisyB; thanks to Caz)<br>
+- changed the whole internal ROM database code (by NoisyB)<br>
+- added -dbs search ROM database (all entries) by CRC32; $ROM=0xCRC32 (by NoisyB)<br>
+- added (Virtual Boy) show info (by NoisyB)<br>
+- added (Wonder Swan) show info (by NoisyB)<br>
+- added (ColecoVision) show info (by NoisyB)<br>
+- added (Vectrex) show info (by NoisyB)<br>
+- added ROMs to database for Virtual Boy, Wonder Swan, ColecoVision and Vectrex<br>
+  (by NoisyB)<br>
+- added (Intellivision) show info (by NoisyB)<br>
+- made the internal ROM Database optional; compiled without DB uCON64 will be <br>
+  only ~250kB in size! (by NoisyB)<br>
+- updated (all) fixed -cs (file compare) (by dbjh)<br>
+- updated (SNES) fixed dumping of `special' SNES cartridges (for the meaning of<br>
+  special, see src/backup/swc.c) (by dbjh; thanks to Caz)<br>
+- updated (SNES) fixed -k (crack) (by dbjh)<br>
+- updated (SNES) fixed -f (NTSC/PAL fix) (by dbjh)<br>
+- uCON64 will recognize *ANY* kind of ROM or Console System via DB now...<br>
+  give it a Atari2600 ROM and it will just recognize it :) (by NoisyB)<br>
+- updated the internal DB; it can recognize now 12387 different ROMs (by NoisyB)<br>
+- updated (SNES) fixed -s (split ROM) (by dbjh)<br>
+- updated (GENESIS) fixed -s (by NoisyB)<br>
+- updated (all) fixed -swc & -ins (and others) for files with a size a<br>
+  multiple of 32kB (by dbjh)<br>
+- updated (SNES) fixed -swc when ROM file has a name that already has the<br>
+  extension .swc fixed the same problem for -smc and -fig (by dbjh)<br>
+- added -lsv like -ls but more verbose; $ROM=DIRECTORY (by NoisyB)<br>
+- updated (SNES) fixed checksum output (by NoisyB)<br>
+- updated (SNES) fixed -j (join multi files) (by dbjh)<br>
+- updated (SNES) fixed checksum output for Broadcast Satellaview ROMs (by<br>
+  dbjh; thanks to Cowering)<br>
+- added (SNES) -figs (convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG)<br>
+  (by dbjh; thanks to Caz)<br>
+- added (SNES) -ufos (convert Snes9x/ZSNES *.srm (SRAM) to Super UFO) (by<br>
+  dbjh; thanks to Caz)<br>
+- added (SNES) -int, -int2 & -nint (force ROM is (not) in interleaved format (2))<br>
+  (by dbjh)<br>
+- added (SNES) -dint (convert ROM to non-interleaved format) (by dbjh)<br>
+- added 2830 new ROMs to internal ROM database (by NoisyB)<br>
+- added (GENESIS) -xsmd send/receive ROM to/from Super Magicom Drive/SMD; <br>
+  $FILE=PORT (by NoisyB)<br>
+- added (GENESIS) -xsmds send/receive SRAM to/from Super Magicom Drive/SMD; <br>
+  $FILE=PORT (by NoisyB)<br>
+- added support for cd-based consoles again; uCON64 uses now cdrdao as burn <br>
+  engine (by NoisyB)<br>
+- added Dreamcast, PSX (one), PS2, Real3DO, CD-i, CD32 and Saturn support  <br>
+  (by NoisyB)<br>
+- added (GENESIS) -smds convert Emulator (*.srm) SRAM to Super Magic Drive/SMD <br>
+  (by NoisyB)<br>
+- added -r2i convert RAW to ISO9660; $ROM=RAW_IMAGE (by NoisyB)<br>
+<br>
+<a name="198">1.9.8<br>
+- added more verbose Wonderswan ROM nfo (by NoisyB; thanks to dox)<br>
+- updated (GBA) used Jeff Frohwein's Flash Advance Linker code V1.72 (by dbjh)<br>
+- added (GBA) -xfals send/receive SRAM to/from Flash Advance Linker; $FILE=PORT\n (by dbjh)<br>
+- added (GBA) -xfalb&#60;n&#62; send/receive SRAM to/from Flash Advance Linker bank n; $FILE=PORT (by dbjh)<br>
+- removed (GBA) -xfalm (use SPP mode), because it is not needed anymore (by dbjh)<br>
+- updated (SNES) fixed checksum function for Far East of Eden Zero (J) (by dbjh)<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+</tt></body></html>

@@ -83,7 +83,7 @@ void
 ucon64_snes (void)
 {
 #include "xpm/snes.xpm"
-//#include "xpm/icon.xpm"
+#include "xpm/icon.xpm"
 
 ucon64gui.console = ucon64_SNES;
 
@@ -92,7 +92,9 @@ ucon64gui.console = ucon64_SNES;
 
 //  html2gui_title ("ucon64gui_snes", icon_xpm);
 
-  html2gui_img (snes_xpm, 10, 10, 0);
+  html2gui_img (icon_xpm, 1, 10, 0);
+
+  html2gui_ ("uCON64_GUI 0.1.0 by NoisyB\nSuper Nintendo");
 
   html2gui_br ();
 

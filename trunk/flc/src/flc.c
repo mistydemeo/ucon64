@@ -49,16 +49,16 @@ if (
 }
 
 if(
-  argcmp(argc,argv,"-d") ||
-  argcmp(argc,argv,"-a") ||
-  argcmp(argc,argv,"-b") ||
+  argcmp(argc,argv,"-t") ||
+  argcmp(argc,argv,"-X") ||
+  argcmp(argc,argv,"-S") ||
   argcmp(argc,argv,"-fr")
 )
 {
   flc.sort=1;
-  flc.bydate = (argcmp(argc,argv,"-d")) ? 1 : 0;
-  flc.byname = (argcmp(argc,argv,"-a")) ? 1 : 0;
-  flc.bysize = (argcmp(argc,argv,"-b")) ? 1 : 0;
+  flc.bydate = (argcmp(argc,argv,"-t")) ? 1 : 0;
+  flc.byname = (argcmp(argc,argv,"-X")) ? 1 : 0;
+  flc.bysize = (argcmp(argc,argv,"-S")) ? 1 : 0;
   flc.fr = (argcmp(argc,argv,"-fr")) ? 1 : 0 ;
 }
 
@@ -174,12 +174,12 @@ printf(
   "\n%s\n"
   "This may be freely redistributed under the terms of the GNU Public License\n\n"
   "USAGE: %s [OPTION]... [FILE]...\n\n"
-  "  -t		also check/test every archive/file in DIRECTORY\n"
-  "		flags: N=not checked (default), P=passed, F=failed\n"
+  "  -c		also test every possible archive in DIRECTORY for errors\n"
+  "		return flags: N=not checked (default), P=passed, F=failed\n"
   "  -html		output as HTML document with links to the files\n"
-  "  -d		sort chronological\n"
-  "  -a		sort alphabetical\n"
-  "  -b		sort by byte size\n"
+  "  -t		sort by modification time\n"
+  "  -X		sort alphabetical\n"
+  "  -S		sort by byte size\n"
   "  -fr		sort reverse\n"
   "  -k		show sizes in kilobytes\n"
   "\n"

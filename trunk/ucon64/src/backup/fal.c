@@ -55,6 +55,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //  6. If no Manuf ID detected then report no cart backup available.
 
 #include "fal.h"
+#include <time.h>
 
 #define outp(p,v)  outportb(p,v); iodelay()
 #define inp(p)   inportb(p)
@@ -125,9 +126,9 @@ void iodelay (void)
    }
 
 void ProgramExit(int code)
-{
-  exit(code);
-}
+   {
+   exit(code);
+   }
 
 void usage(char *name)
    {
@@ -432,10 +433,13 @@ void BackupROM (FILE *fp, int SizekW)
    {
    u16 valw;
    u32 i,j;
+   int size = SizekW << 1;
+   time_t starttime;
 
    WriteFlash (0, INTEL28F_READARRAY);         // Set flash (intel 28F640J3A) Read Mode
 
 
+   starttime = time(NULL);
    for (i = 0; i < (SizekW>>8); i++)
       {
       SetCartAddr (i<<8);                            // Set cart base addr to 0
@@ -449,6 +453,8 @@ void BackupROM (FILE *fp, int SizekW)
          fputc(valw & 0xff, fp);
          fputc(valw >> 8, fp);
          }
+      if ((i & 0x7f)==0)                        // call parport_gauge() after receiving 64kB
+         parport_gauge (starttime, i << 9, size);
       }
    }
 
@@ -712,14 +718,13 @@ void ProgramNonIntIntelFlash (FILE *fp)
    int addr = 0;
    int done;
    int FileSize;
+   time_t starttime;
 
    // Get file size
    FileSize = GetFileSize (fp);
 
    printf("Erasing Visoly non-turbo flash cart...");
-#ifndef __linux__
    fflush(stdout);       // Force printf to print to screen even though no \n
-#endif
 
 //   j=1;
    for (i=0; i<(FileSize>>1); i=i+65536)
@@ -732,11 +737,10 @@ void ProgramNonIntIntelFlash (FILE *fp)
       }
 //   ProgramExit(1);
    printf("\nProgramming Visoly non-turbo flash cart...");
-#ifndef __linux__
    fflush(stdout);       // Force printf to print to screen even though no \n
-#endif
    //403018
 
+   starttime = time(NULL);
    j = GetFileByte (fp);
 
    while (!feof(fp))
@@ -767,13 +771,8 @@ void ProgramNonIntIntelFlash (FILE *fp)
             j = GetFileByte (fp);
          }
       addr += 16;
-      if ((addr & 0x7ffff)==0)
-         {
-         printf("*");
-#ifndef __linux__
-         fflush(stdout);       // Force printf to print to screen even though no \n
-#endif
-         }
+      if ((addr & 0xffff)==0)                   // call parport_gauge() after sending 64kB
+         parport_gauge (starttime, addr, FileSize);
       l4022d0 (INTEL28F_CONFIRM);             // Comfirm block write
       }
 
@@ -791,14 +790,13 @@ void ProgramInterleaveIntelFlash (FILE *fp)
    int addr = 0;
    int done1,done2;
    int FileSize;
+   time_t starttime;
 
    // Get file size
    FileSize = GetFileSize (fp);
 
    printf("Erasing Visoly turbo flash cart...");
-#ifndef __linux__
    fflush(stdout);       // Force printf to print to screen even though no \n
-#endif
 
    j=1;
    for (i=0; i<(FileSize>>1); i=i+(65536*2))
@@ -816,10 +814,9 @@ void ProgramInterleaveIntelFlash (FILE *fp)
       }
 //   ProgramExit(1);
    printf("\nProgramming Visoly turbo flash cart...");
-#ifndef __linux__
    fflush(stdout);       // Force printf to print to screen even though no \n
-#endif
    //403018
+   starttime = time(NULL);
    j = GetFileByte (fp);
 
    while (!feof(fp))
@@ -858,13 +855,8 @@ void ProgramInterleaveIntelFlash (FILE *fp)
             j = GetFileByte (fp);
          }
       addr += 32;
-      if ((addr & 0x7ffff)==0)
-         {
-         printf("*");
-#ifndef __linux__
-         fflush(stdout);       // Force printf to print to screen even though no \n
-#endif
-         }
+      if ((addr & 0xffff)==0)                   // call parport_gauge() after sending 64kB
+         parport_gauge (starttime, addr, FileSize);
       l4022d0 (INTEL28F_CONFIRM);             // Comfirm block write
       l4022d0 (INTEL28F_CONFIRM);             // Comfirm block write
       }
@@ -886,14 +878,13 @@ void ProgramSharpFlash (FILE *fp)
    int addr = 0;
 //   int done;
    int FileSize;
+   time_t starttime;
 
    // Get file size
    FileSize = GetFileSize (fp);
 
    printf("Erasing flash cart...");
-#ifndef __linux__
    fflush(stdout);       // Force printf to print to screen even though no \n
-#endif
 //   j = 0;
    for (i=0; i<(FileSize>>1); i=i+32768)
       {
@@ -908,10 +899,9 @@ void ProgramSharpFlash (FILE *fp)
       }
 
    printf("\nProgramming Nintendo flash cart...");
-#ifndef __linux__
    fflush(stdout);       // Force printf to print to screen even though no \n
-#endif
 
+   starttime = time(NULL);
    j = GetFileByte (fp);
 
    while (!feof(fp))
@@ -930,6 +920,8 @@ void ProgramSharpFlash (FILE *fp)
       addr += 1;
 
       j = GetFileByte (fp);
+      if ((addr & 0xffff)==0)                   // call parport_gauge() after sending 64kB
+         parport_gauge (starttime, addr, FileSize);
       }
 
    WriteFlash (0, INTEL28F_READARRAY);
@@ -1140,9 +1132,7 @@ int fal_main(int argc, char **argv)
          ProgramExit(1);
          }
       printf("Backing up %d mbits of ROM to file '%s'. Please wait...", ChipSize, fname);
-#ifndef __linux__
       fflush(stdout);       // Force printf to print to screen even though no \n
-#endif
 
       BackupROM (fp, ChipSize<<16);
       printf("\n");

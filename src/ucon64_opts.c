@@ -51,8 +51,8 @@ ucon64_switches (int c, const char *optarg)
 {
 #ifdef  DISCMAGE
   char *ptr = NULL, buf[MAXBUFSIZE];
-#endif
   int x = 0;
+#endif
 
   /*
     Handle options or switches that cause other _options_ to be ignored except

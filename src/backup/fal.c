@@ -1639,10 +1639,9 @@ fal_read_rom (char *filename, unsigned int parport, int argc, char *argv[])
 
   return -1;
 #else
-    printf("NOTE: this version was compiled without backup support\n\n");
-    
-      return 0;
-      
+  printf("NOTE: this version was compiled without backup support\n\n");
+
+  return 0;
 #endif // BACKUP
 }
 
@@ -1676,8 +1675,8 @@ fal_write_rom (char *filename, unsigned int parport, int argc, char *argv[])
   return -1;
 #else
   printf("NOTE: this version was compiled without backup support\n\n");
-  
-    return 0;
+
+  return 0;
 #endif // BACKUP
 }
 
@@ -1716,8 +1715,8 @@ fal_read_sram (char *filename, unsigned int parport, int bank)
   return -1;
 #else
   printf("NOTE: this version was compiled without backup support\n\n");
-  
-    return 0;
+
+  return 0;
 #endif // BACKUP
 }
 
@@ -1752,9 +1751,8 @@ fal_write_sram (char *filename, unsigned int parport, int bank)
   return -1;
 #else
   printf("NOTE: this version was compiled without backup support\n\n");
-  
-    return 0;
-    
+
+  return 0;
 #endif // BACKUP
 }
 
@@ -1762,26 +1760,25 @@ int
 fal_usage (int argc, char *argv[])
 {
 #ifdef BACKUP
-  printf ( fal_TITLE "\n"
-
-    "  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
-     "                receives automatically when $ROM does not exist\n"
-     "  -xfalc<n>     specify chip size in mbits of ROM in Flash Advance Linker when\n"
-     "                receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32\n"
+  printf (fal_TITLE "\n"
+          "  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
+          "                receives automatically when $ROM does not exist\n"
+          "  -xfalc<n>     specify chip size in mbits of ROM in Flash Advance Linker when\n"
+          "                receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32\n"
 #if 0
-     "  -xfalm        use SPP mode, default is EPP\n"
+          "  -xfalm        use SPP mode, default is EPP\n"
 #endif
-     "  -xfals        send/receive SRAM to/from Flash Advance Linker; $FILE=PORT\n"
-     "                receives automatically when $ROM(=SRAM) does not exist\n"
-     "  -xfalb<n>     send/receive SRAM to/from Flash Advance Linker bank n\n"
-     "                n can be 1, 2, 3 or 4\n"
-     "                $FILE=PORT; receives automatically when SRAM does not exist\n"
-
-            "                You only need to specify PORT if uCON64 doesn't detect the\n"
-            "                (right) parallel port. If that is the case give a hardware\n"
-            "                address, for example:\n"
-            "                ucon64 -xfal \"0087 - Mario Kart Super Circuit (U).gba\" 0x378\n");
-  // TODO more info like technical info about cabeling and stuff for the copier
+          "  -xfals        send/receive SRAM to/from Flash Advance Linker; $FILE=PORT\n"
+          "                receives automatically when $ROM(=SRAM) does not exist\n"
+          "  -xfalb<n>     send/receive SRAM to/from Flash Advance Linker bank n\n"
+          "                n can be 1, 2, 3 or 4\n"
+          "                $FILE=PORT; receives automatically when SRAM does not exist\n"
+          "\n"
+          "                You only need to specify PORT if uCON64 doesn't detect the\n"
+          "                (right) parallel port. If that is the case give a hardware\n"
+          "                address, for example:\n"
+          "                ucon64 -xfal \"0087 - Mario Kart Super Circuit (U).gba\" 0x378\n");
+// TODO more info like technical info about cabeling and stuff for the copier
 #endif // BACKUP
 
   return 0;

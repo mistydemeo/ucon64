@@ -715,19 +715,19 @@ int
 swc_usage (int argc, char *argv[])
 {
 #ifdef BACKUP
-  printf ( swc_TITLE "\n"
-
-    "  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
-     "                receives automatically when $ROM does not exist\n"
-     "                Press q to abort ^C will cause invalid state of backup unit\n"
-     "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
-     "                receives automatically when $ROM(=SRAM) does not exist\n"
-     "                Press q to abort ^C will cause invalid state of backup unit\n"
-
+  printf (swc_TITLE "\n"
+          "  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
+          "                receives automatically when $ROM does not exist\n"
+          "                Press q to abort ^C will cause invalid state of backup unit\n"
+          "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
+          "                receives automatically when $ROM(=SRAM) does not exist\n"
+          "                Press q to abort ^C will cause invalid state of backup unit\n"
+          "\n"
           "                You only need to specify PORT if uCON64 doesn't detect the\n"
           "                (right) parallel port. If that is the case give a hardware\n"
           "                address, for example:\n"
           "                ucon64 -xswc \"Super Mario World (U).swc\" 0x378\n"
+          "\n"
           "                In order to connect the Super Wild Card to a PC's parallel port\n"
           "                you need a standard bidirectional parallel cable like for the\n"
           "                most backup units\n"

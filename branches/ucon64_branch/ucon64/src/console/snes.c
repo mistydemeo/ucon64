@@ -421,7 +421,7 @@ write_deinterleaved_data (st_rominfo_t *rominfo, const char *src_name,
     }
   q_fread (buffer, rominfo->buheader_len, size, src_name);
   snes_deinterleave (rominfo, &buffer, size);
-  q_fwrite (buffer, buheader_len, size, dest_name, "ab");
+  q_fwrite (buffer, buheader_len, size, dest_name, buheader_len ? "ab" : "wb");
   free (buffer);
 }
 
@@ -521,9 +521,8 @@ snes_swc (st_rominfo_t *rominfo)
 void
 snes_set_fig_header (st_rominfo_t *rominfo, st_fig_header_t *header)
 {
-  int size, uses_DSP;
+  int size = ucon64.file_size - rominfo->buheader_len, uses_DSP;
 
-  size = ucon64.file_size - rominfo->buheader_len;
   header->size_low = size / 8192;
   header->size_high = size / 8192 >> 8;
   header->multi = snes_split ? 0x40 : 0;
@@ -650,42 +649,38 @@ is cat. no. 475) would look like: SF16475A.078
 */
 int
 snes_mgd (st_rominfo_t *rominfo)
-// What should we do with this function? snes_gd3() is probably sufficient
-//  (and tested on a real Game Doctor!).
 {
   char mgh[32], src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *fname;
-  int n;
+  int n, size = ucon64.file_size - rominfo->buheader_len;
 
   strcpy (src_name, ucon64.rom);
   fname = basename (ucon64.rom);
-  sprintf (dest_name, "%s%d", is_func (fname, strlen (fname), isupper) ? "SF" : "sf",
-    (ucon64.file_size - rominfo->buheader_len) / MBIT);
+  sprintf (dest_name, "%s%d", is_func (fname, strlen (fname), isupper) ? "SF" : "sf", size / MBIT);
   strncat (dest_name, fname, 5);
   dest_name[8] = 0;
-  for (n = 0; n < 8; n++)
+  for (n = 3; n < 8; n++)
     if (dest_name[n] == ' ')
       dest_name[n] = '_';
 
   // What is the format of this MULTI-GD file?
-  memset (mgh, 0, sizeof (mgh));
   mgh[0] = 'M';
   mgh[1] = 'G';
   mgh[2] = 'H';
   mgh[3] = 0x1a;
+  memset (mgh + 4, 0, 12);
+  memcpy (mgh + 16, rominfo->name, 15);         // copy first 15 bytes (don't use strlen() or strcpy())
   mgh[31] = (unsigned char) 0xff;
-  memcpy (&mgh[16], dest_name, strlen (dest_name));
 
   set_suffix (dest_name, ".078");
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
   if (rominfo->interleaved)
-    write_deinterleaved_data (rominfo, src_name, dest_name,
-                              ucon64.file_size - rominfo->buheader_len, 0);
+    write_deinterleaved_data (rominfo, src_name, dest_name, size, 0);
   else
     q_fcpy (src_name, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
 
-  strcpy (dest_name, "MULTI-GD.MGH");
+  strcpy (dest_name, "MULTI-GD.MGH"); // uCON does "set_suffix (dest_name, ".MGH");" instead
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
   q_fwrite (&mgh, 0, sizeof (mgh), dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
@@ -1108,19 +1103,18 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
 // This function assumes file with name filename is in GD3 format
 {
   char dest_name[FILENAME_MAX], *p;
-  int nparts, surplus, n, sf_romname, size, n_names = 0;
+  int nparts, surplus, n, size, n_names = 0;
 
   size = ucon64.file_size - rominfo->buheader_len;
   p = basename (filename);
-  sf_romname = (p[0] == 'S' || p[0] == 's') && (p[1] == 'F' || p[1] == 'f');
 
   // Don't use PARTSIZE here, because the Game Doctor doesn't support
   //  arbitrary part sizes
   nparts = size / (8 * MBIT);
   surplus = size % (8 * MBIT);
 
-  if (sf_romname)
-    strcpy (dest_name, p);
+  if ((p[0] == 'S' || p[0] == 's') && (p[1] == 'F' || p[1] == 'f'))
+    sprintf (dest_name, "SF%d%s", size / MBIT, p + 2);
   else
     sprintf (dest_name, "SF%d%s", size / MBIT, p);
   strupr (dest_name);
@@ -1401,9 +1395,7 @@ snes_split_smc (st_rominfo_t *rominfo, int size, int part_size)
 int
 snes_s (st_rominfo_t *rominfo)
 {
-  int size, part_size;
-
-  size = ucon64.file_size - rominfo->buheader_len;
+  int size = ucon64.file_size - rominfo->buheader_len, part_size;
 
   if (UCON64_ISSET (ucon64.part_size) && !(type == GD3 || type == UFO))
     {
@@ -1642,6 +1634,10 @@ I don't know what this does, but it isn't necessary to start the game.
    10 f8 38 ef f2 fd c3 f0
 => 10 f8 38 ea a9 00 00 80
 Same here.
+
+- Dixie Kong's Double Trouble E. U version looks like it already has been "patched"
+   a9 c3 80 dd ff ff f0 6c
+=> a9 c3 f0 cc ff ff 80 7d
 */
   char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[32 * 1024];
@@ -1763,6 +1759,7 @@ Same here.
                                                       "\xea\xa9\x00\x00\x80", 5, -4);
 
       n += change_mem (buffer, bytesread, "\xc2\x30\xad\xfc\x1f\xc9\x50\x44\xd0", 9, '*', '!', "\x4c\xd1\x80", 3, -6);
+      n += change_mem (buffer, bytesread, "\xa9\xc3\x80\xdd\xff\xff\xf0\x6c", 8, '*', '!', "\xf0\xcc\xff\xff\x80\x7d", 6, -5);
 
       fwrite (buffer, 1, bytesread, destfile);
     }
@@ -2001,8 +1998,8 @@ snes_f (st_rominfo_t *rominfo)
     {
     // In the Philipines the television standard is NTSC, but do games made
     //  for the Philipines exist?
-    case 0:                                   // Japan
-    case 1:                                   // U.S.A.
+    case 0:                                     // Japan
+    case 1:                                     // U.S.A.
       return snes_fix_ntsc_protection (rominfo);
     default:
       return snes_fix_pal_protection (rominfo);
@@ -2947,7 +2944,16 @@ snes_init (st_rominfo_t *rominfo)
 
   size = ucon64.file_size - rominfo->buheader_len;
   if (size < 0xfffd)
-    return -1;                                  // don't continue (seg faults!)
+    {
+      if (UCON64_ISSET (ucon64.snes_hirom))     // see snes_set_hirom()
+        {
+          snes_hirom = ucon64.snes_hirom;
+          snes_hirom_ok = 1;
+        }
+      if (UCON64_ISSET (ucon64.interleaved))
+        rominfo->interleaved = ucon64.interleaved;
+      return -1;                                // don't continue (seg faults!)
+    }
   if (ucon64.console == UCON64_SNES || (type != SMC && size <= 16 * 1024 * 1024))
     result = 0;                                 // it seems to be a SNES ROM dump
 
@@ -3348,8 +3354,6 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
   int i, internal_rom_size, half_internal_rom_size, remainder;
   unsigned short int sum1, sum2;
 
-  rom_size = ucon64.file_size - rominfo->buheader_len;
-
   if (!bs_dump && snes_header.rom_size <= 13)   // largest known cart size is 64 Mbit
     internal_rom_size = 1 << (snes_header.rom_size + 10);
   else
@@ -3404,8 +3408,6 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
 {
   int i, internal_rom_size;
   unsigned short int sum;
-
-  rom_size = ucon64.file_size - rominfo->buheader_len;
 
   if (!bs_dump)
     {

@@ -1,8 +1,8 @@
 /*
 gd.c - Game Doctor support for uCON64
 
-written by 2002 John Weidman
-           2002 dbjh
+written by 2002 - 2003 John Weidman
+           2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -40,30 +40,71 @@ const st_usage_t gd_usage[] =
     {NULL, NULL, "Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"},
     {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef PARALLEL
-#if 1 // dumping is not yet supported
-    {"xgd3", NULL, "send ROM to Game Doctor SF3(SF6/SF7); " OPTION_LONG_S "port=PORT"},
+#if 1 // dumping is not yet supported (probably never)
+    {"xgd3", NULL, "send ROM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
 #else
-    {"xgd3", NULL, "send/receive ROM to/from Game Doctor SF3(SF6/SF7); " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when " OPTION_LONG_S "ROM does not exist"},
+    {"xgd3", NULL, "send/receive ROM to/from Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
+                "receives automatically when ROM does not exist\n"
 #endif
+                "this option uses the Game Doctor SF3 protocol"},
+#if 1 // dumping is not yet supported (might happen soon)
+    {"xgd6", NULL, "send ROM to Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
+#else
+    {"xgd6", NULL, "send/receive ROM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
+                "receives automatically when ROM does not exist\n"
+#endif
+                "this option uses the Game Doctor SF6 protocol"},
+#if 1 // dumping is not yet supported (probably never)
+    {"xgd3s", NULL, "send SRAM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT"},
+#else
+    {"xgd3s", NULL, "send/receive SRAM to/from Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when SRAM does not exist"},
+#endif
+    {"xgd6s", NULL, "send/receive SRAM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when SRAM does not exist"},
 #endif // PARALLEL
     {NULL, NULL, NULL}
   };
 
 #ifdef PARALLEL
-#define BUFFERSIZE      8192
+
+#define BUFFERSIZE 8192
 #define GD_OK 0
 #define GD_ERROR 1
+#define GD3_PROLOG_STRING "DSF3"
+#define GD6_READ_PROLOG_STRING "GD6R"           // GD reading, PC writing
+#define GD6_WRITE_PROLOG_STRING "GD6W"          // GD writing, PC reading
+#define GD6_TIMEOUT_ATTEMPTS 0x4000
+#define GD6_RX_SYNC_TIMEOUT_ATTEMPTS 0x2000
+#define GD6_SYNC_RETRIES 16
+
+#if     defined _WIN32 && !defined __MINGW32__
+// somebody please explain why this isn't proof that VC++ 6 is broken
+#define inline __inline
+#endif
+
 
 static void init_io (unsigned int port);
 static void deinit_io (void);
 static void io_error (void);
 static void gd_checkabort (int status);
-static void gd3_send_byte (unsigned char data);
-static void gd3_send_bytes (int len, unsigned char *data);
+static void remove_destfile (void);
 static int gd3_send_prolog_byte (unsigned char data);
-static int gd3_send_prolog_bytes (int len, unsigned char *data);
-static int gd3_send_unit_prolog (int header, unsigned size);
+static int gd3_send_prolog_bytes (unsigned char *data, int len);
+static void gd3_send_byte (unsigned char data);
+static int gd3_send_bytes (unsigned char *data, int len);
+static int gd6_sync_hardware (void);
+static int gd6_sync_receive_start (void);
+static inline int gd6_send_byte_helper (unsigned char data, unsigned int timeout);
+static int gd6_send_prolog_byte (unsigned char data);
+static int gd6_send_prolog_bytes (unsigned char *data, int len);
+static int gd6_send_bytes (unsigned char *data, int len);
+static int gd6_receive_bytes (unsigned char *buffer, int len);
+static int gd_send_unit_prolog (int header, unsigned size);
+static int gd_write_rom (const char *filename, unsigned int parport,
+                         st_rominfo_t *rominfo, const char *prolog_str);
+static int gd_write_sram (const char *filename, unsigned int parport,
+                          const char *prolog_str);
 
 typedef struct st_gd3_memory_unit
 {
@@ -72,11 +113,16 @@ typedef struct st_gd3_memory_unit
   unsigned int size;                            // Usually either 0x100000 or 0x80000
 } st_gd3_memory_unit_t;
 
-st_gd3_memory_unit_t gd3_dram_unit[GD3_MAX_UNITS];
-
+static int (*gd_send_prolog_byte) (unsigned char data);
+static int (*gd_send_prolog_bytes) (unsigned char *data, int len);
+static int (*gd_send_bytes) (unsigned char *data, int len);
+static st_gd3_memory_unit_t gd3_dram_unit[GD3_MAX_UNITS];
 static int gd_port, gd_bytessend, gd_fsize, gd_name_i = 0;
 static time_t gd_starttime;
 static char **gd_names;
+static unsigned char gd6_send_toggle;
+static const char *gd_destfname = NULL;
+static FILE *gd_destfile;
 
 
 void
@@ -120,6 +166,9 @@ io_error (void)
 //  error. Or take an integer code that we can interpret here.
 {
   fprintf (stderr, "ERROR: Communication with Game Doctor failed\n");
+  fflush (stderr);
+  // calling fflush() seems to be necessary under Msys in order to make the
+  //  error message be displayed before the "Removing: <filename>" message
   exit (1);
 }
 
@@ -135,70 +184,15 @@ gd_checkabort (int status)
 }
 
 
-int
-gd_read_rom (const char *filename, unsigned int parport)
+static void
+remove_destfile (void)
 {
-#if 0
-  FILE *file;
-  unsigned char *buffer;
-
-  init_io (parport);
-  if ((file = fopen (filename, "wb")) == NULL)
+  if (gd_destfname)
     {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
-      exit (1);
-    }
-  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
-      exit (1);
-    }
-
-  free (buffer);
-  fclose (file);
-  deinit_io ();
-
-  return 0;
-#else
-  (void) filename;                              // warning remover
-  (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented\n");
-#endif
-}
-
-
-/*
-  General data output routine
-  Use this routine for sending ROM data bytes to the Game Doctor SF3 (SF6/SF7
-  too).
-*/
-void
-gd3_send_byte (unsigned char data)
-{
-  // Wait until SF3 is not busy
-  while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0)
-    ;
-
-  outportb ((unsigned short) gd_port, data);    // set data
-  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 5); // Clock data out to SF3
-  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
-}
-
-
-void
-gd3_send_bytes (int len, unsigned char *data)
-{
-  int i = len;
-
-  for (i = 0; i < len; i++)
-    {
-      gd3_send_byte (data[i]);
-      gd_bytessend++;
-      if ((gd_bytessend - GD_HEADER_LEN) % 8192 == 0)
-        {
-          ucon64_gauge (gd_starttime, gd_bytessend, gd_fsize);
-          gd_checkabort (2);                    // 2 to return something other than 1
-        }
+      printf ("Removing: %s\n", gd_destfname);
+      fclose (gd_destfile);
+      remove (gd_destfname);
+      gd_destfname = NULL;
     }
 }
 
@@ -229,30 +223,240 @@ gd3_send_prolog_byte (unsigned char data)
 
 
 int
-gd3_send_prolog_bytes (int len, unsigned char *data)
+gd3_send_prolog_bytes (unsigned char *data, int len)
 {
-  int i = len;
+  int i;
+
+  for (i = 0; i < len; i++)
+    if (gd3_send_prolog_byte (data[i]) == GD_ERROR)
+      return GD_ERROR;
+  return GD_OK;
+}
+
+
+int
+gd_send_unit_prolog (int header, unsigned size)
+{
+  if (gd_send_prolog_byte (0x00) == GD_ERROR)
+    return GD_ERROR;
+  if (gd_send_prolog_byte ((unsigned char) ((header != 0) ? 0x02 : 0x00)) == GD_ERROR)
+    return GD_ERROR;
+  if (gd_send_prolog_byte ((unsigned char) (size >> 16)) == GD_ERROR) // 0x10 = 8Mbit
+    return GD_ERROR;
+  if (gd_send_prolog_byte (0x00) == GD_ERROR)
+    return GD_ERROR;
+  return GD_OK;
+}
+
+
+/*
+  General data output routine
+  Use this routine for sending ROM data bytes to the Game Doctor SF3 (SF6/SF7
+  too).
+*/
+void
+gd3_send_byte (unsigned char data)
+{
+  // Wait until SF3 is not busy
+  while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0)
+    ;
+
+  outportb ((unsigned short) gd_port, data);    // set data
+  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 5); // Clock data out to SF3
+  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
+}
+
+
+int
+gd3_send_bytes (unsigned char *data, int len)
+{
+  int i;
 
   for (i = 0; i < len; i++)
     {
-      if (gd3_send_prolog_byte (*data++) == GD_ERROR)
-        return GD_ERROR;
+      gd3_send_byte (data[i]);
+      gd_bytessend++;
+      if ((gd_bytessend - GD_HEADER_LEN) % 8192 == 0)
+        {
+          ucon64_gauge (gd_starttime, gd_bytessend, gd_fsize);
+          gd_checkabort (2);                    // 2 to return something other than 1
+        }
     }
   return GD_OK;
 }
 
 
 int
-gd3_send_unit_prolog (int header, unsigned size)
+gd6_sync_hardware (void)
+// Sets the SF7 up for an SF6/SF7 protocol transfer
 {
-  if (gd3_send_prolog_byte (0x00) == GD_ERROR)
-    return GD_ERROR;
-  if (gd3_send_prolog_byte ((unsigned char) ((header != 0) ? 0x02 : 0x00)) == GD_ERROR)
-    return GD_ERROR;
-  if (gd3_send_prolog_byte ((unsigned char) (size >> 16)) == GD_ERROR) // 0x10 = 8Mbit
-    return GD_ERROR;
-  if (gd3_send_prolog_byte (0x00) == GD_ERROR)
-    return GD_ERROR;
+  int timeout, retries, delay;
+
+  for (retries = GD6_SYNC_RETRIES; retries > 0; retries--)
+    {
+      timeout = GD6_TIMEOUT_ATTEMPTS;
+
+      outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
+      outportb ((unsigned short) gd_port, 0);
+      outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
+
+      for (delay = 0x1000; delay > 0; delay--)      // A delay may not be necessary here
+        ;
+
+      outportb ((unsigned short) gd_port, 0xaa);
+      outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 0);
+
+      while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x08) == 0)
+        if (--timeout == 0)
+          break;
+      if (timeout == 0)
+        continue;
+
+      outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
+
+      while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x08) != 0)
+        if (--timeout == 0)
+          break;
+      if (timeout == 0)
+        continue;
+
+      outportb ((unsigned short) gd_port, 0x55);
+      outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 0);
+
+      while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x08) == 0)
+        if (--timeout == 0)
+          break;
+      if (timeout == 0)
+        continue;
+
+      outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
+
+      while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x08) != 0)
+        if (--timeout == 0)
+          break;
+      if (timeout == 0)
+        continue;
+
+      return GD_OK;
+    }
+  return GD_ERROR;
+}
+
+
+int
+gd6_sync_receive_start (void)
+// Sync with the start of the received data
+{
+  int timeout = GD6_RX_SYNC_TIMEOUT_ATTEMPTS;
+
+  while (1)
+    {
+      if (((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x03) == 0x03) ||
+          ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x03) == 0))
+        break;
+
+      if (--timeout == 0)
+        return GD_ERROR;
+    }
+
+  outportb ((unsigned short) gd_port, 0);
+
+  timeout = GD6_RX_SYNC_TIMEOUT_ATTEMPTS;
+  while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) != 0)
+    if (--timeout == 0)
+      return GD_ERROR;
+
+  return GD_OK;
+}
+
+
+inline int
+gd6_send_byte_helper (unsigned char data, unsigned int timeout)
+{
+  while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x02) != gd6_send_toggle)
+    if (--timeout == 0)
+      return GD_ERROR;
+
+  gd6_send_toggle = ~gd6_send_toggle & 0x02;
+  outportb ((unsigned short) gd_port, data);
+  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), (unsigned char) (4 | (gd6_send_toggle >> 1)));
+
+  return GD_OK;
+}
+
+
+int
+gd6_send_prolog_byte (unsigned char data)
+{
+  unsigned int timeout = 0x100000;
+
+  gd6_send_toggle = (inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x01) << 1;
+  return gd6_send_byte_helper (data, timeout);
+}
+
+
+int
+gd6_send_prolog_bytes (unsigned char *data, int len)
+{
+  int i;
+  unsigned int timeout = 0x1e00000;
+
+  gd6_send_toggle = (inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x01) << 1;
+  for (i = 0; i < len; i++)
+    if (gd6_send_byte_helper (data[i], timeout) != GD_OK)
+      return GD_ERROR;
+  return GD_OK;
+}
+
+
+int
+gd6_send_bytes (unsigned char *data, int len)
+{
+  int i;
+  unsigned int timeout = 0x1e0000;
+
+  gd6_send_toggle = (inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x01) << 1;
+  for (i = 0; i < len; i++)
+    {
+      if (gd6_send_byte_helper (data[i], timeout) != GD_OK)
+        return GD_ERROR;
+
+      gd_bytessend++;
+      if ((gd_bytessend - GD_HEADER_LEN) % 8192 == 0)
+        {
+          ucon64_gauge (gd_starttime, gd_bytessend, gd_fsize);
+          gd_checkabort (2);                    // 2 to return something other than 1
+        }
+    }
+  return GD_OK;
+}
+
+
+int
+gd6_receive_bytes (unsigned char *buffer, int len)
+{
+  int i;
+  unsigned char nibble1, nibble2;
+  unsigned int timeout = 0x1e0000;
+
+  outportb ((unsigned short) gd_port, 0x80);	// Signal the SF6/SF7 to send the next nibble
+  for (i = 0; i < len; i++)
+    {
+      while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) == 0)
+        if (--timeout == 0)
+          return GD_ERROR;
+
+      nibble1 = (inportb ((unsigned short) (gd_port + PARPORT_STATUS)) >> 3) & 0x0f;
+      outportb ((unsigned short) gd_port, 0x00); // Signal the SF6/SF7 to send the next nibble
+
+      while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) != 0)
+        if (--timeout == 0)
+          return GD_ERROR;
+
+      nibble2 = (inportb ((unsigned short) (gd_port + PARPORT_STATUS)) << 1) & 0xf0;
+      buffer[i] = nibble2 | nibble1;
+      outportb ((unsigned short) gd_port, 0x80);
+    }
   return GD_OK;
 }
 
@@ -276,19 +480,78 @@ gd_add_filename (const char *filename)
 }
 
 
+int
+gd3_read_rom (const char *filename, unsigned int parport)
+{
+  (void) filename;                              // warning remover
+  (void) parport;                               // warning remover
+  return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented\n");
+}
+
+
+int
+gd6_read_rom (const char *filename, unsigned int parport)
+{
+#if 0
+  FILE *file;
+  unsigned char *buffer;
+
+  init_io (parport);
+  if ((file = fopen (filename, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
+      exit (1);
+    }
+
+  free (buffer);
+  fclose (file);
+  deinit_io ();
+
+  return 0;
+#else
+  (void) filename;                              // warning remover
+  (void) parport;                               // warning remover
+  return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented\n");
+#endif
+}
+
+
+int
+gd3_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
+{
+  gd_send_prolog_byte = gd3_send_prolog_byte;   // for gd_send_unit_prolog()
+  gd_send_prolog_bytes = gd3_send_prolog_bytes;
+  gd_send_bytes = gd3_send_bytes;
+
+  return gd_write_rom (filename, parport, rominfo, GD3_PROLOG_STRING);
+}
+
+
+int
+gd6_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
+{
+  gd_send_prolog_byte = gd6_send_prolog_byte;   // for gd_send_unit_prolog()
+  gd_send_prolog_bytes = gd6_send_prolog_bytes;
+  gd_send_bytes = gd6_send_bytes;
+
+  return gd_write_rom (filename, parport, rominfo, GD6_READ_PROLOG_STRING);
+}
+
+
 /*
 Note: On most Game Doctor's the way you enter link mode to be able to upload
       the ROM to the unit is to hold down the R key on the controller while
       resetting the SNES. You will see the Game Doctor menu has a message that
       says "LINKING.."
 */
-/*
-  This function only supports the SF3 protocol. If we know the details about
-  the SF7 protocol this function should be renamed to gd3_write_rom() and a
-  function gd7_write_rom should be added.
-*/
 int
-gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
+gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
+              const char *prolog_str)
 {
   FILE *file = NULL;
   unsigned char *buffer;
@@ -363,9 +626,12 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
   gd_starttime = time (NULL);
 
   // Send the ROM to the hardware
-  if (gd3_send_prolog_bytes (4, (unsigned char *) "DSF3") == GD_ERROR)
-    io_error ();
-  if (gd3_send_prolog_byte ((unsigned char) num_units) == GD_ERROR)
+  if (memcmp (prolog_str, GD6_READ_PROLOG_STRING, 4) == 0)
+    if (gd6_sync_hardware () == GD_ERROR)
+      io_error ();
+  memcpy (buffer, prolog_str, 4);
+  buffer[4] = num_units;
+  if (gd_send_prolog_bytes (buffer, 5) == GD_ERROR)
     io_error ();
 
   printf ("Press q to abort\n\n");
@@ -396,15 +662,15 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
         }
 
       send_header = (i == 0) ? 1 : 0;
-      if (gd3_send_unit_prolog (send_header, gd3_dram_unit[i].size) == GD_ERROR)
+      if (gd_send_unit_prolog (send_header, gd3_dram_unit[i].size) == GD_ERROR)
         io_error ();
-      if (gd3_send_prolog_bytes (11, (unsigned char *) gd3_dram_unit[i].name) == GD_ERROR)
+      if (gd_send_prolog_bytes ((unsigned char *) gd3_dram_unit[i].name, 11) == GD_ERROR)
         io_error ();
       if (send_header)
         {
           // Send the Game Doctor 512 byte header
           fread (buffer, 1, GD_HEADER_LEN, file);
-          if (gd3_send_prolog_bytes (GD_HEADER_LEN, buffer) == GD_ERROR)
+          if (gd_send_prolog_bytes (buffer, GD_HEADER_LEN) == GD_ERROR)
             io_error ();
           gd_bytessend += GD_HEADER_LEN;
         }
@@ -416,7 +682,8 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
             fseek (file, i * 8 * MBIT + GD_HEADER_LEN, SEEK_SET);
         }
       fread (buffer, 1, gd3_dram_unit[i].size, file);
-      gd3_send_bytes (gd3_dram_unit[i].size, buffer);
+      if (gd_send_bytes (buffer, gd3_dram_unit[i].size) == GD_ERROR)
+        io_error ();
 
       if (split || i == num_units - 1)
         fclose (file);
@@ -430,13 +697,24 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
 
 
 int
-gd_read_sram (const char *filename, unsigned int parport)
+gd3_read_sram (const char *filename, unsigned int parport)
 {
-#if 0
+  (void) filename;                              // warning remover
+  (void) parport;                               // warning remover
+  return fprintf (stderr, "ERROR: The function for dumping SRAM is not yet implemented\n");
+}
+
+
+int
+gd6_read_sram (const char *filename, unsigned int parport)
+{
   FILE *file;
-  unsigned char *buffer;
+  unsigned char *buffer, gdfilename[12];
+  int len, bytesreceived = 0, transfer_size;
+  time_t starttime;
 
   init_io (parport);
+
   if ((file = fopen (filename, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
@@ -448,27 +726,98 @@ gd_read_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
+  // Be nice to the user and automatically remove the file on an error (or abortion)
+  gd_destfname = filename;
+  gd_destfile = file;
+  register_func (remove_destfile);
+
+  if (gd6_sync_hardware () == GD_ERROR)
+    io_error ();
+  if (gd6_send_prolog_bytes ((unsigned char *) GD6_WRITE_PROLOG_STRING, 4) == GD_ERROR)
+    io_error ();
+
+  /*
+    The BRAM (SRAM) filename doesn't have to exactly match any game loaded in
+    the SF7. It needs to match any valid Game Doctor file name AND have an
+    extension of .B## (where # is a digit from 0-9)
+  */
+  strcpy ((char *) gdfilename, "SF16497 B00"); // TODO: we might need to make a GD file name from the real one
+  if (gd6_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
+    io_error ();
+
+  if (gd6_sync_receive_start () == GD_ERROR)
+    io_error ();
+
+  if (gd6_receive_bytes (buffer, 16) == GD_ERROR)
+    io_error ();
+
+  transfer_size = buffer[1] | (buffer[2] << 8) | (buffer[3] << 16) | (buffer[4] << 24);
+  if (transfer_size != 0x8000)
+    {
+      fprintf (stderr, "ERROR: SRAM transfer size from Game Doctor != 32768 bytes\n");
+      exit (1);
+    }
+
+  printf ("Receive: %d Bytes\n", transfer_size);
+  printf ("Press q to abort\n\n");
+
+  starttime = time (NULL);
+  while (bytesreceived < transfer_size)
+    {
+      if (transfer_size - bytesreceived >= BUFFERSIZE)
+        len = BUFFERSIZE;
+      else
+        len = transfer_size - bytesreceived;
+
+      if (gd6_receive_bytes (buffer, len) == GD_ERROR)
+        io_error ();
+      fwrite (buffer, 1, len, file);
+
+      bytesreceived += len;
+      ucon64_gauge (starttime, bytesreceived, 32 * 1024);
+      gd_checkabort (2);
+    }
+
+  unregister_func (remove_destfile);
   free (buffer);
   fclose (file);
   deinit_io ();
 
   return 0;
-#else
-  (void) filename;                              // warning remover
-  (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for dumping SRAM is not yet implemented\n");
-#endif
 }
 
 
 int
-gd_write_sram (const char *filename, unsigned int parport)
+gd3_write_sram (const char *filename, unsigned int parport)
 {
-#if 0
+  gd_send_prolog_bytes = gd3_send_prolog_bytes;
+  gd_send_bytes = gd3_send_bytes;
+
+  return gd_write_sram (filename, parport, GD3_PROLOG_STRING);
+}
+
+
+int
+gd6_write_sram (const char *filename, unsigned int parport)
+{
+  gd_send_prolog_bytes = gd6_send_prolog_bytes;
+  gd_send_bytes = gd6_send_bytes;
+
+  return gd_write_sram (filename, parport, GD6_READ_PROLOG_STRING);
+}
+
+
+int
+gd_write_sram (const char *filename, unsigned int parport, const char *prolog_str)
+{
   FILE *file;
   unsigned char *buffer;
+  int bytesread, bytessend = 0, size, header_size;
+  time_t starttime;
+  unsigned char gdfilename[12];
 
   init_io (parport);
+
   if ((file = fopen (filename, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
@@ -480,16 +829,66 @@ gd_write_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
+  size = q_fsize (filename);                    // GD SRAM is 4*8 KB, emu SRAM often not
+
+  if (size == 0x8000)
+    header_size = 0;
+  else if (size == 0x8200)
+    {
+      header_size = 0x200;
+      size = 0x8000;
+    }
+  else
+    {
+      fprintf (stderr, "ERROR: GD SRAM file size must be 32768 or 33280 bytes\n");
+      exit (1);
+    }
+
+  printf ("Send: %d Bytes\n", size);
+  fseek (file, (size_t) header_size, SEEK_SET); // skip the header
+
+  if (memcmp (prolog_str, GD6_READ_PROLOG_STRING, 4) == 0)
+    if (gd6_sync_hardware () == GD_ERROR)
+      io_error ();
+  memcpy (buffer, prolog_str, 4);
+  buffer[4] = 1;
+  if (gd_send_prolog_bytes (buffer, 5) == GD_ERROR)
+    io_error ();
+
+  buffer[0] = 0x00;
+  buffer[1] = 0x80;
+  buffer[2] = 0x00;
+  buffer[3] = 0x00;
+  if (gd_send_prolog_bytes (buffer, 4) == GD_ERROR)
+    io_error ();
+
+  /*
+    The BRAM (SRAM) filename doesn't have to exactly match any game loaded in
+    the SF7. It needs to match any valid Game Doctor file name AND have an
+    extension of .B## (where # is a digit from 0-9)
+  */
+  strcpy ((char *) gdfilename, "SF8123  B00"); // TODO: we might need to make a GD file name from the real one
+  if (gd_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
+    io_error ();
+
+  printf ("Press q to abort\n\n");              // print here, NOT before first GD I/O,
+                                                //  because if we get here q works ;-)
+  starttime = time (NULL);
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+    {
+      if (gd_send_bytes (buffer, bytesread) == GD_ERROR)
+        io_error ();
+
+      bytessend += bytesread;
+      ucon64_gauge (starttime, bytessend, size);
+      gd_checkabort (2);
+    }
+
   free (buffer);
   fclose (file);
   deinit_io ();
 
   return 0;
-#else
-  (void) filename;                              // warning remover
-  (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for sending SRAM is not yet implemented\n");
-#endif
 }
 
 #endif // PARALLEL

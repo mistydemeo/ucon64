@@ -55,8 +55,7 @@ const st_usage_t swc_usage[] =
 
 #ifdef PARALLEL
 
-
-#define BUFFERSIZE      8192                    // don't change, only 8192 works!
+#define BUFFERSIZE 8192                         // don't change, only 8192 works!
 
 
 static int receive_rom_info (unsigned char *buffer);

@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <sys/stat.h>
 #include "misc.h"
 #include "quick_io.h"
 #include "ucon64.h"
@@ -75,9 +76,13 @@ const st_usage_t genesis_usage[] =
 #if 0
     {"p", NULL, "pad ROM to full Mb"},
 #endif
+    {"f", NULL, "remove NTSC/PAL protection"},
     {"chk", NULL, "fix ROM checksum"},
     {"1991", NULL, "fix old third party ROMs to work with consoles build after\n"
                 "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\""},
+    {"multi", "SIZE", "make multi-game file for use with MD-PRO flash card,\n"
+                      "truncated to SIZE Mbit; file with loader must be specified\n"
+                      "first, then all the ROMs, multi-game file to create last"},
     {NULL, NULL, NULL}
   };
 
@@ -289,12 +294,13 @@ genesis_mgd (st_rominfo_t *rominfo)
     return -1;
 
   p = basename (ucon64.rom);
-  strcpy (buf, is_func (p, strlen (p), isupper) ? "MD" : "md");
-  strcat (buf, p);
+  if ((p[0] == 'M' || p[0] == 'm') && (p[1] == 'D' || p[1] == 'd'))
+    strcpy (buf, p);
+  else
+    sprintf (buf, "%s%s", is_func (p, strlen (p), isupper) ? "MD" : "md", p);
   if ((p = strrchr (buf, '.')))
     *p = 0;
-  strcat (buf, "________");
-  buf[7] = '_';
+  strcat (buf, "______");
   buf[8] = 0;
   sprintf (dest_name, "%s.%03u", buf, genesis_rom_size / MBIT);
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
@@ -313,13 +319,15 @@ genesis_mgd (st_rominfo_t *rominfo)
   mgh[5] = (char) 0xf0;
   mgh[31] = (char) 0xff;
 
-  strcpy (buf, (const char *) &OFFSET (genesis_header, 32)); // name
+  // In addition to the above, uCON also does "memcpy (mgh + 16, "MGH By uCON/chp", 15);"
+
+  memcpy (buf, rominfo->name, 15);              // copy first 15 bytes (don't use strlen() or strcpy())
   for (x = 0; x < 15; x++)
     {
       for (y = 0; y < 4; y++)
-        mgh[((x + 2) * 16) + y + 4] = mghcharset[(buf[x] * 8) + y];
+        mgh[((x + 2) * 16) + y + 4] = mghcharset[(((unsigned char *) buf)[x] * 8) + y];
       for (y = 4; y < 8; y++)
-        mgh[((x + 2) * 16) + y + 244] = mghcharset[(buf[x] * 8) + y];
+        mgh[((x + 2) * 16) + y + 244] = mghcharset[(((unsigned char *) buf)[x] * 8) + y];
     }
 
   set_suffix (dest_name, ".MGH");
@@ -358,11 +366,13 @@ genesis_s (st_rominfo_t *rominfo)
   if (type == BIN)
     {
       p = basename (ucon64.rom);
-      strcpy (buf, is_func (p, strlen (p), isupper) ? "MD" : "md");
-      strcat (buf, p);
+      if ((p[0] == 'M' || p[0] == 'm') && (p[1] == 'D' || p[1] == 'd'))
+        strcpy (buf, p);
+      else
+        sprintf (buf, "%s%s", is_func (p, strlen (p), isupper) ? "MD" : "md", p);
       if ((p = strrchr (buf, '.')))
         *p = 0;
-      strcat (buf, "________");
+      strcat (buf, "______");
       buf[7] = is_func (buf, strlen (buf), isupper) ? 'A' : 'a';
       buf[8] = 0;
 
@@ -590,6 +600,164 @@ genesis_chk (st_rominfo_t *rominfo)
 }
 
 
+static int
+genesis_fix_pal_protection (st_rominfo_t *rominfo)
+{
+/*
+  This function searches for PAL protection codes. If it finds one it will
+  fix the code so that the game will run on a Genesis (NTSC).
+*/
+  char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
+       buffer[16 * 1024];
+  FILE *srcfile, *destfile;
+  int bytesread, n = 0, n_extra_patterns, n2;
+  st_cm_pattern_t *patterns = NULL;
+
+  n_extra_patterns = build_cm_patterns (&patterns, "genpal.txt", src_name);
+  if (n_extra_patterns >= 0)
+    printf ("Found %d additional code%s in %s\n",
+            n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
+
+  puts ("Attempting to fix PAL protection code...");
+
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, src_name, 0);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+      return -1;
+    }
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+  if (rominfo->buheader_len)                    // copy header (if present)
+    {
+      fread (header, 1, SMD_HEADER_LEN, srcfile);
+      fseek (srcfile, rominfo->buheader_len, SEEK_SET);
+      fwrite (header, 1, SMD_HEADER_LEN, destfile);
+    }
+
+  while ((bytesread = fread (buffer, 1, 16 * 1024, srcfile)))
+    {
+      for (n2 = 0; n2 < n_extra_patterns; n2++)
+        n += change_mem2 (buffer, bytesread,
+                          patterns[n2].search,
+                          patterns[n2].search_size,
+                          patterns[n2].wildcard,
+                          patterns[n2].escape,
+                          patterns[n2].replace,
+                          patterns[n2].replace_size,
+                          patterns[n2].offset,
+                          patterns[n2].sets);
+      fwrite (buffer, 1, bytesread, destfile);
+    }
+  fclose (srcfile);
+  fclose (destfile);
+  cleanup_cm_patterns (&patterns, n_extra_patterns);
+
+  printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+  return n;
+}
+
+
+static int
+genesis_fix_ntsc_protection (st_rominfo_t *rominfo)
+{
+/*
+  This function searches for NTSC protection codes. If it finds one it will
+  fix the code so that the game will run on a Mega Drive (PAL).
+*/
+  char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
+       buffer[16 * 1024];
+  FILE *srcfile, *destfile;
+  int bytesread, n = 0, n_extra_patterns, n2;
+  st_cm_pattern_t *patterns = NULL;
+
+  n_extra_patterns = build_cm_patterns (&patterns, "mdntsc.txt", src_name);
+  if (n_extra_patterns >= 0)
+    printf ("Found %d additional code%s in %s\n",
+            n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
+
+  puts ("Attempting to fix NTSC protection code...");
+
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, src_name, 0);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+      return -1;
+    }
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+  if (rominfo->buheader_len)                    // copy header (if present)
+    {
+      fread (header, 1, SMD_HEADER_LEN, srcfile);
+      fseek (srcfile, rominfo->buheader_len, SEEK_SET);
+      fwrite (header, 1, SMD_HEADER_LEN, destfile);
+    }
+
+  while ((bytesread = fread (buffer, 1, 16 * 1024, srcfile)))
+    {
+      for (n2 = 0; n2 < n_extra_patterns; n2++)
+        n += change_mem2 (buffer, bytesread,
+                          patterns[n2].search,
+                          patterns[n2].search_size,
+                          patterns[n2].wildcard,
+                          patterns[n2].escape,
+                          patterns[n2].replace,
+                          patterns[n2].replace_size,
+                          patterns[n2].offset,
+                          patterns[n2].sets);
+      fwrite (buffer, 1, bytesread, destfile);
+    }
+  fclose (srcfile);
+  fclose (destfile);
+  cleanup_cm_patterns (&patterns, n_extra_patterns);
+
+  printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+  return n;
+}
+
+
+int
+genesis_f (st_rominfo_t *rominfo)
+{
+  if (rominfo->interleaved)
+    {
+      if (ucon64.quiet <= 0)
+        fprintf (stderr, "ERROR: This option works only on non-interleaved files\n"
+                         "TIP: Create a deinterleaved file with -mgd\n");
+      return -1;
+    }
+
+  switch (OFFSET (genesis_header, 240))
+    {
+    /*
+      In the Philipines the television standard is NTSC, but do games made
+      for the Philipines exist?
+      Yes, we only check the first country code. Just like with SNES we don't
+      guarantee anything for files that needn't be fixed/cracked/patched.
+    */
+    case 'J':                                   // Japan
+    case 'U':                                   // U.S.A.
+      return genesis_fix_ntsc_protection (rominfo);
+    default:
+      return genesis_fix_pal_protection (rominfo);
+    }
+}
+
+
 unsigned char *
 load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
 {
@@ -654,6 +822,161 @@ int
 save_bin (const char *name, unsigned char *buffer, long size)
 {
   return q_fwrite (buffer, 0, size, name, "wb");
+}
+
+
+int
+genesis_multi (int truncate_size, char *fname)
+{
+#define BUFSIZE (32 * 1024)                     // must be a multiple of 16kB
+  int n, n_files, file_no, bytestowrite, byteswritten, totalsize = 0, done,
+      truncated = 0, paddedsize;
+  struct stat fstate;
+  FILE *srcfile, *destfile;
+  char *destname;
+  unsigned char buffer[BUFSIZE];
+
+  if (truncate_size == 0)
+    {
+      fprintf (stderr, "ERROR: Can't make multi-game file of 0 bytes\n");
+      return -1;
+    }
+
+  if (fname != NULL)
+    {
+      destname = fname;
+      n_files = ucon64.argc;
+    }
+  else
+    {
+      destname = ucon64.argv[ucon64.argc - 1];
+      n_files = ucon64.argc - 1;
+    }
+
+  ucon64_file_handler (destname, NULL, OF_FORCE_BASENAME);
+  if ((destfile = fopen (destname, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], destname);
+      return -1;
+    }
+  printf ("Creating multi-game file: %s\n", destname);
+
+  file_no = 0;
+  for (n = 1; n < n_files; n++)
+    {
+      if (access (ucon64.argv[n], F_OK))
+        continue;                               // "file" does not exist (option)
+      stat (ucon64.argv[n], &fstate);
+      if (!S_ISREG (fstate.st_mode))
+        continue;
+
+      ucon64.console = UCON64_UNKNOWN;
+      ucon64.rom = ucon64.argv[n];
+      ucon64.file_size = q_fsize (ucon64.rom);
+      // DON'T use fstate.st_size, because file could be compressed
+      ucon64.rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
+                                       ucon64.buheader_len : 0;
+      ucon64.rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+                                       ucon64.interleaved : 0;
+      if (genesis_init (ucon64.rominfo) != 0)
+        printf ("WARNING: %s does not appear to be a Genesis ROM\n", ucon64.rom);
+      /*
+        NOTE: This is NOT the place to mess with ucon64.console. When this
+              function was entered ucon64.console must have been UCON64_GEN. We
+              modify ucon64.console temporarily only to be able to help detect
+              problems with incorrect files.
+      */
+
+      if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.rom);
+          continue;
+        }
+      if (ucon64.rominfo->buheader_len)
+        fseek (srcfile, ucon64.rominfo->buheader_len, SEEK_SET);
+
+      if (file_no == 0)
+        {
+          printf ("Loader: %s\n", ucon64.rom);
+          if (ucon64.file_size - ucon64.rominfo->buheader_len != MBIT)
+            printf ("WARNING: Are you sure %s is a loader binary?\n", ucon64.rom);
+        }
+      else
+        {
+          printf ("ROM%d: %s\n", file_no, ucon64.rom);
+
+          // fill the next game table entry
+          fseek (destfile, 0x8000 + (file_no - 1) * 0x20, SEEK_SET);
+          if (ucon64.rominfo->name[0] == 0)
+            ucon64.rominfo->name[0] = 'A';                  // if table[0] == 0 => no next game
+          fwrite (ucon64.rominfo->name, 1, 0x1d, destfile); // 0x0 - 0x1c = name
+          fputc (0, destfile);                              // 0x1d = 0
+          fputc (totalsize / (2 * MBIT), destfile);         // 0x1e = bank code
+          fputc (0x08, destfile);                           // 0x1f = (SRAM/region?) flag
+        }
+
+      fseek (destfile, totalsize, SEEK_SET);    // restore file pointer
+      done = 0;
+      byteswritten = 0;                         // # of bytes written per file
+      while (!done)
+        {
+          bytestowrite = fread (buffer, 1, BUFSIZE, srcfile);
+          if (ucon64.rominfo->interleaved)
+            smd_deinterleave (buffer, BUFSIZE); // yes, bytestowrite might not be n*16kB
+          if (totalsize + bytestowrite > truncate_size)
+            {
+              bytestowrite = truncate_size - totalsize;
+              done = 1;
+              truncated = 1;
+              printf ("Output file is %d Mbit, truncating %s, skipping %d bytes\n",
+                      truncate_size / MBIT, ucon64.rom, ucon64.file_size -
+                        ucon64.rominfo->buheader_len - (byteswritten + bytestowrite));
+            }
+          totalsize += bytestowrite;
+          if (bytestowrite == 0)
+            done = 1;
+          fwrite (buffer, 1, bytestowrite, destfile);
+          byteswritten += bytestowrite;
+        }
+      fclose (srcfile);
+      if (truncated)
+        break;
+
+      // games have to be aligned to (start at) a 2 Mbit boundary
+      paddedsize = (totalsize + 2 * MBIT - 1) & ~(2 * MBIT - 1);
+//      printf ("paddedsize: %d (%f); totalsize: %d (%f)\n",
+//              paddedsize, paddedsize / (1.0 * MBIT), totalsize, totalsize / (1.0 * MBIT));
+      if (paddedsize > totalsize)
+        {
+          // I (dbjh) don't think it is really necessary to pad to the truncate
+          //  size, but it won't hurt
+          if (paddedsize > truncate_size)
+            {
+              truncated = 1;                    // not *really* truncated
+              paddedsize = truncate_size;
+            }
+
+          memset (buffer, 0, BUFSIZE);
+          while (totalsize < paddedsize)
+            {
+              bytestowrite = paddedsize - totalsize > BUFSIZE ?
+                              BUFSIZE : paddedsize - totalsize;
+              fwrite (buffer, 1, bytestowrite, destfile);
+              totalsize += bytestowrite;
+            }
+        }
+      if (truncated)
+        break;
+
+      file_no++;
+    }
+  // fill the next game table entry
+  fseek (destfile, 0x8000 + file_no * 0x20, SEEK_SET);
+  fputc (0, destfile);                          // indicate no next game
+  fclose (destfile);
+  ucon64.console = UCON64_GEN;
+
+  return 0;
 }
 
 

@@ -313,6 +313,9 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XGBXS:
     case UCON64_XGBXB:
     case UCON64_XGD3:
+    case UCON64_XGD3S:
+    case UCON64_XGD6:
+    case UCON64_XGD6S:
     case UCON64_XLIT:
     case UCON64_XMCCL:
     case UCON64_XMD:
@@ -605,7 +608,7 @@ ucon64_rename (int mode)
 
   if (one_file (ucon64.rom, buf2))
     {
-      printf ("Skipping \"%s\"\n", basename (ucon64.rom));
+      printf ("Skipping \"%s\"\n", basename2 (ucon64.rom));
       return 0;
     }
 
@@ -1114,7 +1117,7 @@ ucon64_options (int c, const char *optarg)
               ucon64_dat_view (ucon64.console, 0);
               printf ("TIP: %s " OPTION_LONG_S "db " OPTION_LONG_S "nes"
                       " would show only information about known NES ROMs\n\n",
-                      basename (ucon64.argv[0]));
+                      basename2 (ucon64.argv[0]));
             }
           else
             printf (ucon64_msg[DAT_NOT_ENABLED]);
@@ -1127,7 +1130,7 @@ ucon64_options (int c, const char *optarg)
           ucon64_dat_view (ucon64.console, 1);
           printf ("TIP: %s " OPTION_LONG_S "dbv " OPTION_LONG_S "nes"
                   " would show only information about known NES ROMs\n\n",
-                  basename (ucon64.argv[0]));
+                  basename2 (ucon64.argv[0]));
         }
       else
         printf (ucon64_msg[DAT_NOT_ENABLED]);
@@ -1150,7 +1153,7 @@ ucon64_options (int c, const char *optarg)
               printf ("\n"
                       "TIP: %s " OPTION_LONG_S "dbs" OPTARG_S "0x%08x " OPTION_LONG_S
                       "nes would search only for a NES ROM\n\n",
-                      basename (ucon64.argv[0]), ucon64.crc32);
+                      basename2 (ucon64.argv[0]), ucon64.crc32);
             }
         }
       else
@@ -1162,7 +1165,17 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_MULTI:
-      gba_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+      switch (ucon64.console)
+        {
+        case UCON64_GBA:
+          gba_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          break;
+        case UCON64_GEN:
+          genesis_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          break;
+        default:
+          return -1;
+        }
       break;
 
     case UCON64_E:
@@ -1677,15 +1690,45 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_XGD3:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
-        gd_read_rom (ucon64.rom, ucon64.parport); // dumping is not yet supported
+        gd3_read_rom (ucon64.rom, ucon64.parport); // dumping is not yet supported
       else
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format.\n");
           else
-            gd_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo); // file exists -> send it to the copier
+            gd3_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo); // file exists -> send it to the copier
         }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGD3S:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        gd3_read_sram (ucon64.rom, ucon64.parport); // dumping is not yet supported
+      else
+        gd3_write_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGD6:
+      if (access (ucon64.rom, F_OK) != 0)
+        gd6_read_rom (ucon64.rom, ucon64.parport); // dumping is not yet supported
+      else
+        {
+          if (!ucon64.rominfo->buheader_len)
+            fprintf (stderr,
+                    "ERROR: This ROM has no header. Convert to a Game Doctor compatible format.\n");
+          else
+            gd6_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo);
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGD6S:
+      if (access (ucon64.rom, F_OK) != 0)
+        gd6_read_sram (ucon64.rom, ucon64.parport);
+      else
+        gd6_write_sram (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;
 
@@ -1694,15 +1737,16 @@ ucon64_options (int c, const char *optarg)
         md_read_rom (ucon64.rom, ucon64.parport);
       else                                      // file exists -> send it to the copier
         {
-          // TODO: I (dbjh) don't know yet what format the MD-PRO uses
+#if 0
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
                     "ERROR: This ROM has no header. Convert to an MD compatible format.\n");
           else if (!ucon64.rominfo->interleaved)
             fprintf (stderr,
-                    "ERROR: This ROM doesn't seem to be interleaved but the MDonly supports\n"
+                    "ERROR: This ROM doesn't seem to be interleaved but the MD only supports\n"
                     "       interleaved ROMs. Convert to an MD compatible format.\n");
           else
+#endif
             md_write_rom (ucon64.rom, ucon64.parport);
         }
       fputc ('\n', stdout);

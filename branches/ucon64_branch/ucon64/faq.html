@@ -131,6 +131,9 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
 <br>
 Q45: <a href="#45">What is an interleaved ROM?</a><br>
 <br>
+Q46: <a href="#46">The pre-compiled GNU/Linux binary does not work on my
+   system, while a binary compiled by me works fine. How can that be?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -154,11 +157,11 @@ Q45: <a href="#45">What is an interleaved ROM?</a><br>
    Choose a binary package for your system. GNU/Linux users should choose a
    package with "linux" in its name, BeOS users a package with "beos" in its
    name and DOS users a package with "dos" in its name. Windows users can
-   choose any or all of the packages with "win32", "dos" or "cygwin" in their
-   name. Normally, they should choose a package with "win32" in its name. The
-   DOS version also runs under Windows, but has some limitations. For example,
-   the DOS version cannot handle long command lines. The Cygwin version does
-   not have any serious limitations compared to the "normal" Win32 version, but
+   choose any or all of the packages with "win32" or "dos" in their name.
+   Normally, they should choose a package with "win32" in its name. The DOS
+   version also runs under Windows, but has some limitations. For example, the
+   DOS version cannot handle long command lines. The Cygwin version does not
+   have any serious limitations compared to the "normal" Win32 version, but
    behaves a bit more Unix-like than Windows users might want. Users accustomed
    to Unix might prefer the Cygwin version. The Cygwin version needs some
    additional files, though. See <a href="#27">question 27</a>.<br>
@@ -443,11 +446,13 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    &nbsp;&nbsp; ucon64 -version<br>
    If you have not run uCON64 before you should see a message that it created
    a file with a name like ucon64.cfg (DOS version) or .ucon64rc (all other
-   versions). Search for the line that starts with "configuration file". It
-   should say "present" between the parentheses. The file name after the colon
-   is the name of the configuration file. The configuration file may contain
-   names of variables that influence the behaviour of uCON64. Here follows a
-   table of the variable names uCON64 recognises:<br>
+   versions). If you are using GNU/Linux and uCON64 crashes see
+   <a href="#46">question 46</a>.<br>
+   Then search for the line that starts with "configuration file". It should
+   say "present" between the parentheses. The file name after the colon is the
+   name of the configuration file. The configuration file may contain names of
+   variables that influence the behaviour of uCON64. Here follows a table of
+   the variable names uCON64 recognises:<br>
 <br>
 <table border="1">
   <tr>
@@ -781,7 +786,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    -multi that is larger than your flash card. Passing a smaller size is
    correct though. For example, to create a multirom that fits on a 128 Mb (16
    MB) card use a command line like this:<br>
-   &nbsp;&nbsp; ucon64 -multi=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba multi.bin<br>
+   &nbsp;&nbsp; ucon64 -gba -multi=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba multi.bin<br>
    You can also send it directly by using -xfalmulti:<br>
    &nbsp;&nbsp; ucon64 -xfalmulti=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba<br>
    Just like sometimes happens with Visoly's tool it is possible to get the
@@ -1262,7 +1267,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
     <td><tt>GoodGBX or GBX</tt></td>
   </tr>
   <tr>
-    <td><tt>Genesis or Megadrive</tt></td>
+    <td><tt>Genesis or Mega Drive</tt></td>
     <td><tt>GoodGEN or GEN</tt></td>
   </tr>
   <tr>
@@ -1302,7 +1307,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
     <td><tt>GoodPCE or PCE</tt></td>
   </tr>
   <tr>
-    <td><tt>Sega Master System and GameGear</tt></td>
+    <td><tt>Sega Master System and Game Gear</tt></td>
     <td><tt>GoodSMS, GoodGG, SMS or GG</tt></td>
   </tr>
   <tr>
@@ -1403,10 +1408,10 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <b>A</b>: Strictly speaking, interleaved ROMs do not exist. Interleaved ROM
    dumps do. Or perhaps it is better to say ROM dumps in interleaved format.
    It depends on the console type what "interleaved" means. Interleaved formats
-   exist for NES, Sega Master System, GameGear, Genesis, SNES and Nintendo 64.<br>
-   Interleaved NES files have the PRG data stored at the even offsets in the
-   file and the CHR data at the odd offsets.<br>
-   Interleaved Sega Master System, GameGear and Genesis files are produced by
+   exist for NES, Sega Master System, Game Gear, Genesis, SNES and Nintendo 64.<br>
+   Interleaved NES files have the "PRG data" stored at the even offsets in the
+   file and the "CHR data" at the odd offsets.<br>
+   Interleaved Sega Master System, Game Gear and Genesis files are produced by
    the Super Magic Drive. For each block of 16384 bytes of the ROM all bytes at
    even offsets are stored in the upper half of the dumped block. The bytes at
    odd offsets are stored in the lower half. So, each dumped block first
@@ -1433,24 +1438,39 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    For each two bytes the first and the second byte are swapped.<br>
 <br>
    ROM dumps in non-interleaved format can be interleaved with uCON64. Sega
-   Master System, GameGear and Genesis dumps can be interleaved with the option
-   -smd. SNES dumps can be interleaved with -gd3 or -ufo. Nintendo 64 dumps can
-   be interleaved with -v64. NES dumps cannot be interleaved with uCON64.<br>
+   Master System, Game Gear and Genesis dumps can be interleaved with the
+   option -smd. SNES dumps can be interleaved with -gd3 or -ufo. Nintendo 64
+   dumps can be interleaved with -v64. NES dumps cannot be interleaved with
+   uCON64.<br>
 <br>
    Deinterleaving is the process of converting the data to "binary" format.
-   Binary in the sense as how the data is presented to the CPU. Interleaved NES
-   dumps can be deinterleaved with the option -dint. Interleaved SNES and
-   Nintendo 64 dumps can be deinterleaved with -dint too, but it is better to
-   use the regular conversion options. For Nintendo 64 dumps that means you
-   should use the option -z64. For SNES dumps it means you should use -smc,
-   -swc, -fig or -mgd. Some SNES tools erroneously interleave LoROM dumps.
-   These dumps can be deinterleaved with the options -gd3 and -ufo as well as
-   with the aformentioned options.<br>
-   Sega Master System, GameGear and Genesis dumps can be deinterleaved with the
-   option -mgd.<br
+   Binary in the sense as how the data is presented to the CPU. Deinterleaving
+   is the opposite of interleaving a ROM dump. Interleaved NES dumps can be
+   deinterleaved with the option -dint. Interleaved SNES and Nintendo 64 dumps
+   can be deinterleaved with -dint too, but it is better to use the regular
+   conversion options. For Nintendo 64 dumps that means you should use the
+   option -z64. For SNES dumps it means you should use -smc, -swc, -fig or
+   -mgd. Some SNES tools erroneously interleave LoROM dumps. These dumps can be
+   deinterleaved with the options -gd3 and -ufo as well as with the
+   aformentioned (SNES) options.<br>
+   Sega Master System, Game Gear and Genesis dumps can be deinterleaved with
+   the option -mgd.<br>
 <br>
-<br>
-<br>
+<p>
+<a name="46"><b>Q46</b>: The pre-compiled GNU/Linux binary does not work on my
+   system, while a binary compiled by me works fine. How can that be?</a><br>
+<b>A</b>: If you get this output on the command line:<br>
+   &nbsp;&nbsp;libgcc_s.so.1: cannot open shared object file: No such file or directory<br>
+   Or when the command "ldd discmage.so" gives output that looks like this:<br>
+   &nbsp;&nbsp;libz.so.1 => /usr/lib/libz.so.1 (0x4002b000)<br>
+   &nbsp;&nbsp;libgcc_s.so.1 => not found<br>
+   &nbsp;&nbsp;libc.so.6 => /lib/libc.so.6 (0x40039000)<br>
+   &nbsp;&nbsp;/lib/ld-linux.so.2 => /lib/ld-linux.so.2 (0x80000000)<br>
+   (note the text "not found") then you are experiencing a binary
+   incompatibility problem with the add-on discmage library. You can either
+   remove the discmage library from the directory where uCON64 looks for it
+   (see <a href="#4">question 4</a>) or compile the library yourself (see
+   <a href="#3">question 3</a>).<br>
 <br>
 <br>
 <br>

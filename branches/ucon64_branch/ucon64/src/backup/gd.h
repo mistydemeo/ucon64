@@ -30,11 +30,16 @@ extern const st_usage_t gd_usage[];
 // Each logical memory unit is 8Mbit in size (internally it's 2*4Mbit)
 
 #ifdef PARALLEL
-int gd_read_rom (const char *filename, unsigned int parport);
-int gd_write_rom (const char *filename, unsigned int parport,
-                  st_rominfo_t *rominfo);
-int gd_read_sram (const char *filename, unsigned int parport);
-int gd_write_sram (const char *filename, unsigned int parport);
+extern int gd3_read_rom (const char *filename, unsigned int parport);
+extern int gd3_write_rom (const char *filename, unsigned int parport,
+                          st_rominfo_t *rominfo);
+extern int gd6_read_rom (const char *filename, unsigned int parport);
+extern int gd6_write_rom (const char *filename, unsigned int parport,
+                          st_rominfo_t *rominfo);
+extern int gd3_read_sram (const char *filename, unsigned int parport);
+extern int gd3_write_sram (const char *filename, unsigned int parport);
+extern int gd6_read_sram (const char *filename, unsigned int parport);
+extern int gd6_write_sram (const char *filename, unsigned int parport);
 #endif // PARALLEL
 
 #endif // MGD_H

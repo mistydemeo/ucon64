@@ -19,5 +19,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef TOP_H
 #define TOP_H
-extern void ucon64gui_top(void);
+extern void ucon64gui_top (void);
 #endif // TOP_H

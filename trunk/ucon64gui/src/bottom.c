@@ -40,8 +40,9 @@ ucon64gui_bottom (void)
 //  h2g_img (ucon64gui_xpm, 0, 0, 0, NULL);
 
 //  h2g_ ( ucon64gui_TITLE );
-  
-  h2g_a ("ucon64.sf.net", "http://ucon64.sf.net", "Surf to uCON64 and uCON64gui homepage");
+
+  h2g_a ("ucon64.sf.net", "http://ucon64.sf.net",
+         "Surf to uCON64 and uCON64gui homepage");
 //  h2g_input_image ("Emulate", "-e", emulate_xpm, 0, 0, buf);
 
 }

@@ -23,13 +23,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //#include "ucon64.h"
 #define UCON64GUI_HTMLTITLE "uCON64gui"
-#define UCON64GUI_FORMTARGET "http://ucon64"
+#define UCON64GUI_FORMTARGET "file://ucon64"
 #define UCON64GUI_VERSION "0.1.0alpha2"
 #define UCON64GUI_TITLE "uCON64gui " UCON64GUI_VERSION " (for uCON64 " UCON64_VERSION ") 2002 by NoisyB "
 
 #ifndef MAXBUFSIZE
-  #define MAXBUFSIZE 32768
+#define MAXBUFSIZE 32768
 #endif
+
+#define UCON64_ROOT 1
+#define UCON64_CONFIG 2
 
 typedef struct
 {
@@ -37,19 +40,20 @@ typedef struct
   char rom[FILENAME_MAX];
   char file[FILENAME_MAX];
 
-  char console[4096];
+  const char *console;
 
   char ucon64_output[MAXBUFSIZE];
 
   int sub;
 
-  int page; //current "html page"
+  int page;                     //current "html page"
 
-  int hd; // header
-  int ns; // not splitted
+  int hd;                       // header
+  int ns;                       // not splitted
 
   char configfile[FILENAME_MAX];
-} ucon64gui_t;
+}
+ucon64gui_t;
 
 extern ucon64gui_t ucon64gui;
 

@@ -21,8 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef MISC_H
 #define MISC_H
 
-#include <time.h>                               // gauge() prototype contains time_t
-#include <dirent.h>                             // for DIR2_t
+#include <time.h>               // gauge() prototype contains time_t
+#include <dirent.h>             // for DIR2_t
 
 #ifndef FALSE
 #define FALSE 0
@@ -107,31 +107,31 @@ extern int renlwr (const char *dir, int lower);
 #define CURRENT_ENDIAN_S  "Little-Endian"
 #endif
 
-#ifdef  __MSDOS__                               // __MSDOS__ must come before __unix__, because DJGPP defines both
-  #define CURRENT_OS_S "MSDOS"
+#ifdef  __MSDOS__               // __MSDOS__ must come before __unix__, because DJGPP defines both
+#define CURRENT_OS_S "MSDOS"
 #elif   defined __unix__
-  #ifdef  __CYGWIN__
-    #define CURRENT_OS_S "Win32"
-  #elif   defined __FreeBSD__
-    #define CURRENT_OS_S "Unix (FreeBSD)"
-  #elif   defined __linux__
-    #define CURRENT_OS_S "Unix (Linux)"
-  #elif   defined sun
-    #define CURRENT_OS_S "Unix (Solaris)"
-  #else
-    #define CURRENT_OS_S "Unix"
-  #endif
-#elif   defined __BEOS__
-  #define CURRENT_OS_S "BeOS"
+#ifdef  __CYGWIN__
+#define CURRENT_OS_S "Win32"
+#elif   defined __FreeBSD__
+#define CURRENT_OS_S "Unix (FreeBSD)"
+#elif   defined __linux__
+#define CURRENT_OS_S "Unix (Linux)"
+#elif   defined sun
+#define CURRENT_OS_S "Unix (Solaris)"
 #else
-  #define CURRENT_OS_S "?"
+#define CURRENT_OS_S "Unix"
+#endif
+#elif   defined __BEOS__
+#define CURRENT_OS_S "BeOS"
+#else
+#define CURRENT_OS_S "?"
 #endif
 
 #ifdef __MSDOS__
 #ifndef stderr
-#define stderr          stdout                  // Stupid DOS has no error
-#endif                                          //  stream (direct video writes)
-#define FILE_SEPARATOR '\\'                     //  this makes redir possible
+#define stderr          stdout  // Stupid DOS has no error
+#endif //  stream (direct video writes)
+#define FILE_SEPARATOR '\\'     //  this makes redir possible
 #define FILE_SEPARATOR_S "\\"
 #if 0
 #define OPTION '/'
@@ -154,40 +154,44 @@ typedef struct st_func_node
 {
   void (*func) (void);
   struct st_func_node *next;
-} st_func_node_t;
+}
+st_func_node_t;
 
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
 
 #if     defined __unix__ || defined __BEOS__
-#define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
+#define getch           getchar // getchar() acts like DOS getch() after init_conio()
 
 extern void init_conio (void);
-extern int kbhit (void);                        // may only be used after init_conio()!
+extern int kbhit (void);        // may only be used after init_conio()!
 #endif
 
-extern unsigned short bswap_16(unsigned short x);
-extern unsigned int bswap_32(unsigned int x);
-extern unsigned long long int bswap_64(unsigned long long int x);
+extern unsigned short bswap_16 (unsigned short x);
+extern unsigned int bswap_32 (unsigned int x);
+extern unsigned long long int bswap_64 (unsigned long long int x);
 
 
 /*
   File extension handling
 
   setext() set/replace extension of filename with ext
-  GETEXT() get extension of filename
-  EXTCMP() compare extension of filename with ext
+  getext() get extension of filename
+    extension means in this case the extension INCLUDING the dot '.'
 
-  extension means in this case the extension INCLUDING the dot '.'
+  filename_only() returns only the filename from a complete path
 */
 extern char *setext (char *filename, const char *ext);
-#ifdef __GNUC__
-#define GETEXT(filename) (strrchr ((strrchr (filename, FILE_SEPARATOR)?:filename), '.')?:"")
-#else
 extern const char *getext (const char *filename);
-#define GETEXT getext
-#endif // __GNUC__
 #define EXTCMP(filename, ext) (stricmp (GETEXT (filename), ext))
+extern const char *filename_only (const char *str);
+#if 0
+#define GETEXT(filename) (strrchr ((strrchr (filename, FILE_SEPARATOR)?:filename), '.')?:"")
+#define FILENAME_ONLY(path) (strchr (path, FILE_SEPARATOR)?(&path[strrcspn (path, FILE_SEPARATOR_S) + 1]):path)
+#else
+#define GETEXT getext
+#define FILENAME_ONLY filename_only
+#endif
 
 
 /*
@@ -205,8 +209,6 @@ extern const char *getext (const char *filename);
              the position; if str2 could'nt be found strlen() will be returned
              example: strrcspn (".1234.6789",".") == 5
   findlwr()  test str for ANY lowercase characters
-
-  FILENAME_ONLY() returns only the filename from a complete path
 */
 extern char *strupr (char *str);
 extern char *strlwr (char *str);
@@ -218,11 +220,6 @@ extern char *mkprint (char *str, const char replacement);
 extern char *mkfile (char *str, const char replacement);
 extern int strrcspn (const char *str, const char *str2);
 extern int findlwr (const char *str);
-#define FILENAME_ONLY(path) (strchr (path, FILE_SEPARATOR)?(&path[strrcspn (path, FILE_SEPARATOR_S) + 1]):path)
-#if 0
-extern const char *filenameonly (const char *str);
-#define FILENAME_ONLY filenameonly
-#endif
 
 
 /*
@@ -233,10 +230,12 @@ extern const char *filenameonly (const char *str);
   memhexdump() hexdump n Bytes from add on; you can use here a virtual_start for the displayed counter
   mem_crc32()   calculate the crc32 of add for n bytes
 */
-extern int memwcmp (const void *add, const void *add_with_wildcards, size_t n, int wildcard);
+extern int memwcmp (const void *add, const void *add_with_wildcards, size_t n,
+                    int wildcard);
 extern void *memswap (void *add, size_t n);
 extern void memhexdump (const void *add, size_t n, long virtual_start);
-extern unsigned long mem_crc32 (unsigned int size, unsigned long crc, const void *buffer);
+extern unsigned long mem_crc32 (unsigned int size, unsigned long crc,
+                                const void *buffer);
 
 
 /*
@@ -249,10 +248,13 @@ extern unsigned long mem_crc32 (unsigned int size, unsigned long crc, const void
   quickfputc()  same as fputc but takes filename instead of FILE and a pos
   quickftell()  return size of file
 */
-extern size_t quickfread (void *dest, size_t start, size_t len, const char *src);
-extern size_t quickfwrite (const void *src, size_t start, size_t len, const char *dest, const char *mode);
+extern size_t quickfread (void *dest, size_t start, size_t len,
+                          const char *src);
+extern size_t quickfwrite (const void *src, size_t start, size_t len,
+                           const char *dest, const char *mode);
 extern int quickfgetc (const char *filename, long pos);
-extern int quickfputc (const char *filename, long pos, int c, const char *mode);
+extern int quickfputc (const char *filename, long pos, int c,
+                       const char *mode);
 extern long quickftell (const char *filename);
 
 
@@ -276,13 +278,17 @@ extern long quickftell (const char *filename);
   file_crc32()           calculate the crc32 of filename from start
 */
 extern long filencmp (const char *filename, long start, long len,
-  const char *search, long searchlen, int wildcard);
-extern int filecopy (const char *src, long start, long len, const char *dest, const char *mode);
+                      const char *search, long searchlen, int wildcard);
+extern int filecopy (const char *src, long start, long len, const char *dest,
+                     const char *mode);
 extern const char *filebackup (char *move_name, const char *filename);
 extern int fileswap (const char *filename, long start, long len);
 extern int filehexdump (const char *filename, long start, long len);
-extern unsigned long filefile (const char *filename, long start, const char *filename2, long start2, int similar);
-extern int filereplace (const char *filename, long start, const char *search, long slen, const char *replace, long rlen);
+extern unsigned long filefile (const char *filename, long start,
+                               const char *filename2, long start2,
+                               int similar);
+extern int filereplace (const char *filename, long start, const char *search,
+                        long slen, const char *replace, long rlen);
 extern unsigned long file_crc32 (const char *filename, long start);
 
 
@@ -326,13 +332,14 @@ extern char *tmpnam2 (char *temp);
 typedef struct
 {
   DIR *dir;
-  char fullpath[FILENAME_MAX];//==temppath
-} DIR2_t;
+  char fullpath[FILENAME_MAX];  //==temppath
+}
+DIR2_t;
 
 extern DIR2_t *opendir2 (const char *archive_or_dir);
-extern int closedir2 (DIR2_t *p);
+extern int closedir2 (DIR2_t * p);
 int rmdir_R (const char *path);
-extern int fsystem (FILE *output, const char *cmdline);
+extern int fsystem (FILE * output, const char *cmdline);
 #ifdef  __unix__
 extern int drop_privileges (void);
 #endif
@@ -350,8 +357,10 @@ extern void handle_registered_funcs (void);
   DELETEPROPERTY() like setProperty but when value of propname is NULL the
                    whole property will disappear from filename
 */
-extern const char *getProperty (const char *filename, const char *propname, char *value, const char *def);
-extern int setProperty (const char *filename, const char *propname, const char *value);
+extern const char *getProperty (const char *filename, const char *propname,
+                                char *value, const char *def);
+extern int setProperty (const char *filename, const char *propname,
+                        const char *value);
 #define DELETEPROPERTY(a, b) (setProperty(a, b, NULL))
 
 

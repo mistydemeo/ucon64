@@ -27,16 +27,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <errno.h>
 #include <time.h>
-#include <stdarg.h>                             // va_arg()
+#include <stdarg.h>             // va_arg()
 #include <sys/stat.h>
-#ifdef  __CYGWIN__                              // under Cygwin (gcc for Windows) we
-#define USE_POLL                                //  need poll() for kbhit(). poll()
-#include <sys/poll.h>                           //  is available on Linux, not on
-#endif                                          //  BeOS. DOS already has kbhit()
+#ifdef  __CYGWIN__              // under Cygwin (gcc for Windows) we
+#define USE_POLL                //  need poll() for kbhit(). poll()
+#include <sys/poll.h>           //  is available on Linux, not on
+#endif //  BeOS. DOS already has kbhit()
 
 #ifdef __MSDOS__
-#include <conio.h>                              // getch()
-#include <pc.h>                                 // kbhit()
+#include <conio.h>              // getch()
+#include <pc.h>                 // kbhit()
 #endif
 
 #if     defined __unix__ || defined __BEOS__
@@ -118,7 +118,7 @@ calculate_file_crc (FILE * file)
   unsigned char buffer[512];
 
   while ((count = fread (buffer, 1, 512, file)))
-    crc = mem_crc32 (count, crc, buffer); // zlib: crc32 (crc, buffer, count);
+    crc = mem_crc32 (count, crc, buffer);       // zlib: crc32 (crc, buffer, count);
   return crc;
 }
 
@@ -132,9 +132,9 @@ areprint (const char *str, int size)
   while (size > 0)
     {
       if (!isprint ((int) str[--size]))
-        return FALSE;//0
+        return FALSE;           //0
     }
-  return TRUE;//1
+  return TRUE;                  //1
 }
 
 
@@ -147,13 +147,13 @@ mkprint (char *str, const char replacement)
     {
       switch (*str)
         {
-          case '\n':
-            break;
-            
-          default:
-            if (iscntrl ((int) *str))
-              *str = replacement;
-            break; 
+        case '\n':
+          break;
+
+        default:
+          if (iscntrl ((int) *str))
+            *str = replacement;
+          break;
         }
       str++;
     }
@@ -178,18 +178,18 @@ mkfile (char *str, const char replacement)
 
       switch (*str)
         {
-          case '.':
-          case '-':
-            break;
-            
-          case ' ':
+        case '.':
+        case '-':
+          break;
+
+        case ' ':
+          *str = replacement;
+          break;
+
+        default:
+          if (!isalnum ((int) *str))
             *str = replacement;
-            break;
-    
-          default:  
-            if (!isalnum ((int) *str))
-              *str = replacement;
-            break;
+          break;
         }
       str++;
       pos++;
@@ -224,18 +224,19 @@ strnicmp (const char *s1, const char *s2, size_t n)
   if (!strcmp (s1, s2))
     return 0;
 
-  if (!(sb1 = (char *) malloc (strlen(s1) * sizeof (char)))) return -1;
+  if (!(sb1 = (char *) malloc (strlen (s1) * sizeof (char))))
+    return -1;
 
-  if (!(sb2 = (char *) malloc (strlen(s2) * sizeof (char))))
+  if (!(sb2 = (char *) malloc (strlen (s2) * sizeof (char))))
     {
       free (sb1);
       return -1;
     }
 
-  strcpy(sb1, s1);
-  strcpy(sb2, s2);
+  strcpy (sb1, s1);
+  strcpy (sb2, s2);
 
-  result = strncmp (strlwr(sb1), strlwr(sb2), n);
+  result = strncmp (strlwr (sb1), strlwr (sb2), n);
 
   free (sb1);
   free (sb2);
@@ -284,9 +285,11 @@ strrcspn (const char *str, const char *str2)
   int len2 = strlen (str2);
 
   while (len > -1)
-    if (!strncmp (&str[len], str2, len2)) return len;
-    else len--;
-    
+    if (!strncmp (&str[len], str2, len2))
+      return len;
+    else
+      len--;
+
   return strlen (str);
 }
 
@@ -327,33 +330,33 @@ setext (char *filename, const char *ext)
 //  int pos = strrcspn (filename, ".");
   char ext2[FILENAME_MAX];
   int pos = ((strchr (&filename[1], FILE_SEPARATOR) == NULL) ||
-         (strrcspn (filename, ".") > (strrcspn (filename, FILE_SEPARATOR_S) + 1 ))) ?
-    strrcspn (filename, ".") : strlen (filename);
+             (strrcspn (filename, ".") >
+              (strrcspn (filename, FILE_SEPARATOR_S) +
+               1))) ? strrcspn (filename, ".") : strlen (filename);
 
 //  if (filename[pos - 1] != FILE_SEPARATOR) // some files might start with a dot (.)
   filename[pos] = 0;
 
   strcpy (ext2, ext);
-  strcat (filename, findlwr (FILENAME_ONLY (filename)) ? strlwr (ext2) : strupr (ext2));
+  strcat (filename,
+          findlwr (FILENAME_ONLY (filename)) ? strlwr (ext2) : strupr (ext2));
 
   return filename;
 }
 
 
-#ifndef __GNUC__
 const char *
 getext (const char *filename)
 {
-  char *p = NULL;
+  const char *p = NULL;
 
   if (!(p = strrchr (filename, FILE_SEPARATOR)))
     p = filename;
   if (!(p = strrchr (p, '.')))
     p = "";
-  
+
   return p;
 }
-#endif
 
 
 char *
@@ -372,7 +375,7 @@ strtrim (char *str)
 
   while (x && str[x] == 32)
     x--;
-  str[x+1]=0;
+  str[x + 1] = 0;
 
   return stpblk (str);
 }
@@ -392,13 +395,14 @@ stplcr (char *str)
 
 
 int
-memwcmp (const void *add, const void *add_with_wildcards, size_t n, int wildcard)
+memwcmp (const void *add, const void *add_with_wildcards, size_t n,
+         int wildcard)
 {
   const unsigned char *a = add, *a_w = add_with_wildcards;
 
   while (n)
     {
-      if (/* *a != wildcard &&*/ *a_w != wildcard && *a != *a_w)
+      if ( /* *a != wildcard && */ *a_w != wildcard && *a != *a_w)
         return -1;
 
       a++;
@@ -440,11 +444,10 @@ memhexdump (const void *mem, size_t n, long virtual_start)
     {
       if (!(x % 16))
         printf ("%s%s%08lx  ", x ? buf : "",
-                               x ? "\n" : "",
-                               x + virtual_start);
-      printf ("%02x %s", ((char) a[x]) & 0xff,
-                         !((x + 1) % 4) ? " ": "");
-      sprintf (&buf[x % 16], "%c", isprint ((char) a[x]) ? ((char) a[x]) : '.');
+                x ? "\n" : "", x + virtual_start);
+      printf ("%02x %s", ((char) a[x]) & 0xff, !((x + 1) % 4) ? " " : "");
+      sprintf (&buf[x % 16], "%c",
+               isprint ((char) a[x]) ? ((char) a[x]) : '.');
     }
   printf ("%s\n", buf);
 }
@@ -473,8 +476,7 @@ renlwr (const char *dir, int lower)
 //              if(S_ISREG(puffer.st_mode)==1)
           {
             strcpy (buf, ep->d_name);
-            rename (ep->d_name,
-                    lower ? strlwr (buf) : strupr (buf));
+            rename (ep->d_name, lower ? strlwr (buf) : strupr (buf));
           }
         }
     }
@@ -517,10 +519,10 @@ file_crc32 (const char *filename, long start)
 
 long
 filencmp (const char *filename, long start, long len, const char *search,
-  long searchlen, int wildcard)
+          long searchlen, int wildcard)
 {
-  int seg_len = 0; // segment length
-  int seg_pos = 0; // position in segment
+  int seg_len = 0;              // segment length
+  int seg_pos = 0;              // position in segment
   size_t size = quickftell (filename);
   char buf[MAXBUFSIZE];
 
@@ -532,7 +534,7 @@ filencmp (const char *filename, long start, long len, const char *search,
       errno = ENOENT;
       return -1;
     }
-    
+
   if ((size - start) < len)
     len = size - start;
 
@@ -556,7 +558,8 @@ filencmp (const char *filename, long start, long len, const char *search,
 
 #if 0
 long
-filencmp (const char *filename, long start, long len, const char *search, long searchlen, const char wildcard)
+filencmp (const char *filename, long start, long len, const char *search,
+          long searchlen, const char wildcard)
 // searchlen is length of *search in bytes
 {
   register long x, y;
@@ -568,7 +571,7 @@ filencmp (const char *filename, long start, long len, const char *search, long s
       errno = ENOENT;
       return -1;
     }
-    
+
   x = 0;
   if (!(buf = (char *) malloc ((size - start + 2) * sizeof (char))))
     {
@@ -629,14 +632,15 @@ quickfread (void *dest, size_t start, size_t len, const char *src)
   result = fread (dest, 1, len, fh);
   fclose (fh);
 #if 0
-  dest[len]=0;
+  dest[len] = 0;
 #endif
   return result;
 }
 
 
 size_t
-quickfwrite (const void *src, size_t start, size_t len, const char *dest, const char *mode)
+quickfwrite (const void *src, size_t start, size_t len, const char *dest,
+             const char *mode)
 {
   size_t result = 0;
   FILE *fh = fopen (dest, mode);
@@ -648,11 +652,11 @@ quickfwrite (const void *src, size_t start, size_t len, const char *dest, const 
     }
   fseek (fh, start, SEEK_SET);
 
-  if (!src)//then write 0x00
+  if (!src)                     //then write 0x00
     {
       char buf[MAXBUFSIZE];
       memset (buf, 0, MAXBUFSIZE);
-      
+
       while (len >= MAXBUFSIZE)
         {
           result = fwrite (buf, 1, MAXBUFSIZE, fh);
@@ -680,7 +684,7 @@ quickfgetc (const char *filename, long pos)
     {
       errno = ENOENT;
       return -1;
-      
+
     }
 
   c = fgetc (fh);
@@ -730,11 +734,12 @@ filehexdump (const char *filename, long start, long len)
   for (x = 0; x < len; x++)
     {
       if (!(x % 16))
-        printf ("%s%s%08lx  ", x?buf:"", x?"\n":"", x + start);
+        printf ("%s%s%08lx  ", x ? buf : "", x ? "\n" : "", x + start);
 
       dump = fgetc (fh);
-      printf ("%02x %s", dump & 0xff, !((x + 1) % 4)?" ":"");
-      sprintf (&buf[x % 16], "%c", isprint ((char) dump) ? ((char) dump) : '.');
+      printf ("%02x %s", dump & 0xff, !((x + 1) % 4) ? " " : "");
+      sprintf (&buf[x % 16], "%c",
+               isprint ((char) dump) ? ((char) dump) : '.');
     }
   printf ("%s\n", buf);
   fclose (fh);
@@ -744,7 +749,8 @@ filehexdump (const char *filename, long start, long len)
 
 
 int
-filecopy (const char *src, long start, long len, const char *dest, const char *mode)
+filecopy (const char *src, long start, long len, const char *dest,
+          const char *mode)
 {
   int seg_len = 0;
   long size = quickftell (src);
@@ -808,8 +814,8 @@ filebackup (char *move_name, const char *filename)
 #endif
   if (strcmp (filename, buf))
     {
-      remove (buf);                             // try to remove or rename will fail
-      rename (filename, buf);                   // keep file attributes like date, etc.
+      remove (buf);             // try to remove or rename will fail
+      rename (filename, buf);   // keep file attributes like date, etc.
     }
 
   if (move_name == NULL)
@@ -824,31 +830,30 @@ filebackup (char *move_name, const char *filename)
 }
 
 
-#if 0
 const char *
-filenameonly (const char *str)
+filename_only (const char *str)
 {
   const char *str2;
 
   if (!(str2 = strrchr (str, FILE_SEPARATOR)))
-    str2 = str;                                 // strip path if it is a filename
+    str2 = str;                 // strip path if it is a filename
   else
     str2++;
 
   return str2;
 }
-#endif
 
 
 #if 0
 unsigned long
-filefile (const char *filename, long start, const char *filename2, long start2, int similar)
+filefile (const char *filename, long start, const char *filename2,
+          long start2, int similar)
 {
   int fsize = quickftell (filename);
   int fsize2 = quickftell (filename2);
   int pos = 0;
   int base, len, chunksize, chunksize2, readok = 1,
-      bytesread, bytesread2, bytesleft, bytesleft2;
+    bytesread, bytesread2, bytesleft, bytesleft2;
   unsigned char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
   FILE *file, *file2;
 
@@ -859,7 +864,7 @@ filefile (const char *filename, long start, const char *filename2, long start2, 
     {
       errno = ENOENT;
       return -1;
-      
+
     }
 
   if (fsize < start || fsize2 < start2)
@@ -881,7 +886,8 @@ filefile (const char *filename, long start, const char *filename2, long start2, 
   fseek (file, start, SEEK_SET);
   fseek (file2, start2, SEEK_SET);
 
-  while (fread (buf, 1, MAXBUFSIZE, file) && fread (buf2, 1, MAXBUFSIZE, file2))
+  while (fread (buf, 1, MAXBUFSIZE, file)
+         && fread (buf2, 1, MAXBUFSIZE, file2))
     {
       for (pos = 0; pos < MAXBUFSIZE; pos++)
         {
@@ -918,10 +924,11 @@ filefile (const char *filename, long start, const char *filename2, long start2, 
 
 
 unsigned long
-filefile (const char *filename1, long start1, const char *filename2, long start2, int similar)
+filefile (const char *filename1, long start1, const char *filename2,
+          long start2, int similar)
 {
   int base, fsize1, fsize2, len, chunksize1, chunksize2, readok = 1,
-      bytesread1, bytesread2, bytesleft1, bytesleft2, bufsize = 1024 * 1024;
+    bytesread1, bytesread2, bytesleft1, bytesleft2, bufsize = 1024 * 1024;
   unsigned char *buf1, *buf2;
   FILE *file1, *file2;
 
@@ -933,7 +940,7 @@ filefile (const char *filename1, long start1, const char *filename2, long start2
       return -1;
     }
 
-  fsize1 = quickftell (filename1);              // quickftell() returns size in bytes
+  fsize1 = quickftell (filename1);      // quickftell() returns size in bytes
   fsize2 = quickftell (filename2);
   if (fsize1 < start1 || fsize2 < start2)
     return -1;
@@ -1009,9 +1016,11 @@ filefile (const char *filename1, long start1, const char *filename2, long start2
                         }
 
                       printf ("%s:\n", filename1);
-                      memhexdump (&buf1[base], len, start1 + base + bytesread2);
+                      memhexdump (&buf1[base], len,
+                                  start1 + base + bytesread2);
                       printf ("%s:\n", filename2);
-                      memhexdump (&buf2[base], len, start2 + base + bytesread2);
+                      memhexdump (&buf2[base], len,
+                                  start2 + base + bytesread2);
                       printf ("\n");
                       base += len;
                     }
@@ -1111,7 +1120,7 @@ change_string (char *searchstr, int strsize, char wc, char esc,
       while (searchstr[strpos] == esc && bufpos < bufsize)
         {
           if (strpos == pos_1st_esc)
-            va_start (argptr, offset);          // reset argument pointer
+            va_start (argptr, offset);  // reset argument pointer
           if (pos_1st_esc == -1)
             pos_1st_esc = strpos;
 
@@ -1122,9 +1131,9 @@ change_string (char *searchstr, int strsize, char wc, char esc,
           while (i < setsize && buf[bufpos] != set[i])
             i++;
           if (i == setsize)
-            break;                              // buf[bufpos] didn't match with any char
+            break;              // buf[bufpos] didn't match with any char
 
-          if (strpos == strsize - 1)            // check if we are at the end of searchstr
+          if (strpos == strsize - 1)    // check if we are at the end of searchstr
             {
               memcpy (buf + bufpos + offset, end, endsize);
               break;
@@ -1143,7 +1152,7 @@ change_string (char *searchstr, int strsize, char wc, char esc,
       nwc = 0;
       while (searchstr[strpos] == wc && bufpos < bufsize)
         {
-          if (strpos == strsize - 1)            // check if at end of searchstr
+          if (strpos == strsize - 1)    // check if at end of searchstr
             {
               memcpy (buf + bufpos + offset, end, endsize);
               break;
@@ -1163,14 +1172,14 @@ change_string (char *searchstr, int strsize, char wc, char esc,
 
       if (searchstr[strpos] == esc)
         {
-          bufpos--;                             // current char has to be checked, but `for'
-          continue;                             //  increments bufpos
+          bufpos--;             // current char has to be checked, but `for'
+          continue;             //  increments bufpos
         }
 
       // no escape char, no wildcard -> normal character
       if (searchstr[strpos] == buf[bufpos])
         {
-          if (strpos == strsize - 1)            // check if at end of searchstr
+          if (strpos == strsize - 1)    // check if at end of searchstr
             {
               memcpy (buf + bufpos + offset, end, endsize);
               strpos = 0;
@@ -1181,8 +1190,8 @@ change_string (char *searchstr, int strsize, char wc, char esc,
       else
         {
           strpos = 0;
-          bufpos -= nwc;                        // scan the most recent wildcards too if
-        }                                       //  the character didn't match
+          bufpos -= nwc;        // scan the most recent wildcards too if
+        }                       //  the character didn't match
     }
 
   va_end (argptr);
@@ -1203,15 +1212,17 @@ fileswap (const char *filename, long start, long len)
       return -1;
     }
 
-  if ((size - start) < len) len = size - start;
+  if ((size - start) < len)
+    len = size - start;
 
   fseek (fh, start, SEEK_SET);
 
   while (1)
     {
       seg_len = (len >= MAXBUFSIZE) ? MAXBUFSIZE : len;
-      
-      if (!fread (buf, 1, seg_len, fh)) break;
+
+      if (!fread (buf, 1, seg_len, fh))
+        break;
 
       memswap (buf, seg_len);
 
@@ -1245,19 +1256,19 @@ gauge (time_t init_time, long pos, long size)
   if (pos > size)
     return -1;
 #else
-  if (pos > size)                               // When is this necessary?
-    {                                           // DON'T fix other code's bugs
-      value = pos;                              //  here!
+  if (pos > size)               // When is this necessary?
+    {                           // DON'T fix other code's bugs
+      value = pos;              //  here!
       pos = size;
       size = value;
     }
 #endif
 
   if ((curr = time (0) - init_time) == 0)
-    curr = 1;                                   // `round up' to at least 1 sec (no division
-                                                //  by zero below)
+    curr = 1;                   // `round up' to at least 1 sec (no division
+  //  by zero below)
 
-  bps = pos / curr;                             // # bytes/second (average transfer speed)
+  bps = pos / curr;             // # bytes/second (average transfer speed)
   left = size - pos;
 #ifdef __GNUC__
   left /= bps ? : 1;
@@ -1265,8 +1276,8 @@ gauge (time_t init_time, long pos, long size)
   left /= bps ? bps : 1;
 #endif // __GNUC__
 
-  p = (24 * pos) / size;                        // DON'T make precision worse,
-  progress[0] = 0;                              //  by shifting pos or size
+  p = (24 * pos) / size;        // DON'T make precision worse,
+  progress[0] = 0;              //  by shifting pos or size
   strncat (progress, "========================", p);
   strncat (&progress[p], "------------------------", 24 - p);
 
@@ -1275,8 +1286,8 @@ gauge (time_t init_time, long pos, long size)
           pos, progress, percentage, (unsigned long) bps);
 
   if (pos == size)
-    printf ("TOTAL=%03ld:%02ld", (long) curr / 60, (long) curr % 60); // DON'T print a newline
-  else                                                                //  -> gauge can be cleared
+    printf ("TOTAL=%03ld:%02ld", (long) curr / 60, (long) curr % 60);   // DON'T print a newline
+  else                          //  -> gauge can be cleared
     printf ("ETA=%03ld:%02ld   ", (long) left / 60, (long) left % 60);
 
   fflush (stdout);
@@ -1298,11 +1309,11 @@ cygwin_fix (char *value)
 {
   int l = strlen (value);
 
-  change_string ("\x89", 1, 0, 0, "\xeb", 1, value, l, 0); // e diaeresis
-  change_string ("\x84", 1, 0, 0, "\xe4", 1, value, l, 0); // a diaeresis
-  change_string ("\x8b", 1, 0, 0, "\xef", 1, value, l, 0); // i diaeresis
-  change_string ("\x94", 1, 0, 0, "\xf6", 1, value, l, 0); // o diaeresis
-  change_string ("\x81", 1, 0, 0, "\xfc", 1, value, l, 0); // u diaeresis
+  change_string ("\x89", 1, 0, 0, "\xeb", 1, value, l, 0);      // e diaeresis
+  change_string ("\x84", 1, 0, 0, "\xe4", 1, value, l, 0);      // a diaeresis
+  change_string ("\x8b", 1, 0, 0, "\xef", 1, value, l, 0);      // i diaeresis
+  change_string ("\x94", 1, 0, 0, "\xf6", 1, value, l, 0);      // o diaeresis
+  change_string ("\x81", 1, 0, 0, "\xfc", 1, value, l, 0);      // u diaeresis
 
   return value;
 }
@@ -1319,7 +1330,7 @@ getenv2 (const char *variable)
   char *tmp, *dirname;
 
   dirname = (char *) malloc (FILENAME_MAX);     // ALWAYS use dirname, so that the
-                                                //  caller can always use free()
+  //  caller can always use free()
   if ((tmp = getenv (variable)) != NULL)
     strcpy (dirname, tmp);
   else
@@ -1337,14 +1348,14 @@ getenv2 (const char *variable)
             }
           else
             /*
-              Don't just use C:\\ under DOS, the user might not have write access
-              there (Windows NT DOS-box). Besides, it would make uCON64 behave
-              differently on DOS than on the other platforms.
-              Returning the current directory when none of the above environment
-              variables are set can be seen as a feature. A frontend could execute
-              uCON64 with an environment without any of the environment variables
-              set, so that the directory from where uCON64 starts will be used.
-            */
+               Don't just use C:\\ under DOS, the user might not have write access
+               there (Windows NT DOS-box). Besides, it would make uCON64 behave
+               differently on DOS than on the other platforms.
+               Returning the current directory when none of the above environment
+               variables are set can be seen as a feature. A frontend could execute
+               uCON64 with an environment without any of the environment variables
+               set, so that the directory from where uCON64 starts will be used.
+             */
             {
               char c;
               getcwd (dirname, FILENAME_MAX);
@@ -1354,7 +1365,7 @@ getenv2 (const char *variable)
                   dirname[1] == ':' && dirname[2] == '/' && dirname[3] == 0)
                 dirname[2] = 0;
             }
-         }
+        }
 
       if (!strcmp (variable, "TEMP") || !strcmp (variable, "TMP"))
         {
@@ -1374,7 +1385,8 @@ getenv2 (const char *variable)
 
 
 const char *
-getProperty (const char *filename, const char *propname, char *buffer, const char *def)
+getProperty (const char *filename, const char *propname, char *buffer,
+             const char *def)
 {
   char buf[MAXBUFSIZE], *result;
   FILE *fh;
@@ -1387,7 +1399,7 @@ getProperty (const char *filename, const char *propname, char *buffer, const cha
           if (stpblk (buf)[0] == '#')
             continue;
 
-          buf[strcspn (buf, "#")] = 0;          // comment at end of a line
+          buf[strcspn (buf, "#")] = 0;  // comment at end of a line
 
           if (!strncmp (buf, propname, strlen (propname)))
             {
@@ -1413,18 +1425,18 @@ getProperty (const char *filename, const char *propname, char *buffer, const cha
 int
 setProperty (const char *filename, const char *propname, const char *value)
 {
-  int found=0;
+  int found = 0;
   char buf[MAXBUFSIZE], *buf2;
   FILE *fh;
 
-  if (!(buf2 = (char *) malloc ((quickftell(filename)
-                                         + MAXBUFSIZE) * sizeof (char))))
+  if (!(buf2 = (char *) malloc ((quickftell (filename)
+                                 + MAXBUFSIZE) * sizeof (char))))
     {
       errno = ENOMEM;
       return -1;
     }
 
-  buf2[0]=0;
+  buf2[0] = 0;
 
   if ((fh = fopen (filename, "rb")) != 0)
     {
@@ -1442,20 +1454,20 @@ setProperty (const char *filename, const char *propname, const char *value)
       fclose (fh);
     }
 
-    if (!found && value != NULL)
-      {
-        sprintf (buf, "%s=%s\n", propname, value);
-        strcat (buf2, buf);
-      }
+  if (!found && value != NULL)
+    {
+      sprintf (buf, "%s=%s\n", propname, value);
+      strcat (buf2, buf);
+    }
 
-    quickfwrite (buf2, 0, strlen (buf2), filename, "wb");
+  quickfwrite (buf2, 0, strlen (buf2), filename, "wb");
 
-    return 0;
+  return 0;
 }
 
 
 int
-fsystem (FILE *output, const char *cmdline)
+fsystem (FILE * output, const char *cmdline)
 {
   int result = -1;
   FILE *fh;
@@ -1464,8 +1476,8 @@ fsystem (FILE *output, const char *cmdline)
   if (output == stdout)
     return system (cmdline)
 #ifndef __MSDOS__
-      >> 8                                      // the exit code is coded in bits 8-15
-#endif                                          //  (that is, under Linux & BeOS)
+      >> 8                      // the exit code is coded in bits 8-15
+#endif //  (that is, under Linux & BeOS)
 /*
   // Snes9x (Linux) for example returns a non-zero value on a normal exit (3)...
 
@@ -1473,8 +1485,9 @@ fsystem (FILE *output, const char *cmdline)
   //  a Windows executable (as if a fork() happened) it also returns 0 when the
   //  exe could not be started
 */
-    ;
-  if (!(fh = popen (cmdline, "r"))) return -1;
+      ;
+  if (!(fh = popen (cmdline, "r")))
+    return -1;
 
   while (fgets (buf, MAXBUFSIZE, fh) != NULL)
     if (output)
@@ -1496,21 +1509,24 @@ rmdir_R (const char *path)
   struct stat puffer;
   DIR *dp;
 
-  if (!(dp = opendir (path))) return -1;
+  if (!(dp = opendir (path)))
+    return -1;
 
   getcwd (cwd, FILENAME_MAX);
   chdir (path);
 
   while ((ep = readdir (dp)) != NULL)
     {
-      if (stat (ep->d_name, &puffer) == -1) return -1;
+      if (stat (ep->d_name, &puffer) == -1)
+        return -1;
 
       if (S_ISDIR (puffer.st_mode))
         {
-          if (strcmp (ep->d_name, "..") != 0 &&
-            strcmp (ep->d_name, ".") != 0) rmdir_R (ep->d_name);
+          if (strcmp (ep->d_name, "..") != 0 && strcmp (ep->d_name, ".") != 0)
+            rmdir_R (ep->d_name);
         }
-      else remove (ep->d_name);
+      else
+        remove (ep->d_name);
     }
 
   (void) closedir (dp);
@@ -1521,13 +1537,13 @@ rmdir_R (const char *path)
 
 
 char *
-tmpnam2 (char *temp) // tmpnam() replacement
+tmpnam2 (char *temp)            // tmpnam() replacement
 {
   temp[0] = 0;
- 
+
   while (!temp[0] || !access (temp, F_OK))
     sprintf (temp, "%s" FILE_SEPARATOR_S "%08x.tmp", getenv2 ("TEMP"),
-      RANDOM (0x10000000, 0xffffffff));
+             RANDOM (0x10000000, 0xffffffff));
 
   return temp;
 }
@@ -1540,12 +1556,13 @@ opendir2 (const char *archive_or_dir)
 }
 
 
-int closedir2 (DIR2_t *p)
+int
+closedir2 (DIR2_t * p)
 {
   int result = closedir (p->dir);
 
   if (p)
-    { 
+    {
       rmdir_R (p->fullpath);
       free (p);
     }
@@ -1572,34 +1589,36 @@ html_parser (const char *filename, char *buffer)
     {
       switch (c)
         {
-          case '<':
-            tag = 1;
-            break;
-            
-          case '>':
-            tag = 0;
-            break;
-            
-          default:
-            if (!tag) switch (c)
-              {            
+        case '<':
+          tag = 1;
+          break;
+
+        case '>':
+          tag = 0;
+          break;
+
+        default:
+          if (!tag)
+            switch (c)
+              {
 //                case '\n':
 //                  strcat (buffer, "<BR>");
 //                  break;
-               
-                default:
-                  sprintf (buf, "%c", c);
-                  strcat (buffer, buf);
-                  break;
-              }
-    
-            if (tag) switch (c)
-              {
-                default:
-                  break;
+
+              default:
+                sprintf (buf, "%c", c);
+                strcat (buffer, buf);
+                break;
               }
 
-            break;
+          if (tag)
+            switch (c)
+              {
+              default:
+                break;
+              }
+
+          break;
         }
     }
 
@@ -1614,14 +1633,15 @@ cmd2args (char **argv, const char *cmdline)
 {
   char buf[MAXBUFSIZE];
   int argc = 0;
-  
+
   if (cmdline)
     if (cmdline[0])
       {
-  strcpy (buf, cmdline);
+        strcpy (buf, cmdline);
 
-  while ((argv[argc] = strtok (!argc?buf:NULL, " ")) && argc < (ARGS_MAX - 1))
-    argc++;
+        while ((argv[argc] = strtok (!argc ? buf : NULL, " "))
+               && argc < (ARGS_MAX - 1))
+          argc++;
       }
 
   return argc;
@@ -1629,60 +1649,52 @@ cmd2args (char **argv, const char *cmdline)
 
 
 char *
-query2cmd (char *cmd, const char *uri, const char *query)
+query2cmd (char *str, const char *uri, const char *query)
 {
   register int x = 0;
-  int c = 0, query_len = query?strlen(query):0;
+  int c = 0, len = query ? strlen (query) : 0;
   char buf[16], *p = NULL;
-  const char *query_p = NULL;
-  
-  if (!cmd) cmd = (char *) malloc ((strlen (uri) + query_len) * 2); //* 2 should be enough
-  
-  strcpy (cmd, uri);  //the uri is argv[0]
 
-  if (!query_len) return cmd;
+  if (!str)
+    str = (char *) malloc ((strlen (uri) + len) * 2);   //* 2 should be enough
 
-  if (!strchr (query, OPTION)) return cmd;//only queries with '-' in front will be passed
+  strcpy (str, uri);            //the uri is argv[0]
 
-  strcat (cmd, " ");
+  if (!len)
+    return str;
 
-  if (query[0] != OPTION) query_p = strchr (query, OPTION);
-  if (!query_p) query_p = query;
+  strcat (str, " ");
 
-  for (x = 0; x < query_len; x++)
+  for (x = 0; x < len; x++)
     {
       p = NULL;
-      switch (query_p[x])
+      switch (query[x])
         {
-          case 0:
-            break;
-            
 //          case '?':
-          case '&':
-          case '+':
-            p = " ";
-            break;
+        case '&':
+        case '+':
+          p = " ";
+          break;
 
-          case '%':
-            sscanf (&query_p[x+1], "%02x", &c);
-            sprintf (buf, "%c", c);
-            x += 2;
-            break;
+        case '%':
+          sscanf (&query[x + 1], "%02x", &c);
+          sprintf (buf, "%c", c);
+          x += 2;
+          break;
 
-          default:
-            sprintf (buf, "%c", query_p[x]);
-            break;
+        default:
+          sprintf (buf, "%c", query[x]);
+          break;
         }
-        if (query_p[x] == 0) break;
 
-        strcat (cmd, p?
+      strcat (str, p ?
 #ifdef __GNUC__
-        p
+              p
 #endif // __GNUC__
-        :buf);
-     }
+              : buf);
+    }
 
-  return cmd;
+  return str;
 }
 
 #if 0
@@ -1691,14 +1703,16 @@ char *
 tag2cmd (char *str, const char *tag)
 {
   register int x = 0;
-  int c = 0, query_len = query?strlen(query):0;
+  int c = 0, query_len = query ? strlen (query) : 0;
   char buf[16], *p = NULL;
-  
-  if (!str) str = (char *) malloc ((strlen (uri) + query_len) * 2); //* 2 should be enough
 
-  strcpy (str, uri);  //the uri is argv[0]
+  if (!str)
+    str = (char *) malloc ((strlen (uri) + query_len) * 2);     //* 2 should be enough
 
-  if (!query_len) return str;
+  strcpy (str, uri);            //the uri is argv[0]
+
+  if (!query_len)
+    return str;
 
   strcat (str, " ");
 
@@ -1708,28 +1722,28 @@ tag2cmd (char *str, const char *tag)
       switch (query[x])
         {
 //          case '?':
-          case '&':
-          case '+':
-            p = " ";
-            break;
+        case '&':
+        case '+':
+          p = " ";
+          break;
 
-          case '%':
-            sscanf (&query[x+1], "%02x", &c);
-            sprintf (buf, "%c", c);
-            x += 2;
-            break;
+        case '%':
+          sscanf (&query[x + 1], "%02x", &c);
+          sprintf (buf, "%c", c);
+          x += 2;
+          break;
 
-          default:
-            sprintf (buf, "%c", query[x]);
-            break;
+        default:
+          sprintf (buf, "%c", query[x]);
+          break;
         }
 
-        strcat (str, p?
+      strcat (str, p ?
 #ifdef __GNUC__
-        p
+              p
 #endif // __GNUC__
-        :buf);
-     }
+              : buf);
+    }
 
   return str;
 }
@@ -1737,7 +1751,7 @@ tag2cmd (char *str, const char *tag)
 
 
 #if     defined __unix__ || defined __BEOS__
-static int stdin_tty = 1;                       // 1 => stdin is a tty, 0 => it's not
+static int stdin_tty = 1;       // 1 => stdin is a tty, 0 => it's not
 static tty_t oldtty, newtty;
 
 
@@ -1758,7 +1772,7 @@ init_conio (void)
   if (!isatty (STDIN_FILENO))
     {
       stdin_tty = 0;
-      return;                                   // rest is nonsense if not a tty
+      return;                   // rest is nonsense if not a tty
     }
 
   if (tcgetattr (STDIN_FILENO, &oldtty) == -1)
@@ -1776,8 +1790,8 @@ init_conio (void)
   newtty = oldtty;
   newtty.c_lflag &= ~(ICANON | ECHO);
   newtty.c_lflag |= ISIG;
-  newtty.c_cc[VMIN] = 1;                        // if VMIN != 0, read calls
-  newtty.c_cc[VTIME] = 0;                       //  block (wait for input)
+  newtty.c_cc[VMIN] = 1;        // if VMIN != 0, read calls
+  newtty.c_cc[VTIME] = 0;       //  block (wait for input)
 
   set_tty (newtty);
 }
@@ -1808,8 +1822,8 @@ kbhit (void)
   tty_t tmptty = newtty;
   int ch, key_pressed;
 
-  tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected under
-  set_tty(tmptty);                              //   Cygwin (define USE_POLL)
+  tmptty.c_cc[VMIN] = 0;        // doesn't work as expected under
+  set_tty (tmptty);             //   Cygwin (define USE_POLL)
 
   if ((ch = fgetc (stdin)) != EOF)
     {
@@ -1840,9 +1854,9 @@ drop_privileges (void)
       fprintf (stderr, "Could not set uid\n");
       return 1;
     }
-  gid = getgid ();                              // This shouldn't be necessary
-  if (setgid (gid) == -1)                       //  if `make install' was
-    {                                           //  used, but just in case
+  gid = getgid ();              // This shouldn't be necessary
+  if (setgid (gid) == -1)       //  if `make install' was
+    {                           //  used, but just in case
       fprintf (stderr, "Could not set gid\n");  //  (root did `chmod +s')
       return 1;
     }
@@ -1860,7 +1874,8 @@ register_func (void (*func) (void))
   while (func_node->next != NULL)
     func_node = func_node->next;
 
-  if ((new_node = (st_func_node_t *) malloc (sizeof (st_func_node_t))) == NULL)
+  if ((new_node =
+       (st_func_node_t *) malloc (sizeof (st_func_node_t))) == NULL)
     return -1;
 
   new_node->func = func;
@@ -1896,7 +1911,7 @@ handle_registered_funcs (void)
 
   while (func_node->next != NULL)
     {
-      func_node = func_node->next;              // first node contains no func
+      func_node = func_node->next;      // first node contains no func
       if (func_node->func != NULL)
         func_node->func ();
     }
@@ -1911,65 +1926,75 @@ handle_registered_funcs (void)
 #endif
 
 
-unsigned short bswap_16(unsigned short x)
+unsigned short
+bswap_16 (unsigned short x)
 {
 #ifdef WORDS_BIGENDIAN
 #ifndef __i386__
   return (((x) & 0x00ff) << 8 | ((x) & 0xff00) >> 8);
 #else
-  __asm("xchgb %b0,%h0"	:
-        "=q" (x)	:
-        "0" (x));
+__asm ("xchgb %b0,%h0":
+"=q" (x):
+"0" (x));
 #endif // __i386__
 #endif // WORDS_BIGENDIAN
   return x;
 }
 
 
-unsigned int bswap_32(unsigned int x)
+unsigned int
+bswap_32 (unsigned int x)
 {
 #ifdef WORDS_BIGENDIAN
 #ifndef __i386__
-  return ((((x) & 0xff000000) >> 24) | (((x) & 0x00ff0000) >>  8) |
-    (((x) & 0x0000ff00) <<  8) | (((x) & 0x000000ff) << 24));
+  return ((((x) & 0xff000000) >> 24) | (((x) & 0x00ff0000) >> 8) |
+          (((x) & 0x0000ff00) << 8) | (((x) & 0x000000ff) << 24));
 #else
 #if __CPU__ > 386
- __asm("bswap	%0":
-      "=r" (x)     :
+__asm ("bswap	%0":
+"=r" (x):
 #else
- __asm("xchgb	%b0,%h0\n"
-      "	rorl	$16,%0\n"
-      "	xchgb	%b0,%h0":
-      "=q" (x)		:
+__asm ("xchgb	%b0,%h0\n" "	rorl	$16,%0\n" "	xchgb	%b0,%h0":
+"=q" (x):
 #endif
-      "0" (x));
+"0" (x));
 #endif // __i386__
 #endif // WORDS_BIGENDIAN
   return x;
 }
 
 
-unsigned long long int bswap_64(unsigned long long int x)
+unsigned long long int
+bswap_64 (unsigned long long int x)
 {
 #ifdef WORDS_BIGENDIAN
 #ifndef __i386__
-  return
-     (__extension__
-      ({ union { __extension__ unsigned long long int __ll;
-                 unsigned long int __l[2]; } __w, __r;
-         __w.__ll = (x);
-         __r.__l[0] = bswap_32 (__w.__l[1]);
-         __r.__l[1] = bswap_32 (__w.__l[0]);
-         __r.__ll; }));
+  return (__extension__ (
+                          {
+                          union
+                          {
+                          __extension__ unsigned long long int __ll;
+                          unsigned long int __l[2];
+                          }
+                          __w, __r;
+                          __w.__ll = (x);
+                          __r.__l[0] = bswap_32 (__w.__l[1]);
+                          __r.__l[1] = bswap_32 (__w.__l[0]); __r.__ll;
+                          }
+          ));
 #else
-  register union { __extension__ unsigned long long int __ll;
-          unsigned long int __l[2]; } __x;
-  asm("xchgl	%0,%1":
-      "=r"(__x.__l[0]),"=r"(__x.__l[1]):
-      "0"(bswap_32((unsigned long)x)),"1"(bswap_32((unsigned long)(x>>32))));
+  register union
+  {
+    __extension__ unsigned long long int __ll;
+    unsigned long int __l[2];
+  }
+  __x;
+asm ("xchgl	%0,%1":
+"=r" (__x.__l[0]), "=r" (__x.__l[1]):
+"0" (bswap_32 ((unsigned long) x)), "1" (bswap_32 ((unsigned long) (x >> 32))));
   return __x.__ll;
 #endif // __i386__
 #else
-  return x; 
-#endif // WORDS_BIGENDIAN  
+  return x;
+#endif // WORDS_BIGENDIAN
 }

@@ -63,7 +63,7 @@ it is a good start to add support for a new console
 #define BACKUP
 
 
-#ifndef __MSDOS__ //AFAIK there is no Cdrdao for MSDOS
+#ifndef __MSDOS__               //AFAIK there is no Cdrdao for MSDOS
 /*
   enables/disables support for cd backups
 

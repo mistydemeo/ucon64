@@ -1014,7 +1014,7 @@ ucon64_rom_handling (void)
 
 //          ucon64.rominfo = (st_rominfo_t *) &rominfo;
         }
-      ucon64.rominfo = ucon64_probe (&rominfo); // returns console type
+      ucon64.rominfo = ucon64_probe (&rominfo); // determines console type
 
 #ifdef  DISCMAGE
       // check for disc image only if ucon64_probe() failed or --disc was used
@@ -1068,9 +1068,15 @@ ucon64_rom_handling (void)
     {
       ucon64.dat = ucon64_dat_search (ucon64.crc32, NULL);
       if (ucon64.dat)
-        if ((int) ucon64.dat->fsize != ucon64.file_size - // file size must match
-                                       (ucon64.rominfo ? ucon64.rominfo->buheader_len : 0))
-          ucon64.dat = NULL;
+        {
+          // detected file size must match DAT file size
+          int size = UCON64_ISSET (ucon64.rominfo->data_size) ?
+                       ucon64.rominfo->data_size :
+                       ucon64.file_size - (ucon64.rominfo ?
+                                             ucon64.rominfo->buheader_len : 0);
+          if ((int) ucon64.dat->fsize != size)
+            ucon64.dat = NULL;
+        }
 
       if (ucon64.dat)
         switch (ucon64.console)

@@ -885,7 +885,7 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
   ucon64.type = (quickftell (ucon64.rom) <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
   ucon64_flush (&rominfo);
   
-  result = ucon64_console_probe (&rominfo);
+  result = ucon64_init (ucon64.rom, &rominfo);
     switch (mode)
       {
         case UCON64_LSV:

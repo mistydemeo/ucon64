@@ -619,7 +619,7 @@ case ucon64_ATARI:
 	atari_main(&rom);
 break;
 case ucon64_SNES:
-	supernintendo_main(&rom);
+	snes_main(&rom);
 break;
 case ucon64_NEOGEOPOCKET:
 	neogeopocket_main(&rom);
@@ -835,7 +835,7 @@ int ucon64_init(struct ucon64_ *rom)
 {
   if(
 //    (ucon64_init_(rom)==-1) &&
-    (supernintendo_init(rom)==-1) &&
+    (snes_init(rom)==-1) &&
     (genesis_init(rom)==-1) &&
     (nintendo64_init(rom)==-1) &&
     (gameboy_init(rom)==-1) &&
@@ -937,7 +937,7 @@ else if(argcmp(argc,argv,"-psx") ||
 	argcmp(argc,argv,"-psx2"))playstation_usage(argc,argv);
 */
 else if(argcmp(argc,argv,"-jag"))jaguar_usage(argc,argv);
-else if(argcmp(argc,argv,"-snes"))supernintendo_usage(argc,argv);
+else if(argcmp(argc,argv,"-snes"))snes_usage(argc,argv);
 else if(argcmp(argc,argv,"-ng"))neogeo_usage(argc,argv);
 else if(argcmp(argc,argv,"-ngp"))neogeopocket_usage(argc,argv);
 else if(argcmp(argc,argv,"-gen"))genesis_usage(argc,argv);
@@ -958,7 +958,7 @@ else
 {
 	gbadvance_usage(argc,argv);
 	nintendo64_usage(argc,argv);
-	supernintendo_usage(argc,argv);
+	snes_usage(argc,argv);
 	neogeopocket_usage(argc,argv);
 	neogeo_usage(argc,argv);
 	genesis_usage(argc,argv);

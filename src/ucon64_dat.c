@@ -431,7 +431,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
   strcpy (buf, dat_entry);
 
-  argz_extract2 (dat_field, buf, DAT_FIELD_SEPARATOR_S, MAX_FIELDS_IN_DAT);
+  strarg (dat_field, buf, DAT_FIELD_SEPARATOR_S, MAX_FIELDS_IN_DAT);
 
   memset (dat, 0, sizeof (st_ucon64_dat_t));
 
@@ -491,7 +491,7 @@ line_to_crc (const char *dat_entry)
 
   strcpy (buf, dat_entry);
 
-  argz_extract2 (dat_field, buf, DAT_FIELD_SEPARATOR_S, MAX_FIELDS_IN_DAT);
+  strarg (dat_field, buf, DAT_FIELD_SEPARATOR_S, MAX_FIELDS_IN_DAT);
 
   if (dat_field[5])
     sscanf (dat_field[5], "%x", (unsigned int *) &crc32);

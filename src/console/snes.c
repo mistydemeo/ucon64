@@ -4,7 +4,7 @@ snes.c - Super NES support for uCON64
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2004 dbjh
            2002 - 2003 John Weidman
-                  2004 JohnDie
+           2004        JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -1675,7 +1675,11 @@ when it has been patched with -f.
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-  n_extra_patterns = build_cm_patterns (&patterns, "snescopy.txt", src_name);
+  strcpy (src_name, "snescopy.txt");
+  // First try the current directory, then the configuration directory
+  if (access (src_name, F_OK | R_OK) == -1)
+    sprintf (src_name, "%s" FILE_SEPARATOR_S "snescopy.txt", ucon64.configdir);
+  n_extra_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
             n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
@@ -1827,7 +1831,11 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-  n_extra_patterns = build_cm_patterns (&patterns, "snespal.txt", src_name);
+  strcpy (src_name, "snespal.txt");
+  // First try the current directory, then the configuration directory
+  if (access (src_name, F_OK | R_OK) == -1)
+    sprintf (src_name, "%s" FILE_SEPARATOR_S "snespal.txt", ucon64.configdir);
+  n_extra_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
             n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
@@ -1932,7 +1940,11 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-  n_extra_patterns = build_cm_patterns (&patterns, "snesntsc.txt", src_name);
+  strcpy (src_name, "snesntsc.txt");
+  // First try the current directory, then the configuration directory
+  if (access (src_name, F_OK | R_OK) == -1)
+    sprintf (src_name, "%s" FILE_SEPARATOR_S "snesntsc.txt", ucon64.configdir);
+  n_extra_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
             n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
@@ -2065,7 +2077,11 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
   int bytesread, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-  n_extra_patterns = build_cm_patterns (&patterns, "snesslow.txt", src_name);
+  strcpy (src_name, "snesslow.txt");
+  // First try the current directory, then the configuration directory
+  if (access (src_name, F_OK | R_OK) == -1)
+    sprintf (src_name, "%s" FILE_SEPARATOR_S "snesslow.txt", ucon64.configdir);
+  n_extra_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
             n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);

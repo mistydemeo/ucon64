@@ -718,7 +718,11 @@ genesis_fix_pal_protection (st_rominfo_t *rominfo)
   int offset = 0, block_size, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-  n_extra_patterns = build_cm_patterns (&patterns, "genpal.txt", fname);
+  strcpy (fname, "genpal.txt");
+  // First try the current directory, then the configuration directory
+  if (access (fname, F_OK | R_OK) == -1)
+    sprintf (fname, "%s" FILE_SEPARATOR_S "genpal.txt", ucon64.configdir);
+  n_extra_patterns = build_cm_patterns (&patterns, fname, ucon64.quiet == -1 ? 1 : 0);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
             n_extra_patterns, n_extra_patterns != 1 ? "s" : "", fname);
@@ -768,7 +772,11 @@ genesis_fix_ntsc_protection (st_rominfo_t *rominfo)
   int offset = 0, block_size, n = 0, n_extra_patterns, n2;
   st_cm_pattern_t *patterns = NULL;
 
-  n_extra_patterns = build_cm_patterns (&patterns, "mdntsc.txt", fname);
+  strcpy (fname, "mdntsc.txt");
+  // First try the current directory, then the configuration directory
+  if (access (fname, F_OK | R_OK) == -1)
+    sprintf (fname, "%s" FILE_SEPARATOR_S "mdntsc.txt", ucon64.configdir);
+  n_extra_patterns = build_cm_patterns (&patterns, fname, ucon64.quiet == -1 ? 1 : 0);
   if (n_extra_patterns >= 0)
     printf ("Found %d additional code%s in %s\n",
             n_extra_patterns, n_extra_patterns != 1 ? "s" : "", fname);

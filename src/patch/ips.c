@@ -163,8 +163,8 @@ ips_apply (const char *modname, const char *ipsname)
 
   printf ("Patching complete\n\n"
           "NOTE: Sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
-          "      This means you must convert for example a Super Nintendo ROM with -swc\n"
-          "      or -mgd or the patch will not work\n");
+          "      This means you must convert for example a SNES ROM with -swc or -mgd or\n"
+          "      the patch will not work\n");
 
   unregister_func (remove_destfile);            // unregister _after_ possible padding
   fclose (ipsfile);

@@ -1,5 +1,5 @@
 /*
-mccl.h - Mad Catz Camera Link (GameBoy Camera) support for uCON64
+mccl.h - Mad Catz Camera Link (Game Boy Camera) support for uCON64
 
 written by 2002 NoisyB (noisyb@gmx.net)
 

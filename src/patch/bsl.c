@@ -55,13 +55,15 @@ bsl (const char *name, const char *option2)
   printf ("BSL/Baseline\n");
   printf ("%d (%.4f Mb)\n", fsize, (float) fsize / MBIT);
   printf ("\n"
-          "NOTE: sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
-          "      This means you must convert for example a Super Nintendo ROM with -swc\n"
-          "      or -mgd or the patch will not work\n");
+          "NOTE: Sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
+          "      This means you must convert for example a SNES ROM with -swc or -mgd or\n"
+          "      the patch will not work\n");
 
-//      printf("Internal Size: %.4f Mb\n",fsize(romname,8));
-//      printf("Version: 1.%d\n","?");
-//      printf("\n");
+/*
+  printf ("Internal Size: %.4f Mb\n", q_fsize (romname, 8));
+  printf ("Version: 1.%d\n","?");
+  printf ("\n");
+*/
 
   while (!done)
     {
@@ -126,6 +128,4 @@ bsl (const char *name, const char *option2)
   return 0;
 }
 
-
-
-//TODO make bsl patch
+// TODO make bsl patch

@@ -1,6 +1,6 @@
 <html><head><title>CHANGES</title></head><body bgcolor="#c0c0c0" background="images/bg.jpg"><tt><br>
-The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
-<br>
+The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
+<p>
 <a name="190">1.9.0</a><br>
 - completely re-written<br>
 - this is the first real version with support for the most consoles<br>
@@ -16,9 +16,9 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 <a name="192">1.9.2</a><br>
 - started to add missing Sega System16(A/B)/System 18/dual 68000 support<br>
 - -xv64 shows now the filename on the Doctor instead of "UCON64" (sorry)<br>
-- removed -xmp3 option for Songboy (latest informations say that it will
+- removed -xmp3 option for SongBoy (latest informations say that it will
   be a USB device with copyprotected MPE standard instead of MP3.. HAHAHAHA!!!)<br>
-- TODO:  -xmp3 send MP3 file(s) to SongBoy (MP3 player for Gameboy)<br>
+- TODO:  -xmp3 send MP3 file(s) to SongBoy (MP3 player for Game Boy)<br>
 - removed options which were added by mistake (like parallel transfer for Z64)<br>
 - added -ispad (looks for repeating bytes at the end of a probably padded ROM)<br>
 - added -rn (some people might find it useful)<br>
@@ -40,11 +40,11 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - added -na change APS description<br>
 - added -hd, -nhd switches for SMS/GameGear<br>
 - added auto-detection and some information for Jaguar ROMs<br>
-- added -ssc convert to Super Smart Card (GameBoy)<br>
-- fixed/added -chk fix checksum (GameBoy)<br>
-- added -gg Game Genie support for Super Nintendo<br>
+- added -ssc convert to Super Smart Card (Game Boy)<br>
+- fixed/added -chk fix checksum (Game Boy)<br>
+- added -gg Game Genie support for SNES<br>
 - cleaned up the usage output<br>
-- added -chk fix checksum for Super Nintendo/Super Famicom<br>
+- added -chk fix checksum for Super NES/Super Famicom<br>
 - removed most CDROM based consoles from usage since uCON64 could support
   them only by showing some informations about the CDROM itself (option -cdrom)<br>
 - added -gd3 convert to Professor SF(2) Game Doctor SF3/6/7 (autojoin)<br>
@@ -71,7 +71,7 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
   that I had to make more changes in the source starting from ucon64.c<br>
 - Gilligan wrote a nice routine to read out NeoGeo Pocket roms (added)<br>
 - reorganized the whole source<br>
-- added Gameboy Advance support<br>
+- added Game Boy Advance support<br>
 - added (GBA) -n change ROM name; $FILE=NEWNAME<br>
 - added (GBA) -logo restore ROM logo character data 0x04-0x9F<br>
 - added (GBA) -chk fix ROM checksum<br>
@@ -95,18 +95,18 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - added (GBA) -xfal send/receive to/from Flash Advance Linker; $FILE=PORT<br>
 <p>
 <a name="196">1.9.6</a><br>
-- this release brings you full support for the Super Wildcard<br>
+- this release brings you full support for the Super Wild Card<br>
 - added (SNES) -xswc send/receive to/from Super Wild Card*/(all)SWC; $FILE=PORT (by dbjh)<br>
 - added (SNES) -xswcs send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT (by dbjh)<br>
-- added (GameBoy) -sgb convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX
+- added (Game Boy) -sgb convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX
   (by NoisyB)<br>
-- added (GameBoy) -gbx convert from Super Backup Card/GX/GBX to
+- added (Game Boy) -gbx convert from Super Backup Card/GX/GBX to
   GB Xchanger/GB/GBC (by NoisyB)<br>
 - made a few small bug fixes and code cleanups (by NoisyB; thanks to dbjh)<br>
 - DOS port of uCON64 available (by dbjh)<br>
 - BeOS port of uCON64 available (by dbjh)<br>
 - added wildcard support to -find find string in ROM (by NoisyB)<br>
-- added (SNES) some new ntsc/pal and slowrom fix codes (by NoisyB)<br>
+- added (SNES) some new NTSC/PAL and SlowROM fix codes (by NoisyB)<br>
 - added (SNES) -swcs convert Snes9x *.srm to Super Wild Card*/(all)SWC (by NoisyB)<br>
 <p>
 <a name="197">1.9.7</a><br>
@@ -115,7 +115,7 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - added (GBA) -xfalc&#60;n&#62; specify chip size in mbits of ROM in Flash
   Advance Linker when receiving (by dbjh)<br>
 - added (GBA) -xfalm use SPP mode, default is EPP (by dbjh)<br>
-- added (NEOGEO) -bios convert NeoCd Bios to work with NeoCD emulator (by
+- added (NeoGeo) -bios convert NeoCD Bios to work with NeoCD emulator (by
   NoisyB; thanks to Caz)<br>
 - changed the whole internal ROM database code (by NoisyB)<br>
 - added -dbs search ROM database (all entries) by CRC32; $ROM=0xCRC32 (by NoisyB)<br>
@@ -137,7 +137,7 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
   give it a Atari2600 ROM and it will just recognize it :) (by NoisyB)<br>
 - updated the internal DB; it can recognize now 12387 different ROMs (by NoisyB)<br>
 - updated (SNES) fixed -s (split ROM) (by dbjh)<br>
-- updated (GENESIS) fixed -s (by NoisyB)<br>
+- updated (Genesis) fixed -s (by NoisyB)<br>
 - updated (all) fixed -swc & -ins (and others) for files with a size a
   multiple of 32kB (by dbjh)<br>
 - updated (SNES) fixed -swc when ROM file has a name that already has the
@@ -155,13 +155,13 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
   (by dbjh)<br>
 - added (SNES) -dint convert ROM to non-interleaved format (by dbjh)<br>
 - added 2830 new ROMs to internal ROM database (by NoisyB)<br>
-- added (GENESIS) -xsmd send/receive ROM to/from Super Magicom Drive/SMD; $FILE=PORT (by NoisyB)<br>
-- added (GENESIS) -xsmds send/receive SRAM to/from Super Magicom Drive/SMD;
+- added (Genesis) -xsmd send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT (by NoisyB)<br>
+- added (Genesis) -xsmds send/receive SRAM to/from Super Magic Drive/SMD;
   $FILE=PORT (by NoisyB)<br>
 - added support for CD based consoles again; uCON64 uses now cdrdao as burn
   engine (by NoisyB)<br>
 - added Dreamcast, PSX (one), PS2, Real3DO, CD-i, CD32 and Saturn support (by NoisyB)<br>
-- added (GENESIS) -smds convert emulator (*.srm) SRAM to Super Magic Drive/SMD (by NoisyB)<br>
+- added (Genesis) -smds convert emulator (*.srm) SRAM to Super Magic Drive/SMD (by NoisyB)<br>
 - added -r2i convert RAW to ISO9660; $ROM=RAW_IMAGE (by NoisyB)<br>
 <p>
 <a name="198">1.9.8</a><br>
@@ -234,7 +234,7 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - updated (SNES) fixed SNES info for Dai Kaiju Monogatari 2 (J) (by dbjh)<br>
 - updated (SNES) improved SNES chip type info (by dbjh)<br>
 - added gzip support (by dbjh)<br>
-- updated (GENESIS) fixed several bugs (header is correct after -j/-s, correct behaviour
+- updated (Genesis) fixed several bugs (header is correct after -j/-s, correct behaviour
   if switch -nbak is active, -smd/-mgd if already in SMD/MGD format, -lsv) (by dbjh)<br>
 - added --padn=N pad ROM to N Bytes (put Bytes with value 0x00 after end) (by dbjh)<br>
 <!-- beta4 -->
@@ -251,7 +251,7 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - updated (SNES) -smc now writes a correct SMC header (by dbjh)<br>
 - added (SNES) -ctrl{2} specify type of controller in port 1/2 for emu when
   converting (by dbjh)<br>
-- updated (GENESIS) replaced Charles MacDonald's SMD code with our own (by dbjh)<br>
+- updated (Genesis) replaced Charles MacDonald's SMD code with our own (by dbjh)<br>
 - added experimental (PSX/N64) --xdex send/receive BLOCK N to/from DexDrive (by NoisyB)<br>
 - added 664 new ROMs to the internal database (by NoisyB)<br>
 - updated (SNES) replaced Cowering's BS detection code with John Weidman's (by dbjh)<br>
@@ -259,7 +259,7 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - updated (all) fixed two bugs in IPS creation code (by dbjh)<br>
 - updated (all) -mki now generates RLE compressed IPS files (by dbjh)<br>
 - updated (SNES) fixed split file detection for SWC and FIG dumps (by dbjh)<br>
-- updated (GENESIS) fixed -s for RAW images (by dbjh)<br>
+- updated (Genesis) fixed -s for RAW images (by dbjh)<br>
 - updated (SNES) added crack for Donkey Kong Country, Diddy's Kong Quest &
   Mega Man X (by dbjh; many thanks to CL of NSRT)<br>
 - updated (SNES) fixed bug in Game Genie code (by dbjh)<br>

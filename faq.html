@@ -52,7 +52,7 @@ Q21: <a href="#21">uCON64 exits with the message "Flash cart erase failed!" when
 <br>
 Q22: <a href="#22">Where can I get that loader or "game pack" file?</a><br>
 <br>
-Q23: <a href="#23">What is the meaning of the -col option (Super Nintendo)?</a><br>
+Q23: <a href="#23">What is the meaning of the -col option (SNES)?</a><br>
 <br>
 Q24: <a href="#24">Why does uCON64 create ucon64.cfg (DOS executable) or .ucon64rc (Win32 executable)
    files all over the place under DOS and Windows&nbsp;9x (command.com)?</a><br>
@@ -367,12 +367,12 @@ Q34: <a href="#34">Will uCON64 once support the XBox?</a><br>
    It's in a file with a name like <a href="http://www.visoly.com/download/preboot32.zip">preboot32.zip</a>.<br>
 <br>
 <p>
-<a name="23"><b>Q23</b>: What is the meaning of the -col option (Super Nintendo)?</a><br>
+<a name="23"><b>Q23</b>: What is the meaning of the -col option (SNES)?</a><br>
 <b>A</b>: Back in the days stupid people released games with green blood.
    You can use a GFX or HTML editor to find an identical green color and
    write down the color values in HTML style (#RRGGBB). Now you run
    "ucon64 -col #RRGGBB" and it will calculate the hex value for the corresponding
-   Super Nintendo color. Ok? No? Then you don't need this option :-)<br>
+   SNES color. Ok? No? Then you don't need this option :-)<br>
 <br>
 <p>
 <a name="24"><b>Q24</b>: Why does uCON64 create ucon64.cfg (DOS executable) or
@@ -391,7 +391,7 @@ Q34: <a href="#34">Will uCON64 once support the XBox?</a><br>
    create one there. If you don't like this behaviour you should set one of the
    mentioned environment variables yourself. You can do that by adding the
    following line to the end of the file c:\autoexec.bat:<br>
-   set HOME=c:\ucon64<br>
+   &nbsp;&nbsp; set HOME=c:\ucon64<br>
    and reboot. You can also type that line on the command line. The directory
    c:\ucon64 must exist, of course. If you want uCON64 to use another directory
    you should change c:\ucon64 to a directory of your choice. Note that you
@@ -427,7 +427,7 @@ Q34: <a href="#34">Will uCON64 once support the XBox?</a><br>
    for the backslash ('\'). For example:<br>
    &nbsp;&nbsp; ucon64 -help|more<br>
    To get only help on the options for a specific console, specify the console on the
-   command line. For example, to see only the help on GameBoy Advance options:<br>
+   command line. For example, to see only the help on Game Boy Advance options:<br>
    &nbsp;&nbsp; ucon64 -help -gba|more<br>
    Press the space bar to see the next help screen, the enter key to see the next line
    or q to quit.<br>
@@ -504,6 +504,8 @@ Q34: <a href="#34">Will uCON64 once support the XBox?</a><br>
    Say ANSI.SYS is located in the directory c:\windows\command, then the line
    would have to look like this:<br>
    &nbsp;&nbsp; device=c:\windows\command\ansi.sys<br>
+   Note that changes made to config.sys under DOS and Windows&nbsp;9x will
+   become active only after a reboot.<br>
    Under Windows&nbsp;XP/NT you should add a similar line to your
    %SystemRoot%\system32\CONFIG.NT:<br>
    &nbsp;&nbsp; device=%SystemRoot%\system32\ansi.sys<br>

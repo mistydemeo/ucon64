@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.17 2002-11-07 09:36:35 dbjh Exp $
+ * $Id: gg.c,v 1.18 2002-11-11 01:22:39 dbjh Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -916,12 +916,10 @@ usage (void)
   puts ("uggconv v1.0 - Universal Game Genie (tm) Convertor");
   puts ("Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>");
   puts ("\nUsage:");
-  puts
-    ("GameBoy/Gear: uggconv -g [XXX-XXX] [XXX-XXX-XXX] [AAAA:VV] [AAAA:VV:CC] ...");
-  puts ("Megadrive:    uggconv -m [XXXX-XXXX] [AAAAAA:VVVV] ...");
-  puts
-    ("NES:          uggconv -n [XXXXXX] [XXXXXXXX] [AAAA:VV] [AAAA:VV:CC] ...");
-  puts ("SNES:         uggconv -s [XXXX-XXXX] [AAAAAA:VV] ...");
+  puts ("Game Boy/Gear: uggconv -g [XXX-XXX] [XXX-XXX-XXX] [AAAA:VV] [AAAA:VV:CC] ...");
+  puts ("Megadrive:     uggconv -m [XXXX-XXXX] [AAAAAA:VVVV] ...");
+  puts ("NES:           uggconv -n [XXXXXX] [XXXXXXXX] [AAAA:VV] [AAAA:VV:CC] ...");
+  puts ("SNES:          uggconv -s [XXXX-XXXX] [AAAAAA:VV] ...");
   exit (1);
 }
 #endif
@@ -1028,7 +1026,7 @@ gg_display (st_rominfo_t *rominfo, const char *code)
     default:
       fprintf (stderr,
            "ERROR: You must specify a ROM or force the console type\n"
-           "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n");
+           "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n");
       return -1;
     }
   gg_argv[2] = code;

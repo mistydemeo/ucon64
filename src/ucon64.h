@@ -67,7 +67,7 @@ typedef struct st_ucon64
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
   int buheader_len;                            // length of backup unit header 0 == no bu hdr
   int split;                                    // rom is split
-  int snes_hirom;                               // Super Nintendo ROM is HiROM
+  int snes_hirom;                               // SNES ROM is HiROM
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
   int controller;                               // NES UNIF & SNES NSRT
   int controller2;                              // SNES NSRT
@@ -95,7 +95,7 @@ typedef struct st_rominfo
   const char **copier_usage;                    // backup unit usage
 
   int interleaved;                              // ROM is interleaved (swapped)
-  int snes_hirom;                               // Super Nintendo ROM is HiROM
+  int snes_hirom;                               // SNES ROM is HiROM
   int data_size;                                // ROM data size without "red tape"
   int file_size;                                // (uncompressed) ROM file size
 
@@ -115,7 +115,7 @@ typedef struct st_rominfo
   unsigned int current_crc32;                   // current crc32 value of ROM
   unsigned int db_crc32;                        // crc32 value of ROM in internal database
 
-  int has_internal_crc;                         // ROM has internal CRC (SNES, Mega Drive, Gameboy)
+  int has_internal_crc;                         // ROM has internal CRC (SNES, Mega Drive, Game Boy)
   unsigned int current_internal_crc;            // calculated CRC
 
   unsigned int internal_crc;                    // internal CRC

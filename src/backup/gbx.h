@@ -1,5 +1,5 @@
 /*
-gbx.h - GameBoy Xchanger support for uCON64
+gbx.h - Game Boy Xchanger support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh

@@ -1,5 +1,5 @@
 /*
-mccl.c - Mad Catz Camera Link (GameBoy Camera) support for uCON64
+mccl.c - Mad Catz Camera Link (Game Boy Camera) support for uCON64
 
 written by 2002 NoisyB (noisyb@gmx.net)
 
@@ -19,9 +19,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
-This cable is made by Mad Catz, Inc. and has a Gameboy link connector on one end and a parallel port connector on the other. It is designed to interface with the Gameboy Camera cart and comes
-with included software for this. It works by simulating the Gameboy Printer with a PIC chip inside the parallel connector shell. It doesn't do a particularly good job at that so it pretty much only
-works with the Gameboy Camera. 
+This cable is made by Mad Catz, Inc. and has a Game Boy link connector on one
+end and a parallel port connector on the other. It is designed to interface
+with the Game Boy Camera cart and comes with included software for this. It
+works by simulating the Game Boy Printer with a PIC chip inside the parallel
+connector shell. It doesn't do a particularly good job at that so it pretty
+much only works with the Game Boy Camera.
 
 Mad Catz Camera Link Communications Protocol
 
@@ -37,7 +40,7 @@ Reset Procedure:
 4. If read data != 4, then go to step 1.
 5. (Useless read of control port?)
 6. Output 0x22 to control (tristate data and set control to 0010)
-7. Wait for bit 5 of status port to become 0 
+7. Wait for bit 5 of status port to become 0
 8. Output 0x26 to control (tristate data and set control to 0110)
 
 Data Read Procedure:
@@ -45,17 +48,15 @@ Data Read Procedure:
 2. Wait for bit 5 of status port to become 1
 3. Read lower 4 bits of data port, store to lower 4 bits of received byte
 4. (Useless read of control port?)
-5. Output 0x22 to control (tristate data and set control to 0010) 
+5. Output 0x22 to control (tristate data and set control to 0010)
 6. Wait for bit 5 of status port to become 0
 7. Output 0x26 to control (tristate data and set control to 0110)
 8. Wait for bit 5 of status port to become 1
 9. Read lower 4 bits of data port, store to upper 4 bits of received byte
 10. (Useless read of control port?)
-11. Output 0x22 to control (tristate data and set control to 0010) 
+11. Output 0x22 to control (tristate data and set control to 0010)
 12. Wait for bit 5 of status port to become 0
 13. Go to step 1
-
-
 */
 #include <stdio.h>
 #include "config.h"
@@ -64,7 +65,7 @@ Data Read Procedure:
 #include "ucon64_misc.h"
 
 const char *mccl_usage[] = {
-  "Mad Catz Camera Link (GameBoy Camera)",
+  "Mad Catz Camera Link (Game Boy Camera)",
   "XXXX Mad Catz Inc. http://www.madcatz.com",
   "TEST: " OPTION_LONG_S "xmccl   send/receive BYTES to/from Mad Catz Camera Link; " OPTION_LONG_S "file=PORT\n"
   "                  currently only receiving is supported\n",

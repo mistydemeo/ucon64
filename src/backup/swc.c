@@ -37,7 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const char *swc_usage[] =
   {
-    "Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC",
+    "Super Wild Card 1.6XC/Super Wild Card 2.8CC/Super Wild Card DX(2)/SWC",
     "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw",
 #ifdef BACKUP
     "  " OPTION_LONG_S "xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "file=PORT\n"

@@ -1,5 +1,5 @@
 /*
-gbx.c - Gameboy Xchanger/GBDoctor support for uCON64
+gbx.c - Game Boy Xchanger/GBDoctor support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh
@@ -32,7 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "gbx.h"
 const char *gbx_usage[] =
   {
-    "GameBoy Xchanger/GBDoctor",
+    "Game Boy Xchanger/GBDoctor",
     "19XX Bung Enterprises Ltd http://www.bung.com.hk",
 #ifdef BACKUP
     "  " OPTION_LONG_S "xgbx        send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "file=PORT\n"
@@ -1677,23 +1677,25 @@ check_card (void)
     0xbb, 0xbb, 0x67, 0x63, 0x6e, 0x0e, 0xec, 0xcc,
     0xdd, 0xdc, 0x99, 0x9f, 0xbb, 0xb9, 0x33, 0x3e
   };
-/*	char *rominfo_size_define[] = {
-		"256kBit = 32kB = 2 banks",
-		"512kBit = 64kB = 4 banks",
-		"1MBit = 128kB = 8 banks",
-		"2MBit = 256kB = 16 banks",
-		"4MBit = 512kB = 32 banks",
-		"8MBit = 1MB = 64 banks",
-		"16MBit = 2MB = 128 banks",
-		"32MBit = 4MB = 256 banks",
-		"64MBit = 8MB = 512 banks"
-	};
-	char *ram_size_define[] = {
-		"None",
-		"16kBit = 2kB = 1 bank",
-		"64kBit = 8kB = 1 bank",
-		"256kBit = 32kB = 4 banks"
-	};*/
+/*
+  char *rominfo_size_define[] = {
+    "256kBit = 32kB = 2 banks",
+    "512kBit = 64kB = 4 banks",
+    "1MBit = 128kB = 8 banks",
+    "2MBit = 256kB = 16 banks",
+    "4MBit = 512kB = 32 banks",
+    "8MBit = 1MB = 64 banks",
+    "16MBit = 2MB = 128 banks",
+    "32MBit = 4MB = 256 banks",
+    "64MBit = 8MB = 512 banks"
+  };
+  char *ram_size_define[] = {
+    "None",
+    "16kBit = 2kB = 1 bank",
+    "64kBit = 8kB = 1 bank",
+    "256kBit = 32kB = 4 banks"
+  };
+*/
   char game_name[17];
 
   printf ("checking rom information...\n");

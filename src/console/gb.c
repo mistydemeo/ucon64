@@ -1,5 +1,5 @@
 /*
-gb.c - GameBoy support for uCON64
+gb.c - Game Boy support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh
@@ -45,7 +45,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const char *gameboy_usage[] =
   {
-    "GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance)",
+    "Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)",
     "1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com",
     "  " OPTION_LONG_S "gb          force recognition\n"
 #if 0
@@ -194,7 +194,7 @@ gameboy_n2gb (st_rominfo_t *rominfo)
   unsigned char buf[EMULATOR_LEN];
 
 #if 0
-  printf("FC emulator for GameBoy\n");
+  printf("FC emulator for Game Boy\n");
 #endif
 
   if (q_fsize (ucon64.rom) != EMULATOR_LEN)
@@ -520,7 +520,7 @@ gameboy_init (st_rominfo_t *rominfo)
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL},
-      *gameboy_romtype[0x100] = {
+  *gameboy_romtype[0x100] = {
     "ROM only",
     "ROM and MBC1",
     "ROM, MBC1 and RAM",
@@ -593,8 +593,7 @@ gameboy_init (st_rominfo_t *rominfo)
 
   q_fread (&gameboy_header, GAMEBOY_HEADER_START +
     rominfo->buheader_len, GAMEBOY_HEADER_LEN, ucon64.rom);
-  if (OFFSET (gameboy_header, 0) == 0x00 &&
-      OFFSET (gameboy_header, 1) == 0xc3)
+  if (OFFSET (gameboy_header, 0) == 0x00 && OFFSET (gameboy_header, 1) == 0xc3)
     result = 0;
   else
     {
@@ -603,8 +602,7 @@ gameboy_init (st_rominfo_t *rominfo)
 
       q_fread (&gameboy_header, GAMEBOY_HEADER_START +
         rominfo->buheader_len, GAMEBOY_HEADER_LEN, ucon64.rom);
-      if (OFFSET (gameboy_header, 0) == 0x00 &&
-          OFFSET (gameboy_header, 1) == 0xc3)
+      if (OFFSET (gameboy_header, 0) == 0x00 && OFFSET (gameboy_header, 1) == 0xc3)
         result = 0;
       else
         result = -1;
@@ -645,7 +643,7 @@ gameboy_init (st_rominfo_t *rominfo)
   sprintf (buf, "Version: 1.%d\n", OFFSET (gameboy_header, 0x4c));
   strcat (rominfo->misc, buf);
 
-  sprintf (buf, "GameBoy Type: %s\n",
+  sprintf (buf, "Game Boy Type: %s\n",
     (OFFSET (gameboy_header, 0x43) == 0x80) ? "Color" :
 //    (OFFSET (gameboy_header, 0x46) == 0x3) ? "Super" :
     "Standard (4 Colors)");

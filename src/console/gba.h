@@ -1,5 +1,5 @@
 /*
-gba.h - GameBoy Advance support for uCON64
+gba.h - Game Boy Advance support for uCON64
 
 written by 2001 NoisyB (noisyb@gmx.net)
 

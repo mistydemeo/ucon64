@@ -850,7 +850,7 @@ pcengine_check (unsigned char *buf, unsigned int len)
 int
 pcengine_init (st_rominfo_t *rominfo)
 {
-  int result = -1, size, swapped;
+  int result = -1, size, swapped, x;
   unsigned char *rom_buffer;
   st_pce_data_t *info, key;
 
@@ -879,8 +879,9 @@ pcengine_init (st_rominfo_t *rominfo)
     Japanese game is running on an American console. If they are present then
     it is in the first 500 (or so) bytes.
   */
-  if (mem_search (rom_buffer, 32768, "\x94\x02\x0f", 3) ||
-      mem_search (rom_buffer, 32768, "\x94\x02\x01", 3))
+  x = size > 32768 ? 32768 : size;
+  if (mem_search (rom_buffer, x, "\x94\x02\x0f", 3) ||
+      mem_search (rom_buffer, x, "\x94\x02\x01", 3))
     swapped = 1;
   if (UCON64_ISSET (ucon64.interleaved))
     swapped = ucon64.interleaved;

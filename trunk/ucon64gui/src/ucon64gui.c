@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include "config.h"
 #include "ucon64gui.h"
-#include "html2gui/src/html2gui.h"
+#include "html2gui/html2gui.h"
 #include "misc.h"
 #include "url.h"
 

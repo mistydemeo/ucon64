@@ -42,7 +42,6 @@ distclean: clean
 
 ucon64gui: $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
-	cp ucon64gui ../bin
 
 install:
 #	./install.sh

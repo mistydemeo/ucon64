@@ -28,7 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <errno.h>
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
-#include <limits.h>                             // opendir2()
 #include <sys/stat.h>
 
 #ifdef  __unix__
@@ -50,13 +49,16 @@ typedef struct termios tty_t;
 #include "config.h"                             // ZLIB
 #include "misc.h"
 
-#ifdef  ANSI_COLOR
-#ifdef  DJGPP
-#include <dpmi.h>                               // needed for __dpmi_int() by ansi_init()
-#endif
+#ifdef  ZLIB
+#include <zlib.h>
+#include "unzip.h"
 #endif
 
-#ifdef NETWORK
+#if     defined ANSI_COLOR && defined DJGPP
+#include <dpmi.h>                               // needed for __dpmi_int() by ansi_init()
+#endif
+
+#ifdef  NETWORK
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/socket.h>
@@ -246,40 +248,6 @@ ansi_strip (char *str)
 #endif // ANSI_COLOR
 
 
-#if 0
-#if	 defined(HPUX) || defined(sun) && defined(__svr4__)
-/* setenv is missing on solaris and HPUX */
-void
-setenv(const char *name, const char *val, int _xx)
-{
-  int len  = strlen (name) + strlen (val) + 2;
-  char *env = malloc (len);
-
-  if (env != NULL)
-    {
-      strcpy (env, name);
-      strcat (env, "=");
-      strcat (env, val);
-      putenv (env);
-    }
-}
-#endif
-#endif
-
-
-int
-areprint (const char *str, int size)
-// like isprint() but for strings
-{
-  while (size > 0)
-    {
-      if (!isprint ((int) str[--size]))
-        return FALSE;//0
-    }
-  return TRUE;//1
-}
-
-
 char *
 mkprint (char *str, const unsigned char replacement)
 {
@@ -288,17 +256,17 @@ mkprint (char *str, const unsigned char replacement)
   for (; *p; p++)
     switch (*p)
       {
-        case '\n':
+      case '\n':
+        break;
+
+      case '\x1b':                              // escape
+        if (misc_ansi_color)
           break;
 
-        case '\x1b':                          // escape
-          if (misc_ansi_color)
-            break;
-
-        default:
-          if (iscntrl (*p))
-            *p = replacement;
-          break;
+      default:
+        if (iscntrl ((int) *p))
+          *p = replacement;
+        break;
       }
 
   return str;
@@ -314,15 +282,15 @@ mkfile (char *str, const unsigned char replacement)
   for (; *p && pos < FILENAME_MAX; p++, pos++)
     switch (*p)
       {
-        case '.':
-        case '-':
-        case ' ':
-          break;
+      case '.':
+      case '-':
+      case ' ':
+        break;
 
-        default:
-          if (!isalnum (*p))
-            *p = replacement;
-          break;
+      default:
+        if (!isalnum ((int) *p))
+          *p = replacement;
+        break;
       }
 
   *p = 0;
@@ -332,13 +300,24 @@ mkfile (char *str, const unsigned char replacement)
 
 
 int
+areprint (const char *str, int size)
+// like isprint() but for strings
+{
+  while (size > 0)
+    if (!isprint ((int) str[--size]))
+      return FALSE;
+
+  return TRUE;
+}
+
+
+int
 areupper (const char *str)
 // searches the string for ANY lowercase char
 {
-  const char *p = str;
-
-  for (; *p; p++)
-    if (islower (*p)) return FALSE;
+  for (; *str; str++)
+    if (islower ((int) *str))
+      return FALSE;
 
   return TRUE;
 }
@@ -368,38 +347,20 @@ strlwr (char *str)
 }
 
 
-#if 1
 char *
 setext (char *filename, const char *ext)
 {
-  char ext2[FILENAME_MAX], *p = basename2 (filename);
-  
+  char ext2[FILENAME_MAX],
+       *p = basename2 (filename) ? basename2 (filename) : filename;
+
   if ((p = strrchr (p, '.')))
-    if (p > basename2 (filename)) // some files start with a '.'
-      *p = 0;
+    *p = 0;
 
   strcpy (ext2, ext);
   strcat (filename, areupper (basename2 (filename)) ? strupr (ext2) : strlwr (ext2));
 
   return filename;
 }
-#else
-char *
-setext (char *filename, const char *ext)
-{
-  char ext2[FILENAME_MAX];
-  int pos = ((strchr (&filename[1], FILE_SEPARATOR) == NULL) ||
-         (strrcspn (filename, ".") > (strrcspn (filename, FILE_SEPARATOR_S) + 1 ))) ?
-    strrcspn (filename, ".") : strlen (filename);
-
-  filename[pos] = 0;
-
-  strcpy (ext2, ext);
-  strcat (filename, areupper (basename2 (filename)) ? strupr (ext2) : strlwr (ext2));
-
-  return filename;
-}
-#endif
 
 
 const char *
@@ -421,7 +382,8 @@ strtrim (char *str)
 {
   int x = strlen (str);
 
-  while (x && isspace (str[--x]));
+  while (x && isspace ((int) str[--x]))
+    ;
 
   str[++x] = 0;
 
@@ -448,6 +410,71 @@ memwcmp (const void *add, const void *add_with_wildcards, size_t n, int wildcard
 }
 
 
+#if 0
+unsigned short int
+bswap_16 (unsigned short int x)
+{
+  unsigned char *ptr = (unsigned char *) &x, tmp;
+  tmp = ptr[0];
+  ptr[0] = ptr[1];
+  ptr[1] = tmp;
+  return x;
+}
+
+
+unsigned int
+bswap_32 (unsigned int x)
+{
+  unsigned char *ptr = (unsigned char *) &x, tmp;
+  tmp = ptr[0];
+  ptr[0] = ptr[3];
+  ptr[3] = tmp;
+  tmp = ptr[1];
+  ptr[1] = ptr[2];
+  ptr[2] = tmp;
+  return x;
+}
+
+
+unsigned long long int
+bswap_64 (unsigned long long int x)
+{
+  unsigned char *ptr = (unsigned char *) &x, tmp;
+  tmp = ptr[0];
+  ptr[0] = ptr[7];
+  ptr[7] = tmp;
+  tmp = ptr[1];
+  ptr[1] = ptr[6];
+  ptr[6] = tmp;
+  tmp = ptr[2];
+  ptr[2] = ptr[5];
+  ptr[5] = tmp;
+  tmp = ptr[3];
+  ptr[3] = ptr[4];
+  ptr[4] = tmp;
+  return x;
+}
+#endif
+
+
+#if 0
+void *
+mem_swap (void *add, size_t bit, size_t n)
+{
+  size_t pos = 0;
+  size_t increment = bit / 8;
+  unsigned char *a = add, c;
+
+  for (; pos + 1 < n; pos += 2)
+    {
+      c = a[pos];
+      a[pos] = a[pos + 1];
+      a[pos + 1] = c;
+    }
+
+  return add;
+}
+#else
 void *
 mem_swap (void *add, size_t n)
 {
@@ -463,25 +490,31 @@ mem_swap (void *add, size_t n)
 
   return add;
 }
+#endif
 
 
 void
 mem_hexdump (const void *mem, size_t n, long virtual_start)
+//hexdump something
 {
-  size_t x;
+  size_t pos;
   char buf[MAXBUFSIZE];
-  const unsigned char *a = mem;
+  const unsigned char *p = mem;
 
   buf [0] = 0;
-  for (x = 0; x < n; x++)
+  for (pos = 0; pos < n; pos++, p++)
     {
-      if (!(x % 16))
-        printf ("%s%s%08lx  ", x ? buf : "",
-                               x ? "\n" : "",
-                               x + virtual_start);
-      printf ("%02x %s", ((char) a[x]) & 0xff,
-                         !((x + 1) % 4) ? " ": "");
-      sprintf (&buf[x % 16], "%c", isprint ((int) a[x]) ? a[x] : '.');
+      if (!(pos % 16))
+        printf ("%s%s%08lx  ", pos ? buf : "",
+                               pos ? "\n" : "",
+                               pos + virtual_start);
+      printf ("%02x %s", *p, !((pos + 1) % 4) ? " ": "");
+#if 1
+      sprintf (buf + (pos % 16), "%c", isprint (*p) ? *p : '.');
+#else
+      *(buf + (pos % 16)) = isprint (*p) ? *p : '.';
+      *(buf + (pos % 16) + 1) = 0;
+#endif      
     }
   printf ("%s\n", buf);
 }
@@ -507,7 +540,7 @@ renlwr (const char *dir)
     {
       if (!stat (ep->d_name, &fstate))
         {
-//              if(S_ISREG(fstate.st_mode)==1)
+//              if (S_ISREG (fstate.st_mode))
           {
             strcpy (buf, ep->d_name);
             rename (ep->d_name, strlwr (buf));
@@ -521,16 +554,11 @@ renlwr (const char *dir)
 
 char *
 basename2 (const char *str)
-//GNU basename() clone
+// GNU basename() clone
 {
-  char *p;
+  char *p = strrchr (str, FILE_SEPARATOR);
 
-  if (!(p = strrchr (str, FILE_SEPARATOR)))
-    p = (char *)str;                                // strip path if it is a filename
-  else
-    p++;
-
-  return p;
+  return p ? p + 1 : (char *) str;
 }
 
 
@@ -863,10 +891,10 @@ set_property (const char *filename, const char *propname, const char *value)
   char buf[MAXBUFSIZE], *buf2;
   FILE *fh;
   struct stat fstate;
-  
+
   if (stat (filename, &fstate) != 0)
     file_size = fstate.st_size;
-        
+
   if (!(buf2 = (char *) malloc ((file_size + MAXBUFSIZE) * sizeof (char))))
     {
       errno = ENOMEM;
@@ -885,7 +913,7 @@ set_property (const char *filename, const char *propname, const char *value)
               if (value == NULL)
                 continue;
 
-                sprintf (buf, "%s=%s\n", propname, value);
+              sprintf (buf, "%s=%s\n", propname, value);
             }
           strcat (buf2, buf);
         }
@@ -898,107 +926,16 @@ set_property (const char *filename, const char *propname, const char *value)
         strcat (buf2, buf);
       }
 
-  if ((fh = fopen (filename, "wb")) == NULL) return -1;
-                      
+  if ((fh = fopen (filename, "wb")) == NULL)
+    return -1;
+
   result = fwrite (buf2, 1, strlen (buf2), fh);
-  fclose (fh); 
+  fclose (fh);
 
 //  q_fwrite (buf2, 0, strlen (buf2), filename, "wb");
 
   return result;
 }
-
-
-#if 0
-int
-system2 (FILE *output, const char *cmdline, int wait)
-{
-  int result = -1;
-  FILE *fh;
-  char buf[MAXBUFSIZE];
-
-  if (output == stdout)
-    return system (cmdline)
-#ifndef __MSDOS__
-      >> 8                                      // the exit code is coded in bits 8-15
-#endif                                          //  (that is, under non-DOS)
-/*
-  // under WinDOS, system() immediately returns with exit code 0 when starting
-  //  a Windows executable (as if a fork() happened) it also returns 0 when the
-  //  exe could not be started
-*/
-    ;
-  if (!(fh = popen (cmdline, "r"))) 
-    return -1;
-
-  while (fgets (buf, MAXBUFSIZE, fh) != NULL)
-    if (output)
-      fprintf (output, buf);
-
-  result = pclose (fh);
-  if (output)
-    fsync (fileno (output));
-
-  return result;
-}
-//#else
-int
-system2 (FILE *output, const char *cmdline, int wait)
-{
-  static int pid = 0;
-  int result = -1, argc = 0;
-  FILE *fh;
-  char buf[MAXBUFSIZE];
-  char *argv[ARGS_MAX];
-
-  if (!cmdline) return -1;
-//  if (cmdline[0]) return -1;
-
-  if (!wait)
-    {
-      strcpy (buf, cmdline);
-      while ((argv[argc] = strtok (!argc?buf:NULL, " ")) && argc < (ARGS_MAX - 1)) argc++;
-
-      if (pid) kill (pid, SIGTERM);
-  
-      pid = fork ();
-    
-      if (pid == -1) return -1;
-
-      if (!pid) // child
-        {
-           execvp (*argv, argv);
-           exit (0);
-        }
-      return 0;
-    }
-          
-  if (output == stdout)
-    return system (cmdline)
-#ifndef __MSDOS__
-      >> 8                                      // the exit code is coded in bits 8-15
-#endif                                          //  (that is, under non-DOS)
-/*
-  // under WinDOS, system() immediately returns with exit code 0 when starting
-  //  a Windows executable (as if a fork() happened) it also returns 0 when the
-  //  exe could not be started
-*/
-    ;
-
-  if (!(fh = popen (cmdline, "r"))) 
-    return -1;
-
-  while (fgets (buf, MAXBUFSIZE, fh) != NULL)
-    if (output)
-      fprintf (output, buf);
-
-  result = pclose (fh);
-  if (output)
-    fsync (fileno (output));
-
-  return result;
-}
-#endif
 
 
 int
@@ -1041,99 +978,15 @@ tmpnam2 (char *temp)
 // tmpnam() clone
 {
   char *p = getenv2 ("TEMP");
+//  srand (0x10000000);
 
   temp[0] = 0;
   while (!temp[0] || !access (temp, F_OK)) // must work for files AND dirs
-    sprintf (temp, "%s%s%08x.tmp", p, FILE_SEPARATOR_S, RANDOM (0x10000000, 0xffffffff));
+    sprintf (temp, "%s%s%08x.tmp", p, FILE_SEPARATOR_S, rand() % 0xffffffff);
 
   return temp;
 }
 
-
-typedef struct
-{
-  DIR *dir;
-  char temp[FILENAME_MAX]; //  if temp == NULL then archive_or_dir was in fact a dir
-} DIR2;
-
-static DIR2 misc_dir2[FOPEN_MAX];
-
-
-DIR *
-opendir2 (char *archive_or_dir, const char *config_file, const char *property_format, const char *filename)
-{
-  int pos = 0, result = 0;
-  struct stat fstate;
-//  char temp[FILENAME_MAX];
-  char *temp, property_name[MAXBUFSIZE], buf[MAXBUFSIZE], buf2[MAXBUFSIZE],
-       cwd[FILENAME_MAX];
-
-  if (stat (archive_or_dir, &fstate) == -1)
-    return NULL;
-
-  if (S_ISDIR (fstate.st_mode))
-    return opendir (archive_or_dir);
-
-  for (pos = 0; pos < FOPEN_MAX; pos++)
-    if (!misc_dir2[pos].dir)
-      break;
-  if (misc_dir2[pos].dir)
-    return NULL; // FOPEN_MAX has been reached
-
-  sprintf (property_name, (property_format ? property_format : "%s_extract"), &getext (archive_or_dir)[1]);
-  sprintf (buf, NULL_TO_EMPTY (get_property (config_file, strlwr (property_name), buf2, NULL)), archive_or_dir);
-
-  if (!buf[0])
-    return NULL;
-
-  if (filename)
-    {
-      strcat (buf, " ");
-      strcat (buf, filename);
-    }
-
-  temp = archive_or_dir;
-
-  tmpnam2 (temp);
-  if (mkdir (temp, S_IRUSR|S_IWUSR) == -1)
-    return NULL;
-
-  getcwd (cwd, FILENAME_MAX);
-  chdir (temp);
-
-  result = system (buf)
-#ifndef __MSDOS__
-      >> 8                                      // the exit code is coded in bits 8-15
-#endif                                          //  (that is, under non-DOS)
-    ;
-  sync ();
-
-  chdir (cwd);
-
-  misc_dir2[pos].dir = opendir (temp);
-  strcpy (misc_dir2[pos].temp, temp);
-
-  return misc_dir2[pos].dir;
-}
-
-
-int closedir2 (DIR *dir)
-{
-  int pos;
-
-  for (pos = 0; pos < FOPEN_MAX; pos++)
-    if (misc_dir2[pos].dir == dir)
-      {
-        if (misc_dir2[pos].temp[0])
-          rmdir2 (misc_dir2[pos].temp);
-
-        misc_dir2[pos].dir = NULL;
-        misc_dir2[pos].temp[0] = 0;
-        break;
-      }
-
-  return closedir (dir);
-}
 
 
 #if     defined __unix__ || defined __BEOS__
@@ -1429,7 +1282,7 @@ map_dump (st_map_t *map)
 */
 st_map_t *fh_map = NULL;                        // associative array: file handle -> file mode
 
-typedef enum { FM_NORMAL, FM_ZLIB, FM_UNDEF } fmode2_t;
+typedef enum { FM_NORMAL, FM_GZIP, FM_ZIP, FM_UNDEF } fmode2_t;
 
 typedef struct st_finfo
 {
@@ -1437,10 +1290,12 @@ typedef struct st_finfo
   int compressed;
 } st_finfo_t;
 
-static st_finfo_t finfo_list[4] = { {FM_NORMAL, 0},
+static st_finfo_t finfo_list[6] = { {FM_NORMAL, 0},
                                     {FM_NORMAL, 1},     // should never be used
-                                    {FM_ZLIB, 0},
-                                    {FM_ZLIB, 1} };
+                                    {FM_GZIP, 0},
+                                    {FM_GZIP, 1},
+                                    {FM_ZIP, 0},        // should never be used
+                                    {FM_ZIP, 1} };
 
 
 static st_finfo_t *
@@ -1472,7 +1327,7 @@ fopen2 (const char *filename, const char *mode)
   int n, len = strlen (mode), read = 0, compressed = 0;
   fmode2_t fmode = FM_UNDEF;
   st_finfo_t *finfo;
-  FILE *file;
+  FILE *file = NULL;
 
 //  printf ("opening %s", filename);
   if (fh_map == NULL)
@@ -1489,6 +1344,7 @@ fopen2 (const char *filename, const char *mode)
       {
       case 'r':
         read = 1;
+        break;
       case 'f':
       case 'h':
       case '1':
@@ -1500,7 +1356,7 @@ fopen2 (const char *filename, const char *mode)
       case '7':
       case '8':
       case '9':
-        fmode = FM_ZLIB;
+        fmode = FM_GZIP;
         break;
       case 'w':
       case 'a':
@@ -1513,14 +1369,11 @@ fopen2 (const char *filename, const char *mode)
       }
     }
 
-  if (fmode == FM_UNDEF)
-    return NULL;
-
   if (read)
     {
 #undef  fread
 #undef  fclose
-      unsigned char magic[3] = { 0 };
+      unsigned char magic[4] = { 0 };
       FILE *fh;
 
       // TODO: check if mode is valid for fopen(), i.e., no 'f', 'h' or number
@@ -1528,12 +1381,21 @@ fopen2 (const char *filename, const char *mode)
         {
           fread (magic, sizeof (magic), 1, fh);
           if (magic[0] == 0x1f && magic[1] == 0x8b && magic[2] == 0x08)
-            compressed = 1;     // ID1, ID2 and CM. gzip uses Compression Method 8
+            {                           // ID1, ID2 and CM. gzip uses Compression Method 8
+              fmode = FM_GZIP;
+              compressed = 1;
+            }
+          else if (magic[0] == 'P' && magic[1] == 'K' &&
+                   magic[2] == 0x03 && magic[3] == 0x04)
+            {
+              fmode = FM_ZIP;
+              compressed = 1;
+            }
           else
             /*
               Files that are opened with mode "r+" will probably be written to.
               zlib doesn't support mode "r+", so we have to use FM_NORMAL.
-              Mode "r" doesn't require FM_NORMAL and FM_ZLIB works, but we
+              Mode "r" doesn't require FM_NORMAL and FM_GZIP works, but we
               shouldn't introduce needless overhead.
             */
             fmode = FM_NORMAL;
@@ -1545,8 +1407,17 @@ fopen2 (const char *filename, const char *mode)
 
   if (fmode == FM_NORMAL)
     file = fopen (filename, mode);
-  else
+  else if (fmode == FM_GZIP)
     file = gzopen (filename, mode);
+  else if (fmode == FM_ZIP)
+    {
+      file = unzOpen (filename);
+      if (file != NULL)
+        {
+          unzGoToFirstFile (file);
+          unzOpenCurrentFile (file);
+        }
+    }
 
   if (file == NULL)
     return NULL;
@@ -1557,7 +1428,8 @@ fopen2 (const char *filename, const char *mode)
 /*
   printf (", ptr = %p, mode = %s, fmode = %s\n", file, mode,
     fmode == FM_NORMAL ? "FM_NORMAL" :
-      (fmode == FM_ZLIB ? "FM_ZLIB" : "FM_UNDEF"));
+      (fmode == FM_GZIP ? "FM_GZIP" :
+        (fmode == FM_ZIP ? "FM_ZIP" : "FM_UNDEF")));
   map_dump (fh_map);
 */
   return file;
@@ -1574,11 +1446,37 @@ fclose2 (FILE *file)
   map_del (fh_map, file);
   if (fmode == FM_NORMAL)
     return fclose (file);
-  else if (fmode == FM_ZLIB)
+  else if (fmode == FM_GZIP)
     return gzclose (file);
+  else if (fmode == FM_ZIP)
+    {
+      unzCloseCurrentFile (file);
+      return unzClose (file);
+    }
   else
     return EOF;
 #define fclose  fclose2
+}
+
+
+static void
+unzip_seek_helper (FILE *file, int offset)
+{
+  char buffer[MAXBUFSIZE];
+  int n, pos = unztell (file);                  // returns ftell() of the "current file"
+
+  if (pos == offset)
+    return;
+  else if (pos > offset)
+    {
+      unzCloseCurrentFile (file);
+      unzGoToFirstFile (file);
+      unzOpenCurrentFile (file);
+      pos = 0;
+    }
+  n = offset - pos;
+  while (n > 0 && !unzeof (file))
+    n -= unzReadCurrentFile (file, buffer, n > MAXBUFSIZE ? MAXBUFSIZE : n);
 }
 
 
@@ -1591,11 +1489,13 @@ fseek2 (FILE *file, long offset, int mode)
 /*
 //  if (fmode != FM_NORMAL)
   printf ("fmode = %s\n", finfo->fmode == FM_NORMAL ? "FM_NORMAL" :
-                            (finfo->fmode == FM_ZLIB ? "FM_ZLIB" : "FM_UNDEF"));
+                            (finfo->fmode == FM_GZIP ? "FM_GZIP" :
+                              (finfo->fmode == FM_ZIP ? "FM_ZIP" : "FM_UNDEF")));
 */
+
   if (finfo->fmode == FM_NORMAL)
     return fseek (file, offset, mode);
-  else
+  else if (finfo->fmode == FM_GZIP)
     {
       /*
         FUCKING zlib documentation! It took me around 4 hours of debugging time
@@ -1610,6 +1510,30 @@ fseek2 (FILE *file, long offset, int mode)
       gzseek (file, offset, mode);
       return gzeof (file);
     }
+  else if (finfo->fmode == FM_ZIP)
+    {
+      int base;
+      if (mode != SEEK_SET && mode != SEEK_CUR && mode != SEEK_END)
+        {
+          errno = EINVAL;
+          return -1;
+        }
+      if (mode == SEEK_SET)
+        base = 0;
+      else if (mode == SEEK_CUR)
+        base = unztell (file);
+      else // mode == SEEK_END
+        {
+          unz_file_info info;
+
+          unzGoToFirstFile (file);
+          unzGetCurrentFileInfo (file, &info, NULL, 0, NULL, 0, NULL, 0);
+          base = info.uncompressed_size;
+        }
+      unzip_seek_helper (file, base + offset);
+      return unzeof (file);
+    }
+  return -1;
 #define fseek   fseek2
 }
 
@@ -1622,8 +1546,17 @@ fread2 (void *buffer, size_t size, size_t number, FILE *file)
 
   if (fmode == FM_NORMAL)
     return fread (buffer, size, number, file);
-  else
-    return gzread (file, buffer, number * size);
+  else if (fmode == FM_GZIP)
+    {
+      int n = gzread (file, buffer, number * size);
+      return n / size;
+    }
+  else if (fmode == FM_ZIP)
+    {
+      int n = unzReadCurrentFile (file, buffer, number * size);
+      return n / size;
+    }
+  return 0;
 #define fread   fread2
 }
 
@@ -1636,8 +1569,16 @@ fgetc2 (FILE *file)
 
   if (fmode == FM_NORMAL)
     return fgetc (file);
-  else
+  else if (fmode == FM_GZIP)
     return gzgetc (file);
+  else if (fmode == FM_ZIP)
+    {
+      char c;
+      int retval = unzReadCurrentFile (file, &c, 1);
+      return retval <= 0 ? EOF : c & 0xff;      // avoid sign bit extension
+    }
+  else
+    return EOF;
 #define fgetc   fgetc2
 }
 
@@ -1650,8 +1591,28 @@ fgets2 (char *buffer, int maxlength, FILE *file)
 
   if (fmode == FM_NORMAL)
     return fgets (buffer, maxlength, file);
-  else if (fmode == FM_ZLIB)
-    return gzgets (file, buffer, maxlength);
+  else if (fmode == FM_GZIP)
+    {
+      char *retval = gzgets (file, buffer, maxlength);
+      return retval == Z_NULL ? NULL : retval;
+    }
+  else if (fmode == FM_ZIP)
+    {
+      int n = 0, c = 0;
+      while (n < maxlength - 1 && (c = fgetc (file)) != EOF)
+        {
+          buffer[n] = c;                        // '\n' should also be stored in buffer
+          n++;
+          if (c == '\n')
+            {
+              buffer[n] = 0;
+              break;
+            }
+        }
+      if (n >= maxlength - 1 || c == EOF)
+        buffer[n] = 0;
+      return n > 0 ? buffer : NULL;
+    }
   else
     return NULL;
 #define fgets   fgets2
@@ -1666,8 +1627,12 @@ feof2 (FILE *file)
 
   if (fmode == FM_NORMAL)
     return feof (file);
-  else
+  else if (fmode == FM_GZIP)
     return gzeof (file);
+  else if (fmode == FM_ZIP)
+    return unzeof (file);                       // returns feof() of the "current file"
+  else
+    return -1;
 #define feof    feof2
 }
 
@@ -1680,8 +1645,13 @@ fwrite2 (const void *buffer, size_t size, size_t number, FILE *file)
 
   if (fmode == FM_NORMAL)
     return fwrite (buffer, size, number, file);
+  else if (fmode == FM_GZIP)
+    {
+      int n = gzwrite (file, (void *) buffer, number * size);
+      return n / size;
+    }
   else
-    return gzwrite (file, (void *) buffer, number * size);
+    return 0;                                   // writing to zip files is not supported
 #define fwrite  fwrite2
 }
 
@@ -1694,8 +1664,10 @@ fputc2 (int character, FILE *file)
 
   if (fmode == FM_NORMAL)
     return fputc (character, file);
-  else
+  else if (fmode == FM_GZIP)
     return gzputc (file, character);
+  else
+    return EOF;                                 // writing to zip files is not supported
 #define fputc   fputc2
 }
 #endif // ZLIB

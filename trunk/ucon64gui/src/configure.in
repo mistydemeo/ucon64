@@ -23,3 +23,6 @@ dnl Checks for library functions.
 AC_CHECK_FUNCS(getcwd mkdir rmdir socket strcspn strspn strstr strtol)
 
 AC_OUTPUT(Makefile config.h)
+
+echo
+echo NOTE: On non-Linux systems you might need to use gmake instead of make

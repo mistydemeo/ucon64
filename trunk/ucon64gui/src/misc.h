@@ -63,10 +63,6 @@ extern int fputc2 (int character, FILE *file);
 
 #endif
 
-#define getenv getenv2
-#define stricmp strcasecmp
-#define strnicmp strncasecmp
-
 #ifndef FALSE
 #define FALSE 0
 #endif
@@ -93,7 +89,7 @@ extern int fputc2 (int character, FILE *file);
 
 #define NULL_TO_EMPTY(str) ((str) ? (str) : "")
 
-#define RANDOM(min, max) ((rand () % max) + min)
+//#define RANDOM(min, max) ((rand () % max) + min)
 
 #define OFFSET(a, offset) ((((unsigned char *)&(a))+(offset))[0])
 
@@ -150,12 +146,6 @@ extern int fputc2 (int character, FILE *file);
 #define OPTION_S " -"
 #define OPTION_LONG_S "--"
 
-typedef struct st_func_node
-{
-  void (*func) (void);
-  struct st_func_node *next;
-} st_func_node_t;
-
 
 #if     (defined __unix__ || defined __BEOS__)
 #ifndef __MSDOS__
@@ -165,7 +155,6 @@ extern int kbhit (void);                        // may only be used after init_c
 #include <conio.h>                              // getch()
 #include <pc.h>                                 // kbhit()
 #endif
-
 // Should we leave these prototypes visible to the DOS code? The advantage 
 //  would be a few less #ifdef's
 extern void init_conio (void);
@@ -174,30 +163,16 @@ extern void deinit_conio (void);
 
 
 /*
-  Byteswapping
-
-  bswap_16() swap 16 bit integer
-  bswap_32() swap 32 bit integer
-  bswap_64() swap 64 bit integer
-*/
-extern unsigned short int bswap_16 (unsigned short int x);
-extern unsigned int bswap_32 (unsigned int x);
-extern unsigned long long int bswap_64 (unsigned long long int x);
-
-
-/*
   File extension handling
 
   setext() set/replace extension of filename with ext
   getext() get extension of filename
     extension means in this case the extension INCLUDING the dot '.'
-
   basename2() GNU basename() clone
 */
 extern char *setext (char *filename, const char *ext);
 extern const char *getext (const char *filename);
 #define EXTCMP(filename, ext) (strcasecmp (getext (filename), ext))
-
 extern char *basename2 (const char *str);
 
 
@@ -206,24 +181,21 @@ extern char *basename2 (const char *str);
 
   areprint() like isprint() but for a whole string
   areupper() like isupper() but for a whole string
-
   strupr()   convert string to upper-case
   strlwr()   convert string to lower-case
-
   mkprint()  convert all chars to isprint()'s
   mkfile()   convert string into a correct file name
-
   strtrim()  trim isspace()'s from start and end of string
 */
 extern int areupper (const char *str);
 extern int areprint (const char *str, int size);
-
 extern char *strupr (char *str);
 extern char *strlwr (char *str);
-
 extern char *strtrim (char *str);
 extern char *mkprint (char *str, const unsigned char replacement);
 extern char *mkfile (char *str, const unsigned char replacement);
+#define stricmp strcasecmp
+#define strnicmp strncasecmp
 
 
 /*
@@ -236,13 +208,22 @@ extern char *mkfile (char *str, const unsigned char replacement);
   mem_crc32()  calculate the crc32 of buffer for size bytes
 */
 extern int memwcmp (const void *add, const void *add_with_wildcards, size_t n, int wildcard);
-extern void *mem_swap (void *add, size_t n);
 extern void mem_hexdump (const void *add, size_t n, long virtual_start);
 extern unsigned short mem_crc16 (unsigned int size, unsigned short crc16, const void *buffer);
 #ifdef  ZLIB
 #define mem_crc32(SIZE, CRC, BUF)       crc32(CRC, BUF, SIZE)
 #else
 extern unsigned int mem_crc32 (unsigned int size, unsigned int crc32, const void *buffer);
+#endif
+extern void *mem_swap (void *add, size_t n);
+#if 0
+#define bswap_16(x) ((unsigned short int)mem_swap(x,2,2))
+#define bswap_32(x) ((unsigned int)mem_swap(x,4,4))
+#define bswap_64(x) ((unsigned long long int)mem_swap(x,8,8))
+#else
+extern unsigned short int bswap_16 (unsigned short int x);
+extern unsigned int bswap_32 (unsigned int x);
+extern unsigned long long int bswap_64 (unsigned long long int x);
 #endif
 
 
@@ -251,7 +232,7 @@ extern unsigned int mem_crc32 (unsigned int size, unsigned int crc32, const void
 
   change_string() see header of implementation for usage
   ansi_init ()    initalize ansi output
-  ansi_strip ()   strip ansi codes from a non-const string
+  ansi_strip ()   strip ansi codes from a string
   gauge()         init_time == time when gauge() was first started or when
                   the transfer did start
                   pos == current position
@@ -260,20 +241,11 @@ extern unsigned int mem_crc32 (unsigned int size, unsigned int crc32, const void
                   informative things like time, status bar, cps, etc.
                   it can be used for procedures which take some time to
                   inform the user about the actual progress
-  getenv2()       getenv() clone suitable for enviroments w/o HOME, TMP or
-                  TEMP variables
-  opendir2()      opendir() wrapper, additionally extracts archives (zip, lha, etc...)
-                  into a temp_dir and returnes DIR pointer of temp_dir
-                  returns NULL if the archive could'nt be extracted or archive
-                  type not supported
-  closedir2()     closedir() wrapper, recursively deletes temp_dir which was
-                  created by opendir2()
+  getenv2()       getenv() clone for enviroments w/o HOME, TMP or TEMP variables
   rmdir2()        like rmdir but removes non-empty directories recursively
+  tmpnam2()       replacement for tmpnam() temp must have the size of FILENAME_MAX
   renlwr()        rename all files in dir to lowercase
-  system2()       system (or popen) wrapper, FILE *output could be stderr or
-                  stdout or a filepointer
   drop_privileges() switch to the real user and group id (leave "root mode")
-  tmpnam2()       replacement for buggy tmpnam() temp must have the size of FILENAME_MAX
   register_func() atexit() replacement
                   returns -1 if it fails, 0 if it was successful
   unregister_func() unregisters a previously registered function
@@ -289,15 +261,18 @@ extern char *ansi_strip (char *str);
 #endif
 extern int gauge (time_t init_time, int pos, int size);
 extern char *getenv2 (const char *variable);
+#define getenv getenv2
 extern char *tmpnam2 (char *temp);
-extern DIR *opendir2 (char *archive_or_dir, const char *config_file, const char *property_format, const char *filename);
-extern int closedir2 (DIR *p);
 extern int rmdir2 (const char *path);
 extern int renlwr (const char *dir);
-//extern int system2 (FILE *output, const char *cmdline, int wait);
 #if     defined __unix__ && !defined __MSDOS__
 extern int drop_privileges (void);
 #endif
+typedef struct st_func_node
+{
+  void (*func) (void);
+  struct st_func_node *next;
+} st_func_node_t;
 extern int register_func (void (*func) (void));
 extern int unregister_func (void (*func) (void));
 extern void handle_registered_funcs (void);

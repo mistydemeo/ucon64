@@ -353,8 +353,7 @@ cips (char *name, char *option2)
 int
 ips_usage (int argc, char *argv[])
 {
-  printf ("  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE\n\
-  -mki		create IPS patch; $FILE=CHANGED_ROM\n\
-");
+  printf ("  -i            apply IPS patch (<=1.2); $FILE=PATCHFILE\n"
+           "  -mki          create IPS patch; $FILE=CHANGED_ROM\n");
   return 0;
 }

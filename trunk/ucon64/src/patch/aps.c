@@ -724,10 +724,9 @@ n64caps_main (int argc, char *argv[])
 int
 aps_usage (int argc, char *argv[])
 {
-  printf ("\
-  -a		apply APS patch (<=1.2); $FILE=PATCHFILE\n\
-  -mka		create APS patch; $FILE=CHANGED_ROM\n\
-  -na		change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION\n\
-");
+  printf ("  -a            apply APS patch (<=1.2); $FILE=PATCHFILE\n"
+"  -mka          create APS patch; $FILE=CHANGED_ROM\n"
+"  -na           change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION\n"
+);
   return 0;
 }

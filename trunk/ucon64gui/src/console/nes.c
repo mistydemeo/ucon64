@@ -25,7 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64gui.h"
 #include "top.h"
 #include "bottom.h"
-#include "configmenu/configmenu.h"
+#include "configmenu.h"
 
 void
 nes_gui (void)

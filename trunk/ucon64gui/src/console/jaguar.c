@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "html2gui.h"
 #include "top.h"
 #include "bottom.h"
-#include "configmenu/configmenu.h"
+#include "configmenu.h"
 #include "jaguar.h"
 
 void

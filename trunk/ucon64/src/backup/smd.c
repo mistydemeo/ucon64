@@ -48,7 +48,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <time.h>
 #include "config.h"                             // config.h might define BACKUP
-#ifdef BACKUP
 #ifdef  __unix__
 #include <unistd.h>                             // usleep(), microseconds
 #elif   defined __MSDOS__
@@ -65,7 +64,7 @@ const char *smd_usage[] =
   {
     "Super Com Pro (HK)/Super Magic Drive/SMD",
     "19XX Front Far East/FFE http://www.front.com.tw",
-#ifdef BACKUP 
+#ifdef BACKUP
     "  " OPTION_LONG_S "xsmd        send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when ROM does not exist\n"
     "  " OPTION_LONG_S "xsmds       send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "file=PORT\n"
@@ -81,12 +80,14 @@ typedef unsigned short int uint16;
 typedef unsigned long int uint32;
 #endif
 
+#ifdef BACKUP
+
 static uint16 lpt;
 static uint8 block[0x4000];
 #if 0
 static char *opts[] =
   { "-bc", "-lc", "-bs", "-ls", "-ci", "-db", "-rc", NULL };
-#endif 
+#endif
 
 /* from loader.asm */
 static unsigned char loader[0x100] = {

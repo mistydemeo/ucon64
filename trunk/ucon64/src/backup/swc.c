@@ -99,6 +99,15 @@ receive_rom_info (unsigned char *buffer)
   address = 0x200;
   for (n = 0; n < SWC_HEADER_LEN; n++)
     {
+#ifdef  _WIN32
+      /*
+        Talk about strange. Somehow this loop takes unusually long (like 1
+        minute) if no Windows function is called. As a side effect (?) an
+        incorrect size value will be obtained, resulting in an overdump. For
+        example calling kbhit() or printf() solves the problem...
+      */
+      kbhit ();
+#endif
       for (m = 0; m < 65536; m++)               // a delay is necessary here
         ;
       ffe_send_command (5, address, 0);

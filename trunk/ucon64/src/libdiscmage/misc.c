@@ -1845,6 +1845,17 @@ wait2 (int nmillis)
   usleep (nmillis * 1000);
 #elif   defined __BEOS__
   snooze (nmillis * 1000);
+#elif   defined _WIN32
+  Sleep (nmillis);
+#else
+#ifdef  __GNUC__
+#warning Please provide a wait2() implementation
+#else
+#pragma message ("Please provide a wait2() implementation")
+#endif
+  int n;
+  for (n = 0; n < nmillis * 65536; n++)
+    ;
 #endif
 }
 
@@ -2066,7 +2077,7 @@ truncate (const char *path, off_t size)
   retval = SetEndOfFile (file);                 // returns nonzero on success
   CloseHandle (file);
 
-  return retval ? 0 : -1;                       // truncate returns zero on success
+  return retval ? 0 : -1;                       // truncate() returns zero on success
 }
 
 

@@ -217,10 +217,10 @@ if(argcmp(argc,argv,"-ls"))
 {
 //TODO change and optimize
 
-if(access( (((ucon64_rom())[0]!=0)?(ucon64_rom()):".") ,R_OK)==-1 ||
-(dp=opendir( (((ucon64_rom())[0]!=0)?(ucon64_rom()):".") ))==NULL)return(-1);
+if(access( ucon64_rom() ,R_OK)==-1 ||
+(dp=opendir( ucon64_rom() ))==NULL)return(-1);
 
-chdir( (((ucon64_rom())[0]!=0)?(ucon64_rom()):".") );
+chdir( ucon64_rom() );
 
 while((ep=readdir(dp))!=0)
 {
@@ -372,7 +372,7 @@ if(argcmp(argc,argv,"-ppf"))
 
 if(argcmp(argc,argv,"-mki"))
 {
-//	cips_main(ucon64_rom(),ucon64_file());
+	cips(ucon64_rom(),ucon64_file());
 /*
 	ucon64_argv[0]=ucon64_name();
 	ucon64_argv[1]=ucon64_file();
@@ -500,7 +500,13 @@ if(console==ucon64_UNKNOWN)
 
 if(argcmp(argc,argv,"-e"))
 {
-	sprintf(buf,"%s/.ucon64rc",getenv("HOME"));
+#ifdef __UNIX__
+	#define CONFIGFILE ".ucon64rc"
+#else
+	#define CONFIGFILE "ucon64.cfg"
+#endif
+
+	sprintf(buf,"%s%c%s",getenv("HOME"),FILE_SEPARATOR,CONFIGFILE);
 
 	if( console!=ucon64_UNKNOWN && console!=ucon64_KNOWN )
 	{

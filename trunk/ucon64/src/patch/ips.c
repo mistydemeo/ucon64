@@ -216,8 +216,7 @@ if(!(fp=fopen(name,"rb")))
 	}
 
 	strcpy(buf,name);
-	buf[findlast(buf,".")+1]=0;
-	strcat(buf,findlwr(buf)?"ips":"IPS");
+	newext(buf,".IPS");
 	
 	if(!(fp3 = fopen (buf,"wb")))
 	{

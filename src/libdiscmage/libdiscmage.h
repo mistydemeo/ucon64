@@ -123,6 +123,7 @@ typedef struct
 
 /*
   dm_get_version()  returns version of libdiscmage as uint32_t
+  dm_get_version_s() returns version of libdiscmage as string
   dm_open()      this is the first function to call with the filename of the
                    image; it will try to recognize the image format, etc.
   dm_reopen()    like dm_open() but can reuse an existing dm_image_t
@@ -148,6 +149,7 @@ TODO: dm_write()     write single sector to track (in image)
                    by those scripts in contrib/
 */
 extern uint32_t dm_get_version (void);
+extern const char *dm_get_version_s (void);
 extern void dm_set_gauge (void (*gauge) (int, int));
 
 #define DM_RDONLY (1)

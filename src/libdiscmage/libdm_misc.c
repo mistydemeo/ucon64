@@ -808,6 +808,13 @@ dm_get_version (void)
 }
 
 
+const char *
+dm_get_version_s (void)
+{
+  return "0.0.5";
+}
+
+
 void
 dm_set_gauge (void (* gauge) (int, int))
 {

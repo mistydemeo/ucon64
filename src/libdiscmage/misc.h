@@ -96,7 +96,6 @@ typedef signed __int64 int64_t;
 #ifndef MAX
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #endif
-#define SAFE_STRCPY(a,b) strncpy(a,b,sizeof(a)-1);a[sizeof(a)-1]=0;
 #define LIB_VERSION(ver, rel, seq) (((ver) << 16) | ((rel) << 8) | (seq))
 #define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
 //#define RANDOM(min, max) ((rand () % (max - min)) + min)

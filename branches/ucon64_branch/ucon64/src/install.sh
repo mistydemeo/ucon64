@@ -25,8 +25,12 @@ cp discmage.so $HOME/.ucon64
 fi
 if [ -f libnetgui/netgui.so ]; then
 cp libnetgui/netgui.so $HOME/.ucon64
+cp ucon64 /usr/local/bin/gucon64
+cp ucon64 /usr/local/bin/ucon64gui
 elif [ -f netgui.so ]; then
 cp netgui.so $HOME/.ucon64
+cp ucon64 /usr/local/bin/gucon64
+cp ucon64 /usr/local/bin/ucon64gui
 fi
 echo "Be sure to check $HOME/.ucon64rc for some options after"
 echo "you've run uCON64 once."

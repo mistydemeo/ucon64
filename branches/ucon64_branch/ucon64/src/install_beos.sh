@@ -26,8 +26,12 @@ if [ "$areply" ==  "Install" ]; then
   fi
   if [ -f libnetgui/netgui.so ]; then
     cp libnetgui/netgui.so "$HOME/.ucon64"
+    cp ucon64 "$HOME/config/bin/gucon64"
+    cp ucon64 "$HOME/config/bin/ucon64gui"
   elif [ -f netgui.so ]; then
     cp netgui.so "$HOME/.ucon64"
+    cp ucon64 "$HOME/config/bin/gucon64"
+    cp ucon64 "$HOME/config/bin/ucon64gui"
   fi
   # ask for ioport driver installation
   drreply=$(alert "In order to communicate with a backup device (\"copier\") uCON64 needs the BeOS ioport driver by Caz Jones. You needn't install it if you don't want to use uCON64 for communicating with a copier.

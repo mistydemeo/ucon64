@@ -41,11 +41,11 @@ const st_usage_t fig_usage[] =
     {NULL, NULL, "Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)"},
     {NULL, NULL, "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw"},
 #ifdef  PARALLEL
-    {"xfig", NULL, "send/receive ROM to/from *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT\n"
+    {"xfig", NULL, "send/receive ROM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
                    "receives automatically when ROM does not exist"},
-    {"xfigs", NULL, "send/receive SRAM to/from *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT\n"
+    {"xfigs", NULL, "send/receive SRAM to/from *Pro Fighter*/FIG; " OPTION_LONG_S "port=PORT\n"
                     "receives automatically when SRAM does not exist"},
-    {"xfigc", NULL, "send/receive SRAM to/from cartridge in *Pro Fighter*/(all)FIG;\n"
+    {"xfigc", NULL, "send/receive SRAM to/from cartridge in *Pro Fighter*/FIG;\n"
                     OPTION_LONG_S "port=PORT\n"
                     "receives automatically when SRAM does not exist"},
 //                    "Press q to abort; ^C might cause invalid state of backup unit"},

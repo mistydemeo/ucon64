@@ -2,8 +2,9 @@
 snes.c - Super NES support for uCON64
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
+           2001 - 2004 dbjh
            2002 - 2003 John Weidman
+                  2004 JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -89,14 +90,14 @@ const st_usage_t snes_usage[] =
     {"bs", NULL, "force ROM is a Broadcast Satellaview dump"},
     {"nbs", NULL, "force ROM is a regular cartridge dump"},
     {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
-    {"fig", NULL, "convert to *Pro Fighter*/(all)FIG"},
-    {"figs", NULL, "convert emulator *.srm (SRAM) to *Pro Fighter*/(all)FIG"},
+    {"fig", NULL, "convert to *Pro Fighter*/FIG"},
+    {"figs", NULL, "convert emulator *.srm (SRAM) to *Pro Fighter*/FIG"},
     {"gd3", NULL, "convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"},
     {"gd3s", NULL, "convert emulator *.srm (SRAM) to GD SF3(SF6/SF7)/Professor SF*"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
     {"smc", NULL, "convert to Super Magicom/SMC"},
-    {"swc", NULL, "convert to Super Wild Card*/(all)SWC"},
-    {"swcs", NULL, "convert emulator *.srm (SRAM) to Super Wild Card*/(all)SWC"},
+    {"swc", NULL, "convert to Super Wild Card*/SWC"},
+    {"swcs", NULL, "convert emulator *.srm (SRAM) to Super Wild Card*/SWC"},
     {"ufo", NULL, "convert to Super UFO"},
     {"ufos", NULL, "convert emulator *.srm (SRAM) to Super UFO"},
     {"stp", NULL, "convert SRAM from backup unit for use with an emulator\n"

@@ -350,9 +350,10 @@ genesis_mgd (st_rominfo_t *rominfo)
     }
   load_rom_into (ucon64.rom, rom_buffer);
 
-  strcpy (buf, findlwr (basename (ucon64.rom)) ? "md" : "MD");
-  strcat (buf, basename (ucon64.rom));
-  if ((p = strrchr (buf, '.'))) *p = 0;
+  strcpy (buf, areupper (basename2 (ucon64.rom)) ? "MD" : "md");
+  strcat (buf, basename2 (ucon64.rom));
+  if ((p = strrchr (buf, '.')))
+    *p = 0;
   strcat (buf, "________");
   buf[7] = '_';
   buf[8] = 0;
@@ -407,11 +408,12 @@ genesis_s (st_rominfo_t *rominfo)
 
   if (!rominfo->buheader_len)
     {
-      strcpy (buf, findlwr (basename (ucon64.rom)) ? "md" : "MD");
-      strcat (buf, basename (ucon64.rom));
-      if ((p = strrchr (buf, '.'))) *p = 0;
+      strcpy (buf, areupper (basename2 (ucon64.rom)) ? "MD" : "md");
+      strcat (buf, basename2 (ucon64.rom));
+      if ((p = strrchr (buf, '.')))
+        *p = 0;
       strcat (buf, "________");
-      buf[7] = findlwr (buf) ? 'a' : 'A';
+      buf[7] = areupper (buf) ? 'A' : 'a';
       buf[8] = 0;
 
       sprintf (buf2, "%s.%03lu", buf,

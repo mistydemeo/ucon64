@@ -28,7 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 first I want to thank SiGMA SEVEN! who was my mentor and taught me how to
 write programs in C
 */
-
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>

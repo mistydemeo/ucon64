@@ -75,7 +75,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //  6. If no Manuf ID detected then report no cart backup available.
 
 #include "fal.h"
-#include <time.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <time.h>
@@ -1665,10 +1664,15 @@ fal_read_sram (char *filename, unsigned int parport, int bank)
     }
   else
     {
+      if (bank < 1 || bank > 4)
+        {
+          fprintf (STDERR, "bank must be 1, 2, 3 or 4\n");
+          exit(1);
+        }
       bank_str[0] = '0' + bank;
-      bank_str[1] = 0;		// terminate string
+      bank_str[1] = 0;                          // terminate string
       fal_argv[4] = bank_str;
-      fal_argv[5] = "2";	// 64 kB
+      fal_argv[5] = "2";                        // 64 kB
     }
   fal_argv[6] = filename;
   fal_argc = 7;
@@ -1691,8 +1695,13 @@ fal_write_sram (char *filename, unsigned int parport, int bank)
     fal_argv[4] = "1";
   else
     {
+      if (bank < 1 || bank > 4)
+        {
+          fprintf (STDERR, "bank must be 1, 2, 3 or 4\n");
+          exit(1);
+        }
       bank_str[0] = '0' + bank;
-      bank_str[1] = 0;		// terminate string
+      bank_str[1] = 0;                          // terminate string
       fal_argv[4] = bank_str;
     }
   fal_argv[5] = filename;

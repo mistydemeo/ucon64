@@ -31,6 +31,7 @@ unsigned long CRCTable[256];
 #ifdef  __BEOS__
 static int ucon64_io_fd;
 #endif
+#endif
 
 char
 hexDigit (int value)
@@ -265,6 +266,7 @@ filetestpad (char *filename)
   return (size - x - 1 == 1) ? 0 : size - x - 1;
 }
 
+#ifdef  BACKUP
 #if     (__UNIX__ || __BEOS__)	// DJGPP (DOS) has outportX() & inportX()
 unsigned char
 inportb (unsigned short port)

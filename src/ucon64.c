@@ -615,11 +615,13 @@ ucon64_nfo (const st_rominfo_t *rominfo)
       strcpy (buf, rominfo->copier_usage[0]);
       printf ("%s\n", mkprint (buf, '.'));
 
+#if 0
       if (rominfo->copier_usage[1])
         {
           strcpy (buf, rominfo->copier_usage[1]);
           printf ("  %s\n", mkprint (buf, '.'));
         }
+#endif
       printf ("\n");
     }
 
@@ -635,11 +637,13 @@ ucon64_nfo (const st_rominfo_t *rominfo)
       strcpy (buf, rominfo->console_usage[0]);
       printf ("%s\n", mkprint (buf, '.'));
 
+#if 0
       if (rominfo->console_usage[1])
         {
           strcpy (buf, rominfo->console_usage[1]);
           printf ("  %s\n", mkprint (buf, '.'));
         }
+#endif
     }
 
   strcpy (buf, NULL_TO_EMPTY (rominfo->name));
@@ -735,11 +739,17 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 
 
 #if 1
+/*
 #define UCON64_USAGE(s) printf("%s%s%s%s%s", \
                           NULL_TO_EMPTY (s[0]), \
                           s[0]?s[1]?"\n  ":"\n":"", \
                           NULL_TO_EMPTY (s[1]), \
                           s[1]?"\n":"", \
+                          NULL_TO_EMPTY (s[2]))
+*/
+#define UCON64_USAGE(s) printf("%s%s%s", \
+                          NULL_TO_EMPTY (s[0]), \
+                          s[0]?"\n":"", \
                           NULL_TO_EMPTY (s[2]))
 #else
 void

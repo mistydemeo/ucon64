@@ -110,6 +110,7 @@ int ucon64_main(int argc,char *argv[])
   struct dirent *ep;
   struct stat puffer;
   DIR *dp;
+	struct ucon64_DB db;
   char buf[MAXBUFSIZE], buf2[4096], buf3[4096], *ucon64_argv[128], *forceargs[] =
   {
     "",
@@ -140,25 +141,45 @@ int ucon64_main(int argc,char *argv[])
   gid_t gid;
 #endif
 
-  if (argcmp(argc, argv, "-db") || argcmp(argc, argv, "-dbv"))
-  {
-    atari_main(argc,argv);
-//    gameboy_main(argc,argv);
-//    genesis_main(argc,argv);
-    jaguar_main(argc,argv);
-    lynx_main(argc,argv);
-//    nintendo64_main(argc,argv);
-    neogeo_main(argc,argv);
-    nes_main(argc,argv);
-    pcengine_main(argc,argv);
-    sms_main(argc,argv);
-//    supernintendo_main(argc,argv);
-    system16_main(argc,argv);
-
-    printf("\n");
-    return 0;
+if(argcmp(argc,argv,"-db"))
+{
+	printf(
+		"Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n"
+		,ucon64_dbsize(ucon64_UNKNOWN)
+		,ucon64_dbsize(ucon64_UNKNOWN)-ucon64_DBSIZE
+	);
+	return(0);
 }
 
+if(argcmp(argc,argv,"-dbs"))
+{
+	sscanf(ucon64_rom(), "%lx", &x);
+
+	ucon64_dbsearch(	&db
+				,ucon64_UNKNOWN
+				,x
+	);
+
+	printf("%s\n",db.name);
+	printf("%s\n",ucon64_maker(buf,db.maker));
+	printf("%s\n",ucon64_country(buf,db.country));
+	printf("%s\n\n",db.misc);
+
+	return(0);
+}
+
+/*
+if(argcmp(argc,argv,"-dbv"))
+{
+	for(x=0;x<sizeof(atari_DB)/sizeof(atari_DBSTRUCT);x++)
+	printf(
+		",{0x%08lx,ucon64_ATARI,\"%s\",0,0,\"\"}\n"
+		,atari_DB[x].chksum
+		,atari_DB[x].name
+	);
+	return(0);
+}
+*/
   if (!strlen(ucon64_rom()))
   {
     ucon64_usage(argc,argv);
@@ -717,7 +738,7 @@ printf("TODO: $ROM could also be the name of a *.ZIP archive\n"
 	"  -dbv		view ROM database (all entries)\n"
 	"  -crc		show CRC32 value of ROM\n"
 	"  -crchd	show CRC32 value of ROM (regarding to +512 Bytes header)\n"
-	"TODO:  -dbs	search ROM database (all entries) by CRC32; $ROM=CRC32\n"
+	"  -dbs		search ROM database (all entries) by CRC32; $ROM=0xCRC32\n"
 	"  -rl		rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
 	"  -ru		rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"
 	"  -hex		show ROM as hexdump; use \"ucon64 -hex $ROM|less\"\n"

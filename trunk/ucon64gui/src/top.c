@@ -107,6 +107,9 @@ ucon64gui_top (void)
 
   ucon64gui_spacer ();
 
+//  h2g_input_checkbox ("Interleaved", OPTION_LONG_S "int", 1, "(" OPTION_LONG_S "int) force ROM is interleaved (2143)");
+//  h2g_input_radio ("Interleaved", OPTION_LONG_S "int", 1, "(" OPTION_LONG_S "int) force ROM is interleaved (2143)");
+
   h2g_input_submit ("CRC32", OPTION_LONG_S "crc", "(" OPTION_LONG_S "crc) show CRC32 value of ROM");
 
   h2g_ (" ");

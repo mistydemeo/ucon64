@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_defines.h"
 
 #define UCON64GUI_HTMLTITLE "uCON64gui"
-#define UCON64GUI_FORMTARGET "file://ucon64"
+#define UCON64GUI_FORMTARGET "ucon64"
 #define UCON64GUI_VERSION "1.0.0"
 
 extern const char *ucon64gui_title;
@@ -39,22 +39,20 @@ extern const char *ucon64gui_title;
 
 typedef struct
 {
-//  char cmd[FILENAME_MAX];
-//  const char *rom;
-//  const char *file;
   char rom[FILENAME_MAX];
   char file[FILENAME_MAX];
 
   const char *console;
+//  int hd;
+  const char *hd;                       // header
+  const char *ns;                       // not splitted
+  const char *int;                      // interleaved
+  const char *snes_hirom;
+  const char *bs;                  //Broadcast Satellaview dump
 
   char ucon64_output[MAXBUFSIZE];
 
   int sub;                      //sub screen insert back button, etc.
-
-  int page;                     //current "html page"
-
-  int hd;                       // header
-  int ns;                       // not splitted
 
   char configfile[FILENAME_MAX];
 }

@@ -490,7 +490,7 @@ ucon64gui_output (char *output)
 
   h2g_html (0, 0, 0);
   h2g_head ();
-  h2g_title ("uCON64gui - Output", icon_xpm);
+  h2g_title (ucon64gui_title, icon_xpm);
   h2g_head_end ();
   h2g_body (NULL, "#c0c0c0");
 
@@ -516,7 +516,7 @@ ucon64gui_root (void)
 
   h2g_html (0, 0, 0);
   h2g_head ();
-  h2g_title ("uCON64gui", icon_xpm);
+  h2g_title (ucon64gui_title, icon_xpm);
   h2g_head_end ();
   h2g_body (NULL, "#c0c0c0");
   h2g_form (UCON64GUI_FORMTARGET);

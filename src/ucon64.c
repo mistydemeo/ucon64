@@ -70,6 +70,7 @@ write programs in C
 #include "backup/cdrw.h"
 #endif
 
+
 #ifdef	BACKUP
 #include "backup/fig.h"
 #include "backup/swc.h"
@@ -304,7 +305,7 @@ main (int argc, char *argv[])
     }
   else if (strcmp(getProperty (rom.config_file, "version", buf2, "198"), "198") != 0)
     {
-      strcpy (buf2, rom.config_file);
+/*      strcpy (buf2, rom.config_file);
 
       newext (buf2, ".OLD");
 
@@ -327,9 +328,7 @@ main (int argc, char *argv[])
       sync ();
 
       printf ("OK\n\n");
-
-//      printf("ERROR: old config file (<1.9.8) found (%s), please remove it\n", rom.config_file);
-
+*/
 //      return 0;
     }
 

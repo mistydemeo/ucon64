@@ -1065,7 +1065,6 @@ snes_gd3 (st_rominfo_t *rominfo)
           memset (srcbuf + size, 0, newsize - size);
           memset (dstbuf + size, 0, newsize - size);
         }
-	  
 
       if (snes_header_base == SNES_EROM)
         {
@@ -3112,30 +3111,36 @@ snes_init (st_rominfo_t *rominfo)
   st_unknown_header_t header;
   char buf[MAXBUFSIZE], *str;
 #define SNES_COUNTRY_MAX 0xe
-  static const char *snes_country[SNES_COUNTRY_MAX] = {
-    "Japan",
-    "U.S.A.",
-    "Europe, Oceania and Asia",                 // Australia is part of Oceania
-    "Sweden",
-    "Finland",
-    "Denmark",
-    "France",
-    "Holland",
-    "Spain",
-    "Germany, Austria and Switzerland",
-    "Italy",
-    "Hong Kong and China",
-    "Indonesia",
-    "South Korea"},
-    *snes_rom_type[3] = {
-    "ROM",                                      // NOT ROM only, ROM + other chip is possible
-    "ROM + SRAM",
-    "ROM + SRAM + Battery"},
-    *snes_bs_type[4] = {
-    "Full size + Sound link",
-    "Full size",
-    "Part size + Sound link",
-    "Part size"};
+  static const char *snes_country[SNES_COUNTRY_MAX] =
+    {
+      "Japan",
+      "U.S.A.",
+      "Europe, Oceania and Asia",               // Australia is part of Oceania
+      "Sweden",
+      "Finland",
+      "Denmark",
+      "France",
+      "Holland",
+      "Spain",
+      "Germany, Austria and Switzerland",
+      "Italy",
+      "Hong Kong and China",
+      "Indonesia",
+      "South Korea"
+    },
+    *snes_rom_type[3] =
+    {
+      "ROM",                                    // NOT ROM only, ROM + other chip is possible
+      "ROM + SRAM",
+      "ROM + SRAM + Battery"
+    },
+    *snes_bs_type[4] =
+    {
+      "Full size + Sound link",
+      "Full size",
+      "Part size + Sound link",
+      "Part size"
+    };
 
   snes_hirom_ok = 0;                            // init these vars here, for -lsv
   snes_sramsize = 0;                            // idem

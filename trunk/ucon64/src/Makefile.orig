@@ -48,6 +48,11 @@ endif
 
 else                                    # Unix, BeOS or Mac OS X (Darwin)
 
+ifeq ($(findstring openbsd,$(OSTYPE)),openbsd) # for example "openbsd3.4"
+# i386_iopl() is located in libi386.a
+LDFLAGS+=-li386
+endif
+
 ifdef USE_DISCMAGE
 ifeq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
 FULLLIBNAME_DM=$(LIBNAME_DM).dylib
@@ -60,7 +65,9 @@ ifdef DLOPEN
 
 ifneq ($(OSTYPE),beos)
 ifeq ($(findstring freebsd,$(OSTYPE)),) # false if OSTYPE contains "freebsd"
+ifeq ($(findstring openbsd,$(OSTYPE)),) # false if OSTYPE contains "openbsd"
 LDFLAGS+=-ldl
+endif
 endif
 endif
 

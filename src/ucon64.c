@@ -902,7 +902,13 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_S "p, " OPTION_LONG_S "pad    pad ROM to full Mb\n"
     "  " OPTION_LONG_S "padn=N      pad ROM to N Bytes (put Bytes with value 0x00 after end)\n"
     "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
+    "  " OPTION_LONG_S "help        display this help and exit\n"
+    "  " OPTION_LONG_S "version     output version information and exit\n"
+//    "  " OPTION_LONG_S "quiet       don't show output\n"
+    "\n"
     , argv[0], ucon64.configfile);
+
+  printf ("Patching\n");
 
   UCON64_USAGE (bsl_usage);
   UCON64_USAGE (ips_usage);
@@ -922,6 +928,9 @@ ucon64_usage (int argc, char *argv[])
 //    genesis_usage[0],
     nes_usage[0], snes_usage[0]);
 
+  printf ("\n"
+    "%s\n", cdrw_usage[0]);
+  
   printf (
     "  " OPTION_LONG_S "cd          force recognition (of CD IMAGES)\n"
     "                  this is the support for the most CD-based consoles\n");
@@ -961,9 +970,6 @@ ucon64_usage (int argc, char *argv[])
     "TODO: " OPTION_LONG_S "nero    convert DiscJuggler/CDI IMAGE for use with Nero;\n"
     "                  " OPTION_LONG_S "rom=CDI_IMAGE\n"
 #endif
-    "  " OPTION_LONG_S "help        display this help and exit\n"
-    "  " OPTION_LONG_S "version     output version information and exit\n"
-//    "  " OPTION_LONG_S "quiet       don't show output\n"
 #if 0
 #ifdef DEBUG
     "  " OPTION_LONG_S "test        run selftest (DEBUG)\n"

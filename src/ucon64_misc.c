@@ -106,7 +106,7 @@ st_ucon64_obj_t ucon64_wf[] =
     {UCON64_SNES, WF_DEFAULT},                  // WF_OBJ_SNES_DEFAULT
     {UCON64_SNES, WF_DEFAULT | WF_NO_SPLIT},    // WF_OBJ_SNES_DEFAULT_NO_SPLIT
     {UCON64_SNES, WF_NO_ROM},                   // WF_OBJ_SNES_NO_ROM
-    {UCON64_SNES, 0},                           // WF_OBJ_SNES_NULL
+    {UCON64_SNES, WF_INIT | WF_PROBE},          // WF_OBJ_SNES_INIT_PROBE
     {UCON64_SWAN, WF_SWITCH},                   // WF_OBJ_SWAN_SWITCH
 
     {UCON64_N64, WF_STOP | WF_NO_ROM},          // WF_OBJ_N64_STOP_NO_ROM
@@ -2012,7 +2012,7 @@ ucon64_rename (int mode)
       Without this statement repeating a rename action for already renamed
       files would result in a real mess. And I (dbjh) mean a *real* mess...
     */
-    if (!access (buf2, F_OK) && !strcmp(p, p2)) // a file with that name exists already?
+    if (!access (buf2, F_OK) && !strcmp (p, p2)) // a file with that name exists already?
       ucon64_file_handler (buf2, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
 
   if (!good_name)

@@ -71,7 +71,7 @@ neogeo_bios (const char *fname)
 {
   char buf[MAXBUFSIZE];
   strcpy (buf, fname);
-  setext (buf, ".NEW");
+  set_suffix (buf, ".NEW");
 
   ucon64_fbackup (NULL, buf);
   q_fcpy (fname, 0, MBIT, buf, "wb");
@@ -139,7 +139,7 @@ sam2wav (const char *filename)
     return -1;
 
   strcpy (buf, filename);
-  setext (buf, ".WAV");
+  set_suffix (buf, ".WAV");
 
   if (!(fh2 = fopen (buf, "wb")))
     return -1;

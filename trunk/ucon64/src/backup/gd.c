@@ -311,7 +311,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
   for (i = 0; i < num_units; i++)
     {
       /*
-        No extension is necessary but the name entry must be upper case and
+        No suffix is necessary but the name entry must be upper case and
         MUST be 11 characters long, padded at the end with spaces if necessary.
       */
       memset (gd3_dram_unit[i].name, ' ', 11);  // "pad" with spaces

@@ -5789,7 +5789,7 @@ nes_unif (st_rominfo_t *rominfo)
     }
 
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".UNF");
+  set_suffix (dest_name, ".UNF");
   strcpy (src_name, ucon64.rom);
   ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
@@ -6184,7 +6184,7 @@ nes_ines (st_rominfo_t *rominfo)
     return nes_j (rominfo, NULL);
 
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".NES");
+  set_suffix (dest_name, ".NES");
   strcpy (src_name, ucon64.rom);
   ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
@@ -6258,7 +6258,7 @@ nes_ffe (st_rominfo_t *rominfo)
     }
 
   strcpy (buf, ucon64.rom);
-  setext (buf, ".FFE");
+  set_suffix (buf, ".FFE");
 
   memset (&header, 0, UNKNOWN_HEADER_LEN);
   header.size_low = size / 8192;
@@ -6289,7 +6289,7 @@ nes_ineshd (st_rominfo_t *rominfo)
     }
 
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".HDR");
+  set_suffix (dest_name, ".HDR");
   ucon64_output_fname (dest_name, 0);
   ucon64_fbackup (NULL, dest_name);
   q_fcpy (ucon64.rom, rominfo->buheader_start, 16, dest_name, "wb");
@@ -6313,7 +6313,7 @@ nes_dint (st_rominfo_t *rominfo)
     }
 
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".NES");
+  set_suffix (dest_name, ".NES");
   strcpy (src_name, ucon64.rom);
   ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
@@ -6429,7 +6429,7 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
     write_file = 1;
 
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".NES");
+  set_suffix (dest_name, ".NES");
   if (write_file)
     {
       ucon64_output_fname (dest_name, 0);
@@ -6441,7 +6441,7 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
   memcpy (&ines_header.signature, INES_SIG_S, 4);
 
   strcpy (src_name, ucon64.rom);
-  setext (src_name, ".PRM");
+  set_suffix (src_name, ".PRM");
   if (access (src_name, F_OK) == 0)
     {
       parse_prm (&ines_header, src_name);
@@ -6473,14 +6473,14 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
     }
 
   strcpy (src_name, ucon64.rom);
-  setext (src_name, ".700");
+  set_suffix (src_name, ".700");
   if (access (src_name, F_OK) == 0 && q_fsize (src_name) >= 512)
     {
       ines_header.ctrl1 |= INES_TRAINER;
       nparts++;
     }
 
-  setext (src_name, ".PRG");
+  set_suffix (src_name, ".PRG");
   if (access (src_name, F_OK) != 0)             // .PRG file must exist, but
     {                                           //  not for nes_init()
       if (write_file)
@@ -6496,7 +6496,7 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
     }
   ines_header.prg_size = prg_size >> 14;
 
-  setext (src_name, ".CHR");
+  set_suffix (src_name, ".CHR");
   if (access (src_name, F_OK) == 0)
     {
       chr_size = q_fsize (src_name);
@@ -6522,21 +6522,21 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
 
   if (ines_header.ctrl1 & INES_TRAINER)
     {
-      setext (src_name, ".700");
+      set_suffix (src_name, ".700");
       q_fread (buffer, 0, 512, src_name);       // use 512 bytes at max
       bytes_read = 512;
     }
 
   if (prg_size > 0)
     {
-      setext (src_name, ".PRG");
+      set_suffix (src_name, ".PRG");
       q_fread (buffer + bytes_read, 0, prg_size, src_name);
       bytes_read += prg_size;
     }
 
   if (chr_size > 0)
     {
-      setext (src_name, ".CHR");
+      set_suffix (src_name, ".CHR");
       q_fread (buffer + bytes_read, 0, chr_size, src_name);
     }
 
@@ -6672,13 +6672,13 @@ nes_s (st_rominfo_t *rominfo)
     }
 
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".PRM");
+  set_suffix (dest_name, ".PRM");
   ucon64_output_fname (dest_name, 0);
   write_prm (&ines_header, dest_name);
 
   if (ines_header.ctrl1 & INES_TRAINER)
     {
-      setext (dest_name, ".700");
+      set_suffix (dest_name, ".700");
       // don't write backups of parts, because one name is used
       if (q_fwrite (trainer_data, 0, 512, dest_name, "wb") == -1)
         fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name); // try to continue
@@ -6688,7 +6688,7 @@ nes_s (st_rominfo_t *rominfo)
 
   if (prg_size > 0)
     {
-      setext (dest_name, ".PRG");
+      set_suffix (dest_name, ".PRG");
       // don't write backups of parts, because one name is used
       if (q_fwrite (prg_data, 0, prg_size, dest_name, "wb") == -1)
         fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name); // try to continue
@@ -6700,7 +6700,7 @@ nes_s (st_rominfo_t *rominfo)
 
   if (chr_size > 0)
     {
-      setext (dest_name, ".CHR");
+      set_suffix (dest_name, ".CHR");
       // don't write backups of parts, because one name is used
       if (q_fwrite (chr_data, 0, chr_size, dest_name, "wb") == -1)
         fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name); // try to continue
@@ -6781,7 +6781,7 @@ nes_init (st_rominfo_t *rominfo)
 
   if (type == PASOFAMI)                         // INES, UNIF, FDS and FAM are much
     {                                           //  more reliable than stricmp()s
-      str = (char *) getext (ucon64.rom);
+      str = (char *) get_suffix (ucon64.rom);
       if (!stricmp (str, ".prm") ||
           !stricmp (str, ".700") ||
           !stricmp (str, ".prg") ||
@@ -7108,7 +7108,7 @@ nes_init (st_rominfo_t *rominfo)
       rominfo->copier_usage = pasofami_usage;
       rominfo->buheader_start = 0;
       strcpy (buf, ucon64.rom);
-      setext (buf, ".PRM");
+      set_suffix (buf, ".PRM");
       if (access (buf, F_OK) == 0)
         {
           rominfo->buheader_len = q_fsize (buf);
@@ -7402,7 +7402,7 @@ nes_fds (st_rominfo_t *rominfo)
     }
 
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".FDS");
+  set_suffix (dest_name, ".FDS");
   strcpy (src_name, ucon64.rom);
   ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);

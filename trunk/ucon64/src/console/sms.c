@@ -169,7 +169,7 @@ sms_smd (st_rominfo_t *rominfo)
   header.type = 6;
 
   strcpy (buf, ucon64.rom);
-  setext (buf, ".SMD");
+  set_suffix (buf, ".SMD");
 
   ucon64_fbackup (NULL, buf);
   q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
@@ -197,7 +197,7 @@ sms_smds (st_rominfo_t *rominfo)
   header.type = 7;                              // SRAM file
 
   strcpy (buf, ucon64.rom);
-  setext (buf, ".TMP");
+  set_suffix (buf, ".TMP");
   ucon64_fbackup (NULL, ucon64.rom);
   rename (ucon64.rom, buf);
 

@@ -636,7 +636,7 @@ pcengine_smg (st_rominfo_t *rominfo)
   header.type = 2;
 
   strcpy (buf, ucon64.rom);
-  setext (buf, ".SMG");
+  set_suffix (buf, ".SMG");
 
   ucon64_fbackup (NULL, buf);
   q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");

@@ -35,13 +35,11 @@ extern "C" {
 #endif
 #endif
 
-#if     defined _WIN32 || defined WIN32
+// WIN32 stands for __WIN32, _WIN32 and WIN32
+#if     defined __WIN32 || defined _WIN32 || defined WIN32
 #ifndef WIN32
 #define WIN32
 #endif
-//#ifndef _WIN32
-//#define _WIN32
-//#endif
 #endif
 
 #include <string.h>
@@ -124,11 +122,8 @@ typedef signed long long int int64_t;
 #endif
 
 #define LIB_VERSION(ver, rel, seq) (((ver) << 16) | ((rel) << 8) | (seq))
-
 #define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
-
 //#define RANDOM(min, max) ((rand () % (max - min)) + min)
-
 #define OFFSET(a, offset) ((((unsigned char *)&(a))+(offset))[0])
 
 #ifdef WORDS_BIGENDIAN
@@ -251,9 +246,9 @@ char *cygwin_fix (char *value);
 
   strtrim()   trim isspace()'s from start and end of string
 
-  setext()    set/replace extension of filename with ext
-  getext()    get extension of filename
-    extension means in this case the extension INCLUDING the dot '.'
+  get_suffix()    get suffix of filename
+  set_suffix()    set/replace suffix of filename with suffix
+                  suffix means in this case the suffix INCLUDING the dot '.'
 
   basename()  GNU basename() clone
   realpath2() realpath() clone
@@ -279,8 +274,8 @@ extern char *strcasestr2 (const char *str, const char *search);
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
 extern char *strtrim (char *str);
-extern char *setext (char *filename, const char *ext);
-extern const char *getext (const char *filename);
+extern const char *get_suffix (const char *filename);
+extern char *set_suffix (char *filename, const char *suffix);
 //#ifndef HAVE_BASENAME
 extern char *basename2 (const char *path);
 //  the following define will override a possible XPG basename() which mods. the src

@@ -448,11 +448,11 @@ ucon64_dat_total_entries (int console)
 #ifdef  NEW_CODE
       entries += (fsize < 0 ? 0 : fsize / sizeof (st_idx_entry_t)); // TODO: handle this case gracefully
 #else
-      entries += (fsize < 0 ? 0 : fsize);        // TODO: handle this case gracefully
+      entries += (fsize < 0 ? 0 : fsize / sizeof (uint32_t)); // TODO: handle this case gracefully
 #endif
     }
 
-  return (entries / sizeof (uint32_t));
+  return entries;
 }
 
 
@@ -756,6 +756,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat)
   n = strlen (dat->fname);
   p = (char *) dat->fname + n - 4;
   if (stricmp (p, ".nes") &&                    // NES
+      stricmp (p, ".gb") &&                     // Game Boy
       stricmp (p, ".smc") &&                    // SNES
       stricmp (p, ".smd") &&                    // Genesis
       stricmp (p, ".v64"))                      // Nintendo 64

@@ -20,12 +20,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "../ucon64.h"
 
-#ifdef DJGPP
+#ifdef __DOS__
  #include <fcntl.h>
  #include <conio.h>
  #include <dos.h>
  #include <io.h>
- #define getchr getch
 #elif __linux__
  #include <signal.h>
 // #include <asm/io.h>

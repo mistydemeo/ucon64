@@ -49,15 +49,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //    void OpenPort();
 //    void ClosePort();
-  #else
-    #ifdef __linux__
-      #ifdef __GLIBC__
-        #include <sys/io.h>                     // ioperm() (glibc)
-      #endif
+  #elif __linux__
+    #ifdef __GLIBC__
+      #include <sys/io.h>                       // ioperm() (glibc)
     #endif
-    #ifndef __UNIX__
-      #include <pc.h>                           // inportb(), inportw()
-    #endif
+  #elif __DOS__
+    #include <pc.h>                             // inportb(), inportw()
   #endif
 #endif
 

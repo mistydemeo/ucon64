@@ -39,11 +39,11 @@ int main(int argc,char *argv[])
 char buf[NAME_MAX+1];
 char buf2[4096];
 struct flc_ flc;
-struct files_ *files,*file0,file_ns;
+struct file_ *file0=NULL,*file=NULL,file_ns;
 struct dirent *ep;
 struct stat puffer;
 long x = 0;
-int single_file=0;
+//int single_file=0;
 DIR *dp;
 
 
@@ -91,25 +91,25 @@ if(access(buf,F_OK)==-1)
 "#\n"
 "version=100\n"
 "#\n"
-"# LHA\n"
+"# LHA support\n"
 "#\n"
 "lha_test=lha t\n"
 "lha_extract=lha efi \n"
 "#lha_extract=lha e \n"
 "#\n"
-"# LZH\n"
+"# LZH support\n"
 "#\n"
 "lzh_test=lha t\n"
 "lzh_extract=lha efi\n"
 "#lzh_extract=lha e\n"
 "#\n"
-"# ZIP\n"
+"# ZIP support\n"
 "#\n"
 "zip_test=unzip -t\n"
 "zip_extract=unzip -xojC\n"
 "#zip_extract=unzip -xoj\n"
 "#\n"
-"# TXT/NFO/FAQ\n"
+"# TXT/NFO/FAQ support\n"
 "#\n"
 "txt_extract=txtextract\n"
 "nfo_extract=txtextract\n"
@@ -155,7 +155,6 @@ for( x = 0 ; x < argc ; x++ )flc.argv[x]=argv[x];
 
 flc.kb = (argcmp(argc,argv,"-k")) ? 1 : 0;
 flc.html = (argcmp(argc,argv,"-html")) ? 1 : 0 ;
-flc.files = 0;
 
 strcpy(flc.path,getarg(argc,argv,flc_FILE));
 #ifdef __DOS__
@@ -165,95 +164,90 @@ strcpy(flc.path,getarg(argc,argv,flc_FILE));
 #endif
 getProperty(flc.configfile,"file_id_diz",flc.config,"file_id.diz");
 
+if(flc.html)  printf("<html><head><title></title></head><body><pre><tt>");
+
+if(!flc.path[0])
+  getcwd(flc.path,(size_t)sizeof(flc.path));
+if(flc.path[strlen(flc.path)-1]==FILE_SEPARATOR && strlen(flc.path) != 1)
+  flc.path[strlen(flc.path)-1]=0;
+
+/*
+    single file handling
+*/
 if(stat(flc.path,&puffer)!=-1 &&
    S_ISREG(puffer.st_mode)==TRUE)
 {
-  single_file=1;
-  flc.sort=0;
+  file=&file_ns;
+
+  file->next=NULL;
+  file->date=puffer.st_mtime;
+  file->size=puffer.st_size;  
+  file->checked='N';
+  strcpy(file->name,flc.path);
+  flc.path[0]=0;
+
+  extract(&flc,file);
+
+  output(&flc,file);
+
+  return(0);
 }
 
-if(!single_file)
+if(!(dp=opendir(flc.path)))
 {
-  if(!flc.path[0])
-    getcwd(flc.path,(size_t)sizeof(flc.path));
-  if(flc.path[strlen(flc.path)-1]==FILE_SEPARATOR && strlen(flc.path) != 1)
-    flc.path[strlen(flc.path)-1]=0;
-
-  if(!(dp=opendir(flc.path)))
-  {
-    flc_usage(argc,argv);
-    return(-1);
-  }
+  flc_usage(argc,argv);
+  return(-1);
 }
 
-if(flc.html)  printf("<html><head><title></title></head><body><pre><tt>");
-
-if(flc.sort && !single_file)
+while((ep=readdir(dp))!=NULL)
 {
-/*
-    find out how many regular files are in the current dir
-    and malloc files * struct for them 
-*/
-
-  while((ep=readdir(dp))!=NULL)
-  {
-    stat(ep->d_name,&puffer);
-    if(S_ISREG(puffer.st_mode))flc.files++;
-  }
-
-  if(!(files=(struct files_ *)malloc((flc.files+2)*sizeof(struct files_))))
-  {
-    printf("%s: Error allocating memory\n",getarg(argc,argv,0));
-    (void)closedir(dp);
-    return(-1);
-  }
-  file0=files;
-  rewinddir(dp);
-}
-else files=&file_ns;
-
-flc.files=0;
-while( (!single_file) ?
-       ((ep=readdir(dp))!=NULL) : 1
-)
-{
-  if(!single_file)sprintf(buf,"%s/%s",flc.path,ep->d_name);
-  else strcpy(buf,flc.path);
+  sprintf(buf,"%s/%s",flc.path,ep->d_name);
 
   if(stat(buf,&puffer)==-1)continue;
   if(S_ISREG(puffer.st_mode)!=TRUE)continue;
 
-  files->pos=flc.files;
-  files->date=puffer.st_mtime;
-  files->size=puffer.st_size;  
-  files->checked='N';
-  strcpy(files->name,(!single_file) ? ep->d_name : flc.path);  
-  if(single_file)flc.path[0]=0;
-
-  extract(&flc,files);
-
-  if(!flc.sort)
+  if(file0==NULL)
   {
-    output(&flc,files);
-    if(single_file)break;
-    continue;
+    if(!(file=(struct file_ *)malloc(sizeof(struct file_))))
+    {
+      printf("%s: Error allocating memory\n",getarg(argc,argv,0));
+      (void)closedir(dp);
+      return(-1);
+    }
+
+    file0=file;
+  }
+  else
+  {
+    if(!((file->next)=(struct file_ *)malloc(sizeof(struct file_))))
+    {
+      printf("%s: Error allocating memory\n",getarg(argc,argv,0));
+      (void)closedir(dp);
+      return(-1);
+    }
+    file=file->next;
   }
 
-  flc.files++;
-  files++;
+  file->date=puffer.st_mtime;
+  file->size=puffer.st_size;  
+  file->checked='N';
+  strcpy(file->name,ep->d_name);
+  extract(&flc,file);
 }
-if(!single_file)(void)closedir(dp);
-files=file0;
 
-if(flc.sort)
+(void)closedir(dp);
+file->next=NULL;
+file=file0;
+
+if(flc.sort)sort(&flc,file);
+
+for(;;)
 {
-  sort(&flc,files);
-for( x = 0 ; x < flc.files ; x++ )
-  output(&flc,files+(files+x)->pos);
-
-  free(files);
+  output(&flc,file);
+  if(file->next==NULL)break;
+  file=file->next;
 }
-
+free(file0);
 
 if(flc.html)printf(
   "</pre></tt></body></html>\n"
@@ -261,6 +255,9 @@ if(flc.html)printf(
 
 return(0);
 }
+
+
+
 
 int flc_usage(int argc, char *argv[])
 {

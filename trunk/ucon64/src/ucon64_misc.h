@@ -127,6 +127,8 @@ int parport_gauge(	time_t init_time
 			,long size
 );
 
-int raw2iso(char *filename);	//convert RAW (2352 Bytes/Sector) images to ISO9660 (2048 Bytes/Sector) images
+int raw2iso(char *filename);	//convert MODE1_RAW, MODE2_RAW, MODE2 and MODE2_FORM_MIX to ISO9660
+
+int trackmode(long imagesize);	//tries to figure out the used track mode of the cd image
 
 #endif                                          // #ifndef UCON64_MISC_H

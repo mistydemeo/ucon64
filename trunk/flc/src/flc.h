@@ -40,7 +40,7 @@ struct flc_
   //  char argv[128][4096];
   char *argv[128];
 
-  long files;
+//  long files;
 
   int kb;
   int html;
@@ -59,9 +59,10 @@ struct flc_
 
 #define FID_LINES_MAX 20
 
-struct files_
+struct file_
 {
-  unsigned long pos;
+  struct file_ *next;
+
   char name[NAME_MAX+1];
   off_t size;
   unsigned long date;

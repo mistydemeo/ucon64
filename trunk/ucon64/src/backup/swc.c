@@ -164,8 +164,9 @@ int swc_write_sram(char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend = 0;
+  int bytesread, bytessend = 0, size;
   unsigned short address;
+  struct stat fstate;
   time_t starttime;
 
   init_io(parport);
@@ -181,7 +182,9 @@ int swc_write_sram(char *filename, unsigned int parport)
     exit(1);
   }
 
-  printf("Send: %d Bytes\n", 32*1024);
+  stat(filename, &fstate);                      // swc SRAM is 4*8KB, emu SRAM often not
+  size = fstate.st_size - HEADERSIZE;
+  printf("Send: %d Bytes\n", size);
   fseek(file, HEADERSIZE, SEEK_SET);            // skip the header
 
   send_command(5, 0, 0);
@@ -199,7 +202,7 @@ int swc_write_sram(char *filename, unsigned int parport)
     address++;
 
     bytessend += bytesread;
-    parport_gauge(starttime, bytessend, 32*1024);
+    parport_gauge(starttime, bytessend, size);
     checkabort(2);
   }
 
@@ -655,7 +658,7 @@ void checkabort(int status)
 
 void swc_unlock(unsigned int parport)
 /*
-  "unlock" the swc. However, just starting to send, then stopping with ^C,
+  "Unlock" the swc. However, just starting to send, then stopping with ^C,
   gives the same result.
 */
 {

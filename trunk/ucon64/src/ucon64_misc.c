@@ -426,14 +426,9 @@ int parport_gauge(time_t init_time, long pos, long size)
   time_t curr, left;
   char buf[2*24+1];
 
-  if ((curr = time(0) - init_time) == 0)	// if called less then 1 second ago return
-  {						//  (but print at least once)
-    if (pos < size)
-      return 0;
-    else
-      curr = 1;					// `round up' to at least 1 sec (no division
-  }						//  by zero below)
-  if (pos > size)
+  if ((curr = time(0) - init_time) == 0)
+    curr = 1;					// `round up' to at least 1 sec (no division
+  if (pos > size)                               //  by zero below)
     return -1;
 
   cps = pos/curr;				// # bytes/second

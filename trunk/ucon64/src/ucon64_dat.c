@@ -59,7 +59,7 @@ static long filepos_line = 0;
 static int warning = 0;                         // show the warning only once when indexing
 
 const st_usage_t ucon64_dat_usage[] = {
-  {NULL, NULL, "DATabase (support of DAT files)"},
+  {NULL, NULL, "DATabase (support for DAT files)"},
   {"db", NULL, "DATabase statistics"},
   {"dbv", NULL, "like " OPTION_LONG_S "db but more verbose"},
   {"dbs", "CRC32", "search ROM with CRC32 in DATabase"},
@@ -849,24 +849,18 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   */
   n = strlen (dat->fname);
   p = (char *) get_suffix (dat->fname);
-  if (stricmp (p, ".nes") &&                    // NES
-      stricmp (p, ".fds") &&                    // NES FDS
-      stricmp (p, ".gb") &&                     // Game Boy
-      stricmp (p, ".gbc") &&                    // Game Boy Color
-      stricmp (p, ".gba") &&                    // Game Boy Advance
-      stricmp (p, ".smc") &&                    // SNES
-//    stricmp (p, ".smd") &&                    // Genesis
-      stricmp (p, ".v64"))                      // Nintendo 64
-    {
-      if (stricmp (dat->name, dat->fname) != 0)
-        printf ("  Filename: %s\n", dat->fname);
-    }
-  else
-    {
-      n -= strlen (p);
-      if (strnicmp (dat->name, dat->fname, n) != 0)
-        printf ("  Filename: %s\n", dat->fname);
-    }
+  if (!(stricmp (p, ".nes") &&                  // NES
+        stricmp (p, ".fds") &&                  // NES FDS
+        stricmp (p, ".gb") &&                   // Game Boy
+        stricmp (p, ".gbc") &&                  // Game Boy Color
+        stricmp (p, ".gba") &&                  // Game Boy Advance
+        stricmp (p, ".smc") &&                  // SNES
+//      stricmp (p, ".smd") &&                  // Genesis
+        stricmp (p, ".v64")))                   // Nintendo 64
+    ((char *) dat->fname)[strlen (dat->fname) - strlen (p)] = 0;
+
+  if (stricmp (dat->name, dat->fname) != 0)
+    printf ("  Filename: %s\n", dat->fname);
 
   printf ("  %d Bytes (%.4f Mb)\n",
           dat->fsize,

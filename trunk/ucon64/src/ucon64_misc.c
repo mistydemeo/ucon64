@@ -375,18 +375,14 @@ const st_usage_t ucon64_padding_usage[] = {
 };
 
 
-const st_usage_t ucon64_patching_usage[] =
-  {
-    {NULL, NULL, "Patching"},
-    {"poke", "OFF:V", "change byte at file offset OFF to value V (both in hexadecimal)"},
-    {"patch", "PATCH", "specify the PATCH for the following options\n"
-                      "use this option or uCON64 expects the last commandline\n"
-                      "argument to be the name of the PATCH file"},
-    {NULL, NULL, NULL}
-  };
-
-// -xgd3 handles split files. Only SNES and Genesis files can be detected as
-//  being split. Split NES files (Pasofami format) are detected by nes_init().
+const st_usage_t ucon64_patching_usage[] = {
+  {NULL, NULL, "Patching"},
+  {"poke", "OFF:V", "change byte at file offset OFF to value V (both in hexadecimal)"},
+  {"patch", "PATCH", "specify the PATCH for the following options\n"
+                    "use this option or uCON64 expects the last commandline\n"
+                    "argument to be the name of the PATCH file"},
+  {NULL, NULL, NULL}
+};
 
 
 const st_ucon64_wf_t *
@@ -402,6 +398,8 @@ ucon64_get_wf (const int option)
 }
 
 
+// -xgd3 handles split files. Only SNES and Genesis files can be detected as
+//  being split. Split NES files (Pasofami format) are detected by nes_init().
 const st_ucon64_wf_t ucon64_wf[] = {
 //  {option, console, usage, flags},
 /*
@@ -500,8 +498,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_E, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
   {UCON64_FIND, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT},
   {UCON64_GG, UCON64_UNKNOWN, gg_usage,        WF_INIT|WF_PROBE},
-  {UCON64_GGD, UCON64_UNKNOWN, gg_usage,       WF_INIT|WF_PROBE},
-  {UCON64_GGE, UCON64_UNKNOWN, gg_usage,       WF_INIT|WF_PROBE},
+  {UCON64_GGD, UCON64_UNKNOWN, gg_usage,       WF_INIT|WF_PROBE|WF_NO_ROM},
+  {UCON64_GGE, UCON64_UNKNOWN, gg_usage,       WF_INIT|WF_PROBE|WF_NO_ROM},
   {UCON64_HEX, UCON64_UNKNOWN, ucon64_options_usage, 0},
   {UCON64_I, UCON64_UNKNOWN, ips_usage,        WF_STOP},
   {UCON64_IDPPF, UCON64_UNKNOWN, ppf_usage,    0},
@@ -912,13 +910,13 @@ remove_temp_file (void)
 char *
 ucon64_output_fname (char *requested_fname, int flags)
 {
-  char ext[80], fname[FILENAME_MAX];
+  char suffix[80], fname[FILENAME_MAX];
 
   // We have to make a copy, because get_suffix() returns a pointer to a
   //  location in the original string
-  strcpy (ext, get_suffix (requested_fname));
+  strcpy (suffix, get_suffix (requested_fname));
 
-  // force_requested_fname is necessary for options like -gd3. Of course that
+  // OF_FORCE_BASENAME is necessary for options like -gd3. Of course that
   //  code should handle archives and come up with unique filenames for
   //  archives with more than one file.
   if (!ucon64.fname_arch[0] || (flags & OF_FORCE_BASENAME))
@@ -940,9 +938,9 @@ ucon64_output_fname (char *requested_fname, int flags)
     files.
   */
   if (!(flags & OF_FORCE_SUFFIX) &&
-      !(stricmp (ext, ".zip") && stricmp (ext, ".gz")))
-    strcpy (ext, ".tmp");
-  set_suffix (requested_fname, ext);
+      !(stricmp (suffix, ".zip") && stricmp (suffix, ".gz")))
+    strcpy (suffix, ".tmp");
+  set_suffix (requested_fname, suffix);
 
   return requested_fname;
 }

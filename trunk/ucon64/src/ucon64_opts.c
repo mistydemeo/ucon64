@@ -423,15 +423,13 @@ ucon64_rename (int mode)
             if (strlen (p) < 5)
               if (!(stricmp (p, ".nes") &&      // NES
                     stricmp (p, ".fds") &&      // NES FDS
-//                    stricmp (p, ".smd") &&      // Genesis
+//                    stricmp (p, ".smd") &&    // Genesis
                     stricmp (p, ".gb") &&       // Game Boy
                     stricmp (p, ".gbc") &&      // Game Boy Color
                     stricmp (p, ".gba") &&      // Game Boy Advance
                     stricmp (p, ".smc") &&      // SNES
-                    stricmp (p, ".v64")))        // Nintendo 64
-                {
-                  buf[strlen (buf) - strlen (p)] = 0;
-                }
+                    stricmp (p, ".v64")))       // Nintendo 64
+                buf[strlen (buf) - strlen (p)] = 0;
         }
 
   if (!buf[0])
@@ -448,7 +446,7 @@ ucon64_rename (int mode)
 
   // WARNING: use of an "undocumented" feature of get_suffix()
   p = (char *) get_suffix (buf);
-  // Remove the suffix from ucon64.rom. Note that this isn't fool-proof.
+  // Remove the suffix from buf (ucon64.rom). Note that this isn't fool-proof.
   //  However, this is the best solution, because several DAT files contain
   //  "canonical" file names with a suffix. That is a STUPID bug.
   if (p[0] != 0)

@@ -40,7 +40,7 @@ Q15: <a href="#15">Where do I get PPF, APS or IPS patches?</a><br>
 <br>
 Q16: <a href="#16">Where do I get ROMs/Games?</a><br>
 <br>
-Q17: <a href="#17">Usage: What does $ROM and $FILE mean?</a><br>
+Q17: <a href="#17">Usage: What does --rom and --file stand for?</a><br>
 <br>
 Q18: <a href="#18">Why is my backup unit (still) not supported?</a><br>
 <br>
@@ -65,7 +65,7 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
 Q26: <a href="#26">I tried to run the Win32 executable of uCON64 but Windows gave an
    error message that cygwin1.dll could not be found.</a><br>
 <br>
-Q27: <a href="#27">How do make uCON64 display one help screen at a time?</a><br>
+Q27: <a href="#27">How do I make uCON64 display one help screen at a time?</a><br>
 <br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
@@ -112,10 +112,9 @@ Q27: <a href="#27">How do make uCON64 display one help screen at a time?</a><br>
    If you use DOS or Windows&nbsp;9x and don't want uCON64 to create ucon64.cfg or .ucon64rc files
    all over the place (current directories) see <a href="#24">question 24</a>.<br>
 <br>
-   BeOS users will also need Caz's driver inside ioport.zip or available at
+   For copier I/O BeOS users will need Caz's driver inside ioport.zip or available at
    <a href="http://www.infernal.currantbun.com" target="_blank">http://www.infernal.currantbun.com</a>.<br>
-   Under Windows&nbsp;NT/2000/XP you might need a driver if you want to use uCON64 for
-   sending/receiving ROMs to/from a copier. You could use giveio or UserPort. At
+   Windows&nbsp;NT/2000/XP users might also need a driver. You could use giveio or UserPort. At
    <a href="http://www.devrs.com/gba/files/mbv2faqs.php" target="_blank">http://www.devrs.com/gba/files/mbv2faqs.php</a>
    you can find links to those programs. They are also included with the binary release. With giveio sending
    ROMs goes faster than with UserPort, but UserPort is a bit easier to use.<br>
@@ -214,7 +213,7 @@ Q27: <a href="#27">How do make uCON64 display one help screen at a time?</a><br>
    correct. You can make uCON64 rewrite the header with -swc or -fig (the SWC send code of
    uCON64 supports Pro Fighter dumps). uCON64 uses the information in the ROM dump's header,
    so this is important! You can also try to rewrite the header with the option -hi or -nhi to
-   force uCON64 to think it is a HiROM or a LoROM dump. For example:<br>
+   force uCON64 to handle it as a HiROM or a LoROM dump. For example:<br>
    &nbsp;&nbsp; ucon64 -swc -hi "Chrono Trigger (U).swc"<br>
    There are many (good) ROMs on the internet with incorrect headers, so this might well solve
    the problem.<br>
@@ -288,8 +287,8 @@ Q27: <a href="#27">How do make uCON64 display one help screen at a time?</a><br>
    flash card. Use -multi1, -multi2 or -multi3 to create a multirom that is truncated to 64 Mb (8 MB),
    128 Mb (16 MB) or 256 Mb (32 MB) respectively. Note that uCON64 always truncates multirom files to
    512 Mb (64 MB).<br>
-   Just like Visoly's tool it is possible to get the same message when the multirom is
-   small enough. It will probably work when you try again (with the same multirom).<br>
+   Just like sometimes happens with Visoly's tool it is possible to get the same message when the
+   multirom is small enough. It will probably work when you try again (with the same multirom).<br>
 <br>
 <p>
 <a name="22"><b>Q22</b>: Where can I get that loader or "game pack" file?</a><br>
@@ -338,7 +337,7 @@ Q27: <a href="#27">How do make uCON64 display one help screen at a time?</a><br>
    Copy the file to the same directory as the uCON64 executable or to a directory in your PATH.<br>
 <br>
 <p>
-<a name="27"><b>Q27</b>: How do make uCON64 display one help screen at a time?</a><br>
+<a name="27"><b>Q27</b>: How do I make uCON64 display one help screen at a time?</a><br>
 <b>A</b>: Just as is stated in the last few lines of the help, pass the output of uCON64
    to a program that waits for a key after one screen of text. You could use the program
    "more". In order to pass the output of uCON64 to more you have to use the pipe symbol,

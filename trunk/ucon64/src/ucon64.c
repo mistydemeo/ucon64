@@ -98,7 +98,7 @@ st_ucon64_t ucon64;
 
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S
 #if 0
-                             "/" CURRENT_ENDIAN_S 
+                             "/" CURRENT_ENDIAN_S
 #endif
                              " 1999-2002 by (various)";
 
@@ -235,7 +235,7 @@ const struct option long_options[] = {
     {"swcs", 0, 0, UCON64_SWCS},
 #ifdef DEBUG
     {"test", 0, 0, UCON64_TEST},
-#endif // DEBUG    
+#endif // DEBUG
     {"ufos", 0, 0, UCON64_UFOS},
     {"unif", 0, 0, UCON64_UNIF},
     {"usms", 0, 0, UCON64_USMS},
@@ -316,6 +316,7 @@ main (int argc, char **argv)
   ucon64.split =
   ucon64.snes_hirom =
   ucon64.bs_dump =
+  ucon64.fal_size =
   ucon64.console =
   ucon64.do_not_calc_crc = UCON64_UNKNOWN;
 
@@ -351,7 +352,6 @@ main (int argc, char **argv)
 #ifdef BACKUP
   if (ucon64.file)
     sscanf (ucon64.file, "%x", &ucon64.parport);
-  ucon64.parport = ucon64_parport_probe (ucon64.parport);
 #endif
 
   if (!ucon64_init (ucon64.rom, &rom))

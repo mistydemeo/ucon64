@@ -109,9 +109,12 @@ extern unsigned long fileCRC32 (const char *filename, long start);   // calculat
   wrapper for misc.c/filebackup()
 
   if move_name != NULL then filename will just be moved (renamed) and NOT
-  duplicated (faster); move_name will contain the new name then 
+  duplicated (faster); move_name will contain the new name then
 */
 extern const char *ucon64_fbackup (char *move_name, const char *filename);
+extern void handle_existing_file (const char *dest, char *src);
+extern void remove_temp_file (void); // possible temp file created by handle_existing_file()
+
 /*
   wrapper for misc.c/gauge()
 */
@@ -122,9 +125,12 @@ extern long filetestpad (const char *filename); //test if a ROM is padded
 
 extern int ucon64_testsplit (const char *filename);//test if a ROM is split
 
-extern unsigned int ucon64_parport_probe (unsigned int parport); 
+extern unsigned int ucon64_parport_probe (unsigned int parport);
 extern const char *ucon64_parport_error; //std. error message for parport
 extern const char *ucon64_console_error; //std. error message if the correct console couldn't be found
+#ifdef  __unix__
+int drop_privileges (void);
+#endif
 
 extern void ucon64_wrote (const char *filename);
 

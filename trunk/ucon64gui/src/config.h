@@ -19,6 +19,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef CONFIG_H
 #define CONFIG_H
+//#define TODO
 #define DEBUG
 #define MAXBUFSIZE 32768
 

@@ -349,7 +349,8 @@ gba_init (st_rominfo_t *rominfo)
 
   q_fread (&gba_header, GBA_HEADER_START +
            rominfo->buheader_len, GBA_HEADER_LEN, ucon64.rom);
-  if (gba_header.game_id_prefix == 'A' && gba_header.gba_type == 0)
+  if (/*gba_header.game_id_prefix == 'A' && */ // 'B' in Mario vs. Donkey Kong
+      gba_header.start[3] == 0xea && gba_header.pad1 == 0x96 && gba_header.gba_type == 0)
     result = 0;
   else
     {
@@ -402,10 +403,12 @@ gba_init (st_rominfo_t *rominfo)
   sprintf (buf, "Device type: %02x\n", gba_header.device_type);
   strcat (rominfo->misc, buf);
 
-  value = gba_header.start[0] << 24 |
-          gba_header.start[1] << 16 |
-          gba_header.start[2] << 8 |
-          gba_header.start[3];
+  /*
+    start address = current address + (parameter of B instruction * 4) + 8
+    gba_header.start[3] is opcode of B instruction (0xea)
+  */
+  value = 0x8000008 +
+          (gba_header.start[2] << 18 | gba_header.start[1] << 10 | gba_header.start[0] << 2);
   sprintf (buf, "Start address: %08x\n", value);
   strcat (rominfo->misc, buf);
 
@@ -507,7 +510,7 @@ gba_multi (int truncate_size, char *multi_fname)
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], destname);
       return -1;
     }
-  printf ("Creating multi-game file for FAL/F2A: %s\n", destname);
+  printf ("Creating multi-game file for FAL(/F2A): %s\n", destname);
 
   file_no = 0;
   for (n = 1; n < n_files; n++)
@@ -609,6 +612,7 @@ gba_multi (int truncate_size, char *multi_fname)
 }
 
 
+// TODO: Integrate the code below. This is ridiculous... - dbjh
 int
 gbautil (const char *filein, const char *fileout)
 /* gbautil version 1.1

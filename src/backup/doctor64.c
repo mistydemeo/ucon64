@@ -42,6 +42,39 @@ const char *doctor64_usage[] =
     NULL
   };
 
+#if 0
+Doctor V64
+Comment 1:  Bung Enterprises introduce the first ever N64 copier, the Doctor 
+V64! As standard, each unit comes with 128Mbits (16Mbytes) of RAM, and can be 
+upgraded to 256Mbits (32Mbytes) for around £80. This upgrade won't be 
+necessary until game sizes exceed 128Mbits though. Not only will the Doctor 
+let you backup, play, and transfer N64 games via your PC, it also has a built 
+in 8x CD player! This can be used for either loading game compilation CDs 
+(ISO 9660!), playing audio CDs (with 3D stereo spatializer output!), and best 
+of all, playing V-CD MPEG movies! You can even use the CD drive without having
+a N64! As mentioned, these units can be linked up for cartridge to PC, or PC 
+to Doctor V64 transfers, using a utility such as TPC. This means that the 
+Doctor V64 features both playback AND copying of games. The Doctor V64's main 
+BIOS is flashROM, so it can be upgraded by downloading the latest BIOS! This 
+means that theres no need to worry about expensive upgrades, as new protetion 
+routines are incorporated into the N64 game carts! 
+Comment 2 by Bung:   Doctor V64 is a low cost ROM emulator for  N64 with 
+parallel port for connection with computer, it is the perfect development kit 
+for professional or amateur. The price is low and affordable for the average 
+videogame user, yet it is powerful enough for professional developers to 
+develop games. As the Doctor V64 has a flash BIOS built-in, the BIOS, which is
+the program that controls the Doctor V64, can be easily upgraded free of 
+charge by downloading the BIOS from the Internet. Bung Enterprises is 
+committed in providing the best support for it's customers and has been 
+constantly upgrading the Doctor V64 BIOS to add new functions. Therefore, 
+upgrading the Doctor V64 BIOS makes it as good as a new unit every time it is 
+upgraded. Doctor V64 has a MPEG chipset built-in, which makes it a VCD, and 
+Music CD player. It also has a 3D Spatializer chip built-in which will produce
+3D surround sound effect for all audio that are emitted from it, which includes
+videogames and VCD.
+#endif
+
+
 #ifdef BACKUP
 
 

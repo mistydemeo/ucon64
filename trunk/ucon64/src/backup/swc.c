@@ -87,7 +87,7 @@ int swc_write_rom(char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend = 0, size, emu_mode_select, hdr_4th_byte, blocksdone = 0;
+  int bytesread, bytessend, size, emu_mode_select, hdr_4th_byte, blocksdone = 0;
   unsigned short address;
   struct stat fstate;
   time_t starttime;
@@ -106,8 +106,8 @@ int swc_write_rom(char *filename, unsigned int parport)
   }
 
   stat(filename, &fstate);
-  size = fstate.st_size - HEADERSIZE;           // size of ROM in bytes
-  printf("Send (excl. header): %d Bytes (%.4f Mb)\n", size, (float) size/MBIT);
+  size = fstate.st_size;                        // size of ROM in bytes
+  printf("Send: %d Bytes (%.4f Mb)\n", size, (float) size/MBIT);
 
   send_command0(0xc008, 0);
   fread(buffer, 1, HEADERSIZE, file);
@@ -116,6 +116,7 @@ int swc_write_rom(char *filename, unsigned int parport)
 
   send_command(5, 0, 0);
   send_block(0x400, buffer, HEADERSIZE);        // send header
+  bytessend = HEADERSIZE;
 
   printf("Press q to abort\n\n");               // print here, NOT before first swc I/O
                                                 //  because if we get here q works ;)

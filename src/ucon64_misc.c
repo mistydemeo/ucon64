@@ -636,17 +636,18 @@ int (*ucon64_testsplit_callback) (const char *filename) = NULL;
 
 
 // maker/publisher strings for SNES, GB, GBC and GBA games
-const char *nintendo_maker[792] = {
+const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
   NULL, "Nintendo", "Rocket Games/Ajinomoto", "Imagineer-Zoom", "Gray Matter",
   "Zamuse", "Falcom", NULL, "Capcom", "Hot B Co.",
-  "Jaleco", "Coconuts Japan", "Coconuts Japan/G.X.Media", "Micronet", "Technos",
+  "Jaleco", "Coconuts Japan", "Coconuts Japan/G.X.Media/Rage Software",
+    "Micronet", "Technos",
   "Mebio Software", "Shouei System", "Starfish", NULL, "Mitsui Fudosan/Dentsu",
   NULL, "Warashi Inc.", NULL, NULL, NULL,
   "Game Village", NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // 0Z
-  NULL, NULL, "Infocom", "Electronic Arts Japan", NULL,
-  "Cobra Team", "Human/Field", "KOEI", "Hudson Soft", "S.C.P.",
+  NULL, "Starfish", "Infocom/Gremlin Graphics", "Electronic Arts Japan", NULL,
+  "Cobra Team", "Human/Field", "KOEI", "Hudson Soft", "S.C.P./Game Village",
   "Yanoman", NULL, "Tecmo Products", "Japan Glary Business", "Forum/OpenSystem",
   "Virgin Games (Japan)", "SMDE", NULL, NULL, "Daikokudenki",
   NULL, NULL, NULL, NULL, NULL,
@@ -655,7 +656,7 @@ const char *nintendo_maker[792] = {
   NULL,                                         // 1Z
   "Destination Software/KSS", "Sunsoft/Tokai Engineering",
     "POW (Planning Office Wada)/VR 1 Japan", "Micro World", NULL,
-  "San-X", "Enix", "Loriciel/Electro Brain", "Kemco Japan", "Seta",
+  "San-X", "Enix", "Loriciel/Electro Brain", "Kemco Japan", "Seta Co., Ltd.",
   "Culture Brain", NULL, "Palsoft", "Visit Co., Ltd.", "Intec",
   "System Sacom", "Poppo", NULL, NULL, "Media Works",
   "NEC InterChannel", "Tam", "Gajin/Jordan", "Smilesoft", NULL,
@@ -674,22 +675,24 @@ const char *nintendo_maker[792] = {
   NULL,                                         // 3Z
   "Seika Corp.", "UBI SOFT Entertainment Software", "Sunsoft US", NULL, "Life Fitness",
   NULL, "System 3", "Spectrum Holobyte", NULL, "IREM",
-  NULL, "Raya Systems", "Renovation Products", "Malibu Games", NULL,
+  NULL, "Raya Systems/Sculptured Software", "Renovation Products",
+    "Malibu GamesBlack Pearl", NULL,
   "Eidos/U.S. Gold", "Playmates Interactive", NULL, NULL, "Fox Interactive",
   "Time Warner Interactive", NULL, NULL, "Playmates Interactive", NULL,
   NULL, "Disney Interactive", "Time Warner Interactive/Bitmasters", "Black Pearl", NULL,
   "Advanced Productions", NULL, NULL, "GT Interactive", "RARE",
   "Crave Entertainment",                        // 4Z
-  "Absolute Entertainment", "Acclaim", "Activision", "American Sammy", "Take 2/GameTek",
+  "Absolute Entertainment", "Acclaim/LJN Ltd.", "Activision", "American Sammy",
+    "Take 2/GameTek/Time Warner Interactive/Bitmasters",
   "Hi Tech", "LJN Ltd.", NULL, "Mattel", NULL,
   "Mindscape/Red Orb Entertainment", "Romstar", "Taxan", "Midway/Tradewest", NULL,
-  "American Softworks", "Majesco Sales Inc.", "3DO", NULL, NULL,
+  "American Softworks Corp.", "Majesco Sales Inc.", "3DO", NULL, NULL,
   "Williams Entertainment Inc." /*"Hasbro"*/, "NewKidCo", "Telegames",
     "Metro3D/Majesco Sales Inc.", NULL,
   "Vatical Entertainment", "LEGO Media", NULL, "Xicat Interactive", "Cryo Interactive",
   NULL, NULL, "Red Storm Entertainment", "Microids", NULL,
   "Conspiracy/Swing",                           // 5Z
-  "Titus", "Virgin Interactive", "Maxis", NULL, "LucasArts Entertainment",
+  "Titus", "Virgin Interactive", "Maxis", "Origin/FCI/Pony Canyon", "LucasArts Entertainment",
   NULL, NULL, "Ocean", NULL, "Electronic Arts",
   NULL, "Laser Beam", NULL, NULL, "Elite Systems",
   "Electro Brain", "The Learning Company", "BBC", NULL, "Software 2000",
@@ -698,8 +701,9 @@ const char *nintendo_maker[792] = {
   "DreamCatcher", "JoWood Produtions", "SEGA", "Wannado Edition",
     "LSP (Light & Shadow Prod.)",
   "ITE Media",                                  // 6Z
-  "Infogrames", "Interplay", "JVC (US)", "Parker Brothers", NULL,
-  "Sales Curve/Storm/SCI", NULL, NULL, "LucasArts Entertainment/THQ Software", "Accolade",
+  "Infogrames", "Interplay", "JVC (US)", "Parker Brothers", "Konami",
+  "Sales Curve/Storm/SCI", NULL, NULL, "LucasArts Entertainment/THQ Software",
+    "Accolade Inc.",
   "Triffix Entertainment", NULL, "Microprose Software",
     "Universal Interactive/Sierra/Simon & Schuster", NULL,
   "Kemco", "Rage Software", NULL, NULL, NULL,
@@ -716,7 +720,7 @@ const char *nintendo_maker[792] = {
   "SEGA Japan", NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // 8Z
-  "Takara", "Chun Soft", "Video System/McO'River", "BEC", NULL,
+  "Takara", "Chun Soft", "Video System Co., Ltd./McO'River", "BEC", NULL,
   "Varie", "Yonezawa/S'pal", "Kaneko", NULL, "Victor Interactive Software/Pack in Video",
   "Nichibutsu/Nihon Bussan", "Tecmo", "Imagineer", NULL, NULL,
   "Nova", "Den'Z", "Bottom Up", "Tecmo", "TGL (Technical Group Laboratory)",
@@ -732,8 +736,8 @@ const char *nintendo_maker[792] = {
   "Infogrames Hudson", NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // AZ
-  "Acclaim Japan", "ASCII/Nexoft", "Bandai", NULL, "Enix",
-  NULL, "HAL Laboratory", "SNK", NULL, "Pony Canyon Hanbai",
+  "Acclaim Japan", "ASCII Co./Nexoft/Activision", "Bandai", NULL, "Enix",
+  NULL, "HAL Laboratory/Halken", "SNK", NULL, "Pony Canyon Hanbai",
   "Culture Brain", "Sunsoft", "Toshiba EMI", "Sony Imagesoft", NULL,
   "Sammy", "Magical", "Visco", NULL, "Compile",
   NULL, "MTO Inc.", NULL, "Sunrise Interactive", NULL,
@@ -741,15 +745,16 @@ const char *nintendo_maker[792] = {
   NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // BZ
   "Taito", NULL, "Kemco", "Square", "Tokuma Shoten",
-  "Data East", "Tonkin House", NULL, "KOEI", NULL,
-  "Konami/Ultra/Palcom", "NTVIC/VAP", "Use Co., Ltd.", "Meldac", "Pony Canyon (J)/FCI (U)",
+  "Data East", "Tonkin House", NULL, "KOEI/Falcom", NULL,
+  "Konami/Ultra/Palcom", "NTVIC/VAP", "Use Co., Ltd.", "Meldac",
+    "Pony Canyon (J)/FCI (U)/Origin/",
   "Angel/Sotsu Agency/Sunrise", "Yumedia/Aroma Co., Ltd.", NULL, NULL, "Boss",
   "Axela/Crea-Tech", "Sekaibunka-Sha/Sumire kobo/Marigul Management Inc.",
     "Konami Computer Entertainment Osaka", NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // CZ
-  "Taito/Disco", "Sofel", "Quest", "Sigma", "Ask Kodansha",
+  "Taito/Disco", "Sofel", "Quest Corp.", "Sigma", "Ask Kodansha",
   NULL, "Naxat", "Copya System", "Capcom Co., Ltd.", "Banpresto",
   "TOMY", "Acclaim/LJN Japan", NULL, "NCS", "Human Entertainment",
   "Altron", "Jaleco", "Gaps Inc.", NULL, NULL,
@@ -758,7 +763,7 @@ const char *nintendo_maker[792] = {
   NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // DZ
   "Jaleco", NULL, "Yutaka", "Varie", "T&ESoft",
-  "Epoch", NULL, "Athena", "Asmik", "Natsume",
+  "Epoch Co., Ltd.", NULL, "Athena", "Asmik", "Natsume",
   "King Records", "Atlus", "Epic/Sony Records (J)", NULL,
     "IGS (Information Global Service)",
   NULL, "Chatnoir", "Right Stuff", NULL, NULL,
@@ -766,8 +771,8 @@ const char *nintendo_maker[792] = {
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // EZ
-  "A Wave", "Motown Software", "Left Field Entertainment", "Extreme Ent. Grp.",
-    "TecMagik",
+  "A Wave", "Motown Software", "Left Field Entertainment",
+    "Extreme Ent. Grp./Beam Software", "TecMagik",
   NULL, NULL, NULL, NULL, "Cybersoft",
   NULL, "Psygnosis", NULL, NULL, "Davidson/Western Tech.",
   "Hudson Soft", NULL, NULL, NULL, NULL,

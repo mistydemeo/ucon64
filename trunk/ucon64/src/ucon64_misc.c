@@ -603,7 +603,9 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_NBAK, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_NBAT, UCON64_NES, nes_usage,         WF_SWITCH},
   {UCON64_NBS, UCON64_SNES, snes_usage,        WF_SWITCH},
+#ifdef  ANSI_COLOR
   {UCON64_NCOL, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+#endif
   {UCON64_NHD, UCON64_UNKNOWN, ucon64_options_usage,  WF_SWITCH},
   {UCON64_NHI, UCON64_SNES, snes_usage,        WF_SWITCH},
   {UCON64_NINT, UCON64_UNKNOWN, ucon64_options_usage,WF_SWITCH},
@@ -613,7 +615,9 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_O, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_PAL, UCON64_NES, nes_usage,          WF_SWITCH},
   {UCON64_PATCH, UCON64_UNKNOWN, ucon64_patching_usage, WF_SWITCH},
+#ifdef  PARALLEL
   {UCON64_PORT, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+#endif
   {UCON64_Q, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_QQ, UCON64_UNKNOWN, NULL,            WF_SWITCH},
   {UCON64_ROM, UCON64_UNKNOWN, NULL,           WF_SWITCH},
@@ -1436,9 +1440,16 @@ ucon64_parport_init (unsigned int port)
       printf ("Using %s!\n", fname);
       inpout32 = open_module (fname);
       // note that inport_word and output_word keep their default value...
-      input_byte = (unsigned char (__stdcall *) (unsigned short))
+      input_byte = 
+#ifdef  __cplusplus // this is really nice: gcc wants something else than g++...
+      
+                   (unsigned char (__stdcall *) (unsigned short))
+#endif
                    get_symbol (inpout32, "Inp32");
-      output_byte = (void (__stdcall *) (unsigned short, unsigned char))
+      output_byte =
+#ifdef  __cplusplus
+                    (void (__stdcall *) (unsigned short, unsigned char))
+#endif
                     get_symbol (inpout32, "Out32");
     }
 #endif // _WIN32 || __CYGWIN__

@@ -3028,12 +3028,13 @@ score_hirom (unsigned char *rom_buffer, int rom_size)
     score += 2;
   if (!(rom_buffer[0xff00 + 0xfd] & 0x80))
     score -= 4;
-#if 1
+#if 0
   // This seems to work by accident for Snes9x (letting rom_size (CalculatedSize)
-  // be 0 for first call). We do it too as warning remover.
-  rom_size = 0;
+  // be 0 for first call).
   if (rom_size > 1024 * 1024 * 3)
     score += 4;
+#else
+  (void) rom_size;                              // warning remover
 #endif
   if ((1 << (rom_buffer[0xff00 + 0xd7] - 7)) > 48)
     score -= 1;

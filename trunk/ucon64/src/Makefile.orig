@@ -4,7 +4,6 @@ DLOPEN=1
 #ZLIB=1
 
 CC=gcc
-
 CFLAGS=-I. -Wall -W -O3 -DHAVE_CONFIG_H
 LDFLAGS=-s
 
@@ -48,7 +47,7 @@ endif                                   # cygwin
 
 
 OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
-        ucon64_lib.o misc.o getopt.o quick_io.o dlopen.o \
+        ucon64_lib.o misc.o getopt.o quick_io.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
@@ -63,11 +62,23 @@ OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
 ifdef ZLIB
 LDFLAGS+=-lz
 OBJECTS+=unzip.o map.o miscz.o
+endif
+
+ifdef DLOPEN
+OBJECTS+=dlopen.o
+ifndef ZLIB
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 else
 ifdef DJGPP                             # DJGPP code in dlopen needs map code
 OBJECTS+=map.o
-endif
-endif
+endif                                   # DJGPP
+endif                                   # cygwin
+endif                                   # ZLIB
+else
+ifeq ($(TERM),cygwin)                   # Cygwin code in ucon64_misc needs dlopen code
+OBJECTS+=dlopen.o
+endif                                   # cygwin
+endif                                   # DLOPEN
 
 
 TARGET=ucon64

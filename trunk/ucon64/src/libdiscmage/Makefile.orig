@@ -10,7 +10,8 @@ INSTALL = install -c
 LIBTOOL = libtool
 
 CC=gcc
-CFLAGS=-I. -Wall -W -O3 -DHAVE_CONFIG_H -I.. -DDLL
+CFLAGS0=-I. -Wall -W -O3 -DHAVE_CONFIG_H -I..
+CFLAGS=$(CFLAGS0) -DDLL
 # The order of . and .. is important if header files are specified between
 # angle brackets
 ifdef DLOPEN
@@ -25,10 +26,13 @@ LIBS=-lz
 OBJECTS+=unzip.o map.o miscz.o
 else
 LIBS=
-ifdef DJGPP                             # DJGPP code in dllinit needs map code
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+else
+ifdef DJGPP                             # DJGPP code in dllinit needs map code                          
 OBJECTS+=map.o
-endif
-endif
+endif                                   # DJGPP
+endif                                   # cygwin
+endif                                   # ZLIB
 
 
 # The test for Cygwin should be done before the test for DJGPP, because the
@@ -160,7 +164,10 @@ endif
 	@echo "      symbols, read faq.html question 2"
 	dxegen $(LIBNAME).dxe _import_export $(DLLFLAGS)
 ifndef DLOPEN
-	ar rs $(LIBNAME).a djimport.o dlopen.o
+# Recompile map.c, because it has to be a normal object file for the import
+# library (no references to import_export)
+	$(CC) $(CFLAGS0) -c map.c -o map.o
+	ar rs $(LIBNAME).a djimport.o map.o dlopen.o
 endif
 
 else                                    # Unix or BeOS

@@ -22,6 +22,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef MAP_H
 #define MAP_H
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 /*
   map_create()  create a new map (associative array)
   map_copy()    copy map src to map dest
@@ -61,5 +65,9 @@ extern int map_cmp_key_def (void *key1, void *key2);
 extern void *map_get (st_map_t *map, void *key);
 extern void map_del (st_map_t *map, void *key);
 extern void map_dump (st_map_t *map);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif // MAP_H

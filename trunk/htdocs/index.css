@@ -4,6 +4,8 @@
 //     background-repeat: no-repeat;
 //     background-width: 100%;}
 a:hover{color:#ffffff;
-        background-color: #0000ee;}
+        background-color: #0000ee;
+//        text-decoration: overline underline;
+}
 img:hover{color: #0000ee;}
 a{text-decoration: none}

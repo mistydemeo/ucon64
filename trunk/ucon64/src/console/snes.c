@@ -1193,27 +1193,33 @@ int
 snes_j (st_rominfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL;
-  int block_size, total_size = 0;
+  int block_size, total_size = 0, header_len = rominfo->buheader_len;
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".SMC");
+  setext (dest_name, ".TMP");
 
   ucon64_fbackup (NULL, dest_name);
   q_fcpy (src_name, 0, rominfo->buheader_len, dest_name, "wb"); // copy header (if any)
-  block_size = q_fsize (src_name) - rominfo->buheader_len;
-  while (q_fcpy (src_name, rominfo->buheader_len, block_size, dest_name, "ab") != -1)
+  block_size = q_fsize (src_name) - header_len;
+  // Split GD3 files don't have a header _except_ the first one
+  while (q_fcpy (src_name, header_len, block_size, dest_name, "ab") != -1)
     {
+      printf ("Joined: %s\n", src_name);
       total_size += block_size;
-      if ((p = strrchr (src_name, '.')))
-        (*(p + (!rominfo->buheader_len ?
-                 -1 :                           // without header (see code of "-s")
-                 1                              // with header (see code of "-s")
-               )))++;
-      block_size = q_fsize (src_name) - rominfo->buheader_len;
+      p = strrchr (src_name, '.');
+      if (p == NULL)                            // filename didn't contain a period
+        p = src_name + strlen (src_name) - 1;
+      else
+        type == GD3 ? p-- : p++;
+      (*p)++;
+
+      if (type == GD3)
+        header_len = 0;
+      block_size = q_fsize (src_name) - header_len;
     }
 
-  if (rominfo->buheader_len)
+  if (rominfo->buheader_len && type != GD3)
     {                                           // fix header
       q_fputc (dest_name, 0, total_size / 8192, "r+b"); // # 8K blocks low byte
       q_fputc (dest_name, 1, total_size / 8192 >> 8, "r+b"); // # 8K blocks high byte

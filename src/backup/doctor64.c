@@ -304,14 +304,23 @@ doctor64_read (const char *filename, unsigned int parport)
 
   misc_parport_print_info ();
   if (initCommunication (parport) == -1)
-    return -1;
+    {
+      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      exit (1);
+    }
 
   inittime = time (0);
 
   if (sendDownloadHeader (parport, &size) != 0)
-    return -1;
+    {
+      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      exit (1);
+    }
   if (!(fh = fopen (filename, "wb")))
-    return -1;
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
+      exit (1);
+    }
   printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   for (;;)
@@ -341,15 +350,24 @@ doctor64_write (const char *filename, int start, int len, unsigned int parport)
   misc_parport_print_info ();
   size = len - start;
   if (initCommunication (parport) == -1)
-    return -1;
+    {
+      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      exit (1);
+    }
   inittime = time (0);
 
   strcpy (buf, filename);
   if (sendUploadHeader (parport, buf, size) != 0)
-    return -1;
+    {
+      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      exit (1);
+    }
 
   if (!(fh = fopen (filename, "rb")))
-    return -1;
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
+      exit (1);
+    }
 
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 

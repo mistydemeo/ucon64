@@ -3,6 +3,7 @@ lynxit.c - lynxit support for uCON64
 
 written by 1997 - ? K. Wilkins
            2002     NoisyB (noisyb@gmx.net)
+           2004     dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -1016,44 +1017,26 @@ lynxit_main (int argc, char **argv)
 }
 
 
-/*
-  It will save you some work if you don't fully integrate the code above with
-  uCON64's code, because it is a project separate from the uCON64 project.
-*/
-int lynxit_argc;
-char *lynxit_argv[128];
-
-
 int
 lynxit_read_rom (const char *filename, unsigned int parport)
 {
+  char *argv[128];
+
   print_data = parport;
   misc_parport_print_info ();
 
-  lynxit_argv[0] = "ucon64";
-  lynxit_argv[1] = "READ";
+  argv[0] = "ucon64";
+  argv[1] = "READ";
   strcpy (buf, filename);
-  lynxit_argv[2] = buf;
-  lynxit_argc = 3;
+  argv[2] = buf;
 
-  return lynxit_main (lynxit_argc, lynxit_argv);
+  if (lynxit_main (3, argv) != 0)
+    {
+      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      exit (1);
+    }
+  
+  return 0;
 }
 
-
-#if 0
-int
-lynxit_write_rom (const char *filename, unsigned int parport)
-{
-  print_data = parport;
-  misc_parport_print_info ();
-
-  lynxit_argv[0] = "ucon64";
-  lynxit_argv[1] = "WRITE";
-  strcpy (buf, filename);
-  lynxit_argv[2] = buf;
-  lynxit_argc = 3;
-
-  return lynxit_main (lynxit_argc, lynxit_argv);
-}
-#endif
 #endif // PARALLEL

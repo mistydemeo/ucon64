@@ -1524,32 +1524,23 @@ ucon64_options (int c, const char *optarg)
     */
     case UCON64_XDEX:
       if (access (ucon64.rom, F_OK) != 0)
-        {
-          if (dex_read_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport) != 0)
-            fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
-        }
+        dex_read_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport);
       else
-        {
-          if (dex_write_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport) != 0)
-            fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
-        }
+        dex_write_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XDJR:
       if (access (ucon64.rom, F_OK) != 0)
-        {
-          if (doctor64jr_read (ucon64.rom, ucon64.parport) != 0)
-            fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
-        }
+        doctor64jr_read (ucon64.rom, ucon64.parport);
       else
         {
           if (!ucon64.rominfo->interleaved)
             fprintf (stderr,
                      "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 Junior only\n"
                      "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n");
-          else if (doctor64jr_write (ucon64.rom, ucon64.parport) != 0)
-            fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+          else
+            doctor64jr_write (ucon64.rom, ucon64.parport);
         }
       fputc ('\n', stdout);
       break;
@@ -1783,37 +1774,22 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_XV64:
       if (access (ucon64.rom, F_OK) != 0)
-        {
-          if (doctor64_read (ucon64.rom, ucon64.parport) != 0)
-            fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
-        }
+        doctor64_read (ucon64.rom, ucon64.parport);
       else
         {
           if (!ucon64.rominfo->interleaved)
             fprintf (stderr,
                      "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 only\n"
                      "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n");
-          else if (doctor64_write (ucon64.rom, ucon64.rominfo->buheader_len,
-                                   ucon64.file_size, ucon64.parport) != 0)
-            fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+          else
+            doctor64_write (ucon64.rom, ucon64.rominfo->buheader_len,
+                            ucon64.file_size, ucon64.parport);
         }
       fputc ('\n', stdout);
       break;
 
     case UCON64_XLIT:
-#if 0
-      // write does not exist for the current lynxit interface
-      if (!access (ucon64.rom, F_OK))
-        {
-          if (lynxit_write_rom (ucon64.rom, ucon64.parport) != 0)
-            fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
-        }
-      else
-        {
-#endif
-          if (lynxit_read_rom (ucon64.rom, ucon64.parport) != 0)
-            fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
-//        }
+      lynxit_read_rom (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;
 

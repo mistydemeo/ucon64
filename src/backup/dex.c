@@ -2,6 +2,7 @@
 dex.c - DexDrive support for uCON64
 
 written by 2002 NoisyB (noisyb@gmx.net)
+           2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -29,6 +30,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "quick_io.h"
 #include "dex.h"
+#include "psxpblib.h"
+#include "misc_par.h"
 
 
 const st_usage_t dex_usage[] =
@@ -42,22 +45,20 @@ const st_usage_t dex_usage[] =
 
 
 #ifdef PARALLEL
-#include "dex.h"
-#include "psxpblib.h"
-#include "misc_par.h"
-
-
-static int print_data = 0x378;
 
 #define CONPORT 1
 #define TAP 1
 #define DELAY 4
+#define FRAME_SIZE 128
+#define BLOCK_SIZE (64*(FRAME_SIZE))
+
+static int print_data;
+
 
 static unsigned char *
 read_block (int block_num, unsigned char *data)
 {
-  data = psx_memcard_read_block (print_data, CONPORT, TAP, DELAY, block_num);
-  return data;
+  return psx_memcard_read_block (print_data, CONPORT, TAP, DELAY, block_num);
 }
 
 static int
@@ -84,35 +85,29 @@ write_frame (int frame, char *data)
 #endif
 
 
-/*
-  It will save you some work if you don't fully integrate the code above with
-  uCON64's code, because it is a project separate from the uCON64 project.
-*/
-int dex_argc;
-char *dex_argv[128];
-#define FRAME_SIZE 128
-#define BLOCK_SIZE (64*(FRAME_SIZE))
-
 int
 dex_read_block (const char *filename, int block_num, unsigned int parport)
 {
-  unsigned char *result = NULL, data[BLOCK_SIZE];
+  unsigned char data[BLOCK_SIZE];
 
   print_data = parport;
   misc_parport_print_info ();
 
-  result = read_block (block_num, data);
+  if (read_block (block_num, data) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      exit (1);
+    }
 
   q_fwrite (data, 0, BLOCK_SIZE, filename, "wb");
 
-  return result == NULL ? (-1) : 0;
+  return 0;
 }
 
 
 int
 dex_write_block (const char *filename, int block_num, unsigned int parport)
 {
-  int result;
   unsigned char data[BLOCK_SIZE];
 
   print_data = parport;
@@ -120,12 +115,13 @@ dex_write_block (const char *filename, int block_num, unsigned int parport)
 
   q_fread (data, 0, BLOCK_SIZE, filename);
 
-  result = write_block (block_num, data);
+  if (write_block (block_num, data) == -1)
+    {
+      fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+      exit (1);
+    }
 
-  return result == (-1) ? (-1) : 0;
+  return 0;
 }
-
-#undef FRAME_SIZE
-#undef BLOCK_SIZE
 
 #endif // PARALLEL

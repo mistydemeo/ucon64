@@ -1,0 +1,62 @@
+DLOPEN=1
+#ZLIB=1
+
+CC=cl.exe
+CFLAGS=/I. /I.. /nologo /W3 /O2 /DDLL /DHAVE_CONFIG_H
+# The order of . and .. is important if header files are specified between
+# angle brackets
+!ifdef DLOPEN
+CFLAGS=$(CFLAGS) /DDLOPEN
+!endif
+
+LIBNAME=discmage
+OBJECTS=libdm_misc.obj cdi.obj nero.obj sheets.obj dllinit.obj misc.obj
+!ifdef ZLIB
+LIBS=zlib.lib
+OBJECTS=$(OBJECTS) unzip.obj miscz.obj
+!else
+LIBS=
+!endif
+
+
+FULLLIBNAME=$(LIBNAME).dll
+DLLFLAGS=/DLL /OUT:$(LIBNAME).dll $(OBJECTS) $(LIBS) /DEF:discmage.def
+
+
+all: $(FULLLIBNAME)
+
+
+clean:
+	del $(LIBNAME).dll
+	del $(LIBNAME).lib
+	del *.obj
+	del discmage.exp
+
+
+distclean: clean
+	del config.h
+
+
+.c.o:
+	$(CC) $(CFLAGS) -c $< -o $@
+
+
+$(LIBNAME).dll: $(OBJECTS)
+	link.exe $(DLLFLAGS)
+# link.exe automatically creates the import library. "/IMPLIB:filename.lib"
+#  could be used to give the import library another name
+#	lib.exe $(DLLFLAGS) /OUT:$(LIBNAME).lib
+
+
+# Dependencies
+CONFIG_H=../config.h
+
+libdm_misc.o: libdiscmage.h misc.h dxedll_priv.h
+cdi.o: libdiscmage.h misc.h cdi.h dxedll_priv.h
+nero.o: libdiscmage.h misc.h $(CONFIG_H) nero.h cdi.h dxedll_priv.h
+sheets.o: libdiscmage.h misc.h dxedll_priv.h
+dllinit.o: libdiscmage.h misc.h dxedll_priv.h
+misc.o: misc.h dxedll_priv.h
+dxe_misc.o: $(CONFIG_H) dxedll_pub.h
+djimport.o: libdiscmage.h dlopen.h dxedll_pub.h
+dlopen.o: $(CONFIG_H) dlopen.h dxedll_pub.h

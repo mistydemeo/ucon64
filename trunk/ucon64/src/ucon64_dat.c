@@ -73,7 +73,7 @@ const st_usage_t ucon64_dat_usage[] = {
   {"dbv", NULL, "like " OPTION_LONG_S "db but more verbose"},
   {"dbs", "CRC32", "search ROM with CRC32 in DATabase"},
   {"scan", NULL, "generate ROM list for all ROMs using DATabase\n"
-                    "like: GoodXXXX scan ..."},
+              "like: GoodXXXX scan ..."},
   {"lsd", NULL, "same as " OPTION_LONG_S "scan"},
   {"mkdat", "DATFILE", "create DAT file; use -o to specify an output directory"},
   {"rrom", NULL, "rename ROMs to their internal names"},
@@ -81,7 +81,7 @@ const st_usage_t ucon64_dat_usage[] = {
                     "use -o to specify an output directory"},
   {"83", NULL, "force to rename to 8.3 filenames"},
   {"force63", NULL, "force to rename all filenames into Joliet CD format\n"
-              "same as: GoodXXXX rename inplace force63 ...\n"
+              "like: GoodXXXX rename inplace force63 ...\n"
               "TIP: using " OPTION_LONG_S "nes would process only NES ROMs"},
   {"rl", NULL, "rename all ROMs to lowercase"},
   {"ru", NULL, "rename all ROMs to uppercase"},
@@ -910,6 +910,10 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
         stricmp (p, ".gbc") &&                  // Game Boy Color
         stricmp (p, ".gba") &&                  // Game Boy Advance
         stricmp (p, ".smc") &&                  // SNES
+        stricmp (p, ".sc") &&                   // Sega Master System
+        stricmp (p, ".sg") &&                   // Sega Master System
+        stricmp (p, ".sms") &&                  // Sega Master System
+        stricmp (p, ".gg") &&                   // GameGear
 //      stricmp (p, ".smd") &&                  // Genesis
         stricmp (p, ".v64")))                   // Nintendo 64
     ((char *) dat->fname)[strlen (dat->fname) - strlen (p)] = 0;

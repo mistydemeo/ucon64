@@ -294,7 +294,7 @@ vprintf2 (const char *format, va_list argptr)
   if (n_chars > MAXBUFSIZE)
     {
       fprintf (stderr, "INTERNAL ERROR: Output buffer in vprintf2() is too small (%d bytes).\n"
-                       "                %d bytes were needed. Please send a bug report\n", 
+                       "                %d bytes were needed. Please send a bug report\n",
                MAXBUFSIZE, n_chars);
       exit (1);
     }
@@ -1084,7 +1084,7 @@ one_file (const char *filename1, const char *filename2)
   struct stat finfo1, finfo2;
 
   /*
-    Not the name, but the combination inode & device identify a file.
+    Not the name, but the combination inode & device identifies a file.
     Note that stat() doesn't need any access rights except search rights for
     the directories in the path to the file.
   */
@@ -1122,6 +1122,72 @@ one_file (const char *filename1, const char *filename2)
   else
     return 0;
 #endif
+}
+
+
+int
+one_filesystem (const char *filename1, const char *filename2)
+// returns 1 if filename1 and filename2 reside on one file system, 0 if not
+//  (or an error occurred)
+{
+#ifndef _WIN32
+  struct stat finfo1, finfo2;
+
+  if (stat (filename1, &finfo1) != 0)
+    return 0;
+  if (stat (filename2, &finfo2) != 0)
+    return 0;
+  if (finfo1.st_dev == finfo2.st_dev)
+    return 1;
+  else
+    return 0;
+#else
+  HANDLE file1, file2;
+  BY_HANDLE_FILE_INFORMATION finfo1, finfo2;
+
+  file1 = CreateFile (filename1, GENERIC_READ, FILE_SHARE_READ, NULL,
+                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (file1 == INVALID_HANDLE_VALUE)
+    return 0;
+  file2 = CreateFile (filename2, GENERIC_READ, FILE_SHARE_READ, NULL,
+                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (file2 == INVALID_HANDLE_VALUE)
+    {
+      CloseHandle (file1);
+      return 0;
+    }
+  GetFileInformationByHandle (file1, &finfo1);
+  GetFileInformationByHandle (file2, &finfo2);
+  CloseHandle (file1);
+  CloseHandle (file2);
+  if (finfo1.dwVolumeSerialNumber == finfo2.dwVolumeSerialNumber)
+    return 1;
+  else
+    return 0;
+#endif
+}
+
+
+int
+rename2 (const char *oldname, const char *newname)
+{
+  int retval;
+  char *dir1 = dirname2 (oldname), *dir2 = dirname2 (newname);
+
+  // We should use dirname{2}() in case oldname or newname doesn't exist yet
+  if (one_filesystem (dir1, dir2))
+    retval = rename (oldname, newname);
+  else
+    {
+      // don't remove unless the file can be copied
+      retval = q_rfcpy (oldname, newname);
+      if (retval == 0)
+        remove (oldname);
+    }
+
+  free (dir1);
+  free (dir2);
+  return retval;
 }
 
 
@@ -2388,6 +2454,46 @@ q_fcpy (const char *src, int start, int len, const char *dest, const char *mode)
 
   sync ();
   return 0;
+}
+
+
+int
+q_rfcpy (const char *src, const char *dest)
+// Raw file copy function. Raw, because it will copy the file data as it is,
+//  unlike q_fcpy()
+{
+#ifdef  HAVE_ZLIB_H
+#undef  fopen
+#undef  fread
+#undef  fwrite
+#undef  fclose
+#endif
+  FILE *fh, *fh2;
+  int seg_len;
+  char buf[MAXBUFSIZE];
+
+  if (one_file (dest, src))
+    return -1;
+
+  if (!(fh = fopen (src, "rb")))
+    return -1;
+  if (!(fh2 = fopen (dest, "wb")))
+    {
+      fclose (fh);
+      return -1;
+    }
+  while ((seg_len = fread (buf, 1, MAXBUFSIZE, fh)))
+    fwrite (buf, 1, seg_len, fh2);
+
+  fclose (fh);
+  fclose (fh2);
+  return 0;
+#ifdef  HAVE_ZLIB_H
+#define fopen   fopen2
+#define fread   fread2
+#define fwrite  fwrite2
+#define fclose  fclose2
+#endif
 }
 
 

@@ -243,7 +243,11 @@ char *fix_character_set (char *value);
   realpath2() realpath() replacement
   one_file()  returns 1 if two filenames refer to one file, otherwise it
               returns 0
+  one_filesystem() returns 1 if two filenames refer to files on one file
+              system, otherwise it returns 0
   mkdir2()    mkdir() wrapper who automatically cares for rights, etc.
+  rename2()   renames oldname to newname even if oldname and newname are not
+              on one file system
   truncate2() don't use truncate() to enlarge files, because the result is
               undefined (by POSIX) use truncate2() instead which does both
   strargv()   wapper for argz_* to convert a cmdline into an argv[]
@@ -282,8 +286,10 @@ extern char *dirname2 (const char *path);
 #define dirname dirname2
 //#endif
 extern int one_file (const char *filename1, const char *filename2);
+extern int one_filesystem (const char *filename1, const char *filename2);
 extern char *realpath2 (const char *src, char *full_path);
 extern int mkdir2 (const char *name);
+extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, int size);
 extern char ***strargv (int *argc, char ***argv, char *cmdline, int separator_char);
 
@@ -391,6 +397,8 @@ extern void wait2 (int nmillis);
                of search which has searchlen
                wildcard could be one character or -1 (wildcard off)
   q_fcpy()     copy src from start for len to dest with mode (fopen(..., mode))
+  q_rfcpy()    copy src to dest without looking at the file data (no
+               decompression like with q_fcpy())
   q_fswap()    byteswap len bytes of file starting from start
   q_fcrc32()   calculate the crc32 of filename from start
   q_fbackup()
@@ -412,6 +420,7 @@ extern void wait2 (int nmillis);
 extern int q_fncmp (const char *filename, int start, int len,
                     const char *search, int searchlen, int wildcard);
 extern int q_fcpy (const char *src, int start, int len, const char *dest, const char *mode);
+extern int q_rfcpy (const char *src, const char *dest);
 extern int q_fswap (const char *filename, int start, int len);
 extern int q_fcrc32 (const char *filename, int start);
 #if 1

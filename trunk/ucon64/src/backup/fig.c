@@ -42,10 +42,10 @@ const st_usage_t fig_usage[] =
     {NULL, NULL, "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw"},
 #ifdef  PARALLEL
     {"xfig", NULL, "send/receive ROM to/from *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when ROM does not exist"},
+                   "receives automatically when ROM does not exist"},
     {"xfigs", NULL, "send/receive SRAM to/from *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT\n"
-                 "receives automatically when SRAM does not exist"},
-//                 "Press q to abort; ^C might cause invalid state of backup unit"},
+                    "receives automatically when SRAM does not exist"},
+//                    "Press q to abort; ^C might cause invalid state of backup unit"},
 #endif
     {NULL, NULL, NULL}
   };

@@ -221,11 +221,7 @@ lynx_b (st_rominfo_t *rominfo, int bank, const char *value)
     *bankvar = 0;
   else
 #ifdef  WORDS_BIGENDIAN
-#ifdef  AMIGA
-    *bankvar = atol (value) >> 8;
-#else
     *bankvar = bswap_16 (atol (value) * 4);
-#endif
 #else
     *bankvar = atol (value) * 4;
 #endif
@@ -289,20 +285,12 @@ lynx_init (st_rominfo_t *rominfo)
       sprintf (rominfo->misc,
         "Internal Size: Bank0 %hd Bytes (%.4f Mb)\n"
         "               Bank1 %hd Bytes (%.4f Mb)\n"
-        "Version: %d\n"
+        "Version: %hd\n"
         "Rotation: %s",
 #ifdef  WORDS_BIGENDIAN
-#ifdef  AMIGA
-        lnx_header.page_size_bank0 << 8,
-#else        
         bswap_16 (lnx_header.page_size_bank0) * 256,
-#endif        
         TOMBIT_F (bswap_16 (lnx_header.page_size_bank0) * 256),
-#ifdef  AMIGA
-        (lnx_header.page_size_bank1) << 8,
-#else
         bswap_16 (lnx_header.page_size_bank1) * 256,
-#endif
         TOMBIT_F (bswap_16 (lnx_header.page_size_bank1) * 256),
         bswap_16 (lnx_header.version),
 #else

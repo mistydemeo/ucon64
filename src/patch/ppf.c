@@ -3,7 +3,7 @@ ppf.c - Playstation Patch Format support for uCON64
 
 written by ???? - ???? Icarus/Paradox
                   2001 NoisyB (noisyb@gmx.net)
-                  2002 dbjh
+           2002 - 2003 dbjh
 
                   
 This program is free software; you can redistribute it and/or modify
@@ -86,7 +86,7 @@ const char *ppf_usage[] =
 FORMAT : xxxx,y,zzzz
 
          xxxx   = 4 byte file offset.
-	
+
          y      = Number of bytes that will be changed.
 
          zzzz   = New data to be written ('y' number of bytes).
@@ -97,7 +97,7 @@ Example
 Starting from File Offset 0x0015F9D0 replace 3 bytes with 01,02,03
 D0 F9 15 00 03 01 02 03
 
-Be careful! watch the endian format!!! If you own an Amiga and want
+Be careful! Watch the endian format! If you own an Amiga and want
 to do a PPF2-Patcher for Amiga don't forget to swap the endian-format
 of the OFFSET to avoid seek errors!
 
@@ -112,8 +112,8 @@ The fileid area is used to store additional patch information of
 the PPF 2.0 file. I implemented this following the AMIGA standard
 of adding a fileid to e.g. .txt files. You can add a FILE_ID to a
 PPF 2.0 patch by using the tool 'PPFdiz.exe' or "PPF-O-MATIC2"
-included in this package. You dont have to add a FILE_ID to your
-PPF 2.0 patch. It only for your pleasure! :)
+included in this package. You don't have to add a FILE_ID to your
+PPF 2.0 patch. It's only for your pleasure! :)
 
 For developers: a file_id area begins with @BEGIN_FILE_ID.DIZ and
 ends with @END_FILE_ID.DIZ (Amiga BBS standard).
@@ -136,14 +136,13 @@ ID AREA, because it is located after the PATCH DATA!
  * Feel free to optimize speed or something!
  *
  */
-
 int
 makeppf_main (int argc, const char *argv[])
 {
   FILE *originalbin, *patchedbin, *ppffile, *fileid = NULL;
   char desc[52], block[1025], fileidbuf[3073], enc = 1,
        obuf[512], pbuf[512], cbuf[512];
-  unsigned char anz;            /* Hell YES! UNSIGNED CHAR! */
+  unsigned char n_changes;
   int i, z, a, x, y, osize, psize, fsize, seekpos = 0, pos;
 
 //  printf("MakePPF v2.0 Linux/Unix by Icarus/Paradox\n");
@@ -153,7 +152,7 @@ makeppf_main (int argc, const char *argv[])
       return -1;
     }
 
-  /* Open all neccessary files */
+  // Open all necessary files
   originalbin = fopen (argv[1], "rb");
   if (originalbin == NULL)
     {
@@ -201,21 +200,24 @@ makeppf_main (int argc, const char *argv[])
   for (i = 0; i < 50; i++)
     desc[i] = 0x20;
 
-  /* creating PPF2.0 header */
-  printf ("Creating PPF2.0 header data...");
-  fwrite ("PPF20", 5, 1, ppffile);      /* Magic (PPF20) */
-  fwrite (&enc, 1, 1, ppffile);         /* Enc.Method (0x01) */
-  fwrite (desc, 50, 1, ppffile);        /* Description line */
-  fwrite (&osize, 4, 1, ppffile);       /* BINfile size */
+  // creating PPF2.0 header
+  printf ("Creating PPF2.0 header data...\n");
+  fwrite ("PPF20", 5, 1, ppffile);              // Magic (PPF20)
+  fwrite (&enc, 1, 1, ppffile);                 // Enc.Method (0x01)
+  fwrite (desc, 50, 1, ppffile);                // Description line
+#ifdef  WORDS_BIGENDIAN
+  i = bswap_32 (osize);
+  fwrite (&i, 4, 1, ppffile);
+#else
+  fwrite (&osize, 4, 1, ppffile);               // BINfile size
+#endif
   fseek (originalbin, 0x9320, SEEK_SET);
   fread (block, 1024, 1, originalbin);
-  fwrite (block, 1024, 1, ppffile);     /* 1024 byte block */
+  fwrite (block, 1024, 1, ppffile);             // 1024 byte block
   printf ("Done\n");
 
-  printf ("Writing patchdata, please wait...");
-  fflush (stdout);
-
-  /* Finding changes.. i know it slow.. so feel free to optimize */
+  printf ("Writing patch data, please wait...\n");
+  // Finding changes
   z = (osize / 255);
   a = osize - (z * 255);
   do
@@ -232,22 +234,24 @@ makeppf_main (int argc, const char *argv[])
             {
               pos = seekpos + x;
               y = 0;
-              anz = 0;
+              n_changes = 0;
               do
                 {
                   cbuf[y] = pbuf[x];
-                  anz++;
+                  n_changes++;
                   x++;
                   y++;
                 }
               while (x != 255 && obuf[x] != pbuf[x]);
+#ifdef  WORDS_BIGENDIAN
+              pos = bswap_32 (pos);
+#endif
               fwrite (&pos, 4, 1, ppffile);
-              fwrite (&anz, 1, 1, ppffile);
-              fwrite (cbuf, anz, 1, ppffile);
+              fwrite (&n_changes, 1, 1, ppffile);
+              fwrite (cbuf, n_changes, 1, ppffile);
             }
           else
             x++;
-
         }
       while (x != 255);
 
@@ -270,18 +274,21 @@ makeppf_main (int argc, const char *argv[])
             {
               pos = seekpos + x;
               y = 0;
-              anz = 0;
+              n_changes = 0;
               do
                 {
                   cbuf[y] = pbuf[x];
-                  anz++;
+                  n_changes++;
                   x++;
                   y++;
                 }
               while (x != a && obuf[x] != pbuf[x]);
+#ifdef  WORDS_BIGENDIAN
+              pos = bswap_32 (pos);
+#endif
               fwrite (&pos, 4, 1, ppffile);
-              fwrite (&anz, 1, 1, ppffile);
-              fwrite (cbuf, anz, 1, ppffile);
+              fwrite (&n_changes, 1, 1, ppffile);
+              fwrite (cbuf, n_changes, 1, ppffile);
             }
           else
             x++;
@@ -290,26 +297,30 @@ makeppf_main (int argc, const char *argv[])
     }
   printf ("Done\n");
 
-  /* was a file_id.diz argument present? */
+  // Was a file_id.diz argument present?
   if (argc >= 5)
     {
-      printf ("Adding file_id.diz...");
+      printf ("Adding file_id.diz...\n");
       fsize = q_fsize (argv[4]);
       if (fsize > 3072)
-        fsize = 3072;           /* File id only up to 3072 bytes! */
+        fsize = 3072;                           // File id only up to 3072 bytes!
       fread (fileidbuf, fsize, 1, fileid);
-      fwrite ("@BEGIN_FILE_ID.DIZ", 18, 1, ppffile);    /* Write the shit! */
+      fwrite ("@BEGIN_FILE_ID.DIZ", 18, 1, ppffile);
       fwrite (fileidbuf, fsize, 1, ppffile);
       fwrite ("@END_FILE_ID.DIZ", 16, 1, ppffile);
+#ifdef  WORDS_BIGENDIAN
+      fsize = bswap_32 (fsize);                 // Write filesize in little-endian format
+#endif
       fwrite (&fsize, 4, 1, ppffile);
       printf ("Done\n");
     }
 
-  fclose (ppffile);             /* Thats it! */
+  fclose (ppffile);                             // Thats it!
   fclose (originalbin);
   fclose (patchedbin);
   return 0;
 }
+
 
 /*
  * ApplyPPF v2.0 for Linux/Unix. Coded by Icarus/Paradox 2k
@@ -319,19 +330,18 @@ makeppf_main (int argc, const char *argv[])
  * This one applies both, PPF1.0 and PPF2.0 patches.
  *
  * Sorry for the bad code i had no time for some cleanup.. but
- * it works 100% ! Byebye!
+ * it works 100%! Byebye!
  *
- * Btw feel free to use this in your own projects etc of course!!
+ * Btw feel free to use this in your own projects etc of course!
  */
-
-
 int
 applyppf_main (int argc, const char *argv[])
 {
   FILE *binfile, *ppffile;
   char buffer[5], method, in, desc[50], diz[3072],
        ppfmem[512], ppfblock[1025], binblock[1025];
-  int dizlen, binlen, dizyn, dizlensave = 0, count, seekpos, pos, anz, ppfsize;
+  unsigned char n_changes;
+  int len, dizlen = 0, binlen, count, seekpos, pos, ppfsize;
 
 //        printf("ApplyPPF v2.0 for Linux/Unix (c) Icarus/Paradox\n");
   if (argc == 1)
@@ -342,7 +352,7 @@ applyppf_main (int argc, const char *argv[])
       return -1;
     }
 
-  /* Open the bin and ppf file */
+  // Open the bin and ppf file
   binfile = fopen (argv[1], "rb+");
   if (binfile == NULL)
     {
@@ -357,7 +367,7 @@ applyppf_main (int argc, const char *argv[])
       return -1;
     }
 
-  /* Is it a PPF File ? */
+  // Is it a PPF File?
   fread (buffer, 3, 1, ppffile);
   if (strncmp ("PPF", buffer, 3))
     {
@@ -369,32 +379,32 @@ applyppf_main (int argc, const char *argv[])
 
   ppfsize = q_fsize (argv[2]);
 
-  /* What encoding Method? PPF1.0 or PPF2.0? */
+  // What encoding Method? PPF1.0 or PPF2.0?
   fseek (ppffile, 5, SEEK_SET);
   fread (&method, 1, 1, ppffile);
 
   switch (method)
     {
     case 0:
-      /* Show PPF-Patchinformation. */
-      /* This is a PPF 1.0 Patch! */
-      fseek (ppffile, 6, SEEK_SET);     /* Read Desc.line */
+      // Show PPF-Patchinformation.
+      // This is a PPF 1.0 Patch!
+      fseek (ppffile, 6, SEEK_SET);             // Read Desc.line
       fread (desc, 50, 1, ppffile);
       printf ("\nFilename       : %s\n", argv[2]);
       printf ("Enc. Method    : %d (PPF1.0)\n", method);
       printf ("Description    : %s\n", desc);
       printf ("File_id.diz    : no\n\n");
 
-      /* Calculate the count for patching the image later */
-      /* Easy calculation on a PPF1.0 Patch! */
+      // Calculate the count for patching the image later
+      // Easy calculation on a PPF1.0 Patch!
       count = ppfsize;
       count -= 56;
       seekpos = 56;
-      printf ("Patching...");
+      printf ("Patching...\n");
       break;
     case 1:
-      /* Show PPF-Patchinformation. */
-      /* This is a PPF 2.0 Patch! */
+      // Show PPF-Patchinformation.
+      // This is a PPF 2.0 Patch!
       fseek (ppffile, 6, SEEK_SET);
       fread (desc, 50, 1, ppffile);
       printf ("\nFilename       : %s\n", argv[2]);
@@ -404,36 +414,37 @@ applyppf_main (int argc, const char *argv[])
       fseek (ppffile, ppfsize - 8, SEEK_SET);
       fread (buffer, 4, 1, ppffile);
 
-      /* Is there a File id ?! */
+      // Is there a File id?
       if (strncmp (".DIZ", buffer, 4))
-        {
-          printf ("File_id.diz    : no\n\n");
-          dizyn = 0;
-        }
+        printf ("File_id.diz    : no\n\n");
       else
         {
           printf ("File_id.diz    : yes, showing...\n");
           fread (&dizlen, 4, 1, ppffile);
+#ifdef  WORDS_BIGENDIAN
+          dizlen = bswap_32 (dizlen);           // file_id.diz size is in little-endian format
+#endif
           fseek (ppffile, ppfsize - dizlen - 20, SEEK_SET);
           fread (diz, dizlen, 1, ppffile);
           diz[dizlen - 7] = '\0';
           printf ("%s\n", diz);
-          dizyn = 1;
-          dizlensave = dizlen;
         }
-      /* Do the BINfile size check! */
+      // Do the file size check
       fseek (ppffile, 56, SEEK_SET);
-      fread (&dizlen, 4, 1, ppffile);
+      fread (&len, 4, 1, ppffile);
+#ifdef  WORDS_BIGENDIAN
+      len = bswap_32 (len);                     // filesize is stored in little-endian format
+#endif
       binlen = q_fsize (argv[1]);
-      if (dizlen != binlen)
+      if (len != binlen)
         {
-          fprintf (stderr, "ERROR: The size of the image is not %d Bytes\n", dizlen);
+          fprintf (stderr, "ERROR: The size of the image is not %d Bytes\n", len);
           fclose (ppffile);
           fclose (binfile);
           return -1;
         }
 
-      /* do the Binaryblock check! this check is 100% secure! */
+      // Do the binary block check
       fseek (ppffile, 60, SEEK_SET);
       fread (ppfblock, 1024, 1, ppffile);
       fseek (binfile, 0x9320, SEEK_SET);
@@ -447,9 +458,9 @@ applyppf_main (int argc, const char *argv[])
           return -1;
         }
 
-      /* Calculate the count for patching the image later */
+      // Calculate the count for patching the image later
       count = ppfsize;
-      if (dizyn == 0)
+      if (dizlen == 0)
         {
           count -= 1084;
           seekpos = 1084;
@@ -457,37 +468,39 @@ applyppf_main (int argc, const char *argv[])
       else
         {
           count -= 1084;
-          count -= 38;
-          count -= dizlensave;
+          count -= 34 + 4;
+          count -= dizlen;
           seekpos = 1084;
         }
-      printf ("Patching...");
-      fflush (stdout);
+      printf ("Patching...\n");
       break;
     default:
-      /* Enc. Method wasnt 0 or 1 i bet you wont see this */
+      // Enc. Method wasn't 0 or 1
       fprintf (stderr, "ERROR: Unknown encoding method! Check for updates\n");
       fclose (ppffile);
       fclose (binfile);
       return -1;
     }
 
-  /* Patch the Image */
+  // Patch the image
   do
     {
-      fseek (ppffile, seekpos, SEEK_SET);       /* seek to patchdataentry */
-      fread (&pos, 4, 1, ppffile);      /* Get POS for binfile */
+      fseek (ppffile, seekpos, SEEK_SET);       // Seek to patch data entry
+      fread (&pos, 4, 1, ppffile);              // Get POS for binfile
+#ifdef  WORDS_BIGENDIAN
+      pos = bswap_32 (pos);
+#endif
 
-      fread (&anz, 1, 1, ppffile);      /* How many byte do we have to write? */
-      fread (ppfmem, anz, 1, ppffile);  /* And this is WHAT we have to write */
-      fseek (binfile, pos, SEEK_SET);   /* Go to the right position in the BINfile */
-      fwrite (ppfmem, anz, 1, binfile); /* write 'anz' bytes to that pos from our ppfmem */
-      seekpos = seekpos + 5 + anz;      /* calculate next patchentry! */
-      count = count - 5 - anz;  /* have we reached the end of the PPFfile?? */
+      fread (&n_changes, 1, 1, ppffile);        // How many byte do we have to write?
+      fread (ppfmem, n_changes, 1, ppffile);    // And this is WHAT we have to write
+      fseek (binfile, pos, SEEK_SET);           // Go to the right position in the BINfile
+      fwrite (ppfmem, n_changes, 1, binfile);   // Write n_changes bytes to that pos from our ppfmem
+      seekpos = seekpos + 5 + n_changes;        // Calculate next patch entry!
+      count = count - 5 - n_changes;            // Have we reached the end of the PPFfile?
     }
-  while (count != 0);           /* if not -> LOOOOOP! */
+  while (count != 0);                           // if not -> loop
 
-  printf ("Done\n");          /* byebye :) */
+  printf ("Done\n");
   fclose (ppffile);
   fclose (binfile);
   return 0;
@@ -498,11 +511,11 @@ int
 ppf_add_fid (const char *filename, const char *fid)
 {
   long fsize, pos = 0;
-  char fileidbuf[3072], buf[4095];
+  char fileidbuf[3072], buf[3072 + 34 + 1];
 
-  printf ("Adding file_id.diz .. ");
-  fsize = q_fsize (filename);
-  q_fread (fileidbuf, 0, (fsize > 3072) ? 3072 : fsize, fid);
+  printf ("Adding file_id.diz...\n");
+  fsize = q_fsize (fid);
+  q_fread (fileidbuf, 0, (fsize > 3071) ? 3071 : fsize, fid);
   fileidbuf[(fsize > 3071) ? 3071 : fsize] = 0;
   sprintf (buf, "@BEGIN_FILE_ID.DIZ%s@END_FILE_ID.DIZ", fileidbuf);
 
@@ -512,7 +525,9 @@ ppf_add_fid (const char *filename, const char *fid)
   truncate (filename, pos);
 
   q_fwrite (buf, pos, strlen (buf), filename, "r+b");
-
+#ifdef  WORDS_BIGENDIAN
+  fsize = bswap_32 (fsize);                     // Write filesize in little-endian format
+#endif
   q_fwrite (&fsize, fsize, 4, filename, "r+b");
   printf ("Done\n");
   return 0;

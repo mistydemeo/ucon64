@@ -39,10 +39,6 @@ const char *neogeo_usage[] =
     "; NEEDED"
 #endif
     "\n"
-#ifdef TODO
-#warning TODO  --mgd   convert to Multi Game Doctor/MGD2/RAW
-#warning TODO  --mvs   convert to Arcade/MVS
-#endif // TODO
 #if 0
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
     "TODO:  " OPTION_LONG_S "mgd   convert to Multi Game Doctor/MGD2/RAW\n"
@@ -50,24 +46,17 @@ const char *neogeo_usage[] =
 #endif
     "  " OPTION_LONG_S "bios        convert NeoCD BIOS to work with NeoCD emulator; " OPTION_LONG_S "rom=BIOS\n"
     "                  http://www.illusion-city.com/neo/\n"
-#ifdef TODO
-#warning TODO  -j     join split ROM
-#warning TODO  -s     split ROM into 4Mb parts
-#warning TODO  --ngs   convert Neo Geo sound to WAV
-#endif // TODO
 #if 0
     "TODO:  " OPTION_S "j     join split ROM\n"
     "TODO:  " OPTION_S "s     split ROM into 4Mb parts (for backup unit(s) with fdd)\n"
     "TODO:  " OPTION_LONG_S "ngs   convert Neo Geo sound to WAV; " OPTION_LONG_S "rom=*_m1.rom or *_v*.rom\n"
 #endif
     "  " OPTION_LONG_S "sam         convert SAM/M.A.M.E. sound to WAV; " OPTION_LONG_S "rom=SAMFILE\n"
-#ifdef TODO
-#warning TODO --chkm  check/fix Multiple Arcade Machine Emulator/M.A.M.E. ROMs
-#endif // TODO
-#if 0
-    "TODO:  " OPTION_LONG_S "chkm  check/fix Multiple Arcade Machine Emulator/M.A.M.E. ROMs;\n"
-    "               " OPTION_LONG_S "rom=DIRECTORY\n"
-#endif
+//    "TODO: " OPTION_LONG_S "chkm    check/fix Multiple Arcade Machine Emulator/M.A.M.E. ROMs;\n"
+//    "                  " OPTION_LONG_S "rom=DIRECTORY\n"
+//    "INFO: actually this option does the same as Goodxxxx, Romcenter, etc.\n"
+//    "      Therefore you must have the DAT files for Arcade installed\n"
+    "INFO: for more options check the support for DISC-based consoles\n"
     ,
     NULL
   };

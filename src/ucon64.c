@@ -930,7 +930,7 @@ ucon64_usage (int argc, char *argv[])
 #ifdef  LIBDISCMAGE
   printf (
     "\n"
-    "Support for DISC-based consoles (libdiscmage)\n"
+    "All DISC-based consoles (using libdiscmage)\n"
     "  " OPTION_LONG_S "mksheet     generate TOC and CUE sheet files for CD_IMAGE; " OPTION_LONG_S "rom=CD_IMAGE\n"
 //    "                  " OPTION_LONG_S "rom could also be an existing TOC or CUE file\n"
 //    "                TRACK_MODE='CD_DA'     (2352 Bytes; AUDIO)\n"

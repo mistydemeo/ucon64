@@ -891,7 +891,7 @@ ucon64_parport_init (unsigned int port)
   outportb (port + PARPORT_CONTROL, inportb (port + PARPORT_CONTROL) & 0x0f);
   // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 
-#if     defined __linux__ || defined __FreeBSD__
+#if     defined __linux__
   /*
     Some code needs us to switch to the real uid and gid. However, other code
     needs access to I/O ports other than the standard printer port registers.
@@ -899,17 +899,13 @@ ucon64_parport_init (unsigned int port)
     users to run all code without being root (of course with the uCON64
     executable setuid root). Anyone a better idea?
   */
-#ifdef  __FreeBSD__
-  if (i386_iopl (3) == -1)
-#else
   if (iopl (3) == -1)
-#endif
     {
       fprintf (stderr, "ERROR: Could not set the I/O privilege level to 3\n"
                        "       (This program needs root privileges for the requested action)\n");
       return 1;
     }
-#endif // __linux__ || __FreeBSD__
+#endif // __linux__
 
   return port;
 }

@@ -893,16 +893,16 @@ ucon64_output_fname (char *requested_fname, int flags)
     sprintf (requested_fname, "%s%s", ucon64.output_path, ucon64.fname_arch);
 
   /*
-    Keep the requested suffix, but only if it isn't ".zip". This because we
-    currently don't write to zip files. Otherwise the output file would have
-    the suffix ".zip" while it isn't a zip file. uCON64 handles such files
-    correctly, because it looks at the file data itself, but many programs
-    don't.
+    Keep the requested suffix, but only if it isn't ".zip" or ".gz". This
+    because we currently don't write to zip or gzip files. Otherwise the output
+    file would have the suffix ".zip" or ".gz" while it isn't a zip or gzip
+    file. uCON64 handles such files correctly, because it looks at the file
+    data itself, but many programs don't.
     If the flag OF_FORCE_SUFFIX was used we keep the suffix, even if it's
-    ".zip". Now ucon64_output_fname() can be used when renaming/moving
+    ".zip" or ".gz". Now ucon64_output_fname() can be used when renaming/moving
     files.
   */
-  if (!(flags & OF_FORCE_SUFFIX) && !stricmp (ext, ".zip"))
+  if (!(flags & OF_FORCE_SUFFIX) && !(stricmp (ext, ".zip") && stricmp (ext, ".gz")))
     strcpy (ext, ".tmp");
   set_suffix (requested_fname, ext);
 

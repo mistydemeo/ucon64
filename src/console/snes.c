@@ -657,8 +657,18 @@ snes_mgd (st_rominfo_t *rominfo)
 
   strcpy (src_name, ucon64.rom);
   fname = basename (ucon64.rom);
-  sprintf (dest_name, "%s%d", is_func (fname, strlen (fname), isupper) ? "SF" : "sf", size / MBIT);
-  strncat (dest_name, fname, 5);
+  sprintf (dest_name, "%s%d%s", is_func (fname, strlen (fname), isupper) ? "SF" : "sf",
+           size / MBIT, fname);
+  if (size < 10 * MBIT)
+    {
+      if (!strnicmp (dest_name, fname, 3))
+        strcpy (dest_name, fname);
+    }
+  else
+    {
+      if (!strnicmp (dest_name, fname, 4))
+        strcpy (dest_name, fname);
+    }
   dest_name[8] = 0;
   for (n = 3; n < 8; n++)
     if (dest_name[n] == ' ')

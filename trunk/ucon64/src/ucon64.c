@@ -963,7 +963,7 @@ ucon64_usage (int argc, char *argv[])
         UCON64_USAGE (doctor64_usage);
         UCON64_USAGE (doctor64jr_usage);
 //        UCON64_USAGE (cd64_usage);
-//        UCON64_USAGE (dex_usage);
+        UCON64_USAGE (dex_usage);
 #endif // BACKUP
         single = 1;
         break;

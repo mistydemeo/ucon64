@@ -585,6 +585,7 @@ main (int argc, char **argv)
   // load libnetgui
   ucon64.netgui_enabled = ucon64_load_netgui ();
 #endif
+#endif
 
   // ucon64.dat_enabled and ucon64.discmage_enabled can affect the usage output
   if (argc < 2)
@@ -1627,7 +1628,8 @@ ucon64_usage (int argc, char *argv[])
      "DATabase: %d known ROMs (DAT files: %s)\n\n",
        ucon64_dat_total_entries (),
        ucon64.datdir);
-          
+
+#ifdef  DISCMAGE          
   name_discmage =
 #ifdef  DLOPEN
     ucon64.discmage_path;
@@ -1648,6 +1650,7 @@ ucon64_usage (int argc, char *argv[])
       printf (ucon64_msg[NO_LIB], name_discmage);
       printf ("\n");
     }
+#endif
     
 #undef  PARALLEL_MSG
 #ifdef  PARALLEL

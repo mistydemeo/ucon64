@@ -563,7 +563,6 @@ to_func (char *s, int size, int (*func) (int))
 }
 
 
-//#ifndef HAVE_STRCASESTR
 char *
 strcasestr2 (const char *str, const char *search)
 {
@@ -579,7 +578,6 @@ strcasestr2 (const char *str, const char *search)
 
   return NULL;
 }
-//#endif
 
 
 char *

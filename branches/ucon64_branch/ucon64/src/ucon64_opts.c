@@ -52,8 +52,12 @@ int ucon64_parport_needed = 0;
 int
 ucon64_switches (int c, const char *optarg)
 {
-  char *ptr = NULL, *ptr2 = NULL, buf[MAXBUFSIZE];
-  char buf2[MAXBUFSIZE];
+#ifdef  DISCMAGE
+  char *ptr = NULL, buf[MAXBUFSIZE];
+#endif
+#ifdef  GUI
+  char *ptr2 = NULL, buf2[MAXBUFSIZE];
+#endif
   int x = 0;
 
   /*
@@ -131,6 +135,7 @@ ucon64_switches (int c, const char *optarg)
 #define ZLIB_STATUS "no"
 #endif
 
+#ifdef  DISCMAGE
       ptr =
 #ifdef  DLOPEN
         ucon64.discmage_path;
@@ -147,16 +152,15 @@ ucon64_switches (int c, const char *optarg)
 #endif // DLOPEN
       if (ucon64.discmage_enabled)
         {
-#ifdef  DISCMAGE
           x = libdm_get_version();
-#else
-          x = 0;
-#endif                    
           sprintf (buf, "%d.%d.%d", x >> 16, x >> 8, x);
         }
       else
         strcpy (buf, "not available");
+#endif
 
+
+#ifdef  GUI
       ptr2 =
 #ifdef  DLOPEN
         ucon64.netgui_path;
@@ -173,15 +177,12 @@ ucon64_switches (int c, const char *optarg)
 #endif // DLOPEN
       if (ucon64.netgui_enabled)
         {
-#ifdef  GUI
           x = libng_get_version();
-#else
-          x = 0;
-#endif                    
           sprintf (buf2, "%d.%d.%d", x >> 16, x >> 8, x);
         }
       else
         strcpy (buf2, "not available");
+#endif
 
       printf ("version:                           %s (%s)\n"
               "platform:                          %s\n"
@@ -190,17 +191,7 @@ ucon64_switches (int c, const char *optarg)
               "parallel port backup unit support: %s\n"
               "ANSI colors enabled:               %s\n"
               "gzip and zip support:              %s\n"
-              "configuration file %s  %s\n"
-              DISCMAGE_STATUS_MSG
-              "discmage enabled:                  %s\n"
-              "discmage version:                  %s\n"
-              NETGUI_STATUS_MSG
-              "netgui enabled:                    %s\n"
-              "netgui version:                    %s\n"
-              "configuration directory:           %s\n"
-              "DAT file directory:                %s\n"
-              "entries in DATabase:               %d\n"
-              "DATabase enabled:                  %s\n",
+              "configuration file %s  %s\n",
               UCON64_VERSION_S, __DATE__,
               CURRENT_OS_S,
               ENDIANESS_STATUS,
@@ -209,18 +200,35 @@ ucon64_switches (int c, const char *optarg)
               ANSI_COLOR_STATUS,
               ZLIB_STATUS,
               // display the existence only for the config file (really helps solving problems)
-              access (ucon64.configfile, F_OK) ? "(not present):" : "(present):    ", ucon64.configfile,
+              access (ucon64.configfile, F_OK) ? "(not present):" : "(present):    ",
+              ucon64.configfile);
+
+#ifdef  DISCMAGE
+      printf (DISCMAGE_STATUS_MSG
+              "discmage enabled:                  %s\n"
+              "discmage version:                  %s\n",
               ptr,
               ucon64.discmage_enabled ? "yes" : "no",
-              buf,
+              buf);
+#endif              
+
+#ifdef  GUI
+      printf (NETGUI_STATUS_MSG
+              "netgui enabled:                  %s\n"
+              "netgui version:                  %s\n",
               ptr2,
               ucon64.netgui_enabled ? "yes" : "no",
-              buf2,
+              buf2);
+#endif              
+
+      printf ("configuration directory:           %s\n"
+              "DAT file directory:                %s\n"
+              "entries in DATabase:               %d\n"
+              "DATabase enabled:                  %s\n",
               ucon64.configdir,
               ucon64.datdir,
               ucon64_dat_total_entries (),
-              ucon64.dat_enabled ? "yes" : "no"
-      );
+              ucon64.dat_enabled ? "yes" : "no");
       exit (0);
       break;
 

@@ -33,8 +33,9 @@ extern const char *ucon64gui_title;
 #define MAXBUFSIZE 32768
 #endif
 
-#define UCON64_ROOT 1
-#define UCON64_CONFIG 2
+#define UCON64GUI_ROOT 1
+#define UCON64GUI_CONFIG 2
+#define UCON64GUI_SURFTO 3
 
 typedef struct
 {

@@ -226,8 +226,9 @@ const struct option long_options[] = {
   {"dumpinfo", 0, 0, UCON64_DUMPINFO},
   {"version", 0, 0, UCON64_VERSION},
 
-  {"root", 0, 0, UCON64_ROOT},
-  {"config", 0, 0, UCON64_CONFIG},
+  {"root", 0, 0, UCON64GUI_ROOT},
+  {"config", 0, 0, UCON64GUI_CONFIG},
+  {"surfto", 1, 0, UCON64GUI_SURFTO},
 
   {0, 0, 0, 0}
 };
@@ -270,14 +271,14 @@ html2gui_request (const char *uri, const char *query)
 
   if (ucon64gui.rom[0])
     {
-      strcat (buf, " \"");
+      strcat (buf, " --rom=\"");
       strcat (buf, ucon64gui.rom);
       strcat (buf, "\"");
     }
 
   if (ucon64gui.file[0])
     {
-      strcat (buf, " \"");
+      strcat (buf, " --file=\"");
       strcat (buf, ucon64gui.file);
       strcat (buf, "\"");
     }
@@ -343,16 +344,20 @@ html2gui_request (const char *uri, const char *query)
           case UCON64_X64JR:
             return;
 #endif
-          case UCON64_ROOT:
+          case UCON64GUI_ROOT:
             ucon64gui.sub = 0;
             ucon64gui.console = NULL;
             ucon64gui_root ();
             return;
             
-          case UCON64_CONFIG:
+          case UCON64GUI_CONFIG:
             ucon64gui.sub = 1;
             ucon64gui.console = NULL;
             ucon64gui_config ();
+            return;
+
+          case UCON64GUI_SURFTO:
+//            fsystem (stderr, "netscape uco64.sf.net &");
             return;
 
           default:

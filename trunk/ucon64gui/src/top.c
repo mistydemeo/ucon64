@@ -204,13 +204,13 @@ ucon64gui_top (void)
 
   h2g_select ("file", 0, 0, "Choose the desired Track Mode here",
     "MODE2_RAW (2352 Bytes; default)",
-    "MODE2_RAW",
+    "--file=MODE2_RAW",
     "MODE1 (2048 Bytes; standard ISO9660)",
-    "MODE1",
+    "--file=MODE1",
     "MODE1_RAW (2352 Bytes)",
-    "MODE1_RAW",
+    "--file=MODE1_RAW",
     "MODE2 (2336 Bytes)",
-    "MODE2"
+    "--file=MODE2"
     ,0);
 
 #endif // BACKUP_CD

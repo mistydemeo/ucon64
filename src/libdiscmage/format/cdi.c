@@ -145,7 +145,7 @@ cdi_track_init (dm_track_t *track, FILE *fh)
   value32 = le2me_32 (value32);
   if (/* value8 < 0 || */ value32 > 2)
     {
-      fprintf (stderr, "ERROR: unsupported sector size (%d)\n", value32);
+      fprintf (stderr, "ERROR: unsupported sector size (%u)\n", (unsigned int) value32);
       return -1;
     }
   track->sector_size = cdi_track_modes[value32];

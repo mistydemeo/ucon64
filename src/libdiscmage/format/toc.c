@@ -307,7 +307,7 @@ dm_toc_write (const dm_image_t *image)
                      "\n"
                      "TRACK %s\n"
 //                     "NO COPY\n"
-                     "DATAFILE \"%s\" %d// length in bytes: %d\n",
+                     "DATAFILE \"%s\" %lu// length in bytes: %lu\n",
                      dm_get_track_desc (track->mode, track->sector_size, FALSE),
                      basename2 (image->fname), track->total_len * track->sector_size,
                      track->total_len * track->sector_size);
@@ -319,7 +319,7 @@ dm_toc_write (const dm_image_t *image)
                      "\n"
                      "TRACK %s\n"
 //                     "NO COPY\n"
-                     "DATAFILE \"%s\" %d// length in bytes: %d\n",
+                     "DATAFILE \"%s\" %lu// length in bytes: %lu\n",
                      dm_get_track_desc (track->mode, track->sector_size, FALSE),
                      basename2 (image->fname), track->total_len * track->sector_size,
                      track->total_len * track->sector_size);
@@ -331,7 +331,7 @@ dm_toc_write (const dm_image_t *image)
                      "\n"
                      "TRACK %s\n"
 //                     "NO COPY\n"
-                     "DATAFILE \"%s\" %d// length in bytes: %d\n",
+                     "DATAFILE \"%s\" %lu// length in bytes: %lu\n",
                      dm_get_track_desc (track->mode, track->sector_size, FALSE),
                      basename2 (image->fname), track->total_len * track->sector_size,
                      track->total_len * track->sector_size);

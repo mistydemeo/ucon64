@@ -6006,7 +6006,7 @@ nes_mapper_number (const char *board_name)
   n = 0;
   while (name_to_mapr[n].string != NULL)
     {
-      if (!strncmp(board_name, name_to_mapr[n].string, BOARDNAME_MAXLEN - 1))
+      if (!strncmp (board_name, name_to_mapr[n].string, BOARDNAME_MAXLEN - 1))
         return name_to_mapr[n].value;
       n++;
     }

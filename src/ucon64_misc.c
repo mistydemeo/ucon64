@@ -1255,7 +1255,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
             printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32);
           else
             printf ("Checksum (CRC32): 0x%08x\n", ucon64.crc32);
-          ucon64_dat_nfo (ucon64_dat);
+          ucon64_dat_nfo (ucon64_dat, 1);
           printf ("\n");
           ucon64_flush (&rominfo);
         }

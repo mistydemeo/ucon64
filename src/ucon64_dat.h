@@ -47,11 +47,16 @@ typedef struct
   const char **copier_usage;            // backup unit usage
 } st_ucon64_dat_t;
 
-extern st_ucon64_dat_t *ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat); //search dat files for crc and return ucon64_dat_t
-extern unsigned int ucon64_dat_total_entries (int console);       // returns # of ROMs in all DAT's
-extern int ucon64_dat_view (int console);        // printf the complete dat collection
-extern int ucon64_dat_indexer (void);          // create or update index file for DAT's
-extern void ucon64_dat_nfo (const st_ucon64_dat_t *dat); // view contents of ucon64_dat_t
+// search dat files for crc and return ucon64_dat_t
+extern st_ucon64_dat_t *ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat);
+// return # of ROMs in all DAT's
+extern unsigned int ucon64_dat_total_entries (int console);
+// display the complete dat collection
+extern int ucon64_dat_view (int console, int verbose);
+// create or update index file for DAT's
+extern int ucon64_dat_indexer (void);
+// view contents of ucon64_dat_t
+extern void ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version);
 
 #endif // UCON64_DAT_H
 

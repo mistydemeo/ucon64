@@ -1035,7 +1035,7 @@ set_mapper (st_ines_header_t *header, unsigned int mapper)
           exit (1);
         }
       // We can't just clear bits 0 & 1 of ctrl2, because they have their own
-      // meaning. So, a warning is in place here.
+      //  meaning. So, a warning is in place here.
       printf ("WARNING: Mapper number is greater than 255\n");
       header->ctrl2 |= (mapper >> 8) & 0xf;
     }
@@ -2525,7 +2525,7 @@ nes_fds (st_rominfo_t *rominfo)
 
   for (n = 0; n < 4; n++)
     {
-      if (q_fread (buffer, 0, 65500, src_name) != 65500)
+      if (q_fread (buffer, n * 65500, 65500, src_name) != 65500)
         break;
 
       // check disk image for validity

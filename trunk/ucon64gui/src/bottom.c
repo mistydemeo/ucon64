@@ -39,11 +39,8 @@ ucon64gui_bottom (void)
 
 //  h2g_img (ucon64gui_xpm, 0, 0, 0, NULL);
 
-  h2g_ ("uCON64gui "
-#ifdef __GTK__
-             "(GTK) "
-#endif
-             "0.1.0alpha (for uCON64 " ucon64_VERSION ") 2002 by NoisyB ");
+  h2g_ ( ucon64gui_TITLE2 );
+  
   h2g_input_submit ("ucon64.sf.net", "http://ucon64.sf.net", "Surf to uCON64 and uCON64gui homepage");
 //  h2g_input_image ("Emulate", "-e", emulate_xpm, 0, 0, buf);
 

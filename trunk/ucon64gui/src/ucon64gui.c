@@ -40,6 +40,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/cdrw.h"
 
 
+
+static void ucon64gui_root (void);
+//static void ucon64gui_system (void);
+static void ucon64gui_output (char *output);
+
+
 struct ucon64gui_ ucon64gui;
 
 #define DEBUG

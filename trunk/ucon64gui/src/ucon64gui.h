@@ -21,7 +21,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64GUI_H
 #define UCON64GUI_H
 
+#define ucon64gui_VERSION "0.1.0alpha2"
+
 #define ucon64gui_TITLE "uCON64gui"
+#define ucon64gui_TITLE2 "uCON64gui " ucon64gui_VERSION " (for uCON64 " ucon64_VERSION ") 2002 by NoisyB "
 
 #define ucon64gui_FORMTARGET "http://ucon64"
 
@@ -48,13 +51,5 @@ extern struct ucon64gui_
 
   char configfile[FILENAME_MAX];
 } ucon64gui;
-
-
-extern void ucon64gui_root (void);
-
-extern void ucon64gui_system (void);
-
-extern void ucon64gui_output (char *output);
-
 
 #endif // UCON64GUI_H

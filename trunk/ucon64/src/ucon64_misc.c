@@ -601,7 +601,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XSWC2, UCON64_SNES, swc_usage,       WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
   {UCON64_XSWCS, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_SPLIT},
   {UCON64_XV64, UCON64_N64, doctor64_usage,    WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
-  {UCON64_Z64, UCON64_N64, z64_usage,          WF_DEFAULT},
+  {UCON64_Z64, UCON64_N64, n64_usage,          WF_DEFAULT},
 /*
   these consoles do not (need to) know the console or work for more than one
 */
@@ -636,7 +636,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_LS, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
   {UCON64_LSD, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
   {UCON64_LSV, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
-  {UCON64_MGD, UCON64_UNKNOWN, mgd_usage,      WF_DEFAULT},
+  {UCON64_MGD, UCON64_UNKNOWN, NULL,      WF_DEFAULT},
 //  {UCON64_MGH, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
   {UCON64_MKA, UCON64_UNKNOWN, aps_usage,      0},
 //  {UCON64_MKCUE, UCON64_UNKNOWN, ucon64_options_usage, 0},

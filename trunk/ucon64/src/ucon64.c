@@ -46,9 +46,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <sys/stat.h>
 #include <sys/types.h>
-#ifdef  __linux__
-#include <sys/io.h>
-#endif
 #ifdef  _WIN32
 #include <windows.h>
 #endif

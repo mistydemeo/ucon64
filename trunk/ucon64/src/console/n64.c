@@ -2,6 +2,7 @@
 n64.c - Nintendo64 support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+                  2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -37,14 +38,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/dex.h"
 #include "backup/z64.h"
 
+
+#define N64_HEADER_START 0
+#define N64_HEADER_LEN (sizeof (st_n64_header_t))
+#define N64_SRAM_SIZE 512
+#define N64_NAME_LEN  20
+#define N64_BOT_SIZE 4032
+#define LAC_ROM_SIZE  1310720
+
 const char *n64_usage[] =
   {
     "Nintendo 64",
     "1996 Nintendo http://www.nintendo.com",
     "  " OPTION_LONG_S "n64         force recognition\n"
-#if 0
-    "  " OPTION_LONG_S "int         force ROM is interleaved (2143)\n"
-    "  " OPTION_LONG_S "nint        force ROM is not interleaved (1234)\n"
+#if 0   // unlike for SNES ROMs we can't make a mistake about this
+    "  " OPTION_LONG_S "int         force ROM is in interleaved format\n"
+    "  " OPTION_LONG_S "int2        force ROM is in interleaved format 2\n"
+    "  " OPTION_LONG_S "nint        force ROM is not in interleaved format\n"
 #endif
     "  " OPTION_S "n           change ROM name; " OPTION_LONG_S "file=NEWNAME\n"
     "  " OPTION_LONG_S "v64         convert to Doctor V64 (and compatibles/interleaved)\n"
@@ -99,33 +109,31 @@ typedef struct st_n64_header
   unsigned char pad4;
 #endif
 #if 0
-        rominfo.validation           = *(tr_u16 *)(rom.header + (0x00 ^ 0x02));
-        rominfo.compression          = *(tr_u8 *) (rom.header + (0x02 ^ 0x03));
-        rominfo.unknown1             = *(tr_u8 *) (rom.header + (0x03 ^ 0x03));
-        rominfo.clockrate            = *(tr_u32 *) (rom.header +  0x04);
-        rominfo.programcounter       = *(tr_u32 *) (rom.header +  0x08);
-        rominfo.release              = *(tr_u32 *) (rom.header +  0x0c);
-        rominfo.crc1                 = *(tr_u32 *) (rom.header +  0x10);
-        rominfo.crc2                 = *(tr_u32 *) (rom.header +  0x14);
-        rominfo.unknown2_h           = *(tr_u32 *) (rom.header +  0x18);
-        rominfo.unknown2_l           = *(tr_u32 *) (rom.header +  0x1c);
-        for(i=0; i<20; i++)
-                rominfo.name[i^0x03] = rom.header[i+0x20];
-        rominfo.unknown3             = *(tr_u8 *) (rom.header + (0x34 ^ 0x03));
-        rominfo.unknown4             = *(tr_u8 *) (rom.header + (0x35 ^ 0x03));
-        rominfo.unknown5             = *(tr_u8 *) (rom.header + (0x36 ^ 0x03));
-        rominfo.unknown6             = *(tr_u8 *) (rom.header + (0x37 ^ 0x03));
-        rominfo.unknown7             = *(tr_u8 *) (rom.header + (0x38 ^ 0x03));
-        rominfo.unknown8             = *(tr_u8 *) (rom.header + (0x39 ^ 0x03));
-        rominfo.unknown9             = *(tr_u8 *) (rom.header + (0x3a ^ 0x03));
-        rominfo.makerid       = *(tr_u8 *) (rom.header + (0x3b ^ 0x03));
-        rominfo.cartridgeid          = *(tr_u16 *)(rom.header + (0x3c ^ 0x02));
-        rominfo.countrycode          = *(tr_u8 *) (rom.header + (0x3e ^ 0x03));
-        rominfo.unknown10            = *(tr_u8 *) (rom.header + (0x3f ^ 0x03));
+  rominfo.validation           = *(tr_u16 *)(rom.header + (0x00 ^ 0x02));
+  rominfo.compression          = *(tr_u8 *) (rom.header + (0x02 ^ 0x03));
+  rominfo.unknown1             = *(tr_u8 *) (rom.header + (0x03 ^ 0x03));
+  rominfo.clockrate            = *(tr_u32 *) (rom.header +  0x04);
+  rominfo.programcounter       = *(tr_u32 *) (rom.header +  0x08);
+  rominfo.release              = *(tr_u32 *) (rom.header +  0x0c);
+  rominfo.crc1                 = *(tr_u32 *) (rom.header +  0x10);
+  rominfo.crc2                 = *(tr_u32 *) (rom.header +  0x14);
+  rominfo.unknown2_h           = *(tr_u32 *) (rom.header +  0x18);
+  rominfo.unknown2_l           = *(tr_u32 *) (rom.header +  0x1c);
+  for (i=0; i < 20; i++)
+    rominfo.name[i ^ 0x03] = rom.header[i + 0x20];
+  rominfo.unknown3             = *(tr_u8 *) (rom.header + (0x34 ^ 0x03));
+  rominfo.unknown4             = *(tr_u8 *) (rom.header + (0x35 ^ 0x03));
+  rominfo.unknown5             = *(tr_u8 *) (rom.header + (0x36 ^ 0x03));
+  rominfo.unknown6             = *(tr_u8 *) (rom.header + (0x37 ^ 0x03));
+  rominfo.unknown7             = *(tr_u8 *) (rom.header + (0x38 ^ 0x03));
+  rominfo.unknown8             = *(tr_u8 *) (rom.header + (0x39 ^ 0x03));
+  rominfo.unknown9             = *(tr_u8 *) (rom.header + (0x3a ^ 0x03));
+  rominfo.makerid              = *(tr_u8 *) (rom.header + (0x3b ^ 0x03));
+  rominfo.cartridgeid          = *(tr_u16 *)(rom.header + (0x3c ^ 0x02));
+  rominfo.countrycode          = *(tr_u8 *) (rom.header + (0x3e ^ 0x03));
+  rominfo.unknown10            = *(tr_u8 *) (rom.header + (0x3f ^ 0x03));
 #endif
 } st_n64_header_t;
-#define N64_HEADER_START 0
-#define N64_HEADER_LEN (sizeof (st_n64_header_t))
 
 st_n64_header_t n64_header;
 
@@ -136,25 +144,21 @@ typedef struct st_n64_chksum
 } st_n64_chksum_t;
 
 static st_n64_chksum_t n64crc;
-
 static int n64_chksum (st_rominfo_t *rominfo);
 
 
+// This is the support of LaC's makesram routine for uploading
+//  SRAM files to a Cart SRAM.  The .v64 file is his work, not mine
 int
 n64_sram (st_rominfo_t *rominfo)
 {
-#define N64_SRAM_SIZE 512
-#define LAC_ROM_SIZE 1310720
   char sram[N64_SRAM_SIZE];
-
-//      This is the support of LaC's makesram routine for uploading
-//      SRAM files to a Cart SRAM.  The .v64 file is his work, not mine
 
   if (q_fsize (ucon64.file) != N64_SRAM_SIZE ||
       q_fsize (ucon64.rom) != LAC_ROM_SIZE)
     {
       fprintf (stderr,
-        "ERROR: check if ROM has %d Bytes and SRAM has %d Bytes\n"
+        "ERROR: Check if ROM has %d Bytes and SRAM has %d Bytes\n"
         "       or the ROM is too short to calculate checksum\n", LAC_ROM_SIZE, N64_SRAM_SIZE);
       return -1;
     }
@@ -190,65 +194,8 @@ n64_v64 (st_rominfo_t *rominfo)
   ucon64_fbackup (NULL, buf);
   q_fcpy (ucon64.rom, 0, size, buf, "wb");
   q_fswap (buf, 0, size);
+
   ucon64_wrote (buf);
-  return 0;
-}
-
-
-int
-n64_n (st_rominfo_t *rominfo)
-{
-  char buf[MAXBUFSIZE];
-
-  sprintf (buf, "%s                     ", ucon64.file);
-  if (rominfo->interleaved != 0) mem_swap (buf, strlen (buf));
-  ucon64_fbackup (NULL, ucon64.rom);
-  q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 32, 20,
-               ucon64.rom, "r+b");
-  ucon64_wrote (ucon64.rom);
-  return 0;
-}
-
-
-int
-n64_f (st_rominfo_t *rominfo)
-{
-//TODO pal/ntsc fix
-  return 0;
-}
-
-
-int
-n64_chk (st_rominfo_t *rominfo)
-{
-  int x;
-  char buf[10];
-  
-  ucon64_fbackup (NULL, ucon64.rom);
-  n64_chksum (rominfo);
-
-  for (x = 0; x < 4; x++)
-    {
-      q_fputc (ucon64.rom,
-                  N64_HEADER_START + rominfo->buheader_len + 0x10 +
-                  (x ^ rominfo->interleaved),
-                  (n64crc.crc1 & 0xff000000) >> 24, "r+b");
-      n64crc.crc1 <<= 8;
-    }
-
-  for (x = 0; x < 4; x++)
-    {
-      q_fputc (ucon64.rom,
-                  N64_HEADER_START + rominfo->buheader_len + 0x14 +
-                  (x ^ rominfo->interleaved),
-                  (n64crc.crc2 & 0xff000000) >> 24, "r+b");
-      n64crc.crc2 <<= 8;
-    }
-
-  q_fread (buf, 0x10 + rominfo->buheader_len, 8, ucon64.rom);
-
-  mem_hexdump (buf, 8, 0x10 + rominfo->buheader_len);
-
   return 0;
 }
 
@@ -278,9 +225,71 @@ n64_z64 (st_rominfo_t *rominfo)
 
 
 int
+n64_n (st_rominfo_t *rominfo)
+{
+  char buf[N64_NAME_LEN];
+
+  memset (buf, ' ', N64_NAME_LEN);
+  strncpy (buf, ucon64.file, strlen (ucon64.file) > N64_NAME_LEN ?
+           N64_NAME_LEN : strlen (ucon64.file));
+
+  if (rominfo->interleaved != 0)
+    mem_swap (buf, N64_NAME_LEN);
+
+  ucon64_fbackup (NULL, ucon64.rom);
+  q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 32, 20,
+               ucon64.rom, "r+b");
+
+  ucon64_wrote (ucon64.rom);
+  return 0;
+}
+
+
+int
+n64_f (st_rominfo_t *rominfo)
+{
+  // TODO: PAL/NTSC fix
+  return 0;
+}
+
+
+int
+n64_chk (st_rominfo_t *rominfo)
+{
+  int x;
+  char buf[10];
+
+  ucon64_fbackup (NULL, ucon64.rom);
+
+  // n64crc is set by n64_checksum() when called from n64_init()
+  for (x = 0; x < 4; x++)
+    {
+      q_fputc (ucon64.rom,
+                  N64_HEADER_START + rominfo->buheader_len + 0x10 +
+                  (x ^ rominfo->interleaved),
+                  (n64crc.crc1 & 0xff000000) >> 24, "r+b");
+      n64crc.crc1 <<= 8;
+    }
+
+  for (x = 0; x < 4; x++)
+    {
+      q_fputc (ucon64.rom,
+                  N64_HEADER_START + rominfo->buheader_len + 0x14 +
+                  (x ^ rominfo->interleaved),
+                  (n64crc.crc2 & 0xff000000) >> 24, "r+b");
+      n64crc.crc2 <<= 8;
+    }
+
+  q_fread (buf, 0x10 + rominfo->buheader_len, 8, ucon64.rom);
+  mem_hexdump (buf, 8, 0x10 + rominfo->buheader_len);
+
+  return 0;
+}
+
+
+int
 n64_bot (st_rominfo_t *rominfo)
 {
-#define N64_BOT_SIZE 4032
   char buf[MAXBUFSIZE];
 
   if (!access (ucon64.file, F_OK))
@@ -291,9 +300,8 @@ n64_bot (st_rominfo_t *rominfo)
         mem_swap (buf, N64_BOT_SIZE);
 
       ucon64_fbackup (NULL, ucon64.rom);
-      q_fwrite (buf, N64_HEADER_START
-                   + rominfo->buheader_len
-                   + 0x40, N64_BOT_SIZE, ucon64.rom, "r+b");
+      q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 0x40,
+        N64_BOT_SIZE, ucon64.rom, "r+b");
     }
   else
     {
@@ -301,9 +309,8 @@ n64_bot (st_rominfo_t *rominfo)
       setext (buf, ".BOT");
 
       ucon64_fbackup (NULL, buf);
-      q_fcpy (ucon64.rom,
-                N64_HEADER_START + rominfo->buheader_len + 0x040,
-                N64_BOT_SIZE, buf, "wb");
+      q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len + 0x040,
+        N64_BOT_SIZE, buf, "wb");
 
       if (rominfo->interleaved != 0)
         q_fswap (buf, 0, q_fsize (buf));
@@ -317,17 +324,16 @@ n64_bot (st_rominfo_t *rominfo)
 int
 n64_usms (st_rominfo_t *rominfo)
 {
-  char *usmsbuf;
-  char buf[MAXBUFSIZE];
+  char *usmsbuf, buf[MAXBUFSIZE];
 
   if (!access (ucon64.file, F_OK))
     {
       long size = q_fsize (ucon64.file);
-//must be smaller than 4mbit 524288 bytes will be inserted
-//from 1b410 to 9b40f (7ffff)
+      // must be smaller than 4 Mbit, 524288 bytes will be inserted
+      //  from 1b410 to 9b40f (7ffff)
       if (size > ((4 * MBIT) - 1))
         {
-          fprintf (stderr, "ERROR: the Sega Master System/GameGear ROM must be smaller than 524288 Bytes\n");
+          fprintf (stderr, "ERROR: The Sega Master System/GameGear ROM must be smaller than 524288 Bytes\n");
           return -1;
         }
 
@@ -339,11 +345,10 @@ n64_usms (st_rominfo_t *rominfo)
         mem_swap (usmsbuf, size);
 
       ucon64_fbackup (NULL, "patched.v64");
-      q_fwrite (usmsbuf,
-                   N64_HEADER_START + rominfo->buheader_len + 0x01b410,
-                   size, "patched.v64", "r+b");
-
+      q_fwrite (usmsbuf, N64_HEADER_START + rominfo->buheader_len + 0x01b410,
+        size, "patched.v64", "r+b");
       ucon64_wrote ("patched.v64");
+
       free (usmsbuf);
     }
   else
@@ -351,13 +356,15 @@ n64_usms (st_rominfo_t *rominfo)
       strcpy (buf, ucon64.rom);
       setext (buf, ".GG");
       ucon64_fbackup (NULL, buf);
-      q_fcpy (ucon64.rom,
-                N64_HEADER_START + rominfo->buheader_len + 0x040,
-                0x01000 - 0x040, buf, "wb");
+
+      q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len + 0x040,
+        0x01000 - 0x040, buf, "wb");
       if (rominfo->interleaved != 0)
         q_fswap (buf, 0, q_fsize (buf));
+
       ucon64_wrote (buf);
     }
+
   return 0;
 }
 
@@ -387,7 +394,7 @@ n64_init (st_rominfo_t *rominfo)
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, "Nintendo", NULL},
 #define N64_COUNTRY_MAX 0x5a
-      *n64_country[N64_COUNTRY_MAX] = {
+  *n64_country[N64_COUNTRY_MAX] = {
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
@@ -402,33 +409,45 @@ n64_init (st_rominfo_t *rominfo)
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, "Germany", "U.S.A.",
-    NULL, NULL, NULL, NULL, "Japan",
+    "France", NULL, NULL, "Italy", "Japan",
     NULL, NULL, NULL, NULL, NULL,
-    "Europe", NULL, NULL, NULL, NULL,
+    "Europe", NULL, NULL, "Spain", NULL,
     "Australia", NULL, NULL, "France, Germany, Holland", NULL};
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
     ucon64.buheader_len : 0;
 
-  q_fread (&n64_header, N64_HEADER_START +
-    rominfo->buheader_len, N64_HEADER_LEN, ucon64.rom);
+  q_fread (&n64_header, N64_HEADER_START + rominfo->buheader_len,
+    N64_HEADER_LEN, ucon64.rom);
 
-  value = OFFSET (n64_header, 0) << 24;
-  value += OFFSET (n64_header, 1) << 16;
-  value += OFFSET (n64_header, 2) << 8;
-  value += OFFSET (n64_header, 3);
-
-  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ? ucon64.interleaved : 0;
-  if (value != 0x80371240)
+  value = OFFSET (n64_header, 0);
+  value += OFFSET (n64_header, 1) << 8;
+  value += OFFSET (n64_header, 2) << 16;
+  value += OFFSET (n64_header, 3) << 24;
+  if (value == 0x40123780) // 0x80371240
     {
-      rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ? ucon64.interleaved : 1;
-      if (value != 0x37804012)
-        result = -1;
-      else
-        result = 0;
+      rominfo->interleaved = 0;
+      result = 0;
     }
+  else if (value == 0x12408037) // 0x37804012
+    {
+      rominfo->interleaved = 1;
+      result = 0;
+    }
+#if 0
+  // What format is this?
+  // Conversion: 1234 -> 3412
+  else if (value == 0x80371240) // 0x40123780
+    {
+      rominfo->interleaved = 2;
+      result = 0;
+    }
+#endif
   else
-    result = 0;
+    result = -1;
+
+  if (UCON64_ISSET (ucon64.interleaved))
+    rominfo->interleaved = ucon64.interleaved;
   if (ucon64.console == UCON64_N64)
     result = 0;
 
@@ -438,19 +457,18 @@ n64_init (st_rominfo_t *rominfo)
   rominfo->header = &n64_header;
 
   // internal ROM name
-  strncpy (rominfo->name, &OFFSET (n64_header, 32), 20);
-  rominfo->name[20] = 0;
+  strncpy (rominfo->name, &OFFSET (n64_header, 32), N64_NAME_LEN);
   if (rominfo->interleaved)
-    mem_swap (rominfo->name, 20);
-  rominfo->name[20] = 0;
+    mem_swap (rominfo->name, N64_NAME_LEN);
+  rominfo->name[N64_NAME_LEN] = 0;
 
   // ROM maker
   rominfo->maker = NULL_TO_UNKNOWN_S (n64_maker[MIN (OFFSET
-    (n64_header, 59 ^ rominfo->interleaved) & 0xff, N64_MAKER_MAX - 1)]);
+    (n64_header, 59 ^ rominfo->interleaved), N64_MAKER_MAX - 1)]);
 
   // ROM country
   rominfo->country = NULL_TO_UNKNOWN_S (n64_country[MIN (OFFSET
-    (n64_header, 63 ^ (!rominfo->interleaved)) & 0xff, N64_COUNTRY_MAX - 1)]);
+    (n64_header, 63 ^ (!rominfo->interleaved)), N64_COUNTRY_MAX - 1)]);
 
   // CRC stuff
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
@@ -459,7 +477,6 @@ n64_init (st_rominfo_t *rominfo)
       rominfo->internal_crc_len = rominfo->internal_crc2_len = 4;
 
       n64_chksum (rominfo);
-
       rominfo->current_internal_crc = n64crc.crc1;
 
       for (x = 0; x < 4; x++)
@@ -506,32 +523,24 @@ cd64_usage
 }
 
 
-int
-n64_chksum (st_rominfo_t *rominfo)
-{
-//   ROM Checksum Routine Courtesy of:
-//   chksum64 V1.2, a program to calculate the ROM checksum of Nintendo64 ROMs.
-//   Copyright (C) 1997  Andreas Sterbenz (stan@sbox.tu-graz.ac.at)
+// ROM Checksum Routine Courtesy of:
+//  chksum64 V1.2, a program to calculate the ROM checksum of Nintendo64 ROMs.
+//  Copyright (C) 1997  Andreas Sterbenz (stan@sbox.tu-graz.ac.at)
+
 #define ROL(i, b) (((i)<<(b)) | ((i)>>(32-(b))))
 #define BYTES2LONG(b, s) ( (((b)[0^(s)] & 0xffL) << 24) | \
                            (((b)[1^(s)] & 0xffL) << 16) | \
                            (((b)[2^(s)] & 0xffL) <<  8) | \
                            (((b)[3^(s)] & 0xffL)) )
 
-#define LONG2BYTES(l, b, s)  (b)[0^(s)] = ((l)>>24)&0xff; \
-                             (b)[1^(s)] = ((l)>>16)&0xff; \
-                             (b)[2^(s)] = ((l)>> 8)&0xff; \
-                             (b)[3^(s)] = ((l)    )&0xff;
-
-
-
 #define CHECKSUM_START 0x1000
 #define CHECKSUM_LENGTH 0x100000L
 #define CHECKSUM_HEADERPOS 0x10
-#define CHECKSUM_END (CHECKSUM_START + CHECKSUM_LENGTH)
 #define CHECKSUM_STARTVALUE 0xf8ca4ddc
-#define HEADER_MAGIC 0x80371240
 
+int
+n64_chksum (st_rominfo_t *rominfo)
+{
   char readchunk3[MAXBUFSIZE];
   unsigned long i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,
                 rlen = (rominfo->file_size - rominfo->buheader_len) - CHECKSUM_START,
@@ -557,22 +566,16 @@ n64_chksum (st_rominfo_t *rominfo)
       if (rlen > 0)
         {
           n = fread (readchunk3, 1, MIN (sizeof (readchunk3), clen), fh);
-          if ((n & 0x03) != 0)
-            {
-              n += fread (readchunk3 + n, 1, 4 - (n & 3), fh);
-            }
+          if ((n & 3) != 0)
+            n += fread (readchunk3 + n, 1, 4 - (n & 3), fh);
         }
       else
-        {
-          n = MIN (sizeof (readchunk3), clen);
-        }
+        n = MIN (sizeof (readchunk3), clen);
+
       if ((n == 0) || ((n & 3) != 0))
         {
           if ((clen != 0) || (n != 0))
-            {
-              fprintf (stderr,
-                       "ERROR: short read, checksum may be incorrect.\n");
-            }
+            fprintf (stderr, "ERROR: Short read, checksum may be incorrect.\n");
           break;
         }
       for (i = 0; i < n; i += 4)
@@ -587,13 +590,9 @@ n64_chksum (st_rominfo_t *rominfo)
           k1 = ROL (c1, k2);
           t5 += k1;
           if (c1 < t2)
-            {
-              t2 ^= k1;
-            }
+            t2 ^= k1;
           else
-            {
-              t2 ^= t6 ^ c1;
-            }
+            t2 ^= t6 ^ c1;
           t1 += c1 ^ t5;
         }
       if (rlen > 0)
@@ -607,13 +606,6 @@ n64_chksum (st_rominfo_t *rominfo)
   sum1 = t6 ^ t4 ^ t3;
   sum2 = t5 ^ t2 ^ t1;
 
-  LONG2BYTES (sum1, &readchunk3[0], 0);
-  LONG2BYTES (sum2, &readchunk3[4], 0);
-  fseek (fh, CHECKSUM_HEADERPOS, SEEK_SET);
-  fread (readchunk3 + 8, 1, 8, fh);
-  fseek (fh, CHECKSUM_HEADERPOS, SEEK_SET);
-  LONG2BYTES (sum1, &readchunk3[16], rominfo->interleaved);
-  LONG2BYTES (sum2, &readchunk3[20], rominfo->interleaved);
   fclose (fh);
 
   n64crc.crc1 = sum1;

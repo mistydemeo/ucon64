@@ -83,6 +83,14 @@ void BuildCRCTable ();
 unsigned long CalculateBufferCRC (unsigned int count, unsigned long crc,
                                   void *buffer);
 unsigned long CalculateFileCRC (FILE * file);
+
+/*
+  like zlib/crc32(); uCON64 has it's own crc calc. stuff
+  this is just a wrapper
+*/
+unsigned long
+unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size);
+
 unsigned long fileCRC32 (char *filename, long start);   // calculate CRC32 of filename beginning from start
 
 //ucon64 specific wrapper for misc.c/filebackup()

@@ -585,7 +585,7 @@ main (int argc, char **argv)
         WIN32_FIND_DATA find_data;
         HANDLE dp;
 #endif
-        
+
         realpath2 (argv[rom_index], buf);
         if (stat (buf, &fstate) != -1)
           {

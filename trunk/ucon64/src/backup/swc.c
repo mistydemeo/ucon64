@@ -662,9 +662,7 @@ wait_for_ready (void)
 void
 checkabort (int status)
 {
-  if (
-       ((!rom.frontend) ? kbhit () : 0)
-       && getch () == 'q')
+  if (((!rom.frontend) ? kbhit () : 0) && getch () == 'q')
     {
       puts ("\nProgram aborted");
       exit (status);

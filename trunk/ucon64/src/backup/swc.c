@@ -775,6 +775,7 @@ swc_write_rts (const char *filename, unsigned int parport)
       ucon64_gauge (starttime, bytessend, size);
       ffe_checkabort (2);
     }
+  ffe_send_command (6, 3, 0);
 
   free (buffer);
   fclose (file);

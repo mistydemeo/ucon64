@@ -50,8 +50,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 	unsigned short Data16;
     } IO_Tuple;
 
-//    void OpenPort();
-//    void ClosePort();
   #elif __linux__
     #ifdef __GLIBC__
       #include <sys/io.h>                       // ioperm() (glibc)
@@ -105,22 +103,6 @@ long filetestpad(	char *filename	//test if EOF is padded (repeating bytes) begin
 int testsplit(	char *filename		//test if ROM is splitted into parts
 );
 
-/*
-unsigned char inportb(	unsigned int arg1	//read a byte from the parallel port
-);
-
-unsigned char outportb(	unsigned int arg1	//write a byte to the p.p.
-			,unsigned int arg2
-);
-
-unsigned short int inport(	unsigned int arg1	//read a word from the p.p.
-);
-
-unsigned short int outport(	unsigned int arg1	//write a word to the p.p.
-				,unsigned int arg2
-);
-*/
-
 #define out1byte(p,x)	outportb(p,x)
 #define in1byte(p)	inportb(p)
 // DJGPP has outportX() & inportX()
@@ -133,16 +115,6 @@ inline void outportw(unsigned short port, unsigned short word);
 #endif
 
 unsigned int parport_probe(	unsigned int parport	//detect parallel port
-);
-
-int parport_write(	char src[]
-			,unsigned int len
-			,unsigned int parport
-);
-
-int parport_read(	char dest[]
-			,unsigned int len
-			,unsigned int parport
 );
 
 int parport_gauge(	time_t init_time

@@ -30,13 +30,17 @@ int bsl(char *name,char *option2)
  long   done=0, add;
  int    dat;
 
-if(!(fh=fopen(name,"r+b")))return(-1);
+if(!(fh=fopen(filebackup(name),"r+b")))return(-1);
 if(!(fh2=fopen(option2,"rb")))return(-1);
 
 
 	printf("BSL/Baseline\n");
 	printf("%ld (%.4f Mb)\n",quickftell(option2),(float)quickftell(option2)/MBIT);
-	printf("\n");
+	printf("\n"
+	"NOTE: sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
+"      This means you must convert for example a Super Nintendo ROM with -swc\n"
+"      or -mgd or the patch will not work\n"
+);
 
 //	printf("Internal Size: %.4f Mb\n",fsize(romname,8));
 //	printf("Version: 1.%d\n","?");

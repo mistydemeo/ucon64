@@ -498,11 +498,11 @@ main (int argc, char **argv)
 #endif
 
   if (!strlen (ucon64.rom) && optind < argc)
-    ucon64.rom = argv[optind++];
+    ucon64.rom = argv[optind];
 
 //  ucon64.rom = ucon64_extract (ucon64.rom);
 
-  rom_index = optind > 0 ? optind - 1 : 0;      // save index of first file
+  rom_index = optind;                           // save index of first file
   /*
     We want to make it as easy as possible to use uCON64. Therefore don't
     require that --file is specified when only two non-switch non-option
@@ -525,14 +525,11 @@ main (int argc, char **argv)
   if (argc - rom_index == 2 && !strlen (ucon64.file))
     {
       ucon64.file = argv[argc - 1];
-      if (!access (argv[argc - 1], F_OK))
+      if (!access (ucon64.file, F_OK))
         file_message = 1;
       argc--;
     }
-/*
-  for (c = 0; c < argc; c++)
-    printf ("argv[%d] = %s\n", c, ucon64.argv[c]);
-*/
+
 #ifdef  BACKUP
   if (ucon64.file)
     sscanf (ucon64.file, "%x", &ucon64.parport);
@@ -544,7 +541,6 @@ main (int argc, char **argv)
     {
       ucon64.rom = argv[rom_index];
       ucon64.console = console;
-      optind = 0;
 
       ucon64.show_nfo = show_nfo;
       if (!ucon64_init (ucon64.rom, &rom))
@@ -560,10 +556,10 @@ main (int argc, char **argv)
           ucon64_nfo (&rom);
 
       /*
-        Several options take more than one file, but should be executed only
-        once. Options that use the --file argument, needn't be specified here,
-        because argc has already been decremented. See the code that sets
-        ucon64.file.
+        Some options take more than one file as argument, but should be
+        executed only once. Options that use the --file argument, needn't be
+        specified here, because argc has already been decremented. See the code
+        that sets ucon64.file.
       */
       switch (ucon64_option)
         {
@@ -590,17 +586,19 @@ int
 ucon64_execute_options (void)
 // execute all options for a single file
 {
-  int ucon64_argc, c = 0, result = 0, value = 0;
+  int ucon64_argc, c, result = 0, value = 0;
   unsigned int padded;
-  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], src_name[FILENAME_MAX];
+  char buf[MAXBUFSIZE], src_name[FILENAME_MAX];
   const char *ucon64_argv[128];
 
+  optind = 0;                                   // start with first option
   while ((ucon64_option = c =
             getopt_long_only (ucon64.argc, ucon64.argv, "", long_options, NULL)) != -1)
     {
 #include "options.c"
     }
-  return 0;
+
+  return result;
 }
 
 

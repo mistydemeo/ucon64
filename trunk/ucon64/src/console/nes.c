@@ -1013,7 +1013,7 @@ nes_unif (st_rominfo_t *rominfo)
   fclose (destfile);
   unregister_func (remove_temp_file);
   remove_temp_file ();
-  ucon64_wrote (dest_name);
+  fprintf (stderr, ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -1399,7 +1399,7 @@ nes_ines (st_rominfo_t *rominfo)
   fclose (destfile);
   unregister_func (remove_temp_file);
   remove_temp_file ();
-  ucon64_wrote (dest_name);
+  fprintf (stderr, ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -1439,7 +1439,7 @@ nes_ffe (st_rominfo_t *rominfo)
   ucon64_fbackup (NULL, buf);
   q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
   q_fcpy (ucon64.rom, rominfo->buheader_len, size, buf, "ab");
-  ucon64_wrote (buf);
+  fprintf (stderr, ucon64_msg[WROTE], buf);
 
   return 0;
 }
@@ -1460,7 +1460,7 @@ nes_ineshd (st_rominfo_t *rominfo)
   setext (dest_name, ".HDR");
   ucon64_fbackup (NULL, dest_name);
   q_fcpy (ucon64.rom, rominfo->buheader_start, 16, dest_name, "wb");
-  ucon64_wrote (dest_name);
+  fprintf (stderr, ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -1507,7 +1507,7 @@ nes_dint (st_rominfo_t *rominfo)
   fclose (destfile);
   unregister_func (remove_temp_file);
   remove_temp_file ();
-  ucon64_wrote (dest_name);
+  fprintf (stderr, ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -1707,7 +1707,7 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
     {
       q_fwrite (&ines_header, 0, INES_HEADER_LEN, dest_name, "wb");
       q_fwrite (buffer, INES_HEADER_LEN, size, dest_name, "ab");
-      ucon64_wrote (dest_name);
+      fprintf (stderr, ucon64_msg[WROTE], dest_name);
       free (buffer);
     }
   else
@@ -1780,7 +1780,7 @@ write_prm (st_ines_header_t *header, const char *fname)
       return -1;                                // try to continue
     }
   else
-    ucon64_wrote (fname);
+    fprintf (stderr, ucon64_msg[WROTE], fname);
 
   return 0;
 }
@@ -1845,7 +1845,7 @@ nes_s (st_rominfo_t *rominfo)
       if (q_fwrite (trainer_data, 0, 512, dest_name, "wb") == -1)
         fprintf (stderr, "ERROR: Can't write %s\n", dest_name); // try to continue
       else
-        ucon64_wrote (dest_name);
+        fprintf (stderr, ucon64_msg[WROTE], dest_name);
     }
 
   if (prg_size > 0)
@@ -1855,7 +1855,7 @@ nes_s (st_rominfo_t *rominfo)
       if (q_fwrite (prg_data, 0, prg_size, dest_name, "wb") == -1)
         fprintf (stderr, "ERROR: Can't write %s\n", dest_name); // try to continue
       else
-        ucon64_wrote (dest_name);
+        fprintf (stderr, ucon64_msg[WROTE], dest_name);
     }
   else
     printf ("WARNING: No PRG data in %s\n", ucon64.rom);
@@ -1867,7 +1867,7 @@ nes_s (st_rominfo_t *rominfo)
       if (q_fwrite (chr_data, 0, chr_size, dest_name, "wb") == -1)
         fprintf (stderr, "ERROR: Can't write %s\n", dest_name); // try to continue
       else
-        ucon64_wrote (dest_name);
+        fprintf (stderr, ucon64_msg[WROTE], dest_name);
     }
 
   free (trainer_data);
@@ -2550,7 +2550,7 @@ nes_fds (st_rominfo_t *rominfo)
 
   free (buffer);
   remove_temp_file ();
-  ucon64_wrote (dest_name);
+  fprintf (stderr, ucon64_msg[WROTE], dest_name);
 
   return 0;
 }

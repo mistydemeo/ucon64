@@ -482,7 +482,7 @@ next_byte:
   fclose (orgfile);
   fclose (modfile);
   fclose (ipsfile);
-  ucon64_wrote (ipsname);
+  fprintf (stderr, ucon64_msg[WROTE], ipsname);
 
   return 0;
 }

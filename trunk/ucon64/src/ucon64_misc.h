@@ -71,20 +71,19 @@ extern const char *unknown_usage[];
 extern char *ucon64_temp_file;
 extern const char *nintendo_maker[];
 
-#if 0
+/*
+  uCON64 messages
+  
+  usage example: fprintf (stdout, ucon64_msg[WROTE], filename);
+*/
 enum
 {
-  PARPORT_ERROR,
+  PARPORT_ERROR = 0,
   CONSOLE_ERROR,
   WROTE
 };
 
-extern void ucon64_msg(int msg, ...);
-#else
-extern const char *ucon64_parport_error; // std. error message for parport
-extern const char *ucon64_console_error; // std. error message if the correct console couldn't be found
-extern void ucon64_wrote (const char *filename);
-#endif
+extern const char *ucon64_msg[]; 
 
 
 /*
@@ -113,13 +112,6 @@ extern int ucon64_testsplit (const char *filename); // test if ROM is split
 extern unsigned int ucon64_parport_init (unsigned int parport);
 
 
-/*
-  open an archive and look for a rom; if rom found return romname else
-  return (char *)archive
-
-  to delete the tempdir *dp must be closed with closedir2()
-*/
-extern const char *ucon64_extract (const char *archive);
 extern int ucon64_e (const char *rominfo);
 extern int ucon64_ls (const char *path, int mode);
 extern int ucon64_configfile (void);

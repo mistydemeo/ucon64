@@ -79,7 +79,7 @@ lynx_lyx (st_rominfo_t *rominfo)
   ucon64_fbackup (NULL, buf);
   q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), buf, "wb");
 
-  ucon64_wrote (buf);
+  fprintf (stderr, ucon64_msg[WROTE], buf);
   return 0;
 }
 
@@ -126,7 +126,7 @@ lynx_lnx (st_rominfo_t *rominfo)
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), buf, "wb");
   q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), buf, "ab");
 
-  ucon64_wrote (buf);
+  fprintf (stderr, ucon64_msg[WROTE], buf);
   return 0;
 }
 
@@ -149,7 +149,7 @@ lynx_rot (st_rominfo_t *rominfo, int rotation)
   ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom, "r+b");
 
-  ucon64_wrote (ucon64.rom);
+  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
 
   return 0;
 }
@@ -195,7 +195,7 @@ lynx_n (st_rominfo_t *rominfo)
   ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom, "r+b");
 
-  ucon64_wrote (ucon64.rom);
+  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 
@@ -231,7 +231,7 @@ lynx_b (st_rominfo_t *rominfo, int bank)
   ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom, "r+b");
 
-  ucon64_wrote (ucon64.rom);
+  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 

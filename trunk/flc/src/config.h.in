@@ -1,3 +1,4 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
 /*
 config.h - config file for flc
 
@@ -20,11 +21,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef CONFIG_H
 #define CONFIG_H
 //#define TODO
-//#define DEBUG
+@DEFINE_DEBUG@
 //#define USE_ZLIB //not supported yet
 
-#endif // CONFIG_H
-/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+/* enables/disables the use of color in the display output */
+@DEFINE_ANSI_COLOR@
 
 /* Define to empty if the keyword does not work.  */
 #undef const
@@ -76,3 +77,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
+#endif // CONFIG_H

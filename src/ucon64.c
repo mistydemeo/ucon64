@@ -319,92 +319,83 @@ main (int argc, char *argv[])
           ucon64.backup = 0;
           break;
 
-        case ucon64_E:
-        case ucon64_B0:
-        case ucon64_B1:
+        case ucon64_A:
+        case ucon64_B:
         case ucon64_BIOS:
-        case ucon64_BOT:
+        case ucon64_C:
         case ucon64_CHK:
         case ucon64_CRC:
         case ucon64_CRCHD:
-        case ucon64_RL:
-        case ucon64_RU:
-        case ucon64_HEX:
-        case ucon64_C:
+        case ucon64_CRP:
         case ucon64_CS:
-        case ucon64_FIND:
-        case ucon64_SWAP:
-        case ucon64_PAD:
-        case ucon64_PADHD:
-        case ucon64_ISPAD:
-        case ucon64_STRIP:
-        case ucon64_STP:
-        case ucon64_INS:
-        case ucon64_B:
-        case ucon64_I:
-        case ucon64_A:
-        case ucon64_MKI:
-        case ucon64_MKA:
-        case ucon64_NA:
-        case ucon64_PPF:
-        case ucon64_MKPPF:
-        case ucon64_NPPF:
-        case ucon64_IDPPF:
-        case ucon64_LS:
-        case ucon64_LSV:
-        case ucon64_ISO:
-        case ucon64_MKTOC:
-        case ucon64_MKCUE:
-#ifdef BACKUP_CD
-        case ucon64_XCDRW:
-#endif // BACKUP_CD
         case ucon64_DB:
         case ucon64_DBS:
         case ucon64_DBV:
-        case ucon64_CRP:
         case ucon64_DINT:
+        case ucon64_E:
         case ucon64_F:
 //        case ucon64_FDS:
 //        case ucon64_FDSL:
         case ucon64_FFE:
         case ucon64_FIG:
+        case ucon64_FIND:
         case ucon64_GD3:
         case ucon64_GDF:
         case ucon64_GG:
         case ucon64_GGD:
         case ucon64_GGE:
-        case ucon64_INES:
-        case ucon64_INESHD:
+        case ucon64_HELP:
+        case ucon64_HEX:
+        case ucon64_I:
+        case ucon64_IDPPF:
+        case ucon64_INS:
+        case ucon64_ISO:
+        case ucon64_ISPAD:
         case ucon64_J:
         case ucon64_K:
         case ucon64_L:
-        case ucon64_LNX:
-        case ucon64_LOGO:
-        case ucon64_LYX:
+        case ucon64_LS:
+        case ucon64_LSV:
         case ucon64_MGD:
+//        case ucon64_MGH:
+        case ucon64_MKA:
+        case ucon64_MKCUE:
+        case ucon64_MKI:
+        case ucon64_MKPPF:
+        case ucon64_MKTOC:
         case ucon64_MVS:
         case ucon64_N:
         case ucon64_N2:
+        case ucon64_NA:
+        case ucon64_NPPF:
         case ucon64_NROT:
         case ucon64_P:
+        case ucon64_PAD:
+        case ucon64_PADHD:
         case ucon64_PAS:
+        case ucon64_PPF:
+        case ucon64_RL:
+        case ucon64_RU:
         case ucon64_S:
         case ucon64_SGB:
         case ucon64_SMC:
         case ucon64_SMD:
         case ucon64_SMDS:
         case ucon64_SMG:
-        case ucon64_HELP:
         case ucon64_SRAM:
         case ucon64_SSC:
+        case ucon64_STP:
+        case ucon64_STRIP:
+        case ucon64_SWAP:
         case ucon64_SWC:
         case ucon64_UNIF:
         case ucon64_USMS:
         case ucon64_V64:
+#ifdef BACKUP_CD
+        case ucon64_XCDRW:
+#endif // BACKUP_CD
         case ucon64_Z64:
-//        case ucon64_MGH:
           break;
-          
   
         case ucon64_SWCS:
         case ucon64_FIGS:
@@ -415,9 +406,14 @@ main (int argc, char *argv[])
           rom.snes_hirom = 1;
         case ucon64_NHI:
           rom.snes_hirom = 0;
+        case ucon64_SNES:
+#ifdef BACKUP
+        case ucon64_XSWC:
+        case ucon64_XSWCS:
+#endif // BACKUP
           rom.console = ucon64_SNES;
           break;
-          
+
         case ucon64_IP:
           rom.console = ucon64_DC;
           break;
@@ -467,8 +463,12 @@ main (int argc, char *argv[])
           break;
   
         case ucon64_LYNX:
+        case ucon64_B0:
+        case ucon64_B1:
         case ucon64_ROTL:
         case ucon64_ROTR:
+        case ucon64_LNX:
+        case ucon64_LYX:
           rom.console = ucon64_LYNX;
           break;
   
@@ -484,6 +484,8 @@ main (int argc, char *argv[])
           rom.console = ucon64_NEOGEOPOCKET;
           break;
   
+        case ucon64_INES:
+        case ucon64_INESHD:
         case ucon64_NES:
           rom.console = ucon64_NES;
           break;
@@ -513,16 +515,9 @@ main (int argc, char *argv[])
         case ucon64_XV64:
         case ucon64_XDJR:
 #endif // BACKUP
+        case ucon64_BOT:
         case ucon64_N64:
           rom.console = ucon64_N64;
-          break;
-  
-        case ucon64_SNES:
-#ifdef BACKUP
-        case ucon64_XSWC:
-        case ucon64_XSWCS:
-#endif // BACKUP
-          rom.console = ucon64_SNES;
           break;
   
         case ucon64_MULTI:
@@ -535,6 +530,7 @@ main (int argc, char *argv[])
         case ucon64_XFALB:
         case ucon64_XFALC:
 #endif // BACKUP
+        case ucon64_LOGO:
         case ucon64_GBA:
           rom.console = ucon64_GBA;
           break;

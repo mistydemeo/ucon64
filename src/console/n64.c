@@ -576,7 +576,7 @@ n64_chksum (st_rominfo_t *rominfo)
   t6 = CHECKSUM_STARTVALUE;
 
   if (rlen < 0x0100000)                         // 0x0101000
-    return -1;                                  // rom is too short
+    return -1;                                  // ROM is too short
 
   if (!(file = fopen (ucon64.rom, "rb")))
     return -1;

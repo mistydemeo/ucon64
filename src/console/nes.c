@@ -6697,7 +6697,6 @@ nes_init (st_rominfo_t *rominfo)
 
   internal_name = NULL;                         // reset this var, see nes_n()
   type = PASOFAMI;                              // reset type, see below
-  ucon64.crc32 = 0;                             // we have to do this, see below
 
   q_fread (magic, 0, 15, ucon64.rom);
   if (memcmp (magic, INES_SIG_S, 4) == 0)

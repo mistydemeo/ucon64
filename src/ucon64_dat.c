@@ -182,6 +182,9 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t * dat)
     "(UK) England",
     "(Unk) Unknown Country",
     "(I) Italy",
+    "(UE) U.S.A. & Europe",
+    "(JU) Japan & U.S.A.",
+    "(JUE) Japan, U.S.A. & Europe",
     NULL
   };
 
@@ -279,7 +282,7 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t * dat)
       sprintf (dat->misc, "Flags: %s", buf2);
     }
 
-  p = dat->name; 
+  p = dat->name;
   dat->country = NULL;
   for (pos = 0; dat_country[pos]; pos++)
     {

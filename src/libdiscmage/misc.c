@@ -642,14 +642,14 @@ get_suffix (const char *filename)
  vertical tab = 0x09 - 0x0D + 0x20)
 */
 static int
-strtrimr (char *pszStr)
+strtrimr (char *str)
 {
   int i, j;
 
-  j = i = strlen (pszStr) - 1;
+  j = i = strlen (str) - 1;
 
-  while (isspace (pszStr[i]) && (i >= 0))
-    pszStr[i--] = 0;
+  while (isspace (str[i]) && (i >= 0))
+    str[i--] = 0;
 
   return j - i;
 }
@@ -661,17 +661,17 @@ strtrimr (char *pszStr)
   vertical tab = 0x09 - 0x0D + 0x20)
 */
 static int
-strtriml (char *pszStr)
+strtriml (char *str)
 {
   int i = 0, j;
 
-  j = strlen (pszStr) - 1;
+  j = strlen (str) - 1;
 
-  while (isspace (pszStr[i]) && (i <= j))
+  while (isspace (str[i]) && (i <= j))
     i++;
 
   if (0 < i)
-    strcpy (pszStr, &pszStr[i]);
+    strcpy (str, &str[i]);
 
   return i;
 }
@@ -683,26 +683,13 @@ strtriml (char *pszStr)
   vertical tab = 0x09 - 0x0D + 0x20)
 */
 char *
-strtrim (char *pszStr)
-#if 1
+strtrim (char *str)
 {
-  int iBlank;
+  strtrimr (str);
+  strtriml (str);
 
-  iBlank = strtrimr (pszStr);
-  iBlank += strtriml (pszStr);
-
-  return pszStr;
+  return str;
 }
-#else
-{
-  int x = strlen (str) - 1;
-
-  for (; x >= 0 && isspace ((int) *(str + x)); x--);
-  *(str + x + 1) = 0;
-
-  return (char *) (str + strspn (str, "\t "));
-}
-#endif
 
 
 int

@@ -296,15 +296,14 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
   int size = rominfo->file_size;
   int pos = rominfo->file_size - 2;
   int c = q_fgetc (filename, rominfo->file_size - 1);
-  char *buf;
+  unsigned char *buf;
 
-  if (!(buf = (char *) malloc ((size + 2) * sizeof (char))))
+  if (!(buf = (unsigned char *) malloc ((size + 2) * sizeof (unsigned char))))
     return -1;
 
   q_fread (buf, 0, size, filename);
 
-  while (c == (buf[pos] & 0xff))
-    pos--;
+  while (c == buf[pos]) pos--;
 
   free (buf);
 

@@ -1754,7 +1754,7 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_XF2A:
       if (access (ucon64.rom, F_OK) != 0)
-        f2a_read_rom (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
+        f2a_read_rom (ucon64.rom, ucon64.parport, 32);
       else
         f2a_write_rom (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
@@ -1807,7 +1807,7 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_XFAL:
       if (access (ucon64.rom, F_OK) != 0)
-        fal_read_rom (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
+        fal_read_rom (ucon64.rom, ucon64.parport, 32);
       else
         fal_write_rom (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);

@@ -1654,33 +1654,20 @@ fal_args (unsigned int parport)
 int
 fal_read_rom (const char *filename, unsigned int parport, int size)
 {
+  char size_str[80];
+
   fal_args (parport);
 
   fal_argv[fal_argc++] = "-c";
-  if (size != UCON64_UNKNOWN)
+  if (size != 8 && size != 16 && size != 32 && size != 64 && size != 128 &&
+      size != 256)
     {
-      if (size == 8)
-        fal_argv[fal_argc++] = "8";
-      else if (size == 16)
-        fal_argv[fal_argc++] = "16";
-      else if (size == 32)
-        fal_argv[fal_argc++] = "32";
-      else if (size == 64)
-        fal_argv[fal_argc++] = "64";
-      else if (size == 128)
-        fal_argv[fal_argc++] = "128";
-      else if (size == 256)
-        fal_argv[fal_argc++] = "256";
-      else
-        {
-          fprintf (stderr, "ERROR: Invalid argument for -xfalc=n\n"
-                           "       n can be 8, 16, 32, 64, 128 or 256\n");
-          exit (1);
-        }
+      fprintf (stderr, "ERROR: Invalid argument for -xfalc=n\n"
+                       "       n can be 8, 16, 32, 64, 128 or 256\n");
+      exit (1);
     }
-  else
-    fal_argv[fal_argc++] = "32";
-
+  sprintf (size_str, "%d", size);
+  fal_argv[fal_argc++] = size_str;
   fal_argv[fal_argc++] = "-s";
   fal_argv[fal_argc++] = (char *) filename;     // this is safe (FAL code
                                                 //  doesn't modify argv)

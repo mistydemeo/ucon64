@@ -3,9 +3,6 @@ AC_INIT(uCON64, 1.9.8-4, noisyb@gmx.net)
 AC_CONFIG_HEADER(config.h libdiscmage/config.h)
 
 
-CFLAGS="-Wall -W -O3"
-LDFLAGS=-s
-
 dnl Checks for programs.
 AC_PROG_CC(gcc egcs cc)
 AC_PROG_GCC_TRADITIONAL

@@ -1212,9 +1212,6 @@ ac_config_headers="$ac_config_headers config.h libdiscmage/config.h"
 
 
 
-CFLAGS="-Wall -W -O3"
-LDFLAGS=-s
-
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'

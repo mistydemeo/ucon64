@@ -164,8 +164,8 @@ makeppf_main (int argc, const char *argv[])
       fclose (originalbin);
       exit (0);
     }
-  osize = file_size (argv[1]);
-  psize = file_size (argv[2]);
+  osize = q_fsize (argv[1]);
+  psize = q_fsize (argv[2]);
   if (osize != psize)
     {
       fprintf (stderr, "ERROR: Filesize does not match\n");
@@ -293,7 +293,7 @@ makeppf_main (int argc, const char *argv[])
   if (argc >= 5)
     {
       printf ("Adding file_id.diz ...");
-      fsize = file_size (argv[4]);
+      fsize = q_fsize (argv[4]);
       if (fsize > 3072)
         fsize = 3072;           /* File id only up to 3072 bytes! */
       fread (fileidbuf, fsize, 1, fileid);
@@ -367,7 +367,7 @@ applyppf_main (int argc, const char *argv[])
       exit (0);
     }
 
-  ppfsize = file_size (argv[2]);
+  ppfsize = q_fsize (argv[2]);
 
   /* What encoding Method? PPF1.0 or PPF2.0? */
   fseek (ppffile, 5, SEEK_SET);
@@ -424,7 +424,7 @@ applyppf_main (int argc, const char *argv[])
       /* Do the BINfile size check! */
       fseek (ppffile, 56, SEEK_SET);
       fread (&dizlen, 4, 1, ppffile);
-      binlen = file_size (argv[1]);
+      binlen = q_fsize (argv[1]);
       if (dizlen != binlen)
         {
           fprintf (stderr, "ERROR: the size of the IMAGE is not %d Bytes\n", dizlen);
@@ -501,19 +501,19 @@ addppfid (const char *filename)
   char fileidbuf[3072], buf[4095];
 
   printf ("Adding file_id.diz .. ");
-  fsize = file_size (filename);
-  quick_fread (fileidbuf, 0, (fsize > 3072) ? 3072 : fsize, ucon64.file);
+  fsize = q_fsize (filename);
+  q_fread (fileidbuf, 0, (fsize > 3072) ? 3072 : fsize, ucon64.file);
   fileidbuf[fsize] = 0;
   sprintf (buf, "@BEGIN_FILE_ID.DIZ%s@END_FILE_ID.DIZ", fileidbuf);
 
-  pos = filencmp (filename, 0, file_size (filename), "@BEGIN_FILE_ID.DIZ", 18, -1);
+  pos = q_fncmp (filename, 0, q_fsize (filename), "@BEGIN_FILE_ID.DIZ", 18, -1);
   if (pos == -1)
-    pos = file_size (filename);
+    pos = q_fsize (filename);
   truncate (filename, pos);
 
-  quick_fwrite (buf, pos, strlen (buf), filename, "r+b");
+  q_fwrite (buf, pos, strlen (buf), filename, "r+b");
 
-  quick_fwrite (&fsize, file_size (filename), 4, filename, "r+b");
+  q_fwrite (&fsize, q_fsize (filename), 4, filename, "r+b");
   printf ("done!\n");
   return 0;
 }

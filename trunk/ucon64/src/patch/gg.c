@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.8 2002-08-25 12:15:47 noisyb Exp $
+ * $Id: gg.c,v 1.9 2002-08-30 09:49:49 noisyb Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.  
  * All rights reserved. Distributed under the BSD Software License.
@@ -1066,7 +1066,7 @@ gg_ggd (void)
 int
 gg_gg (st_rominfo_t *rominfo)
 {
-  long size = file_size (ucon64.rom) - rominfo->buheader_len;
+  long size = q_fsize (ucon64.rom) - rominfo->buheader_len;
   long add, value;
   char buf[MAXBUFSIZE];
   int result = -1;
@@ -1107,11 +1107,11 @@ gg_gg (st_rominfo_t *rominfo)
     }
 
   printf ("\n");
-  file_hexdump (ucon64.rom, add + rominfo->buheader_len, 1);
+  q_fhexdump (ucon64.rom, add + rominfo->buheader_len, 1);
 
-  quick_fputc (file_backup(NULL, ucon64.rom), add + rominfo->buheader_len, (unsigned char) value, "r+b");
+  q_fputc (q_fbackup(NULL, ucon64.rom), add + rominfo->buheader_len, (unsigned char) value, "r+b");
 
-  file_hexdump (ucon64.rom, add + rominfo->buheader_len, 1);
+  q_fhexdump (ucon64.rom, add + rominfo->buheader_len, 1);
   printf ("\n");
 
   return 0;

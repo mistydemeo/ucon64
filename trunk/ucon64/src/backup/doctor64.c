@@ -335,7 +335,7 @@ doctor64_write (const char *filename, long start, long len, unsigned int parport
   FILE *fh;
   unsigned int size, inittime, pos, bytessend = 0;
 
-  size = file_size (filename) - start;
+  size = q_fsize (filename) - start;
   if (initCommunication (parport) == -1)
     return -1;
   inittime = time (0);

@@ -584,7 +584,7 @@ swc_write_rom (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  fsize = file_size (filename);
+  fsize = q_fsize (filename);
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   send_command0 (0xc008, 0);
@@ -722,7 +722,7 @@ swc_write_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  size = file_size (filename) - HEADERSIZE;     // SWC SRAM is 4*8KB, emu SRAM often not
+  size = q_fsize (filename) - HEADERSIZE;     // SWC SRAM is 4*8KB, emu SRAM often not
   printf ("Send: %d Bytes\n", size);
   fseek (file, HEADERSIZE, SEEK_SET);           // skip the header
 

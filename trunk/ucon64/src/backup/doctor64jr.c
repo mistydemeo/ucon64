@@ -719,7 +719,7 @@ download_n64 ()
       printf ("open error !!!\07\n");
       return (-1);
     }
-  size = file_size (file_name);
+  size = q_fsize (file_name);
 
   if (sel == 0)
     printf ("Downloading");

@@ -113,7 +113,7 @@ const char *unknown_usage[] =
 
 /*
   Return type is not const char *, because it may return move_name (indirectly
-  via file_backup()), which is not a pointer to constant characters.
+  via q_fbackup()), which is not a pointer to constant characters.
 */
 char *
 ucon64_fbackup (char *move_name, const char *filename)
@@ -127,7 +127,7 @@ ucon64_fbackup (char *move_name, const char *filename)
       fflush (stdout);
     }
 
-  return file_backup (move_name, filename);
+  return q_fbackup (move_name, filename);
 }
 
 
@@ -160,7 +160,7 @@ handle_existing_file (const char *dest, char *src)
             {                                   // case 1a
               ucon64_fbackup (NULL, dest);
               setext (src, ".BAK");
-            }                                   // must match with what file_backup() does
+            }                                   // must match with what q_fbackup() does
           else
             {                                   // case 1b
               ucon64.backup = 1;                // force ucon64_fbackup() to _rename_ file
@@ -188,14 +188,14 @@ remove_temp_file (void)
 
 
 int
-filepad (const char *filename, int start, int size)
+ucon64_pad (const char *filename, int start, int size)
 /*
   Pad file (if necessary) to start + size bytes;
   Ignore start bytes (if file has header or something)
 */
 {
   FILE *file;
-  int oldsize = file_size (filename) - start, sizeleft;
+  int oldsize = q_fsize (filename) - start, sizeleft;
   unsigned char padbuffer[MAXBUFSIZE];
 
   // now we can also "pad" to smaller sizes
@@ -226,7 +226,7 @@ filepad (const char *filename, int start, int size)
 
 #if 1
 long
-file_testpad (const char *filename, st_rominfo_t *rominfo)
+ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
   int size, pos, c;
@@ -234,12 +234,12 @@ file_testpad (const char *filename, st_rominfo_t *rominfo)
 
   size = rominfo->file_size;
   pos = size - 2;
-  c = quick_fgetc (filename, size - 1);
+  c = q_fgetc (filename, size - 1);
 
   if (!(buf = (char *) malloc ((size + 2) * sizeof (char))))
     return -1;
 
-  quick_fread (buf, 0, size, filename);
+  q_fread (buf, 0, size, filename);
 
   while (c == (buf[pos] & 0xff))
     pos--;
@@ -253,16 +253,16 @@ file_testpad (const char *filename, st_rominfo_t *rominfo)
 
 
 long
-file_testpad (const char *filename, st_rominfo_t *rominfo)
+ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
   int pos, c;
   char buf[MAXBUFSIZE];
 
   pos = rominfo->file_size - 2;
-  c = quick_fgetc (filename, pos + 1);
+  c = q_fgetc (filename, pos + 1);
 
-  while (quick_fread (buf, pos - (pos % MAXBUFSIZE),
+  while (q_fread (buf, pos - (pos % MAXBUFSIZE),
            pos % MAXBUFSIZE, filename) > 0)
     {
       while ((pos % MAXBUFSIZE) >= 0)
@@ -376,8 +376,32 @@ outportw (unsigned short port, unsigned short word)
 #endif // defined __unix__ || defined __BEOS__
 
 
-int
-detect_parport (unsigned int port)
+
+
+#if 0
+  if (port <= 3)
+    {
+printf ("SHIT");
+fflush (stdout);
+      for (i = 0; i < 3; i++)
+        {
+          if (detect_parport (parport_addresses[i]) == 1)
+            {
+              port = parport_addresses[i];
+              break;
+            }
+        }
+      if (i >= 3)
+        port = 0;
+    }
+  else
+    if ((port != parport_addresses[0]) &&
+        (port != parport_addresses[1]) &&
+        (port != parport_addresses[2]))
+    port = 0;
+#endif
+unsigned int
+ucon64_parport_probe (unsigned int port)
 {
   int i;
 
@@ -417,11 +441,11 @@ detect_parport (unsigned int port)
 
 
 unsigned int
-parport_probe (unsigned int port)
-// detect parallel port
+ucon64_parport_init (unsigned int port)
 {
   unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };
   int i;
+  port = ucon64_parport_probe (port);
 
 #ifdef  __BEOS__
   ucon64_io_fd = open ("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
@@ -437,10 +461,10 @@ parport_probe (unsigned int port)
         }
       else
         {                                       // print warning, but continue
-          printf ("WARNING: Support for the driver parnew is deprecated. Future versions of uCON64\n"
-                  "         might not support this driver. You can download the latest ioport\n"
-                  "         driver from http://www.infernal.currantbun.com or\n"
-                  "         http://ucon64.sourceforge.net\n\n");
+          fprintf (stderr, "WARNING: Support for the driver parnew is deprecated. Future versions of uCON64\n"
+                           "         might not support this driver. You can download the latest ioport\n"
+                           "         driver from http://www.infernal.currantbun.com or\n"
+                           "         http://ucon64.sourceforge.net\n\n");
         }
     }
 
@@ -452,24 +476,6 @@ parport_probe (unsigned int port)
     }
 #endif // __BEOS__
 
-  if (port <= 3)
-    {
-      for (i = 0; i < 3; i++)
-        {
-          if (detect_parport (parport_addresses[i]) == 1)
-            {
-              port = parport_addresses[i];
-              break;
-            }
-        }
-      if (i >= 3)
-        return 0;
-    }
-  else
-    if ((port != parport_addresses[0]) &&
-        (port != parport_addresses[1]) &&
-        (port != parport_addresses[2]))
-    return 0;
 
   if (port != 0)
     {
@@ -490,15 +496,6 @@ parport_probe (unsigned int port)
       outportb (port + PARPORT_CONTROL, inportb (port + PARPORT_CONTROL) & 0x0f);
     }                                           // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 
-  return port;
-}
-
-
-unsigned int
-ucon64_parport_probe (unsigned int port)
-{
-  if (!(port = parport_probe (port)))
-    ;
 /*
     fprintf (stderr, "ERROR: no parallel port 0x%s found\n\n", strupr (buf));
   else
@@ -538,7 +535,7 @@ ucon64_gauge (time_t init_time, long pos, long size)
     return gauge (init_time, pos, size);
   else
     {
-      int percentage = 100 * pos/size;
+      int percentage = (100LL * pos) / size;
 
       printf ("%u\n", percentage);
       fflush (stdout);
@@ -631,7 +628,7 @@ ucon64_bin2iso (const char *image, int track_mode)
 
   strcpy (buf, filename_only(image));
   setext (buf, ".ISO");
-  size = file_size (image) / sector_size;
+  size = q_fsize (image) / sector_size;
 
   if (!(src = fopen (image, "rb")))
     return -1;
@@ -689,7 +686,7 @@ seek_pvd (int sector_size, int mode, const char *filename)
 
   fread (buffer, 1, 8, fsource);
 #endif
-  quick_fread (buf, 16 * sector_size
+  q_fread (buf, 16 * sector_size
     + ((sector_size == 2352) ? 16 : 0) // header
     + ((mode == 2) ? 8 : 0)            // subheader
     , 8, filename);
@@ -769,7 +766,7 @@ ucon64_trackmode_probe (const char *image)
     { 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0 };
   char buf[MAXBUFSIZE];
 
-  quick_fread (buf, 0, 16, image);
+  q_fread (buf, 0, 16, image);
 
 #ifdef DEBUG
   mem_hexdump(buf, 16, 0);
@@ -816,7 +813,7 @@ ucon64_mktoc (st_rominfo_t *rominfo)
   int result, fsize;
 
   result = ucon64_trackmode_probe (ucon64.rom);
-  fsize = file_size (ucon64.rom);
+  fsize = q_fsize (ucon64.rom);
 
   sprintf (buf, "%s\n" "\n" "\n" "// Track 1\n"
            "TRACK %s\n"
@@ -1073,6 +1070,11 @@ ucon64_configfile (void)
 //                 "# before processing a ROM uCON64 will make a backup of it\n"
                  "#\n"
                  "backups=1\n"
+#ifdef ANSI_COLOR
+                 "# use ANSI colors in output? (1=yes; 0=no)\n"
+                 "#\n"
+                 "ansi_color=1\n"
+#endif                 
                  "#\n"
                  "# parallel port\n"
                  "#\n"
@@ -1156,13 +1158,13 @@ ucon64_configfile (void)
 
       printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
 
-      filecopy (ucon64.configfile, 0, file_size (ucon64.configfile), buf2, "wb");
+      q_fcpy (ucon64.configfile, 0, q_fsize (ucon64.configfile), buf2, "wb");
 
       sprintf (buf, "%d", UCON64_VERSION);
       set_property (ucon64.configfile, "version", buf);
 
+      set_property (ucon64.configfile, "ansi_color", "1");
 #if 0
-      set_property (ucon64.configfile, "backups", "1");
 
 #ifdef BACKUP
       set_property (ucon64.configfile, "parport", "0x378");

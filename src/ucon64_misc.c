@@ -339,7 +339,7 @@ const st_usage_t ucon64_options_usage[] = {
 #endif
   {"crc", NULL, "show CRC32 value of ROM"  //; this will also force calculation for\n"
              /* "files bigger than %d Bytes (%.4f Mb)" */},
-  {"ls", NULL, "generate ROM list for all ROMs"},
+  {"ls", NULL, "generate ROM list for all recognized ROMs"},
   {"lsv", NULL, "like " OPTION_LONG_S "ls but more verbose"},
 #ifdef  __MSDOS__
   {"hex", NULL, "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex ...|more\""},

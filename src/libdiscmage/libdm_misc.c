@@ -81,18 +81,6 @@ const char *dm_msg[] = {
 };
 
 
-int
-fsize (const char *fname)
-{
-  struct stat fstate;
-
-  if (!stat (fname, &fstate))
-    return fstate.st_size;
-
-  return -1;
-}
-
-
 void
 writewavheader (FILE * fdest, int track_length)
 {
@@ -245,28 +233,12 @@ msf_to_lba (struct cdrom_msf *msf)
 #endif
 
 
-#if 0
-int32_t
-read_raw_frame (int32_t fd, int32_t lba, unsigned char *buf)
+int
+dm_free (dm_image_t *image)
 {
-  struct cdrom_msf *msf = (struct cdrom_msf *) buf;
-  int32_t rc;
-
-//  msf = (struct cdrom_msf *) buf;
-#if 1
-  n2msf (lba + CD_MSF_OFFSET, msf);
-#else
-  msf->cdmsf_min0 = (lba + CD_MSF_OFFSET) / CD_FRAMES / CD_SECS;
-  msf->cdmsf_sec0 = (lba + CD_MSF_OFFSET) / CD_FRAMES % CD_SECS;
-  msf->cdmsf_frame0 = (lba + CD_MSF_OFFSET) % CD_FRAMES;
-#endif
-
-  if ((rc = ioctl (fd, CDROMREADMODE2, buf)) == -1)
-    fprintf (stderr, "ERROR: ioctl CDROMREADMODE2\n");
-
-  return rc;
+  memset (image, 0, sizeof (dm_image_t));
+  return 0;
 }
-#endif
 
 
 const dm_track_t *
@@ -329,7 +301,7 @@ dm_track_init (dm_track_t *track, FILE *fh)
 
 
 dm_image_t *
-dm_reopen (const char *fname, dm_image_t *image_p)
+dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
 // recurses through all <image_type>_init functions to find correct image type
 {
   typedef struct
@@ -342,52 +314,78 @@ dm_reopen (const char *fname, dm_image_t *image_p)
   static st_probe_t probe[] =
     {
       {DM_CDI, cdi_init, "CDI (DiscJuggler) Image"},
-      {DM_SHEET, sheet_init, "Image with external sheet file (like: CUE, TOC, ...)"},
 #if 0
       {DM_NRG, nrg_init, "NRG (Nero) Image"}, // nero
       {DM_CCD, ccd_init, "CCD (CloneCD) Image"},
       {DM_UNKNOWN, NULL, "Unknown Image"},
 #endif
+      {DM_SHEET, sheet_init, "Image with external sheet file (like: CUE, TOC, ...)"},
       {0, NULL, NULL}
     };
-  static dm_image_t image; //TODO: malloc
-  static dm_track_t track; //TODO: malloc
-  int x = 0, identified = 0;
+  static dm_image_t image_temp;
+  int x = 0;
   FILE *fh;
 
+#if 0
   (void) image_p;                               // warning remover
 
   memset (&track, 0, sizeof (dm_track_t));
+#endif
 
-  memset (&image, 0, sizeof (dm_image_t));
-  strcpy (image.fname, fname);
+  if (image)
+    dm_free (image);
+
+  if (!image)
+    image = (dm_image_t *) &image_temp; 
+//    image = (dm_image_t *) malloc (sizeof (dm_image_t));
+  if (!image)
+    return NULL;
+
+  memset (image, 0, sizeof (dm_image_t));
+
+  image->flags = flags;
+  strcpy (image->fname, fname);
 
   for (x = 0; probe[x].type; x++)
     if (probe[x].func)
-      if (probe[x].func (&image) != -1)
-        {
-          identified = 1;
-          break;
-        }
+      {
+        memset (image, 0, sizeof (dm_image_t));
+        strcpy (image->fname, fname);
 
-  if (!identified)
+        if (probe[x].func (image) != -1)
+          {
+            image->type = probe[x].type;
+            image->desc = probe[x].desc;
+            break;
+          }
+      }
+
+  if (!image->type) // unknown image
     return NULL;
-
-  image.type = probe[x].type;
-  image.desc = probe[x].desc;
 
   if (!(fh = fopen (fname, "rb")))
     return NULL;
 
-//  for (x = 0; x < image.tracks; x++)
+  for (x = 0; x < image->tracks; x++)
     {
-//      dm_fseek (fh, x, SEEK_SET);
-      dm_track_init (&track, fh);
-      image.track = (dm_track_t *) &track;
+      dm_track_t *track = (dm_track_t *) &image->track[x];
+
+      switch (image->type)
+        {
+          case DM_CDI:
+//          fseek (fh, 0, SEEK_SET);
+            dm_cdi_track_init (track, fh);
+            break;
+
+          default:
+            fseek (fh, 0, SEEK_SET);
+            dm_track_init (track, fh);
+            break;
+        }
     }
 
   fclose (fh);
-  return &image;
+  return image;
 }
 
 
@@ -402,15 +400,16 @@ dm_fseek (FILE *fp, int track, int how)
 
 
 dm_image_t *
-dm_open (const char *fname)
+dm_open (const char *fname, uint32_t flags)
 {
-  return dm_reopen (fname, NULL);
+  return dm_reopen (fname, flags, NULL);
 }
 
 
 int
 dm_close (dm_image_t *image)
 {
+  dm_free (image);
 //  fclose (image->fh);
 //  free (image);
   (void) image;                                 // warning remover
@@ -419,25 +418,15 @@ dm_close (dm_image_t *image)
 
 
 int
-dm_rip (const dm_image_t *image)
+dm_bin2iso (const dm_image_t *image, int track_num)
 {
-  (void) image;                                 // warning remover
-  return 0;
-}
-
-
-int
-dm_bin2iso (const dm_image_t *image)
-{
-  dm_track_t *track = NULL;
+  dm_track_t *track = (dm_track_t *) &image->track[track_num];
   uint32_t i, size, netto_size = 0;
   char buf[MAXBUFSIZE];
   FILE *dest, *src;
 
   if (!image)
     return -1;
-
-  track = image->track;
 
   if (track->mode == 1 && track->sector_size == 2048)
     {
@@ -457,7 +446,7 @@ dm_bin2iso (const dm_image_t *image)
       return -1;
     }
 
-  size = fsize (image->fname);
+  size = q_fsize (image->fname);
 // TODO: float point exception
   size /= track->sector_size;
 
@@ -487,12 +476,12 @@ dm_bin2iso (const dm_image_t *image)
 
 
 int
-dm_isofix (const dm_image_t * image, int start_lba)
+dm_isofix (const dm_image_t * image, int start_lba, int track_num)
 {
 #define BOOTFILE_S "bootfile.bin"
 #define HEADERFILE_S "header.iso"
   int32_t size_left, last_pos, i, size;
-  dm_track_t *track = NULL;
+  dm_track_t *track = (dm_track_t *) &image->track[track_num];
   char buf[MAXBUFSIZE], buf2[FILENAME_MAX];
   FILE *dest = NULL, *src = NULL, *boot = NULL, *header = NULL;
   int mac = FALSE;
@@ -504,10 +493,9 @@ dm_isofix (const dm_image_t * image, int start_lba)
       return -1;
     }
 
-  if (!image)
+  if (!track)
     return -1;
-
-  track = image->track;
+  
   mac = (track->sector_size == 2056 ? TRUE : FALSE);
 
   if (!(src = fopen (image->fname, "rb")))
@@ -637,7 +625,7 @@ dm_isofix (const dm_image_t * image, int start_lba)
 
 // append original iso image
   fseek (src, 0L, SEEK_SET);
-  size = fsize (buf2);
+  size = q_fsize (buf2);
   size_left = size / track->sector_size;
   for (i = 0; i < size_left; i++)
     {
@@ -734,4 +722,36 @@ void
 dm_set_gauge (void (* gauge) (int, int))
 {
   dm_ext_gauge = gauge;
+}
+
+
+int
+dm_read (char buffer, int track_num, int sector, const dm_image_t *image)
+{
+  (void) buffer;
+  (void) track_num;
+  (void) sector;
+  (void) image;
+  return 0;
+}
+
+
+int
+dm_write (const char buffer, int track_num, int sector, const dm_image_t *image)
+{
+  (void) buffer;
+  (void) track_num;
+  (void) sector;
+  (void) image;
+  return 0;
+}
+
+
+FILE *
+dm_fdopen (dm_image_t *image, int track_num, const char *mode)
+{
+  (void) image;
+  (void) track_num;
+  (void) mode;
+  return NULL;
 }

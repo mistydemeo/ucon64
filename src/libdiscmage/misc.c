@@ -621,38 +621,6 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
 }
 
 
-#if 0
-int
-renlwr (const char *path)
-{
-  struct dirent *ep;
-  struct stat fstate;
-  DIR *dp;
-  char buf[FILENAME_MAX];
-
-  if (access (path, R_OK) != 0 || (dp = opendir (path)) == NULL)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
-  chdir (path);
-
-  while ((ep = readdir (dp)) != 0)
-    if (!stat (ep->d_name, &fstate))
-//      if (S_ISREG (fstate.st_mode))
-        {
-          strcpy (buf, ep->d_name);
-          strlwr (buf);
-          rename (ep->d_name, buf);
-        }
-
-  closedir (dp);
-  return 0;
-}
-#endif
-
-
 #if 0                                           // currently not used
 int
 mkdir2 (const char *name)
@@ -798,6 +766,7 @@ dirname2 (const char *path)
 char *
 realpath2 (const char *src, char *full_path)
 // clone of realpath() which returns the absolute path of a file
+#if 0
 {
   char path1[FILENAME_MAX], path2[FILENAME_MAX];
 
@@ -828,6 +797,68 @@ realpath2 (const char *src, char *full_path)
 
   return full_path;
 }
+#else
+{
+  char path1[FILENAME_MAX], path2[FILENAME_MAX];
+#ifndef HAVE_REALPATH
+  char *p = NULL, *p2 = NULL;
+  int x = 0;
+#endif
+
+  if (src[0] == '~')
+    {
+      if (src[1] == FILE_SEPARATOR)
+        {
+          strcpy (path1, getenv2 ("HOME"));
+          strcpy (path2, &src[2]);
+          sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
+        }
+      else if (src[1] == 0)
+        strcpy (full_path, getenv2 ("HOME"));
+    }
+  else if (src[0] == '.')
+    {
+#ifdef  HAVE_REALPATH
+      realpath (src, full_path);
+#else
+      for (x = 0; src[x] == '.'; x++);
+
+      if (src[x] == FILE_SEPARATOR)
+        {
+          getcwd (path1, FILENAME_MAX);
+          strcpy (path2, &src[x + 1]);
+          sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
+        }
+      else if (src[x] == 0)
+        getcwd (full_path, FILENAME_MAX);       // callers should always pass
+#endif
+    }                                           //  arrays that are large enough
+  else
+    strcpy (full_path, src);
+
+#ifdef  HAVE_REALPATH
+  strcpy (path1, full_path);
+  return realpath (path1, full_path);
+#else
+  for (p = p2 = full_path; *p; p++, p2++)
+    {
+      while (*p == FILE_SEPARATOR &&
+        (*(p + 1) == FILE_SEPARATOR || *(p + 1) == 0))
+          p++;
+      
+      *p2 = *p;
+    }
+  *p2 = 0;
+
+  if (!access (full_path, F_OK))
+    return full_path;
+
+  if ((p = strrchr (full_path, FILE_SEPARATOR))) *p = 0;
+
+  return NULL;
+#endif
+}
+#endif
 
 
 int

@@ -21,47 +21,45 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef LIBDM_MISC_H
 #define LIBDM_MISC_H
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
+// wav header
+typedef struct
+{
+  uint8_t magic[4];
+  uint32_t total_length;
+  uint8_t type[4];
+  uint8_t fmt[4];
+  uint32_t header_length;
+  uint16_t format;
+  uint16_t channels;
+  uint32_t samplerate;
+  uint32_t bitrate;
+  uint16_t blockalign;
+  uint16_t bitspersample;
+  uint8_t data[4];
+  uint32_t data_length;
+} wav_header_t;
 
-#ifdef  HAVE_CDROM_H
-#include <linux/cdrom.h>
-#else
-#define CD_MINS              74 /* max. minutes per CD, not really a limit */
-#define CD_SECS              60 /* seconds per minute */
-#define CD_FRAMES            75 /* frames per second */
-#define CD_SYNC_SIZE         12 /* 12 sync bytes per raw data frame */
-#define CD_MSF_OFFSET       150 /* MSF numbering offset of first frame */
-#define CD_CHUNK_SIZE        24 /* lowest-level "data bytes piece" */
-#define CD_NUM_OF_CHUNKS     98 /* chunks per frame */
-#define CD_FRAMESIZE_SUB     96 /* subchannel data "frame" size */
-#define CD_HEAD_SIZE          4 /* header (address) bytes per raw data frame */
-#define CD_SUBHEAD_SIZE       8 /* subheader bytes per raw XA data frame */
-#define CD_EDC_SIZE           4 /* bytes EDC per most raw data frame types */
-#define CD_ZERO_SIZE          8 /* bytes zero per yellow book mode 1 frame */
-#define CD_ECC_SIZE         276 /* bytes ECC per most raw data frame types */
-#define CD_FRAMESIZE       2048 /* bytes per frame, "cooked" mode */
-#define CD_FRAMESIZE_RAW   2352 /* bytes per frame, "raw" mode */
-#define CD_FRAMESIZE_RAWER 2646 /* The maximum possible returned bytes */ 
-/* most drives don't deliver everything: */
-#define CD_FRAMESIZE_RAW1 (CD_FRAMESIZE_RAW-CD_SYNC_SIZE) /*2340*/
-#define CD_FRAMESIZE_RAW0 (CD_FRAMESIZE_RAW-CD_SYNC_SIZE-CD_HEAD_SIZE) /*2336*/
 
-#define CD_XA_HEAD        (CD_HEAD_SIZE+CD_SUBHEAD_SIZE) /* "before data" part of raw XA frame */
-#define CD_XA_TAIL        (CD_EDC_SIZE+CD_ECC_SIZE) /* "after data" part of raw XA frame */
-#define CD_XA_SYNC_HEAD   (CD_SYNC_SIZE+CD_XA_HEAD) /* sync bytes + header of XA frame */
+/*
+  libdm messages
 
-/* CD-ROM address types (cdrom_tocentry.cdte_format) */
-#define	CDROM_LBA 0x01 /* "logical block": first frame is #0 */
-#define	CDROM_MSF 0x02 /* "minute-second-frame": binary, not bcd here! */
+  usage example: fprintf (stdout, dm_msg[DEPRECATED], filename);
+*/
+enum
+{
+  DEPRECATED = 0,
+  UNKNOWN_IMAGE,
+  ALREADY_2048
+};
+extern const char *dm_msg[];
 
-/* bit to tell whether track is data or audio (cdrom_tocentry.cdte_ctrl) */
-#define	CDROM_DATA_TRACK	0x04
 
-/* The leadout track is always 0xAA, regardless of # of tracks on disc */
-#define	CDROM_LEADOUT		0xAA
-#endif  // HAVE_CDROM_H
+/*
+  dm_track_init()     fillup current dm_track_t
+  dm_free()           free all dm_track_t, dm_session_t and dm_image_t recursively
+*/
+extern const dm_track_t *dm_track_init (dm_track_t *track, FILE *fh);
+extern int dm_free (dm_image_t *image);
 
 
 /*
@@ -85,70 +83,4 @@ extern int lba_to_msf (int lba, dm_msf_t * mp);
 extern int msf_to_lba (int m, int s, int f, int force_positive);
 extern int from_bcd (int b);
 extern int to_bcd (int i);
-
-
-/*
-  libdm messages
-  
-  usage example: fprintf (stdout, dm_msg[DEPRECATED], filename);
-*/
-enum
-{
-  DEPRECATED = 0,
-  UNKNOWN_IMAGE,
-  ALREADY_2048
-};
-extern const char *dm_msg[];
-
-// get file size of fname
-extern int fsize (const char *fname);
-extern const dm_track_t *dm_track_init (dm_track_t *track, FILE *fh);
-
-
-// wav header
-typedef struct
-{
-  unsigned char magic[4];
-  uint32_t total_length;
-  unsigned char type[4];
-  unsigned char fmt[4];
-  uint32_t header_length;
-  unsigned short format;
-  unsigned short channels;
-  uint32_t samplerate;
-  uint32_t bitrate;
-  unsigned short blockalign;
-  unsigned short bitspersample;
-  unsigned char data[4];
-  uint32_t data_length;
-} wav_header_t;
-
-
-#define ISO_HEADER_START 0
-#define ISO_HEADER_LEN (sizeof (st_iso_header_t))
-
-#define DM_UNKNOWN (-1)
-
-#define DM_SHEET 1
-#define DM_CDI 3
-#define DM_NRG 4
-#define DM_CCD 5
-
-//TODO: remove these
-#define READ_BUF_SIZE  (1024*1024)
-#define WRITE_BUF_SIZE (1024*1024)
-
-#define DM_TRACK_TYPE (TRUE)
-#define DM_SAVE_AS_ISO (TRUE)
-#define DM_PREGAP (TRUE)
-#define DM_CONVERT (TRUE)
-#define DM_FULLDATA (TRUE)
-#define DM_CUTALL (TRUE)
-#define DM_CUTFIRST (TRUE)
-#define DM_DO_CONVERT (TRUE)
-#define DM_DO_CUT (TRUE)
-
-#define MAXBUFSIZE 32768
-
-
 #endif  // LIBDM_MISC_H

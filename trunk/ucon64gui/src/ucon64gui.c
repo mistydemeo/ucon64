@@ -30,7 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "xpm/open.xpm"
 
 void
-ucon64_bottom (void)
+ucon64gui_bottom (void)
 {
 
   html2gui_br ();
@@ -57,7 +57,7 @@ ucon64_bottom (void)
 
 
 void
-ucon64_system (void)
+ucon64gui_system (void)
 {
 //  FILE *fh;
   char buf[MAXBUFSIZE];
@@ -98,39 +98,40 @@ ucon64_system (void)
 }
 
 void
-ucon64_rom (void)
+ucon64gui_rom (void)
 {
   html2gui_input_file ("Select ROM", ucon64gui.rom);
+
 }
 
 void
-ucon64_file (void)
+ucon64gui_file (void)
 {
 //_text nutzen?
   html2gui_input_file ("Select ROM", ucon64gui.file);
 }
 
 void
-ucon64_info (void)
+ucon64gui_info (void)
 {
   strcpy (ucon64gui.rom, html2gui_filename);
   sprintf (ucon64gui.cmd, "ucon64 \"%s\"", ucon64gui.rom);
-  ucon64_system ();
+  ucon64gui_system ();
 }
 
 void
-ucon64_ls (void)
+ucon64gui_ls (void)
 {
   strcpy (ucon64gui.cmd, "ucon64 -ls .");
-  ucon64_system ();
+  ucon64gui_system ();
 }
 
 void
-ucon64_e (void)
+ucon64gui_e (void)
 {
   strcpy (ucon64gui.rom, html2gui_filename);
   sprintf (ucon64gui.cmd, "ucon64 -e \"%s\"", ucon64gui.rom);
-  ucon64_system ();
+  ucon64gui_system ();
 }
 
 
@@ -140,18 +141,25 @@ ucon64gui_top(void)
 {
 //<html>
 
-  html2gui_input_submit (ucon64_rom, "Open ROM", "Open ROM", 0, 0,
+  html2gui_input_submit (ucon64gui_rom, "Open ROM", "Open ROM", 0, 0,
                          open_xpm);
+
+  html2gui_("  ");
+  strcpy (ucon64gui.rom, html2gui_filename);
+  
+  html2gui_(ucon64gui.rom);
 
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
   html2gui_br ();
 
   html2gui_ ("Miscellaneous options");
   html2gui_br ();
-  html2gui_input_submit (ucon64_info, "Show info",
+  html2gui_input_submit (ucon64gui_info, "Show info",
                          "Click here to see information about ROM", 0, 0,
                          NULL);
-  html2gui_input_submit (ucon64_e, "Emulate", "Run ROM in an emulator\nNOTE: uCON64 is not an emulator it works as intelligent frontend to choose the right emulator for the ROM. Check it's config file for the settings.", 0,
+
+//TODO which configfile? distiction between UNIX and NOT unix
+  html2gui_input_submit (ucon64gui_e, "Emulate", "Run ROM in an emulator\nNOTE: uCON64 is not an emulator it works as intelligent frontend to choose the right emulator for the ROM. Check it's config file for the settings.", 0,
                          0, NULL);
 
 /*
@@ -195,7 +203,7 @@ ucon64gui_top(void)
 
 
 void
-ucon64_root (void)
+ucon64gui_root (void)
 {
 
   ucon64gui.console = ucon64_UNKNOWN;
@@ -208,7 +216,7 @@ ucon64_root (void)
 
   html2gui_ ("Console specific options");
   html2gui_br ();
-  html2gui_input_submit (ucon64_snes, "Super Nintendo",
+  html2gui_input_submit (ucon64gui_snes, "Super Nintendo",
                          "Options for Super Nintendo", 0, 0, NULL);
 
   html2gui_br ();
@@ -216,10 +224,10 @@ ucon64_root (void)
 //  html2gui_hr ();
   html2gui_ ("Backup unit specific options");
   html2gui_br ();
-  html2gui_input_submit (ucon64_swc, "Super Wild Card",
+  html2gui_input_submit (ucon64gui_swc, "Super Wild Card",
                          "Options for Super Wild Card", 0, 0, NULL);
 
-  ucon64_bottom ();
+  ucon64gui_bottom ();
 
 //</html>
 }
@@ -229,7 +237,7 @@ main (int argc, char *argv[])
 {
   html2gui_start (argc, argv);
 
-  ucon64_root ();
+  ucon64gui_root ();
 
   html2gui_end ();
 

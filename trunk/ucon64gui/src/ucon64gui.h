@@ -43,25 +43,25 @@ struct ucon64gui_
 ucon64gui;
 
 
-void ucon64_root (void);
+void ucon64gui_root (void);
 
-void ucon64_bottom (void);
+void ucon64gui_bottom (void);
 
 void ucon64gui_top (void);
 
-void ucon64_system (void);
+void ucon64gui_system (void);
 
-void ucon64_rom (void);
+void ucon64gui_rom (void);
 
-void ucon64_file (void);
+void ucon64gui_file (void);
 
-void ucon64_info (void);
+void ucon64gui_info (void);
 
-void ucon64_ls (void);
+void ucon64gui_ls (void);
 
-void ucon64_e (void);
+void ucon64gui_e (void);
 
-void ucon64_root (void);
+void ucon64gui_root (void);
 
 
 #endif /* UCON64GUI_H */

@@ -619,7 +619,7 @@ is cat. no. 475) would look like: SF16475A.078
 */
 int
 snes_mgd (st_rominfo_t *rominfo)
-// What should we do with this funtcion? snes_gd3() is probably sufficient
+// What should we do with this function? snes_gd3() is probably sufficient
 //  (and tested on a real Game Doctor!).
 {
 #if 1

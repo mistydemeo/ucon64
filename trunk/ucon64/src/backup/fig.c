@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "../misc.h"
@@ -29,14 +30,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 int
 fig_usage (int argc, char *argv[])
 {
-//    printf ("%s\n", fig_TITLE);
+#ifdef BACKUP
 
-/*
-  printf
-    ("TODO:  -xfig	send/receive ROM to/from *Pro Fighter* /(all)FIG; $FILE=PORT\n"
+    printf (fig_TITLE "\n"
+    "TODO:  -xfig	send/receive ROM to/from *Pro Fighter* /(all)FIG; $FILE=PORT\n"
      "		receives automatically when $ROM does not exist\n");
-*/
-//TODO more info like technical info about cabeling and stuff for the copier
 
+#endif BACKUP
   return 0;
 }

@@ -19,6 +19,21 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include "../config.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "../misc.h"
+#include "../ucon64.h"
+#include "../ucon64_db.h"
+#include "../ucon64_misc.h"
+#include <sys/stat.h>
+//#include <math.h>
+#include "fal.h"
+
+#ifdef BACKUP
+
+
 /********************************************************/
 /* Flash Linker Advance                                 */
 /*   by Jeff Frohwein, 2001-Jun-28                      */
@@ -73,17 +88,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //  4. If diff, write back data & exit with SRAM detect flag.
 //  5. If no diff get device Manuf ID for flash.
 //  6. If no Manuf ID detected then report no cart backup available.
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include "../misc.h"
-#include "../ucon64.h"
-#include "../ucon64_db.h"
-#include "../ucon64_misc.h"
-#include <sys/stat.h>
-//#include <math.h>
-#include "fal.h"
 
 #define outpb(p,v)  outportb(p,v); iodelay()
 #define inpb(p)   inportb(p)
@@ -1584,9 +1588,13 @@ fal_args (unsigned int parport)
     fal_argv[2] = "1";          // 0x378
 }
 
+#endif // BACKUP
+
+
 int
 fal_read_rom (char *filename, unsigned int parport, int argc, char *argv[])
 {
+#ifdef BACKUP
   fal_args (parport);
 
   fal_argv[3] = "-c";
@@ -1630,11 +1638,18 @@ fal_read_rom (char *filename, unsigned int parport, int argc, char *argv[])
     return 0;
 
   return -1;
+#else
+    printf("NOTE: this version was compiled without backup support\n\n");
+    
+      return 0;
+      
+#endif // BACKUP
 }
 
 int
 fal_write_rom (char *filename, unsigned int parport, int argc, char *argv[])
 {
+#ifdef BACKUP
   fal_args (parport);
 
   if (argncmp (argc, argv, "-xfalc", 6))        // strlen("-xfalc") == 6
@@ -1659,11 +1674,17 @@ fal_write_rom (char *filename, unsigned int parport, int argc, char *argv[])
     return 0;
 
   return -1;
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+  
+    return 0;
+#endif // BACKUP
 }
 
 int
 fal_read_sram (char *filename, unsigned int parport, int bank)
 {
+#ifdef BACKUP
   char bank_str[2];
 
   fal_args (parport);
@@ -1693,11 +1714,17 @@ fal_read_sram (char *filename, unsigned int parport, int bank)
     return 0;
 
   return -1;
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+  
+    return 0;
+#endif // BACKUP
 }
 
 int
 fal_write_sram (char *filename, unsigned int parport, int bank)
 {
+#ifdef BACKUP
   char bank_str[2];
 
   fal_args (parport);
@@ -1723,15 +1750,21 @@ fal_write_sram (char *filename, unsigned int parport, int bank)
     return 0;
 
   return -1;
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+  
+    return 0;
+    
+#endif // BACKUP
 }
 
 int
 fal_usage (int argc, char *argv[])
 {
-  printf ("%s\n", fal_TITLE);
+#ifdef BACKUP
+  printf ( fal_TITLE "\n"
 
-  printf
-    ("  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
+    "  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
      "                receives automatically when $ROM does not exist\n"
      "  -xfalc<n>     specify chip size in mbits of ROM in Flash Advance Linker when\n"
      "                receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32\n"
@@ -1742,14 +1775,15 @@ fal_usage (int argc, char *argv[])
      "                receives automatically when $ROM(=SRAM) does not exist\n"
      "  -xfalb<n>     send/receive SRAM to/from Flash Advance Linker bank n\n"
      "                n can be 1, 2, 3 or 4\n"
-     "                $FILE=PORT; receives automatically when SRAM does not exist\n");
+     "                $FILE=PORT; receives automatically when SRAM does not exist\n"
 
-    printf ("\n"
+    "\n"
             "                You only need to specify PORT if uCON64 doesn't detect the\n"
             "                (right) parallel port. If that is the case give a hardware\n"
             "                address, for example:\n"
             "                ucon64 -xfal \"0087 - Mario Kart Super Circuit (U).gba\" 0x378\n");
   // TODO more info like technical info about cabeling and stuff for the copier
+#endif // BACKUP
 
   return 0;
 }

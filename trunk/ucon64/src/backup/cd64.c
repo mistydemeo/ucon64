@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "../misc.h"
@@ -1196,12 +1197,12 @@ main (int argc, char *argv[])
 int
 cd64_usage (int argc, char *argv[])
 {
-//    printf ("%s\n", cd64_TITLE);
-/*
+#ifdef BACKUP
+
+    printf ("%s\n", cd64_TITLE);
   printf ("TODO:  -xcd64	send/receive ROM to/from CD64; $FILE=PORT\n"
           "		receives automatically when $ROM does not exist\n");
-          */
-
+#endif // BACKUP
   return 0;
 }
 

@@ -21,6 +21,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "../config.h"
 #include <dirent.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -31,6 +32,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "../ucon64_db.h"
 #include "../ucon64_misc.h"
 #include "swc.h"
+
+#ifdef BACKUP
 
 
 #define INPUT_MASK      0x78
@@ -83,134 +86,6 @@ init_io (unsigned int port)
   printf ("Using I/O port 0x%x\n", swc_port);
 }
 
-int
-swc_write_rom (char *filename, unsigned int parport)
-{
-  FILE *file;
-  unsigned char *buffer;
-  int bytesread, bytessend, totalblocks, blocksdone = 0, emu_mode_select;
-  unsigned short address;
-  struct stat fstate;
-  time_t starttime;
-
-  init_io (parport);
-
-  if ((file = fopen (filename, "rb")) == NULL)
-    {
-      printf ("Can't open %s for reading\n", filename); // stdout for frontend
-      exit (1);
-    }
-  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
-    {
-      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
-      exit (1);
-    }
-
-  stat (filename, &fstate);
-  printf ("Send: %d Bytes (%.4f Mb)\n", (int) fstate.st_size, (float) fstate.st_size / MBIT);
-
-  send_command0 (0xc008, 0);
-  fread (buffer, 1, HEADERSIZE, file);
-  send_command (5, 0, 0);
-  send_block (0x400, buffer, HEADERSIZE);       // send header
-  bytessend = HEADERSIZE;
-
-  emu_mode_select = buffer[2];                  // this byte is needed later
-  if (buffer[3] & 0x80)                         // Pro Fighter (FIG) HiROM dump
-    emu_mode_select |= 0x30;                    // set bit 5&4 (SRAM & DRAM mem map mode 21)
-  if ((emu_mode_select & 0x0c) == 0x0c)         // 0x0c == no SRAM; we use the header, so
-    {                                           //  that the user can override this
-      if (emu_mode_select & 0x10)               // bit 4 == 1 => DRAM mode 21 (HiROM)
-        emu_mode_select &= ~0x20;               // disable SRAM by setting SRAM mem map mode 20
-      else                                      // bit 4 == 0 => DRAM mode 20 (LoROM)
-        emu_mode_select |= 0x20;                // disable SRAM by setting SRAM mem map mode 21
-    }
-
-  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
-                                                //  because if we get here q works ;-)
-  address = 0x200;                              // vgs '00 uses 0x200, vgs '96 uses 0,
-  starttime = time (NULL);                      //  but then some ROMs don't work
-  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
-    {
-      send_command0 (0xc010, blocksdone >> 9);  // only 3 ROM dumps exist where 2nd arg != 0
-      send_command (5, address, 0);
-      send_block (0x8000, buffer, bytesread);
-      address++;
-      blocksdone++;
-
-      bytessend += bytesread;
-      ucon64_gauge (&rom, starttime, bytessend, fstate.st_size);
-      checkabort (2);
-    }
-
-  if (blocksdone > 0x200)                       // ROM dump > 512 8KB blocks (=32Mb (=4MB))
-    send_command0 (0xc010, 2);
-
-  send_command (5, 0, 0);
-  totalblocks = (fstate.st_size - HEADERSIZE + BUFFERSIZE - 1) / BUFFERSIZE; // round up
-  send_command (6, 5 | (totalblocks << 8), totalblocks >> 8); // bytes: 6, 5, #8K L, #8K H, 0
-  send_command (6, 1 | (emu_mode_select << 8), 0);
-
-  wait_for_ready ();
-  outportb (swc_port + PARPORT_DATA, 0);
-  outportb (swc_port + PARPORT_CONTROL, inportb (swc_port + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
-
-  free (buffer);
-  fclose (file);
-  return 0;
-}
-
-int
-swc_write_sram (char *filename, unsigned int parport)
-{
-  FILE *file;
-  unsigned char *buffer;
-  int bytesread, bytessend = 0, size;
-  unsigned short address;
-  struct stat fstate;
-  time_t starttime;
-
-  init_io (parport);
-
-  if ((file = fopen (filename, "rb")) == NULL)
-    {
-      printf ("Can't open %s for reading\n", filename); // stdout for frontend
-      exit (1);
-    }
-  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
-    {
-      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
-      exit (1);
-    }
-
-  stat (filename, &fstate);                     // SWC SRAM is 4*8KB, emu SRAM often not
-  size = fstate.st_size - HEADERSIZE;
-  printf ("Send: %d Bytes\n", size);
-  fseek (file, HEADERSIZE, SEEK_SET);           // skip the header
-
-  send_command (5, 0, 0);
-  send_command0 (0xe00d, 0);
-  send_command0 (0xc008, 0);
-
-  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
-                                                //  because if we get here q works ;-)
-  address = 0x100;
-  starttime = time (NULL);
-  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
-    {
-      send_command (5, address, 0);
-      send_block (0x2000, buffer, bytesread);
-      address++;
-
-      bytessend += bytesread;
-      ucon64_gauge (&rom, starttime, bytessend, size);
-      checkabort (2);
-    }
-
-  free (buffer);
-  fclose (file);
-  return 0;
-}
 
 void
 send_block (unsigned short address, unsigned char *buffer, int len)
@@ -256,96 +131,6 @@ sendb (unsigned char byte)
   outportb (swc_port + PARPORT_DATA, byte);
   outportb (swc_port + PARPORT_CONTROL, inportb (swc_port + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
   wait_for_ready ();                            // necessary if followed by receiveb()
-}
-
-int
-swc_read_rom (char *filename, unsigned int parport)
-{
-  FILE *file;
-  unsigned char *buffer, byte;
-  int n, size, blocksleft, bytesreceived = 0;
-  unsigned short address1, address2;
-  time_t starttime;
-
-  init_io (parport);
-
-  if ((file = fopen (filename, "wb")) == NULL)
-    {
-      printf ("Can't open %s for writing\n", filename); // stdout for frontend
-      exit (1);
-    }
-  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
-    {
-      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
-      exit (1);
-    }
-
-  size = receive_rom_info (buffer);
-  if (size == 0)
-    {
-      printf ("There is no cartridge present in the Super Wild Card\n"); // stdout for frontend
-      fclose (file);
-      remove (filename);
-      exit (1);
-    }
-  blocksleft = size * 16;                       // 1 Mb (128KB) unit == 16 8KB units
-  printf ("Receive: %d Bytes (%.4f Mb)\n", size * MBIT, (float) size);
-  size *= MBIT;                                 // size in bytes for ucon64_gauge() below
-
-  send_command (5, 0, 0);
-  send_command0 (0xe00c, 0);
-  send_command0 (0xe003, 0);
-  send_command (1, 0xbfd8, 1);
-  byte = receiveb ();
-  if ((0x81 ^ byte) != receiveb ())
-    printf ("received data is corrupt\n");
-
-  buffer[2] = get_emu_mode_select (byte, blocksleft / 16);
-  fwrite (buffer, 1, HEADERSIZE, file);         // write header (other necessary fields are
-                                                //  filled in by receive_rom_info())
-  if (hirom)
-    blocksleft >>= 1;                           // this must come _after_ get_emu_mode_select()!
-
-  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
-                                                //  because if we get here q works ;-)
-  address1 = 0x300;                             // address1 = 0x100, address2 = 0 should
-  address2 = 0x200;                             //  also work
-  starttime = time (NULL);
-  while (blocksleft > 0)
-    {
-      if (hirom)
-        {
-          for (n = 0; n < 4; n++)
-            {
-              send_command (5, address1, 0);
-              receive_block (0x2000, buffer, BUFFERSIZE);
-              address1++;
-              fwrite (buffer, 1, BUFFERSIZE, file);
-
-              bytesreceived += BUFFERSIZE;
-              ucon64_gauge (&rom, starttime, bytesreceived, size);
-              checkabort (2);
-            }
-        }
-
-      for (n = 0; n < 4; n++)
-        {
-          send_command (5, address2, 0);
-          receive_block (0xa000, buffer, BUFFERSIZE);
-          blocksleft--;
-          address2++;
-          fwrite (buffer, 1, BUFFERSIZE, file);
-
-          bytesreceived += BUFFERSIZE;
-          ucon64_gauge (&rom, starttime, bytesreceived, size);
-          checkabort (2);
-        }
-    }
-  send_command (5, 0, 0);
-
-  free (buffer);
-  fclose (file);
-  return 0;
 }
 
 #if BUFFERSIZE < HEADERSIZE
@@ -525,62 +310,6 @@ get_emu_mode_select (unsigned char byte, int size)
   return ems;
 }
 
-int
-swc_read_sram (char *filename, unsigned int parport)
-{
-  FILE *file;
-  unsigned char *buffer;
-  int blocksleft, bytesreceived = 0;
-  unsigned short address;
-  time_t starttime;
-
-  init_io (parport);
-
-  if ((file = fopen (filename, "wb")) == NULL)
-    {
-      printf ("Can't open %s for writing\n", filename); // stdout for frontend
-      exit (1);
-    }
-  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
-    {
-      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
-      exit (1);
-    }
-
-  printf ("Receive: %d Bytes\n", 32 * 1024);
-  memset (buffer, 0, HEADERSIZE);
-  buffer[8] = 0xaa;
-  buffer[9] = 0xbb;
-  buffer[10] = 5;
-  fwrite (buffer, 1, HEADERSIZE, file);
-
-  send_command (5, 0, 0);
-  send_command0 (0xe00d, 0);
-  send_command0 (0xc008, 0);
-
-  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
-                                                //  because if we get here q works ;-)
-  blocksleft = 4;                               // SRAM is 4*8KB
-  address = 0x100;
-  starttime = time (NULL);
-  while (blocksleft > 0)
-    {
-      send_command (5, address, 0);
-      receive_block (0x2000, buffer, BUFFERSIZE);
-      blocksleft--;
-      address++;
-      fwrite (buffer, 1, BUFFERSIZE, file);
-
-      bytesreceived += BUFFERSIZE;
-      ucon64_gauge (&rom, starttime, bytesreceived, 32 * 1024);
-      checkabort (2);
-    }
-
-  free (buffer);
-  fclose (file);
-  return 0;
-}
-
 void
 receive_block (unsigned short address, unsigned char *buffer, int len)
 {
@@ -675,6 +404,8 @@ checkabort (int status)
 //  send_command (5, 0, 0);                       // vgs: when sending/receiving a ROM
 }
 
+#endif // BACKUP
+
 void
 swc_unlock (unsigned int parport)
 /*
@@ -682,56 +413,341 @@ swc_unlock (unsigned int parport)
   gives the same result.
 */
 {
+#ifdef BACKUP
   init_io (parport);
 
   send_command (6, 0, 0);
+#endif // BACKUP
 }
+
+
+int
+swc_read_rom (char *filename, unsigned int parport)
+{
+#ifdef BACKUP
+  FILE *file;
+  unsigned char *buffer, byte;
+  int n, size, blocksleft, bytesreceived = 0;
+  unsigned short address1, address2;
+  time_t starttime;
+
+  init_io (parport);
+
+  if ((file = fopen (filename, "wb")) == NULL)
+    {
+      printf ("Can't open %s for writing\n", filename); // stdout for frontend
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
+      exit (1);
+    }
+
+  size = receive_rom_info (buffer);
+  if (size == 0)
+    {
+      printf ("There is no cartridge present in the Super Wild Card\n"); // stdout for frontend
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
+  blocksleft = size * 16;                       // 1 Mb (128KB) unit == 16 8KB units
+  printf ("Receive: %d Bytes (%.4f Mb)\n", size * MBIT, (float) size);
+  size *= MBIT;                                 // size in bytes for ucon64_gauge() below
+
+  send_command (5, 0, 0);
+  send_command0 (0xe00c, 0);
+  send_command0 (0xe003, 0);
+  send_command (1, 0xbfd8, 1);
+  byte = receiveb ();
+  if ((0x81 ^ byte) != receiveb ())
+    printf ("received data is corrupt\n");
+
+  buffer[2] = get_emu_mode_select (byte, blocksleft / 16);
+  fwrite (buffer, 1, HEADERSIZE, file);         // write header (other necessary fields are
+                                                //  filled in by receive_rom_info())
+  if (hirom)
+    blocksleft >>= 1;                           // this must come _after_ get_emu_mode_select()!
+
+  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+                                                //  because if we get here q works ;-)
+  address1 = 0x300;                             // address1 = 0x100, address2 = 0 should
+  address2 = 0x200;                             //  also work
+  starttime = time (NULL);
+  while (blocksleft > 0)
+    {
+      if (hirom)
+        {
+          for (n = 0; n < 4; n++)
+            {
+              send_command (5, address1, 0);
+              receive_block (0x2000, buffer, BUFFERSIZE);
+              address1++;
+              fwrite (buffer, 1, BUFFERSIZE, file);
+
+              bytesreceived += BUFFERSIZE;
+              ucon64_gauge (&rom, starttime, bytesreceived, size);
+              checkabort (2);
+            }
+        }
+
+      for (n = 0; n < 4; n++)
+        {
+          send_command (5, address2, 0);
+          receive_block (0xa000, buffer, BUFFERSIZE);
+          blocksleft--;
+          address2++;
+          fwrite (buffer, 1, BUFFERSIZE, file);
+
+          bytesreceived += BUFFERSIZE;
+          ucon64_gauge (&rom, starttime, bytesreceived, size);
+          checkabort (2);
+        }
+    }
+  send_command (5, 0, 0);
+
+  free (buffer);
+  fclose (file);
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+  
+#endif // BACKUP
+
+  return 0;
+}
+
+int
+swc_write_rom (char *filename, unsigned int parport)
+{
+#ifdef BACKUP
+  FILE *file;
+  unsigned char *buffer;
+  int bytesread, bytessend, totalblocks, blocksdone = 0, emu_mode_select;
+  unsigned short address;
+  struct stat fstate;
+  time_t starttime;
+
+  init_io (parport);
+
+  if ((file = fopen (filename, "rb")) == NULL)
+    {
+      printf ("Can't open %s for reading\n", filename); // stdout for frontend
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
+      exit (1);
+    }
+
+  stat (filename, &fstate);
+  printf ("Send: %d Bytes (%.4f Mb)\n", (int) fstate.st_size, (float) fstate.st_size / MBIT);
+
+  send_command0 (0xc008, 0);
+  fread (buffer, 1, HEADERSIZE, file);
+  send_command (5, 0, 0);
+  send_block (0x400, buffer, HEADERSIZE);       // send header
+  bytessend = HEADERSIZE;
+
+  emu_mode_select = buffer[2];                  // this byte is needed later
+  if (buffer[3] & 0x80)                         // Pro Fighter (FIG) HiROM dump
+    emu_mode_select |= 0x30;                    // set bit 5&4 (SRAM & DRAM mem map mode 21)
+  if ((emu_mode_select & 0x0c) == 0x0c)         // 0x0c == no SRAM; we use the header, so
+    {                                           //  that the user can override this
+      if (emu_mode_select & 0x10)               // bit 4 == 1 => DRAM mode 21 (HiROM)
+        emu_mode_select &= ~0x20;               // disable SRAM by setting SRAM mem map mode 20
+      else                                      // bit 4 == 0 => DRAM mode 20 (LoROM)
+        emu_mode_select |= 0x20;                // disable SRAM by setting SRAM mem map mode 21
+    }
+
+  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+                                                //  because if we get here q works ;-)
+  address = 0x200;                              // vgs '00 uses 0x200, vgs '96 uses 0,
+  starttime = time (NULL);                      //  but then some ROMs don't work
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+    {
+      send_command0 (0xc010, blocksdone >> 9);  // only 3 ROM dumps exist where 2nd arg != 0
+      send_command (5, address, 0);
+      send_block (0x8000, buffer, bytesread);
+      address++;
+      blocksdone++;
+
+      bytessend += bytesread;
+      ucon64_gauge (&rom, starttime, bytessend, fstate.st_size);
+      checkabort (2);
+    }
+
+  if (blocksdone > 0x200)                       // ROM dump > 512 8KB blocks (=32Mb (=4MB))
+    send_command0 (0xc010, 2);
+
+  send_command (5, 0, 0);
+  totalblocks = (fstate.st_size - HEADERSIZE + BUFFERSIZE - 1) / BUFFERSIZE; // round up
+  send_command (6, 5 | (totalblocks << 8), totalblocks >> 8); // bytes: 6, 5, #8K L, #8K H, 0
+  send_command (6, 1 | (emu_mode_select << 8), 0);
+
+  wait_for_ready ();
+  outportb (swc_port + PARPORT_DATA, 0);
+  outportb (swc_port + PARPORT_CONTROL, inportb (swc_port + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
+
+  free (buffer);
+  fclose (file);
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+  
+
+#endif // BACKUP
+
+  return 0;
+}
+
+
+
+int
+swc_read_sram (char *filename, unsigned int parport)
+{
+#ifdef BACKUP
+  FILE *file;
+  unsigned char *buffer;
+  int blocksleft, bytesreceived = 0;
+  unsigned short address;
+  time_t starttime;
+
+  init_io (parport);
+
+  if ((file = fopen (filename, "wb")) == NULL)
+    {
+      printf ("Can't open %s for writing\n", filename); // stdout for frontend
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
+      exit (1);
+    }
+
+  printf ("Receive: %d Bytes\n", 32 * 1024);
+  memset (buffer, 0, HEADERSIZE);
+  buffer[8] = 0xaa;
+  buffer[9] = 0xbb;
+  buffer[10] = 5;
+  fwrite (buffer, 1, HEADERSIZE, file);
+
+  send_command (5, 0, 0);
+  send_command0 (0xe00d, 0);
+  send_command0 (0xc008, 0);
+
+  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+                                                //  because if we get here q works ;-)
+  blocksleft = 4;                               // SRAM is 4*8KB
+  address = 0x100;
+  starttime = time (NULL);
+  while (blocksleft > 0)
+    {
+      send_command (5, address, 0);
+      receive_block (0x2000, buffer, BUFFERSIZE);
+      blocksleft--;
+      address++;
+      fwrite (buffer, 1, BUFFERSIZE, file);
+
+      bytesreceived += BUFFERSIZE;
+      ucon64_gauge (&rom, starttime, bytesreceived, 32 * 1024);
+      checkabort (2);
+    }
+
+  free (buffer);
+  fclose (file);
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+#endif // BACKUP
+
+  return 0;
+}
+
+
+
+int
+swc_write_sram (char *filename, unsigned int parport)
+{
+#ifdef BACKUP
+  FILE *file;
+  unsigned char *buffer;
+  int bytesread, bytessend = 0, size;
+  unsigned short address;
+  struct stat fstate;
+  time_t starttime;
+
+  init_io (parport);
+
+  if ((file = fopen (filename, "rb")) == NULL)
+    {
+      printf ("Can't open %s for reading\n", filename); // stdout for frontend
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      printf ("Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE); // stdout for frontend
+      exit (1);
+    }
+
+  stat (filename, &fstate);                     // SWC SRAM is 4*8KB, emu SRAM often not
+  size = fstate.st_size - HEADERSIZE;
+  printf ("Send: %d Bytes\n", size);
+  fseek (file, HEADERSIZE, SEEK_SET);           // skip the header
+
+  send_command (5, 0, 0);
+  send_command0 (0xe00d, 0);
+  send_command0 (0xc008, 0);
+
+  printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
+                                                //  because if we get here q works ;-)
+  address = 0x100;
+  starttime = time (NULL);
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+    {
+      send_command (5, address, 0);
+      send_block (0x2000, buffer, bytesread);
+      address++;
+
+      bytessend += bytesread;
+      ucon64_gauge (&rom, starttime, bytessend, size);
+      checkabort (2);
+    }
+
+  free (buffer);
+  fclose (file);
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+#endif // BACKUP
+  return 0;
+}
+
+
 
 int
 swc_usage (int argc, char *argv[])
 {
-  printf ("%s\n", swc_TITLE);
+#ifdef BACKUP
 
-  printf
-    ("  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
+  printf ( swc_TITLE "\n"
+
+    "  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
      "                receives automatically when $ROM does not exist\n"
      "                Press q to abort ^C will cause invalid state of backup unit\n"
      "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
      "                receives automatically when $ROM(=SRAM) does not exist\n"
-     "                Press q to abort ^C will cause invalid state of backup unit\n");
+     "                Press q to abort ^C will cause invalid state of backup unit\n"
 
-  printf ("\n"
+  "\n"
           "                You only need to specify PORT if uCON64 doesn't detect the\n"
           "                (right) parallel port. If that is the case give a hardware\n"
           "                address, for example:\n"
-          "                ucon64 -xswc \"Super Mario World (U).swc\" 0x378\n");
-  printf ("\n"
+          "                ucon64 -xswc \"Super Mario World (U).swc\" 0x378\n"
+  "\n"
           "                In order to connect the Super Wild Card to a PC's parallel port\n"
           "                you need a standard bidirectional parallel cable like for the\n"
           "                most backup units\n"
-/*
-                           , i.e. a cable with male DB-25\n"
-          "                connectors at both ends where the pins are connected in the\n"
-          "                following way:\n"
-          "                pin 1  <-> pin 1\n"
-          "                pin 2  <-> pin 2\n"
-          "                pin 3  <-> pin 3\n"
-          "                pin 4  <-> pin 4\n"
-          "                pin 5  <-> pin 5\n"
-          "                pin 6  <-> pin 6\n"
-          "                pin 7  <-> pin 7\n"
-          "                pin 8  <-> pin 8\n"
-          "                pin 9  <-> pin 9\n"
-          "                pin 10 <-> pin 10\n"
-          "                pin 11 <-> pin 11\n"
-          "                pin 12 <-> pin 12\n"
-          "                pin 13 <-> pin 13\n"
-          "                pin 15 <-> pin 15\n"
-          "                pin 25 <-> pin 25\n"
-          "                Pins 2-9 are used for output, pins 10-13 & 15 for input and pin\n"
-          "                25 is ground. The other pins may be left unconnected.\n"
-*/
          );
-
+#endif // BACKUP
   return 0;
 }

@@ -20,7 +20,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
+#include "config.h"
 #include <ctype.h>
 //#include <stddef.h>
 #include <stdio.h>
@@ -551,24 +551,3 @@ trackmode_probe (long imagesize)
 }
 
 
-int
-raw2iso (char *filename)
-// convert MODE1_RAW, MODE2_RAW, MODE2 and MODE2_FORM_MIX to ISO9660
-{
-  int seek_header, seek_ecc, sector_size;
-  long i, source_length;
-  char buf[2352], destfilename[4096];
-  const char SYNC_HEADER[12] =
-    { 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0 };
-  FILE *fdest, *fsource;
-
-  strcpy (destfilename, filename);
-  newext (destfilename, ".ISO");
-
-  fsource = fopen (filename, "rb");
-  fdest = fopen (destfilename, "wb");
-
-  fread (buf, sizeof (char), 16, fsource);
-
-  return 0;
-}

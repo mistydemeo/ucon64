@@ -14,6 +14,9 @@
  *
  */
 
+#include "../config.h"
+#ifdef BACKUP
+
 /*
   added for uCON64 support
 */
@@ -26,13 +29,11 @@
 #endif
 
 
+
 // outportb() and inportb() are only present in uCON64 if BACKUP is defined
-#ifndef BACKUP
-#error  outportb() and inportb() must be present. Define BACKUP in appropriate Makefile
-#else
+
 #define psx_outportb(P, B) outportb(P, B)
 #define psx_inportb(P) inportb(P)
-#endif
 
 #ifdef  _PSXPB_DJGPP_
 #include <stdlib.h>
@@ -228,3 +229,5 @@ PSX_MCB_INFO *psx_mcb_info_merge (PSX_MCB_INFO_DIR mcb_info_dir,
 /* Reads the info associated with block from the directory and it's data */
 PSX_MCB_INFO *psx_mcb_read_info (int base, int conport, int tap, int delay,
                                  int block);
+
+#endif // BACKUP

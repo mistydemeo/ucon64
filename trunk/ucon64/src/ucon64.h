@@ -27,36 +27,37 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_H
 
 
-//#define ucon64_KNOWN          -1
-#define ucon64_UNKNOWN		0
-#define ucon64_GB		1
-#define ucon64_GENESIS		2
-#define ucon64_SMS		3
-#define ucon64_JAGUAR		4
-#define ucon64_LYNX		5
-#define ucon64_N64		6
-#define ucon64_NEOGEO		7
-#define ucon64_NES		8
-#define ucon64_PCE		9
-#define ucon64_PSX		10
-#define ucon64_PS2		11
-#define ucon64_SNES		12
-#define ucon64_SATURN		13
-#define ucon64_DC		14
-#define ucon64_CD32		15
-#define ucon64_CDI		16
-#define ucon64_REAL3DO		17
-#define ucon64_ATARI		18
-#define ucon64_SYSTEM16		19
+//#define ucon64_KNOWN    -1
+#define ucon64_UNKNOWN    0
+#define ucon64_GB    1
+#define ucon64_GENESIS    2
+#define ucon64_SMS    3
+#define ucon64_JAGUAR    4
+#define ucon64_LYNX    5
+#define ucon64_N64    6
+#define ucon64_NEOGEO    7
+#define ucon64_NES    8
+#define ucon64_PCE    9
+#define ucon64_PSX    10
+#define ucon64_PS2    11
+#define ucon64_SNES    12
+#define ucon64_SATURN    13
+#define ucon64_DC    14
+#define ucon64_CD32    15
+#define ucon64_CDI    16
+#define ucon64_REAL3DO    17
+#define ucon64_ATARI    18
+#define ucon64_SYSTEM16    19
 #define ucon64_NEOGEOPOCKET	20
-#define ucon64_GBA		21
-#define ucon64_VECTREX		22
+#define ucon64_GBA    21
+#define ucon64_VECTREX    22
 #define ucon64_VIRTUALBOY	23
 #define ucon64_WONDERSWAN	24
-#define ucon64_COLECO		25
-#define ucon64_INTELLI		26
-#define ucon64_GAMECUBE		27
-#define ucon64_XBOX		28
+#define ucon64_COLECO    25
+#define ucon64_INTELLI    26
+#define ucon64_GAMECUBE    27
+#define ucon64_XBOX    28
+#define ucon64_GP32    29
 
 #define ucon64_VERSION "1.9.8beta3"
 

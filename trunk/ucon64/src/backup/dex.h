@@ -33,4 +33,4 @@ char *read_frame (int frame, char *data);
 int write_frame (int frame, char *data);
 int get_perm ();
 
-#endif /* DEX_H */
+#endif // DEX_H

@@ -29,6 +29,7 @@ first I want to thank SiGMA SEVEN! who was my mentor and taught me how to
 write programs in C
 */
 
+#include "config.h"
 #include <ctype.h>
 #include <dirent.h>
 #include <stdio.h>
@@ -79,6 +80,7 @@ write programs in C
 #include "real3do/real3do.h"
 #include "gamecube/gamecube.h"
 #include "xbox/xbox.h"
+#include "gp32/gp32.h"
 
 #include "patch/ppf.h"
 #include "patch/xps.h"
@@ -87,16 +89,12 @@ write programs in C
 #include "patch/ips.h"
 #include "patch/bsl.h"
 
-#ifdef	BACKUP
-  #include "backup/fig.h"
-  #include "backup/swc.h"
-  #include "backup/unknown_bu.h"
-  #include "backup/unknown_bu512.h"
-#endif
+#include "backup/fig.h"
+#include "backup/swc.h"
+#include "backup/unknown_bu.h"
+#include "backup/unknown_bu512.h"
 
-#ifdef BACKUP_CD
-  #include "backup/cdrw.h"
-#endif
+#include "backup/cdrw.h"
 
 struct ucon64_ rom;
 
@@ -145,7 +143,8 @@ main (int argc, char *argv[])
     "-coleco",
     "-intelli",
     "-gc",
-    "-xbox"
+    "-xbox",
+    "-gp32"
   };
 #if     defined BACKUP && defined __unix__
   uid_t uid;
@@ -234,7 +233,7 @@ main (int argc, char *argv[])
 /*
    configfile handling
 */
-  sprintf (rom.config_file, "%s%c"
+  sprintf (rom.config_file, "%s" FILE_SEPARATOR_S
 #ifdef  __MSDOS__
   "ucon64.cfg"
 #else
@@ -249,7 +248,7 @@ main (int argc, char *argv[])
   */
   ".ucon64rc"
 #endif
-  , getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
+  , getchd (buf2, FILENAME_MAX));
 
   if (access (rom.config_file, F_OK) != 0)
     {
@@ -302,6 +301,7 @@ main (int argc, char *argv[])
                  "emulate_cd32=\n"
                  "emulate_cdi=\n"
                  "emulate_3do=\n"
+                 "emulate_gp32=\n"
 #ifdef BACKUP_CD
                  "#\n"
                  "# uCON64 can operate as frontend for CD burning software to make backups\n"
@@ -675,6 +675,7 @@ main (int argc, char *argv[])
     (argcmp (argc, argv, "-dc")) ? ucon64_DC :
     (argcmp (argc, argv, "-xbox")) ? ucon64_XBOX :
     (argcmp (argc, argv, "-gc")) ? ucon64_GAMECUBE :
+    (argcmp (argc, argv, "-gp32")) ? ucon64_GP32 :
 //    (argcmp (argc, argv, "-ip")) ? ucon64_DC :
     (argcmp (argc, argv, "-col")) ? ucon64_SNES :
     (argcmp (argc, argv, "-n2gb")) ? ucon64_GB :
@@ -848,11 +849,9 @@ main (int argc, char *argv[])
               (argcmp (argc, argv, "-sgb")) ? gameboy_sgb (&rom) :
               (argcmp (argc, argv, "-ssc")) ? gameboy_ssc (&rom) :
               (argcmp (argc, argv, "-n2gb")) ? gameboy_n2gb (&rom) :
-#ifdef  BACKUP
               (argcmp (argc, argv, "-xgbx")) ? gameboy_xgbx (&rom) :
               (argncmp (argc, argv, "-xgbxb", 6)) ? gameboy_xgbxb (&rom) :
               (argcmp (argc, argv, "-xgbxs")) ? gameboy_xgbxs (&rom) :
-#endif
               0);
       break;
 
@@ -865,12 +864,10 @@ main (int argc, char *argv[])
               (argcmp (argc, argv, "-multi")) ? gbadvance_multi (&rom, 256 * MBIT) :
               (argcmp (argc, argv, "-multi1")) ? gbadvance_multi (&rom, 64 * MBIT) :
               (argcmp (argc, argv, "-multi2")) ? gbadvance_multi (&rom, 128 * MBIT) :
-#ifdef  BACKUP
               (argcmp (argc, argv, "-xfal")) ? gbadvance_xfal (&rom) :
               (argncmp (argc, argv, "-xfalc", 6)) ? gbadvance_xfal (&rom) :
               (argncmp (argc, argv, "-xfalb", 6)) ? gbadvance_xfalb (&rom) :
               (argcmp (argc, argv, "-xfals")) ? gbadvance_xfals (&rom) :
-#endif
               0);
       break;
 
@@ -887,14 +884,8 @@ main (int argc, char *argv[])
               (argcmp (argc, argv, "-s")) ? genesis_s (&rom) :
               (argcmp (argc, argv, "-smd")) ? genesis_smd (&rom) :
               (argcmp (argc, argv, "-smds")) ? genesis_smds (&rom) :
-#ifdef	BACKUP
               (argcmp (argc, argv, "-xsmd")) ? genesis_xsmd (&rom) :
               (argcmp (argc, argv, "-xsmds")) ? genesis_xsmds (&rom) :
-#endif
-#ifdef	BACKUP_CD
-              (argcmp (argc, argv, "-mktoc")) ? genesis_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? genesis_xcdrw (&rom) :
-#endif
               0);
       break;
 
@@ -920,10 +911,8 @@ main (int argc, char *argv[])
               (argcmp (argc, argv, "-usms")) ? nintendo64_usms (&rom) :
               (argcmp (argc, argv, "-v64")) ? nintendo64_v64 (&rom) :
               (argcmp (argc, argv, "-z64")) ? nintendo64_z64 (&rom) :
-#ifdef	BACKUP
               (argcmp (argc, argv, "-xdjr")) ? nintendo64_xdjr (&rom) :
               (argcmp (argc, argv, "-xv64")) ? nintendo64_xv64 (&rom) :
-#endif
               0);
       break;
 
@@ -933,10 +922,6 @@ main (int argc, char *argv[])
               (argcmp (argc, argv, "-mvs")) ? neogeo_mvs (&rom) :
               (argcmp (argc, argv, "-s")) ? neogeo_s (&rom) :
               (argcmp (argc, argv, "-sam")) ? neogeo_sam (&rom) :
-#ifdef	BACKUP_CD
-              (argcmp (argc, argv, "-mktoc")) ? neogeo_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? neogeo_xcdrw (&rom) :
-#endif
               0);
       break;
 
@@ -984,29 +969,19 @@ main (int argc, char *argv[])
               (argcmp (argc, argv, "-swc")) ? snes_swc (&rom) :
               (argcmp (argc, argv, "-swcs")) ? snes_swcs (&rom) :
               (argcmp (argc, argv, "-ufos")) ? snes_ufos (&rom) :
-#ifdef	BACKUP
               (argcmp (argc, argv, "-xswc")) ? snes_xswc (&rom) :
               (argcmp (argc, argv, "-xswcs")) ? snes_xswcs (&rom) :
-#endif
               0);
       break;
 
     case ucon64_PCE:
       return ((argcmp (argc, argv, "-mgd")) ? pcengine_mgd (&rom) :
               (argcmp (argc, argv, "-smg")) ? pcengine_smg (&rom) :
-#ifdef	BACKUP_CD
-              (argcmp (argc, argv, "-mktoc")) ? pcengine_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? pcengine_xcdrw (&rom) :
-#endif
               0);
       break;
 
     case ucon64_JAGUAR:
       return (
-#ifdef	BACKUP_CD
-               (argcmp (argc, argv, "-mktoc")) ? jaguar_mktoc (&rom) :
-               (argcmp (argc, argv, "-xcdrw")) ? jaguar_xcdrw (&rom) :
-#endif
                0);
       break;
 
@@ -1029,70 +1004,44 @@ main (int argc, char *argv[])
       return ((argcmp (argc, argv, "-ip")) ?
               /* ip0000(char *dev,char *name) */ 0 :
               (argcmp (argc, argv, "-iso")) ? /* cdi2iso(rom.rom) */ :
-#ifdef BACKUP_CD
               (argcmp (argc, argv, "-mktoc")) ? dc_mktoc (&rom) :
               (argcmp (argc, argv, "-xcdrw")) ? dc_xcdrw (&rom) : 
-#endif             
               0);
       break;
 
     case ucon64_PSX:
-      return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-#ifdef BACKUP_CD
-              (argcmp (argc, argv, "-mktoc")) ? psx_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? psx_xcdrw (&rom) : 
-#endif
+      return (
+              (argcmp (argc, argv, "-iso")) ? bin2iso (rom.rom) :
               0);
       break;
 
     case ucon64_PS2:
-      return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-#ifdef BACKUP_CD
-              (argcmp (argc, argv, "-mktoc")) ? ps2_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? ps2_xcdrw (&rom) : 
-#endif
+      return ((argcmp (argc, argv, "-iso")) ? bin2iso (rom.rom) :
               0);
       break;
 
     case ucon64_SATURN:
-      return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-#ifdef BACKUP_CD
-              (argcmp (argc, argv, "-mktoc")) ? saturn_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? saturn_xcdrw (&rom) : 
-#endif
+      return ((argcmp (argc, argv, "-iso")) ? bin2iso (rom.rom) :
               0);
       break;
 
     case ucon64_CDI:
-      return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-#ifdef BACKUP_CD
-              (argcmp (argc, argv, "-mktoc")) ? cdi_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? cdi_xcdrw (&rom) : 
-#endif
+      return ((argcmp (argc, argv, "-iso")) ? bin2iso (rom.rom) :
               0);
       break;
 
     case ucon64_CD32:
-      return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-#ifdef BACKUP_CD
-              (argcmp (argc, argv, "-mktoc")) ? cd32_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? cd32_xcdrw (&rom) : 
-#endif
+      return ((argcmp (argc, argv, "-iso")) ? bin2iso (rom.rom) :
               0);
       break;
 
     case ucon64_REAL3DO:
-      return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-#ifdef BACKUP_CD
-              (argcmp (argc, argv, "-mktoc")) ? real3do_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? real3do_xcdrw (&rom) : 
-#endif
+      return ((argcmp (argc, argv, "-iso")) ? bin2iso (rom.rom) :
               0);
       break;
 
     case ucon64_UNKNOWN:
     default:
-#ifdef	BACKUP_CD
       if(argcmp (argc, argv, "-mktoc"))
         {
           return cdrw_mktoc (&rom);
@@ -1107,7 +1056,6 @@ main (int argc, char *argv[])
         {
           return (!access (rom.rom, F_OK)) ? cdrw_write (&rom) : cdrw_read (&rom);
         }
-#endif
       if (!access (rom.rom, F_OK) || argcmp (argc, argv, "-xsmd") ||    // the SMD made backups for Genesis and Sega Master System
           argcmp (argc, argv, "-xsmds")
         )
@@ -1268,6 +1216,9 @@ ucon64_init (struct ucon64_ *rom)
         (vectrex_init (rom) == -1) &&
         (coleco_init (rom) == -1) &&
         (intelli_init (rom) == -1) &&
+        (gamecube_init (rom) == -1) &&
+        (xbox_init (rom) == -1) &&
+        (gp32_init (rom) == -1) &&
         (wonderswan_init (rom) == -1))
       rom->console = ucon64_UNKNOWN;
 
@@ -1445,6 +1396,8 @@ ucon64_usage (int argc, char *argv[])
     gamecube_usage (argc, argv);
   else if (argcmp (argc, argv, "-xbox"))
     xbox_usage (argc, argv);
+  else if (argcmp (argc, argv, "-gp32"))
+    gp32_usage (argc, argv);
   else
     {
       gamecube_usage (argc, argv);
@@ -1472,9 +1425,7 @@ ucon64_usage (int argc, char *argv[])
       ppf_usage (argc, argv);
       xps_usage (argc, argv);
 
-#ifdef BACKUP_CD
       cdrw_usage (argc, argv);
-#endif
 
       printf ("\n");
 
@@ -1501,8 +1452,8 @@ ucon64_usage (int argc, char *argv[])
       intelli_usage (argc, argv);
 */
 
-      printf ("%s\n%s\n%s\n%s\n%s\n%s\n"
-              "  -s16, -ata, -coleco, -vboy, -vec, -intelli\n"
+      printf ("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
+              "  -s16, -ata, -coleco, -vboy, -vec, -intelli, -gp32\n"
               "                force recognition"
 #ifndef DB
               "; NEEDED"
@@ -1512,7 +1463,7 @@ ucon64_usage (int argc, char *argv[])
               "  -nhd          force ROM has no header\n"
               "  *             show info (default)\n\n", system16_TITLE,
               atari_TITLE, coleco_TITLE, virtualboy_TITLE,
-              vectrex_TITLE, intelli_TITLE);
+              vectrex_TITLE, intelli_TITLE, gp32_TITLE);
 
     }
 

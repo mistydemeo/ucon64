@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include "../config.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +30,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "../ucon64_db.h"
 #include "../ucon64_misc.h"
 #include "doctor64.h"
+
+#ifdef BACKUP
 
 #define SYNC_MAX_CNT 8192
 #define SYNC_MAX_TRY 32
@@ -276,10 +279,13 @@ sendDownloadHeader (unsigned int baseport, char name[], long *len)
   return 0;
 }
 
+#endif // BACKUP
+
 
 int
 doctor64_read (char *filename, unsigned int parport)
 {
+#ifdef BACKUP
   char buf[MAXBUFSIZE];
   FILE *fh;
   unsigned long size, inittime;
@@ -306,6 +312,10 @@ doctor64_read (char *filename, unsigned int parport)
     }
   sync ();
   fclose (fh);
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+
+#endif // BACKUP
   return 0;
 }
 
@@ -314,6 +324,7 @@ doctor64_read (char *filename, unsigned int parport)
 int
 doctor64_write (char *filename, long start, long len, unsigned int parport)
 {
+#ifdef BACKUP
   char buf[MAXBUFSIZE];
   FILE *fh;
   unsigned long size, inittime, pos;
@@ -345,20 +356,22 @@ doctor64_write (char *filename, long start, long len, unsigned int parport)
                      (quickftell (filename) - start));
     }
   fclose (fh);
+#else
+  printf("NOTE: this version was compiled without backup support\n\n");
+  
+#endif // BACKUP
   return 0;
 }
-
 
 int
 doctor64_usage (int argc, char *argv[])
 {
-    printf ("%s\n", doctor64_TITLE);
+#ifdef BACKUP
+    printf (doctor64_TITLE "\n"
 
-  printf
-    ("  -xv64         send/receive ROM to/from Doctor V64; $FILE=PORT\n"
+    "  -xv64         send/receive ROM to/from Doctor V64; $FILE=PORT\n"
      "                receives automatically when $ROM does not exist\n");
-
-//TODO more info like technical info about cabeling and stuff for the copier
+#endif
 
   return 0;
 }

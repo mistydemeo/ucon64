@@ -608,6 +608,9 @@ snes_mgd (st_rominfo_t *rominfo)
   char mgh[32], src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   int size = ucon64.file_size - rominfo->buheader_len;
 
+  if (snes_hirom)
+    printf ("NOTE: This game might not work with a MGD because it's a HiROM game\n");
+
   strcpy (src_name, ucon64.rom);
   mgd_make_name (ucon64.rom, "SF", size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
@@ -643,7 +646,7 @@ snes_int_blocks (const unsigned char *deintptr, unsigned char *ipl,
 {
   int i;
 
-  // interleave 64K blocks
+  // interleave 64 K blocks
   for (i = nblocks; i > 0; i--)
     {
       memmove (ipl, deintptr, 0x8000);
@@ -1009,7 +1012,7 @@ snes_ufo (st_rominfo_t *rominfo)
       header.size = newsize / MBIT;
 
       if (snes_sramsize != 0)
-        header.sram_a20_a21 = 0x0c;             // Try 3 if game gives protection message
+        header.sram_a20_a21 = 0x0c;             // try 3 if game gives protection message
       header.sram_a22_a23 = 2;
       // Tales of Phantasia (J) & Dai Kaiju Monogatari 2 (J) [14-17]: 0 0x0e 0 0
 
@@ -1069,7 +1072,7 @@ snes_ufo (st_rominfo_t *rominfo)
         }
       else // cartridge contains SRAM
         {
-          header.sram_a15 = 2;                  // Try 1 if game gives protection error
+          header.sram_a15 = 2;                  // try 1 if game gives protection error
           header.sram_a20_a21 = 0x0f;
           header.sram_a22_a23 = 3;
         }
@@ -3148,7 +3151,7 @@ snes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, "\n");
 
       sprintf (buf, "ROM speed: %s\n",
-               snes_header.map_type & 0x10 ? "120ns (FastROM)" : "200ns (SlowROM)");
+               snes_header.map_type & 0x10 ? "120 ns (FastROM)" : "200 ns (SlowROM)");
       strcat (rominfo->misc, buf);
 
       snes_sramsize = snes_header.sram_size ? 1 << (snes_header.sram_size + 10) : 0;
@@ -3200,7 +3203,7 @@ snes_init (st_rominfo_t *rominfo)
         "(snes_header.bs_map_type >> 4) > 2".
       */
       sprintf (buf, "ROM speed: %s\n",
-               snes_header.bs_map_type & 0x10 ? "120ns (FastROM)" : "200ns (SlowROM)");
+               snes_header.bs_map_type & 0x10 ? "120 ns (FastROM)" : "200 ns (SlowROM)");
       strcat (rominfo->misc, buf);
     }
 

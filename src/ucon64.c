@@ -129,7 +129,7 @@ const struct option options[] = {
     {"b1", 0, 0, UCON64_B1},
     {"bios", 0, 0, UCON64_BIOS},
     {"bot", 0, 0, UCON64_BOT},
-    {"c", 0, 0, UCON64_C},
+    {"c", 1, 0, UCON64_C},
     {"disc", 0, 0, UCON64_DISC},
 //    {"cd32", 0, 0, UCON64_CD32},
 //    {"cdi", 0, 0, UCON64_CDI},
@@ -140,7 +140,7 @@ const struct option options[] = {
     {"crc", 0, 0, UCON64_CRC},
     {"crchd", 0, 0, UCON64_CRCHD},
     {"crp", 0, 0, UCON64_CRP},
-    {"cs", 0, 0, UCON64_CS},
+    {"cs", 1, 0, UCON64_CS},
     {"db", 0, 0, UCON64_DB},
     {"dbs", 0, 0, UCON64_DBS},
     {"dbuh", 0, 0, UCON64_DBUH},
@@ -154,8 +154,7 @@ const struct option options[] = {
     {"ffe", 0, 0, UCON64_FFE},
     {"fig", 0, 0, UCON64_FIG},
     {"figs", 0, 0, UCON64_FIGS},
-    {"file", 1, 0, UCON64_FILE},
-    {"find", 0, 0, UCON64_FIND},
+    {"find", 1, 0, UCON64_FIND},
     {"frontend", 0, 0, UCON64_FRONTEND},
     {"gb", 0, 0, UCON64_GB},
     {"gba", 0, 0, UCON64_GBA},
@@ -251,7 +250,7 @@ const struct option options[] = {
     {"ssize", 1, 0, UCON64_SSIZE},
     {"stp", 0, 0, UCON64_STP},
     {"stpn", 1, 0, UCON64_STPN},
-    {"strip", 0, 0, UCON64_STRIP},
+    {"strip", 1, 0, UCON64_STRIP},
     {"swan", 0, 0, UCON64_SWAN},
     {"swap", 0, 0, UCON64_SWAP},
     {"swc", 0, 0, UCON64_SWC},
@@ -544,6 +543,7 @@ main (int argc, char **argv)
     Note that getopt[_long_only]() sorts argv so that all switches and options
     come before all non-switches and non-options.
   */
+#if 1
   if (argc - rom_index == 2 && !strlen (ucon64.file))
     {
       ucon64.file = argv[argc - 1];
@@ -555,6 +555,7 @@ main (int argc, char **argv)
 #ifdef  PARALLEL
   if (ucon64.file)
     sscanf (ucon64.file, "%x", &ucon64.parport);
+#endif
 #endif
 
   // no ROM or FILE argument (for example -dbv)
@@ -617,10 +618,11 @@ main (int argc, char **argv)
       rom_index++;
     }
 
+#if 1
   if (file_message)
     printf ("NOTE: Use --file=0 if \"%s\"\n"
             "      should NOT be interpreted as --file argument\n", ucon64.file);
-
+#endif
   return 0;
 }
 
@@ -1201,9 +1203,9 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "ru          rename all files in DIRECTORY to uppercase; " OPTION_LONG_S "rom=DIRECTORY\n"
 */
     HEXDUMP_MSG
-    "  " OPTION_LONG_S "find        find string in ROM; " OPTION_LONG_S "file=STRING (wildcard: '?')\n"
-    "  " OPTION_S "c           compare ROMs for differencies; " OPTION_LONG_S "file=OTHER_ROM\n"
-    "  " OPTION_LONG_S "cs          compare ROMs for similarities; " OPTION_LONG_S "file=OTHER_ROM\n"
+    "  " OPTION_LONG_S "find=STRING find STRING in ROM (wildcard: '?')\n"
+    "  " OPTION_S "c=FILE      compare FILE with ROMs for differencies\n"
+    "  " OPTION_LONG_S "cs=FILE     compare FILE with ROMs for similarities\n"
     "  " OPTION_LONG_S "help        display this help and exit\n"
     "  " OPTION_LONG_S "version     output version information and exit\n"
     "  " OPTION_S "q           be quiet (don't show ROM info)\n"
@@ -1215,7 +1217,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "ispad       check if ROM is padded\n"
     "  " OPTION_S "p, " OPTION_LONG_S "pad    pad ROM to full Mb\n"
     "  " OPTION_LONG_S "padn=N      pad ROM to N Bytes (put Bytes with value 0x00 after end)\n"
-    "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
+    "  " OPTION_LONG_S "strip=N     strip N Bytes from end of ROM\n"
     "  " OPTION_LONG_S "stpn=N      strip N Bytes from ROM beginning\n"
     "  " OPTION_LONG_S "stp         same as " OPTION_LONG_S "stpn=512\n"
     "                  most backup units use a header with 512 Bytes size\n"

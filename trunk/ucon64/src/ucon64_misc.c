@@ -2,7 +2,7 @@
 ucon64_misc.c - miscellaneous functions for uCON64
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2002 dbjh
+           2001 - 2003 dbjh
                   2001 Caz
                   2002 Jan-Erik Karlsson (Amiga)
 
@@ -85,8 +85,10 @@ const char *ucon64_msg[] = {
   "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
 
   "Wrote output to: %s\n",
-  "ERROR: Can't open %s for reading\n",
-  "ERROR: Can't open %s for writing\n",
+  "ERROR: Can't open \"%s\" for reading\n",
+  "ERROR: Can't open \"%s\" for writing\n",
+  "ERROR: Can't read from \"%s\"\n",
+  "ERROR: Can't write to \"%s\"\n",
   "ERROR: Not enough memory for buffer (%d bytes)\n",
   "ERROR: Not enough memory for ROM buffer (%d bytes)\n",
   "ERROR: Not enough memory for file buffer (%d bytes)\n",

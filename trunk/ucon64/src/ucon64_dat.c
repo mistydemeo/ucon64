@@ -273,7 +273,8 @@ line_to_dat (const char *dat_entry, ucon64_dat_t * dat)
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], *p = NULL;
   uint32_t pos = 0;
 
-  if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR) return NULL;
+  if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
+    return NULL;
 
   strcpy (buf, dat_entry); 
     
@@ -281,7 +282,7 @@ line_to_dat (const char *dat_entry, ucon64_dat_t * dat)
        (dat_field[pos] = strtok (!pos ? buf : NULL, DAT_FIELD_SEPARATOR_S))
        && pos < (MAX_FIELDS_IN_DAT - 1); pos++);
 
-   memset (dat, 0, sizeof (ucon64_dat_t));
+  memset (dat, 0, sizeof (ucon64_dat_t));
 
   if (dat_field[5])
     sscanf (dat_field[5], "%x", &dat->current_crc32);
@@ -361,7 +362,7 @@ get_dat_entry (char *fname, ucon64_dat_t * dat, uint32_t crc32)
   char buf[MAXBUFSIZE];
 
   if (!fdat)
-    if (!(fdat = fopen (fname, "r")))
+    if (!(fdat = fopen (fname, "rb")))
       {
         fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname);
         return NULL;
@@ -453,7 +454,7 @@ ucon64_dat_search (uint32_t crc32, ucon64_dat_t * dat)
 // load the index for the current dat file
       setext (buf, ".idx");
 
-      if (!(fh = fopen (buf, "r")))
+      if (!(fh = fopen (buf, "rb")))
         {
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], buf);
           return NULL;
@@ -470,7 +471,7 @@ ucon64_dat_search (uint32_t crc32, ucon64_dat_t * dat)
 
       if (fread (p, 1, fsize, fh) != fsize)
         {
-          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], buf);
+          fprintf (stderr, ucon64_msg[READ_ERROR], buf);
           fclose (fh);
           free (p);
           return NULL;
@@ -482,7 +483,7 @@ ucon64_dat_search (uint32_t crc32, ucon64_dat_t * dat)
       for (pos = 0; pos < fsize; pos += sizeof (uint32_t))
         if (get_uint32 (&p[pos]) == crc32) // crc32 found
           {
-// open dat file and read entry 
+// open dat file and read entry
             free (p);
             setext (buf, ".dat");
 

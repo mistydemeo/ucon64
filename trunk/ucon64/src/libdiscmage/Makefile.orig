@@ -42,7 +42,11 @@ endif
 LIBNAME=discmage
 OBJECTS=libdm_misc.o dllinit.o misc.o misc_wav.o format/format.o format/cdi.o \
         format/nero.o format/cue.o format/toc.o format/other.o
+ifneq ($(OSTYPE),beos)
 LIBS=-lm
+else
+LIBS=
+endif
 ifdef USE_ZLIB
 LIBS+=-lz
 OBJECTS+=unzip.o map.o misc_z.o

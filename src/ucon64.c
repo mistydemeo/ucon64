@@ -1683,6 +1683,7 @@ int ucon64_e(struct ucon64_ *rom)
 
 int ucon64_ls (int verbose)
 {
+  int result = 0;
   int ucon64_argc;
   struct dirent *ep;
   struct stat puffer;
@@ -1713,7 +1714,7 @@ int ucon64_ls (int verbose)
 
               ucon64_flush (ucon64_argc, ucon64_argv, &rom);
               strcpy (rom.rom, ep->d_name);
-              ucon64_init (&rom);
+              result = ucon64_init (&rom);
 
               if (verbose == 0)
                 {
@@ -1722,7 +1723,7 @@ int ucon64_ls (int verbose)
                   printf ("%-31.31s %10d %s %s\n", rom.name,
                           (int) puffer.st_size, buf, rom.rom);
                 }
-              else if (verbose == 1)
+              else if (verbose == 1 && !result)
                 ucon64_nfo (&rom);
 /*TODO renamer!
               else if (argcmp (argc, argv, "-rrom") &&

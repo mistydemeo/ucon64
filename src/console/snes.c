@@ -44,7 +44,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SNES_NAME_LEN 21
 #define ALT_HILO                                // use Snes9x' Hi/LoROM detection method
 #define GD3_HEADER_MAPSIZE 0x18
-
+#define NSRT_HEADER_VERSION 15                  // version 1.5 header
 
 static int snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
 static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_size);
@@ -97,13 +97,16 @@ const char *snes_usage[] =
     "                  TYPE='0' gamepad\n"
     "                  TYPE='1' mouse\n"
     "                  TYPE='2' mouse / gamepad\n"
+    "                  TYPE='6' multitap\n"
+    "  " OPTION_LONG_S "ctrl2=TYPE  specify type of controller in port 2 for emu when converting\n"
+    "                  TYPE='0' gamepad\n"
+    "                  TYPE='1' mouse\n"
+    "                  TYPE='2' mouse / gamepad\n"
     "                  TYPE='3' super scope\n"
     "                  TYPE='4' super scope / gamepad\n"
     "                  TYPE='5' Konami's justifier\n"
     "                  TYPE='6' multitap\n"
     "                  TYPE='7' mouse / super scope / gamepad\n"
-    "  " OPTION_LONG_S "ctrl2=TYPE  specify type of controller in port 2 for emu when converting\n"
-    "                  TYPE may be any value that is valid for " OPTION_LONG_S "ctrl\n"
     "  " OPTION_LONG_S "col         convert 0xRRGGBB (html) <-> 0xXXXX (snes); " OPTION_LONG_S "rom=0xCOLOR\n"
     "                  this routine was used to find green colors in games and\n"
     "                  to replace them with red colors (blood mode)\n"
@@ -474,6 +477,14 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
   int x;
   char checksum = -1;                           // byte => no need to take the modulus of 256
 
+  if (rominfo->buheader_len && !memcmp (&OFFSET (header, 0x1e8), "NSRT", 4))
+    {
+      // an NSRT header is already present
+      ((unsigned char *) header)[0x1ec] = NSRT_HEADER_VERSION;
+      return;                                   // don't do anything else
+    }
+
+
   if (UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
     {
       if (rominfo->current_internal_crc != rominfo->internal_crc)
@@ -487,7 +498,7 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
       ((unsigned char *) header)[0x1e6] = snes_header.checksum_low;
       ((unsigned char *) header)[0x1e7] = snes_header.checksum_high;
       memcpy (((unsigned char *) header) + 0x1e8, "NSRT", 4);
-      ((unsigned char *) header)[0x1ec] = 15;   // version 1.5 header
+      ((unsigned char *) header)[0x1ec] = NSRT_HEADER_VERSION;
     }
 
   if (UCON64_ISSET (ucon64.controller))
@@ -495,8 +506,11 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
       for (x = 0; x < 8; x++)
         if ((ucon64.controller >> x) & 1)
           break;
-      if (x >= 8)
-        x = 0;
+      if (x != 0 && x != 1 && x != 2 && x != 6)
+        {
+          printf ("WARNING: Invalid value for controller in port 1, using \"0\"\n");
+          x = 0;
+        }
       ((unsigned char *) header)[0x1ed] = (unsigned char) (x << 4);
     }
   if (UCON64_ISSET (ucon64.controller2))
@@ -505,7 +519,10 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
         if ((ucon64.controller2 >> x) & 1)
           break;
       if (x >= 8)
-        x = 0;
+        {
+          printf ("WARNING: Invalid value for controller in port 2, using \"0\"\n");
+          x = 0;
+        }
       ((unsigned char *) header)[0x1ed] |= x;
     }
 
@@ -1721,7 +1738,7 @@ snes_init (st_rominfo_t *rominfo)
     "Italy",
     "Hong Kong and China",
     "Indonesia",
-    "Korea"},
+    "South Korea"},
       *snes_romtype[3] = {
     "ROM",                                      // NOT ROM only, ROM + other chip is possible
     "ROM and RAM",

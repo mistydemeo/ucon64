@@ -20,6 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "ucon64gui.h"
 #include "snes/snes.h"
+#include "nes/nes.h"
 
 #include "backup/swc.h"
 #include "top.h"
@@ -31,7 +32,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 void h2g_system(char *query)
 {
 int len;
-char buf[MAXBUFSIZE];
+char name[4096];
+char value[4096];
 char buf2[MAXBUFSIZE];
 
 #ifdef DEBUG
@@ -40,8 +42,10 @@ char buf2[MAXBUFSIZE];
 #endif // DEBUG
 
 len = findlast(query,"=");
-strcpy(buf,query);
-buf[len]=0;
+strcpy(value,query);
+value[len]=0;
+
+strcpy(name,&query[len+1]);
 
 if(!strncmp(query,"rom=",4))
 {
@@ -53,62 +57,40 @@ if(!strncmp(query,"file=",5))
   strcpy(ucon64gui.file,&query[5]);
   return;
 }
-if(!strdcmp(buf,"ucon64gui_snes"))
+
+if(!strncmp(value,"ucon64gui_",10))
 {
-  ucon64gui_snes();
-  return;
-}
-if(!strdcmp(buf,"ucon64gui_root"))
-{
-  ucon64gui_root();
+  if(!strdcmp(value,"ucon64gui_snes"))    ucon64gui_snes();
+  if(!strdcmp(value,"ucon64gui_root"))    ucon64gui_root();
+  if(!strdcmp(value,"ucon64gui_nes"))    ucon64gui_nes();
+  if(!strdcmp(value,"ucon64gui_swc"))    ucon64gui_swc();
+  if(!strdcmp(value,"ucon64gui_config"))    ucon64gui_config();
+
   return;
 }
 
-if(!strdcmp(buf,"ucon64gui_swc"))
+if(!strncmp(value,"emulate_",8) ||
+  !strncmp(value,"cdrw_",5) ||
+  !strdcmp(value,"backups"))
 {
-  ucon64gui_swc();
+  setProperty (ucon64gui.configfile, value, &query[len+1]);
   return;
 }
-
-if(!strdcmp(buf,"ucon64gui_config"))
-{
-  ucon64gui_config();
-  return;
-}
-
-if(!strncmp(buf,"emulate_",8))
-{
-  setProperty (ucon64gui.configfile, buf, &query[len+1]);
-  return;
-}
-
-if(!strncmp(buf,"cdrw_",5))
-{
-  setProperty (ucon64gui.configfile, buf, &query[len+1]);
-  return;
-}
-
-if(!strdcmp(buf,"backups"))
-{
-  setProperty (ucon64gui.configfile, buf, &query[len+1]);
-  return;
-}
-
 
 // switches/overrides
-if(!strdcmp(buf,"-hd"))
+if(!strdcmp(name,"-hd"))
 {
   ucon64gui.hd = 1;
   return;
 }
 
-if(!strdcmp(buf,"-nhd"))
+if(!strdcmp(name,"-nhd"))
 {
   ucon64gui.hd = 0;
   return;
 }
 
-if(!strdcmp(buf,"-ns"))
+if(!strdcmp(name,"-ns"))
 {
   ucon64gui.ns = (ucon64gui.ns == 1) ? 0 : 1;
   return;
@@ -117,8 +99,7 @@ if(!strdcmp(buf,"-ns"))
 /*
   options
 */
-
-  sprintf(buf2,"ucon64 %s \"%s\" \"%s\"", buf
+  sprintf(buf2,"ucon64 %s \"%s\" \"%s\"", value
   , (ucon64gui.rom != NULL) ? ucon64gui.rom : ""
   , (ucon64gui.file != NULL) ? ucon64gui.file : ""
   );
@@ -129,13 +110,13 @@ if(!strdcmp(buf,"-ns"))
   system (buf2);
 
 /*
-  if (!(fh = popen (buf, "r")))
+  if (!(fh = popen (buf2, "r")))
     {
       strcpy (ucon64gui.ucon64_output, "");
       return;
     }
 
-  while (fgets (buf, sizeof buf, fh) != NULL)
+  while (fgets (buf2, sizeof buf, fh) != NULL)
     {
       strcat (ucon64gui.ucon64_output, buf);
     }
@@ -201,7 +182,7 @@ main (int argc, char *argv[])
 void
 ucon64gui_root (void)
 {
-#include "xpm/trans_1x3.xpm"
+#include "xpm/trans.xpm"
 #include "xpm/icon.xpm"
 
   h2g_html (0, 0, 0);
@@ -216,9 +197,10 @@ ucon64gui_root (void)
   h2g_ ("Console specific options");
   h2g_br ();
   h2g_input_submit ("Super Nintendo", "ucon64gui_snes", "(-snes) Options for Super Nintendo");
+  h2g_input_submit ("NES", "ucon64gui_nes", "(-snes) Options for Nintendo Entertainment System");
 
   h2g_br ();
-  h2g_img (trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_img (trans_xpm, 0, 3, 0, NULL);
 //  h2g_hr ();
   h2g_ ("Backup unit specific options");
   h2g_br ();

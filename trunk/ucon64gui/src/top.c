@@ -5,7 +5,7 @@
 void
 ucon64gui_top(void)
 {
-#include "xpm/trans_1x3.xpm"
+#include "xpm/trans.xpm"
 #include "xpm/open.xpm"
 #include "xpm/emulate.xpm"
 
@@ -18,22 +18,22 @@ ucon64gui_top(void)
   h2g_input_submit ("Config", "ucon64gui_config",
                          buf);
   h2g_br();
-  h2g_img(trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_img(trans_xpm, 0, 3, 0, NULL);
 
   h2g_br();
 
   h2g_("$ROM: ");
 
-  h2g_input_file ("rom","", 350, 0, open_xpm, 0, 0, "Select $ROM");
+  h2g_input_file ("rom","", 50, 0, open_xpm, 0, 0, "Select $ROM");
   
   h2g_br();
   h2g_("$FILE:  ");
 
-  h2g_input_file ("file", "", 350, 0, open_xpm, 0, 0,
+  h2g_input_file ("file", "", 50, 0, open_xpm, 0, 0,
     "Select $FILE or enter a value by hand");
   
   h2g_br ();
-  h2g_img (trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_img (trans_xpm, 0, 3, 0, NULL);
   h2g_br ();
 
   h2g_ ("Miscellaneous options");
@@ -62,7 +62,7 @@ ucon64gui_top(void)
   h2g_input_submit ("Truncate", "-strip", "(-strip) strip Bytes from end of ROM; $FILE=VALUE");
 
   h2g_br();
-  h2g_img(trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_img(trans_xpm, 0, 3, 0, NULL);
 
   h2g_br();
 
@@ -75,7 +75,7 @@ ucon64gui_top(void)
 
   h2g_input_submit ("Swap/(De)Interleave ROM", "-swap", "(-swap) swap/(de)interleave ALL Bytes in ROM (1234<->2143)");
   h2g_br ();
-  h2g_img (trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_img (trans_xpm, 0, 3, 0, NULL);
   h2g_br ();
 
   h2g_("List ROMs: ");
@@ -91,7 +91,7 @@ ucon64gui_top(void)
   h2g_input_submit ("similarities", "-cs", "(-cs) compare ROMs for similarities; $FILE=OTHER_ROM");
 
   h2g_br ();
-  h2g_img (trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_img (trans_xpm, 0, 3, 0, NULL);
   h2g_br ();
 
   h2g_("Database: ");
@@ -112,13 +112,13 @@ ucon64gui_top(void)
   h2g_input_submit ("Check", "-ispad", "(-ispad) check if ROM is padded");
 
   h2g_br();
-  h2g_img(trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_img(trans_xpm, 0, 3, 0, NULL);
 
   h2g_br();
 
   h2g_hr();
   h2g_br();
-  h2g_img(trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_img(trans_xpm, 0, 3, 0, NULL);
 
   h2g_br();
   h2g_("Patches");
@@ -148,7 +148,7 @@ ucon64gui_top(void)
   h2g_input_submit ("Rename", "-na", "(-na) change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION");
   
   h2g_br ();
-  h2g_img (trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_img (trans_xpm, 0, 3, 0, NULL);
   h2g_br ();
   
   h2g_("PPF: ");
@@ -163,7 +163,7 @@ ucon64gui_top(void)
   
   
   h2g_br ();
-  h2g_img (trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_img (trans_xpm, 0, 3, 0, NULL);
   h2g_br();
 
   h2g_hr();

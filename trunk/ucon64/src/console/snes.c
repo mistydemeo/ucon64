@@ -763,6 +763,8 @@ make_gd_name (const char *filename, st_rominfo_t *rominfo, char *name,
               exit (1);
             }
           q_fread (buffer, ucon64.rominfo->buheader_len, size, filename);
+          if (rominfo->interleaved)
+            snes_deinterleave (rominfo, &buffer, size);
         }
 
       for (n = 0; n < size; n++)

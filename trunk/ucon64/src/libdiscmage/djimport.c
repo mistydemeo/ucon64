@@ -1,7 +1,7 @@
 /*
 djimport.c - discmage import library for DJGPP
 
-written by 2002 - 2003 dbjh
+written by 2002 - 2004 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -92,11 +92,6 @@ load_dxe (void)
 
 uint32_t
 dm_get_version (void)
-/*
-  Our DXE code can export (pointers to) variables. However, Windows DLLs can
-  only export (pointers to) functions. To avoid platform-specific code we
-  let all code use these functions in libdiscmage (dm_get_version()).
-*/
 {
   CHECK
   return dm_get_version_ptr ();

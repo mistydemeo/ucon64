@@ -1,7 +1,7 @@
 /*
 misc_z.c - miscellaneous zlib functions
 
-written by 2001 - 2003 dbjh
+written by 2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -625,8 +625,8 @@ popen2 (const char *command, const char *mode)
 #define popen _popen
 #endif
   int compressed = 0;
-  fmode2_t fmode = FM_NORMAL;                   // we don't (yet?) support
-  st_finfo_t *finfo;                            //  popen() for compressed files
+  fmode2_t fmode = FM_NORMAL;
+  st_finfo_t *finfo;
   FILE *file;
 
   if (fh_map == NULL)
@@ -657,8 +657,8 @@ pclose2 (FILE *stream)
   if (fmode == FM_NORMAL)
     return pclose (stream);
   else if (fmode == FM_GZIP || fmode == FM_ZIP)
-    return -1;                                  // we don't (yet?) support
-  else                                          //  pclose() for compressed files
+    return -1;
+  else
     return -1;
 #undef  pclose
 #define pclose  pclose2

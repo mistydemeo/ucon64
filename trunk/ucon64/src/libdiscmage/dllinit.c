@@ -34,7 +34,7 @@ DECLARE_CYGWIN_DLL(DllMain);
 #if     defined __CYGWIN__ || defined _WIN32
 #include <windows.h>
 
-#if     defined __MINGW32__ && defined __cplusplus
+#ifdef  __cplusplus
 extern "C" BOOL WINAPI DllMain (HINSTANCE h, DWORD reason, LPVOID ptr);
 #endif
 

@@ -1,9 +1,9 @@
 /*
-fal.c - Flash Advance Linker support for uCON64
+fal.h - Flash Linker Advance support for uCON64
 
-written by 2001 Jeff Frohwein
-           2001 NoisyB (noisyb@gmx.net)
-           2001 dbjh
+written by 2001        Jeff Frohwein
+           2001        NoisyB (noisyb@gmx.net)
+           2001 - 2002 dbjh
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,11 +38,31 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //                     Richard W for the code fix. Thanks Richard!
 //                    Fixed random lockup bug when programming Turbo carts.
 //                    Added -n option. Header is now repaired by default.
+// V1.5  - 01/09/25 - Added error retries/checking for older Visoly carts.
+//                  - Odd length files no longer give a verify error on last byte+1 location.
+// V1.6  - 01/11/11 - Made IRQ 7 instead of 5 and DMA 3 instead of 1 default
+//                  - linux values. (Thanks to Massimiliano Marsiglietti.)
+//                  - Added -D & -I to allow linux to change IRQ & DMA defaults.
+//                  - Added LPT3 support.
+//                  - Added error checking for space between switch & parameters.
+//                  - Added -2 options for faster operation for some EPP ports.
+// V1.7  - 01/11/13 - Added -b option to backup game save SRAM or game save Flash.
+//                  - Added -r option to restore game save SRAM. (No flash support.)
+// V1.71 - 01/11/23 - Fixed bug introduced in v1.7 where -d option printed out twice.
+// V1.72 - 01/12/12 - Force 0x96 at location 0xb2 in header since it's required.
 
 // To compile source on linux:
 //   cc -o fl fl.c -O2
 // You must have root access to run this under linux.
-
+//
+// NOTE: This file is filled with cr+lf line terminators. This may
+// lead to unhelpful and weird error messages with gcc for linux.
+// Strip out the cr characters to prevent this problem. The following
+// unix command line will work for that:
+//   tr -d \\r < dosfile > unixfile
+// On some unix distributions you can also use the following command:
+//   dos2unix
+// (Thanks to Massimiliano Marsiglietti for locating this problem.)
 
 // RAM Detect notes for dev. (Just ignore!)
 //-----------------------------------------
@@ -56,14 +76,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "fal.h"
 #include <time.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
-#define outp(p,v)  outportb(p,v); iodelay()
-#define inp(p)   inportb(p)
+#define outpb(p,v)  outportb(p,v); iodelay()
+#define inpb(p)   inportb(p)
+#define outpw(p,v)  outportw(p,v); iodelay()
+#define inpw(p)   inportw(p)
 
 //#define HEADER_LENGTH 0xc0
 //#define OUTBUFLEN 256                   // Must be a multiple of 2! (ex:64,128,256...)
 
 #define INTEL28F_BLOCKERASE 0x20
+#define INTEL28F_CLEARSR    0x50
 #define INTEL28F_CONFIRM    0xD0
 #define INTEL28F_QUIRY      0x98
 #define INTEL28F_READARRAY  0xff
@@ -73,12 +102,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define SHARP28F_BLOCKERASE 0x20
 #define SHARP28F_CONFIRM    0xD0
+#define SHARP28F_READARRAY  0xff
 #define SHARP28F_WORDWRITE  0x10
 
 #define u8      unsigned char
-#define u16     unsigned int
-#define u32     unsigned long
+#define u16     unsigned short
+#define u32     unsigned int
 #define CONST_U8 const unsigned char
+
 
 // ***Global Variables ***
 
@@ -88,6 +119,21 @@ unsigned SPPStatPort;
 unsigned SPPCtrlPort;
 unsigned EPPAddrPort;
 unsigned EPPDataPort;
+unsigned ECPRegECR;
+
+// prototypes
+void WriteFlash (int addr, int data);
+int ReadFlash (int addr);
+void iodelay (void);
+int PPReadWord (void);
+void PPWriteWord (int i);
+void SetCartAddr (int addr);
+void l4021d0 (int i);
+void l40226c (void);
+
+#define FLINKER 1
+
+#include "cartlib.c"
 
 int debug,verbose;
 int DataSize16;
@@ -100,7 +146,7 @@ int FileHeader[0xc0];
 int HeaderBad;
 int Complement = 0;
 
-const unsigned char GoodHeader [] = {
+const u8 GoodHeader [] = {
  46,0,0,234,36,255,174,81,105,154,162,33,61,132,130,10,
  132,228,9,173,17,36,139,152,192,129,127,33,163,82,190,25,
  147,9,206,32,16,70,74,74,248,39,49,236,88,199,232,51,
@@ -125,56 +171,71 @@ void iodelay (void)
       }
    }
 
-void ProgramExit(int code)
+void ProgramExit (int code)
    {
-   exit(code);
+   exit (code);
    }
 
-void usage(char *name)
+void usage (char *name)
    {
    char _small[255];
    char smaller[255];
    int i = 0;
 
-   strcpy(_small, name);
+   strcpy (_small, name);
 
-#ifndef __linux__
-   if (strchr(name, '.') != NULL)
+#if 0
+   if (strchr (name, '.') != NULL)
       _small[strlen(_small)-4] = 0;               /* remove trailing file type */
 #endif
 
    while ( (_small[strlen(_small)-i] != 0x2f) &&   /* loop until we find a / */
-           ((strlen(_small)-i) > 0 ) )
+           ((strlen (_small)-i) > 0 ) )
       i++;
 
-   if ((strlen(_small)-i) == 0) i++;
+   if ((strlen (_small)-i) == 0) i++;
 
    strcpy (smaller, (char *)(&_small[strlen(_small)-i+1]) );
 
-   fprintf (stderr, "GBA FLinker v1.4 by Jeff F.\n");
-   fprintf (stderr, "Usage: %s [-c n][-d n][-h][-l n][-m][-p file][-s file][-v file][-w n]\n\n", smaller);
+   fprintf (STDERR, "GBA FLinker v1.72 by Jeff F.\n");
+   fprintf (STDERR, "Usage: %s [options]\n", smaller);
 
-//   fprintf (stderr, "\t-b n\tBackup 32k bytes of SRAM into file\n");
-   fprintf (stderr, "\t-c n\tSpecify chip size in mbits (8,16,32,64,128,256) (default=32)\n");
-   fprintf (stderr, "\t-d n\tDump 256 bytes of ROM to screen (default: n=0)\n");
-   fprintf (stderr, "\t-h\tThis help screen\n");
-   fprintf (stderr, "\t-l n\tSpecify the parallel port to use (default is 1 = LPT1)\n");
-   fprintf (stderr, "\t-m\tSet Standard Parallel Port (SPP) mode (default = EPP)\n");
-   fprintf (stderr, "\t-n\tDo not repair incorrect header (default = repair header)\n");
-   fprintf (stderr, "\t-p file\tProgram flash cart with file\n");
-   fprintf (stderr, "\t-s file\tSave the cart into a file (Use -c to specify size)\n");
-   fprintf (stderr, "\t-v file\tVerify flash cart with file\n");
-   fprintf (stderr, "\t-w n\tAdd delay to make transfer more reliable\n");
+   fprintf (STDERR, "\t-2      Use 16bit EPP data path for faster operation (default=8bit)\n");
+   fprintf (STDERR, "\t-b o s file   Backup game save SRAM or Flash to file\n");
+   fprintf (STDERR, "\t               (o = Bank Number [1-4])\n");
+   fprintf (STDERR, "\t               (s=1 - Backup 32K bytes to file.)\n");
+   fprintf (STDERR, "\t               (s=2 - Backup 64K bytes to file.)\n");
+   fprintf (STDERR, "\t               (s=3 - Backup 128K bytes to file.)\n");
+   fprintf (STDERR, "\t               (s=4 - Backup 256K bytes to file.)\n");
+   fprintf (STDERR, "\t-c n    Specify chip size in mbits (8,16,32,64,128,256) (default=32)\n");
+   fprintf (STDERR, "\t-d n    Dump 256 bytes of ROM to screen (default: n=0)\n");
+   fprintf (STDERR, "\t-h      This help screen\n");
+   fprintf (STDERR, "\t-l n    Specify the parallel port to use (default is 1 = LPT1)\n");
+//   fprintf (STDERR, "\t-m\tSet Standard Parallel Port (SPP) mode (default = EPP)\n");
+   fprintf (STDERR, "\t-n      Do not repair incorrect header (default = repair header)\n");
+   fprintf (STDERR, "\t-p file Program flash cart with file\n");
+   fprintf (STDERR, "\t-r o file     Restore game save SRAM from file (No save flash support)\n");
+   fprintf (STDERR, "\t               (o = Bank Number [1-4])\n");
+   fprintf (STDERR, "\t-s file Save the cart into a file (Use -c to specify size)\n");
+   fprintf (STDERR, "\t-v file Verify flash cart with file\n");
+   fprintf (STDERR, "\t-w n    Add delay to make transfer more reliable\n");
    }
 
 void InitPort (int port)
    {
-   int ECPRegECR;
+//   int ECPRegECR;
 
-   if (port == 1)
-       SPPDataPort = 0x378;
-   else
-       SPPDataPort = 0x278;
+    switch (port)
+       {
+       case 2 :  SPPDataPort = 0x278; break;
+       case 3 :  SPPDataPort = 0x3bc; break;
+       default : SPPDataPort = 0x378;
+       }
+
+//   if (port == 1)
+//       SPPDataPort = 0x378;
+//   else
+//       SPPDataPort = 0x278;
 
    SPPStatPort = SPPDataPort + 1;
    SPPCtrlPort = SPPDataPort + 2;
@@ -183,64 +244,64 @@ void InitPort (int port)
    ECPRegECR   = SPPDataPort + 0x402;
 
 //#ifndef __linux__
-   if (EPPMode)
-      { outp (ECPRegECR, 4); }             // Set EPP mode for ECP chipsets
-   else
-      { outp (ECPRegECR, 0); }             // Set SPP mode for ECP chipsets
+//   if (EPPMode)
+//      { outpb (ECPRegECR, 4); }             // Set EPP mode for ECP chipsets
+//   else
+//      { outpb (ECPRegECR, 0); }             // Set SPP mode for ECP chipsets
 //#endif
    }
 
 void l4020a4 (int reg)
    {
-   outp (SPPCtrlPort, 1);
-   outp (SPPDataPort, reg);
-   outp (SPPCtrlPort, 9);
-   outp (SPPCtrlPort, 1);
+   outpb (SPPCtrlPort, 1);
+   outpb (SPPDataPort, reg);
+   outpb (SPPCtrlPort, 9);
+   outpb (SPPCtrlPort, 1);
    }
 
-void l4020dc (int i)
+void SPPWriteByte (int i)       // l4020dc
    {
-   outp (SPPDataPort, i);
-   outp (SPPCtrlPort, 3);
-   outp (SPPCtrlPort, 1);
+   outpb (SPPDataPort, i);
+   outpb (SPPCtrlPort, 3);
+   outpb (SPPCtrlPort, 1);
    }
 
 void l402108 (int reg, int adr)
    {
    l4020a4 (reg);
-   l4020dc (adr);
+   SPPWriteByte (adr);
    }
 
 int SPPReadByte (void)                      // 402124
    {
    int v;
 
-   outp (SPPCtrlPort, 0);
-   outp (SPPCtrlPort, 2);
-   v = ((inp(SPPStatPort)) >> 3) & 0xf;
-   outp (SPPCtrlPort, 6);
-   v += (((inp(SPPStatPort)) << 1) & 0xf0);
-   outp (SPPCtrlPort, 0);
+   outpb (SPPCtrlPort, 0);
+   outpb (SPPCtrlPort, 2);
+   v = ((inpb (SPPStatPort)) >> 3) & 0xf;
+   outpb (SPPCtrlPort, 6);
+   v += (((inpb (SPPStatPort)) << 1) & 0xf0);
+   outpb (SPPCtrlPort, 0);
 
    return (v);
    }
 
 void l402188 (int reg)
    {
-   outp (SPPCtrlPort, 1);
-   outp (EPPAddrPort, reg);
+   outpb (SPPCtrlPort, 1);
+   outpb (EPPAddrPort, reg);
    }
 
 void l4021a8 (int reg, int adr)
    {
    l402188 (reg);
-   outp (SPPCtrlPort, 1);
-   outp (EPPDataPort, adr);
+   outpb (SPPCtrlPort, 1);
+   outpb (EPPDataPort, adr);
    }
 
 void l4021d0 (int i)
    {
-   outp (SPPCtrlPort, 1);
+   outpb (SPPCtrlPort, 1);
 
    if (EPPMode)
       l402188 (i);
@@ -272,20 +333,34 @@ void l40226c (void)
       l402200 (4, 0x47);
    }
 
-void l4022d0 (int i)
+void PPWriteByte (int i)                    // 4022d0
    {
    if (EPPMode)
       {
-      outp (EPPDataPort, i);
+      outpb (EPPDataPort, i);
+      }
+   else
+      SPPWriteByte (i);
+   }
+
+void PPWriteWord (int i)                    // 4022d0
+   {
+   if (EPPMode)
+      {
       if (DataSize16)
          {
-         outp (EPPDataPort, (i>>8));
+         outpw (EPPDataPort, i);
+         }
+      else
+         {
+         outpb (EPPDataPort, i);
+         outpb (EPPDataPort, (i>>8));
          }
       }
    else
       {
-      l4020dc(i);
-      l4020dc(i>>8);
+      SPPWriteByte (i);
+      SPPWriteByte (i>>8);
       }
    }
 
@@ -294,22 +369,26 @@ int PPReadByte (void)                  // 40234c
    int v;
 
    if (EPPMode)
-      v = inp (EPPDataPort);
+      v = inpb (EPPDataPort);
    else
       v = SPPReadByte ();
 
    return (v);
    }
 
-int ReadFlash (void)                      // 402368
+int PPReadWord (void)                      // 402368  // ReadFlash
    {
    int v = 0;
 
    if (EPPMode)
       {
-      v = inp (EPPDataPort);
       if (DataSize16)
-         v += (inp (EPPDataPort) << 8);
+         v = inpw (EPPDataPort);
+      else
+         {
+         v = inpb (EPPDataPort);
+         v += (inpb (EPPDataPort) << 8);
+         }
       }
    else
       {
@@ -330,103 +409,199 @@ void WriteFlash (int addr, int data)    // 402414
    {
    SetCartAddr (addr);
    l4021d0 (3);
-   l4022d0 (data);
+   PPWriteWord (data);
    }
 
-void WriteRepeat (int addr, int data, int count)
+int ReadFlash (int addr)
    {
-   int i;
-   for (i=0; i<count; i++)
-      WriteFlash (addr, data);
-   }
-
-
-void VisolyModePreamble (void)  // 402438
-   {
-   l40226c ();
-   WriteRepeat (0x987654, 0x5354, 1);
-   WriteRepeat ( 0x12345, 0x1234, 500);
-   WriteRepeat (  0x7654, 0x5354, 1);
-   WriteRepeat ( 0x12345, 0x5354, 1);
-   WriteRepeat ( 0x12345, 0x5678, 500);
-   WriteRepeat (0x987654, 0x5354, 1);
-   WriteRepeat ( 0x12345, 0x5354, 1);
-   WriteRepeat (0x765400, 0x5678, 1);
-   WriteRepeat ( 0x13450, 0x1234, 1);
-   WriteRepeat ( 0x12345, 0xabcd, 500);
-   WriteRepeat (0x987654, 0x5354, 1);
-   }
-
-void SetVisolyFlashRWMode (void)
-   {
-   VisolyModePreamble ();
-   WriteFlash (0xf12345, 0x9413);
-   }
-
-void SetVisolyBackupRWMode (int i)                     // 402550
-   {
-   VisolyModePreamble ();
-   WriteFlash (0xa12345, i>>1);
+   SetCartAddr (addr);
+   l4021d0 (3);
+   outpb (SPPCtrlPort, 0);
+   return (PPReadWord ());
    }
 
 void l402684 (void)
    {
-   outp (SPPStatPort, 1);
+   outpb (SPPStatPort, 1);
    l40226c ();
    }
 
-void LinkerInit (void)
+int LookForLinker (void)                   // 4026a8
    {
    l402684 ();
-//   l402200 (2,0x12);
-//   l402200 (1,0x34);
-//   l402200 (0,0x56);
+   l402200 (2,0x12);
+   l402200 (1,0x34);
+   l402200 (0,0x56);
    l4021d0 (2);
-   outp (SPPCtrlPort, 0);
-   outp (SPPCtrlPort, 4);
+   outpb (SPPCtrlPort, 0);
+   if (PPReadByte () != 0x12)           // 40234c
+      return (0);
+
+   l4021d0 (1);
+   outpb (SPPCtrlPort, 0);
+   if (PPReadByte () != 0x34)
+      return (0);
+
+   l4021d0 (0);
+   outpb (SPPCtrlPort, 0);
+   if (PPReadByte () != 0x56)
+      return (0);
+
+   outpb (SPPCtrlPort, 4);
+   return(1);
    }
 
-//void l4027c4 (void)
-//   {
-//   LinkerInit();
-//   }
+void LinkerInit (void)                     // 4027c4
+   {
+   outpb (ECPRegECR, 4);             // Set EPP mode for ECP chipsets
+
+   EPPMode = 1;
+   if (LookForLinker ())
+      {
+      // Linker found using EPP mode.
+      printf ("Linker found. EPP Found.\n");
+      if (SPPDataPort == 0x3bc) return;
+      outpb (SPPCtrlPort, 4);
+      }
+   else
+      {
+      // Look for linker in SPP mode.
+      outpb (ECPRegECR, 0);             // Set EPP mode for ECP chipsets
+
+      EPPMode = 0;
+      if (LookForLinker ())
+         {
+         printf ("Linker found. EPP not Found - SPP used.\n");
+         }
+      else
+         {
+         fprintf (STDERR, "ERROR: Flash Advance Linker not found or not turned on.\n");
+         ProgramExit (1);
+         }
+      }
+   }
 
 int ReadStatusRegister (int addr)                     // 402dd8
    {
    int v;
-   WriteFlash (addr,INTEL28F_READSR);
-   outp (SPPCtrlPort, 0);
-   v = ReadFlash (); // & 0xff;
-   v = ReadFlash (); // & 0xff;
+   WriteFlash (addr, INTEL28F_READSR);
+   outpb (SPPCtrlPort, 0);
+   v = PPReadWord (); // & 0xff;
+   v = PPReadWord (); // & 0xff;
    return (v);
    }
 
-void DumpSRAM (void)                    // 4046f4
+//void OldDumpSRAM (void)                    // 4046f4
+//   {
+//   int i,j,k,v;
+//
+//   i=1;
+//   SetVisolyBackupRWMode (i>>1);
+//   l402234 ();
+//
+//   for (j=0; j<0x80; j++)
+//      {
+//      l402200 (0, 0);
+//      if (i==1)
+//         l402200 (1, j);
+//      else
+//         l402200 (1, j|0x80);
+//      l402200 (2, 0);
+//      l4021d0 (3);
+//      outpb (SPPCtrlPort, 0);
+//
+//      for (k=0; k<0x100; k++)
+//         {
+//         v = PPReadByte ();
+//         printf ("%x ", v);
+//         }
+//      }
+//   printf("\n");
+//   }
+
+// StartOffSet: 1 = 0, 2 = 64k, 3 = 128k, 4 = 192k
+// Size: 1 = 32k, 2 = 64k, 3 = 128k, 4 = 256k
+
+void BackupSRAM (FILE *fp, int StartOS, int Size)                    // 4046f4
    {
-   int i,j,k,v;
+   int j,k,v;
+   int m;
+   int n = 1 << (Size-1);
+   int size = n*32*1024, bytesread = 0;
+   time_t starttime = time(NULL);
 
-   i=1;
-   SetVisolyBackupRWMode (i);
-   l402234 ();
-
-   for (j=0; j<0x80; j++)
+   for (m=((StartOS-1)<<1); m < (((StartOS-1)<<1)+n); m++)
       {
-      l402200 (0, 0);
-      if (i==1)
-         l402200 (1, j);
-      else
-         l402200 (1, j|0x80);
-      l402200 (2, 0);
-      l4021d0 (3);
-      outp (SPPCtrlPort, 0);
-
-      for (k=0; k<0x100; k++)
+      if ((m & 1) == 0)
          {
-         v = PPReadByte ();
-         printf("%x ", v);
+         SetVisolyBackupRWMode (m>>1);
+         l402234 ();
+         }
+
+      // Backup a 32k byte chunk
+      for (j=0; j<0x80; j++)
+         {
+         l402200 (0, 0);
+         l402200 (1, j+(0x80*(m&1)));
+         l402200 (2, 0);
+         l4021d0 (3);
+         outpb (SPPCtrlPort, 0);
+
+         for (k=0; k<0x100; k++)
+            {
+            v = PPReadByte ();
+            fputc (v, fp);
+            }
+         bytesread += 256;
+         if ((bytesread & 0x1fff) == 0)         // call parport_gauge() after receiving 8kB
+            parport_gauge (starttime, bytesread, size);
          }
       }
-   printf("\n");
+   }
+
+// StartOffSet: 1 = 0, 2 = 64k, 3 = 128k, 4 = 192k
+
+void RestoreSRAM (FILE *fp, int StartOS)
+   {
+   int i;
+   int j,k;
+   int m = ((StartOS-1)<<1);
+   int byteswritten = 0;
+   time_t starttime;
+   struct stat fstate;
+
+   fstat(fileno(fp), &fstate);
+   starttime = time(NULL);
+
+   i = fgetc (fp);
+   while (!feof (fp))
+      {
+      if ((m & 1) == 0)
+         {
+         SetVisolyBackupRWMode (m>>1);
+         l402234 ();
+         }
+
+      // Restore a 32k byte chunk
+      for (j=0; j<0x80; j++)
+         {
+         l402200 (0, 0);
+         l402200 (1, j+(0x80*(m&1)));
+         l402200 (2, 0);
+         l4021d0 (3);
+         outpb (SPPCtrlPort, 0);
+
+         for (k=0; k<0x100; k++)
+            {
+            PPWriteByte (i);
+            i = fgetc (fp);
+            }
+         byteswritten += 256;
+         if ((byteswritten & 0x1fff) == 0)      // call parport_gauge() after sending 8kB
+            parport_gauge (starttime, byteswritten, fstate.st_size);
+         }
+      m++;
+      }
    }
 
 void BackupROM (FILE *fp, int SizekW)
@@ -438,20 +613,19 @@ void BackupROM (FILE *fp, int SizekW)
 
    WriteFlash (0, INTEL28F_READARRAY);         // Set flash (intel 28F640J3A) Read Mode
 
-
    starttime = time(NULL);
    for (i = 0; i < (SizekW>>8); i++)
       {
       SetCartAddr (i<<8);                            // Set cart base addr to 0
       l4021d0 (3);
 
-      outp (SPPCtrlPort, 0);
+      outpb (SPPCtrlPort, 0);
 
       for (j = 0; j < 256; j++)
          {
-         valw = ReadFlash ();
-         fputc(valw & 0xff, fp);
-         fputc(valw >> 8, fp);
+         valw = PPReadWord ();
+         fputc (valw & 0xff, fp);
+         fputc (valw >> 8, fp);
          }
       bytesread += 256 << 1;                    // 256 words
       if ((bytesread & 0xffff) == 0)            // call parport_gauge() after receiving 64kB
@@ -473,19 +647,19 @@ void dump (u8 BaseAdr)
    SetCartAddr (BaseAdr<<7);                   // Set cart base addr to read
    l4021d0 (3);
 
-   outp (SPPCtrlPort, 0);
+   outpb (SPPCtrlPort, 0);
 
-   for(i=0; i<128; i++)
+   for (i=0; i<128; i++)
       {
       if (First == 1)
          {
-         if (i*2 < 256) printf("0");
-         if (i*2 < 16) printf("0");
-         printf("%hx - ",(i*2));
+         if (i*2 < 256) printf ("0");
+         if (i*2 < 16) printf ("0");
+         printf ("%hx - ",(i*2));
          First = 0;
          }
 
-      v = ReadFlash();
+      v = PPReadWord ();
       val2 = v >> 8;
       val1 = v & 255;
 
@@ -495,8 +669,8 @@ void dump (u8 BaseAdr)
        Display[(i & 7)*2] = 46;
 
       if (val1 < 16)
-         printf("0");
-      printf("%hx ",val1);
+         printf ("0");
+      printf ("%hx ",val1);
 
       if ((val2 > 31) & (val2 < 127))
 
@@ -505,111 +679,47 @@ void dump (u8 BaseAdr)
        Display[(i & 7)*2+1] = 46;
 
       if (val2 < 16)
-         printf("0");
-      printf("%hx ",val2);
+         printf ("0");
+      printf ("%hx ",val2);
 
       if ((i & 7)==7)
          {
          First = 1;
-         printf("   %3s",(&Display[0]));
-         printf("\n");
+         printf ("   %3s",(&Display[0]));
+         printf ("\n");
          }
       }
    }
 
-void CheckForFC (void)                  // 402f40
+void CheckForFC (void)
    {
-   int Manuf;
-
    LinkerInit ();
+//   if (LinkerInit () == 0)
+//      {
+//      fprintf (STDERR, "ERROR: Flash Advance Linker not found or not turned on.\n");
+//      ProgramExit (1);
+//      }
+
    SetVisolyFlashRWMode ();
-   WriteFlash (0, INTEL28F_RIC);          // Read Identifier codes from flash.
-                                          // Works for intel 28F640J3A & Sharp LH28F320BJE.
+   Device = CartTypeDetect ();
+   VisolyTurbo = 0;
 
-   SetCartAddr (0);                     // Set cart addr to 0
-   l4021d0 (3);
+   printf ("Device ID = 0x%x : ", Device);
 
-   outp (SPPCtrlPort, 0);
-
-   Manuf = ReadFlash ();
-   Device = ReadFlash ();
-
-//   if (Manuf == 0x2e)
-//      printf("Manufacturer ID = Standard ROM\n");
-//   else
-//      printf("Manufacturer ID = 0x%x: Device ID = 0x%x: ", Manuf, Device);
-
-   printf("Manufacturer ID = 0x%x ", Manuf);
-   switch (Manuf)
+   switch (Device)
       {
-      case 0x2e:
-         // Standard ROM
-         printf("(Standard ROM)\n");
-         break;
-      case 0x89:
-         // Intel chips
-         printf("(Intel): Device ID = 0x");
-         switch (Device)
-            {
-            case 0x16:
-               printf("16 (i28F320J3A)\n");
-               break;
-            case 0x17:
-               printf("17 (i28F640J3A)\n");
-               break;
-            case 0x18:
-               printf("18 (i28F128J3A)\n");
-               break;
-            default:
-               // Check to see if this is a Visoly "Turbo" cart
-               Device = ReadFlash ();
-               printf("%x (Turbo - 2 x ", Device);
-               VisolyTurbo = 1;
-               switch (Device)
-                  {
-                  case 0x16:
-                     printf("i28F320J3A)\n");
-                     break;
-                  case 0x17:
-                     printf("i28F640J3A)\n");
-                     break;
-                  case 0x18:
-                     printf("i28F128J3A)\n");
-                     break;
-                  default:
-                     printf("(unknown)\n");
-                     VisolyTurbo = 0;
-                     break;
-                  }
-            }
-         break;
-      case 0xb0:
-         // Sharp chips
-         printf("(Sharp): Device ID = 0x%x ", Device);
-         switch (Device)
-            {
-            case 0xe2:
-               printf("(LH28F320BJE)\n");
-               break;
-            default:
-               printf("(unknown)\n");
-               break;
-            }
-         break;
-      default:
-         printf("(Unknown)\n");
-         Device = 0;
+      case 0x16 : printf ("FA 32M (i28F320J3A)");  break;
+      case 0x17 : printf ("FA 64M (i28F640J3A)");  break;
+      case 0x18 : printf ("FA 128M (i28F128J3A)"); break;
+      case 0x2e : printf ("Standard ROM");         break;
+      case 0x96 : printf ("Turbo FA 64M (2 x i28F320J3A)");  VisolyTurbo=1; break;
+      case 0x97 : printf ("Turbo FA 128M (2 x i28F640J3A)"); VisolyTurbo=1; break;
+      case 0x98 : printf ("Turbo FA 256M (2 x i28F128J3A");  VisolyTurbo=1; break;
+      case 0xdc : printf ("Hudson");               break;
+      case 0xe2 : printf ("Nintendo Flash Cart (LH28F320BJE)");   break;
+      default   : printf ("Unknown");              break;
       }
-//   WriteFlash (0, INTEL28F_QUIRY);          // Read Identifier codes from flash.
-//   SetCartAddr (0);                     // Set cart addr to 0
-//   l4021d0 (3);
-
-//   outp (SPPCtrlPort, 0);
-
-//   for (i=0; i<32; i++)
-//      printf("%x ", ReadFlash ());
-//   printf("\n");
-
+   printf ("\n");
    }
 
 int GetFileByte (FILE *fp)
@@ -622,7 +732,7 @@ int GetFileByte (FILE *fp)
       // Set file pointer just past header
       if (FilePos == 0)
          for (i = 0; i < 0xa0; i++)
-            (void) fgetc(fp);
+            (void) fgetc (fp);
 
       if (FilePos < 0xa0)
          {
@@ -632,16 +742,19 @@ int GetFileByte (FILE *fp)
             i = FileHeader [FilePos];
          }
       else
-         if (FilePos == 0xbd)
+         if ((FilePos == 0xb2) || (FilePos == 0xbd))
             {
-            (void) fgetc(fp);           // Discard complement in file
-            i = Complement;
+            if (FilePos == 0xb2)
+               i = 0x96;          // Required
+            else
+               i = Complement;
+            (void) fgetc (fp);           // Discard file value
             }
          else
-            i = fgetc(fp);
+            i = fgetc (fp);
       }
    else
-      i = fgetc(fp);
+      i = fgetc (fp);
 
    FilePos++;
    return (i);
@@ -657,213 +770,298 @@ int GetFileSize (FILE *fp)
       int j;
 
       FileSize = 0;
-      while (!feof(fp) && (FileSize < 0xc0))
+      while (!feof (fp) && (FileSize < 0xc0))
          {
-         FileHeader[FileSize++] = fgetc(fp);
+         FileHeader[FileSize++] = fgetc (fp);
          }
 
-      if (feof(fp))
+      if (feof (fp))
          {
-         fprintf(stderr, "ERROR: File must be 192 bytes or larger\n");
-         ProgramExit(1);
+         fprintf (STDERR, "ERROR: File must be 192 bytes or larger\n");
+         ProgramExit (1);
          }
       else
          FileSize--;
 
-      while (!feof(fp))
+      while (!feof (fp))
          {
-         (void) fgetc(fp);
+         (void) fgetc (fp);
          FileSize++;
          }
 
       HeaderBad = 0;
       i = 4;
-      while (i < 0x9c)
+      while (i < 0xa0) //9c)
          {
          if (FileHeader[i] != GoodHeader[i])
             HeaderBad = 1;
          i++;
          }
       if (HeaderBad)
-         printf("Fixing logo area. ");
+         printf ("Fixing logo area. ");
 
+      Complement = 0;
+      FileHeader[0xb2] = 0x96;          // Required
       for (j=0xa0; j<0xbd; j++)
          Complement += FileHeader [j];
       Complement = (0-(0x19+Complement)) & 0xff;
-//      printf("[Complement = 0x%x]", (int)Complement);
+      //printf("[Complement = 0x%x]", (int)Complement);
+      //printf("[HeaderComp = 0x%x]", (int)FileHeader[0xbd]);
       if (FileHeader[0xbd] != Complement)
-         printf("Fixing complement check.");
+         printf ("Fixing complement check.");
 
       if ((FileHeader[0xbd] != Complement) || HeaderBad)
-         printf("\n");
-      rewind(fp);
+         printf ("\n");
+      rewind (fp);
       }
    else
       {
       FileSize = -1;
-      while (!feof(fp))
+      while (!feof (fp))
          {
-         (void) fgetc(fp);
+         (void) fgetc (fp);
          FileSize++;
          }
-      rewind(fp);
+      rewind (fp);
       }
    return (FileSize);
    }
 
 // Program older (non-Turbo) Visoly flash cart
+// (Single flash chip)
 
-void ProgramNonIntIntelFlash (FILE *fp)
+void ProgramNonTurboIntelFlash (FILE *fp)
    {
    int i,j,k;
    int addr = 0;
-   int done;
    int FileSize;
+   int Ready = 0;
+   int Timeout;
    time_t starttime;
 
    // Get file size
    FileSize = GetFileSize (fp);
 
-   printf("Erasing Visoly non-turbo flash cart...\n");
+   printf ("Erasing Visoly non-turbo flash cart...\n");
 
-//   j=1;
-   for (i=0; i<(FileSize>>1); i=i+65536)
+   // Erase as many 128k blocks as are required
+   Ready = EraseNonTurboFABlocks (0, ((FileSize - 1) >> 17)+1);
+
+   if (Ready)
       {
-      WriteFlash (i, INTEL28F_BLOCKERASE);          // Erase a block
-      WriteFlash (i, INTEL28F_CONFIRM);             // Comfirm block erase
-      while ((ReadStatusRegister(i) & 0x80)==0)
-         {
-         }
-      }
-//   ProgramExit(1);
-   printf("Programming Visoly non-turbo flash cart...\n\n");
+      printf ("Programming Visoly non-turbo flash cart...\n\n");
    //403018
 
-   starttime = time(NULL);
-   j = GetFileByte (fp);
+      starttime = time(NULL);
+      j = GetFileByte (fp);
 
-   while (!feof(fp))
-      {
-      done = 0;
-      while (!done)
+      while (!feof (fp))
          {
-         WriteFlash (addr, INTEL28F_WRTOBUF);
-         outp (SPPCtrlPort, 0);
+         Ready = 0;
+         Timeout = 0x4000;
 
-         done = ReadFlash() & 0x80;
+         while ((Ready == 0) && (Timeout != 0))
+            {
+            WriteFlash (addr, INTEL28F_WRTOBUF);
+            outpb (SPPCtrlPort, 0);
+            Ready = PPReadWord() & 0x80;
+
+            Timeout--;
+            }
+
+         if (Ready)
+            {
+            WriteFlash (addr, 15);              // Write 15+1 16bit words
+
+            SetCartAddr (addr);                  // Set cart base addr to 0
+            l4021d0 (3);
+
+            for (i=0; i<16; i++)
+               {
+               k = j;
+               if (j != EOF)
+                  j = GetFileByte (fp);
+               k += (j << 8);
+               PPWriteWord (k);
+
+               if (j != EOF)
+                  j = GetFileByte (fp);
+               }
+
+            addr += 16;
+            if ((addr & 0x3fff) == 0)           // call parport_gauge() after sending 32kB
+               parport_gauge (starttime, addr << 1, FileSize);
+
+            PPWriteWord (INTEL28F_CONFIRM);             // Comfirm block write
+
+            Ready = 0;
+            Timeout = 0x4000;
+
+            while ((Ready == 0) && (Timeout != 0))
+               {
+               WriteFlash (0, INTEL28F_READSR);
+               outpb (SPPCtrlPort, 0);
+               i = PPReadWord() & 0xff;
+               Ready = i & 0x80;
+
+               Timeout--;
+               }
+
+            if (Ready)
+               {
+               if (i & 0x7f)
+                  {
+                  // One or more status register error bits are set
+                  outpb (SPPCtrlPort, 1);
+                  WriteFlash (0, INTEL28F_CLEARSR);
+                  Ready = 0;
+                  break;
+                  }
+               }
+            else
+               {
+               outpb (SPPCtrlPort, 1);
+               WriteFlash (0, INTEL28F_CLEARSR);
+               break;
+               }
+            }
+         else
+            {
+            break;
+            }
          }
 
-      WriteFlash (addr, 0xf);              // Write 0xf+1 words
+      WriteFlash (0, INTEL28F_READARRAY);
+      outpb (SPPCtrlPort, 0);
 
-      SetCartAddr (addr);                           // Set cart base addr to 0
-      l4021d0 (3);
-
-      for (i=0; i<16; i++)
+      if (Ready)
+         printf ("\nDone.\n");
+      else
          {
-         k = j;
-         if (j != EOF)
-            j = GetFileByte (fp);
-         k += (j << 8);
-         l4022d0 (k);
-
-         if (j != EOF)
-            j = GetFileByte (fp);
+         printf ("\nFlash cart write failed!\n");
          }
-      addr += 16;
-      if ((addr & 0x3fff) == 0)                 // call parport_gauge() after sending 32kB
-         parport_gauge (starttime, addr << 1, FileSize);
-      l4022d0 (INTEL28F_CONFIRM);             // Comfirm block write
       }
-
-   WriteFlash (0, INTEL28F_READARRAY);
-   outp (SPPCtrlPort, 0);
-
-   printf("\nDone.\n");
+   else
+      {
+      printf ("\nFlash cart erase failed!\n");
+      }
    }
 
 // Program newer (Turbo) Visoly flash cart
+// (Dual chip / Interleave)
 
-void ProgramInterleaveIntelFlash (FILE *fp)
+void ProgramTurboIntelFlash (FILE *fp)
    {
-   int i,j,k,z;
+   int i,j=0;
+   int k; //z;
    int addr = 0;
    int done1,done2;
    int FileSize;
+   int Timeout;
+   int Ready; //= 0;
    time_t starttime;
 
    // Get file size
    FileSize = GetFileSize (fp);
 
-   printf("Erasing Visoly turbo flash cart...\n");
+   printf ("Erasing Visoly turbo flash cart...\n");
 
-   j=1;
-   for (i=0; i<(FileSize>>1); i=i+(65536*2))
+   // Erase as many 256k blocks as are required
+   Ready = EraseTurboFABlocks (0, ((FileSize - 1) >> 18)+1);
+
+   if (Ready)
       {
-      WriteFlash (i, INTEL28F_BLOCKERASE);          // Erase a block
-      WriteFlash (i+1, INTEL28F_BLOCKERASE);        // Erase a block
-      WriteFlash (i, INTEL28F_CONFIRM);             // Comfirm block erase
-      while (((z=ReadStatusRegister(i)) & 0x80)==0)
-         {
-         }
-      WriteFlash (i+1, INTEL28F_CONFIRM);             // Comfirm block erase
-      while (((z=ReadStatusRegister(i+1)) & 0x80)==0)
-         {
-         }
-      }
-//   ProgramExit(1);
-   printf("Programming Visoly turbo flash cart...\n\n");
+      printf("Programming Visoly turbo flash cart...\n\n");
    //403018
-   starttime = time(NULL);
-   j = GetFileByte (fp);
+      starttime = time(NULL);
+      j = GetFileByte (fp);
 
-   while (!feof(fp))
-      {
-      done1=0;
-      done2=0;
-      while ((done1+done2)!=0x100)
+      while (!feof(fp))
          {
-         if (done1 == 0) WriteFlash (addr+0, INTEL28F_WRTOBUF);
-         if (done2 == 0) WriteFlash (addr+1, INTEL28F_WRTOBUF);
+         done1 = 0;
+         done2 = 0;
+         Ready = 0;
+         Timeout = 0x4000;
 
-         SetCartAddr (addr);                           // Set cart base addr to 0
-         l4021d0 (3);
+         while ((!Ready) && (Timeout != 0))
+            {
+            if (done1 == 0) WriteFlash (addr+0, INTEL28F_WRTOBUF);
+            if (done2 == 0) WriteFlash (addr+1, INTEL28F_WRTOBUF);
 
-         outp (SPPCtrlPort, 0);
+            SetCartAddr (addr);                           // Set cart base addr
+            l4021d0 (3);
+            outpb (SPPCtrlPort, 0);
 
-         done1 = ReadFlash() & 0x80;
-         done2 = ReadFlash() & 0x80;
+            done1 = PPReadWord () & 0x80;
+            done2 = PPReadWord () & 0x80;
+            Ready = ((done1+done2) == 0x100);
+
+            Timeout--;
+            }
+
+         if (Ready)
+            {
+            WriteFlash (addr, 15);              // Write 15+1 16bit words
+            PPWriteWord (15);
+
+            SetCartAddr (addr);                           // Set cart base addr
+            l4021d0 (3);
+
+            for (i=0; i<32; i++)
+               {
+               k = j;
+               if (j != EOF)
+                  j = GetFileByte (fp);
+               k += (j << 8);
+               PPWriteWord (k);
+
+               if (j != EOF)
+                  j = GetFileByte (fp);
+               }
+            addr += 32;
+            if ((addr & 0x3fff) == 0)           // call parport_gauge() after sending 32kB
+               parport_gauge (starttime, addr << 1, FileSize);
+            PPWriteWord (INTEL28F_CONFIRM);             // Comfirm block write
+            PPWriteWord (INTEL28F_CONFIRM);             // Comfirm block write
+
+            Ready = 0;
+            Timeout = 0x4000;
+            k = 0;
+
+            while (((k & 0x8080) != 0x8080) && (Timeout != 0))
+               {
+               outpb (SPPCtrlPort, 0);
+               k = PPReadWord() & 0xff;
+               k += ((PPReadWord() & 0xff) << 8);
+               Ready = (k == 0x8080);
+
+               Timeout--;
+               }
+
+            if (!Ready)
+               break;
+            }
+         else
+            break;
          }
+      WriteFlash (0, INTEL28F_READARRAY);
+      outpb (SPPCtrlPort, 0);
+      WriteFlash (1, INTEL28F_READARRAY);
+      outpb (SPPCtrlPort, 0);
 
-      WriteFlash (addr, 0xf);              // Write 0xf+1 words
-      l4022d0 (0xf);
-
-      SetCartAddr (addr);                           // Set cart base addr to 0
-      l4021d0 (3);
-
-      for (i=0; i<32; i++)
+      if (Ready)
+         printf ("\nDone.\n");
+      else
          {
-         k = j;
-         if (j != EOF)
-            j = GetFileByte (fp);
-         k += (j << 8);
-         l4022d0 (k);
-
-         if (j != EOF)
-            j = GetFileByte (fp);
+         WriteFlash (0, INTEL28F_CLEARSR);
+         PPWriteWord (INTEL28F_CLEARSR);
+         printf ("\nFlash cart write failed!\n");
          }
-      addr += 32;
-      if ((addr & 0x3fff) == 0)                 // call parport_gauge() after sending 32kB
-         parport_gauge (starttime, addr << 1, FileSize);
-      l4022d0 (INTEL28F_CONFIRM);             // Comfirm block write
-      l4022d0 (INTEL28F_CONFIRM);             // Comfirm block write
       }
-
-   WriteFlash (0, INTEL28F_READARRAY);
-   outp (SPPCtrlPort, 0);
-   WriteFlash (1, INTEL28F_READARRAY);
-   outp (SPPCtrlPort, 0);
-
-   printf("\nDone.\n");
+   else
+      {
+      printf ("\nFlash cart erase failed!\n");
+      }
    }
 
 // Program official Nintendo flash cart
@@ -873,56 +1071,52 @@ void ProgramSharpFlash (FILE *fp)
    int i,j;
    int k = 0;
    int addr = 0;
-//   int done;
    int FileSize;
+   int Ready;
    time_t starttime;
 
    // Get file size
    FileSize = GetFileSize (fp);
 
-   printf("Erasing flash cart...\n");
-//   j = 0;
-   for (i=0; i<(FileSize>>1); i=i+32768)
+   printf ("Erasing flash cart...\n");
+
+   // Erase as many 64k blocks as are required
+   Ready = EraseNintendoFlashBlocks (0, ((FileSize - 1) >> 16)+1);
+
+   if (Ready)
       {
-//      printf("%d,%ld\n", ++j,i);
-      WriteFlash (addr, SHARP28F_BLOCKERASE);          // Erase a block
-      WriteFlash (addr, SHARP28F_CONFIRM);             // Comfirm block erase
-      while ((ReadStatusRegister (0) & 0x80)==0)
-         {
-//         printf("RSR = %d\n", ReadStatusRegister ());
-         }
-//      printf(" %d,%ld\n", j,i);
-      }
+      printf ("Programming Nintendo flash cart...\n\n");
 
-   printf("Programming Nintendo flash cart...\n\n");
-
-   starttime = time(NULL);
-   j = GetFileByte (fp);
-
-   while (!feof(fp))
-      {
-      if (j != EOF)
-         k = GetFileByte (fp);
-
-      i = ((k & 0xff)<<8)+(j & 0xff);
-
-      while ((ReadStatusRegister (0) & 0x80)==0)
-         {
-         }
-
-      WriteFlash(addr, SHARP28F_WORDWRITE);
-      WriteFlash(addr, i);
-      addr += 1;
-
+      starttime = time(NULL);
       j = GetFileByte (fp);
-      if ((addr & 0x3fff) == 0)                 // call parport_gauge() after sending 32kB
-         parport_gauge (starttime, addr << 1, FileSize);
+
+      while (!feof (fp))
+         {
+         if (j != EOF)
+            k = GetFileByte (fp);
+
+         i = ((k & 0xff)<<8)+(j & 0xff);
+
+         while ((ReadStatusRegister (0) & 0x80)==0)
+            {
+            }
+
+         WriteFlash (addr, SHARP28F_WORDWRITE);
+         WriteFlash (addr, i);
+         addr += 1;
+
+         j = GetFileByte (fp);
+         if ((addr & 0x3fff) == 0)              // call parport_gauge() after sending 32kB
+            parport_gauge (starttime, addr << 1, FileSize);
+         }
+
+      WriteFlash (0, INTEL28F_READARRAY);
+      outpb (SPPCtrlPort, 0);
+
+      printf ("\nDone.\n");
       }
-
-   WriteFlash (0, INTEL28F_READARRAY);
-   outp (SPPCtrlPort, 0);
-
-   printf("\nDone.\n");
+   else
+      printf ("\nFlash cart erase failed!\n");
    }
 
 void VerifyFlash (FILE *fp)
@@ -935,9 +1129,9 @@ void VerifyFlash (FILE *fp)
    WriteFlash (0, INTEL28F_READARRAY);         // Set flash (intel 28F640J3A) Read Mode
 
    j=0;
-   while (!feof(fp))
+   while (!feof (fp))
       {
-      j = fgetc(fp);
+      j = fgetc (fp);
       if (j != EOF)
          {
          if ((addr & 0x1ff) == 0)
@@ -945,12 +1139,12 @@ void VerifyFlash (FILE *fp)
             SetCartAddr (addr>>1);                            // Set cart base addr to read
             l4021d0 (3);
 
-            outp (SPPCtrlPort, 0);
+            outpb (SPPCtrlPort, 0);
             }
 
-         k = fgetc(fp);
+         k = fgetc (fp);
 
-         i = ReadFlash();
+         i = PPReadWord ();
          m = i & 0xff;
          n = i >> 8;
 
@@ -959,7 +1153,7 @@ void VerifyFlash (FILE *fp)
             printf("Address %x - Cartridge %x : File %hx\n", addr, m, j);
             CompareFail = 1;
             }
-         if (n != k)
+         if ((n != k) && (k != EOF))
             {
             printf("Address %x - Cartridge %x : File %hx\n", addr+1, n, k);
             CompareFail = 1;
@@ -967,11 +1161,24 @@ void VerifyFlash (FILE *fp)
          addr += 2;
          }
       }
+
+   // Correct verify length if at EOF
+   if (k == EOF) addr--;
+
    if (CompareFail == 0)
-      printf("%d bytes compared ok.\n", addr);
+      printf ("%d bytes compared ok.\n", addr);
    }
 
-int fal_main(int argc, char **argv)
+void SpaceCheck (char c)
+   {
+   if (c != 0)
+      {
+      fprintf (STDERR, "ERROR: Space required between option and parameter\n");
+      ProgramExit (1);
+      }
+   }
+
+int fal_main (int argc, char **argv)
    {
    int arg,i;
    u8 Base = 0;
@@ -980,21 +1187,25 @@ int fal_main(int argc, char **argv)
    int OptB = 0;
    int OptD = 0;
    int OptP = 0;
+   int OptR = 0;
    int OptS = 0;
    int OptV = 0;
+   int OptZ = 0;
    int port = 1;
    int ChipSize = 32;
+   int BackupMemOffset = 0;
+   int BackupMemSize = 0;
 
    if (argc < 2)
       {
-      usage(argv[0]);
-      ProgramExit(1);
+      usage (argv[0]);
+      ProgramExit (1);
       }
 
    debug = 0;
    verbose = 1;
    EPPMode = 1;
-   DataSize16 = 1;
+   DataSize16 = 0;
    WaitDelay = 0;
    VisolyTurbo = 0;
    RepairHeader = 1;
@@ -1003,18 +1214,37 @@ int fal_main(int argc, char **argv)
       {
       if (argv[arg][0] != '-')
          {
-         usage(argv[0]);
-         ProgramExit(1);
+         usage (argv[0]);
+         ProgramExit (1);
          }
 
-      switch(argv[arg][1])
+      switch (argv[arg][1])
          {
-//            case 'b':
-//                    OptB=1;
-//                    break;
+            case 'b':
+                    SpaceCheck (argv[arg][2]);
+                    BackupMemOffset = *(char *)argv[++arg] - 0x30;
+                    SpaceCheck (argv[arg][1]);
+                    BackupMemSize = *(char *)argv[++arg] - 0x30;
+
+                    if ( (BackupMemSize<1) || (BackupMemSize>4) ||
+                         (BackupMemOffset<1) || (BackupMemOffset>4) )
+                       {
+                       fprintf (STDERR, "ERROR: -b parameter values must be between 1-4\n");
+                       ProgramExit (1);
+                       }
+//                    printf ("Param val = %x\n", param);
+                    SpaceCheck (argv[arg][1]);
+                    strcpy (fname, argv[++arg]);
+                    OptB=1;
+                    break;
+            case '2':
+                    // 16bit EPP support enable
+                    DataSize16 = 1;
+                    break;
             case 'c':
                     // Set cart size
-                    ChipSize = (u16)(atoi(argv[++arg]));
+                    SpaceCheck (argv[arg][2]);
+                    ChipSize = (u16)(atoi (argv[++arg]));
                     if ( (ChipSize != 8) &&
                          (ChipSize != 16) &&
                          (ChipSize != 32) &&
@@ -1022,138 +1252,212 @@ int fal_main(int argc, char **argv)
                          (ChipSize != 128) &&
                          (ChipSize != 256) )
                        {
-                       fprintf(stderr, "ERROR: Chip size must be 8,16,32,64,128 or 256.\n");
-                       ProgramExit(1);
+                       fprintf (STDERR, "ERROR: Chip size must be 8,16,32,64,128 or 256.\n");
+                       ProgramExit (1);
                        }
                     break;
             case 'd':
                     // Dump 256 bytes to screen
+                    SpaceCheck (argv[arg][2]);
                     if (argv[++arg] != NULL)
-                       Base = (u8)(atoi(argv[arg]));
-                    printf("Base address : %hx\n",Base*256);
+                       Base = (u8)(atoi (argv[arg]));
+                    printf ("Base address : %hx\n",Base*256);
                     OptD = 1;
                     break;
             case 's':
                     // Backup flash cart
-                    strcpy(fname, argv[++arg]);
+                    SpaceCheck (argv[arg][2]);
+                    strcpy (fname, argv[++arg]);
                     OptS = 1;
                     break;
             case 'p':
                     // Program flash cart
-                    strcpy(fname, argv[++arg]);
+                    SpaceCheck (argv[arg][2]);
+                    strcpy (fname, argv[++arg]);
                     OptP = 1;
+                    break;
+            case 'r':
+                    SpaceCheck (argv[arg][2]);
+                    BackupMemOffset = *(char *)argv[++arg] - 0x30;
+//                    SpaceCheck (argv[arg][1]);
+//                    BackupMemSize = *(char *)argv[++arg] - 0x30;
+//                    if ( (BackupMemSize<1) || (BackupMemSize>4) ||
+                    if ( (BackupMemOffset<1) || (BackupMemOffset>4) )
+                       {
+                       fprintf (STDERR, "ERROR: -r parameter value must be between 1-4\n");
+                       ProgramExit (1);
+                       }
+//                    printf ("Param val = %x\n", param);
+                    SpaceCheck (argv[arg][1]);
+                    strcpy (fname, argv[++arg]);
+                    OptR=1;
                     break;
             case 'v':
                     // Verify flash cart
-                    strcpy(fname2, argv[++arg]);
+                    SpaceCheck (argv[arg][2]);
+                    strcpy (fname2, argv[++arg]);
                     OptV = 1;
                     break;
             case 'l':
-                    i = atoi(argv[++arg]);
-                    if ((i==1) || (i==2))
+                    SpaceCheck (argv[arg][2]);
+                    i = atoi (argv[++arg]);
+                    if ((i>0) && (i<4))
                        port = i;
                     else
                        {
-                       fprintf(stderr, "ERROR: Only LPT1 & LPT2 are supported");
-                       ProgramExit(1);
+                       fprintf (STDERR, "ERROR: Only LPT1, LPT2, & LPT3 are supported");
+                       ProgramExit (1);
                        }
                     break;
-            case 'm':
-                    // Set SPP mode
-                    EPPMode = 0;
-                    break;
+//            case 'm':
+//                    // Set SPP mode
+//                    EPPMode = 0;
+//                    break;
             case 'n':
                     // Don't repair header
                     RepairHeader = 0;
                     break;
             case 'w':
-                    WaitDelay = atoi(argv[++arg]);
+                    SpaceCheck (argv[arg][2]);
+                    WaitDelay = atoi (argv[++arg]);
+                    break;
+            case 'z':
+                    OptZ = 1;
                     break;
             default:
-                    usage(argv[0]);
-                    ProgramExit(1);
+                    usage (argv[0]);
+                    ProgramExit (1);
          }
       }
 
-   InitPort(port);
+   InitPort (port);
 
    CheckForFC ();
 
-   if (OptB) DumpSRAM ();
+   if (OptB)
+      {
+      //DumpSRAM ();
+#if 0
+      if (strchr (fname, '.') == NULL)
+         strcat (fname, ".sav");
+#endif
+      if ((fp = fopen (fname, "wb")) == NULL)
+         {
+         fprintf (STDERR, "ERROR trying to open file '%s'\n", fname);
+         ProgramExit (1);
+         }
+      printf ("Backing up backup SRAM to file '%s'. Please wait...\n\n", fname);
+
+      BackupSRAM (fp, BackupMemOffset, BackupMemSize);
+      printf ("\n");
+      fclose (fp);
+      }
 
    if (OptD) dump (Base);
 
    if ( (OptP) &&
-        ((Device == 0) || (Device == 0xffff)) )
+        ((Device == 0) || (Device == 0x2e) || (Device == 0xff)) )
       {
-      fprintf(stderr, "ERROR: Device type unrecognized\n");
-      ProgramExit(1);
+      fprintf (STDERR, "ERROR: Device type not recognized as programmable\n");
+      ProgramExit (1);
       }
 
+   if (OptR)
+      {
+#if 0
+      if (strchr (fname, '.') == NULL)
+         strcat (fname, ".sav");
+#endif
+      if ((fp = fopen (fname, "rb")) == NULL)
+         {
+         fprintf (STDERR, "ERROR trying to open file '%s'\n", fname);
+         ProgramExit (1);
+         }
+      printf ("Restoring backup SRAM from file '%s'. Please wait...\n\n", fname);
+
+      RestoreSRAM (fp, BackupMemOffset); //, BackupMemSize);
+      printf ("\n");
+      fclose (fp);
+      }
+
+//   if (OptD) dump (Base);
+
+//   if ( (OptP) &&
+//        ((Device == 0) || (Device == 0x2e) || (Device == 0xff)) )
+//      {
+//      fprintf (STDERR, "ERROR: Device type not recognized as programmable\n");
+//      ProgramExit (1);
+//      }
+//
    if (OptP)
       {
-#ifndef __linux__
-      if (strchr(fname, '.') == NULL)
-         strcat(fname, ".gba");
+#if 0
+      if (strchr (fname, '.') == NULL)
+         strcat (fname, ".gba");
 #endif
-      if ((fp = fopen(fname, "rb")) == NULL)
+      if ((fp = fopen (fname, "rb")) == NULL)
          {
-         fprintf(stderr, "ERROR trying to open file '%s'\n", fname);
-         ProgramExit(1);
+         fprintf (STDERR, "ERROR trying to open file '%s'\n", fname);
+         ProgramExit (1);
          }
-      printf("Programming flash with file '%s'.\n", fname);
+      printf ("Programming flash with file '%s'.\n", fname);
 
       if (Device == 0xe2)
          ProgramSharpFlash (fp);
       else
          {
          if (VisolyTurbo)
-            ProgramInterleaveIntelFlash (fp);
+            ProgramTurboIntelFlash (fp);
          else
-            ProgramNonIntIntelFlash (fp);
+            ProgramNonTurboIntelFlash (fp);
          }
-      fclose(fp);
+      fclose (fp);
       }
 
    if (OptS)
       {
-#ifndef __linux__
-      if (strchr(fname, '.') == NULL)
-         strcat(fname, ".gba");
+#if 0
+      if (strchr (fname, '.') == NULL)
+         strcat (fname, ".gba");
 #endif
-      if ((fp = fopen(fname, "wb")) == NULL)
+      if ((fp = fopen (fname, "wb")) == NULL)
          {
-         fprintf(stderr, "ERROR trying to open file '%s'\n", fname);
-         ProgramExit(1);
+         fprintf (STDERR, "ERROR trying to open file '%s'\n", fname);
+         ProgramExit (1);
          }
-      printf("Backing up %d mbits of ROM to file '%s'. Please wait...\n\n", ChipSize, fname);
+      printf ("Backing up %d mbits of ROM to file '%s'. Please wait...\n\n", ChipSize, fname);
 
       BackupROM (fp, ChipSize<<16);
-      printf("\nDone.\n");
-      fclose(fp);
+      printf ("\n");
+      fclose (fp);
       }
 
    if (OptV)
       {
-#ifndef __linux__
-      if (strchr(fname2, '.') == NULL)
-         strcat(fname2, ".gba");
+#if 0
+      if (strchr (fname2, '.') == NULL)
+         strcat (fname2, ".gba");
 #endif
-      if ((fp = fopen(fname2, "rb")) == NULL)
+      if ((fp = fopen (fname2, "rb")) == NULL)
          {
-         fprintf(stderr, "ERROR trying to open file '%s'\n", fname2);
-         ProgramExit(1);
+         fprintf (STDERR, "ERROR trying to open file '%s'\n", fname2);
+         ProgramExit (1);
          }
-      printf("Comparing flash with file '%s'.\n", fname2);
+      printf ("Comparing flash with file '%s'.\n", fname2);
 
       VerifyFlash (fp);
-      fclose(fp);
+      fclose (fp);
       }
 
-   ProgramExit(0);
-   exit(0);
-   }
+//   if (OptZ)
+//      {
+//      printf("Erase N blocks\n");
+//      EraseNintendoFlashBlocks (0, 2);
+//      }
 
+   ProgramExit (0);
+   exit (0);
+   }
 
 /*
   It will save you some work if you don't fully integrate the code above with uCON64's code,
@@ -1162,59 +1466,64 @@ int fal_main(int argc, char **argv)
 int fal_argc;
 char *fal_argv[128];
 
-int fal_read(char *filename, unsigned int parport, int argc, char *argv[])
+void fal_args(unsigned int parport)
 {
-  fal_argv[0] = "fal";
+  fal_argv[0] = "fl";
+  if (parport != 0x3bc && parport != 0x378 && parport != 0x278)
+  {
+    fprintf(STDERR, "PORT must be 0x3bc, 0x378 or 0x278\n");
+    fflush(stdout);
+    exit(1);
+  }
+  fal_argv[1] = "-l";
+  if (parport == 0x3bc)
+    fal_argv[2] = "3";
+  else if (parport == 0x278)
+    fal_argv[2] = "2";
+  else
+    fal_argv[2] = "1";                          // 0x378
+}
 
-  fal_argv[1] = "-c";
-  if (argncmp(argc, argv, "-xfalc", 6))		// strlen("-xfalc") == 6
+int fal_read_rom(char *filename, unsigned int parport, int argc, char *argv[])
+{
+  fal_args(parport);
+
+  fal_argv[3] = "-c";
+  if (argncmp(argc, argv, "-xfalc", 6))         // strlen("-xfalc") == 6
   {
     if (argcmp(argc, argv, "-xfalc8"))
-      fal_argv[2] = "8";
+      fal_argv[4] = "8";
     else if (argcmp(argc, argv, "-xfalc16"))
-      fal_argv[2] = "16";
+      fal_argv[4] = "16";
     else if (argcmp(argc, argv, "-xfalc32"))
-      fal_argv[2] = "32";
+      fal_argv[4] = "32";
     else if (argcmp(argc, argv, "-xfalc64"))
-      fal_argv[2] = "64";
+      fal_argv[4] = "64";
     else if (argcmp(argc, argv, "-xfalc128"))
-      fal_argv[2] = "128";
+      fal_argv[4] = "128";
     else if (argcmp(argc, argv, "-xfalc256"))
-      fal_argv[2] = "256";
+      fal_argv[4] = "256";
     else
     {
-      fprintf(stderr, "Invalid argument for -xfalc<n>\n"
+      fprintf(STDERR, "Invalid argument for -xfalc<n>\n"
                       "n can be 8, 16, 32, 64, 128 or 256; default is -xfalc32\n");
       exit(1);
     }
   }
   else
-    fal_argv[2] = "32";
-
-  if (parport != 0x378 && parport != 0x278)
-  {
-    fprintf(stderr,
-            "PORT must be 0x378 or 0x278\n"
-            "If you didn't specify PORT on the command line, change the address in your BIOS\n"
-            "setup\n");
-    fflush(stdout);
-    exit(1);
-  }
-  fal_argv[3] = "-l";
-  if (parport == 0x378)
-    fal_argv[4] = "1";
-  else
-    fal_argv[4] = "2";
+    fal_argv[4] = "32";
 
   fal_argv[5] = "-s";
   fal_argv[6] = filename;
   fal_argc = 7;
 
+#if 0
   if (argcmp(argc, argv, "-xfalm"))
   {
     fal_argv[7] = "-m";
     fal_argc++;
   }
+#endif
 
   if (!fal_main(fal_argc, fal_argv))
     return 0;
@@ -1222,39 +1531,79 @@ int fal_read(char *filename, unsigned int parport, int argc, char *argv[])
   return -1;
 }
 
-int fal_write(char *filename, long start, long len, unsigned int parport, int argc, char *argv[])
+int fal_write_rom(char *filename, unsigned int parport, int argc, char *argv[])
 {
-  fal_argv[0] = "fal";
+  fal_args(parport);
 
-  if (argncmp(argc, argv, "-xfalc", 6))		// strlen("-xfalc") == 6
+  if (argncmp(argc, argv, "-xfalc", 6))         // strlen("-xfalc") == 6
   {
-    fprintf(stderr, "-xfalc<n> can only be used when receiving a ROM\n");
+    fprintf(STDERR, "-xfalc<n> can only be used when receiving a ROM\n");
     exit(1);
   }
-  if (parport != 0x378 && parport != 0x278)
-  {
-    fprintf(stderr,
-            "PORT must be 0x378 or 0x278\n"
-            "If you didn't specify PORT on the command line, change the address in your BIOS\n"
-            "setup\n");
-    fflush(stdout);
-    exit(1);
-  }
-  fal_argv[1] = "-l";
-  if (parport == 0x378)
-    fal_argv[2] = "1";
-  else
-    fal_argv[2] = "2";
 
   fal_argv[3] = "-p";
   fal_argv[4] = filename;
   fal_argc = 5;
 
+#if 0
   if (argcmp(argc, argv, "-xfalm"))
   {
     fal_argv[5] = "-m";
     fal_argc++;
   }
+#endif
+
+  if (!fal_main(fal_argc, fal_argv))
+    return 0;
+
+  return -1;
+}
+
+int fal_read_sram(char *filename, unsigned int parport, int bank)
+{
+  char bank_str[2];
+
+  fal_args(parport);
+
+  fal_argv[3] = "-b";
+  if (bank == -1)
+  {
+    fal_argv[4] = "1";
+    fal_argv[5] = "4";                          // 256 kB
+  }
+  else
+  {
+    bank_str[0] = '0' + bank;
+    bank_str[1] = 0;                            // terminate string
+    fal_argv[4] = bank_str;
+    fal_argv[5] = "2";                          // 64 kB
+  }
+  fal_argv[6] = filename;
+  fal_argc = 7;
+
+  if (!fal_main(fal_argc, fal_argv))
+    return 0;
+
+  return -1;
+}
+
+int fal_write_sram(char *filename, unsigned int parport, int bank)
+{
+  char bank_str[2];
+
+  fal_args(parport);
+
+  fal_argv[3] = "-r";
+  if (bank == -1)
+    fal_argv[4] = "1";
+  else
+  {
+    bank_str[0] = '0' + bank;
+    bank_str[1] = 0;                            // terminate string
+    fal_argv[4] = bank_str;
+  }
+  fal_argv[5] = filename;
+  fal_argc = 6;
 
   if (!fal_main(fal_argc, fal_argv))
     return 0;
@@ -1274,11 +1623,15 @@ int fal_usage(int argc, char *argv[])
 
   printf("  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
          "                receives automatically when $ROM does not exist\n"
-         "TODO:  -xfals   send/receive SRAM to/from Flash Advance Linker; $FILE=PORT\n"
-         "                receives automatically when $ROM(=SRAM) does not exist\n"
          "  -xfalc<n>     specify chip size in mbits of ROM in Flash Advance Linker when\n"
          "                receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32\n"
-         "  -xfalm        use SPP mode, default is EPP\n");
+#if 0
+         "  -xfalm        use SPP mode, default is EPP\n"
+#endif
+         "  -xfals        send/receive SRAM to/from Flash Advance Linker; $FILE=PORT\n"
+         "                receives automatically when $ROM(=SRAM) does not exist\n"
+         "  -xfalb<n>     send/receive SRAM to/from Flash Advance Linker bank n; $FILE=PORT\n"
+         "                receives automatically when $ROM(=SRAM) does not exist\n");
 
   if (verbose)
     printf("\n"

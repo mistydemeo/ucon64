@@ -1,9 +1,9 @@
 /*
-fal.h - Flash Linker Advance support for uCON64
+fal.c - Flash Linker Advance support for uCON64
 
-written by 2001 Jeff Frohwein
-           2001 NoisyB (noisyb@gmx.net)
-           2001 dbjh
+written by 2001        Jeff Frohwein
+           2001        NoisyB (noisyb@gmx.net)
+           2001 - 2002 dbjh
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,10 +24,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "../ucon64.h"
 
 #define fal_TITLE "Flash Advance Linker\n2001 Visoly http://www.visoly.com"
-
-int fal_read(char *filename, unsigned int parport, int argc, char *argv[]);
-int fal_write(char *filename, long start, long len, unsigned int parport, int argc, char *argv[]);
-int fal_usage(int argc, char *argv[]);
 #define fal_HEADER_START 0
 #define fal_HEADER_LEN 0
+
+int fal_read_rom(char *filename, unsigned int parport, int argc, char *argv[]);
+int fal_write_rom(char *filename, unsigned int parport, int argc, char *argv[]);
+int fal_read_sram(char *filename, unsigned int parport, int bank);
+int fal_write_sram(char *filename, unsigned int parport, int bank);
+int fal_usage(int argc, char *argv[]);
+
 #endif /* FAL_H */

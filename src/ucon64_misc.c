@@ -2,7 +2,7 @@
 ucon64_misc.c - miscellaneous functions for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2001 dbjh
+           2001 - 2002 dbjh
                   2001 Caz
 
 
@@ -23,11 +23,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 
 #define MAXBUFSIZE 32768
+#define DETECT_MAX_CNT 1000
+#define CRC32_POLYNOMIAL     0xEDB88320L
 
-char hexDigit(	int value
-)
+unsigned long CRCTable[256];
+#ifdef  BACKUP
+#ifdef  __BEOS__
+static int ucon64_io_fd;
+#endif
+
+char hexDigit(int value)
 {
-  switch(toupper(value)) {
+  switch (toupper(value))
+  {
     case 0: return '0';
     case 1: return '1';
     case 2: return '2';
@@ -47,13 +55,12 @@ char hexDigit(	int value
     default: break;
   }
   return '?';
-
 }
 
-int hexValue(	char digit
-)
+int hexValue(char digit)
 {
-  switch(toupper(digit)) {
+  switch (toupper(digit))
+  {
     case '0': return 0;
     case '1': return 1;
     case '2': return 2;
@@ -75,162 +82,144 @@ int hexValue(	char digit
   return 0;
 }
 
-int hexByteValue(	char x
-		,char y
-)
+int hexByteValue(char x, char y)
 {
   return (hexValue(x) << 4) + hexValue(y);
 }
 
-
-unsigned long CRCTable[ 256 ];
-
-#define CRC32_POLYNOMIAL     0xEDB88320L
-
 void BuildCRCTable()
 {
-    int i;
-    int j;
-    unsigned long crc;
+  int i, j;
+  unsigned long crc;
 
-    for ( i = 0; i <= 255 ; i++ ) {
-        crc = i;
-        for ( j = 8 ; j > 0; j-- ) {
-            if ( crc & 1 )
-                crc = ( crc >> 1 ) ^ CRC32_POLYNOMIAL;
-            else
-                crc >>= 1;
-        }
-        CRCTable[ i ] = crc;
+  for (i = 0; i <= 255 ; i++)
+  {
+    crc = i;
+    for (j = 8 ; j > 0; j--)
+    {
+      if (crc & 1)
+        crc = ( crc >> 1 ) ^ CRC32_POLYNOMIAL;
+      else
+        crc >>= 1;
     }
+    CRCTable[ i ] = crc;
+  }
 }
 
-
-unsigned long CalculateBufferCRC(	unsigned int count
-					,unsigned long crc
-					,void *buffer
-)
+unsigned long CalculateBufferCRC(unsigned int count, unsigned long crc, void *buffer)
 {
-    unsigned char *p;
-    unsigned long temp1;
-    unsigned long temp2;
+  unsigned char *p;
+  unsigned long temp1, temp2;
 
-    p = (unsigned char*) buffer;
-    while ( count-- != 0 ) {
-        temp1 = ( crc >> 8 ) & 0x00FFFFFFL;
-        temp2 = CRCTable[ ( (int) crc ^ *p++ ) & 0xff ];
-        crc = temp1 ^ temp2;
-    }
-    return( crc );
+  p = (unsigned char*) buffer;
+  while (count-- != 0)
+  {
+    temp1 = (crc >> 8) & 0x00FFFFFFL;
+    temp2 = CRCTable[((int) crc ^ *p++) & 0xff];
+    crc = temp1 ^ temp2;
+  }
+  return crc;
 }
 
-unsigned long CalculateFileCRC(	FILE *file
-)
+unsigned long CalculateFileCRC(FILE *file)
 {
-    unsigned long crc;
-    int count;
-    unsigned char buffer[ 512 ];
-    int i;
+  unsigned long crc;
+  int count, i;
+  unsigned char buffer[ 512 ];
 
-    crc = 0xFFFFFFFFL;
-    i = 0;
-    for ( ; ; ) {
-        count = fread( buffer ,1 ,512 ,file );
-        if ( ( i++ % 32 ) == 0 )
-//            putc( '.' ,stdout );
-        if ( count == 0 )
-            break;
-        crc = CalculateBufferCRC( count ,crc ,buffer );
-    }
-//    putc( ' ' ,stdout );
-    return( crc ^= 0xFFFFFFFFL );
+  crc = 0xFFFFFFFFL;
+  i = 0;
+  for ( ; ; )
+  {
+    count = fread(buffer, 1, 512, file);
+    if ((i++ % 32) == 0)
+      if (count == 0)
+        break;
+    crc = CalculateBufferCRC( count ,crc ,buffer );
+  }
+  return crc ^= 0xFFFFFFFFL;
 }
 
-unsigned long fileCRC32(	char *filename
-				,long start
-)
+unsigned long fileCRC32(char *filename, long start)
 {
-	unsigned long val;
-	FILE *fh;
+  unsigned long val;
+  FILE *fh;
 
-	BuildCRCTable();
+  BuildCRCTable();
 
-        if(!(fh=fopen(filename,"rb")))return(-1);
-	fseek(fh,start,SEEK_SET);
-        val=CalculateFileCRC( fh );
-	fclose(fh);
+  if (!(fh = fopen(filename, "rb")))
+    return -1;
+  fseek(fh, start, SEEK_SET);
+  val = CalculateFileCRC(fh);
+  fclose(fh);
 
-	return(val);
+  return val;
 }
 
-size_t filepad(	char *filename
-		,long start
-		,long unit
-)
+char *ucon64_fbackup(char *filename)
 {
-	size_t size;
+  printf("Writing backup of: %s\n\n", filename);
+  fflush(stdout);
+  return filebackup(filename);
+}
 
-	size=quickftell(filename)-start;
+size_t filepad(char *filename, long start, long unit)
+/*
+  pad file (if necessary) from start  size_t size;
+  ignore start bytes (if file has header or something)
+  unit is size of block (example: MBIT)
+*/
+{
+  size_t size = quickftell(filename) - start;
 
 /*
-	if(!(size%unit))return(size);
+  if (!(size%unit))
+    return size;
 
-	size=(size_t)size/unit;
-	size=size+1;
-	size=size*unit;
+  size = (size_t) size/unit;
+  size = size + 1;
+  size = size*unit;
 
-	truncate(filename,size+start);
+  truncate(filename, size + start);
 */
-	if((size%unit)!=0)
-	{
-		size/=unit;
-		size+=1;
-		size*=unit;
 
-		truncate(filename,size+start);
-	}
-	return(size);
+  if ((size%unit) != 0)
+  {
+    size/=unit;
+    size+=1;
+    size*=unit;
+
+    truncate(filename, size + start);
+  }
+  return size;
 }
 
-char *ucon64_fbackup(	char *filename
-)
+long filetestpad(char *filename)
+// test if EOF is padded (repeating bytes) beginning from start
 {
-	printf("Writing backup of: %s\n\n",filename);
-	fflush(stdout);
-	return(filebackup(filename));
+  long size, x;
+  int y;
+  char *buf;
+
+  size = quickftell(filename);
+
+  if (!(buf = (char *) malloc((size + 2)*sizeof (char))))
+    return -1;
+
+  quickfread(buf, 0, size, filename);
+
+  y = buf[size - 1]&0xff;
+  x = size - 2;
+  while (y == (buf[x]&0xff))
+    x--;
+/*
+  if (y != (buf[x+1]&0xff))
+    x++;
+*/
+  free(buf);
+
+  return (size - x - 1 == 1) ? 0 : size - x - 1;
 }
-
-
-long filetestpad(	char *filename
-)
-{
-	long size;
-	long x;
-	int y;
-	char *buf;
-
-	size=quickftell(filename);
-
-	if( !( buf=(char *)malloc( (size+2)*sizeof(char) ) ) )return(-1);
-
-	quickfread(buf,0,size,filename);
-
-	y=buf[size-1]&0xff;
-	x=size-2;
-	while(y==(buf[x]&0xff))x--;
-//	if(y!=(buf[x+1]&0xff))x++;
-
-	free(buf);
-
-	return(
-		( ( ( ( size )-x )-1 )==1) ? 0 : ( ( ( size )-x )-1 )
-	);
-}
-
-#ifdef  BACKUP
-#ifdef  __BEOS__
-static int ucon64_io_fd;
-#endif
 
 #if     (__UNIX__ || __BEOS__)                  // DJGPP (DOS) has outportX() & inportX()
 unsigned char inportb(unsigned short port)
@@ -312,13 +301,11 @@ void outportw(unsigned short port, unsigned short word)
 }
 #endif                                          // (__UNIX__ || __BEOS__)
 
-#define DETECT_MAX_CNT 1000
-
-int detectParPort(unsigned int port)
+int detect_parport(unsigned int port)
 {
   int i;
 
-#ifdef	__linux__
+#ifdef  __linux__
   if (ioperm(port, 1, 1) == -1)
     return -1;
 #endif
@@ -335,7 +322,7 @@ int detectParPort(unsigned int port)
         break;
   }
 
-#ifdef	__linux__
+#ifdef  __linux__
   if (ioperm(port, 1, 0) == -1)
     return -1;
 #endif
@@ -353,10 +340,10 @@ static void close_io_port(void)
 }
 #endif
 
-#define getParPort(x) parport_probe(x)
 unsigned int parport_probe(unsigned int port)
+// detect parallel port
 {
-  unsigned int parPortAddresses[] = {0x3bc, 0x378, 0x278};
+  unsigned int parport_addresses[] = {0x3bc, 0x378, 0x278};
   int i;
 
 #ifdef  __BEOS__
@@ -393,9 +380,9 @@ unsigned int parport_probe(unsigned int port)
   {
     for (i = 0; i < 3; i++)
     {
-      if (detectParPort(parPortAddresses[i]) == 1)
+      if (detect_parport(parport_addresses[i]) == 1)
       {
-        port = parPortAddresses[i];
+        port = parport_addresses[i];
         break;
       }
     }
@@ -403,15 +390,15 @@ unsigned int parport_probe(unsigned int port)
       return 0;
   }
   else
-    if ((port != parPortAddresses[0]) &&
-        (port != parPortAddresses[1]) &&
-        (port != parPortAddresses[2]))
+    if ((port != parport_addresses[0]) &&
+        (port != parport_addresses[1]) &&
+        (port != parport_addresses[2]))
       return 0;
 
   if (port != 0)
   {
-#ifdef	__linux__
-    if (ioperm(port, 3, 1) == -1)		// data, status & control
+#ifdef  __linux__
+    if (ioperm(port, 3, 1) == -1)               // data, status & control
     {
       fprintf(stderr, "Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
                       "(This program needs root privileges)\n",
@@ -432,11 +419,11 @@ int parport_gauge(time_t init_time, long pos, long size)
   char buf[2*24+1];
 
   if ((curr = time(0) - init_time) == 0)
-    curr = 1;					// `round up' to at least 1 sec (no division
+    curr = 1;                                   // `round up' to at least 1 sec (no division
   if (pos > size)                               //  by zero below)
     return -1;
 
-  cps = pos/curr;				// # bytes/second (average transfer speed)
+  cps = pos/curr;                               // # bytes/second (average transfer speed)
   left = (size - pos)/cps;
 
   buf[0] = 0;
@@ -459,100 +446,58 @@ int parport_gauge(time_t init_time, long pos, long size)
 #endif                                          // BACKUP
 
 int testsplit(char *filename)
+// test if ROM is splitted into parts
 {
-long x=0;
-char buf[4096];
+  long x = 0;
+  char buf[4096];
 
-strcpy(buf,filename);
-buf[findlast(buf,".")-1]++;
-while(	!access(buf,F_OK) &&
-	strdcmp(buf,filename)!=0
-)
-{
-	buf[findlast(buf,".")-1]++;
-	x++;
+  strcpy(buf, filename);
+  buf[findlast(buf, ".") - 1]++;
+  while (!access(buf, F_OK) && strdcmp(buf, filename) != 0)
+  {
+    buf[findlast(buf, ".") - 1]++;
+    x++;
+  }
+
+  if (x != 0)
+    return x+1;
+
+  strcpy(buf, filename);
+  buf[findlast(buf, ".") + 1]++;
+  while(!access(buf, F_OK) && strdcmp(buf, filename) != 0)
+  {
+    buf[findlast(buf, ".") + 1]++;
+    x++;
+  }
+
+  return (x != 0) ? (x + 1) : 0;
 }
-
-if(x!=0)return(x+1);
-
-strcpy(buf,filename);
-buf[findlast(buf,".")+1]++;
-while(	!access(buf,F_OK) &&
-	strdcmp(buf,filename)!=0
-)
-{
-	buf[findlast(buf,".")+1]++;
-	x++;
-}
-
-return( ( x != 0 ) ? ( x + 1 ) : 0 );
-}
-
 
 int raw2iso(char *filename)
+// convert MODE1_RAW, MODE2_RAW, MODE2 and MODE2_FORM_MIX to ISO9660
 {
-	int   seek_header, seek_ecc, sector_size;
-	long  i, source_length;
-	char  buf[2352], destfilename[4096];
-	const char SYNC_HEADER[12] = { 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0 };
-	FILE  *fdest, *fsource;
+#if 0
+  int seek_header, seek_ecc, sector_size;
+  long i, source_length;
+  char  buf[2352], destfilename[4096];
+  const char SYNC_HEADER[12] = {0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0};
+  FILE *fdest, *fsource;
 
+  strcpy(destfilename, filename);
+  newext(destfilename, ".ISO");
 
-   	strcpy(destfilename, filename);
-	newext(destfilename,".ISO");
+  fsource = fopen(filename, "rb");
+//  fdest = fopen(filebackup(destfilename),"wb");
+  fdest = fopen(destfilename, "wb");
 
-fsource = fopen(filename,"rb");
-//fdest = fopen(filebackup(destfilename),"wb");
-fdest = fopen(destfilename,"wb");
-
-fread(buf, sizeof(char), 16, fsource);
-
-if (memcmp(SYNC_HEADER, buf, 12))
-   {
-	seek_header = 8;		// Mode2/2336    // ** Mac: change to 0
-	seek_ecc = 280;
-	sector_size = 2336;
-   }
-else
-   {
-	switch(buf[15])
-	   {
-	   case 2:
-		seek_header = 24;	// Mode2/2352    // ** Mac: change to 16
-		seek_ecc = 280;
-		sector_size = 2352;
-		break;
-	   case 1:
-		seek_header = 16;	// Mode1/2352
-		seek_ecc = 288;
-		sector_size = 2352;
-		break;
-	   default:
-		printf("Error: Unsupported track mode");
-		return(-1);
-	   }
-   }
-
-fseek(fsource, 0L, SEEK_END);
-source_length = ftell(fsource)/sector_size;
-fseek(fsource, 0L, SEEK_SET);
-
-for(i = 0; i < source_length; i++)
-   {
-	fseek(fsource, seek_header, SEEK_CUR);
-	fread(buf, sizeof(char), 2048, fsource);    // ** Mac: change to 2056 for Mode2
-	fwrite(buf, sizeof(char), 2048, fdest);     // ** same as above
-	fseek(fsource, seek_ecc, SEEK_CUR);
-   }
-
-fclose(fdest);
-fclose(fsource);
-
-return(0);
+  fread(buf, sizeof (char), 16, fsource);
+#endif
+  return 0;
 }
 
 /*
 int trackmode(long imagesize)
+// tries to figure out the used track mode of the cd image
 {
   return(
     (!(imagesize%2048)) ? 2048 : // MODE1, MODE2_FORM1

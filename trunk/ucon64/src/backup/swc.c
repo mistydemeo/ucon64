@@ -2,8 +2,10 @@
 swc.c - Super Wild Card support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
+           2001 - 2004 dbjh
                   2001 Caz
+                  2003 John Weidman
+                  2004 JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -351,7 +353,7 @@ get_emu_mode_select (unsigned char byte, int size)
       else
         ems = x;
 
-//      if (size <= 8)       // JohnDie: This bit should always be 0
+//      if (size <= 8)                          // JohnDie: This bit should always be 0
 //        ems++;
     }
 
@@ -977,6 +979,7 @@ swc_write_rts (const char *filename, unsigned int parport)
   return 0;
 }
 
+
 int
 swc_read_cart_sram (const char *filename, unsigned int parport)
 {
@@ -1008,13 +1011,13 @@ swc_read_cart_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  ffe_send_command (5, 3, 0);                   // detect cartridge SRAM size because we don't
-  ffe_send_command0 (0xe00c, 0);                //  want to read too less data
+  ffe_send_command (5, 3, 0);                   // detect cartridge SRAM size because
+  ffe_send_command0 (0xe00c, 0);                //  we don't want to read too few data
   byte = ffe_send_command1 (0xbfd8);
 
-  size = MAX ((byte ? 1 << (byte + 10) : 0), 32*1024);
-
+  size = MAX ((byte ? 1 << (byte + 10) : 0), 32 * 1024);
   printf ("Receive: %d Bytes\n", size);
+
   memset (buffer, 0, SWC_HEADER_LEN);
   buffer[8] = 0xaa;
   buffer[9] = 0xbb;
@@ -1027,10 +1030,9 @@ swc_read_cart_sram (const char *filename, unsigned int parport)
 
   printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
-  starttime = time (NULL);
-
   address = hirom ? 0x2c3 : 0x1c0;
 
+  starttime = time (NULL);
   while (bytesreceived < size)
     {
       ffe_send_command (5, address, 0);
@@ -1098,10 +1100,9 @@ swc_write_cart_sram (const char *filename, unsigned int parport)
 
   printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
-  starttime = time (NULL);
-
   address = hirom ? 0x2c3 : 0x1c0;
 
+  starttime = time (NULL);
   while ((bytessend < size) && (bytesread = fread (buffer, 1, MIN (size, BUFFERSIZE), file)))
     {
       ffe_send_command (5, address, 0);

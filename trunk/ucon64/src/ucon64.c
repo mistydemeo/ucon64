@@ -6,7 +6,7 @@ handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
 written by 1999 - 2003 NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
+           2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -747,7 +747,7 @@ ucon64_process_rom (char *fname)
             name. So, if the entry in the ZIP file is a directory
             ucon64.fname_arch will be an empty string.
           */
-          if (strlen (ucon64.fname_arch) == 0)
+          if (ucon64.fname_arch[0] == 0)
             continue;
 
           ucon64.rom = fname;

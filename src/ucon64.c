@@ -123,6 +123,7 @@ const struct option options[] = {
     {"dbv", 0, 0, UCON64_DBV},
     {"dc", 0, 0, UCON64_DC},
     {"dint", 0, 0, UCON64_DINT},
+    {"disc", 0, 0, UCON64_DISC},
     {"dumpinfo", 1, 0, UCON64_DUMPINFO},
     {"e", 0, 0, UCON64_E},
     {"f", 0, 0, UCON64_F},
@@ -856,8 +857,10 @@ ucon64_rom_handling (void)
 //          ucon64.rominfo = (st_rominfo_t *) &rominfo;
         }
 
-      if (ucon64.discmage_enabled)
-        ucon64.image = libdm_open (ucon64.rom); // disc-based?
+      // check for disc image only if ucon64_probe() failed or --disc was used
+      if (!ucon64.rominfo || ucon64.force_disc)
+        if (ucon64.discmage_enabled)
+          ucon64.image = libdm_reopen (ucon64.rom, ucon64.image);
     }
 //end of WF_PROBE
 
@@ -883,8 +886,9 @@ ucon64_rom_handling (void)
 
       default:
         if (ucon64.crc32 == 0)
-          if (!(ucon64.flags & WF_NOCRC32) || ucon64.file_size < MAXROMSIZE)
-            ucon64.crc32 = q_fcrc32 (ucon64.rom, ucon64.rominfo ? ucon64.rominfo->buheader_len : 0);
+          if (!ucon64.force_disc) // NOT for disc images
+            if (!(ucon64.flags & WF_NOCRC32) || ucon64.file_size < MAXROMSIZE)
+              ucon64.crc32 = q_fcrc32 (ucon64.rom, ucon64.rominfo ? ucon64.rominfo->buheader_len : 0);
         break;
     }
 
@@ -1012,19 +1016,18 @@ ucon64_nfo (void)
     printf ("  (%s)\n", ucon64.fname_arch);
   fputc ('\n', stdout);
 
-  if (ucon64.console == UCON64_UNKNOWN)
+  if (ucon64.console == UCON64_UNKNOWN && !ucon64.image)
     {
       fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
       printf ("\n");
     }
 
+  if (ucon64.rominfo && ucon64.console != UCON64_UNKNOWN && !ucon64.force_disc)
+    ucon64_rom_nfo (ucon64.rominfo);
+  
   if (ucon64.discmage_enabled)
     if (ucon64.image)
       libdm_nfo (ucon64.image);
-      
-  if (!ucon64.image /* libdm_nfo() and ucon64_rom_nfo() interfere */
-       && ucon64.rominfo && ucon64.console != UCON64_UNKNOWN)
-    ucon64_rom_nfo (ucon64.rominfo);
 
   // Use ucon64.fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
   printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32 ? ucon64.fcrc32 : ucon64.crc32);

@@ -52,8 +52,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_CONSOLE (0)
 
 // Keep these (libdiscmage) options separate
-//#define UCON64_CDIRIP (UCON64_OPTION + 270)
-//#define UCON64_ISO (UCON64_OPTION + 271)
+#define UCON64_DISC (UCON64_OPTION + 269)
 #define UCON64_MKCUE (UCON64_OPTION + 272)
 #define UCON64_MKSHEET (UCON64_OPTION + 273)
 #define UCON64_MKTOC (UCON64_OPTION + 274)

@@ -24,33 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-
-#if     defined __linux__ || defined __FreeBSD__ || \
-        defined __BEOS__ || defined __solaris__ || HAVE_INTTYPES_H
-#include <inttypes.h>
-#elif   defined __CYGWIN__
-#include <sys/types.h>
-#ifndef OWN_INTTYPES
-#define OWN_INTTYPES                            // signal that these are defined
-typedef u_int8_t uint8_t;
-typedef u_int16_t uint16_t;
-typedef u_int32_t uint32_t;
-typedef u_int64_t uint64_t;
-#endif // OWN_INTTYPES
-#else
-#ifndef OWN_INTTYPES
-#define OWN_INTTYPES                            // signal that these are defined
-typedef unsigned char uint8_t;
-typedef unsigned short int uint16_t;
-typedef unsigned int uint32_t;
-typedef unsigned long long int uint64_t;
-
-typedef signed char int8_t;
-typedef signed short int int16_t;
-typedef signed int int32_t;
-typedef signed long long int int64_t;
-#endif // OWN_INTTYPES
-#endif
+#include "inttypes.h"
 
 
 #define ISODCL(from, to) (to - from + 1)
@@ -94,19 +68,10 @@ typedef struct
 
 typedef struct
 {
+  uint32_t track_start; // embedded? 
   uint32_t track_len;
   st_iso_header_t iso_header;
 
-#if 1
-  uint16_t global_current_track;  // current track
-  uint16_t number;
-  uint32_t position;
-  uint32_t sector_size_value;
-  uint32_t pregap_length;
-  uint32_t total_length;
-  uint32_t start_lba;
-  uint32_t filename_length;
-#endif
 
   uint32_t mode;
   uint32_t sector_size;
@@ -120,7 +85,7 @@ typedef struct
 
 typedef struct
 {
-  int type; // image type DM_CDI, DM_NRG, DM_BIN, ...
+  int type; // image type DM_CDI, DM_NRG, DM_TOC, etc.
   char *desc; // like type but verbal
   char fname[FILENAME_MAX];
 

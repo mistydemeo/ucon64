@@ -485,8 +485,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_BIN2ISO, UCON64_UNKNOWN, libdm_usage,       WF_DEFAULT},
   {UCON64_MKSHEET, UCON64_UNKNOWN, libdm_usage,       0},
   {UCON64_MKTOC, UCON64_UNKNOWN, libdm_usage,  0},
-//  {UCON64_CDIRIP, UCON64_UNKNOWN, libdm_usage,        WF_DEFAULT},
-//  {UCON64_NRGRIP, UCON64_UNKNOWN, libdm_usage,        WF_DEFAULT},
   {UCON64_ISOFIX, UCON64_UNKNOWN, libdm_usage,        WF_DEFAULT},
   {UCON64_MKCUE, UCON64_UNKNOWN, libdm_usage,         0},
   {UCON64_RIP, UCON64_UNKNOWN, libdm_usage,        0},
@@ -550,6 +548,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   force recognition switches
 */
+  {UCON64_DISC, UCON64_UNKNOWN, libdm_usage,        WF_SWITCH},
+
   {UCON64_3DO, UCON64_3DO, real3do_usage,  WF_SWITCH},
   {UCON64_ATA, UCON64_ATA, atari_usage,      WF_SWITCH},
 //  {UCON64_CD32, UCON64_CD32, cd32_usage,       WF_SWITCH},

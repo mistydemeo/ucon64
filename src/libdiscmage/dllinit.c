@@ -113,6 +113,11 @@ dxe_init (void)
 
   symbol = map_put (symbol, "dm_rip", dm_rip);
 
+  symbol = map_put (symbol, "dm_lba_to_msf", dm_lba_to_msf);
+  symbol = map_put (symbol, "dm_msf_to_lba", dm_msf_to_lba);
+  symbol = map_put (symbol, "dm_bcd_to_int", dm_bcd_to_int);
+  symbol = map_put (symbol, "dm_int_to_bcd", dm_int_to_bcd);
+
   return 0;
 }
 

@@ -461,11 +461,8 @@ parport_probe (unsigned int port)
   return port;
 }
 
-/*
-  checkout the definition of parport_gauge() in ucon64_misc.h
-*/
 int
-fparport_gauge (FILE *output, time_t init_time, long pos, long size)
+parport_gauge (time_t init_time, long pos, long size)
 {
   long cps;
   int p, percentage;
@@ -473,13 +470,8 @@ fparport_gauge (FILE *output, time_t init_time, long pos, long size)
   char progress[24 + 1];
 
   percentage = 100 * pos / size;
-  if (output != stdout)
-    {
-      fprintf (output, "%u\n", percentage);
-      printf ("%u\n", percentage); //added until seeucon changes
-      fflush (stdout);  //added until seeucon changes
-      fflush (output);
-    }
+  if (frontend)
+    printf ("%u\n", percentage);
   else
     {
       if ((curr = time (0) - init_time) == 0)
@@ -502,9 +494,8 @@ fparport_gauge (FILE *output, time_t init_time, long pos, long size)
         printf ("TOTAL=%03ld:%02ld", (long) curr / 60, (long) curr % 60); // DON'T print a newline
       else                                                                //  -> gauge can be cleared
         printf ("ETA=%03ld:%02ld   ", (long) left / 60, (long) left % 60);
-
-      fflush (stdout);
     }
+  fflush (stdout);
 
   return 0;
 }

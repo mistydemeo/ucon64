@@ -1642,7 +1642,7 @@ fal_args (unsigned int parport)
     }
 #endif
   fal_argv[fal_argc++] = "-l";
-  sprintf (parport_str, "%x", parport);
+  sprintf (parport_str, "%d", parport); // don't use %x, as Jeff Frohwein uses atoi()
   fal_argv[fal_argc++] = parport_str;
 
   if (ucon64.parport_mode == UCON64_EPP)

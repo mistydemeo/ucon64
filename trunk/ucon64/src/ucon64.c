@@ -524,8 +524,16 @@ main (int argc, char **argv)
           if (p)
             if (p->object)
               {
-                arg[x].flags = (uint32_t) p->object;
-                arg[x].console = ((uint32_t) p->object) & 0xffff;
+                arg[x].flags = (uint32_t)
+#ifdef  __LP64__
+                               (uint64_t)
+#endif
+                               p->object;
+                arg[x].console = ((uint32_t)
+#ifdef  __LP64__
+                                  (uint64_t)
+#endif
+                                  p->object) & 0xffff;
 
                 if (!arg[x].console)
                   arg[x].console = UCON64_UNKNOWN;
@@ -1345,7 +1353,11 @@ ucon64_usage (int argc, char *argv[])
         for (y = 0; option[y]; y++)
           for (c = 0; option[y][c].name || option[y][c].help; c++)
             if (option[y][c].object)
-              if ((((int) option[y][c].object) & 0xffff) == arg[x].console)
+              if ((((int)
+#ifdef  __LP64__
+                    (uint64_t)
+#endif
+                    option[y][c].object) & 0xffff) == arg[x].console)
                 {
                   getopt2_usage (option[y]);
                   single = 1;
@@ -1355,7 +1367,7 @@ ucon64_usage (int argc, char *argv[])
           fputc ('\n', stdout);
       }
 
-  if (!single) 
+  if (!single)
     getopt2_usage (options);
 
   fputc ('\n', stdout);

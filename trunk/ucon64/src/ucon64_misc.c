@@ -1957,10 +1957,12 @@ ucon64_configfile (void)
                    "discmage_path=~\\discmage.dll\n"
                    "ucon64_configdir=~\n"
                    "ucon64_datdir=~\n"
-#elif   defined __unix__ || defined __BEOS__ || defined __APPLE__ // Mac OS X actually
-#ifndef __APPLE__ // TODO: find out if discmage compiles on Mac OS X
+#elif   defined __APPLE__                       // Mac OS X actually
+                   "discmage_path=~/.ucon64/discmage.dylib\n"
+                   "ucon64_configdir=~/.ucon64\n"
+                   "ucon64_datdir=~/.ucon64/dat\n"
+#elif   defined __unix__ || defined __BEOS__
                    "discmage_path=~/.ucon64/discmage.so\n"
-#endif
                    "ucon64_configdir=~/.ucon64\n"
                    "ucon64_datdir=~/.ucon64/dat\n"
 #endif
@@ -2060,7 +2062,9 @@ ucon64_configfile (void)
         "~/discmage.dll"
 #elif   defined _WIN32
         "~\\discmage.dll"
-#elif   defined __unix__ || defined __BEOS__ // || defined __APPLE__ // Mac OS X actually
+#elif   defined __APPLE__                       // Mac OS X actually
+        "~/.ucon64/discmage.dylib"
+#elif   defined __unix__ || defined __BEOS__
         "~/.ucon64/discmage.so"
 #else
         ""

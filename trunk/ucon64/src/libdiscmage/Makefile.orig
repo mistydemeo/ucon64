@@ -28,7 +28,7 @@ ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 else
 ifeq ($(OSTYPE),msys)                   # test msys (MinGW's POSIX build env.) before DJGPP
 else
-ifdef DJGPP                             # DJGPP code in dllinit needs map code                          
+ifdef DJGPP                             # DJGPP code in dllinit needs map code
 OBJECTS+=map.o
 endif                                   # DJGPP
 endif                                   # msys
@@ -93,20 +93,30 @@ DLLFLAGS=$(OBJECTS) $(LIBS) $(LDFLAGS)
 # $(LDFLAGS) must come after $(OBJECTS)
 FULLLIBNAME=$(LIBNAME).dxe
 
-else                                    # Unix or BeOS
+else                                    # Unix, BeOS or Mac OS X (Darwin)
 
 CFLAGS+=-fPIC
-ifdef DLOPEN
-FULLLIBNAME=$(LIBNAME).so
+
+ifeq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
+FULLLIBNAME=$(LIBNAME).dylib
 else
-FULLLIBNAME=lib$(LIBNAME).so
+FULLLIBNAME=$(LIBNAME).so
+endif
+
+ifndef DLOPEN                           # GNU specific: "simply expanded variable"
+FULLLIBNAME:=$(addprefix lib, $(FULLLIBNAME))
 endif
 
 ifeq ($(OSTYPE),beos)
 LDFLAGS+=-nostart
 else
+ifeq ($(findstring darwin,$(OSTYPE)),darwin)
+LDFLAGS+=-dynamiclib
+else
 LDFLAGS+=-shared
-endif
+endif                                   # darwin
+endif                                   # beos
+
 DLLFLAGS+=$(LDFLAGS) $(OBJECTS) $(LIBS) -o $(FULLLIBNAME)
 
 endif                                   # DJGPP
@@ -119,21 +129,21 @@ all: $(FULLLIBNAME)
 
 clean:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f $(LIBNAME).dll $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
+	rm -f $(FULLLIBNAME) $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
               tmp.def tmp.base tmp.exp
 else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
-	rm -f $(LIBNAME).dll $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
+	rm -f $(FULLLIBNAME) $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
               tmp.def tmp.base tmp.exp
 else
 ifdef DJGPP
-	del $(LIBNAME).dxe
+	del $(FULLLIBNAME)
 ifndef DLOPEN
 	del $(LIBNAME).a
 endif
 	del *.o
-else                                    # Unix or BeOS
-	rm -f *.so $(OBJECTS) *.core *.stackdump *.o
+else                                    # Unix, BeOS or Mac OS X (Darwin)
+	rm -f $(FULLLIBNAME) $(OBJECTS) *.core *.stackdump *.o
 endif                                   # DJGPP
 endif                                   # msys
 endif                                   # cygwin
@@ -220,8 +230,9 @@ ifndef DLOPEN
 	ar rs $(LIBNAME).a djimport.o map.o dlopen.o
 endif
 
-else                                    # Unix or BeOS
-# Unix uses LD_LIBRARY_PATH for dynamic linking, BeOS uses LIBRARY_PATH
+else                                    # Unix, BeOS or Mac OS X (Darwin)
+# Unix uses LD_LIBRARY_PATH for dynamic linking, BeOS uses LIBRARY_PATH, Darwin
+# uses LD_LIBRARY_PATH, DYLD_LIBRARY_PATH and DYLD_FALLBACK_LIBRARY_PATH
 
 $(FULLLIBNAME): $(OBJECTS)
 	$(CC) $(DLLFLAGS)

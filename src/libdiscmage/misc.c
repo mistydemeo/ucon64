@@ -749,20 +749,6 @@ strargv (int *argc, char ***argv, char *cmdline, int separator_char)
 #endif
 
 
-#ifdef  WIN32
-// VC++ support
-int access (const char *fname, void *mode)
-{
-  struct stat fstate;
-
-  if (!stat (fname, &fstate))
-    return 0;
-
-  return -1;
-}
-#endif // WIN32
-
-
 int
 change_mem (char *buf, int bufsize, char *searchstr, int strsize,
             char wc, char esc, char *newstr, int newsize, int offset, ...)

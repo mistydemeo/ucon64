@@ -38,7 +38,6 @@ write programs in C
 #include <time.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <limits.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif

@@ -29,7 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern "C" {
 #endif
 #include <string.h>
-#include <limits.h>
 #include <time.h>                               // gauge() prototype contains time_t
 #include <stdio.h>
 #ifdef  HAVE_DIRENT_H
@@ -266,44 +265,6 @@ extern char *realpath2 (const char *src, char *full_path);
 extern int mkdir2 (const char *name);
 extern int truncate2 (const char *filename, int size);
 extern char ***strargv (int *argc, char ***argv, char *cmdline, int separator_char);
-
-
-#ifdef  WIN32
-/*
-  VC++ support (MinGW lite; mainly unistd.h and dirent.h)
-
-  access()  see libc documentation
-*/
-#ifndef R_OK
-#define R_OK
-#define W_OK
-#define F_OK
-#define X_OK
-#endif
-typedef struct
-{
-  char pad;
-} DIR;
-
-
-struct dirent
-{
-  char d_name[FILENAME_MAX + 1];
-};
-
-
-extern DIR *opendir (const char *path);
-extern struct dirent *readdir (DIR *p);
-void rewinddir (DIR *p);
-extern int closedir (DIR *p);
-extern int access (const char *fname, void *mode);
-extern void sync (void);
-extern char *getcwd (char *p, size_t p_size);
-extern int chdir (const char *path);
-extern int mkdir (const char *path, void *mode);
-extern int rmdir (const char *path);
-//extern int isatty
-#endif  // WIN32
 
 
 /*

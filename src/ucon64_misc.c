@@ -32,7 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_DIRENT_H
 #include <dirent.h>
 #endif
-#include <limits.h>
 #include <sys/stat.h>
 #if     defined __unix__ || defined __BEOS__ || defined AMIGA || HAVE_UNISTD_H
   #include <unistd.h>                           // ioperm() (libc5)

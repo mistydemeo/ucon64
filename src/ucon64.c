@@ -758,9 +758,9 @@ int ucon64_usage(int argc,char *argv[])
 ,ucon64_name()
 );
 
-printf("TODO: $ROM could also be the name of a *.ZIP archive\n"
+printf(/*"TODO: $ROM could also be the name of a *.ZIP archive\n"
 	"      it will automatically find and extract the ROM\n"
-	"\n"
+	"\n"*/
 	"TODO:  -sh	use uCON64 in shell modus\n"
 	"  -e		emulate/run ROM (check INSTALL and $HOME/.ucon64rc for more)\n"
 	"  -db		ROM database statistics (# of entries)\n"

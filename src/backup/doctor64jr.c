@@ -518,7 +518,7 @@ short int read_file(void)
   fflush(stdout);
 #endif
   pos += trans_size;
-  ucon64_gauge (init_time, pos, size);
+  if (!(pos % (trans_size * 2))) ucon64_gauge (init_time, pos, size);
    return(0);
 }
 

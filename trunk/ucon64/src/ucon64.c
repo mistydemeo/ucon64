@@ -973,13 +973,17 @@ main (int argc, char *argv[])
                0);
       break;
 
+    case ucon64_WONDERSWAN:
+      return ((argcmp (argc, argv, "-chk")) ? wonderswan_chk (&rom) :
+              0);
+      break;
+      
     case ucon64_SYSTEM16:
     case ucon64_ATARI:
     case ucon64_SMS:
     case ucon64_NEOGEOPOCKET:
     case ucon64_VECTREX:
     case ucon64_VIRTUALBOY:
-    case ucon64_WONDERSWAN:
     case ucon64_COLECO:
     case ucon64_INTELLI:
       break;

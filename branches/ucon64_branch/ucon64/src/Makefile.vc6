@@ -3,11 +3,12 @@ DLOPEN=1
 DISCMAGE=1
 
 CC=cl.exe
-CFLAGS=/nologo /I. /W3 /O2 /DHAVE_CONFIG_H
+CFLAGS=/nologo /I.
 LDFLAGS=/NOLOGO setargv.obj
 
 !ifdef DISCMAGE
 LIBNAME_DM=discmage
+CFLAGS=$(CFLAGS) /Ilibdiscmage/
 !endif
 
 !ifdef DISCMAGE
@@ -17,6 +18,7 @@ LDFLAGS=$(LDFLAGS) libdiscmage/$(LIBNAME_DM).lib
 !endif
 !endif
 
+CFLAGS=$(CFLAGS) /W3 /O2 /DHAVE_CONFIG_H
 
 OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
         misc.obj getopt.obj quick_io.obj dlopen.obj \

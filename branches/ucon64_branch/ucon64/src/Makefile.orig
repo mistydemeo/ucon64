@@ -6,16 +6,20 @@ DISCMAGE=1
 #GUI=1
 
 CC=gcc
-CFLAGS=-I. -Wall -W -O3 -DHAVE_CONFIG_H
+CFLAGS=-I.
 LDFLAGS=-s
 
 ifdef DISCMAGE
 LIBNAME_DM=discmage
+CFLAGS+=-Ilibdiscmage/
 endif
 
 ifdef GUI
 LIBNAME_NG=netgui
+CFLAGS+=-Ilibnetgui/
 endif
+
+CFLAGS+=-Wall -W -O3 -DHAVE_CONFIG_H
 
 # The test for Cygwin should be done before the test for DJGPP, because the
 # environment variable DJGPP can be set under Bash for people who have

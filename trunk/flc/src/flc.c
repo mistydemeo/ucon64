@@ -49,11 +49,11 @@ int
 main (int argc, char *argv[])
 {
   char buf[FILENAME_MAX + 1];
-  st_file_t *file0 = NULL, *file = NULL, file_ns;
+  st_file_t file;
+  st_file_t *file_p = NULL;
+  char path[MAXBUFSIZE];
   struct dirent *ep;
   struct stat puffer;
-  long x = 0;
-//int single_file=0;
   DIR *dp;
   int c;
   int option_index = 0;
@@ -134,49 +134,40 @@ main (int argc, char *argv[])
         }
     }
 
-  if (optind < argc)
-    {
-      while (optind < argc)
-        strcpy (flc.path, argv[optind++]);
-    }
-
-  flc.argc = argc;
-  for (x = 0; x < argc; x++)
-    flc.argv[x] = argv[x];
-
-  getProperty (flc.configfile, "file_id_diz", flc.config, "file_id.diz");
-
   if (flc.html)
     printf ("<html><head><title></title></head><body><pre><tt>");
 
-  if (!flc.path[0])
-    getcwd (flc.path, (size_t) sizeof (flc.path));
-  if (flc.path[strlen (flc.path) - 1] == FILE_SEPARATOR
-      && strlen (flc.path) != 1)
-    flc.path[strlen (flc.path) - 1] = 0;
+  if (optind < argc)
+    {
+      while (optind < argc)
+        strcpy (path, argv[optind++]);
+    }
 
+  if (!path[0])
+    getcwd (path, (size_t) sizeof (path));
+  else 
+    if (stat (path, &puffer) != -1 && S_ISREG (puffer.st_mode) == TRUE)
+    {
 /*
     single file handling
 */
-  if (stat (flc.path, &puffer) != -1 && S_ISREG (puffer.st_mode) == TRUE)
-    {
-      file = &file_ns;
+      file.next = NULL;
+      file.sub.date = puffer.st_mtime;
+      file.sub.size = puffer.st_size;
+      file.sub.checked = 'N';
+      strcpy (file.sub.name, path);
 
-      file->next = NULL;
-      (file->sub).date = puffer.st_mtime;
-      (file->sub).size = puffer.st_size;
-      (file->sub).checked = 'N';
-      strcpy ((file->sub).name, flc.path);
-      flc.path[0] = 0;
+      extract (&file.sub);
 
-      extract (&file->sub);
-
-      output (&file->sub);
+      output (&file.sub);
 
       return 0;
     }
 
-  if (!(dp = opendir (flc.path)))
+/*
+  multiple file handling
+*/
+  if (!(dp = opendir (path)))
     {
       flc_usage (argc, argv);
       return -1;
@@ -184,57 +175,48 @@ main (int argc, char *argv[])
 
   while ((ep = readdir (dp)) != NULL)
     {
-      sprintf (buf, "%s/%s", flc.path, ep->d_name);
+      sprintf (buf, "%s/%s", path, ep->d_name);
 
       if (stat (buf, &puffer) == -1)
         continue;
       if (S_ISREG (puffer.st_mode) != TRUE)
         continue;
 
-      if (file0 == NULL)
-        {
-          if (!(file = (st_file_t *) malloc (sizeof (st_file_t))))
-            {
-              printf ("%s: Error allocating memory\n", argv[0]);
-              (void) closedir (dp);
-              return -1;
-            }
-
-          file0 = file;
-        }
+      if (!file_p) file_p = &file;
       else
         {
-          if (!((file->next) = (st_file_t *) malloc (sizeof (st_file_t))))
+          file_p->next = (st_file_t *) malloc (sizeof (st_file_t));
+
+          if (!file_p->next)
             {
-              printf ("%s: Error allocating memory\n", argv[0]);
+              fprintf (stderr, "ERROR: allocating memory\n");
               (void) closedir (dp);
               return -1;
             }
-          file = file->next;
-        }
 
-      (file->sub).date = puffer.st_mtime;
-      (file->sub).size = puffer.st_size;
-      (file->sub).checked = 'N';
-      strcpy ((file->sub).name, ep->d_name);
-      extract (&file->sub);
+          file_p = file_p->next;
+        }
+        
+      file_p->sub.date = puffer.st_mtime;
+      file_p->sub.size = puffer.st_size;
+      file_p->sub.checked = 'N';
+      strcpy (file_p->sub.name, buf);
+      extract (&file_p->sub);
     }
 
   (void) closedir (dp);
-  file->next = NULL;
-  file = file0;
+  file_p->next = NULL;
+  file_p = &file;
 
-  if (flc.sort)
-    sort (file);
+  if (flc.sort) sort (file_p);
 
-  for (;;)
+  while (file_p)
     {
-      output (&file->sub);
-      if (file->next == NULL)
-        break;
-      file = file->next;
+      output (&file_p->sub);
+      file_p = file_p->next;
     }
-  free (file0);
+
+  free (file.next);
 
   if (flc.html)
     printf ("</pre></tt></body></html>\n");

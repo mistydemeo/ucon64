@@ -32,14 +32,9 @@ extern void flc_usage (int argc, char *argv[]);
 
 typedef struct st_flc
 {
-  int argc;
-  //  char argv[128][4096];
-  char *argv[128];
-
-//  long files;
-
   int kb;
   int html;
+  int check;
 
   int sort;
   int bydate;
@@ -47,16 +42,8 @@ typedef struct st_flc
   int byname;
   int fr;
 
-  int check;
-
-  char tmppath[FILENAME_MAX];
-
-  char path[FILENAME_MAX];
-
   char configfile[FILENAME_MAX];
-  char config[4096];
-}
-st_flc_t;
+} st_flc_t;
 
 extern st_flc_t flc;
 

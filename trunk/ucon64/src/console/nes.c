@@ -1431,7 +1431,6 @@ nes_ffe (st_rominfo_t *rominfo)
       return -1;
     }
 
-  ucon64_fbackup (NULL, ucon64.rom);
   strcpy (buf, ucon64.rom);
   setext (buf, ".FFE");
 

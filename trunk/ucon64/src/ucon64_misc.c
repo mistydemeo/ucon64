@@ -119,39 +119,6 @@ const char *unknown_usage[] =
 };
 
 
-/*
-  Return type is not const char *, because it may return move_name (indirectly
-  via q_fbackup()), which is not a pointer to constant characters.
-*/
-#if 0
-static void
-ucon64_fbak (char *move_name, const char *filename)
-{
-#if 0
-  if (!ucon64.backup)
-    return;// (char *) filename;
-#endif
-
-  if (!access (filename, F_OK))
-    {
-//      printf ("Writing backup of: %s\n", filename); // verbose
-//      fflush (stdout);
-    }
-
-  if (move_name)
-    {
-      strcpy (move_name, q_fbackup (filename, BAK_MOVE));
-//      move_name = q_fbackup (filename, BAK_MOVE);
-    }
-  else
-    {
-      q_fbackup (filename, BAK_DUPE);
-    }
-  return;
-}
-#endif
-
-
 void
 handle_existing_file (const char *dest, char *src)
 /*
@@ -172,7 +139,7 @@ handle_existing_file (const char *dest, char *src)
        postcondition: src == rom.fig
 */
 {
-  ucon64_temp_file = 0;
+  ucon64_temp_file = NULL;
   if (!access (dest, F_OK))
     {
       if (ucon64.backup)
@@ -181,37 +148,49 @@ handle_existing_file (const char *dest, char *src)
           fflush (stdout);
         }
 
-      if (!strcmp (dest, ucon64.rom))
+      if (src == NULL)
+        {
+          q_fbackup (dest, BAK_DUPE);
+          return;
+        }
+
+      if (!strcmp (dest, src))
         {                                       // case 1
           if (ucon64.backup)
             {                                   // case 1a
+              strcpy (src, q_fbackup (dest, BAK_DUPE));
 #ifdef  DEBUG
-              printf ("case: 1a, src: %s\n", src?src:"NULL");
+              printf ("case: 1a, src: %s\n", src ? src : "NULL");
               fflush (stdout);
 #endif
-//              ucon64_fbak (NULL, dest);
-              q_fbackup (dest, BAK_DUPE);
-              if (src) setext (src, ".BAK");
-            }                                   // must match with what q_fbackup() does
+            }
           else
             {                                   // case 1b
-#ifdef  DEBUG
-              printf ("case: 1b, src: %s\n", src?src:"NULL");
-              fflush (stdout);
-#endif              
-//              ucon64_fbak (src, dest);       // arg 1 != NULL -> rename
               strcpy (src, q_fbackup (dest, BAK_MOVE));
               ucon64_temp_file = src;
+#ifdef  DEBUG
+              printf ("case: 1b, src: %s\n", src ? src : "NULL");
+              fflush (stdout);
+#endif
             }
         }
       else
         {
+          if (ucon64.backup)
+            {
+              q_fbackup (dest, BAK_DUPE);
 #ifdef  DEBUG
-          printf ("case: 2\n");
-          fflush (stdout);
-#endif          
-//          ucon64_fbak (NULL, dest);            // case 2 (ucon64_fbak() handles a & b)
-          q_fbackup (dest, BAK_DUPE);
+              printf ("case: 2a, src: %s\n", src ? src : "NULL");
+              fflush (stdout);
+#endif
+            }
+          else
+            {
+#ifdef  DEBUG
+              printf ("case: 2b, src: %s\n", src ? src : "NULL");
+              fflush (stdout);
+#endif
+            }
         }
     }
 }
@@ -234,13 +213,13 @@ ucon64_fhexdump (const char *filename, int start, int len)
 {
   int pos, size = q_fsize (filename);
   int value = 0;
-  int buf_size = MAXBUFSIZE - (MAXBUFSIZE % 16); 
+  int buf_size = MAXBUFSIZE - (MAXBUFSIZE % 16);
                                   // buf_size must be < MAXBUFSIZE && 16 * n
   char buf[MAXBUFSIZE];
   FILE *fh = fopen (filename, "rb");
 
   if (!fh) return -1;
-  
+
   if ((size - start) < len)
     len = size - start;
 
@@ -312,7 +291,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2, int s
             {
               for (base = 0; base < chunksize2; base++)
                 {
-                  if (similar == TRUE ? 
+                  if (similar == TRUE ?
                       buf1[base] == buf2[base] :
                       buf1[base] != buf2[base])
                     {
@@ -815,7 +794,7 @@ ucon64_extract (const char *archive)
 
 #ifdef  DEBUG
   fprintf (stderr, "%s\n", temp);
-#endif  
+#endif
 
 #if 1
   result = system (buf)
@@ -843,10 +822,10 @@ ucon64_extract (const char *archive)
 
 #ifdef  DEBUG
   fprintf (stderr, "%s\n\n", path);
-#endif  
-  
+#endif
+
               q_fcpy (path, 0, q_fsize (path), ucon64.rom_in_archive, "wb");
-           
+
               rmdir2 (temp);
 
               return ucon64.rom_in_archive;
@@ -888,10 +867,10 @@ ucon64_testsplit (const char *filename)
     {
       parts = 0;
       strcpy (buf, filename);
-      p = strrchr (buf, '.') + x;            // if x == -1 change char before '.'
+      p = strrchr (buf, '.') + x;               // if x == -1 change char before '.'
                                                 // else if x == 1 change char behind '.'
       while (!access (buf, F_OK))
-        (*p)--;                             // "rewind"
+        (*p)--;                                 // "rewind"
       (*p)++;
 
       while (!access (buf, F_OK))               // count split parts
@@ -1203,9 +1182,9 @@ int ucon64_e (const char *romfile)
 
   result = system (buf)
 #ifndef __MSDOS__
-      >> 8                                      // the exit code is coded in bits 8-15
+           >> 8                                 // the exit code is coded in bits 8-15
 #endif                                          //  (that is, under non-DOS)
-  ;
+           ;
 
 #if 1
   // Snes9x (Linux) for example returns a non-zero value on a normal exit
@@ -1333,8 +1312,8 @@ ucon64_ls (const char *path, int mode)
           if (n != -1)
             {
               for (unzip_current_file_nr = 0; unzip_current_file_nr < n;
-                unzip_current_file_nr++)
-              ucon64_ls_main (ep->d_name, &fstate, mode, console);
+                   unzip_current_file_nr++)
+                ucon64_ls_main (ep->d_name, &fstate, mode, console);
               unzip_current_file_nr = 0;
             }
           else

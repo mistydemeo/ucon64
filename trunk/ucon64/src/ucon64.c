@@ -399,7 +399,7 @@ main (int argc, char **argv)
   if (optind < argc)
     ucon64.rom = argv[optind++];
 
-  ucon64.rom = ucon64_extract (ucon64.rom);
+//  ucon64.rom = ucon64_extract (ucon64.rom);
 
   if (optind < argc)
     ucon64.file = argv[optind++];

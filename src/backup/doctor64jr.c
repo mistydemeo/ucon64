@@ -339,7 +339,7 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
 }
 
 
-#if 1
+#if 0
 char
 verify_32k (unsigned short int hi_word, unsigned short int lo_word)
 {

@@ -65,9 +65,6 @@ typedef struct
   const st_usage_t *copier_usage;               // backup unit usage
 
   int interleaved;                              // ROM is interleaved (swapped)
-  int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
-  int snes_hirom;                               // SNES ROM is HiROM
-
   int data_size;                                // ROM data size without "red tape"
 
   int buheader_start;                           // start of backup unit header (mostly 0)
@@ -114,7 +111,7 @@ typedef struct
   const char *rom;                              // ROM (cmdline) with path
 
   int fname_len;                                // force fname output format for --rrom, --rename, etc...
-        // fname_len can be UCON64_83 (8.3) or UCON64_FORCE63 (63.x)
+  // fname_len can be UCON64_83 (8.3) or UCON64_FORCE63 (63.x)
   char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
   int file_size;                                // (uncompressed) ROM file size
   unsigned int crc32;                           // crc32 value of ROM (used for DAT files)
@@ -159,7 +156,7 @@ typedef struct
   int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
 
   // only used in switches.c for --crc (!)
-  int crc_big_files;                            // enable checksum calc. for files bigger than MAXROMSIZE (512Mb)
+  int crc_big_files;                            // enable checksum calc. for files larger than MAXROMSIZE (512Mb)
 
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
   /*

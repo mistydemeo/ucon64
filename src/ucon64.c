@@ -978,12 +978,6 @@ ucon64_rom_handling (void)
           if (UCON64_ISSET (ucon64.buheader_len))
             rominfo.buheader_len = ucon64.buheader_len;
 
-          if (UCON64_ISSET (ucon64.snes_header_base))
-            rominfo.snes_header_base = ucon64.snes_header_base;
-
-          if (UCON64_ISSET (ucon64.snes_hirom))
-            rominfo.snes_hirom = ucon64.snes_hirom;
-
           if (UCON64_ISSET (ucon64.interleaved))
             rominfo.interleaved = ucon64.interleaved;
 
@@ -1033,7 +1027,7 @@ ucon64_rom_handling (void)
   */
   if (ucon64.crc32 == 0)
     if (!ucon64.force_disc) // NOT for disc images
-      if (!(ucon64.flags & WF_NOCRC32) || ucon64.file_size < MAXROMSIZE)
+      if (!(ucon64.flags & WF_NOCRC32) || ucon64.file_size <= MAXROMSIZE)
         ucon64.crc32 = q_fcrc32 (ucon64.rom, ucon64.rominfo ? ucon64.rominfo->buheader_len : 0);
 
 
@@ -1149,7 +1143,7 @@ ucon64_probe (st_rominfo_t * rominfo)
             return rominfo;
           }
     }
-  else if (ucon64.file_size < MAXROMSIZE)       // give auto_recognition a try
+  else if (ucon64.file_size <= MAXROMSIZE)      // give auto_recognition a try
     {
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].flags & AUTO)

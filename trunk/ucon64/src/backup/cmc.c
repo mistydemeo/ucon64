@@ -636,8 +636,6 @@ cyan_test_copier (int test, int speed, unsigned int parport)
       printf ("                                                                          P %2d",
               count);
       fflush (stdout);
-      if (ucon64.frontend)
-        fputc ('\n', stdout);
       buffer1 = cyan_read_rom (speed, parport, NULL);
       if (!buffer1)                             // user abort
         exit (0);
@@ -661,8 +659,6 @@ cyan_test_copier (int test, int speed, unsigned int parport)
           printf ("                                                                          P %2d",
                   count);
           fflush (stdout);
-          if (ucon64.frontend)
-            fputc ('\n', stdout);
           buffer2 = cyan_read_rom (speed, parport, buffer2);
           if (!buffer2)
             {

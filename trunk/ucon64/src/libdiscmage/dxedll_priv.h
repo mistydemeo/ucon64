@@ -49,11 +49,11 @@ extern st_symbol_t import_export;
 #define feof import_export.feof
 #define fwrite import_export.fwrite
 #define fputc import_export.fputc
+#define ftell import_export.ftell
 #endif
 #endif
 
 #define fdopen import_export.fdopen
-#define ftell import_export.ftell
 #define rewind import_export.rewind
 #define fflush import_export.fflush
 #define ferror import_export.ferror
@@ -121,6 +121,7 @@ extern st_symbol_t import_export;
 #define gzread import_export.gzread
 #define gzgetc import_export.gzgetc
 #define gzrewind import_export.gzrewind
+#define gztell import_export.gztell
 
 // unzip functions
 #define unzOpen import_export.unzOpen

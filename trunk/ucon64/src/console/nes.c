@@ -223,13 +223,13 @@ const char *nes_boardtypes = {
 
 typedef struct
 {
-  uint32_t crc;
+  uint32_t crc32;
   uint8_t maker;
   uint8_t country;
   uint16_t date;
-} nes_data_t;
+} st_nes_data_t;
 
-static const nes_data_t nes_data[] = {
+static const st_nes_data_t nes_data[] = {
   {0x00161afd, 195, 0, 0},
   {0x0021ed29, 133, 0, 0},
   {0x003a1bd1, 133, 0, 0},
@@ -4935,8 +4935,7 @@ static const nes_data_t nes_data[] = {
   {0xffbef374, 100, 0, 0},
   {0xffd9db04, 147, 0, 0},
   {0xffecf645, 46, 1, 790},
-  {0xffef86c8, 126, 0, 0},
-  {0, 0, 0, 0}
+  {0xffef86c8, 126, 0, 0}
 };
 
 nes_file_t type;
@@ -4977,6 +4976,13 @@ static const int unif_cck_ids[] = {CCK0_ID, CCK1_ID, CCK2_ID, CCK3_ID,
 static const char *nes_destfname = NULL, *internal_name;
 static int rom_size;
 static FILE *nes_destfile;
+
+
+static int
+nes_compare (const void *key, const void *found)
+{
+  return ((st_nes_data_t *) key)->crc32 - ((st_nes_data_t *) found)->crc32;
+}
 
 
 static int
@@ -6694,6 +6700,7 @@ nes_init (st_rominfo_t *rominfo)
   //  introducing bugs when controller type text would be changed
   char buf[MAXBUFSIZE], ctrl_str[200], *str, *str_list[8];
   st_unif_chunk_t *unif_chunk, *unif_chunk2;
+  st_nes_data_t *info, key;
 
   internal_name = NULL;                         // reset this var, see nes_n()
   type = PASOFAMI;                              // reset type, see below
@@ -7159,25 +7166,20 @@ nes_init (st_rominfo_t *rominfo)
     ucon64.crc32 = q_fcrc32 (ucon64.rom, rominfo->buheader_len);
 
   // additional info
-#if 1
-  n = binary_search ((unsigned char *) &nes_data, sizeof (nes_data_t),
-                     (unsigned char *) &(nes_data[0].crc) - (unsigned char *) &nes_data[0],
-                     0, sizeof nes_data / sizeof (nes_data_t) - 1, ucon64.crc32);
-  if (n != -1)
-#else
-  for (n = 0; nes_data[n].crc; n++)
-    if (nes_data[n].crc == ucon64.crc32)
-#endif
+  key.crc32 = ucon64.crc32;
+  info = bsearch (&key, &nes_data, sizeof nes_data / sizeof (st_nes_data_t) - 1,
+                  sizeof (st_nes_data_t), nes_compare);
+  if (info)
       {
-        if (nes_data[n].maker)
-          rominfo->maker = NULL_TO_UNKNOWN_S (nes_maker[MIN (nes_data[n].maker, NES_MAKER_MAX - 1)]);
+        if (info->maker)
+          rominfo->maker = NULL_TO_UNKNOWN_S (nes_maker[MIN (info->maker, NES_MAKER_MAX - 1)]);
 
-        if (nes_data[n].country)
-          rominfo->country = NULL_TO_UNKNOWN_S (nes_country[MIN (nes_data[n].country, NES_COUNTRY_MAX - 1)]);
+        if (info->country)
+          rominfo->country = NULL_TO_UNKNOWN_S (nes_country[MIN (info->country, NES_COUNTRY_MAX - 1)]);
 
-        if (nes_data[n].date)
+        if (info->date)
           {
-            int month = nes_data[n].date / 100, year = nes_data[n].date % 100;
+            int month = info->date / 100, year = info->date % 100;
             char format[80];
 
             if (month)
@@ -7332,8 +7334,8 @@ nes_fdsl (st_rominfo_t *rominfo, char *output_str)
 int
 nes_fds (st_rominfo_t *rominfo)
 /*
-  This function converts a Famicom Disk System disk image from .FAM format to
-  .FDS format. It does almost the same as -strip apart from three checks
+  This function converts a Famicom Disk System disk image from FAM format to
+  FDS format. It does almost the same as -strip apart from three checks
   whether the input file is a valid FAM file.
   The "algorithm" comes from Marat Fayzullin's FAM2FDS.
 */

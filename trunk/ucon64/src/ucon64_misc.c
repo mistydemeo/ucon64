@@ -1240,7 +1240,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
       if (ucon64.crc32)
         {
           printf ("%s\n", ucon64.rom);
-          if (ucon64.fcrc32)                    // SNES interleaved ROMs
+          if (ucon64.fcrc32)            // SNES & Genesis interleaved/N64 non-interleaved
             printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32);
           else
             printf ("Checksum (CRC32): 0x%08x\n", ucon64.crc32);

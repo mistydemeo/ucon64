@@ -54,6 +54,7 @@ extern char *fgets2 (char *buffer, int maxlength, FILE *file);
 extern int feof2 (FILE *file);
 extern size_t fwrite2 (const void *buffer, size_t size, size_t number, FILE *file);
 extern int fputc2 (int character, FILE *file);
+extern long ftell2 (FILE *file);
 
 #undef feof                                     // necessary on (at least) Cygwin
 
@@ -66,6 +67,7 @@ extern int fputc2 (int character, FILE *file);
 #define feof(FILE) feof2(FILE)
 #define fwrite(BUF, SIZE, NUM, FILE) fwrite2(BUF, SIZE, NUM, FILE)
 #define fputc(CHAR, FILE) fputc2(CHAR, FILE)
+#define ftell(FILE) ftell2(FILE)
 
 #endif                                          // HAVE_ZLIB_H
 
@@ -371,6 +373,9 @@ extern int unzip_get_number_entries (const char *filename);
 extern int unzip_goto_file (unzFile file, int file_index);
 extern int unzip_current_file_nr;
 #endif
+
+extern int binary_search (unsigned char *data, int element_size, int key_offset,
+                          int minpos, int maxpos, unsigned int search_value);
 
 #ifdef __cplusplus
 }

@@ -2,7 +2,7 @@
 n64.c - Nintendo64 support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2002 dbjh
+           2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -527,15 +527,15 @@ cd64_usage
 }
 
 
-// ROM Checksum Routine Courtesy of:
+// ROM checksum routine courtesy of:
 //  chksum64 V1.2, a program to calculate the ROM checksum of Nintendo64 ROMs.
 //  Copyright (C) 1997  Andreas Sterbenz (stan@sbox.tu-graz.ac.at)
 
 #define ROL(i, b) (((i)<<(b)) | ((i)>>(32-(b))))
-#define BYTES2LONG(b, s) ( (((b)[0^(s)] & 0xffL) << 24) | \
-                           (((b)[1^(s)] & 0xffL) << 16) | \
-                           (((b)[2^(s)] & 0xffL) <<  8) | \
-                           (((b)[3^(s)] & 0xffL)) )
+#define BYTES2LONG(b, s) ( (b)[0^(s)] << 24 | \
+                           (b)[1^(s)] << 16 | \
+                           (b)[2^(s)] <<  8 | \
+                           (b)[3^(s)] )
 
 #define CHECKSUM_START 0x1000
 #define CHECKSUM_LENGTH 0x100000L
@@ -546,26 +546,14 @@ cd64_usage
 int
 n64_chksum (st_rominfo_t *rominfo)
 {
-  char chunk[MAXBUFSIZE];
+  unsigned char chunk[MAXBUFSIZE];
   unsigned long i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,
-                rlen = (ucon64.file_size - rominfo->buheader_len) - CHECKSUM_START,
-                sum1, sum2;
+                rlen = (ucon64.file_size - rominfo->buheader_len) - CHECKSUM_START;
   unsigned int n = 0;
   FILE *file;
 #ifdef  CALC_CRC32
   unsigned int scrc32 = 0, fcrc32 = 0;          // search CRC32 & file CRC32
   unsigned char *crc32_mem;
-
-  if (!rominfo->interleaved)
-    {
-      if ((crc32_mem = (unsigned char *) malloc (MAXBUFSIZE)) == NULL)
-        {
-          fprintf (stderr, ucon64_msg[BUFFER_ERROR], MAXBUFSIZE);
-          return -1;
-        }
-    }
-  else
-    crc32_mem = chunk;
 #endif
 
   t1 = CHECKSUM_STARTVALUE;
@@ -580,7 +568,20 @@ n64_chksum (st_rominfo_t *rominfo)
 
   if (!(file = fopen (ucon64.rom, "rb")))
     return -1;
+
 #ifdef  CALC_CRC32
+  if (!rominfo->interleaved)
+    {
+      if ((crc32_mem = (unsigned char *) malloc (MAXBUFSIZE)) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[BUFFER_ERROR], MAXBUFSIZE);
+          fclose (file);
+          return -1;
+        }
+    }
+  else
+    crc32_mem = chunk;
+
   fseek (file, rominfo->buheader_len, SEEK_SET);
   fread (crc32_mem, 1, CHECKSUM_START, file);
   if (!rominfo->interleaved)
@@ -644,8 +645,8 @@ n64_chksum (st_rominfo_t *rominfo)
         }
       clen -= n;
     }
-  sum1 = t6 ^ t4 ^ t3;
-  sum2 = t5 ^ t2 ^ t1;
+  n64crc.crc1 = t6 ^ t4 ^ t3;
+  n64crc.crc2 = t5 ^ t2 ^ t1;
 
 #ifdef  CALC_CRC32
   if (!rominfo->interleaved)
@@ -662,18 +663,12 @@ n64_chksum (st_rominfo_t *rominfo)
         }
       scrc32 = mem_crc32 (n, scrc32, crc32_mem);
     }
-#endif
 
-  fclose (file);
-
-  n64crc.crc1 = sum1;
-  n64crc.crc2 = sum2;
-
-#ifdef  CALC_CRC32
   ucon64.crc32 = scrc32;
   if (!rominfo->interleaved)
     ucon64.fcrc32 = fcrc32;
 #endif
 
+  fclose (file);
   return 0;
 }

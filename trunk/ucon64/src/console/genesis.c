@@ -40,7 +40,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static void interleave_buffer (unsigned char *buffer, int size);
 static void deinterleave_chunk (unsigned char *dest, unsigned char *src);
 static int genesis_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
-static int load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer);
+static unsigned char *load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer);
 static int save_smd (const char *name, unsigned char *rom_buffer, st_smd_header_t *header, long size);
 static int save_bin (const char *name, unsigned char *rom_buffer, long size);
 
@@ -151,12 +151,8 @@ genesis_smd (st_rominfo_t *rominfo)
   st_smd_header_t header;
   unsigned char dest_name[FILENAME_MAX], *rom_buffer = NULL;
 
-  if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
-    {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], genesis_rom_size);
-      return -1;
-    }
-  load_rom (rominfo, ucon64.rom, rom_buffer);
+  if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
+    return -1;
 
   memset (&header, 0, SMD_HEADER_LEN);
   header.size = genesis_rom_size / 16384;
@@ -341,12 +337,8 @@ genesis_mgd (st_rominfo_t *rominfo)
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   };
 
-  if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
-    {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], genesis_rom_size);
-      return -1;
-    }
-  load_rom (rominfo, ucon64.rom, rom_buffer);
+  if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
+    return -1;
 
   p = basename (ucon64.rom);
   strcpy (buf, is_func (p, strlen (p), isupper) ? "MD" : "md");
@@ -551,12 +543,8 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
 {
   char *rom_buffer = NULL, buf[FILENAME_MAX];
 
-  if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
-    {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], genesis_rom_size);
-      return -1;
-    }
-  load_rom (rominfo, ucon64.rom, rom_buffer);
+  if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
+    return -1;
 
   if (name1)
     {
@@ -613,21 +601,13 @@ genesis_1991 (st_rominfo_t *rominfo)
 int
 genesis_chk (st_rominfo_t *rominfo)
 {
-  unsigned char *rom_buffer;
-  int chksum = 0;
+  unsigned char *rom_buffer = NULL;
 
-  if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
-    {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], genesis_rom_size);
-      return -1;
-    }
-  load_rom (rominfo, ucon64.rom, rom_buffer);
+  if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
+    return -1;
 
-  mem_hexdump (&rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e);
-
-  chksum = genesis_chksum (rominfo, rom_buffer);
-  rom_buffer[GENESIS_HEADER_START + 143] = chksum;      // low byte of checksum
-  rom_buffer[GENESIS_HEADER_START + 142] = chksum >> 8; // high byte of checksum
+  rom_buffer[GENESIS_HEADER_START + 143] = rominfo->current_internal_crc;      // low byte of checksum
+  rom_buffer[GENESIS_HEADER_START + 142] = rominfo->current_internal_crc >> 8; // high byte of checksum
 
   mem_hexdump (&rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e);
 
@@ -649,15 +629,23 @@ genesis_chk (st_rominfo_t *rominfo)
 }
 
 
-int
+unsigned char *
 load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
 {
   FILE *file;
-  int bytesread, pos = 0;
-  unsigned char buf[MAXBUFSIZE];                // should be at least 16384 bytes
+  int bytesread, pos = 0, calc_fcrc32 = !ucon64.fcrc32;
+  unsigned char buf[16384];
 
   if ((file = fopen (name, "rb")) == NULL)
-    return -1;
+    return NULL;
+
+  if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], genesis_rom_size);
+      fclose (file);
+      return NULL;
+    }
+
   fseek (file, rominfo->buheader_len, SEEK_SET); // don't do this only for SMD!
 
   if (type == SMD)
@@ -669,22 +657,29 @@ load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
       */
       while (fread (buf, 16384, 1, file))
         {
+          // Use calc_fcrc32, because the first iteration ucon64.fcrc32 is zero
+          //  while the next it's non-zero.
+          if (calc_fcrc32)
+            ucon64.fcrc32 = mem_crc32 (16384, ucon64.fcrc32, buf);
           // Deinterleave each 16 KB chunk
           deinterleave_chunk (rom_buffer + pos, buf);
           pos += 16384;
         }
     }
-  else
+  else // if (type == BIN)
     {
-      while ((bytesread = fread (buf, 1, MAXBUFSIZE, file)))
+      while ((bytesread = fread (buf, 1, 16384, file)))
         {
           memcpy (rom_buffer + pos, buf, bytesread);
           pos += bytesread;
         }
     }
 
+  if (ucon64.crc32 == 0)                        // Calculate the CRC32 only once
+    ucon64.crc32 = mem_crc32 (pos, 0, rom_buffer);
+
   fclose (file);
-  return 0;
+  return rom_buffer;
 }
 
 
@@ -740,7 +735,7 @@ int
 genesis_init (st_rominfo_t *rominfo)
 {
   int result = -1, value = 0, x;
-  unsigned char *rom_buffer, buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
+  unsigned char *rom_buffer = NULL, buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
   static char maker[9], country[200]; // 200 characters should be enough for 5 country names
   static const char *genesis_maker[0x100] = {
     NULL, "Accolade", "Virgin Games", "Parker Brothers", "Westone",
@@ -1013,12 +1008,8 @@ genesis_init (st_rominfo_t *rominfo)
   // internal ROM crc
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
-      if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
-        {
-          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], genesis_rom_size);
-          return -1;
-        }
-      load_rom (rominfo, ucon64.rom, rom_buffer);
+      if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
+        return -1;
 
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 2;

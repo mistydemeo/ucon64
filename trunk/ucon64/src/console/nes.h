@@ -2,7 +2,7 @@
 nes.c - Nintendo Entertainment System support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2002 dbjh
+           2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -201,7 +201,7 @@ typedef struct
 // DINF chunk data
 typedef struct
 {
-  char dumper_name[100];                        // name of the person who dumped cart
+  char dumper_name[100];                        // name of the person who dumped the cart
   unsigned char day;                            // day of the month when cartridge was dumped
   unsigned char month;                          // month of the year when cartridge was dumped
   unsigned short year;                          // year during which the cartridge was dumped
@@ -215,7 +215,7 @@ typedef struct
 
 
 // the FAM define is a guess based on FAM2FDS, more info is needed about the
-//  .FAM format
+//  FAM format
 #define FAM_HEADER_LEN  192
 
 

@@ -1,7 +1,7 @@
 /*
 map.c - a map (associative array) implementation
 
-written by 2002 dbjh
+written by 2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -56,12 +56,20 @@ map_copy (st_map_t *dest, st_map_t *src)
 }
 
 
+int
+map_cmp_key_def (void *key1, void *key2)
+{
+  return key1 != key2;
+}
+
+
 st_map_t *
 map_put (st_map_t *map, void *key, void *object)
 {
   int n = 0;
 
-  while (n < map->size && map->data[n].key != MAP_FREE_KEY)
+  while (n < map->size && map->data[n].key != MAP_FREE_KEY &&
+         map->cmp_key (map->data[n].key, key))
     n++;
 
   if (n == map->size)                           // current map is full
@@ -79,13 +87,6 @@ map_put (st_map_t *map, void *key, void *object)
   map->data[n].object = object;
 
   return map;
-}
-
-
-int
-map_cmp_key_def (void *key1, void *key2)
-{
-  return key1 != key2;
 }
 
 

@@ -147,7 +147,7 @@ main (int argc, char *argv[])
     "-gc",
     "-xbox"
   };
-#if     defined BACKUP && defined __UNIX__
+#if     defined BACKUP && defined __unix__
   uid_t uid;
   gid_t gid;
 #endif
@@ -189,7 +189,7 @@ main (int argc, char *argv[])
     printf ("0x%x\n\n", rom.parport);
 */
 
-#ifdef  __UNIX__
+#ifdef  __unix__
   /*
     Some code needs us to switch to the real uid and gid. However, other code
     needs access to I/O ports other than the standard printer port registers.
@@ -219,7 +219,7 @@ main (int argc, char *argv[])
       fprintf (stderr, "Could not set gid\n");  //  (root did `chmod +s')
       return 1;
     }
-#endif // __UNIX__
+#endif // __unix__
 #endif // BACKUP
 
 /*

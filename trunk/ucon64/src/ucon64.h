@@ -60,7 +60,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define ucon64_VERSION "1.9.8beta3"
 
-#ifdef  __UNIX__
+#ifdef  __unix__
   #ifdef  __CYGWIN__
     #define ucon64_OS "Win32"
   #elif __FreeBSD__

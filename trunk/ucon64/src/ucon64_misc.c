@@ -290,7 +290,7 @@ filetestpad (char *filename)
 }
 
 #ifdef  BACKUP
-#if     defined __UNIX__ || defined __BEOS__ // DJGPP (DOS) has outportX() & inportX()
+#if     defined __unix__ || defined __BEOS__ // DJGPP (DOS) has outportX() & inportX()
 unsigned char
 inportb (unsigned short port)
 {
@@ -356,7 +356,7 @@ outportw (unsigned short port, unsigned short word)
   __asm__ __volatile__ ("outw %1, %0"::"d" (port), "a" (word));
 #endif
 }
-#endif // defined __UNIX__ || defined __BEOS__
+#endif // defined __unix__ || defined __BEOS__
 
 int
 detect_parport (unsigned int port)

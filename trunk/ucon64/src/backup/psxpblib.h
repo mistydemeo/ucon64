@@ -19,7 +19,7 @@
 */
 #ifdef  __MSDOS__
 #define _PSXPB_DJGPP_
-#elif   defined __UNIX__
+#elif   defined __unix__
 #define _PSXPB_LINUX_
 #elif   defined __BEOS__
 #define _PSXPB_BEOS_

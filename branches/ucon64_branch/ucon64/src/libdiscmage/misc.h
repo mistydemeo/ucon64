@@ -547,6 +547,7 @@ int fprintf2 (FILE *file, const char *format, ...);
 #define isatty  _isatty
 #define rmdir   _rmdir
 #define stat    _stat
+#define strdup  _strdup
 #define strnicmp _strnicmp
 #endif // DLL
 

@@ -35,7 +35,7 @@ const char *neogeo_usage[] =
     "Neo Geo/Neo Geo CD(Z)/MVS",
     "1990/1994 SNK http://www.neogeo.co.jp",
     "  " OPTION_LONG_S "ng          force recognition"
-#ifndef DB
+#ifndef HAVE_ZLIB_H
     "; NEEDED"
 #endif
     "\n"

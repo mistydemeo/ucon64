@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 const char *doctor64jr_usage[] = {
   "Doctor64 Jr",
   "19XX Bung Enterprises Ltd http://www.bung.com.hk",
-#ifdef BACKUP
+#ifdef PARALLEL
   "  " OPTION_LONG_S "xdjr        send/receive ROM to/from Doctor64 Jr; "
     OPTION_LONG_S "file=PORT\n"
 //          "                receives automatically when ROM does not exist\n"
@@ -46,7 +46,7 @@ const char *doctor64jr_usage[] = {
     OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when SRAM does not exist\n"
 #endif
-#endif                          // BACKUP
+#endif                          // PARALLEL
   NULL
 };
 
@@ -169,7 +169,7 @@ void mainproc(void *arg) {
 }
 */
 
-#ifdef BACKUP
+#ifdef PARALLEL
 
 #ifdef TODO
 #warning TODO doctor64jr.c sram routines
@@ -1054,4 +1054,4 @@ doctor64jr_write (const char *filename, long start, long len,
   return 0;
 }
 
-#endif // BACKUP
+#endif // PARALLEL

@@ -255,7 +255,7 @@ const struct option long_options[] = {
     {"vec", 0, 0, UCON64_VEC},
     {"xbox", 0, 0, UCON64_XBOX},
     {"xcdrw", 0, 0, UCON64_XCDRW},
-#ifdef  BACKUP
+#ifdef  PARALLEL
     {"xdex", 1, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
     {"xfal", 0, 0, UCON64_XFAL},
@@ -275,7 +275,7 @@ const struct option long_options[] = {
     {"xswc2", 0, 0, UCON64_XSWC2},
     {"xswcs", 0, 0, UCON64_XSWCS},
     {"xv64", 0, 0, UCON64_XV64},
-#endif // BACKUP
+#endif // PARALLEL
     {"z64", 0, 0, UCON64_Z64},
     {"hd", 0, 0, UCON64_HD},
     {"hdn", 1, 0, UCON64_HDN},
@@ -538,7 +538,7 @@ main (int argc, char **argv)
       argc--;                                   // use argc, NOT ucon64.argc!
     }
 
-#ifdef  BACKUP
+#ifdef  PARALLEL
   if (ucon64.file)
     sscanf (ucon64.file, "%x", &ucon64.parport);
 #endif
@@ -780,7 +780,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       if (rominfo->current_crc32 == 0)
         rominfo->current_crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
 
-#ifdef  DB
+#ifdef  HAVE_ZLIB_H
       switch (ucon64.console)
         {
           case UCON64_SNES:
@@ -795,7 +795,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
             ucon64_dbsearch (rominfo);
             break;
         }
-#endif // DB
+#endif // HAVE_ZLIB_H
     }
   else if (UCON64_TYPE_ISCD (ucon64.type))
     {
@@ -1058,13 +1058,13 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "dbs         search ROM database (all entries) by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
     "  " OPTION_LONG_S "db          ROM database statistics (# of entries)\n"
     "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
-#ifdef  DB
+#ifdef  HAVE_ZLIB_H
 #if 0
     "TODO: " OPTION_LONG_S "dat     import DAT files into ROM database; " OPTION_LONG_S "rom=DAT_FILE\n"
     "                  parses all Romcenter, Goodxxxx, etc. DAT files and updates\n"
     "                  the database cache in %scache\n"
 #endif
-#endif  // DB
+#endif  // HAVE_ZLIB_H
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
@@ -1153,20 +1153,20 @@ ucon64_usage (int argc, char *argv[])
         {
       case UCON64_GBA:
         UCON64_USAGE (gba_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
         UCON64_USAGE (fal_usage);
-#endif // BACKUP
+#endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_N64:
         UCON64_USAGE (n64_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
         UCON64_USAGE (doctor64_usage);
         UCON64_USAGE (doctor64jr_usage);
 //        UCON64_USAGE (cd64_usage);
         UCON64_USAGE (dex_usage);
-#endif // BACKUP
+#endif // PARALLEL
         single = 1;
         break;
 
@@ -1177,13 +1177,13 @@ ucon64_usage (int argc, char *argv[])
 
       case UCON64_SNES:
         UCON64_USAGE (snes_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
         UCON64_USAGE (swc_usage);
         UCON64_USAGE (gd_usage);
 //        UCON64_USAGE (fig_usage);
 //        UCON64_USAGE (smc_usage);
 //        UCON64_USAGE (mgd_usage);
-#endif // BACKUP
+#endif // PARALLEL
         single = 1;
         break;
 
@@ -1194,51 +1194,51 @@ ucon64_usage (int argc, char *argv[])
 
       case UCON64_NGP:
         UCON64_USAGE (ngp_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
 //        UCON64_USAGE (fpl_usage);
-#endif // BACKUP
+#endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_GEN:
         UCON64_USAGE (genesis_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
         UCON64_USAGE (smd_usage);
 //        UCON64_USAGE (mgd_usage);
-#endif // BACKUP
+#endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_GB:
         UCON64_USAGE (gameboy_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
         UCON64_USAGE (gbx_usage);
         UCON64_USAGE (mccl_usage);
-#endif // BACKUP
+#endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_LYNX:
         UCON64_USAGE (lynx_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
         UCON64_USAGE (lynxit_usage);
-#endif // BACKUP
+#endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_PCE:
         UCON64_USAGE (pcengine_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
 //        UCON64_USAGE (mgd_usage);
-#endif // BACKUP
+#endif // PARALLEL
         single = 1;
         break;
 
       case UCON64_SMS:
         UCON64_USAGE (sms_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
 //        UCON64_USAGE (smd_usage);
-#endif // BACKUP
+#endif // PARALLEL
         single = 1;
         break;
 
@@ -1259,9 +1259,9 @@ ucon64_usage (int argc, char *argv[])
 
       case UCON64_PSX:
         UCON64_USAGE (psx_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
         UCON64_USAGE (dex_usage);
-#endif // BACKUP
+#endif // PARALLEL
         single = 1;
         break;
 
@@ -1295,69 +1295,69 @@ ucon64_usage (int argc, char *argv[])
       printf("\n");
 
       UCON64_USAGE (psx_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
       UCON64_USAGE (dex_usage);
-#endif // BACKUP
+#endif // PARALLEL
       printf ("\n");
 
       UCON64_USAGE (gba_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
       UCON64_USAGE (fal_usage);
-#endif // BACKUP
+#endif // PARALLEL
       printf ("\n");
 
       UCON64_USAGE (n64_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
       UCON64_USAGE (doctor64_usage);
       UCON64_USAGE (doctor64jr_usage);
 //      UCON64_USAGE (cd64_usage);
       UCON64_USAGE (dex_usage);
-#endif // BACKUP
+#endif // PARALLEL
       printf ("\n");
 
       UCON64_USAGE (snes_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
       UCON64_USAGE (swc_usage);
       UCON64_USAGE (gd_usage);
 //      UCON64_USAGE (fig_usage);
 //      UCON64_USAGE (smc_usage);
 //      UCON64_USAGE (mgd_usage);
-#endif // BACKUP
+#endif // PARALLEL
       printf ("\n");
 
       UCON64_USAGE (neogeo_usage);
       printf ("\n");
 
       UCON64_USAGE (genesis_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
       UCON64_USAGE (smd_usage);
 //      UCON64_USAGE (mgd_usage);
-#endif // BACKUP
+#endif // PARALLEL
       printf ("\n");
 
       UCON64_USAGE (gameboy_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
       UCON64_USAGE (gbx_usage);
       UCON64_USAGE (mccl_usage);
-#endif // BACKUP
+#endif // PARALLEL
       printf ("\n");
 
       UCON64_USAGE (lynx_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
       UCON64_USAGE (lynxit_usage);
-#endif // BACKUP
+#endif // PARALLEL
       printf ("\n");
 
       UCON64_USAGE (pcengine_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
 //      UCON64_USAGE (mgd_usage);
-#endif // BACKUP
+#endif // PARALLEL
       printf ("\n");
 
       UCON64_USAGE (sms_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
 //      UCON64_USAGE (smd_usage);
-#endif // BACKUP
+#endif // PARALLEL
       printf ("\n");
 
       UCON64_USAGE (nes_usage);
@@ -1370,9 +1370,9 @@ ucon64_usage (int argc, char *argv[])
       printf ("\n");
 
       UCON64_USAGE (ngp_usage);
-#ifdef  BACKUP
+#ifdef  PARALLEL
 //      UCON64_USAGE (fpl_usage);
-#endif // BACKUP
+#endif // PARALLEL
       printf ("\n");
 
 #ifdef  SAMPLE
@@ -1382,9 +1382,9 @@ ucon64_usage (int argc, char *argv[])
   }
 
   printf (
-#ifdef  DB
+#ifdef  HAVE_ZLIB_H
      "Database: %d known ROMs in cache (%+d)\n"
-#endif // DB
+#endif // HAVE_ZLIB_H
      "\n"
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
 #ifdef  __MSDOS__
@@ -1396,10 +1396,10 @@ ucon64_usage (int argc, char *argv[])
      "\n"
      "Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
      "\n"
-#ifdef  DB
+#ifdef  HAVE_ZLIB_H
      , ucon64_dbsize (UCON64_UNKNOWN)
      , ucon64_dbsize (UCON64_UNKNOWN) - UCON64_DBSIZE
-#endif // DB
+#endif // HAVE_ZLIB_H
      , argv[0], argv[0]);
 }
 

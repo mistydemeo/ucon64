@@ -37,7 +37,7 @@ const char *ngp_usage[] =
     "Neo Geo Pocket/Neo Geo Pocket Color",
     "1998/1999 SNK http://www.neogeo.co.jp",
     "  " OPTION_LONG_S "ngp         force recognition"
-#ifndef DB
+#ifndef HAVE_ZLIB_H
     "; NEEDED"
 #endif
     "\n",

@@ -73,7 +73,7 @@ const char *mccl_usage[] = {
 };
 
 
-#ifdef BACKUP
+#ifdef PARALLEL
 
 static int mccl_argc;
 static char *mccl_argv[128];
@@ -162,4 +162,4 @@ mccl_read (const char *filename, unsigned int parport)
   return mccl_main (mccl_argc, mccl_argv);
 }
 
-#endif // BACKUP
+#endif // PARALLEL

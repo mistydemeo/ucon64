@@ -844,8 +844,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-todo           enable todo output (default: no)
   --enable-debug          enable debug output (default: no)
-  --enable-db             enable internal database (default: yes)
-  --enable-backup         enable support for parallel port backup units
+  --enable-parallel       enable support for parallel port backup units
                           (default: yes)
   --enable-dload          enable dynamic loading of add-on libraries (default:
                           yes)
@@ -2285,44 +2284,24 @@ echo "$as_me:$LINENO: result: $enable_debug" >&5
 echo "${ECHO_T}$enable_debug" >&6
 
 
-echo "$as_me:$LINENO: checking whether the internal database is enabled" >&5
-echo $ECHO_N "checking whether the internal database is enabled... $ECHO_C" >&6
-# Check whether --enable-db or --disable-db was given.
-if test "${enable_db+set}" = set; then
-  enableval="$enable_db"
-  enable_db=$enableval
-else
-  enable_db=yes
-fi;
-if test $enable_db = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define DB 1
-_ACEOF
-
-fi
-echo "$as_me:$LINENO: result: $enable_db" >&5
-echo "${ECHO_T}$enable_db" >&6
-
-
 echo "$as_me:$LINENO: checking whether support for parallel port backup units is enabled" >&5
 echo $ECHO_N "checking whether support for parallel port backup units is enabled... $ECHO_C" >&6
-# Check whether --enable-backup or --disable-backup was given.
-if test "${enable_backup+set}" = set; then
-  enableval="$enable_backup"
-  enable_backup=$enableval
+# Check whether --enable-parallel or --disable-parallel was given.
+if test "${enable_parallel+set}" = set; then
+  enableval="$enable_parallel"
+  enable_parallel=$enableval
 else
-  enable_backup=yes
+  enable_parallel=yes
 fi;
-if test $enable_backup = yes; then
+if test $enable_parallel = yes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define BACKUP 1
+#define PARALLEL 1
 _ACEOF
 
 fi
-echo "$as_me:$LINENO: result: $enable_backup" >&5
-echo "${ECHO_T}$enable_backup" >&6
+echo "$as_me:$LINENO: result: $enable_parallel" >&5
+echo "${ECHO_T}$enable_parallel" >&6
 
 
 echo "$as_me:$LINENO: checking whether add-on libraries are dynamically loaded" >&5

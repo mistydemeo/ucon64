@@ -37,7 +37,7 @@ const char *dex_usage[] =
   };
 
 
-#ifdef BACKUP
+#ifdef PARALLEL
 #include "dex.h"
 #include "psxpblib.h"
 
@@ -119,4 +119,4 @@ dex_write_block (const char *filename, int block_num, unsigned int parport)
 #undef FRAME_SIZE
 #undef BLOCK_SIZE
 
-#endif // BACKUP
+#endif // PARALLEL

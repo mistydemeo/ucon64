@@ -23,10 +23,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const char *lynxit_usage[];
 
-#ifdef BACKUP
+#ifdef PARALLEL
 extern int lynxit_read_rom (const char *filename, unsigned int parport);
 extern int lynxit_write_rom (const char *filename, unsigned int parport);
-#endif // BACKUP
+#endif // PARALLEL
 
 #define LYNXIT_HEADER_START 0
 #define LYNXIT_HEADER_LEN 0

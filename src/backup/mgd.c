@@ -42,5 +42,5 @@ const char *mgd_usage[] =
     NULL
   };
 
-#ifdef BACKUP
-#endif // BACKUP
+#ifdef PARALLEL
+#endif // PARALLEL

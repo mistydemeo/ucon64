@@ -29,12 +29,12 @@ extern const char *gd_usage[];
 #define GD3_MAX_UNITS 16                        // Maximum that the hardware supports
 // Each logical memory unit is 8Mbit in size (internally it's 2*4Mbit)
 
-#ifdef BACKUP
+#ifdef PARALLEL
 int gd_read_rom (const char *filename, unsigned int parport);
 int gd_write_rom (const char *filename, unsigned int parport,
                   st_rominfo_t *rominfo);
 int gd_read_sram (const char *filename, unsigned int parport);
 int gd_write_sram (const char *filename, unsigned int parport);
-#endif // BACKUP
+#endif // PARALLEL
 
 #endif // MGD_H

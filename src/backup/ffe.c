@@ -30,7 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ffe.h"
 
 
-#ifdef BACKUP
+#ifdef PARALLEL
 
 
 #define INPUT_MASK      0x78
@@ -224,4 +224,4 @@ ffe_checkabort (int status)
     }
 }
 
-#endif // BACKUP
+#endif // PARALLEL

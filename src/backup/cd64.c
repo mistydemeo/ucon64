@@ -28,16 +28,16 @@ const char *cd64_usage[] =
 #ifdef TODO
 #warning TODO -xcd64        send/receive ROM to/from CD64
 #endif // TODO
-#ifdef BACKUP
+#ifdef PARALLEL
 #if 0
     "TODO:  -xcd64        send/receive ROM to/from CD64; " OPTION_LONG_S "file=PORT\n"
     "             receives automatically when " OPTION_LONG_S "rom does not exist\n",
 #endif
-#endif // BACKUP
+#endif // PARALLEL
     NULL
   };
 
-#ifdef BACKUP
+#ifdef PARALLEL
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
@@ -1275,4 +1275,4 @@ int cd64_write_sram(char *filename, unsigned int parport)
 }
 */
 
-#endif // BACKUP
+#endif // PARALLEL

@@ -44,7 +44,7 @@ const char *pcengine_usage[] =
     "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\nSuper Grafx/Turbo (Grafx(16)/CD/DUO/Express)",
     "1987/19XX/19XX NEC",
     "  " OPTION_LONG_S "pce         force recognition"
-#ifndef DB
+#ifndef HAVE_ZLIB_H
     "; NEEDED"
 #endif
     "\n"

@@ -26,11 +26,11 @@ extern const char *fal_usage[];
 #define FAL_HEADER_START 0
 #define FAL_HEADER_LEN 0
 
-#ifdef BACKUP
+#ifdef PARALLEL
 extern int fal_read_rom (const char *filename, unsigned int parport, int size);
 extern int fal_write_rom (const char *filename, unsigned int parport);
 extern int fal_read_sram (const char *filename, unsigned int parport, int bank);
 extern int fal_write_sram (const char *filename, unsigned int parport, int bank);
-#endif // BACKUP
+#endif // PARALLEL
 
 #endif // FAL_H

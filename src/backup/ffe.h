@@ -59,7 +59,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
     11-511 - 0, reserved
 */
 
-#ifdef BACKUP
+#ifdef PARALLEL
 
 #define STROBE_BIT      1
 
@@ -73,6 +73,6 @@ extern unsigned char ffe_receiveb (void);
 extern void ffe_wait_for_ready (void);
 extern void ffe_checkabort (int status);
 
-#endif // BACKUP
+#endif // PARALLEL
 
 #endif // FFE_H

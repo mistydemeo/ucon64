@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "config.h"
 
-#ifdef BACKUP
+#ifdef PARALLEL
 
 
 
@@ -748,4 +748,4 @@ WriteTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
 }
 #endif
 
-#endif // BACKUP
+#endif // PARALLEL

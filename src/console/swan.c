@@ -36,7 +36,7 @@ const char *swan_usage[] =
     "WonderSwan/WonderSwan Color/SwanCrystal",
     "19XX/19XX/2002 Bandai",
     "  " OPTION_LONG_S "swan        force recognition"
-#ifndef DB
+#ifndef HAVE_ZLIB_H
     "; NEEDED"
 #endif
     "\n"

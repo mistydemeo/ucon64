@@ -34,7 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "ffe.h"
 #include "swc.h"
-#include "../console/snes.h"
+#include "console/snes.h"                       // for snes_get_file_type ()
 
 
 const st_usage_t swc_usage[] =

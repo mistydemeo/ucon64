@@ -470,6 +470,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XFALC, UCON64_GBA, fal_usage,        WF_STOP|WF_NO_ROM},
   {UCON64_XFALMULTI, UCON64_GBA, fal_usage,    WF_DEFAULT|WF_STOP}, // send only
   {UCON64_XFALS, UCON64_GBA, fal_usage,        WF_STOP|WF_NO_ROM},
+  {UCON64_XFIG, UCON64_SNES, fig_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XGBX, UCON64_GB, gbx_usage,          WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_XGBXB, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_ROM},
   {UCON64_XGBXS, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_ROM},

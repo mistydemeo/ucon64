@@ -289,6 +289,7 @@ const struct option options[] = {
     {"xfalc", 1, 0, UCON64_XFALC},
     {"xfals", 0, 0, UCON64_XFALS},
     {"xfalm", 0, 0, UCON64_XFALM},
+    {"xfig", 0, 0, UCON64_XFIG},
     {"xgbx", 0, 0, UCON64_XGBX},
     {"xgbxb", 1, 0, UCON64_XGBXB},
     {"xgbxs", 0, 0, UCON64_XGBXS},
@@ -1419,12 +1420,12 @@ ucon64_usage (int argc, char *argv[])
 #ifdef  PARALLEL
       swc_usage,
       gd_usage,
-//      fig_usage,
+      fig_usage,
 //      mgd_usage,
 #else
-      0, 0,
+      0, 0, 0,
 #endif // PARALLEL
-      0, 0, 0}},
+      0, 0}},
     {UCON64_NG, {neogeo_usage, 0, 0, 0, 0, 0}},
     {UCON64_GEN, {genesis_usage,
 #ifdef  PARALLEL

@@ -240,6 +240,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XFALC:
     case UCON64_XFALS:
     case UCON64_XFALB:
+    case UCON64_XFIG:
     case UCON64_XGBX:
     case UCON64_XGBXS:
     case UCON64_XGBXB:
@@ -1482,6 +1483,20 @@ ucon64_options (int c, const char *optarg)
         {
           if (doctor64jr_read (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+        }
+      printf ("\n");
+      break;
+
+    case UCON64_XFIG:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
+        fig_read_rom (ucon64.rom, ucon64.parport); // dumping is not yet supported
+      else
+        {
+          if (!ucon64.rominfo->buheader_len)
+            fprintf (stderr,
+                    "ERROR: This ROM has no header. Convert to a Pro Fighter compatible format.\n");
+          else
+            fig_write_rom (ucon64.rom, ucon64.parport); // file exists -> send it to the copier
         }
       printf ("\n");
       break;

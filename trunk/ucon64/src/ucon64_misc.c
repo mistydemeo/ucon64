@@ -325,7 +325,8 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
         pos -= MAXBUFSIZE, buf_pos = MAXBUFSIZE)
     {
       for (; buf_pos > 0; buf_pos--)
-        if (buf[buf_pos - 1] != c) return rominfo->file_size - (pos + buf_pos);
+        if (buf[buf_pos - 1] != c) 
+          return rominfo->file_size - (pos + buf_pos);
     }
 
   return 0;

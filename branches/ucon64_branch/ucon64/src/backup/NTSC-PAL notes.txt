@@ -1,0 +1,107 @@
+Legend for Code1:
+0 = seems to work without modification
+1 = needs crack (uCON64 option -k)
+2 = needs NTSC/PAL fix (uCON64 option -f)
+3 = needs backup unit header fix
+4 = seems to work, but doesn't work correctly
+5 = music doesn't work
+6 = copy protection screen
+7 = wrong television standard (NTSC/PAL) screen
+8 = corrupted/distorted graphics
+9 = doesn't work
+
+
+Legend for Code2:
+N1  = 3f 21 29/89 10 f0                     3f 21 29/89 10 80
+N2  = ad 3f 21 29 10 d0                     ad 3f 21 29 10 ea ea
+P3  = ad 3f 21 89 10 d0                     ad 3f 21 89 10 80                - Terranigma
+N4  = ad 3f 21 89 10 d0                     ad 3f 21 89 10 80/(ea ea)        - Live-a-Live
+N5  = 3f 21 29/89 10 00 f0                  3f 21 29/89 10 00 80             - Clock Tower
+N6  = 3f 21 29/89 10 00 d0                  3f 21 29/89 10 00 ea ea          - Mario no Super Picross
+P7  = ad 3f 21 29 10 00 d0                  ad 3f 21 29 10 00 80
+P8  = ad 3f 21 89 10 00 d0                  a9 10 00 89 10 00 d0             - Eric Cantona Football ?
+N9  =    3f 21 89 10 c2 XX d0                  3f 21 89 10 c2 XX ea ea       - Robotrek
+N10 = 3f 21 29/89 10 c9 10 f0               3f 21 29/89 10 c9 10 80
+N11 = ad 3f 21 29 10 c9 00 f0               ad 3f 21 29 10 c9 00 80/(ea ea) <= original uCON used 80
+N12 = ad 3f 21 29 10 c9 00 d0               ad 3f 21 29 10 c9 00 80
+N13 = ad 3f 21 29 10 c9 10 d0               ad 3f 21 29 10 c9 10 ea ea
+P14 = ad 3f 21 29 10 cf bd ff 00 f0         ad 3f 21 29 10 cf bd ff 00 80    - Tiny Toons - Wild and Wacky Sports ?
+N15 =    3f 21 29 10 cf XX YY 80 f0            3f 21 29 10 cf XX YY 80 80    - Gokujyou Parodius/Tokimeki Memorial
+N16 = ad 3f 21 8d XX YY 29 10 8d            ad 3f 21 8d XX YY 29 00 8d       - Dragon Ball Z - Super Butoden 2 ?
+N17 = 3f 21 00 29/89 10 f0                  3f 21 00 29/89 10 80             - Kirby's Dream Course U
+P18 = af 3f 21 00 29 10 d0                  af 3f 21 00 29 10 80
+N19 = af 3f 21 00 29/89 10 d0               af 3f 21 00 29/89 10 ea ea       - Kirby No Kira Kizzu/Final Fight Guy
+P20 = af 3f 21 00 29 10 00 d0               af 3f 21 00 29 10 00 ea ea
+N21 = af 3f 21 00 29/89 10 00 f0            af 3f 21 00 29/89 10 00 80
+P22 = af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Secret of Mana E
+N23 = af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Seiken Densetsu 3
+N24 = af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken Densetsu 2/Secret of Mana U
+N25 =    3f 21 00 89 10 c2 XX f0               3f 21 00 89 10 c2 XX 80       - Dragon - The Bruce Lee Story U
+N26 = af 3f 21 00 XX YY 29 10 00 d0         af 3f 21 00 XX YY 29 10 00 ea ea - Fatal Fury Special ?
+N27 =    3f 21 c2 XX 29 10 00 d0               3f 21 c2 XX 29 10 00 ea ea    - Dual Orb 2
+N28 = af 3f 21 ea 89 10 00 d0               a9 00 00 ea 89 10 00 d0          - Super Famista 3 ?
+P29 = a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country E
+N30 = a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country U
+N31 = 29 10 00 a2 00 00 c9 10 00 d0         29 10 00 a2 00 00 c9 10 00 80    - Wolfenstein 3D U
+
+
+Comment:
+Code1 is valid for an SWC 2.8cc 32 Mbit PAL. For example Terranigma has a Code1
+of 0, but a Code2 of P3, because it runs without modification on a PAL SNES but
+needs an NTSC/PAL fix for an NTSC SNES.
+The prefix N indicates an NTSC protection code, the prefix P indicates a PAL
+protection code. Cracking or fixing an NTSC protection code makes a game run
+on a PAL SNES and vice versa.
+
+
+Code1   Code2   Game
+2       N5      Clock Tower (J) <= 0x29
+1 + 2   N1      Demon's Crest (U) <= (0xad) 0x29
+1 + 2 + 4  N6   Diddy's Kong Quest (V1.1) (U) <= can't get past the first level; 0x29
+1       P29     Donkey Kong Country (V1.0) (E)
+1 + 2   N30     Donkey Kong Country (V1.0) (U)
+1       P29     Donkey Kong Country (V1.1) (E)
+1 + 2   N30     Donkey Kong Country (V1.1) (U)
+2       N25     Dragon - The Bruce Lee Story (U)
+2       N4      Dr. Mario (J) (NP) <= 0xea 0xea
+2       N27     Dual Orb 2 (J)
+1 + 2   N17     Earthbound (U) <= 0x29
+2 + 3   N1      Final Fight 3 (U) <= emulation mode select byte: 0x1c; (0xad) 0x29
+2       N19     Final Fight Guy (U) <= 0x89
+2 + 3   N1      Final Fight Tough (J) <= emulation mode select byte: 0x1c; (0xad) 0x29
+2       N15     Gokujyou Parodius (J) <=  0xad 0xff
+2       N1      Illusion of Gaia (U) <= (0xad) 0x89
+2 + 9   N15     Jikkyou Oshaberi Parodius (J) <= 0xad 0xff
+2       N1      Joe and Mac 2 (U)(35468) <= (0xad) 0x29
+2       N19     Kirby No Kira Kizzu (J) (NP) <= 0x29
+1 + 2   N17     Kirby's Dream Course (U) <= 0x29
+2       N4      Live-a-Live (J) <= 0xea 0xea
+1 + 2   N6      Mario no Super Picross (J) <= 0x89
+2       N1      Mega Man 7 (U) <= (0xad) 0x29
+2       N1      Mega Man Soccer (U) <= (0xad) 0x89
+2 + 9   N1      Mega Man X 2 (U) <= the intro can be viewed; (0xad) 0x89
+1 + 2   N1      Mega Man X (V1.0) (U) <= (0xad) 0x89
+1 + 2   N1      Mega Man X (V1.1) (U) <= (0xad) 0x89
+2 + 3   N1 + N2 Mickey & Donald 3 (J) <= emulation mode select byte: 0x1c; (0xad) 0x29
+2       N2      Ninja Gaiden Trilogy (U)
+2       N9      Robotrek (U) <= 0x20
+2       N17     Romancing SaGa 2 (J) <= 0x89
+2       N17     Romancing SaGa 3 (V1.0) (J) <= 0x89
+2       N17     Romancing SaGa 3 (V1.1) (J) <= 0x89
+2       N24     Secret of Mana (U)
+0       P22     Secret of Mana (V1.0) (E) <= 0x10 0x10
+0       P22     Secret of Mana (V1.1) (E) <= 0x10 0x10
+2       N24     Seiken Densetsu 2 (J)
+2       N23     Seiken Densetsu 3 (J) <= 0x10 0x00
+2       N1      Street Fighter II Turbo (U) <= (0xad) 0x29
+1 + 2   N1      Super Mario All-Stars (U) <= (0xad) 0x89
+1 + 2   N1      Super Mario All-Stars & World (U) <= (0xad) 0x89
+1 + 2   N1      Super Mario Collection (V1.1) (J) <= (0xad) 0x89
+1 + 2   N1      Super Metroid (JU) <= (0xad) 0x89
+0       P3      Terranigma (E)
+2 + 8 + 9  N15  Tokimeki Memorial (V1.1) (J) <= the game halts after a while; 0xad 0xff
+2       N31     Wolfenstein 3D (U)
+2       N1      Yoshi's Safari (U) <= I don't have a Super Scope...; (0xad) 0x29
+2       N2      Ys 5 Expert (J)
+
+EOF

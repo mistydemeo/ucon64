@@ -755,31 +755,59 @@ ucon64_parport_init (unsigned int port)
 
 
 const char *
-ucon64_rom_in_archive (DIR **dp, const char *archive, char *romname,
-                       const char *configfile)
+ucon64_rom_in_archive (const char *archive)
 {
+#ifndef __MSDOS__
 #if 0
   struct dirent *ep;
   struct stat fstate;
   char buf[FILENAME_MAX], cwd[FILENAME_MAX];
+  int pos = 0, result = 0;
+  char tmp[FILENAME_MAX];
+  char *temp, property_name[MAXBUFSIZE], buf2[MAXBUFSIZE];
 
-#ifdef UNZIP
-  if (!stricmp (getext (archive), ".zip"))
-    {
-//use zlib
-    }
-#endif // UNZIP
+  if (!archive) return NULL;
 
-#ifndef __MSDOS__
+  strcpy (ucon64.rom_in_archive, archive);
+
   getcwd (cwd, FILENAME_MAX);
-  sprintf (buf, "%s" FILE_SEPARATOR_S "%s", cwd, archive);
-//  strcpy (buf, archive);
+  tmpnam2 (tmp);
+  chdir (tmp);
 
-  if (!(*dp = opendir2 (buf, configfile, NULL, NULL)))
-    return archive;
+  sprintf (property_name, "%s_extract", &getext (archive)[1]);
+  sprintf (buf, NULL_TO_EMPTY (get_property (config_file, strlwr (property_name), buf2, NULL)), archive);
 
-  chdir (buf);
+  if (!buf[0])
+    return ucon64.rom_in_archive;
 
+  if (archive)
+    {
+      strcat (buf, " ");
+      strcat (buf, archive);
+    }
+
+  temp = archive_or_dir;
+
+  tmpnam2 (temp);
+  if (mkdir (temp, S_IRUSR|S_IWUSR) == -1)
+    return NULL;
+
+  getcwd (cwd, FILENAME_MAX);
+  chdir (temp);
+
+#if 0
+  result = system (buf)
+#ifndef __MSDOS__
+      >> 8                                      // the exit code is coded in bits 8-15
+#endif                                          //  (that is, under non-DOS)
+    ;
+  sync ();
+#else
+  printf ("%s\n", buf);
+  fflush (stdout);
+#endif
+
+#if 0
   while ((ep = readdir (*dp)))                  // find rom in dp and return it as romname
     if (!stat (ep->d_name, &fstate))
       if (S_ISREG (fstate.st_mode))
@@ -789,11 +817,15 @@ ucon64_rom_in_archive (DIR **dp, const char *archive, char *romname,
 
           return romname;
         }
+#endif
 
   chdir (cwd);
-#endif
+
 #endif
   return archive;
+#else
+  return archive;
+#endif
 }
 
 

@@ -303,9 +303,6 @@ const struct option options[] = {
     {"version", 0, 0, UCON64_VER},
     {"vram", 0, 0, UCON64_VRAM},
     {"xbox", 0, 0, UCON64_XBOX},
-#ifdef  DISCMAGE
-    {"xcdrw", 0, 0, UCON64_XCDRW},
-#endif    
 #ifdef  PARALLEL
     {"xdex", 1, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},

@@ -59,9 +59,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "misc.h"
 #include "ucon64.h"
-#ifdef  DISCMAGE
-#include "ucon64_dm.h"
-#endif
 #include "quick_io.h"
 #include "ucon64_misc.h"
 #include "console/console.h"
@@ -505,10 +502,12 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_ISOFIX, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
   {UCON64_MKCUE, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
   {UCON64_RIP, UCON64_UNKNOWN, libdm_usage,    WF_DEFAULT},
-  {UCON64_XCDRW, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_CDMAGE, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
+  {UCON64_XCDRW, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
 #endif
-
+#ifdef  GUI
+  {UCON64_GUI, UCON64_UNKNOWN, libng_usage,  WF_DEFAULT},
+#endif  
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},
   {UCON64_A, UCON64_UNKNOWN, aps_usage,        WF_STOP},
   {UCON64_B, UCON64_UNKNOWN, bsl_usage,        WF_STOP},
@@ -571,7 +570,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
 #ifdef  DISCMAGE
   {UCON64_DISC, UCON64_UNKNOWN, libdm_usage,   WF_SWITCH},
 #endif
-
   {UCON64_3DO, UCON64_3DO, real3do_usage,      WF_SWITCH},
   {UCON64_ATA, UCON64_ATA, atari_usage,        WF_SWITCH},
 //  {UCON64_CD32, UCON64_CD32, cd32_usage,       WF_SWITCH},

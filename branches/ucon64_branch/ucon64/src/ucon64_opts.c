@@ -86,11 +86,14 @@ ucon64_switches (int c, const char *optarg)
       so we can't use preprocessor directives in the argument list.
     */
     case UCON64_VER:
+#ifdef  DISCMAGE
 #ifdef  DLOPEN
 #define DISCMAGE_STATUS_MSG "discmage DLL:                      %s\n"
 #else
 #define DISCMAGE_STATUS_MSG "discmage DLL:                      %s, dynamically linked\n"
 #endif
+#endif
+
 
 #ifdef  DLOPEN
 #define NETGUI_STATUS_MSG "netgui DLL:                        %s\n"

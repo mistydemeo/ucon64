@@ -196,6 +196,7 @@ static struct option long_options[] = {
     {"ngp", 0, 0, 242},
     {"nppf", 0, 0, 151},
     {"nrot", 0, 0, 199},
+    {"ns", 0, 0, 256},
     {"p", 0, 0, 'p'},
     {"pad", 0, 0, 140},
     {"padhd", 0, 0, 141},
@@ -1058,6 +1059,10 @@ while ((c =
         rom.console = ucon64_GP32;
         break;
 
+      case 256:                //ns
+        rom.splitted[0] = 0;
+        break;
+
       default:
 /*      if (!access (rom.rom, F_OK) || argcmp (argc, argv, "-xsmd") ||    // the SMD made backups for Genesis and Sega Master System
           argcmp (argc, argv, "-xsmds")
@@ -1622,7 +1627,7 @@ ucon64_nfo (struct ucon64_ *rom)
 //      printf("Splitted: No\n");
 //    else
       if (rom->splitted[0])
-        printf ("Splitted: Yes, %d parts (recommended: use -j to join)\n",
+        printf ("Splitted: Yes, %d parts\n",
                 rom->splitted[0]);
     }
   if (rom->misc[0])

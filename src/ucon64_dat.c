@@ -112,7 +112,7 @@ get_dat_header (char *fname, ucon64_dat_t * dat)
   dat->version[sizeof (dat->version) - 1] = 0;
   strncpy (dat->refname, get_property (fname, "refname", buf, ""), sizeof (dat->refname));
   dat->refname[sizeof (dat->refname) - 1] = 0;
-  strcpy (dat->comment, get_property (fname, "comment", buf, "!!!"));
+  strcpy (dat->comment, get_property (fname, "comment", buf, ""));
   strncpy (dat->date, get_property (fname, "date", buf, "?"), sizeof (dat->date));
   dat->date[sizeof (dat->date) - 1] = 0;
 

@@ -1076,7 +1076,8 @@ ucon64_usage (int argc, char *argv[])
     "                  this differs from the SNES & NES " OPTION_LONG_S "dint option\n"
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
     "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
-    "  " OPTION_LONG_S "crc         show CRC32 value of ROM\n"
+    "  " OPTION_LONG_S "crc         show CRC32 value of ROM; this will also force\n"
+    "                  calculation for files bigger than %d Bytes (%.4f Mb)\n"
     "  " OPTION_LONG_S "dbs         search ROM in all DAT files by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
     "  " OPTION_LONG_S "db          DAT file statistics (DAT files: %s)\n"
     "  " OPTION_LONG_S "dbv         like " OPTION_LONG_S "db but more verbose\n"
@@ -1113,7 +1114,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_S "q           be quiet (don't show ROM info)\n"
 //    "  " OPTION_LONG_S "qq          be even more quiet\n"
     "\n"
-    , argv[0], ucon64.configfile, ucon64.configdir);
+    , argv[0], ucon64.configfile, MAXROMSIZE, TOMBIT_F (MAXROMSIZE), ucon64.configdir);
 
   printf ("Patching\n");
 

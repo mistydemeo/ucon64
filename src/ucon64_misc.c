@@ -463,7 +463,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_COL, UCON64_SNES, snes_usage,        WF_NO_ROM},
   {UCON64_DBUH, UCON64_SNES, snes_usage,       WF_DEFAULT},
   {UCON64_DMIRR, UCON64_SNES, snes_usage,      WF_DEFAULT},
-#if 1 // -f is now used for SNES *and* Genesis
+#if 1 // -f is now used for SNES, Genesis and PC-Engine
   {UCON64_F, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
 #else
   {UCON64_F, UCON64_SNES, snes_usage,          WF_DEFAULT},

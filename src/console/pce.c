@@ -55,6 +55,7 @@ const st_usage_t pcengine_usage[] =
     {"msg", NULL, "convert to Magic Super Griffin/MSG"},
     {"mgd", NULL, "convert to Multi Game Doctor*/MGD2/RAW"},
     {"swap", NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)"},
+    {"f", NULL, "fix region protection"},
     {NULL, NULL, NULL}
 };
 
@@ -742,6 +743,43 @@ pcengine_swap (st_rominfo_t *rominfo)
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
   return 0;
+}
+
+
+int
+pcengine_f (st_rominfo_t *rominfo)
+/*
+  Region protection codes are found in (American) TurboGrafx-16 games. It
+  prevents those games from running on a PC-Engine. One search pattern seems
+  sufficient to fix/crack all TG-16 games. In addition to that, the protection
+  code appears to be always somewhere in the first 32 kB.
+*/
+{
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], buffer[32 * 1024];
+  int bytesread, n;
+
+  puts ("Attempting to fix region protection code...");
+
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, src_name, 0);
+  q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
+
+  if ((bytesread = q_fread (buffer, rominfo->buheader_len, 32 * 1024, src_name)) <= 0)
+    return -1;
+
+  // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
+  if (rominfo->interleaved)
+    n = change_mem (buffer, bytesread, "\x94\x02\x0f", 3, '*', '!', "\x01", 1, 0);
+  else
+    n = change_mem (buffer, bytesread, "\x29\x40\xf0", 3, '*', '!', "\x80", 1, 0);
+
+  q_fwrite (buffer, rominfo->buheader_len, 32 * 1024, dest_name, "r+b");
+
+  printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+  return n;
 }
 
 

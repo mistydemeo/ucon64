@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.3 2002-06-06 14:15:09 dbjh Exp $
+ * $Id: gg.c,v 1.4 2002-06-11 23:11:49 noisyb Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.  
  * All rights reserved. Distributed under the BSD Software License.
@@ -76,11 +76,16 @@ const char *gg_usage[] = {
   "                    GG_CODE='XXXXXX' or GG_CODE='XXXXXXXX'\n"
   "                  " OPTION_LONG_S "snes " OPTION_LONG_S "rom=GG_CODE\n"
   "                    GG_CODE='XXXX-XXXX'\n"
-  "TODO:  " OPTION_LONG_S "gg          apply GameGenie code (permanent); " OPTION_LONG_S "file=GG_CODE\n"
+  "  " OPTION_LONG_S "gg          apply GameGenie code (permanent); " OPTION_LONG_S "file=GG_CODE\n"
   "                  example: (like above but " OPTION_LONG_S "file=GG_CODE instead of\n"
   "                  " OPTION_LONG_S "rom=GG_CODE) " OPTION_LONG_S "rom=ROM " OPTION_LONG_S "file=GG_CODE\n",
   NULL
 };
+
+static int gameGenieDecodeGameBoy (const char *in, char *out);
+static int gameGenieDecodeMegadrive (const char *in, char *out);
+static int gameGenieDecodeNES (const char *in, char *out);
+static int gameGenieDecodeSNES (const char *in, char *out);
 
 #define GAME_GENIE_MAX_STRLEN 12
 
@@ -90,8 +95,7 @@ const char *gg_usage[] = {
  *
  *********************************************************************/
 
-extern int gameGenieDecodeGameBoy (const char *in, char *out);
-extern int gameGenieEncodeGameBoy (const char *in, char *out);
+static int gameGenieEncodeGameBoy (const char *in, char *out);
 
 /*********************************************************************
  *
@@ -99,10 +103,9 @@ extern int gameGenieEncodeGameBoy (const char *in, char *out);
  *
  *********************************************************************/
 
-extern int isGenesisChar (char c);
-extern int genesisValue (char c);
-extern int gameGenieDecodeMegadrive (const char *in, char *out);
-extern int gameGenieEncodeMegadrive (const char *in, char *out);
+static int isGenesisChar (char c);
+static int genesisValue (char c);
+static int gameGenieEncodeMegadrive (const char *in, char *out);
 
 /*********************************************************************
  *
@@ -113,11 +116,10 @@ extern int gameGenieEncodeMegadrive (const char *in, char *out);
 #define encodeNES(v, n, m, s) data[n] |= (v >> s) & m
 #define decodeNES(v, n, m, s) v |= (data[n] & m) << s
 
-extern char mapNesChar (char hex);
-extern char unmapNesChar (char genie);
-extern int isNesChar (char c);
-extern int gameGenieDecodeNES (const char *in, char *out);
-extern int gameGenieEncodeNES (const char *in, char *out);
+static char mapNesChar (char hex);
+static char unmapNesChar (char genie);
+static int isNesChar (char c);
+static int gameGenieEncodeNES (const char *in, char *out);
 
 /*********************************************************************
  *
@@ -128,10 +130,9 @@ extern int gameGenieEncodeNES (const char *in, char *out);
 #define encodeSNES(x, y) transposed |= (((address & (0xc00000 >> (2*y))) << (2*y)) >> (2*x))
 #define decodeSNES(x, y) address |= (((transposed & (0xc00000 >> (2*x))) << (2*x)) >> (2*y))
 
-extern char mapSnesChar (char hex);
-extern char unmapSnesChar (char genie);
-extern int gameGenieDecodeSNES (const char *in, char *out);
-extern int gameGenieEncodeSNES (const char *in, char *out);
+static char mapSnesChar (char hex);
+static char unmapSnesChar (char genie);
+static int gameGenieEncodeSNES (const char *in, char *out);
 
 /*********************************************************************
  *
@@ -1052,6 +1053,61 @@ gg_ggd (void)
   gg_argc = 3;
 
   gg_main (gg_argc, gg_argv);
+
+  return 0;
+}
+
+
+int
+gg_gg (st_rominfo_t *rominfo)
+{
+  long size = quickftell (ucon64.rom) - rominfo->buheader_len;
+  long add, value;
+  char buf[MAXBUFSIZE];
+  int result = -1;
+
+  switch (ucon64.console)
+    {
+      case UCON64_GB:
+      case UCON64_SMS:
+        result = gameGenieDecodeGameBoy (ucon64.file, buf);
+        break;
+      case UCON64_GENESIS://smd?
+        result = gameGenieDecodeMegadrive (ucon64.file, buf);
+        break;
+      case UCON64_NES:
+        result = gameGenieDecodeNES (ucon64.file, buf);
+        break;
+      case UCON64_SNES://interleaved?
+        result = gameGenieDecodeSNES (ucon64.file, buf);
+        break;
+      default:
+        break;
+    }
+
+  if (result != 0)
+    {
+      fprintf (stderr, "ERROR: GameGenie code %s is badly formed\n", ucon64.file);
+      return -1;
+    }
+
+  printf ("%-12s = %s\n", ucon64.file, buf);
+
+  sscanf (buf, "%lx:%lx:*", &add, &value);
+
+  if (add > size)
+    {
+      fprintf (stderr, "ERROR: ROM is smaller than %ld Bytes\n", add);
+      return -1;
+    }
+
+  printf ("\n");
+  filehexdump (ucon64.rom, add + rominfo->buheader_len, 1);
+
+  quickfputc (filebackup(NULL, ucon64.rom), add + rominfo->buheader_len, (unsigned char) value, "r+b");
+
+  filehexdump (ucon64.rom, add + rominfo->buheader_len, 1);
+  printf ("\n");
 
   return 0;
 }

@@ -535,29 +535,28 @@ int
 ucon64_testsplit (const char *filename)
 // test if ROM is split into parts
 {
-  long x = 0;
-  char buf[4096];
+  long parts = 0;
+  char buf[MAXBUFSIZE];
 
   strcpy (buf, filename);
   buf[strrcspn (buf, ".") - 1]++;
   while (!access (buf, F_OK) && strcmp (buf, filename) != 0)
     {
       buf[strrcspn (buf, ".") - 1]++;
-      x++;
+      parts++;
     }
 
-  if (x != 0)
-    return x + 1;
+  if (parts) return parts + 1;
 
   strcpy (buf, filename);
   buf[strrcspn (buf, ".") + 1]++;
   while (!access (buf, F_OK) && strcmp (buf, filename) != 0)
     {
       buf[strrcspn (buf, ".") + 1]++;
-      x++;
+      parts++;
     }
 
-  return (x != 0) ? (x + 1) : 0;
+  return parts ? (parts + 1) : 0;
 }
 
 

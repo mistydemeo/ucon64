@@ -719,7 +719,20 @@ int ucon64_probe(int argc,char *argv[])
 	else if(gameboy_probe(argc,argv)!=-1)console=ucon64_GB;
 	else if(gbadvance_probe(argc,argv)!=-1)console=ucon64_GBA;
 	else if(jaguar_probe(argc,argv)!=-1)console=ucon64_JAGUAR;
-//	else if(pcengine_probe(argc,argv)!=-1)console=ucon64_PCE;
+
+/*
+	else if(pcengine_probe(argc,argv)!=-1)console=ucon64_PCE;
+	else if(atari_probe(argc,argv)!=-1)console=ucon64_ATARI;
+	else if(coleco_probe(argc,argv)!=-1)console=ucon64_COLECO;
+	else if(intelli_probe(argc,argv)!=-1)console=ucon64_INTELLI;
+	else if(neogeo_probe(argc,argv)!=-1)console=ucon64_NEOGEO;
+	else if(ngpocket_probe(argc,argv)!=-1)console=ucon64_NGP;
+	else if(sms_probe(argc,argv)!=-1)console=ucon64_SMS;
+	else if(system16_probe(argc,argv)!=-1)console=ucon64_SYS16;
+	else if(virtualboy_probe(argc,argv)!=-1)console=ucon64_VIRTUALBOY;
+	else if(vectrex_probe(argc,argv)!=-1)console=ucon64_VECTREX;
+	else if(wonderswan_probe(argc,argv)!=-1)console=ucon64_WONDERSWAN;
+*/
 	else console=ucon64_UNKNOWN;
 
 	return(console);

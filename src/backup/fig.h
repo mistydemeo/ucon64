@@ -27,29 +27,45 @@ extern const char *fig_usage[];
 #endif // BACKUP
 
 /*
-Offset Function
-  0    Lower 8 bits of size word
-  1    Upper 8 bits of size word
-  2    40h - Multi image
-       00h - Last image in set (or single image)
-  3    80h - if HiROM
-       00h - if LoROM
-  4    If using FX microchip:
-           11h
-       Else if using DSP1 microchip:
-           FDh - If using SRAM (SRAM size>0)
-           47h - If no SRAM (SRAM size=0)
-       If not using DSP1 microchip:
-           00h - If using SRAM
-           77h - If no SRAM
-  5    If using FX microchip:
-           2
-       Else if using DSP1 microchip:
-           82h - If using SRAM
-           83h - If no SRAM
-       If not using DSP1 microchip:
-           80h - If using SRAM
-           83h - If no SRAM
+Super Pro Fighter (FIG) Header Format
+Last edited: 19.06.2002
+
+Offset       |  Content
+-------------+------------------------------------
+$0000        |  Lo-Byte of 8K-Block#
+-------------+------------------------------------
+$0001        |  Hi-Byte of 8K-Block#
+-------------+------------------------------------
+$0002        |  $00 = Last File
+             |  $40 = More Files Present
+-------------+------------------------------------
+$0003        |  $00 = LoROM
+             |  $80 = HiROM
+-------------+------------------------------------
+$0004-$0005  |  $77 $83 = No SRAM  (LoROM)
+             |  $00 $80 = 16 KBit  (LoROM)
+             |  $00 $80 = 64 KBit  (LoROM)
+             |  $00 $00 = 256 KBit (LoROM)
+             |  $47 $83 = No SRAM  (LoROM) (DSP)
+             |  $11 $02 = No SRAM  (LoROM) (SFX)
+             |  $77 $83 = No SRAM  (HiROM)
+             |  $DD $82 = 16 KBit  (HiROM)
+             |  $DD $82 = 64 KBit  (HiROM)
+             |  $DD $02 = 256 KBit (HiROM)
+             |  $F7 $83 = No SRAM  (HiROM) (DSP)
+             |  $FD $82 = 16 KBit  (HiROM) (DSP)
+-------------+------------------------------------
+$0006-$01FF  |  Reserved (=$00)
+
+
+
+NOTE 1: The Super Pro Fighter does not distinguish between 16 KBit SRAM
+        and 64 KBit SRAM.
+
+NOTE 2: When splitting files, the SPF writes all relevant header fields
+        to all files. So each file has the same header with exception of
+        the last one, because it has $0002 set to $00 to indicate that it
+        is the last file.
 */
 typedef struct st_fig_header
 {

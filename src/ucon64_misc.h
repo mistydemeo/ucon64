@@ -93,6 +93,19 @@ extern const st_usage_t vectrex_usage[];
 extern const st_usage_t xbox_usage[];
 extern const st_usage_t mame_usage[];
 
+
+typedef struct
+// more workflow related stuff
+{
+  int option;
+  int console;                                // UCON64_SNES, ...
+  const st_usage_t *usage;
+  uint8_t show_nfo;
+  uint8_t show_nfo_after;
+} st_option2_t;
+
+
+extern const st_option2_t options2[];
 extern char *ucon64_temp_file;
 extern int (*ucon64_testsplit_callback) (const char *filename);
 extern const char *nintendo_maker[];

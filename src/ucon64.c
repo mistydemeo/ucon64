@@ -103,14 +103,6 @@ write programs in C
 #include "backup/mccl.h"
 #include "backup/lynxit.h"
 
-typedef struct
-{
-  int option;
-  int console;                                // UCON64_SNES, ...
-  const st_usage_t **usage;
-  uint8_t show_nfo;
-  uint8_t show_nfo_after;
-} st_option2_t;
 
 static void ucon64_exit (void);
 static void ucon64_usage (int argc, char *argv[]);
@@ -370,180 +362,6 @@ main (int argc, char **argv)
 {
   int x = 0, c = 0, console, show_nfo, rom_index;
   char buf[MAXBUFSIZE], *ptr = NULL;
-  static const st_option2_t options2[] = {
-//    {option, console, usage, show_nfo, show_nfo_after},
-    {UCON64_1991, UCON64_GENESIS, (const st_usage_t **)genesis_usage, 1, 0},
-    {UCON64_3DO, UCON64_REAL3DO, (const st_usage_t **)real3do_usage, 1, 0},
-    {UCON64_HELP, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_A, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_ATA, UCON64_ATARI, (const st_usage_t **)atari_usage, 1, 0},
-    {UCON64_B, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_B0, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
-    {UCON64_B1, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
-    {UCON64_BIOS, UCON64_NEOGEO, (const st_usage_t **)neogeo_usage, 1, 0},
-    {UCON64_BOT, UCON64_N64, (const st_usage_t **)n64_usage, 1, 0},
-    {UCON64_C, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_CD32, UCON64_CD32, (const st_usage_t **)cd32_usage, 1, 0},
-    {UCON64_CDI, UCON64_CDI, (const st_usage_t **)cdi_usage, 1, 0},
-    {UCON64_CDIRIP, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_CHK, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_COL, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_COLECO, UCON64_COLECO, (const st_usage_t **)coleco_usage, 1, 0},
-    {UCON64_CRC, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_CRCHD, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_CRP, UCON64_GBA, (const st_usage_t **)gba_usage, 1, 0},
-    {UCON64_CS, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_DB, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_DBS, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_DBUH, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
-    {UCON64_DBV, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_DC, UCON64_DC, (const st_usage_t **)dc_usage, 1, 0},
-    {UCON64_DINT, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_E, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_F, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
-    {UCON64_FDS, UCON64_NES, (const st_usage_t **)nes_usage, 0, 0},
-    {UCON64_FDSL, UCON64_NES, (const st_usage_t **)nes_usage, 0, 0},
-    {UCON64_FFE, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_FIG, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
-    {UCON64_FIGS, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_FILE, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_FIND, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_FRONTEND, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_GB, UCON64_GB, (const st_usage_t **)gameboy_usage, 1, 0},
-    {UCON64_GBA, UCON64_GBA, (const st_usage_t **)gba_usage, 1, 0},
-    {UCON64_GBX, UCON64_GB, (const st_usage_t **)gameboy_usage, 1, 0},
-    {UCON64_GC, UCON64_GAMECUBE, (const st_usage_t **)gc_usage, 1, 0},
-    {UCON64_GD3, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
-    {UCON64_GEN, UCON64_GENESIS, (const st_usage_t **)genesis_usage, 1, 0},
-    {UCON64_GG, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_GGD, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_GGE, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_GP32, UCON64_GP32, (const st_usage_t **)gp32_usage, 1, 0},
-    {UCON64_GOOD, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_HELP, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_HELP, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_HEX, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_I, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_IDPPF, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_INES, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_INESHD, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_INS, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_INSN, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_INTELLI, UCON64_INTELLI, (const st_usage_t **)intelli_usage, 1, 0},
-    {UCON64_IP, UCON64_DC, (const st_usage_t **)dc_usage, 1, 0},
-    {UCON64_ISO, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_ISPAD, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_J, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_JAG, UCON64_JAGUAR, (const st_usage_t **)jaguar_usage, 1, 0},
-    {UCON64_K, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
-    {UCON64_L, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
-    {UCON64_LNX, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
-    {UCON64_LOGO, UCON64_GBA, (const st_usage_t **)gba_usage, 1, 0},
-    {UCON64_LS, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_LSD, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_LSRAM, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_LSV, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_LYNX, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
-    {UCON64_LYX, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
-    {UCON64_MGD, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_MGH, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_MKA, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_MKCUE, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_MKI, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_MKPPF, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_MKSHEET, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_MKTOC, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_MULTI, UCON64_GBA, (const st_usage_t **)gba_usage, 0, 0},
-    {UCON64_MVS, UCON64_NEOGEO, (const st_usage_t **)neogeo_usage, 1, 0},
-    {UCON64_N, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_N2, UCON64_GENESIS, (const st_usage_t **)genesis_usage, 1, 0},
-    {UCON64_N2GB, UCON64_GB, (const st_usage_t **)gameboy_usage, 1, 0},
-    {UCON64_N64, UCON64_N64, (const st_usage_t **)n64_usage, 1, 0},
-    {UCON64_NA, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_NBAK, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_NCOL, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_NRGRIP, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_NES, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_NG, UCON64_NEOGEO, (const st_usage_t **)neogeo_usage, 1, 0},
-    {UCON64_NGP, UCON64_NEOGEOPOCKET, (const st_usage_t **)ngp_usage , 1, 0},
-    {UCON64_NPPF, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_NROT, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
-    {UCON64_NS, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_O, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_P, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_PAD, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_PADHD, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_PADN, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_PASOFAMI, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_PATCH, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_PCE, UCON64_PCE, (const st_usage_t **)pcengine_usage, 1, 0},
-    {UCON64_PORT, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_PPF, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_PS2, UCON64_PS2, (const st_usage_t **)ps2_usage, 1, 0},
-    {UCON64_PSX, UCON64_PSX, (const st_usage_t **)psx_usage, 1, 0},
-    {UCON64_Q, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_QQ, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_RROM, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_RR83, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_RL, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_ROM, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_ROTL, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
-    {UCON64_ROTR, UCON64_LYNX, (const st_usage_t **)lynx_usage, 1, 0},
-    {UCON64_S, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_S16, UCON64_SYSTEM16, (const st_usage_t **)s16_usage, 1, 0},
-    {UCON64_SAM, UCON64_NEOGEO, (const st_usage_t **)neogeo_usage, 1, 0},
-    {UCON64_SAT, UCON64_SATURN, (const st_usage_t **)sat_usage, 1, 0},
-    {UCON64_SGB, UCON64_GB, (const st_usage_t **)gameboy_usage, 1, 0},
-    {UCON64_SMC, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
-    {UCON64_SMD, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_SMDS, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_SMG, UCON64_PCE, (const st_usage_t **)pcengine_usage, 1, 0},
-    {UCON64_SMS, UCON64_SMS, (const st_usage_t **)sms_usage, 1, 0},
-    {UCON64_SNES, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
-    {UCON64_SRAM, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_SSC, UCON64_GB, (const st_usage_t **)gameboy_usage, 1, 0},
-    {UCON64_SSIZE, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
-    {UCON64_STP, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_STPN, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_STRIP, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_SWAN, UCON64_WONDERSWAN, (const st_usage_t **)swan_usage, 1, 0},
-    {UCON64_SWAP, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_SWC, UCON64_SNES, (const st_usage_t **)snes_usage, 1, 0},
-    {UCON64_SWCS, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_UFOS, UCON64_UNKNOWN, NULL, 0, 0},
-    {UCON64_UNIF, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_USMS, UCON64_N64, (const st_usage_t **)n64_usage, 1, 0},
-    {UCON64_V64, UCON64_N64, (const st_usage_t **)n64_usage, 1, 0},
-    {UCON64_VBOY, UCON64_VIRTUALBOY, (const st_usage_t **)vboy_usage, 1, 0},
-    {UCON64_VEC, UCON64_VECTREX, (const st_usage_t **)vectrex_usage, 1, 0},
-    {UCON64_XBOX, UCON64_XBOX, (const st_usage_t **)xbox_usage, 1, 0},
-    {UCON64_XCDRW, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_Z64, UCON64_N64, (const st_usage_t **)n64_usage, 1, 0},
-    {UCON64_HD, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_HDN, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_NHD, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_INT, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_INT2, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_NINT, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_HI, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_NHI, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_BS, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_NBS, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_CTRL, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_CTRL2, UCON64_UNKNOWN, NULL, 1, 0},
-    {UCON64_NTSC, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_PAL, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_BAT, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_NBAT, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_VRAM, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_NVRAM, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_MIRR, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_MAPR, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_CMNT, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_DUMPINFO, UCON64_NES, (const st_usage_t **)nes_usage, 1, 0},
-    {UCON64_VER, UCON64_UNKNOWN, NULL, 0, 0},
-    {0, 0, NULL, 0, 0}
-  };
 
   printf ("%s\n"
     "Uses code from various people. See 'developers.html' for more!\n"
@@ -1280,7 +1098,7 @@ static void
 ucon64_render_usage (const st_usage_t *usage)
 {
   register int x, pos = 0;
-  char buf[128];
+  char buf[MAXBUFSIZE];
   
   for (x = 0; usage[x].option_s || usage[x].desc; x++)
     {
@@ -1322,12 +1140,119 @@ ucon64_render_usage (const st_usage_t *usage)
 }
 
 
+typedef struct
+{
+  int console;
+  const st_usage_t *usage[6];
+} st_usage_array_t;
+
 void
 ucon64_usage (int argc, char *argv[])
 {
+  int x = 0;
   int c = 0, single = 0;
   char *name_exe = basename2 (argv[0]);
-  st_usage_t options_usage[] = {
+  st_usage_array_t usage_array[] = {
+    {UCON64_DC, {(const st_usage_t *)dc_usage, 0, 0, 0, 0, 0}},
+    {UCON64_PSX, {(const st_usage_t *)psx_usage,
+#ifdef  PARALLEL
+      (const st_usage_t *)dex_usage,
+#else
+      0,
+#endif // PARALLEL
+      0, 0, 0, 0}},
+    {UCON64_GBA, {(const st_usage_t *)gba_usage,
+#ifdef  PARALLEL
+      (const st_usage_t *)fal_usage,
+#else
+      0,
+#endif // PARALLEL
+      0, 0, 0, 0}},
+    {UCON64_N64, {(const st_usage_t *)n64_usage,
+#ifdef  PARALLEL
+      (const st_usage_t *)doctor64_usage,
+      (const st_usage_t *)doctor64jr_usage,
+//      (const st_usage_t *)cd64_usage,
+      (const st_usage_t *)dex_usage,
+#else
+      0, 0, 0, 0,
+#endif // PARALLEL
+      0}},
+    {UCON64_SNES, {(const st_usage_t *)snes_usage,
+#ifdef  PARALLEL
+      (const st_usage_t *)swc_usage,
+      (const st_usage_t *)gd_usage,
+//      (const st_usage_t *)fig_usage,
+//      (const st_usage_t *)mgd_usage,
+#else
+      0, 0,
+#endif // PARALLEL
+      0, 0, 0}},
+    {UCON64_NG, {(const st_usage_t *)neogeo_usage, 0, 0, 0, 0, 0}},
+    {UCON64_GEN, {(const st_usage_t *)genesis_usage,
+#ifdef  PARALLEL
+        (const st_usage_t *)smd_usage,
+//        (const st_usage_t *)mgd_usage,
+#else
+      0,
+#endif // PARALLEL
+      0, 0, 0, 0}},
+    {UCON64_GB, {(const st_usage_t *)gameboy_usage,
+#ifdef  PARALLEL
+        (const st_usage_t *)gbx_usage,
+        (const st_usage_t *)mccl_usage,
+#else
+      0, 0,
+#endif // PARALLEL
+      0, 0, 0}},  
+    {UCON64_LYNX, {(const st_usage_t *)lynx_usage,
+#ifdef  PARALLEL
+      (const st_usage_t *)lynxit_usage,
+#else
+      0,
+#endif // PARALLEL
+      0, 0, 0, 0}},
+    {UCON64_PCE, {(const st_usage_t *)pcengine_usage,
+#ifdef  PARALLEL
+//        (const st_usage_t *)mgd_usage,
+#endif // PARALLEL
+      0, 0, 0, 0}},
+    {UCON64_SMS, {(const st_usage_t *)sms_usage,
+#ifdef  PARALLEL
+      (const st_usage_t *)smd_usage,
+#else
+      0,
+#endif // PARALLEL
+      0, 0, 0, 0}},
+    {UCON64_NES, {(const st_usage_t *)nes_usage, 0, 0, 0, 0, 0}},
+    {UCON64_SWAN, {(const st_usage_t *)swan_usage, 0, 0, 0, 0, 0}},
+    {UCON64_JAG, {(const st_usage_t *)jaguar_usage, 0, 0, 0, 0, 0}},
+    {UCON64_NGP, {(const st_usage_t *)ngp_usage,
+#ifdef  PARALLEL
+//        (const st_usage_t *)fpl_usage,
+#endif // PARALLEL
+      0, 0, 0, 0, 0}},
+#if 0
+    {UCON64_G, {(const st_usage_t *)nes_usage, 0, 0, 0, 0, 0}},
+    {UCON64_S16, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_ATA, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_COLECO, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_VBOY, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_VEC, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_INTELLI, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_PS2, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_SAT, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_3DO, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_CD32, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_CDI, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_XBOX, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_GP32, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+#endif
+    {0, {0, 0, 0, 0, 0, 0}}
+  };
+
+
+  static const st_usage_t options_usage[] = {
     {NULL, "Options"},
     {"nbak", "prevents backup files (*.BAK)"},
 #ifdef  ANSI_COLOR
@@ -1354,10 +1279,10 @@ ucon64_usage (int argc, char *argv[])
                /* "files bigger than %d Bytes (%.4f Mb)" */},
     {"ls", "generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY"},
     {"lsv", "like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY"},
-/*
-    "  " OPTION_LONG_S "rl          rename all files in DIRECTORY to lowercase; " OPTION_LONG_S "rom=DIRECTORY\n"
-    "  " OPTION_LONG_S "ru          rename all files in DIRECTORY to uppercase; " OPTION_LONG_S "rom=DIRECTORY\n"
-*/
+#if 0
+    {"rl", "rename all files in DIRECTORY to lowercase; " OPTION_LONG_S "rom=DIRECTORY"},
+    {"ru", "rename all files in DIRECTORY to uppercase; " OPTION_LONG_S "rom=DIRECTORY"},
+#endif
 #ifdef  __MSDOS__
     {"hex", "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\""},
 #else
@@ -1374,7 +1299,8 @@ ucon64_usage (int argc, char *argv[])
   };
 // ucon64.config_file
 
-  st_usage_t padding_usage[] = {
+
+  static const st_usage_t padding_usage[] = {
     {NULL, "Padding"},
     {"ispad", "check if ROM is padded"},
     {"pad", "pad ROM to full Mb"},
@@ -1391,7 +1317,7 @@ ucon64_usage (int argc, char *argv[])
   };
     
 
-  st_usage_t dat_usage[] = {
+  static const st_usage_t dat_usage[] = {
     {NULL, "DATabase (support of DAT files)"},
 #ifdef  __MSDOS__
     {"db", "DATabase statistics (DAT files: ucon64/)"},
@@ -1405,10 +1331,6 @@ ucon64_usage (int argc, char *argv[])
     {"rr83", "like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY"},
     {"good", "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed and sorted\n"
                 "into subdirs according to the DATabase (\"ROM manager\")"},
-    {NULL, NULL}
-  };
-// ucon64.config_dir
-
 /*
 GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
 *visit NEWNet #rareroms*
@@ -1445,7 +1367,19 @@ Good_RAR     = log of RAR errors
 
 Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 */
+    {NULL, NULL}
+  };
+// ucon64.config_dir
 
+
+  static const st_usage_t patching_usage[] = 
+    {
+      {NULL, "Patching"},
+      {"patch=PATCH", "specify the PATCH for the following options\n"
+                        "use this option or uCON64 expects the last commandline\n"
+                        "argument to be the name of the PATCH file"},
+      {NULL, NULL}
+    };
 
   printf (
     "Usage: %s [OPTION(S)]... [[" OPTION_LONG_S "rom=]ROM(S)]... " /* [-o=OUTPUT_PATH] */ "\n\n", name_exe);
@@ -1461,10 +1395,9 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 //  if (ucon64.dat_enabled)
     ucon64_render_usage (dat_usage);
 
-  printf ("\nPatching\n"
-    "  " OPTION_LONG_S "patch=PATCH specify the PATCH for the following options\n"
-    "                  use this option or uCON64 expects the last commandline\n"
-    "                  argument to be the name of the PATCH file\n");
+  printf ("\n");
+
+  ucon64_render_usage (patching_usage);
 
   ucon64_render_usage (bsl_usage);
   ucon64_render_usage (ips_usage);
@@ -1490,223 +1423,30 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 
   while (!single && (c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
-//      if (single) break;
-      single = 1;
+      single = 0;
 
-      switch (c)
-        {
-      case UCON64_GBA:
-        ucon64_render_usage (gba_usage);
-#ifdef  PARALLEL
-        ucon64_render_usage (fal_usage);
-#endif // PARALLEL
-        break;
-
-      case UCON64_N64:
-        ucon64_render_usage (n64_usage);
-#ifdef  PARALLEL
-        ucon64_render_usage (doctor64_usage);
-        ucon64_render_usage (doctor64jr_usage);
-//        ucon64_render_usage (cd64_usage);
-        ucon64_render_usage (dex_usage);
-#endif // PARALLEL
-        break;
-
-      case UCON64_JAG:
-        ucon64_render_usage (jaguar_usage);
-        break;
-
-      case UCON64_SNES:
-        ucon64_render_usage (snes_usage);
-#ifdef  PARALLEL
-        ucon64_render_usage (swc_usage);
-        ucon64_render_usage (gd_usage);
-//        ucon64_render_usage (fig_usage);
-//        ucon64_render_usage (mgd_usage);
-#endif // PARALLEL
-        break;
-
-      case UCON64_NG:
-        ucon64_render_usage (neogeo_usage);
-        break;
-
-      case UCON64_NGP:
-        ucon64_render_usage (ngp_usage);
-#ifdef  PARALLEL
-//        ucon64_render_usage (fpl_usage);
-#endif // PARALLEL
-        break;
-
-      case UCON64_GEN:
-        ucon64_render_usage (genesis_usage);
-#ifdef  PARALLEL
-        ucon64_render_usage (smd_usage);
-//        ucon64_render_usage (mgd_usage);
-#endif // PARALLEL
-        break;
-
-      case UCON64_GB:
-        ucon64_render_usage (gameboy_usage);
-#ifdef  PARALLEL
-        ucon64_render_usage (gbx_usage);
-        ucon64_render_usage (mccl_usage);
-#endif // PARALLEL
-        break;
-
-      case UCON64_LYNX:
-        ucon64_render_usage (lynx_usage);
-#ifdef  PARALLEL
-        ucon64_render_usage (lynxit_usage);
-#endif // PARALLEL
-        break;
-
-      case UCON64_PCE:
-        ucon64_render_usage (pcengine_usage);
-#ifdef  PARALLEL
-//        ucon64_render_usage (mgd_usage);
-#endif // PARALLEL
-        break;
-
-      case UCON64_SMS:
-        ucon64_render_usage (sms_usage);
-#ifdef  PARALLEL
-//        ucon64_render_usage (smd_usage);
-#endif // PARALLEL
-        break;
-
-      case UCON64_NES:
-        ucon64_render_usage (nes_usage);
-        break;
-
-      case UCON64_SWAN:
-        ucon64_render_usage (swan_usage);
-        break;
-
-      case UCON64_DC:
-        ucon64_render_usage (dc_usage);
-        break;
-
-      case UCON64_PSX:
-        ucon64_render_usage (psx_usage);
-#ifdef  PARALLEL
-        ucon64_render_usage (dex_usage);
-#endif // PARALLEL
-        break;
-
-#if 0
-      case UCON64_GC:
-      case UCON64_S16:
-      case UCON64_ATA:
-      case UCON64_COLECO:
-      case UCON64_VBOY:
-      case UCON64_VEC:
-      case UCON64_INTELLI:
-      case UCON64_PS2:
-      case UCON64_SAT:
-      case UCON64_3DO:
-      case UCON64_CD32:
-      case UCON64_CDI:
-      case UCON64_XBOX:
-      case UCON64_GP32:
-        break;
-#endif
-
-      default:
-        single = 0;
-        break;
-      }
+      for (x = 0; usage_array[x].console != 0; x++)
+        if (usage_array[x].console == ucon64.console)
+          {
+            int y = 0;
+            for (; usage_array[x].usage[y]; y++)
+              ucon64_render_usage (usage_array[x].usage[y]);
+            single = 1;
+            break;
+          }
       printf ("\n");
     }
 
   if (!single)
     {
-      ucon64_render_usage (dc_usage);
-      printf("\n");
-
-      ucon64_render_usage (psx_usage);
-#ifdef  PARALLEL
-      ucon64_render_usage (dex_usage);
-#endif // PARALLEL
-      printf ("\n");
-
-      ucon64_render_usage (gba_usage);
-#ifdef  PARALLEL
-      ucon64_render_usage (fal_usage);
-#endif // PARALLEL
-      printf ("\n");
-
-      ucon64_render_usage (n64_usage);
-#ifdef  PARALLEL
-      ucon64_render_usage (doctor64_usage);
-      ucon64_render_usage (doctor64jr_usage);
-//      ucon64_render_usage (cd64_usage);
-      ucon64_render_usage (dex_usage);
-#endif // PARALLEL
-      printf ("\n");
-
-      ucon64_render_usage (snes_usage);
-#ifdef  PARALLEL
-      ucon64_render_usage (swc_usage);
-      ucon64_render_usage (gd_usage);
-//      ucon64_render_usage (fig_usage);
-//      ucon64_render_usage (mgd_usage);
-#endif // PARALLEL
-      printf ("\n");
-
-      ucon64_render_usage (neogeo_usage);
-      printf ("\n");
-
-      ucon64_render_usage (genesis_usage);
-#ifdef  PARALLEL
-      ucon64_render_usage (smd_usage);
-//      ucon64_render_usage (mgd_usage);
-#endif // PARALLEL
-      printf ("\n");
-
-      ucon64_render_usage (gameboy_usage);
-#ifdef  PARALLEL
-      ucon64_render_usage (gbx_usage);
-      ucon64_render_usage (mccl_usage);
-#endif // PARALLEL
-      printf ("\n");
-
-      ucon64_render_usage (lynx_usage);
-#ifdef  PARALLEL
-      ucon64_render_usage (lynxit_usage);
-#endif // PARALLEL
-      printf ("\n");
-
-      ucon64_render_usage (pcengine_usage);
-#ifdef  PARALLEL
-//      ucon64_render_usage (mgd_usage);
-#endif // PARALLEL
-      printf ("\n");
-
-      ucon64_render_usage (sms_usage);
-#ifdef  PARALLEL
-//      ucon64_render_usage (smd_usage);
-#endif // PARALLEL
-      printf ("\n");
-
-      ucon64_render_usage (nes_usage);
-      printf ("\n");
-
-      ucon64_render_usage (swan_usage);
-      printf ("\n");
-
-      ucon64_render_usage (jaguar_usage);
-      printf ("\n");
-
-      ucon64_render_usage (ngp_usage);
-#ifdef  PARALLEL
-//      ucon64_render_usage (fpl_usage);
-#endif // PARALLEL
-      printf ("\n");
-
-#ifdef  SAMPLE
-      ucon64_render_usage (sample_usage);
-      printf ("\n");
-#endif // SAMPLE
+      for (x = 0; usage_array[x].console != 0; x++)
+        {
+          int y = 0;
+          for (; usage_array[x].usage[y]; y++)
+            ucon64_render_usage (usage_array[x].usage[y]);
+            
+          printf ("\n");
+        }
   }
 
 #undef  PARALLEL_MSG

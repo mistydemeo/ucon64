@@ -1,17 +1,17 @@
 DLOPEN=1
-#ZLIB=1
-DISCMAGE=1
-#USB=1
+#USE_ZLIB=1
+USE_DISCMAGE=1
+#USE_USB=1
 
 CC=cl.exe
 CFLAGS=/nologo /I. /W3 /O2 /DHAVE_CONFIG_H
 LDFLAGS=/NOLOGO setargv.obj
 
-!ifdef DISCMAGE
+!ifdef USE_DISCMAGE
 LIBNAME_DM=discmage
 !endif
 
-!ifdef DISCMAGE
+!ifdef USE_DISCMAGE
 FULLLIBNAME_DM=$(LIBNAME_DM).dll
 !ifndef DLOPEN
 LDFLAGS=$(LDFLAGS) libdiscmage/$(LIBNAME_DM).lib
@@ -33,14 +33,14 @@ OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
         backup/md.obj backup/mgd.obj backup/smd.obj backup/swc.obj backup/ufo.obj \
         backup/dex.obj backup/psxpblib.obj backup/mccl.obj backup/lynxit.obj \
         backup/ffe.obj backup/msg.obj backup/smc.obj backup/f2a.obj
-!ifdef ZLIB
+!ifdef USE_ZLIB
 LDFLAGS=$(LDFLAGS) zlib.lib
 OBJECTS=$(OBJECTS) unzip.obj map.obj misc_z.obj
 !endif
-!ifdef DISCMAGE
+!ifdef USE_DISCMAGE
 OBJECTS=$(OBJECTS) ucon64_dm.obj
 !endif
-!ifdef USB
+!ifdef USE_USB
 LDFLAGS=$(LDFLAGS) usblib.lib
 OBJECTS=$(OBJECTS) misc_usb.obj
 !endif
@@ -73,7 +73,7 @@ distclean: clean
 	$(CC) $(CFLAGS) /c $< /Fo$@
 
 
-!ifdef DISCMAGE
+!ifdef USE_DISCMAGE
 libdiscmage/$(FULLLIBNAME_DM):
 	cd libdiscmage
 	$(MAKE) /NOLOGO /f Makefile.vc6

@@ -40,12 +40,12 @@ const st_usage_t smd_usage[] =
   {
     {NULL, NULL, "Super Com Pro/Super Magic Drive/SMD"},
     {NULL, NULL, "19XX Front Far East/FFE http://www.front.com.tw"},
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
     {"xsmd", NULL, "send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
                  "receives automatically when ROM does not exist"},
     {"xsmds", NULL, "send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
                  "receives automatically when SRAM does not exist"},
-#endif // PARALLEL
+#endif // USE_PARALLEL
     {NULL, NULL, NULL}
   };
 
@@ -88,7 +88,7 @@ smd_deinterleave (unsigned char *buffer, int size)
 }
 
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 
 #define BUFFERSIZE      16384
 
@@ -325,4 +325,4 @@ smd_write_sram (const char *filename, unsigned int parport)
 
   return 0;
 }
-#endif // PARALLEL
+#endif // USE_PARALLEL

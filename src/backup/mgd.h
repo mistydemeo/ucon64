@@ -166,8 +166,8 @@ e.g. The first 8 Mbit file of Donkey Kong Country (assuming it
 is cat. no. 475) would look like: SF32475A.078
 */
 
-#ifdef PARALLEL
-#endif // PARALLEL
+#ifdef USE_PARALLEL
+#endif // USE_PARALLEL
 
 // the following four functions are used by non-transfer code in genesis.c
 extern void mgd_interleave (unsigned char **buffer, int size);

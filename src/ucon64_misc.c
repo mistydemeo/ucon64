@@ -37,7 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "misc.h"
 #include "ucon64.h"
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
 #include "ucon64_dm.h"
 #endif
 #include "quick_io.h"
@@ -298,7 +298,7 @@ unknown_init (st_rominfo_t *rominfo)
 {
   ucon64.rominfo = rominfo;
   ucon64.dat = NULL;
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   ucon64.image = NULL;
 #endif
 
@@ -347,29 +347,29 @@ const st_usage_t ucon64_options_usage[] = {
   {NULL, NULL, "Options"},
   {"o", "DIRECTORY", "specify output directory"},
   {"nbak", NULL, "prevents backup files (*.BAK)"},
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
   {"ncol", NULL, "disable ANSI colors in output"},
 #endif
-#if     (defined PARALLEL || defined HAVE_USB_H)
+#if     defined USE_PARALLEL || defined USE_USB
   {"port", "PORT", "specify "
-#ifdef  HAVE_USB_H
+#ifdef  USE_USB
                    "USB"
 #endif
-#if     (defined PARALLEL && defined HAVE_USB_H)
+#if     defined USE_PARALLEL && defined USE_USB
                    " or "
 #endif
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
                    "parallel"
 #endif
                    " PORT={"
-#ifdef  HAVE_USB_H
+#ifdef  USE_USB
                    "USB0, USB1, "
 #endif
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
                    "3bc, 378, 278, "
 #endif
                    "...}"},
-#endif  // (defined PARALLEL || defined HAVE_USB_H)
+#endif  // defined USE_PARALLEL || defined USE_USB
   {"hdn", "N", "force ROM has backup unit/emulator header with size of N Bytes"},
   {"hd", NULL, "same as " OPTION_LONG_S "hdn=512\n"
                    "most backup units use a header with a size of 512 Bytes"},
@@ -512,7 +512,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_USMS, UCON64_N64, n64_usage,         WF_DEFAULT},
   {UCON64_V64, UCON64_N64, n64_usage,          WF_DEFAULT},
 
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
   // We have to add |WF_NO_ROM to the copier options workflow parameter in
   //  order to support dumping of cartridges or copier SRAM.
   {UCON64_XDEX, UCON64_N64, dex_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM},
@@ -554,8 +554,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XSWCS, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XSWCC, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XV64, UCON64_N64, doctor64_usage,    WF_DEFAULT|WF_STOP|WF_NO_ROM},
-#endif // PARALLEL
-#if     defined PARALLEL || defined HAVE_USB_H
+#endif // USE_PARALLEL
+#if     defined USE_PARALLEL || defined USE_USB
   {UCON64_XF2A, UCON64_GBA, f2a_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_XF2AB, UCON64_GBA, f2a_usage,        WF_STOP|WF_NO_ROM},
   {UCON64_XF2AC, UCON64_GBA, f2a_usage,        WF_STOP|WF_NO_ROM},
@@ -566,7 +566,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   these options do not (need to) know the console or work for more than one
 */
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   {UCON64_BIN2ISO, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
   {UCON64_MKSHEET, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
   {UCON64_MKTOC, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
@@ -642,7 +642,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   force recognition switches
 */
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   {UCON64_DISC, UCON64_UNKNOWN, libdm_usage,   WF_SWITCH},
 #endif
 
@@ -701,7 +701,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_NBAK, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_NBAT, UCON64_NES, nes_usage,         WF_SWITCH},
   {UCON64_NBS, UCON64_SNES, snes_usage,        WF_SWITCH},
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
   {UCON64_NCOL, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
 #endif
   {UCON64_NHD, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
@@ -713,7 +713,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_O, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_PAL, UCON64_NES, nes_usage,          WF_SWITCH},
   {UCON64_PATCH, UCON64_UNKNOWN, ucon64_patching_usage, WF_SWITCH},
-#if     defined PARALLEL || defined HAVE_USB_H
+#if     defined USE_PARALLEL || defined USE_USB
   {UCON64_PORT, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
 #endif
   {UCON64_Q, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
@@ -723,7 +723,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_SSIZE, UCON64_UNKNOWN, NULL,         WF_SWITCH}, // for SNES & Genesis
   {UCON64_V, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_VRAM, UCON64_NES, nes_usage,         WF_SWITCH},
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
   {UCON64_XFALM, UCON64_GBA, fal_usage,        WF_SWITCH},
   {UCON64_XSWC_IO, UCON64_SNES, swc_usage,     WF_SWITCH},
 #endif
@@ -1320,10 +1320,148 @@ ucon64_testsplit (const char *filename)
 
 
 // configfile handling
+static int
+ucon64_configfile_update (void)
+{
+  char buf[MAXBUFSIZE];
+  
+  sprintf (buf, "%d", UCON64_CONFIG_VERSION);
+  set_property (ucon64.configfile, "version",     buf, "uCON64 configuration");
+
+  set_property (ucon64.configfile, "f2afirmware", "f2afirm.hex", "F2A support files");
+  set_property (ucon64.configfile, "iclientu",    "iclientu.bin", NULL);
+  set_property (ucon64.configfile, "iclientp",    "iclientp.bin", NULL);
+  set_property (ucon64.configfile, "ilogo",       "ilogo.bin",    NULL);
+  set_property (ucon64.configfile, "gbaloader",   "loader.bin",   NULL);
+
+  return 0;
+}
+
+
+typedef struct
+{
+  int id;
+  const char *emu;
+} st_emulate_t;
+
+
+static int
+ucon64_configfile_create (void)
+{
+  st_emulate_t emulate[] = {
+    {UCON64_3DO,      ""},
+    {UCON64_ATA,      ""},
+    {UCON64_CD32,     ""},
+    {UCON64_CDI,      ""},
+    {UCON64_COLECO,   ""},
+    {UCON64_DC,       ""},
+    {UCON64_GB,       "vgb -sound -sync 50 -sgb -scale 2"},
+    {UCON64_GBA,      "vgba -scale 2 -uperiod 6"},
+    {UCON64_GC,       ""},
+    {UCON64_GEN,      "dgen -f -S 2"},
+    {UCON64_INTELLI,  ""},
+    {UCON64_JAG,      ""},
+    {UCON64_LYNX,     ""},
+    {UCON64_MAME,     ""},
+    {UCON64_N64,      ""},
+    {UCON64_NES,      "tuxnes -E2 -rx11 -v -s/dev/dsp -R44100"},
+    {UCON64_NG,       ""},
+    {UCON64_NGP,      ""},
+    {UCON64_PCE,      ""},
+    {UCON64_PS2,      ""},
+    {UCON64_PSX,      "pcsx"},
+    {UCON64_S16,      ""},
+    {UCON64_SAT,      ""},
+    {UCON64_SMS,      ""},
+    {UCON64_GAMEGEAR, ""},
+    {UCON64_SNES,     "zsnes"},
+    {UCON64_SWAN,     ""},
+    {UCON64_VBOY,     ""},
+    {UCON64_VEC,      ""},
+    {UCON64_XBOX,     ""},
+    {0, NULL}
+  };
+  int x = 0, y = 0;
+
+  ucon64_configfile_update ();
+
+  set_property (ucon64.configfile, "backups",     "1",
+    "create backups of files? (1=yes; 0=no)\n"
+    "before processing a ROM uCON64 will make a backup of it");
+
+  set_property (ucon64.configfile, "ansi_color",  "1", "use ANSI colors in output? (1=yes; 0=no)");
+
+#ifdef  USE_PPDEV
+  set_property (ucon64.configfile, "parport_dev", "/dev/parport0",   "parallel port");
+#elif   defined AMIGA
+  set_property (ucon64.configfile, "parport_dev", "parallel.device", "parallel port");
+  set_property (ucon64.configfile, "parport",     "0", NULL);
+#else
+  set_property (ucon64.configfile, "parport",     "378",             "parallel port");
+#endif
+
+  set_property (ucon64.configfile, "discmage_path",
+#if     defined __MSDOS__
+    "~\\discmage.dxe",                          // realpath2() expands the tilde
+#elif   defined __CYGWIN__
+    "~/discmage.dll",
+#elif   defined _WIN32
+    "~\\discmage.dll",
+#elif   defined __APPLE__                       // Mac OS X actually
+    "~/.ucon64/discmage.dylib",
+#elif   defined __unix__ || defined __BEOS__
+    "~/.ucon64/discmage.so",
+#else
+    "",
+#endif
+    "complete path to the discmage library for CD image support");
+
+  set_property (ucon64.configfile, "ucon64_configdir",
+#if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
+    "~",                                        // realpath2() expands the tilde
+#elif   defined __unix__ || defined __BEOS__ || defined __APPLE__ // Mac OS X actually
+    "~/.ucon64",
+#else
+    "",
+#endif
+    "directory with additional config files");
+
+  set_property (ucon64.configfile, "ucon64_datdir",
+#if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
+    "~",                                        // realpath2() expands the tilde
+#elif   defined __unix__ || defined __BEOS__ || defined __APPLE__ // Mac OS X actually
+    "~/.ucon64/dat",
+#else
+    "",
+#endif
+    "directory with DAT files");
+
+  for (x = 0; emulate[x].emu; x++)
+    for (y = 0; options[y].name; y++)
+       if (emulate[x].id == options[y].val)
+         {
+           char buf[MAXBUFSIZE];
+
+           sprintf (buf, "emulate_%s", options[y].name);
+
+           set_property (ucon64.configfile, buf, emulate[x].emu, !x ?
+             "emulate_<console shortcut>=<emulator with options>\n\n"
+             "You can also use CRC32 values for ROM specific emulation options:\n\n"
+             "emulate_0x<crc32>=<emulator with options>\n"
+             "emulate_<crc32>=<emulator with options>": NULL);
+
+           break;
+         }
+
+  return 0;
+}
+
+
 int
 ucon64_configfile (void)
 {
   char buf[MAXBUFSIZE], *dirname;
+  int result = -1;
 
   dirname = getenv2 ("UCON64_HOME");
   if (!dirname[0])
@@ -1354,138 +1492,19 @@ ucon64_configfile (void)
           printf ("FAILED\n\n");
           return -1;
         }
-      else
+      fclose (fh);                              // we'll use set_property() from now
+
+      result = ucon64_configfile_create ();
+
+      if (!result)
         {
-          fprintf (fh,
-                   "# uCON64 configuration\n"
-                   "#\n"
-                   "version=%d\n"
-                   "#\n"
-                   "# create backups of files? (1=yes; 0=no)\n"
-//                   "# before processing a ROM uCON64 will make a backup of it\n"
-                   "#\n"
-                   "backups=1\n"
-                   "#\n"
-                   "# use ANSI colors in output? (1=yes; 0=no)\n"
-                   "#\n"
-                   "ansi_color=1\n"
-                   "#\n"
-                   "# parallel port\n"
-                   "#\n"
-#ifdef  PPDEV
-                   "#parport_dev=/dev/parport0\n"
-#elif   defined AMIGA
-                   "#parport_dev=parallel.device\n"
-                   "#parport=0\n"
-#else
-                   "#parport=378\n"
-#endif
-                   "#\n"
-#if     defined __MSDOS__
-                   "discmage_path=~\\discmage.dxe\n" // realpath2() expands the tilde
-                   "ucon64_configdir=~\n"
-                   "ucon64_datdir=~\n"
-#elif   defined __CYGWIN__
-                   "discmage_path=~/discmage.dll\n"
-                   "ucon64_configdir=~\n"
-                   "ucon64_datdir=~\n"
-#elif   defined _WIN32
-                   "discmage_path=~\\discmage.dll\n"
-                   "ucon64_configdir=~\n"
-                   "ucon64_datdir=~\n"
-#elif   defined __APPLE__                       // Mac OS X actually
-                   "discmage_path=~/.ucon64/discmage.dylib\n"
-                   "ucon64_configdir=~/.ucon64\n"
-                   "ucon64_datdir=~/.ucon64/dat\n"
-#elif   defined __unix__ || defined __BEOS__
-                   "discmage_path=~/.ucon64/discmage.so\n"
-                   "ucon64_configdir=~/.ucon64\n"
-                   "ucon64_datdir=~/.ucon64/dat\n"
-#endif
-                   "#\n"
-                   "# F2A support files\n"
-                   "#\n"
-                   "f2afirmware=f2afirm.hex\n"
-                   "iclientu=iclientu.bin\n"
-                   "iclientp=iclientp.bin\n"
-                   "ilogo=ilogo.bin\n"
-                   "gbaloader=loader.bin\n"
-                   "#\n"
-                   "# emulate_<console shortcut>=<emulator with options>\n"
-                   "#\n"
-                   "# You can also use CRC32 values for ROM specific emulation options:\n"
-                   "#\n"
-                   "# emulate_0x<crc32>=<emulator with options>\n"
-                   "# emulate_<crc32>=<emulator with options>\n"
-                   "#\n"
-                   "emulate_gb=vgb -sound -sync 50 -sgb -scale 2\n"
-                   "emulate_gen=dgen -f -S 2\n"
-                   "emulate_sms=\n"
-                   "emulate_jag=\n"
-                   "emulate_lynx=\n"
-                   "emulate_n64=\n"
-                   "emulate_ng=\n"
-                   "emulate_nes=tuxnes -E2 -rx11 -v -s/dev/dsp -R44100\n"
-                   "emulate_pce=\n"
-                   "emulate_snes=zsnes\n"
-                   "emulate_ngp=\n"
-                   "emulate_ata=\n"
-                   "emulate_s16=\n"
-                   "emulate_gba=vgba -scale 2 -uperiod 6\n"
-                   "emulate_vec=\n"
-                   "emulate_vboy=\n"
-                   "emulate_swan=\n"
-                   "emulate_coleco=\n"
-                   "emulate_intelli=\n"
-                   "emulate_psx=pcsx\n"
-                   "emulate_ps2=\n"
-                   "emulate_sat=\n"
-                   "emulate_dc=\n"
-                   "emulate_cd32=\n"
-                   "emulate_cdi=\n"
-                   "emulate_3do=\n"
-                   "emulate_gp32=\n"
-#if 0
-#ifndef __MSDOS__
-                   "#\n"
-                   "# LHA support\n"
-                   "#\n"
-                   "lha_extract=lha efi \"%%s\"\n"
-                   "#\n"
-                   "# LZH support\n"
-                   "#\n"
-                   "lzh_extract=lha efi \"%%s\"\n"
-                   "#\n"
-                   "# ZIP support\n"
-                   "#\n"
-                   "zip_extract=unzip -xojC \"%%s\"\n"
-                   "#\n"
-                   "# RAR support\n"
-                   "#\n"
-                   "rar_extract=unrar x \"%%s\"\n"
-                   "#\n"
-                   "# ACE support\n"
-                   "#\n"
-                   "ace_extract=unace e \"%%s\"\n"
-#endif
-                   "#\n"
-                   "# uCON64 can operate as frontend for CD burning software to make backups\n"
-                   "# for CD-based consoles \n"
-                   "#\n"
-                   "# We suggest cdrdao (http://cdrdao.sourceforge.net) as burn engine for uCON64\n"
-                   "# Make sure you check this configfile for the right settings\n"
-                   "#\n"
-                   "# --device [bus,id,lun] (cdrdao)\n"
-                   "#\n"
-                   "cdrw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
-                   "cdrw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
-#endif
-                   , UCON64_CONFIG_VERSION);
-          fclose (fh);
+          sync ();
           printf ("OK\n\n");
         }
+      else
+        printf ("FAILED\n\n");
     }
-  else if (strtol (get_property (ucon64.configfile, "version", buf, "0"), NULL, 10) < UCON64_CONFIG_VERSION)
+  else if (get_property_int (ucon64.configfile, "version") < UCON64_CONFIG_VERSION)
     {
       strcpy (buf, ucon64.configfile);
       set_suffix (buf, ".OLD");
@@ -1494,68 +1513,18 @@ ucon64_configfile (void)
 
       q_fcpy (ucon64.configfile, 0, q_fsize (ucon64.configfile), buf, "wb"); // "wb" is correct for copying
 
-      sprintf (buf, "%d", UCON64_CONFIG_VERSION);
-      set_property (ucon64.configfile, "version", buf);
+      result = ucon64_configfile_update ();
 
-      set_property (ucon64.configfile, "ansi_color", "1");
-
-      set_property (ucon64.configfile, "discmage_path",
-#if     defined __MSDOS__
-        "~\\discmage.dxe"                       // realpath2() expands the tilde
-#elif   defined __CYGWIN__
-        "~/discmage.dll"
-#elif   defined _WIN32
-        "~\\discmage.dll"
-#elif   defined __APPLE__                       // Mac OS X actually
-        "~/.ucon64/discmage.dylib"
-#elif   defined __unix__ || defined __BEOS__
-        "~/.ucon64/discmage.so"
-#else
-        ""
-#endif
-      );
-
-      set_property (ucon64.configfile, "ucon64_configdir",
-#if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
-        "~"                                     // realpath2() expands the tilde
-#elif   defined __unix__ || defined __BEOS__ || defined __APPLE__ // Mac OS X actually
-        "~/.ucon64"
-#else
-        ""
-#endif
-      );
-
-      set_property (ucon64.configfile, "ucon64_datdir",
-#if     defined __MSDOS__ || defined __CYGWIN__ || defined _WIN32
-        "~"                                     // realpath2() expands the tilde
-#elif   defined __unix__ || defined __BEOS__ || defined __APPLE__ // Mac OS X actually
-        "~/.ucon64/dat"
-#else
-        ""
-#endif
-      );
-
-#if 0
-      DELETE_PROPERTY (ucon64.configfile, "cdrw_read");
-      DELETE_PROPERTY (ucon64.configfile, "cdrw_write");
-
-      set_property (ucon64.configfile, "lha_extract", "lha efi \"%s\"");
-      set_property (ucon64.configfile, "lzh_extract", "lha efi \"%s\"");
-      set_property (ucon64.configfile, "zip_extract", "unzip -xojC \"%s\"");
-      set_property (ucon64.configfile, "rar_extract", "unrar x \"%s\"");
-      set_property (ucon64.configfile, "ace_extract", "unace e \"%s\"");
-#endif
-
-      set_property (ucon64.configfile, "f2afirmware", "f2afirm.hex");
-      set_property (ucon64.configfile, "iclientu", "iclientu.bin");
-      set_property (ucon64.configfile, "iclientp", "iclientp.bin");
-      set_property (ucon64.configfile, "ilogo", "ilogo.bin");
-      set_property (ucon64.configfile, "gbaloader", "loader.bin");
-
-      sync ();
-      printf ("OK\n\n");
+      if (!result)
+        {
+          sync ();
+          printf ("OK\n\n");
+        }
+      else
+        printf ("FAILED\n\n");
     }
-  return 0;
+
+  return result;
 }
 
 
@@ -1690,7 +1659,7 @@ ucon64_rename (int mode)
 #ifndef DEBUG
   rename2 (ucon64.rom, buf2);                   // rename2() must be used!
 #endif
-#ifdef  HAVE_ZLIB_H
+#ifdef  USE_ZLIB
   unzip_current_file_nr = 0x7fffffff - 1;       // dirty hack
 #endif
   return 0;

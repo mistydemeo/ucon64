@@ -21,7 +21,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifdef  HAVE_CONFIG_H
-#include "config.h"                             // HAVE_ZLIB_H
+#include "config.h"                             // USE_ZLIB
 #endif
 #include <stddef.h>
 #include <stdlib.h>
@@ -56,7 +56,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <windows.h>                            // Sleep(), milliseconds
 #endif
 
-#ifdef  HAVE_ZLIB_H
+#ifdef  USE_ZLIB
 #include "misc_z.h"
 #endif
 #include "misc.h"
@@ -98,7 +98,7 @@ static void set_tty (tty_t *param);
 #endif
 
 
-#ifndef HAVE_ZLIB_H
+#ifndef USE_ZLIB
 int
 q_fsize (const char *filename)
 {
@@ -113,7 +113,7 @@ q_fsize (const char *filename)
 #endif
 
 
-#if     defined _WIN32 && defined ANSI_COLOR
+#if     defined _WIN32 && defined USE_ANSI_COLOR
 int
 vprintf2 (const char *format, va_list argptr)
 // Cheap hack to get the Visual C++ and MinGW ports support "ANSI colors".
@@ -252,7 +252,7 @@ fprintf2 (FILE *file, const char *format, ...)
   va_end (argptr);
   return n_chars;
 }
-#endif // defined _WIN32 && defined ANSI_COLOR
+#endif // defined _WIN32 && defined USE_ANSI_COLOR
 
 
 int
@@ -289,24 +289,24 @@ ansi_strip (char *str)
   for (; *p; p++)
     switch (*p)
       {
-        case '\x1b':                            // escape
-          ansi = 1;
-          break;
+      case '\x1b':                              // escape
+        ansi = 1;
+        break;
 
-        case 'm':
-          if (ansi)
-            {
-              ansi = 0;
-              break;
-            }
+      case 'm':
+        if (ansi)
+          {
+            ansi = 0;
+            break;
+          }
 
-        default:
-          if (!ansi)
-            {
-              *s = *p;
-              s++;
-            }
-          break;
+      default:
+        if (!ansi)
+          {
+            *s = *p;
+            s++;
+          }
+        break;
       }
   *s = 0;
 
@@ -1802,36 +1802,37 @@ getenv2 (const char *variable)
 
 
 char *
-get_property (const char *filename, const char *propname, char *buffer, const char *def)
+get_property (const char *filename, const char *propname, char *buffer,
+              const char *def)
 {
   char line[MAXBUFSIZE], *p = NULL;
   FILE *fh;
-  int prop_found = 0, i;
+  int prop_found = 0, i, whitespace_len;
 
   if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
     {                                           //  avoids trouble under DOS
       while (fgets (line, sizeof line, fh) != NULL)
         {
-          p = line + strspn (line, "\t ");      // strip leading whitespace
+          whitespace_len = strspn (line, "\t ");
+          p = line + whitespace_len;            // ignore leading whitespace
           if (*p == '#' || *p == '\n' || *p == '\r')
             continue;                           // text after # is comment
-          if ((p = strpbrk (line, "\n\r#")))    // strip *any* returns
+          if ((p = strpbrk (line, "#\r\n")))    // strip *any* returns
             *p = 0;
 
           p = strchr (line, PROPERTY_SEPARATOR);
+          // if no divider was found the propname must be a bool config entry
+          //  (present or not present)
           if (p)
-            {
-              // if no divider was found the propname must be a bool config
-              //  entry (present or not present)
-              *p = 0;                           // note that this "cuts" line
-              // strip trailing whitespace from property name part of line
-              for (i = strlen (line) - 1;
-                   i >= 0 && (line[i] == '\t' || line[i] == ' ');
-                   i--)
-                line[i] = 0;
-            }
+            *p = 0;                             // note that this "cuts" _line_
+          // strip trailing whitespace from property name part of line
+          for (i = strlen (line) - 1;
+               i >= 0 && (line[i] == '\t' || line[i] == ' ');
+               i--)
+            ;
+          line[i + 1] = 0;
 
-          if (!stricmp (line, propname))
+          if (!stricmp (line + whitespace_len, propname))
             {
               if (p)
                 {
@@ -1842,7 +1843,8 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
                   for (i = strlen (buffer) - 1;
                        i >= 0 && (buffer[i] == '\t' || buffer[i] == ' ');
                        i--)
-                    buffer[i] = 0;
+                    ;
+                  buffer[i + 1] = 0;
                 }
               prop_found = 1;
               break;                            // an environment variable
@@ -1879,9 +1881,9 @@ get_property_int (const char *filename, const char *propname)
   if (buf[0])
     switch (tolower (buf[0]))
       {
-        case '0': // 0
-        case 'n': // [Nn]o
-          return 0;
+      case '0':                                 // 0
+      case 'n':                                 // [Nn]o
+        return 0;
       }
 
   value = strtol (buf, NULL, 10);
@@ -1890,7 +1892,8 @@ get_property_int (const char *filename, const char *propname)
 
 
 char *
-get_property_fname (const char *filename, const char *propname, char *buffer, const char *def)
+get_property_fname (const char *filename, const char *propname, char *buffer,
+                    const char *def)
 // get a filename from file with name filename, expand it and fix characters
 {
   char tmp[FILENAME_MAX];
@@ -1904,54 +1907,83 @@ get_property_fname (const char *filename, const char *propname, char *buffer, co
 
 
 int
-set_property (const char *filename, const char *propname, const char *value)
+set_property (const char *filename, const char *propname, const char *value,
+              const char *comment)
 {
-  int found = 0, result = 0, file_size = 0;
-  char buf[MAXBUFSIZE], *buf2;
+  int found = 0, result = 0, file_size = 0, i;
+  char line[MAXBUFSIZE], line2[MAXBUFSIZE], *str = NULL, *p = NULL;
   FILE *fh;
   struct stat fstate;
 
   if (stat (filename, &fstate) != 0)
     file_size = fstate.st_size;
 
-  if (!(buf2 = (char *) malloc ((file_size + MAXBUFSIZE) * sizeof (char))))
+  if (!(str = (char *) malloc ((file_size + MAXBUFSIZE) * sizeof (char))))
     {
       errno = ENOMEM;
       return -1;
     }
-
-  *buf2 = 0;
+  *str = 0;
 
   if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
     {                                           //  avoids trouble under DOS
-      while (fgets (buf, sizeof buf, fh) != NULL)
+      while (fgets (line, sizeof line, fh) != NULL)
         {
-          if (!strnicmp (buf, propname, strlen (propname)))
+          strcpy (line2, line);
+          if ((p = strpbrk (line2, PROPERTY_SEPARATOR_S "#\r\n")))
+            *p = 0;                             // note that this "cuts" _line2_
+          for (i = strlen (line2) - 1;
+               i >= 0 && (line2[i] == '\t' || line2[i] == ' ');
+               i--)
+            ;
+          line2[i + 1] = 0;
+
+          if (!stricmp (line2 + strspn (line2, "\t "), propname))
             {
               found = 1;
               if (value == NULL)
                 continue;
 
-              sprintf (buf, "%s" PROPERTY_SEPARATOR_S "%s\n", propname, value);
+              sprintf (line, "%s" PROPERTY_SEPARATOR_S "%s\n", propname, value);
             }
-          strcat (buf2, buf);
+          strcat (str, line);
         }
       fclose (fh);
     }
 
-  if (!found && value != NULL)
+  if (!found && value)
     {
-      sprintf (buf, "%s" PROPERTY_SEPARATOR_S "%s\n", propname, value);
-      strcat (buf2, buf);
+      if (comment)
+        {
+          strcat (str, PROPERTY_COMMENT_S "\n" PROPERTY_COMMENT_S " ");
+
+          for (p = strchr (str, 0); *comment; comment++)
+            switch (*comment)
+              {
+              case '\r':
+                break;
+              case '\n':
+                strcat (str, "\n" PROPERTY_COMMENT_S " ");
+                break;
+
+              default:
+                p = strchr (str, 0);
+                *p = *comment;
+                *(++p) = 0;
+                break;
+              }
+
+          strcat (str, "\n" PROPERTY_COMMENT_S "\n");
+        }
+
+      sprintf (line, "%s" PROPERTY_SEPARATOR_S "%s\n", propname, value);
+      strcat (str, line);
     }
 
   if ((fh = fopen (filename, "w")) == NULL)     // open in text mode
     return -1;
-
-  result = fwrite (buf2, 1, strlen (buf2), fh);
+  result = fwrite (str, 1, strlen (str), fh);
   fclose (fh);
-
-//  q_fwrite (buf2, 1, strlen (buf2), filename, "w");
 
   return result;
 }
@@ -2315,18 +2347,18 @@ q_fbackup (const char *filename, int mode)
 
   switch (mode)
     {
-      case BAK_MOVE:
-        return buf;
+    case BAK_MOVE:
+      return buf;
 
-      case BAK_DUPE:
-      default:
-        if (q_fcpy (buf, 0, q_fsize (buf), filename, "wb"))
-          {
-            fprintf (stderr, "ERROR: Can't open \"%s\" for writing\n", filename);
-            exit (1);
-          }
-        sync ();
-        return buf;
+    case BAK_DUPE:
+    default:
+      if (q_fcpy (buf, 0, q_fsize (buf), filename, "wb"))
+        {
+          fprintf (stderr, "ERROR: Can't open \"%s\" for writing\n", filename);
+          exit (1);
+        }
+      sync ();
+      return buf;
     }
 }
 
@@ -2375,7 +2407,7 @@ q_rfcpy (const char *src, const char *dest)
 // Raw file copy function. Raw, because it will copy the file data as it is,
 //  unlike q_fcpy()
 {
-#ifdef  HAVE_ZLIB_H
+#ifdef  USE_ZLIB
 #undef  fopen
 #undef  fread
 #undef  fwrite
@@ -2401,7 +2433,7 @@ q_rfcpy (const char *src, const char *dest)
   fclose (fh);
   fclose (fh2);
   return 0;
-#ifdef  HAVE_ZLIB_H
+#ifdef  USE_ZLIB
 #define fopen   fopen2
 #define fread   fread2
 #define fwrite  fwrite2

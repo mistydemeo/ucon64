@@ -62,7 +62,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
     11-511 - 0, reserved
 */
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 
 extern void ffe_init_io (unsigned int port);
 extern void ffe_deinit_io (void);
@@ -77,6 +77,6 @@ extern unsigned char ffe_receiveb (void);
 extern void ffe_wait_for_ready (void);
 extern void ffe_checkabort (int status);
 
-#endif // PARALLEL
+#endif // USE_PARALLEL
 
 #endif // FFE_H

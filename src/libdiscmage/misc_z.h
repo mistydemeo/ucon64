@@ -22,16 +22,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MISCZ_H
 
 #ifdef  HAVE_CONFIG_H
-#include "config.h"                             // HAVE_ZLIB_H
+#include "config.h"                             // USE_ZLIB
 #endif
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
-#ifdef  HAVE_ZLIB_H
+#ifdef  USE_ZLIB
 // make sure ZLIB support is enabled everywhere
-//#warning HAVE_ZLIB_H is defined
+//#warning USE_ZLIB is defined
 
 #include <stdio.h>
 #include <zlib.h>

@@ -811,7 +811,7 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
 
       for (s = t = 0; s < image->sessions; s++)
         {
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
           if (ansi_color)
             printf ("\x1b[0m[\x1b[30;41m%2d \x1b[0m", s + 1);
 //            printf ("\x1b[0m[\x1b[30;41m");
@@ -821,14 +821,14 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
 //            printf ("[");
 
           for (x = 0; x < image->session[s]; x++, t++)
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
             if (ansi_color)
               printf ("\x1b[0m[\x1b[30;42m%2d \x1b[0m]", t + 1);
             else
 #endif
               printf ("[%2d ]", t + 1);
 
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
           if (ansi_color)
             printf ("\x1b[0m] ");
           else

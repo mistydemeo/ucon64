@@ -37,5 +37,5 @@ const st_usage_t ssc_usage[] =
     {NULL, NULL, NULL}
   };
 
-#ifdef PARALLEL
-#endif // PARALLEL
+#ifdef USE_PARALLEL
+#endif // USE_PARALLEL

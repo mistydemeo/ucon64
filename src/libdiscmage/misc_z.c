@@ -19,9 +19,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifdef  HAVE_CONFIG_H
-#include "config.h"                             // HAVE_ZLIB_H
+#include "config.h"                             // USE_ZLIB
 #endif
-#ifdef  HAVE_ZLIB_H
+#ifdef  USE_ZLIB
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,7 +42,7 @@ extern int errno;
 
 int
 q_fsize (const char *filename)
-// If HAVE_ZLIB_H is defined this function is very slow. Please avoid to use
+// If USE_ZLIB is defined this function is very slow. Please avoid to use
 //  it much.
 {
   FILE *file;
@@ -663,4 +663,4 @@ pclose2 (FILE *stream)
 #undef  pclose
 #define pclose  pclose2
 }
-#endif // HAVE_ZLIB_H
+#endif // USE_ZLIB

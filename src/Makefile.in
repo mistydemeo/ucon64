@@ -9,7 +9,7 @@ CC=@CC@
 CFLAGS=-I. -Wall -W -O3 @DEFS@
 LDFLAGS=-s
 
-ifdef DISCMAGE
+ifdef USE_DISCMAGE
 LIBNAME_DM=discmage
 endif
 
@@ -29,7 +29,7 @@ endif
 
 ifeq ($(GCC_WIN),1)
 
-ifdef DISCMAGE
+ifdef USE_DISCMAGE
 FULLLIBNAME_DM=$(LIBNAME_DM).dll
 ifndef DLOPEN
 LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
@@ -39,7 +39,7 @@ endif
 else
 ifdef DJGPP
 
-ifdef DISCMAGE
+ifdef USE_DISCMAGE
 FULLLIBNAME_DM=$(LIBNAME_DM).dxe
 ifndef DLOPEN
 LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
@@ -48,7 +48,7 @@ endif
 
 else                                    # Unix, BeOS or Mac OS X (Darwin)
 
-ifdef DISCMAGE
+ifdef USE_DISCMAGE
 ifeq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
 FULLLIBNAME_DM=$(LIBNAME_DM).dylib
 else
@@ -65,7 +65,7 @@ endif
 endif
 
 else                                    # DLOPEN
-ifdef DISCMAGE                          # GNU specific: "simply expanded variable"
+ifdef USE_DISCMAGE                      # GNU specific: "simply expanded variable"
 FULLLIBNAME_DM:=$(addprefix lib,$(FULLLIBNAME_DM))
 LDFLAGS+=-Llibdiscmage -l$(LIBNAME_DM)
 endif
@@ -90,28 +90,28 @@ OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
         backup/md.o backup/mgd.o backup/smd.o backup/swc.o backup/ufo.o \
         backup/dex.o backup/psxpblib.o backup/mccl.o backup/lynxit.o \
         backup/ffe.o backup/msg.o backup/smc.o backup/f2a.o
-ifdef ZLIB
+ifdef USE_ZLIB
 LDFLAGS+=-lz
 OBJECTS+=unzip.o map.o misc_z.o
 endif
-ifdef DISCMAGE
+ifdef USE_DISCMAGE
 OBJECTS+=ucon64_dm.o
 endif
-ifdef USB
+ifdef USE_USB
 LDFLAGS+=-lusb
 OBJECTS+=misc_usb.o
 endif
 
 ifdef DLOPEN
 OBJECTS+=dlopen.o
-ifndef ZLIB
+ifndef USE_ZLIB
 ifeq ($(GCC_WIN),1)
 else
 ifdef DJGPP                             # DJGPP code in dlopen needs map code
 OBJECTS+=map.o
 endif                                   # DJGPP
 endif                                   # GCC_WIN
-endif                                   # ZLIB
+endif                                   # USE_ZLIB
 else
 ifeq ($(GCC_WIN),1)                     # Cygwin/MinGW code in ucon64_misc needs dlopen code
 OBJECTS+=dlopen.o
@@ -179,7 +179,7 @@ endif                                   # GCC_WIN
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
-ifdef DISCMAGE
+ifdef USE_DISCMAGE
 libdiscmage/$(FULLLIBNAME_DM):
 ifeq ($(GCC_WIN),1)
 	cd libdiscmage && $(MAKE)
@@ -192,7 +192,7 @@ else
 	cd libdiscmage && $(MAKE)
 endif                                   # DJGPP
 endif                                   # GCC_WIN
-endif                                   # DISCMAGE
+endif                                   # USE_DISCMAGE
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@

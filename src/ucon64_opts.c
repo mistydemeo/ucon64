@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_defines.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
 #include "ucon64_dm.h"
 #endif
 #include "ucon64_opts.h"
@@ -50,7 +50,7 @@ int ucon64_parport_needed = 0;
 int
 ucon64_switches (int c, const char *optarg)
 {
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   char *ptr = NULL, buf[MAXBUFSIZE];
   int x = 0;
 #endif
@@ -78,7 +78,7 @@ ucon64_switches (int c, const char *optarg)
       so we can't use preprocessor directives in the argument list.
     */
     case UCON64_VER:
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
 #ifdef  DLOPEN
 #define DISCMAGE_STATUS_MSG "discmage DLL:                      %s\n"
 #else
@@ -98,35 +98,35 @@ ucon64_switches (int c, const char *optarg)
 #define DEBUG_STATUS "no"
 #endif
 
-#ifdef  PARALLEL
-#ifdef  PPDEV
+#ifdef  USE_PARALLEL
+#ifdef  USE_PPDEV
 #define PARALLEL_STATUS "yes (ppdev)"
 #else
 #define PARALLEL_STATUS "yes"
-#endif // PPDEV
+#endif // USE_PPDEV
 #else
 #define PARALLEL_STATUS "no"
 #endif
 
-#ifdef  HAVE_USB_H
+#ifdef  USE_USB
 #define USB_STATUS "yes"
 #else
 #define USB_STATUS "no"
 #endif
 
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
 #define ANSI_COLOR_STATUS "yes"
 #else
 #define ANSI_COLOR_STATUS "no"
 #endif
 
-#ifdef  HAVE_ZLIB_H
+#ifdef  USE_ZLIB
 #define ZLIB_STATUS "yes"
 #else
 #define ZLIB_STATUS "no"
 #endif
 
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
       ptr =
 #ifdef  DLOPEN
         ucon64.discmage_path;
@@ -174,7 +174,7 @@ ucon64_switches (int c, const char *optarg)
               access (ucon64.configfile, F_OK) ? "(not present):" : "(present):    ",
               ucon64.configfile);
 
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
       printf (DISCMAGE_STATUS_MSG
               "discmage enabled:                  %s\n"
               "discmage version:                  %s\n",
@@ -207,7 +207,7 @@ ucon64_switches (int c, const char *optarg)
       ucon64.backup = 0;
       break;
 
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
     case UCON64_NCOL:
       ucon64.ansi_color = 0;
       break;
@@ -256,7 +256,7 @@ ucon64_switches (int c, const char *optarg)
       break;
 
     case UCON64_PORT:
-#ifdef  HAVE_USB_H
+#ifdef  USE_USB
       if (strlen (optarg) == 4 && !strnicmp (optarg, "usb", 3))
         ucon64.usbport = strtol (optarg + 3, NULL, 10) + 1; // usb0 => ucon64.usbport = 1
       else
@@ -264,7 +264,7 @@ ucon64_switches (int c, const char *optarg)
         ucon64.parport = strtol (optarg, NULL, 16);
       break;
 
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
     // We detect the presence of these options here so that we can drop privileges ASAP
     case UCON64_XDEX:
     case UCON64_XDJR:
@@ -305,7 +305,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XSWCS:
     case UCON64_XSWCC:
     case UCON64_XV64:
-#ifdef  HAVE_USB_H
+#ifdef  USE_USB
       if (!ucon64.usbport)                      // no pport I/O if F2A option and USB F2A
 #endif
       ucon64_parport_needed = 1;
@@ -379,6 +379,8 @@ ucon64_switches (int c, const char *optarg)
                 strcat (flagstr, "DX2 trick, ");
               if (ucon64.swc_io_mode & SWC_IO_MMX2)
                 strcat (flagstr, "Mega Man X 2, ");
+              if (ucon64.swc_io_mode & SWC_IO_DUMP_BIOS)
+                strcat (flagstr, "dump BIOS, ");
 
               if (flagstr[0])
                 flagstr[strlen (flagstr) - 2] = 0;
@@ -387,7 +389,7 @@ ucon64_switches (int c, const char *optarg)
           fputc ('\n', stdout);
         }
       break;
-#endif // PARALLEL
+#endif // USE_PARALLEL
 
     case UCON64_PATCH:
 #if 0 // falling through, so --patch is an alias for --file
@@ -555,7 +557,7 @@ ucon64_switches (int c, const char *optarg)
 int
 ucon64_options (int c, const char *optarg)
 {
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
   int enableRTS = -1;                           // for UCON64_XSWC & UCON64_XSWC2
 #endif
   int value = 0, x = 0, result = 0, padded;
@@ -872,7 +874,7 @@ ucon64_options (int c, const char *optarg)
       ucon64_rename (UCON64_RROM);
       break;
 
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
     case UCON64_BIN2ISO:
     case UCON64_ISOFIX:
     case UCON64_RIP:
@@ -964,7 +966,7 @@ ucon64_options (int c, const char *optarg)
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
       break;
-#endif  // DISCMAGE
+#endif  // USE_DISCMAGE
 
     case UCON64_DB:
       if (ucon64.quiet > -1) // -db + -v == -dbv
@@ -1516,7 +1518,7 @@ ucon64_options (int c, const char *optarg)
       n64_v64 (ucon64.rominfo);
       break;
 
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
     /*
       It doesn't make sense to continue after executing a (send) backup option
       ("multizip"). Don't return, but use break instead. ucon64_execute_options()
@@ -1876,8 +1878,8 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
-#endif // PARALLEL
-#if     defined PARALLEL || defined HAVE_USB_H
+#endif // USE_PARALLEL
+#if     defined USE_PARALLEL || defined USE_USB
     case UCON64_XF2A:
       if (access (ucon64.rom, F_OK) != 0)
         f2a_read_rom (ucon64.rom, ucon64.parport, 32);
@@ -1911,7 +1913,7 @@ ucon64_options (int c, const char *optarg)
         f2a_write_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
       fputc ('\n', stdout);
       break;
-#endif // PARALLEL || HAVE_USB_H
+#endif // USE_PARALLEL || USE_USB
 
     case UCON64_Z64:
       n64_z64 (ucon64.rominfo);
@@ -1923,4 +1925,3 @@ ucon64_options (int c, const char *optarg)
 
   return 0;
 }
-

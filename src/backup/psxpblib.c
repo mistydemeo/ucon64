@@ -34,7 +34,7 @@
 #include "psxpblib.h"
 #include "misc_par.h"
 
-#ifdef  PARALLEL
+#ifdef  USE_PARALLEL
 
 static unsigned char psx_parallel_out_0 = 0xff;
 static unsigned char psx_parallel_out_2 = 0x00;
@@ -1082,4 +1082,4 @@ psx_mcb_read_info (int base, int conport, int tap, int delay, int block)
   return psx_mcb_info_merge (*mcb_info_dir, *mcb_info_dat, &mcb_info);
 }
 
-#endif // PARALLEL
+#endif // USE_PARALLEL

@@ -414,7 +414,7 @@ gba_init (st_rominfo_t *rominfo)
   strcat (rominfo->misc, "Logo data: ");
   if (memcmp (gba_header.logo, gba_logodata, GBA_LOGODATA_LEN) == 0)
     {
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
       if (ucon64.ansi_color)
         strcat (rominfo->misc, "\x1b[01;32mOk\x1b[0m");
       else
@@ -423,7 +423,7 @@ gba_init (st_rominfo_t *rominfo)
     }
   else
     {
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
       if (ucon64.ansi_color)
         strcat (rominfo->misc, "\x1b[01;31mBad\x1b[0m");
       else

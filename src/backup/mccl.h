@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MCCL_H
 extern const st_usage_t mccl_usage[];
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 extern int mccl_read (const char *filename, unsigned int parport);
-#endif // PARALLEL
+#endif // USE_PARALLEL
 #endif // MCCL_H

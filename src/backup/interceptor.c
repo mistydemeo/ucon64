@@ -38,5 +38,5 @@ const st_usage_t interceptor_usage[] =
     {NULL, NULL, NULL}
   };
 
-#ifdef PARALLEL
-#endif // PARALLEL
+#ifdef USE_PARALLEL
+#endif // USE_PARALLEL

@@ -580,7 +580,7 @@ gameboy_init (st_rominfo_t *rominfo)
 
       x = gameboy_header.complement_checksum;
       sprintf (rominfo->internal_crc2, buf,
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
                ucon64.ansi_color ?
                  ((checksum.complement == x) ?
                    "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")

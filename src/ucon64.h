@@ -27,7 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_H
 
 #ifdef  HAVE_CONFIG_H
-#include "config.h"                             // ANSI_COLOR
+#include "config.h"                             // USE_ANSI_COLOR
 #endif
 
 #include "getopt.h"                             // for struct option
@@ -47,7 +47,7 @@ typedef struct
 } st_usage_t;
 
 
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
 #include "ucon64_dm.h"
 #endif
 
@@ -131,25 +131,25 @@ typedef struct
   char configdir[FILENAME_MAX];                 // directory for config
   char datdir[FILENAME_MAX];                    // directory for DAT files
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   char discmage_path[FILENAME_MAX];             // path to the discmage DLL
 #endif
-#if     defined PPDEV || defined AMIGA
+#if     defined USE_PPDEV || defined AMIGA
   char parport_dev[80];                         // parallel port device (e.g.
 #endif                                          //  /dev/parport0 or parallel.device)
   int parport;                                  // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
-#ifdef  HAVE_USB_H
+#ifdef  USE_USB
   int usbport;                                  // non-zero => use usbport, 1 = USB0, 2 = USB1
   char usbport_dev[80];                         // usb port device (e.g. /dev/usb/hiddev0)
 #endif
 
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
   int ansi_color;
 #endif
   int backup;                                   // flag if backups files should be created
   int frontend;                                 // flag if uCON64 was started by a frontend
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   int discmage_enabled;                         // flag if discmage DLL is loaded
 #endif
   int dat_enabled;                              // flag if DAT file(s) are usable/enabled
@@ -189,7 +189,7 @@ typedef struct
   int use_dump_info;                            // NES UNIF
   int vram;                                     // NES UNIF
 
-#ifdef  DISCMAGE
+#ifdef  USE_DISCMAGE
   dm_image_t *image;                            // info from libdiscmage
 #endif
   st_ucon64_dat_t *dat;                         // info from DATabase
@@ -210,7 +210,7 @@ extern int ucon64_nfo (void);
 extern st_rominfo_t *ucon64_flush_rom (st_rominfo_t *);
 
 extern void ucon64_usage (int argc, char *argv[]);
-#ifdef  HAVE_ZLIB_H
+#ifdef  USE_ZLIB
 extern void ucon64_fname_arch (const char *fname);
 #endif
 

@@ -2471,7 +2471,7 @@ static const char *
 matches_deviates (int equal)
 {
   return
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
     ucon64.ansi_color ?
       (equal ? "\x1b[01;32mMatches\x1b[0m" : "\x1b[01;33mDeviates\x1b[0m") :
       (equal ? "Matches" : "Deviates");
@@ -3091,7 +3091,7 @@ snes_init (st_rominfo_t *rominfo)
                rominfo->internal_crc2_len * 2, rominfo->internal_crc2_len * 2,
                rominfo->internal_crc2_len * 2);
       sprintf (rominfo->internal_crc2, buf,
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
                ucon64.ansi_color ?
                  ((rominfo->current_internal_crc + x == 0xffff) ?
                    "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")

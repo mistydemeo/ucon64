@@ -24,8 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define FIG_H
 extern const st_usage_t fig_usage[];
 
-#ifdef PARALLEL
-#endif // PARALLEL
+#ifdef USE_PARALLEL
+#endif // USE_PARALLEL
 
 /*
 Super Pro Fighter (FIG) Header Format
@@ -87,13 +87,13 @@ typedef struct st_fig_header
 #define FIG_HEADER_START 0
 #define FIG_HEADER_LEN (sizeof (st_fig_header_t))
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 extern int fig_read_rom (const char *filename, unsigned int parport);
 extern int fig_write_rom (const char *filename, unsigned int parport);
 extern int fig_read_sram (const char *filename, unsigned int parport);
 extern int fig_write_sram (const char *filename, unsigned int parport);
 extern int fig_read_cart_sram (const char *filename, unsigned int parport);
 extern int fig_write_cart_sram (const char *filename, unsigned int parport);
-#endif // PARALLEL
+#endif // USE_PARALLEL
 
 #endif // FIG_H

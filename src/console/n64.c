@@ -494,7 +494,7 @@ n64_init (st_rominfo_t *rominfo)
                rominfo->internal_crc2_len * 2, rominfo->internal_crc2_len * 2);
 
       sprintf (rominfo->internal_crc2, buf,
-#ifdef  ANSI_COLOR
+#ifdef  USE_ANSI_COLOR
                ucon64.ansi_color ?
                  ((n64crc.crc2 == value) ?
                    "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")

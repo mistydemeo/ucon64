@@ -38,7 +38,7 @@ const st_usage_t gbx_usage[] =
   {
     {NULL, NULL, "Game Boy Xchanger/GBDoctor"},
     {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
     {"xgbx", NULL, "send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically when ROM does not exist"},
     {"xgbxs", NULL, "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
@@ -46,11 +46,11 @@ const st_usage_t gbx_usage[] =
     {"xgbxb", "BANK", "send/receive 64 kbits SRAM to/from GB Xchanger BANK\n"
                      "BANK can be a number from 0 to 15; " OPTION_LONG_S "port=PORT\n"
                      "receives automatically when ROM does not exist"},
-#endif // PARALLEL
+#endif // USE_PARALLEL
     {NULL, NULL, NULL}
   };
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 static void set_ai_data (unsigned char _ai, unsigned char _data);
 static char check_card (void);
 static void set_ai(unsigned char _ai);
@@ -2762,4 +2762,4 @@ gbx_write_sram (const char *filename, unsigned int parport, int bank)
   return 0;
 }
 
-#endif // PARALLEL
+#endif // USE_PARALLEL

@@ -41,7 +41,7 @@ const st_usage_t fal_usage[] =
   {
     {NULL, NULL, "Flash Advance Linker"},
     {NULL, NULL, "2001 Visoly http://www.visoly.com"},
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
     {"xfal", NULL, "send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically (32 Mbits) when ROM does not exist"},
     {"xfalmulti", "SIZE", "send multiple ROMs to Flash Advance Linker (makes temporary\n"
@@ -55,12 +55,12 @@ const st_usage_t fal_usage[] =
                      "BANK can be 1, 2, 3 or 4; " OPTION_LONG_S "port=PORT\n"
                      "receives automatically when SRAM does not exist"},
     {"xfalm", NULL, "try to enable EPP mode, default is SPP mode"},
-#endif // PARALLEL
+#endif // USE_PARALLEL
     {NULL, NULL, NULL}
 };
 
 
-#ifdef PARALLEL
+#ifdef USE_PARALLEL
 
 /********************************************************/
 /* Flash Linker Advance                                 */
@@ -1769,4 +1769,4 @@ fal_write_sram (const char *filename, unsigned int parport, int bank)
   return -1;
 }
 
-#endif // PARALLEL
+#endif // USE_PARALLEL

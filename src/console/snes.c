@@ -443,16 +443,31 @@ snes_ufos (st_rominfo_t *rominfo)
 
 static void
 set_nsrt_info (st_rominfo_t *rominfo, void *header)
+/*
+  This function will write an NSRT header if the user specified a controller
+  type, but only if the checksum is correct.
+  NSRT is a SNES ROM tool. See developers.html.
+*/
 {
   int x;
 
   if (UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
     {
-      ((unsigned char *) header)[0x1d0] = snes_header.country;
+      if (rominfo->current_internal_crc != rominfo->internal_crc)
+        {
+          printf ("WARNING: The controller type info will be discarded (checksum is bad)\n");
+          return;
+        }
+
+      ((unsigned char *) header)[0x1d0] = snes_header.country | (snes_hirom ? 0x20 : 0);
       memcpy (((unsigned char *) header) + 0x1d1, &snes_header.name, SNES_NAME_LEN);
       ((unsigned char *) header)[0x1e6] = snes_header.checksum_low;
       ((unsigned char *) header)[0x1e7] = snes_header.checksum_high;
       memcpy (((unsigned char *) header) + 0x1e8, "NSRT", 4);
+      ((unsigned char *) header)[0x1ec] = 20;   // version 2.0 header
+
+//TODO:      ((unsigned char *) header)[0x1ee] = ?; checksum low byte
+//TODO:      ((unsigned char *) header)[0x1ef] = ?; checksum high byte
     }
 
   if (UCON64_ISSET (ucon64.controller))
@@ -2019,12 +2034,14 @@ snes_init (st_rominfo_t *rominfo)
                       "  Original game name: \"%s\"\n"
                       "  Original checksum: 0x%x\n"
                       "  Port 1 controller type: %s\n"
-                      "  Port 2 controller type: %s",
+                      "  Port 2 controller type: %s\n"
+                      "  Header version: %.1f",
                NULL_TO_UNKNOWN_S (snes_country[MIN (OFFSET (header, 0x1d0) & 0xf, SNES_COUNTRY_MAX - 1)]),
                name,
                OFFSET (header, 0x1e6) + (OFFSET (header, 0x1e7) << 8),
                str_list[ctrl1],
-               str_list[ctrl2]);
+               str_list[ctrl2],
+               OFFSET (header, 0x1ec) / 10.f);
       strcat (rominfo->misc, buf);
     }
 

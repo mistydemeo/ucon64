@@ -82,8 +82,9 @@ write programs in C
 #include "patch/ips.h"
 #include "patch/bsl.h"
 
-int frontend = 0;
 
+struct ucon64_ rom;
+  
 void
 ucon64_exit (void)
 {
@@ -135,8 +136,15 @@ main (int argc, char *argv[])
   uid_t uid;
   gid_t gid;
 #endif
-  struct ucon64_ rom;
+//  struct ucon64_ rom;
 
+/*
+  int option_index = 0;
+  struct option long_options[] = {
+    {"test", 1, 0, 1},
+    {0, 0, 0, 0}
+  };
+*/
 
   ucon64_flush (argc, argv, &rom);
   if (!strlen (rom.rom))
@@ -208,7 +216,7 @@ main (int argc, char *argv[])
   if (argcmp (argc, argv, "-frontend"))
     {
       atexit (ucon64_exit);
-      frontend = 1;                             // used by parport_gauge()
+      rom.frontend = 1;                             // used by ucon64_gauge()
     }
 
 /*

@@ -462,41 +462,18 @@ parport_probe (unsigned int port)
 }
 
 int
-parport_gauge (time_t init_time, long pos, long size)
+ucon64_gauge (struct ucon64_ *rom, time_t init_time, long pos, long size)
 {
-  long bps;
-  int p, percentage;
-  time_t curr, left;
-  char progress[24 + 1];
+  int percentage;
+  
+//  size = rom->bytes;//quickftell (rom->rom);
+
+  if (!rom->frontend)
+    return gauge(init_time, pos, size);
 
   percentage = 100 * pos / size;
-  if (frontend)
-    printf ("%u\n", percentage);
-  else
-    {
-      if ((curr = time (0) - init_time) == 0)
-        curr = 1;                               // `round up' to at least 1 sec (no division
-      if (pos > size)                           //  by zero below)
-        return -1;
-
-      bps = pos / curr;                         // # bytes/second (average transfer speed)
-      left = (size - pos) / bps;
-
-      p = 24 * pos / size;
-      progress[0] = 0;
-      strncat (progress, "========================", p);
-      strncat (&progress[p], "------------------------", 24 - p);
-
-      printf ("\r%10lu Bytes [%s] %u%%, BPS=%lu, ",
-              pos, progress, percentage, (unsigned long) bps);
-
-      if (pos == size)
-        printf ("TOTAL=%03ld:%02ld", (long) curr / 60, (long) curr % 60); // DON'T print a newline
-      else                                                                //  -> gauge can be cleared
-        printf ("ETA=%03ld:%02ld   ", (long) left / 60, (long) left % 60);
-    }
+  printf ("%u\n", percentage);
   fflush (stdout);
-
   return 0;
 }
 #endif // BACKUP

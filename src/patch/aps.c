@@ -71,13 +71,13 @@ n64aps_CheckFile (char *Filename, char *mode)
 
   fp = fopen (Filename, mode);
   if (fp == NULL)
-    return (n64aps_FALSE);
+    return n64aps_FALSE;
   else
     {
       fclose (fp);
       if (mode[0] == 'w')
         unlink (Filename);
-      return (n64aps_TRUE);
+      return n64aps_TRUE;
     }
 }
 
@@ -336,9 +336,9 @@ n64aps_main (int argc, char *argv[])
   strcpy (File2, argv[3]);
 
   if (!n64aps_CheckFile (File1, "rb+"))
-    return (1);
+    return 1;
   if (!n64aps_CheckFile (File2, "rb"))
-    return (1);
+    return 1;
 
   n64aps_ORGFile = fopen (File1, "rb+");
   n64aps_APSFile = fopen (File2, "rb");
@@ -361,7 +361,7 @@ n64aps_main (int argc, char *argv[])
   fclose (n64aps_ORGFile);
   fclose (n64aps_APSFile);
 
-  return (0);
+  return 0;
 }
 
 /* Create APS (Advanced Patch System) for N64 Images
@@ -422,7 +422,7 @@ n64caps_CheckFile (char *Filename, char *mode, int Image)
 
   fp = fopen (Filename, mode);
   if (fp == NULL)
-    return (n64caps_FALSE);
+    return n64caps_FALSE;
   else
     {
       if (Image)
@@ -440,12 +440,12 @@ n64caps_CheckFile (char *Filename, char *mode, int Image)
                   printf ("%s is an Invalid Image\n", Filename);
                   fflush (stdout);
                 }
-              return (n64caps_FALSE);
+              return n64caps_FALSE;
             }
-          return (n64caps_TRUE);
+          return n64caps_TRUE;
         }
     }
-  return (n64caps_TRUE);
+  return n64caps_TRUE;
 }
 
 void
@@ -660,11 +660,11 @@ n64caps_main (int argc, char *argv[])
   strcpy (OutFile, argv[4]);
 
   if (!n64caps_CheckFile (File1, "rb", n64caps_TRUE))
-    return (1);
+    return 1;
   if (!n64caps_CheckFile (File2, "rb", n64caps_TRUE))
-    return (1);
+    return 1;
   if (!n64caps_CheckFile (OutFile, "wb", n64caps_FALSE))
-    return (1);
+    return 1;
 
   n64caps_APSFile = fopen (OutFile, "wb");
   n64caps_ORGFile = fopen (File1, "rb");
@@ -709,7 +709,7 @@ n64caps_main (int argc, char *argv[])
       unlink (OutFile);
     }
 
-  return (0);
+  return 0;
 }
 
 
@@ -722,5 +722,5 @@ aps_usage (int argc, char *argv[])
   -mka		create APS patch; $FILE=CHANGED_ROM\n\
   -na		change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION\n\
 ");
-  return (0);
+  return 0;
 }

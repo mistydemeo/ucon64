@@ -32,9 +32,9 @@ bsl (char *name, char *option2)
   int dat;
 
   if (!(fh = fopen (name, "r+b")))
-    return (-1);
+    return -1;
   if (!(fh2 = fopen (option2, "rb")))
-    return (-1);
+    return -1;
 
 
   printf ("BSL/Baseline\n");
@@ -109,7 +109,7 @@ bsl (char *name, char *option2)
 
   fclose (fh2);
   fclose (fh);
-  return (0);
+  return 0;
 }
 
 
@@ -118,7 +118,7 @@ bsl_usage (int argc, char *argv[])
 {
   printf ("  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE\n\
 ");
-  return (0);
+  return 0;
 }
 
 //TODO make bsl patch

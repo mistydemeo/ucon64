@@ -528,7 +528,7 @@ addppfid (int argc, char *argv[])
 
   quickfwrite (&fsize, quickftell (filename), 4, filename, "r+b");
   printf ("done!\n");
-  return (0);
+  return 0;
 }
 
 
@@ -543,5 +543,5 @@ ppf_usage (int argc, char *argv[])
   -idppf	change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ\n\
 ");
 
-  return (0);
+  return 0;
 }

@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>             // ioperm() (libc5)
+#include <getopt.h>
 //#include "config.h"
 
 #include "ucon64_db.h"
@@ -117,12 +118,7 @@ struct ucon64_
   char config_file[FILENAME_MAX]; //path and name of the config file
 
   int backup;			//flag if backups files (*.bak) should be created
-/*
-  If ucon64 operates as backend for a front end and the commandline argument 
-  -frontend was given output will contain a pointer to an existing file 
-  instead of stdout
-*/
-//  FILE *output;
+  int frontend;			//flag if uCON64 was started by a frontend
 
   long console;                 //integer for the detected console system
 //  long console_forced;
@@ -172,8 +168,7 @@ struct ucon64_
   char misc[MAXBUFSIZE];        //some miscellaneous information about the ROM in one single string
 };
 
-
-extern int frontend;
+extern struct ucon64_ rom;
 
 #include "ucon64_misc.h"
 

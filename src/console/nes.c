@@ -6879,13 +6879,13 @@ nes_init (st_rominfo_t *rominfo)
   internal_name = NULL;                         // reset this var, see nes_n()
   type = PASOFAMI;                              // reset type, see below
 
-  q_fread (magic, 0, 15, ucon64.rom);  
+  q_fread (magic, 0, 15, ucon64.rom);
   if (memcmp (magic, "NES", 3) == 0)
     /*
-      Check for "NES" and not for INES_SIG_S ("NES\x1a"), because there are a
-      few NES files floating around on the internet with a pseudo iNES header.
-      For example, there exists a copy of "Linus Music Demo (PD)" with the magic
-      bytes "NES\x1b".
+      Check for "NES" and not for INES_SIG_S ("NES\x1a"), because there are two
+      NES files floating around on the internet with a pseudo iNES header:
+      "Home Alone 2 - Lost in New York (U) [b3]" (magic: "NES\x19") and
+      "Linus Music Demo (PD)" (magic: "NES\x1b")
     */
     {
       type = INES;

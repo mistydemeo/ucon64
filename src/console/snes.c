@@ -3161,18 +3161,24 @@ snes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, buf);
       if ((snes_header.rom_type & 0xf) >= 3)
         {
-          if (snes_header.rom_type == 3 || snes_header.rom_type == 4 ||
-              snes_header.rom_type == 5)
+          if (snes_header.rom_type == 3 || snes_header.rom_type == 5)
             str = "DSP";
           else if (snes_header.rom_type == 0x13)
-            str = "SuperFX";
-          else if ((snes_header.rom_type & 0xf0) == 0x10) // 0x14, 0x15 or 0x1a
-            str = "SuperFX2";
+            str = "Super FX (Mario Chip 1)";
+          else if (snes_header.rom_type == 0x1a)
+            str = "Super FX";
+          else if (snes_header.rom_type == 0x14 || snes_header.rom_type == 0x15)
+            {
+              if (snes_header.rom_size > 10)
+                str = "Super FX 2";             // larger than 8 Mbit
+              else
+                str = "Super FX";
+            }
           else if (snes_header.rom_type == 0x25)
             str = "OBC1";
-          else if ((snes_header.rom_type & 0xf0) == 0x30) // 0x34 or 0x35
+          else if (snes_header.rom_type == 0x34 || snes_header.rom_type == 0x35)
             str = "SA-1";
-          else if ((snes_header.rom_type & 0xf0) == 0x40) // 0x43 or 0x45
+          else if (snes_header.rom_type == 0x43 || snes_header.rom_type == 0x45)
             str = "S-DD1";
           else if (snes_header.rom_type == 0x55)
             str = "S-RTC";

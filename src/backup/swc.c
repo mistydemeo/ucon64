@@ -82,11 +82,11 @@ static int hirom;                               // `hirom' was `special'
 
 #ifdef  DUMP_SA1
 static void set_sa1_map (unsigned short chunk);
-/*extern*/ int snes_sa1;
+/*extern*/ int snes_sa1 = 0;            // change to non-zero to dump SA-1 cartridges
 #endif
 #ifdef  DUMP_SDD1
 static void set_sdd1_map (unsigned short chunk);
-/*extern*/ int snes_sdd1;
+/*extern*/ int snes_sdd1 = 0;           // change to non-zero to dump S-DD1 cartridges
 #endif
 
 

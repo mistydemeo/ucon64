@@ -28,9 +28,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 extern "C" {
 #endif
 
-#if     defined __linux__ || defined __FreeBSD__ || defined __solaris__ || \
-        defined __MINGW32__ || defined __CYGWIN__ || defined __BEOS__ || \
-        defined AMIGA || defined __APPLE__      // Mac OS X actually
+#if     defined __linux__ || defined __FreeBSD__ || defined __OpenBSD__ || \
+        defined __solaris__ || defined __MINGW32__ || defined __CYGWIN__ || \
+        defined __BEOS__ || defined AMIGA || defined __APPLE__ // Mac OS X actually
 // We cannot use config.h (for HAVE_INTTYPES_H), because this header file may be
 //  installed in a system include directory
 #include <inttypes.h>

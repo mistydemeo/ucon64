@@ -28,7 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
-#include "quick_io.h"
 #include "dex.h"
 #include "psxpblib.h"
 #include "misc_par.h"

@@ -1343,7 +1343,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose
   This function goes a bit over the top what memory allocation technique
   concerns, but at least it's stable.
   Note the important difference between (*patterns)[0].n_sets and
-  patterns[0]->n_sets (not especially that member). I (dbjh) am too ashamed too
+  patterns[0]->n_sets (not especially that member). I (dbjh) am too ashamed to
   tell how long it took me to finally realise that...
 */
 {
@@ -2537,6 +2537,74 @@ q_fncmp (const char *filename, int start, int len, const char *search,
 
   fclose (fh);
   return -1;
+}
+
+
+int
+quick_io (void *buffer, size_t start, size_t len, const char *filename,
+          const char *mode)
+{
+  int result;
+  FILE *fh;
+
+  if ((fh = fopen (filename, (const char *) mode)) == NULL)
+    {
+#ifdef DEBUG
+      extern int errno;
+      fprintf (stderr, "ERROR: Could not open \"%s\" in mode \"%s\"\n"
+                       "CAUSE: %s\n", filename, mode, strerror (errno));
+#endif
+      return -1; // TODO: 0?
+    }
+
+#ifdef DEBUG
+  fprintf (stderr, "\"%s\": \"%s\"\n", filename, (char *) mode);
+#endif
+
+  fseek (fh, start, SEEK_SET);                  // TODO: what if fseek fails?
+
+  // Note the order of arguments of fread() and fwrite(). Now quick_io()
+  //  returns the number of characters read or written. Some code relies on
+  //  this behaviour!
+  if (*mode == 'r' && mode[1] != '+')           // "r+b" always writes
+    result = (int) fread (buffer, 1, len, fh);
+  else
+    result = (int) fwrite (buffer, 1, len, fh);
+
+  fclose (fh);
+  return result;
+}
+
+
+int
+quick_io_c (int value, size_t start, const char *filename, const char *mode)
+{
+  int result;
+  FILE *fh;
+
+  if ((fh = fopen (filename, (const char *) mode)) == NULL)
+    {
+#ifdef DEBUG
+      extern int errno;
+      fprintf (stderr, "ERROR: Could not open \"%s\" in mode \"%s\"\n"
+                       "CAUSE: %s\n", filename, mode, strerror (errno));
+#endif
+      return -1; // TODO: 0?
+    }
+
+#ifdef DEBUG
+  fprintf (stderr, "\"%s\": \"%s\"\n", filename, (char *) mode);
+#endif
+
+  fseek (fh, start, SEEK_SET);                  // TODO: what if fseek fails?
+
+  if (*mode == 'r' && mode[1] != '+')           // "r+b" always writes
+    result = fgetc (fh);
+  else
+    result = fputc (value, fh);
+
+  fclose (fh);
+  return result;
 }
 
 

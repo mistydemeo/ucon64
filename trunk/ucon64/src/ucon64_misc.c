@@ -92,17 +92,17 @@ const st_usage_t unknown_usage[] =
 
 const st_usage_t gc_usage[] =
   {
-    {NULL, NULL, "Nintendo Game Cube/Panasonic Gamecube Q\n"},
-    {NULL, NULL, "2001/2002 Nintendo http://www.nintendo.com\n"},
-    {"gc", NULL, "force recognition\n"},
+    {NULL, NULL, "Nintendo Game Cube/Panasonic Gamecube Q"},
+    {NULL, NULL, "2001/2002 Nintendo http://www.nintendo.com"},
+    {"gc", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
 const st_usage_t s16_usage[] =
   {
-    {NULL, NULL, "Sega System 16(A/B)/Sega System 18/dual 68000\n"},
-    {NULL, NULL, "1987/19XX/19XX SEGA http://www.sega.com\n"},
-    {"s16", NULL, "force recognition\n"},
+    {NULL, NULL, "Sega System 16(A/B)/Sega System 18/dual 68000"},
+    {NULL, NULL, "1987/19XX/19XX SEGA http://www.sega.com"},
+    {"s16", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
@@ -116,81 +116,81 @@ const st_usage_t atari_usage[] =
 
 const st_usage_t coleco_usage[] =
   {
-    {NULL, NULL, "ColecoVision\n"},
-    {NULL, NULL, "1982\n"},
-    {"coleco", NULL, "force recognition\n"},
+    {NULL, NULL, "ColecoVision"},
+    {NULL, NULL, "1982"},
+    {"coleco", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
 const st_usage_t vboy_usage[] =
   {
-    {NULL, NULL, "Nintendo Virtual Boy\n"},
-    {NULL, NULL, "19XX Nintendo http://www.nintendo.com\n"},
-    {"vboy", NULL, "force recognition\n"},
+    {NULL, NULL, "Nintendo Virtual Boy"},
+    {NULL, NULL, "19XX Nintendo http://www.nintendo.com"},
+    {"vboy", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
 const st_usage_t vectrex_usage[] =
   {
-    {NULL, NULL, "Vectrex\n"},
-    {NULL, NULL, "1982\n"},
-    {"vec", NULL, "force recognition\n"},
+    {NULL, NULL, "Vectrex"},
+    {NULL, NULL, "1982"},
+    {"vec", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
 const st_usage_t intelli_usage[] =
   {
-    {NULL, NULL, "Intellivision\n"},
-    {NULL, NULL, "1979 Mattel\n"},
-    {"intelli", NULL, "force recognition\n"},
+    {NULL, NULL, "Intellivision"},
+    {NULL, NULL, "1979 Mattel"},
+    {"intelli", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
 const st_usage_t gp32_usage[] =
   {
-    {NULL, NULL, "GP32 Game System\n"},
-    {NULL, NULL, "2002 Gamepark http://www.gamepark.co.kr\n"},
-    {"gp32", NULL, "force recognition\n"},
+    {NULL, NULL, "GP32 Game System"},
+    {NULL, NULL, "2002 Gamepark http://www.gamepark.co.kr"},
+    {"gp32", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
 const st_usage_t ps2_usage[] =
   {
-    {NULL, NULL, "Playstation 2\n"},
-    {NULL, NULL, "2000 Sony http://www.playstation.com\n"},
-    {"ps2", NULL, "force recognition\n"},
+    {NULL, NULL, "Playstation 2"},
+    {NULL, NULL, "2000 Sony http://www.playstation.com"},
+    {"ps2", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
 const st_usage_t xbox_usage[] =
   {
-    {NULL, NULL, "XBox\n"},
-    {NULL, NULL, "2001 Microsoft http://www.xbox.com\n"},
-    {"xbox", NULL, "force recognition\n"},
+    {NULL, NULL, "XBox"},
+    {NULL, NULL, "2001 Microsoft http://www.xbox.com"},
+    {"xbox", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
 const st_usage_t sat_usage[] =
   {
-    {NULL, NULL, "Saturn\n"},
-    {NULL, NULL, "1994 SEGA http://www.sega.com\n"},
-    {"sat", NULL, "force recognition\n"},
+    {NULL, NULL, "Saturn"},
+    {NULL, NULL, "1994 SEGA http://www.sega.com"},
+    {"sat", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
 const st_usage_t real3do_usage[] =
   {
-    {NULL, NULL, "Real3DO\n"},
-    {NULL, NULL, "1993 Panasonic/Goldstar/Philips\n"},
-    {"3do", NULL, "force recognition\n"},
+    {NULL, NULL, "Real3DO"},
+    {NULL, NULL, "1993 Panasonic/Goldstar/Philips"},
+    {"3do", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
 const st_usage_t cd32_usage[] =
   {
-    {NULL, NULL, "CD32\n"},
-    {NULL, NULL, "1993 Commodore\n"},
-    {"cd32", NULL, "force recognition\n"},
+    {NULL, NULL, "CD32"},
+    {NULL, NULL, "1993 Commodore"},
+    {"cd32", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
@@ -198,7 +198,7 @@ const st_usage_t cdi_usage[] =
   {
     {NULL, NULL, "CD-i"},
     {NULL, NULL, "1991 Philips"},
-    {"cdi", NULL, "force recognition\n"},
+    {"cdi", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
@@ -486,6 +486,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_LSRAM, UCON64_N64, n64_usage,        WF_INIT|WF_PROBE},
   {UCON64_LYX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
   {UCON64_MGDGG, UCON64_SMS, sms_usage,        WF_DEFAULT|WF_NO_SPLIT},
+  {UCON64_MKIP, UCON64_DC, dc_usage,           WF_NO_ROM},
   {UCON64_MSG, UCON64_PCE, pcengine_usage,     WF_DEFAULT},
 #if 1 // -multi is now used for GBA *and* Genesis
   {UCON64_MULTI, UCON64_UNKNOWN, NULL,         WF_INIT|WF_PROBE|WF_STOP},
@@ -496,10 +497,12 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_N2, UCON64_GEN, genesis_usage,       WF_DEFAULT},
   {UCON64_N2GB, UCON64_GB, gameboy_usage,      WF_DEFAULT},
   {UCON64_NROT, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
+  {UCON64_PARSE, UCON64_DC, dc_usage,          WF_NO_ROM},
   {UCON64_PASOFAMI, UCON64_NES, nes_usage,     WF_DEFAULT},
   {UCON64_ROTL, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
   {UCON64_ROTR, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
   {UCON64_SAM, UCON64_NG, neogeo_usage,        WF_DEFAULT},
+  {UCON64_SCR, UCON64_DC, dc_usage,            WF_DEFAULT},
   {UCON64_SGB, UCON64_GB, gameboy_usage,       WF_DEFAULT},
   {UCON64_SMC, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
   {UCON64_SRAM, UCON64_GBA, gba_usage,         0},
@@ -509,9 +512,10 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_UFO, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
   {UCON64_UFOS, UCON64_SNES, snes_usage,       0},
   {UCON64_UNIF, UCON64_NES, nes_usage,         WF_DEFAULT},
+  {UCON64_UNSCR, UCON64_DC, dc_usage,          WF_DEFAULT},
   {UCON64_USMS, UCON64_N64, n64_usage,         WF_DEFAULT},
   {UCON64_V64, UCON64_N64, n64_usage,          WF_DEFAULT},
-
+  {UCON64_VMS, UCON64_DC, dc_usage,            0},
 #ifdef  USE_PARALLEL
   // We have to add |WF_NO_ROM to the copier options workflow parameter in
   //  order to support dumping of cartridges or copier SRAM.

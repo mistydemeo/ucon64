@@ -432,6 +432,36 @@ extern int q_fsize (const char *filename);
 
 
 /*
+  Quick IO
+
+  mode
+    "r", "rb", "w", "wb", "a", "ab"
+
+  quick_io_c() returns byte read or fputc()'s status
+  quick_io() returns number of bytes read or written
+*/
+extern int quick_io (void *buffer, size_t start, size_t len, const char *fname, const char *mode);
+extern int quick_io_c (int value, size_t start, const char *fname, const char *mode);
+
+
+/*
+  Macros
+
+  q_fread()  same as fread but takes start and src is a filename
+  q_fwrite() same as fwrite but takes start and dest is a filename; mode
+             is the same as fopen() modes
+  q_fgetc()  same as fgetc but takes filename instead of FILE and a pos
+  q_fputc()  same as fputc but takes filename instead of FILE and a pos
+
+  b,s,l,f,m == buffer,start,len,filename,mode
+*/
+#define q_fread(b,s,l,f) (quick_io(b,s,l,f,"rb"))
+#define q_fwrite(b,s,l,f,m) (quick_io((void *)b,s,l,f,m))
+#define q_fgetc(f,s) (quick_io_c(0,s,f,"rb"))
+#define q_fputc(f,s,b,m) (quick_io_c(b,s,f,m))
+
+
+/*
   Configuration file handling
 
   get_property()  get value of propname from filename or return value of env

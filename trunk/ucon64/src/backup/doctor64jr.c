@@ -136,7 +136,6 @@ void mainproc(void *arg) {
 #include <string.h>
 #include <time.h>
 #include "misc.h"
-#include "quick_io.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
@@ -161,37 +160,25 @@ const st_usage_t doctor64jr_usage[] = {
 #ifdef USE_PARALLEL
 
 #define BUFFERSIZE 32768
-#define set_ai_write outportb(port_a, 5);       // ninit=1, nwrite=0
-#define set_data_write outportb(port_a, 1);     // ninit=0, nwrite=0
-#define set_data_read outportb(port_a, 0);      // ninit=0, nwrite=1
-#define set_normal outportb(port_a, 4);         // ninit=1, nwrite=1
+//#define set_ai_write outportb (port_a, 5);    // ninit=1, nwrite=0
+#define set_data_write outportb (port_a, 1);    // ninit=0, nwrite=0
+#define set_data_read outportb (port_a, 0);     // ninit=0, nwrite=1
+//#define set_normal outportb (port_a, 4);      // ninit=1, nwrite=1
 
 static unsigned short int port_8, port_9, port_a, port_b, port_c,
                           *buffer;
 int wv_mode;
 
-static void set_ai (unsigned char ai);
-static void set_ai_data (unsigned char ai, unsigned char data);
-static void init_port (int enable_write);
-static void end_port (int enable_write);
-static char write_32k (unsigned short int hi_word, unsigned short int lo_word);
-#if 0
-static char verify_32k (unsigned short int hi_word, unsigned short int lo_word);
-static void gen_pat_32k (unsigned short int offset);
-static unsigned short int test_dram (void);
-#endif
-static unsigned long int get_address (void);
 
-
-void
+static void
 set_ai (unsigned char ai)
 {
-  set_ai_write                                  // ninit=1, nwrite=0
+  outportb (port_a, 5);                         // ninit=1, nwrite=0
   outportb (port_b, ai);
 }
 
 
-void
+static void
 set_ai_data (unsigned char ai, unsigned char data)
 {
   set_ai (ai);
@@ -200,10 +187,10 @@ set_ai_data (unsigned char ai, unsigned char data)
 }
 
 
-void
+static void
 init_port (int enable_write)
 {
-#ifndef USE_PPDEV // probably #if 0, but first test if this works with ppdev - dbjh
+#if 0 // not necessary *and* not correct (read-only register) - dbjh
   outportb (port_9, 1);                         // clear EPP time flag
 #endif
   set_ai_data (6, 0x0a);
@@ -215,17 +202,17 @@ init_port (int enable_write)
 }
 
 
-void
+static void
 end_port (int enable_write)
 {
   set_ai_data (5, (unsigned char) enable_write); // d0=0 is write protect mode
   set_ai_data (7, 0);                           // release pc mode
   set_ai_data (6, 0);                           // 6==0x0a, 7==0x05 is pc_control mode
-  set_normal                                    // ninit=1, nWrite=1
+  outportb (port_a, 4);                         // ninit=1, nwrite=1
 }
 
 
-unsigned char
+static int
 check_card (void)
 {
   set_ai_data (3, 0x12);
@@ -257,7 +244,7 @@ check_card (void)
 }
 
 
-char
+static int
 write_32k (unsigned short int hi_word, unsigned short int lo_word)
 {
   unsigned char unpass, pass1;
@@ -273,11 +260,11 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
           set_ai_data (1, (unsigned char) ((i << 1) | lo_word));
           set_ai_data (0, 0);
           set_ai (4);                           // set address index=4
-          set_data_write                        // ninit=0, nWrite=0
+          set_data_write                        // ninit=0, nwrite=0
           fix = i << 8;
           for (j = 0; j < 256; j++)
             outportw (port_c, buffer[j + fix]);
-          set_data_read                         // ninit=0, nWrite=1
+          set_data_read                         // ninit=0, nwrite=1
           if (wv_mode)
             {
               for (j = 0; j < 256; j++)
@@ -304,7 +291,7 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
                   set_ai_data (1, (unsigned char) ((i << 1) | lo_word | 1));
                   set_ai_data (0, 0xf8);
                   set_ai (4);
-                  set_data_read                 // ninit=0, nWrite=1
+                  set_data_read                 // ninit=0, nwrite=1
                   for (j = 252; j < 256; j++)
                     {
                       temp = inportw (port_c);
@@ -339,8 +326,8 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
 }
 
 
-#if 0
-char
+#if 0 // not used
+static int
 verify_32k (unsigned short int hi_word, unsigned short int lo_word)
 {
   char unpass;
@@ -388,7 +375,7 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
 }
 
 
-void
+static void
 gen_pat_32k (unsigned short int offset)
 {
   int i;
@@ -398,7 +385,7 @@ gen_pat_32k (unsigned short int offset)
 }
 
 
-unsigned short int
+static unsigned short int
 test_dram (void)
 {
   int n_pages = 0, page;
@@ -465,7 +452,7 @@ test_dram (void)
 #endif
 
 
-unsigned long int
+static unsigned long int
 get_address (void)
 {
   unsigned long int address;
@@ -491,21 +478,6 @@ get_address (void)
 
   return address;
 }
-
-
-#if 0
-static void
-usage (char *progname)
-{
-  fprintf (stderr, "Usage: %s [-w] [-v] [-t] [-a] <File>\n", progname);
-  fprintf (stderr, "-w : DRAM write protect disabled.\n");
-  fprintf (stderr, "-v : verify File data vs DRAM data.\n");
-  fprintf (stderr, "-t : test DRAM.\n");
-  fprintf (stderr, "-a : enable cartridge and unprotect.\n");
-  exit (2);
-  return;
-}
-#endif
 
 
 int
@@ -542,10 +514,6 @@ doctor64jr_write (const char *filename, unsigned int parport)
       end_port (enable_write);
       exit (1);
     }
-
-  set_ai (3);
-  set_data_read
-  inportb (port_c);                             // required? - dbjh
 
   wv_mode = 0;
 

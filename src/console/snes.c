@@ -3499,13 +3499,13 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
         score += 1;
 
       // map type
-      if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0xf) < 4)
+      x = rom_buffer[SNES_HEADER_START + header_offset + 37];
+      if ((x & 0xf) < 4)
         score += 2;
-      x = rom_buffer[SNES_HEADER_START + header_offset + 38];
-      if (snes_hirom_ok && !(x == 0x34 || x == 0x35)) // ROM type for SA-1
+      y = rom_buffer[SNES_HEADER_START + header_offset + 38];
+      if (snes_hirom_ok && !(y == 0x34 || y == 0x35)) // ROM type for SA-1
         // map type, HiROM flag (only if we're sure about value of snes_hirom)
-        if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0x01) ==
-            (header_offset >= snes_header_base + SNES_HIROM) ? 0x01 : 0x00)
+        if ((x & 1) == ((header_offset >= snes_header_base + SNES_HIROM) ? 1 : 0))
           score += 1;
 
       // ROM size
@@ -3522,10 +3522,11 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
     }
   else
     {
-      // map type, HiROM flag
-      if ((rom_buffer[SNES_HEADER_START + header_offset + 40] & 0x01) ==
-          (header_offset >= snes_header_base + SNES_HIROM) ? 0x01 : 0x00)
-        score += 1;
+      if (snes_hirom_ok)
+        // map type, HiROM flag
+        if ((rom_buffer[SNES_HEADER_START + header_offset + 40] & 1) ==
+            ((header_offset >= snes_header_base + SNES_HIROM) ? 1 : 0))
+          score += 1;
     }
 
   // publisher "escape code"

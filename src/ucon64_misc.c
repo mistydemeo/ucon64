@@ -910,23 +910,6 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
         ucon64_nfo (&rominfo);
         break;
 
-    case UCON64_LSFID:
-//if diz already exists... 
-      if (!result)
-        {
-          strcpy (buf, NULL_TO_EMPTY (rominfo.console_usage[0]));
-          buf [strcspn (buf, "(/")] = 0;
-          
-          printf ("%-45.45s\n%-45.45s\n%-45.45s\n%.4f Mb %-34.34s\n\n", mkprint (rominfo.name, ' '),
-                                              NULL_TO_EMPTY (rominfo.maker),
-                                              buf,
-                                              TOMBIT_F (quickftell (ucon64.rom) - rominfo.buheader_len),
-                                              NULL_TO_EMPTY (rominfo.country));
-
-          fflush (stdout);
-        }
-        break;
-
     case UCON64_RROM:
     case UCON64_RR83:
       if (ucon64.console != UCON64_UNKNOWN)

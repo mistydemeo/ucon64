@@ -177,7 +177,6 @@ const struct option long_options[] = {
     {"lnx", 0, 0, UCON64_LNX},
     {"logo", 0, 0, UCON64_LOGO},
     {"ls", 0, 0, UCON64_LS},
-    {"lsfid", 0, 0, UCON64_LSFID},
     {"lsv", 0, 0, UCON64_LSV},
     {"lynx", 0, 0, UCON64_LYNX},
     {"lyx", 0, 0, UCON64_LYX},
@@ -255,6 +254,7 @@ const struct option long_options[] = {
     {"xcdrw", 0, 0, UCON64_XCDRW},
 #endif // BACKUP_CD
 #ifdef BACKUP
+    {"xdex", 0, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
     {"xfal", 0, 0, UCON64_XFAL},
     {"xfalb", 1, 0, UCON64_XFALB},
@@ -272,6 +272,7 @@ const struct option long_options[] = {
     {"xv64", 0, 0, UCON64_XV64},
 #endif // BACKUP
     {"z64", 0, 0, UCON64_Z64},
+
     {"hd", 0, 0, UCON64_HD},
     {"hdn", 1, 0, UCON64_HDN},
     {"nhd", 0, 0, UCON64_NHD},
@@ -846,7 +847,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
-//    "  " OPTION_LONG_S "lsfid       generate ROM list in FILE_ID.DIZ format; " OPTION_LONG_S "rom=DIRECTORY\n"
+    "  " OPTION_LONG_S "lsfid       generate FILE_ID.DIZ(s) for ROM(s); " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
     "                  this is often used by people who lose control of their ROMs\n"
     "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"
@@ -965,7 +966,7 @@ ucon64_usage (int argc, char *argv[])
         UCON64_USAGE (doctor64_usage);
         UCON64_USAGE (doctor64jr_usage);
 //        UCON64_USAGE (cd64_usage);
-        UCON64_USAGE (dex_usage);
+//        UCON64_USAGE (dex_usage);
 #endif // BACKUP
         single = 1;
         break;
@@ -1112,7 +1113,7 @@ ucon64_usage (int argc, char *argv[])
       UCON64_USAGE (doctor64_usage);
       UCON64_USAGE (doctor64jr_usage);
 //      UCON64_USAGE (cd64_usage);
-      UCON64_USAGE (dex_usage);
+//      UCON64_USAGE (dex_usage);
 #endif // BACKUP
       printf ("\n");
 

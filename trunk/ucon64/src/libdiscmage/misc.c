@@ -681,10 +681,12 @@ basename2 (const char *path)
   p2 = strrchr (path, '\\');
   if (p2 > p1)                                  // use the last separator in path
     p1 = p2;
-  if (p1 == NULL)                               // no slash, perhaps a drive?
-    p1 = strrchr (path, ':');
 #else
   p1 = strrchr (path, FILE_SEPARATOR);
+#endif
+#if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
+  if (p1 == NULL)                               // no slash, perhaps a drive?
+    p1 = strrchr (path, ':');
 #endif
 
   return p1 ? p1 + 1 : (char *) path;
@@ -715,6 +717,10 @@ dirname2 (const char *path)
   p2 = strrchr (dir, '\\');
   if (p2 > p1)                                  // use the last separator in path
     p1 = p2;
+#else
+  p1 = strrchr (dir, FILE_SEPARATOR);
+#endif
+#if     defined DJGPP || defined __CYGWIN__ || defined _WIN32
   if (p1 == NULL)                               // no slash, perhaps a drive?
     {
       if ((p1 = strrchr (dir, ':')))
@@ -723,8 +729,6 @@ dirname2 (const char *path)
           p1 += 2;
         }
     }
-#else
-  p1 = strrchr (dir, FILE_SEPARATOR);
 #endif
 
   while (p1 > dir &&                            // find first of last separators (we have to strip trailing ones)

@@ -9,11 +9,13 @@ CC=@CC@
 CFLAGS=-I. -I./html2gui/src/ -Wall -O3
 LDFLAGS=-s
 
-OBJECTS=ucon64gui.o misc.o network.o \
-        snes/snes.o top.o bottom.o swan/swan.o gba/gba.o \
-        configmenu/configmenu.o nes/nes.o n64/n64.o gb/gb.o sms/sms.o \
-	html2gui/src/html2gui.o genesis/genesis.o dc/dc.o lynx/lynx.o \
-        jaguar/jaguar.o pce/pce.o neogeo/neogeo.o ngp/ngp.o
+OBJECTS=ucon64gui.o misc.o url.o \
+        console/snes.o top.o bottom.o console/swan.o console/gba.o \
+        configmenu/configmenu.o console/nes.o console/n64.o console/gb.o \
+        console/sms.o \
+	html2gui/src/html2gui.o console/genesis.o console/dc.o console/lynx.o \
+        console/jaguar.o console/pce.o console/neogeo.o console/ngp.o
+
 
 ifdef GTK
   CFLAGS+=  `gtk-config --cflags`
@@ -30,7 +32,7 @@ endif
 all: ucon64gui
 
 clean:
-	rm -f $(OBJECTS) DEADJOE */DEADJOE ucon64gui *~ */*~ */*/*~ *.core ../bin/ucon64gui
+	rm -f $(OBJECTS) DEADJOE */DEADJOE ucon64gui *~ */*~ */*/*~ *.core
 
 distclean: clean
 	rm -f Makefile config.log config.status config.cache config.h
@@ -55,39 +57,7 @@ misc.o: misc.h
 ucon64_gui.o: switches.c options.c $(UCON64GUI_STD_H)
 html2gui/src/html2gui.o: html2gui/src/html2gui.h html2gui/src/gtk/gtk.c html2gui/src/sdl/sdl.c html2gui/src/curses/curses.c $(UCON64GUI_STD_H)
 configmenu/configmenu.o: configmenu/configmenu.h $(UCON64GUI_STD_H)
-xpm/xpm.o: xpm/xpm.h $(UCON64GUI_STD_H)
-gb/gb.o: gb/gb.h $(UCON64GUI_STD_H)
-#gba/gba.o: gba/gba.h $(UCON64GUI_STD_H)
-#genesis/genesis.o: genesis/genesis.h $(UCON64GUI_STD_H)
-#jaguar/jaguar.o: jaguar/jaguar.h $(UCON64GUI_STD_H)
-#lynx/lynx.o: lynx/lynx.h $(UCON64GUI_STD_H)
-n64/n64.o: n64/n64.h $(UCON64GUI_STD_H)
-#neogeo/neogeo.o: neogeo/neogeo.h $(UCON64GUI_STD_H)
-nes/nes.o: nes/nes.h $(UCON64GUI_STD_H)
-#ngp/ngp.o: ngp/ngp.h $(UCON64GUI_STD_H)
-#pce/pce.o: pce/pce.h $(UCON64GUI_STD_H)
-#sms/sms.o: sms/sms.h $(UCON64GUI_STD_H)
-snes/snes.o: snes/snes.h $(UCON64GUI_STD_H)
-#swan/swan.o: swan/swan.h $(UCON64GUI_STD_H)
-#dc/dc.o: dc/dc.h $(UCON64GUI_STD_H)
-#patch/aps.o: patch/aps.h $(UCON64GUI_STD_H)
-#patch/bsl.o: patch/bsl.h $(UCON64GUI_STD_H)
-#patch/ips.o: patch/ips.h $(UCON64GUI_STD_H)
-#patch/ppf.o: patch/ppf.h $(UCON64GUI_STD_H)
-#patch/xps.o: patch/xps.h $(UCON64GUI_STD_H)
-#patch/pal4u.o: patch/pal4u.h $(UCON64GUI_STD_H)
-#patch/gg.o: patch/gg.h $(UCON64GUI_STD_H)
-#backup/doctor64.o: backup/doctor64.h $(UCON64GUI_STD_H)
-#backup/doctor64jr.o: backup/doctor64jr.h $(UCON64GUI_STD_H)
-#backup/fal.o: backup/fal.h backup/cartlib.c $(UCON64GUI_STD_H)
-#backup/fig.o: backup/fig.h $(UCON64GUI_STD_H)
-#backup/fpl.o: backup/fpl.h $(UCON64GUI_STD_H)
-#backup/gbx.o: backup/gbx.h $(UCON64GUI_STD_H)
-#backup/mgd.o: backup/mgd.h $(UCON64GUI_STD_H)
-#backup/smc.o: backup/smc.h $(UCON64GUI_STD_H)
-#backup/smd.o: backup/smd.h $(UCON64GUI_STD_H)
-#backup/swc.o: backup/swc.h $(UCON64GUI_STD_H)
-#backup/cd64.o: backup/cd64.h $(UCON64GUI_STD_H)
-#backup/cdrw.o: backup/cdrw.h $(UCON64GUI_STD_H)
-#backup/dex.o: backup/dex.h backup/psxpblib.h $(UCON64GUI_STD_H)
-#backup/mccl.o: backup/mccl.h $(UCON64GUI_STD_H)
+console/gb.o: console/gb.h $(UCON64GUI_STD_H)
+console/n64.o: console/n64.h $(UCON64GUI_STD_H)
+console/nes.o: console/nes.h $(UCON64GUI_STD_H)
+console/snes.o: console/snes.h $(UCON64GUI_STD_H)

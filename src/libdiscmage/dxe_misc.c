@@ -175,7 +175,7 @@ fprintf (FILE *file, const char *format, ...)
 {
   va_list argptr;
   int n_chars;
-  
+
   va_start (argptr, format);
   n_chars = import_export.vfprintf (file, format, argptr);
   va_end (argptr);
@@ -188,7 +188,7 @@ sprintf (char *buffer, const char *format, ...)
 {
   va_list argptr;
   int n_chars;
-  
+
   va_start (argptr, format);
   n_chars = import_export.vsprintf (buffer, format, argptr);
   va_end (argptr);
@@ -200,13 +200,6 @@ int
 vsprintf (char *buffer, const char *format, va_list argptr)
 {
   return import_export.vsprintf (buffer, format, argptr);
-}
-
-
-long
-ftell (FILE *file)
-{
-  return import_export.ftell (file);
 }
 
 

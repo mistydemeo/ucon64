@@ -352,7 +352,7 @@ genesis_mgd (st_rominfo_t *rominfo)
   buf[7] = '_';
   buf[8] = 0;
   sprintf (dest_name, "%s.%03u", buf, genesis_rom_size / MBIT);
-  ucon64_output_fname (dest_name, 1);
+  ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
   ucon64_fbackup (NULL, dest_name);
 
   save_bin (dest_name, rom_buffer, genesis_rom_size);
@@ -423,7 +423,7 @@ genesis_s (st_rominfo_t *rominfo)
 
       sprintf (dest_name, "%s.%03lu", buf,
                (unsigned long) (ucon64.file_size - rominfo->buheader_len) / MBIT);
-      ucon64_output_fname (dest_name, 1);
+      ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
 
       if (surplus)
         nparts++;
@@ -691,8 +691,9 @@ load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
 }
 
 
-int save_smd (const char *name, unsigned char *rom_buffer,
-              st_smd_header_t *header, long size)
+int
+save_smd (const char *name, unsigned char *rom_buffer, st_smd_header_t *header,
+          long size)
 {
   interleave_buffer (rom_buffer, size);
   q_fwrite (header, 0, SMD_HEADER_LEN, name, "wb");
@@ -700,7 +701,8 @@ int save_smd (const char *name, unsigned char *rom_buffer,
 }
 
 
-int save_bin (const char *name, unsigned char *rom_buffer, long size)
+int
+save_bin (const char *name, unsigned char *rom_buffer, long size)
 {
   return q_fwrite (rom_buffer, 0, size, name, "wb");
 }
@@ -946,7 +948,7 @@ genesis_init (st_rominfo_t *rominfo)
   // misc stuff
   memcpy (buf2, &OFFSET (genesis_header, 80), 48);
   buf2[48] = 0;
-  sprintf (buf, "Overseas Game Name: %s\n", buf2);
+  sprintf (buf, "Overseas game name: %s\n", buf2);
   strcat (rominfo->misc, buf);
 
 #if 0
@@ -955,7 +957,7 @@ genesis_init (st_rominfo_t *rominfo)
     strcpy(buf, "Internal Size: ? Mb\n");
   else
 #endif
-  sprintf (buf, "Internal Size: %.4f Mb\n", (float)
+  sprintf (buf, "Internal size: %.4f Mb\n", (float)
            (OFFSET (genesis_header, 165) + 1) / 2);
   strcat (rominfo->misc, buf);
 
@@ -975,26 +977,26 @@ genesis_init (st_rominfo_t *rominfo)
 
 #if 1
 // This code seems to give better results than the old code.
-  sprintf (buf, "RomType: %s\n",
+  sprintf (buf, "ROM type: %s\n",
            (OFFSET (genesis_header, 128) == 'G') ? "Game" : "Education");
   strcat (rominfo->misc, buf);
 #else
   if (OFFSET (genesis_header, 128) == 'G')
     {
-      sprintf (buf, "RomType: %s\n",
+      sprintf (buf, "ROM type: %s\n",
                (OFFSET (genesis_header, 129) == 'M') ? "Game" : "Education");
       strcat (rominfo->misc, buf);
     }
 #endif
 
-  sprintf (buf, "I/O Device(s): %s %s %s %s\n",
+  sprintf (buf, "I/O device(s): %s %s %s %s\n",
            NULL_TO_UNKNOWN_S (genesis_io[MIN ((int) OFFSET (genesis_header, 144), GENESIS_IO_MAX - 1)]),
            NULL_TO_EMPTY (genesis_io[MIN ((int) OFFSET (genesis_header, 145), GENESIS_IO_MAX - 1)]),
            NULL_TO_EMPTY (genesis_io[MIN ((int) OFFSET (genesis_header, 146), GENESIS_IO_MAX - 1)]),
            NULL_TO_EMPTY (genesis_io[MIN ((int) OFFSET (genesis_header, 147), GENESIS_IO_MAX - 1)]));
   strcat (rominfo->misc, buf);
 
-  sprintf (buf, "ProductCode: %-11.11s\n", &OFFSET (genesis_header, 128));
+  sprintf (buf, "Product code: %-11.11s\n", &OFFSET (genesis_header, 128));
   strcat (rominfo->misc, buf);
 
   sprintf (buf, "Date: %-8.8s\n", &OFFSET (genesis_header, 24));

@@ -342,7 +342,7 @@ gameboy_mgd (st_rominfo_t *rominfo)
 
   sprintf (dest_name, "%s.%03lu", buf,
            (unsigned long) ((q_fsize (ucon64.rom) - rominfo->buheader_len) / MBIT));
-  ucon64_output_fname (dest_name, 1);
+  ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
   ucon64_fbackup (NULL, dest_name);
   q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), dest_name, "wb");
 
@@ -549,7 +549,7 @@ gameboy_init (st_rominfo_t *rominfo)
   rominfo->country = (OFFSET (gameboy_header, 0x4a) == 0) ? "Japan" : "U.S.A./Europe";
 
   // misc stuff
-  sprintf (buf, "RomType: %s\n", NULL_TO_UNKNOWN_S (gameboy_romtype[OFFSET (gameboy_header, 0x47)]));
+  sprintf (buf, "ROM type: %s\n", NULL_TO_UNKNOWN_S (gameboy_romtype[OFFSET (gameboy_header, 0x47)]));
   strcat (rominfo->misc, buf);
 
   value = OFFSET (gameboy_header, 0x49);
@@ -567,7 +567,7 @@ gameboy_init (st_rominfo_t *rominfo)
   sprintf (buf, "Version: 1.%d\n", OFFSET (gameboy_header, 0x4c));
   strcat (rominfo->misc, buf);
 
-  sprintf (buf, "Game Boy Type: %s\n",
+  sprintf (buf, "Game Boy type: %s\n",
     (OFFSET (gameboy_header, 0x43) == 0x80) ? "Color" :
 //    (OFFSET (gameboy_header, 0x46) == 0x3) ? "Super" :
     "Standard (4 Colors)");
@@ -577,7 +577,7 @@ gameboy_init (st_rominfo_t *rominfo)
   value += OFFSET (gameboy_header, 0x03) << 8;
   value += OFFSET (gameboy_header, 0x02);
 
-  sprintf (buf, "Start Address: %04x", value);
+  sprintf (buf, "Start address: %04x", value);
   strcat (rominfo->misc, buf);
 
   rominfo->console_usage = gameboy_usage;
@@ -596,7 +596,7 @@ gameboy_init (st_rominfo_t *rominfo)
          q_fgetc (ucon64.rom, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4f);
 
       sprintf (buf,
-               "Complement Checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)",
+               "Complement checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)",
                rominfo->internal_crc2_len * 2, rominfo->internal_crc2_len * 2);
 
       x = q_fgetc (ucon64.rom, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d);
@@ -604,11 +604,11 @@ gameboy_init (st_rominfo_t *rominfo)
 #ifdef  ANSI_COLOR
                ucon64.ansi_color ?
                  ((checksum.complement == x) ?
-                   "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
+                   "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
                  :
-                 ((checksum.complement == x) ? "ok" : "bad"),
+                 ((checksum.complement == x) ? "Ok" : "Bad"),
 #else
-               (checksum.complement == x) ? "ok" : "bad",
+               (checksum.complement == x) ? "Ok" : "Bad",
 #endif
                checksum.complement,
                (checksum.complement == x) ? "=" : "!", x);

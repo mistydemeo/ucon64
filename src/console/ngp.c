@@ -86,7 +86,7 @@ ngp_init (st_rominfo_t *rominfo)
 
 //ROM maker
   rominfo->maker = (!strncmp (&OFFSET (ngp_header, 0), snk_code, strlen(snk_code))) ?
-    "SNK" : "third party";
+    "SNK" : "Third party";
 
 //misc stuff
   sprintf (buf, "Mode: %s",

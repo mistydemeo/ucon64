@@ -5579,9 +5579,9 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
               parse_info_file (&info, ucon64.dump_info);
 /*
               printf ("Dump info:\n"
-                      "  dumper: %s\n"
-                      "  date: %d-%d-%d\n"
-                      "  agent: %s\n",
+                      "  Dumper: %s\n"
+                      "  Date: %d-%d-%d\n"
+                      "  Agent: %s\n",
                       info.dumper_name,
                       info.day, info.month, info.year,
                       info.dumper_agent);
@@ -6817,22 +6817,22 @@ nes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, buf);
 
       if (ines_header.ctrl1 & INES_MIRROR)
-        str = "vertical";
+        str = "Vertical";
       else if (ines_header.ctrl1 & INES_4SCREEN)
-        str = "four screens of VRAM";
+        str = "Four screens of VRAM";
       else
-        str = "horizontal";
+        str = "Horizontal";
       sprintf (buf, "Mirroring: %s\n", str);
       strcat (rominfo->misc, buf);
 
-      sprintf (buf, "Save RAM: %s\n", (ines_header.ctrl1 & INES_SRAM) ? "yes" : "no");
+      sprintf (buf, "Save RAM: %s\n", (ines_header.ctrl1 & INES_SRAM) ? "Yes" : "No");
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "512-byte trainer: %s\n",
-                (ines_header.ctrl1 & INES_TRAINER) ? "yes" : "no");
+                (ines_header.ctrl1 & INES_TRAINER) ? "Yes" : "No");
       strcat (rominfo->misc, buf);
 
-      sprintf (buf, "VS-System: %s", (ines_header.ctrl2 & 0x01) ? "yes" : "no");
+      sprintf (buf, "VS-System: %s", (ines_header.ctrl2 & 0x01) ? "Yes" : "No");
       strcat (rominfo->misc, buf);
       break;
     case UNIF:
@@ -6928,7 +6928,7 @@ nes_init (st_rominfo_t *rominfo)
           str_list[1] = "PAL";
           str_list[2] = "NTSC/PAL";
           x = *((unsigned char *) unif_chunk->data);
-          sprintf (buf, "Television standard: %s\n", x > 2 ? "unknown" : str_list[x]);
+          sprintf (buf, "Television standard: %s\n", x > 2 ? "Unknown" : str_list[x]);
           strcat (rominfo->misc, buf);
         }
       free (unif_chunk);
@@ -6936,9 +6936,9 @@ nes_init (st_rominfo_t *rominfo)
         {
           st_dumper_info_t *info = (st_dumper_info_t *) unif_chunk->data;
           sprintf (buf, "Dump info:\n"
-                        "  dumper: %s\n"
-                        "  date: %d-%d-%d\n"
-                        "  agent: %s\n",
+                        "  Dumper: %s\n"
+                        "  Date: %d-%d-%d\n"
+                        "  Agent: %s\n",
                         info->dumper_name,
                         info->day, info->month,
 #ifdef  WORDS_BIGENDIAN
@@ -6952,13 +6952,13 @@ nes_init (st_rominfo_t *rominfo)
       free (unif_chunk);
       if ((unif_chunk = read_chunk (CTRL_ID, rom_buffer, 0)) != NULL)
         {
-          str_list[0] = "regular joypad";
-          str_list[1] = "zapper";
+          str_list[0] = "Regular joypad";
+          str_list[1] = "Zapper";
           str_list[2] = "R.O.B.";
           str_list[3] = "Arkanoid controller";
-          str_list[4] = "power pad";
-          str_list[5] = "four-score adapter";
-          str_list[6] = "unknown";              // bit 6 and 7 are reserved
+          str_list[4] = "Power pad";
+          str_list[5] = "Four-score adapter";
+          str_list[6] = "Unknown";              // bit 6 and 7 are reserved
           str_list[7] = str_list[6];
           ctrl_str[0] = 0;
 
@@ -7004,7 +7004,7 @@ nes_init (st_rominfo_t *rominfo)
                       (x == *((int *) unif_chunk2->data)) ? "ok" : "bad";
 #endif
                 }
-              sprintf (buf, "PRG%d: %.4f Mb, checksum %s\n",
+              sprintf (buf, "PRG%X: %.4f Mb, checksum %s\n",
                 n, TOMBIT_F (unif_chunk->length), str);
               strcat (rominfo->misc, buf);
               free (unif_chunk2);
@@ -7038,7 +7038,7 @@ nes_init (st_rominfo_t *rominfo)
                       (x == *((int *) unif_chunk2->data)) ? "ok" : "bad";
 #endif
                 }
-              sprintf (buf, "CHR%d: %.4f Mb, checksum %s\n",
+              sprintf (buf, "CHR%X: %.4f Mb, checksum %s\n",
                         n, TOMBIT_F (unif_chunk->length), str);
               strcat (rominfo->misc, buf);
               free (unif_chunk2);
@@ -7056,26 +7056,26 @@ nes_init (st_rominfo_t *rominfo)
       x = 0;
       if ((unif_chunk = read_chunk (BATR_ID, rom_buffer, 0)) != NULL)
         x = 1;
-      sprintf (buf, "Save RAM: %s\n", x ? "yes" : "no");
+      sprintf (buf, "Save RAM: %s\n", x ? "Yes" : "No");
       strcat (rominfo->misc, buf);
       free (unif_chunk);
       if ((unif_chunk = read_chunk (MIRR_ID, rom_buffer, 0)) != NULL)
         {
-          str_list[0] = "horizontal (hard wired)";
-          str_list[1] = "vertical (hard wired)";
-          str_list[2] = "all pages from $2000 (hard wired)";
-          str_list[3] = "all pages from $2400 (hard wired)";
-          str_list[4] = "four screens of VRAM (hard wired)";
-          str_list[5] = "controlled by mapper hardware";
+          str_list[0] = "Horizontal (hard wired)";
+          str_list[1] = "Vertical (hard wired)";
+          str_list[2] = "All pages from $2000 (hard wired)";
+          str_list[3] = "All pages from $2400 (hard wired)";
+          str_list[4] = "Four screens of VRAM (hard wired)";
+          str_list[5] = "Controlled by mapper hardware";
           x = *((unsigned char *) unif_chunk->data);
-          sprintf (buf, "Mirroring: %s\n", x > 5 ? "unknown" : str_list[x]);
+          sprintf (buf, "Mirroring: %s\n", x > 5 ? "Unknown" : str_list[x]);
           strcat (rominfo->misc, buf);
         }
       free (unif_chunk);
       x = 0;
       if ((unif_chunk = read_chunk (VROR_ID, rom_buffer, 0)) != NULL)
         x = 1;
-      sprintf (buf, "VRAM override: %s", x ? "yes" : "no");
+      sprintf (buf, "VRAM override: %s", x ? "Yes" : "No");
       strcat (rominfo->misc, buf);
       free (unif_chunk);
 
@@ -7134,15 +7134,15 @@ nes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "Mirroring: %s\n",
-        (ines_header.ctrl1 & INES_MIRROR) ? "vertical" : "horizontal");
+        (ines_header.ctrl1 & INES_MIRROR) ? "Vertical" : "Horizontal");
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "Save RAM: %s\n",
-        (ines_header.ctrl1 & INES_SRAM) ? "yes" : "no");
+        (ines_header.ctrl1 & INES_SRAM) ? "Yes" : "No");
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "512-byte trainer: %s",
-        (ines_header.ctrl1 & INES_TRAINER) ? "yes" : "no");
+        (ines_header.ctrl1 & INES_TRAINER) ? "Yes" : "No");
       strcat (rominfo->misc, buf);
       break;
     case FFE:

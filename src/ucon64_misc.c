@@ -599,7 +599,7 @@ remove_temp_file (void)
 
 
 char *
-ucon64_output_fname (char *requested_fname, int force_requested_fname)
+ucon64_output_fname (char *requested_fname, int force_flags)
 {
   char ext[80], fname[FILENAME_MAX];
 
@@ -610,7 +610,7 @@ ucon64_output_fname (char *requested_fname, int force_requested_fname)
   // force_requested_fname is necessary for options like -gd3. Of course that
   //  code should handle archives and come up with unique filenames for
   //  archives with more than one file.
-  if (!ucon64.fname_arch[0] || force_requested_fname)
+  if (!ucon64.fname_arch[0] || (force_flags & OF_FORCE_BASENAME))
     {
       strcpy (fname, basename (requested_fname));
       sprintf (requested_fname, "%s%s", ucon64.output_path, fname);
@@ -624,8 +624,11 @@ ucon64_output_fname (char *requested_fname, int force_requested_fname)
     the suffix ".zip" while it isn't a zip file. uCON64 handles such files
     correctly, because it looks at the file data itself, but many programs
     don't.
+    If the flag OF_FORCE_SUFFIX was used we keep the suffix, even if it's
+    ".zip". Now ucon64_output_fname() can be used when renaming/moving
+    files.
   */
-  if (!stricmp (ext, ".zip"))
+  if (!(force_flags & OF_FORCE_SUFFIX) && !stricmp (ext, ".zip"))
     strcpy (ext, ".tmp");
   setext (requested_fname, ext);
 
@@ -1300,7 +1303,11 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
     case UCON64_LSD:
       if (ucon64.crc32)
         {
-          printf ("%s\n", ucon64.rom);
+          printf ("%s", ucon64.rom);
+          if (ucon64.fname_arch[0])
+            printf (" (%s)\n", ucon64.fname_arch);
+          else
+            fputc ('\n', stdout);
           if (ucon64.fcrc32)            // SNES & Genesis interleaved/N64 non-interleaved
             printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32);
           else
@@ -1361,7 +1368,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
               if (!strcmp (ucon64.rom, buf))
                 {
 #ifdef  DEBUG
-                  printf ("Found %s\n", ucon64.rom);
+                  printf ("Found \"%s\"\n", ucon64.rom);
 #endif
                   return 0;
                 }
@@ -1373,7 +1380,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
               else
                 // TODO: here should come some code that checks if buf is really
                 //       the file that its name suggests
-                //       DON'T remove buf! That would be stupid.
+                //       DON'T remove file with name buf! That would be stupid.
                 printf ("File \"%s\" already exists, skipping \"%s\"\n", buf, ucon64.rom);
             }
         }
@@ -1381,9 +1388,18 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
 
     case UCON64_LS:
     default:
+#if 1 // Displaying the year when the file was last modified seems more useful
+      // to me (dbjh) than displaying the hour and minute
+      strftime (buf, 13, "%b %d %Y", localtime (&fstate->st_mtime));
+#else
       strftime (buf, 13, "%b %d %H:%M", localtime (&fstate->st_mtime));
-      printf ("%-31.31s %10d %s %s\n", to_func (rominfo.name, strlen (rominfo.name), toprint2),
+#endif
+      printf ("%-31.31s %10d %s %s", to_func (rominfo.name, strlen (rominfo.name), toprint2),
               ucon64.file_size, buf, ucon64.rom);
+      if (ucon64.fname_arch[0])
+        printf (" (%s)\n", ucon64.fname_arch);
+      else
+        fputc ('\n', stdout);
       fflush (stdout);
       break;
     }
@@ -1430,8 +1446,12 @@ ucon64_ls (const char *path, int mode)
             {
               for (unzip_current_file_nr = 0; unzip_current_file_nr < n;
                    unzip_current_file_nr++)
-                ucon64_ls_main (ep->d_name, &fstate, mode, console);
+                {
+                  ucon64_fname_arch (ep->d_name);
+                  ucon64_ls_main (ep->d_name, &fstate, mode, console);
+                }
               unzip_current_file_nr = 0;
+              ucon64.fname_arch[0] = 0;
             }
           else
 #endif

@@ -801,7 +801,7 @@ snes_mgd (st_rominfo_t *rominfo)
   memcpy (&mgh[16], dest_name, strlen (dest_name));
 
   setext (dest_name, ".078");
-  ucon64_output_fname (dest_name, 1);
+  ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
   ucon64_fbackup (NULL, dest_name);
   q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -924,7 +924,7 @@ snes_gd3 (st_rominfo_t *rominfo)
     dest_name[6] = 0;
   else
     dest_name[7] = 0;
-  ucon64_output_fname (dest_name, 1);
+  ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
 
   if (snes_hirom)
     {
@@ -1194,13 +1194,13 @@ snes_s (st_rominfo_t *rominfo)
           half_size = size / 2;
 
           sprintf (dest_name, "%s.078", names[name_i++]);
-          ucon64_output_fname (dest_name, 1);
+          ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
           // don't write backups of parts, because one name is used
           q_fcpy (ucon64.rom, 0, half_size + rominfo->buheader_len, dest_name, "wb");
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
           sprintf (dest_name, "%s.078", names[name_i++]);
-          ucon64_output_fname (dest_name, 1);
+          ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
           q_fcpy (ucon64.rom, half_size + rominfo->buheader_len, size - half_size, dest_name, "wb");
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
         }
@@ -1210,7 +1210,7 @@ snes_s (st_rominfo_t *rominfo)
             {
               // don't write backups of parts, because one name is used
               sprintf (dest_name, "%s.078", names[name_i++]);
-              ucon64_output_fname (dest_name, 1);
+              ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
               q_fcpy (ucon64.rom, x * 8 * MBIT + (x ? rominfo->buheader_len : 0),
                         8 * MBIT + (x ? 0 : rominfo->buheader_len), dest_name, "wb");
               fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -1220,7 +1220,7 @@ snes_s (st_rominfo_t *rominfo)
             {
               // don't write backups of parts, because one name is used
               sprintf (dest_name, "%s.078", names[name_i++]);
-              ucon64_output_fname (dest_name, 1);
+              ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
               q_fcpy (ucon64.rom, x * 8 * MBIT + (x ? rominfo->buheader_len : 0),
                         surplus + (x ? 0 : rominfo->buheader_len), dest_name, "wb");
               fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -1295,7 +1295,7 @@ snes_j (st_rominfo_t *rominfo)
       if (p == NULL)                            // filename didn't contain a period
         p = src_name + strlen (src_name) - 1;
       else
-        type == GD3 ? p-- : p++;
+        (type == GD3 || type == MGD) ? p-- : p++;
       (*p)++;
 
       if (type == GD3)
@@ -2006,10 +2006,10 @@ matches_deviates (int equal)
   return
 #ifdef  ANSI_COLOR
     ucon64.ansi_color ?
-      (equal ? "\x1b[01;32mmatches\x1b[0m" : "\x1b[01;33mdeviates\x1b[0m") :
-      (equal ? "matches" : "deviates");
+      (equal ? "\x1b[01;32mMatches\x1b[0m" : "\x1b[01;33mDeviates\x1b[0m") :
+      (equal ? "Matches" : "Deviates");
 #else
-      (equal ? "matches" : "deviates");
+      (equal ? "Matches" : "Deviates");
 #endif
 }
 
@@ -2516,10 +2516,10 @@ snes_init (st_rominfo_t *rominfo)
       rominfo->country = NULL_TO_UNKNOWN_S (snes_country[MIN (snes_header.country, SNES_COUNTRY_MAX - 1)]);
 
       // misc stuff
-      sprintf (buf, "Internal Size: %.4f Mb\n", (float) (1 << (snes_header.size - 7)));
+      sprintf (buf, "Internal size: %.4f Mb\n", (float) (1 << (snes_header.size - 7)));
       strcat (rominfo->misc, buf);
 
-      sprintf (buf, "RomType: (%x) %s", snes_header.rom_type,
+      sprintf (buf, "ROM type: (%x) %s", snes_header.rom_type,
         snes_romtype[(snes_header.rom_type & 7) % 3]);
       strcat (rominfo->misc, buf);
       if ((snes_header.rom_type & 0xf) >= 3)
@@ -2548,7 +2548,7 @@ snes_init (st_rominfo_t *rominfo)
           else if (snes_header.rom_type == 0xf6)
             str = "Seta's DSP";
           else
-            str = "unknown";
+            str = "Unknown";
           sprintf (buf, " and %s", str);
           strcat (rominfo->misc, buf);
         }
@@ -2565,7 +2565,7 @@ snes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, buf);
       // TODO: reverse engineering SMC.COM ;-)
     }
-  sprintf (buf, "RomSpeed: %s\n",
+  sprintf (buf, "ROM speed: %s\n",
            snes_header.map_type & 0x10 ? "120ns (FastROM)" : "200ns (SlowROM)");
   strcat (rominfo->misc, buf);
 
@@ -2580,18 +2580,18 @@ snes_init (st_rominfo_t *rominfo)
       x = snes_header.inverse_checksum_low;
       x += snes_header.inverse_checksum_high << 8;
       sprintf (buf,
-               "Inverse Checksum: %%s, 0x%%0%dlx + 0x%%0%dlx = 0x%%0%dlx %%s",
+               "Inverse checksum: %%s, 0x%%0%dlx + 0x%%0%dlx = 0x%%0%dlx %%s",
                rominfo->internal_crc2_len * 2, rominfo->internal_crc2_len * 2,
                rominfo->internal_crc2_len * 2);
       sprintf (rominfo->internal_crc2, buf,
 #ifdef  ANSI_COLOR
                ucon64.ansi_color ?
                  ((rominfo->current_internal_crc + x == 0xffff) ?
-                   "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
+                   "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
                  :
-                 ((rominfo->current_internal_crc + x == 0xffff) ? "ok" : "bad"),
+                 ((rominfo->current_internal_crc + x == 0xffff) ? "Ok" : "Bad"),
 #else
-               (rominfo->current_internal_crc + x == 0xffff) ? "ok" : "bad",
+               (rominfo->current_internal_crc + x == 0xffff) ? "Ok" : "Bad",
 #endif
                rominfo->current_internal_crc, x, rominfo->current_internal_crc + x,
                (rominfo->current_internal_crc + x == 0xffff) ? "" : "~0xffff");
@@ -2621,7 +2621,7 @@ snes_init (st_rominfo_t *rominfo)
         {
           "Gamepad", "Mouse", "Mouse / Gamepad", "Super Scope",
           "Super Scope / Gamepad", "Konami's Justifier", "Multitap",
-          "Mouse / Super Scope / Gamepad", "unknown"
+          "Mouse / Super Scope / Gamepad", "Unknown"
         };
       int x = OFFSET (header, 0x1ed), ctrl1 = x >> 4, ctrl2 = x & 0xf;
 

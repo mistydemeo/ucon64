@@ -174,5 +174,8 @@ extern int ucon64_nfo (const st_rominfo_t *);
 extern int ucon64_init (const char *romfile, st_rominfo_t *);
 extern st_rominfo_t *ucon64_flush (st_rominfo_t *);
 extern int ucon64_console_probe (st_rominfo_t *);
+#ifdef  HAVE_ZLIB_H
+extern void ucon64_fname_arch (const char *fname);
+#endif
 
 #endif // #ifndef UCON64_H

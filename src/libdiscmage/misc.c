@@ -206,12 +206,12 @@ ansi_init (void)
 #ifndef WIN32
   int result = isatty (STDOUT_FILENO);
 #else
-  int result = 0; // no ANSI for WIN32
+  int result = 1;
 #endif
 
+#ifdef  DJGPP
   if (result)
     {
-#ifdef  DJGPP
 // Don't use __MSDOS__, because __dpmi_regs and __dpmi_int are DJGPP specific
       __dpmi_regs reg;
 
@@ -219,8 +219,8 @@ ansi_init (void)
       __dpmi_int (0x2f, &reg);
       if (reg.h.al != 0xff)                     // AL == 0xff if installed
         result = 0;
-#endif
     }
+#endif
 
   misc_ansi_color = result;
 
@@ -277,6 +277,7 @@ isfname (int c)
 #else
 #endif
       case '.':
+      case ',':
       case '-':
       case ' ':
       case '(':
@@ -299,7 +300,7 @@ isprint2 (int c)
 
   switch (c)
     {
-// characters that are also work with printf
+// characters that also work with printf
 #ifdef  __unix__
 #else
 #endif
@@ -631,17 +632,17 @@ strargv (int *argc, char ***argv, char *cmdline, int separator_char)
 
 
 #ifdef  WIN32
-//  VC++ support
+// VC++ support
 int access (const char *fname, void *mode)
 {
   struct stat fstate;
-  
+
   if (!stat (fname, &fstate))
     return 0;
-  
+
   return -1;
 }
-#endif  // WIN32
+#endif // WIN32
 
 
 int
@@ -672,13 +673,13 @@ change_mem (char *buf, int bufsize, char *searchstr, int strsize,
   in searchstr. This makes change_mem() behave a bit more intuitive. For
   example
     char str[] = "f foobar means...";
-    change_mem ("f**bar", 6, '*', '!', "XXXXXXXX", 8, str, strlen (str), 2);
+    change_mem (str, strlen (str), "f**bar", 6, '*', '!', "XXXXXXXX", 8, 2);
   finds and changes "foobar means..." into "foobar XXXXXXXX", while with uCON's
   algorithm it would not (but does the job good enough for patching SNES ROMs).
 
   One example of using sets:
     char str[] = "fu-bar     is the same as foobar    ";
-    change_mem ("f!!", 3, '*', '!', "fighter", 7, str, strlen (str), 1,
+    change_mem (str, strlen (str), "f!!", 3, '*', '!', "fighter", 7, 1,
                 "uo", 2, "o-", 2);
   This changes str into "fu-fighter is the same as foofighter".
 */
@@ -894,14 +895,13 @@ getenv2 (const char *variable)
     {
       if (!strcmp (variable, "HOME"))
         {
-          if ((tmp = getenv (variable)) != NULL)
-            strcpy (value, tmp);
-          else if ((tmp = getenv ("USERPROFILE")) != NULL)
+          if ((tmp = getenv ("USERPROFILE")) != NULL)
             strcpy (value, tmp);
           else if ((tmp = getenv ("HOMEDRIVE")) != NULL)
             {
               strcpy (value, tmp);
-              strcat (value, getenv ("HOMEPATH"));
+              tmp = getenv ("HOMEPATH");
+              strcat (value, tmp ? tmp : FILE_SEPARATOR_S);
             }
           else
             /*
@@ -926,10 +926,8 @@ getenv2 (const char *variable)
 
       if (!strcmp (variable, "TEMP") || !strcmp (variable, "TMP"))
         {
-          if ((tmp = getenv (variable)) != NULL)
-            strcpy (value, tmp);
-          else if (access ("/tmp/", R_OK | W_OK) == 0)  // trailing slash to force
-            strcpy (value, "/tmp");                     //  it to be a directory
+          if (access (FILE_SEPARATOR_S"tmp", R_OK | W_OK) == 0)
+            strcpy (value, FILE_SEPARATOR_S"tmp");
           else
             getcwd (value, FILENAME_MAX);
         }
@@ -963,7 +961,7 @@ get_property2 (const char *filename, const char *propname, char divider, char *b
     {                                           //  avoids trouble under DOS
       while (fgets (buf, sizeof buf, fh) != NULL)
         {
-          if ((p = strpbrk (buf, "\n\r")))        // strip *ANY* returns
+          if ((p = strpbrk (buf, "\n\r")))      // strip *any* returns
             *p = 0;
 
           if (*(buf + strspn (buf, "\t ")) == '#')
@@ -974,8 +972,8 @@ get_property2 (const char *filename, const char *propname, char divider, char *b
           if (!strnicmp (buf, propname, strlen (propname)))
             {
               p = strchr (buf, divider);
-              if (p) 
-                {
+              if (p)                    // if no divider was found the propname must be
+                {                       //  a bool config entry (present or not present)
                   p++;
                   strcpy (buffer, p + strspn (p, "\t "));
                 }
@@ -1016,7 +1014,7 @@ get_property_int (const char *filename, const char *propname, char divider)
 {
   char buf[MAXBUFSIZE];
   int32_t value = 0;
-  
+
   get_property2 (filename, propname, divider, buf, NULL);
 
   if (buf[0])
@@ -1028,8 +1026,8 @@ get_property_int (const char *filename, const char *propname, char divider)
       }
 
   value = strtol (buf, NULL, 10);
-  return value ? value : 1; // if buf was only text like 'Yes' we'll return at
-                                                                 // least 1
+  return value ? value : 1;                     // if buf was only text like 'Yes'
+                                                //  we'll return at least 1
 }
 
 
@@ -1242,7 +1240,7 @@ kbhit (void)
   int ch, key_pressed;
 
   tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected under
-  set_tty(&tmptty);                             //  Cygwin (define USE_POLL)
+  set_tty (&tmptty);                            //  Cygwin (define USE_POLL)
 
   if ((ch = fgetc (stdin)) != EOF)
     {
@@ -1859,7 +1857,7 @@ bswap_32 (uint32_t x)
 }
 
 
-uint64_t 
+uint64_t
 bswap_64 (uint64_t x)
 {
   unsigned char *ptr = (unsigned char *) &x, tmp;

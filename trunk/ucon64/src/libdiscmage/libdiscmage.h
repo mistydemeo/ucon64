@@ -22,28 +22,17 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef LIBDISCMAGE_H
 #define LIBDISCMAGE_H
 
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
-#ifdef  HAVE_INTTYPES_H
+#if     defined __linux__ || defined __FreeBSD__ || defined __solaris__ || \
+        defined __MINGW32__ || defined __CYGWIN__ || defined __BEOS__ || \
+        defined __APPLE__                       // Mac OS X actually
+// We cannot use config.h (for HAVE_INTTYPES_H), because this header file may be
+//  installed in a system include directory
 #include <inttypes.h>
-#elif   defined __CYGWIN__
-#include <sys/types.h>
-#if     __GNUC__ < 3
-#ifndef OWN_INTTYPES
-#define OWN_INTTYPES                            // signal that these are defined
-typedef u_int8_t uint8_t;
-typedef u_int16_t uint16_t;
-typedef u_int32_t uint32_t;
-typedef u_int64_t uint64_t;
-#endif
-#endif                                          // __GNUC__ < 3
-#else                                           // __MSDOS__, _WIN32, AMIGA
+#else                                           // __MSDOS__, _WIN32 (VC++), AMIGA
 #ifndef OWN_INTTYPES
 #define OWN_INTTYPES                            // signal that these are defined
 typedef unsigned char uint8_t;

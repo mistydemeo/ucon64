@@ -551,6 +551,7 @@ fclose(fsource);
 return(0);
 }
 
+/*
 int trackmode(long imagesize)
 {
   return(
@@ -561,3 +562,4 @@ int trackmode(long imagesize)
                            -1   // unknown
   );
 }
+*/

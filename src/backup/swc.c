@@ -186,8 +186,7 @@ receive_rom_info (unsigned char *buffer, int io_mode)
   else
     {
       byte = read_cartridge1 (0x00ffd5);
-      if ((byte & 1 && byte != 0x23) || byte == 0x3a) // & 1 => 0x21, 0x31, 0x35
-        hirom = 1;
+      hirom = ((byte & 1 && byte != 0x23) || byte == 0x3a) ? 1 : 0; // & 1 => 0x21, 0x31, 0x35
     }
 
   for (n = 0; n < (int) SWC_HEADER_LEN; n++)

@@ -7070,8 +7070,13 @@ nes_init (st_rominfo_t *rominfo)
 #endif
       if ((unif_chunk = read_chunk (NAME_ID, rom_buffer, 0)) != NULL)
         {
+#if 0
           sprintf (buf, "Internal name: %s\n", (char *) unif_chunk->data);
           strcat (rominfo->misc, buf);
+#endif
+          memcpy (rominfo->name, unif_chunk->data,
+                  unif_chunk->length > sizeof rominfo->name ?
+                    sizeof rominfo->name : unif_chunk->length);
         }
       free (unif_chunk);
       if ((unif_chunk = read_chunk (TVCI_ID, rom_buffer, 0)) != NULL)

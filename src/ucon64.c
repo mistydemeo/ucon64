@@ -1061,18 +1061,17 @@ ucon64_rom_handling (void)
               //  file could not be created/opened -> no segmentation fault
               if (ucon64.dat && ucon64.rominfo)
                 {
-                  if (ucon64.console == UCON64_NES)
-                    {
+                  if (!ucon64.rominfo->name[0])
+                    strcpy (ucon64.rominfo->name, NULL_TO_EMPTY (ucon64.dat->name));
+                  else if (ucon64.console == UCON64_NES)
+                    { // override the three-character FDS or FAM name
                       int t = nes_get_file_type ();
-                      if (t == UNIF || t == INES || t == PASOFAMI || t == FDS)
-                        strcpy ((char *) ucon64.rominfo->name,
-                                NULL_TO_EMPTY (ucon64.dat->name));
-                      if (!ucon64.rominfo->country)
-                        ucon64.rominfo->country = NULL_TO_EMPTY (ucon64.dat->country);
+                      if (t == FDS || t == FAM)
+                        strcpy (ucon64.rominfo->name, NULL_TO_EMPTY (ucon64.dat->name));
                     }
-                  else if (ucon64.console == UCON64_SMS)
-                    strcpy ((char *) ucon64.rominfo->name,
-                            NULL_TO_EMPTY (ucon64.dat->name));
+
+                  if (!ucon64.rominfo->country)
+                    ucon64.rominfo->country = NULL_TO_EMPTY (ucon64.dat->country);
                 }
               break;
           }

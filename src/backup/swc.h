@@ -20,8 +20,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef SWC_H
 #define SWC_H
-#define swc_TITLE "Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n" \
-                  "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"
+
+extern char *swc_title;
 #define swc_HEADER_START 0
 #define swc_HEADER_LEN 512
 
@@ -31,7 +31,7 @@ extern int swc_write_rom (char *filename, unsigned int parport);
 extern int swc_read_sram (char *filename, unsigned int parport);
 extern int swc_write_sram (char *filename, unsigned int parport);
 extern void swc_unlock (unsigned int parport);
-extern int swc_usage (int argc, char *argv[]);
+extern void swc_usage (void);
 #endif // BACKUP
 
 #endif // SWC_H

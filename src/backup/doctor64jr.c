@@ -29,6 +29,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "doctor64jr.h"
 
+
+char *doctor64jr_title = "Doctor64 Jr\n"
+                         "19XX Bung Enterprises Ltd http://www.bung.com.hk";
+
+
 //#define ai 0x37b
 //#define data 0x37c
 #define trans_size 32768
@@ -712,15 +717,15 @@ doctor64jr_write (char *filename, long start, long len, unsigned int parport)
 
 
 
-int
-doctor64jr_usage (int argc, char *argv[])
+void
+doctor64jr_usage (void)
 {
-    printf ( doctor64jr_TITLE "\n"
+    printf ("%s\n"
 
-  "  -xdjr         send/receive ROM to/from Doctor64 Jr; $FILE=PORT\n"
+  "  " OPTION_LONG_S "xdjr         send/receive ROM to/from Doctor64 Jr; $FILE=PORT\n"
           "                receives automatically when $ROM does not exist\n"
-          "NOTE: currently only sending is supported\n");
+          "NOTE: currently only sending is supported\n"
+          , doctor64jr_title);
 
-  return 0;
 }
 #endif // BACKUP

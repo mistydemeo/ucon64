@@ -61,6 +61,11 @@ static unsigned long CalculateFileCRC (FILE * file);
 static int detect_parport (unsigned int port);
 #endif
 
+
+char *unknown_bu_title = "Unknown backup unit";
+char *unknown_bu512_title = "Unknown backup unit (with 512 bytes header)";
+
+
 char
 hexDigit (int value)
 {
@@ -236,9 +241,9 @@ unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size)
 */
 
 char *
-ucon64_fbackup (struct ucon64_ *rom, char *filename)
+ucon64_fbackup (char *filename)
 {
-  if (!rom->backup)
+  if (!ucon64.backup)
     return filename;
 
   if (!access (filename, F_OK))
@@ -499,22 +504,24 @@ parport_probe (unsigned int port)
 }
 
 int
-ucon64_gauge (struct ucon64_ *rom, time_t init_time, long pos, long size)
+ucon64_gauge (time_t init_time, long pos, long size)
 {
-  int percentage;
-
-  if (!rom->frontend)
+  if (!ucon64.frontend)
     return gauge (init_time, pos, size);
+  else
+    {
+      int percentage;
 
-  percentage = 100 * pos / size;
-  printf ("%u\n", percentage);
-  fflush (stdout);
-  return 0;
+      percentage = 100 * pos / size;
+      printf ("%u\n", percentage);
+      fflush (stdout);
+      return 0;
+    }
 }
 #endif // BACKUP
 
 int
-testsplit (char *filename)
+ucon64_testsplit (char *filename)
 // test if ROM is splitted into parts
 {
   long x = 0;
@@ -543,7 +550,7 @@ testsplit (char *filename)
 }
 
 int
-trackmode_probe (long imagesize)
+ucon64_trackmode_probe (long imagesize)
 // tries to figure out the used track mode of the cd image
 {
   return (!(imagesize % 2048)) ? 2048 :        // MODE1, MODE2_FORM1

@@ -1,5 +1,5 @@
 /*
-ssc.h - minimal support for Super Smart Card/SSC
+ssc.c - support for Super Smart Card
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
 
@@ -18,11 +18,23 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef SCC_H
-#define SCC_H
+#include <dirent.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+#include <sys/stat.h>
+#include "config.h"
 
-extern char *ssc_title;
+#ifdef BACKUP
 
-#define ssc_HEADER_START 0
-#define ssc_HEADER_LEN 512
-#endif /* SCC_H */
+#include "misc.h"                               // kbhit(), getch()
+#include "ucon64.h"
+#include "ucon64_misc.h"
+#include "ssc.h"
+
+
+
+char *ssc_title = "Super Smart Card/SSC";
+
+#endif // BACKUP

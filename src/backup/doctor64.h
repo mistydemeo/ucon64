@@ -27,10 +27,11 @@ extern int doctor64_read (char *filename, unsigned int parport);
 extern int doctor64_write (char *filename, long start, long len,
                     unsigned int parport);
 
-extern int doctor64_usage (int argc, char *argv[]);
+extern void doctor64_usage (void);
 #endif // BACKUP
 
-#define doctor64_TITLE "Doctor V64\n19XX Bung Enterprises Ltd http://www.bung.com.hk"
+extern char *doctor64_title;
+
 #define doctor64_HEADER_START 0
 #define doctor64_HEADER_LEN 0
 

@@ -28,15 +28,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "mgd.h"
 
-int
-mgd_usage (int argc, char *argv[])
+char *mgd_title = "Multi Game Doctor(2)/Multi Game Hunter/MGH/RAW\n"
+                  "19XX Bung Enterprises Ltd http://www.bung.com.hk\n"
+                  "?Makko Toys Co., Ltd.?";
+
+
+void
+mgd_usage (void)
 {
 #if 0
-    printf (mgd_TITLE "\n"
+    printf (mgd_title "\n"
 
     "TODO:  -xmgd    send/receive ROM to/from Multi Game* /MGD2/MGH/RAW; $FILE=PORT\n"
      "		receives automatically when $ROM does not exist\n");
 #endif
-  return 0;
 }
 #endif // BACKUP

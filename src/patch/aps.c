@@ -723,12 +723,11 @@ n64caps_main (int argc, char *argv[])
 
 
 
-int
-aps_usage (int argc, char *argv[])
+void
+aps_usage (void)
 {
-  printf ("  -a            apply APS patch (<=1.2); $FILE=PATCHFILE\n"
-"  -mka          create APS patch; $FILE=CHANGED_ROM\n"
-"  -na           change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION\n"
+  printf ("  " OPTION_S "a            apply APS patch (<=1.2); $FILE=PATCHFILE\n"
+"  " OPTION_LONG_S "mka          create APS patch; $FILE=CHANGED_ROM\n"
+"  " OPTION_LONG_S "na           change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION\n"
 );
-  return 0;
 }

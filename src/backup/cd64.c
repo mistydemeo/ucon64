@@ -28,6 +28,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "cd64.h"
+
+char *cd64_title = "CD64\n"
+                   "19XX UFO http://www.cd64.com";
+
 /*
 
 
@@ -1196,16 +1200,15 @@ main (int argc, char *argv[])
                 else usage_message();
 }
 */
-int
-cd64_usage (int argc, char *argv[])
+void
+cd64_usage (void)
 {
 #if 0
 
-    printf ("%s\n", cd64_TITLE);
+    printf ("%s\n", cd64_title);
   printf ("TODO:  -xcd64	send/receive ROM to/from CD64; $FILE=PORT\n"
           "		receives automatically when $ROM does not exist\n");
 #endif
-  return 0;
 }
 
 /*

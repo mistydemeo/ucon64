@@ -33,6 +33,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "doctor64.h"
 
+char *doctor64_title = "Doctor V64\n"
+                       "19XX Bung Enterprises Ltd http://www.bung.com.hk";
+
 
 #define SYNC_MAX_CNT 8192
 #define SYNC_MAX_TRY 32
@@ -306,7 +309,7 @@ doctor64_read (char *filename, unsigned int parport)
           return 0;
         }
       fwrite (buf, 1, sizeof (buf), fh);
-      ucon64_gauge (&rom, inittime, quickftell (filename), size);
+      ucon64_gauge (inittime, quickftell (filename), size);
     }
   sync ();
   fclose (fh);
@@ -345,7 +348,7 @@ doctor64_write (char *filename, long start, long len, unsigned int parport)
       if (parport_write (buf, pos, parport) != 0)
         break;
       size = size - pos;
-      ucon64_gauge (&rom, inittime, (quickftell (filename) - start) - size,
+      ucon64_gauge (inittime, (quickftell (filename) - start) - size,
                      (quickftell (filename) - start));
     }
   fclose (fh);
@@ -353,15 +356,15 @@ doctor64_write (char *filename, long start, long len, unsigned int parport)
   return 0;
 }
 
-int
-doctor64_usage (int argc, char *argv[])
+void
+doctor64_usage (void)
 {
-    printf (doctor64_TITLE "\n"
+    printf ("%s\n"
 
-    "  -xv64         send/receive ROM to/from Doctor V64; $FILE=PORT\n"
-     "                receives automatically when $ROM does not exist\n");
+    "  " OPTION_LONG_S "xv64         send/receive ROM to/from Doctor V64; $FILE=PORT\n"
+     "                receives automatically when $ROM does not exist\n"
+     , doctor64_title);
 
-  return 0;
 }
 
 #endif // BACKUP

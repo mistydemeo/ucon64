@@ -2389,7 +2389,7 @@ q_fbackup (const char *filename, int mode)
       remove (buf);                             // *try* to remove or rename will fail
       if (rename (filename, buf))               // keep file attributes like date, etc.
         {
-          fprintf (stderr, "ERROR: Can't rename %s to %s\n", filename, buf);
+          fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
           exit (1);
         }
     }
@@ -2399,7 +2399,7 @@ q_fbackup (const char *filename, int mode)
       strcpy (buf, basename (tmpnam2 (buf)));
       if (rename (filename, buf))
         {
-          fprintf (stderr, "ERROR: Can't rename %s to %s\n", filename, buf);
+          fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
           exit (1);
         }
     }
@@ -2413,7 +2413,7 @@ q_fbackup (const char *filename, int mode)
       default:
         if (q_fcpy (buf, 0, q_fsize (buf), filename, "wb"))
           {
-            fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
+            fprintf (stderr, "ERROR: Can't open \"%s\" for writing\n", filename);
             exit (1);
           }
         sync ();
@@ -2658,8 +2658,8 @@ int
 truncate (const char *path, off_t size)
 {
   int retval;
-  HANDLE file = CreateFile (path, GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
-                            FILE_ATTRIBUTE_NORMAL, NULL);
+  HANDLE file = CreateFile (path, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+                            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   if (file == INVALID_HANDLE_VALUE)
     return -1;
 

@@ -219,8 +219,8 @@ int
 n64_chk (st_rominfo_t *rominfo)
 {
   int x;
+  char buf[10];
   
-  q_fhexdump (ucon64.rom, 0x10 + rominfo->buheader_len, 8);
   ucon64_fbackup (NULL, ucon64.rom);
   n64_chksum (rominfo);
 
@@ -242,7 +242,9 @@ n64_chk (st_rominfo_t *rominfo)
       n64crc.crc2 <<= 8;
     }
 
-  q_fhexdump (ucon64.rom, 0x10 + rominfo->buheader_len, 8);
+  q_fread (buf, 0x10 + rominfo->buheader_len, 8, ucon64.rom);
+
+  mem_hexdump (buf, 8, 0x10 + rominfo->buheader_len);
 
   return 0;
 }

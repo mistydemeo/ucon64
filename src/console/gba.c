@@ -204,19 +204,10 @@ gba_logo (st_rominfo_t *rominfo)
   0x87, 0xf0, 0x3c, 0xaf, 0xd6, 0x25, 0xe4, 0x8b,
   0x38, 0x0a, 0xac, 0x72, 0x21, 0xd4, 0xf8, 0x07};
 
-  q_fhexdump (ucon64.rom,
-               GBA_HEADER_START + rominfo->buheader_len + 0x04,
-               LOGODATA_LEN);
-  printf ("\n");
-
   q_fwrite (logodata,
                GBA_HEADER_START + rominfo->buheader_len + 0x04,
                LOGODATA_LEN, ucon64_fbackup (NULL, ucon64.rom), "r+b");
 
-  q_fhexdump (ucon64.rom,
-               GBA_HEADER_START + rominfo->buheader_len + 0x04,
-               LOGODATA_LEN);
-  printf ("\n");
   ucon64_wrote (ucon64.rom);
   return 0;
 }
@@ -225,15 +216,17 @@ gba_logo (st_rominfo_t *rominfo)
 int
 gba_chk (st_rominfo_t *rominfo)
 {
-  q_fhexdump (ucon64.rom,
-               GBA_HEADER_START + rominfo->buheader_len + 0xbd, 1);
+  char buf[2];
+  char chksum = gba_chksum (rominfo) & 0xff;
+
   ucon64_fbackup (NULL, ucon64.rom);
 
   q_fputc (ucon64.rom, GBA_HEADER_START + rominfo->buheader_len + 0xbd,
-              gba_chksum (rominfo), "r+b");
+              chksum, "r+b");
 
-  q_fhexdump (ucon64.rom,
-               GBA_HEADER_START + rominfo->buheader_len + 0xbd, 1);
+  q_fread (buf, GBA_HEADER_START + rominfo->buheader_len + 0xbd, 1, ucon64.rom);
+
+  mem_hexdump (buf, 1, GBA_HEADER_START + rominfo->buheader_len + 0xbd);
 
   ucon64_wrote (ucon64.rom);
   return 0;

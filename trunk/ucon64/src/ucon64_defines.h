@@ -45,7 +45,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define TOMBIT(x) ((int)(x) / MBIT)
 #define TOMBIT_F(x) ((float)(x) / MBIT)
 
-#define MAXROMSIZE ((512 * MBIT) + 1)
+#define MAXROMSIZE (512 * MBIT)
 
 #define UCON64_OPTION (1000)
 #define UCON64_CONSOLE (0)

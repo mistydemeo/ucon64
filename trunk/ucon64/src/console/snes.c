@@ -60,6 +60,7 @@ static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer,
                               int rom_size);
 static unsigned short int get_internal_sums (st_rominfo_t *rominfo);
 static int snes_check_bs (void);
+static int snes_isprint (int c);
 static int check_banktype (unsigned char *rom_buffer, int header_offset);
 static void reset_header (void *header);
 static void set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header);
@@ -3466,6 +3467,15 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
 
 
 int
+snes_isprint (int c)
+// we don't want to get different results of check_banktype() for different
+//  locale settings
+{
+  return c >= 0x20 && c <= 0x7e ? 1 : 0;
+}
+
+
+int
 check_banktype (unsigned char *rom_buffer, int header_offset)
 /*
   This function is used to check if the value of header_offset is a good guess
@@ -3480,13 +3490,14 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
 //               SNES_HEADER_LEN, SNES_HEADER_START + header_offset);
 
   // game ID info (many games don't have useful info here)
-  if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset + 2, 4, isprint))
+  if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset + 2, 4,
+               snes_isprint))
     score += 1;
 
   if (!bs_dump)
     {
       if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset + 16,
-                   SNES_NAME_LEN, isprint))
+                   SNES_NAME_LEN, snes_isprint))
         score += 1;
 
       // map type
@@ -3524,7 +3535,8 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
   if (rom_buffer[SNES_HEADER_START + header_offset + 42] == 0x33)
     score += 2;
   else // publisher code
-    if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset, 2, isprint))
+    if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset, 2,
+                 snes_isprint))
       score += 2;
 
   // version

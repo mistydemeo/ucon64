@@ -217,16 +217,17 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    cannot (directly) execute Bash shell scripts. command.com is the default
    shell on Windows&nbsp;9x, cmd.exe is the default shell on Windows&nbsp;XP
    (NT/2000).<br>
-   So, for DOS (DJGPP) copy config.h.orig to config.h, Makefile.orig to
-   Makefile and libdiscmage/Makefile.orig to libdiscmage/Makefile. You can do
-   the same for Cygwin, but in Cygwin you can get the same effect much easier
-   by just running the configure script.<br>
-   For Windows (Visual C++) copy config.h.vc6 to config.h. Do not copy
-   any of the Makefile.vc6 files. You may do so, but do not complain if these
-   instructions do not seem to be right after having done that.<br>
-   To save us some work, when using MinGW we only support configuring and
-   building uCON64 from within Msys (MinGW's POSIX build environment, a port of
-   Bash).<br>
+   So, for DOS (DJGPP) copy config.h.orig to config.h and to
+   libdiscmage/config.h, Makefile.orig to Makefile and
+   libdiscmage/Makefile.orig to libdiscmage/Makefile. You can do the same for
+   Cygwin, but in Cygwin you can get the same effect much easier by just
+   running the configure script.<br>
+   For Windows (Visual C++) copy config.h.vc6 to config.h and to
+   libdiscmage/config.h. Do not copy any of the Makefile.vc6 files. You may do
+   so, but do not complain if these instructions do not seem to be right after
+   having done that.<br>
+   To save us some work, for MinGW we only support configuring and building
+   uCON64 from within Msys (MinGW's POSIX build environment, a port of Bash).<br>
 <br>
    <b>Support for files in gzip (.gz) or zip format (.zip)</b><br>
    For gzip &amp; zip support you need zlib. If you do not have zlib you can
@@ -239,9 +240,10 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    --without-zlib to the configure script.<br>
    2.) When using config.h and Makefile "templates".<br>
    By default gzip &amp; zip support is disabled. If you want to enable it you
-   have to define the constant HAVE_ZLIB_H in config.h (remove the "//" in
-   front of the line that defines it) <i>and</i> ZLIB in Makefile and
-   libdiscmage/Makefile (remove the "#" in front of the line that defines it).<br>
+   have to define the constant HAVE_ZLIB_H in config.h and libdiscmage/config.h
+   (remove the "//" in front of the line that defines it) <i>and</i> ZLIB in
+   Makefile and libdiscmage/Makefile (remove the "#" in front of the line that
+   defines it).<br>
 <br>
    If you want to change other things in config.h or the makefiles do so before
    proceeding to the next step.<br>
@@ -275,7 +277,7 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    If you want to compile the source code including discmage, type:<br>
    &nbsp;&nbsp; make<br>
    If you do not want to compile discmage the last command should look like
-   this for DJGPP and Cygwin:<br>
+   this for DJGPP, Cygwin and MinGW:<br>
    &nbsp;&nbsp; make ucon64.exe<br>
    Otherwise it should look like this:<br>
    &nbsp;&nbsp; make ucon64<br>
@@ -283,7 +285,7 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    On Unix systems other than GNU/Linux you might need to use "gmake" (GNU
    make) instead of "make". If the last make command has been successfully
    executed you can find the executable in the directory where you ran make.
-   For DOS and Cygwin you are now ready to proceed to
+   For DOS, Cygwin and MinGW you are now ready to proceed to
    <a href="#4">question 4</a>. For the other platforms one extra command is
    needed (or simply handy):<br>
    &nbsp;&nbsp; make install<br>
@@ -437,11 +439,13 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    LoROM dump. Try the switches -hi and -nhi and see if uCON64 reports the
    check sum differently. Sometimes ROM dumps are detected as not being
    interleaved while they actually are. Try the switches -int and -int2 and see
-   if you get better results. If the check sum is reported as good it is likely
-   that the ROM is really good. Alternatively, you may want to convert the ROM
-   to a non-interleaved format with -dint and run uCON64 on the converted ROM.
-   Luckily you will not find many interleaved ROM dumps that uCON64 cannot
-   handle, probably because Snes9x and ZSNES often cannot handle them either.<br>
+   if you get better results. It could also be that uCON64 detects the ROM as
+   interleaved while it is not. The switch -nint might help in that case. If
+   the check sum is reported as good it is likely that the ROM is really good.
+   Alternatively, you may want to convert the ROM to a non-interleaved format
+   with -dint and run uCON64 on the converted ROM. Luckily you will not find
+   many interleaved ROM dumps that uCON64 cannot handle, probably because
+   Snes9x and ZSNES often cannot handle them either.<br>
    Perhaps "Ok" looks nicer than "Bad", but it is far more important that
    uCON64 displays DAT file information. If you installed a SNES DAT file (see
    <a href="#36">question 36</a>) and uCON64 does not display a line with the
@@ -450,7 +454,7 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    (i.e. bad) dump or an overdump. GoodSNES 0.999.5 does not use the CRC32 to
    identify files, so if uCON64 does not display DAT info, but GoodSNES
    identified it as good then uCON64 is right. For reasons see
-   <a href="#42">question 42</a>).<br>
+   <a href="#42">question 42</a>.<br>
 <br>
 <p>
 <a name="10"><b>Q10</b>: I have a SNES ROM of which Snes9x and ZSNES say it is
@@ -626,8 +630,8 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    you make a multirom file do not forget that the loader or "game pack" file
    also needs some space (32 kB) on the flash card. Do not pass a size to
    -multi that is larger than your flash card. Passing a smaller size is
-   correct too. For example, to create a multirom that fits on a 128 Mb (16 MB)
-   card use a command line like this:<br>
+   correct though. For example, to create a multirom that fits on a 128 Mb (16
+   MB) card use a command line like this:<br>
    &nbsp;&nbsp; ucon64 -multi=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba multi.bin<br>
    You can also send it directly by using -xfalmulti:<br>
    &nbsp;&nbsp; ucon64 -xfalmulti=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba<br>
@@ -696,10 +700,9 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    Windows gave an error message that cygwin1.dll, cygz.dll or zlib.dll could
    not be found.</a><br>
 <b>A</b>: The Cygwin-compiled Win32 executable of uCON64 needs cygwin1.dll and
-   cygz.dll in order to run. The Visual C++-compiled Win32 executable (the
-   "official" Win32 executable) needs zlib.dll. You can download these files
-   from <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64
-   homepage</a>.
+   cygz.dll in order to run. The Visual C++-compiled Win32 executable needs
+   zlib.dll. You can download these files from
+   <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>.
    Copy the file(s) to the same directory as the uCON64 executable or to a
    directory in your PATH.<br>
 <br>

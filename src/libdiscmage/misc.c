@@ -2794,8 +2794,10 @@ _getenv (const char *name)
 }
 
 
+// custom _popen() and _pclose(), because the standard ones (named popen() and
+//  pclose()) are buggy
 FILE *
-popen (const char *path, const char *mode)
+_popen (const char *path, const char *mode)
 {
   int fd;
   BPTR fh;
@@ -2827,7 +2829,7 @@ popen (const char *path, const char *mode)
 
 
 int
-pclose (FILE *stream)
+_pclose (FILE *stream)
 {
   return fclose (stream);
 }

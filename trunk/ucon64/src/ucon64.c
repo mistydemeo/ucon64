@@ -207,6 +207,8 @@ if(argcmp(argc,argv,"-db"))
 		,ucon64_dbsize(console)
 		,ucon64_dbsize(console)-ucon64_DBSIZE
 	);
+
+	printf("TIP: %s -db -nes would show only the number of known NES ROMs\n\n",ucon64_name());
 	return(0);
 }
 
@@ -224,12 +226,16 @@ if(argcmp(argc,argv,"-dbs"))
 	printf("%s\n",db.country);
 	printf("%s\n\n",db.misc);
 
+	printf("TIP: %s -dbs -nes would search only for a NES ROM\n\n",ucon64_name());
+
 	return(0);
 }
 
 if(argcmp(argc,argv,"-dbv"))
 {
 	ucon64_dbview(console);
+
+	printf("\nTIP: %s -db -nes would view only NES ROMs\n\n",ucon64_name());
 	return(0);
 }
 

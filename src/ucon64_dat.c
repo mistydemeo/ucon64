@@ -134,7 +134,6 @@ get_dat_header (char *fname, st_ucon64_dat_t *dat)
 #endif
 
   // Hell yes!!! I use get_property() here...
-
   strncpy (dat->author, get_property (fname, "author", buf, "Unknown"), sizeof (dat->author));
   dat->author[sizeof (dat->author) - 1] = 0;
   strncpy (dat->version, get_property (fname, "version", buf, "?"), sizeof (dat->version));
@@ -461,7 +460,14 @@ ucon64_dat_total_entries (int console)
 static int
 idx_compare (const void *key, const void *found)
 {
-  return ((st_idx_entry_t *) key)->crc32 - ((st_idx_entry_t *) found)->crc32;
+  /*
+    The return statement looks overly complicated, but is really necessary.
+    This contruct:
+      return ((st_idx_entry_t *) key)->crc32 - ((st_idx_entry_t *) found)->crc32;
+    does *not* work correctly for all cases.
+  */
+  return ((int64_t) ((st_idx_entry_t *) key)->crc32 -
+          (int64_t) ((st_idx_entry_t *) found)->crc32) / 2;
 }
 #endif
 
@@ -573,10 +579,12 @@ ucon64_dat_indexer (void)
 #ifdef  NEW_CODE
 #define MAX_GAMES_FOR_CONSOLE 50000
   st_idx_entry_t *idx_entries, *idx_entry, key;
-  int duplicates = 0;
+  int duplicates;
+  FILE *errorfile;
+  char errorfname[FILENAME_MAX];
 
   if (!(idx_entries = (st_idx_entry_t *)
-        malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t)))) // TODO?: dynamic size)
+        malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t)))) // TODO?: dynamic size
     {
       fprintf (stderr, ucon64_msg[BUFFER_ERROR],
         MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t));
@@ -614,24 +622,39 @@ ucon64_dat_indexer (void)
 
       fclose_fdat ();
       pos = 0;
+      duplicates = 0;
+      errorfile = NULL;
       while (get_dat_entry (buf, &dat, 0, -1))
         {
 #ifdef  NEW_CODE
           key.crc32 = dat.current_crc32;
           idx_entry = bsearch (&key, idx_entries, pos,
-                              sizeof (st_idx_entry_t), idx_compare);
+                               sizeof (st_idx_entry_t), idx_compare);
           if (idx_entry)
             {
               // This really makes one loose trust in the DAT files...
               char current_name[2 * 80];
               long current_filepos = ftell (fdat);
 
+              if (!errorfile)
+                {
+                  strcpy (errorfname, buf2);
+                  setext (errorfname, ".err");
+                  if (!(errorfile = fopen (errorfname, "wb")))
+                    {
+                      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], errorfname);
+                      continue;
+                    }
+                }
+
               strcpy (current_name, dat.name);
               get_dat_entry (buf, &dat, 0, idx_entry->filepos);
-              printf ("\nWarning: DAT file contains a duplicate CRC32!\n"
-                      "  First game with this CRC32: \"%s\"\n"
-                      "  Ignoring game:              \"%s\"\n",
-                      dat.name, current_name);
+              fprintf (errorfile,
+                       "\nWarning: DAT file contains a duplicate CRC32 (0x%x)!\n"
+                       "  First game with this CRC32: \"%s\"\n"
+                       "  Ignoring game:              \"%s\"\n",
+                      key.crc32, dat.name, current_name);
+
               duplicates++;
               fseek (fdat, current_filepos, SEEK_SET);
               continue;
@@ -663,12 +686,18 @@ ucon64_dat_indexer (void)
 
 #ifdef  NEW_CODE
       if (duplicates > 0)
-        printf ("\n\nWarning: DAT file contains %d duplicate CRC32%s",
-                duplicates, duplicates != 1 ? "s" : "");
+        printf ("\n\nWarning: DAT file contains %d duplicate CRC32%s\n"
+                "         Warnings have been written to \"%s\"",
+                duplicates, duplicates != 1 ? "s" : "", errorfname);
+      if (errorfile)
+        {
+          fclose (errorfile);
+          errorfile = NULL;
+        }
 #endif
-     fprintf (stdout, "\n\n");
-     fclose (fh);
-   }
+      fprintf (stdout, "\n\n");
+      fclose (fh);
+    }
 // stats
 #ifdef  NEW_CODE
   free (idx_entries);

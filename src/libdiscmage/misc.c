@@ -346,13 +346,13 @@ to_func (unsigned char *s, int size, int (*func) (int))
 }
 
 
-const char *
+char *
 strcasestr2 (const char *str, const char *search)
 {
-  const char *p = str;
+  char *p = (char *) str;
   int len = strlen (search);
   
-  if (!len) return str;
+  if (!len) return p;
   
   for (; *p; p++)
     if (!strnicmp (p, search, len))
@@ -601,8 +601,8 @@ realpath2 (const char *src, char *full_path)
 }
 
 
-void
-argz_extract2 (char *cmd, size_t argc, char ***argv)
+char ***
+strargv (int *argc, char ***argv, char *cmdline, int separator_char)
 {
 //this will be replaced by argz_extract() soon
 #if 0
@@ -612,6 +612,7 @@ argz_extract2 (char *cmd, size_t argc, char ***argv)
   if (*cmd)
     for (; (argv[i] = strtok (!i?cmd:NULL, " ")) && i < (argc - 1); i++);
 #endif
+  return NULL;
 }
 
 
@@ -1817,84 +1818,4 @@ wait2 (int nmillis)
 #elif   defined __BEOS__
   snooze (nmillis * 1000);
 #endif
-}
-
-
-int
-binary_search (unsigned char *data, int element_size, int key_offset,
-               int minpos, int maxpos, unsigned int search_value)
-/*
-  "Generic" implementation of the binary search algorithm.
-  TODO: add usage information and do thorough tests.
-  Warning: this function has not undergone that much testing. It should work
-  correctly for both packed and padded structs.
-*/
-{
-//#define DEBUG_BS
-  int pos, range;
-  unsigned int current_value;
-
-#ifdef DEBUG_BS
-  printf ("element size: %d\n"
-          "key offset:   %d\n"
-          "min pos:      %d\n"
-          "max pos:      %d\n"
-          "search value: %x\n\n",
-          element_size, key_offset, minpos, maxpos, search_value);
-#endif
-
-  if (minpos >= maxpos)
-    return -1;
-
-  pos = range = (maxpos - minpos) >> 1;
-  while (1)
-    {
-      current_value = *((unsigned int *) (data + pos * element_size + key_offset));
-      if (current_value == search_value)
-#ifdef DEBUG_BS
-        {
-          printf ("current value: %x ==\n"
-                  "range:         [%d - %d] %d %d\n"
-                  "pos:           %d\n",
-                  current_value, minpos, maxpos, maxpos - minpos + 1, range, pos);
-          return pos;
-        }
-#else
-        return pos;
-#endif
-      else if (current_value < search_value)
-        {
-#ifdef DEBUG_BS
-          printf ("current value: %x <\n"
-                  "range:         [%d - %d] %d %d\n"
-                  "pos:           %d\n",
-                  current_value, minpos, maxpos, maxpos - minpos + 1, range, pos);
-#endif
-          minpos = pos + 1;
-          if (range > 1)
-            range >>= 1;
-          pos += range;
-          if (pos > maxpos)
-            break;
-        }
-      else // if (current_value > search_value)
-        {
-#ifdef DEBUG_BS
-          printf ("current value: %x >\n"
-                  "range:         [%d - %d] %d %d\n"
-                  "pos:           %d\n",
-                  current_value, minpos, maxpos, maxpos - minpos + 1, range, pos);
-#endif
-          maxpos = pos - 1;
-          if (range > 1)
-            range >>= 1;
-          pos -= range;
-          if (pos < minpos)
-            break;
-        }
-    }
-#ifdef DEBUG_BS
-  printf ("value not found\n");
-#endif
-  return -1;
 }

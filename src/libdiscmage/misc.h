@@ -242,8 +242,9 @@ char *cygwin_fix (char *value);
 
   basename()  GNU basename() clone
   realpath2() realpath() clone
-  argz_extract2() temporary argz_extract() clone
   mkdir2()    mkdir() wrapper who automatically cares for rights, etc.
+  strargv()   wapper for argz_* to convert a cmdline into an argv[]
+              like array
 */
 extern int isfname (int c);
 extern int isprint2 (int c);
@@ -256,7 +257,7 @@ extern char *to_func (unsigned char *s, int size, int (*func) (int));
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
 extern char *strtrim (char *str);
-extern const char *strcasestr2 (const char *str, const char *search);
+extern char *strcasestr2 (const char *str, const char *search);
 #define stristr strcasestr2
 extern char *setext (char *filename, const char *ext);
 extern const char *getext (const char *filename);
@@ -269,8 +270,8 @@ extern char *basename2 (const char *str);
 #define basename basename2
 extern char *dirname2 (char *str);
 extern char *realpath2 (const char *src, char *full_path);
-//extern void argz_extract2 (char *cmd, size_t argc, char ***argv);
 extern int mkdir2 (const char *name);
+extern char ***strargv (int *argc, char ***argv, char *cmdline, int separator_char);
 
 
 /*
@@ -373,9 +374,6 @@ extern int unzip_get_number_entries (const char *filename);
 extern int unzip_goto_file (unzFile file, int file_index);
 extern int unzip_current_file_nr;
 #endif
-
-extern int binary_search (unsigned char *data, int element_size, int key_offset,
-                          int minpos, int maxpos, unsigned int search_value);
 
 #ifdef __cplusplus
 }

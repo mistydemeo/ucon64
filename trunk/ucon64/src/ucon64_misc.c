@@ -124,7 +124,7 @@ const char *unknown_usage[] =
   via q_fbackup()), which is not a pointer to constant characters.
 */
 char *
-u64_fbackup (char *move_name, const char *filename)
+ucon64_fbackup (char *move_name, const char *filename)
 {
   if (!ucon64.backup)
     return (char *) filename;
@@ -166,19 +166,19 @@ handle_existing_file (const char *dest, char *src)
         {                                       // case 1
           if (ucon64.backup)
             {                                   // case 1a
-              u64_fbackup (NULL, dest);
+              ucon64_fbackup (NULL, dest);
               setext (src, ".BAK");
             }                                   // must match with what q_fbackup() does
           else
             {                                   // case 1b
               ucon64.backup = 1;                // force ucon64_fbackup() to _rename_ file
-              u64_fbackup (src, dest);       // arg 1 != NULL -> rename
+              ucon64_fbackup (src, dest);       // arg 1 != NULL -> rename
               ucon64.backup = 0;
               ucon64_temp_file = src;
             }
         }
       else
-        u64_fbackup (NULL, dest);            // case 2 (ucon64_fbackup() handles a & b)
+        ucon64_fbackup (NULL, dest);            // case 2 (ucon64_fbackup() handles a & b)
     }
 }
 

@@ -224,7 +224,7 @@ char *fix_character_set (char *value);
               suffix means in this case the suffix INCLUDING the dot '.'
 
   basename()  GNU basename() clone
-  realpath2() advanced realpath() wrapper
+  realpath2() realpath() replacement
   mkdir2()    mkdir() wrapper who automatically cares for rights, etc.
   truncate2() don't use truncate() to enlarge files, because the result is
               undefined (by POSIX) use truncate2() instead which does both

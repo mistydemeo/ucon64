@@ -329,61 +329,60 @@ if(argcmp(argc,argv,"-hex"))
 	return(0);
 }
 
-if(argcmp(argc,argv,"-ls"))
+if (argcmp(argc, argv, "-ls"))
 {
-if(access( ucon64_rom() ,R_OK)==-1 ||
-(dp=opendir( ucon64_rom() ))==NULL)return(-1);
+  if (access(ucon64_rom(), R_OK) == -1 || (dp = opendir(ucon64_rom())) == NULL)
+    return -1;
 
-chdir( ucon64_rom() );
+  chdir(ucon64_rom());
 
-while((ep=readdir(dp))!=0)
-{
-	if(!stat(ep->d_name,&puffer))
-	{
-		if(S_ISREG(puffer.st_mode)==1)
-		{
+  while ((ep = readdir(dp)) != 0)
+  {
+    if (!stat(ep->d_name, &puffer))
+    {
+      if (S_ISREG(puffer.st_mode))
+      {
 /*
 TODO this completely sucks.. its a dirty hack and i'll have to make some
 changes to uCON64 to fix this..
 */
+        ucon64_argv[0] = ucon64_name();
+        ucon64_argv[1] = "-ls";
+        ucon64_argv[2] = ep->d_name;
+        ucon64_argc = 3;
+        db.name = "";
+        ucon64_probe(ucon64_argc, ucon64_argv, &db);
+        strftime(buf, 13, "%b %d %H:%M", localtime(&puffer.st_mtime));
+        printf("%-31.31s %10ld %s %s\n", db.name, puffer.st_size, buf, ep->d_name);
+      }
+    }
+  }
+  closedir(dp);
 
-	ucon64_argv[0]=ucon64_name();
-	ucon64_argv[1]="-ls";
-	ucon64_argv[2]=ep->d_name;
-	ucon64_argc=3;
-			db.name="";
-			ucon64_probe(ucon64_argc,ucon64_argv,&db);
-			strftime(buf,13,"%b %d %H:%M",localtime(&puffer.st_mtime));
-			printf("%-31.31s %10ld %s %s\n",db.name,puffer.st_size,buf,ep->d_name);
-		}
-	}
+  return 0;
 }
-(void)closedir(dp);
 
-return(0);
-}
-
-if(argcmp(argc,argv,"-lsv"))
+if (argcmp(argc, argv, "-lsv"))
 {
-if(access( ucon64_rom() ,R_OK)==-1 ||
-(dp=opendir( ucon64_rom() ))==NULL)return(-1);
+  if (access(ucon64_rom(), R_OK) == -1 || (dp = opendir(ucon64_rom())) == NULL)
+    return -1;
 
-chdir( ucon64_rom() );
+  chdir(ucon64_rom());
 
-while((ep=readdir(dp))!=0)
-{
-	if(!stat(ep->d_name,&puffer))
-	{
-		if(S_ISREG(puffer.st_mode)==1)
-		{
-			sprintf(buf,"%s %s",argv[0],ep->d_name);
-			system(buf);
-		}
-	}
-}
-(void)closedir(dp);
+  while ((ep = readdir(dp)) != 0)
+  {
+    if (!stat(ep->d_name, &puffer))
+    {
+      if (S_ISREG(puffer.st_mode))
+      {
+        sprintf(buf, "%s \"%s\"", argv[0], ep->d_name);
+	system(buf);
+      }
+    }
+  }
+  closedir(dp);
 
-	return(0);
+  return 0;
 }
 
 if(argcmp(argc,argv,"-rrom"))

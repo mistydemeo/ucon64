@@ -1432,9 +1432,10 @@ nes_ffe (st_rominfo_t *rominfo)
   memset (&header, 0, UNKNOWN_HEADER_LEN);
   header.size_low = size / 8192;
   header.size_high = size / 8192 >> 8;
-#if 0
-  header.id_code1 = 0xaa;
-  header.id_code2 = 0xbb;
+#if 1
+  // TODO: verify if this is correct. It seems logical though.
+  header.id1 = 0xaa;
+  header.id2 = 0xbb;
 #endif
   ucon64_fbackup (NULL, buf);
   q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
@@ -1954,7 +1955,8 @@ nes_init (st_rominfo_t *rominfo)
         {                                       //  for detecting FFE images
           x = q_fgetc (ucon64.rom, 0) * 8192;
           x += q_fgetc (ucon64.rom, 1) * 8192 << 8;
-          if (rominfo->file_size - UNKNOWN_HEADER_LEN == x)
+          if (rominfo->file_size - UNKNOWN_HEADER_LEN == x &&
+              q_fgetc (ucon64.rom, 8) == 0xaa && q_fgetc (ucon64.rom, 9) == 0xbb)
             {
               type = FFE;
               result = 0;

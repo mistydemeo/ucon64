@@ -3,7 +3,7 @@ misc.c - miscellaneous functions
 
 written by 1999 - 2004 NoisyB (noisyb@gmx.net)
            2001 - 2004 dbjh
-           2002 - 2003 Jan-Erik Karlsson (Amiga)
+           2002 - 2004 Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -2585,7 +2585,8 @@ strarg (char **argv, char *str, const char *separator_s, int max_args)
     return 0;
 
   for (; (argv[argc] = (char *) strtok (!argc ? str : NULL, separator_s)) &&
-       (argc < (max_args - 1)); argc++);
+       (argc < (max_args - 1)); argc++)
+    ;
 
 #ifdef  DEBUG
   fprintf (stderr, "argc:     %d\n", argc);
@@ -2641,7 +2642,16 @@ fdopen (int fd, const char *mode)
 int
 truncate (const char *path, off_t size)
 {
-  return 0;
+  BPTR fh;
+  ULONG newsize;
+
+  if (!(fh = Open (path, MODE_OLDFILE)))
+    return -1;
+
+  newsize = SetFileSize (fh, size, OFFSET_BEGINNING);
+  Close (fh);
+
+  return newsize == (ULONG) size ? 0 : -1;      // truncate() returns zero on success
 }
 
 
@@ -2673,6 +2683,9 @@ sync (void)
 int
 readlink (const char *path, char *buf, int bufsize)
 {
+  (void) path;                                  // warning remover
+  (void) buf;                                   // idem
+  (void) bufsize;                               // idem
   // always return -1 as if anything passed to it isn't a soft link
   return -1;
 }

@@ -19,9 +19,13 @@ CFLAGS=$(CFLAGS0) -DDLL
 ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
-LDFLAGS=-s
+ifeq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
 # On Mac OS X using -s gives the following warning:
 # /usr/bin/libtool: -static not specified, -s invalid
+LDFLAGS=
+else
+LDFLAGS=-s
+endif
 
 # The test for Cygwin should be done before the test for DJGPP, because the
 # environment variable DJGPP can be set under Bash for people who have
@@ -109,7 +113,7 @@ else                                    # Unix, BeOS or Mac OS X (Darwin)
 
 CFLAGS+=-fPIC
 
-ifeq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
+ifeq ($(findstring darwin,$(OSTYPE)),darwin)
 FULLLIBNAME=$(LIBNAME).dylib
 else
 FULLLIBNAME=$(LIBNAME).so

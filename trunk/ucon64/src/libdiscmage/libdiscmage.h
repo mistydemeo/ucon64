@@ -1,8 +1,8 @@
 /*
 libdiscmage.h - libdiscmage
 
-written by 2002 - 2003 NoisyB (noisyb@gmx.net)
-           2002 - 2003 dbjh
+written by 2002 - 2004 NoisyB (noisyb@gmx.net)
+           2002 - 2004 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -21,6 +21,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #ifndef LIBDISCMAGE_H
 #define LIBDISCMAGE_H
+
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #ifdef  __cplusplus
 extern "C" {
 #endif

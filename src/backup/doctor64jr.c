@@ -248,7 +248,7 @@ static int
 write_32k (unsigned short int hi_word, unsigned short int lo_word)
 {
   unsigned char unpass, pass1;
-  unsigned short int i, j, fix, temp;
+  unsigned short int i, j, fix;
 
   set_ai_data (3, (unsigned char) (0x10 | (hi_word >> 8)));
   set_ai_data (2, (unsigned char) hi_word);
@@ -268,24 +268,18 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
           if (wv_mode)
             {
               for (j = 0; j < 256; j++)
-                {
-                  temp = inportw (port_c);
-                  if (buffer[j + fix] != temp)
-                    break;
-                }
+                if (inportw (port_c) != buffer[j + fix])
+                  break;
             }
           else
             {
               pass1 = 1;
               for (j = 0; j < 4; j++)
-                {
-                  temp = inportw (port_c);
-                  if (buffer[j + fix] != temp)
-                    {
-                      pass1 = 0;
-                      break;
-                    }
-                }
+                if (inportw (port_c) != buffer[j + fix])
+                  {
+                    pass1 = 0;
+                    break;
+                  }
               if (pass1)
                 {
                   set_ai_data (1, (unsigned char) ((i << 1) | lo_word | 1));
@@ -293,11 +287,8 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
                   set_ai (4);
                   set_data_read                 // ninit=0, nwrite=1
                   for (j = 252; j < 256; j++)
-                    {
-                      temp = inportw (port_c);
-                      if (buffer[j + fix] != temp)
-                        break;
-                    }
+                    if (inportw (port_c) != buffer[j + fix])
+                      break;
                 }
             }
           set_ai (0);
@@ -331,7 +322,7 @@ static int
 verify_32k (unsigned short int hi_word, unsigned short int lo_word)
 {
   char unpass;
-  unsigned short int i, j, temp, fix;
+  unsigned short int i, j, fix;
 
   set_ai_data (3, (unsigned char) (0x10 | (hi_word >> 8)));
   set_ai_data (2, (unsigned char) hi_word);
@@ -347,8 +338,7 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
           fix = i << 8;
           for (j = 0; j < 256; j++)
             {
-              temp = inportw (port_c);
-              if (temp != buffer[j + fix])
+              if (inportw (port_c) != buffer[j + fix])
                 {
                   outportb (port_a, 0x0b);      // all pin=0 for debug
                   set_ai_data (3, (unsigned char) (0x10 | (hi_word >> 8)));
@@ -368,8 +358,8 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
 /*
   outportb (ai,0);
   printf ("\na[7..0]=%02x\n", inportb (data));
-  outportb(ai, 1);
-  printf("a[15..8]=%02x\n", inportb (data));
+  outportb (ai, 1);
+  printf ("a[15..8]=%02x\n", inportb (data));
 */
   return 0;
 }

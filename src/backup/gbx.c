@@ -456,7 +456,7 @@ wait_status (void)
     {
       if ((temp & 0x20) == 0x20)
         // Original comment was: "had to comment out because this wouldnt work on 16 meg"
-        // TODO: Test with a 16 Mbit cartridge!?
+        // TODO: Test with a 16 Mbit flash card!?
         {
           fprintf (stderr, "ERROR: Erase failed\n");
           return -1;
@@ -1013,7 +1013,7 @@ intel_write_eeprom_16k (unsigned int bank_16k)
 
 //  set_adr_long (block_adr, 0);                  // set real address
   for (j = 0; j < 512; j++)
-    {                                           // 16k bytes = 512 X 32 bytes
+    {                                           // 16k bytes = 512 x 32 bytes
       idx = j * 32;
 //      if (intel_byte_write_32 (block_adr, idx)) return -1;
       if (intel_buffer_write_32 (block_adr, idx))
@@ -1096,7 +1096,7 @@ check_card (void)
     printf ("NOTE: Incorrect header checksum (0x%x), should be 0x%x\n",
             buffer[0x4d], sum);
 
-  return (1 << buffer[0x48]) * 32 * 1024;
+  return (1 << (buffer[0x48] > 8 ? 9 : buffer[0x48])) * 32 * 1024;
 }
 
 
@@ -1294,7 +1294,7 @@ test_sram_v (int n_banks)
           set_data_read
           for (i = 0; i < 256; i++)
             {
-              if (buffer[i + idx] != read_data ())
+              if (read_data () != buffer[i + idx])
                 {
                   fprintf (stderr, "ERROR: SRAM verify error\n");
                   return -1;
@@ -1523,7 +1523,7 @@ gbx_read_rom (const char *filename, unsigned int parport)
     n_banks = 512;                              // backup 64 Mbit
 
   totalbytes = n_banks * 16 * 1024;
-  printf ("Receive: %d Bytes (%.4f Mb)\n", totalbytes, totalbytes / (float) MBIT);
+  printf ("Receive: %d Bytes (%.4f Mb)\n\n", totalbytes, totalbytes / (float) MBIT);
 
   starttime = time (NULL);
   for (bank = 0; bank < n_banks; bank++)
@@ -1574,14 +1574,14 @@ gbx_write_rom (const char *filename, unsigned int parport)
   n_banks = (filesize / 0x8000) * 2;            // how many 16k banks (rounded
                                                 //  down to 32k boundary)
   if (eeprom_type == 16)
-    if (erase ())                               // erase 16M flash
+    if (mx_erase ())                            // erase 16M flash
       {
-        fprintf (stderr, "ERROR: Erase failed\n");
+        // wait_status() prints error message
         end_port ();
         exit (1);
       }
 
-  printf ("Send: %d Bytes (%.4f Mb)\n",
+  printf ("Send: %d Bytes (%.4f Mb)\n\n",
           n_banks * 0x4000, (float) (n_banks * 0x4000) / MBIT);
 
   starttime = time (NULL);
@@ -1641,6 +1641,11 @@ gbx_write_rom (const char *filename, unsigned int parport)
 
 static int
 sram_size_banks (int pocket_camera)
+/*
+  This function needs the GB header to determine the SRAM size for game
+  cartridges. So, if there's a game cartridge plugged in the GBX call it with
+  buffer filled with the GB internal header.
+*/
 {
   int n_banks;
 
@@ -1650,8 +1655,13 @@ sram_size_banks (int pocket_camera)
       //  (1 Mbit SRAM) is plugged in the GBX
       if (pocket_camera)
         n_banks = 16;
-      else
-        n_banks = 4;                            // no flash card -> 4 x 8 kB (Why? - dbjh)
+      else // no flash card, must be game cartridge
+        {
+          int x = (buffer[0x49] & 7) << 1;
+          if (x)
+            x = 1 << (x - 1);                   // SRAM size in kB
+          n_banks = (x + 8192 - 1) / 8192;      // round up to 1 bank if it's 2 kB
+        }
     }
   else
     {
@@ -1690,12 +1700,24 @@ gbx_read_sram (const char *filename, unsigned int parport, int bank_no)
     {
       start_bank = 0;
       n_banks = sram_size_banks (pocket_camera);
+      if (!n_banks)
+        {
+          fprintf (stderr, "ERROR: No SRAM available\n");
+          end_port ();
+          exit (1);
+        }
     }
   else
     {
       start_bank = bank_no;
       n_banks = sram_size_banks (pocket_camera);
-      if (n_banks == 4)
+      if (!n_banks)
+        {
+          fprintf (stderr, "ERROR: No SRAM available\n");
+          end_port ();
+          exit (1);
+        }
+      else if (n_banks == 4)
         {
           if (start_bank > 3)
             {
@@ -1718,7 +1740,7 @@ gbx_read_sram (const char *filename, unsigned int parport, int bank_no)
 
   memset (buffer, 0, 8192);
   totalbytes = n_banks * 8192;
-  printf ("Receive: %d Bytes (%.4f Mb)\n", totalbytes, (float) totalbytes / MBIT);
+  printf ("Receive: %d Bytes (%.4f Mb)\n\n", totalbytes, (float) totalbytes / MBIT);
 
   enable_sram_bank ();
   starttime = time (NULL);
@@ -1772,6 +1794,12 @@ gbx_write_sram (const char *filename, unsigned int parport, int bank_no)
     {
       start_bank = 0;
       i = sram_size_banks (pocket_camera);
+      if (!i)
+        {
+          fprintf (stderr, "ERROR: No SRAM to write to\n");
+          end_port ();
+          exit (1);
+        }
       j = q_fsize (filename);
       n_banks = MIN (i, (j + 8192 - 1) / 8192); // "+ 8192 - 1" to round up
     }
@@ -1779,7 +1807,13 @@ gbx_write_sram (const char *filename, unsigned int parport, int bank_no)
     {
       start_bank = bank_no;
       n_banks = sram_size_banks (pocket_camera);
-      if (n_banks == 4)
+      if (!n_banks)
+        {
+          fprintf (stderr, "ERROR: No SRAM to write to\n");
+          end_port ();
+          exit (1);
+        }
+      else if (n_banks == 4)
         {
           if (start_bank > 3)
             {
@@ -1802,7 +1836,7 @@ gbx_write_sram (const char *filename, unsigned int parport, int bank_no)
 
   memset (buffer, 0, 8192);
   totalbytes = n_banks * 8192;                  // yes, we _send_ totalbytes bytes
-  printf ("Send: %d Bytes (%.4f Mb)\n", totalbytes, (float) totalbytes / MBIT);
+  printf ("Send: %d Bytes (%.4f Mb)\n\n", totalbytes, (float) totalbytes / MBIT);
 
   enable_sram_bank ();
   starttime = time (NULL);

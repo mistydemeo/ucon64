@@ -761,12 +761,10 @@ else
 
 printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
 	"     %s -help|less (to see everything in less)\n"
-	"\n     If you backup a ROM/SRAM you must force recognition of the system\n"
-	"     %s -snes -xswc backup.swc\n"
 	"\n"
 	"Report problems/ideas/fixes to noisyb@gmx.net\n"
 	"\n"
-,ucon64_name(),ucon64_name(),ucon64_name()
+,ucon64_name(),ucon64_name()
 );
 	return(0);
 }

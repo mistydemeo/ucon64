@@ -106,6 +106,15 @@ custom_strnicmp (const void *a, const void *b)
 }
 
 
+#if 0
+static int
+custom_stricmp (const void *a, const void *b)
+{
+  return stricmp ((const char *)a, (const char *)b);
+}
+#endif
+
+
 static char *
 get_next_file (char *fname)
 {
@@ -618,7 +627,7 @@ ucon64_dat_indexer (void)
       start_time = time (0);
       size = q_fsize (fname_dat);
 
-#if 1 // We never update the index file, we always create it - dbjh
+#if 0 // PR decision
       fprintf (stdout, "%s: %s\n", "Create", basename (fname_index));
 #else
       fprintf (stdout, "%s: %s\n", (update ? "Update" : "Create"), basename (fname_index));

@@ -134,7 +134,7 @@ all: libdiscmage/$(FULLLIBNAME_DM) $(TARGET)
 
 
 CLEAN_CMD=rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~; \
-cd libdiscmage && $(MAKE) clean; cd ..; \
+cd libdiscmage && $(MAKE) clean
 
 clean:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
@@ -160,8 +160,7 @@ endif                                   # cygwin
 
 
 DISTCLEAN_CMD=rm -f Makefile config.log config.status config.cache config.h; \
-cd libdiscmage && $(MAKE) distclean; cd ..; \
-cd libnetgui && $(MAKE) distclean
+cd libdiscmage && $(MAKE) distclean
 
 distclean: clean
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP

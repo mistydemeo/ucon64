@@ -57,6 +57,7 @@ nero.obj: libdiscmage.h misc.h $(CONFIG_H) nero.h cdi.h dxedll_priv.h
 sheets.obj: libdiscmage.h misc.h dxedll_priv.h
 dllinit.obj: libdiscmage.h misc.h dxedll_priv.h
 misc.obj: misc.h dxedll_priv.h
+miscz.obj: miscz.h misc.h dxedll_priv.h
 dxe_misc.obj: $(CONFIG_H) dxedll_pub.h
 djimport.obj: libdiscmage.h dlopen.h dxedll_pub.h
 dlopen.obj: $(CONFIG_H) dlopen.h dxedll_pub.h

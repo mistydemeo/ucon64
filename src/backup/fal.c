@@ -3,7 +3,7 @@ fal.c - Flash Linker Advance support for uCON64
 
 written by 2001        Jeff Frohwein
            2001        NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
+           2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -140,8 +140,10 @@ const st_usage_t fal_usage[] =
 #define SHARP28F_WORDWRITE  0x10
 
 #define u8      unsigned char
-#define u16     unsigned short
+#define u16     unsigned short int
 #define u32     unsigned int
+#define u64     unsigned long long int
+// u64 is needed to compile cartlib.c without warnings on Linux/x86_64
 #define CONST_U8 const unsigned char
 
 

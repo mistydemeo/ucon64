@@ -105,7 +105,7 @@ ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
               DEADJOE */DEADJOE *~ */*~ */*/*~
 	cd libdiscmage && $(MAKE) clean
-        cd libnetgui && $(MAKE) clean
+	cd libnetgui && $(MAKE) clean
 else
 ifdef DJGPP
 	del *.o
@@ -115,9 +115,9 @@ ifdef DJGPP
 	del $(TARGET)
 	cd libdiscmage
 	$(MAKE) clean
-        cd ..
-        cd libnetgui
-        $(MAKE) clean
+	cd ..
+	cd libnetgui
+	$(MAKE) clean
 	cd ..
 else                                    # Unix or BeOS
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \

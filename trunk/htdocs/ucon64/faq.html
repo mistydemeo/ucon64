@@ -186,11 +186,8 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    downloaded from <a href="http://www.gnu.org/order/ftp.html" target="_blank">
    http://www.gnu.org/order/ftp.html</a>. Visual C++ can be bought for about 60
    euro (at 15 May 2003) in most computer shops.<br>
-   uCON64 can be compiled for Unix (GNU/Linux, Solaris, FreeBSD), DOS, BeOS and
-   Windows (95/98/ME/NT/2000/XP). It should also be possible to compile uCON64
-   for AmigaOS, but that port is not directly supported by us, because we do
-   not have access to a machine running AmigaOS. The Amiga port is being
-   maintained by Jan-Erik Karlsson.<br>
+   uCON64 can be compiled for Unix (GNU/Linux, Solaris, FreeBSD), DOS, BeOS,
+   Windows (95/98/ME/NT/2000/XP), AmigaOS (PPC/68K) and Mac OS X.<br>
    A DOS port of GCC (and other GNU development tools) named DJGPP is
    available from <a href="http://www.delorie.com/djgpp/" target="_blank">
    http://www.delorie.com/djgpp/</a>. A Win32 port of GCC (and many other GNU
@@ -204,13 +201,15 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    - whether uCON64 will produce debug output (default: no)<br>
    - whether uCON64 will have support for parallel port backup units (default:
    yes)<br>
+   - whether uCON64 will use the ppdev interface for parallel port I/O (default:
+   no)<br>
    - whether uCON64 will be able to use color in its display output (default:
    yes)<br>
-   - whether uCON64 will be able to read .gz and .zip files (default: not if a
-   Makefile "template" is used, see below)<br>
-   - whether uCON64 will be able to use the discmage library (default: yes)<br>
    - whether add-on libraries will be dynamically loaded or linked (default:
    loaded)<br>
+   - whether uCON64 will be able to use the discmage library (default: yes)<br>
+   - whether uCON64 will be able to read .gz and .zip files (default: not if a
+   Makefile "template" is used, see below)<br>
 <br>
    The presence or settings of these features is controlled by the header file
    config.h in combination with the makefiles. There are two ways to create a
@@ -283,6 +282,13 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    Now read the relevant section for the compiler you are using.<br>
 <br>
    <b>GCC</b> (including DJGPP and Cygwin)<br>
+   If you use Bash you may have to take one extra step before running make.
+   Because of a strange design decision made by the authors of Bash, the
+   environment variable OSTYPE is not exported on all platforms. Because of
+   that, on several platforms (like FreeBSD and Mac OS X), you have to export it
+   manually before running make. You can do that with the following command:<br>
+   &nbsp;&nbsp; export OSTYPE<br>
+<br>
    If you have compiled uCON64 in the same directory before, first type:<br>
    &nbsp;&nbsp; make clean<br>
 <br>
@@ -303,11 +309,20 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    &nbsp;&nbsp; make install<br>
 <br>
    Under Unix this command will ask for root's password, because uCON64 needs
-   to be setuid root for parallel port access. If you configured uCON64 without
-   support for parallel port backup units, uCON64 need not be setuid root. Just
-   copy ucon64 to any directory you like. "make install" also creates a
-   configuration directory for uCON64 and copies discmage.so to it, so you
-   might find it easier to use it.<br>
+   to be setuid root for parallel port access and because regular users usually
+   do not have write access in the default installation directory,
+   /usr/local/bin. If you configured uCON64 without support for parallel port
+   backup units or if you configured it to use ppdev, uCON64 need not be setuid
+   root. Just copy ucon64 to any directory you like.<br>
+   Under Mac OS X it is usual to install programs in /usr/bin. You can override
+   the default destination directory /usr/local/bin by setting the environment
+   variable DESTDIR. So, in order to install uCON64 in the directory /usr/bin
+   use a command like:<br>
+   &nbsp;&nbsp; DESTDIR=/usr/bin make install<br>
+   This works also on Unix.<br>
+   "make install" also creates a configuration directory for uCON64 and copies
+   discmage.so (Unix and BeOS) or discmage.dylib (Mac OS X) to it, so you may
+   find it easier to use it.<br>
    Under BeOS this command will open a dialog window. Just follow the
    instructions.<br>
 <br>
@@ -332,7 +347,7 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    information specific for your operating system. Then continue to the section
    <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
 <br>
-   <b>Unix (GNU/Linux, FreeBSD, Solaris) &amp; BeOS</b><br>
+   <b>Unix (GNU/Linux, FreeBSD, Solaris), BeOS &amp; Mac OS X</b><br>
    Start a command line shell like Bash. Then extract the binary package.
    To extract or unpack a package in .tar.gz format use a command line like
    this:<br>
@@ -348,11 +363,16 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    (Graphical User Interface) like KDE's ark or a similar program.<br>
    After you have extracted the package install uCON64 by running the install
    script. On Unix, if you do not have root access, copy the uCON64 executable
-   to a directory in your PATH. If you do have root access, run the shell
-   script install.sh. On BeOS just run the script install_beos.sh. So, for Unix
-   do something like this:<br>
+   to a directory in your PATH. If you do have root access (i.e., know the root
+   password), run the shell script install.sh. On BeOS just run the script
+   install_beos.sh. For Unix do something like this:<br>
    &nbsp;&nbsp; cd ucon64-1.9.8-1-linux-bin<br>
    &nbsp;&nbsp; ./install.sh<br>
+   By default install.sh will try to copy ucon64 to /usr/local/bin. You can
+   specify another directory by setting the environment variable DESTDIR.
+   On Mac OS X programs are usually installed in the directory /usr/bin. Users
+   of that OS might want to install uCON64 with a command like:<br>
+   &nbsp;&nbsp; DESTDIR=/usr/bin ./install.sh<br>
 <br>
    For copier I/O BeOS users will need Caz's driver inside ioport.zip or
    available at <a href="http://www.infernal.currantbun.com" target="_blank">
@@ -483,8 +503,12 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
     <td><tt>uCON64 will use color in its display output if it is 1</tt></td>
   </tr>
   <tr>
+    <td><tt>parport_dev</tt></td>
+    <td><tt>name of parallel port device (AmigaOS or Unix with ppdev)</tt></td>
+  </tr>
+  <tr>
     <td><tt>parport</tt></td>
-    <td><tt>hardware address of parallel port</tt></td>
+    <td><tt>hardware address of parallel port (AmigaOS: port number)</tt></td>
   </tr>
   <tr>
     <td><tt>discmage_path</tt></td>

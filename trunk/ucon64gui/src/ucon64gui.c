@@ -20,6 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "ucon64gui.h"
 #include "snes/snes.h"
+#include "n64/n64.h"
 #include "nes/nes.h"
 
 #include "backup/swc.h"
@@ -65,6 +66,8 @@ h2g_system (char *query)
     {
       if (!strdcmp (value, "ucon64gui_snes"))
         ucon64gui_snes ();
+      if (!strdcmp (value, "ucon64gui_n64"))
+        ucon64gui_n64 ();
       if (!strdcmp (value, "ucon64gui_root"))
         ucon64gui_root ();
       if (!strdcmp (value, "ucon64gui_nes"))
@@ -229,7 +232,9 @@ ucon64gui_root (void)
   h2g_input_submit ("Super Nintendo", "ucon64gui_snes",
                     "(-snes) Options for Super Nintendo");
   h2g_input_submit ("NES", "ucon64gui_nes",
-                    "(-snes) Options for Nintendo Entertainment System");
+                    "(-nes) Options for Nintendo Entertainment System");
+  h2g_input_submit ("Nintendo 64", "ucon64gui_n64",
+                    "(-n64) Options for Nintendo 64");
 
   h2g_br ();
   h2g_img (trans_xpm, 0, 3, 0, NULL);

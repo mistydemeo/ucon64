@@ -624,21 +624,20 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
 
   fseek (file, rominfo->buheader_len, SEEK_SET);
   fread (crc32_mem, 1, CHECKSUM_START, file);
+  memcpy (bootcode_buf, crc32_mem + N64_HEADER_LEN, N64_BC_SIZE);
   if (!rominfo->interleaved)
     {
       fcrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
-      memcpy (bootcode_buf, crc32_mem + N64_HEADER_LEN, N64_BC_SIZE);
       ucon64_bswap16_n (crc32_mem, CHECKSUM_START);
     }
   else
-    {
-      memcpy (bootcode_buf, crc32_mem + N64_HEADER_LEN, N64_BC_SIZE);
-      ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
-    }
+    ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
   scrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
 #else
   fseek (file, rominfo->buheader_len + N64_HEADER_LEN, SEEK_SET);
   fread (bootcode_buf, 1, N64_BC_SIZE, file);
+  if (rominfo->interleaved)
+    ucon64_bswap16_n (bootcode_buf, N64_BC_SIZE);
 #endif
   if (crc32 (0, bootcode_buf, N64_BC_SIZE) == 0x98bc2c86)
     {
@@ -698,7 +697,10 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
             t2 ^= t6 ^ c1;
 
           if (bootcode == 6105)
-            t1 += BYTES2LONG (&bootcode_buf[0x710 + (i & 0xff)], 0) ^ c1;
+            {
+              k1 = 0x710 + (i & 0xff);
+              t1 += BYTES2LONG (&bootcode_buf[k1], 0) ^ c1;
+            }
           else
             t1 += c1 ^ t5;
         }

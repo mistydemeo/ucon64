@@ -10,7 +10,8 @@ DESTDIR=/usr/local/bin
 fi
 
 echo Give root\'s password:
-su -c "
+# The version of su on Mac OS X requires the user name to be specified
+su root -c "
 echo Continueing installation.
 chown root ucon64
 chmod 4775 ucon64

@@ -2351,13 +2351,13 @@ ucon64_find_func (void *buffer, int n, void *object)
   for (m = 0; matchlen; matchlen--)
     {
       memcpy (compare, match + m++, matchlen);
-      memcpy (compare + matchlen, ptr1, (o->searchlen + 0x0f & ~0x0f) - matchlen);
+      memcpy (compare + matchlen, ptr1, ((o->searchlen + 0x0f) & ~0x0f) - matchlen);
       if (memcmp2 (compare, o->search, o->searchlen, o->flags) == 0)
         {
           o->found = o->pos - matchlen;
           if (!(o->flags & UCON64_FIND_QUIET))
             {
-              dumper (stdout, compare, o->searchlen + 0x0f & ~0x0f, o->found, DUMPER_HEX);
+              dumper (stdout, compare, (o->searchlen + 0x0f) & ~0x0f, o->found, DUMPER_HEX);
               fputc ('\n', stdout);
             }
         }
@@ -2372,7 +2372,7 @@ ucon64_find_func (void *buffer, int n, void *object)
           o->found = o->pos + ptr1 - ptr0;
           if (!(o->flags & UCON64_FIND_QUIET))
             {
-              dumper (stdout, ptr1, o->searchlen + 0x0f & ~0x0f, o->found, DUMPER_HEX);
+              dumper (stdout, ptr1, (o->searchlen + 0x0f) & ~0x0f, o->found, DUMPER_HEX);
               fputc ('\n', stdout);
             }
           ptr1++;

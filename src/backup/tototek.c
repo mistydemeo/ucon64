@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #endif
 #include <stdio.h>
+#include "misc/bswap.h"
 #include "misc/misc.h"
 #include "misc/parallel.h"
 #ifdef  USE_ZLIB

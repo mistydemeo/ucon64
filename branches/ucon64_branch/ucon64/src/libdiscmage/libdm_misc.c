@@ -387,7 +387,9 @@ dm_track_init (dm_track_t *track, FILE *fh)
                   track_probe[x].seek_header + track->track_start;
             fseek (fh, pos, SEEK_SET);
             fread (value_s, 1, 16, fh);
-            if (!memcmp (pvd_magic, &value_s, 8))
+            if (!memcmp (pvd_magic, &value_s, 8) ||
+                !memcmp (svd_magic, &value_s, 8) ||
+                !memcmp (vdt_magic, &value_s, 8))
               {
                 identified = 1;
                 break;
@@ -406,7 +408,9 @@ dm_track_init (dm_track_t *track, FILE *fh)
              track_probe[x].seek_header + track->track_start, SEEK_SET);
       fread (value_s, 1, 16, fh);
 
-      if (!memcmp (pvd_magic, &value_s, 8))
+      if (!memcmp (pvd_magic, &value_s, 8) ||
+          !memcmp (svd_magic, &value_s, 8) ||
+          !memcmp (vdt_magic, &value_s, 8))
         identified = 1;
     }
 
@@ -611,7 +615,7 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
   p = (char *) get_suffix (buf);
   if (p)
     buf[strlen (buf) - strlen (p)] = 0;
-  sprintf (buf2, "%s_%d", buf, track_num);
+  sprintf (buf2, "%s_%d", buf, track_num + 1);
 
   switch (track->mode)
     {
@@ -635,7 +639,6 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
   if (track->total_len < track->track_len + track->pregap_len)
     {
       fprintf (stderr, "SKIPPING: track seems truncated\n");
-      fclose (fh);
       return -1;
     }
 

@@ -292,14 +292,10 @@ ucon64_exit (void)
 int
 main (int argc, char **argv)
 {
-  int ucon64_argc;
-  int c = 0, result = 0;
-  long size = 0;
-  int value = 0;
-  unsigned long padded;
+  int ucon64_argc, c = 0, result = 0, value = 0, option_index = 0;
+  unsigned long padded, size = 0;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
   const char *ucon64_argv[128];
-  int option_index = 0;
   st_rominfo_t rom;
 
   printf ("%s\n"

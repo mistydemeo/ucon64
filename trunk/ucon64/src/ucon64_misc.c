@@ -104,7 +104,7 @@ const char *unknown_usage[] =
 char *ucon64_temp_file = NULL;
 int (*ucon64_testsplit_callback) (const char *filename) = 0;
 
-// maker strings for SNES, GB, GBC and GBA games
+// maker/publisher strings for SNES, GB, GBC and GBA games
 const char *nintendo_maker[792] = {
   NULL, "Nintendo", "Rocket Games/Ajinomoto", "Imagineer-Zoom", "Gray Matter",
   "Zamuse", "Falcom", NULL, "Capcom", "Hot B Co.",
@@ -181,7 +181,7 @@ const char *nintendo_maker[792] = {
   NULL, "Tokuma Shoten Intermedia", "Tsukuda Original", "DATAM-Polystar", NULL,
   NULL, "Bulletproof Software", "Vic Tokai Inc.", NULL, "Character Soft",
   "I'Max", "Saurus", NULL, NULL, "General Entertainment",
-  NULL, NULL, NULL, "Success", NULL,
+  NULL, NULL, "I'Max", "Success", NULL,
   "SEGA Japan", NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL,                                         // 8Z

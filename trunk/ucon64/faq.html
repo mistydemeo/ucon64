@@ -117,12 +117,13 @@ Q33: <a href="#33">How do I enable or disable colors in the display output of
    enable gzip &amp; zip support. zlib is available from
    <a href="http://www.gzip.org/zlib/" target="_blank">http://www.gzip.org/zlib/</a>.<br>
    If you use a Bash incompatible shell (like command.com or cmd.exe), copy
-   Makefile.orig to Makefile and config.h.orig to config.h.<br>
+   Makefile.orig to Makefile, libdiscmage/Makefile.orig to libdiscmage/Makefile
+   and config.h.orig to config.h.<br>
    Now you can optionally open Makefile and config.h in an editor and
    change the defines.<br>
    Note that if you want to enable zlib support under DOS you must define the
-   constant HAVE_ZLIB_H in config.h (remove the "//" in front of the line that defines
-   it) <i>and</i> ZLIB in Makefile.<br>
+   constant HAVE_ZLIB_H in config.h (remove the "//" in front of the line that
+   defines it) <i>and</i> ZLIB in Makefile.<br>
    Then enter the following lines:<br>
    &nbsp;&nbsp; make clean<br>
    &nbsp;&nbsp; make<br>

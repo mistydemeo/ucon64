@@ -504,7 +504,7 @@ int
 ucon64_testsplit (const char *filename)
 // test if ROM is split into parts
 {
-  long parts = 0;
+  int parts = 0;
   char buf[MAXBUFSIZE];
 
   strcpy (buf, filename);
@@ -519,10 +519,32 @@ ucon64_testsplit (const char *filename)
     return parts + 1;
 
   strcpy (buf, filename);
+  buf[strrcspn (buf, ".") - 1]--;
+  while (!access (buf, F_OK) && strcmp (buf, filename) != 0)
+    {
+      buf[strrcspn (buf, ".") - 1]--;
+      parts++;
+    }
+
+  if (parts)
+    return parts + 1;
+
+  strcpy (buf, filename);
   buf[strrcspn (buf, ".") + 1]++;
   while (!access (buf, F_OK) && strcmp (buf, filename) != 0)
     {
       buf[strrcspn (buf, ".") + 1]++;
+      parts++;
+    }
+
+  if (parts)
+    return parts + 1;
+
+  strcpy (buf, filename);
+  buf[strrcspn (buf, ".") + 1]--;
+  while (!access (buf, F_OK) && strcmp (buf, filename) != 0)
+    {
+      buf[strrcspn (buf, ".") + 1]--;
       parts++;
     }
 
@@ -912,7 +934,7 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
 
     case UCON64_RROM:
     case UCON64_RR83:
-      if (ucon64.console != UCON64_UNKNOWN)
+      if (ucon64.console != UCON64_UNKNOWN && !ucon64_testsplit (filename))
         {
           strcpy (buf, mkfile (strtrim (rominfo.name), '_'));
           if (!buf[0])
@@ -932,10 +954,13 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
 
     case UCON64_LS:
     default:
+if (!ucon64_testsplit (filename))
+{
       strftime (buf, 13, "%b %d %H:%M", localtime (&puffer->st_mtime));
       printf ("%-31.31s %10ld %s %s\n", mkprint(rominfo.name, ' '),
             (long) puffer->st_size, buf, ucon64.rom);
       fflush (stdout);
+      }
       break;
     }
   return 0;

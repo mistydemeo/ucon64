@@ -397,12 +397,12 @@ main (int argc, char **argv)
     ucon64.ansi_color = ansi_init ();
 #endif
 
-  if (optind < argc)
+  if (!strlen (ucon64.rom) && optind < argc)
     ucon64.rom = argv[optind++];
 
 //  ucon64.rom = ucon64_extract (ucon64.rom);
 
-  if (optind < argc)
+  if (!strlen (ucon64.file) && optind < argc)
     ucon64.file = argv[optind++];
 
 #ifdef BACKUP
@@ -410,9 +410,25 @@ main (int argc, char **argv)
     sscanf (ucon64.file, "%x", &ucon64.parport);
 #endif
 
+#if 1
+  do
+    {
+      if (!ucon64_init (ucon64.rom, &rom))
+        ucon64_nfo (&rom);
+      // wildcard support ("ucon64 *.swc --file=0")
+      if (optind < argc)
+        {
+          ucon64.rom = argv[optind];
+          ucon64.console = UCON64_UNKNOWN;
+        }
+      optind++;
+    }
+  while (optind <= argc);
+#else
   if (!ucon64_init (ucon64.rom, &rom))
     if (ucon64.show_nfo == UCON64_YES)
       ucon64_nfo (&rom);
+#endif
   ucon64.show_nfo = UCON64_NO;
 
   optind = option_index = 0;
@@ -639,7 +655,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 //      rominfo->console_usage =
 
 //      rominfo->copier_usage = cdrw_usage;
-      
+
       dm_close (image);
 #endif
    }
@@ -700,7 +716,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
   strcpy (buf, NULL_TO_EMPTY (rominfo->name));
   x = UCON64_ISSET (rominfo->data_size) ?
     rominfo->data_size :
-    rominfo->file_size - rominfo->buheader_len,
+    rominfo->file_size - rominfo->buheader_len;
   printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
           // some ROMs have a name with control chars in it -> replace control chars
           mkprint (buf, '.'),
@@ -723,7 +739,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 
       if (!padded)
         printf ("Padded: No\n");
-      else if (padded)
+      else
         printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n", padded,
                 TOMBIT_F (padded));
 
@@ -732,7 +748,8 @@ ucon64_nfo (const st_rominfo_t *rominfo)
         printf ("Intro/Trainer: Maybe, %d Bytes\n", intro);
 
       if (rominfo->interleaved != UCON64_UNKNOWN)
-        // printing this is handy for SNES ROMs, but maybe nonsense for others
+        // printing this is handy for SNES, N64 & Genesis ROMs, but maybe
+        //  nonsense for others
         printf ("Interleaved/Swapped: %s\n",
           rominfo->interleaved ?
             (rominfo->interleaved > 1 ?

@@ -567,30 +567,7 @@ ucon64_pad (const char *filename, int start, int size)
 }
 
 
-#if 0
-int
-ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
-// test if EOF is padded (repeating bytes)
-{
-  int size = rominfo->file_size;
-  int pos = rominfo->file_size - 2;
-  int c = q_fgetc (filename, rominfo->file_size - 1);
-  unsigned char *buf;
-
-  if (!(buf = (unsigned char *) malloc ((size + 2) * sizeof (unsigned char))))
-    return -1;
-
-  q_fread (buf, 0, size, filename);
-
-  while (c == buf[pos])
-    pos--;
-
-  free (buf);
-
-  size -= (pos + 1);
-  return size > 1 ? size : 0;
-}
-#else
+#if 1
 int
 ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
@@ -622,6 +599,29 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
   fclose (fh);
 
   return rominfo->file_size;                    // the whole file is "padded"
+}
+#else
+int
+ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
+// test if EOF is padded (repeating bytes)
+{
+  int size = rominfo->file_size;
+  int pos = rominfo->file_size - 2;
+  int c = q_fgetc (filename, rominfo->file_size - 1);
+  unsigned char *buf;
+
+  if (!(buf = (unsigned char *) malloc ((size + 2) * sizeof (unsigned char))))
+    return -1;
+
+  q_fread (buf, 0, size, filename);
+
+  while (c == buf[pos])
+    pos--;
+
+  free (buf);
+
+  size -= (pos + 1);
+  return size > 1 ? size : 0;
 }
 #endif
 
@@ -827,7 +827,7 @@ ucon64_parport_init (unsigned int port)
       exit (1);
     }
 #endif
-#if     defined AMIGA
+#ifdef  AMIGA
   ucon64_io_fd = open ("PAR:", O_RDWR | O_NONBLOCK);
 //  ucon64_io_fd = fopen ("PAR:", "r+");
 //  if (ucon64_io_fd == NULL)

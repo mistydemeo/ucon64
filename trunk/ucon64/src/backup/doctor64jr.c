@@ -33,22 +33,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "doctor64jr.h"
 
 const st_usage_t doctor64jr_usage[] = {
-  {NULL, "Doctor64 Jr"},
-  {NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
+  {NULL, NULL, "Doctor64 Jr"},
+  {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef PARALLEL
-  {"xdjr", "send/receive ROM to/from Doctor64 Jr; " OPTION_LONG_S "port=PORT\n"
+  {"xdjr", NULL, "send/receive ROM to/from Doctor64 Jr; " OPTION_LONG_S "port=PORT\n"
 //          "                receives automatically when ROM does not exist\n"
               "currently only sending is supported"},
-#ifdef TODO
-#warning TODO --xdjrs send/receive SRAM to/from Doctor64 Jr
-#endif
 #if 0
-  "  " OPTION_LONG_S "xdjrs       send/receive SRAM to/from Doctor64 Jr; "
-    OPTION_LONG_S "port=PORT\n"
-    "                  receives automatically when SRAM does not exist\n"
+  {"xdjrs", NULL, "send/receive SRAM to/from Doctor64 Jr; " OPTION_LONG_S "port=PORT\n"
+    "                  receives automatically when SRAM does not exist"},
 #endif
 #endif                          // PARALLEL
-  {NULL, NULL}
+  {NULL, NULL, NULL}
 };
 
 

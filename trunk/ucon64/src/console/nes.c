@@ -42,39 +42,39 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t nes_usage[] =
   {
-    {NULL, "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)"},
-    {NULL, "1983 Nintendo http://www.nintendo.com"},
-    {"nes", "force recognition"},
+    {NULL, NULL, "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)"},
+    {NULL, NULL, "1983 Nintendo http://www.nintendo.com"},
+    {"nes", NULL, "force recognition"},
 #if 0
     "  " OPTION_LONG_S "hd          force ROM has FFE header (+512 Bytes)\n"
     "  " OPTION_LONG_S "nhd         force ROM has no FFE header\n"
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
 #endif
-    {"unif", "convert to UNIF format/UNF (uses default values)"},
-    {"ines", "convert to iNES format/NES (uses default values)"},
-    {"ineshd", "extract iNES header from ROM (16 Bytes)"},
-    {"j", "join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)"},
-    {"pasofami", "convert to Pasofami/PRM/700/PRG/CHR"},
-    {"s", "convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)"},
-    {"ffe", "convert to FFE format"},
-    {"mapr=MAPR", "specify board name or mapper number for conversion options\n"
+    {"unif", NULL, "convert to UNIF format/UNF (uses default values)"},
+    {"ines", NULL, "convert to iNES format/NES (uses default values)"},
+    {"ineshd", NULL, "extract iNES header from ROM (16 Bytes)"},
+    {"j", NULL, "join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)"},
+    {"pasofami", NULL, "convert to Pasofami/PRM/700/PRG/CHR"},
+    {"s", NULL, "convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)"},
+    {"ffe", NULL, "convert to FFE format"},
+    {"mapr", "MAPR", "specify board name or mapper number for conversion options\n"
                      "MAPR must be a board name for UNIF or a number for Pasofami\n"
                      "and iNES"},
-    {"dint", "convert to non-interleaved format"},
-    {"ctrl=TYPE", "specify controller type (UNIF only)\n"
+    {"dint", NULL, "convert to non-interleaved format"},
+    {"ctrl", "TYPE", "specify controller type (UNIF only)\n"
                      "TYPE='0' regular joypad\n"
                      "TYPE='1' zapper\n"
                      "TYPE='2' R.O.B.\n"
                      "TYPE='3' Arkanoid controller\n"
                      "TYPE='4' powerpad\n"
                      "TYPE='5' four-score adapter"},
-    {"ntsc", "specify TV standard is NTSC (UNIF only)"},
-    {"pal", "specify TV standard is PAL (UNIF only)"},
-    {"bat", "specify battery is present"},
-    {"nbat", "specify battery is not present"},
-    {"vram", "specify VRAM override (UNIF only)"},
-    {"nvram", "specify no VRAM override (UNIF only)"},
-    {"mirr=MTYPE", "specify mirroring type\n"
+    {"ntsc", NULL, "specify TV standard is NTSC (UNIF only)"},
+    {"pal", NULL, "specify TV standard is PAL (UNIF only)"},
+    {"bat", NULL, "specify battery is present"},
+    {"nbat", NULL, "specify battery is not present"},
+    {"vram", NULL, "specify VRAM override (UNIF only)"},
+    {"nvram", NULL, "specify no VRAM override (UNIF only)"},
+    {"mirr", "MTYPE", "specify mirroring type\n"
                       "MTYPE='0' horizontal mirroring\n"
                       "MTYPE='1' vertical mirroring\n"
                       "MTYPE='2' mirror all pages from $2000 (UNIF only)\n"
@@ -82,12 +82,12 @@ const st_usage_t nes_usage[] =
                       "MTYPE='4' four screens of VRAM\n"
                       "MTYPE='5' mirroring controlled by mapper hardware (UNIF only)"},
 #if     UNIF_REVISION > 7
-    {"cmnt=TEXT", "specify that TEXT should be used as comment (UNIF only)"},
+    {"cmnt", "TEXT", "specify that TEXT should be used as comment (UNIF only)"},
 #endif
-    {"dumpinfo=FILE", "use dumper info from FILE when converting to UNIF"},
-    {"n=NEW_NAME", "change internal ROM name to NEW_NAME (UNIF only)"},
-    {"fds", "convert Famicom Disk System file (diskimage) from FAM to FDS"},
-    {"fdsl", "list Famicom Disk System/FDS (diskimage) contents"},
+    {"dumpinfo", "FILE", "use dumper info from FILE when converting to UNIF"},
+    {"n", "NEW_NAME", "change internal ROM name to NEW_NAME (UNIF only)"},
+    {"fds", NULL, "convert Famicom Disk System file (diskimage) from FAM to FDS"},
+    {"fdsl", NULL, "list Famicom Disk System/FDS (diskimage) contents"},
 #if 0
     "TODO  " OPTION_LONG_S "fam     convert Famicom Disk System file (diskimage) from FDS to FAM\n"
     "TODO:  " OPTION_LONG_S "tr     truncate doubled PRG/CHR\n"
@@ -97,7 +97,7 @@ const st_usage_t nes_usage[] =
     "  " OPTION_LONG_S "gg          apply GameGenie code (permanent);\n"
     "                  " OPTION_LONG_S "file=XXXXXX or " OPTION_LONG_S "file=XXXXXXXX\n"
 #endif
-      {NULL, NULL}
+      {NULL, NULL, NULL}
   };
 
 #if 0

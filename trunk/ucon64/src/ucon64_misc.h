@@ -154,7 +154,8 @@ enum
   FILE_BUFFER_ERROR,
   DAT_NOT_FOUND,
   DAT_NOT_ENABLED,
-  READ_CONFIG_FILE
+  READ_CONFIG_FILE,
+  NO_LIB
 };
 
 extern const char *ucon64_msg[];

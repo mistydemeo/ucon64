@@ -36,14 +36,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t jaguar_usage[] =
   {
-    {NULL, "Panther(32bit prototype)/Jaguar64/Jaguar64 CD"},
-    {NULL, "1989 Flare2/1993 Atari/1995 Atari"},
-    {"jag", "force recognition"},
+    {NULL, NULL, "Panther(32bit prototype)/Jaguar64/Jaguar64 CD"},
+    {NULL, NULL, "1989 Flare2/1993 Atari/1995 Atari"},
+    {"jag", NULL, "force recognition"},
 #if 0
     "  " OPTION_LONG_S "hd          force ROM has header (+512 Bytes)\n"
     "  " OPTION_LONG_S "nhd         force ROM has no header\n"
 #endif
-    {NULL, NULL}
+    {NULL, NULL, NULL}
 };
 
 typedef struct st_jaguar

@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 typedef struct
 {
   const char *option_s;                         // "chk", ..
+  const char *optarg;
   const char *desc;                             // "fix checksum", ...
 //  const char *desc_long;                        // long description
 //  int status;                                   // development status of option

@@ -61,6 +61,7 @@ extern uint32_t dm_get_version (void);
 typedef struct
 {
   const char *option_s;                         // "chk", ..
+  const char *optarg;
   const char *desc;                             // "fix checksum", ...
 //  const char *desc_long;                        // long description
 //  int status;                                   // development status of option

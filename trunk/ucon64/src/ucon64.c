@@ -565,7 +565,7 @@ ucon64_discmage (void)
         {
           fprintf (stderr,
                    "ERROR: Your libdiscmage is too old (%d.%d.%d)\n"
-                   "       You need at least version %d.%d.%d for this version of uCON64\n\n",
+                   "       You need at least version %d.%d.%d\n\n",
                    version >> 16, (version >> 8) & 0xff, version & 0xff,
                    0, 0, 2);
           return 0;
@@ -616,7 +616,7 @@ ucon64_discmage (void)
     {
       fprintf (stderr,
                "ERROR: Your libdiscmage is too old (%d.%d.%d)\n"
-               "       You need at least version %d.%d.%d for this version of uCON64\n\n",
+               "       You need at least version %d.%d.%d\n\n",
                version >> 16, (version >> 8) & 0xff, version & 0xff,
                0, 0, 2);
       return 0;
@@ -751,22 +751,24 @@ ucon64_console_probe (st_rominfo_t *rominfo)
     {
       int console;
       int (*init) (st_rominfo_t *);
-      uint8_t auto_recognition;
+#define AUTO_RECOGNITION (1)
+//...
+      uint32_t flags;
     } st_probe_t;
 
   int x = 0;
   st_probe_t probe[] =
     {
-      {UCON64_GBA, gba_init, 1},
-      {UCON64_N64, n64_init, 1},
-      {UCON64_GENESIS, genesis_init, 1},
-      {UCON64_LYNX, lynx_init, 1},
-      {UCON64_GB, gameboy_init, 1},
-      {UCON64_SNES, snes_init, 1},
-      {UCON64_NES, nes_init, 1},
-      {UCON64_NEOGEOPOCKET, ngp_init, 1},
-      {UCON64_SWAN, swan_init, 1},
-      {UCON64_JAGUAR, jaguar_init, 1},
+      {UCON64_GBA, gba_init, AUTO_RECOGNITION},
+      {UCON64_N64, n64_init, AUTO_RECOGNITION},
+      {UCON64_GENESIS, genesis_init, AUTO_RECOGNITION},
+      {UCON64_LYNX, lynx_init, AUTO_RECOGNITION},
+      {UCON64_GB, gameboy_init, AUTO_RECOGNITION},
+      {UCON64_SNES, snes_init, AUTO_RECOGNITION},
+      {UCON64_NES, nes_init, AUTO_RECOGNITION},
+      {UCON64_NEOGEOPOCKET, ngp_init, AUTO_RECOGNITION},
+      {UCON64_SWAN, swan_init, AUTO_RECOGNITION},
+      {UCON64_JAGUAR, jaguar_init, AUTO_RECOGNITION},
       {UCON64_SMS, sms_init, 0},
       {UCON64_NEOGEO, neogeo_init, 0},
       {UCON64_PCE, pcengine_init, 0},
@@ -807,7 +809,7 @@ ucon64_console_probe (st_rominfo_t *rominfo)
     {
       if (UCON64_TYPE_ISROM (ucon64.type))      // TODO: still needed?
         for (x = 0; probe[x].console != 0; x++)
-          if (probe[x].auto_recognition)
+          if (probe[x].flags & AUTO_RECOGNITION)
             {
               ucon64_flush (rominfo);
               if (!probe[x].init (rominfo))
@@ -1144,15 +1146,24 @@ ucon64_render_usage (const st_usage_t *usage)
               int len = strlen (usage[x].option_s);
 
 // adjust tabs for OPTION_S and OPTION_LONG_S here not in the OPTION_S definition
-              if (MAX (1, MIN (len, strcspn (usage[x].option_s, "= "))) == 1)
-                printf ("   %s", OPTION_S);
-              else
-                printf ("  %s", OPTION_LONG_S);
+              sprintf (buf, 
+                        (len == 1 ?
+                         ("   " OPTION_S "%s%c") :
+                         ("  " OPTION_LONG_S "%s%c")),
+                         usage[x].option_s,
+                         (usage[x].optarg ? OPTARG : '\0'));
 
-              sprintf (buf, "%s                          ", usage[x].option_s);
-              buf[len < 12 ? 12 : len + 1] = 0;
+              if (usage[x].optarg)
+                strcat (buf, usage[x].optarg);
 
-              printf ("%s", buf);
+              strcat (buf, " ");
+
+              if (strlen (buf) < 16)
+                {
+                  strcat (buf, "                             ");
+                  buf[16] = 0;
+                }
+              printf (buf);
             }
 
           if (usage[x].desc)
@@ -1174,6 +1185,13 @@ ucon64_render_usage (const st_usage_t *usage)
 #endif                
               printf ("\n");
             }
+#ifdef  DEBUG
+// malformed usage entries use to have no desc == NULL
+          else
+            {
+              fprintf (stderr, "\n\nERROR: Usage entry for (%s) is malformed", usage[x].option_s);
+            }
+#endif            
         }
     }
 }
@@ -1341,10 +1359,9 @@ ucon64_usage (int argc, char *argv[])
 #endif
 #endif
 
-  printf ("All DISC-based consoles (using libdiscmage)\n");
+  printf ("All DISC-based consoles (using %s)\n", ucon64.discmage_path);
   if (!ucon64.discmage_enabled)
-    printf ("                %s\n"
-            "                  not found or too old, support disabled\n", name_discmage);
+    fprintf (stdout, ucon64_msg[NO_LIB], name_discmage);
   else
     ucon64_render_usage ((const st_usage_t *) dm_get_usage ());
   printf ("\n");

@@ -59,13 +59,13 @@ fsize (const char *filename)
 }
 
 const st_dm_usage_t dm_usage[] = {
-  {"mksheet", "generate TOC and CUE sheet files for IMAGE; " OPTION_LONG_S "rom=IMAGE" /*\n"
+  {"mksheet", NULL, "generate TOC and CUE sheet files for IMAGE; " OPTION_LONG_S "rom=IMAGE" /*\n"
                 OPTION_LONG_S "rom could also be an existing TOC or CUE file\n" */},
 #if 0
 // TODO
-  {"cdirip=N", "rip/dump track N from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE"},
-  {"nrgrip=N", "rip/dump track N from Nero/NRG IMAGE; " OPTION_LONG_S "rom=NRG_IMAGE"},
-  {"rip", "rip/dump file(s) from a track; " OPTION_LONG_S "rom=TRACK"},
+  {"cdirip", "N", "rip/dump track N from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE"},
+  {"nrgrip", "N", "rip/dump track N from Nero/NRG IMAGE; " OPTION_LONG_S "rom=NRG_IMAGE"},
+  {"rip", NULL, "rip/dump file(s) from a track; " OPTION_LONG_S "rom=TRACK"},
 /*
     OPTION_LONG_S "file=SECTOR_SIZE\n"
       "TODO: " OPTION_LONG_S "iso     strip SECTOR_SIZE of any CD_IMAGE to MODE1/2048; " OPTION_LONG_S "rom=CD_IMAGE\n"
@@ -76,7 +76,7 @@ const st_dm_usage_t dm_usage[] = {
       "                  2352 (default), or custom values\n"
 */
 #endif
-  {NULL, NULL}
+  {NULL, NULL, NULL}
 };
 
 

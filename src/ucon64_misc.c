@@ -1439,12 +1439,12 @@ ucon64_configfile (void)
                  "cdrw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
                  "cdrw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
 #endif
-                 , UCON64_VERSION);
+                 , UCON64_CONFIG_VERSION);
           fclose (fh);
           printf ("OK\n\n");
         }
     }
-  else if (strtol (get_property (ucon64.configfile, "version", buf2, "0"), NULL, 10) < UCON64_VERSION)
+  else if (strtol (get_property (ucon64.configfile, "version", buf2, "0"), NULL, 10) < UCON64_CONFIG_VERSION)
     {
       strcpy (buf2, ucon64.configfile);
       setext (buf2, ".OLD");
@@ -1453,7 +1453,7 @@ ucon64_configfile (void)
 
       q_fcpy (ucon64.configfile, 0, q_fsize (ucon64.configfile), buf2, "wb");
 
-      sprintf (buf, "%d", UCON64_VERSION);
+      sprintf (buf, "%d", UCON64_CONFIG_VERSION);
       set_property (ucon64.configfile, "version", buf);
 
       set_property (ucon64.configfile, "ansi_color", "1");

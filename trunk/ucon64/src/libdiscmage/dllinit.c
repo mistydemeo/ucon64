@@ -91,8 +91,11 @@ dxe_init (void)
 
   symbol = map_put (symbol, "dm_open", dm_open);
   symbol = map_put (symbol, "dm_reopen", dm_reopen);
+  symbol = map_put (symbol, "dm_fdopen", dm_fdopen);
   symbol = map_put (symbol, "dm_close", dm_close);
 
+  symbol = map_put (symbol, "dm_read", dm_read);
+  symbol = map_put (symbol, "dm_write", dm_write);
   symbol = map_put (symbol, "dm_rip", dm_rip);
 
   symbol = map_put (symbol, "dm_disc_read", dm_disc_read);
@@ -101,9 +104,7 @@ dxe_init (void)
   symbol = map_put (symbol, "dm_mktoc", dm_mktoc);
   symbol = map_put (symbol, "dm_mkcue", dm_mkcue);
 
-  symbol = map_put (symbol, "dm_bin2iso", dm_bin2iso);
   symbol = map_put (symbol, "dm_set_gauge", dm_set_gauge);
-  symbol = map_put (symbol, "dm_isofix", dm_isofix);
   return 0;
 }
 

@@ -49,6 +49,7 @@ int
 ucon64_switches (int c, const char *optarg)
 {
   char *ptr = NULL;
+  int x = 0;
 
   /*
     Handle options or switches that cause other _options_ to be ignored except
@@ -73,6 +74,11 @@ ucon64_switches (int c, const char *optarg)
       so we can't use preprocessor directives in the argument list.
     */
     case UCON64_VER:
+      if (ucon64.discmage_enabled)
+        x = libdm_get_version();
+      else
+        x = 0;
+
 #ifdef  DLOPEN
 #define DISCMAGE_STATUS_MSG "discmage DLL:                      %s\n"
 #else
@@ -133,6 +139,7 @@ ucon64_switches (int c, const char *optarg)
               "configuration file %s  %s\n"
               DISCMAGE_STATUS_MSG
               "discmage enabled:                  %s\n"
+              "discmage version:                  %d.%d.%d\n"
               "configuration directory:           %s\n"
               "DAT file directory:                %s\n"
               "entries in DATabase:               %d\n"
@@ -148,6 +155,7 @@ ucon64_switches (int c, const char *optarg)
               access (ucon64.configfile, F_OK) ? "(not present):" : "(present):    ", ucon64.configfile,
               ptr,
               ucon64.discmage_enabled ? "yes" : "no",
+              x >> 16, x >> 8, x,
               ucon64.configdir,
               ucon64.datdir,
               ucon64_dat_total_entries (),
@@ -871,30 +879,36 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_BIN2ISO:
-      if (ucon64.discmage_enabled)
-        {
-          libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
-          libdm_bin2iso (ucon64.image);
-        }
-      else
-        printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
-      break;
-
     case UCON64_ISOFIX:
-      if (ucon64.discmage_enabled)
-        {
-          libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
-          libdm_isofix (ucon64.image, strtol (optarg, NULL, 10));
-        }
-      else
-        printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
-      break;
-
     case UCON64_RIP:
       if (ucon64.discmage_enabled)
         {
-          libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
-          libdm_rip (ucon64.image);
+          uint32_t flags = DM_RDONLY; // just read sectors
+
+          switch (c)
+            {
+              case UCON64_BIN2ISO:
+                flags |= DM_2048; // DM_RDONLY|DM_2048 read sectors and convert to 2048 Bytes
+                break;
+              
+              case UCON64_ISOFIX:
+                flags |= DM_FIX; // DM_RDONLY|DM_FIX read sectors and fix (if needed/possbile)
+                break;
+            }
+
+          ucon64.image = libdm_reopen (ucon64.rom, flags, ucon64.image);
+          if (ucon64.image)
+            {
+              int track = strtol (optarg, NULL, 10);
+              if (track < 1)
+                track = 1;
+
+              libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
+              libdm_rip (ucon64.image, track);
+            }
+          else
+            {
+            }
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);

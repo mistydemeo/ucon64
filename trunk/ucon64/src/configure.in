@@ -124,7 +124,7 @@ dnl Checks for library functions.
 AC_FUNC_MEMCMP
 AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(getcwd mkdir rmdir strcspn strtol strcasestr basename dirname)
+AC_CHECK_FUNCS(getcwd mkdir rmdir strcspn strtol strcasestr basename dirname realpath)
 
 AC_OUTPUT(Makefile libdiscmage/Makefile)
 

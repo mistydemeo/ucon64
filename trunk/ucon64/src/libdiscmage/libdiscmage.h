@@ -64,6 +64,19 @@ typedef signed __int64 int64_t;
 #endif // OWN_INTTYPES
 #endif
 
+//TODO: make this dynamic
+#define DM_MAX_TRACKS (0xfff)
+
+
+#define DM_UNKNOWN (-1)
+
+#define DM_SHEET (1)
+#define DM_CUE (DM_SHEET)
+#define DM_TOC (DM_SHEET)
+#define DM_CDI (2)
+#define DM_NRG (3)
+#define DM_CCD (4)
+
 
 #define ISODCL(from, to) (to - from + 1)
 typedef struct
@@ -106,15 +119,24 @@ typedef struct
 
 typedef struct
 {
-  uint32_t track_start; // embedded? 
-  uint32_t track_len;
+// TODO?: replace those uint32_t with uint64_t or so...
+
+// some formats use to have the track "embedded" (like: cdi, nrg, etc..)
+// this is the start offset inside the image
+  uint32_t track_start; // in bytes
+  
+  int pregap_len; // in sectors
+  int start_lba;  // in sectors?
+
+  uint32_t track_len; // in sectors
+  uint32_t total_len; // int sectors; pregap_len + track_len (less if the track is truncated)
+
   st_iso_header_t iso_header;
 
-
-  uint32_t mode;
-  uint32_t sector_size;
-  uint32_t seek_header;
-  uint32_t seek_ecc;
+  int mode;        // 0 == AUDIO, 1 == MODE1, 2 == MODE2
+  int sector_size; // in bytes; includes seek_header + seek_ecc
+  int seek_header; // in bytes
+  int seek_ecc;    // in bytes
 
   char *desc;
   char *cdrdao_desc;
@@ -123,45 +145,22 @@ typedef struct
 
 typedef struct
 {
-  int type; // image type DM_CDI, DM_NRG, DM_TOC, etc.
-  char *desc; // like type but verbal
+  int type;               // image type DM_CDI, DM_NRG, DM_TOC, etc.
+  char *desc;             // like type but more verbose
+  int flags;              // DM_FIX, ...
   char fname[FILENAME_MAX];
-
-  uint16_t sessions;      // # of sessions
-  uint16_t tracks;        // # of tracks
-
-//  dm_track_t **track; // TODO make an array of this(!)
-  dm_track_t *track;
-
-//  TODO make this dissappear
-  int track_type, 
-      save_as_iso, 
-      pregap,convert, 
-      fulldata, 
-      cutall, 
-      cutfirst;
-  char do_convert, 
-       do_cut;
+  uint32_t session[DM_MAX_TRACKS + 1]; // array with tracks per session
+  int sessions;
+  dm_track_t track[DM_MAX_TRACKS];
+  int tracks;
 } dm_image_t;
 
 
 /*
   dm_get_version()  returns version of libdiscmage as uint32_t
-  dm_open()      this is the first function to call with the filename of the
-                 image; it will try to recognize the image format, etc.
-  dm_reopen()    like dm_open() but can reuse an existing dm_image_t
-  dm_close()     the last function; close image
-  dm_fseek()     seek for tracks inside image
-                 dm_fseek (image, 2, SEEK_END);
-                 will seek to the end of the 2nd track in image
-  dm_set_gauge() enter here the name of a function that takes two integers
-                 gauge (pos, total)
-                   {
-                     printf ("%d of %d done", pos, total);
-                   }
-  dm_bin2iso()   convert binary Mx/xxxx image to M1/2048
-TODO:  dm_rip()  rip files from track
-  dm_isofix()    takes an ISO image with PVD pointing
+TODO: DM_FILES   rip files from track instead of track
+  DM_RIP_2048    (bin2iso) convert binary Mx/xxxx image to M1/2048
+  DM_FIX         (isofix) takes an ISO image with PVD pointing
                  to bad DR offset and add padding data so actual DR
                  gets located in right absolute address.
                  Original boot area, PVD, SVD and VDT are copied to
@@ -170,7 +169,22 @@ TODO:  dm_rip()  rip files from track
                  2352 and 2056 bytes per sector. All of them are
                  converted to 2048 bytes per sector when writing
                  excluding 2056 image which is needed by Mac users.
-TODO:  dm_cdifix()  fix a cdi image
+  dm_open()      this is the first function to call with the filename of the
+                 image; it will try to recognize the image format, etc.
+  dm_reopen()    like dm_open() but can reuse an existing dm_image_t
+  dm_close()     the last function; close image
+  dm_fdopen()    returns a FILE ptr from the start of a track (in image)
+  dm_fseek()     seek for tracks inside image
+                 dm_fseek (image, 2, SEEK_END);
+                 will seek to the end of the 2nd track in image
+  dm_set_gauge() enter here the name of a function that takes two integers
+                 gauge (pos, total)
+                   {
+                     printf ("%d of %d done", pos, total);
+                   }
+  dm_rip()       rip track from image
+  dm_read()      read single sector from track (in image)
+TODO: dm_write()     write single sector to track (in image)
   dm_mktoc()     automagically generates toc sheets
   dm_mkcue()     automagically generates cue sheets
   dm_disc_read() deprecated reading or writing images is done
@@ -178,23 +192,35 @@ TODO:  dm_cdifix()  fix a cdi image
   dm_disc_write()deprecated reading or writing images is done
                  by those scripts in contrib/
 */
-//extern const uint32_t dm_version;
 extern uint32_t dm_get_version (void);
-extern dm_image_t *dm_open (const char *fname);
-extern dm_image_t *dm_reopen (const char *fname, dm_image_t *image);
-extern int dm_close (dm_image_t *image);
-extern int dm_fseek (FILE *fp, int track, int how);
 extern void dm_set_gauge (void (*gauge) (int, int));
-extern int dm_bin2iso (const dm_image_t *image);
-extern int dm_rip (const dm_image_t *image);
-extern int dm_isofix (const dm_image_t *image, int start_lba);
+
+#define DM_RDONLY (1)
+//#define DM_WRONLY (2)
+//#define DM_RDWR (4)
+//#define DM_CREAT (8)
+#define DM_FIX (16)
+#define DM_2048 (32)
+#define DM_FILES (64)
+extern dm_image_t *dm_open (const char *fname, uint32_t flags);
+extern dm_image_t *dm_reopen (const char *fname, uint32_t flags, dm_image_t *image);
+extern int dm_close (dm_image_t *image);
+
+//extern int dm_fseek (FILE *fp, int track_num, int how);
+extern FILE *dm_fdopen (dm_image_t *image, int track_num, const char *mode);
+
+extern int dm_read (char buffer, int track_num, int sector, const dm_image_t *image);
+extern int dm_write (const char buffer, int track_num, int sector, const dm_image_t *image);
+
 extern int dm_mktoc (const dm_image_t *image);
 extern int dm_mkcue (const dm_image_t *image);
+
+extern int dm_rip (const dm_image_t *image, int track_num);
+
 extern int dm_disc_read (const dm_image_t *image);
 extern int dm_disc_write (const dm_image_t *image);
 
 #ifdef  __cplusplus
 }
 #endif
-
 #endif  // LIBDISCMAGE_H

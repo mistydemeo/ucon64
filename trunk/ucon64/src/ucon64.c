@@ -106,14 +106,13 @@ const struct option options[] = {
     {"b0", 1, 0, UCON64_B0},
     {"b1", 1, 0, UCON64_B1},
     {"bat", 0, 0, UCON64_BAT},
-    {"bin2iso", 0, 0, UCON64_BIN2ISO},
+    {"bin2iso", 1, 0, UCON64_BIN2ISO},
     {"bios", 1, 0, UCON64_BIOS},
     {"bot", 1, 0, UCON64_BOT},
     {"bs", 0, 0, UCON64_BS},
     {"c", 1, 0, UCON64_C},
 //    {"cd32", 0, 0, UCON64_CD32},
 //    {"cdi", 0, 0, UCON64_CDI},
-//    {"cdirip", 0, 0, UCON64_CDIRIP},
     {"chk", 0, 0, UCON64_CHK},
     {"cmnt", 1, 0, UCON64_CMNT},                // will be active only if UNIF_REVISION > 7
     {"col", 1, 0, UCON64_COL},
@@ -237,7 +236,7 @@ const struct option options[] = {
     {"q", 0, 0, UCON64_Q},
     {"qq", 0, 0, UCON64_QQ},
     {"rename", 0, 0, UCON64_RENAME},
-    {"rip", 0, 0, UCON64_RIP},
+    {"rip", 1, 0, UCON64_RIP},
     {"rr83", 0, 0, UCON64_RR83},
     {"rrom", 0, 0, UCON64_RROM},
     {"rl", 0, 0, UCON64_RL},
@@ -436,7 +435,11 @@ int
 main (int argc, char **argv)
 {
   int x = 0, rom_index = 0, c = 0;
+#if (FILENAME_MAX < MAXBUFSIZE)
   static char buf[MAXBUFSIZE];
+#else
+  static char buf[FILENAME_MAX];
+#endif
   struct stat fstate;
 
   printf ("%s\n"
@@ -581,24 +584,28 @@ main (int argc, char **argv)
         WIN32_FIND_DATA find_data;
         HANDLE dp;
 #endif
-        char *path = argv[rom_index];
-
-        if (stat (path, &fstate) != -1)
+        
+        realpath2 (argv[rom_index], buf);
+        if (stat (buf, &fstate) != -1)
           {
             if (S_ISREG (fstate.st_mode))
-              result = ucon64_process_rom (argv[rom_index]);
+              result = ucon64_process_rom (buf);
             else if (S_ISDIR (fstate.st_mode))  // a dir?
               {
 #ifndef _WIN32
-                if ((dp = opendir (path)))
+                if ((dp = opendir (buf)))
                   {
                     while ((ep = readdir (dp)))
                       {
-                        sprintf (buf, "%s" FILE_SEPARATOR_S "%s", path, ep->d_name);
-                        if (stat (buf, &fstate) != -1)
+                        char buf2[FILENAME_MAX], buf3[FILENAME_MAX];
+                        
+                        sprintf (buf2, "%s" FILE_SEPARATOR_S "%s", buf, ep->d_name);
+                        realpath2 (buf2, buf3);
+
+                        if (stat (buf3, &fstate) != -1)
                           if (S_ISREG (fstate.st_mode))
                             {
-                              result = ucon64_process_rom (buf);
+                              result = ucon64_process_rom (buf3);
                               if (result == 1)
                                 break;
                             }
@@ -606,16 +613,18 @@ main (int argc, char **argv)
                     closedir (dp);
                   }
 #else
-                sprintf (search_pattern, "%s" FILE_SEPARATOR_S "*", path);
+                sprintf (search_pattern, "%s" FILE_SEPARATOR_S "*", buf);
                 if ((dp = FindFirstFile (search_pattern, &find_data)) != INVALID_HANDLE_VALUE)
                   {
                     do
                       {
-                        sprintf (buf, "%s" FILE_SEPARATOR_S "%s", path, find_data.cFileName);
-                        if (stat (buf, &fstate) != -1)
+                        sprintf (buf2, "%s" FILE_SEPARATOR_S "%s", buf, find_data.cFileName);
+                        realpath2 (buf2, buf3);
+
+                        if (stat (buf3, &fstate) != -1)
                           if (S_ISREG (fstate.st_mode))
                             {
-                              result = ucon64_process_rom (buf);
+                              result = ucon64_process_rom (buf3);
                               if (result == 1)
                                 break;
                             }
@@ -626,10 +635,10 @@ main (int argc, char **argv)
 #endif
               }
             else
-              result = ucon64_process_rom(argv[rom_index]);
+              result = ucon64_process_rom (buf);
           }
         else
-          result = ucon64_process_rom(argv[rom_index]);
+          result = ucon64_process_rom (buf);
 
         if (result == 1)
           break;
@@ -897,9 +906,10 @@ ucon64_rom_handling (void)
         }
 
       // check for disc image only if ucon64_probe() failed or --disc was used
-      if (!ucon64.rominfo || ucon64.force_disc)
-        if (ucon64.discmage_enabled)
-          ucon64.image = libdm_reopen (ucon64.rom, ucon64.image);
+      if (ucon64.discmage_enabled)
+//        if (!ucon64.rominfo || ucon64.force_disc)
+        if (ucon64.force_disc)
+          ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
     }
 //end of WF_PROBE
 
@@ -1349,7 +1359,6 @@ ucon64_usage (int argc, char *argv[])
       const st_usage_t *usage[6];
     } st_usage_array_t;
 
-  int x = 0, c = 0, single = 0;
   st_usage_array_t usage_array[] = {
     {UCON64_DC, {dc_usage, 0, 0, 0, 0, 0}},
     {UCON64_PSX, {psx_usage,
@@ -1442,7 +1451,9 @@ ucon64_usage (int argc, char *argv[])
 #endif
     {0, {0, 0, 0, 0, 0, 0}}
   };
+  int x = 0, c = 0, single = 0;
   char *name_exe = basename (argv[0]), *name_discmage;
+  (void) argc;
 
 #ifdef  HAVE_ZLIB_H
 #define USAGE_S "Usage: %s [OPTION]... [ROM|IMAGE|SRAM|FILE|DIR|ARCHIVE]...\n\n"
@@ -1499,30 +1510,24 @@ ucon64_usage (int argc, char *argv[])
 #endif
 #endif
 
-  printf ("All disc-based consoles (using %s)\n", name_discmage);
-  if (!ucon64.discmage_enabled)
-    printf (ucon64_msg[NO_LIB], name_discmage);
-  else
-    ucon64_render_usage (libdm_usage);
-  printf ("\n");
-
-  optind = 0;
-  single = 0;
-
-  while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
+  if (ucon64.discmage_enabled)
     {
-      for (x = 0; usage_array[x].console != 0; x++)
-        if (usage_array[x].console == c)
-          {
-            int y = 0;
-            for (; usage_array[x].usage[y]; y++)
-              ucon64_render_usage (usage_array[x].usage[y]);
-
-            single = 1; // we show only the usage for the specified console(s)
-
-            printf ("\n");
-          }
+      ucon64_render_usage (libdm_usage);
+      printf ("\n");
     }
+
+  // getopt()?
+  for (c = 0; arg[c].val; c++)
+    for (x = 0; usage_array[x].console != 0; x++)
+      if (usage_array[x].console == arg[c].val)
+        {
+          int y = 0;
+          for (; usage_array[x].usage[y]; y++)
+            ucon64_render_usage (usage_array[x].usage[y]);
+           single = 1; // we show only the usage for the specified console(s)
+
+          printf ("\n");
+        }
 
   if (!single)
     {
@@ -1555,8 +1560,17 @@ ucon64_usage (int argc, char *argv[])
 #endif
 
   printf (
-     "DATabase: %d known ROMs (DAT files: %s)\n"
-     "\n"
+     "DATabase: %d known ROMs (DAT files: %s)\n\n",
+       ucon64_dat_total_entries (),
+       ucon64.datdir);
+          
+  if (!ucon64.discmage_enabled)
+    {
+      printf (ucon64_msg[NO_LIB], name_discmage);
+      printf ("\n");
+    }
+    
+  printf (
      PARALLEL_MSG
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
      MORE_MSG
@@ -1564,8 +1578,6 @@ ucon64_usage (int argc, char *argv[])
      "\n"
      "Please report any problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
      "\n",
-     ucon64_dat_total_entries (),
-     ucon64.datdir,
      name_exe, name_exe);
 }
 

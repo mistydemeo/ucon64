@@ -587,19 +587,25 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   if (S_ISREG (fstate.st_mode) != TRUE)
     return result;
 
-  ucon64_fsize = q_fsize (ucon64.rom);       // save size in ucon64_fsize
+  ucon64_fsize = q_fsize (ucon64.rom);          // save size in ucon64_fsize
   rominfo->file_size = ucon64_fsize;
 
 /*
   currently the media type is determined by its size
 */
+#if 1
+  ucon64.type = (rominfo->file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
+#else
+#ifdef  LIBDISCMAGE
   if (ucon64.type == UCON64_UNKNOWN)
     {
-      image = dm_init(romfile);
-//      ucon64.type = (rominfo->file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
+      image = dm_init (romfile);
       ucon64.type = image ? UCON64_CD : UCON64_ROM;
-      if (image) dm_close (image);
+      if (image)
+        dm_close (image);
     }
+#endif
+#endif
 
   ucon64_flush (rominfo);
 

@@ -51,8 +51,8 @@ ucon64_switches (int c, const char *optarg)
 {
 #ifdef  DISCMAGE
   char *ptr = NULL, buf[MAXBUFSIZE];
-  int x = 0;
 #endif
+  int x = 0;
 
   /*
     Handle options or switches that cause other _options_ to be ignored except
@@ -130,11 +130,7 @@ ucon64_switches (int c, const char *optarg)
 #endif // DLOPEN
       if (ucon64.discmage_enabled)
         {
-#ifdef  DISCMAGE
           x = libdm_get_version();
-#else
-          x = 0;
-#endif                    
           sprintf (buf, "%d.%d.%d", x >> 16, x >> 8, x);
         }
       else
@@ -166,8 +162,7 @@ ucon64_switches (int c, const char *optarg)
               "discmage version:                  %s\n",
               ptr,
               ucon64.discmage_enabled ? "yes" : "no",
-              buf
-              );
+              buf);
 #endif              
 
       printf ("configuration directory:           %s\n"

@@ -3009,7 +3009,8 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
     }
 
   // HiROM flag
-  if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0x01) == (header_offset >= snes_header_base + SNES_HIROM) ? 0x01 : 0x00)
+  if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0x01) ==
+      (header_offset >= snes_header_base + SNES_HIROM) ? 0x01 : 0x00)
     score += 1;
 
   // ROM size
@@ -3037,7 +3038,7 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
        (rom_buffer[SNES_HEADER_START + header_offset + 47] << 8)) == 0xffff)
     score += 3;
 
-  // Reset vector
+  // reset vector
   if (rom_buffer[SNES_HEADER_START + header_offset + 0x4d] & 0x80)
     score += 4;
 

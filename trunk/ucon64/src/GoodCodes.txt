@@ -3,13 +3,13 @@
 :                                               :\
 :   [a] Alternate        [p] Pirate             :\
 :   [b] Bad Dump         [t] Trained            :\
-:   [f] Fixed            [T] Translation        :\
-:   [h] Hack             [x] Bad Checksum       :\
+:   [f] Fixed            [T-] OldTranslation    :\
+:                        [T+] NewerTranslation  :\
+:   [h] Hack             (-) Unknown Year       :\
 :   [o] Overdump         [!] Verified Good Dump :\
 :  (M#) Multilanguage (# of Languages)          :\
 : (###) Checksum       (??k) ROM Size           :\
 :  ZZZ_ Unclassified   (Unl) Unlicensed		:\
-:   (-) Unknown Year                            :\
 :...............................................:\
  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
@@ -24,16 +24,19 @@
 :                      .--------Atari---------. :\
 : .-----Genesis-----.  [ (PAL) Euro Version   ] :\
 : [ (1) Japan       ]  `----------------------' :\
-: [ (4) USA         ]  .-----Thomson MO5------. :\
-: [ (5) NTSC Only   ]  [ (Y) Year unknown     ] :\
+: [ (4) USA         ]  .---------GBA----------. :\
+: [ (5) NTSC Only   ]  [ [hI??] Intro hacks   ] :\
 : [ (8) PAL Only    ]  `----------------------' :\
 : [ (B) non USA     ]  .--------Coleco--------. :\
 : [ [c] Checksum    ]  [ (Adam) ADAM Version  ] :\
-: `-----------------'  `----------------------' :\
-:                      .-------Nintendo-------. :\
+: [ [x] Bad Checksum]  `----------------------' :\
+: [ [R-] Countries  ]                           :\
+: `-----------------'                           :\
+:                      .--------NES/FC--------. :\
 : .--NeoGeo Pocket--.  [ (PC10) PlayChoice 10 ] :\
 : [ [M] Mono Only   ]  [   (VS) Versus        ] :\
-: `-----------------'  `----------------------' :\
+: `-----------------'  [ [hFFE] FFE Copier fmt] :\
+:                      `----------------------' :\
 :...............................................:\
  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
@@ -46,11 +49,13 @@
 :   (C) China             (NL) Netherlands      :\
 :   (E) Europe            (PD) Public Domain    :\
 :   (F) France             (S) Spain            :\
+:   (F) World (Genesis)                         :\
 :  (FC) French Canadian   (SW) Sweden           :\
 :  (FN) Finland            (U) USA              :\
 :   (G) Germany           (UK) England          :\
 :  (GR) Greece           (Unk) Unknown Country  :\
 :  (HK) Hong Kong          (I) Italy		:\
+:  (H)  Holland          (Unl) Unlicensed       :\
 :...............................................:\
  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 

@@ -457,17 +457,33 @@ snes_ufos (void)
 }
 
 
+static void
+write_deinterleaved_data (st_rominfo_t *rominfo, const char *dest_name, int size)
+{
+  unsigned char *buffer;
+  if (!(buffer = (unsigned char *) malloc (size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+      exit (1);
+    }
+  q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
+  force_interleaved = 1;
+  snes_deinterleave (rominfo, buffer, size);
+  q_fwrite (buffer, SWC_HEADER_LEN, size, dest_name, "ab");
+  free (buffer);
+}
+
+
 static int
 snes_ffe (st_rominfo_t *rominfo, char *ext)
 {
   st_swc_header_t header;
-  int size;
+  int size = ucon64.file_size - rominfo->buheader_len;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   q_fread (&header, 0, rominfo->buheader_len > (int) SWC_HEADER_LEN ?
                          (int) SWC_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
-  size = ucon64.file_size - rominfo->buheader_len;
   header.size_low = size / 8192;
   header.size_high = size / 8192 >> 8;
 
@@ -493,7 +509,10 @@ snes_ffe (st_rominfo_t *rominfo, char *ext)
   ucon64_file_handler (dest_name, src_name, 0);
 
   q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
-  q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
+  if (rominfo->interleaved)
+    write_deinterleaved_data (rominfo, dest_name, size);
+  else
+    q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -577,6 +596,7 @@ int
 snes_fig (st_rominfo_t *rominfo)
 {
   st_fig_header_t header;
+  int size = ucon64.file_size - rominfo->buheader_len;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   q_fread (&header, 0, rominfo->buheader_len > (int) FIG_HEADER_LEN ?
@@ -591,8 +611,10 @@ snes_fig (st_rominfo_t *rominfo)
   ucon64_file_handler (dest_name, src_name, 0);
 
   q_fwrite (&header, 0, FIG_HEADER_LEN, dest_name, "wb");
-  q_fcpy (src_name, rominfo->buheader_len, ucon64.file_size - rominfo->buheader_len,
-          dest_name, "ab");
+  if (rominfo->interleaved)
+    write_deinterleaved_data (rominfo, dest_name, size);
+  else
+    q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -678,7 +700,10 @@ snes_mgd (st_rominfo_t *rominfo)
 
   set_suffix (dest_name, ".078");
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
-  q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
+  if (rominfo->interleaved)
+    write_deinterleaved_data (rominfo, dest_name, ucon64.file_size - rominfo->buheader_len);
+  else
+    q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
 
   strcpy (dest_name, "MULTI-GD.MGH");

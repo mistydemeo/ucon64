@@ -1821,8 +1821,8 @@ snes_n (st_rominfo_t *rominfo, const char *name)
   strncpy (buf, name, strlen (name) > SNES_NAME_LEN ?
                         SNES_NAME_LEN : strlen (name));
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   q_fwrite (buf, rominfo->header_start + rominfo->buheader_len + 16, SNES_NAME_LEN,
             dest_name, "r+b");
 
@@ -1838,8 +1838,8 @@ snes_chk (st_rominfo_t *rominfo)
   int image = rominfo->header_start + rominfo->buheader_len;
 
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
   // change inverse checksum
   q_fputc (dest_name, image + 44, (0xffff - rominfo->current_internal_crc), "r+b");      // low byte

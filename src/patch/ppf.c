@@ -149,8 +149,8 @@ ppf_apply (const char *mod, const char *ppfname)
   unsigned int pos;
 
   strcpy (modname, mod);
-  if (!ucon64_file_handler (modname, NULL, 0))
-    q_fcpy (mod, 0, q_fsize (mod), modname, "wb");
+  ucon64_file_handler (modname, NULL, 0);
+  q_fcpy (mod, 0, q_fsize (mod), modname, "wb");
 
   if ((modfile = fopen (modname, "rb+")) == NULL)
     {
@@ -437,8 +437,8 @@ ppf_set_desc (const char *ppf, const char *description)
   strcpy (ppfname, ppf);
   memset (desc, ' ', 50);
   strncpy (desc, description, strlen (description));
-  if (!ucon64_file_handler (ppfname, NULL, 0))
-    q_fcpy (ppf, 0, q_fsize (ppf), ppfname, "wb");
+  ucon64_file_handler (ppfname, NULL, 0);
+  q_fcpy (ppf, 0, q_fsize (ppf), ppfname, "wb");
   q_fwrite (desc, 6, 50, ppfname, "r+b");
 
   printf (ucon64_msg[WROTE], ppfname);
@@ -454,8 +454,8 @@ ppf_set_fid (const char *ppf, const char *fidname)
        fidbuf[MAX_ID_SIZE + 34 + 1] = "@BEGIN_FILE_ID.DIZ"; // +1 for string terminator
 
   strcpy (ppfname, ppf);
-  if (!ucon64_file_handler (ppfname, NULL, 0))
-    q_fcpy (ppf, 0, q_fsize (ppf), ppfname, "wb");
+  ucon64_file_handler (ppfname, NULL, 0);
+  q_fcpy (ppf, 0, q_fsize (ppf), ppfname, "wb");
 
   printf ("Adding file_id.diz (%s)...\n", fidname);
   fidsize = q_fread (fidbuf + 18, 0, MAX_ID_SIZE, fidname);

@@ -48,8 +48,8 @@ bsl_apply (const char *mod, const char *bslname)
   int dat, numdat, i, done = 0, add;
 
   strcpy (modname, mod);
-  if (!ucon64_file_handler (modname, NULL, 0))
-    q_fcpy (mod, 0, q_fsize (mod), modname, "wb");
+  ucon64_file_handler (modname, NULL, 0);
+  q_fcpy (mod, 0, q_fsize (mod), modname, "wb");
 
   if ((modfile = fopen (modname, "r+b")) == NULL)
     {

@@ -172,8 +172,8 @@ gba_n (st_rominfo_t *rominfo, const char *name)
   memset (buf, 0, 0x0b);
   strncpy (buf, name, 0x0b);
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   q_fwrite (buf, GBA_HEADER_START + rominfo->buheader_len + 0xa0, 0x0b,
             dest_name, "r+b");
 
@@ -209,8 +209,8 @@ gba_logo (st_rominfo_t *rominfo)
   char dest_name[FILENAME_MAX];
 
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   q_fwrite (logodata, GBA_HEADER_START + rominfo->buheader_len + 0x04,
             LOGODATA_LEN, dest_name, "r+b");
 
@@ -225,8 +225,8 @@ gba_chk (st_rominfo_t *rominfo)
   char buf[2], dest_name[FILENAME_MAX], chksum = gba_chksum (rominfo) & 0xff;
 
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
   q_fputc (dest_name, GBA_HEADER_START + rominfo->buheader_len + 0xbd, chksum, "r+b");
   q_fread (buf, GBA_HEADER_START + rominfo->buheader_len + 0xbd, 1, dest_name);
@@ -244,8 +244,8 @@ gba_sram (st_rominfo_t *rominfo)
   char buf[MAXBUFSIZE], dest_name[FILENAME_MAX];
 
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
   strcpy (buf, dest_name);
   set_suffix (buf, ".TMP");

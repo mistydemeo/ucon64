@@ -164,8 +164,8 @@ n64_sram (st_rominfo_t *rominfo, const char *sramfile)
     mem_swap (sram, N64_SRAM_SIZE);
 
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   q_fwrite (sram, 0x286C0, N64_SRAM_SIZE, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -230,8 +230,8 @@ n64_n (st_rominfo_t *rominfo, const char *name)
     mem_swap (buf, N64_NAME_LEN);
 
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
   q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 32, 20, dest_name,
             "r+b");
 
@@ -255,8 +255,8 @@ n64_chk (st_rominfo_t *rominfo)
   char buf[8], dest_name[FILENAME_MAX];
 
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
   // n64crc is set by n64_checksum() when called from n64_init()
   for (x = 0; x < 4; x++)
@@ -298,8 +298,8 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
       if (rominfo->interleaved != 0)
         mem_swap (buf, N64_BOT_SIZE);
 
-      if (!ucon64_file_handler (dest_name, NULL, 0))
-        q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+      ucon64_file_handler (dest_name, NULL, 0);
+      q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
       q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 0x40,
         N64_BOT_SIZE, dest_name, "r+b");
     }

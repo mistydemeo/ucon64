@@ -263,8 +263,8 @@ aps_apply (const char *mod, const char *apsname)
   int size = q_fsize (mod);
 
   strcpy (modname, mod);
-  if (!ucon64_file_handler (modname, NULL, 0))
-    q_fcpy (mod, 0, size, modname, "wb");
+  ucon64_file_handler (modname, NULL, 0);
+  q_fcpy (mod, 0, size, modname, "wb");
 
   if ((n64aps_modfile = fopen (modname, "rb+")) == NULL)
     {
@@ -530,8 +530,8 @@ aps_set_desc (const char *aps, const char *description)
   strcpy (apsname, aps);
   memset (desc, ' ', 50);
   strncpy (desc, description, strlen (description));
-  if (!ucon64_file_handler (apsname, NULL, 0))
-    q_fcpy (aps, 0, q_fsize (aps), apsname, "wb");
+  ucon64_file_handler (apsname, NULL, 0);
+  q_fcpy (aps, 0, q_fsize (aps), apsname, "wb");
   q_fwrite (desc, 7, 50, apsname, "r+b");
 
   printf (ucon64_msg[WROTE], apsname);

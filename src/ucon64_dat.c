@@ -65,7 +65,8 @@ static FILE *fdat = NULL;
 static void
 closedir_dptr (void)
 {
-  if (dptr) closedir (dptr);
+  if (dptr)
+    closedir (dptr);
   dptr = NULL;
 }
 
@@ -73,7 +74,8 @@ closedir_dptr (void)
 static void
 fclose_fdat (void)
 {
-  if (fdat) fclose (fdat);
+  if (fdat)
+    fclose (fdat);
   fdat = NULL;
 }
 
@@ -128,7 +130,7 @@ get_dat_header (char *fname, ucon64_dat_t * dat)
   char buf[MAXBUFSIZE];
 #endif
 
-//hell yes!!! i use get_property() here... 
+// Hell yes!!! I use get_property() here...
 
   strncpy (dat->author, get_property (fname, "author", buf, "Unknown"), sizeof (dat->author));
   dat->author[sizeof (dat->author) - 1] = 0;
@@ -214,7 +216,7 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t * dat)
     {"swan", UCON64_WONDERSWAN, swan_usage},
     {"coleco", UCON64_COLECO, coleco_usage},
     {"intelli", UCON64_INTELLI, intelli_usage},
-//TODO add more; see ucon64_misc.c/*_usage[]
+// TODO add more; see ucon64_misc.c/*_usage[]
     {0, 0, 0}
   };
 
@@ -313,7 +315,8 @@ line_to_crc (const char *dat_entry)
   uint32_t pos = 0, crc32 = 0;
   char buf[MAXBUFSIZE];
 
-  if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR) return 0;
+  if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
+    return 0;
 
   strcpy (buf, dat_entry); 
     
@@ -343,7 +346,8 @@ get_dat_entry (char *fname, ucon64_dat_t * dat, uint32_t crc32)
   while (fgets (buf, MAXBUFSIZE, fdat) != NULL)
     if ((unsigned char) buf[0] == DAT_FIELD_SEPARATOR)
       if (!crc32 || line_to_crc (buf) == crc32)
-        if (line_to_dat (fname, buf, dat)) return dat;
+        if (line_to_dat (fname, buf, dat))
+          return dat;
 
   fclose_fdat ();
 
@@ -423,7 +427,8 @@ ucon64_dat_search (uint32_t crc32, ucon64_dat_t * dat)
   uint32_t fsize = 0;
   FILE *fh = NULL;
 
-  if (!crc32) return NULL;
+  if (!crc32)
+    return NULL;
 
   closedir_dptr ();
   while (get_next_file (buf) != NULL)

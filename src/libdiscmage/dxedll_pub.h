@@ -56,7 +56,7 @@ typedef struct st_symbol
                                                 //  (or it could be a function)
   /*
      functions imported by the DXE module
-     Note that _every_ function used by the DXE module and not defined in it
+     Note that most functions used by the DXE module and not defined in it
      should be listed here. That includes standard C library functions and
      variables.
   */
@@ -68,6 +68,7 @@ typedef struct st_symbol
   int (*puts) (const char *);
   int (*fputs) (const char *, FILE *);
   int (*sscanf) (const char *, const char *, ...);
+  int (*vsscanf) (const char *, const char *, va_list);
   FILE *(*fopen) (const char *, const char *);
   FILE *(*fdopen) (int, const char *);
   FILE *(*popen) (const char *, const char *);
@@ -90,7 +91,7 @@ typedef struct st_symbol
   void (*free) (void *);
   void *(*malloc) (size_t);
   void *(*calloc) (size_t, size_t);
-  void (*exit) (int);
+  void (*exit) (int) __attribute__ ((noreturn));
   long (*strtol) (const char *, char **, int);
   char *(*getenv) (const char *);
   void (*srand) (unsigned);

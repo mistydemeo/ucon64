@@ -819,10 +819,9 @@ int
 gd_write_sram (const char *filename, unsigned int parport, const char *prolog_str)
 {
   FILE *file;
-  unsigned char *buffer;
+  unsigned char *buffer, gdfilename[12];
   int bytesread, bytessend = 0, size, header_size;
   time_t starttime;
-  unsigned char gdfilename[12];
 
   init_io (parport);
 
@@ -1018,8 +1017,9 @@ int
 gd_write_saver (const char *filename, unsigned int parport, const char *prolog_str)
 {
   FILE *file;
-  unsigned char *buffer, gdfilename[12], *p;
-  int bytesread, bytessend = 0, size, fn_length, i;
+  unsigned char *buffer, gdfilename[12];
+  char *p;
+  int bytesread, bytessend = 0, size, fn_length;
   time_t starttime;
 
   init_io (parport);
@@ -1067,7 +1067,7 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
   gdfilename[11] = 0;                           // terminate string
   memcpy (gdfilename, p, fn_length - 4);        // copy name except extension
   memcpy (&gdfilename[8], "S00", 3);            // copy extension S00
-  strupr (gdfilename);
+  strupr ((char *) gdfilename);
 
   printf ("Send: %d Bytes\n", size);
   fseek (file, (size_t) 0, SEEK_SET);

@@ -414,11 +414,19 @@ main (int argc, char **argv)
 #else // !defined DLOPEN
 #ifdef  DJGPP
   {
+    /*
+      The follwoing piece of code makes the DLL "search" behaviour a bit like
+      the search behaviour for Windows programs. A bit, because the import
+      library just opens the file with the name that is stored in
+      djimport_path. It won't search for the DXE in the Windows system
+      directory, nor will it search the directories of the PATH environment
+      variable.
+    */
     extern char djimport_path[FILENAME_MAX];
     char *p;
 
     strcpy (buf, argv[0]);
-    // the next statement is not necessary, but will caus less confusion
+    // the next statement is not necessary, but will cause less confusion
     change_string ("/", 1, 0, 0, FILE_SEPARATOR_S, 1, buf, strlen (buf), 0);
     if ((p = strrchr (buf, FILE_SEPARATOR)))
       *p = 0;

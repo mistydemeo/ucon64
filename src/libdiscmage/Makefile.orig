@@ -14,7 +14,6 @@ ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
 LDFLAGS=-s
-# -rdynamic is not necessary under GNU/Linux, but see info page of dlopen().
 
 LIBNAME=discmage
 OBJECTS=libdiscmage.o cdi.o nero.o sheets.o dllinit.o
@@ -25,6 +24,7 @@ OBJECTS=libdiscmage.o cdi.o nero.o sheets.o dllinit.o
 # installed both gcc (and friends) ports.
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+
 LIBS=-lcygwin -lkernel32
 # kernel32 for DLOPEN and DisableThreadLibraryCalls()
 
@@ -40,14 +40,17 @@ DLLTOOLFLAGS=--dllname $(LIBNAME).dll --def tmp.def
 
 else
 ifdef DJGPP
+
 FULLLIBNAME=$(LIBNAME).dxe
+
 else                                    # Unix or BeOS
+
 CFLAGS+=-fPIC
 
-ifeq ($(OSTYPE),beos)                   # BeOS
-DLLFLAGS=-nostart
-else                                    # Unix
-DLLFLAGS=-shared
+ifeq ($(OSTYPE),beos)
+DLLFLAGS=$(LDFLAGS) -nostart
+else
+DLLFLAGS=$(LDFLAGS) -shared
 endif
 
 ifdef DLOPEN
@@ -55,6 +58,7 @@ FULLLIBNAME=$(LIBNAME).so
 else
 FULLLIBNAME=lib$(LIBNAME).so
 endif
+
 endif                                   # DJGPP
 endif                                   # cygwin
 
@@ -134,15 +138,10 @@ ifndef DLOPEN
 endif
 
 else                                    # Unix or BeOS
-# Unix uses LD_LIBRARY_PATH for dynamic linking, BeOS LIBRARY_PATH
+# Unix uses LD_LIBRARY_PATH for dynamic linking, BeOS uses LIBRARY_PATH
 
-ifndef DLOPEN
-lib$(LIBNAME).so: $(OBJECTS)
-	$(CC) $(DLLFLAGS) $(OBJECTS) -o lib$(LIBNAME).so
-else
-$(LIBNAME).so: $(OBJECTS)
-	$(CC) $(DLLFLAGS) $(OBJECTS) -o $(LIBNAME).so
-endif
+$(FULLLIBNAME): $(OBJECTS)
+	$(CC) $(DLLFLAGS) $(OBJECTS) -o $(FULLLIBNAME)
 
 endif                                   # DJGPP
 endif                                   # cygwin
@@ -150,7 +149,7 @@ endif                                   # cygwin
 
 #ifndef DLOPEN
 #install:
-#	$(LIBTOOL) --mode=install $(INSTALL) lib$(LIBNAME).so $(libdir)/lib$(LIBNAME).so
+#	$(LIBTOOL) --mode=install $(INSTALL) $(FULLLIBNAME) $(libdir)/$(FULLLIBNAME)
 #endif
 
 # Dependencies

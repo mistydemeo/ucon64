@@ -15,6 +15,7 @@ LIBNAME=discmage
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
+FULLLIBNAME=$(LIBNAME).dll
 ifndef DLOPEN
 LDFLAGS+=libdiscmage/$(LIBNAME).a
 endif
@@ -22,26 +23,25 @@ endif
 else
 ifdef DJGPP
 
+FULLLIBNAME=$(LIBNAME).dxe
 ifndef DLOPEN
 LDFLAGS+=libdiscmage/$(LIBNAME).a
 endif
 
 else                                    # Unix or BeOS
-ifeq ($(OSTYPE),beos)                   # BeOS
-
-ifndef DLOPEN
-LDFLAGS+=-Llibdiscmage -l$(LIBNAME)
-endif
-
-else                                    # Unix
 
 ifdef DLOPEN
+FULLLIBNAME=$(LIBNAME).so
+
+ifneq ($(OSTYPE),beos)
 LDFLAGS+=-ldl
+endif
+
 else
+FULLLIBNAME=lib$(LIBNAME).so
 LDFLAGS+=-Llibdiscmage -l$(LIBNAME)
 endif
 
-endif                                   # BeOS
 endif                                   # DJGPP
 endif                                   # cygwin
 
@@ -76,7 +76,7 @@ TARGET:=$(addsuffix .exe, $(TARGET))
 endif                                   # DJGPP
 endif                                   # cygwin
 
-all: $(TARGET)
+all: libdiscmage/$(FULLLIBNAME) $(TARGET)
 
 
 clean:
@@ -127,7 +127,7 @@ endif                                   # cygwin
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
-$(TARGET): $(OBJECTS)
+libdiscmage/$(FULLLIBNAME):
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	cd libdiscmage && $(MAKE)
 else
@@ -139,6 +139,9 @@ else
 	cd libdiscmage && $(MAKE)
 endif                                   # DJGPP
 endif                                   # cygwin
+
+
+$(TARGET): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
 
 

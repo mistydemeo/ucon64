@@ -128,11 +128,13 @@ open_module (char *module_name)
   sym->getenv = getenv;
   sym->srand = srand;
   sym->rand = rand;
+  sym->atoi = atoi;
 
   sym->memcpy = memcpy;
   sym->memset = memset;
   sym->strcmp = strcmp;
   sym->strcpy = strcpy;
+  sym->strncpy = strncpy;
   sym->strcat = strcat;
   sym->strncat = strncat;
   sym->strcasecmp = strcasecmp;
@@ -144,6 +146,7 @@ open_module (char *module_name)
   sym->strcspn = strcspn;
   sym->strlen = strlen;
   sym->strstr = strstr;
+  sym->strdup = strdup;
 
   sym->tolower = tolower;
   sym->toupper = toupper;

@@ -3037,7 +3037,7 @@ strurl (st_url_t *url, const char *url_s)
     {
       // We have an URL beginniurl like http://www.hostname.com:1212
       // Get the port number
-      url->port = atoi (p2 + 1);
+      url->port = (int) atoi (p2 + 1);
       pos2 = p2 - url_s;
     }
   // copy the hostname in the URL container

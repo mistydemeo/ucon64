@@ -116,7 +116,7 @@ char *forceargs[] =
   "-vboy",
   "-swan",
   "-coleco",
-  "-int"
+  "-intelli"
   };
 
 #ifdef	__UNIX__
@@ -499,7 +499,7 @@ if(argcmp(argc,argv,"-coleco"))rom.console=ucon64_COLECO;
 if(argcmp(argc,argv,"-vboy"))rom.console=ucon64_VIRTUALBOY;
 if(argcmp(argc,argv,"-swan"))rom.console=ucon64_WONDERSWAN;
 if(argcmp(argc,argv,"-vec"))rom.console=ucon64_VECTREX;
-if(argcmp(argc,argv,"-int"))rom.console=ucon64_INTELLI;
+if(argcmp(argc,argv,"-intelli"))rom.console=ucon64_INTELLI;
 if(argcmp(argc,argv,"-lynx"))rom.console=ucon64_LYNX;
 if(argcmp(argc,argv,"-sms"))rom.console=ucon64_SMS;
 if(argcmp(argc,argv,"-ngp"))rom.console=ucon64_NEOGEOPOCKET;
@@ -1056,7 +1056,7 @@ else if(argcmp(argc,argv,"-coleco"))coleco_usage(argc,argv);
 else if(argcmp(argc,argv,"-vboy"))virtualboy_usage(argc,argv);
 else if(argcmp(argc,argv,"-swan"))wonderswan_usage(argc,argv);
 else if(argcmp(argc,argv,"-vec"))vectrex_usage(argc,argv);
-else if(argcmp(argc,argv,"-int"))intelli_usage(argc,argv);
+else if(argcmp(argc,argv,"-intelli"))intelli_usage(argc,argv);
 //#ifdef BACKUP
 #ifdef CD
 else if(argcmp(argc,argv,"-dc"));
@@ -1113,7 +1113,7 @@ printf("\n");
 */
 
 printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
-	"  -s16, -ata, -coleco, -vboy, -swan, -vec, -int\n"
+	"  -s16, -ata, -coleco, -vboy, -swan, -vec, -intelli\n"
 	"		force recognition"
 #ifndef DB
 "; NEEDED"

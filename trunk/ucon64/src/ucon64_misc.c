@@ -1547,10 +1547,10 @@ ucon64_configfile (void)
 #endif
 
       set_property (ucon64.configfile, "f2afirmware", "f2afirm.hex");
-      set_property (ucon64.configfile, "iclientu", "iclientu.bin\n");
-      set_property (ucon64.configfile, "iclientp", "iclientp.bin\n");
-      set_property (ucon64.configfile, "ilogo", "ilogo.bin\n");
-      set_property (ucon64.configfile, "gbaloader", "loader.bin\n");
+      set_property (ucon64.configfile, "iclientu", "iclientu.bin");
+      set_property (ucon64.configfile, "iclientp", "iclientp.bin");
+      set_property (ucon64.configfile, "ilogo", "ilogo.bin");
+      set_property (ucon64.configfile, "gbaloader", "loader.bin");
 
       sync ();
       printf ("OK\n\n");

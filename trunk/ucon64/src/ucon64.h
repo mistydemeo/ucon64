@@ -1,5 +1,5 @@
 /*
-uCON64 1.9.7 - a tool to modify video game ROMs and to transfer ROMs to the
+uCON64 - a tool to modify video game ROMs and to transfer ROMs to the
 different backup units/emulators that exist. It is based on the old uCON but
 with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
@@ -74,80 +74,88 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define MAXBUFSIZE 32768
 
+struct ucon64_
+{
+  int argc;
+//  char argv[128][4096];
+  char *argv[128];
+
+//  char arg0[4096];
+  char rom[4096];		//$ROM (cmdline) with path
+  char file[4096];	//$FILE (cmdline) with path
+
+  long console;	//integer for the console system
+
+  char title[4096];
+  char copier[4096];
+  unsigned long bytes;	//size in bytes
+  float mbit;		//size in mbit
+  int swapped;
+  unsigned long padded;
+  unsigned long intro;
+//  int splitted[128];
+
+  unsigned long current_crc32;	//current crc32 value of ROM
+  unsigned long db_crc32;	//crc32 value of ROM in internal database
+
+  int has_internal_crc;	//ROM has internal CRC (Super Nintendo, Mega Drive, Gameboy)
+    unsigned long current_internal_crc;	//calculated CRC
+    unsigned long internal_crc;	//internal CRC
+    long internal_crc_start;	//start of internal CRC in ROM header
+    int internal_crc_len;	//length (in bytes) of internal CRC in ROM header
+    unsigned long internal_inverse_crc;	//internal CRC inverted
+    long internal_inverse_crc_start;	//start of inverted internal CRC
+    int internal_inverse_crc_len;	//length (in bytes) of inverted internal CRC
+
+  char buheader[512];	//(possible) header of backup unit
+  long buheader_start;	//start of backup unit header (mostly 0)
+  long buheader_len;	//length of backup unit header (==0)?no bu header
+
+  char header[4096];	//(possible) internal ROM header
+  long header_start;	//start of internal ROM header
+  long header_len;	//length of internal ROM header (==0)?no header
+
+  char name[4096];	//ROM name
+  long name_start;	//start of internal ROM name (==0)?name comes from database
+  long name_len;		//length of ROM name
+	
+  char name2[4096];	//2nd ROM name (japanese)
+  long name2_start;	//start of internal ROM name (==0)?name comes from database
+  long name2_len;		//length of ROM name
+
+  char manufacturer[4096];	//manufacturer name of the ROM
+  long manufacturer_start;	//start of internal manufacturer name (==0)?manufacturer comes from database
+  long manufacturer_len;	//length of manufacturer name
+	
+  char country[4096];	//country name of the ROM
+  long country_start;	//start of internal country name (==0)? country comes from database
+  long country_len;	//length of country name
+	
+  char misc[MAXBUFSIZE];	//some miscellaneous information about the ROM in one single string
+};
+ 
+
+
+
 #define ucon64_NAME	0
 #define ucon64_ROM	1
 #define ucon64_FILE	2
-#define ucon64_name() (getarg(argc,argv,ucon64_NAME))
-#define ucon64_rom() (getarg(argc,argv,ucon64_ROM))
-#define ucon64_file() (getarg(argc,argv,ucon64_FILE))
+//#define ucon64_name() (getarg(argc,argv,ucon64_NAME))
+//#define ucon64_rom() (getarg(argc,argv,ucon64_ROM))
+//#define ucon64_file() (getarg(argc,argv,ucon64_FILE))
 
-struct ucon64_DB;                               // avoids a warning when included from ucon64_db.h
+struct ucon64_;                               // avoids a warning when included from ucon64_db.h
                                                 //  (#include "ucon64.h" in ucon64_db.h could also
 int ucon64_usage(int argc,char *argv[]);        //  come after definition of struct...)
-int ucon64_probe(int argc,char *argv[], struct ucon64_DB *db);
+int ucon64_init(struct ucon64_ *rom);
 int ucon64_main(int argc,char *argv[]);
+int ucon64_nfo(struct ucon64_ *rom);
+
 
 unsigned int ucon64_parport;
 long ucon64_hsize;
 
 
-struct ucon64_
-{
-	int argc;
-	char *argv[128];
-	int parport;
-
-	char file[4096];	//filename with path
-
-	unsigned long mbit;
-	unsigned long bytes;
-
-	long console;	//integer for the console system
-
-	int swapped;
-	int splitted[128];
-	unsigned long padded;
-	unsigned long intro;
-	unsigned long crc32;	//standart crc32 checksum of the rom
-
-	unsigned long intern_crc;	//custom crc (if not crc32)
-	long intern_crc_start;
-	int intern_crc_len;	//size in bytes
-
-	unsigned long current_crc;	//current custom crc
-
-	unsigned long intern_crccmp;	//crc complement
-	long intern_crccmp_start;
-	int intern_crccmp_len;		//size in bytes
-	
-	char buheader[512];	//default is 512
-	long buheader_start;
-	long buheader_len;	//header of backup unit
-
-	char header[4096];
-	long header_start;
-	long header_len;	//header of rom itself (if present)
-
-	char name[4096];	//name of the ROM
-	long name_start;
-	long name_len;
-	
-	char manufacturer[4096];	//maker of the ROM as integer
-	long manufacturer_start;
-	long manufacturer_len;
-	
-	char country[4096];	//country of the ROM as integer
-	long country_start;
-	long country_len;
-	
-	char misc[4096];	//some miscellaneous information about the ROM
-
-	unsigned long db_crc32;
-	char *db_name;
-	char *db_manufacturer;
-	char *db_country;
-	char *db_misc;
-};
- 
+int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom);
 
 #endif                                          // #ifndef UCON64_H

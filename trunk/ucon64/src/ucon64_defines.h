@@ -1,8 +1,8 @@
 /*
 ucon64_defines.h - definitions for uCON64
 
-written by 2002 - 2003 NoisyB (noisyb@gmx.net)
-           2002 - 2004 dbjh
+Copyright (c) 2002 - 2003 NoisyB <noisyb@gmx.net>
+Copyright (c) 2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -252,6 +252,9 @@ enum {
   UCON64_XCD64M,
   UCON64_XCD64P,
   UCON64_XCD64S,
+  UCON64_XCMC,
+  UCON64_XCMCM,
+  UCON64_XCMCT,
   UCON64_XDEX,
   UCON64_XDJR,
   UCON64_XF2A,

@@ -271,6 +271,8 @@ ucon64_switches (int c, const char *optarg)
       privileges before libcd64 is initialised (after cd64_t.devopen() has been
       called).
     */
+    case UCON64_XCMC:
+    case UCON64_XCMCT:
     case UCON64_XDEX:
     case UCON64_XDJR:
     case UCON64_XF2A:                           // could be for USB version
@@ -364,6 +366,10 @@ ucon64_switches (int c, const char *optarg)
       ucon64.io_mode = strtol (optarg, NULL, 10);
       break;
 #endif
+
+    case UCON64_XCMCM:
+      ucon64.io_mode = strtol (optarg, NULL, 10);
+      break;
 
     case UCON64_XFALM:
     case UCON64_XGBXM:
@@ -1630,6 +1636,18 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 #endif
+
+    case UCON64_XCMC:
+      if (!access (ucon64.rom, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", q_fbackup (ucon64.rom, BAK_MOVE));
+      cmc_read_rom (ucon64.rom, ucon64.parport, ucon64.io_mode); // ucon64.io_mode contains speed value
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XCMCT:
+      cmc_test (strtol (optarg, NULL, 10), ucon64.parport, ucon64.io_mode);
+      fputc ('\n', stdout);
+      break;
 
     case UCON64_XDEX:
       if (access (ucon64.rom, F_OK) != 0)

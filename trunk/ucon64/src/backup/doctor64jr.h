@@ -1,7 +1,7 @@
 /*
 doctor64jr.h - Bung Doctor V64 Junior support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -21,13 +21,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef DOCTOR64JR_H
 #define DOCTOR64JR_H
 
+extern const st_getopt2_t doctor64jr_usage[];
+
 #ifdef USE_PARALLEL
 extern int doctor64jr_read (const char *filename, unsigned int parport);
 extern int doctor64jr_write (const char *filename, unsigned int parport);
-#endif // USE_PARALLEL
+#endif
 
-extern const st_getopt2_t doctor64jr_usage[];
-
-#define DOCTOR64JR_HEADER_START 0
-#define DOCTOR64JR_HEADER_LEN 0
-#endif // DOCTOR64JR_H
+#endif

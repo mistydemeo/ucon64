@@ -1,7 +1,7 @@
 /*
 msg.h - Magic Super Griffin support for uCON64
 
-written by 2003 dbjh
+Copyright (c) 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -41,6 +41,6 @@ typedef struct st_msg_header
 #ifdef USE_PARALLEL
 extern int msg_read_rom (const char *filename, unsigned int parport);
 extern int msg_write_rom (const char *filename, unsigned int parport);
-#endif // USE_PARALLEL
+#endif
 
 #endif // MSG_H

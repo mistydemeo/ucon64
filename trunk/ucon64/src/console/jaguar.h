@@ -1,7 +1,7 @@
 /*
 jaguar.h - Atari Jaguar support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -24,4 +24,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern const st_getopt2_t jaguar_usage[];
 extern int jaguar_init (st_rominfo_t *rominfo);
 
-#endif /* JAGUAR_H */
+#endif

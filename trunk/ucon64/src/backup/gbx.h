@@ -1,8 +1,8 @@
 /*
 gbx.h - Game Boy Xchanger support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2002 dbjh
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 2001 - 2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -24,14 +24,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const st_getopt2_t gbx_usage[];
 
-#define GBX_HEADER_START 0
-#define GBX_HEADER_LEN 0
-
 #ifdef USE_PARALLEL
 extern int gbx_read_rom (const char *filename, unsigned int parport);
 extern int gbx_write_rom (const char *filename, unsigned int parport);
 extern int gbx_read_sram (const char *filename, unsigned int parport, int bank);
 extern int gbx_write_sram (const char *filename, unsigned int parport, int bank);
-#endif // USE_PARALLEL
+#endif
 
 #endif // GBX_H

@@ -24,7 +24,7 @@ GCC_WIN=0
 ifeq ($(TERM),cygwin)
 GCC_WIN=1
 endif
-# test msys before DJGPP; Msys, MinGW's POSIX build environment
+# test msys before DJGPP; MSYS, MinGW's POSIX build environment
 ifeq ($(OSTYPE),msys)
 GCC_WIN=1
 endif
@@ -52,7 +52,7 @@ else                                    # Unix, BeOS or Mac OS X (Darwin)
 
 ifeq ($(findstring openbsd,$(OSTYPE)),openbsd) # for example "openbsd3.4"
 # i386_iopl() is located in libi386.a
-LDFLAGS+=-li386
+LDFLAGS+=
 endif
 
 ifdef USE_DISCMAGE
@@ -101,13 +101,14 @@ OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
         console/jaguar.o console/lynx.o console/n64.o console/neogeo.o \
         console/nes.o console/ngp.o console/pce.o console/psx.o console/sms.o \
         console/snes.o console/swan.o \
-        backup/cd64.o backup/dex.o backup/doctor64.o backup/doctor64jr.o \
-        backup/f2a.o backup/fal.o backup/ffe.o backup/fig.o backup/fpl.o \
-        backup/gbx.o backup/gd.o backup/interceptor.o backup/lynxit.o \
-        backup/mccl.o backup/mcd.o backup/md-pro.o backup/mgd.o backup/msg.o \
-        backup/smc.o backup/smd.o backup/smsgg-pro.o backup/ssc.o backup/swc.o \
-        backup/pce-pro.o backup/psxpblib.o backup/tototek.o backup/ufo.o \
-        backup/yoko.o backup/z64.o
+        backup/cd64.o backup/cmc.o backup/dex.o backup/doctor64.o \
+        backup/doctor64jr.o backup/f2a.o backup/fal.o backup/ffe.o \
+        backup/fig.o backup/fpl.o backup/gbx.o backup/gd.o \
+        backup/interceptor.o backup/lynxit.o backup/mccl.o backup/mcd.o \
+        backup/md-pro.o backup/mgd.o backup/msg.o backup/smc.o backup/smd.o \
+        backup/smsgg-pro.o backup/ssc.o backup/swc.o backup/pce-pro.o \
+        backup/psxpblib.o backup/tototek.o backup/ufo.o backup/yoko.o \
+        backup/z64.o
 ifdef USE_ZLIB
 LDFLAGS+=-lz
 OBJECTS+=map.o misc_z.o unzip.o
@@ -344,6 +345,7 @@ console/sms.o: console/sms.h backup/smd.h backup/mgd.h $(UCON64_STD_H)
 console/snes.o: console/snes.h backup/mgd.h $(UCON64_STD_H)
 console/swan.o: console/swan.h $(UCON64_STD_H)
 backup/cd64.o: backup/cd64.h $(UCON64_STD_H)
+backup/cmc.o: backup/cmc.h $(UCON64_STD_H)
 backup/dex.o: backup/dex.h backup/psxpblib.h $(UCON64_STD_H)
 backup/doctor64.o: backup/doctor64.h $(UCON64_STD_H)
 backup/doctor64jr.o: backup/doctor64jr.h $(UCON64_STD_H)

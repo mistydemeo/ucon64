@@ -31,20 +31,20 @@ TARGETS=$(TARGETS) backup/libcd64/cd64.lib
 
 OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
         misc.obj misc_chk.obj misc_par.obj getopt.obj dlopen.obj \
-        patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj patch/pal4u.obj \
-        patch/ppf.obj patch/xps.obj \
+        patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj \
+        patch/pal4u.obj patch/ppf.obj patch/xps.obj \
         console/dc.obj console/gb.obj console/gba.obj console/genesis.obj \
-        console/jaguar.obj console/lynx.obj console/n64.obj console/neogeo.obj \
-        console/nes.obj console/ngp.obj console/pce.obj console/psx.obj \
-        console/sms.obj console/snes.obj console/swan.obj \
-        backup/cd64.obj backup/dex.obj backup/doctor64.obj \
+        console/jaguar.obj console/lynx.obj console/n64.obj \
+        console/neogeo.obj console/nes.obj console/ngp.obj console/pce.obj \
+        console/psx.obj console/sms.obj console/snes.obj console/swan.obj \
+        backup/cd64.obj backup/cmc.obj backup/dex.obj backup/doctor64.obj \
         backup/doctor64jr.obj backup/f2a.obj backup/fal.obj backup/ffe.obj \
         backup/fig.obj backup/fpl.obj backup/gbx.obj backup/gd.obj \
-        backup/interceptor.obj backup/lynxit.obj backup/mccl.obj backup/mcd.obj \
-        backup/md-pro.obj backup/mgd.obj backup/msg.obj backup/smc.obj \
-        backup/smd.obj backup/smsgg-pro.obj backup/ssc.obj backup/swc.obj \
-        backup/pce-pro.obj backup/psxpblib.obj backup/tototek.obj \
-        backup/ufo.obj backup/yoko.obj backup/z64.obj
+        backup/interceptor.obj backup/lynxit.obj backup/mccl.obj \
+        backup/mcd.obj backup/md-pro.obj backup/mgd.obj backup/msg.obj \
+        backup/smc.obj backup/smd.obj backup/smsgg-pro.obj backup/ssc.obj \
+        backup/swc.obj backup/pce-pro.obj backup/psxpblib.obj \
+        backup/tototek.obj backup/ufo.obj backup/yoko.obj backup/z64.obj
 !ifdef USE_ZLIB
 LDFLAGS=$(LDFLAGS) zlib.lib
 OBJECTS=$(OBJECTS) map.obj misc_z.obj unzip.obj
@@ -187,6 +187,7 @@ console/sms.obj: console/sms.h backup/smd.h backup/mgd.h $(UCON64_STD_H)
 console/snes.obj: console/snes.h backup/mgd.h $(UCON64_STD_H)
 console/swan.obj: console/swan.h $(UCON64_STD_H)
 backup/cd64.obj: backup/cd64.h $(UCON64_STD_H)
+backup/cmc.obj: backup/cmc.h $(UCON64_STD_H)
 backup/dex.obj: backup/dex.h backup/psxpblib.h $(UCON64_STD_H)
 backup/doctor64.obj: backup/doctor64.h $(UCON64_STD_H)
 backup/doctor64jr.obj: backup/doctor64jr.h $(UCON64_STD_H)

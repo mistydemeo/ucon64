@@ -1,8 +1,8 @@
 /*
 ngp.c - NeoGeo Pocket support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2001 Gulliver
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c)        2001 Gulliver
 
 
 This program is free software; you can redistribute it and/or modify
@@ -85,16 +85,16 @@ ngp_init (st_rominfo_t *rominfo)
   rominfo->header_len = NGP_HEADER_LEN;
   rominfo->header = &ngp_header;
 
-//internal ROM name
+  // internal ROM name
   strncpy (rominfo->name, (const char *) &OFFSET (ngp_header, 0x24), 12);
   rominfo->name[12] = 0;
 
-//ROM maker
+  // ROM maker
   rominfo->maker =
     (!strncmp ((const char *) &OFFSET (ngp_header, 0), snk_code, strlen (snk_code))) ?
       "SNK" : "Third party";
 
-//misc stuff
+  // misc stuff
   sprintf (buf, "Mode: %s",
       (OFFSET (ngp_header, 0x23) == 0x00) ? "Mono" :
       (OFFSET (ngp_header, 0x23) == 0x10) ? "Color" :

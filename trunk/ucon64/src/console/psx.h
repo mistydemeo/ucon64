@@ -1,7 +1,7 @@
 /*
 psx.h - Playstation support for uCON64
 
-written by 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -22,6 +22,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define PSX_H
 extern int psx_init (st_rominfo_t *rominfo);
 extern const st_getopt2_t psx_usage[];
-
-
-#endif /* PSX_H */
+#endif

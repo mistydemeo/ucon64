@@ -1,7 +1,7 @@
 /*
 lynx.h - Atari Lynx support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -51,4 +51,4 @@ extern int lynx_rotr (st_rominfo_t *rominfo);
 extern int lynx_init (st_rominfo_t *rominfo);
 
 extern const st_getopt2_t lynx_usage[];
-#endif /* LYNX_H */
+#endif // LYNX_H

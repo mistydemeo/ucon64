@@ -110,9 +110,14 @@ AC_ARG_ENABLE(libcd64,
 if test $enable_libcd64 = yes; then
   AC_DEFINE(USE_LIBCD64, 1, [enable libcd64 (default: no)])
   DEFINE_LIBCD64_MAKE="USE_LIBCD64=1"
+else
+  dnl libi386 is necessary under OpenBSD, but only if libcd64 isn't enabled. The
+  dnl  reason is that libcd64 already includes libi386.
+  LIBI386_MAKE="-li386"
 fi
 AC_MSG_RESULT($enable_libcd64)
 AC_SUBST(DEFINE_LIBCD64_MAKE)
+AC_SUBST(LIBI386_MAKE)
 
 
 dnl Checks for libraries.

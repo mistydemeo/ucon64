@@ -1,8 +1,8 @@
 /*
-bsl.c - Baseline patcher support for uCON64
+bsl.h - Baseline patcher support for uCON64
 
-written by ???? - ???? The White Knight
-           1999 - 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) ???? - ???? The White Knight
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -23,4 +23,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define BSL_H
 extern const st_getopt2_t bsl_usage[];
 extern int bsl_apply (const char *modname, const char *bslname);
-#endif /* BSL_H */
+#endif

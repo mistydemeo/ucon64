@@ -5,8 +5,8 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-written by 1999 - 2004 NoisyB (noisyb@gmx.net)
-           2001 - 2004 dbjh
+Copyright (c) 1999 - 2004 NoisyB <noisyb@gmx.net>
+Copyright (c) 2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -25,8 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
-  first I want to thank SiGMA SEVEN! who was my mentor and taught me how to
-  write programs in C
+  First I want to thank SiGMA SEVEN! who was my mentor and taught me how to
+  write programs in C.
 */
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
@@ -172,6 +172,7 @@ const st_getopt2_t lf[] = {
   smd_usage,
   mdpro_usage,
   mcd_usage,
+  cmc_usage,
 //  mgd_usage,
 #endif
   lf,

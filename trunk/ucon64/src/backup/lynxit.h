@@ -1,8 +1,8 @@
 /*
 lynxit.h - lynxit support for uCON64
 
-written by 1997 - ? K. Wilkins
-           2002     NoisyB (noisyb@gmx.net)
+Copyright (c) 1997 - ???? K. Wilkins
+Copyright (c) 2002        NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -26,8 +26,6 @@ extern const st_getopt2_t lynxit_usage[];
 
 #ifdef USE_PARALLEL
 extern int lynxit_read_rom (const char *filename, unsigned int parport);
-#endif // USE_PARALLEL
+#endif
 
-#define LYNXIT_HEADER_START 0
-#define LYNXIT_HEADER_LEN 0
-#endif // LYNXIT_H
+#endif

@@ -1,7 +1,7 @@
 /*
 patch.h - single header file for all patch functions
 
-written by 2003 NoisyB (noisyb@gmx.net)
+Copyright (c) 2003 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -29,4 +29,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ppf.h"
 #include "xps.h"
 
-#endif  // PATCH
+#endif

@@ -1,7 +1,7 @@
 /*
-wswan.h - WonderSwan support for uCON64
+swan.h - WonderSwan support for uCON64
 
-written by 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -24,5 +24,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern int swan_init (st_rominfo_t *rominfo);
 extern const st_getopt2_t swan_usage[];
 extern int swan_chk (st_rominfo_t *rominfo);
-
-#endif /* WSWAN_H */
+#endif

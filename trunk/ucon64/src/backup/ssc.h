@@ -1,7 +1,7 @@
 /*
 ssc.h - minimal support for Super Smart Card/SSC
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -29,6 +29,6 @@ typedef struct st_ssc_header
 } st_ssc_header_t;
 
 
-#define SSC_HEADER_START 0
 #define SSC_HEADER_LEN (sizeof (st_ssc_header_t))
-#endif // SCC_H
+
+#endif

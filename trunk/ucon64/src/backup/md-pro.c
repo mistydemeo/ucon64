@@ -1,8 +1,8 @@
 /*
 md-pro.c - MD-PRO flash card programmer support for uCON64
 
-written by 2003 - 2004 dbjh
-           2003        NoisyB (noisyb@gmx.net)
+Copyright (c) 2003 - 2004 dbjh
+Copyright (c) 2003        NoisyB <noisyb@gmx.net>
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
 code has been used with permission. However, ToToTEK Multi Media explicitly

@@ -1,9 +1,9 @@
 /*
 fal.c - Flash Linker Advance support for uCON64
 
-written by 2001        Jeff Frohwein
-           2001        NoisyB (noisyb@gmx.net)
-           2001 - 2004 dbjh
+Copyright (c) 2001        Jeff Frohwein
+Copyright (c) 2001        NoisyB <noisyb@gmx.net>
+Copyright (c) 2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

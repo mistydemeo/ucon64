@@ -1,7 +1,7 @@
 /*
-aps.h - APS support for uCON64
+aps.h - Advanced Patch System support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef APS_H
 #define APS_H
+
 extern const st_getopt2_t aps_usage[];
+
 extern int aps_apply (const char *modname, const char *apsname);
 extern int aps_create (const char *orgname, const char *modname);
 extern int aps_set_desc (const char *apsname, const char *description);

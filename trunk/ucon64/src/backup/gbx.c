@@ -1,9 +1,10 @@
 /*
 gbx.c - Game Boy Xchanger/GBDoctor support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2004 dbjh
-Based on gbt15.c - (C) Bung Enterprises
+Copyright (c) 1999 - 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 2001 - 2004 dbjh
+Based on gbt15.c - Copyright (c) Bung Enterprises
+
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

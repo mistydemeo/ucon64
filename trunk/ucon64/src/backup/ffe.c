@@ -1,8 +1,8 @@
 /*
 ffe.c - General Front Far East copier routines for uCON64
 
-written by 2002 - 2003 dbjh
-                  2003 JohnDie
+Copyright (c) 2002 - 2004 dbjh
+Copyright (c)        2003 JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -130,7 +130,7 @@ ffe_send_command1 (unsigned short address)
   ffe_send_command (1, address, 1);
   byte = ffe_receiveb ();
   if ((0x81 ^ byte) != ffe_receiveb ())
-    printf ("received data is corrupt\n");
+    puts ("received data is corrupt");
 
   return byte;
 }
@@ -189,7 +189,7 @@ ffe_receive_block (unsigned short address, unsigned char *buffer, int len)
   while ((checksum1 != checksum2) && (n_try < N_TRY_MAX));
 
   if (checksum1 != checksum2)
-    printf ("\nreceived data is corrupt\n");
+    puts ("\nreceived data is corrupt");
 }
 
 
@@ -219,7 +219,7 @@ ffe_receive_block2 (unsigned short address, unsigned char *buffer, int len)
   while ((checksum1 != checksum2) && (n_try < N_TRY_MAX));
 
   if (checksum1 != checksum2)
-    printf ("\nreceived data is corrupt\n");
+    puts ("\nreceived data is corrupt");
 }
 
 
@@ -261,8 +261,9 @@ ffe_wait_while_busy (void)
 */
   if (n_try >= N_TRY_MAX)
     {
-      fprintf (stderr, "ERROR: The copier is not ready\n" // yes, "ready" :-)
-                       "       Turn it off for a few seconds then turn it on and try again\n");
+      fputs ("ERROR: The copier is not ready\n" // yes, "ready" :-)
+             "       Turn it off for a few seconds then turn it on and try again\n",
+             stderr);
       exit (1);
     }
 #endif
@@ -288,8 +289,9 @@ ffe_wait_for_ready (void)
 #if 0
   if (n_try >= N_TRY_MAX)
     {
-      fprintf (stderr, "ERROR: The copier is not ready\n"
-                       "       Turn it off for a few seconds then turn it on and try again\n");
+      fputs ("ERROR: The copier is not ready\n"
+             "       Turn it off for a few seconds then turn it on and try again\n",
+             stderr);
       exit (1);
     }
 #endif

@@ -1,7 +1,7 @@
 /*
 yoko.c - support for Yoko backup unit (Atari 2600, etc.)
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify

@@ -1,8 +1,8 @@
 /*
 mgd.c - Multi Game Doctor/Hunter support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2004 dbjh
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -457,7 +457,6 @@ mgd_write_index_file (void *ptr, int n_names)
   q_fwrite (buf, 0, strlen (buf), dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
 }
-
 
 #ifdef USE_PARALLEL
 #endif // USE_PARALLEL

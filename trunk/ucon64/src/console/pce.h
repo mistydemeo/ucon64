@@ -1,7 +1,7 @@
 /*
-pce.c - PC-Engine support for uCON64
+pce.h - PC-Engine support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -28,4 +28,4 @@ extern int pcengine_msg (st_rominfo_t *rominfo);
 extern int pcengine_swap (st_rominfo_t *rominfo);
 extern int pcengine_f (st_rominfo_t *rominfo);
 extern int pcengine_multi (int truncate_size, char *fname);
-#endif // PCE_H
+#endif

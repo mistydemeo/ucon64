@@ -1,7 +1,7 @@
 /*
 smsgg-pro.c - SMS-PRO/GG-PRO flash card programmer support for uCON64
 
-written by 2004 dbjh
+Copyright (c) 2004 dbjh
 
 Based on Delphi source code by ToToTEK Multi Media. Information in that source
 code has been used with permission. However, ToToTEK Multi Media explicitly
@@ -336,4 +336,3 @@ smsgg_write_sram (const char *filename, unsigned int parport, int start_bank)
 }
 
 #endif // USE_PARALLEL
-

@@ -1,7 +1,7 @@
 /*
 yoko.h - minimal support for Yoko backup unit (Atari 2600, etc.)
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef YOKO_H
 #define YOKO_H
+
 extern const st_getopt2_t yoko_usage[];
 
-#define YOKO_HEADER_START 0
-#define YOKO_HEADER_LEN 0
-#endif // YOKO_H
+#endif

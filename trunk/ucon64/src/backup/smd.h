@@ -1,8 +1,8 @@
 /*
 smd.h - Super Magic Drive support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2002 - 2003 dbjh
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef SMD_H
 #define SMD_H
+
 extern const st_getopt2_t smd_usage[];
 
 // For the header format, see ffe.h
@@ -42,12 +43,11 @@ extern int smd_read_rom (const char *filename, unsigned int parport);
 extern int smd_write_rom (const char *filename, unsigned int parport);
 extern int smd_read_sram (const char *filename, unsigned int parport);
 extern int smd_write_sram (const char *filename, unsigned int parport);
-#endif // USE_PARALLEL
+#endif
 // the following two functions are used by non-transfer code in genesis.c and sms.c
 extern void smd_interleave (unsigned char *buffer, int size);
 extern void smd_deinterleave (unsigned char *buffer, int size);
 
-#define SMD_HEADER_START 0
 #define SMD_HEADER_LEN (sizeof (st_smd_header_t))
 
-#endif // #ifndef SMD_H
+#endif // SMD_H

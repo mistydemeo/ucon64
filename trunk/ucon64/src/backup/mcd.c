@@ -1,7 +1,7 @@
 /*
 mcd.c - Mike Pavone's Genesis/Sega CD transfer cable support for uCON64
 
-written by 2004 dbjh
+Copyright (c) 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

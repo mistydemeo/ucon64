@@ -1,7 +1,7 @@
 /*
 gba.h - Game Boy Advance support for uCON64
 
-written by 2001 NoisyB (noisyb@gmx.net)
+Copyright (c) 2001 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -34,4 +34,4 @@ extern int gba_n (st_rominfo_t *rominfo, const char *name);
 extern int gba_sram (void);
 extern int gba_multi (int truncate_size, char *fname);
 
-#endif // GBA_H
+#endif

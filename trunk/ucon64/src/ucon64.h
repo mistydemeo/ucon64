@@ -5,8 +5,8 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2004 dbjh
+Copyright (c) 1999 - 2002 NoisyB <noisyb@gmx.net>
+Copyright (c) 2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -165,7 +165,7 @@ typedef struct
   int controller;                               // NES UNIF & SNES NSRT
   int controller2;                              // SNES NSRT
   const char *dump_info;                        // NES UNIF
-  int io_mode;                                  // SNES SWC & Nintendo 64 CD64
+  int io_mode;                                  // SNES SWC, Nintendo 64 CD64 & Cyan's Megadrive copier
   const char *mapr;                             // NES UNIF board name or iNES mapper number
   int mirror;                                   // NES UNIF/iNES/Pasofami
   int part_size;                                // SNES/Genesis split part size
@@ -206,4 +206,4 @@ extern st_ucon64_t ucon64;
 extern int ucon64_parport_needed;
 extern st_getopt2_t options[UCON64_MAX_ARGS];
 
-#endif // #ifndef UCON64_H
+#endif // UCON64_H

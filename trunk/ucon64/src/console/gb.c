@@ -1,8 +1,8 @@
 /*
 gb.c - Game Boy support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2004 dbjh
+Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

@@ -1,7 +1,7 @@
 /*
-console.h - single header for all console dependent functions
+console.h - single header for all console functions
 
-written by 2003 NoisyB (noisyb@gmx.net)
+Copyright (c) 2003 NoisyB <noisyb@gmx.net>
 
 
 This program is free software; you can redistribute it and/or modify
@@ -35,4 +35,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "sms.h"
 #include "snes.h"
 #include "swan.h"
-#endif  // CONSOLE_H
+#endif // CONSOLE_H

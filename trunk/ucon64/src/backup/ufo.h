@@ -1,7 +1,7 @@
 /*
 ufo.h - Super UFO for uCON64
 
-written by 2003 dbjh
+Copyright (c) 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -139,7 +139,6 @@ typedef struct st_ufo_header
   unsigned char pad2[488];
 } st_ufo_header_t;
 
-#define UFO_HEADER_START 0
 #define UFO_HEADER_LEN (sizeof (st_ufo_header_t))
 
 #endif // UFO_H

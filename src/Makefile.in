@@ -126,7 +126,7 @@ ucon64_misc.o: libdiscmage/cdi.h libdiscmage/nero.h $(UCON64_STD_H)
 ucon64_db.o: ucon64_db.h $(UCON64_STD_H)
 libdiscmage/libdiscmage.o: libdiscmage/libdiscmage_cfg.h $(UCON64_STD_H)
 libdiscmage/nero.o: libdiscmage/nero.h libdiscmage/cdi.h config.h
-libdiscmage/cdi.o: libdiscmage/cdi.h misc.h config.h
+libdiscmage/cdi.o: libdiscmage/cdi.h
 console/gb.o: console/gb.h $(UCON64_STD_H)
 console/gba.o: console/gba.h $(UCON64_STD_H)
 console/genesis.o: console/genesis.h $(UCON64_STD_H)

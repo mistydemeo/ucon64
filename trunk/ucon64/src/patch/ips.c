@@ -156,7 +156,7 @@ ips_apply (const char *mod, const char *ipsname)
             }
         }
     }
-  fclose (modfile);                             // commit changes before calling ucon64_pad()
+  fclose (modfile);                             // commit changes before calling truncate2()
 
   byte = fgetc (ipsfile);                       // don't use read_byte() here;
   if (!feof (ipsfile))                          //  this part is optional
@@ -164,7 +164,7 @@ ips_apply (const char *mod, const char *ipsname)
       byte2 = read_byte (ipsfile);
       byte3 = read_byte (ipsfile);
       length = (byte << 16) + (byte2 << 8) + byte3;
-      ucon64_pad (modname, 0, length);
+      truncate2 (modname, length);
       printf ("File truncated to %.4f MBit\n", length / (float) MBIT);
     }
 

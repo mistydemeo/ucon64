@@ -200,7 +200,6 @@ extern unsigned int ucon64_filefile (const char *filename1, int start1, const ch
 
 //  wrapper for misc.c/gauge()
 extern int ucon64_gauge (time_t init_time, int pos, int size);
-extern int ucon64_pad (const char *filename, int start, int size); // pad ROM to a certain size
 extern int ucon64_testpad (const char *filename); // test if ROM is padded
 
 extern int ucon64_testsplit (const char *filename); // test if ROM is split

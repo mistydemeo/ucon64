@@ -74,6 +74,56 @@ static long filepos_line = 0;
 static int warning = 0;                         // show the warning only once when indexing
 
 
+const st_usage_t ucon64_dat_usage[] = {
+  {NULL, "DATabase (support of DAT files)"},
+  {"db", "DATabase statistics"},
+  {"dbv", "like " OPTION_LONG_S "db but more verbose"},
+  {"dbs=CRC32", "search ROM with CRC32 in DATabase"},
+  {"lsd", "generate ROM list for all ROMs using DATabase; " OPTION_LONG_S "rom=ROM or DIR"},
+  {"rrom", "rename ROMs in DIR to their internal names; " OPTION_LONG_S "rom=ROM or DIR"},
+  {"rr83", "like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=ROM or DIR"},
+  {"good", "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed and sorted\n"
+              "into subdirs according to the DATabase (\"ROM manager\")"},
+/*
+GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
+*visit NEWNet #rareroms*
+
+Usage: GoodSNES [rename|move|scan[d]|scannew[d]|list[d]|audit[2]
+              [changes[-]][changesnew[-]][quiet][dirs|inplace][deep][sepX]
+
+rename     = Rename files
+renamebad  = Rename bad checksummed files
+move       = Move files
+move       = Move bad checksummed files
+scan       = Generate listing of all files [w/dirs]
+scannew    = Generate listing of unknown files [w/dirs]
+list       = Lists files you have/need without renaming [w/dirs]
+audit      = Prints names not matching any line in Goodinfo.cfg
+inplace    = Renames files in same dir, not making 'Ren' dir
+changes    = Log rename/move operations (- reverses)
+changesnew = Log rename/move operations that change a filename
+dirs       = Move to dirs using Goodinfo.cfg info
+quiet      = Suppress most non-error messages
+sepX       = Replaces space in filenames with char X ('nosep' removes spaces)
+deep       = Adds more detail to scanfiles (where applicable)
+force63    = Force all filenames into Joliet CD format
+Hit ENTER to continue
+Several output files are created depending on selected options:
+
+GoodSNES.db  = database of scanned ROMs
+SNESMiss     = ROMs missing (if in rename/move/list mode)
+SNESHave     = ROMS present (if in rename/move/list mode)
+SNESScan     = log of 'scan' and 'scannew'
+SNESLog      = log of 'changes' and 'changesnew'
+Good_ZIP     = log of ZIP errors
+Good_RAR     = log of RAR errors
+
+Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
+*/
+  {NULL, NULL}
+};
+
+
 static void
 closedir_ddat (void)
 {

@@ -261,154 +261,126 @@ const st_usage_t mame_usage[] =
   };
 
 #if 0
-N-Gage (Handheld)
-2003 Nokia http://www.n-gage.com
-
-
-Nintendo Game Cube/Panasonic Gamecube Q
-2001/2002 Nintendo http://www.nintendo.com
-gc
-Sega System 16(A/B)/Sega System 18/dual 68000
-1987/19XX/19XX SEGA http://www.sega.com
-s16
-Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr
-1977/1982/1984/1986 Atari
-ata
-ColecoVision
-1982
-coleco
-Nintendo Virtual Boy
-19XX Nintendo http://www.nintendo.com
-vboy
-Vectrex
-1982
-vec
-Intellivision
-1979 Mattel
-intelli
-GP32 Game System
-2002 Gamepark http://www.gamepark.co.kr
-gp32
-Playstation 2
-2000 Sony http://www.playstation.com
-ps2
-XBox
-2001 Microsoft http://www.xbox.com
-xbox
-Saturn
-1994 SEGA http://www.sega.com
-sat
-Real3DO
-1993
-3do
-CD32
-1993 Commodore
-cd32
-CD-i
-1991
-cdi
-
-Vectrex (1982)
-Colecovision (1982)
-Interton VC4000 (~1980)
-Intellivision (1979)
-G7400+/Odyssey² (1978)
-Channel F (1976)
-Odyssey (Ralph Baer/USA/1972)
-Virtual Boy
-Real 3DO 1993 Panasonic/Goldstar/Philips?
-Game.com ? Tiger
-CD-i (1991) 1991
-Vectrex 1982
-Colecovision 1982
-Interton VC4000 ~1980
-Intellivision 1979
-G7400+/Odyssey² 1978
-Channel F 1976
-Odyssey 1972 Ralph Baer
-
-X-Box
-Game Cube
-Indrema
-Nuon
-GB Advance
-Playstation 2
-Dreamcast
-Nintendo 64
-Playstation
-Virtual Boy
-Saturn
-Sega 32X
-Jaguar
-3DO
-Sega CD
-Philips CDI
-Super Nintendo
-Neo·Geo
-Game Gear
-Lynx
-GameBoy
-Turbo Grafx 16
-Genesis
-XE System
-Master System
-Atari 7800
-Nintendo
-Commodore 64
-Coleco Vision
-Atari 5200
-Arcadia
-Vectrex
-Microvision
 Adv. Vision
-RDI Halcyon
-Intellivision
-Odyssey 2
+Arcadia
 Astrocade
-Home Arcade
 Atari 2600
-RCA Studio 2
-FC Channel F
-Telstar
+Atari 5200
+Atari 7800
 Atari Pong
-PONG
-Odyssey
-
-gametz.com
-gameaxe.com
-sys2064.com
-logiqx.com
-romcenter.com
-emuchina.net
-
-Bandai announced that a new version of the system, the SwanCrystal, will debut in Japan this July.
-
+CD-i (1991) 1991
+Channel F (1976)
+Coleco Vision
+Colecovision (1982)
+Dreamcast
+FC Channel F
+G7400+/Odyssey² (1978)
+GameBoy
+Game.com ? Tiger
+Game Cube
+Game Gear
 Indrema
+Intellivision (1979)
+Interton VC4000 (~1980)
+Microvision
+N-Gage (Handheld) 2003 Nokia http://www.n-gage.com
 Nuon
-Saturn
+Odyssey (Ralph Baer/USA/1972)
+Philips CDI
+PONG
+RCA Studio 2
+RDI Halcyon
+Real 3DO 1993 Panasonic/Goldstar/Philips?
 Sega 32X
 Sega CD
-Philips CDI
-Super Nintendo
-XE System
-Arcadia
-Microvision
-Adv. Vision
-RDI Halcyon
-Astrocade
-Home Arcade
-RCA Studio 2
 Telstar
-Atari Pong
-PONG
+Turbo Grafx 16
+Vectrex (1982)
+Virtual Boy
+X-Box
+XE System
 
-gametz.com
+emuchina.net
 gameaxe.com
-sys2064.com
+gametz.com
 logiqx.com
 romcenter.com
-emuchina.net
+sys2064.com
 #endif
+
+
+const st_usage_t ucon64_options_usage[] = {
+  {NULL, "Options"},
+  {"nbak", "prevents backup files (*.BAK)"},
+#ifdef  ANSI_COLOR
+  {"ncol", "disable ANSI colors in output"},
+#endif
+#ifdef  PARALLEL
+  {"port=PORT", "specify parallel PORT={3bc, 378, 278, ...}"},
+#endif
+  {"hdn=N", "force ROM has backup unit/emulator header with N Bytes size"},
+  {"hd", "same as " OPTION_LONG_S "hdn=512\n"
+                   "most backup units use a header with 512 Bytes size"},
+  {"nhd", "force ROM has no backup unit/emulator header"},
+  {"int", "force ROM is interleaved (2143)"},
+  {"nint", "force ROM is not interleaved (1234)"},
+  {"dint", "convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
+             "this differs from the SNES & NES " OPTION_LONG_S "dint option"},
+  {"ns", "force ROM is not split"},
+#ifdef  __MSDOS__
+  {"e", "emulate/run ROM (check ucon64.cfg for more)"},
+#else
+  {"e", "emulate/run ROM (check .ucon64rc for more)"},
+#endif
+  {"crc", "show CRC32 value of ROM"  //; this will also force calculation for\n"
+             /* "files bigger than %d Bytes (%.4f Mb)" */},
+  {"ls", "generate ROM list for all ROMs; " OPTION_LONG_S "rom=ROM or DIR"},
+  {"lsv", "like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=ROM or DIR"},
+#if 0
+  {"rl", "rename all files in DIR to lowercase; " OPTION_LONG_S "rom=ROM or DIR"},
+  {"ru", "rename all files in DIR to uppercase; " OPTION_LONG_S "rom=ROM or DIR"},
+#endif
+#ifdef  __MSDOS__
+  {"hex", "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\""},
+#else
+  {"hex", "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\""},       // less is more ;-)
+#endif
+  {"find=STRING", "find STRING in ROM (wildcard: '?')"},
+  {"c=FILE", "compare FILE with ROM for differences"},
+  {"cs=FILE", "compare FILE with ROM for similarities"},
+  {"help", "display this help and exit"},
+  {"version", "output version information and exit"},
+  {"q", "be quiet (don't show ROM info)"},
+//  {"qq", "be even more quiet"},
+  {NULL, NULL}
+};
+
+
+const st_usage_t ucon64_padding_usage[] = {
+  {NULL, "Padding"},
+  {"ispad", "check if ROM is padded"},
+  {"pad", "pad ROM to full Mb"},
+  {"p", "same as " OPTION_LONG_S "pad"},
+  {"padn=N", "pad ROM to N Bytes (put Bytes with value 0x00 after end)"},
+  {"strip=N", "strip N Bytes from end of ROM"},
+  {"stpn=N", "strip N Bytes from ROM beginning"},
+  {"stp", "same as " OPTION_LONG_S "stpn=512\n"
+            "most backup units use a header with 512 Bytes size"},
+  {"insn=N", "insert N Bytes (0x00) before ROM"},
+  {"ins", "same as " OPTION_LONG_S "insn=512\n"
+             "most backup units use a header with 512 Bytes size"},
+  {NULL, NULL}
+};
+  
+
+const st_usage_t ucon64_patching_usage[] = 
+  {
+    {NULL, "Patching"},
+    {"patch=PATCH", "specify the PATCH for the following options\n"
+                      "use this option or uCON64 expects the last commandline\n"
+                      "argument to be the name of the PATCH file"},
+    {NULL, NULL}
+  };
 
 
 const st_option2_t options2[] = {

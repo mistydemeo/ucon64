@@ -53,7 +53,7 @@ const st_usage_t fal_usage[] =
     {"xfals", "send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
                  "receives automatically when SRAM does not exist"},
     {"xfalb=BANK", "send/receive SRAM to/from Flash Advance Linker BANK\n"
-                     "BANK can be 1, 2, 3 or 4;  " OPTION_LONG_S "port=PORT\n"
+                     "BANK can be 1, 2, 3 or 4; " OPTION_LONG_S "port=PORT\n"
                      "receives automatically when SRAM does not exist"},
 #endif // PARALLEL
     {NULL, NULL}

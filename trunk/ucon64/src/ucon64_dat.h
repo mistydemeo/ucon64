@@ -48,6 +48,8 @@ typedef struct
   const st_usage_t *copier_usage;                     // backup unit usage
 } st_ucon64_dat_t;
 
+// usage
+extern const st_usage_t ucon64_dat_usage[];
 // search dat files for crc and return ucon64_dat_t
 extern st_ucon64_dat_t *ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat);
 // return # of ROMs in all DAT's

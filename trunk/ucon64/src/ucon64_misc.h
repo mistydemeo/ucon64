@@ -93,6 +93,10 @@ extern const st_usage_t vectrex_usage[];
 extern const st_usage_t xbox_usage[];
 extern const st_usage_t mame_usage[];
 
+extern const st_usage_t ucon64_options_usage[];
+extern const st_usage_t ucon64_padding_usage[];
+extern const st_usage_t ucon64_patching_usage[];
+
 
 typedef struct
 // more workflow related stuff

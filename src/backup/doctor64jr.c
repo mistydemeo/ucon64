@@ -37,10 +37,15 @@ const char *doctor64jr_usage[] =
     "  " OPTION_LONG_S "xdjr        send/receive ROM to/from Doctor64 Jr; " OPTION_LONG_S "file=PORT\n"
 //          "                receives automatically when ROM does not exist\n"
     "                  currently only sending is supported\n"
+#ifdef TODO
+#warning TODO --xdjrs send/receive SRAM to/from Doctor64 Jr
+#endif
+#if 0
     "  " OPTION_LONG_S "xdjrs       send/receive SRAM to/from Doctor64 Jr; " OPTION_LONG_S "file=PORT\n"
-    "                  receives automatically when SRAM does not exist\n",
+    "                  receives automatically when SRAM does not exist\n"
+#endif
 #endif // BACKUP
-    NULL
+    ,NULL
   };
 
 static unsigned long init_time = 0, size = 0, pos = 0;

@@ -252,11 +252,10 @@ Q27: <a href="#27">How do make uCON64 display one help screen at a time?</a><br>
 <b>A</b>: <a href="http://www.ebay.com">www.ebay.com</a><br>
 <br>
 <p>
-<a name="17"><b>Q17</b>: Usage: What does $ROM and $FILE mean?</a><br>
+<a name="17"><b>Q17</b>: Usage: What does --rom and --file stand for?</a><br>
 <b>A</b>: Enter "ucon64 -help | more" and look at the top where it says:<br>
-   "USAGE: ucon64 [OPTION(S)] ROM [FILE]"<br>
-   Do you understand now where the $ROM and $FILE keywords refer to?
-   $FILE is often optional and mostly not needed at all.<br>
+   Usage: ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]<br>
+   --rom and --file take an argument, --file is mostly optional.<br>
 <br>
 <p>
 <a name="18"><b>Q18</b>: Why is my backup unit (still) not supported?</a><br>
@@ -300,7 +299,7 @@ Q27: <a href="#27">How do make uCON64 display one help screen at a time?</a><br>
 <p>
 <a name="23"><b>Q23</b>: What is the meaning of the -col option (Super Nintendo)?</a><br>
 <b>A</b>: Back in the days stupid people released games with green blood.
-   You can use a graphics or HTML editor to find an identical green color and
+   You can use a GFX or HTML editor to find an identical green color and
    write down the color values in HTML style (#RRGGBB). Now you run
    "ucon64 -col #RRGGBB" and it will calculate the hex value for the corresponding
    Super Nintendo color. Ok? No? Then you don't need this option :-)<br>

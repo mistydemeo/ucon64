@@ -91,12 +91,12 @@ write programs in C
 #include "backup/mccl.h"
 
 static void ucon64_exit (void);
-static void usage (const char **usage);
+//static void usage (const char **usage);
 static void ucon64_usage (int argc, char *argv[]);
 
 st_ucon64_t ucon64;
 
-static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " UCON64_OS 
+static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS 
                               " 1999-2002 by (various)";
 
 const struct option long_options[] = {
@@ -469,7 +469,7 @@ ucon64_console_probe (st_rominfo_t *rominfo)
         if (UCON64_TYPE_ISROM (ucon64.type))
           ucon64.console =
 #ifdef CONSOLE_PROBE
-//            (!nes_init (ucon64_flush (rominfo))) ? UCON64_NES :
+            (!nes_init (ucon64_flush (rominfo))) ? UCON64_NES :
             (!gba_init (ucon64_flush (rominfo))) ? UCON64_GBA :
             (!n64_init (ucon64_flush (rominfo))) ? UCON64_N64 :
             (!genesis_init (ucon64_flush (rominfo))) ? UCON64_GENESIS :
@@ -721,6 +721,14 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 }
 
 
+#if 1
+#define UCON64_USAGE(s) printf("%s%s%s%s%s", \
+                          NULL_TO_EMPTY (s[0]), \
+                          s[0]?s[1]?"\n  ":"\n":"", \
+                          NULL_TO_EMPTY (s[1]), \
+                          s[1]?"\n":"", \
+                          NULL_TO_EMPTY (s[2]))
+#else
 void
 usage (const char **usage)
 {
@@ -731,7 +739,8 @@ usage (const char **usage)
 
   printf (NULL_TO_EMPTY (usage[2]));
 }
-
+#define UCON64_USAGE usage
+#endif
 
 void
 ucon64_usage (int argc, char *argv[])
@@ -790,13 +799,13 @@ ucon64_usage (int argc, char *argv[])
     , argv[0], ucon64.configfile
   );
 
-  usage (bsl_usage);
-  usage (ips_usage);
-  usage (aps_usage);
-  usage (pal4u_usage);
-  usage (ppf_usage);
-  usage (xps_usage);
-  usage (gg_usage);
+  UCON64_USAGE (bsl_usage);
+  UCON64_USAGE (ips_usage);
+  UCON64_USAGE (aps_usage);
+  UCON64_USAGE (pal4u_usage);
+  UCON64_USAGE (ppf_usage);
+  UCON64_USAGE (xps_usage);
+  UCON64_USAGE (gg_usage);
   
   printf ("                  supported are:\n"
     "                  %s,\n"
@@ -811,7 +820,7 @@ ucon64_usage (int argc, char *argv[])
     "                  this is the support for the most CD-based consoles\n"
     );
     
-//  usage (cdrw_usage);
+//  UCON64_USAGE (cdrw_usage);
   printf ("%s", cdrw_usage[2]);
 
 
@@ -867,104 +876,104 @@ ucon64_usage (int argc, char *argv[])
       switch (c)
         {
       case UCON64_GBA:
-        usage (gba_usage);
+        UCON64_USAGE (gba_usage);
 #ifdef BACKUP
-        usage (fal_usage);
+        UCON64_USAGE (fal_usage);
 #endif // BACKUP
         single = 1;
         break;
 
       case UCON64_N64:
-        usage (n64_usage);
+        UCON64_USAGE (n64_usage);
 #ifdef BACKUP
-        usage (doctor64_usage);
-        usage (doctor64jr_usage);
-//        usage (cd64_usage);
-//        usage (dex_usage);
+        UCON64_USAGE (doctor64_usage);
+        UCON64_USAGE (doctor64jr_usage);
+//        UCON64_USAGE (cd64_usage);
+//        UCON64_USAGE (dex_usage);
 #endif // BACKUP
         single = 1;
         break;
 
       case UCON64_JAG:
-        usage (jaguar_usage);
+        UCON64_USAGE (jaguar_usage);
         single = 1;
         break;
 
       case UCON64_SNES:
-        usage (snes_usage);
+        UCON64_USAGE (snes_usage);
 #ifdef BACKUP
-        usage (swc_usage);
-//        usage (fig_usage);
-//        usage (smc_usage);
-//        usage (mgd_usage);
+        UCON64_USAGE (swc_usage);
+//        UCON64_USAGE (fig_usage);
+//        UCON64_USAGE (smc_usage);
+//        UCON64_USAGE (mgd_usage);
 #endif // BACKUP
         single = 1;
         break;
 
       case UCON64_NG:
-        usage (neogeo_usage);
+        UCON64_USAGE (neogeo_usage);
         single = 1;
         break;
 
       case UCON64_NGP:
-        usage (ngp_usage);
+        UCON64_USAGE (ngp_usage);
 #ifdef BACKUP
-//        usage (fpl_usage);
+//        UCON64_USAGE (fpl_usage);
 #endif // BACKUP
         single = 1;
         break;
 
       case UCON64_GEN:
-        usage (genesis_usage);
+        UCON64_USAGE (genesis_usage);
 #ifdef BACKUP
-        usage (smd_usage);
-//        usage (mgd_usage);
+        UCON64_USAGE (smd_usage);
+//        UCON64_USAGE (mgd_usage);
 #endif // BACKUP
         single = 1;
         break;
 
       case UCON64_GB:
-        usage (gameboy_usage);
+        UCON64_USAGE (gameboy_usage);
 #ifdef BACKUP
-        usage (gbx_usage);
-        usage (mccl_usage);
+        UCON64_USAGE (gbx_usage);
+        UCON64_USAGE (mccl_usage);
 #endif // BACKUP
         single = 1;
         break;
 
       case UCON64_LYNX:
-        usage (lynx_usage);
+        UCON64_USAGE (lynx_usage);
         single = 1;
         break;
 
       case UCON64_PCE:
-        usage (pcengine_usage);
+        UCON64_USAGE (pcengine_usage);
 #ifdef BACKUP
-//        usage (mgd_usage);
+//        UCON64_USAGE (mgd_usage);
 #endif // BACKUP
         single = 1;
         break;
 
       case UCON64_SMS:
-        usage (sms_usage);
+        UCON64_USAGE (sms_usage);
 #ifdef BACKUP
-        usage (smd_usage);
+        UCON64_USAGE (smd_usage);
 #endif // BACKUP
         single = 1;
         break;
 
       case UCON64_NES:
-        usage (nes_usage);
+        UCON64_USAGE (nes_usage);
         single = 1;
         break;
 
       case UCON64_SWAN:
-        usage (swan_usage);
+        UCON64_USAGE (swan_usage);
         single = 1;
         break;
 
       case UCON64_DC:
-        usage (dc_usage);
+        UCON64_USAGE (dc_usage);
         single = 1;
         break;
 
@@ -984,7 +993,7 @@ ucon64_usage (int argc, char *argv[])
       case UCON64_XBOX:
       case UCON64_GP32:
 #ifdef SAMPLE
-        usage (sample_usage);
+        UCON64_USAGE (sample_usage);
         single = 1;
 #endif // SAMPLE        
         break;
@@ -997,82 +1006,82 @@ ucon64_usage (int argc, char *argv[])
 
   if (!single)
     {
-      usage (dc_usage);
+      UCON64_USAGE (dc_usage);
       printf("\n");
       
-      usage (gba_usage);
+      UCON64_USAGE (gba_usage);
 #ifdef BACKUP
-      usage (fal_usage);
+      UCON64_USAGE (fal_usage);
 #endif // BACKUP
       printf ("\n");
 
-      usage (n64_usage);
+      UCON64_USAGE (n64_usage);
 #ifdef BACKUP
-      usage (doctor64_usage);
-      usage (doctor64jr_usage);
-//      usage (cd64_usage);
-//      usage (dex_usage);
+      UCON64_USAGE (doctor64_usage);
+      UCON64_USAGE (doctor64jr_usage);
+//      UCON64_USAGE (cd64_usage);
+//      UCON64_USAGE (dex_usage);
 #endif // BACKUP
       printf ("\n");
 
-      usage (snes_usage);
+      UCON64_USAGE (snes_usage);
 #ifdef BACKUP
-      usage (swc_usage);
-//      usage (fig_usage);
-//      usage (smc_usage);
-//      usage (mgd_usage);
+      UCON64_USAGE (swc_usage);
+//      UCON64_USAGE (fig_usage);
+//      UCON64_USAGE (smc_usage);
+//      UCON64_USAGE (mgd_usage);
 #endif // BACKUP
       printf ("\n");
 
-      usage (neogeo_usage);
+      UCON64_USAGE (neogeo_usage);
       printf ("\n");
       
-      usage (genesis_usage);
+      UCON64_USAGE (genesis_usage);
 #ifdef BACKUP
-      usage (smd_usage);
-//      usage (mgd_usage);
+      UCON64_USAGE (smd_usage);
+//      UCON64_USAGE (mgd_usage);
 #endif // BACKUP
       printf ("\n");
 
-      usage (gameboy_usage);
+      UCON64_USAGE (gameboy_usage);
 #ifdef BACKUP
-      usage (gbx_usage);
-      usage (mccl_usage);
+      UCON64_USAGE (gbx_usage);
+      UCON64_USAGE (mccl_usage);
 #endif // BACKUP
       printf ("\n");
 
-      usage (lynx_usage);
+      UCON64_USAGE (lynx_usage);
       printf ("\n");
 
-      usage (pcengine_usage);
+      UCON64_USAGE (pcengine_usage);
 #ifdef BACKUP
-//      usage (mgd_usage);
+//      UCON64_USAGE (mgd_usage);
 #endif // BACKUP
       printf ("\n");
 
-      usage (sms_usage);
+      UCON64_USAGE (sms_usage);
 #ifdef BACKUP
-      usage (smd_usage);
+      UCON64_USAGE (smd_usage);
 #endif // BACKUP
       printf ("\n");
 
-      usage (nes_usage);
+      UCON64_USAGE (nes_usage);
       printf ("\n");
 
-      usage (swan_usage);
+      UCON64_USAGE (swan_usage);
       printf ("\n");
 
-      usage (jaguar_usage);
+      UCON64_USAGE (jaguar_usage);
       printf ("\n");
 
-      usage (ngp_usage);
+      UCON64_USAGE (ngp_usage);
 #ifdef BACKUP
-//      usage (fpl_usage);
+//      UCON64_USAGE (fpl_usage);
 #endif // BACKUP
       printf ("\n");
 
 #ifdef SAMPLE
-      usage (sample_usage);
+      UCON64_USAGE (sample_usage);
       printf ("\n");
 #endif // SAMPLE
   }

@@ -538,6 +538,12 @@ int fprintf2 (FILE *file, const char *format, ...);
 #define getcwd  _getcwd
 #define isatty  _isatty
 #define rmdir   _rmdir
+#ifndef pclose                                  // miscz.h's definition gets higher "precedence"
+#define pclose  _pclose
+#endif
+#ifndef popen                                   // idem
+#define popen   _popen
+#endif
 #define stat    _stat
 #define strnicmp _strnicmp
 #endif // DLL

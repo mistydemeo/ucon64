@@ -103,7 +103,9 @@ open_module (char *module_name)
   sym->fputs = fputs;
   sym->fopen = fopen;
   sym->fdopen = fdopen;
+  sym->popen = popen;
   sym->fclose = fclose;
+  sym->pclose = pclose;
   sym->fseek = fseek;
   sym->ftell = ftell;
   sym->rewind = rewind;
@@ -141,6 +143,7 @@ open_module (char *module_name)
   sym->strspn = strspn;
   sym->strcspn = strcspn;
   sym->strlen = strlen;
+  sym->strstr = strstr;
 
   sym->tolower = tolower;
   sym->toupper = toupper;

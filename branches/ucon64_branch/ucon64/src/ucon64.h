@@ -33,6 +33,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
 #include "misc.h"
+#include "libdiscmage/libdiscmage.h"            // dm_image_t
+#ifdef  GUI
+#include "libnetgui/libnetgui.h"
+#endif
 
 typedef struct
 {
@@ -188,8 +192,13 @@ typedef struct
 
 #ifdef  GUI
   netgui_t *netgui;                             // pointer to netgui GUI
+<<<<<<< ucon64.h
+#endif
+
+=======
 #endif
 #ifdef  DISCMAGE
+>>>>>>> 1.177.2.5
   dm_image_t *image;                            // info from libdiscmage
 #endif
   st_ucon64_dat_t *dat;                         // info from DATabase

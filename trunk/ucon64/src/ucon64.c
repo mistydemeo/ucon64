@@ -107,7 +107,7 @@ static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S
 #if 0
                              "/" CURRENT_ENDIAN_S
 #endif
-                             " 1999-2002 by (various)";
+                             " 1999-2002";
 static int ucon64_fsize = 0;
 
 const struct option long_options[] = {
@@ -139,8 +139,8 @@ const struct option long_options[] = {
     {"dint", 0, 0, UCON64_DINT},
     {"e", 0, 0, UCON64_E},
     {"f", 0, 0, UCON64_F},
-//    {"fds", 0, 0, UCON64_FDS},
-//    {"fdsl", 0, 0, UCON64_FDSL},
+    {"fds", 0, 0, UCON64_FDS},
+    {"fdsl", 0, 0, UCON64_FDSL},
     {"ffe", 0, 0, UCON64_FFE},
     {"fig", 0, 0, UCON64_FIG},
     {"figs", 0, 0, UCON64_FIGS},

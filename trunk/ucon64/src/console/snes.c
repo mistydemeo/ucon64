@@ -60,7 +60,7 @@ static int score_hirom (unsigned char *rom_buffer, int rom_size);
 
 const char *snes_usage[] =
   {
-    "Super Nintendo/SNES/Super Famicom",
+    "Super Nintendo Entertainment System/SNES/Super Famicom",
     "1990 Nintendo http://www.nintendo.com",
     "  " OPTION_LONG_S "snes        force recognition"
 #ifndef CONSOLE_PROBE

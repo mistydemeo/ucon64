@@ -990,7 +990,7 @@ ucon64_usage (int argc, char *argv[])
         UCON64_USAGE (doctor64_usage);
         UCON64_USAGE (doctor64jr_usage);
 //        UCON64_USAGE (cd64_usage);
-//        UCON64_USAGE (dex_usage);
+        UCON64_USAGE (dex_usage);
 #endif // BACKUP
         single = 1;
         break;
@@ -1137,7 +1137,7 @@ ucon64_usage (int argc, char *argv[])
       UCON64_USAGE (doctor64_usage);
       UCON64_USAGE (doctor64jr_usage);
 //      UCON64_USAGE (cd64_usage);
-//      UCON64_USAGE (dex_usage);
+      UCON64_USAGE (dex_usage);
 #endif // BACKUP
       printf ("\n");
 
@@ -1208,7 +1208,7 @@ ucon64_usage (int argc, char *argv[])
 
   printf (
 #ifdef DB
-     "Database: %d known ROMs in db.h (%+d)\n"
+     "Database: %d known ROMs in db.c (%+d)\n"
 #endif // DB
      "\n"
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only Super Nintendo related help)\n"

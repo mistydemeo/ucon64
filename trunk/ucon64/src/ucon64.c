@@ -120,6 +120,7 @@ int ucon64_main(int argc,char *argv[])
   struct dirent *ep;
   struct stat puffer;
   DIR *dp;
+struct ucon64_ ucon64;
 	struct ucon64_DB db;
   char buf[MAXBUFSIZE], buf2[4096], buf3[4096], *ucon64_argv[128], *forceargs[] =
   {
@@ -161,7 +162,7 @@ int ucon64_main(int argc,char *argv[])
 
 
 
-if(argcmp(argc,argv,"-ata"))console=ucon64_ATARI;
+if(argcmp(argc,argv,"-ata"))ucon64.console=ucon64_ATARI;
 if(argcmp(argc,argv,"-s16"))console=ucon64_SYSTEM16;
 if(argcmp(argc,argv,"-n64"))console=ucon64_N64;
 if(argcmp(argc,argv,"-psx"))console=ucon64_PSX;
@@ -381,7 +382,6 @@ if (argcmp(argc, argv, "-lsv"))
     }
   }
   closedir(dp);
-
   return 0;
 }
 

@@ -341,17 +341,40 @@ main (int argc, char *argv[])
           strcpy (rom.copier, unknown_title);
           break;
 
+        case ucon64_SWP://depricated
         case ucon64_INT:
-          ucon64.interleaved = 1;
-          break;
+#if 0
+          switch (rom.console)
+            {
+              case ucon64_SNES:
+              default:
+#endif              
+                ucon64.interleaved = 1;
+              break;
+//            }
 
         case ucon64_INT2:
-          ucon64.interleaved = 2;
-          break;
+#if 0
+          switch (rom.console)
+            {
+              case ucon64_SNES:
+              default:
+#endif
+                ucon64.interleaved = 2;
+                break;
+//            }
 
+        case ucon64_NSWP://depricated
         case ucon64_NINT:
-          ucon64.interleaved = 0;
-          break;
+#if 0
+          switch (rom.console)
+            {
+              case ucon64_SNES:
+              default:
+#endif              
+                ucon64.interleaved = 0;
+                break;
+//            }
 
         case ucon64_PORT:
           if(optarg)
@@ -373,12 +396,12 @@ main (int argc, char *argv[])
         case ucon64_C:
         case ucon64_CHK:
         case ucon64_CRC:
-        case ucon64_CRCHD://obsolete only for compat.
+        case ucon64_CRCHD://depricated
         case ucon64_CS:
         case ucon64_DB:
         case ucon64_DBS:
         case ucon64_DBV:
-        case ucon64_DINT://TODO replace --swap?
+        case ucon64_DINT:
         case ucon64_SWAP:
         case ucon64_E:
         case ucon64_FIND:
@@ -407,7 +430,7 @@ main (int argc, char *argv[])
         case ucon64_NPPF:
         case ucon64_P:
         case ucon64_PAD:
-        case ucon64_PADHD://obsolete only for compat.
+        case ucon64_PADHD://depricated
         case ucon64_PPF:
         case ucon64_REN:
         case ucon64_RL:
@@ -441,7 +464,7 @@ main (int argc, char *argv[])
         case ucon64_K:
         case ucon64_L:
         case ucon64_GD3:
-//        case ucon64_GDF://obsolete
+//        case ucon64_GDF:
         case ucon64_SMC:
         case ucon64_SWC:
         case ucon64_FIG:
@@ -452,10 +475,6 @@ main (int argc, char *argv[])
           rom.console = ucon64_SNES;
           break;
 
-        case ucon64_IP:
-          rom.console = ucon64_DC;
-          break;
-  
         case ucon64_GB:
         case ucon64_SGB:
         case ucon64_GBX:
@@ -469,11 +488,6 @@ main (int argc, char *argv[])
           rom.console = ucon64_GB;
           break;
 
-        case ucon64_SAM:
-        case ucon64_MVS:
-        case ucon64_BIOS:
-          rom.console = ucon64_NEOGEO;
-          break;
   
         case ucon64_ATA:
           rom.console = ucon64_ATARI;
@@ -549,6 +563,9 @@ main (int argc, char *argv[])
           break;
   
         case ucon64_NG:
+        case ucon64_SAM:
+        case ucon64_MVS:
+        case ucon64_BIOS:
           rom.console = ucon64_NEOGEO;
           break;
   
@@ -605,6 +622,7 @@ main (int argc, char *argv[])
           rom.console = ucon64_REAL3DO;
           break;
   
+        case ucon64_IP:
         case ucon64_DC:
           rom.console = ucon64_DC;
           break;
@@ -668,7 +686,7 @@ main (int argc, char *argv[])
           ucon64_usage (argc, argv);
           return 0;
 
-        case ucon64_CRCHD://obsolete only for compat.
+        case ucon64_CRCHD://depricated
           rom.buheader_len = unknown_HEADER_LEN;
         case ucon64_CRC:
           printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, rom.buheader_len));
@@ -712,13 +730,8 @@ main (int argc, char *argv[])
             }
           return 0;
   
-        case ucon64_SWAP:
-          result = fileswap (ucon64_fbackup (rom.rom), 0,
-                           quickftell (rom.rom));
-          printf ("Wrote output to %s\n", rom.rom);
-          return result;
   
-        case ucon64_PADHD:
+        case ucon64_PADHD://depricated
           rom.buheader_len = unknown_HEADER_LEN;
         case ucon64_PAD:
           ucon64_fbackup (rom.rom);
@@ -958,7 +971,18 @@ main (int argc, char *argv[])
           return gbadvance_crp (&rom);
   
         case ucon64_DINT:
-          return snes_dint (&rom);
+        case ucon64_SWAP://depricated
+          switch (rom.console)
+            {
+            case ucon64_SNES:
+              return snes_dint (&rom);
+
+            default:
+              result = fileswap (ucon64_fbackup (rom.rom), 0,
+                           quickftell (rom.rom));
+              printf ("Wrote output to %s\n", rom.rom);
+              return result;
+            }
   
         case ucon64_F:
           switch (rom.console)
@@ -1307,6 +1331,8 @@ main (int argc, char *argv[])
         case ucon64_NHD:
         case ucon64_HI:
         case ucon64_NHI:
+        case ucon64_SWP://depricated
+        case ucon64_NSWP://depricated
         case ucon64_FRONTEND:
         case ucon64_NBAK:
         case ucon64_PORT:
@@ -1968,7 +1994,7 @@ ucon64_usage (int argc, char *argv[])
            "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
            "  " OPTION_LONG_S "int         force ROM is interleaved (2143)\n"
            "  " OPTION_LONG_S "nint        force ROM is not interleaved (1234)\n"
-           "  " OPTION_LONG_S "swap        swap/(de)interleave ALL Bytes in ROM (1234<->2143)\n"
+           "  " OPTION_LONG_S "dint        (de)interleave ALL Bytes in ROM\n"
            "  " OPTION_LONG_S "ns          force ROM is not splitted\n"
 #ifdef	__MSDOS__
            "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"

@@ -1,7 +1,6 @@
 /*
 libdm_misc.c - libdiscmage miscellaneous
 
-
 written by 2002 NoisyB (noisyb@gmx.net)
 
 

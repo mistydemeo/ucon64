@@ -5,96 +5,215 @@
 #include <stdlib.h>
 #include <string.h>
 //#include <sys/ioctl.h>
-//#include <sys/perm.h>
+#include <sys/perm.h>
 #include <sys/stat.h>
 //#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 
-
 #define MBIT 131072
-                
-int strdcmp(char *str,char *str1);
-int argcmp(int argc,char *argv[],char *str);
-char *getarg(int argc,char *argv[],int pos);
-int findlwr(char *str);
-char *strupr(char *str);
-char *strlwr(char *str);
-char *newext(char *str,char *ext);
-//char *stprblk(char *str1,char *str2);
-char *stpblk(char *str);
-char *stplcr(char *str);
 
-int rencase(char *dir,char *mode);
+#define FALSE 0
+#define TRUE 1
+
+char hexDigit(	int value	//GameGenie "codec" routine
+);
+
+int hexValue(	char digit	//GameGenie "codec" routine
+);
+
+//#define hexByteValue(x ,y) ((hexValue(x) << 4) + hexValue(y))
+int hexByteValue(	char x	//GameGenie "codec" routine
+			,char y
+);
+
+int strdcmp(	char *str
+		,char *str1
+);
+
+int argcmp(	int argc	// check the cmdline options for str
+		,char *argv[]
+		,char *str
+);
+
+char *getarg(	int argc	//get arg pos from cmdline options
+		,char *argv[]
+		,int pos
+);
+
+int findlwr(	char *str	//find any lower char in str
+);
+
+char *strupr(	char *str
+);
+                                                        
+char *strlwr(	char *str
+);
+
+char *newext(	char *filename	//replace extension of str with ext
+		,char *ext
+);
+
+char *stpblk(	char *str	//strip blanks from beginning of str
+);
+
+char *strtrim(	char *dest	//trim blanks from start and end of str
+		,char *str
+);
+
+char *stplcr(	char *str	//kill all returns at end of str
+);
+
+char *strswap(	char *str	//swap bytes in str from start for len
+		,long start
+		,long len
+);
+
+int strhexdump(	char *str	//hexdump str from start for len
+		,long start
+		,long len
+);
+
+int renlwr(	char *dir	//rename all files in dir to lower case
+);
+
+int renupr(	char *dir	//rename all files in dir to upper case
+);
+
+void BuildCRCTable();		//needed for CRC32
+
+unsigned long CalculateBufferCRC(	unsigned int count	//needed for CRC32
+					,unsigned long crc
+					,void *buffer
+);
+
+unsigned long CalculateFileCRC(	FILE *file	//needed for CRC32
+);
+
+unsigned long fileCRC32(	char *filename	//calculate CRC32 of filename beginning from start
+				,long start
+);
+
+long quickftell(	char *filename	//return size of filename
+);
+
+long filencmp(	char *filename		//search filename for search from start for len
+		,char *search
+		,long start
+		,long len
+);
+
+size_t quickfread(	char *dest	//same as fread but takes start and src is a filename
+			,size_t start
+			,size_t len
+			,char *src
+);
 
 
-int filecmp(char *f_name,long f_start,char *f2_name,long f2_start,int mode);
-#define filecmp_DIFF 0
-#define filecmp_SIMI 1
+size_t quickfwrite(	char *src	//same as fwrite but takes start and dest is a filename
+			,size_t start
+			,size_t len
+			,char *dest
+);
+
+
+int quickfgetc(	char *filename		//same as fgetc but takes filename instead of FILE and a pos
+		,long pos
+);
 
 
 
-long quickfread(char *buf,long len,long start,char *file);
-long quickfwrite(char *buf,long len,long start,char *file);
+int filehexdump(	char *filename	//same as strhexdump
+			,long start
+			,long len
+);
 
-//int filereplace(char *fname,char wildcard,char *search,long slen,char *replace,long rlen,long fstart)
+
+size_t filepad(	char *filename	//pad file (if necessary) from start
+		,long start	//ignore start bytes (if file has header or something)
+		,long unit	//size of block (example: MBIT)
+);
+
+long filetestpad(	char *filename	//test if EOF is padded (repeating bytes) beginning from start
+);
+
+int filecopy(	char *src	//copy src from start for len to dest
+		,long start
+		,long len
+		,char *dest
+		,char *mode
+);
+
+char *filebackup(	char *filename
+);
+
+
+
+unsigned long filefile(	char *filename	//compare filename from start with filename2 from start2
+			,long start
+			,char *filename2
+			,long start2
+			,int similar	//TRUE==find similarities; FALSE==find differences
+);
+
+
+
+
+int filereplace(	char *filename	//search filename from start for search which has slen and replace with replace which has rlen
+			,long start
+			,char *search
+			,long slen
+			,char *replace
+			,long rlen
+);
+
+
+int fileswap(	char *filename	//bytesswap filename from start for len
+		,long start
+		,long len
+);
+
 
 /*
-	generate a standard checksum -- until it will be replaced by the real checksum methods for each console
+unsigned char inportb(	unsigned int arg1	//read a byte from the parallel port
+);
+
+unsigned char outportb(	unsigned int arg1	//write a byte to the p.p.
+			,unsigned int arg2
+);
+
+unsigned short int inport(	unsigned int arg1	//read a word from the p.p.
+);
+
+unsigned short int outport(	unsigned int arg1	//write a word to the p.p.
+				,unsigned int arg2
+);
 */
-long filechksum(char *file_name,long file_start,int byte_offset);
 
-/*
-	same as ftell() but takes filename instead of pointer
-*/
-long quickftell(char *file_name);
+void out1byte(	unsigned int port		//read a byte from the p.p.
+		,unsigned char c
+);
 
-/*
-	search in file_name for search from file_start for file_len relative from file_start
-*/
-long filegrep(char *file_name,char *search,long file_start,long file_len);//fstrnstr
+unsigned char in1byte(	unsigned int port	//write a byte to the p.p.
+);
 
-/*
-	swap file from start for length
-*/
-int fileswap(char *file_name,long file_start,long file_length);
-#define fileswap_EOF -1//can be used for file_length (means: until EOF)
 
-/*
-	same as fgetc() but takes filename instead of a pointer
-*/
-int quickfgetc(char *file_name,long pos);
 
-/*	hexdump a file (or the string itself if file does not exist)
-	from file_start for file_length
-*/
-int hexdump(char *file,long file_start,long file_length);
-#define hexdump_EOF -1//can be used for file_length (means: until EOF)
+unsigned int parport_probe(	unsigned int parport	//detect parallel port
+);
 
-/*	pads a file (mode="w") or checks if a file is padded (mode="r")
-	returns the number of bytes added
+int parport_write(	char src[]
+			,unsigned int len
+			,unsigned int parport
+);
 
-	TODO:take MBIT argument (units)
-*/
-long filepad(char *file,long file_start,char *mode);
+int parport_read(	char dest[]
+			,unsigned int len
+			,unsigned int parport
+);
 
-//filecopy which takes start position and length of source
-int filecopy(char *source_file,long source_start,long source_length,char *dest_name,char *mode);
-#define filecopy_EOF -1//can be used for source_len (means: until EOF)
+int parport_gauge(	time_t init_time
+			,long pos
+			,long size
+);
 
-/*
-	makes backup of file an returns the original name
-*/
-char *filebackup(char *file);
-
-/*
-	needed by WyrmCorp's GameGenie "codec"
-*/
-char hexDigit(int value);
-int hexValue(char digit);
-int hexByteValue(char x, char y);
-
-/*
-	needed by the transfer routines
-*/
-int gauge(time_t fgtstart,long fpos,long fsize);

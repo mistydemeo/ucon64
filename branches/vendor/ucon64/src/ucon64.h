@@ -20,6 +20,7 @@
 #define ucon64_ATARI		17
 #define ucon64_SYSTEM16		18
 #define ucon64_NEOGEOPOCKET	19
+#define ucon64_GBA		20
 #define ucon64_KNOWN		9999
 
 #define ucon64_VERSION "1.9.5"
@@ -34,3 +35,7 @@
 #define ucon64_name() (getarg(argc,argv,ucon64_NAME))
 #define ucon64_rom() (getarg(argc,argv,ucon64_ROM))
 #define ucon64_file() (getarg(argc,argv,ucon64_FILE))
+
+int ucon64_usage(int argc,char *argv[]);
+
+unsigned int ucon64_parport;

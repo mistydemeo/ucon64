@@ -1,15 +1,10 @@
 #include "ucon64_misc.h"
 
-#define n_BUFSIZE 32768
+#define MAXBUFSIZE 32768
 
-enum
+char hexDigit(	int value
+)
 {
-        FALSE
-        ,TRUE
-};
-
-char 
-hexDigit(int value) {
   switch(toupper(value)) {
     case 0: return '0';
     case 1: return '1';
@@ -33,8 +28,9 @@ hexDigit(int value) {
 
 }
 
-int 
-hexValue(char digit) {
+int hexValue(	char digit
+) 
+{
   switch(toupper(digit)) {
     case '0': return 0;
     case '1': return 1;
@@ -57,13 +53,16 @@ hexValue(char digit) {
   return 0;
 }
 
-int 
-hexByteValue(char x, char y) {
+int hexByteValue(	char x
+		,char y
+)
+{
   return (hexValue(x) << 4) + hexValue(y);
 }
 
-
-int strdcmp(char *str,char *str1)
+int strdcmp(	char *str
+		,char *str1
+)
 {
 //compares length and case
 	return(
@@ -76,9 +75,11 @@ int strdcmp(char *str,char *str1)
 	);
 }
 
-int argcmp(int argc,char *argv[],char *str)
+int argcmp(	int argc
+		,char *argv[]
+		,char *str
+)
 {
-//check for an option
 	register int x=0;
 
 	for(x=1;x<argc;x++)//leave out first arg
@@ -89,7 +90,10 @@ int argcmp(int argc,char *argv[],char *str)
 	return(0);//not found
 }
 
-char *getarg(int argc,char *argv[],int pos)
+char *getarg(	int argc
+		,char *argv[]
+		,int pos
+)
 {
 //return a filename
 	register int x=0,y=0;
@@ -106,7 +110,8 @@ char *getarg(int argc,char *argv[],int pos)
 	return("");//not found
 }
 
-int findlwr(char *str)
+int findlwr(	char *str
+)
 {
 //searches the string for ANY lowercase char
 	char *str2;
@@ -116,15 +121,14 @@ int findlwr(char *str)
 
 	while(*str2)
 	{                
-		if(	isalpha(*str2) &&
-			islower(*str2)
-		)return(TRUE);
+		if( isalpha(*str2) && islower(*str2) )return(TRUE);
 		str2++;
 	}
 	return(FALSE);
 }
 
-char *strupr(char *str)
+char *strupr(	char *str
+)
 {
 	char *str1=str;
 
@@ -137,7 +141,8 @@ char *strupr(char *str)
 	return(str1);
 }
                                                         
-char *strlwr(char *str)
+char *strlwr(	char *str
+)
 {
 	char *str1=str;
 
@@ -150,57 +155,112 @@ char *strlwr(char *str)
 	return(str1);
 }
 
-char *newext(char *str,char *ext)
+char *newext(	char *filename
+		,char *ext
+)
 {
-	//replace file extension
-
-	str[strcspn(str,".")]=0;
-	strcat(str,ext);
+	filename[strcspn(filename,".")]=0;
+	strcat(filename,ext);
 	
 	return(	
-		findlwr(str) ?
-		strlwr(str) :
-		strupr(str)
+		findlwr(filename) ?
+		strlwr(filename) :
+		strupr(filename)
 	);
 }
 
-/*
-char *stprblk(char *str1,char *str2)
+char *stpblk(	char *str
+)
 {
-	register long x;
-	str1[0]=0;
-	
-	x=strlen(str2)-1;
-	while(x>-1&&str2[x]==32)x--;
-	x++;
-	return(strncat(str1,str2,x));
-}
-*/
-
-char *stpblk(char *str)
-{
-	while(*str=='\t'||*str==32)str++;
+	while( *str=='\t' || *str==32 )str++;
 	return(str);
 }
 
-char *stplcr(char *str)
+char *strtrim(	char *dest
+		,char *str
+)
 {
-	while(*str!=0x00&&*str!=0x0a&&*str!=0x0d)str++;
+	register long x;
+	str[0]=0;
+	
+	x=strlen( str )-1;
+	while( x>=0 && str[x]==32 )x--;
+
+	return(strncat( dest ,stpblk(str) ,x+1 ));
+}
+
+char *stplcr(	char *str
+)
+{
+	while( *str!=0x00 && *str!=0x0a && *str!=0x0d )str++;
 	*str=0;
 	return(str);
 }
 
-int rencase(char *dir,char *mode)
+char *strswap(	char *str
+		,long start
+		,long len
+)
+{
+	register unsigned long x;
+	char c;
+
+
+	for(x=start;x<(len-start);x+=2)
+	{
+		c=str[x];
+		str[x]=str[x+1];
+		str[x+1]=c;
+	}
+	return(str);
+}
+
+int strhexdump(	char *str
+		,long start
+		,long len
+)
+{
+	register long x;
+	char buf[256];
+	int dump;
+
+	buf[16]=0;
+
+	for(x=0;x<len;x++)
+	{
+		if( x!=0 && !(x%16) ) printf("%s\n",buf);
+		if( !x || !(x%16) ) printf("%08lx  ",x+start);
+
+		dump=str[x+start];
+
+		printf("%02x %s"
+				,dump&0xff
+				,( ( !( (x+1) %4 ) ) ? " " : "" )
+			);
+			
+
+		buf[(x%16)]=( isprint(dump) ? dump : '.' );
+		buf[(x%16)+1]=0;
+	}
+	printf("%s\n",buf);
+	return(0);
+}
+
+int rencase(	char *dir
+		,char *mode
+)
 {
 struct dirent *ep;
 struct stat puffer;
 DIR *dp;
-char buf[n_BUFSIZE];
+char buf[MAXBUFSIZE];
 
-if(access(dir,R_OK)==-1 ||
-(dp=opendir(dir))==NULL)return(-1);
 
-chdir(dir);
+
+if(access( ((dir[0]!=0)?dir:".") ,R_OK)==-1 ||
+(dp=opendir( ((dir[0]!=0)?dir:".") ))==NULL)return(-1);
+
+chdir( ((dir[0]!=0)?dir:".") );
 
 while((ep=readdir(dp))!=0)
 {
@@ -218,85 +278,109 @@ return(0);
 }
 
 
-long filechksum(char *str,long fstart,int chksum_len)
+int renlwr(	char *dir
+)
 {
-FILE *fh;
-register long x,y;
-char buf[n_BUFSIZE];
-unsigned long chksum=0;
-
-if(!(fh=fopen(str,"rb")))return(-1);
-fseek(fh,fstart,SEEK_SET);
-
-while(fread(buf,1,chksum_len,fh)>0)
-{
-	for(x=0;x<chksum_len;x++)
-	{
-		chksum+=((buf[x])<<(x*8));
-	}
+	return(rencase(dir,"lwr"));
 }
 
-fclose(fh);
-
-y=0;
-for(x=0;x<chksum_len;x++)
+int renupr(	char *dir
+)
 {
-	y=y<<8;
-	y=y+0x0ff;
-}
-return(chksum&y);
+	return(rencase(dir,"upr"));
 }
 
 
+unsigned long CRCTable[ 256 ];
 
-int gauge(time_t fgtstart,long fpos,long fsize)
+#define CRC32_POLYNOMIAL     0xEDB88320L
+
+void BuildCRCTable()
 {
-//#ifdef LINUX
-//#define START 0
-	long cps=0;
-	time_t curr,left;
-	char buf[256];
-	
-/*	if(fpos==START)
-	{
-		fgtstart=time(0);
-		return(0);
-	}
-*/
-	curr=time(0)-fgtstart;
-	if(curr!=0)
-	{
-		cps=fpos/curr;
-		left=(fsize-fpos)/cps;
+    int i;
+    int j;
+    unsigned long crc;
 
-		buf[0]=0;
-		strncat(buf,"===============================",(size_t)((long)24*fpos/fsize));
-		strcat(buf,"-------------------------------");
-		buf[24]=0;
-
-		printf("\r%10lu Bytes [%s] %lu%%, CPS=%lu, ",fpos,buf,(unsigned int)100*fpos/fsize,(unsigned long)cps);
-if(fpos==fsize)
-		printf("TOTAL=%03ld:%02ld ",(long)(curr/60),((long)curr)%60);
-else 		printf("ETA=%03ld:%02ld   ",(long)(left/60),((long)left)%60);
-
-		fflush(stdout);
-	}
-/*
-#else
-	printf(".");
-	fflush(stdout);
-#endif
-*/
-	return(0);
+    for ( i = 0; i <= 255 ; i++ ) {
+        crc = i;
+        for ( j = 8 ; j > 0; j-- ) {
+            if ( crc & 1 )
+                crc = ( crc >> 1 ) ^ CRC32_POLYNOMIAL;
+            else
+                crc >>= 1;
+        }
+        CRCTable[ i ] = crc;
+    }
 }
 
 
-long quickftell(char *str)
+unsigned long CalculateBufferCRC(	unsigned int count
+					,unsigned long crc
+					,void *buffer
+)
 {
-	long size=0;
+    unsigned char *p;
+    unsigned long temp1;
+    unsigned long temp2;
+
+    p = (unsigned char*) buffer;
+    while ( count-- != 0 ) {
+        temp1 = ( crc >> 8 ) & 0x00FFFFFFL;
+        temp2 = CRCTable[ ( (int) crc ^ *p++ ) & 0xff ];
+        crc = temp1 ^ temp2;
+    }
+    return( crc );
+}
+
+unsigned long CalculateFileCRC(	FILE *file
+)
+{
+    unsigned long crc;
+    int count;
+    unsigned char buffer[ 512 ];
+    int i;
+
+    crc = 0xFFFFFFFFL;
+    i = 0;
+    for ( ; ; ) {
+        count = fread( buffer ,1 ,512 ,file );
+        if ( ( i++ % 32 ) == 0 )
+//            putc( '.' ,stdout );
+        if ( count == 0 )
+            break;
+        crc = CalculateBufferCRC( count ,crc ,buffer );
+    }
+//    putc( ' ' ,stdout );
+    return( crc ^= 0xFFFFFFFFL );
+}
+
+unsigned long fileCRC32(	char *filename
+				,long start
+)
+{
+	unsigned long val;
 	FILE *fh;
 
-	if(!(fh=fopen(str,"rb")))return(strlen(str));
+	BuildCRCTable();
+
+        if(!(fh=fopen(filename,"rb")))return(-1);
+	fseek(fh,start,SEEK_SET);
+        val=CalculateFileCRC( fh );
+	fclose(fh);
+
+	return(val);
+}
+
+
+
+
+long quickftell(	char *filename
+)
+{
+	long size;
+	FILE *fh;
+
+	if(!(fh=fopen(filename,"rb")))return(-1);
 	fseek(fh,0,SEEK_END);
 	size=ftell(fh);
 	fclose(fh);
@@ -304,23 +388,29 @@ long quickftell(char *str)
 }
 
 
-long filegrep(char *fname,char *search,long fstart,long slen)//fstrnstr
+long filencmp(	char *filename
+		,char *search
+		,long start
+		,long len
+)
 {
 	register unsigned long x,y;
 	char *buf;
 	FILE *fh;
 
-	x=0;
-	if(!(fh=fopen(fname,"rb")))return(-1);
+	len=( ( (quickftell(filename)-start) < len ) ? (quickftell(filename)-start) : len );
 
-	if(!(buf=(char *)malloc(((quickftell(fname)-fstart)+2)*sizeof(char))))
+	x=0;
+	if(!(fh=fopen(filename,"rb")))return(-1);
+
+	if(!(buf=(char *)malloc(((quickftell(filename)-start)+2)*sizeof(char))))
 	{
 		fclose(fh);
 	        return(-1);
 	}
 
-	fseek(fh,fstart,SEEK_SET);
-	if(!fread(buf,(quickftell(fname)-fstart),1,fh))
+	fseek(fh,start,SEEK_SET);
+	if(!fread(buf,(quickftell(filename)-start),1,fh))
 	{
 		free(buf);
 		fclose(fh);
@@ -329,276 +419,255 @@ long filegrep(char *fname,char *search,long fstart,long slen)//fstrnstr
 
 	fclose(fh);
 
-	y=(quickftell(fname)-fstart);
-	while((x+slen)<y)
+	y=(quickftell(filename)-start);
+	while((x+len)<y)
 	{
-		if(!strncmp(&buf[x],search,slen))return(x+fstart);
+		if(!strncmp(&buf[x],search,len))return(x+start);
 		x++;
 	}
 	free(buf);
 	return(-1);
 }
 
-long quickfread(char *dest,long start,long len,char *source)
+size_t quickfread(	char *dest
+			,size_t start
+			,size_t len
+			,char *src
+)
 {
-	long x=0;
+	size_t result=0;
 	FILE *fh;
 
-	if(!(fh=fopen(source,"rb")))return(-1);
+	len=( ( (quickftell(src)-start) < len ) ? (quickftell(src)-start) : len );
+
+	if(!(fh=fopen(src,"rb")))return(-1);
 	fseek(fh,start,SEEK_SET);
-	x=fread(dest,len,1,fh);
+	result=fread(dest,len,1,fh);
 	dest[len]=0;
 	fclose(fh);
-	return(x);
+	return(result);
 }
 
 
 
-long quickfwrite(char *source,long start,long len,char *dest)
+size_t quickfwrite(	char *src
+			,size_t start
+			,size_t len
+			,char *dest
+)
 {
-	long x=0;
+	size_t result;
 	FILE *fh;
 
-	if(!(fh=fopen(dest,"r+b")))return(-1);
+	if( !( fh=fopen(dest ,( access(dest,F_OK)!=0 ) ? "wb" : "r+b" ) ) )return(-1);
 	fseek(fh,start,SEEK_SET);
-	x=fwrite(source,len,1,fh);
+	result=fwrite(src,len,1,fh);
 	fclose(fh);
-	return(x);
+	return(result);
 }
 
-int fileswap(char *name,long start,long len)
-{
-	register unsigned long x;
-	size_t size;
-	int failed=0;
-	FILE  *fh,*fh2=0;
-	char buf[n_BUFSIZE],buf2[3],buf3;
 
-	if(len==fileswap_EOF)len=quickftell(name);
-	
-	if(!(fh=fopen(name,"rb")))failed=1;
-	if(!failed)
-	{
-		strcpy(buf,name);
-		newext(buf,".TMP");
-	                                        
-		if(!(fh2=fopen(buf,"wb")))
-		{
-			fclose(fh);
-			return(-1);
-		}
-	
-		fseek(fh,start,SEEK_SET);
-	}
-	for(x=0;x<(len-start);x=x+2)
-	{
-		if(!failed)
-		{	
-			if(!fread(buf2,2,1,fh))break;
-			buf3=buf2[0];
-			buf2[0]=buf2[1];
-			buf2[1]=buf3;
-			fwrite(buf2,2,1,fh2);
-		}
-		else
-		{
-			buf3=name[x+start];
-			name[x+start]=name[x+1+start];
-			name[x+1+start]=buf3;
-		}
-	}
-	if(!failed)
-	{
-		size=(len-start)%2;
-		fread(buf2,size,1,fh);
-		fwrite(buf2,size,1,fh2);
-		fclose(fh);
-		fclose(fh2);
-		
-		remove(name);
-		rename(buf,name);
-	}
-	return(0);
-}
-
-int quickfgetc(char *name,long pos)
+int quickfgetc(	char *filename
+		,long pos
+)
 {
 	int c;
 	FILE *fh;
 
-        if(!(fh=fopen(name,"rb")) ||
-	fseek(fh,pos,SEEK_SET)!=0)return(EOF);
+        if(!(fh=fopen(filename,"rb")) || fseek(fh,pos,SEEK_SET)!=0)return(EOF);
 	c=fgetc(fh);
 	fclose(fh);
 	
 	return(c);
 }
 
-int hexdump(char *str,long start,long len)
+int filehexdump(	char *filename
+			,long start
+			,long len
+)
 {
-//wenn name[0]=0; dann memdump!
 	register long x;
-	int failed=0;
 	char buf[256];
 	int dump;
 	FILE *fh;
 
-	if(!(fh=fopen(str,"rb")))failed=1;
+	len=( ( (quickftell(filename)-start) < len ) ? (quickftell(filename)-start) : len );
+
+	if(!(fh=fopen(filename,"rb")))return(-1);
 	
 	buf[16]=0;
-	for(x=0;x<((len==hexdump_EOF)?quickftell(str):len);x++)
+
+	for(x=0;x<len;x++)
 	{
 		if(x!=0&&!(x%16))printf("%s\n",buf);
 		if(!x||!(x%16))printf("%08lx  ",x+start);
 
-		dump=(!failed)?quickfgetc(str,start+x):str[start+x];
+		dump=quickfgetc(filename,x+start);
 
 		printf("%02x %s"
 				,dump&0xff
-				,(!((x+1)%4)) ?
-				" " :
-				""
+				,( ( !( (x+1)%4 ) ) ? " " : "" )
 			);
 
 		buf[(x%16)]=isprint(dump)?dump:'.';
 		buf[(x%16)+1]=0;
 	}
 	printf("%s\n",buf);
-	if(!failed)fclose(fh);
+	fclose(fh);
 	return(0);
 }
 
-long filepad(char *name,long start,char *mode)
+
+
+size_t filepad(	char *filename
+		,long start
+		,long unit
+)
 {
 	size_t size;
+
+	size=(quickftell(filename)-start);
+
+	if(!(size%unit))return(size);
+
+	size=(size_t)size/unit;
+	size=size+1;
+	size=size*unit;
+
+	truncate(filename,size+start);
+	return(size);
+}
+
+long filetestpad(	char *filename
+)
+{
+	long size;
 	register long x;
 	int y;
 	char *buf;
 	FILE *fh;
 	
-	if(!islower(mode[0]))return(-1);
+	size=quickftell(filename);
 
-	if(mode[0]=='r')//counts the size of the pad (if padded)
+	if(!(fh=fopen(filename,"rb")))return(-1);
+
+	if( !( buf=(char *)malloc( (size+2)*sizeof(char) ) ) )
 	{
-		if(!(fh=fopen(name,mode)))return(-1);
-		if(!(buf=(char *)malloc(((quickftell(name))+2)*sizeof(char))))
-		{
-			fclose(fh);
-        		return(-1);
-		}
-		if(!fread(buf,(quickftell(name)),1,fh))
-		{
-			fclose(fh);
-			free(buf);
-			return(-1);
-		}
 		fclose(fh);
-
-		y=buf[(quickftell(name))-1]&0xff;
-		x=(quickftell(name))-2;
-		while(y==(buf[x]&0xff))x--;//x-=2;
-//		if(y!=(buf[x+1]&0xff))x++;
-
-		free(buf);
-		if((((quickftell(name))-x)-1)==1)return(0);
-		return(((quickftell(name))-x)-1);
+       		return(-1);
 	}
-	size=(quickftell(name)-start);
+	if( !fread(buf,size,1,fh) )
+	{
+		fclose(fh);
+		free(buf);
+		return(-1);
+	}
+	fclose(fh);
 
-	if(!(size%MBIT))return(size);
+	y=buf[size-1]&0xff;
+	x=size-2;
+	while(y==(buf[x]&0xff))x--;
+//	if(y!=(buf[x+1]&0xff))x++;
 
-	size=(size_t)size/MBIT;
-	size=size+1;
-	size=size*MBIT;
-
-	truncate(name,size+start);
-	return(size);
+	free(buf);
+	if( ( ( ( size )-x )-1 )==1)return(0);
+	return( ( ( size )-x )-1 );
 }
 
-int filecopy(char *s_name,long s_start,long s_len,char *d_name,char *mode)
+
+
+
+int filecopy(	char *src
+		,long start
+		,long len
+		,char *dest
+		,char *mode
+)
 {
-	long size,ab_size=0;
-	char buf[n_BUFSIZE];
+	long size;
+	char buf[MAXBUFSIZE];
 	FILE *fh,*fh2;
 
-	if(s_len==filecopy_EOF)s_len=quickftell(s_name);
-        if(!islower(mode[0]))return(-1);
+	len=( ( (quickftell(src)-start) < len ) ? (quickftell(src)-start) : len );
 
-	if(mode[0]=='a')ab_size=(quickftell(d_name));
-
-//if(!strdcmp(d_name,sname))return(-1);
-
-	if(!(fh=fopen(s_name,"rb")))return(-1);
-	if(!(fh2=fopen(d_name,mode)))
+	if(!strdcmp(dest,src))return(-1);
+	if(!(fh=fopen(src,"rb")))return(-1);
+	if(!(fh2=fopen(dest,mode)))
 	{
 	        fclose(fh);
 		return(-1);
 	}
 
 	fseek(fh,0,SEEK_END);
-	size=(ftell(fh)-s_start)%n_BUFSIZE;
-	fseek(fh,s_start,SEEK_SET);
+	size=(ftell(fh)-start)%MAXBUFSIZE;
+	fseek(fh,start,SEEK_SET);
+
 	fseek(fh2,0,SEEK_END);
-	while(fread(buf,n_BUFSIZE,1,fh))fwrite(buf,n_BUFSIZE,1,fh2);
+
+	while(fread(buf,MAXBUFSIZE,1,fh))fwrite(buf,MAXBUFSIZE,1,fh2);
+
 	fread(buf,size,1,fh);
 	fwrite(buf,size,1,fh2);
 		
 	fclose(fh);
 	fclose(fh2);
 
-/*
-	if(s_len!=0)
-	{
-	if(s_len<(quickftell(d_name)))
-	truncate(d_name,s_len+ab_size);
-}
-*/
 	return(0);
 }
 
-char *filebackup(char *name)
+char *filebackup(	char *filename
+)
 {
-	char buf[n_BUFSIZE];
-	if(!access(name,F_OK))
+	char buf[MAXBUFSIZE];
+
+	if(!access(filename,F_OK))
 	{
-		strcpy(buf,name);
-//		newext(buf,".bak");
-		strcat(buf,".bak");//~
-		filecopy(name,0,filecopy_EOF,filebackup(buf),"wb");
+		strcpy(buf,filename);
+//		newext(buf,".BAK");
+		strcat(buf,(findlwr(buf)? ".bak" : ".BAK"));//~
+		filecopy(filename,0,quickftell(filename),buf,"wb");
 	}
-	return(name);
+	return(filename);
 }
 
-
-int filecmp(char *fname,long fstart,char *fname2,long fstart2,int mode)
+unsigned long filefile(	char *filename
+			,long start
+			,char *filename2
+			,long start2
+			,int similar
+)
 {
-	register long x,y,len;
+	register long size,x,len;
 	char *buf,*buf2;
 	FILE *fh,*fh2;
 	
-	if(!strdcmp(fname,fname2))return(0);
-
-
-        if(!(fh=fopen(fname,"rb")))return(-1);
-	if(!(fh2=fopen(fname2,"rb")))
+	if(!strdcmp(filename,filename2))return(0);
+	
+        if(!(fh=fopen(filename,"rb")))return(-1);
+	if(!(fh2=fopen(filename2,"rb")))
 	{
 		fclose(fh);
 		return(-1);
 	}
-	if(!(buf=(char *)malloc(((quickftell(fname))+2)*sizeof(char))))
+
+	if( !(buf=(char *)malloc( ( quickftell(filename)+2 ) *sizeof(char) ) ) )
 	{
 		fclose(fh);
 		fclose(fh2);
         	return(-1);
 	}
-	if(!(buf2=(char *)malloc(((quickftell(fname2))+2)*sizeof(char))))
+
+	if( !(buf2=(char *)malloc( ( quickftell(filename2)+2 ) *sizeof(char) ) ) )
 	{
 		free(buf);
 		fclose(fh);
 		fclose(fh2);
 		return(-1);
 	}
-	if(!fread(buf,(quickftell(fname)),1,fh)||!fread(buf2,(quickftell(fname2)),1,fh2))
+
+	if(	!fread(buf,quickftell(filename),1,fh) ||
+		!fread(buf2,quickftell(filename2),1,fh2)
+	)
 	{
 		free(buf);
 		free(buf2);
@@ -606,57 +675,334 @@ int filecmp(char *fname,long fstart,char *fname2,long fstart2,int mode)
 		fclose(fh2);
 		return(-1);
 	}	
-
 	fclose(fh);
 	fclose(fh2);
-	x=(	(quickftell(fname)-fstart)<(quickftell(fname2)-fstart2) ?
-		(quickftell(fname)-fstart) :
-		(quickftell(fname2)-fstart2)
+
+	size=(	(quickftell(filename)-start)<(quickftell(filename2)-start2) ?
+		(quickftell(filename)-start) :
+		(quickftell(filename2)-start2)
 	);
 
-	for(y=0;y<x;y++)
+	for(x=0;x<=size;x++)
 	{
 		if
 		(
-		(mode==filecmp_DIFF&&buf[y+fstart]!=buf2[y+fstart2])
-		||
-		(mode==filecmp_SIMI&&buf[y+fstart]==buf2[y+fstart2])	
+			( similar==FALSE && buf[x+start] != buf2[x+start2] ) ||
+			( similar==TRUE && buf[x+start] == buf2[x+start2] )
 		)
 		{
 			len=0;
-			if(mode==filecmp_DIFF)while(buf[y+fstart+len]!=buf2[y+fstart2+len])len++;
-			else while(buf[y+fstart+len]==buf2[y+fstart2+len])len++;
-			printf("%s\n",fname);
-			hexdump(buf,y+fstart,len);
-			printf("%s\n",fname2);
-			hexdump(buf2,y+fstart2,len);
+			while(
+				( similar==TRUE ) ?
+				(buf[x+start+len]==buf2[x+start2+len]) :
+				(buf[x+start+len]!=buf2[x+start2+len])
+			)len++;
+
+			strhexdump(buf,x+start,len);
 			printf("\n");
-			y+=len;
+			x+=len;
 		}
 	}
 	free(buf);
 	free(buf2);
-	return(0);
+	return(x);
 }
 
-int filereplace(char *fname,char wildcard,char *search,long slen,char *replace,long rlen,long fstart)
+
+
+
+
+int filereplace(	char *filename
+			,long start
+			,char *search
+			,long slen
+			,char *replace
+			,long rlen
+)
 {
 	register long x;
-	x=fstart;
+	x=start;
 	
 	for(;;)
 	{
-		x=filegrep(fname,search,x,slen);
-
-		if(x==-1)return(0);
-
-		hexdump(fname,x,slen);
-
-		quickfwrite(replace,x,rlen,fname);
-
-		hexdump(fname,x,rlen);
-
+		if((x=filencmp(filename,search,x,slen))==-1)return(0);
+		filehexdump(filename,x,slen);
+		quickfwrite(replace,x,rlen,filename);
+		filehexdump(filename,x,rlen);
 		printf("\n");
 		x++;
 	}
+}
+
+
+
+
+
+int fileswap(	char *filename
+		,long start
+		,long len
+)
+{
+	register unsigned long x;
+	size_t size;
+	FILE *in,*out;
+	char buf[MAXBUFSIZE],buf2[3],buf3;
+
+	len=( ( (quickftell(filename)-start) < len ) ? (quickftell(filename)-start) : len );
+
+
+	if(!(in=fopen(filename,"rb")))return(-1);
+	fseek(in,start,SEEK_SET);
+
+	strcpy(buf,filename);
+	newext(buf,".TMP");
+	if(!(out=fopen(buf,"wb")))
+	{
+		fclose(in);
+		return(-1);
+	}
+
+	for(x=0;x<(len-start);x+=2)
+	{
+		if(!fread(buf2,2,1,in))break;
+		buf3=buf2[0];
+		buf2[0]=buf2[1];
+		buf2[1]=buf3;
+		fwrite(buf2,2,1,out);
+	}
+	size=(len-start)%2;
+	fread(buf2,size,1,in);
+	fwrite(buf2,size,1,out);
+
+	fclose(in);fclose(out);
+		
+	remove(filename);
+	rename(buf,filename);
+
+	return(0);
+}
+
+
+/*
+unsigned char inportb(unsigned int arg1)
+{
+  __asm__("
+  movl    8(%ebp),%edx
+  inb     %dx,%al
+  movzbl  %al,%eax                  
+  ");
+}
+
+unsigned char outportb(unsigned int arg1,unsigned int arg2)
+{
+  __asm__("
+  movl    0x8(%ebp),%edx
+  movl    0xc(%ebp),%eax
+  outb    %al,%dx
+  ");
+}
+
+unsigned short int inport(unsigned int arg1)
+{
+  __asm__("
+  movl    8(%ebp),%edx
+  inw     %dx,%ax
+  ");
+}
+
+unsigned short int outport(unsigned int arg1,unsigned int arg2)
+{
+  __asm__("
+  movl    0x8(%ebp),%edx
+  movl    0xc(%ebp),%eax
+  outw    %ax,%dx
+  ");
+}
+*/
+void out1byte(unsigned int port, unsigned char c)
+{
+  __asm__ volatile ("outb %0,%1"
+		    ::"a" ((char) c), "d"((unsigned short) port));
+}
+
+unsigned char in1byte(unsigned int port)
+{
+  char _v;
+  __asm__ volatile ("inb %1,%0"
+		    :"=a" (_v):"d"((unsigned short) port));
+
+  return _v;
+}
+
+
+#define DETECT_MAX_CNT 1000
+
+int detectParPort(unsigned int port)
+{
+  int i;
+
+  if(ioperm(port, 1, 1)==-1)return(-1);
+  out1byte(port, 0xaa);
+  for( i=0; i<DETECT_MAX_CNT; i++ )
+   {
+    if( in1byte(port) == 0xaa ) break;
+  }
+  if( i < DETECT_MAX_CNT ) {
+    out1byte(port, 0x55);
+    for( i=0; i<DETECT_MAX_CNT; i++ ) {
+      if( in1byte(port) == 0x55 ) break;
+    }
+  }
+  if(ioperm(port, 1, 0)==-1)return(-1);
+  
+  if( i >= DETECT_MAX_CNT ) return 0;
+  return 1;
+}
+
+
+
+unsigned int parport_probe(unsigned int port)
+{
+  uid_t uid;
+  unsigned int parPortAddresses[] = { 0x3bc, 0x378, 0x278 };
+  int i;
+  
+  if( port == 0 ) port = 1;
+  if( port <= 3 ) {
+    for( i=0; i<3; i++ ) {
+      port -= detectParPort(parPortAddresses[i]);
+      if( port == 0 ) {
+        port = parPortAddresses[i];
+        break;
+      }
+    }
+    if( i >= 3 ) return (0);
+  } else {
+    if( (port != parPortAddresses[0]) && (port != parPortAddresses[1]) && (port != parPortAddresses[2]) ) {
+	return(0);
+    }
+  }
+  if( port != 0 ) {
+    if(ioperm(port, 3, 1)==-1)return(0);
+    uid = getuid();
+    seteuid(uid);
+  }
+  return port;
+}
+
+
+
+int parport_gauge(	time_t init_time
+		,long pos
+		,long size
+)
+{
+	long cps=0;
+	time_t curr,left;
+	char buf[256];
+	
+	if( !( curr=( time(0)-init_time ) ) )return(0);
+
+	cps=pos/curr;
+	left=(size-pos)/cps;
+
+	buf[0]=0;
+	strncat(buf,"===============================",(size_t)((long)24*pos/size));
+	strcat(buf,"-------------------------------");
+	buf[24]=0;
+
+	printf("\r%10lu Bytes [%s] %lu%% ,CPS=%lu ,"
+	,pos
+	,buf
+	,(unsigned int)100*pos/size
+	,(unsigned long)cps
+	);
+
+	if(pos==size)
+	{
+		printf("TOTAL=%03ld:%02ld "
+		,(long)(curr/60)
+		,((long)curr)%60
+		);
+	}
+	else
+	{
+		printf("ETA=%03ld:%02ld   "
+		,(long)(left/60)
+		,((long)left)%60
+		);
+	}
+	fflush(stdout);
+
+	return(0);
+}
+
+
+
+
+#define SEND_MAX_WAIT 0x300000
+                                                
+int parport_write(	char src[]
+			,unsigned int len
+			,unsigned int parport
+)
+{
+long maxwait;
+unsigned int i;
+
+for( i=0; i<len; i++ ) 
+{
+	maxwait = SEND_MAX_WAIT;
+	if( (in1byte(parport+2) & 1) == 0 )       /* check ~strobe */
+	{
+		while( ((in1byte(parport+2) & 2) != 0) && maxwait-- ) ;  /* wait for */
+		if( maxwait <= 0 ) return 1;                        /* auto feed == 0 */
+		out1byte(parport, src[i]);         /* write data    */
+		out1byte(parport+2, 5);                  /* ~strobe = 1   */
+	}
+	else
+	{
+		while( ((in1byte(parport+2) & 2) == 0) && maxwait-- ) ;  /* wait for */
+		if( maxwait <= 0 ) return 1;                        /* auto feed == 1 */
+		out1byte(parport, src[i]);         /* write data    */
+		out1byte(parport+2, 4);                  /* ~strobe = 0   */
+	}
+}
+return 0;
+}
+
+
+
+
+#define REC_HIGH_NIBBLE 0x80
+#define REC_LOW_NIBBLE 0x00
+#define REC_MAX_WAIT SEND_MAX_WAIT
+
+int parport_read(	char dest[]
+			,unsigned int len
+			,unsigned int parport
+)
+{
+int i;
+long maxwait;
+unsigned char c;
+
+for( i=0; i<len; i++ ) 
+{
+	out1byte(parport, REC_HIGH_NIBBLE);
+	maxwait = REC_MAX_WAIT;
+	while( ((in1byte(parport+1) & 0x80) == 0) && maxwait-- ) ; /* wait for ~busy=1 */
+	if( maxwait <= 0 ) return len-i;
+	c = (in1byte(parport+1) >> 3) & 0x0f; /* ~ack, pe, slct, ~error */
+
+	out1byte(parport, REC_LOW_NIBBLE);
+	maxwait = REC_MAX_WAIT;
+	while( ((in1byte(parport+1) & 0x80) != 0) && maxwait-- ) ; /* wait for ~busy=0 */
+	if( maxwait <= 0 ) return len-i;
+	c |= (in1byte(parport+1) << 1) & 0xf0; /* ~ack, pe, slct, ~error */
+
+	dest[i] = c;
+}
+out1byte(parport, REC_HIGH_NIBBLE);
+return 0;
 }

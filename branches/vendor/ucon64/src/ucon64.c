@@ -2,7 +2,7 @@
 uCON64 1.9.5 by NoisyB (noisyb@gmx.net)
 uCON64 is a tool to modify video game ROMs and to transfer ROMs to the
 different backup units/emulators that exist. It is based on the old uCON but
-with completely new source. It supports N64, PSX, JAG, SNES, NG,
+with completely new src. It supports N64, PSX, JAG, SNES, NG,
 SEGA, GB, LYNX, PCE, SMS, GG, C64, NES, ATARI and backup units.
 Copyright (C) 1999/2000/2001 NoisyB (noisyb@gmx.net)
 
@@ -35,6 +35,7 @@ write programs in C
 //#include "unzip.h"
 #include "snes/snes.h"
 #include "gb/gb.h"
+#include "gba/gba.h"
 #include "jaguar/jaguar.h"
 #include "n64/n64.h"
 #include "lynx/lynx.h"
@@ -49,15 +50,21 @@ write programs in C
 #include "atari/atari.h"
 #include "ngp/ngp.h"
 
+#define MAXBUFSIZE 32768
 
+int ucon64_usage(int argc,char *argv[]);
 int ucon64_probe(int argc,char *argv[]);
 
 int main(int argc,char *argv[])
 {
 register long x;
-char buf[4096],buf2[4096];
+char buf2[4096];
 long console=ucon64_UNKNOWN;
 FILE *fh;
+struct dirent *ep;
+struct stat puffer;
+DIR *dp;
+char buf[MAXBUFSIZE];
 int ucon64_argc;
 char *ucon64_argv[128];
 
@@ -75,12 +82,9 @@ if(	argc<2 ||
 	return(0);
 }
 
-
-
 if(argcmp(argc,argv,"-db")||argcmp(argc,argv,"-dbv"))
 {
 	atari_main(argc,argv);
-//	commodore_main(argc,argv);
 //	gameboy_main(argc,argv);
 //	genesis_main(argc,argv);
 	jaguar_main(argc,argv);
@@ -103,43 +107,81 @@ if(!ucon64_rom()[0])
 	return(0);
 }
 
+if(ucon64_file()[0])
+{
+	strcpy(buf,ucon64_file());
+	sscanf(buf,"%x",&ucon64_parport);
+}
+if(!(ucon64_parport=parport_probe(ucon64_parport)))
+	printf("ERROR: no parallel port 0x%s found\n\n",strupr(buf));
+else printf("0x%x\n\n",ucon64_parport);
+
+if(argcmp(argc,argv,"-crc"))
+{
+	printf("Checksum: %08lx\n\n",fileCRC32(ucon64_rom(),0));
+	return(0);
+}
+
+if(argcmp(argc,argv,"-crchd"))
+{
+	printf("Checksum: %08lx\n\n",fileCRC32(ucon64_rom(),512));
+	return(0);
+}
+
+
 if(argcmp(argc,argv,"-rl"))
 {
-	rencase(ucon64_rom(),"lwr");
+	renlwr(ucon64_rom());
 	return(0);
 }
 
 if(argcmp(argc,argv,"-ru"))
 {
-	rencase(ucon64_rom(),"upr");
+	renupr(ucon64_rom());
 	return(0);
 }
 
 if(argcmp(argc,argv,"-hex"))
 {
-	hexdump(ucon64_rom(),0,quickftell(ucon64_rom()));
+	filehexdump(ucon64_rom(),0,quickftell(ucon64_rom()));
 	return(0);
 }
 
 if(argcmp(argc,argv,"-ls"))
 {
-//TODO read dir and then while file ucon64_probe und <con>_nfo
+//TODO change and optimize
 
-//	mkfid(ucon64_rom());
+if(access( (((ucon64_rom())[0]!=0)?(ucon64_rom()):".") ,R_OK)==-1 ||
+(dp=opendir( (((ucon64_rom())[0]!=0)?(ucon64_rom()):".") ))==NULL)return(-1);
+
+chdir( (((ucon64_rom())[0]!=0)?(ucon64_rom()):".") );
+
+while((ep=readdir(dp))!=0)
+{
+	if(!stat(ep->d_name,&puffer))
+	{
+		if(S_ISREG(puffer.st_mode)==1)
+		{
+			sprintf(buf,"%s %s",argv[0],ep->d_name);
+			system(buf);
+		}
+	}                
+}
+(void)closedir(dp);
 
 	return(0);
 }
 
 if(argcmp(argc,argv,"-c"))
 {
-//	if(n_cmp(ucon64_rom(),0,ucon64_file(),0,filecmp_DIFF)!=0)
+	if(filefile(ucon64_rom(),0,ucon64_file(),0,FALSE)==-1)
 		printf("ERROR: file not found/out of memory\n");
 	return(0);
 }
 
 if(argcmp(argc,argv,"-cs"))
 {
-//	if(n_cmp(ucon64_rom(),0,ucon64_file(),0,filecmp_SIMI)!=0)
+	if(filefile(ucon64_rom(),0,ucon64_file(),0,TRUE)==-1)
                        printf("ERROR: file not found/out of memory\n");
 	return(0);
 }
@@ -147,49 +189,30 @@ if(argcmp(argc,argv,"-cs"))
 if(argcmp(argc,argv,"-find"))
 {
 	x=0;
-	while((x=filegrep(ucon64_rom(),ucon64_file(),x,strlen(ucon64_file())))!=-1)
+	while((x=filencmp(ucon64_rom(),ucon64_file(),x,strlen(ucon64_file())))!=-1)
 	{
-		hexdump(ucon64_rom(),x,strlen(ucon64_file()));
+		filehexdump(ucon64_rom(),x,strlen(ucon64_file()));
 		x++;
 		printf("\n");
 	}
 	return(0);
 }
 
-/*
-if(argcmp(argc,argv,"-cdrom"))
-{
-//	cdromnfo(ucon64_rom(),ucon64_rom());
-	ucon64_argv[0]=ucon64_name();
-	ucon64_argv[1]=ucon64_rom();
-	ucon64_argc=2;
-
-//	cdinfo_main(ucon64_argc,ucon64_argv);
-	return(0);
-}
-*/
-
 if(argcmp(argc,argv,"-swap"))
 {
-/*
-	strcpy(buf,romname);
-	buf[strcspn(buf,".")+1]=0;
-	strcat(buf,findlwr(buf)?"rom":"ROM");
-
-	filecopy(romname,0,quickftell(romname),buf,"wb");
-//	if(!swapped)fswap(buf,0,(quickftell(buf)-hsize));
-	fileswap(buf,0,(quickftell(buf)-hsize));
-
-
-*/
-
-	fileswap(ucon64_rom(),0,quickftell(ucon64_rom()));
+	fileswap(filebackup(ucon64_rom()),0,quickftell(ucon64_rom()));
 	return(0);
 }
 
 if(argcmp(argc,argv,"-pad"))
 {
-	filepad(ucon64_rom(),0,"ab");
+	filepad(ucon64_rom(),0,MBIT);
+	return(0);
+}
+
+if(argcmp(argc,argv,"-padhd"))
+{
+	filepad(ucon64_rom(),512,MBIT);
 	return(0);
 }
 
@@ -197,35 +220,35 @@ if(argcmp(argc,argv,"-ispad"))
 {
 	unsigned long padded;
 	
-	if((padded=filepad(ucon64_rom(),0,"rb"))!=-1)
+	if((padded=filetestpad(ucon64_rom()))!=-1)
 	{
 		if(!padded)printf("Padded: No\n");
 		else printf("Padded: Maybe, %ld Bytes (%.4f Mb)\n",padded,(float)padded/MBIT);
 	}
-	printf("\n");return(0);
+	printf("\n");
+	return(0);
 }
 
 if(argcmp(argc,argv,"-stp"))
 {
-	strcpy(buf,ucon64_rom());
-	buf[strcspn(buf,".")+1]=0;
-	strcat(buf,findlwr(buf)?"tmp":"TMP");
+	strcpy(buf,filebackup(ucon64_rom()));
+	newext(buf,".TMP");
+
 	rename(ucon64_rom(),buf);
 	filecopy(buf,512,quickftell(buf),ucon64_rom(),"wb");
-
 	remove(buf);
 	return(0);
 }
+
 if(argcmp(argc,argv,"-ins"))
 {
 	strcpy(buf,ucon64_rom());
-	buf[strcspn(buf,".")+1]=0;
-	strcat(buf,findlwr(buf)?"tmp":"TMP");
-	rename(ucon64_rom(),buf);
+	newext(buf,".TMP");
 
+	rename(ucon64_rom(),buf);
 	if((fh=fopen(ucon64_rom(),"wb"))!=0)
 	{
-		memset(buf2,0x00,512);
+		memset(buf2,0,512);
 		fwrite(buf2,512,1,fh);
 		fclose(fh);
 	}
@@ -358,6 +381,7 @@ if(argcmp(argc,argv,"-sms"))console=ucon64_SMS;
 if(argcmp(argc,argv,"-snes"))console=ucon64_SNES;
 if(argcmp(argc,argv,"-gen"))console=ucon64_GENESIS;
 if(argcmp(argc,argv,"-gb"))console=ucon64_GB;
+if(argcmp(argc,argv,"-gba"))console=ucon64_GBA;
 if(argcmp(argc,argv,"-ng"))console=ucon64_NEOGEO;
 if(argcmp(argc,argv,"-ngp"))console=ucon64_NEOGEOPOCKET;
 if(argcmp(argc,argv,"-nes"))console=ucon64_NES;
@@ -403,6 +427,9 @@ switch(console)
 
 case ucon64_GB:
 	gameboy_main(argc,argv);
+break;
+case ucon64_GBA:
+	gbadvance_main(argc,argv);
 break;
 case ucon64_GENESIS:
 	genesis_main(argc,argv);
@@ -452,7 +479,7 @@ case ucon64_NEOGEOPOCKET:
 break;
 case ucon64_UNKNOWN:
 default:
-	hexdump(ucon64_rom(),0,hexdump_EOF);
+	filehexdump(ucon64_rom(),0,512);//show possible header or maybe the internal rom header
 	printf("\nERROR: unknown file %s\n       USE -<CONSOLE> force recognition OPTION\n\n",ucon64_rom());
 //	usage_main(argc,argv);
 break;
@@ -471,12 +498,59 @@ int ucon64_probe(int argc,char *argv[])
 	else if(nintendo64_probe(argc,argv)!=-1)console=ucon64_N64;
 	else if(nes_probe(argc,argv)!=-1)console=ucon64_NES;
 	else if(gameboy_probe(argc,argv)!=-1)console=ucon64_GB;
+	else if(gbadvance_probe(argc,argv)!=-1)console=ucon64_GBA;
 	else if(jaguar_probe(argc,argv)!=-1)console=ucon64_JAGUAR;
-	else if(pcengine_probe(argc,argv)!=-1)console=ucon64_PCE;
+//	else if(pcengine_probe(argc,argv)!=-1)console=ucon64_PCE;
 	else console=ucon64_UNKNOWN;
 
 	return(console);
 }
+
+
+
+int ucon64_usage(int argc,char *argv[])
+{
+printf("TODO: $ROM could also be the name of a *.ZIP archive\n\
+      it will automatically find and extract the ROM\n\
+\n\
+  -db		ROM database statistics (# of entries)\n\
+  -dbv		view ROM database (all entries)\n\
+  -crc		show CRC32 value of ROM\n\
+  -crchd	show CRC32 value of ROM (regarding to +512 Bytes header)\n\
+TODO:  -dbs	search ROM database (all entries) by CRC32; $ROM=CRC32\n\
+  -rl		rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n\
+  -ru		rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n\
+  -hex		show ROM as hexdump; use \"ucon64 -hex $ROM|less\"\n\
+  -ls		generate ROM list for all ROMs; $ROM=DIRECTORY\n\
+  -c		compare ROMs; $FILE=OTHER_ROM\n\
+  -cs		compare ROMs for similarities; $FILE=OTHER_ROM\n\
+  -find		find string in ROM; $FILE=STRING\n\
+  -swap		swap/(de)interleave (ALL) Bytes in ROM (1234<->2143)\n\
+  -pad		pad ROM to full Mb\n\
+  -padhd	pad ROM to full Mb (regarding to +512 Bytes header)\n\
+  -ispad	check if ROM is padded\n\
+  -stp		strip first 512 Bytes (possible header) from ROM\n\
+  -ins		insert 512 Bytes (0x00) before ROM\n\
+  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE\n\
+  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE\n\
+  -a		apply APS patch (<=1.2); $FILE=PATCHFILE\n\
+  -mki		create IPS patch; $FILE=CHANGED ROM\n\
+  -mka		create APS patch; $FILE=CHANGED ROM\n\
+  -na		change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION\n\
+TODO:  -aps	convert Baseline/BSL/IPS to APS; $ROM=PATCHFILE\n\
+  -ppf		apply PPF patch (<=2.0); $ROM=ISO_IMAGE $FILE=PATCHFILE\n\
+TODO:  -xps	apply XPS patch; $ROM=ISO_IMAGE $FILE=PATCHFILE\n\
+  -mkppf	create PPF patch; $ROM=ISO_IMAGE $FILE=CHANGED_IMAGE\n\
+  -nppf		change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION\n\
+TODO:  -idppf	change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ\n\
+TODO:  -mkxps	create XPS patch; $ROM=ISO_IMAGE $FILE=CHANGED_IMAGE\n\
+\n"
+);
+
+return(0);
+}
+
+
 
 
 /*

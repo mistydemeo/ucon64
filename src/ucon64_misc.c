@@ -1428,7 +1428,11 @@ inportb (unsigned short port)
     Can one CTRL-C a DoIO() request? (Or for that matter a SendIO().)
   */
 
-  DoIO ((struct IORequest *) ucon64_io_req);
+  if (DoIO ((struct IORequest *) ucon64_io_req))
+	{
+		//fprintf	(stderr,	"Couldn't Read from parallel port: %s\n",	ucon64_io_req->IOPar.io_Error);
+    return -1; // what is a error?
+	}
 
   return (unsigned char) ucon64_io_req->io_Data;
 #elif   defined _WIN32 || defined __CYGWIN__
@@ -1465,7 +1469,11 @@ inportw (unsigned short port)
   WaitIO ((struct IORequest *) ucon64_io_req);
 */
 
-  DoIO ((struct IORequest *) ucon64_io_req);
+  if (DoIO ((struct IORequest *) ucon64_io_req))
+  {
+		//fprintf (stderr, "Couldn't Read from parallel port: %s\n",  ucon64_io_req->IOPar.io_Error);
+    return -1; // what is a error?
+	}
 
   return (unsigned short) ucon64_io_req->io_Data;
 #elif   defined _WIN32 || defined __CYGWIN__
@@ -1502,7 +1510,12 @@ outportb (unsigned short port, unsigned char byte)
   WaitIO ((struct IORequest *) ucon64_io_req);
 */
 
-  DoIO ((struct IORequest *) ucon64_io_req);
+  if(DoIO ((struct IORequest *) ucon64_io_req))
+  {
+		//fprintf(stderr,"Couldn't Read from parallel port: %s\n",ucon64_io_req->IOPar.io_Error);
+    //return -1; // what is a error?
+	}
+
 #elif   defined _WIN32 || defined __CYGWIN__
   output_byte (port, byte);
 #elif   defined __i386__
@@ -1537,7 +1550,12 @@ outportw (unsigned short port, unsigned short word)
   WaitIO ((struct IORequest *) ucon64_io_req);
 */
 
-  DoIO ((struct IORequest *) ucon64_io_req);
+  if(DoIO ((struct IORequest *) ucon64_io_req))
+  {
+		//fprintf(stderr,"Couldn't Read from parallel port: %s\n",ucon64_io_req->IOPar.io_Error);
+    //return -1; // what is a error?
+	}
+
 #elif   defined _WIN32 || defined __CYGWIN__
   output_word (port, word);
 #elif   defined __i386__

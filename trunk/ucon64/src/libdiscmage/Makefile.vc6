@@ -10,7 +10,7 @@ CFLAGS=$(CFLAGS) /DDLOPEN
 !endif
 
 LIBNAME=discmage
-OBJECTS=libdm_misc.obj cdi.obj nero.obj sheets.obj dllinit.obj misc.obj
+OBJECTS=libdm_misc.obj cdi.obj nero.obj sheets.obj other.obj dllinit.obj misc.obj
 !ifdef ZLIB
 LIBS=zlib.lib
 OBJECTS=$(OBJECTS) unzip.obj map.obj miscz.obj

@@ -2029,13 +2029,13 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_si
             {
               for (i = 0; i < (32 * MBIT) >> 16; i++)
                 {
-                  blocks[i * 2] = i + (24 * MBIT >> 15);
+                  blocks[i * 2] = (unsigned char) (i + (24 * MBIT >> 15));
                   blocks[i * 2 + 1] = i + ((i < (8 * MBIT >> 16) ? 4 : 8) * MBIT >> 15);
                 }
               for (; i < (40 * MBIT) >> 16; i++)
                 {
-                  blocks[i * 2] = i - (8 * MBIT >> 15);
-                  blocks[i * 2 + 1] = i - (16 * MBIT >> 15);
+                  blocks[i * 2] = (unsigned char) (i - (8 * MBIT >> 15));
+                  blocks[i * 2 + 1] = (unsigned char) (i - (16 * MBIT >> 15));
                 }
             }
           else
@@ -2050,8 +2050,8 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_si
               j = size2 >> 16;
               for (; i < j + (32 * MBIT >> 16); i++)
                 {
-                  blocks[i * 2] = i + j - (32 * MBIT >> 16);
-                  blocks[i * 2 + 1] = i - (32 * MBIT >> 16);
+                  blocks[i * 2] = (unsigned char) (i + j - (32 * MBIT >> 16));
+                  blocks[i * 2 + 1] = (unsigned char) (i - (32 * MBIT >> 16));
                 }
             }
         }

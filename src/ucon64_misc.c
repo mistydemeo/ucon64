@@ -259,7 +259,7 @@ const char *nintendo_maker[792] = {
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, "Sachen",
   NULL,                                         // HZ
-  NULL, NULL, NULL, NULL, "Enix",
+  NULL, "ASCII", NULL, NULL, "Enix",
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, "Yojigen", NULL, NULL,

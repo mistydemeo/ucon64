@@ -2308,7 +2308,7 @@ snes_init (st_rominfo_t *rominfo)
       strcpy (rominfo->name, "Name: N/A");
       rominfo->console_usage = NULL;
       rominfo->copier_usage = swc_usage;
-      rominfo->maker = "Manufacturer: You?";
+      rominfo->maker = "Publisher: You?";
       rominfo->country = "Country: Your country?";
       rominfo->has_internal_crc = 0;
       strcat (rominfo->misc, "Type: Super Wild Card SRAM file\n");

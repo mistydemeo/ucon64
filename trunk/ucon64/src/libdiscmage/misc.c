@@ -763,11 +763,17 @@ dirname2 (const char *path)
 
 #ifndef HAVE_REALPATH
 #undef realpath
-// TODO (Visual C++): Find out if GetFullPathName() is as good as "our"
-//                    realpath() implementation 
 char *
 realpath (const char *path, char *full_path)
 {
+#ifndef _WIN32
+/*
+  Keep the "defined _WIN32"'s in this code in case GetFullPathName() turns out
+  to have some unexpected problems. This code works for Visual C++, but it
+  doesn't return the same paths as GetFullPathName() does. Most notably,
+  GetFullPathName() expands <drive letter>:. to the current directory of
+  <drive letter>: while this code doesn't.
+*/
 #define MAX_READLINKS 32
   char copy_path[FILENAME_MAX], got_path[FILENAME_MAX], *new_path = got_path,
        *max_path;
@@ -793,7 +799,12 @@ realpath (const char *path, char *full_path)
 #if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
   c = toupper (*path);
   if (c >= 'A' && c <= 'Z' && path[1] == ':')
-    ;
+    {
+      *new_path++ = *path++;
+      *new_path++ = *path++;
+      if (*path == FILE_SEPARATOR)
+        *new_path++ = *path++;
+    }
   else
 #endif
   if (*path != FILE_SEPARATOR)
@@ -839,7 +850,7 @@ realpath (const char *path, char *full_path)
                   if (new_path == got_path + 1)
                     continue;
                   // Handle ".." by backing up
-                  while ((--new_path)[-1] != FILE_SEPARATOR)
+                  while (*((--new_path) - 1) != FILE_SEPARATOR)
                     ;
                   continue;
                 }
@@ -879,7 +890,7 @@ realpath (const char *path, char *full_path)
         }
       else
         {
-          // Note: readlink doesn't add the null byte
+          // Note: readlink() doesn't add the null byte
           link_path[n] = 0;
           if (*link_path == FILE_SEPARATOR)
             // Start over for an absolute symlink
@@ -899,12 +910,48 @@ realpath (const char *path, char *full_path)
       *new_path++ = FILE_SEPARATOR;
     }
   // Delete trailing slash but don't whomp a lone slash
-  if (new_path != got_path + 1 && new_path[-1] == FILE_SEPARATOR)
-    new_path--;
+  if (new_path != got_path + 1 && *(new_path - 1) == FILE_SEPARATOR)
+    {
+#if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
+      if (new_path >= got_path + 3)
+        {
+          if (*(new_path - 2) == ':')
+            {
+              c = toupper (*(new_path - 3));
+              if (!(c >= 'A' && c <= 'Z'))
+                new_path--;
+            }
+          else
+            new_path--;
+        }
+      else
+        new_path--;
+#else
+      new_path--;
+#endif
+    }
   // Make sure it's null terminated
   *new_path = 0;
   strcpy (full_path, got_path);
+
   return full_path;
+#else
+  char *p, c;
+  int n;
+
+  if (GetFullPathName (path, FILENAME_MAX, full_path, &p) == 0)
+    return NULL;
+  
+  c = toupper (full_path[0]);
+  n = strlen (full_path) - 1;
+  // Remove trailing separator if full_path is not the root dir of a drive,
+  //  because Visual C++'s runtime system is *really* stupid
+  if (full_path[n] == FILE_SEPARATOR &&
+      !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == 0)) // && full_path[2] == FILE_SEPARATOR
+    full_path[n] = 0;
+
+  return full_path;
+#endif // _WIN32
 }
 #endif
 

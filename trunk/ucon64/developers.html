@@ -39,10 +39,10 @@ A: For read-only access you must have CVS installed
 Q: How do I connect to CVS as anonymous?
 A: cvs -d:pserver:anonymous@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 login
    &#60;return at password prompt&#62;
-   cvs -d:pserver:anonymous@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 checkout -P
+   cvs -d:pserver:anonymous@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 checkout -P ucon64
 
 Q: How do I connect to CVS as developer with read/write access?
-A: cvs -d:ext:<name>@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 checkout -P
+A: cvs -d:ext:<name>@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 checkout -P ucon64
    &#60;enter password at prompt&#62;
 
    now it will checkout all files and afterwards you can simply cd into the

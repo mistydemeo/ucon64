@@ -3,21 +3,18 @@ uCON64 1.9.8beta3 Unix (Linux) 1999-2002 by (various)
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
-Usage: ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
+Usage: ./ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
 
   --nbak        prevents backup files (*.BAK)
-  --hdn=BYTES   force ROM has backup unit/emulator header with BYTES size
+  --hdn=N       force ROM has backup unit/emulator header with N Bytes size
   --hd          same as --hdn=512
                   most backup units use a header with 512 Bytes size
   --nhd         force ROM has no backup unit/emulator header
-  --stp         strip header from ROM; default size 512 Bytes
-  --ins         insert empty header before ROM; default size 512 Bytes
-  --strip       strip Bytes from end of ROM; --file=VALUE
   --int         force ROM is interleaved (2143)
   --nint        force ROM is not interleaved (1234)
   --dint        convert ROM to (non-)interleaved format (1234 <-> 2143)
-                  this differs from the Super Nintendo --dint option
-  --ns          force ROM is not splitted
+                  this differs from the Super Nintendo & NES --dint option
+  --ns          force ROM is not split
    -e           emulate/run ROM (see /root/.ucon64rc for more)
   --crc         show CRC32 value of ROM
   --dbs         search ROM database (all entries) by CRC32; --rom=0xCRC32
@@ -25,51 +22,95 @@ Usage: ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
   --dbv         view ROM database (all entries)
   --ls          generate ROM list for all ROMs; --rom=DIRECTORY
   --lsv         like --ls but more verbose; --rom=DIRECTORY
-  --rl          rename all files in DIRECTORY to lowercase; --rom=DIRECTORY
-  --ru          rename all files in DIRECTORY to uppercase; --rom=DIRECTORY
+  --rrom        rename all ROMs in DIRECTORY to their internal names; --rom=DIR
+                  this is often used by people who lose control of their ROMs
+  --rr83        like --rrom but with 8.3 filenames; --rom=DIRECTORY
   --hex         show ROM as hexdump; use "ucon64 --hex --rom=ROM|less"
-  --find        find string in ROM; --file=STRING ('?'==wildcard for ONE char!)
+  --find        find string in ROM; --file=STRING (wildcard: '?')
    -c           compare ROMs for differencies; --file=OTHER_ROM
   --cs          compare ROMs for similarities; --file=OTHER_ROM
+  --stpn=N      strip N Bytes from ROM beginning
+  --stp         same as --stpn=512
+                  most backup units use a header with 512 Bytes size
+  --insn=N      insert N Bytes (0x00) before ROM
+  --ins         same as --insn=512
+                  most backup units use a header with 512 Bytes size
   --ispad       check if ROM is padded
-  --pad         pad ROM to full Mb
-   -b           apply Baseline/BSL patch (<=x.x); --file=PATCHFILE
-   -i           apply IPS patch (<=1.2); --file=PATCHFILE
+   -p, --pad    pad ROM to full Mb
+  --strip       strip Bytes from end of ROM; --file=VALUE
+   -b           apply Baseline/BSL patch (<=vx.x); --file=PATCHFILE
+   -i           apply IPS patch (<=v1.2); --file=PATCHFILE
   --mki         create IPS patch; --file=CHANGED_ROM
-   -a           apply APS patch (<=1.2); --file=PATCHFILE
+   -a           apply APS patch (<=v1.2); --file=PATCHFILE
   --mka         create APS patch; --file=CHANGED_ROM
   --na          change APS description; --rom=PATCHFILE --file=DESCRIPTION
-  --ppf         apply PPF patch (<=2.0); --rom=RAW_IMAGE --file=PATCHFILE
+  --ppf         apply PPF patch (<=v2.0); --rom=RAW_IMAGE --file=PATCHFILE
   --mkppf       create PPF patch; --rom=RAW_IMAGE --file=CHANGED_IMAGE
   --nppf        change PPF description; --rom=PATCHFILE --file=DESCRIPTION
-  --idppf       change PPF FILE_ID.DIZ (2.0); --rom=PATCHFILE
+  --idppf       change PPF FILE_ID.DIZ (v2.0); --rom=PATCHFILE
                   --file=FILE_ID.DIZ
+  --gge         encode GameGenie code; --rom=CODE
+                  example: --sms --rom=CODE or --gb --rom=CODE
+                    CODE='AAAA:VV' or CODE='AAAA:VV:CC'
+                  --gen --rom=CODE
+                    CODE='AAAAAA:VVVV'
+                  --nes --rom=CODE
+                    CODE='AAAA:VV' or CODE='AAAA:VV:CC'
+                  --snes --rom=CODE
+                    CODE='AAAAAA:VV'
+  --ggd         decode GameGenie code; --rom=GG_CODE
+                  example: --sms --rom=GG_CODE or --gb --rom=GG_CODE
+                    GG_CODE='XXX-XXX' or GG_CODE='XXX-XXX-XXX'
+                  --gen --rom=GG_CODE
+                    GG_CODE='XXXX-XXXX'
+                  --nes --rom=GG_CODE
+                    GG_CODE='XXXXXX' or GG_CODE='XXXXXXXX'
+                  --snes --rom=GG_CODE
+                    GG_CODE='XXXX-XXXX'
+  --gg          apply GameGenie code (permanent); --file=GG_CODE
+                  example: (like above but --file=GG_CODE instead of
+                  --rom=GG_CODE) --rom=ROM --file=GG_CODE
+                  supported are:
+                  GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance),
+                  Sega Master System(II/III)/GameGear (Handheld),
+                  Nintendo Entertainment System/NES/Famicon Game Axe (Redant),
+                  and Super Nintendo/SNES/Super Famicon
+  --cd          force recognition (of CD IMAGES)
+                  this is the support for the most CD-based consoles
   --xcdrw       read/write IMAGE from/to CD-Writer;
                   --rom=CD_IMAGE --file=TRACK_MODE
                   reads automatically when CD_IMAGE does not exist
                   we recommend http://cdrdao.sourceforge.net as burn engine
+                  TRACK_MODE='MODE2_RAW' (2352 Bytes; default)
+                  TRACK_MODE='MODE1'     (2048 Bytes; standard ISO9660)
+                  TRACK_MODE='MODE1_RAW' (2352 Bytes)
+                  TRACK_MODE='MODE2'     (2336 Bytes)
+                  --file=TRACK_MODE is optional, uCON64 will always try to
+                  detect the correct TRACK_MODE from the CD_IMAGE itself
   --mktoc       generate TOC file for Cdrdao; --rom=CD_IMAGE --file=TRACK_MODE
   --mkcue       generate CUE file; --rom=CD_IMAGE --file=TRACK_MODE
-                  TRACK_MODE='MODE2_RAW'      (2352 Bytes; default)
-                  TRACK_MODE='MODE1'          (2048 Bytes; standard ISO9660)
-                  TRACK_MODE='MODE1_RAW'      (2352 Bytes)
-                  TRACK_MODE='MODE2'          (2336 Bytes)
-  --tm          probe/show TRACK_MODE of CD_IMAGE; --rom=CD_IMAGE
-  --iso         convert MODE1_RAW/MODE2(_RAW) to MODE1/2048; --rom=CD_IMAGE
+                  TRACK_MODE='MODE2_RAW' (2352 Bytes; default)
+                  TRACK_MODE='MODE1'     (2048 Bytes; standard ISO9660)
+                  TRACK_MODE='MODE1_RAW' (2352 Bytes)
+                  TRACK_MODE='MODE2'     (2336 Bytes)
+                  --file=TRACK_MODE is optional, uCON64 will always try to
+                  detect the correct TRACK_MODE from the CD_IMAGE itself
+  --iso         convert BIN/RAW CD_IMAGE to MODE1 (2048 Bytes); --rom=CD_IMAGE
                   this might be useful if you made a MODE2_RAW image of a
-                  MODE1/2048 CD and want to mount or burn it as MODE1/2048
+                  MODE1 CD and want to mount or burn it as MODE1 (2048 Bytes)
+                  this does only work for MODE1_RAW and MODE2(_RAW) CD_IMAGEs
   --help        display this help and exit
   --version     output version information and exit
+  --test        run selftest (DEBUG)
+                  if you can read this uCON64 was compiled with active DEBUG
+                  this should only happen for development versions
 
 Dreamcast
-  1998 SEGA http://www.sega.com
   --dc          force recognition; NEEDED
-TODO: --iso    convert DiscJuggler3/CDI IMAGE to MODE1/2048; --rom=CDI_IMAGE
                   --xcdrw works currently only for MODE1/2048 backups which
                   need the Utopia BootCD
 
 GameBoy Advance
-  2001 Nintendo http://www.nintendo.com
   --gba         force recognition
    -n           change ROM name; --file=NEWNAME
   --logo        restore ROM logo character data; Offset: 0x04-0x9F
@@ -90,8 +131,8 @@ GameBoy Advance
                   create last
   --multi1      same as --multi, but truncate multirom size to 64Mb
   --multi2      same as --multi, but truncate multirom size to 128Mb
+  --multi3      same as --multi, but truncate multirom size to 256Mb
 Flash Advance Linker
-  2001 Visoly http://www.visoly.com
   --xfal        send/receive ROM to/from Flash Advance Linker; --file=PORT
                   receives automatically when ROM does not exist
   --xfalc=SIZE  specify chip SIZE in mbits of ROM in Flash Advance Linker when
@@ -106,7 +147,6 @@ Flash Advance Linker
                   address: ucon64 --xfal "rom.gba" 0x378
 
 Nintendo 64
-  1996 Nintendo http://www.nintendo.com
   --n64         force recognition
    -n           change ROM name; --file=NEWNAME
   --v64         convert to Doctor V64 (and compatibles/interleaved)
@@ -120,25 +160,23 @@ Nintendo 64
                   works only for ROMs which are <= 4 Mb in size
   --chk         fix ROM checksum
                   supports only 6101 and 6102 boot codes
-   -p           pad ROM to full Mb
 Doctor V64
-  19XX Bung Enterprises Ltd http://www.bung.com.hk
   --xv64        send/receive ROM to/from Doctor V64; --file=PORT
                   receives automatically when ROM does not exist
 Doctor64 Jr
-  19XX Bung Enterprises Ltd http://www.bung.com.hk
   --xdjr        send/receive ROM to/from Doctor64 Jr; --file=PORT
                   currently only sending is supported
 
 Super Nintendo/SNES/Super Famicon
-  1990 Nintendo http://www.nintendo.com
   --snes        force recognition
   --hi          force ROM is HiROM
   --nhi         force ROM is not HiROM
   --int         force ROM is in interleaved format
   --int2        force ROM is in interleaved format 2
   --nint        force ROM is not in interleaved format
-   -n           change ROM name; --file=NEWNAME
+  --bs          force ROM is a Broadcast Satellaview dump
+  --nbs         force ROM is a regular cartridge dump
+   -n           change internal ROM name; --file=NEWNAME
   --smc         convert to Super Magicom/SMC
   --fig         convert to *Pro Fighter*/(all)FIG
   --figs        convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG;
@@ -155,18 +193,13 @@ Super Nintendo/SNES/Super Famicon
   --col         convert 0xRRGGBB (html) <-> 0xXXXX (snes); --rom=0xCOLOR
                   this routine was used to find green colors in games and
                   to replace them with red colors (blood mode)
-   -j           join splitted ROM
+   -j           join split ROM
    -s           split ROM into 4Mb parts (for backup unit(s) with fdd)
-   -p           pad ROM to full Mb
    -k           remove protection (crack)
    -f           remove NTSC/PAL protection
    -l           convert to SlowROM
   --chk         fix ROM checksum
-  --gge         encode GameGenie code; --rom=AAAAAA:VV
-  --ggd         decode GameGenie code; --rom=XXXX-XXXX
-  --gg          apply GameGenie code (permanent); --file=XXXX-XXXX
 Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC
-  1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw
   --xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; --file=PORT
                   receives automatically when ROM does not exist
                   Press q to abort ^C will cause invalid state of backup unit
@@ -182,14 +215,12 @@ Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC
                   for the most backup units
 
 Neo Geo/Neo Geo CD(Z)/MVS
-  1990/1994 SNK http://www.neogeo.co.jp
   --ng          force recognition
   --bios        convert NeoCd Bios to work with NeoCD emulator; --rom=BIOS
                   http://www.illusion-city.com/neo/
   --sam         convert SAM/M.A.M.E. sound to WAV; --rom=SAMFILE
 
 Genesis/Sega Mega Drive/Sega CD/32X/Nomad
-  1989/19XX/19XX SEGA http://www.sega.com
   --gen         force recognition
   --smd         convert to Super Magic Drive/SMD
   --smds        convert Emulator (*.srm) SRAM to Super Magic Drive/SMD
@@ -197,25 +228,20 @@ Genesis/Sega Mega Drive/Sega CD/32X/Nomad
   --stp         convert SRAM from backup unit for use with an Emulator
                   --stp just strips the first 512 bytes
   --mgd         convert to Multi Game*/MGD2/MGH/RAW
-   -j           join splitted ROM
    -n           change foreign ROM name; --file=NEWNAME
   --n2          change japanese ROM name; --file=NEWNAME
+   -j           join split ROM
    -s           split ROM into 4Mb parts (for backup unit(s) with fdd)
-   -p           pad ROM to full Mb
   --chk         fix ROM checksum
   --1991        fix old third party ROMs to work with consoles build after
                   October 1991 by inserting "(C) SEGA" and "(C)SEGA"
-  --gge         encode GameGenie code; --rom=AAAAAA:VVVV
-  --ggd         decode GameGenie code; --rom=XXXX-XXXX
 Super Com Pro (HK)/Super Magic Drive/SMD
-  19XX Front Far East/FFE http://www.front.com.tw
   --xsmd        send/receive ROM to/from Super Magic Drive/SMD; --file=PORT
                   receives automatically when ROM does not exist
   --xsmds       send/receive SRAM to/from Super Magic Drive/SMD; --file=PORT
                   receives automatically when SRAM does not exist
 
 GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance)
-  1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com
   --gb          force recognition
    -n           change ROM name; --file=NEWNAME
   --mgd         convert to Multi Game*/MGD2/RAW
@@ -226,12 +252,7 @@ GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance)
                   --rom=NES_ROM --file=FC.GB (the Emulator)
                   m-kami@da2.so-net.ne.jp www.playoffline.com
   --chk         fix ROM checksum
-  --gge         encode GameGenie code; --rom=AAAA:VV or --rom=AAAA:VV:CC
-  --ggd         decode GameGenie code; --rom=XXX-XXX or --rom=XXX-XXX-XXX
-  --gg          apply GameGenie code (permanent);
-                  --file=XXX-XXX or --file=XXX-XXX-XXX
 GameBoy Xchanger/GBDoctor
-  19XX Bung Enterprises Ltd http://www.bung.com.hk
   --xgbx        send/receive ROM to/from GB Xchanger; --file=PORT
                   receives automatically when ROM does not exist
   --xgbxs       send/receive SRAM to/from GB Xchanger; --file=PORT
@@ -242,9 +263,11 @@ GameBoy Xchanger/GBDoctor
                   You only need to specify PORT if uCON64 doesn't detect the
                   (right) parallel port. If that is the case give a hardware
                   address: ucon64 --xgbx "rom.gb" 0x378
+Mad Catz Camera Link (GameBoy Camera)
+TEST: --xmccl   send/receive BYTES to/from Mad Catz Camera Link; --file=PORT
+                  currently only receiving is supported
 
 Handy(prototype)/Lynx/Lynx II
-  1987 Epyx/1989 Atari/1991 Atari
   --lynx        force recognition
   --lyx         convert to LYX/RAW (strip 64 Bytes LNX header)
   --lnx         convert to LNX (uses default values for the header);
@@ -258,123 +281,74 @@ Handy(prototype)/Lynx/Lynx II
 
 PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))
 Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)
-  1987/19XX/19XX NEC
   --pce         force recognition
   --smg         convert to Super Magic Griffin/SMG
   --mgd         convert to Multi Game Doctor*/MGD2/RAW
 
 Sega Master System(II/III)/GameGear (Handheld)
-  1986/19XX SEGA http://www.sega.com
   --sms         force recognition
   --mgd         convert to Multi Game*/MGD2/MGH/RAW
   --smd         convert to Super Magic Drive/SMD (+512 Bytes)
   --smds        convert Emulator (*.srm) SRAM to Super Magic Drive/SMD
-  --gge         encode GameGenie code; --rom=AAAA:VV or --rom=AAAA:VV:CC
-  --ggd         decode GameGenie code; --rom=XXX-XXX or --rom=XXX-XXX-XXX
-  --gg          apply GameGenie code (permanent); --file=CODE-CODE
+Super Com Pro (HK)/Super Magic Drive/SMD
+  --xsmd        send/receive ROM to/from Super Magic Drive/SMD; --file=PORT
+                  receives automatically when ROM does not exist
+  --xsmds       send/receive SRAM to/from Super Magic Drive/SMD; --file=PORT
+                  receives automatically when SRAM does not exist
 
 Nintendo Entertainment System/NES/Famicon Game Axe (Redant)
-  1983 Nintendo http://www.nintendo.com
   --nes         force recognition
-  --ffe         convert to FFE (+512 Bytes)
-  --ines        convert to iNES format/NES
-  --ineshd      extract iNES header from ROM (16 Bytes)
   --unif        convert to UNIF format/UNF (uses default values)
-TODO:  --bn     change board type/name (UNIF only); --file=NEWNAME
-TODO:  --ctrl   set controller type for ROM (UNIF only); --file=TYPE
-                  TYPE='0' standard joypad (default)
+  --ines        convert to iNES format/NES (uses default values)
+  --ineshd      extract iNES header from ROM (16 Bytes)
+   -j           join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)
+  --pasofami    convert to Pasofami/PRM/700/PRG/CHR
+   -s           convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)
+  --ffe         convert to FFE (+512 Bytes)
+  --mapr=NAME   specify board name or mapper number for conversion options
+                  NAME must be a string for UNIF and a number for Pasofami
+                  and iNES
+  --dint        convert ROM to non-interleaved format
+  --ctrl=TYPE   specify controller type for ROM (UNIF only)
+                  TYPE='0' regular joypad
                   TYPE='1' zapper
                   TYPE='2' R.O.B.
-                  TYPE='3' arkanoid controller
+                  TYPE='3' Arkanoid controller
                   TYPE='4' powerpad
-                  TYPE='5' Four-Score adapter
-TODO:  --ntsc   set TV compatibility to NTSC (UNIF only)
-TODO:  --pal    set TV compatibility to PAL (UNIF only)
-TODO:  --bat    set battery backup (UNIF only; default)
-TODO:  --nbat   set no battery backup (UNIF only)
-TODO:  --vram   set VRAM override (UNIF only; default)
-TODO:  --nvram  set no VRAM override (UNIF only)
-TODO:  --mirr   set mirroring type (UNIF only); --file=MTYPE
-                  MTYPE='0' Horizontal Mirroring
-                  MTYPE='1' Vertical Mirroring
-                  MTYPE='2' Mirror All Pages From $2000
-                  MTYPE='3' Mirror All Pages From $2400
-                  MTYPE='4' Four Screens of VRAM
-                  MTYPE='5' Mirroring Controlled By Mapper Hardware (default)
-  --gge         encode GameGenie code; --rom=AAAA:VV or --rom=AAAA:VV:CC
-  --ggd         decode GameGenie code; --rom=XXXXXX or --rom=XXXXXXXX
-  --gg          apply GameGenie code (permanent);
-                  --file=XXXXXX or --file=XXXXXXXX
+                  TYPE='5' four-score adapter
+  --ntsc        specify TV compatibility to NTSC (UNIF only)
+  --pal         specify TV compatibility to PAL (UNIF only)
+  --bat         specify battery backup
+  --nbat        specify no battery backup
+  --vram        specify VRAM override (UNIF only)
+  --nvram       specify no VRAM override (UNIF only)
+  --mirr=MTYPE  specify mirroring type
+                  MTYPE='0' horizontal mirroring
+                  MTYPE='1' vertical mirroring
+                  MTYPE='2' mirror all pages from $2000 (UNIF only)
+                  MTYPE='3' mirror all pages from $2400 (UNIF only)
+                  MTYPE='4' four screens of VRAM
+                  MTYPE='5' mirroring controlled by mapper hardware (UNIF only)
+  --dumpinfo    use dumper info when converting to UNIF; --file=INFOFILE
+   -n           change internal ROM name (UNIF only); --file=NEWNAME
 
-WonderSwan/WonderSwan Color
-  19XX/19XX Bandai
+WonderSwan/WonderSwan Color/SwanCrystal
   --swan        force recognition
   --chk         fix ROM checksum
 
-Nintendo Game Cube/Panasonic Gamecube Q
-  2001/2002 Nintendo http://www.nintendo.com
 Panther(32bit prototype)/Jaguar64/Jaguar64 CD
-  1989 Flare2/1993 Atari/1995 Atari
+  --jag         force recognition
+
 Neo Geo Pocket/Neo Geo Pocket Color
-  1998/1999 SNK http://www.neogeo.co.jp
-Sega System 16(A/B)/Sega System 18/dual 68000
-  1987/19XX/19XX SEGA http://www.sega.com
-Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr
-  1977/1982/1984/1986 Atari
-ColecoVision
-  1982
-Nintendo Virtual Boy
-  19XX Nintendo http://www.nintendo.com
-Vectrex
-  1982
-Intellivision
-  1979 Mattel
-GP32 Game System
-  2002 Gamepark http://www.gamepark.co.kr
-Playstation (One)/Playstation 2 (CD only)
-  1994/(2000) Sony http://www.playstation.com
-Playstation 2
-  2000 Sony http://www.playstation.com
-XBox
-  2001 Microsoft http://www.xbox.com
-Saturn
-  1994 SEGA http://www.sega.com
-Real3DO
-  1993
-CD32
-  1993 Commodore
-CD-i
-  1991
-  --gc, --jag, --ngp, --s16, --ata, --coleco, --vboy, --vec, --intelli, --gp32
-                force recognition
-                  these consoles have no specific options
-                  see the miscellaneous options at the top for more
-  --psx, --ps2, --xbox, --sat, --3do, --cd32, --cdi
-                force recognition; NEEDED
-                  these consoles have no specific options
-                  see the miscellaneous options at the top for more
-                  uCON64 can make backups for most CD-based consoles
-  --xcdrw       read/write IMAGE from/to CD-Writer;
-                  --rom=CD_IMAGE --file=TRACK_MODE
-                  reads automatically when CD_IMAGE does not exist
-                  we recommend http://cdrdao.sourceforge.net as burn engine
-  --mktoc       generate TOC file for Cdrdao; --rom=CD_IMAGE --file=TRACK_MODE
-  --mkcue       generate CUE file; --rom=CD_IMAGE --file=TRACK_MODE
-                  TRACK_MODE='MODE2_RAW'      (2352 Bytes; default)
-                  TRACK_MODE='MODE1'          (2048 Bytes; standard ISO9660)
-                  TRACK_MODE='MODE1_RAW'      (2352 Bytes)
-                  TRACK_MODE='MODE2'          (2336 Bytes)
-  --tm          probe/show TRACK_MODE of CD_IMAGE; --rom=CD_IMAGE
-  --iso         convert MODE1_RAW/MODE2(_RAW) to MODE1/2048; --rom=CD_IMAGE
-                  this might be useful if you made a MODE2_RAW image of a
-                  MODE1/2048 CD and want to mount or burn it as MODE1/2048
+  --ngp         force recognition
 
-Database: 15217 known ROMs in db.h (+0)
+Database: 15216 known ROMs in db.h (+0)
 
-TIP: ucon64 --help --snes (would show only Super Nintendo related help)
-     ucon64 --help|less (to see everything in less)
+TIP: ./ucon64 --help --snes (would show only Super Nintendo related help)
+     ./ucon64 --help|less (to see everything in less)
      give the force recognition option a try if something went wrong
 
 Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net
+
 
 </pre></tt></body></html>

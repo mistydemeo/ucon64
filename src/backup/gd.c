@@ -71,7 +71,7 @@ static int gd3_send_unit_prolog (int header, unsigned size);
 typedef struct st_gd3_memory_unit
 {
   char name[12];                                // Exact size is 11 chars but I'll
-  unsigned char *data;                          //  add one extra for string terminator
+//  unsigned char *data;                        //  add one extra for string terminator
   unsigned int size;                            // Usually either 0x100000 or 0x80000
 } st_gd3_memory_unit_t;
 
@@ -289,7 +289,7 @@ Note: On most Game Doctor's the way you enter link mode to be able to upload
 int
 gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
 {
-  FILE *file;
+  FILE *file = NULL;
   unsigned char *buffer, *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12],
                 filenames[GD3_MAX_UNITS][8 + 1 + 3 + 1]; // +1 for period, +1 for ASCII-z;
   int num_units, i, send_header, x, split = 1, hirom = snes_get_snes_hirom();
@@ -384,10 +384,13 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
         }
       else
         {
-          if ((file = fopen (filename, "rb")) == NULL)
+          if (file == NULL)                     // don't open the file more than once
             {
-              fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
-              exit (1);
+              if ((file = fopen (filename, "rb")) == NULL)
+                {
+                  fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
+                  exit (1);
+                }
             }
         }
 
@@ -409,7 +412,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
           if (hirom)
             fseek (file, i * gd3_dram_unit[0].size + GD_HEADER_LEN, SEEK_SET);
           else
-            fseek (file, i * 0x100000 + GD_HEADER_LEN, SEEK_SET);
+            fseek (file, i * 8 * MBIT + GD_HEADER_LEN, SEEK_SET);
         }
       fread (buffer, 1, gd3_dram_unit[i].size, file);
       gd3_send_bytes (gd3_dram_unit[i].size, buffer);

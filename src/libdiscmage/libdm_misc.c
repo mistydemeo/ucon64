@@ -36,12 +36,40 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "cdi.h"
 #include "nero.h"
-#include "toc.h"
-#include "cue.h"
+#include "sheets.h"
 
 static const char pvd_magic[] = {0x01, 'C', 'D', '0', '0', '1', 0x01, 0};
 static const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
 static const char vdt_magic[] = {0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
+
+typedef struct
+{
+  int mode;
+  int sector_size;
+  int seek_header;
+  int seek_ecc;
+  char *desc;
+  char *cdrdao_desc;
+} st_track_probe_t;
+
+const st_track_probe_t track_probe[] = 
+  {
+    {1, 2048, 0, 0, "MODE1/2048", "MODE1"},
+    {1, 2352, 16, 288, "MODE1/2352", "MODE1_RAW"},
+    {2, 2336, 8, 280, "MODE2/2336", "MODE2"},
+    {2, 2352, 24, 280, "MODE2/2352", "MODE2_RAW"},
+#if 0
+    {2, 2340, , },
+    {2, 2368, , },
+    {2, 2448, , },
+    {2, 2646, , },
+    {2, 2647, , },
+    {2, 2336, 0, 280},  // MODE2/2336, Macintosh
+    {2, 2352, 16, 280}, // MODE2/2352, Macintosh
+    {2, 2056, 0, 0},  // MODE2/2056, Macintosh
+#endif
+    {0, 0, 0, 0, NULL, NULL}
+  };
 
 static void (* dm_ext_gauge) (int, int);
 
@@ -241,50 +269,25 @@ read_raw_frame (int32_t fd, int32_t lba, unsigned char *buf)
 #endif
 
 
-static dm_track_t *
+const dm_track_t *
 dm_track_init (dm_track_t *track, FILE *fh)
 {
-  typedef struct
-  {
-    int mode;
-    int sector_size;
-    int seek_header;
-    int seek_ecc;
-  } st_probe_t;
-
-  const st_probe_t probe[] = 
-    {
-      {1, 2048, 0, 0},    // MODE1_2048, MODE1
-      {1, 2352, 16, 288}, // MODE1_2352, MODE1_RAW
-      {2, 2336, 8, 280},  // MODE2_2336, MODE2
-      {2, 2352, 24, 280}, // MODE2_2352, MODE2_RAW
-#if 0
-      {2, 2340, , },
-      {2, 2368, , },
-      {2, 2448, , },
-      {2, 2646, , },
-      {2, 2647, , },
-      {2, 2336, 0, 280},  // MODE2/2336, Macintosh
-      {2, 2352, 16, 280}, // MODE2/2352, Macintosh
-      {2, 2056, 0, 0},  // MODE2/2056, Macintosh
-#endif
-      {0, 0, 0, 0}
-    };
   const char sync_data[] = {0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0};
   char buf[32];
+  st_iso_header_t iso_header;
   int x = 0, identified = 0;
 
 //TODO?: callibration?
   fread (buf, 1, 16, fh);
   if (!memcmp (sync_data, buf, 12))
-    for (x = 0; probe[x].mode; x++)
-      if (probe[x].mode == buf[15])
+    for (x = 0; track_probe[x].mode; x++)
+      if (track_probe[x].mode == buf[15])
         {
             // search for valid PVD in sector 16 of source image
-            fseek (fh, (probe[x].sector_size * 16) + probe[x].seek_header, SEEK_SET);
-            fread (buf, 1, 8, fh);
+            fseek (fh, (track_probe[x].sector_size * 16) + track_probe[x].seek_header, SEEK_SET);
+            fread (&iso_header, 1, sizeof (st_iso_header_t), fh);
 
-            if (!memcmp (pvd_magic, buf, 8))
+            if (!memcmp (pvd_magic, &iso_header, 8))
               {
                 identified = 1;
                 break;
@@ -294,10 +297,13 @@ dm_track_init (dm_track_t *track, FILE *fh)
   if (!identified)
     return NULL;
 
-  track->sector_size = probe[x].sector_size;
-  track->mode = probe[x].mode;
-  track->seek_header = probe[x].seek_header;
-  track->seek_ecc = probe[x].seek_ecc;
+  memcpy (&track->iso_header, &iso_header, sizeof (st_iso_header_t));
+  track->sector_size = track_probe[x].sector_size;
+  track->mode = track_probe[x].mode;
+  track->seek_header = track_probe[x].seek_header;
+  track->seek_ecc = track_probe[x].seek_ecc;
+  track->desc = track_probe[x].desc;
+  track->cdrdao_desc = track_probe[x].cdrdao_desc;
 
   return track;
 }
@@ -317,8 +323,7 @@ dm_reopen (const char *fname, dm_image_t *image_p)
   static st_probe_t probe[] = 
     {
       {DM_CDI, cdi_init, "CDI (DiscJuggler) Image"},
-      {DM_CUE, cue_init, "Image with CUE file"},
-      {DM_TOC, toc_init, "Image with TOC file"},
+      {DM_SHEET, sheet_init, "Image with external sheet file (like: CUE, TOC, ...)"},
 #if 0
       {DM_NRG, nrg_init, "NRG (Nero) Image"}, // nero
       {DM_CCD, ccd_init, "CCD (CloneCD) Image"},
@@ -336,7 +341,7 @@ dm_reopen (const char *fname, dm_image_t *image_p)
 
   for (x = 0; probe[x].type; x++)
     if (probe[x].func)
-      if (probe[x].func (&image))
+      if (probe[x].func (&image) != -1)
         {
           identified = 1;
           break;
@@ -387,15 +392,15 @@ dm_close (dm_image_t *image)
 }
 
 
-int32_t
-dm_rip (dm_image_t *image)
+int
+dm_rip (const dm_image_t *image)
 {
   return 0;
 }
 
 
 int
-dm_bin2iso (dm_image_t *image)
+dm_bin2iso (const dm_image_t *image)
 {
   dm_track_t *track = NULL;
   uint32_t i, size, netto_size = 0;
@@ -454,8 +459,8 @@ dm_bin2iso (dm_image_t *image)
 }
 
 
-int32_t
-dm_isofix (dm_image_t * image, int start_lba)
+int
+dm_isofix (const dm_image_t * image, int start_lba)
 {
 #define BOOTFILE_S "bootfile.bin"
 #define HEADERFILE_S "header.iso"
@@ -629,7 +634,7 @@ dm_isofix (dm_image_t * image, int start_lba)
 
 
 int
-dm_disc_read (dm_image_t *image)
+dm_disc_read (const dm_image_t *image)
 {
 #if 1
   fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_read()");
@@ -658,7 +663,7 @@ dm_disc_read (dm_image_t *image)
 
 
 int
-dm_disc_write (dm_image_t *image)
+dm_disc_write (const dm_image_t *image)
 {
 #if 1
   fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_write()");

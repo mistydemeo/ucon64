@@ -61,46 +61,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 /* The leadout track is always 0xAA, regardless of # of tracks on disc */
 #define	CDROM_LEADOUT		0xAA
-
-#if 0
-#define ISODCL(from, to) (to - from + 1)
-typedef struct st_iso_header
-{
-  char type[ISODCL (1, 1)];   /* 711 */
-  char id[ISODCL (2, 6)];
-  char version[ISODCL (7, 7)];        /* 711 */
-  char unused1[ISODCL (8, 8)];
-  char system_id[ISODCL (9, 40)];     /* achars */
-  char volume_id[ISODCL (41, 72)];    /* dchars */
-  char unused2[ISODCL (73, 80)];
-  char volume_space_size[ISODCL (81, 88)];    /* 733 */
-  char unused3[ISODCL (89, 120)];
-  char volume_set_size[ISODCL (121, 124)];    /* 723 */
-  char volume_sequence_number[ISODCL (125, 128)];     /* 723 */
-  char logical_block_size[ISODCL (129, 132)]; /* 723 */
-  char path_table_size[ISODCL (133, 140)];    /* 733 */
-  char type_l_path_table[ISODCL (141, 144)];  /* 731 */
-  char opt_type_l_path_table[ISODCL (145, 148)];      /* 731 */
-  char type_m_path_table[ISODCL (149, 152)];  /* 732 */
-  char opt_type_m_path_table[ISODCL (153, 156)];      /* 732 */
-  char root_directory_record[ISODCL (157, 190)];      /* 9.1 */
-  char volume_set_id[ISODCL (191, 318)];      /* dchars */
-  char publisher_id[ISODCL (319, 446)];       /* achars */
-  char preparer_id[ISODCL (447, 574)];        /* achars */
-  char application_id[ISODCL (575, 702)];     /* achars */
-  char copyright_file_id[ISODCL (703, 739)];  /* 7.5 dchars */
-  char abstract_file_id[ISODCL (740, 776)];   /* 7.5 dchars */
-  char bibliographic_file_id[ISODCL (777, 813)];      /* 7.5 dchars */
-  char creation_date[ISODCL (814, 830)];      /* 8.4.26.1 */
-  char modification_date[ISODCL (831, 847)];  /* 8.4.26.1 */
-  char expiration_date[ISODCL (848, 864)];    /* 8.4.26.1 */
-  char effective_date[ISODCL (865, 881)];     /* 8.4.26.1 */
-  char file_structure_version[ISODCL (882, 882)];     /* 711 */
-  char unused4[ISODCL (883, 883)];
-  char application_data[ISODCL (884, 1395)];
-  char unused5[ISODCL (1396, 2048)];
-} st_iso_header_t;
-#endif
 #endif  // HAVE_CDROM_H
 
 
@@ -142,6 +102,7 @@ extern const char *dm_msg[];
 
 // get file size of fname
 extern int fsize (const char *fname);
+extern const dm_track_t *dm_track_init (dm_track_t *track, FILE *fh);
 
 
 // wav header
@@ -168,8 +129,7 @@ typedef struct
 
 #define DM_UNKNOWN (-1)
 
-#define DM_TOC 1
-#define DM_CUE 2
+#define DM_SHEET 1
 #define DM_CDI 3
 #define DM_NRG 4
 #define DM_CCD 5

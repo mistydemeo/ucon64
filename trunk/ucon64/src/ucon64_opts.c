@@ -99,7 +99,11 @@ ucon64_switches (int c, const char *optarg)
 #endif
 
 #ifdef  PARALLEL
+#ifdef  PPDEV
+#define PARALLEL_STATUS "yes (ppdev)"
+#else
 #define PARALLEL_STATUS "yes"
+#endif // PPDEV
 #else
 #define PARALLEL_STATUS "no"
 #endif
@@ -1136,6 +1140,10 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_DMIRR:
       snes_demirror (ucon64.rominfo);
+      break;
+
+    case UCON64_DNSRT:
+      snes_densrt (ucon64.rominfo);
       break;
 
     case UCON64_F:

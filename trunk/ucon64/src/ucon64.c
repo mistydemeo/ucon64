@@ -148,6 +148,7 @@ const struct option options[] = {
     {"disc", 0, 0, UCON64_DISC},
 #endif
     {"dmirr", 0, 0, UCON64_DMIRR},
+    {"dnsrt", 0, 0, UCON64_DNSRT},
     {"dumpinfo", 1, 0, UCON64_DUMPINFO},
     {"e", 0, 0, UCON64_E},
     {"erom", 0, 0, UCON64_EROM},

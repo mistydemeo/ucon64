@@ -88,7 +88,7 @@ typedef struct
 
 static st_args_t arg[UCON64_MAX_ARGS];
 
-const struct option options[] =   {
+const struct option options[] = {
     {"83", 0, 0, UCON64_83},
     {"1991", 0, 0, UCON64_1991},
     {"3do", 0, 0, UCON64_3DO},
@@ -298,6 +298,7 @@ ucon64_rom_flush (st_rominfo_t * rominfo)
     memset (rominfo, 0L, sizeof (st_rominfo_t));
 
   ucon64.rominfo = NULL;
+  ucon64.crc32 = ucon64.fcrc32 = 0;             // yes, this belongs here
   rominfo->data_size = UCON64_UNKNOWN;
 
   return rominfo;
@@ -420,7 +421,7 @@ main (int argc, char **argv)
 
 #ifdef  DEBUG
   ucon64_runtime_debug ();
-#endif  
+#endif
 
   if (atexit (ucon64_exit) == -1)
     {
@@ -487,7 +488,7 @@ main (int argc, char **argv)
     if (!stat (ucon64.datdir, &fstate))
       if (S_ISDIR (fstate.st_mode))
         ucon64.dat_enabled = 1;
-        
+
   if (!ucon64.dat_enabled)
     if (!access (ucon64.configdir, R_OK | W_OK | X_OK))
       if (!stat (ucon64.configdir, &fstate))
@@ -555,7 +556,7 @@ main (int argc, char **argv)
           {
             if (S_ISREG (fstate.st_mode))
               result = ucon64_process_rom (argv[rom_index]);
-            else if (S_ISDIR (fstate.st_mode))  // a dir!?
+            else if (S_ISDIR (fstate.st_mode))  // a dir?
               {
                 if ((dp = opendir (path)))
                   while ((ep = readdir (dp)))
@@ -678,6 +679,8 @@ ucon64_execute_options (void)
         ucon64_switches (arg[x].val, arg[x].optarg);
     }
 
+
+#ifdef  PARALLEL
     /*
       The copier options need root privileges for ucon64_parport_init()
       We can't use ucon64.flags & WF_PAR to detect whether a (parallel port)
@@ -686,6 +689,7 @@ ucon64_execute_options (void)
     */
     if (ucon64_parport_needed)
       ucon64.parport = ucon64_parport_init (ucon64.parport);
+#endif
 #if     defined __unix__ && !defined __MSDOS__
     if (!privileges_droppped)
       {
@@ -714,7 +718,7 @@ ucon64_execute_options (void)
       // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
       result = ucon64_rom_handling ();
 
-      if (result == -1) // no_rom but WF_NO_ROM
+      if (result == -1) // no rom, but WF_NO_ROM
         return -1;
 
       if (ucon64_options (arg[x].val, arg[x].optarg) == -1)
@@ -723,7 +727,7 @@ ucon64_execute_options (void)
 //          const st_usage_t *p = (ucon64_get_wf (c))->usage;
           const char *opt = option ? option->name : NULL;
 
-          fprintf (stderr, "ERROR: %s%s returned a problem\n",
+          fprintf (stderr, "ERROR: %s%s encountered a problem\n",
                            opt ? (!opt[1] ? OPTION_S : OPTION_LONG_S) : "",
                            opt ? opt : "uCON64");
 
@@ -754,12 +758,12 @@ ucon64_execute_options (void)
         break;
     }
 
-  if (!opts) // no options == just view the roms
+  if (!opts) // no options == just display ROM info
     {
       ucon64.flags = WF_DEFAULT;
       // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
       if (ucon64_rom_handling () == -1)
-        return -1; // no_rom but WF_NO_ROM
+        return -1; // no rom, but WF_NO_ROM
     }
 
   fflush (stdout);
@@ -798,16 +802,15 @@ ucon64_rom_handling (void)
     {
       if (!(ucon64.flags & WF_NO_ROM))
         {
-          fprintf (stderr, "ERROR: A ROM is required for this option\n");
+          fprintf (stderr, "ERROR: This option requires a file argument\n");
           return -1;
         }
       return 0;
     }
 
-  // the next two statements are important and should be executed as soon as
-  //  possible in this function
+  // the next statement is important and should be executed as soon as
+  //  possible (and sensible) in this function
   ucon64.file_size = q_fsize (ucon64.rom);
-  ucon64.crc32 = ucon64.fcrc32 = 0;
 
   // Does the option allow split ROMs?
   if (ucon64.flags & WF_NO_SPLIT)
@@ -870,7 +873,7 @@ ucon64_rom_handling (void)
     }
 
 
-  // DAtabase
+  // DATabase
   ucon64.dat = NULL;
   if (ucon64.crc32 != 0 && ucon64.dat_enabled)
     {
@@ -886,7 +889,7 @@ ucon64_rom_handling (void)
             case UCON64_N64:
               // These ROMs have internal headers with name, country, maker, etc.
               break;
-    
+
             default:
               // Use dat instead of ucon64.dat_enabled in case the index
               //  file could not be created/opened -> no segmentation fault
@@ -899,7 +902,7 @@ ucon64_rom_handling (void)
               break;
           }
     }
-      
+
   // display info
   if ((ucon64.flags & WF_NFO || ucon64.flags & WF_NFO_AFTER) && ucon64.quiet < 1)
     ucon64_nfo ();
@@ -965,7 +968,7 @@ ucon64_probe (st_rominfo_t * rominfo)
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].console == ucon64.console)
           {
-            ucon64_rom_flush (rominfo); 
+            ucon64_rom_flush (rominfo);
 
             probe[x].init (rominfo);
 
@@ -977,8 +980,8 @@ ucon64_probe (st_rominfo_t * rominfo)
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].flags & AUTO)
           {
-            ucon64_rom_flush (rominfo); 
-            
+            ucon64_rom_flush (rominfo);
+
             if (!probe[x].init (rominfo))
               {
                 ucon64.console = probe[x].console;
@@ -1041,13 +1044,13 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   char buf[MAXBUFSIZE];
 
   // backup unit header
-  
-  if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != SWC_HEADER_LEN)
+
+  if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != UNKNOWN_HEADER_LEN)
     {
       mem_hexdump (rominfo->buheader, rominfo->buheader_len, rominfo->buheader_start);
       printf ("\n");
     }
-  else 
+  else
     if (rominfo->buheader_len && ucon64.quiet < 0)
       {
         ucon64_fhexdump (ucon64.rom, rominfo->buheader_start, rominfo->buheader_len);
@@ -1225,7 +1228,7 @@ ucon64_render_usage (const st_usage_t *usage)
       usage[x].option_s,
       usage[x].optarg,
       usage[x].desc);
-#endif            
+#endif
 
   for (x = 0; usage[x].option_s || usage[x].desc; x++)
     {

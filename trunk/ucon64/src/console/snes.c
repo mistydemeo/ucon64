@@ -425,7 +425,7 @@ snes_convert_sramfile (const void *header)
 
 
 int
-snes_swcs (st_rominfo_t *rominfo)
+snes_swcs (void)
 {
   st_swc_header_t header;
 
@@ -439,7 +439,7 @@ snes_swcs (st_rominfo_t *rominfo)
 
 
 int
-snes_figs (st_rominfo_t *rominfo)
+snes_figs (void)
 {
   st_fig_header_t header;
 
@@ -451,7 +451,7 @@ snes_figs (st_rominfo_t *rominfo)
 
 
 int
-snes_ufos (st_rominfo_t *rominfo)
+snes_ufos (void)
 {
   unsigned char header[SWC_HEADER_LEN];
 

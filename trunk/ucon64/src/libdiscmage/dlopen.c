@@ -105,13 +105,14 @@ open_module (char *module_name)
   sym->fdopen = fdopen;
   sym->fclose = fclose;
   sym->fseek = fseek;
+  sym->ftell = ftell;
+  sym->rewind = rewind;
   sym->fread = fread;
+  sym->fwrite = fwrite;
   sym->fgetc = fgetc;
   sym->fgets = fgets;
   sym->feof = feof;
-  sym->fwrite = fwrite;
   sym->fputc = fputc;
-  sym->ftell = ftell;
   sym->fflush = fflush;
   sym->ferror = ferror;
   sym->rename = rename;

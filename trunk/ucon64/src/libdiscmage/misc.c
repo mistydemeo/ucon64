@@ -402,6 +402,7 @@ set_suffix (char *filename, const char *suffix)
 
 const char *
 get_suffix (const char *filename)
+// Note that get_suffix() never returns NULL. Other code relies on that!
 {
   const char *p = NULL;
 
@@ -930,8 +931,7 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 }
 
 
-// currently there is no uCON64-specific defined constant
-#if     defined PARALLEL && !defined DLL
+#if     defined UCON64 && !defined DLL
 // I think this function belongs here, because it is related to change_mem()
 // Be a man and accept that the world is not perfect.
 #include "ucon64_misc.h"

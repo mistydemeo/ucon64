@@ -430,7 +430,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_L, UCON64_SNES, snes_usage,          WF_DEFAULT},
   {UCON64_LNX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
   {UCON64_LOGO, UCON64_GBA, gba_usage,         WF_DEFAULT},
-  {UCON64_LSRAM, UCON64_N64, n64_usage,        0},
+  {UCON64_LSRAM, UCON64_N64, n64_usage,        WF_PROBE},
   {UCON64_LYX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
   {UCON64_MULTI, UCON64_GBA, gba_usage,        WF_STOP},
 //  {UCON64_MVS, UCON64_NEOGEO, neogeo_usage,    WF_DEFAULT},
@@ -452,6 +452,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_UNIF, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_USMS, UCON64_N64, n64_usage,         WF_DEFAULT},
   {UCON64_V64, UCON64_N64, n64_usage,          WF_DEFAULT},
+#ifdef  PARALLEL
   // We have to add |WF_NO_ROM to the copier options workflow parameter in
   //  order to support dumping of cartridges or copier SRAM.
   {UCON64_XDEX, UCON64_N64, dex_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
@@ -478,6 +479,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XSWC2, UCON64_SNES, swc_usage,       WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XSWCS, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XV64, UCON64_N64, doctor64_usage,    WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+#endif
   {UCON64_Z64, UCON64_N64, n64_usage,          WF_DEFAULT},
 /*
   these options do not (need to) know the console or work for more than one
@@ -494,12 +496,12 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_DB, UCON64_UNKNOWN, ucon64_dat_usage, WF_NO_ROM},
   {UCON64_DBS, UCON64_UNKNOWN, ucon64_dat_usage, WF_NO_ROM},
   {UCON64_DBV, UCON64_UNKNOWN, ucon64_dat_usage, WF_NO_ROM},
-  {UCON64_DINT, UCON64_UNKNOWN, ucon64_options_usage, WF_PROBE|WF_INIT},
+  {UCON64_DINT, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
   {UCON64_E, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
   {UCON64_FIND, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT},
-  {UCON64_GG, UCON64_UNKNOWN, gg_usage,        0},
-  {UCON64_GGD, UCON64_UNKNOWN, gg_usage,       0},
-  {UCON64_GGE, UCON64_UNKNOWN, gg_usage,       0},
+  {UCON64_GG, UCON64_UNKNOWN, gg_usage,        WF_PROBE},
+  {UCON64_GGD, UCON64_UNKNOWN, gg_usage,       WF_PROBE},
+  {UCON64_GGE, UCON64_UNKNOWN, gg_usage,       WF_PROBE},
   {UCON64_HEX, UCON64_UNKNOWN, ucon64_options_usage, 0},
   {UCON64_I, UCON64_UNKNOWN, ips_usage,        WF_STOP},
   {UCON64_IDPPF, UCON64_UNKNOWN, ppf_usage,    0},
@@ -507,11 +509,11 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_INSN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
 //  {UCON64_ISO, UCON64_UNKNOWN, ucon64_options_usage, 0},
   {UCON64_ISPAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_INIT|WF_NO_SPLIT},
-  {UCON64_J, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
-  {UCON64_LS, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
-  {UCON64_LSD, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
-  {UCON64_LSV, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
-  {UCON64_MGD, UCON64_UNKNOWN, NULL,      WF_DEFAULT},
+  {UCON64_J, UCON64_UNKNOWN, NULL,             WF_PROBE|WF_INIT},
+  {UCON64_LS, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
+  {UCON64_LSD, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE},
+  {UCON64_LSV, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
+  {UCON64_MGD, UCON64_UNKNOWN, NULL,           WF_DEFAULT},
 //  {UCON64_MGH, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
   {UCON64_MKA, UCON64_UNKNOWN, aps_usage,      WF_STOP},
 //  {UCON64_MKCUE, UCON64_UNKNOWN, ucon64_options_usage, 0},
@@ -540,7 +542,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_STP, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_STPN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_STRIP, UCON64_UNKNOWN, ucon64_padding_usage, 0},
-  {UCON64_SWAP, UCON64_UNKNOWN, NULL,          0},
+  {UCON64_SWAP, UCON64_UNKNOWN, NULL,          WF_PROBE},
   {UCON64_VER, UCON64_UNKNOWN, ucon64_options_usage, WF_STOP},
 //  {UCON64_XCDRW, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
 /*

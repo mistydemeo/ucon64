@@ -118,6 +118,9 @@
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
+/* indicate it's uCON64 source code */
+#define UCON64 1
+
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */
 

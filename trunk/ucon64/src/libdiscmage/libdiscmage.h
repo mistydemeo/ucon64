@@ -22,14 +22,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef LIBDISCMAGE_H
 #define LIBDISCMAGE_H
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
 #include "libdm_cfg.h"
-#include "misc.h"                               // or let every source file include
-
 
 //  version of this libdiscmage
 extern const char *dm_version;
@@ -42,15 +38,15 @@ typedef struct
 {
   unsigned short global_current_track;  // current track
   unsigned short number;
-  uint32_t position;
-  uint32_t mode;
-  uint32_t sector_size;
-  uint32_t sector_size_value;
-  uint32_t track_length;
-  uint32_t pregap_length;
-  uint32_t total_length;
-  uint32_t start_lba;
-  uint32_t filename_length;
+  unsigned long position;
+  unsigned long mode;
+  unsigned long sector_size;
+  unsigned long sector_size_value;
+  unsigned long track_length;
+  unsigned long pregap_length;
+  unsigned long total_length;
+  unsigned long start_lba;
+  unsigned long filename_length;
 } dm_track_t;
 
 
@@ -60,10 +56,10 @@ typedef struct
 /*
   image nfo
 */
-  uint32_t header_offset;
-  uint32_t header_position;
-  uint32_t image_length;
-  uint32_t version;
+  unsigned long header_offset;
+  unsigned long header_position;
+  unsigned long image_length;
+  unsigned long version;
   unsigned short sessions;      // # of sessions
   unsigned short tracks;        // # of tracks
   unsigned short remaining_sessions;    // sessions left
@@ -78,29 +74,17 @@ typedef struct
   TODO make this dissappear
 */
   char filename[FILENAME_MAX];
-  FILE *fh;
+//  FILE *fh;
 
-  int32_t track_type, save_as_iso, pregap,convert, fulldata, cutall, cutfirst;
+  int track_type, save_as_iso, pregap,convert, fulldata, cutall, cutfirst;
   char do_convert, do_cut;
 
-  uint32_t seek_header;
+  unsigned long seek_header;
   int type;
-  uint32_t seek_ecc;
+  unsigned long seek_ecc;
   char *common;
   char *cdrdao;
 } dm_image_t;
-
-
-// struct for LBA <-> MSF conversions
-typedef struct
-{
-  uint8_t    cdmsf_min0;     /* start minute */
-  uint8_t    cdmsf_sec0;     /* start second */
-  uint8_t    cdmsf_frame0;   /* start frame */
-  uint8_t    cdmsf_min1;     /* end minute */
-  uint8_t    cdmsf_sec1;     /* end second */
-  uint8_t    cdmsf_frame1;   /* end frame */
-} dm_msf_t;
 
 
 /*
@@ -137,31 +121,20 @@ TODO:  dm_cdi2nero() <- this will become dm_neroadd()
 TODO:  dm_isofix()   fix an iso image
 TODO:  dm_cdifix()   fix a cdi image
 
-  dm_lba_to_msf() convert LBA to minutes, seconds, frames
-  dm_msf_to_lba() convert minutes, seconds, frames to LBA
-  dm_from_bcd()   convert BCD to integer
-  dm_to_bcd()     convert integer to BCD
-
   dm_mktoc()  automagically generates toc sheets
   dm_mkcue()  automagically generates cue sheets
 */
-extern int32_t dm_set_gauge (int (*gauge) (uint32_t, uint32_t));
-extern int32_t dm_bin2iso (dm_image_t *image);
-extern int32_t dm_cdirip (dm_image_t *image);
-extern int32_t dm_nrgrip (dm_image_t *image);
-extern int32_t dm_rip (dm_image_t *image);
-extern int32_t dm_cdi2nero (dm_image_t *image);
-extern int32_t dm_isofix (dm_image_t *image);
-//extern int32_t dm_cdifix (dm_image_t *image);
-
-extern int32_t dm_lba_to_msf (int32_t lba, dm_msf_t * mp);
-extern int32_t dm_msf_to_lba (int32_t m, int32_t s, int32_t f, int32_t force_positive);
-extern int32_t dm_from_bcd (int32_t b);
-extern int32_t dm_to_bcd (int32_t i);
-
-extern int32_t dm_mktoc (dm_image_t *image);
-extern int32_t dm_mkcue (dm_image_t *image);
-extern int32_t dm_mksheets (dm_image_t *image);
+extern int dm_set_gauge (int (*gauge) (unsigned long, unsigned long));
+extern int dm_bin2iso (dm_image_t *image);
+extern int dm_cdirip (dm_image_t *image);
+extern int dm_nrgrip (dm_image_t *image);
+extern int dm_rip (dm_image_t *image);
+extern int dm_cdi2nero (dm_image_t *image);
+extern int dm_isofix (dm_image_t *image);
+//extern int dm_cdifix (dm_image_t *image);
+extern int dm_mktoc (dm_image_t *image);
+extern int dm_mkcue (dm_image_t *image);
+extern int dm_mksheets (dm_image_t *image);
 //#define dm_mksheets(i) (MIN(dm_mktoc(i),dm_mkcue(i)))
 
 
@@ -169,7 +142,7 @@ extern int32_t dm_mksheets (dm_image_t *image);
   dm_disc_read() and dm_disc_write() are deprecated
   reading or writing images is done by those scripts in contrib/
 */
-extern int32_t dm_disc_read (dm_image_t *image);
-extern int32_t dm_disc_write (dm_image_t *image);
+extern int dm_disc_read (dm_image_t *image);
+extern int dm_disc_write (dm_image_t *image);
 
 #endif  // LIBDISCMAGE_H

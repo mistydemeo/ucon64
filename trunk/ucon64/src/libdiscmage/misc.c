@@ -471,13 +471,13 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
 }
 
 
-static int
-ren (const char *path, int (*func) (int))
+int
+renlwr (const char *path)
 {
   struct dirent *ep;
   struct stat fstate;
   DIR *dp;
-  char buf[FILENAME_MAX], *p = NULL;
+  char buf[FILENAME_MAX];
 
   if (access (path, R_OK) != 0 || (dp = opendir (path)) == NULL)
     {
@@ -488,29 +488,16 @@ ren (const char *path, int (*func) (int))
   chdir (path);
 
   while ((ep = readdir (dp)) != 0)
-    {
-      if (!stat (ep->d_name, &fstate))
+    if (!stat (ep->d_name, &fstate))
+//      if (S_ISREG (fstate.st_mode))
         {
-//              if (S_ISREG (fstate.st_mode))
-          {
-            strcpy (buf, ep->d_name);
-
-            for (p = buf; *p; p++)
-              *p = func (*p);
-
-            rename (ep->d_name, buf);
-          }
+          strcpy (buf, ep->d_name);
+          strlwr (buf);
+          rename (ep->d_name, buf);
         }
-    }
+
   closedir (dp);
   return 0;
-}
-
-
-int
-renlwr (const char *path)
-{
-  return ren (path, tolower);
 }
 
 

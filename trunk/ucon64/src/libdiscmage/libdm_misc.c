@@ -1,5 +1,5 @@
 /*
-libdiscmage.c - libdiscmage
+libdm_misc.c - libdiscmage miscellaneous
 
 written by 2002 NoisyB (noisyb@gmx.net)
 
@@ -26,8 +26,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/stat.h>
 #include <limits.h>
 #include <unistd.h>
+#ifdef  HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "misc.h"
 #include "libdiscmage.h"
+#include "libdm_misc.h"
 #ifdef  DJGPP                                   // DXE's are specific to DJGPP
 // It's important that this file is included _after_ the headers of code
 //  external to the DXE!
@@ -48,77 +52,6 @@ fsize (const char *filename)
 }
 
 
-typedef struct
-{
-  unsigned char magic[4];
-  uint32_t total_length;
-  unsigned char type[4];
-  unsigned char fmt[4];
-  uint32_t header_length;
-  unsigned short format;
-  unsigned short channels;
-  uint32_t samplerate;
-  uint32_t bitrate;
-  unsigned short blockalign;
-  unsigned short bitspersample;
-  unsigned char data[4];
-  uint32_t data_length;
-} wav_header_t;
-
-
-
-#define ISODCL(from, to) (to - from + 1)
-typedef struct st_iso_header
-{
-  char type[ISODCL (1, 1)];   /* 711 */
-  char id[ISODCL (2, 6)];
-  char version[ISODCL (7, 7)];        /* 711 */
-  char unused1[ISODCL (8, 8)];
-  char system_id[ISODCL (9, 40)];     /* achars */
-  char volume_id[ISODCL (41, 72)];    /* dchars */
-  char unused2[ISODCL (73, 80)];
-  char volume_space_size[ISODCL (81, 88)];    /* 733 */
-  char unused3[ISODCL (89, 120)];
-  char volume_set_size[ISODCL (121, 124)];    /* 723 */
-  char volume_sequence_number[ISODCL (125, 128)];     /* 723 */
-  char logical_block_size[ISODCL (129, 132)]; /* 723 */
-  char path_table_size[ISODCL (133, 140)];    /* 733 */
-  char type_l_path_table[ISODCL (141, 144)];  /* 731 */
-  char opt_type_l_path_table[ISODCL (145, 148)];      /* 731 */
-  char type_m_path_table[ISODCL (149, 152)];  /* 732 */
-  char opt_type_m_path_table[ISODCL (153, 156)];      /* 732 */
-  char root_directory_record[ISODCL (157, 190)];      /* 9.1 */
-  char volume_set_id[ISODCL (191, 318)];      /* dchars */
-  char publisher_id[ISODCL (319, 446)];       /* achars */
-  char preparer_id[ISODCL (447, 574)];        /* achars */
-  char application_id[ISODCL (575, 702)];     /* achars */
-  char copyright_file_id[ISODCL (703, 739)];  /* 7.5 dchars */
-  char abstract_file_id[ISODCL (740, 776)];   /* 7.5 dchars */
-  char bibliographic_file_id[ISODCL (777, 813)];      /* 7.5 dchars */
-  char creation_date[ISODCL (814, 830)];      /* 8.4.26.1 */
-  char modification_date[ISODCL (831, 847)];  /* 8.4.26.1 */
-  char expiration_date[ISODCL (848, 864)];    /* 8.4.26.1 */
-  char effective_date[ISODCL (865, 881)];     /* 8.4.26.1 */
-  char file_structure_version[ISODCL (882, 882)];     /* 711 */
-  char unused4[ISODCL (883, 883)];
-  char application_data[ISODCL (884, 1395)];
-  char unused5[ISODCL (1396, 2048)];
-} st_iso_header_t;
-
-#define ISO_HEADER_START 0
-#define ISO_HEADER_LEN (sizeof (st_iso_header_t))
-
-
-#define DEFAULT_FORMAT   0
-#define ISO_FORMAT       1
-#define BIN_FORMAT       2
-#define CDI_FORMAT       3
-#define NRG_FORMAT       4
-#define CCD_FORMAT       5
-
-#define READ_BUF_SIZE  (1024*1024)
-#define WRITE_BUF_SIZE (1024*1024)
-
 
 void gauge_dummy (uint32_t pos, uint32_t total)
 {
@@ -127,7 +60,10 @@ void gauge_dummy (uint32_t pos, uint32_t total)
 //static void (gauge *) (int,int) = gauge_dummy;
 
 
-
+const char *libdm_msg[] = {
+  "ERROR: %s has been depricated\n",
+  NULL
+};
 
 
 static const char pvd[8] = { 0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\x01" "CD001" "\x01" "\0";
@@ -378,26 +314,32 @@ dm_open (const char *image_filename)
 {
   char buf[32];
   dm_image_t *image;
-  FILE *fh = fopen (image_filename, "rb");
-  if (!fh)
-    return NULL;
+  FILE *fh = NULL;
 
-  image = (dm_image_t *) malloc (sizeof (dm_image_t));
-  if (!image)
-    {
-      return NULL;
-    }
+  if (!(image = (dm_image_t *) malloc (sizeof (dm_image_t))))
+    return NULL;
     
   memset (image, 0, sizeof (dm_image_t));
 
   strcpy (image->filename, image_filename);
 
-  fread (buf, 1, 16, fh);
-  fclose (fh);
+  if (!(fh = fopen (image->filename, "rb")))
+    {
+      free (image);
+      return NULL;
+    }
 
+//  image->type =
+//    !cdi_init (image) ? CDI_FORMAT : DEFAULT_FORMAT;
+  if (cdi_init (image) != 0)
+    {
+      fclose (fh);
+      free (image);
+      return NULL;
+    }
+    
+  image->type = CDI_FORMAT;
 
-  image->type =
-    !cdi_init (image) ? CDI_FORMAT : DEFAULT_FORMAT;
 #if 0
     !nrg_open (image) ? NRG_FORMAT : 
     !iso_init (image) ? ISO_FORMAT :
@@ -466,10 +408,10 @@ dm_open (const char *image_filename)
 
 int dm_close (dm_image_t *image)
 {
+//  fclose (image->fh);
   free (image);
   return 0;
 }
-
 
 
 static int32_t
@@ -496,7 +438,6 @@ sector_read (char *buffer, int32_t sector_size, int32_t mode, FILE * fsource)
 
   return status;
 }
-
 
 
 int32_t
@@ -608,8 +549,6 @@ dm_bin2iso (dm_image_t * image)
 
   return 0;
 }
-
-
 
 
 int32_t
@@ -915,8 +854,7 @@ dm_isofix (dm_image_t * image)
 int
 dm_disc_read (dm_image_t *image)
 {
-  fprintf (stderr, "INFO: deprecated for portability reasons\n"
-                   "      Use the libdiscmage scripts in contrib/ instead\n");
+  fprintf (stderr, libdm_msg[DEPRICATED], "dm_disc_read()");
   return 0;
 }
 
@@ -924,6 +862,6 @@ dm_disc_read (dm_image_t *image)
 int
 dm_disc_write (dm_image_t *image)
 {
-  dm_disc_read (image);
+  fprintf (stderr, libdm_msg[DEPRICATED], "dm_disc_write()");
   return 0;
 }

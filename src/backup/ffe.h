@@ -54,7 +54,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
              3 : Magic Griffin SRAM data
              4 : SNES program
              5 : SWC & SMC password, SRAM data, saver data
-             6 : Megadrive program
+             6 : Mega Drive program
              7 : SMD SRAM data
     11-511 - 0, reserved
 */

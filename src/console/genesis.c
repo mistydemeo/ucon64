@@ -670,7 +670,7 @@ genesis_fix_ntsc_protection (st_rominfo_t *rominfo)
 {
 /*
   This function searches for NTSC protection codes. If it finds one it will
-  fix the code so that the game will run on a Megadrive (PAL).
+  fix the code so that the game will run on a Mega Drive (PAL).
 */
   char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[16 * 1024];

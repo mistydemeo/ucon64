@@ -1,13 +1,9 @@
 .PHONY: all clean install uninstall
 
-GTK=1
-#CURSES=1
-#SDL=1
-
 CC=@CC@
 
-CFLAGS=-I. -I./html2gui/ -Wall -O3
-LDFLAGS=-s
+CFLAGS=@CFLAGS@
+LDFLAGS=@LDFLAGS@
 
 OBJECTS=ucon64gui.o misc.o url.o \
         console/snes.o top.o bottom.o console/swan.o console/gba.o \
@@ -15,19 +11,6 @@ OBJECTS=ucon64gui.o misc.o url.o \
         console/sms.o \
 	html2gui/html2gui.o console/genesis.o console/dc.o console/lynx.o \
         console/jaguar.o console/pce.o console/neogeo.o console/ngp.o
-
-
-ifdef GTK
-  CFLAGS+=  `gtk-config --cflags`
-  LDFLAGS+= `gtk-config --cflags --libs`
-endif
-
-ifdef SDL
-  CFLAGS+=  `sdl-config --cflags`
-  LDFLAGS+= `sdl-config --cflags --libs`
-endif
-
-
 
 all: ucon64gui
 

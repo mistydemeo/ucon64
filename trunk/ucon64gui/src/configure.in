@@ -5,6 +5,11 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
 
+CFLAGS="-I. -I./html2gui/ -Wall -O3 \`gtk-config --cflags\`"
+LDFLAGS="-s \`gtk-config --cflags --libs\`"
+
+#sdl-config --cflags --libs
+ 
 dnl Checks for libraries.
 dnl Replace `main' with a function in -libs:
 AC_CHECK_LIB(ibs, main)

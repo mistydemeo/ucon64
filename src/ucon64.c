@@ -395,7 +395,19 @@ if (argcmp(argc, argv, "-ls") ||
           strftime(buf, 13, "%b %d %H:%M", localtime(&puffer.st_mtime));
           printf("%-31.31s %10d %s %s\n", rom.name, (int) puffer.st_size, buf, rom.rom);
         }
-        else ucon64_nfo(&rom);
+        else if (argcmp(argc, argv, "-lsv"))
+        {
+          ucon64_nfo(&rom);
+        }
+        else if (argcmp(argc, argv, "-rrom") && rom.console != ucon64_UNKNOWN && rom.console != ucon64_KNOWN)
+        {
+          strcpy(buf,&rom.rom[findlast(rom.rom,".")+1]);
+          printf("%s.%s\n",rom.name,buf);
+        }
+        else 
+        {
+          
+        }
 	fflush(stdout);
       }
     }
@@ -886,7 +898,7 @@ int ucon64_usage(int argc,char *argv[])
 	"  -ls           generate ROM list for all ROMs; $ROM=DIRECTORY\n"
 	"  -lsv          like -ls but more verbose; $ROM=DIRECTORY\n"
 //	"TODO:  -rrom    rename all ROMs in DIRECTORY to their internal names; $ROM=DIR\n"
-	"TODO:  -rr83    like -rrom but with 8.3 filenames; $ROM=DIR\n"
+//	"TODO:  -rr83    like -rrom but with 8.3 filenames; $ROM=DIR\n"
 //	"                this is often used by people who loose control of their ROMs\n"
 	"  -rl           rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
 	"  -ru           rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"

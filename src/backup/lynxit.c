@@ -31,30 +31,36 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include "misc/misc.h"
+#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "console/lynx.h"
 #include "lynxit.h"
 #include "misc/parallel.h"
 
 
-const st_getopt2_t lynxit_usage[] = {
+const st_getopt2_t lynxit_usage[] =
+  {
     {
       NULL, 0, 0, 0,
       NULL, "Lynxit (Lynx cartridge backup board)"/*"1997 K.Wilkins (selfmade)"*/,
       NULL
     },
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
     {
       "xlit", 0, 0, UCON64_XLIT,
       NULL, "receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT",
 //    "                  receives automatically when ROM does not exist\n"
-      (void *) (UCON64_LYNX|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_LYNX_STOP_NO_ROM]
     },
-#endif // USE_PARALLEL
+#endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
+
 
 #ifdef USE_PARALLEL
 
@@ -1030,7 +1036,7 @@ lynxit_read_rom (const char *filename, unsigned int parport)
   char *argv[128];
 
   print_data = parport;
-  misc_parport_print_info ();
+  parport_print_info ();
 
   argv[0] = "ucon64";
   argv[1] = "READ";

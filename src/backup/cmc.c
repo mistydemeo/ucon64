@@ -117,7 +117,7 @@ respective owners.
   confusion.
 */
 #define INTRO_TEXT "Cyan's Megadrive Copier             (c) 1999-2004 Cyan Helkaraxe\n" \
-                   "Software version 2.3, designed for hardware version 1.x\n\n"
+                   "Software version 2.3 original, designed for hardware version 1.x\n\n"
 
 
 #ifdef  HAVE_CONFIG_H
@@ -127,8 +127,14 @@ respective owners.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include "misc/bswap.h"
 #include "misc/misc.h"
 #include "misc/parallel.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
 #include "ucon64_misc.h"
 #include "cmc.h"
 
@@ -275,7 +281,7 @@ cyan_checksum_rom (unsigned char *buffer)
               (buffer2[0x1a7] & 0xfe)) + 2;
   if (buffer2 > buffer + 4 * MBYTE)
     buffer2 = buffer + 4 * MBYTE;
-  buffer += 0x100;
+  buffer += 0x200;
   if (buffer2 < buffer + 2)
     return -1;
 
@@ -345,7 +351,7 @@ cyan_delay (int speed, unsigned int parport)
 
 
 static void
-cyan_reset(unsigned int parport)
+cyan_reset (unsigned int parport)
 // resets the copier
 {
   cyan_delay (0, parport);
@@ -453,17 +459,17 @@ cyan_read_rom (int speed, unsigned int parport, unsigned char *buffer)
         exit (1);
       }
 
-  cyan_reset (parport); // reset the copier
+  cyan_reset (parport);                         // reset the copier
 
   t = time (NULL);
   // copy routine
-  for (q = 0; q < 2 * MBYTE; ) // loop through all words
+  for (q = 0; q < 2 * MBYTE; )                  // loop through all words
     {
       // get a (16-bit) word from the ROM
       ((unsigned short *) buffer)[cyan_get_address (q)] = cyan_get_word (speed, parport);
 
       // periodically update progress bar, without hammering ucon64_gauge()
-      if (!(q & 0x3ff))
+      if (!(q & (0xfff >> (5 - speed))))
         {
           if (check_exit ())
             {
@@ -530,6 +536,21 @@ cyan_test_parport (unsigned int parport)
   else
     puts ("Passed");
 
+  // discharge caps to see if we've got power
+  cyan_reset (parport);
+  cyan_reset (parport);
+  cyan_write_copier (CNLO + CNHI, parport);
+  cyan_delay (0, parport);
+  for (temp = 0; temp < 1000; temp++)
+    {
+      cyan_write_copier (0, parport);
+      cyan_delay (3, parport);
+      cyan_write_copier (CNLO + CNHI, parport);
+      cyan_delay (3, parport);
+    }
+  cyan_reset (parport);
+  cyan_reset (parport);
+
   fputs ("Parallel port output test: ", stdout);
   fflush (stdout);
   cyan_write_copier (255, parport);
@@ -537,16 +558,16 @@ cyan_test_parport (unsigned int parport)
   temp = (cyan_verify_copier (parport) != 255);
   cyan_write_copier (0, parport);
   cyan_delay (0, parport);
-  temp |= (cyan_verify_copier(parport) != 0);
+  temp |= (cyan_verify_copier (parport) != 0);
   cyan_write_copier (CNLO, parport);
   cyan_delay (0, parport);
   temp |= (cyan_verify_copier (parport) != CNLO);
   cyan_write_copier (CNHI, parport);
   cyan_delay (0, parport);
-  temp |= (cyan_verify_copier(parport) != CNHI);
+  temp |= (cyan_verify_copier (parport) != CNHI);
   cyan_write_copier (RSLO, parport);
   cyan_delay (0, parport);
-  temp |= (cyan_verify_copier(parport) != RSLO);
+  temp |= (cyan_verify_copier (parport) != RSLO);
   cyan_write_copier (RSHI, parport);
   cyan_delay (0, parport);
   temp |= (cyan_verify_copier (parport) != RSHI);
@@ -593,7 +614,7 @@ cyan_test_copier (int test, int speed, unsigned int parport)
   int count = 1;
 
   fputs (INTRO_TEXT, stdout);
-  misc_parport_print_info ();
+  parport_print_info ();
 
   switch (test)
     {
@@ -622,8 +643,16 @@ cyan_test_copier (int test, int speed, unsigned int parport)
       while (1)
         {
           clear_line ();                        // remove last gauge
-          printf ("Pass %2d OK\n", count);
+          printf ("   Pass %2d OK\n", count);
           count++;
+
+          // verify checksum of first pass
+          if (count == 2)                       // check only in first iteration
+            if (cyan_checksum_rom (buffer1))    // verify checksum
+              puts ("\n"
+                    "WARNING: Checksum of ROM does not appear to be correct.\n"
+                    "         This may be normal for this ROM, or it may indicate a bad copy\n");
+
           printf ("                                                                          P %2d",
                   count);
           fflush (stdout);
@@ -642,11 +671,11 @@ cyan_test_copier (int test, int speed, unsigned int parport)
                       "incompatible parallel port, extremely poor wiring, or power supply problems --\n"
                       "you may wish to replace the battery or try another power supply, and use\n"
                       "shorter cables.\n"
-                      "Try lowering the speed and running this test again, as a too high speed can"
+                      "Try lowering the speed and running this test again, as a too high speed can\n"
                       "often cause these symptoms.\n"
                       "Alternatively, it may have been a one-time glitch; re-run the test to be sure.\n"
                       "When (if?) you find a lower speed which works reliably, use that speed for\n"
-                      "copying ROMs");
+                      "copying ROMs\n");
               else
                 puts ("The first couple of passes were successful. This indicates that you have a\n"
                       "minor intermittent problem; most likely power supply problems, bad wiring, or\n"
@@ -654,7 +683,7 @@ cyan_test_copier (int test, int speed, unsigned int parport)
                       "You may wish to replace the battery or try another power supply, and use\n"
                       "shorter cables.\n"
                       "Make sure no electrical appliances turn on or off during the copy.\n"
-                      "Re-run the test to be sure; it's recommended that you use a lower speed");
+                      "Re-run the test to be sure; it's recommended that you use a lower speed\n");
               free (buffer1);
               free (buffer2);
               exit (1);
@@ -750,7 +779,7 @@ cyan_test_copier (int test, int speed, unsigned int parport)
           cyan_delay (1, parport);
           fflush (stdout);
 
-          if (check_exit())
+          if (check_exit ())
             {
               cyan_reset (parport);
               puts ("\nUser aborted test");
@@ -781,13 +810,13 @@ cyan_copy_rom (const char *filename, int speed, unsigned int parport)
   FILE *f;
 
   fputs (INTRO_TEXT, stdout);
-  misc_parport_print_info ();
+  parport_print_info ();
 
   if (!strlen (filename))
     {
       fputs ("ERROR: Filename not specified\n"
              "       You must specify a filename on the commandline, as follows:\n"
-             "       ucon64 -xcmc dump.bin\n", stderr);
+             "       ucon64 " OPTION_LONG_S "xcmc dump.bin\n", stderr);
       exit (1);
     }
 
@@ -875,14 +904,14 @@ const st_getopt2_t cmc_usage[] =
     {
       "xcmc", 0, 0, UCON64_XCMC,
       NULL, "receive ROM from Cyan's Megadrive ROM copier; " OPTION_LONG_S "port=PORT",
-      (void *) (UCON64_GEN|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_GEN_STOP_NO_ROM]
     },
     {
       "xcmct", 1, 0, UCON64_XCMCT,
       "TEST", "run test TEST\n"
       "TEST=1 burn-in reliability test (specify speed)\n"
       "TEST=2 testbench mode (experts only)",
-      (void *) (UCON64_GEN|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_GEN_STOP_NO_ROM]
     },
     {
       "xcmcm", 1, 0, UCON64_XCMCM,
@@ -891,7 +920,7 @@ const st_getopt2_t cmc_usage[] =
       "SPEED=2 medium\n"
       "SPEED=3 fast (default)\n"                // verify with value of DEFAULT_SPEED
       "SPEED=4 full speed (risky)",
-      (void *) (UCON64_GEN|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_GEN_SWITCH]
     },
 #endif // USE_PARALLEL
     {NULL, 0, 0, 0, NULL, NULL, NULL}

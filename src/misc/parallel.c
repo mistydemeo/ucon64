@@ -71,10 +71,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/cygwin.h>
 #include "dlopen.h"
 #endif
-
-#include "ucon64.h"
-#include "parallel.h"
 #include "misc.h"
+#include "file.h"
+#include "itypes.h"
+#include "parallel.h"
+#include "getopt2.h"
+#include "ucon64.h"
 
 
 #if     defined USE_PPDEV || defined __BEOS__ || defined __FreeBSD__ || defined AMIGA
@@ -89,10 +91,10 @@ inline static void i386_output_word (unsigned short, unsigned short);
 
 
 #if     defined USE_PPDEV || defined __BEOS__ || defined __FreeBSD__
-static int misc_io_fd;
+static int parport_io_fd;
 #ifdef  USE_PPDEV
-static enum { FORWARD = 0, REVERSE } misc_io_direction;
-static int misc_io_mode;
+static enum { FORWARD = 0, REVERSE } parport_io_direction;
+static int parport_io_mode;
 #endif
 #endif
 
@@ -106,8 +108,8 @@ typedef struct st_ioport
 #endif
 
 #ifdef  AMIGA
-static struct IOStdReq *misc_io_req;
-static struct MsgPort *misc_parport;
+static struct IOStdReq *parport_io_req;
+static struct MsgPort *parport;
 #endif
 
 
@@ -233,34 +235,34 @@ inportb (unsigned short port)
   switch (ppreg)
     {
     case 0:                                     // data
-      if (misc_io_direction == FORWARD)         // dir is forward?
+      if (parport_io_direction == FORWARD)      // dir is forward?
         {
-          misc_io_direction = REVERSE;          // change it to reverse
-          ioctl (misc_io_fd, PPDATADIR, &misc_io_direction);
+          parport_io_direction = REVERSE;       // change it to reverse
+          ioctl (parport_io_fd, PPDATADIR, &parport_io_direction);
         }
-      ioctl (misc_io_fd, PPRDATA, &byte);
+      ioctl (parport_io_fd, PPRDATA, &byte);
       break;
     case 1:                                     // status
-      ioctl (misc_io_fd, PPRSTATUS, &byte);
+      ioctl (parport_io_fd, PPRSTATUS, &byte);
       break;
     case 2:                                     // control
-      ioctl (misc_io_fd, PPRCONTROL, &byte);
+      ioctl (parport_io_fd, PPRCONTROL, &byte);
       break;
     case 3:                                     // EPP/ECP address
-      if (!(misc_io_mode & IEEE1284_ADDR))      // IEEE1284_DATA is 0!
+      if (!(parport_io_mode & IEEE1284_ADDR))   // IEEE1284_DATA is 0!
         {
-          misc_io_mode |= IEEE1284_ADDR;
-          ioctl (misc_io_fd, PPSETMODE, &misc_io_mode);
+          parport_io_mode |= IEEE1284_ADDR;
+          ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      read (misc_io_fd, &byte, 1);
+      read (parport_io_fd, &byte, 1);
       break;
     case 4:                                     // EPP/ECP data
-      if (misc_io_mode & IEEE1284_ADDR)
+      if (parport_io_mode & IEEE1284_ADDR)
         {
-          misc_io_mode &= ~IEEE1284_ADDR;       // IEEE1284_DATA is 0
-          ioctl (misc_io_fd, PPSETMODE, &misc_io_mode);
+          parport_io_mode &= ~IEEE1284_ADDR;    // IEEE1284_DATA is 0
+          ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      read (misc_io_fd, &byte, 1);
+      read (parport_io_fd, &byte, 1);
       break;
     case 0x402:                                 // ECP register
       printf ("WARNING: Ignored read from ECP register, returning 0\n");
@@ -277,23 +279,23 @@ inportb (unsigned short port)
   st_ioport_t temp;
 
   temp.port = port;
-  ioctl (misc_io_fd, 'r', &temp, 0);
+  ioctl (parport_io_fd, 'r', &temp, 0);
 
   return temp.data8;
 #elif   defined AMIGA
   (void) port;                                  // warning remover
   ULONG wait_mask;
 
-  misc_io_req->io_Length = 1;
-  misc_io_req->io_Command = CMD_READ;
+  parport_io_req->io_Length = 1;
+  parport_io_req->io_Command = CMD_READ;
 
 /*
-  SendIO ((struct IORequest *) misc_io_req);
+  SendIO ((struct IORequest *) parport_io_req);
 
-  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << misc_parport->mp_SigBit;
+  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << parport->mp_SigBit;
   if (Wait (wait_mask) & (SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F))
-    AbortIO ((struct IORequest *) misc_io_req);
-  WaitIO ((struct IORequest *) misc_io_req);
+    AbortIO ((struct IORequest *) parport_io_req);
+  WaitIO ((struct IORequest *) parport_io_req);
 */
 
   /*
@@ -305,14 +307,14 @@ inportb (unsigned short port)
     Can one CTRL-C a DoIO() request? (Or for that matter a SendIO().)
   */
 
-  if (DoIO ((struct IORequest *) misc_io_req))
+  if (DoIO ((struct IORequest *) parport_io_req))
     {
       fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %d)\n",
                        ucon64.parport_dev, ucon64.parport);
       exit (1);
     }
 
-  return (unsigned char) misc_io_req->io_Data;
+  return (unsigned char) parport_io_req->io_Data;
 #elif   defined _WIN32 || defined __CYGWIN__
   return input_byte (port);
 #elif   defined __i386__ || defined __x86_64__
@@ -333,20 +335,20 @@ inportw (unsigned short port)
   switch (ppreg)
     {
     case 3:                                     // EPP/ECP address
-      if (!(misc_io_mode & IEEE1284_ADDR))      // IEEE1284_DATA is 0!
+      if (!(parport_io_mode & IEEE1284_ADDR))   // IEEE1284_DATA is 0!
         {
-          misc_io_mode |= IEEE1284_ADDR;
-          ioctl (misc_io_fd, PPSETMODE, &misc_io_mode);
+          parport_io_mode |= IEEE1284_ADDR;
+          ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      read (misc_io_fd, buf, 2);
+      read (parport_io_fd, buf, 2);
       break;
     case 4:                                     // EPP/ECP data
-      if (misc_io_mode & IEEE1284_ADDR)
+      if (parport_io_mode & IEEE1284_ADDR)
         {
-          misc_io_mode &= ~IEEE1284_ADDR;       // IEEE1284_DATA is 0
-          ioctl (misc_io_fd, PPSETMODE, &misc_io_mode);
+          parport_io_mode &= ~IEEE1284_ADDR;    // IEEE1284_DATA is 0
+          ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      read (misc_io_fd, buf, 2);
+      read (parport_io_fd, buf, 2);
       break;
     // the data, status, control and ECP registers should only be accessed in "8-bit mode"
     default:
@@ -360,24 +362,24 @@ inportw (unsigned short port)
   st_ioport_t temp;
 
   temp.port = port;
-  ioctl (misc_io_fd, 'r16', &temp, 0);
+  ioctl (parport_io_fd, 'r16', &temp, 0);
 
   return temp.data16;
 #elif   defined AMIGA
   (void) port;                                  // warning remover
   ULONG wait_mask;
 
-  misc_io_req->io_Length = 2;
-  misc_io_req->io_Command = CMD_READ;
+  parport_io_req->io_Length = 2;
+  parport_io_req->io_Command = CMD_READ;
 
-  if (DoIO ((struct IORequest *) misc_io_req))
+  if (DoIO ((struct IORequest *) parport_io_req))
     {
       fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %d)\n",
                        ucon64.parport_dev, ucon64.parport);
       exit (1);
     }
 
-  return (unsigned short) misc_io_req->io_Data;
+  return (unsigned short) parport_io_req->io_Data;
 #elif   defined _WIN32 || defined __CYGWIN__
   return input_word (port);
 #elif   defined __i386__ || defined __x86_64__
@@ -397,31 +399,31 @@ outportb (unsigned short port, unsigned char byte)
   switch (ppreg)
     {
     case 0:                                     // data
-      if (misc_io_direction == REVERSE)         // dir is reverse?
+      if (parport_io_direction == REVERSE)      // dir is reverse?
         {
-          misc_io_direction = FORWARD;          // change it to forward
-          ioctl (misc_io_fd, PPDATADIR, &misc_io_direction);
+          parport_io_direction = FORWARD;       // change it to forward
+          ioctl (parport_io_fd, PPDATADIR, &parport_io_direction);
         }
-      ioctl (misc_io_fd, PPWDATA, &byte);
+      ioctl (parport_io_fd, PPWDATA, &byte);
       break;
     case 2:                                     // control
-      ioctl (misc_io_fd, PPWCONTROL, &byte);
+      ioctl (parport_io_fd, PPWCONTROL, &byte);
       break;
     case 3:                                     // EPP/ECP address
-      if (!(misc_io_mode & IEEE1284_ADDR))      // IEEE1284_DATA is 0!
+      if (!(parport_io_mode & IEEE1284_ADDR))   // IEEE1284_DATA is 0!
         {
-          misc_io_mode |= IEEE1284_ADDR;
-          ioctl (misc_io_fd, PPSETMODE, &misc_io_mode);
+          parport_io_mode |= IEEE1284_ADDR;
+          ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      write (misc_io_fd, &byte, 1);
+      write (parport_io_fd, &byte, 1);
       break;
     case 4:                                     // EPP/ECP data
-      if (misc_io_mode & IEEE1284_ADDR)
+      if (parport_io_mode & IEEE1284_ADDR)
         {
-          misc_io_mode &= ~IEEE1284_ADDR;       // IEEE1284_DATA is 0
-          ioctl (misc_io_fd, PPSETMODE, &misc_io_mode);
+          parport_io_mode &= ~IEEE1284_ADDR;    // IEEE1284_DATA is 0
+          ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      write (misc_io_fd, &byte, 1);
+      write (parport_io_fd, &byte, 1);
       break;
     case 0x402:                                 // ECP register
       printf ("WARNING: Ignored write to ECP register\n");
@@ -437,16 +439,16 @@ outportb (unsigned short port, unsigned char byte)
 
   temp.port = port;
   temp.data8 = byte;
-  ioctl (misc_io_fd, 'w', &temp, 0);
+  ioctl (parport_io_fd, 'w', &temp, 0);
 #elif   defined AMIGA
   (void) port;                                  // warning remover
   ULONG wait_mask;
 
-  misc_io_req->io_Length = 1;
-  misc_io_req->io_Data = byte;
-  misc_io_req->io_Command = CMD_WRITE;
+  parport_io_req->io_Length = 1;
+  parport_io_req->io_Data = byte;
+  parport_io_req->io_Command = CMD_WRITE;
 
-  if (DoIO ((struct IORequest *) misc_io_req))
+  if (DoIO ((struct IORequest *) parport_io_req))
     {
       fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %d)\n",
                        ucon64.parport_dev, ucon64.parport);
@@ -475,20 +477,20 @@ outportw (unsigned short port, unsigned short word)
   switch (ppreg)
     {
     case 3:                                     // EPP/ECP address
-      if (!(misc_io_mode & IEEE1284_ADDR))      // IEEE1284_DATA is 0!
+      if (!(parport_io_mode & IEEE1284_ADDR))   // IEEE1284_DATA is 0!
         {
-          misc_io_mode |= IEEE1284_ADDR;
-          ioctl (misc_io_fd, PPSETMODE, &misc_io_mode);
+          parport_io_mode |= IEEE1284_ADDR;
+          ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      write (misc_io_fd, buf, 2);
+      write (parport_io_fd, buf, 2);
       break;
     case 4:                                     // EPP/ECP data
-      if (misc_io_mode & IEEE1284_ADDR)
+      if (parport_io_mode & IEEE1284_ADDR)
         {
-          misc_io_mode &= ~IEEE1284_ADDR;       // IEEE1284_DATA is 0
-          ioctl (misc_io_fd, PPSETMODE, &misc_io_mode);
+          parport_io_mode &= ~IEEE1284_ADDR;    // IEEE1284_DATA is 0
+          ioctl (parport_io_fd, PPSETMODE, &parport_io_mode);
         }
-      write (misc_io_fd, buf, 2);
+      write (parport_io_fd, buf, 2);
       break;
     // the data, control and ECP registers should only be accessed in "8-bit mode"
     default:
@@ -502,16 +504,16 @@ outportw (unsigned short port, unsigned short word)
 
   temp.port = port;
   temp.data16 = word;
-  ioctl (misc_io_fd, 'w16', &temp, 0);
+  ioctl (parport_io_fd, 'w16', &temp, 0);
 #elif   defined AMIGA
   (void) port;                                  // warning remover
   ULONG wait_mask;
 
-  misc_io_req->io_Length = 2;
-  misc_io_req->io_Data = word;
-  misc_io_req->io_Command = CMD_WRITE;
+  parport_io_req->io_Length = 2;
+  parport_io_req->io_Data = word;
+  parport_io_req->io_Command = CMD_WRITE;
 
-  if (DoIO ((struct IORequest *) misc_io_req))
+  if (DoIO ((struct IORequest *) parport_io_req))
     {
       fprintf (stderr, "ERROR: Could not communicate with parallel port (%s, %d)\n",
                        ucon64.parport_dev, ucon64.parport);
@@ -530,7 +532,7 @@ outportw (unsigned short port, unsigned short word)
 #if     (defined __i386__ || defined __x86_64__ || defined _WIN32) && !defined USE_PPDEV
 #define DETECT_MAX_CNT 1000
 static int
-misc_parport_probe (unsigned int port)
+parport_probe (unsigned int port)
 {
   int i = 0;
 
@@ -585,7 +587,7 @@ new_exception_handler (PEXCEPTION_RECORD exception_record, void *establisher_fra
 
 
 int
-misc_parport_open (int port)
+parport_open (int port)
 {
 #ifdef  USE_PPDEV
   struct timeval t;
@@ -594,8 +596,8 @@ misc_parport_open (int port)
   if (port == PARPORT_UNKNOWN)
     port = 0;
 
-  misc_io_fd = open (ucon64.parport_dev, O_RDWR | O_NONBLOCK);
-  if (misc_io_fd == -1)
+  parport_io_fd = open (ucon64.parport_dev, O_RDWR | O_NONBLOCK);
+  if (parport_io_fd == -1)
     {
       fprintf (stderr, "ERROR: Could not open parallel port device (%s)\n"
                        "       Check if you have the required privileges\n",
@@ -603,17 +605,17 @@ misc_parport_open (int port)
       exit (1);
     }
 
-  ioctl (misc_io_fd, PPEXCL);                   // disable sharing
-  ioctl (misc_io_fd, PPCLAIM);
+  ioctl (parport_io_fd, PPEXCL);                // disable sharing
+  ioctl (parport_io_fd, PPCLAIM);
   t.tv_sec = 0;
   t.tv_usec = 500 * 1000;                       // set time-out to 500 milliseconds
-  ioctl (misc_io_fd, PPSETTIME, &t);
+  ioctl (parport_io_fd, PPSETTIME, &t);
 /*
-  ioctl (misc_io_fd, PPGETTIME, &t);
+  ioctl (parport_io_fd, PPGETTIME, &t);
   printf ("Current time-out value: %ld microseconds\n", t.tv_usec);
 */
 
-  ioctl (misc_io_fd, PPGETMODES, &capabilities);
+  ioctl (parport_io_fd, PPGETMODES, &capabilities);
 //  printf ("Capabilities: %x\n", capabilities);
 
   if (ucon64.parport_mode == UCON64_EPP || ucon64.parport_mode == UCON64_ECP)
@@ -622,25 +624,25 @@ misc_parport_open (int port)
 
   // set mode for read() and write()
   if (capabilities & PARPORT_MODE_ECP)
-    misc_io_mode = IEEE1284_MODE_ECP;
+    parport_io_mode = IEEE1284_MODE_ECP;
   else if (capabilities & PARPORT_MODE_EPP)
-    misc_io_mode = IEEE1284_MODE_EPP;
+    parport_io_mode = IEEE1284_MODE_EPP;
   else
-    misc_io_mode = IEEE1284_MODE_BYTE;
-  misc_io_mode |= IEEE1284_DATA;                // default to EPP/ECP data reg
-  ioctl (misc_io_fd, PPSETMODE, &misc_io_mode); //  (IEEE1284_DATA is 0...)
+    parport_io_mode = IEEE1284_MODE_BYTE;
+  parport_io_mode |= IEEE1284_DATA;             // default to EPP/ECP data reg
+  ioctl (parport_io_fd, PPSETMODE, &parport_io_mode); //  (IEEE1284_DATA is 0...)
 
   x = PP_FASTREAD | PP_FASTWRITE;               // enable 16-bit transfers
-  ioctl (misc_io_fd, PPSETFLAGS, &x);
+  ioctl (parport_io_fd, PPSETFLAGS, &x);
 
-  misc_io_direction = FORWARD;                  // set forward direction as default
-  ioctl (misc_io_fd, PPDATADIR, &misc_io_direction);
+  parport_io_direction = FORWARD;               // set forward direction as default
+  ioctl (parport_io_fd, PPDATADIR, &parport_io_direction);
 #elif   defined __BEOS__
-  misc_io_fd = open ("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
-  if (misc_io_fd == -1)
+  parport_io_fd = open ("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
+  if (parport_io_fd == -1)
     {
-      misc_io_fd = open ("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
-      if (misc_io_fd == -1)
+      parport_io_fd = open ("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
+      if (parport_io_fd == -1)
         {
           fprintf (stderr, "ERROR: Could not open I/O port device (no driver)\n"
                            "       You can download the latest ioport driver from\n"
@@ -658,18 +660,18 @@ misc_parport_open (int port)
 #elif   defined AMIGA
   int x;
 
-  misc_parport = CreatePort (NULL, 0);
-  if (misc_parport == NULL)
+  parport = CreatePort (NULL, 0);
+  if (parport == NULL)
     {
       fprintf (stderr, "ERROR: Could not create the MsgPort\n");
       exit (1);
     }
-  misc_io_req = CreateExtIO (misc_parport, sizeof (struct IOExtPar));
-  if (misc_io_req == NULL)
+  parport_io_req = CreateExtIO (parport, sizeof (struct IOExtPar));
+  if (parport_io_req == NULL)
     {
       fprintf (stderr, "ERROR: Could not create the I/O request structure\n");
-      DeletePort (misc_parport);
-      misc_io_req = NULL;
+      DeletePort (parport);
+      parport_io_req = NULL;
       exit (1);
     }
 
@@ -677,30 +679,30 @@ misc_parport_open (int port)
   if (port == PARPORT_UNKNOWN)
     port = 0;
 
-  x = OpenDevice (ucon64.parport_dev, port, (struct IORequest *) misc_io_req,
+  x = OpenDevice (ucon64.parport_dev, port, (struct IORequest *) parport_io_req,
                   (ULONG) 0);
   if (x != 0)
     {
       fprintf (stderr, "ERROR: Could not open parallel port (%s, %x)\n",
                ucon64.parport_dev, port);
-      DeleteExtIO ((struct IOExtPar *) misc_io_req);
-      DeletePort (misc_parport);
+      DeleteExtIO ((struct IOExtPar *) parport_io_req);
+      DeletePort (parport);
       exit (1);
     }
 
   if (register_func (close_io_port) == -1)
     {
-      // AbortIO ((struct IORequest *) misc_io_req); // should not be necessary with DoIO()
-      CloseDevice ((struct IORequest *) misc_io_req);
-      DeleteExtIO (misc_io_req);
-      DeletePort (misc_parport);
-      misc_io_req = NULL;
+      // AbortIO ((struct IORequest *) parport_io_req); // should not be necessary with DoIO()
+      CloseDevice ((struct IORequest *) parport_io_req);
+      DeleteExtIO (parport_io_req);
+      DeletePort (parport);
+      parport_io_req = NULL;
       fprintf (stderr, "ERROR: Could not register function with register_func()\n");
       exit (1);
     }
 #elif   defined __FreeBSD__
-  misc_io_fd = open ("/dev/io", O_RDWR);
-  if (misc_io_fd == -1)
+  parport_io_fd = open ("/dev/io", O_RDWR);
+  if (parport_io_fd == -1)
     {
       fprintf (stderr, "ERROR: Could not open I/O port device (/dev/io)\n"
                        "       (This program needs root privileges for the requested action)\n");
@@ -711,7 +713,7 @@ misc_parport_open (int port)
 #if     defined USE_PPDEV || defined __BEOS__ || defined __FreeBSD__
   if (register_func (close_io_port) == -1)
     {
-      close (misc_io_fd);
+      close (parport_io_fd);
       fprintf (stderr, "ERROR: Could not register function with register_func()\n");
       exit(1);
     }
@@ -899,7 +901,7 @@ misc_parport_open (int port)
       int x, found = 0;
 
       for (x = 0; x < 3; x++)
-        if ((found = misc_parport_probe (parport_addresses[x])) == 1)
+        if ((found = parport_probe (parport_addresses[x])) == 1)
           {
             port = parport_addresses[x];
             break;
@@ -935,25 +937,25 @@ void
 close_io_port (void)
 {
 #ifdef  AMIGA
-  CloseDevice ((struct IORequest *) misc_io_req);
-  DeleteExtIO ((struct IOExtPar *) misc_io_req);
-  DeletePort (misc_parport);
-  misc_io_req = NULL;
+  CloseDevice ((struct IORequest *) parport_io_req);
+  DeleteExtIO ((struct IOExtPar *) parport_io_req);
+  DeletePort (parport);
+  parport_io_req = NULL;
 #elif   defined USE_PPDEV
-  misc_io_mode = IEEE1284_MODE_COMPAT;
+  parport_io_mode = IEEE1284_MODE_COMPAT;
   // We really don't want to perform IEEE 1284 negotiation, but if we don't do
   //  it ppdev will do it for us...
-  ioctl (misc_io_fd, PPNEGOT, &misc_io_mode);
-  ioctl (misc_io_fd, PPRELEASE);
+  ioctl (parport_io_fd, PPNEGOT, &parport_io_mode);
+  ioctl (parport_io_fd, PPRELEASE);
 #else                                           // __BEOS__ || __FreeBSD__
-  close (misc_io_fd);
+  close (parport_io_fd);
 #endif
 }
 #endif
 
 
 int
-misc_parport_close (int parport)
+parport_close (int parport)
 {
   (void) parport;
 #if     defined USE_PPDEV || defined __BEOS__ || defined __FreeBSD__ || defined AMIGA
@@ -970,7 +972,7 @@ misc_parport_close (int parport)
 
 
 void
-misc_parport_print_info (void)
+parport_print_info (void)
 {
 #ifdef  USE_PPDEV
   printf ("Using parallel port device: %s\n", ucon64.parport_dev);

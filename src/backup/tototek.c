@@ -25,13 +25,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <stdio.h>
 #include "misc/misc.h"
 #include "misc/parallel.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "tototek.h"
 
 
 #ifdef USE_PARALLEL
-
 
 static void set_data_read (void);
 //static void set_data_write (void);
@@ -59,7 +63,7 @@ ttt_init_io (unsigned int port)
   port_b = port + 3;
   port_c = port + 4;
 
-  misc_parport_print_info ();
+  parport_print_info ();
 
   init_port ();
 }

@@ -28,8 +28,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "misc/misc.h"
 #include "misc/parallel.h"
+#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/file.h"
+#include "misc/misc.h"
+#include "ucon64.h"
 #include "ucon64_misc.h"
 #include "tototek.h"
 #include "smsgg-pro.h"
@@ -42,32 +49,32 @@ const st_getopt2_t smsggpro_usage[] =
       NULL, "SMS-PRO/GG-PRO flash card programmer"/*"2004 ToToTEK Multi Media http://www.tototek.com"*/,
       NULL
     },
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
     {
       "xgg", 0, 0, UCON64_XGG,
       NULL, "send/receive ROM to/from SMS-PRO/GG-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
       "receives automatically (32 Mbits) when ROM does not exist",
-      (void *) (UCON64_SMS|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SMS_DEFAULT_STOP_NO_SPLIT_NO_ROM]
     },
     {
       "xggs", 0, 0, UCON64_XGGS,
       NULL, "send/receive SRAM to/from SMS-PRO/GG-PRO flash card programmer\n" OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      (void *) (UCON64_SMS|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SMS_STOP_NO_ROM]
     },
     {
       "xggb", 1, 0, UCON64_XGGB,
       "BANK", "send/receive SRAM to/from SMS-PRO/GG-PRO BANK\n"
       "BANK can be a number from 1 to 4; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      (void *) (UCON64_SMS|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SMS_STOP_NO_ROM]
     },
 #endif // USE_PARALLEL
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
 
 static void eep_reset (void);
 static void write_rom_by_byte (int *addr, unsigned char *buf);
@@ -199,7 +206,7 @@ smsgg_write_rom (const char *filename, unsigned int parport)
     }
   ttt_init_io (parport);
 
-  size = q_fsize (filename);
+  size = fsizeof (filename);
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   starttime = time (NULL);
@@ -299,7 +306,7 @@ smsgg_write_sram (const char *filename, unsigned int parport, int start_bank)
   void (*write_block) (int *, unsigned char *) = write_ram_by_byte; // write_ram_by_page
   (void) write_ram_by_page;
 
-  size = q_fsize (filename);
+  size = fsizeof (filename);
   if (start_bank == -1)
     address = 0;
   else

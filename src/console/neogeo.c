@@ -28,10 +28,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include "misc/misc.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "neogeo.h"
+
 
 const st_getopt2_t neogeo_usage[] =
   {
@@ -43,7 +48,7 @@ const st_getopt2_t neogeo_usage[] =
     {
       "ng", 0, 0, UCON64_NG,
       NULL, "force recognition",
-      (void *) (UCON64_NG|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NG_SWITCH]
     },
 #if 0
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
@@ -54,7 +59,7 @@ const st_getopt2_t neogeo_usage[] =
       "bios", 1, 0, UCON64_BIOS,
       "BIOS", "convert NeoCD BIOS to work with NeoCD emulator" /*;\n"
       "http://www.illusion-city.com/neo/"*/,
-      (void *) (UCON64_NG|WF_DEFAULT)
+      &ucon64_wf[WF_OBJ_NG_DEFAULT]
     },
 #if 0
     "TODO:  " OPTION_S "j     join split ROM"
@@ -64,12 +69,10 @@ const st_getopt2_t neogeo_usage[] =
     {
       "sam", 1, 0, UCON64_SAM,
       "SAMFILE", "convert SAM/M.A.M.E. sound to WAV",
-      (void *) (UCON64_NG|WF_DEFAULT)
+      &ucon64_wf[WF_OBJ_NG_DEFAULT]
     },
 //    "TODO: " OPTION_LONG_S "chkm    check/fix Multiple Arcade Machine Emulator/M.A.M.E. ROMs;\n"
 //    "                  " OPTION_LONG_S "rom=DIRECTORY"
-//    "INFO: actually this option does the same as GoodXXXX, RomCenter, etc.\n"
-//    "      Therefore you must have the DAT files for Arcade installed\n"
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
@@ -86,11 +89,11 @@ neogeo_bios (const char *fname)
   char dest_name[FILENAME_MAX];
 
   strcpy (dest_name, fname);
-  set_suffix (dest_name, ".TMP");
+  set_suffix (dest_name, ".tmp");
 
   ucon64_file_handler (dest_name, NULL, 0);
-  q_fcpy (fname, 0, MBIT, dest_name, "wb");
-  q_fswap_b (dest_name, 0, MBIT);
+  fcopy (fname, 0, MBIT, dest_name, "wb");
+  ucon64_fbswap16 (dest_name, 0, MBIT);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -133,8 +136,8 @@ neogeo_init (st_rominfo_t *rominfo)
 {
   int result = -1;
 
-  rominfo->console_usage = neogeo_usage;
-  rominfo->copier_usage = unknown_usage;
+  rominfo->console_usage = neogeo_usage[0].help;
+  rominfo->copier_usage = unknown_usage[0].help;
 
   return result;
 }
@@ -147,13 +150,13 @@ sam2wav (const char *filename)
   FILE *fh, *fh2;
   unsigned datasize, wavesize, riffsize, freq, bits, rate;
 
-  if (q_fsize (filename) < 16)
+  if (fsizeof (filename) < 16)
     return -1;
   if (!(fh = fopen (filename, "rb")))
     return -1;
 
   strcpy ((char *) buf, filename);
-  set_suffix ((char *) buf, ".WAV");
+  set_suffix ((char *) buf, ".wav");
 
   if (!(fh2 = fopen ((char *) buf, "wb")))
     return -1;

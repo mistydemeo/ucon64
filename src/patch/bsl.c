@@ -3,7 +3,7 @@ bsl.c - Baseline patcher support for uCON64
 
 Copyright (c) ???? - ???? The White Knight
 Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
-Copyright (c)        2003 dbjh
+Copyright (c) 2003        dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include "misc/misc.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "bsl.h"
@@ -37,7 +42,7 @@ const st_getopt2_t bsl_usage[] =
     {
       "b", 0, 0, UCON64_B,
       NULL, "apply Baseline/BSL PATCH to ROM",
-      (void *) WF_STOP
+      &ucon64_wf[WF_OBJ_ALL_STOP]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
@@ -53,7 +58,7 @@ bsl_apply (const char *mod, const char *bslname)
 
   strcpy (modname, mod);
   ucon64_file_handler (modname, NULL, 0);
-  q_fcpy (mod, 0, q_fsize (mod), modname, "wb"); // no copy if one file
+  fcopy (mod, 0, fsizeof (mod), modname, "wb"); // no copy if one file
 
   if ((modfile = fopen (modname, "r+b")) == NULL)
     {

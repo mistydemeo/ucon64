@@ -2,7 +2,7 @@
 ppf.c - Playstation Patch File support for uCON64
 
 Copyright (c) ???? - ???? Icarus/Paradox
-Copyright (c)        2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 2001        NoisyB <noisyb@gmx.net>
 Copyright (c) 2002 - 2003 dbjh
 
 
@@ -30,8 +30,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include "misc/misc.h"
+#include "misc/file.h"
+#include "misc/string.h"                        // MEMMEM2_CASE
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "ppf.h"
 
@@ -47,16 +52,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 const st_getopt2_t ppf_usage[] =
-{
+  {
     {
       "ppf", 0, 0, UCON64_PPF,
       NULL, "apply PPF PATCH to IMAGE (PPF<=v2.0); ROM should be an IMAGE",
-      (void *) WF_STOP
+      &ucon64_wf[WF_OBJ_ALL_STOP]
     },
     {
       "mkppf", 1, 0, UCON64_MKPPF,
       "ORG_IMG", "create PPF patch; ROM should be the modified IMAGE",
-      (void *) WF_STOP
+      &ucon64_wf[WF_OBJ_ALL_STOP]
     },
     {
       "nppf", 1, 0, UCON64_NPPF,
@@ -69,7 +74,7 @@ const st_getopt2_t ppf_usage[] =
       NULL
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
-};
+  };
 
 /*
 
@@ -166,7 +171,7 @@ ppf_apply (const char *mod, const char *ppfname)
 
   strcpy (modname, mod);
   ucon64_file_handler (modname, NULL, 0);
-  q_fcpy (mod, 0, q_fsize (mod), modname, "wb"); // no copy if one file
+  fcopy (mod, 0, fsizeof (mod), modname, "wb"); // no copy if one file
 
   if ((modfile = fopen (modname, "r+b")) == NULL)
     {
@@ -200,7 +205,7 @@ ppf_apply (const char *mod, const char *ppfname)
       return -1;
     }
 
-  ppfsize = q_fsize (ppfname);
+  ppfsize = fsizeof (ppfname);
 
   // Show PPF information
   fseek (ppffile, 6, SEEK_SET);                 // Read description line
@@ -246,7 +251,7 @@ ppf_apply (const char *mod, const char *ppfname)
 #ifdef  WORDS_BIGENDIAN
       x = bswap_32 (x);                         // file size is stored in little-endian format
 #endif
-      modlen = q_fsize (modname);
+      modlen = fsizeof (modname);
       if (x != modlen)
         {
           fprintf (stderr, "ERROR: The size of %s is not %d bytes\n", modname, x);
@@ -308,8 +313,8 @@ ppf_create (const char *orgname, const char *modname)
   int x, osize, msize, blocksize, n_changes;
   unsigned int seekpos = 0, pos;
 
-  osize = q_fsize (orgname);
-  msize = q_fsize (modname);
+  osize = fsizeof (orgname);
+  msize = fsizeof (modname);
 #ifndef DIFF_FSIZE
   if (osize != msize)
     {
@@ -330,7 +335,7 @@ ppf_create (const char *orgname, const char *modname)
       return -1;
     }
   strcpy (ppfname, modname);
-  set_suffix (ppfname, ".PPF");
+  set_suffix (ppfname, ".ppf");
   ucon64_file_handler (ppfname, NULL, 0);
   if ((ppffile = fopen (ppfname, "wb")) == NULL)
     {
@@ -421,11 +426,11 @@ ppf_create (const char *orgname, const char *modname)
 #if 0
   if (fidname)
     {
-      int fsize = q_fsize (fidname);
+      int fsize = fsizeof (fidname);
       if (fsize > MAX_ID_SIZE)
         fsize = MAX_ID_SIZE;                    // File id only up to 3072 bytes!
       printf ("Adding file_id.diz (%s)...\n", fidname);
-      q_fread (buffer, 0, fsize, fidname);
+      ucon64_fread (buffer, 0, fsize, fidname);
       fwrite ("@BEGIN_FILE_ID.DIZ", 18, 1, ppffile);
       fwrite (buffer, fsize, 1, ppffile);
       fwrite ("@END_FILE_ID.DIZ", 16, 1, ppffile);
@@ -454,8 +459,8 @@ ppf_set_desc (const char *ppf, const char *description)
   memset (desc, ' ', 50);
   strncpy (desc, description, strlen (description));
   ucon64_file_handler (ppfname, NULL, 0);
-  q_fcpy (ppf, 0, q_fsize (ppf), ppfname, "wb"); // no copy if one file
-  q_fwrite (desc, 6, 50, ppfname, "r+b");
+  fcopy (ppf, 0, fsizeof (ppf), ppfname, "wb"); // no copy if one file
+  ucon64_fwrite (desc, 6, 50, ppfname, "r+b");
 
   printf (ucon64_msg[WROTE], ppfname);
   return 0;
@@ -471,24 +476,24 @@ ppf_set_fid (const char *ppf, const char *fidname)
 
   strcpy (ppfname, ppf);
   ucon64_file_handler (ppfname, NULL, 0);
-  q_fcpy (ppf, 0, q_fsize (ppf), ppfname, "wb"); // no copy if one file
+  fcopy (ppf, 0, fsizeof (ppf), ppfname, "wb"); // no copy if one file
 
   printf ("Adding file_id.diz (%s)...\n", fidname);
-  fidsize = q_fread (fidbuf + 18, 0, MAX_ID_SIZE, fidname);
+  fidsize = ucon64_fread (fidbuf + 18, 0, MAX_ID_SIZE, fidname);
   memcpy (fidbuf + 18 + fidsize, "@END_FILE_ID.DIZ", 16);
 
-  ppfsize = q_fsize (ppfname);
-  pos = q_fncmp (ppfname, 0, ppfsize, "@BEGIN_FILE_ID.DIZ", 18, -1);
+  ppfsize = fsizeof (ppfname);
+  pos = ucon64_find (ppfname, 0, ppfsize, "@BEGIN_FILE_ID.DIZ", 18, MEMMEM2_CASE);
   if (pos == -1)
     pos = ppfsize;
   truncate (ppfname, pos);
 
-  q_fwrite (fidbuf, pos, fidsize + 18 + 16, ppfname, "r+b");
+  ucon64_fwrite (fidbuf, pos, fidsize + 18 + 16, ppfname, "r+b");
   pos += fidsize + 18 + 16;
 #ifdef  WORDS_BIGENDIAN
   fidsize = bswap_32 (fidsize);                 // Write file size in little-endian format
 #endif
-  q_fwrite (&fidsize, pos, 4, ppfname, "r+b");
+  ucon64_fwrite (&fidsize, pos, 4, ppfname, "r+b");
 
   printf (ucon64_msg[WROTE], ppfname);
   return 0;

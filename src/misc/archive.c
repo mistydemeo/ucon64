@@ -1,5 +1,5 @@
 /*
-archive.c - miscellaneous zlib functions
+archive.c - g(un)zip and unzip support
 
 Copyright (c) 2001 - 2004 dbjh
 
@@ -28,6 +28,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <errno.h>
 #include <sys/stat.h>
 #include <zlib.h>
+#ifdef  HAVE_BYTESWAP_H
+#include <byteswap.h>
+#else
+#include "bswap.h"
+#endif
 #include "archive.h"
 #include "misc.h"
 #include "map.h"
@@ -37,11 +42,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
+#ifdef  MAXBUFSIZE
+#undef  MAXBUFSIZE
+#endif  // MAXBUFSIZE
+#define MAXBUFSIZE 32768
+
+
 extern int errno;
 
 
 int
-q_fsize (const char *filename)
+fsizeof (const char *filename)
 // If USE_ZLIB is defined this function is very slow. Please avoid to use
 //  it much.
 {

@@ -1,5 +1,5 @@
 /*
-archive.h - miscellaneous zlib functions
+archive.h - g(un)zip and unzip support
 
 Copyright (c) 2001 - 2003 dbjh
 
@@ -51,7 +51,7 @@ extern void rewind2 (FILE *file);
 extern FILE *popen2 (const char *command, const char *mode);
 extern int pclose2 (FILE *stream);
 
-extern int q_fsize2 (const char *filename);
+extern int fsizeof2 (const char *filename);
 
 #undef  feof                                    // necessary on (at least) Cygwin
 
@@ -70,17 +70,16 @@ extern int q_fsize2 (const char *filename);
 #define popen(COMMAND, MODE) popen2(COMMAND, MODE)
 #undef  pclose
 #define pclose(FILE) pclose2(FILE)
-#define q_fsize(FILENAME) q_fsize2(FILENAME)
+#define fsizeof(FILENAME) fsizeof2(FILENAME)
 
 // Returns the number of files in the "central dir of this disk" or -1 if
 //  filename is not a ZIP file or an error occured.
 extern int unzip_get_number_entries (const char *filename);
 extern int unzip_goto_file (unzFile file, int file_index);
 extern int unzip_current_file_nr;
-#endif
+#endif // USE_ZLIB
 
 #ifdef  __cplusplus
 }
 #endif
-
 #endif // MISC_ARCHIVE_H

@@ -26,8 +26,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "misc/misc.h"
 #include "misc/parallel.h"
+#include "misc/file.h"
+#include "ucon64.h"
 #include "ucon64_misc.h"
 #include "pl.h"
 
@@ -44,21 +51,22 @@ const st_getopt2_t pl_usage[] =
       "xpl", 0, 0, UCON64_XPL,
       NULL, "send/receive ROM to/from Pocket Linker;" OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist",
-      (void *) (UCON64_NGP|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_NGP_DEFAULT_STOP_NO_ROM]
     },
     {
       "xpli", 0, 0, UCON64_XPLI,
       NULL, "show information about inserted cartridge;" OPTION_LONG_S "port=PORT",
-      (void *) (UCON64_NGP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_NGP_STOP_NO_ROM]
     },
     {
       "xplm", 0, 0, UCON64_XPLM,
       NULL, "try to enable EPP mode, default is SPP mode",
-      (void *) (UCON64_NGP|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_NGP_SWITCH]
     },
 #endif // USE_PARALLEL
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
+
 
 #ifdef  USE_PARALLEL
 
@@ -456,7 +464,7 @@ init_io (unsigned int port)
   port_b = port + 3;
   port_c = port + 4;
 
-  misc_parport_print_info ();
+  parport_print_info ();
 
   if (ucon64.parport_mode == UCON64_EPP && port_8 != 0x3bc)
     port_mode = UCON64_EPP;                     // if port == 0x3bc => no EPP available
@@ -715,7 +723,7 @@ pl_write_rom (const char *filename, unsigned int parport)
       exit (1);
     }
   init_io (parport);
-  size = q_fsize (filename);
+  size = fsizeof (filename);
 
   erase ();
   reset_read ();

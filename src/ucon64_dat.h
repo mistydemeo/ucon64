@@ -24,8 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "misc/misc.h"
-#include "ucon64.h"
 
 extern const st_getopt2_t ucon64_dat_usage[];
 
@@ -47,8 +45,8 @@ typedef struct
   char comment[25 * 80];                        // comment of dat file
   char refname[100];                            // ref name
 
-  const st_getopt2_t *console_usage;              // console system usage
-  const st_getopt2_t *copier_usage;               // backup unit usage
+  const char *console_usage;                    // console system usage
+  const char *copier_usage;                     // backup unit usage
 } st_ucon64_dat_t;
 
 /*
@@ -63,9 +61,9 @@ extern st_ucon64_dat_t *ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
 extern unsigned int ucon64_dat_total_entries (void);
 extern int ucon64_dat_view (int console, int verbose);
 extern int ucon64_dat_indexer (void);
-extern st_ucon64_dat_t *ucon64_dat_flush (st_ucon64_dat_t *dat);
+//extern st_ucon64_dat_t *ucon64_dat_flush (st_ucon64_dat_t *dat);
 extern void ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version);
 extern int ucon64_create_dat (const char *dat_file_name, const char *filename,
-                              st_rominfo_t *rominfo);
-
+                              int buheader_len);
+                   
 #endif // UCON64_DAT_H

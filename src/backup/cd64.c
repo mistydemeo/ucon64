@@ -27,6 +27,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <ultra64/host/cd64lib.h>
 #include "misc/misc.h"
 #include "misc/parallel.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
@@ -45,42 +49,42 @@ const st_getopt2_t cd64_usage[] =
       "xcd64", 0, 0, UCON64_XCD64,
       NULL, "send/receive ROM to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "receives automatically (64 Mbits) when ROM does not exist",
-      (void *) (UCON64_N64|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_N64_DEFAULT_STOP_NO_ROM]
     },
     {
       "xcd64c", 1, 0, UCON64_XCD64C,
       "N", "receive N Mbits of ROM from CD64; " OPTION_LONG_S "port=PORT",
-      (void *) (UCON64_N64|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_N64_STOP_NO_ROM]
     },
     {
       "xcd64b", 0, 0, UCON64_XCD64B,
       NULL, "send boot emu to CD64; " OPTION_LONG_S "port=PORT",
-      (void *) (UCON64_N64|WF_DEFAULT|WF_STOP)
+      &ucon64_wf[WF_OBJ_N64_DEFAULT_STOP]
     },
     {
       "xcd64s", 0, 0, UCON64_XCD64S,
       NULL, "send/receive SRAM to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM file does not exist",
-      (void *) (UCON64_N64|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_N64_STOP_NO_ROM]
     },
     {
       "xcd64f", 0, 0, UCON64_XCD64F,
       NULL, "send/receive flash RAM to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when flash RAM file does not exist",
-      (void *) (UCON64_N64|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_N64_STOP_NO_ROM]
     },
     {
       "xcd64e", 0, 0, UCON64_XCD64E,
       NULL, "send/receive EEPROM data to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when EEPROM file does not exist",
-      (void *) (UCON64_N64|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_N64_STOP_NO_ROM]
     },
     {
       "xcd64m", 1, 0, UCON64_XCD64M,
       "INDEX", "send/receive memory pack data to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "INDEX is ignored for CD64 BIOS protocol\n"
       "receives automatically when memory pack file does not exist",
-      (void *) (UCON64_N64|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_N64_STOP_NO_ROM]
     },
     {
       "xcd64p", 1, 0, UCON64_XCD64P,
@@ -88,7 +92,7 @@ const st_getopt2_t cd64_usage[] =
       "PROT=0 CD64 BIOS\n"
       "PROT=1 Ghemor\n"
       "PROT=2 UltraLink",
-      (void *) (UCON64_N64|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_N64_SWITCH]
     },
 #endif // USE_PARALLEL && USE_LIBCD64
     {NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -224,9 +228,9 @@ cd64_init (void)
   cd64->progress_callback = cd64_progress;
   strcpy (cd64->io_driver_dir, ucon64.configdir);
 
-  // misc_parport_print_info() displays a reasonable message (even if we're
-  //  using a comms link)
-  misc_parport_print_info ();
+  // parport_print_info() displays a reasonable message (even if we're using a
+  //  comms link)
+  parport_print_info ();
 
   if (!cd64->devopen (cd64))
     {

@@ -25,12 +25,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  USE_USB
 #include <stdio.h>
 #include <usb.h>
-#include "misc/usb.h"
+#include "usb.h"
 #include "misc.h"
 
 
 usb_dev_handle *
-misc_usb_open (struct usb_device *device)
+usbport_open (struct usb_device *device)
 {
   usb_dev_handle *handle = usb_open (device);
   return handle;
@@ -38,7 +38,7 @@ misc_usb_open (struct usb_device *device)
 
 
 int
-misc_usb_close (usb_dev_handle *handle)
+usbport_close (usb_dev_handle *handle)
 {
   usb_release_interface (handle, 0);
   return usb_close (handle);
@@ -46,7 +46,7 @@ misc_usb_close (usb_dev_handle *handle)
 
 
 int
-misc_usb_read (usb_dev_handle *handle, char *buffer, int buffer_size)
+usbport_read (usb_dev_handle *handle, char *buffer, int buffer_size)
 {
   int result;
 
@@ -62,7 +62,7 @@ misc_usb_read (usb_dev_handle *handle, char *buffer, int buffer_size)
 
 
 int
-misc_usb_write (usb_dev_handle *handle, char *buffer, int buffer_size)
+usbport_write (usb_dev_handle *handle, char *buffer, int buffer_size)
 {
   int result;
 
@@ -78,7 +78,7 @@ misc_usb_write (usb_dev_handle *handle, char *buffer, int buffer_size)
 
 
 struct usb_device *
-misc_usb_probe (int vendor_id, int product_id)
+usbport_probe (int vendor_id, int product_id)
 {
   struct usb_bus *bus;
   struct usb_device *dev;

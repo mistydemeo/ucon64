@@ -40,9 +40,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <errno.h>
+#include "misc/bswap.h"
 #include "misc/misc.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "f2a.h"
 #include "console/gba.h"
@@ -55,6 +60,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  USE_PARALLEL
 #include "misc/parallel.h"
 #endif
+#include "misc/property.h"
 
 
 const st_getopt2_t f2a_usage[] =
@@ -69,33 +75,33 @@ const st_getopt2_t f2a_usage[] =
       "xf2a", 0, 0, UCON64_XF2A,
       NULL, "send/receive ROM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
       "receives automatically (32 Mbits) when ROM does not exist",
-      (void *) (UCON64_GBA|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_GBA_DEFAULT_STOP_NO_ROM]
     },
     {
       "xf2amulti", 1, 0, UCON64_XF2AMULTI, // send only
       "SIZE", "send multiple ROMs to Flash 2 Advance (Ultra); specify a\n"
       "loader in the configuration file; " OPTION_LONG_S "port=PORT",
-      (void *) (UCON64_GBA|WF_DEFAULT|WF_STOP)
+      &ucon64_wf[WF_OBJ_GBA_DEFAULT_STOP]
     },
     {
       "xf2ac", 1, 0, UCON64_XF2AC,
       "N", "receive N Mbits of ROM from Flash 2 Advance (Ultra);\n" OPTION_LONG_S "port=PORT",
-      (void *) (UCON64_GBA|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_GBA_STOP_NO_ROM]
     },
     {
       "xf2as", 0, 0, UCON64_XF2AS,
       NULL, "send/receive SRAM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      (void *) (UCON64_GBA|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_GBA_STOP_NO_ROM]
     },
     {
       "xf2ab", 1, 0, UCON64_XF2AB,
       "BANK", "send/receive SRAM to/from Flash 2 Advance (Ultra) BANK\n"
       "BANK should be a number >= 1; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      (void *) (UCON64_GBA|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_GBA_STOP_NO_ROM]
     },
-#endif // USE_PARALLEL || USE_USB
+#endif
     {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
@@ -344,7 +350,7 @@ f2a_connect_usb (void)
   struct usb_device *dev, *f2adev = NULL;
 
   get_property_fname (ucon64.configfile, "f2afirmware", f2afirmware_fname, "f2afirm.hex");
-  if (q_fread (f2afirmware, 0, F2A_FIRM_SIZE, f2afirmware_fname) == -1)
+  if (ucon64_fread (f2afirmware, 0, F2A_FIRM_SIZE, f2afirmware_fname) == -1)
     {
       fprintf (stderr, "ERROR: Could not load F2A firmware (%s)\n", f2afirmware_fname);
       exit (1);                                 // fatal
@@ -455,7 +461,7 @@ f2a_connect_usb (void)
       return -1;
     }
 
-  f2a_handle = misc_usb_open (f2adev);
+  f2a_handle = usbport_open (f2adev);
 
   result = usb_claim_interface (f2a_handle, 0x4);
   if (result == -1)
@@ -486,12 +492,12 @@ f2a_info (f2a_recvmsg_t *rm)
 
   sm.command = me2le_32 (CMD_GETINF);
 
-  if (misc_usb_write (f2a_handle, (char *) &sm, SENDMSG_SIZE) == -1)
+  if (usbport_write (f2a_handle, (char *) &sm, SENDMSG_SIZE) == -1)
     {
       fprintf (stderr, "ERROR: Could not send info request\n");
       exit (1);
     }
-  if (misc_usb_read (f2a_handle, (char *) rm, sizeof (f2a_recvmsg_t)) == -1)
+  if (usbport_read (f2a_handle, (char *) rm, sizeof (f2a_recvmsg_t)) == -1)
     {
       fprintf (stderr, "ERROR: Did not receive info request\n");
       exit (1);
@@ -528,7 +534,7 @@ f2a_boot_usb (const char *ilclient_fname)
           "Uploading iLinker client\n"
           "Please turn OFF, then ON your GBA with SELECT and START held down\n");
 
-  if (q_fread (ilclient, 0, 16 * 1024, ilclient_fname) == -1)
+  if (ucon64_fread (ilclient, 0, 16 * 1024, ilclient_fname) == -1)
     {
       fprintf (stderr, "ERROR: Could not load GBA client binary (%s)\n", ilclient_fname);
       return -1;
@@ -537,19 +543,19 @@ f2a_boot_usb (const char *ilclient_fname)
   // boot the GBA
   memset (&sm, 0, sizeof (f2a_sendmsg_t));
   sm.command = me2le_32 (CMD_MULTIBOOT1);
-  misc_usb_write (f2a_handle, (char *) &sm, SENDMSG_SIZE);
+  usbport_write (f2a_handle, (char *) &sm, SENDMSG_SIZE);
   sm.command = me2le_32 (CMD_MULTIBOOT2);
   sm.size = me2le_32 (16 * 1024);
-  misc_usb_write (f2a_handle, (char *) &sm, SENDMSG_SIZE);
+  usbport_write (f2a_handle, (char *) &sm, SENDMSG_SIZE);
 
   // send the multiboot image
-  if (misc_usb_write (f2a_handle, ilclient, 16 * 1024) == -1)
+  if (usbport_write (f2a_handle, ilclient, 16 * 1024) == -1)
     {
       fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
       return -1;
     }
 
-  if (misc_usb_read (f2a_handle, (char *) ack, 16 * 4) == -1)
+  if (usbport_read (f2a_handle, (char *) ack, 16 * 4) == -1)
     return -1;
 
   if (ucon64.quiet < 0)
@@ -577,7 +583,7 @@ f2a_read_usb (int address, int size, const char *filename)
   if ((file = fopen (filename, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
-      //exit (1); for now, return, although registering misc_usb_close() is better
+      //exit (1); for now, return, although registering usbport_close() is better
       return -1;
     }
 
@@ -587,12 +593,12 @@ f2a_read_usb (int address, int size, const char *filename)
   sm.address = me2le_32 (address);
   sm.size = me2le_32 (size);
   sm.sizekb = me2le_32 (size / 1024);
-  if (misc_usb_write (f2a_handle, (char *) &sm, SENDMSG_SIZE) == -1)
+  if (usbport_write (f2a_handle, (char *) &sm, SENDMSG_SIZE) == -1)
     return -1;
 
   for (i = 0; i < size; i += 1024)
     {
-      if (misc_usb_read (f2a_handle, buffer, 1024) == -1)
+      if (usbport_read (f2a_handle, buffer, 1024) == -1)
         {
           fclose (file);
           return -1;
@@ -629,7 +635,7 @@ f2a_write_usb (int n_files, char **files, int address)
     {
       printf ("Uploading multiloader\n");
       get_property_fname (ucon64.configfile, "gbaloader", loader_fname, "loader.bin");
-      if (q_fread (loader, 0, LOADER_SIZE, loader_fname) == -1)
+      if (ucon64_fread (loader, 0, LOADER_SIZE, loader_fname) == -1)
         {
           fprintf (stderr, "ERROR: Could not load loader binary (%s)\n", loader_fname);
           return -1;
@@ -643,10 +649,10 @@ f2a_write_usb (int n_files, char **files, int address)
       sm.address = me2le_32 (address);
       sm.sizekb = me2le_32 (LOADER_SIZE / 1024);
 
-      if (misc_usb_write (f2a_handle, (char *) &sm, SENDMSG_SIZE) == -1)
+      if (usbport_write (f2a_handle, (char *) &sm, SENDMSG_SIZE) == -1)
         return -1;
 
-      if (misc_usb_write (f2a_handle, (char *) loader, LOADER_SIZE) == -1)
+      if (usbport_write (f2a_handle, (char *) loader, LOADER_SIZE) == -1)
         {
           fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
           return -1;
@@ -655,7 +661,7 @@ f2a_write_usb (int n_files, char **files, int address)
     }
   for (j = 0; j < n_files; j++)
     {
-      if ((fsize = q_fsize (files[j])) == -1)
+      if ((fsize = fsizeof (files[j])) == -1)
         {
           fprintf (stderr, f2a_msg[CANNOT_GET_FILE_SIZE], files[j]);
           return -1;
@@ -670,7 +676,7 @@ f2a_write_usb (int n_files, char **files, int address)
       if ((file = fopen (files[j], "rb")) == NULL)
         {
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], files[j]);
-          //exit (1); for now, return, although registering misc_usb_close() is better
+          //exit (1); for now, return, although registering usbport_close() is better
           return -1;
         }
       clearerr (file);
@@ -679,7 +685,7 @@ f2a_write_usb (int n_files, char **files, int address)
       sm.address = me2le_32 (address);
       sm.sizekb = me2le_32 (size / 1024);
 
-      if (misc_usb_write (f2a_handle, (char *) &sm, SENDMSG_SIZE) == -1)
+      if (usbport_write (f2a_handle, (char *) &sm, SENDMSG_SIZE) == -1)
         return -1;
 
       for (i = 0; i < size; i += 1024)
@@ -694,7 +700,7 @@ f2a_write_usb (int n_files, char **files, int address)
               fclose (file);
               return -1;                        // see comment for fopen() call
             }
-          if (misc_usb_write (f2a_handle, buffer, 1024) == -1)
+          if (usbport_write (f2a_handle, buffer, 1024) == -1)
             return -1;
           ucon64_gauge (starttime, i + 1024, size);
         }
@@ -740,7 +746,7 @@ parport_init (int port, int target_delay)
   f2a_pport = port;
   parport_nop_cntr = parport_init_delay (target_delay);
 
-  misc_parport_print_info ();
+  parport_print_info ();
 
 #ifndef USE_PPDEV
   outportb ((unsigned short) (f2a_pport + PARPORT_STATUS), 0x01); // clear EPP time flag
@@ -927,7 +933,7 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
       unsigned char ilogo[LOGO_SIZE];
 
       printf ("Uploading iLinker logo\n");
-      if (q_fread (ilogo, 0, LOGO_SIZE, ilogo_fname) == -1)
+      if (ucon64_fread (ilogo, 0, LOGO_SIZE, ilogo_fname) == -1)
         {
           fprintf (stderr, "ERROR: Could not load logo file (%s)\n", ilogo_fname);
           return -1;
@@ -941,7 +947,7 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
     }
 
   printf ("Uploading iLinker client\n");
-  if (q_fread (iclientp, 0, BOOT_SIZE, iclientp_fname) == -1)
+  if (ucon64_fread (iclientp, 0, BOOT_SIZE, iclientp_fname) == -1)
     {
       fprintf (stderr, "ERROR: Could not load GBA client binary (%s)\n", iclientp_fname);
       return -1;
@@ -967,7 +973,7 @@ f2a_write_par (int n_files, char **files, unsigned int address)
     {
       printf ("Uploading multiloader\n");
       get_property_fname (ucon64.configfile, "gbaloader", loader_fname, "loader.bin");
-      if (q_fread (loader, 0, LOADER_SIZE, loader_fname) == -1)
+      if (ucon64_fread (loader, 0, LOADER_SIZE, loader_fname) == -1)
         {
           fprintf (stderr, "ERROR: Could not load loader binary (%s)\n", loader_fname);
           return -1;
@@ -985,7 +991,7 @@ f2a_write_par (int n_files, char **files, unsigned int address)
     }
   for (j = 0; j < n_files; j++)
     {
-      if ((fsize = q_fsize (files[j])) == -1)
+      if ((fsize = fsizeof (files[j])) == -1)
         {
           fprintf (stderr, f2a_msg[CANNOT_GET_FILE_SIZE], files[j]);
           return -1;
@@ -1452,7 +1458,7 @@ f2a_read_rom (const char *filename, int size)
     {
       f2a_init_usb ();
       f2a_read_usb (0x8000000 + offset * MBIT, size * MBIT, filename);
-      misc_usb_close (f2a_handle);
+      usbport_close (f2a_handle);
     }
 #endif
 #if     defined USE_PARALLEL && defined USE_USB
@@ -1502,7 +1508,7 @@ f2a_write_rom (const char *filename, int size)
                 }
             }
 
-          fsize = q_fsize (ucon64.argv[n]);
+          fsize = fsizeof (ucon64.argv[n]);
           if (totalsize + fsize > size)
             {
               printf ("WARNING: The sum of the sizes of the files is larger than the specified flash\n"
@@ -1526,7 +1532,7 @@ f2a_write_rom (const char *filename, int size)
     {
       f2a_init_usb ();
       f2a_write_usb (n_files, files, 0x8000000 + offset * MBIT);
-      misc_usb_close (f2a_handle);
+      usbport_close (f2a_handle);
     }
 #endif
 #if     defined USE_PARALLEL && defined USE_USB
@@ -1574,7 +1580,7 @@ f2a_read_sram (const char *filename, int bank)
     {
       f2a_init_usb ();
       f2a_read_usb (0xe000000 + bank * 64 * 1024, size, filename);
-      misc_usb_close (f2a_handle);
+      usbport_close (f2a_handle);
     }
 #endif
 #if     defined USE_PARALLEL && defined USE_USB
@@ -1612,7 +1618,7 @@ f2a_write_sram (const char *filename, int bank)
     {
       f2a_init_usb ();
       f2a_write_usb (1, files, 0xe000000 + bank * 64 * 1024);
-      misc_usb_close (f2a_handle);
+      usbport_close (f2a_handle);
     }
 #endif
 #if     defined USE_PARALLEL && defined USE_USB

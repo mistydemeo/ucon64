@@ -3,7 +3,7 @@ ips.c - IPS support for uCON64
 
 Copyright (c) ???? - ???? madman
 Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
-Copyright (c)        2002 dbjh
+Copyright (c) 2002        dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -30,6 +30,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <string.h>
 #include "misc/misc.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "ips.h"
@@ -44,19 +49,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#define DEBUG_IPS
 
 const st_getopt2_t ips_usage[] =
-{
   {
-    "i", 0, 0, UCON64_I,
-    NULL, "apply IPS PATCH to ROM (IPS<=v1.2)",
-    (void *) WF_STOP
-  },
-  {
-    "mki", 1, 0, UCON64_MKI,
-    "ORG_ROM", "create IPS patch; ROM should be the modified ROM",
-    (void *) WF_STOP
-  },
-  {NULL, 0, 0, 0, NULL, NULL, NULL}
-};
+    {
+      "i", 0, 0, UCON64_I,
+      NULL, "apply IPS PATCH to ROM (IPS<=v1.2)",
+      &ucon64_wf[WF_OBJ_ALL_STOP]
+    },
+    {
+      "mki", 1, 0, UCON64_MKI,
+      "ORG_ROM", "create IPS patch; ROM should be the modified ROM",
+      &ucon64_wf[WF_OBJ_ALL_STOP]
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
+  };
 
 static FILE *orgfile, *modfile, *ipsfile, *destfile;
 static int ndiffs = 0, address = -1, rle_value = NO_RLE, filepos = 0;
@@ -101,7 +106,7 @@ ips_apply (const char *mod, const char *ipsname)
 
   strcpy (modname, mod);
   ucon64_file_handler (modname, NULL, 0);
-  q_fcpy (mod, 0, q_fsize (mod), modname, "wb"); // no copy if one file
+  fcopy (mod, 0, fsizeof (mod), modname, "wb"); // no copy if one file
 
   if ((modfile = fopen (modname, "r+b")) == NULL)
     {
@@ -373,7 +378,7 @@ ips_create (const char *orgname, const char *modname)
       exit (1);
     }
   strcpy (ipsname, modname);
-  set_suffix (ipsname, ".IPS");
+  set_suffix (ipsname, ".ips");
   ucon64_file_handler (ipsname, NULL, 0);
   if ((ipsfile = fopen (ipsname, "wb")) == NULL)
     {
@@ -385,8 +390,8 @@ ips_create (const char *orgname, const char *modname)
   destfile = ipsfile;
   register_func (remove_destfile);
 
-  orgfilesize = q_fsize (orgname);
-  modfilesize = q_fsize (modname);
+  orgfilesize = fsizeof (orgname);
+  modfilesize = fsizeof (modname);
 
   fprintf (ipsfile, "PATCH");
 

@@ -94,7 +94,8 @@ endif
 
 
 OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
-        misc/chksum.o misc/getopt.o misc/misc.o misc/parallel.o \
+        misc/chksum.o misc/file.o misc/getopt.o misc/getopt2.o \
+        misc/misc.o misc/parallel.o misc/property.o misc/string.o \
         patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/dc.o console/gb.o console/gba.o console/genesis.o \
@@ -112,9 +113,6 @@ OBJECTS=ucon64.o ucon64_dat.o ucon64_misc.o ucon64_opts.o \
 ifdef USE_ZLIB
 LDFLAGS+=-lz
 OBJECTS+=misc/archive.o misc/map.o misc/unzip.o
-endif
-ifdef USE_DISCMAGE
-OBJECTS+=ucon64_dm.o
 endif
 ifdef USE_USB
 LDFLAGS+=-lusb
@@ -298,7 +296,7 @@ misc/misc.o: misc/misc.h misc/archive.h config.h
 misc/parallel.o: misc/parallel.h config.h
 misc/usb.o: misc/usb.h config.h
 misc/unzip.o: misc/unzip.h config.h
-ucon64.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
+ucon64.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
           console/dc.h console/gb.h console/gba.h console/genesis.h \
           console/jaguar.h console/lynx.h console/n64.h console/neogeo.h \
           console/nes.h console/ngp.h console/pce.h console/psx.h console/sms.h \
@@ -313,9 +311,8 @@ ucon64.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
           patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/pal4u.h \
           patch/ppf.h patch/xps.h $(UCON64_STD_H)
 ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)
-ucon64_dm.o: ucon64_dm.h misc/dlopen.h $(UCON64_STD_H)
 ucon64_misc.o: misc/dlopen.h $(UCON64_STD_H)
-ucon64_opts.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
+ucon64_opts.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_opts.h \
                console/dc.h console/gb.h console/gba.h console/genesis.h \
                console/jaguar.h console/lynx.h console/n64.h console/neogeo.h \
                console/nes.h console/ngp.h console/pce.h console/psx.h \

@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef MISC_PARALLEL_H
 #define MISC_PARALLEL_H
+
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -45,9 +46,9 @@ extern unsigned char inportb (unsigned short port);
 extern unsigned short inportw (unsigned short port);
 extern void outportb (unsigned short port, unsigned char byte);
 extern void outportw (unsigned short port, unsigned short word);
-#endif // USE_PARALLEL
 
-extern int misc_parport_open (int parport);
-extern int misc_parport_close (int parport);
-extern void misc_parport_print_info (void);
+extern int parport_open (int parport);
+extern int parport_close (int parport);
+extern void parport_print_info (void);
+#endif // USE_PARALLEL
 #endif // MISC_PARALLEL_H

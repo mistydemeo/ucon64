@@ -25,8 +25,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "misc/misc.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "dex.h"
 #include "psxpblib.h"
@@ -44,7 +48,7 @@ const st_getopt2_t dex_usage[] =
       "xdex", 1, 0, UCON64_XDEX,
       "N", "send/receive Block N to/from DexDrive; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      (void *) (WF_DEFAULT|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_ALL_DEFAULT_STOP_NO_ROM]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
@@ -99,7 +103,7 @@ dex_read_block (const char *filename, int block_num, unsigned int parport)
   unsigned char *data;
 
   print_data = parport;
-  misc_parport_print_info ();
+  parport_print_info ();
 
   if ((data = read_block (block_num)) == NULL)
     {
@@ -107,7 +111,7 @@ dex_read_block (const char *filename, int block_num, unsigned int parport)
       exit (1);
     }
 
-  q_fwrite (data, 0, BLOCK_SIZE, filename, "wb");
+  ucon64_fwrite (data, 0, BLOCK_SIZE, filename, "wb");
 
   return 0;
 }
@@ -119,9 +123,9 @@ dex_write_block (const char *filename, int block_num, unsigned int parport)
   unsigned char data[BLOCK_SIZE];
 
   print_data = parport;
-  misc_parport_print_info ();
+  parport_print_info ();
 
-  q_fread (data, 0, BLOCK_SIZE, filename);
+  ucon64_fread (data, 0, BLOCK_SIZE, filename);
 
   if (write_block (block_num, data) == -1)
     {

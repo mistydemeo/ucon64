@@ -15,7 +15,7 @@ su root -c "
 echo Continuing installation.
 chown root ucon64
 chmod 4775 ucon64
-cp ucon64 $DESTDIR
+cp -p ucon64 $DESTDIR
 "
 if [ ! -e $HOME/.ucon64 ]; then
 mkdir $HOME/.ucon64

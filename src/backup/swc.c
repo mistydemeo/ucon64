@@ -30,12 +30,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include "misc/misc.h"
+#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/file.h"
+#include "misc/parallel.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "ffe.h"
 #include "swc.h"
 #include "console/snes.h"                       // for snes_get_file_type ()
-#include "misc/parallel.h"
 
 
 const st_getopt2_t swc_usage[] =
@@ -46,17 +52,17 @@ const st_getopt2_t swc_usage[] =
       /*"1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"*/,
       NULL
     },
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
     {
       "xswc", 0, 0, UCON64_XSWC,
       NULL, "send/receive ROM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist",
-      (void *) (UCON64_SNES|WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_DEFAULT_STOP_NO_SPLIT_NO_ROM]
     },
     {
       "xswc2", 0, 0, UCON64_XSWC2,
       NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)",
-      (void *) (UCON64_SNES|WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_DEFAULT_STOP_NO_SPLIT_NO_ROM]
     },
 #if 1
 /*
@@ -79,7 +85,7 @@ const st_getopt2_t swc_usage[] =
       "MODE=0x100 dump BIOS\n"
       "It is possible to combine flags. MODE=0x44 makes it possible\n"
       "to dump for example Yoshi's Island",
-      (void *) (UCON64_SNES|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_SNES_SWITCH]
     },
 #endif
     {
@@ -87,19 +93,19 @@ const st_getopt2_t swc_usage[] =
       NULL,
       "send/receive SRAM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      (void *) (UCON64_SNES|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
     },
     {
       "xswcc", 0, 0, UCON64_XSWCC,
       NULL, "send/receive SRAM to/from cartridge in Super Wild Card*/SWC;\n"
       OPTION_LONG_S "port=PORT\n" "receives automatically when SRAM does not exist",
-      (void *) (UCON64_SNES|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
     },
     {
       "xswcr", 0, 0, UCON64_XSWCR,
       NULL, "send/receive RTS data to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when RTS file does not exist",
-      (void *) (UCON64_SNES|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_SNES_STOP_NO_ROM]
     },
 #endif // USE_PARALLEL
     {NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -200,14 +206,14 @@ receive_rom_info (unsigned char *buffer, int io_mode)
 
       ffe_send_command (5, (unsigned short) (address / 0x2000), 0);
       ffe_receive_block ((unsigned short) ((address & 0x1fff) + 0x2000), buffer, 8);
-      mem_hexdump (buffer, 8, address);
+      dumper (stdout, buffer, 8, address, DUMPER_HEX);
 
       ffe_send_command (5, (unsigned short) (address / 0x2000), 0);
       ffe_send_command0 ((unsigned short) ((address & 0x1fff) + 0x2000), 0);
 
       ffe_send_command (5, (unsigned short) (address / 0x2000), 0);
       ffe_receive_block ((unsigned short) ((address & 0x1fff) + 0x2000), buffer, 8);
-      mem_hexdump (buffer, 8, address);
+      dumper (stdout, buffer, 8, address, DUMPER_HEX);
     }
 #endif
 
@@ -846,7 +852,7 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
       exit (1);
     }
 
-  fsize = q_fsize (filename);
+  fsize = fsizeof (filename);
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   ffe_send_command0 (0xc008, 0);
@@ -999,7 +1005,7 @@ swc_write_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  size = q_fsize (filename) - SWC_HEADER_LEN;   // SWC SRAM is 4*8 kB, emu SRAM often not
+  size = fsizeof (filename) - SWC_HEADER_LEN;   // SWC SRAM is 4*8 kB, emu SRAM often not
   printf ("Send: %d Bytes\n", size);
   fseek (file, SWC_HEADER_LEN, SEEK_SET);       // skip the header
 
@@ -1166,7 +1172,7 @@ swc_write_rts (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  size = q_fsize (filename) - SWC_HEADER_LEN;
+  size = fsizeof (filename) - SWC_HEADER_LEN;
   printf ("Send: %d Bytes\n", size);
   fseek (file, SWC_HEADER_LEN, SEEK_SET);       // skip the header
 
@@ -1316,7 +1322,7 @@ swc_write_cart_sram (const char *filename, unsigned int parport, int io_mode)
   ffe_send_command (5, 3, 0);                   // detect cartridge SRAM size because we don't
   ffe_send_command0 (0xe00c, 0);                //  want to write more data than necessary
   byte = read_cartridge1 (io_mode & SWC_IO_SUPER_FX ? 0x00ffbd : 0x00ffd8);
-  size = q_fsize (filename) - SWC_HEADER_LEN;   // SWC SRAM is 4*8 kB, emu SRAM often not
+  size = fsizeof (filename) - SWC_HEADER_LEN;   // SWC SRAM is 4*8 kB, emu SRAM often not
   size = MIN ((byte ? 1 << (byte + 10) : 0), size);
 
   printf ("Send: %d Bytes\n", size);

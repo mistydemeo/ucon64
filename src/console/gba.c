@@ -29,12 +29,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
+#include "misc/file.h"
 #include "misc/misc.h"
+#include "misc/property.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/string.h"
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "gba.h"
-#include "patch/ips.h"
 #include "backup/fal.h"
 
 
@@ -55,27 +60,27 @@ const st_getopt2_t gba_usage[] =
     {
       "gba", 0, 0, UCON64_GBA,
       NULL, "force recognition",
-      (void *) (UCON64_GBA|WF_SWITCH)
+      &ucon64_wf[WF_OBJ_GBA_SWITCH]
     },
     {
       "n", 1, 0, UCON64_N,
       "NEW_NAME", "change internal ROM name to NEW_NAME",
-      (void *) WF_DEFAULT
+      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
     },
     {
       "logo", 0, 0, UCON64_LOGO,
       NULL, "restore ROM logo character data (offset: 0x04-0x9F)",
-      (void *) WF_DEFAULT
+      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
     },
     {
       "chk", 0, 0, UCON64_CHK,
       NULL, "fix ROM header checksum",
-      (void *) WF_DEFAULT
+      &ucon64_wf[WF_OBJ_ALL_DEFAULT]
     },
     {
       "sram", 0, 0, UCON64_SRAM,
       NULL, "patch ROM for SRAM saving",
-      (void *) UCON64_GBA
+      &ucon64_wf[WF_OBJ_GBA_DEFAULT]
     },
     {
       "crp", 1, 0, UCON64_CRP,
@@ -88,7 +93,7 @@ const st_getopt2_t gba_usage[] =
       "WAIT_TIME=20 default in most original cartridges\n"
       "WAIT_TIME=24 fastest cartridge access speed\n"
       "WAIT_TIME=28 faster than 8 but slower than 16",
-      (void *) (UCON64_GBA|WF_DEFAULT)
+      &ucon64_wf[WF_OBJ_GBA_DEFAULT]
     },
 //  "n 0 and 28, with a stepping of 4. I.e. 0, 4, 8, 12 ...\n"
     {
@@ -96,7 +101,7 @@ const st_getopt2_t gba_usage[] =
       "SIZE", "make multi-game file for use with FAL/F2A flash card, truncated\n"
       "to SIZE Mbit; file with loader must be specified first, then\n"
       "all the ROMs, multi-game file to create last",
-      (void *) (WF_INIT|WF_PROBE|WF_STOP)
+      &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_STOP]
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
@@ -244,8 +249,8 @@ gba_n (st_rominfo_t *rominfo, const char *name)
   strncpy (buf, name, GBA_NAME_LEN);
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
-  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fwrite (buf, GBA_HEADER_START + rominfo->buheader_len + 0xa0, GBA_NAME_LEN,
+  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_fwrite (buf, GBA_HEADER_START + rominfo->buheader_len + 0xa0, GBA_NAME_LEN,
             dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -260,8 +265,8 @@ gba_logo (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
-  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fwrite (gba_logodata, GBA_HEADER_START + rominfo->buheader_len + 0x04,
+  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_fwrite (gba_logodata, GBA_HEADER_START + rominfo->buheader_len + 0x04,
             GBA_LOGODATA_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -276,13 +281,13 @@ gba_chk (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
-  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
   buf = rominfo->current_internal_crc;
-  q_fputc (dest_name, GBA_HEADER_START + rominfo->buheader_len + 0xbd,
+  ucon64_fputc (dest_name, GBA_HEADER_START + rominfo->buheader_len + 0xbd,
     buf, "r+b");
 
-  mem_hexdump (&buf, 1, GBA_HEADER_START + rominfo->buheader_len + 0xbd);
+  dumper (stdout, &buf, 1, GBA_HEADER_START + rominfo->buheader_len + 0xbd, DUMPER_HEX);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -380,7 +385,7 @@ gba_sram (void)
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
-  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
   if ((destfile = fopen (dest_name, "rb+")) == NULL)
     {
@@ -403,7 +408,7 @@ gba_sram (void)
 
   bufferptr = buffer + 160 + 12 + 4;
 
-  ptr = (unsigned char *) mem_search (bufferptr, fsize, "EEPROM_", 7);
+  ptr = (unsigned char *) memmem2 (bufferptr, fsize, "EEPROM_", 7, 0);
   if (ptr == 0)
     {
       printf ("This ROM does not appear to use EEPROM saving\n");
@@ -415,7 +420,8 @@ gba_sram (void)
   minor = ptr[9] - '0';
   micro = ptr[10] - '0';
   if (ucon64.quiet < 0)
-    printf ("version: %d.%d.%d; offset: 0x%08x\n", major, minor, micro, ptr - buffer);
+    printf ("version: %d.%d.%d; offset: 0x%08x\n",
+            major, minor, micro, (int) (ptr - buffer));
   if (minor > 2)
     {
       fputs ("ERROR: ROMs with an EEPROM minor version higher than 2 are not supported\n", stderr);
@@ -424,8 +430,8 @@ gba_sram (void)
       return -1;
     }
 
-  ptr = (unsigned char *) mem_search (bufferptr, fsize,
-                                      fl_orig[minor - 1], sizeof (fl_orig[minor - 1]));
+  ptr = (unsigned char *) memmem2 (bufferptr, fsize,
+                                   fl_orig[minor - 1], sizeof (fl_orig[minor - 1]), 0);
   if (ptr == 0)
     {
       fputs ("ERROR: Could not find fl pattern. Perhaps this file is already patched?\n", stderr);
@@ -434,7 +440,7 @@ gba_sram (void)
       return -1;
     }
   if (ucon64.quiet < 0)
-    printf ("fl offset: 0x%08x\n", ptr - buffer);
+    printf ("fl offset: 0x%08x\n", (int) (ptr - buffer));
   fseek (destfile, ptr - buffer, SEEK_SET);
   fwrite (fl_repl[minor - 1], 1, sizeof (fl_repl[minor - 1]), destfile);
 
@@ -457,8 +463,8 @@ gba_sram (void)
       return -1;
     }
 
-  ptr = (unsigned char *) mem_search (bufferptr, fsize,
-                                      st_orig[minor - 1], sizeof (st_orig[minor - 1]));
+  ptr = (unsigned char *) memmem2 (bufferptr, fsize,
+                                   st_orig[minor - 1], sizeof (st_orig[minor - 1]), 0);
   if (ptr == 0)
     {
       fputs ("ERROR: Could not find st pattern\n", stderr);
@@ -582,7 +588,7 @@ gba_init (st_rominfo_t *rominfo)
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
     ucon64.buheader_len : 0;
 
-  q_fread (&gba_header, GBA_HEADER_START +
+  ucon64_fread (&gba_header, GBA_HEADER_START +
            rominfo->buheader_len, GBA_HEADER_LEN, ucon64.rom);
   if (/*gba_header.game_id_prefix == 'A' && */ // 'B' in Mario vs. Donkey Kong
       gba_header.start[3] == 0xea && gba_header.pad1 == 0x96 && gba_header.gba_type == 0)
@@ -593,7 +599,7 @@ gba_init (st_rominfo_t *rominfo)
       rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
         ucon64.buheader_len : UNKNOWN_HEADER_LEN;
 
-      q_fread (&gba_header, GBA_HEADER_START +
+      ucon64_fread (&gba_header, GBA_HEADER_START +
                rominfo->buheader_len, GBA_HEADER_LEN, ucon64.rom);
       if (gba_header.game_id_prefix == 'A' && gba_header.gba_type == 0)
         result = 0;
@@ -678,9 +684,9 @@ gba_init (st_rominfo_t *rominfo)
       rominfo->internal_crc2[0] = 0;
     }
 
-  rominfo->console_usage = gba_usage;
+  rominfo->console_usage = gba_usage[0].help;
   // We use fal_usage, but we could just as well use f2a_usage
-  rominfo->copier_usage = (!rominfo->buheader_len ? fal_usage : unknown_usage);
+  rominfo->copier_usage = (!rominfo->buheader_len ? fal_usage[0].help : unknown_usage[0].help);
 
   return result;
 }
@@ -777,7 +783,7 @@ gba_multi (int truncate_size, char *multi_fname)
             fname = ucon64.argv[n];
 
           printf ("Loader: %s\n", fname);
-          if (q_fsize (fname) > 64 * 1024)
+          if (fsizeof (fname) > 64 * 1024)
             printf ("WARNING: Are you sure %s is a loader binary?\n", fname);
         }
       else
@@ -803,7 +809,7 @@ gba_multi (int truncate_size, char *multi_fname)
               truncated = 1;
               printf ("Output file is %d Mbit, truncating %s, skipping %d bytes\n",
                       truncate_size / MBIT, fname,
-                      q_fsize (fname) - (byteswritten + bytestowrite));
+                      fsizeof (fname) - (byteswritten + bytestowrite));
               // DON'T use fstate.st_size, because file could be compressed
             }
           totalsize += bytestowrite;

@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -28,8 +27,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <time.h>
 #include "misc/misc.h"
+#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "misc/file.h"
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "ffe.h"
 #include "smd.h"
@@ -42,18 +46,18 @@ const st_getopt2_t smd_usage[] =
       NULL, "Super Com Pro/Super Magic Drive/SMD"/*"19XX Front Far East/FFE http://www.front.com.tw"*/,
       NULL
     },
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
     {
       "xsmd", 0, 0, UCON64_XSMD,
       NULL, "send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist",
-      (void *) (UCON64_GEN|WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_GEN_DEFAULT_STOP_NO_SPLIT_NO_ROM]
     },
     {
       "xsmds", 0, 0, UCON64_XSMDS,
       NULL, "send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM does not exist",
-      (void *) (UCON64_GEN|WF_STOP|WF_NO_ROM)
+      &ucon64_wf[WF_OBJ_GEN_STOP_NO_ROM]
     },
 #endif // USE_PARALLEL
     {NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -98,7 +102,7 @@ smd_deinterleave (unsigned char *buffer, int size)
 }
 
 
-#ifdef USE_PARALLEL
+#ifdef  USE_PARALLEL
 
 #define BUFFERSIZE      16384
 
@@ -197,7 +201,7 @@ smd_write_rom (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  fsize = q_fsize (filename);
+  fsize = fsizeof (filename);
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   fread (buffer, 1, SMD_HEADER_LEN, file);
@@ -309,7 +313,7 @@ smd_write_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  size = q_fsize (filename) - SMD_HEADER_LEN;
+  size = fsizeof (filename) - SMD_HEADER_LEN;
   printf ("Send: %d Bytes\n", size);
   fseek (file, SMD_HEADER_LEN, SEEK_SET);       // skip the header
 
@@ -335,4 +339,5 @@ smd_write_sram (const char *filename, unsigned int parport)
 
   return 0;
 }
+
 #endif // USE_PARALLEL

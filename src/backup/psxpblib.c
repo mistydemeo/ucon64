@@ -26,13 +26,19 @@
 #include <string.h>
 #include <time.h>
 #ifdef  HAVE_UNISTD_H
-#include <unistd.h>             // ioperm() (libc5)
+#include <unistd.h>
 #endif
-#include "ucon64.h"
 #include "misc/misc.h"
+#include "misc/itypes.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
+#include "ucon64.h"
 #include "ucon64_misc.h"
 #include "psxpblib.h"
 #include "misc/parallel.h"
+
 
 #ifdef  USE_PARALLEL
 

@@ -30,28 +30,34 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #endif
 #include "misc/misc.h"
+#include "misc/file.h"
+#ifdef  USE_ZLIB
+#include "misc/archive.h"
+#endif
+#include "misc/getopt2.h"                       // st_getopt2_t
 #include "ucon64.h"
-#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "doctor64.h"
 #include "misc/parallel.h"
 
-const st_getopt2_t doctor64_usage[] = {
+
+const st_getopt2_t doctor64_usage[] =
   {
-    NULL, 0, 0, 0,
-    NULL, "Doctor V64"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/,
-    NULL
-  },
-#ifdef USE_PARALLEL
-  {
-    "xv64", 0, 0, UCON64_XV64,
-    NULL, "send/receive ROM to/from Doctor V64; " OPTION_LONG_S "port=PORT\n"
-    "receives automatically when ROM does not exist",
-    (void *) (UCON64_N64|WF_DEFAULT|WF_STOP|WF_NO_ROM)
-  },
-#endif // USE_PARALLEL
-  {NULL, 0, 0, 0, NULL, NULL, NULL}
-};
+    {
+      NULL, 0, 0, 0,
+      NULL, "Doctor V64"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/,
+      NULL
+    },
+#ifdef  USE_PARALLEL
+    {
+      "xv64", 0, 0, UCON64_XV64,
+      NULL, "send/receive ROM to/from Doctor V64; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when ROM does not exist",
+      &ucon64_wf[WF_OBJ_N64_DEFAULT_STOP_NO_ROM]
+    },
+#endif
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
+  };
 
 
 #ifdef USE_PARALLEL
@@ -308,7 +314,7 @@ doctor64_read (const char *filename, unsigned int parport)
   FILE *fh;
   int size, inittime, bytesreceived = 0;
 
-  misc_parport_print_info ();
+  parport_print_info ();
   if (initCommunication (parport) == -1)
     {
       fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
@@ -353,7 +359,7 @@ doctor64_write (const char *filename, int start, int len, unsigned int parport)
   FILE *fh;
   unsigned int size, inittime, pos, bytessend = 0;
 
-  misc_parport_print_info ();
+  parport_print_info ();
   size = len - start;
   if (initCommunication (parport) == -1)
     {

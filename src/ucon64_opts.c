@@ -188,7 +188,6 @@ ucon64_switches (int c, const char *optarg)
       break;
 
     case UCON64_CRC:
-      ucon64.crc_big_files = 1;
       break;
 
     case UCON64_NBAK:

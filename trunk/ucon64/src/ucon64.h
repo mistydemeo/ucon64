@@ -81,8 +81,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_rom() (getarg(argc,argv,ucon64_ROM))
 #define ucon64_file() (getarg(argc,argv,ucon64_FILE))
 
-int ucon64_usage(int argc,char *argv[]);
-int ucon64_probe(int argc,char *argv[],struct ucon64_DB *db);
+struct ucon64_DB;                               // avoids a warning when included from ucon64_db.h
+                                                //  (#include "ucon64.h" in ucon64_db.h could also
+int ucon64_usage(int argc,char *argv[]);        //  come after definition of struct...)
+int ucon64_probe(int argc,char *argv[], struct ucon64_DB *db);
 int ucon64_main(int argc,char *argv[]);
 
 unsigned int ucon64_parport;

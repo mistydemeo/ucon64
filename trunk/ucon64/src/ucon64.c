@@ -65,7 +65,7 @@ write programs in C
 #include "patch/xps.h"
 #include "patch/pal4u.h"
 
-#ifdef CD 
+#ifdef BACKUP_CD 
   #include "backup/cdrw.h"
 #endif
 
@@ -281,7 +281,7 @@ main (int argc, char *argv[])
                  "emulate_cd32=\n"
                  "emulate_cdi=\n"
                  "emulate_3do=\n"
-#ifdef CD
+#ifdef BACKUP_CD
                  "#\n"
                  "# uCON64 can operate as frontend for CD burning software to make backups\n"
                  "# for CD-based consoles \n"
@@ -859,7 +859,7 @@ main (int argc, char *argv[])
               (argcmp (argc, argv, "-xsmd")) ? genesis_xsmd (&rom) :
               (argcmp (argc, argv, "-xsmds")) ? genesis_xsmds (&rom) :
 #endif
-#ifdef	CD
+#ifdef	BACKUP_CD
               (argcmp (argc, argv, "-mktoc")) ? genesis_mktoc (&rom) :
               (argcmp (argc, argv, "-xcdrw")) ? genesis_xcdrw (&rom) :
 #endif
@@ -901,7 +901,7 @@ main (int argc, char *argv[])
               (argcmp (argc, argv, "-mvs")) ? neogeo_mvs (&rom) :
               (argcmp (argc, argv, "-s")) ? neogeo_s (&rom) :
               (argcmp (argc, argv, "-sam")) ? neogeo_sam (&rom) :
-#ifdef	CD
+#ifdef	BACKUP_CD
               (argcmp (argc, argv, "-mktoc")) ? neogeo_mktoc (&rom) :
               (argcmp (argc, argv, "-xcdrw")) ? neogeo_xcdrw (&rom) :
 #endif
@@ -957,7 +957,7 @@ main (int argc, char *argv[])
     case ucon64_PCE:
       return ((argcmp (argc, argv, "-mgd")) ? pcengine_mgd (&rom) :
               (argcmp (argc, argv, "-smg")) ? pcengine_smg (&rom) :
-#ifdef	CD
+#ifdef	BACKUP_CD
               (argcmp (argc, argv, "-mktoc")) ? pcengine_mktoc (&rom) :
               (argcmp (argc, argv, "-xcdrw")) ? pcengine_xcdrw (&rom) :
 #endif
@@ -966,7 +966,7 @@ main (int argc, char *argv[])
 
     case ucon64_JAGUAR:
       return (
-#ifdef	CD
+#ifdef	BACKUP_CD
                (argcmp (argc, argv, "-mktoc")) ? jaguar_mktoc (&rom) :
                (argcmp (argc, argv, "-xcdrw")) ? jaguar_xcdrw (&rom) :
 #endif
@@ -988,7 +988,7 @@ main (int argc, char *argv[])
       return ((argcmp (argc, argv, "-ip")) ?
               /* ip0000(char *dev,char *name) */ 0 :
               (argcmp (argc, argv, "-iso")) ? /* cdi2iso(rom.rom) */ :
-#ifdef CD
+#ifdef BACKUP_CD
               (argcmp (argc, argv, "-mktoc")) ? dc_mktoc (&rom) :
               (argcmp (argc, argv, "-xcdrw")) ? dc_xcdrw (&rom) : 
 #endif             
@@ -997,7 +997,7 @@ main (int argc, char *argv[])
 
     case ucon64_PSX:
       return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-#ifdef CD
+#ifdef BACKUP_CD
               (argcmp (argc, argv, "-mktoc")) ? psx_mktoc (&rom) :
               (argcmp (argc, argv, "-xcdrw")) ? psx_xcdrw (&rom) : 
 #endif
@@ -1006,7 +1006,7 @@ main (int argc, char *argv[])
 
     case ucon64_PS2:
       return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-#ifdef CD
+#ifdef BACKUP_CD
               (argcmp (argc, argv, "-mktoc")) ? ps2_mktoc (&rom) :
               (argcmp (argc, argv, "-xcdrw")) ? ps2_xcdrw (&rom) : 
 #endif
@@ -1015,7 +1015,7 @@ main (int argc, char *argv[])
 
     case ucon64_SATURN:
       return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-#ifdef CD
+#ifdef BACKUP_CD
               (argcmp (argc, argv, "-mktoc")) ? saturn_mktoc (&rom) :
               (argcmp (argc, argv, "-xcdrw")) ? saturn_xcdrw (&rom) : 
 #endif
@@ -1024,7 +1024,7 @@ main (int argc, char *argv[])
 
     case ucon64_CDI:
       return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-#ifdef CD
+#ifdef BACKUP_CD
               (argcmp (argc, argv, "-mktoc")) ? cdi_mktoc (&rom) :
               (argcmp (argc, argv, "-xcdrw")) ? cdi_xcdrw (&rom) : 
 #endif
@@ -1033,7 +1033,7 @@ main (int argc, char *argv[])
 
     case ucon64_CD32:
       return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-#ifdef CD
+#ifdef BACKUP_CD
               (argcmp (argc, argv, "-mktoc")) ? cd32_mktoc (&rom) :
               (argcmp (argc, argv, "-xcdrw")) ? cd32_xcdrw (&rom) : 
 #endif
@@ -1042,7 +1042,7 @@ main (int argc, char *argv[])
 
     case ucon64_REAL3DO:
       return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-#ifdef CD
+#ifdef BACKUP_CD
               (argcmp (argc, argv, "-mktoc")) ? real3do_mktoc (&rom) :
               (argcmp (argc, argv, "-xcdrw")) ? real3do_xcdrw (&rom) : 
 #endif
@@ -1053,7 +1053,7 @@ main (int argc, char *argv[])
     default:
       if (!access (rom.rom, F_OK) || argcmp (argc, argv, "-xsmd") ||    //the SMD made backups for Genesis and Sega Master System
           argcmp (argc, argv, "-xsmds")
-#ifdef CD
+#ifdef BACKUP_CD
           || argcmp (argc, argv, "-mktoc") ||   //take image for which cd-based console?
           argcmp (argc, argv, "-xcdrw")
 #endif
@@ -1419,7 +1419,7 @@ ucon64_usage (int argc, char *argv[])
       ppf_usage (argc, argv);
       xps_usage (argc, argv);
 
-#ifdef CD
+#ifdef BACKUP_CD
       cdrw_usage (argc, argv);
 #endif
 

@@ -89,7 +89,7 @@ if(access(buf,F_OK)==-1)
     fputs(       
 "# flc config\n"
 "#\n"
-"version=093\n"
+"version=100\n"
 "#\n"
 "# LHA\n"
 "#\n"

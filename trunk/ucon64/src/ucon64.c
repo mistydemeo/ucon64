@@ -230,6 +230,9 @@ const struct option long_options[] = {
     {"swap", 0, 0, UCON64_SWAP},
     {"swc", 0, 0, UCON64_SWC},
     {"swcs", 0, 0, UCON64_SWCS},
+#ifdef DEBUG
+    {"test", 0, 0, UCON64_TEST},
+#endif // DEBUG    
     {"ufos", 0, 0, UCON64_UFOS},
     {"unif", 0, 0, UCON64_UNIF},
     {"usms", 0, 0, UCON64_USMS},
@@ -839,6 +842,11 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "help        display this help and exit\n"
     "  " OPTION_LONG_S "version     output version information and exit\n"
 //    "  " OPTION_LONG_S "quiet       don't show output\n"
+#ifdef DEBUG
+    "  " OPTION_LONG_S "test        run selftest (DEBUG)\n"
+    "                  if you can read this uCON64 was compiled with active DEBUG\n"
+    "                  this should only happen for development versions\n"
+#endif // DEBUG
     "\n"
   );
 

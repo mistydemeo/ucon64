@@ -1,7 +1,7 @@
 A Super Wild Card compatibility list
-Version: 1.17
+Version: 1.18
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 30 april 2003
+Date: 2 may 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
 Software: uCON64 1.9.8beta8
 
@@ -149,6 +149,7 @@ Code    Game
 0 -     Earthworm Jim (U)
 0 -     Eek! the Cat (E)
 0 -     F-1 Grand Prix (J)
+8 + 9 - F1 Roc 2 - Race of Champions (U) <= course is not visible
 9 -     Far East of Eden Zero (J)
 9 -     Far East of Eden Zero - Shounen Jump no Shou (J)
 0 -     Final Fantasy III (V1.0) (U)
@@ -172,6 +173,7 @@ Code    Game
 0 -     Gradius III (U)
 0 -     Gunple (J)
 0 -     Harvest Moon (U)
+9 -     Hayazashi Nidan Morita Shogi 2 (J) <= halts on "TRANSMIT WAIT"
 9 -     Hoshi no Kirby 3 (J)
 2 -     Illusion of Gaia (U)
 0 -     Illusion of Time (E)

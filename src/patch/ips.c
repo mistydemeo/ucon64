@@ -49,9 +49,9 @@ const char *ips_usage[] =
   NULL
 };
 
-static FILE *orgfile, *modfile, *ipsfile;
+static FILE *orgfile, *modfile, *ipsfile, *destfile;
 static int ndiffs = 0, address = -1, rle_value = NO_RLE, filepos = 0;
-static char ipsname[FILENAME_MAX];
+static char ipsname[FILENAME_MAX], *destfname = NULL;
 
 
 static unsigned char
@@ -177,7 +177,7 @@ write_address (FILE *file, const char *name, int address)
   else
     {
       fprintf (stderr, "ERROR: IPS doesn't support addresses greater than 16777215\n"
-                      "       Consider using another patch format\n");
+                       "       Consider using another patch format\n");
       fclose (file);
       remove (name);
       exit (1);
@@ -250,13 +250,12 @@ check_for_rle (unsigned char byte, unsigned char *buf)
   if (rle_value == NO_RLE)
     {
       /*
-        Start with a new block (and stop with the current one) only
-        if there are at least RLE_RESTART_TRESHOLD + 1 equal bytes
-        in a row. Restarting for RLE has some overhead: possibly 5
-        bytes for the interrupted current block plus 7 bytes for
-        the RLE block. So, values smaller than 11 for
-        RLE_RESTART_TRESHOLD only make the IPS file larger than if
-        no RLE compression would be used.
+        Start with a new block (and stop with the current one) only if there
+        are at least RLE_RESTART_TRESHOLD + 1 equal bytes in a row. Restarting
+        for RLE has some overhead: possibly 5 bytes for the interrupted current
+        block plus 7 bytes for the RLE block. So, values smaller than 11 for
+        RLE_RESTART_TRESHOLD only make the IPS file larger than if no RLE
+        compression would be used.
       */
       if (ndiffs > RLE_RESTART_TRESHOLD)
         {
@@ -285,10 +284,9 @@ check_for_rle (unsigned char byte, unsigned char *buf)
             }
         }
       /*
-        Use RLE only if the last RLE_START_TRESHOLD + 1 (or more)
-        bytes were the same. Values smaller than 7 for
-        RLE_START_TRESHOLD will make the IPS file larger than if no
-        RLE would be used (for this block).
+        Use RLE only if the last RLE_START_TRESHOLD + 1 (or more) bytes were
+        the same. Values smaller than 7 for RLE_START_TRESHOLD will make the
+        IPS file larger than if no RLE would be used (for this block).
         normal block:
         i      address high byte
         i + 1  address medium byte
@@ -306,8 +304,8 @@ check_for_rle (unsigned char byte, unsigned char *buf)
         i + 5  length high byte
         i + 6  length low byte
         i + 7  new byte
-        The value 7 (instead of 2) is to compensate for normal
-        blocks that immediately follow the RLE block.
+        The value 7 (instead of 2) is to compensate for normal blocks that
+        immediately follow the RLE block.
       */
       else if (ndiffs > RLE_START_TRESHOLD)
         {
@@ -331,6 +329,18 @@ check_for_rle (unsigned char byte, unsigned char *buf)
 }
 
 
+static void remove_destfile (void)
+{
+  if (destfname)
+    {
+      printf ("Removing: %s\n", destfname);
+      fclose (destfile);                        // necessary under DOS/Win9x for DJGPP port
+      remove (destfname);
+      destfile = NULL;
+    }
+}
+
+
 int
 ips_create (const char *orgname, const char *modname)
 {
@@ -349,11 +359,16 @@ ips_create (const char *orgname, const char *modname)
     }
   strcpy (ipsname, orgname);
   setext (ipsname, ".IPS");
+  ucon64_fbackup (NULL, ipsname);
   if ((ipsfile = fopen (ipsname, "wb")) == NULL)
     {
       fprintf (stderr, "ERROR: Could not open %s\n", ipsname);
       exit (1);
     }
+
+  destfname = ipsname;
+  destfile = ipsfile;
+  register_func (remove_destfile);
 
   orgfilesize = q_fsize (orgname);
   modfilesize = q_fsize (modname);
@@ -369,7 +384,7 @@ next_byte:
       if (feof (modfile))
         break;
 
-      if (modfilesize >= 0x454f46 && filepos == 0x454f46)
+      if (modfilesize > 0x454f46 && filepos == 0x454f46)
         /*
           We must avoid writing 0x454f46 (4542278) as offset, because it has a
           special meaning. Offset 0x454f46 is interpreted as EOF marker. It is
@@ -379,7 +394,7 @@ next_byte:
           modfile.
         */
         {
-          flush_diffs (buf);                // commit any pending data
+          flush_diffs (buf);                    // commit any pending data
 
           write_address (ipsfile, ipsname, 0x454f46 - 1);
           // write 2 patch bytes (for offsets 0x454f45 and 0x454f46)
@@ -389,7 +404,7 @@ next_byte:
           ndiffs = 2;
           flush_diffs (buf);
 
-          fseek (orgfile, filepos, SEEK_SET); // keep the files synchronized
+          fseek (orgfile, filepos, SEEK_SET);   // keep the files synchronized
 #ifdef  DEBUG_IPS
           printf ("[%02x] => %02x\n"
                   "[%02x] => %02x\n"
@@ -466,6 +481,7 @@ next_byte:
   if (modfilesize < orgfilesize)
     write_address (ipsfile, ipsname, modfilesize);
 
+  unregister_func (remove_destfile);
   fclose (orgfile);
   fclose (modfile);
   fclose (ipsfile);

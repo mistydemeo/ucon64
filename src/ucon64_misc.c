@@ -27,11 +27,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include <dirent.h>
-#include <sys/stat.h>
 #include <limits.h>
+#include <sys/stat.h>
 
 #if     defined __unix__ || defined __BEOS__ || defined AMIGA
-  #include <unistd.h>                             // ioperm() (libc5)
+#include <unistd.h>                             // ioperm() (libc5)
 #endif
 
 #include "config.h"
@@ -41,7 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
     #include <machine/sysarch.h>
   #elif   defined __linux__
     #ifdef  __GLIBC__
-      #include <sys/io.h>                             // ioperm() (glibc)
+      #include <sys/io.h>                       // ioperm() (glibc)
     #endif
   #elif   defined __BEOS__ || defined AMIGA
     #include <fcntl.h>
@@ -549,10 +549,19 @@ ucon64_pad (const char *filename, int start, int size)
   FILE *file;
   int oldsize = q_fsize (filename) - start, sizeleft;
   unsigned char padbuffer[MAXBUFSIZE];
+  struct stat fstate;
 
   // now we can also "pad" to smaller sizes
   if (oldsize > size)
-    truncate (filename, size + start);
+    {
+      stat (filename, &fstate);
+      if (chmod (filename, fstate.st_mode | S_IWUSR))
+        {
+          fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
+          exit (1);
+        }
+      truncate (filename, size + start);
+    }
   else if (oldsize < size)
     {
       // don't use truncate() to enlarge files, because the result is undefined (by POSIX)

@@ -80,7 +80,7 @@ typedef struct st_ucon64
   const char *comment;                          // NES UNIF
   int interleaved;                              // rom is interleaved (swapped)
   int console;                                  // the detected console system
-  int do_not_calc_crc;                          // disable crc calc. to speed up --ls,--lsv, etc.
+  int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
 
 #define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
 #define UCON64_TYPE_ISCD(x) (x == UCON64_CD)
@@ -115,16 +115,16 @@ typedef struct st_rominfo
   unsigned int current_crc32;                   // current crc32 value of ROM
   unsigned int db_crc32;                        // crc32 value of ROM in internal database
 
-  int has_internal_crc;                         // ROM has internal CRC (SNES, Mega Drive, Game Boy)
-  unsigned int current_internal_crc;            // calculated CRC
+  int has_internal_crc;                         // ROM has internal checksum (SNES, Mega Drive, Game Boy)
+  unsigned int current_internal_crc;            // calculated checksum
 
-  unsigned int internal_crc;                    // internal CRC
-  int internal_crc_start;                       // start of internal CRC in ROM header
-  int internal_crc_len;                         // length (in bytes) of internal CRC in ROM header
+  unsigned int internal_crc;                    // internal checksum
+  int internal_crc_start;                       // start of internal checksum in ROM header
+  int internal_crc_len;                         // length (in bytes) of internal checksum in ROM header
 
-  char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal CRC
-  int internal_crc2_start;                      // start of 2nd/inverse internal CRC
-  int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal CRC
+  char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal checksum
+  int internal_crc2_start;                      // start of 2nd/inverse internal checksum
+  int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal checksum
 } st_rominfo_t;
 
 extern const struct option long_options[];

@@ -242,12 +242,12 @@ snes_dint (st_rominfo_t *rominfo)
   handle_existing_file (dest_name, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", src_name);
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
       return -1;
     }
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", dest_name);
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", dest_name);
       return -1;
     }
 
@@ -261,7 +261,7 @@ snes_dint (st_rominfo_t *rominfo)
     success = 0;
   if (!success)
     {
-      fprintf (stderr, "ERROR: Could not read from %s\n", ucon64.rom);
+      fprintf (stderr, "ERROR: Can't read from %s\n", ucon64.rom);
       free (buffer);
       fclose (srcfile);
       fclose (destfile);
@@ -381,12 +381,12 @@ snes_convert_sramfile (const void *header)
   handle_existing_file (dest_name, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", src_name);
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
       return -1;
     }
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", dest_name);
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", dest_name);
       return -1;
     }
 
@@ -1299,12 +1299,12 @@ TODO: make sense of Diddy's Kong Quest codes
   handle_existing_file (ucon64.rom, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", src_name);
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
       return -1;
     }
   if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", ucon64.rom);
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", ucon64.rom);
       return -1;
     }
   if (rominfo->buheader_len)                    // copy header (if present)
@@ -1408,12 +1408,12 @@ a2 18 01 bd 27 20 89 10 00 f0/d0 01   a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
   handle_existing_file (ucon64.rom, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", src_name);
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
       return -1;
     }
   if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", ucon64.rom);
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", ucon64.rom);
       return -1;
     }
   if (rominfo->buheader_len)                    // copy header (if present)
@@ -1500,12 +1500,12 @@ A9 01 8F 0D 42 00               A9 00 8F 0D 42 00
   handle_existing_file (ucon64.rom, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", src_name);
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", src_name);
       return -1;
     }
   if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", ucon64.rom);
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", ucon64.rom);
       return -1;
     }
   if (rominfo->buheader_len)                    // copy header (if present)
@@ -2135,7 +2135,7 @@ snes_init (st_rominfo_t *rominfo)
       x = snes_header.inverse_checksum_low;
       x += snes_header.inverse_checksum_high << 8;
       sprintf (buf,
-               "Inverse checksum: %%s, 0x%%0%dlx + 0x%%0%dlx = 0x%%0%dlx %%s",
+               "Inverse Checksum: %%s, 0x%%0%dlx + 0x%%0%dlx = 0x%%0%dlx %%s",
                rominfo->internal_crc2_len * 2, rominfo->internal_crc2_len * 2,
                rominfo->internal_crc2_len * 2);
       sprintf (rominfo->internal_crc2, buf,

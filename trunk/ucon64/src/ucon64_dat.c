@@ -376,7 +376,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 // parse a dat entry into st_ucon64_dat_t
 {
   static const char *dat_country[28][2] = {
-    {"(FC)", "French Canadian"},
+    {"(FC)", "French Canada"},
     {"(FN)", "Finland"},
     {"(G)", "Germany"},
     {"(GR)", "Greece"},
@@ -412,8 +412,8 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     {"(F)", "France"},
     {NULL, NULL}
   };
-  // Often flags contain numbers, so don't search for the closing bracket
   static const char *dat_flags[][2] = {
+    // Often flags contain numbers, so don't search for the closing bracket
     {"[a", "Alternate"},
     {"[p", "Pirate"},
     {"[b", "Bad dump"},

@@ -51,11 +51,16 @@ IO_Tuple;
 #endif // defined __unix__ || defined __BEOS__
 #endif // BACKUP
 
+typedef struct st_track_modes
+  {
+    char *common;
+    char *cdrdao;
+  } st_track_modes_t;
 #define MODE1_2048 0
 #define MODE1_2352 1
 #define MODE2_2336 2
 #define MODE2_2352 3
-extern const char *track_modes[];
+extern const st_track_modes_t track_modes[];
 
 #define MBIT 131072
 
@@ -114,6 +119,8 @@ extern const char *ucon64_console_error; //std. error message if the correct con
 
 extern int ucon64_bin2iso (const char *image, int track_mode);
 extern int ucon64_trackmode_probe (const char *image);
+extern int ucon64_mktoc (st_rominfo_t *rominfo);
+extern int ucon64_mkcue (st_rominfo_t *rominfo);
 
 extern int ucon64_e (const char *rominfo);
 extern int ucon64_ls (const char *path, int mode);

@@ -174,9 +174,9 @@ const struct option long_options[] = {
     {"mki", 0, 0, UCON64_MKI},
     {"mkppf", 0, 0, UCON64_MKPPF},
     {"mktoc", 0, 0, UCON64_MKTOC},
-    {"multi", 0, 0, UCON64_MULTI},
-    {"multi1", 0, 0, UCON64_MULTI1},
-    {"multi2", 0, 0, UCON64_MULTI2},
+    {"multi", 1, 0, UCON64_MULTI},
+    {"multi1", 1, 0, UCON64_MULTI1},
+    {"multi2", 1, 0, UCON64_MULTI2},
     {"mvs", 0, 0, UCON64_MVS},
     {"n", 0, 0, UCON64_N},
     {"n2", 0, 0, UCON64_N2},
@@ -514,6 +514,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   else if (UCON64_TYPE_ISCD (ucon64.type))
     {
       st_iso_header_t iso_header;
+      int value;
 
 //      ucon64_flush (rominfo);
 
@@ -535,7 +536,8 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       rominfo->maker = iso_header.publisher_id;
 
 //misc stuff
-      sprintf (rominfo->misc, "Track Mode: %s\n", track_modes[ucon64_trackmode_probe (romfile)]);
+      value = ucon64_trackmode_probe (romfile);
+      sprintf (rominfo->misc, "Track Mode: %s (Cdrdao: %s)\n", track_modes[value].common, track_modes[value].cdrdao);
 
 //      rominfo->console_usage = 
 

@@ -1,7 +1,7 @@
 /*
 aps.c - APS support for uCON64
 
-written by 1998 Silo / BlackBag
+written by 1998 - Silo / BlackBag
            1999 - 2001 NoisyB (noisyb@gmx.net)
                   2002 dbjh
 
@@ -41,7 +41,7 @@ const char *aps_usage[] =
     NULL,
     NULL,
     "  " OPTION_S "a           apply APS PATCH to ROM (APS<=v1.2)\n"
-    "  " OPTION_LONG_S "mka=MOD_ROM create APS patch from MOD_ROM; " OPTION_LONG_S "rom=ORIGINAL_ROM\n"
+    "  " OPTION_LONG_S "mka=ORG_ROM create APS patch; " OPTION_LONG_S "rom=MOD_ROM\n"
     "  " OPTION_LONG_S "na=DESC     change APS single line DESCRIPTION\n",
     NULL
   };

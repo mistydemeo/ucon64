@@ -546,9 +546,7 @@ main (int argc, char **argv)
 #ifdef  HAVE_ZLIB_H
       int process_multizips, n_entries;
 
-      /*
-        was the last argument the name of a (the) patch file?
-      */
+      // Was the last argument the name of a (the) patch file?
       if (rom_index == argc - 1)
         if (!strcmp (argv[rom_index], ucon64.patch_file))
           break;
@@ -1154,9 +1152,9 @@ ucon64_usage (int argc, char *argv[])
 #endif
 
 #ifdef  PARALLEL
-#define PARALLEL_OPTION  "  " OPTION_LONG_S "port=PORT   specify parallel PORT={3bc, 378, 278, ...}\n"
+#define PARALLEL_MSG "  " OPTION_LONG_S "port=PORT   specify parallel PORT={3bc, 378, 278, ...}\n"
 #else
-#define PARALLEL_OPTION  ""
+#define PARALLEL_MSG ""
 #endif
 
   printf (
@@ -1164,7 +1162,7 @@ ucon64_usage (int argc, char *argv[])
     "Options\n"
     "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
     ANSI_COLOR_MSG
-    PARALLEL_OPTION
+    PARALLEL_MSG
     "  " OPTION_LONG_S "hdn=N       force ROM has backup unit/emulator header with N Bytes size\n"
     "  " OPTION_LONG_S "hd          same as " OPTION_LONG_S "hdn=512\n"
     "                  most backup units use a header with 512 Bytes size\n"
@@ -1552,6 +1550,7 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 #endif // SAMPLE
   }
 
+#undef  PARALLEL_MSG
 #ifdef  PARALLEL
 #define PARALLEL_MSG "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n" \
      "      parallel port. If that is the case give a hardware address. For example:\n" \

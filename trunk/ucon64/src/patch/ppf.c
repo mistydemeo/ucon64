@@ -41,7 +41,7 @@ const char *ppf_usage[] =
     NULL,
     NULL,
     "  " OPTION_LONG_S "ppf         apply PPF PATCH to IMAGE (PPF<=v2.0); " OPTION_LONG_S "rom=IMAGE\n"
-    "  " OPTION_LONG_S "mkppf=IMAGE create PPF patch from IMAGE; " OPTION_LONG_S "rom=ORIGINAL_IMAGE\n"
+    "  " OPTION_LONG_S "mkppf=ORG_IMG create PPF patch; " OPTION_LONG_S "rom=MOD_IMAGE\n"
     "  " OPTION_LONG_S "nppf=DESC   change PPF single line DESCRIPTION\n"
     "  " OPTION_LONG_S "idppf=FILE_ID.DIZ change FILE_ID.DIZ of PPF PATCH (PPF v2.0)\n",
     NULL

@@ -58,12 +58,12 @@ bsl (const char *modname, const char *bslname)
     {
       memset (addstr, ' ', sizeof (addstr));
       fscanf (bslfile, "%[-1234567890]\n", addstr);
-      byte = fgetc (bslfile);
+      fgetc (bslfile);
       add = atoi (addstr);
 
       memset (datstr, ' ', sizeof (datstr));
       fscanf (bslfile, "%[-1234567890]\n", datstr);
-      byte = fgetc (bslfile);
+      fgetc (bslfile);
       dat = atoi (datstr);
 
       if ((add == -1) && (dat == -1))
@@ -77,12 +77,12 @@ bsl (const char *modname, const char *bslname)
 
   memset (addstr, ' ', sizeof (addstr));
   fscanf (bslfile, "%[-1234567890]\n", addstr);
-  byte = fgetc (bslfile);
+  fgetc (bslfile);
   add = atoi (addstr);
 
   memset (datstr, ' ', sizeof (datstr));
   fscanf (bslfile, "%[-1234567890]\n", datstr);
-  byte = fgetc (bslfile);
+  fgetc (bslfile);
   numdat = atoi (datstr);
 
   fseek (modfile, add, SEEK_SET);

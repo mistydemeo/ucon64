@@ -49,7 +49,7 @@ const char *ips_usage[] =
   NULL,
   NULL,
   "  " OPTION_S "i           apply IPS PATCH to ROM (IPS<=v1.2)\n"
-  "  " OPTION_LONG_S "mki=MOD_ROM create IPS patch from MOD_ROM; " OPTION_LONG_S "rom=ORIGINAL_ROM\n",
+  "  " OPTION_LONG_S "mki=ORG_ROM create IPS patch; " OPTION_LONG_S "rom=MOD_ROM\n",
   NULL
 };
 

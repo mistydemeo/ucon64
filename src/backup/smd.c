@@ -45,7 +45,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "smd.h"
 #include <stdio.h>
-#include <malloc.h>
 #include <string.h>
 #ifdef  __UNIX__
 #include <unistd.h>             // usleep(), microseconds

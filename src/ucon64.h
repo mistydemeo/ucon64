@@ -71,7 +71,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_GAMECUBE		27
 #define ucon64_XBOX		28
 
-#define ucon64_VERSION "1.9.8beta2"
+#define ucon64_VERSION "1.9.8beta3"
 
 #ifdef  __UNIX__
 #ifdef  __SOLARIS__                             // Hmmm, Solaris *is* a UNIX

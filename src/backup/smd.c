@@ -2,7 +2,7 @@
 smd.c - Super Magic Drive support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2001 dbjh
+           2001 - 2002 dbjh
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -47,9 +47,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "config.h"
-#include "misc.h"
-#include "ucon64.h"
+#include "config.h"                             // config.h might define BACKUP
+#ifdef BACKUP
+#ifdef  __unix__
+#include <unistd.h>                             // usleep(), microseconds
+#elif   defined __MSDOS__
+#include <dos.h>                                // delay(), milliseconds
+#elif   defined __BEOS__
+#include <OS.h>                                 // snooze(), microseconds
+#endif
+#include "misc.h"                               // including misc.h after OS.h
+#include "ucon64.h"                             //  avoids warnings about MIN & MAX
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "smd.h"
@@ -65,16 +73,6 @@ const char *smd_usage[] =
 #endif // BACKUP
     NULL
 };
-
-
-#ifdef BACKUP
-#ifdef  __unix__
-#include <unistd.h>                             // usleep(), microseconds
-#elif   defined __MSDOS__
-#include <dos.h>                                // delay(), milliseconds
-#elif   defined __BEOS__
-#include <OS.h>                                 // snooze(), microseconds
-#endif
 
 
 #ifndef __BEOS__

@@ -698,22 +698,20 @@ swc_write_sram (char *filename, unsigned int parport)
 int
 swc_usage (int argc, char *argv[])
 {
-  printf ( swc_TITLE "\n"
-
-    "  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
-     "                receives automatically when $ROM does not exist\n"
-     "                Press q to abort ^C will cause invalid state of backup unit\n"
-     "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
-     "                receives automatically when $ROM(=SRAM) does not exist\n"
-     "                Press q to abort ^C will cause invalid state of backup unit\n"
-
-"NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
-"      parallel port. If that is the case give a hardware address:\n"
-"      ucon64 -xswc \"Super Mario World (U).swc\" 0x378\n"
-"      In order to connect the Super Wild Card to a PC's parallel port you\n"
-"      need a standard bidirectional parallel cable like for the most backup\n"
-"      units\n"
-         );
+  printf (swc_TITLE "\n"
+          "  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
+          "                receives automatically when $ROM does not exist\n"
+          "                Press q to abort ^C will cause invalid state of backup unit\n"
+          "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
+          "                receives automatically when $ROM(=SRAM) does not exist\n"
+          "                Press q to abort ^C will cause invalid state of backup unit\n"
+          "\n"
+          "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
+          "      parallel port. If that is the case give a hardware address:\n"
+          "      ucon64 -xswc \"Super Mario World (U).swc\" 0x378\n"
+          "      In order to connect the Super Wild Card to a PC's parallel port you\n"
+          "      need a standard bidirectional parallel cable like for the most backup\n"
+          "      units\n");
   return 0;
 }
 

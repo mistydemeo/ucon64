@@ -46,7 +46,7 @@ Q18: <a href="#18">Why is my backup unit (still) not supported?</a><br>
 <br>
 Q19: <a href="#19">How do I specify a bank number for the GB Xchanger?</a><br>
 <br>
-Q20: <a href="#20">What's the difference between the Flash Advance Linker options -xfals and -xfalb&#60;n&#62;?</a><br>
+Q20: <a href="#20">What's the difference between the Flash Advance Linker options -xfals and -xfalb &#60;n&#62;?</a><br>
 <br>
 Q21: <a href="#21">uCON64 exits with the message "Flash cart erase failed!" when I try
    to write a multirom to my flash card. What's wrong?</a><br>
@@ -261,18 +261,18 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
 <br>
 <p>
 <a name="19"><b>Q19</b>: How do I specify a bank number for the GB Xchanger?</a><br>
-<b>A</b>: ucon64 -xgbxb&#60;0&#62; "Pokemon (Green).sav" wouldn't work. You should
+<b>A</b>: ucon64 -xgbxb &#60;0&#62; "Pokemon (Green).sav" wouldn't work. You should
    leave out those angle brackets. This should work:<br>
-   &nbsp;&nbsp; ucon64 -xgbxb0 "Pokemon (Green).sav"<br>
+   &nbsp;&nbsp; ucon64 -xgbxb 0 "Pokemon (Green).sav"<br>
 <br>
 <p>
-<a name="20"><b>Q20</b>: What's the difference between the Flash Advance Linker options -xfals and -xfalb&#60;n&#62;?</a><br>
-<b>A</b>: When saving -xfals saves all 256kB while -xfalb&#60;n&#62; saves only the 64kB of bank n.
-   When restoring -xfals starts restoring the SRAM in bank 1 while -xfalb&#60;n&#62; starts in bank n.
+<a name="20"><b>Q20</b>: What's the difference between the Flash Advance Linker options -xfals and -xfalb &#60;n&#62;?</a><br>
+<b>A</b>: When saving -xfals saves all 256kB while -xfalb &#60;n&#62; saves only the 64kB of bank n.
+   When restoring -xfals starts restoring the SRAM in bank 1 while -xfalb &#60;n&#62; starts in bank n.
    For example, if you have Super Mario Advance 2 (J) in your Flash Card in "ROM bank" 4
    (GBA Pack) and would like to save/restore SRAM bank 4 you should do something like:<br>
-   &nbsp;&nbsp; ucon64 -xfalb4 "Super Mario Advance 2 (J).sav"<br>
-   Note that the file size determines how many bytes are restored, even when you use -xfalb&#60;n&#62;.
+   &nbsp;&nbsp; ucon64 -xfalb 4 "Super Mario Advance 2 (J).sav"<br>
+   Note that the file size determines how many bytes are restored, even when you use -xfalb &#60;n&#62;.
    So, if the file is greater than 64kB more than one bank will be written to.<br>
 <br>
 <p>

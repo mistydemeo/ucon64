@@ -4999,7 +4999,7 @@ nes_compare (const void *key, const void *found)
 {
   /*
     The return statement looks overly complicated, but is really necessary.
-    This contruct:
+    This construct:
       return ((st_nes_data_t *) key)->crc32 - ((st_nes_data_t *) found)->crc32;
     does *not* work correctly for all cases.
   */

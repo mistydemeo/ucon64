@@ -740,10 +740,10 @@ check_card (void)
   char game_name[16];
   int i;
 
-  fputs ("Checking ROM data...\n", stdout);
+  puts ("Checking ROM data...");
 
   if (mbc_type == ROCKET)
-    fputs ("NOTE: Rocket Games cartridge detected\n", stdout);
+    puts ("NOTE: Rocket Games cartridge detected");
   else if (memcmp (buffer + 4, gb_logodata, GB_LOGODATA_LEN) != 0)
     {
       fputs ("ERROR: Cartridge does not contain official Nintendo logo data\n", stderr);
@@ -974,7 +974,7 @@ win_write_eeprom_16k (unsigned int bank)
           set_ai_data ((unsigned char) 2, 0x80); // disable wr/rd inc.
           set_ai_data ((unsigned char) 0, 0xff); // point to xxff
           if (data_polling ())
-            fputs ("\nWARNING: Write error\n", stdout); // was: "Write error check (d6)"
+            puts ("\nWARNING: Write error");    // was: "Write error check (d6)"
 
           wr_done = 0;
 
@@ -1308,9 +1308,9 @@ check_port (void)
 
   // If we get here, a GBX was detected
   if (port_mode == UCON64_EPP)
-    fputs ("GBX found. EPP found\n", stdout);
+    puts ("GBX found. EPP found");
   else
-    fputs ("GBX found. EPP not found or not enabled - SPP used\n", stdout);
+    puts ("GBX found. EPP not found or not enabled - SPP used");
 
   return 0;
 }
@@ -1504,14 +1504,14 @@ try_read0 (void)
       try_read ();
     }
   set_bank (0x6000, (unsigned char) 1);
-  fputs ("6000:1\n", stdout);
+  puts ("6000:1");
   for (j = 0; j < 4; j++)
     {
       set_sram_bank ((unsigned char) j);
       try_read ();
     }
   set_bank (0x6000, (unsigned char) 0);
-  fputs ("6000:0\n", stdout);
+  puts ("6000:0");
   for (j = 0; j < 4; j++)
     {
       set_sram_bank ((unsigned char) j);
@@ -1587,7 +1587,7 @@ verify_card_from_file (const char *filename, unsigned int parport)
       ucon64_gauge (starttime, (bank + 1) * 0x4000, filesize);
     }
   fclose (file);
-  fputs ("\nVerify card OK\n", stdout);
+  puts ("\nVerify card OK");
 
   return 0;
 }
@@ -1754,7 +1754,7 @@ gbx_write_rom (const char *filename, unsigned int parport)
 #if 0 // write_eeprom_16k() already calls verify_rom_16k() (indirectly)...
   // remove last gauge
   fputs ("\r                                                                              \r", stdout);
-  fputs ("Verifying card...\n", stdout);
+  puts ("Verifying card...");
   fseek (file, 0, SEEK_SET);
   n_bytes = 0;
   starttime = time (NULL);

@@ -780,6 +780,10 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
   st_iso_header_t iso_header;
   FILE *fh = NULL;
 
+#ifndef USE_ANSI_COLOR
+  (void) ansi_color;                            // warning remover
+#endif
+
 #if 0
   if (image->console_usage != NULL)
     {

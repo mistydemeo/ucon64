@@ -342,11 +342,15 @@ const struct option options[] = {
     {"xgd6", 0, 0, UCON64_XGD6},
     {"xgd6r", 0, 0, UCON64_XGD6R},
     {"xgd6s", 0, 0, UCON64_XGD6S},
+    {"xgg", 0, 0, UCON64_XGG},
+    {"xggs", 0, 0, UCON64_XGGS},
     {"xlit", 0, 0, UCON64_XLIT},
     {"xmccl", 0, 0, UCON64_XMCCL},
     {"xmd", 0, 0, UCON64_XMD},
     {"xmds", 0, 0, UCON64_XMDS},
     {"xmsg", 0, 0, UCON64_XMSG},
+    {"xpce", 0, 0, UCON64_XPCE},
+    {"xpces", 0, 0, UCON64_XPCES},
     {"xsmc", 0, 0, UCON64_XSMC},
     {"xsmcr", 0, 0, UCON64_XSMCR},
     {"xsmd", 0, 0, UCON64_XSMD},
@@ -1227,7 +1231,11 @@ ucon64_nfo (void)
   if (ucon64.discmage_enabled)
     if (ucon64.image)
       {
-        dm_nfo (ucon64.image, ucon64.quiet < 0 ? 1 : 0, ucon64.ansi_color ? 1 : 0);
+        dm_nfo (ucon64.image, ucon64.quiet < 0 ? 1 : 0,
+#ifdef  USE_ANSI_COLOR
+                ucon64.ansi_color ? 1 :
+#endif
+                                    0);
         fputc ('\n', stdout);
 
         return 0; // no crc calc. for disc images and therefore no dat entry either
@@ -1499,7 +1507,7 @@ ucon64_usage (int argc, char *argv[])
     {
       UCON64_GEN,
 #ifdef  USE_PARALLEL
-      {genesis_usage, smd_usage, md_usage, /* mgd_usage, */ NULL}
+      {genesis_usage, smd_usage, mdpro_usage, /* mgd_usage, */ NULL}
 #else
       {genesis_usage, NULL}
 #endif // USE_PARALLEL
@@ -1523,7 +1531,7 @@ ucon64_usage (int argc, char *argv[])
     {
       UCON64_PCE,
 #ifdef  USE_PARALLEL
-      {pcengine_usage, msg_usage, /* mgd_usage, */ NULL}
+      {pcengine_usage, msg_usage, pcepro_usage, /* mgd_usage, */ NULL}
 #else
       {pcengine_usage, NULL}
 #endif // USE_PARALLEL
@@ -1538,7 +1546,11 @@ ucon64_usage (int argc, char *argv[])
     },
     {
       UCON64_SMS,
+#ifdef  USE_PARALLEL
+      {sms_usage, smsggpro_usage, NULL}
+#else
       {sms_usage, NULL}
+#endif // USE_PARALLEL
     },
     {
       UCON64_SWAN,

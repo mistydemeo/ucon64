@@ -1,0 +1,314 @@
+<html><head><title>README</title></head><body bgcolor="#c0c0c0"><tt><pre>
+uCON64 1.9.5 GNU/Linux 1999/2000/2001 by NoisyB (noisyb@gmx.net)
+Uses code from various people. See 'DEVELOPERS' for more!
+This may be freely redistributed under the terms of the GNU Public License
+
+USAGE: ucon64 [OPTION(S)] ROM [FILE]
+
+TODO: $ROM could also be the name of a *.ZIP archive
+      it will automatically find and extract the ROM
+
+TODO:  -sh	use uCON64 in shell modus
+  -e		emulate/run ROM (check INSTALL and $HOME/.ucon64rc for more)
+  -db		ROM database statistics (# of entries)
+  -dbv		view ROM database (all entries)
+  -crc		show CRC32 value of ROM
+  -crchd	show CRC32 value of ROM (regarding to +512 Bytes header)
+TODO:  -dbs	search ROM database (all entries) by CRC32; $ROM=CRC32
+  -rl		rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY
+  -ru		rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY
+  -hex		show ROM as hexdump; use "ucon64 -hex $ROM|less"
+  -ls		generate ROM list for all ROMs; $ROM=DIRECTORY
+  -c		compare ROMs; $FILE=OTHER_ROM
+  -cs		compare ROMs for similarities; $FILE=OTHER_ROM
+  -find		find string in ROM; $FILE=STRING
+  -swap		swap/(de)interleave (ALL) Bytes in ROM (1234<->2143)
+  -pad		pad ROM to full Mb
+  -padhd	pad ROM to full Mb (regarding to +512 Bytes header)
+  -ispad	check if ROM is padded
+  -strip	strip Bytes from end of ROM; $FILE=VALUE
+  -stp		strip first 512 Bytes (possible header) from ROM
+  -ins		insert 512 Bytes (0x00) before ROM
+  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
+  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -mki		create IPS patch; $FILE=CHANGED_ROM
+  -a		apply APS patch (<=1.2); $FILE=PATCHFILE
+  -mka		create APS patch; $FILE=CHANGED_ROM
+  -na		change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION
+  -ppf		apply PPF patch (<=2.0); $ROM=ISO_IMAGE $FILE=PATCHFILE
+  -mkppf	create PPF patch; $ROM=ISO_IMAGE $FILE=CHANGED_IMAGE
+  -nppf		change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION
+  -idppf	change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ
+TODO:  -xps	apply XPS patch; $ROM=ISO_IMAGE $FILE=PATCHFILE
+TODO:  -mkxps	create XPS patch; $ROM=ISO_IMAGE $FILE=CHANGED_IMAGE
+
+GameBoy Advance
+2001 Nintendo http://www.nintendo.com
+  -gba		force recognition
+  -hd		force ROM has header (+512 Bytes)
+  -nhd		force ROM has no header
+  *		show info (default)
+  -n		change ROM name; $FILE=NEWNAME
+  -logo		restore ROM logo character data 0x04-0x9F
+  -chk		fix ROM checksum
+  -sram		patch ROM for SRAM saving
+  -crp		slow down Flash Advance Linker access for ROM (crash patch);
+		$FILE=WAIT_TIME
+		$FILE=0  (default in most crash patches)
+		$FILE=4  (faster than 0, slower than 8)
+		$FILE=8  (faster than 4, slower than 28)
+		$FILE=12 (slowest cartridge access speed)
+		$FILE=16 (faster than 28, but slower than 20)
+		$FILE=20 (default in most original carts)
+		$FILE=24 (fastest cartridge access speed)
+		$FILE=28 (faster than 8 but slower than 16)
+  -strip	strip Bytes from end of ROM (use -ispad before); $FILE=VALUE
+  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -mki		create IPS patch; $FILE=CHANGED_ROM
+  -xfal         send/receive to/from Flash Advance Linker; $FILE=PORT
+  		receives automatically when $ROM does not exist
+TODO: test if -xfal does work with the hardware
+
+Nintendo 64
+1996 Nintendo http://www.nintendo.com
+  -n64		force recognition
+  -swp		force ROM is swapped (2143)
+  -nswp		force ROM is not swapped (1234)
+  *		show info (default)
+  -n		change ROM name; $FILE=NEWNAME
+  -v64		convert to Doctor V64 (and compatibles/swapped)
+  -z64		convert to Z64 (Zip Drive/not swapped)
+TODO:  -f	remove NTSC/PAL protection
+  -bot		add/extract boot code to(from) ROM; $FILE=BOOTCODE
+		extracts automatically when $FILE does not exist (4032 Bytes)
+                supports: 6101, 6102, 6103, 6105 and 6106 boot codes
+  -sram		LAC's Makesram; $ROM=(LAC's SRAM ROM image) $FILE=SRAMFILE
+  		the SRAMFILE must have a size of 512 Bytes
+  -usms		Jos Kwanten's ultraSMS (Sega Master System/GameGear Emulator);
+		$ROM=(Jos Kwanten's ultraSMS ROM image) $FILE=SMSROM(<=4Mb)
+  -chk		fix ROM checksum
+TODO:  -bios	enable backup in Doctor V64 BIOS; $ROM=BIOS
+  -p		pad ROM to full Mb
+TODO:  -gs	apply GameShark code (permanent); $FILE=CODE
+  -a		apply APS patch (<=1.2); $FILE=PATCHFILE
+  -mka		create APS patch; $FILE=CHANGED_ROM
+  -na		change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION
+  -xv64		send/receive to/from Doctor V64; $FILE=PORT
+		receives automatically when $ROM does not exist
+  -xdjr         send/receive to/from Doctor64 Jr; $FILE=PORT
+  		receives automatically when $ROM does not exist
+TODO: test if -xdjr does work with the hardware
+
+Panther(32bit prototype)/Jaguar64/(Jaguar64 CD)
+1989 Flare2/1993 Atari/1995 Atari
+  -jag		force recognition
+  -hd		force ROM has header (+512 Bytes)
+  -nhd		force ROM has no header
+  *		show info (default)
+
+Super Nintendo/SNES/Super Famicon
+1990 Nintendo http://www.nintendo.com
+  -snes		force recognition
+  -hi		force ROM is HiROM
+  -nhi		force ROM is not HiROM
+  -hd		force ROM has SMC/FIG/SWC header (+512 Bytes)
+  -nhd		force ROM has no SMC/FIG/SWC header (MGD2/MGH/RAW)
+  -ns		force ROM is not splitted
+  *		show info (default)
+  -n		change ROM name; $FILE=NEWNAME
+  -smc		convert to Super Magicom/SMC
+  -fig		convert to *Pro Fighter*/(all)FIG
+  -swc		convert to Super Wild Card*/(all)SWC
+  -mgd		convert to Multi Game*/MGD2/MGH/RAW
+  -gd3		convert to Professor SF(2) Game Doctor SF3/6/7
+  -col		convert 0xRRGGBB (html) <-> 0xXXXX (snes); $ROM=0xCOLOR
+		this routine was used to find green colors in games and
+		to replace them with red colors (blood mode)
+TODO:  -sx	convert to Snes9X (Emulator)/S9X save state; $ROM=SAVESTATE
+TODO:  -zs	convert to ZSNES (Emulator) save state; $ROM=SAVESTATE
+TODO:  -xzs	extract GFX from ZSNES (Emulator) save state; $ROM=SAVESTATE
+TODO:  -spc	convert SPC sound to WAV; $ROM=SPCFILE
+  -j            join splitted ROM
+  -s		split ROM into 4Mb parts (for backup unit(s) with fdd)
+  -p		pad ROM to full Mb
+TODO:  -k	remove protection (crack)
+  -f		remove NTSC/PAL protection
+  -l		convert to LoROM/SlowROM
+  -chk		fix ROM checksum
+  -gge		encode GameGenie code; $ROM=AAAAAA:VV
+  -ggd		decode GameGenie code; $ROM=XXXX-XXXX
+  -gg		apply GameGenie code (permanent); $FILE=XXXX-XXXX
+  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
+  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -mki		create IPS patch; $FILE=CHANGED_ROM
+TODO:  -xsmc	send/receive to/from Super Magicom/SMC; $FILE=PORT
+		receives automatically when $ROM does not exist
+TODO:  -xswc    send/receive to/from Super Wild Card*/(all)SWC; $FILE=PORT
+		receives automatically when $ROM does not exist
+TODO:  -xfig	send/receive to/from *Pro Fighter*/(all)FIG; $FILE=PORT
+		receives automatically when $ROM does not exist
+TODO:  -xmgd    send/receive to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT
+		receives automatically when $ROM does not exist
+
+Neo Geo/(Neo Geo CD(Z))/MVS/(M.A.M.E.)
+1990/1994 SNK http://www.neogeo.co.jp
+  -ng		force recognition; NEEDED
+  -ns		force ROM is not splitted
+  *		show info (default)
+TODO:  -mgd	convert to Multi Game Doctor/MGD2/RAW
+TODO:  -mvs	convert to Arcade/MVS
+TODO:  -j	join splitted ROM
+TODO:  -s	split ROM into 4Mb parts (for backup unit(s) with fdd)
+TODO:  -ngs	convert Neo Geo sound to WAV; $ROM=*_m1.rom or *_v*.rom
+  -sam		convert SAM/M.A.M.E. sound to WAV; $ROM=SAMFILE
+TODO:  -chkm	check/fix Multiple Arcade Machine Emulator/M.A.M.E. ROMs;
+		$ROM=DIRECTORY
+TODO: show info for ROMs
+
+Neo Geo Pocket/Neo Geo Pocket Color
+1998/1999 SNK http://www.neogeo.co.jp
+  -ngp		force recognition; NEEDED
+  *		show info (default)
+TODO:  -xfpl    send/receive to/from Flash Pocket Linker; $FILE=PORT
+		receives automatically when $ROM does not exist
+
+Genesis/Sega Mega Drive/(Sega CD)/(32X)/Nomad
+1989/19XX/19XX SEGA http://www.sega.com
+  -gen		force recognition
+  -hd		force ROM has SMD header (+512 Bytes)
+  -nhd		force ROM has no SMD header (MGD2/MGH/RAW)
+  -ns		force ROM is not splitted
+  *		show info (default)
+  -smd		convert to Super Magicom Drive/SMD
+  -mgd		convert to Multi Game*/MGD2/MGH/RAW
+TODO:  -gf	convert Sega CD country code to Europe; ROM=$ISO_IMAGE
+TODO:  -ga	convert Sega CD country code to U.S.A.; ROM=$ISO_IMAGE
+TODO:  -gc	convert to Genecyst (Emulator)/GSV save state; $ROM=SAVESTATE
+TODO:  -ge	convert to GenEm (Emulator)/SAV save state; $ROM=SAVESTATE
+TODO:  -gym	convert GYM (Genecyst) sound to WAV; $ROM=GYMFILE
+TODO:  -cym	convert CYM (Callus Emulator) sound to WAV; $ROM=CYMFILE
+  -j		join splitted ROM
+  -n		change foreign ROM name; $FILE=NEWNAME
+  -n2		change japanese ROM name; $FILE=NEWNAME
+  -s		split ROM into 4Mb parts (for backup unit(s) with fdd)
+TODO: split for Super Magicom Drive format
+  -p		pad ROM to full Mb
+TODO:  -chk	fix ROM checksum
+  -1991		fix old third party ROMs to work with consoles build after
+		October 1991 by inserting "(C) SEGA" and "(C)SEGA"
+  -gge		encode GameGenie code; $ROM=AAAAAA:VVVV
+  -ggd		decode GameGenie code; $ROM=XXXX-XXXX
+TODO:  -gg	apply GameGenie code (permanent); $FILE=XXXX-XXXX
+  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
+  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -mki		create IPS patch; $FILE=CHANGED_ROM
+TODO:  -xsmd    send/receive to/from Super Magicom Drive/SMD; $FILE=PORT
+		receives automatically when $ROM does not exist
+TODO:  -xmgd    send/receive to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT
+		receives automatically when $ROM does not exist
+
+GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance)
+1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com
+  -gb		force recognition
+  -hd		force ROM has SSC header (+512 Bytes)
+  -nhd		force ROM has no SSC header
+  *		show info (default)
+  -n		change ROM name; $FILE=NEWNAME
+  -mgd		convert to Multi Game*/MGD2/RAW
+  -ssc		convert to Super Smart Card/SSC (+512 Bytes)
+  -n2gb		convert for use with Kami's FC Emulator (NES Emulator);
+		$ROM=NES_ROM $FILE=FC.GB (the Emulator)
+		m-kami@da2.so-net.ne.jp www.playoffline.com
+  -chk		fix ROM checksum
+  -gge		encode GameGenie code; $ROM=AAAA:VV or $ROM=AAAA:VV:CC
+  -ggd		decode GameGenie code; $ROM=XXX-XXX or $ROM=XXX-XXX-XXX
+  -gg		apply GameGenie code (permanent);
+		$FILE=XXX-XXX or $FILE=XXX-XXX-XXX
+TODO:  -gs	apply GameShark code (permanent)
+  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
+  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -mki		create IPS patch; $FILE=CHANGED_ROM
+TODO:  -xgbx    send/receive to/from GB Xchanger; $FILE=PORT
+		receives automatically when $ROM does not exist
+
+Handy(prototype)/Lynx/Lynx II
+1987 Epyx/1989 Atari/1991 Atari
+  -lynx		force recognition; NEEDED
+  -hd		force ROM has LNX header (+64 Bytes)
+  -nhd		force ROM has no LNX header
+  *		show info (default)
+  -lyx		convert to LYX/RAW (strip 64 Bytes LNX header)
+  -lnx		convert to LNX (uses default values for the header);
+		adjust the LNX header with the following options
+  -n		change ROM name (LNX only); $FILE=NEWNAME
+  -nrot		set no rotation (LNX only)
+  -rotl		set rotation left (LNX only)
+  -rotr		set rotation right (LNX only)
+  -b0		change Bank0 kBytes size (LNX only); $FILE={0,64,128,256,512}
+  -b1		change Bank1 kBytes size (LNX only); $FILE={0,64,128,256,512}
+
+PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))
+Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)
+1987/19XX/19XX NEC
+  -pce		force recognition; NEEDED
+  -hd		force ROM has SMG header (+512 Bytes)
+  -nhd		force ROM has no SMG header (MGD2/RAW)
+  *		show info (default)
+  -smg		convert to Super Magic Griffin/SMG
+  -mgd		convert to Multi Game Doctor*/MGD2/RAW
+TODO:  -xmgd    send/receive to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT
+		receives automatically when $ROM does not exist
+
+Sega Master System(II/III)/GameGear (Handheld)
+1986/19XX SEGA http://www.sega.com
+  -sms		force recognition; NEEDED
+  -hd		force ROM has header (+512 Bytes)
+  -nhd		force ROM has no header (MGD2/MGH/RAW)
+  *		show info (default)
+TODO: show more detailed ROM info
+  -mgd		convert to Multi Game*/MGD2/MGH/RAW
+  -smd		convert to Super Magicom Drive/SMD (+512 Bytes)
+TODO:  -chk	fix ROM checksum
+  -gge		encode GameGenie code; $ROM=AAAA:VV or $ROM=AAAA:VV:CC
+  -ggd		decode GameGenie code; $ROM=XXX-XXX or $ROM=XXX-XXX-XXX
+  -gg		apply GameGenie code (permanent); $FILE=CODE-CODE
+TODO:  -xsmd    send/receive to/from Super Magicom Drive/SMD; $FILE=PORT
+		receives automatically when $ROM does not exist
+
+Nintendo Entertainment System/NES
+1983 Nintendo http://www.nintendo.com
+  -nes		force recognition
+  *		show info/contents (default); $ROM=ROM or $ROM=DISKIMAGE
+  -hd		force ROM has FFE header (+512 Bytes)
+  -nhd		force ROM has no FFE header
+  -ns		force ROM is not splitted
+  -ffe		convert to FFE (+512 Bytes)
+  -ines		convert to iNES(Emu)/RAW
+  -ineshd	extract iNES header from ROM (16 Bytes)
+TODO:  -fam	convert to FAM(jap. Emu)
+  -fds		convert FAM to Famicon DiskSystem/FDS (diskimage)
+TODO:  -j	join splitted ROM
+TODO:  -pas,-s	convert/split to Pasofami/PRM/PRG/CHR/700 (Emulator)
+TODO:  -tr	truncate doubled PRG/CHR/RAM
+TODO:  -nfs	convert NFS sound to WAV; $ROM=NFSFILE
+  -gge		encode GameGenie code; $ROM=AAAA:VV or $ROM=AAAA:VV:CC
+  -ggd		decode GameGenie code; $ROM=XXXXXX or $ROM=XXXXXXXX
+  -gg		apply GameGenie code (permanent);
+		$FILE=XXXXXX or $FILE=XXXXXXXX
+
+Sega System 16(A/B)/Sega System 18/dual 68000
+1987/19XX/19XX SEGA http://www.sega.com
+  -s16		force recognition; NEEDED
+  *		show info (default)
+
+Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr
+1977/1982/1984/1986 Atari
+  -ata		force recognition; NEEDED
+  *		show info (default)
+
+TIP: ucon64 -help -snes (would show only Super Nintendo related help)
+     ucon64 -help|less (to see everything in less)
+
+Report problems/ideas/fixes to noisyb@gmx.net
+
+</pre></tt></body></html>

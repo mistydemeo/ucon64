@@ -1,0 +1,89 @@
+<html><head><title>DEVELOPERS</title></head><body bgcolor="#c0c0c0"><tt><pre>
+Q: Who develops uCON64?
+A: written/modified by:
+   NoisyB		(Dirk)
+
+   Uses code (or at least ideas) from:
+   Chicken & chp	(original ucon)
+   Gilligan/DC-S	(Neo Geo Pocket)
+   Silo / BlackBag	(APS patcher)
+   madman		(IPS patcher)
+   The White Knight/ATX	(BSL patcher)
+   Icarus/Paradox	(PPF patcher)
+   WyrmCorp &#60;http://wyrmcorp.com&#62;	(GameGenie "codec")
+   Marat Fayzullin	(some Famicon Disk System routines/PSG player)
+   Andreas Sterbenz (stan@sbox.tu-graz.ac.at) (d64 transfer)
+   m-kami@da2.so-net.ne.jp &#60;http://www.playoffline.com&#62; (NES emulator for Gameboy)
+   LaC	(N64 makesram)
+   Jeff Frohwein (Flash Linker Advance)
+   Omar Kilani &#60;gbautil@aurore.net&#62; (GameBoy Advance sram routine)
+   and more ...
+
+Q: How can I take part?
+A: Download the CVS from <a href="http://ucon64.sourceforge.net" target="_blank">http://ucon64.sourceforge.net</a> and make changes
+   then email me (<a href="mailto:noisyb@gmx.net">mailto:noisyb@gmx.net</a>) and you will be named in this file
+   Just the typical way of open source developement
+
+Q: How are the sources of uCON64 organized?
+A: This is the concept of ucon64.c which recurses into all other source files
+   It might be possible to separate sources to let them become independend
+   executables by just renaming their bla_main() function to main()
+
+	int argcmp(int argc,char *argv[],char *str)
+	{
+		//check for an option
+		register int x=0;
+	
+		for(x=1;x&lt;argc;x++)//leave out first arg
+		{
+			if(argv[x][0]=='-'&&!strdcmp(argv[x],str))return(x);
+		}
+
+		return(0);//not found
+	}
+
+	char *getarg(int argc,char *argv[],int pos)
+	{
+		//return a filename
+		register int x=0,y=0;
+
+		for(x=0;x&lt;argc;x++)
+		{
+			if(argv[x][0]!='-')
+			{
+				if(y!=pos)y++;
+				else return(argv[x]);
+			}
+		}
+
+		return("");//not found
+	}
+
+
+
+
+	int main(int argc,char *argv[])
+	{
+		if(argcmp(argc,argv,"-0"))bla0_main(argc,argv);
+		if(argcmp(argc,argv,"-1"))bla1_main(argc,argv);
+		if(argcmp(argc,argv,"-2"))bla2_main(argc,argv);
+	}
+
+	int bla0_main(int argc,char *argv[])
+	{
+		if(argcmp(argc,argv,"--help"))
+		{
+			printf("You used --help as option");
+			return(0);
+		}
+
+		printf("Filename: ",getarg(argc,argv,1);
+		
+		return(0);
+	}
+
+
+
+
+
+</pre></tt></body></html>

@@ -22,14 +22,64 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64GUI_H
 
 #include "misc.h"
-
+#include "ucon64.h"
 #include "html2gui/src/html2gui.h"
+
+//#include "xpm/snes.xpm"
+//#include "xpm/snes2.xpm"
+//#include "xpm/snes3.xpm"
+#include "xpm/snes_96.xpm"
+#include "xpm/snes2_96.xpm"
+#include "xpm/snes3_96.xpm"
+#include "xpm/back.xpm"
+#include "xpm/open.xpm"
+#include "xpm/icon.xpm"
+#include "xpm/trans_1x3.xpm"
+#include "xpm/icon_16x16.xpm"
+
+#ifndef MAXBUFSIZE
+  #define MAXBUFSIZE 32768
+#endif
+
+struct ucon64gui_
+{
+
+  char cmd[NAME_MAX];
+  char rom[NAME_MAX];
+  char file[NAME_MAX];
+
+  char ucon64_output[MAXBUFSIZE];
+
+  int console;
+}
+ucon64gui;
+
 
 void
 ucon64_root (void);
 
+void ucon64_bottom(void);
+
 void
-ucon64_snes (void);
+ucon64_system (void);
+
+void
+ucon64_rom (void);
+
+void
+ucon64_file (void);
+
+void
+ucon64_info (void);
+
+void
+ucon64_ls (void);
+
+void
+ucon64_e (void);
+
+void
+ucon64_root (void);
 
 
 #endif /* UCON64GUI_H */

@@ -3,6 +3,7 @@ misc.h - miscellaneous functions
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh
+                  2002 Jan-Erik Karlsson (Amiga)
 
            
 This program is free software; you can redistribute it and/or modify
@@ -33,6 +34,7 @@ extern "C" {
 
 #include <limits.h>
 #include <time.h>                               // gauge() prototype contains time_t
+#include <stdio.h>
 #include <dirent.h>
 #include "config.h"                             // ZLIB, ANSI_COLOR support
 
@@ -64,6 +66,22 @@ extern int fputc2 (int character, FILE *file);
 
 #endif
 
+#ifdef  __CYGWIN__
+#include <sys/types.h>
+typedef u_int8_t uint8_t;
+typedef u_int16_t uint16_t;
+typedef u_int32_t uint32_t;
+typedef u_int64_t uint64_t;
+#elif   defined __MSDOS__
+typedef unsigned char uint8_t;
+typedef unsigned short int uint16_t;
+typedef unsigned int uint32_t;
+typedef unsigned long long int uint64_t;
+#else
+#include <inttypes.h>                           // int32_t and uint32_t
+#endif
+
+
 #ifndef FALSE
 #define FALSE 0
 #endif
@@ -89,7 +107,7 @@ extern int fputc2 (int character, FILE *file);
 
 #define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
 
-//#define RANDOM(min, max) ((rand () % max) + min)
+//#define RANDOM(min, max) ((rand () % (max - min)) + min)
 
 #define OFFSET(a, offset) ((((unsigned char *)&(a))+(offset))[0])
 
@@ -124,8 +142,6 @@ extern int fputc2 (int character, FILE *file);
   #else
     #define CURRENT_OS_S "Unix"
   #endif
-#elif   defined AMIGA
-  #define CURRENT_OS_S "Amiga"
 #elif   defined __APPLE__
   #if   defined __POWERPC__ || defined __ppc__
     #define CURRENT_OS_S "Apple (ppc)"
@@ -134,9 +150,37 @@ extern int fputc2 (int character, FILE *file);
   #endif
 #elif   defined __BEOS__
   #define CURRENT_OS_S "BeOS"
+#elif defined AMIGA
+  #if defined __PPC__
+    #define CURRENT_OS_S "Amiga (ppc)"
+  #else
+    #define CURRENT_OS_S "Amiga (68k)"
+  #endif
 #else
   #define CURRENT_OS_S "?"
 #endif
+
+
+#ifdef WORDS_BIGENDIAN
+#define me2be_16(x) (x)
+#define me2be_32(x) (x)
+#define me2be_64(x) (x)
+#define me2be_n(x,n) 
+#define me2le_16(x) (bswap_16(x))
+#define me2le_32(x) (bswap_32(x))
+#define me2le_64(x) (bswap_64(x))
+#define me2le_n(x,n) (mem_swap(x,n))
+#else
+#define me2be_16(x) (bswap_16(x))
+#define me2be_32(x) (bswap_32(x))
+#define me2be_64(x) (bswap_64(x))
+#define me2be_n(x,n) (mem_swap(x,n))
+#define me2le_16(x) (x)
+#define me2le_32(x) (x)
+#define me2le_64(x) (x)
+#define me2le_n(x,n) 
+#endif
+
 
 #ifdef __MSDOS__
 #define FILE_SEPARATOR '\\'
@@ -151,7 +195,7 @@ extern int fputc2 (int character, FILE *file);
 #define OPTION_LONG_S "--"
 
 
-#if     (defined __unix__ || defined __BEOS__)
+#if (defined __unix__ || defined __BEOS__ || defined AMIGA)
 #ifndef __MSDOS__
 #define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
 extern int kbhit (void);                        // may only be used after init_conio()!
@@ -159,7 +203,7 @@ extern int kbhit (void);                        // may only be used after init_c
 #include <conio.h>                              // getch()
 #include <pc.h>                                 // kbhit()
 #endif
-// Should we leave these prototypes visible to the DOS code? The advantage 
+// Should we leave these prototypes visible to the DOS code? The advantage
 //  would be a few less #ifdef's
 extern void init_conio (void);
 extern void deinit_conio (void);
@@ -207,15 +251,15 @@ extern char *basename2 (const char *str);
   mem_crc16()  calculate the crc16 of buffer for size bytes
   mem_crc32()  calculate the crc32 of buffer for size bytes
 */
-extern int memwcmp (const void *add, const void *add_with_wildcards, size_t n, int wildcard);
-extern void mem_hexdump (const void *add, size_t n, int virtual_start);
+extern int memwcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildcard);
+extern void mem_hexdump (const void *add, uint32_t n, int virtual_start);
 extern unsigned short mem_crc16 (unsigned int size, unsigned short crc16, const void *buffer);
 #ifdef  ZLIB
 #define mem_crc32(SIZE, CRC, BUF)       crc32(CRC, BUF, SIZE)
 #else
 extern unsigned int mem_crc32 (unsigned int size, unsigned int crc32, const void *buffer);
 #endif
-extern void *mem_swap (void *add, size_t n);
+extern void *mem_swap (void *add, uint32_t n);
 #if 0
 #define bswap_16(x) ((unsigned short int)mem_swap(x,2,2))
 #define bswap_32(x) ((unsigned int)mem_swap(x,4,4))
@@ -253,7 +297,7 @@ extern unsigned long long int bswap_64 (unsigned long long int x);
   unregister_func() unregisters a previously registered function
                   returns -1 if it fails, 0 if it was successful
   handle_registered_funcs() calls all the registered functions
-  wait            wait (sleep) a specified number of milliseconds
+  wait2           wait (sleep) a specified number of milliseconds
 */
 extern void change_string (char *searchstr, int strsize, char wc, char esc,
                            char *end, int endsize, char *buf, int bufsize,
@@ -277,7 +321,7 @@ extern int drop_privileges (void);
 extern int register_func (void (*func) (void));
 extern int unregister_func (void (*func) (void));
 extern void handle_registered_funcs (void);
-extern void wait (int nmillis);
+extern void wait2 (int nmillis);
 
 
 /*

@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <stdio.h>
 #include "config.h"
-#include "html2gui.h"
+#include "libhtmlgtk/libhtmlgtk.h"
 #include "configmenu.h"
 #include "ucon64gui.h"
 #include "top.h"

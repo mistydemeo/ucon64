@@ -3,6 +3,7 @@ misc.c - miscellaneous functions
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh
+                  2002 Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -32,7 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef  __unix__
 #include <unistd.h>
-#include <signal.h>                             // kill()
 #endif
 
 #ifdef  __CYGWIN__                              // under Cygwin (gcc for Windows) we
@@ -48,12 +48,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <OS.h>                                 // snooze(), microseconds
 #endif
 
-#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
+#if     (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
 #include <termios.h>
-
 typedef struct termios tty_t;
 #endif
-
 #include "config.h"                             // ZLIB
 #include "misc.h"
 
@@ -78,13 +76,15 @@ static st_func_node_t func_list = { NULL, NULL };
 static int func_list_locked = 0;
 static int misc_ansi_color = 0;
 
-#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
+#if     (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
 static void set_tty (tty_t *param);
 #endif
 
 #ifdef  __CYGWIN__
 static char *cygwin_fix (char *value);
 #endif
+
+void deinit_conio(void);
 
 #if 0                                           // currently not used
 /*
@@ -359,10 +359,12 @@ char *
 setext (char *filename, const char *ext)
 {
   char ext2[FILENAME_MAX],
-       *p = basename2 (filename) ? basename2 (filename) : filename;
+       *p = basename2 (filename) ? basename2 (filename) : filename,
+       *p2 = NULL;
 
-  if ((p = strrchr (p, '.')))
-    *p = 0;
+  if ((p2 = strrchr (p, '.')))
+    if (strcmp (p2 ,p) != 0) // some files start with '.'
+      *p2 = 0;
 
   strcpy (ext2, ext);
   strcat (filename, areupper (basename2 (filename)) ? strupr (ext2) : strlwr (ext2));
@@ -400,7 +402,7 @@ strtrim (char *str)
 
 
 int
-memwcmp (const void *add, const void *add_with_wildcards, size_t n, int wildcard)
+memwcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildcard)
 {
   const unsigned char *a = add, *a_w = add_with_wildcards;
 
@@ -420,10 +422,10 @@ memwcmp (const void *add, const void *add_with_wildcards, size_t n, int wildcard
 
 #if 0
 void *
-mem_swap (void *add, size_t bit, size_t n)
+mem_swap (void *add, uint32_t bit, uint32_t n)
 {
-  size_t pos = 0;
-  size_t increment = bit / 8;
+  uint32_t pos = 0;
+  uint32_t increment = bit / 8;
   unsigned char *a = add, c;
 
   for (; pos + 1 < n; pos += 2)
@@ -437,9 +439,9 @@ mem_swap (void *add, size_t bit, size_t n)
 }
 #else
 void *
-mem_swap (void *add, size_t n)
+mem_swap (void *add, uint32_t n)
 {
-  size_t pos = 0;
+  uint32_t pos = 0;
   unsigned char *a = add, c;
 
   for (; pos + 1 < n; pos += 2)
@@ -455,10 +457,10 @@ mem_swap (void *add, size_t n)
 
 
 void
-mem_hexdump (const void *mem, size_t n, int virtual_start)
+mem_hexdump (const void *mem, uint32_t n, int virtual_start)
 //hexdump something
 {
-  size_t pos;
+  uint32_t pos;
   char buf[MAXBUFSIZE];
   const unsigned char *p = mem;
 
@@ -818,13 +820,13 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
     {
       while (fgets (buf, sizeof buf, fh) != NULL)
         {
-          if ((p = strpbrk (buf, "\x0a\x0d"))) // strip any returns
+          if ((p = strpbrk (buf, "\x0a\x0d")))  // strip any returns
              *p = 0;
 
           if (*(buf + strspn (buf, "\t ")) == '#')
             continue;
 
-          *(buf + strcspn (buf, "#")) = 0;          // comment at end of a line
+          *(buf + strcspn (buf, "#")) = 0;      // comment at end of a line
 
           if (!strnicmp (buf, propname, strlen (propname)))
             {
@@ -840,7 +842,7 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
     }
 
   p = getenv2 (propname);
-  if (p[0] == 0)                              // getenv2() never returns NULL
+  if (p[0] == 0)                                // getenv2() never returns NULL
     {
       if (def)
         strcpy (buffer, def);
@@ -947,11 +949,17 @@ tmpnam2 (char *temp)
 // tmpnam() clone
 {
   char *p = getenv2 ("TEMP");
-//  srand (0x10000000);
+  static time_t init = 0;
+  
+  if (!init)
+    {
+      init = time (0);
+      srand (init);
+    }
 
   temp[0] = 0;
-  while (!temp[0] || !access (temp, F_OK)) // must work for files AND dirs
-    sprintf (temp, "%s%s%08x.tmp", p, FILE_SEPARATOR_S, rand() % 0xffffffff);
+  while (!temp[0] || !access (temp, F_OK))      // must work for files AND dirs
+    sprintf (temp, "%s%s%08x.tmp", p, FILE_SEPARATOR_S, rand());
 
   return temp;
 }
@@ -982,7 +990,7 @@ tmpnam3 (char *temp, int type)
 }
 
 
-#if     defined __unix__ || defined __BEOS__
+#if     defined __unix__ || defined __BEOS__ || defined AMIGA
 #ifndef __MSDOS__
 static int oldtty_set = 0, stdin_tty = 1;       // 1 => stdin is a tty, 0 => it's not
 static tty_t oldtty, newtty;
@@ -1726,17 +1734,22 @@ fputc2 (int character, FILE *file)
 unsigned short int
 bswap_16 (unsigned short int x)
 {
+#if 1
   unsigned char *ptr = (unsigned char *) &x, tmp;
   tmp = ptr[0];
   ptr[0] = ptr[1];
   ptr[1] = tmp;
   return x;
+#else
+  return (((x) & 0x00ff) << 8 | ((x) & 0xff00) >> 8);
+#endif
 }
 
 
 unsigned int
 bswap_32 (unsigned int x)
 {
+#if 1
   unsigned char *ptr = (unsigned char *) &x, tmp;
   tmp = ptr[0];
   ptr[0] = ptr[3];
@@ -1745,6 +1758,10 @@ bswap_32 (unsigned int x)
   ptr[1] = ptr[2];
   ptr[2] = tmp;
   return x;
+#else
+  return ((((x) & 0xff000000) >> 24) | (((x) & 0x00ff0000) >>  8) | \
+    (((x) & 0x0000ff00) <<  8) | (((x) & 0x000000ff) << 24));
+#endif
 }
 
 
@@ -1769,11 +1786,11 @@ bswap_64 (unsigned long long int x)
 
 
 void
-wait (int nmillis)
+wait2 (int nmillis)
 {
 #ifdef  __MSDOS__
   delay (nmillis);
-#elif   defined __unix__
+#elif   defined __unix__ || defined AMIGA
   usleep (nmillis * 1000);
 #elif   defined __BEOS__
   snooze (nmillis * 1000);

@@ -1,5 +1,5 @@
 /*
-ucon64gui.c - a GUI for ucon64 (using html2gui framework)
+ucon64gui.c - a GUI for ucon64 (using libhtmlgtk framework)
 
 written by 2002 NoisyB (noisyb@gmx.net)
            
@@ -24,7 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include "config.h"
 #include "ucon64gui.h"
-#include "html2gui/html2gui.h"
+#include "getopt.h"
+#include "libhtmlgtk/libhtmlgtk.h"
 #include "misc.h"
 #include "url.h"
 
@@ -247,7 +248,7 @@ const struct option long_options[] = {
 
 
 void
-html2gui_request (const char *uri, const char *query)
+libhtmlgtk_request (const char *uri, const char *query)
 {
   FILE *fh;
   int len;
@@ -293,7 +294,7 @@ html2gui_request (const char *uri, const char *query)
     }
 
 //  while ((
-  c = html2gui_getopt (uri, query, long_options, &option_index);
+  c = libhtmlgtk_getopt (uri, query, long_options, &option_index);
 //  ) != -1)
     {
       switch (c)

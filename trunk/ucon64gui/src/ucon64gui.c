@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "xpm/icon_16x16.xpm"
 #include "xpm/icon.xpm"
 #include "xpm/open.xpm"
+//#include "xpm/ucon64gui.xpm"
 
 void
 ucon64gui_bottom (void)
@@ -37,6 +38,8 @@ ucon64gui_bottom (void)
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
   html2gui_br ();
   html2gui_img (icon_16x16_xpm, 0, 0, 0);
+
+//  html2gui_img (ucon64gui_xpm,0,0,0);
 
   html2gui_ ("uCON64gui "
 #ifdef __GTK__

@@ -849,7 +849,7 @@ main (int argc, char *argv[])
 #endif // BACKUP_CD
   
         case ucon64_DB:
-          printf ("Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n"
+          printf ("Database: %ld known ROMs in db.h (%+ld)\n\n"
                   "TIP: %s -db -nes would show only the number of known NES ROMs\n\n",
                   ucon64_dbsize (rom.console),
                   ucon64_dbsize (rom.console) - ucon64_DBSIZE,
@@ -2153,7 +2153,7 @@ ucon64_usage (int argc, char *argv[])
               vectrex_title, intelli_title, gp32_title);
     }
 
-  printf ("Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n"
+  printf ("Database: %ld known ROMs in db.h (%+ld)\n\n"
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only Super Nintendo related help)\n"
 #ifdef	__MSDOS__
      "     %s " OPTION_LONG_S "help|more (to see everything in more)\n"
@@ -2189,6 +2189,54 @@ Intellivision 1979
 G7400+/Odyssey² 1978
 Channel F 1976
 Odyssey 1972 Ralph Baer
+X-Box
+   Game Cube
+    Indrema
+      Nuon
+   GB Advance
+ Playstation 2
+   Dreamcast
+  Nintendo 64
+  Playstation
+  Virtual Boy
+     Saturn
+    Sega 32X
+     Jaguar
+       3DO
+    Sega CD
+  Philips CDI
+     Super
+    Nintendo
+    Neo·Geo
+   Game Gear
+      Lynx
+    GameBoy
+  Turbo Grafx
+       16
+    Genesis
+   XE System
+ Master System
+   Atari 7800
+    Nintendo
+ Commodore 64
+ Coleco Vision
+   Atari 5200
+    Arcadia
+    Vectrex
+  Microvision
+  Adv. Vision
+  RDI Halcyon
+ Intellivision
+   Odyssey 2
+   Astrocade
+  Home Arcade
+   Atari 2600
+ RCA Studio 2
+ FC Channel F
+    Telstar
+   Atari Pong
+      PONG
+    Odyssey
 
 gametz.com
 gameaxe.com

@@ -710,12 +710,12 @@ swc_usage (void)
           "                " OPTION_LONG_S "file=PORT\n"
           "                receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n"
           "                Press q to abort ^C will cause invalid state of backup unit\n"
-          "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
-          "      parallel port. If that is the case give a hardware address:\n"
-          "      ucon64 " OPTION_LONG_S "xswc \"Super Mario World (U).swc\" 0x378\n"
-          "      In order to connect the Super Wild Card to a PC's parallel port you\n"
-          "      need a standard bidirectional parallel cable like for the most backup\n"
-          "      units\n", swc_title);
+          "                  You only need to specify PORT if uCON64 doesn't detect the\n"
+          "                  (right) parallel port. If that is the case give a hardware\n"
+          "                  address: ucon64 " OPTION_LONG_S "xswc \"rom.swc\" 0x378\n"
+          "                  In order to connect the Super Wild Card to a PC's parallel\n"
+          "                  port you need a standard bidirectional parallel cable like\n"
+          "                  for the most backup units\n", swc_title);
 }
 
 #endif // BACKUP

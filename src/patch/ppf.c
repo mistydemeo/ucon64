@@ -547,6 +547,6 @@ ppf_usage (void)
      "  " OPTION_LONG_S "mkppf       create PPF patch; " OPTION_LONG_S "rom=RAW_IMAGE " OPTION_LONG_S "file=CHANGED_IMAGE\n"
      "  " OPTION_LONG_S "nppf        change PPF description; " OPTION_LONG_S "rom=PATCHFILE " OPTION_LONG_S "file=DESCRIPTION\n"
      "  " OPTION_LONG_S "idppf       change PPF FILE_ID.DIZ (2.0); " OPTION_LONG_S "rom=PATCHFILE\n"
-     "                " OPTION_LONG_S "file=FILE_ID.DIZ\n"
+     "                  " OPTION_LONG_S "file=FILE_ID.DIZ\n"
 );
 }

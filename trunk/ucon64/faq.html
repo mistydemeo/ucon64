@@ -49,7 +49,7 @@ Q15: <a href="#15">Where do I get PPF, APS or IPS patches?</a><br>
 <br>
 Q16: <a href="#16">Where do I get ROMs/Games?</a><br>
 <br>
-Q17: <a href="#17">Usage: What does --rom and --file stand for?</a><br>
+Q17: <a href="#17">Usage: What does --rom stand for?</a><br>
 <br>
 Q18: <a href="#18">Why is my backup unit (still) not supported?</a><br>
 <br>
@@ -196,7 +196,7 @@ Q36: <a href="#36">Some SNES games don't work on my Super Pro Fighter Q(+).
    first parallel port (it stops probing for a parallel port if it finds one).
    So, you should specify the address of the second parallel port on the command
    line. For example:<br>
-   &nbsp;&nbsp; ucon64 -xfal demo.gba 0x278<br>
+   &nbsp;&nbsp; ucon64 -xfal demo.gba -port 0x278<br>
 <br>
    The I/O address of the parallel port can be 0x3bc, 0x378 or 0x278. If you
    don't want to type the address of the parallel port everytime you want to
@@ -350,10 +350,11 @@ Q36: <a href="#36">Some SNES games don't work on my Super Pro Fighter Q(+).
 <b>A</b>: <a href="http://www.ebay.com">www.ebay.com</a><br>
 <br>
 <p>
-<a name="17"><b>Q17</b>: Usage: What does --rom and --file stand for?</a><br>
+<a name="17"><b>Q17</b>: Usage: What does --rom stand for?</a><br>
 <b>A</b>: Enter "ucon64 -help | more" and look at the top where it says:<br>
-   Usage: ucon64 [OPTION]... [--rom=][ROM]... [[--file=]FILE]<br>
-   --rom and --file take an argument, --file is mostly optional.<br>
+   Usage: ucon64 [OPTION(S)]... [[--rom=]ROM(S)]...<br>
+   --rom takes an argument. Instead of the character '=' you may also use a
+   space.<br>
 <br>
 <p>
 <a name="18"><b>Q18</b>: Why is my backup unit (still) not supported?</a><br>
@@ -364,8 +365,8 @@ Q36: <a href="#36">Some SNES games don't work on my Super Pro Fighter Q(+).
 <br>
 <p>
 <a name="19"><b>Q19</b>: How do I specify a bank number for the GB Xchanger?</a><br>
-<b>A</b>: ucon64 -xgbxb &#60;0&#62; "Pokemon (Green).sav" wouldn't work. You should
-   leave out those angle brackets. This should work:<br>
+<b>A</b>: ucon64 -xgbxb &#60;0&#62; "Pokemon (Green).sav" wouldn't work.
+   You should leave out those angle brackets. This should work:<br>
    &nbsp;&nbsp; ucon64 -xgbxb 0 "Pokemon (Green).sav"<br>
 <br>
 <p>
@@ -441,7 +442,8 @@ Q36: <a href="#36">Some SNES games don't work on my Super Pro Fighter Q(+).
    What does that mean?</a><br>
 <b>A</b>: You can get that message with the DOS executable if you pass more than 127
    characters as argument to uCON64. There are two solutions:<br>
-   1.) Use the Win32 executable (download it from <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>).<br>
+   1.) Use the Win32 executable (download it from
+   <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>).<br>
    2.) Rename the ROMs so that their combined names are short enough to fit into 127 characters.<br>
 <br>
 <p>
@@ -563,14 +565,6 @@ Q36: <a href="#36">Some SNES games don't work on my Super Pro Fighter Q(+).
    In case something goes terribly wrong and uCON64 crashes it might still be
    necessary to use one of the previous methods, because every file will be
    processed and not only the files before the crash.<br>
-<!--
-   Note that uCON64 will interpret the second file as the --file argument if
-   only two files match with the wildcard. uCON64 will display a message in
-   that case. Just as is stated in that message, you should use the --file
-   option if you don't want uCON64 to do this. You could use a dummy argument
-   like 0. For example:<br>
-   &nbsp;&nbsp; ucon64 --snes --swc *.mgd --file=0<br>
--->
 <br>
 <p>
 <a name="35"><b>Q35</b>: Does uCON64 support DAT (Goodxxxx, RomCenter, etc.) files?</a><br>
@@ -589,8 +583,7 @@ Q36: <a href="#36">Some SNES games don't work on my Super Pro Fighter Q(+).
    files from sites like
    <a href="http://www.romcenter.com/" target="_blank">http://www.romcenter.com/</a>
    or
-   <a href="http://gooddat.emu-france.com/" target="_blank">http://gooddat.emu-france.com/</a>
-   .
+   <a href="http://gooddat.emu-france.com/" target="_blank">http://gooddat.emu-france.com/</a>.
    uCON64 will automatically create index files which speed up the access to
    the DAT files dramatically. Now uCON64 uses the information inside the DAT
    files to identify or rename ROMs without an internal header.<br>

@@ -557,7 +557,8 @@ if(!strcmp(strupr(&buf[strlen(buf)-4]),".FDS")&&(quickftell(ucon64_rom())%65500)
 if(console==ucon64_UNKNOWN)
 {
 //the same but automatic
-	console=ucon64_probe(argc,argv);
+        if(!access(ucon64_rom(),F_OK))
+        	console=ucon64_probe(argc,argv);
 }
 
 
@@ -641,9 +642,17 @@ case ucon64_INTELLI:
 break;
 case ucon64_UNKNOWN:
 default:
-	filehexdump(ucon64_rom(),0,512);//show possible header or maybe the internal rom header
-	printf("\nERROR: unknown file %s\n       USE -<CONSOLE> force recognition OPTION\n\n",ucon64_rom());
-//	ucon64_usage(argc,argv);
+	if(!access(ucon64_rom(),F_OK))
+	{
+		filehexdump(ucon64_rom(),0,512);//show possible header or maybe the internal rom header
+		printf(
+"\n"
+"ERROR: unknown ROM: %s (not found in internal DB)\n"
+"TIP:   if this is a ROM you can force recognition with the -<CONSOLE> option\n"
+"       if you compiled from the sources you can add it to ucon64_db.c and\n"
+"       recompile\n",ucon64_rom());
+	}
+	else ucon64_usage(argc,argv);
 break;
 }
 
@@ -746,15 +755,6 @@ int ucon64_probe(int argc,char *argv[])
 	return(console);
 }
 
-
-int ucon64_shell(int argc,char *argv[])
-{
-//	for(;;)
-	{
-		
-	}
-	return(0);
-}
 
 int ucon64_usage(int argc,char *argv[])
 {

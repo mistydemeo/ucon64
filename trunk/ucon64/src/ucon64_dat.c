@@ -1175,7 +1175,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
     file is not unique (a duplicate). We store the current filename inside the
     archive as well, to be even more helpful :-)
   */
-  x = strlen (fname) + (ucon64.fname_arch[0] ? strlen (ucon64.fname_arch) + 4 : 0);
+  x = strlen (fname) + (ucon64.fname_arch[0] ? strlen (ucon64.fname_arch) + 4 : 1);
   if (!(ucon64_mkdat_entries[n_files].fname = (char *) malloc (x))) // + 3 for " ()"
     {                                                               //  + 1 for ASCII-z
       fprintf (stderr, ucon64_msg[BUFFER_ERROR], x);

@@ -145,6 +145,7 @@ struct ucon64_
 //#define ucon64_file() (getarg(argc,argv,ucon64_FILE))
 
 int ucon64_usage(int argc,char *argv[]);
+int ucon64_init_(struct ucon64_ *rom);
 int ucon64_init(struct ucon64_ *rom);
 int ucon64_main(int argc,char *argv[]);
 int ucon64_nfo(struct ucon64_ *rom);

@@ -621,7 +621,7 @@ rename2 (const char *oldname, const char *newname)
   // We should use dirname{2}() in case oldname or newname doesn't exist yet
   if (one_filesystem (dir1, dir2))
     {
-      if (access (newname, F_OK) == 0)
+      if (access (newname, F_OK) == 0 && !one_file (oldname, newname))
         {
           stat (newname, &fstate);
           chmod (newname, fstate.st_mode | S_IWUSR);

@@ -629,7 +629,12 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   still uses the first parallel port by default. It's possible to override that
   by setting parport_dev in the configuration file or to set an environment
   variable<br>
-  Use the configure option --enable-ppdev to enable the code
+  Use the configure option --enable-ppdev to enable the code<br>
+- added (GBA) support for the Flash 2 Advance (Ultra); options are -xf2a
+  (transfer ROM data), -xf2ac=N (dump N Mbits), -xf2as (transfer 256 kB of SRAM
+  data) and -xf2ab=BANK (transfer 64 kB of SRAM data to "bank" BANK) (by NoisyB
+  and dbjh, based on source code of Ulrich Hecht and David Voswinkel; many
+  thanks to David Voswinkel for testing the parallel port code)<br>
 <br>
 <br>
 <br>

@@ -620,6 +620,92 @@ parport_init (int port, int target_delay)
 }
 
 
+static int
+parport_init_delay (int n_micros)
+/*
+  We only have millisecond accuracy, while we have to determine the correct
+  initial loop counter value for a number of microseconds. Luckily, the function
+  of time against the initial loop counter value is linear (provided that the
+  initial counter value is large enough), so we can just divide the found loop
+  value by 1000.
+*/
+{
+#define N_CHECKS  10
+#define N_HITSMAX 10
+  struct timeb t0, t1;
+  int n_millis = 0, n, n_hits = 0, loop = 10000, loop_sum = 0;
+  volatile int m;                               // volatile is necessary for Visual C++...
+
+  printf ("Determining delay loop value for %d microseconds...", n_micros);
+  fflush (stdout);
+  while (n_hits < N_HITSMAX)
+    {
+      n_millis = 0;
+      for (n = 0; n < N_CHECKS; n++)
+        {
+          m = loop;
+          ftime (&t0);
+          while (m--)
+            ;
+          ftime (&t1);
+          n_millis += (t1.time * 1000 + t1.millitm) - (t0.time * 1000 + t0.millitm);
+        }
+      n_millis /= N_CHECKS;
+
+#ifndef DJGPP
+      if (n_millis - n_micros == 0)             // we are aiming at microsecond accuracy...
+#else // DJGPP's runtime system is quite inaccurate under Windows XP
+      n = n_millis - n_micros;
+      if (n < 0)
+        n = -n;
+      if (n <= 1)                               // allow a deviation of 1 ms?
+#endif
+        {
+          n_hits++;
+          loop_sum += loop;
+          loop -= loop >> 3;                    // force "variation" in hope of better accuracy
+          continue;
+        }
+
+      if (n_millis == 0)
+        loop <<= 1;
+      else
+        loop = (int) (n_micros / ((float) n_millis / loop));
+    }
+
+  n = loop_sum / (1000 * N_HITSMAX);            // we summed N_HITSMAX loop values
+  printf ("done (%d)\n", n);
+  return n;
+}
+
+
+static void
+parport_nop ()
+{
+  volatile int i = parport_nop_cntr;            // volatile is necessary for Visual C++...
+  while (i--)
+    ;
+}
+
+
+static void
+parport_out31 (unsigned char val)
+{
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x03);
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
+  outportb ((unsigned short) (f2a_pport + PARPORT_DATA), val);
+}
+
+
+static void
+parport_out91 (unsigned char val)
+{
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x09);
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
+  outportb ((unsigned short) (f2a_pport + PARPORT_DATA), val);
+}
+
+
 int
 f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
 {
@@ -815,10 +901,8 @@ f2a_exec_cmd_par (int cmd, int addr, int size)
 static int
 f2a_receive_data_par (int cmd, int addr, int size, const char *filename, int flip)
 {
-  //unsigned char buffer[1024];
-  //int i; //, n, progress;
-  unsigned char recv[4], *mbuffer;
-  int j;
+  unsigned char buffer[1024], recv[4]; //, *mbuffer;
+  int i, j; //, n, progress;
   f2a_msg_cmd_t msg_cmd;
   FILE *file;
 
@@ -849,7 +933,7 @@ f2a_receive_data_par (int cmd, int addr, int size, const char *filename, int fli
       return -1;
     }
 
-#if 1
+#if 0
   if ((mbuffer = (unsigned char *) malloc (size)) == NULL)
     {
       fprintf (stderr, ucon64_msg[BUFFER_ERROR], size);
@@ -991,12 +1075,22 @@ f2a_send_buffer_par (int cmd, int addr, int size, const unsigned char *resource,
     {
       if (mode == 1)
         {
-          if (!fread (buffer, 1024, 1, file))   // note order of arguments
+          if (!feof (file))
             {
-              fprintf (stderr, ucon64_msg[READ_ERROR], (char *) resource);
-              fclose (file);
-              return -1;                        // see comment for fopen() call
-            }
+              memset (buffer, 0, 1024);
+              if (!fread (buffer, 1024, 1, file)) // note order of arguments
+                {
+                  if (ferror (file))
+                    {
+                      fputc ('\n', stderr);
+                      fprintf (stderr, ucon64_msg[READ_ERROR], (char *) resource);
+                      fclose (file);
+                      return -1;
+                    }
+                }
+           }
+          else
+            memset (buffer, 0, 1024);
         }
       else
         memcpy (buffer, resource, 1024);
@@ -1074,18 +1168,18 @@ f2a_receive_raw_par (unsigned char *buffer, int len)
   if (parport_debug)
     fprintf (stderr, "\nreceive:\n%04x: ", 0);
 
+  *ptr = 0;
   for (err = 0, i = 0; i < len * 2; i++)
     {
       nibble = 0;
       outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x04);
       parport_nop ();
       while (inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY)
-        ; // nanosleep() is not portable & we like busy waiting
+        ;
       outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x05);
       nibble = inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
-      parport_nop ();
       while (!(inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY))
-        ; // see above
+        ;
       if (i % 2)
         {
           *ptr |= (nibble >> 3) & 0x0f;
@@ -1095,6 +1189,7 @@ f2a_receive_raw_par (unsigned char *buffer, int len)
               if (!(((i / 2) + 1) % 32) && i && (i / 2) < len - 1)
                 fprintf (stderr, "\n%04x: ", (i / 2) + 1);
             }
+          *ptr = 0;
           ptr++;
         }
       else
@@ -1129,17 +1224,17 @@ f2a_send_raw_par (unsigned char *buffer, int len)
       parport_nop ();
       while ((inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY) &&
              (timeout--) > 0)
-        ; // nanosleep() is not portable & we like busy waiting
+        wait2 (1);
       outportb ((unsigned short) (f2a_pport + PARPORT_DATA), *pc);
       parport_nop ();
       while ((inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY) &&
              (timeout--) > 0)
-        ; // see above
+        wait2 (1);
       outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x05);
       parport_nop ();
       while ((!(inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY)) &&
              (timeout--) > 0)
-        ; // see above
+        wait2 (1);
       pc++;
       if (timeout < 0)
         {
@@ -1171,92 +1266,6 @@ f2a_wait_par (void)
       inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
     }
   return 0;
-}
-
-
-static int
-parport_init_delay (int n_micros)
-/*
-  We only have millisecond accuracy, while we have to determine the correct
-  initial loop counter value for a number of microseconds. Luckily, the function
-  of time against the initial loop counter value is linear (provided that the
-  initial counter value is large enough), so we can just divide the found loop
-  value by 1000.
-*/
-{
-#define N_CHECKS  10
-#define N_HITSMAX 10
-  struct timeb t0, t1;
-  int n_millis = 0, n, n_hits = 0, loop = 10000, loop_sum = 0;
-  volatile int m;                               // volatile is necessary for Visual C++...
-
-  printf ("Determining delay loop value for %d microseconds...", n_micros);
-  fflush (stdout);
-  while (n_hits < N_HITSMAX)
-    {
-      n_millis = 0;
-      for (n = 0; n < N_CHECKS; n++)
-        {
-          m = loop;
-          ftime (&t0);
-          while (m--)
-            ;
-          ftime (&t1);
-          n_millis += (t1.time * 1000 + t1.millitm) - (t0.time * 1000 + t0.millitm);
-        }
-      n_millis /= N_CHECKS;
-
-#ifndef DJGPP
-      if (n_millis - n_micros == 0)             // we are aiming at microsecond accuracy...
-#else // DJGPP's runtime system is quite inaccurate under Windows XP
-      n = n_millis - n_micros;
-      if (n < 0)
-        n = -n;
-      if (n <= 1)                               // allow a deviation of 1 ms?
-#endif
-        {
-          n_hits++;
-          loop_sum += loop;
-          loop -= loop >> 3;                    // force "variation" in hope of better accuracy
-          continue;
-        }
-
-      if (n_millis == 0)
-        loop <<= 1;
-      else
-        loop = (int) (n_micros / ((float) n_millis / loop));
-    }
-
-  n = loop_sum / (1000 * N_HITSMAX);            // we summed N_HITSMAX loop values
-  printf ("done (%d)\n", n);
-  return n;
-}
-
-
-static void
-parport_nop ()
-{
-  volatile int i = parport_nop_cntr;            // volatile is necessary for Visual C++...
-  while (i--)
-    ;
-}
-
-
-static void
-parport_out31 (unsigned char val)
-{
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x03);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_DATA), val);
-}
-
-
-static void
-parport_out91 (unsigned char val)
-{
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x09);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_DATA), val);
 }
 
 
@@ -1301,7 +1310,7 @@ f2a_write_rom (const char *filename, unsigned int parport)
 #endif
     {
       f2a_init_par (parport, 10);
-//      f2a_erase_par (0x08000000, size * MBIT);
+      //f2a_erase_par (0x08000000, size * MBIT);
       f2a_write_par (1, files, 0x8000000 + offset * MBIT);
     }
   return 0;
@@ -1377,7 +1386,7 @@ f2a_write_sram (const char *filename, unsigned int parport, int bank)
 #endif
     {
       f2a_init_par (parport, 10);
-//      f2a_erase_par (0xe000000, size * MBIT);
+      //f2a_erase_par (0xe000000, size * MBIT);
       f2a_write_par (1, files, 0xe000000 + bank * 64 * 1024);
     }
   return 0;

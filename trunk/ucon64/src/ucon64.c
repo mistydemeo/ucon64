@@ -578,8 +578,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 //      rominfo->console_usage =
 
       rominfo->copier_usage = cdrw_usage;
-    }
-
+   }
   return result;
 }
 
@@ -591,6 +590,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
   int size = quickftell (ucon64.rom);
 
   printf ("%s\n\n", ucon64.rom);
+
 
   if (rominfo->buheader_len && rominfo->buheader_len != SMC_HEADER_LEN)
     {

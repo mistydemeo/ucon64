@@ -334,7 +334,7 @@ ReadPatch ()
 
 
 int
-n64aps_main (int argc, char *argv[])
+n64aps_main (int argc, const char *argv[])
 {
   char File1[256];
   char File2[256];
@@ -652,7 +652,7 @@ WritePatch ()
 
 
 int
-n64caps_main (int argc, char *argv[])
+n64caps_main (int argc, const char *argv[])
 {
   char File1[256];
   char File2[256];

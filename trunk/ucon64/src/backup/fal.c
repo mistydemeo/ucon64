@@ -209,36 +209,36 @@ usage (char *name)
 
   strcpy (smaller, (char *) (&_small[strlen (_small) - i + 1]));
 
-  fprintf (STDERR, "GBA FLinker v1.72 by Jeff F.\n");
-  fprintf (STDERR, "Usage: %s [options]\n", smaller);
+  fprintf (stderr, "GBA FLinker v1.72 by Jeff F.\n");
+  fprintf (stderr, "Usage: %s [options]\n", smaller);
 
-  fprintf (STDERR,
+  fprintf (stderr,
            "\t-2      Use 16bit EPP data path for faster operation (default=8bit)\n");
-  fprintf (STDERR,
+  fprintf (stderr,
            "\t-b o s file   Backup game save SRAM or Flash to file\n");
-  fprintf (STDERR, "\t               (o = Bank Number [1-4])\n");
-  fprintf (STDERR, "\t               (s=1 - Backup 32K bytes to file.)\n");
-  fprintf (STDERR, "\t               (s=2 - Backup 64K bytes to file.)\n");
-  fprintf (STDERR, "\t               (s=3 - Backup 128K bytes to file.)\n");
-  fprintf (STDERR, "\t               (s=4 - Backup 256K bytes to file.)\n");
-  fprintf (STDERR,
+  fprintf (stderr, "\t               (o = Bank Number [1-4])\n");
+  fprintf (stderr, "\t               (s=1 - Backup 32K bytes to file.)\n");
+  fprintf (stderr, "\t               (s=2 - Backup 64K bytes to file.)\n");
+  fprintf (stderr, "\t               (s=3 - Backup 128K bytes to file.)\n");
+  fprintf (stderr, "\t               (s=4 - Backup 256K bytes to file.)\n");
+  fprintf (stderr,
            "\t-c n    Specify chip size in mbits (8,16,32,64,128,256) (default=32)\n");
-  fprintf (STDERR,
+  fprintf (stderr,
            "\t-d n    Dump 256 bytes of ROM to screen (default: n=0)\n");
-  fprintf (STDERR, "\t-h      This help screen\n");
-  fprintf (STDERR,
+  fprintf (stderr, "\t-h      This help screen\n");
+  fprintf (stderr,
            "\t-l n    Specify the parallel port to use (default is 1 = LPT1)\n");
-//   fprintf (STDERR, "\t-m\tSet Standard Parallel Port (SPP) mode (default = EPP)\n");
-  fprintf (STDERR,
+//   fprintf (stderr, "\t-m\tSet Standard Parallel Port (SPP) mode (default = EPP)\n");
+  fprintf (stderr,
            "\t-n      Do not repair incorrect header (default = repair header)\n");
-  fprintf (STDERR, "\t-p file Program flash cart with file\n");
-  fprintf (STDERR,
+  fprintf (stderr, "\t-p file Program flash cart with file\n");
+  fprintf (stderr,
            "\t-r o file     Restore game save SRAM from file (No save flash support)\n");
-  fprintf (STDERR, "\t               (o = Bank Number [1-4])\n");
-  fprintf (STDERR,
+  fprintf (stderr, "\t               (o = Bank Number [1-4])\n");
+  fprintf (stderr,
            "\t-s file Save the cart into a file (Use -c to specify size)\n");
-  fprintf (STDERR, "\t-v file Verify flash cart with file\n");
-  fprintf (STDERR, "\t-w n    Add delay to make transfer more reliable\n");
+  fprintf (stderr, "\t-v file Verify flash cart with file\n");
+  fprintf (stderr, "\t-w n    Add delay to make transfer more reliable\n");
 }
 
 void
@@ -752,7 +752,7 @@ CheckForFC (void)
   LinkerInit ();
 //   if (LinkerInit () == 0)
 //      {
-//      fprintf (STDERR, "ERROR: Flash Advance Linker not found or not turned on.\n");
+//      fprintf (stderr, "ERROR: Flash Advance Linker not found or not turned on.\n");
 //      ProgramExit (1);
 //      }
 
@@ -857,7 +857,7 @@ GetFileSize (FILE * fp)
 
       if (feof (fp))
         {
-          fprintf (STDERR, "ERROR: File must be 192 bytes or larger\n");
+          fprintf (stderr, "ERROR: File must be 192 bytes or larger\n");
           ProgramExit (1);
         }
       else
@@ -1272,7 +1272,7 @@ SpaceCheck (char c)
 {
   if (c != 0)
     {
-      fprintf (STDERR,
+      fprintf (stderr,
                "ERROR: Space required between option and parameter\n");
       ProgramExit (1);
     }
@@ -1330,7 +1330,7 @@ fal_main (int argc, char **argv)
           if ((BackupMemSize < 1) || (BackupMemSize > 4) ||
               (BackupMemOffset < 1) || (BackupMemOffset > 4))
             {
-              fprintf (STDERR,
+              fprintf (stderr,
                        "ERROR: -b parameter values must be between 1-4\n");
               ProgramExit (1);
             }
@@ -1352,7 +1352,7 @@ fal_main (int argc, char **argv)
               (ChipSize != 32) &&
               (ChipSize != 64) && (ChipSize != 128) && (ChipSize != 256))
             {
-              fprintf (STDERR,
+              fprintf (stderr,
                        "ERROR: Chip size must be 8,16,32,64,128 or 256.\n");
               ProgramExit (1);
             }
@@ -1385,7 +1385,7 @@ fal_main (int argc, char **argv)
 //                    if ( (BackupMemSize<1) || (BackupMemSize>4) ||
           if ((BackupMemOffset < 1) || (BackupMemOffset > 4))
             {
-              fprintf (STDERR,
+              fprintf (stderr,
                        "ERROR: -r parameter value must be between 1-4\n");
               ProgramExit (1);
             }
@@ -1407,7 +1407,7 @@ fal_main (int argc, char **argv)
             port = i;
           else
             {
-              fprintf (STDERR,
+              fprintf (stderr,
                        "ERROR: Only LPT1, LPT2, & LPT3 are supported");
               ProgramExit (1);
             }
@@ -1490,7 +1490,7 @@ fal_main (int argc, char **argv)
 //   if ( (OptP) &&
 //        ((Device == 0) || (Device == 0x2e) || (Device == 0xff)) )
 //      {
-//      fprintf (STDERR, "ERROR: Device type not recognized as programmable\n");
+//      fprintf (stderr, "ERROR: Device type not recognized as programmable\n");
 //      ProgramExit (1);
 //      }
 //
@@ -1546,7 +1546,7 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname2, "rb")) == NULL)
         {
-          fprintf (STDERR, "ERROR trying to open file '%s'\n", fname2);
+          fprintf (stderr, "ERROR trying to open file '%s'\n", fname2);
           ProgramExit (1);
         }
       printf ("Comparing flash with file '%s'.\n", fname2);
@@ -1612,7 +1612,7 @@ fal_read_rom (char *filename, unsigned int parport, int size)
         fal_argv[4] = "256";
       else
         {
-          fprintf (STDERR, "Invalid argument for -xfalc=n\n"
+          fprintf (stderr, "Invalid argument for -xfalc=n\n"
                    "n can be 8, 16, 32, 64, 128 or 256; default is 32\n");
           exit (1);
         }
@@ -1684,7 +1684,7 @@ fal_read_sram (char *filename, unsigned int parport, int bank)
     {
       if (bank < 1 || bank > 4)
         {
-          fprintf (STDERR, "bank must be 1, 2, 3 or 4\n");
+          fprintf (stderr, "bank must be 1, 2, 3 or 4\n");
           exit (1);
         }
       bank_str[0] = '0' + bank;
@@ -1715,7 +1715,7 @@ fal_write_sram (char *filename, unsigned int parport, int bank)
     {
       if (bank < 1 || bank > 4)
         {
-          fprintf (STDERR, "bank must be 1, 2, 3 or 4\n");
+          fprintf (stderr, "bank must be 1, 2, 3 or 4\n");
           exit (1);
         }
       bank_str[0] = '0' + bank;

@@ -550,7 +550,7 @@ ucon64_rename (int mode)
 
   if (one_file (ucon64.rom, buf2))
     {
-      printf ("Skipping \"%s\"\n", basename (ucon64.rom));
+      printf ("Skipping \"%s\"\n", basename2 (ucon64.rom));
       return 0;
     }
 
@@ -1046,7 +1046,7 @@ ucon64_options (int c, const char *optarg)
               ucon64_dat_view (ucon64.console, 0);
               printf ("TIP: %s " OPTION_LONG_S "db " OPTION_LONG_S "nes"
                       " would show only information about known NES ROMs\n\n",
-                      basename (ucon64.argv[0]));
+                      basename2 (ucon64.argv[0]));
             }
           else
             printf (ucon64_msg[DAT_NOT_ENABLED]);
@@ -1059,7 +1059,7 @@ ucon64_options (int c, const char *optarg)
           ucon64_dat_view (ucon64.console, 1);
           printf ("TIP: %s " OPTION_LONG_S "dbv " OPTION_LONG_S "nes"
                   " would show only information about known NES ROMs\n\n",
-                  basename (ucon64.argv[0]));
+                  basename2 (ucon64.argv[0]));
         }
       else
         printf (ucon64_msg[DAT_NOT_ENABLED]);
@@ -1082,7 +1082,7 @@ ucon64_options (int c, const char *optarg)
               printf ("\n"
                       "TIP: %s " OPTION_LONG_S "dbs" OPTARG_S "0x%08x " OPTION_LONG_S
                       "nes would search only for a NES ROM\n\n",
-                      basename (ucon64.argv[0]), ucon64.crc32);
+                      basename2 (ucon64.argv[0]), ucon64.crc32);
             }
         }
       else

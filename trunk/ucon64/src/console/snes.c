@@ -524,7 +524,7 @@ set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header)
         }
 
       header[0x1d0] = bs_dump ? 0 : snes_header.country;
-      if (rominfo->header_start == SNES_HEADER_START + SNES_HIROM + 0x400000)
+      if (rominfo->header_start == SNES_HEADER_START + SNES_EHIROM)
         header[0x1d0] |= 0x30;
       else
         header[0x1d0] |= snes_hirom ? 0x20 : 0x10;
@@ -2495,9 +2495,11 @@ snes_init (st_rominfo_t *rominfo)
 
   // step 3.
   if (UCON64_ISSET (ucon64.snes_hirom))         // -hi, -ehi or -nhi option was specified
-    snes_hirom = ucon64.snes_hirom;
-  if (snes_hirom && size < (int) (SNES_HEADER_START + snes_hirom + SNES_HEADER_LEN))
-    snes_hirom = SNES_HIROM;                    // Don't let -ehi crash on a too small ROM
+    {
+      snes_hirom = ucon64.snes_hirom;
+      if (snes_hirom && size < (int) (SNES_HEADER_START + snes_hirom + SNES_HEADER_LEN))
+        snes_hirom = SNES_HIROM;                // Don't let -ehi crash on a too small ROM
+    }
 
   rominfo->header_start = SNES_HEADER_START + snes_hirom;
   rominfo->header_len = SNES_HEADER_LEN;

@@ -1189,13 +1189,13 @@ ucon64_usage (int argc, char *argv[])
 #endif
 
 #ifdef  __MSDOS__
-#define GOOD_EXAMPLE  "                  Example: %s " OPTION_LONG_S "rrom " OPTION_LONG_S "good C:\\MAME_ROMS\\\n"
+#define GOOD_EXAMPLE  "                  example:\n                    %s " OPTION_LONG_S "rrom " OPTION_LONG_S "good C:\\MAME_ROMS\\\n"
 #else
-#define GOOD_EXAMPLE  "                  Example: %s " OPTION_LONG_S "rrom " OPTION_LONG_S "good /home/joe/mame/\n"
+#define GOOD_EXAMPLE  "                  example:\n                    %s " OPTION_LONG_S "rrom " OPTION_LONG_S "good /home/joe/mame/\n"
 #endif
 
 #ifdef  PARALLEL
-#define PARALLEL_OPTION  "  " OPTION_LONG_S "port=PORT   specify parallel PORT (0x3bc, 0x378 (default), 0x278)\n"
+#define PARALLEL_OPTION  "  " OPTION_LONG_S "port=PORT   specify parallel PORT={3bc, 378, 278, ...}\n"
 #else
 #define PARALLEL_OPTION  ""
 #endif
@@ -1594,7 +1594,7 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 #ifdef  PARALLEL
 #define PARALLEL_MSG "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n" \
      "      parallel port. If that is the case give a hardware address. For example:\n" \
-     "        ucon64 " OPTION_LONG_S "xswc \"rom.swc\" 0x378\n" \
+     "        ucon64 " OPTION_LONG_S "xswc \"rom.swc\" " OPTION_LONG_S "port=0x378\n" \
      "      In order to connect a copier to a PC's parallel port you need a standard\n" \
      "      bidirectional parallel cable\n" \
      "\n"

@@ -1,5 +1,5 @@
 <html><head><title>README</title></head><body bgcolor="#c0c0c0"><tt><pre>
-uCON64 1.9.5 GNU/Linux 1999/2000/2001 by NoisyB (noisyb@gmx.net)
+uCON64 1.9.6 Unix
 Uses code from various people. See 'DEVELOPERS' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
@@ -21,7 +21,7 @@ TODO:  -dbs	search ROM database (all entries) by CRC32; $ROM=CRC32
   -ls		generate ROM list for all ROMs; $ROM=DIRECTORY
   -c		compare ROMs; $FILE=OTHER_ROM
   -cs		compare ROMs for similarities; $FILE=OTHER_ROM
-  -find		find string in ROM; $FILE=STRING
+  -find		find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)
   -swap		swap/(de)interleave (ALL) Bytes in ROM (1234<->2143)
   -pad		pad ROM to full Mb
   -padhd	pad ROM to full Mb (regarding to +512 Bytes header)
@@ -65,9 +65,11 @@ GameBoy Advance
   -strip	strip Bytes from end of ROM (use -ispad before); $FILE=VALUE
   -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
   -mki		create IPS patch; $FILE=CHANGED_ROM
-  -xfal         send/receive to/from Flash Advance Linker; $FILE=PORT
-  		receives automatically when $ROM does not exist
-TODO: test if -xfal does work with the hardware
+  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT
+                receives automatically when $ROM does not exist
+  -xfalc<n>     specify chip size in mbits of ROM in Flash Advance Linker when
+                receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32
+  -xfalm        use SPP mode, default is EPP
 
 Nintendo 64
 1996 Nintendo http://www.nintendo.com
@@ -93,9 +95,9 @@ TODO:  -gs	apply GameShark code (permanent); $FILE=CODE
   -a		apply APS patch (<=1.2); $FILE=PATCHFILE
   -mka		create APS patch; $FILE=CHANGED_ROM
   -na		change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION
-  -xv64		send/receive to/from Doctor V64; $FILE=PORT
+  -xv64		send/receive ROM to/from Doctor V64; $FILE=PORT
 		receives automatically when $ROM does not exist
-  -xdjr         send/receive to/from Doctor64 Jr; $FILE=PORT
+  -xdjr         send/receive ROM to/from Doctor64 Jr; $FILE=PORT
   		receives automatically when $ROM does not exist
 TODO: test if -xdjr does work with the hardware
 
@@ -119,6 +121,7 @@ Super Nintendo/SNES/Super Famicon
   -smc		convert to Super Magicom/SMC
   -fig		convert to *Pro Fighter*/(all)FIG
   -swc		convert to Super Wild Card*/(all)SWC
+  -swcs		convert Snes9x *.srm (SRAM) to Super Wild Card*/(all)SWC
   -mgd		convert to Multi Game*/MGD2/MGH/RAW
   -gd3		convert to Professor SF(2) Game Doctor SF3/6/7
   -col		convert 0xRRGGBB (html) <-> 0xXXXX (snes); $ROM=0xCOLOR
@@ -128,7 +131,7 @@ TODO:  -sx	convert to Snes9X (Emulator)/S9X save state; $ROM=SAVESTATE
 TODO:  -zs	convert to ZSNES (Emulator) save state; $ROM=SAVESTATE
 TODO:  -xzs	extract GFX from ZSNES (Emulator) save state; $ROM=SAVESTATE
 TODO:  -spc	convert SPC sound to WAV; $ROM=SPCFILE
-  -j            join splitted ROM
+  -j		join splitted ROM
   -s		split ROM into 4Mb parts (for backup unit(s) with fdd)
   -p		pad ROM to full Mb
 TODO:  -k	remove protection (crack)
@@ -141,13 +144,17 @@ TODO:  -k	remove protection (crack)
   -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
   -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
   -mki		create IPS patch; $FILE=CHANGED_ROM
-TODO:  -xsmc	send/receive to/from Super Magicom/SMC; $FILE=PORT
+  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT
+                receives automatically when $ROM does not exist
+                Press q to abort ^C will cause invalid state of backup unit
+  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT
+                receives automatically when $ROM does not exist
+                Press q to abort ^C will cause invalid state of backup unit
+TODO:  -xfig	send/receive ROM to/from *Pro Fighter*/(all)FIG; $FILE=PORT
 		receives automatically when $ROM does not exist
-TODO:  -xswc    send/receive to/from Super Wild Card*/(all)SWC; $FILE=PORT
+TODO:  -xsmc	send/receive ROM to/from Super Magicom/SMC; $FILE=PORT
 		receives automatically when $ROM does not exist
-TODO:  -xfig	send/receive to/from *Pro Fighter*/(all)FIG; $FILE=PORT
-		receives automatically when $ROM does not exist
-TODO:  -xmgd    send/receive to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT
+TODO:  -xmgd    send/receive ROM to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT
 		receives automatically when $ROM does not exist
 
 Neo Geo/(Neo Geo CD(Z))/MVS/(M.A.M.E.)
@@ -169,7 +176,7 @@ Neo Geo Pocket/Neo Geo Pocket Color
 1998/1999 SNK http://www.neogeo.co.jp
   -ngp		force recognition; NEEDED
   *		show info (default)
-TODO:  -xfpl    send/receive to/from Flash Pocket Linker; $FILE=PORT
+TODO:  -xfpl    send/receive ROM to/from Flash Pocket Linker; $FILE=PORT
 		receives automatically when $ROM does not exist
 
 Genesis/Sega Mega Drive/(Sega CD)/(32X)/Nomad
@@ -191,7 +198,6 @@ TODO:  -cym	convert CYM (Callus Emulator) sound to WAV; $ROM=CYMFILE
   -n		change foreign ROM name; $FILE=NEWNAME
   -n2		change japanese ROM name; $FILE=NEWNAME
   -s		split ROM into 4Mb parts (for backup unit(s) with fdd)
-TODO: split for Super Magicom Drive format
   -p		pad ROM to full Mb
 TODO:  -chk	fix ROM checksum
   -1991		fix old third party ROMs to work with consoles build after
@@ -202,9 +208,9 @@ TODO:  -gg	apply GameGenie code (permanent); $FILE=XXXX-XXXX
   -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
   -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
   -mki		create IPS patch; $FILE=CHANGED_ROM
-TODO:  -xsmd    send/receive to/from Super Magicom Drive/SMD; $FILE=PORT
+TODO:  -xsmd    send/receive ROM to/from Super Magicom Drive/SMD; $FILE=PORT
 		receives automatically when $ROM does not exist
-TODO:  -xmgd    send/receive to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT
+TODO:  -xmgd    send/receive ROM to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT
 		receives automatically when $ROM does not exist
 
 GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance)
@@ -216,6 +222,8 @@ GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance)
   -n		change ROM name; $FILE=NEWNAME
   -mgd		convert to Multi Game*/MGD2/RAW
   -ssc		convert to Super Smart Card/SSC (+512 Bytes)
+  -sgb		convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX
+  -gbx		convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC
   -n2gb		convert for use with Kami's FC Emulator (NES Emulator);
 		$ROM=NES_ROM $FILE=FC.GB (the Emulator)
 		m-kami@da2.so-net.ne.jp www.playoffline.com
@@ -228,8 +236,8 @@ TODO:  -gs	apply GameShark code (permanent)
   -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
   -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
   -mki		create IPS patch; $FILE=CHANGED_ROM
-TODO:  -xgbx    send/receive to/from GB Xchanger; $FILE=PORT
-		receives automatically when $ROM does not exist
+TODO:  -xgbx    send/receive ROM to/from GB Xchanger; $FILE=PORT
+                receives automatically when $ROM does not exist
 
 Handy(prototype)/Lynx/Lynx II
 1987 Epyx/1989 Atari/1991 Atari
@@ -256,7 +264,7 @@ Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)
   *		show info (default)
   -smg		convert to Super Magic Griffin/SMG
   -mgd		convert to Multi Game Doctor*/MGD2/RAW
-TODO:  -xmgd    send/receive to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT
+TODO:  -xmgd    send/receive ROM to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT
 		receives automatically when $ROM does not exist
 
 Sega Master System(II/III)/GameGear (Handheld)
@@ -272,7 +280,7 @@ TODO:  -chk	fix ROM checksum
   -gge		encode GameGenie code; $ROM=AAAA:VV or $ROM=AAAA:VV:CC
   -ggd		decode GameGenie code; $ROM=XXX-XXX or $ROM=XXX-XXX-XXX
   -gg		apply GameGenie code (permanent); $FILE=CODE-CODE
-TODO:  -xsmd    send/receive to/from Super Magicom Drive/SMD; $FILE=PORT
+TODO:  -xsmd    send/receive ROM to/from Super Magicom Drive/SMD; $FILE=PORT
 		receives automatically when $ROM does not exist
 
 Nintendo Entertainment System/NES

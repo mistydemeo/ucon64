@@ -263,7 +263,11 @@ sms_header_len (void)
                mem_search (buffer, SEARCHBUFSIZE, search_str[n], 8)) != NULL)
           return ptr - buffer - SMS_HEADER_START;
 
-      return ucon64.file_size % (16 * 1024); // SMD_HEADER_LEN
+      n = ucon64.file_size % (16 * 1024);       // SMD_HEADER_LEN
+      if (ucon64.file_size > n)
+        return n;
+      else
+        return 0;
     }
 }
 #undef SEARCHBUFSIZE

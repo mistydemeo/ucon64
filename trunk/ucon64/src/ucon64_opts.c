@@ -258,6 +258,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XGBXS:
     case UCON64_XGBXB:
     case UCON64_XGD3:
+    case UCON64_XGD6:
     case UCON64_XLIT:
     case UCON64_XMCCL:
     case UCON64_XMD:
@@ -1594,14 +1595,28 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_XGD3:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
-        gd_read_rom (ucon64.rom, ucon64.parport); // dumping is not yet supported
+        gd3_read_rom (ucon64.rom, ucon64.parport); // dumping is not yet supported
       else
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format.\n");
           else
-            gd_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo); // file exists -> send it to the copier
+            gd3_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo); // file exists -> send it to the copier
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGD6:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
+        gd6_read_rom (ucon64.rom, ucon64.parport); // dumping is not yet supported
+      else
+        {
+          if (!ucon64.rominfo->buheader_len)
+            fprintf (stderr,
+                    "ERROR: This ROM has no header. Convert to a Game Doctor compatible format.\n");
+          else
+            gd6_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo); // file exists -> send it to the copier
         }
       fputc ('\n', stdout);
       break;

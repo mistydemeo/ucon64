@@ -448,8 +448,11 @@ ucon64_get_wf (const int option)
 }
 
 
-// -xgd3 handles split files. Only SNES and Genesis files can be detected as
-//  being split. Split NES files (Pasofami format) are detected by nes_init().
+/*
+  -xgd3 & -xgd6 handle split files. Only SNES and Genesis files can be detected
+  as being split (by ucon64_testsplit()). Split NES files (Pasofami format) are
+  detected by nes_init().
+*/
 const st_ucon64_wf_t ucon64_wf[] = {
 //  {option, console, usage, flags},
 /*
@@ -518,6 +521,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XGBXB, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_ROM},
   {UCON64_XGBXS, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_ROM},
   {UCON64_XGD3, UCON64_SNES, gd_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM}, // supports split files
+  {UCON64_XGD6, UCON64_SNES, gd_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM}, // supports split files
   {UCON64_XLIT, UCON64_GB, lynxit_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XMCCL, UCON64_LYNX, mccl_usage,      WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_XMD, UCON64_GEN, md_usage,           WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},

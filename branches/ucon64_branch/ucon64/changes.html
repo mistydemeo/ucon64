@@ -325,13 +325,13 @@ The original uCON for SNES and Genesis was written by Chicken & chp in ~1995<br>
   --find, -c, --cs, --dbs, -b, -i, --mki, -a, --mka, --na, --ppf, --mkppf,
   --nppf, --idppf, --crp, -n, --bot, --lsram, --usms, --n2, --n2gb, --b0, --b1,
   --sam, --bios and --dumpinfo (by NoisyB)<br>
-- fixed (PSX) PPF code works correctly and generates correct patches on
+- updated (PSX) PPF code works correctly and generates correct patches on
   big-endian machines (by dbjh)<br>
 - added (patch) --patch option to specify the patch file for APS, IPS, BSL
   and PPF (by NoisyB)<br>
 - updated (SNES) added NTSC/PAL fix for Dual Orb 2 (thanks to John), Dr. Mario,
   Dragon - The Bruce Lee Story (U) and Wolfenstein 3D (U) (by dbjh)<br>
-- fixed (N64) APS code works correctly and generates correct patches on
+- updated (N64) APS code works correctly and generates correct patches on
   big-endian machines (by dbjh)<br>
 - added (all) -o specify output directory. Note that now uCON64 by default
   writes its output files to the current directory (by NoisyB and dbjh)<br>
@@ -447,15 +447,6 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - removed (NES) support for bad FDS DAT files. If you really want to use FDS
   DAT files created by tools that erroneously include the header in the CRC32
   calculation, use the switch -nhd (by dbjh)<br>
-- added (GB) --logo restore ROM logo character data (offset: 0x104-0x134)
-  (by NoisyB)<br>
-- added (Dreamcast) --vms=SAV convert NES SAV file to a VMS file for use with
-  NesterDC (by NoisyB)<br>
-<!--
-- added (Genesis) -xmd &amp; -xmds send/receive ROM/SRAM to/from MD-PRO flash
-  card programmer (by dbjh and NoisyB with many thanks to timofonic and of
-  course ToToTEK Multi Media for providing us with the necessary information)<br>
--->
 - updated (SNES) fixed crashing on first split file of Tales of Phantasia and
   Daikaijuu Monogatari 2 (by dbjh)<br>
 - added (SNES) -xgd6 send ROM to Game Doctor SF6/SF7. This probably solves the
@@ -463,10 +454,34 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - added (SNES) -xgd6s send/receive SRAM to/from Game Doctor SF6/SF7 (by John)<br>
 - added (SNES) -xgd3s send SRAM to Game Doctor SF3/SF6/SF7 (by John)<br>
 - added (Genesis) -multi can create a multi-game file for use on the MD-PRO
-  flash card. The downside: creating a multirom for the FAL won't work without
-  -gba (by dbjh)<br>
+  flash card. The downside: creating a multirom for the FAL doesn't work
+  without -gba anymore (by dbjh)<br>
 - added (Genesis) -f can fix region protections, addendum files are genpal.txt
   and mdntsc.txt (by dbjh)<br>
+- added (SNES) -id force -gd3 to produce a unique file name. This switch
+  doesn't show in the help, because it "fails" for 130 dumps of the GoodSNES
+  "0.999.6--" set. 128 IDs are each shared by 2 games, 2 IDs are shared by 3
+  games (by dbjh)<br>
+- updated (all) the patch generation options (-mka, -mki, -mkppf) use the
+  modified ROM name for the patch to create. They used to use the name of the
+  original ROM (by dbjh)<br>
+- updated (N64) fixed major bug in APS creation code (by dbjh)<br>
+- updated (SNES) added NTSC/PAL fix for Magical Pop'n (J) and Metal Warriors
+  (U) (by dbjh)<br>
+- added (Genesis) recognition of <i>real</i> MGD files (by dbjh, thanks to
+  acem77 for the feedback)<br>
+- updated (Genesis) -mgd now produces proper MGD files (by dbjh)<br>
+- added (Genesis) -bin convert to binary format. This option produces files in
+  the format that uCON64 1.9.8-1 produces with the option -mgd (by dbjh)<br>
+- added (Genesis) -xmd &amp; -xmds send/receive ROM/SRAM to/from MD-PRO flash
+  card programmer (by dbjh and NoisyB with many thanks to timofonic and of
+  course ToToTEK Multi Media for providing us with the necessary information.
+  Special thanks go to Leo of ToToTEK for being very helpful and willing to
+  answer our questions)<br>
+- added (Genesis) -ssize=SIZE specify split part size in Mbit (by dbjh)<br>
+- updated (SNES, SMS, PCE & Genesis) -mgd produces correct file names (by dbjh,
+  thanks to acem77 for testing and feedback)<br>
+- updated (Genesis) -mgd automatically pads files to the right size (by dbjh)<br>
 <br>
 <br>
 <br>

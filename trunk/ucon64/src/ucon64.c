@@ -482,6 +482,8 @@ if (setgid(gid) == -1)                          //  was used, but just in case (
 
 #endif
 
+
+
 if(argcmp(argc,argv,"-ata"))rom.console=ucon64_ATARI;
 if(argcmp(argc,argv,"-s16"))rom.console=ucon64_SYSTEM16;
 if(argcmp(argc,argv,"-n64"))rom.console=ucon64_N64;
@@ -750,7 +752,7 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
   for( x = 0 ; x < argc ; x++ )rom->argv[x]=argv[x];
 
   strcpy(rom->name,"");
-  strcpy(rom->name2,"");
+//  strcpy(rom->name2,"");
 
 
   strcpy(rom->rom,getarg(argc,argv,ucon64_ROM));
@@ -885,6 +887,7 @@ if(rom->console != ucon64_UNKNOWN)
   }
 }
 
+
 if(rom->console == ucon64_UNKNOWN)
 {
   if(
@@ -913,7 +916,6 @@ if(rom->console == ucon64_UNKNOWN)
     return(-1);
   }
 }
-
   quickfread(rom->buheader,rom->buheader_start,rom->buheader_len,rom->rom);
 //  quickfread(rom->header,rom->header_start,rom->header_len,rom->rom);
 
@@ -1091,7 +1093,8 @@ char buf[4096];
   printf("%s\n%s\n%s%s%s\n%s\n%ld bytes (%.4f Mb)\n\n"
     ,rom->title
     ,rom->name
-    ,rom->name2,(rom->name2[0])?"\n":""
+//    ,rom->name2,(rom->name2[0])?"\n":""
+  ,"",""
     ,rom->manufacturer
     ,rom->country
     ,rom->bytes-rom->buheader_len

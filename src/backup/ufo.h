@@ -36,27 +36,27 @@ Byte-Offset  Function
                           0x00 == This is the last chunk.
 03-07        0x00
 08-0F        53 55 50 45 52 55 46 4F  (SUPERUFO)
-10
+10           0x01 == This file is a ROM image file
 11           ROM size: 04 == 4 Mb, 0x18 == 24 Mb, 0x20 == 32 Mb, etc.
 12           ROM format:  00 == HiROM,  01 == LoROM
 
 ====  Start SRAM address mapping config ===============
 
-14          SRAM Size:
+13          SRAM Size:
                00:  0Kb
                01:  16Kb
                02:  64Kb
                03:  256Kb
                04-07: Not used
                08: XXXKb (Used for sram sizes above 256Kb, like 1024Kb)
-15          SRAM A15 control:
+14          SRAM A15 control:
                00: A15 not used for SRAM control?
                    Use this for HiROM games
                    LoROM: Use this if SRAM size = 0Kb (no SRAM)
                01: A15=X selects SRAM
                02: A15=0 selects SRAM
                03: A15=1 selects SRAM
-16          SRAM A20 and A21 control:
+15          SRAM A20 and A21 control:
              Bits 3:2
                00: A21=x selects SRAM
                01: Not used?
@@ -67,7 +67,7 @@ Byte-Offset  Function
                01: Not used?
                10: A20=0 selects SRAM
                11: A20=1 selects SRAM
-17          SRAM A22 and A23 control:
+16          SRAM A22 and A23 control:
              Bits 3:2
                00: A23=x selects SRAM
                01: Not used?
@@ -78,13 +78,13 @@ Byte-Offset  Function
                01: Not used?
                10: A22=0 selects SRAM
                11: A22=1 selects SRAM
-18          SRAM type
+17          SRAM type
                0x00: Linear	(HiROM)
                0x03: Skip	(LoROM)
 
 ====  End SRAM address mapping config  ================
 
-19-1FF      00
+18-1FF      00
 
 LoROM SRAM header
 =========================================================
@@ -128,16 +128,15 @@ typedef struct st_ufo_header
   unsigned char multi;
   unsigned char pad[5];
   unsigned char id[8];                          // "SUPERUFO"
-  unsigned char pad2;
+  unsigned char isrom;
   unsigned char size;
   unsigned char banktype;
-  unsigned char pad3;
   unsigned char sram_size;
   unsigned char sram_a15;
   unsigned char sram_a20_a21;
   unsigned char sram_a22_a23;
   unsigned char sram_type;
-  unsigned char pad4[487];
+  unsigned char pad3[488];
 } st_ufo_header_t;
 
 #define UFO_HEADER_START 0

@@ -2318,12 +2318,16 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   if (check_map_type && !snes_hirom)
     {
       // first check if it's an interleaved Extended HiROM dump
-      if (crc == 0xd7470b37 || crc == 0xa2c5fd29) // GD3
-        snes_header_base = SNES_EROM;
-      else if (crc == 0x9f1d6284 || crc == 0xfe536fc9) // UFO
+      if (ucon64.file_size >= (int) (SNES_HEADER_START + SNES_EROM + SNES_HEADER_LEN))
         {
-          snes_header_base = SNES_EROM;
-          interleaved = 1;
+          // don't set snes_header_base to SNES_EROM for too small files (split files)
+          if (crc == 0xd7470b37 || crc == 0xa2c5fd29) // GD3
+            snes_header_base = SNES_EROM;
+          else if (crc == 0x9f1d6284 || crc == 0xfe536fc9) // UFO
+            {
+              snes_header_base = SNES_EROM;
+              interleaved = 1;
+            }
         }
       if (snes_header.map_type == 0x21 || snes_header.map_type == 0x31 ||
           snes_header.map_type == 0x35 || snes_header.map_type == 0x3a ||

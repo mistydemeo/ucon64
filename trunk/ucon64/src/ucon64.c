@@ -104,8 +104,9 @@ static void ucon64_dat_nfo (const ucon64_dat_t *dat);
 
 st_ucon64_t ucon64;
 static st_rominfo_t rom;
-static ucon64_dat_t ucon64_dat;
-static dm_image_t *image = NULL;
+static ucon64_dat_t dat;
+ucon64_dat_t *ucon64_dat = NULL;
+dm_image_t *image = NULL;
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
 static int ucon64_fsize = 0, ucon64_option = 0;
 
@@ -438,7 +439,7 @@ main (int argc, char **argv)
                1 : 0);
 #endif
 
-  ucon64.type =
+//  ucon64.type =
   ucon64.buheader_len =
   ucon64.interleaved =
   ucon64.split =
@@ -629,6 +630,16 @@ ucon64_flush (st_rominfo_t *rominfo)
   rominfo->console_usage = rominfo->copier_usage = NULL;
 #endif
 
+// restoring the overrides from st_ucon64_t
+  if (UCON64_ISSET (ucon64.buheader_len))
+    rominfo->buheader_len = ucon64.buheader_len;
+
+  if (UCON64_ISSET (ucon64.snes_hirom))
+    rominfo->snes_hirom = ucon64.snes_hirom;
+
+  if (UCON64_ISSET (ucon64.interleaved))
+    rominfo->interleaved = ucon64.interleaved;
+
   return rominfo;
 }
 
@@ -636,6 +647,8 @@ ucon64_flush (st_rominfo_t *rominfo)
 int
 ucon64_console_probe (st_rominfo_t *rominfo)
 {
+  ucon64_flush (rominfo);
+
   switch (ucon64.console)
     {
     case UCON64_GB:
@@ -731,8 +744,8 @@ ucon64_console_probe (st_rominfo_t *rominfo)
           (!jaguar_init (ucon64_flush (rominfo))) ? UCON64_JAGUAR :
           UCON64_UNKNOWN;
 
-//      if (ucon64.console == UCON64_UNKNOWN)
-//        ucon64_flush (rominfo);
+      if (ucon64.console == UCON64_UNKNOWN)
+        ucon64_flush (rominfo);
 
       return (ucon64.console == UCON64_UNKNOWN) ? (-1) : 0;
 
@@ -757,40 +770,41 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   if (S_ISREG (fstate.st_mode) != TRUE)
     return -1;
 
+  ucon64_flush (rominfo); // clear rominfo
+
   ucon64_fsize = q_fsize (ucon64.rom);          // save size in ucon64_fsize
   rominfo->file_size = ucon64_fsize;
 
-/*
-  currently the media type is determined by its size
-*/
-#if 1
-  ucon64.type = (rominfo->file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
-#else
+//  what media type? do not calc crc32 and stuff for DISC images (speed!)
+  ucon64.type = UCON64_ROM;
+
   if (ucon64.discmage_enabled)
-    if (ucon64.type == UCON64_UNKNOWN)
-      {
-        image = dm_open (romfile);
-        ucon64.type = image ? UCON64_CD : UCON64_ROM;
-        if (image)
-          dm_close (image);
-      }
-#endif
+    {
+#if 0
+      image = dm_open (ucon64.rom);
+      ucon64.type = (image ? UCON64_CD : UCON64_ROM);
+      dm_close (image);
+#endif      
+    }
 
-  ucon64_flush (rominfo);
-
-  result = ucon64_console_probe (rominfo);
+  if (UCON64_TYPE_ISROM (ucon64.type))
+    ucon64.type = (rominfo->file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
 
   if (UCON64_TYPE_ISROM (ucon64.type))
     {
+      result = ucon64_console_probe (rominfo);
+
       // TODO Calculating the CRC for the ROM data of a UNIF file (NES) shouldn't
       //  be done with q_fcrc32(). nes_init() uses mem_crc32().
       if (rominfo->current_crc32 == 0)
         rominfo->current_crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
 
       if (ucon64.dat_enabled)
-        rominfo->dat = ucon64_dbsearch (rominfo->current_crc32, &ucon64_dat);
-      else
-        rominfo->dat = NULL;
+        {
+          memset (&dat, 0, sizeof (ucon64_dat_t));
+          ucon64_dat = ucon64_dbsearch (rominfo->current_crc32, &dat);
+        }
+      else ucon64_dat = NULL;
 
       switch (ucon64.console)
         {
@@ -803,13 +817,12 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
             break;
 
           default:
-            if (rominfo->dat)
+            if (ucon64_dat)
               {
-                strcpy (rominfo->name, rominfo->dat->name);
-//                strcpy (rominfo->fname, rominfo->dat->fname);
-                if (ucon64.console == UCON64_UNKNOWN)
+//                strcpy (rominfo->name, ucon64_dat->name);
 
-                  ucon64.console = rominfo->dat->console;
+//                if (ucon64.console == UCON64_UNKNOWN)
+//                  ucon64.console = ucon64_dat->console;
               }
             break;
         }
@@ -817,44 +830,9 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   else if (UCON64_TYPE_ISCD (ucon64.type))
     {
 #if 0
-      st_iso_header_t iso_header;
-//      int value;
-
-//      ucon64_flush (rominfo);
-
-      result = 0;
-
-      image = dm_open (romfile);
-      rominfo->image = image;
-
-      q_fread (&iso_header, ISO_HEADER_START +
-          UCON64_ISSET (ucon64.buheader_len) ?
-            ucon64.buheader_len :
-             CDRW_HEADER_START (image->sector_size),
-              ISO_HEADER_LEN, romfile);
-      rominfo->header_start = ISO_HEADER_START;
-      rominfo->header_len = ISO_HEADER_LEN;
-      rominfo->header = &iso_header;
-
-//CD internal name
-      strcpy (rominfo->name, iso_header.volume_id);
-
-//CD maker
-      rominfo->maker = iso_header.publisher_id;
-
-//misc stuff
-      if (image->sector_size == -1)
-        strcpy (rominfo->misc, "Track Mode: Unknown (Maybe CDI or NRG?)\n");
-      else
-        sprintf (rominfo->misc, "Track Mode: %s (cdrdao: %s)\n", image->common, image->cdrdao);
-
-//      rominfo->console_usage =
-
-//      rominfo->copier_usage = cdrw_usage;
-
-      dm_close (image);
 #endif
-   }
+      result = -1;
+    }
   return result;
 }
 
@@ -862,19 +840,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 void
 ucon64_dat_nfo (const ucon64_dat_t *dat)
 {
-  printf ("DAT info:\n"
-          "  %s\n"
-          "  Version: %s (%s, %s)\n"
-//          "  Author: %s\n"
-//          "  Comment: %s\n"
-          "  %s\n",
-          dat->datfile,
-          dat->version,
-          dat->date,
-          dat->refname,
-//          dat->author,
-//          dat->comment,
-          dat->name);
+  printf ("DAT info:\n" "  %s\n", dat->name);
 
   if (dat->misc[0])
     printf ("  %s\n", dat->misc);
@@ -885,9 +851,16 @@ ucon64_dat_nfo (const ucon64_dat_t *dat)
   if (stricmp (dat->name, dat->fname) != 0)
     printf ("  Filename: %s\n", dat->fname);
 
-  printf ("  Size: %d Bytes (%.4f Mb)\n",
+  printf ("  Size: %d Bytes (%.4f Mb)\n"
+          "  %s\n"
+          "  Version: %s (%s, %s)\n",
           dat->fsize,
-          TOMBIT_F (dat->fsize));
+          TOMBIT_F (dat->fsize),
+          dat->datfile,
+          dat->version,
+          dat->date,
+          dat->refname);
+
 }
 
 
@@ -1047,8 +1020,8 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 
       if (ucon64.dat_enabled)
         {
-          if (rominfo->dat) // a dat file entry was found
-            ucon64_dat_nfo (rominfo->dat);
+          if (ucon64_dat)
+            ucon64_dat_nfo (ucon64_dat);
           else
             printf ("DAT info: ROM not found\n");
         }

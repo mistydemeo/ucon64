@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_NO 0
 
 #define UCON64_UNKNOWN_S "Unknown"
+#define NULL_TO_UNKNOWN_S(str) (str?:UCON64_UNKNOWN_S)
 
 //#define UCON64_KNOWN -1
 #define UCON64_UNKNOWN -1
@@ -247,7 +248,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define TOMBIT_F(x) ((float)(x) / MBIT)
 
 #define MAXROMSIZE ((512 + 1) * MBIT)
-#define MAXBUFSIZE 32768
 
 /*
   this struct holds only workflow relevant informations

@@ -86,7 +86,6 @@ const char *ucon64_console_error =
   "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n";
 
 
-#define MAXBUFSIZE 32768
 #define DETECT_MAX_CNT 1000
 #define CRC32_POLYNOMIAL     0xEDB88320L
 

@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #include "config.h"
 
-char *doctor64_title = "Doctor V64\n"
+const char *doctor64_title = "Doctor V64\n"
                        "  19XX Bung Enterprises Ltd http://www.bung.com.hk";
 
 #ifdef BACKUP

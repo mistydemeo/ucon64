@@ -51,6 +51,15 @@ IO_Tuple;
 #endif // defined __unix__ || defined __BEOS__
 #endif // BACKUP
 
+enum
+{
+  MODE1_2048,
+  MODE1_2352,
+  MODE2_2336,
+  MODE2_2352
+};
+extern const char *track_modes[];
+
 #define MBIT 131072
 
 #define PARPORT_DATA    0       // output
@@ -59,9 +68,9 @@ IO_Tuple;
 /*
   defines for unknown backup units/emulators
 */
-#define unknown_HEADER_START 0
+#define UNKNOWN_HEADER_START 0
 #define unknown_HEADER_LEN 512
-extern char *unknown_title;
+extern const char *unknown_title;
 
 // GameGenie "codec" routines
 extern char hexDigit (int value);
@@ -83,21 +92,22 @@ extern unsigned long fileCRC32 (char *filename, long start);   // calculate CRC3
 //ucon64 specific wrapper for misc.c/filebackup()
 extern char *ucon64_fbackup (char *filename);
 
-extern size_t filepad (char *filename, long start, long unit);//pad a ROM in Mb
-extern long filetestpad (char *filename); //test if a ROM is padded
+extern size_t filepad (const char *filename, long start, long unit);//pad a ROM in Mb
+extern long filetestpad (const char *filename); //test if a ROM is padded
 
-extern int ucon64_testsplit (char *filename);//test if a ROM is splitted
+extern int ucon64_testsplit (const char *filename);//test if a ROM is splitted
 
 extern unsigned int ucon64_parport_probe (unsigned int parport); 
 
 //ucon64 specific wrapper for misc.c/gauge()
 extern int ucon64_gauge (time_t init_time, long pos, long size);
 
-extern int ucon64_trackmode_probe (long imagesize);
+extern int ucon64_bin2iso (const char *image, int track_mode);
+extern int ucon64_trackmode_probe (const char *image);
 
 #define ISODCL(from, to) (to - from + 1)
 
-struct iso_primary_descriptor
+typedef struct st_iso_primary_descriptor
 {
   char type[ISODCL (1, 1)];   /* 711 */
   char id[ISODCL (2, 6)];
@@ -132,5 +142,5 @@ struct iso_primary_descriptor
   char unused4[ISODCL (883, 883)];
   char application_data[ISODCL (884, 1395)];
   char unused5[ISODCL (1396, 2048)];
-};
+} st_iso_primary_descriptor_t;
 #endif // #ifndef UCON64_MISC_H

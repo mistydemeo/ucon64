@@ -21,12 +21,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef MGD_H
 #define MGD_H
 
-extern char *mgd_title;
+extern const char *mgd_title;
 
 #ifdef BACKUP
 extern void mgd_usage (void);
 #endif // BACKUP
 
-#define mgd_HEADER_START 0
-#define mgd_HEADER_LEN 0
-#endif /* MGD_H */
+#define MGD_HEADER_START 0
+#define MGD_HEADER_LEN 0
+#endif // MGD_H 

@@ -178,6 +178,7 @@ enum
   ucon64_SWCS,
   ucon64_SWP,
   ucon64_SYSTEM16,
+  ucon64_TM,
   ucon64_UFOS,
   ucon64_UNIF,
   ucon64_UNKNOWN,
@@ -186,6 +187,7 @@ enum
   ucon64_VBOY,
   ucon64_VEC,
   ucon64_VECTREX,
+  ucon64_VERSION,
   ucon64_VIRTUALBOY,
   ucon64_WONDERSWAN,
   ucon64_XBOX,
@@ -207,29 +209,29 @@ enum
   ucon64_Z64
 };
 
-#define ucon64_VERSION "1.9.8beta3"
+#define UCON64_VERSION_S "1.9.8beta3"
 
 #ifdef  __MSDOS__                               // __MSDOS__ must come before __unix__, because DJGPP defines both
-  #define ucon64_OS "MSDOS"
+  #define UCON64_OS "MSDOS"
 #elif   defined __unix__
   #ifdef  __CYGWIN__
-    #define ucon64_OS "Win32"
+    #define UCON64_OS "Win32"
   #elif   defined __FreeBSD__
-    #define ucon64_OS "Unix (FreeBSD)"
+    #define UCON64_OS "Unix (FreeBSD)"
   #elif   defined __linux__
-    #define ucon64_OS "Unix (Linux)"
+    #define UCON64_OS "Unix (Linux)"
   #elif   defined sun
-    #define ucon64_OS "Unix (Solaris)"
+    #define UCON64_OS "Unix (Solaris)"
   #else
-    #define ucon64_OS "Unix"
+    #define UCON64_OS "Unix"
   #endif
 #elif   defined __BEOS__
-  #define ucon64_OS "BeOS"
+  #define UCON64_OS "BeOS"
 #else
-  #define ucon64_OS ""
+  #define UCON64_OS ""
 #endif
 
-#define ucon64_TITLE "uCON64 " ucon64_VERSION " " ucon64_OS " 1999-2002 by (various)"
+//extern const char *ucon64_title;
 
 #define MBIT	131072
 #define MAXROMSIZE ( ( 512+1 ) * MBIT )
@@ -238,7 +240,7 @@ enum
 /*
   this struct holds only workflow relevant informations
 */
-extern struct ucon64_
+typedef struct st_ucon64
 {
 //TODO get rid of argc and argv here
   int argc;
@@ -265,26 +267,26 @@ extern struct ucon64_
   int splitted;                 //rom is splitted
   int snes_hirom;               //super nintendo ROM is a HiROM
   int interleaved;              //rom is interleaved (swapped)
-} ucon64;
+} st_ucon64_t;
 
+extern st_ucon64_t ucon64;
 
 /*
   this struct holds only ROM relevant informations
 */
-struct rom_
+typedef struct st_rom
 {
   char rom[FILENAME_MAX];               //rom (cmdline) with path
 
   long console;                 //integer for the detected console system
-  char *title;                  //console system name
-  char *copier;                 //name of backup unit
+  const char *title;                  //console system name
+  const char *copier;                 //name of backup unit
   unsigned long bytes;          //size in bytes
   float mbit;                   //size in mbit
   int interleaved;              //rom is interleaved (swapped)
   unsigned long padded;         //rom is padded
   unsigned long intro;          //rom has intro
   int splitted;                 //rom is splitted
-
   int snes_hirom;               //super nintendo ROM is a HiROM
 
   unsigned long current_crc32;  //current crc32 value of ROM
@@ -292,9 +294,11 @@ struct rom_
 
   int has_internal_crc;         //ROM has internal CRC (Super Nintendo, Mega Drive, Gameboy)
   unsigned long current_internal_crc;   //calculated CRC
+
   unsigned long internal_crc;   //internal CRC
   long internal_crc_start;      //start of internal CRC in ROM header
   int internal_crc_len;         //length (in bytes) of internal CRC in ROM header
+
   char internal_crc2[4096];     //2nd or inverse internal CRC
   long internal_crc2_start;     //start of 2nd/inverse internal CRC
   int internal_crc2_len;        //length (in bytes) of 2nd/inverse internal CRC
@@ -308,18 +312,9 @@ struct rom_
   long header_len;              //length of internal ROM header (==0)?no header
 
   char name[4096];              //ROM name
-  long name_start;              //start of internal ROM name (==0)?name comes from database
-  long name_len;                //length of ROM name
-
-  char manufacturer[4096];      //manufacturer name of the ROM
-  long manufacturer_start;      //start of internal manufacturer name (==0)?manufacturer comes from database
-  long manufacturer_len;        //length of manufacturer name
-
-  char country[4096];           //country name of the ROM
-  long country_start;           //start of internal country name (==0)? country comes from database
-  long country_len;             //length of country name
-
+  const char *maker;      //maker name of the ROM
+  const char *country;           //country name of the ROM
   char misc[MAXBUFSIZE];        //some miscellaneous information about the ROM in one single string
-};
+} st_rom_t;
 
 #endif // #ifndef UCON64_H

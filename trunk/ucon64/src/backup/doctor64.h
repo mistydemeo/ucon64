@@ -30,9 +30,9 @@ extern int doctor64_write (char *filename, long start, long len,
 extern void doctor64_usage (void);
 #endif // BACKUP
 
-extern char *doctor64_title;
+extern const char *doctor64_title;
 
-#define doctor64_HEADER_START 0
-#define doctor64_HEADER_LEN 0
+#define DOCTOR64_HEADER_START 0
+#define DOCTOR64_HEADER_LEN 0
 
 #endif /* DOCTOR64_H */

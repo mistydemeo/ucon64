@@ -20,9 +20,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef CD64_H
 #define CD64_H
 
-extern char *cd64_title;
-#define cd64_HEADER_START 0
-#define cd64_HEADER_LEN 0
+extern const char *cd64_title;
+#define CD64_HEADER_START 0
+#define CD64_HEADER_LEN 0
 
 #ifdef BACKUP
 extern void cd64_usage (void);

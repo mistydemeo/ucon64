@@ -68,7 +68,7 @@ write programs in C
 #include "coleco/coleco.h"
 #include "vboy/vboy.h"
 #include "vectrex/vectrex.h"
-#include "wswan/wswan.h"
+#include "swan/swan.h"
 #include "intelli/intelli.h"
 #include "cd32/cd32.h"
 #include "ps2/ps2.h"
@@ -94,19 +94,22 @@ write programs in C
 
 #define DEBUG
 
-static int ucon64_init (char *romfile, struct rom_ *rombuf);
-static int ucon64_console_probe (struct rom_ *rombuf);
-static int ucon64_nfo (struct rom_ *rombuf);
+static int ucon64_init (const char *romfile, st_rom_t *rominfo);
+static int ucon64_console_probe (st_rom_t *rominfo);
+static int ucon64_nfo (const st_rom_t *rominfo);
 
-static int ucon64_e (struct rom_ *rombuf);
+static int ucon64_e (const st_rom_t *rominfo);
 static int ucon64_ls (char *path, int mode);
 static int ucon64_configfile (void);
 static void ucon64_exit (void);
 static void ucon64_usage (int argc, char *argv[]);
 
-struct ucon64_ ucon64;
+st_ucon64_t ucon64;
 
-static struct option long_options[] = {
+static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " UCON64_OS 
+                              " 1999-2002 by (various)";
+
+static const struct option long_options[] = {
     {"1991", 0, 0, ucon64_1991},
     {"3do", 0, 0, ucon64_3DO},
     {"?", 0, 0, ucon64_HELP},
@@ -232,6 +235,7 @@ static struct option long_options[] = {
     {"swap", 0, 0, ucon64_SWAP},
     {"swc", 0, 0, ucon64_SWC},
     {"swcs", 0, 0, ucon64_SWCS},
+    {"tm", 0, 0, ucon64_TM},
     {"ufos", 0, 0, ucon64_UFOS},
     {"unif", 0, 0, ucon64_UNIF},
     {"usms", 0, 0, ucon64_USMS},
@@ -266,6 +270,7 @@ static struct option long_options[] = {
     {"nint", 0, 0, ucon64_NINT},
     {"hi", 0, 0, ucon64_HI},
     {"nhi", 0, 0, ucon64_NHI},
+    {"version", 0, 0, ucon64_VERSION},
     {0, 0, 0, 0}
   };
 
@@ -285,13 +290,14 @@ main (int argc, char *argv[])
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], *ucon64_argv[128];
   int option_index = 0;
   struct stat puffer;
-  struct rom_ rom;
+  st_rom_t rom;
 
-  printf ("%s\n", ucon64_TITLE);
-  printf ("Uses code from various people. See 'developers.html' for more!\n");
-  printf ("This may be freely redistributed under the terms of the GNU Public License\n\n");
+  printf ("%s\n"
+    "Uses code from various people. See 'developers.html' for more!\n"
+    "This may be freely redistributed under the terms of the GNU Public License\n\n",
+    ucon64_title);
 
-  memset (&ucon64, 0L, sizeof (struct ucon64_));
+  memset (&ucon64, 0L, sizeof (st_ucon64_t));
 /*
   if these values are != -1 before <console>_init() then --hdn=n, --nhd, etc.
   were used...
@@ -454,6 +460,7 @@ main (int argc, char *argv[])
         case ucon64_SRAM:
         case ucon64_STP:
         case ucon64_STRIP:
+        case ucon64_TM:
 #ifdef BACKUP_CD
         case ucon64_XCDRW:
 #endif // BACKUP_CD
@@ -463,6 +470,7 @@ main (int argc, char *argv[])
         case ucon64_XSMD:
         case ucon64_XSMDS:
 #endif // BACKUP
+        case ucon64_VERSION:
           break;
   
         case ucon64_SWCS:
@@ -876,7 +884,13 @@ main (int argc, char *argv[])
           return ucon64_ls (rom.rom, ucon64_REN);
   
         case ucon64_ISO:
-          return bin2iso (rom.rom);
+          return ucon64_bin2iso (rom.rom, ucon64_trackmode_probe (rom.rom));
+
+        case ucon64_TM:
+          result = ucon64_trackmode_probe (rom.rom);
+          
+          printf ("Track mode: %s\n", (result != -1) ? track_modes[result] : "Unknown/Unsupported");
+          return 0;
 
         case ucon64_MKTOC:
           return cdrw_mktoc (&rom);
@@ -903,7 +917,7 @@ main (int argc, char *argv[])
           printf ("Database: %ld known ROMs in db.h (%+ld)\n\n"
                   "TIP: %s " OPTION_LONG_S "db " OPTION_LONG_S "nes would show only the number of known NES ROMs\n\n",
                   ucon64_dbsize (rom.console),
-                  ucon64_dbsize (rom.console) - ucon64_DBSIZE,
+                  ucon64_dbsize (rom.console) - UCON64_DBSIZE,
                   argv[0]);
           break;
 
@@ -926,13 +940,13 @@ main (int argc, char *argv[])
           break;
   
         case ucon64_MULTI:
-          return gbadvance_multi (&rom, 256 * MBIT);
+          return gba_multi (&rom, 256 * MBIT);
 
         case ucon64_MULTI1:
-          return gbadvance_multi (&rom, 64 * MBIT);
+          return gba_multi (&rom, 64 * MBIT);
 
         case ucon64_MULTI2:
-          return gbadvance_multi (&rom, 128 * MBIT);
+          return gba_multi (&rom, 128 * MBIT);
   
         case ucon64_SWCS:
           return snes_swcs (&rom);
@@ -959,7 +973,7 @@ main (int argc, char *argv[])
           return neogeo_bios (&rom);
   
         case ucon64_BOT:
-          return nintendo64_bot (&rom);
+          return n64_bot (&rom);
   
         case ucon64_CHK:
           switch (rom.console)
@@ -967,15 +981,15 @@ main (int argc, char *argv[])
             case ucon64_GB:
               return gameboy_chk (&rom);
             case ucon64_GBA:
-              return gbadvance_chk (&rom);
+              return gba_chk (&rom);
             case ucon64_GENESIS:
               return genesis_chk (&rom);
             case ucon64_N64:
-              return nintendo64_chk (&rom);
+              return n64_chk (&rom);
             case ucon64_SNES:
               return snes_chk (&rom);
             case ucon64_WONDERSWAN:
-              return wonderswan_chk (&rom);
+              return swan_chk (&rom);
             default:
 //TODO error
               return -1;
@@ -985,7 +999,7 @@ main (int argc, char *argv[])
           return snes_col (&rom);
   
         case ucon64_CRP:
-          return gbadvance_crp (&rom);
+          return gba_crp (&rom);
   
         case ucon64_DINT:
         case ucon64_SWAP://deprecated
@@ -1005,7 +1019,7 @@ main (int argc, char *argv[])
           switch (rom.console)
             {
             case ucon64_N64:
-              return nintendo64_f (&rom);
+              return n64_f (&rom);
             case ucon64_SNES:
               return snes_f (&rom);
             default:
@@ -1120,7 +1134,7 @@ main (int argc, char *argv[])
           return lynx_lnx (&rom);
   
         case ucon64_LOGO:
-          return gbadvance_logo (&rom);
+          return gba_logo (&rom);
   
         case ucon64_LYX:
           return lynx_lyx (&rom);
@@ -1152,13 +1166,13 @@ main (int argc, char *argv[])
             case ucon64_GB:
               return gameboy_n (&rom);
             case ucon64_GBA:
-              return gbadvance_n (&rom);
+              return gba_n (&rom);
             case ucon64_GENESIS:
               return genesis_n (&rom);
             case ucon64_LYNX:
               return lynx_n (&rom);
             case ucon64_N64:
-              return nintendo64_n (&rom);
+              return n64_n (&rom);
 #if 0
             case ucon64_NES:
               return nes_n (&rom);
@@ -1185,7 +1199,7 @@ main (int argc, char *argv[])
             case ucon64_GENESIS:
               return genesis_p (&rom);
             case ucon64_N64:
-              return nintendo64_p (&rom);
+              return n64_p (&rom);
             case ucon64_SNES:
               return snes_p (&rom);
             default:
@@ -1240,9 +1254,9 @@ main (int argc, char *argv[])
           switch (rom.console)
             {
             case ucon64_GBA:
-              return gbadvance_sram (&rom);
+              return gba_sram (&rom);
             case ucon64_N64:
-              return nintendo64_sram (&rom);
+              return n64_sram (&rom);
             default:
   //TODO error
               return -1;
@@ -1258,20 +1272,20 @@ main (int argc, char *argv[])
           return nes_unif (&rom);
 
         case ucon64_USMS:
-          return nintendo64_usms (&rom);
+          return n64_usms (&rom);
   
         case ucon64_V64:
-          return nintendo64_v64 (&rom);
+          return n64_v64 (&rom);
   
 #ifdef BACKUP
         case ucon64_XDJR:
-          return nintendo64_xdjr (&rom);
+          return n64_xdjr (&rom);
   
         case ucon64_XFAL:
-          return gbadvance_xfal (&rom, -1);
+          return gba_xfal (&rom, -1);
 
         case ucon64_XFALS:
-          return gbadvance_xfals (&rom);
+          return gba_xfals (&rom);
 
         case ucon64_XGBX:
           return gameboy_xgbx (&rom);
@@ -1292,21 +1306,21 @@ main (int argc, char *argv[])
           return snes_xswcs (&rom);
   
         case ucon64_XV64:
-          return nintendo64_xv64 (&rom);
+          return n64_xv64 (&rom);
 #endif  // BACKUP
   
         case ucon64_Z64:
-          return nintendo64_z64 (&rom);
+          return n64_z64 (&rom);
 #if 0
         case ucon64_MGH:
           return snes_mgh (&rom);
 #endif
 #ifdef BACKUP
         case ucon64_XFALB:
-          return gbadvance_xfalb (&rom, strtol (optarg, NULL, 10));
+          return gba_xfalb (&rom, strtol (optarg, NULL, 10));
 
         case ucon64_XFALC:
-          return gbadvance_xfal (&rom, strtol (optarg, NULL, 10));
+          return gba_xfal (&rom, strtol (optarg, NULL, 10));
 
         case ucon64_XGBXB:
           return gameboy_xgbxb (&rom, strtol (optarg, NULL, 10));
@@ -1358,6 +1372,10 @@ main (int argc, char *argv[])
         case ucon64_ROM:
           break;
 
+        case ucon64_VERSION:
+          printf ("%s\n", UCON64_VERSION_S);
+          return 0;
+
         case ucon64_GETOPT_ERROR:
         default:
 //          fprintf (STDERR, "Try '%s " OPTION_LONG_S "help' for more information.\n", argv[0]);
@@ -1404,39 +1422,40 @@ main (int argc, char *argv[])
 
 
 int
-ucon64_init (char *romfile, struct rom_ *rombuf)
+ucon64_init (const char *romfile, st_rom_t *rominfo)
 {
   int result = 0;
 
   if (romfile == NULL)
-//  flush struct rombuf_
+//  flush rominfo
     {
-      memset (rombuf, 0L, sizeof (struct rom_));
-      rombuf->console = ucon64_UNKNOWN;
+      memset (rominfo, 0L, sizeof (st_rom_t));
+      rominfo->console = ucon64_UNKNOWN;
+      rominfo->title = rominfo->copier = "";
 
       return 0;
     }
 
-  strcpy(rombuf->rom, romfile);
+  strcpy(rominfo->rom, romfile);
 
-  rombuf->bytes = quickftell (rombuf->rom);
+  rominfo->bytes = quickftell (rominfo->rom);
 
   // The next 4 if-statements MUST precede the call to ucon64_console_probe!
   if (ucon64.buheader_len != -1)
-    rombuf->buheader_len = ucon64.buheader_len;
+    rominfo->buheader_len = ucon64.buheader_len;
 
   if (ucon64.interleaved != -1)
-    rombuf->interleaved = ucon64.interleaved;
+    rominfo->interleaved = ucon64.interleaved;
 
   if (ucon64.splitted != -1)
-    rombuf->splitted = ucon64.splitted;
+    rominfo->splitted = ucon64.splitted;
 
   if (ucon64.snes_hirom != -1)
-    rombuf->snes_hirom = ucon64.snes_hirom;
+    rominfo->snes_hirom = ucon64.snes_hirom;
 
-  result = ucon64_console_probe (rombuf);
+  result = ucon64_console_probe (rominfo);
 
-  if (rombuf->console == ucon64_UNKNOWN)
+  if (rominfo->console == ucon64_UNKNOWN)
     {
        printf ("ERROR: could not auto detect the right ROM/console type\n"
                "TIP:   If this is a ROM you might try to force the recognition\n"
@@ -1444,24 +1463,24 @@ ucon64_init (char *romfile, struct rom_ *rombuf)
        result = -1;
     }
 
-  quickfread (rombuf->buheader, rombuf->buheader_start, rombuf->buheader_len,
-              rombuf->rom);
-//  quickfread(rombuf->header, rombuf->header_start, rombuf->header_len, rombuf->rom);
+  quickfread (rominfo->buheader, rominfo->buheader_start, rominfo->buheader_len,
+              rominfo->rom);
+//  quickfread(rominfo->header, rominfo->header_start, rominfo->header_len, rominfo->rom);
 
-  rombuf->mbit = (rombuf->bytes - rombuf->buheader_len) / (float) MBIT;
+  rominfo->mbit = (rominfo->bytes - rominfo->buheader_len) / (float) MBIT;
 
-  if (rombuf->bytes <= MAXROMSIZE)
+  if (rominfo->bytes <= MAXROMSIZE)
     {
-      rombuf->padded = filetestpad (rombuf->rom);
-      rombuf->intro = ((rombuf->bytes - rombuf->buheader_len) > MBIT) ?
-        ((rombuf->bytes - rombuf->buheader_len) % MBIT) : 0;
+      rominfo->padded = filetestpad (rominfo->rom);
+      rominfo->intro = ((rominfo->bytes - rominfo->buheader_len) > MBIT) ?
+        ((rominfo->bytes - rominfo->buheader_len) % MBIT) : 0;
 
-      rombuf->splitted = ucon64_testsplit (rombuf->rom);
+      rominfo->splitted = ucon64_testsplit (rominfo->rom);
 
-      rombuf->current_crc32 = fileCRC32 (rombuf->rom, rombuf->buheader_len);
+      rominfo->current_crc32 = fileCRC32 (rominfo->rom, rominfo->buheader_len);
 
-      if (rombuf->console == ucon64_UNKNOWN)    // don't call if console type is already
-        ucon64_dbsearch (rombuf);               //  known (destroys rombuf fields)
+      if (rominfo->console == ucon64_UNKNOWN)    // don't call if console type is already
+        ucon64_dbsearch (rominfo);               //  known (destroys rominfo fields)
     }
 
   return result;
@@ -1469,174 +1488,174 @@ ucon64_init (char *romfile, struct rom_ *rombuf)
 
 
 int
-ucon64_console_probe (struct rom_ *rombuf)
+ucon64_console_probe (st_rom_t *rominfo)
 {
-  switch (rombuf->console)
+  switch (rominfo->console)
     {
       case ucon64_GB:
-        gameboy_init (rombuf);
+        gameboy_init (rominfo);
         break;
 
       case ucon64_GBA:
-        gbadvance_init (rombuf);
+        gba_init (rominfo);
         break;
 
       case ucon64_GENESIS:
-        genesis_init (rombuf);
+        genesis_init (rominfo);
         break;
 
       case ucon64_N64:
-        nintendo64_init (rombuf);
+        n64_init (rominfo);
         break;
 
       case ucon64_SNES:
-        snes_init (rombuf);
+        snes_init (rominfo);
         break;
 
       case ucon64_SMS:
-        sms_init (rombuf);
+        sms_init (rominfo);
         break;
 
       case ucon64_JAGUAR:
-        jaguar_init (rombuf);
+        jaguar_init (rominfo);
         break;
 
       case ucon64_LYNX:
-        lynx_init (rombuf);
+        lynx_init (rominfo);
         break;
 
       case ucon64_NEOGEO:
-        neogeo_init (rombuf);
+        neogeo_init (rominfo);
         break;
 
       case ucon64_NES:
-        nes_init (rombuf);
+        nes_init (rominfo);
         break;
 
       case ucon64_PCE:
-        pcengine_init (rombuf);
+        pcengine_init (rominfo);
         break;
 
       case ucon64_SYSTEM16:
-        system16_init (rombuf);
+        system16_init (rominfo);
         break;
 
       case ucon64_ATARI:
-        atari_init (rombuf);
+        atari_init (rominfo);
         break;
 
       case ucon64_NEOGEOPOCKET:
-        neogeopocket_init (rombuf);
+        ngp_init (rominfo);
         break;
 
       case ucon64_VECTREX:
-        vectrex_init (rombuf);
+        vectrex_init (rominfo);
         break;
 
       case ucon64_VIRTUALBOY:
-        virtualboy_init (rombuf);
+        vboy_init (rominfo);
         break;
 
       case ucon64_WONDERSWAN:
-        wonderswan_init (rombuf);
+        swan_init (rominfo);
         break;
 
       case ucon64_COLECO:
-        coleco_init (rombuf);
+        coleco_init (rominfo);
         break;
 
       case ucon64_INTELLI:
-        intelli_init (rombuf);
+        intelli_init (rominfo);
         break;
 
       case ucon64_PS2:
-        ps2_init (rombuf);
+        ps2_init (rominfo);
         break;
 
       case ucon64_DC:
-        dc_init (rombuf);
+        dc_init (rominfo);
         break;
 
       case ucon64_SATURN:
-        saturn_init (rombuf);
+        saturn_init (rominfo);
         break;
 
       case ucon64_CDI:
-        cdi_init (rombuf);
+        cdi_init (rominfo);
         break;
 
       case ucon64_CD32:
-        cd32_init (rombuf);
+        cd32_init (rominfo);
         break;
 
       case ucon64_PSX:
-        psx_init (rombuf);
+        psx_init (rominfo);
         break;
 
       case ucon64_GAMECUBE:
-        gamecube_init (rombuf);
+        gamecube_init (rominfo);
         break;
 
       case ucon64_XBOX:
-        xbox_init (rombuf);
+        xbox_init (rominfo);
         break;
 
       case ucon64_GP32:
-        gp32_init (rombuf);
+        gp32_init (rominfo);
         break;
 
       case ucon64_REAL3DO:
-        real3do_init (rombuf);
+        real3do_init (rominfo);
         break;
 
       case ucon64_UNKNOWN:
-        if (rombuf->bytes <= MAXROMSIZE)
-          rombuf->console =
+        if (rominfo->bytes <= MAXROMSIZE)
+          rominfo->console =
 #ifdef CONSOLE_PROBE
 /*
   these <console>_init() functions can detect the ROM and the correct console
   by significant bytes
 */
-            (!snes_init (rombuf)) ? ucon64_SNES :
-            (!gameboy_init (rombuf)) ? ucon64_GB :
-            (!gbadvance_init (rombuf)) ? ucon64_GBA :
-            (!nes_init (rombuf)) ? ucon64_NES :
-            (!nintendo64_init (rombuf)) ? ucon64_N64 :
-            (!genesis_init (rombuf)) ? ucon64_GENESIS :
-            (!psx_init (rombuf)) ? ucon64_PSX ://TODO (rombuf->bytes <= MAXROMSIZE)
-            (!jaguar_init (rombuf)) ? ucon64_JAGUAR :
-            (!lynx_init (rombuf)) ? ucon64_LYNX :
+            (!nes_init (rominfo)) ? ucon64_NES :
+            (!gameboy_init (rominfo)) ? ucon64_GB :
+            (!gba_init (rominfo)) ? ucon64_GBA :
+            (!snes_init (rominfo)) ? ucon64_SNES :
+            (!n64_init (rominfo)) ? ucon64_N64 :
+            (!genesis_init (rominfo)) ? ucon64_GENESIS :
+            (!psx_init (rominfo)) ? ucon64_PSX ://TODO (rominfo->bytes <= MAXROMSIZE)
+            (!jaguar_init (rominfo)) ? ucon64_JAGUAR :
+            (!lynx_init (rominfo)) ? ucon64_LYNX :
 #if 0
 /*
   these <console>_init() still contain no auto-detection or probe code
 */
-            (!atari_init (rombuf)) ? ucon64_ATARI :
-            (!pcengine_init (rombuf)) ? ucon64_PCE :
-            (!neogeo_init (rombuf)) ? ucon64_NEOGEO :
-            (!neogeopocket_init (rombuf)) ? ucon64_NEOGEOPOCKET :
-            (!sms_init (rombuf)) ? ucon64_SMS :
-            (!system16_init (rombuf)) ? ucon64_SYSTEM16 :
-            (!virtualboy_init (rombuf)) ? ucon64_VIRTUALBOY :
-            (!vectrex_init (rombuf)) ? ucon64_VECTREX :
-            (!coleco_init (rombuf)) ? ucon64_COLECO :
-            (!intelli_init (rombuf)) ? ucon64_INTELLI :
-            (!wonderswan_init (rombuf)) ? ucon64_WONDERSWAN :
-            (!gamecube_init (rombuf)) ? ucon64_GAMECUBE :
-            (!xbox_init (rombuf)) ? ucon64_XBOX :
-            (!gp32_init (rombuf)) ? ucon64_GP32 :
-            (!cd32_init (rombuf)) ? ucon64_CD32 :
-            (!cdi_init (rombuf)) ? ucon64_CDI :
-            (!dc_init (rombuf)) ? ucon64_DC :
-            (!ps2_init (rombuf)) ? ucon64_PS2 :
-            (!real3do_init (rombuf)) ? ucon64_REAL3DO :
-            (!saturn_init (rombuf)) ? ucon64_SATURN :
+            (!atari_init (rominfo)) ? ucon64_ATARI :
+            (!pcengine_init (rominfo)) ? ucon64_PCE :
+            (!neogeo_init (rominfo)) ? ucon64_NEOGEO :
+            (!ngp_init (rominfo)) ? ucon64_NEOGEOPOCKET :
+            (!sms_init (rominfo)) ? ucon64_SMS :
+            (!system16_init (rominfo)) ? ucon64_SYSTEM16 :
+            (!vboy_init (rominfo)) ? ucon64_VIRTUALBOY :
+            (!vectrex_init (rominfo)) ? ucon64_VECTREX :
+            (!coleco_init (rominfo)) ? ucon64_COLECO :
+            (!intelli_init (rominfo)) ? ucon64_INTELLI :
+            (!swan_init (rominfo)) ? ucon64_WONDERSWAN :
+            (!gamecube_init (rominfo)) ? ucon64_GAMECUBE :
+            (!xbox_init (rominfo)) ? ucon64_XBOX :
+            (!gp32_init (rominfo)) ? ucon64_GP32 :
+            (!cd32_init (rominfo)) ? ucon64_CD32 :
+            (!cdi_init (rominfo)) ? ucon64_CDI :
+            (!dc_init (rominfo)) ? ucon64_DC :
+            (!ps2_init (rominfo)) ? ucon64_PS2 :
+            (!real3do_init (rominfo)) ? ucon64_REAL3DO :
+            (!saturn_init (rominfo)) ? ucon64_SATURN :
 #endif
 #endif // CONSOLE_PROBE
                 ucon64_UNKNOWN;
-            return (rombuf->console == ucon64_UNKNOWN) ? -1 : 0;
+            return (rominfo->console == ucon64_UNKNOWN) ? -1 : 0;
 
         default:
-            rombuf->console = ucon64_UNKNOWN;
+            rominfo->console = ucon64_UNKNOWN;
             return -1;
         }
   return 0;
@@ -1647,80 +1666,85 @@ ucon64_console_probe (struct rom_ *rombuf)
     this is the now centralized nfo output for all kinds of ROMs
 */
 int
-ucon64_nfo (struct rom_ *rombuf)
+ucon64_nfo (const st_rom_t *rominfo)
 {
   char buf[4096];
-  int n;
 
-  printf ("%s\n%s\n\n", rombuf->rom, rombuf->copier);
+  printf ("%s\n\n", rominfo->rom);
 
-  if (rombuf->header_len)
+  if (rominfo->buheader_len)
     {
-      strhexdump (rombuf->header, 0, rombuf->header_start + rombuf->buheader_len,
-                  rombuf->header_len);
+      strhexdump (rominfo->buheader, 0, rominfo->buheader_start,
+                  rominfo->buheader_len);
       printf ("\n");
     }
 
-  // some ROMs have a name with control chars in it -> replace control chars
-  for (n = 0; n < strlen (rombuf->name); n++)
-    buf[n] = isprint ((int) rombuf->name[n]) ? rombuf->name[n] : '.';
-  buf[n] = 0;                   // terminate string
+  printf ("%s\n\n", rominfo->copier);
 
-  printf ("%s\n%s\n%s%s%s\n%s\n%ld bytes (%.4f Mb)\n\n", rombuf->title, buf,
-//        rombuf->name2, (rombuf->name2[0]) ? "\n": "",
-          "", "",
-          rombuf->manufacturer,
-          rombuf->country, rombuf->bytes - rombuf->buheader_len, rombuf->mbit);
-
-  if (rombuf->bytes <= MAXROMSIZE) // if it is no CD image
+  if (rominfo->header_len)
     {
-      if (!rombuf->padded)
-        printf ("Padded: No\n");
-      else if (rombuf->padded)
-        printf ("Padded: Maybe, %ld Bytes (%.4f Mb)\n", rombuf->padded,
-                (float) rombuf->padded / MBIT);
+      strhexdump (rominfo->header, 0, rominfo->header_start + rominfo->buheader_len,
+                  rominfo->header_len);
+      printf ("\n");
+    }
 
-//    if (!rombuf->intro)
+  strcpy(buf, rominfo->name);
+  mkprint (buf, '.');  // some ROMs have a name with control chars in it -> replace control chars
+
+  printf ("%s\n%s\n%s%s%s\n%s\n%ld bytes (%.4f Mb)\n\n", rominfo->title, buf,
+          "", "",
+          rominfo->maker,
+          rominfo->country, rominfo->bytes - rominfo->buheader_len, rominfo->mbit);
+
+  if (rominfo->bytes <= MAXROMSIZE) // if it is no CD image
+    {
+      if (!rominfo->padded)
+        printf ("Padded: No\n");
+      else if (rominfo->padded)
+        printf ("Padded: Maybe, %ld Bytes (%.4f Mb)\n", rominfo->padded,
+                (float) rominfo->padded / MBIT);
+
+//    if (!rominfo->intro)
 //      printf("Intro/Trainer: No\n");
 //    else
-      if (rombuf->intro)
-        printf ("Intro/Trainer: Maybe, %ld Bytes\n", rombuf->intro);
+      if (rominfo->intro)
+        printf ("Intro/Trainer: Maybe, %ld Bytes\n", rominfo->intro);
 
-      if (!rombuf->buheader_len)
+      if (!rominfo->buheader_len)
         printf ("Backup Unit Header: No\n");    // printing this is handy for
-      else if (rombuf->buheader_len)            //  SNES ROMs
-        printf ("Backup Unit Header: Yes, %ld Bytes\n", rombuf->buheader_len);
+      else if (rominfo->buheader_len)            //  SNES ROMs
+        printf ("Backup Unit Header: Yes, %ld Bytes\n", rominfo->buheader_len);
 
-//    if (!rombuf->splitted)
+//    if (!rominfo->splitted)
 //      printf("Splitted: No\n");
 //    else
-      if (rombuf->splitted)
+      if (rominfo->splitted)
         printf ("Splitted: Yes, %d parts\n",
-                rombuf->splitted);
+                rominfo->splitted);
     }
-  if (rombuf->misc[0])
-    printf ("%s\n", rombuf->misc);
+  if (rominfo->misc[0])
+    printf ("%s\n", rominfo->misc);
 
-  if (rombuf->has_internal_crc)
+  if (rominfo->has_internal_crc)
     {
       sprintf (buf,
                "Checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)\n",
-               rombuf->internal_crc_len * 2, rombuf->internal_crc_len * 2);
+               rominfo->internal_crc_len * 2, rominfo->internal_crc_len * 2);
       printf (buf,
-              (rombuf->current_internal_crc ==
-               rombuf->internal_crc) ? "ok" : "bad",
-              rombuf->current_internal_crc,
-              (rombuf->current_internal_crc == rombuf->internal_crc) ? "=" : "!",
-              rombuf->internal_crc);
+              (rominfo->current_internal_crc ==
+               rominfo->internal_crc) ? "ok" : "bad",
+              rominfo->current_internal_crc,
+              (rominfo->current_internal_crc == rominfo->internal_crc) ? "=" : "!",
+              rominfo->internal_crc);
 
-      if (rombuf->internal_crc2[0])
-        printf ("%s\n", rombuf->internal_crc2);
+      if (rominfo->internal_crc2[0])
+        printf ("%s\n", rominfo->internal_crc2);
     }
 
-  if (rombuf->current_crc32 != 0)
-    printf ("Checksum (CRC32): 0x%08lx\n", rombuf->current_crc32);
+  if (rominfo->current_crc32 != 0)
+    printf ("Checksum (CRC32): 0x%08lx\n", rominfo->current_crc32);
 
-  if (rombuf->splitted)
+  if (rominfo->splitted)
     printf ("NOTE: to get the correct checksum the ROM must be joined\n");
 
   printf ("\n");
@@ -1729,13 +1753,13 @@ ucon64_nfo (struct rom_ *rombuf)
 }
 
 
-int ucon64_e (struct rom_ *rombuf)
+int ucon64_e (const st_rom_t *rominfo)
 {
   int result, x;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[4096];
   char *property;
 
-  if (rombuf->console == ucon64_UNKNOWN)
+  if (rominfo->console == ucon64_UNKNOWN)
     {
        printf ("ERROR: could not auto detect the right ROM/console type\n"
                "TIP:   If this is a ROM you might try to force the recognition\n"
@@ -1746,7 +1770,7 @@ int ucon64_e (struct rom_ *rombuf)
   x = 0;
   while (long_options[x].name)
     {
-      if (long_options[x].val == rombuf->console)
+      if (long_options[x].val == rominfo->console)
       {
         sprintf (buf3, "emulate_%s", long_options[x].name);
         break;
@@ -1804,7 +1828,7 @@ int ucon64_ls (char *path, int mode)
 {
   struct dirent *ep;
   struct stat puffer;
-  struct rom_ rom;
+  st_rom_t rom;
 //  int single_file = 0;
   char current_dir[FILENAME_MAX];
   DIR *dp;
@@ -1861,7 +1885,7 @@ int ucon64_ls (char *path, int mode)
                                 localtime (&puffer.st_mtime));
 //                      printf ("%-31.31s %10d %s %s\n", rom.name,
 //                              (int) puffer.st_size, buf, rom.rom);
-                      printf ("%-31.31s %10d %s %s\n", str2filename(rom.name),
+                      printf ("%-31.31s %10d %s %s\n", mkprint(rom.name, ' '),
                               (int) puffer.st_size, buf, rom.rom);
                       fflush (stdout);
                       break;
@@ -1901,7 +1925,7 @@ ucon64_configfile (void)
   */
   ".ucon64rc"
 #endif
-  , getchd (buf2, FILENAME_MAX));
+  , ms_getenv ("HOME"));
 
   if (access (ucon64.configfile, F_OK) != 0)
     {
@@ -2013,7 +2037,7 @@ ucon64_usage (int argc, char *argv[])
   int option_index = 0;
   int single = 0;
 
-  printf ("USAGE: %s [OPTION(S)] [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE]\n\n"
+  printf ("Usage: %s [OPTION]... [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE]\n\n"
            "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
            "  " OPTION_LONG_S "hdn=BYTES   force ROM has backup unit/emulator header with BYTES size\n"
            "  " OPTION_LONG_S "hd          same as " OPTION_LONG_S "hdn=512\n"
@@ -2066,7 +2090,9 @@ ucon64_usage (int argc, char *argv[])
 
   cdrw_usage ();
 
-  printf ("\n");
+  printf (           "  " OPTION_LONG_S "help        display this help and exit\n"
+           "  " OPTION_LONG_S "version     output version information and exit\n"
+"\n");
 
   optind = option_index = 0;//TODO is there a better way to "reset"?
 
@@ -2079,11 +2105,11 @@ ucon64_usage (int argc, char *argv[])
       switch (c)
         {
       case ucon64_GBA:
-        gbadvance_usage ();
+        gba_usage ();
         single = 1;
         break;
       case ucon64_N64:
-        nintendo64_usage ();
+        n64_usage ();
         single = 1;
         break;
       case ucon64_JAG:
@@ -2099,7 +2125,7 @@ ucon64_usage (int argc, char *argv[])
         single = 1;
         break;
       case ucon64_NGP:
-        neogeopocket_usage ();
+        ngp_usage ();
         single = 1;
         break;
       case ucon64_GEN:
@@ -2139,11 +2165,11 @@ ucon64_usage (int argc, char *argv[])
         single = 1;
         break;
       case ucon64_VBOY:
-        virtualboy_usage ();
+        vboy_usage ();
         single = 1;
         break;
       case ucon64_SWAN:
-        wonderswan_usage ();
+        swan_usage ();
         single = 1;
         break;
       case ucon64_VEC:
@@ -2203,8 +2229,8 @@ ucon64_usage (int argc, char *argv[])
   if (!single)
     {
       dc_usage ();
-      gbadvance_usage ();
-      nintendo64_usage ();
+      gba_usage ();
+      n64_usage ();
       snes_usage ();
       neogeo_usage ();
       genesis_usage ();
@@ -2213,7 +2239,7 @@ ucon64_usage (int argc, char *argv[])
       pcengine_usage ();
       sms_usage ();
       nes_usage ();
-      wonderswan_usage ();
+      swan_usage ();
 
 #if 0
       psx_usage ();
@@ -2228,12 +2254,12 @@ ucon64_usage (int argc, char *argv[])
       sys16_usage ();
       atari_usage ();
       coleco_usage ();
-      virtualboy_usage ();
-      wonderswan_usage ();
+      vboy_usage ();
+      swan_usage ();
       vectrex_usage ();
       intelli_usage ();
       jaguar_usage ();
-      neogeopocket_usage ();
+      ngp_usage ();
       gamecube_usage ();
 #endif
 
@@ -2270,9 +2296,9 @@ ucon64_usage (int argc, char *argv[])
               "                  uCON64 can make backups for most CD-based consoles\n",
               gamecube_title,
               jaguar_title,
-              neogeopocket_title,
+              ngp_title,
               system16_title,
-              atari_title, coleco_title, virtualboy_title,
+              atari_title, coleco_title, vboy_title,
               vectrex_title, intelli_title, gp32_title,
               psx_title, ps2_title,
               xbox_title,
@@ -2297,7 +2323,7 @@ ucon64_usage (int argc, char *argv[])
      "Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
      "\n"
      , ucon64_dbsize (ucon64_UNKNOWN)
-     , ucon64_dbsize (ucon64_UNKNOWN) - ucon64_DBSIZE
+     , ucon64_dbsize (ucon64_UNKNOWN) - UCON64_DBSIZE
      , argv[0], argv[0]
    );
 

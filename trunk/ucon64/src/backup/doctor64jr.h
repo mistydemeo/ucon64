@@ -29,8 +29,8 @@ extern int doctor64jr_write (char *filename, long start, long len,
 extern void doctor64jr_usage (void);
 #endif // BACKUP
 
-extern char *doctor64jr_title;
+extern const char *doctor64jr_title;
 
-#define doctor64jr_HEADER_START 0
-#define doctor64jr_HEADER_LEN 0
-#endif /* DOCTOR64JR_H */
+#define DOCTOR64JR_HEADER_START 0
+#define DOCTOR64JR_HEADER_LEN 0
+#endif // DOCTOR64JR_H

@@ -197,11 +197,6 @@ ucon64_switches (int c, const char *optarg)
       ucon64.frontend = 1;                      // used by ucon64_gauge()
       break;
 
-    case UCON64_CRC:
-    case UCON64_SHA1:
-    case UCON64_MD5:
-      break;
-
     case UCON64_NBAK:
       ucon64.backup = 0;
       break;
@@ -421,12 +416,12 @@ ucon64_switches (int c, const char *optarg)
         ucon64.file = ucon64.argv[ucon64.argc - 1];
       break;
 
-    case UCON64_ROM:
 #if 0
+    case UCON64_ROM:
       if (optarg)
         ucon64.rom = optarg;
-#endif
       break;
+#endif
 
     case UCON64_O:
       {
@@ -443,8 +438,7 @@ ucon64_switches (int c, const char *optarg)
             }
 
         if (!dir)
-          puts ("WARNING: Argument for -o must be a directory\n"
-                "         Using current directory instead");
+          puts ("WARNING: Argument for -o must be a directory. Using current directory instead");
       }
       break;
 

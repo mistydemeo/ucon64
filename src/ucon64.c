@@ -340,14 +340,14 @@ ucon64_runtime_debug (void)
 //                options[y].help != options[x].help || // (allowed)
                 options[y].object != options[x].object) // (NOT allowed)
               {
-                printf ("ERROR: different dupe options found\n  ");
+                fputs ("ERROR: different dupe options found\n  ", stdout);
                 ucon64_runtime_debug_output ((st_getopt2_t *) &options[x]);
-                printf ("  ");
+                fputs ("  ", stdout);
                 ucon64_runtime_debug_output ((st_getopt2_t *) &options[y]);
-                printf ("\n\n");
+                fputs ("\n\n", stdout);
               }
 #endif
-  printf ("DEBUG: Sanity check finished\n");
+  puts ("DEBUG: Sanity check finished");
   fflush (stdout);
 }
 #endif  // DEBUG
@@ -386,7 +386,7 @@ main (int argc, char **argv)
 
   if (atexit (ucon64_exit) == -1)
     {
-      fprintf (stderr, "ERROR: Could not register function with atexit()\n");
+      fputs ("ERROR: Could not register function with atexit()\n", stderr);
       exit (1);
     }
 
@@ -711,7 +711,6 @@ ucon64_execute_options (void)
   int c = 0, result = 0, x = 0, opts = 0;
   static int first_call = 1;                    // first call to this function
 
-  ucon64.console = UCON64_UNKNOWN;
   ucon64.dat = NULL;
 #ifdef  USE_DISCMAGE
   ucon64.image = NULL;
@@ -745,7 +744,7 @@ ucon64_execute_options (void)
   // switches
   for (x = 0; arg[x].val; x++)
     {
-      if (arg[x].console)
+      if (arg[x].console != UCON64_UNKNOWN)
         ucon64.console = arg[x].console;
       if (arg[x].flags)
         ucon64.flags = arg[x].flags;
@@ -793,39 +792,40 @@ ucon64_execute_options (void)
         if (ucon64.console == UCON64_UNKNOWN)
           ucon64.console = arg[x].console;
         ucon64.flags = arg[x].flags;
-  
+
         opts++;
-  
+
         // WF_NO_SPLIT, WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
         result = ucon64_rom_handling ();
-  
+
         if (result == -1) // no rom, but WF_NO_ROM
           return -1;
-  
+
         if (ucon64_options (arg[x].val, arg[x].optarg) == -1)
           {
             const st_getopt2_t *p = getopt2_get_index_by_val (options, c);
             const char *opt = p ? p->name : NULL;
-  
+
             fprintf (stderr, "ERROR: %s%s encountered a problem\n",
                              opt ? (!opt[1] ? OPTION_S : OPTION_LONG_S) : "",
                              opt ? opt : "uCON64");
-  
+
 //            if (p)
 //              getopt2_usage (p);
-  
-            fprintf (stderr, "       Is the option you used available for the current console system?\n"
-                             "       Please report bugs to noisyb@gmx.net or ucon64-announce@lists.sf.net\n\n");
-  
+
+            fputs ("       Is the option you used available for the current console system?\n"
+                   "       Please report bugs to noisyb@gmx.net or ucon64-announce@lists.sf.net\n\n",
+                   stderr);
+
             return -1;
           }
-  
+
 #if 0
         // WF_NFO_AFTER?!
         if (!result && (ucon64.flags & WF_NFO_AFTER) && ucon64.quiet < 1)
           ucon64_rom_handling ();
 #endif
-  
+
         /*
           "stop" options:
           - -multi (and -xfalmulti) takes more than one file as argument, but
@@ -885,7 +885,7 @@ ucon64_rom_handling (void)
     {
       if (!(ucon64.flags & WF_NO_ROM))
         {
-          fprintf (stderr, "ERROR: This option requires a file argument (ROM/image/SRAM file/directory)\n");
+          fputs ("ERROR: This option requires a file argument (ROM/image/SRAM file/directory)\n", stderr);
           return -1;
         }
       return 0;

@@ -1,21 +1,25 @@
 DLOPEN=1
 #ZLIB=1
+DISCMAGE=1
 
 CC=cl.exe
-
 CFLAGS=/nologo /I. /W3 /O2 /DHAVE_CONFIG_H
 LDFLAGS=/NOLOGO setargv.obj
 
-LIBNAME=discmage
+!ifdef DISCMAGE
+LIBNAME_DM=discmage
+!endif
 
-FULLLIBNAME=$(LIBNAME).dll
+!ifdef DISCMAGE
+FULLLIBNAME_DM=$(LIBNAME_DM).dll
 !ifndef DLOPEN
-LDFLAGS=$(LDFLAGS) libdiscmage/$(LIBNAME).lib
+LDFLAGS=$(LDFLAGS) libdiscmage/$(LIBNAME_DM).lib
+!endif
 !endif
 
 
 OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
-        ucon64_dm.obj misc.obj getopt.obj quick_io.obj dlopen.obj \
+        misc.obj getopt.obj quick_io.obj dlopen.obj \
         patch/aps.obj patch/bsl.obj patch/ips.obj patch/gg.obj patch/pal4u.obj \
         patch/ppf.obj patch/xps.obj \
         console/gb.obj console/gba.obj console/genesis.obj console/lynx.obj \
@@ -31,11 +35,14 @@ OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
 LDFLAGS=$(LDFLAGS) zlib.lib
 OBJECTS=$(OBJECTS) unzip.obj map.obj miscz.obj
 !endif
+!ifdef DISCMAGE
+OBJECTS=$(OBJECTS) ucon64_dm.obj
+!endif
 
 
 TARGET=ucon64.exe
 
-all: libdiscmage/$(FULLLIBNAME) $(TARGET)
+all: libdiscmage/$(FULLLIBNAME_DM) $(TARGET)
 
 
 clean:
@@ -60,10 +67,12 @@ distclean: clean
 	$(CC) $(CFLAGS) /c $< /Fo$@
 
 
-libdiscmage/$(FULLLIBNAME):
+!ifdef DISCMAGE
+libdiscmage/$(FULLLIBNAME_DM):
 	cd libdiscmage
 	$(MAKE) -f Makefile.vc6
 	cd ..
+!endif
 
 
 $(TARGET): $(OBJECTS)

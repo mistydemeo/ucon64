@@ -43,6 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MAX_FIELDS_IN_DAT 32
 #define DAT_FIELD_SEPARATOR (0xac)
 #define DAT_FIELD_SEPARATOR_S "\xac"
+#define MAX_GAMES_FOR_CONSOLE 50000             // TODO?: dynamic size
 
 typedef struct
 {
@@ -59,16 +60,22 @@ typedef struct
   long filepos;
 } st_idx_entry_t;
 
+typedef struct
+{
+  uint32_t crc32;
+  char *fname;
+} st_mkdat_entry_t;
+
 #ifndef _WIN32
 static DIR *ddat = NULL;
 #else
 static HANDLE ddat = NULL;
 #endif
 static FILE *fdat = NULL;
-static long filepos_line = 0;
-static int warning = 1;                         // show the warning only once when indexing
-static FILE *ucon64_datfile;
+static int ucon64_n_files = 0, filepos_line = 0, warning = 1; // show the warning
+static FILE *ucon64_datfile;                                  // only once when indexing
 static char ucon64_dat_fname[FILENAME_MAX];
+static st_mkdat_entry_t *ucon64_mkdat_entries = NULL;
 
 const st_usage_t ucon64_dat_usage[] = {
   {NULL, NULL, "DATabase (support for DAT files)"},
@@ -665,8 +672,6 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
         continue;
       fsize = q_fsize (fname_index);
 
-      if (access (fname_index, F_OK) != 0)      // for a bad DAT file
-        continue;
       if (!(p = (unsigned char *) malloc (fsize)))
         {
           fprintf (stderr, ucon64_msg[BUFFER_ERROR], fsize);
@@ -714,7 +719,6 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
 }
 
 
-#define MAX_GAMES_FOR_CONSOLE 50000             // TODO?: dynamic size
 int
 ucon64_dat_indexer (void)
 // create or update index of DAT file
@@ -953,11 +957,20 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
 static void
 ucon64_close_datfile (void)
 {
+  int n;
+
   if (ucon64_datfile)
     {
       fclose (ucon64_datfile);
       printf (ucon64_msg[WROTE], ucon64_dat_fname);
       ucon64_datfile = NULL;
+
+      for (n = 0; n < ucon64_n_files; n++)
+        {
+          free (ucon64_mkdat_entries[n].fname);
+          ucon64_mkdat_entries[n].fname = NULL;
+        }
+      ucon64_n_files = 0;
     }
 }
 
@@ -966,119 +979,132 @@ int
 ucon64_create_dat (const char *dat_file_name, const char *filename,
                    st_rominfo_t *rominfo)
 {
-  static int first_file = 1;
+  static int first_file = 1, console;
+  int n, x;
+  static char *console_name;
   char fname[FILENAME_MAX], *ptr;
   time_t time_t_val;
   struct tm *t;
 
   if (first_file)
     {
+      first_file = 0;
+      console = ucon64.console;
+      switch (ucon64.console)
+        {
+          case UCON64_3DO:
+            console_name = "3DO";
+            break;
+          case UCON64_ATA:
+            console_name = "NES";
+            break;
+          case UCON64_CD32:
+            console_name = "CD32";
+            break;
+          case UCON64_CDI:
+            console_name = "CD-i";
+            break;
+          case UCON64_COLECO:
+            console_name = "Coleco";
+            break;
+          case UCON64_DC:
+            console_name = "Dreamcast";
+            break;
+          case UCON64_GB:
+            console_name = "Game Boy";
+            break;
+          case UCON64_GBA:
+            console_name = "Game Boy Advance";
+            break;
+          case UCON64_GC:
+            console_name = "Game Cube";
+            break;
+          case UCON64_GEN:
+            console_name = "Genesis/Megadrive";
+            break;
+          case UCON64_INTELLI:
+            console_name = "Intellivision";
+            break;
+          case UCON64_JAG:
+            console_name = "Jaguar";
+            break;
+          case UCON64_LYNX:
+            console_name = "Lynx";
+            break;
+          case UCON64_MAME:
+            console_name = "M.A.M.E.";
+            break;
+          case UCON64_N64:
+            console_name = "Nintendo 64";
+            break;
+          case UCON64_NES:
+            console_name = "NES";
+            break;
+          case UCON64_NG:
+            console_name = "Neo Geo";
+            break;
+          case UCON64_NGP:
+            console_name = "Neo Geo Pocket";
+            break;
+          case UCON64_PCE:
+            console_name = "PC Engine";
+            break;
+          case UCON64_PS2:
+            console_name = "Playstation 2";
+            break;
+          case UCON64_PSX:
+            console_name = "Playstation";
+            break;
+          case UCON64_S16:
+            console_name = "S16";
+            break;
+          case UCON64_SAT:
+            console_name = "Saturn";
+            break;
+          case UCON64_SMS:
+            console_name = "SMS";
+            break;
+          case UCON64_SNES:
+            console_name = "SNES";
+            break;
+          case UCON64_SWAN:
+            console_name = "Wonderswan";
+            break;
+          case UCON64_VBOY:
+            console_name = "Virtual Boy";
+            break;
+          case UCON64_VEC:
+            console_name = "Vectrex";
+            break;
+          case UCON64_XBOX:
+            console_name = "XBox";
+            break;
+          default:
+            fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+            exit (1);
+            break;
+        }
+
+      if (!(ucon64_mkdat_entries = (st_mkdat_entry_t *)
+              malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_mkdat_entry_t))))
+        {
+          fprintf (stderr, ucon64_msg[BUFFER_ERROR],
+            MAX_GAMES_FOR_CONSOLE * sizeof (st_mkdat_entry_t));
+          exit (1);
+        }
+
       strcpy (ucon64_dat_fname, dat_file_name);
       ucon64_file_handler (ucon64_dat_fname, NULL, OF_FORCE_BASENAME);
-
       if (!(ucon64_datfile = fopen (ucon64_dat_fname, "wb")))
         {
           fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], ucon64_dat_fname);
           exit (1);
         }
-
       register_func (ucon64_close_datfile);
-      first_file = 0;
-      switch (ucon64.console)
-        {
-          case UCON64_3DO:
-            ptr = "3DO";
-            break;
-          case UCON64_ATA:
-            ptr = "NES";
-            break;
-          case UCON64_CD32:
-            ptr = "CD32";
-            break;
-          case UCON64_CDI:
-            ptr = "CD-i";
-            break;
-          case UCON64_COLECO:
-            ptr = "Coleco";
-            break;
-          case UCON64_DC:
-            ptr = "Dreamcast";
-            break;
-          case UCON64_GB:
-            ptr = "Game Boy";
-            break;
-          case UCON64_GBA:
-            ptr = "Game Boy Advance";
-            break;
-          case UCON64_GC:
-            ptr = "Game Cube";
-            break;
-          case UCON64_GEN:
-            ptr = "Genesis/Megadrive";
-            break;
-          case UCON64_INTELLI:
-            ptr = "Intellivision";
-            break;
-          case UCON64_JAG:
-            ptr = "Jaguar";
-            break;
-          case UCON64_LYNX:
-            ptr = "Lynx";
-            break;
-          case UCON64_MAME:
-            ptr = "M.A.M.E.";
-            break;
-          case UCON64_N64:
-            ptr = "Nintendo 64";
-            break;
-          case UCON64_NES:
-            ptr = "NES";
-            break;
-          case UCON64_NG:
-            ptr = "Neo Geo";
-            break;
-          case UCON64_NGP:
-            ptr = "Neo Geo Pocket";
-            break;
-          case UCON64_PCE:
-            ptr = "PC Engine";
-            break;
-          case UCON64_PS2:
-            ptr = "Playstation 2";
-            break;
-          case UCON64_PSX:
-            ptr = "Playstation";
-            break;
-          case UCON64_S16:
-            ptr = "S16";
-            break;
-          case UCON64_SAT:
-            ptr = "Saturn";
-            break;
-          case UCON64_SMS:
-            ptr = "Sega Master System";
-            break;
-          case UCON64_SNES:
-            ptr = "SNES";
-            break;
-          case UCON64_SWAN:
-            ptr = "Wonderswan";
-            break;
-          case UCON64_VBOY:
-            ptr = "Virtual Boy";
-            break;
-          case UCON64_VEC:
-            ptr = "Vectrex";
-            break;
-          case UCON64_XBOX:
-            ptr = "XBox";
-            break;
-          default:
-            ptr = "unknown";
-            break;
-        }
+
       time_t_val = time (NULL);
       t = localtime (&time_t_val);
+      // RomCenter generates files in DOS text format, so we do too
       fprintf (ucon64_datfile, "[CREDITS]\r\n"
                                "Author=uCON64\r\n"
                                "Email=noisyb@gmx.net\r\n"
@@ -1093,13 +1119,82 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                                "refname=%s\r\n"
                                "version=\r\n"
                                "[GAMES]\r\n",
-                               ptr,
+                               console_name,
                                t->tm_mday, t->tm_mon, t->tm_year + 1900,
-                               ptr);
+                               console_name);
+    } // first_file
+
+  if (ucon64_n_files == MAX_GAMES_FOR_CONSOLE)
+    {
+      fprintf (stderr,
+               "INTERNAL ERROR: MAX_GAMES_FOR_CONSOLE is too small (%d)\n",
+               MAX_GAMES_FOR_CONSOLE);
+      exit (1);
+    }
+  strcpy (fname, basename (filename));
+
+  // Check the console type
+  n = 0;
+  if (ucon64.console != console)
+    {
+      if (ucon64.quiet == -1)
+        printf ("WARNING: Skipping (!%s) ", console_name);
+      else
+        return -1;
+    }
+  else
+    {
+      // Check if the CRC32 is unique. We don't want to be as stupid as
+      //  RomCenter...
+      // Yes, a plain and simple linear search. Analysing the files is orders
+      //  of magnitude slower than this search
+      for (; n < ucon64_n_files; n++)
+        if (ucon64_mkdat_entries[n].crc32 == ucon64.crc32)
+          break;
+      if (n != ucon64_n_files)
+        {
+          if (ucon64.quiet < 1)                 // better print this by default
+            printf ("WARNING: Skipping (duplicate) ");
+          else
+            return -1;
+        }
     }
 
-  strcpy (fname, basename (filename));
-  printf ("%s\n", filename);
+  printf ("%s", filename);
+  if (ucon64.quiet == -1)                       // -v was specified
+    if (ucon64.fname_arch[0])
+      printf (" (%s)", ucon64.fname_arch);
+  fputc ('\n', stdout);
+
+  if (ucon64.console != console)                // ucon64.quiet == -1
+    return -1;
+  if (n != ucon64_n_files)
+    {
+      if (ucon64.quiet < 1)                     // better print this by default
+        printf ("         First file with this CRC32 (0x%x) is:\n"
+                "         \"%s\"\n", ucon64.crc32, ucon64_mkdat_entries[n].fname);
+      return -1;
+    }
+
+  // Store the CRC32 to check if a file is unique
+  ucon64_mkdat_entries[ucon64_n_files].crc32 = ucon64.crc32;
+  /*
+    Also store the name of the file to display a helpful error message if a
+    file is not unique (a duplicate). We store the current filename inside the
+    archive as well, to be even more helpful :-)
+  */
+  x = strlen (fname) + (ucon64.fname_arch[0] ? strlen (ucon64.fname_arch) + 4 : 1);
+  if (!(ucon64_mkdat_entries[ucon64_n_files].fname = (char *) malloc (x)))
+    {                                                 // + 3 for " ()"
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], x);  //  + 1 for ASCII-z
+      exit (1);
+    }
+  sprintf (ucon64_mkdat_entries[ucon64_n_files].fname, "%s%s%s%s",
+    fname,
+    ucon64.fname_arch[0] ? " (" : "",
+    ucon64.fname_arch[0] ? ucon64.fname_arch : "",
+    ucon64.fname_arch[0] ? ")" : "");
+
   ptr = (char *) get_suffix (fname);
   if (*ptr)
     *ptr = 0;
@@ -1113,12 +1208,13 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                            DAT_FIELD_SEPARATOR_S
                            DAT_FIELD_SEPARATOR_S
                            DAT_FIELD_SEPARATOR_S "\r\n",
-                           fname,
-                           fname,
-                           fname,
+                           fname,               // What are we missing here? Or
+                           fname,               //  is RomCenter's DAT file
+                           fname,               //  format simply plain stupid?
                            fname,
                            fname,
                            ucon64.crc32,
                            ucon64.file_size - (rominfo ? rominfo->buheader_len : 0));
+  ucon64_n_files++;
   return 0;
 }

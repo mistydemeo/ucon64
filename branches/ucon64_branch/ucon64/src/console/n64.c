@@ -70,7 +70,7 @@ const st_usage_t n64_usage[] =
     {"lsram", "SRAM", "LaC's SRAM upload tool; ROM should be LaC's ROM image\n"
                        "the SRAM must have a size of 512 Bytes\n"
                        "this option generates a ROM which can be used to transfer\n"
-                       "SRAMs to your console"},
+                       "SRAMs to your cartridge's SRAM (EEPROM)"},
     {"usms", "SMSROM", "Jos Kwanten's UltraSMS (Sega Master System/GameGear emulator);\n"
                        "ROM should be Jos Kwanten's UltraSMS ROM image\n"
                        "works only for SMSROMs which are <= 4 Mb in size"},
@@ -333,7 +333,10 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
         }
 
       if (!(usmsbuf = (char *) malloc (4 * MBIT)))
-        return -1;
+        {
+          fprintf (stderr, ucon64_msg[BUFFER_ERROR], 4 * MBIT);
+          return -1;
+        }
       memset (usmsbuf, 0xff, 4 * MBIT);
       q_fread (usmsbuf, 0, size, smsrom);
 

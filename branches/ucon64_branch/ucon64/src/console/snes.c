@@ -48,7 +48,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GD3_HEADER_MAPSIZE 0x18
 #define NSRT_HEADER_VERSION 22                  // version 2.2 header
 
-static int snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
+static int snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer);
 static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_size);
 static int snes_convert_sramfile (const void *header);
 static int snes_fix_pal_protection (st_rominfo_t *rominfo);
@@ -144,12 +144,13 @@ typedef struct st_snes_header
   unsigned char name[SNES_NAME_LEN];            // 16
   unsigned char map_type;                       // 37, a.k.a. ROM makeup
   unsigned char rom_type;                       // 38
-#define bs_month rom_type
+#define bs_month rom_type                       // release date, month
   unsigned char rom_size;                       // 39
+#define bs_day rom_size                         // release date, day
   unsigned char sram_size;                      // 40
-#define bs_makeup sram_size
+#define bs_makeup sram_size                     // "ROM" speed
   unsigned char country;                        // 41
-#define bs_size country
+#define bs_type country
   unsigned char maker;                          // 42
   unsigned char version;                        // 43
   /*
@@ -413,7 +414,9 @@ snes_convert_sramfile (const void *header)
     {
       // Pad SRAM to 32.5 kB by repeating the SRAM data. At least the SWC DX2
       //  does something similar.
-      fwrite (buf, 1, blocksize, destfile);
+      fwrite (buf, 1, byteswritten + blocksize <= 32 * 1024 + SWC_HEADER_LEN ?
+                blocksize : 32 * 1024 + SWC_HEADER_LEN - byteswritten,
+              destfile);
       byteswritten += blocksize;
     }
 
@@ -1922,8 +1925,7 @@ snes_n (st_rominfo_t *rominfo, const char *name)
   char buf[SNES_NAME_LEN], dest_name[FILENAME_MAX];
 
   memset (buf, ' ', SNES_NAME_LEN);
-  strncpy (buf, name, strlen (name) > SNES_NAME_LEN ?
-                        SNES_NAME_LEN : strlen (name));
+  strncpy (buf, name, strlen (name) > SNES_NAME_LEN ? SNES_NAME_LEN : strlen (name));
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
@@ -1956,13 +1958,13 @@ snes_chk (st_rominfo_t *rominfo)
                                     snes_header.checksum_high) +
                                    2 * 0xff; // + 2 * 0;
   // change inverse checksum
-  q_fputc (dest_name, image + 44, (0xffff - rominfo->current_internal_crc), "r+b");      // low byte
-  q_fputc (dest_name, image + 45, (0xffff - rominfo->current_internal_crc) >> 8, "r+b"); // high byte
+  buf[0] = 0xffff - rominfo->current_internal_crc;        // low byte
+  buf[1] = (0xffff - rominfo->current_internal_crc) >> 8; // high byte
   // change checksum
-  q_fputc (dest_name, image + 46, rominfo->current_internal_crc, "r+b");      // low byte
-  q_fputc (dest_name, image + 47, rominfo->current_internal_crc >> 8, "r+b"); // high byte
+  buf[2] = rominfo->current_internal_crc;       // low byte
+  buf[3] = rominfo->current_internal_crc >> 8;  // high byte
+  q_fwrite (buf, image + 44, 4, dest_name, "r+b");
 
-  q_fread (buf, image + 44, 4, dest_name);
   mem_hexdump (buf, 4, image + 44);
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -2318,7 +2320,12 @@ snes_init (st_rominfo_t *rominfo)
     *snes_romtype[3] = {
     "ROM",                                      // NOT ROM only, ROM + other chip is possible
     "ROM + RAM",
-    "ROM + Save RAM"};
+    "ROM + Save RAM"},
+    *snes_bstype[4] = {
+    "Full size + Sound link",
+    "Full size",
+    "Part size + Sound link",
+    "Part size"};
 
   rom_is_top = 0;                               // init these vars here, for -lsv
   snes_hirom_changed = 0;                       // idem
@@ -2476,7 +2483,7 @@ snes_init (st_rominfo_t *rominfo)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       return -1;                                // don't exit(), we might've been
-    }                                           //  called from -lsv
+    }                                           //  called with -lsv
   q_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
 
 #ifdef  ALT_HILO
@@ -2531,7 +2538,7 @@ snes_init (st_rominfo_t *rominfo)
   for (x = 0; x < SNES_NAME_LEN; x++)
     if (!isprint ((int) rominfo->name[x]))      // we can't use mkprint(), because it skips \n
       rominfo->name[x] = '.';
-  rominfo->name[SNES_NAME_LEN] = 0;             // terminate string (at 1st byte _after_ string)
+  rominfo->name[bs_dump ? 16 : SNES_NAME_LEN] = 0; // terminate string (at 1st byte _after_ string)
 
   rominfo->console_usage = snes_usage;
   if (!rominfo->buheader_len)
@@ -2621,6 +2628,10 @@ snes_init (st_rominfo_t *rominfo)
           strcat (rominfo->misc, buf);
         }
       strcat (rominfo->misc, "\n");
+
+      sprintf (buf, "ROM speed: %s\n",
+              snes_header.map_type & 0x10 ? "120ns (FastROM)" : "200ns (SlowROM)");
+      strcat (rominfo->misc, buf);
     }
   else                                          // BS info
     {
@@ -2629,20 +2640,37 @@ snes_init (st_rominfo_t *rominfo)
       // misc stuff
       sprintf (buf, "\nBroadcast Satellaview dump\n");  // new line is intentional
       strcat (rominfo->misc, buf);
-      sprintf (buf, "Size: 0x%x\n", snes_header.bs_size);
+
+      x = snes_header.bs_day & 0x0f;
+      if (x <= 3)
+        y = (snes_header.bs_day >> 4) * 2;
+      else if (x >= 8 && x <= 0xb)
+        y = (snes_header.bs_day >> 4) * 2 + 1;
+      else // incorrect data
+        y = 0;
+      sprintf (buf, "Release date: %d/%d\n", y, snes_header.bs_month >> 4);
       strcat (rominfo->misc, buf);
-      // TODO: reverse engineering SMC.COM ;-)
+
+      // misc stuff
+      sprintf (buf, "Internal size: %d Mb\n", 8 - (snes_header.bs_type >> (4 + 1)) * 4);
+      strcat (rominfo->misc, buf);
+
+      x = snes_header.bs_type >> 4;
+      sprintf (buf, "ROM type: (%x) %s\n", snes_header.bs_type,
+        x > 3 ? "Unknown" : snes_bstype[x]);
+      strcat (rominfo->misc, buf);
+
+      sprintf (buf, "ROM speed: %s\n",
+        (snes_header.bs_makeup >> 4) > 2 ? "120ns (FastROM)" : "200ns (SlowROM)");
+      strcat (rominfo->misc, buf);
     }
-  sprintf (buf, "ROM speed: %s\n",
-           snes_header.map_type & 0x10 ? "120ns (FastROM)" : "200ns (SlowROM)");
-  strcat (rominfo->misc, buf);
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
       // internal ROM crc
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = rominfo->internal_crc2_len = 2;
-      rominfo->current_internal_crc = snes_chksum (rominfo, rom_buffer);
+      rominfo->current_internal_crc = snes_chksum (rominfo, &rom_buffer);
       rominfo->internal_crc = snes_header.checksum_low;
       rominfo->internal_crc += snes_header.checksum_high << 8;
       x = snes_header.inverse_checksum_low;
@@ -2734,7 +2762,7 @@ snes_check_bs (void)
 {
   unsigned int value;
 
-  if (snes_header.bs_size & 0x4f)
+  if (snes_header.bs_type & 0x4f)
     return 0;
 
   if (snes_header.maker != 0x33 && snes_header.maker != 0xff)
@@ -2898,63 +2926,64 @@ snes_check_bs (void)
 #endif
 
 
+#if 1
 int
-snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer)
+snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
 /*
-  Calculate the checksum of a SNES ROM. This function tries to calculate a
-  checksum that matches the one that is stored inside the ROM. As a result of
-  this the calculated checksum is not of much use if this function can't
-  calculate a sum that matches the internal one. However, it's not *that* bad,
-  because the CRC32 should be used anyway to identify SNES ROM dumps.
+  Calculate the checksum of a SNES ROM. This version of snes_chksum() has one
+  advantage over the one below in that it is a bit more sensitive to overdumps.
 */
 {
-  int i, rom_size, pow2size, pow2size_half, remainder;
-  unsigned short int sum1, sum2, internal_sum;
+  int i, rom_size, internal_rom_size, half_internal_rom_size, remainder;
+  unsigned short int sum1, sum2;
 
   rom_size = ucon64.file_size - rominfo->buheader_len;
   if (rominfo->interleaved)
     {
-      ucon64.fcrc32 = crc32 (0, rom_buffer, rom_size);
-      snes_deinterleave (rominfo, rom_buffer, rom_size);
+      ucon64.fcrc32 = crc32 (0, *rom_buffer, rom_size);
+      snes_deinterleave (rominfo, *rom_buffer, rom_size);
     }
-  ucon64.crc32 = crc32 (0, rom_buffer, rom_size);
+  ucon64.crc32 = crc32 (0, *rom_buffer, rom_size);
 
-  pow2size = 1;
-  while (pow2size < rom_size)
-    pow2size <<= 1;
-  pow2size_half = pow2size >> 1;
+  if (!bs_dump && snes_header.rom_size <= 13)   // largest known cart size is 64 Mbit
+    internal_rom_size = 1 << (snes_header.rom_size + 10);
+  else
+    internal_rom_size = rom_size;
+  half_internal_rom_size = internal_rom_size >> 1;
 
   sum1 = 0;
-  if (pow2size_half >= MBIT && bs_dump)
-    {                                           // Broadcast Satellaview "ROM"
-      for (i = 0; i < rominfo->header_start; i++)
-        sum1 += rom_buffer[i];
-      for (i = rominfo->header_start + SNES_HEADER_LEN; i < pow2size_half; i++)
-        sum1 += rom_buffer[i];
+  if ((snes_header.rom_type == 0xf5 && snes_header.map_type != 0x30)
+      || snes_header.rom_type == 0xf9 || bs_dump)
+    {
+      for (i = 0; i < rom_size; i++)
+        sum1 += (*rom_buffer)[i];               // Far East of Eden Zero (J)
+      if (rom_size == 24 * MBIT)
+        sum1 *= 2;                              // Momotaro Dentetsu Happy (J)
+
+      if (bs_dump)                              // Broadcast Satellaview "ROM"
+        for (i = rominfo->header_start;
+             i < (int) (rominfo->header_start + SNES_HEADER_LEN); i++)
+          sum1 -= (*rom_buffer)[i];
     }
   else
-    for (i = 0; i < pow2size_half; i++)         // normal ROM
-      sum1 += rom_buffer[i];
+    {
+      // Handle split files. Don't make this dependent of ucon64.split as
+      //  the last file doesn't get detected as being split. Besides, we don't
+      //  want to crash on *any* input data.
+      int i_max = half_internal_rom_size > rom_size ? rom_size : half_internal_rom_size;
+      for (i = 0; i < i_max; i++)               // normal ROM
+        sum1 += (*rom_buffer)[i];
 
-  sum2 = 0;
-  remainder = rom_size - pow2size_half;
-  for (i = pow2size_half; i < rom_size; i++)
-    sum2 += rom_buffer[i];
-  sum1 += sum2 * (pow2size_half / remainder);
+      remainder = rom_size - half_internal_rom_size;
+      if (!remainder)                           // don't divide by zero below
+        remainder = half_internal_rom_size;
 
-  // here follows a fix for ROM dumps like Far East of Eden Zero (J)
-  //  and Momotaro Dentetsu Happy (J)
-  internal_sum = snes_header.checksum_low + (snes_header.checksum_high << 8);
-  if (internal_sum != sum1)                     // checksum seems bad -> try another
-    {                                           //  checksum algorithm
       sum2 = 0;
-      for (i = 0; i < rom_size; i++)
-        sum2 += rom_buffer[i];
-      if (sum2 == internal_sum)
-        sum1 = sum2;                            // Far East of Eden Zero
-      sum2 *= 2;
-      if (sum2 == internal_sum)
-        sum1 = sum2;                            // Momotaro Dentetsu Happy
+      for (i = half_internal_rom_size; i < rom_size; i++)
+        sum2 += (*rom_buffer)[i];
+      sum1 += sum2 * (half_internal_rom_size / remainder);
+//      printf ("DEBUG internal_rom_size: %d; half_internal_rom_size: %d; remainder: %d\n",
+//              internal_rom_size, half_internal_rom_size, remainder);
     }
 
   /*
@@ -2974,10 +3003,84 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer)
       no                  no              no
   */
   if (force_interleaved || rominfo->interleaved)
-    q_fread (rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
+    q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
 
   return sum1;
 }
+#else
+int
+snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
+// Calculate the checksum of a SNES ROM.
+{
+  int i, rom_size, internal_rom_size;
+  unsigned short int sum;
+
+  rom_size = ucon64.file_size - rominfo->buheader_len;
+  if (rominfo->interleaved)
+    {
+      ucon64.fcrc32 = crc32 (0, *rom_buffer, rom_size);
+      snes_deinterleave (rominfo, *rom_buffer, rom_size);
+    }
+  ucon64.crc32 = crc32 (0, *rom_buffer, rom_size);
+
+  if (!bs_dump)
+    {
+      internal_rom_size = 1 << (snes_header.rom_size + 10);
+      if (internal_rom_size < rom_size)
+        internal_rom_size = rom_size;
+      if (internal_rom_size > 16 * 1024 *1024)
+        internal_rom_size = 16 * 1024 *1024;
+    }
+  else
+    internal_rom_size = rom_size;
+
+//  printf ("DEBUG internal_rom_size: %d; rom_size: %d\n", internal_rom_size, rom_size);
+  if (internal_rom_size > rom_size)
+    {
+      int blocksize;
+      unsigned char *ptr;
+
+      if (!(*rom_buffer = (unsigned char *) realloc (*rom_buffer, internal_rom_size)))
+        {
+          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], internal_rom_size);
+          return -1;                            // don't exit(), we might've been
+        }                                       //  called with -lsv
+      blocksize = internal_rom_size - rom_size;
+      ptr = *rom_buffer + rom_size;
+      if (blocksize % (3 * MBIT) == 0)          // 6 (16 - 10), 12 (32 - 20), 24 (64 - 40)
+        {
+          blocksize /= 3;
+          for (i = 0; i < 3; i++)
+            memcpy (ptr + i * blocksize, ptr - blocksize, blocksize);
+        }
+      else
+        memcpy (ptr, ptr - blocksize, blocksize);
+    }
+
+  sum = 0;
+  if ((snes_header.rom_type == 0xf5 && snes_header.map_type != 0x30)
+      || snes_header.rom_type == 0xf9 || bs_dump)
+    {
+      for (i = 0; i < rom_size; i++)
+        sum += (*rom_buffer)[i];                // Far East of Eden Zero (J)
+      if (rom_size == 24 * MBIT)
+        sum *= 2;                               // Momotaro Dentetsu Happy (J)
+
+      if (bs_dump)
+        for (i = rominfo->header_start;
+             i < (int) (rominfo->header_start + SNES_HEADER_LEN); i++)
+          sum -= (*rom_buffer)[i];
+    }
+  else
+    for (i = 0; i < internal_rom_size; i++)
+      sum += (*rom_buffer)[i];
+
+  if (force_interleaved || rominfo->interleaved)
+    q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
+
+  return sum;
+}
+#endif
 
 
 #ifdef  ALT_HILO

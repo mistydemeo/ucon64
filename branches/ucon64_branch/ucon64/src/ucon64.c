@@ -803,7 +803,7 @@ ucon64_execute_options (void)
     drop_privileges ();                         // now we can drop privileges
 #endif
   first_call = 0;
-  
+
   for (x = 0; arg[x].val; x++)
     {
       if ((wf = ucon64_get_wf (arg[x].val)))    // get workflow for that option

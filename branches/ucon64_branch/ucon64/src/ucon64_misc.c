@@ -865,7 +865,10 @@ ucon64_file_handler (char *dest, char *src, int flags)
 
   ucon64_output_fname (dest, flags);            // call this function unconditionally
 
+#if 0
+  // ucon64_temp_file will be reset in remove_temp_file()
   ucon64_temp_file = NULL;
+#endif
   if (!access (dest, F_OK))
     {
       stat (dest, &dest_info);
@@ -1117,7 +1120,7 @@ ucon64_testpad (const char *filename)
   the zipped dump and 12 seconds for the gzipped dump.
 */
 {
-  int c = 0, blocksize, i, n = 0;
+  int c = 0, blocksize, i, n = 0, start_n;
   unsigned char buffer[MAXBUFSIZE];
   FILE *file = fopen (filename, "rb");
 
@@ -1131,12 +1134,27 @@ ucon64_testpad (const char *filename)
           c = buffer[blocksize - 1];
           n = 0;
         }
+      start_n = n;
       for (i = blocksize - 1; i >= 0; i--)
         {
           if (buffer[i] != c)
-            break;
+            {
+              n -= start_n;
+              break;
+            }
           else
-            n++;
+            {
+              /*
+                A file is either padded with 2 or more bytes or it isn't
+                padded at all. It can't be detected that a file is padded with
+                1 byte.
+              */
+              if (i == blocksize - 2)
+                n += 2;
+              else if (i < blocksize - 2)
+                n++;
+              // NOT else, because i == blocksize - 1 must initially be skipped
+            }
         }
     }
 
@@ -1705,38 +1723,24 @@ ucon64_configfile (void)
                  "#\n"
 #if     defined __MSDOS__
                  "discmage_path=~\\discmage.dxe\n" // realpath2() expands the tilde
+                 "netgui_path=~\\netgui.dxe\n"
                  "ucon64_configdir=~\n"
                  "ucon64_datdir=~\n"
 #elif   defined __CYGWIN__
                  "discmage_path=~/discmage.dll\n"
+                 "netgui_path=~/netgui.dll\n"
                  "ucon64_configdir=~\n"
                  "ucon64_datdir=~\n"
 #elif   defined _WIN32
                  "discmage_path=~\\discmage.dll\n"
+                 "netgui_path=~\\netgui.dll\n"
                  "ucon64_configdir=~\n"
                  "ucon64_datdir=~\n"
 #elif   defined __unix__ || defined __BEOS__
                  "discmage_path=~/.ucon64/discmage.so\n"
+                 "netgui_path=~/.ucon64/netgui.so\n"
                  "ucon64_configdir=~/.ucon64\n"
                  "ucon64_datdir=~/.ucon64/dat\n"
-#endif
-                 "#\n"
-#if     defined __MSDOS__
-                 "netgui_path=~\\netgui.dxe\n" // realpath2() expands the tilde
-                 "configdir=~\n"
-                 "datdir=~\n"
-#elif   defined __CYGWIN__
-                 "netgui_path=~/netgui.dll\n"
-                 "configdir=~\n"
-                 "datdir=~\n"
-#elif   defined _WIN32
-                 "netgui_path=~\\netgui.dll\n"
-                 "configdir=~\n"
-                 "datdir=~\n"
-#elif   defined __unix__ || defined __BEOS__
-                 "netgui_path=~/.ucon64/netgui.so\n"
-                 "configdir=~/.ucon64\n"
-                 "datdir=~/.ucon64/dat\n"
 #endif
                  "#\n"
                  "# emulate_<console shortcut>=<emulator with options>\n"

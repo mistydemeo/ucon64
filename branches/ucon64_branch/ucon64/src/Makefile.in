@@ -12,6 +12,7 @@ LDFLAGS=@LDFLAGS@
 ifdef DISCMAGE
 LIBNAME_DM=discmage
 endif
+
 ifdef GUI
 LIBNAME_NG=netgui
 endif
@@ -39,9 +40,18 @@ endif
 else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 
+ifdef DISCMAGE
 FULLLIBNAME=$(LIBNAME).dll
 ifndef DLOPEN
 LDFLAGS+=libdiscmage/$(LIBNAME).a
+endif
+endif
+
+ifdef GUI
+FULLLIBNAME_NG=$(LIBNAME_NG).dxe
+ifndef DLOPEN
+LDFLAGS+=libnetgui/$(LIBNAME_NG).a
+endif
 endif
 
 else
@@ -83,12 +93,12 @@ else
 ifdef DISCMAGE
 FULLLIBNAME_DM=lib$(LIBNAME_DM).so
 LDFLAGS+=-Llibdiscmage -l$(LIBNAME_DM)
-endif
+endif                                   # DISCMAGE
 
 ifdef GUI
 FULLLIBNAME_NG=lib$(LIBNAME_NG).so
 LDFLAGS+=-Llibnetgui -l$(LIBNAME_NG)
-endif
+endif                                   # GUI
 
 endif
 
@@ -251,6 +261,9 @@ libnetgui/$(FULLLIBNAME_NG):
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	cd libnetgui && $(MAKE)
 else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+	cd libdiscmage && $(MAKE)
+else
 ifdef DJGPP
 	cd libnetgui
 	$(MAKE)
@@ -258,6 +271,7 @@ ifdef DJGPP
 else
 	cd libnetgui && $(MAKE)
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 endif                                   # GUI
 
@@ -326,7 +340,17 @@ ucon64.o: ucon64_opts.h ucon64_dat.h ucon64_lib.h dlopen.h getopt.h \
           backup/smd.h backup/fal.h backup/gbx.h backup/cd64.h backup/dex.h \
           backup/fpl.h backup/mgd.h backup/gd.h backup/mccl.h backup/lynxit.h \
           $(UCON64_STD_H)
-ucon64_opts.o: ucon64_opts.h $(UCON64_STD_H)
+ucon64_opts.o: ucon64_opts.h ucon64_dat.h ucon64_lib.h dlopen.h getopt.h \
+               console/snes.h console/gb.h console/gba.h console/n64.h \
+               console/lynx.h console/sms.h console/nes.h console/genesis.h \
+               console/pce.h console/neogeo.h console/ngp.h console/swan.h \
+               console/dc.h console/jaguar.h console/psx.h \
+               patch/ppf.h patch/xps.h patch/pal4u.h patch/aps.h patch/ips.h \
+               patch/bsl.h patch/gg.h \
+               backup/fig.h backup/swc.h backup/doctor64jr.h \
+               backup/doctor64.h backup/smd.h backup/fal.h backup/gbx.h \
+               backup/cd64.h backup/dex.h backup/fpl.h backup/mgd.h \
+               backup/gd.h backup/mccl.h backup/lynxit.h $(UCON64_STD_H)
 ucon64_misc.o: dlopen.h $(UCON64_STD_H)
 ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)
 ucon64_lib.o: ucon64_lib.h dlopen.h $(UCON64_STD_H)

@@ -244,17 +244,17 @@ gba_logo (st_rominfo_t *rominfo)
 int
 gba_chk (st_rominfo_t *rominfo)
 {
-  char buf[2], dest_name[FILENAME_MAX];
+  char buf, dest_name[FILENAME_MAX];
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
+  buf = rominfo->current_internal_crc;
   q_fputc (dest_name, GBA_HEADER_START + rominfo->buheader_len + 0xbd,
-    rominfo->current_internal_crc, "r+b");
+    buf, "r+b");
 
-  q_fread (buf, GBA_HEADER_START + rominfo->buheader_len + 0xbd, 1, dest_name);
-  mem_hexdump (buf, 1, GBA_HEADER_START + rominfo->buheader_len + 0xbd);
+  mem_hexdump (&buf, 1, GBA_HEADER_START + rominfo->buheader_len + 0xbd);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;

@@ -370,8 +370,7 @@ ucon64_switches (int c, const char *optarg)
             if (S_ISDIR (fstate.st_mode))
               {
                 strcpy (ucon64.output_path, optarg);
-                if (OFFSET (ucon64.output_path, strlen (ucon64.output_path) - 1)
-                      != FILE_SEPARATOR)
+                if (ucon64.output_path[strlen (ucon64.output_path) - 1] != FILE_SEPARATOR)
                   strcat (ucon64.output_path, FILE_SEPARATOR_S);
                 dir = 1;
               }
@@ -1419,7 +1418,7 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_N2GB:
-      gameboy_n2gb (optarg);
+      gameboy_n2gb (ucon64.rominfo, optarg);
       break;
 
     case UCON64_NROT:
@@ -1715,6 +1714,16 @@ ucon64_options (int c, const char *optarg)
       tmpnam2 (src_name);
       ucon64_temp_file = src_name;
       register_func (remove_temp_file);
+      // gba_multi() calls ucon64_file_handler() so the directory part will be
+      //  stripped from src_name. The directory should be used though.
+      if (!ucon64.output_path[0])
+        {
+          char *dir = dirname2 (src_name);
+          strcpy (ucon64.output_path, dir);
+          if (ucon64.output_path[strlen (ucon64.output_path) - 1] != FILE_SEPARATOR)
+            strcat (ucon64.output_path, FILE_SEPARATOR_S);
+          free (dir);
+        }
       gba_multi (strtol (optarg, NULL, 10) * MBIT, src_name);
       fal_write_rom (src_name, ucon64.parport);
       unregister_func (remove_temp_file);

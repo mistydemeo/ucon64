@@ -626,11 +626,13 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
         break;
     }
 
+#if 0
   if (track->total_len < track->track_len + track->pregap_len)
     {
       fprintf (stderr, "SKIPPING: track seems truncated\n");
       return -1;
     }
+#endif
 
 #if 0
 // this is not a problem

@@ -131,6 +131,7 @@ ReadN64Header (int Force)
 	unsigned char Teritory,APSTeritory;
     unsigned char APSFormat;
 
+
 	fseek (n64aps_ORGFile,0,SEEK_SET);
 	fread (&n64aps_MagicTest,sizeof (n64aps_MagicTest),1,n64aps_ORGFile);
 	fread (Buffer,1,1,n64aps_APSFile);
@@ -318,37 +319,13 @@ ReadPatch ()
 int
 n64aps_main (int argc, char *argv[])
 {
-	int		Result;
 	char	File1[256];
 	char	File2[256];
-	int		Force=n64aps_FALSE;
+	int		Force=n64aps_TRUE;
 
-	while ((Result = getopt (argc, argv, "1:2:fq")) != -1)
-	{
-		switch (Result)
-		{
-		case 'f': // Force
-			Force=n64aps_TRUE;
-			break;
-		case 'q': // n64aps_Quiet
-			n64aps_Quiet=n64aps_TRUE;
-			break;
-		case '?':
-			printf ("Unknown option %c\n", Result);
-			n64aps_syntax();
-			return (1);
-			break;
-		}
-	}
 
-	if (argc - optind != 2)
-	{
-		n64aps_syntax();
-		return (1);
-	}
-
-	strcpy (File1,argv[optind]);
-	strcpy (File2,argv[optind+1]);
+	strcpy (File1,argv[2]);
+	strcpy (File2,argv[3]);
 
 	if (!n64aps_CheckFile (File1,"rb+")) return(1);
 	if (!n64aps_CheckFile (File2,"rb")) return(1);
@@ -366,12 +343,11 @@ n64aps_main (int argc, char *argv[])
 	ReadStdHeader ();
 
 	ReadN64Header (Force);
-
 	ReadSizeHeader (File1);
 
 	ReadPatch ();
 
-	fclose (n64aps_NEWFile);
+//	fclose (n64aps_NEWFile);
 	fclose (n64aps_ORGFile);
 	fclose (n64aps_APSFile);
 
@@ -649,7 +625,6 @@ WritePatch ()
 int
 n64caps_main (int argc, char *argv[])
 {
-	int		Result;
 	char	File1[256];
 	char	File2[256];
 	char	OutFile[256];
@@ -659,33 +634,10 @@ n64caps_main (int argc, char *argv[])
 
 	Description[0]=0;
 
-	while ((Result = getopt (argc, argv, "d:q")) != -1)
-	{
-		switch (Result)
-		{
-		case 'd': // Description
-			strcpy (Description, optarg);
-			break;
-		case 'q': // n64caps_Quiet
-			n64caps_Quiet=n64caps_TRUE;
-			break;
-		case '?':
-			printf ("Unknown option %c\n", Result);
-			n64caps_syntax();
-			return (1);
-			break;
-		}
-	}
 
-	if ((argc - optind) != 3)
-	{
-		n64caps_syntax();
-		return (1);
-	}
-
-	strcpy (File1,argv[optind]);
-	strcpy (File2,argv[optind+1]);
-	strcpy (OutFile,argv[optind+2]);
+	strcpy (File1,argv[2]);
+	strcpy (File2,argv[3]);
+	strcpy (OutFile,argv[4]);
 
 	if (!n64caps_CheckFile (File1,"rb",n64caps_TRUE)) return(1);
 	if (!n64caps_CheckFile (File2,"rb",n64caps_TRUE)) return(1);

@@ -43,7 +43,7 @@ extern int lynx_lnx (st_rominfo_t *rominfo);
 extern int lynx_lyx (st_rominfo_t *rominfo);
 extern const char *lynx_lyx_desc;
 
-extern int lynx_n (st_rominfo_t *rominfo, const char *newname);
+extern int lynx_n (st_rominfo_t *rominfo, const char *name);
 extern int lynx_nrot (st_rominfo_t *rominfo);
 extern int lynx_rotl (st_rominfo_t *rominfo);
 extern int lynx_rotr (st_rominfo_t *rominfo);

@@ -1,4 +1,4 @@
-#/*
+/*
 n64.c - Nintendo 64 support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
@@ -60,7 +60,7 @@ const char *n64_usage[] =
     "  " OPTION_LONG_S "int2        force ROM is in interleaved format 2\n"
     "  " OPTION_LONG_S "nint        force ROM is not in interleaved format\n"
 #endif
-    "  " OPTION_S "n=NEWNAME   change ROM name to NEWNAME\n"
+    "  " OPTION_S "n=NEWNAME   change internal ROM name to NEWNAME\n"
     "  " OPTION_LONG_S "v64         convert to Doctor V64 (and compatibles/interleaved)\n"
     "  " OPTION_LONG_S "z64         convert to Z64 (Zip Drive/not interleaved)\n"
 #ifdef TODO
@@ -231,20 +231,20 @@ n64_z64 (st_rominfo_t *rominfo)
 
 
 int
-n64_n (st_rominfo_t *rominfo, const char *newname)
+n64_n (st_rominfo_t *rominfo, const char *name)
 {
   char buf[N64_NAME_LEN];
 
   memset (buf, ' ', N64_NAME_LEN);
-  strncpy (buf, newname, strlen (newname) > N64_NAME_LEN ?
-           N64_NAME_LEN : strlen (newname));
+  strncpy (buf, name, strlen (name) > N64_NAME_LEN ?
+                        N64_NAME_LEN : strlen (name));
 
   if (rominfo->interleaved != 0)
     mem_swap (buf, N64_NAME_LEN);
 
   ucon64_fbackup (NULL, ucon64.rom);
-  q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 32, 20,
-               ucon64.rom, "r+b");
+  q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 32, 20, ucon64.rom,
+            "r+b");
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   return 0;

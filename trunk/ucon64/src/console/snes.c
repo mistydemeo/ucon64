@@ -83,7 +83,7 @@ const char *snes_usage[] =
     "  " OPTION_LONG_S "nint        force ROM is not in interleaved format\n"
     "  " OPTION_LONG_S "bs          force ROM is a Broadcast Satellaview dump\n"
     "  " OPTION_LONG_S "nbs         force ROM is a regular cartridge dump\n"
-    "  " OPTION_S "n=NEWNAME   change ROM name to NEWNAME\n"
+    "  " OPTION_S "n=NEWNAME   change internal ROM name to NEWNAME\n"
     "  " OPTION_LONG_S "smc         convert to Super Magicom/SMC\n"
     "  " OPTION_LONG_S "fig         convert to *Pro Fighter*/(all)FIG\n"
     "  " OPTION_LONG_S "figs        convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG;\n"
@@ -301,7 +301,6 @@ snes_dint (st_rominfo_t *rominfo)
 
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
-
   return 0;
 }
 
@@ -425,7 +424,6 @@ snes_convert_sramfile (const void *header)
   fclose (srcfile);
   fclose (destfile);
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
-
   return 0;
 }
 
@@ -627,9 +625,9 @@ snes_ffe (st_rominfo_t *rominfo, char *ext)
 
   q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
   q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
+
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
-
   return 0;
 }
 
@@ -718,9 +716,9 @@ snes_fig (st_rominfo_t *rominfo)
 
   q_fwrite (&header, 0, FIG_HEADER_LEN, dest_name, "wb");
   q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
+
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
-
   return 0;
 }
 
@@ -810,8 +808,8 @@ snes_mgd (st_rominfo_t *rominfo)
 
   strcpy (dest_name, "MULTI-GD.MGH");
   q_fwrite (&mgh, 0, sizeof (mgh), dest_name, "wb");
-  fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
   return 0;
 #else
   char mgh[32], buf[FILENAME_MAX], buf2[FILENAME_MAX], *p = NULL;
@@ -842,10 +840,9 @@ snes_mgd (st_rominfo_t *rominfo)
 
   strcpy (buf, buf2);
   setext (buf, ".MGH");
-
   q_fwrite (&mgh, 0, sizeof (mgh), buf, "wb");
-  fprintf (stdout, ucon64_msg[WROTE], buf);
 
+  fprintf (stdout, ucon64_msg[WROTE], buf);
   return 0;
 #endif
 }
@@ -866,7 +863,6 @@ snes_int_blocks (unsigned char *deintptr, unsigned char *ipl,
       ipl += 0x8000;
       iph += 0x8000;
     }
-  return;
 }
 
 
@@ -1271,7 +1267,6 @@ snes_s (st_rominfo_t *rominfo)
           q_fcpy (ucon64.rom, x * part_size + rominfo->buheader_len, surplus, dest_name, "ab");
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
         }
-
       return 0;
     }
 }
@@ -1314,8 +1309,8 @@ snes_j (st_rominfo_t *rominfo)
       q_fputc (dest_name, 1, total_size / 8192 >> 8, "r+b"); // # 8K blocks high byte
       q_fputc (dest_name, 2, q_fgetc (dest_name, 2) & ~0x40, "r+b"); // last file -> clear bit 6
     }
-  fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -1547,7 +1542,6 @@ Same here.
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   remove_temp_file ();
-
   return 0;
 }
 
@@ -1613,7 +1607,6 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   remove_temp_file ();
-
   return 0;
 }
 
@@ -1715,7 +1708,6 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   remove_temp_file ();
-
   return 0;
 }
 
@@ -1803,25 +1795,23 @@ a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   remove_temp_file ();
-
   return 0;
 }
 
 
 int
-snes_n (st_rominfo_t *rominfo, const char *newname)
+snes_n (st_rominfo_t *rominfo, const char *name)
 {
   char buf[SNES_NAME_LEN];
 
   memset (buf, ' ', SNES_NAME_LEN);
-  strncpy (buf, newname, strlen (newname) > SNES_NAME_LEN ?
-           SNES_NAME_LEN : strlen (newname));
+  strncpy (buf, name, strlen (name) > SNES_NAME_LEN ?
+                        SNES_NAME_LEN : strlen (name));
   ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (buf, rominfo->header_start + rominfo->buheader_len + 16, SNES_NAME_LEN,
             ucon64.rom, "r+b");
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
-
   return 0;
 }
 
@@ -1845,7 +1835,6 @@ snes_chk (st_rominfo_t *rominfo)
   mem_hexdump (buf, 4, image + 44);
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
-
   return 0;
 }
 

@@ -221,7 +221,7 @@ typedef struct
 
 extern int nes_fds (st_rominfo_t *rominfo);
 extern int nes_fdsl (st_rominfo_t *rominfo, char *output_str);
-extern int nes_n (st_rominfo_t *rominfo, const char *newname);
+extern int nes_n (st_rominfo_t *rominfo, const char *name);
 extern int nes_s (st_rominfo_t *rominfo);
 extern int nes_pasofami (st_rominfo_t *rominfo);
 extern int nes_ineshd (st_rominfo_t *rominfo);

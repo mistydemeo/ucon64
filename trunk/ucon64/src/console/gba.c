@@ -2,7 +2,7 @@
 gba.c - Game Boy Advance support for uCON64
 
 written by 2001        NoisyB (noisyb@gmx.net)
-           2001 - 2002 dbjh
+           2001 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -48,7 +48,7 @@ const char *gba_usage[] =
     "  " OPTION_LONG_S "gba         force recognition\n"
 //    "  " OPTION_LONG_S "hd          force ROM has header (+512 Bytes)\n"
 //    "  " OPTION_LONG_S "nhd         force ROM has no header\n"
-    "  " OPTION_S "n=NEWNAME   change ROM name to NEWNAME\n"
+    "  " OPTION_S "n=NEWNAME   change internal ROM name to NEWNAME\n"
     "  " OPTION_LONG_S "logo        restore ROM logo character data; Offset: 0x04-0x9F\n"
 //    "  " OPTION_LONG_S "chk         fix ROM header checksum\n"
     "  " OPTION_LONG_S "sram        patch ROM for SRAM saving\n"
@@ -168,15 +168,15 @@ typedef struct st_gba_header
 static st_gba_header_t gba_header;
 
 int
-gba_n (st_rominfo_t *rominfo, const char *newname)
+gba_n (st_rominfo_t *rominfo, const char *name)
 {
   char buf[MAXBUFSIZE];
 
-  memset(buf, 0L, MAXBUFSIZE - 1);
-  strcpy (buf, newname);
+  memset(buf, 0, MAXBUFSIZE - 1);
+  strcpy (buf, name);
   ucon64_fbackup (NULL, ucon64.rom);
-  q_fwrite (buf, GBA_HEADER_START + rominfo->buheader_len + 0xa0,
-               0x0b, ucon64.rom, "r+b");
+  q_fwrite (buf, GBA_HEADER_START + rominfo->buheader_len + 0xa0, 0x0b,
+            ucon64.rom, "r+b");
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   return 0;

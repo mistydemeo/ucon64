@@ -28,7 +28,7 @@ extern int n64_chk (st_rominfo_t *rominfo);
 
 extern int n64_f (st_rominfo_t *rominfo);
 extern int n64_init (st_rominfo_t *rominfo);
-extern int n64_n (st_rominfo_t *rominfo, const char *newname);
+extern int n64_n (st_rominfo_t *rominfo, const char *name);
 extern int n64_sram (st_rominfo_t *rominfo, const char *sramfile);
 extern int n64_usms (st_rominfo_t *rominfo, const char *smsrom);
 extern int n64_v64 (st_rominfo_t *rominfo);

@@ -1465,7 +1465,7 @@ ucon64_parport_init (unsigned int port)
     {
       fprintf (stderr, "ERROR: Could not set the I/O privilege level to 3\n"
                        "       (This program needs root privileges for the requested action)\n");
-      return 1;                                 // Don't return, if iopl() fails port access
+      exit (1);                                 // Don't return, if iopl() fails port access
     }                                           //  causes core dump
 #endif // __linux__
 

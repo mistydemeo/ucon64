@@ -12,7 +12,6 @@
  * see psxpblib.h for details.
  *
  */
-#include "../config.h"
 #include <fcntl.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -23,6 +22,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>             // ioperm() (libc5)
+#include "../config.h"
 #include "ucon64.h"
 #include "misc.h"
 #include "ucon64_misc.h"

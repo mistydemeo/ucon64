@@ -28,6 +28,8 @@
 #define flc_NAME 0
 #define flc_FILE 1
 
+#define MAXBUFSIZE 32768
+
 int flc_usage(int argc, char *argv[]);
 
 #define flc_TITLE "flc 0.9.3 1999/2000/2001 by NoisyB (noisyb@gmx.net)"
@@ -38,7 +40,7 @@ struct flc_
   //  char argv[128][4096];
   char *argv[128];
 
-  int files;
+  long files;
 
   int kb;
   int html;
@@ -49,18 +51,22 @@ struct flc_
   int byname;
   int fr;
   
-  char path[4096];
+  char path[MAXBUFSIZE];
+
+  char configfile[MAXBUFSIZE];
+  char config[4096];
 };
 
-struct file_
+#define FID_LINES_MAX 20
+
+struct files_
 {
   unsigned long pos;
   char name[NAME_MAX+1];
   off_t size;
   unsigned long date;
   int checked;
-#define FID_LINES_MAX 20
-  char file_id[FID_LINES_MAX+1][49];
+  char files_id[FID_LINES_MAX+1][49];
 };
 
 

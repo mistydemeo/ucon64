@@ -31,9 +31,9 @@
 
 int main(int argc,char *argv[])
 {
-char buf[4096];
+char buf[NAME_MAX+1];
 struct flc_ flc;
-struct file_ *file,*file0,file_ns;
+struct files_ *files,*file0,file_ns;
 struct dirent *ep;
 struct stat puffer;
 long x = 0;
@@ -71,6 +71,12 @@ flc.html = (argcmp(argc,argv,"-html")) ? 1 : 0 ;
 flc.files = 0;
 
 strcpy(flc.path,getarg(argc,argv,flc_FILE));
+#ifdef __DOS__
+  strcpy(flc.configfile, "flc.cfg");
+#else
+  sprintf(flc.configfile, "%s%c.flcrc", getenv("HOME"), FILE_SEPARATOR);
+#endif
+getProperty(flc.configfile,"file_id_diz",flc.config,"file_id.diz");
 
 if(stat(flc.path,&puffer)!=-1 &&
    S_ISREG(puffer.st_mode)==TRUE)
@@ -78,7 +84,8 @@ if(stat(flc.path,&puffer)!=-1 &&
   single_file=1;
   flc.sort=0;
 }
-else
+
+if(!single_file)
 {
   if(!flc.path[0])
     getcwd(flc.path,(size_t)sizeof(flc.path));
@@ -106,18 +113,9 @@ if(flc.sort && !single_file)
     stat(ep->d_name,&puffer);
     if(S_ISREG(puffer.st_mode))flc.files++;
   }
-
-  if(!(file=(struct file_ *)malloc((flc.files+2)*sizeof(struct file_))))
-  {
-    printf("%s: Error allocating memory\n",getarg(argc,argv,0));
-    (void)closedir(dp);
-    return(-1);
-  }
-  file0=file;
   rewinddir(dp);
 }
-else file=&file_ns;
-
+else files=&file_ns;
 
 flc.files=0;
 while( (!single_file) ?
@@ -126,39 +124,52 @@ while( (!single_file) ?
 {
   if(!single_file)sprintf(buf,"%s/%s",flc.path,ep->d_name);
   else strcpy(buf,flc.path);
-  
+
   if(stat(buf,&puffer)==-1)continue;
   if(S_ISREG(puffer.st_mode)!=TRUE)continue;
 
-  file->date=puffer.st_mtime;
-  file->size=puffer.st_size;  
-  file->checked='N';
-  strcpy(file->name,(!single_file) ? ep->d_name : flc.path);  
-  if(single_file)flc.path[0]=0;
 
-  extract(&flc,file);
+  if(!(files=(struct files_ *)malloc((flc.files+2)*sizeof(struct files_))))
+  {
+    printf("%s: Error allocating memory\n",getarg(argc,argv,0));
+    (void)closedir(dp);
+    return(-1);
+  }
+  file0=files;
+  files->pos=flc.files;
+//  files->date=puffer.st_mtime;
+//  files->size=puffer.st_size;  
+//  files->checked='N';
+//  strcpy(files->name,(!single_file) ? ep->d_name : flc.path);  
+//  if(single_file)flc.path[0]=0;
+printf("%s\n",files->name);
+fflush(stdout);
+
+//  extract(&flc,files);
 
   if(!flc.sort)
   {
-    output(&flc,file);
+    output(&flc,files);
     if(single_file)break;
     continue;
   }
 
-  file->pos=flc.files;
-  file++;
   flc.files++;
+//  files++;//=(int)(sizeof(struct files_));
 }
 if(!single_file)(void)closedir(dp);
-file=file0;
+files=file0;
+
+printf("OK");
+fflush(stdout);
 
 if(flc.sort)
 {
-  sort(&flc,file);
+  sort(&flc,files);
 for( x = 0 ; x < flc.files ; x++ )
-  output(&flc,file+(file+x)->pos);
+  output(&flc,files+(files+x)->pos);
 
-  free(file);
+  free(files);
 }
 
 

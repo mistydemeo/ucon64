@@ -541,7 +541,7 @@ ucon64_testsplit (const char *filename)
 
   strcpy (buf, filename);
   buf[strrcspn (buf, ".") - 1]++;
-  while (!access (buf, F_OK) && STRDCMP (buf, filename) != 0)
+  while (!access (buf, F_OK) && strcmp (buf, filename) != 0)
     {
       buf[strrcspn (buf, ".") - 1]++;
       x++;
@@ -552,7 +552,7 @@ ucon64_testsplit (const char *filename)
 
   strcpy (buf, filename);
   buf[strrcspn (buf, ".") + 1]++;
-  while (!access (buf, F_OK) && STRDCMP (buf, filename) != 0)
+  while (!access (buf, F_OK) && strcmp (buf, filename) != 0)
     {
       buf[strrcspn (buf, ".") + 1]++;
       x++;

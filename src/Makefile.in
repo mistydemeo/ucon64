@@ -184,7 +184,7 @@ UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
 getopt.o: getopt.h
 unzip.o: unzip.h
 misc.o: map.c map.h misc.h miscz.h config.h
-miscz.o: map.c map.h misc.h miscz.h config.h
+miscz.o: map.h miscz.h config.h
 quick_io.o: quick_io.h misc.h config.h
 dlopen.o: dlopen.h dxedll_pub.h config.h
 ucon64.o: ucon64_opts.h dlopen.h getopt.h ucon64_dat.h \

@@ -53,8 +53,8 @@ write programs in C
 #ifdef  DEBUG
 #warning DEBUG active
 #endif
-#include "getopt.h"
 #include "misc.h"
+#include "getopt.h"
 #include "quick_io.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
@@ -524,6 +524,11 @@ main (int argc, char **argv)
           arg[x].val = c;
           arg[x++].optarg = (optarg ? optarg : NULL);
         }
+      else
+        {
+// this shouldn't happen
+          exit (1);
+        }
     }
 
 #ifdef  DEBUG
@@ -544,8 +549,8 @@ main (int argc, char **argv)
       int result = 0;
       struct dirent *ep;
       DIR *dp;
-
       char *path = argv[rom_index];
+
       if (stat (path, &fstate) != -1)
         {
           if (S_ISREG (fstate.st_mode))
@@ -553,18 +558,20 @@ main (int argc, char **argv)
           else if (S_ISDIR (fstate.st_mode))    // a dir!?
             {
               if ((dp = opendir (path)))
-                while ((ep = readdir (dp)))
-                  {
-                    sprintf (buf, "%s" FILE_SEPARATOR_S "%s", path, ep->d_name);
-                    if (stat (buf, &fstate) != -1)
-                      if (S_ISREG (fstate.st_mode))
-                        {
-                          result = ucon64_process_rom (buf);
-                          if (result == 1)
-                            break;
-                        }
-                  }
-                closedir (dp);
+                {
+                  while ((ep = readdir (dp)))
+                    {
+                      sprintf (buf, "%s" FILE_SEPARATOR_S "%s", path, ep->d_name);
+                      if (stat (buf, &fstate) != -1)
+                        if (S_ISREG (fstate.st_mode))
+                          {
+                            result = ucon64_process_rom (buf);
+                            if (result == 1)
+                              break;
+                          }
+                    }
+                  closedir (dp);
+                }
             }
           else
             result = ucon64_process_rom(argv[rom_index]);
@@ -585,6 +592,7 @@ ucon64_process_rom (char *fname)
 {
 #ifdef  HAVE_ZLIB_H
   int n_entries = unzip_get_number_entries (fname);
+printf ("SHIT");
 
   if (n_entries != -1)                      // it's a zip file
     {

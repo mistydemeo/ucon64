@@ -370,11 +370,11 @@ ucon64_switches (int c, const char *optarg)
 
     case UCON64_83:
     case UCON64_RR83:
-      ucon64.fname_len = 1; // 1 == 8.3
+      ucon64.fname_len = UCON64_83;
       break;
 
     case UCON64_FORCE63:
-      ucon64.fname_len = 2; // 2 == 63.x (Joilet)
+      ucon64.fname_len = UCON64_FORCE63;
       break;
 
     case UCON64_Q:
@@ -402,7 +402,7 @@ static int
 ucon64_rename (int mode)
 {
   char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1],
-       *suffix = (char *) get_suffix (ucon64.rom), *p;
+       *suffix = (char *) get_suffix (ucon64.rom), *p = NULL;
 
   buf[0] = 0;
 
@@ -435,9 +435,9 @@ ucon64_rename (int mode)
   if (!buf[0])
     return 0;
 
-  if (ucon64.fname_len == 2)
+  if (ucon64.fname_len == UCON64_FORCE63)
     buf[63] = 0;
-  else if (ucon64.fname_len == 1)
+  else if (ucon64.fname_len == UCON64_83)
     buf[8] = 0;
 
   // replace chars the fs might not like
@@ -466,7 +466,7 @@ ucon64_rename (int mode)
   // DON'T use set_suffix()! Consider file names like
   //  "Final Fantasy III (V1.1) (U) [!]". The suffix is ".1) (U) [!]"...
   strcat (buf2, suffix);
-  if (ucon64.fname_len == 1)
+  if (ucon64.fname_len == UCON64_83)
     buf2[12] = 0;
 
   if (access (buf2, F_OK))
@@ -606,6 +606,12 @@ ucon64_options (int c, const char *optarg)
     case UCON64_RL:
       strcpy (buf, ucon64.rom);
       strlwr (basename2 (buf));
+      rename (ucon64.rom, buf);
+      break;
+
+    case UCON64_RU:
+      strcpy (buf, ucon64.rom);
+      strupr (basename2 (buf));
       rename (ucon64.rom, buf);
       break;
 
@@ -850,40 +856,39 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_RR83:
-      ucon64.fname_len = 1;
+      ucon64.fname_len = UCON64_83;
     case UCON64_RROM:
       ucon64_rename (UCON64_RROM);
       break;
 
-#if 0
-    case UCON64_ISO:
+    case UCON64_BIN2ISO:
       if (ucon64.discmage_enabled)
         {
-          ucon64.image = dm_open (ucon64.rom);
-          dm_bin2iso (ucon64.image);
-          dm_close (ucon64.image);
+          ucon64.image = libdm_open (ucon64.rom);
+          libdm_bin2iso (ucon64.image);
+          libdm_close (ucon64.image);
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
       break;
 
-    case UCON64_NRGRIP:
+    case UCON64_ISOFIX:
       if (ucon64.discmage_enabled)
         {
-          ucon64.image = dm_open (ucon64.rom);
-          dm_cdirip (ucon64.image);
-          dm_close (ucon64.image);
+          ucon64.image = libdm_open (ucon64.rom);
+          libdm_isofix (ucon64.image, strtol (optarg, NULL, 10));
+          libdm_close (ucon64.image);
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
       break;
 
-    case UCON64_CDIRIP:
+    case UCON64_RIP:
       if (ucon64.discmage_enabled)
         {
-          ucon64.image = dm_open (ucon64.rom);
-          dm_cdirip (ucon64.image);
-          dm_close (ucon64.image);
+          ucon64.image = libdm_open (ucon64.rom);
+          libdm_rip (ucon64.image);
+          libdm_close (ucon64.image);
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
@@ -892,12 +897,12 @@ ucon64_options (int c, const char *optarg)
     case UCON64_MKTOC:
       if (ucon64.discmage_enabled)
         {
-          ucon64.image = dm_open (ucon64.rom);
+          ucon64.image = libdm_open (ucon64.rom);
           strcpy (buf, ucon64.rom);
-          set_suffix (buf, ".toc");
-          if (!dm_mktoc (ucon64.image))
+          set_suffix (buf, ".TOC");
+          if (!libdm_mktoc (ucon64.image))
             printf (ucon64_msg[WROTE], buf);
-          dm_close (ucon64.image);
+          libdm_close (ucon64.image);
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
@@ -906,41 +911,49 @@ ucon64_options (int c, const char *optarg)
     case UCON64_MKCUE:
       if (ucon64.discmage_enabled)
         {
-          ucon64.image = dm_open (ucon64.rom);
+          ucon64.image = libdm_open (ucon64.rom);
           strcpy (buf, ucon64.rom);
-          set_suffix (buf, ".toc");
-          if (!dm_mkcue (ucon64.image))
+          set_suffix (buf, ".CUE");
+          if (!libdm_mkcue (ucon64.image))
             printf (ucon64_msg[WROTE], buf);
-          dm_close (ucon64.image);
+          libdm_close (ucon64.image);
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
       break;
-#endif
 
     case UCON64_MKSHEET:
       if (ucon64.discmage_enabled)
-        ucon64_libdm_mksheet (&ucon64);
-      else
-        printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
-      break;
-
-
-#if 0
-    case UCON64_XCDRW:
-      if (ucon64.discmage_enabled)
         {
-          ucon64.image = dm_open (ucon64.rom);
-          if (!access (ucon64.rom, F_OK))
-            dm_disc_write (ucon64.image);
-          else
-            dm_disc_read (ucon64.image);
-          dm_close (ucon64.image);
+          ucon64.image = libdm_open (ucon64.rom);
+          if (!libdm_mksheet (ucon64.image))
+            {
+              strcpy (buf, ucon64.rom);
+              set_suffix (buf, ".TOC");
+              printf (ucon64_msg[WROTE], buf);
+              strcpy (buf, ucon64.rom);
+              set_suffix (buf, ".CUE");
+              printf (ucon64_msg[WROTE], buf);
+            }
+          libdm_close (ucon64.image);
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
       break;
-#endif
+
+    case UCON64_XCDRW:
+      if (ucon64.discmage_enabled)
+        {
+          ucon64.image = libdm_open (ucon64.rom);
+          if (!access (ucon64.rom, F_OK))
+            libdm_disc_write (ucon64.image);
+          else
+            libdm_disc_read (ucon64.image);
+          libdm_close (ucon64.image);
+        }
+      else
+        printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
+      break;
 
     case UCON64_DB:
       if (ucon64.quiet > -1) // -db + -v == -dbv
@@ -1042,7 +1055,7 @@ ucon64_options (int c, const char *optarg)
         case UCON64_GBA:
           gba_chk (ucon64.rominfo);
           break;
-        case UCON64_GENESIS:
+        case UCON64_GEN:
           genesis_chk (ucon64.rominfo);
           break;
         case UCON64_N64:
@@ -1051,7 +1064,7 @@ ucon64_options (int c, const char *optarg)
         case UCON64_SNES:
           snes_chk (ucon64.rominfo);
           break;
-        case UCON64_WONDERSWAN:
+        case UCON64_SWAN:
           swan_chk (ucon64.rominfo);
           break;
         default:
@@ -1139,7 +1152,7 @@ ucon64_options (int c, const char *optarg)
         {
         case UCON64_GB:
         case UCON64_SMS:
-        case UCON64_GENESIS:
+        case UCON64_GEN:
         case UCON64_NES:
         case UCON64_SNES:
           gg_apply (ucon64.rominfo, optarg);
@@ -1176,7 +1189,7 @@ ucon64_options (int c, const char *optarg)
     case UCON64_J:
       switch (ucon64.console)
         {
-        case UCON64_GENESIS:
+        case UCON64_GEN:
           genesis_j (ucon64.rominfo);
           break;
         case UCON64_NES:
@@ -1218,10 +1231,10 @@ ucon64_options (int c, const char *optarg)
         case UCON64_GB:
           gameboy_mgd (ucon64.rominfo);
           break;
-        case UCON64_GENESIS:
+        case UCON64_GEN:
           genesis_mgd (ucon64.rominfo);
           break;
-        case UCON64_NEOGEO:
+        case UCON64_NG:
           neogeo_mgd (ucon64.rominfo);
           break;
         case UCON64_SNES:
@@ -1248,7 +1261,7 @@ ucon64_options (int c, const char *optarg)
         case UCON64_GBA:
           gba_n (ucon64.rominfo, optarg);
           break;
-        case UCON64_GENESIS:
+        case UCON64_GEN:
           genesis_n (ucon64.rominfo, optarg);
           break;
         case UCON64_LYNX:
@@ -1324,10 +1337,10 @@ ucon64_options (int c, const char *optarg)
     case UCON64_S:
       switch (ucon64.console)
         {
-        case UCON64_GENESIS:
+        case UCON64_GEN:
           genesis_s (ucon64.rominfo);
           break;
-        case UCON64_NEOGEO:
+        case UCON64_NG:
           neogeo_s (ucon64.rominfo);
           break;
         case UCON64_NES:

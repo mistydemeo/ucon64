@@ -57,10 +57,20 @@ const st_dm_usage_t dm_usage[] = {
   {"rip", NULL, "rip/dump file(s) from a TRACK"},
 #endif
   {"bin2iso", NULL, "convert binary TRACK to ISO (if possible)"},
-  {"mksheet", NULL, "generate TOC and CUE sheet files for IMAGE" /*\n"
-                "could also be an existing TOC or CUE file\n" */},
+  {"mktoc", NULL, "generate TOC sheet for IMAGE or existing CUE sheet"},
+  {"mkcue", NULL, "generate CUE sheet for IMAGE or existing TOC sheet"},
+  {"mksheet", NULL, "same as " OPTION_LONG_S "mktoc and " OPTION_LONG_S "mkcue combined"},
   {NULL, NULL, NULL}
 };
+
+
+static void (* external_gauge) (int, int);
+
+void
+dm_set_gauge (void (* ptr) (int, int))
+{
+//  external_gauge = &ptr;
+}
 
 
 // msgs
@@ -84,61 +94,10 @@ fsize (const char *filename)
 }
 
 
-void gauge_dummy (uint32_t pos, uint32_t total)
-{
-  return;
-}
+const char pvd_magic[] = {0x01, 'C', 'D', '0', '0', '1', 0x01, 0};
+const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
+const char vdt_magic[] = {0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
 
-
-const char sync_data[12] =
-  { 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0 };
-const char pvd_magic[8] = { 0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\x01" "CD001" "\x01" "\0";
-#if 0
-const char svd_magic[8] = { 0x02, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\x02" "CD001" "\x01" "\0";
-const char vdt_magic[8] = { 0xff, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\xFF" "CD001" "\x01" "\0";
-#endif
-const char sub_header[8] = { 0, 0, 0x08, 0, 0, 0, 0x08, 0 };
-
-#if 0
-  const st_track_modes_t track_modes[] = {
-    {1, 2048, 0, 0, "MODE1/2048", "MODE1"},
-    {1, 2352, 16, 288, "MODE1/2352", "MODE1_RAW"},
-    {2, 2336, 8, 280, "MODE2/2336", "MODE2"},
-    {2, 2352, 24, 280, "MODE2/2352", "MODE2_RAW"},
-#if 0
-    {2, 2056, 0, 0, "MODE2/2056 (Macintosh)", ""},      // Macintosh
-    {2, 2336, 0, 280, "MODE2/2336 (Macintosh)", ""},    // Macintosh
-    {, 2340, , "/2340", ""},
-    {2, 2352, 16, 280, "MODE2/2352 (Macintosh)", ""},   // Macintosh
-    {, 2368, , "/2368", ""},
-    {, 2448, , "/2448", ""},
-    {, 2646, , "/2646", ""},
-    {, 2647, , "/2647", ""},
-#endif
-    {0, 0, 0, 0, NULL, NULL}
-  };
-#else
-  typedef struct
-    {
-      int sector_size;
-      int mode;
-      int seek_header;
-      int seek_ecc;
-    } st_probe_t;
-    
-  const st_probe_t probe[] = {
-#ifdef __MAC__
-      {2336, 2, 0, 280},
-      {2352, 2, 16, 280},
-//      {2056, 2, 0, 0},
-#endif
-      {2336, 2, 8, 280},  // MODE2_2336
-      {2352, 2, 24, 280}, // MODE2_2352
-      {2352, 1, 16, 288}, // MODE1_2352
-      {2048, 1, 0, 0},    // MODE1_2048
-      {0, 0, 0, 0}
-    };
-#endif
 
 
 void
@@ -188,7 +147,7 @@ to_bcd (int value)
   int a, b;
   a = (value / 10) * 16;
   b = value % 10;
-  return (a + b);
+  return a + b;
 }
 #endif
 
@@ -318,25 +277,46 @@ read_raw_frame (int32_t fd, int32_t lba, unsigned char *buf)
 #endif
 
 
-dm_image_t *
-dm_open (const char *image_filename)
-// recurses through all <image_type>_init functions to find correct image type
+static dm_track_t *
+dm_track_init (dm_track_t *track, FILE *fh)
 {
-  dm_image_t *image = NULL;
-//  dm_track_t *track = NULL;
+  typedef struct
+  {
+    int mode;
+    int sector_size;
+    int seek_header;
+    int seek_ecc;
+  } st_probe_t;
+
+  const st_probe_t probe[] = 
+    {
+      {1, 2048, 0, 0},    // MODE1_2048, MODE1
+      {1, 2352, 16, 288}, // MODE1_2352, MODE1_RAW
+      {2, 2336, 8, 280},  // MODE2_2336, MODE2
+      {2, 2352, 24, 280}, // MODE2_2352, MODE2_RAW
+#if 0
+      {2, 2340, , },
+      {2, 2368, , },
+      {2, 2448, , },
+      {2, 2646, , },
+      {2, 2647, , },
+#endif
+      {2, 2336, 0, 280},  // MODE2/2336, Macintosh
+      {2, 2352, 16, 280}, // MODE2/2352, Macintosh
+//      {2, 2056, 0, 0},  // MODE2/2056, Macintosh
+      {0, 0, 0, 0}
+    };
+  const char sync_data[] = {0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0};
+  char buf[32];
   int x = 0, identified = 0;
-  char buf[MAXBUFSIZE];
-  FILE *fh;
 
-  if (!(fh = fopen (image_filename, "rb")))
-    return NULL;
-
+//TODO?: callibration?
   fread (buf, 1, 16, fh);
   if (!memcmp (sync_data, buf, 12))
     for (x = 0; probe[x].mode; x++)
       if (probe[x].mode == buf[15])
         {
-// will search for valid PVD in sector 16 of source image
+            // search for valid PVD in sector 16 of source image
             fseek (fh, (probe[x].sector_size * 16) + probe[x].seek_header, SEEK_SET);
             fread (buf, 1, 8, fh);
 
@@ -347,194 +327,21 @@ dm_open (const char *image_filename)
               }
         }
 
-  fclose (fh);
-
-  if (!identified) return NULL;
-
-  if (!(image = (dm_image_t *) malloc (sizeof (dm_image_t))))
+  if (!identified)
     return NULL;
 
-//  memset (image, 0, sizeof (dm_image_t));
+  track->sector_size = probe[x].sector_size;
+  track->mode = probe[x].mode;
+  track->seek_header = probe[x].seek_header;
+  track->seek_ecc = probe[x].seek_ecc;
 
-//  track = (dm_track_t *)(image->track);
-  image->track->sector_size = 0;
-//   (uint32_t)probe[x].sector_size;
-//  track->mode = 0;//probe[x].mode;
-//  track->seek_header = 0;//probe[x].seek_header;
-//  track->seek_ecc = 0;//probe[x].seek_ecc;
-
-  strcpy (image->filename, image_filename);
-
-  return image;
-}
-
-
-int
-dm_close (dm_image_t *image)
-{
-//  fclose (image->fh);
-  free (image);
-  return 0;
-}
-
-
-static int32_t
-sector_read (char *buffer, dm_track_t *track, FILE * fsource)
-// will put user data into buffer no matter the source libdiscmage
-{
-  int status;
-
-  fseek (fsource, track->seek_header, SEEK_CUR);
-
-  status = fread (buffer, 2048, 1, fsource);
-
-  fseek (fsource, track->seek_ecc, SEEK_CUR);
-
-  return status;
-}
-
-
-int32_t
-dm_nrgrip (dm_image_t *image)
-{
-  return 0;
-}
-
-
-int32_t
-dm_rip (dm_image_t *image)
-{
-  return 0;
-}
-
-
-int
-dm_bin2iso (const char *fname, void (* gauge) (int, int))
-{
-  dm_image_t *image = NULL;
-  dm_track_t *track = NULL;
-  uint32_t i, size;
-  char buf[MAXBUFSIZE];
-  FILE *dest, *src;
-  
-  if (!(image = dm_open (fname))) return -1;
-
-  track = image->track;
-
-  if (track->mode == 1 && track->sector_size == 2048)
-    fprintf (stderr, libdm_msg[ALREADY_2048]);
-
-  strcpy (buf, basename (image->filename));
-  set_suffix (buf, ".ISO");
-
-  size = fsize (image->filename) / track->sector_size;
-
-  if (!(src = fopen (image->filename, "rb")))
-    return -1;
-
-  if (!(dest = fopen (buf, "wb")))
-    {
-      fclose (src);
-      return -1;
-    }
-
-  for (i = 0; i < size; i++)
-    {
-      fseek (src, track->seek_header, SEEK_CUR);
-
-#ifdef  __MAC__
-      fread (buf, 1, 2056, src);
-      fwrite (buf, 1, 2056, dest);
-#else
-      fread (buf, 1, 2048, src);
-      fwrite (buf, 1, 2048, dest);
-#endif
-      fseek (src, track->seek_ecc, SEEK_CUR);
-
-      gauge (i * track->sector_size, size * track->sector_size);
-    }
-
-  fclose (dest);
-  fclose (src);
-  dm_close (image);
-
-  return 0;
-}
-
-
-int32_t
-dm_cdi2nero (dm_image_t * image)
-{
-  return 0;
-}
-
-
+  return track;
 #if 0
-int32_t
-dm_isofix (dm_image_t * image)
-/*
-  ISO start LBA fixing routine
-
-  This tool will take an ISO image with PVD point32_ting
-  to bad DR offset and add padding data so actual DR
-  gets located in right absolute address.
-
-  Original boot area, PVD, SVD and VDT are copied to
-  the start of new, fixed ISO image.
-
-  Supported input image libdiscmages are: 2048, 2336,
-  2352 and 2056 bytes per sector. All of them are
-  converted to 2048 bytes per sector when writing
-  excluding 2056 libdiscmage which is needed by Mac users.
-*/
-{
-  int32_t sector_size = 2048, mode = 1;
-  int32_t image_length, remaining_length, last_pos, i;
-
-
-  static time_t start_time = 0;
-
-  char destfname[256];
-  char string[256];
-  char buffer[4096];
-
-  int32_t last_vd = FALSE;
-  int32_t extractbootonly = FALSE;
-  int32_t extractheaderonly = FALSE;
-  int32_t maclibdiscmage = FALSE;
-  int32_t isolibdiscmage = FALSE;
-  int32_t start_lba = strtol (image->filename, NULL, 10);     // !!!!!
-
-  FILE *fsource, *fdest = NULL, *fboot = NULL, *fheader = NULL;
-
-  if (!start_time)
-    start_time = time (0);
-  if (!start_lba)
-    start_lba = 0;              // ????
-
-  strcpy (destfname, "fixed.iso");
-
-  extractbootonly = TRUE;       // boot
-  extractheaderonly = TRUE;     // header
-  maclibdiscmage = TRUE;        // mac
-  isolibdiscmage = TRUE;        // iso
-
-  strcpy (string, image->filename);
-
-  if (!(fsource = fopen (string, "rb")))
-    return -1;
-
-  fseek (fsource, 0L, SEEK_END);
-  image_length = ftell (fsource);
-  fseek (fsource, 0L, SEEK_SET);
-
-// detect libdiscmage
-
-  fread (buffer, 1, 16, fsource);
-  if (!memcmp (sync_data, buffer, 12))  // raw (2352)
+  fread (buf, 1, 16, src);
+  if (!memcmp (sync_data, buf, 12))  // raw (2352)
     {
       sector_size = 2352;
-      switch (buffer[15])
+      switch (buf[15])
         {
         case 2:
           mode = 2;
@@ -544,7 +351,7 @@ dm_isofix (dm_image_t * image)
           break;
         default:
           {
-            printf ("Unsupported track mode (%d)", buffer[15]);
+            printf ("Unsupported track mode (%d)", buf[15]);
             return -1;
           }
         }
@@ -575,142 +382,306 @@ dm_isofix (dm_image_t * image)
       fprintf (stderr, "ERROR: Could not find PVD\n");
       return -1;
     }
+#endif
+}
 
-  if (isolibdiscmage == TRUE)
-    maclibdiscmage = FALSE;
 
-  printf ("sector size = %d, mode = %d\n", sector_size, mode);
-
-// detect libdiscmage end
-
-  if (extractbootonly == FALSE && extractheaderonly == FALSE)
+dm_image_t *
+dm_open (const char *image_filename)
+// recurses through all <image_type>_init functions to find correct image type
+{
+  typedef struct
     {
-      if (start_lba <= 0)
+      int type;
+      int (* func) (dm_image_t *);
+      char *desc;
+    } st_probe_t;
+
+  static st_probe_t probe[] = 
+    {
+      {DM_CDI, cdi_init, "CDI (DiscJuggler) Image"},
+//      {DM_ISO, iso_init, "ISO Image"},
+//      {DM_BIN, bin_init, "BIN Image"},
+//      {DM_NRG, nrg_init, "NRG (Nero) Image"}, // nero
+//      {DM_CCD, ccd_init, "CCD (CloneCD) Image"},
+//      {DM_UNKNOWN, NULL, "Unknown Image"},
+      {0, NULL, NULL}
+    };
+  static dm_image_t image; //TODO: malloc
+  static dm_track_t track; //TODO: malloc
+  int x = 0, identified = 0;
+  FILE *fh;
+
+  memset (&image, 0, sizeof (dm_image_t));
+  strcpy (image.filename, image_filename);
+
+  for (x = 0; probe[x].type; x++)
+    if (probe[x].func)
+      if (probe[x].func (&image))
         {
-          fprintf (stderr, "ERROR: Bad LBA value");
-          return -1;
+          identified = 1;
+          break;
         }
 
+  if (!identified)
+    return NULL;
 
-      printf ("Creating destination file '%s'...\n", destfname);
+  image.type = probe[x].type;
+  image.desc = probe[x].desc;
+  strcpy (image.layout, "|            |           |            |");
+  strcpy (image.layout_ansi, "\x1b[32;42m|            |           |            |\x1b[0m");
 
-      if (!(fdest = fopen (destfname, "wb")))
-        return -1;
-    }
+  if (!(fh = fopen (image_filename, "rb")))
+    return NULL;
 
-  if (extractheaderonly == FALSE
-      || (extractheaderonly == TRUE && extractbootonly == TRUE))
+//  for (session = 0; session < image->session; session++)
     {
-      printf ("Saving boot area to file 'bootfile.bin'...\n");
-      fboot = fopen ("bootfile.bin", "wb");
+//get start pos from track
+      dm_track_init (&track, fh);
+      mem_hexdump (&track, sizeof (dm_track_t), 0);
+      image.track = (dm_track_t *) &track;
     }
-  if (extractbootonly == FALSE
-      || (extractheaderonly == TRUE && extractbootonly == TRUE))
+
+  fclose (fh);
+  return &image;
+}
+
+
+int
+dm_close (dm_image_t *image)
+{
+//  fclose (image->fh);
+//  free (image);
+  return 0;
+}
+
+
+#if 0
+static int32_t
+sector_read (char *buffer, dm_track_t *track, FILE * fsource)
+// will put user data into buffer no matter the source libdiscmage
+{
+  int status;
+
+  fseek (fsource, track->seek_header, SEEK_CUR);
+
+  status = fread (buffer, 2048, 1, fsource);
+
+  fseek (fsource, track->seek_ecc, SEEK_CUR);
+
+  return status;
+}
+#endif
+
+
+int32_t
+dm_nrgrip (dm_image_t *image)
+{
+  return 0;
+}
+
+
+int32_t
+dm_rip (dm_image_t *image)
+{
+  return 0;
+}
+
+
+int
+dm_bin2iso (dm_image_t *image)
+{
+  dm_track_t *track = NULL;
+  uint32_t i, size, netto_size = 0;
+  char buf[MAXBUFSIZE];
+  FILE *dest, *src;
+  
+  if (!image)
+    return -1;
+
+  track = image->track;
+    
+  if (track->mode == 1 && track->sector_size == 2048)
     {
-      printf ("Saving ISO header to file 'header.iso'...\n");
-      fheader = fopen ("header.iso", "wb");
+      fprintf (stderr, libdm_msg[ALREADY_2048]);
+      return -1;
     }
 
-// save boot area
+  if (!(src = fopen (image->filename, "rb")))
+    return -1;
 
-  fseek (fsource, 0L, SEEK_SET);
+  strcpy (buf, basename (image->filename));
+  set_suffix (buf, ".ISO");
+
+  if (!(dest = fopen (buf, "wb")))
+    {
+      fclose (src);
+      return -1;
+    }
+
+  size = fsize (image->filename);
+  size /= track->sector_size;
+
+  netto_size = track->sector_size - (track->seek_header + track->seek_ecc);
+
+  for (i = 0; i < size; i++)
+    {
+      fseek (src, track->seek_header, SEEK_CUR);
+
+      fread (buf, 1, netto_size, src);
+      fwrite (buf, 1, netto_size, dest);
+
+      fseek (src, track->seek_ecc, SEEK_CUR);
+
+//      external_gauge (i * track->sector_size, size * track->sector_size);
+      external_gauge (1,100);
+    }
+
+  fclose (dest);
+  fclose (src);
+
+  return 0;
+}
+
+
+int32_t
+dm_cdi2nero (dm_image_t * image)
+{
+  return 0;
+}
+
+
+int32_t
+dm_isofix (dm_image_t * image, int start_lba)
+{
+#define BOOTFILE_S "bootfile.bin"
+#define HEADERFILE_S "header.iso"
+  int32_t size_left, last_pos;
+  dm_track_t *track = NULL;
+  uint32_t i, size;
+  char buf[MAXBUFSIZE], buf2[FILENAME_MAX];
+  FILE *dest = NULL, *src = NULL, *boot = NULL, *header = NULL;
+  int mac = FALSE;
+  const char sub_header[] = {0, 0, 0x08, 0, 0, 0, 0x08, 0};
+  
+  if (start_lba <= 0)
+    {
+      fprintf (stderr, "ERROR: Bad LBA value");
+      return -1;
+    }
+
+  if (!image)
+    return -1;
+
+  track = image->track;
+  mac = (track->sector_size == 2056 ? TRUE : FALSE);
+    
+  if (!(src = fopen (image->filename, "rb")))
+    return -1;
+
+  strcpy (buf2, basename (image->filename));
+  set_suffix (buf2, ".FIX");
+  if (!(dest = fopen (buf2, "wb")))
+    {
+      fclose (src);
+      return -1;
+    }
+
+  // Saving boot area to file 'bootfile.bin'...
+  if (!(boot = fopen (BOOTFILE_S, "wb")))
+    { 
+      fclose (src);
+
+      fclose (dest);
+      remove (buf);
+
+      return -1;
+    }
+
+  // Saving ISO header to file 'header.iso'...
+  if (!(header = fopen (HEADERFILE_S, "wb")))
+    {
+      fclose (src);
+
+      fclose (dest);
+      remove (buf);
+
+      fclose (boot);
+      remove (BOOTFILE_S);
+
+      return -1;
+    }
+
+  // save boot area
   for (i = 0; i < 16; i++)
     {
-      sector_read (buffer, sector_size, mode, fsource);
-      if (extractbootonly == FALSE && extractheaderonly == FALSE)
-        {
-          if (maclibdiscmage == TRUE)
-            fwrite (sub_header, 8, 1, fdest);
-          fwrite (buffer, 2048, 1, fdest);
-        }
-      if (extractheaderonly == FALSE
-          || (extractheaderonly == TRUE && extractbootonly == TRUE))
-        {
-          if (maclibdiscmage == TRUE)
-            fwrite (sub_header, 8, 1, fboot);
-          fwrite (buffer, 2048, 1, fboot);
-        }
-      if (extractbootonly == FALSE
-          || (extractheaderonly == TRUE && extractbootonly == TRUE))
-        {
-          if (maclibdiscmage == TRUE)
-            fwrite (sub_header, 8, 1, fheader);
-          fwrite (buffer, 2048, 1, fheader);
-        }
+      fseek (src, track->seek_header, SEEK_CUR);
+      fread (buf, 2048, 1, src);
+      fseek (src, track->seek_ecc, SEEK_CUR);
+
+      if (mac)
+        fwrite (sub_header, 8, 1, dest);
+      fwrite (buf, 2048, 1, dest);
+
+      if (mac)
+        fwrite (sub_header, 8, 1, boot);
+      fwrite (buf, 2048, 1, boot);
+
+      if (mac)
+        fwrite (sub_header, 8, 1, header);
+      fwrite (buf, 2048, 1, header);
     }
+  fclose (boot); // boot area written
 
-  if (extractheaderonly == FALSE
-      || (extractheaderonly == TRUE && extractbootonly == TRUE))
-    fclose (fboot);
-  if (extractbootonly == TRUE && extractheaderonly == FALSE)
-    return 0;                   // boot saved, exit
-
-// seek & copy pvd etc.
-
-  last_pos = ftell (fsource);   // start of pvd
-
-  do
+  // seek & copy pvd etc.
+//  last_pos = ftell (src);   // start of pvd
+  for (last_pos = ftell (src); memcmp (vdt_magic, buf, 8) != 0; last_pos = ftell (src))
     {
-      sector_read (buffer, sector_size, mode, fsource);
+      fseek (src, track->seek_header, SEEK_CUR);
+      fread (buf, 2048, 1, src);
+      fseek (src, track->seek_ecc, SEEK_CUR);
 
-      if (!memcmp (pvd, buffer, 8))
-        {
-          printf ("Found PVD at sector %d\n", last_pos / sector_size);
-        }
-      else if (!memcmp (svd, buffer, 8))
-        {
-          printf ("Found SVD at sector %d\n", last_pos / sector_size);
-        }
-      else if (!memcmp (vdt, buffer, 8))
-        {
-          printf ("Found VDT at sector %d\n", last_pos / sector_size);
-          last_vd = TRUE;
-        }
-      else
+      if (memcmp (pvd_magic, buf, 8) != 0 &&
+          memcmp (svd_magic, buf, 8) != 0 &&
+          memcmp (vdt_magic, buf, 8) != 0)
         {
           fprintf (stderr, "ERROR: Found unknown Volume Descriptor");
+// which sector?
           return -1;
         }
 
-      if (extractbootonly == FALSE && extractheaderonly == FALSE)
-        {
-          if (maclibdiscmage == TRUE)
-            fwrite (sub_header, 8, 1, fdest);
-          fwrite (buffer, 2048, 1, fdest);
-        }
+      printf ("Found %s at sector %d\n",
+        !memcmp (pvd_magic, buf, 8) ? "PVD" :
+        !memcmp (svd_magic, buf, 8) ? "SVD" :
+        !memcmp (vdt_magic, buf, 8) ? "VDT" : "unknown Volume Descriptor", 
+        last_pos / track->sector_size);
 
-      if (maclibdiscmage == TRUE)
-        fwrite (sub_header, 8, 1, fheader);
-      fwrite (buffer, 2048, 1, fheader);
-      last_pos = ftell (fsource);
+      if (mac)
+        fwrite (sub_header, 8, 1, dest);
+      fwrite (buf, 2048, 1, dest);
+
+      if (mac)
+        fwrite (sub_header, 8, 1, header);
+      fwrite (buf, 2048, 1, header);
     }
-  while (last_vd == FALSE);
 
-// add padding data to header file
-
-  memset (&buffer, 0, sizeof (buffer));
-
-  remaining_length = 300 - (last_pos / sector_size);
-
-  for (i = 0; i < remaining_length; i++)
+  // add padding data to header file
+  memset (&buf, 0, sizeof (buf));
+  size_left = 300 - (last_pos / track->sector_size);
+  for (i = 0; i < size_left; i++)
     {
-      if (maclibdiscmage == TRUE)
-        fwrite (sub_header, 8, 1, fheader);
-      fwrite (buffer, 2048, 1, fheader);
+      if (mac == TRUE)
+        fwrite (sub_header, 8, 1, header);
+      fwrite (buf, 2048, 1, header);
     }
+  fclose (header);
 
-  fclose (fheader);
-
-  if (extractheaderonly == TRUE)
-    return 0;                   // header saved
-
-// add padding data to iso image
-
-  if (last_pos > start_lba * sector_size)
+  // add padding data to iso image
+  if (last_pos > start_lba * track->sector_size)
     {
       fprintf (stderr, "ERROR: LBA value is too small\n"
                "       It should be at least %d for current ISO image (probably greater)",
-               last_pos / sector_size);
+               last_pos / track->sector_size);
       return -1;
     }
 
@@ -719,55 +690,66 @@ dm_isofix (dm_image_t * image)
              "WARNING: LBA value should be greater or equal to 11700 for multisession\n"
              "         images\n");
 
-  printf ("Adding padding data up to start LBA value...");
-
-  remaining_length = start_lba - (last_pos / sector_size);
-
-  for (i = 0; i < remaining_length; i++)
+  // adding padding data up to start LBA value...
+  size_left = start_lba - (last_pos / track->sector_size);
+  memset (&buf, 0, sizeof (buf));
+  for (i = 0; i < size_left; i++)
     {
-      if (!(i % 512))
-//        gauge (start_time, i, remaining_length);
-
-      if (maclibdiscmage == TRUE)
-        fwrite (sub_header, 8, 1, fdest);
-
-      if (!fwrite (buffer, 2048, 1, fdest))
+      if (mac)
+        fwrite (sub_header, 8, 1, dest);
+      if (!fwrite (buf, 2048, 1, dest))
         return -1;
     }
 
 // append original iso image
-
-  fseek (fsource, 0L, SEEK_SET);
-
-  remaining_length = image_length / sector_size;
-
-  for (i = 0; i < remaining_length; i++)
+  fseek (src, 0L, SEEK_SET);
+  size = fsize (buf2);
+  size_left = size / track->sector_size;
+  for (i = 0; i < size_left; i++)
     {
-      if (!(i % 512))
-//        gauge (start_time, i, remaining_length);
+      fseek (src, track->seek_header, SEEK_CUR);
+      if (!fread (buf, 2048, 1, src))
+        break;
+      fseek (src, track->seek_ecc, SEEK_CUR);
 
-      if (!sector_read (buffer, sector_size, mode, fsource))
-        return -1;
-
-      if (maclibdiscmage == TRUE)
-        fwrite (sub_header, 8, 1, fdest);
-
-      if (!fwrite (buffer, 2048, 1, fdest))
+      if (mac)
+        fwrite (sub_header, 8, 1, dest);
+      if (!fwrite (buf, 2048, 1, dest))
         return -1;
     }
 
-  fclose (fsource);
-  fclose (fdest);
+  fclose (src);
+  fclose (dest);
 
   return 0;
 }
-#endif
 
 
 int
 dm_disc_read (dm_image_t *image)
 {
+#if 1
   fprintf (stderr, libdm_msg[DEPRECATED], "dm_disc_read()");
+#else 
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
+
+  get_property (ucon64.configfile, "cdrw_raw_read", buf2,
+    get_property (ucon64.configfile, "cdrw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile"));
+
+  strcpy (buf3, ucon64.rom);
+  setext (buf3, ".TOC");
+  sprintf (buf, "%s \"%s\" \"%s\"", buf2, ucon64.rom, buf3);
+
+  printf ("%s\n", buf);
+  fflush (stdout);
+  sync ();
+
+  return system (buf)
+#ifndef __MSDOS__
+      >> 8                                      // the exit code is coded in bits 8-15
+#endif                                          //  (that is, under non-DOS)
+  ;
+#endif
   return 0;
 }
 
@@ -775,7 +757,31 @@ dm_disc_read (dm_image_t *image)
 int
 dm_disc_write (dm_image_t *image)
 {
+#if 1
   fprintf (stderr, libdm_msg[DEPRECATED], "dm_disc_write()");
+#else
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
+
+  get_property (ucon64.configfile, "cdrw_raw_write", buf2, 
+    get_property (ucon64.configfile, "cdrw_write", buf2, "cdrdao write --eject --device 0,0,0 --driver generic-mmc"));
+
+  strcpy (buf3, ucon64.rom);
+  setext (buf3, ".TOC");
+  if (access (buf3, F_OK) != 0 || !strncmp (ucon64.file, "MODE", 4))
+    ucon64_mktoc (rominfo);
+
+  sprintf (buf, "%s \"%s\"", buf2, buf3);
+
+  printf ("%s\n", buf);
+  fflush (stdout);
+  sync ();
+
+  return system (buf)
+#ifndef __MSDOS__
+      >> 8                                      // the exit code is coded in bits 8-15
+#endif                                          //  (that is, under non-DOS)
+  ;
+#endif 
   return 0;
 }
 

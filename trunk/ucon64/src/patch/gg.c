@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.32 2003-03-15 16:02:25 noisyb Exp $
+ * $Id: gg.c,v 1.33 2003-03-25 18:04:22 noisyb Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -1001,7 +1001,7 @@ gg_display (st_rominfo_t *rominfo, const char *code)
       gg_argv[1] = "-s";
       break;
 
-    case UCON64_GENESIS:
+    case UCON64_GEN:
       gg_argv[1] = "-m";
       break;
 
@@ -1058,7 +1058,7 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
       case UCON64_SMS:
         result = gameGenieDecodeGameBoy (code, buf);
         break;
-      case UCON64_GENESIS:
+      case UCON64_GEN:
         result = gameGenieDecodeMegadrive (code, buf);
         break;
       case UCON64_NES:

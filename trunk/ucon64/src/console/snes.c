@@ -38,7 +38,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/fig.h"
 
 
-#define SNES_HEADER_START 0x7fb0
 #define SNES_HEADER_LEN (sizeof (st_snes_header_t))
 #define SNES_HIROM 0x8000
 #define SNES_NAME_LEN 21

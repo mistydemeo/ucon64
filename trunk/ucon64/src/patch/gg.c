@@ -1,19 +1,19 @@
 /********************************************************************
- * $Id: gg.c,v 1.14 2002-10-15 23:12:29 dbjh Exp $
+ * $Id: gg.c,v 1.15 2002-11-05 02:57:59 dbjh Exp $
  *
- * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.  
+ * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions 
+ * modification, are permitted provided that the following conditions
  * are met:
- * 
- * 1. Redistributions of source code must retain the above copyright 
+ *
+ * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- * 
- * 2. Redistributions in binary form must reproduce the above 
- * copyright notice, this list of conditions and the following 
- * disclaimer in the documentation and/or other materials provided 
+ *
+ * 2. Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided
  * with the distribution.
  *
  * 3. Neither the name of the <ORGANIZATION> nor the names of its
@@ -45,6 +45,10 @@
  *   gcc uggconv.c -o uggconv
  * or the equivalent for your platform.
  */
+/*
+modified by 2001 - 2002 NoisyB (noisyb@gmx.net)
+                   2002 dbjh
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,48 +59,46 @@
 #include "config.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
-
 #include "patch/gg.h"
-
 #include "console/snes.h"
 #include "console/genesis.h"
 #include "console/nes.h"
 #include "console/sms.h"
 #include "console/gb.h"
 
+
+#define GAME_GENIE_MAX_STRLEN 12
+
+
 const char *gg_usage[] = {
   NULL,
   NULL,
-  "  " OPTION_LONG_S "gge         encode GameGenie code; " OPTION_LONG_S "rom=CODE\n"
-  "                  example: " OPTION_LONG_S "sms " OPTION_LONG_S "rom=CODE or " OPTION_LONG_S "gb " OPTION_LONG_S "rom=CODE\n"
+  "  " OPTION_LONG_S "gge=CODE    encode and display Game Genie code\n"
+  "                  example: " OPTION_LONG_S "gge=CODE " OPTION_LONG_S "sms or " OPTION_LONG_S "gge=CODE " OPTION_LONG_S "gb\n"
   "                    CODE='AAAA:VV' or CODE='AAAA:VV:CC'\n"
-  "                  " OPTION_LONG_S "gen " OPTION_LONG_S "rom=CODE\n"
+  "                  " OPTION_LONG_S "gge=CODE " OPTION_LONG_S "gen\n"
   "                    CODE='AAAAAA:VVVV'\n"
-  "                  " OPTION_LONG_S "nes " OPTION_LONG_S "rom=CODE\n"
+  "                  " OPTION_LONG_S "gge=CODE " OPTION_LONG_S "nes\n"
   "                    CODE='AAAA:VV' or CODE='AAAA:VV:CC'\n"
-  "                  " OPTION_LONG_S "snes " OPTION_LONG_S "rom=CODE\n"
+  "                  " OPTION_LONG_S "gge=CODE " OPTION_LONG_S "snes\n"
   "                    CODE='AAAAAA:VV'\n"
-  "  " OPTION_LONG_S "ggd         decode GameGenie code; " OPTION_LONG_S "rom=GG_CODE\n"
-  "                  example: " OPTION_LONG_S "sms " OPTION_LONG_S "rom=GG_CODE or " OPTION_LONG_S "gb " OPTION_LONG_S "rom=GG_CODE\n"
+  "  " OPTION_LONG_S "ggd=GG_CODE decode Game Genie code\n"
+  "                  example: " OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "sms or " OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "gb\n"
   "                    GG_CODE='XXX-XXX' or GG_CODE='XXX-XXX-XXX'\n"
-  "                  " OPTION_LONG_S "gen " OPTION_LONG_S "rom=GG_CODE\n"
+  "                  " OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "gen\n"
   "                    GG_CODE='XXXX-XXXX'\n"
-  "                  " OPTION_LONG_S "nes " OPTION_LONG_S "rom=GG_CODE\n"
+  "                  " OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "nes\n"
   "                    GG_CODE='XXXXXX' or GG_CODE='XXXXXXXX'\n"
-  "                  " OPTION_LONG_S "snes " OPTION_LONG_S "rom=GG_CODE\n"
+  "                  " OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "snes\n"
   "                    GG_CODE='XXXX-XXXX'\n"
-  "  " OPTION_LONG_S "gg          apply GameGenie code (permanent); " OPTION_LONG_S "file=GG_CODE\n"
-  "                  example: (like above but " OPTION_LONG_S "file=GG_CODE instead of\n"
-  "                  " OPTION_LONG_S "rom=GG_CODE) " OPTION_LONG_S "rom=ROM " OPTION_LONG_S "file=GG_CODE\n",
+  "  " OPTION_LONG_S "gg=GG_CODE  apply GameGenie code (permanently)\n"
+  "                  example: like above but " OPTION_LONG_S "rom is required\n",
   NULL
 };
 
-static int gameGenieDecodeGameBoy (const char *in, char *out);
-static int gameGenieDecodeMegadrive (const char *in, char *out);
-static int gameGenieDecodeNES (const char *in, char *out);
-static int gameGenieDecodeSNES (const char *in, char *out);
 
-#define GAME_GENIE_MAX_STRLEN 12
+static st_rominfo_t *gg_rominfo;
+
 
 /*********************************************************************
  *
@@ -104,6 +106,7 @@ static int gameGenieDecodeSNES (const char *in, char *out);
  *
  *********************************************************************/
 
+static int gameGenieDecodeGameBoy (const char *in, char *out);
 static int gameGenieEncodeGameBoy (const char *in, char *out);
 
 /*********************************************************************
@@ -114,6 +117,7 @@ static int gameGenieEncodeGameBoy (const char *in, char *out);
 
 static int isGenesisChar (char c);
 static int genesisValue (char c);
+static int gameGenieDecodeMegadrive (const char *in, char *out);
 static int gameGenieEncodeMegadrive (const char *in, char *out);
 
 /*********************************************************************
@@ -128,6 +132,7 @@ static int gameGenieEncodeMegadrive (const char *in, char *out);
 static char mapNesChar (char hex);
 static char unmapNesChar (char genie);
 static int isNesChar (char c);
+static int gameGenieDecodeNES (const char *in, char *out);
 static int gameGenieEncodeNES (const char *in, char *out);
 
 /*********************************************************************
@@ -141,7 +146,9 @@ static int gameGenieEncodeNES (const char *in, char *out);
 
 static char mapSnesChar (char hex);
 static char unmapSnesChar (char genie);
+static int gameGenieDecodeSNES (const char *in, char *out);
 static int gameGenieEncodeSNES (const char *in, char *out);
+
 
 /*********************************************************************
  *
@@ -193,6 +200,7 @@ hexDigit (int value)
 
 }
 
+
 int
 hexValue (char digit)
 {
@@ -236,11 +244,13 @@ hexValue (char digit)
   return 0;
 }
 
+
 int
 hexByteValue (char x, char y)
 {
   return (hexValue (x) << 4) + hexValue (y);
 }
+
 
 /*********************************************************************
  *
@@ -258,17 +268,11 @@ gameGenieDecodeGameBoy (const char *in, char *out)
   int i;
 
   if (strlen (in) == 11 && in[3] == '-' && in[7] == '-')
-    {
-      haveCheck = 1;
-    }
+    haveCheck = 1;
   else if (strlen (in) == 7 && in[3] == '-')
-    {
-      haveCheck = 0;
-    }
+    haveCheck = 0;
   else
-    {
-      return -1;
-    }
+    return -1;
   for (i = 0; i < strlen (in); ++i)
     if (in[i] != '-' && !isxdigit ((int) in[i]))
       return -1;
@@ -289,12 +293,11 @@ gameGenieDecodeGameBoy (const char *in, char *out)
       sprintf (out, "%04X:%02X:%02X", address, value, check);
     }
   else
-    {
-      sprintf (out, "%04X:%02X", address, value);
-    }
+    sprintf (out, "%04X:%02X", address, value);
 
   return 0;
 }
+
 
 int
 gameGenieEncodeGameBoy (const char *in, char *out)
@@ -306,17 +309,11 @@ gameGenieEncodeGameBoy (const char *in, char *out)
   int i;
 
   if (strlen (in) == 10 && in[4] == ':' && in[7] == ':')
-    {
-      haveCheck = 1;
-    }
+    haveCheck = 1;
   else if (strlen (in) == 7 && in[4] == ':')
-    {
-      haveCheck = 0;
-    }
+    haveCheck = 0;
   else
-    {
-      return -1;
-    }
+    return -1;
   for (i = 0; i < strlen (in); ++i)
     if (in[i] != ':' && !isxdigit ((int) in[i]))
       return -1;
@@ -352,6 +349,7 @@ gameGenieEncodeGameBoy (const char *in, char *out)
   return 0;
 }
 
+
 /*********************************************************************
  *
  * MEGADRIVE  ROUTINES
@@ -360,17 +358,20 @@ gameGenieEncodeGameBoy (const char *in, char *out)
 
 static const char genesisChars[] = "ABCDEFGHJKLMNPRSTVWXYZ0123456789";
 
+
 int
 isGenesisChar (char c)
 {
   return strchr (genesisChars, toupper (c)) != 0;
 }
 
+
 int
 genesisValue (char c)
 {
   return strchr (genesisChars, toupper (c)) - genesisChars;
 }
+
 
 int
 gameGenieDecodeMegadrive (const char *in, char *out)
@@ -413,6 +414,7 @@ gameGenieDecodeMegadrive (const char *in, char *out)
   return 0;
 }
 
+
 int
 gameGenieEncodeMegadrive (const char *in, char *out)
 {
@@ -453,6 +455,7 @@ gameGenieEncodeMegadrive (const char *in, char *out)
 
   return 0;
 }
+
 
 /*********************************************************************
  *
@@ -503,6 +506,7 @@ mapNesChar (char hex)
   return '?';
 }
 
+
 char
 unmapNesChar (char genie)
 {
@@ -546,11 +550,13 @@ unmapNesChar (char genie)
   return '0';
 }
 
+
 int
 isNesChar (char c)
 {
   return strchr ("APZLGITYEOXUKSVN-", toupper (c)) != 0;
 }
+
 
 int
 gameGenieDecodeNES (const char *in, char *out)
@@ -563,17 +569,11 @@ gameGenieDecodeNES (const char *in, char *out)
   int i;
 
   if (strlen (in) == 8)
-    {
-      haveCheck = 1;
-    }
+    haveCheck = 1;
   else if (strlen (in) == 6)
-    {
-      haveCheck = 0;
-    }
+    haveCheck = 0;
   else
-    {
-      return -1;
-    }
+    return -1;
   for (i = 0; i < strlen (in); ++i)
     if (!isNesChar (in[i]))
       return -1;
@@ -614,16 +614,13 @@ gameGenieDecodeNES (const char *in, char *out)
     }
 
   if (haveCheck)
-    {
-      sprintf (out, "%04X:%02X:%02X", address, value, check);
-    }
+    sprintf (out, "%04X:%02X:%02X", address, value, check);
   else
-    {
-      sprintf (out, "%04X:%02X", address, value);
-    }
+    sprintf (out, "%04X:%02X", address, value);
 
   return 0;
 }
+
 
 int
 gameGenieEncodeNES (const char *in, char *out)
@@ -636,31 +633,21 @@ gameGenieEncodeNES (const char *in, char *out)
   int i;
 
   if (strlen (in) == 10 && in[4] == ':' && in[7] == ':')
-    {
-      haveCheck = 1;
-    }
+    haveCheck = 1;
   else if (strlen (in) == 7 && in[4] == ':')
-    {
-      haveCheck = 0;
-    }
+    haveCheck = 0;
   else
-    {
-      return -1;
-    }
+    return -1;
   for (i = 0; i < strlen (in); ++i)
     if (in[i] != ':' && !isxdigit ((int) in[i]))
       return -1;
 
   if (haveCheck)
-    {
-      sscanf (in, "%x:%x:%x", &address, &value, &check);
-    }
+    sscanf (in, "%x:%x:%x", &address, &value, &check);
   else
-    {
-      sscanf (in, "%x:%x", &address, &value);
-    }
+    sscanf (in, "%x:%x", &address, &value);
 
-  /* Encode address with transposition cipher. 
+  /* Encode address with transposition cipher.
    * Do not encode the high address bit (optional, Galoob isn't
    * consistent but usually doesn't.
    */
@@ -716,6 +703,7 @@ gameGenieEncodeNES (const char *in, char *out)
   return 0;
 }
 
+
 /*********************************************************************
  *
  * SNES ROUTINES
@@ -765,6 +753,7 @@ mapSnesChar (char hex)
   return ' ';
 }
 
+
 char
 unmapSnesChar (char genie)
 {
@@ -808,6 +797,7 @@ unmapSnesChar (char genie)
   return ' ';
 }
 
+
 int
 gameGenieDecodeSNES (const char *in, char *out)
 {
@@ -847,10 +837,30 @@ gameGenieDecodeSNES (const char *in, char *out)
   decodeSNES (10, 3);
   decodeSNES (11, 6);
 
+  if (gg_rominfo != 0)
+    {
+      if (gg_rominfo->header_start > SNES_HEADER_START)
+        {                                           // HiROM
+          if (address >= 0xc00000 && address <= 0xffffff)
+            address -= 0xc00000;
+          else if (address >= 0x400000 && address <= 0x7fffff)
+            address -= 0x400000;
+        }
+      else                                          // LoROM
+        {
+          if (address >= 0x808000)
+            address -= 0x808000;
+          else if (address >= 0x008000)
+            address -= 0x008000;
+          address = (address & 0x7fff) | ((address & 0xff0000) >> 1);
+        }
+    }
+
   sprintf (out, "%06lX:%02X", address, value);
 
   return 0;
 }
+
 
 int
 gameGenieEncodeSNES (const char *in, char *out)
@@ -896,10 +906,10 @@ gameGenieEncodeSNES (const char *in, char *out)
 }
 
 
+#if 0
 static void
 usage (void)
 {
-//#if 0
   puts ("uggconv v1.0 - Universal Game Genie (tm) Convertor");
   puts ("Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>");
   puts ("\nUsage:");
@@ -910,8 +920,9 @@ usage (void)
     ("NES:          uggconv -n [XXXXXX] [XXXXXXXX] [AAAA:VV] [AAAA:VV:CC] ...");
   puts ("SNES:         uggconv -s [XXXX-XXXX] [AAAAAA:VV] ...");
   exit (1);
-//#endif  
 }
+#endif
+
 
 int
 gg_main (int argc, const char **argv)
@@ -920,18 +931,17 @@ gg_main (int argc, const char **argv)
   int i;
   int result = 0;
 
+#if 0
   if (argc < 3 || strlen (argv[1]) != 2 || argv[1][0] != '-')
     usage ();
   if (strchr ("gmns", argv[1][1]) == 0)
     usage ();
+#endif
 
   for (i = 2; i < argc; ++i)
     {
       if (strchr (argv[i], ':') == 0)
         {
-//          printf ("SHIT!");
-          fflush (stdout);
-
           switch (argv[1][1])
             {
             case 'g':
@@ -967,13 +977,9 @@ gg_main (int argc, const char **argv)
             }
         }
       if (result != 0)
-        {
-          printf ("%-12s is badly formed\n", argv[i]);
-        }
+        printf ("%-12s is badly formed\n", argv[i]);
       else
-        {
-          printf ("%-12s = %s\n", argv[i], buffer);
-        }
+        printf ("%-12s = %s\n", argv[i], buffer);
     }
   return 0;
 }
@@ -988,7 +994,7 @@ const char *gg_argv[128];
 
 
 int
-gg_gge (void)
+gg_display (st_rominfo_t *rominfo, const char *code)
 {
   gg_argv[0] = "uggconv";
 
@@ -1013,14 +1019,18 @@ gg_gge (void)
 
     default:
       fprintf (stderr,
-           "ERROR: You must specify the console via force recognition\n"
+           "ERROR: You must specify a ROM or force the console type\n"
            "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n");
       return -1;
     }
-  gg_argv[2] = ucon64.rom;
+  gg_argv[2] = code;
 
   gg_argc = 3;
 
+  if (rominfo->file_size > 0)                   // check if rominfo contains valid ROM info
+    gg_rominfo = rominfo;
+  else
+    gg_rominfo = 0;
   gg_main (gg_argc, gg_argv);
 
   return 0;
@@ -1028,66 +1038,34 @@ gg_gge (void)
 
 
 int
-gg_ggd (void)
-{
-  gg_argv[0] = "uggconv";
-
-  switch (ucon64.console)
-    {
-    case UCON64_SNES:
-      gg_argv[1] = "-s";
-      break;
-
-    case UCON64_GENESIS:
-      gg_argv[1] = "-m";
-      break;
-
-    case UCON64_NES:
-      gg_argv[1] = "-n";
-      break;
-
-    case UCON64_GB:
-    case UCON64_SMS:
-      gg_argv[1] = "-g";
-      break;
-
-    default:
-      fprintf (stderr, 
-           "ERROR: You must specify the console via force recognition\n"
-           "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n");
-      return -1;
-    }
-  gg_argv[2] = ucon64.rom;
-
-  gg_argc = 3;
-
-  gg_main (gg_argc, gg_argv);
-
-  return 0;
-}
-
-
-int
-gg_gg (st_rominfo_t *rominfo)
+gg_apply (st_rominfo_t *rominfo, const char *code)
 {
   long size = rominfo->file_size - rominfo->buheader_len, add, value;
   char buf[MAXBUFSIZE];
   int result = -1;
 
+  if (rominfo->file_size > 0)                   // check if rominfo contains valid ROM info
+    gg_rominfo = rominfo;
+  else
+    {
+      fprintf (stderr, "ERROR: You must specify a ROM to apply the code to\n");
+      return -1;
+    }
+
   switch (ucon64.console)
     {
       case UCON64_GB:
       case UCON64_SMS:
-        result = gameGenieDecodeGameBoy (ucon64.file, buf);
+        result = gameGenieDecodeGameBoy (code, buf);
         break;
-      case UCON64_GENESIS://smd?
-        result = gameGenieDecodeMegadrive (ucon64.file, buf);
+      case UCON64_GENESIS:                      // smd?
+        result = gameGenieDecodeMegadrive (code, buf);
         break;
       case UCON64_NES:
-        result = gameGenieDecodeNES (ucon64.file, buf);
+        result = gameGenieDecodeNES (code, buf);
         break;
-      case UCON64_SNES://interleaved?
-        result = gameGenieDecodeSNES (ucon64.file, buf);
+      case UCON64_SNES:                         // interleaved?
+        result = gameGenieDecodeSNES (code, buf);
         break;
       default:
         break;
@@ -1099,7 +1077,7 @@ gg_gg (st_rominfo_t *rominfo)
       return -1;
     }
 
-  printf ("%-12s = %s\n", ucon64.file, buf);
+  printf ("%-12s = %s\n", code, buf);
 
   sscanf (buf, "%lx:%lx:*", &add, &value);
 
@@ -1117,7 +1095,7 @@ gg_gg (st_rominfo_t *rominfo)
 
   q_fputc (ucon64.rom, add + rominfo->buheader_len, (unsigned char) value, "r+b");
 
-  buf[0] = q_fgetc (ucon64.rom, add + rominfo->buheader_len);
+  buf[0] = value;
   mem_hexdump (buf, 1, add + rominfo->buheader_len);
 
   printf ("\n");

@@ -38,9 +38,9 @@ const char *smd_usage[] =
     "Super Com Pro (HK)/Super Magic Drive/SMD",
     "19XX Front Far East/FFE http://www.front.com.tw",
 #ifdef BACKUP
-    "  " OPTION_LONG_S "xsmd        send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "file=PORT\n"
+    "TEST: " OPTION_LONG_S "xsmd    send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when ROM does not exist\n"
-    "  " OPTION_LONG_S "xsmds       send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "file=PORT\n"
+    "TEST: " OPTION_LONG_S "xsmds   send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when SRAM does not exist\n",
 #endif // BACKUP
     NULL};

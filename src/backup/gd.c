@@ -160,7 +160,7 @@ gd_read_rom (const char *filename, unsigned int parport)
 #else
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: This function is not yet implemented\n");
+  return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented\n");
 #endif
 }
 
@@ -454,7 +454,7 @@ gd_read_sram (const char *filename, unsigned int parport)
 #else
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: This function is not yet implemented\n");
+  return fprintf (stderr, "ERROR: The function for dumping SRAM is not yet implemented\n");
 #endif
 }
 
@@ -486,7 +486,7 @@ gd_write_sram (const char *filename, unsigned int parport)
 #else
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: This function is not yet implemented\n");
+  return fprintf (stderr, "ERROR: The function for sending SRAM is not yet implemented\n");
 #endif
 }
 

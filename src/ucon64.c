@@ -157,6 +157,7 @@ main (int argc, char *argv[])
     {"help", 0, 0, 1},
     {"frontend", 0, 0, 2},
     {"crc", 0, 0, 3},
+    {"nbak", 0, 0, 4},
     {0, 0, 0, 0}
   };
 
@@ -342,6 +343,11 @@ main (int argc, char *argv[])
       rom.frontend = 1;                         // used by ucon64_gauge()
     }
 
+  rom.backup = (argcmp (argc, argv, "-nbak")) ? 0 :
+    (
+      (!strcmp (getProperty (rom.config_file, "backups", buf2, "1"), "1")) ? 1 : 0
+    );
+
   if (argc < 2)
     {
        ucon64_usage (argc, argv);
@@ -349,22 +355,26 @@ main (int argc, char *argv[])
     }
 
 /*
-  getopt_long_only () - uCON64 has many options
+  getopt_long_only()
 */
 while ((c =
         getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
   {
     switch(c)
     {
-      case 1:
-        ucon64_usage (argc, argv);
-        return 0;
-      break;
-
       case 2:
         atexit (ucon64_exit);
         rom.frontend = 1;                         // used by ucon64_gauge()
       break;        
+
+      case 4:
+//        rom.backup = 0;
+      break;
+
+      case 1:
+        ucon64_usage (argc, argv);
+        return 0;
+      break;
 
       case 3:
         printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, 0));
@@ -379,10 +389,6 @@ while ((c =
     }
   }
 
-  rom.backup = (argcmp (argc, argv, "-nbak")) ? 0 :
-    (
-      (!strcmp (getProperty (rom.config_file, "backups", buf2, "1"), "1")) ? 1 : 0
-    );
 
   if (argcmp (argc, argv, "-crchd"))
     {

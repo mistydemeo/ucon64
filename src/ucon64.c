@@ -182,7 +182,7 @@ main (int argc, char *argv[])
 
   if (access (buf, F_OK) == -1)
     printf ("ERROR: %s not found: creating...", buf);
-  else if (strcmp(getProperty (buf, "version", buf2, NULL),"198")!=0)
+  else if (strcmp (getProperty (buf, "version", buf2, NULL), "198") != 0)
     {
 /*      strcpy (buf2, buf);
       newext (buf2, ".OLD");
@@ -204,7 +204,7 @@ main (int argc, char *argv[])
       deleteProperty(buf,"cdrw_iso_write");
 
       sync ();
-      
+
       printf ("OK\n\n");
 */
       return 0;

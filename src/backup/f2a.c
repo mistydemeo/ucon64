@@ -322,7 +322,7 @@ f2a_info (f2a_recvmsg_t *rm)
   memset (&sm, 0, SENDMSG_SIZE);
   memset (rm, 0, sizeof (f2a_recvmsg_t));
 
-  sm.command = CMD_GETINF;
+  sm.command = me2le_32 (CMD_GETINF);
 
 /*
   if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
@@ -367,10 +367,10 @@ f2a_boot_usb (const char *ilclient_fname)
 
   // boot the GBA
   memset (&sm, 0, SENDMSG_SIZE);
-  sm.command = CMD_MULTIBOOT1;
+  sm.command = me2le_32 (CMD_MULTIBOOT1);
   misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE);
-  sm.command = CMD_MULTIBOOT2;
-  sm.size = 16 * 1024;
+  sm.command = me2le_32 (CMD_MULTIBOOT2);
+  sm.size = me2le_32 (16 * 1024);
   misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE);
 
   // send the multiboot image
@@ -399,7 +399,7 @@ static int
 f2a_read_usb (int address, int size, const char *filename)
 {
   FILE *file;
-  unsigned int i;
+  int i;
   f2a_sendmsg_t sm;
   char buffer[1024];
 
@@ -412,16 +412,16 @@ f2a_read_usb (int address, int size, const char *filename)
       return -1;
     }
 
-  sm.command = CMD_READDATA;
-  sm.magic = MAGIC_NUMBER;
-  sm.unknown = 7;
-  sm.address = address;
-  sm.size = size;
-  sm.sizekb = size / 1024;
+  sm.command = me2le_32 (CMD_READDATA);
+  sm.magic = me2le_32 (MAGIC_NUMBER);
+  sm.unknown = me2le_32 (7);
+  sm.address = me2le_32 (address);
+  sm.size = me2le_32 (size);
+  sm.sizekb = me2le_32 (size / 1024);
   if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
     return -1;
 
-  for (i = 0; i < sm.sizekb; i++)
+  for (i = 0; i < size; i += 1024)
     {
       if (misc_usb_read (f2ahandle, buffer, 1024) == -1)
         {
@@ -434,7 +434,7 @@ f2a_read_usb (int address, int size, const char *filename)
           fclose (file);
           return -1;                            // see comment for fopen() call
         }
-      ucon64_gauge (starttime, i * 1024, size);
+      ucon64_gauge (starttime, i, size);
     }
   fclose (file);
   return 0;
@@ -452,9 +452,9 @@ f2a_write_usb (int n_files, char **files, int address)
 
   // initialize command buffer
   memset (&sm, 0, SENDMSG_SIZE);
-  sm.command = CMD_WRITEDATA;
-  sm.magic = MAGIC_NUMBER;
-  sm.unknown = 0xa;                             // no idea what this is...
+  sm.command = me2le_32 (CMD_WRITEDATA);
+  sm.magic = me2le_32 (MAGIC_NUMBER);
+  sm.unknown = me2le_32 (0xa);                  // no idea what this is...
 
   if (n_files > 1)
     {
@@ -466,14 +466,13 @@ f2a_write_usb (int n_files, char **files, int address)
           return -1;
         }
 #if 1 // Overwriting the start address makes sense for some files... - dbjh
-      ((int *) loader)[0] = me2le_32 (0x2e0000ea); // start address
+      ((int *) loader)[0] = me2be_32 (0x2e0000ea); // start address
 #endif
-      for (j = 1; j < GBA_LOGODATA_LEN / 4 + 1; j++) // + 1 for start address
-        ((int *) loader)[j] = bswap_32 (((int *) gba_logodata)[j - 1]);
+      memcpy (loader + 4, gba_logodata, GBA_LOGODATA_LEN); // + 4 for start address
 
-      sm.size = LOADER_SIZE;
-      sm.address = address;
-      sm.sizekb = LOADER_SIZE / 1024;
+      sm.size = me2le_32 (LOADER_SIZE);
+      sm.address = me2le_32 (address);
+      sm.sizekb = me2le_32 (LOADER_SIZE / 1024);
 
       if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
         return -1;
@@ -506,9 +505,9 @@ f2a_write_usb (int n_files, char **files, int address)
           return -1;
         }
 
-      sm.size = size;
-      sm.address = address;
-      sm.sizekb = size / 1024;
+      sm.size = me2le_32 (size);
+      sm.address = me2le_32 (address);
+      sm.sizekb = me2le_32 (size / 1024);
 
       if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
         return -1;
@@ -782,7 +781,7 @@ f2a_write_par (int n_files, char **files, unsigned int address)
           return -1;
         }
       if (f2a_send_buffer_par (PP_CMD_WRITEROM, address, LOADER_SIZE, loader,
-                               HEAD, 0, 0, 0))
+                               HEAD, FLIP, 0, 0))
         {
           fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
           return -1;

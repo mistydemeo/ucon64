@@ -150,6 +150,9 @@ Q50: <a href="#50">I configured uCON64 to use ppdev and tried to send a file to
 Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
    Advance?</a><br>
 <br>
+Q52: <a href="#52">What is the option --xreset for? In what case should it be
+   used?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -1849,6 +1852,26 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
    &nbsp;&nbsp;ucon64 -xf2a "Wario Ware Inc.zip" -port=usb<br>
    uCON64 detects to which USB port the F2A is connected, so you do not have to
    specify a specific port.<br>
+<br>
+<p>
+<a name="52"><b>Q52</b>: What is the option --xreset for? In what case should it
+   be used?</a><br>
+<b>A</b>: Simply put, this option removes power from the parallel port, until
+   you next use the parallel port (it sets all data lines low).<br>
+   Before running uCON64, power is sometimes present on the parallel port. If
+   power is present and you connect a device that is not switched on, power will
+   "back-feed" into the device from the parallel port, potentially damaging the
+   device and the PC.<br>
+   By using the --xreset command <i>before</i> attaching your device, power is
+   removed from the parallel port, eliminating the hazard.<br>
+   Likewise, a danger exists when you have finished using your device and switch
+   the power off.<br>
+   Normally, uCON64 will remove power from the parallel port when the transfer
+   has finished, but if you abort uCON64 part-way, power may still be present.
+   In this case, use --xreset before switching the device off.<br>
+   Additionally, after switching the device off, aim to disconnect it as soon as
+   possible. Printing, rebooting, and running certain applications may cause
+   power to be re-applied to the parallel port -- a back-feed hazard.<br>
 <br>
 <p>
 <br>

@@ -360,7 +360,6 @@ dm_reopen (const char *fname, dm_image_t *image_p)
     {
 //      dm_fseek (fh, x, SEEK_SET);
       dm_track_init (&track, fh);
-      mem_hexdump (&track, sizeof (dm_track_t), 0);
       image.track = (dm_track_t *) &track;
     }
 

@@ -412,6 +412,9 @@ ucon64_runtime_debug (void)
 void
 ucon64_exit (void)
 {
+  if (ucon64.discmage_enabled)
+    if (ucon64.image)
+      libdm_close (ucon64.image);
   handle_registered_funcs ();
   fflush (stdout);
 }
@@ -1017,8 +1020,7 @@ ucon64_nfo (void)
 
   if (ucon64.rominfo && ucon64.console != UCON64_UNKNOWN)
     ucon64_rom_nfo (ucon64.rominfo);
-
-  if (ucon64.discmage_enabled)
+  else if (ucon64.discmage_enabled)
     if (ucon64.image)
       libdm_nfo (ucon64.image);
 

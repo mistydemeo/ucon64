@@ -215,25 +215,6 @@ q_fsize (const char *filename)
 
 
 #if     defined _WIN32 && defined ANSI_COLOR
-static void
-print_string (char *string, int length)
-{
-  // TODO: Is there a function that prints a string without interpreting it?
-  //       printf() can't be used, because it interprets its argument.
-  int x;
-  char *ptr = string + length - 1;
-
-  if (*ptr == '\n')
-    {
-      *ptr = 0;
-      puts (string);
-    }
-  else
-    for (x = 0; x < length; x++)
-      fputc (string[x], stdout);
-}
-
-
 int
 vprintf2 (const char *format, va_list argptr)
 // Cheap hack to get the Visual C++ port support "ANSI colors". Cheap,
@@ -258,7 +239,7 @@ vprintf2 (const char *format, va_list argptr)
     }
 
   if ((ptr = strchr (output, 0x1b)) == NULL)
-    print_string (output, n_chars);
+    fputs (output, stdout);
   else
     {
       stdout_handle = GetStdHandle (STD_OUTPUT_HANDLE);
@@ -268,7 +249,7 @@ vprintf2 (const char *format, va_list argptr)
       if (ptr > output)
         {
           *ptr = 0;
-          print_string (output, ptr - output);
+          fputs (output, stdout);
           *ptr = 0x1b;
         }
       while (!done)
@@ -325,7 +306,7 @@ vprintf2 (const char *format, va_list argptr)
 
           ptr[n_print] = 0;
           ptr += n_ctrl;
-          print_string (ptr, n_print - n_ctrl);
+          fputs (ptr, stdout);
           (ptr - n_ctrl)[n_print] = 0x1b;
           ptr = ptr2;
         }

@@ -2931,32 +2931,38 @@ snes_init (st_rominfo_t *rominfo)
   bs_dump = 0;                                  // for -lsv, but also just to init it
   st_dump = 0;                                  // idem
 
+  x = 0;
   q_fread (&header, UNKNOWN_HEADER_START, UNKNOWN_HEADER_LEN, ucon64.rom);
   if (header.id1 == 0xaa && header.id2 == 0xbb)
+    x = (int) SWC;
+  else if (!strncmp ((char *) &header + 8, "SUPERUFO", 8))
+    x = (int) UFO;
+  if ((x == (int) SWC && (header.type == 5 || header.type == 8)) ||
+      (x == (int) UFO && (OFFSET (header, 0x10) == 0)))
     {
-      if (header.type == 5 || header.type == 8)
+      rominfo->buheader_len = SWC_HEADER_LEN;
+      strcpy (rominfo->name, "Name: N/A");
+      rominfo->console_usage = NULL;
+      rominfo->maker = "Publisher: You?";
+      rominfo->country = "Country: Your country?";
+      rominfo->has_internal_crc = 0;
+      ucon64.split = 0;                         // SRAM & RTS files are never split
+      if (x == (int) SWC)
         {
-          rominfo->buheader_len = SWC_HEADER_LEN;
-          strcpy (rominfo->name, "Name: N/A");
-          rominfo->console_usage = NULL;
           rominfo->copier_usage = swc_usage;
-          rominfo->maker = "Publisher: You?";
-          rominfo->country = "Country: Your country?";
-          rominfo->has_internal_crc = 0;
-          ucon64.split = 0;                     // SRAM & RTS files are never split
           type = SWC;
+          if (header.type == 5)
+            strcat (rominfo->misc, "Type: Super Wild Card SRAM file\n");
+          else if (header.type == 8)
+            strcat (rominfo->misc, "Type: Super Wild Card RTS file\n");
         }
-
-      if (header.type == 5)
+      else if (x == (int) UFO)
         {
-          strcat (rominfo->misc, "Type: Super Wild Card SRAM file\n");
-          return 0;                             // rest is nonsense for SRAM file
+          rominfo->copier_usage = ufo_usage;
+          type = UFO;
+          strcat (rominfo->misc, "Type: Super UFO SRAM file\n");
         }
-      else if (header.type == 8)
-        {
-          strcat (rominfo->misc, "Type: Super Wild Card RTS file\n");
-          return 0;                             // rest is nonsense for RTS file
-        }
+      return 0;                                 // rest is nonsense for SRAM/RTS file
     }
 
   /*
@@ -2978,11 +2984,11 @@ snes_init (st_rominfo_t *rominfo)
     snes_split = ucon64.split;
   else
     {
-      if (type == SWC || type == FIG)
+      if (type == SWC || type == FIG || type == UFO)
         {
           // TODO?: fix this code for last split file
           snes_split = 0;
-          if (header.emulation & 0x40)
+          if (header.emulation & 0x40 || (type == UFO && header.emulation & 0x10))
             snes_split = ucon64_testsplit (ucon64.rom);
           ucon64.split = snes_split;            // force displayed info to be correct
         }                                       //  if not split (see ucon64.c)

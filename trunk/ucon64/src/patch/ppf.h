@@ -19,7 +19,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifndef PPF_H
+#define PPF_H
 int makeppf_main(int argc, char *argv[]);
 int applyppf_main(int argc, char *argv[]);
 int addppfid(int argc, char *argv[]);
 int ppf_usage(int argc,char *argv[]);
+#endif PPF_H

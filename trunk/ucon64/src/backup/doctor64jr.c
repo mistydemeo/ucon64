@@ -629,7 +629,7 @@ if(argcmp(argc,argv,"-help"))printf("\n%s\n",doctor64jr_TITLE);
 
 printf(	"  -xdjr         send/receive ROM to/from Doctor64 Jr; $FILE=PORT\n"
 	"  		receives automatically when $ROM does not exist\n"
-	"TODO: test if -xdjr does work with the hardware\n");
+);
 
 if(argcmp(argc,argv,"-help"))
 {

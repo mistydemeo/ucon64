@@ -17,7 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
+#ifndef CD64_H
+#define CD64_H
 #include "../ucon64.h"
 
 #define cd64_TITLE "CD64\n19XX UFO http://www.cd64.com"
@@ -45,3 +46,4 @@ int grab (char comm, unsigned long addr, unsigned long length, char *str);
 main (int argc, char *argv[]);
 */
 int cd64_usage(int argc, char *argv[]);
+#endif /* CD64_H */

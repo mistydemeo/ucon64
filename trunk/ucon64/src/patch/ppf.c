@@ -20,6 +20,87 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "../ucon64.h"
+/*
+
+.-----------------------------------------------------------------.
+| PLAYSTATION PATCH FILE VERSION 2.0 FILE-STRUCTURE FOR DEVELOPERS|
+'-----------------------------------------------------------------'
+
+1. The PPF 2.0 Header:
+
+@START_PPF20HEADER
+.----------+--------+---------------------------------------------.
+| POSITION |  SIZE  |              E X P L A N A T I O N          |
++----------|--------|---------------------------------------------+
+| 00-04    |   05   | PPF-Magic: "PPF20"                          |
++----------|--------|---------------------------------------------+
+| 05       |   01   | Encoding Method:                            |
+|          |        | - If $00 then it is a PPF 1.0 Patch         |
+|          |        | - If $01 then it is a PPF 2.0 Patch         |
++----------|--------|---------------------------------------------+
+| 06-55    |   50   | Patch Description                           |
++----------|--------|---------------------------------------------+
+| 56-59    |   04   | Size of the file (e.g. CDRWin binfile) this |
+|          |        | patch was made of. Used for Identification  |
++----------|--------|---------------------------------------------+
+| 60-1083  | 1024   | this is a binary block of 1024 byte taken   |
+|          |        | from position $9320 of the file (e.g. CDRWin|
+|          |        | binfile) this patch was made of. Used for   |
+|          |        | identification.                             |
++----------|--------|---------------------------------------------+
+| 1084-X   |   XX   | The Patch itself.. see below for structure! |
+'----------+--------+---------------------------------------------'
+@END_PPF20HEADER - TOTAL HEADER-SIZE = 1084 BYTE.
+
+
+2. The PPF 2.0 Patch Itself (Encoding Method #1)
+
+@START_PPF20PATCH
+FORMAT : xxxx,y,zzzz
+
+         xxxx   = 4 byte file offset.
+	
+         y      = Number of bytes that will be changed.
+
+         zzzz   = New data to be written ('y' number of bytes).
+
+Example
+~~~~~~~
+
+Starting from File Offset 0x0015F9D0 replace 3 bytes with 01,02,03
+D0 F9 15 00 03 01 02 03
+
+Be careful! watch the endian format!!! If you own an Amiga and want
+to do a PPF2-Patcher for Amiga don't forget to swap the endian-format
+of the OFFSET to avoid seek errors!
+
+@END_PPF20PATCH
+
+
+3. The PPF 2.0 Fileid area
+
+@START_FILEID
+
+The fileid area is used to store additional patch information of
+the PPF 2.0 file. I implemented this following the AMIGA standard
+of adding a fileid to e.g. .txt files. You can add a FILE_ID to a
+PPF 2.0 patch by using the tool 'PPFdiz.exe' or "PPF-O-MATIC2"
+included in this package. You dont have to add a FILE_ID to your
+PPF 2.0 patch. It only for your pleasure! :)
+
+For developers: a file_id area begins with @BEGIN_FILE_ID.DIZ and
+ends with @END_FILE_ID.DIZ (Amiga BBS standard).
+Between @BEGIN_FILE_ID.DIZ and @END_FILE_ID.DIZ you will find
+the File_Id and followed after @END_FILE_ID.DIZ you will find an
+Integer (4 byte long) with the length of the FILE_ID.DIZ!
+
+A File_ID.diz file cannot be greater than 3072 Bytes.
+
+If you do a PPF 2.0 Applier be sure to check for an existing FILE
+ID AREA, because it is located after the PATCH DATA!
+
+@END_FILEID
+*/
 
 /*
  * MakePPF v2.0 Sourcecode by Icarus/Paradox
@@ -290,17 +371,17 @@ char binblock[1025];
                          printf("File_id.diz    : no\n\n");
                          dizyn=0;
                          }
-                         else{
-                         printf("File_id.diz    : yes, showing...\n");
-                         fread(&dizlen, 4, 1, ppffile);
-                         fseek(ppffile, -dizlen-20, SEEK_END);
-                         fread(diz, dizlen, 1, ppffile);
-                         diz[dizlen-7]='\0';
-                         printf("%s\n",diz);
-                         dizyn=1;
-                         dizlensave=dizlen;
+                         else
+                         {
+                           printf("File_id.diz    : yes, showing...\n");
+                           fread(&dizlen, 4, 1, ppffile);
+                           fseek(ppffile, -dizlen-20, SEEK_END);
+                           fread(diz, dizlen, 1, ppffile);
+                           diz[dizlen-7]='\0';
+                           printf("%s\n",diz);
+                           dizyn=1;
+                           dizlensave=dizlen;
                          }
-printf("1");fflush(stdout);                        
                          /* Do the BINfile size check! */
                          fseek(ppffile, 56, SEEK_SET);
                          fread(&dizlen, 4, 1,ppffile);
@@ -316,7 +397,6 @@ printf("1");fflush(stdout);
                          exit(0);
                          }}
 
-printf("2");fflush(stdout);                        
 			 /* do the Binaryblock check! this check is 100% secure! */
                          fseek(ppffile, 60, SEEK_SET);
                          fread(ppfblock, 1024, 1, ppffile);
@@ -339,7 +419,7 @@ printf("2");fflush(stdout);
 			 /* Calculate the count for patching the image later */
                          fseek(ppffile, 0, SEEK_END);
                          count=ftell(ppffile);
-printf("3");fflush(stdout);                        
+
                          if(dizyn==0)
                          {
                            count-=1084;
@@ -348,11 +428,12 @@ printf("3");fflush(stdout);
                          else
                          {
                            count-=1084;
-                           count-=38;
+	                   count-=38;
                            count-=dizlensave;
                            seekpos=1084;
                          }
                          printf("Patching ... ");
+			 fflush(stdout);
                          break;
                 default:
                 
@@ -369,7 +450,9 @@ printf("3");fflush(stdout);
         do{
         fseek(ppffile, seekpos, SEEK_SET);  /* seek to patchdataentry */
         fread(&pos, 4, 1, ppffile);	    /* Get POS for binfile */
+        
         fread(&anz, 1, 1, ppffile);         /* How many byte do we have to write? */
+//printf("%ld %ld\n",pos,anz);fflush(stdout);
         fread(ppfmem, anz, 1, ppffile);     /* And this is WHAT we have to write */
         fseek(binfile, pos, SEEK_SET);      /* Go to the right position in the BINfile */
         fwrite(ppfmem, anz, 1, binfile);    /* write 'anz' bytes to that pos from our ppfmem */
@@ -412,8 +495,8 @@ int addppfid(int argc, char *argv[])
 int ppf_usage(int argc,char *argv[])
 {
 
-printf("  -ppf		apply PPF patch (<=2.0); $ROM=ISO_IMAGE $FILE=PATCHFILE\n\
-  -mkppf	create PPF patch; $ROM=ISO_IMAGE $FILE=CHANGED_IMAGE\n\
+printf("  -ppf		apply PPF patch (<=2.0); $ROM=BIN_IMAGE $FILE=PATCHFILE\n\
+  -mkppf	create PPF patch; $ROM=BIN_IMAGE $FILE=CHANGED_IMAGE\n\
   -nppf		change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION\n\
   -idppf	change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ\n\
 ");

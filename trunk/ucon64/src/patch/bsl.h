@@ -19,6 +19,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifndef BSL_H
+#define BSL_H
 int bsl(char *name,char *option2);
 int bsl_usage(int argc,char *argv[]);
 
+#endif /* BSL_H */

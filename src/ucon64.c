@@ -1264,152 +1264,23 @@ ucon64_usage (int argc, char *argv[])
   };
 
 
-  static const st_usage_t options_usage[] = {
-    {NULL, "Options"},
-    {"nbak", "prevents backup files (*.BAK)"},
-#ifdef  ANSI_COLOR
-    {"ncol", "disable ANSI colors in output"},
-#endif
-#ifdef  PARALLEL
-    {"port=PORT", "specify parallel PORT={3bc, 378, 278, ...}"},
-#endif
-    {"hdn=N", "force ROM has backup unit/emulator header with N Bytes size"},
-    {"hd", "same as " OPTION_LONG_S "hdn=512\n"
-                     "most backup units use a header with 512 Bytes size"},
-    {"nhd", "force ROM has no backup unit/emulator header"},
-    {"int", "force ROM is interleaved (2143)"},
-    {"nint", "force ROM is not interleaved (1234)"},
-    {"dint", "convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
-               "this differs from the SNES & NES " OPTION_LONG_S "dint option"},
-    {"ns", "force ROM is not split"},
-#ifdef  __MSDOS__
-    {"e", "emulate/run ROM (check ucon64.cfg for more)"},
-#else
-    {"e", "emulate/run ROM (see $HOME/.ucon64rc for more)"},
-#endif
-    {"crc", "show CRC32 value of ROM"  //; this will also force calculation for\n"
-               /* "files bigger than %d Bytes (%.4f Mb)" */},
-    {"ls", "generate ROM list for all ROMs; " OPTION_LONG_S "rom=ROM or DIR"},
-    {"lsv", "like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=ROM or DIR"},
-#if 0
-    {"rl", "rename all files in DIR to lowercase; " OPTION_LONG_S "rom=ROM or DIR"},
-    {"ru", "rename all files in DIR to uppercase; " OPTION_LONG_S "rom=ROM or DIR"},
-#endif
-#ifdef  __MSDOS__
-    {"hex", "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\""},
-#else
-    {"hex", "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\""},       // less is more ;-)
-#endif
-    {"find=STRING", "find STRING in ROM (wildcard: '?')"},
-    {"c=FILE", "compare FILE with ROM for differences"},
-    {"cs=FILE", "compare FILE with ROM for similarities"},
-    {"help", "display this help and exit"},
-    {"version", "output version information and exit"},
-    {"q", "be quiet (don't show ROM info)"},
-//  {"qq", "be even more quiet"},
-    {NULL, NULL}
-  };
-// ucon64.config_file
-
-
-  static const st_usage_t padding_usage[] = {
-    {NULL, "Padding"},
-    {"ispad", "check if ROM is padded"},
-    {"pad", "pad ROM to full Mb"},
-    {"p", "same as " OPTION_LONG_S "pad"},
-    {"padn=N", "pad ROM to N Bytes (put Bytes with value 0x00 after end)"},
-    {"strip=N", "strip N Bytes from end of ROM"},
-    {"stpn=N", "strip N Bytes from ROM beginning"},
-    {"stp", "same as " OPTION_LONG_S "stpn=512\n"
-              "most backup units use a header with 512 Bytes size"},
-    {"insn=N", "insert N Bytes (0x00) before ROM"},
-    {"ins", "same as " OPTION_LONG_S "insn=512\n"
-               "most backup units use a header with 512 Bytes size"},
-    {NULL, NULL}
-  };
-    
-
-  static const st_usage_t dat_usage[] = {
-    {NULL, "DATabase (support of DAT files)"},
-#ifdef  __MSDOS__
-    {"db", "DATabase statistics (DAT files: ucon64/)"},
-#else    
-    {"db", "DATabase statistics (DAT files: $HOME/.ucon64/)"},
-#endif
-    {"dbv", "like " OPTION_LONG_S "db but more verbose"},
-    {"dbs=CRC32", "search ROM with CRC32 in DATabase"},
-    {"lsd", "generate ROM list for all ROMs using DATabase; " OPTION_LONG_S "rom=ROM or DIR"},
-    {"rrom", "rename ROMs in DIR to their internal names; " OPTION_LONG_S "rom=ROM or DIR"},
-    {"rr83", "like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=ROM or DIR"},
-    {"good", "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed and sorted\n"
-                "into subdirs according to the DATabase (\"ROM manager\")"},
-/*
-GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
-*visit NEWNet #rareroms*
-
-Usage: GoodSNES [rename|move|scan[d]|scannew[d]|list[d]|audit[2]
-                [changes[-]][changesnew[-]][quiet][dirs|inplace][deep][sepX]
-
-rename     = Rename files
-renamebad  = Rename bad checksummed files
-move       = Move files
-move       = Move bad checksummed files
-scan       = Generate listing of all files [w/dirs]
-scannew    = Generate listing of unknown files [w/dirs]
-list       = Lists files you have/need without renaming [w/dirs]
-audit      = Prints names not matching any line in Goodinfo.cfg
-inplace    = Renames files in same dir, not making 'Ren' dir
-changes    = Log rename/move operations (- reverses)
-changesnew = Log rename/move operations that change a filename
-dirs       = Move to dirs using Goodinfo.cfg info
-quiet      = Suppress most non-error messages
-sepX       = Replaces space in filenames with char X ('nosep' removes spaces)
-deep       = Adds more detail to scanfiles (where applicable)
-force63    = Force all filenames into Joliet CD format
-Hit ENTER to continue
-Several output files are created depending on selected options:
-
-GoodSNES.db  = database of scanned ROMs
-SNESMiss     = ROMs missing (if in rename/move/list mode)
-SNESHave     = ROMS present (if in rename/move/list mode)
-SNESScan     = log of 'scan' and 'scannew'
-SNESLog      = log of 'changes' and 'changesnew'
-Good_ZIP     = log of ZIP errors
-Good_RAR     = log of RAR errors
-
-Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
-*/
-    {NULL, NULL}
-  };
-// ucon64.config_dir
-
-
-  static const st_usage_t patching_usage[] = 
-    {
-      {NULL, "Patching"},
-      {"patch=PATCH", "specify the PATCH for the following options\n"
-                        "use this option or uCON64 expects the last commandline\n"
-                        "argument to be the name of the PATCH file"},
-      {NULL, NULL}
-    };
-
   printf (
     "Usage: %s [OPTION(S)]... [[" OPTION_LONG_S "rom=]ROM(S)]... " /* [-o=OUTPUT_PATH] */ "\n\n", name_exe);
 
-  ucon64_render_usage (options_usage);
+  ucon64_render_usage (ucon64_options_usage);
 
   printf ("\n");
 
-  ucon64_render_usage (padding_usage);
+  ucon64_render_usage (ucon64_padding_usage);
 
   printf ("\n");
 
 //  if (ucon64.dat_enabled)
-    ucon64_render_usage (dat_usage);
+    ucon64_render_usage (ucon64_dat_usage);
 
   printf ("\n");
 
-  ucon64_render_usage (patching_usage);
+  ucon64_render_usage (ucon64_patching_usage);
 
   ucon64_render_usage (bsl_usage);
   ucon64_render_usage (ips_usage);

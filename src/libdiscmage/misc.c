@@ -649,7 +649,7 @@ strtrimr (char *str)
 
   j = i = strlen (str) - 1;
 
-  while (isspace (str[i]) && (i >= 0))
+  while (isspace ((int) str[i]) && (i >= 0))
     str[i--] = 0;
 
   return j - i;
@@ -668,7 +668,7 @@ strtriml (char *str)
 
   j = strlen (str) - 1;
 
-  while (isspace (str[i]) && (i <= j))
+  while (isspace ((int) str[i]) && (i <= j))
     i++;
 
   if (0 < i)

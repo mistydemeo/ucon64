@@ -1001,7 +1001,6 @@ snes_ufo (st_rominfo_t *rominfo)
   header.multi = snes_split ? 0x40 : 0; // TODO
   memcpy (header.id, "SUPERUFO", 8);
   header.isrom = 1;
-  header.size = size / MBIT;
   header.banktype = snes_hirom ? 0 : 1;
 
   if (snes_sramsize > 32 * 1024)
@@ -1033,6 +1032,7 @@ snes_ufo (st_rominfo_t *rominfo)
 
       header.size_low = newsize / 8192;
       header.size_high = newsize / 8192 >> 8;
+      header.size = newsize / MBIT;
 
       if (snes_sramsize != 0)
         header.sram_a20_a21 = 0x0c;             // Try 3 if game gives protection message
@@ -1076,6 +1076,7 @@ snes_ufo (st_rominfo_t *rominfo)
     {
       header.size_low = size / 8192;
       header.size_high = size / 8192 >> 8;
+      header.size = size / MBIT;
 
       if (snes_sramsize == 0)
         {
@@ -1087,7 +1088,10 @@ snes_ufo (st_rominfo_t *rominfo)
               header.sram_a20_a21 = 0x0c;
             }
           else // no SRAM & doesn't use a DSP chip
-            header.sram_a22_a23 = 2;
+            {
+              header.sram_a22_a23 = 2;
+              header.sram_type = 0;
+            }
         }
       else // cartridge contains SRAM
         {

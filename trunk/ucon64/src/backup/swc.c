@@ -837,7 +837,7 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
 #if 1
   /*
     0x0c == no SRAM & LoROM; we use the header, so that the user can override this
-    bit 4 == 0 => DRAM mode 20 (LoROM); disable SRAM by setting SRAM mem map mode 21
+    bit 4 == 0 => DRAM mode 20 (LoROM); disable SRAM by setting SRAM mem map mode 2
   */
   if ((buffer[2] & 0x1c) == 0x0c)
     buffer[2] |= 0x20;
@@ -846,9 +846,9 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
   if ((buffer[2] & 0x0c) == 0x0c)               // 0x0c == no SRAM; we use the header, so
     {                                           //  that the user can override this
       if (buffer[2] & 0x10)                     // bit 4 == 1 => DRAM mode 21 (HiROM)
-        buffer[2] &= ~0x20;                     // disable SRAM by setting SRAM mem map mode 20
+        buffer[2] &= ~0x20;                     // disable SRAM by setting SRAM mem map mode 1
       else                                      // bit 4 == 0 => DRAM mode 20 (LoROM)
-        buffer[2] |= 0x20;                      // disable SRAM by setting SRAM mem map mode 21
+        buffer[2] |= 0x20;                      // disable SRAM by setting SRAM mem map mode 2
     }
 #endif
   emu_mode_select = buffer[2];                  // this byte is needed later

@@ -468,7 +468,7 @@ if (argcmp(argc, argv, "-ls") || argcmp(argc, argv, "-lsv"))
 	if (argcmp(argc, argv, "-ls"))
 	{
           strftime(buf, 13, "%b %d %H:%M", localtime(&puffer.st_mtime));
-          printf("%-22.22s %10d %s %s\n", rom.name, (int) puffer.st_size, buf, rom.rom);
+          printf("%-31.31s %10d %s %s\n", rom.name, (int) puffer.st_size, buf, rom.rom);
         }
         else ucon64_nfo(&rom);
       }
@@ -579,17 +579,13 @@ if(argcmp(argc,argv,"-db"))
 
 if(argcmp(argc,argv,"-dbs"))
 {
-	sscanf(rom.rom, "%lx", &x);
+	ucon64_flush(argc,argv,&rom);
 
-	ucon64_dbsearch(	&rom
-//				,rom.console
-//				,x
-	);
+	sscanf(rom.rom, "%lx", &rom.current_crc32);
 
-	printf("%s\n",rom.name);
-	printf("%s\n",rom.manufacturer);
-	printf("%s\n",rom.country);
-	printf("%s\n\n",rom.misc);
+	ucon64_dbsearch(	&rom	);
+	
+	ucon64_nfo(&rom);
 
 	printf("TIP: %s -dbs -nes would search only for a NES ROM\n\n",getarg(argc,argv,ucon64_NAME));
 

@@ -1479,17 +1479,17 @@ ucon64_parport_init (unsigned int port)
           driver_found = 1;
           printf ("Using %s\n", fname);
           io_driver = open_module (fname);
-          // note that inport_word and output_word keep their default value...
           Inp32 = 
-    #ifdef  __cplusplus
+#ifdef  __cplusplus
                   (unsigned char (__stdcall *) (unsigned short))
-    #endif
+#endif
                   get_symbol (io_driver, "Inp32");
           Outp32 =
-    #ifdef  __cplusplus
+#ifdef  __cplusplus
                    (void (__stdcall *) (unsigned short, unsigned char))
-    #endif
+#endif
                    get_symbol (io_driver, "Out32");
+          // note that inport_word and output_word keep their default value...
           input_byte = inpout32_input_byte;
           output_byte = inpout32_output_byte;
         }

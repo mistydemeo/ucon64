@@ -2359,8 +2359,6 @@ ucon64_cdi2nero (const char *image)
 }
 
 
-
-
 int
 ucon64_isofix (const char *image)
 /*

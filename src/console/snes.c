@@ -46,8 +46,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SNES_NAME_LEN 21
 #define GD3_HEADER_MAPSIZE 0x18
 #define NSRT_HEADER_VERSION 22                  // version 2.2 header
-#define DETECT_SMC_COM_FUCKED_UP_LOROM 1        // adds support for interleaved LoROMs
-#define DETECT_INSNEST_FUCKED_UP_LOROM 1        // only adds support for its 24 Mbit
+#define DETECT_NOTGOOD_DUMPS                    // makes _a_ complete GoodSNES 0.999.5 set detected
+#define DETECT_SMC_COM_FUCKED_UP_LOROM          // adds support for interleaved LoROMs
+#define DETECT_INSNEST_FUCKED_UP_LOROM          // only adds support for its 24 Mbit
                                                 //  interleaved LoROM "format"
 //#define PAD_40MBIT_GD3_DUMPS                  // padding works for
                                                 //  Dai Kaiju Monogatari 2 (J)
@@ -781,7 +782,7 @@ snes_gd3 (st_rominfo_t *rominfo)
       if (!((size >= 2 * MBIT && total4Mbparts <= 8) ||
             total4Mbparts == 10 || total4Mbparts == 12))
         {
-          fprintf (stderr, "ERROR: ROM size is %d Mbit -- conversion not yet implemented\n",
+          fprintf (stderr, "ERROR: ROM size is %d Mbit -- conversion not yet implemented/verified\n",
                    size / MBIT);
           return -1;
         }
@@ -1891,8 +1892,8 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     Special case hell
 
     0x9b4638d0: Street Fighter Alpha 2 (E/U) {[b1]}, Street Fighter Zero 2 (J)
-    These games have two nearly identical headers which can't be used to
-    determine whether the dump is interleaved or not.
+    Only really necessary for (U). The other versions can be detected because
+    one of the two internal headers has checksum bytes ff ff 00 00.
 
     0xd7470b37: Dai Kaiju Monogatari 2 (J)
     0xa2c5fd29: Tales of Phantasia (J)
@@ -1939,6 +1940,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     These are also not special cases (not: HiROM map type byte + LoROM game).
     GoodSNES - 0.999.5 for RC 2.5.dat simply contains bugs.
 
+    0x2a4c6a9b: Super Noah's Ark 3D (U)
     0xfa83b519: Mortal Kombat (Beta)
     0xf3aa1eca: Power Piggs of the Dark Age (Pre-Release) {[h1]}
     0x65485afb: Super Aleste (J) {[t1]} <= header == trainer
@@ -1950,16 +1952,25 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     0xe2b95725/0x9ca5ed58: Zool (Sample Cart)/interleaved
     These games/dumps have garbage in their header
   */
-  if (crc == 0xc3194ad7 || crc == 0x89d09a77 || crc == 0xd3095af3 ||
-      crc == 0x9b161d4d || crc == 0x6910700a || crc == 0x447df9d5 ||
-      crc == 0x02f401df || crc == 0xf423997a || crc == 0xfa83b519 ||
-      crc == 0xf3aa1eca || crc == 0xaad23842 || crc == 0x422c95c4 ||
-      crc == 0x7a44bd18 || crc == 0xf0bf8d7c || crc == 0x8e1933d0 ||
-      crc == 0xe2b95725)
+  if (crc == 0xc3194ad7
+#ifdef  DETECT_NOTGOOD_DUMPS
+      ||
+      crc == 0x89d09a77 || crc == 0xd3095af3 || crc == 0x9b161d4d ||
+      crc == 0x6910700a || crc == 0x447df9d5 || crc == 0x02f401df ||
+      crc == 0xf423997a || crc == 0xfa83b519 || crc == 0xf3aa1eca ||
+      crc == 0xaad23842 || crc == 0x422c95c4 || crc == 0x7a44bd18 ||
+      crc == 0xf0bf8d7c || crc == 0x8e1933d0 || crc == 0xe2b95725
+#endif
+     )
     check_map_type = 0;                         // not interleaved
   else if (crc == 0x9b4638d0 || crc == 0x7039388a || crc == 0xdbc88ebf ||
+           crc == 0x2a4c6a9b
+#ifdef  DETECT_NOTGOOD_DUMPS
+           ||
            crc == 0x65485afb || crc == 0x5ee74558 || crc == 0x92180571 ||
-           crc == 0x9ca5ed58)
+           crc == 0x9ca5ed58
+#endif
+          )
     {
       interleaved = 1;
       snes_hirom = 0;
@@ -2359,16 +2370,23 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
         rominfo->buheader_len = SWC_HEADER_LEN;
       else
         {
-          int surplus = ucon64.file_size > 32768 ? ucon64.file_size % 32768 : 0;
+          int surplus = ucon64.file_size % 32768;
           if (surplus == 0)
             // most likely we guessed the copier type wrong
             {
               rominfo->buheader_len = 0;
               type = MGD;
             }
-          else if ((surplus % SWC_HEADER_LEN) == 0 && surplus < MAXBUFSIZE)
+          /*
+            16384 instead of MAXBUFSIZE (32768) to detect "Joystick Sampler
+            with Still Picture (PD)". Don't do <= 16384 or else "Super Wild
+            Card V2.255 DOS ROM (BIOS)" won't be detected if it has no header.
+          */
+          else if ((surplus % SWC_HEADER_LEN) == 0 && surplus < 16384)
             rominfo->buheader_len = surplus;
-          else if (type == SWC || type == GD3)  // special case for Infinity Demo (PD)...
+          // special case for Infinity Demo (PD)... Don't add "|| type == FIG"
+          //  as it is too unreliable
+          else if (type == SWC || type == GD3)
             rominfo->buheader_len = SWC_HEADER_LEN;
         }
     }
@@ -2409,8 +2427,8 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
 
   score_hi = check_banktype (rom_buffer, x);
   score_lo = check_banktype (rom_buffer, snes_header_base);
-  if (score_hi > score_lo)
-    {
+  if (score_hi > score_lo)                      // yes, a preference for LoROM
+    {                                           //  (">" vs. ">=")
       snes_hirom = SNES_HIROM;
       x = score_hi;
     }
@@ -2444,6 +2462,35 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
     }
 
   return x;
+}
+
+
+static void
+snes_set_bs_dump (st_rominfo_t *rominfo, unsigned char *rom_buffer, int size)
+{
+  bs_dump = snes_check_bs ();
+  /*
+    Do the following check before checking for ucon64.bs_dump. Then it's
+    possible to specify both -erom and -bs with effect, for what it's worth ;-)
+    The main reason to test this case is to display correct info for "SD Gundam
+    G-NEXT + Rom Pack Collection (J) [!]". Note that testing for SNES_EROM
+    causes the code to be skipped for Sufami Turbo dumps.
+  */
+  if (bs_dump &&
+      snes_header_base == SNES_EROM && !UCON64_ISSET (ucon64.snes_header_base))
+    {
+      bs_dump = 0;
+      snes_header_base = 0;
+      snes_set_hirom (rom_buffer, size);
+      rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
+      memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
+    }
+  if (UCON64_ISSET (ucon64.bs_dump))            // -bs or -nbs switch was specified
+    {
+      bs_dump = ucon64.bs_dump;
+      if (bs_dump && snes_header_base == SNES_EROM)
+        bs_dump = 2;                            // Extended ROM => must be add-on cart
+    }
 }
 
 
@@ -2546,7 +2593,7 @@ snes_init (st_rominfo_t *rominfo)
     }                                           //  called with -lsv
   q_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
 
-  x = snes_set_hirom (rom_buffer, size);        // second part of step 2. (#ifdef ALT_HILO)
+  x = snes_set_hirom (rom_buffer, size);        // second part of step 2.
 
   rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
   rominfo->header_len = SNES_HEADER_LEN;
@@ -2559,7 +2606,6 @@ snes_init (st_rominfo_t *rominfo)
     ucon64.interleaved : snes_testinterleaved (rom_buffer, size, x);
 
   calc_checksums = !UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0;
-
   // we want the CRC32 of the "raw" data (too)
   if (calc_checksums)
     ucon64.fcrc32 = crc32 (0, rom_buffer, size);
@@ -2574,9 +2620,7 @@ snes_init (st_rominfo_t *rominfo)
       memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
     }
 
-  bs_dump = snes_check_bs ();
-  if (UCON64_ISSET (ucon64.bs_dump))            // -bs or -nbs switch was specified
-    bs_dump = ucon64.bs_dump;
+  snes_set_bs_dump (rominfo, rom_buffer, size);
 
   if (calc_checksums)
     {
@@ -2779,7 +2823,7 @@ snes_init (st_rominfo_t *rominfo)
         y = (snes_header.bs_day >> 4) * 2 + 1;
       else // incorrect data
         y = 0;
-      sprintf (buf, "Release date: %d/%d\n", y, snes_header.bs_month >> 4);
+      sprintf (buf, "Dumping date: %d/%d\n", y, snes_header.bs_month >> 4);
       strcat (rominfo->misc, buf);
 
       // misc stuff
@@ -3063,10 +3107,11 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
   the chance the guess was correct.
 */
 {
-  int score = 0;
+  int score = 0, x, y;
 
 //  mem_hexdump ((char *) rom_buffer + SNES_HEADER_START + header_offset,
 //               SNES_HEADER_LEN, SNES_HEADER_START + header_offset);
+
   // game ID info (many games don't have useful info here)
   if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset + 2, 4, isprint))
     score += 1;
@@ -3080,10 +3125,11 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
       // map type
       if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0xf) < 4)
         score += 2;
-      // map type, HiROM flag
-      if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0x01) ==
-          (header_offset >= snes_header_base + SNES_HIROM) ? 0x01 : 0x00)
-        score += 1;
+      if (snes_hirom_ok)
+        // map type, HiROM flag (only if we're sure about value of snes_hirom)
+        if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0x01) ==
+            (header_offset >= snes_header_base + SNES_HIROM) ? 0x01 : 0x00)
+          score += 1;
 
       // ROM size
       if (1 << (rom_buffer[SNES_HEADER_START + header_offset + 39] - 7) <= 64)
@@ -3117,15 +3163,21 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
     score += 2;
 
   // checksum bytes
-  if ((rom_buffer[SNES_HEADER_START + header_offset + 44] +
-       (rom_buffer[SNES_HEADER_START + header_offset + 45] << 8) +
-       rom_buffer[SNES_HEADER_START + header_offset + 46] +
-       (rom_buffer[SNES_HEADER_START + header_offset + 47] << 8)) == 0xffff)
-    score += 3;
+  x = rom_buffer[SNES_HEADER_START + header_offset + 44] +
+      (rom_buffer[SNES_HEADER_START + header_offset + 45] << 8);
+  y = rom_buffer[SNES_HEADER_START + header_offset + 46] +
+      (rom_buffer[SNES_HEADER_START + header_offset + 47] << 8);
+  if (x + y == 0xffff)
+    {
+      if (x == 0xffff || y == 0xffff)
+        score += 3;
+      else
+        score += 4;
+    }
 
   // reset vector
   if (rom_buffer[SNES_HEADER_START + header_offset + 0x4d] & 0x80)
-    score += 4;
+    score += 3;
 
   return score;
 }

@@ -573,7 +573,7 @@ ucon64_rename (int mode)
   rename2 (ucon64.rom, buf2);                   // rename2() must be used!
 #endif
 #ifdef  HAVE_ZLIB_H
-  unzip_current_file_nr = 0x7fffffff - 1;       // dirty hack, will be removed later
+  unzip_current_file_nr = 0x7fffffff - 1;       // dirty hack
 #endif
   return 0;
 }
@@ -1191,6 +1191,10 @@ ucon64_options (int c, const char *optarg)
           printf (ucon64_msg[WROTE], dest_name);
           break;
         }
+      break;
+
+    case UCON64_DMIRR:
+      snes_demirror (ucon64.rominfo);
       break;
 
     case UCON64_F:

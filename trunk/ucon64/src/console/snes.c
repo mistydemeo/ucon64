@@ -53,7 +53,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#define PAD_40MBIT_GD3_DUMPS                  // padding works for
                                                 //  Dai Kaiju Monogatari 2 (J)
 
-static int snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer);
+static int snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer,
+                        int rom_size);
 static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer,
                               int rom_size);
 static unsigned short int get_internal_sums (st_rominfo_t *rominfo);
@@ -130,6 +131,7 @@ const st_usage_t snes_usage[] =
     {"f", NULL, "remove NTSC/PAL protection"},
     {"l", NULL, "remove SlowROM checks"},
     {"chk", NULL, "fix ROM checksum"},
+    {"dmirr", NULL, "\"de-mirror\" ROM (strip mirrored block from end of ROM)"},
     {NULL, NULL, NULL}
   };
 
@@ -671,16 +673,17 @@ snes_mgd (st_rominfo_t *rominfo)
   memcpy (&mgh[16], dest_name, strlen (dest_name));
 
   set_suffix (dest_name, ".078");
-  ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
+  ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
   if (rominfo->interleaved)
     write_deinterleaved_data (rominfo, src_name, dest_name,
                               ucon64.file_size - rominfo->buheader_len);
   else
     q_fcpy (src_name, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
 
   strcpy (dest_name, "MULTI-GD.MGH");
-  ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
+  ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
   q_fwrite (&mgh, 0, sizeof (mgh), dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
 
@@ -923,6 +926,7 @@ snes_gd3 (st_rominfo_t *rominfo)
       q_fwrite (header, 0, GD_HEADER_LEN, dest_name, "wb");
       q_fwrite (dstbuf, GD_HEADER_LEN, newsize, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);
+      remove_temp_file ();
 
       free (srcbuf);
       free (dstbuf);
@@ -974,6 +978,7 @@ snes_gd3 (st_rominfo_t *rominfo)
       else
         q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);
+      remove_temp_file ();
 
       rominfo->buheader_len = GD_HEADER_LEN;
       rominfo->interleaved = 1;
@@ -1713,13 +1718,13 @@ snes_f (st_rominfo_t *rominfo)
 // See the document "src/backup/NTSC-PAL notes.txt".
   switch (snes_header.country)
     {
-      // In the Philipines the television standard is NTSC, but do games made
-      //  for the Philipines exist?
-      case 0:                                   // Japan
-      case 1:                                   // U.S.A.
-        return snes_fix_ntsc_protection (rominfo);
-      default:
-        return snes_fix_pal_protection (rominfo);
+    // In the Philipines the television standard is NTSC, but do games made
+    //  for the Philipines exist?
+    case 0:                                   // Japan
+    case 1:                                   // U.S.A.
+      return snes_fix_ntsc_protection (rominfo);
+    default:
+      return snes_fix_pal_protection (rominfo);
     }
 }
 
@@ -1953,7 +1958,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     0x3e2e5619: Super Adventure Island II (Beta)
     0x023e1298: Super Air Driver (E) [b]
     These are also not special cases (not: HiROM map type byte + LoROM game).
-    GoodSNES - 0.999.5 for RC 2.5.dat simply contains bugs.
+    GoodSNES - 0.999.5 for RC 2.5.dat simply contains errors.
 
     0x2a4c6a9b: Super Noah's Ark 3D (U)
     0xfa83b519: Mortal Kombat (Beta)
@@ -2644,7 +2649,7 @@ snes_init (st_rominfo_t *rominfo)
       // internal ROM crc
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = rominfo->internal_crc2_len = 2;
-      rominfo->current_internal_crc = snes_chksum (rominfo, &rom_buffer);
+      rominfo->current_internal_crc = snes_chksum (rominfo, &rom_buffer, size);
       rominfo->internal_crc = snes_header.checksum_low;
       rominfo->internal_crc += snes_header.checksum_high << 8;
       x = snes_header.inverse_checksum_low;
@@ -2988,13 +2993,13 @@ snes_check_bs (void)
 
 #if 1
 int
-snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
+snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
 /*
   Calculate the checksum of a SNES ROM. This version of snes_chksum() has one
   advantage over the one below in that it is a bit more sensitive to overdumps.
 */
 {
-  int i, rom_size, internal_rom_size, half_internal_rom_size, remainder;
+  int i, internal_rom_size, half_internal_rom_size, remainder;
   unsigned short int sum1, sum2;
 
   rom_size = ucon64.file_size - rominfo->buheader_len;
@@ -3048,10 +3053,10 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
 }
 #else
 int
-snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
+snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
 // Calculate the checksum of a SNES ROM
 {
-  int i, rom_size, internal_rom_size;
+  int i, internal_rom_size;
   unsigned short int sum;
 
   rom_size = ucon64.file_size - rominfo->buheader_len;
@@ -3369,4 +3374,60 @@ handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
     }
   else
     nsrt_header = 0;
+}
+
+
+int
+snes_demirror (st_rominfo_t *rominfo)           // nice verb :-)
+{
+  int fixed = 0, size = ucon64.file_size - rominfo->buheader_len, mirror_size;
+  unsigned int crc;
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  unsigned char *buffer;
+
+  if (!(buffer = (unsigned char *) malloc (size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+      exit (1);
+    }
+  q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
+  if (rominfo->interleaved)
+    {
+      printf ("NOTE: ROM is interleaved -- deinterleaving\n");
+      snes_deinterleave (rominfo, &buffer, size);
+    }
+
+  if (size % (12 * MBIT) == 0)                  // 12, 24 or 48 Mbit dumps can be mirrored
+    {
+      mirror_size = size / 12 * 2;
+      crc = crc32 (0, buffer + size - mirror_size, mirror_size);
+      if (crc == crc32 (0, buffer + size - 2 * mirror_size, mirror_size))
+        {
+          if (ucon64.quiet == -1)
+            printf ("Mirrored: %d - %d == %d - %d\n",
+                    (size - 2 * mirror_size) / MBIT, (size - mirror_size) / MBIT,
+                    (size - mirror_size) / MBIT, size / MBIT);
+          size -= mirror_size;
+          fixed = 1;
+        }
+    }
+
+  if (!fixed)
+    {
+      if (ucon64.quiet < 1)
+        printf ("NOTE: Did not detect a mirrored block -- no file has been written\n");
+      free (buffer);
+      return 0;
+    }
+
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, src_name, 0);
+  q_fcpy (src_name, 0, rominfo->buheader_len, dest_name, "wb");
+  q_fwrite (buffer, rominfo->buheader_len, size, dest_name, "ab");
+  printf (ucon64_msg[WROTE], dest_name);
+
+  remove_temp_file ();
+  free (buffer);
+  return 1;
 }

@@ -427,6 +427,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_CRP, UCON64_GBA, gba_usage,          WF_DEFAULT},
   {UCON64_COL, UCON64_SNES, snes_usage,        WF_NO_ROM},
   {UCON64_DBUH, UCON64_SNES, snes_usage,       WF_DEFAULT},
+  {UCON64_DMIRR, UCON64_SNES, snes_usage,      WF_DEFAULT},
   {UCON64_F, UCON64_SNES, snes_usage,          WF_DEFAULT},
   {UCON64_FDS, UCON64_NES, nes_usage,          WF_DEFAULT},
   {UCON64_FDSL, UCON64_NES, nes_usage,         WF_DEFAULT},

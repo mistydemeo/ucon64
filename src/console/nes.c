@@ -5835,9 +5835,8 @@ nes_unif (st_rominfo_t *rominfo)
   unregister_func (remove_destfile);
   fclose (destfile);
   unregister_func (remove_temp_file);
-  remove_temp_file ();
-
   printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }
 
@@ -6221,9 +6220,8 @@ nes_ines (st_rominfo_t *rominfo)
   unregister_func (remove_destfile);
   fclose (destfile);
   unregister_func (remove_temp_file);
-  remove_temp_file ();
-
   printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }
 
@@ -6330,9 +6328,8 @@ nes_dint (st_rominfo_t *rominfo)
   fclose (srcfile);
   fclose (destfile);
   unregister_func (remove_temp_file);
-  remove_temp_file ();
-
   printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }
 
@@ -7419,8 +7416,7 @@ nes_fds (st_rominfo_t *rominfo)
   */
 
   free (buffer);
-  remove_temp_file ();
-
   printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }

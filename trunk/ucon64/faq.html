@@ -266,10 +266,16 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    --without-zlib to the configure script.<br>
    2.) When using config.h and Makefile "templates".<br>
    By default gzip &amp; zip support is disabled. If you want to enable it you
-   have to define the constant HAVE_ZLIB_H in config.h and libdiscmage/config.h
-   (remove the "//" in front of the line that defines it) <i>and</i> ZLIB in
+   have to define the constant USE_ZLIB in config.h and libdiscmage/config.h
+   (remove the "//" in front of the line that defines it) <i>and</i> in
    Makefile and libdiscmage/Makefile (remove the "#" in front of the line that
    defines it).<br>
+<br>
+   There is one additional thing you should think of. The import library of
+   zlib versions later than 1.1.4 is named libzdll.a or zdll.lib. In practice
+   this means that if you want to use the DLL of zlib 1.2 (instead of the
+   static library), that you have to edit Makefile.vc6 or rename or copy
+   zdll.lib to zlib.lib.<br>
 <br>
    If you want to change other things in config.h or the makefiles do so before
    proceeding to the next step.<br>
@@ -295,7 +301,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
    Now read the relevant section for the compiler you are using.<br>
 <br>
-   <b>GCC</b> (including DJGPP and Cygwin)<br>
+   <b>GCC</b> (including DJGPP, Cygwin and MinGW)<br>
    If you use Bash you may have to take one extra step before running make.
    Because of a strange design decision made by the authors of Bash, the
    environment variable OSTYPE is not exported on all platforms. Because of
@@ -316,8 +322,8 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <br>
    If you use Mac OS X and get an error message that dlfcn.h cannot be found,
    please install the library
-   <a href="http://www.opendarwin.org/projects/dlcompat/" target="_blank">dlcompat</a>
-   and try again.<br>
+   <a href="http://www.opendarwin.org/projects/dlcompat/" target="_blank">
+   dlcompat</a> and try again.<br>
    On Unix systems other than GNU/Linux you might need to use "gmake" (GNU
    make) instead of "make". If the last make command has been successfully
    executed you can find the executable in the directory where you ran make.
@@ -409,8 +415,10 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    <b>Windows (95/98/ME/NT/2000/XP) &amp; DOS</b><br>
    On Windows, unpack the package with a program like
    <a href="http://www.winzip.com/" target="_blank">WinZip</a>,
-   <a href="http://www.rarlab.com/" target="_blank">WinRAR</a> or
-   <a href="http://www.powerarchiver.com/" target="_blank">Power Archiver</a>.
+   <a href="http://www.rarlab.com/" target="_blank">WinRAR</a>,
+   <a href="http://www.powerarchiver.com/" target="_blank">Power Archiver</a>
+   or a more free program like
+   <a href="http://www.ultimatezip.com/" target="_blank">UltimateZip</a>.
    On plain DOS (DOS without Windows) use a program like
    <a href="http://www.pkware.com/" target="_blank">PKUNZIP</a>.<br>
    We recommend to extract the package to a directory (or folder) of its own.
@@ -1842,7 +1850,9 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    by default, but you can do it manually with "mount -t usbdevfs none 
    /proc/bus/usb")<br>
    - if you use Linux 2.4 or older then the EZUSB2131 firmware upload driver 
-   has to be loaded, see <a href="http://ezusb2131.sourceforge.net/" target="_blank">http://ezusb2131.sourceforge.net/</a><br>
+   has to be loaded, see
+   <a href="http://ezusb2131.sourceforge.net/" target="_blank">
+   http://ezusb2131.sourceforge.net/</a><br>
    - if you use Linux 2.5 or later fxload should be present in /sbin<br>
    - you need to have read/write access to /proc/ezusb and /proc/bus/usb, so 
    you have to run uCON64 as root (or setuid root) for the USB version of the 

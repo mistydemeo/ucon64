@@ -92,6 +92,9 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
 Q33: <a href="#33">How do I enable or disable colors in the display output of
    uCON64?</a><br>
 <br>
+Q34: <a href="#34">When I try to convert a large number of files using
+   wildcards, uCON64 will only convert the first file. Is this a bug?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -471,44 +474,46 @@ Q33: <a href="#33">How do I enable or disable colors in the display output of
 <p>
 <a name="30"><b>Q30</b>: How do I convert a NES ROM from Pasofami to FFE? Or from
    UNIF to Pasofami?</a><br>
-<b>A</b>: Use iNES as intermediate format. So, to do the conversion Pasofami -> FFE, do this
-  conversion instead: first Pasofami -> iNES and then iNES -> FFE.<br>
-  To answer the second question, to do the conversion UNIF -> Pasofami do this: UNIF -> iNES
-  and then iNES -> Pasofami.<br>
+<b>A</b>: Use iNES as intermediate format. So, to do the conversion Pasofami ->
+   FFE, do this conversion instead: first Pasofami -> iNES and then iNES -> FFE.<br>
+   To answer the second question, to do the conversion UNIF -> Pasofami do this:
+   UNIF -> iNES and then iNES -> Pasofami.<br>
 <br>
 <p>
 <a name="31"><b>Q31</b>: How do I specify dumper information when converting to UNIF?</a><br>
-<b>A</b>: Create a text file with three lines. The first line should contain the name (or
-  "handle") of the person who dumped the cartridge. This line may be 99 characters long at
-  maximum. The next line should contain the date when the cartridge was dumped. The format is
-  dd-mm-yyyy. Instead of the hyphen ('-') you may also use the slash ('/'). If day or month
-  is smaller than 10 you may use 1 or 2 digits, for example:<br>
-  &nbsp;&nbsp; 02/02/2002<br>
-  or<br>
-  &nbsp;&nbsp; 2-2-2002<br>
-  The third and last line should contain information about the dumping means that was used.
-  This line may also contain 99 characters at maximum. Here is an example info file:<br>
-  &nbsp;&nbsp; Dirk &#60;noisyb@gmx.net&#62;<br>
-  &nbsp;&nbsp; 26-7-2002<br>
-  &nbsp;&nbsp; Custom built hardware<br>
-  To get this information in a UNIF file, you should use the -dumpinfo switch in combination
-  with the -unif option. Say you store the dumper information in the file info.txt. This
-  would get the info in a UNIF file:<br>
-  &nbsp;&nbsp; ucon64 -unif smb.nes -mapr NROM -dumpinfo info.txt<br>
-  If you already have a UNIF file the command line looks almost the same:<br>
-  &nbsp;&nbsp; ucon64 -unif smb.unf -dumpinfo info.txt<br>
-  For an existing UNIF file you needn't specify the board name, but you might want to
-  specify it if you want to change the board name in the file. Afterwards run uCON64 on the
-  newly written ROM to see if you were successful. uCON64's display output should contain a
-  dump info section then.<br>
+<b>A</b>: Create a text file with three lines. The first line should contain
+   the name (or "handle") of the person who dumped the cartridge. This line may
+   be 99 characters long at maximum. The next line should contain the date when
+   the cartridge was dumped. The format is dd-mm-yyyy. Instead of the hyphen
+   ('-') you may also use the slash ('/'). If day or month is smaller than 10
+   you may use 1 or 2 digits, for example:<br>
+   &nbsp;&nbsp; 02/02/2002<br>
+   or<br>
+   &nbsp;&nbsp; 2-2-2002<br>
+   The third and last line should contain information about the dumping means
+   that was used. This line may also contain 99 characters at maximum. Here is
+   an example info file:<br>
+   &nbsp;&nbsp; Dirk &#60;noisyb@gmx.net&#62;<br>
+   &nbsp;&nbsp; 26-7-2002<br>
+   &nbsp;&nbsp; Custom built hardware<br>
+   To get this information in a UNIF file, you should use the -dumpinfo switch
+   in combination with the -unif option. Say you store the dumper information
+   in the file info.txt. This would get the info in a UNIF file:<br>
+   &nbsp;&nbsp; ucon64 -unif smb.nes -mapr NROM -dumpinfo info.txt<br>
+   If you already have a UNIF file the command line looks almost the same:<br>
+   &nbsp;&nbsp; ucon64 -unif smb.unf -dumpinfo info.txt<br>
+   For an existing UNIF file you needn't specify the board name, but you might
+   want to specify it if you want to change the board name in the file.
+   Afterwards run uCON64 on the newly written ROM to see if you were
+   successful. uCON64's display output should contain a dump info section then.<br>
 <br>
 <p>
-<a name="32"><b>Q32</b>: How do I specify that a NES game in UNIF format supports multiple
-   controller types?</a><br>
-<b>A</b>: Use the -ctrl switch multiple times on the <b>same</b> command line. For example,
-  to specify that a game supports the controller types "regular joypad" and "power pad"
-  you would use a command line like this:<br>
-  &nbsp;&nbsp; ucon64 -unif smb.nes -mapr NROM -ctrl 0 -ctrl 4<br>
+<a name="32"><b>Q32</b>: How do I specify that a NES game in UNIF format
+   supports multiple controller types?</a><br>
+<b>A</b>: Use the -ctrl switch multiple times on the <b>same</b> command line.
+   For example, to specify that a game supports the controller types "regular
+   joypad" and "power pad" you would use a command line like this:<br>
+   &nbsp;&nbsp; ucon64 -unif smb.nes -mapr NROM -ctrl 0 -ctrl 4<br>
 <br>
 <p>
 <a name="33"><b>Q33</b>: How do I enable or disable colors in the display
@@ -530,10 +535,28 @@ Q33: <a href="#33">How do I enable or disable colors in the display output of
    &nbsp;&nbsp; ansi_color=0<br>
 <br>
 <p>
+<a name="34"><b>Q34</b>: When I try to convert a large number of files using
+   wildcards, uCON64 will only convert the first file. Is this a bug?</a><br>
+<b>A</b>: No, it isn't. uCON64 1.9.8beta6 just doesn't supports wildcards. For
+   example, to convert all files with the suffix (M$ speak: extension) .mgd
+   to Super Wild Card format, try this in Bash:<br>
+   &nbsp;&nbsp; find -name \*.mgd -exec ucon64 --snes --swc {} \;<br>
+   or this in command.com or cmd.exe:<br>
+   &nbsp;&nbsp; for %f in (*.mgd) do ucon64 --snes --swc "%f"<br>
+   However, this funtionality has been added to uCON64 1.9.8beta7. With that
+   version you can do the same thing with:<br>
+   &nbsp;&nbsp; ucon64 --snes --swc *.mgd<br>
+   In case something goes terribly wrong and uCON64 crashes it might still be
+   necessary to use one of the previous methods, because every file will be
+   processed and not only the files before the crash.<br>
+   Note that uCON64 will interpret the second file as the --file argument if
+   only two files match with the wildcard. uCON64 will display a message in
+   that case. Just as is stated in that message, you should use the --file
+   option if you don't want uCON64 to do this. You can use a dummy argument
+   like 0. For example:<br>
+   &nbsp;&nbsp; ucon64 --snes --swc *.mgd --file=0<br>
 <br>
-<br>
-<br>
-<br>
+<p>
 <br>
 <br>
 <br>

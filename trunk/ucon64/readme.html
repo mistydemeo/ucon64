@@ -16,11 +16,11 @@ uCON64 - THE tool for all video game consoles. Its main features are:
 
 For console specific options check the following usage:
 
-uCON64 1.9.8beta7 Unix (Linux) 1999-2002
+uCON64 1.9.8beta7 Unix (Linux) 1999-2003
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
-Usage: ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
+Usage: ucon64 [OPTION]... [--rom=][ROM]... [[--file=]FILE]
 
   --nbak        prevents backup files (*.BAK)
   --ncol        disable ANSI colors in output
@@ -59,6 +59,7 @@ Usage: ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
   --strip       strip Bytes from end of ROM; --file=VALUE
   --help        display this help and exit
   --version     output version information and exit
+   -q           be quiet (don't show ROM info)
 
 Patching
    -b           apply Baseline/BSL patch (&#60;=vx.x); --file=PATCHFILE
@@ -196,9 +197,9 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --mgd         convert to Multi Game*/MGD2/MGH/RAW
   --gd3         convert to Professor SF(2) Game Doctor SF3/6/7
   --ufos        convert Snes9x/ZSNES *.srm (SRAM) to Super UFO; --rom=SRAM
-  --dbuh        display (relevant part of) backup unit header
   --stp         convert SRAM from backup unit for use with an emulator
                   --stp just strips the first 512 bytes
+  --dbuh        display (relevant part of) backup unit header
   --dint        convert ROM to non-interleaved format
   --ctrl=TYPE   specify type of controller in port 1 for emu when converting
                   TYPE='0' gamepad
@@ -226,11 +227,12 @@ Super Nintendo Entertainment System/SNES/Super Famicom
 Super Wild Card 1.6XC/Super Wild Card 2.8CC/Super Wild Card DX(2)/SWC
   --xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; --file=PORT
                   receives automatically when ROM does not exist
-                  Press q to abort ^C will cause invalid state of backup unit
+                  Press q to abort; ^C will cause invalid state of backup unit
+  --xswc2       same as --xswc, but enables Real Time Save mode
   --xswcs       send/receive SRAM to/from Super Wild Card*/(all)SWC;
                   --file=PORT
                   receives automatically when SRAM does not exist
-                  Press q to abort ^C will cause invalid state of backup unit
+                  Press q to abort; ^C will cause invalid state of backup unit
                   You only need to specify PORT if uCON64 doesn't detect the
                   (right) parallel port. If that is the case give a hardware
                   address: ucon64 --xswc "rom.swc" 0x378

@@ -99,12 +99,13 @@ write programs in C
 #include "backup/lynxit.h"
 
 static void ucon64_exit (void);
-//static void usage (const char **usage);
 static void ucon64_usage (int argc, char *argv[]);
+static int ucon64_execute_options (void);
 
 st_ucon64_t ucon64;
+static st_rominfo_t rom;
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
-static int ucon64_fsize = 0;
+static int ucon64_fsize = 0, ucon64_option = 0;
 
 const struct option long_options[] = {
     {"1991", 0, 0, UCON64_1991},
@@ -214,6 +215,8 @@ const struct option long_options[] = {
     {"ppf", 0, 0, UCON64_PPF},
     {"ps2", 0, 0, UCON64_PS2},
     {"psx", 0, 0, UCON64_PSX},
+    {"q", 0, 0, UCON64_Q},
+    {"qq", 0, 0, UCON64_QQ},
     {"rrom", 0, 0, UCON64_RROM},
     {"rr83", 0, 0, UCON64_RR83},
     {"rl", 0, 0, UCON64_RL},
@@ -341,11 +344,8 @@ ucon64_exit (void)
 int
 main (int argc, char **argv)
 {
-  int ucon64_argc, c = 0, result = 0, value = 0, option_index = 0;
-  unsigned int padded;
-  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], src_name[FILENAME_MAX];
-  const char *ucon64_argv[128];
-  st_rominfo_t rom;
+  int c = 0, console, show_nfo, rom_index, file_message = 0;
+  char buf[MAXBUFSIZE];
 
   printf ("%s\n"
     "Uses code from various people. See 'developers.html' for more!\n"
@@ -370,7 +370,7 @@ main (int argc, char **argv)
   ucon64_configfile ();
 
 #ifdef  DLOPEN
-  strcpy (ucon64.discmage_path, get_property (ucon64.configfile, "discmage_path", buf2, ""));
+  strcpy (ucon64.discmage_path, get_property (ucon64.configfile, "discmage_path", buf, ""));
   if (strlen (ucon64.discmage_path) >= 3)
     // There should be some standard C library function that does this...
     //  (filename expansion)
@@ -440,7 +440,7 @@ main (int argc, char **argv)
   ucon64.show_nfo = UCON64_YES;
 
 #ifdef  ANSI_COLOR
-  ucon64.ansi_color = ((!strcmp (get_property (ucon64.configfile, "ansi_color", buf2, "1"), "1")) ?
+  ucon64.ansi_color = ((!strcmp (get_property (ucon64.configfile, "ansi_color", buf, "1"), "1")) ?
                1 : 0);
 #endif
 
@@ -468,12 +468,12 @@ main (int argc, char **argv)
   getcwd (ucon64.output_path, FILENAME_MAX); // default output path
   if (OFFSET (ucon64.output_path, strlen (ucon64.output_path) - 1) != FILE_SEPARATOR)
     strcat (ucon64.output_path, FILE_SEPARATOR_S);
-  strcpy (ucon64.cache_path, get_property (ucon64.configfile, "cache_path", buf2, ""));
+  strcpy (ucon64.cache_path, get_property (ucon64.configfile, "cache_path", buf, ""));
 
   // if the config file doesn't contain a parport line use "0" to force probing
-  sscanf (get_property (ucon64.configfile, "parport", buf2, "0"), "%x", &ucon64.parport);
+  sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
 
-  ucon64.backup = ((!strcmp (get_property (ucon64.configfile, "backups", buf2, "1"), "1")) ?
+  ucon64.backup = ((!strcmp (get_property (ucon64.configfile, "backups", buf, "1"), "1")) ?
                1 : 0);
 
   if (argc < 2)
@@ -487,7 +487,7 @@ main (int argc, char **argv)
 
   ucon64_flush (&rom);
 
-  while ((c = getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
+  while ((c = getopt_long_only (argc, argv, "", long_options, NULL)) != -1)
     {
 #include "switches.c"
     }
@@ -502,51 +502,104 @@ main (int argc, char **argv)
 
 //  ucon64.rom = ucon64_extract (ucon64.rom);
 
-  if (!strlen (ucon64.file) && optind < argc)
-    ucon64.file = argv[optind++];
-
+  rom_index = optind > 0 ? optind - 1 : 0;      // save index of first file
+  /*
+    We want to make it as easy as possible to use uCON64. Therefore don't
+    require that --file is specified when only two non-switch non-option
+    arguments are specified on the command line. Of course this introduces the
+    problem that when only two files match with a wildcard, the second file
+    will be interpreted as the --file argument. I (dbjh) think it's better to
+    display a message in that case instead of always having to use --file. Now
+    we can do the following:
+      ucon64 -swc *.fig
+      ucon64 -i mario.swc mario.ips
+      ucon64 -xswc2 mario.swc 0x378
+      ucon64 -ls /usr/local/snesrom /mnt/xp/snesrom --file=0
+    In the first case a message will be displayed if only two files match with
+    *.fig. In the second case a message will be displayed. In the third case a
+    message will be displayed in the unlikely situation that the file 0x378
+    exists. In the fourth case no message will be displayed.
+    Note that getopt[_long_only]() sorts argv so that all switches and options
+    come before all non-switches and non-options.
+  */
+  if (argc - rom_index == 2 && !strlen (ucon64.file))
+    {
+      ucon64.file = argv[argc - 1];
+      if (!access (argv[argc - 1], F_OK))
+        file_message = 1;
+      argc--;
+    }
+/*
+  for (c = 0; c < argc; c++)
+    printf ("argv[%d] = %s\n", c, ucon64.argv[c]);
+*/
 #ifdef  BACKUP
   if (ucon64.file)
     sscanf (ucon64.file, "%x", &ucon64.parport);
 #endif
 
-#if 1
-  do
+  console = ucon64.console;
+  show_nfo = ucon64.show_nfo;
+  while (rom_index < argc)
     {
+      ucon64.rom = argv[rom_index];
+      ucon64.console = console;
+      optind = 0;
+
+      ucon64.show_nfo = show_nfo;
       if (!ucon64_init (ucon64.rom, &rom))
+        if (ucon64.show_nfo == UCON64_YES)
+          ucon64_nfo (&rom);
+
+      ucon64.show_nfo = UCON64_NO;
+
+      ucon64_execute_options ();
+
+      if (ucon64.show_nfo == UCON64_YES)
+        if (!ucon64_init (ucon64.rom, &rom))
+          ucon64_nfo (&rom);
+
+      /*
+        Several options take more than one file, but should be executed only
+        once. Options that use the --file argument, needn't be specified here,
+        because argc has already been decremented. See the code that sets
+        ucon64.file.
+      */
+      switch (ucon64_option)
         {
-          if (ucon64.show_nfo == UCON64_YES)
-            ucon64_nfo (&rom);
-          else
-            break;
+        case UCON64_MULTI:                      // falling through
+        case UCON64_XFALMULTI:
+          rom_index = argc;                     // this will stop the main loop
+          break;
+        default:
+          ;
         }
-      // wildcard support ("ucon64 *.swc --file=0")
-      if (optind < argc)
-        {
-          ucon64.rom = argv[optind];
-          ucon64.console = UCON64_UNKNOWN;
-        }
-      optind++;
+
+      rom_index++;
     }
-  while (optind <= argc);
-#else
-  if (!ucon64_init (ucon64.rom, &rom))
-    if (ucon64.show_nfo == UCON64_YES)
-      ucon64_nfo (&rom);
-#endif
-  ucon64.show_nfo = UCON64_NO;
 
-  optind = option_index = 0;
+  if (file_message)
+    printf ("NOTE: Use --file=0 if \"%s\"\n"
+            "      should NOT be interpreted as --file argument\n", ucon64.file);
 
-  while ((c = getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
+  return 0;
+}
+
+
+int
+ucon64_execute_options (void)
+// execute all options for a single file
+{
+  int ucon64_argc, c = 0, result = 0, value = 0;
+  unsigned int padded;
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], src_name[FILENAME_MAX];
+  const char *ucon64_argv[128];
+
+  while ((ucon64_option = c =
+            getopt_long_only (ucon64.argc, ucon64.argv, "", long_options, NULL)) != -1)
     {
 #include "options.c"
     }
-
-  if (ucon64.show_nfo == UCON64_YES)
-    if (!ucon64_init (ucon64.rom, &rom))
-      ucon64_nfo (&rom);
-
   return 0;
 }
 
@@ -969,12 +1022,10 @@ usage (const char **s)
 void
 ucon64_usage (int argc, char *argv[])
 {
-  int c = 0;
-  int option_index = 0;
-  int single = 0;
+  int c = 0, single = 0;
 
   printf (
-    "Usage: %s [OPTION]... [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE]" /* [-o=OUTPUT_PATH] */ "\n\n"
+    "Usage: %s [OPTION]... [" OPTION_LONG_S "rom=][ROM]... [[" OPTION_LONG_S "file=]FILE]" /* [-o=OUTPUT_PATH] */ "\n\n"
     "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
 #ifdef  ANSI_COLOR
     "  " OPTION_LONG_S "ncol        disable ANSI colors in output\n"
@@ -1033,7 +1084,8 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
     "  " OPTION_LONG_S "help        display this help and exit\n"
     "  " OPTION_LONG_S "version     output version information and exit\n"
-//    "  " OPTION_LONG_S "quiet       don't show output\n"
+    "  " OPTION_S "q           be quiet (don't show ROM info)\n"
+//    "  " OPTION_LONG_S "qq          be even more quiet\n"
     "\n"
     , argv[0], ucon64.configfile);
 
@@ -1077,10 +1129,10 @@ ucon64_usage (int argc, char *argv[])
 #endif
       "\n");
 
-  optind = option_index = 0;
+  optind = 0;
   single = 0;
 
-  while (!single && (c = getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
+  while (!single && (c = getopt_long_only (argc, argv, "", long_options, NULL)) != -1)
     {
 //      if (single) break;
 

@@ -783,7 +783,7 @@ printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
 	"     %s -help|less (to see everything in less)\n"
 	"     give the force recognition option a try if something went wrong\n"
 	"\n"
-	"Report problems/ideas/fixes to noisyb@gmx.net\n"
+	"Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
 	"\n"
 ,ucon64_name(),ucon64_name()
 );

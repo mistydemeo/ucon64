@@ -18,20 +18,20 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include <ctype.h>
-#include <dirent.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <stdarg.h>
-#include <stddef.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <stdlib.h>
+
+#include "html2gui/src/html2gui.h"
+
 #include "misc.h"
 #include "ucon64.h"
-#include "html2gui/src/html2gui.h"
 #include "ucon64gui.h"
+
+#include "top.h"
+#include "bottom.h"
+#include "config/config.h"
 #include "snes/snes.h"
 #include "n64/n64.h"
 #include "nes/nes.h"
@@ -40,9 +40,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/swc.h"
 #include "backup/cdrw.h"
 
-#include "top.h"
-#include "bottom.h"
-#include "config/config.h"
 
 #define DEBUG
 

@@ -36,18 +36,6 @@ char buf[MAXBUFSIZE];
   fflush (stdout);
 #endif // DEBUG
 
-if(!strdcmp(query,"ucon64gui_rom"))
-{
-  h2g_input_file ("rom", ucon64gui.rom, "Select $ROM");
-  return;
-}
-
-if(!strdcmp(query,"ucon64gui_file"))
-{
-  h2g_input_file ("file", ucon64gui.file, "Select $FILE");
-  return;
-}
-
 if(!strdcmp(query,"ucon64gui_snes"))
 {
   ucon64gui_snes();
@@ -159,7 +147,7 @@ ucon64gui_root (void)
   h2g_head();
   h2g_title ("uCON64gui", icon_xpm);
   h2g_head_end();
-  h2g_body(NULL);
+  h2g_body(NULL,"#c0c0c0");
   h2g_form("http://ucon64");
 
   ucon64gui_top();

@@ -60,7 +60,7 @@ const char *n64_usage[] =
     "  " OPTION_LONG_S "int2        force ROM is in interleaved format 2\n"
     "  " OPTION_LONG_S "nint        force ROM is not in interleaved format\n"
 #endif
-    "  " OPTION_S "n=NEWNAME   change internal ROM name to NEWNAME\n"
+    "  " OPTION_S "n=NEW_NAME  change internal ROM name to NEW_NAME\n"
     "  " OPTION_LONG_S "v64         convert to Doctor V64 (and compatibles/interleaved)\n"
     "  " OPTION_LONG_S "z64         convert to Z64 (Zip Drive/not interleaved)\n"
 #ifdef TODO

@@ -49,9 +49,12 @@ typedef struct
   unsigned int crc32;                           // crc32 value of ROM (used for DAT files)
   unsigned int fcrc32;                          // if non-zero: crc32 of ROM as it is on disk
 
-#define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
-#define UCON64_TYPE_ISDISC(x) (x == UCON64_DISC)
-  int type;                                     // ROM type ROM or CD image
+#define UCON64_TYPE_ISUNKNOWN(x) (x == UCON64_TYPE_UNKNOWN)
+#define UCON64_TYPE_ISROM(x) (x == UCON64_TYPE_ROM)
+#define UCON64_TYPE_ISDISC(x) (x == UCON64_TYPE_DISC)
+#define UCON64_TYPE_ISPATCH(x) (x == UCON64_TYPE_PATCH)
+#define UCON64_TYPE_ISSRAM(x) (x == UCON64_TYPE_SRAM)
+  int type;                                     // file type (rom, disc, patch or sram)
 
   /*
     if console == UCON64_UNKNOWN or st_rominfo_t == NULL ucon64_rom_nfo() won't
@@ -61,7 +64,8 @@ typedef struct
 
 // gone for the sake of a "cleaner" getopt() use
 //  const char *file;                             // FILE (cmdline) with path
-
+  const char *patch_file;
+ 
   char configfile[FILENAME_MAX];                // path and name of the config file
   char configdir[FILENAME_MAX];                 // directory for config and DAT files
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)

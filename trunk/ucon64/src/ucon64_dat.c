@@ -53,11 +53,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define DAT_FIELD_SEPARATOR (0xac)
 #define DAT_FIELD_SEPARATOR_S ("\xac")
 
-
 typedef struct
 {
-  const char *id;                               // string to detect console from datfile name
-  uint8_t console;                              // UCON64_SNES, UCON64_NES, etc.
+  const char *id;                              // string to detect console from datfile name
+  int (*compare) (const char *, const char *); // the function which compares the id with the filename
+     // compare() == 0 means success
+  int8_t console;                              // UCON64_SNES, UCON64_NES, etc.
   const char **console_usage;
 } st_console_t;
 
@@ -148,79 +149,84 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
   // TODO: update this list to contain only strings that real DAT filenames
   //  start with
 
+  char buf[FILENAME_MAX];
   static const st_console_t console_type[] = {
-    {"GoodSNES", UCON64_SNES, snes_usage},
-    {"GoodNES", UCON64_NES, nes_usage},
-    {"GoodGBX", UCON64_GB, gameboy_usage},
-    {"GoodGEN", UCON64_GENESIS, genesis_usage},
+    {"GoodSNES", stricmp, UCON64_SNES, snes_usage},
+    {"GoodNES", stricmp, UCON64_NES, nes_usage},
+    {"GoodGBA", stricmp, UCON64_GBA, gba_usage},
+    {"GoodGBX", stricmp, UCON64_GB, gameboy_usage},
+    {"GoodGEN", stricmp, UCON64_GENESIS, genesis_usage},
+    {"GoodGG", stricmp, UCON64_SMS, sms_usage},
+    {"GoodSMS", stricmp, UCON64_SMS, sms_usage},
+    {"GoodJAG", stricmp, UCON64_JAGUAR, jaguar_usage},
+    {"GoodLynx", stricmp, UCON64_LYNX, lynx_usage},
+    {"GoodN64", stricmp, UCON64_N64, n64_usage},
+    {"Neo-Geo", stricmp, UCON64_NEOGEO, neogeo_usage},
+    {"GoodPCE", stricmp, UCON64_PCE, pcengine_usage},
+    {"Good2600", stricmp, UCON64_ATARI, atari_usage},
+    {"Good5200", stricmp, UCON64_ATARI, atari_usage},
+    {"Good7800", stricmp, UCON64_ATARI, atari_usage},
+    {"MAME", stricmp, UCON64_MAME, mame_usage},
 /*
-    {"sms", UCON64_SMS, sms_usage},
-    {"jag", UCON64_JAGUAR, jaguar_usage},
-    {"lynx", UCON64_LYNX, lynx_usage},
+    {"psx", stristr, UCON64_PSX, psx_usage},
+    {"ps1", stristr, UCON64_PSX, psx_usage},
+    {"psone", stristr, UCON64_PSX, psx_usage},
+    {"ps2", stristr, UCON64_PS2, ps2_usage},
+    {"sat", stristr, UCON64_SATURN, sat_usage},
+    {"dreamcast", stristr, UCON64_DC, dc_usage},
+    {"dc", stristr, UCON64_DC, dc_usage},
+    {"cd32", stristr, UCON64_CD32, cd32_usage},
+    {"cdi", stristr, UCON64_CDI, cdi_usage},
+    {"3do", stristr, UCON64_REAL3DO, real3do_usage},
+    {"system", stristr, UCON64_SYSTEM16, s16_usage},
+    {"pocket", stristr, UCON64_NEOGEOPOCKET, ngp_usage},
+    {"vectrex", stristr, UCON64_VECTREX, vectrex_usage},
+    {"virtual", stristr, UCON64_VIRTUALBOY, vboy_usage},
+    {"swan", stristr, UCON64_WONDERSWAN, swan_usage},
+    {"coleco", stristr, UCON64_COLECO, coleco_usage},
+    {"intelli", stristr, UCON64_INTELLI, intelli_usage},
+    {"", stristr, 0, cd32_usage},
+    {"", stristr, 0, cdi_usage},
+    {"", stristr, 0, channelf_usage},
+    {"", stristr, 0, coleco_usage},
+    {"", stristr, 0, gamecom_usage},
+    {"", stristr, 0, gc_usage},
+    {"", stristr, 0, gp32_usage},
+    {"", stristr, 0, intelli_usage},
+    {"", stristr, 0, odyssey2_usage},
+    {"", stristr, 0, odyssey_usage},
+    {"", stristr, 0, real3do_usage},
+    {"", stristr, 0, s16_usage},
+    {"", stristr, 0, sat_usage},
+    {"", stristr, 0, vboy_usage},
+    {"", stristr, 0, vc4000_usage},
+    {"", stristr, 0, vectrex_usage},
+    {"", stristr, 0, xbox_usage},
 */
-    {"GoodN64", UCON64_N64, n64_usage},
-/*
-    {"neo", UCON64_NEOGEO, neogeo_usage},
-    {"geo", UCON64_NEOGEO, neogeo_usage},
-    {"pce", UCON64_PCE, pcengine_usage},
-    {"engine", UCON64_PCE, pcengine_usage},
-    {"psx", UCON64_PSX, psx_usage},
-    {"ps1", UCON64_PSX, psx_usage},
-    {"psone", UCON64_PSX, psx_usage},
-    {"ps2", UCON64_PS2, ps2_usage},
-    {"sat", UCON64_SATURN, sat_usage},
-    {"dreamcast", UCON64_DC, dc_usage},
-    {"dc", UCON64_DC, dc_usage},
-    {"cd32", UCON64_CD32, cd32_usage},
-    {"cdi", UCON64_CDI, cdi_usage},
-    {"3do", UCON64_REAL3DO, real3do_usage},
-    {"2600", UCON64_ATARI, atari_usage},
-    {"5200", UCON64_ATARI, atari_usage},
-    {"7800", UCON64_ATARI, atari_usage},
-    {"system", UCON64_SYSTEM16, s16_usage},
-    {"pocket", UCON64_NEOGEOPOCKET, ngp_usage},
-*/
-    {"GoodGBA", UCON64_GBA, gba_usage},
-/*
-    {"vectrex", UCON64_VECTREX, vectrex_usage},
-    {"virtual", UCON64_VIRTUALBOY, vboy_usage},
-    {"swan", UCON64_WONDERSWAN, swan_usage},
-    {"coleco", UCON64_COLECO, coleco_usage},
-    {"intelli", UCON64_INTELLI, intelli_usage},
-*/
-#if 0
-    {"", 0, cd32_usage},
-    {"", 0, cdi_usage},
-    {"", 0, channelf_usage},
-    {"", 0, coleco_usage},
-    {"", 0, gamecom_usage},
-    {"", 0, gc_usage},
-    {"", 0, gp32_usage},
-    {"", 0, intelli_usage},
-    {"", 0, odyssey2_usage},
-    {"", 0, odyssey_usage},
-    {"", 0, real3do_usage},
-    {"", 0, s16_usage},
-    {"", 0, sat_usage},
-    {"", 0, vboy_usage},
-    {"", 0, vc4000_usage},
-    {"", 0, vectrex_usage},
-    {"", 0, xbox_usage},
-#endif
-    {0, 0, 0}
+    {0, 0, 0, 0}
   };
   int pos;
 
   for (pos = 0; console_type[pos].id; pos++)
     {
-      // Don't use stristr(), because it is probably less reliable.
-      if (!strnicmp (fname, console_type[pos].id, strlen (console_type[pos].id)))
+      strcpy (buf, fname);
+
+  // if we use stricmp(), strcmp(), etc. as compare() the strings must
+  //  have the same lengths. This saves us from using strnicmp(), 
+  //  strncmp(), etc. since they need a 3rd argument... 
+  // stristr() will work with this too..
+
+      if (console_type[pos].compare (buf, console_type[pos].id) != 0)
+        buf[strlen (console_type[pos].id)] = 0;
+      
+      if (!console_type[pos].compare (buf, console_type[pos].id))
         {
           dat->console = console_type[pos].console;
           dat->console_usage = console_type[pos].console_usage;
           break;
         }
     }
+
   if (console_type[pos].id == 0)
     {
       if (!warning)

@@ -79,8 +79,8 @@ const char *genesis_usage[] =
     "TODO:  " OPTION_LONG_S "gym    convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE\n"
     "TODO:  " OPTION_LONG_S "cym    convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE\n"
 #endif
-    "  " OPTION_S "n=NEWNAME   change foreign ROM name to NEWNAME\n"
-    "  " OPTION_LONG_S "n2=NEWNAME  change Japanese ROM name to NEWNAME\n"
+    "  " OPTION_S "n=NEW_NAME  change foreign ROM name to NEW_NAME\n"
+    "  " OPTION_LONG_S "n2=NEW_NAME change Japanese ROM name to NEW_NAME\n"
     "  " OPTION_S "j           join split ROM\n"
     "  " OPTION_S "s           split ROM into 4 Mb parts (for backup unit(s) with fdd)\n"
 // NOTE: part size number should match with size actually used

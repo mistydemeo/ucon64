@@ -91,7 +91,7 @@ extern const char *vboy_usage[];
 extern const char *vc4000_usage[];
 extern const char *vectrex_usage[];
 extern const char *xbox_usage[];
-
+extern const char *mame_usage[];
 
 extern char *ucon64_temp_file;
 extern int (*ucon64_testsplit_callback) (const char *filename);

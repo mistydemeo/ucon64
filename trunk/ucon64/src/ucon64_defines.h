@@ -30,8 +30,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define NULL_TO_UNKNOWN_S(str) ((str) ? (str) : (UCON64_UNKNOWN_S))
 
-//#define UCON64_KNOWN -1
-#define UCON64_UNKNOWN -1
+//#define UCON64_KNOWN (-1)
+#define UCON64_UNKNOWN (-1)
+
+//definitions for file types
+#define UCON64_TYPE_UNKNOWN (UCON64_UNKNOWN)
+#define UCON64_TYPE_ROM 1
+#define UCON64_TYPE_DISC 2
+#define UCON64_TYPE_PATCH 3
+#define UCON64_TYPE_SRAM 4
 
 #define UCON64_OPTION 1000
 #define UCON64_CONSOLE 0
@@ -71,7 +78,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_DBUH (UCON64_OPTION + 25)
 #define UCON64_DBV (UCON64_OPTION + 26)
 #define UCON64_DINT (UCON64_OPTION + 27)
-#define UCON64_DISC (UCON64_OPTION + 28)
+//gap
 #define UCON64_DUMPINFO (UCON64_OPTION + 29)
 #define UCON64_E (UCON64_OPTION + 30)
 #define UCON64_F (UCON64_OPTION + 31)
@@ -220,6 +227,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_LSD (UCON64_OPTION + 200)
 #define UCON64_GOOD (UCON64_OPTION + 201)
 #define UCON64_LSRAM (UCON64_OPTION + 202)
+#define UCON64_PATCH (UCON64_OPTION + 203)
 
 #define UCON64_ATARI (UCON64_CONSOLE + 1) // UCON64_ATA
 #define UCON64_CD32 (UCON64_CONSOLE + 2)
@@ -249,6 +257,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_VIRTUALBOY (UCON64_CONSOLE + 26) // UCON64_VBOY
 #define UCON64_WONDERSWAN (UCON64_CONSOLE + 27) // UCON64_SWAN
 #define UCON64_XBOX (UCON64_CONSOLE + 28)
+#define UCON64_MAME (UCON64_CONSOLE + 29)
 
 #define UCON64_VERSION_S "1.9.8beta8"
 

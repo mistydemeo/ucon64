@@ -1373,7 +1373,7 @@ genesis_init (st_rominfo_t *rominfo)
       (OFFSET (genesis_header, 165) << 16) +
       (OFFSET (genesis_header, 166) << 8) +
        OFFSET (genesis_header, 167);
-  sprintf ((char *) buf, "Internal size: %.4f Mb\n", (float) (y - x) / MBIT);
+  sprintf ((char *) buf, "Internal size: %.4f Mb\n", (float) (y - x + 1) / MBIT);
   strcat (rominfo->misc, (char *) buf);
 
   sprintf ((char *) buf, "ROM start: %08x\n", x);
@@ -1395,7 +1395,7 @@ genesis_init (st_rominfo_t *rominfo)
           (OFFSET (genesis_header, 186) << 8) +
            OFFSET (genesis_header, 187);
       sprintf ((char *) buf, "Cartridge RAM: Yes, %d kBytes (%s)\n",
-               y - x >> 10,
+               y - x + 1 >> 10,
                OFFSET (genesis_header, 178) & 0x40 ? "backup" : "non-backup");
       strcat (rominfo->misc, (char *) buf);
 
@@ -1408,22 +1408,13 @@ genesis_init (st_rominfo_t *rominfo)
   else
     strcat (rominfo->misc, "Cartridge RAM: No\n");
 
-#if 1
-/*
-  This code seems to give better results than the old code.
-  "Officially" "GM" indicates it's a game and "Al" that it's educational.
-*/
+  /*
+    Only checking for 'G' seems to give better results than checking for "GM".
+    "Officially" "GM" indicates it's a game and "Al" that it's educational.
+  */
   sprintf ((char *) buf, "Product type: %s\n",
-           (OFFSET (genesis_header, 128) == 'G') ? "Game" : "Education");
+           (OFFSET (genesis_header, 128) == 'G') ? "Game" : "Educational");
   strcat (rominfo->misc, (char *) buf);
-#else
-  if (OFFSET (genesis_header, 128) == 'G')
-    {
-      sprintf ((char *) buf, "ROM type: %s\n",
-               (OFFSET (genesis_header, 129) == 'M') ? "Game" : "Education");
-      strcat (rominfo->misc, (char *) buf);
-    }
-#endif
 
   sprintf ((char *) buf, "I/O device(s): %s",
     NULL_TO_UNKNOWN_S (genesis_io[MIN ((int) OFFSET (genesis_header, 144), GENESIS_IO_MAX - 1)]));

@@ -23,6 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SNES_H
 #define SNES_H
 
+#include "backup/fig.h"                                // for st_fig_header_t
+
 #define SNES_HEADER_START 0x7fb0
 #define SNES_HIROM 0x8000
 #define SNES_EHIROM (SNES_HIROM + 0x400000)
@@ -54,4 +56,5 @@ extern int snes_buheader_info (st_rominfo_t *rominfo);
 extern int snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names);
 extern int snes_get_snes_hirom (void);
 extern snes_file_t snes_get_file_type (void);
+extern void snes_set_fig_header (st_rominfo_t *rominfo, st_fig_header_t *header);
 #endif /* SNES_H */

@@ -77,7 +77,7 @@ int ucon64_exit(int value,struct ucon64_ *rom)
 #include "patch/ppf.h"
 #include "patch/bsl.h"
 #include "patch/xps.h"
-#include "patch/pal4u.h"
+//#include "patch/pal4u.h"
 
 
 
@@ -1034,7 +1034,7 @@ int ucon64_usage(int argc,char *argv[])
 bsl_usage( argc, argv );
 ips_usage( argc, argv );
 aps_usage( argc, argv );
-pal4u_usage( argc, argv );
+//pal4u_usage( argc, argv );
 ppf_usage( argc, argv );
 xps_usage( argc, argv );
 

@@ -113,26 +113,26 @@ struct ucon64_
     long internal_crc2_start;	//start of 2nd/inverse internal CRC
     int internal_crc2_len;	//length (in bytes) of 2nd/inverse internal CRC
 
-  char buheader[512];	//(possible) header of backup unit
+  unsigned char buheader[512];	//(possible) header of backup unit
   long buheader_start;	//start of backup unit header (mostly 0)
   long buheader_len;	//length of backup unit header (==0)?no bu header
 
-  char header[4096];	//(possible) internal ROM header
+  unsigned char header[4096];	//(possible) internal ROM header
   long header_start;	//start of internal ROM header
   long header_len;	//length of internal ROM header (==0)?no header
 
   char name[4096];	//ROM name
   long name_start;	//start of internal ROM name (==0)?name comes from database
   long name_len;		//length of ROM name
-	
+
   char manufacturer[4096];	//manufacturer name of the ROM
   long manufacturer_start;	//start of internal manufacturer name (==0)?manufacturer comes from database
   long manufacturer_len;	//length of manufacturer name
-	
+
   char country[4096];	//country name of the ROM
   long country_start;	//start of internal country name (==0)? country comes from database
   long country_len;	//length of country name
-	
+
   char misc[MAXBUFSIZE];	//some miscellaneous information about the ROM in one single string
 };
 

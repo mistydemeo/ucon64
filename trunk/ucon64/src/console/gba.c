@@ -40,7 +40,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 #define GBA_NAME_LEN 12
-#define LOGODATA_LEN 156
 #define GBA_HEADER_START 0
 #define GBA_HEADER_LEN (sizeof (st_gba_header_t))
 
@@ -164,7 +163,7 @@ Offset beh-bfh - Reserved  area  -  Fixed,  00h filled area without any useful
 typedef struct st_gba_header
 {
   unsigned char start[4];                       // 0x00
-  unsigned char logo[LOGODATA_LEN];             // 0x04
+  unsigned char logo[GBA_LOGODATA_LEN];         // 0x04
   unsigned char name[GBA_NAME_LEN];             // 0xa0
   unsigned char game_id_prefix;                 // 0xac
   unsigned char game_id_low;                    // 0xad
@@ -182,7 +181,7 @@ typedef struct st_gba_header
 } st_gba_header_t;
 
 static st_gba_header_t gba_header;
-static const unsigned char logodata[] = {
+const unsigned char gba_logodata[] = {          // Note: not a static variable
   0x24, 0xff, 0xae, 0x51,
   0x69, 0x9a, 0xa2, 0x21, 0x3d, 0x84, 0x82, 0x0a,
   0x84, 0xe4, 0x09, 0xad, 0x11, 0x24, 0x8b, 0x98,
@@ -232,8 +231,8 @@ gba_logo (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fwrite (logodata, GBA_HEADER_START + rominfo->buheader_len + 0x04,
-            LOGODATA_LEN, dest_name, "r+b");
+  q_fwrite (gba_logodata, GBA_HEADER_START + rominfo->buheader_len + 0x04,
+            GBA_LOGODATA_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -413,7 +412,7 @@ gba_init (st_rominfo_t *rominfo)
   strcat (rominfo->misc, buf);
 
   strcat (rominfo->misc, "Logo data: ");
-  if (memcmp (gba_header.logo, logodata, LOGODATA_LEN) == 0)
+  if (memcmp (gba_header.logo, gba_logodata, GBA_LOGODATA_LEN) == 0)
     {
 #ifdef  ANSI_COLOR
       if (ucon64.ansi_color)

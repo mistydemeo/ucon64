@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "gbx.h"
+#include "misc_par.h"
 
 const st_usage_t gbx_usage[] =
   {

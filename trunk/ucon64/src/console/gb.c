@@ -86,12 +86,12 @@ typedef struct st_gameboy_header
   unsigned char id2;                            // 0x01
   unsigned char start_low;                      // 0x02
   unsigned char start_high;                     // 0x03
-  unsigned char pad1[0x30];
+  unsigned char logo[0x30];                     // 0x04
   unsigned char name[GB_NAME_LEN];              // 0x34
   unsigned char gb_type;                        // 0x43
   unsigned char maker_high;                     // 0x44
   unsigned char maker_low;                      // 0x45
-  unsigned char pad2;
+  unsigned char pad;
   unsigned char rom_type;                       // 0x47
   unsigned char rom_size;                       // 0x48
   unsigned char sram_size;                      // 0x49
@@ -131,7 +131,7 @@ gameboy_logo (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fwrite (gb_logo, rominfo->buheader_len + 0x104,
+  q_fwrite (gb_logo, rominfo->buheader_len + GAMEBOY_HEADER_START + 4,
             48, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -179,14 +179,14 @@ gameboy_n2gb (st_rominfo_t *rominfo, const char *nesrom)
 
   for (n = 0; n < ucon64.file_size - rominfo->buheader_len; n++)
     {
-      if (n == 0x14e || n == 0x14f)
+      if ((n == GAMEBOY_HEADER_START + 0x4e) || (n == GAMEBOY_HEADER_START + 0x4f))
         continue;
       else
         crc += buf[rominfo->buheader_len + n];
     }
 
-  buf[rominfo->buheader_len + 0x14e] = crc >> 8;
-  buf[rominfo->buheader_len + 0x14f] = crc;
+  buf[rominfo->buheader_len + GAMEBOY_HEADER_START + 0x4e] = crc >> 8;
+  buf[rominfo->buheader_len + GAMEBOY_HEADER_START + 0x4f] = crc;
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fwrite (buf, 0, ucon64.file_size, dest_name, "wb");
@@ -320,7 +320,7 @@ gameboy_n (st_rominfo_t *rominfo, const char *name)
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fwrite (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x34,
+  q_fwrite (buf, rominfo->buheader_len + GAMEBOY_HEADER_START + 0x34,
             GB_NAME_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -340,7 +340,8 @@ gameboy_chk (st_rominfo_t *rominfo)
   buf[0] = checksum.complement;
   buf[1] = rominfo->current_internal_crc >> 8;
   buf[2] = rominfo->current_internal_crc;
-  q_fwrite (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d, 3, dest_name, "r+b");
+  q_fwrite (buf, rominfo->buheader_len + GAMEBOY_HEADER_START + 0x4d, 3,
+            dest_name, "r+b");
 
   mem_hexdump (buf, 3, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d);
 
@@ -483,8 +484,8 @@ gameboy_init (st_rominfo_t *rominfo)
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
-  q_fread (&gameboy_header, GAMEBOY_HEADER_START +
-    rominfo->buheader_len, GAMEBOY_HEADER_LEN, ucon64.rom);
+  q_fread (&gameboy_header, rominfo->buheader_len + GAMEBOY_HEADER_START,
+           GAMEBOY_HEADER_LEN, ucon64.rom);
   if (gameboy_header.id1 == 0x00 && gameboy_header.id2 == 0xc3)
     result = 0;
   else
@@ -492,8 +493,8 @@ gameboy_init (st_rominfo_t *rominfo)
       rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
         ucon64.buheader_len : (int) SSC_HEADER_LEN;
 
-      q_fread (&gameboy_header, GAMEBOY_HEADER_START +
-        rominfo->buheader_len, GAMEBOY_HEADER_LEN, ucon64.rom);
+      q_fread (&gameboy_header, rominfo->buheader_len + GAMEBOY_HEADER_START,
+               GAMEBOY_HEADER_LEN, ucon64.rom);
       if (gameboy_header.id1 == 0x00 && gameboy_header.id2 == 0xc3)
         result = 0;
       else
@@ -610,9 +611,12 @@ gameboy_chksum (st_rominfo_t *rominfo)
 
   for (i = 0; i < size; i++)
     {
-      if (i != 0x014d && i != 0x014e && i != 0x014f)
+      if ((i != GAMEBOY_HEADER_START + 0x4d) &&
+          (i != GAMEBOY_HEADER_START + 0x4e) &&
+          (i != GAMEBOY_HEADER_START + 0x4f))
         sum.value += rom_buffer[i];
-      if (i >= 0x0134 && i < 0x014d)
+      if ((i >= GAMEBOY_HEADER_START + 0x34) &&
+          (i < GAMEBOY_HEADER_START + 0x4d))
         sum.complement += rom_buffer[i];
     }
   free (rom_buffer);

@@ -35,6 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "doctor64.h"
+#include "misc_par.h"
 
 const st_usage_t doctor64_usage[] = {
   {NULL, NULL, "Doctor V64"},
@@ -57,7 +58,7 @@ const st_usage_t doctor64_usage[] = {
 #define REC_MAX_WAIT SEND_MAX_WAIT
 
 
-int
+static int
 parport_write (char src[], int len, unsigned int parport)
 {
   int maxwait, i;
@@ -88,7 +89,7 @@ parport_write (char src[], int len, unsigned int parport)
 }
 
 
-int
+static int
 parport_read (char dest[], int len, unsigned int parport)
 {
   int i, maxwait;

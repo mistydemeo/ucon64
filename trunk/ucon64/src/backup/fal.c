@@ -33,6 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "fal.h"
+#include "misc_par.h"
 
 
 const st_usage_t fal_usage[] =

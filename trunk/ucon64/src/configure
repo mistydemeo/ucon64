@@ -838,6 +838,7 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-zlib             build with gzip and zip support (default: yes)
+  --with-libusb           build with (lib)usb support (default: no)
 
 Some influential environment variables:
   CC          C compiler command
@@ -2050,8 +2051,6 @@ echo "${ECHO_T}$enable_parallel" >&6
 
 
 
-
-
 echo "$as_me:$LINENO: checking whether to use ppdev" >&5
 echo $ECHO_N "checking whether to use ppdev... $ECHO_C" >&6
 # Check whether --enable-ppdev or --disable-ppdev was given.
@@ -2191,11 +2190,72 @@ cat >>confdefs.h <<\_ACEOF
 #define HAVE_ZLIB_H 1
 _ACEOF
 
-  LDFLAGS="$LDFLAGS -lz"
   DEFINE_ZLIB_MAKE="ZLIB=1"
 fi
 echo "$as_me:$LINENO: result: $with_zlib" >&5
 echo "${ECHO_T}$with_zlib" >&6
+
+
+
+echo "$as_me:$LINENO: checking for libusb" >&5
+echo $ECHO_N "checking for libusb... $ECHO_C" >&6
+
+# Check whether --with-libusb or --without-libusb was given.
+if test "${with_libusb+set}" = set; then
+  withval="$with_libusb"
+  with_libusb=$withval
+else
+  with_libusb=no
+fi;
+if test $with_libusb = yes; then
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+#include <usb.h>
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  with_libusb=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+with_libusb=no
+fi
+rm -f conftest.$ac_objext conftest.$ac_ext
+fi
+if test $with_libusb = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_USB_H 1
+_ACEOF
+
+  DEFINE_USB_MAKE="USB=1"
+fi
+echo "$as_me:$LINENO: result: $with_libusb" >&5
+echo "${ECHO_T}$with_libusb" >&6
 
 
 
@@ -4396,6 +4456,7 @@ s,@CPP@,$CPP,;t t
 s,@DEFINE_DLOPEN_MAKE@,$DEFINE_DLOPEN_MAKE,;t t
 s,@DEFINE_DISCMAGE_MAKE@,$DEFINE_DISCMAGE_MAKE,;t t
 s,@DEFINE_ZLIB_MAKE@,$DEFINE_ZLIB_MAKE,;t t
+s,@DEFINE_USB_MAKE@,$DEFINE_USB_MAKE,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@RANLIB@,$RANLIB,;t t
 s,@ac_ct_RANLIB@,$ac_ct_RANLIB,;t t

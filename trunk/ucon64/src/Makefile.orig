@@ -3,6 +3,7 @@
 DLOPEN=1
 #ZLIB=1
 DISCMAGE=1
+#USB=1
 
 CC=gcc
 CFLAGS=-I. -Wall -W -O3 -DHAVE_CONFIG_H
@@ -76,7 +77,7 @@ endif                                   # GCC_WIN
 
 
 OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
-        misc.o getopt.o quick_io.o \
+        misc.o misc_par.o getopt.o quick_io.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
@@ -88,13 +89,17 @@ OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
         backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/gd.o \
         backup/md.o backup/mgd.o backup/smd.o backup/swc.o backup/ufo.o \
         backup/dex.o backup/psxpblib.o backup/mccl.o backup/lynxit.o \
-        backup/ffe.o backup/msg.o backup/smc.o
+        backup/ffe.o backup/msg.o backup/smc.o backup/f2a.o
 ifdef ZLIB
 LDFLAGS+=-lz
-OBJECTS+=unzip.o map.o miscz.o
+OBJECTS+=unzip.o map.o misc_z.o
 endif
 ifdef DISCMAGE
 OBJECTS+=ucon64_dm.o
+endif
+ifdef USB
+LDFLAGS+=-lusb
+OBJECTS+=misc_usb.o
 endif
 
 ifdef DLOPEN
@@ -240,9 +245,11 @@ UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
 
 getopt.o: getopt.h
 unzip.o: unzip.h config.h
-misc.o: misc.h miscz.h config.h
+misc.o: misc.h misc_z.h config.h
 map.o: map.h config.h
-miscz.o: miscz.h map.h config.h
+misc_z.o: misc_z.h map.h config.h
+misc_par.o: misc_par.h config.h
+misc_usb.o: misc_usb.h config.h
 quick_io.o: quick_io.h misc.h config.h
 dlopen.o: dlopen.h dxedll_pub.h config.h
 ucon64.o: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
@@ -313,3 +320,4 @@ backup/mccl.o: backup/mccl.h $(UCON64_STD_H)
 backup/lynxit.o: backup/lynxit.h $(UCON64_STD_H)
 backup/ffe.o: backup/ffe.h $(UCON64_STD_H)
 backup/psxpblib.o: backup/psxpblib.h $(UCON64_STD_H)
+backup/f2a.o: backup/f2a.h $(UCON64_STD_H)

@@ -139,6 +139,10 @@ typedef struct
 #endif                                          //  /dev/parport0 or parallel.device)
   int parport;                                  // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
+#ifdef  HAVE_USB_H
+  int usbport;                                  // if (usbport != 0) use usbport
+  char usbport_dev[80];                         // usb port device (e.g. /dev/usb/hiddev0)
+#endif
 
 #ifdef  ANSI_COLOR
   int ansi_color;

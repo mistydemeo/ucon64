@@ -32,6 +32,7 @@
 #include "misc.h"
 #include "ucon64_misc.h"
 #include "psxpblib.h"
+#include "misc_par.h"
 
 #ifdef  PARALLEL
 

@@ -488,7 +488,7 @@ ucon64_exit (void)
 #ifdef  DISCMAGE
   if (ucon64.discmage_enabled)
     if (ucon64.image)
-      libdm_close (ucon64.image);
+      dm_close (ucon64.image);
 #endif
 
   handle_registered_funcs ();
@@ -851,11 +851,7 @@ ucon64_execute_options (void)
     copier option has been specified, because another switch might've been
     specified after -port.
   */
-  if (ucon64_parport_needed
-#ifdef  HAVE_USB_H
-      && !ucon64.usbport
-#endif
-     )
+  if (ucon64_parport_needed)
     ucon64.parport = misc_parport_open (ucon64.parport);
 #endif // PARALLEL
 #if     defined __unix__ && !defined __MSDOS__
@@ -1025,7 +1021,7 @@ ucon64_rom_handling (void)
       if (ucon64.discmage_enabled)
 //        if (!ucon64.rominfo || ucon64.force_disc)
         if (ucon64.force_disc)
-          ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
+          ucon64.image = dm_reopen (ucon64.rom, 0, ucon64.image);
 #endif
     }
   // end of WF_PROBE

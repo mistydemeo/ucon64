@@ -1431,7 +1431,7 @@ ucon64_configfile (void)
                    "emulate_ng=\n"
                    "emulate_nes=tuxnes -E2 -rx11 -v -s/dev/dsp -R44100\n"
                    "emulate_pce=\n"
-                   "emulate_snes=snes9x -tr -fs -sc -hires -dfr -r 7 -is -j\n"
+                   "emulate_snes=zsnes\n"
                    "emulate_ngp=\n"
                    "emulate_ata=\n"
                    "emulate_s16=\n"

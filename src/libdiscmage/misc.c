@@ -926,7 +926,21 @@ getenv2 (const char *variable)
 
       if (!strcmp (variable, "TEMP") || !strcmp (variable, "TMP"))
         {
-          if (access (FILE_SEPARATOR_S"tmp", R_OK | W_OK) == 0)
+#if     defined __MSDOS__ || defined __CYGWIN__
+          /*
+            DJGPP and (yet another) Cygwin quirck
+            A trailing backslash is used to check for a directory. Normally 
+            DJGPP's runtime system is able to handle forward slashes in paths,
+            but access() won't differentiate between files and dirs if a
+            forward slash is used. Cygwin's runtime system seems to handle
+            paths with forward slashes quite different from paths with
+            backslashes. This trick seems to work only if a backslash is used.
+          */
+          if (access ("\\tmp\\", R_OK | W_OK) == 0)
+#else
+          // trailing file separator to force it to be a directory
+          if (access (FILE_SEPARATOR_S"tmp"FILE_SEPARATOR_S, R_OK | W_OK) == 0) 
+#endif  
             strcpy (value, FILE_SEPARATOR_S"tmp");
           else
             getcwd (value, FILENAME_MAX);

@@ -44,7 +44,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "cdi.h"
 #include "nero.h"
 
-const uint32_t dm_version = LINUX_VERSION (0,0,1);
+const uint32_t dm_version = LIB_VERSION (0, 0, 2);
 
 
 int
@@ -880,7 +880,7 @@ dm_isofix (dm_image_t * image)
 int
 dm_disc_read (dm_image_t *image)
 {
-  fprintf (stderr, libdm_msg[DEPRICATED], "dm_disc_read()");
+  fprintf (stderr, libdm_msg[DEPRECATED], "dm_disc_read()");
   return 0;
 }
 
@@ -888,6 +888,20 @@ dm_disc_read (dm_image_t *image)
 int
 dm_disc_write (dm_image_t *image)
 {
-  fprintf (stderr, libdm_msg[DEPRICATED], "dm_disc_write()");
+  fprintf (stderr, libdm_msg[DEPRECATED], "dm_disc_write()");
   return 0;
+}
+
+
+uint32_t
+dm_get_version (void)
+{
+  return dm_version;
+}
+
+
+st_dm_usage_t *
+dm_get_usage (void)
+{
+  return (st_dm_usage_t *) dm_usage;
 }

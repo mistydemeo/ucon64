@@ -123,9 +123,7 @@ typedef signed long long int int64_t;
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #endif
 
-#ifndef LINUX_VERSION
-#define LINUX_VERSION(ver,rel,seq) (((ver)<<16) | ((rel)<<8) | (seq))
-#endif
+#define LIB_VERSION(ver, rel, seq) (((ver) << 16) | ((rel) << 8) | (seq))
 
 #define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
 
@@ -200,10 +198,11 @@ typedef signed long long int int64_t;
 #define me2le_64(x) (x)
 #endif
 
-#if     defined __unix__ || defined __BEOS__ // DJGPP, Cygwin, GNU/Linux, Solaris, FreeBSD, BeOS
+#if     ((defined __unix__ || defined __BEOS__) && !defined __MSDOS__)
+// Cygwin, GNU/Linux, Solaris, FreeBSD, BeOS
 #define FILE_SEPARATOR '/'
 #define FILE_SEPARATOR_S "/"
-#else   // __MSDOS__, WIN32
+#else // DJGPP, Win32
 #define FILE_SEPARATOR '\\'
 #define FILE_SEPARATOR_S "\\"
 #endif

@@ -109,6 +109,7 @@ static void ucon64_usage (int argc, char *argv[]);
 static int ucon64_process_rom (const char *fname, int console, int show_nfo);
 static int ucon64_execute_options (void);
 static void ucon64_rom_nfo (const st_rominfo_t *rominfo);
+static int ucon64_libdiscmage (void);
 
 st_ucon64_t ucon64;
 static st_rominfo_t rom;
@@ -315,15 +316,14 @@ const struct option options[] =   {
     {0, 0, 0, 0}
   };
 
-
 #ifdef  DLOPEN
 void *libdm;
 
-#define dm_version dm_version_ptr
-const uint32_t *dm_version_ptr = 0;
+#define dm_get_version dm_get_version_ptr
+uint32_t (*dm_get_version_ptr) (void) = NULL;
 
-#define dm_usage dm_usage_ptr
-const st_dm_usage_t *dm_usage_ptr = NULL;
+#define dm_get_usage dm_get_usage_ptr
+st_dm_usage_t *(*dm_get_usage_ptr) (void) = NULL;
 
 #define dm_open dm_open_ptr
 #define dm_close dm_close_ptr
@@ -377,7 +377,7 @@ main (int argc, char **argv)
       exit (1);
     }
 
-  memset (&ucon64, 0L, sizeof (st_ucon64_t));
+  memset (&ucon64, 0, sizeof (st_ucon64_t));
 
 #ifdef  __unix__
   // We need to modify the umask, because the configfile is made while we are
@@ -386,74 +386,11 @@ main (int argc, char **argv)
   umask (002);
 #endif
 
+  ucon64.argc = argc;
+  ucon64.argv = argv;                           // must be set prior to calling
+                                                //  ucon64_libdiscmage()
   ucon64_configfile ();
-
-#ifdef  DLOPEN
-  strcpy (ucon64.discmage_path, get_property (ucon64.configfile, "discmage_path", buf, ""));
-#ifdef  __CYGWIN__
-  strcpy (ucon64.discmage_path, cygwin_fix (ucon64.discmage_path));
-#endif
-  strcpy (buf, ucon64.discmage_path);
-  realpath2 (buf, ucon64.discmage_path);
-
-  // if ucon64.discmage_path points to an existing file then load it
-  if (!access (ucon64.discmage_path, F_OK))
-    {
-      libdm = open_module (ucon64.discmage_path);
-
-      dm_version = get_symbol (libdm, "dm_version");
-      
-      if ((uint32_t)dm_version < (uint32_t)LINUX_VERSION(0,0,2))
-        {
-          fprintf (stderr, "ERROR: Your libdiscmage is too old\n\n");
-          ucon64.discmage_enabled = 0;
-        }
-      else
-        {
-          dm_usage = get_symbol (libdm, "dm_usage");
-
-          dm_open = get_symbol (libdm, "dm_open");
-          dm_close = get_symbol (libdm, "dm_close");
-
-          dm_rip = get_symbol (libdm, "dm_rip");
-          dm_cdirip = get_symbol (libdm, "dm_cdirip");
-          dm_nrgrip = get_symbol (libdm, "dm_nrgrip");
-
-          dm_disc_read = get_symbol (libdm, "dm_disc_read");
-          dm_disc_write = get_symbol (libdm, "dm_disc_write");
-
-          dm_mksheets = get_symbol (libdm, "dm_mksheets");
-          dm_mktoc = get_symbol (libdm, "dm_mktoc");
-          dm_mkcue = get_symbol (libdm, "dm_mkcue");
-
-          ucon64.discmage_enabled = 1;
-        }
-    }
-  else
-    ucon64.discmage_enabled = 0;
-#else // !defined DLOPEN
-#ifdef  DJGPP
-  {
-    /*
-      The following piece of code makes the DLL "search" behaviour a bit like
-      the search behaviour for Windows programs. A bit, because the import
-      library just opens the file with the name that is stored in
-      djimport_path. It won't search for the DXE in the Windows system
-      directory, nor will it search the directories of the PATH environment
-      variable.
-    */
-    extern char djimport_path[FILENAME_MAX];
-    char *p;
-
-    strcpy (buf, argv[0]);
-    change_string ("/", 1, 0, 0, FILE_SEPARATOR_S, 1, buf, strlen (buf), 0);
-    if ((p = strrchr (buf, FILE_SEPARATOR)))
-      *p = 0;
-    sprintf (djimport_path, "%s"FILE_SEPARATOR_S"%s", buf, "discmage.dxe");
-  }
-#endif // DJGPP
-  ucon64.discmage_enabled = 1;
-#endif
+  ucon64.discmage_enabled = ucon64_libdiscmage ();
 
   ucon64.show_nfo = UCON64_YES;
 
@@ -521,9 +458,6 @@ main (int argc, char **argv)
       ucon64_usage (argc, argv);
       return 0;
     }
-
-  ucon64.argc = argc;
-  ucon64.argv = argv;
 
 #ifdef  ANSI_COLOR
   if (ucon64.ansi_color)
@@ -600,6 +534,98 @@ main (int argc, char **argv)
     }
 
   return 0;
+}
+
+
+int
+ucon64_libdiscmage (void)
+{
+  uint32_t version;
+#if     defined DLOPEN || defined DJGPP
+  char buf[MAXBUFSIZE];
+#endif
+
+#ifdef  DLOPEN
+  strcpy (ucon64.discmage_path, get_property (ucon64.configfile, "discmage_path", buf, ""));
+#ifdef  __CYGWIN__
+  strcpy (ucon64.discmage_path, cygwin_fix (ucon64.discmage_path));
+#endif
+  strcpy (buf, ucon64.discmage_path);
+  realpath2 (buf, ucon64.discmage_path);
+
+  // if ucon64.discmage_path points to an existing file then load it
+  if (!access (ucon64.discmage_path, F_OK))
+    {
+      libdm = open_module (ucon64.discmage_path);
+
+      dm_get_version = get_symbol (libdm, "dm_get_version");
+      version = dm_get_version ();
+      if (version < LIB_VERSION (0, 0, 2))
+        {
+          fprintf (stderr,
+                   "ERROR: Your libdiscmage is too old (%d.%d.%d)\n"
+                   "       You need at least version %d.%d.%d for this version of uCON64\n\n",
+                   version >> 16, (version >> 8) & 0xff, version & 0xff,
+                   0, 0, 2);
+          return 0;
+        }
+      else
+        {
+          dm_get_usage = get_symbol (libdm, "dm_get_usage");
+
+          dm_open = get_symbol (libdm, "dm_open");
+          dm_close = get_symbol (libdm, "dm_close");
+
+          dm_rip = get_symbol (libdm, "dm_rip");
+          dm_cdirip = get_symbol (libdm, "dm_cdirip");
+          dm_nrgrip = get_symbol (libdm, "dm_nrgrip");
+
+          dm_disc_read = get_symbol (libdm, "dm_disc_read");
+          dm_disc_write = get_symbol (libdm, "dm_disc_write");
+
+          dm_mksheets = get_symbol (libdm, "dm_mksheets");
+          dm_mktoc = get_symbol (libdm, "dm_mktoc");
+          dm_mkcue = get_symbol (libdm, "dm_mkcue");
+
+          return 1;
+        }
+    }
+  else
+    return 0;
+#else // !defined DLOPEN
+#ifdef  DJGPP
+  {
+    /*
+      The following piece of code makes the DLL "search" behaviour a bit like
+      the search behaviour for Windows programs. A bit, because the import
+      library just opens the file with the name that is stored in
+      djimport_path. It won't search for the DXE in the Windows system
+      directory, nor will it search the directories of the PATH environment
+      variable.
+    */
+    extern char djimport_path[FILENAME_MAX];
+    char *p;
+
+    strcpy (buf, ucon64.argv[0]);
+    change_mem (buf, strlen (buf), "/", 1, 0, 0, FILE_SEPARATOR_S, 1, 0);
+    if ((p = strrchr (buf, FILE_SEPARATOR)))
+      *p = 0;
+    sprintf (djimport_path, "%s"FILE_SEPARATOR_S"%s", buf, "discmage.dxe");
+  }
+#endif // DJGPP
+  version = dm_get_version ();
+  if (version < LIB_VERSION (0, 0, 2))
+    {
+      fprintf (stderr,
+               "ERROR: Your libdiscmage is too old (%d.%d.%d)\n"
+               "       You need at least version %d.%d.%d for this version of uCON64\n\n",
+               version >> 16, (version >> 8) & 0xff, version & 0xff,
+               0, 0, 2);
+      return 0;
+    }
+  else
+    return 1;
+#endif // #ifdef DLOPEN
 }
 
 
@@ -1116,9 +1142,9 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
 static void
 ucon64_render_usage (const st_usage_t *usage)
 {
-  register int x, pos = 0;
+  int x, pos = 0;
   char buf[MAXBUFSIZE];
-  
+
   for (x = 0; usage[x].option_s || usage[x].desc; x++)
     {
       if (!usage[x].option_s) // title
@@ -1130,11 +1156,11 @@ ucon64_render_usage (const st_usage_t *usage)
         {
           if (usage[x].option_s)
             {
-              sprintf (buf, 
-                (strlen (usage[x].option_s) < 12 ? 
+              sprintf (buf,
+                (strlen (usage[x].option_s) < 12 ?
                  "  %s%s                             " :
                  "  %s%s "),
-                (!usage[x].option_s[1] || 
+                (!usage[x].option_s[1] ||
                  usage[x].option_s[1] == '=' ||
                  usage[x].option_s[1] == ' ' ? OPTION_S : OPTION_LONG_S),
                 usage[x].option_s);
@@ -1147,7 +1173,7 @@ ucon64_render_usage (const st_usage_t *usage)
                 printf ("%s\n", buf);
               else
                 printf ("%s", buf);
-#endif              
+#endif
             }
 
           if (usage[x].desc)
@@ -1177,105 +1203,117 @@ void
 ucon64_usage (int argc, char *argv[])
 {
   int x = 0, c = 0, single = 0;
-  char *name_exe = basename2 (argv[0]);
   st_usage_array_t usage_array[] = {
-    {UCON64_DC, {(const st_usage_t *)dc_usage, 0, 0, 0, 0, 0}},
-    {UCON64_PSX, {(const st_usage_t *)psx_usage,
+    {UCON64_DC, {dc_usage, 0, 0, 0, 0, 0}},
+    {UCON64_PSX, {psx_usage,
 #ifdef  PARALLEL
-      (const st_usage_t *)dex_usage,
+      dex_usage,
 #else
       0,
 #endif // PARALLEL
       0, 0, 0, 0}},
-    {UCON64_GBA, {(const st_usage_t *)gba_usage,
+    {UCON64_GBA, {gba_usage,
 #ifdef  PARALLEL
-      (const st_usage_t *)fal_usage,
+      fal_usage,
 #else
       0,
 #endif // PARALLEL
       0, 0, 0, 0}},
-    {UCON64_N64, {(const st_usage_t *)n64_usage,
+    {UCON64_N64, {n64_usage,
 #ifdef  PARALLEL
-      (const st_usage_t *)doctor64_usage,
-      (const st_usage_t *)doctor64jr_usage,
-//      (const st_usage_t *)cd64_usage,
-      (const st_usage_t *)dex_usage,
+      doctor64_usage,
+      doctor64jr_usage,
+//      cd64_usage,
+      dex_usage,
 #else
       0, 0, 0, 0,
 #endif // PARALLEL
       0}},
-    {UCON64_SNES, {(const st_usage_t *)snes_usage,
+    {UCON64_SNES, {snes_usage,
 #ifdef  PARALLEL
-      (const st_usage_t *)swc_usage,
-      (const st_usage_t *)gd_usage,
-//      (const st_usage_t *)fig_usage,
-//      (const st_usage_t *)mgd_usage,
+      swc_usage,
+      gd_usage,
+//      fig_usage,
+//      mgd_usage,
 #else
       0, 0,
 #endif // PARALLEL
       0, 0, 0}},
-    {UCON64_NG, {(const st_usage_t *)neogeo_usage, 0, 0, 0, 0, 0}},
-    {UCON64_GEN, {(const st_usage_t *)genesis_usage,
+    {UCON64_NG, {neogeo_usage, 0, 0, 0, 0, 0}},
+    {UCON64_GEN, {genesis_usage,
 #ifdef  PARALLEL
-        (const st_usage_t *)smd_usage,
-//        (const st_usage_t *)mgd_usage,
+        smd_usage,
+//        mgd_usage,
 #else
       0,
 #endif // PARALLEL
       0, 0, 0, 0}},
-    {UCON64_GB, {(const st_usage_t *)gameboy_usage,
+    {UCON64_GB, {gameboy_usage,
 #ifdef  PARALLEL
-        (const st_usage_t *)gbx_usage,
-        (const st_usage_t *)mccl_usage,
+        gbx_usage,
+        mccl_usage,
 #else
       0, 0,
 #endif // PARALLEL
       0, 0, 0}},  
-    {UCON64_LYNX, {(const st_usage_t *)lynx_usage,
+    {UCON64_LYNX, {lynx_usage,
 #ifdef  PARALLEL
-      (const st_usage_t *)lynxit_usage,
+      lynxit_usage,
 #else
       0,
 #endif // PARALLEL
       0, 0, 0, 0}},
-    {UCON64_PCE, {(const st_usage_t *)pcengine_usage,
+    {UCON64_PCE, {pcengine_usage,
 #ifdef  PARALLEL
-//        (const st_usage_t *)mgd_usage,
+//        mgd_usage,
 #endif // PARALLEL
       0, 0, 0, 0}},
-    {UCON64_SMS, {(const st_usage_t *)sms_usage,
+    {UCON64_SMS, {sms_usage,
 #ifdef  PARALLEL
-      (const st_usage_t *)smd_usage,
+      smd_usage,
 #else
       0,
 #endif // PARALLEL
       0, 0, 0, 0}},
-    {UCON64_NES, {(const st_usage_t *)nes_usage, 0, 0, 0, 0, 0}},
-    {UCON64_SWAN, {(const st_usage_t *)swan_usage, 0, 0, 0, 0, 0}},
-    {UCON64_JAG, {(const st_usage_t *)jaguar_usage, 0, 0, 0, 0, 0}},
-    {UCON64_NGP, {(const st_usage_t *)ngp_usage,
+    {UCON64_NES, {nes_usage, 0, 0, 0, 0, 0}},
+    {UCON64_SWAN, {swan_usage, 0, 0, 0, 0, 0}},
+    {UCON64_JAG, {jaguar_usage, 0, 0, 0, 0, 0}},
+    {UCON64_NGP, {ngp_usage,
 #ifdef  PARALLEL
-//        (const st_usage_t *)fpl_usage,
+//        fpl_usage,
 #endif // PARALLEL
       0, 0, 0, 0, 0}},
 #if 0
-    {UCON64_G, {(const st_usage_t *)nes_usage, 0, 0, 0, 0, 0}},
-    {UCON64_S16, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
-    {UCON64_ATA, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
-    {UCON64_COLECO, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
-    {UCON64_VBOY, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
-    {UCON64_VEC, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
-    {UCON64_INTELLI, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
-    {UCON64_PS2, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
-    {UCON64_SAT, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
-    {UCON64_3DO, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
-    {UCON64_CD32, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
-    {UCON64_CDI, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
-    {UCON64_XBOX, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
-    {UCON64_GP32, {(const st_usage_t *)unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_G, {nes_usage, 0, 0, 0, 0, 0}},
+    {UCON64_S16, {unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_ATA, {unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_COLECO, {unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_VBOY, {unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_VEC, {unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_INTELLI, {unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_PS2, {unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_SAT, {unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_3DO, {unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_CD32, {unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_CDI, {unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_XBOX, {unknown_usage, 0, 0, 0, 0, 0}},
+    {UCON64_GP32, {unknown_usage, 0, 0, 0, 0, 0}},
 #endif
     {0, {0, 0, 0, 0, 0, 0}}
   };
+
+  char *name_discmage;
+#if     defined __unix__ || defined __BEOS__ // DJGPP, Cygwin, GNU/Linux, Solaris, FreeBSD, BeOS
+  char *name_exe = strrchr (argv[0], '/') + 1;
+#else // Windows
+  char *name_exe = strrchr (argv[0], '\\') + 1;
+#endif
+  // Don't use basename[2](), because it searches for FILE_SEPARATOR, which is
+  //  '\' on DOS. DJGPP's runtime system expands argv[0] to the full path, but
+  //  with forward slashes...
+
+  if (name_exe == (char *) 1)                   // argv[0] doesn't contain a
+    name_exe = argv[0];                         //  file separator
 
 
   printf (
@@ -1314,11 +1352,27 @@ ucon64_usage (int argc, char *argv[])
 //    genesis_usage[0].desc,
     nes_usage[0].desc, snes_usage[0].desc);
 
+  name_discmage = 
+#ifdef  DLOPEN
+      ucon64.discmage_path;
+#else
+#if     defined __MSDOS__
+    "discmage.dxe";
+#elif   defined __CYGWIN__
+     "discmage.dll";
+#elif   defined __unix__ || defined __BEOS__
+    "libdiscmage.so";
+#else
+    "unknown";
+#endif
+#endif
+
   printf ("All DISC-based consoles (using libdiscmage)\n");
   if (!ucon64.discmage_enabled)
-    printf ("                %s not found; support disabled\n", ucon64.discmage_path);
+    printf ("                %s\n"
+            "                  not found or too old, support disabled\n", name_discmage);
   else
-    ucon64_render_usage ((const st_usage_t *)dm_usage);
+    ucon64_render_usage ((const st_usage_t *) dm_get_usage ());
   printf ("\n");
 
   optind = 0;

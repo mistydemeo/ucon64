@@ -37,9 +37,9 @@ typedef struct
 {
   const char *option_s;                         // "chk", ..
   const char *desc;                             // "fix checksum", ...
-//  const char *desc_long;                      // long description
-//  int status;                                  // development status of option
-                                              // 0 = OK, 1 = TODO, 2 = TEST
+//  const char *desc_long;                        // long description
+//  int status;                                   // development status of option
+                                                  // 0 = OK, 1 = TODO, 2 = TEST
 } st_usage_t;
 
 
@@ -74,9 +74,8 @@ typedef struct
   */
   int console;                                  // the detected console system
 
-//  const char *file;                             // FILE (cmdline) with path
-  const char *file;
- 
+  const char *file;                             // FILE (cmdline) with path
+
   char configfile[FILENAME_MAX];                // path and name of the config file
   char configdir[FILENAME_MAX];                 // directory for config and DAT files
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
@@ -112,7 +111,7 @@ typedef struct
   int snes_hirom;                               // SNES ROM is HiROM
   int interleaved;                              // ROM is interleaved (swapped)
 
-  // the following values are for the SNES and NES
+  // the following values are for the SNES, NES and the Genesis
   int part_size;                                // SNES split part size
   int split;                                    // ROM is split
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump

@@ -218,8 +218,8 @@ sms_init (st_rominfo_t *rominfo)
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
     ucon64.buheader_len : 0;
 
-  rominfo->console_usage = (const st_usage_t *)sms_usage;
-  rominfo->copier_usage = (const st_usage_t *)(ucon64.buheader_len ? mgd_usage : smd_usage);
+  rominfo->console_usage = sms_usage;
+  rominfo->copier_usage = (ucon64.buheader_len ? mgd_usage : smd_usage);
 
   return result;
 }

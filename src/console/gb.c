@@ -579,8 +579,8 @@ gameboy_init (st_rominfo_t *rominfo)
   sprintf (buf, "Start address: %04x", value);
   strcat (rominfo->misc, buf);
 
-  rominfo->console_usage = (const st_usage_t *)gameboy_usage;
-  rominfo->copier_usage = (const st_usage_t *)(!rominfo->buheader_len ? mgd_usage : ssc_usage);
+  rominfo->console_usage = gameboy_usage;
+  rominfo->copier_usage = (!rominfo->buheader_len ? mgd_usage : ssc_usage);
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {

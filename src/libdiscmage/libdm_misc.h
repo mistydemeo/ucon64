@@ -48,11 +48,11 @@ extern int32_t dm_to_bcd (int32_t i);
 /*
   libdm messages
   
-  usage example: fprintf (stdout, libdm_msg[DEPRICATED], filename);
+  usage example: fprintf (stdout, libdm_msg[DEPRECATED], filename);
 */
 enum
 {
-  DEPRICATED = 0
+  DEPRECATED = 0
 };
                           
 extern const char *libdm_msg[];

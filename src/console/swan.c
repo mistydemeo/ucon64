@@ -163,8 +163,8 @@ Byte6 - Additional capabilities(?)
   if (ucon64.console == UCON64_SWAN)
     result = 0;
 
-  rominfo->console_usage = (const st_usage_t *)swan_usage;
-  rominfo->copier_usage = (const st_usage_t *)unknown_usage;
+  rominfo->console_usage = swan_usage;
+  rominfo->copier_usage = unknown_usage;
 
   free (rom_buffer);
   return result;

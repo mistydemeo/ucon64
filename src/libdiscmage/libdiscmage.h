@@ -55,19 +55,21 @@ typedef signed long long int int64_t;
 
 //  version of this libdiscmage
 extern const uint32_t dm_version;
+extern uint32_t dm_get_version (void);
 
 //  usage (example) of libdiscmage
 typedef struct
 {
   const char *option_s;                         // "chk", ..
   const char *desc;                             // "fix checksum", ...
-//  const char *desc_long;                      // long description
-//  int status;                                  // development status of option
-                                              // 0 = OK, 1 = TODO, 2 = TEST
+//  const char *desc_long;                        // long description
+//  int status;                                   // development status of option
+                                                  // 0 = OK, 1 = TODO, 2 = TEST
 } st_dm_usage_t;
 
 
 extern const st_dm_usage_t dm_usage[];
+extern st_dm_usage_t *dm_get_usage (void);
 
 /*
   track nfo

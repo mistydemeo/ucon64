@@ -48,8 +48,8 @@ psx_init (st_rominfo_t *rominfo)
 {
   int result = -1;
 
-  rominfo->console_usage = (const st_usage_t *)psx_usage;
-//  rominfo->copier_usage = (const st_usage_t *)cdrw_usage;
+  rominfo->console_usage = psx_usage;
+//  rominfo->copier_usage = cdrw_usage;
 
   return result;
 }

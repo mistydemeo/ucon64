@@ -848,7 +848,7 @@ genesis_init (st_rominfo_t *rominfo)
       rominfo->buheader_len = SMD_HEADER_LEN;
       strcpy (rominfo->name, "Name: N/A");
       rominfo->console_usage = NULL;
-      rominfo->copier_usage = (const st_usage_t *)smd_usage;
+      rominfo->copier_usage = smd_usage;
       rominfo->maker = "Manufacturer: You?";
       rominfo->country = "Country: Your country?";
       rominfo->has_internal_crc = 0;
@@ -1030,8 +1030,8 @@ genesis_init (st_rominfo_t *rominfo)
       rominfo->internal_crc2[0] = 0;
       free (rom_buffer);
     }
-  rominfo->console_usage = (const st_usage_t *)genesis_usage;
-  rominfo->copier_usage = (const st_usage_t *)(!rominfo->buheader_len ? mgd_usage : smd_usage);
+  rominfo->console_usage = genesis_usage;
+  rominfo->copier_usage = (!rominfo->buheader_len ? mgd_usage : smd_usage);
 
   return result;
 }

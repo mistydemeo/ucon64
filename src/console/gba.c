@@ -389,8 +389,8 @@ gba_init (st_rominfo_t *rominfo)
       rominfo->internal_crc2[0] = 0;
     }
 
-  rominfo->console_usage = (const st_usage_t *)gba_usage;
-  rominfo->copier_usage = (const st_usage_t *)(!rominfo->buheader_len ? fal_usage : unknown_usage);
+  rominfo->console_usage = gba_usage;
+  rominfo->copier_usage = (!rominfo->buheader_len ? fal_usage : unknown_usage);
 
   return result;
 }

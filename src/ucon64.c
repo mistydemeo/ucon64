@@ -77,6 +77,7 @@ int ucon64_exit(int value,struct ucon64_ *rom)
 #include "patch/ppf.h"
 #include "patch/bsl.h"
 #include "patch/xps.h"
+#include "patch/pal4u.h"
 
 
 
@@ -490,6 +491,12 @@ if (setgid(gid) == -1)                          //  was used, but just in case (
 
 #endif
 
+if(!access(rom.rom,F_OK))
+{
+  ucon64_init(&rom);
+  if(rom.console!=ucon64_UNKNOWN)ucon64_nfo(&rom);
+}
+
 /*
   here comes the console and ROM *specific* stuff
 */
@@ -583,12 +590,6 @@ if(argcmp(argc,argv,"-dbv"))
 
 	printf("\nTIP: %s -db -nes would view only NES ROMs\n\n",getarg(argc,argv,ucon64_NAME));
 	return(ucon64_exit(0,&rom));
-}
-
-if(!access(rom.rom,F_OK))
-{
-  ucon64_init(&rom);
-  if(rom.console!=ucon64_UNKNOWN)ucon64_nfo(&rom);
 }
 
 switch(rom.console)
@@ -804,7 +805,7 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
 
   rom->console=ucon64_UNKNOWN;	//integer for the console system
 
-  rom->swapped=0;
+  rom->interleaved=0;
   for( x = 0 ; x < sizeof( rom->splitted ) / sizeof( rom->splitted[0] ) ; x++ )rom->splitted[x]=0;
   rom->padded=0;
   rom->intro=0;
@@ -1033,6 +1034,7 @@ int ucon64_usage(int argc,char *argv[])
 bsl_usage( argc, argv );
 ips_usage( argc, argv );
 aps_usage( argc, argv );
+pal4u_usage( argc, argv );
 ppf_usage( argc, argv );
 xps_usage( argc, argv );
 
@@ -1079,6 +1081,7 @@ printf("%s\n%s\n%s\n"
 ,coleco_TITLE
 );
 
+pal4u_usage( argc, argv );
 ppf_usage( argc, argv );
 xps_usage( argc, argv );
 

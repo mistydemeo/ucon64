@@ -227,11 +227,12 @@ char binblock[1025];
         }
 
         /* Open the bin and ppf file */
-        binfile=fopen(filebackup(argv[1]), "rb+");
+        binfile=fopen(argv[1], "rb+");
         if(binfile==null){
         printf("File %s does not exist.\n",argv[1]);
         exit(0);
         }
+
         ppffile=fopen(argv[2], "rb");
         if(ppffile==null){
         printf("File %s does not exist.\n",argv[2]);
@@ -240,8 +241,9 @@ char binblock[1025];
 
         /* Is it a PPF File ? */
         fread(buffer, 3, 1, ppffile);
-        if(strcmp("PPF", buffer)){
-        printf("File %s if *NO* PPF file.\n",argv[2]);
+
+        if(strncmp("PPF", buffer,3)){
+        printf("File %s is *NO* PPF file.\n",argv[2]);
         fclose(ppffile);
         fclose(binfile);
         exit(0);
@@ -284,7 +286,7 @@ char binblock[1025];
                          fread(buffer, 4, 1,ppffile);
 
 			 /* Is there a File id ?! */
-                         if(strcmp(".DIZ", buffer)){
+                         if(strncmp(".DIZ", buffer,4)){
                          printf("File_id.diz    : no\n\n");
                          dizyn=0;
                          }
@@ -298,7 +300,7 @@ char binblock[1025];
                          dizyn=1;
                          dizlensave=dizlen;
                          }
-                        
+printf("1");fflush(stdout);                        
                          /* Do the BINfile size check! */
                          fseek(ppffile, 56, SEEK_SET);
                          fread(&dizlen, 4, 1,ppffile);
@@ -314,33 +316,41 @@ char binblock[1025];
                          exit(0);
                          }}
 
+printf("2");fflush(stdout);                        
 			 /* do the Binaryblock check! this check is 100% secure! */
                          fseek(ppffile, 60, SEEK_SET);
                          fread(ppfblock, 1024, 1, ppffile);
                          fseek(binfile, 0x9320, SEEK_SET);
                          fread(binblock, 1024, 1, binfile);
                          in=memcmp(ppfblock, binblock, 1024);
-                         if(in!=0){
-                         printf("The BINfile does not seem to be the right one\nCONTINUE though? (Suggestion: NO) (y/n): ");
-                         in=getc(stdin);
-                         if(in!='y'&&in!='Y'){
-                         fclose(ppffile);
-                         fclose(binfile);
-                         printf("\nAborted...\n");
-                         exit(0);
-                         }}
+                         if(in!=0)
+                         {
+                           printf("The BINfile does not seem to be the right one\nCONTINUE though? (Suggestion: NO) (y/n): ");
+                           in=getc(stdin);
+                           if(in!='y'&&in!='Y')
+                           {
+                             fclose(ppffile);
+                             fclose(binfile);
+                             printf("\nAborted...\n");
+                             exit(0);
+                           }
+                         }
 
 			 /* Calculate the count for patching the image later */
                          fseek(ppffile, 0, SEEK_END);
                          count=ftell(ppffile);
-                         if(dizyn==0){
-                         count-=1084;
-                         seekpos=1084;
-                         }else{
-                         count-=1084;
-                         count-=38;
-                         count-=dizlensave;
-                         seekpos=1084;
+printf("3");fflush(stdout);                        
+                         if(dizyn==0)
+                         {
+                           count-=1084;
+                           seekpos=1084;
+                         }
+                         else
+                         {
+                           count-=1084;
+                           count-=38;
+                           count-=dizlensave;
+                           seekpos=1084;
                          }
                          printf("Patching ... ");
                          break;

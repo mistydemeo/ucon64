@@ -43,7 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SNES_NAME_LEN 21
 #define ALT_HILO                                // use Snes9x' Hi/LoROM detection method
 #define GD3_HEADER_MAPSIZE 0x18
-#define NSRT_HEADER_VERSION 15                  // version 1.5 header
+#define NSRT_HEADER_VERSION 22                  // version 2.2 header
 
 static int snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
 static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_size);

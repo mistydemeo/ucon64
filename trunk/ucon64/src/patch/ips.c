@@ -33,9 +33,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 #define NO_RLE  256
-// for some strange reason 6 seems to be a general optimum value for RLE_START_TRESHOLD
-#define RLE_START_TRESHOLD 6                    // must be smaller than RLE_RESTART_TRESHOLD!
-#define RLE_RESTART_TRESHOLD 13
+// for some strange reason 6 seems to be a general optimum value for RLE_START_THRESHOLD
+#define RLE_START_THRESHOLD 6                   // must be smaller than RLE_RESTART_THRESHOLD!
+#define RLE_RESTART_THRESHOLD 13
 #define BRIDGE_LEN 5
 //#define DEBUG_IPS
 
@@ -92,12 +92,12 @@ ips_apply (const char *modname, const char *ipsname)
 
   if ((modfile = fopen (modname, "rb+")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", modname);
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", modname);
       exit (1);
     }
   if ((ipsfile = fopen (ipsname, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", ipsname);
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", ipsname);
       exit (1);
     }
 
@@ -262,16 +262,16 @@ check_for_rle (unsigned char byte, unsigned char *buf)
     {
       /*
         Start with a new block (and stop with the current one) only if there
-        are at least RLE_RESTART_TRESHOLD + 1 equal bytes in a row. Restarting
+        are at least RLE_RESTART_THRESHOLD + 1 equal bytes in a row. Restarting
         for RLE has some overhead: possibly 5 bytes for the interrupted current
         block plus 7 bytes for the RLE block. So, values smaller than 11 for
-        RLE_RESTART_TRESHOLD only make the IPS file larger than if no RLE
+        RLE_RESTART_THRESHOLD only make the IPS file larger than if no RLE
         compression would be used.
       */
-      if (ndiffs > RLE_RESTART_TRESHOLD)
+      if (ndiffs > RLE_RESTART_THRESHOLD)
         {
           use_rle = 1;
-          for (i = ndiffs - RLE_RESTART_TRESHOLD; i <= ndiffs - 1; i++)
+          for (i = ndiffs - RLE_RESTART_THRESHOLD; i <= ndiffs - 1; i++)
             if (buf[i] != byte)
               {
                 use_rle = 0;
@@ -280,8 +280,8 @@ check_for_rle (unsigned char byte, unsigned char *buf)
           if (use_rle)
             // we are not using RLE, but we should => start a new block
             {
-              ndiffs -= RLE_RESTART_TRESHOLD;
-              filepos -= RLE_RESTART_TRESHOLD;
+              ndiffs -= RLE_RESTART_THRESHOLD;
+              filepos -= RLE_RESTART_THRESHOLD;
               fseek (orgfile, filepos, SEEK_SET);
               fseek (modfile, filepos, SEEK_SET);
 
@@ -294,8 +294,8 @@ check_for_rle (unsigned char byte, unsigned char *buf)
             }
         }
       /*
-        Use RLE only if the last RLE_START_TRESHOLD + 1 (or more) bytes were
-        the same. Values smaller than 7 for RLE_START_TRESHOLD will make the
+        Use RLE only if the last RLE_START_THRESHOLD + 1 (or more) bytes were
+        the same. Values smaller than 7 for RLE_START_THRESHOLD will make the
         IPS file larger than if no RLE would be used (for this block).
         normal block:
         i      address high byte
@@ -314,10 +314,10 @@ check_for_rle (unsigned char byte, unsigned char *buf)
         i + 5  length high byte
         i + 6  length low byte
         i + 7  new byte
-        The value 7 for RLE_START_TRESHOLD (instead of 2) is to compensate for
+        The value 7 for RLE_START_THRESHOLD (instead of 2) is to compensate for
         normal blocks that immediately follow the RLE block.
       */
-      else if (ndiffs > RLE_START_TRESHOLD)
+      else if (ndiffs > RLE_START_THRESHOLD)
         {
           use_rle = 1;
           for (i = 0; i < ndiffs; i++)
@@ -347,12 +347,12 @@ ips_create (const char *orgname, const char *modname)
 
   if ((orgfile = fopen (orgname, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", orgname);
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", orgname);
       exit (1);
     }
   if ((modfile = fopen (modname, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", modname);
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", modname);
       exit (1);
     }
   strcpy (ipsname, orgname);

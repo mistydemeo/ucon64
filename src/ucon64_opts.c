@@ -647,20 +647,32 @@ switch (c)
     value = UNKNOWN_HEADER_LEN;
   case UCON64_P:
   case UCON64_PAD:
-    if (!value)
-      value = ucon64.rominfo ? ucon64.rominfo->buheader_len : ucon64.buheader_len;
+    if (!value && ucon64.rominfo)
+      value = ucon64.rominfo->buheader_len;
     ucon64_file_handler (dest_name, src_name, 0);
+
     q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb");
-    ucon64_pad (dest_name, value, 
-      (((ucon64.file_size - value) + MBIT - 1) / MBIT) * MBIT);
+
+    if (truncate2 (dest_name, ucon64.file_size + (MBIT - ((ucon64.file_size - value) % MBIT))) == -1)
+      {
+        fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
+        exit (1);
+      }
+
     printf (ucon64_msg[WROTE], dest_name);
     break;
 
   case UCON64_PADN:
     ucon64_file_handler (dest_name, src_name, 0);
+
     q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb");
-    ucon64_pad (dest_name, ucon64.rominfo->buheader_len, strtol (optarg, NULL, 10) -
-                ucon64.rominfo->buheader_len);
+    if (truncate2 (dest_name, strtol (optarg, NULL, 10) +
+          (ucon64.rominfo ? ucon64.rominfo->buheader_len : 0)) == -1)
+      {
+        fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name); // msg is not a typo
+        exit (1);
+      }
+
     printf (ucon64_msg[WROTE], dest_name);
     break;
 

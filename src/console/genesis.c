@@ -159,10 +159,19 @@ genesis_smd (st_rominfo_t *rominfo)
 int
 genesis_smds (st_rominfo_t *rominfo)
 {
-  char buf[MAXBUFSIZE];
+  char buf[MAXBUFSIZE], buf2[32768]/*, p = NULL */;
   st_smd_header_t header;
 
+#if 0
+  if (!(p = malloc (ucon64.file_size)))
+    {
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], ucon64.file_size);
+      return -1;
+    }
+#endif
+
   memset (&header, 0, SMD_HEADER_LEN);
+  memset (&buf2, 0, 32768);
 
   header.size = 0;
   header.id0 = 0;
@@ -174,9 +183,10 @@ genesis_smds (st_rominfo_t *rominfo)
   strcpy (buf, ucon64.rom);
   set_suffix (buf, ".SAV");
 
-  q_fwrite (&header, 0, SMD_HEADER_LEN, buf, "wb");
-  q_fcpy (ucon64.rom, 0, ucon64.file_size, buf, "ab");
-
+  q_fread (buf2, 0, ucon64.file_size, ucon64.rom);
+  save_smd (buf, buf2, &header, 32768); // sram's are interleaved too
+//  free (p);
+  
   printf (ucon64_msg[WROTE], buf);
   return 0;
 }

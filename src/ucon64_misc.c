@@ -1208,52 +1208,6 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2, int s
 }
 
 
-int
-ucon64_pad (const char *filename, int start, int size)
-/*
-  Pad file (if necessary) to start + size bytes;
-  Ignore start bytes (if file has header or something)
-*/
-{
-  FILE *file;
-  int oldsize = q_fsize (filename) - start, sizeleft;
-  unsigned char padbuffer[MAXBUFSIZE];
-  struct stat fstate;
-
-  // now we can also "pad" to smaller sizes
-  if (oldsize > size)
-    {
-      stat (filename, &fstate);
-      if (chmod (filename, fstate.st_mode | S_IWUSR))
-        {
-          fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename); // msg is not a typo
-          exit (1);
-        }
-      truncate (filename, size + start);
-    }
-  else if (oldsize < size)
-    {
-      // don't use truncate() to enlarge files, because the result is undefined (by POSIX)
-      if ((file = fopen (filename, "ab")) == NULL)
-        {
-          fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
-          exit (1);
-        }
-      sizeleft = size - oldsize;
-      memset (padbuffer, 0, MAXBUFSIZE);
-      while (sizeleft >= MAXBUFSIZE)
-        {
-          fwrite (padbuffer, 1, MAXBUFSIZE, file);
-          sizeleft -= MAXBUFSIZE;
-        }
-      if (sizeleft)
-        fwrite (padbuffer, 1, sizeleft, file);
-      fclose (file);
-    }
-  return size;
-}
-
-
 #if 1
 int
 ucon64_testpad (const char *filename)

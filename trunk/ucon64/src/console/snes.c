@@ -1483,7 +1483,8 @@ a2 18 01 bd 27 20 89 10 00 f0/d0 01   a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 3f 21 00 29/89 10 d0                  3f 21 00 29/89 10 ea ea          - Final Fight Guy (89)
 3f 21 29 10 cf XX YY 80 f0            3f 21 29 10 cf XX YY 80 80       - Gokujyou Parodius/Tokimeki Memorial
 3f 21 89 10 c2 XX d0                  3f 21 89 10 c2 XX 80             - Robotrek
-af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Seiken Densetsu 3
+af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Seiken Densetsu 3/Secret of Mana (E)
+af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken Densetsu 2/Secret of Mana (U)
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
@@ -1555,6 +1556,8 @@ af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Seiken 
       change_string ("\x3f\x21\x29\x10\xcf\x01\x01\x80\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
       change_string ("\x3f\x21\x89\x10\xc2\x01\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\xaf\x3f\x21\x00\x29\x01\xc9\x01\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+
+      change_string ("\xaf\x3f\x21\x00\x29\x10\x80\x2d\x00\x1b", 10, '\x01', '\x02', "\x00", 1, buffer, bytesread, -4);
 
       fwrite (buffer, 1, bytesread, destfile);
     }

@@ -3,7 +3,7 @@ fal.c - Flash Linker Advance support for uCON64
 
 written by 2001        Jeff Frohwein
            2001        NoisyB (noisyb@gmx.net)
-           2001 - 2002 dbjh
+           2001 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -866,7 +866,13 @@ GetFileByte (FILE * fp)
 }
 
 int
-GetFileSize2 (FILE * fp) // the name "GetFileSize" conflicts with a Windows function
+GetFileSize2 (FILE * fp)
+/*
+  The name "GetFileSize" conflicts with a Windows function.
+  For some odd reason Jeff Frohwein returned the file size minus 1. I (dbjh)
+  guess that's a bug. I disabled the (terribly inefficient) file size code
+  because uCON64 already determined the file size at this point.
+*/
 {
   int FileSize;
 
@@ -886,6 +892,7 @@ GetFileSize2 (FILE * fp) // the name "GetFileSize" conflicts with a Windows func
           fprintf (stderr, "ERROR: File must be 192 bytes or larger\n");
           ProgramExit (1);
         }
+#if 0
       else
         FileSize--;
 
@@ -894,6 +901,7 @@ GetFileSize2 (FILE * fp) // the name "GetFileSize" conflicts with a Windows func
           (void) fgetc (fp);
           FileSize++;
         }
+#endif
 
       HeaderBad = 0;
       i = 4;
@@ -904,7 +912,7 @@ GetFileSize2 (FILE * fp) // the name "GetFileSize" conflicts with a Windows func
           i++;
         }
       if (HeaderBad)
-        printf ("Fixing logo area. ");
+        printf ("Fixing logo area.");
 
       Complement = 0;
       FileHeader[0xb2] = 0x96;  // Required
@@ -922,15 +930,21 @@ GetFileSize2 (FILE * fp) // the name "GetFileSize" conflicts with a Windows func
     }
   else
     {
+#if 0
       FileSize = -1;
       while (!feof (fp))
         {
           (void) fgetc (fp);
           FileSize++;
         }
+#endif
       rewind (fp);
     }
+#if 1
+  return ucon64.file_size;
+#else
   return FileSize;
+#endif
 }
 
 // Program older (non-Turbo) Visoly flash cart
@@ -1472,14 +1486,14 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname, "wb")) == NULL)
         {
-          fprintf (stderr, "ERROR trying to open file '%s'\n", fname);
+          fprintf (stderr, "ERROR: Can't open file \"%s\"\n", fname);
           ProgramExit (1);
         }
-      printf ("Backing up backup SRAM to file '%s'. Please wait...\n\n",
+      printf ("Backing up backup SRAM to file \"%s\". Please wait...\n\n",
               fname);
 
       BackupSRAM (fp, BackupMemOffset, BackupMemSize);
-      printf ("\n\n");
+      printf ("\n");
       fclose (fp);
     }
 
@@ -1500,14 +1514,14 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname, "rb")) == NULL)
         {
-          fprintf (stderr, "ERROR trying to open file '%s'\n", fname);
+          fprintf (stderr, "ERROR: Can't open file \"%s\"\n", fname);
           ProgramExit (1);
         }
-      printf ("Restoring backup SRAM from file '%s'. Please wait...\n\n",
+      printf ("Restoring backup SRAM from file \"%s\". Please wait...\n\n",
               fname);
 
       RestoreSRAM (fp, BackupMemOffset);        //, BackupMemSize);
-      printf ("\n\n");
+      printf ("\n");
       fclose (fp);
     }
 
@@ -1528,10 +1542,10 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname, "rb")) == NULL)
         {
-          fprintf (stderr, "ERROR trying to open file '%s'\n", fname);
+          fprintf (stderr, "ERROR: Can't open file \"%s\"\n", fname);
           ProgramExit (1);
         }
-      printf ("Programming flash with file '%s'.\n", fname);
+      printf ("Programming flash with file \"%s\".\n", fname);
 
       if (Device == 0xe2)
         ProgramSharpFlash (fp);
@@ -1542,6 +1556,7 @@ fal_main (int argc, char **argv)
           else
             ProgramNonTurboIntelFlash (fp);
         }
+      printf ("\n");
       fclose (fp);
     }
 
@@ -1553,10 +1568,10 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname, "wb")) == NULL)
         {
-          fprintf (stderr, "ERROR trying to open file '%s'\n", fname);
+          fprintf (stderr, "ERROR: Can't open file \"%s\"\n", fname);
           ProgramExit (1);
         }
-      printf ("Backing up %d Mbits of ROM to file '%s'. Please wait...\n\n",
+      printf ("Backing up %d Mbits of ROM to file \"%s\". Please wait...\n\n",
               ChipSize, fname);
 
       BackupROM (fp, ChipSize << 16);
@@ -1572,10 +1587,10 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname2, "rb")) == NULL)
         {
-          fprintf (stderr, "ERROR trying to open file '%s'\n", fname2);
+          fprintf (stderr, "ERROR: Can't open file \"%s\"\n", fname2);
           ProgramExit (1);
         }
-      printf ("Comparing flash with file '%s'.\n", fname2);
+      printf ("Comparing flash with file \"%s\".\n", fname2);
 
       VerifyFlash (fp);
       fclose (fp);
@@ -1590,6 +1605,7 @@ fal_main (int argc, char **argv)
   ProgramExit (0);
   exit (0);
 }
+
 
 /*
   It will save you some work if you don't fully integrate the code above with
@@ -1615,6 +1631,7 @@ fal_args (unsigned int parport)
   else
     fal_argv[2] = "1";          // 0x378
 }
+
 
 int
 fal_read_rom (const char *filename, unsigned int parport, int size)
@@ -1664,6 +1681,7 @@ fal_read_rom (const char *filename, unsigned int parport, int size)
   return -1;
 }
 
+
 int
 fal_write_rom (const char *filename, unsigned int parport)
 {
@@ -1686,6 +1704,7 @@ fal_write_rom (const char *filename, unsigned int parport)
 
   return -1;
 }
+
 
 int
 fal_read_sram (const char *filename, unsigned int parport, int bank)
@@ -1720,6 +1739,7 @@ fal_read_sram (const char *filename, unsigned int parport, int bank)
 
   return -1;
 }
+
 
 int
 fal_write_sram (const char *filename, unsigned int parport, int bank)

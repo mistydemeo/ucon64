@@ -49,10 +49,10 @@ extern st_symbol_t import_export;
 #define fwrite import_export.fwrite
 #define fputc import_export.fputc
 #define ftell import_export.ftell
+#define rewind import_export.rewind
 #endif
 
 #define fdopen import_export.fdopen
-#define rewind import_export.rewind
 #define fflush import_export.fflush
 #define ferror import_export.ferror
 #define rename import_export.rename

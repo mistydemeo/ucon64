@@ -130,6 +130,8 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    To create a Win32 executable you'll need
    <a href="http://www.cygwin.com" target="_blank">Cygwin</a>,
    a Windows port of gcc and many other GNU tools and libraries.<br>
+   uCON64 1.9.8 can also be build with Visual C++. See below the "GNU help" for
+   further instructions.
 <br>
    If you use a Bash compatible shell first enter the following line:<br>
    &nbsp;&nbsp; ./configure<br>
@@ -152,21 +154,32 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    typing "make" type "make ucon64".<br>
    Note that if you want to enable zlib support under DOS you must define the
    constant HAVE_ZLIB_H in config.h (remove the "//" in front of the line that
-   defines it) <i>and</i> ZLIB in Makefile.<br>
+   defines it) <i>and</i> ZLIB in Makefile and libdiscmage/Makefile.<br>
    Then enter the following lines:<br>
    &nbsp;&nbsp; make clean<br>
    &nbsp;&nbsp; make<br>
    &nbsp;&nbsp; make install<br>
 <br>
-   Under Unix the last command will ask for root's password, because uCON64
-   needs to be setuid root for parallel port access. Under BeOS the last command
-   will open a dialog window. Just follow the instructions. Under DOS and
-   Windows (but also under Unix and BeOS) you can find the executable in the
-   directory where you ran make.<br>
+   On Unix systems other than Linux you might need to use 'gmake' instead of
+   'make'. Under Unix the last command will ask for root's password, because
+   uCON64 needs to be setuid root for parallel port access. Under BeOS the last
+   command will open a dialog window. Just follow the instructions. Under DOS
+   and Windows (but also under Unix and BeOS) you can find the executable in
+   the directory where you ran make.<br>
+   To build uCON64 with Visual C++, first copy config.h.vc6 to config.h. If you
+   want to enable zlib support you should follow the same steps as when using
+   the GNU tools with the exception that you should edit Makefile.vc6 and
+   libdiscmage/Makefile.vc6. Then start a command prompt, go to the correct
+   directory and enter the following lines:<br>
+   &nbsp;&nbsp; nmake -f Makefile.vc6 clean<br>
+   &nbsp;&nbsp; nmake -f Makefile.vc6<br>
+<br>
+   If you don't want to compile libdiscmage pass "ucon64.exe" as argument to
+   nmake:<br>
+   &nbsp;&nbsp; nmake -f Makefile.vc6 ucon64.exe<br>
+<br>
    You could use UPX to compress the executable. UPX is available from
    <a href="http://upx.sourceforge.net" target="_blank">http://upx.sourceforge.net</a>.<br>
-   On Unix systems other than Linux you might need to use 'gmake' instead of
-   'make'.<br>
 <br>
 <p>
 <a name="3"><b>Q3</b>: How do I install uCON64?</a><br>

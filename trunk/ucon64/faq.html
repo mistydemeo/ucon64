@@ -464,7 +464,7 @@ Q33: <a href="#33">How do I enable or disable colors in the display output of
   For an existing UNIF file you needn't specify the board name, but you might want to
   specify it if you want to change the board name in the file. Afterwards run uCON64 on the
   newly written ROM to see if you were successful. uCON64's display output should contain a
-  dump info section now.<br>
+  dump info section then.<br>
 <br>
 <p>
 <a name="32"><b>Q32</b>: How do I specify that a NES game in UNIF format supports multiple
@@ -488,7 +488,8 @@ Q33: <a href="#33">How do I enable or disable colors in the display output of
    %SystemRoot%\system32\CONFIG.NT:<br>
    &nbsp;&nbsp; device=%SystemRoot%\system32\ansi.sys<br>
    The use of color can be disabled by specifying the switch -ncol on the
-   command line.<br>
+   command line. You can also add the following line to the config file:<br>
+   &nbsp;&nbsp; ansi_color=0<br>
 <br>
 <p>
 <br>

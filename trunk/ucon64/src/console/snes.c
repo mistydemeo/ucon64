@@ -96,6 +96,17 @@ const char *snes_usage[] =
     "  " OPTION_LONG_S "gdf         fix Professor SF(2) Game Doctor SF3/6/7 savegame problems\n"
 #endif
     "  " OPTION_LONG_S "dint        convert ROM to non-interleaved format\n"
+    "  " OPTION_LONG_S "ctrl=TYPE   specify type of controller in port 1 for emu when converting\n"
+    "                  TYPE='0' gamepad\n"
+    "                  TYPE='1' mouse\n"
+    "                  TYPE='2' mouse / gamepad\n"
+    "                  TYPE='3' super scope\n"
+    "                  TYPE='4' super scope / gamepad\n"
+    "                  TYPE='5' Konami's justifier\n"
+    "                  TYPE='6' multitap\n"
+    "                  TYPE='7' mouse / super scope / gamepad\n"
+    "  " OPTION_LONG_S "ctrl2=TYPE  specify type of controller in port 2 for emu when converting\n"
+    "                  TYPE may be any value that is valid for " OPTION_LONG_S "ctrl\n"
     "  " OPTION_LONG_S "col         convert 0xRRGGBB (html) <-> 0xXXXX (snes); " OPTION_LONG_S "rom=0xCOLOR\n"
     "                  this routine was used to find green colors in games and\n"
     "                  to replace them with red colors (blood mode)\n"
@@ -430,6 +441,41 @@ snes_ufos (st_rominfo_t *rominfo)
 }
 
 
+static void
+set_nsrt_info (st_rominfo_t *rominfo, void *header)
+{
+  int x;
+
+  if (UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
+    {
+      ((unsigned char *) header)[0x1d0] = snes_header.country;
+      memcpy (((unsigned char *) header) + 0x1d1, &snes_header.name, SNES_NAME_LEN);
+      ((unsigned char *) header)[0x1e6] = snes_header.checksum_low;
+      ((unsigned char *) header)[0x1e7] = snes_header.checksum_high;
+      memcpy (((unsigned char *) header) + 0x1e8, "NSRT", 4);
+    }
+
+  if (UCON64_ISSET (ucon64.controller))
+    {
+      for (x = 0; x < 8; x++)
+        if ((ucon64.controller >> x) & 1)
+          break;
+      if (x >= 8)
+        x = 0;
+      ((unsigned char *) header)[0x1ed] = (unsigned char) (x << 4);
+    }
+  if (UCON64_ISSET (ucon64.controller2))
+    {
+      for (x = 0; x < 8; x++)
+        if ((ucon64.controller2 >> x) & 1)
+          break;
+      if (x >= 8)
+        x = 0;
+      ((unsigned char *) header)[0x1ed] |= x;
+    }
+}
+
+
 // header format is specified in src/backup/smc.h
 int
 snes_smc (st_rominfo_t *rominfo)
@@ -448,6 +494,8 @@ snes_smc (st_rominfo_t *rominfo)
   header.id1 = 0xaa;
   header.id2 = 0xbb;
   header.type = 4;
+
+  set_nsrt_info (rominfo, &header);
 
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".SMC");
@@ -516,6 +564,8 @@ snes_fig (st_rominfo_t *rominfo)
         }
     }
 
+  set_nsrt_info (rominfo, &header);
+
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".FIG");
   strcpy (src_name, ucon64.rom);
@@ -555,6 +605,8 @@ snes_swc (st_rominfo_t *rominfo)
   header.id1 = 0xaa;
   header.id2 = 0xbb;
   header.type = 4;
+
+  set_nsrt_info (rominfo, &header);
 
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".SWC");
@@ -859,7 +911,8 @@ snes_gd3 (st_rominfo_t *rominfo)
             }
         }
 
-      // write it out
+      set_nsrt_info (rominfo, &header);
+
       ucon64_fbackup (NULL, dest_name);
       q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
       q_fwrite (dstbuf, SMC_HEADER_LEN, newsize, dest_name, "ab");
@@ -868,8 +921,7 @@ snes_gd3 (st_rominfo_t *rominfo)
       free (srcbuf);
       free (dstbuf);
 
-      // make sure we show a header now
-      rominfo->buheader_len = SMC_HEADER_LEN;       // Now we can update it
+      rominfo->buheader_len = SMC_HEADER_LEN;
       rominfo->interleaved = 1;
     }
   else
@@ -905,12 +957,14 @@ snes_gd3 (st_rominfo_t *rominfo)
           header[0x28] = 0x40;
         }
 
+      set_nsrt_info (rominfo, &header);
+
       ucon64_fbackup (NULL, dest_name);
       q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
       q_fcpy (ucon64.rom, rominfo->buheader_len, size, dest_name, "ab");
       ucon64_wrote (dest_name);
 
-      rominfo->buheader_len = SMC_HEADER_LEN;   // Now we can update it
+      rominfo->buheader_len = SMC_HEADER_LEN;
       rominfo->interleaved = 1;
     }
 
@@ -1950,6 +2004,40 @@ snes_init (st_rominfo_t *rominfo)
 
   sprintf (buf, "Version: 1.%d", snes_header.version);
   strcat (rominfo->misc, buf);
+
+  if (rominfo->buheader_len && !memcmp (&OFFSET (header, 0x1e8), "NSRT", 4))
+    {
+      char name[SNES_NAME_LEN + 1], *str_list[9] =
+        {
+          "Gamepad", "Mouse", "Mouse / Gamepad", "Super Scope",
+          "Super Scope / Gamepad", "Konami's Justifier", "Multitap",
+          "Mouse / Super Scope / Gamepad", "unknown"
+        };
+      int x = OFFSET (header, 0x1ed), ctrl1 = x >> 4, ctrl2 = x & 0xf;
+
+      memcpy (name, &OFFSET (header, 0x1d1), SNES_NAME_LEN);
+      name[SNES_NAME_LEN] = 0;
+      for (x = 0; x < SNES_NAME_LEN; x++)
+        if (!isprint ((int) name[x]))
+          name[x] = '.';
+
+      if (ctrl1 > 8)
+        ctrl1 = 8;
+      if (ctrl2 > 8)
+        ctrl2 = 8;
+      sprintf (buf, "\nNSRT info:\n"
+                      "  Original country: %s\n"
+                      "  Original game name: \"%s\"\n"
+                      "  Original checksum: 0x%x\n"
+                      "  Port 1 controller type: %s\n"
+                      "  Port 2 controller type: %s",
+               NULL_TO_UNKNOWN_S (snes_country[MIN (OFFSET (header, 0x1d0) & 0xf, SNES_COUNTRY_MAX - 1)]),
+               name,
+               OFFSET (header, 0x1e6) + (OFFSET (header, 0x1e7) << 8),
+               str_list[ctrl1],
+               str_list[ctrl2]);
+      strcat (rominfo->misc, buf);
+    }
 
   free (rom_buffer);
   return result;

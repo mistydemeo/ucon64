@@ -2,7 +2,7 @@
 ucon64_defines.h - definitions for uCON64
 
 written by 2002 NoisyB (noisyb@gmx.net)
-           2002 dbjh
+           2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -157,7 +157,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_PORT (UCON64_OPTION + 111)
 #define UCON64_PPF (UCON64_OPTION + 112)
 #define UCON64_Q (UCON64_OPTION + 113)
-#define UCON64_QQ (UCON64_OPTION + 114)         // alreay reserved ;-)
+#define UCON64_QQ (UCON64_OPTION + 114)         // already reserved ;-)
 #define UCON64_RROM (UCON64_OPTION + 115)
 #define UCON64_RR83 (UCON64_OPTION + 116)
 #define UCON64_RL (UCON64_OPTION + 117)

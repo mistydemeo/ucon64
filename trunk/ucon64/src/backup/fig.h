@@ -26,6 +26,13 @@ extern const char *fig_title;
 extern void fig_usage (void);
 #endif // BACKUP
 
+typedef struct st_fig_header
+{
+  char pad[512];
+} st_fig_header_t;
+
+
+
 #define FIG_HEADER_START 0
-#define FIG_HEADER_LEN 512
-#endif /* FIG_H */
+#define FIG_HEADER_LEN (sizeof (st_fig_header_t))
+#endif // FIG_H

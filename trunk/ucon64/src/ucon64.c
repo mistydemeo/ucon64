@@ -92,17 +92,12 @@ write programs in C
 #include "backup/swc.h"
 #include "backup/cdrw.h"
 
-#define UCON64_SHOW_NFO_NEVER -1
-#define UCON64_SHOW_NFO_BEFORE 0
-#define UCON64_SHOW_NFO_AFTER 1
-#define UCON64_SHOW_NFO_BEFORE_AND_AFTER 2
-
 static int ucon64_nfo (const st_rom_t *rominfo);
+static int ucon64_console_probe (st_rom_t *rominfo);
+static int ucon64_e (const st_rom_t *rominfo);
 
 static int ucon64_init (const char *romfile, st_rom_t *rominfo);
-static int ucon64_console_probe (st_rom_t *rominfo);
 
-static int ucon64_e (const st_rom_t *rominfo);
 static int ucon64_ls (const char *path, int mode);
 static int ucon64_configfile (void);
 static void ucon64_exit (void);
@@ -278,12 +273,14 @@ static const struct option long_options[] = {
     {0, 0, 0, 0}
   };
 
+
 void
 ucon64_exit (void)
 {
   printf ("+++EOF");
   fflush (stdout);
 }
+
 
 int
 main (int argc, char *argv[])
@@ -1427,7 +1424,7 @@ ucon64_init (const char *romfile, st_rom_t *rominfo)
     {
       memset (rominfo, 0L, sizeof (st_rom_t));
       rominfo->console = UCON64_UNKNOWN;
-      rominfo->title = rominfo->copier = "";
+      rominfo->maker = rominfo->country = rominfo->title = rominfo->copier = "";
 
       return 0;
     }
@@ -1673,12 +1670,14 @@ ucon64_nfo (const st_rom_t *rominfo)
 
   printf ("%s\n\n", rominfo->rom);
 
+#if 0
   if (rominfo->buheader_len)
     {
       strhexdump (rominfo->buheader, 0, rominfo->buheader_start,
                   rominfo->buheader_len);
       printf ("\n");
     }
+#endif
 
   printf ("%s\n\n", rominfo->copier);
 
@@ -1712,9 +1711,9 @@ ucon64_nfo (const st_rom_t *rominfo)
         printf ("Intro/Trainer: Maybe, %ld Bytes\n", rominfo->intro);
 
       if (!rominfo->buheader_len)
-        printf ("Backup Unit Header: No\n");    // printing this is handy for
+        printf ("Backup unit/Emulator header: No\n");    // printing this is handy for
       else if (rominfo->buheader_len)            //  SNES ROMs
-        printf ("Backup Unit Header: Yes, %ld Bytes\n", rominfo->buheader_len);
+        printf ("Backup unit/Emulator header: Yes, %ld Bytes\n", rominfo->buheader_len);
 
 //    if (!rominfo->splitted)
 //      printf("Splitted: No\n");

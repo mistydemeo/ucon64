@@ -23,6 +23,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const char *ssc_title;
 
+typedef struct st_ssc_header
+{
+  char pad[512];
+} st_ssc_header_t;
+
+
 #define SSC_HEADER_START 0
-#define SSC_HEADER_LEN 512
+#define SSC_HEADER_LEN (sizeof (st_ssc_header_t))
 #endif // SCC_H

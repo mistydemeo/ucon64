@@ -2,8 +2,8 @@
 fig.c - Super PRO Fighter support for uCON64
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
-                  2003 JohnDie
+           2001 - 2004 dbjh
+           2003 - 2004 JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -344,7 +344,7 @@ fig_read_rom (const char *filename, unsigned int parport)
   ffe_send_command (5, 0, 0);
 
   // Create a correct header. We can't obtain the header from the Pro Fighter
-  //  unless a (the same) cartridge was just dumped to floppy...
+  //  unless a (the same) cartridge was just dumped to diskette...
   ucon64.rom = filename;
   ucon64.file_size = size + FIG_HEADER_LEN;
   // override everything we know for sure
@@ -375,7 +375,8 @@ fig_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread = 0, bytessend, totalblocks, blocksdone = 0, blocksleft, fsize, n, emu_mode_select;
+  int bytesread = 0, bytessend, totalblocks, blocksdone = 0, blocksleft, fsize,
+      n, emu_mode_select;
   unsigned short address1, address2;
   time_t starttime;
 
@@ -613,13 +614,13 @@ fig_read_cart_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  ffe_send_command (5, 3, 0);                   // detect cartridge SRAM size because we don't
-  ffe_send_command0 (0xe00c, 0);                //  want to read too less data
+  ffe_send_command (5, 3, 0);                   // detect cartridge SRAM size because
+  ffe_send_command0 (0xe00c, 0);                //  we don't want to read too few data
   byte = ffe_send_command1 (0xbfd8);
 
-  size = MAX ((byte ? 1 << (byte + 10) : 0), 32*1024);
-
+  size = MAX ((byte ? 1 << (byte + 10) : 0), 32 * 1024);
   printf ("Receive: %d Bytes\n", size);
+
   memset (buffer, 0, FIG_HEADER_LEN);
 #if 0 // Not needed for FIG, as size is always 4 blocks
   buffer[0] = 4;                                // 32 kB == 4*8 kB, "size_high" is already 0
@@ -632,10 +633,9 @@ fig_read_cart_sram (const char *filename, unsigned int parport)
 
   printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
                                                 //  because if we get here q works ;-)
-  starttime = time (NULL);
-
   address = hirom ? 0x2c3 : 0x1c0;
 
+  starttime = time (NULL);
   while (bytesreceived < size)
     {
       ffe_send_command (5, address, 0);
@@ -703,10 +703,9 @@ fig_write_cart_sram (const char *filename, unsigned int parport)
 
   printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
                                                 //  because if we get here q works ;-)
-  starttime = time (NULL);
-
   address = hirom ? 0x2c3 : 0x1c0;
 
+  starttime = time (NULL);
   while ((bytessend < size) && (bytesread = fread (buffer, 1, MIN (size, BUFFERSIZE), file)))
     {
       ffe_send_command (5, address, 0);

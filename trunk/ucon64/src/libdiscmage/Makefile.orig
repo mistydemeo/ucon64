@@ -41,9 +41,12 @@ endif                                   # ZLIB
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
-GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/
+GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/3.2/
 LIBS+=-lcygwin -lkernel32 -L$(GCCA_DIR) -lgcc
 # kernel32 for DLOPEN and DisableThreadLibraryCalls()
+ifeq ($(CC),g++)
+LIBS+=-lstdc++ -lpthread
+endif
 
 ifdef DLOPEN
 ENTRY=__cygwin_dll_entry@12

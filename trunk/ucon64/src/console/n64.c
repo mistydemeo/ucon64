@@ -336,8 +336,9 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
           return -1;
         }
 
-      if (!(usmsbuf = (char *) malloc (size + 2)))
+      if (!(usmsbuf = (char *) malloc (4 * MBIT)))
         return -1;
+      memset (usmsbuf, 0xff, 4 * MBIT);
       q_fread (usmsbuf, 0, size, smsrom);
 
       if (rominfo->interleaved != 0)
@@ -348,7 +349,7 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
       q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len,
         ucon64.file_size, dest_name, "wb");
       q_fwrite (usmsbuf, N64_HEADER_START + rominfo->buheader_len + 0x01b410,
-        size, dest_name, "r+b");
+        4 * MBIT, dest_name, "r+b");
 
       free (usmsbuf);
       printf (ucon64_msg[WROTE], dest_name);

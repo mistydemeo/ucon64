@@ -1075,6 +1075,7 @@ printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
 */
 int ucon64_nfo(struct ucon64_ *rom)
 {
+char buf[4096];
 
   printf("%s\n%s\n\n"
     ,rom->rom
@@ -1110,14 +1111,15 @@ if(rom->buheader_len)printf("Backup Unit Header: Yes, %ld Bytes (use -nhd to ove
 
 //  if(!rom->splitted[0])printf("Splitted: No\n");
 //  else 
-if(rom->splitted[0])printf("Splitted: Yes, %d parts (Note: for most options the ROM must be joined)\n",rom->splitted[0]);
+if(rom->splitted[0])printf("Splitted: Yes, %d parts (recommended: use -j to join)\n",rom->splitted[0]);
 
   if(rom->misc[0])printf("%s\n",rom->misc);
 
   if(rom->has_internal_crc)
   {
-//TODO rom->current_internal_crc_len!!!!
-    printf("Checksum: %s, %04lx (calculated) %s= %04lx (internal)\n",
+    sprintf(buf,"Checksum: %%s, %%0%dlx (calculated) %%s= %%0%dlx (internal)\n"
+             ,rom->internal_crc_len*2,rom->internal_crc_len*2);
+    printf(buf,
            (rom->current_internal_crc == rom->internal_crc) ? "ok" : "bad (use -chk to fix)",
            rom->current_internal_crc,
            (rom->current_internal_crc == rom->internal_crc) ? "=" : "!",
@@ -1128,7 +1130,8 @@ if(rom->splitted[0])printf("Splitted: Yes, %d parts (Note: for most options the 
            rom->current_internal_crc, rom->internal_inverse_crc, rom->current_internal_crc + rom->internal_inverse_crc,
            (rom->current_internal_crc + rom->internal_inverse_crc == 0xffff) ? "" : "~0xffff");
 */
-    printf("Inverse checksum: %04lx\n",rom->internal_inverse_crc);
+    sprintf(buf,"Inverse checksum: %%0%dlx\n",rom->internal_inverse_crc_len*2);
+      printf(buf,rom->internal_inverse_crc);
   }
   printf("Checksum (CRC32): %08lx\n",rom->current_crc32);
 

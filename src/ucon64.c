@@ -199,6 +199,7 @@ const struct option long_options[] = {
     {"n64", 0, 0, UCON64_N64},
     {"na", 0, 0, UCON64_NA},
     {"nbak", 0, 0, UCON64_NBAK},
+    {"ncol", 0, 0, UCON64_NCOL},
     {"nes", 0, 0, UCON64_NES},
     {"ng", 0, 0, UCON64_NG},
     {"ngp", 0, 0, UCON64_NGP},
@@ -844,7 +845,7 @@ ucon64_usage (int argc, char *argv[])
   int single = 0;
 
   printf (
-    "Usage: %s [OPTION]... [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE]\n\n"
+    "Usage: %s [OPTION]... [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE] [-o=OUTPUT_PATH]\n\n"
     "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
 #ifdef ANSI_COLOR
     "  " OPTION_LONG_S "ncol        disable ANSI colors in output\n"

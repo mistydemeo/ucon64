@@ -772,6 +772,7 @@ printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
 
 
 /*
+sentimental crap...
 _ __ ________________________________________________________________ __ _
                                                       ___
     .,,,,     .---._ Oo  .::::. .::::. :::   :::    __\__\

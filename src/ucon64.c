@@ -92,7 +92,7 @@ int
 main (int argc, char *argv[])
 {
   long x, y = 0;
-  int ucon64_argc;
+  int ucon64_argc, skip_init_nfo = 0;
   struct dirent *ep;
   struct stat puffer;
   DIR *dp;
@@ -687,7 +687,14 @@ if(argcmp(argc, argv, "-sh"))
       return (0);
     }
 
-/*
+  if (argcmp (argc, argv, "-multi") ||          // This gets rid of nonsense GBA info
+      argcmp (argc, argv, "-multi1") ||         //  on a GBA multirom loader binary
+      argcmp (argc, argv, "-multi2"))
+    {
+      skip_init_nfo = 1;
+    }
+
+     /*
   Do the following outside the if that checks for existence of rom.rom
   (necessary for headerless SRAM files, which can't be detected without
   looking at the command line options)
@@ -700,18 +707,17 @@ if(argcmp(argc, argv, "-sh"))
      argcmp (argc, argv, "-xgbxs")) ? ucon64_GB :
     (argcmp (argc, argv, "-xswc") ||
      argcmp (argc, argv, "-xswcs")) ? ucon64_SNES :
-    (argcmp (argc, argv, "-multi") ||           // If not here, where? We don't detect a
-     argcmp (argc, argv, "-multi1") ||          //  GBA multirom loader binary yet (dbjh)
+    (argcmp (argc, argv, "-multi") ||
+     argcmp (argc, argv, "-multi1") ||
      argcmp (argc, argv, "-multi2") ||
      argcmp (argc, argv, "-xfal") ||
      argncmp (argc, argv, "-xfalc", 6) ||
      argncmp (argc, argv, "-xfalb", 6) ||
      argcmp (argc, argv, "-xfals")) ? ucon64_GBA : rom.console;
-  if (!access (rom.rom, F_OK) &&
-      rom.console == ucon64_UNKNOWN)            // Should auto-detect override the fact that
-    {                                           //  we implicitly specify a console type?
-      ucon64_init (&rom);                       //  This gets also rid of nonsense GBA info
-      if (rom.console != ucon64_UNKNOWN)        //  on a GBA multirom loader binary (dbjh)
+  if (!access (rom.rom, F_OK) && !skip_init_nfo)
+    {
+      ucon64_init (&rom);
+      if (rom.console != ucon64_UNKNOWN)
         ucon64_nfo (&rom);
     }
 
@@ -1089,13 +1095,13 @@ ucon64_init (struct ucon64_ *rom)
     {
       (rom->console == ucon64_GB &&
        bytes <= MAXROMSIZE) ? gameboy_init (rom) :
-(rom->console == ucon64_GBA &&
-bytes <= MAXROMSIZE) ? gbadvance_init (rom) :
-(rom->console == ucon64_GENESIS &&
-bytes <= MAXROMSIZE) ? genesis_init (rom) :
-(rom->console == ucon64_N64 &&
-bytes <= MAXROMSIZE) ? nintendo64_init (rom) :
-(rom->console == ucon64_SNES && bytes <= MAXROMSIZE) ? snes_init (rom) :
+       (rom->console == ucon64_GBA &&
+        bytes <= MAXROMSIZE) ? gbadvance_init (rom) :
+       (rom->console == ucon64_GENESIS &&
+        bytes <= MAXROMSIZE) ? genesis_init (rom) :
+       (rom->console == ucon64_N64 &&
+        bytes <= MAXROMSIZE) ? nintendo64_init (rom) :
+       (rom->console == ucon64_SNES && bytes <= MAXROMSIZE) ? snes_init (rom) :
 /*                                  (rom->console = ucon64_UNKNOWN);
 }
     ROMs for the following consoles can be only detected by their CRC32

@@ -224,31 +224,23 @@ usage (char *name)
   fprintf (STDERR, "GBA FLinker v1.72 by Jeff F.\n");
   fprintf (STDERR, "Usage: %s [options]\n", smaller);
 
-  fprintf (STDERR,
-	   "\t-2      Use 16bit EPP data path for faster operation (default=8bit)\n");
-  fprintf (STDERR,
-	   "\t-b o s file   Backup game save SRAM or Flash to file\n");
+  fprintf (STDERR, "\t-2      Use 16bit EPP data path for faster operation (default=8bit)\n");
+  fprintf (STDERR, "\t-b o s file   Backup game save SRAM or Flash to file\n");
   fprintf (STDERR, "\t               (o = Bank Number [1-4])\n");
   fprintf (STDERR, "\t               (s=1 - Backup 32K bytes to file.)\n");
   fprintf (STDERR, "\t               (s=2 - Backup 64K bytes to file.)\n");
   fprintf (STDERR, "\t               (s=3 - Backup 128K bytes to file.)\n");
   fprintf (STDERR, "\t               (s=4 - Backup 256K bytes to file.)\n");
-  fprintf (STDERR,
-	   "\t-c n    Specify chip size in mbits (8,16,32,64,128,256) (default=32)\n");
-  fprintf (STDERR,
-	   "\t-d n    Dump 256 bytes of ROM to screen (default: n=0)\n");
+  fprintf (STDERR, "\t-c n    Specify chip size in mbits (8,16,32,64,128,256) (default=32)\n");
+  fprintf (STDERR, "\t-d n    Dump 256 bytes of ROM to screen (default: n=0)\n");
   fprintf (STDERR, "\t-h      This help screen\n");
-  fprintf (STDERR,
-	   "\t-l n    Specify the parallel port to use (default is 1 = LPT1)\n");
+  fprintf (STDERR, "\t-l n    Specify the parallel port to use (default is 1 = LPT1)\n");
 //   fprintf (STDERR, "\t-m\tSet Standard Parallel Port (SPP) mode (default = EPP)\n");
-  fprintf (STDERR,
-	   "\t-n      Do not repair incorrect header (default = repair header)\n");
+  fprintf (STDERR, "\t-n      Do not repair incorrect header (default = repair header)\n");
   fprintf (STDERR, "\t-p file Program flash cart with file\n");
-  fprintf (STDERR,
-	   "\t-r o file     Restore game save SRAM from file (No save flash support)\n");
+  fprintf (STDERR, "\t-r o file     Restore game save SRAM from file (No save flash support)\n");
   fprintf (STDERR, "\t               (o = Bank Number [1-4])\n");
-  fprintf (STDERR,
-	   "\t-s file Save the cart into a file (Use -c to specify size)\n");
+  fprintf (STDERR, "\t-s file Save the cart into a file (Use -c to specify size)\n");
   fprintf (STDERR, "\t-v file Verify flash cart with file\n");
   fprintf (STDERR, "\t-w n    Add delay to make transfer more reliable\n");
 }
@@ -1033,10 +1025,10 @@ ProgramNonTurboIntelFlash (FILE * fp)
       outpb (SPPCtrlPort, 0);
 
       if (Ready)
-	printf ("\nDone.\n");
+	printf ("\n\nDone.\n");
       else
 	{
-	  printf ("\nFlash cart write failed!\n");
+	  printf ("\n\nFlash cart write failed!\n");
 	}
     }
   else
@@ -1157,12 +1149,12 @@ ProgramTurboIntelFlash (FILE * fp)
       outpb (SPPCtrlPort, 0);
 
       if (Ready)
-	printf ("\nDone.\n");
+	printf ("\n\nDone.\n");
       else
 	{
 	  WriteFlash (0, INTEL28F_CLEARSR);
 	  PPWriteWord (INTEL28F_CLEARSR);
-	  printf ("\nFlash cart write failed!\n");
+	  printf ("\n\nFlash cart write failed!\n");
 	}
     }
   else
@@ -1226,10 +1218,10 @@ ProgramSharpFlash (FILE * fp)
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
-      printf ("\nDone.\n");
+      printf ("\n\nDone.\n");
     }
   else
-    printf ("\nFlash cart erase failed!\n");
+    printf ("\n\nFlash cart erase failed!\n");
 }
 
 void
@@ -1471,7 +1463,7 @@ fal_main (int argc, char **argv)
 	      fname);
 
       BackupSRAM (fp, BackupMemOffset, BackupMemSize);
-      printf ("\n");
+      printf ("\n\n");
       fclose (fp);
     }
 
@@ -1499,7 +1491,7 @@ fal_main (int argc, char **argv)
 	      fname);
 
       RestoreSRAM (fp, BackupMemOffset);	//, BackupMemSize);
-      printf ("\n");
+      printf ("\n\n");
       fclose (fp);
     }
 

@@ -94,7 +94,7 @@ endif
 
 
 OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
-        misc.o misc_chk.o misc_par.o getopt.o \
+        misc/chksum.o misc/getopt.o misc/misc.o misc/parallel.o \
         patch/aps.o patch/bsl.o patch/gg.o patch/ips.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/dc.o console/gb.o console/gba.o console/genesis.o \
@@ -111,29 +111,29 @@ OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
         backup/z64.o
 ifdef USE_ZLIB
 LDFLAGS+=-lz
-OBJECTS+=map.o misc_z.o unzip.o
+OBJECTS+=misc/archive.o misc/map.o misc/unzip.o
 endif
 ifdef USE_DISCMAGE
 OBJECTS+=ucon64_dm.o
 endif
 ifdef USE_USB
 LDFLAGS+=-lusb
-OBJECTS+=misc_usb.o
+OBJECTS+=misc/usb.o
 endif
 
 ifdef DLOPEN
-OBJECTS+=dlopen.o
+OBJECTS+=misc/dlopen.o
 ifndef USE_ZLIB
 ifeq ($(GCC_WIN),1)
 else
 ifdef DJGPP                             # DJGPP code in dlopen needs map code
-OBJECTS+=map.o
+OBJECTS+=misc/map.o
 endif                                   # DJGPP
 endif                                   # GCC_WIN
 endif                                   # USE_ZLIB
 else
 ifeq ($(GCC_WIN),1)                     # Cygwin/MinGW code in ucon64_misc needs dlopen code
-OBJECTS+=dlopen.o
+OBJECTS+=misc/dlopen.o
 endif                                   # GCC_WIN
 endif                                   # DLOPEN
 
@@ -164,6 +164,7 @@ ifdef DJGPP
 	del patch\*.o
 	del console\*.o
 	del backup\*.o
+	del misc\*.o
 	del $(TARGET)
 	cd libdiscmage
 	$(MAKE) clean
@@ -286,17 +287,18 @@ endif
 # Dependencies
 
 # Most source files include these
-UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h
+UCON64_STD_H=ucon64.h ucon64_misc.h misc/misc.h config.h ucon64_defines.h
 
-dlopen.o: dlopen.h dxedll_pub.h config.h
-getopt.o: getopt.h
-map.o: map.h config.h
-misc.o: misc.h misc_z.h config.h
-misc_chk.o: misc_chk.h config.h
-misc_par.o: misc_par.h config.h
-misc_usb.o: misc_usb.h config.h
-misc_z.o: misc_z.h map.h config.h
-ucon64.o: dlopen.h getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
+misc/archive.o: misc/archive.h misc/map.h config.h
+misc/chksum.o: misc/chksum.h config.h
+misc/dlopen.o: misc/dlopen.h misc/dxedll_pub.h config.h
+misc/getopt.o: misc/getopt.h
+misc/map.o: misc/map.h config.h
+misc/misc.o: misc/misc.h misc/archive.h config.h
+misc/parallel.o: misc/parallel.h config.h
+misc/usb.o: misc/usb.h config.h
+misc/unzip.o: misc/unzip.h config.h
+ucon64.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
           console/dc.h console/gb.h console/gba.h console/genesis.h \
           console/jaguar.h console/lynx.h console/n64.h console/neogeo.h \
           console/nes.h console/ngp.h console/pce.h console/psx.h console/sms.h \
@@ -311,9 +313,9 @@ ucon64.o: dlopen.h getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
           patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/pal4u.h \
           patch/ppf.h patch/xps.h $(UCON64_STD_H)
 ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)
-ucon64_dm.o: ucon64_dm.h dlopen.h $(UCON64_STD_H)
-ucon64_misc.o: dlopen.h $(UCON64_STD_H)
-ucon64_opts.o: dlopen.h getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
+ucon64_dm.o: ucon64_dm.h misc/dlopen.h $(UCON64_STD_H)
+ucon64_misc.o: misc/dlopen.h $(UCON64_STD_H)
+ucon64_opts.o: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
                console/dc.h console/gb.h console/gba.h console/genesis.h \
                console/jaguar.h console/lynx.h console/n64.h console/neogeo.h \
                console/nes.h console/ngp.h console/pce.h console/psx.h \
@@ -328,7 +330,6 @@ ucon64_opts.o: dlopen.h getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
                backup/z64.h \
                patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/pal4u.h \
                patch/ppf.h patch/xps.h $(UCON64_STD_H)
-unzip.o: unzip.h config.h
 console/dc.o: console/dc.h $(UCON64_STD_H)
 console/gb.o: console/gb.h backup/mgd.h $(UCON64_STD_H)
 console/gba.o: console/gba.h $(UCON64_STD_H)

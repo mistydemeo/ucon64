@@ -25,8 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "misc.h"
-#include "misc_par.h"
+#include "misc/misc.h"
+#include "misc/parallel.h"
 #include "tototek.h"
 
 

@@ -57,12 +57,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma message ("DEBUG active")
 #endif
 #endif
-#include "misc.h"
+#include "misc/misc.h"
 #ifdef  USE_PARALLEL
-#include "misc_par.h"
+#include "misc/parallel.h"
 #endif
-#include "misc_chk.h"
-#include "getopt.h"
+#include "misc/chksum.h"
+#include "misc/getopt.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"

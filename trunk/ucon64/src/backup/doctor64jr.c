@@ -135,12 +135,12 @@ void mainproc(void *arg) {
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "misc.h"
+#include "misc/misc.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "doctor64jr.h"
-#include "misc_par.h"
+#include "misc/parallel.h"
 
 
 const st_getopt2_t doctor64jr_usage[] = {
@@ -178,7 +178,7 @@ const st_getopt2_t doctor64jr_usage[] = {
 
 static unsigned short int port_8, port_9, port_a, port_b, port_c,
                           *buffer;
-int wv_mode;
+static int wv_mode;
 
 
 static void

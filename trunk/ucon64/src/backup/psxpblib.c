@@ -29,10 +29,10 @@
 #include <unistd.h>             // ioperm() (libc5)
 #endif
 #include "ucon64.h"
-#include "misc.h"
+#include "misc/misc.h"
 #include "ucon64_misc.h"
 #include "psxpblib.h"
-#include "misc_par.h"
+#include "misc/parallel.h"
 
 #ifdef  USE_PARALLEL
 

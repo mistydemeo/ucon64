@@ -30,7 +30,7 @@ TARGETS=$(TARGETS) backup/libcd64/cd64.lib
 
 
 OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
-        misc.obj misc_chk.obj misc_par.obj getopt.obj dlopen.obj \
+        misc/chksum.obj misc/getopt.obj misc/misc.obj misc/parallel.obj \
         patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj \
         patch/pal4u.obj patch/ppf.obj patch/xps.obj \
         console/dc.obj console/gb.obj console/gba.obj console/genesis.obj \
@@ -47,14 +47,14 @@ OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
         backup/tototek.obj backup/ufo.obj backup/yoko.obj backup/z64.obj
 !ifdef USE_ZLIB
 LDFLAGS=$(LDFLAGS) zlib.lib
-OBJECTS=$(OBJECTS) map.obj misc_z.obj unzip.obj
+OBJECTS=$(OBJECTS) misc/map.obj misc/archive.obj misc/unzip.obj
 !endif
 !ifdef USE_DISCMAGE
 OBJECTS=$(OBJECTS) ucon64_dm.obj
 !endif
 !ifdef USE_USB
 LDFLAGS=$(LDFLAGS) usb.lib
-OBJECTS=$(OBJECTS) misc_usb.obj
+OBJECTS=$(OBJECTS) misc/usb.obj
 !endif
 
 
@@ -69,6 +69,7 @@ clean:
 	del patch\*.obj
 	del console\*.obj
 	del backup\*.obj
+	del misc\*.obj
 	del $(TARGET)
 	cd libdiscmage
 	$(MAKE) /NOLOGO /f Makefile.vc6 clean
@@ -128,17 +129,18 @@ uninstall:
 # Dependencies
 
 # Most source files include these
-UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h
+UCON64_STD_H=ucon64.h ucon64_misc.h misc/misc.h config.h ucon64_defines.h
 
-dlopen.obj: dlopen.h dxedll_pub.h config.h
-getopt.obj: getopt.h
-map.obj: map.h config.h
-misc.obj: misc.h misc_z.h config.h
-misc_chk.obj: misc_chk.h config.h
-misc_par.obj: misc_par.h config.h
-misc_usb.obj: misc_usb.h config.h
-misc_z.obj: misc_z.h map.h config.h
-ucon64.obj: dlopen.h getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
+misc/archive.obj: misc/archive.h misc/map.h config.h
+misc/chk.obj: misc/chksum.h config.h
+misc/dlopen.obj: misc/dlopen.h misc/dxedll_pub.h config.h
+misc/getopt.obj: misc/getopt.h
+misc/map.obj: misc/map.h config.h
+misc/misc.obj: misc/misc.h misc/archive.h config.h
+misc/parallel.obj: misc/parallel.h config.h
+misc/usb.obj: misc/usb.h config.h
+misc/unzip.obj: misc/unzip.h config.h
+ucon64.obj: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
             console/dc.h console/gb.h console/gba.h console/genesis.h \
             console/jaguar.h console/lynx.h console/n64.h console/neogeo.h \
             console/nes.h console/ngp.h console/pce.h console/psx.h \
@@ -153,9 +155,9 @@ ucon64.obj: dlopen.h getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
             patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/pal4u.h \
             patch/ppf.h patch/xps.h $(UCON64_STD_H)
 ucon64_dat.obj: ucon64_dat.h $(UCON64_STD_H)
-ucon64_dm.obj: ucon64_dm.h dlopen.h $(UCON64_STD_H)
-ucon64_misc.obj: dlopen.h $(UCON64_STD_H)
-ucon64_opts.obj: dlopen.h getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
+ucon64_dm.obj: ucon64_dm.h misc/dlopen.h $(UCON64_STD_H)
+ucon64_misc.obj: misc/dlopen.h $(UCON64_STD_H)
+ucon64_opts.obj: misc/dlopen.h misc/getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
                  console/dc.h console/gb.h console/gba.h console/genesis.h \
                  console/jaguar.h console/lynx.h console/n64.h \
                  console/neogeo.h console/nes.h console/ngp.h console/pce.h \
@@ -170,7 +172,6 @@ ucon64_opts.obj: dlopen.h getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
                  backup/yoko.h backup/z64.h \
                  patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/pal4u.h \
                  patch/ppf.h patch/xps.h $(UCON64_STD_H)
-unzip.obj: unzip.h config.h
 console/dc.obj: console/dc.h $(UCON64_STD_H)
 console/gb.obj: console/gb.h backup/mgd.h $(UCON64_STD_H)
 console/gba.obj: console/gba.h $(UCON64_STD_H)

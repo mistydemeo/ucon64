@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "misc.h"
+#include "misc/misc.h"
 #include "ucon64.h"
 
 extern const st_getopt2_t ucon64_dat_usage[];

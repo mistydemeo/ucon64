@@ -27,10 +27,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include "misc.h"                               // kbhit(), getch()
+#include "misc/misc.h"                          // kbhit(), getch()
 #include "ucon64_misc.h"
 #include "ffe.h"
-#include "misc_par.h"
+#include "misc/parallel.h"
 
 
 #ifdef USE_PARALLEL

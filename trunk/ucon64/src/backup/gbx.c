@@ -63,13 +63,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
-#include "misc.h"
+#include "misc/misc.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "gbx.h"
 #include "console/gb.h"                         // gb_logodata
-#include "misc_par.h"
+#include "misc/parallel.h"
 
 
 const st_getopt2_t gbx_usage[] =

@@ -12,9 +12,9 @@ cd64_ghemor_send
 cd64_upload_dram
 cd64_upload_ram
 cd64_upload_bootemu
-;cd64_upload_sram
-;cd64_upload_flashram
-;cd64_upload_eeprom
+cd64_upload_sram
+cd64_upload_flashram
+cd64_upload_eeprom
 cd64_upload_mempak
 cd64_download_cart
 cd64_download_dram

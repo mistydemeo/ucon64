@@ -199,8 +199,8 @@ extern int dm_close (dm_image_t *image);
 //extern int dm_fseek (FILE *fp, int track_num, int how);
 extern FILE *dm_fdopen (dm_image_t *image, int track_num, const char *mode);
 
-extern int dm_read (char buffer, int track_num, int sector, const dm_image_t *image);
-extern int dm_write (const char buffer, int track_num, int sector, const dm_image_t *image);
+extern int dm_read (char *buffer, int track_num, int sector, const dm_image_t *image);
+extern int dm_write (const char *buffer, int track_num, int sector, const dm_image_t *image);
 
 extern dm_image_t *dm_toc_read (dm_image_t *image, const char *toc_sheet);
 extern int dm_toc_write (const dm_image_t *image);

@@ -280,6 +280,16 @@ vprintf2 (const char *format, va_list argptr)
               new_attr = FOREGROUND_GREEN | BACKGROUND_GREEN;
               n_ctrl = 8;
             }
+          else if (memcmp (ptr, "\x1b[30;41m", 8) == 0) // 30 = foreground black
+            {
+              new_attr = BACKGROUND_RED;
+              n_ctrl = 8;
+            }
+          else if (memcmp (ptr, "\x1b[30;42m", 8) == 0)
+            {
+              new_attr = BACKGROUND_GREEN;
+              n_ctrl = 8;
+            }
           else if (*ptr == 0x1b)
             {
               new_attr = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
@@ -2383,6 +2393,52 @@ q_fncmp (const char *filename, int start, int len, const char *search,
   fclose (fh);
   return -1;
 }
+
+
+#if 0
+int
+process_file (const char *fname, int start, int len, int (*func) (char *, const char*))
+{
+  int seg_len = 0, size = q_fsize (src);
+  char buf[MAXBUFSIZE];
+  FILE *fh, *fh2;
+
+  if (!strcmp (dest, src))
+    return -1;
+
+  if (!(fh = fopen (src, "rb")))
+    {
+      errno = ENOENT;
+      return -1;
+    }
+
+  if (!(fh2 = fopen (dest, mode)))
+    {
+      errno = ENOENT;
+      fclose (fh);
+      return -1;
+    }
+
+  fseek (fh, start, SEEK_SET);
+  fseek (fh2, 0, SEEK_END);
+
+  len = MIN (len, size - start);
+
+  for (; ; len -= seg_len)
+    {
+      seg_len = MIN (len, MAXBUFSIZE);
+      if (!fread (buf, seg_len, 1, fh))
+        break;
+      fwrite (buf, seg_len, 1, fh2);
+    }
+
+  fclose (fh);
+  fclose (fh2);
+
+  sync ();
+  return 0;
+}
+#endif
 
 
 #ifdef  _WIN32

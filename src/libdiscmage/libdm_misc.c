@@ -880,7 +880,7 @@ dm_set_gauge (void (* gauge) (int, int))
 
 
 int
-dm_read (char buffer, int track_num, int sector, const dm_image_t *image)
+dm_read (char *buffer, int track_num, int sector, const dm_image_t *image)
 {
   dm_track_t *track = (dm_track_t *) &image->track[track_num];
   FILE *fh;
@@ -894,7 +894,7 @@ dm_read (char buffer, int track_num, int sector, const dm_image_t *image)
       return 0;
     }
   
-  if (fread (&buffer, track->sector_size, 1, fh) != track->sector_size)
+  if (fread (buffer, track->sector_size, 1, fh) != track->sector_size)
     {
       fclose (fh);
       return 0;
@@ -906,7 +906,7 @@ dm_read (char buffer, int track_num, int sector, const dm_image_t *image)
 
 
 int
-dm_write (const char buffer, int track_num, int sector, const dm_image_t *image)
+dm_write (const char *buffer, int track_num, int sector, const dm_image_t *image)
 {
   (void) buffer;
   (void) track_num;

@@ -894,7 +894,7 @@ ucon64_options (int c, const char *optarg)
               case UCON64_BIN2ISO:
                 flags |= DM_2048; // DM_RDONLY|DM_2048 read sectors and convert to 2048 Bytes
                 break;
-              
+
               case UCON64_ISOFIX:
                 flags |= DM_FIX; // DM_RDONLY|DM_FIX read sectors and fix (if needed/possbile)
                 break;
@@ -910,9 +910,6 @@ ucon64_options (int c, const char *optarg)
               libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
               libdm_rip (ucon64.image, track);
             }
-          else
-            {
-            }
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);
@@ -924,23 +921,23 @@ ucon64_options (int c, const char *optarg)
       if (ucon64.discmage_enabled)
         {
           if (ucon64.image)
-          {
-            if (c == UCON64_MKTOC || c == UCON64_MKSHEET)
-              {
-                if (!libdm_toc_write (ucon64.image))
-                  printf (ucon64_msg[WROTE], "toc sheet");
-                else
-                  fprintf (stderr, "ERROR: Could not generate toc sheet\n");
-              }
+            {
+              if (c == UCON64_MKTOC || c == UCON64_MKSHEET)
+                {
+                  if (!libdm_toc_write (ucon64.image))
+                    printf (ucon64_msg[WROTE], "toc sheet");
+                  else
+                    fprintf (stderr, "ERROR: Could not generate toc sheet\n");
+                }
 
-            if (c == UCON64_MKCUE || c == UCON64_MKSHEET)
-              {
-                if (!libdm_cue_write (ucon64.image))
-                  printf (ucon64_msg[WROTE], "cue sheet");
-                else
-                  fprintf (stderr, "ERROR: Could not generate cue sheet\n");
-              }
-          }
+              if (c == UCON64_MKCUE || c == UCON64_MKSHEET)
+                {
+                  if (!libdm_cue_write (ucon64.image))
+                    printf (ucon64_msg[WROTE], "cue sheet");
+                  else
+                    fprintf (stderr, "ERROR: Could not generate cue sheet\n");
+                }
+            }
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);

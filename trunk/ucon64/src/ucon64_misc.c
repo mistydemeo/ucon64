@@ -6,6 +6,7 @@ written by 1999 - 2002 NoisyB (noisyb@gmx.net)
                   2001 Caz
                   2002 Jan-Erik Karlsson (Amiga)
 
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -297,7 +298,7 @@ static int ucon64_io_fd;
 
 const char *unknown_usage[] =
 {
-  "Unknown backup unit/Emulator",
+  "Unknown backup unit/emulator",
   NULL,
   NULL,
   NULL
@@ -1105,7 +1106,7 @@ ucon64_e (const char *romfile)
   //  returns 0 when the exe could not be started
   if (result != 127 && result != -1 && result != 0)        // 127 && -1 are system() errors, rest are exit codes
     {
-      fprintf (stderr, "ERROR: the Emulator returned an error code (%d)\n"
+      fprintf (stderr, "ERROR: the emulator returned an error code (%d)\n"
                "TIP:   If the wrong emulator was used you might try to force recognition\n"
                "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n",
                result);

@@ -49,7 +49,7 @@ const char *sms_usage[] =
 #endif
     "  " OPTION_LONG_S "mgd         convert to Multi Game*/MGD2/MGH/RAW\n"
     "  " OPTION_LONG_S "smd         convert to Super Magic Drive/SMD (+512 Bytes)\n"
-    "  " OPTION_LONG_S "smds        convert Emulator (*.srm) SRAM to Super Magic Drive/SMD\n"
+    "  " OPTION_LONG_S "smds        convert emulator (*.srm) SRAM to Super Magic Drive/SMD\n"
 #if 0
     "TODO:  " OPTION_LONG_S "chk   fix ROM checksum\n"
     "  " OPTION_LONG_S "gge         encode GameGenie code; " OPTION_LONG_S "rom=AAAA:VV or " OPTION_LONG_S "rom=AAAA:VV:CC\n"

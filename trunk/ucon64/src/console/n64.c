@@ -59,7 +59,7 @@ const char *n64_usage[] =
     "                  extracts automatically if BOOTCODE does not exist\n"
     "  " OPTION_LONG_S "sram        LAC's Makesram; " OPTION_LONG_S "rom=(LAC's SRAM ROM image) " OPTION_LONG_S "file=SRAMFILE\n"
     "                  the SRAMFILE must have a size of 512 Bytes\n"
-    "  " OPTION_LONG_S "usms        Jos Kwanten's ultraSMS (Sega Master System/GameGear Emulator);\n"
+    "  " OPTION_LONG_S "usms        Jos Kwanten's ultraSMS (Sega Master System/GameGear emulator);\n"
     "                  " OPTION_LONG_S "rom=(Jos Kwanten's ultraSMS ROM image) " OPTION_LONG_S "file=SMSROM\n"
     "                  works only for ROMs which are <= 4 Mb in size\n"
     "  " OPTION_LONG_S "chk         fix ROM checksum\n"

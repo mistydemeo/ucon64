@@ -89,7 +89,7 @@ const char *snes_usage[] =
     "  " OPTION_LONG_S "mgd         convert to Multi Game*/MGD2/MGH/RAW\n"
     "  " OPTION_LONG_S "gd3         convert to Professor SF(2) Game Doctor SF3/6/7\n"
     "  " OPTION_LONG_S "ufos        convert Snes9x/ZSNES *.srm (SRAM) to Super UFO; " OPTION_LONG_S "rom=SRAM\n"
-    "  " OPTION_LONG_S "stp         convert SRAM from backup unit for use with an Emulator\n"
+    "  " OPTION_LONG_S "stp         convert SRAM from backup unit for use with an emulator\n"
     "                  " OPTION_LONG_S "stp just strips the first 512 bytes\n"
 #if 0
     "  " OPTION_LONG_S "gdf         fix Professor SF(2) Game Doctor SF3/6/7 savegame problems\n"
@@ -113,9 +113,9 @@ const char *snes_usage[] =
     "                  this routine was used to find green colors in games and\n"
     "                  to replace them with red colors (blood mode)\n"
 #if 0
-    "TODO:  " OPTION_LONG_S "sx     convert to Snes9X (Emulator)/S9X save state; " OPTION_LONG_S "rom=SAVESTATE\n"
-    "TODO:  " OPTION_LONG_S "zs     convert to ZSNES (Emulator) save state; " OPTION_LONG_S "rom=SAVESTATE\n"
-    "TODO:  " OPTION_LONG_S "xzs    extract GFX from ZSNES (Emulator) save state; " OPTION_LONG_S "rom=SAVESTATE\n"
+    "TODO:  " OPTION_LONG_S "sx     convert to Snes9X (emulator)/S9X save state; " OPTION_LONG_S "rom=SAVESTATE\n"
+    "TODO:  " OPTION_LONG_S "zs     convert to ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE\n"
+    "TODO:  " OPTION_LONG_S "xzs    extract GFX from ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE\n"
     "TODO:  " OPTION_LONG_S "spc    convert SPC sound to WAV; " OPTION_LONG_S "rom=SPCFILE\n"
 #endif
     "  " OPTION_S "j           join split ROM\n"

@@ -24,12 +24,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern int genesis_1991 (st_rominfo_t *rominfo);
 extern int genesis_chk (st_rominfo_t *rominfo);
 extern int genesis_j (st_rominfo_t *rominfo);
-extern int genesis_mgd (st_rominfo_t *rominfo);
 extern int genesis_n (st_rominfo_t *rominfo, const char *name);
 extern int genesis_n2 (st_rominfo_t *rominfo, const char *name);
 extern int genesis_s (st_rominfo_t *rominfo);
 extern int genesis_smd (st_rominfo_t *rominfo);
 extern int genesis_smds (void);
+extern int genesis_bin (st_rominfo_t *rominfo);
+extern int genesis_mgd (st_rominfo_t *rominfo);
 extern int genesis_multi (int truncate_size, char *fname);
 extern int genesis_init (st_rominfo_t *rominfo);
 extern int genesis_f (st_rominfo_t *rominfo);

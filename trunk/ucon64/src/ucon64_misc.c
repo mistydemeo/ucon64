@@ -377,10 +377,6 @@ const st_usage_t ucon64_options_usage[] = {
   {"hd", NULL, "same as " OPTION_LONG_S "hdn=512\n"
                    "most backup units use a header with a size of 512 Bytes"},
   {"nhd", NULL, "force ROM has no backup unit/emulator header"},
-  {"int", NULL, "force ROM is interleaved (2143)"},
-  {"nint", NULL, "force ROM is not interleaved (1234)"},
-  {"dint", NULL, "convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
-             "this differs from the SNES & NES " OPTION_LONG_S "dint option"},
   {"ns", NULL, "force ROM is not split"},
 #ifdef  __MSDOS__
   {"e", NULL, "emulate/run ROM (check ucon64.cfg for more)"},
@@ -566,6 +562,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},
   {UCON64_A, UCON64_UNKNOWN, aps_usage,        WF_STOP},
   {UCON64_B, UCON64_UNKNOWN, bsl_usage,        WF_STOP},
+  {UCON64_BIN, UCON64_GEN, genesis_usage,      WF_DEFAULT|WF_NO_SPLIT},
   {UCON64_C, UCON64_UNKNOWN, ucon64_options_usage, 0},
   {UCON64_CHK, UCON64_UNKNOWN, NULL,           WF_DEFAULT},
   {UCON64_CRC, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
@@ -675,7 +672,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_HI, UCON64_SNES, snes_usage,         WF_SWITCH},
   {UCON64_ID, UCON64_UNKNOWN, NULL,            WF_SWITCH}, // might be used for different
   {UCON64_INT, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH}, //  consoles in the future
-  {UCON64_INT2, UCON64_SNES, snes_usage, WF_SWITCH},
+  {UCON64_INT2, UCON64_UNKNOWN, NULL,          WF_SWITCH}, // for SNES & Genesis
   {UCON64_MAPR, UCON64_NES, nes_usage,         WF_SWITCH},
   {UCON64_MIRR, UCON64_NES, nes_usage,         WF_SWITCH},
   {UCON64_NBAK, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},

@@ -459,8 +459,8 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - added (SNES) -xgd6s send/receive SRAM to/from Game Doctor SF6/SF7 (by John)<br>
 - added (SNES) -xgd3s send SRAM to Game Doctor SF3/SF6/SF7 (by John)<br>
 - added (Genesis) -multi can create a multi-game file for use on the MD-PRO
-  flash card. The downside: creating a multirom for the FAL won't work without
-  -gba (by dbjh)<br>
+  flash card. The downside: creating a multirom for the FAL doesn't work
+  without -gba anymore (by dbjh)<br>
 - added (Genesis) -f can fix region protections, addendum files are genpal.txt
   and mdntsc.txt (by dbjh)<br>
 - added (SNES) -id force -gd3 to produce a unique file name. This switch
@@ -473,6 +473,11 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (N64) fixed major bug in APS creation code (by dbjh)<br>
 - updated (SNES) added NTSC/PAL fix for Magical Pop'n (J) and Metal Warriors
   (U) (by dbjh)<br>
+- added (Genesis) recognition of <i>real</i> MGD files (by dbjh, thanks to
+  acem77 for the feedback)<br>
+- updated (Genesis) -mgd now produces proper MGD files (by dbjh)<br>
+- added (Genesis) -bin convert to binary format. This option produces files in
+  the format that uCON64 1.9.8-1 produces with the option -mgd (by dbjh)<br>
 <br>
 <br>
 <br>

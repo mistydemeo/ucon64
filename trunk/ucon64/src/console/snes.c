@@ -82,8 +82,8 @@ const st_usage_t snes_usage[] =
 #endif
 // the next switch remains undocumented until we know of a good checksum algorithm
 //    {"id", NULL, "force -gd3 to produce a unique file name"},
-    {"int", NULL, "force ROM is in interleaved format"},
-    {"int2", NULL, "force ROM is in interleaved format 2"},
+    {"int", NULL, "force ROM is in interleaved format (GD3/UFO)"},
+    {"int2", NULL, "force ROM is in interleaved format 2 (SFX)"},
     {"nint", NULL, "force ROM is not in interleaved format"},
     {"bs", NULL, "force ROM is a Broadcast Satellaview dump"},
     {"nbs", NULL, "force ROM is a regular cartridge dump"},
@@ -743,7 +743,7 @@ snes_mirror (unsigned char *dstbuf, unsigned int start, unsigned int data_end,
 }
 
 
-static int
+static void
 make_gd_name (const char *filename, st_rominfo_t *rominfo, char *name,
               unsigned char *buffer, int newsize)
 {
@@ -820,8 +820,6 @@ make_gd_name (const char *filename, st_rominfo_t *rominfo, char *name,
   for (n = 3; n < 7; n++)                       // skip "sf" and first digit
     if (name[n] == ' ')
       name[n] = '_';
-
-  return 0;
 }
 
 
@@ -2393,7 +2391,7 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_si
   if (nblocks * 2 > 256)
     return -1;                                  // file > 8 MB
 
-  if (rominfo->interleaved == 2)                // SFX2 games (Doom, Yoshi's Island)
+  if (rominfo->interleaved == 2)                // SFX(2) games (Doom, Yoshi's Island)
     {
       for (i = 0; i < nblocks * 2; i++)
         {

@@ -2,6 +2,7 @@
 mgd.h - Multi Game Doctor/Hunter support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+           2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -105,6 +106,11 @@ is cat. no. 475) would look like: SF16475A.078
 
 #ifdef PARALLEL
 #endif // PARALLEL
+
+// the following three functions are used by non-transfer code in genesis.c
+extern void mgd_interleave (unsigned char **buffer, int size);
+extern void mgd_deinterleave (unsigned char **buffer, int size);
+extern int q_fread_mgd (void *buffer, size_t start, size_t len, const char *filename);
 
 #define MGD_HEADER_START 0
 #define MGD_HEADER_LEN 512

@@ -327,11 +327,14 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
 <p>
 <a name="21"><b>Q21</b>: uCON64 exits with the message "Flash cart erase failed!" when I try
    to write a multirom to my flash card. What's wrong?</a><br>
-<b>A</b>: The multirom file you created is too large for your flash card. When you make a multirom
-   file don't forget that the loader or "game pack" file also needs some space (32 kB) on the
-   flash card. Use -multi1, -multi2 or -multi3 to create a multirom that is truncated to 64 Mb (8 MB),
-   128 Mb (16 MB) or 256 Mb (32 MB) respectively. Note that uCON64 always truncates multirom files to
-   512 Mb (64 MB).<br>
+<b>A</b>: The multirom file you created is too large for your flash card. When you make a
+   multirom file don't forget that the loader or "game pack" file also needs some space (32
+   kB) on the flash card. Don't pass a size to -multi that is larger than your flash card.
+   Passing a smaller size is correct too. For example, to create a multirom that fits on a
+   128 Mb (16 MB) card use a command line like this:<br>
+   &nbsp;&nbsp; ucon64 -multi=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba multi.bin<br>
+   You can also send it directly by using -xfalmulti:<br>
+   &nbsp;&nbsp; ucon64 -xfalmulti=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba<br>
    Just like sometimes happens with Visoly's tool it is possible to get the same message when the
    multirom is small enough. It will probably work when you try again (with the same multirom).<br>
 <br>

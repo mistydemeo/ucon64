@@ -60,13 +60,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_VERSION "1.9.7"
 
 #ifdef __DOS__
-	#define ucon64_TITLE "uCON64 1.9.7 DOS"
+	#define ucon64_TITLE "uCON64 1.9.7 DOS 1999-2001"
 #elif __UNIX__
-	#define ucon64_TITLE "uCON64 1.9.7 Unix"
+	#define ucon64_TITLE "uCON64 1.9.7 Unix 1999-2001"
 #elif __BEOS__
-	#define ucon64_TITLE "uCON64 1.9.7 BeOS"
+	#define ucon64_TITLE "uCON64 1.9.7 BeOS 1999-2001"
 #else
-	#define ucon64_TITLE "uCON64 1.9.7"
+	#define ucon64_TITLE "uCON64 1.9.7 1999-2001"
 #endif
 
 #define MBIT	131072

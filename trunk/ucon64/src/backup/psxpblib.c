@@ -13,9 +13,8 @@
  *
  */
 
+#include "psxpblib.h"
 
-
-#include"psxpblib.h"
 static unsigned char psx_parallel_out_0 = 0xff;
 static unsigned char psx_parallel_out_2 = 0x00;
 
@@ -24,7 +23,7 @@ static unsigned char psx_parallel_out_2 = 0x00;
 
 /*
  *
- * sets clock for conport connected to parallel port base 
+ * sets clock for conport connected to parallel port base
  *
  */
 void
@@ -286,7 +285,7 @@ psx_obtain_io_permission (int base)
     }
   // return 1 if successful, otherwise, 0
 #if 0                                           // uCON64 already enabled access to I/O ports
-#ifdef _PSX_LINUX_
+#ifdef  _PSX_LINUX_
   if (ioperm (base, 3, 1))
     {
       return 0;

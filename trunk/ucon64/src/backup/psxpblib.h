@@ -19,11 +19,11 @@
 */
 #include "../ucon64_misc.h"
 
-#ifdef __DOS__
+#ifdef  __DOS__
 #define _PSXPB_DJGPP_
-#elif __UNIX__
+#elif   defined __UNIX__
 #define _PSXPB_LINUX_
-#elif __BEOS__
+#elif   defined __BEOS__
 #define _PSXPB_BEOS_
 #endif
 
@@ -36,12 +36,12 @@
 #define psx_inportb(P) inportb(P)
 #endif
 
-#ifdef _PSXPB_DJGPP_
+#ifdef  _PSXPB_DJGPP_
 #include <stdlib.h>
 #include <pc.h>
 #endif
 
-#if defined(_PSXPB_LINUX_) || defined(_PSXPB_BEOS_)
+#if     defined _PSXPB_LINUX_ || defined _PSXPB_BEOS_
 #include <string.h>
 #include <unistd.h>
 #endif

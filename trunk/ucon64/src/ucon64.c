@@ -67,6 +67,7 @@ write programs in C
 
 int main(int argc,char *argv[])
 {
+
 /*if(	!argcmp(argc, argv, "-ls") &&
 	!argcmp(argc, argv, "-lsv")
 )*/
@@ -157,6 +158,7 @@ int ucon64_main(int argc,char *argv[])
 
 
 //find out which console type
+
 
 
 if(argcmp(argc,argv,"-ata"))console=ucon64_ATARI;
@@ -798,12 +800,12 @@ int ucon64_probe(int argc,char *argv[])
 	if(supernintendo_probe(argc,argv)!=-1)console=ucon64_SNES;
 	else if(genesis_probe(argc,argv)!=-1)console=ucon64_GENESIS;
 	else if(nintendo64_probe(argc,argv)!=-1)console=ucon64_N64;
+	else if(atari_probe(argc,argv)!=-1)console=ucon64_ATARI;
 	else if(nes_probe(argc,argv)!=-1)console=ucon64_NES;
 	else if(lynx_probe(argc,argv)!=-1)console=ucon64_LYNX;
 	else if(gameboy_probe(argc,argv)!=-1)console=ucon64_GB;
 	else if(gbadvance_probe(argc,argv)!=-1)console=ucon64_GBA;
 	else if(jaguar_probe(argc,argv)!=-1)console=ucon64_JAGUAR;
-	else if(atari_probe(argc,argv)!=-1)console=ucon64_ATARI;
 	else if(pcengine_probe(argc,argv)!=-1)console=ucon64_PCE;
 	else if(coleco_probe(argc,argv)!=-1)console=ucon64_COLECO;
 	else if(intelli_probe(argc,argv)!=-1)console=ucon64_INTELLI;

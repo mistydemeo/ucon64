@@ -476,7 +476,7 @@ fig_read_sram (const char *filename, unsigned int parport)
 
   printf ("Receive: %d Bytes\n", 32 * 1024);
   memset (buffer, 0, FIG_HEADER_LEN);
-#if 0	// Not needed for FIG, as size is always 4 blocks
+#if 0 // Not needed for FIG, as size is always 4 blocks
   buffer[0] = 4;                                // 32 kB == 4*8 kB, "size_high" is already 0
 #endif
 

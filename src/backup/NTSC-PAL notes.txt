@@ -73,6 +73,7 @@ Code1   Code2   Game
 2       N1      Illusion of Gaia (U) <= (0xad) 0x89
 2 + 9   N15     Jikkyou Oshaberi Parodius (J) <= 0xad 0xff
 2       N1      Joe and Mac 2 (U)(35468) <= (0xad) 0x29
+2 + 9   N5      Kaite Tukutte Asoberu Dezaemon (J) <= 0x89
 2       N19     Kirby No Kira Kizzu (J) (NP) <= 0x29
 1 + 2   N17     Kirby's Dream Course (U) <= 0x29
 2       N4      Live-a-Live (J) <= 0xea 0xea

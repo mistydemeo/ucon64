@@ -223,8 +223,11 @@ char *fix_character_set (char *value);
   set_suffix() set/replace suffix of filename with suffix
               suffix means in this case the suffix INCLUDING the dot '.'
 
-  basename()  GNU basename() clone
+  basename2() DJGPP basename() clone
+  dirname2()  DJGPP dirname() clone
   realpath2() realpath() replacement
+  one_file()  returns 1 if two filenames refer to one file, otherwise it
+              returns 0
   mkdir2()    mkdir() wrapper who automatically cares for rights, etc.
   truncate2() don't use truncate() to enlarge files, because the result is
               undefined (by POSIX) use truncate2() instead which does both
@@ -262,6 +265,7 @@ extern char *basename2 (const char *path);
 extern char *dirname2 (const char *path);
 #define dirname dirname2
 //#endif
+extern int one_file (const char *filename1, const char *filename2);
 extern char *realpath2 (const char *src, char *full_path);
 extern int mkdir2 (const char *name);
 extern int truncate2 (const char *filename, int size);

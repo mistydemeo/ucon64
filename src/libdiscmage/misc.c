@@ -983,6 +983,50 @@ realpath2 (const char *path, char *full_path)
 
 
 int
+one_file (const char *filename1, const char *filename2)
+// returns 1 if filename1 and filename2 refer to one file, 0 if not (or error)
+{
+#ifndef _WIN32
+  struct stat finfo1, finfo2;
+
+  /*
+    Not the name, but the combination inode & device identify a file.
+    Note that stat() doesn't need any access rights except search rights for
+    the directories in the path to the file.
+  */
+  if (stat (filename1, &finfo1) != 0)
+    return 0;
+  if (stat (filename2, &finfo2) != 0)
+    return 0;
+  if (finfo1.st_dev == finfo2.st_dev && finfo1.st_ino == finfo2.st_ino)
+    return 1;
+  else
+    return 0;
+#else
+  HANDLE file1, file2;
+  BY_HANDLE_FILE_INFORMATION finfo1, finfo2;
+
+  file1 = CreateFile (filename1, GENERIC_READ, FILE_SHARE_READ, NULL,
+                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  file2 = CreateFile (filename2, GENERIC_READ, FILE_SHARE_READ, NULL,
+                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (file1 == INVALID_HANDLE_VALUE || file2 == INVALID_HANDLE_VALUE)
+    return 0;
+  GetFileInformationByHandle (file1, &finfo1);
+  GetFileInformationByHandle (file2, &finfo2);
+  CloseHandle (file1);
+  CloseHandle (file2);
+  if (finfo1.dwVolumeSerialNumber == finfo2.dwVolumeSerialNumber &&
+      (finfo1.nFileIndexHigh << 16 | finfo1.nFileIndexLow) ==
+      (finfo2.nFileIndexHigh << 16 | finfo2.nFileIndexLow))
+    return 1;
+  else
+    return 0;
+#endif
+}
+
+
+int
 truncate2 (const char *filename, int new_size)
 {
   int size = q_fsize (filename);
@@ -2211,8 +2255,8 @@ q_fcpy (const char *src, int start, int len, const char *dest, const char *mode)
   char buf[MAXBUFSIZE];
   FILE *fh, *fh2;
 
-  if (!strcmp (dest, src))
-    return -1;
+  if (one_file (dest, src))                     // other code depends on this
+    return -1;                                  //  behaviour!
 
   if (!(fh = fopen (src, "rb")))
     {

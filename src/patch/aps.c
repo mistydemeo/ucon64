@@ -264,13 +264,12 @@ readpatch (void)
 int
 aps_apply (const char *mod, const char *apsname)
 {
-  char modname[FILENAME_MAX], srcname[FILENAME_MAX];
+  char modname[FILENAME_MAX];
   int size = q_fsize (mod);
 
-  strcpy (srcname, mod);
   strcpy (modname, mod);
-  ucon64_file_handler (modname, srcname, 0);
-  q_fcpy (srcname, 0, q_fsize (srcname), modname, "wb");
+  ucon64_file_handler (modname, NULL, 0);
+  q_fcpy (mod, 0, size, modname, "wb");         // no copy if one file
 
   if ((n64aps_modfile = fopen (modname, "rb+")) == NULL)
     {
@@ -293,7 +292,6 @@ aps_apply (const char *mod, const char *apsname)
   fclose (n64aps_apsfile);
 
   printf (ucon64_msg[WROTE], modname);
-  remove_temp_file ();
   return 0;
 }
 
@@ -532,18 +530,15 @@ aps_create (const char *orgname, const char *modname)
 int
 aps_set_desc (const char *aps, const char *description)
 {
-  char desc[50], apsname[FILENAME_MAX], srcname[FILENAME_MAX];
+  char desc[50], apsname[FILENAME_MAX];
 
-
-  strcpy (srcname, aps);
   strcpy (apsname, aps);
   memset (desc, ' ', 50);
   strncpy (desc, description, strlen (description));
-  ucon64_file_handler (apsname, srcname, 0);
-  q_fcpy (srcname, 0, q_fsize (srcname), apsname, "wb");
+  ucon64_file_handler (apsname, NULL, 0);
+  q_fcpy (aps, 0, q_fsize (aps), apsname, "wb"); // no copy if one file
   q_fwrite (desc, 7, 50, apsname, "r+b");
 
   printf (ucon64_msg[WROTE], apsname);
-  remove_temp_file ();
   return 0;
 }

@@ -1025,10 +1025,10 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    they have a name that ends with ".dat". Note also that the name starts with
    "snes". uCON64 will use all DAT files (in its DAT directory) that start with
    "snes" to identify SNES ROM dumps. The letter case is not important, so you
-   could also "SNES" or "Snes". If you use an incorrect name uCON64 will not
-   use the DAT file, but will print a warning message each time you run uCON64
-   on a ROM dump. Here follows a table to see which name uCON64 uses for what
-   console:<br>
+   could also use a name that starts with "SNES" or "Snes". If you use an
+   incorrect name uCON64 will not use the DAT file, but will print a warning
+   message each time you run uCON64 on a ROM dump. Here follows a table to see
+   which name uCON64 uses for what console:<br>
 <br>
 <table border="1">
   <tr>
@@ -1141,17 +1141,17 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
 </tt><tt> <!-- browser bug? -->
 <br>
    You can create a DAT file from a subset of the files in a directory by
-   explicitly specifying them on the command line:<br>
+   explicitly specifying the files on the command line:<br>
    &nbsp;&nbsp;ucon64 --mkdat=snes-02062003.dat c:\snesrom\*.swc<br>
    uCON64 uses the first file to determine for which console a DAT file is
    meant. So, if you want to create a DAT file from a set of ROMs of several
    consoles, the first file uCON64 encounters will determine the DAT file type.
    You can do two things in such a case to be sure for which console the
-   resulting DAT file will meant:<br>
+   resulting DAT file will be meant:<br>
    1.) Specify one extra ROM dump as first file on the command line. For
    example:<br>
    &nbsp;&nbsp;ucon64 --mkdat=n64-02062003.dat c:\rom\mario64.v64 c:\rom<br>
-   2.) Use a force recognition option. For example:<br>
+   2.) Use a force recognition switch. For example:<br>
    &nbsp;&nbsp;ucon64 --mkdat=sms-02062003.dat c:\rom -sms<br>
 <br>
    The second option should only be used when you are sure all the files are
@@ -1163,8 +1163,8 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    warning if it encounters a file that has the same CRC32 as a file uCON64
    already processed (a "duplicate").<br>
    2.) When neither -v nor -q is specified uCON64 will display a warning only
-   it finds a duplicate or if the console type of the first file could not be
-   determined.<br>
+   if it finds a duplicate or if the console type of the first file could not
+   be determined.<br>
    3.) When -q is specified uCON64 will display a warning only if the console
    type of the first file could not be determined.<br>
 <br>

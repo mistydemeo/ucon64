@@ -1043,7 +1043,8 @@ ucon64_options (int c, const char *optarg)
           swan_chk (ucon64.rominfo);
           break;
         default:
-          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+// The next msg has already been printed
+//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
           return -1;
         }
       break;
@@ -1091,7 +1092,8 @@ ucon64_options (int c, const char *optarg)
           snes_f (ucon64.rominfo);
           break;
         default:
-          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+// The next msg has already been printed
+//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
           return -1;
         }
       break;
@@ -1132,6 +1134,7 @@ ucon64_options (int c, const char *optarg)
           break;
         default:
           fprintf (stderr, "ERROR: Can not apply Game Genie code for this ROM/console\n");
+// The next msg has already been printed
 //          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
           return -1;
         }
@@ -1171,7 +1174,8 @@ ucon64_options (int c, const char *optarg)
           snes_j (ucon64.rominfo);
           break;
         default:
-          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+// The next msg has already been printed
+//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
           return -1;
         }
       break;
@@ -1215,7 +1219,8 @@ ucon64_options (int c, const char *optarg)
           pcengine_mgd (ucon64.rominfo);
           break;
         default:
-          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+// The next msg has already been printed
+//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
           return -1;
         }
       break;
@@ -1247,7 +1252,8 @@ ucon64_options (int c, const char *optarg)
           snes_n (ucon64.rominfo, optarg);
           break;
         default:
-          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+// The next msg has already been printed
+//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
           return -1;
         }
       break;
@@ -1319,7 +1325,8 @@ ucon64_options (int c, const char *optarg)
           snes_s (ucon64.rominfo);
           break;
         default:
-          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+// The next msg has already been printed
+//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
           return -1;
         }
       break;

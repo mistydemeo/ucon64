@@ -235,8 +235,8 @@ extern struct ucon64_
   int argc;
   char *argv[128];
 
-//  char rom[FILENAME_MAX];               //" OPTION_LONG_S "rom (cmdline) with path
-  char file[FILENAME_MAX];              //" OPTION_LONG_S "file (cmdline) with path
+  char rom[FILENAME_MAX];               //rom (cmdline) with path
+  char file[FILENAME_MAX];              //file (cmdline) with path
 
   unsigned int parport;         //parallel port address
   int parport_mode;             //parallel port mode: ECP, EPP, SPP, other
@@ -251,15 +251,20 @@ extern struct ucon64_
                                 //1 skip before and after processing of ROM
                                 //2 show after processing of ROM
                                 //3 show before and after processing of ROM
+
+  long buheader_len;            //length of backup unit header (==0)?no bu head
+  int splitted;                 //rom is splitted
+  int snes_hirom;               //super nintendo ROM is a HiROM
+  int interleaved;              //rom is interleaved (swapped)
 } ucon64;
 
 
 /*
   this struct holds only ROM relevant informations
 */
-extern struct rom_
+struct rom_
 {
-  char rom[FILENAME_MAX];               //" OPTION_LONG_S "rom (cmdline) with path
+  char rom[FILENAME_MAX];               //rom (cmdline) with path
 
   long console;                 //integer for the detected console system
   char title[4096];             //console system name
@@ -269,7 +274,7 @@ extern struct rom_
   int interleaved;              //rom is interleaved (swapped)
   unsigned long padded;         //rom is padded
   unsigned long intro;          //rom has intro
-  int splitted[128];            //rom is splitted
+  int splitted;                 //rom is splitted
 
   int snes_hirom;               //super nintendo ROM is a HiROM
 
@@ -306,6 +311,6 @@ extern struct rom_
   long country_len;             //length of country name
 
   char misc[MAXBUFSIZE];        //some miscellaneous information about the ROM in one single string
-} rom;
+};
 
 #endif // #ifndef UCON64_H

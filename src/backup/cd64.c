@@ -267,7 +267,7 @@ void test_key (void)
 {
         int temp;
 
-        if ((!rom->frontend) ? kbhit () : 0)
+        if ((!rombuf->frontend) ? kbhit () : 0)
         {
                 temp=getch ();
                 if (temp==27||temp==3)

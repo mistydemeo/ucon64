@@ -66,7 +66,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
   <td><tt>d64 transfer</tt></td>
 </tr>
 <tr>
-  <td>Kami</td>
+  <td><tt>Kami</tt></td>
   <td><a href="mailto:m-kami@da2.so-net.ne.jp"><tt>m-kami@da2.so-net.ne.jp</tt></a><br>
       <a href="http://www.playoffline.com" target="_blank"><tt>http://www.playoffline.com</tt></a></td>
   <td><tt>NES emulator for GameBoy</tt></td>
@@ -201,55 +201,219 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <br>
 <p>
 <a name="6"><b>Q6</b>: How is the source of uCON64 organized?</a><br>
-<b>A</b>: The heart of uCON64 is ucon64.h/st_rominfo_t. This struct is 
-   designed to hold all information you could get from any ROM.<br>
-<br>
-   You start uCON64 with the name of a ROM as argument. ucon64.c/ucon64_flush()
-   will initialize struct st_ucon64_t and st_rominfo_t with empty strings and NULL's.
-   ucon64.c/ucon64_init() will recurse into all &#60;console&#62;.c/&#60;console&#62;_init()
-   functions which probe if the ROM belongs to their console. If the right
-   console was found st_rominfo_t will be filled with the right values and
-   strings. ucon64.c/ucon64_nfo() displays the values and strings of st_rominfo_t.<br>
+<b>A</b>: The heart of uCON64 is ucon64.c/main()/rom. This <i>struct</i> is
+   designed to hold all information you could get from a ROM.<br>
+   uCON64 starts with the name of a ROM and possibly some arguments. Then it
+   checks if a configuration file exists and creates one if that is not the
+   case. uCON64 uses the configuration file to set some members of another
+   important structure, ucon64.c/ucon64. For example the value of
+   ucon64.parport, the variable that contains the I/O address of the parallel
+   port, will initially be set to the value that is found in the configuration
+   file.<br>
+   Then it scans the command line for switches. Switches are command line
+   arguments that will not result in an action by themselves, but they
+   influence the other type of command line arguments, options. uCON64
+   initializes ucon64.c/ucon64, based on the switches. This code can be found
+   in switches.c. This is also the place where ucon64.show_nfo is set. This
+   variable determines whether or not uCON64 displays ROM information.<br>
+   Then uCON64 calls ucon64_init() which calls ucon64_console_probe(). The
+   latter calls the init function for all the supported console types if the
+   user didn't use a force console switch. For example the init function for
+   SNES is snes/snes_init(), for NES nes/nes_init(). Each init function tries
+   to determine if the ROM file belongs to its console type. If that is the
+   case it returns 0, otherwise -1.<br>
+   Some ROM file types contain much information such as the internal name,
+   country and creator of the game that can be used to fill
+   ucon64.c/main()/rom. SNES ROM files are an example of this type of file. For
+   other ROM file types this information is not present inside the ROM file.
+   NES ROMs are an example of that type. In that case uCON64 uses a large
+   database in db.h to make it possible to display the country, creator and
+   full name of the game. ucon64_init() calls the function ucon64_dbsearch()
+   that uses the CRC32 of the ROM file data to find the required information in
+   the database. If the information could be found ucon64_dbsearch() fills
+   ucon64.c/main()/rom with it.<br>
+   After that if ucon64.show_nfo has the value UCON64_YES uCON64 will call
+   ucon64_nfo() which displays the values and strings of ucon64.c/main()/rom.
+   For some options it doesn't make sense to display ROM info. If one of those
+   options has been specified on the command line ucon64.show_nfo will be set
+   to UCON64_NO.<br>
+   Then uCON64 starts scanning the command line for options. This code can be
+   found in options.c. From this code allmost all operations of uCON64 are
+   executed. Under Unix this is also the point where root privileges are given
+   up if uCON64 had them and a "normal", i.e. non-copier I/O, option was
+   specified. If a copier I/O option was specified under Unix, root privileges
+   will be given up by the function ucon64_parport_probe().<br>
 <br>
 <p>
 <a name="7"><b>Q7</b>: What coding style is preferred?</a><br>
-<b>A</b>: Two spaces instead if a real tab. For the rest just look below...
-<form><textarea rows="40" cols="80" readonly>
-#include &#60;stdio.h&#62;
-#include "config.h"
-#include "misc.h"
+<b>A</b>:<br>
+<br>
+   <b>Keywords</b><br>
+   Always put a space after a keyword. That includes the keyword <i>sizeof</i>.<br>
+<br>
+   <b>Indentation</b><br>
+   Two spaces instead of a real tab. The curly braces of functions should not
+   be indented.<br>
+<br>
+   <b>Compound statements</b><br>
+   The curly braces should be indented and the code of the compound statement
+   should be indented again. The only exception is the <i>switch</i> statement.
+   The labels inside a <i>switch</i> statement should be aligned with the curly
+   braces. Example:<br>
+<pre>
+   int
+   function (int value)
+   {
+     if (value &#60; 0)
+       {
+         printf ("Invalid argument: %d\n", value);
+         exit (1);
+       }
+     switch (value)
+       {
+       case 0:
+       case 1:
+       case 2:                                     // falling through
+         puts ("lesser than or equal to 2\n");
+       case 3:
+       case 4:
+         puts ("lesser than or equal to 4\n");
+         break;
+       default:
+         puts ("greater than 4\n");
+         break;
+       }
 
-#ifndef BLA
-#define BLA "bla"
-#endif // BLA
-
-static int bla (int x);
-
-int
-main (int argc, char *argv[])
-{
-  int x;
-  char buf[256];
-
-  for (x = 0; x &#60; 3; x++)
+     return 0;
+   }
+</pre>
+   A <i>do-while</i> compound statement should have this layout:<br>
+<pre>
+   do
+     {
+       ...
+     }
+   while (...);
+</pre>
+<br>
+   <b>Functions</b><br>
+   Function calls should contain one space after the name of the function.
+   Every parameter of the function should be separated from a previous one with
+   a space after the comma.<br>
+   For a function implementation the return type should be specified on its own
+   line. This doesn't apply to function prototypes. If a function needn't be
+   known at global scope it should be declared or defined as <i>static</i>.
+   Function implementations should be separated from each other by two new
+   lines.<br>
+<br>
+   <b>Variables</b><br>
+   Variables of the same type should be defined in one group. Example:<br>
+<pre>
+   int x, y = 0, z;
+   char str1[] = "xyz", *str2;
+</pre>
+   Variables that need to be known at file scope but not at global scope should
+   be defined as <i>static</i>. Variables that do need to be known at global
+   scope should be defined in a source file, not in a header file. The header
+   file should contain an <i>extern</i> statement for the variable.<br>
+<br>
+   <b>Types (<i>struct</i>s)</b><br>
+   A <i>struct</i> tag of a <i>struct</i> should have the suffix "_t". A new
+   type based on a <i>struct</i> should have the same suffix and the prefix
+   "st_". Example:<br>
+<pre>
+ typedef struct
+ {
+   unsigned long id;
+   unsigned long length;
+   void *data;
+ } st_unif_chunk_t;
+</pre>
+<br>
+   <b>Line length</b><br>
+   The length of lines shouldn't be much longer than 90 characters. This
+   doesn't necessarily include the length of comment. Longer lines should be
+   broken into several shorter ones. Example:<br>
+<pre>
+   static const int unif_prg_tags[] = {PRG0_ID, PRG1_ID, PRG2_ID, PRG3_ID,
+                                       PRG4_ID, PRG5_ID, PRG6_ID, PRG7_ID,
+                                       PRG8_ID, PRG9_ID, PRGA_ID, PRGB_ID,
+                                       PRGC_ID, PRGD_ID, PRGE_ID, PRGF_ID};
+</pre>
+<br>
+   <b>Comment</b><br>
+   Single or two-line comments should use //. Comments that need more lines
+   should use the pair /* and */. A two-line comment should signify that it is
+   one two-line comment instead of two one-line comments by putting one extra
+   space behind the //. Single or two-line comments should start at column 49
+   if that's possible. Example:<br>
+<pre>
+   unsigned char buf[SIZE186], number[80];       // 4 should be enough, but don't
+                                                 //  be too sensitive to errors
+</pre>
+   Long comments should use the same indentation as the code that follows it:<br>
+<pre>
+  if (interleaved)
+    /*
+      This is a bit of a hack, i.e., putting the following code in this
+      ...
+    */
     {
-      {
-        {
-          strcpy (buf, BLA);
-          printf (buf);
-        }
-      }
-    }
-
-  return 0;
-}
-
-
-int bla (int x)
-{
-  return x;
-}
-</textarea></form>
+      unsigned char *data;
+      int size, n = 0, prg = 0, chr = 0;
+      ...
+</pre>
+<br>
+   <b>Preprocessor directives</b><br>
+   Preprocessor directives should not be indented. This does not only apply to
+   #include, but to all preprocessor directives.<br>
+   For #if and #ifdef blocks that are complex or enclose many lines of code the
+   corresponding #else, #elif or #endif should contain a comment that signifies
+   to which #if or #ifdef it belongs. <a name="multiplatform">Example:</a><br>
+<pre>
+   #ifdef  __unix__                                // wait 32 milliseconds
+     usleep (32000);
+     ...
+   #elif   defined __MSDOS__                       // __unix__
+     delay (32);
+     ...
+   #elif   defined __BEOS__                        // __MSDOS__
+     snooze (32000);
+     ...
+   #endif                                          // __BEOS__
+</pre>
+   Standard system header files should be included by specifying the name of
+   the header file between angle brackets. Non-standard header files should be
+   included with the name between double quotes. Example:<br>
+<pre>
+   #include &#60;stdio.h&#62;
+   #ifdef  __unix__
+   #include &#60;unistd.h&#62;
+   #endif
+   #include "ucon64.h"
+</pre>
+<br>
+   <b>Header files</b><br>
+   Header files should be protected against being included multiple times by
+   putting the entire file inside an #ifndef block. Define the constant for
+   which the #ifndef checks inside the #ifndef block. For example, for the file
+   swc.h:<br>
+<pre>
+   #ifndef SWC_H
+   #define SWC_H
+   ...
+   #endif // SWC_H
+</pre>
+   Header files should only contain information about their corresponding
+   source file that may be needed by other source files. They should not
+   include information about variables or function definitions that are used
+   only inside the source file.<br>
+<br>
+   <b>Portability</b><br>
+   Platform-specific function calls, variable types and #includes of header
+   files should be put inside #ifdef or #if blocks. For an example see the
+   <a href="#multiplatform">first code example</a> in the section Preprocessor
+   directives.<br>
 <br>
 <p>
 <br>

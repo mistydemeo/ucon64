@@ -63,7 +63,7 @@ write programs in C
 
 int main(int argc,char *argv[])
 {
-long x;
+long x,y=0;
 char buf[MAXBUFSIZE],buf2[4096],buf3[4096];
 long console=ucon64_UNKNOWN;
 struct dirent *ep;
@@ -230,7 +230,8 @@ if(argcmp(argc,argv,"-cs"))
 if(argcmp(argc,argv,"-find"))
 {
 	x=0;
-	while((x=filencmp(ucon64_rom(),ucon64_file(),x,strlen(ucon64_file())))!=-1)
+	y=quickftell(ucon64_rom());
+	while((x=filencmp(ucon64_rom(),x,y,ucon64_file(),strlen(ucon64_file())))!=-1)
 	{
 		filehexdump(ucon64_rom(),x,strlen(ucon64_file()));
 		x++;

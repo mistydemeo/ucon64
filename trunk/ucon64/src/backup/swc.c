@@ -348,8 +348,7 @@ int swc_read_rom(char *filename, unsigned int parport)
 #endif
 int receive_rom_info(unsigned char *buffer)
 /*
-  - returns size of ROM in Mb (128KB) units (if special returned size ==
-    2 * real size)
+  - returns size of ROM in Mb (128KB) units
   - returns ROM header in buffer (index 2 (emulation mode select) is not yet
     filled in)
   - sets global `special'

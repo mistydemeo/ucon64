@@ -89,7 +89,7 @@ ifdef ZLIB
 OBJECTS+=unzip.o map.o miscz.o
 endif
 ifdef DISCMAGE
-OBJECTS+=ucon64_lib.o
+OBJECTS+=ucon64_dm.o
 endif
 
 ifdef DLOPEN
@@ -260,7 +260,7 @@ map.o: map.h
 miscz.o: miscz.h map.h config.h
 quick_io.o: quick_io.h misc.h config.h
 dlopen.o: dlopen.h dxedll_pub.h config.h
-ucon64.o: ucon64_opts.h ucon64_dat.h ucon64_lib.h dlopen.h getopt.h \
+ucon64.o: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
           console/snes.h console/gb.h console/gba.h console/n64.h \
           console/lynx.h console/sms.h console/nes.h console/genesis.h \
           console/pce.h console/neogeo.h console/ngp.h console/swan.h \
@@ -271,7 +271,7 @@ ucon64.o: ucon64_opts.h ucon64_dat.h ucon64_lib.h dlopen.h getopt.h \
           backup/smd.h backup/fal.h backup/gbx.h backup/cd64.h backup/dex.h \
           backup/fpl.h backup/mgd.h backup/gd.h backup/mccl.h backup/lynxit.h \
           $(UCON64_STD_H)
-ucon64_opts.o: ucon64_opts.h ucon64_dat.h ucon64_lib.h dlopen.h getopt.h \
+ucon64_opts.o: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
                console/snes.h console/gb.h console/gba.h console/n64.h \
                console/lynx.h console/sms.h console/nes.h console/genesis.h \
                console/pce.h console/neogeo.h console/ngp.h console/swan.h \
@@ -284,8 +284,7 @@ ucon64_opts.o: ucon64_opts.h ucon64_dat.h ucon64_lib.h dlopen.h getopt.h \
                backup/gd.h backup/mccl.h backup/lynxit.h $(UCON64_STD_H)
 ucon64_misc.o: dlopen.h $(UCON64_STD_H)
 ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)
-ucon64_lib.o: ucon64_lib.h dlopen.h $(UCON64_STD_H)
-ucon64_libng.o: ucon64_lib.h dlopen.h $(UCON64_STD_H)
+ucon64_dm.o: ucon64_dm.h dlopen.h $(UCON64_STD_H)
 console/gb.o: console/gb.h $(UCON64_STD_H)
 console/gba.o: console/gba.h $(UCON64_STD_H)
 console/genesis.o: console/genesis.h $(UCON64_STD_H)

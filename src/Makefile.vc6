@@ -15,7 +15,7 @@ LDFLAGS=$(LDFLAGS) libdiscmage/$(LIBNAME).lib
 
 
 OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
-        ucon64_lib.obj misc.obj getopt.obj quick_io.obj dlopen.obj \
+        ucon64_dm.obj misc.obj getopt.obj quick_io.obj dlopen.obj \
         patch/aps.obj patch/bsl.obj patch/ips.obj patch/gg.obj patch/pal4u.obj \
         patch/ppf.obj patch/xps.obj \
         console/gb.obj console/gba.obj console/genesis.obj console/lynx.obj \
@@ -94,7 +94,7 @@ map.obj: map.h
 miscz.obj: miscz.h map.h config.h
 quick_io.obj: quick_io.h misc.h config.h
 dlopen.obj: dlopen.h dxedll_pub.h config.h
-ucon64.obj: ucon64_opts.h ucon64_dat.h ucon64_lib.h dlopen.h getopt.h \
+ucon64.obj: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
             console/snes.h console/gb.h console/gba.h console/n64.h \
             console/lynx.h console/sms.h console/nes.h console/genesis.h \
             console/pce.h console/neogeo.h console/ngp.h console/swan.h \
@@ -105,7 +105,7 @@ ucon64.obj: ucon64_opts.h ucon64_dat.h ucon64_lib.h dlopen.h getopt.h \
             backup/smd.h backup/fal.h backup/gbx.h backup/cd64.h backup/dex.h \
             backup/fpl.h backup/mgd.h backup/gd.h backup/mccl.h backup/lynxit.h \
             $(UCON64_STD_H)
-ucon64_opts.obj: ucon64_opts.h ucon64_dat.h ucon64_lib.h dlopen.h getopt.h \
+ucon64_opts.obj: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
                  console/snes.h console/gb.h console/gba.h console/n64.h \
                  console/lynx.h console/sms.h console/nes.h console/genesis.h \
                  console/pce.h console/neogeo.h console/ngp.h console/swan.h \
@@ -118,7 +118,7 @@ ucon64_opts.obj: ucon64_opts.h ucon64_dat.h ucon64_lib.h dlopen.h getopt.h \
                  backup/gd.h backup/mccl.h backup/lynxit.h $(UCON64_STD_H)
 ucon64_misc.obj: dlopen.h $(UCON64_STD_H)
 ucon64_dat.obj: ucon64_dat.h $(UCON64_STD_H)
-ucon64_lib.obj: ucon64_lib.h dlopen.h $(UCON64_STD_H)
+ucon64_dm.obj: ucon64_dm.h dlopen.h $(UCON64_STD_H)
 console/gb.obj: console/gb.h $(UCON64_STD_H)
 console/gba.obj: console/gba.h $(UCON64_STD_H)
 console/genesis.obj: console/genesis.h $(UCON64_STD_H)

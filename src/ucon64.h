@@ -46,7 +46,7 @@ typedef struct
 
 
 #ifdef  DISCMAGE
-#include "ucon64_lib.h"
+#include "ucon64_dm.h"
 #endif
 
 /*

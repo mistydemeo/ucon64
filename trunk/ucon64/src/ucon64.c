@@ -145,8 +145,8 @@ if(argcmp(argc,argv,"-db"))
 {
 	printf(
 		"Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n"
-		,ucon64_dbsize(ucon64_UNKNOWN)
-		,ucon64_dbsize(ucon64_UNKNOWN)-ucon64_DBSIZE
+		,ucon64_dbsize(console)
+		,ucon64_dbsize(console)-ucon64_DBSIZE
 	);
 	return(0);
 }
@@ -156,7 +156,7 @@ if(argcmp(argc,argv,"-dbs"))
 	sscanf(ucon64_rom(), "%lx", &x);
 
 	ucon64_dbsearch(	&db
-				,ucon64_UNKNOWN
+				,console
 				,x
 	);
 
@@ -168,18 +168,12 @@ if(argcmp(argc,argv,"-dbs"))
 	return(0);
 }
 
-/*
 if(argcmp(argc,argv,"-dbv"))
 {
-	for(x=0;x<sizeof(atari_DB)/sizeof(atari_DBSTRUCT);x++)
-	printf(
-		",{0x%08lx,ucon64_ATARI,\"%s\",0,0,\"\"}\n"
-		,atari_DB[x].chksum
-		,atari_DB[x].name
-	);
+	ucon64_dbview(console);
 	return(0);
 }
-*/
+
   if (!strlen(ucon64_rom()))
   {
     ucon64_usage(argc,argv);

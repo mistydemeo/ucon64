@@ -1,7 +1,7 @@
 /*
 dxedll_pub.h - DXE client support code
 
-Copyright (c) 2002 - 2004 dbjh
+Copyright (c) 2002 - 2005 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -86,6 +86,7 @@ typedef struct st_symbol
   int (*ferror) (FILE *);
   int (*rename) (const char *, const char *);
   int (*remove) (const char *);
+  void (*clearerr) (FILE *);
 
   void (*free) (void *);
   void *(*malloc) (size_t);

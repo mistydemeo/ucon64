@@ -585,7 +585,7 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #ifdef  DLL
 #define access  _access
 #define chmod   _chmod
-#define fileno  _fileno
+//#define fileno  _fileno
 #define getcwd  _getcwd
 #define isatty  _isatty
 #define rmdir   _rmdir

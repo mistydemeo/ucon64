@@ -1,7 +1,7 @@
 /*
 dxe_misc.c - miscellaneous functions for the grand libdiscmage DXE hack
 
-Copyright 2003 - 2004 dbjh
+Copyright 2003 - 2005 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -248,6 +248,13 @@ int
 remove (const char *filename)
 {
   return import_export.remove (filename);
+}
+
+
+void
+clearerr (FILE *file)
+{
+  import_export.clearerr (file);
 }
 
 

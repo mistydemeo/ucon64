@@ -1,7 +1,7 @@
 /*
 dlopen.c - DLL support code
 
-Copyright (c) 2002 - 2004 dbjh
+Copyright (c) 2002 - 2005 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -122,6 +122,7 @@ open_module (char *module_name)
   sym->ferror = ferror;
   sym->rename = rename;
   sym->remove = remove;
+  sym->clearerr = clearerr;
 
   sym->free = free;
   sym->malloc = malloc;

@@ -62,7 +62,7 @@ endif                                   # USE_ZLIB
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
-GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/3.2/
+GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/3.3.3/
 ifeq ($(CC),g++)
 LIBS+=-lstdc++
 endif
@@ -85,7 +85,7 @@ endif
 else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 
-GCCA_DIR=/mingw/lib/gcc-lib/mingw32/3.2.3/
+GCCA_DIR=/mingw/lib/gcc/mingw32/3.4.2/
 LIBS+=-L/mingw/lib -lkernel32 -lmsvcrt -L$(GCCA_DIR) -lgcc
 # MSYS problem: Specifying the library directory is necessary when compiling on
 # a different filesystem than the filesystem that MinGW is installed on.
@@ -102,7 +102,7 @@ ifdef DJGPP
 
 OBJECTS+=dxe_misc.o
 
-GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/3.31
+GCCA_DIR=c:/djgpp/lib/gcc/djgpp/3.43
 LIBS+=-L$(GCCA_DIR) -lgcc
 
 DLLFLAGS=$(OBJECTS) $(LIBS) $(LDFLAGS)

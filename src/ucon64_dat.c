@@ -375,14 +375,14 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     "%s%s%s%s%s%s%s%s%s%s",
     (strstr (p, "[a") ? "Alternate, " : ""),
     (strstr (p, "[p") ? "Pirate, " : ""),
-    (strstr (p, "[b") ? "Bad Dump, " : ""),
+    (strstr (p, "[b") ? "Bad dump, " : ""),
     (strstr (p, "[t") ? "Trained, " : ""),
     (strstr (p, "[f") ? "Fixed, " : ""),
     (strstr (p, "[T") ? "Translation, " : ""),
     (strstr (p, "[h") ? "Hack, " : ""),
-    (strstr (p, "[x") ? "Bad Checksum, " : ""),
+    (strstr (p, "[x") ? "Bad checksum, " : ""),
     (strstr (p, "[o") ? "Overdump, " : ""),
-    (strstr (p, "[!]") ? "Verified Good Dump, " : "")); // [!] is ok
+    (strstr (p, "[!]") ? "Verified good dump, " : "")); // [!] is ok
   if (buf[0])
     {
       if ((p = strrchr (buf, ',')))
@@ -794,7 +794,7 @@ ucon64_dat_flush (st_ucon64_dat_t *dat)
   memset (dat, 0, sizeof (st_ucon64_dat_t));
   ucon64.dat = NULL;
   return NULL;
-}  
+}
 
 
 void
@@ -880,5 +880,3 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
           dat->refname);
     }
 }
-
-

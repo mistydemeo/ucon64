@@ -181,7 +181,7 @@ extern dm_image_t *dm_open (const char *fname);
 extern dm_image_t *dm_reopen (const char *fname, dm_image_t *image);
 extern int dm_close (dm_image_t *image);
 extern int dm_fseek (FILE *fp, int track, int how);
-extern void dm_set_gauge (void (* gauge) (int, int));
+extern void dm_set_gauge (void (*gauge) (int, int));
 extern int dm_bin2iso (const dm_image_t *image);
 extern int dm_rip (const dm_image_t *image);
 extern int dm_isofix (const dm_image_t *image, int start_lba);

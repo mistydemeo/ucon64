@@ -63,10 +63,7 @@ static unsigned int parport_probe (unsigned int parport);
 static int detect_parport (unsigned int port);
 #endif
 
-
-char *unknown_bu_title = "Unknown backup unit";
-char *unknown_bu512_title = "Unknown backup unit (with 512 bytes header)";
-
+char *unknown_title = "Unknown backup unit/emulator";
 
 char
 hexDigit (int value)

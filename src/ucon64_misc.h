@@ -60,13 +60,9 @@ IO_Tuple;
 /*
   defines for unknown backup units
 */
-extern char *unknown_bu_title;
-#define unknown_bu_HEADER_START 0
-#define unknown_bu_HEADER_LEN 0
+#define unknown_HEADER_LEN 512
+extern char *unknown_title;
 
-extern char *unknown_bu512_title;
-#define unknown_bu512_HEADER_START 0
-#define unknown_bu512_HEADER_LEN 512
 
 // GameGenie "codec" routines
 extern char hexDigit (int value);

@@ -329,15 +329,10 @@ main (int argc, char *argv[])
           break;
 
         case ucon64_HD:
-          rom.buheader_start = unknown_bu512_HEADER_START;
-          rom.buheader_len = unknown_bu512_HEADER_LEN;
-          strcpy (rom.copier, unknown_bu512_title);
-          break;
-
+          rom.buheader_len = atoi (optarg);
         case ucon64_NHD:
-          rom.buheader_start = unknown_bu_HEADER_START;
-          rom.buheader_len = unknown_bu_HEADER_LEN;
-          strcpy (rom.copier, unknown_bu_title);
+          rom.buheader_start = 0;
+          strcpy (rom.copier, unknown_title);
           break;
 
         case ucon64_INT:
@@ -627,15 +622,14 @@ main (int argc, char *argv[])
       }
     }
 
-
   if (optind < argc)
     strcpy(rom.rom, argv[optind++]);
   if (optind < argc)
     strcpy(ucon64.file, argv[optind++]);
 
-  if (ucon64.file[0] && !ucon64.parport)
-    sscanf (ucon64.file, "%x", &ucon64.parport);
-  ucon64_parport_probe (ucon64.parport);
+  if (ucon64.file[0])// && !ucon64.parport)
+      sscanf (ucon64.file, "%x", &ucon64.parport);
+  ucon64.parport = ucon64_parport_probe (ucon64.parport);
 
   if (!access (rom.rom, F_OK|R_OK))
     {

@@ -204,7 +204,7 @@ gd3_send_bytes (unsigned len, unsigned char *data)
     {
       gd3_send_byte (data[i]);
       gd_bytessend += len;
-      if ((gd_bytessend - GD_HEADER_LEN) % 8192)
+      if ((gd_bytessend - GD_HEADER_LEN) % 8192 == 0)
         ucon64_gauge (gd_starttime, gd_bytessend, gd_fsize);
     }
 }

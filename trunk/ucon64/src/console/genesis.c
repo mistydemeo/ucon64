@@ -2,7 +2,7 @@
 genesis.c - Sega Genesis/Mega Drive support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2002 dbjh
+                  2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -132,7 +132,7 @@ interleave_buffer (unsigned char *buffer, int size)
 
 void
 deinterleave_chunk (unsigned char *dest, unsigned char *src)
-// Deinterleave the 16KB memory chunk src and write the deinterleaved data to dest
+// Deinterleave the 16 KB memory chunk src and write the deinterleaved data to dest
 {
   int offset;
   for (offset = 0; offset < 8192; offset++)
@@ -429,20 +429,6 @@ genesis_s (st_rominfo_t *rominfo)
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
           (*(strrchr (dest_name, '.') - 1))++;
         }
-
-#if 0
-      if (surplus != 0)
-        {
-          // don't write backups of parts, because one name is used
-          // write first part of file
-          q_fcpy (ucon64.rom, x * (PARTSIZE / 2), (PARTSIZE / 2), dest_name, "wb");
-
-          // write the rest
-          q_fcpy (ucon64.rom, nparts * (PARTSIZE / 2) + x * (PARTSIZE / 2),
-            surplus - (PARTSIZE / 2), dest_name, "ab");
-          fprintf (stdout, ucon64_msg[WROTE], dest_name);
-        }
-#endif
     }
   else
     {
@@ -510,7 +496,10 @@ genesis_j (st_rominfo_t *rominfo)
       strcpy (src_name, ucon64.rom);
       while (q_fcpy (src_name, rominfo->buheader_len + block_size,
              block_size, dest_name, "ab") != -1)
-        (*(strrchr (src_name, '.') - 1))++;
+        {
+          printf ("Joined: %s\n", src_name);    // print this here, not in the
+          (*(strrchr (src_name, '.') - 1))++;   //  previous loop
+        }
 
       fprintf (stdout, ucon64_msg[WROTE], dest_name);
     }
@@ -525,6 +514,7 @@ genesis_j (st_rominfo_t *rominfo)
       block_size = q_fsize (src_name) - rominfo->buheader_len;
       while (q_fcpy (src_name, rominfo->buheader_len, block_size, dest_name, "ab") != -1)
         {
+          printf ("Joined: %s\n", src_name);
           total_size += block_size;
           (*(strrchr (src_name, '.') + 1))++;
           block_size = q_fsize (src_name) - rominfo->buheader_len;
@@ -661,13 +651,13 @@ load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
   if (type == SMD)
     {
       /*
-        Note the order of arguments 16384 and 1 of fread(). If the file data size
-        (size without header) is not a multiple of 16KB, the excess bytes will be
-        discarded (which is what we want).
+        Note the order of arguments 16384 and 1 of fread(). If the file data
+        size (size without header) is not a multiple of 16 KB, the excess bytes
+        will be discarded (which is what we want).
       */
       while (fread (buf, 16384, 1, file))
         {
-          // Deinterleave each 16KB chunk
+          // Deinterleave each 16 KB chunk
           deinterleave_chunk (rom_buffer + pos, buf);
           pos += 16384;
         }
@@ -706,31 +696,29 @@ genesis_testinterleaved (st_rominfo_t *rominfo)
 {
   unsigned char *buf, *buf2;
 
-  if (!(buf = (unsigned char *) malloc (16384)))
+  /*
+    Allocate memory for buf and buf2 from the heap and not from the stack,
+    because there seems to be a problem with an older version of DJGPP (gcc
+    2.95.2).
+  */
+  if (!(buf = (unsigned char *) malloc (2 * 16384)))
     {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], 16384);
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], 2 * 16384);
       return -1;
     }
-
-  if (!(buf2 = (unsigned char *) malloc (16384)))
-    {
-      free (buf);
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], 16384);
-      return -1;
-    }
+  buf2 = buf + 16384;
 
   q_fread (buf, rominfo->buheader_len, 8192 + (GENESIS_HEADER_START + 4) / 2, ucon64.rom);
   deinterleave_chunk (buf2, buf);
-  free (buf);
 
   if (!memcmp (buf2 + GENESIS_HEADER_START, "SEGA", 4))
     {
-      free (buf2);
+      free (buf);
       return 1;
     }
   else
     {
-      free (buf2);
+      free (buf);
       return 0;
     }
 }
@@ -837,7 +825,6 @@ genesis_init (st_rominfo_t *rominfo)
     NULL, "Paddle Controller", NULL};
 
   type = BIN;                                   // init this var here, for -lsv
-  genesis_rom_size = rominfo->file_size;
 
   q_fread (&buf, 0, 11, ucon64.rom);
   if (buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 7)
@@ -882,10 +869,13 @@ genesis_init (st_rominfo_t *rominfo)
       memcpy (&genesis_header, buf2 + GENESIS_HEADER_START, GENESIS_HEADER_LEN);
     }
   else                                          // type == BIN
-    // We use rominfo->buheader_len to make it user controllable. Normally it
-    //  should be 0 for BIN.
-    q_fread (&genesis_header, rominfo->buheader_len + GENESIS_HEADER_START,
-      GENESIS_HEADER_LEN, ucon64.rom);
+    {
+      // We use rominfo->buheader_len to make it user controllable. Normally it
+      //  should be 0 for BIN.
+      genesis_rom_size = rominfo->file_size - rominfo->buheader_len;
+      q_fread (&genesis_header, rominfo->buheader_len + GENESIS_HEADER_START,
+        GENESIS_HEADER_LEN, ucon64.rom);
+    }
 
   if (!memcmp (&OFFSET (genesis_header, 0), "SEGA", 4))
     result = 0;

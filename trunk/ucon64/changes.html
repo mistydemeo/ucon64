@@ -336,6 +336,8 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - added (all) -o specify output directory. Note that now uCON64 by default
   writes its output files to the current directory (by NoisyB and dbjh)<br>
 - added (all) --poke=OFF:V change byte at file offset OFF to value V (by dbjh)<br>
+- updated (SNES) fixed problem where it was necessary to run uCON64 twice on a
+  ROM with the option -chk, before the checksum was really fixed (by dbjh)<br>
 <!--
 - replaced internal handling/conversion of DiscJuggler and Nero images with
   libdiscmage from http://discmage.sourceforge.net (by NoisyB)<br>

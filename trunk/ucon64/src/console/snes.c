@@ -1841,6 +1841,16 @@ snes_chk (st_rominfo_t *rominfo)
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
+  /*
+    The internal checksum bytes have been included in the checksum
+    calculation, but they will be changed after this function returns. We
+    account for that. Otherwise we would have to run uCON64 on the ROM twice.
+  */
+  rominfo->current_internal_crc += (-snes_header.inverse_checksum_low -
+                                    snes_header.inverse_checksum_high -
+                                    snes_header.checksum_low -
+                                    snes_header.checksum_high) +
+                                   2 * 0xff; // + 2 * 0;
   // change inverse checksum
   q_fputc (dest_name, image + 44, (0xffff - rominfo->current_internal_crc), "r+b");      // low byte
   q_fputc (dest_name, image + 45, (0xffff - rominfo->current_internal_crc) >> 8, "r+b"); // high byte
@@ -2371,7 +2381,7 @@ snes_init (st_rominfo_t *rominfo)
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
     {
       rominfo->buheader_len = ucon64.buheader_len;
-      if (type == MGD)
+      if (type == MGD && rominfo->buheader_len)
         type = SMC;
     }
 

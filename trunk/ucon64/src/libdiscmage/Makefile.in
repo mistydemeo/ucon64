@@ -29,7 +29,7 @@ endif
 
 # The test for Cygwin should be done before the test for DJGPP, because the
 # environment variable DJGPP can be set under Bash for people who have
-# installed both gcc (and friends) ports.
+# installed both GCC (and friends) ports.
 
 GCC_WIN=0
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
@@ -60,8 +60,7 @@ ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
 GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/3.2/
 ifeq ($(CC),g++)
-# talk about unnecessary dependencies...
-LIBS+=-lstdc++ -lc -lpthread
+LIBS+=-lstdc++
 endif
 LIBS+=-L$(GCCA_DIR) -lgcc -lcygwin -lkernel32
 # kernel32 for DLOPEN and DisableThreadLibraryCalls()
@@ -84,7 +83,7 @@ ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 
 GCCA_DIR=/mingw/lib/gcc-lib/mingw32/3.2.3/
 LIBS+=-L/mingw/lib -lkernel32 -lmsvcrt -L$(GCCA_DIR) -lgcc
-# Msys problem: Specifying the library directory is necessary when compiling on
+# MSYS problem: Specifying the library directory is necessary when compiling on
 # a different filesystem than the filesystem that MinGW is installed on.
 
 FULLLIBNAME=$(LIBNAME).dll
@@ -98,9 +97,6 @@ else
 ifdef DJGPP
 
 OBJECTS+=dxe_misc.o
-# This file is only really necessary when zlib support is/should be enabled,
-# but it's wise to have as little conditionally compiled code as possible.
-# Besides it currently gets used even if zlib support is disabled.
 
 GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/3.31
 LIBS+=-L$(GCCA_DIR) -lgcc
@@ -192,12 +188,10 @@ endif
 ##	nm $(OBJECTS) | grep ' T _' | sed 's/.* T _//' >> tmp.def
 #	nm $(OBJECTS) | grep '^........ [T] _' | sed 's/[^_]*_//' >> tmp.def
 # We use nm instead of dlltool --output-def, so that we don't have to
-# specify explicitly (in the source code) which symbols should be exported
+# specify explicitly (in the source code) which symbols should be exported.
 # We don't create the .def file automatically anymore. Using nm resulted in a
-# (too large?) .def file which resulted in a non-working DLL when using Cygwin
+# (too large?) .def file which resulted in a non-working DLL when using Cygwin.
 
-	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
-	@echo "      symbols, read faq.html question 3"
 	ld --base-file tmp.base $(DLLFLAGS)
 	dlltool $(DLLTOOLFLAGS)
 	ld tmp.exp $(DLLFLAGS)
@@ -210,8 +204,6 @@ $(LIBNAME).dxe $(LIBNAME).a: $(OBJECTS) djimport.o dlopen.o
 else
 $(LIBNAME).dxe: $(OBJECTS)
 endif
-	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
-	@echo "      symbols, read faq.html question 3"
 	dxegen $(LIBNAME).dxe _import_export $(DLLFLAGS)
 ifndef DLOPEN
 # Recompile map.c, because it has to be a normal object file for the import

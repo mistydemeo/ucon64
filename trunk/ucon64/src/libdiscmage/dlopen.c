@@ -52,7 +52,7 @@ void
 uninit_func (void)
 {
   fprintf (stderr, "An uninitialized member of the import/export structure was called!\n"
-                   "Update dlopen.c/open_module().\n");
+                   "Update dlopen.c/open_module()\n");
   exit (1);
 }
 #endif
@@ -265,7 +265,7 @@ get_symbol (void *handle, char *symbol_name)
       exit (1);
     }
 #elif   defined _WIN32
-  symptr = (void *) GetProcAddress ((HINSTANCE) handle, symbol_name); // actually only function names
+  symptr = (void *) GetProcAddress ((HINSTANCE) handle, symbol_name);
   if (symptr == NULL)
     {
       LPTSTR strptr;
@@ -282,7 +282,7 @@ get_symbol (void *handle, char *symbol_name)
     }
 #elif   defined __BEOS__
   int status = get_image_symbol ((int) handle, symbol_name,
-                                 B_SYMBOL_TYPE_TEXT, &symptr);
+                                 B_SYMBOL_TYPE_TEXT, &symptr); // B_SYMBOL_TYPE_DATA/B_SYMBOL_TYPE_ANY
   if (status != B_OK)
     {
       fprintf (stderr, "Could not find symbol: %s\n", symbol_name);

@@ -1,5 +1,5 @@
 /*
-miscz.c - miscellaneous zlib functions
+misc_z.c - miscellaneous zlib functions
 
 written by 2001 - 2003 dbjh
 

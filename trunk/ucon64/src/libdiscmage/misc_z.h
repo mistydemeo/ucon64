@@ -1,5 +1,5 @@
 /*
-miscz.h - miscellaneous zlib functions
+misc_z.h - miscellaneous zlib functions
 
 written by 2001 - 2003 dbjh
 
@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MISCZ_H
 
 #ifdef  HAVE_CONFIG_H
-#include "config.h"                             // HAVE_ZLIB_H, ANSI_COLOR support
+#include "config.h"                             // HAVE_ZLIB_H
 #endif
 
 #ifdef  __cplusplus

@@ -234,16 +234,8 @@ main (int argc, char *argv[])
 
   h2g_end ();
 
-  return (0);
+  return 0;
 }
-
-
-/*
-void ucon64gui_root(void)
-{
-  
-}
-*/
 
 
 void
@@ -401,6 +393,7 @@ ucon64gui_root (void)
 
   h2g_ ("Backup unit specific options");
   h2g_br ();
+#endif // BACKUP || BACKUP_CD
 
 #ifdef BACKUP_CD
   h2g_input_submit ("CD-Writer", "ucon64gui_cdrw",
@@ -434,7 +427,6 @@ ucon64gui_root (void)
                     "options for GameBoy Xchanger");
 
 #endif // BACKUP
-#endif // BACKUP || BACKUP_CD
 
   ucon64gui_bottom ();
 

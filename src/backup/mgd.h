@@ -43,6 +43,9 @@ game size       # of files      names           MULTI-GD
                                 SF8XXXxB.078    SF8XXXxB
 16M             2               SF16XXXA.078    SF16XXXA
                                 SF16XXXB.078    SF16XXXB
+20M             3               SF20XXXA.078    SF20XXXA
+                                SF20XXXB.078    SF20XXXB
+                                SF20XXXC.078    SF20XXXC
 24M             3               SF24XXXA.078    SF24XXXA
                                 SF24XXXB.078    SF24XXXB
                                 SF24XXXC.078    SF24XXXC
@@ -61,6 +64,9 @@ game size       # of files      names           MULTI-GD
 8M              1               MD8XXX.008      MD8XXX
 16M             2               MD16XXXA.018    MD16XXXA
                                 MD16XXXB.018    MD16XXXB
+20M             3               MD20XXXA.038    MD20XXXA
+                                MD20XXXB.038    MD20XXXB
+                                MD20XXXC.038    MD20XXXC
 24M             3               MD24XXXA.038    MD24XXXA
                                 MD24XXXB.038    MD24XXXB
                                 MD24XXXC.038    MD24XXXC
@@ -82,8 +88,8 @@ Game Gear:
 
 game size       # of files      names           MULTI-GD
 ================================================================
-2M              1               GG2XXX.000 (040) GG2XXX
-4M              1               GG4XXX.018 (048) GG4XXX
+2M              1               GG2XXX.000 (040) GG2XXX
+4M              1               GG4XXX.018 (048) GG4XXX
 
 
 Contrary to popular belief the Game Doctor SF3/SF6/SF7 *does*

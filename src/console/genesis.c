@@ -346,6 +346,8 @@ genesis_mgd (st_rominfo_t *rominfo)
     genesis_rom_size = 8 * MBIT;
   else if (genesis_rom_size <= 16 * MBIT)
     genesis_rom_size = 16 * MBIT;
+  else if (genesis_rom_size <= 20 * MBIT)
+    genesis_rom_size = 20 * MBIT;
   else if (genesis_rom_size <= 24 * MBIT)
     genesis_rom_size = 24 * MBIT;
   else
@@ -473,12 +475,18 @@ genesis_s (st_rominfo_t *rominfo)
     }
   else // type == MGD_GEN
     {
-      char suffix[5];
+      char suffix[5], *p;
+      int n;
 
       mgd_make_name (ucon64.rom, "MD", genesis_rom_size, dest_name);
       strcpy (suffix, (char *) get_suffix (dest_name));
-      dest_name[7] = is_func (dest_name, strlen (dest_name), isupper) ? 'A' : 'a';
-      dest_name[8] = 0;
+      if ((p = strchr (dest_name, '.')))
+        *p = 0;
+      n = strlen (dest_name);
+      if (n > 7)
+        n = 7;
+      dest_name[n] = is_func (dest_name, strlen (dest_name), isupper) ? 'A' : 'a';
+      dest_name[n + 1] = 0;
       strcat (dest_name, suffix);
       ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
 

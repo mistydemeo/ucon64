@@ -251,6 +251,9 @@ static void
 ucon64_runtime_debug (void)
 {
   int x = 0, y = 0, c = 0;
+  (void) x;
+  (void) y;
+  (void) c;
 
 #if 0
   // how many options (incl. dupes) do we have?
@@ -414,13 +417,7 @@ main (int argc, char **argv)
     for (y = 0; option[x][y].name || option[x][y].help; y++)
       if (c < UCON64_MAX_ARGS)
         {
-          options[c].name = option[x][y].name;
-          options[c].has_arg = option[x][y].has_arg;
-          options[c].flag = option[x][y].flag;
-          options[c].val = option[x][y].val;
-          options[c].arg_name = option[x][y].arg_name;
-          options[c].help = option[x][y].help;
-          options[c].object = option[x][y].object;
+          memcpy (&options[c], &option[x][y], sizeof (st_getopt2_t));
           c++;
         }
 

@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <getopt.h>                             // struct option
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -114,9 +115,28 @@ q_fsize (const char *filename)
 
 
 #ifdef  DEBUG
+static void
+getopt2_sanity_check (const st_getopt2_t *option)
+{
+  int x, y;
+
+  for (x = 0; option[x].name || option[x].help; x++)
+    if (option[x].name)
+      for (y = 0; option[y].name || option[y].help; y++)
+        if (option[y].name)
+          if (!strcmp (option[x].name, option[y].name))
+            if (option[x].val != option[y].val ||
+                option[x].has_arg != option[y].has_arg)
+              {
+                fprintf (stderr, "ERROR: getopt2_sanity_check(): found dupe %s%s with different has_arg, or val\n",
+                  option[x].name[1] ? OPTION_LONG_S : OPTION_S, option[x].name);
+              }
+}
+
+
 void
-parse_usage_code (const char *usage_output)
-// parse usage output into C code (for development)
+getopt2_parse_usage (const char *usage_output)
+// parse usage output into st_getopt2_t array (for development)
 {
   int i = 0, count = 0;
   char buf[MAXBUFSIZE], *s = NULL, *d = NULL;
@@ -127,13 +147,13 @@ parse_usage_code (const char *usage_output)
 
   while (fgets (buf, MAXBUFSIZE, fh))
     {
-      st_usage_t usage;
+      st_getopt2_t usage;
       int value = 0;
 
       if (*buf == '\n')
         continue;
 
-      memset (&usage, 0, sizeof (st_usage_t));
+      memset (&usage, 0, sizeof (st_getopt2_t));
 
 #ifdef  DEBUG
       printf (buf);
@@ -156,24 +176,24 @@ parse_usage_code (const char *usage_output)
             d = strtok (s, " ");
 
           if (d)
-            usage.option_s = d;
+            usage.name = d;
 
           if (value)            // parse =VALUE
             {
               d = strtok (NULL, " ");
 
               if (d)
-                usage.optarg = d;
+                usage.arg_name = d;
             }
         }
 
 
-      if (usage.option_s)
+      if (usage.name)
         {
-          printf ("{\"%s\", ", usage.option_s);
+          printf ("{\"%s\", ", usage.name);
 
-          if (usage.optarg)
-            printf ("1, \"%s\", ", usage.optarg);
+          if (usage.arg_name)
+            printf ("1, \"%s\", ", usage.arg_name);
           else
             printf ("0, NULL, ");
 
@@ -189,68 +209,213 @@ parse_usage_code (const char *usage_output)
       fputc ('\n', stdout);
     }
 }
-#endif
+#endif // DEBUG
 
 
-void
-render_usage (const st_usage_t *usage, int more)
+#ifdef  DEBUG
+static char *
+string_code (char *d, const char *s)
 {
-  int opt;
+  char *p = d;
+
+  *p = 0;
+  for (; *s; s++)
+    switch (*s)
+      {
+        case '\n':
+          strcat (p, "\\n\"\n  \"");
+          break;
+
+        case '\"':
+          strcat (p, "\\\"");
+          break;
+
+        default:
+          p = strchr (p, 0);
+          *p = *s;
+          *(++p) = 0;
+      }
+
+  return d;
+}
+
+
+static void
+getopt2_usage_code (const st_getopt2_t *usage)
+{
+  int i = 0;
   char buf[MAXBUFSIZE];
 
 #ifdef  DEBUG
-  // look for malformed usages
-  for (opt = 0; usage[opt].option_s || usage[opt].optarg || usage[opt].desc; opt++)
-    fprintf (stderr, "{\"%s\", \"%s\", \"%s\"},\n",
-      usage[opt].option_s,
-      usage[opt].optarg,
-      usage[opt].desc);
+  getopt2_sanity_check (usage);
 #endif
 
-  for (opt = 0; usage[opt].option_s || usage[opt].desc; opt++)
+  for (; usage[i].name || usage[i].help; i++)
     {
-      if (usage[opt].option_s)
-        {
-          sprintf (buf, "%s%s%s%s%s%s ",
-            // long or short option_s?
-            (usage[opt].option_s[1] ? "  " OPTION_LONG_S : "   " OPTION_S),
-            usage[opt].option_s,
-            usage[opt].has_arg == 2 ? "[" : "", // == 2 optarg is optional
-            usage[opt].optarg ? OPTARG_S : "",
-            usage[opt].optarg ? usage[opt].optarg : "",
-            usage[opt].has_arg == 2 ? "]" : ""); // == 2 optarg is optional
-
-          if (strlen (buf) < 16)
-            {
-              strcat (buf, "                             ");
-              buf[16] = 0;
-            }
-          fputs (buf, stdout);
-        }
-
-      if (usage[opt].desc)
-        {
-          char c, *p = buf, *p2 = NULL;
-
-          if (more && usage[opt].desc_more)
-            sprintf (buf, "%s\n%s", usage[opt].desc, usage[opt].desc_more);
-          else
-            strcpy (buf, usage[opt].desc);
-
-          if (usage[opt].option_s)
-            for (; (p2 = strchr (p, '\n')); p = p2 + 1)
-              {
-                c = p2[1];
-                p2[1] = 0;
-                fputs (p, stdout);
-                fputs ("                  ", stdout);
-                p2[1] = c;
-              }
-
-          fputs (p, stdout);
-          fputc ('\n', stdout);
-        }
+      printf ("{\n  %s%s%s, %d, 0, %d, // %d\n  %s%s%s, %s%s%s,\n  (void *) %d\n},\n",
+        usage[i].name ? "\"" : "",
+        usage[i].name ? usage[i].name : "NULL",
+        usage[i].name ? "\"" : "",
+        usage[i].has_arg,
+        usage[i].val,
+        i,
+        usage[i].arg_name ? "\"" : "",
+        usage[i].arg_name ? usage[i].arg_name : "NULL",
+        usage[i].arg_name ? "\"" : "",
+        usage[i].help ? "\"" : "",
+        usage[i].help ? string_code (buf, usage[i].help) : "NULL",
+        usage[i].help ? "\"" : "",
+        (int) usage[i].object);
     }
+}
+#endif // DEBUG
+
+
+void
+getopt2_usage (const st_getopt2_t *usage)
+{
+#ifdef  DEBUG
+  getopt2_usage_code (usage);
+#else
+  int i = 0;
+  char buf[MAXBUFSIZE];
+
+  for (i = 0; usage[i].name || usage[i].help; i++)
+    if (usage[i].help) // hidden options ARE allowed
+      {
+        if (usage[i].name)
+          {
+            sprintf (buf, "%s%s%s%s%s%s ",
+              // long or short name?
+              (usage[i].name[1] ? "  " OPTION_LONG_S : "   " OPTION_S),
+              usage[i].name,
+              usage[i].has_arg == 2 ? "[" : "", // == 2 arg is optional
+              usage[i].arg_name ? OPTARG_S : "",
+              usage[i].arg_name ? usage[i].arg_name : "",
+              usage[i].has_arg == 2 ? "]" : ""); // == 2 arg is optional
+
+            if (strlen (buf) < 16)
+              {
+                strcat (buf, "                             ");
+                buf[16] = 0;
+              }
+            fputs (buf, stdout);
+          }
+
+        if (usage[i].help)
+          {
+            char c, *p = buf, *p2 = NULL;
+
+            strcpy (buf, usage[i].help);
+
+            if (usage[i].name)
+              for (; (p2 = strchr (p, '\n')); p = p2 + 1)
+                {
+                  c = p2[1];
+                  p2[1] = 0;
+                  fputs (p, stdout);
+                  fputs ("                  ", stdout);
+                  p2[1] = c;
+                }
+
+            fputs (p, stdout);
+            fputc ('\n', stdout);
+          }
+      }
+#endif // DEBUG
+}
+
+
+int
+getopt2_long (struct option *long_option, const st_getopt2_t *option, int n)
+{
+  int i = 0, j = 0, x = 0;
+
+#ifdef  DEBUG
+  getopt2_sanity_check (option);
+#endif
+
+  memset (long_option, 0, sizeof (struct option) * n);
+
+  for (; option[i].name || option[i].help; i++)
+    if (option[i].name) // IS option
+      {
+        for (j = 0; j < i; j++)
+          if (option[j].name)
+            if (!strcmp (option[i].name, option[j].name))
+              break; // no dupes
+
+        if (j == i && x < n)
+          {
+#ifdef  _MSC_VER
+            (char *)
+#endif
+            long_option[x].name =
+#ifdef  _MSC_VER
+                                  (char *)
+#endif
+                                  option[i].name;
+            long_option[x].has_arg = option[i].has_arg;
+            long_option[x].flag = option[i].flag;
+            long_option[x++].val = option[i].val;
+          }
+      }
+
+  return x < n ? x + 1 : 0;
+}
+
+
+int
+getopt2_short (char *short_option, const st_getopt2_t *option, int n)
+{
+  int i = 0;
+  char *p = short_option;
+
+#ifdef  DEBUG
+  getopt2_sanity_check (option);
+#endif
+
+  *p = 0;
+  for (; option[i].name || option[i].help; i++)
+    if ((int) strlen (short_option) + 3 < n && option[i].name) // IS option
+      if (!option[i].name[1]) // IS short
+        if (!strchr (short_option, option[i].name[0])) // no dupes
+          {
+            *p++ = option[i].name[0];
+            switch (option[i].has_arg)
+              {
+                case 2:                         // falling through
+                case 1:
+                  *p++ = ':';
+                case 0:
+                  break;
+#ifdef  DEBUG
+                default:
+                  fprintf (stderr, "ERROR: getopt2_short(): unexpected has_arg value (%d)\n", option[i].has_arg);
+#endif // DEBUG
+              }
+            *p = 0;
+          }
+#ifdef  DEBUG
+  printf ("%s\n", short_option);
+  fflush (stdout);
+#endif
+
+  return (int) strlen (short_option) + 3 < n ? (int) strlen (short_option) : 0;
+}
+
+
+const st_getopt2_t *
+getopt2_get_index_by_val (const st_getopt2_t *option, int val)
+{
+  int x = 0;
+
+  for (; option[x].name || option[x].help; x++)
+    if (option[x].name) // it IS an option
+      if (option[x].val == val)
+        return &option[x];
+
+  return NULL;
 }
 
 
@@ -268,12 +433,11 @@ vprintf2 (const char *format, va_list argptr)
   CONSOLE_SCREEN_BUFFER_INFO info;
   WORD org_attr, new_attr = 0;
 
-  n_chars = vsprintf (output, format, argptr);
-  if (n_chars > MAXBUFSIZE)
+  n_chars = _vsnprintf (output, MAXBUFSIZE, format, argptr);
+  if (n_chars == -1)
     {
       fprintf (stderr, "INTERNAL ERROR: Output buffer in vprintf2() is too small (%d bytes).\n"
-                       "                %d bytes were needed. Please send a bug report\n",
-               MAXBUFSIZE, n_chars);
+                       "                Please send a bug report\n", MAXBUFSIZE);
       exit (1);
     }
 
@@ -2761,8 +2925,7 @@ quick_io (void *buffer, size_t start, size_t len, const char *filename,
 
   if ((fh = fopen (filename, (const char *) mode)) == NULL)
     {
-#ifdef DEBUG
-      extern int errno;
+#ifdef  DEBUG
       fprintf (stderr, "ERROR: Could not open \"%s\" in mode \"%s\"\n"
                        "CAUSE: %s\n", filename, mode, strerror (errno));
 #endif
@@ -2796,15 +2959,14 @@ quick_io_c (int value, size_t start, const char *filename, const char *mode)
 
   if ((fh = fopen (filename, (const char *) mode)) == NULL)
     {
-#ifdef DEBUG
-      extern int errno;
+#ifdef  DEBUG
       fprintf (stderr, "ERROR: Could not open \"%s\" in mode \"%s\"\n"
                        "CAUSE: %s\n", filename, mode, strerror (errno));
 #endif
       return -1;
     }
 
-#ifdef DEBUG
+#ifdef  DEBUG
   fprintf (stderr, "\"%s\": \"%s\"\n", filename, (char *) mode);
 #endif
 

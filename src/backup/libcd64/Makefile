@@ -2,12 +2,10 @@ CC=gcc
 
 ifdef DEBUG
 # I think we only use gnu99 instead of c99 due to va_args extensions.
-CFLAGS=-pg -g -Wall -W -pedantic -ansi -DDEBUG
+CFLAGS=-I. -Wall -W -pg -g -pedantic -ansi -DDEBUG
 else
-CFLAGS=-O6 -funroll-loops -fexpensive-optimizations -Wall -W
+CFLAGS=-I. -Wall -W -O6 -funroll-loops -fexpensive-optimizations
 endif
-
-INC=-I.
 
 ifndef DJGPP
 # uname is not available by default under DOS
@@ -81,7 +79,7 @@ RAWIO = 1
 endif
 
 ifeq ($(findstring OpenBSD,$(OSTYPE)),OpenBSD)
-# i386_iopl() is located in libi386.a
+# i386_iopl() is located in libi386.a (note the .a)
 LIBS += -li386
 RAWIO = 1
 endif
@@ -107,7 +105,7 @@ endif # DEFAULT_BUILD = 1
 
 ifdef LIBIEEE1284
 CFLAGS += -DCD64_USE_LIBIEEE1284
-LIBS +=-lieee1284
+LIBS += -lieee1284
 endif
 
 ifdef PPDEV
@@ -134,29 +132,29 @@ all:	libcd64.a libcd64.so
 endif # GCC_WIN
 endif # DJGPP
 
-# Libcd64 stuff
+# libcd64 stuff
 
 cd64io.o: cd64io.c
-	$(CC) $(CFLAGS) $^ -c -o $@ $(INC)
+	$(CC) $(CFLAGS) $^ -c -o $@
 
 cd64lib.o: cd64lib.c
-	$(CC) $(CFLAGS) $^ -c -o $@ $(INC)
+	$(CC) $(CFLAGS) $^ -c -o $@
 
 libcd64.a: cd64lib.o cd64io.o
-	rm -f $@
-	ar crv $@ $^
-	ranlib $@
+	ld -i $^ $(LIBS) -o $*.o
+#	rm -f $@
+	ar crs $@ $*.o
 
 ifeq ($(GCC_WIN),1)
 cd64.dll: cd64lib.o cd64io.o
 else
 libcd64.so: cd64lib.o cd64io.o
 endif
-	rm -f $@
+#	rm -f $@
 ifeq ($(findstring BeOS,$(OSTYPE)),BeOS)
-	$(CC) -nostart $^ -o $@ $(LIBS)
+	$(CC) $^ -nostart $(LIBS) -o $@
 else
-	$(CC) -shared $^ -o $@ $(LIBS)
+	$(CC) $^ -shared $(LIBS) -o $@
 endif
 
 clean:

@@ -18,10 +18,30 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#ifndef MISC_WAV_H
-#define MISC_WAV_H
+#ifndef  MISC_WAV_H
+#define  MISC_WAV_H
 /*
-  writewavheader()    write header for a wav file
+  misc_wav_header()     read/(over-)write a wav header
+                          mode == "r", "rb", "w", "wb", etc...
+                          it does NOT insert a wav header
+  misc_wav_generator()  generate a SQUARE_WAVE or SINE_WAVE
 */
-extern void writewavheader (FILE * fdest, int track_length);
-#endif // MISC_WAV_H
+extern int misc_wav_write_header (FILE *fh,
+                                  int channels,
+                                  int freq,
+                                  int bytespersecond,
+                                  int blockalign,
+                                  int bitspersample,
+                                  int data_length);
+// TODO: remove these
+#define misc_wav_write_header_v2(fh,c,f,bit,dl) misc_wav_write_header(fh, c, f,     (bit*c*f)/8, (bit*c)/8, bit, dl)
+#define misc_wav_write_header_v3(fh,dl) misc_wav_write_header        (fh, 2, 44100, 176400,      4,         16,  dl)
+
+                                                                                     
+#define SQUARE_WAVE 0
+#define SINE_WAVE 1
+extern void misc_wav_generator (unsigned char *bit,
+                                int bitLength,
+                                float volume,
+                                int wavType);
+#endif  // MISC_WAV_H

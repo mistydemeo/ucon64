@@ -264,7 +264,7 @@ flc_usage (int argc, char *argv[])
           "k           show sizes in kilobytes\n" "  " OPTION_LONG_S
           "help        display this help and exit\n" "  " OPTION_LONG_S
           "version     output version information and exit\n" "\n"
-          "Amiga version: noC-st_flc_t Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
+          "Amiga version: noC-flc Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
           "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n",
           flc_TITLE, argv[0]);
 }

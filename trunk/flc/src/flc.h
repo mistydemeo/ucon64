@@ -33,7 +33,7 @@ extern int flc_usage(int argc, char *argv[]);
 
 #define flc_TITLE "flc " flc_VERSION " 1999-2002 by NoisyB (noisyb@gmx.net)"
 
-struct flc_
+extern struct flc_
 {
   int argc;
   //  char argv[128][4096];
@@ -49,12 +49,14 @@ struct flc_
   int bysize;
   int byname;
   int fr;
+
+  int check;
   
   char path[MAXBUFSIZE];
 
   char configfile[MAXBUFSIZE];
   char config[4096];
-};
+}flc;
 
 #define FID_LINES_MAX 20
 

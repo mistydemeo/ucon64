@@ -77,9 +77,9 @@ main (int argc, char *argv[])
     {"k", 0, 0, 'k'},
     {"html", 0, 0, 3},
     {"c", 0, 0, 'c'},
-    {"h", 0, 0, '?'},
-    {"help", 0, 0, '?'},
-    {"?", 0, 0, '?'},
+    {"h", 0, 0, 'h'},
+    {"help", 0, 0, 'h'},
+    {"?", 0, 0, 'h'},
     {0, 0, 0, 0}
   };
 
@@ -130,9 +130,13 @@ main (int argc, char *argv[])
           flc.check = 1;
           break;
 
-        case '?':
-        default:
+        case 'h':
           flc_usage (argc, argv);
+          return 0;
+          break;
+
+        default:
+          printf ("Try '%s --help' for more information.\n", argv[0]);
           return 0;
           break;
         }

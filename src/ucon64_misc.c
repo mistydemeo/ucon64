@@ -483,6 +483,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_LNX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
   {UCON64_LSRAM, UCON64_N64, n64_usage,        WF_INIT|WF_PROBE},
   {UCON64_LYX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
+  {UCON64_MGDGG, UCON64_SMS, sms_usage,        WF_DEFAULT|WF_NO_SPLIT},
 #if 1 // -multi is now used for GBA *and* Genesis
   {UCON64_MULTI, UCON64_UNKNOWN, NULL,         WF_INIT|WF_PROBE|WF_STOP},
 #else

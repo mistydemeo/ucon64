@@ -1362,7 +1362,7 @@ ucon64_options (int c, const char *optarg)
           neogeo_mgd ();
           break;
         case UCON64_SMS:
-          sms_mgd (ucon64.rominfo);
+          sms_mgd (ucon64.rominfo, UCON64_SMS);
           break;
         case UCON64_SNES:
           snes_mgd (ucon64.rominfo);
@@ -1375,6 +1375,10 @@ ucon64_options (int c, const char *optarg)
 //          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
           return -1;
         }
+      break;
+
+    case UCON64_MGDGG:
+      sms_mgd (ucon64.rominfo, UCON64_GAMEGEAR);
       break;
 
     case UCON64_N:

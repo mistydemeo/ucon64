@@ -199,6 +199,7 @@ const struct option options[] = {
     {"lyx", 0, 0, UCON64_LYX},
     {"mapr", 1, 0, UCON64_MAPR},
     {"mgd", 0, 0, UCON64_MGD},
+    {"mgdgg", 0, 0, UCON64_MGDGG},
 //    {"mgh", 0, 0, UCON64_MGH},
     {"mirr", 1, 0, UCON64_MIRR},
     {"mka", 1, 0, UCON64_MKA},

@@ -7074,8 +7074,7 @@ nes_init (st_rominfo_t *rominfo)
                         "  Date: %d-%d-%d\n"
                         "  Agent: %s\n",
                         info->dumper_name,
-                        info->day, info->month,
-                        le2me_16 (info->year),
+                        info->day, info->month, le2me_16 (info->year),
                         info->dumper_agent);
           strcat (rominfo->misc, buf);
         }

@@ -1,5 +1,5 @@
 /*
-pce-pro.c - PCE-PRO flash flash card programmer support for uCON64
+pce-pro.c - PCE-PRO flash card programmer support for uCON64
 
 written by 2004 dbjh
 

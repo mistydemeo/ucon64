@@ -1,5 +1,5 @@
 /*
-md-pro.c - MD-PRO flash flash card programmer support for uCON64
+md-pro.c - MD-PRO flash card programmer support for uCON64
 
 written by 2003 - 2004 dbjh
            2003        NoisyB (noisyb@gmx.net)

@@ -623,7 +623,7 @@ ucon64_discmage (void)
     }
   else
     return 1;
-#endif // #ifdef DLOPEN
+#endif // !defined DLOPEN
 }
 
 
@@ -984,7 +984,11 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   // backup unit type?
   if (rominfo->copier_usage != NULL)
     {
-      strcpy (buf, rominfo->copier_usage[0].desc);
+// TODO: Dirk, you shouldn't use st_usage_t for copier info...
+      if (rominfo->copier_usage[0].desc != NULL)
+        strcpy (buf, rominfo->copier_usage[0].desc);
+      else
+        strcpy (buf, rominfo->copier_usage[0].optarg);
       printf ("%s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
@@ -1008,7 +1012,11 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   // console type
   if (rominfo->console_usage != NULL)
     {
-      strcpy (buf, rominfo->console_usage[0].desc);
+// TODO: Dirk, you shouldn't use st_usage_t for copier info...
+      if (rominfo->console_usage[0].desc != NULL)
+        strcpy (buf, rominfo->console_usage[0].desc);
+      else
+        strcpy (buf, rominfo->console_usage[0].optarg);
       printf ("%s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
@@ -1146,7 +1154,7 @@ ucon64_render_usage (const st_usage_t *usage)
               int len = strlen (usage[x].option_s);
 
 // adjust tabs for OPTION_S and OPTION_LONG_S here not in the OPTION_S definition
-              sprintf (buf, 
+              sprintf (buf,
                         (len == 1 ?
                          ("   " OPTION_S "%s%c") :
                          ("  " OPTION_LONG_S "%s%c")),
@@ -1182,7 +1190,7 @@ ucon64_render_usage (const st_usage_t *usage)
                   strncpy (buf, usage[x].desc[pos], strcspn (usage[x].desc[pos], '\n') + 1);
                   printf ("%s                  ", buf);
                 }
-#endif                
+#endif
               printf ("\n");
             }
 #ifdef  DEBUG
@@ -1191,7 +1199,7 @@ ucon64_render_usage (const st_usage_t *usage)
             {
               fprintf (stderr, "\n\nERROR: Usage entry for (%s) is malformed", usage[x].option_s);
             }
-#endif            
+#endif
         }
     }
 }
@@ -1344,7 +1352,7 @@ ucon64_usage (int argc, char *argv[])
 //    genesis_usage[0].desc,
     nes_usage[0].desc, snes_usage[0].desc);
 
-  name_discmage = 
+  name_discmage =
 #ifdef  DLOPEN
     ucon64.discmage_path;
 #else
@@ -1359,7 +1367,7 @@ ucon64_usage (int argc, char *argv[])
 #endif
 #endif
 
-  printf ("All DISC-based consoles (using %s)\n", ucon64.discmage_path);
+  printf ("All DISC-based consoles (using %s)\n", name_discmage);
   if (!ucon64.discmage_enabled)
     fprintf (stdout, ucon64_msg[NO_LIB], name_discmage);
   else

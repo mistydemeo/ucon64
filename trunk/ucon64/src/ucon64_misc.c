@@ -1084,7 +1084,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
                       mem_hexdump (&buf1[base], len, start1 + base + bytesread2);
                       printf ("%s:\n", filename2);
                       mem_hexdump (&buf2[base], len, start2 + base + bytesread2);
-                      printf ("\n");
+                      fputc ('\n', stdout);
                       base += len;
                       n_bytes += len;
                     }

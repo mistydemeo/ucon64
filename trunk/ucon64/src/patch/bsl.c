@@ -3,6 +3,7 @@ bsl.c - Baseline patcher support for uCON64
 
 written by ???? - ???? The White Knight
            1999 - 2001 NoisyB (noisyb@gmx.net)
+                  2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

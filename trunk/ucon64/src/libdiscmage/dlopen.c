@@ -195,7 +195,7 @@ open_module (char *module_name)
   if ((handle = dlopen (module_name, RTLD_LAZY)) == NULL)
     {
       fputs (dlerror (), stderr);
-      fputs ("\n", stderr);
+      fputc ('\n', stderr);
       exit (1);
     }
 #elif   defined _WIN32
@@ -252,7 +252,7 @@ get_symbol (void *handle, char *symbol_name)
   if ((strptr = dlerror ()) != NULL)            // this is "the correct way"
     {                                           //  according to the info page
       fputs (strptr, stderr);
-      fputs ("\n", stderr);
+      fputc ('\n', stderr);
       exit (1);
     }
 #elif   defined _WIN32

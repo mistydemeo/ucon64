@@ -21,13 +21,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
+
+#ifdef BACKUP
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "doctor64jr.h"
-
-#ifdef BACKUP
 
 //#define ai 0x37b
 //#define data 0x37c
@@ -674,12 +674,9 @@ d64jr_main (int argc, char *argv[])
 int doctor64jr_argc;
 char *doctor64jr_argv[128];
 
-#endif // BACKUP
-
 int
 doctor64jr_read (char *filename, unsigned int parport)
 {
-#ifdef BACKUP
   port[0] = parport;
 /*    
 TODO
@@ -692,10 +689,6 @@ TODO
       return 0;
     }
 */
-#else
-  printf("NOTE: this version was compiled without backup support\n\n");
-  
-#endif // BACKUP
 
   return 0;
 }
@@ -703,7 +696,6 @@ TODO
 int
 doctor64jr_write (char *filename, long start, long len, unsigned int parport)
 {
-#ifdef BACKUP
   port[0] = parport;
 
   doctor64jr_argv[0] = "jrsend";
@@ -715,11 +707,6 @@ doctor64jr_write (char *filename, long start, long len, unsigned int parport)
       return 0;
     }
   return -1;
-#else
-  printf("NOTE: this version was compiled without backup support\n\n");
-  
-  return 0;
-#endif // BACKUP
 }
 
 
@@ -728,15 +715,12 @@ doctor64jr_write (char *filename, long start, long len, unsigned int parport)
 int
 doctor64jr_usage (int argc, char *argv[])
 {
-#ifdef BACKUP
-
     printf ( doctor64jr_TITLE "\n"
 
   "  -xdjr         send/receive ROM to/from Doctor64 Jr; $FILE=PORT\n"
           "                receives automatically when $ROM does not exist\n"
           "NOTE: currently only sending is supported\n");
 
-#endif
-
   return 0;
 }
+#endif // BACKUP

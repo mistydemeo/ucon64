@@ -20,11 +20,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef MGD_H
 #define MGD_H
-#define mgd_TITLE "Multi Game Doctor(2)/Multi Game Hunter/MGH/RAW\n" \
-                   "19XX Bung Enterprises Ltd http://www.bung.com.hk\n" \
-                   "?Makko Toys Co., Ltd.?"
+#define mgd_TITLE "Multi Game Doctor(2)/Multi Game Hunter/MGH/RAW\n19XX Bung Enterprises Ltd http://www.bung.com.hk\n?Makko Toys Co., Ltd.?"
 
+#ifdef BACKUP
 extern int mgd_usage (int argc, char *argv[]);
+#endif // BACKUP
+
 #define mgd_HEADER_START 0
 #define mgd_HEADER_LEN 0
 #endif /* MGD_H */

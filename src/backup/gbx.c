@@ -24,13 +24,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <time.h>
 #include "config.h"
+#ifdef BACKUP
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "gbx.h"
-
-#ifdef BACKUP
 
 /* Modified version of gbt15.c - (C) Bung Enterprises */
 
@@ -2538,28 +2537,23 @@ gbx_init (unsigned int parport, char *filename)
   if (eeprom_type == 64)
     maxfilesize = 8 * 1024 * 1024;      // 64Mb
 }
-#endif // BACKUP
 
 
 int
 gbx_read_rom (char *filename, unsigned int parport)
 {
-#ifdef BACKUP
   gbx_init (parport, filename);
 
   cmd = 'B';
   backup ();
   end_port ();
-#else
-  printf("NOTE: this version was compiled without backup support\n\n");
-#endif // BACKUP
+
   return 0;
 }
 
 int
 gbx_write_rom (char *filename, unsigned int parport)
 {
-#ifdef BACKUP
   gbx_init (parport, filename);
 
   if (eeprom_type != 0)
@@ -2575,17 +2569,11 @@ gbx_write_rom (char *filename, unsigned int parport)
       end_port ();
       return -1;
     }
-#else
-  printf("NOTE: this version was compiled without backup support\n\n");
-  
-  return 0;
-#endif // BACKUP
 }
 
 int
 gbx_read_sram (char *filename, unsigned int parport, int bank)
 {
-#ifdef BACKUP
   gbx_init (parport, filename);
   if (bank == -1)
     {
@@ -2599,17 +2587,13 @@ gbx_read_sram (char *filename, unsigned int parport, int bank)
     }
 
   end_port ();
-#else
-  printf("NOTE: this version was compiled without backup support\n\n");
-  
-#endif // BACKUP
+
   return 0;
 }
 
 int
 gbx_write_sram (char *filename, unsigned int parport, int bank)
 {
-#ifdef BACKUP
   struct stat fstat;
 
   gbx_init (parport, filename);
@@ -2636,17 +2620,13 @@ gbx_write_sram (char *filename, unsigned int parport, int bank)
     }
 
   end_port ();
-#else
-  printf("NOTE: this version was compiled without backup support\n\n");
-  
-#endif // BACKUP
+
   return 0;
 }
 
 int
 gbx_usage (int argc, char *argv[])
 {
-#ifdef BACKUP
   printf ( gbx_TITLE "\n"
 
      "  -xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
@@ -2661,6 +2641,6 @@ gbx_usage (int argc, char *argv[])
             "                (right) parallel port. If that is the case give a hardware\n"
             "                address, for example:\n"
             "                ucon64 -xgbx \"Pokemon (Green).gb\" 0x378\n");
-#endif // BACKUP
   return 0;
 }
+#endif // BACKUP

@@ -106,7 +106,7 @@ static void ucon64_exit (void);
 
 struct ucon64_ rom;
 
-static void
+void
 ucon64_exit (void)
 {
   printf ("+++EOF");
@@ -889,9 +889,11 @@ while ((c =
               (argcmp (argc, argv, "-sgb")) ? gameboy_sgb (&rom) :
               (argcmp (argc, argv, "-ssc")) ? gameboy_ssc (&rom) :
               (argcmp (argc, argv, "-n2gb")) ? gameboy_n2gb (&rom) :
+#ifdef BACKUP
               (argcmp (argc, argv, "-xgbx")) ? gameboy_xgbx (&rom) :
               (argncmp (argc, argv, "-xgbxb", 6)) ? gameboy_xgbxb (&rom) :
               (argcmp (argc, argv, "-xgbxs")) ? gameboy_xgbxs (&rom) :
+#endif // BACKUP             
               0);
       break;
 
@@ -904,10 +906,12 @@ while ((c =
               (argcmp (argc, argv, "-multi")) ? gbadvance_multi (&rom, 256 * MBIT) :
               (argcmp (argc, argv, "-multi1")) ? gbadvance_multi (&rom, 64 * MBIT) :
               (argcmp (argc, argv, "-multi2")) ? gbadvance_multi (&rom, 128 * MBIT) :
+#ifdef BACKUP
               (argcmp (argc, argv, "-xfal")) ? gbadvance_xfal (&rom) :
               (argncmp (argc, argv, "-xfalc", 6)) ? gbadvance_xfal (&rom) :
               (argncmp (argc, argv, "-xfalb", 6)) ? gbadvance_xfalb (&rom) :
               (argcmp (argc, argv, "-xfals")) ? gbadvance_xfals (&rom) :
+#endif // BACKUP              
               0);
       break;
 
@@ -924,8 +928,10 @@ while ((c =
               (argcmp (argc, argv, "-s")) ? genesis_s (&rom) :
               (argcmp (argc, argv, "-smd")) ? genesis_smd (&rom) :
               (argcmp (argc, argv, "-smds")) ? genesis_smds (&rom) :
+#ifdef BACKUP
               (argcmp (argc, argv, "-xsmd")) ? genesis_xsmd (&rom) :
               (argcmp (argc, argv, "-xsmds")) ? genesis_xsmds (&rom) :
+#endif // BACKUP              
               0);
       break;
 
@@ -951,8 +957,10 @@ while ((c =
               (argcmp (argc, argv, "-usms")) ? nintendo64_usms (&rom) :
               (argcmp (argc, argv, "-v64")) ? nintendo64_v64 (&rom) :
               (argcmp (argc, argv, "-z64")) ? nintendo64_z64 (&rom) :
+#ifdef BACKUP
               (argcmp (argc, argv, "-xdjr")) ? nintendo64_xdjr (&rom) :
               (argcmp (argc, argv, "-xv64")) ? nintendo64_xv64 (&rom) :
+#endif // BACKUP              
               0);
       break;
 
@@ -1009,8 +1017,10 @@ while ((c =
               (argcmp (argc, argv, "-swc")) ? snes_swc (&rom) :
               (argcmp (argc, argv, "-swcs")) ? snes_swcs (&rom) :
               (argcmp (argc, argv, "-ufos")) ? snes_ufos (&rom) :
+#ifdef BACKUP
               (argcmp (argc, argv, "-xswc")) ? snes_xswc (&rom) :
               (argcmp (argc, argv, "-xswcs")) ? snes_xswcs (&rom) :
+#endif // BACKUP            
               0);
       break;
 
@@ -1044,7 +1054,9 @@ while ((c =
               /* ip0000(char *dev,char *name) */ 0 :
               (argcmp (argc, argv, "-iso")) ? /* cdi2iso(rom.rom) */ :
               (argcmp (argc, argv, "-mktoc")) ? dc_mktoc (&rom) :
+#ifdef BACKUP_CD
               (argcmp (argc, argv, "-xcdrw")) ? dc_xcdrw (&rom) :
+#endif // BACKUP_CD
               0);
       break;
 
@@ -1089,11 +1101,12 @@ while ((c =
         {
           return cdrw_mkcue (&rom);
         }
-        
+#ifdef BACKUP_CD        
       if (argcmp (argc, argv, "-xcdrw"))
         {
           return (!access (rom.rom, F_OK)) ? cdrw_write (&rom) : cdrw_read (&rom);
         }
+#endif // BACKUP_CD
       if (!access (rom.rom, F_OK) || argcmp (argc, argv, "-xsmd") ||    // the SMD made backups for Genesis and Sega Master System
           argcmp (argc, argv, "-xsmds")
         )
@@ -1120,7 +1133,7 @@ while ((c =
 }
 
 
-static int
+int
 ucon64_init (struct ucon64_ *rom)
 {
   long bytes = 0;
@@ -1320,7 +1333,7 @@ ucon64_init (struct ucon64_ *rom)
 }
 
 
-static int
+int
 ucon64_usage (int argc, char *argv[])
 {
   printf ("USAGE: %s [OPTION(S)] ROM [FILE]\n\n",
@@ -1554,7 +1567,7 @@ emuchina.net
 /*
     this is the now centralized nfo output for all kinds of ROMs
 */
-static int
+int
 ucon64_nfo (struct ucon64_ *rom)
 {
   char buf[4096];
@@ -1641,7 +1654,7 @@ ucon64_nfo (struct ucon64_ *rom)
 /*
     flush the ucon64 struct with default values
 */
-static int
+int
 ucon64_flush (int argc, char *argv[], struct ucon64_ *rom)
 {
   long x = 0;

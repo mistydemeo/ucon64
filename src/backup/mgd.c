@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
+#ifdef BACKUP 
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
@@ -30,13 +31,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 int
 mgd_usage (int argc, char *argv[])
 {
-#ifdef BACKUP
 #if 0
     printf (mgd_TITLE "\n"
 
     "TODO:  -xmgd    send/receive ROM to/from Multi Game* /MGD2/MGH/RAW; $FILE=PORT\n"
      "		receives automatically when $ROM does not exist\n");
 #endif
-#endif // BACKUP
   return 0;
 }
+#endif // BACKUP

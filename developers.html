@@ -199,10 +199,14 @@ Q8: <a href="#8">What syntax style is preferred?</a><br>
 <b>A</b>: Two spaces instead if a real tab. For the rest just look below...
 <form><textarea rows="40" cols="80" readonly>
 #include &#60;stdio.h&#62;
+#include "config.h"
+#include "misc.h"
 
 #ifndef BLA
 #define BLA "bla"
 #endif // BLA
+
+static int bla (int x);
 
 int
 main (int argc, char *argv[])
@@ -221,6 +225,12 @@ main (int argc, char *argv[])
     }
 
   return 0;
+}
+
+
+int bla (int x)
+{
+  return x;
 }
 </textarea></form>
 <br>

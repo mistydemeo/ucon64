@@ -20,12 +20,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef DOCTOR64_H
 #define DOCTOR64_H
+
+#ifdef BACKUP
 extern int doctor64_read (char *filename, unsigned int parport);
 
 extern int doctor64_write (char *filename, long start, long len,
                     unsigned int parport);
 
 extern int doctor64_usage (int argc, char *argv[]);
+#endif // BACKUP
 
 #define doctor64_TITLE "Doctor V64\n19XX Bung Enterprises Ltd http://www.bung.com.hk"
 #define doctor64_HEADER_START 0

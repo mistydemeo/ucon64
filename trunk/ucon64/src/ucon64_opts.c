@@ -291,10 +291,12 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XGD6S:
     case UCON64_XGG:
     case UCON64_XGGS:
+    case UCON64_XGGB:
     case UCON64_XLIT:
     case UCON64_XMCCL:
     case UCON64_XMD:
     case UCON64_XMDS:
+    case UCON64_XMDB:
     case UCON64_XMSG:
     case UCON64_XPCE:
     case UCON64_XSMC:
@@ -1689,9 +1691,17 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_XGGS:
       if (access (ucon64.rom, F_OK) != 0)
-        smsgg_read_sram (ucon64.rom, ucon64.parport);
+        smsgg_read_sram (ucon64.rom, ucon64.parport, -1);
       else
-        smsgg_write_sram (ucon64.rom, ucon64.parport);
+        smsgg_write_sram (ucon64.rom, ucon64.parport, -1);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGGB:
+      if (access (ucon64.rom, F_OK) != 0)
+        smsgg_read_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
+      else
+        smsgg_write_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
       fputc ('\n', stdout);
       break;
 
@@ -1715,9 +1725,17 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_XMDS:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
-        md_read_sram (ucon64.rom, ucon64.parport);
+        md_read_sram (ucon64.rom, ucon64.parport, -1);
       else                                      // file exists -> restore SRAM
-        md_write_sram (ucon64.rom, ucon64.parport);
+        md_write_sram (ucon64.rom, ucon64.parport, -1);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XMDB:
+      if (access (ucon64.rom, F_OK) != 0)
+        md_read_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
+      else
+        md_write_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
       fputc ('\n', stdout);
       break;
 

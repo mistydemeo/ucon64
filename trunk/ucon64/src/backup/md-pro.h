@@ -29,8 +29,8 @@ extern const st_usage_t mdpro_usage[];
 #ifdef USE_PARALLEL
 extern int md_read_rom (const char *filename, unsigned int parport, int size);
 extern int md_write_rom (const char *filename, unsigned int parport);
-extern int md_read_sram (const char *filename, unsigned int parport);
-extern int md_write_sram (const char *filename, unsigned int parport);
+extern int md_read_sram (const char *filename, unsigned int parport, int start_bank);
+extern int md_write_sram (const char *filename, unsigned int parport, int start_bank);
 #endif // USE_PARALLEL
 
 #endif // MD_PRO_H

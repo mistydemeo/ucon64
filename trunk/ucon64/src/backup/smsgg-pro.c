@@ -45,6 +45,9 @@ const st_usage_t smsggpro_usage[] =
     {"xggs", 0, NULL, "send/receive SRAM to/from SMS-PRO/GG-PRO flash card programmer\n"
                        OPTION_LONG_S "port=PORT\n"
                        "receives automatically when SRAM does not exist", NULL},
+    {"xggb", 1, "BANK", "send/receive SRAM to/from SMS-PRO/GG-PRO BANK\n"
+                        "BANK can be a number from 1 to 4; " OPTION_LONG_S "port=PORT\n"
+                        "receives automatically when SRAM does not exist", NULL},
 #endif // USE_PARALLEL
     {NULL, 0, NULL, NULL, NULL}
   };
@@ -169,7 +172,7 @@ int
 smsgg_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
-  unsigned char *buffer;
+  unsigned char buffer[0x4000];
   int size, address = 0, bytesread, bytessend = 0;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
@@ -178,11 +181,6 @@ smsgg_write_rom (const char *filename, unsigned int parport)
   if ((file = fopen (filename, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
-      exit (1);
-    }
-  if ((buffer = (unsigned char *) malloc (0x4000)) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], 0x4000);
       exit (1);
     }
   ttt_init_io (parport);
@@ -207,7 +205,6 @@ smsgg_write_rom (const char *filename, unsigned int parport)
   else
     fprintf (stderr, "ERROR: SMS-PRO/GG-PRO flash card (programmer) not detected\n");
 
-  free (buffer);
   fclose (file);
   ttt_deinit_io ();
 
@@ -216,21 +213,37 @@ smsgg_write_rom (const char *filename, unsigned int parport)
 
 
 int
-smsgg_read_sram (const char *filename, unsigned int parport)
+smsgg_read_sram (const char *filename, unsigned int parport, int start_bank)
 {
   FILE *file;
   unsigned char buffer[0x100];
-  int blocksleft, address = 0, size = 128 * 1024;
+  int blocksleft, address, size, bytesreceived = 0;
   time_t starttime;
   void (*read_block) (int, unsigned char *) = ttt_read_ram_b; // ttt_read_ram_w
+
+  if (start_bank == -1)
+    {
+      address = 0;
+      size = 128 * 1024;
+    }
+  else
+    {
+      if (start_bank < 1 || start_bank > 4)
+        {
+          fputs ("ERROR: Bank must be a value 1 - 4\n", stderr);
+          exit (1);
+        }
+      address = (start_bank - 1) * 32 * 1024;
+      size = 32 * 1024;
+    }
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
       exit (1);
     }
-  ttt_init_io (parport);
 
+  ttt_init_io (parport);
   printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   if (read_block == ttt_read_ram_w)
@@ -248,8 +261,9 @@ smsgg_read_sram (const char *filename, unsigned int parport)
       read_block (address, buffer);             // 0x100 bytes read
       fwrite (buffer, 1, 0x100, file);
       address += 0x100;
+      bytesreceived += 0x100;
       if ((address & 0x3fff) == 0)
-        ucon64_gauge (starttime, address, size);
+        ucon64_gauge (starttime, bytesreceived, size);
     }
   if (read_block == ttt_read_ram_w)
     ttt_ram_disable ();
@@ -262,28 +276,35 @@ smsgg_read_sram (const char *filename, unsigned int parport)
 
 
 int
-smsgg_write_sram (const char *filename, unsigned int parport)
+smsgg_write_sram (const char *filename, unsigned int parport, int start_bank)
 {
   FILE *file;
-  unsigned char *buffer;
-  int size, bytesread, bytessend = 0, address = 0;
+  unsigned char buffer[0x4000];
+  int size, bytesread, bytessend = 0, address;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_ram_by_byte; // write_ram_by_page
   (void) write_ram_by_page;
+
+  size = q_fsize (filename);
+  if (start_bank == -1)
+    address = 0;
+  else
+    {
+      if (start_bank < 1 || start_bank > 4)
+        {
+          fputs ("ERROR: Bank must be a value 1 - 4\n", stderr);
+          exit (1);
+        }
+      address = (start_bank - 1) * 32 * 1024;
+    }
 
   if ((file = fopen (filename, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
       exit (1);
     }
-  if ((buffer = (unsigned char *) malloc (0x4000)) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], 0x4000);
-      exit (1);
-    }
-  ttt_init_io (parport);
 
-  size = q_fsize (filename);
+  ttt_init_io (parport);
   printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   starttime = time (NULL);
@@ -294,7 +315,6 @@ smsgg_write_sram (const char *filename, unsigned int parport)
       ucon64_gauge (starttime, bytessend, size);
     }
 
-  free (buffer);
   fclose (file);
   ttt_deinit_io ();
 

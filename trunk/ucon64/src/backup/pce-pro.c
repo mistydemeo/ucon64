@@ -138,7 +138,7 @@ int
 pce_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
-  unsigned char *buffer;
+  unsigned char buffer[0x4000];
   int size, fsize, address = 0, bytesread, bytessend = 0;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
@@ -147,11 +147,6 @@ pce_write_rom (const char *filename, unsigned int parport)
   if ((file = fopen (filename, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
-      exit (1);
-    }
-  if ((buffer = (unsigned char *) malloc (0x4000)) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], 0x4000);
       exit (1);
     }
   ttt_init_io (parport);
@@ -183,7 +178,6 @@ pce_write_rom (const char *filename, unsigned int parport)
   else
     fprintf (stderr, "ERROR: PCE-PRO flash card (programmer) not detected\n");
 
-  free (buffer);
   fclose (file);
   ttt_deinit_io ();
 

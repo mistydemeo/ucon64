@@ -29,8 +29,8 @@ extern const st_usage_t smsggpro_usage[];
 #ifdef USE_PARALLEL
 extern int smsgg_read_rom (const char *filename, unsigned int parport, int size);
 extern int smsgg_write_rom (const char *filename, unsigned int parport);
-extern int smsgg_read_sram (const char *filename, unsigned int parport);
-extern int smsgg_write_sram (const char *filename, unsigned int parport);
+extern int smsgg_read_sram (const char *filename, unsigned int parport, int start_bank);
+extern int smsgg_write_sram (const char *filename, unsigned int parport, int start_bank);
 #endif // USE_PARALLEL
 
 #endif // SMSGG_PRO_H

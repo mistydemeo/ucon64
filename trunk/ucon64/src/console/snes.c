@@ -1892,13 +1892,23 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     Special case hell
 
     0x4a70ad38: Double Dragon, Return of (J), Super Double Dragon (E/U) {[!], [a1]}
+    0x0b34ddad: Kakinoki Shogi (J)
     0x348b5357: King of Rally, The (J)
+    0xc39b8d3a: Pro Kishi Simulation Kishi no Hanamichi (J)
+    0xbd7bc39f: Shin Syogi Club (J)
     0x9b4638d0: Street Fighter Alpha 2 (E/U) {[b1]}, Street Fighter Zero 2 (J)
     Only really necessary for (U). The other versions can be detected because
     one of the two internal headers has checksum bytes ff ff 00 00.
     0x0085b742: Super Bowling (U)
     0x30cbf83c: Super Bowling (J)
     These games have two headers.
+
+    BUG ALERT: We don't check for 0xbd7bc39f. The first 512 bytes of what
+    uCON64 detects as the interleaved dump of Shin Syogi Club (J) are identical
+    to the first 512 bytes of what we detect as the uninterleaved dump of
+    Kakinoki Shogi (J). We prefer uninterleaved dumps. Besides, concluding a
+    dump is interleaved if the first 512 byte have CRC32 0xbd7bc39f would mess
+    up the detection of some BS dumps. See below.
 
     0x7039388a: Ys 3 - Wanderers from Ys (J)
     This game has 31 internal headers...
@@ -1968,9 +1978,10 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
 #endif
      )
     check_map_type = 0;                         // not interleaved
-  else if (crc == 0x4a70ad38 || crc == 0x348b5357 || crc == 0x9b4638d0 ||
-           crc == 0x0085b742 || crc == 0x30cbf83c || crc == 0x7039388a ||
-           crc == 0xdbc88ebf || crc == 0x2a4c6a9b
+  else if (crc == 0x4a70ad38 || crc == 0x0b34ddad || crc == 0x348b5357 ||
+           crc == 0xc39b8d3a || crc == 0x9b4638d0 || crc == 0x0085b742 ||
+           crc == 0x30cbf83c || crc == 0x7039388a || crc == 0xdbc88ebf ||
+           crc == 0x2a4c6a9b
 #ifdef  DETECT_NOTGOOD_DUMPS
            ||
            crc == 0x65485afb || crc == 0x5ee74558 || crc == 0x92180571 ||
@@ -2875,7 +2886,8 @@ snes_check_bs (void)
       if (date == 0)
         return 2;                               // BS add-on cartridge dump
       else if (date == 0xffff ||
-               ((snes_header.bs_month & 0xf) == 0 && (snes_header.bs_month >> 4) <= 12))
+               ((snes_header.bs_month & 0xf) == 0 &&
+               ((unsigned int) ((snes_header.bs_month >> 4) - 1)) < 12))
         return 1;                               // BS dump (via BSX)
     }
   return 0;
@@ -3131,7 +3143,8 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
       // map type
       if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0xf) < 4)
         score += 2;
-      if (snes_hirom_ok)
+      x = rom_buffer[SNES_HEADER_START + header_offset + 38];
+      if (snes_hirom_ok && !(x == 0x34 || x == 0x35)) // ROM type for SA-1
         // map type, HiROM flag (only if we're sure about value of snes_hirom)
         if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0x01) ==
             (header_offset >= snes_header_base + SNES_HIROM) ? 0x01 : 0x00)

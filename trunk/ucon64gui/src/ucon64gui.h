@@ -43,7 +43,7 @@ struct ucon64gui_
 
   char ucon64_output[MAXBUFSIZE];
 
-  int submenu;
+  int sub;
 
   int page; //current "html page"
 

@@ -1483,7 +1483,8 @@ int ucon64_nfo(struct ucon64_ *rom)
 
 
   if (rom->current_crc32 != 0)
-    printf("Checksum (CRC32): 0x%08lx\n", rom->current_crc32);
+//    printf("Checksum (CRC32): 0x%08lx\n", rom->current_crc32);
+    printf("Checksum (CRC32): 0x%08lx\n", fileCRC32(rom->rom,rom->buheader_len));
 
   printf("\n");
 

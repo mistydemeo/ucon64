@@ -65,7 +65,7 @@ extern const st_usage_t nes_usage[];
  which conflicts with VS Unisystem/PlayChoice-10 identification.
 */
 
-#define INES_SIG_S      "NES\x1A"
+#define INES_SIG_S      "NES\x1a"
 
 // flags in st_ines_header_t.ctrl1
 #define INES_MIRROR     0x01

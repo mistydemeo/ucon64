@@ -2709,7 +2709,9 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
     not a guarantee that rominfo->buheader_len already has the right value
     (e.g. Earthworm Jim (U), Alfred Chicken (U|E), Soldiers of Fortune (U)).
   */
+#if 0
   if (type != MGD_SNES) // don't do "&& type != SMC" or we'll miss a lot of PD ROMs
+#endif
     {
       y = ((header->size_high << 8) + header->size_low) * 8 * 1024;
       y += SWC_HEADER_LEN;                      // if SWC-like header -> hdr[1] high byte,

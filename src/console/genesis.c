@@ -788,7 +788,7 @@ genesis_f (st_rominfo_t *rominfo)
     Just like with SNES we don't guarantee anything for files that needn't be
     fixed/cracked/patched.
   */
-  if (genesis_tv_standard == 0)               // NTSC (Japan, U.S.A. or Brazil)
+  if (genesis_tv_standard == 0)               // NTSC (Japan, U.S.A. or Brazil ('4'))
     return genesis_fix_ntsc_protection (rominfo);
   else
     return genesis_fix_pal_protection (rominfo);
@@ -1176,10 +1176,10 @@ genesis_init (st_rominfo_t *rominfo)
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, "Brazil", NULL, NULL,
+    NULL, NULL, "Brazil", NULL, NULL,           // Brazil NTSC
     NULL, "Hong Kong", NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    "Asia", "Brazil", NULL, NULL, "Europe",
+    "Asia", "Brazil", NULL, NULL, "Europe",     // Brazil PAL
     "France", NULL, NULL, NULL, "Japan",
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
@@ -1321,8 +1321,8 @@ genesis_init (st_rominfo_t *rominfo)
 
       if ((x > 0 && country_code == 0) || country_code == ' ')
         continue;
-      if (country_code == 'J' || country_code == 'U' || country_code == 'B')
-        genesis_tv_standard = 0;        // Japan, the U.S.A. and Brazil use NTSC
+      if (country_code == 'J' || country_code == 'U' || country_code == '4')
+        genesis_tv_standard = 0;        // Japan, the U.S.A. and Brazil ('4') use NTSC
       strcat (country, NULL_TO_UNKNOWN_S
                (genesis_country[MIN (country_code, GENESIS_COUNTRY_MAX - 1)]));
       strcat (country, ", ");

@@ -122,7 +122,7 @@ extern const st_usage_t ucon64_patching_usage[];
   WF_USB            this option requires a USB port
   WF_SERIAL         this option requires a serial port
   WF_NO_SPLIT       this option does not work with split ROMs
-  WF_DEFAULT        same as WF_PROBE|WF_INIT|WF_NFO
+  WF_DEFAULT        same as WF_INIT|WF_PROBE|WF_NFO
 
   example:
   WF_NFO|WF_MFO_AFTER

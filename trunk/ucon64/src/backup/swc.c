@@ -106,7 +106,7 @@ int swc_write_rom(char *filename, unsigned int parport)
   }
 
   stat(filename, &fstate);
-  printf("Send: %ld Bytes (%.4f Mb)\n", fstate.st_size, (float) fstate.st_size/MBIT);
+  printf("Send: %d Bytes (%.4f Mb)\n", (int) fstate.st_size, (float) fstate.st_size/MBIT);
 
   send_command0(0xc008, 0);
   fread(buffer, 1, HEADERSIZE, file);

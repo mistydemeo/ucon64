@@ -280,9 +280,10 @@ ucon64_exit (void)
 int
 main (int argc, char **argv)
 {
-  long x, y = 0;
   int ucon64_argc;
   int c = 0, result = 0;
+  long size = 0;
+  int value = 0;  
   unsigned long padded;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
   const char *ucon64_argv[128];

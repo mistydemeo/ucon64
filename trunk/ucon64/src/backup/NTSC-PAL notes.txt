@@ -46,7 +46,7 @@ N31 = 29 10 00 a2 00 00 c9 10 00 d0         29 10 00 a2 00 00 c9 10 00 80    - W
 
 
 Comment:
-Code1 is valid for a SWC 2.8cc 32 Mbit PAL. For example Terranigma has a Code1
+Code1 is valid for an SWC 2.8cc 32 Mbit PAL. For example Terranigma has a Code1
 of 0, but a Code2 of P3, because it runs without modification on a PAL SNES but
 needs an NTSC/PAL fix for an NTSC SNES.
 The prefix N indicates an NTSC protection code, the prefix P indicates a PAL

@@ -1138,7 +1138,7 @@ snes_s (st_rominfo_t *rominfo)
 
   size = ucon64.file_size - rominfo->buheader_len;
 
-  if (UCON64_ISSET (ucon64.part_size))
+  if (UCON64_ISSET (ucon64.part_size) && type != GD3)
     {
       part_size = ucon64.part_size;
       /*
@@ -1149,7 +1149,8 @@ snes_s (st_rominfo_t *rominfo)
         suffix ".:". The SWC does ask for that filename though.
         Also don't base the minimum part size on the actual file size, because
         that will probably only confuse users.
-        We ignore the few ROMs that are greater than 32 MBit.
+        We ignore the few ROMs that are greater than 32 MBit. Just use -ssize
+        to specify a larger part size for those.
       */
       if (part_size < 4 * MBIT)
         {
@@ -1161,7 +1162,22 @@ snes_s (st_rominfo_t *rominfo)
   else
     part_size = PARTSIZE;
 
-  if (size <= part_size)
+  if (type == GD3)
+    /*
+      part_size is ignored for Game Doctor.
+      Note that 4 Mbit is the smallest size a split Game Doctor file can be
+      (the minimum size of a GD memory unit).
+    */
+    {
+      if (size <= 4 * MBIT)
+        {
+          printf (
+            "NOTE: ROM size is smaller than or equal to 4 Mbit -- won't be split\n",
+            4 * MBIT);
+          return -1;
+        }
+    }
+  else if (size <= part_size)
     {
       printf (
         "NOTE: ROM size is smaller than or equal to %d Mbit -- won't be split\n",

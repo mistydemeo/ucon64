@@ -59,7 +59,7 @@ const st_usage_t sms_usage[] =
 
 typedef struct st_sms_header
 {
-  char signature[8];                            // "TMR SEGA"/"TMR SMSC"/"TMG SEGA"
+  char signature[8];                            // "TMR "{"SEGA", "ALVS", "SMSC"}/"TMG SEGA"
   unsigned char pad[2];                         // 8
   unsigned char checksum_low;                   // 10
   unsigned char checksum_high;                  // 11
@@ -214,18 +214,60 @@ sms_testinterleaved (st_rominfo_t *rominfo)
   q_fread (buf, rominfo->buheader_len + 0x4000, // header in 2nd 16 kB block
            0x2000 + (SMS_HEADER_START - 0x4000 + 8) / 2, ucon64.rom);
   if (!(memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SEGA", 8) &&
-        memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SMSC", 8) && // SMS
+        memcmp (buf + SMS_HEADER_START - 0x4000, "TMR ALVS", 8) && // SMS
+        memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SMSC", 8) && // SMS (unofficial)
         memcmp (buf + SMS_HEADER_START - 0x4000, "TMG SEGA", 8)))  // GG
     return 0;
 
   smd_deinterleave (buf, 0x4000);
   if (!(memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SEGA", 8) &&
+        memcmp (buf + SMS_HEADER_START - 0x4000, "TMR ALVS", 8) &&
         memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SMSC", 8) &&
         memcmp (buf + SMS_HEADER_START - 0x4000, "TMG SEGA", 8)))
     return 1;
 
   return 0;                                     // unknown, act as if it's not interleaved
 }
+
+
+#define SEARCHBUFSIZE (SMS_HEADER_START + 8 + 16 * 1024)
+#define N_SEARCH_STR 4
+static int
+sms_header_len (void)
+/*
+  At first sight it seems reasonable to also determine whether the file is
+  interleaved in this function. However, we run into a chicken-and-egg problem:
+  in order to deinterleave the data we have to know the header length. And in
+  order to determine the header length we have to know whether the file is
+  interleaved :-) Of course we could assume the header has an even size, but it
+  turns out that that is not always the case. For example, there is a copy of
+  GG Shinobi (E) [b1] floating around with a "header" of 5 bytes.
+  In short: this function works works only for files that are not interleaved.
+*/
+{
+  // first two hacks for Majesco Game Gear BIOS (U) [!]
+  if (ucon64.file_size == 1024)
+    return 0;
+  else if (ucon64.file_size == 1024 + SMD_HEADER_LEN)
+    return SMD_HEADER_LEN;
+  else
+    {
+      char buffer[SEARCHBUFSIZE], *ptr, search_str[N_SEARCH_STR][9] =
+             { "TMR SEGA", "TMR ALVS", "TMR SMSC", "TMG SEGA" };
+      int n;
+
+      q_fread (buffer, 0, SEARCHBUFSIZE, ucon64.rom);
+
+      for (n = 0; n < N_SEARCH_STR; n++)
+        if ((ptr = (char *)
+               mem_search (buffer, SEARCHBUFSIZE, search_str[n], 8)) != NULL)
+          return ptr - buffer - SMS_HEADER_START;
+
+      return ucon64.file_size % (16 * 1024); // SMD_HEADER_LEN
+    }
+}
+#undef SEARCHBUFSIZE
+#undef N_SEARCH_STR
 
 
 int
@@ -240,7 +282,7 @@ sms_init (st_rominfo_t *rominfo)
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
     rominfo->buheader_len = ucon64.buheader_len;
   else
-    rominfo->buheader_len = ucon64.file_size % (16 * 1024); // SMD_HEADER_LEN
+    rominfo->buheader_len = sms_header_len ();
 
   rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
     ucon64.interleaved : sms_testinterleaved (rominfo);
@@ -266,7 +308,8 @@ sms_init (st_rominfo_t *rominfo)
   //  is alright to set result to 0
   if ((buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 6) ||
       !(memcmp (sms_header.signature, "TMR SEGA", 8) &&
-        memcmp (sms_header.signature, "TMR SMSC", 8) &&  // SMS
+        memcmp (sms_header.signature, "TMR ALVS", 8) &&  // SMS
+        memcmp (sms_header.signature, "TMR SMSC", 8) &&  // SMS (unofficial)
         memcmp (sms_header.signature, "TMG SEGA", 8)) || // GG
       ucon64.console == UCON64_SMS)
     result = 0;

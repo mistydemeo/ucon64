@@ -706,6 +706,20 @@ memwcmp (const void *data, const void *search, uint32_t searchlen, int wildcard)
 
 
 void *
+mem_search (const void *buffer, uint32_t buflen,
+            const void *search, uint32_t searchlen)
+{
+  int32_t n;
+
+  for (n = 0; n <= (int32_t) (buflen - searchlen); n++)
+    if (memcmp ((uint8_t *) buffer + n, search, searchlen) == 0)
+      return (uint8_t *) buffer + n;
+
+  return 0;
+}
+
+
+void *
 mem_swap (void *add, uint32_t n)
 {
   unsigned char *a = (unsigned char *) add, c;

@@ -879,14 +879,8 @@ pcengine_init (st_rominfo_t *rominfo)
     Japanese game is running on an American console. If they are present then
     it is in the first 500 (or so) bytes.
   */
-#if 1
-  // I don't feel like writing a new memory search function at the moment...
-  if (q_fncmp (ucon64.rom, rominfo->buheader_len, 32768, "\x94\x02\x0f", 3, 0) != -1 ||
-      q_fncmp (ucon64.rom, rominfo->buheader_len, 32768, "\x94\x02\x01", 3, 0) != -1)
-#else
-  if (change_mem ((char *) rom_buffer, 32768, "\x94\x02\x0f", 3, 0, 0, "\x0f", 1, 0) > 0 ||
-      change_mem ((char *) rom_buffer, 32768, "\x94\x02\x01", 3, 0, 0, "\x01", 1, 0) > 0)
-#endif
+  if (mem_search (rom_buffer, 32768, "\x94\x02\x0f", 3) ||
+      mem_search (rom_buffer, 32768, "\x94\x02\x01", 3))
     swapped = 1;
   if (UCON64_ISSET (ucon64.interleaved))
     swapped = ucon64.interleaved;
@@ -912,11 +906,6 @@ pcengine_init (st_rominfo_t *rominfo)
 
   if (ucon64.console == UCON64_PCE)
     result = 0;
-
-#if 0 // TODO: more info is needed about this
-  memcpy (&pce_header, rom_buffer + PCENGINE_HEADER_START, PCENGINE_HEADER_LEN);
-  rominfo->header = &pce_header;
-#endif
 
   rominfo->header_start = PCENGINE_HEADER_START;
   rominfo->header_len = PCENGINE_HEADER_LEN;

@@ -307,17 +307,17 @@ dm_image_t *image = NULL;
 #ifdef  DLOPEN
 void *libdm;
 
-#define dm_init dm_init_ptr
+#define dm_open dm_open_ptr
 #define dm_close dm_close_ptr
-dm_image_t *(*dm_init_ptr) (const char *) = NULL;
+dm_image_t *(*dm_open_ptr) (const char *) = NULL;
 int (*dm_close_ptr) (dm_image_t *) = NULL;
 
-#define dm_bin2iso dm_bin2iso_ptr
+#define dm_rip dm_rip_ptr
 #define dm_cdirip dm_cdirip_ptr
-#define dm_cdi2nero dm_cdi2nero_ptr
-int32_t (*dm_bin2iso_ptr) (dm_image_t *) = NULL;
+#define dm_nrgrip dm_nrgrip_ptr
+int32_t (*dm_rip_ptr) (dm_image_t *) = NULL;
 int32_t (*dm_cdirip_ptr) (dm_image_t *) = NULL;
-int32_t (*dm_cdi2nero_ptr) (dm_image_t *) = NULL;
+int32_t (*dm_nrgrip_ptr) (dm_image_t *) = NULL;
 
 #define dm_disc_read dm_disc_read_ptr
 #define dm_disc_write dm_disc_write_ptr
@@ -376,6 +376,10 @@ main (int argc, char **argv)
     // There should be some standard C library function that does this...
     //  (filename expansion)
     {
+#if 1
+      strcpy (buf, ucon64.discmage_path);
+      realpath2 (buf, ucon64.discmage_path);
+#else
       char path1[FILENAME_MAX], path2[FILENAME_MAX];
       if (ucon64.discmage_path[0] == '~' && ucon64.discmage_path[1] == FILE_SEPARATOR)
         {
@@ -389,18 +393,20 @@ main (int argc, char **argv)
           strcpy (path2, &ucon64.discmage_path[2]);
           sprintf (ucon64.discmage_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
         }
+#endif
     }
+    
   // if ucon64.discmage_path points to an existing file then load it
   if (!access (ucon64.discmage_path, F_OK))
     {
       libdm = open_module (ucon64.discmage_path);
 
-      dm_init = get_symbol (libdm, "dm_init");
+      dm_open = get_symbol (libdm, "dm_open");
       dm_close = get_symbol (libdm, "dm_close");
 
-      dm_bin2iso = get_symbol (libdm, "dm_bin2iso");
       dm_cdirip = get_symbol (libdm, "dm_cdirip");
-      dm_cdi2nero = get_symbol (libdm, "dm_cdi2nero");
+      dm_nrgrip = get_symbol (libdm, "dm_nrgrip");
+      dm_rip = get_symbol (libdm, "dm_rip");
 
       dm_disc_read = get_symbol (libdm, "dm_disc_read");
       dm_disc_write = get_symbol (libdm, "dm_disc_write");
@@ -1053,7 +1059,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "db          ROM database statistics (# of entries)\n"
     "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
 #ifdef  DB
-#if 0 // NoisyB: this is a T O D O! (dbjh)
+#if 0
     "TODO: " OPTION_LONG_S "dat     import DAT files into ROM database; " OPTION_LONG_S "rom=DAT_FILE\n"
     "                  parses all Romcenter, Goodxxxx, etc. DAT files and updates\n"
     "                  the database cache in %scache\n"
@@ -1113,10 +1119,11 @@ ucon64_usage (int argc, char *argv[])
 //    genesis_usage[0],
     nes_usage[0], snes_usage[0]);
 
-  if (ucon64.discmage_enabled)
     printf (
       "\n"
-      "All DISC-based consoles (using libdiscmage)\n"
+      "All DISC-based consoles (using libdiscmage)\n");
+  if (ucon64.discmage_enabled)
+    printf (
       "  " OPTION_LONG_S "mksheet     generate TOC and CUE sheet files for CD_IMAGE; " OPTION_LONG_S "rom=CD_IMAGE\n"
 //      "                  " OPTION_LONG_S "rom could also be an existing TOC or CUE file\n"
       "TODO: " OPTION_LONG_S "cdirip=Nrip/dump track N from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
@@ -1132,6 +1139,8 @@ ucon64_usage (int argc, char *argv[])
       "                  2352 (default), or custom values\n"
 #endif
       "\n");
+  else
+    printf ("                %s not found; support disabled\n\n", ucon64.discmage_path);
 
   optind = 0;
   single = 0;

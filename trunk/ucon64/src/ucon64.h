@@ -34,6 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_defines.h"
 #include "misc.h"
 
+
 typedef struct
 {
   const char *option_s;                         // "chk", ...
@@ -48,6 +49,7 @@ typedef struct
 #ifdef  DISCMAGE
 #include "ucon64_dm.h"
 #endif
+
 
 /*
   This struct contains very specific informations only <console>_init() can
@@ -135,7 +137,7 @@ typedef struct
 #ifdef  AMIGA
   char parport_dev[80];                         // parallel port device (e.g. "PAR:")
 #endif
-  unsigned int parport;                         // parallel port address
+  int parport;                                  // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
 
 #ifdef  ANSI_COLOR
@@ -168,7 +170,7 @@ typedef struct
   int interleaved;                              // ROM is interleaved (swapped)
   int id;                                       // generate unique name (currently
                                                 //  only used by snes_gd3())
-  // the following values are for the SNES, NES and the Genesis
+  // the following values are for SNES, NES and Genesis
   int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
   int snes_hirom;                               // SNES ROM is HiROM
   int part_size;                                // SNES/Genesis split part size

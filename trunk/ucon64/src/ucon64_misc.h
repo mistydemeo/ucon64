@@ -203,7 +203,7 @@ extern int ucon64_testpad (const char *filename); // test if ROM is padded
 
 extern int ucon64_testsplit (const char *filename); // test if ROM is split
 
-extern unsigned int ucon64_parport_init (unsigned int parport);
+extern int ucon64_parport_init (int parport);
 
 extern int ucon64_configfile (void);
 

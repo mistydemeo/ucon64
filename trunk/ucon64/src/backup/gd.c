@@ -54,7 +54,6 @@ const st_usage_t gd_usage[] =
 #define BUFFERSIZE      8192
 #define GD_OK 0
 #define GD_ERROR 1
-#define DEBUG
 
 static void init_io (unsigned int port);
 static void deinit_io (void);

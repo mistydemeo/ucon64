@@ -39,6 +39,9 @@ const char *psx_usage[] =
     "Playstation (One)/Playstation 2 (CD only)",
     "1994/(2000) Sony http://www.playstation.com",
     "  " OPTION_LONG_S "psx         force recognition; NEEDED\n"
+    "                  " OPTION_LONG_S "xcdrw combined with MODE2_RAW (default) will most likely\n"
+    "                  do the job\n"
+                      
       ,
       NULL
 };

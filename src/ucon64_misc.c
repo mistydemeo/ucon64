@@ -1407,6 +1407,7 @@ ucon64_configfile (void)
                  "emulate_cdi=\n"
                  "emulate_3do=\n"
                  "emulate_gp32=\n"
+#if 0
 #ifndef __MSDOS__
                  "#\n"
                  "# LHA support\n"
@@ -1428,6 +1429,7 @@ ucon64_configfile (void)
                  "# ACE support\n"
                  "#\n"
                  "ace_extract=unace e \"%%s\"\n"
+#endif
 #endif
 #ifdef  BACKUP_CD
                  "#\n"

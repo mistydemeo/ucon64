@@ -40,6 +40,46 @@ long x = 0;
 int single_file=0;
 DIR *dp;
 
+/*
+.flcrc
+flc.cfg
+
+
+#
+# flc config
+#
+# LHA
+#
+lha_test=lha t
+lha_extract=lha efi 
+#lha_extract=lha e 
+#
+# LZH
+#
+lzh_test=lha t
+lzh_extract=lha efi
+#lzh_extract=lha e
+#
+# ZIP
+#
+zip_test=unzip -t
+zip_extract=unzip -xojC
+#zip_extract=unzip -xoj
+#
+# TXT/NFO/FAQ
+#
+txt_extract=txtextract
+nfo_extract=txtextract
+faq_extract=txtextract
+#
+# FILE_ID.DIZ names/synonyms
+#
+file_id_diz=*_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]
+
+
+
+*/
+
 if (
     argcmp(argc, argv, "-h") ||
     argcmp(argc, argv, "-help") ||

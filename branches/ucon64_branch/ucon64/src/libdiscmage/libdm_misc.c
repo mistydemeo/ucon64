@@ -347,78 +347,8 @@ callibrate (const char *s, int len, FILE *fh)
 
 const dm_track_t *
 dm_track_init (dm_track_t *track, FILE *fh)
-#if 0
 {
-  int x = 0, identified = 0;
-  const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff,
-                            (const char) 0xff, (const char) 0xff, 0};
-  uint8_t value8 = 0;
-  char value_s[0xff];
-  int pos = ftell (fh);
-
-  if (callibrate (sync_data, 12, fh))
-    {
-      fread (&value_s, 16, 1, fh);
-      value8 = (uint8_t) value_s[15];
-
-      for (x = 0; track_probe[x].sector_size; x++)
-        if (track_probe[x].mode == value8)
-          {
-            // check if we suggest the correct track size
-            fseek (fh, track_probe[x].sector_size, SEEK_SET);
-            fread (value_s, 1, 16, fh);
-
-//#ifdef  DEBUG
-            mem_hexdump (value_s, 16, ftell (fh));
-//#endif
-            if (memcmp (sync_data, value_s, 12) != 0) // correct mode but wrong sector_size
-              continue;
-
-            // search for valid PVD in sector 16 of source image
-
-            fseek (fh, (track_probe[x].sector_size * 16) +
-                   track_probe[x].seek_header,
-                   SEEK_CUR);
-
-            fread (&value_s, 8, 1, fh);
-            if (!memcmp (pvd_magic, value_s, 8))
-              {
-                printf ("%d %d\n\n", track_probe[x].mode, track_probe[x].sector_size);
-                identified = 1;
-                break;
-              }
-          }
-     }
-
-  // no sync_data found? probably MODE1/2048
-  if (!identified)
-    {
-      // search for valid PVD in sector 16 of source image
-      fseek (fh, pos, SEEK_SET);
-      if (callibrate (pvd_magic, 8, fh))
-        identified = 1;
-    }
-
-  if (!identified)
-    {
-      fprintf (stderr, "ERROR: could not find iso header of current track\n");
-      return NULL;
-    }
-
-  track->sector_size = track_probe[x].sector_size;
-  track->mode = track_probe[x].mode;
-  track->seek_header = track_probe[x].seek_header;
-  track->seek_ecc = track_probe[x].seek_ecc;
-  track->iso_header_start = (track_probe[x].sector_size * 16) + track_probe[x].seek_header;
-  track->desc = dm_get_track_desc (track->mode, track->sector_size, TRUE);
-
-  return track;
-}
-#else
-{
+  int pos = 0; 
   int x = 0, identified = 0;
   const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
                             (const char) 0xff, (const char) 0xff,
@@ -426,9 +356,10 @@ dm_track_init (dm_track_t *track, FILE *fh)
                             (const char) 0xff, (const char) 0xff,
                             (const char) 0xff, (const char) 0xff, 0};
   char value_s[32];
-
+  uint8_t value8 = 0;
+  
   fseek (fh, track->track_start, SEEK_SET);
-#if 0
+#if 1
   fread (value_s, 1, 16, fh);
 #else
 // callibrate
@@ -445,21 +376,25 @@ dm_track_init (dm_track_t *track, FILE *fh)
 #endif
 
   if (!memcmp (sync_data, value_s, 12))
-    for (x = 0; track_probe[x].sector_size; x++)
-      if (track_probe[x].mode == value_s[15])
-        {
-          // search for valid PVD in sector 16 of source image
-          fseek (fh, (track_probe[x].sector_size * 16) +
-                 track_probe[x].seek_header + track->track_start, SEEK_SET);
-          fread (value_s, 1, 16, fh);
-
-          if (!memcmp (pvd_magic, &value_s, 8))
-            {
-              identified = 1;
-              break;
-            }
-        }
-
+    {
+      value8 = (uint8_t) value_s[15];
+    
+      for (x = 0; track_probe[x].sector_size; x++)
+        if (track_probe[x].mode == value8)
+          {
+            // search for valid PVD in sector 16 of source image
+            pos = (track_probe[x].sector_size * 16) +
+                  track_probe[x].seek_header + track->track_start;
+            fseek (fh, pos, SEEK_SET);
+            fread (value_s, 1, 16, fh);
+            if (!memcmp (pvd_magic, &value_s, 8))
+              {
+                identified = 1;
+                break;
+              }
+          }
+    }
+    
   // no sync_data found? probably MODE1/2048
   if (!identified)
     {
@@ -490,7 +425,6 @@ dm_track_init (dm_track_t *track, FILE *fh)
 
   return track;
 }
-#endif
 
 
 dm_image_t *
@@ -672,7 +606,6 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
   char *p = NULL;
   FILE *fh = NULL, *fh2 = NULL;
 
-
 // set dest. name
   strcpy (buf, basename (image->fname));
   p = (char *) get_suffix (buf);
@@ -699,22 +632,6 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
         break;
     }
 
-// open source and check
-  if (!(fh = fopen (image->fname, "rb")))
-    return -1;
-
-  fseek (fh, track->track_start, SEEK_SET); // start of track
-
-  if (track->pregap_len != 150) // 0x96
-    fprintf (stderr, "WARNING: track seems to have a non-standard pregap (%d Bytes)\n",
-             track->pregap_len);
-  fseek (fh, track->pregap_len * track->sector_size, SEEK_CUR); // always? skip pregap
-#if 0
-  if (image->pregap && track->mode == 0 && remaining_tracks > 1) // quick hack to save next track pregap (audio tracks only)
-    track->track_len += pregap_length;       // if this isn't last track in current session
-// does this mean i shouldn't skip pregrap if it's a audio track?
-#endif
-
   if (track->total_len < track->track_len + track->pregap_len)
     {
       fprintf (stderr, "SKIPPING: track seems truncated\n");
@@ -722,11 +639,28 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
       return -1;
     }
 
+#if 0
+// this is not a problem
   if (flags & DM_2048 && track->mode == 1 && track->sector_size == 2048)
     {
       fprintf (stderr, dm_msg[ALREADY_2048]);
       return -1;
     }
+#endif
+
+  if (track->pregap_len != 150) // 0x96
+    fprintf (stderr, "WARNING: track seems to have a non-standard pregap (%d Bytes)\n",
+             track->pregap_len);
+ 
+#if 0
+  if (image->pregap && track->mode == 0 && remaining_tracks > 1) // quick hack to save next track pregap (audio tracks only)
+    track->track_len += pregap_length;       // if this isn't last track in current session
+// does this mean i shouldn't skip pregrap if it's a audio track?
+#endif
+
+// open source and check
+  if (!(fh = fopen (image->fname, "rb")))
+    return -1;
 
 // open dest.
   if (!(fh2 = fopen (buf2, "wb")))
@@ -738,14 +672,38 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
   if (!track->mode && flags & DM_WAV)
     writewavheader (fh2, track->track_len);
 
+  fseek (fh, track->track_start, SEEK_SET); // start of track
+  // skip pregap (always?)
+  fseek (fh, track->pregap_len * track->sector_size, SEEK_CUR);
+
   for (x = 0; x < track->track_len; x++)
     {
-      fread (&buf, track->sector_size, 1, fh);
+      memset (buf, 0, sizeof (buf));
+      fread (&buf, 1, track->sector_size, fh);
 
       if (flags & DM_2048)
-        result = fwrite (&buf[track->seek_header], 2048, 1, fh2);
+        result = fwrite (&buf[track->seek_header], 1, 2048, fh2);
+      else if (flags & DM_CDMAGE) // cdmage compat. flag
+        {
+          const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff, 0};
+//          uint32_t value_32 = 0;
+
+          memset (&buf2, 0, sizeof (buf2));
+          result = 0;
+          result += fwrite (&sync_data, 1, 12, fh2);
+          result += fwrite (&buf2, 1, 3, fh2); //TODO: MSF
+          if (fputc (track->mode, fh2))
+            result++;
+          result += fwrite (&buf2, 1, track->seek_header, fh2); // padding
+          result += fwrite (&buf, 1, track->sector_size, fh2);
+          result += fwrite (&buf2, 1, track->seek_ecc, fh2); // padding
+        }
       else
-        result = fwrite (&buf, track->sector_size, 1, fh2);
+        result = fwrite (&buf, 1, track->sector_size, fh2);
 
       if (!result)
         {

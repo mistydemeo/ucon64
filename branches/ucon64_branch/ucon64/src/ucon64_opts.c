@@ -249,6 +249,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_ISOFIX:
     case UCON64_XCDRW:
     case UCON64_DISC:
+    case UCON64_CDMAGE:
       ucon64.force_disc = 1;
       break;
 
@@ -984,6 +985,7 @@ ucon64_options (int c, const char *optarg)
     case UCON64_BIN2ISO:
     case UCON64_ISOFIX:
     case UCON64_RIP:
+    case UCON64_CDMAGE:
       if (ucon64.discmage_enabled)
         {
           uint32_t flags = 0;
@@ -997,6 +999,10 @@ ucon64_options (int c, const char *optarg)
               case UCON64_ISOFIX:
                 flags |= DM_FIX; // DM_RDONLY|DM_FIX read sectors and fix (if needed/possbile)
                 break;
+
+              case UCON64_CDMAGE:
+                flags |= DM_CDMAGE;
+                break;
             }
 
           ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
@@ -1005,7 +1011,10 @@ ucon64_options (int c, const char *optarg)
               int track = strtol (optarg, NULL, 10);
               if (track < 1)
                 track = 1;
+              track--; // decrement for libdm_rip()
 
+              printf ("Writing track: %d\n\n", track + 1);
+              
               libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
               libdm_rip (ucon64.image, track, flags);
               printf ("\n");

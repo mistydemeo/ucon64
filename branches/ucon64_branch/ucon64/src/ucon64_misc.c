@@ -505,6 +505,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_MKCUE, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
   {UCON64_RIP, UCON64_UNKNOWN, libdm_usage,    WF_DEFAULT},
   {UCON64_XCDRW, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
+  {UCON64_CDMAGE, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
 #endif
 
 #ifdef  GUI

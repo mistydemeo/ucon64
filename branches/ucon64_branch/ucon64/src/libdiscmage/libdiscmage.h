@@ -197,6 +197,7 @@ TODO: DM_FIX     (isofix) takes an ISO image with PVD pointing
 #define DM_WAV (2)
 #define DM_2048 (4)
 #define DM_FIX (8)
+#define DM_CDMAGE (16)
 extern int dm_rip (const dm_image_t *image, int track_num, uint32_t flags);
 
 #ifdef  __cplusplus

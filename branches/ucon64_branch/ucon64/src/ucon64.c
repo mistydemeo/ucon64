@@ -114,6 +114,7 @@ const struct option options[] = {
     {"bot", 1, 0, UCON64_BOT},
     {"bs", 0, 0, UCON64_BS},
     {"c", 1, 0, UCON64_C},
+    {"cdmage", 1, 0, UCON64_CDMAGE},
 //    {"cd32", 0, 0, UCON64_CD32},
 //    {"cdi", 0, 0, UCON64_CDI},
     {"chk", 0, 0, UCON64_CHK},
@@ -1122,7 +1123,7 @@ ucon64_nfo (void)
   if (ucon64.rominfo && ucon64.console != UCON64_UNKNOWN && !ucon64.force_disc)
     ucon64_rom_nfo (ucon64.rominfo);
   
-#ifdef  DISMCAGE
+#ifdef  DISCMAGE
   if (ucon64.discmage_enabled)
     if (ucon64.image)
       {

@@ -22,7 +22,7 @@
 #define FLC_H
 
 #include <limits.h>
-#include "flc_misc.h"
+#include "misc.h"
 
 #define flc_NAME 0
 #define flc_FILE 1
@@ -39,6 +39,7 @@ struct flc_
 
   int kb;
   int files;
+  int sort;
   char path[4096];
 };
 

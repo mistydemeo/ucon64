@@ -34,7 +34,6 @@ struct dirent *ep;
 struct stat puffer;
 long x = 0;
 DIR *dp;
-int sort=0;
 
 if (
     argcmp(argc, argv, "-h") ||
@@ -50,7 +49,7 @@ if(
   argcmp(argc,argv,"-a") ||
   argcmp(argc,argv,"-b") ||
   argcmp(argc,argv,"-fr")
-)sort=1;
+)flc.sort=1;
 
 flc.argc=argc;
 for( x = 0 ; x < argc ; x++ )flc.argv[x]=argv[x];
@@ -73,7 +72,7 @@ if(!(dp=opendir(flc.path)))
 if(argcmp(argc,argv,"-h"))
   printf("<html><head><title></title></head><body><pre><tt>");
 
-if(sort)
+if(flc.sort)
 {
 /*
     find out how many regular files are in the current dir
@@ -110,7 +109,7 @@ while((ep=readdir(dp))!=NULL)
 
   extract(&flc,file);
 
-  if(!sort)
+  if(!flc.sort)
   {
     output(&flc,file);
     continue;
@@ -122,7 +121,7 @@ while((ep=readdir(dp))!=NULL)
 (void)closedir(dp);
 file=file0;
 
-if(sort)
+if(flc.sort)
 {
 //  sort(&flc,file);
 for( x = 0 ; x < flc.files ; x++ )

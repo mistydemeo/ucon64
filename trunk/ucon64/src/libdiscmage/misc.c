@@ -1,7 +1,7 @@
 /*
 misc.c - miscellaneous functions
 
-written by 1999 - 2002 NoisyB (noisyb@gmx.net)
+written by 1999 - 2004 NoisyB (noisyb@gmx.net)
            2001 - 2004 dbjh
            2002 - 2003 Jan-Erik Karlsson (Amiga)
 
@@ -697,10 +697,32 @@ mem_swap_w (void *buffer, uint32_t n)
 }
 
 
+#ifdef  DEBUG
+static void
+mem_hexdump_code (const void *buffer, uint32_t n, int virtual_start)
+// hexdump something into C code (for development)
+{
+  uint32_t pos;
+  const unsigned char *p = (const unsigned char *) buffer;
+
+  for (pos = 0; pos < n; pos++, p++)
+    {
+      printf ("0x%02x, ", *p);
+
+      if (!((pos + 1) & 7))
+        fprintf (stdout, "// 0x%x (%d)\n", pos + virtual_start + 1, pos + virtual_start + 1);
+    }
+}
+#endif
+
+
 void
 mem_hexdump (const void *buffer, uint32_t n, int virtual_start)
 // hexdump something
 {
+#ifdef  DEBUG
+  mem_hexdump_code (buffer, n, virtual_start);
+#else
   uint32_t pos;
   char buf[17];
   const unsigned char *p = (const unsigned char *) buffer;
@@ -721,6 +743,7 @@ mem_hexdump (const void *buffer, uint32_t n, int virtual_start)
       *(buf + (pos & 15)) = 0;
       puts (buf);
     }
+#endif
 }
 
 

@@ -5129,11 +5129,7 @@ read_chunk (unsigned long id, unsigned char *rom_buffer, int cont)
         (int) sizeof (st_unif_chunk_t) + chunk_header.length);
       exit (1);
     }
-#ifdef  WORDS_BIGENDIAN
-  unif_chunk->id = bswap_32 (chunk_header.id);
-#else
-  unif_chunk->id = chunk_header.id;
-#endif
+  unif_chunk->id = me2le_32 (chunk_header.id);
   unif_chunk->length = chunk_header.length;
   unif_chunk->data = &((unsigned char *) unif_chunk)[sizeof (st_unif_chunk_t)];
 
@@ -5268,11 +5264,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   // write UNIF file
   memset (&unif_header, 0, UNIF_HEADER_LEN);
   memcpy (&unif_header.signature, UNIF_SIG_S, 4);
-#ifdef  WORDS_BIGENDIAN
-  unif_header.revision = bswap_32 (UNIF_REVISION);
-#else
-  unif_header.revision = UNIF_REVISION;
-#endif
+  unif_header.revision = me2le_32 (UNIF_REVISION);
   fwrite (&unif_header, 1, UNIF_HEADER_LEN, destfile);
 
   unif_chunk.id = MAPR_ID;
@@ -5446,20 +5438,12 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
   st_unif_chunk_t *unif_chunk1, unif_chunk2, *unif_chunk3;
   unsigned char b;
 
-#ifdef  WORDS_BIGENDIAN
-  x = bswap_32 (unif_header.revision);
-#else
-  x = unif_header.revision;
-#endif
+  x = me2le_32 (unif_header.revision);
   if (x > UNIF_REVISION)
     printf ("WARNING: The UNIF file is of a revision later than %d (%d), but uCON64\n"
             "         doesn't support that revision yet. Some chunks may be discarded.\n",
             UNIF_REVISION, x);
-#ifdef  WORDS_BIGENDIAN
-  unif_header.revision = bswap_32 (UNIF_REVISION);
-#else
-  unif_header.revision = UNIF_REVISION;
-#endif
+  unif_header.revision = me2le_32 (UNIF_REVISION);
   memcpy (&unif_header.signature, UNIF_SIG_S, 4);
   fwrite (&unif_header, 1, UNIF_HEADER_LEN, destfile);
 
@@ -6041,11 +6025,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
   int n, x, prg_size = 0, chr_size = 0;
   st_unif_chunk_t *unif_chunk;
 
-#ifdef  WORDS_BIGENDIAN
-  x = bswap_32 (unif_header.revision);
-#else
-  x = unif_header.revision;
-#endif
+  x = me2le_32 (unif_header.revision);
   if (x > UNIF_REVISION)
     printf ("WARNING: The UNIF file is of a revision later than %d (%d), but uCON64\n"
             "         doesn't support that revision yet. Some chunks may be discarded.\n",
@@ -7002,11 +6982,7 @@ nes_init (st_rominfo_t *rominfo)
       q_fread (rom_buffer, UNIF_HEADER_LEN, rom_size, ucon64.rom);
       ucon64.split = 0;                         // UNIF files are never split
 
-#ifdef  WORDS_BIGENDIAN
-      x = bswap_32 (unif_header.revision);      // Don't modify header data
-#else
-      x = unif_header.revision;
-#endif
+      x = me2le_32 (unif_header.revision);      // Don't modify header data
       sprintf (buf, "UNIF revision: %d\n", x);
       strcpy (rominfo->misc, buf);
 
@@ -7099,11 +7075,7 @@ nes_init (st_rominfo_t *rominfo)
                         "  Agent: %s\n",
                         info->dumper_name,
                         info->day, info->month,
-#ifdef  WORDS_BIGENDIAN
-                        bswap_16 (info->year),
-#else
-                        info->year,
-#endif
+                        le2me_16 (info->year),
                         info->dumper_agent);
           strcat (rominfo->misc, buf);
         }

@@ -3106,11 +3106,7 @@ snes_init (st_rominfo_t *rominfo)
             come from cartridges (with a constant date).
             Why 42? It's the answer to life, the universe and everything :-)
           */
-#ifdef  WORDS_BIGENDIAN
-          *bs_date_ptr = 0x4200;
-#else
-          *bs_date_ptr = 0x0042;
-#endif
+          *bs_date_ptr = me2le_16 (0x0042);
           ucon64.crc32 = crc32 (0, rom_buffer, size);
           *bs_date_ptr = bs_date;
         }

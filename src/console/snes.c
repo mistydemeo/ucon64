@@ -3169,9 +3169,9 @@ handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
           "Super Scope / Gamepad", "Konami's Justifier", "Multitap",
           "Mouse / Super Scope / Gamepad", "Unknown"
         };
-      int x = OFFSET (header, 0x1ed), ctrl1 = x >> 4, ctrl2 = x & 0xf;
+      int x = header[0x1ed], ctrl1 = x >> 4, ctrl2 = x & 0xf;
 
-      memcpy (name, &OFFSET (header, 0x1d1), SNES_NAME_LEN);
+      memcpy (name, header + 0x1d1, SNES_NAME_LEN);
       name[SNES_NAME_LEN] = 0;
       for (x = 0; x < SNES_NAME_LEN; x++)
         if (!isprint ((int) name[x]))
@@ -3188,12 +3188,12 @@ handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
                       "  Port 1 controller type: %s\n"
                       "  Port 2 controller type: %s\n"
                       "  Header version: %.1f",
-               NULL_TO_UNKNOWN_S (snes_country[MIN (OFFSET (header, 0x1d0) & 0xf, SNES_COUNTRY_MAX - 1)]),
+               NULL_TO_UNKNOWN_S (snes_country[MIN (header[0x1d0] & 0xf, SNES_COUNTRY_MAX - 1)]),
                name,
-               OFFSET (header, 0x1e6) + (OFFSET (header, 0x1e7) << 8),
+               header[0x1e6] + (header[0x1e7] << 8),
                str_list[ctrl1],
                str_list[ctrl2],
-               OFFSET (header, 0x1ec) / 10.f);
+               header[0x1ec] / 10.f);
       strcat (rominfo->misc, buf);
 
       nsrt_header = 1;

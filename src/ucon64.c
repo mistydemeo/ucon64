@@ -51,8 +51,6 @@ write programs in C
 #include "vectrex/vectrex.h"
 #include "wswan/wswan.h"
 #include "intelli/intelli.h"
-
-#ifdef  CD
 #include "cd32/cd32.h"
 #include "ps2/ps2.h"
 #include "saturn/saturn.h"
@@ -67,7 +65,8 @@ write programs in C
 #include "patch/xps.h"
 #include "patch/pal4u.h"
 
-#include "backup/cdrw.h"
+#ifdef CD 
+  #include "backup/cdrw.h"
 #endif
 
 
@@ -275,7 +274,6 @@ main (int argc, char *argv[])
                  "emulate_vec=\n"
                  "emulate_vboy=\n"
                  "emulate_swan=\n" "emulate_coleco=\n" "emulate_intelli=\n"
-#ifdef CD
                  "emulate_psx=pcsx\n"
                  "emulate_ps2=\n"
                  "emulate_sat=\n"
@@ -283,6 +281,7 @@ main (int argc, char *argv[])
                  "emulate_cd32=\n"
                  "emulate_cdi=\n"
                  "emulate_3do=\n"
+#ifdef CD
                  "#\n"
                  "# uCON64 can operate as frontend for CD burning software to make backups\n"
                  "# for CD-based consoles \n"
@@ -520,8 +519,6 @@ main (int argc, char *argv[])
       return (0);
     }
 
-#ifdef  CD
-
   if (argcmp (argc, argv, "-ppf"))
     {
       ucon64_argv[0] = "ucon64";
@@ -563,8 +560,6 @@ main (int argc, char *argv[])
       addppfid (argc, argv);
       return (0);
     }
-
-#endif
 
   if (argcmp (argc, argv, "-ls") || argcmp (argc, argv, "-lsv"))
 //    || argcmp (argc, argv, "-rrom") || argcmp(argc,argv, "-rr83")
@@ -639,7 +634,6 @@ main (int argc, char *argv[])
     (argcmp (argc, argv, "-snes")) ? ucon64_SNES :
     (argcmp (argc, argv, "-gba")) ? ucon64_GBA :
     (argcmp (argc, argv, "-gb")) ? ucon64_GB :
-#ifdef	CD
     (argcmp (argc, argv, "-sat")) ? ucon64_SATURN :
     (argcmp (argc, argv, "-psx")) ? ucon64_PSX :
     (argcmp (argc, argv, "-ps2")) ? ucon64_PS2 :
@@ -649,8 +643,7 @@ main (int argc, char *argv[])
     (argcmp (argc, argv, "-dc")) ? ucon64_DC :
     (argcmp (argc, argv, "-xbox")) ? ucon64_XBOX :
     (argcmp (argc, argv, "-gc")) ? ucon64_GAMECUBE :
-    (argcmp (argc, argv, "-ip")) ? ucon64_DC :
-#endif
+//    (argcmp (argc, argv, "-ip")) ? ucon64_DC :
     (argcmp (argc, argv, "-col")) ? ucon64_SNES :
     (argcmp (argc, argv, "-n2gb")) ? ucon64_GB :
     (argcmp (argc, argv, "-sam")) ? ucon64_NEOGEO : ucon64_UNKNOWN;
@@ -991,59 +984,70 @@ main (int argc, char *argv[])
     case ucon64_INTELLI:
       break;
 
-#ifdef CD
     case ucon64_DC:
       return ((argcmp (argc, argv, "-ip")) ?
               /* ip0000(char *dev,char *name) */ 0 :
               (argcmp (argc, argv, "-iso")) ? /* cdi2iso(rom.rom) */ :
-/*  backup */
+#ifdef CD
               (argcmp (argc, argv, "-mktoc")) ? dc_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? dc_xcdrw (&rom) : 0);
+              (argcmp (argc, argv, "-xcdrw")) ? dc_xcdrw (&rom) : 
+#endif             
+              0);
       break;
 
     case ucon64_PSX:
       return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-/*  backup */
+#ifdef CD
               (argcmp (argc, argv, "-mktoc")) ? psx_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? psx_xcdrw (&rom) : 0);
+              (argcmp (argc, argv, "-xcdrw")) ? psx_xcdrw (&rom) : 
+#endif
+              0);
       break;
 
     case ucon64_PS2:
       return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-/*  backup */
+#ifdef CD
               (argcmp (argc, argv, "-mktoc")) ? ps2_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? ps2_xcdrw (&rom) : 0);
+              (argcmp (argc, argv, "-xcdrw")) ? ps2_xcdrw (&rom) : 
+#endif
+              0);
       break;
 
     case ucon64_SATURN:
       return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-/*  backup */
+#ifdef CD
               (argcmp (argc, argv, "-mktoc")) ? saturn_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? saturn_xcdrw (&rom) : 0);
+              (argcmp (argc, argv, "-xcdrw")) ? saturn_xcdrw (&rom) : 
+#endif
+              0);
       break;
 
     case ucon64_CDI:
       return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-/*  backup */
+#ifdef CD
               (argcmp (argc, argv, "-mktoc")) ? cdi_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? cdi_xcdrw (&rom) : 0);
+              (argcmp (argc, argv, "-xcdrw")) ? cdi_xcdrw (&rom) : 
+#endif
+              0);
       break;
 
     case ucon64_CD32:
       return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-/*  backup */
+#ifdef CD
               (argcmp (argc, argv, "-mktoc")) ? cd32_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? cd32_xcdrw (&rom) : 0);
+              (argcmp (argc, argv, "-xcdrw")) ? cd32_xcdrw (&rom) : 
+#endif
+              0);
       break;
 
     case ucon64_REAL3DO:
       return ((argcmp (argc, argv, "-iso")) ? raw2iso (rom.rom) :
-/*  backup */
+#ifdef CD
               (argcmp (argc, argv, "-mktoc")) ? real3do_mktoc (&rom) :
-              (argcmp (argc, argv, "-xcdrw")) ? real3do_xcdrw (&rom) : 0);
+              (argcmp (argc, argv, "-xcdrw")) ? real3do_xcdrw (&rom) : 
+#endif
+              0);
       break;
-#endif /* CD */
-
 
     case ucon64_UNKNOWN:
     default:
@@ -1162,7 +1166,6 @@ ucon64_init (struct ucon64_ *rom)
       // now check if it's one of the CD based consoles
       switch (rom->console)
         {
-#ifdef	CD
         case ucon64_PS2:
           ps2_init (rom);
           break;
@@ -1187,7 +1190,6 @@ ucon64_init (struct ucon64_ *rom)
         case ucon64_XBOX:
           xbox_init (rom);
           break;
-#endif
         default:
           if (other_console)
             rom->console = ucon64_UNKNOWN;
@@ -1244,7 +1246,6 @@ ucon64_init (struct ucon64_ *rom)
   rom->bytes = quickftell (rom->rom);
   rom->mbit = (rom->bytes - rom->buheader_len) / (float) MBIT;
 
-#ifdef	CD
   if (rom->console == ucon64_PS2 ||
       rom->console == ucon64_PSX ||
       rom->console == ucon64_DC ||
@@ -1270,7 +1271,6 @@ ucon64_init (struct ucon64_ *rom)
 */
       return (0);
     }
-#endif
 
   rom->padded = filetestpad (rom->rom);
   rom->intro = ((rom->bytes - rom->buheader_len) > MBIT) ?
@@ -1329,11 +1329,11 @@ ucon64_usage (int argc, char *argv[])
   bsl_usage (argc, argv);
   ips_usage (argc, argv);
   aps_usage (argc, argv);
-#ifdef	CD
+
   pal4u_usage (argc, argv);
   ppf_usage (argc, argv);
   xps_usage (argc, argv);
-#endif
+
 
   printf ("\n");
 
@@ -1375,7 +1375,6 @@ ucon64_usage (int argc, char *argv[])
     vectrex_usage (argc, argv);
   else if (argcmp (argc, argv, "-intelli"))
     intelli_usage (argc, argv);
-#ifdef	CD
   else if (argcmp (argc, argv, "-dc"))
     dc_usage (argc, argv);
   else if (argcmp (argc, argv, "-psx"))
@@ -1393,10 +1392,8 @@ ucon64_usage (int argc, char *argv[])
 //  else if(argcmp(argc,argv,"-gc"))gamecube_usage(argc,argv);
   else if (argcmp (argc, argv, "-xbox"))
     xbox_usage (argc, argv);
-#endif
   else
     {
-#ifdef CD
 //  gamecube_usage(argc,argv);
       dc_usage (argc, argv);
       psx_usage (argc, argv);
@@ -1422,10 +1419,11 @@ ucon64_usage (int argc, char *argv[])
       ppf_usage (argc, argv);
       xps_usage (argc, argv);
 
+#ifdef CD
       cdrw_usage (argc, argv);
+#endif
 
       printf ("\n");
-#endif
 
       gbadvance_usage (argc, argv);
       nintendo64_usage (argc, argv);

@@ -693,9 +693,9 @@ smd_usage (int argc, char *argv[])
     printf ("%s\n", smd_TITLE);
 
   printf
-    ("TEST:  -xsmd    send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT\n"
+    ("  -xsmd         send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT\n"
      "                receives automatically when $ROM does not exist\n"
-     "TEST:  -xsmds   send/receive SRAM to/from Super Magic Drive/SMD; $FILE=PORT\n"
+     "  -xsmds        send/receive SRAM to/from Super Magic Drive/SMD; $FILE=PORT\n"
      "                receives automatically when $ROM(=SRAM) does not exist\n");
 
   if (argcmp (argc, argv, "-help"))

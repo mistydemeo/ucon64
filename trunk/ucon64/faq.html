@@ -1428,12 +1428,15 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <br>
    Sega Master System, Game Gear and Genesis<br>
    Interleaved Sega Master System, Game Gear and Genesis dumps are produced by
-   the Super Magic Drive. For each block of 16384 bytes of the ROM all bytes at
-   even offsets are stored in the upper half of the dumped block. The bytes at
-   odd offsets are stored in the lower half. So, each dumped block first
-   contains 8192 "odd bytes" then 8192 "even bytes".<br>
-   Can be interleaved with uCON64 using the option -smd.<br>
-   Can be deinterleaved with uCON64 using the option -mgd.<br>
+   the Super Magic Drive and the Multi Game Doctor 2.<br>
+   For the SMD: for each block of 16384 bytes of the ROM all bytes at even
+   offsets are stored in the upper half of the dumped block. The bytes at odd
+   offsets are stored in the lower half. So, each dumped block first contains
+   8192 "odd bytes" then 8192 "even bytes".<br>
+   For the MGD2: all odd bytes of the file are stored in the first half of the
+   file, all even bytes in the second half.<br>
+   Can be interleaved with uCON64 using the option -smd or -mgd.<br>
+   Can be deinterleaved with uCON64 using the option -bin.<br>
 <br>
    SNES<br>
    Interleaved SNES dumps are produced by the Game Doctor and the Super UFO

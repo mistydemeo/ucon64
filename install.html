@@ -1,6 +1,6 @@
 <html><head><title>INSTALL</title></head><body bgcolor="#c0c0c0"><tt><pre>
 Q: How do I compile uCON64?
-A: you can optionally open the Makefile in an editor and change the defines
+A: You can optionally open the Makefile in an editor and change the defines
 
    DB     enables/disables the internal ROM database
           disabled with an # in front uCON64 will be only ~250kB in size!
@@ -8,15 +8,31 @@ A: you can optionally open the Makefile in an editor and change the defines
    BACKUP enables/disables support for backup units
           disabled with an # in front
 
-   afterwards enter the following lines
+   Afterwards enter the following lines
 
    make -f Makefile.&#60;your OS&#62; clean
    make -f Makefile.&#60;your OS&#62;
    make -f Makefile.&#60;your OS&#62; install
 
+   Under Unix (Linux) the last command will ask for root's password, because
+   uCON64 needs to be setuid root for parallel port access.
+   Under BeOS the last command will open a dialog window. Just follow the
+   instructions.
+
 Q: How do I install uCON64?
-A: run install[_&#60;your OS&#62;].sh and edit $HOME/.ucon64rc or ucon64.cfg (DOS)
+A: You already did if you followed the directions in the previous answer (you
+   downloaded the source package).
+   If you don't use WinDOS run install_&#60;your OS&#62;.sh and edit
+   $HOME/.ucon64rc.
+   If you use WinDOS you might want to copy ucon64.exe to a directory in your
+   PATH and maybe edit ucon64.cfg.
 
    BeOS users will also need Caz's driver inside ioport.zip or available at
    http://www.infernal.currantbun.com
+
+Q: Sometimes my terminal seems to be locked after I do
+   ucon64 -xswc "Super Metroid (JU).swc" | more
+A: You are right, it seems to be locked, but the only thing that happened is
+   that the character echoing of the terminal is disabled. For the rest: just
+   don't do that ;-)
 </pre></tt></body></html>

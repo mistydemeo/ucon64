@@ -5772,6 +5772,7 @@ nes_unif (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".UNF");
   strcpy (src_name, ucon64.rom);
+  ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
@@ -6166,6 +6167,7 @@ nes_ines (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".NES");
   strcpy (src_name, ucon64.rom);
+  ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
   if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
@@ -6269,6 +6271,7 @@ nes_ineshd (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".HDR");
+  ucon64_output_fname (dest_name, 0);
   ucon64_fbackup (NULL, dest_name);
   q_fcpy (ucon64.rom, rominfo->buheader_start, 16, dest_name, "wb");
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -6293,6 +6296,7 @@ nes_dint (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".NES");
   strcpy (src_name, ucon64.rom);
+  ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
@@ -6408,13 +6412,16 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".NES");
   if (write_file)
-    ucon64_fbackup (NULL, dest_name);
+    {
+      ucon64_output_fname (dest_name, 0);
+      ucon64_fbackup (NULL, dest_name);
+    }
 
   // build iNES header
   memset (&ines_header, 0, INES_HEADER_LEN);
   memcpy (&ines_header.signature, INES_SIG_S, 4);
 
-  strcpy (src_name, dest_name);
+  strcpy (src_name, ucon64.rom);
   setext (src_name, ".PRM");
   if (access (src_name, F_OK) == 0)
     {
@@ -6446,7 +6453,7 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
         printf ("WARNING: Invalid mirroring type specified, using \"0\"\n");
     }
 
-  strcpy (src_name, dest_name);
+  strcpy (src_name, ucon64.rom);
   setext (src_name, ".700");
   if (access (src_name, F_OK) == 0 && q_fsize (src_name) >= 512)
     {
@@ -6647,6 +6654,7 @@ nes_s (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".PRM");
+  ucon64_output_fname (dest_name, 0);
   write_prm (&ines_header, dest_name);
 
   if (ines_header.ctrl1 & INES_TRAINER)
@@ -7373,6 +7381,7 @@ nes_fds (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".FDS");
   strcpy (src_name, ucon64.rom);
+  ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
 
   for (n = 0; n < 4; n++)

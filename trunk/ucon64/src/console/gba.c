@@ -211,8 +211,8 @@ gba_logo (st_rominfo_t *rominfo)
 
   ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (logodata,
-               GBA_HEADER_START + rominfo->buheader_len + 0x04,
-               LOGODATA_LEN, ucon64.rom, "r+b");
+            GBA_HEADER_START + rominfo->buheader_len + 0x04,
+            LOGODATA_LEN, ucon64.rom, "r+b");
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
   return 0;
@@ -967,7 +967,8 @@ static waitstate waitstates[] = {
                       printf
                         ("This file has been previously crash patched.\n");
                       printf
-                        ("Or, there is no support for this particular ROM.\nReport it to gbautil@aurore.net\n");
+                        ("Or, there is no support for this particular ROM.\n"
+                         "Report it to gbautil@aurore.net\n");
                       if (switches == SWITCH_CRASH_PATCH)
                         {
                           free (buffer);

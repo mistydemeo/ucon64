@@ -2,9 +2,9 @@
 gb.c - Game Boy support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2002 dbjh
+           2001 - 2003 dbjh
 
-           
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -166,9 +166,8 @@ int
 gameboy_gbx (st_rominfo_t *rominfo)
 {
   long x;
-  int c;
-  char buf[MAXBUFSIZE];
-  int gbx2gbc[] = {
+  char dest_name[FILENAME_MAX];
+  int c, gbx2gbc[] = {
     0xB4, 0xBC, 0xA4, 0xAC, 0x94, 0x9C, 0x84, 0x8C, 0xF4, 0xFC, 0xE4, 0xEC,
     0xD4, 0xDC, 0xC4, 0xCC,
     0x34, 0x3C, 0x24, 0x2C, 0x14, 0x1C, 0x04, 0x0C, 0x74, 0x7C, 0x64, 0x6C,
@@ -203,20 +202,21 @@ gameboy_gbx (st_rominfo_t *rominfo)
     0x53, 0x5B, 0x43, 0x4B
   };
 
-  strcat (buf, basename (ucon64.rom));
-  setext (buf, ((OFFSET (buf, strlen (buf) - 2) == 'B' ||
-                 OFFSET (buf, strlen (buf) - 2) == 'b') ? ".GBC" : ".GB"));
+  strcat (dest_name, basename (ucon64.rom));
+  setext (dest_name, ((OFFSET (dest_name, strlen (dest_name) - 2) == 'B' ||
+                       OFFSET (dest_name, strlen (dest_name) - 2) == 'b') ? ".GBC" : ".GB"));
 
-  ucon64_fbackup (NULL, buf);
-  q_fcpy (ucon64.rom, 0, rominfo->buheader_len, buf, "wb");
+  ucon64_output_fname (dest_name, 0);
+  ucon64_fbackup (NULL, dest_name);
+  q_fcpy (ucon64.rom, 0, rominfo->buheader_len, dest_name, "wb");
 
   x = 0;
   while ((c = q_fgetc (ucon64.rom, rominfo->buheader_len + x)) != -1)
     {
-      q_fwrite (&gbx2gbc[c], rominfo->buheader_len + x, 1, buf, "ab");
+      q_fwrite (&gbx2gbc[c], rominfo->buheader_len + x, 1, dest_name, "ab");
       x++;
     }
-  fprintf (stdout, ucon64_msg[WROTE], buf);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -326,7 +326,7 @@ gameboy_chk (st_rominfo_t *rominfo)
 int
 gameboy_mgd (st_rominfo_t *rominfo)
 {
-  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], *p = NULL;
+  char buf[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL;
 
   if (!rominfo->buheader_len)
     {
@@ -343,15 +343,13 @@ gameboy_mgd (st_rominfo_t *rominfo)
   buf[7] = '_';
   buf[8] = 0;
 
-  sprintf (buf2, "%s.%03lu", buf,
-           (unsigned long) ((q_fsize (ucon64.rom) - rominfo->buheader_len) /
-                            MBIT));
+  sprintf (dest_name, "%s.%03lu", buf,
+           (unsigned long) ((q_fsize (ucon64.rom) - rominfo->buheader_len) / MBIT));
+  ucon64_output_fname (dest_name, 1);
+  ucon64_fbackup (NULL, dest_name);
+  q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), dest_name, "wb");
 
-  ucon64_fbackup (NULL, buf2);
-  q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom),
-            buf2, "wb");
-
-  fprintf (stdout, ucon64_msg[WROTE], buf2);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -359,7 +357,7 @@ gameboy_mgd (st_rominfo_t *rominfo)
 int
 gameboy_ssc (st_rominfo_t *rominfo)
 {
-  char buf[MAXBUFSIZE], *p = NULL;
+  char dest_name[FILENAME_MAX], *p = NULL;
   long size = q_fsize (ucon64.rom) - rominfo->buheader_len;
 
   if (rominfo->buheader_len != 0)
@@ -377,16 +375,16 @@ gameboy_ssc (st_rominfo_t *rominfo)
   unknown_header.type = 2;
 
   p = basename (ucon64.rom);
-  strcpy (buf, is_func (p, strlen (p), isupper) ? "GB" : "gb");
-  strcat (buf, p);
-  setext (buf, ".GB");
+  strcpy (dest_name, is_func (p, strlen (p), isupper) ? "GB" : "gb");
+  strcat (dest_name, p);
+  setext (dest_name, ".GB");
 
-  ucon64_fbackup (NULL, buf);
-  q_fwrite (&unknown_header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
+  ucon64_output_fname (dest_name, 0);
+  ucon64_fbackup (NULL, dest_name);
+  q_fwrite (&unknown_header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
+  q_fcpy (ucon64.rom, 0, size, dest_name, "ab");
 
-  q_fcpy (ucon64.rom, 0, size, buf, "ab");
-
-  fprintf (stdout, ucon64_msg[WROTE], buf);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
   return 0;
 }
 

@@ -257,7 +257,9 @@ snes_dint (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".TMP");
   strcpy (src_name, ucon64.rom);
+  ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
+
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
@@ -396,7 +398,9 @@ snes_convert_sramfile (const void *header)
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".SAV");
+  ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
+
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
@@ -618,7 +622,9 @@ snes_ffe (st_rominfo_t *rominfo, char *ext)
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ext);
   strcpy (src_name, ucon64.rom);
+  ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
+
   q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
   q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -707,7 +713,9 @@ snes_fig (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".FIG");
   strcpy (src_name, ucon64.rom);
+  ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
+
   q_fwrite (&header, 0, FIG_HEADER_LEN, dest_name, "wb");
   q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -795,6 +803,7 @@ snes_mgd (st_rominfo_t *rominfo)
   memcpy (&mgh[16], dest_name, strlen (dest_name));
 
   setext (dest_name, ".078");
+  ucon64_output_fname (dest_name, 1);
   ucon64_fbackup (NULL, dest_name);
   q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -919,6 +928,7 @@ snes_gd3 (st_rominfo_t *rominfo)
     dest_name[6] = 0;
   else
     dest_name[7] = 0;
+  ucon64_output_fname (dest_name, 1);
 
   if (snes_hirom)
     {
@@ -1188,11 +1198,13 @@ snes_s (st_rominfo_t *rominfo)
           half_size = size / 2;
 
           sprintf (dest_name, "%s.078", names[name_i++]);
+          ucon64_output_fname (dest_name, 1);
           // don't write backups of parts, because one name is used
           q_fcpy (ucon64.rom, 0, half_size + rominfo->buheader_len, dest_name, "wb");
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
           sprintf (dest_name, "%s.078", names[name_i++]);
+          ucon64_output_fname (dest_name, 1);
           q_fcpy (ucon64.rom, half_size + rominfo->buheader_len, size - half_size, dest_name, "wb");
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
         }
@@ -1202,6 +1214,7 @@ snes_s (st_rominfo_t *rominfo)
             {
               // don't write backups of parts, because one name is used
               sprintf (dest_name, "%s.078", names[name_i++]);
+              ucon64_output_fname (dest_name, 1);
               q_fcpy (ucon64.rom, x * 8 * MBIT + (x ? rominfo->buheader_len : 0),
                         8 * MBIT + (x ? 0 : rominfo->buheader_len), dest_name, "wb");
               fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -1211,6 +1224,7 @@ snes_s (st_rominfo_t *rominfo)
             {
               // don't write backups of parts, because one name is used
               sprintf (dest_name, "%s.078", names[name_i++]);
+              ucon64_output_fname (dest_name, 1);
               q_fcpy (ucon64.rom, x * 8 * MBIT + (x ? rominfo->buheader_len : 0),
                         surplus + (x ? 0 : rominfo->buheader_len), dest_name, "wb");
               fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -1237,6 +1251,7 @@ snes_s (st_rominfo_t *rominfo)
             header[2] &= ~0x40;                 // last file -> clear bit 6
 
           // don't write backups of parts, because one name is used
+          ucon64_output_fname (dest_name, 0);
           q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
           q_fcpy (ucon64.rom, x * part_size + rominfo->buheader_len, part_size, dest_name, "ab");
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -1251,6 +1266,7 @@ snes_s (st_rominfo_t *rominfo)
           header[2] &= ~0x40;                   // last file -> clear bit 6
 
           // don't write backups of parts, because one name is used
+          ucon64_output_fname (dest_name, 0);
           q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
           q_fcpy (ucon64.rom, x * part_size + rominfo->buheader_len, surplus, dest_name, "ab");
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -1271,6 +1287,7 @@ snes_j (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".TMP");
 
+  ucon64_output_fname (dest_name, 0);
   ucon64_fbackup (NULL, dest_name);
   q_fcpy (src_name, 0, rominfo->buheader_len, dest_name, "wb"); // copy header (if any)
   block_size = q_fsize (src_name) - header_len;
@@ -1366,9 +1383,9 @@ knowing when that is necessary.
    8f XX YY 77 e2 XX af XX YY 77 c9 XX f0
 => 8f XX YY 77 e2 XX af XX YY 77 c9 XX 80
 
-- Mario no Super Picross (b0, b1)
-   8f/af XX YY b0/b1/b2/b3 cf XX YY b0/b1/b2/b3 d0
-=> 8f/af XX YY b0/b1/b2/b3 cf XX YY b0/b1/b2/b3 ea ea
+- Mario no Super Picross
+   8f/af XX YY b0 cf XX YY b1 d0
+=> 8f/af XX YY b0 cf XX YY b1 ea ea
 
 - most probably only Killer Instinct
    5c 7f d0 83 18 fb 78 c2 30           jmp $83d07f; clc; xce; sei; rep #$30
@@ -1486,8 +1503,8 @@ Same here.
 
       change_string ("!**!!**!\xd0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
                      "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
-      change_string ("!**!\xcf**!\xd0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
-                     "\x8f\xaf", 2, "\xb0\xb1\xb2\xb3", 4, "\xb0\xb1\xb2\xb3", 4);
+      change_string ("!**\xb0\xcf**\xb1\xd0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
+                     "\x8f\xaf", 2);
       change_string ("!**!\xaf**!\xc9**\xd0", 12, '*', '!', "\x80", 1, buffer, bytesread, 0,
                      "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\x30\x31\x32\x33", 4);
       change_string ("\xa9\x00\x00\xa2\xfe\x1f\xdf\x00\x00\x70\xd0", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, 0);
@@ -1623,7 +1640,7 @@ ad 3f 21 29 10 c9 10 d0               ad 3f 21 29 10 c9 10 ea ea
    3f 21 29 10 cf XX YY 80 f0            3f 21 29 10 cf XX YY 80 80    - Gokujyou Parodius/Tokimeki Memorial
 ad 3f 21 8d XX YY 29 10 8d            ad 3f 21 8d XX YY 29 00 8d       - Dragon Ball Z - Super Butoden 2 ?
 3f 21 00 29/89 10 f0                  3f 21 00 29/89 10 80             - Kirby's Dream Course U (29)
-af 3f 21 00 29/89 10 d0               af 3f 21 00 89 10 ea ea          - Kirby No Kira Kizzu/Final Fight Guy
+af 3f 21 00 29/89 10 d0               af 3f 21 00 29/89 10 ea ea       - Kirby No Kira Kizzu (29)/Final Fight Guy (89)
 af 3f 21 00 29/89 10 00 f0            af 3f 21 00 29/89 10 00 80
 af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Seiken Densetsu 3
 af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken Densetsu 2/Secret of Mana U

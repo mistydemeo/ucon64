@@ -444,6 +444,7 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
       {0, NULL}
     };
   int x = 0;
+//  static dm_image_t image2;
 
 #ifdef  DEBUG
   printf ("sizeof (dm_track_t) == %d\n", sizeof (dm_track_t));
@@ -461,6 +462,7 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
 
   if (!image)
     image = (dm_image_t *) malloc (sizeof (dm_image_t));
+//    image = (dm_image_t *) &image2;
   if (!image)
     return NULL;
 

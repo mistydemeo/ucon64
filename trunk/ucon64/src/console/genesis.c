@@ -749,8 +749,8 @@ genesis_f (st_rominfo_t *rominfo)
       Yes, we only check the first country code. Just like with SNES we don't
       guarantee anything for files that needn't be fixed/cracked/patched.
     */
-    case 74:                                    // Japan
-    case 85:                                    // U.S.A.
+    case 'J':                                   // Japan
+    case 'U':                                   // U.S.A.
       return genesis_fix_ntsc_protection (rominfo);
     default:
       return genesis_fix_pal_protection (rominfo);

@@ -83,7 +83,7 @@ ucon64gui_top(void)
 
   h2g_input_submit ("verbose", "-ls", "(-ls) generate ROM list for all ROMs; $ROM=DIRECTORY");
 
-  h2g_input_submit ("more verbose", "-lsv", "(-lsv) like [ROM list] but more verbose; $ROM=DIRECTORY");
+  h2g_input_submit ("VERBOSE", "-lsv", "(-lsv) like [ROM list] but more verbose; $ROM=DIRECTORY");
 
   h2g_(" Compare ROMs: ");
 

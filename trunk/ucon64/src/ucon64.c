@@ -180,6 +180,7 @@ const struct option options[] = {
     {"int", 0, 0, UCON64_INT},
     {"int2", 0, 0, UCON64_INT2},
     {"intelli", 0, 0, UCON64_INTELLI},
+    {"invert", 0, 0, UCON64_INVERT},
 //    {"ip", 0, 0, UCON64_IP},
 #ifdef  DISCMAGE
     {"isofix", 1, 0, UCON64_ISOFIX},

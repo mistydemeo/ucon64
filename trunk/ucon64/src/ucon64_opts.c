@@ -1294,6 +1294,10 @@ ucon64_options (int c, const char *optarg)
           break;
 #endif
 
+    case UCON64_INVERT:
+      pcengine_invert (ucon64.rominfo);
+      break;
+
     case UCON64_J:
       switch (ucon64.console)
         {

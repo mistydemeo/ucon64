@@ -2,6 +2,7 @@
 pce.c - PC-Engine support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+                  2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -50,6 +51,7 @@ const st_usage_t pcengine_usage[] =
     {"pce", NULL, "force recognition"},
     {"smg", NULL, "convert to Super Magic Griffin/SMG"},
     {"mgd", NULL, "convert to Multi Game Doctor*/MGD2/RAW"},
+    {"invert", NULL, "invert bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)"},
     {NULL, NULL, NULL}
 };
 
@@ -660,6 +662,56 @@ pcengine_mgd (st_rominfo_t *rominfo)
 
 
 int
+pcengine_invert (st_rominfo_t *rominfo)
+{
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  unsigned char buffer[MAXBUFSIZE], byte;
+  FILE *srcfile, *destfile;
+  int bytesread, n, bit;
+
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, src_name, 0);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+      return -1;
+    }
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+  if (rominfo->buheader_len)                    // copy header (if present)
+    {
+      fread (buffer, 1, UNKNOWN_HEADER_LEN, srcfile);
+      fseek (srcfile, rominfo->buheader_len, SEEK_SET);
+      fwrite (buffer, 1, UNKNOWN_HEADER_LEN, destfile);
+    }
+
+  while ((bytesread = fread (buffer, 1, MAXBUFSIZE, srcfile)))
+    {
+      for (n = 0; n < bytesread; n++)
+        {
+          byte = 0;
+          for (bit = 0; bit < 8; bit++)
+            if (buffer[n] & (1 << bit))
+              byte |= 1 << (7 - bit);
+          buffer[n] = byte;
+        }
+      fwrite (buffer, 1, bytesread, destfile);
+    }
+
+  fclose (srcfile);
+  fclose (destfile);
+
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+  return 0;
+}
+
+
+int
 pcengine_init (st_rominfo_t *rominfo)
 {
   int result = -1;
@@ -680,7 +732,7 @@ pcengine_init (st_rominfo_t *rominfo)
   // PCE dumps don't have an internal CRC. The code below is debug/test code.
   rominfo->has_internal_crc = 1;
   rominfo->internal_crc_len = 4;
-  rominfo->current_internal_crc = pcengine_chksum(rominfo);
+  rominfo->current_internal_crc = pcengine_chksum (rominfo);
   rominfo->internal_crc = rominfo->current_internal_crc;
   rominfo->internal_crc2[0] = 0;
 #endif

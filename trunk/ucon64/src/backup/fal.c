@@ -470,8 +470,8 @@ ReadFlash (int addr)
 void
 l402684 (void)
 {
-#if 0 // not necessary *and* not correct (read-only register) - dbjh
-  outpb (SPPStatPort, 1);
+#ifndef USE_PPDEV
+  outpb (SPPStatPort, 1);                       // clear EPP time flag
 #endif
   l40226c ();
 }
@@ -527,7 +527,7 @@ LinkerInit (void)               // 4027c4
         with Windows executables (Cygwin, VC++ and MinGW) - dbjh
       */
 #ifndef USE_PPDEV
-      outpb (ECPRegECR, 4);                     // Set EPP mode for ECP chipsets
+      outpb (ECPRegECR, 4);                     // set EPP mode for ECP chipsets
 #endif
       if (LookForLinker ())
         {
@@ -545,7 +545,7 @@ LinkerInit (void)               // 4027c4
       // Look for linker in SPP mode.
 #ifndef USE_PPDEV
       if (EPPMode)
-        outpb (ECPRegECR, 0);                   // Set SPP mode for ECP chipsets
+        outpb (ECPRegECR, 0);                   // set SPP mode for ECP chipsets
 #endif
 
       EPPMode = 0;
@@ -923,9 +923,7 @@ ProgramNonTurboIntelFlash (FILE *fp)
   // Erase as many 128k blocks as are required
   Ready = EraseNonTurboFABlocks (0, ((FileSize - 1) >> 17) + 1);
 
-  // remove "erase gauge"
-  fputs ("\r                                                                              \r",
-         stdout);
+  clear_line ();                                // remove "erase gauge"
   if (Ready)
     {
       printf ("Send: %d Bytes (%.4f Mb)\n\n", FileSize, (float) FileSize / MBIT);
@@ -1008,9 +1006,7 @@ ProgramNonTurboIntelFlash (FILE *fp)
             break;
         }
 
-      // remove last gauge
-      fputs ("\r                                                                              \r",
-             stdout);
+      clear_line ();                            // remove last gauge
       ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32 k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
@@ -1047,9 +1043,7 @@ ProgramTurboIntelFlash (FILE *fp)
   // Erase as many 256k blocks as are required
   Ready = EraseTurboFABlocks (0, ((FileSize - 1) >> 18) + 1);
 
-  // remove "erase gauge"
-  fputs ("\r                                                                              \r",
-         stdout);
+  clear_line ();                                // remove "erase gauge"
   if (Ready)
     {
       printf ("Send: %d Bytes (%.4f Mb)\n\n", FileSize, (float) FileSize / MBIT);
@@ -1129,9 +1123,7 @@ ProgramTurboIntelFlash (FILE *fp)
             break;
         }
 
-      // remove last gauge
-      fputs ("\r                                                                              \r",
-             stdout);
+      clear_line ();                            // remove last gauge
       ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32 k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
@@ -1171,9 +1163,7 @@ ProgramSharpFlash (FILE *fp)
   // Erase as many 64k blocks as are required
   Ready = EraseNintendoFlashBlocks (0, ((FileSize - 1) >> 16) + 1);
 
-  // remove "erase gauge"
-  fputs ("\r                                                                              \r",
-         stdout);
+  clear_line ();                                // remove "erase gauge"
   if (Ready)
     {
       printf ("Send: %d Bytes (%.4f Mb)\n\n", FileSize, (float) FileSize / MBIT);
@@ -1200,9 +1190,7 @@ ProgramSharpFlash (FILE *fp)
             ucon64_gauge (starttime, addr << 1, FileSize);
         }
 
-      // remove last gauge
-      fputs ("\r                                                                              \r",
-             stdout);
+      clear_line ();                            // remove last gauge
       ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32 k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);

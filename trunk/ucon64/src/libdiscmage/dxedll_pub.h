@@ -79,10 +79,10 @@ typedef struct st_symbol
   void (*rewind) (FILE *);
   size_t (*fread) (void *, size_t, size_t, FILE *);
   size_t (*fwrite) (const void *, size_t, size_t, FILE *);
-  int (*fgetc) (FILE *file);
-  char *(*fgets) (char *buffer, int maxlength, FILE *file);
-  int (*feof) (FILE *file);
-  int (*fputc) (int character, FILE *file);
+  int (*fgetc) (FILE *);
+  char *(*fgets) (char *, int, FILE *);
+  int (*feof) (FILE *);
+  int (*fputc) (int, FILE *);
   int (*fflush) (FILE *);
   int (*ferror) (FILE *);
   int (*rename) (const char *, const char *);

@@ -607,6 +607,10 @@ parport_init (int port, int target_delay)
 
   misc_parport_print_info ();
 
+#ifndef USE_PPDEV
+  outportb ((unsigned short) (f2a_pport + PARPORT_STATUS), 0x01); // clear EPP time flag
+#endif
+
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x04);
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
   outportb ((unsigned short) (f2a_pport + PARPORT_DATA), 0x04);

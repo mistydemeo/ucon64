@@ -396,6 +396,36 @@ fprintf2 (FILE *file, const char *format, ...)
 #endif // defined _WIN32 && defined USE_ANSI_COLOR
 
 
+void
+clear_line (void)
+/*
+  This function is used to fix a problem when using the MinGW or Visual C++
+  port under Windows 98 (probably Windows 95 too) while ANSI.SYS is not loaded.
+  If a line contains colors, printed with printf() or fprintf() (actually
+  printf2() or fprintf2()), it cannot be cleared by printing spaces on the same
+  line. A solution is using SetConsoleTextAttribute().
+  The problem doesn't occur if ANSI.SYS is loaded. It also doesn't occur under
+  Windows XP, even if ANSI.SYS isn't loaded.
+  We display 79 spaces (not 80), because under command.com the cursor advances
+  to the next line if we display something on the 80th column (in 80 column
+  mode). This doesn't happen under xterm.
+*/
+{
+#ifndef _WIN32
+  fputs ("\r                                                                               \r", stdout);
+#else
+  WORD org_attr;
+  CONSOLE_SCREEN_BUFFER_INFO info;
+  HANDLE stdout_handle = GetStdHandle (STD_OUTPUT_HANDLE);
+  GetConsoleScreenBufferInfo (stdout_handle, &info);
+  org_attr = info.wAttributes;
+  SetConsoleTextAttribute (stdout_handle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+  fputs ("\r                                                                               \r", stdout);
+  SetConsoleTextAttribute (stdout_handle, org_attr);
+#endif
+}
+
+
 int
 ansi_init (void)
 {

@@ -1,13 +1,11 @@
 /*
-uCON64 1.9.6
-
-uCON64 is a tool to modify video game ROMs and to transfer ROMs to the
+uCON64 1.9.6 - a tool to modify video game ROMs and to transfer ROMs to the
 different backup units/emulators that exist. It is based on the old uCON but
 with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-Copyright (C) 1999 - 2001 NoisyB (noisyb@gmx.net)
+written by 1999 - 2001 NoisyB (noisyb@gmx.net)
 
 
 

@@ -1,3 +1,28 @@
+/*
+uCON64 1.9.6 - a tool to modify video game ROMs and to transfer ROMs to the
+different backup units/emulators that exist. It is based on the old uCON but
+with completely new source. It aims to support all cartridge consoles and
+handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
+their backup units
+
+written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+
+
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
 #include "ucon64_misc.h"
 
 #define ucon64_KNOWN		-1
@@ -30,7 +55,7 @@
 
 
 #define ucon64_VERSION "1.9.6"
-#define ucon64_TITLE "uCON64 1.9.6 GNU/Linux 1999/2000/2001 by NoisyB (noisyb@gmx.net)"
+#define ucon64_TITLE "uCON64 1.9.6 Linux/DOS"
 
 
 #define MBIT	131072

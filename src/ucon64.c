@@ -1378,9 +1378,10 @@ ucon64_usage (int argc, char *argv[])
 #ifndef DB
 	      "; NEEDED"
 #endif
-	      "\n  -hd           force ROM has header (+512 Bytes)\n"
+	      "\n"
+              "  -hd           force ROM has header (+512 Bytes)\n"
 	      "  -nhd          force ROM has no header\n"
-	      "  *		show info (default)\n\n", system16_TITLE,
+	      "  *             show info (default)\n\n", system16_TITLE,
 	      atari_TITLE, coleco_TITLE, virtualboy_TITLE,
 	      vectrex_TITLE, intelli_TITLE);
 
@@ -1436,14 +1437,6 @@ emuchina.net
 }
 
 
-
-
-
-
-
-
-
-
 /*
   this is the now centralized nfo output for all kinds of ROMs
 */
@@ -1464,7 +1457,7 @@ ucon64_nfo (struct ucon64_ *rom)
 
   // some ROMs have a name with control chars in it -> replace control chars
   for (n = 0; n < strlen (rom->name); n++)
-    buf[n] = isprint (rom->name[n]) ? rom->name[n] : '.';
+    buf[n] = isprint ((int) rom->name[n]) ? rom->name[n] : '.';
   buf[n] = 0;			// terminate string
 
   printf ("%s\n%s\n%s%s%s\n%s\n%ld bytes (%.4f Mb)\n\n", rom->title, buf,
@@ -1487,12 +1480,15 @@ ucon64_nfo (struct ucon64_ *rom)
       if (rom->intro)
 	printf ("Intro/Trainer: Maybe, %ld Bytes\n", rom->intro);
 
-//    if (!rom->buheader_len)
-//      printf("Backup Unit Header: No\n");
-//    else
-      if (rom->buheader_len)
-	printf ("Backup Unit Header: Yes, %ld Bytes\n"
-		/* (use -nhd to override)\n" */ , rom->buheader_len);
+// noisyb: in the case that you don't wan't the "Backup Unit Header: No", don't print
+// "Backup Unit Header:" when there is a header, because that makes people like me (dbjh)
+// search for "Backup Unit Header: No" when there is no header
+      if (!rom->buheader_len)
+        printf("Backup Unit Header: No\n");
+      else
+        if (rom->buheader_len)
+          printf("Backup Unit Header: Yes, %ld Bytes\n"/* (use -nhd to override)\n"*/,
+                 rom->buheader_len);
 
 //    if (!rom->splitted[0])
 //      printf("Splitted: No\n");
@@ -1532,14 +1528,6 @@ ucon64_nfo (struct ucon64_ *rom)
 
   return 0;
 }
-
-
-
-
-
-
-
-
 
 
 /*

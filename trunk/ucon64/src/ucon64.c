@@ -91,7 +91,16 @@ ucon64_rom_flush (st_rominfo_t * rominfo)
 st_ucon64_t ucon64;               // containes ptr to image, dat and rominfo
 
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
-//static int ucon64_fsize = 0;
+
+typedef struct
+  {
+    int val; // option
+//    const 
+      char *optarg; // option argument
+  } st_args_t;
+
+static st_args_t arg[ARG_MAX]; // is ARG_MAX correct?
+
 const struct option options[] =   {
     {"83", 0, 0, UCON64_83},
     {"1991", 0, 0, UCON64_1991},
@@ -394,7 +403,7 @@ ucon64_exit (void)
 int
 main (int argc, char **argv)
 {
-  int rom_index = 0, c = 0;
+  int x = 0, rom_index = 0, c = 0;
   static char buf[MAXBUFSIZE];
   struct stat fstate;
 
@@ -496,11 +505,20 @@ main (int argc, char **argv)
       return 0;
     }
 
-  optind = 0;
-  // TODO?: the getopt() is only left here to produce rom_index
-  while ((c = getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
-    ;
+  x = optind = 0;
+  while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
+    if (x < ARG_MAX - 1) 
+      {
+        arg[x].val = c;
+        arg[x++].optarg = (optarg ? optarg : NULL);
+        memset (&arg[x], 0, sizeof (st_args_t)); // set next arg to NULL
+      }
 
+#ifdef  DEBUG
+  for (x = 0; arg[x].val; x++) 
+    printf ("%d %s\n\n", arg[x].val, arg[x].optarg ? arg[x].optarg : "(null)");
+#endif
+    
   rom_index = optind;                           // save index of first file
 #if 1
   if (rom_index == argc)
@@ -598,7 +616,8 @@ ucon64_execute_options (void)
   ucon64_rom_handling()
 */
 {
-  int c = 0, result = 0, opts = 0;
+  int c = 0, result = 0, x = 0;
+  int opts = 0;
 #if     defined __unix__ && !defined __MSDOS__
   static int privileges_droppped = 0;
 #endif
@@ -630,19 +649,26 @@ ucon64_execute_options (void)
   ucon64.crc32 =
   ucon64.fcrc32 = 0;
 
+#if 0
   // switches
-  // TODO?: more "elegance" needed or merge them into options?
   optind = 0;
   while ((c = getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
     {
-      if ((wf = ucon64_get_wf (c)))             // get workflow for that option
+      if ((wf = ucon64_get_wf (c))) // get workflow for that option
+#else
+  for (x = 0; arg[x].val; x++)
+    {
+#endif
+
+      if ((wf = ucon64_get_wf (arg[x].val)))             // get workflow for that option
         {
           if (wf->console != UCON64_UNKNOWN)
             ucon64.console = wf->console;
           ucon64.flags = wf->flags;
         }
-//        if (wf->flags & WF_SWITCH)
-        ucon64_switches (c);
+
+//      if (wf->flags & WF_SWITCH)
+        ucon64_switches (arg[x].val, arg[x].optarg);
     }
 
     /*
@@ -663,10 +689,16 @@ ucon64_execute_options (void)
 #endif
 
 
+#if 0
   optind = 0;                                   // start with first option
   while ((c = getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
     {
       wf = ucon64_get_wf (c); // get workflow for that option
+#else
+  for (x = 0; arg[x].val; x++)
+    {
+      wf = ucon64_get_wf (arg[x].val); // get workflow for that option
+#endif
 
       if (wf)
         if (wf->flags & WF_SWITCH)
@@ -688,7 +720,7 @@ ucon64_execute_options (void)
       if (result == -1) // no_rom but WF_ROM_REQ
         return -1;
 
-      if (ucon64_options (c) == -1) // because we have more than 180 options
+      if (ucon64_options (arg[x].val, arg[x].optarg) == -1) // because we have more than 180 options
         {
 //          const st_usage_t *p = (ucon64_get_wf (c))->usage;
           const char *opt = (ucon64_get_opt (c))->name;

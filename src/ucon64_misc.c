@@ -59,6 +59,7 @@ static void BuildCRCTable ();
 static unsigned long CalculateFileCRC (FILE * file);
 
 #ifdef BACKUP
+static unsigned int parport_probe (unsigned int parport);
 static int detect_parport (unsigned int port);
 #endif
 
@@ -422,6 +423,61 @@ close_io_port (void)
   close (ucon64_io_fd);
 }
 #endif
+
+unsigned int
+ucon64_parport_probe(unsigned int port)
+{
+#ifdef BACKUP
+#ifdef __unix__
+  uid_t uid;
+  gid_t gid;
+#endif
+
+
+  if (!(port = parport_probe (port)))
+    ;
+/*
+    printf ("ERROR: no parallel port 0x%s found\n\n", strupr (buf));
+  else
+    printf ("0x%x\n\n", port);
+*/
+
+#ifdef  __unix__
+  /*
+    Some code needs us to switch to the real uid and gid. However, other code
+    needs access to I/O ports other than the standard printer port registers.
+    We just do an iopl(3) and all code should be happy. Using iopl(3) enables
+    users to run all code without being root (of course with the uCON64
+    executable setuid root). Anyone a better idea?
+  */
+#ifdef  __linux__
+  if (iopl (3) == -1)
+    {
+      fprintf (stderr, "Could not set the I/O privilege level to 3\n"
+                       "(This program needs root privileges)\n");
+      return 1;
+    }
+#endif
+
+  // now we can drop privileges
+  uid = getuid ();
+  if (setuid (uid) == -1)
+    {
+      fprintf (stderr, "Could not set uid\n");
+      return 1;
+    }
+  gid = getgid ();                              // This shouldn't be necessary
+  if (setgid (gid) == -1)                       //  if `make install' was
+    {                                           //  used, but just in case
+      fprintf (stderr, "Could not set gid\n");  //  (root did `chmod +s')
+      return 1;
+    }
+#endif // __unix__
+#endif // BACKUP
+  return port;
+}
+
+
 
 unsigned int
 parport_probe (unsigned int port)

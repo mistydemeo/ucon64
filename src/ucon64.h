@@ -247,9 +247,6 @@ extern struct ucon64_
                                 //1 skip before and after processing of ROM
                                 //2 show after processing of ROM
                                 //3 show before and after processing of ROM
-
-//  long console_forced;          //detection of console was forced
-//  int show_nfo;                 //!show_nfo == no ucon64_nfo ()
 } ucon64;
 
 
@@ -259,7 +256,6 @@ extern struct ucon64_
 extern struct rom_
 {
   char rom[FILENAME_MAX];               //$ROM (cmdline) with path
-//  char file[FILENAME_MAX];              //$FILE (cmdline) with path
 
   long console;                 //integer for the detected console system
   char title[4096];             //console system name

@@ -346,6 +346,7 @@ ucon64_switches (int c, const char *optarg)
 #endif
       break;
 
+#ifdef  USE_LIBCD64
     case UCON64_XCD64:
     case UCON64_XCD64B:
     case UCON64_XCD64C:
@@ -358,10 +359,10 @@ ucon64_switches (int c, const char *optarg)
       ucon64_parport_needed = 2;
       break;
 
-
     case UCON64_XCD64P:
       ucon64.io_mode = strtol (optarg, NULL, 10);
       break;
+#endif
 
     case UCON64_XFALM:
     case UCON64_XGBXM:

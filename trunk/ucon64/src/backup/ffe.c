@@ -2,6 +2,7 @@
 ffe.c - General Front Far East copier routines for uCON64
 
 written by 2002 - 2003 dbjh
+                  2003 JohnDie
 
 
 This program is free software; you can redistribute it and/or modify
@@ -75,7 +76,7 @@ void
 ffe_deinit_io (void)
 {
 #if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
-    deinit_conio ();
+  deinit_conio ();
 #endif
 }
 
@@ -83,7 +84,8 @@ ffe_deinit_io (void)
 void
 ffe_send_block (unsigned short address, unsigned char *buffer, int len)
 {
-  int checksum = 0x81, n;
+  int n;
+  unsigned char checksum = 0x81;
 
   ffe_send_command (0, address, (unsigned short) len);
   for (n = 0; n < len; n++)
@@ -91,14 +93,15 @@ ffe_send_block (unsigned short address, unsigned char *buffer, int len)
       ffe_sendb (buffer[n]);
       checksum ^= buffer[n];
     }
-  ffe_sendb ((unsigned char) checksum);
+  ffe_sendb (checksum);
 }
 
 
 void
 ffe_send_block2 (unsigned short address, unsigned char *buffer, int len)
 {
-  int checksum = 0x81, n;
+  int n;
+  unsigned char checksum = 0x81;
 
   ffe_send_command (2, address, (unsigned short) len);
   for (n = 0; n < len; n++)
@@ -106,7 +109,7 @@ ffe_send_block2 (unsigned short address, unsigned char *buffer, int len)
       ffe_sendb (buffer[n]);
       checksum ^= buffer[n];
     }
-  ffe_sendb ((unsigned char) checksum);
+  ffe_sendb (checksum);
 }
 
 
@@ -146,7 +149,7 @@ ffe_send_command (unsigned char command_code, unsigned short a, unsigned short l
   ffe_sendb ((unsigned char) (a >> 8));         // high byte
   ffe_sendb ((unsigned char) l);                // low byte
   ffe_sendb ((unsigned char) (l >> 8));         // high byte
-  ffe_sendb ((unsigned char) (0x81 ^ command_code ^ a ^ (a >> 8) ^ l ^ (l >> 8))); // checksum
+  ffe_sendb ((unsigned char) (0x81 ^ command_code ^ a ^ (a >> 8) ^ l ^ (l >> 8))); // check sum
 }
 
 
@@ -164,38 +167,56 @@ ffe_sendb (unsigned char byte)
 void
 ffe_receive_block (unsigned short address, unsigned char *buffer, int len)
 {
-  int checksum = 0x81, n, m;
+  int n, n_try = 0;
+  unsigned char checksum1 = 0x81, checksum2;
 
-  ffe_send_command (1, address, (unsigned short) len);
-  for (n = 0; n < len; n++)
+  do
     {
-      buffer[n] = ffe_receiveb ();
-      checksum ^= buffer[n];
-    }
-  if (checksum != ffe_receiveb ())
-    printf ("\nreceived data is corrupt\n");
+      ffe_send_command (1, address, (unsigned short) len);
+      for (n = 0; n < len; n++)
+        {
+          buffer[n] = ffe_receiveb ();
+          checksum1 ^= buffer[n];
+        }
+      checksum2 = ffe_receiveb ();
 
-  for (m = 0; m < 65536; m++)                   // a delay is necessary here
-    ;
+      for (n = 0; n < 65536; n++)               // a delay is necessary here
+        ;
+
+      n_try++;
+    }
+  while ((checksum1 != checksum2) && (n_try < N_TRY_MAX));
+
+  if (checksum1 != checksum2)
+    printf ("\nreceived data is corrupt\n");
 }
 
 
 void
 ffe_receive_block2 (unsigned short address, unsigned char *buffer, int len)
 {
-  int checksum = 0x81, n, m;
+  int n, n_try = 0;
+  unsigned char checksum1 = 0x81, checksum2;
 
-  ffe_send_command (3, address, (unsigned short) len);
-  for (n = 0; n < len; n++)
+  do
     {
-      buffer[n] = ffe_receiveb ();
-      checksum ^= buffer[n];
-    }
-  if (checksum != ffe_receiveb ())
-    printf ("\nreceived data is corrupt\n");
+      ffe_send_command (3, address, (unsigned short) len);
+      for (n = 0; n < len; n++)
+        {
+          buffer[n] = ffe_receiveb ();
+          checksum1 ^= buffer[n];
+        }
+      checksum2 = ffe_receiveb ();
 
-  for (m = 0; m < 65536; m++)                   // a delay is necessary here
-    ;
+      for (n = 0; n < 65536; n++)               // a delay is necessary here
+        ;
+
+      n_try++;
+    }
+  while ((checksum1 != checksum2) && (n_try < N_TRY_MAX));
+
+  if (checksum1 != checksum2)
+    printf ("\nreceived data is corrupt\n");
 }
 
 
@@ -241,7 +262,8 @@ ffe_wait_while_busy (void)
     }
 #endif
 
-  return input;
+  // read port again to let data settle down and to delay a little bit - JohnDie
+  return inportb ((unsigned short) (ffe_port + PARPORT_STATUS));
 }
 
 

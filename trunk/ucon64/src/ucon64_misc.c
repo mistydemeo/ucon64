@@ -1,7 +1,7 @@
 /*
 ucon64_misc.c - miscellaneous functions for uCON64
 
-written by 1999 - 2002 NoisyB (noisyb@gmx.net)
+written by 1999 - 2003 NoisyB (noisyb@gmx.net)
            2001 - 2003 dbjh
                   2001 Caz
            2002 - 2003 Jan-Erik Karlsson (Amiga)

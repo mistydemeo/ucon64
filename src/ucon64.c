@@ -871,9 +871,18 @@ int ucon64_init(struct ucon64_ *rom)
     (virtualboy_init(rom)==-1) &&
     (vectrex_init(rom)==-1) &&
     (wonderswan_init(rom)==-1)
-  ) return(-1);
+  )
+  {
+    rom->console=ucon64_UNKNOWN;
+    return(-1);
+  }
   else
   {
+    quickfread(rom->buheader,rom->buheader_start,rom->buheader_len,rom->rom);
+    quickfread(rom->header,rom->header_start,rom->header_len,rom->rom);
+
+    if(!rom->current_crc32)rom->current_crc32=fileCRC32(rom->rom,rom->buheader_len);
+
     rom->bytes=quickftell(rom->rom);
     rom->mbit=(float)((rom->bytes-rom->buheader_len)/MBIT);
 

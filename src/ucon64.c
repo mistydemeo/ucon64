@@ -66,11 +66,12 @@ void ucon64_exit(void)
   #include "psx/psx.h"
   #include "dc/dc.h"
   #include "real3do/real3do.h"
+  #include "gamecube/gamecube.h"
+  #include "xbox/xbox.h"
 
   #include "patch/ppf.h"
   #include "patch/xps.h"
   #include "patch/pal4u.h"
-  #include "patch/ciso.h"
 
   #include "backup/cdrw.h"
 #endif
@@ -123,6 +124,8 @@ char *forceargs[] =
   "-swan",
   "-coleco",
   "-intelli"
+  "-gc"
+  "-xbox"
   };
 
 #ifdef	BACKUP
@@ -611,7 +614,8 @@ rom.console=
   (argcmp(argc,argv,"-cd32")) ? ucon64_CD32 :
   (argcmp(argc,argv,"-3do")) ? ucon64_REAL3DO :
   (argcmp(argc,argv,"-dc")) ? ucon64_DC :
-
+  (argcmp(argc,argv,"-xbox")) ? ucon64_XBOX :
+  (argcmp(argc,argv,"-gc")) ? ucon64_GAMECUBE :
   (argcmp(argc,argv,"-ip")) ? ucon64_DC :
 #endif
 (argcmp(argc,argv,"-col")) ? ucon64_SNES :
@@ -657,7 +661,6 @@ if(argcmp(argc,argv,"-dbv"))
 	printf("\nTIP: %s -db -nes would view only NES ROMs\n\n",getarg(argc,argv,ucon64_NAME));
 	return(0);
 }
-
 
 
 if(!access(rom.rom,F_OK))
@@ -1093,12 +1096,14 @@ if(rom->console != ucon64_UNKNOWN)
     (rom->console == ucon64_CDI) ? cdi_init(rom) :
     (rom->console == ucon64_CD32) ? cd32_init(rom) :
     (rom->console == ucon64_PSX) ? psx_init(rom) :
+    (rom->console == ucon64_GAMECUBE) ? gamecube_init(rom) :
+    (rom->console == ucon64_XBOX) ? xbox_init(rom) :
 #endif
                                          (rom->console = ucon64_UNKNOWN);
   }
 }
 
-if(rom->console == ucon64_UNKNOWN)
+if(rom->console == ucon64_UNKNOWN && rom->bytes <= MAXROMSIZE )
 {
   if(
     (snes_init(rom)==-1) &&
@@ -1139,7 +1144,10 @@ if(rom->console == ucon64_UNKNOWN)
       rom->console == ucon64_SATURN ||
       rom->console == ucon64_CDI ||
       rom->console == ucon64_CD32 ||
-      rom->console == ucon64_REAL3DO
+      rom->console == ucon64_REAL3DO ||
+      rom->console == ucon64_XBOX ||
+      rom->console == ucon64_GAMECUBE ||
+      rom->bytes > MAXROMSIZE
   )return(0);
 #endif
 
@@ -1171,7 +1179,11 @@ int ucon64_usage(int argc,char *argv[])
 	"      it will automatically find and extract the ROM\n"
 	"\n"*/
 //	"TODO:  -sh      use uCON64 in shell modus\n"
-	"  -e            emulate/run ROM (check INSTALL and $HOME/.ucon64rc for more)\n"
+#ifdef	__DOS__
+	"  -e            emulate/run ROM (see ucon64.cfg for more)\n"
+#else
+	"  -e            emulate/run ROM (see $HOME/.ucon64rc for more)\n"
+#endif
 	"  -crc          show CRC32 value of ROM\n"
 	"  -crchd        show CRC32 value of ROM (regarding to +512 Bytes header)\n"
 	"  -dbs          search ROM database (all entries) by CRC32; $ROM=0xCRC32\n"
@@ -1205,7 +1217,6 @@ bsl_usage( argc, argv );
 ips_usage( argc, argv );
 aps_usage( argc, argv );
 #ifdef	CD
-  ciso_usage( argc, argv );
   pal4u_usage( argc, argv );
   ppf_usage( argc, argv );
   xps_usage( argc, argv );
@@ -1240,10 +1251,13 @@ else if(argcmp(argc,argv,"-intelli"))intelli_usage(argc,argv);
   else if(argcmp(argc,argv,"-3do"))real3do_usage(argc,argv);
   else if(argcmp(argc,argv,"-cd32"))cd32_usage(argc,argv);
   else if(argcmp(argc,argv,"-cdi"))cdi_usage(argc,argv);
+//  else if(argcmp(argc,argv,"-gc"))gamecube_usage(argc,argv);
+  else if(argcmp(argc,argv,"-xbox"))xbox_usage(argc,argv);
 #endif
 else
 {
 #ifdef CD
+//  gamecube_usage(argc,argv);
   dc_usage(argc,argv);
   psx_usage(argc,argv);
 /*
@@ -1253,13 +1267,14 @@ else
   cd32_usage(argc,argv);
   cdi_usage(argc,argv);
 */
-  printf("%s\n%s\n%s\n%s\n%s\n"
-	"  -ps2, -sat, -3do, -cd32, -cdi\n"
+  printf("%s\n%s\n%s\n%s\n%s\n%s\n"
+	"  -xbox, -ps2, -sat, -3do, -cd32, -cdi\n"
 	"		force recognition; NEEDED\n"
 	"  -iso		force image is ISO9660\n"
 	"  -raw		force image is MODE2_RAW/BIN\n"
 	"  *		show info (default); ONLY $ROM=RAW_IMAGE\n"
 	"  -r2i          convert MODE2_RAW/BIN to ISO9660; $ROM=RAW_IMAGE\n"
+  ,xbox_TITLE
   ,ps2_TITLE
   ,saturn_TITLE
   ,real3do_TITLE
@@ -1267,10 +1282,10 @@ else
   ,cdi_TITLE
   );
 
-//  ppf_usage( argc, argv );
-//  xps_usage( argc, argv );
-  ciso_usage( argc, argv );
+  ppf_usage( argc, argv );
+  xps_usage( argc, argv );
 
+  cdrw_iso_usage(argc,argv);
   cdrw_raw_usage(argc,argv);
 
   printf("\n");

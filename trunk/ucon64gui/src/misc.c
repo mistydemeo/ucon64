@@ -30,8 +30,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
 #include <sys/stat.h>
+#ifdef  HAVE_CONFIG_H
+#include "config.h"                             // HAVE_ZLIB_H
+#endif
 
-#ifdef  __unix__
+#ifdef  __MSDOS__
+#include <dos.h>                                // delay(), milliseconds
+#elif   defined __unix__
+#include <unistd.h>                             // usleep(), microseconds
+#elif   defined __BEOS__
+#include <OS.h>                                 // snooze(), microseconds
+// Include OS.h before misc.h, because OS.h includes StorageDefs.h which
+//  includes param.h which unconditionally defines MIN and MAX.
+#endif
+
+#include "misc.h"
+#include "map.h"
+
+#ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -40,27 +56,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/poll.h>                           //  is available on Linux, not on
 #endif                                          //  BeOS. DOS already has kbhit()
 
-#ifdef  __MSDOS__
-#include <dos.h>                                // delay(), milliseconds
-#elif   defined __unix__
-#include <unistd.h>                             // usleep(), microseconds
-#elif   defined __BEOS__
-#include <OS.h>                                 // snooze(), microseconds
-#endif
-
 #if     (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
 #include <termios.h>
 typedef struct termios tty_t;
 #endif
-#include "config.h"                             // ZLIB
-#include "misc.h"
 
-#ifdef  ZLIB
+#ifdef  HAVE_ZLIB_H
 #include <zlib.h>
 #include "unzip.h"
 #endif
 
-#if     defined ANSI_COLOR && defined DJGPP
+#ifdef  DJGPP
 #include <dpmi.h>                               // needed for __dpmi_int() by ansi_init()
 #endif
 
@@ -139,7 +145,7 @@ mem_crc16 (unsigned int size, unsigned short crc16, const void *buf)
 #endif
 
 
-#ifndef ZLIB
+#ifndef HAVE_ZLIB_H
 /*
   crc32 routines
 
@@ -194,7 +200,6 @@ mem_crc32 (unsigned int size, unsigned int crc32, const void *buffer)
 #endif
 
 
-#ifdef  ANSI_COLOR
 int
 ansi_init (void)
 {
@@ -253,7 +258,6 @@ ansi_strip (char *str)
   return str;
 }
 #endif
-#endif // ANSI_COLOR
 
 
 char *
@@ -359,15 +363,15 @@ char *
 setext (char *filename, const char *ext)
 {
   char ext2[FILENAME_MAX],
-       *p = basename2 (filename) ? basename2 (filename) : filename,
+       *p = basename (filename) ? basename (filename) : filename,
        *p2 = NULL;
 
   if ((p2 = strrchr (p, '.')))
-    if (strcmp (p2 ,p) != 0) // some files start with '.'
+    if (strcmp (p2 ,p) != 0)                    // some files start with '.'
       *p2 = 0;
 
   strcpy (ext2, ext);
-  strcat (filename, areupper (basename2 (filename)) ? strupr (ext2) : strlwr (ext2));
+  strcat (filename, areupper (basename (filename)) ? strupr (ext2) : strlwr (ext2));
 
   return filename;
 }
@@ -392,10 +396,10 @@ strtrim (char *str)
 {
   int x = strlen (str);
 
-  while (x && isspace ((int) str[--x]))
+  while (x && isspace ((int) *(str + (--x))))
     ;
 
-  str[++x] = 0;
+  *(str + (++x)) = 0;
 
   return str + strspn (str, "\t ");
 }
@@ -420,51 +424,31 @@ memwcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildca
 }
 
 
-#if 1
 void *
 mem_swap (void *add, uint32_t n)
 {
-  uint32_t pos = 0;
   unsigned char *a = add, c;
 
-  for (; pos + 1 < n; pos += 2)
+  for (; n > 1; a += 2, n -= 2)
     {
-      c = a[pos];
-      a[pos] = a[pos + 1];
-      a[pos + 1] = c;
+      c = *a;
+      *a = *(a + 1);
+      *(a + 1) = c;
     }
 
   return add;
 }
-#else
-void *
-mem_swap (void *add, uint32_t bit, uint32_t n)
-{
-  uint32_t pos = 0;
-  uint32_t increment = bit / 8;
-  unsigned char *a = add, c;
-
-  for (; pos + 1 < n; pos += 2)
-    {
-      c = a[pos];
-      a[pos] = a[pos + 1];
-      a[pos + 1] = c;
-    }
-
-  return add;
-}
-#endif
 
 
 void
 mem_hexdump (const void *mem, uint32_t n, int virtual_start)
-//hexdump something
+// hexdump something
 {
   uint32_t pos;
   char buf[MAXBUFSIZE];
   const unsigned char *p = mem;
 
-  buf [0] = 0;
+  *buf = 0;
   for (pos = 0; pos < n; pos++, p++)
     {
       if (!(pos % 16))
@@ -472,32 +456,28 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
                                pos ? "\n" : "",
                                (int) pos + virtual_start);
       printf ("%02x %s", *p, !((pos + 1) % 4) ? " ": "");
-#if 1
-      sprintf (buf + (pos % 16), "%c", isprint (*p) ? *p : '.');
-#else
       *(buf + (pos % 16)) = isprint (*p) ? *p : '.';
       *(buf + (pos % 16) + 1) = 0;
-#endif
     }
   printf ("%s\n", buf);
 }
 
 
-int
-renlwr (const char *dir)
+static int
+ren (const char *path, int (*func) (int))
 {
   struct dirent *ep;
   struct stat fstate;
   DIR *dp;
-  char buf[MAXBUFSIZE];
+  char buf[FILENAME_MAX], *p = NULL;
 
-  if (access (dir, R_OK) != 0 || (dp = opendir (dir)) == NULL)
+  if (access (path, R_OK) != 0 || (dp = opendir (path)) == NULL)
     {
       errno = ENOENT;
       return -1;
     }
 
-  chdir (dir);
+  chdir (path);
 
   while ((ep = readdir (dp)) != 0)
     {
@@ -506,22 +486,108 @@ renlwr (const char *dir)
 //              if (S_ISREG (fstate.st_mode))
           {
             strcpy (buf, ep->d_name);
-            rename (ep->d_name, strlwr (buf));
+
+            for (p = buf; *p; p++)
+              *p = func (*p);
+
+            rename (ep->d_name, buf);
           }
         }
     }
-  (void) closedir (dp);
+  closedir (dp);
   return 0;
 }
 
 
+int
+renlwr (const char *path)
+{
+  return ren (path, tolower); 
+}
+
+
+// create a directory and check its permissions
+#if 0
+void
+mkdir2 (const char *name)
+{
+  struct stat *st;
+  if (lstat (name, st) == -1)
+    {
+      if (errno != ENOENT)
+        fprintf (stderr, "lstat %s", name);
+      if (mkdir (name, 0700) == -1)
+        fprintf (stderr, "mkdir %s", name);
+      if (lstat (name, st) == -1)
+        fprintf (stderr, "lstat %s", name);
+    }
+
+  if (!S_ISDIR (st->st_mode))
+    fprintf (stderr, "%s is not a directory\n", name);
+  if (st->st_uid != getuid ())
+    fprintf (stderr, "%s is not owned by you\n", name);
+  if (st->st_mode & 077)
+    fprintf (stderr, "%s must not be accessible by other users\n", name);
+}
+#endif
+
+
 char *
 basename2 (const char *str)
-// GNU basename() clone
+// basename() clone
 {
   char *p = strrchr (str, FILE_SEPARATOR);
 
   return p ? p + 1 : (char *) str;
+}
+
+
+char *
+dirname2 (char *str)
+// dirname() clone
+{
+  char *p = strrchr (str, FILE_SEPARATOR);
+  if (p) *(++p) = 0;
+  
+  return str;
+}
+
+
+char *
+realpath2 (const char *src, char *full_path)
+// clone of realpath() which returns the absolute path of a file
+{
+  char path1[FILENAME_MAX], path2[FILENAME_MAX];
+
+  if (src[0] == '~' && src[1] == FILE_SEPARATOR)
+    {
+      strcpy (path1, getenv2 ("HOME"));
+      strcpy (path2, &src[2]);
+      sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
+    }
+
+  if (src[0] == '.' && src[1] == FILE_SEPARATOR)
+    {
+      getcwd (path1, FILENAME_MAX);
+      strcpy (path2, &src[2]);
+      sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
+    }
+
+  return full_path;
+}
+
+
+void
+argz_extract2 (char *cmd, size_t argc, char ***argv)
+{
+//this will be replaced by argz_extract() soon
+#if 0
+  int i = 0;
+  char buf[MAXBUFSIZE];
+
+  if (*cmd)
+    for (; (argv[i] = strtok (!i?cmd:NULL, " ")) && i < (argc - 1); i++);
+#endif
 }
 
 
@@ -680,27 +746,23 @@ gauge (time_t init_time, int pos, int size)
   left /= bps ? bps : 1;
 
   p = (GAUGE_LENGTH * pos) / size;
-  progress[0] = 0;
+  *progress = 0;
   strncat (progress, "========================", p);
 
-#ifdef  ANSI_COLOR
   if (misc_ansi_color)
     {
       progress[p] = 0;
       if (p < GAUGE_LENGTH)
         strcat(progress, "\x1b[31;41m");
     }
-#endif
 
   strncat (&progress[p], "------------------------", GAUGE_LENGTH - p);
 
   percentage = (100LL * pos) / size;
 
-    printf (
-#ifdef ANSI_COLOR
+  printf (
     misc_ansi_color ? "\r%10d Bytes [\x1b[32;42m%s\x1b[0m] %d%%, BPS=%d, " :
-#endif
-    "\r%10d Bytes [%s] %d%%, BPS=%d, ", pos, progress, percentage, bps);
+      "\r%10d Bytes [%s] %d%%, BPS=%d, ", pos, progress, percentage, bps);
 
   if (pos == size)
     printf ("TOTAL=%03d:%02d", curr / 60, curr % 60); // DON'T print a newline
@@ -746,11 +808,25 @@ cygwin_fix (char *value)
 char *
 getenv2 (const char *variable)
 {
-#undef getenv
   char *tmp;
-  static char value[FILENAME_MAX];
+  static char value[MAXBUFSIZE];
+#if     defined __CYGWIN__ || defined __MSDOS__
+/*
+  Under DOS and Windows the environment variables are not stored in a case
+  sensitive manner. The runtime systems of DJGPP and Cygwin act as if they are
+  stored in upper case. Their getenv() however *is* case sensitive. We fix this
+  by changing all characters of the search string (variable) to upper case.
 
-  value[0] = 0;
+  Note that under Cygwin's Bash environment variables *are* stored in a case
+  sensitive manner.
+*/
+  char tmp2[MAXBUFSIZE];
+
+  strcpy (tmp2, variable);
+  variable = strupr (tmp2);                     // DON'T copy the string into variable
+#endif                                          //  (variable itself is local)
+
+  *value = 0;
 
   if ((tmp = getenv (variable)) != NULL)
     strcpy (value, tmp);
@@ -780,7 +856,7 @@ getenv2 (const char *variable)
             {
               char c;
               getcwd (value, FILENAME_MAX);
-              c = toupper (value[0]);
+              c = toupper (*value);
               // if current dir is root dir strip problematic ending slash (DJGPP)
               if (c >= 'A' && c <= 'Z' &&
                   value[1] == ':' && value[2] == '/' && value[3] == 0)
@@ -801,9 +877,9 @@ getenv2 (const char *variable)
 
 #ifdef __CYGWIN__
   /*
-    Under certain circumstances Cygwin's runtime system returns "/" as value of HOME
-    while that var has not been set. To specify the root dir a drive letter should be
-    used.
+    Under certain circumstances Cygwin's runtime system returns "/" as value of
+    HOME while that var has not been set. To specify a root dir a path like
+    /cygdrive/<drive letter> or simply a drive letter should be used.
   */
   if (!strcmp (variable, "HOME") && !strcmp (value, "/"))
     getcwd (value, FILENAME_MAX);
@@ -812,7 +888,6 @@ getenv2 (const char *variable)
 #else
   return value;
 #endif
-#define getenv getenv2
 }
 
 
@@ -821,13 +896,14 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
 {
   char buf[MAXBUFSIZE], *p = NULL;
   FILE *fh;
+  int prop_found = 0;
 
-  if ((fh = fopen (filename, "rb")) != 0)
-    {
+  if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
+    {                                           //  avoids trouble under DOS
       while (fgets (buf, sizeof buf, fh) != NULL)
         {
-          if ((p = strpbrk (buf, "\x0a\x0d")))  // strip any returns
-             *p = 0;
+          if ((p = strpbrk (buf, "\n")))        // strip any returns
+            *p = 0;
 
           if (*(buf + strspn (buf, "\t ")) == '#')
             continue;
@@ -840,21 +916,24 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
               p++;
               strcpy (buffer, p + strspn (p, "\t "));
 
-              fclose (fh);
-              return buffer;
-            }
+              prop_found = 1;
+              break;                            // an environment variable
+            }                                   //  might override this
         }
       fclose (fh);
     }
 
   p = getenv2 (propname);
-  if (p[0] == 0)                                // getenv2() never returns NULL
+  if (*p == 0)                                  // getenv2() never returns NULL
     {
-      if (def)
-        strcpy (buffer, def);
-      else
-        buffer = (char *) def;                  // buffer won't be changed
-    }                                           //  after this func (=ok)
+      if (!prop_found)
+        {
+          if (def)
+            strcpy (buffer, def);
+          else
+            buffer = NULL;                      // buffer won't be changed
+        }                                       //  after this func (=ok)
+    }
   else
     strcpy (buffer, p);
   return buffer;
@@ -878,10 +957,10 @@ set_property (const char *filename, const char *propname, const char *value)
       return -1;
     }
 
-  buf2[0] = 0;
+  *buf2 = 0;
 
-  if ((fh = fopen (filename, "rb")) != 0)
-    {
+  if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
+    {                                           //  avoids trouble under DOS
       while (fgets (buf, sizeof buf, fh) != NULL)
         {
           if (!strncasecmp (buf, propname, strlen (propname)))
@@ -903,7 +982,7 @@ set_property (const char *filename, const char *propname, const char *value)
         strcat (buf2, buf);
       }
 
-  if ((fh = fopen (filename, "wb")) == NULL)
+  if ((fh = fopen (filename, "w")) == NULL)     // open in text mode
     return -1;
 
   result = fwrite (buf2, 1, strlen (buf2), fh);
@@ -956,41 +1035,16 @@ tmpnam2 (char *temp)
 {
   char *p = getenv2 ("TEMP");
   static time_t init = 0;
-  
+
   if (!init)
     {
       init = time (0);
       srand (init);
     }
 
-  temp[0] = 0;
-  while (!temp[0] || !access (temp, F_OK))      // must work for files AND dirs
+  *temp = 0;
+  while (!(*temp) || !access (temp, F_OK))      // must work for files AND dirs
     sprintf (temp, "%s%s%08x.tmp", p, FILE_SEPARATOR_S, rand());
-
-  return temp;
-}
-
-
-char *
-tmpnam3 (char *temp, int type)
-// tmpnam() clone
-{
-  FILE *fh;
-  tmpnam2 (temp);
-
-// create file or dir in the same moment to prevent double usage
-  switch (type)
-    {
-      case TYPE_DIR:
-        mkdir (temp, S_IRUSR|S_IWUSR);
-        break;
-
-      case TYPE_FILE:
-      default: // a file is the default
-        if ((fh = fopen (temp, "wb+")) != 0)
-          fclose (fh);
-        break;
-    }
 
   return temp;
 }
@@ -1058,7 +1112,10 @@ deinit_conio (void)
 {
 #ifndef __MSDOS__
   if (oldtty_set)
-    tcsetattr (STDIN_FILENO, TCSAFLUSH, &oldtty);
+    {
+      tcsetattr (STDIN_FILENO, TCSAFLUSH, &oldtty);
+      oldtty_set = 0;
+    }
 #endif
 }
 
@@ -1112,13 +1169,13 @@ drop_privileges (void)
   uid = getuid ();
   if (setuid (uid) == -1)
     {
-      fprintf (stderr, "Could not set uid\n");
+      fprintf (stderr, "ERROR: Could not set uid\n");
       return 1;
     }
   gid = getgid ();                              // This shouldn't be necessary
   if (setgid (gid) == -1)                       //  if `make install' was
     {                                           //  used, but just in case
-      fprintf (stderr, "Could not set gid\n");  //  (root did `chmod +s')
+      fprintf (stderr, "ERROR: Could not set gid\n"); //  (root did `chmod +s')
       return 1;
     }
 
@@ -1183,100 +1240,10 @@ handle_registered_funcs (void)
 }
 
 
-#ifdef  ZLIB
-st_map_t *
-map_create (int n_elements)
-{
-  st_map_t *map;
-  int size = sizeof (st_map_t) + n_elements * sizeof (st_map_element_t);
+// map code should be included unconditionally (needed by gz/zip & DLL (DXE) code)
+#include "map.c"
 
-  if ((map = (st_map_t *) malloc (size)) == NULL)
-    {
-      fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", size);
-      exit (1);
-    }
-  map->data = (st_map_element_t *) (((unsigned char *) map) + sizeof (st_map_t));
-  memset (map->data, MAP_FREE_KEY, n_elements * sizeof (st_map_element_t));
-  map->size = n_elements;
-  return map;
-}
-
-
-void
-map_copy (st_map_t *dest, st_map_t *src)
-{
-  memcpy (dest->data, src->data, src->size * sizeof (st_map_element_t));
-}
-
-
-st_map_t *
-map_put (st_map_t *map, void *key, void *object)
-{
-  int n = 0;
-
-  // I (dbjh) don't use a more efficient but also more complex technique,
-  //  because we will probably only have small maps.
-  while (n < map->size && map->data[n].key != MAP_FREE_KEY)
-    n++;
-
-  if (n == map->size)                           // current map is full
-    {
-      int new_size = map->size + 20;
-      st_map_t *map2;
-
-      map2 = map_create (new_size);
-      map_copy (map2, map);
-      free (map);
-      map = map2;
-    }
-
-  map->data[n].key = key;
-  map->data[n].object = object;
-
-  return map;
-}
-
-
-void *
-map_get (st_map_t *map, void *key)
-{
-  int n = 0;
-
-  while (n < map->size && map->data[n].key != key)
-    n++;
-
-  if (n == map->size)
-    return NULL;
-
-  return map->data[n].object;
-}
-
-
-void
-map_del (st_map_t *map, void *key)
-{
-  int n = 0;
-
-  while (n < map->size && map->data[n].key != key)
-    n++;
-
-  if (n < map->size)
-    map->data[n].key = MAP_FREE_KEY;
-}
-
-
-void
-map_dump (st_map_t *map)
-{
-  int n = 0;
-
-  while (n < map->size)
-    {
-      printf ("%p -> %p\n", map->data[n].key, map->data[n].object);
-      n++;
-    }
-}
-
+#ifdef  HAVE_ZLIB_H
 
 /*
   The zlib functions gzwrite() and gzputc() write compressed data if the file
@@ -1420,33 +1387,33 @@ fopen2 (const char *filename, const char *mode)
   for (n = 0; n < len; n++)
     {
       switch (mode[n])
-      {
-      case 'r':
-        read = 1;
-        break;
-      case 'f':
-      case 'h':
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9':
-        fmode = FM_GZIP;
-        break;
-      case 'w':
-      case 'a':
-        fmode = FM_NORMAL;
-        break;
-      case '+':
-        if (fmode == FM_UNDEF)
+        {
+        case 'r':
+          read = 1;
+          break;
+        case 'f':
+        case 'h':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+          fmode = FM_GZIP;
+          break;
+        case 'w':
+        case 'a':
           fmode = FM_NORMAL;
-        break;
+          break;
+        case '+':
+          if (fmode == FM_UNDEF)
+            fmode = FM_NORMAL;
+          break;
+        }
       }
-    }
 
   if (read)
     {
@@ -1734,9 +1701,10 @@ fputc2 (int character, FILE *file)
     return EOF;                                 // writing to zip files is not supported
 #define fputc   fputc2
 }
-#endif // ZLIB
+#endif // HAVE_ZLIB_H
 
 
+#ifndef HAVE_BYTESWAP_H
 unsigned short int
 bswap_16 (unsigned short int x)
 {
@@ -1789,6 +1757,7 @@ bswap_64 (unsigned long long int x)
   ptr[4] = tmp;
   return x;
 }
+#endif // #ifndef HAVE_BYTESWAP_H
 
 
 void

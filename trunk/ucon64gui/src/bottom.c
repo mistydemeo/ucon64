@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #include "misc.h"
 #include "ucon64gui.h"
-#include "libhtmltk/libhtmltk.h"
+#include "libhtk/libhtk.h"
 #include "bottom.h"
 
 void

@@ -1,7 +1,8 @@
 /*
-pce.c - PC-Engine support for uCON64gui
+libhtk_cfg.h - configfile for libhtk
 
-written by 2002 NoisyB (noisyb@gmx.net)
+written by 2002 Dirk Reinelt (d_i_r_k_@gmx.net)
+           
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,28 +18,22 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifndef HTML2GUI_CFG_H
+#define HTML2GUI_CFG_H
+#ifndef MAXBUFSIZE
+#define MAXBUFSIZE 32768
+#endif // MAXBUFSIZE
 
-#include <stdlib.h>
-#include <stdio.h>
-#include "config.h"
-#include "misc.h"
-#include "ucon64gui.h"
-#include "libhtk/libhtk.h"
-#include "top.h"
-#include "bottom.h"
-#include "configmenu.h"
-#include "pce.h"
+//#define USE_GETOPT  // crashes
+//#define USE_HTML4
 
-void
-pce_gui (void)
-{
-  ucon64gui_top ();
+//#define SDL
+#define GTK
+//#define CURSES
 
-//  htk_img (swc_xpm, 0, 0, 0, NULL);
+#ifdef GTK
+#define img_src *img_src
+#endif
 
-  ucon64gui_divider ();
 
-  htk_input_submit ("fix Checksum", OPTION_LONG_S "chk", "(" OPTION_LONG_S "chk) fix ROM checksum");
-
-  ucon64gui_bottom ();
-}
+#endif // HTML2GUI_CFG_H

@@ -1,5 +1,5 @@
 /*
-ucon64gui.h - a GUI for ucon64 (using libhtmltk framework)
+ucon64gui.h - a GUI for ucon64 (using libhtk framework)
 
 written by 2002 NoisyB (noisyb@gmx.net)
            

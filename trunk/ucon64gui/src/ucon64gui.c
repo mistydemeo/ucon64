@@ -1,5 +1,5 @@
 /*
-ucon64gui.c - a GUI for ucon64 (using libhtmltk framework)
+ucon64gui.c - a GUI for ucon64 (using libhtk framework)
 
 written by 2002 NoisyB (noisyb@gmx.net)
            
@@ -25,7 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #include "ucon64gui.h"
 #include "misc.h"
-#include "url.h"
+#include "fopen3.h"
 
 #include "top.h"
 #include "bottom.h"
@@ -46,7 +46,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/neogeo.h"
 #include "console/ngp.h"
 
-#include "libhtmltk/libhtmltk.h"
+#include "libhtk/libhtk.h"
 
 
 const char *ucon64gui_title = "uCON64gui " UCON64GUI_VERSION " (for uCON64 " UCON64_VERSION_S ") 2002 by NoisyB ";
@@ -257,7 +257,7 @@ htk_request (const char *uri, const char *query)
   const char *value;
   char buf[MAXBUFSIZE];
   const char *p = NULL;
-  st_url_t url;
+  URL_t *Curl;
 
 #ifdef DEBUG
   fprintf (stderr, "query: %s\n", query);
@@ -269,14 +269,17 @@ htk_request (const char *uri, const char *query)
 
   sprintf (buf, "localhost%s%s%s", uri, p ? "?" : "", p ? p : "");
     
-  url_parser (&url, buf);
+  if (!(Curl = url_new (buf)))
+    return;
 
 #ifdef DEBUG
-  printf ("cmdline: %s\n", url.cmd);
+  printf ("cmdline: %s\n", Curl->cmd);
 #endif
 
-  sprintf (buf, "%s %s", url.cmd,
+  sprintf (buf, "%s %s", Curl->cmd,
            NULL_TO_EMPTY (ucon64gui.console));
+
+  url_free (Curl);
 
 
   if (ucon64gui.rom[0])

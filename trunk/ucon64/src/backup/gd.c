@@ -314,7 +314,7 @@ gd6_send_byte_helper (unsigned char data, unsigned int timeout)
     if (--timeout == 0)
       return GD_ERROR;
 
-  gd6_send_toggle ^= 2;
+  gd6_send_toggle = ~gd6_send_toggle & 0x02;
   outportb ((unsigned short) gd_port, data);
   outportb ((unsigned short) (gd_port + PARPORT_CONTROL), (unsigned char) (4 | (gd6_send_toggle >> 1)));
 

@@ -69,12 +69,12 @@ read_byte (FILE *file)
 }
 
 
-// Based on IPS v1.0 for UNIX by madman
+// based on IPS v1.0 for UNIX by madman
 int
 ips_apply (const char *destname, const char *patchname)
 {
   FILE *destfile;
-  unsigned char byte, byte2, byte3, magic[5];
+  unsigned char byte, byte2, byte3, magic[6];
   unsigned int offset, length, i;
 
   ucon64_fbackup (NULL, destname);
@@ -157,17 +157,15 @@ ips_apply (const char *destname, const char *patchname)
 }
 
 
-// The ULTIMATE IPS creation code ;-) Ultimate as in generating the
-//  smallest IPS file possible.
-// TODO: cleaning up this code
-
+// TODO: cleaning up most of the IPS creation code
 static void
-write_address (FILE *file, const char *name, int address)
+write_address (FILE *file, const char *name, int new_address)
 {
+  address = new_address;
   if (address < 16777216)
     /*
-      16777216 = 2^24. The original code checked for 16711680
-      (2^24 - 64K), but that is an artificial limit.
+      16777216 = 2^24. The original code checked for 16711680 (2^24 - 64K), but
+      that is an artificial limit.
     */
     {
       fputc (address >> 16, file);
@@ -275,8 +273,7 @@ check_for_rle (unsigned char byte, unsigned char *buf)
               fseek (modfile, filepos, SEEK_SET);
 
               flush_diffs (buf);
-              address = filepos;
-              write_address (ipsfile, ipsname, address);
+              write_address (ipsfile, ipsname, filepos);
               retval = 1;
 #ifdef  DEBUG_IPS
               printf ("restart (%x)\n", address);
@@ -388,27 +385,27 @@ next_byte:
         /*
           We must avoid writing 0x454f46 (4542278) as offset, because it has a
           special meaning. Offset 0x454f46 is interpreted as EOF marker. It is
-          the numerical representation of the ASCII string "EOF".
+          a numerical representation of the ASCII string "EOF".
           We solve the problem by writing 2 patch bytes for offsets 0x454f45
           and 0x454f46 regardless whether those bytes differ for orgfile and
           modfile.
         */
         {
-          flush_diffs (buf);                    // commit any pending data
-
-          write_address (ipsfile, ipsname, 0x454f46 - 1);
+          if (address < 0 || address + ndiffs != 0x454f46 - 1 || ndiffs > 65535 - 2)
+            {
+              flush_diffs (buf);                // commit any pending data
+              write_address (ipsfile, ipsname, 0x454f46 - 1);
+            }
           // write 2 patch bytes (for offsets 0x454f45 and 0x454f46)
-          buf[0] = byte2;
-          buf[1] = read_byte (modfile);
+          buf[ndiffs++] = byte2;
+          buf[ndiffs++] = read_byte (modfile);
           filepos++;
-          ndiffs = 2;
-          flush_diffs (buf);
 
           fseek (orgfile, filepos, SEEK_SET);   // keep the files synchronized
 #ifdef  DEBUG_IPS
           printf ("[%02x] => %02x\n"
-                  "[%02x] => %02x\n"
-                  "length: 2\n", filepos - 2, buf[0], filepos - 1, buf[1]);
+                  "[%02x] => %02x\n",
+                  filepos - 2, buf[ndiffs - 2], filepos - 1, buf[ndiffs - 1]);
 #endif
           continue;
         }
@@ -421,8 +418,7 @@ next_byte:
           if (address < 0)
             {
               flush_diffs (buf);                // commit previous block
-              address = filepos - 1;
-              write_address (ipsfile, ipsname, address);
+              write_address (ipsfile, ipsname, filepos - 1);
             }
 
           buf[ndiffs++] = byte2;

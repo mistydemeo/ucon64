@@ -182,7 +182,7 @@ typedef struct
   int interleaved;                              // ROM is interleaved (swapped)
   int id;                                       // generate unique name (currently
                                                 //  only used by snes_gd3())
-  // the following values are for SNES, NES and the Genesis
+  // the following values are for SNES, NES and Genesis
   int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
   int snes_hirom;                               // SNES ROM is HiROM
   int part_size;                                // SNES/Genesis split part size

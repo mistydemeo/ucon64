@@ -522,6 +522,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_UNSCRAMBLE, UCON64_DC, dc_usage,     WF_DEFAULT},
   {UCON64_USMS, UCON64_N64, n64_usage,         WF_DEFAULT},
   {UCON64_V64, UCON64_N64, n64_usage,          WF_DEFAULT},
+  {UCON64_VMS, UCON64_DC, dc_usage,            0},
 #ifdef  PARALLEL
   // We have to add |WF_NO_ROM to the copier options workflow parameter in
   //  order to support dumping of cartridges or copier SRAM.

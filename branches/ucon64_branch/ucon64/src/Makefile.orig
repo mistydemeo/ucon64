@@ -84,7 +84,7 @@ FULLLIBNAME_NG=$(LIBNAME_NG).so
 endif
 
 ifneq ($(OSTYPE),beos)
-ifneq ($(OSTYPE),FreeBSD)
+ifeq ($(findstring freebsd,$(OSTYPE)),) # false if OSTYPE contains "freebsd"
 LDFLAGS+=-ldl
 endif
 endif

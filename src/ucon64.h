@@ -36,7 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>             // ioperm() (libc5)
-#include <getopt.h>
+//#include <getopt.h>           // __FreeBSD__ problems
 //#include "config.h"
 
 #include "ucon64_db.h"

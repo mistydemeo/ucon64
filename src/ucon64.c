@@ -60,8 +60,67 @@ write programs in C
 #define MAXBUFSIZE 32768
 
 
-
 int main(int argc,char *argv[])
+{
+/*  long x, y = 0, console=ucon64_UNKNOWN;
+  int ucon64_argc;
+  struct dirent *ep;
+  struct stat puffer;
+  DIR *dp;
+  char buf[MAXBUFSIZE], buf2[4096], buf3[4096], *ucon64_argv[128], *forceargs[] =
+  {
+    "",
+    "-gb",
+    "-gen",
+    "-sms",
+    "-jag",
+    "-lynx",
+    "-n64",
+    "-ng",
+    "-nes",
+    "-pce",
+    "-psx",
+    "-psx2",
+    "-snes",
+    "-sat",
+    "-dc",
+    "-cd32",
+    "-cdi",
+    "-3do",
+    "-ata",
+    "-s16",
+    "-ngp",
+    "-gba"
+  };
+#ifdef	__UNIX__
+  uid_t uid;
+  gid_t gid;
+#endif
+*/
+  printf("%s\n",ucon64_TITLE);
+  printf("Uses code from various people. See 'DEVELOPERS' for more!\n");
+  printf("This may be freely redistributed under the terms of the GNU Public License\n\n");
+
+  if (argc<2 ||
+      argcmp(argc, argv, "-h") ||
+      argcmp(argc, argv, "--help") ||
+      argcmp(argc, argv, "-?"))
+  {
+    ucon64_usage(argc,argv);
+    return 0;
+  }
+
+/*
+if(argcmp(argc, argv, "-sh"))
+{
+//TODO shell modus
+	return(0);
+}
+*/
+  return(ucon64_main(argc,argv));
+}
+
+int ucon64_main(int argc,char *argv[])
 {
   long x, y = 0, console=ucon64_UNKNOWN;
   int ucon64_argc;
@@ -97,7 +156,7 @@ int main(int argc,char *argv[])
   uid_t uid;
   gid_t gid;
 #endif
-
+/*
   printf("%s\n",ucon64_TITLE);
   printf("Uses code from various people. See 'DEVELOPERS' for more!\n");
   printf("This may be freely redistributed under the terms of the GNU Public License\n\n");
@@ -110,7 +169,7 @@ int main(int argc,char *argv[])
     ucon64_usage(argc,argv);
     return 0;
   }
-
+*/
   if (argcmp(argc, argv, "-db") || argcmp(argc, argv, "-dbv"))
   {
     atari_main(argc,argv);

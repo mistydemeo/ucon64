@@ -1070,11 +1070,8 @@ ucon64_rom_handling (void)
                         ucon64.rominfo->country = NULL_TO_EMPTY (ucon64.dat->country);
                     }
                   else if (ucon64.console == UCON64_SMS)
-                    {
-                      strcpy ((char *) ucon64.rominfo->name,
-                              NULL_TO_EMPTY (ucon64.dat->name));
-                      ucon64.rominfo->country = NULL_TO_EMPTY (ucon64.dat->country);
-                    }
+                    strcpy ((char *) ucon64.rominfo->name,
+                            NULL_TO_EMPTY (ucon64.dat->name));
                 }
               break;
           }
@@ -1116,7 +1113,7 @@ ucon64_probe (st_rominfo_t * rominfo)
       {UCON64_GEN, genesis_init, AUTO},
       {UCON64_LYNX, lynx_init, AUTO},
       {UCON64_GB, gameboy_init, AUTO},
-      {UCON64_SMS, sms_init, AUTO},             // only auto for SMD files
+      {UCON64_SMS, sms_init, AUTO},
       {UCON64_SNES, snes_init, AUTO},
       {UCON64_NES, nes_init, AUTO},
       {UCON64_NGP, ngp_init, AUTO},
@@ -1199,7 +1196,7 @@ ucon64_nfo (void)
         return 0; // no crc calc. for disc images and therefore no dat entry either
       }
 #endif
-  // Use ucon64.fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
+  // Use ucon64.fcrc32 for SNES, Genesis & SMS interleaved/N64 non-interleaved
   if (ucon64.fcrc32 && ucon64.crc32)
     printf ("Search checksum (CRC32): 0x%08x\n"
             "Data checksum (CRC32): 0x%08x\n", ucon64.crc32, ucon64.fcrc32);
@@ -1733,17 +1730,17 @@ ucon64_usage (int argc, char *argv[])
 _ __ ________________________________________________________________ __ _
                                                       ___
     .,,,,     .---._ Oo  .::::. .::::. :::   :::    __\__\
-    ( oo)__   (¯oo) /..\ ::  :: ::  :: :::   :::    \ / Oo\o  (\(\
+    ( oo)__   (oo) /..\ ::  :: ::  :: :::   :::    \ / Oo\o  (\(\
    /\_  \__) /\_  \/\_,/ ::  .. ::..:: ::'   ::'    _\\`--_/ o/oO \
    \__)_/   _\__)_/_/    :::::: :::::: ::....::.... \_ \  \  \.--'/
-   /_/_/    \ /_/_//     `::::' ::  :: `:::::`:::::: /_/__/   /¯\ \___
+   /_/_/    \ /_/_//     `::::' ::  :: `:::::`:::::: /_/__/   /\ \___
  _(__)_)_,   (__)_/  .::::.                      ;::  |_|_    \_/_/\_/\
-  o    o      (__)) ,:' `::::::::::::::::::::::::::' (__)_)___(_(_)  ¯¯
+  o    o      (__)) ,:' `::::::::::::::::::::::::::' (__)_)___(_(_)  
      ________  ________  _____ _____________________/   __/_  __/_________
     _\___   /__\___   /_/____/_\    __________     /    ___/  ______     /
    /    /    /    /    /     /  \      \/    /    /     /     /    /    /
   /    /    /         /     /          /    _____/_    /_    /_   _____/_
- /____/    /_________/     /·aBn/fAZ!/nB·_________/_____/_____/_________/
+ /____/    /_________/     /aBn/fAZ!/nB_________/_____/_____/_________/
 - -- /_____\--------/_____/------------------------------------------ -- -
 4 Nodes USRobotics & Isdn Power     All Releases Since Day 0 Are Available
  SNES/Sega/Game Boy/GameGear/Ultra 64/PSX/Jaguar/Saturn/Engine/Lynx/NeoGeo

@@ -1161,6 +1161,9 @@ ucon64_options (int c, const char *optarg)
         case UCON64_N64:
           n64_chk (ucon64.rominfo);
           break;
+        case UCON64_SMS:
+          sms_chk (ucon64.rominfo);
+          break;
         case UCON64_SNES:
           snes_chk (ucon64.rominfo);
           break;

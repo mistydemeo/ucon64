@@ -31,4 +31,5 @@ extern int sms_init (st_rominfo_t *rominfo);
 extern int sms_mgd (st_rominfo_t *rominfo, int console);
 extern int sms_smd (st_rominfo_t *rominfo);
 extern int sms_smds (void);
+extern int sms_chk (st_rominfo_t *rominfo);
 #endif // SMS_H

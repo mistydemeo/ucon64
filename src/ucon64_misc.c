@@ -2004,14 +2004,15 @@ ucon64_rename (int mode)
   if (!good_name)
     /*
       Note that the previous statement causes whatever file is present in the
-      dir specified with -o (or the current dir) to be overwritten. This seems
-      bad, but is actually better than making a backup. It isn't so bad,
-      because the file that gets overwritten is either the same as the file it
-      is overwritten with or doesn't deserve its name.
+      dir specified with -o (or the current dir) to be overwritten (if the file
+      already has a correct name). This seems bad, but is actually better than
+      making a backup. It isn't so bad, because the file that gets overwritten
+      is either the same as the file it is overwritten with or doesn't deserve
+      its name.
       Without this statement repeating a rename action for already renamed
       files would result in a real mess. And I (dbjh) mean a *real* mess...
     */
-    if (!access (buf2, F_OK))                   // a file with that name exists already?
+    if (!access (buf2, F_OK) && !strcmp(p, p2)) // a file with that name exists already?
       ucon64_file_handler (buf2, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
 
   if (!good_name)

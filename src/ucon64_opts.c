@@ -670,7 +670,8 @@ ucon64_options (st_ucon64_t *p)
       printf ("Renaming \"%s\" to ", buf);
       strlwr (buf);
       printf ("\"%s\"\n", buf);
-      rename (ucon64.rom, buf);
+      ucon64_output_fname (buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+      rename2 (ucon64.rom, buf);
       strcpy ((char *) ucon64.rom, buf);
       break;
 
@@ -679,32 +680,33 @@ ucon64_options (st_ucon64_t *p)
       printf ("Renaming \"%s\" to ", buf);
       strupr (buf);
       printf ("\"%s\"\n", buf);
-      rename (ucon64.rom, buf);
+      ucon64_output_fname (buf, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+      rename2 (ucon64.rom, buf);
       strcpy ((char *) ucon64.rom, buf);
       break;
 
     case UCON64_HEX:
       ucon64_dump (stdout, ucon64.rom,
-               optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
-               ucon64.file_size, DUMPER_HEX);
+                   optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
+                   ucon64.file_size, DUMPER_HEX);
       break;
 
     case UCON64_DUAL:
       ucon64_dump (stdout, ucon64.rom,
-               optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
-               ucon64.file_size, DUMPER_DUAL);
+                   optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
+                   ucon64.file_size, DUMPER_DUAL);
       break;
 
     case UCON64_CODE:
       ucon64_dump (stdout, ucon64.rom,
-               optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
-               ucon64.file_size, DUMPER_CODE);
+                   optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
+                   ucon64.file_size, DUMPER_CODE);
       break;
 
     case UCON64_PRINT:
       ucon64_dump (stdout, ucon64.rom,
-               optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
-               ucon64.file_size, DUMPER_PRINT);
+                   optarg ? MAX (strtol2 (optarg, NULL), 0) : 0,
+                   ucon64.file_size, DUMPER_PRINT);
       break;
 
     case UCON64_C:

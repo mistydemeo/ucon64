@@ -142,6 +142,7 @@ const struct option options[] = {
 #ifdef  DISCMAGE
     {"disc", 0, 0, UCON64_DISC},
 #endif
+    {"dmirr", 0, 0, UCON64_DMIRR},
     {"dumpinfo", 1, 0, UCON64_DUMPINFO},
     {"e", 0, 0, UCON64_E},
     {"erom", 0, 0, UCON64_EROM},
@@ -292,6 +293,7 @@ const struct option options[] = {
     {"swap", 0, 0, UCON64_SWAP},
     {"swc", 0, 0, UCON64_SWC},
     {"swcs", 0, 0, UCON64_SWCS},
+    {"ufo", 0, 0, UCON64_UFO},
     {"ufos", 0, 0, UCON64_UFOS},
     {"unif", 0, 0, UCON64_UNIF},
     {"usms", 1, 0, UCON64_USMS},
@@ -851,7 +853,7 @@ ucon64_execute_options (void)
 
       opts++;
 
-      // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
+      // WF_NO_SPLIT, WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
       result = ucon64_rom_handling ();
 
       if (result == -1) // no rom, but WF_NO_ROM
@@ -950,6 +952,50 @@ ucon64_rom_handling (void)
   // The next statement is important and should be executed as soon as
   //  possible (and sensible) in this function
   ucon64.file_size = q_fsize (ucon64.rom);
+  // We have to do this here, because we don't know the file size until now
+  if (ucon64.buheader_len > ucon64.file_size)
+    {
+      fprintf (stderr,
+               "ERROR: A backup unit header length was specified that is larger than the file\n"
+               "       size (%d > %d)\n", ucon64.buheader_len, ucon64.file_size);
+      return -1;
+    }
+
+  if (!(ucon64.flags & WF_INIT))
+    return 0;
+
+  // "walk through" <console>_init()
+  if (ucon64.flags & WF_PROBE)
+    {
+      ucon64.rominfo = ucon64_probe (&rominfo); // returns console type
+
+      if (ucon64.rominfo)
+        {
+          // restore any overrides from st_ucon64_t
+          if (UCON64_ISSET (ucon64.buheader_len))
+            rominfo.buheader_len = ucon64.buheader_len;
+
+          if (UCON64_ISSET (ucon64.snes_header_base))
+            rominfo.snes_header_base = ucon64.snes_header_base;
+
+          if (UCON64_ISSET (ucon64.snes_hirom))
+            rominfo.snes_hirom = ucon64.snes_hirom;
+
+          if (UCON64_ISSET (ucon64.interleaved))
+            rominfo.interleaved = ucon64.interleaved;
+
+//          ucon64.rominfo = (st_rominfo_t *) &rominfo;
+        }
+
+#ifdef  DISCMAGE
+      // check for disc image only if ucon64_probe() failed or --disc was used
+      if (ucon64.discmage_enabled)
+//        if (!ucon64.rominfo || ucon64.force_disc)
+        if (ucon64.force_disc)
+          ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
+#endif
+    }
+  // end of WF_PROBE
 
   // Does the option allow split ROMs?
   if (ucon64.flags & WF_NO_SPLIT)

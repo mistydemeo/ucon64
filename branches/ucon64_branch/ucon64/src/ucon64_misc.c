@@ -426,16 +426,16 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_BOT, UCON64_N64, n64_usage,          WF_DEFAULT},
   {UCON64_CRP, UCON64_GBA, gba_usage,          WF_DEFAULT},
   {UCON64_COL, UCON64_SNES, snes_usage,        WF_NO_ROM},
-  {UCON64_DMIRR, UCON64_SNES, snes_usage,      WF_DEFAULT},
   {UCON64_DBUH, UCON64_SNES, snes_usage,       WF_DEFAULT},
+  {UCON64_DMIRR, UCON64_SNES, snes_usage,      WF_DEFAULT},
   {UCON64_F, UCON64_SNES, snes_usage,          WF_DEFAULT},
   {UCON64_FDS, UCON64_NES, nes_usage,          WF_DEFAULT},
   {UCON64_FDSL, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_FFE, UCON64_NES, nes_usage,          WF_DEFAULT},
-  {UCON64_FIG, UCON64_SNES, snes_usage,        WF_DEFAULT},
+  {UCON64_FIG, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
   {UCON64_FIGS, UCON64_SNES, snes_usage,       0},
   {UCON64_GBX, UCON64_GB, gameboy_usage,       WF_DEFAULT},
-  {UCON64_GD3, UCON64_SNES, snes_usage,        WF_DEFAULT},
+  {UCON64_GD3, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
   {UCON64_INES, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_INESHD, UCON64_NES, nes_usage,       WF_DEFAULT},
 //  {UCON64_IP, UCON64_DC, dc_usage,             WF_DEFAULT},
@@ -455,12 +455,13 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_ROTR, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
   {UCON64_SAM, UCON64_NG, neogeo_usage,        WF_DEFAULT},
   {UCON64_SGB, UCON64_GB, gameboy_usage,       WF_DEFAULT},
-  {UCON64_SMC, UCON64_SNES, snes_usage,        WF_DEFAULT},
+  {UCON64_SMC, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
   {UCON64_SMG, UCON64_PCE, pcengine_usage,     WF_DEFAULT},
   {UCON64_SRAM, UCON64_GBA, gba_usage,         0},
   {UCON64_SSC, UCON64_GB, gameboy_usage,       WF_DEFAULT},
-  {UCON64_SWC, UCON64_SNES, snes_usage,        WF_DEFAULT},
+  {UCON64_SWC, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
   {UCON64_SWCS, UCON64_SNES, snes_usage,       0},
+  {UCON64_UFO, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
   {UCON64_UFOS, UCON64_SNES, snes_usage,       0},
   {UCON64_UNIF, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_USMS, UCON64_N64, n64_usage,         WF_DEFAULT},
@@ -509,9 +510,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XCDRW, UCON64_UNKNOWN, NULL,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_CDMAGE, UCON64_UNKNOWN, NULL,  WF_DEFAULT},
 #endif
-#ifdef  GUI
-  {UCON64_GUI, UCON64_UNKNOWN, libng_usage,  WF_DEFAULT},
-#endif  
+
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},
   {UCON64_A, UCON64_UNKNOWN, aps_usage,        WF_STOP},
   {UCON64_B, UCON64_UNKNOWN, bsl_usage,        WF_STOP},
@@ -523,7 +522,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_DB, UCON64_UNKNOWN, ucon64_dat_usage, WF_NO_ROM},
   {UCON64_DBS, UCON64_UNKNOWN, ucon64_dat_usage, WF_NO_ROM},
   {UCON64_DBV, UCON64_UNKNOWN, ucon64_dat_usage, WF_NO_ROM},
-  {UCON64_DINT, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
+  {UCON64_DINT, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
   {UCON64_E, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
   {UCON64_FIND, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT},
   {UCON64_GG, UCON64_UNKNOWN, gg_usage,        WF_INIT|WF_PROBE},
@@ -539,7 +538,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_LS, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
   {UCON64_LSD, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE},
   {UCON64_LSV, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
-  {UCON64_MGD, UCON64_UNKNOWN, NULL,           WF_DEFAULT},
+  {UCON64_MGD, UCON64_UNKNOWN, NULL,           WF_DEFAULT|WF_NO_SPLIT},
 //  {UCON64_MGH, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
   {UCON64_MKA, UCON64_UNKNOWN, aps_usage,      WF_STOP},
   {UCON64_MKDAT, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE},
@@ -559,9 +558,9 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_RR83, UCON64_UNKNOWN, NULL,          WF_INIT|WF_PROBE|WF_NO_SPLIT},
   {UCON64_RL, UCON64_UNKNOWN, NULL,            0},
   {UCON64_RU, UCON64_UNKNOWN, NULL,            0},
-  {UCON64_S, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
+  {UCON64_S, UCON64_UNKNOWN, NULL,             WF_DEFAULT|WF_NO_SPLIT},
   {UCON64_SCAN, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
-  {UCON64_SMD, UCON64_UNKNOWN, NULL,           WF_DEFAULT}, // Genesis AND Sega Master System
+  {UCON64_SMD, UCON64_UNKNOWN, NULL,           WF_DEFAULT|WF_NO_SPLIT}, // Genesis AND Sega Master System
   {UCON64_SMDS, UCON64_UNKNOWN, NULL,          0}, // Genesis AND Sega Master System
   {UCON64_STP, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_STPN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
@@ -574,6 +573,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
 #ifdef  DISCMAGE
   {UCON64_DISC, UCON64_UNKNOWN, libdm_usage,   WF_SWITCH},
 #endif
+
   {UCON64_3DO, UCON64_3DO, real3do_usage,      WF_SWITCH},
   {UCON64_ATA, UCON64_ATA, atari_usage,        WF_SWITCH},
 //  {UCON64_CD32, UCON64_CD32, cd32_usage,       WF_SWITCH},
@@ -652,6 +652,9 @@ const st_ucon64_wf_t ucon64_wf[] = {
 #ifdef  PARALLEL
   {UCON64_XFALM, UCON64_GBA, fal_usage,        WF_SWITCH},
 #endif
+#ifdef  GUI
+  {UCON64_GUI, UCON64_UNKNOWN, libng_usage,  WF_DEFAULT},
+#endif  
   {0, 0, NULL, 0}
 };
 

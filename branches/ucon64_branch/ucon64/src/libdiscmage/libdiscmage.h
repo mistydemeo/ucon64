@@ -65,6 +65,11 @@ typedef signed __int64 int64_t;
 #endif // OWN_INTTYPES
 #endif
 
+#define DM_VERSION_MAJOR (0)
+#define DM_VERSION_MINOR (0)
+#define DM_VERSION_STEP (4)
+
+
 // a CD can have max. 99 tracks; this value might change in the future
 #define DM_MAX_TRACKS (99)
 

@@ -22,10 +22,10 @@ Sparcade RAT File
 Mimic GCS
 Nebula Driver
 -->
-- Support for 8+ different backup units to backup/restore ROM(s), disc(s) and
+- Support for 10+ different backup units to backup/restore ROM(s), disc(s) and
   SRAM(s) like: Flash Advance Linker, Doctor V64 (Junior), Super Wild Card,
   Game Doctor, Dexdrive, Super Magic Drive, Game Boy Xchanger, Mad Catz Camera
-  Link, Lynxit and your CD-Writer.
+  Link, Lynxit, MD-PRO and your CD-Writer.
 - Finally 150+(!) different options/features for every kind of ROM
   handling/management known to man :-)
 <!-- 120 options, 62 switches last time I counted them -->
@@ -40,7 +40,7 @@ Nebula Driver
 
 For console specific options check the following usage:
 
-uCON64 1.9.8-2 Unix (Linux) 1999-2003
+uCON64 1.9.8-3 Unix (Linux) 1999-2003
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
@@ -102,6 +102,7 @@ DATabase (support for DAT files)
 
 Patching
   --poke=OFF:V  change byte at file offset OFF to value V (both in hexadecimal)
+  --pattern=FILE change ROM based on patterns specified in FILE
   --patch=PATCH specify the PATCH for the following options
                   use this option or uCON64 expects the last commandline
                   argument to be the name of the PATCH file
@@ -204,7 +205,8 @@ Nintendo 64
   --v64         convert to Doctor V64 (and compatibles/interleaved)
   --z64         convert to Mr. Backup Z64 (not interleaved)
   --dint        convert ROM to (non-)interleaved format (1234 &#60;-&#62; 2143)
-  --swap        same as --dint
+  --swap        same as --dint, byte-swap ROM
+  --swap2       word-swap ROM (1234 &#60;-&#62; 3412)
   --bot=BOOTCODE add/extract BOOTCODE (4032 Bytes) to/from ROM;
                   extracts automatically if BOOTCODE does not exist
   --lsram=SRAM  LaC's SRAM upload tool; ROM should be LaC's ROM image
@@ -238,14 +240,15 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --nbs         force ROM is a regular cartridge dump
    -n=NEW_NAME  change internal ROM name to NEW_NAME
   --fig         convert to *Pro Fighter*/(all)FIG
-  --figs        convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG
+  --figs        convert emulator *.srm (SRAM) to *Pro Fighter*/(all)FIG
   --gd3         convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)
+  --gd3s        convert emulator *.srm (SRAM) to GD SF3(SF6/SF7)/Professor SF*
   --mgd         convert to Multi Game*/MGD2/MGH/RAW
   --smc         convert to Super Magicom/SMC
   --swc         convert to Super Wild Card*/(all)SWC
-  --swcs        convert Snes9x/ZSNES *.srm (SRAM) to Super Wild Card*/(all)SWC
+  --swcs        convert emulator *.srm (SRAM) to Super Wild Card*/(all)SWC
   --ufo         convert to Super UFO
-  --ufos        convert Snes9x/ZSNES *.srm (SRAM) to Super UFO
+  --ufos        convert emulator *.srm (SRAM) to Super UFO
   --stp         convert SRAM from backup unit for use with an emulator
                   --stp just strips the first 512 bytes
   --dbuh        display (relevant part of) backup unit header
@@ -264,9 +267,7 @@ Super Nintendo Entertainment System/SNES/Super Famicom
                   TYPE='5' Konami's justifier
                   TYPE='6' multitap
                   TYPE='7' mouse / super scope / gamepad
-  --col=0xCOLOR convert 0xRRGGBB (html) &#60;-&#62; 0xXXXX (SNES)
-                  this routine was used to find green colors in games and
-                  to replace them with red colors (blood mode)
+  --col=0xCOLOR convert 0xRRGGBB (HTML) &#60;-&#62; 0xXXXX (SNES)
    -j           join split ROM
    -s           split ROM; default part size is 8 Mb
   --ssize=SIZE  specify split part size in Mbit (not for Game Doctor SF3)
@@ -282,7 +283,9 @@ Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC
   --xswcs       send/receive SRAM to/from Super Wild Card*/(all)SWC;
                   --port=PORT
                   receives automatically when SRAM does not exist
-                  Press q to abort; ^C might cause invalid state of backup unit
+  --xswcr       send/receive RTS data to/from Super Wild Card*/(all)SWC;
+                  --port=PORT
+                  receives automatically when RTS file does not exist
 Game Doctor SF3(SF6/SF7)/Professor SF(SF II)
   --xgd3        send ROM to Game Doctor SF3/SF6/SF7; --port=PORT
                   this option uses the Game Doctor SF3 protocol
@@ -291,12 +294,14 @@ Game Doctor SF3(SF6/SF7)/Professor SF(SF II)
   --xgd3s       send SRAM to Game Doctor SF3/SF6/SF7; --port=PORT
   --xgd6s       send/receive SRAM to/from Game Doctor SF6/SF7; --port=PORT
                   receives automatically when SRAM does not exist
+  --xgd6r       send/receive saver (RTS) data to/from Game Doctor SF6/SF7;
+                  --port=PORT
+                  receives automatically when saver file does not exist
 Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)
   --xfig        send/receive ROM to/from *Pro Fighter*/(all)FIG; --port=PORT
                   receives automatically when ROM does not exist
   --xfigs       send/receive SRAM to/from *Pro Fighter*/(all)FIG; --port=PORT
                   receives automatically when SRAM does not exist
-                  Press q to abort; ^C might cause invalid state of backup unit
 
 Neo Geo/Neo Geo CD(Z)/MVS
   --ng          force recognition
@@ -326,7 +331,11 @@ Genesis/Sega Mega Drive/Sega CD/32X/Nomad
   --multi=SIZE  make multi-game file for use with MD-PRO flash card,
                   truncated to SIZE Mbit; file with loader must be specified
                   first, then all the ROMs, multi-game file to create last
-  --pal         enable region function (PAL/NTSC); use with -multi
+  --region=CODE enable region function; use with -multi
+                  CODE='0' force NTSC/Japan for all games
+                  CODE='1' force NTSC/U.S.A. for all games
+                  CODE='2' force PAL for all games
+                  CODE='x' use whatever setting games expect
 Super Com Pro/Super Magic Drive/SMD
   --xsmd        send/receive ROM to/from Super Magic Drive/SMD; --port=PORT
                   receives automatically when ROM does not exist
@@ -345,7 +354,7 @@ Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)
    -n=NEW_NAME  change internal ROM name to NEW_NAME
   --logo        restore ROM logo character data (offset: 0x104-0x134)
   --mgd         convert to Multi Game*/MGD2/RAW
-  --ssc         convert to Super Smart Card/SSC (+512 Bytes)
+  --ssc         convert to Super Smart Card/SSC
   --sgb         convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX
   --gbx         convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC
   --n2gb=NESROM KAMI's FC EMUlator (NES emulator);
@@ -375,25 +384,21 @@ Handy (prototype)/Lynx/Lynx II
   --rotr        set rotation right (LNX only)
   --b0=N        change Bank0 kBytes size to N={0,64,128,256,512} (LNX only)
   --b1=N        change Bank1 kBytes size to N={0,64,128,256,512} (LNX only)
-Lynxit (Lynx Cartridge Backup Board)
+Lynxit (Lynx cartridge backup board)
   --xlit        receive ROM from Lynxit interface; --port=PORT
 
 PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))
 Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)
   --pce         force recognition
-  --int         force ROM is in interleaved format
-  --nint        force ROM is not in interleaved format
-  --smg         convert to Super Magic Griffin/SMG
+  --int         force ROM is in interleaved (bit-swapped) format
+  --nint        force ROM is not in interleaved (bit-swapped) format
+  --msg         convert to Magic Super Griffin/MSG
   --mgd         convert to Multi Game Doctor*/MGD2/RAW
   --swap        swap bits of all bytes in file (TurboGrafx-16 &#60;-&#62; PC-Engine)
-
-Sega Master System(II/III)/Game Gear (Handheld)
-  --sms         force recognition
-  --int         force ROM is in interleaved format (SMD)
-  --nint        force ROM is not in interleaved format (RAW)
-  --mgd         convert to Multi Game*/MGD2/MGH/RAW
-  --smd         convert to Super Magic Drive/SMD (+512 Bytes)
-  --smds        convert emulator (*.srm) SRAM to Super Magic Drive/SMD
+   -f           fix region protection
+Magic Super Griffin/MSG
+  --xmsg        send/receive ROM to/from Magic Super Griffin/MSG; --port=PORT
+                  receives automatically when ROM does not exist
 
 Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)
   --nes         force recognition
@@ -404,7 +409,7 @@ Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)
    -j           join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -&#62; iNES)
   --pasofami    convert to Pasofami/PRM/700/PRG/CHR
    -s           convert/split to Pasofami/PRM/700/PRG/CHR (iNES -&#62; Pasofami)
-  --ffe         convert to FFE format
+  --ffe         convert to FFE format (Super Magic Card)
   --mapr=MAPR   specify board name or mapper number for conversion options
                   MAPR must be a board name for UNIF or a number for Pasofami
                   and iNES
@@ -433,6 +438,20 @@ Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)
   --dumpinfo=FILE use dumper info from FILE when converting to UNIF
   --fds         convert Famicom Disk System file (diskimage) from FAM to FDS
   --fdsl        list Famicom Disk System/FDS (diskimage) contents
+Super Magic Card
+  --xsmc        send ROM (in FFE format) to Super Magic Card; --port=PORT
+  --xsmcr       send/receive RTS data to/from Super Magic Card; --port=PORT
+                  receives automatically when RTS file does not exist
+
+Sega Master System(II/III)/Game Gear (Handheld)
+  --sms         force recognition
+  --int         force ROM is in interleaved format (SMD)
+  --nint        force ROM is not in interleaved format (RAW)
+  --mgd         convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)
+  --mgdgg       same as --mgd, but gives GG name
+  --smd         convert to Super Magic Drive/SMD
+  --smds        convert emulator (*.srm) SRAM to Super Magic Drive/SMD
+  --chk         fix ROM checksum (SMS only)
 
 WonderSwan/WonderSwan Color/SwanCrystal
   --swan        force recognition
@@ -444,7 +463,7 @@ Panther(32bit prototype)/Jaguar64/Jaguar64 CD
 Neo Geo Pocket/Neo Geo Pocket Color
   --ngp         force recognition
 
-DATabase: 28543 known ROMs (DAT files: /home/daniel/.ucon64/dat)
+DATabase: 31343 known ROMs (DAT files: /home/daniel/.ucon64/dat)
 
 NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)
       parallel port. If that is the case give a hardware address. For example:

@@ -28,7 +28,7 @@ extern void flc_usage (int argc, char *argv[]);
 
 #define flc_VERSION "1.0.2"
 
-#define flc_TITLE "flc " flc_VERSION " 1999-2002 by NoisyB (noisyb@gmx.net)"
+#define flc_TITLE "flc " flc_VERSION " " CURRENT_OS " 1999-2002 by NoisyB (noisyb@gmx.net)"
 
 typedef struct st_flc
 {

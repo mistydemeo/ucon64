@@ -20,8 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "ucon64gui.h"
 
-struct html2gui_ html2gui__;
-
 struct ucon64gui_
 {
 
@@ -45,14 +43,14 @@ ucon64_system (void)
 void
 ucon64_rom (void)
 {
-  html2gui_file (&html2gui__, "Select ROM", ucon64.rom);
+  html2gui_file ("Select ROM", ucon64.rom);
 }
 
 void
 ucon64_file (void)
 {
 //_text nutzen
-  html2gui_file (&html2gui__, "Select ROM", ucon64.file);
+  html2gui_file ("Select ROM", ucon64.file);
 }
 
 void
@@ -79,22 +77,22 @@ ucon64_snes (void)
 
   if(snes_window)
   {
-    html2gui_html_end (&html2gui__);
+    html2gui_html_end ();
     snes_window=0;
     return;
   }
   snes_window=1;
   
 //<html>
-  html2gui_html (&html2gui__, 640, 400, 0);
+  html2gui_html (640, 400, 0);
 
-  html2gui_title (&html2gui__, "ucon64gui_snes", icon_xpm);
+  html2gui_title ("ucon64gui_snes", icon_xpm);
 
-  html2gui_img (&html2gui__, snes_xpm, 10, 10, 0);
+  html2gui_img (snes_xpm, 10, 10, 0);
 
-  html2gui_br (&html2gui__);
+  html2gui_br ();
 
-  html2gui_button (&html2gui__, ucon64_nfo, "NFO", "Click here to see ROM info", 10, 10, info_xpm);
+  html2gui_button (ucon64_nfo, "NFO", "Click here to see ROM info", 10, 10, info_xpm);
 
 //</html>
 }
@@ -107,34 +105,32 @@ ucon64_main (void)
 #include "xpm/selectrom.xpm"
 #include "xpm/icon.xpm"
 
-
-
 //<html>
-  html2gui_html (&html2gui__, 640, 400, 0);
+  html2gui_html (640, 400, 0);
 
-  html2gui_title (&html2gui__, "ucon64gui", icon_xpm);
+  html2gui_title ("ucon64gui", icon_xpm);
 
-  html2gui_img (&html2gui__, icon_xpm, 1, 10, 0);
+  html2gui_img (icon_xpm, 1, 10, 0);
 
-  html2gui_br (&html2gui__);
-  html2gui_hr (&html2gui__);
-  html2gui_br (&html2gui__);
+  html2gui_br ();
+  html2gui_hr ();
+  html2gui_br ();
 
-  html2gui_button (&html2gui__, ucon64_rom, "Select ROM", "Click here to open a ROM", 10, 10, selectrom_xpm);
+  html2gui_button (ucon64_rom, "Select ROM", "Click here to open a ROM", 10, 10, selectrom_xpm);
 
-  html2gui_button (&html2gui__, ucon64_nfo, "NFO", "Click here to see information about ROM", 10, 10, info_xpm);
+  html2gui_button (ucon64_nfo, "NFO", "Click here to see information about ROM", 10, 10, info_xpm);
 
-  html2gui_br (&html2gui__);
-  html2gui_button (&html2gui__, ucon64_snes, "Super Nintendo", "Super Nintendo Options", 10, 10, snes_xpm);
+  html2gui_br ();
+  html2gui_button (ucon64_snes, "Super Nintendo", "Super Nintendo Options", 10, 10, snes_xpm);
 
-//  html2gui_html_end (&html2gui__);
+//  html2gui_html_end ();
 //</html>
 }
 
 int
 main (int argc, char *argv[])
 {
-  html2gui(&html2gui__, argc, argv);
+  html2gui_start(argc, argv);
 
   ucon64_main();
 

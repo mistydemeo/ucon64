@@ -92,7 +92,7 @@ const char *ucon64_msg[] = {
   "ERROR: Not enough memory for buffer (%d bytes)\n",
   "ERROR: Not enough memory for ROM buffer (%d bytes)\n",
   "ERROR: Not enough memory for file buffer (%d bytes)\n",
-  "SORRY: No ROM with 0x%08x as checksum found\n",
+  "DAT info: No ROM with 0x%08x as checksum found\n",
   NULL
 };
 

@@ -554,7 +554,7 @@ ucon64_dat_indexer (void)
          if (!(pos % 20)) ucon64_gauge (start_time, ftell (fdat), size);
          pos++;
        }
-     ucon64_gauge (start_time, ftell (fdat), size);
+     ucon64_gauge (start_time, size, size);
      fprintf (stdout, "\n\n");
      fclose (fh);
    }

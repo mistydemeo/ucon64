@@ -36,13 +36,14 @@ ucon64_bottom (void)
   html2gui_br ();
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
   html2gui_br ();
-  html2gui_textarea (ucon64gui.ucon64_output, 80, 30);
+/*  html2gui_textarea (ucon64gui.ucon64_output, 80, 30);
 
   html2gui_br ();
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
   html2gui_br ();
   html2gui_textarea (ucon64gui.cmd, 80, 1);
   html2gui_br ();
+*/
   html2gui_img (icon_16x16_xpm, 48, 48, 0);
 
   html2gui_ ("uCON64gui "
@@ -58,8 +59,9 @@ ucon64_bottom (void)
 void
 ucon64_system (void)
 {
-  FILE *fh;
-  char buf[4096];
+//  FILE *fh;
+  char buf[MAXBUFSIZE];
+  char buf2[MAXBUFSIZE];
 
   switch (ucon64gui.console)
     {
@@ -71,9 +73,17 @@ ucon64_system (void)
       break;
     }
 
-//TODO pipe? ucon64gui.ucon64_output
-//  system (ucon64gui.cmd);
-  if (!(fh = popen (ucon64gui.cmd, "r")))
+  sprintf(buf2,"xterm -bg black -fg white -rightbar -title \"%s\" -e",ucon64gui.cmd);
+
+  sprintf(buf,"%s %s",buf2,ucon64gui.cmd);
+
+//  html2gui_html_end();
+  system (buf);
+//  html2gui_html(640,400,0);
+
+
+/*
+  if (!(fh = popen (buf, "r")))
     {
       strcpy (ucon64gui.ucon64_output, "");
       return;
@@ -84,6 +94,7 @@ ucon64_system (void)
       strcat (ucon64gui.ucon64_output, buf);
     }
   pclose (fh);
+*/
 }
 
 void

@@ -372,7 +372,7 @@ f2a_boot_usb (const char *ilclient_fname)
 
   printf ("Booting GBA\n"
           "Uploading iLinker client\n"
-          "Please turn on GBA with SELECT and START held down\n");
+          "Please turn OFF, then ON your GBA with SELECT and START held down\n");
 
   if (q_fread (ilclient, 0, 16 * 1024, ilclient_fname) == -1)
     {
@@ -757,7 +757,7 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
   unsigned char recv[4], iclientp[BOOT_SIZE];
 
   printf ("Booting GBA\n"
-          "Please turn on GBA with SELECT and START held down\n");
+          "Please turn OFF, then ON your GBA with SELECT and START held down\n");
 
   if (f2a_send_head_par (PP_HEAD_BOOT, 1))
     return -1;

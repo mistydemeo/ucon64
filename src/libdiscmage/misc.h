@@ -509,6 +509,7 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #define rmdir   _rmdir
 #define stat    _stat
 #define strdup  _strdup
+#define stricmp _stricmp
 #define strnicmp _strnicmp
 #endif // DLL
 

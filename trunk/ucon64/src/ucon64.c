@@ -523,16 +523,16 @@ ucon64_console_probe (st_rominfo_t *rominfo)
           (!n64_init (ucon64_flush (rominfo))) ? UCON64_N64 :
           (!genesis_init (ucon64_flush (rominfo))) ? UCON64_GENESIS :
           (!lynx_init (ucon64_flush (rominfo))) ? UCON64_LYNX :
+          (!gameboy_init (ucon64_flush (rominfo))) ? UCON64_GB :
           (!snes_init (ucon64_flush (rominfo))) ? UCON64_SNES :
           (!nes_init (ucon64_flush (rominfo))) ? UCON64_NES :
-          (!gameboy_init (ucon64_flush (rominfo))) ? UCON64_GB :
           (!ngp_init (ucon64_flush (rominfo))) ? UCON64_NEOGEOPOCKET :
           (!swan_init (ucon64_flush (rominfo))) ? UCON64_WONDERSWAN :
           (!jaguar_init (ucon64_flush (rominfo))) ? UCON64_JAGUAR :
 #endif // CONSOLE_PROBE
           UCON64_UNKNOWN;
 
-          return (ucon64.console == UCON64_UNKNOWN) ? (-1) : 0;
+      return (ucon64.console == UCON64_UNKNOWN) ? (-1) : 0;
 
     default:
       ucon64.console = UCON64_UNKNOWN;
@@ -570,13 +570,8 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 
   if (UCON64_TYPE_ISROM (ucon64.type))
     {
-#if 0
-      rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-        ucon64.buheader_len : rominfo->buheader_len;
-#endif
-
       // Calculating the CRC for the ROM data of a UNIF file (NES) shouldn't
-      // be done with file_crc32(). nes_init() uses mem_crc32().
+      //  be done with file_crc32(). nes_init() uses mem_crc32().
       if (rominfo->current_crc32 == 0)
         rominfo->current_crc32 = file_crc32 (romfile, rominfo->buheader_len);
 
@@ -755,10 +750,17 @@ ucon64_nfo (const st_rominfo_t *rominfo)
     {
       if (rominfo->has_internal_crc)
         {
-          sprintf (buf,
-            "Checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)\n",
-            rominfo->internal_crc_len * 2, rominfo->internal_crc_len * 2);
+          char *fstr;
 
+          // the internal checksum of GBA ROMS stores only the checksum of the
+          //  internal header
+          if (ucon64.console != UCON64_GBA)
+            fstr = "Checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)\n";
+          else
+            fstr = "Header checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)\n";
+
+          sprintf (buf, fstr,
+            rominfo->internal_crc_len * 2, rominfo->internal_crc_len * 2);
           printf (buf,
             (rominfo->current_internal_crc == rominfo->internal_crc) ? "ok" : "bad",
             rominfo->current_internal_crc,

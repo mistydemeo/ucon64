@@ -689,13 +689,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
   printf ("\n");
 
   if (ucon64.console == UCON64_UNKNOWN)
-    {
-       printf (
-           "ERROR: could not auto detect the right ROM/IMAGE/console type\n"
-           "TIP:   If this is a ROM or CD IMAGE you might try to force the recognition\n"
-           "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n"
-         );
-    }
+    fprintf (stderr, ucon64_console_error);
 
   fflush (stdout);
 

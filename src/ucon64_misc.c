@@ -77,6 +77,13 @@ const char *ucon64_parport_error =
   "        use " OPTION_LONG_S "file={3bc,378,278,...} to specify your port\n"
   "        set the port to SPP (Standard, Normal) mode in your bios\n";
 
+
+const char *ucon64_console_error =
+  "ERROR: could not auto detect the right ROM/IMAGE/console type\n"
+  "TIP:   If this is a ROM or CD IMAGE you might try to force the recognition\n"
+  "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n";
+
+
 #define MAXBUFSIZE 32768
 #define DETECT_MAX_CNT 1000
 #define CRC32_POLYNOMIAL     0xEDB88320L

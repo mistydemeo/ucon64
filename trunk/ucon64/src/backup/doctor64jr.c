@@ -252,7 +252,7 @@ saveram_pc_main (int argc, char *argv[], char *envp[])
   delay (2);
 #elif   defined __BEOS__
   snooze (2000);
- #endif
+#endif
 
   printf("\nPower N64 and press any key to continue...");
   fflush(stdout);
@@ -1003,8 +1003,8 @@ doctor64jr_main (int argc, char *argv[])
 }
 
 /*
-  It will save you some work if you don't fully integrate the code above with uCON64's code,
-  because it is a project separate from the uCON64 project.
+  It will save you some work if you don't fully integrate the code above with
+  uCON64's code, because it is a project separate from the uCON64 project.
 */
 int doctor64jr_argc;
 char *doctor64jr_argv[128];

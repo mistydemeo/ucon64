@@ -264,6 +264,9 @@ InitPort (int port)
 {
 //   int ECPRegECR;
 
+#if 1 // uCON64 comment: see the comment in fal_main() where port is initialised
+  SPPDataPort = port;
+#else
   switch (port)
     {
     case 2:
@@ -275,6 +278,7 @@ InitPort (int port)
     default:
       SPPDataPort = 0x378;
     }
+#endif
 
 //   if (port == 1)
 //       SPPDataPort = 0x378;
@@ -1335,7 +1339,7 @@ fal_main (int argc, char **argv)
   int OptS = 0;
   int OptV = 0;
   int OptZ = 0;
-  int port = 1;
+  int port = 0x378;
   int ChipSize = 32;
   int BackupMemOffset = 0;
   int BackupMemSize = 0;
@@ -1446,6 +1450,11 @@ fal_main (int argc, char **argv)
         case 'l':
           SpaceCheck (argv[arg][2]);
           i = atoi (argv[++arg]);
+// uCON64 comment: we want to support non-standard parallel port addresses too
+//  So, instead of passing a number from 1 to 4, we pass the address itself
+#if 1
+          port = i;
+#else
           if ((i > 0) && (i < 4))
             port = i;
           else
@@ -1454,8 +1463,9 @@ fal_main (int argc, char **argv)
                        "ERROR: Only LPT1, LPT2, & LPT3 are supported");
               ProgramExit (1);
             }
+#endif
           break;
-        case 'm': 
+        case 'm':
           // uCON64 comment: See comment in LinkerInit(). Note that we reverse
           //  the meaning compared to the original code.
           EPPMode = 1;                          // Set EPP mode
@@ -1621,19 +1631,19 @@ char *fal_argv[128];
 void
 fal_args (unsigned int parport)
 {
+  char parport_str[80];
+
   fal_argv[fal_argc++] = "fl";
+#if 0 // we want to support non-standard parallel port addresses
   if (parport != 0x3bc && parport != 0x378 && parport != 0x278)
     {
       fprintf (stderr, "ERROR: PORT must be 0x3bc, 0x378 or 0x278\n");
       exit (1);
     }
+#endif
   fal_argv[fal_argc++] = "-l";
-  if (parport == 0x3bc)
-    fal_argv[fal_argc++] = "3";
-  else if (parport == 0x278)
-    fal_argv[fal_argc++] = "2";
-  else
-    fal_argv[fal_argc++] = "1";                 // 0x378
+  sprintf (parport_str, "%x", parport);
+  fal_argv[fal_argc++] = parport_str;
 
   if (ucon64.parport_mode == UCON64_EPP)
     fal_argv[fal_argc++] = "-m";

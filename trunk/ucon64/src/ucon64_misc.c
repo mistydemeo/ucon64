@@ -787,16 +787,20 @@ int ucon64_ls (const char *path, int mode)
   char old_dir[FILENAME_MAX];
   DIR *dp;
 
+  dir[0]=0;
+  
   if (path)
     if (path[0])
-    if (!stat (path, &puffer))
-      if (S_ISREG (puffer.st_mode))
-        return ucon64_ls_main (path, &puffer, mode);
+      {
+        if (!stat (path, &puffer))
+          {
+            if (S_ISREG (puffer.st_mode))
+              return ucon64_ls_main (path, &puffer, mode);
+          }
+        strcpy (dir, path);
+      }
 
-  if (!path || !path[0])
-    getcwd (dir, FILENAME_MAX);
-  else
-    strcpy (dir, path);
+  if (!dir[0]) getcwd (dir, FILENAME_MAX);
     
   if ((dp = opendir (dir)) == NULL)
     return -1;

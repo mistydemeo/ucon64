@@ -39,6 +39,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/smd.h"
 
 
+#define GENESIS_HEADER_START 256
+#define GENESIS_HEADER_LEN (sizeof (st_genesis_header_t))
+#define GENESIS_NAME_LEN 48
+
 static void interleave_buffer (unsigned char *buffer, int size);
 static void deinterleave_chunk (unsigned char *dest, unsigned char *src);
 static int genesis_chksum (unsigned char *rom_buffer);
@@ -84,8 +88,6 @@ typedef struct st_genesis_header
 {
   char pad[256];
 } st_genesis_header_t;
-#define GENESIS_HEADER_START 256
-#define GENESIS_HEADER_LEN (sizeof (st_genesis_header_t))
 
 st_genesis_header_t genesis_header;
 enum { SMD, BIN } type;
@@ -535,15 +537,18 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
 
   if (name1)
     {
-      memset (buf, ' ', 48);
-      memcpy (buf, name1, strlen (name1));
-      memcpy (&rom_buffer[GENESIS_HEADER_START + 32], buf, 48);
+      memset (buf, ' ', GENESIS_NAME_LEN);
+      strncpy (buf, name1, strlen (name1) > GENESIS_NAME_LEN ?
+        GENESIS_NAME_LEN : strlen (name1));
+      memcpy (&rom_buffer[GENESIS_HEADER_START + 32], buf, GENESIS_NAME_LEN);
     }
   if (name2)
     {
-      memset (buf, ' ', 48);
-      memcpy (buf, name2, strlen (name2));
-      memcpy (&rom_buffer[GENESIS_HEADER_START + 32 + 48], buf, 48);
+      memset (buf, ' ', GENESIS_NAME_LEN);
+      strncpy (buf, name2, strlen (name2) > GENESIS_NAME_LEN ?
+        GENESIS_NAME_LEN : strlen (name2));
+      memcpy (&rom_buffer[GENESIS_HEADER_START + 32 + GENESIS_NAME_LEN], buf,
+        GENESIS_NAME_LEN);
     }
 
   strcpy (buf, ucon64.rom);
@@ -559,7 +564,6 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
     save_bin (buf, rom_buffer, genesis_rom_size);
 
   free (rom_buffer);
-
   printf (ucon64_msg[WROTE], buf);
   return 0;
 }
@@ -889,8 +893,8 @@ genesis_init (st_rominfo_t *rominfo)
   rominfo->header = &genesis_header;
 
   // internal ROM name
-  memcpy (rominfo->name, &OFFSET (genesis_header, 32), 48);
-  rominfo->name[48] = 0;
+  memcpy (rominfo->name, &OFFSET (genesis_header, 32), GENESIS_NAME_LEN);
+  rominfo->name[GENESIS_NAME_LEN] = 0;
 
   // ROM maker
   memcpy (maker, &OFFSET (genesis_header, 16), 8);
@@ -928,8 +932,8 @@ genesis_init (st_rominfo_t *rominfo)
   rominfo->country = country;
 
   // misc stuff
-  memcpy (buf2, &OFFSET (genesis_header, 80), 48);
-  buf2[48] = 0;
+  memcpy (buf2, &OFFSET (genesis_header, 80), GENESIS_NAME_LEN);
+  buf2[GENESIS_NAME_LEN] = 0;
   sprintf ((char *) buf, "Overseas game name: %s\n", buf2);
   strcat (rominfo->misc, (const char *) buf);
 

@@ -2,7 +2,7 @@
 libdiscmage.h - libdiscmage
 
 written by 2002 NoisyB (noisyb@gmx.net)
-           2002 dbjh
+           2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -96,10 +96,12 @@ extern char *basename2 (const char *str);
 #ifdef  HAVE_BYTESWAP_H
 #include <byteswap.h>
 #else
-#define OWN_BYTESWAP
+#ifndef OWN_BYTESWAP
+#define OWN_BYTESWAP                            // signal that these are defined
 extern unsigned short int bswap_16 (unsigned short int x);
 extern unsigned int bswap_32 (unsigned int x);
 extern unsigned long long int bswap_64 (unsigned long long int x);
+#endif // OWN_BYTESWAP
 #endif
 
 #ifdef WORDS_BIGENDIAN

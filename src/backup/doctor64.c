@@ -25,16 +25,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <unistd.h>
 #include "config.h"
-
-const char *doctor64_title = "Doctor V64\n"
-                       "  19XX Bung Enterprises Ltd http://www.bung.com.hk";
-
-#ifdef BACKUP
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "doctor64.h"
+
+const char *doctor64_usage[] =
+  {
+    "Doctor V64",
+    "19XX Bung Enterprises Ltd http://www.bung.com.hk",
+#ifdef BACKUP
+    "  " OPTION_LONG_S "xv64        send/receive ROM to/from Doctor V64; " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when ROM does not exist\n",
+#endif // BACKUP
+    NULL
+  };
+
+#ifdef BACKUP
 
 
 #define SYNC_MAX_CNT 8192
@@ -197,17 +205,21 @@ checkSync (unsigned int baseport)
 }
 
 int
-sendFilename (unsigned int baseport, char name[])
+sendFilename (unsigned int baseport, const char *name)
 {
   int i;
   char *c;
+  char sname[12];
   char mname[12];
 
+  strncpy (sname, name, 12);
+  sname[12] = 0;
+
   memset (mname, ' ', 11);
-  c = (strrchr (name, FILE_SEPARATOR));
+  c = (strrchr (sname, FILE_SEPARATOR));
   if (c == NULL)
     {
-      c = name;
+      c = sname;
     }
   else
     {
@@ -227,7 +239,7 @@ sendFilename (unsigned int baseport, char name[])
 }
 
 int
-sendUploadHeader (unsigned int baseport, char name[], long len)
+sendUploadHeader (unsigned int baseport, const char *name, long len)
 {
   char mname[12];
 
@@ -252,7 +264,7 @@ sendUploadHeader (unsigned int baseport, char name[], long len)
 }
 
 int
-sendDownloadHeader (unsigned int baseport, char name[], long *len)
+sendDownloadHeader (unsigned int baseport, const char *name, long *len)
 {
   char mname[12];
 
@@ -285,7 +297,7 @@ sendDownloadHeader (unsigned int baseport, char name[], long *len)
 
 
 int
-doctor64_read (char *filename, unsigned int parport)
+doctor64_read (const char *filename, unsigned int parport)
 {
   char buf[MAXBUFSIZE];
   FILE *fh;
@@ -319,7 +331,7 @@ doctor64_read (char *filename, unsigned int parport)
 
 
 int
-doctor64_write (char *filename, long start, long len, unsigned int parport)
+doctor64_write (const char *filename, long start, long len, unsigned int parport)
 {
   char buf[MAXBUFSIZE];
   FILE *fh;
@@ -356,15 +368,5 @@ doctor64_write (char *filename, long start, long len, unsigned int parport)
   return 0;
 }
 
-void
-doctor64_usage (void)
-{
-    printf ("%s\n"
-
-    "  " OPTION_LONG_S "xv64        send/receive ROM to/from Doctor V64; " OPTION_LONG_S "file=PORT\n"
-     "                  receives automatically when ROM does not exist\n"
-     , doctor64_title);
-
-}
 
 #endif // BACKUP

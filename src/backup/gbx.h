@@ -22,17 +22,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef GBX_H
 #define GBX_H
 
-extern const char *gbx_title;
+extern const char *gbx_usage[];
 
 #define GBX_HEADER_START 0
 #define GBX_HEADER_LEN 0
 
 #ifdef BACKUP
-extern int gbx_read_rom (char *filename, unsigned int parport);
-extern int gbx_write_rom (char *filename, unsigned int parport);
-extern int gbx_read_sram (char *filename, unsigned int parport, int bank);
-extern int gbx_write_sram (char *filename, unsigned int parport, int bank);
-extern void gbx_usage (void);
+extern int gbx_read_rom (const char *filename, unsigned int parport);
+extern int gbx_write_rom (const char *filename, unsigned int parport);
+extern int gbx_read_sram (const char *filename, unsigned int parport, int bank);
+extern int gbx_write_sram (const char *filename, unsigned int parport, int bank);
 #endif // BACKUP
 
-#endif /* GBX_H */
+#endif // GBX_H

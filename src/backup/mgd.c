@@ -21,26 +21,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
-const char *mgd_title = "Multi Game Doctor(2)/Multi Game Hunter/MGH/RAW\n"
-                  "  19XX Bung Enterprises Ltd http://www.bung.com.hk\n"
-                  "?Makko Toys Co., Ltd.?";
-
+const char *mgd_usage[] =
+  {
+    "Multi Game Doctor(2)/Multi Game Hunter/MGH/RAW",
+    "19XX Bung Enterprises Ltd http://www.bung.com.hk\n"
+    "?Makko Toys Co., Ltd.?",
+#if 0
+    "TODO:  " OPTION_LONG_S "xmgd    send/receive ROM to/from Multi Game* /MGD2/MGH/RAW; " OPTION_LONG_S "file=PORT\n"
+    "		receives automatically when " OPTION_LONG_S "rom does not exist\n",
+#endif
+    NULL
+  };
+  
 #ifdef BACKUP 
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "mgd.h"
-
-
-void
-mgd_usage (void)
-{
-#if 0
-    printf (mgd_title "\n"
-
-    "TODO:  " OPTION_LONG_S "xmgd    send/receive ROM to/from Multi Game* /MGD2/MGH/RAW; " OPTION_LONG_S "file=PORT\n"
-     "		receives automatically when " OPTION_LONG_S "rom does not exist\n");
-#endif
-}
 #endif // BACKUP

@@ -24,15 +24,37 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <time.h>
 #include "config.h"
-const char *gbx_title = "GameBoy Xchanger/GBDoctor\n"
-                  "  19XX Bung Enterprises Ltd http://www.bung.com.hk";
-
-#ifdef BACKUP
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "gbx.h"
+const char *gbx_usage[] =
+  {
+    "GameBoy Xchanger/GBDoctor",
+    "19XX Bung Enterprises Ltd http://www.bung.com.hk",
+#ifdef BACKUP
+    "  " OPTION_LONG_S "xgbx        send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when ROM does not exist\n"
+    "  " OPTION_LONG_S "xgbxs       send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when SRAM does not exist\n"
+    "  " OPTION_LONG_S "xgbxb=BANK  send/receive 64kbits SRAM to/from GB Xchanger BANK\n"
+    "                  BANK can be a number from 0 to 15; " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when ROM does not exist\n"
+    "                  You only need to specify PORT if uCON64 doesn't detect the\n"
+    "                  (right) parallel port. If that is the case give a hardware\n"
+    "                  address: ucon64 " OPTION_LONG_S "xgbx \"rom.gb\" 0x378\n",
+#endif // BACKUP
+    NULL
+  };
+  
+#ifdef BACKUP
+static void set_ai_data (unsigned char _ai, unsigned char _data);
+static char check_card (void);
+static void set_ai(unsigned char _ai);
+static void init_port (void);
+static void end_port (void);
+      
 
 
 /* Modified version of gbt15.c - (C) Bung Enterprises */
@@ -104,7 +126,7 @@ unsigned int port_8, port_9, port_a, port_b, port_c;
 unsigned int bank, bank_size;
 
 unsigned long maxfilesize;
-char *file_name = NULL;
+const char *file_name = NULL;
 unsigned char cmd, eeprom_type; // command
 FILE *fptr;
 union mix_buffer
@@ -127,7 +149,7 @@ char pocket_camera = 0;         // 0=not pocket camera sram(1Mbits)
 
 
 unsigned long
-newfsize (char *fname)
+newfsize (const char *fname)
 {
   struct stat sbuf;
   //printf("Doing stat on %s\n", fname);
@@ -2507,7 +2529,7 @@ test_intel (void)
 */
 
 void
-gbx_init (unsigned int parport, char *filename)
+gbx_init (unsigned int parport, const char *filename)
 {
   pocket_camera = 0;
   mbc1_exp = 0;
@@ -2544,7 +2566,7 @@ gbx_init (unsigned int parport, char *filename)
 
 
 int
-gbx_read_rom (char *filename, unsigned int parport)
+gbx_read_rom (const char *filename, unsigned int parport)
 {
   gbx_init (parport, filename);
 
@@ -2556,7 +2578,7 @@ gbx_read_rom (char *filename, unsigned int parport)
 }
 
 int
-gbx_write_rom (char *filename, unsigned int parport)
+gbx_write_rom (const char *filename, unsigned int parport)
 {
   gbx_init (parport, filename);
 
@@ -2576,7 +2598,7 @@ gbx_write_rom (char *filename, unsigned int parport)
 }
 
 int
-gbx_read_sram (char *filename, unsigned int parport, int bank)
+gbx_read_sram (const char *filename, unsigned int parport, int bank)
 {
   gbx_init (parport, filename);
   if (bank == -1)
@@ -2596,7 +2618,7 @@ gbx_read_sram (char *filename, unsigned int parport, int bank)
 }
 
 int
-gbx_write_sram (char *filename, unsigned int parport, int bank)
+gbx_write_sram (const char *filename, unsigned int parport, int bank)
 {
   struct stat fstat;
 
@@ -2628,19 +2650,4 @@ gbx_write_sram (char *filename, unsigned int parport, int bank)
   return 0;
 }
 
-void
-gbx_usage (void)
-{
-  printf ("%s\n"
-          "  " OPTION_LONG_S "xgbx        send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "file=PORT\n"
-          "                  receives automatically when ROM does not exist\n"
-          "  " OPTION_LONG_S "xgbxs       send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "file=PORT\n"
-          "                  receives automatically when SRAM does not exist\n"
-          "  " OPTION_LONG_S "xgbxb=BANK  send/receive 64kbits SRAM to/from GB Xchanger BANK\n"
-          "                  BANK can be a number from 0 to 15; " OPTION_LONG_S "file=PORT\n"
-          "                  receives automatically when ROM does not exist\n"
-"                  You only need to specify PORT if uCON64 doesn't detect the\n"
-"                  (right) parallel port. If that is the case give a hardware\n"
-"                  address: ucon64 " OPTION_LONG_S "xgbx \"rom.gb\" 0x378\n", gbx_title);
-}
 #endif // BACKUP

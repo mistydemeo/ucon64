@@ -29,8 +29,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_YES 1
 #define UCON64_NO 0
 
+#define UCON64_UNKNOWN_S "Unknown"
+
 //#define UCON64_KNOWN -1
-#define UCON64_UNKNOWN 0
+#define UCON64_UNKNOWN -1
 
 #define UCON64_OPTION 1000
 #define UCON64_CONSOLE 2000
@@ -47,6 +49,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_BIOS (UCON64_OPTION + 9)
 #define UCON64_BOT (UCON64_OPTION + 10)
 #define UCON64_C (UCON64_OPTION + 11)
+#define UCON64_CD (UCON64_OPTION + 12)
 #define UCON64_CHK (UCON64_OPTION + 14)
 #define UCON64_COL (UCON64_OPTION + 15)
 #define UCON64_CRC (UCON64_OPTION + 17)
@@ -179,33 +182,33 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_XV64 (UCON64_OPTION + 170)
 #define UCON64_Z64 (UCON64_OPTION + 171)
 
-#define UCON64_ATARI (UCON64_CONSOLE + 1)
+#define UCON64_ATARI UCON64_ATA
 #define UCON64_CD32 (UCON64_CONSOLE + 2)
 #define UCON64_CDI (UCON64_CONSOLE + 3)
 #define UCON64_COLECO (UCON64_CONSOLE + 4)
 #define UCON64_DC (UCON64_CONSOLE + 5)
-#define UCON64_GAMECUBE (UCON64_CONSOLE + 6)
+#define UCON64_GAMECUBE UCON64_GC
 #define UCON64_GB (UCON64_CONSOLE + 7)
 #define UCON64_GBA (UCON64_CONSOLE + 8)
-#define UCON64_GENESIS (UCON64_CONSOLE + 9)
+#define UCON64_GENESIS UCON64_GEN
 #define UCON64_INTELLI (UCON64_CONSOLE + 10)
-#define UCON64_JAGUAR (UCON64_CONSOLE + 11)
+#define UCON64_JAGUAR UCON64_JAG
 #define UCON64_LYNX (UCON64_CONSOLE + 12)
 #define UCON64_N64 (UCON64_CONSOLE + 13)
-#define UCON64_NEOGEO (UCON64_CONSOLE + 14)
-#define UCON64_NEOGEOPOCKET (UCON64_CONSOLE + 15)
+#define UCON64_NEOGEO UCON64_NG
+#define UCON64_NEOGEOPOCKET UCON64_NGP
 #define UCON64_NES (UCON64_CONSOLE + 16)
 #define UCON64_PCE (UCON64_CONSOLE + 17)
 #define UCON64_PS2 (UCON64_CONSOLE + 18)
 #define UCON64_PSX (UCON64_CONSOLE + 19)
-#define UCON64_REAL3DO (UCON64_CONSOLE + 20)
-#define UCON64_SATURN (UCON64_CONSOLE + 21)
+#define UCON64_REAL3DO UCON64_3DO
+#define UCON64_SATURN UCON64_SAT
 #define UCON64_SMS (UCON64_CONSOLE + 22)
 #define UCON64_SNES (UCON64_CONSOLE + 23)
-#define UCON64_SYSTEM16 (UCON64_CONSOLE + 24)
-#define UCON64_VECTREX (UCON64_CONSOLE + 25)
-#define UCON64_VIRTUALBOY (UCON64_CONSOLE + 26)
-#define UCON64_WONDERSWAN (UCON64_CONSOLE + 27)
+#define UCON64_SYSTEM16 UCON64_S16
+#define UCON64_VECTREX UCON64_VEC
+#define UCON64_VIRTUALBOY UCON64_VBOY
+#define UCON64_WONDERSWAN UCON64_SWAN
 #define UCON64_XBOX (UCON64_CONSOLE + 28)
 
 #define UCON64_VERSION_S "1.9.8beta3"
@@ -230,10 +233,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   #define UCON64_OS ""
 #endif
 
-//extern const char *ucon64_title;
-
 #define MBIT	131072
-#define MAXROMSIZE ( ( 512+1 ) * MBIT )
+#define TOMBIT(x) ((long)(x) / MBIT)
+#define TOMBIT_F(x) ((float)(x) / MBIT)
+
+#define MAXROMSIZE ((512 + 1) * MBIT)
 #define MAXBUFSIZE 32768
 
 /*
@@ -243,7 +247,7 @@ typedef struct st_ucon64
 {
 //TODO get rid of argc and argv here
   int argc;
-  char *argv[128];
+  char **argv;
 
   const char *rom;               //rom (cmdline) with path
   const char *file;              //file (cmdline) with path
@@ -261,32 +265,40 @@ typedef struct st_ucon64
 #define UCON64_SHOW_NFO_BEFORE_AND_AFTER 2
   int show_nfo;                 //show or skip info output for ROM
 
-#define ISSET(x) (x != -1)
+#define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
   long buheader_len;            //length of backup unit header (==0)?no bu head
   int splitted;                 //rom is splitted
   int snes_hirom;               //super nintendo ROM is a HiROM
   int interleaved;              //rom is interleaved (swapped)
+  int console;                 //integer for the detected console system
+
+#define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
+#define UCON64_TYPE_ISCD(x) (x == UCON64_CD)
+  int type;                   //rom type ROM or CD image
 } st_ucon64_t;
 
 extern st_ucon64_t ucon64;
 
-/*
-  this struct holds only ROM relevant informations
-*/
-typedef struct st_rom
+typedef struct st_rominfo
 {
-  char rom[FILENAME_MAX];       //rom (cmdline) with path
+  const char **console_usage;                  //console system usage
+  const char **copier_usage;                 //backup unit usage
 
-  long console;                 //integer for the detected console system
-  const char *title;            //console system name
-  const char *copier;           //name of backup unit
-  unsigned long bytes;          //size in bytes
-  float mbit;                   //size in mbit
   int interleaved;              //rom is interleaved (swapped)
-  unsigned long padded;         //rom is padded
-  unsigned long intro;          //rom has intro
-  int splitted;                 //rom is splitted
   int snes_hirom;               //super nintendo ROM is a HiROM
+
+  long buheader_start;          //start of backup unit header (mostly 0)
+  long buheader_len;            //length of backup unit header (==0)?no bu header
+  const void *buheader;  //(possible) header of backup unit
+
+  long header_start;            //start of internal ROM header
+  long header_len;              //length of internal ROM header (==0)?no header
+  const void *header;     //(possible) internal ROM header
+
+  char name[MAXBUFSIZE];              //ROM name
+  const char *maker;      //maker name of the ROM
+  const char *country;           //country name of the ROM
+  char misc[MAXBUFSIZE];        //some miscellaneous information about the ROM in one single string
 
   unsigned long current_crc32;  //current crc32 value of ROM
   unsigned long db_crc32;       //crc32 value of ROM in internal database
@@ -298,22 +310,16 @@ typedef struct st_rom
   long internal_crc_start;      //start of internal CRC in ROM header
   int internal_crc_len;         //length (in bytes) of internal CRC in ROM header
 
-  char internal_crc2[4096];     //2nd or inverse internal CRC
+  char internal_crc2[MAXBUFSIZE];     //2nd or inverse internal CRC
   long internal_crc2_start;     //start of 2nd/inverse internal CRC
   int internal_crc2_len;        //length (in bytes) of 2nd/inverse internal CRC
+} st_rominfo_t;
 
-  unsigned char buheader[MAXBUFSIZE];  //(possible) header of backup unit
-  long buheader_start;          //start of backup unit header (mostly 0)
-  long buheader_len;            //length of backup unit header (==0)?no bu header
+extern const struct option long_options[];
 
-  unsigned char header[MAXBUFSIZE];     //(possible) internal ROM header
-  long header_start;            //start of internal ROM header
-  long header_len;              //length of internal ROM header (==0)?no header
-
-  char name[4096];              //ROM name
-  const char *maker;            //maker name of the ROM
-  const char *country;          //country name of the ROM
-  char misc[MAXBUFSIZE];        //some miscellaneous information about the ROM in one single string
-} st_rom_t;
+extern int ucon64_nfo (const st_rominfo_t *rominfo);
+extern int ucon64_init (const char *romfile, st_rominfo_t *rominfo);
+extern st_rominfo_t *ucon64_flush (st_rominfo_t *rominfo);
+extern int ucon64_console_probe (st_rominfo_t *rominfo);
 
 #endif // #ifndef UCON64_H

@@ -25,7 +25,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include "config.h"
-const char *ssc_title = "Super Smart Card/SSC";
+const char *ssc_usage[] =
+  { 
+    "Super Smart Card/SSC",
+    NULL
+  };
 
 
 #ifdef BACKUP

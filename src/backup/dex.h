@@ -20,13 +20,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef DEX_H
 #define DEX_H
-extern const char *dex_title;
+extern const char *dex_usage[];
 
 #define DEX_HEADER_START 0
 #define DEX_HEADER_LEN 0
 
 #ifdef BACKUP
-extern void dex_usage (void);
 extern char *read_block (int block_num, char *data);
 extern int write_block (int block_num, char *data);
 extern char *read_frame (int frame, char *data);

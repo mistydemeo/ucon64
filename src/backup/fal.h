@@ -21,17 +21,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef FAL_H
 #define FAL_H
-extern const char *fal_title;
+extern const char *fal_usage[];
 
 #define FAL_HEADER_START 0
 #define FAL_HEADER_LEN 0
 
 #ifdef BACKUP
-extern int fal_read_rom (char *filename, unsigned int parport, int size);
-extern int fal_write_rom (char *filename, unsigned int parport, int size);
-extern int fal_read_sram (char *filename, unsigned int parport, int bank);
-extern int fal_write_sram (char *filename, unsigned int parport, int bank);
-extern void fal_usage (void);
+extern int fal_read_rom (const char *filename, unsigned int parport, int size);
+extern int fal_write_rom (const char *filename, unsigned int parport, int size);
+extern int fal_read_sram (const char *filename, unsigned int parport, int bank);
+extern int fal_write_sram (const char *filename, unsigned int parport, int bank);
 #endif // BACKUP
 
 #endif // FAL_H

@@ -20,9 +20,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef SMD_H
 #define SMD_H
-extern const char *smd_title;
+extern const char *smd_usage[];
 
-#if 0
+/*
         Important SMD Header Bytes:
 
         Offset 00h:     Number of 16KB blocks. This number may be incorrect in
@@ -38,24 +38,24 @@ extern const char *smd_title;
           other bytes besides those mentioned as important are 0. This is not
           always the case. The header information in this document should be
           considered fairly accurate.
-#endif
+*/
 typedef struct st_smd_header
 {
-  unsigned char size;
-  char pad;
+  unsigned char low;
+  unsigned char high;
   unsigned char split;
   char pad2[5];
   unsigned char code1;
   unsigned char code2;
-  char pad3[502];
+  unsigned char type;
+  char pad3[501];
 } st_smd_header_t;
 
 #ifdef BACKUP
-extern void smd_usage (void);
-extern int smd_read_rom (char *filename, unsigned int parport);
-extern int smd_write_rom (char *filename, unsigned int parport);
-extern int smd_read_sram (char *filename, unsigned int parport);
-extern int smd_write_sram (char *filename, unsigned int parport);
+extern int smd_read_rom (const char *filename, unsigned int parport);
+extern int smd_write_rom (const char *filename, unsigned int parport);
+extern int smd_read_sram (const char *filename, unsigned int parport);
+extern int smd_write_sram (const char *filename, unsigned int parport);
 #endif // BACKUP
 
 #define SMD_HEADER_START 0

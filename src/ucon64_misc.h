@@ -78,14 +78,7 @@ typedef struct st_unknown_header //uses swc header layout
 } st_unknown_header_t;
 #define UNKNOWN_HEADER_START 0
 #define UNKNOWN_HEADER_LEN (sizeof (st_unknown_header_t))
-extern const char *unknown_title;
-
-/*
-  GameGenie "codec" routines
-*/
-extern char hexDigit (int value);
-extern int hexValue (char digit);
-extern int hexByteValue (char x, char y);
+extern const char *unknown_usage[];
 
 /*
   CRC32 routines
@@ -116,11 +109,13 @@ extern long filetestpad (const char *filename); //test if a ROM is padded
 extern int ucon64_testsplit (const char *filename);//test if a ROM is splitted
 
 extern unsigned int ucon64_parport_probe (unsigned int parport); 
+extern const char *ucon64_parport_error; //std. error message for parport
 
 extern int ucon64_bin2iso (const char *image, int track_mode);
 extern int ucon64_trackmode_probe (const char *image);
 
-extern void ucon64_save_rominfo (st_rom_t *rominfo);
-extern int ucon64_restore_rominfo (int result, st_rom_t *rominfo);
+extern int ucon64_e (const char *rominfo);
+extern int ucon64_ls (const char *path, int mode);
+extern int ucon64_configfile (void);
 
 #endif // #ifndef UCON64_MISC_H

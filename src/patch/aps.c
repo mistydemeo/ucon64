@@ -29,6 +29,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "aps.h"
 
+
+const char *aps_usage[] =
+  {
+    NULL,
+    NULL,
+    "  " OPTION_S "a           apply APS patch (<=v1.2); " OPTION_LONG_S "file=PATCHFILE\n"
+    "  " OPTION_LONG_S "mka         create APS patch; " OPTION_LONG_S "file=CHANGED_ROM\n"
+    "  " OPTION_LONG_S "na          change APS description; " OPTION_LONG_S "rom=PATCHFILE " OPTION_LONG_S "file=DESCRIPTION\n",
+    NULL
+  };
+  
 /* Apply an APS (Advanced Patch System) File for N64 Images
  * (C)1998 Silo / BlackBag
  *
@@ -719,15 +730,4 @@ n64caps_main (int argc, const char *argv[])
     }
 
   return 0;
-}
-
-
-
-void
-aps_usage (void)
-{
-  printf ("  " OPTION_S "a           apply APS patch (<=1.2); " OPTION_LONG_S "file=PATCHFILE\n"
-"  " OPTION_LONG_S "mka         create APS patch; " OPTION_LONG_S "file=CHANGED_ROM\n"
-"  " OPTION_LONG_S "na          change APS description; " OPTION_LONG_S "rom=PATCHFILE " OPTION_LONG_S "file=DESCRIPTION\n"
-);
 }

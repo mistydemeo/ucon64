@@ -25,7 +25,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include "config.h"
-const char *z64_title = "Z64";
+const char *z64_usage[] =
+  {
+    "Z64",
+    NULL
+  };
 
 #ifdef BACKUP
 

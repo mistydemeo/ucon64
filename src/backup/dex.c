@@ -21,8 +21,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
-const char *dex_title = "DexDrive\n"
-                  "  InterAct http://www.dexdrive.de";
+const char *dex_usage[] =
+  {
+    "DexDrive",
+    "InterAct http://www.dexdrive.de",
+#if 0
+    "TODO:  -xdex    send/receive SRAM to/from DexDrive; " OPTION_LONG_S "file=PORT\n"
+    "		receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n",
+#endif
+    NULL
+  };
 
 
 #ifdef BACKUP
@@ -73,16 +81,4 @@ get_perm ()
   return psx_obtain_io_permission (BASE_ADDR);
 }
 
-void
-dex_usage (void)
-{
-#if 0
-    printf ("%s\n", dex_title);
-
-
-  printf
-    ("TODO:  -xdex    send/receive SRAM to/from DexDrive; " OPTION_LONG_S "file=PORT\n"
-     "		receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n");
-#endif
-}
 #endif // BACKUP

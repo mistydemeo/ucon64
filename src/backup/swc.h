@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SWC_H
 #define SWC_H
 
-extern const char *swc_title;
+extern const char *swc_usage[];
 
 #if 0
     0      - Low byte of 8kB page count
@@ -54,7 +54,8 @@ typedef struct st_swc_header
   unsigned char low;
   unsigned char high;
   unsigned char emulation;
-  char pad[5];
+  unsigned char hirom;
+  char pad[4];
   unsigned char code1; // 0xAA
   unsigned char code2; // 0xBB
   unsigned char type;
@@ -65,12 +66,11 @@ typedef struct st_swc_header
 #define SWC_HEADER_LEN (sizeof (st_swc_header_t))
 
 #ifdef BACKUP
-extern int swc_read_rom (char *filename, unsigned int parport);
-extern int swc_write_rom (char *filename, unsigned int parport);
-extern int swc_read_sram (char *filename, unsigned int parport);
-extern int swc_write_sram (char *filename, unsigned int parport);
+extern int swc_read_rom (const char *filename, unsigned int parport);
+extern int swc_write_rom (const char *filename, unsigned int parport);
+extern int swc_read_sram (const char *filename, unsigned int parport);
+extern int swc_write_sram (const char *filename, unsigned int parport);
 extern void swc_unlock (unsigned int parport);
-extern void swc_usage (void);
 #endif // BACKUP
 
 #endif // SWC_H

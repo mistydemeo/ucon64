@@ -26,6 +26,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include <unistd.h>             // ioperm() (libc5)
+#include <dirent.h>
+#include <sys/stat.h>
 #include "config.h"
 #ifdef  BACKUP
 #ifdef  __FreeBSD__
@@ -44,12 +46,36 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc.h"
 #include "ucon64_misc.h"
 
+#include "snes/snes.h"
+#include "gb/gb.h"
+#include "gba/gba.h"
+#include "n64/n64.h"
+#include "lynx/lynx.h"
+#include "sms/sms.h"
+#include "nes/nes.h"
+#include "genesis/genesis.h"
+#include "pce/pce.h"
+#include "neogeo/neogeo.h"
+#include "ngp/ngp.h"
+#include "swan/swan.h"
+#include "dc/dc.h"
+#include "jaguar/jaguar.h"
+#include "sample/sample.h"
+
+
 const char *track_modes[] = {
   "MODE1/2048",
   "MODE1/2352",
   "MODE2/2336",
   "MODE2/2352"
 };
+
+const char *ucon64_parport_error =
+  "ERROR:  please check cables and connection\n"
+  "        turn off/on the backup unit\n"
+  "        splitted ROMs must be joined first\n"
+  "        use " OPTION_LONG_S "file={3bc,378,278,...} to specify your port\n"
+  "        set the port to SPP (Standard, Normal) mode in your bios\n";
 
 #define MAXBUFSIZE 32768
 #define DETECT_MAX_CNT 1000
@@ -69,99 +95,11 @@ static unsigned int parport_probe (unsigned int parport);
 static int detect_parport (unsigned int port);
 #endif
 
-const char *unknown_title = "Unknown backup unit/emulator";
-
-char
-hexDigit (int value)
-{
-  switch (toupper (value))
-    {
-    case 0:
-      return '0';
-    case 1:
-      return '1';
-    case 2:
-      return '2';
-    case 3:
-      return '3';
-    case 4:
-      return '4';
-    case 5:
-      return '5';
-    case 6:
-      return '6';
-    case 7:
-      return '7';
-    case 8:
-      return '8';
-    case 9:
-      return '9';
-    case 10:
-      return 'A';
-    case 11:
-      return 'B';
-    case 12:
-      return 'C';
-    case 13:
-      return 'D';
-    case 14:
-      return 'E';
-    case 15:
-      return 'F';
-    default:
-      break;
-    }
-  return '?';
-}
-
-int
-hexValue (char digit)
-{
-  switch (toupper (digit))
-    {
-    case '0':
-      return 0;
-    case '1':
-      return 1;
-    case '2':
-      return 2;
-    case '3':
-      return 3;
-    case '4':
-      return 4;
-    case '5':
-      return 5;
-    case '6':
-      return 6;
-    case '7':
-      return 7;
-    case '8':
-      return 8;
-    case '9':
-      return 9;
-    case 'A':
-      return 10;
-    case 'B':
-      return 11;
-    case 'C':
-      return 12;
-    case 'D':
-      return 13;
-    case 'E':
-      return 14;
-    case 'F':
-      return 15;
-    default:
-      break;
-    }
-  return 0;
-}
-
-int
-hexByteValue (char x, char y)
-{
-  return (hexValue (x) << 4) + hexValue (y);
-}
+const char *unknown_usage[] =
+  {
+    "Unknown backup unit/emulator",
+    NULL
+  };
 
 void
 BuildCRCTable ()
@@ -379,11 +317,14 @@ detect_parport (unsigned int port)
 {
   int i;
 
-#if     defined  __linux__
-  if (ioperm (port, 1, 1) == -1)
-    return -1;
-#elif   defined __FreeBSD__
-  if (i386_set_ioperm (port, 1, 1) == -1)
+#if     defined  __linux__ || defined __FreeBSD__
+  if (
+#ifdef  __linux__
+      ioperm
+#else
+      i386_set_ioperm
+#endif // __linux__
+      (port, 1, 1) == -1)
     return -1;
 #endif
 
@@ -399,11 +340,14 @@ detect_parport (unsigned int port)
           break;
     }
 
-#if     defined  __linux__
-  if (ioperm (port, 1, 0) == -1)
-    return -1;
-#elif   defined __FreeBSD__
-  if (i386_set_ioperm (port, 1, 0) == -1)
+#if     defined  __linux__ || defined __FreeBSD__
+  if (
+#ifdef  __linux__
+      ioperm
+#else
+      i386_set_ioperm
+#endif // __linux__
+      (port, 1, 0) == -1)
     return -1;
 #endif
 
@@ -434,7 +378,7 @@ ucon64_parport_probe (unsigned int port)
   if (!(port = parport_probe (port)))
     ;
 /*
-    printf ("ERROR: no parallel port 0x%s found\n\n", strupr (buf));
+    fprintf (stderr, "ERROR: no parallel port 0x%s found\n\n", strupr (buf));
   else
     printf ("0x%x\n\n", port);
 */
@@ -535,11 +479,13 @@ parport_probe (unsigned int port)
   if (port != 0)
     {
 #if     defined  __linux__ || defined __FreeBSD__
-#ifdef  __linux__
-      if (ioperm (port, 3, 1) == -1)            // data, status & control
+  if (
+#ifdef __linux__
+      ioperm
 #else
-      if (i386_set_ioperm (port, 3, 1) == -1)   // data, status & control
+      i386_set_ioperm
 #endif // __linux__
+      (port, 3, 1) == -1)                       // data, status & control
         {
           fprintf (stderr,
                    "Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
@@ -612,7 +558,7 @@ ucon64_bin2iso (const char *image, int track_mode)
   switch (track_mode)
     {
       case MODE1_2048:
-        printf ("ERROR: the images track mode is already MODE1/2048\n");
+        fprintf (stderr, "ERROR: the images track mode is already MODE1/2048\n");
         return -1;
 
       case MODE1_2352:
@@ -620,7 +566,7 @@ ucon64_bin2iso (const char *image, int track_mode)
         seek_ecc = 288;
         sector_size = 2352;
         break;
-
+      
       case MODE2_2336:
 #ifdef __MAC__ // macintosh
         seek_header = 0;
@@ -629,7 +575,7 @@ ucon64_bin2iso (const char *image, int track_mode)
 #endif      
         seek_ecc = 280;
         sector_size = 2336;
-        break;
+        break;        
 
       case MODE2_2352:
 #ifdef __MAC__ // macintosh
@@ -642,7 +588,7 @@ ucon64_bin2iso (const char *image, int track_mode)
         break;
 
       default:
-        printf ("ERROR: unknown/unsupported track mode");
+        fprintf (stderr, "ERROR: unknown/unsupported track mode");
         return -1;
     }
 
@@ -694,84 +640,293 @@ ucon64_trackmode_probe (const char *image)
 
   quickfread (buf, 0, 16, image);
 
-  printf ("\n");
-  strhexdump (buf, 0, 0, 16);
-  printf ("\n");
   if (memcmp (SYNC_HEADER, buf, 12))
-  {
-    printf("MODE2_2336");
+{
     result = MODE2_2336;
-  }
-  else
+ } else
     switch (buf[15])
       {
         case 2:
           result = MODE2_2352;
-          printf("MODE2_2352");
           break;
 
         case 1:
-          printf("MODE1_2352");
           result = MODE1_2352;
           break;
 
         case 0://TODO test this... at least we know MODE1_2048 has no sync headers
-          printf("MODE1_2048");
           result = MODE1_2048;
           break;
-
+          
         default:
           printf ("\n");
           strhexdump (buf, 0, 0, 16);
           printf ("\n");
           break;
-      }
+        }
   return result;
 }
 
 
-/*
-  TODO: remove me?
-  Here follows a (hopefully temporary) fix for lazy programmers :-)
-  The <console>_init functions should return rominfo the way it was before they
-  were called if they don't return 0 (=ROM is detected as being comaptible with
-  that console). This is only important for force options (fields) like -hd,
-  -nhd, -hdn etc, but now no functions have to be checked to see if they modify
-  those members (and add code to not change them). Instead it was sufficient to
-  just put a ucon64_save_rominfo() call at the beginning and a
-  ucon64_restore_rominfo() call at the end of the <console>_init functions.
-*/
-static struct
+int ucon64_e (const char *romfile)
 {
-  int interleaved;
-  int splitted;
-  int snes_hirom;
-  long buheader_len;
-} force_fields;
+  int result, x;
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
+  const char *property;
 
-void
-ucon64_save_rominfo (st_rom_t *rominfo)
-{
-  // only these fields need to be preserved (st_rom_t is quite big)
-  force_fields.interleaved = rominfo->interleaved;
-  force_fields.splitted = rominfo->splitted;
-  force_fields.snes_hirom = rominfo->snes_hirom;
-  force_fields.buheader_len = rominfo->buheader_len;
+  x = 0;
+  while (long_options[x].name)
+    {
+      if (long_options[x].val == ucon64.console)
+      {
+        sprintf (buf3, "emulate_%s", long_options[x].name);
+        break;
+      }
+      x++;
+    }
+
+  if (access (ucon64.configfile, F_OK) != 0)
+    {
+      fprintf (stderr, "ERROR: %s does not exist\n", ucon64.configfile);
+      return -1;
+    }
+
+
+  property = getProperty (ucon64.configfile, buf3, buf2, NULL);   // buf2 also contains property value
+  if (property == NULL)
+    {
+      fprintf (stderr, "ERROR: could not find the correct settings (%s) in\n"
+              "       %s\n"
+              "TIP:   If the wrong console was detected you might try to force recognition\n"
+              "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n",
+              buf3, ucon64.configfile);
+      return -1;
+    }
+
+  sprintf (buf, "%s %s", buf2, ucon64.rom);
+
+  printf ("%s\n", buf);
+  fflush (stdout);
+  sync ();
+
+  result = system (buf);
+#ifndef __MSDOS__
+  result >>= 8;                  // the exit code is coded in bits 8-15
+#endif                          //  (that is, under Unix & BeOS)
+
+#if 1
+  // Snes9x (Linux) for example returns a non-zero value on a normal exit
+  //  (3)...
+  // under WinDOS, system() immediately returns with exit code 0 when
+  //  starting a Windows executable (as if fork() was called) it also
+  //  returns 0 when the exe could not be started
+  if (result != 127 && result != -1 && result != 0)        // 127 && -1 are system() errors, rest are exit codes
+    {
+      fprintf (stderr, "ERROR: the Emulator returned an error code (%d)\n"
+              "TIP:   If the wrong emulator was used you might try to force recognition\n"
+              "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n",
+              (int) result);
+    }
+#endif
+  return result;
 }
 
 
 int
-ucon64_restore_rominfo (int result, st_rom_t *rominfo)
+ucon64_ls_main (const char *filename, struct stat *puffer, int mode)
 {
-  // rominfo has to be restored only if the ROM doesn't belong to a specific console
-  if (result != 0)
-  {
-    rominfo->interleaved = force_fields.interleaved;
-    rominfo->splitted = force_fields.splitted;
-    rominfo->snes_hirom = force_fields.snes_hirom;
-    rominfo->buheader_len = force_fields.buheader_len;
-  }
+  int result;
+  char buf[MAXBUFSIZE];
+  st_rominfo_t rominfo;
 
-  return result;
+  ucon64.console = UCON64_UNKNOWN;
+  ucon64.rom = filename;
+  ucon64.type = (quickftell (ucon64.rom) <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
+  ucon64_flush (&rominfo);
+  
+  result = ucon64_console_probe (&rominfo);
+    switch (mode)
+      {
+        case UCON64_LSV:
+          if (!result) ucon64_nfo (&rominfo);
+          break;
+#if 0
+//TODO renamer!
+        case UCON64_REN:
+          if (ucon64.console != UCON64_UNKNOWN)
+//                        && ucon64.console != UCON64_KNOWN)
+            {
+              strcpy (buf, &ucon64.rom[findlast (ucon64.rom, ".") + 1]);
+              printf ("%s.%s\n", rom.name, buf);
+            }
+          break;
+#endif
+        case UCON64_LS:
+        default:
+          strftime (buf, 13, "%b %d %H:%M", localtime (&puffer->st_mtime));
+          printf ("%-31.31s %10ld %s %s\n", mkprint(rominfo.name, ' '),
+            (long) puffer->st_size, buf, ucon64.rom);
+          fflush (stdout);
+          break;
+    }
+  return 0;
+}
+
+int ucon64_ls (const char *path, int mode)
+{
+  struct dirent *ep;
+  struct stat puffer;
+  char dir[FILENAME_MAX];
+  char old_dir[FILENAME_MAX];
+  DIR *dp;
+
+  if (path)
+    if (!stat (path, &puffer))
+      if (S_ISREG (puffer.st_mode))
+        return ucon64_ls_main (path, &puffer, mode);
+                
+  if (!path)
+    getcwd (dir, FILENAME_MAX);
+  else
+    strcpy (dir, path);
+    
+  if ((dp = opendir (dir)) == NULL)
+    return -1;
+
+  getcwd (old_dir,FILENAME_MAX); // remember current dir 
+  chdir (dir);
+
+  while ((ep = readdir (dp)))
+    if (!stat (ep->d_name, &puffer))
+      if (S_ISREG (puffer.st_mode))
+        ucon64_ls_main (ep->d_name, &puffer, mode);
+
+  closedir (dp);
+
+  chdir (old_dir);
+
+  return 0;
+}
+
+
+int
+ucon64_configfile (void)
+{
+  char buf2[MAXBUFSIZE];
+/*
+  configfile handling
+*/
+  sprintf (ucon64.configfile, "%s" FILE_SEPARATOR_S
+#ifdef  __MSDOS__
+  "ucon64.cfg"
+#else
+  ".ucon64rc"
+#endif
+  , ms_getenv ("HOME"));
+
+  if (access (ucon64.configfile, F_OK) != 0)
+    {
+      FILE *fh;
+
+      printf ("WARNING: %s not found: creating...", ucon64.configfile);
+
+      if (!(fh = fopen (ucon64.configfile, "wb")))
+        {
+          printf ("FAILED\n\n");
+
+//          return -1;
+        }
+      else
+        {
+          fputs ("# uCON64 config\n"
+                 "#\n"
+                 "version=198\n"
+                 "#\n"
+                 "# create backups of files? (1=yes; 0=no)\n"
+//                 "# before processing a ROM uCON64 will make a backup of it\n"
+                 "#\n"
+                 "backups=1\n"
+                 "#\n"
+                 "# emulate_<console shortcut>=<emulator with options>\n"
+                 "#\n"
+                 "emulate_gb=vgb -sound -sync 50 -sgb -scale 2\n"
+                 "emulate_gen=dgen -f -S 2\n"
+                 "emulate_sms=\n"
+                 "emulate_jag=\n"
+                 "emulate_lynx=\n"
+                 "emulate_n64=\n"
+                 "emulate_ng=\n"
+                 "emulate_nes=tuxnes -E2 -rx11 -v -s/dev/dsp -R44100\n"
+                 "emulate_pce=\n"
+                 "emulate_snes=snes9x -tr -fs -sc -hires -dfr -r 7 -is -j\n"
+                 "emulate_ngp=\n"
+                 "emulate_ata=\n"
+                 "emulate_s16=\n"
+                 "emulate_gba=vgba -scale 2 -uperiod 6\n"
+                 "emulate_vec=\n"
+                 "emulate_vboy=\n"
+                 "emulate_swan=\n"
+                 "emulate_coleco=\n"
+                 "emulate_intelli=\n"
+                 "emulate_psx=pcsx\n"
+                 "emulate_ps2=\n"
+                 "emulate_sat=\n"
+                 "emulate_dc=\n"
+                 "emulate_cd32=\n"
+                 "emulate_cdi=\n"
+                 "emulate_3do=\n"
+                 "emulate_gp32=\n"
+#ifdef BACKUP_CD
+                 "#\n"
+                 "# uCON64 can operate as frontend for CD burning software to make backups\n"
+                 "# for CD-based consoles \n"
+                 "#\n"
+                 "# We suggest cdrdao (http://cdrdao.sourceforge.net) as burn engine for uCON64\n"
+                 "# Make sure you check this configfile for the right settings\n"
+                 "#\n"
+                 "# --device [bus,id,lun] (cdrdao)\n"
+                 "#\n"
+                 "cdrw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
+                 "cdrw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
+#endif
+                 , fh);
+
+          fclose (fh);
+          printf ("OK\n\n");
+        }
+    }
+  else if (strcmp (getProperty (ucon64.configfile, "version", buf2, "198"), "198") != 0)
+    {
+      strcpy (buf2, ucon64.configfile);
+      setext (buf2, ".OLD");
+
+      printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
+
+      filecopy (ucon64.configfile, 0, quickftell (ucon64.configfile), buf2, "wb");
+
+      setProperty (ucon64.configfile, "version", "198");
+
+      setProperty (ucon64.configfile, "backups", "1");
+
+#ifdef BACKUP
+      setProperty (ucon64.configfile, "parport", "0x378");
+#endif // BACKUP
+
+      setProperty (ucon64.configfile, "emulate_gp32", "");
+
+      setProperty (ucon64.configfile, "cdrw_read",
+        getProperty (ucon64.configfile, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
+      setProperty (ucon64.configfile, "cdrw_write",
+        getProperty (ucon64.configfile, "cdrw_raw_write", buf2, "cdrdao write --device 0,0,0 --driver generic-mmc "));
+
+      deleteProperty (ucon64.configfile, "cdrw_raw_read");
+      deleteProperty (ucon64.configfile, "cdrw_raw_write");
+      deleteProperty (ucon64.configfile, "cdrw_iso_read");
+      deleteProperty (ucon64.configfile, "cdrw_iso_write");
+
+      sync ();
+      printf ("OK\n\n");
+    }
+  return 0;
 }
 

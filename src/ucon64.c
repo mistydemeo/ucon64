@@ -295,8 +295,10 @@ ucon64_exit (void)
 {
   if (ucon64.frontend == 1)
     printf ("+++EOF");
+#if 0
   if (ucon64.dp)
     closedir2 (ucon64.dp);
+#endif
   handle_registered_funcs ();
   fflush (stdout);
 }
@@ -307,7 +309,7 @@ main (int argc, char **argv)
 {
   int ucon64_argc, c = 0, result = 0, value = 0, option_index = 0;
   unsigned long padded, size = 0;
-  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], *p = NULL;
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
   const char *ucon64_argv[128];
   st_rominfo_t rom;
 
@@ -377,10 +379,10 @@ main (int argc, char **argv)
   if (optind < argc)
     ucon64.rom = argv[optind++];
 
-  p = ucon64_rom_in_archive (ucon64.dp, ucon64.rom, ucon64.rom_in_archive,
+#if 0
+  ucon64.rom = ucon64_rom_in_archive (ucon64.dp, ucon64.rom, ucon64.rom_in_archive,
                              ucon64.configfile);
-  if (p)
-    ucon64.rom = p;
+#endif
 
   if (optind < argc)
     ucon64.file = argv[optind++];

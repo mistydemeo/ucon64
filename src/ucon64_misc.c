@@ -653,8 +653,9 @@ seek_pvd (int sector_size, int mode, const char *filename)
 }
 
 
+#if 0
 char *
-ucon64_rom_in_archive (void *dp, const char *archive, char *romname,
+ucon64_rom_in_archive (DIR2_t *dp, const char *archive, char *romname,
                        char *configfile)
 {
 #if 0
@@ -669,7 +670,7 @@ ucon64_rom_in_archive (void *dp, const char *archive, char *romname,
 #endif
   return NULL;
 }
-
+#endif
 
 int
 ucon64_trackmode_probe (const char *image)

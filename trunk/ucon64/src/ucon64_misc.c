@@ -467,7 +467,8 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 
   q_fread (buf, 0, size, filename);
 
-  while (c == buf[pos]) pos--;
+  while (c == buf[pos])
+    pos--;
 
   free (buf);
 

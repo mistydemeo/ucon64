@@ -150,7 +150,7 @@ crc16 (unsigned short crc16, const void *buf, unsigned int size)
 /*
   crc32 routines
 */
-#define CRC32_POLYNOMIAL     0xedb88320L
+#define CRC32_POLYNOMIAL     0xedb88320
 
 static unsigned int crc32_table[256];
 static int crc32_table_built = 0;
@@ -180,20 +180,15 @@ unsigned int
 crc32 (unsigned int crc32, const void *buffer, unsigned int size)
 {
   unsigned char *p;
-  unsigned int temp1, temp2;
 
   if (!crc32_table_built)
     build_crc32_table ();
 
-  crc32 ^= 0xffffffffL;
+  crc32 ^= 0xffffffff;
   p = (unsigned char *) buffer;
   while (size-- != 0)
-    {
-      temp1 = (crc32 >> 8) & 0x00ffffffL;
-      temp2 = crc32_table[((int) crc32 ^ *p++) & 0xff];
-      crc32 = temp1 ^ temp2;
-    }
-  return crc32 ^ 0xffffffffL;
+    crc32 = (crc32 >> 8) ^ crc32_table[(crc32 ^ *p++) & 0xff];
+  return crc32 ^ 0xffffffff;
 }
 
 
@@ -2699,9 +2694,9 @@ int
 argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
 {
 //TODO replace with argz_extract() 
-//#ifdef  DEBUG
+#ifdef  DEBUG
   int pos = 0;
-//#endif
+#endif
   int argc = 0;
 
   if (!str)
@@ -2712,219 +2707,15 @@ argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
   for (; (argv[argc] = (char *) strtok (!argc?str:NULL, separator_s)) &&
     argc < (max_args - 1); argc++);
 
-//#ifdef  DEBUG
+#ifdef  DEBUG
   fprintf (stderr, "argc:     %d\n", argc);
   for (pos = 0; pos < argc; pos++)
     fprintf (stderr, "argv[%d]:  %s\n", pos, argv[pos]);
 
   fflush (stderr);
-//#endif
+#endif
 
   return argc;
 }
 
 
-char *
-strunesc (char *dest, const char *src)
-{
-  unsigned int c;
-  char *p = dest;
-
-  if (!src)
-    return NULL;
-  if (!src[0])
-    return "";
-
-  while ((c = *src++))
-    {
-      if (c == '%')
-        {
-          unsigned char buf[4];
-
-          buf[0] = *src++;
-          buf[1] = *src++;
-          buf[2] = 0;
-        
-          sscanf (buf, "%x", &c);
-        }
-
-       *p++ = c;
-     }
-  *p = 0;
-  
-  return dest;
-}
-
-
-char *
-stresc (char *dest, const char *src)
-{
-//TODO: what if the src was already escaped?
-  unsigned char c;
-  char *p = dest;
-  const unsigned char *positiv =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ" 
-    "abcdefghijklmnopqrstuvwxyz"
-    "0123456789"
-#if 1
-    "+/"
-#else
-    "-_.!~"                     // mark characters
-    "*\\()%"                    // do not touch escape character
-    ";/?:@"                     // reserved characters
-    "&=+$,"                     // see RFC 2396
-//  "\x7f ... \xff"    far east languages(Chinese, Korean, Japanese)
-#endif
-    ;
-
-  if (!src)
-    return NULL;
-  if (!src[0])
-    return "";
-            
-  while ((c = *src++))
-    if (strchr (positiv, c) != NULL || c >= 0x7f)
-      *p++ = c;
-    else
-      {
-        sprintf (p, "%%%02X", c);
-        p += 3;
-      }
-  *p = 0;
-
-  return dest;
-}
-
-
-#ifdef  DEBUG
-static void
-strurl_test (st_strurl_t *url)
-{
-  fprintf (stderr, "url_s:    %s\n", url->url_s);
-  fprintf (stderr, "protocol: %s\n", url->protocol);
-  fprintf (stderr, "hostname: %s\n", url->host);
-  fprintf (stderr, "file:     %s\n", url->file);
-  fprintf (stderr, "port:     %d\n", url->port);
-  fprintf (stderr, "user:     %s\n", url->user);
-  fprintf (stderr, "pass:     %s\n", url->pass);
-
-  fflush (stderr);
-}
-#endif
-
-
-st_strurl_t *
-strurl (st_strurl_t *url, const char *url_s)
-{
-#define ANONYMOUS_S "anonymous"
-#define LOCALHOST_S "localhost"
-  int pos = 0, pos2 = 0;
-  char *p = NULL, *p2 = NULL, *p3 = NULL;
-
-  if (!url)
-    return NULL;
-  if (!url_s)
-    return NULL;
-  if (!url_s[0])
-    return NULL;
-
-#ifdef  DEBUG
-  fprintf (stderr, "%s\n\n", url_s);
-#endif
-
-  memset (url, 0, sizeof (st_strurl_t));
-  strcpy (url->url_s, url_s);
-  url->port = -1;
-
-  // look for "://"
-  if ((p = strstr (url_s, "://")))
-    {
-      // extract the protocol
-      pos = p - url_s;
-      strncpy (url->protocol, url_s, pos);
-      url->protocol[pos] = 0;
-
-      // jump the "://"
-      p += 3;
-      pos += 3;
-    }
-  else
-    p = (char *) url_s;
-
-  // check if a user:pass is given
-  if ((p2 = strchr (p, '@')))
-    {
-      int len = p2 - p;
-      strncpy (url->user, p, len);
-      url->user[len] = 0;
-
-      p3 = strchr (p, ':');
-      if (p3 != NULL && p3 < p2)
-        {
-          int len2 = p2 - p3 - 1;
-
-          url->user[p3 - p] = 0;
-          strncpy (url->pass, p3 + 1, len2);
-          url->pass[len2] = 0;
-        }
-      p = p2 + 1;
-      pos = p - url_s;
-    }
-
-  // look if the port is given
-  p2 = strchr (p, ':');                 // If the : is after the first / it isn't the port
-  p3 = strchr (p, '/');
-  if (p3 && p3 - p2 < 0)
-    p2 = NULL;
-  if (!p2)
-    {
-      pos2 =
-        (p2 = strchr (p, '/')) ?        // Look if a path is given
-        (p2 - url_s) :                  // We have an URL like http://www.hostname.com/file.txt
-        (int) strlen (url_s);           // No path/filename
-                                        // So we have an URL like http://www.hostname.com
-    }
-  else
-    {
-      // We have an URL beginning like http://www.hostname.com:1212
-      url->port = atoi (p2 + 1);  // Get the port number
-      pos2 = p2 - url_s;
-    }
-
-  // copy the hostname into st_strurl_t
-  strncpy (url->host, p, pos2 - pos);
-  url->host[pos2 - pos] = 0;
-
-  // look if a path is given
-  if ((p2 = strchr (p, '/')))
-    if (strlen (p2) > 1)                // A path/filename is given check if it's not a trailing '/'
-#if 1
-      strunesc (url->file, p2);         // copy the path/filename into st_strurl_t
-#else
-      strcpy (url->file, p2);           // copy the path/filename into st_strurl_t
-#endif
-
-  // defaults
-  if (!url->protocol[0])
-    strcpy (url->protocol, "http");
-#if 0
-  if (!url->user[0])
-    strcpy (url->user, ANONYMOUS_S);
-  if (!url->pass[0])
-    strcpy (url->pass, ANONYMOUS_S);
-#endif
-  if (!url->host)
-    strcpy (url->host, LOCALHOST_S);
-  if (url->port == -1 && !strnicmp (url->protocol, "http", 3))
-    url->port = 80;
-#if 0
-  if (!url->file[0])
-    strcpy (url->file, "/");
-#endif
-
-#ifdef  DEBUG
-  strurl_test (url);
-#endif
-
-  return url;
-}

@@ -256,8 +256,6 @@ char *fix_character_set (char *value);
               undefined (by POSIX) use truncate2() instead which does both
   argz_extract2() simplified argz_extract() replacement
   argz_extract3() like argz_extract2() but for spaces only
-  stresc()        replace chars with %xx escape sequences
-  strunesc()      replace %xx escape sequences with the char
 */
 extern int isfname (int c);
 extern int isprint2 (int c);
@@ -299,8 +297,6 @@ extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, int size);
 extern int argz_extract2 (char **argv, char *str, const char *separator_s, int max_args);
 #define argz_extract3(a,c,m) argz_extract2(a,c," ",m)
-extern char *stresc (char *dest, const char *src);
-extern char *strunesc (char *dest, const char *src); 
 
 
 /*
@@ -361,10 +357,6 @@ extern unsigned int crc32 (unsigned int crc32, const void *buffer, unsigned int 
                   returns -1 if it fails, 0 if it was successful
   handle_registered_funcs() calls all the registered functions
   wait2           wait (sleep) a specified number of milliseconds
-  strurl()        a general routine to parse commandlines into urls and the
-                  other direction. strurl() returns st_strurl_t with all further
-                  informations that came with the url like protocol, host,
-                  port, etc..
 */
 typedef struct st_cm_set
 {
@@ -403,26 +395,6 @@ extern int register_func (void (*func) (void));
 extern int unregister_func (void (*func) (void));
 extern void handle_registered_funcs (void);
 extern void wait2 (int nmillis);
-#if 0
-#if     FILENAME_MAX > MAXBUFSIZE
-#define STRURL_MAX (FILENAME_MAX)
-#else
-#define STRURL_MAX (MAXBUFSIZE)
-#endif
-#else
-#define STRURL_MAX (0xff)
-#endif
-typedef struct
-{
-  char url_s[STRURL_MAX];       // default: "http://localhost:80/"
-  char protocol[STRURL_MAX];    // default: "http"
-  char user[STRURL_MAX];        // default: ""
-  char pass[STRURL_MAX];        // default: ""
-  char host[STRURL_MAX];        // default: localhost
-  int port;                   // default: 80
-  char file[STRURL_MAX];        // default: "/"
-} st_strurl_t;
-extern st_strurl_t *strurl (st_strurl_t *url, const char *url_s);
 
 
 /*

@@ -412,9 +412,23 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     {"(F)", "France"},
     {NULL, NULL}
   };
+  static const char *dat_flags[][2] = {
+    {"[a", "Alternate"},
+    {"[p", "Pirate"},
+    {"[b", "Bad dump"},
+    {"[t", "Trained"},
+    {"[f", "Fixed"},
+    {"[T", "Translation"},
+    {"[h", "Hack"},
+    {"[x", "Bad checksum"},
+    {"[o", "Overdump"},
+    {"[!]", "Verified good dump"}, // [!] is ok
+    {NULL, NULL}
+  };
   char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE], *p = NULL;
   uint32_t pos = 0;
-
+  int x = 0;
+  
   if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
     return NULL;
 
@@ -448,6 +462,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
   else
     sscanf (dat_field[6], "%d", &dat->fsize);
 
+#if 0
   p = dat->name;
   // Often flags contain numbers, so don't search for the closing bracket
   sprintf (buf,
@@ -462,6 +477,12 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     (strstr (p, "[x") ? "Bad checksum, " : ""),
     (strstr (p, "[o") ? "Overdump, " : ""),
     (strstr (p, "[!]") ? "Verified good dump, " : "")); // [!] is ok
+#else
+  *buf = 0;
+  for (x = 0, p = buf; dat_flags[x][0]; x++, p += strlen (p))
+    if (strstr (dat->name, dat_flags[x][0]))
+      sprintf (p, "%s, ", dat_flags[x][1]);
+#endif
   if (buf[0])
     {
       if ((p = strrchr (buf, ',')))

@@ -4,7 +4,7 @@ ucon64_misc.c - miscellaneous functions for uCON64
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2003 dbjh
                   2001 Caz
-                  2002 Jan-Erik Karlsson (Amiga)
+           2002 - 2003 Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -45,13 +45,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/io.h>                             // ioperm() (glibc)
 #elif   defined __BEOS__ || defined __FreeBSD__
 #include <fcntl.h>
-#elif defined(AMIGA)
+#elif   defined AMIGA
 #include <fcntl.h>
 #include <exec/types.h>
-#include <dos/dos.h>
-#include <dos/var.h>
 #include <exec/io.h>
 #include <exec/ports.h>
+#include <dos/dos.h>
+#include <dos/var.h>
 #include <devices/parallel.h>
 #elif   defined _WIN32
 #include <conio.h>                              // inp{w}() & outp{w}()
@@ -891,7 +891,11 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
   NULL};                                        // IZ
 
 
-#if     defined PARALLEL && (defined __BEOS__ || defined AMIGA || defined __FreeBSD__)
+#ifdef   PARALLEL
+
+#if     defined __BEOS__ || defined __FreeBSD__
+static int ucon64_io_fd;
+
 typedef struct st_ioport
 {
   unsigned int port;
@@ -899,17 +903,11 @@ typedef struct st_ioport
   unsigned short data16;
 } st_ioport_t;
 
-static int ucon64_io_fd;
-#if   defined(AMIGA)
-	struct IOStdReq *parIO;
-	struct MsgPort *parPort;
-	char *pardev;
-	char *pardev2;
-	char *parnum;
-	int parnum2;
-	ULONG WaitMask;
-	ULONG Temp;
-#endif //AMIGA
+#elif   defined AMIGA
+static struct IOStdReq *ucon64_io_req;
+static struct MsgPort *ucon64_parport;
+#endif
+
 #endif
 
 
@@ -1375,14 +1373,14 @@ void (*output_word) (unsigned short, unsigned short) = outpw_func;
 void
 close_io_port (void)
 {
-	#if   defined(AMIGA)
-	  CloseDevice((struct IORequest *)parIO);
-		DeleteExtIO((struct IOExtPar *)parIO);
-		DeletePort(parPort);
-		parIO = NULL;
-	#else
-    close (ucon64_io_fd);
-	#endif
+#ifdef  AMIGA
+  CloseDevice ((struct IORequest *) ucon64_io_req);
+  DeleteExtIO ((struct IOExtPar *) ucon64_io_req);
+  DeletePort (ucon64_parport);
+  ucon64_io_req = NULL;
+#else
+  close (ucon64_io_fd);
+#endif
 }
 #endif
 
@@ -1397,24 +1395,22 @@ inportb (unsigned short port)
   ioctl (ucon64_io_fd, 'r', &temp, 0);
 
   return temp.data8;
-#elif defined(AMIGA)
-	st_ioport_t temp;
-	temp.port = port;
+#elif   defined AMIGA
+  ULONG wait_mask;
+  (void) port;                                  // warning remover
 
-	WaitMask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << parPort->mp_SigBit;
+  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
 
-	parIO->io_Length = (sizeof(temp.data8));
+  ucon64_io_req->io_Length = 1;
+  ucon64_io_req->io_Command = CMD_READ;
 
-	parIO->io_Data = temp.data8;
-	parIO->io_Command = CMD_READ;
+  SendIO ((struct IORequest *) ucon64_io_req);
 
-	SendIO((struct IORequest *)parIO);
+  if (Wait (wait_mask) & (SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F))
+    AbortIO ((struct IORequest *) ucon64_io_req);
+  WaitIO ((struct IORequest *) ucon64_io_req);
 
-	if(Wait(WaitMask) & (SIGBREAKF_CTRL_C|SIGBREAKF_CTRL_F))
-		AbortIO((struct IORequest *)parIO);
-	WaitIO((struct IORequest *)parIO);
-
-	return temp.data8;
+  return (unsigned char) ucon64_io_req->io_Data;
 #elif   defined _WIN32 || defined __CYGWIN__
   return input_byte (port);
 #elif   defined __i386__
@@ -1433,24 +1429,22 @@ inportw (unsigned short port)
   ioctl (ucon64_io_fd, 'r16', &temp, 0);
 
   return temp.data16;
-#elif   defined(AMIGA)
-	st_ioport_t temp;
-	temp.port = port;
+#elif   defined AMIGA
+  ULONG wait_mask;
+  (void) port;                                  // warning remover
 
-	WaitMask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << parPort->mp_SigBit;
+  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
 
-	parIO->io_Length = (sizeof(temp.data16));
+  ucon64_io_req->io_Length = 2;
+  ucon64_io_req->io_Command = CMD_READ;
 
- 	parIO->io_Data = temp.data16;
-	parIO->io_Command = CMD_READ;
+  SendIO ((struct IORequest *) ucon64_io_req);
 
-	SendIO((struct IORequest *)parIO);
+  if (Wait (wait_mask) & (SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F))
+    AbortIO ((struct IORequest *) ucon64_io_req);
+  WaitIO ((struct IORequest *) ucon64_io_req);
 
-  if(Wait(WaitMask) & (SIGBREAKF_CTRL_C|SIGBREAKF_CTRL_F))
-		AbortIO((struct IORequest *)parIO);
-	WaitIO((struct IORequest *) parIO);
-
-	return temp.data16;
+  return (unsigned short) ucon64_io_req->io_Data;
 #elif   defined _WIN32 || defined __CYGWIN__
   return input_word (port);
 #elif   defined __i386__
@@ -1468,24 +1462,21 @@ outportb (unsigned short port, unsigned char byte)
   temp.port = port;
   temp.data8 = byte;
   ioctl (ucon64_io_fd, 'w', &temp, 0);
-#elif   defined(AMIGA)
-	 st_ioport_t temp;
+#elif   defined AMIGA
+  ULONG wait_mask;
+  (void) port;                                  // warning remover
 
-  temp.port = port;
-  temp.data8 = byte;
+  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
 
-  WaitMask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << parPort->mp_SigBit;
+  ucon64_io_req->io_Length = 1;
+  ucon64_io_req->io_Data = byte;
+  ucon64_io_req->io_Command = CMD_WRITE;
 
-	parIO->io_Length = (sizeof(temp.data8));
+  SendIO ((struct IORequest *) ucon64_io_req);
 
-	parIO->io_Data = temp.data8;
-	parIO->io_Command = CMD_WRITE;
-
-	SendIO((struct IORequest *)parIO);
-
-	if(Wait(WaitMask) & (SIGBREAKF_CTRL_C|SIGBREAKF_CTRL_F))
-		AbortIO((struct IORequest *)parIO);
-  WaitIO((struct IORequest *)parIO);
+  if (Wait (wait_mask) & (SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F))
+    AbortIO ((struct IORequest *) ucon64_io_req);
+  WaitIO ((struct IORequest *) ucon64_io_req);
 #elif   defined _WIN32 || defined __CYGWIN__
   output_byte (port, byte);
 #elif   defined __i386__
@@ -1503,25 +1494,21 @@ outportw (unsigned short port, unsigned short word)
   temp.port = port;
   temp.data16 = word;
   ioctl (ucon64_io_fd, 'w16', &temp, 0);
-#elif   defined(AMIGA)
-	st_ioport_t temp;
+#elif   defined AMIGA
+  ULONG wait_mask;
+  (void) port;                                  // warning remover
 
-  temp.port = port;
-  temp.data16 = word;
+  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
 
-  WaitMask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << parPort->mp_SigBit;
+  ucon64_io_req->io_Length = 2;
+  ucon64_io_req->io_Data = word;
+  ucon64_io_req->io_Command = CMD_WRITE;
 
-	parIO->io_Length = (sizeof(temp.data16));
+  SendIO ((struct IORequest *) ucon64_io_req);
 
-	parIO->io_Data = temp.data16;
-	parIO->io_Command = CMD_WRITE;
-
-	SendIO((struct IORequest *)parIO);
-
-	if( Wait(WaitMask) & (SIGBREAKF_CTRL_C|SIGBREAKF_CTRL_F) )
-    AbortIO((struct IORequest *)parIO);
-
-  WaitIO((struct IORequest *)parIO);
+  if (Wait (wait_mask) & (SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F) )
+    AbortIO ((struct IORequest *) ucon64_io_req);
+  WaitIO ((struct IORequest *) ucon64_io_req);
 #elif   defined _WIN32 || defined __CYGWIN__
   output_word (port, word);
 #elif   defined __i386__
@@ -1579,42 +1566,45 @@ ucon64_parport_init (unsigned int port)
                   "         http://ucon64.sourceforge.net\n\n");
         }
     }
-#elif   defined(AMIGA)
-	parPort = CreatePort(NULL, 0);
-	if(parPort == NULL)
-	{
-		fprintf(stderr,"ERROR: Could not create the MsgPort\n");
-		exit(1);
-	}
- 	parIO = CreateExtIO(parPort, sizeof(struct IOExtPar));
-	if(parIO == NULL)
- 	{
-		fprintf(stderr, "ERROR: Could not create the parIO Request\n");
-		DeletePort(parPort);
-		parIO=NULL;
- 		exit(1);
-	}
+#elif   defined AMIGA
+  int x;
 
-	ucon64_io_fd = OpenDevice(ucon64.parport_dev?ucon64.parport_dev:"parallel.device", ucon64.parport, (struct IORequest *)parIO, (ULONG)0);
+  ucon64_parport = CreatePort (NULL, 0);
+  if (ucon64_parport == NULL)
+    {
+      fprintf (stderr, "ERROR: Could not create the MsgPort\n");
+      exit (1);
+    }
+  ucon64_io_req = CreateExtIO (ucon64_parport, sizeof (struct IOExtPar));
+  if (ucon64_io_req == NULL)
+    {
+      fprintf (stderr, "ERROR: Could not create the I/O request structure\n");
+      DeletePort (ucon64_parport);
+      ucon64_io_req = NULL;
+      exit (1);
+    }
 
-  if (ucon64_io_fd != NULL)
-  {
-    fprintf(stderr, "ERROR: Could not open parallel port\n");
-		DeleteExtIO((struct IOExtPar *)parIO);
-		DeletePort(parPort);
-    exit (1);
-  }
+  x = OpenDevice (ucon64.parport_dev, ucon64.parport,
+                  (struct IORequest *) ucon64_io_req, (ULONG) 0);
+  if (x != NULL)
+    {
+      fprintf (stderr, "ERROR: Could not open parallel port (%s, %x)\n",
+               ucon64.parport_dev, ucon64.parport);
+      DeleteExtIO ((struct IOExtPar *) ucon64_io_req);
+      DeletePort (ucon64_parport);
+      exit (1);
+    }
 
-  if ( atexit (close_io_port) == -1)
-  {
-		AbortIO((struct IORequest *) parIO);
-    CloseDevice((struct IORequest *) parIO);
-		DeleteExtIO(parIO);
-		DeletePort(parPort);
-		parIO = NULL;
-    fprintf (stderr, "ERROR: Could not register function with atexit()\n");
-    exit(1);
-  }
+  if (atexit (close_io_port) == -1)
+    {
+      AbortIO ((struct IORequest *) ucon64_io_req);
+      CloseDevice ((struct IORequest *) ucon64_io_req);
+      DeleteExtIO (ucon64_io_req);
+      DeletePort (ucon64_parport);
+      ucon64_io_req = NULL;
+      fprintf (stderr, "ERROR: Could not register function with atexit()\n");
+      exit (1);
+    }
 #elif   defined __FreeBSD__
   ucon64_io_fd = open ("/dev/io", O_RDWR);
   if (ucon64_io_fd == -1)
@@ -1879,9 +1869,9 @@ ucon64_configfile (void)
                    "#\n"
                    "# parallel port\n"
                    "#\n"
-#if defined(AMIGA)
+#ifdef  AMIGA
                    "#parport_dev=parallel.device\n"
-									 "#parport=0\n"
+                   "#parport=0\n"
 #else
                    "#parport=378\n"
 #endif

@@ -88,10 +88,10 @@ st_ucon64_t ucon64;                             // containes ptr to image, dat a
 
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
 
-#if defined(AMIGA)
-	unsigned long __stack = 0x40000L;
-	char vers[] = "$VER: uCON64 "UCON64_VERSION_S" "CURRENT_OS_S" ("__DATE__") ("__TIME__")";
-#endif //AMIGA
+#ifdef  AMIGA
+unsigned long __stack = 0x40000L;
+char vers[] = "$VER: uCON64 "UCON64_VERSION_S" "CURRENT_OS_S" ("__DATE__") ("__TIME__")";
+#endif
 
 typedef struct
 {
@@ -533,18 +533,19 @@ main (int argc, char **argv)
 #endif
 
   // parallel port?
-#if defined(AMIGA)
+#ifdef  AMIGA
   strcpy (ucon64.parport_dev,
           get_property (ucon64.configfile, "parport_dev", buf, "parallel.device"));
 #endif
   // Use "0" to force probing if the config file doesn't contain a parport line
+  //  (does not apply to the Amiga version, parport 0 is a valid value)
   sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
 
   // make backups?
   ucon64.backup = get_property_int (ucon64.configfile, "backups", '=');
 
   // $HOME/.ucon64/ ?
-  strcpy (ucon64.configdir, get_property (ucon64.configfile, "ucon64_configdir", buf, "~")); //J-E.K changed to $home
+  strcpy (ucon64.configdir, get_property (ucon64.configfile, "ucon64_configdir", buf, ""));
 #ifdef  __CYGWIN__
   strcpy (ucon64.configdir, fix_character_set (ucon64.configdir));
 #endif
@@ -553,7 +554,7 @@ main (int argc, char **argv)
 
   // DAT file handling
   ucon64.dat_enabled = 0;
-  strcpy (ucon64.datdir, get_property (ucon64.configfile, "ucon64_datdir", buf, "~/dat")); //J-E.K changed this to $home/dat
+  strcpy (ucon64.datdir, get_property (ucon64.configfile, "ucon64_datdir", buf, ""));
 #ifdef  __CYGWIN__
   strcpy (ucon64.datdir, fix_character_set (ucon64.datdir));
 #endif

@@ -3,7 +3,7 @@ misc.c - miscellaneous functions
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2003 dbjh
-                  2002 Jan-Erik Karlsson (Amiga)
+           2002 - 2003 Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -47,11 +47,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <OS.h>                                 // snooze(), microseconds
 // Include OS.h before misc.h, because OS.h includes StorageDefs.h which
 //  includes param.h which unconditionally defines MIN and MAX.
-#elif   defined(AMIGA)
+#elif   defined AMIGA
+#include <unistd.h>
+#include <fcntl.h>
 #include <dos/dos.h>
 #include <dos/var.h>
 #include <proto/dos.h>
-#include <unistd.h>
 #elif   defined _WIN32
 #include <windows.h>                            // Sleep(), milliseconds
 #endif
@@ -66,7 +67,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/poll.h>                           //  is available on Linux, not on
 #endif                                          //  BeOS. DOS already has kbhit()
 
-#if     (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
+#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
 #include <termios.h>
 typedef struct termios tty_t;
 #endif
@@ -91,7 +92,7 @@ static st_func_node_t func_list = { NULL, NULL };
 static int func_list_locked = 0;
 static int misc_ansi_color = 0;
 
-#if     (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
+#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
 static void set_tty (tty_t *param);
 #endif
 
@@ -915,11 +916,10 @@ dirname2 (const char *path)
 
 #ifndef HAVE_REALPATH
 #undef realpath
-#if !defined(AMIGA)
 char *
 realpath (const char *path, char *full_path)
 {
-#ifndef _WIN32
+#if     defined __unix__ || defined __BEOS__ || defined __MSDOS__
 /*
   Keep the "defined _WIN32"'s in this code in case GetFullPathName() turns out
   to have some unexpected problems. This code works for Visual C++, but it
@@ -1093,7 +1093,7 @@ realpath (const char *path, char *full_path)
   strcpy (full_path, got_path);
 
   return full_path;
-#else
+#elif   defined _WIN32
   char *p, c;
   int n;
 
@@ -1109,12 +1109,14 @@ realpath (const char *path, char *full_path)
     full_path[n] = 0;
 
   return full_path;
-#endif // _WIN32
+#elif   defined AMIGA
+  strcpy (full_path, path);
+  return full_path;
+#endif
 }
-#endif //AMIGA
 #endif
 
-#if !defined(AMIGA)
+
 char *
 realpath2 (const char *path, char *full_path)
 // enhanced realpath() which returns the absolute path of a file
@@ -1139,7 +1141,7 @@ realpath2 (const char *path, char *full_path)
 
   return realpath (path2, full_path);
 }
-#endif //AMIGA
+
 
 int
 one_file (const char *filename1, const char *filename2)
@@ -2129,8 +2131,7 @@ tmpnam2 (char *temp)
 }
 
 
-#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
-        defined AMIGA
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__
 static int oldtty_set = 0, stdin_tty = 1;       // 1 => stdin is a tty, 0 => it's not
 static tty_t oldtty, newtty;
 
@@ -2138,13 +2139,11 @@ static tty_t oldtty, newtty;
 void
 set_tty (tty_t *param)
 {
-	#if !defined(AMIGA)
   if (stdin_tty && tcsetattr (STDIN_FILENO, TCSANOW, param) == -1)
     {
       fprintf (stderr, "ERROR: Could not set tty parameters\n");
       exit (100);
     }
-	#endif //AMIGA
 }
 
 
@@ -2156,7 +2155,6 @@ set_tty (tty_t *param)
 void
 init_conio (void)
 {
-	#if !defined(AMIGA)
   if (!isatty (STDIN_FILENO))
     {
       stdin_tty = 0;
@@ -2183,20 +2181,17 @@ init_conio (void)
   newtty.c_cc[VTIME] = 0;                       //  block (wait for input)
 
   set_tty (&newtty);
-	#endif //AMIGA
 }
 
 
 void
 deinit_conio (void)
 {
-	#if !defined(AMIGA)
   if (oldtty_set)
     {
       tcsetattr (STDIN_FILENO, TCSAFLUSH, &oldtty);
       oldtty_set = 0;
     }
-	#endif //AMIGA
 }
 
 
@@ -2235,7 +2230,13 @@ kbhit (void)
   return key_pressed;
 #endif
 }
-#endif                                          // (__unix__ && !__MSDOS__) || __BEOS__ || AMIGA
+#elif   defined AMIGA                           // (__unix__ && !__MSDOS__) || __BEOS__
+int
+kbhit (void)
+{
+  return 0;
+}
+#endif                                          // AMIGA
 
 
 #if     defined __unix__ && !defined __MSDOS__
@@ -2384,8 +2385,8 @@ wait2 (int nmillis)
   usleep (nmillis * 1000);
 #elif   defined __BEOS__
   snooze (nmillis * 1000);
-#elif   defined(AMIGA)
-  Delay(nmillis * 1000);
+#elif   defined AMIGA
+  Delay (nmillis * 1000);
 #elif   defined _WIN32
   Sleep (nmillis);
 #else
@@ -2680,6 +2681,35 @@ process_file (const char *src, int start, int len, const char *dest, const char 
 #endif
 
 
+int
+argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
+{
+// TODO: replace with argz_extract()
+#ifdef  DEBUG
+  int pos = 0;
+#endif
+  int argc = 0;
+
+  if (!str)
+    return 0;
+  if (!str[0])
+    return 0;
+
+  for (; (argv[argc] = (char *) strtok (!argc?str:NULL, separator_s)) &&
+    argc < (max_args - 1); argc++);
+
+#ifdef  DEBUG
+  fprintf (stderr, "argc:     %d\n", argc);
+  for (pos = 0; pos < argc; pos++)
+    fprintf (stderr, "argv[%d]:  %s\n", pos, argv[pos]);
+
+  fflush (stderr);
+#endif
+
+  return argc;
+}
+
+
 #ifdef  _WIN32
 int
 truncate (const char *path, off_t size)
@@ -2717,132 +2747,123 @@ fdopen (int fd, const char *mode)
 }
 #endif
 
-#endif // _WIN32
+
+#elif   defined AMIGA                           // _WIN32
+int
+truncate (const char *path, off_t size)
+{
+  return 0;
+}
 
 
 int
-argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
+chmod (const char *path, mode_t mode)
 {
-// TODO: replace with argz_extract()
-#ifdef  DEBUG
-  int pos = 0;
-#endif
-  int argc = 0;
-
-  if (!str)
-    return 0;
-  if (!str[0])
-    return 0;
-
-  for (; (argv[argc] = (char *) strtok (!argc?str:NULL, separator_s)) &&
-    argc < (max_args - 1); argc++);
-
-#ifdef  DEBUG
-  fprintf (stderr, "argc:     %d\n", argc);
-  for (pos = 0; pos < argc; pos++)
-    fprintf (stderr, "argv[%d]:  %s\n", pos, argv[pos]);
-
-  fflush (stderr);
-#endif
-
-  return argc;
-}
-
-#if defined(AMIGA)
-int truncate(const char *path, off_t size)
-{
-	/* for the time being we don't do anything*/
-	return 0;
-}
-
-int chmod(const char *path, mode_t mode)
-{
-	if(!SetProtection((STRPTR)path,((mode&S_IRUSR?0:FIBF_READ)|
-																	(mode&S_IWUSR?0:FIBF_WRITE|FIBF_DELETE)|
-																	(mode&S_IXUSR?0:FIBF_EXECUTE)|
-																	(mode&S_IRGRP?FIBF_GRP_READ:0)|
-                                  (mode&S_IWGRP?FIBF_GRP_WRITE|FIBF_GRP_DELETE:0)|
-                                  (mode&S_IXGRP?FIBF_GRP_EXECUTE:0)|
-                                  (mode&S_IROTH?FIBF_OTR_READ:0)|
-                                  (mode&S_IWOTH?FIBF_OTR_WRITE|FIBF_OTR_DELETE:0)|
-                                  (mode&S_IXOTH?FIBF_OTR_EXECUTE:0))))
-  	return -1;
-	return 0;
-}
-
-void sync (void)
-{
-	/* for the time being we don't do anything*/
-}
-
-int readlink(const char *path, char *buf, int bufsize)
-{
-	/* always return -1 as if anything passed to it isn't a soft link */
-	return -1;
-}
-
-char *realpath (const char *path, char *full_path)
-{
-	return full_path;
-}
-
-char *realpath2 (const char *src, char *full_path)
-// clone of realpath() which returns the absolute path of a file
-{
-  char path1[FILENAME_MAX], path2[FILENAME_MAX];
-
-  if (src[0] == '~')
-    {
-      if (src[1] == FILE_SEPARATOR)
-        {
-          strcpy (path1, getenv2 ("HOME"));
-          strcpy (path2, &src[2]);
-          sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
-        }
-      else if (src[1] == 0)
-        strcpy (full_path, getenv2 ("HOME"));
-    }
+  if (!SetProtection ((STRPTR) path,
+                        ((mode & S_IRUSR ? 0 : FIBF_READ) |
+                         (mode & S_IWUSR ? 0 : FIBF_WRITE | FIBF_DELETE) |
+                         (mode & S_IXUSR ? 0 : FIBF_EXECUTE) |
+                         (mode & S_IRGRP ? FIBF_GRP_READ : 0) |
+                         (mode & S_IWGRP ? FIBF_GRP_WRITE | FIBF_GRP_DELETE: 0) |
+                         (mode & S_IXGRP ? FIBF_GRP_EXECUTE : 0) |
+                         (mode & S_IROTH ? FIBF_OTR_READ : 0) |
+                         (mode & S_IWOTH ? FIBF_OTR_WRITE | FIBF_OTR_DELETE : 0) |
+                         (mode & S_IXOTH ? FIBF_OTR_EXECUTE : 0))))
+    return -1;
   else
-    strcpy (full_path, src);
-
-  return full_path;
+    return 0;
 }
 
-char *_getenv(const char *name)
-{
 
-	static char *var;
+void
+sync (void)
+{
+}
+
+
+int
+readlink (const char *path, char *buf, int bufsize)
+{
+  // always return -1 as if anything passed to it isn't a soft link
+  return -1;
+}
+
+
+char *
+_getenv (const char *name)
+{
+  static char *var;
   size_t len,i;
 
   var = NULL;
   i = 0;
 
   do
-  {
-  	i+=256;
-    if(var!=NULL) // free old buffer
-      free(var);
-    var=malloc(i); // and get a new one
-    if(var==NULL) // Oh, dear
-      return NULL;
-    len=GetVar((char *)name,var,i,GVF_BINARY_VAR)+1;
-  }while(len>=i); // just to be sure we got everything, we _require_ 1 unused byte
-  if(len==0) // Variable doesn't exist
+    {
+      i += 256;
+      if (var!= NULL)                           // free old buffer
+        free (var);
+      var = malloc (i);                         // and get a new one
+      if (var == NULL)                          // oh, dear
+        return NULL;
+      len = GetVar ((char *) name, var, i, GVF_BINARY_VAR) + 1;
+    }
+  while (len >= i);                             // just to be sure we got everything,
+                                                //  we _require_ 1 unused byte
+  if (len == 0)                                 // variable doesn't exist
     return NULL;
   else
     return var;
 /*
-    static char *buffer;
+  static char *buffer;
 
-    buffer = NULL;
+  buffer = NULL;
 
-    if(GetVar(name,buffer,sizeof(buffer),GVF_BINARY_VAR)<0)
-    	return(NULL);
-    else
-    	return(buffer);
+  if (GetVar (name, buffer, sizeof (buffer), GVF_BINARY_VAR) < 0)
+    return NULL;
+  else
+    return buffer;
 
-	return(NULL);
+  return NULL;
 */
 }
-#endif //AMIGA
 
+
+FILE *
+popen (const char *path, const char *mode)
+{
+  int fd;
+  BPTR fh;
+  long fdflags, fhflags;
+  char *apipe = malloc (strlen (path) + 7);
+
+  if (!apipe)
+    return NULL;
+
+  strcpy (apipe, "APIPE:");
+  strcat (apipe, path);
+
+  if (*mode == 'w')
+    {
+      fdflags = 2;
+      fhflags = MODE_NEWFILE;
+    }
+  else
+    {
+      fdflags = 1;
+      fhflags = MODE_OLDFILE;
+    }
+
+  if (!(fh = Open (apipe, fhflags)))
+    return NULL;
+
+  return fdopen (fd, mode));
+}
+
+
+int
+pclose (FILE *stream)
+{
+  return fclose (stream);
+}
+#endif                                          // AMIGA

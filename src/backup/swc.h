@@ -50,6 +50,8 @@ extern int swc_read_rom (const char *filename, unsigned int parport, int superdu
 extern int swc_write_rom (const char *filename, unsigned int parport, int enableRTS);
 extern int swc_read_sram (const char *filename, unsigned int parport);
 extern int swc_write_sram (const char *filename, unsigned int parport);
+extern int swc_read_rts (const char *filename, unsigned int parport);
+extern int swc_write_rts (const char *filename, unsigned int parport);
 extern void swc_unlock (unsigned int parport);
 #endif // PARALLEL
 

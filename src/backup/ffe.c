@@ -105,6 +105,21 @@ ffe_send_command0 (unsigned short address, unsigned char byte)
 }
 
 
+unsigned char
+ffe_send_command1 (unsigned short address)
+// command 1 for 1 byte
+{
+  unsigned char byte;
+
+  ffe_send_command (1, address, 1);
+  byte = ffe_receiveb ();
+  if ((0x81 ^ byte) != ffe_receiveb ())
+    printf ("received data is corrupt\n");
+
+  return byte;
+}
+
+
 void
 ffe_send_command (unsigned char command_code, unsigned short a, unsigned short l)
 {

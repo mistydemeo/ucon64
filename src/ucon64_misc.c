@@ -542,6 +542,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XSWC, UCON64_SNES, swc_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XSWC_SUPER, UCON64_SNES, swc_usage,  WF_STOP|WF_NO_SPLIT|WF_NO_ROM}, // receive only
   {UCON64_XSWC2, UCON64_SNES, swc_usage,       WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XSWCR, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XSWCS, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XV64, UCON64_N64, doctor64_usage,    WF_DEFAULT|WF_STOP|WF_NO_ROM},
 #endif

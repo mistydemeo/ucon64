@@ -54,6 +54,10 @@ const st_usage_t swc_usage[] =
                  OPTION_LONG_S "port=PORT\n"
                  "receives automatically when SRAM does not exist\n"
                  "Press q to abort; ^C might cause invalid state of backup unit"},
+    {"xswcr", NULL, "send/receive RTS data to/from Super Wild Card*/(all)SWC;\n"
+                 OPTION_LONG_S "port=PORT\n"
+                 "receives automatically when RTS file does not exist\n"
+                 "Press q to abort; ^C might cause invalid state of backup unit"},
 #endif // PARALLEL
     {NULL, NULL, NULL}
   };
@@ -70,6 +74,9 @@ static int check2 (unsigned char *info_block, int index, unsigned char value);
 static int check3 (unsigned char *info_block, int index1, int index2, int size);
 static unsigned char get_emu_mode_select (unsigned char byte, int size);
 static void handle_fig_header (unsigned char *header);
+static int sub (void);
+static int mram_helper (int x);
+static int mram (void);
 
 static int hirom;                               // `hirom' was `special'
 
@@ -93,10 +100,8 @@ receive_rom_info (unsigned char *buffer, int superdump)
 
   ffe_send_command0 (0xe00c, 0);
   ffe_send_command (5, 3, 0);
-  ffe_send_command (1, 0xbfd5, 1);
-  byte = ffe_receiveb ();
-  if ((0x81 ^ byte) != ffe_receiveb ())
-    printf ("received data is corrupt\n");
+
+  byte = ffe_send_command1 (0xbfd5);
   hirom = byte & 1;                             // Caz (vgs '96) does (byte & 0x21) == 0x21 ? 1 : 0;
 
   address = 0x200;
@@ -114,10 +119,7 @@ receive_rom_info (unsigned char *buffer, int superdump)
       for (m = 0; m < 65536; m++)               // a delay is necessary here
         ;
       ffe_send_command (5, address, 0);
-      ffe_send_command (1, 0xa0a0, 1);
-      buffer[n] = ffe_receiveb ();
-      if ((0x81 ^ buffer[n]) != ffe_receiveb ())
-        printf ("received data is corrupt\n");
+      byte = ffe_send_command1 (0xa0a0);
 
       address++;
     }
@@ -355,11 +357,7 @@ swc_read_rom (const char *filename, unsigned int parport, int superdump)
   ffe_send_command (5, 0, 0);
   ffe_send_command0 (0xe00c, 0);
   ffe_send_command0 (0xe003, 0);
-  ffe_send_command (1, 0xbfd8, 1);
-  byte = ffe_receiveb ();
-  if ((0x81 ^ byte) != ffe_receiveb ())
-    printf ("received data is corrupt\n");
-
+  byte = ffe_send_command1 (0xbfd8);
   buffer[2] = get_emu_mode_select (byte, blocksleft / 16);
   fwrite (buffer, 1, SWC_HEADER_LEN, file);     // write header (other necessary fields are
                                                 //  filled in by receive_rom_info())
@@ -599,6 +597,180 @@ swc_write_sram (const char *filename, unsigned int parport)
       ffe_send_command (5, address, 0);
       ffe_send_block (0x2000, buffer, bytesread);
       address++;
+
+      bytessend += bytesread;
+      ucon64_gauge (starttime, bytessend, size);
+      ffe_checkabort (2);
+    }
+
+  free (buffer);
+  fclose (file);
+  ffe_deinit_io ();
+
+  return 0;
+}
+
+
+int
+sub (void)
+{
+  ffe_send_command (5, 7 * 4, 0);
+  ffe_send_command0 (0xe00d, 0);
+  ffe_send_command0 (0xe003, 0);
+
+  if (ffe_send_command1 (0xb080) != 'S')
+    return 0;
+  if (ffe_send_command1 (0xb081) != 'U')
+    return 0;
+  if (ffe_send_command1 (0xb082) != 'B')
+    return 0;
+
+  return 1;
+}
+
+
+int
+mram_helper (int x)
+{
+  ffe_send_command (5, x, 0);
+  x = ffe_send_command1 (0x8000);
+  ffe_send_command0 (0x8000, x ^ 0xff);
+  if (ffe_send_command1 (0x8000) != (x ^ 0xff))
+    return 0;
+
+  ffe_send_command0 (0x8000, x);
+  return 1;
+}
+
+
+int
+mram (void)
+{
+  if (mram_helper (0x76 * 4))
+    return 0x76 * 4;
+  if (mram_helper (0x56 * 4))
+    return 0x56 * 4;
+  if (mram_helper (0x36 * 4))
+    return 0x36 * 4;
+  return 0x16 * 4;
+}
+
+
+int
+swc_read_rts (const char *filename, unsigned int parport)
+{
+  FILE *file;
+  unsigned char *buffer;
+  int blocksleft, bytesreceived = 0;
+  unsigned short address1, address2;
+  time_t starttime;
+
+  ffe_init_io (parport);
+
+  if ((file = fopen (filename, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
+      exit (1);
+    }
+
+  printf ("Receive: %d Bytes\n", 256 * 1024);
+  memset (buffer, 0, SWC_HEADER_LEN);
+  buffer[8] = 0xaa;
+  buffer[9] = 0xbb;
+  buffer[10] = 8;
+  fwrite (buffer, 1, SWC_HEADER_LEN, file);
+
+  printf ("Press q to abort\n\n");
+  blocksleft = 32;                              // RTS data is 32*8 KB
+
+  if (sub ())
+    {
+      address1 = 0;
+      address2 = 0xa000;
+    }
+  else
+    {
+      address1 = mram ();
+      address2 = 0x8000;
+    }
+
+  starttime = time (NULL);
+  while (blocksleft > 0)
+    {
+      ffe_send_command (5, address1, 0);
+      if (address2 == 0x8000)
+        ffe_send_command0 (0xc010, 1);
+      ffe_receive_block (address2, buffer, BUFFERSIZE);
+
+      blocksleft--;
+      address1++;
+      fwrite (buffer, 1, BUFFERSIZE, file);
+
+      bytesreceived += BUFFERSIZE;
+      ucon64_gauge (starttime, bytesreceived, 256 * 1024);
+      ffe_checkabort (2);
+    }
+  ffe_send_command (6, 3, 0);
+
+  free (buffer);
+  fclose (file);
+  ffe_deinit_io ();
+
+  return 0;
+}
+
+
+int
+swc_write_rts (const char *filename, unsigned int parport)
+{
+  FILE *file;
+  unsigned char *buffer;
+  int bytesread, bytessend = 0, size;
+  unsigned short address1, address2;
+  time_t starttime;
+
+  ffe_init_io (parport);
+
+  if ((file = fopen (filename, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
+      exit (1);
+    }
+
+  size = q_fsize (filename) - SWC_HEADER_LEN;
+  printf ("Send: %d Bytes\n", size);
+  fseek (file, SWC_HEADER_LEN, SEEK_SET);       // skip the header
+
+  printf ("Press q to abort\n\n");
+  if (sub ())
+    {
+      address1 = 0;
+      address2 = 0xa000;
+    }
+  else
+    {
+      address1 = mram ();
+      address2 = 0x8000;
+    }
+
+  starttime = time (NULL);
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+    {
+      ffe_send_command (5, address1, 0);
+      if (address2 == 0x8000)
+        ffe_send_command0 (0xc010, 1);
+      ffe_send_block (address2, buffer, bytesread);
+      address1++;
 
       bytessend += bytesread;
       ucon64_gauge (starttime, bytessend, size);

@@ -37,7 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t gd_usage[] =
   {
-    {NULL, NULL, "Game Doctor SF3(SF6/SF7)"},
+    {NULL, NULL, "Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"},
     {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef PARALLEL
 #if 1 // dumping is not yet supported
@@ -291,7 +291,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
   FILE *file = NULL;
   unsigned char *buffer;
   char *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12],
-       filenames[GD3_MAX_UNITS][8 + 1 + 3 + 1]; // +1 for period, +1 for ASCII-z;
+       filenames[GD3_MAX_UNITS][8 + 1 + 3 + 1]; // +1 for period, +1 for ASCII-z
   int num_units, i, send_header, x, split = 1, hirom = snes_get_snes_hirom();
 
   init_io (parport);

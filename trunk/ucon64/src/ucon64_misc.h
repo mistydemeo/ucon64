@@ -153,7 +153,7 @@ extern const st_ucon64_wf_t ucon64_wf[];
 extern char *ucon64_temp_file;
 extern int (*ucon64_testsplit_callback) (const char *filename);
 
-#define NINTENDO_MAKER_LEN 792
+#define NINTENDO_MAKER_LEN 684
 extern const char *nintendo_maker[];
 
 /*

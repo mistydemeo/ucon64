@@ -382,7 +382,13 @@ gba_init (st_rominfo_t *rominfo)
   rominfo->name[GBA_NAME_LEN] = 0;
 
   // ROM maker
-  value = (gba_header.maker_high - '0') * 36 + gba_header.maker_low - '0';
+  {
+    int ih = gba_header.maker_high <= '9' ?
+               gba_header.maker_high - '0' : gba_header.maker_high - 'A' + 10,
+        il = gba_header.maker_low <= '9' ?
+               gba_header.maker_low - '0' : gba_header.maker_low - 'A' + 10;
+    value = ih * 36 + il;
+  }
   if (value < 0 || value >= NINTENDO_MAKER_LEN)
     value = 0;
   rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[value]);

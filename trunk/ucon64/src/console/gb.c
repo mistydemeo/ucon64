@@ -470,7 +470,13 @@ gameboy_init (st_rominfo_t *rominfo)
 
   // ROM maker
   if (gameboy_header.maker == 0x33)
-    x = (gameboy_header.maker_high - '0') * 36 + gameboy_header.maker_low - '0';
+    {
+      int ih = gameboy_header.maker_high <= '9' ?
+                 gameboy_header.maker_high - '0' : gameboy_header.maker_high - 'A' + 10,
+          il = gameboy_header.maker_low <= '9' ?
+                 gameboy_header.maker_low - '0' : gameboy_header.maker_low - 'A' + 10;
+      x = ih * 36 + il;
+    }
   else
     x = (gameboy_header.maker >> 4) * 36 + (gameboy_header.maker & 0x0f);
 

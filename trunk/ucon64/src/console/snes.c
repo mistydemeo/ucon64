@@ -2530,7 +2530,13 @@ snes_init (st_rominfo_t *rominfo)
 
   // ROM maker
   if (snes_header.maker == 0x33 || bs_dump)
-    x = (snes_header.maker_high - '0') * 36 + snes_header.maker_low - '0';
+    {
+      int ih = snes_header.maker_high <= '9' ?
+                 snes_header.maker_high - '0' : snes_header.maker_high - 'A' + 10,
+          il = snes_header.maker_low <= '9' ?
+                 snes_header.maker_low - '0' : snes_header.maker_low - 'A' + 10;
+      x = ih * 36 + il;
+    }
   else if (snes_header.maker != 0)
     x = (snes_header.maker >> 4) * 36 + (snes_header.maker & 0x0f);
 

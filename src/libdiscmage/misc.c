@@ -555,28 +555,97 @@ mkdir2 (const char *name)
 
 
 char *
-basename2 (const char *str)
+basename2 (const char *path)
 // basename() clone
 {
-  char *p = strrchr (str, FILE_SEPARATOR);
+  char *p1;
+#if     defined DJGPP || defined __CYGWIN__
+  char *p2;
+#endif
 
-  return p ? p + 1 : (char *) str;
+  if (path == NULL)
+    return NULL;
+
+#if     defined DJGPP || defined __CYGWIN__
+  // Yes, DJGPP, not __MSDOS__, because DJGPP's dirname() behaves the same
+  // __CYGWIN__ has no dirname()
+  p1 = strrchr (path, '/');
+  p2 = strrchr (path, '\\');
+  if (p2 > p1)                                  // use the last separator in path
+    p1 = p2;
+  if (p1 == NULL)                               // no slash, perhaps a drive?
+    p1 = strrchr (path, ':');
+#else
+  p1 = strrchr (path, FILE_SEPARATOR);
+#endif
+
+  return p1 ? p1 + 1 : (char *) path;
 }
 
 
 char *
-dirname2 (const char *str)
+dirname2 (const char *path)
 // dirname() clone
 {
-  static char path[FILENAME_MAX];
-  char *p;
-  
-  strcpy (path, str);
-  p = strrchr (path, FILE_SEPARATOR);
-  if (p)
-    *(++p) = 0;
+  char *p1, *dir;
+#if     defined DJGPP || defined __CYGWIN__
+  char *p2;
+#endif
 
-  return path;
+  if (path == NULL)
+    return NULL;
+  // real dirname() uses malloc() so we do too
+  // +2: +1 for string terminator +1 if path is "<drive>:"
+  if ((dir = (char *) malloc (strlen (path) + 2)) == NULL)
+    return NULL;
+
+  strcpy (dir, path);
+#if     defined DJGPP || defined __CYGWIN__
+  // Yes, DJGPP, not __MSDOS__, because DJGPP's dirname() behaves the same
+  // __CYGWIN__ has no dirname()
+  p1 = strrchr (dir, '/');
+  p2 = strrchr (dir, '\\');
+  if (p2 > p1)                                  // use the last separator in path
+    p1 = p2;
+  if (p1 == NULL)                               // no slash, perhaps a drive?
+    {
+      if ((p1 = strrchr (dir, ':')))
+        {
+          p1[1] = '.';
+          p1 += 2;
+        }
+    }
+#else
+  p1 = strrchr (dir, FILE_SEPARATOR);
+#endif
+
+  while (p1 > dir &&                            // find first of last separators
+         ((*(p1 - 1) == '/' && (*p1 == '/'      //  (we have to strip trailing ones)
+#if     defined DJGPP || defined __CYGWIN__
+                                           || *p1 == '\\'))
+          ||
+          (*(p1 - 1) == '\\' && (*p1 == '\\' || *p1 == '/'
+#endif
+         ))))
+    p1--;
+
+  if (p1 == dir)
+    p1++;                                       // don't overwrite single separator (root dir)
+#if     defined DJGPP || defined __CYGWIN__
+  else if (p1 > dir)
+    if (*(p1 - 1) == ':')
+      p1++;                                     // we must not overwrite the last separator if
+#endif                                          //  it was directly preceded by a drive letter
+
+  if (p1)
+    *p1 = 0;                                    // terminate string (overwrite the separator)
+  else
+    {
+      dir[0] = '.';
+      dir[1] = 0;
+    }
+
+  return dir;
 }
 
 

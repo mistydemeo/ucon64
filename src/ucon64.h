@@ -142,8 +142,8 @@ extern st_ucon64_t ucon64;
 */
 typedef struct
 {
-  const st_usage_t *console_usage;                    // console system usage
-  const st_usage_t *copier_usage;                     // backup unit usage
+  const st_usage_t *console_usage;              // console system usage
+  const st_usage_t *copier_usage;               // backup unit usage
 
   int interleaved;                              // ROM is interleaved (swapped)
   int snes_hirom;                               // SNES ROM is HiROM

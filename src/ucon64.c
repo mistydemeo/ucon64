@@ -469,14 +469,19 @@ main (int argc, char **argv)
 
   ucon64_flush (&rom);
 
+  ucon64.show_nfo = UCON64_YES;
   while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
       for (x = 0; options2[x].option != 0 && options2[x].console != 0; x++)
         if (options2[x].option == c)
-          { 
-            ucon64.console = options2[x].console;
-            ucon64.show_nfo = ((options2[x].flags & WF_SHOW_NFO) ? TRUE : FALSE);
-            break;
+          {
+            // a specific console takes precedence over unknown
+            if (options2[x].console != UCON64_UNKNOWN)
+              ucon64.console = options2[x].console;
+            // no takes precedence over yes
+            if (options2[x].show_nfo == UCON64_NO)
+              ucon64.show_nfo = UCON64_NO;
+//            ucon64.show_nfo = ((options2[x].flags & WF_SHOW_NFO) ? TRUE : FALSE);
           }
 
 #include "switches.c"
@@ -1315,20 +1320,7 @@ ucon64_usage (int argc, char *argv[])
 #endif
     {0, {0, 0, 0, 0, 0, 0}}
   };
-
-  char *name_discmage;
-#if     defined __unix__ || defined __BEOS__ // DJGPP, Cygwin, GNU/Linux, Solaris, FreeBSD, BeOS
-  char *name_exe = strrchr (argv[0], '/') + 1;
-#else // Windows
-  char *name_exe = strrchr (argv[0], '\\') + 1;
-#endif
-  // Don't use basename[2](), because it searches for FILE_SEPARATOR, which is
-  //  '\' on DOS. DJGPP's runtime system expands argv[0] to the full path, but
-  //  with forward slashes...
-
-  if (name_exe == (char *) 1)                   // argv[0] doesn't contain a
-    name_exe = argv[0];                         //  file separator
-
+  char *name_exe = basename (argv[0]), *name_discmage;
 
   printf (
     "Usage: %s [OPTION(S)]... [[" OPTION_LONG_S "rom=]ROM(S)]... " /* [-o=OUTPUT_PATH] */ "\n\n", name_exe);
@@ -1368,12 +1360,12 @@ ucon64_usage (int argc, char *argv[])
 
   name_discmage = 
 #ifdef  DLOPEN
-      ucon64.discmage_path;
+    ucon64.discmage_path;
 #else
 #if     defined __MSDOS__
     "discmage.dxe";
 #elif   defined __CYGWIN__
-     "discmage.dll";
+    "discmage.dll";
 #elif   defined __unix__ || defined __BEOS__
     "libdiscmage.so";
 #else

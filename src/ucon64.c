@@ -325,8 +325,6 @@ main (int argc, char **argv)
     "This may be freely redistributed under the terms of the GNU Public License\n\n",
     ucon64_title);
 
-  srand (time (NULL));
-
   if (atexit (ucon64_exit) == -1)
     {
       fprintf (stderr, "ERROR: Could not register function with atexit()\n");

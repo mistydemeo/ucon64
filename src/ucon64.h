@@ -121,7 +121,7 @@ struct ucon64_
 	int intern_crccmp_len;		//size in bytes
 	
 	char buheader[512];	//default is 512
-	long buheader_start
+	long buheader_start;
 	long buheader_len;	//header of backup unit
 
 	char header[4096];

@@ -278,12 +278,12 @@ gba_crp (st_rominfo_t *rominfo)
   rename (ucon64.rom, backup_name);
   if ((srcfile = fopen (backup_name, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: could not open %s\n", backup_name);
+      fprintf (stderr, "ERROR: Could not open %s\n", backup_name);
       return -1;
     }
   if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: could not open %s\n", ucon64.rom);
+      fprintf (stderr, "ERROR: Could not open %s\n", ucon64.rom);
       return -1;
     }
   if (rominfo->buheader_len)        // copy header (if present)
@@ -426,7 +426,7 @@ gba_chksum (st_rominfo_t *rominfo)
 
 int
 gba_multi (st_rominfo_t *rominfo, int truncate_size, char *fname)
-// TODO: Test if 1024 Mbit multiroms are supported by the FAL code
+// TODO: Check if 1024 Mbit multiroms are supported by the FAL code
 {
   int n, n_files, file_no, bytestowrite, byteswritten, bufsize = 32 * 1024,
       totalsize = 0, done, truncated = 0, size_pow2_lesser = 1, size_pow2 = 1,
@@ -458,7 +458,7 @@ gba_multi (st_rominfo_t *rominfo, int truncate_size, char *fname)
 
   if ((destfile = fopen (destname, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: could not open %s\n", destname);
+      fprintf (stderr, "ERROR: Could not open %s\n", destname);
       return -1;
     }
   printf ("Creating multirom file: %s\n", destname);
@@ -483,7 +483,7 @@ gba_multi (st_rominfo_t *rominfo, int truncate_size, char *fname)
 
           if ((srcfile = fopen (ucon64.argv[n], "rb")) == NULL)
             {
-              fprintf (stderr, "ERROR: could not open %s\n", ucon64.argv[n]);
+              fprintf (stderr, "ERROR: Could not open %s\n", ucon64.argv[n]);
               continue;
             }
           done = 0;

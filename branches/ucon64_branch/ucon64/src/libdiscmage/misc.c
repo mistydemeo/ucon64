@@ -2700,13 +2700,12 @@ fdopen (int fd, const char *mode)
 int
 argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
 {
-//this will be replaced by argz_extract() soon
+//TODO replace with argz_extract() 
   int argc = 0;
 
   if (!str)
     return 0;
-
-  if (!(*str))
+  if (!str[0])
     return 0;
 
   for (; (argv[argc] = (char *) strtok (!argc?str:NULL, separator_s)) &&
@@ -2731,11 +2730,11 @@ strunesc (char *dest, const char *src)
     {
       if (c == '%')
         {
-          unsigned char buf[4], *p2 = buf;
+          unsigned char buf[4];
 
-          *p2++ = *src++;
-          *p2++ = *src++;
-          *p2 = 0;
+          buf[0] = *src++;
+          buf[1] = *src++;
+          buf[2] = 0;
         
           sscanf (buf, "%x", &c);
         }
@@ -2820,11 +2819,6 @@ strurl (st_strurl_t *url, const char *url_s)
 #define LOCALHOST_S "localhost"
   int pos = 0, pos2 = 0;
   char *p = NULL, *p2 = NULL, *p3 = NULL;
-#if     FILENAME_MAX < MAXBUFSIZE
-  char buf[MAXBUFSIZE];
-#else
-  char buf[FILENAME_MAX];
-#endif
 
   if (!url)
     return NULL;
@@ -2854,16 +2848,7 @@ strurl (st_strurl_t *url, const char *url_s)
       pos += 3;
     }
   else
-#if 1
-    p = (char *)url_s;
-#else
-    {
-//#ifdef  DEBUG
-      fprintf (stderr, "ERROR: Not an URL\n");
-//#endif
-      return NULL;
-    }
-#endif
+    p = (char *) url_s;
 
 // check if a user:pass is given
   if ((p2 = strchr (p, '@')))
@@ -2886,35 +2871,24 @@ strurl (st_strurl_t *url, const char *url_s)
     }
 
 // look if the port is given
-  p2 = strchr (p, ':');
-  // If the : is after the first / it isn't the port
+  p2 = strchr (p, ':');  // If the : is after the first / it isn't the port
   p3 = strchr (p, '/');
   if (p3 && p3 - p2 < 0)
     p2 = NULL;
   if (!p2) 
     {
-      // Look if a path is given
-      p2 = strchr (p, '/');
-      if (p2 == NULL)
-        {
-          // No path/filename
-          // So we have an URL like http://www.hostname.com
-          pos2 = strlen (url_s);
-        }
-      else
-        {
-          // We have an URL like http://www.hostname.com/file.txt
-          pos2 = p2 - url_s;
-        }
+      pos2 = 
+        (p2 = strchr (p, '/')) ?  // Look if a path is given
+        (p2 - url_s) :  // We have an URL like http://www.hostname.com/file.txt
+        strlen (url_s);  // No path/filename
+                         // So we have an URL like http://www.hostname.com
     }
   else
     {
       // We have an URL beginning like http://www.hostname.com:1212
-      // Get the port number
-      url->port = atoi (p2 + 1);
+      url->port = atoi (p2 + 1);  // Get the port number
       pos2 = p2 - url_s;
     }
-
 
 // copy the hostname into st_strurl_t
   strncpy (url->host, p, pos2 - pos);
@@ -2922,23 +2896,17 @@ strurl (st_strurl_t *url, const char *url_s)
 
 // look if a path is given
   if ((p2 = strchr (p, '/')))
-    {
-      // A path/filename is given check if it's not a trailing '/'
-      if (strlen (p2) > 1)
+    if (strlen (p2) > 1)  // A path/filename is given check if it's not a trailing '/'
 #if 1
-        {
-          strcpy (buf, p2);
-          strunesc (url->file, buf); // copy the path/filename into st_strurl_t
-        }
+      strunesc (url->file, p2); // copy the path/filename into st_strurl_t
 #else
-        strcpy (url->file, p2);  // copy the path/filename into st_strurl_t
+      strcpy (url->file, p2);  // copy the path/filename into st_strurl_t
 #endif
-    }
 
 // Special
-  url->argc = argz_extract2 (url->argv, url->file, "?&+", STRURL_MAX);
-  p = (char *) url->cmd_s;
-  for (pos = 0; pos < url->argc; pos++, p += strlen (p))
+  strcpy (url->cmd_s, url->file);
+  url->argc = argz_extract2 (url->argv, url->cmd_s, "?&+", STRURL_MAX);
+  for (pos = 0, p = url->cmd_s; pos < url->argc; pos++, p += strlen (p))
     sprintf (p, "%s ", url->argv[pos]);
 
 // defaults

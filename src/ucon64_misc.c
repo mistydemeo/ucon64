@@ -896,6 +896,7 @@ close_io_port (void)
 }
 #endif
 
+
 unsigned char
 inportb (unsigned short port)
 {

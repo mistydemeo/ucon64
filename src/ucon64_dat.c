@@ -153,6 +153,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 {
 // parse a dat entry into st_ucon64_dat_t
   static const char *dat_country[] = {
+//maybe we should default to goodtool.cfg here?
     "(1) Japan & Korea",
     "(A) Australia",
     "(B) non U.S.A. (Genesis)",
@@ -315,8 +316,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     {
       for (pos = 0; console_type[pos].id; pos++)
         {
-          if (stristr (dat->datfile, console_type[pos].id) ||
-              stristr (dat->refname, console_type[pos].id))
+          if (stristr (dat->datfile, console_type[pos].id))
             {
               dat->console = console_type[pos].console;
               dat->console_usage = console_type[pos].console_usage;
@@ -764,7 +764,11 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat)
     suffix).
   */
   n = strlen (dat->fname);
-  p = (char *) dat->fname + n - 4;
+#if 0
+  p = (char *) dat->fname + n - 4; //nb: 4?
+#else
+  p = (char *) getext (dat->fname);
+#endif
   if (stricmp (p, ".nes") &&                    // NES
       stricmp (p, ".gb") &&                     // Game Boy
       stricmp (p, ".smc") &&                    // SNES
@@ -776,7 +780,11 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat)
     }
   else
     {
-      n -= 4;
+#if 0
+      n -= 4; //nb: 4?
+#else
+      n -= strlen (p);
+#endif
       if (strnicmp (dat->name, dat->fname, n) != 0)
         printf ("  Filename: %s\n", dat->fname);
     }

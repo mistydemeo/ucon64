@@ -1100,6 +1100,17 @@ ucon64_gauge (time_t init_time, int pos, int size)
 
 
 int
+ucon64_dm_gauge (int pos, int size)
+{
+  time_t init_time = 0;
+  
+  if (!init_time || !pos /* || !size */) init_time = time (0);
+
+  return ucon64_gauge (init_time, pos, size);
+}
+
+
+int
 ucon64_testsplit (const char *filename)
 // test if ROM is split into parts based on the name of files
 {

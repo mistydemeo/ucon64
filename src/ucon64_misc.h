@@ -137,6 +137,12 @@ extern unsigned int ucon64_filefile (const char *filename1, int start1, const ch
   wrapper for misc.c/gauge()
 */
 extern int ucon64_gauge (time_t init_time, int pos, int size);
+/*
+  libdiscmage can use a gauge function
+
+  unlike ucon64_gauge() the timer will reset if pos == 0
+*/
+extern int ucon64_dm_gauge (int pos, int size);
 
 extern int ucon64_pad (const char *filename, int start, int size); // pad ROM to a certain size
 extern int ucon64_testpad (const char *filename, st_rominfo_t *rominfo); // test if ROM is padded

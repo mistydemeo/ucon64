@@ -595,6 +595,15 @@ swc_write_rom (const char *filename, unsigned int parport)
   emu_mode_select = buffer[2];                  // this byte is needed later
   if (buffer[3] & 0x80)                         // Pro Fighter (FIG) HiROM dump
     emu_mode_select |= 0x30;                    // set bit 5&4 (SRAM & DRAM mem map mode 21)
+#if 1
+  /*
+    0x0c == no SRAM & LoROM; we use the header, so that the user can override this
+    bit 4 == 0 => DRAM mode 20 (LoROM); disable SRAM by setting SRAM mem map mode 21
+  */
+  if ((emu_mode_select & 0x1c) == 0x0c)
+    emu_mode_select |= 0x20;
+#else
+  // TODO: The code below doesn't seem to work for HiROM games. This has to be verified.
   if ((emu_mode_select & 0x0c) == 0x0c)         // 0x0c == no SRAM; we use the header, so
     {                                           //  that the user can override this
       if (emu_mode_select & 0x10)               // bit 4 == 1 => DRAM mode 21 (HiROM)
@@ -602,6 +611,7 @@ swc_write_rom (const char *filename, unsigned int parport)
       else                                      // bit 4 == 0 => DRAM mode 20 (LoROM)
         emu_mode_select |= 0x20;                // disable SRAM by setting SRAM mem map mode 21
     }
+#endif
 
   printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)

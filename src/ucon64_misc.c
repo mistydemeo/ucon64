@@ -1288,7 +1288,23 @@ ucon64_ls (const char *path, int mode)
         if (!stat (path, &fstate))
           {
             if (S_ISREG (fstate.st_mode))
-              return ucon64_ls_main (path, &fstate, mode, console);
+              {
+#ifdef  ZLIB
+                int n = unzip_get_number_entries (path), retval = 0;
+                if (n != -1)
+                  {
+                    for (unzip_current_file_nr = 0; unzip_current_file_nr < n;
+                         unzip_current_file_nr++)
+                      retval = ucon64_ls_main (path, &fstate, mode, console);
+                    unzip_current_file_nr = 0;
+                  }
+                else
+                  retval = ucon64_ls_main (path, &fstate, mode, console);
+                return retval;
+#else
+                return ucon64_ls_main (path, &fstate, mode, console);
+#endif
+              }
           }
         strcpy (dir, path);
       }
@@ -1305,7 +1321,20 @@ ucon64_ls (const char *path, int mode)
   while ((ep = readdir (dp)))
     if (!stat (ep->d_name, &fstate))
       if (S_ISREG (fstate.st_mode))
-        ucon64_ls_main (ep->d_name, &fstate, mode, console);
+        {
+#ifdef  ZLIB
+          int n = unzip_get_number_entries (ep->d_name);
+          if (n != -1)
+            {
+              for (unzip_current_file_nr = 0; unzip_current_file_nr < n;
+                unzip_current_file_nr++)
+              ucon64_ls_main (ep->d_name, &fstate, mode, console);
+              unzip_current_file_nr = 0;
+            }
+          else
+#endif
+          ucon64_ls_main (ep->d_name, &fstate, mode, console);
+        }
 
   closedir (dp);
 

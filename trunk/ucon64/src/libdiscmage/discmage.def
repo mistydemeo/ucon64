@@ -1,0 +1,16 @@
+EXPORTS
+dm_bin2iso
+dm_close
+dm_disc_read
+dm_disc_write
+dm_fseek
+dm_get_version
+dm_isofix
+dm_open
+dm_reopen
+dm_rip
+dm_set_gauge
+dm_track_init
+dm_cdirip
+dm_mkcue
+dm_mktoc

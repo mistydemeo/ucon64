@@ -307,7 +307,7 @@ gameboy_n (st_rominfo_t *rominfo, const char *name)
 int
 gameboy_chk (st_rominfo_t *rominfo)
 {
-  unsigned char buf[4], dest_name[FILENAME_MAX];
+  char buf[4], dest_name[FILENAME_MAX];
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);

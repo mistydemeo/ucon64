@@ -133,7 +133,6 @@ typedef struct
   char datdir[FILENAME_MAX];                    // directory for DAT files
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
   char discmage_path[FILENAME_MAX];             // path to the discmage DLL
-  char netgui_path[FILENAME_MAX];               // path to the netgui DLL
 
   unsigned int parport;                         // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
@@ -144,7 +143,6 @@ typedef struct
   int backup;                                   // flag if backups files should be created
   int frontend;                                 // flag if uCON64 was started by a frontend
   int discmage_enabled;                         // flag if discmage DLL is loaded
-  int netgui_enabled;                           // flag if netgui DLL is loaded
   int dat_enabled;                              // flag if DAT file(s) are usable/enabled
   int quiet;                                    // quiet == -1 means verbose + 1
 

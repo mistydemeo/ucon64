@@ -34,10 +34,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #ifdef  DISCMAGE
-#include "ucon64_lib.h"
+#include "ucon64_dm.h"
 #endif
 #ifdef  GUI
-#include "ucon64_libng.h"
+#include "ucon64_ng.h"
 #endif
 #include "ucon64_opts.h"
 #include "quick_io.h"

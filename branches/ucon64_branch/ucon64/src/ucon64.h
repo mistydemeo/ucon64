@@ -46,10 +46,10 @@ typedef struct
 
 
 #ifdef  DISCMAGE
-#include "ucon64_lib.h"
+#include "ucon64_dm.h"
 #endif
 #ifdef  GUI
-#include "ucon64_libng.h"
+#include "ucon64_ng.h"
 #endif
 
 /*

@@ -68,10 +68,10 @@ write programs in C
 #include "ucon64_misc.h"
 #include "ucon64_opts.h"
 #ifdef  DISCMAGE
-#include "ucon64_lib.h"
+#include "ucon64_dm.h"
 #endif
 #ifdef  GUI
-#include "ucon64_libng.h"
+#include "ucon64_ng.h"
 #endif
 #include "console/console.h"
 #include "patch/patch.h"

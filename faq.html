@@ -137,6 +137,9 @@ Q46: <a href="#46">The pre-compiled GNU/Linux binary does not work on my
 Q47: <a href="#47">I use Windows XP (NT/2000) and everytime I run uCON64 I get
    this error message about ntuser.dat. What does it mean?</a><br>
 <br>
+Q48: <a href="#48">Is there any way to make uCON64 convert a ROM dump to Game
+   Doctor SF3/SF6/SF7 format and split it, in one command?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -1514,6 +1517,72 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    name that ends with ".dat" or make an environment variable with the name
    ucon64_datdir point to such a directory. Do not forget that the environment
    variable will not be set the next time you start a DOS session.<br>
+<br>
+<p>
+<a name="48"><b>Q48</b>: Is there any way to make uCON64 convert a ROM dump to
+   Game Doctor SF3/SF6/SF7 format and split it, in one command?</a><br>
+<b>A</b>: Not directly, but it can be done with the help of a shell script or
+   batch file. See <a href="#41">question 41</a> for some information on how to
+   make a shell script or batch file run. Here is a Bash script:<br>
+   &nbsp;&nbsp;#! /bin/bash<br>
+<br>
+   &nbsp;&nbsp;usage ()<br>
+   &nbsp;&nbsp;{<br>
+   &nbsp;&nbsp;  echo "Usage: $0 file_to_convert_and_split"<br>
+   &nbsp;&nbsp;  exit<br>
+   &nbsp;&nbsp;}<br>
+<br>
+   &nbsp;&nbsp;GD3DIR="convert"<br>
+   &nbsp;&nbsp;SPLITDIR="split"<br>
+<br>
+   &nbsp;&nbsp;if [ ! -n "$1" ]; then usage; fi<br>
+   &nbsp;&nbsp;if [ ! -e "$1" ]; then usage; fi<br>
+<br>
+   &nbsp;&nbsp;if [ ! -e "$GD3DIR" ]; then mkdir "$GD3DIR"; fi<br>
+   &nbsp;&nbsp;if [ ! -e "$SPLITDIR" ]; then mkdir "$SPLITDIR"; fi<br>
+<br>
+   &nbsp;&nbsp;rm -f "$GD3DIR"/*<br>
+   &nbsp;&nbsp;rm -f "$SPLITDIR"/*<br>
+<br>
+   &nbsp;&nbsp;ucon64 -q -gd3 "$1" -o "$GD3DIR"<br>
+   &nbsp;&nbsp;ucon64 -q -s "$GD3DIR"/* -o "$SPLITDIR"<br>
+   <br>
+   And here is a batch file:<br>
+   &nbsp;&nbsp;@echo off<br>
+<br>
+   &nbsp;&nbsp;set GD3DIR="convert"<br>
+   &nbsp;&nbsp;set SPLITDIR="split"<br>
+<br>
+   &nbsp;&nbsp;if .==.%1 goto usage<br>
+   &nbsp;&nbsp;if not exist %1 goto usage<br>
+<br>
+   &nbsp;&nbsp;if not exist %GD3DIR% mkdir %GD3DIR%<br>
+   &nbsp;&nbsp;if not exist %SPLITDIR% mkdir %SPLITDIR%<br>
+<br>
+   &nbsp;&nbsp;del /q %GD3DIR%\*<br>
+   &nbsp;&nbsp;del /q %SPLITDIR%\*<br>
+<br>
+   &nbsp;&nbsp;ucon64 -q -gd3 %1 -o %GD3DIR%<br>
+   &nbsp;&nbsp;ucon64 -q -s %GD3DIR%\* -o %SPLITDIR%<br>
+   &nbsp;&nbsp;goto exit<br>
+<br>
+   &nbsp;&nbsp;:usage<br>
+   &nbsp;&nbsp;echo Usage: %0 file_to_convert_and_split<br>
+<br>
+   &nbsp;&nbsp;:exit<br>
+<br>
+   Say you saved the batch file to the name cs.bat, then you can convert a
+   file to Game Doctor format and split it with:<br>
+   &nbsp;&nbsp;cs somegame.swc<br>
+   Afterwards you can find a file in Game Doctor format in the directory
+   convert and the split parts in the directory split. Modify the scripts above
+   if you want them to make uCON64 write its output to other directories. Do
+   *not* make GD3DIR or SPLITDIR point to the current directory or to your SNES
+   ROM directory as the scripts will remove all files in the directories
+   pointed to by GD3DIR or SPLITDIR. Starting with empty directories is the
+   main reason why the scripts work (actually, this is only true for GD3DIR).<br>
+<br>
+<br>
 <br>
 <br>
 <br>

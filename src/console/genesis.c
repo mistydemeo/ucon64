@@ -870,7 +870,7 @@ static void
 write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
                         int totalsize)
 {
-//  static int sram_page = 0, file_no_sram = 0;
+  static int sram_page = 0, file_no_sram = 0;
   int m;
   unsigned char flags = 0; // SRAM/region flags: F, D (reserved), E, P, V, T, S1, S0
 
@@ -886,7 +886,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
 
   if (genesis_has_ram)
     {
-#if 0 // TODO: ask Leo how to use S1 & S0
+      // TODO: ask Leo if this is correct use of S1 & S0
       flags = sram_page++;
       if (sram_page == 3)
         file_no_sram = file_no;
@@ -895,7 +895,6 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
           printf ("WARNING: This ROM will share SRAM with ROM %d\n", file_no_sram);
           sram_page = 3;
         }
-#endif
       if ((ucon64.file_size - rominfo->buheader_len) > 16 * MBIT)
         flags |= 0x80;                          // set F (>16 Mb & SRAM)
     }
@@ -921,7 +920,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
 int
 genesis_multi (int truncate_size, char *fname)
 {
-#define BUFSIZE (32 * 1024)                     // must be a multiple of 16kB
+#define BUFSIZE (32 * 1024)                     // must be a multiple of 16 kB
   int n, n_files, file_no, bytestowrite, byteswritten, totalsize = 0, done,
       truncated = 0, paddedsize, org_do_not_calc_crc = ucon64.do_not_calc_crc;
   struct stat fstate;

@@ -472,11 +472,11 @@ main (int argc, char *argv[])
            , getenv2 ("HOME"));
 
 
-  h2g_start (argc, argv);
+  htk_start (argc, argv);
 
   ucon64gui_root ();
 
-  h2g_end ();
+  htk_end ();
 
   return 0;
 }
@@ -488,24 +488,24 @@ ucon64gui_output (char *output)
 #include "xpm/icon.xpm"
 #include "xpm/back.xpm"
 
-  h2g_html (0, 0, 0);
-  h2g_head ();
-  h2g_title (ucon64gui_title, icon_xpm);
-  h2g_head_end ();
-  h2g_body (NULL, "#c0c0c0");
+  htk_html (0, 0, 0);
+  htk_head ();
+  htk_title (ucon64gui_title, icon_xpm);
+  htk_head_end ();
+  htk_body (NULL, "#c0c0c0");
 
-  h2g_input_image ("Back", OPTION_LONG_S "root", back_xpm, 0, 0, "Back");
+  htk_input_image ("Back", OPTION_LONG_S "root", back_xpm, 0, 0, "Back");
 
-//  h2g_br();
+//  htk_br();
 
-  h2g_textarea ("output", output, 80, 25, TRUE, FALSE, NULL);
+  htk_textarea ("output", output, 80, 25, TRUE, FALSE, NULL);
 
   ucon64gui_bottom ();
 
-  h2g_form_end ();
-  h2g_body_end ();
+  htk_form_end ();
+  htk_body_end ();
 
-  h2g_html_end ();
+  htk_html_end ();
 }
 
 
@@ -514,63 +514,63 @@ ucon64gui_root (void)
 {
 #include "xpm/icon.xpm"
 
-  h2g_html (0, 0, 0);
-  h2g_head ();
-  h2g_title (ucon64gui_title, icon_xpm);
-  h2g_head_end ();
-  h2g_body (NULL, "#c0c0c0");
-  h2g_form (UCON64GUI_FORMTARGET);
+  htk_html (0, 0, 0);
+  htk_head ();
+  htk_title (ucon64gui_title, icon_xpm);
+  htk_head_end ();
+  htk_body (NULL, "#c0c0c0");
+  htk_form (UCON64GUI_FORMTARGET);
 
   ucon64gui_top ();
 
-  h2g_ ("Console specific options");
-  h2g_br ();
+  htk_ ("Console specific options");
+  htk_br ();
 
 #if 0
-  h2g_input_submit ("NES", OPTION_LONG_S "nes",
+  htk_input_submit ("NES", OPTION_LONG_S "nes",
                     "(" OPTION_LONG_S "nes) options for Nintendo Entertainment System/NES\n1983 Nintendo http://www.nintendo.com");
-  h2g_input_submit ("GameBoy", OPTION_LONG_S "gb",
+  htk_input_submit ("GameBoy", OPTION_LONG_S "gb",
                     "(" OPTION_LONG_S "gb) options for GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance)\n1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com");
-  h2g_input_submit ("Super Nintendo", OPTION_LONG_S "snes",
+  htk_input_submit ("Super Nintendo", OPTION_LONG_S "snes",
                     "(" OPTION_LONG_S "snes) options for Super Nintendo/SNES/Super Famicon\n1990 Nintendo http://www.nintendo.com");
-  h2g_input_submit ("Nintendo 64", OPTION_LONG_S "n64",
+  htk_input_submit ("Nintendo 64", OPTION_LONG_S "n64",
                     "(" OPTION_LONG_S "n64) options for Nintendo 64\n1996 Nintendo http://www.nintendo.com");
-  h2g_input_submit ("GameBoy Advance", OPTION_LONG_S "gba",
+  htk_input_submit ("GameBoy Advance", OPTION_LONG_S "gba",
                     "(" OPTION_LONG_S "gba) options for GameBoy Advance\n2001 Nintendo http://www.nintendo.com");
 
   ucon64gui_spacer ();
 
-  h2g_input_submit ("Sega Master System/Game Gear", OPTION_LONG_S "sms",
+  htk_input_submit ("Sega Master System/Game Gear", OPTION_LONG_S "sms",
                     "(" OPTION_LONG_S "sms) options for Sega Master System(II/III)/GameGear (Handheld)\n1986/19XX SEGA http://www.sega.com");
-  h2g_input_submit ("Genesis", OPTION_LONG_S "gen",
+  htk_input_submit ("Genesis", OPTION_LONG_S "gen",
                     "(" OPTION_LONG_S "gen) options for Genesis/Sega Mega Drive/Sega CD/32X/Nomad\n1989/19XX/19XX SEGA http://www.sega.com");
-  h2g_input_submit ("Dreamcast", OPTION_LONG_S "dc",
+  htk_input_submit ("Dreamcast", OPTION_LONG_S "dc",
                     "(" OPTION_LONG_S "dc) options for Dreamcast\n1998 SEGA http://www.sega.com");
 
   ucon64gui_spacer ();
 
-  h2g_input_submit ("Lynx", OPTION_LONG_S "lynx",
+  htk_input_submit ("Lynx", OPTION_LONG_S "lynx",
                     "(" OPTION_LONG_S "lynx) options for Handy(prototype)/Lynx/Lynx II\n1987 Epyx/1989 Atari/1991 Atari");
-  h2g_input_submit ("Jaguar", OPTION_LONG_S "jag",
+  htk_input_submit ("Jaguar", OPTION_LONG_S "jag",
                     "(" OPTION_LONG_S "jag) options for Panther(32bit prototype)/Jaguar64/Jaguar64 CD\n1989 Flare2/1993 Atari/1995 Atari");
 
-  h2g_ (" ");
-  h2g_input_submit ("PC-Engine", OPTION_LONG_S "pce",
+  htk_ (" ");
+  htk_input_submit ("PC-Engine", OPTION_LONG_S "pce",
                     "(" OPTION_LONG_S "pce) options for PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))/Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)\n1987/19XX/19XX NEC");
 
-  h2g_ (" ");
+  htk_ (" ");
 
-  h2g_input_submit ("Neo Geo", OPTION_LONG_S "ng",
+  htk_input_submit ("Neo Geo", OPTION_LONG_S "ng",
                     "(" OPTION_LONG_S "ng) options for Neo Geo/Neo Geo CD(Z)/MVS\n1990/1994 SNK http://www.neogeo.co.jp");
-  h2g_input_submit ("Neo Geo Pocket", OPTION_LONG_S "ngp",
+  htk_input_submit ("Neo Geo Pocket", OPTION_LONG_S "ngp",
                     "(" OPTION_LONG_S "ngp) options for Neo Geo Pocket/Neo Geo Pocket Color\n1998/1999 SNK http://www.neogeo.co.jp");
 
-  h2g_ (" ");
+  htk_ (" ");
 
-  h2g_input_submit ("WonderSwan", OPTION_LONG_S "wswan",
+  htk_input_submit ("WonderSwan", OPTION_LONG_S "wswan",
                     "(" OPTION_LONG_S "swan) options for WonderSwan/WonderSwan Color\n19XX/19XX Bandai");
 #else
-  h2g_select ("page", 0, 0, "Choose your console system here",
+  htk_select ("page", 0, 0, "Choose your console system here",
     "NES",
     OPTION_LONG_S "nes", 
     "GameBoy",
@@ -605,10 +605,10 @@ ucon64gui_root (void)
 
   ucon64gui_bottom ();
 
-  h2g_form_end ();
-  h2g_body_end ();
+  htk_form_end ();
+  htk_body_end ();
 
-  h2g_html_end ();
+  htk_html_end ();
 }
 
 
@@ -616,12 +616,12 @@ void
 ucon64gui_divider (void)
 {
 #include "xpm/trans.xpm"
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
-  h2g_hr ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
+  htk_br ();
+  htk_img (trans_xpm, 0, 3, 0, NULL);
+  htk_br ();
+  htk_hr ();
+  htk_img (trans_xpm, 0, 3, 0, NULL);
+  htk_br ();
 }
 
 
@@ -629,9 +629,9 @@ void
 ucon64gui_spacer (void)
 {
 #include "xpm/trans.xpm"
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
+  htk_br ();
+  htk_img (trans_xpm, 0, 3, 0, NULL);
+  htk_br ();
 }
 
 

@@ -32,14 +32,14 @@ ucon64gui_bottom (void)
 
   ucon64gui_spacer ();
   
-  h2g_img (icon_16x16_xpm, 0, 0, 0, "uCON64gui");
+  htk_img (icon_16x16_xpm, 0, 0, 0, "uCON64gui");
 
-  h2g_a ("Visit ucon64.sf.net", OPTION_LONG_S "surfto=http://ucon64.sf.net",
+  htk_a ("Visit ucon64.sf.net", OPTION_LONG_S "surfto=http://ucon64.sf.net",
          "Surf to uCON64 and uCON64gui homepage");
 
-  h2g_form_end ();
+  htk_form_end ();
 
-  h2g_body_end ();
+  htk_body_end ();
 
-  h2g_html_end ();
+  htk_html_end ();
 }

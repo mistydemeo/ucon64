@@ -34,22 +34,22 @@ nes_gui (void)
 
   ucon64gui_top ();
 
-  h2g_img (nes_xpm, 0, 0, 0, NULL);
+  htk_img (nes_xpm, 0, 0, 0, NULL);
 
   ucon64gui_divider ();
 
-  h2g_input_submit ("iNES header", OPTION_LONG_S "ineshd",
+  htk_input_submit ("iNES header", OPTION_LONG_S "ineshd",
                     "(" OPTION_LONG_S "ineshd) extract iNES header from ROM (16 Bytes)");
 
   ucon64gui_spacer ();
 
-  h2g_ ("Convert ROM to: ");
+  htk_ ("Convert ROM to: ");
 
-  h2g_input_submit ("FFE", OPTION_LONG_S "ffe", "(" OPTION_LONG_S "ffe) convert to FFE (+512 Bytes)");
+  htk_input_submit ("FFE", OPTION_LONG_S "ffe", "(" OPTION_LONG_S "ffe) convert to FFE (+512 Bytes)");
 
-  h2g_input_submit ("iNES", OPTION_LONG_S "ines", "(" OPTION_LONG_S "ines) convert to iNES(Emu)");
+  htk_input_submit ("iNES", OPTION_LONG_S "ines", "(" OPTION_LONG_S "ines) convert to iNES(Emu)");
 
-  h2g_input_submit ("UNIF", OPTION_LONG_S "unif", "(" OPTION_LONG_S "unif) convert to UNIF format/UNF");
+  htk_input_submit ("UNIF", OPTION_LONG_S "unif", "(" OPTION_LONG_S "unif) convert to UNIF format/UNF");
 
   ucon64gui_bottom ();
 }

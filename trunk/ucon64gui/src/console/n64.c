@@ -35,41 +35,41 @@ n64_gui (void)
 
   ucon64gui_top ();
 
-  h2g_img (n64_xpm, 0, 0, 0, NULL);
-  h2g_img (d64_xpm, 0, 0, 0, NULL);
+  htk_img (n64_xpm, 0, 0, 0, NULL);
+  htk_img (d64_xpm, 0, 0, 0, NULL);
 
   ucon64gui_divider ();
 
-  h2g_input_submit ("Rename ROM", OPTION_S "n",
+  htk_input_submit ("Rename ROM", OPTION_S "n",
                     "(" OPTION_S "n) change ROM name; $FILE=NEWNAME");
 
-  h2g_ (" ");
+  htk_ (" ");
 
-  h2g_input_submit ("Boot Code", OPTION_LONG_S "bot",
+  htk_input_submit ("Boot Code", OPTION_LONG_S "bot",
                     "(" OPTION_LONG_S "bot) add/extract boot code to/from ROM; $FILE=BOOTCODE\nextracts automatically when $FILE does not exist (4032 Bytes)");
 
-  h2g_ (" ");
+  htk_ (" ");
 
-  h2g_input_submit ("LAC's Makesram", OPTION_LONG_S "sram",
+  htk_input_submit ("LAC's Makesram", OPTION_LONG_S "sram",
                     "(" OPTION_LONG_S "sram) LAC's Makesram; $ROM=(LAC's SRAM ROM image) $FILE=SRAMFILE\nthe SRAMFILE must have a size of 512 Bytes");
 
-  h2g_ (" ");
+  htk_ (" ");
 
-  h2g_input_submit ("ultraSMS", OPTION_LONG_S "usms",
+  htk_input_submit ("ultraSMS", OPTION_LONG_S "usms",
                     "(" OPTION_LONG_S "usms) Jos Kwanten's ultraSMS (Sega Master System/GameGear Emulator)\n$ROM=(Jos Kwanten's ultraSMS ROM image) $FILE=SMSROM(<=4Mb)");
 
-  h2g_ (" ");
+  htk_ (" ");
 
-  h2g_input_submit ("Fix Chksum", OPTION_LONG_S "chk", "(" OPTION_LONG_S "chk) fix ROM checksum");
+  htk_input_submit ("Fix Chksum", OPTION_LONG_S "chk", "(" OPTION_LONG_S "chk) fix ROM checksum");
 
   ucon64gui_spacer ();
 
-  h2g_ ("Convert ROM to: ");
+  htk_ ("Convert ROM to: ");
 
-  h2g_input_submit ("V64", OPTION_LONG_S "v64",
+  htk_input_submit ("V64", OPTION_LONG_S "v64",
                     "(" OPTION_LONG_S "v64) convert to Doctor V64 (and compatibles/swapped)");
 
-  h2g_input_submit ("Z64", OPTION_LONG_S "z64",
+  htk_input_submit ("Z64", OPTION_LONG_S "z64",
                     "(" OPTION_LONG_S "z64) convert to Z64 (Zip Drive/not swapped)");
 
   ucon64gui_bottom ();

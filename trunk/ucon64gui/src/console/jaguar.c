@@ -34,11 +34,11 @@ jaguar_gui (void)
 {
   ucon64gui_top ();
 
-//  h2g_img (swc_xpm, 0, 0, 0, NULL);
+//  htk_img (swc_xpm, 0, 0, 0, NULL);
 
   ucon64gui_divider ();
 
-  h2g_input_submit ("fix Checksum", OPTION_LONG_S "chk", "(" OPTION_LONG_S "chk) fix ROM checksum");
+  htk_input_submit ("fix Checksum", OPTION_LONG_S "chk", "(" OPTION_LONG_S "chk) fix ROM checksum");
 
   ucon64gui_bottom ();
 }

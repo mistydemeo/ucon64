@@ -35,39 +35,39 @@ ucon64gui_config (void)
 #include "xpm/back.xpm"
 #include "xpm/icon.xpm"
 
-  h2g_html (0, 0, 0);
+  htk_html (0, 0, 0);
 
-  h2g_head ();
-  h2g_title (ucon64gui_title, icon_xpm);
-  h2g_head_end ();
+  htk_head ();
+  htk_title (ucon64gui_title, icon_xpm);
+  htk_head_end ();
 
-  h2g_body (NULL, "#c0c0c0");
+  htk_body (NULL, "#c0c0c0");
 
-  h2g_form (UCON64GUI_FORMTARGET);
+  htk_form (UCON64GUI_FORMTARGET);
 
-  h2g_input_image ("Back", OPTION_LONG_S "root", back_xpm, 0, 0, "Back");
+  htk_input_image ("Back", OPTION_LONG_S "root", back_xpm, 0, 0, "Back");
 
-  h2g_br ();
+  htk_br ();
 
   sprintf (buf, "Configuration of (%s)", ucon64gui.configfile);
-  h2g_ (buf);
+  htk_ (buf);
 
-  h2g_br ();
-  h2g_ ("backups = ");
+  htk_br ();
+  htk_ ("backups = ");
 
-  h2g_input_text ("backups",
+  htk_input_text ("backups",
                   get_property (ucon64gui.configfile, "backups", buf, "1"), 2,
                   0, FALSE,
                   "create backups of files? (1=yes; 0=no)\nbefore processing a ROM uCON64 will make a backup of it");
 
-  h2g_ (" (1=yes; 0=no); check the tooltips for more information");
+  htk_ (" (1=yes; 0=no); check the tooltips for more information");
 
 #ifdef BACKUP_CD
   ucon64gui_spacer ();
 
-  h2g_br ();
-  h2g_ ("cdrw_read = ");
-  h2g_input_text ("cdrw_read",
+  htk_br ();
+  htk_ ("cdrw_read = ");
+  htk_input_text ("cdrw_read",
                   get_property (ucon64gui.configfile, "cdrw_read", buf, ""),
                   70, 0, FALSE,
                   "uCON64 can operate as frontend for CD burning software to make backups"
@@ -77,9 +77,9 @@ ucon64gui_config (void)
                   "--device [bus,id,lun] (cdrdao)\n"
                   "bin and toc filenames are added by ucon64 at the end");
 
-  h2g_br ();
-  h2g_ ("cdrw_write = ");
-  h2g_input_text ("cdrw_write",
+  htk_br ();
+  htk_ ("cdrw_write = ");
+  htk_input_text ("cdrw_write",
                   get_property (ucon64gui.configfile, "cdrw_write", buf, ""),
                   70, 0, FALSE,
                   "uCON64 can operate as frontend for CD burning software to make backups"

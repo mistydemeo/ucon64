@@ -29,6 +29,7 @@ clean:
 	del $(LIBNAME).dll
 	del $(LIBNAME).lib
 	del *.obj
+	del format\*.obj
 	del $(LIBNAME).exp
 
 

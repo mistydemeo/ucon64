@@ -134,6 +134,9 @@ Q45: <a href="#45">What is an interleaved ROM?</a><br>
 Q46: <a href="#46">The pre-compiled GNU/Linux binary does not work on my
    system, while a binary compiled by me works fine. How can that be?</a><br>
 <br>
+Q47: <a href="#47">I use Windows XP (NT/2000) and everytime I run uCON64 I get
+   this error message about ntuser.dat. What does it mean?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -1481,6 +1484,28 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    remove the discmage library from the directory where uCON64 looks for it
    (see <a href="#4">question 4</a>) or compile the library yourself (see
    <a href="#3">question 3</a>).<br>
+<br>
+<p>
+<a name="47"><b>Q47</b>: I use Windows XP (NT/2000) and everytime I run uCON64
+   I get this error message about ntuser.dat. What does it mean?</a><br>
+<b>A</b>: If you see lines in the display output of uCON64 that look like
+   these:<br>
+   &nbsp;&nbsp;Create: ntuser.idx<br>
+   &nbsp;&nbsp;ERROR: Can't open "C:\Documents and Settings\Daniël\ntuser.dat" for reading<br>
+   you should modify the configuration file so that ucon64_datdir points to
+   another directory.<br>
+   By default uCON64 will use the home directory as the directory where it
+   searches for DAT files (the "DAT file directory"). uCON64 handles all files
+   in the DAT file directory that have a name that ends with ".dat" as DAT
+   files. ntuser.dat seems to be a standard file in a Windows XP user's home
+   directory (and should not be removed), but it is not a DAT file for use with
+   uCON64. See <a href="#36">question 36</a> for more information on how to
+   configure uCON64 so that it uses "real" DAT files. If you only want to get
+   rid of that error message either make ucon64_datdir in the configuration
+   file point to an existing directory that does not contain any files with a
+   name that ends with ".dat" or make an environment variable with the name
+   ucon64_datdir point to such a directory. Do not forget that the environment
+   variable will not be set the next time you start a DOS session.<br>
 <br>
 <br>
 <br>

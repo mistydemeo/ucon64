@@ -2397,7 +2397,7 @@ int gbx_usage(int argc, char *argv[])
            "                (right) parallel port. If that is the case give a hardware\n"
            "                address, for example:\n"
            "                ucon64 -xgbx \"Pokemon (Green).gb\" 0x378\n");
-  //TODO more info like technical info about cabeling and stuff for the copier
+  // TODO more info like technical info about cabeling and stuff for the copier
 
   return 0;
 }

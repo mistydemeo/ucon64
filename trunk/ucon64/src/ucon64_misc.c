@@ -266,7 +266,7 @@ filepad (char *filename, long start, long unit)
 
 long
 filetestpad (char *filename)
-// test if EOF is padded (repeating bytes) beginning from start
+// test if EOF is padded (repeating bytes)
 {
   long size, x;
   int y;
@@ -539,7 +539,7 @@ testsplit (char *filename)
 }
 
 int
-trackmode (long imagesize)
+trackmode_probe (long imagesize)
 // tries to figure out the used track mode of the cd image
 {
   return (!(imagesize % 2048)) ? 2048 :        // MODE1, MODE2_FORM1
@@ -555,7 +555,6 @@ int
 raw2iso (char *filename)
 // convert MODE1_RAW, MODE2_RAW, MODE2 and MODE2_FORM_MIX to ISO9660
 {
-#if 0
   int seek_header, seek_ecc, sector_size;
   long i, source_length;
   char buf[2352], destfilename[4096];
@@ -567,10 +566,9 @@ raw2iso (char *filename)
   newext (destfilename, ".ISO");
 
   fsource = fopen (filename, "rb");
-//  fdest = fopen(filebackup(destfilename),"wb");
   fdest = fopen (destfilename, "wb");
 
   fread (buf, sizeof (char), 16, fsource);
-#endif
+
   return 0;
 }

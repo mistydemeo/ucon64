@@ -25,7 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define SNES_HEADER_START 0x7fb0
 
-typedef enum { SWC, GD3, FIG, MGD, SMC } snes_copier_t;
+typedef enum { SWC, GD3, FIG, MGD, SMC } snes_file_t;
 
 extern const char *snes_usage[];
 
@@ -52,5 +52,5 @@ extern int snes_buheader_info (st_rominfo_t *rominfo);
 extern int snes_make_gd_names (const char *filename, st_rominfo_t *rominfo,
                                char **names);
 extern int snes_get_snes_hirom (void);
-extern snes_copier_t snes_get_copier_type (void);
+extern snes_file_t snes_get_file_type (void);
 #endif /* SNES_H */

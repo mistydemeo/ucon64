@@ -1230,7 +1230,10 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
       if (ucon64.crc32)
         {
           printf ("%s\n", ucon64.rom);
-          printf ("Checksum (CRC32): 0x%08x\n", ucon64.crc32);
+          if (ucon64.fcrc32)                    // SNES interleaved ROMs
+            printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32);
+          else
+            printf ("Checksum (CRC32): 0x%08x\n", ucon64.crc32);
           ucon64_dat_nfo (ucon64_dat);
           printf ("\n");
           ucon64_flush (&rominfo);

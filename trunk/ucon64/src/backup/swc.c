@@ -423,7 +423,7 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
   ffe_send_block (0x400, buffer, SWC_HEADER_LEN); // send header
   bytessend = SWC_HEADER_LEN;
 
-  if (snes_get_copier_type () == FIG)
+  if (snes_get_file_type () == FIG)
     handle_fig_header (buffer);
   emu_mode_select = buffer[2];                  // this byte is needed later
 #if 1

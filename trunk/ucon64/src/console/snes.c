@@ -178,7 +178,7 @@ static int snes_split, force_interleaved, bs_dump, rom_is_top,  // flag for inte
   called from snes_dint().
 */
 
-snes_copier_t type;
+snes_file_t type;
 
 static unsigned char gd3_hirom_8mb_map[GD3_HEADER_MAPSIZE] = {
   0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
@@ -230,8 +230,8 @@ snes_get_snes_hirom (void)
 }
 
 
-snes_copier_t
-snes_get_copier_type (void)
+snes_file_t
+snes_get_file_type (void)
 {
   return type;
 }
@@ -1994,7 +1994,7 @@ snes_buheader_info (st_rominfo_t *rominfo)
 {
   unsigned char header[512];
   int x, y;
-  snes_copier_t org_type = type;
+  snes_file_t org_type = type;
 
   if (rominfo->buheader_len == 0) // type == MGD
     {
@@ -2038,7 +2038,7 @@ snes_buheader_info (st_rominfo_t *rominfo)
 
       y = sram_sizes[(~header[2] & 0x0c) >> 2]; // 32 => 12, 8 => 8, 2 => 4, 0 => 0
       printf ("[2:2-3] SRAM size: %d kB => %s\n",
-        y , matches_deviates (snes_sramsize == y * 1024));
+        y, matches_deviates (snes_sramsize == y * 1024));
 
       x = snes_hirom ? 1 : 0;
       y = header[2] & 0x10 ? 1 : 0;
@@ -2820,7 +2820,11 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer)
 
   rom_size = ucon64.file_size - rominfo->buheader_len;
   if (rominfo->interleaved)
-    snes_deinterleave (rominfo, rom_buffer, rom_size);
+    {
+      ucon64.fcrc32 = mem_crc32 (rom_size, 0, rom_buffer);
+      snes_deinterleave (rominfo, rom_buffer, rom_size);
+    }
+  ucon64.crc32 = mem_crc32 (rom_size, 0, rom_buffer);
 
   pow2size = 1;
   while (pow2size < rom_size)

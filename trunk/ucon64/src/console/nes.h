@@ -22,6 +22,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef NES_H
 #define NES_H
 
+typedef enum { INES, UNIF, PASOFAMI, FFE, FDS, FAM } nes_file_t;
+
 extern const char *nes_usage[];
 
 /*
@@ -229,5 +231,6 @@ extern int nes_init (st_rominfo_t *rominfo);
 extern int nes_unif (st_rominfo_t *rominfo);
 extern int nes_j (st_rominfo_t *rominfo, unsigned char **mem_image);
 extern int nes_dint (st_rominfo_t *rominfo);
+extern nes_file_t nes_get_file_type (void);
 
 #endif // NES_H

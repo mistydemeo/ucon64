@@ -25,10 +25,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef UCON64_H
 #define UCON64_H
-//#include <dirent.h>                             // for *temp
+
 #ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif                             // ANSI_COLOR
+#include "config.h"                             // ANSI_COLOR
+#endif
 #include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
 #include "ucon64_dat.h"
@@ -45,7 +45,9 @@ typedef struct
 
   const char *rom;                              // ROM (cmdline) with path
   int file_size;                                // (uncompressed) ROM file size
-  unsigned int crc32;                           // current crc32 value of ROM
+  unsigned int crc32;                           // crc32 value of ROM (used for DAT files)
+  unsigned int fcrc32;                          // crc32 value of ROM (as it is on disk)
+
 #define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
 #define UCON64_TYPE_ISDISC(x) (x == UCON64_DISC)
   int type;                                     // ROM type ROM or CD image
@@ -85,9 +87,9 @@ typedef struct
 
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
 /*
-  these values override values in st_rominfo_t use UCON64_ISSET()
-  to check them; when adding new ones.. dont forget to update ucon64_flush()
-  too
+  These values override values in st_rominfo_t. Use UCON64_ISSET()
+  to check them. When adding new ones don't forget to update ucon64_flush()
+  too.
 */
   int buheader_len;                             // length of backup unit header 0 == no bu hdr
   int snes_hirom;                               // SNES ROM is HiROM
@@ -111,14 +113,14 @@ typedef struct
 extern st_ucon64_t ucon64;
 
 /*
-  this struct contains very specific informations only <console>_init() can
-  supply after the correct console type was identified
-  
-  dbjh: file_size and current_crc32 are not console specific and were moved
-        to st_ucon64_t
-        
-  if all <console>_init()'s faild just ucon64_flush() this and ucon64_rom_nfo()
-  won't be shown..
+  This struct contains very specific informations only <console>_init() can
+  supply after the correct console type was identified.
+
+  file_size and current_crc32 are not console specific and were moved
+  to st_ucon64_t.
+
+  If all <console>_init()'s failed just ucon64_flush() this and ucon64_rom_nfo()
+  won't be shown.
 */
 typedef struct
 {

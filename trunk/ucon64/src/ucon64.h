@@ -274,7 +274,6 @@ typedef struct st_ucon64
   int snes_hirom;                               // Super Nintendo ROM is HiROM
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
   int fal_size;                                 // Flash Advance Linker cart size
-  int data_size;                                // data size without "red tape"
   int controller;                               // NES UNIF
   int tv_standard;                              // NES UNIF
   int battery;                                  // NES UNIF/iNES/Pasofami
@@ -300,6 +299,7 @@ typedef struct st_rominfo
 
   int interleaved;                              // ROM is interleaved (swapped)
   int snes_hirom;                               // Super Nintendo ROM is HiROM
+  int data_size;                                // ROM data size without "red tape"
 
   long buheader_start;                          // start of backup unit header (mostly 0)
   long buheader_len;                            // length of backup unit header 0 == no bu hdr

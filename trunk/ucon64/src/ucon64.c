@@ -338,7 +338,6 @@ main (int argc, char **argv)
   ucon64.snes_hirom =
   ucon64.bs_dump =
   ucon64.fal_size =
-  ucon64.data_size =
   ucon64.controller =
   ucon64.tv_standard =
   ucon64.battery =
@@ -407,6 +406,7 @@ st_rominfo_t *
 ucon64_flush (st_rominfo_t *rominfo)
 {
   memset (rominfo, 0L, sizeof (st_rominfo_t));
+  rominfo->data_size = UCON64_UNKNOWN;
 #if 0
   rominfo->maker = rominfo->country = "";
   rominfo->console_usage = rominfo->copier_usage = NULL;
@@ -669,7 +669,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
     }
 
   strcpy (buf, NULL_TO_EMPTY (rominfo->name));
-  x = UCON64_ISSET (ucon64.data_size) ? ucon64.data_size : size - rominfo->buheader_len,
+  x = UCON64_ISSET (rominfo->data_size) ? rominfo->data_size : size - rominfo->buheader_len,
   printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
           // some ROMs have a name with control chars in it -> replace control chars
           mkprint (buf, '.'),

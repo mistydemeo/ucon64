@@ -99,10 +99,6 @@ static int ucon64_io_fd;
 static void BuildCRCTable ();
 static unsigned long CalculateFileCRC (FILE * file);
 
-#ifdef BACKUP
-static unsigned int parport_probe (unsigned int parport);
-static int detect_parport (unsigned int port);
-#endif
 
 const char *unknown_usage[] =
   {
@@ -253,7 +249,17 @@ filetestpad (const char *filename)
   return (size - x - 1 == 1) ? 0 : size - x - 1;
 }
 
+
 #ifdef  BACKUP
+#ifdef  __BEOS__
+void
+close_io_port (void)
+{
+  close (ucon64_io_fd);
+}
+#endif
+
+
 #if     defined __unix__ || defined __BEOS__ // DJGPP (DOS) has outportX() & inportX()
 unsigned char
 inportb (unsigned short port)
@@ -322,6 +328,7 @@ outportw (unsigned short port, unsigned short word)
 }
 #endif // defined __unix__ || defined __BEOS__
 
+
 int
 detect_parport (unsigned int port)
 {
@@ -366,68 +373,6 @@ detect_parport (unsigned int port)
 
   return 1;
 }
-
-#ifdef  __BEOS__
-void
-close_io_port (void)
-{
-  close (ucon64_io_fd);
-}
-#endif
-
-unsigned int
-ucon64_parport_probe (unsigned int port)
-{
-#ifdef BACKUP
-#ifdef __unix__
-  uid_t uid;
-  gid_t gid;
-#endif
-
-
-  if (!(port = parport_probe (port)))
-    ;
-/*
-    fprintf (stderr, "ERROR: no parallel port 0x%s found\n\n", strupr (buf));
-  else
-    printf ("0x%x\n\n", port);
-*/
-
-#ifdef  __unix__
-  /*
-    Some code needs us to switch to the real uid and gid. However, other code
-    needs access to I/O ports other than the standard printer port registers.
-    We just do an iopl(3) and all code should be happy. Using iopl(3) enables
-    users to run all code without being root (of course with the uCON64
-    executable setuid root). Anyone a better idea?
-  */
-#ifdef  __linux__
-  if (iopl (3) == -1)
-    {
-      fprintf (stderr, "Could not set the I/O privilege level to 3\n"
-                       "(This program needs root privileges)\n");
-      return 1;
-    }
-#endif
-
-  // now we can drop privileges
-  uid = getuid ();
-  if (setuid (uid) == -1)
-    {
-      fprintf (stderr, "Could not set uid\n");
-      return 1;
-    }
-  gid = getgid ();                              // This shouldn't be necessary
-  if (setgid (gid) == -1)                       //  if `make install' was
-    {                                           //  used, but just in case
-      fprintf (stderr, "Could not set gid\n");  //  (root did `chmod +s')
-      return 1;
-    }
-#endif // __unix__
-#endif // BACKUP
-  return port;
-}
-
 
 
 unsigned int
@@ -510,6 +455,64 @@ parport_probe (unsigned int port)
 
   return port;
 }
+
+
+unsigned int
+ucon64_parport_probe (unsigned int port)
+{
+#ifdef BACKUP
+#ifdef __unix__
+  uid_t uid;
+  gid_t gid;
+#endif
+
+#if 0
+  if (!(port = parport_probe (port)))
+    ;
+/*
+    fprintf (stderr, "ERROR: no parallel port 0x%s found\n\n", strupr (buf));
+  else
+    printf ("0x%x\n\n", port);
+*/
+#else
+
+#endif
+
+#ifdef  __unix__
+  /*
+    Some code needs us to switch to the real uid and gid. However, other code
+    needs access to I/O ports other than the standard printer port registers.
+    We just do an iopl(3) and all code should be happy. Using iopl(3) enables
+    users to run all code without being root (of course with the uCON64
+    executable setuid root). Anyone a better idea?
+  */
+#ifdef  __linux__
+  if (iopl (3) == -1)
+    {
+      fprintf (stderr, "Could not set the I/O privilege level to 3\n"
+                       "(This program needs root privileges)\n");
+      return 1;
+    }
+#endif
+
+  // now we can drop privileges
+  uid = getuid ();
+  if (setuid (uid) == -1)
+    {
+      fprintf (stderr, "Could not set uid\n");
+      return 1;
+    }
+  gid = getgid ();                              // This shouldn't be necessary
+  if (setgid (gid) == -1)                       //  if `make install' was
+    {                                           //  used, but just in case
+      fprintf (stderr, "Could not set gid\n");  //  (root did `chmod +s')
+      return 1;
+    }
+#endif // __unix__
+#endif // BACKUP
+  return port;
+}
+
 
 int
 ucon64_gauge (time_t init_time, long pos, long size)
@@ -642,46 +645,98 @@ ucon64_bin2iso (const char *image, int track_mode)
 }
 
 
+// seek_pvd() will search for valid PVD in sector 16 of source image
+
+int
+seek_pvd (int sector_size, int mode, const char *filename)
+{
+  const char PVD_STRING[8] = { 0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };      //"\x01" "CD001" "\x01" "\0";
+#if 0
+  const char SVD_STRING[8] = { 0x02, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };      //"\x02" "CD001" "\x01" "\0";
+  const char VDT_STRING[8] = { 0xff, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };      //"\xFF" "CD001" "\x01" "\0";
+#endif
+  char buf[MAXBUFSIZE];
+#if 0
+  fseek (fsource, 0L, SEEK_SET);
+  fseek (fsource, 16 * sector_size, SEEK_CUR);  // boot area
+
+  if (sector_size == 2352)
+    fseek (fsource, 16, SEEK_CUR);      // header
+  if (mode == 2)
+    fseek (fsource, 8, SEEK_CUR);       // subheader
+
+  fread (buffer, 1, 8, fsource);
+#endif
+  quickfread (buf, 16 * sector_size
+    + ((sector_size == 2352) ? 16 : 0) // header
+    + ((mode == 2) ? 8 : 0)            // subheader
+    ,8 , filename);
+
+  if (!memcmp (PVD_STRING, buf, 8)
+#if 0
+      || !memcmp (SVD_STRING, buf, 8)
+      || !memcmp (VDT_STRING, buf, 8)
+#endif
+    )
+    return 1;
+
+  return 0;
+}
+
+
 int
 ucon64_trackmode_probe (const char *image)
 // tries to figure out the used track mode of the cd image
 {
 //TODO support image == "/dev/<cdrom>"
-  int result = -1;
+  int result = -1; 
+#if 0
+  const char PVD_STRING[8] = { 0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };      //"\x01" "CD001" "\x01" "\0";
+  const char SVD_STRING[8] = { 0x02, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };      //"\x02" "CD001" "\x01" "\0";
+  const char VDT_STRING[8] = { 0xff, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };      //"\xFF" "CD001" "\x01" "\0";
+  const char SYNC_DATA[12] =
+    { 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0 };
+  const char SUB_HEADER[8] = { 0, 0, 0x08, 0, 0, 0, 0x08, 0 };
+#endif  
   const char SYNC_HEADER[12] =
-    { 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0 };
+    { 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0 };
   char buf[MAXBUFSIZE];
 
   quickfread (buf, 0, 16, image);
 
 #ifdef DEBUG
-printf("DEBUG:");
-strhexdump(buf,0,0,16);
+  strhexdump(buf, 0, 0, 16);
 #endif
 
-  if (memcmp (SYNC_HEADER, buf, 12))
+  if (!memcmp (SYNC_HEADER, buf, 12))
     {
-      result = MODE1_2048;
-    } 
-  else
-    switch (buf[15])
-      {
-        case 2:
-          result = MODE2_2352;
-          break;
+      switch (buf[15])
+        {
+          case 2:
+            if (seek_pvd (2352, 2, image)) result = MODE2_2352;
+            break;
 
-        case 1:
-          result = MODE1_2352;
-          break;
+          case 1:
+            if (seek_pvd (2352, 1, image)) result = MODE1_2352;
+            break;
 
-        case 0:
-          result = MODE2_2336;
-          break;
-          
-        default:
-          result = MODE1_2048;
-          break;
+          default:
+            result = -1;
+            break;
         }
+      return result;
+    }
+
+  result = (seek_pvd (2048, 1, image)) ? MODE1_2048 :
+           (seek_pvd (2352, 1, image)) ? MODE1_2352 :
+           (seek_pvd (2336, 2, image)) ? MODE2_2336 :
+           (seek_pvd (2352, 2, image)) ? MODE2_2352 :
+#if 0
+//mac
+           (seek_pvd (2056, 2, image)) ? MODE2_2056 :
+#endif
+  (-1);
+  
   return result;
 }
 
@@ -718,6 +773,7 @@ ucon64_mktoc (st_rominfo_t *rominfo)
 
   return result;
 }
+
 
 int
 ucon64_mkcue (st_rominfo_t *rominfo)
@@ -879,7 +935,7 @@ int ucon64_ls (const char *path, int mode)
   int console = ucon64.console;
 
   dir[0]=0;
-  
+
   if (path)
     if (path[0])
       {

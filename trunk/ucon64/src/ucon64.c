@@ -111,6 +111,7 @@ const struct option long_options[] = {
     {"bios", 0, 0, UCON64_BIOS},
     {"bot", 0, 0, UCON64_BOT},
     {"c", 0, 0, UCON64_C},
+    {"cd", 0, 0, UCON64_CD},
     {"cd32", 0, 0, UCON64_CD32},
     {"cdi", 0, 0, UCON64_CDI},
     {"chk", 0, 0, UCON64_CHK},
@@ -165,8 +166,8 @@ const struct option long_options[] = {
     {"l", 0, 0, UCON64_L},
     {"lnx", 0, 0, UCON64_LNX},
     {"logo", 0, 0, UCON64_LOGO},
-    {"ls", 1, 0, UCON64_LS},
-    {"lsv", 1, 0, UCON64_LSV},
+    {"ls", 0, 0, UCON64_LS},
+    {"lsv", 0, 0, UCON64_LSV},
     {"lynx", 0, 0, UCON64_LYNX},
     {"lyx", 0, 0, UCON64_LYX},
     {"mgd", 0, 0, UCON64_MGD},
@@ -299,6 +300,7 @@ main (int argc, char **argv)
 
   ucon64.show_nfo = UCON64_YES;
 
+  ucon64.type =
   ucon64.buheader_len =
   ucon64.interleaved =
   ucon64.split =
@@ -495,7 +497,8 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 /*
   currently the media type is determined by its size
 */
-  ucon64.type = (size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
+  if (ucon64.type == UCON64_UNKNOWN)
+    ucon64.type = (size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
         
   ucon64_flush (rominfo);
 
@@ -540,7 +543,10 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 
 //misc stuff
       value = ucon64_trackmode_probe (romfile);
-      sprintf (rominfo->misc, "Track Mode: %s (Cdrdao: %s)\n", track_modes[value].common, track_modes[value].cdrdao);
+      if (value == -1)
+        strcpy (rominfo->misc, "Track Mode: Unknown (Maybe CDI or NRG?)\n");
+      else
+        sprintf (rominfo->misc, "Track Mode: %s (Cdrdao: %s)\n", track_modes[value].common, track_modes[value].cdrdao);
 
 //      rominfo->console_usage = 
 
@@ -612,8 +618,6 @@ ucon64_nfo (const st_rominfo_t *rominfo)
     }
   else if (UCON64_TYPE_ISROM (ucon64.type))
     {
-
-
       unsigned long padded = filetestpad (ucon64.rom);
       unsigned long intro = ((size - rominfo->buheader_len) > MBIT) ?
         ((size - rominfo->buheader_len) % MBIT) : 0;
@@ -678,12 +682,13 @@ ucon64_nfo (const st_rominfo_t *rominfo)
     
       if (rominfo->current_crc32)
         printf ("Checksum (CRC32): 0x%08lx\n", rominfo->current_crc32);
+
+      printf ("\n");
+
+      if (ucon64.console == UCON64_UNKNOWN)
+        fprintf (stderr, ucon64_console_error);
+
     }
-
-  printf ("\n");
-
-  if (ucon64.console == UCON64_UNKNOWN)
-    fprintf (stderr, ucon64_console_error);
 
   fflush (stdout);
 
@@ -776,8 +781,14 @@ ucon64_usage (int argc, char *argv[])
     "                  and %s\n",
     gameboy_usage[0], sms_usage[0], genesis_usage[0], nes_usage[0], snes_usage[0]);
   
+  printf (
+    "  " OPTION_LONG_S "cd          force recognition (of CD IMAGES)\n"
+    "                  this is the support for the most CD-based consoles\n"
+    );
+    
 //  usage (cdrw_usage);
-  printf (cdrw_usage[2]);
+  printf ("%s", cdrw_usage[2]);
+
 
   printf (
     "  " OPTION_LONG_S "mktoc       generate TOC file for Cdrdao; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"

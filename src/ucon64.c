@@ -1229,3 +1229,123 @@ _ __ ________________________________________________________________ __ _
  SNES/Sega/Game Boy/GameGear/Ultra 64/PSX/Jaguar/Saturn/Engine/Lynx/NeoGeo
 - -- ---------------------------------------------------------------- -- -
 */
+
+/*
+Nintendo Game Cube/Panasonic Gamecube Q
+2001/2002 Nintendo http://www.nintendo.com
+gc
+Sega System 16(A/B)/Sega System 18/dual 68000
+1987/19XX/19XX SEGA http://www.sega.com
+s16
+Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr
+1977/1982/1984/1986 Atari
+ata
+ColecoVision
+1982
+coleco
+Nintendo Virtual Boy
+19XX Nintendo http://www.nintendo.com
+vboy
+Vectrex
+1982
+vec
+Intellivision
+1979 Mattel
+intelli
+GP32 Game System
+2002 Gamepark http://www.gamepark.co.kr
+gp32
+Playstation 2
+2000 Sony http://www.playstation.com
+ps2
+XBox
+2001 Microsoft http://www.xbox.com
+xbox
+Saturn
+1994 SEGA http://www.sega.com
+sat
+Real3DO
+1993
+3do
+CD32
+1993 Commodore
+cd32
+CD-i
+1991
+cdi
+
+Vectrex (1982)
+Colecovision (1982)
+Interton VC4000 (~1980)
+Intellivision (1979)
+G7400+/Odyssey² (1978)
+Channel F (1976)
+Odyssey (Ralph Baer/USA/1972)
+Virtual Boy
+Real 3DO 1993 Panasonic/Goldstar/Philips?
+Game.com ? Tiger
+CD-i (1991) 1991
+Vectrex 1982
+Colecovision 1982
+Interton VC4000 ~1980
+Intellivision 1979
+G7400+/Odyssey² 1978
+Channel F 1976
+Odyssey 1972 Ralph Baer
+
+X-Box
+Game Cube
+Indrema
+Nuon
+GB Advance
+Playstation 2
+Dreamcast
+Nintendo 64
+Playstation
+Virtual Boy
+Saturn
+Sega 32X
+Jaguar
+3DO
+Sega CD
+Philips CDI
+Super Nintendo
+Neo·Geo
+Game Gear
+Lynx
+GameBoy
+Turbo Grafx 16
+Genesis
+XE System
+Master System
+Atari 7800
+Nintendo
+Commodore 64
+Coleco Vision
+Atari 5200
+Arcadia
+Vectrex
+Microvision
+Adv. Vision
+RDI Halcyon
+Intellivision
+Odyssey 2
+Astrocade
+Home Arcade
+Atari 2600
+RCA Studio 2
+FC Channel F
+Telstar
+Atari Pong
+PONG
+Odyssey
+
+gametz.com
+gameaxe.com
+sys2064.com
+logiqx.com
+romcenter.com
+emuchina.net
+
+Bandai announced that a new version of the system, the SwanCrystal, will debut in Japan this July.
+*/

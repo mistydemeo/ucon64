@@ -2,7 +2,7 @@
 ucon64_misc.h - miscellaneous functions for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2002 dbjh
+           2001 - 2003 dbjh
                   2001 Caz
 
 

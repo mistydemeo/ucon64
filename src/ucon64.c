@@ -354,7 +354,7 @@ int
 main (int argc, char **argv)
 {
   int c = 0, console, show_nfo, rom_index, file_message = 0;
-  char buf[MAXBUFSIZE];
+  char buf[MAXBUFSIZE], *ptr;
 
   printf ("%s\n"
     "Uses code from various people. See 'developers.html' for more!\n"
@@ -442,6 +442,8 @@ main (int argc, char **argv)
 #ifdef  ANSI_COLOR
   ucon64.ansi_color = ((!strcmp (get_property (ucon64.configfile, "ansi_color", buf, "1"), "1")) ?
                1 : 0);
+#else
+  ucon64.ansi_color = 0;
 #endif
 
 //  ucon64.type =
@@ -1021,15 +1023,11 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
           sprintf (buf, fstr,
             rominfo->internal_crc_len * 2, rominfo->internal_crc_len * 2);
           printf (buf,
-#ifdef  ANSI_COLOR
             ucon64.ansi_color ?
               ((rominfo->current_internal_crc == rominfo->internal_crc) ?
                 "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
               :
               ((rominfo->current_internal_crc == rominfo->internal_crc) ? "ok" : "bad"),
-#else
-            (rominfo->current_internal_crc == rominfo->internal_crc) ? "ok" : "bad",
-#endif
             rominfo->current_internal_crc,
             (rominfo->current_internal_crc == rominfo->internal_crc) ? "=" : "!",
             rominfo->internal_crc);
@@ -1070,12 +1068,20 @@ ucon64_usage (int argc, char *argv[])
 {
   int c = 0, single = 0;
 
+#ifdef  ANSI_COLOR
+#define ANSI_COLOR_MSG "  " OPTION_LONG_S "ncol        disable ANSI colors in output\n"
+#endif
+
+#ifdef  __MSDOS__
+#define HEXDUMP_MSG "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\"\n"
+#else
+#define HEXDUMP_MSG "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\"\n"       // less is more ;-)
+#endif
+
   printf (
     "Usage: %s [OPTION]... [" OPTION_LONG_S "rom=][ROM]... [[" OPTION_LONG_S "file=]FILE]" /* [-o=OUTPUT_PATH] */ "\n\n"
     "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
-#ifdef  ANSI_COLOR
-    "  " OPTION_LONG_S "ncol        disable ANSI colors in output\n"
-#endif
+    ANSI_COLOR_MSG
     "  " OPTION_LONG_S "hdn=N       force ROM has backup unit/emulator header with N Bytes size\n"
     "  " OPTION_LONG_S "hd          same as " OPTION_LONG_S "hdn=512\n"
     "                  most backup units use a header with 512 Bytes size\n"
@@ -1094,17 +1100,11 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
     "                  this is often used by people who lose control of their ROMs\n"
     "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"
-
-
-#if 0
+/*
     "  " OPTION_LONG_S "rl          rename all files in DIRECTORY to lowercase; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "ru          rename all files in DIRECTORY to uppercase; " OPTION_LONG_S "rom=DIRECTORY\n"
-#endif
-#ifdef  __MSDOS__
-    "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\"\n"
-#else
-    "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\"\n"       // less is more ;-)
-#endif
+*/
+    HEXDUMP_MSG
     "  " OPTION_LONG_S "find        find string in ROM; " OPTION_LONG_S "file=STRING (wildcard: '?')\n"
     "  " OPTION_S "c           compare ROMs for differencies; " OPTION_LONG_S "file=OTHER_ROM\n"
     "  " OPTION_LONG_S "cs          compare ROMs for similarities; " OPTION_LONG_S "file=OTHER_ROM\n"
@@ -1122,8 +1122,8 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "version     output version information and exit\n"
     "  " OPTION_S "q           be quiet (don't show ROM info)\n"
 //    "  " OPTION_LONG_S "qq          be even more quiet\n"
-    "\n"
-    , argv[0], ucon64.configfile, MAXROMSIZE, TOMBIT_F (MAXROMSIZE));
+    "\n",
+    argv[0], ucon64.configfile, MAXROMSIZE, TOMBIT_F (MAXROMSIZE));
 
   if (ucon64.dat_enabled)
     printf ("DATabase\n"
@@ -1167,7 +1167,7 @@ ucon64_usage (int argc, char *argv[])
       "TODO: " OPTION_LONG_S "cdirip=Nrip/dump track N from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
       "TODO: " OPTION_LONG_S "nrgrip=Nrip/dump track N from Nero/NRG IMAGE; " OPTION_LONG_S "rom=NRG_IMAGE\n"
       "TODO: " OPTION_LONG_S "rip     rip/dump file(s) from a track; " OPTION_LONG_S "rom=TRACK\n"
-#if 0
+/*
     OPTION_LONG_S "file=SECTOR_SIZE\n"
       "TODO: " OPTION_LONG_S "iso     strip SECTOR_SIZE of any CD_IMAGE to MODE1/2048; " OPTION_LONG_S "rom=CD_IMAGE\n"
       "                  " OPTION_LONG_S "file=SECTOR_SIZE\n"
@@ -1175,7 +1175,7 @@ ucon64_usage (int argc, char *argv[])
       "                  detect the correct SECTOR_SIZE from the CD_IMAGE itself\n"
       "                  SECTOR_SIZE can be 2048, 2052, 2056, 2324, 2332, 2336, 2340,\n"
       "                  2352 (default), or custom values\n"
-#endif
+*/
       "\n");
   else
     printf ("                %s not found; support disabled\n\n", ucon64.discmage_path);
@@ -1417,31 +1417,34 @@ ucon64_usage (int argc, char *argv[])
 #endif // SAMPLE
   }
 
-// TODO: change DB-specific "HAVE_ZLIB_H"'s to "DB"
+#ifdef  PARALLEL
+#define PARALLEL_MSG "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n" \
+     "      parallel port. If that is the case give a hardware address. For example:\n" \
+     "        ucon64 " OPTION_LONG_S "xswc \"rom.swc\" 0x378\n" \
+     "      In order to connect a copier to a PC's parallel port you need a standard\n" \
+     "      bidirectional parallel cable\n" \
+     "\n"
+#endif
+
+#ifdef  __MSDOS__
+#define MORE_MSG "     %s " OPTION_LONG_S "help|more (to see everything in more)\n"
+#else
+#define MORE_MSG "     %s " OPTION_LONG_S "help|less (to see everything in less)\n" // less is more ;-)
+#endif
+
   printf (
      "DATabase: %d known ROMs (DAT files: %s)\n"
      "\n"
-#ifdef  PARALLEL
-     "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
-     "      parallel port. If that is the case give a hardware address. For example:\n"
-     "        ucon64 " OPTION_LONG_S "xswc \"rom.swc\" 0x378\n"
-     "      In order to connect a copier to a PC's parallel port you need a standard\n"
-     "      bidirectional parallel cable\n"
-     "\n"
-#endif
+     PARALLEL_MSG
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
-#ifdef  __MSDOS__
-     "     %s " OPTION_LONG_S "help|more (to see everything in more)\n"
-#else
-     "     %s " OPTION_LONG_S "help|less (to see everything in less)\n" // less is more ;-)
-#endif
+     MORE_MSG
      "     give the force recognition switch a try if something went wrong\n"
      "\n"
      "Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
-     "\n"
-     , ucon64_dat_total_entries (UCON64_UNKNOWN)
-     , ucon64.configdir
-     , argv[0], argv[0]);
+     "\n",
+     ucon64_dat_total_entries (UCON64_UNKNOWN),
+     ucon64.configdir,
+     argv[0], argv[0]);
 }
 
 

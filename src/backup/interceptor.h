@@ -1,6 +1,5 @@
-
 /*
-mgd.h - Multi Game Doctor/Hunter support for uCON64
+interceptor.h - Mega Disk/Super Disk Interceptor support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
 
@@ -21,10 +20,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "../ucon64.h"
 
-#define mgd_TITLE "Multi Game Doctor(2)/Multi Game Hunter/MGH/RAW\n"
-                   "19XX Bung Enterprises Ltd http://www.bung.com.hk\n"
-                   "?Makko Toys Co., Ltd.?"
+#define interceptor_TITLE "Mega Disk/Super Disk (Interceptor)\n"
+                 "19XX Taiwan Sang Ting Co. Ltd."
 
-int mgd_usage(int argc,char *argv[]);
-#define mgd_HEADER_START 0
-#define mgd_HEADER_LEN 0
+#define interceptor_HEADER_START 0
+#define interceptor_HEADER_LEN 512

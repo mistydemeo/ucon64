@@ -647,19 +647,15 @@ gameboy_init (st_rominfo_t *rominfo)
     {
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 2;
-      rominfo->internal_crc2_len = 1;
       checksum = gameboy_chksum (rominfo);
       rominfo->current_internal_crc = checksum.value;
 
       rominfo->internal_crc = (gameboy_header.checksum_high << 8) +
                               gameboy_header.checksum_low;
 
-      sprintf (buf,
-               "Header checksum: %%s, 0x%%0%dlx (calculated) %%c= 0x%%0%dlx (internal)",
-               rominfo->internal_crc2_len * 2, rominfo->internal_crc2_len * 2);
-
       x = gameboy_header.header_checksum;
-      sprintf (rominfo->internal_crc2, buf,
+      sprintf (rominfo->internal_crc2,
+               "Header checksum: %s, 0x%02x (calculated) %c= 0x%02x (internal)",
 #ifdef  USE_ANSI_COLOR
                ucon64.ansi_color ?
                  ((checksum.header == x) ?

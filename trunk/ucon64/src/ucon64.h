@@ -74,8 +74,6 @@ typedef struct
   int internal_crc_len;                         // length (in bytes) of internal checksum in ROM header
 
   char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal checksum
-  int internal_crc2_start;                      // start of 2nd/inverse internal checksum
-  int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal checksum
 } st_rominfo_t;
 
 typedef struct
@@ -188,11 +186,7 @@ typedef struct
   int console;                                  // UCON64_SNES, etc...
   uint32_t flags;                               // WF_INIT, etc..
 //  const char *optarg;                           // pointer to optarg
-                                                 // initiated with NULL and used later
-//  int (* func) (st_ucon64_t *);                 // the belonging function
-//  int (* func[2]) (st_ucon64_t *);              // an array of functions?
-// TODO: replacing ucon64_options() and ucon64_switches()
-// TODO: and turning st_ucon64_t from global into a local variable?
+                                                // initialised with NULL and used later
 } st_ucon64_obj_t;
 
 /*
@@ -204,7 +198,6 @@ typedef struct
   ucon64_fname_arch()
 
   ucon64                global (st_ucon64_t *)
-TODO: make (st_ucon64_t *) ucon64 local
 */
 extern int ucon64_init (void);
 extern int ucon64_nfo (void);

@@ -167,7 +167,7 @@ swan_init (st_rominfo_t *rominfo)
   ucon64_fread (rom_buffer, 0, ucon64.file_size, ucon64.rom);
 
   rominfo->has_internal_crc = 1;
-  rominfo->internal_crc_len = rominfo->internal_crc2_len = 2;
+  rominfo->internal_crc_len = 2;
 
   if (ucon64.file_size > 10)                    // header itself is already 10 bytes
     {

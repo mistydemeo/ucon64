@@ -2660,7 +2660,7 @@ snes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "ROM speed: %s\n",
-        ((snes_header.bs_makeup >> 4) & 3) > 2 ? "120ns (FastROM)" : "200ns (SlowROM)");
+        (snes_header.bs_makeup >> 4) > 2 ? "120ns (FastROM)" : "200ns (SlowROM)");
       strcat (rominfo->misc, buf);
     }
 

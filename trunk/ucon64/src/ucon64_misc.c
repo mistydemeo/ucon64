@@ -416,6 +416,9 @@ int testsplit(char *filename)
 long x=0;
 char buf[4096];
 
+strcpy(buf,filenameonly(filename));
+if(!strchr(buf,'.'))return(0);
+
 strcpy(buf,filename);
 buf[strcspn(buf,".")-1]++;
 while(!access(buf,F_OK))

@@ -161,6 +161,7 @@ if(!(ucon64_parport=parport_probe(ucon64_parport)))
 #endif
 
 
+
 if(argcmp(argc,argv,"-crc"))
 {
 	printf("Checksum: %08lx\n\n",fileCRC32(ucon64_rom(),0));
@@ -469,14 +470,11 @@ if(!strcmp(strupr(&buf[strlen(buf)-4]),".FDS")&&(quickftell(ucon64_rom())%65500)
 	console=ucon64_NES;
 
 
-
 if(console==ucon64_UNKNOWN)
 {
 //the same but automatic
 	console=ucon64_probe(argc,argv);
 }
-
-
 
 
 if(argcmp(argc,argv,"-e"))
@@ -507,6 +505,21 @@ if the wrong ROM/console type was detected\n",buf3,getenv("HOME"));
 	}
 
 	sprintf(buf,"%s %s \"%s\"",buf2,ucon64_file(),ucon64_rom());
+
+	for( x=0 ; x < argc ; x++ )
+	{
+		if(	strdcmp(argv[x],"-e") &&
+			strdcmp(argv[x],ucon64_name()) &&
+			strdcmp(argv[x],ucon64_rom()) &&
+			strdcmp(argv[x],ucon64_file())
+		)
+		{
+			sprintf(buf2," %s",argv[x]);
+			strcat(buf,buf2);
+		}
+	}
+
+
 	printf("%s\n",buf);
 	fflush(stdout);
 	sync();
@@ -527,7 +540,6 @@ ERROR: the Emulator returned a error code (%d) maybe %s is corrupt...\n\
 
 
 //options which depend on a special console system
-
 
 switch(console)
 {

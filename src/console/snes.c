@@ -1819,28 +1819,26 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   copier, but by incorrect ROM tools...
 */
 {
-  int interleaved = 0;
+  int interleaved = 0, check_map_type = 1;
 
   // Mortal Kombat (Beta) doesn't have an internal header...
+  //  By coincidence the second if statement works for the interleaved dump
   if (crc32 (0, rom_buffer, 512) == 0xfa83b519)
-    ;                                           // not interleaved
-  else if (crc32 (0, rom_buffer + size / 2, 512) == 0xfa83b519)
-    interleaved = 1;
-  else if (banktype_score < 10)
-    /*
-      A banktype_score lower than 10 indicates that no "normal" internal SNES
-      header was found by check_banktype() at the normal locations. This is an
-      indication the dump is an interleaved LoROM dump.
-    */
+    check_map_type = 0;                         // not interleaved
+  else
     {
-      if (check_banktype (rom_buffer, size / 2) >= 10)
+      int org_snes_header_base = snes_header_base;
+      check_map_type = 0;
+      snes_header_base = size / 2;
+      if (check_banktype (rom_buffer, snes_header_base) > banktype_score)
         {
           interleaved = 1;
           snes_hirom = 0;
           snes_hirom_changed = 1;               // keep snes_deinterleave()
         }                                       //  from changing snes_hirom
+      snes_header_base = org_snes_header_base;
     }
-  else if (!snes_hirom)
+  if (check_map_type && !snes_hirom)
     {
       if (snes_header.map_type == 0x21 || snes_header.map_type == 0x31 ||
           snes_header.map_type == 0x35 || snes_header.map_type == 0x3a)

@@ -1243,7 +1243,7 @@ while ((c =
       else
         return ucon64_usage (argc, argv);
 */
-        printf ("Try '%s --help' for more information.\n", argv[0]);
+        fprintf (STDERR, "Try '%s --help' for more information.\n", argv[0]);
         return -1;
       break;
     }

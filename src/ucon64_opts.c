@@ -428,31 +428,39 @@ ucon64_rename (int mode)
 
   buf[0] = 0;
 
-  if (mode != UCON64_RENAME)
-    if (ucon64.rominfo)
-      if (ucon64.rominfo->name)
-        strcpy (buf, strtrim (ucon64.rominfo->name));
-
-  if (!buf[0] || mode == UCON64_RENAME) // GoodXXXX mode
-    if (ucon64.dat)
-      if (ucon64.dat->fname)
-        {
-          p = (char *) get_suffix (ucon64.dat->fname);
-          strcpy (buf, ucon64.dat->fname);
-
-          // get_suffix() never returns NULL
-          if (p[0])
-            if (strlen (p) < 5)
-              if (!(stricmp (p, ".nes") &&      // NES
-                    stricmp (p, ".fds") &&      // NES FDS
-//                    stricmp (p, ".smd") &&    // Genesis
-                    stricmp (p, ".gb") &&       // Game Boy
-                    stricmp (p, ".gbc") &&      // Game Boy Color
-                    stricmp (p, ".gba") &&      // Game Boy Advance
-                    stricmp (p, ".smc") &&      // SNES
-                    stricmp (p, ".v64")))       // Nintendo 64
-                buf[strlen (buf) - strlen (p)] = 0;
-        }
+  switch (mode)
+    {
+      case UCON64_RROM:
+        if (ucon64.rominfo)
+          if (ucon64.rominfo->name)
+            strcpy (buf, strtrim (ucon64.rominfo->name));
+        break;
+        
+      case UCON64_RENAME: // GoodXXXX style rename
+        if (ucon64.dat)
+          if (ucon64.dat->fname)
+            {
+              p = (char *) get_suffix (ucon64.dat->fname);
+              strcpy (buf, ucon64.dat->fname);
+ 
+              // get_suffix() never returns NULL
+              if (p[0])
+                if (strlen (p) < 5)
+                  if (!(stricmp (p, ".nes") &&      // NES
+                      stricmp (p, ".fds") &&      // NES FDS
+//                      stricmp (p, ".smd") &&    // Genesis
+                      stricmp (p, ".gb") &&       // Game Boy
+                      stricmp (p, ".gbc") &&      // Game Boy Color
+                      stricmp (p, ".gba") &&      // Game Boy Advance
+                      stricmp (p, ".smc") &&      // SNES
+                      stricmp (p, ".v64")))       // Nintendo 64
+                    buf[strlen (buf) - strlen (p)] = 0;
+            }
+        break;
+      
+      default:
+        return 0; // invalid mode
+    }
 
   if (!buf[0])
     return 0;
@@ -466,16 +474,15 @@ ucon64_rename (int mode)
   strcpy (buf2, to_func (buf, strlen (buf), tofname));
   strcpy (buf, basename2 (ucon64.rom));
 
-  // WARNING: use of an "undocumented" feature of get_suffix()
   p = (char *) get_suffix (buf);
   // Remove the suffix from buf (ucon64.rom). Note that this isn't fool-proof.
   //  However, this is the best solution, because several DAT files contain
   //  "canonical" file names with a suffix. That is a STUPID bug.
-  if (p[0] != 0)
-    *p = 0;
+  if (p)
+    buf[strlen (buf) - strlen (p)] = 0;
 
 #ifdef  DEBUG
-  printf ("buf: \"%s\"; buf2: \"%s\"\n", buf, buf2);
+//  printf ("buf: \"%s\"; buf2: \"%s\"\n", buf, buf2);
 #endif
   if (!strcmp (buf, buf2))
     {
@@ -488,33 +495,21 @@ ucon64_rename (int mode)
   // DON'T use set_suffix()! Consider file names like
   //  "Final Fantasy III (V1.1) (U) [!]". The suffix is ".1) (U) [!]"...
   strcat (buf2, suffix);
+
   if (ucon64.fname_len == UCON64_83)
     buf2[12] = 0;
 
-  if (access (buf2, F_OK))
-    { // file with name buf doesn't exist
-      printf ("Renaming \"%s\" to \"%s\"\n", basename2 (ucon64.rom),
-              basename2 (buf2));
-#ifndef DEBUG
-      rename (ucon64.rom, buf2);
-#endif
-    }
-  else
+  if (!access (buf2, F_OK)) // a file with that name exists already?
     {
-      // TODO: Here should come some code that checks if <buf2> is really
-      //       the file that its name suggests
-      //       DON'T remove file with name <buf2>! That would be stupid.
-      //       For the simple-minded:
-      //         The file name is NOT what identifies a ROM! A file with name
-      //         <buf2> could already exist, but the CRC32 should be calculated
-      //         to determine if it "deserves" its name. This problem can be
-      //         solved in several ways:
-      //           - Move "good" files to another (new) directory.
-      //           - Rename files that don't deserve their name. For example by
-      //             giving them the suffix ".bad".
-      printf ("File \"%s\" already exists, skipping\n", buf2);
+      strcpy (buf, ucon64.rom);
+      ucon64_file_handler (buf2, buf, 0);
     }
 
+  printf ("Renaming \"%s\" to \"%s\"\n", basename2 (ucon64.rom),
+          basename2 (buf2));
+#ifndef DEBUG
+  rename (ucon64.rom, buf2);
+#endif
   return 0;
 }
 

@@ -62,11 +62,15 @@ extern const char *dm_msg[];
   dm_get_track_desc() returns a string like "MODE1/2352" depending on the 
                         mode and sector_size specified; if cue == FALSE
                         it will return the string in TOC format
+  callibrate()        a brute force function that tries to find a iso header
+                        or anything else that could identify a file as an
+                        image (can be very slow)
 */
 extern const dm_track_t *dm_track_init (dm_track_t *track, FILE *fh);
 extern int dm_free (dm_image_t *image);
 //extern void writewavheader (FILE * fdest, int track_length);
 extern const char *dm_get_track_desc (int mode, int sector_size, int cue);
+//extern int callibrate (const char *fname, int track_num);
 
 
 /*

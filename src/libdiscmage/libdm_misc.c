@@ -367,8 +367,8 @@ dm_free (dm_image_t *image)
 
 
 #if 0
-static int
-dirty_hack (const char *fname, int track_num)
+int
+callibrate (const char *fname, int track_num)
 // brute force sync_data[] callibration for unknown images
 {
   FILE *fh;
@@ -491,16 +491,15 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
 
   static st_probe_t probe[] =
     {
-      {DM_SHEET, sheet_init},
       {DM_CDI, cdi_init},
-#if 0
       {DM_NRG, nrg_init},
+#if 0
       {DM_CCD, ccd_init},
-      {DM_UNKNOWN, NULL},
 #endif
+      {DM_SHEET, sheet_init},
       {0, NULL}
     };
-  int x = 0;
+  int x = 0, identified = 0;
 //  static dm_image_t image2;
 
 #ifdef  DEBUG
@@ -523,27 +522,24 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
   if (!image)
     return NULL;
 
-  dm_clean (image);
-  image->flags = flags;
-  strcpy (image->fname, fname);
   for (x = 0; probe[x].type; x++)
     if (probe[x].func)
       {
-        if (probe[x].func (image) != -1)
+        dm_clean (image);
+        image->flags = flags;
+        strcpy (image->fname, fname);
+        
+        if (!probe[x].func (image))
           {
-            image->type = probe[x].type;
+            identified = 1;
             break;
-          }
-        else
-          {
-            dm_clean (image);
-            image->flags = flags;
-            strcpy (image->fname, fname);
           }
       }
 
-  if (!image->type) // unknown image
+  if (!identified) // unknown image
     return NULL;
+
+  image->type = probe[x].type;
 
   return image;
 }

@@ -222,7 +222,7 @@ ppf_apply (const char *mod, const char *ppfname)
             dizlen = MAX_ID_SIZE;               // do this after setting bytes_to_skip!
           fread (diz, dizlen, 1, ppffile);
           diz[dizlen] = 0;                      // terminate string
-          printf ("%s\n", diz);
+          puts (diz);
         }
 
       // Do the file size check

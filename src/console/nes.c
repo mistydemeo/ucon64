@@ -38,7 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const char *nes_usage[] =
   {
-    "Nintendo Entertainment System/NES/Famicom Game Axe (Redant)",
+    "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)",
     "1983 Nintendo http://www.nintendo.com",
     "  " OPTION_LONG_S "nes         force recognition\n"
 #if 0

@@ -153,7 +153,7 @@ ppf_apply (const char *mod, const char *ppfname)
   ucon64_file_handler (modname, NULL, 0);
   q_fcpy (mod, 0, q_fsize (mod), modname, "wb"); // no copy if one file
 
-  if ((modfile = fopen (modname, "rb+")) == NULL)
+  if ((modfile = fopen (modname, "r+b")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], modname);
       return -1;

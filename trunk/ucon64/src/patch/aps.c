@@ -258,7 +258,7 @@ aps_apply (const char *mod, const char *apsname)
   ucon64_file_handler (modname, NULL, 0);
   q_fcpy (mod, 0, size, modname, "wb");         // no copy if one file
 
-  if ((n64aps_modfile = fopen (modname, "rb+")) == NULL)
+  if ((n64aps_modfile = fopen (modname, "r+b")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], modname);
       return -1;

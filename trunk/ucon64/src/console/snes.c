@@ -124,7 +124,7 @@ const st_usage_t snes_usage[] =
     {"spc", "convert SPC sound to WAV; " OPTION_LONG_S "rom=SPCFILE"},
 #endif
     {"j", NULL, "join split ROM"},
-    {"s", NULL, "split ROM into 8 Mb parts (for backup unit(s) with fdd)"},
+    {"s", NULL, "split ROM; default part size is 8 Mb"},
     {"ssize", "SIZE", "specify split part size in Mbit (not for Game Doctor SF3)"},
 #if 0
     {"p", NULL, "pad ROM to full Mb"},

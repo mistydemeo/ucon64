@@ -14,159 +14,159 @@ ucon64gui_top(void)
 
 //<html>
 
-  html2gui_input_submit ("Config", "",
+  h2g_input_submit ("Config", "",
                          buf);
-  html2gui_br();
-  html2gui_img(trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_br();
+  h2g_img(trans_1x3_xpm, 0, 0, 0, NULL);
 
-  html2gui_br();
+  h2g_br();
 
-  html2gui_("$ROM: ");
+  h2g_("$ROM: ");
 
-  html2gui_input_text ("ROM=", ucon64gui.rom, "Enter $ROM", 20, 0, FALSE);
-  html2gui_input_image ("Open", "ucon64gui_rom", open_xpm, 0, 0, "Open");
+  h2g_input_text ("ROM=", ucon64gui.rom, "Enter $ROM", 20, 0, FALSE);
+  h2g_input_image ("Open", "ucon64gui_rom", open_xpm, 0, 0, "Open");
 
-  html2gui_br();
-  html2gui_("$FILE:  ");
+  h2g_br();
+  h2g_("$FILE:  ");
 
-  html2gui_input_text ("FILE=", ucon64gui.file, "Enter $FILE", 20, 0, FALSE);
-  html2gui_input_image ("Open", "ucon64gui_file", open_xpm, 0, 0, "Open");
+  h2g_input_text ("FILE=", ucon64gui.file, "Enter $FILE", 20, 0, FALSE);
+  h2g_input_image ("Open", "ucon64gui_file", open_xpm, 0, 0, "Open");
 
-  html2gui_br ();
-  html2gui_img (trans_1x3_xpm, 0, 0, 0, NULL);
-  html2gui_br ();
+  h2g_br ();
+  h2g_img (trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_br ();
 
-  html2gui_ ("Miscellaneous options");
-  html2gui_br ();
-  html2gui_input_submit ("Show info", "*",
+  h2g_ ("Miscellaneous options");
+  h2g_br ();
+  h2g_input_submit ("Show info", "*",
                          "Click here to see information about ROM");
 
-  html2gui_(" ");
+  h2g_(" ");
 
 
   sprintf(buf,"(-e) emulate/run ROM (see %s for more)",ucon64gui.configfile);
-  html2gui_input_submit ("Emulate", "-e", buf);
+  h2g_input_submit ("Emulate", "-e", buf);
 
-  html2gui_ (" ");
+  h2g_ (" ");
 
-  html2gui_input_submit ("CRC32", "-crc", "(-crc) show CRC32 value of ROM");
+  h2g_input_submit ("CRC32", "-crc", "(-crc) show CRC32 value of ROM");
 
-  html2gui_input_submit ("CRC32 (w/ hd)", "-crchd", "(-crchd) show CRC32 value of ROM (regarding to +512 Bytes header)");
+  h2g_input_submit ("CRC32 (w/ hd)", "-crchd", "(-crchd) show CRC32 value of ROM (regarding to +512 Bytes header)");
 
-  html2gui_ (" ");
+  h2g_ (" ");
 
-  html2gui_input_submit ("Strip", "-stp", "(-stp) strip first 512 Bytes (possible header) from ROM");
+  h2g_input_submit ("Strip", "-stp", "(-stp) strip first 512 Bytes (possible header) from ROM");
 
-  html2gui_input_submit ("Insert", "-ins", "(-ins) insert 512 Bytes (0x00) before ROM");
+  h2g_input_submit ("Insert", "-ins", "(-ins) insert 512 Bytes (0x00) before ROM");
 
-  html2gui_input_submit ("Truncate", "-strip", "(-strip) strip Bytes from end of ROM; $FILE=VALUE");
+  h2g_input_submit ("Truncate", "-strip", "(-strip) strip Bytes from end of ROM; $FILE=VALUE");
 
-  html2gui_br();
-  html2gui_img(trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_br();
+  h2g_img(trans_1x3_xpm, 0, 0, 0, NULL);
 
-  html2gui_br();
+  h2g_br();
 
-  html2gui_input_submit ("Hexdump", "-hex", "(-hex) show ROM as hexdump");
+  h2g_input_submit ("Hexdump", "-hex", "(-hex) show ROM as hexdump");
 
-  html2gui_ (" ");
-  html2gui_input_submit ("Find String", "-find", "(-find) find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)");
+  h2g_ (" ");
+  h2g_input_submit ("Find String", "-find", "(-find) find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)");
 
-  html2gui_ (" ");
+  h2g_ (" ");
 
-  html2gui_input_submit ("Swap/(De)Interleave ROM", "-swap", "(-swap) swap/(de)interleave ALL Bytes in ROM (1234<->2143)");
-  html2gui_br ();
-  html2gui_img (trans_1x3_xpm, 0, 0, 0, NULL);
-  html2gui_br ();
+  h2g_input_submit ("Swap/(De)Interleave ROM", "-swap", "(-swap) swap/(de)interleave ALL Bytes in ROM (1234<->2143)");
+  h2g_br ();
+  h2g_img (trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_br ();
 
-  html2gui_("List ROMs: ");
+  h2g_("List ROMs: ");
 
-  html2gui_input_submit ("verbose", "-ls", "(-ls) generate ROM list for all ROMs; $ROM=DIRECTORY");
+  h2g_input_submit ("verbose", "-ls", "(-ls) generate ROM list for all ROMs; $ROM=DIRECTORY");
 
-  html2gui_input_submit ("more verbose", "-lsv", "(-lsv) like [ROM list] but more verbose; $ROM=DIRECTORY");
+  h2g_input_submit ("more verbose", "-lsv", "(-lsv) like [ROM list] but more verbose; $ROM=DIRECTORY");
 
-  html2gui_(" Compare ROMs: ");
+  h2g_(" Compare ROMs: ");
 
-  html2gui_input_submit ("differencies", "-c", "(-c) compare ROMs for differencies; $FILE=OTHER_ROM");
+  h2g_input_submit ("differencies", "-c", "(-c) compare ROMs for differencies; $FILE=OTHER_ROM");
 
-  html2gui_input_submit ("similarities", "-cs", "(-cs) compare ROMs for similarities; $FILE=OTHER_ROM");
+  h2g_input_submit ("similarities", "-cs", "(-cs) compare ROMs for similarities; $FILE=OTHER_ROM");
 
-  html2gui_br ();
-  html2gui_img (trans_1x3_xpm, 0, 0, 0, NULL);
-  html2gui_br ();
+  h2g_br ();
+  h2g_img (trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_br ();
 
-  html2gui_("Database: ");
+  h2g_("Database: ");
   
-  html2gui_input_submit ("Search", "-dbs", "(-dbs) search ROM database (all entries) by CRC32; $ROM=0xCRC32");
+  h2g_input_submit ("Search", "-dbs", "(-dbs) search ROM database (all entries) by CRC32; $ROM=0xCRC32");
 
-  html2gui_input_submit ("Stats", "-db", "(-db) ROM database statistics (# of entries)");
+  h2g_input_submit ("Stats", "-db", "(-db) ROM database statistics (# of entries)");
 
-  html2gui_input_submit ("View", "-dbv", "(-dbv) view ROM database (all entries)");
+  h2g_input_submit ("View", "-dbv", "(-dbv) view ROM database (all entries)");
 
-  html2gui_(" Padding: ");
+  h2g_(" Padding: ");
 
 
-  html2gui_input_submit ("Pad ROM", "-pad", "(-pad) pad ROM to full Mb");
+  h2g_input_submit ("Pad ROM", "-pad", "(-pad) pad ROM to full Mb");
 
-  html2gui_input_submit ("Pad ROM (w/ hd)", "-padhd", "(-padhd) pad ROM to full Mb (regarding to +512 Bytes header)");
+  h2g_input_submit ("Pad ROM (w/ hd)", "-padhd", "(-padhd) pad ROM to full Mb (regarding to +512 Bytes header)");
 
-  html2gui_input_submit ("Check", "-ispad", "(-ispad) check if ROM is padded");
+  h2g_input_submit ("Check", "-ispad", "(-ispad) check if ROM is padded");
 
-  html2gui_br();
-  html2gui_img(trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_br();
+  h2g_img(trans_1x3_xpm, 0, 0, 0, NULL);
 
-  html2gui_br();
+  h2g_br();
 
-  html2gui_hr();
-  html2gui_br();
-  html2gui_img(trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_hr();
+  h2g_br();
+  h2g_img(trans_1x3_xpm, 0, 0, 0, NULL);
 
-  html2gui_br();
-  html2gui_("Patches");
+  h2g_br();
+  h2g_("Patches");
   
-  html2gui_br();
-  html2gui_("Baseline/BSL: ");
+  h2g_br();
+  h2g_("Baseline/BSL: ");
 
 
-  html2gui_input_submit ("Apply", "-b", "(-b) apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE");
+  h2g_input_submit ("Apply", "-b", "(-b) apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE");
                          
-//  html2gui_br();
+//  h2g_br();
   
-  html2gui_(" IPS: ");
+  h2g_(" IPS: ");
 
-  html2gui_input_submit ("Apply", "-i", "(-i) apply IPS patch (<=1.2); $FILE=PATCHFILE");
+  h2g_input_submit ("Apply", "-i", "(-i) apply IPS patch (<=1.2); $FILE=PATCHFILE");
   
-  html2gui_input_submit ("Create", "-mki", "(-mki) create IPS patch; $FILE=CHANGED_ROM");
+  h2g_input_submit ("Create", "-mki", "(-mki) create IPS patch; $FILE=CHANGED_ROM");
   
-//  html2gui_br();
+//  h2g_br();
 
-  html2gui_(" APS: ");
+  h2g_(" APS: ");
 
-  html2gui_input_submit ("Apply", "-a", "(-a) apply APS patch (<=1.2); $FILE=PATCHFILE");
+  h2g_input_submit ("Apply", "-a", "(-a) apply APS patch (<=1.2); $FILE=PATCHFILE");
   
-  html2gui_input_submit ("Create", "-mka", "(-mka) create APS patch; $FILE=CHANGED_ROM");
+  h2g_input_submit ("Create", "-mka", "(-mka) create APS patch; $FILE=CHANGED_ROM");
   
-  html2gui_input_submit ("Rename", "-na", "(-na) change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION");
+  h2g_input_submit ("Rename", "-na", "(-na) change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION");
   
-  html2gui_br ();
-  html2gui_img (trans_1x3_xpm, 0, 0, 0, NULL);
-  html2gui_br ();
+  h2g_br ();
+  h2g_img (trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_br ();
   
-  html2gui_("PPF: ");
+  h2g_("PPF: ");
 
-  html2gui_input_submit ("Apply", "-ppf", "(-ppf) apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE");
+  h2g_input_submit ("Apply", "-ppf", "(-ppf) apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE");
   
-  html2gui_input_submit ("Create", "-mkppf", "(-mkppf) create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE");
+  h2g_input_submit ("Create", "-mkppf", "(-mkppf) create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE");
   
-  html2gui_input_submit ("Rename", "-nppf", "(-nppf) change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION");
+  h2g_input_submit ("Rename", "-nppf", "(-nppf) change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION");
   
-  html2gui_input_submit ("FILE_ID.DIZ", "-idppf", "(-idppf) change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ");
+  h2g_input_submit ("FILE_ID.DIZ", "-idppf", "(-idppf) change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ");
   
   
-  html2gui_br ();
-  html2gui_img (trans_1x3_xpm, 0, 0, 0, NULL);
-  html2gui_br();
+  h2g_br ();
+  h2g_img (trans_1x3_xpm, 0, 0, 0, NULL);
+  h2g_br();
 
-  html2gui_hr();
-  html2gui_br();
+  h2g_hr();
+  h2g_br();
 
 }

@@ -5269,9 +5269,10 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   // write UNIF file
   memset (&unif_header, 0, UNIF_HEADER_LEN);
   memcpy (&unif_header.signature, UNIF_SIG_S, 4);
-  unif_header.revision = UNIF_REVISION;
 #ifdef  WORDS_BIGENDIAN
-  unif_header.revision = bswap_32 (unif_header.revision);
+  unif_header.revision = bswap_32 (UNIF_REVISION);
+#else
+  unif_header.revision = UNIF_REVISION;
 #endif
   fwrite (&unif_header, 1, UNIF_HEADER_LEN, destfile);
 
@@ -5446,10 +5447,15 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
   st_unif_chunk_t *unif_chunk1, unif_chunk2, *unif_chunk3;
   unsigned char b;
 
-  if (unif_header.revision > UNIF_REVISION)     // conversion already done on b.e. machines
+#ifdef  WORDS_BIGENDIAN
+  x = bswap_32 (unif_header.revision);
+#else
+  x = unif_header.revision;
+#endif
+  if (x > UNIF_REVISION)
     printf ("WARNING: The UNIF file is of a revision later than %d (%d), but uCON64\n"
             "         doesn't support that revision yet. Some chunks may be discarded.\n",
-            UNIF_REVISION, unif_header.revision);
+            UNIF_REVISION, x);
 #ifdef  WORDS_BIGENDIAN
   unif_header.revision = bswap_32 (UNIF_REVISION);
 #else
@@ -6036,10 +6042,15 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
   int n, x, prg_size = 0, chr_size = 0;
   st_unif_chunk_t *unif_chunk;
 
-  if (unif_header.revision > UNIF_REVISION)     // conversion already done on b.e. machines
+#ifdef  WORDS_BIGENDIAN
+  x = bswap_32 (unif_header.revision);
+#else
+  x = unif_header.revision;
+#endif
+  if (x > UNIF_REVISION)
     printf ("WARNING: The UNIF file is of a revision later than %d (%d), but uCON64\n"
             "         doesn't support that revision yet. Some chunks may be discarded.\n",
-            UNIF_REVISION, unif_header.revision);
+            UNIF_REVISION, x);
 
   // build iNES header
   memset (&ines_header, 0, INES_HEADER_LEN);
@@ -6858,9 +6869,11 @@ nes_init (st_rominfo_t *rominfo)
       ucon64.split = 0;                         // UNIF files are never split
 
 #ifdef  WORDS_BIGENDIAN
-      unif_header.revision = bswap_32 (unif_header.revision);
+      x = bswap_32 (unif_header.revision);      // Don't modify header data
+#else
+      x = unif_header.revision;
 #endif
-      sprintf (buf, "UNIF revision: %d\n", unif_header.revision);
+      sprintf (buf, "UNIF revision: %d\n", x);
       strcpy (rominfo->misc, buf);
 
       if ((unif_chunk = read_chunk (MAPR_ID, rom_buffer, 0)) != NULL)

@@ -66,8 +66,7 @@ const st_usage_t gba_usage[] =
                          "WAIT_TIME='20' (default in most original carts)\n"
                          "WAIT_TIME='24' (fastest cartridge access speed)\n"
                          "WAIT_TIME='28' (faster than 8 but slower than 16)"},
-//  "n 0 and 28, with a stepping of 4. I.e 0, 4, 8, 12 ...\n"
-    {"strip", "N", "strip N Bytes from end of ROM (use " OPTION_LONG_S "ispad before)"},
+//  "n 0 and 28, with a stepping of 4. I.e. 0, 4, 8, 12 ...\n"
     {"multi", "SIZE", "make multirom for Flash Advance Linker, truncated to SIZE Mbit;\n"
                       "file with loader must be specified first, then all the ROMs,\n"
                       "multirom to create last; use -o to specify output directory"},
@@ -296,7 +295,7 @@ gba_crp (st_rominfo_t *rominfo, const char *value)
 
   if (wait_time % 4 != 0 || wait_time > 28 || wait_time < 0)
     {
-      fprintf (stderr, "ERROR: you specified a wrong WAIT_TIME value\n");
+      fprintf (stderr, "ERROR: You specified a wrong WAIT_TIME value\n");
       return -1;
     }
 

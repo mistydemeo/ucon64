@@ -75,11 +75,11 @@ ucon64_system (void)
 
   sprintf(buf2,"xterm -title \"%s\" -e",ucon64gui.cmd);
 
-  sprintf(buf,"%s %s",buf2,ucon64gui.cmd);
+  sprintf(buf,"%s %s &",buf2,ucon64gui.cmd);
 
-//  html2gui_html_end();
+  html2gui_html_end();
   system (buf);
-//  html2gui_html(640,400,0);
+  html2gui_html(640,400,0);
 
 
 /*
@@ -141,7 +141,7 @@ ucon64_root (void)
   ucon64gui.console = ucon64_UNKNOWN;
 
 //<html>
-  html2gui_html (640, 400, 0);
+  html2gui_html (0, 0, 0);
 
   html2gui_title ("uCON64gui", icon_xpm);
 

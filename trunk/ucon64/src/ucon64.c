@@ -108,9 +108,6 @@ static void ucon64_usage (int argc, char *argv[]);
 static int ucon64_process_rom (const char *fname, int console, int show_nfo);
 static int ucon64_execute_options (void);
 static void ucon64_rom_nfo (const st_rominfo_t *rominfo);
-#ifdef  HAVE_ZLIB_H
-static void ucon64_fname_arch (const char *fname);
-#endif
 
 st_ucon64_t ucon64;
 static st_rominfo_t rom;
@@ -540,7 +537,7 @@ main (int argc, char **argv)
 
   console = ucon64.console;
   show_nfo = ucon64.show_nfo;
-  while (rom_index < argc)                      // use argc, NOT ucon64.argc!
+  for (; rom_index < argc; rom_index++)
     {
 #ifdef  HAVE_ZLIB_H
       int process_multizips = 1, n_entries;
@@ -549,26 +546,8 @@ main (int argc, char **argv)
       if (rom_index == argc - 1)
         if (!strcmp (argv[rom_index], ucon64.patch_file))
           break;
-
-#if 0 // TODO: think of a way to set ucon64_option
-      /*
-        See the comment in ucon64_process_rom(). I (dbjh) prefer the GBA
-        multirom creation code to handle several zip files instead of stopping
-        after the first one. The disadvantage is that users can't create a
-        multirom by passing one zip with all the games. It's not so bad,
-        because it's probably more common for zip files to contain only a
-        single game.
-      */
-      switch (ucon64_option)
-        {
-        case UCON64_MULTI:                      // falling through
-        case UCON64_XFALMULTI:
-          process_multizips = 0;
-          break;
-        default:
-          process_multizips = 1;
-        }
-#endif
+      if (access (argv[rom_index], F_OK) != 0)
+        continue;
 
       n_entries = unzip_get_number_entries (argv[rom_index]);
       if (n_entries != -1)                      // it's a zip file
@@ -596,7 +575,6 @@ main (int argc, char **argv)
           break;
 
       ucon64.fname_arch[0] = 0;
-      rom_index++;
     }
 
   return 0;
@@ -863,7 +841,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
           case UCON64_GB:
           case UCON64_GBA:
           case UCON64_N64:
-          // These ROMs have internal headers with name, country, maker, etc.
+            // These ROMs have internal headers with name, country, maker, etc.
             break;
 
           default:
@@ -1044,7 +1022,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
       // nes.c calculates the correct checksum for split ROMs (=Pasofami
       // format), so there is no need to join the files
       if (ucon64.console != UCON64_NES)
-        printf ("NOTE: to get the correct checksum the ROM must be joined\n");
+        printf ("NOTE: To get the correct checksum the ROM parts must be joined\n");
     }
 
   // miscellaneous info
@@ -1072,15 +1050,15 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
       printf (buf,
         ucon64.ansi_color ?
           ((rominfo->current_internal_crc == rominfo->internal_crc) ?
-            "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
+            "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
           :
-          ((rominfo->current_internal_crc == rominfo->internal_crc) ? "ok" : "bad"),
+          ((rominfo->current_internal_crc == rominfo->internal_crc) ? "Ok" : "Bad"),
         rominfo->current_internal_crc,
         (rominfo->current_internal_crc == rominfo->internal_crc) ? "=" : "!",
         rominfo->internal_crc);
 #else
       printf (buf,
-        (rominfo->current_internal_crc == rominfo->internal_crc) ? "ok" : "bad",
+        (rominfo->current_internal_crc == rominfo->internal_crc) ? "Ok" : "Bad",
         rominfo->current_internal_crc,
         (rominfo->current_internal_crc == rominfo->internal_crc) ? "=" : "!",
         rominfo->internal_crc);
@@ -1105,7 +1083,7 @@ ucon64_render_usage (const char **s)
     NULL_TO_EMPTY (s[0]),
     s[0]?"\n":"",
     NULL_TO_EMPTY (s[2]));
-#else                          
+#else
   printf("%s%s%s%s%s",
     NULL_TO_EMPTY (s[0]),
     s[0]?s[1]?"\n  ":"\n":"",

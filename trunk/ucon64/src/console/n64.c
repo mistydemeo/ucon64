@@ -502,18 +502,18 @@ n64_init (st_rominfo_t *rominfo)
 
       sprintf (buf,
                "2nd Checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)\n"
-               "NOTE: the checksum routine supports only 6101 and 6102 boot codes",
+               "NOTE: The checksum routine supports only 6101 and 6102 boot codes",
                rominfo->internal_crc2_len * 2, rominfo->internal_crc2_len * 2);
 
       sprintf (rominfo->internal_crc2, buf,
 #ifdef  ANSI_COLOR
                ucon64.ansi_color ?
                  ((n64crc.crc2 == value) ?
-                   "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
+                   "\x1b[01;32mOk\x1b[0m" : "\x1b[01;31mBad\x1b[0m")
                  :
-                 ((n64crc.crc2 == value) ? "ok" : "bad"),
+                 ((n64crc.crc2 == value) ? "Ok" : "Bad"),
 #else
-               (n64crc.crc2 == value) ? "ok" : "bad",
+               (n64crc.crc2 == value) ? "Ok" : "Bad",
 #endif
                n64crc.crc2,
                (n64crc.crc2 == value) ? "=" : "!", value);

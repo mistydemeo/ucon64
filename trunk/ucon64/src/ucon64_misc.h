@@ -99,7 +99,7 @@ extern const char *nintendo_maker[];
 
 /*
   uCON64 messages
-  
+
   usage example: fprintf (stdout, ucon64_msg[WROTE], filename);
 */
 enum
@@ -130,7 +130,9 @@ extern void handle_existing_file (const char *dest, char *src);
 #define ucon64_fbackup(a,b) (handle_existing_file(b,a))
 extern void remove_temp_file (void); // possible temp file created by handle_existing_file()
 
-extern char *ucon64_output_fname (char *requested_fname, int force_requested_fname);
+#define OF_FORCE_BASENAME 1
+#define OF_FORCE_SUFFIX   2
+extern char *ucon64_output_fname (char *requested_fname, int force_flags);
 
 extern int ucon64_fhexdump (const char *filename, int start, int len);
 

@@ -43,10 +43,10 @@ const char *dc_usage[] =
     "Dreamcast",
     "1998 SEGA http://www.sega.com",
     "  " OPTION_LONG_S "dc          force recognition\n"
-    "TODO: " OPTION_LONG_S "ip=FILE add/extract ip.bin FILE to/from IMAGE; --rom=IMAGE\n"
-      ,
-      NULL
+    "TODO: " OPTION_LONG_S "ip=FILE add/extract ip.bin FILE to/from IMAGE; --rom=IMAGE\n",
+    NULL
 };
+
 
 int
 dc_init (st_rominfo_t *rominfo)
@@ -73,7 +73,7 @@ struct field {
   char *name;
   int pos;
   int len;
-  int (*extra_check)(char *, struct field *);
+  int (*extra_check) (char *, struct field *);
 } fields[NUM_FIELDS] = {
   { "Hardware ID", 0x0, 0x10, NULL },
   { "Maker ID", 0x10, 0x10, NULL },
@@ -90,28 +90,30 @@ struct field {
 
 int filled_in[NUM_FIELDS];
 
-int check_areasym(char *ptr, struct field *f)
+int
+check_areasym (char *ptr, struct field *f)
 {
   int i, a = 0;
-  for(i=0; i<f->len; i++)
-    switch(ptr[i]) {
-     case 'J':
-       a |= (1<<0);
-       break;
-     case 'U':
-       a |= (1<<1);
-       break;
-     case 'E':
-       a |= (1<<2);
-       break;
-     case ' ':
-       break;
-     default:
-       fprintf(stderr, "Unknown area symbol '%c'.\n", ptr[i]);
-       return 0;
-    }
-  for(i=0; i<f->len; i++)
-    if((a & (1<<i)) == 0)
+  for (i = 0; i < f->len; i++)
+    switch (ptr[i])
+      {
+      case 'J':
+        a |= (1<<0);
+        break;
+      case 'U':
+        a |= (1<<1);
+        break;
+      case 'E':
+        a |= (1<<2);
+        break;
+      case ' ':
+        break;
+      default:
+        fprintf (stderr, "Unknown area symbol '%c'.\n", ptr[i]);
+        return 0;
+      }
+  for (i = 0; i < f->len; i++)
+    if ((a & (1<<i)) == 0)
       ptr[i] = ' ';
     else
       ptr[i] = "JUE"[i];
@@ -119,12 +121,13 @@ int check_areasym(char *ptr, struct field *f)
 }
 
 
-void trim(char *str)
+void
+trim (char *str)
 {
   int l = strlen(str);
-  while(l>0 && (str[l-1] == '\r' || str[l-1] == '\n' ||
-		str[l-1] == ' ' || str[l-1] == '\t'))
-    str[--l]='\0';
+  while (l > 0 && (str[l-1] == '\r' || str[l-1] == '\n' ||
+         str[l-1] == ' ' || str[l-1] == '\t'))
+    str[--l] = 0;
 }
 
 
@@ -185,6 +188,7 @@ parse_input (FILE * fh, char *ip)
   return 1;
 }
 
+
 int
 calcCRC (const unsigned char *buf, int size)
 {
@@ -200,6 +204,7 @@ calcCRC (const unsigned char *buf, int size)
     }
   return n & 0xffff;
 }
+
 
 void
 update_crc (char *ip)
@@ -281,7 +286,7 @@ Game Title    : TITLE OF THE SOFTWARE
  11. subtract this from the value at B84A (step 4.) (example: 2DE5 - 2DB6 = 2F)
  12. multiply this value by 800 (example: 800 * 2F = 17800)
  13. subtract 8000 from this value (example: 17800 - 8000 = F800)
- 14. go to address 8000 in your mkisofs iso (tmp.iso) 
+ 14. go to address 8000 in your mkisofs iso (tmp.iso)
  15. select a block that is the size in bytes from step 8. (example, select F800 bytes starting at 8000)
  16. copy this and paste into a new file. you now have a new, fixed header file
  17. go back to the original iso you got from cdirip. Go to address 8000, select the same size block from step 10, paste your
@@ -299,7 +304,7 @@ Game Title    : TITLE OF THE SOFTWARE
  At this point you should burn your new iso to see if it works.
  If it does you might as well proceed to make the patch.
 
- 1. Name your new altered iso nData02.iso (or whatever you wish) 
+ 1. Name your new altered iso nData02.iso (or whatever you wish)
  2. Use cdirip again to make an original TData02.iso.
  3. Have the 2 isos in the same folder as makeppf.exe
  4. From the command line, type: makeppf TData02.iso nData02.iso patch.ppf

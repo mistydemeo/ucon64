@@ -363,20 +363,20 @@ gba_init (st_rominfo_t *rominfo)
     (value == 'J') ? "Japan/Asia" :
     (value == 'E') ? "U.S.A." :
     (value == 'P') ? "Europe, Australia and Africa" :
-    "Unknown Country";
+    "Unknown country";
 
   // misc stuff
   sprintf (buf, "Version: %02x\n", OFFSET (gba_header, 0xbc));
   strcat (rominfo->misc, buf);
 
-  sprintf (buf, "Device Type: %02x\n", OFFSET (gba_header, 0xb4));
+  sprintf (buf, "Device type: %02x\n", OFFSET (gba_header, 0xb4));
   strcat (rominfo->misc, buf);
 
   value = OFFSET (gba_header, 0) << 24;
   value += OFFSET (gba_header, 1) << 16;
   value += OFFSET (gba_header, 2) << 8;
   value += OFFSET (gba_header, 3);
-  sprintf (buf, "Start Address: %08x", value);
+  sprintf (buf, "Start address: %08x", value);
   strcat (rominfo->misc, buf);
 
   // internal ROM crc
@@ -453,6 +453,7 @@ gba_multi (st_rominfo_t *rominfo, int truncate_size, char *fname)
       n_files = ucon64.argc - 1;
     }
 
+  ucon64_fbackup (NULL, destname);
   if ((destfile = fopen (destname, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], destname);

@@ -170,7 +170,7 @@ typedef signed long long int int64_t;
   #endif
 #elif   defined __BEOS__
   #define CURRENT_OS_S "BeOS"
-#elif defined AMIGA
+#elif   defined AMIGA
   #if defined __PPC__
     #define CURRENT_OS_S "Amiga (ppc)"
   #else

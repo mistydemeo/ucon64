@@ -24,11 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#include "config.h"
-#if 0
-#include "quick_io.h"
-#include "misc.h"
-#else
+
 #ifndef FALSE
 #define FALSE 0
 #endif
@@ -85,7 +81,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
 
-#endif
 #ifdef  __linux__
 #include <linux/cdrom.h>
 #else

@@ -62,25 +62,28 @@ parport_write (char src[], unsigned int len, unsigned int parport)
   for (i = 0; i < len; i++)
     {
       maxwait = SEND_MAX_WAIT;
-      if ((in1byte (parport + 2) & 1) == 0)     /* check ~strobe */
+      if ((in1byte (parport + 2) & 1) == 0)     // check ~strobe
         {
-          while (((in1byte (parport + 2) & 2) != 0) && maxwait--);      /* wait for */
+          while (((in1byte (parport + 2) & 2) != 0) && maxwait--)
+            ;                                   // wait for
           if (maxwait <= 0)
-            return 1;           /* auto feed == 0 */
-          out1byte (parport, src[i]);   /* write data    */
-          out1byte (parport + 2, 5);    /* ~strobe = 1   */
+            return 1;                           // auto feed == 0
+          out1byte (parport, src[i]);           // write data
+          out1byte (parport + 2, 5);            // ~strobe = 1
         }
       else
         {
-          while (((in1byte (parport + 2) & 2) == 0) && maxwait--);      /* wait for */
+          while (((in1byte (parport + 2) & 2) == 0) && maxwait--)
+            ;                                   // wait for
           if (maxwait <= 0)
-            return 1;           /* auto feed == 1 */
-          out1byte (parport, src[i]);   /* write data    */
-          out1byte (parport + 2, 4);    /* ~strobe = 0   */
+            return 1;                           // auto feed == 1
+          out1byte (parport, src[i]);           // write data
+          out1byte (parport + 2, 4);            // ~strobe = 0
         }
     }
   return 0;
 }
+
 
 int
 parport_read (char dest[], unsigned int len, unsigned int parport)
@@ -93,17 +96,19 @@ parport_read (char dest[], unsigned int len, unsigned int parport)
     {
       out1byte (parport, REC_HIGH_NIBBLE);
       maxwait = REC_MAX_WAIT;
-      while (((in1byte (parport + 1) & 0x80) == 0) && maxwait--);       /* wait for ~busy=1 */
+      while (((in1byte (parport + 1) & 0x80) == 0) && maxwait--)
+        ;                                       // wait for ~busy=1
       if (maxwait <= 0)
         return len - i;
-      c = (in1byte (parport + 1) >> 3) & 0x0f;  /* ~ack, pe, slct, ~error */
+      c = (in1byte (parport + 1) >> 3) & 0x0f;  // ~ack, pe, slct, ~error
 
       out1byte (parport, REC_LOW_NIBBLE);
       maxwait = REC_MAX_WAIT;
-      while (((in1byte (parport + 1) & 0x80) != 0) && maxwait--);       /* wait for ~busy=0 */
+      while (((in1byte (parport + 1) & 0x80) != 0) && maxwait--)
+        ;                                       // wait for ~busy=0
       if (maxwait <= 0)
         return len - i;
-      c |= (in1byte (parport + 1) << 1) & 0xf0; /* ~ack, pe, slct, ~error */
+      c |= (in1byte (parport + 1) << 1) & 0xf0; // ~ack, pe, slct, ~error
 
       dest[i] = c;
     }
@@ -111,41 +116,40 @@ parport_read (char dest[], unsigned int len, unsigned int parport)
   return 0;
 }
 
+
 int
 syncHeader (unsigned int baseport)
 {
   int i = 0;
 
-  out1byte (baseport, 0);       /* data = 00000000    */
-  out1byte (baseport + 2, 4);   /* ~strobe=0          */
+  out1byte (baseport, 0);                       // data = 00000000
+  out1byte (baseport + 2, 4);                   // ~strobe=0
   while (i < SYNC_MAX_CNT)
     {
-      if ((in1byte (baseport + 2) & 8) == 0)    /* wait for select=0  */
+      if ((in1byte (baseport + 2) & 8) == 0)    // wait for select=0
         {
-          out1byte (baseport, 0xaa);    /* data = 10101010    */
-          out1byte (baseport + 2, 0);   /* ~strobe=0, ~init=0 */
+          out1byte (baseport, 0xaa);            // data = 10101010
+          out1byte (baseport + 2, 0);           // ~strobe=0, ~init=0
           while (i < SYNC_MAX_CNT)
             {
-              if ((in1byte (baseport + 2) & 8) != 0)    /* wait for select=1  */
+              if ((in1byte (baseport + 2) & 8) != 0) // wait for select=1
                 {
-                  out1byte (baseport + 2, 4);   /* ~strobe=0          */
+                  out1byte (baseport + 2, 4);   // ~strobe=0
                   while (i < SYNC_MAX_CNT)
                     {
-                      if ((in1byte (baseport + 2) & 8) == 0)    /* w for select=0  */
+                      if ((in1byte (baseport + 2) & 8) == 0) // w for select=0
                         {
-                          out1byte (baseport, 0x55);    /* data = 01010101    */
-                          out1byte (baseport + 2, 0);   /* ~strobe=0, ~init=0 */
+                          out1byte (baseport, 0x55); // data = 01010101
+                          out1byte (baseport + 2, 0); // ~strobe=0, ~init=0
                           while (i < SYNC_MAX_CNT)
                             {
-                              if ((in1byte (baseport + 2) & 8) != 0)    /* w select=1 */
+                              if ((in1byte (baseport + 2) & 8) != 0)    // w select=1
                                 {
-                                  out1byte (baseport + 2, 4);   /* ~strobe=0          */
+                                  out1byte (baseport + 2, 4); // ~strobe=0
                                   while (i < SYNC_MAX_CNT)
                                     {
-                                      if ((in1byte (baseport + 2) & 8) == 0)    /* select=0 */
-                                        {
-                                          return 0;
-                                        }
+                                      if ((in1byte (baseport + 2) & 8) == 0) // select=0
+                                        return 0;
                                       i++;
                                     }
                                 }
@@ -165,6 +169,7 @@ syncHeader (unsigned int baseport)
   return 1;
 }
 
+
 int
 initCommunication (unsigned int port)
 {
@@ -175,9 +180,10 @@ initCommunication (unsigned int port)
         break;
     }
   if (i >= SYNC_MAX_TRY)
-    return (-1);
-  return (0);
+    return -1;
+  return 0;
 }
+
 
 int
 checkSync (unsigned int baseport)
@@ -189,10 +195,10 @@ checkSync (unsigned int baseport)
       if (((in1byte (baseport + 2) & 3) == 3)
           || ((in1byte (baseport + 2) & 3) == 0))
         {
-          out1byte (baseport, 0);       /* ~strobe, auto feed */
+          out1byte (baseport, 0);               // ~strobe, auto feed
           for (j = 0; j < SYNC_MAX_CNT; j++)
             {
-              if ((in1byte (baseport + 1) & 0x80) == 0) /* wait for ~busy=0 */
+              if ((in1byte (baseport + 1) & 0x80) == 0) // wait for ~busy=0
                 {
                   return 0;
                 }
@@ -203,12 +209,12 @@ checkSync (unsigned int baseport)
   return 1;
 }
 
+
 int
 sendFilename (unsigned int baseport, char name[])
 {
   int i;
-  char *c;
-  char mname[12];
+  char *c, mname[12];
 
   memset (mname, ' ', 11);
   c = (strrchr (name, FILE_SEPARATOR));
@@ -233,12 +239,11 @@ sendFilename (unsigned int baseport, char name[])
   return parport_write (mname, 11, baseport);
 }
 
+
 int
 sendUploadHeader (unsigned int baseport, char name[], long len)
 {
-  char mname[12];
-
-  char lenbuffer[4];
+  char mname[12], lenbuffer[4];
   static char protocolId[] = "GD6R\1";
 
   if (parport_write (protocolId, strlen (protocolId), baseport) != 0)
@@ -257,11 +262,11 @@ sendUploadHeader (unsigned int baseport, char name[], long len)
   return 0;
 }
 
+
 int
-sendDownloadHeader (unsigned int baseport, char name[], long *len)
+sendDownloadHeader (unsigned int baseport, char name[], int *len)
 {
   char mname[12];
-
   static char protocolId[] = "GD6W";
   unsigned char recbuffer[15];
 
@@ -276,17 +281,14 @@ sendDownloadHeader (unsigned int baseport, char name[], long *len)
   if (parport_read ((char *) recbuffer, 1, baseport) != 0)
     return 1;
   if (recbuffer[0] != 1)
-    {
-      return (-1);
-    }
+    return -1;
   if (parport_read ((char *) recbuffer, 15, baseport) != 0)
     return 1;
-  *len =
-    (long) recbuffer[0] | ((long) recbuffer[1] << 8) | ((long) recbuffer[2] <<
-                                                        16) | ((long)
-                                                               recbuffer[3] <<
-                                                               24);
-  return (0);
+  *len = (long) recbuffer[0] |
+         ((long) recbuffer[1] << 8) |
+         ((long) recbuffer[2] << 16) |
+         ((long) recbuffer[3] << 24);
+  return 0;
 }
 
 
@@ -295,74 +297,69 @@ doctor64_read (const char *filename, unsigned int parport)
 {
   char buf[MAXBUFSIZE];
   FILE *fh;
-  unsigned long size, inittime;
+  unsigned int size, inittime, bytesreceived = 0;
 
   if (initCommunication (parport) == -1)
-    return (-1);
+    return -1;
 
   inittime = time (0);
 
   strcpy (buf, filename);
   if (sendDownloadHeader (parport, buf, &size) != 0)
-    return (-1);
+    return -1;
   if (!(fh = fopen (filename, "wb")))
-    return (-1);
-  printf ("Receive: %ld Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
+    return -1;
+  printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   for (;;)
     {
-      if (parport_read (buf, sizeof (buf), parport) != 0)
+      if (parport_read (buf, sizeof buf, parport) != 0)
         {
           fclose (fh);
-          return (0);
+          return 0;
         }
-      fwrite (buf, 1, sizeof (buf), fh);
-      ucon64_gauge (inittime, file_size (filename), size);
+      bytesreceived += sizeof buf;
+      fwrite (buf, 1, sizeof buf, fh);
+      ucon64_gauge (inittime, bytesreceived, size);
     }
   sync ();
   fclose (fh);
-  return (0);
+  return 0;
 }
-
 
 
 int
-doctor64_write (const char *filename, long start, long len,
-                unsigned int parport)
+doctor64_write (const char *filename, long start, long len, unsigned int parport)
 {
   char buf[MAXBUFSIZE];
   FILE *fh;
-  unsigned long size, inittime, pos;
+  unsigned int size, inittime, pos, bytessend = 0;
 
+  size = file_size (filename) - start;
   if (initCommunication (parport) == -1)
-    return (-1);
+    return -1;
   inittime = time (0);
 
-
   strcpy (buf, filename);
-  if (sendUploadHeader (parport, buf, (file_size (filename) - start)) != 0)
-    return (-1);
+  if (sendUploadHeader (parport, buf, size) != 0)
+    return -1;
 
   if (!(fh = fopen (filename, "rb")))
-    return (-1);
+    return -1;
 
-  printf ("Send: %ld Bytes (%.4f Mb)\n\n", (file_size (filename) - start),
-          (float) (file_size (filename) - start) / MBIT);
-  size = file_size (filename);
+  printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   for (;;)
     {
-      if (!(pos = fread (buf, 1, sizeof (buf), fh)))
+      if (!(pos = fread (buf, 1, sizeof buf, fh)))
         break;
       if (parport_write (buf, pos, parport) != 0)
         break;
-      size = size - pos;
-      ucon64_gauge (inittime, (file_size (filename) - start) - size,
-                    (file_size (filename) - start));
+      bytessend += sizeof buf;
+      ucon64_gauge (inittime, bytessend, size);
     }
   fclose (fh);
-  return (0);
+  return 0;
 }
-
 
 #endif // BACKUP

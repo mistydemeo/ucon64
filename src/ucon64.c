@@ -731,7 +731,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
             "No");
 
       if (rominfo->buheader_len)
-        printf ("Backup unit/Emulator header: Yes, %ld Bytes\n",
+        printf ("Backup unit/Emulator header: Yes, %d Bytes\n",
           rominfo->buheader_len);
       else
 // for NoisyB: <read only mode ON>
@@ -791,7 +791,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
         }
 
       if (rominfo->current_crc32)
-        printf ("Checksum (CRC32): 0x%08lx\n", rominfo->current_crc32);
+        printf ("Checksum (CRC32): 0x%08x\n", rominfo->current_crc32);
 
       printf ("\n");
 

@@ -67,7 +67,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/swan.h"
 #include "console/dc.h"
 #include "console/jaguar.h"
-#include "console/other.h"
 
 
 const char *ucon64_parport_error =

@@ -28,14 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 /*
-  console/other.[ch] are for consoles which have no specific support, yet
-
-  it is also a good start to add support for a new console
-*/
-//#define OTHER
-
-
-/*
   enables/disables the internal ROM database
 
   comment this and uCON64 will be only ~160kB in size but won't recognize

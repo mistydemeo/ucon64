@@ -927,12 +927,7 @@ return(0);
 return(0);
 }
 
-
-int ucon64_init(struct ucon64_ *rom)
-{
-if(quickftell(rom->rom) <= MAXROMSIZE)
-{
-  switch(rom->console)
+/*  switch(rom->console)
   {
     case ucon64_GB:
       gameboy_init(rom);
@@ -997,29 +992,47 @@ if(quickftell(rom->rom) <= MAXROMSIZE)
       rom->console=ucon64_UNKNOWN;
     break;
   }
-}
-else 
-{
-#ifdef CD
-  switch(rom->console)
-  {
-    case ucon64_PS2:
-    case ucon64_DC:
-    case ucon64_SATURN:
-    case ucon64_CDI:
-    case ucon64_CD32:
-//TODO init
-    break;
-    case ucon64_PSX:
-      psx_init(rom);
-    break;
+  */
 
-    case ucon64_UNKNOWN:
-    default:
-      rom->console=ucon64_UNKNOWN;
-    break;
+int ucon64_init(struct ucon64_ *rom)
+{
+if(rom->console != ucon64_UNKNOWN)
+{
+  if( quickftell(rom->rom) <= MAXROMSIZE )
+  {  
+    (rom->console == ucon64_GB) ? gameboy_init(rom) :
+    (rom->console == ucon64_GBA) ? gbadvance_init(rom) :
+    (rom->console == ucon64_GENESIS) ? genesis_init(rom) :
+    (rom->console == ucon64_SMS) ? sms_init(rom) :
+    (rom->console == ucon64_JAGUAR) ? jaguar_init(rom) :
+    (rom->console == ucon64_LYNX) ? lynx_init(rom) :
+    (rom->console == ucon64_N64) ? nintendo64_init(rom) :
+    (rom->console == ucon64_NEOGEO) ? neogeo_init(rom) :
+    (rom->console == ucon64_NES) ? nes_init(rom) :
+    (rom->console == ucon64_PCE) ? pcengine_init(rom) :
+    (rom->console == ucon64_SYSTEM16) ? system16_init(rom) :
+    (rom->console == ucon64_ATARI) ? atari_init(rom) :
+    (rom->console == ucon64_SNES) ? snes_init(rom) :
+    (rom->console == ucon64_NEOGEOPOCKET) ? neogeopocket_init(rom) :
+    (rom->console == ucon64_VECTREX) ? vectrex_init(rom) :
+    (rom->console == ucon64_VIRTUALBOY) ? virtualboy_init(rom) :
+    (rom->console == ucon64_WONDERSWAN) ? wonderswan_init(rom) :
+    (rom->console == ucon64_COLECO) ? coleco_init(rom) :
+    (rom->console == ucon64_INTELLI) ? intelli_init(rom) :
+                                         (rom->console = ucon64_UNKNOWN);
   }
+  else
+  {  
+#ifdef CD
+    (rom->console == ucon64_PS2) ? ps2_init(rom) :
+    (rom->console == ucon64_DC) ? dc_init(rom) :
+    (rom->console == ucon64_SATURN) ? saturn_init(rom) :
+    (rom->console == ucon64_CDI) ? cdi_init(rom) :
+    (rom->console == ucon64_CD32) ? cd32_init(rom) :
+    (rom->console == ucon64_PSX) ? psx_init(rom) :
 #endif
+                                         (rom->console = ucon64_UNKNOWN);
+  }
 }
 
 if(rom->console == ucon64_UNKNOWN)

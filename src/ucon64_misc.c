@@ -504,51 +504,34 @@ int
 ucon64_testsplit (const char *filename)
 // test if ROM is split into parts
 {
+  signed int x;
   int parts = 0;
-  char buf[MAXBUFSIZE];
+  char buf[FILENAME_MAX];
+  int pos = 0;
 
-  strcpy (buf, filename);
-  buf[strrcspn (buf, ".") - 1]++;
-  while (!access (buf, F_OK) && strcmp (buf, filename) != 0)
+  if (!strchr (filename, '.')) return 0;
+
+  for (x = -1; x < 2; x += 2)
     {
-      buf[strrcspn (buf, ".") - 1]++;
-      parts++;
+      parts = 0;
+      strcpy (buf, filename);
+      pos = strrcspn (buf, ".") + x; /* x == -1 change char before '.'
+                                        else x == 1 change char behind '.' */
+
+      while (!access (buf, F_OK))buf[pos]--;  /* "rewind" */
+      buf[pos]++;
+
+      while (!access (buf, F_OK)) /* count split parts */
+        {
+          buf[pos]++;
+          parts++;
+        }
+
+      if (parts > 1)
+        return parts;
     }
 
-  if (parts)
-    return parts + 1;
-
-  strcpy (buf, filename);
-  buf[strrcspn (buf, ".") - 1]--;
-  while (!access (buf, F_OK) && strcmp (buf, filename) != 0)
-    {
-      buf[strrcspn (buf, ".") - 1]--;
-      parts++;
-    }
-
-  if (parts)
-    return parts + 1;
-
-  strcpy (buf, filename);
-  buf[strrcspn (buf, ".") + 1]++;
-  while (!access (buf, F_OK) && strcmp (buf, filename) != 0)
-    {
-      buf[strrcspn (buf, ".") + 1]++;
-      parts++;
-    }
-
-  if (parts)
-    return parts + 1;
-
-  strcpy (buf, filename);
-  buf[strrcspn (buf, ".") + 1]--;
-  while (!access (buf, F_OK) && strcmp (buf, filename) != 0)
-    {
-      buf[strrcspn (buf, ".") + 1]--;
-      parts++;
-    }
-
-  return parts ? (parts + 1) : 0;
+  return 0;
 }
 
 
@@ -954,13 +937,10 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
 
     case UCON64_LS:
     default:
-if (!ucon64_testsplit (filename))
-{
       strftime (buf, 13, "%b %d %H:%M", localtime (&puffer->st_mtime));
       printf ("%-31.31s %10ld %s %s\n", mkprint(rominfo.name, ' '),
             (long) puffer->st_size, buf, ucon64.rom);
       fflush (stdout);
-      }
       break;
     }
   return 0;

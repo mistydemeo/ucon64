@@ -70,32 +70,31 @@ Patching
   --nppf        change PPF description; --rom=PATCHFILE --file=DESCRIPTION
   --idppf       change PPF FILE_ID.DIZ (v2.0); --rom=PATCHFILE
                   --file=FILE_ID.DIZ
-  --gge         encode GameGenie code; --rom=CODE
-                  example: --sms --rom=CODE or --gb --rom=CODE
+  --gge=CODE    encode and display Game Genie code
+                  example: --gge=CODE --sms or --gge=CODE --gb
                     CODE='AAAA:VV' or CODE='AAAA:VV:CC'
-                  --gen --rom=CODE
+                  --gge=CODE --gen
                     CODE='AAAAAA:VVVV'
-                  --nes --rom=CODE
+                  --gge=CODE --nes
                     CODE='AAAA:VV' or CODE='AAAA:VV:CC'
-                  --snes --rom=CODE
+                  --gge=CODE --snes
                     CODE='AAAAAA:VV'
-  --ggd         decode GameGenie code; --rom=GG_CODE
-                  example: --sms --rom=GG_CODE or --gb --rom=GG_CODE
+  --ggd=GG_CODE decode Game Genie code
+                  example: --ggd=GG_CODE --sms or --ggd=GG_CODE --gb
                     GG_CODE='XXX-XXX' or GG_CODE='XXX-XXX-XXX'
-                  --gen --rom=GG_CODE
+                  --ggd=GG_CODE --gen
                     GG_CODE='XXXX-XXXX'
-                  --nes --rom=GG_CODE
+                  --ggd=GG_CODE --nes
                     GG_CODE='XXXXXX' or GG_CODE='XXXXXXXX'
-                  --snes --rom=GG_CODE
+                  --ggd=GG_CODE --snes
                     GG_CODE='XXXX-XXXX'
-  --gg          apply GameGenie code (permanent); --file=GG_CODE
-                  example: (like above but --file=GG_CODE instead of
-                  --rom=GG_CODE) --rom=ROM --file=GG_CODE
+  --gg=GG_CODE  apply GameGenie code (permanently)
+                  example: like above but --rom is required
                   supported are:
                   GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance),
                   Sega Master System(II/III)/GameGear (Handheld),
                   Nintendo Entertainment System/NES/Famicom/Game Axe (Redant),
-                  and Super Nintendo Entertainment System/SNES/Super Famicom
+                  Super Nintendo Entertainment System/SNES/Super Famicom
 
 CD-Writer
   --cd          force recognition (of CD IMAGES)

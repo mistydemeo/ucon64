@@ -21,6 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SNES_H
 #define SNES_H
 
+#define SNES_HEADER_START 0x7fb0
+
 extern const char *snes_usage[];
 
 extern int snes_chk (st_rominfo_t *rominfo);

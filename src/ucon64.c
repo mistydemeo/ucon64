@@ -156,9 +156,9 @@ const struct option long_options[] = {
     {"gd3", 0, 0, UCON64_GD3},
     {"gdf", 0, 0, UCON64_GDF},
     {"gen", 0, 0, UCON64_GEN},
-    {"gg", 0, 0, UCON64_GG},
-    {"ggd", 0, 0, UCON64_GGD},
-    {"gge", 0, 0, UCON64_GGE},
+    {"gg", 1, 0, UCON64_GG},
+    {"ggd", 1, 0, UCON64_GGD},
+    {"gge", 1, 0, UCON64_GGE},
     {"gp32", 0, 0, UCON64_GP32},
     {"h", 0, 0, UCON64_HELP},
     {"help", 0, 0, UCON64_HELP},
@@ -923,14 +923,14 @@ ucon64_usage (int argc, char *argv[])
     "                  %s,\n"
 //    "                  %s,\n"
     "                  %s,\n"
-    "                  and %s\n",
+    "                  %s\n",
     gameboy_usage[0], sms_usage[0],
 //    genesis_usage[0],
     nes_usage[0], snes_usage[0]);
 
   printf ("\n"
     "%s\n", cdrw_usage[0]);
-  
+
   printf (
     "  " OPTION_LONG_S "cd          force recognition (of CD IMAGES)\n"
     "                  this is the support for the most CD-based consoles\n");

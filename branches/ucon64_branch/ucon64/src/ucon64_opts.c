@@ -292,6 +292,8 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XFALC:
     case UCON64_XFALS:
     case UCON64_XFALB:
+    case UCON64_XFIG:
+    case UCON64_XFIGS:
     case UCON64_XGBX:
     case UCON64_XGBXS:
     case UCON64_XGBXB:
@@ -1535,6 +1537,32 @@ ucon64_options (int c, const char *optarg)
           if (doctor64jr_read (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
+      printf ("\n");
+      break;
+
+    case UCON64_XFIG:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
+        fig_read_rom (ucon64.rom, ucon64.parport);
+      else
+        {
+          if (!ucon64.rominfo->buheader_len)
+            fprintf (stderr,
+                    "ERROR: This ROM has no header. Convert to a FIG compatible format.\n");
+          else if (ucon64.rominfo->interleaved)
+            fprintf (stderr,
+                    "ERROR: This ROM seems to be interleaved but the FIG doesn't support\n"
+                    "       interleaved ROMs. Convert to a FIG compatible format.\n");
+          else // file exists -> send it to the copier
+            fig_write_rom (ucon64.rom, ucon64.parport);
+        }
+      printf ("\n");
+      break;
+
+    case UCON64_XFIGS:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        fig_read_sram (ucon64.rom, ucon64.parport);
+      else
+        fig_write_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
       printf ("\n");
       break;
 

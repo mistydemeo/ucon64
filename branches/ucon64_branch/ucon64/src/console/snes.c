@@ -410,8 +410,10 @@ snes_convert_sramfile (const void *header)
 
   blocksize = fread (buf, 1, 32 * 1024, srcfile); // read 32 kB at max
   while (byteswritten < 32 * 1024 + SWC_HEADER_LEN)
-    {                                           // pad sram to 32.5 kB by
-      fwrite (buf, 1, blocksize, destfile);     //  repeating the SRAM data
+    {
+      // Pad SRAM to 32.5 kB by repeating the SRAM data. At least the SWC DX2
+      //  does something similar.
+      fwrite (buf, 1, blocksize, destfile);
       byteswritten += blocksize;
     }
 
@@ -431,8 +433,8 @@ snes_swcs (void)
   memset (&header, 0, SWC_HEADER_LEN);
   header.id1 = 0xaa;
   header.id2 = 0xbb;
-  header.type = 5;                              // size doesn't need to be set for the SWC
-
+  header.type = 5;                              // size needn't be set for the SWC
+                                                //  (SWC itself doesn't set it either)
   return snes_convert_sramfile (&header);
 }
 
@@ -524,7 +526,7 @@ set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header)
         }
 
       header[0x1d0] = bs_dump ? 0 : snes_header.country;
-      if (rominfo->header_start == SNES_HEADER_START + SNES_HIROM + 0x400000)
+      if (rominfo->header_start == SNES_HEADER_START + SNES_EHIROM)
         header[0x1d0] |= 0x30;
       else
         header[0x1d0] |= snes_hirom ? 0x20 : 0x10;
@@ -2495,9 +2497,11 @@ snes_init (st_rominfo_t *rominfo)
 
   // step 3.
   if (UCON64_ISSET (ucon64.snes_hirom))         // -hi, -ehi or -nhi option was specified
-    snes_hirom = ucon64.snes_hirom;
-  if (snes_hirom && size < (int) (SNES_HEADER_START + snes_hirom + SNES_HEADER_LEN))
-    snes_hirom = SNES_HIROM;                    // Don't let -ehi crash on a too small ROM
+    {
+      snes_hirom = ucon64.snes_hirom;
+      if (snes_hirom && size < (int) (SNES_HEADER_START + snes_hirom + SNES_HEADER_LEN))
+        snes_hirom = SNES_HIROM;                // Don't let -ehi crash on a too small ROM
+    }
 
   rominfo->header_start = SNES_HEADER_START + snes_hirom;
   rominfo->header_len = SNES_HEADER_LEN;

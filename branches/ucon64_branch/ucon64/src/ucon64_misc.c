@@ -51,6 +51,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <conio.h>                              // inp{w}() & outp{w}()
 #include "dlopen.h"
 #elif   defined __CYGWIN__
+#include <windows.h>                            // definition of WINAPI
+#undef  _WIN32
 #include "dlopen.h"
 #endif
 #endif // PARALLEL
@@ -471,6 +473,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XFALC, UCON64_GBA, fal_usage,        WF_STOP|WF_NO_ROM},
   {UCON64_XFALMULTI, UCON64_GBA, fal_usage,    WF_DEFAULT|WF_STOP}, // send only
   {UCON64_XFALS, UCON64_GBA, fal_usage,        WF_STOP|WF_NO_ROM},
+  {UCON64_XFIG, UCON64_SNES, fig_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XFIGS, UCON64_SNES, fig_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XGBX, UCON64_GB, gbx_usage,          WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_XGBXB, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_ROM},
   {UCON64_XGBXS, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_ROM},
@@ -1156,9 +1160,6 @@ ucon64_testpad (const char *filename)
 
 #ifdef  __i386__                                // GCC && x86
 inline static unsigned char
-#ifdef  __CYGWIN__
-__stdcall
-#endif
 i386_input_byte (unsigned short port)
 {
   unsigned char byte;
@@ -1185,9 +1186,6 @@ i386_input_word (unsigned short port)
 
 
 inline static void
-#ifdef  __CYGWIN__
-__stdcall
-#endif
 i386_output_byte (unsigned short port, unsigned char byte)
 {
   __asm__ __volatile__
@@ -1210,27 +1208,51 @@ i386_output_word (unsigned short port, unsigned short word)
 #endif // __i386__
 
 
+#if     defined _WIN32 || defined __CYGWIN__
+void *io_driver;
+
+// inpout32.dll only has I/O functions for byte-sized I/O
+unsigned char (__stdcall *Inp32) (unsigned short) = NULL;
+void (__stdcall *Outp32) (unsigned short, unsigned char) = NULL;
+
+unsigned char inpout32_input_byte (unsigned short port) { return Inp32 (port); }
+void inpout32_output_byte (unsigned short port, unsigned char byte) { Outp32 (port, byte); }
+
+// io.dll has more functions then the ones we refer to here, but we don't need them
+char (WINAPI *PortIn) (short int) = NULL;
+short int (WINAPI *PortWordIn) (short int) = NULL;
+void (WINAPI *PortOut) (short int, char) = NULL;
+void (WINAPI *PortWordOut) (short int, short int) = NULL;
+short int (WINAPI *IsDriverInstalled) () = NULL;
+
+unsigned char io_input_byte (unsigned short port) { return PortIn (port); }
+unsigned short io_input_word (unsigned short port) { return PortWordIn (port); }
+void io_output_byte (unsigned short port, unsigned char byte) { PortOut (port, byte); }
+void io_output_word (unsigned short port, unsigned short word) { PortWordOut (port, word); }
+
 #if     defined _WIN32
 // The following four functions are needed because inp{w} and outp{w} seem to be macros
-// __stdcall is used, because the functions in inpout32.dll also use that attribute
-unsigned char __stdcall inp_func (unsigned short port) { return (unsigned char) inp (port); }
+unsigned char inp_func (unsigned short port) { return (unsigned char) inp (port); }
 unsigned short inpw_func (unsigned short port) { return inpw (port); }
-void __stdcall outp_func (unsigned short port, unsigned char byte) { outp (port, byte); }
+void outp_func (unsigned short port, unsigned char byte) { outp (port, byte); }
 void outpw_func (unsigned short port, unsigned short word) { outpw (port, word); }
 
-void *inpout32;
-unsigned char (__stdcall *input_byte) (unsigned short) = inp_func;
+// default to functions which are always available (but which generate an
+//  exception without a "driver" such as UserPort)
+unsigned char (*input_byte) (unsigned short) = inp_func;
 unsigned short (*input_word) (unsigned short) = inpw_func;
-void (__stdcall *output_byte) (unsigned short, unsigned char) = outp_func;
+void (*output_byte) (unsigned short, unsigned char) = outp_func;
 void (*output_word) (unsigned short, unsigned short) = outpw_func;
 
 #elif   defined __CYGWIN__
-void *inpout32;
-unsigned char (__stdcall *input_byte) (unsigned short) = i386_input_byte;
+// default to functions which are always available (but which generate an
+//  exception without a "driver" such as UserPort)
+unsigned char (*input_byte) (unsigned short) = i386_input_byte;
 unsigned short (*input_word) (unsigned short) = i386_input_word;
-void (__stdcall *output_byte) (unsigned short, unsigned char) = i386_output_byte;
+void (*output_byte) (unsigned short, unsigned char) = i386_output_byte;
 void (*output_word) (unsigned short, unsigned short) = i386_output_word;
 #endif
+#endif // defined _WIN32 || defined __CYGWIN__
 
 
 #if     defined __BEOS__ || defined AMIGA
@@ -1403,32 +1425,82 @@ ucon64_parport_init (unsigned int port)
 
 #if     defined _WIN32 || defined __CYGWIN__
   /*
-    We support the I/O port driver inpout32.dll, because using that file is way
-    easier than using UserPort or GiveIO. inpout32.dll is also more reliable
-    and seems to enable access to all I/O ports (at least it's *very* easy to
-    crash Windows XP ;-) The only downside is that it's almost two times slower
-    than UserPort...
+    We support the I/O port drivers inpout32.dll and io.dll, because using them
+    is way easier than using UserPort or GiveIO. The drivers are also more
+    reliable and seem to enable access to all I/O ports (at least it's *very*
+    easy to crash Windows XP ;-) The only downside to inpout32.dll is that it's
+    almost two times slower than UserPort...
   */
   char fname[FILENAME_MAX];
-  sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, "inpout32.dll");
+  int driver_found = 0;
+  
+  sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, "io.dll");
 #if 0 // We must not do this for Cygwin or access() won't "find" the file
   change_mem (fname, strlen (fname), "/", 1, 0, 0, "\\", 1, 0);
 #endif
   if (access (fname, F_OK) == 0)
     {
-      printf ("Using %s\n", fname);
-      inpout32 = open_module (fname);
-      // note that inport_word and output_word keep their default value...
-      input_byte = 
+      io_driver = open_module (fname);
+
+      IsDriverInstalled = 
 #ifdef  __cplusplus // this is really nice: gcc wants something else than g++...
-                   (unsigned char (__stdcall *) (unsigned short))
+                          (short int (WINAPI *) ())
 #endif
-                   get_symbol (inpout32, "Inp32");
-      output_byte =
+                          get_symbol (io_driver, "IsDriverInstalled");
+      if (IsDriverInstalled ())
+        {
+          driver_found = 1;
+          printf ("Using %s\n", fname);
+
+          PortIn = 
 #ifdef  __cplusplus
-                    (void (__stdcall *) (unsigned short, unsigned char))
+                   (char (WINAPI *) (short int))
 #endif
-                    get_symbol (inpout32, "Out32");
+                   get_symbol (io_driver, "PortIn");
+          PortWordIn = 
+#ifdef  __cplusplus
+                       (short int (WINAPI *) (short int))
+#endif
+                       get_symbol (io_driver, "PortWordIn");
+          PortOut =
+#ifdef  __cplusplus
+                    (void (WINAPI *) (short int, char))
+#endif
+                    get_symbol (io_driver, "PortOut");
+          PortWordOut =
+#ifdef  __cplusplus
+                        (void (WINAPI *) (short int, short int))
+#endif
+                        get_symbol (io_driver, "PortWordOut");
+          input_byte = io_input_byte;
+          input_word = io_input_word;
+          output_byte = io_output_byte;
+          output_word = io_output_word;
+        }
+    }
+
+  if (!driver_found)
+    {
+      sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, "inpout32.dll");
+      if (access (fname, F_OK) == 0)
+        {
+          driver_found = 1;
+          printf ("Using %s\n", fname);
+          io_driver = open_module (fname);
+          Inp32 = 
+#ifdef  __cplusplus
+                  (unsigned char (__stdcall *) (unsigned short))
+#endif
+                  get_symbol (io_driver, "Inp32");
+          Outp32 =
+#ifdef  __cplusplus
+                   (void (__stdcall *) (unsigned short, unsigned char))
+#endif
+                   get_symbol (io_driver, "Out32");
+          // note that inport_word and output_word keep their default value...
+          input_byte = inpout32_input_byte;
+          output_byte = inpout32_output_byte;
+        }
     }
 #endif // _WIN32 || __CYGWIN__
 

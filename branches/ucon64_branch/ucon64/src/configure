@@ -845,7 +845,7 @@ Optional Features:
   --enable-debug          enable debug output (default: no)
   --enable-parallel       enable support for parallel port backup units
                           (default: yes)
-  --enable-gui            enable Gui (default: no)
+  --enable-gui            enable GUI (default: no)
   --enable-discmage       enable libdiscmage (default: yes)
   --enable-dload          enable dynamic loading of add-on libraries (default:
                           yes)
@@ -1282,11 +1282,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-          ac_config_headers="$ac_config_headers config.h"
+                              ac_config_headers="$ac_config_headers config.h libnetgui/config.h libdiscmage/config.h"
 
 
 
-CFLAGS="-I. -Wall -W -O3"
+CFLAGS="-Wall -W -O3"
 LDFLAGS=-s
 
 ac_ext=c
@@ -2296,8 +2296,8 @@ echo "${ECHO_T}$enable_parallel" >&6
 
 
 
-echo "$as_me:$LINENO: checking whether Gui is enabled" >&5
-echo $ECHO_N "checking whether Gui is enabled... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking whether GUI is enabled" >&5
+echo $ECHO_N "checking whether GUI is enabled... $ECHO_C" >&6
 # Check whether --enable-gui or --disable-gui was given.
 if test "${enable_gui+set}" = set; then
   enableval="$enable_gui"
@@ -4532,6 +4532,8 @@ do
   "libdiscmage/Makefile" ) CONFIG_FILES="$CONFIG_FILES libdiscmage/Makefile" ;;
   "libnetgui/Makefile" ) CONFIG_FILES="$CONFIG_FILES libnetgui/Makefile" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
+  "libnetgui/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS libnetgui/config.h" ;;
+  "libdiscmage/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS libdiscmage/config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;

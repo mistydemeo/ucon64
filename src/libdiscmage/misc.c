@@ -47,6 +47,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <OS.h>                                 // snooze(), microseconds
 // Include OS.h before misc.h, because OS.h includes StorageDefs.h which
 //  includes param.h which unconditionally defines MIN and MAX.
+#elif   defined(AMIGA)
+#include <dos/dos.h>
+#include <dos/var.h>
+#include <proto/dos.h>
+#include <unistd.h>
 #elif   defined _WIN32
 #include <windows.h>                            // Sleep(), milliseconds
 #endif
@@ -407,7 +412,7 @@ fprintf2 (FILE *file, const char *format, ...)
     n_chars = vfprintf (file, format, argptr);
   else
     n_chars = vprintf2 (format, argptr);
-  va_end (argptr);      
+  va_end (argptr);
   return n_chars;
 }
 #endif // defined _WIN32 && defined ANSI_COLOR
@@ -910,6 +915,7 @@ dirname2 (const char *path)
 
 #ifndef HAVE_REALPATH
 #undef realpath
+#if !defined(AMIGA)
 char *
 realpath (const char *path, char *full_path)
 {
@@ -1105,9 +1111,10 @@ realpath (const char *path, char *full_path)
   return full_path;
 #endif // _WIN32
 }
+#endif //AMIGA
 #endif
 
-
+#if !defined(AMIGA)
 char *
 realpath2 (const char *path, char *full_path)
 // enhanced realpath() which returns the absolute path of a file
@@ -1132,7 +1139,7 @@ realpath2 (const char *path, char *full_path)
 
   return realpath (path2, full_path);
 }
-
+#endif //AMIGA
 
 int
 one_file (const char *filename1, const char *filename2)
@@ -1885,7 +1892,7 @@ getenv2 (const char *variable)
 #if     defined __MSDOS__ || defined __CYGWIN__
           /*
             DJGPP and (yet another) Cygwin quirck
-            A trailing backslash is used to check for a directory. Normally 
+            A trailing backslash is used to check for a directory. Normally
             DJGPP's runtime system is able to handle forward slashes in paths,
             but access() won't differentiate between files and dirs if a
             forward slash is used. Cygwin's runtime system seems to handle
@@ -1895,8 +1902,8 @@ getenv2 (const char *variable)
           if (access ("\\tmp\\", R_OK | W_OK) == 0)
 #else
           // trailing file separator to force it to be a directory
-          if (access (FILE_SEPARATOR_S"tmp"FILE_SEPARATOR_S, R_OK | W_OK) == 0) 
-#endif  
+          if (access (FILE_SEPARATOR_S"tmp"FILE_SEPARATOR_S, R_OK | W_OK) == 0)
+#endif
             strcpy (value, FILE_SEPARATOR_S"tmp");
           else
             getcwd (value, FILENAME_MAX);
@@ -2131,11 +2138,13 @@ static tty_t oldtty, newtty;
 void
 set_tty (tty_t *param)
 {
+	#if !defined(AMIGA)
   if (stdin_tty && tcsetattr (STDIN_FILENO, TCSANOW, param) == -1)
     {
       fprintf (stderr, "ERROR: Could not set tty parameters\n");
       exit (100);
     }
+	#endif //AMIGA
 }
 
 
@@ -2147,6 +2156,7 @@ set_tty (tty_t *param)
 void
 init_conio (void)
 {
+	#if !defined(AMIGA)
   if (!isatty (STDIN_FILENO))
     {
       stdin_tty = 0;
@@ -2173,17 +2183,20 @@ init_conio (void)
   newtty.c_cc[VTIME] = 0;                       //  block (wait for input)
 
   set_tty (&newtty);
+	#endif //AMIGA
 }
 
 
 void
 deinit_conio (void)
 {
+	#if !defined(AMIGA)
   if (oldtty_set)
     {
       tcsetattr (STDIN_FILENO, TCSAFLUSH, &oldtty);
       oldtty_set = 0;
     }
+	#endif //AMIGA
 }
 
 
@@ -2367,10 +2380,12 @@ wait2 (int nmillis)
 {
 #ifdef  __MSDOS__
   delay (nmillis);
-#elif   defined __unix__ || defined AMIGA
+#elif   defined __unix__
   usleep (nmillis * 1000);
 #elif   defined __BEOS__
   snooze (nmillis * 1000);
+#elif   defined(AMIGA)
+  Delay(nmillis * 1000);
 #elif   defined _WIN32
   Sleep (nmillis);
 #else
@@ -2732,3 +2747,102 @@ argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
 
   return argc;
 }
+
+#if defined(AMIGA)
+int truncate(const char *path, off_t size)
+{
+	/* for the time being we don't do anything*/
+	return 0;
+}
+
+int chmod(const char *path, mode_t mode)
+{
+	if(!SetProtection((STRPTR)path,((mode&S_IRUSR?0:FIBF_READ)|
+																	(mode&S_IWUSR?0:FIBF_WRITE|FIBF_DELETE)|
+																	(mode&S_IXUSR?0:FIBF_EXECUTE)|
+																	(mode&S_IRGRP?FIBF_GRP_READ:0)|
+                                  (mode&S_IWGRP?FIBF_GRP_WRITE|FIBF_GRP_DELETE:0)|
+                                  (mode&S_IXGRP?FIBF_GRP_EXECUTE:0)|
+                                  (mode&S_IROTH?FIBF_OTR_READ:0)|
+                                  (mode&S_IWOTH?FIBF_OTR_WRITE|FIBF_OTR_DELETE:0)|
+                                  (mode&S_IXOTH?FIBF_OTR_EXECUTE:0))))
+  	return -1;
+	return 0;
+}
+
+void sync (void)
+{
+	/* for the time being we don't do anything*/
+}
+
+int readlink(const char *path, char *buf, int bufsize)
+{
+	/* always return -1 as if anything passed to it isn't a soft link */
+	return -1;
+}
+
+char *realpath (const char *path, char *full_path)
+{
+	return full_path;
+}
+
+char *realpath2 (const char *src, char *full_path)
+// clone of realpath() which returns the absolute path of a file
+{
+  char path1[FILENAME_MAX], path2[FILENAME_MAX];
+
+  if (src[0] == '~')
+    {
+      if (src[1] == FILE_SEPARATOR)
+        {
+          strcpy (path1, getenv2 ("HOME"));
+          strcpy (path2, &src[2]);
+          sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
+        }
+      else if (src[1] == 0)
+        strcpy (full_path, getenv2 ("HOME"));
+    }
+  else
+    strcpy (full_path, src);
+
+  return full_path;
+}
+
+char *_getenv(const char *name)
+{
+
+	static char *var;
+  size_t len,i;
+
+  var = NULL;
+  i = 0;
+
+  do
+  {
+  	i+=256;
+    if(var!=NULL) // free old buffer
+      free(var);
+    var=malloc(i); // and get a new one
+    if(var==NULL) // Oh, dear
+      return NULL;
+    len=GetVar((char *)name,var,i,GVF_BINARY_VAR)+1;
+  }while(len>=i); // just to be sure we got everything, we _require_ 1 unused byte
+  if(len==0) // Variable doesn't exist
+    return NULL;
+  else
+    return var;
+/*
+    static char *buffer;
+
+    buffer = NULL;
+
+    if(GetVar(name,buffer,sizeof(buffer),GVF_BINARY_VAR)<0)
+    	return(NULL);
+    else
+    	return(buffer);
+
+	return(NULL);
+*/
+}
+#endif //AMIGA
+

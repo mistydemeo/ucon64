@@ -43,8 +43,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  PARALLEL
 #if     defined __linux__ && defined __GLIBC__
 #include <sys/io.h>                             // ioperm() (glibc)
-#elif   defined __BEOS__ || defined AMIGA || defined __FreeBSD__
+#elif   defined __BEOS__ || defined __FreeBSD__
 #include <fcntl.h>
+#elif defined(AMIGA)
+#include <fcntl.h>
+#include <exec/types.h>
+#include <dos/dos.h>
+#include <dos/var.h>
+#include <exec/io.h>
+#include <exec/ports.h>
+#include <devices/parallel.h>
 #elif   defined _WIN32
 #include <conio.h>                              // inp{w}() & outp{w}()
 #include "dlopen.h"
@@ -892,6 +900,16 @@ typedef struct st_ioport
 } st_ioport_t;
 
 static int ucon64_io_fd;
+#if   defined(AMIGA)
+	struct IOStdReq *parIO;
+	struct MsgPort *parPort;
+	char *pardev;
+	char *pardev2;
+	char *parnum;
+	int parnum2;
+	ULONG WaitMask;
+	ULONG Temp;
+#endif //AMIGA
 #endif
 
 
@@ -1357,7 +1375,14 @@ void (*output_word) (unsigned short, unsigned short) = outpw_func;
 void
 close_io_port (void)
 {
-  close (ucon64_io_fd);
+	#if   defined(AMIGA)
+	  CloseDevice((struct IORequest *)parIO);
+		DeleteExtIO((struct IOExtPar *)parIO);
+		DeletePort(parPort);
+		parIO = NULL;
+	#else
+    close (ucon64_io_fd);
+	#endif
 }
 #endif
 
@@ -1365,13 +1390,31 @@ close_io_port (void)
 unsigned char
 inportb (unsigned short port)
 {
-#if     defined __BEOS__ || defined AMIGA
+#if     defined __BEOS__
   st_ioport_t temp;
 
   temp.port = port;
   ioctl (ucon64_io_fd, 'r', &temp, 0);
 
   return temp.data8;
+#elif defined(AMIGA)
+	st_ioport_t temp;
+	temp.port = port;
+
+	WaitMask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << parPort->mp_SigBit;
+
+	parIO->io_Length = (sizeof(temp.data8));
+
+	parIO->io_Data = temp.data8;
+	parIO->io_Command = CMD_READ;
+
+	SendIO((struct IORequest *)parIO);
+
+	if(Wait(WaitMask) & (SIGBREAKF_CTRL_C|SIGBREAKF_CTRL_F))
+		AbortIO((struct IORequest *)parIO);
+	WaitIO((struct IORequest *)parIO);
+
+	return temp.data8;
 #elif   defined _WIN32 || defined __CYGWIN__
   return input_byte (port);
 #elif   defined __i386__
@@ -1383,13 +1426,31 @@ inportb (unsigned short port)
 unsigned short
 inportw (unsigned short port)
 {
-#if     defined __BEOS__ || defined AMIGA
+#if     defined __BEOS__
   st_ioport_t temp;
 
   temp.port = port;
   ioctl (ucon64_io_fd, 'r16', &temp, 0);
 
   return temp.data16;
+#elif   defined(AMIGA)
+	st_ioport_t temp;
+	temp.port = port;
+
+	WaitMask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << parPort->mp_SigBit;
+
+	parIO->io_Length = (sizeof(temp.data16));
+
+ 	parIO->io_Data = temp.data16;
+	parIO->io_Command = CMD_READ;
+
+	SendIO((struct IORequest *)parIO);
+
+  if(Wait(WaitMask) & (SIGBREAKF_CTRL_C|SIGBREAKF_CTRL_F))
+		AbortIO((struct IORequest *)parIO);
+	WaitIO((struct IORequest *) parIO);
+
+	return temp.data16;
 #elif   defined _WIN32 || defined __CYGWIN__
   return input_word (port);
 #elif   defined __i386__
@@ -1401,12 +1462,30 @@ inportw (unsigned short port)
 void
 outportb (unsigned short port, unsigned char byte)
 {
-#if     defined __BEOS__ || defined AMIGA
+#if     defined __BEOS__
   st_ioport_t temp;
 
   temp.port = port;
   temp.data8 = byte;
   ioctl (ucon64_io_fd, 'w', &temp, 0);
+#elif   defined(AMIGA)
+	 st_ioport_t temp;
+
+  temp.port = port;
+  temp.data8 = byte;
+
+  WaitMask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << parPort->mp_SigBit;
+
+	parIO->io_Length = (sizeof(temp.data8));
+
+	parIO->io_Data = temp.data8;
+	parIO->io_Command = CMD_WRITE;
+
+	SendIO((struct IORequest *)parIO);
+
+	if(Wait(WaitMask) & (SIGBREAKF_CTRL_C|SIGBREAKF_CTRL_F))
+		AbortIO((struct IORequest *)parIO);
+  WaitIO((struct IORequest *)parIO);
 #elif   defined _WIN32 || defined __CYGWIN__
   output_byte (port, byte);
 #elif   defined __i386__
@@ -1418,12 +1497,31 @@ outportb (unsigned short port, unsigned char byte)
 void
 outportw (unsigned short port, unsigned short word)
 {
-#if     defined __BEOS__ || defined AMIGA
+#if     defined __BEOS__
   st_ioport_t temp;
 
   temp.port = port;
   temp.data16 = word;
   ioctl (ucon64_io_fd, 'w16', &temp, 0);
+#elif   defined(AMIGA)
+	st_ioport_t temp;
+
+  temp.port = port;
+  temp.data16 = word;
+
+  WaitMask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << parPort->mp_SigBit;
+
+	parIO->io_Length = (sizeof(temp.data16));
+
+	parIO->io_Data = temp.data16;
+	parIO->io_Command = CMD_WRITE;
+
+	SendIO((struct IORequest *)parIO);
+
+	if( Wait(WaitMask) & (SIGBREAKF_CTRL_C|SIGBREAKF_CTRL_F) )
+    AbortIO((struct IORequest *)parIO);
+
+  WaitIO((struct IORequest *)parIO);
 #elif   defined _WIN32 || defined __CYGWIN__
   output_word (port, word);
 #elif   defined __i386__
@@ -1481,13 +1579,42 @@ ucon64_parport_init (unsigned int port)
                   "         http://ucon64.sourceforge.net\n\n");
         }
     }
-#elif   defined AMIGA
-  ucon64_io_fd = open (ucon64.parport_dev, O_RDWR | O_NONBLOCK);
-  if (ucon64_io_fd == -1)
-    {
-      fprintf (stderr, "ERROR: Could not open parallel port (%s)\n", ucon64.parport_dev);
-      exit (1);
-    }
+#elif   defined(AMIGA)
+	parPort = CreatePort(NULL, 0);
+	if(parPort == NULL)
+	{
+		fprintf(stderr,"ERROR: Could not create the MsgPort\n");
+		exit(1);
+	}
+ 	parIO = CreateExtIO(parPort, sizeof(struct IOExtPar));
+	if(parIO == NULL)
+ 	{
+		fprintf(stderr, "ERROR: Could not create the parIO Request\n");
+		DeletePort(parPort);
+		parIO=NULL;
+ 		exit(1);
+	}
+
+	ucon64_io_fd = OpenDevice(ucon64.parport_dev?ucon64.parport_dev:"parallel.device", ucon64.parport, (struct IORequest *)parIO, (ULONG)0);
+
+  if (ucon64_io_fd != NULL)
+  {
+    fprintf(stderr, "ERROR: Could not open parallel port\n");
+		DeleteExtIO((struct IOExtPar *)parIO);
+		DeletePort(parPort);
+    exit (1);
+  }
+
+  if ( atexit (close_io_port) == -1)
+  {
+		AbortIO((struct IORequest *) parIO);
+    CloseDevice((struct IORequest *) parIO);
+		DeleteExtIO(parIO);
+		DeletePort(parPort);
+		parIO = NULL;
+    fprintf (stderr, "ERROR: Could not register function with atexit()\n");
+    exit(1);
+  }
 #elif   defined __FreeBSD__
   ucon64_io_fd = open ("/dev/io", O_RDWR);
   if (ucon64_io_fd == -1)
@@ -1497,7 +1624,7 @@ ucon64_parport_init (unsigned int port)
       exit (1);
     }
 #endif
-#if     defined __BEOS__ || defined AMIGA || defined __FreeBSD__
+#if     defined __BEOS__ || defined __FreeBSD__
   if (atexit (close_io_port) == -1)
     {
       close (ucon64_io_fd);
@@ -1752,10 +1879,12 @@ ucon64_configfile (void)
                    "#\n"
                    "# parallel port\n"
                    "#\n"
-#ifdef  AMIGA
-                   "#parport_dev=PAR:\n"
-#endif
+#if defined(AMIGA)
+                   "#parport_dev=parallel.device\n"
+									 "#parport=0\n"
+#else
                    "#parport=378\n"
+#endif
                    "#\n"
 #if     defined __MSDOS__
                    "discmage_path=~\\discmage.dxe\n" // realpath2() expands the tilde

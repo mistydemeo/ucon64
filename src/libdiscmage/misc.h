@@ -72,6 +72,7 @@ typedef unsigned long long int uint64_t;
 #else
 typedef unsigned __int64 uint64_t;
 #endif
+#if !defined(__BIT_TYPES_DEFINED__) //AMIGA Only?
 typedef signed char int8_t;
 typedef signed short int int16_t;
 typedef signed int int32_t;
@@ -80,6 +81,7 @@ typedef signed long long int int64_t;
 #else
 typedef signed __int64 int64_t;
 #endif
+#endif //__BIT_TYPES_DEFINED__
 #endif // OWN_INTTYPES
 #endif
 
@@ -147,9 +149,9 @@ typedef signed __int64 int64_t;
   #define CURRENT_OS_S "BeOS"
 #elif   defined AMIGA
   #if defined __PPC__
-    #define CURRENT_OS_S "Amiga (ppc)"
+    #define CURRENT_OS_S "AmigaPPC"
   #else
-    #define CURRENT_OS_S "Amiga (68k)"
+    #define CURRENT_OS_S "Amiga"
   #endif
 #else
   #define CURRENT_OS_S "?"
@@ -185,6 +187,9 @@ typedef signed __int64 int64_t;
 
 #if     ((defined __unix__ || defined __BEOS__) && !defined __MSDOS__)
 // Cygwin, GNU/Linux, Solaris, FreeBSD, BeOS
+#define FILE_SEPARATOR '/'
+#define FILE_SEPARATOR_S "/"
+#elif defined(AMIGA) //just for safety in case it will have to be changed later on.
 #define FILE_SEPARATOR '/'
 #define FILE_SEPARATOR_S "/"
 #else // DJGPP, Win32

@@ -1098,7 +1098,8 @@ ucon64_usage (int argc, char *argv[])
 #endif
 
   printf (
-    "Usage: %s [OPTION]... [" OPTION_LONG_S "rom=][ROM]... [[" OPTION_LONG_S "file=]FILE]" /* [-o=OUTPUT_PATH] */ "\n\n"
+    "Usage: %s [SWITCH]... [OPTION]... [" OPTION_LONG_S "rom=][ROM]... [[" OPTION_LONG_S "file=]FILE]" /* [-o=OUTPUT_PATH] */ "\n\n"
+    "Switches\n"
     "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
     ANSI_COLOR_MSG
     "  " OPTION_LONG_S "hdn=N       force ROM has backup unit/emulator header with N Bytes size\n"
@@ -1110,6 +1111,8 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "dint        convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
     "                  this differs from the SNES & NES " OPTION_LONG_S "dint option\n"
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
+    "\n"
+    "Options\n"
     "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
     "  " OPTION_LONG_S "crc         show CRC32 value of ROM; this will also force calculation for\n"
     "                  files bigger than %d Bytes (%.4f Mb)\n"

@@ -261,7 +261,7 @@ const char *channelf_usage[] =
 
 const char *odyssey_usage[] =
   {
-    "Odyssey",
+    "Magnavox Odyssey",
     "1972 Ralph Baer (USA)",
     NULL,
     NULL,
@@ -1147,24 +1147,34 @@ ucon64_e (const char *romfile)
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
   const char *property;
 
-  x = 0;
-  while (options[x].name)
-    {
-      if (options[x].val == ucon64.console)
-      {
-        sprintf (buf3, "emulate_%s", options[x].name);
-        break;
-      }
-      x++;
-    }
-
   if (access (ucon64.configfile, F_OK) != 0)
     {
       fprintf (stderr, "ERROR: %s does not exist\n", ucon64.configfile);
       return -1;
     }
 
+  sprintf (buf3, "emulate_%08x", ucon64.crc32);
+
   property = get_property (ucon64.configfile, buf3, buf2, NULL);   // buf2 also contains property value
+  if (property == NULL)
+    {
+      sprintf (buf3, "emulate_0x%08x", ucon64.crc32);
+
+      property = get_property (ucon64.configfile, buf3, buf2, NULL);   // buf2 also contains property value
+    }
+
+  if (property == NULL)
+    {
+      for (x = 0; options[x].name; x++)
+        if (options[x].val == ucon64.console)
+          {
+            sprintf (buf3, "emulate_%s", options[x].name);
+            break;
+          }
+
+      property = get_property (ucon64.configfile, buf3, buf2, NULL);   // buf2 also contains property value
+    }
+
   if (property == NULL)
     {
       fprintf (stderr, "ERROR: Could not find the correct settings (%s) in\n"
@@ -1423,6 +1433,11 @@ ucon64_configfile (void)
 #endif
                  "#\n"
                  "# emulate_<console shortcut>=<emulator with options>\n"
+                 "#\n"
+                 "# You can also use CRC32 values for ROM specific emulation options:\n"
+                 "#\n"
+                 "# emulate_0x<crc32>=<emulator with options>\n"
+                 "# emulate_<crc32>=<emulator with options>\n"
                  "#\n"
                  "emulate_gb=vgb -sound -sync 50 -sgb -scale 2\n"
                  "emulate_gen=dgen -f -S 2\n"

@@ -77,42 +77,41 @@ extern st_dm_usage_t *dm_get_usage (void);
 */
 typedef struct
 {
+  uint32_t track_length;
+
+#if 1
   uint16_t global_current_track;  // current track
   uint16_t number;
   uint32_t position;
-  uint32_t mode;
-  uint32_t sector_size;
   uint32_t sector_size_value;
-  uint32_t track_length;
   uint32_t pregap_length;
   uint32_t total_length;
   uint32_t start_lba;
   uint32_t filename_length;
+#endif
 
+  uint32_t mode;
+  uint32_t sector_size;
   uint32_t seek_header;
   uint32_t seek_ecc;
-
 } dm_track_t;
 
 
-// this struct contains all important data and is init'ed by dm_open()
 typedef struct
 {
-/*
-  image nfo
-*/
-  uint32_t header_offset;
-  uint32_t header_position;
+  int type; // image type DM_CDI, DM_NRG, DM_BIN, ...
+  char *desc; // like type but verbal
+
   uint32_t image_length;
-  uint32_t version;
+
   uint16_t sessions;      // # of sessions
   uint16_t tracks;        // # of tracks
-  uint16_t remaining_sessions;    // sessions left
-  uint16_t remaining_tracks;      // tracks left
-  uint16_t global_current_session;        // current session
 
-//  dm_track_t **track; // TODO make an array of this
+//  dm_track_t **track; // TODO make an array of this(!)
   dm_track_t *track;
+
+  char layout[80];
+  char layout_ansi[32768]; // TODO: 32768
 
 /*
   workflow
@@ -124,9 +123,8 @@ typedef struct
   int track_type, save_as_iso, pregap,convert, fulldata, cutall, cutfirst;
   char do_convert, do_cut;
 
-  int type;
-  char *common;
-  char *cdrdao;
+//  char *common;
+//  char *cdrdao;
 } dm_image_t;
 
 
@@ -180,29 +178,44 @@ extern int get_num_of_tracks(void);
       {
         printf ("%d of %d done", pos, total);
       }
-
-  dm_bin2iso()  convert M2/2048 image to M1/2048
-  dm_cdirip()   rip tracks from cdi image
-TODO:  dm_nrgrip()  rip tracks from nero image
-TODO:  dm_rip()     rip files from track
-TODO:  dm_cdi2nero() <- this will become dm_neroadd()
-TODO:  dm_isofix()   fix an iso image
-TODO:  dm_cdifix()   fix a cdi image
-
-  dm_mktoc()  automagically generates toc sheets
-  dm_mkcue()  automagically generates cue sheets
 */
-extern int dm_bin2iso (const char *fname, void (* gauge) (int, int));
+extern void dm_set_gauge (void (* gauge) (int, int));
+
+
+/*
+  dm_bin2iso() convert binary Mx/xxxx image to M1/2048
+  dm_cdirip()  rip tracks from cdi image
+TODO:  dm_nrgrip()  rip tracks from nero image
+TODO:  dm_rip()  rip files from track
+TODO:  dm_cdi2nero() <- this will become dm_neroadd()
+  dm_isofix()  ISO start LBA fixing routine
+ 
+               This tool will take an ISO image with PVD pointing
+               to bad DR offset and add padding data so actual DR
+               gets located in right absolute address.
+
+               Original boot area, PVD, SVD and VDT are copied to
+               the start of new, fixed ISO image.
+
+               Supported input images are: 2048, 2336,
+               2352 and 2056 bytes per sector. All of them are
+               converted to 2048 bytes per sector when writing
+               excluding 2056 image which is needed by Mac users.
+
+TODO:  dm_cdifix()  fix a cdi image
+
+  dm_mktoc()   automagically generates toc sheets
+  dm_mkcue()   automagically generates cue sheets
+*/
+extern int dm_bin2iso (dm_image_t *image);
 extern int dm_cdirip (dm_image_t *image);
 extern int dm_nrgrip (dm_image_t *image);
 extern int dm_rip (dm_image_t *image);
 extern int dm_cdi2nero (dm_image_t *image);
-extern int dm_isofix (dm_image_t *image);
+extern int dm_isofix (dm_image_t *image, int start_lba);
 //extern int dm_cdifix (dm_image_t *image);
 extern int dm_mktoc (dm_image_t *image);
 extern int dm_mkcue (dm_image_t *image);
-extern int dm_mksheets (dm_image_t *image);
-//#define dm_mksheets(i) (MIN(dm_mktoc(i),dm_mkcue(i)))
 
 
 /*

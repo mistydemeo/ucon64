@@ -105,13 +105,8 @@ typedef struct
 // TODO?: rename to fname
   const char *rom;                              // ROM (cmdline) with path
 
-/* 
-  force fname output format for --rrom, --rename, etc...
-  fname_len == 1 -> 8.3
-  fname_len == 2 -> 63.x
-*/ 
-  int fname_len;
-
+  int fname_len;                                // force fname output format for --rrom, --rename, etc...
+        // fname_len can be UCON64_83 (8.3) or UCON64_FORCE63 (63.x)
   char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
   int file_size;                                // (uncompressed) ROM file size
   unsigned int crc32;                           // crc32 value of ROM (used for DAT files)

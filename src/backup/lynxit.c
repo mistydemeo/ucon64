@@ -1,7 +1,8 @@
 /*
 lynxit.c - lynxit support for uCON64
 
-written by 2002 NoisyB (noisyb@gmx.net)
+written by 1997 - ? K. Wilkins
+           2002     NoisyB (noisyb@gmx.net)
 
 
 This program is free software; you can redistribute it and/or modify

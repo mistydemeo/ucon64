@@ -877,7 +877,7 @@ genesis_init (st_rominfo_t *rominfo)
   else
     result = -1;
 
-  if (ucon64.console == UCON64_GENESIS)
+  if (ucon64.console == UCON64_GEN)
     result = 0;
 
   rominfo->header_start = GENESIS_HEADER_START;

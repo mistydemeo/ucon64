@@ -38,6 +38,7 @@ write programs in C
 #include <time.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <limits.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -99,13 +100,14 @@ const struct option options[] = {
     {"b0", 1, 0, UCON64_B0},
     {"b1", 1, 0, UCON64_B1},
     {"bat", 0, 0, UCON64_BAT},
+    {"bin2iso", 0, 0, UCON64_BIN2ISO},
     {"bios", 1, 0, UCON64_BIOS},
     {"bot", 1, 0, UCON64_BOT},
     {"bs", 0, 0, UCON64_BS},
     {"c", 1, 0, UCON64_C},
 //    {"cd32", 0, 0, UCON64_CD32},
 //    {"cdi", 0, 0, UCON64_CDI},
-    {"cdirip", 0, 0, UCON64_CDIRIP},
+//    {"cdirip", 0, 0, UCON64_CDIRIP},
     {"chk", 0, 0, UCON64_CHK},
     {"cmnt", 1, 0, UCON64_CMNT},                // will be active only if UNIF_REVISION > 7
     {"col", 1, 0, UCON64_COL},
@@ -161,6 +163,7 @@ const struct option options[] = {
     {"int2", 0, 0, UCON64_INT2},
     {"intelli", 0, 0, UCON64_INTELLI},
 //    {"ip", 0, 0, UCON64_IP},
+    {"isofix", 1, 0, UCON64_ISOFIX},
     {"ispad", 0, 0, UCON64_ISPAD},
     {"j", 0, 0, UCON64_J},
     {"jag", 0, 0, UCON64_JAG},
@@ -179,11 +182,11 @@ const struct option options[] = {
 //    {"mgh", 0, 0, UCON64_MGH},
     {"mirr", 1, 0, UCON64_MIRR},
     {"mka", 1, 0, UCON64_MKA},
-//    {"mkcue", 0, 0, UCON64_MKCUE},
+    {"mkcue", 0, 0, UCON64_MKCUE},
     {"mki", 1, 0, UCON64_MKI},
     {"mkppf", 1, 0, UCON64_MKPPF},
     {"mksheet", 0, 0, UCON64_MKSHEET},
-//    {"mktoc", 0, 0, UCON64_MKTOC},
+    {"mktoc", 0, 0, UCON64_MKTOC},
     {"multi", 1, 0, UCON64_MULTI},
 //    {"mvs", 0, 0, UCON64_MVS},
     {"n", 1, 0, UCON64_N},
@@ -202,7 +205,6 @@ const struct option options[] = {
     {"ng", 0, 0, UCON64_NG},
     {"ngp", 0, 0, UCON64_NGP},
     {"nppf", 1, 0, UCON64_NPPF},
-    {"nrgrip", 0, 0, UCON64_NRGRIP},
     {"nrot", 0, 0, UCON64_NROT},
     {"ns", 0, 0, UCON64_NS},
     {"ntsc", 0, 0, UCON64_NTSC},
@@ -224,6 +226,7 @@ const struct option options[] = {
     {"q", 0, 0, UCON64_Q},
     {"qq", 0, 0, UCON64_QQ},
     {"rename", 0, 0, UCON64_RENAME},
+    {"rip", 0, 0, UCON64_RIP},
     {"rr83", 0, 0, UCON64_RR83},
     {"rrom", 0, 0, UCON64_RROM},
     {"rl", 0, 0, UCON64_RL},
@@ -232,6 +235,7 @@ const struct option options[] = {
     {"rom", 0, 0, UCON64_ROM},
     {"rotl", 0, 0, UCON64_ROTL},
     {"rotr", 0, 0, UCON64_ROTR},
+    {"ru", 0, 0, UCON64_RU},
     {"s", 0, 0, UCON64_S},
     {"s16", 0, 0, UCON64_S16},
     {"sam", 1, 0, UCON64_SAM},
@@ -264,7 +268,7 @@ const struct option options[] = {
     {"version", 0, 0, UCON64_VER},
     {"vram", 0, 0, UCON64_VRAM},
     {"xbox", 0, 0, UCON64_XBOX},
-//    {"xcdrw", 0, 0, UCON64_XCDRW},
+    {"xcdrw", 0, 0, UCON64_XCDRW},
 #ifdef  PARALLEL
     {"xdex", 1, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
@@ -325,6 +329,13 @@ ucon64_runtime_debug (void)
   int x = 0, y = 0;
   char buf[MAXBUFSIZE];
 
+  // how many consoles does uCON64 support?
+  for (x = 0; ucon64_wf[x].option; x++)
+    if (ucon64_wf[x].option == ucon64_wf[x].console)
+      y++;
+
+  fprintf (stderr, "DEBUG: %d consoles found\n", y);
+      
   // sanity check at runtime
   // Does ucon64_wf cover all getopt() options and vice versa?
   for (x = 0; options[x].val; x++)
@@ -842,6 +853,9 @@ ucon64_rom_handling (void)
 
 //          ucon64.rominfo = (st_rominfo_t *) &rominfo;
         }
+
+      if (ucon64.discmage_enabled)
+        ucon64.image = libdm_open (ucon64.rom); // disc-based?
     }
 //end of WF_PROBE
 
@@ -883,7 +897,7 @@ ucon64_rom_handling (void)
         switch (ucon64.console)
           {
             case UCON64_SNES:
-            case UCON64_GENESIS:
+            case UCON64_GEN:
             case UCON64_GB:
             case UCON64_GBA:
             case UCON64_N64:
@@ -929,35 +943,29 @@ ucon64_probe (st_rominfo_t * rominfo)
     {
       {UCON64_GBA, gba_init, AUTO},
       {UCON64_N64, n64_init, AUTO},
-      {UCON64_GENESIS, genesis_init, AUTO},
+      {UCON64_GEN, genesis_init, AUTO},
       {UCON64_LYNX, lynx_init, AUTO},
       {UCON64_GB, gameboy_init, AUTO},
       {UCON64_SNES, snes_init, AUTO},
       {UCON64_NES, nes_init, AUTO},
-      {UCON64_NEOGEOPOCKET, ngp_init, AUTO},
+      {UCON64_NGP, ngp_init, AUTO},
       {UCON64_SWAN, swan_init, AUTO},
-      {UCON64_JAGUAR, jaguar_init, AUTO},
+      {UCON64_JAG, jaguar_init, AUTO},
       {UCON64_SMS, sms_init, 0},
-      {UCON64_NEOGEO, neogeo_init, 0},
+      {UCON64_NG, neogeo_init, 0},
       {UCON64_PCE, pcengine_init, 0},
-      {UCON64_WONDERSWAN, swan_init, 0},
+      {UCON64_SWAN, swan_init, 0},
       {UCON64_DC, dc_init, 0},
       {UCON64_PSX, psx_init, 0},
-      {UCON64_SATURN, ucon64_libdm_init, 0},
-      {UCON64_CDI, ucon64_libdm_init, 0},
-      {UCON64_CD32, ucon64_libdm_init, 0},
-      {UCON64_REAL3DO, ucon64_libdm_init, 0},
-      {UCON64_PS2, ucon64_libdm_init, 0},
-      {UCON64_XBOX, ucon64_libdm_init, 0},
 #if 0
-      {UCON64_GAMECUBE, NULL, 0},
+      {UCON64_GC, NULL, 0},
       {UCON64_GP32, NULL, 0},
       {UCON64_COLECO, NULL, 0},
       {UCON64_INTELLI, NULL, 0},
-      {UCON64_SYSTEM16, NULL, 0},
-      {UCON64_ATARI, NULL, 0},
-      {UCON64_VECTREX, NULL, 0},
-      {UCON64_VIRTUALBOY, NULL, 0},
+      {UCON64_S16, NULL, 0},
+      {UCON64_ATA, NULL, 0},
+      {UCON64_VEC, NULL, 0},
+      {UCON64_VBOY, NULL, 0},
 #endif
       {UCON64_UNKNOWN, unknown_init, 0},
       {0, NULL, 0}
@@ -989,7 +997,7 @@ ucon64_probe (st_rominfo_t * rominfo)
               }
           }
     }
-
+  
   return NULL;
 }
 
@@ -1008,12 +1016,12 @@ ucon64_nfo (void)
       printf ("\n");
     }
 
-  if (ucon64.discmage_enabled)
-    if (ucon64.image)
-      ucon64_libdm_nfo (ucon64.image);
-
   if (ucon64.rominfo && ucon64.console != UCON64_UNKNOWN)
     ucon64_rom_nfo (ucon64.rominfo);
+
+  if (ucon64.discmage_enabled)
+    if (ucon64.image)
+      libdm_nfo (ucon64.image);
 
   if (ucon64.fcrc32)                    // SNES & Genesis interleaved/N64 non-interleaved
     printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32);
@@ -1452,7 +1460,7 @@ ucon64_usage (int argc, char *argv[])
   if (!ucon64.discmage_enabled)
     printf (ucon64_msg[NO_LIB], name_discmage);
   else
-    ucon64_render_usage (ucon64_libdm_get_usage ());
+    ucon64_render_usage (libdm_get_usage ());
   printf ("\n");
 
   optind = 0;

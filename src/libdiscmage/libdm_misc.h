@@ -166,18 +166,29 @@ typedef struct
 #define ISO_HEADER_START 0
 #define ISO_HEADER_LEN (sizeof (st_iso_header_t))
 
-// TODO: remove
-enum
-{
-  LIBDM_UNKNOWN = -1,
-  LIBDM_ISO_FORMAT,
-  LIBDM_BIN_FORMAT,
-  LIBDM_CDI_FORMAT,
-  LIBDM_NRG_FORMAT,
-  LIBDM_CCD_FORMAT
-};
+#define DM_UNKNOWN (-1)
+
+#define DM_ISO 1
+#define DM_BIN 2
+#define DM_CDI 3
+#define DM_NRG 4
+#define DM_CCD 5
 
 //TODO: remove these
 #define READ_BUF_SIZE  (1024*1024)
 #define WRITE_BUF_SIZE (1024*1024)
+
+#define DM_TRACK_TYPE (TRUE)
+#define DM_SAVE_AS_ISO (TRUE)
+#define DM_PREGAP (TRUE)
+#define DM_CONVERT (TRUE)
+#define DM_FULLDATA (TRUE)
+#define DM_CUTALL (TRUE)
+#define DM_CUTFIRST (TRUE)
+#define DM_DO_CONVERT (TRUE)
+#define DM_DO_CUT (TRUE)
+
+#define MAXBUFSIZE 32768
+
+
 #endif  // LIBDM_MISC_H

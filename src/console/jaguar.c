@@ -83,8 +83,6 @@ jaguar_init (st_rominfo_t *rominfo)
       else
         result = -1;
     }
-  if (ucon64.console == UCON64_JAG)
-    result = 0;
 
   rominfo->header_start = JAGUAR_HEADER_START;
   rominfo->header_len = JAGUAR_HEADER_LEN;

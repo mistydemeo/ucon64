@@ -1,14 +1,16 @@
 #!/bin/sh
 # BeOS R5 install script for uCON64
+DEST=$HOME/config/bin
+
 cd $(dirname "$0")
 
 areply=$(alert "This will start installation of uCON64 in a BeOS system.
 
-uCON64 will be installed in $HOME/config/bin.
+uCON64 will be installed in $DEST.
 
 Do you want to continue?" "Cancel" "Install")
 if [ "$areply" ==  "Install" ]; then
-  cp ucon64 "$HOME/config/bin"
+  cp ucon64 $DEST
   if [ ! -e "$HOME/.ucon64" ]; then
     mkdir "$HOME/.ucon64"
   fi
@@ -26,12 +28,12 @@ if [ "$areply" ==  "Install" ]; then
   fi
   if [ -f libnetgui/netgui.so ]; then
     cp libnetgui/netgui.so "$HOME/.ucon64"
-    cp ucon64 "$HOME/config/bin/gucon64"
-    cp ucon64 "$HOME/config/bin/ucon64gui"
+    ln -sf $DEST/ucon64 $DEST/gucon64
+    ln -sf $DEST/ucon64 $DEST/ucon64gui
   elif [ -f netgui.so ]; then
     cp netgui.so "$HOME/.ucon64"
-    cp ucon64 "$HOME/config/bin/gucon64"
-    cp ucon64 "$HOME/config/bin/ucon64gui"
+    ln -sf $DEST/ucon64 $DEST/gucon64
+    ln -sf $DEST/ucon64 $DEST/ucon64gui
   fi
   # ask for ioport driver installation
   drreply=$(alert "In order to communicate with a backup device (\"copier\") uCON64 needs the BeOS ioport driver by Caz Jones. You needn't install it if you don't want to use uCON64 for communicating with a copier.

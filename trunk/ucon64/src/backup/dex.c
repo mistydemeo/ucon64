@@ -56,7 +56,7 @@ static int print_data;
 
 
 static unsigned char *
-read_block (int block_num, unsigned char *data)
+read_block (int block_num)
 {
   return psx_memcard_read_block (print_data, CONPORT, TAP, DELAY, block_num);
 }
@@ -93,7 +93,7 @@ dex_read_block (const char *filename, int block_num, unsigned int parport)
   print_data = parport;
   misc_parport_print_info ();
 
-  if (read_block (block_num, data) == NULL)
+  if (read_block (block_num) == NULL)
     {
       fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
       exit (1);

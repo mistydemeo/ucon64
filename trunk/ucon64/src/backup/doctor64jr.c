@@ -175,10 +175,12 @@ static void set_ai_data (unsigned char ai, unsigned char data);
 static void init_port (int enable_write);
 static void end_port (int enable_write);
 static char write_32k (unsigned short int hi_word, unsigned short int lo_word);
+#if 0
 static char verify_32k (unsigned short int hi_word, unsigned short int lo_word);
-static unsigned long int get_address (void);
 static void gen_pat_32k (unsigned short int offset);
 static unsigned short int test_dram (void);
+#endif
+static unsigned long int get_address (void);
 
 
 void
@@ -209,17 +211,49 @@ init_port (int enable_write)
 //  set_ai (5);
 //  set_data_read
 //  enable_write = inportb (port_c);
-  set_ai_data (5, enable_write);                // d0=0 is write protect mode
+  set_ai_data (5, (unsigned char) enable_write); // d0=0 is write protect mode
 }
 
 
 void
 end_port (int enable_write)
 {
-  set_ai_data (5, enable_write);                // d0=0 is write protect mode
+  set_ai_data (5, (unsigned char) enable_write); // d0=0 is write protect mode
   set_ai_data (7, 0);                           // release pc mode
   set_ai_data (6, 0);                           // 6==0x0a, 7==0x05 is pc_control mode
   set_normal                                    // ninit=1, nWrite=1
+}
+
+
+unsigned char
+check_card (void)
+{
+  set_ai_data (3, 0x12);
+  set_ai_data (2, 0x34);
+  set_ai_data (1, 0x56);
+  set_ai_data (0, 0x78);
+
+  set_ai (3);
+  set_data_read                                 // ninit=0, nwrite=1
+  if ((inportb (port_c) & 0x1f) != 0x12)
+    return 1;
+
+  set_ai (2);
+  set_data_read
+  if (inportb (port_c) != 0x34)
+    return 1;
+
+  set_ai (1);
+  set_data_read
+  if (inportb (port_c) != 0x56)
+    return 1;
+
+  set_ai (0);
+  set_data_read
+  if (inportb (port_c) != 0x78)
+    return 1;
+
+  return 0;
 }
 
 
@@ -305,6 +339,7 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
 }
 
 
+#if 0
 char
 verify_32k (unsigned short int hi_word, unsigned short int lo_word)
 {
@@ -349,66 +384,6 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
   outportb(ai, 1);
   printf("a[15..8]=%02x\n", inportb (data));
 */
-  return 0;
-}
-
-
-unsigned long int
-get_address (void)
-{
-  unsigned long int address;
-
-  set_ai_data (6, 0x0a);                        // enable pc mode
-  set_ai_data (7, 0x05);                        // enable pc mode
-
-  set_ai (3);
-  set_data_read                                 // ninit=0, nwrite=1
-  address = inportb (port_c) << 24;
-
-  set_ai (2);
-  set_data_read
-  address |= inportb (port_c) << 16;
-
-  set_ai (1);
-  set_data_read
-  address |= inportb (port_c) << 8;
-
-  set_ai (0);
-  set_data_read
-  address |= inportb (port_c);
-
-  return address;
-}
-
-
-unsigned char
-check_card (void)
-{
-  set_ai_data (3, 0x12);
-  set_ai_data (2, 0x34);
-  set_ai_data (1, 0x56);
-  set_ai_data (0, 0x78);
-
-  set_ai (3);
-  set_data_read                                 // ninit=0, nwrite=1
-  if ((inportb (port_c) & 0x1f) != 0x12)
-    return 1;
-
-  set_ai (2);
-  set_data_read
-  if (inportb (port_c) != 0x34)
-    return 1;
-
-  set_ai (1);
-  set_data_read
-  if (inportb (port_c) != 0x56)
-    return 1;
-
-  set_ai (0);
-  set_data_read
-  if (inportb (port_c) != 0x78)
-    return 1;
-
   return 0;
 }
 
@@ -487,6 +462,35 @@ test_dram (void)
 
   return pages;
 }
+#endif
+
+
+unsigned long int
+get_address (void)
+{
+  unsigned long int address;
+
+  set_ai_data (6, 0x0a);                        // enable pc mode
+  set_ai_data (7, 0x05);                        // enable pc mode
+
+  set_ai (3);
+  set_data_read                                 // ninit=0, nwrite=1
+  address = inportb (port_c) << 24;
+
+  set_ai (2);
+  set_data_read
+  address |= inportb (port_c) << 16;
+
+  set_ai (1);
+  set_data_read
+  address |= inportb (port_c) << 8;
+
+  set_ai (0);
+  set_data_read
+  address |= inportb (port_c);
+
+  return address;
+}
 
 
 #if 0
@@ -517,7 +521,8 @@ doctor64jr_read (const char *filename, unsigned int parport)
 int
 doctor64jr_write (const char *filename, unsigned int parport)
 {
-  unsigned int enable_write = 0, init_time, size, bytesread, bytessend = 0, page;
+  unsigned int enable_write = 0, init_time, size, bytesread, bytessend = 0;
+  unsigned short int page;
   FILE *file;
 
   misc_parport_print_info ();

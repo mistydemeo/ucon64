@@ -234,7 +234,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_WONDERSWAN UCON64_SWAN
 #define UCON64_XBOX (UCON64_CONSOLE + 28)
 
-#define UCON64_VERSION_S "1.9.8beta5"
+#define UCON64_VERSION_S "1.9.8"
 #define UCON64_VERSION 200
 
 #define MBIT	131072

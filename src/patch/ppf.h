@@ -1,5 +1,5 @@
 /*
-ppf.h - Playstation Patch Format support for uCON64
+ppf.h - Playstation Patch File support for uCON64
 
 written by ???? - ???? Icarus/Paradox
                   2001 NoisyB (noisyb@gmx.net)

@@ -805,28 +805,26 @@ snes_gd3 (st_rominfo_t *rominfo)
           fprintf (stderr, "ERROR: This ROM seems to be interleaved\n");
           return -1;
         }
-      if (size > 48 * MBIT)
+
+      if (!((size >= 2 * MBIT && total4Mbparts <= 8) ||
+            total4Mbparts == 10 || total4Mbparts == 12))
         {
-          fprintf (stderr, "ERROR: This ROM > 48 Mbit -- conversion not yet implemented\n");
+          fprintf (stderr, "ERROR: ROM size is %d Mbit -- conversion not yet implemented\n",
+                   size / MBIT);
           return -1;
         }
-      if (size < 2 * MBIT)
+      else if (total4Mbparts > 8 && snes_header_base != SNES_EROM)
         {
-          fprintf (stderr, "ERROR: This ROM < 2 Mbit -- conversion not yet implemented\n");
+          fprintf (stderr, "ERROR: Normal ROM > 32 Mbit -- conversion not yet implemented\n");
           return -1;
         }
 
       if (total4Mbparts == 5)
         total4Mbparts = 6;                      // 20 Mbit HiROMs get padded to 24 Mbit
-      else if (total4Mbparts > 8 && total4Mbparts <= 12) // <= instead of < to test Star Ocean
-        {                                       // 36-44 Mbit HiROMs get padded to 48 Mbit
-          if (snes_header_base != SNES_EROM)
-            {
-              fprintf (stderr, "ERROR: Normal ROM > 32 Mbit -- conversion not yet implemented\n");
-              return -1;
-            }
-          total4Mbparts = 12;
-          printf ("WARNING: Paddding to 48 Mbit -- hasn't been tested on a real Game Doctor yet\n");
+      else if (total4Mbparts == 10)
+        {
+          total4Mbparts = 12;                   // 40 Mbit HiROMs get padded to 48 Mbit
+          printf ("WARNING: Paddding to 48 Mbit -- hasn't been tested on a real Game Doctor\n");
         }
 
       // create the header
@@ -902,21 +900,18 @@ snes_gd3 (st_rominfo_t *rominfo)
             }
         }
       else if (total4Mbparts == 12)
-        {
-          int size2 = size - 32 * MBIT,         // size of second ROM (16 Mbit if ToP)
-              newsize2 = newsize - size;
-          n = size2 / 2;
+        {                                       // we assume it is an Extended ROM
+          int size2 = size - 32 * MBIT;         // size of second ROM (16 Mbit if ToP)
           // interleave the 32 Mbit ROM
           snes_int_blocks (srcbuf, dstbuf + 32 * MBIT, dstbuf + 16 * MBIT,
                            (32 * MBIT) / 0x10000);
-          // interleave the smaller ROM
-          snes_int_blocks (srcbuf + 32 * MBIT, dstbuf + n, dstbuf, size2 / 0x10000);
+          // interleave the second ROM
+          snes_int_blocks (srcbuf + 32 * MBIT, dstbuf + 8 * MBIT, dstbuf,
+                           size2 / 0x10000);
           if (pad > 0)
             {
-              half_size_4Mb = (size2 / 2) & ~(4 * MBIT - 1);
-              half_size_1Mb = (size2 / 2 + MBIT - 1) & ~(MBIT - 1);
-              snes_mirror (dstbuf, half_size_4Mb, half_size_1Mb, newsize2 / 2);
-              snes_mirror (dstbuf, n + half_size_4Mb, n + half_size_1Mb, newsize2);
+              snes_mirror (dstbuf, 0, 4 * MBIT, 8 * MBIT);
+              snes_mirror (dstbuf, 8 * MBIT, 12 * MBIT, 16 * MBIT);
             }
         }
       else
@@ -927,7 +922,7 @@ snes_gd3 (st_rominfo_t *rominfo)
             {
               half_size_4Mb = (size / 2) & ~(4 * MBIT - 1);
               half_size_1Mb = (size / 2 + MBIT - 1) & ~(MBIT - 1);
-              snes_mirror (dstbuf, half_size_4Mb, half_size_1Mb, newsize / 2);
+              snes_mirror (dstbuf, half_size_4Mb, half_size_1Mb, n);
               snes_mirror (dstbuf, n + half_size_4Mb, n + half_size_1Mb, newsize);
             }
         }
@@ -1918,6 +1913,11 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     
     0x39b94597: BS Satella2 1 (J) has a LoROM map type byte while it's a HiROM
     game
+    
+    0xd7470b37: Dai Kaiju Monogatari 2 (J)
+    0xa2c5fd29: Tales of Phantasia (J)
+    These are Extended HiROM games. By "coincidence" ToP can be detected in
+    another way, but DKM2 can't. The CRC32's are checked for below.
   */
   if (crc1 == 0xfa83b519 || crc1 == 0x4a54adc7)
     check_map_type = 0;                         // not interleaved
@@ -1943,8 +1943,16 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
         }
 #endif
 #ifdef  DETECT_INSNEST_FUCKED_UP_LOROM
-// "the most advanced and researched Super Nintendo ROM utility available", what a joke
-// They don't support their own "format"...
+      /*
+        "the most advanced and researched Super Nintendo ROM utility available"
+        What a joke. They don't support their own "format"...
+        For some games we never reach this code, because the previous code
+        detects them (incorrectly). I (dbjh) don't think there are games in
+        this format available on the internet, so I won't add special-case code
+        (like CRC32 checks) to fix that -- it's a bug in inSNESt. Examples are:
+        Lufia II - Rise of the Sinistrals (H)
+        Super Mario All-Stars & World (E) [!]
+      */
       if (!interleaved && size == 24 * MBIT)
         {
           snes_header_base = 16 * MBIT;
@@ -1962,15 +1970,8 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   if (check_map_type && !snes_hirom)
     {
       // first check if it's an interleaved Extended HiROM dump
-      if (size >= (int) (SNES_HEADER_START + SNES_EROM + SNES_HEADER_LEN))
-        {
-          org_snes_header_base = snes_header_base;
-          snes_header_base = size - SNES_EROM;
-          if (check_banktype (rom_buffer, snes_header_base) >= banktype_score)
-            snes_header_base = SNES_EROM;
-          else
-            snes_header_base = org_snes_header_base;
-        }
+      if (crc1 == 0xd7470b37 || crc1 == 0xa2c5fd29)
+        snes_header_base = SNES_EROM;
       if (snes_header.map_type == 0x21 || snes_header.map_type == 0x31 ||
           snes_header.map_type == 0x35 || snes_header.map_type == 0x3a ||
           snes_header.bs_map_type == 0x21 || snes_header.bs_map_type == 0x31)

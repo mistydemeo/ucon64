@@ -280,15 +280,11 @@ extern char *strtrim (char *str);
 extern const char *get_suffix (const char *filename);
 extern char *set_suffix (char *filename, const char *suffix);
 extern char *set_suffix_i (char *filename, const char *suffix);
-//#ifndef HAVE_BASENAME
 extern char *basename2 (const char *path);
-//  the following define will override a possible XPG basename() which mods. the src
+// override a possible XPG basename() which modifies its arg
 #define basename basename2
-//#endif
-//#ifndef HAVE_DIRNAME
 extern char *dirname2 (const char *path);
 #define dirname dirname2
-//#endif
 extern int one_file (const char *filename1, const char *filename2);
 extern int one_filesystem (const char *filename1, const char *filename2);
 extern char *realpath2 (const char *src, char *full_path);

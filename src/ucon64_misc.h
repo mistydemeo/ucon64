@@ -43,12 +43,12 @@ IO_Tuple;
 #define in1byte(p)      inportb(p)
 
 // DJGPP (DOS) has outportX() & inportX()
-#if     defined __UNIX__ || defined __BEOS__
+#if     defined __unix__ || defined __BEOS__
   unsigned char inportb (unsigned short port);
   unsigned short inportw (unsigned short port);
   void outportb (unsigned short port, unsigned char byte);
   void outportw (unsigned short port, unsigned short word);
-#endif // defined __UNIX__ || defined __BEOS__
+#endif // defined __unix__ || defined __BEOS__
 #endif // BACKUP
 
 #define MBIT 131072

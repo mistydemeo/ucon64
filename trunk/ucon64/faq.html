@@ -1,238 +1,283 @@
-<html><head><title>FAQ</title></head><body bgcolor="#c0c0c0" background="images/bg.jpg"><pre><tt>
-Q: <a href="#1">Why uCON64?</a>
-
-Q: <a href="#2">How do I compile uCON64?</a>
-
-Q: <a href="#3">How do I install uCON64?</a>
-
-Q: <a href="#4">Sometimes my terminal seems to be locked after "ucon64 -xswc <file> | more"</a>
-
-Q: <a href="#5">How do I make uCON64 display only information about a ROM? When I use * I get</a>
-   <a href="#5">strange results.</a>
-
-Q: <a href="#6">I have two parallel ports in my PC and my Flash Advance Linker is connected to the</a>
-   <a href="#6">second. However, when I try to use uCON64 to send a demo to the FAL something goes wrong.</a>
-   <a href="#6">What happened?</a>
-
-Q: <a href="#7">I tried to dump a SNES cartridge using a Super Wild Card connected to my PC with an</a>
-   <a href="#7">interlink cable, but it didn't work. What's wrong?</a>
-
-Q: <a href="#8">I have a SNES ROM of which GoodSNES says it's good, but uCON64 says it's bad.</a>
-   <a href="#8">Who is right?</a>
-
-Q: <a href="#9">I have a SNES ROM of which Snes9x and ZSNES say it's bad, but uCON64 says it's good.</a>
-   <a href="#9">Who is right?</a>
-
-Q: <a href="#10">I have a SNES ROM of which uCON64 said it was bad, so I used the -chk option. Now</a>
-   <a href="#10">uCON64, Snes9x and ZSNES all say the ROM is good, but GoodSNES still says it's bad. How</a>
-   <a href="#10">can that be, I did fix the ROM, right?</a>
-
-Q: <a href="#11">Some SNES games don't work on my Super Wild Card. What can I do about that?</a>
-
-Q: <a href="#12">Which backup devices are supported by uCON64?</a>
-
-Q: <a href="#13">I use Windows XP (NT/2000). When I try to run ucon64.exe under command.com (start -> Run...</a>
-   <a href="#13">-> command) uCON64 crashes. What do I do wrong?</a>
-
-Q: <a href="#14">I don't like the commandline.. are there graphical frontends available?</a>
-
-Q: <a href="#15">Where do I get PPF, APS or IPS patches?</a>
-
-Q: <a href="#16">Where do I get ROMs/Games?</a>
-
-Q: <a href="#17">Usage: What does $ROM and $FILE mean?</a>
-
-Q: <a href="#18">Why is my backup unit (still) not supported?</a>
-
-Q: <a href="#19">How do I specify a bank number for the GB Xchanger?</a>
-
-Q: <a href="#20">What's the difference between the Flash Advance Linker options -xfals and -xfalb&#60;n&#62;?</a>
-
-
-
-<a name="1">Q: Why uCON64?
-A: uCON64 was designed for people who don't care about emulators because they
-   want to play all the games on the original hardware. Here you got a powerful
-   tool to backup, restore games and for many other operations.
-   It is just a keep-old-hardware-alive tool :-)
-   But beside this it <i>can</i> operate as intelligent frontend for EVERY
-   available emulator.
-
-
-<a name="2">Q: How do I compile uCON64?
-A: You can optionally open the Makefile in an editor and change the defines
-
-   "DB" enables/disables the internal ROM database
-        disabled with an # in front uCON64 will be only ~250kB in size!
-
-   "BACKUP" enables/disables support for backup units
-            disabled with an # in front
-
-   "CD" enables/disables support for cd backups (we suggest <a href="http://cdrdao.sourceforge.net" target="_blank">cdrdao</a> as burn engine for ucon64)
-
-   Afterwards enter the following lines
-
-   make -f Makefile.&#60;your&nbsp;OS&#62; clean
-   make -f Makefile.&#60;your&nbsp;OS&#62;
-   make -f Makefile.&#60;your&nbsp;OS&#62; install
-
-   Under Unix (Linux) the last command will ask for root's password, because
-   uCON64 needs to be setuid root for parallel port access.
-   Under BeOS the last command will open a dialog window. Just follow the
-   instructions.
-
-
-<a name="3">Q: How do I install uCON64?
-A: You already did if you followed the directions in the previous answer (you
-   downloaded the source package). If you don't use WinDOS run
-   install_&#60;your&nbsp;OS&#62;.sh and edit $HOME/.ucon64rc. If you use WinDOS you may
-   want to copy ucon64.exe to a directory in your PATH and maybe edit ucon64.cfg.
-
-   BeOS users will also need Caz's driver inside ioport.zip or available at
-   <a href="http://www.infernal.currantbun.com" target="_blank">http://www.infernal.currantbun.com</a>
-   Under Windows NT/2000/XP you will need a driver only if you want to use uCON64 for
-   sending/receiving ROMs to/from a copier. You could use giveio or UserPort. At
-   <a href="http://www.devrs.com/gba/files/mbv2faqs.php" target="_blank">http://www.devrs.com/gba/files/mbv2faqs.php</a>
-   you can find links to those programs. With giveio sending ROMs goes faster than with
-   UserPort, but UserPort is a bit easier to use.
-
-
-<a name="4">Q: Sometimes my terminal seems to be locked after "ucon64 -xswc <file> | more"
-A: You are right, it <u>seems</u> to be locked, but the only thing that happened is
-   that the character echoing of the terminal is disabled by more. Just don't do that ;-)
-
-
-<a name="5">Q: How do I make uCON64 display only information about a ROM? When I use * I get
-   strange results.
-A: The help says that * will show info to indicate that most uCON64 options
-   will show information about a ROM. If you want to display information about a
-   ROM just run uCON64 with the name of the ROM as the only argument. Note that
-   sometimes you will have to specify the console type for uCON64, because the
-   ROM dump is damaged or simply not detected correctly by uCON64. For example:
-   ucon64 -snes "Super Aleste (J) [t1].swc"
-
-
-<a name="6">Q: I have two parallel ports in my PC and my Flash Advance Linker is connected to the
-   second. However, when I try to use uCON64 to send a demo to the FAL something goes wrong.
-   What happened?
-A: Well, many things could have gone wrong, but uCON64 only detects your first parallel
-   port (it stops probing for a parallel port if it finds one). So, you should specify the
-   address of the second parallel port on the command line. For example:
-   &nbsp;&nbsp; ucon64 -xfal demo.gba 0x278
-
-
-<a name="7">Q: I tried to dump a SNES cartridge using a Super Wild Card connected to my PC with an
-   interlink cable, but it didn't work. What's wrong?
-A: You shouldn't use an interlink cable, but an ordinary parallel cable. Use the options
-   "-snes -help|more" to see how the pins of the connectors should be connected.
-
-
-<a name="8">Q: I have a SNES ROM of which GoodSNES says it's good, but uCON64 says it's bad.
-   Who is right?
-A: GoodSNES.
-   There may be several reasons why uCON64 reports that the checksum is bad. It could have
-   made a mistake while determining if the ROM is a HiROM or a LoROM dump. Try the options
-   -hi and -nhi and see if uCON64 reports the checksum differently. A bigger problem is that
-   the interleave detection code (stolen from Snes9x ;-) is not reliable. Especially BS ROMs
-   are often detected as not being interleaved while they actually are. Try the options -int
-   and -int2 and see if you get better results. If the checksum is reported as good it is
-   very likely that the ROM is really good. Alternatively, you may want to convert the ROM
-   to a non-interleaved format with -dint and run uCON64 on the converted ROM. That gives
-   the best results. Luckily you won't find many interleaved ROM dumps that uCON64 can't
-   handle, probably because Snes9x and ZSNES often can't handle them either.
-
-
-<a name="9">Q: I have a SNES ROM of which Snes9x and ZSNES say it's bad, but uCON64 says it's good.
-   Who is right?
-A: uCON64, probably :-)
-   Neither Snes9x 1.39 nor ZSNES 1.337 calculate the checksum correctly for BS ROMs, so you
-   can be pretty sure the ROM is good if it's a BS ROM. See previous answer.
-
-
-<a name="10">Q: I have a SNES ROM of which uCON64 said it was bad, so I used the -chk option. Now
-   uCON64, Snes9x and ZSNES all say the ROM is good, but GoodSNES still says it's bad. How
-   can that be, I did fix the ROM, right?
-A: No, you did not. When you use -chk uCON64 changes four bytes in the ROM dump, so that
-   they match with the calculated checksum. However, the ROM stays just as bad as it was.
-   Use -chk with care. -chk might be useful if you want to store a ROM somewhere without
-   using a database with its checksum. You can then later check if the ROM is still the same
-   as it was when you stored it by using the checksum that is stored in the ROM.
-
-
-<a name="11">Q: Some SNES games don't work on my Super Wild Card. What can I do about that?
-A: You can do several things. First make sure the original game cartidge doesn't contain
-   any special chips that your Super Wild Card doesn't support (look at the rom type
-   information). For example, if you are trying to upload a game like Super Mario Kart (which
-   uses a DSP chip) your Super Wild Card should have an extension with the correct DSP chip
-   (or have the right cartridge with that chip plugged in your SWC). Then, make sure you are
-   using a good dump (look at the checksum information). Also verify that the backup header is
-   correct. You can make uCON64 rewrite the header with -swc or -fig (the SWC send code of
-   uCON64 supports Pro Fighter dumps). uCON64 uses the information in the ROM dump's header,
-   so this is important! You can also try to rewrite the header with the option -hi or -nhi to
-   force uCON64 to think it is a HiROM or a LoROM dump. For example:
-   &nbsp;&nbsp; ucon64 -swc -hi "Chrono Trigger (U).swc"
-   There are many (good) ROMs on the internet with incorrect headers, so this might well solve
-   the problem.
-   Several games contain a copy protection that prevents them from running on a backup unit,
-   so this can also be a reason why the game doesn't work. You can try -k to remove that
-   protection. Several games also check if they are running on a PAL or an NTSC SNES. Use -f
-   to remove that form of copy protection. Some other games check the ROM speed. You can use -l
-   for those. Note that some games have more than one type of copy protection, so it might be
-   necessary to use uCON64 several times with a different option.
-
-
-<a name="12">Q: Which backup devices are supported by uCON64?
-A: See <a href="hardware.html" target="_blank">hardware.html</a>.
-
-
-<a name="13">Q: I use Windows XP (NT/2000). When I try to run ucon64.exe under command.com (start -> Run...
-   -> command) uCON64 crashes. What do I do wrong?
-A: You shouldn't use command, use cmd instead.
-
-
-<a name="14"><a name="frontend">Q: I don't like the commandline.. are there graphical frontends available?
-A: Yes, have a look at...
-   <a href="http://www.planetmir.net/html/softw.htm#ucon64" target="_blank">http://www.planetmir.net/html/softw.htm#ucon64</a> or
-   <a href="http://www.bebits.com/app/2679" target="_blank">http://www.bebits.com/app/2679</a> for a nice BeOS frontend (Thanks to Ove)
-   (a web based frontend is also planned)
-
-
-<a name="15">Q: Where do I get PPF, APS or IPS patches?
-A:
-   <form method=GET action="http://www.google.com/search" target="_blank"><table bgcolor="#FFFFFF"><tr><td>
-   <a href="http://www.google.com/" target="_blank"><img src="http://www.google.com/logos/Logo_25wht.gif" border="0" alt="Google" align="absmiddle"></a><br>
-   <input type=text name=q maxlength=255 value="ppf aps ips patch"><br>
-   <input type=submit name=btnG value="Google Search">
-   </td></tr></table></form><tt><pre>
-
-
-<a name="16">Q: Where do I get ROMs/Games?
-A: <a href="http://www.ebay.com">www.ebay.com</a>
-
-
-<a name="17">Q: Usage: What does $ROM and $FILE mean?
-A: Enter "ucon64 -help" and look at the top where it says:
-   "USAGE: ucon64 [OPTION(S)] ROM [FILE]"
-   Do you understand now where the $ROM and $FILE keywords refer to?
-   $FILE is often optional and mostly not needed at all.
-
-
-<a name="18">Q: Why is my backup unit (still) not supported?
-A: Get us the protocol or the sources of existing transfer tools and you'll
-   see what happens. uCON64 already supports all important backup units which
-   were and are available. Manufacturers of devices which are still not
-   supported are welcome to contact us.
-
-
-<a name="19">Q: How do I specify a bank number for the GB Xchanger?
-A: ucon64 -xgbxb&#60;0&#62; "Pokemon (Green).sav" wouldn't work you should
-   leave out those angle brackets. This should work:
-   ucon64 -xgbxb0 "Pokemon (Green).sav"
-
-
-<a name="20">Q: What's the difference between the Flash Advance Linker options -xfals and -xfalb&#60;n&#62;?
-A: -xfals saves or restores all four banks while -xfalb&#60;n&#62; saves or restores only bank n.
-   For example, if you have Super Mario Advance 2 (J) in your Flash Card in "ROM bank" 4 (GBA Pack)
-   and would like to save/restore SRAM bank 4 you should do something like:
-   ucon64 -xfalb4 "Super Mario Advance 2 (J).sav"
-</pre></tt></body></html>
+<html><head><title>FAQ</title></head><body bgcolor="#c0c0c0" background="images/bg.jpg"><tt>
+Q: <a href="#1">Why uCON64?</a><br>
+<br>
+Q: <a href="#2">How do I compile uCON64?</a><br>
+<br>
+Q: <a href="#3">How do I install uCON64?</a><br>
+<br>
+Q: <a href="#4">Sometimes my terminal seems to be locked after "ucon64 -xswc <file> | more"</a><br>
+<br>
+Q: <a href="#5">How do I make uCON64 display only information about a ROM? When I use * I get</a><br>
+   <a href="#5">strange results.</a><br>
+<br>
+Q: <a href="#6">I have two parallel ports in my PC and my Flash Advance Linker is connected to the</a><br>
+   <a href="#6">second. However, when I try to use uCON64 to send a demo to the FAL something goes wrong.</a><br>
+   <a href="#6">What happened?</a><br>
+<br>
+Q: <a href="#7">I tried to dump a SNES cartridge using a Super Wild Card connected to my PC with an</a><br>
+   <a href="#7">interlink cable, but it didn't work. What's wrong?</a><br>
+<br>
+Q: <a href="#8">I have a SNES ROM of which GoodSNES says it's good, but uCON64 says it's bad.</a><br>
+   <a href="#8">Who is right?</a><br>
+<br>
+Q: <a href="#9">I have a SNES ROM of which Snes9x and ZSNES say it's bad, but uCON64 says it's good.</a><br>
+   <a href="#9">Who is right?</a><br>
+<br>
+Q: <a href="#10">I have a SNES ROM of which uCON64 said it was bad, so I used the -chk option. Now</a><br>
+   <a href="#10">uCON64, Snes9x and ZSNES all say the ROM is good, but GoodSNES still says it's bad. How</a><br>
+   <a href="#10">can that be, I did fix the ROM, right?</a><br>
+<br>
+Q: <a href="#11">Some SNES games don't work on my Super Wild Card. What can I do about that?</a><br>
+<br>
+Q: <a href="#12">Which backup devices are supported by uCON64?</a><br>
+<br>
+Q: <a href="#13">I use Windows XP (NT/2000). When I try to run ucon64.exe under command.com (start -> Run...</a><br>
+   <a href="#13">-> command) uCON64 crashes. What do I do wrong?</a><br>
+<br>
+Q: <a href="#14">I don't like the commandline.. are there graphical frontends available?</a><br>
+<br>
+Q: <a href="#15">Where do I get PPF, APS or IPS patches?</a><br>
+<br>
+Q: <a href="#16">Where do I get ROMs/Games?</a><br>
+<br>
+Q: <a href="#17">Usage: What does $ROM and $FILE mean?</a><br>
+<br>
+Q: <a href="#18">Why is my backup unit (still) not supported?</a><br>
+<br>
+Q: <a href="#19">How do I specify a bank number for the GB Xchanger?</a><br>
+<br>
+Q: <a href="#20">What's the difference between the Flash Advance Linker options -xfals and -xfalb&#60;n&#62;?</a><br>
+<br>
+<br>
+<br>
+<a name="1">Q: Why uCON64?<br>
+A: uCON64 was designed for people who don't care about emulators because they<br>
+   want to play all the games on the original hardware. Here you got a powerful<br>
+   tool to backup, restore games and for many other operations.<br>
+   It is just a keep-old-hardware-alive tool :-)<br>
+   But beside this it <i>can</i> operate as intelligent frontend for EVERY<br>
+   available emulator.<br>
+<br>
+<br>
+<a name="2">Q: How do I compile uCON64?<br>
+A: You can optionally open the Makefile in an editor and change the defines<br>
+<br>
+   "DB" enables/disables the internal ROM database<br>
+        disabled with an # in front uCON64 will be only ~250kB in size!<br>
+<br>
+   "BACKUP" enables/disables support for backup units<br>
+            disabled with an # in front<br>
+<br>
+   "CD" enables/disables support for cd backups (we suggest <a href="http://cdrdao.sourceforge.net" target="_blank">cdrdao</a> as burn engine for ucon64)<br>
+<br>
+   Afterwards enter the following lines<br>
+<br>
+   make -f Makefile.&#60;your&nbsp;OS&#62; clean<br>
+   make -f Makefile.&#60;your&nbsp;OS&#62;<br>
+   make -f Makefile.&#60;your&nbsp;OS&#62; install<br>
+<br>
+   Under Unix (Linux) the last command will ask for root's password, because<br>
+   uCON64 needs to be setuid root for parallel port access.<br>
+   Under BeOS the last command will open a dialog window. Just follow the<br>
+   instructions.<br>
+<br>
+<br>
+<a name="3">Q: How do I install uCON64?<br>
+A: You already did if you followed the directions in the previous answer (you<br>
+   downloaded the source package). If you don't use WinDOS run<br>
+   install_&#60;your&nbsp;OS&#62;.sh and edit $HOME/.ucon64rc. If you use WinDOS you may<br>
+   want to copy ucon64.exe to a directory in your PATH and maybe edit ucon64.cfg.<br>
+<br>
+   BeOS users will also need Caz's driver inside ioport.zip or available at<br>
+   <a href="http://www.infernal.currantbun.com" target="_blank">http://www.infernal.currantbun.com</a><br>
+   Under Windows NT/2000/XP you will need a driver only if you want to use uCON64 for<br>
+   sending/receiving ROMs to/from a copier. You could use giveio or UserPort. At<br>
+   <a href="http://www.devrs.com/gba/files/mbv2faqs.php" target="_blank">http://www.devrs.com/gba/files/mbv2faqs.php</a><br>
+   you can find links to those programs. With giveio sending ROMs goes faster than with<br>
+   UserPort, but UserPort is a bit easier to use.<br>
+<br>
+<br>
+<a name="4">Q: Sometimes my terminal seems to be locked after "ucon64 -xswc <file> | more"<br>
+A: You are right, it <u>seems</u> to be locked, but the only thing that happened is<br>
+   that the character echoing of the terminal is disabled by more. Just don't do that ;-)<br>
+<br>
+<br>
+<a name="5">Q: How do I make uCON64 display only information about a ROM? When I use * I get<br>
+   strange results.<br>
+A: The help says that * will show info to indicate that most uCON64 options<br>
+   will show information about a ROM. If you want to display information about a<br>
+   ROM just run uCON64 with the name of the ROM as the only argument. Note that<br>
+   sometimes you will have to specify the console type for uCON64, because the<br>
+   ROM dump is damaged or simply not detected correctly by uCON64. For example:<br>
+   ucon64 -snes "Super Aleste (J) [t1].swc"<br>
+<br>
+<br>
+<a name="6">Q: I have two parallel ports in my PC and my Flash Advance Linker is connected to the<br>
+   second. However, when I try to use uCON64 to send a demo to the FAL something goes wrong.<br>
+   What happened?<br>
+A: Well, many things could have gone wrong, but uCON64 only detects your first parallel<br>
+   port (it stops probing for a parallel port if it finds one). So, you should specify the<br>
+   address of the second parallel port on the command line. For example:<br>
+   &nbsp;&nbsp; ucon64 -xfal demo.gba 0x278<br>
+<br>
+<br>
+<a name="7">Q: I tried to dump a SNES cartridge using a Super Wild Card connected to my PC with an<br>
+   interlink cable, but it didn't work. What's wrong?<br>
+A: You shouldn't use an interlink cable, but an ordinary parallel cable. Use the options<br>
+   "-snes -help|more" to see how the pins of the connectors should be connected.<br>
+<br>
+<br>
+<a name="8">Q: I have a SNES ROM of which GoodSNES says it's good, but uCON64 says it's bad.<br>
+   Who is right?<br>
+A: GoodSNES.<br>
+   There may be several reasons why uCON64 reports that the checksum is bad. It could have<br>
+   made a mistake while determining if the ROM is a HiROM or a LoROM dump. Try the options<br>
+   -hi and -nhi and see if uCON64 reports the checksum differently. A bigger problem is that<br>
+   the interleave detection code (stolen from Snes9x ;-) is not reliable. Especially BS ROMs<br>
+   are often detected as not being interleaved while they actually are. Try the options -int<br>
+   and -int2 and see if you get better results. If the checksum is reported as good it is<br>
+   very likely that the ROM is really good. Alternatively, you may want to convert the ROM<br>
+   to a non-interleaved format with -dint and run uCON64 on the converted ROM. That gives<br>
+   the best results. Luckily you won't find many interleaved ROM dumps that uCON64 can't<br>
+   handle, probably because Snes9x and ZSNES often can't handle them either.<br>
+<br>
+<br>
+<a name="9">Q: I have a SNES ROM of which Snes9x and ZSNES say it's bad, but uCON64 says it's good.<br>
+   Who is right?<br>
+A: uCON64, probably :-)<br>
+   Neither Snes9x 1.39 nor ZSNES 1.337 calculate the checksum correctly for BS ROMs, so you<br>
+   can be pretty sure the ROM is good if it's a BS ROM. See previous answer.<br>
+<br>
+<br>
+<a name="10">Q: I have a SNES ROM of which uCON64 said it was bad, so I used the -chk option. Now<br>
+   uCON64, Snes9x and ZSNES all say the ROM is good, but GoodSNES still says it's bad. How<br>
+   can that be, I did fix the ROM, right?<br>
+A: No, you did not. When you use -chk uCON64 changes four bytes in the ROM dump, so that<br>
+   they match with the calculated checksum. However, the ROM stays just as bad as it was.<br>
+   Use -chk with care. -chk might be useful if you want to store a ROM somewhere without<br>
+   using a database with its checksum. You can then later check if the ROM is still the same<br>
+   as it was when you stored it by using the checksum that is stored in the ROM.<br>
+<br>
+<br>
+<a name="11">Q: Some SNES games don't work on my Super Wild Card. What can I do about that?<br>
+A: You can do several things. First make sure the original game cartidge doesn't contain<br>
+   any special chips that your Super Wild Card doesn't support (look at the rom type<br>
+   information). For example, if you are trying to upload a game like Super Mario Kart (which<br>
+   uses a DSP chip) your Super Wild Card should have an extension with the correct DSP chip<br>
+   (or have the right cartridge with that chip plugged in your SWC). Then, make sure you are<br>
+   using a good dump (look at the checksum information). Also verify that the backup header is<br>
+   correct. You can make uCON64 rewrite the header with -swc or -fig (the SWC send code of<br>
+   uCON64 supports Pro Fighter dumps). uCON64 uses the information in the ROM dump's header,<br>
+   so this is important! You can also try to rewrite the header with the option -hi or -nhi to<br>
+   force uCON64 to think it is a HiROM or a LoROM dump. For example:<br>
+   &nbsp;&nbsp; ucon64 -swc -hi "Chrono Trigger (U).swc"<br>
+   There are many (good) ROMs on the internet with incorrect headers, so this might well solve<br>
+   the problem.<br>
+   Several games contain a copy protection that prevents them from running on a backup unit,<br>
+   so this can also be a reason why the game doesn't work. You can try -k to remove that<br>
+   protection. Several games also check if they are running on a PAL or an NTSC SNES. Use -f<br>
+   to remove that form of copy protection. Some other games check the ROM speed. You can use -l<br>
+   for those. Note that some games have more than one type of copy protection, so it might be<br>
+   necessary to use uCON64 several times with a different option.<br>
+<br>
+<br>
+<a name="12">Q: Which backup devices are supported by uCON64?<br>
+A: See <a href="hardware.html" target="_blank">hardware.html</a>.<br>
+<br>
+<br>
+<a name="13">Q: I use Windows XP (NT/2000). When I try to run ucon64.exe under command.com (start -> Run...<br>
+   -> command) uCON64 crashes. What do I do wrong?<br>
+A: You shouldn't use command, use cmd instead.<br>
+<br>
+<br>
+<a name="14"><a name="frontend">Q: I don't like the commandline.. are there graphical frontends available?<br>
+A: Yes, have a look at...<br>
+   <a href="http://www.planetmir.net/html/softw.htm#ucon64" target="_blank">http://www.planetmir.net/html/softw.htm#ucon64</a> or<br>
+   <a href="http://www.bebits.com/app/2679" target="_blank">http://www.bebits.com/app/2679</a> for a nice BeOS frontend (Thanks to Ove)<br>
+   (a web based frontend is also planned)<br>
+<br>
+<br>
+<a name="15">Q: Where do I get PPF, APS or IPS patches?<br>
+A:<br>
+   <form method=GET action="http://www.google.com/search" target="_blank"><table bgcolor="#FFFFFF"><tr><td><br>
+   <a href="http://www.google.com/" target="_blank"><img src="http://www.google.com/logos/Logo_25wht.gif" border="0" alt="Google" align="absmiddle"></a><br><br>
+   <input type=text name=q maxlength=255 value="ppf aps ips patch"><br><br>
+   <input type=submit name=btnG value="Google Search"><br>
+   </td></tr></table></form><tt><br>
+<br>
+<br>
+<a name="16">Q: Where do I get ROMs/Games?<br>
+A: <a href="http://www.ebay.com">www.ebay.com</a><br>
+<br>
+<br>
+<a name="17">Q: Usage: What does $ROM and $FILE mean?<br>
+A: Enter "ucon64 -help" and look at the top where it says:<br>
+   "USAGE: ucon64 [OPTION(S)] ROM [FILE]"<br>
+   Do you understand now where the $ROM and $FILE keywords refer to?<br>
+   $FILE is often optional and mostly not needed at all.<br>
+<br>
+<br>
+<a name="18">Q: Why is my backup unit (still) not supported?<br>
+A: Get us the protocol or the sources of existing transfer tools and you'll<br>
+   see what happens. uCON64 already supports all important backup units which<br>
+   were and are available. Manufacturers of devices which are still not<br>
+   supported are welcome to contact us.<br>
+<br>
+<br>
+<a name="19">Q: How do I specify a bank number for the GB Xchanger?<br>
+A: ucon64 -xgbxb&#60;0&#62; "Pokemon (Green).sav" wouldn't work you should<br>
+   leave out those angle brackets. This should work:<br>
+   ucon64 -xgbxb0 "Pokemon (Green).sav"<br>
+<br>
+<br>
+<a name="20">Q: What's the difference between the Flash Advance Linker options -xfals and -xfalb&#60;n&#62;?<br>
+A: -xfals saves or restores all four banks while -xfalb&#60;n&#62; saves or restores only bank n.<br>
+   For example, if you have Super Mario Advance 2 (J) in your Flash Card in "ROM bank" 4 (GBA Pack)<br>
+   and would like to save/restore SRAM bank 4 you should do something like:<br>
+   ucon64 -xfalb4 "Super Mario Advance 2 (J).sav"<br>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+</tt></body></html>

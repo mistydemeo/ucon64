@@ -59,7 +59,7 @@ const st_usage_t sms_usage[] =
 
 typedef struct st_sms_header
 {
-  char signature[8];                            // "TMR SEGA"
+  char signature[8];                            // "TMR SEGA"/"TMR SMSC"/"TMG SEGA"
   unsigned char pad[2];                         // 8
   unsigned char checksum_low;                   // 10
   unsigned char checksum_high;                  // 11
@@ -213,11 +213,15 @@ sms_testinterleaved (st_rominfo_t *rominfo)
 
   q_fread (buf, rominfo->buheader_len + 0x4000, // header in 2nd 16 kB block
            0x2000 + (SMS_HEADER_START - 0x4000 + 8) / 2, ucon64.rom);
-  if (!memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SEGA", 8))
+  if (!(memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SEGA", 8) &&
+        memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SMSC", 8) && // SMS
+        memcmp (buf + SMS_HEADER_START - 0x4000, "TMG SEGA", 8)))  // GG
     return 0;
 
   smd_deinterleave (buf, 0x4000);
-  if (!memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SEGA", 8))
+  if (!(memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SEGA", 8) &&
+        memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SMSC", 8) &&
+        memcmp (buf + SMS_HEADER_START - 0x4000, "TMG SEGA", 8)))
     return 1;
 
   return 0;                                     // unknown, act as if it's not interleaved
@@ -261,7 +265,9 @@ sms_init (st_rominfo_t *rominfo)
   //  The init function for Genesis files is called before this function so it
   //  is alright to set result to 0
   if ((buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 6) ||
-      !memcmp (sms_header.signature, "TMR SEGA", 8) ||
+      !(memcmp (sms_header.signature, "TMR SEGA", 8) &&
+        memcmp (sms_header.signature, "TMR SMSC", 8) &&  // SMS
+        memcmp (sms_header.signature, "TMG SEGA", 8)) || // GG
       ucon64.console == UCON64_SMS)
     result = 0;
   else
@@ -323,7 +329,7 @@ sms_init (st_rominfo_t *rominfo)
     ((sms_header.version & 0xf0) << 12));
   strcat (rominfo->misc, (char *) buf);
 
-  sprintf ((char *) buf, "Version: %x", sms_header.version & 0xf);
+  sprintf ((char *) buf, "Version: %d", sms_header.version & 0xf);
   strcat (rominfo->misc, (char *) buf);
 
   rominfo->console_usage = sms_usage;

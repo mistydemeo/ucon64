@@ -143,15 +143,20 @@ ucon64_switches (int c, const char *optarg)
               "platform:                          %s\n"
               "endianess:                         %s\n"
               "debug:                             %s\n"
-              "parallel port backup unit support: %s\n"
-              "ANSI colors enabled:               %s\n"
-              "gzip and zip support:              %s\n"
-              "configuration file %s  %s\n",
+              "parallel port backup unit support: %s\n",
               UCON64_VERSION_S, __DATE__,
               CURRENT_OS_S,
               ENDIANESS_STATUS,
               DEBUG_STATUS,
-              PARALLEL_STATUS,
+              PARALLEL_STATUS);
+
+#if     defined AMIGA && defined PARALLEL
+      printf ("parallel port device:              %s\n", ucon64.parport_dev);
+#endif
+
+      printf ("ANSI colors enabled:               %s\n"
+              "gzip and zip support:              %s\n"
+              "configuration file %s  %s\n",
               ANSI_COLOR_STATUS,
               ZLIB_STATUS,
               // display the existence only for the config file (really helps solving problems)

@@ -39,7 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#define UCON64_VERSION (198)
 
 /* version of config file layout */
-#define UCON64_CONFIG_VERSION (205)
+#define UCON64_CONFIG_VERSION (206)
 
 #define MBIT (131072)
 #define TOMBIT(x) ((int)(x) / MBIT)

@@ -67,7 +67,9 @@ write programs in C
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "ucon64_opts.h"
+#ifdef  DISCMAGE
 #include "ucon64_lib.h"
+#endif
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
@@ -200,7 +202,7 @@ const struct option options[] = {
 //    {"mgh", 0, 0, UCON64_MGH},
     {"mirr", 1, 0, UCON64_MIRR},
     {"mka", 1, 0, UCON64_MKA},
-#ifdef  DISCMAG
+#ifdef  DISCMAGE
     {"mkcue", 0, 0, UCON64_MKCUE},
 #endif
     {"mkdat", 1, 0, UCON64_MKDAT},

@@ -288,7 +288,7 @@ ucon64_pad (const char *filename, int start, int size)
 }
 
 
-#if 0
+#if 1
 long
 ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
@@ -325,7 +325,7 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
         pos -= MAXBUFSIZE, buf_pos = MAXBUFSIZE)
     {
       for (; buf_pos > 0; buf_pos--)
-        if (buf[buf_pos - 1] != c) 
+        if (buf[buf_pos - 1] != c)
           return rominfo->file_size - (pos + buf_pos) > 1 ?
             rominfo->file_size - (pos + buf_pos) : 0;
     }
@@ -433,23 +433,25 @@ outportw (unsigned short port, unsigned short word)
 #endif // defined __unix__ || defined __BEOS__
 
 
+#define DETECT_MAX_CNT 1000
 static int
 ucon64_parport_probe (unsigned int port)
 {
   int i = 0;
-#define DETECT_MAX_CNT 1000
 
-#ifdef __FreeBSD__
+#ifdef  __FreeBSD__
   if (i386_set_ioperm (port, 1, 1) == -1)
-#else
-  if (ioperm (port, 1, 1) == -1)
-#endif
     return -1;
+#elif   defined __linux__
+  if (ioperm (port, 1, 1) == -1)
+    return -1;
+#endif
 
   outportb (port, 0xaa);
   for (i = 0; i < DETECT_MAX_CNT; i++)
-    if (inportb (port) == 0xaa) break;
-    
+    if (inportb (port) == 0xaa)
+      break;
+
   if (i < DETECT_MAX_CNT)
     {
       outportb (port, 0x55);
@@ -458,12 +460,13 @@ ucon64_parport_probe (unsigned int port)
           break;
     }
 
-#ifdef __FreeBSD__
+#ifdef  __FreeBSD__
   if (i386_set_ioperm (port, 1, 0) == -1)
-#else
+    return -1;
+#elif   defined __linux__
   if (ioperm (port, 1, 0) == -1)
+    return -1;
 #endif
-    return -1; 
 
   if (i >= DETECT_MAX_CNT)
     return 0;
@@ -502,38 +505,33 @@ ucon64_parport_init (unsigned int port)
       fprintf (stderr, "ERROR: Could not register function with atexit()\n");
       exit (1);
     }
-#else 
-
-#ifdef __i386__ // 0x3bc, 0x378, 0x278
-
-  if (!port) // no port specified or forced yet?
+#elif   defined __i386__                        // 0x3bc, 0x378, 0x278
+  if (!port)                                    // no port specified or forced yet?
     {
       unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };
       int x, found = 0;
-      
+
       for (x = 0; x < 3; x++)
         if ((found = ucon64_parport_probe (parport_addresses[x])) == 1)
           {
             port = parport_addresses[x];
             break;
           }
-      
+
       if (found != 1)
         {
           fprintf (stderr, "ERROR: Could not find a parallel port on your system\n"
-                           "       Try " OPTION_LONG_S "port=PORT to specify it by hand\n\n"
-           );
-
-           exit (1);
+                           "       Try " OPTION_LONG_S "port=PORT to specify it by hand\n\n");
+          exit (1);
         }
-    }      
-
+    }
 #endif // __i386__
 
+#if     defined __linux__ || defined __FreeBSD__
 #ifdef  __FreeBSD__
-      if (i386_set_ioperm (port, 3, 1) == -1)            // data, status & control
+      if (i386_set_ioperm (port, 3, 1) == -1)   // data, status & control
 #else
-      if (ioperm (port, 3, 1) == -1)   // data, status & control
+      if (ioperm (port, 3, 1) == -1)            // data, status & control
 #endif
         {
           fprintf (stderr,
@@ -542,13 +540,13 @@ ucon64_parport_init (unsigned int port)
                    port + PARPORT_DATA, port + PARPORT_STATUS, port + PARPORT_CONTROL);
           exit (1);                             // Don't return, if ioperm() fails port access
         }                                       //  causes core dump
-#endif // __BEOS__
+#endif // __linux__ || __FreeBSD__
 
   outportb (port + PARPORT_CONTROL,
-    inportb (port + PARPORT_CONTROL) & 0x0f); // bit 4 = 0 -> IRQ disable for
-                                              //  ACK, bit 5-7 unused
+    inportb (port + PARPORT_CONTROL) & 0x0f);   // bit 4 = 0 -> IRQ disable for
+                                                //  ACK, bit 5-7 unused
 
-#ifdef  __unix__
+#if     defined __linux__ || defined __FreeBSD__
   /*
     Some code needs us to switch to the real uid and gid. However, other code
     needs access to I/O ports other than the standard printer port registers.
@@ -566,7 +564,7 @@ ucon64_parport_init (unsigned int port)
                        "       (This program needs root privileges for the requested action)\n");
       return 1;
     }
-#endif // __unix__
+#endif // __linux__ || __FreeBSD__
 
   return port;
 }
@@ -599,7 +597,7 @@ ucon64_rom_in_archive (DIR **dp, const char *archive, char *romname,
 
   chdir (buf);
 
-  while ((ep = readdir (*dp)))  //find rom in dp and return it as romname
+  while ((ep = readdir (*dp)))                  // find rom in dp and return it as romname
     if (!stat (ep->d_name, &fstate))
       if (S_ISREG (fstate.st_mode))
         {

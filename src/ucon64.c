@@ -372,8 +372,7 @@ main (int argc, char **argv)
   ucon64.comment = "";
 
   getcwd (ucon64.output_path, FILENAME_MAX); // default output path
-  if (OFFSET (ucon64.output_path, strlen (ucon64.output_path) - 1)
-        != FILE_SEPARATOR)
+  if (OFFSET (ucon64.output_path, strlen (ucon64.output_path) - 1) != FILE_SEPARATOR)
     strcat (ucon64.output_path, FILE_SEPARATOR_S);
 
   sscanf (get_property (ucon64.configfile, "parport", buf2, "0x378"), "%x", &ucon64.parport);
@@ -854,7 +853,7 @@ ucon64_usage (int argc, char *argv[])
   printf (
     "Usage: %s [OPTION]... [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE] [-o=OUTPUT_PATH]\n\n"
     "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
-#ifdef ANSI_COLOR
+#ifdef  ANSI_COLOR
     "  " OPTION_LONG_S "ncol        disable ANSI colors in output\n"
 #endif
     "  " OPTION_LONG_S "hdn=N       force ROM has backup unit/emulator header with N Bytes size\n"
@@ -866,7 +865,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "dint        convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
     "                  this differs from the SNES & NES " OPTION_LONG_S "dint option\n"
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
-#ifdef	__MSDOS__
+#ifdef  __MSDOS__
     "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
 #else
     "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
@@ -884,16 +883,14 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "rl          rename all files in DIRECTORY to lowercase; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "ru          rename all files in DIRECTORY to uppercase; " OPTION_LONG_S "rom=DIRECTORY\n"
 #endif
-#ifdef	__MSDOS__
+#ifdef  __MSDOS__
     "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\"\n"
 #else
     "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\"\n"       // less is more ;-)
 #endif
-#if __MSDOS__
     "  " OPTION_LONG_S "find        find string in ROM; " OPTION_LONG_S "file=STRING (wildcard: '?')\n"
     "  " OPTION_S "c           compare ROMs for differencies; " OPTION_LONG_S "file=OTHER_ROM\n"
     "  " OPTION_LONG_S "cs          compare ROMs for similarities; " OPTION_LONG_S "file=OTHER_ROM\n"
-#endif
     "  " OPTION_LONG_S "stpn=N      strip N Bytes from ROM beginning\n"
     "  " OPTION_LONG_S "stp         same as " OPTION_LONG_S "stpn=512\n"
     "                  most backup units use a header with 512 Bytes size\n"
@@ -904,8 +901,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_S "p, " OPTION_LONG_S "pad    pad ROM to full Mb\n"
     "  " OPTION_LONG_S "padn=N      pad ROM to N Bytes (put Bytes with value 0x00 after end)\n"
     "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
-    , argv[0], ucon64.configfile
-  );
+    , argv[0], ucon64.configfile);
 
   UCON64_USAGE (bsl_usage);
   UCON64_USAGE (ips_usage);
@@ -921,14 +917,13 @@ ucon64_usage (int argc, char *argv[])
 //    "                  %s,\n"
     "                  %s,\n"
     "                  and %s\n",
-    gameboy_usage[0], sms_usage[0], 
-//    genesis_usage[0], 
+    gameboy_usage[0], sms_usage[0],
+//    genesis_usage[0],
     nes_usage[0], snes_usage[0]);
 
   printf (
     "  " OPTION_LONG_S "cd          force recognition (of CD IMAGES)\n"
-    "                  this is the support for the most CD-based consoles\n"
-    );
+    "                  this is the support for the most CD-based consoles\n");
 
 //  UCON64_USAGE (cdrw_usage);
   printf ("%s", cdrw_usage[2]);
@@ -970,8 +965,7 @@ ucon64_usage (int argc, char *argv[])
     "                  if you can read this uCON64 was compiled with active DEBUG\n"
     "                  this should only happen for development versions\n"
 #endif // DEBUG
-    "\n"
-  );
+    "\n");
 
   optind = option_index = 0;
   single = 0;
@@ -1231,8 +1225,7 @@ ucon64_usage (int argc, char *argv[])
      , ucon64_dbsize (UCON64_UNKNOWN)
      , ucon64_dbsize (UCON64_UNKNOWN) - UCON64_DBSIZE
 #endif // DB
-     , argv[0], argv[0]
-   );
+     , argv[0], argv[0]);
 }
 
 

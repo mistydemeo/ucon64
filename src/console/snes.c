@@ -48,7 +48,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GD3_HEADER_MAPSIZE 0x18
 #define NSRT_HEADER_VERSION 22                  // version 2.2 header
 
-static int snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
+static int snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer);
 static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_size);
 static int snes_convert_sramfile (const void *header);
 static int snes_fix_pal_protection (st_rominfo_t *rominfo);
@@ -2476,7 +2476,7 @@ snes_init (st_rominfo_t *rominfo)
     {
       fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       return -1;                                // don't exit(), we might've been
-    }                                           //  called from -lsv
+    }                                           //  called with -lsv
   q_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
 
 #ifdef  ALT_HILO
@@ -2642,7 +2642,7 @@ snes_init (st_rominfo_t *rominfo)
       // internal ROM crc
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = rominfo->internal_crc2_len = 2;
-      rominfo->current_internal_crc = snes_chksum (rominfo, rom_buffer);
+      rominfo->current_internal_crc = snes_chksum (rominfo, &rom_buffer);
       rominfo->internal_crc = snes_header.checksum_low;
       rominfo->internal_crc += snes_header.checksum_high << 8;
       x = snes_header.inverse_checksum_low;
@@ -2898,8 +2898,87 @@ snes_check_bs (void)
 #endif
 
 
+#if 1
 int
-snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer)
+snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
+// Calculate the checksum of a SNES ROM.
+{
+  int i, rom_size, internal_rom_size;
+  unsigned short int sum;
+
+  rom_size = ucon64.file_size - rominfo->buheader_len;
+  if (rominfo->interleaved)
+    {
+      ucon64.fcrc32 = crc32 (0, *rom_buffer, rom_size);
+      snes_deinterleave (rominfo, *rom_buffer, rom_size);
+    }
+  ucon64.crc32 = crc32 (0, *rom_buffer, rom_size);
+
+  if (!bs_dump)
+    {
+      internal_rom_size = 1 << (snes_header.rom_size + 10);
+      if (internal_rom_size < rom_size)
+        internal_rom_size = rom_size;
+      if (internal_rom_size > 16 * 1024 *1024)
+        internal_rom_size = 16 * 1024 *1024;
+    }
+  else
+    internal_rom_size = rom_size;
+
+//  printf ("DEBUG internal_rom_size: %d; rom_size: %d\n",
+//          internal_rom_size, rom_size);
+  if (!(*rom_buffer = (unsigned char *) realloc (*rom_buffer, internal_rom_size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], internal_rom_size);
+      return -1;                                // don't exit(), we might've been
+    }                                           //  called with -lsv
+  if (internal_rom_size > rom_size)
+    memcpy (*rom_buffer + rom_size,
+            *rom_buffer + (rom_size - (internal_rom_size - rom_size)),
+            internal_rom_size - rom_size);
+
+  sum = 0;
+  if ((snes_header.rom_type == 0xf5 && snes_header.map_type != 0x30)
+      || snes_header.rom_type == 0xf9 || bs_dump)
+    {
+      for (i = 0; i < rom_size; i++)
+        sum += (*rom_buffer)[i];                // Far East of Eden Zero (J)
+      if (rom_size == 24 * MBIT)
+        sum *= 2;                               // Momotaro Dentetsu Happy (J)
+
+      if (bs_dump)
+        for (i = rominfo->header_start;
+             i < (int) (rominfo->header_start + SNES_HEADER_LEN); i++)
+          sum -= (*rom_buffer)[i];
+    }
+  else
+    for (i = 0; i < internal_rom_size; i++)
+      sum += (*rom_buffer)[i];
+
+  /*
+    Load rom_buffer with the ROM again if uCON64 detected it as interleaved or
+    if uCON64 was forced to handle it as being interleaved, so that rom_buffer
+    matches with the ROM dump on disk. rom_buffer was "deinterleaved" (=changed)
+    in order to calculate the checksum. However, it isn't necessary to load
+    rom_buffer again in the case that uCON64 wasn't forced to handle the ROM as
+    interleaved and snes_deinterleave() detected that the ROM wasn't interleaved
+    after all. In that case snes_deinterleave() already reloaded rom_buffer. Of
+    course, it also isn't necessary to reload rom_buffer if ROM is a normal ROM.
+    In short:
+      force_interleaved?  interleaved?    reload?
+      yes                 yes             yes
+      yes                 no              yes
+      no                  yes             yes
+      no                  no              no
+  */
+  if (force_interleaved || rominfo->interleaved)
+    q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
+
+  return sum;
+}
+#else
+int
+snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
 /*
   Calculate the checksum of a SNES ROM. This function tries to calculate a
   checksum that matches the one that is stored inside the ROM. As a result of
@@ -2914,10 +2993,10 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer)
   rom_size = ucon64.file_size - rominfo->buheader_len;
   if (rominfo->interleaved)
     {
-      ucon64.fcrc32 = crc32 (0, rom_buffer, rom_size);
-      snes_deinterleave (rominfo, rom_buffer, rom_size);
+      ucon64.fcrc32 = crc32 (0, *rom_buffer, rom_size);
+      snes_deinterleave (rominfo, *rom_buffer, rom_size);
     }
-  ucon64.crc32 = crc32 (0, rom_buffer, rom_size);
+  ucon64.crc32 = crc32 (0, *rom_buffer, rom_size);
 
   pow2size = 1;
   while (pow2size < rom_size)
@@ -2928,19 +3007,21 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer)
   if (pow2size_half >= MBIT && bs_dump)
     {                                           // Broadcast Satellaview "ROM"
       for (i = 0; i < rominfo->header_start; i++)
-        sum1 += rom_buffer[i];
+        sum1 += (*rom_buffer)[i];
       for (i = rominfo->header_start + SNES_HEADER_LEN; i < pow2size_half; i++)
-        sum1 += rom_buffer[i];
+        sum1 += (*rom_buffer)[i];
     }
   else
     for (i = 0; i < pow2size_half; i++)         // normal ROM
-      sum1 += rom_buffer[i];
+      sum1 += (*rom_buffer)[i];
 
   sum2 = 0;
   remainder = rom_size - pow2size_half;
   for (i = pow2size_half; i < rom_size; i++)
-    sum2 += rom_buffer[i];
+    sum2 += (*rom_buffer)[i];
   sum1 += sum2 * (pow2size_half / remainder);
+//  printf ("DEBUG pow2size: %d; pow2size_half: %d; remainder: %d\n",
+//          pow2size, pow2size_half, remainder);
 
   // here follows a fix for ROM dumps like Far East of Eden Zero (J)
   //  and Momotaro Dentetsu Happy (J)
@@ -2949,7 +3030,7 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer)
     {                                           //  checksum algorithm
       sum2 = 0;
       for (i = 0; i < rom_size; i++)
-        sum2 += rom_buffer[i];
+        sum2 += (*rom_buffer)[i];
       if (sum2 == internal_sum)
         sum1 = sum2;                            // Far East of Eden Zero
       sum2 *= 2;
@@ -2974,10 +3055,11 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer)
       no                  no              no
   */
   if (force_interleaved || rominfo->interleaved)
-    q_fread (rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
+    q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
 
   return sum1;
 }
+#endif
 
 
 #ifdef  ALT_HILO

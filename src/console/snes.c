@@ -3659,7 +3659,7 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
 int
 snes_demirror (st_rominfo_t *rominfo)           // nice verb :-)
 {
-  int fixed = 0, size = ucon64.file_size - rominfo->buheader_len, mirror_size;
+  int fixed = 0, size = ucon64.file_size - rominfo->buheader_len, mirror_size = 0;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
 
@@ -3676,8 +3676,14 @@ snes_demirror (st_rominfo_t *rominfo)           // nice verb :-)
     }
 
   if (size % (12 * MBIT) == 0 && size != 36 * MBIT) // 12, 24 or 48 Mbit dumps can be mirrored
+    mirror_size = size / 12 * 2;
+  else if (size == 16 * MBIT)                   // ...and some C4 dumps too
+    mirror_size = 4 * MBIT;
+  else if (size == 32 * MBIT)                   // ...and some SA-1 dumps too
+    mirror_size = 8 * MBIT;
+
+  if (mirror_size)
     {
-      mirror_size = size / 12 * 2;
       if (memcmp (buffer + size - mirror_size, buffer + size - 2 * mirror_size,
                   mirror_size) == 0)
         {

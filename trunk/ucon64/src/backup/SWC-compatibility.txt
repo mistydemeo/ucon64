@@ -1,7 +1,7 @@
 A Super Wild Card compatibility list
-Version: 1.19
+Version: 1.20
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 8 may 2003
+Date: 19 May 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
 Software: uCON64 1.9.8beta8
 
@@ -182,6 +182,7 @@ Code    Game
 0 -     International Superstar Soccer (E)
 2 + 9 - Jikkyou Oshaberi Parodius (J)
 2 -     Joe and Mac 2 (U)(35468)
+2 -     Joe and Mac 2 (U)(54227)
 0 -     Joe and Mac - Caveman Ninja (E)
 0 -     Joe and Mac - Caveman Ninja (U)
 0 -     JRR Tolkien's The Lord of the Rings - Volume One (U)

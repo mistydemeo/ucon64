@@ -891,17 +891,20 @@ ucon64_rom_handling (void)
       return 0;
     }
 
-  // the next statement is important and should be executed as soon as
+  // The next statement is important and should be executed as soon as
   //  possible (and sensible) in this function
   ucon64.file_size = q_fsize (ucon64.rom);
 
   // Does the option allow split ROMs?
   if (ucon64.flags & WF_NO_SPLIT)
-    if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.rom))
-      {
-        fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n", basename2 (ucon64.rom));
-        return -1;
-      }
+    // test for split files only if the console type knows about split files at all
+    if (ucon64.console == UCON64_NES || ucon64.console == UCON64_SNES ||
+        ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG)
+      if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.rom))
+        {
+          fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n", basename2 (ucon64.rom));
+          return -1;
+        }
 
   if (!(ucon64.flags & WF_INIT))
     return 0;
@@ -932,7 +935,7 @@ ucon64_rom_handling (void)
         if (ucon64.force_disc)
           ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
     }
-//end of WF_PROBE
+  // end of WF_PROBE
 
 
   /*

@@ -908,7 +908,7 @@ ucon64_output_fname (char *requested_fname, int flags)
   // We have to make a copy, because get_suffix() returns a pointer to a
   //  location in the original string
   strncpy (suffix, get_suffix (requested_fname), 80);
-  suffix[80] = 0;                               // in case suffix is >= 80 chars
+  suffix[80 - 1] = 0;                           // in case suffix is >= 80 chars
 
   // OF_FORCE_BASENAME is necessary for options like -gd3. Of course that
   //  code should handle archives and come up with unique filenames for
@@ -1518,7 +1518,6 @@ ucon64_testsplit (const char *filename)
       strcpy (buf, filename);
       p = strrchr (buf, '.') + x;               // if x == -1 change char before '.'
                                                 // else if x == 1 change char behind '.'
-
       if (buf > p ||                            // filename starts with a period
           p - buf > ((int) strlen (buf)) - 1)   // filename ends with a period
         continue;

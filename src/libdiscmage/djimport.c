@@ -204,8 +204,8 @@ dm_cue_write (const dm_image_t *a)
 
 
 int
-dm_rip (const dm_image_t *a, int b, uint32_t c);
+dm_rip (const dm_image_t *a, int b, uint32_t c)
 {
   CHECK
-  return dm_rip_ptr (a,b,c);
+  return dm_rip_ptr (a, b, c);
 }

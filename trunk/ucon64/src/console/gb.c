@@ -395,7 +395,7 @@ gameboy_ssc (st_rominfo_t *rominfo)
   if ((p[0] == 'G' || p[0] == 'g') && (p[1] == 'B' || p[1] == 'b'))
     strcpy (dest_name, p);
   else
-    sprintf (dest_name, "%s%s", is_func (p, strlen (p), isupper) ? "GB" : "gb", p);
+    sprintf (dest_name, "%s%s", is_func (p, strlen (p), isupper2) ? "GB" : "gb", p);
   set_suffix (dest_name, ".GB");
 
   ucon64_file_handler (dest_name, src_name, 0);

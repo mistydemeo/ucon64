@@ -205,12 +205,11 @@ const char *dm_msg[] = {
 
 static void (*dm_gauge_ptr) (int pos, int size) = NULL;
 /*
-  dm_gauge_set MUST be static (hidden) on Mac OS X or we get a strange error
+  dm_gauge_ptr MUST be static (hidden) on Mac OS X or we get a strange error
   about common symbols (?) not being allowed with MH_DYLIB output format. This
   is a bit strange, because other (non-basic type) symbols don't result in that
   warning message. It's probably my ignorance. - dbjh
 */
-static int dm_gauge_set = 0;
 
 
 int
@@ -386,14 +385,13 @@ void
 dm_set_gauge (void (*gauge) (int, int))
 {
   dm_gauge_ptr = gauge;
-  dm_gauge_set = gauge ? 1 : 0;
 }
 
 
 void
 dm_gauge (int pos, int size)
 {
-  if (dm_gauge_set)
+  if (dm_gauge_ptr)
     dm_gauge_ptr (pos, size);
 }
 

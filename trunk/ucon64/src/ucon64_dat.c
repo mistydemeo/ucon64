@@ -30,6 +30,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef  HAVE_DIRENT_H
+#include <dirent.h>
+#endif
 #ifdef  _WIN32
 #include <windows.h>
 #endif

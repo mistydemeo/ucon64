@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef LIBDISCMAGE_H
 #define LIBDISCMAGE_H
 
+#include <stdio.h>                              // FILENAME_MAX
+
 #ifdef  __cplusplus
 extern "C" {
 #endif

@@ -24,14 +24,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#ifdef  HAVE_DIRENT_H
-#include <dirent.h>
-#endif
 #include <sys/stat.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>                             // ioperm() (libc5)

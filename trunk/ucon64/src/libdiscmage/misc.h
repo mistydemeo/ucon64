@@ -34,9 +34,6 @@ extern "C" {
 #include <string.h>
 #include <time.h>                               // gauge() prototype contains time_t
 #include <stdio.h>
-#ifdef  HAVE_DIRENT_H
-#include <dirent.h>
-#endif
 #ifdef  HAVE_ZLIB_H
 #include "misc_z.h"
 #endif                                          // HAVE_ZLIB_H
@@ -239,10 +236,11 @@ extern char *fix_character_set (char *value);
   strtrim()   trim isspace()'s from start and end of string
   strncpy2()  a safer strncpy that DOES terminate a string
 
-  get_suffix() get suffix of filename
+  is_upper2() wrapper for is_upper() (DAMN stupid programmers!)
   set_suffix() set/replace suffix of filename with suffix
               suffix means in this case the suffix INCLUDING the dot '.'
   set_suffix_i() like set_suffix(), but doesn't change the case
+  get_suffix() get suffix of filename
 
   basename2() DJGPP basename() clone
   dirname2()  DJGPP dirname() clone
@@ -279,9 +277,10 @@ extern char *strcasestr2 (const char *str, const char *search);
 #endif
 extern char *strtrim (char *str);
 extern char *strncpy2 (char *dest, const char *src, size_t size);
-extern const char *get_suffix (const char *filename);
+extern int isupper2 (int c);
 extern char *set_suffix (char *filename, const char *suffix);
 extern char *set_suffix_i (char *filename, const char *suffix);
+extern const char *get_suffix (const char *filename);
 extern char *basename2 (const char *path);
 // override a possible XPG basename() which modifies its arg
 #define basename basename2
@@ -341,7 +340,6 @@ extern uint64_t bswap_64 (uint64_t x);
                   it can be used for procedures which take some time to
                   inform the user about the actual progress
   getenv2()       getenv() clone for enviroments w/o HOME, TMP or TEMP variables
-  rmdir2()        like rmdir() but removes non-empty directories recursively
   tmpnam2()       replacement for tmpnam() temp must have the size of FILENAME_MAX
   renlwr()        renames all files tolower()
   drop_privileges() switch to the real user and group id (leave "root mode")
@@ -377,7 +375,6 @@ extern char *ansi_strip (char *str);
 extern int gauge (time_t init_time, int pos, int size);
 extern char *getenv2 (const char *variable);
 extern char *tmpnam2 (char *temp);
-extern int rmdir2 (const char *path);
 //extern int renlwr (const char *path);
 #if     defined __unix__ && !defined __MSDOS__
 extern int drop_privileges (void);

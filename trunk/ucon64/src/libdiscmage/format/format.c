@@ -184,8 +184,8 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
   typedef struct
     {
       int type;
-      int (* init) (dm_image_t *);
-      int (* track_init) (dm_track_t *, FILE *);
+      int (*init) (dm_image_t *);
+      int (*track_init) (dm_track_t *, FILE *);
     } st_probe_t;
 
   static st_probe_t probe[] =

@@ -26,9 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stddef.h>
 #include <stdlib.h>
 #include <ctype.h>
-#ifdef  HAVE_DIRENT_H
-#include <dirent.h>
-#endif
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -417,6 +414,13 @@ strncpy2 (char *dest, const char *src, size_t size)
 }
 
 
+int
+isupper2 (int c)
+{
+  return isupper (c);
+}
+
+
 char *
 set_suffix (char *filename, const char *suffix)
 {
@@ -429,7 +433,7 @@ set_suffix (char *filename, const char *suffix)
       *p2 = 0;
 
   strcpy (suffix2, suffix);
-  strcat (filename, is_func (p, strlen (p), isupper) ? strupr (suffix2) : strlwr (suffix2));
+  strcat (filename, is_func (p, strlen (p), isupper2) ? strupr (suffix2) : strlwr (suffix2));
 
   return filename;
 }
@@ -1938,43 +1942,6 @@ set_property (const char *filename, const char *propname, const char *value)
 //  q_fwrite (buf2, 1, strlen (buf2), filename, "w");
 
   return result;
-}
-
-
-int
-rmdir2 (const char *path)
-{
-#if 0
-  char cwd[FILENAME_MAX];
-  struct dirent *ep;
-  struct stat fstate;
-  DIR *dp;
-
-  if (!(dp = opendir (path)))
-    return -1;
-
-  getcwd (cwd, FILENAME_MAX);
-  chdir (path);
-
-  while ((ep = readdir (dp)) != NULL)
-    {
-      if (stat (ep->d_name, &fstate) == -1)
-        return -1;
-
-      if (S_ISDIR (fstate.st_mode))
-        {
-          if (strcmp (ep->d_name, "..") != 0 && strcmp (ep->d_name, ".") != 0)
-            rmdir2 (ep->d_name);
-        }
-      else
-        remove (ep->d_name);
-    }
-
-  closedir (dp);
-  chdir (cwd);
-
-#endif
-  return rmdir (path);
 }
 
 

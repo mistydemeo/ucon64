@@ -527,38 +527,40 @@ basename2 (const char *str)
 
 void
 change_string (char *searchstr, int strsize, char wc, char esc,
-               char *end, int endsize, char *buf, int bufsize, int offset,
+               char *newstr, int newsize, char *buf, int bufsize, int offset,
                ...)
 /*
-  Search for all occurrences of string searchstr in buf and replace endsize bytes in buf
-  by copying string end to the end of the found searchstring in buf plus offset.
-  If searchstr contains wildcard characters wc, then n wildcard characters in searchstr
-  match any n characters in buf.
-  If searchstr contains escape characters esc, change_string() must be called with two
-  extra arguments for each escape character, set, which must be a string (char *) and
-  setsize, which must be an int. searchstr matches for an escape character if one of the
-  characters in set matches.
-  Note that searchstr is not necessarily a C string; it may contain one or more zero bytes
-  as strsize indicates the length.
-  offset is the relative offset from the last character in searchstring and may have a
-  negative value.
-  This function was written to patch SNES ROM dumps. It does basically the same as the old
-  uCON does, with one exception, the line with:
+  Search for all occurrences of string searchstr in buf and replace newsize
+  bytes in buf by copying string newstr to the end of the found search string
+  in buf plus offset.
+  If searchstr contains wildcard characters wc, then n wildcard characters in
+  searchstr match any n characters in buf.
+  If searchstr contains escape characters esc, change_string() must be called
+  with two extra arguments for each escape character, set, which must be a
+  string (char *) and setsize, which must be an int. searchstr matches for an
+  escape character if one of the characters in set matches.
+  Note that searchstr is not necessarily a C string; it may contain one or more
+  zero bytes as strsize indicates the length.
+  offset is the relative offset from the last character in searchstring and may
+  have a negative value.
+  This function was written to patch SNES ROM dumps. It does basically the same
+  as the old uCON does, with one exception, the line with:
     bufpos -= nwc;
 
-  As stated in the comment, this causes the search to restart at the first wildcard
-  character of the sequence of wildcards that was most recently skipped if the current
-  character in buf didn't match the current character in searchstr. This makes
-  change_string() behave a bit more intuitive. For example
+  As stated in the comment, this causes the search to restart at the first
+  wildcard character of the sequence of wildcards that was most recently
+  skipped if the current character in buf didn't match the current character
+  in searchstr. This makes change_string() behave a bit more intuitive. For
+  example
     char str[] = "f foobar means...";
-    change_string("f**bar", 6, '*', '!', "XXXXXXXX", 8, str, strlen(str), 2);
-  finds and changes "foobar means..." into "foobar XXXXXXXX", while with uCON's algorithm
-  it would not (but does the job good enough for patching SNES ROMs).
+    change_string ("f**bar", 6, '*', '!', "XXXXXXXX", 8, str, strlen (str), 2);
+  finds and changes "foobar means..." into "foobar XXXXXXXX", while with uCON's
+  algorithm it would not (but does the job good enough for patching SNES ROMs).
 
   One example of using sets:
     char str[] = "fu-bar     is the same as foobar    ";
-    change_string("f!!", 3, '*', '!', "fighter", 7, str, strlen(str), 1,
-                  "uo", 2, "o-", 2);
+    change_string ("f!!", 3, '*', '!', "fighter", 7, str, strlen (str), 1,
+                   "uo", 2, "o-", 2);
   This changes str into "fu-fighter is the same as foofighter".
 */
 {
@@ -593,7 +595,7 @@ change_string (char *searchstr, int strsize, char wc, char esc,
 
           if (strpos == strsize - 1)            // check if we are at the end of searchstr
             {
-              memcpy (buf + bufpos + offset, end, endsize);
+              memcpy (buf + bufpos + offset, newstr, newsize);
               break;
             }
 
@@ -612,7 +614,7 @@ change_string (char *searchstr, int strsize, char wc, char esc,
         {
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
-              memcpy (buf + bufpos + offset, end, endsize);
+              memcpy (buf + bufpos + offset, newstr, newsize);
               break;
             }
 
@@ -639,7 +641,7 @@ change_string (char *searchstr, int strsize, char wc, char esc,
         {
           if (strpos == strsize - 1)            // check if at end of searchstr
             {
-              memcpy (buf + bufpos + offset, end, endsize);
+              memcpy (buf + bufpos + offset, newstr, newsize);
               strpos = 0;
             }
           else
@@ -647,9 +649,13 @@ change_string (char *searchstr, int strsize, char wc, char esc,
         }
       else
         {
-          strpos = 0;
           bufpos -= nwc;                        // scan the most recent wildcards too if
-        }                                       //  the character didn't match
+          if (strpos > 0)                       //  the character didn't match
+            {
+              bufpos--;                         // current char has to be checked, but `for'
+              strpos = 0;                       //  increments bufpos
+            }
+        }
     }
 
   va_end (argptr);
@@ -985,7 +991,7 @@ tmpnam3 (char *temp, int type)
           fclose (fh);
         break;
     }
-    
+
   return temp;
 }
 

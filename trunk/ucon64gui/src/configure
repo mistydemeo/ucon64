@@ -2511,7 +2511,7 @@ program_transform_name=`echo $program_transform_name | sed -f conftest.sed`
 rm conftest.sed
 
 
-CFLAGS="-I. -I./html2gui/ -Wall -O3 \`gtk-config --cflags\`"
+CFLAGS="-I. -Wall -O3 \`gtk-config --cflags\`"
 LDFLAGS="-s \`gtk-config --cflags --libs\`"
 
 echo "$as_me:$LINENO: checking whether debugging output is enabled" >&5

@@ -300,7 +300,7 @@ extern unsigned long long int bswap_64 (unsigned long long int x);
   wait2           wait (sleep) a specified number of milliseconds
 */
 extern void change_string (char *searchstr, int strsize, char wc, char esc,
-                           char *end, int endsize, char *buf, int bufsize,
+                           char *newstr, int newsize, char *buf, int bufsize,
                            int offset, ...);
 #ifdef  ANSI_COLOR
 extern int ansi_init (void);

@@ -9,7 +9,7 @@ AC_ISC_POSIX
 AC_STDC_HEADERS
 AC_ARG_PROGRAM
 
-CFLAGS="-I. -I./html2gui/ -Wall -O3 \`gtk-config --cflags\`"
+CFLAGS="-I. -Wall -O3 \`gtk-config --cflags\`"
 LDFLAGS="-s \`gtk-config --cflags --libs\`"
 dnl sdl-config --cflags --libs
 

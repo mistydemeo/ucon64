@@ -2549,7 +2549,7 @@ snes_bs_name (void)
         {
           value = snes_header.name[n + 1];
           if (value < 0x20)
-            if ((n_valid != 11) || (value != 0))     // Dr. Mario Hack
+            if ((n_valid != 11) || (value != 0)) // Dr. Mario Hack
               break;
 
           n_valid++;

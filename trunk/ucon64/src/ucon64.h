@@ -73,6 +73,7 @@ typedef struct
   int frontend;                                 // flag if uCON64 was started by a frontend
   int discmage_enabled;                         // flag if discmage DLL is loaded
   int dat_enabled;                              // flag if DAT file(s) are usable/enabled
+  int good_enabled;                             // --good was used
 
   int show_nfo;                                 // show or skip info output for ROM
 

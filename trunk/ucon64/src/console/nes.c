@@ -207,6 +207,13 @@ static int rom_size;
 static FILE *nes_destfile;
 
 
+static int
+my_toprint (int c)
+{
+  return isprint (c) ? c : '-';
+}
+  
+
 static void
 remove_destfile (void)
 {
@@ -2478,10 +2485,12 @@ nes_fdsl (st_rominfo_t *rominfo, char *output_str)
             }
           /*
             Some FDS files contain control characters in their names. sprintf()
-            won't print those character so we have to use mkprint().
+            won't print those character so we have to use to_func() with my_toprint().
           */
           sprintf (line, "%03d $%02x '%-8s' $%04x-$%04x [%s]\n",
-                   buffer[1], buffer[2], mkprint (name, '-'), start, start + size - 1,
+                   buffer[1], buffer[2], 
+                   to_func (name, strlen (name), my_toprint),
+                   start, start + size - 1,
                    str_list[buffer[15]]);
           strcat (info, line);
 

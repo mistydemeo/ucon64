@@ -22,6 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -135,8 +136,9 @@ random number when backing up games.
       return -1;
     }
 
-  strcpy (buf, areupper (basename (ucon64.rom)) ? "PC" : "pc");
-  strcat (buf, basename (ucon64.rom));
+  p = basename (ucon64.rom);
+  strcpy (buf, is_func (p, strlen (p), isupper) ? "PC" : "pc");
+  strcat (buf, p);
   if ((p = strrchr (buf, '.')))
     *p = 0;
   strcat (buf, "________");

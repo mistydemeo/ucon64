@@ -208,7 +208,7 @@ int
 genesis_mgd (st_rominfo_t *rominfo)
 {
   unsigned char dest_name[FILENAME_MAX], *rom_buffer = NULL, buf[FILENAME_MAX], mgh[512];
-  char *p = NULL;
+  unsigned char *p = NULL;
   int x, y;
   const char mghcharset[1024] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -348,8 +348,9 @@ genesis_mgd (st_rominfo_t *rominfo)
     }
   load_rom (rominfo, ucon64.rom, rom_buffer);
 
-  strcpy (buf, areupper (basename (ucon64.rom)) ? "MD" : "md");
-  strcat (buf, basename (ucon64.rom));
+  p = basename (ucon64.rom);
+  strcpy (buf, is_func (p, strlen (p), isupper) ? "MD" : "md");
+  strcat (buf, p);
   if ((p = strrchr (buf, '.')))
     *p = 0;
   strcat (buf, "________");
@@ -415,12 +416,13 @@ genesis_s (st_rominfo_t *rominfo)
 
   if (type == BIN)
     {
-      strcpy (buf, areupper (basename (ucon64.rom)) ? "MD" : "md");
-      strcat (buf, basename (ucon64.rom));
+      p = basename (ucon64.rom);
+      strcpy (buf, is_func (p, strlen (p), isupper) ? "MD" : "md");
+      strcat (buf, p);
       if ((p = strrchr (buf, '.')))
         *p = 0;
       strcat (buf, "________");
-      buf[7] = areupper (buf) ? 'A' : 'a';
+      buf[7] = is_func (buf, strlen (buf), isupper) ? 'A' : 'a';
       buf[8] = 0;
 
       sprintf (dest_name, "%s.%03lu", buf,

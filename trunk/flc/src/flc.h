@@ -63,7 +63,7 @@ struct flc_
 
 struct sub_
 {
-  char name[NAME_MAX+1];
+  char name[FILENAME_MAX+1];
   off_t size;
   unsigned long date;
   int checked;

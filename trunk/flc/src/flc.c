@@ -36,8 +36,8 @@ void flc_exit(void)
 
 int main(int argc,char *argv[])
 {
-char buf[NAME_MAX+1];
-char buf2[4096];
+char buf[FILENAME_MAX+1];
+char buf2[FILENAME_MAX];
 struct flc_ flc;
 struct file_ *file0=NULL,*file=NULL,file_ns;
 struct dirent *ep;
@@ -55,11 +55,22 @@ if(argcmp(argc, argv, "-frontend"))atexit(flc_exit);
 /*
    configfile handling
 */
-#ifdef	__DOS__
-  strcpy(buf, "flc.cfg");
+  sprintf (buf, "%s%c"
+#ifdef  __DOS__
+  "flc.cfg"
 #else
-  sprintf(buf, "%s%c.flcrc", getenv("HOME"), FILE_SEPARATOR);
+  /*
+    Use getchd() here too. If this code gets compiled under Windows the compiler has to be
+    Cygwin. So, uCON64 will be a Win32 executable which will run only in an environment
+    where long filenames are available and where files can have more than three characters
+    as "extension". Under Bash HOME will be set, but most Windows people will propably run
+    uCON64 under cmd or command where HOME is not set by default. Under Windows XP/2000
+    (/NT?) USERPROFILE and/or HOMEDRIVE+HOMEPATH will be set which getchd() will "detect".
+  */
+  ".flcrc"
 #endif
+  , getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
+
 
 if(access(buf,F_OK)==-1)printf("ERROR: %s not found: creating...",buf);
 else if(getProperty(buf, "version", buf2, NULL) == NULL)

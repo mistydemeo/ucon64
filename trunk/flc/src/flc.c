@@ -206,13 +206,13 @@ if(stat(flc.path,&puffer)!=-1 &&
 
   output(&flc,&file->sub);
 
-  return(0);
+  return 0;
 }
 
 if(!(dp=opendir(flc.path)))
 {
   flc_usage(argc,argv);
-  return(-1);
+  return -1;
 }
 
 while((ep=readdir(dp))!=NULL)
@@ -228,7 +228,7 @@ while((ep=readdir(dp))!=NULL)
     {
       printf("%s: Error allocating memory\n",getarg(argc,argv,0));
       (void)closedir(dp);
-      return(-1);
+      return -1;
     }
 
     file0=file;
@@ -239,7 +239,7 @@ while((ep=readdir(dp))!=NULL)
     {
       printf("%s: Error allocating memory\n",getarg(argc,argv,0));
       (void)closedir(dp);
-      return(-1);
+      return -1;
     }
     file=file->next;
   }
@@ -269,7 +269,7 @@ if(flc.html)printf(
   "</pre></tt></body></html>\n"
 );
 
-return(0);
+return 0;
 }
 
 
@@ -296,5 +296,5 @@ printf(
   ,getarg(argc,argv,flc_NAME)
 );
 
-return(0);
+return 0; 
 }

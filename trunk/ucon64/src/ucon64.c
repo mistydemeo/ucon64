@@ -72,7 +72,7 @@ write programs in C
 #include "console/dc.h"
 #include "console/jaguar.h"
 #include "console/psx.h"
-#include "console/sample.h"
+#include "console/other.h"
 
 #include "patch/ppf.h"
 #include "patch/xps.h"

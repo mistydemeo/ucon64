@@ -65,7 +65,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/swan.h"
 #include "console/dc.h"
 #include "console/jaguar.h"
-#include "console/sample.h"
+#include "console/other.h"
 
 
 const st_track_modes_t track_modes[] = {

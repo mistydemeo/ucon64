@@ -142,6 +142,10 @@ Q48: <a href="#48">Is there any way to make uCON64 convert a ROM dump to Game
 <br>
 Q49: <a href="#49">How do I use the command line?</a><br>
 <br>
+Q50: <a href="#50">I configured uCON64 to use ppdev and tried to send a file to
+   my backup unit as a regular user. I got an error message that the parallel
+   port device could not be opened. What did I do wrong?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -504,7 +508,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
   </tr>
   <tr>
     <td><tt>parport_dev</tt></td>
-    <td><tt>name of parallel port device (AmigaOS or Unix with ppdev)</tt></td>
+    <td><tt>name of parallel port device (AmigaOS or Linux with ppdev)</tt></td>
   </tr>
   <tr>
     <td><tt>parport</tt></td>
@@ -512,7 +516,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
   </tr>
   <tr>
     <td><tt>discmage_path</tt></td>
-    <td><tt>full path of discmage DLL</tt></td>
+    <td><tt>path to discmage DLL</tt></td>
   </tr>
   <tr>
     <td><tt>ucon64_configdir</tt></td>
@@ -533,6 +537,26 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
   <tr>
     <td><tt>emulate_0x&#60;CRC32&#62;</tt></td>
     <td><tt>command line to use to start emulator for file with that CRC32</tt></td>
+  </tr>
+  <tr>
+    <td><tt>f2afirmware</tt></td>
+    <td><tt>path to F2A firmware</tt></td>
+  </tr>
+  <tr>
+    <td><tt>iclientu</tt></td>
+    <td><tt>path to GBA client binary (for USB code)</tt></td>
+  </tr>
+  <tr>
+    <td><tt>iclientp</tt></td>
+    <td><tt>path to GBA client binary (for parallel port code)</tt></td>
+  </tr>
+  <tr>
+    <td><tt>ilogo</tt></td>
+    <td><tt>path to iLinker logo file</tt></td>
+  </tr>
+  <tr>
+    <td><tt>gbaloader</tt></td>
+    <td><tt>path to multi-game loader</tt></td>
   </tr>
 </table><br>
    Each of these variables can also be set in the command line environment. If
@@ -937,10 +961,10 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <a name="30"><b>Q30</b>: I want to convert a NES ROM in iNES format to UNIF.
    How do I know what board name to use?</a><br>
 <b>A</b>: The file
-   <a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/ucon64/ucon64/src/console/boardtable.txt?rev=1.1" target="_blank">
+   <a href="http://cvs.sourceforge.net/viewcvs.py/ucon64/ucon64/src/console/boardtable.txt?view=markup" target="_blank">
    boardtable.txt</a> contains a table where you can find what game uses what
    board. The file
-   <a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/ucon64/ucon64/src/console/boardnames?rev=1.1" target="_blank">
+   <a href="http://cvs.sourceforge.net/viewcvs.py/ucon64/ucon64/src/console/boardnames?view=markup" target="_blank">
    boardnames</a> contains a list of all known board names.<br>
 <br>
 <p>
@@ -1736,6 +1760,32 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    value 378. Then uCON64 is used to transfer mana.swc to a Super Wild Card
    while using parallel port address 0x378. Then the file mana.swc is removed.
    Finally the directory "test" is removed.<br>
+<br>
+<p>
+<a name="50"><b>Q50</b>: I configured uCON64 to use ppdev and tried to send a
+   file to my backup unit as a regular user. I got an error message that the
+   parallel port device could not be opened. What did I do wrong?</a><br>
+<b>A</b>: There are two possibilities:<br>
+   1.) You specified an incorrect parallel port device in the configuration
+   file.<br>
+   In most cases the correct device is /dev/parport0. Only change the device
+   name if you are sure /dev/parport0 is not the device associated with the
+   parallel port your backup unit is connected to. Try for example /dev/parport1
+   or /dev/parport2.<br>
+   2.) You do not have the required privileges.<br>
+   It is true that regular users can transfer files to and from their backup
+   units (without the executable being setuid root), but that does not mean
+   <i>any</i> user can do that. It is quite common that only users in the group
+   "lp" have access to /dev/parport&#60;n&#62;. So, you should add yourself to
+   that group. Say your login name is helanren. Root could use the following
+   command to give you the privilege to use /dev/parport0:<br>
+   &nbsp;&nbsp;usermod -G `echo \`id -Gn helanren\` | sed "s/ /,/g"`,lp helanren<br>
+   Explanation:<br>
+   <b>usermod -G &#60;groups&#62; helanren</b> is used to make helanren a member
+   of those groups.<br>
+   <b>id -Gn helanren</b> lists the groups helanren is currently a member of,
+   separated by spaces.<br>
+   <b>sed "s/ /,/g"</b> replaces all spaces with commas.<br>
 <br>
 <p>
 <br>

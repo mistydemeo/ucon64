@@ -620,16 +620,21 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   correct index files (MULTI-GD) (by dbjh)<br>
 - updated (SNES &amp; Genesis) -s produces an index file if the ROM dump is in
   MGD format (by dbjh)<br>
-- added support for ppdev (currently GNU/Linux-only) (by dbjh)<br>
+- added support for ppdev (GNU/Linux-only) (by dbjh)<br>
   This solves two problems:<br>
   1.) It's no longer necessary for uCON64 to be setuid root in order to
   communicate with a backup unit. Just make sure /dev/parport&#60;n&#62; has the
   right permissions or get yourself added to the correct group<br>
   2.) Non-standard parallel port addresses do not have to be specified. uCON64
   still uses the first parallel port by default. It's possible to override that
-  by setting parport_dev in the configuration file or to set an environment
+  by setting parport_dev in the configuration file or by setting an environment
   variable<br>
-  Use the configure option --enable-ppdev to enable the code
+  Use the configure option --enable-ppdev to enable the code<br>
+- added (GBA) support for the Flash 2 Advance (Ultra); options are -xf2a
+  (transfer ROM data), -xf2ac=N (dump N Mbits), -xf2as (transfer 256 kB of SRAM
+  data) and -xf2ab=BANK (transfer 64 kB of SRAM data to "bank" BANK) (by NoisyB
+  and dbjh, based on source code of Ulrich Hecht and David Voswinkel; many
+  thanks to David Voswinkel for testing the parallel port code)<br>
 <br>
 <br>
 <br>

@@ -65,7 +65,7 @@ bsl_apply (const char *mod, const char *bslname)
 
   printf ("Applying BSL/Baseline patch...\n");
   
-  while (!feof (bslfile))                        // we could use 1, but feof() makes it fail-safe
+  while (!feof (bslfile))                       // we could use 1, but feof() makes it fail-safe
     {
       fscanf (bslfile, "%d\n", &offset);
       fscanf (bslfile, "%d\n", &data);

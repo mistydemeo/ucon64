@@ -128,23 +128,17 @@ main (int argc, char *argv[])
           return -1;
         }
     }
-/*
+
   if (optind < argc)
     {
-      printf (" non - option ARGV - elements : ");
       while (optind < argc)
-        printf ("%s ", argv[optind++]);
-      printf ("\n");
+        strcpy (flc.path, argv[optind++]);
     }
-  exit (0);
-}
-*/
 
   flc.argc = argc;
   for (x = 0; x < argc; x++)
     flc.argv[x] = argv[x];
 
-  strcpy (flc.path, getarg (argc, argv, flc_FILE));
   getProperty (flc.configfile, "file_id_diz", flc.config, "file_id.diz");
 
   if (flc.html)
@@ -197,7 +191,7 @@ main (int argc, char *argv[])
           if (!(file = (struct file_ *) malloc (sizeof (struct file_))))
             {
               printf ("%s: Error allocating memory\n",
-                      getarg (argc, argv, 0));
+                      argv[0]);
               (void) closedir (dp);
               return -1;
             }
@@ -211,7 +205,7 @@ main (int argc, char *argv[])
                (struct file_ *) malloc (sizeof (struct file_))))
             {
               printf ("%s: Error allocating memory\n",
-                      getarg (argc, argv, 0));
+                      argv[0]);
               (void) closedir (dp);
               return -1;
             }
@@ -247,7 +241,7 @@ main (int argc, char *argv[])
   return 0;
 }
 
-int
+void
 flc_usage (int argc, char *argv[])
 {
   printf ("\n%s\n"
@@ -264,9 +258,7 @@ flc_usage (int argc, char *argv[])
           "\n"
           "Amiga version: noC-FLC Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
           "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n",
-          flc_TITLE, getarg (argc, argv, flc_NAME));
-
-  return 0;
+          flc_TITLE, argv[0]);
 }
 
 int

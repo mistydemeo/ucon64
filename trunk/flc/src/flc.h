@@ -22,12 +22,9 @@
 #ifndef FLC_H
 #define FLC_H
 
-#define flc_NAME 0
-#define flc_FILE 1
-
 #define MAXBUFSIZE 32768
 
-extern int flc_usage(int argc, char *argv[]);
+extern void flc_usage(int argc, char *argv[]);
 
 #define flc_VERSION "1.0.1"
 

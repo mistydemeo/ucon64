@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 enum
 {
-  ucon64_1991,
+  ucon64_1991 = 1,
   ucon64_3DO,
   ucon64_A,
   ucon64_ATA,
@@ -127,6 +127,7 @@ enum
   ucon64_NHD,
   ucon64_NHI,
   ucon64_NINT,
+  ucon64_NO,
   ucon64_NPPF,
   ucon64_NROT,
   ucon64_NS,
@@ -189,6 +190,7 @@ enum
   ucon64_XSWC,
   ucon64_XSWCS,
   ucon64_XV64,
+  ucon64_YES,
   ucon64_Z64
 };
 

@@ -23,6 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define PPF_H
 extern int makeppf_main (int argc, char *argv[]);
 extern int applyppf_main (int argc, char *argv[]);
-extern int addppfid (int argc, char *argv[]);
+extern int addppfid (char *filename);
 extern void ppf_usage (void);
 #endif

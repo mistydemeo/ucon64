@@ -508,22 +508,19 @@ applyppf_main (int argc, char *argv[])
 
 #include "ucon64.h"
 int
-addppfid (int argc, char *argv[])
+addppfid (char *filename)
 {
   long fsize;
   long pos = 0;
 
-  char filename[4096];
   char fileidbuf[3072];
   char buf[4095];
-
-  strcpy (filename, getarg (argc, argv, ucon64_ROM));
 
   printf ("Adding file_id.diz .. ");
   fsize = quickftell (filename);
   if (fsize > 3072)
     fsize = 3072;               /* File id only up to 3072 bytes! */
-  quickfread (fileidbuf, 0, fsize, getarg (argc, argv, ucon64_FILE));
+  quickfread (fileidbuf, 0, fsize, ucon64.file);
   fileidbuf[fsize] = 0;
   sprintf (buf, "@BEGIN_FILE_ID.DIZ%s@END_FILE_ID.DIZ", fileidbuf);
 

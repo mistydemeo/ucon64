@@ -3,6 +3,7 @@ fal.c - Flash Linker Advance support for uCON64
 
 written by 2001 Jeff Frohwein
            2001 NoisyB (noisyb@gmx.net)
+           2001 dbjh
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -54,6 +55,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //  6. If no Manuf ID detected then report no cart backup available.
 
 #include "fal.h"
+
+#define outp(p,v)  outportb(p,v); iodelay()
+#define inp(p)   inportb(p)
 
 //#define HEADER_LENGTH 0xc0
 //#define OUTBUFLEN 256                   // Must be a multiple of 2! (ex:64,128,256...)
@@ -1167,63 +1171,134 @@ int fal_main(int argc, char **argv)
    }
 
 
-
+/*
+  It will save you some work if you don't fully integrate the code above with ucon64's code,
+  because it is a project separate from the ucon64 project.
+*/
 int fal_argc;
 char *fal_argv[128];
 
-int fal_read(	char *filename
-			,unsigned int parport
-)
+int fal_read(char *filename, unsigned int parport, int argc, char *argv[])
 {
-
 //TODO more options
+  fal_argv[0] = "fal";
 
-	fal_argv[0]="fal";
-	fal_argv[1]="-s";
-	fal_argv[2]=filename;
-	fal_argc=3;
+  fal_argv[1] = "-c";
+  if (argncmp(argc, argv, "-xfalc", 6))		// strlen("-xfalc") == 6
+  {
+    if (argcmp(argc, argv, "-xfalc8"))
+      fal_argv[2] = "8";
+    else if (argcmp(argc, argv, "-xfalc16"))
+      fal_argv[2] = "16";
+    else if (argcmp(argc, argv, "-xfalc32"))
+      fal_argv[2] = "32";
+    else if (argcmp(argc, argv, "-xfalc64"))
+      fal_argv[2] = "64";
+    else if (argcmp(argc, argv, "-xfalc128"))
+      fal_argv[2] = "128";
+    else if (argcmp(argc, argv, "-xfalc256"))
+      fal_argv[2] = "256";
+    else
+    {
+      fprintf(stderr, "Invalid argument for -xfalc<n>\n"
+                      "n can be 8, 16, 32, 64, 128 or 256; default is -xfalc32\n");
+      exit(1);
+    }
+  }
+  else
+    fal_argv[2] = "32";
 
-	if(!fal_main(	fal_argc, fal_argv ))
-	{
-		return(0);
-	}
-        return(-1);
-	return(0);
+  if (parport != 0x378 && parport != 0x278)
+  {
+    fprintf(stderr,
+            "PORT must be 0x378 or 0x278\n"
+            "If you didn't specify PORT on the command line, change the address in your BIOS\n"
+            "setup\n");
+    fflush(stdout);
+    exit(1);
+  }
+  fal_argv[3] = "-l";
+  if (parport == 0x378)
+    fal_argv[4] = "1";
+  else
+    fal_argv[4] = "2";
+
+  fal_argv[5] = "-s";
+  fal_argv[6] = filename;
+  fal_argc = 7;
+
+  if (argcmp(argc, argv, "-xfalm"))
+  {
+    fal_argv[7] = "-m";
+    fal_argc++;
+  }
+
+  if (!fal_main(fal_argc, fal_argv))
+  {
+    return 0;
+  }
+
+  return -1;
 }
 
-int fal_write(	char *filename
-			,long start
-			,long len
-			,unsigned int parport
-)
+int fal_write(char *filename, long start, long len, unsigned int parport, int argc, char *argv[])
 {
-
 //TODO more options
-	fal_argv[0]="fal";
-	fal_argv[1]="-p";
-	fal_argv[2]=filename;
-	fal_argc=3;
+  fal_argv[0] = "fal";
 
-	if(!fal_main(	fal_argc, fal_argv ))
-	{
-		return(0);
-	}
-        return(-1);
+  if (argncmp(argc, argv, "-xfalc", 6))		// strlen("-xfalc") == 6
+  {
+    fprintf(stderr, "-xfalc<n> can only be used when receiving a ROM\n");
+    exit(1);
+  }
+  if (parport != 0x378 && parport != 0x278)
+  {
+    fprintf(stderr,
+            "PORT must be 0x378 or 0x278\n"
+            "If you didn't specify PORT on the command line, change the address in your BIOS\n"
+            "setup\n");
+    fflush(stdout);
+    exit(1);
+  }
+  fal_argv[1] = "-l";
+  if (parport == 0x378)
+    fal_argv[2] = "1";
+  else
+    fal_argv[2] = "2";
+
+  fal_argv[3] = "-p";
+  fal_argv[4] = filename;
+  fal_argc = 5;
+
+  if (argcmp(argc, argv, "-xfalm"))
+  {
+    fal_argv[5] = "-m";
+    fal_argc++;
+  }
+
+  if (!fal_main(fal_argc, fal_argv))
+  {
+    return 0;
+  }
+
+  return -1;
 }
 
-
-int fal_usage(int argc,char *argv[])
+int fal_usage(int argc, char *argv[])
 {
-if(argcmp(argc,argv,"-help"))printf("\n%s\n",fal_TITLE);
+  if (argcmp(argc, argv, "-help"))
+    printf("\n%s\n", fal_TITLE);
 
-printf(	"  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
-	"  		receives automatically when $ROM does not exist\n"
-	"TODO: test if -xfal does work with the hardware\n");
+  printf("  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
+         "                receives automatically when $ROM does not exist\n"
+         "  -xfalc<n>     specify chip size in mbits of ROM in Flash Advance Linker when\n"
+         "                receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32\n"
+         "  -xfalm        use SPP mode, default is EPP\n");
 
-if(argcmp(argc,argv,"-help"))
-{
-//TODO more info like technical info about cabeling and stuff for the copier
+  if (argcmp(argc, argv, "-help"))
+  {
+  //TODO more info like technical info about cabeling and stuff for the copier
+  }
 
-}
-	return(0);
+  return 0;
 }

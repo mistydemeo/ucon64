@@ -499,10 +499,10 @@ checkabort (int status)
 {
   if (((!ucon64.frontend) ? kbhit () : 0) && getch () == 'q')
     {
+//      send_command (5, 0, 0);                   // vgs: when sending/receiving a ROM
       puts ("\nProgram aborted");
       exit (status);
     }
-//  send_command (5, 0, 0);                       // vgs: when sending/receiving a ROM
 }
 
 void

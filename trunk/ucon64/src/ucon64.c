@@ -122,6 +122,8 @@ main (int argc, char *argv[])
   struct dirent *ep;
   struct stat puffer;
   DIR *dp;
+  unsigned long padded;
+  char current_dir[FILENAME_MAX];
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[4096], *ucon64_argv[128],
        *forceargs[] = {
     "",
@@ -197,8 +199,6 @@ main (int argc, char *argv[])
     {0, 0, 0, 0}
   };
 
-  unsigned long padded;
-  char current_dir[FILENAME_MAX];
 
   printf ("%s\n", ucon64_TITLE);
   printf ("Uses code from various people. See 'developers.html' for more!\n");
@@ -1616,6 +1616,46 @@ ucon64_flush (int argc, char *argv[], struct ucon64_ *rom)
 
 int ucon64_e(void)
     {
+  long x, y = 0;
+  int ucon64_argc, skip_init_nfo = 0, c = 0;
+  struct dirent *ep;
+  struct stat puffer;
+  DIR *dp;
+  unsigned long padded;
+  char current_dir[FILENAME_MAX];
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[4096], *ucon64_argv[128],
+       *forceargs[] = {
+    "",
+    "-gb",
+    "-gen",
+    "-sms",
+    "-jag",
+    "-lynx",
+    "-n64",
+    "-ng",
+    "-nes",
+    "-pce",
+    "-psx",
+    "-ps2",
+    "-snes",
+    "-sat",
+    "-dc",
+    "-cd32",
+    "-cdi",
+    "-3do",
+    "-ata",
+    "-s16",
+    "-ngp",
+    "-gba",
+    "-vec",
+    "-vboy",
+    "-swan",
+    "-coleco",
+    "-intelli",
+    "-gc",
+    "-xbox",
+    "-gp32"
+  };
       char *property;
 
       if (rom.console != ucon64_UNKNOWN /* && rom.console != ucon64_KNOWN */ )
@@ -1646,18 +1686,18 @@ int ucon64_e(void)
         }
 
       sprintf (buf, "%s %s", buf2, rom.file);
-      for (x = 0; x < argc; x++)
+/*      for (x = 0; x < argc; x++)
         {
           if (strdcmp (argv[x], "-e")
               && strdcmp (argv[x], getarg (argc, argv, ucon64_NAME))
               && strdcmp (argv[x], rom.file))
             {
-              sprintf (buf2, ((!strdcmp (argv[x], rom.rom)) ? " \"%s\"" :       /*" %s" */
+              sprintf (buf2, ((!strdcmp (argv[x], rom.rom)) ? " \"%s\"" :
                               ""), argv[x]);
               strcat (buf, buf2);
             }
         }
-
+*/
       printf ("%s\n", buf);
       fflush (stdout);
       sync ();
@@ -1688,6 +1728,46 @@ int ucon64_e(void)
 
 int ucon64_ls(void)
 {
+  long x, y = 0;
+  int ucon64_argc, skip_init_nfo = 0, c = 0;
+  struct dirent *ep;
+  struct stat puffer;
+  DIR *dp;
+  unsigned long padded;
+  char current_dir[FILENAME_MAX];
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[4096], *ucon64_argv[128],
+       *forceargs[] = {
+    "",
+    "-gb",
+    "-gen",
+    "-sms",
+    "-jag",
+    "-lynx",
+    "-n64",
+    "-ng",
+    "-nes",
+    "-pce",
+    "-psx",
+    "-ps2",
+    "-snes",
+    "-sat",
+    "-dc",
+    "-cd32",
+    "-cdi",
+    "-3do",
+    "-ata",
+    "-s16",
+    "-ngp",
+    "-gba",
+    "-vec",
+    "-vboy",
+    "-swan",
+    "-coleco",
+    "-intelli",
+    "-gc",
+    "-xbox",
+    "-gp32"
+  };
         if (access (rom.rom, R_OK) != 0 || (dp = opendir (rom.rom)) == NULL)
           return -1;
 
@@ -1708,14 +1788,14 @@ int ucon64_ls(void)
                     strcpy (rom.rom, ep->d_name);
                     ucon64_init (&rom);
 
-                    if (argcmp (argc, argv, "-ls"))
+//TODO                    if (argcmp (argc, argv, "-ls"))
                       {
                         strftime (buf, 13, "%b %d %H:%M",
                                   localtime (&puffer.st_mtime));
                         printf ("%-31.31s %10d %s %s\n", rom.name,
                                 (int) puffer.st_size, buf, rom.rom);
                       }
-                    else if (argcmp (argc, argv, "-lsv"))
+//TODO                    else if (argcmp (argc, argv, "-lsv"))
                       ucon64_nfo (&rom);
 /*TODO renamer!
                     else if (argcmp (argc, argv, "-rrom") &&

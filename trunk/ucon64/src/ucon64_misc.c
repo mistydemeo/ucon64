@@ -791,11 +791,24 @@ ucon64_extract (const char *archive)
   char temp[FILENAME_MAX];
   char path[FILENAME_MAX];
   char property_name[MAXBUFSIZE], buf2[MAXBUFSIZE];
+  const char *property_format = NULL;
 
   if (!archive) return archive;
   if (!archive[0]) return archive;
 
   getcwd (cwd, FILENAME_MAX);
+  sprintf (path, "%s" FILE_SEPARATOR_S "%s", cwd, basename2 (archive));
+
+  sprintf (property_name, "%s_extract", &getext (archive)[1]);
+  property_format = get_property (ucon64.configfile, strlwr (property_name), buf2, NULL);
+
+  if (!property_format)
+    return archive;
+
+  sprintf (buf, property_format, path);
+
+  if (!buf[0])
+    return archive;
 
   tmpnam3 (temp, TYPE_DIR);
   chdir (temp);
@@ -803,14 +816,6 @@ ucon64_extract (const char *archive)
 #ifdef  DEBUG
   fprintf (stderr, "%s\n", temp);
 #endif  
-
-  sprintf (path, "%s" FILE_SEPARATOR_S "%s", cwd, basename2 (archive));
-
-  sprintf (property_name, "%s_extract", &getext (archive)[1]);
-  sprintf (buf, NULL_TO_EMPTY (get_property (ucon64.configfile, strlwr (property_name), buf2, NULL)), path);
-
-  if (!buf[0])
-    return archive;
 
 #if 1
   result = system (buf)

@@ -68,12 +68,12 @@ h2g_system (char *query)
   strcpy (name, &query[len + 1]);
 
 
-  if (!strncmp (query, "rom=", 4))
+  if (!strncmp (query, "--rom=", 6))
     {
       strcpy (ucon64gui.rom, &query[4]);
       return;
     }
-  if (!strncmp (query, "file=", 5))
+  if (!strncmp (query, "--file=", 7))
     {
       strcpy (ucon64gui.file, &query[5]);
       return;
@@ -282,11 +282,11 @@ ucon64gui_root (void)
 {
 #include "xpm/trans.xpm"
 #ifdef BACKUP
-  char *backup_unit_options[]={
+  static const char *backup_unit_options[]={
 "Flash Advance Linker","Doctor V64","Doctor64 Jr","Super Wild Card", 
 "Super Magic Drive","GameBoy Xchanger",NULL
 };
-  char *backup_unit_values[]={
+  static const char *backup_unit_values[]={
 "ucon64gui_fal","ucon64gui_doctor64","ucon64gui_doctor64jr",
 "ucon64gui_swc","ucon64gui_smd","ucon64gui_gbx",
 NULL

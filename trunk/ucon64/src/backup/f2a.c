@@ -159,7 +159,7 @@ static int f2a_boot_par (const char *ilclient2_fname, const char *illogo_fname);
 static int f2a_write_par (int files_cnt, char **files, unsigned int addr);
 static int f2a_read_par (unsigned int start, unsigned int size,
                          const char *filename);
-static int f2a_erase_par (unsigned int start, unsigned int size);
+//static int f2a_erase_par (unsigned int start, unsigned int size);
 static int f2a_send_buffer_par (int cmd, int addr,
                                 int size, const unsigned char *resource, int head,
                                 int flip, unsigned int exec, int mode);
@@ -545,17 +545,12 @@ f2a_init_par (int parport, int parport_delay)
 int
 parport_init (int port, int target_delay)
 {
-  int stat; //, ecpreg = port + 0x402, eppmode = 1;
-
   f2a_pport = port;
   parport_nop_cntr = parport_init_delay (target_delay);
 
   printf ("Using I/O port 0x%x\n", f2a_pport);
 
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x04);
-#if 0 // Don't write to the _STATUS_ register
-  outportb ((unsigned short) (f2a_pport + PARPORT_STATUS), 0x01);
-#endif
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
   outportb ((unsigned short) (f2a_pport + PARPORT_DATA), 0x04);
 
@@ -569,28 +564,12 @@ parport_init (int port, int target_delay)
   parport_out31 (0x02);
   parport_out91 (0x00);
 
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x00);
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x02);
-  stat = inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
-#if 0
-  if (stat != 0x7e)
-    {
-      fprintf (stderr, "ERROR: Parallel port initialisation failed (%d)\n", stat);
-      return -1;
-    }
-#endif
+  inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x06);
-  stat = inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
-#if 0
-  if (stat != 0x7e)
-    {
-      fprintf (stderr, "ERROR: Parallel port initialisation failed (%d)\n", stat);
-      return -1;
-    }
-#endif
-
-#if 0 // Don't write to the _STATUS_ register
-  outportb ((unsigned short) (f2a_pport + PARPORT_STATUS), 0x01);
-#endif
+  
+  inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
   outportb ((unsigned short) (f2a_pport + PARPORT_EADDRESS), 0x04);
   outportb ((unsigned short) (f2a_pport + PARPORT_EDATA), 0x07);
@@ -608,14 +587,9 @@ parport_init (int port, int target_delay)
   outportb ((unsigned short) (f2a_pport + PARPORT_EDATA), 0x56);
 
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
-  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
   outportb ((unsigned short) (f2a_pport + PARPORT_EADDRESS), 0x02);
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x00);
-  if (inportb ((unsigned short) (f2a_pport + PARPORT_EDATA)) != 0xff)
-    {
-      fprintf (stderr, "ERROR: Parallel port initialisation failed\n");
-      return -1;
-    }
+  
   return 0;
 }
 
@@ -692,6 +666,7 @@ static void
 parport_out31 (unsigned char val)
 {
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x03);
+  outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x01);
   outportb ((unsigned short) (f2a_pport + PARPORT_DATA), val);
 }

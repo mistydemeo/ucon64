@@ -219,7 +219,11 @@ lynx_b (st_rominfo_t *rominfo, int bank)
     *bankvar = 0;
   else
 #ifdef  WORDS_BIGENDIAN
+#ifdef  AMIGA
+    *bankvar = atol (ucon64.file) >> 8;
+#else
     *bankvar = bswap_16 (atol (ucon64.file) * 4);
+#endif
 #else
     *bankvar = atol (ucon64.file) * 4;
 #endif
@@ -286,9 +290,17 @@ lynx_init (st_rominfo_t *rominfo)
         "Version: %d\n"
         "Rotation: %s",
 #ifdef  WORDS_BIGENDIAN
+#ifdef  AMIGA
+        lnx_header.page_size_bank0 << 8,
+#else        
         bswap_16 (lnx_header.page_size_bank0) * 256,
+#endif        
         TOMBIT_F (bswap_16 (lnx_header.page_size_bank0) * 256),
+#ifdef  AMIGA
+        (lnx_header.page_size_bank1) << 8,
+#else
         bswap_16 (lnx_header.page_size_bank1) * 256,
+#endif
         TOMBIT_F (bswap_16 (lnx_header.page_size_bank1) * 256),
         bswap_16 (lnx_header.version),
 #else

@@ -34,6 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 #include "config.h"
+
 #ifdef  BACKUP
 #ifdef  __FreeBSD__
 #include <machine/sysarch.h>
@@ -288,16 +289,13 @@ typedef struct st_ioport
 {
   unsigned int port;
 #if     defined AMIGA
-  FILE *fd;
+  //FILE *fd;
 #endif
   unsigned char data8;
   unsigned short data16;
 } st_ioport_t;
 
 static int ucon64_io_fd;
-#if     defined AMIGA
-//static FILE *ucon64_io_fd;
-#endif
 #endif
 
 const char *unknown_usage[] =
@@ -649,7 +647,6 @@ close_io_port (void)
 }
 #endif
 
-
 unsigned char
 inportb (unsigned short port)
 {
@@ -662,12 +659,12 @@ inportb (unsigned short port)
   return temp.data8;
 #elif   defined AMIGA
   st_ioport_t temp;
-  
+
   temp.port = port;
-          
+
   ioctl (ucon64_io_fd, 'r', &temp, 0);
 //  fscanf (ucon64_io_fd, "%c", temp.data8);
-                  
+
   return temp.data8;
 #elif   defined __i386__
   unsigned char byte;
@@ -695,9 +692,9 @@ inportw (unsigned short port)
   return temp.data16;
 #elif   defined AMIGA
   st_ioport_t temp;
-        
+
   temp.port = port;
-                
+
   ioctl (ucon64_io_fd, 'r16', &temp, 0);
 //  fscanf (ucon64_io_fd, "%ld",temp.data16);
 
@@ -727,7 +724,7 @@ outportb (unsigned short port, unsigned char byte)
   ioctl (ucon64_io_fd, 'w', &temp, 0);
 #elif   defined AMIGA
   st_ioport_t temp;
-        
+
   temp.port = port;
   temp.data8 = byte;
   ioctl (ucon64_io_fd, 'w', &temp, 0);
@@ -753,7 +750,7 @@ outportw (unsigned short port, unsigned short word)
   ioctl (ucon64_io_fd, 'w16', &temp, 0);
 #elif   defined AMIGA
   st_ioport_t temp;
-  
+
   temp.port = port;
   temp.data16 = word;
   ioctl (ucon64_io_fd, 'w16', &temp, 0);

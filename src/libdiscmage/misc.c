@@ -1812,25 +1812,37 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
     {                                           //  avoids trouble under DOS
       while (fgets (line, sizeof line, fh) != NULL)
         {
-          p = line + strspn (line, "\t ");
+          p = line + strspn (line, "\t ");      // strip leading whitespace
           if (*p == '#' || *p == '\n' || *p == '\r')
             continue;                           // text after # is comment
           if ((p = strpbrk (line, "\n\r#")))    // strip *any* returns
             *p = 0;
 
-          if (!strnicmp (line, propname, strlen (propname)))
+          p = strchr (line, PROPERTY_SEPARATOR);
+          if (p)
             {
-              p = strchr (line, PROPERTY_SEPARATOR);
-              if (p)                    // if no divider was found the propname must be
-                {                       //  a bool config entry (present or not present)
+              // if no divider was found the propname must be a bool config
+              //  entry (present or not present)
+              *p = 0;                           // note that this "cuts" line
+              // strip trailing whitespace from property name part of line
+              for (i = strlen (line) - 1;
+                   i >= 0 && (line[i] == '\t' || line[i] == ' ');
+                   i--)
+                line[i] = 0;
+            }
+
+          if (!stricmp (line, propname))
+            {
+              if (p)
+                {
                   p++;
+                  // strip leading whitespace from value
                   strcpy (buffer, p + strspn (p, "\t "));
-                  // strip trailing whitespace
+                  // strip trailing whitespace from value
                   for (i = strlen (buffer) - 1;
                        i >= 0 && (buffer[i] == '\t' || buffer[i] == ' ');
                        i--)
                     buffer[i] = 0;
-
                 }
               prop_found = 1;
               break;                            // an environment variable
@@ -2206,8 +2218,8 @@ bswap_32 (uint32_t x)
   ptr[2] = tmp;
   return x;
 #else
-  return ((((x) & 0xff000000) >> 24) | (((x) & 0x00ff0000) >>  8) | \
-    (((x) & 0x0000ff00) <<  8) | (((x) & 0x000000ff) << 24));
+  return ((((x) & 0xff000000) >> 24) | (((x) & 0x00ff0000) >>  8) |
+          (((x) & 0x0000ff00) <<  8) | (((x) & 0x000000ff) << 24));
 #endif
 }
 
@@ -2665,7 +2677,7 @@ _popen (const char *path, const char *mode)
 {
   int fd;
   BPTR fh;
-  long fdflags, fhflags;
+  long fhflags;
   char *apipe = malloc (strlen (path) + 7);
 
   if (!apipe)
@@ -2675,15 +2687,9 @@ _popen (const char *path, const char *mode)
   strcat (apipe, path);
 
   if (*mode == 'w')
-    {
-      fdflags = 2;
-      fhflags = MODE_NEWFILE;
-    }
+    fhflags = MODE_NEWFILE;
   else
-    {
-      fdflags = 1;
-      fhflags = MODE_OLDFILE;
-    }
+    fhflags = MODE_OLDFILE;
 
   if (!(fh = Open (apipe, fhflags)))
     return NULL;

@@ -30,11 +30,11 @@ extern "C" {
 
 #if     defined __linux__ || defined __FreeBSD__ || defined __solaris__ || \
         defined __MINGW32__ || defined __CYGWIN__ || defined __BEOS__ || \
-        defined __APPLE__                       // Mac OS X actually
+        defined AMIGA || defined __APPLE__      // Mac OS X actually
 // We cannot use config.h (for HAVE_INTTYPES_H), because this header file may be
 //  installed in a system include directory
 #include <inttypes.h>
-#else                                           // __MSDOS__, _WIN32 (VC++), AMIGA
+#else                                           // __MSDOS__, _WIN32 (VC++)
 #ifndef OWN_INTTYPES
 #define OWN_INTTYPES                            // signal that these are defined
 typedef unsigned char uint8_t;
@@ -45,7 +45,6 @@ typedef unsigned long long int uint64_t;
 #else
 typedef unsigned __int64 uint64_t;
 #endif
-#ifndef AMIGA                                   // __BIT_TYPES_DEFINED__?
 typedef signed char int8_t;
 typedef signed short int int16_t;
 typedef signed int int32_t;
@@ -54,7 +53,6 @@ typedef signed long long int int64_t;
 #else
 typedef signed __int64 int64_t;
 #endif
-#endif                                          // AMIGA
 #endif                                          // OWN_INTTYPES
 #endif
 

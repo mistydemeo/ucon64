@@ -3,7 +3,7 @@ misc.h - miscellaneous functions
 
 written by 1999 - 2004 NoisyB (noisyb@gmx.net)
            2001 - 2004 dbjh
-           2002 - 2003 Jan-Erik Karlsson (Amiga)
+           2002 - 2004 Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -46,7 +46,7 @@ extern "C" {
 
 #ifdef  HAVE_INTTYPES_H
 #include <inttypes.h>
-#else                                           // __MSDOS__, _WIN32, AMIGA
+#else                                           // __MSDOS__, _WIN32 (VC++)
 #ifndef OWN_INTTYPES
 #define OWN_INTTYPES                            // signal that these are defined
 typedef unsigned char uint8_t;
@@ -57,7 +57,6 @@ typedef unsigned long long int uint64_t;
 #else
 typedef unsigned __int64 uint64_t;
 #endif
-#ifndef AMIGA                                   // __BIT_TYPES_DEFINED__?
 typedef signed char int8_t;
 typedef signed short int int16_t;
 typedef signed int int32_t;
@@ -66,7 +65,6 @@ typedef signed long long int int64_t;
 #else
 typedef signed __int64 int64_t;
 #endif
-#endif                                          // AMIGA
 #endif                                          // OWN_INTTYPES
 #endif
 

@@ -204,12 +204,6 @@ const char *dm_msg[] = {
 };
 
 static void (*dm_gauge_ptr) (int pos, int size) = NULL;
-/*
-  dm_gauge_ptr MUST be static (hidden) on Mac OS X or we get a strange error
-  about common symbols (?) not being allowed with MH_DYLIB output format. This
-  is a bit strange, because other (non-basic type) symbols don't result in that
-  warning message. It's probably my ignorance. - dbjh
-*/
 
 
 int

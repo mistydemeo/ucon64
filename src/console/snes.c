@@ -49,8 +49,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define DETECT_SMC_COM_FUCKED_UP_LOROM 1        // adds support for interleaved LoROMs
 #define DETECT_INSNEST_FUCKED_UP_LOROM 1        // only adds support for its 24 Mbit
                                                 //  interleaved LoROM "format"
-//#define PAD_40MBIT_GD3_DUMPS                    // I (dbjh) want to know if padding
-                                                //  works for Dai Kaiju Monogatari 2 (J)
+//#define PAD_40MBIT_GD3_DUMPS                  // padding works for
+                                                //  Dai Kaiju Monogatari 2 (J)
 
 static int snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer);
 static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer,
@@ -792,9 +792,9 @@ snes_gd3 (st_rominfo_t *rominfo)
   else if (n > 32 && n < 48)
     n = 48;
 #else
-  else if (n > 32 && n <= 40)
+  else if (n > 32 && n < 40)
     n = 40;
-  else if (n < 48)
+  else if (n > 40 && n < 48)
     n = 48;
 #endif
   sprintf (dest_name, "%s%d", is_func (p, strlen (p), isupper) ? "SF" : "sf", n);
@@ -839,7 +839,7 @@ snes_gd3 (st_rominfo_t *rominfo)
       else if (total4Mbparts == 10)
         {
           total4Mbparts = 12;                   // 40 Mbit HiROMs get padded to 48 Mbit
-          printf ("WARNING: Paddding to 48 Mbit -- hasn't been tested on a real Game Doctor\n");
+          printf ("NOTE: Paddding to 48 Mbit\n");
         }
 #endif
 
@@ -1890,7 +1890,7 @@ snes_chk (st_rominfo_t *rominfo)
   /*
     The internal checksum bytes have been included in the checksum
     calculation, but they will be changed after this function returns. We
-    account for that. Otherwise we would have to run uCON64 on the ROM twice.
+    account for that. Otherwise we could have to run uCON64 on the ROM twice.
   */
   rominfo->current_internal_crc += (-snes_header.inverse_checksum_low -
                                     snes_header.inverse_checksum_high -
@@ -1927,25 +1927,21 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   copier, but by incorrect ROM tools...
 */
 {
-  int interleaved = 0, check_map_type = 1, org_snes_header_base;
-  unsigned int crc1 = crc32 (0, rom_buffer, 512),
-               crc2 = crc32 (0, rom_buffer + size / 2, 512);
+  int interleaved = 0, check_map_type = 1, header_offset;
+  unsigned int crc = crc32 (0, rom_buffer, 512);
 
   /*
+    Special case hell
+
     0xfa83b519: Mortal Kombat (Beta) doesn't have an internal header...
     By coincidence no special if statement is needed for the interleaved dump
 
-    0x4a54adc7: Super Aleste (J) [t1] has its header overwritten with the
+    0x65485afb: Super Aleste (J) [t1] has its header overwritten with the
     trainer. The CRC is the same as for Super Aleste (J) (1st 512 bytes)
 
-    0xe43491b8: Street Fighter Alpha 2 (E) {[b1]}
-    0x44ca1045: Street Fighter Alpha 2 (U)
-    0x0c0bc8c5: Street Fighter Zero 2 (J)
+    0x9b4638d0: Street Fighter Alpha 2 (E/U) {[b1]}, Street Fighter Zero 2 (J)
     These games have two nearly identical headers which can't be used to
     determine whether the dump is interleaved or not.
-
-    0x39b94597: BS Satella2 1 (J) has a LoROM map type byte while it's a HiROM
-    game
 
     0xd7470b37: Dai Kaiju Monogatari 2 (J)
     0xa2c5fd29: Tales of Phantasia (J)
@@ -1954,11 +1950,30 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
 
     0x7039388a: Ys 3 - Wanderers from Ys (J)
     This game has 31 internal headers...
+
+    0xdbc88ebf: BS Satella2 1 (J)
+    This game has a LoROM map type byte while it is a HiROM game
+
+    0x29226b62: BS Busters - Digital Magazine 5-24-98 (J),
+                BS Do-Re-Mi No.2 5-10 (J),
+                BS Do-Re-Mi No.2 5-25 (J),
+                BS Furoito No Chousenjou {2, 3, 4, 5, 6} (J),
+                BS Nintendo HP 5-17 (J),
+                BS Nintendo HP 5-31 (J)
+    0xbd7bc39f: BS Goods Press 6 Gatsu Gou (J),
+                BS NP Magazine 107 (J),
+                BS Tora no Maki 5-17 (J),
+                BS Tora no Maki 5-31 (J)
+    0x4ef3d27b: BS Lord Monarke (J)
+    These games are *not* special cases. uCON64 detects them correctly, but the
+    tool that was used to create GoodSNES - 0.999.5 for RC 2.5.dat, does not.
+    This has been verified on a real SNES for the games with crc 0x29226b62 and
+    0x4ef3d27b. The games with crc 0xbd7bc39f don't seem to run on a copier.
   */
-  if (crc1 == 0xfa83b519 || crc1 == 0x4a54adc7)
+  if (crc == 0xfa83b519)
     check_map_type = 0;                         // not interleaved
-  else if (crc2 == 0x4a54adc7 || crc2 == 0xe43491b8 || crc2 == 0x44ca1045 ||
-           crc2 == 0x0c0bc8c5 || crc2 == 0x39b94597 || crc1 == 0x7039388a) // yes, crc1
+  else if (crc == 0x65485afb || crc == 0x9b4638d0 || crc == 0x7039388a ||
+           crc == 0xdbc88ebf)
     {
       interleaved = 1;
       snes_hirom = 0;
@@ -1970,10 +1985,9 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     check_map_type = 0;
   else
     {
-      org_snes_header_base = snes_header_base;
 #ifdef  DETECT_SMC_COM_FUCKED_UP_LOROM
-      snes_header_base = size / 2;
-      if (check_banktype (rom_buffer, snes_header_base) > banktype_score)
+      header_offset = size / 2;
+      if (check_banktype (rom_buffer, header_offset) > banktype_score)
         {
           interleaved = 1;
           snes_hirom = 0;
@@ -1994,8 +2008,8 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
       */
       if (!interleaved && size == 24 * MBIT)
         {
-          snes_header_base = 16 * MBIT;
-          if (check_banktype (rom_buffer, snes_header_base) > banktype_score)
+          header_offset = 16 * MBIT;
+          if (check_banktype (rom_buffer, header_offset) > banktype_score)
             {
               interleaved = 1;
               snes_hirom = 0;
@@ -2004,12 +2018,11 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
             }
         }
 #endif
-      snes_header_base = org_snes_header_base;
     }
   if (check_map_type && !snes_hirom)
     {
       // first check if it's an interleaved Extended HiROM dump
-      if (crc1 == 0xd7470b37 || crc1 == 0xa2c5fd29)
+      if (crc == 0xd7470b37 || crc == 0xa2c5fd29)
         snes_header_base = SNES_EROM;
       if (snes_header.map_type == 0x21 || snes_header.map_type == 0x31 ||
           snes_header.map_type == 0x35 || snes_header.map_type == 0x3a ||
@@ -3094,6 +3107,8 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
 {
   int score = 0;
 
+//  mem_hexdump ((char *) rom_buffer + SNES_HEADER_START + header_offset,
+//               SNES_HEADER_LEN, SNES_HEADER_START + header_offset);
   // game ID info (many games don't have useful info here)
   if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset + 2, 4, isprint))
     score += 1;

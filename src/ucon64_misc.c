@@ -307,7 +307,7 @@ emuchina.net
 
 
 char *ucon64_temp_file = NULL;
-int (*ucon64_testsplit_callback) (const char *filename) = 0;
+int (*ucon64_testsplit_callback) (const char *filename) = NULL;
 
 
 // maker/publisher strings for SNES, GB, GBC and GBA games

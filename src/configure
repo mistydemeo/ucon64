@@ -2102,8 +2102,8 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 echo "${ECHO_T}$with_zlib" >&6
   if test x$with_zlib = xyes; then
     LDFLAGS="$LDFLAGS -lz"
-    DEFINE_ZLIB="#define ZLIB"
-# We could also do CFLAGS="$CFLAGS -DZLIB" instead.
+    DEFINE_ZLIB_CONFIG="#define ZLIB"
+    DEFINE_ZLIB_MAKE="ZLIB=1"
   fi
 else
   echo "$as_me:$LINENO: result: not enabled by user" >&5
@@ -3809,6 +3809,7 @@ done
 
 
 
+
 ac_config_files="$ac_config_files Makefile config.h"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -4401,7 +4402,8 @@ s,@INSTALL_SCRIPT@,$INSTALL_SCRIPT,;t t
 s,@INSTALL_DATA@,$INSTALL_DATA,;t t
 s,@CPP@,$CPP,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
-s,@DEFINE_ZLIB@,$DEFINE_ZLIB,;t t
+s,@DEFINE_ZLIB_CONFIG@,$DEFINE_ZLIB_CONFIG,;t t
+s,@DEFINE_ZLIB_MAKE@,$DEFINE_ZLIB_MAKE,;t t
 CEOF
 
 _ACEOF

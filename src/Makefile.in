@@ -17,6 +17,10 @@ OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
         backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/mgd.o \
         backup/smc.o backup/smd.o backup/swc.o backup/dex.o backup/psxpblib.o \
         backup/mccl.o backup/lynxit.o
+@DEFINE_ZLIB_MAKE@
+ifdef ZLIB
+OBJECTS+=unzip.o
+endif
 
 
 TARGET=ucon64
@@ -109,8 +113,9 @@ endif                                   # cygwin
 UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
 
 getopt.o: getopt.h
+unzip.o: unzip.h
 misc.o: misc.h config.h
-quick_io.o: misc.h
+quick_io.o: quick_io.h misc.h config.h
 ucon64.o: switches.c options.c $(UCON64_STD_H)
 ucon64_misc.o: $(UCON64_STD_H)
 ucon64_db.o: ucon64_db.h $(UCON64_STD_H)

@@ -22,8 +22,8 @@ if test x$with_zlib = xyes; then
   AC_MSG_RESULT($with_zlib)
   if test x$with_zlib = xyes; then
     LDFLAGS="$LDFLAGS -lz"
-    DEFINE_ZLIB="#define ZLIB"
-# We could also do CFLAGS="$CFLAGS -DZLIB" instead.
+    DEFINE_ZLIB_CONFIG="#define ZLIB"
+    DEFINE_ZLIB_MAKE="ZLIB=1"
   fi
 else
   AC_MSG_RESULT(not enabled by user)
@@ -50,7 +50,8 @@ AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(getcwd mkdir putenv rmdir strcspn strerror strtol basename dirname)
 
-AC_SUBST(DEFINE_ZLIB)
+AC_SUBST(DEFINE_ZLIB_CONFIG)
+AC_SUBST(DEFINE_ZLIB_MAKE)
 AC_OUTPUT(Makefile config.h)
 
 echo

@@ -35,11 +35,11 @@ it is also a good start to add support for a new console
 
 
 /*
-  enables/disables support for gzip files
+  enables/disables support for gzip & zip files
 
   comment this to disable it even if the configure script found zlib
 */
-@DEFINE_ZLIB@
+@DEFINE_ZLIB_CONFIG@
 
 
 /*

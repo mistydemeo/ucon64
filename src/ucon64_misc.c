@@ -484,8 +484,9 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
   int c = q_fgetc (filename, pos);
   unsigned char buf[MAXBUFSIZE];
   FILE *fh = fopen (filename, "rb");
-  
-  if (!fh) return -1;
+
+  if (!fh)
+    return -1;
 
   for (pos -= buf_pos; !fseek (fh, pos, SEEK_SET) && pos > -1;
         pos -= MAXBUFSIZE, buf_pos = MAXBUFSIZE)
@@ -496,7 +497,7 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
         if (buf[buf_pos - 1] != c)
           {
             fclose (fh);
-            
+
             return rominfo->file_size - (pos + buf_pos) > 1 ?
               rominfo->file_size - (pos + buf_pos) : 0;
           }
@@ -504,7 +505,7 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 
   fclose (fh);
 
-  return rominfo->file_size; // the whole file is "padded"
+  return rominfo->file_size;                    // the whole file is "padded"
 }
 #endif
 

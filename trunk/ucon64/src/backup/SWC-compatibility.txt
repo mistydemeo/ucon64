@@ -1,7 +1,7 @@
 A Super Wild Card compatibility list
-Version: 1.23
+Version: 1.24
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 23 July 2003
+Date: 16 August 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
 Software: uCON64 1.9.8-2
 
@@ -118,6 +118,7 @@ Code    Game
 0 -     Contra III - The Alien Wars (U)
 0 -     Cybernator (U)
 0 -     Daffy Duck - The Marvin Missions (U)
+7 -     Dai-3-Ji Super Robot Taisen (J)
 9 -     Daikaijuu Monogatari 2 (J) <= works on an SWC DX2 64 Mbit PAL
 0 -     Darius Twin (E)
 0 -     Darius Twin (U)
@@ -209,6 +210,7 @@ Code    Game
 1 -     Lufia II - Rise of the Sinistrals (U)
 0 -     Lufia & The Fortress of Doom (U)
 0 -     Magical Drop (J)
+2* -    Magical Pop'n (J)
 0 -     Magical Quest Starring Mickey Mouse, The (Beta)
 0 -     Magical Quest Starring Mickey Mouse, The (E)
 0 -     Magical Quest Starring Mickey Mouse, The (U)
@@ -223,6 +225,7 @@ Code    Game
 1 + 2 - Mega Man X (U) (V1.0)
 1 + 2 - Mega Man X (U) (V1.1)
 8 + 9 - Metal Combat - Falcon's Revenge (U) <= sprites are not visible
+2* -    Metal Warriors (U)
 2 + 3 - Mickey to Donald Magical Adventure 3 (J) <= emulation mode select byte: 0x1c
 0 -     Micro Machines 2 - Turbo Tournament (E)
 0 -     Micro Machines (U)

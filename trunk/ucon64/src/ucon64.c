@@ -717,8 +717,13 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 // for NoisyB: <read only mode OFF>
 
       if (split)
-        printf ("Split: Yes, %d parts\n"
-          "NOTE: to get the correct checksum the ROM must be joined\n", split);
+        {
+          printf ("Split: Yes, %d part%s\n", split, (split != 1) ? "s" : "");
+          // nes.c calculates the correct checksum for split ROMs (=Pasofami
+          // format), so there is no need to join the files
+          if (UCON64_ISSET (ucon64.console) && ucon64.console != UCON64_NES)
+            printf ("NOTE: to get the correct checksum the ROM must be joined\n");
+        }
     }
 
   if (rominfo->misc[0])

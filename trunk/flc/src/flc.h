@@ -50,6 +50,7 @@ extern st_flc_t flc;
 typedef struct st_sub
 {
   char name[FILENAME_MAX + 1];
+  char fullpath[FILENAME_MAX + 1];
   off_t size;
   unsigned long date;
   int checked;

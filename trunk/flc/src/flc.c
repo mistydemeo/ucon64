@@ -62,7 +62,7 @@ main (int argc, char *argv[])
   DIR *dp;
   int c;
   int option_index = 0;
-  const struct option long_options[] = {
+  static const struct option long_options[] = {
     {"frontend", 0, 0, 1},
     {"t", 0, 0, 't'},
     {"X", 0, 0, 'X'},
@@ -138,7 +138,7 @@ main (int argc, char *argv[])
           return -1;
         }
     }
-
+                    
   if (flc.html)
     printf ("<html><head><title></title></head><body><pre><tt>");
 
@@ -192,7 +192,12 @@ main (int argc, char *argv[])
       fprintf (stderr, "ERROR: could not create temp dir");
       return -1;
     }
-  mkdir (temp, S_IRUSR|S_IWUSR);
+  if (mkdir (temp, S_IRUSR|S_IWUSR) == -1)
+    {
+      fprintf (stderr, "ERROR: could not create temp dir");
+      return -1;
+    }
+
   getcwd (cwd, FILENAME_MAX);
   chdir (temp);
 
@@ -225,7 +230,8 @@ main (int argc, char *argv[])
       file_p->sub.date = puffer.st_mtime;
       file_p->sub.size = puffer.st_size;
       file_p->sub.checked = 'N';
-      strcpy (file_p->sub.name, buf);
+      strcpy (file_p->sub.fullpath, buf);
+      strcpy (file_p->sub.name, FILENAME_ONLY (buf));
       extract (&file_p->sub);
     }
   (void) closedir (dp);

@@ -158,7 +158,7 @@ if(access(buf,R_OK)==-1)
   else
   {
     fputs(        
-"#\n"
+"# uCON64 config\n"
 "#\n"
 "# emulate_<console shortcut>=<emulator with options>\n"
 "#\n"
@@ -183,16 +183,27 @@ if(access(buf,R_OK)==-1)
 "emulate_ata=\n"
 "emulate_s16=\n"
 "emulate_gba=vgba -scale 2 -uperiod 6\n"
+"# ...to be continued!\n"
 "#\n"
-"# ucon64 can operate as frontend for CD burning software to make backups\n"
+"# uCON64 can operate as frontend for CD burning software to make backups\n"
 "# for CD-based consoles \n"
 "#\n"
-"# --device [bus,id,lun] (cdrdao) - The SCSI-address of the used device\n"
+"# It currently supports cdrdao and cdrecord; make sure you check this\n"
+"# configfile for the right settings\n"
+"#\n"
+"# --device [bus,id,lun] (cdrdao)\n"
+"# or\n"
+"# dev=[bus,id,lun] (cdrecord)\n"
+"#\n"
+"# cdrecord has still problems with RAW formats so it is used only to\n"
+"# read/write ISO9660 compatible images like un-bootable Dreamcast backups\n"
 "#\n"
 "cdrdao_raw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
 "cdrdao_raw_write=cdrdao write --eject --speed 12 --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
 "cdrdao_iso_read=cdrdao read-cd --device 0,0,0 --driver generic-mmc --datafile #bin and toc filenames are added by ucon64 at the end\n"
 "cdrdao_iso_write=cdrdao write --eject --speed 12 --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
+"cdrecord_iso_read=\n"
+"cdrecord_iso_write=\n"
     ,fh);
 
     fclose(fh);
@@ -1304,6 +1315,7 @@ else
 	"  -iso		force image is ISO9660 (2048 Bytes/Sector)\n"
 	"  -raw		force image is RAW (2352 Bytes/Sector)\n"
 	"  *		show info (default); ONLY $ROM=RAW_IMAGE\n"
+	"  -r2i          convert RAW to ISO9660; $ROM=RAW_IMAGE\n"
   ,dc_TITLE
   ,ps2_TITLE
   ,saturn_TITLE

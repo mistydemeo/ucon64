@@ -635,9 +635,6 @@ snes_fig (st_rominfo_t *rominfo)
 int
 snes_mgd (st_rominfo_t *rominfo)
 {
-#if 0 // TODO: We need more info about the Multi Game Hunter
-  char mgh[32];
-#endif
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   int size = ucon64.file_size - rominfo->buheader_len;
 
@@ -655,20 +652,6 @@ snes_mgd (st_rominfo_t *rominfo)
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
 
-#if 0 // TODO: We need more info about the Multi Game Hunter (and a new option)
-  // What is the format of this index file?
-  mgh[0] = 'M';
-  mgh[1] = 'G';
-  mgh[2] = 'H';
-  mgh[3] = 0x1a;
-  memset (mgh + 4, 0, 12);
-  memcpy (mgh + 16, rominfo->name, 15);         // copy first 15 bytes (don't use strlen() or strcpy())
-  mgh[31] = (unsigned char) 0xff;
-
-  strcpy (dest_name, "MULTI-GD" /*.MGH"*/); // uCON does "set_suffix (dest_name, ".MGH");" instead
-  ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
-  q_fwrite (&mgh, 0, sizeof (mgh), dest_name, "wb");
-#endif
   mgd_write_index_file (basename2 (dest_name), 1);
 
   return 0;
@@ -2151,10 +2134,11 @@ int
 snes_n (st_rominfo_t *rominfo, const char *name)
 {
   char buf[SNES_NAME_LEN], dest_name[FILENAME_MAX];
-  int size = ucon64.file_size - rominfo->buheader_len, header_start;
+  int size = ucon64.file_size - rominfo->buheader_len, header_start,
+      name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN;
 
-  memset (buf, ' ', SNES_NAME_LEN);
-  strncpy (buf, name, strlen (name) > SNES_NAME_LEN ? SNES_NAME_LEN : strlen (name));
+  memset (buf, ' ', name_len);
+  strncpy (buf, name, strlen (name) > (unsigned int) name_len ? name_len : strlen (name));
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
 
@@ -2162,10 +2146,11 @@ snes_n (st_rominfo_t *rominfo, const char *name)
 
   if (rominfo->interleaved)
     header_start = SNES_HEADER_START + (snes_hirom ? 0 : size / 2); // (Ext.) HiROM : LoROM
+  else if (st_dump)                             // ignore interleaved ST dumps
+    header_start = 8 * MBIT;
   else
     header_start = rominfo->header_start;
-  q_fwrite (buf, header_start + rominfo->buheader_len + 16, SNES_NAME_LEN,
-            dest_name, "r+b");
+  q_fwrite (buf, header_start + rominfo->buheader_len + 16, name_len, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -3077,6 +3062,19 @@ snes_init (st_rominfo_t *rominfo)
 
   snes_set_bs_dump (rominfo, rom_buffer, size);
 
+  // internal ROM name
+  if (!bs_dump && st_dump)
+    memcpy (rominfo->name, rom_buffer + 8 * MBIT + 16, SNES_NAME_LEN);
+  else
+    {
+      memcpy (rominfo->name, snes_header.name, SNES_NAME_LEN);
+      for (x = 0; x < SNES_NAME_LEN; x++)
+        if (!isprint ((int) rominfo->name[x]))  // we can't use mkprint(), because it skips \n
+          rominfo->name[x] = '.';
+    }
+  rominfo->name[(bs_dump || st_dump) ? 16 : SNES_NAME_LEN] = 0;
+  // terminate string (at 1st byte _after_ string)
+
   if (calc_checksums)
     {
       // internal ROM crc
@@ -3133,19 +3131,6 @@ snes_init (st_rominfo_t *rominfo)
           ucon64.fcrc32 = 0;
         }
     }
-
-  // internal ROM name
-  if (!bs_dump && st_dump)
-    memcpy (rominfo->name, rom_buffer + 8 * MBIT + 16, SNES_NAME_LEN);
-  else
-    {
-      memcpy (rominfo->name, snes_header.name, SNES_NAME_LEN);
-      for (x = 0; x < SNES_NAME_LEN; x++)
-        if (!isprint ((int) rominfo->name[x]))  // we can't use mkprint(), because it skips \n
-          rominfo->name[x] = '.';
-    }
-  rominfo->name[(bs_dump || st_dump) ? 16 : SNES_NAME_LEN] = 0;
-  // terminate string (at 1st byte _after_ string)
 
   rominfo->console_usage = snes_usage;
   if (!rominfo->buheader_len)
@@ -3205,7 +3190,7 @@ snes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, buf);
 */
       sprintf (buf, "ROM type: (%x) %s", snes_header.rom_type,
-        snes_rom_type[(snes_header.rom_type & 7) % 3]);
+               snes_rom_type[(snes_header.rom_type & 7) % 3]);
       strcat (rominfo->misc, buf);
       if ((snes_header.rom_type & 0xf) >= 3)
         {
@@ -3689,7 +3674,7 @@ snes_demirror (st_rominfo_t *rominfo)           // nice verb :-)
       snes_deinterleave (rominfo, &buffer, size);
     }
 
-  if (size % (12 * MBIT) == 0)                  // 12, 24 or 48 Mbit dumps can be mirrored
+  if (size % (12 * MBIT) == 0 && size != 36 * MBIT) // 12, 24 or 48 Mbit dumps can be mirrored
     {
       mirror_size = size / 12 * 2;
       if (memcmp (buffer + size - mirror_size, buffer + size - 2 * mirror_size,
@@ -3734,7 +3719,8 @@ snes_densrt (st_rominfo_t *rominfo)
 
   if (!nsrt_header)
     {
-      printf ("NOTE: ROM has no NSRT header -- no file has been written\n");
+      if (ucon64.quiet < 1)
+        printf ("NOTE: ROM has no NSRT header -- no file has been written\n");
       return 1;
     }
 
@@ -3765,7 +3751,7 @@ snes_densrt (st_rominfo_t *rominfo)
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
   free (buffer);
-  return 1;
+  return 0;
 }
 
 
@@ -3837,7 +3823,10 @@ set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header)
       else
         header[0x1d0] |= snes_hirom ? 0x20 : 0x10;
 
-      memcpy (header + 0x1d1, &snes_header.name, SNES_NAME_LEN);
+      if (!bs_dump && st_dump)
+        memcpy (header + 0x1d1, rominfo->name, 16);
+      else // for ST dumps, rominfo->name may be used
+        memcpy (header + 0x1d1, &snes_header.name, SNES_NAME_LEN);
       header[0x1e6] = snes_header.checksum_low;
       header[0x1e7] = snes_header.checksum_high;
       memcpy (header + 0x1e8, "NSRT", 4);
@@ -3880,14 +3869,22 @@ get_nsrt_info (unsigned char *rom_buffer, int header_start, unsigned char *buhea
 {
   if (nsrt_header)
     {
-      memcpy (rom_buffer + header_start + 16, buheader + 0x1d1, SNES_NAME_LEN); // name
-      // Yep, conflict here. I assume not many people change the region byte... - dbjh
+      memcpy (rom_buffer + header_start + 16 - (st_dump ? SNES_HEADER_START : 0),
+              buheader + 0x1d1, (bs_dump || st_dump) ? 16 : SNES_NAME_LEN); // name
+      // we ignore interleaved ST dumps
       if (!bs_dump)
-        rom_buffer[header_start + 41] = buheader[0x1d0] & 0x0f; // region
-      rom_buffer[header_start + 44] = ~buheader[0x1e6]; // inverse checksum low
-      rom_buffer[header_start + 45] = ~buheader[0x1e7]; // inverse checksum high
-      rom_buffer[header_start + 46] = buheader[0x1e6]; // checksum low
-      rom_buffer[header_start + 47] = buheader[0x1e7]; // checksum high
+        {
+          // According to the NSRT specification, the region byte should be set
+          //  to 0 for BS dumps.
+          rom_buffer[header_start + 41] = buheader[0x1d0] & 0x0f; // region
+          // NSRT only modifies the internal header. For BS dumps the internal
+          //  checksum does not include the header. So, we don't have to
+          //  overwrite the checksum.
+          rom_buffer[header_start + 44] = ~buheader[0x1e6]; // inverse checksum low
+          rom_buffer[header_start + 45] = ~buheader[0x1e7]; // inverse checksum high
+          rom_buffer[header_start + 46] = buheader[0x1e6]; // checksum low
+          rom_buffer[header_start + 47] = buheader[0x1e7]; // checksum high
+        }
     }
 }
 
@@ -3918,11 +3915,12 @@ handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
       "Super Scope / Gamepad", "Konami's Justifier", "Multitap",
       "Mouse / Super Scope / Gamepad", "Unknown"
     };
-  int x = header[0x1ed], ctrl1 = x >> 4, ctrl2 = x & 0xf;
+  int x = header[0x1ed], ctrl1 = x >> 4, ctrl2 = x & 0xf,
+      name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN;;
 
-  memcpy (name, header + 0x1d1, SNES_NAME_LEN);
-  name[SNES_NAME_LEN] = 0;
-  for (x = 0; x < SNES_NAME_LEN; x++)
+  memcpy (name, header + 0x1d1, name_len);
+  name[name_len] = 0;
+  for (x = 0; x < name_len; x++)
     if (!isprint ((int) name[x]))
       name[x] = '.';
 

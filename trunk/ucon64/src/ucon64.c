@@ -389,9 +389,8 @@ if(argcmp(argc,argv,"-mka"))
 
 if (argcmp(argc, argv, "-na"))
 {
-  strcpy(buf2, rom.file);
-  strcat(buf2, "                                                            ");
-
+  memset(buf2, ' ', 50);
+  strncpy(buf2, rom.file, strlen(rom.file));
   quickfwrite(buf2, 7, 50, filebackup(rom.rom), "r+b");
 
   return(0);
@@ -426,23 +425,12 @@ if(argcmp(argc,argv,"-mkppf"))
 	return(0);
 }
 
-if(argcmp(argc,argv,"-nppf"))
-{
-	strcpy(buf2,rom.file);
-	strcat(buf2
-,"                                                            ");
-
-	quickfwrite(buf2,6,50,filebackup(rom.rom),"r+b");
-	return(0);
-}
-
-
 if (argcmp(argc, argv, "-nppf"))
 {
-  strcpy(buf2, rom.file);
-  strcat(buf2, "                                                            ");
-
+  memset(buf2, ' ', 50);
+  strncpy(buf2, rom.file, strlen(rom.file));
   quickfwrite(buf2, 6, 50, filebackup(rom.rom), "r+b");
+
   return(0);
 }
 
@@ -462,7 +450,7 @@ if (argcmp(argc, argv, "-ls") ||
 {
   char current_dir[FILENAME_MAX];
   if (access(rom.rom, R_OK) == -1 || (dp = opendir(rom.rom)) == NULL)
-return(-1);
+    return(-1);
 
   getcwd(current_dir, FILENAME_MAX);
   chdir(rom.rom);
@@ -482,17 +470,11 @@ return(-1);
           printf("%-31.31s %10d %s %s\n", rom.name, (int) puffer.st_size, buf, rom.rom);
         }
         else if (argcmp(argc, argv, "-lsv"))
-        {
           ucon64_nfo(&rom);
-        }
         else if (argcmp(argc, argv, "-rrom") && rom.console != ucon64_UNKNOWN /* && rom.console != ucon64_KNOWN */ )
         {
           strcpy(buf,&rom.rom[findlast(rom.rom,".")+1]);
           printf("%s.%s\n",rom.name,buf);
-        }
-        else 
-        {
-          
         }
 	fflush(stdout);
       }
@@ -501,7 +483,7 @@ return(-1);
   closedir(dp);
   chdir(current_dir);
 
-return(0);
+  return(0);
 }
 
 rom.console=
@@ -537,13 +519,6 @@ rom.console=
 (argcmp(argc,argv,"-n2gb")) ? ucon64_GB :
 (argcmp(argc,argv,"-ip")) ? ucon64_DC :
 (argcmp(argc,argv,"-sam")) ? ucon64_NEOGEO : ucon64_UNKNOWN;
-
-
-
-
-
-
-
 
 
 
@@ -584,7 +559,6 @@ if(argcmp(argc,argv,"-dbv"))
 	printf("\nTIP: %s -db -nes would view only NES ROMs\n\n",getarg(argc,argv,ucon64_NAME));
 	return(0);
 }
-
 
 
 

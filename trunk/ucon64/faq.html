@@ -156,9 +156,11 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
    type the address of the parallel port everytime you want to transfer something to your FAL
    (or another copier) edit .ucon64rc or ucon64.cfg (for the DOS version) and remove the hash
    symbol in front of the line that starts with "parport=" (without the quotes). If that line
-   isn't present add one. If you specify an I/O address in the configuration file, you don't
-   have to use the prefix 0x. For example:<br>
-   &nbsp;&nbsp; parport=278
+   isn't present add one. You don't have to use the prefix 0x. For example:<br>
+   &nbsp;&nbsp; parport=278<br>
+   You can also set an environment variable with the name parport to the right value. Note
+   that the value in the configuration file takes precedence over the value of the environment
+   variable.<br>
 <br>
 <p>
 <a name="7"><b>Q7</b>: I tried to dump a SNES cartridge using a Super Wild Card connected to my PC with an

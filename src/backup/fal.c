@@ -454,7 +454,7 @@ void BackupROM (FILE *fp, int SizekW)
          fputc(valw >> 8, fp);
          }
       bytesread += 256 << 1;                    // 256 words
-      if ((bytesread & 0xffff)==0)              // call parport_gauge() after receiving 64kB
+      if ((bytesread & 0x7fff)==0)              // call parport_gauge() after receiving 32kB
          parport_gauge (starttime, bytesread, size);
       }
    }

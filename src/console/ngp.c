@@ -57,6 +57,7 @@ typedef struct st_ngp_header
 {
   char pad[48];
 } st_ngp_header_t;
+
 #define NGP_HEADER_START 0
 #define NGP_HEADER_LEN (sizeof (st_ngp_header_t))
 
@@ -71,15 +72,14 @@ ngp_init (st_rominfo_t *rominfo)
   char *snk_code = "COPYRIGHT BY SNK CORPORATION",
        *third_code = " LICENSED BY SNK CORPORATION", buf[MAXBUFSIZE];
 
-  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-                            ucon64.buheader_len : 0;
+  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
-  ucon64_fread (&ngp_header, NGP_HEADER_START +
-      rominfo->buheader_start, NGP_HEADER_LEN, ucon64.rom);
+  ucon64_fread (&ngp_header, NGP_HEADER_START + rominfo->buheader_len,
+    NGP_HEADER_LEN, ucon64.rom);
 
   if (!strncmp ((const char *) &OFFSET (ngp_header, 0), snk_code, strlen (snk_code)) ||
       !strncmp ((const char *) &OFFSET (ngp_header, 0), third_code, strlen (third_code)))
-      result = 0;
+    result = 0;
   else
     result = -1;
   if (ucon64.console == UCON64_NGP)
@@ -95,7 +95,7 @@ ngp_init (st_rominfo_t *rominfo)
 
   // ROM maker
   rominfo->maker =
-    (!strncmp ((const char *) &OFFSET (ngp_header, 0), snk_code, strlen (snk_code))) ?
+    !strncmp ((const char *) &OFFSET (ngp_header, 0), snk_code, strlen (snk_code)) ?
       "SNK" : "Third party";
 
   // misc stuff
@@ -106,7 +106,7 @@ ngp_init (st_rominfo_t *rominfo)
   strcat (rominfo->misc, buf);
 
   rominfo->console_usage = ngp_usage[0].help;
-  rominfo->copier_usage = (!rominfo->buheader_len ? pl_usage[0].help : unknown_usage[0].help);
+  rominfo->copier_usage = !rominfo->buheader_len ? pl_usage[0].help : unknown_usage[0].help;
 
   return result;
 }

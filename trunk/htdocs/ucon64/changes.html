@@ -121,7 +121,7 @@ The original uCON for SNES and Genesis was written by Chicken &amp; chp in
   NoisyB)<br>
 - updated (GBA) -xfal send/receive ROM to/from Flash Advance Linker; --file=PORT
   (by dbjh)<br>
-- added (GBA) -xfalc&#60;n&#62; specify chip size in mbits of ROM in Flash
+- added (GBA) -xfalc&#60;n&#62; specify chip size in Mbits of ROM in Flash
   Advance Linker when receiving (by dbjh)<br>
 - added (GBA) -xfalm use SPP mode, default is EPP (by dbjh)<br>
 - added (Neo Geo) -bios convert NeoCD Bios to work with NeoCD emulator (by
@@ -653,7 +653,92 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   sending an SRAM file (by dbjh)<br>
 - updated (GBA) made -xfalmulti use gbaloader to be consistent with -xf2amulti.
   So, don't specify a loader as file argument anymore (by dbjh)<br>
-<br>
+<p>
+<a name="200">2.0.0</a><br> <!-- 1.9.8-5 -->
+- updated (GBA) fixed F2A USB send code (by dbjh; many thanks to David Gauchard
+  for feedback, testing and sending a patch to fix the problem)<br>
+- updated (N64) cleaned up Doctor V64 Junior transfer source code (by dbjh;
+  thanks to TenOfTen and GameCopierUser0666 for testing)<br>
+- updated (SNES) added new SWC "I/O mode" 0x100, dump BIOS (by dbjh)<br>
+- updated (GB) improved ROM info (by dbjh)<br>
+- updated (GB) fixed problem with dumping "Rocket Games" cartridges with the
+  Game Boy Xchanger (by dbjh; thanks to Anna Kubisty for reporting the problem
+  and testing, and thanks to Cowering for his help and providing us with the
+  necessary information)<br>
+- updated (GB) cleaned up Game Boy Xchanger transfer source code (by dbjh; many
+  thanks to Anna Kubisty for testing)<br>
+- added (DC) --scr scramble 1ST_READ.BIN for selfboot CDs (by NoisyB)<br>
+- added (DC) --unscr unscramble 1ST_READ.BIN for non-selfboot CDs (by NoisyB)<br>
+- added (DC) --mkip generate IP.BIN file with default values (by NoisyB)<br>
+- added (DC) --parse=TEMPLATE parse TEMPLATE file into a IP.BIN (by NoisyB)<br>
+- updated (SNES) corrected output of -dbuh (by dbjh)<br>
+- added (GB) --xgbxm try to enable EPP mode (by dbjh)<br>
+- added (SMS/Game Gear) --xgg &amp; --xggs send/receive ROM/SRAM to/from
+  SMS-PRO/GG-PRO flash card programmer (by dbjh; thanks to timofonic and Leo of
+  ToToTEK Multi Media for providing us with the necessary information, many
+  thanks to Walter van Niftrik for testing)<br>
+- added (PCE) --xpce send/receive ROM to/from PCE-PRO flash card programmer (by
+  dbjh; thanks to timofonic and Leo of ToToTEK Multi Media for providing us with
+  the necessary information)<br>
+- added (PCE) --multi create a multi-game file for use on a PCE-PRO flash card
+  (by dbjh)<br>
+- added (SMS/Game Gear) --multi create a multi-game file for use on an SMS-PRO
+  or GG-PRO flash card (by dbjh; thanks to Walter van Niftrik for his patch and
+  for testing)<br>
+- added (SMS/Game Gear) --xggb=BANK send/receive SRAM to/from SMS-PRO/GG-PRO
+  BANK (by dbjh; thanks to Walter van Niftrik for the suggestion and testing)<br>
+- added (Genesis) --xmdb=BANK send/receive SRAM to/from MD-PRO BANK (by dbjh)<br>
+- added support for I/O port driver DlPortIO to the Windows ports. See the FAQ
+  for more information (by dbjh)<br>
+- the Windows versions of uCON64 won't crash anymore without a (working) I/O
+  port driver under Windows NT/2000/XP. They display a helpful error message
+  instead (by dbjh)<br>
+- updated (GBA) improved recognition of GBA files and fixed start address
+  information (by dbjh)<br>
+- updated (GBA) added support for Linux 2.5 (and later) to F2A USB code (by
+  dbjh; thanks to colle for sending a patch and testing)<br>
+- added support for OpenBSD (by dbjh; thanks to timofonic for testing)<br>
+- added (N64) --xcd64, --xcd64b, --xcd64s, --xcd64f, --xcd64e, --xcd64m &amp;
+  --xcd64p transfer ROM/boot emu/SRAM/flash RAM/EEPROM/memory pack data to/from
+  CD64 (by dbjh; thanks to Ryan Underwood for libcd64 and testing)<br>
+- added (Genesis) support for Mike Pavone's Genesis/Sega CD transfer cable (by
+  dbjh; thanks to Mike Pavone for the information and thanks to timofonic for
+  his PR work ;-)<br>
+- updated (SNES) -gd3 does not produce 28 Mbit HiROM files anymore, it
+  automatically pads them to 32 Mbit (by dbjh)<br>
+- added (Genesis) support for Cyan's Megadrive ROM copier (by Cyan Helkaraxe and
+  dbjh; thanks to timofonic for his PR work)<br>
+- moved and split some files in the codebase and changed the workflow. Adding a
+  new option/function now requires only two changes in the code (by NoisyB)<br>
+- added --dual show ROM as dualdump (by NoisyB)<br>
+- added --code show ROM as code (by NoisyB)<br>
+- added --print show ROM in printable characters (by NoisyB)<br>
+- added --findi find STRING in ROM and ignore case of alpha bytes (by NoisyB)<br>
+- added --findr find STRING in ROM but look also for shifted/relative
+  similarities (by NoisyB)<br>
+- added (NeoGeo Pocket) --xpl send/receive ROM to/from Pocket Linker, --xpli
+  show information about inserted cartridge &amp; --xplm try to enable EPP mode
+  (by Walter van Niftrik)<br>
+- added (SNES) --multi create a multi-game file for use on a Super Flash flash
+  card (by JohnDie)<br>
+- added (SNES) --xsf send/receive ROM to/from Super Flash card, --xsfs to
+  send/receive SRAM to/from Super Flash card (by JohnDie)<br>
+- updated (Genesis) added support for 32 Mbit Intel MD-PRO flash card (by dbjh;
+  thanks to Marc Haisenko for sending a patch and testing)<br>
+- updated (Genesis) fixed -n and -n2 (-n did what -n2 should do and vice versa)
+  (by dbjh)<br>
+- added (Genesis) support for splitting and joining binary (Magicom) files (by
+  dbjh; thanks to T. Reid for the information)<br>
+- updated (NES) fixed -dumpinfo so that the year field is read correctly from
+  the dumper info file if it has more than 2 digits (by dbjh)<br>
+- updated (SNES) --swcs, --figs, --ufos &amp; --gd3s now also work for backup
+  unit SRAM files, i.e., files with a header (by dbjh)<br>
+- updated (SNES) fixed a bug that caused several headerless dumps to be detected
+  as SWC RTS or SWC SRAM files (by dbjh; many thanks to Dweezledap for reporting
+  this bug and for testing)<br>
+- updated (N64) added support for 6105 boot codes to check sum routine (by dbjh)<br>
+- updated (SNES) fixed some other issues with auto-detection (by dbjh; many
+  thanks to Dweezledap for reporting these problems and for testing)<br>
 <br>
 <br>
 <br>

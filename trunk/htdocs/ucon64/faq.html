@@ -65,8 +65,9 @@ Q20: <a href="#20">How do I specify a bank number for the GB Xchanger?</a><br>
 Q21: <a href="#21">What is the difference between the Flash Advance Linker
    options -xfals and -xfalb &#60;n&#62;?</a><br>
 <br>
-Q22: <a href="#22">uCON64 exits with the message "Flash cart erase failed!"
-   when I try to write a multirom to my flash card. What is wrong?</a><br>
+Q22: <a href="#22">uCON64 exits with the message "ERROR: Flash card erase
+   failed" when I try to write a multi-game file to my flash card. What is
+   wrong?</a><br>
 <br>
 Q23: <a href="#23">Where can I get that loader or "game pack" file?</a><br>
 <br>
@@ -76,12 +77,12 @@ Q25: <a href="#25">Why does uCON64 create ucon64.cfg (DOS executable) or
    .ucon64rc (Win32 executable) files all over the place under DOS and
    Windows&nbsp;9x (command.com)?</a><br>
 <br>
-Q26: <a href="#26">When I try to create a multirom under Windows I get the
-   message "The system cannot execute the specified program." (or something
+Q26: <a href="#26">When I try to create a multi-game file under Windows I get
+   the message "The system cannot execute the specified program." (or something
    similar). What does that mean?</a><br>
 <br>
-Q27: <a href="#27">I tried to run the Win32 executable of uCON64 but Windows
-   gave an error message that cygwin1.dll, cygz.dll or zlib.dll could not be
+Q27: <a href="#27">I tried to run a Win32 executable of uCON64 but Windows gave
+   an error message that cygwin1.dll, cygz.dll or zlib.dll could not be
    found.</a><br>
 <br>
 Q28: <a href="#28">How do I make uCON64 display one help screen at a time?</a><br>
@@ -176,7 +177,7 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
    Normally, they should choose a package with "win32" in its name. The DOS
    version also runs under Windows, but has some limitations. For example, the
    DOS version cannot handle long command lines. The Cygwin version does not
-   have any serious limitations compared to the "normal" Win32 version, but
+   have any serious limitations compared to the "normal" Win32 versions, but
    behaves a bit more Unix-like than Windows users might want. Users accustomed
    to Unix might prefer the Cygwin version. The Cygwin version needs some
    additional files, though. See <a href="#27">question 27</a>.<br>
@@ -193,8 +194,8 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
    downloaded from <a href="http://www.gnu.org/order/ftp.html" target="_blank">
    http://www.gnu.org/order/ftp.html</a>. Visual C++ can be bought for about 60
    euro (at 15 May 2003) in most computer shops.<br>
-   uCON64 can be compiled for Unix (GNU/Linux, Solaris, FreeBSD), DOS, BeOS,
-   Windows (95/98/ME/NT/2000/XP), AmigaOS (PPC/68K) and Mac OS X.<br>
+   uCON64 can be compiled for Unix (GNU/Linux, Solaris, FreeBSD, OpenBSD), DOS,
+   BeOS, Windows (95/98/ME/NT/2000/XP), AmigaOS (PPC/68K) and Mac OS X.<br>
    A DOS port of GCC (and other GNU development tools) named DJGPP is
    available from <a href="http://www.delorie.com/djgpp/" target="_blank">
    http://www.delorie.com/djgpp/</a>. A Win32 port of GCC (and many other GNU
@@ -215,6 +216,7 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
    - whether add-on libraries will be dynamically loaded or linked (default:
    loaded)<br>
    - whether uCON64 will be able to use the discmage library (default: yes)<br>
+   - whether uCON64 will have support for the CD64 (default: no)<br>
    - whether uCON64 will be able to read .gz and .zip files (default: not if a
    Makefile "template" is used, see below)<br>
    - whether uCON64 will use libusb/have support for USB backup units (default:
@@ -346,7 +348,8 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
 <br>
    If you want to compile the source code including discmage, type:<br>
    &nbsp;&nbsp; nmake /f Makefile.vc6<br>
-   If you do not want to compile discmage the last command should like this:<br>
+   If you do not want to compile discmage the last command should look like
+   this:<br>
    &nbsp;&nbsp; nmake /f Makefile.vc6 ucon64.exe<br>
 <br>
    Under GNU/Linux, DOS and Windows you could use UPX to compress the
@@ -409,45 +412,40 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
    <a href="http://www.pkware.com/" target="_blank">PKUNZIP</a>.<br>
    We recommend to extract the package to a directory (or folder) of its own.
    The zip file contains a directory, but you need not use that directory.<br>
-   Windows&nbsp;NT/2000/XP users might need a driver for copier I/O. You do not
-   need a driver if you use Windows&nbsp;95, 98 or ME. A driver is also not needed
-   when you will not use uCON64 to communicate with a backup unit.<br>
-   You could use a driver like GiveIO, UserPort, io.dll or inpout32.dll. At
-   <a href="http://www.devrs.com/gba/files/mbv2faqs.php#WinXP" target="_blank">
-   http://www.devrs.com/gba/files/mbv2faqs.php#WinXP</a> you can find links to
-   GiveIO and UserPort.
-<!--
-I admit that it's a bit strange to include this link, but UserPort doesn't seem
-to have an official homepage. GiveIO should be available from the site of
-Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
--->
+   Windows&nbsp;NT/2000/XP users are likely to need a driver for copier I/O. You
+   do not need a driver if you use Windows&nbsp;95, 98 or ME. A driver is also
+   not needed when you will not use uCON64 to communicate with a backup unit.<br>
+   You could use a driver like UserPort, DlPortIO, io.dll or inpout32.dll.
+<!-- UserPort doesn't seem to have an official homepage. -->
+   You can download DlPortIO at
+   <a href="http://www.driverlinx.com/DownLoad/dnload.htm#Windows%2095/NT%20Port%20I/O%20Driver" target="_blank">
+   http://www.driverlinx.com/DownLoad/dnload.htm#Windows%2095/NT%20Port%20I/O%20Driver</a>, directly at
+   <a href="http://www.driverlinx.com/DownLoad/DlPortIO.htm" target="_blank">
+   http://www.driverlinx.com/DownLoad/DlPortIO.htm</a> or from
+   <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>.
    You can find io.dll in a file named io.zip at
    <a href="http://www.geekhideout.com/iodll.shtml" target="_blank">
    http://www.geekhideout.com/iodll.shtml</a> and you can find inpout32.dll in
    a file named inpout32_source_and_bins.zip at
    <a href="http://www.logix4u.net" target="_blank">http://www.logix4u.net</a>.
-   GiveIO is plainly horrible to configure. We recommend UserPort, io.dll and
-   inpout32.dll. They are also included with the binary release. With GiveIO
-   sending ROMs seems to go a bit faster than with UserPort, but UserPort is
-   much easier to use. To install io.dll or inpout32.dll, put it in uCON64's
-   configuration directory. See the section
+   UserPort and io.dll are included with the binary release. We recommend
+   DlPortIO and io.dll. To install DlPortIO simply start port95nt.exe. After the
+   installation is completed, copy DLPORTIO.dll from the Windows system(32)
+   directory to uCON64's configuration directory. To install io.dll or
+   inpout32.dll, put them in uCON64's configuration directory. See the section
    <a href="#configbin">"How to configure the uCON64 executable"</a> for more
    information about the configuration directory.<br>
-   Note that although inpout32.dll is even easier to use than UserPort, the
-   transfer speed is much lower (about half as fast compared to the transfer
-   speed in combination with UserPort). io.dll does not have this limitation,
-   but its source code is not freely available.<br>
-   uCON64 will display a message if it finds io.dll or inpout32.dll before
-   communicating with a copier. It displays this message before it displays
-   file information, so you might want to use the command line switch -q. Only
-   the Windows versions of uCON64 are able to use io.dll or inpout32.dll. If
-   both inpout32.dll and io.dll are present in the configuration directory,
-   uCON64 will first try to load io.dll. If that fails it will try to load
-   inpout32.dll.<br>
+   uCON64 displays a message if it finds DLPORTIO.dll, io.dll or inpout32.dll
+   before communicating with a copier. It displays this message before it
+   displays file information, so you might want to use the command line switch
+   -q. Only the Windows versions of uCON64 are able to use DLPORTIO.dll, io.dll
+   or inpout32.dll. If more than one I/O driver is present in the configuration
+   directory, uCON64 will first try to load DLPORTIO.dll. If that fails it will
+   try to load io.dll. If that also fails it will try to load inpout32.dll.<br>
    It <i>is</i> possible to use the DOS version of uCON64 as a transfer tool
-   under Windows&nbsp;XP without GiveIO or UserPort. We have received reports
-   from people who were able to send and receive ROMs under Windows&nbsp;XP as
-   a regular user (no Administrator rights and not "Power Users").<br>
+   under Windows&nbsp;XP without UserPort. We have received reports from people
+   who were able to send and receive ROMs under Windows&nbsp;XP as a regular
+   user (no Administrator rights and not "Power Users").<br>
 <br>
 <a name="cmdline">The command line environment<br></a>
    uCON64 is a command line program and is usually started from a program like
@@ -763,10 +761,12 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    necessary anymore for Demon's Crest. Use the option -k instead. For
    Mega Man X you will need version 1.9.8beta7 or later.<br>
 <br>
-   Finally, you could have a look at an (incomplete) Super Wild Card
-   compatibility list on the uCON64 homepage (it can also be found in the
-   source package) to see if it is possible to run a certain game on a Super
-   Wild Card <u>2.8cc 32 Mbit PAL</u>.<br>
+   Finally, you could have a look at an incomplete
+<!-- Keep next URL absolute. -->
+   <a href="http://ucon64.sourceforge.net/ucon64/SWC-compatibility.txt" target="_blank">
+   Super Wild Card compatibility list</a> on the uCON64 homepage (it can also be
+   found in the source package) to see if it is possible to run a certain game
+   on a Super Wild Card <u>2.8cc 32 Mbit PAL</u>.<br>
 <br>
 <p>
 <a name="13"><b>Q13</b>: Which backup devices are supported by uCON64?</a><br>
@@ -828,9 +828,11 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <br>
 <p>
 <a name="20"><b>Q20</b>: How do I specify a bank number for the GB Xchanger?</a><br>
-<b>A</b>: ucon64 -xgbxb &#60;0&#62; "Pokemon (Green).sav" would not work.
-   You should leave out those angle brackets. This should work:<br>
+<b>A</b>: Separate the bank number from the option -xgbxb with either a space or
+   an equal sign. For example:<br>
    &nbsp;&nbsp; ucon64 -xgbxb 0 "Pokemon (Green).sav"<br>
+   or:<br>
+   &nbsp;&nbsp; ucon64 -xgbxb=0 "Pokemon (Green).sav"<br>
 <br>
 <p>
 <a name="21"><b>Q21</b>: What is the difference between the Flash Advance
@@ -838,32 +840,33 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <b>A</b>: When saving -xfals saves all 256 kB while -xfalb &#60;n&#62; saves
    only the 64 kB of bank n. When restoring -xfals starts restoring the SRAM in
    bank 1 while -xfalb &#60;n&#62; starts in bank n. For example, if you have
-   Super Mario Advance 2 (J) in your Flash Card in "ROM bank" 4 (GBA Pack) and
-   would like to save/restore SRAM bank 4 you should do something like:<br>
+   Super Mario Advance 2 (J) on your flash card in "ROM bank" 4 and would like
+   to save/restore SRAM bank 4 you should do something like:<br>
    &nbsp;&nbsp; ucon64 -xfalb 4 "Super Mario Advance 2 (J).sav"<br>
    The file size determines how many bytes are restored, even when you use
    -xfalb &#60;n&#62;. So, if the file is greater than 64 kB more than one bank
    will be written to.<br>
 <br>
 <p>
-<a name="22"><b>Q22</b>: uCON64 exits with the message "Flash cart erase
-   failed!" when I try to write a multirom to my flash card. What is wrong?</a><br>
-<b>A</b>: The multirom file you created is too large for your flash card. When
-   you make a multirom file do not forget that the loader or "game pack" file
-   also needs some space (32 kB) on the flash card. Do not pass a size to
-   -multi that is larger than your flash card. Passing a smaller size is
-   correct though. For example, to create a multirom that fits on a 128 Mb (16
+<a name="22"><b>Q22</b>: uCON64 exits with the message "ERROR: Flash card erase
+   failed" when I try to write a multi-game file to my flash card. What is
+   wrong?</a><br>
+<b>A</b>: The multi-game file you created is too large for your flash card. When
+   you make a multi-game file do not forget that the loader or "game pack" file
+   also needs some space (32 kB) on the flash card. Do not pass a size to -multi
+   that is larger than your flash card. Passing a smaller size is correct
+   though. For example, to create a multi-game file that fits on a 128 Mb (16
    MB) card use a command line like this:<br>
    &nbsp;&nbsp; ucon64 -gba -multi=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba multi.bin<br>
    You can also send it directly by using -xfalmulti:<br>
    &nbsp;&nbsp; ucon64 -xfalmulti=128 rom1.gba rom2.gba rom3.gba rom4.gba<br>
    Please note that when using -multi you have to specify a loader and the name
-   of the multirom file to create, while when using -xfalmulti you must omit
+   of the multi-game file to create, while when using -xfalmulti you must omit
    them. -xfalmulti uses the variable gbaloader to find the loader. See
    <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
    Just like sometimes happens with Visoly's tool it is possible to get the
-   same message when the multirom is small enough. It will probably work when
-   you try again (with the same multirom).<br>
+   same message when the multi-game file is small enough. It will probably work when
+   you try again (with the same multi-game file).<br>
 <br>
 <p>
 <a name="23"><b>Q23</b>: Where can I get that loader or "game pack" file?</a><br>
@@ -912,20 +915,20 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    -version on the command line.<br>
 <br>
 <p>
-<a name="26"><b>Q26</b>: When I try to create a multirom under Windows I get
-   the message "The system cannot execute the specified program." (or something
-   similar). What does that mean?</a><br>
+<a name="26"><b>Q26</b>: When I try to create a multi-game file under Windows I
+   get the message "The system cannot execute the specified program." (or
+   something similar). What does that mean?</a><br>
 <b>A</b>: You can get that message with the DOS executable if you pass more
    than 127 characters as argument to uCON64. There are two solutions:<br>
-   1.) Use the Win32 executable (download it from
+   1.) Use a Win32 executable (download one from
    <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64
    homepage</a>).<br>
    2.) Rename the ROMs so that their combined names are short enough to fit
    into 127 characters.<br>
 <br>
 <p>
-<a name="27"><b>Q27</b>: I tried to run the Win32 executable of uCON64 but
-   Windows gave an error message that cygwin1.dll, cygz.dll or zlib.dll could
+<a name="27"><b>Q27</b>: I tried to run a Win32 executable of uCON64 but Windows
+   gave an error message that cygwin1.dll, cygz.dll or zlib.dll could
    not be found.</a><br>
 <b>A</b>: The Cygwin-compiled Win32 executable of uCON64 needs cygwin1.dll and
    cygz.dll in order to run. The Visual C++-compiled Win32 executable needs
@@ -962,13 +965,16 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    then you did not install an I/O driver (correctly). In this case "install"
    means that the I/O driver is running at the time uCON64 tries to access the
    parallel port. See <a href="#4">question 4</a>.<br>
-   You will also see this message if you tried to enable EPP mode for the FAL
-   under Windows XP (NT/2000), i.e., you specified the switch -xfalm, without
-   an appropriate I/O port driver. UserPort is <i>inappropriate</i> for this,
-   because it enables access to I/O ports up to 0x3ff. However, in order to
-   enable EPP mode the FAL code tries to access an I/O port with an address
-   higher than 0x3ff. If you want to be able to use EPP mode try io.dll or
-   inpout32.dll.<br>
+   You will also see this message (with a Windows version of uCON64) if you
+   tried to enable EPP mode for the FAL under Windows XP (NT/2000) , i.e., you
+   specified the switch -xfalm, without an appropriate I/O port driver.
+   UserPort is <i>inappropriate</i> for this, because it enables access to I/O
+   ports up to 0x3ff. However, in order to enable EPP mode the FAL code tries
+   to access an I/O port with an address higher than 0x3ff. If you want to be
+   able to use EPP mode try io.dll or inpout32.dll.<br>
+   Starting with version 2.0.0 uCON64 will not crash anymore if it cannot
+   access the parallel port at start up (unless you use UserPort in combination
+   with a Windows version of uCON64).<br>
 <br>
 <p>
 <a name="30"><b>Q30</b>: I want to convert a NES ROM in iNES format to UNIF.
@@ -1082,8 +1088,8 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    configuration file.<br>
    Then copy all DAT files you have into that directory. You can download DAT
    files from sites like
-   <a href="http://gooddat.emu-france.com/" target="_blank">
-   http://gooddat.emu-france.com/</a>,
+   <a href="http://emulationrealm.com/rcdat.php#Cowering_GoodTools" target="_blank">
+   http://emulationrealm.com/</a>,
    <a href="http://www.romcenter.com/" target="_blank">
    http://www.romcenter.com/</a> or
    <a href="http://www.rommanager.com/" target="_blank">
@@ -1364,7 +1370,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
   </tr>
   <tr>
     <td><tt>Neo Geo Pocket</tt></td>
-    <td><tt>GoodNGPX</tt></td>
+    <td><tt>GoodNGPX or NGP</tt></td>
   </tr>
   <tr>
     <td><tt>NES</tt></td>
@@ -1392,7 +1398,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
   </tr>
   <tr>
     <td><tt>Virtual Boy</tt></td>
-    <td><tt>GoodVBOY</tt></td>
+    <td><tt>GoodVBOY or VBOY</tt></td>
   </tr>
   <tr>
     <td><tt>WonderSwan</tt></td>
@@ -1480,8 +1486,8 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <b>A</b>: Strictly speaking, interleaved ROMs do not exist. Interleaved ROM
    dumps do. Or perhaps it is better to say ROM dumps in interleaved format.
    The meaning of "interleaved" depends on the console type. Interleaved
-   formats exist for NES, Sega Master System, Game Gear, Genesis, SNES and
-   Nintendo 64.<br>
+   formats exist for NES, Sega Master System, Game Gear, PC-Engine, Genesis,
+   SNES and Nintendo 64.<br>
    Deinterleaving is the opposite of interleaving a ROM dump. It is the process
    of converting the data to "binary" format. Binary in the sense as how the
    data (in a cartridge) is presented to the CPU.<br>
@@ -1506,6 +1512,18 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    file, all even bytes in the second half.<br>
    Can be interleaved with uCON64 using the option -smd or -mgd.<br>
    Can be deinterleaved with uCON64 using the option -bin.<br>
+<br>
+   PC-Engine<br>
+   Interleaved PC-Engine or TurboGrafx-16 dumps are not produced by a specific
+   copier. It depends on the HuCARD (PC-Engine/TurboGrafx-16 game cartridge).
+   American HuCARDs produce an interleaved dump, because the 8 data pins are
+   reversed compared to Japanese HuCARDs. Perhaps "bit-swapped" is a better
+   word to describe the format, but using the word interleaved prevents
+   confusion (as bit-swapped implies a non bit-swapped reference).<br>
+   Can be interleaved with uCON64 using the option -mgd, making the game
+   suitable for a TurboGrafx-16. You can use the option -swap afterwards if you
+   want to play the game on a PC-Engine.<br>
+   Can be deinterleaved with uCON64 using the option -msg.<br>
 <br>
    SNES<br>
    Interleaved SNES dumps are produced by the Game Doctor and the Super UFO
@@ -1819,15 +1837,18 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    GNU/Linux distributions)<br>
    - usbdevfs has to be mounted (most (?) distributions have usbdevfs mounted by
    default, but you can do it manually with "mount -t usbdevfs none /proc/bus/usb")<br>
-   - the EZUSB2131 firmware upload driver has to be loaded, see
-     <a href="http://ezusb2131.sourceforge.net/" target="_blank">http://ezusb2131.sourceforge.net/</a><br>
+   - if you use Linux 2.4 or older then the EZUSB2131 firmware upload driver has
+   to be loaded, see <a href="http://ezusb2131.sourceforge.net/" target="_blank">http://ezusb2131.sourceforge.net/</a><br>
+   - if you use Linux 2.5 or later fxload should be present in /sbin<br>
    - you need to have read/write access to /proc/ezusb and /proc/bus/usb, so you
-   have to run uCON64 as root for the USB version of the F2A<br>
+   have to run uCON64 as root (or setuid root) for the USB version of the F2A<br>
 <br>
    By default, uCON64 tries to access a parallel port to communicate with an
    F2A. In order to make uCON64 communicate with an F2A connected to a USB port,
-   specify one. For example:<br>
-   &nbsp;&nbsp;ucon64 -xf2a "Wario Ware Inc.zip" -port=usb0<br>
+   use the switch -port. For example:<br>
+   &nbsp;&nbsp;ucon64 -xf2a "Wario Ware Inc.zip" -port=usb<br>
+   uCON64 detects to which USB port the F2A is connected, so you do not have to
+   specify a specific port.<br>
 <br>
 <p>
 <br>

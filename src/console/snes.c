@@ -50,8 +50,10 @@ static int snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
 static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_size);
 static int snes_convert_sramfile (st_rominfo_t *rominfo, const void *header);
 static int get_internal_sums (st_rominfo_t *rominfo);
-static int snes_special_bs (void);
+//static int snes_special_bs (void);
+static int snes_bs_name(void);
 static int snes_check_bs (void);
+static int check_char (unsigned char c);
 #ifdef  ALT_HILO
 static int score_lorom (unsigned char *rom_buffer, int rom_size);
 static int score_hirom (unsigned char *rom_buffer, int rom_size);
@@ -135,9 +137,6 @@ typedef struct st_snes_header
   unsigned char maker_y;                        // 1
   unsigned char pad[14];                        // 2
   unsigned char name[SNES_NAME_LEN];            // 16
-#if     SNES_NAME_LEN != 21
-#error  Adjust st_snes_header.pad to make st_snes_header 48 bytes in size
-#endif
   unsigned char map_type;                       // 37, AKA ROM makeup
   unsigned char rom_type;                       // 38
 #define bs_month rom_type
@@ -501,7 +500,8 @@ set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header)
           return;
         }
 
-      header[0x1d0] = snes_header.country | (snes_hirom ? 0x20 : 0x10);
+      x = bs_dump ? 0 : snes_header.country;
+      header[0x1d0] = x | (snes_hirom ? 0x20 : 0x10);
       memcpy (header + 0x1d1, &snes_header.name, SNES_NAME_LEN);
       header[0x1e6] = snes_header.checksum_low;
       header[0x1e7] = snes_header.checksum_high;
@@ -2123,6 +2123,98 @@ snes_init (st_rominfo_t *rominfo)
 }
 
 
+#if 1
+int
+snes_check_bs (void)
+{
+  unsigned int value;
+
+  if (snes_header.bs_size & 0x4f)
+    return 0;
+
+  if (snes_header.maker != 0x33 && snes_header.maker != 0xff)
+    return 0;                                   // 0x33 = Nintendo
+
+  value = ((unsigned char *) &snes_header)[39] << 8 |
+          ((unsigned char *) &snes_header)[38];
+  if (value != 0x0000 && value != 0xffff)
+    {
+      if ((value & 0x040f) != 0)
+        return 0;
+      if ((value & 0xff) > 0xc0)
+        return 0;
+    }
+
+  if (snes_header.bs_makeup & 0xce || ((snes_header.bs_makeup & 0x30) == 0))
+    return 0;
+
+  if ((snes_header.map_type & 0x03) != 0)
+    return 0;
+
+  value = ((unsigned char *) &snes_header)[35];
+  if (value != 0x00 && value != 0xff)
+    return 0;
+
+  if (((unsigned char *) &snes_header)[36] != 0x00)
+    return 0;
+
+  return snes_bs_name ();
+}
+
+
+int
+snes_bs_name (void)
+{
+  unsigned int value;
+  int n, n_valid = 0;
+
+  for (n = 0; n < 8; n++)
+    {
+      value = snes_header.name[n * 2];
+      if (check_char (value) != 0)
+        {
+          value = snes_header.name[n * 2 + 1];
+          if (value < 0x20)
+            if ((n_valid != 11) || (value != 0))     // Dr. Mario Hack
+              break;
+
+          n_valid++;
+        }
+      else
+        {
+          if (value == 0)
+            {
+              if (n_valid == 0)
+                break;
+              continue;
+            }
+
+          if (value < 0x20)
+            break;
+
+          if (value >= 0x80)
+            if (value < 0xa0 || value >= 0xf0)
+              break;
+          n_valid++;
+        }
+    }
+
+  return n == 8 && n_valid > 0 ? 1 : 0;
+}
+
+
+int
+check_char (unsigned char c)
+{
+  if ((c & 0x80) == 0)
+    return 0;
+
+  if ((c - 0x20) & 0x40)
+    return 1;
+  else
+    return 0;
+}
+#else
 int
 snes_special_bs (void)
 {
@@ -2197,6 +2289,7 @@ snes_check_bs (void)
 
   return 1;
 }
+#endif
 
 
 int

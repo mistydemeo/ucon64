@@ -21,14 +21,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <fcntl.h>
 #include <ctype.h>
-#include <dirent.h>
-#include <stddef.h>
+//#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>             // ioperm() (libc5)
 #include "ucon64.h"

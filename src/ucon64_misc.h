@@ -23,34 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_MISC_H
 #define UCON64_MISC_H
 
-#include <fcntl.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#ifdef __FreeBSD__
-  #include <machine/sysarch.h>
-#endif
-#include <time.h>
-#include <unistd.h>             // ioperm() (libc5)
-#include "ucon64.h"
-#include "misc.h"
-
 #ifdef  BACKUP
-#ifdef  __linux__
-#ifdef  __GLIBC__
-#include <sys/io.h>             // ioperm() (glibc)
-#endif
-
-#elif   defined __MSDOS__
-#include <pc.h>                 // inportb(), inportw()
-
-#elif   defined __BEOS__
-#include <fcntl.h>
-
+#ifdef  __BEOS__
 #define DRV_READ_IO_8 'r'
 #define DRV_WRITE_IO_8 'w'
 #define DRV_READ_IO_16 'r16'
@@ -74,7 +48,6 @@ unsigned char inportb (unsigned short port);
 unsigned short inportw (unsigned short port);
 void outportb (unsigned short port, unsigned char byte);
 void outportw (unsigned short port, unsigned short word);
-
 #endif
 
 #endif // BACKUP

@@ -1338,17 +1338,17 @@ ucon64_parport_init (unsigned int port)
 
 #if     defined __linux__ || defined __FreeBSD__
 #ifdef  __FreeBSD__
-      if (i386_set_ioperm (port, 3, 1) == -1)   // data, status & control
+  if (i386_set_ioperm (port, 3, 1) == -1)       // data, status & control
 #else
-      if (ioperm (port, 3, 1) == -1)            // data, status & control
+  if (ioperm (port, 3, 1) == -1)                // data, status & control
 #endif
-        {
-          fprintf (stderr,
-                   "ERROR: Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
-                   "       (This program needs root privileges for the requested action)\n",
-                   port + PARPORT_DATA, port + PARPORT_STATUS, port + PARPORT_CONTROL);
-          exit (1);                             // Don't return, if ioperm() fails port access
-        }                                       //  causes core dump
+    {
+      fprintf (stderr,
+              "ERROR: Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
+              "       (This program needs root privileges for the requested action)\n",
+              port + PARPORT_DATA, port + PARPORT_STATUS, port + PARPORT_CONTROL);
+      exit (1);                                 // Don't return, if ioperm() fails port access
+    }                                           //  causes core dump
 #endif // __linux__ || __FreeBSD__
 
   outportb (port + PARPORT_CONTROL, inportb (port + PARPORT_CONTROL) & 0x0f);

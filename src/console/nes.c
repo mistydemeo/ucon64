@@ -7023,8 +7023,8 @@ nes_init (st_rominfo_t *rominfo)
                       (x == *((int *) unif_chunk2->data)) ? "ok" : "bad";
 #endif
                 }
-              sprintf (buf, "PRG%X: %.4f Mb, checksum %s\n",
-                n, TOMBIT_F (unif_chunk->length), str);
+              sprintf (buf, "PRG%X: %.4f Mb, checksum %s\n", n,
+                TOMBIT_F (unif_chunk->length), str);
               strcat (rominfo->misc, buf);
               free (unif_chunk2);
             }
@@ -7057,8 +7057,8 @@ nes_init (st_rominfo_t *rominfo)
                       (x == *((int *) unif_chunk2->data)) ? "ok" : "bad";
 #endif
                 }
-              sprintf (buf, "CHR%X: %.4f Mb, checksum %s\n",
-                        n, TOMBIT_F (unif_chunk->length), str);
+              sprintf (buf, "CHR%X: %.4f Mb, checksum %s\n", n,
+                TOMBIT_F (unif_chunk->length), str);
               strcat (rominfo->misc, buf);
               free (unif_chunk2);
             }

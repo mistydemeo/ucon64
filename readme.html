@@ -1,6 +1,6 @@
 <html><head>
 <link rel="icon" href="images/icon.png" type="image/png">
-<title>uCON64 - ReadME</title></head><body bgcolor="#ffffff"><tt><pre>
+<title>uCON64 - ReadMe</title></head><body bgcolor="#ffffff"><tt><pre>
 uCON64 - THE tool for all video game consoles. Its main features are:
 - Patches (apply or create): IPS (with RLE compression), APS, BSL (apply only),
   PPF, Game Genie.
@@ -9,9 +9,9 @@ uCON64 - THE tool for all video game consoles. Its main features are:
   Super Magic Drive, Game Boy Xchanger, Mad Catz Camera Link, Lynxit.
   Transfers: ROMs and SRAMs.
 - Miscellaneous ROM functions: verbose ROM information for ALL systems with
-  support from internal ROM database (like Romcenter or Goodutil), CRC32
-  calculation, ROM comparison, modification (strip, pad, etc), SRAM conversion
-  (emulator &#60;-&#62; backup unit), DiscJuggler, Nero and ISO2BIN conversions.
+  support from DAT files (RomCenter or Goodutil), CRC32 calculation, ROM
+  comparison, modification (strip, pad, etc), SRAM conversion (emulator
+  &#60;-&#62; backup unit), DiscJuggler, Nero and ISO2BIN conversions.
 - gzip and zip support for all file-related funtions.
 - Support for new formats and headers like UNIF (NES) and NSRT (SNES).
 
@@ -21,12 +21,12 @@ uCON64 1.9.8beta8 Unix (Linux) 1999-2003
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
-Usage: ucon64 [OPTION(S)]... [--rom=][ROM]... [[--file=]FILE]
+Usage: ucon64 [OPTION(S)]... [[--rom=]ROM(S)]... 
 
 Options
   --nbak        prevents backup files (*.BAK)
   --ncol        disable ANSI colors in output
-  --port=PORT   specify parallel PORT (0x3bc, 0x378 (default), 0x278)
+  --port=PORT   specify parallel PORT={3bc, 378, 278, ...}
   --hdn=N       force ROM has backup unit/emulator header with N Bytes size
   --hd          same as --hdn=512
                   most backup units use a header with 512 Bytes size
@@ -37,14 +37,13 @@ Options
                   this differs from the SNES & NES --dint option
   --ns          force ROM is not split
    -e           emulate/run ROM (see /root/.ucon64rc for more)
-  --crc         show CRC32 value of ROM; this will also force calculation for
-                  files bigger than 67108865 Bytes (512.0000 Mb)
+  --crc         show CRC32 value of ROM
   --ls          generate ROM list for all ROMs; --rom=DIRECTORY
   --lsv         like --ls but more verbose; --rom=DIRECTORY
   --hex         show ROM as hexdump; use "ucon64 --hex --rom=ROM|less"
-  --find        find string in ROM; --file=STRING (wildcard: '?')
-   -c           compare ROMs for differencies; --file=OTHER_ROM
-  --cs          compare ROMs for similarities; --file=OTHER_ROM
+  --find=STRING find STRING in ROM (wildcard: '?')
+   -c=FILE      compare FILE with ROM for differences
+  --cs=FILE     compare FILE with ROM for similarities
   --help        display this help and exit
   --version     output version information and exit
    -q           be quiet (don't show ROM info)
@@ -53,7 +52,7 @@ Padding
   --ispad       check if ROM is padded
    -p, --pad    pad ROM to full Mb
   --padn=N      pad ROM to N Bytes (put Bytes with value 0x00 after end)
-  --strip       strip Bytes from end of ROM; --file=VALUE
+  --strip=N     strip N Bytes from end of ROM
   --stpn=N      strip N Bytes from ROM beginning
   --stp         same as --stpn=512
                   most backup units use a header with 512 Bytes size
@@ -61,34 +60,30 @@ Padding
   --ins         same as --insn=512
                   most backup units use a header with 512 Bytes size
 
-DATabase (support for DAT files and ROM managing)
-  --dbs         search ROM in DATabase by CRC32; --rom=0xCRC32
-  --db          DATabase statistics
+DATabase (support of DAT files)
+  --db          DATabase statistics (DAT files: /root/.ucon64)
   --dbv         like --db but more verbose
+  --dbs=CRC32   search ROM with CRC32 in DATabase
   --lsd         generate ROM list for all ROMs using DATabase info; --rom=DIR
   --rrom        rename all ROMs in DIRECTORY to their internal names; --rom=DIR
-                  with --good it will use DATabase instead of internal names
-                  and sort the ROMs into subdirs (DAT files: /root/.ucon64)
-                  Example: ucon64 --rrom --good /home/joe/mame/
-                  Only ROMs of these consoles have internal names:
-                  Super Nintendo Entertainment System/SNES/Super Famicom,
-                  Genesis/Sega Mega Drive/Sega CD/32X/Nomad,
-                  Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance),
-                  Game Boy Advance, and Nintendo 64
   --rr83        like --rrom but with 8.3 filenames; --rom=DIRECTORY
+  --good        used with --rrom and --rr83 ROMs will be renamed and sorted
+                  into subdirs according to the DATabase ("ROM manager")
 
 Patching
-   -b           apply Baseline/BSL patch (<=vx.x); --file=PATCHFILE
-   -i           apply IPS patch (<=v1.2); --file=PATCHFILE
-  --mki         create IPS patch; --file=CHANGED_ROM
-   -a           apply APS patch (<=v1.2); --file=PATCHFILE
-  --mka         create APS patch; --file=CHANGED_ROM
-  --na          change APS description; --rom=PATCHFILE --file=DESCRIPTION
-  --ppf         apply PPF patch (<=v2.0); --rom=RAW_IMAGE --file=PATCHFILE
-  --mkppf       create PPF patch; --rom=RAW_IMAGE --file=CHANGED_IMAGE
-  --nppf        change PPF description; --rom=PATCHFILE --file=DESCRIPTION
-  --idppf       change PPF FILE_ID.DIZ (v2.0); --rom=PATCHFILE
-                  --file=FILE_ID.DIZ
+  --patch=PATCH specify the PATCH for the following options
+                  use this option or uCON64 expects the last commandline
+                  argument to be the name of the PATCH file
+   -b           apply Baseline/BSL PATCH to ROM
+   -i           apply IPS PATCH to ROM (IPS<=v1.2)
+  --mki=ORG_ROM create IPS patch; --rom=MOD_ROM
+   -a           apply APS PATCH to ROM (APS<=v1.2)
+  --mka=ORG_ROM create APS patch; --rom=MOD_ROM
+  --na=DESC     change APS single line DESCRIPTION
+  --ppf         apply PPF PATCH to IMAGE (PPF<=v2.0); --rom=IMAGE
+  --mkppf=ORG_IMG create PPF patch; --rom=MOD_IMAGE
+  --nppf=DESC   change PPF single line DESCRIPTION
+  --idppf=FILE_ID.DIZ change FILE_ID.DIZ of PPF PATCH (PPF v2.0)
   --gge=CODE    encode and display Game Genie code
                   example: --gge=CODE --sms or --gge=CODE --gb
                     CODE='AAAA:VV' or CODE='AAAA:VV:CC'
@@ -123,21 +118,20 @@ TODO: --rip     rip/dump file(s) from a track; --rom=TRACK
 
 Dreamcast
   --dc          force recognition
-TODO: --ip      extract IP.BIN; --rom=CD_IMAGE
+TODO: --ip=FILE add/extract ip.bin FILE to/from IMAGE; --rom=IMAGE
 
 Playstation (One)/Playstation 2 (CD only)
   --psx         force recognition
 DexDrive
-TEST: --xdex=N  send/receive Block N to/from DexDrive; --file=PORT
+TEST: --xdex=N  send/receive Block N to/from DexDrive; --port=PORT
                   receives automatically when --rom(=SRAM) does not exist
 
 Game Boy Advance
   --gba         force recognition
-   -n           change ROM name; --file=NEWNAME
-  --logo        restore ROM logo character data; Offset: 0x04-0x9F
+   -n=NEW_NAME  change internal ROM name to NEW_NAME
+  --logo        restore ROM logo character data (offset: 0x04-0x9F)
   --sram        patch ROM for SRAM saving
-  --crp         slow down Flash Advance Linker access for ROM (crash patch);
-                  --file=WAIT_TIME
+  --crp=WAIT_TIME slow down Flash Advance Linker access for ROM (crash patch);
                   WAIT_TIME='0'  (default in most crash patches)
                   WAIT_TIME='4'  (faster than 0, slower than 8)
                   WAIT_TIME='8'  (faster than 4, slower than 28)
@@ -146,46 +140,48 @@ Game Boy Advance
                   WAIT_TIME='20' (default in most original carts)
                   WAIT_TIME='24' (fastest cartridge access speed)
                   WAIT_TIME='28' (faster than 8 but slower than 16)
-  --strip       strip Bytes from end of ROM (use --ispad before); --file=VALUE
+  --strip=N     strip N Bytes from end of ROM (use --ispad before)
   --multi=SIZE  make multirom for Flash Advance Linker, truncated to SIZE Mbit;
                   file with loader must be specified first, then all the ROMs,
                   multirom to create last
 Flash Advance Linker
-  --xfal        send/receive ROM to/from Flash Advance Linker; --file=PORT
+  --xfal        send/receive ROM to/from Flash Advance Linker; --port=PORT
                   receives automatically (32 Mbits) when ROM does not exist
   --xfalmulti=SIZE send multiple ROMs to Flash Advance Linker (makes temporary
                   multirom truncated to SIZE Mbit); file with loader must be
-                  specified first, then all the ROMs; --file=PORT
-  --xfalc=N     receive N Mbits of ROM from Flash Advance Linker; --file=PORT
+                  specified first, then all the ROMs; --port=PORT
+  --xfalc=N     receive N Mbits of ROM from Flash Advance Linker; --port=PORT
                   N can be 8, 16, 32, 64, 128 or 256
-  --xfals       send/receive SRAM to/from Flash Advance Linker; --file=PORT
+  --xfals       send/receive SRAM to/from Flash Advance Linker; --port=PORT
                   receives automatically when SRAM does not exist
   --xfalb=BANK  send/receive SRAM to/from Flash Advance Linker BANK
-                  BANK can be 1, 2, 3 or 4;  --file=PORT
+                  BANK can be 1, 2, 3 or 4;  --port=PORT
                   receives automatically when SRAM does not exist
 
 Nintendo 64
   --n64         force recognition
-   -n           change ROM name; --file=NEWNAME
+   -n=NEW_NAME  change internal ROM name to NEW_NAME
   --v64         convert to Doctor V64 (and compatibles/interleaved)
   --z64         convert to Z64 (Zip Drive/not interleaved)
-  --bot         add/extract boot code to/from ROM; --file=BOOTCODE (4032 Bytes)
+  --bot=BOOTCODE add/extract BOOTCODE (4032 Bytes) to/from ROM;
                   extracts automatically if BOOTCODE does not exist
-  --sram        LAC's Makesram; --rom=(LAC's SRAM ROM image) --file=SRAMFILE
-                  the SRAMFILE must have a size of 512 Bytes
-  --usms        Jos Kwanten's ultraSMS (Sega Master System/GameGear emulator);
-                  --rom=(Jos Kwanten's ultraSMS ROM image) --file=SMSROM
-                  works only for ROMs which are <= 4 Mb in size
+  --lsram=SRAM  LAC's Makesram; --rom=(LAC's SRAM ROM image);
+                  the SRAM must have a size of 512 Bytes
+                  this option generates a ROM which can be used to transfer
+                  SRAMs to your console
+  --usms=SMSROM Jos Kwanten's ultraSMS (Sega Master System/GameGear emulator);
+                  --rom=(Jos Kwanten's ultraSMS ROM image)
+                  works only for SMSROMs which are <= 4 Mb in size
   --chk         fix ROM checksum
                   supports only 6101 and 6102 boot codes
 Doctor V64
-  --xv64        send/receive ROM to/from Doctor V64; --file=PORT
+  --xv64        send/receive ROM to/from Doctor V64; --port=PORT
                   receives automatically when ROM does not exist
 Doctor64 Jr
-  --xdjr        send/receive ROM to/from Doctor64 Jr; --file=PORT
+  --xdjr        send/receive ROM to/from Doctor64 Jr; --port=PORT
                   currently only sending is supported
 DexDrive
-TEST: --xdex=N  send/receive Block N to/from DexDrive; --file=PORT
+TEST: --xdex=N  send/receive Block N to/from DexDrive; --port=PORT
                   receives automatically when --rom(=SRAM) does not exist
 
 Super Nintendo Entertainment System/SNES/Super Famicom
@@ -197,7 +193,7 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --nint        force ROM is not in interleaved format
   --bs          force ROM is a Broadcast Satellaview dump
   --nbs         force ROM is a regular cartridge dump
-   -n           change internal ROM name; --file=NEWNAME
+   -n=NEW_NAME  change internal ROM name to NEW_NAME
   --smc         convert to Super Magicom/SMC
   --fig         convert to *Pro Fighter*/(all)FIG
   --figs        convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG;
@@ -237,16 +233,16 @@ Super Nintendo Entertainment System/SNES/Super Famicom
    -l           remove SlowROM checks
   --chk         fix ROM checksum
 Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC)/SWC DX(2)
-  --xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; --file=PORT
+  --xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; --port=PORT
                   receives automatically when ROM does not exist
                   Press q to abort; ^C will cause invalid state of backup unit
   --xswc2       same as --xswc, but enables Real Time Save mode (SWC only)
   --xswcs       send/receive SRAM to/from Super Wild Card*/(all)SWC;
-                  --file=PORT
+                  --port=PORT
                   receives automatically when SRAM does not exist
                   Press q to abort; ^C will cause invalid state of backup unit
 Game Doctor SF3(SF6/SF7)
-  --xgd3        send ROM to Game Doctor SF3(SF6/SF7); --file=PORT
+  --xgd3        send ROM to Game Doctor SF3(SF6/SF7); --port=PORT
 
 Neo Geo/Neo Geo CD(Z)/MVS
   --ng          force recognition
@@ -262,40 +258,39 @@ Genesis/Sega Mega Drive/Sega CD/32X/Nomad
   --stp         convert SRAM from backup unit for use with an emulator
                   --stp just strips the first 512 bytes
   --mgd         convert to Multi Game*/MGD2/MGH/RAW
-   -n           change foreign ROM name; --file=NEWNAME
-  --n2          change Japanese ROM name; --file=NEWNAME
+   -n=NEW_NAME  change foreign ROM name to NEW_NAME
+  --n2=NEW_NAME change Japanese ROM name to NEW_NAME
    -j           join split ROM
    -s           split ROM into 4 Mb parts (for backup unit(s) with fdd)
   --chk         fix ROM checksum
   --1991        fix old third party ROMs to work with consoles build after
                   October 1991 by inserting "(C) SEGA" and "(C)SEGA"
 Super Com Pro (HK)/Super Magic Drive/SMD
-TEST: --xsmd    send/receive ROM to/from Super Magic Drive/SMD; --file=PORT
+TEST: --xsmd    send/receive ROM to/from Super Magic Drive/SMD; --port=PORT
                   receives automatically when ROM does not exist
-TEST: --xsmds   send/receive SRAM to/from Super Magic Drive/SMD; --file=PORT
+TEST: --xsmds   send/receive SRAM to/from Super Magic Drive/SMD; --port=PORT
                   receives automatically when SRAM does not exist
 
 Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)
   --gb          force recognition
-   -n           change ROM name; --file=NEWNAME
+   -n=NEW_NAME  change internal ROM name to NEW_NAME
   --mgd         convert to Multi Game*/MGD2/RAW
   --ssc         convert to Super Smart Card/SSC (+512 Bytes)
   --sgb         convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX
   --gbx         convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC
-  --n2gb        convert for use with Kami's FC emulator (NES emulator);
-                  --rom=NES_ROM --file=FC.GB (the emulator)
-                  m-kami@da2.so-net.ne.jp www.playoffline.com
+  --n2gb=EMU    convert for use with Kami's FC EMUlator (NES emulator);
+                  --rom=NES_ROM
   --chk         fix ROM checksum
 Game Boy Xchanger/GBDoctor
-  --xgbx        send/receive ROM to/from GB Xchanger; --file=PORT
+  --xgbx        send/receive ROM to/from GB Xchanger; --port=PORT
                   receives automatically when ROM does not exist
-  --xgbxs       send/receive SRAM to/from GB Xchanger; --file=PORT
+  --xgbxs       send/receive SRAM to/from GB Xchanger; --port=PORT
                   receives automatically when SRAM does not exist
   --xgbxb=BANK  send/receive 64kbits SRAM to/from GB Xchanger BANK
-                  BANK can be a number from 0 to 15; --file=PORT
+                  BANK can be a number from 0 to 15; --port=PORT
                   receives automatically when ROM does not exist
 Mad Catz Camera Link (Game Boy Camera)
-TEST: --xmccl   send/receive BYTES to/from Mad Catz Camera Link; --file=PORT
+TEST: --xmccl   send/receive BYTES to/from Mad Catz Camera Link; --port=PORT
                   currently only receiving is supported
 
 Handy (prototype)/Lynx/Lynx II
@@ -303,14 +298,14 @@ Handy (prototype)/Lynx/Lynx II
   --lyx         convert to LYX/RAW (strip 64 Bytes LNX header)
   --lnx         convert to LNX (uses default values for the header);
                   adjust the LNX header with the following options
-   -n           change ROM name (LNX only); --file=NEWNAME
+   -n=NEW_NAME  change internal ROM name to NEW_NAME (LNX only)
   --nrot        set no rotation (LNX only)
   --rotl        set rotation left (LNX only)
   --rotr        set rotation right (LNX only)
-  --b0          change Bank0 kBytes size (LNX only); --file={0,64,128,256,512}
-  --b1          change Bank1 kBytes size (LNX only); --file={0,64,128,256,512}
+  --b0=N        change Bank0 kBytes size to N={0,64,128,256,512} (LNX only)
+  --b1=N        change Bank1 kBytes size to N={0,64,128,256,512} (LNX only)
 Lynxit (Lynx Cartridge Backup Board)
-TEST: --xlit    receive ROM from Lynxit interface; --file=PORT
+TEST: --xlit    receive ROM from Lynxit interface; --port=PORT
 
 PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))
 Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)
@@ -358,8 +353,8 @@ Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)
                   MTYPE='4' four screens of VRAM
                   MTYPE='5' mirroring controlled by mapper hardware (UNIF only)
   --cmnt=TEXT   specify that TEXT should be used as comment (UNIF only)
-  --dumpinfo    use dumper info when converting to UNIF; --file=INFOFILE
-   -n           change internal ROM name (UNIF only); --file=NEWNAME
+  --dumpinfo=FILE use dumper info from FILE when converting to UNIF
+   -n=NEW_NAME  change internal ROM name to NEW_NAME (UNIF only)
   --fds         convert Famicom Disk System file (diskimage) from FAM to FDS
   --fdsl        list Famicom Disk System/FDS (diskimage) contents
 
@@ -377,14 +372,14 @@ DATabase: 22770 known ROMs (DAT files: /root/.ucon64)
 
 NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)
       parallel port. If that is the case give a hardware address. For example:
-        ucon64 --xswc "rom.swc" 0x378
+        ucon64 --xswc "rom.swc" --port=0x378
       In order to connect a copier to a PC's parallel port you need a standard
       bidirectional parallel cable
 
 TIP: ucon64 --help --snes (would show only SNES related help)
      ucon64 --help|less (to see everything in less)
-     give the force recognition switch a try if something went wrong
+     Give the force recognition switch a try if something went wrong
 
-Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net
+Please report any problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net
 
 </pre></tt></body></html>

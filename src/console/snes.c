@@ -2968,11 +2968,19 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
     }
   else
     {
-      for (i = 0; i < half_internal_rom_size; i++) // normal ROM
+      // Handle split files. Don't make this dependent of ucon64.split as
+      //  the last file doesn't get detected as being split. Besides, we don't
+      //  want to crash on *any* input data.
+      int i_max = half_internal_rom_size > rom_size ? rom_size : half_internal_rom_size;
+
+      for (i = 0; i < i_max; i++) // normal ROM
         sum1 += (*rom_buffer)[i];
 
-      sum2 = 0;
       remainder = rom_size - half_internal_rom_size;
+      if (!remainder)                           // don't devide by zero below
+        remainder = half_internal_rom_size;
+
+      sum2 = 0;
       for (i = half_internal_rom_size; i < rom_size; i++)
         sum2 += (*rom_buffer)[i];
       sum1 += sum2 * (half_internal_rom_size / remainder);

@@ -315,7 +315,7 @@ if(argcmp(argc,argv,"-find"))
 {
 	x=0;
 	y=quickftell(ucon64_rom());
-	while((x=filencmp(ucon64_rom(),x,y,ucon64_file(),strlen(ucon64_file())))!=-1)
+	while((x=filencmp2(ucon64_rom(),x,y,ucon64_file(),strlen(ucon64_file()),'*'))!=-1)
 	{
 		filehexdump(ucon64_rom(),x,strlen(ucon64_file()));
 		x++;
@@ -747,7 +747,7 @@ printf("TODO: $ROM could also be the name of a *.ZIP archive\n"
 	"  -ls		generate ROM list for all ROMs; $ROM=DIRECTORY\n"
 	"  -c		compare ROMs; $FILE=OTHER_ROM\n"
 	"  -cs		compare ROMs for similarities; $FILE=OTHER_ROM\n"
-	"  -find		find string in ROM; $FILE=STRING\n"
+	"  -find		find string in ROM; $FILE=STRING ('*'==wildcard for ONE char!)\n"
 	"  -swap		swap/(de)interleave (ALL) Bytes in ROM (1234<->2143)\n"
 	"  -pad		pad ROM to full Mb\n"
 	"  -padhd	pad ROM to full Mb (regarding to +512 Bytes header)\n"

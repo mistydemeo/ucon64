@@ -38,8 +38,8 @@ const st_usage_t dc_usage[] = {
     {NULL, 0, NULL, "Dreamcast", "1998 SEGA http://www.sega.com"},
     {"dc", 0, NULL, "force recognition", NULL},
 //    {"vms", 1, "SAV", "convert NES SAV file to a VMS file for use with NesterDC", NULL},
-    {"scr", 0, NULL, "scramble 1ST_READ.BIN for selfboot CD's", NULL},
-    {"unscr", 0, NULL, "unscramble 1ST_READ.BIN for non-selfboot CD's", NULL},
+    {"scr", 0, NULL, "scramble 1ST_READ.BIN for selfboot CDs", NULL},
+    {"unscr", 0, NULL, "unscramble 1ST_READ.BIN for non-selfboot CDs", NULL},
 //    {"ip", 1, "FILE", "extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE", NULL},
     {"mkip", 0, NULL, "generate IP.BIN file with default values", NULL},
     {"parse", 1, "TEMPLATE", "parse TEMPLATE file into a IP.BIN;\n"

@@ -284,9 +284,6 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
   Seiken Densetsu 3 (by dbjh)<br>
 - updated (SNES) added crack for Uniracers/Unirally and NTSC/PAL fix for
   Seiken Densetsu 2 and Secret of Mana (by dbjh, thanks to John Weidman)<br>
-- updated (all) added wildcard support (ucon64 *.swc --file=0). Note that you
-  have to use --file=&#60;value&#62; to avoid that uCON64 interprets the second
-  file as the FILE argument (by dbjh)<br>
 - updated (all) fixed problem with reading environment variables under DOS and
   Windows (by dbjh)<br>
 - updated (all) environment variables now take precedence over configuration
@@ -295,16 +292,20 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - added (SNES) -xgd3 send ROM to Game Doctor SF3(SF6/SF7); --file=PORT
   (by John Weidman and dbjh)<br>
 - added (SNES) -dbuh display backup unit header and see if it matches with what
-  uCON64 found while analyzing the ROM data (by dbjh, based on an idea by JohnDie)<br>
+  uCON64 found while analyzing the ROM data (by dbjh, based on an idea by
+  JohnDie)<br>
 - removed (SNES) -gdf (fix Game Doctor savegame problems) because -gd3 already
   provides this functionality (by dbjh)<br>
 - updated (SNES) fixed some -xgd3 problems, uppercase filenames sent to unit,
   buffer data now correct for all files, transfer file size fixed (by John)<br>
-- updated (SNES) checksums and deinterleaves for HiROM 24Mbit Game Doctor format
-  should now work (by John)<br>
-- added (SNES) -xswc2 send ROM to Super Wild Card and enable Real Time Save mode
-  (by dbjh)<br>
+- updated (SNES) checksums and deinterleaves for HiROM 24 Mbit Game Doctor
+  format should now work (by John)<br>
+- added (SNES) -xswc2 send ROM to Super Wild Card and enable Real Time Save
+  mode (by dbjh)<br>
 - updated (SNES) added NTSC/PAL fix for Live-a-Live (by dbjh)<br>
+- updated (all) added full wildcard support ("ucon64 -fig *.swc"). Don't forget
+  to read the FAQ (by dbjh)<br>
+- added (all) -q be quiet (don't show ROM info) (by dbjh)<br>
 <br>
 <br>
 <br>

@@ -3,15 +3,15 @@
 DLOPEN=1
 #ZLIB=1
 
-prefix = /usr/local
-exec_prefix = ${prefix}
-includedir = ${prefix}/include
-libdir =  ${exec_prefix}/lib
+prefix=/usr/local
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
 
-INSTALL = /usr/bin/install -c
-INSTALL_PROGRAM = ${INSTALL}
-INSTALL_DATA = ${INSTALL} -m 644
-#RANLIB = ranlib
+INSTALL=/usr/bin/install -c
+INSTALL_PROGRAM=${INSTALL}
+INSTALL_DATA=${INSTALL} -m 644
+#RANLIB=ranlib
 
 CC=gcc
 CFLAGS0=-Wall -W -O3 -DHAVE_CONFIG_H

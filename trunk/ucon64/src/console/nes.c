@@ -97,7 +97,7 @@ const st_usage_t nes_usage[] =
     "  " OPTION_LONG_S "gg          apply GameGenie code (permanent);\n"
     "                  " OPTION_LONG_S "file=XXXXXX or " OPTION_LONG_S "file=XXXXXXXX\n"
 #endif
-      {NULL, NULL} 
+      {NULL, NULL}
   };
 
 #if 0
@@ -6808,7 +6808,7 @@ nes_init (st_rominfo_t *rominfo)
   switch (type)
     {
     case INES:
-      rominfo->copier_usage = (const st_usage_t *)ines_usage;
+      rominfo->copier_usage = ines_usage;
       rominfo->buheader_start = INES_HEADER_START;
       rominfo->buheader_len = INES_HEADER_LEN;
       q_fread (&ines_header, INES_HEADER_START, INES_HEADER_LEN, ucon64.rom);
@@ -6855,7 +6855,7 @@ nes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, buf);
       break;
     case UNIF:
-      rominfo->copier_usage = (const st_usage_t *)unif_usage;
+      rominfo->copier_usage = unif_usage;
       rominfo->buheader_start = UNIF_HEADER_START;
       rominfo->buheader_len = UNIF_HEADER_LEN;
       q_fread (&unif_header, UNIF_HEADER_START, UNIF_HEADER_LEN, ucon64.rom);
@@ -7105,7 +7105,7 @@ nes_init (st_rominfo_t *rominfo)
         Either a *.PRM header file, a 512-byte *.700 trainer file, a *.PRG
         ROM data file or a *.CHR VROM data file.
       */
-      rominfo->copier_usage = (const st_usage_t *)pasofami_usage;
+      rominfo->copier_usage = pasofami_usage;
       rominfo->buheader_start = 0;
       strcpy (buf, ucon64.rom);
       setext (buf, ".PRM");
@@ -7178,14 +7178,14 @@ nes_init (st_rominfo_t *rominfo)
         because there is no information about the image other than it's size
         and CRC.
       */
-      rominfo->copier_usage = (const st_usage_t *) ffe_usage;
+      rominfo->copier_usage = ffe_usage;
       rominfo->buheader_start = UNKNOWN_HEADER_START;
       rominfo->buheader_len = UNKNOWN_HEADER_LEN;
       q_fread (&ffe_header, UNKNOWN_HEADER_START, UNKNOWN_HEADER_LEN, ucon64.rom);
       rominfo->buheader = &ffe_header;
       break;
     case FDS:
-      rominfo->copier_usage = (const st_usage_t *)fds_usage;
+      rominfo->copier_usage = fds_usage;
       rominfo->country = "Japan";
       strcat (rominfo->misc, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
@@ -7195,7 +7195,7 @@ nes_init (st_rominfo_t *rominfo)
       ucon64.crc32 = q_fcrc32 (ucon64.rom, 0);
       break;
     case FAM:
-      rominfo->copier_usage = (const st_usage_t *)fds_usage;
+      rominfo->copier_usage = fds_usage;
       rominfo->country = "Japan";
 
       // FAM files don't have a header. Instead they seem to have a 192 byte trailer.
@@ -7245,7 +7245,7 @@ nes_init (st_rominfo_t *rominfo)
           }
       }
 
-  rominfo->console_usage = (const st_usage_t *)nes_usage;
+  rominfo->console_usage = nes_usage;
 
   return result;
 }

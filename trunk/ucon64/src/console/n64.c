@@ -518,8 +518,8 @@ n64_init (st_rominfo_t *rominfo)
                (n64crc.crc2 == value) ? "=" : "!", value);
     }
 
-  rominfo->console_usage = (const st_usage_t *)n64_usage;
-  rominfo->copier_usage = (const st_usage_t *)(!rominfo->buheader_len ?
+  rominfo->console_usage = n64_usage;
+  rominfo->copier_usage = (!rominfo->buheader_len ?
     ((!rominfo->interleaved) ? z64_usage : doctor64_usage
 #if 0
 doctor64jr_usage

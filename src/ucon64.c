@@ -813,10 +813,12 @@ ucon64_usage (int argc, char *argv[])
   printf ("                  supported are:\n"
     "                  %s,\n"
     "                  %s,\n"
-    "                  %s,\n"
+//    "                  %s,\n"
     "                  %s,\n"
     "                  and %s\n",
-    gameboy_usage[0], sms_usage[0], genesis_usage[0], nes_usage[0], snes_usage[0]);
+    gameboy_usage[0], sms_usage[0], 
+//    genesis_usage[0], 
+    nes_usage[0], snes_usage[0]);
 
   printf (
     "  " OPTION_LONG_S "cd          force recognition (of CD IMAGES)\n"

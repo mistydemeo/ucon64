@@ -1319,6 +1319,9 @@ ucon64_options (int c, const char *optarg)
         case UCON64_NG:
           neogeo_mgd ();
           break;
+        case UCON64_SMS:
+          sms_mgd (ucon64.rominfo);
+          break;
         case UCON64_SNES:
           snes_mgd (ucon64.rominfo);
           break;
@@ -1452,11 +1455,31 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_SMD:
-      genesis_smd (ucon64.rominfo);
+      switch (ucon64.console)
+        {
+        case UCON64_GEN:
+          genesis_smd (ucon64.rominfo);
+          break;
+        case UCON64_SMS:
+          sms_smd (ucon64.rominfo);
+          break;
+        default:
+          return -1;
+        }
       break;
 
     case UCON64_SMDS:
-      genesis_smds ();
+      switch (ucon64.console)
+        {
+        case UCON64_GEN:
+          genesis_smds ();
+          break;
+        case UCON64_SMS:
+          sms_smds ();
+          break;
+        default:
+          return -1;
+        }
       break;
 
     case UCON64_SMG:

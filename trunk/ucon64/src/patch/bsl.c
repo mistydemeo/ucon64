@@ -35,99 +35,80 @@ const char *bsl_usage[] =
   {
     NULL,
     NULL,
-    "  " OPTION_S "b=PATCH     apply Baseline/BSL PATCH against ROM (BSL vx.x)\n",
+    "  " OPTION_S "b=PATCH     apply Baseline/BSL PATCH to ROM\n",
     NULL
   };
 
 
 int
-bsl (const char *name, const char *option2)
+bsl (const char *modname, const char *bslname)
 {
-  FILE *fh, *fh2;
-  char inchar[1], addstr[10], datstr[10], inchar2[4096];
-  long numdat, i, done = 0, add;
-  int dat, fsize;
+  FILE *modfile, *bslfile;
+  unsigned char byte, addstr[10], datstr[10], buf[4096];
+  int dat, numdat, i, done = 0, add;
 
-  if (!(fh = fopen (name, "r+b")))
+  if (!(modfile = fopen (modname, "r+b")))
     return -1;
-  if (!(fh2 = fopen (option2, "rb")))
+  if (!(bslfile = fopen (bslname, "rb")))
     return -1;
 
-  fsize = q_fsize (option2);
-  printf ("BSL/Baseline\n");
-  printf ("%d (%.4f Mb)\n", fsize, (float) fsize / MBIT);
-  printf ("\n"
-          "NOTE: Sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
-          "      This means you must convert for example a SNES ROM with -swc or -mgd or\n"
-          "      the patch will not work\n");
-
-/*
-  printf ("Internal Size: %.4f Mb\n", q_fsize (romname, 8));
-  printf ("Version: 1.%d\n","?");
-  printf ("\n");
-*/
+  printf ("Applying BSL/Baseline patch...\n");
 
   while (!done)
     {
       memset (addstr, ' ', sizeof (addstr));
-      fscanf (fh2, "%[-1234567890]\n", addstr);
-      fread (inchar, sizeof (inchar), 1, fh2);
-
-      add = atol (addstr);
+      fscanf (bslfile, "%[-1234567890]\n", addstr);
+      byte = fgetc (bslfile);
+      add = atoi (addstr);
 
       memset (datstr, ' ', sizeof (datstr));
-      fscanf (fh2, "%[-1234567890]\n", addstr);
-      fread (inchar, sizeof (inchar), 1, fh2);
-
+      fscanf (bslfile, "%[-1234567890]\n", datstr);
+      byte = fgetc (bslfile);
       dat = atoi (datstr);
-      inchar[0] = dat;
 
       if ((add == -1) && (dat == -1))
         done = 1;
-
-      if (done == 0)
+      else
         {
-//                printf("(Offset:  %lX)\n", add);
-
-          fseek (fh, add, SEEK_SET);
-          fwrite (inchar, sizeof (inchar), 1, fh);
+          fseek (modfile, add, SEEK_SET);
+          fputc (dat, modfile);
         }
     }
 
   memset (addstr, ' ', sizeof (addstr));
-  fscanf (fh2, "%[-1234567890]\n", addstr);
-  fread (inchar, sizeof (inchar), 1, fh2);
-
-  add = atol (addstr);
+  fscanf (bslfile, "%[-1234567890]\n", addstr);
+  byte = fgetc (bslfile);
+  add = atoi (addstr);
 
   memset (datstr, ' ', sizeof (datstr));
-  fscanf (fh2, "%[-1234567890]\n", addstr);
-  fread (inchar, sizeof (inchar), 1, fh2);
+  fscanf (bslfile, "%[-1234567890]\n", datstr);
+  byte = fgetc (bslfile);
+  numdat = atoi (datstr);
 
-  numdat = atol (datstr);
-  fseek (fh, add, SEEK_SET);
+  fseek (modfile, add, SEEK_SET);
 
   if (numdat > 0)
     {
       while (numdat > 4096)
         {
-//                        printf("(Offset:  %lX)\n", add);
-          fread (inchar2, sizeof (inchar2), 1, fh2);
-          fwrite (inchar2, sizeof (inchar2), 1, fh);
-          numdat = numdat - 4096;
-          add = add + 4096;
+          fread (buf, 4096, 1, bslfile);
+          fwrite (buf, 4096, 1, modfile);
+          numdat -= 4096;
         }
-      for (i = 0; i < (numdat + 1); i++)
+      for (i = 0; i <= numdat; i++)
         {
-//                        printf("(Offset:  %lX)\n", (add+i));
-          fread (inchar, sizeof (inchar), 1, fh2);
-          fwrite (inchar, sizeof (inchar), 1, fh);
+          byte = fgetc (bslfile);
+          fputc (byte, modfile);
         }
     }
 
-  fclose (fh2);
-  fclose (fh);
+  printf ("Patching complete\n"
+          "NOTE: Sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
+          "      This means you must convert for example a SNES ROM with -swc or -mgd or\n"
+          "      the patch will not work\n");
+  fclose (bslfile);
+  fclose (modfile);
   return 0;
 }
 
-// TODO make bsl patch
+// TODO: make bsl patch

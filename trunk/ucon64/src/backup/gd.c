@@ -196,7 +196,7 @@ gd3_send_prolog_byte (unsigned char data)
 int
 gd3_send_prolog_bytes (unsigned char *data, int len)
 {
-  int i = len;
+  int i;
 
   for (i = 0; i < len; i++)
     if (gd3_send_prolog_byte (data[i]) == GD_ERROR)
@@ -241,7 +241,7 @@ gd3_send_byte (unsigned char data)
 int
 gd3_send_bytes (unsigned char *data, int len)
 {
-  int i = len;
+  int i;
 
   for (i = 0; i < len; i++)
     {
@@ -335,7 +335,7 @@ gd6_send_prolog_byte (unsigned char data)
 int
 gd6_send_prolog_bytes (unsigned char *data, int len)
 {
-  int i = len;
+  int i;
   unsigned int timeout = 0x1e00000;
 
   gd6_send_toggle = (inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x01) << 1;
@@ -349,7 +349,7 @@ gd6_send_prolog_bytes (unsigned char *data, int len)
 int
 gd6_send_bytes (unsigned char *data, int len)
 {
-  int i = len;
+  int i;
   unsigned int timeout = 0x1e0000;
 
   gd6_send_toggle = (inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x01) << 1;

@@ -891,7 +891,7 @@ int ucon64_usage(int argc,char *argv[])
   printf(/*"TODO: $ROM could also be the name of a *.ZIP archive\n"
 	"      it will automatically find and extract the ROM\n"
 	"\n"*/
-	"TODO:  -sh      use uCON64 in shell modus\n"
+//	"TODO:  -sh      use uCON64 in shell modus\n"
 	"  -e            emulate/run ROM (check INSTALL and $HOME/.ucon64rc for more)\n"
 	"  -crc          show CRC32 value of ROM\n"
 	"  -crchd        show CRC32 value of ROM (regarding to +512 Bytes header)\n"

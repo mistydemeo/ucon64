@@ -47,20 +47,19 @@ extern "C" {
 #endif
 #endif
 
-#if     defined __linux__ || defined __FreeBSD__ || \
-        defined __BEOS__ || defined __solaris__ || defined HAVE_INTTYPES_H
+#ifdef  HAVE_INTTYPES_H
 #include <inttypes.h>
 #elif   defined __CYGWIN__
 #include <sys/types.h>
+#if     __GNUC__ < 3
 #ifndef OWN_INTTYPES
 #define OWN_INTTYPES                            // signal that these are defined
-#if     __GNUC__ < 3
 typedef u_int8_t uint8_t;
 typedef u_int16_t uint16_t;
 typedef u_int32_t uint32_t;
 typedef u_int64_t uint64_t;
 #endif
-#endif                                          // OWN_INTTYPES
+#endif                                          // __GNUC__ < 3
 #else                                           // __MSDOS__, _WIN32, AMIGA
 #ifndef OWN_INTTYPES
 #define OWN_INTTYPES                            // signal that these are defined

@@ -21,14 +21,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#ifdef  HAVE_DIRENT_H
-#include <dirent.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include "misc.h"
 #include "ucon64.h"
+#include "ucon64_misc.h"
+#include "yoko.h"
+
 
 const st_usage_t yoko_usage[] =
   {
@@ -37,12 +38,4 @@ const st_usage_t yoko_usage[] =
   };
 
 #ifdef PARALLEL
-
-#include "misc.h"                               // kbhit(), getch()
-#include "ucon64.h"
-#include "ucon64_misc.h"
-#include "yoko.h"
-
-
-
 #endif // PARALLEL

@@ -620,6 +620,9 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_SSIZE, UCON64_SNES, snes_usage,      WF_SWITCH},
   {UCON64_V, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_VRAM, UCON64_NES, nes_usage,         WF_SWITCH},
+#ifdef  PARALLEL
+  {UCON64_XFALM, UCON64_GBA, fal_usage,        WF_SWITCH},
+#endif
   {0, 0, NULL, 0}
 };
 

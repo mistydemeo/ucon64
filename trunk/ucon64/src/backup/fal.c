@@ -47,14 +47,12 @@ const st_usage_t fal_usage[] =
                           "specified first, then all the ROMs; " OPTION_LONG_S "port=PORT"},
     {"xfalc", "N", "receive N Mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
                    "N can be 8, 16, 32, 64, 128 or 256"},
-#if 0
-    {"xfalm", NULL, "use SPP mode, default is EPP"},
-#endif
     {"xfals", NULL, "send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
                  "receives automatically when SRAM does not exist"},
     {"xfalb", "BANK", "send/receive SRAM to/from Flash Advance Linker BANK\n"
                      "BANK can be 1, 2, 3 or 4; " OPTION_LONG_S "port=PORT\n"
                      "receives automatically when SRAM does not exist"},
+    {"xfalm", NULL, "try to enable EPP mode, default is SPP mode"},
 #endif // PARALLEL
     {NULL, NULL, NULL}
 };
@@ -527,27 +525,41 @@ LookForLinker (void)            // 4026a8
 void
 LinkerInit (void)               // 4027c4
 {
-  outpb (ECPRegECR, 4);         // Set EPP mode for ECP chipsets
-
-  EPPMode = 1;
-  if (LookForLinker ())
+  int linker_found = 0;
+  
+  /*
+    uCON64 comment:
+    Accessing I/O ports with addresses higher than 0x3ff causes an access
+    violation under Windows XP (NT/2000) for _Windows_ executables without the
+    use of an appropriate device driver. UserPort is an example of an
+    *inappropriate* device driver, because it enables access to I/O ports up to
+    0x3ff. For some (ridiculous) reason, DOS executables are allowed to
+    _access_ at least the ECP register this code uses. That doesn't mean it
+    will result in the expected behaviour like enabling EPP.
+  */
+  if (EPPMode)
     {
-      // Linker found using EPP mode.
-      printf ("Linker found. EPP Found.\n");
-      if (SPPDataPort == 0x3bc)
-        return;
-      outpb (SPPCtrlPort, 4);
+      outpb (ECPRegECR, 4);     // Set EPP mode for ECP chipsets
+      if (LookForLinker ())
+        {
+          // Linker found using EPP mode.
+          linker_found = 1;
+          printf ("Linker found. EPP found.\n");
+  
+          if (SPPDataPort == 0x3bc)
+            return;
+          outpb (SPPCtrlPort, 4);
+        }
     }
-  else
+  if (!linker_found)
     {
       // Look for linker in SPP mode.
-      outpb (ECPRegECR, 0);     // Set EPP mode for ECP chipsets
+      if (EPPMode)
+        outpb (ECPRegECR, 0);   // Set EPP mode for ECP chipsets
 
       EPPMode = 0;
       if (LookForLinker ())
-        {
-          printf ("Linker found. EPP not Found - SPP used.\n");
-        }
+        printf ("Linker found. EPP not found or not enabled - SPP used.\n");
       else
         {
           fprintf (stderr,
@@ -631,7 +643,7 @@ BackupSRAM (FILE * fp, int StartOS, int Size)   // 4046f4
               fputc (v, fp);
             }
           bytesread += 256;
-          if ((bytesread & 0x1fff) == 0)        // call ucon64_gauge() after receiving 8kB
+          if ((bytesread & 0x1fff) == 0)        // call ucon64_gauge() after receiving 8 kB
             ucon64_gauge (starttime, bytesread, size);
         }
     }
@@ -674,7 +686,7 @@ RestoreSRAM (FILE * fp, int StartOS)
               i = fgetc (fp);
             }
           byteswritten += 256;
-          if ((byteswritten & 0x1fff) == 0)     // call ucon64_gauge() after sending 8kB
+          if ((byteswritten & 0x1fff) == 0)     // call ucon64_gauge() after sending 8 kB
             ucon64_gauge (starttime, byteswritten, ucon64.file_size);
         }
       m++;
@@ -706,7 +718,7 @@ BackupROM (FILE * fp, int SizekW)
           fputc (valw >> 8, fp);
         }
       bytesread += 256 << 1;    // 256 words
-      if ((bytesread & 0xffff) == 0)    // call ucon64_gauge() after receiving 64kB
+      if ((bytesread & 0xffff) == 0)    // call ucon64_gauge() after receiving 64 kB
         ucon64_gauge (starttime, bytesread, size);
     }
 }
@@ -1011,7 +1023,7 @@ ProgramNonTurboIntelFlash (FILE * fp)
                 }
 
               addr += 16;
-              if ((addr & 0x3fff) == 0) // call ucon64_gauge() after sending 32kB
+              if ((addr & 0x3fff) == 0) // call ucon64_gauge() after sending 32 kB
                 ucon64_gauge (starttime, addr << 1, FileSize);
 
               PPWriteWord (INTEL28F_CONFIRM);   // Comfirm block write
@@ -1054,7 +1066,7 @@ ProgramNonTurboIntelFlash (FILE * fp)
         }
 
       printf ("\r                                                                              \r"); // remove last gauge
-      ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
+      ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32 k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
@@ -1147,7 +1159,7 @@ ProgramTurboIntelFlash (FILE * fp)
                     j = GetFileByte (fp);
                 }
               addr += 32;
-              if ((addr & 0x3fff) == 0) // call ucon64_gauge() after sending 32kB
+              if ((addr & 0x3fff) == 0) // call ucon64_gauge() after sending 32 kB
                 ucon64_gauge (starttime, addr << 1, FileSize);
               PPWriteWord (INTEL28F_CONFIRM);   // Comfirm block write
               PPWriteWord (INTEL28F_CONFIRM);   // Comfirm block write
@@ -1174,7 +1186,7 @@ ProgramTurboIntelFlash (FILE * fp)
         }
 
       printf ("\r                                                                              \r"); // remove last gauge
-      ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
+      ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32 k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
       WriteFlash (1, INTEL28F_READARRAY);
@@ -1239,12 +1251,12 @@ ProgramSharpFlash (FILE * fp)
           addr += 1;
 
           j = GetFileByte (fp);
-          if ((addr & 0x3fff) == 0)     // call ucon64_gauge() after sending 32kB
+          if ((addr & 0x3fff) == 0)     // call ucon64_gauge() after sending 32 kB
             ucon64_gauge (starttime, addr << 1, FileSize);
         }
 
       printf ("\r                                                                              \r"); // remove last gauge
-      ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
+      ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32 k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
@@ -1345,7 +1357,7 @@ fal_main (int argc, char **argv)
 
   debug = 0;
   verbose = 1;
-  EPPMode = 1;
+  EPPMode = 0;                                  // uCON64 comment: use the most compatible setting as default
   DataSize16 = 0;
   WaitDelay = 0;
   VisolyTurbo = 0;
@@ -1452,10 +1464,11 @@ fal_main (int argc, char **argv)
               ProgramExit (1);
             }
           break;
-//            case 'm':
-//                    // Set SPP mode
-//                    EPPMode = 0;
-//                    break;
+        case 'm': 
+          // uCON64 comment: See comment in LinkerInit(). Note that we reverse
+          //  the meaning compared to the original code.
+          EPPMode = 1;                          // Set EPP mode
+          break;
         case 'n':
           // Don't repair header
           RepairHeader = 0;
@@ -1611,25 +1624,28 @@ fal_main (int argc, char **argv)
   It will save you some work if you don't fully integrate the code above with
   uCON64's code, because it is a project separate from the uCON64 project.
 */
-int fal_argc;
+int fal_argc = 0;
 char *fal_argv[128];
 
 void
 fal_args (unsigned int parport)
 {
-  fal_argv[0] = "fl";
+  fal_argv[fal_argc++] = "fl";
   if (parport != 0x3bc && parport != 0x378 && parport != 0x278)
     {
       fprintf (stderr, "ERROR: PORT must be 0x3bc, 0x378 or 0x278\n");
       exit (1);
     }
-  fal_argv[1] = "-l";
+  fal_argv[fal_argc++] = "-l";
   if (parport == 0x3bc)
-    fal_argv[2] = "3";
+    fal_argv[fal_argc++] = "3";
   else if (parport == 0x278)
-    fal_argv[2] = "2";
+    fal_argv[fal_argc++] = "2";
   else
-    fal_argv[2] = "1";          // 0x378
+    fal_argv[fal_argc++] = "1";                 // 0x378
+
+  if (ucon64.parport_mode == UCON64_EPP)
+    fal_argv[fal_argc++] = "-m";
 }
 
 
@@ -1638,21 +1654,21 @@ fal_read_rom (const char *filename, unsigned int parport, int size)
 {
   fal_args (parport);
 
-  fal_argv[3] = "-c";
+  fal_argv[fal_argc++] = "-c";
   if (size != UCON64_UNKNOWN)
     {
       if (size == 8)
-        fal_argv[4] = "8";
+        fal_argv[fal_argc++] = "8";
       else if (size == 16)
-        fal_argv[4] = "16";
+        fal_argv[fal_argc++] = "16";
       else if (size == 32)
-        fal_argv[4] = "32";
+        fal_argv[fal_argc++] = "32";
       else if (size == 64)
-        fal_argv[4] = "64";
+        fal_argv[fal_argc++] = "64";
       else if (size == 128)
-        fal_argv[4] = "128";
+        fal_argv[fal_argc++] = "128";
       else if (size == 256)
-        fal_argv[4] = "256";
+        fal_argv[fal_argc++] = "256";
       else
         {
           fprintf (stderr, "ERROR: Invalid argument for -xfalc=n\n"
@@ -1661,20 +1677,11 @@ fal_read_rom (const char *filename, unsigned int parport, int size)
         }
     }
   else
-    fal_argv[4] = "32";
+    fal_argv[fal_argc++] = "32";
 
-  fal_argv[5] = "-s";
-  fal_argv[6] = (char *) filename;              // this is safe (FAL code
-  fal_argc = 7;                                 //  doesn't modify argv)
-
-#if 0
-  if (argcmp (argc, argv, "-xfalm"))
-    {
-      fal_argv[7] = "-m";
-      fal_argc++;
-    }
-#endif
-
+  fal_argv[fal_argc++] = "-s";
+  fal_argv[fal_argc++] = (char *) filename;     // this is safe (FAL code
+                                                //  doesn't modify argv)
   if (!fal_main (fal_argc, fal_argv))
     return 0;
 
@@ -1687,17 +1694,8 @@ fal_write_rom (const char *filename, unsigned int parport)
 {
   fal_args (parport);
 
-  fal_argv[3] = "-p";
-  fal_argv[4] = (char *) filename;
-  fal_argc = 5;
-
-#if 0
-  if (argcmp (argc, argv, "-xfalm"))
-    {
-      fal_argv[5] = "-m";
-      fal_argc++;
-    }
-#endif
+  fal_argv[fal_argc++] = "-p";
+  fal_argv[fal_argc++] = (char *) filename;
 
   if (!fal_main (fal_argc, fal_argv))
     return 0;
@@ -1713,11 +1711,11 @@ fal_read_sram (const char *filename, unsigned int parport, int bank)
 
   fal_args (parport);
 
-  fal_argv[3] = "-b";
+  fal_argv[fal_argc++] = "-b";
   if (bank == UCON64_UNKNOWN)
     {
-      fal_argv[4] = "1";
-      fal_argv[5] = "4";        // 256 kB
+      fal_argv[fal_argc++] = "1";
+      fal_argv[fal_argc++] = "4";               // 256 kB
     }
   else
     {
@@ -1727,12 +1725,11 @@ fal_read_sram (const char *filename, unsigned int parport, int bank)
           exit (1);
         }
       bank_str[0] = '0' + bank;
-      bank_str[1] = 0;          // terminate string
-      fal_argv[4] = bank_str;
-      fal_argv[5] = "2";        // 64 kB
+      bank_str[1] = 0;                          // terminate string
+      fal_argv[fal_argc++] = bank_str;
+      fal_argv[fal_argc++] = "2";               // 64 kB
     }
-  fal_argv[6] = (char *) filename;
-  fal_argc = 7;
+  fal_argv[fal_argc++] = (char *) filename;
 
   if (!fal_main (fal_argc, fal_argv))
     return 0;
@@ -1748,9 +1745,9 @@ fal_write_sram (const char *filename, unsigned int parport, int bank)
 
   fal_args (parport);
 
-  fal_argv[3] = "-r";
+  fal_argv[fal_argc++] = "-r";
   if (bank == UCON64_UNKNOWN)
-    fal_argv[4] = "1";
+    fal_argv[fal_argc++] = "1";
   else
     {
       if (bank < 1 || bank > 4)
@@ -1759,11 +1756,10 @@ fal_write_sram (const char *filename, unsigned int parport, int bank)
           exit (1);
         }
       bank_str[0] = '0' + bank;
-      bank_str[1] = 0;          // terminate string
-      fal_argv[4] = bank_str;
+      bank_str[1] = 0;                          // terminate string
+      fal_argv[fal_argc++] = bank_str;
     }
-  fal_argv[5] = (char *) filename;
-  fal_argc = 6;
+  fal_argv[fal_argc++] = (char *) filename;
 
   if (!fal_main (fal_argc, fal_argv))
     return 0;

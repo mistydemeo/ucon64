@@ -132,7 +132,7 @@ ucon64_switches (int c, const char *optarg)
               "parallel port backup unit support: %s\n"
               "ANSI colors enabled:               %s\n"
               "gzip and zip support:              %s\n"
-              "configuration file %s   %s\n"
+              "configuration file %s  %s\n"
               DISCMAGE_STATUS_MSG
               "discmage enabled:                  %s\n"
               "configuration directory:           %s\n"
@@ -147,7 +147,7 @@ ucon64_switches (int c, const char *optarg)
               ANSI_COLOR_STATUS,
               ZLIB_STATUS,
               // display the existence only for the config file (really helps solving problems)
-              access (ucon64.configfile, F_OK) ? "(exists not):" : "(exists):    ", ucon64.configfile,
+              access (ucon64.configfile, F_OK) ? "(not present):" : "(present):    ", ucon64.configfile,
               ptr,
               ucon64.discmage_enabled ? "yes" : "no",
               ucon64.configdir,
@@ -216,6 +216,7 @@ ucon64_switches (int c, const char *optarg)
       break;
 
 #ifdef  PARALLEL
+    // We detect the presence of these options here so that we can drop privileges ASAP
     case UCON64_XDEX:
     case UCON64_XDJR:
     case UCON64_XFAL:
@@ -248,6 +249,10 @@ ucon64_switches (int c, const char *optarg)
             //  [0x]378 or [0x]3bc and a file with the same name (path) exists.
             ucon64.parport = strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
       ucon64_parport_needed = 1;
+      break;
+
+    case UCON64_XFALM:
+      ucon64.parport_mode = UCON64_EPP;
       break;
 #endif // PARALLEL
 
@@ -677,6 +682,7 @@ ucon64_options (int c, const char *optarg)
         }
 
       printf (ucon64_msg[WROTE], dest_name);
+      remove_temp_file ();
       break;
 
     case UCON64_PADN:
@@ -691,6 +697,7 @@ ucon64_options (int c, const char *optarg)
         }
 
       printf (ucon64_msg[WROTE], dest_name);
+      remove_temp_file ();
       break;
 
     case UCON64_ISPAD:

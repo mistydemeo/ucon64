@@ -127,8 +127,8 @@ typedef struct
   char discmage_path[FILENAME_MAX];             // path to the discmage DLL
 
   unsigned int parport;                         // parallel port address
-  int parport_mode;                             // parallel port mode: ECP, EPP, SPP, other
-
+  enum { UCON64_SPP, UCON64_EPP, UCON64_ECP } parport_mode; // parallel port mode: ECP, EPP, SPP
+  
 #ifdef  ANSI_COLOR
   int ansi_color;
 #endif

@@ -267,6 +267,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XSMD:
     case UCON64_XSMDS:
     case UCON64_XSWC:
+    case UCON64_XSWC_SUPERHI:
     case UCON64_XSWC2:
     case UCON64_XSWCS:
     case UCON64_XV64:
@@ -1721,6 +1722,16 @@ ucon64_options (int c, const char *optarg)
       else                                      // file exists -> restore SRAM
         smd_write_sram (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSWC_SUPERHI:
+      ucon64.snes_superhi = 1;
+      enableRTS = 0;
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
+        swc_read_rom (ucon64.rom, ucon64.parport);
+      else
+        fprintf (stderr,
+                "ERROR: -xswc-superhi dump requested but ROM image file exists\n");
       break;
 
     case UCON64_XSWC:

@@ -23,24 +23,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MISC_H
 
 #ifndef FALSE
-#define FALSE 0
+  #define FALSE 0
 #endif
 
 #ifndef TRUE
-#define TRUE 1
+  #define TRUE 1
 #endif
 
-#ifndef __MSDOS__
-#define STDERR          stderr
-#define FILE_SEPARATOR '/'
-#define FILE_SEPARATOR_S "/"
+#ifdef __MSDOS__
+  #define STDERR          stdout                  // Stupid DOS has no error
+  #define FILE_SEPARATOR '\\'                     //  stream (direct video writes)
+  #define FILE_SEPARATOR_S "\\"                   //  this makes redir possible
 #else
-#define STDERR          stdout                  // Stupid DOS has no error
-#define FILE_SEPARATOR '\\'                     //  stream (direct video writes)
-#define FILE_SEPARATOR_S "\\"                   //  this makes redir possible
+  #define STDERR          stderr
+  #define FILE_SEPARATOR '/'
+  #define FILE_SEPARATOR_S "/"
 #endif                                          
 
-#if     defined __UNIX__ || defined __BEOS__
+#define MAXBUFSIZE 32768
+
+#if     defined __unix__ || defined __BEOS__
 #define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
 
 void init_conio (void);

@@ -39,7 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define MAXBUFSIZE 32768
 
-#if     defined __UNIX__ || defined __BEOS__
+#if     defined __unix__ || defined __BEOS__
 #include <stdlib.h>                             // atexit()
 //#include <unistd.h>                             // tcsetattr()
 #include <termios.h>
@@ -52,7 +52,7 @@ typedef struct termios tty_t;
 #include <sys/poll.h>                           //  is available under Linux, but not
 #endif                                          //  under BeOS. DOS already has kbhit()
 
-#if     defined __UNIX__ || defined __BEOS__
+#if     defined __unix__ || defined __BEOS__
 static void deinit_conio (void);
 static void set_tty (tty_t param);
 #endif
@@ -1229,7 +1229,7 @@ getLinks (char *filename, char *buffer)
   return buffer;
 }
 
-#if     defined __UNIX__ || defined __BEOS__
+#if     defined __unix__ || defined __BEOS__
 static int stdin_tty = 1;                       // 1 => stdin is a tty, 0 => it's not
 static tty_t oldtty, newtty;
 

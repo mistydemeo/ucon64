@@ -231,19 +231,19 @@ main (int argc, char *argv[])
    configfile handling
 */
 #ifdef  __DOS__
-  sprintf (buf, "%s%cucon64.cfg", getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
-//  strcpy (buf, "ucon64.cfg");
+  sprintf (rom.config_file, "%s%cucon64.cfg", getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
+//  strcpy (rom.config_file, "ucon64.cfg");
 #else
-  sprintf (buf, "%s%c.ucon64rc", getenv ("HOME"), FILE_SEPARATOR);
+  sprintf (rom.config_file, "%s%c.ucon64rc", getenv ("HOME"), FILE_SEPARATOR);
 #endif
 
-  if (access (buf, F_OK) == -1)
+  if (access (rom.config_file, F_OK) == -1)
     {
       FILE *fh;
 
-    printf ("WARNING: %s not found: creating...", buf);
+    printf ("WARNING: %s not found: creating...", rom.config_file);
 
-      if (!(fh = fopen (buf, "wb")))
+      if (!(fh = fopen (rom.config_file, "wb")))
         {
           printf ("FAILED\n\n");
 
@@ -302,33 +302,33 @@ main (int argc, char *argv[])
 
 //      return 0;
     }
-  else if (strcmp(getProperty (buf, "version", buf2, "198"), "198") != 0)
+  else if (strcmp(getProperty (rom.config_file, "version", buf2, "198"), "198") != 0)
     {
-      strcpy (buf2, buf);
+      strcpy (buf2, rom.config_file);
 
       newext (buf2, ".OLD");
 
       printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
 
-      filecopy (buf, 0, quickftell(buf), buf2, "wb");
+      filecopy (rom.config_file, 0, quickftell(rom.config_file), buf2, "wb");
 
-      setProperty(buf,"version","198");
+      setProperty(rom.config_file,"version","198");
 
-      setProperty(buf,"cdrw_read",
-         getProperty (buf, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
-      setProperty(buf,"cdrw_write",
-         getProperty (buf, "cdrw_raw_write", buf2, "cdrdao write --device 0,0,0 --driver generic-mmc "));
+      setProperty(rom.config_file,"cdrw_read",
+         getProperty (rom.config_file, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
+      setProperty(rom.config_file,"cdrw_write",
+         getProperty (rom.config_file, "cdrw_raw_write", buf2, "cdrdao write --device 0,0,0 --driver generic-mmc "));
 
-      deleteProperty(buf,"cdrw_raw_read");
-      deleteProperty(buf,"cdrw_raw_write");
-      deleteProperty(buf,"cdrw_iso_read");
-      deleteProperty(buf,"cdrw_iso_write");
+      deleteProperty(rom.config_file,"cdrw_raw_read");
+      deleteProperty(rom.config_file,"cdrw_raw_write");
+      deleteProperty(rom.config_file,"cdrw_iso_read");
+      deleteProperty(rom.config_file,"cdrw_iso_write");
 
       sync ();
 
       printf ("OK\n\n");
 
-//      printf("ERROR: old config file (<1.9.8) found (%s), please remove it\n", buf);
+//      printf("ERROR: old config file (<1.9.8) found (%s), please remove it\n", rom.config_file);
 
 //      return 0;
     }
@@ -742,11 +742,6 @@ main (int argc, char *argv[])
   if (argcmp (argc, argv, "-e"))
     {
       char *property;
-#ifdef	__DOS__
-      strcpy (buf, "ucon64.cfg");
-#else
-      sprintf (buf, "%s%c.ucon64rc", getenv ("HOME"), FILE_SEPARATOR);
-#endif
 
       if (rom.console != ucon64_UNKNOWN /* && rom.console != ucon64_KNOWN */ )
         sprintf (buf3, "emulate_%s", &forceargs[rom.console][1]);
@@ -758,20 +753,20 @@ main (int argc, char *argv[])
           return (-1);
         }
 
-      if (access (buf, F_OK) == -1)
+      if (access (rom.config_file, F_OK) == -1)
         {
-          printf ("ERROR: %s does not exist\n", buf);
+          printf ("ERROR: %s does not exist\n", rom.config_file);
           return (-1);
         }
 
-      property = getProperty (buf, buf3, buf2, NULL);   // buf2 also contains property value
+      property = getProperty (rom.config_file, buf3, buf2, NULL);   // buf2 also contains property value
       if (property == NULL)
         {
           printf ("ERROR: could not find the correct settings (%s) in\n"
                   "       %s\n"
                   "TIP:   If the wrong console was detected you might try to force recognition\n"
                   "       The force recognition option for Super Nintendo would be -snes\n",
-                  buf3, buf);
+                  buf3, rom.config_file);
           return (-1);
         }
 

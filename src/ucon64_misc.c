@@ -930,7 +930,7 @@ ucon64_extract (const char *archive)
   if (!archive[0]) return archive;
 
   getcwd (cwd, FILENAME_MAX);
-  sprintf (path, "%s" FILE_SEPARATOR_S "%s", cwd, basename2 (archive));
+  sprintf (path, "%s" FILE_SEPARATOR_S "%s", cwd, basename (archive));
 
   sprintf (property_name, "%s_extract", &getext (archive)[1]);
   property_format = get_property (ucon64.configfile, strlwr (property_name), buf2, NULL);

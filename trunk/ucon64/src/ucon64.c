@@ -533,8 +533,6 @@ main (int argc, char **argv)
 
   while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
-#include "switches.c"
-
       for (x = 0; options2[x].option != 0 && options2[x].console != 0; x++)
         if (options2[x].option == c)
           { 
@@ -542,6 +540,8 @@ main (int argc, char **argv)
             ucon64.show_nfo = (options2[x].show_nfo ? UCON64_YES : UCON64_NO);
             break;
           }
+
+#include "switches.c"
     }
 
   if (!strlen (ucon64.rom) && optind < argc)
@@ -1146,11 +1146,11 @@ typedef struct
   const st_usage_t *usage[6];
 } st_usage_array_t;
 
+
 void
 ucon64_usage (int argc, char *argv[])
 {
-  int x = 0;
-  int c = 0, single = 0;
+  int x = 0, c = 0, single = 0;
   char *name_exe = basename2 (argv[0]);
   st_usage_array_t usage_array[] = {
     {UCON64_DC, {(const st_usage_t *)dc_usage, 0, 0, 0, 0, 0}},
@@ -1421,20 +1421,19 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
   optind = 0;
   single = 0;
 
-  while (!single && (c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
+  while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
-      single = 0;
-
       for (x = 0; usage_array[x].console != 0; x++)
-        if (usage_array[x].console == ucon64.console)
+        if (usage_array[x].console == c)
           {
             int y = 0;
             for (; usage_array[x].usage[y]; y++)
               ucon64_render_usage (usage_array[x].usage[y]);
-            single = 1;
-            break;
+
+            single = 1; // we show only the usage for the specified console(s)
+ 
+            printf ("\n");
           }
-      printf ("\n");
     }
 
   if (!single)

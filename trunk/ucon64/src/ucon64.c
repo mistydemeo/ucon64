@@ -510,6 +510,7 @@ ucon64_console_probe (st_rominfo_t *rominfo)
       psx_init (rominfo);
       break;
 
+#if 0
     case UCON64_SATURN:
     case UCON64_CDI:
     case UCON64_CD32:
@@ -524,10 +525,8 @@ ucon64_console_probe (st_rominfo_t *rominfo)
     case UCON64_ATARI:
     case UCON64_VECTREX:
     case UCON64_VIRTUALBOY:
-#ifdef SAMPLE
-      sample_init (rominfo);
-#endif // SAMPLE
       break;
+#endif
 
     case UCON64_UNKNOWN:
       if (UCON64_TYPE_ISROM (ucon64.type))
@@ -817,28 +816,20 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 
 
 #if 1
-/*
-#define UCON64_USAGE(s) printf("%s%s%s%s%s", \
-                          NULL_TO_EMPTY (s[0]), \
-                          s[0]?s[1]?"\n  ":"\n":"", \
-                          NULL_TO_EMPTY (s[1]), \
-                          s[1]?"\n":"", \
-                          NULL_TO_EMPTY (s[2]))
-*/
 #define UCON64_USAGE(s) printf("%s%s%s", \
                           NULL_TO_EMPTY (s[0]), \
                           s[0]?"\n":"", \
                           NULL_TO_EMPTY (s[2]))
 #else
 void
-usage (const char **usage)
+usage (const char **s)
 {
-  if (usage[0])
-    printf ("%s\n" , usage[0]);
-  if (usage[1])
-    printf ("  %s\n", usage[1]);
-
-  printf (NULL_TO_EMPTY (usage[2]));
+  printf("%s%s%s%s%s",
+    NULL_TO_EMPTY (s[0]),
+    s[0]?s[1]?"\n  ":"\n":"",
+    NULL_TO_EMPTY (s[1]),
+    s[1]?"\n":"",
+    NULL_TO_EMPTY (s[2]));
 }
 #define UCON64_USAGE usage
 #endif
@@ -1071,6 +1062,7 @@ ucon64_usage (int argc, char *argv[])
         single = 1;
         break;
 
+#if 0
       case UCON64_GC:
       case UCON64_S16:
       case UCON64_ATA:
@@ -1085,11 +1077,8 @@ ucon64_usage (int argc, char *argv[])
       case UCON64_CDI:
       case UCON64_XBOX:
       case UCON64_GP32:
-#ifdef SAMPLE
-        UCON64_USAGE (sample_usage);
-        single = 1;
-#endif // SAMPLE
         break;
+#endif
 
       default:
         break;

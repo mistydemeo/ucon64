@@ -42,6 +42,8 @@ const char *lynxit_usage[] = {
     ""
 #endif // BACKUP
     ,
+    NULL,
+    NULL,
     NULL
   };
 
@@ -125,10 +127,10 @@ int verify = TRUE;
 #define  OUTPUT(port,data) outportb(port,data)
 
 
+#if 0
 void
 usage (void)
 {
-#if 0
   MESSAGE (("\nUsage: lynxit [-pX] [-d] [-q] <command> <filename> [cartname] [manuf]\n"));
   MESSAGE (("\n"));
   MESSAGE (("   Commands = read/write/verify/test\n"));
@@ -137,8 +139,8 @@ usage (void)
   MESSAGE (("        -q  = Quiet mode\n"));
   MESSAGE (("        -n  = Don't verify read/write operations\n"));
   MESSAGE (("        -h  = Print this text\n"));
-#endif
 }
+#endif
 
 int
 ptr_port_init (unsigned int port)
@@ -921,7 +923,7 @@ lynxit_main (int argc, char **argv)
 
       if (strlen (argv[loop]) > 3)
         {
-          usage ();
+//          usage ();
           printf ("\nInvalid argument %d <%s>\n", loop, argv[loop]);
           exit (FALSE);
         }
@@ -941,10 +943,10 @@ lynxit_main (int argc, char **argv)
           verify = FALSE;
           break;
         case 'H':
-          usage ();
+//          usage ();
           exit (FALSE);
         default:
-          usage ();
+//          usage ();
           printf ("\nUnrecognised argument %d <%s>\n", loop, argv[loop]);
           exit (FALSE);
         }
@@ -954,7 +956,7 @@ lynxit_main (int argc, char **argv)
 
   if (loop + 1 >= argc)
     {
-      usage ();
+//      usage ();
       MESSAGE (("\nERROR    : Missing command/filename\n"));
       exit (FALSE);
     }
@@ -1015,7 +1017,7 @@ lynxit_main (int argc, char **argv)
     }
   else
     {
-      usage ();
+//      usage ();
       printf ("\nInvalid command argument - Use READ/WRITE/VERIFY/TEST\n");
       exit (FALSE);
     }

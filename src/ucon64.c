@@ -163,7 +163,6 @@ main (int argc, char *argv[])
 #ifdef  BACKUP
   if (rom.file[0])
     {
-//      strcpy(buf, rom.file);
       sscanf (rom.file, "%x", &rom.parport);
     }
 

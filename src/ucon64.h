@@ -66,6 +66,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 	#define ucon64_TITLE "uCON64 1.9.7 DOS 1999-2001 by (various)"
 #elif __BEOS__
 	#define ucon64_TITLE "uCON64 1.9.7 BeOS 1999-2001 by (various)"
+#elif __SOLARIS__
+	#define ucon64_TITLE "uCON64 1.9.7 Solaris 1999-2001 by (various)"
 #else
 	#define ucon64_TITLE "uCON64 1.9.7 1999-2001 by (various)"
 #endif
@@ -140,9 +142,6 @@ struct ucon64_
 #define ucon64_NAME	0
 #define ucon64_ROM	1
 #define ucon64_FILE	2
-//#define ucon64_name() (getarg(argc,argv,ucon64_NAME))
-//#define ucon64_rom() (getarg(argc,argv,ucon64_ROM))
-//#define ucon64_file() (getarg(argc,argv,ucon64_FILE))
 
 int ucon64_usage(int argc,char *argv[]);
 int ucon64_init_(struct ucon64_ *rom);
@@ -152,8 +151,6 @@ int ucon64_nfo(struct ucon64_ *rom);
 
 
 unsigned int ucon64_parport;
-long ucon64_hsize;
-
 
 int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom);
 

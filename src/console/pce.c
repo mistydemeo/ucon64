@@ -67,7 +67,7 @@ pcengine_smg (st_rominfo_t *rominfo)
 {
   char buf[MAXBUFSIZE];
   st_unknown_header_t header;
-  long size = q_fsize (ucon64.rom) - rominfo->buheader_len;
+  int size = q_fsize (ucon64.rom) - rominfo->buheader_len;
 
   if (rominfo->buheader_len != 0)
     {
@@ -222,8 +222,8 @@ e.g. The first 16Mbit file of Donkey Kong Country (assuming it
   strcat (buf, "________");
   buf[7] = '_';
   buf[8] = 0;
-  sprintf (buf2, "%s.%03lu", buf,
-           (unsigned long) ((q_fsize (ucon64.rom) - rominfo->buheader_len) /
+  sprintf (buf2, "%s.%03u", buf,
+           (unsigned int) ((q_fsize (ucon64.rom) - rominfo->buheader_len) /
                             MBIT));
 
   ucon64_fbackup (NULL, buf2);

@@ -91,7 +91,7 @@ lynx_lnx (st_rominfo_t *rominfo)
 {
   st_lnx_header_t header;
   char buf[MAXBUFSIZE];
-  long size = q_fsize (ucon64.rom);
+  int size = q_fsize (ucon64.rom);
 
   if (rominfo->buheader_len != 0)
     {

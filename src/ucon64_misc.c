@@ -123,27 +123,31 @@ const char *unknown_usage[] =
   Return type is not const char *, because it may return move_name (indirectly
   via q_fbackup()), which is not a pointer to constant characters.
 */
-#if 1
-void
-ucon64_fbackup (char *move_name, const char *filename)
+#if 0
+static void
+ucon64_fbak (char *move_name, const char *filename)
 {
+#if 0
   if (!ucon64.backup)
     return;// (char *) filename;
+#endif
 
   if (!access (filename, F_OK))
     {
-      printf ("Writing backup of: %s\n", filename); // verbose
-      fflush (stdout);
+//      printf ("Writing backup of: %s\n", filename); // verbose
+//      fflush (stdout);
     }
 
-  q_fbackup (move_name, filename);
-  return;// q_fbackup (move_name, filename);
-}
-#else
-void
-ucon64_fbackup (char *move_name, const char *filename)
-{
-  handle_existing_file (filename, move_name);
+  if (move_name)
+    {
+      strcpy (move_name, q_fbackup (filename, BAK_MOVE));
+//      move_name = q_fbackup (filename, BAK_MOVE);
+    }
+  else
+    {
+      q_fbackup (filename, BAK_DUPE);
+    }
+  return;
 }
 #endif
 
@@ -171,23 +175,38 @@ handle_existing_file (const char *dest, char *src)
   ucon64_temp_file = 0;
   if (!access (dest, F_OK))
     {
+      if (ucon64.backup)
+        {
+          printf ("Writing backup of: %s\n", dest); // verbose
+          fflush (stdout);
+        }
+
       if (!strcmp (dest, ucon64.rom))
         {                                       // case 1
           if (ucon64.backup)
             {                                   // case 1a
-              ucon64_fbackup (NULL, dest);
-              setext (src, ".BAK");
+              printf ("case: 1a, src: %s\n", src?src:"NULL");
+              fflush (stdout);
+//              ucon64_fbak (NULL, dest);
+              q_fbackup (dest, BAK_DUPE);
+              if (src) setext (src, ".BAK");
             }                                   // must match with what q_fbackup() does
           else
             {                                   // case 1b
-              ucon64.backup = 1;                // force ucon64_fbackup() to _rename_ file
-              ucon64_fbackup (src, dest);       // arg 1 != NULL -> rename
-              ucon64.backup = 0;
+              printf ("case: 1b, src: %s\n", src?src:"NULL");
+              fflush (stdout);
+//              ucon64_fbak (src, dest);       // arg 1 != NULL -> rename
+              strcpy (src, q_fbackup (dest, BAK_MOVE));
               ucon64_temp_file = src;
             }
         }
       else
-        ucon64_fbackup (NULL, dest);            // case 2 (ucon64_fbackup() handles a & b)
+        {
+          printf ("case: 2\n");
+          fflush (stdout);
+//          ucon64_fbak (NULL, dest);            // case 2 (ucon64_fbak() handles a & b)
+          q_fbackup (dest, BAK_DUPE);
+        }
     }
 }
 
@@ -205,7 +224,7 @@ remove_temp_file (void)
 
 
 int
-ucon64_fhexdump (const char *filename, long start, long len)
+ucon64_fhexdump (const char *filename, int start, int len)
 {
   int pos, size = q_fsize (filename);
   int value = 0;
@@ -233,8 +252,8 @@ ucon64_fhexdump (const char *filename, long start, long len)
 
 
 #if 0
-unsigned long
-ucon64_filefile (const char *filename1, long start1, const char *filename2, long start2, int similar)
+unsigned int
+ucon64_filefile (const char *filename1, int start1, const char *filename2, int start2, int similar)
 {
   int base, fsize1, fsize2, len, chunksize1, chunksize2, readok = 1,
       bytesread1, bytesread2, bytesleft1, bytesleft2;
@@ -316,8 +335,8 @@ ucon64_filefile (const char *filename1, long start1, const char *filename2, long
   return 0;
 }
 #else
-unsigned long
-ucon64_filefile (const char *filename1, long start1, const char *filename2, long start2, int similar)
+unsigned int
+ucon64_filefile (const char *filename1, int start1, const char *filename2, int start2, int similar)
 {
   int base, fsize1, fsize2, len, chunksize1, chunksize2, readok = 1,
       bytesread1, bytesread2, bytesleft1, bytesleft2, bufsize = 1024 * 1024;
@@ -462,7 +481,7 @@ ucon64_pad (const char *filename, int start, int size)
 
 
 #if 0
-long
+int
 ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
@@ -485,7 +504,7 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
   return size > 1 ? size : 0;
 }
 #else
-long
+int
 ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
@@ -755,47 +774,38 @@ ucon64_parport_init (unsigned int port)
 
 
 const char *
-ucon64_rom_in_archive (const char *archive)
+ucon64_extract (const char *archive)
 {
 #ifndef __MSDOS__
-#if 0
+  DIR *dp;
   struct dirent *ep;
   struct stat fstate;
   char buf[FILENAME_MAX], cwd[FILENAME_MAX];
-  int pos = 0, result = 0;
-  char tmp[FILENAME_MAX];
-  char *temp, property_name[MAXBUFSIZE], buf2[MAXBUFSIZE];
+  int result = 0;
+  char temp[FILENAME_MAX];
+  char path[FILENAME_MAX];
+  char property_name[MAXBUFSIZE], buf2[MAXBUFSIZE];
 
   if (!archive) return NULL;
 
-  strcpy (ucon64.rom_in_archive, archive);
-
   getcwd (cwd, FILENAME_MAX);
-  tmpnam2 (tmp);
-  chdir (tmp);
 
-  sprintf (property_name, "%s_extract", &getext (archive)[1]);
-  sprintf (buf, NULL_TO_EMPTY (get_property (config_file, strlwr (property_name), buf2, NULL)), archive);
-
-  if (!buf[0])
-    return ucon64.rom_in_archive;
-
-  if (archive)
-    {
-      strcat (buf, " ");
-      strcat (buf, archive);
-    }
-
-  temp = archive_or_dir;
-
-  tmpnam2 (temp);
-  if (mkdir (temp, S_IRUSR|S_IWUSR) == -1)
-    return NULL;
-
-  getcwd (cwd, FILENAME_MAX);
+  tmpnam3 (temp, TYPE_DIR);
   chdir (temp);
 
-#if 0
+#ifdef  DEBUG
+  fprintf (stderr, "%s\n", temp);
+#endif  
+
+  sprintf (path, "%s" FILE_SEPARATOR_S "%s", cwd, basename2 (archive));
+
+  sprintf (property_name, "%s_extract", &getext (archive)[1]);
+  sprintf (buf, NULL_TO_EMPTY (get_property (ucon64.configfile, strlwr (property_name), buf2, NULL)), path);
+
+  if (!buf[0])
+    return archive;
+
+#if 1
   result = system (buf)
 #ifndef __MSDOS__
       >> 8                                      // the exit code is coded in bits 8-15
@@ -803,34 +813,41 @@ ucon64_rom_in_archive (const char *archive)
     ;
   sync ();
 #else
-  printf ("%s\n", buf);
+  fprintf (stderr, "%s\n", buf);
   fflush (stdout);
-#endif
-
-#if 0
-  while ((ep = readdir (*dp)))                  // find rom in dp and return it as romname
-    if (!stat (ep->d_name, &fstate))
-      if (S_ISREG (fstate.st_mode))
-        {
-          sprintf (romname, "%s" FILE_SEPARATOR_S "%s", buf, ep->d_name);
-          chdir (cwd);
-
-          return romname;
-        }
 #endif
 
   chdir (cwd);
 
+  if ((dp = opendir (temp)) != NULL)
+    while ((ep = readdir (dp)))
+      {
+        strcpy (ucon64.rom_in_archive, ep->d_name);
+        sprintf (path, "%s" FILE_SEPARATOR_S "%s", temp, ucon64.rom_in_archive);
+
+        if (!stat (path, &fstate))
+          if (S_ISREG (fstate.st_mode) && fstate.st_size >= MBIT)
+            {
+
+#ifdef  DEBUG
+  fprintf (stderr, "%s\n\n", path);
+#endif  
+  
+              q_fcpy (path, 0, q_fsize (path), ucon64.rom_in_archive, "wb");
+           
+              rmdir2 (temp);
+
+              return ucon64.rom_in_archive;
+            }
+      }
+  rmdir2 (temp);
 #endif
   return archive;
-#else
-  return archive;
-#endif
 }
 
 
 int
-ucon64_gauge (time_t init_time, long pos, long size)
+ucon64_gauge (time_t init_time, int pos, int size)
 {
   if (!ucon64.frontend)
     return gauge (init_time, pos, size);
@@ -845,7 +862,6 @@ ucon64_gauge (time_t init_time, long pos, long size)
 }
 
 
-#if 1
 int
 ucon64_testsplit (const char *filename)
 // test if ROM is split into parts
@@ -878,40 +894,6 @@ ucon64_testsplit (const char *filename)
 
   return 0;
 }
-#else
-int
-ucon64_testsplit (const char *filename)
-// test if ROM is split into parts
-{
-  int x, parts = 0, pos = 0;
-  char buf[FILENAME_MAX];
-
-  if (!strchr (filename, '.'))
-    return 0;
-
-  for (x = -1; x < 2; x += 2)
-    {
-      parts = 0;
-      strcpy (buf, filename);
-      pos = strrcspn (buf, ".") + x;            // if x == -1 change char before '.'
-                                                // else if x == 1 change char behind '.'
-      while (!access (buf, F_OK))
-        buf[pos]--;                             // "rewind"
-      buf[pos]++;
-
-      while (!access (buf, F_OK))               // count split parts
-        {
-          buf[pos]++;
-          parts++;
-        }
-
-      if (parts > 1)
-        return parts;
-    }
-
-  return 0;
-}
-#endif
 
 
 int
@@ -1405,7 +1387,6 @@ ucon64_configfile (void)
                  "emulate_cdi=\n"
                  "emulate_3do=\n"
                  "emulate_gp32=\n"
-#if 0
 #ifndef __MSDOS__
                  "#\n"
                  "# LHA support\n"
@@ -1427,7 +1408,6 @@ ucon64_configfile (void)
                  "# ACE support\n"
                  "#\n"
                  "ace_extract=unace e \"%%s\"\n"
-#endif
 #endif
 #ifdef  BACKUP_CD
                  "#\n"
@@ -1613,7 +1593,7 @@ static int VERBOSE = 1;
 
   out << "FILE \"" << binFileName << "\" BINARY" << endl;
 
-  long offset = 0;
+  int offset = 0;
 
   for (trun = titr.first(start, end), trackNr = 1;
        trun != NULL;
@@ -1690,7 +1670,7 @@ static int VERBOSE = 1;
 
 #if 0
 void
-frame2msf (unsigned long i, struct cdrom_msf *msf)
+frame2msf (unsigned int i, struct cdrom_msf *msf)
 {
   msf->cdmsf_min0 = i / CD_SECS / CD_FRAMES;
   msf->cdmsf_sec0 = (i / CD_FRAMES) % CD_SECS;
@@ -1701,7 +1681,7 @@ frame2msf (unsigned long i, struct cdrom_msf *msf)
 }
 
 
-unsigned long
+unsigned int
 msf2frame (struct cdrom_msf0 *msf)
 {
   return (msf->minute * CD_SECS * CD_FRAMES +

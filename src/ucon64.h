@@ -47,6 +47,8 @@ typedef struct st_ucon64
 
   const char *file;                             // file (cmdline) with path
 
+//  char temp_file[FILENAME_MAX];
+
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
 
 #ifdef  ANSI_COLOR
@@ -63,7 +65,7 @@ typedef struct st_ucon64
   int show_nfo;                                 // show or skip info output for ROM
 
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
-  long buheader_len;                            // length of backup unit header 0 == no bu hdr
+  int buheader_len;                            // length of backup unit header 0 == no bu hdr
   int split;                                    // rom is split
   int snes_hirom;                               // Super Nintendo ROM is HiROM
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump

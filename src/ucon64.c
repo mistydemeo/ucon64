@@ -312,7 +312,7 @@ int
 main (int argc, char **argv)
 {
   int ucon64_argc, c = 0, result = 0, value = 0, option_index = 0;
-  unsigned long padded;
+  unsigned int padded;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], src_name[FILENAME_MAX];
   const char *ucon64_argv[128];
   st_rominfo_t rom;
@@ -399,10 +399,7 @@ main (int argc, char **argv)
   if (optind < argc)
     ucon64.rom = argv[optind++];
 
-#if 0
-  ucon64.rom = ucon64_rom_in_archive (&ucon64.temp, ucon64.rom, ucon64.rom_in_archive,
-                                      ucon64.configfile);
-#endif                                      
+  ucon64.rom = ucon64_extract (ucon64.rom);
 
   if (optind < argc)
     ucon64.file = argv[optind++];
@@ -715,8 +712,8 @@ ucon64_nfo (const st_rominfo_t *rominfo)
     }
   else if (UCON64_TYPE_ISROM (ucon64.type))
     {
-      unsigned long padded = ucon64_testpad (ucon64.rom, (st_rominfo_t *) rominfo);
-      unsigned long intro = ((rominfo->file_size - rominfo->buheader_len) > MBIT) ?
+      unsigned int padded = ucon64_testpad (ucon64.rom, (st_rominfo_t *) rominfo);
+      unsigned int intro = ((rominfo->file_size - rominfo->buheader_len) > MBIT) ?
         ((rominfo->file_size - rominfo->buheader_len) % MBIT) : 0;
       int split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
         ucon64_testsplit (ucon64.rom);
@@ -724,12 +721,12 @@ ucon64_nfo (const st_rominfo_t *rominfo)
       if (!padded)
         printf ("Padded: No\n");
       else if (padded)
-        printf ("Padded: Maybe, %ld Bytes (%.4f Mb)\n", padded,
+        printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n", padded,
                 TOMBIT_F (padded));
 
       // nes.c determines itself whether or not there is a trainer
       if (intro && ucon64.console != UCON64_NES)
-        printf ("Intro/Trainer: Maybe, %ld Bytes\n", intro);
+        printf ("Intro/Trainer: Maybe, %d Bytes\n", intro);
 
       if (rominfo->interleaved != UCON64_UNKNOWN)
         // printing this is handy for SNES ROMs, but maybe nonsense for others
@@ -1209,7 +1206,7 @@ ucon64_usage (int argc, char *argv[])
 
   printf (
 #ifdef DB
-     "Database: %ld known ROMs in db.h (%+ld)\n"
+     "Database: %d known ROMs in db.h (%+d)\n"
 #endif // DB
      "\n"
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only Super Nintendo related help)\n"

@@ -688,7 +688,7 @@ if(argcmp(argc, argv, "-sh"))
     }
 
 /*
-  do the following outside the if that checks for existence of rom.rom
+  Do the following outside the if that checks for existence of rom.rom
   (necessary for headerless SRAM files, which can't be detected without
   looking at the command line options)
 */
@@ -700,15 +700,19 @@ if(argcmp(argc, argv, "-sh"))
      argcmp (argc, argv, "-xgbxs")) ? ucon64_GB :
     (argcmp (argc, argv, "-xswc") ||
      argcmp (argc, argv, "-xswcs")) ? ucon64_SNES :
-    (argcmp (argc, argv, "-xfal") ||
+    (argcmp (argc, argv, "-multi") ||           // If not here, where? We don't detect a
+     argcmp (argc, argv, "-multi1") ||          //  GBA multirom loader binary yet (dbjh)
+     argcmp (argc, argv, "-multi2") ||
+     argcmp (argc, argv, "-xfal") ||
      argncmp (argc, argv, "-xfalc", 6) ||
      argncmp (argc, argv, "-xfalb", 6) ||
      argcmp (argc, argv, "-xfals")) ? ucon64_GBA : rom.console;
-  if (!access (rom.rom, F_OK))
-    {
-      ucon64_init (&rom);
-      if (rom.console != ucon64_UNKNOWN)
-	ucon64_nfo (&rom);
+  if (!access (rom.rom, F_OK) &&
+      rom.console == ucon64_UNKNOWN)            // Should auto-detect override the fact that
+    {                                           //  we implicitly specify a console type?
+      ucon64_init (&rom);                       //  This gets also rid of nonsense GBA info
+      if (rom.console != ucon64_UNKNOWN)        //  on a GBA multirom loader binary (dbjh)
+        ucon64_nfo (&rom);
     }
 
   if (argcmp (argc, argv, "-e"))
@@ -815,8 +819,9 @@ if(argcmp(argc, argv, "-sh"))
 	      (argcmp (argc, argv, "-logo")) ? gbadvance_logo (&rom) :
 	      (argcmp (argc, argv, "-n")) ? gbadvance_n (&rom) :
 	      (argcmp (argc, argv, "-sram")) ? gbadvance_sram (&rom) :
-	      (argcmp (argc, argv, "-multi")) ? gbadvance_multi (&rom, FALSE) :
-	      (argcmp (argc, argv, "-multi2")) ? gbadvance_multi (&rom, TRUE) :
+	      (argcmp (argc, argv, "-multi")) ? gbadvance_multi (&rom, 256 * MBIT) :
+	      (argcmp (argc, argv, "-multi1")) ? gbadvance_multi (&rom, 64 * MBIT) :
+	      (argcmp (argc, argv, "-multi2")) ? gbadvance_multi (&rom, 128 * MBIT) :
 #ifdef	BACKUP
 	      (argcmp (argc, argv, "-xfal")) ? gbadvance_xfal (&rom) :
 	      (argncmp (argc, argv, "-xfalc", 6)) ? gbadvance_xfal (&rom) :

@@ -3,7 +3,7 @@ ips.c - IPS support for uCON64
 
 Copyright (c) ???? - ???? madman
 Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
-Copyright (c) 2002        dbjh
+Copyright (c) 2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -64,7 +64,7 @@ const st_getopt2_t ips_usage[] =
   };
 
 static FILE *orgfile, *modfile, *ipsfile, *destfile;
-static int ndiffs = 0, address = -1, rle_value = NO_RLE, filepos = 0;
+static int ndiffs = 0, totaldiffs = 0, address = -1, rle_value = NO_RLE, filepos = 0;
 static const char *destfname = NULL;
 
 
@@ -248,6 +248,7 @@ flush_diffs (unsigned char *buffer)
 {
   if (ndiffs)
     {
+      totaldiffs += ndiffs;
       write_block (ndiffs, buffer, rle_value);
       ndiffs = 0;
       rle_value = NO_RLE;
@@ -410,26 +411,32 @@ next_byte:
           special meaning. Offset 0x454f46 is interpreted as EOF marker. It is
           a numerical representation of the ASCII string "EOF".
           We solve the problem by writing 2 patch bytes for offsets 0x454f45
-          and 0x454f46 regardless whether those bytes differ for orgfile and
+          and 0x454f46 if at least one of those bytes differs for orgfile and
           modfile.
         */
         {
-          if (address < 0 || address + ndiffs != 0x454f46 - 1 || ndiffs > BUFSIZE - 2)
-            {
-              flush_diffs (buf);                // commit any pending data
-              write_address (0x454f46 - 1);
-            }
-          // write 2 patch bytes (for offsets 0x454f45 and 0x454f46)
-          buf[ndiffs++] = byte2;
-          buf[ndiffs++] = read_byte (modfile);
+          int byte3 = fgetc (orgfile);
+          unsigned char byte4 = read_byte (modfile);
           filepos++;
 
-          fseek (orgfile, filepos, SEEK_SET);   // keep the files synchronized
+          if (byte3 == EOF || byte != byte2 || byte3 != byte4)
+            {
+              if (address < 0 || address + ndiffs != 0x454f46 - 1 ||
+                  ndiffs > BUFSIZE - 2)
+                {
+                  flush_diffs (buf);            // commit any pending data
+                  write_address (0x454f46 - 1);
+                }
+              // write 2 patch bytes (for offsets 0x454f45 and 0x454f46)
+              buf[ndiffs++] = byte2;
+              buf[ndiffs++] = byte4;
+
 #ifdef  DEBUG_IPS
-          printf ("[%02x] => %02x\n"
-                  "[%02x] => %02x\n",
-                  filepos - 2, buf[ndiffs - 2], filepos - 1, buf[ndiffs - 1]);
+              printf ("[%02x] => %02x\n"
+                      "[%02x] => %02x\n",
+                      filepos - 2, buf[ndiffs - 2], filepos - 1, buf[ndiffs - 1]);
 #endif
+            }
           continue;
         }
 
@@ -479,8 +486,8 @@ next_byte:
                     filepos++;
                   }
                 filepos--;
-                byte = bridge[n];
-                byte2 = buf[ndiffs];
+//                byte = bridge[n];
+//                byte2 = buf[ndiffs];
                 break;
               }
 
@@ -503,6 +510,14 @@ next_byte:
   fclose (orgfile);
   fclose (modfile);
   fclose (ipsfile);
+
+  if (totaldiffs == 0)
+    {
+      printf ("%s and %s are identical\n"
+              "Removing: %s\n", orgname, modname, ipsname);
+      remove (ipsname);
+      return -1;
+    }
 
   printf (ucon64_msg[WROTE], ipsname);
   return 0;

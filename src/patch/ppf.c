@@ -2,8 +2,8 @@
 ppf.c - Playstation Patch File support for uCON64
 
 Copyright (c) ???? - ???? Icarus/Paradox
-Copyright (c) 2001        NoisyB <noisyb@gmx.net>
-Copyright (c) 2002 - 2003 dbjh
+Copyright (c)        2001 NoisyB <noisyb@gmx.net>
+Copyright (c) 2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -177,12 +177,12 @@ ppf_apply (const char *mod, const char *ppfname)
   if ((modfile = fopen (modname, "r+b")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], modname);
-      return -1;
+      exit (1);
     }
   if ((ppffile = fopen (ppfname, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ppfname);
-      return -1;
+      exit (1);
     }
 
   // Is it a PPF File?
@@ -190,9 +190,7 @@ ppf_apply (const char *mod, const char *ppfname)
   if (strncmp ("PPF", buffer, 3))
     {
       fprintf (stderr, "ERROR: %s is not a valid PPF file\n", ppfname);
-      fclose (ppffile);
-      fclose (modfile);
-      return -1;
+      exit (1);
     }
 
   // What encoding method? PPF 1.0 or PPF 2.0?
@@ -201,9 +199,7 @@ ppf_apply (const char *mod, const char *ppfname)
   if (method != 0 && method != 1)
     {
       fprintf (stderr, "ERROR: Unknown encoding method! Check for updates\n");
-      fclose (ppffile);
-      fclose (modfile);
-      return -1;
+      exit (1);
     }
 
   ppfsize = fsizeof (ppfname);
@@ -256,9 +252,7 @@ ppf_apply (const char *mod, const char *ppfname)
       if (x != modlen)
         {
           fprintf (stderr, "ERROR: The size of %s is not %d bytes\n", modname, x);
-          fclose (ppffile);
-          fclose (modfile);
-          return -1;
+          exit (1);
         }
 
       // Do the binary block check
@@ -270,9 +264,7 @@ ppf_apply (const char *mod, const char *ppfname)
       if (memcmp (ppfblock, buffer, 1024))
         {
           fprintf (stderr, "ERROR: This patch does not belong to this image\n");
-          fclose (ppffile);
-          fclose (modfile);
-          return -1;
+          exit (1);
         }
 
       fseek (ppffile, 1084, SEEK_SET);
@@ -311,7 +303,7 @@ ppf_create (const char *orgname, const char *modname)
 #if 0
   char *fidname = "FILE_ID.DIZ";
 #endif
-  int x, osize, msize, blocksize, n_changes;
+  int x, osize, msize, blocksize, n_changes, total_changes = 0;
   unsigned int seekpos = 0, pos;
 
   osize = fsizeof (orgname);
@@ -327,13 +319,12 @@ ppf_create (const char *orgname, const char *modname)
   if ((orgfile = fopen (orgname, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], orgname);
-      return -1;
+      exit (1);
     }
   if ((modfile = fopen (modname, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], modname);
-      fclose (orgfile);
-      return -1;
+      exit (1);
     }
   strcpy (ppfname, modname);
   set_suffix (ppfname, ".ppf");
@@ -341,9 +332,7 @@ ppf_create (const char *orgname, const char *modname)
   if ((ppffile = fopen (ppfname, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], ppfname);
-      fclose (modfile);
-      fclose (orgfile);
-      return -1;
+      exit (1);
     }
 
   // creating PPF 2.0 header
@@ -388,6 +377,7 @@ ppf_create (const char *orgname, const char *modname)
                   x++;
                 }
               while (x != blocksize && obuf[x] != mbuf[x]);
+              total_changes += n_changes;
 #ifdef  WORDS_BIGENDIAN
               pos = bswap_32 (pos);
 #endif
@@ -407,6 +397,7 @@ ppf_create (const char *orgname, const char *modname)
       pos = seekpos;
       while ((blocksize = fread (buffer, 1, 255, modfile)))
         {
+          total_changes += blocksize;
 #ifdef  WORDS_BIGENDIAN
           x = bswap_32 (pos);
           fwrite (&x, 4, 1, ppffile);
@@ -423,6 +414,18 @@ ppf_create (const char *orgname, const char *modname)
             "         PPF can't store information about that fact\n",
             modname, orgname);
 #endif
+
+  fclose (orgfile);
+  fclose (modfile);
+
+  if (total_changes == 0)
+    {
+      printf ("%s and %s are identical\n"
+              "Removing: %s\n", orgname, modname, ppfname);
+      fclose (ppffile);
+      remove (ppfname);
+      return -1;
+    }
 
 #if 0
   if (fidname)
@@ -441,10 +444,7 @@ ppf_create (const char *orgname, const char *modname)
       fwrite (&fsize, 4, 1, ppffile);
     }
 #endif
-
   fclose (ppffile);
-  fclose (orgfile);
-  fclose (modfile);
 
   printf (ucon64_msg[WROTE], ppfname);
   return 0;

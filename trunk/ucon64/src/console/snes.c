@@ -445,11 +445,38 @@ static void
 set_nsrt_info (st_rominfo_t *rominfo, void *header)
 /*
   This function will write an NSRT header if the user specified a controller
-  type, but only if the checksum is correct.
+  type, but only if the checksum is correct. We write a complete NSRT header
+  only to be 100% compatible with NSRT. We are only interested in the
+  controller type feature, though.
   NSRT is a SNES ROM tool. See developers.html.
+
+  NSRT header format (0x1d0 - 0x1ef, offsets in _copier header_):
+  0x1d0                 low nibble = original country byte
+                        high nibble = 2 for HiROM games, 1 for LOROM
+  0x1d1 - 0x1e5         original game name
+  0x1e6                 low byte of original SNES checksum
+  0x1e7                 high byte of original SNES checksum
+  0x1e8 - 0x1eb         "NSRT"
+  0x1ec                 header version; a value of for example 20 should be
+                        interpreted as 2.0
+  0x1ed                 low nibble = port 1 controller type
+                        high nibble = port 2 controller type
+                        0 = gamepad
+                        1 = mouse
+                        2 = mouse / gamepad
+                        3 = super scope
+                        4 = super scope / gamepad
+                        5 = Konami's justifier
+                        6 = multitap
+                        7 = mouse / super scope / gamepad
+  0x1ee                 NSRT header checksum
+                        the checksum is calculated by adding all bytes of the
+                        NSRT header (except the checksum bytes themselves) and
+                        taking the modulus of 256
+  0x1ef                 inverse NSRT header checksum
 */
 {
-  int x;
+  int x, checksum = 0;
 
   if (UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
     {
@@ -459,15 +486,12 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
           return;
         }
 
-      ((unsigned char *) header)[0x1d0] = snes_header.country | (snes_hirom ? 0x20 : 0);
+      ((unsigned char *) header)[0x1d0] = snes_header.country | (snes_hirom ? 0x20 : 0x10);
       memcpy (((unsigned char *) header) + 0x1d1, &snes_header.name, SNES_NAME_LEN);
       ((unsigned char *) header)[0x1e6] = snes_header.checksum_low;
       ((unsigned char *) header)[0x1e7] = snes_header.checksum_high;
       memcpy (((unsigned char *) header) + 0x1e8, "NSRT", 4);
       ((unsigned char *) header)[0x1ec] = 20;   // version 2.0 header
-
-//TODO:      ((unsigned char *) header)[0x1ee] = ?; checksum low byte
-//TODO:      ((unsigned char *) header)[0x1ef] = ?; checksum high byte
     }
 
   if (UCON64_ISSET (ucon64.controller))
@@ -487,6 +511,19 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
       if (x >= 8)
         x = 0;
       ((unsigned char *) header)[0x1ed] |= x;
+    }
+
+  // set the checksum bytes
+  if (UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
+    {
+      ((unsigned char *) header)[0x1ee] = 0;
+      ((unsigned char *) header)[0x1ef] = 0;
+
+      for (x = 0x1d0; x <= 0x1ef; x++)
+        checksum += ((unsigned char *) header)[x];
+      checksum %= 256;
+      ((unsigned char *) header)[0x1ee] = checksum;
+      ((unsigned char *) header)[0x1ef] = ~checksum;
     }
 }
 
@@ -1940,7 +1977,7 @@ snes_init (st_rominfo_t *rominfo)
           else if (snes_header.rom_type == 0xf5 || snes_header.rom_type == 0xf9)
             str = "SPC7110";
           else if (snes_header.rom_type == 0xf6)
-            str = "DSP2";                       // NSRT says "Seta's DSP"
+            str = "Seta's DSP";
           else
             str = "unknown";
           sprintf (buf, " and %s", str);

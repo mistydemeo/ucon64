@@ -5,8 +5,8 @@ uCON64 - THE tool for all video game consoles. Its main features are:
 - Patches (apply or create): IPS (with RLE compression), APS, BSL (apply only),
   PPF, Game Genie.
 - Communication via a parallel port with the following backup units: Flash
-  Advance Linker, Doctor 64 (Jr), Super Wild Card, Dexdrive, Super Magic Drive,
-  Game Boy Xchanger, Mad Catz Camera Link, Lynxit.
+  Advance Linker, Doctor 64 (Jr), Super Wild Card, Game Doctor, Dexdrive,
+  Super Magic Drive, Game Boy Xchanger, Mad Catz Camera Link, Lynxit.
   Transfers: ROMs and SRAMs.
 - Miscellaneous ROM functions: verbose ROM information for ALL systems with
   support from internal ROM database (like Romcenter or Goodutil), CRC32
@@ -16,11 +16,11 @@ uCON64 - THE tool for all video game consoles. Its main features are:
 
 For console specific options check the following usage:
 
-uCON64 1.9.8beta6 Unix (Linux) 1999-2002
+uCON64 1.9.8beta7 Unix (Linux) 1999-2002
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
-Usage: ./ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
+Usage: ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
 
   --nbak        prevents backup files (*.BAK)
   --ncol        disable ANSI colors in output
@@ -30,10 +30,10 @@ Usage: ./ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
   --nhd         force ROM has no backup unit/emulator header
   --int         force ROM is interleaved (2143)
   --nint        force ROM is not interleaved (1234)
-  --dint        convert ROM to (non-)interleaved format (1234 &#60;-&#62 2143)
+  --dint        convert ROM to (non-)interleaved format (1234 &#60;-&#62; 2143)
                   this differs from the SNES & NES --dint option
   --ns          force ROM is not split
-   -e           emulate/run ROM (see /home/daniel/.ucon64rc for more)
+   -e           emulate/run ROM (see /root/.ucon64rc for more)
   --crc         show CRC32 value of ROM
   --dbs         search ROM database (all entries) by CRC32; --rom=0xCRC32
   --db          ROM database statistics (# of entries)
@@ -98,41 +98,20 @@ Patching
                   Nintendo Entertainment System/NES/Famicom/Game Axe (Redant),
                   Super Nintendo Entertainment System/SNES/Super Famicom
 
-CD-Writer
-  --cd          force recognition (of CD IMAGES)
-                  this is the support for the most CD-based consoles
-  --xcdrw       read/write IMAGE from/to CD-Writer;
-                  --rom=CD_IMAGE --file=TRACK_MODE
-                  reads automatically when CD_IMAGE does not exist
-                  we recommend http://cdrdao.sourceforge.net as burn engine
-                  TRACK_MODE='MODE2_RAW' (2352 Bytes; default)
-                  TRACK_MODE='MODE1'     (2048 Bytes; standard ISO9660)
-                  TRACK_MODE='MODE1_RAW' (2352 Bytes)
-                  TRACK_MODE='MODE2'     (2336 Bytes)
-                  --file=TRACK_MODE is optional, uCON64 will always try to
-                  detect the correct TRACK_MODE from the CD_IMAGE itself
-  --mktoc       generate TOC file for cdrdao; --rom=CD_IMAGE --file=TRACK_MODE
-  --mkcue       generate CUE file; --rom=CD_IMAGE --file=TRACK_MODE
-                  TRACK_MODE='MODE2_RAW' (2352 Bytes; default)
-                  TRACK_MODE='MODE1'     (2048 Bytes; standard ISO9660)
-                  TRACK_MODE='MODE1_RAW' (2352 Bytes)
-                  TRACK_MODE='MODE2'     (2336 Bytes)
-                  --file=TRACK_MODE is optional, uCON64 will always try to
-                  detect the correct TRACK_MODE from the CD_IMAGE itself
-  --iso         convert BIN/RAW CD_IMAGE to MODE1 (2048 Bytes); --rom=CD_IMAGE
-                  this might be useful if you made a MODE2_RAW image of a
-                  MODE1 CD and want to mount or burn it as MODE1 (2048 Bytes)
-                  this does only work for MODE1_RAW and MODE2(_RAW) CD_IMAGEs
+All DISC-based consoles (using libdiscmage)
+  --mksheet     generate TOC and CUE sheet files for CD_IMAGE; --rom=CD_IMAGE
+TODO: --cdirip=Nrip/dump track N from DiscJuggler/CDI IMAGE; --rom=CDI_IMAGE
+TODO: --nrgrip=Nrip/dump track N from Nero/NRG IMAGE; --rom=NRG_IMAGE
+TODO: --rip     rip/dump file(s) from a track; --rom=TRACK
 
 Dreamcast
   --dc          force recognition; NEEDED
-                  --xcdrw works currently only for MODE1/2048 backups which
-                  need the Utopia BootCD
+TODO: --ip      extract IP.BIN; --rom=CD_IMAGE
+                  for more options check the support for DISC-based consoles
 
 Playstation (One)/Playstation 2 (CD only)
   --psx         force recognition; NEEDED
-                  --xcdrw combined with MODE2_RAW (default) will most likely
-                  do the job
+                  for more options check the support for DISC-based consoles
 DexDrive
 TEST: --xdex=N  send/receive Block N to/from DexDrive; --file=PORT
                   receives automatically when --rom(=SRAM) does not exist
@@ -217,6 +196,7 @@ Super Nintendo Entertainment System/SNES/Super Famicom
   --mgd         convert to Multi Game*/MGD2/MGH/RAW
   --gd3         convert to Professor SF(2) Game Doctor SF3/6/7
   --ufos        convert Snes9x/ZSNES *.srm (SRAM) to Super UFO; --rom=SRAM
+  --dbuh        display (relevant part of) backup unit header
   --stp         convert SRAM from backup unit for use with an emulator
                   --stp just strips the first 512 bytes
   --dint        convert ROM to non-interleaved format
@@ -234,7 +214,7 @@ Super Nintendo Entertainment System/SNES/Super Famicom
                   TYPE='5' Konami's justifier
                   TYPE='6' multitap
                   TYPE='7' mouse / super scope / gamepad
-  --col         convert 0xRRGGBB (html) &#60;-&#62 0xXXXX (snes); --rom=0xCOLOR
+  --col         convert 0xRRGGBB (html) &#60;-&#62; 0xXXXX (SNES); --rom=0xCOLOR
                   this routine was used to find green colors in games and
                   to replace them with red colors (blood mode)
    -j           join split ROM
@@ -257,12 +237,15 @@ Super Wild Card 1.6XC/Super Wild Card 2.8CC/Super Wild Card DX(2)/SWC
                   In order to connect the Super Wild Card to a PC's parallel
                   port you need a standard bidirectional parallel cable like
                   for the most backup units
+Game Doctor SF3(SF6/SF7)
+  --xgd3        send ROM to Game Doctor SF3(SF6/SF7); --file=PORT
 
 Neo Geo/Neo Geo CD(Z)/MVS
   --ng          force recognition
   --bios        convert NeoCD BIOS to work with NeoCD emulator; --rom=BIOS
                   http://www.illusion-city.com/neo/
   --sam         convert SAM/M.A.M.E. sound to WAV; --rom=SAMFILE
+                  for more options check the support for DISC-based consoles
 
 Genesis/Sega Mega Drive/Sega CD/32X/Nomad
   --gen         force recognition
@@ -323,14 +306,14 @@ Handy (prototype)/Lynx/Lynx II
   --b0          change Bank0 kBytes size (LNX only); --file={0,64,128,256,512}
   --b1          change Bank1 kBytes size (LNX only); --file={0,64,128,256,512}
 Lynxit (Lynx Cartridge Backup Board)
-TEST: --xlit    send/receive ROM to/from Lynxit interface; --file=PORT
-                  receives automatically when ROM does not exist
+TEST: --xlit    receive ROM from Lynxit interface; --file=PORT
 
 PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))
 Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)
   --pce         force recognition
   --smg         convert to Super Magic Griffin/SMG
   --mgd         convert to Multi Game Doctor*/MGD2/RAW
+                  for more options check the support for DISC-based consoles
 
 Sega Master System(II/III)/GameGear (Handheld)
   --sms         force recognition
@@ -343,9 +326,9 @@ Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)
   --unif        convert to UNIF format/UNF (uses default values)
   --ines        convert to iNES format/NES (uses default values)
   --ineshd      extract iNES header from ROM (16 Bytes)
-   -j           join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -&#62 iNES)
+   -j           join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -&#62; iNES)
   --pasofami    convert to Pasofami/PRM/700/PRG/CHR
-   -s           convert/split to Pasofami/PRM/700/PRG/CHR (iNES -&#62 Pasofami)
+   -s           convert/split to Pasofami/PRM/700/PRG/CHR (iNES -&#62; Pasofami)
   --ffe         convert to FFE format
   --mapr=MAPR   specify board name or mapper number for conversion options
                   MAPR must be a board name for UNIF or a number for Pasofami
@@ -383,14 +366,15 @@ WonderSwan/WonderSwan Color/SwanCrystal
 
 Panther(32bit prototype)/Jaguar64/Jaguar64 CD
   --jag         force recognition
+                  for more options check the support for DISC-based consoles
 
 Neo Geo Pocket/Neo Geo Pocket Color
   --ngp         force recognition
 
-Database: 15880 known ROMs in db.c (+0)
+Database: 15880 known ROMs in cache (+0)
 
-TIP: ./ucon64 --help --snes (would show only SNES related help)
-     ./ucon64 --help|less (to see everything in less)
+TIP: ucon64 --help --snes (would show only SNES related help)
+     ucon64 --help|less (to see everything in less)
      give the force recognition switch a try if something went wrong
 
 Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net

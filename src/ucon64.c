@@ -1060,7 +1060,15 @@ ucon64_init (struct ucon64_ *rom)
 
   bytes = quickftell (rom->rom);
 
-  if (bytes <= MAXROMSIZE)
+  if (bytes <= MAXROMSIZE &&
+	rom->console != ucon64_PS2 &&
+	rom->console != ucon64_DC &&
+	rom->console != ucon64_SATURN &&
+	rom->console != ucon64_CDI &&
+	rom->console != ucon64_CD32 &&
+	rom->console != ucon64_PSX &&
+	rom->console != ucon64_GAMECUBE &&
+	rom->console != ucon64_XBOX )
     rom->current_crc32 = fileCRC32 (rom->rom, 0);
 
 // call testsplit() before any <CONSOLE>_init() function to provide for a

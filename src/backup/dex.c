@@ -50,7 +50,7 @@ const st_usage_t dex_usage[] =
 #define TAP 1
 #define DELAY 4
 #define FRAME_SIZE 128
-#define BLOCK_SIZE (64*(FRAME_SIZE))
+#define BLOCK_SIZE (64*FRAME_SIZE)
 
 static int print_data;
 
@@ -61,6 +61,7 @@ read_block (int block_num)
   return psx_memcard_read_block (print_data, CONPORT, TAP, DELAY, block_num);
 }
 
+
 static int
 write_block (int block_num, unsigned char *data)
 {
@@ -68,13 +69,14 @@ write_block (int block_num, unsigned char *data)
                                   data);
 }
 
+
 #if 0
 char *
 read_frame (int frame, char *data)
 {
-  data = psx_memcard_read_frame (print_data, CONPORT, TAP, DELAY, frame);
-  return data;
+  return psx_memcard_read_frame (print_data, CONPORT, TAP, DELAY, frame);
 }
+
 
 int
 write_frame (int frame, char *data)
@@ -88,12 +90,12 @@ write_frame (int frame, char *data)
 int
 dex_read_block (const char *filename, int block_num, unsigned int parport)
 {
-  unsigned char data[BLOCK_SIZE];
+  unsigned char *data;
 
   print_data = parport;
   misc_parport_print_info ();
 
-  if (read_block (block_num) == NULL)
+  if ((data = read_block (block_num)) == NULL)
     {
       fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
       exit (1);

@@ -1216,10 +1216,9 @@ int fal_usage(int argc,char *argv[])
 {
 if(argcmp(argc,argv,"-help"))printf("\n%s\n",fal_TITLE);
 
-printf("  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n\
-  		receives automatically when $ROM does not exist\n\
-TODO: test if -xfal does work with the hardware\n\
-");
+printf(	"  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
+	"  		receives automatically when $ROM does not exist\n"
+	"TODO: test if -xfal does work with the hardware\n");
 
 if(argcmp(argc,argv,"-help"))
 {

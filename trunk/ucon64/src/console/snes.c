@@ -2901,6 +2901,80 @@ snes_check_bs (void)
 #if 1
 int
 snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
+/*
+  Calculate the checksum of a SNES ROM. This version of snes_chksum() has one
+  advantage over the one below in that it is a bit more sensitive to overdumps.
+*/
+{
+  int i, rom_size, internal_rom_size, half_internal_rom_size, remainder;
+  unsigned short int sum1, sum2;
+
+  rom_size = ucon64.file_size - rominfo->buheader_len;
+  if (rominfo->interleaved)
+    {
+      ucon64.fcrc32 = crc32 (0, *rom_buffer, rom_size);
+      snes_deinterleave (rominfo, *rom_buffer, rom_size);
+    }
+  ucon64.crc32 = crc32 (0, *rom_buffer, rom_size);
+
+  if (!bs_dump && snes_header.rom_size <= 13)   // largest known cart size is 64 Mbit
+    internal_rom_size = 1 << (snes_header.rom_size + 10);
+  else
+    internal_rom_size = rom_size;
+  half_internal_rom_size = internal_rom_size >> 1;
+
+  sum1 = 0;
+  if ((snes_header.rom_type == 0xf5 && snes_header.map_type != 0x30)
+      || snes_header.rom_type == 0xf9 || bs_dump)
+    {
+      for (i = 0; i < rom_size; i++)
+        sum1 += (*rom_buffer)[i];               // Far East of Eden Zero (J)
+      if (rom_size == 24 * MBIT)
+        sum1 *= 2;                              // Momotaro Dentetsu Happy (J)
+
+      if (bs_dump)                              // Broadcast Satellaview "ROM"
+        for (i = rominfo->header_start;
+             i < (int) (rominfo->header_start + SNES_HEADER_LEN); i++)
+          sum1 -= (*rom_buffer)[i];
+    }
+  else
+    {
+      for (i = 0; i < half_internal_rom_size; i++) // normal ROM
+        sum1 += (*rom_buffer)[i];
+
+      sum2 = 0;
+      remainder = rom_size - half_internal_rom_size;
+      for (i = half_internal_rom_size; i < rom_size; i++)
+        sum2 += (*rom_buffer)[i];
+      sum1 += sum2 * (half_internal_rom_size / remainder);
+//      printf ("DEBUG internal_rom_size: %d; half_internal_rom_size: %d; remainder: %d\n",
+//              internal_rom_size, half_internal_rom_size, remainder);
+    }
+
+  /*
+    Load rom_buffer with the ROM again if uCON64 detected it as interleaved or
+    if uCON64 was forced to handle it as being interleaved, so that rom_buffer
+    matches with the ROM dump on disk. rom_buffer was "deinterleaved" (=changed)
+    in order to calculate the checksum. However, it isn't necessary to load
+    rom_buffer again in the case that uCON64 wasn't forced to handle the ROM as
+    interleaved and snes_deinterleave() detected that the ROM wasn't interleaved
+    after all. In that case snes_deinterleave() already reloaded rom_buffer. Of
+    course, it also isn't necessary to reload rom_buffer if ROM is a normal ROM.
+    In short:
+      force_interleaved?  interleaved?    reload?
+      yes                 yes             yes
+      yes                 no              yes
+      no                  yes             yes
+      no                  no              no
+  */
+  if (force_interleaved || rominfo->interleaved)
+    q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
+
+  return sum1;
+}
+#else
+int
+snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
 // Calculate the checksum of a SNES ROM.
 {
   int i, rom_size, internal_rom_size;
@@ -2925,8 +2999,7 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
   else
     internal_rom_size = rom_size;
 
-//  printf ("DEBUG internal_rom_size: %d; rom_size: %d\n",
-//          internal_rom_size, rom_size);
+//  printf ("DEBUG internal_rom_size: %d; rom_size: %d\n", internal_rom_size, rom_size);
   if (internal_rom_size > rom_size)
     {
       int blocksize;
@@ -2967,109 +3040,10 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
     for (i = 0; i < internal_rom_size; i++)
       sum += (*rom_buffer)[i];
 
-  /*
-    Load rom_buffer with the ROM again if uCON64 detected it as interleaved or
-    if uCON64 was forced to handle it as being interleaved, so that rom_buffer
-    matches with the ROM dump on disk. rom_buffer was "deinterleaved" (=changed)
-    in order to calculate the checksum. However, it isn't necessary to load
-    rom_buffer again in the case that uCON64 wasn't forced to handle the ROM as
-    interleaved and snes_deinterleave() detected that the ROM wasn't interleaved
-    after all. In that case snes_deinterleave() already reloaded rom_buffer. Of
-    course, it also isn't necessary to reload rom_buffer if ROM is a normal ROM.
-    In short:
-      force_interleaved?  interleaved?    reload?
-      yes                 yes             yes
-      yes                 no              yes
-      no                  yes             yes
-      no                  no              no
-  */
   if (force_interleaved || rominfo->interleaved)
     q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
 
   return sum;
-}
-#else
-int
-snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
-/*
-  Calculate the checksum of a SNES ROM. This function tries to calculate a
-  checksum that matches the one that is stored inside the ROM. As a result of
-  this the calculated checksum is not of much use if this function can't
-  calculate a sum that matches the internal one. However, it's not *that* bad,
-  because the CRC32 should be used anyway to identify SNES ROM dumps.
-*/
-{
-  int i, rom_size, pow2size, pow2size_half, remainder;
-  unsigned short int sum1, sum2, internal_sum;
-
-  rom_size = ucon64.file_size - rominfo->buheader_len;
-  if (rominfo->interleaved)
-    {
-      ucon64.fcrc32 = crc32 (0, *rom_buffer, rom_size);
-      snes_deinterleave (rominfo, *rom_buffer, rom_size);
-    }
-  ucon64.crc32 = crc32 (0, *rom_buffer, rom_size);
-
-  pow2size = 1;
-  while (pow2size < rom_size)
-    pow2size <<= 1;
-  pow2size_half = pow2size >> 1;
-
-  sum1 = 0;
-  if (pow2size_half >= MBIT && bs_dump)
-    {                                           // Broadcast Satellaview "ROM"
-      for (i = 0; i < rominfo->header_start; i++)
-        sum1 += (*rom_buffer)[i];
-      for (i = rominfo->header_start + SNES_HEADER_LEN; i < pow2size_half; i++)
-        sum1 += (*rom_buffer)[i];
-    }
-  else
-    for (i = 0; i < pow2size_half; i++)         // normal ROM
-      sum1 += (*rom_buffer)[i];
-
-  sum2 = 0;
-  remainder = rom_size - pow2size_half;
-  for (i = pow2size_half; i < rom_size; i++)
-    sum2 += (*rom_buffer)[i];
-  sum1 += sum2 * (pow2size_half / remainder);
-//  printf ("DEBUG pow2size: %d; pow2size_half: %d; remainder: %d\n",
-//          pow2size, pow2size_half, remainder);
-
-  // here follows a fix for ROM dumps like Far East of Eden Zero (J)
-  //  and Momotaro Dentetsu Happy (J)
-  internal_sum = snes_header.checksum_low + (snes_header.checksum_high << 8);
-  if (internal_sum != sum1)                     // checksum seems bad -> try another
-    {                                           //  checksum algorithm
-      sum2 = 0;
-      for (i = 0; i < rom_size; i++)
-        sum2 += (*rom_buffer)[i];
-      if (sum2 == internal_sum)
-        sum1 = sum2;                            // Far East of Eden Zero
-      sum2 *= 2;
-      if (sum2 == internal_sum)
-        sum1 = sum2;                            // Momotaro Dentetsu Happy
-    }
-
-  /*
-    Load rom_buffer with the ROM again if uCON64 detected it as interleaved or
-    if uCON64 was forced to handle it as being interleaved, so that rom_buffer
-    matches with the ROM dump on disk. rom_buffer was "deinterleaved" (=changed)
-    in order to calculate the checksum. However, it isn't necessary to load
-    rom_buffer again in the case that uCON64 wasn't forced to handle the ROM as
-    interleaved and snes_deinterleave() detected that the ROM wasn't interleaved
-    after all. In that case snes_deinterleave() already reloaded rom_buffer. Of
-    course, it also isn't necessary to reload rom_buffer if ROM is a normal ROM.
-    In short:
-      force_interleaved?  interleaved?    reload?
-      yes                 yes             yes
-      yes                 no              yes
-      no                  yes             yes
-      no                  no              no
-  */
-  if (force_interleaved || rominfo->interleaved)
-    q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
-
-  return sum1;
 }
 #endif
 

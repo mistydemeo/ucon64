@@ -385,51 +385,68 @@ dm_track_init (dm_track_t *track, FILE *fh)
                             (const char) 0xff, (const char) 0xff,
                             (const char) 0xff, (const char) 0xff,
                             (const char) 0xff, (const char) 0xff, 0};
-  char value_s[32];
+  uint8_t value8 = 0;
+  char value_s[0xff];
 
   fseek (fh, track->track_start, SEEK_SET);
-#if 0
   fread (value_s, 1, 16, fh);
-#else
-// callibrate
-  fseek (fh, -15, SEEK_CUR);
-  for (x = 0; x < 64; x++)
-    {
-      if (fread (&value_s, 1, 16, fh) != 16)
-        return NULL;
-      fseek (fh, -16, SEEK_CUR);
-      if (!memcmp (sync_data, value_s, 12))
-        break;
-      fseek (fh, 1, SEEK_CUR);
-    }
+#ifdef  DEBUG
+  mem_hexdump (value_s, 16, ftell (fh));
 #endif
 
   if (!memcmp (sync_data, value_s, 12))
-    for (x = 0; track_probe[x].sector_size; x++)
-      if (track_probe[x].mode == value_s[15])
-        {
-          // search for valid PVD in sector 16 of source image
-          fseek (fh, (track_probe[x].sector_size * 16) +
-                 track_probe[x].seek_header + track->track_start, SEEK_SET);
-          fread (value_s, 1, 16, fh);
+    {
+      value8 = (uint8_t) value_s[15];
 
-          if (!memcmp (pvd_magic, &value_s, 8))
-            {
-              identified = 1;
-              break;
-            }
-        }
+      for (x = 0; track_probe[x].sector_size; x++)
+        if (track_probe[x].mode == value8)
+          {
+            // check if we suggest the correct track size
+            fseek (fh, track_probe[x].sector_size, SEEK_SET);
+            fread (value_s, 1, 16, fh);
+
+//#ifdef  DEBUG
+            mem_hexdump (value_s, 16, ftell (fh));
+//#endif
+            if (memcmp (sync_data, value_s, 12) != 0) // correct mode but wrong sector_size
+              continue;
+
+            // search for valid PVD in sector 16 of source image
+            fseek (fh, (track_probe[x].sector_size * 16) +
+                   track_probe[x].seek_header +
+                   track->track_start,
+                   SEEK_SET);
+            fread (value_s, 1, 16, fh);
+
+//#ifdef  DEBUG          
+            mem_hexdump (value_s, 16, ftell (fh));
+//#endif          
+            if (!memcmp (pvd_magic, &value_s, 8))
+              {
+                printf ("%d %d\n\n", track_probe[x].mode, track_probe[x].sector_size);
+                identified = 1;
+                break;
+              }
+          }
+     }
 
   // no sync_data found? probably MODE1/2048
   if (!identified)
     {
       x = 0;
       if (track_probe[x].sector_size != 2048)
-        fprintf (stderr, "ERROR: dm_track_init()\n");
+        fprintf (stderr, "ERROR: dm_track_init() sanity check failed\n");
 
+      // search for valid PVD in sector 16 of source image
       fseek (fh, (track_probe[x].sector_size * 16) +
-             track_probe[x].seek_header + track->track_start, SEEK_SET);
+             track_probe[x].seek_header +
+             track->track_start,
+             SEEK_SET);
       fread (value_s, 1, 16, fh);
+
+#ifdef  DEBUG          
+      mem_hexdump (value_s, 16, pos);
+#endif          
 
       if (!memcmp (pvd_magic, &value_s, 8))
         identified = 1;
@@ -501,7 +518,7 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
         dm_clean (image);
         image->flags = flags;
         strcpy (image->fname, fname);
-        
+
         if (!probe[x].func (image))
           {
             identified = 1;

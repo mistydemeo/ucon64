@@ -297,6 +297,8 @@ ucon64_switches (st_ucon64_t *p)
     case UCON64_XPCE:
     case UCON64_XPL:
     case UCON64_XPLI:
+    case UCON64_XSF:
+    case UCON64_XSFS:
     case UCON64_XSMC:
     case UCON64_XSMCR:
     case UCON64_XSMD:
@@ -702,7 +704,7 @@ ucon64_options (st_ucon64_t *p)
     case UCON64_C:
       ucon64_filefile (optarg, 0, ucon64.rom, 0, FALSE);
       break;
-      
+
     case UCON64_CS:
       ucon64_filefile (optarg, 0, ucon64.rom, 0, TRUE);
       break;
@@ -1090,6 +1092,9 @@ ucon64_options (st_ucon64_t *p)
           break;
         case UCON64_SMS:                        // Sega Master System *and* Game Gear
           sms_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          break;
+        case UCON64_SNES:
+          snes_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
           break;
         default:
           return -1;
@@ -1989,6 +1994,22 @@ ucon64_options (st_ucon64_t *p)
 
     case UCON64_XPLI:
       pl_info (ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSF:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump flash card
+        sf_read_rom (ucon64.rom, ucon64.parport, 64 * MBIT);
+      else                                      // file exists -> send it to the Super Flash
+        sf_write_rom (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSFS:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        sf_read_sram (ucon64.rom, ucon64.parport);
+      else                                      // file exists -> restore SRAM
+        sf_write_sram (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;
 

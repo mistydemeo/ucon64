@@ -479,7 +479,7 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
   ffe_wait_for_ready ();
   outportb ((unsigned short) (parport + PARPORT_DATA), 0);
   outportb ((unsigned short) (parport + PARPORT_CONTROL),
-            inportb ((unsigned short) (parport + PARPORT_CONTROL)) ^ STROBE_BIT); // invert strobe
+            (unsigned char) (inportb ((unsigned short) (parport + PARPORT_CONTROL)) ^ STROBE_BIT)); // invert strobe
 
   free (buffer);
   fclose (file);

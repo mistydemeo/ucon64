@@ -185,24 +185,23 @@ typedef signed __int64 int64_t;
 #define ARGS_MAX 128
 #endif // ARGS_MAX
 
-#if (defined __unix__ || defined __BEOS__ || defined AMIGA)
-#ifndef __MSDOS__
-#define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
-extern int kbhit (void);                        // may only be used after init_conio()!
-#else
-#include <conio.h>                              // getch()
-#include <pc.h>                                 // kbhit()
-#endif
-// Should we leave these prototypes visible to the DOS code? The advantage
-//  would be a few less #ifdef's
+#if (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
 extern void init_conio (void);
 extern void deinit_conio (void);
+#define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
+extern int kbhit (void);                        // may only be used after init_conio()!
+
+#elif defined __MSDOS__
+#include <conio.h>                              // getch()
+#include <pc.h>                                 // kbhit()
+
+#elif defined _WIN32
+#include <conio.h>                              // kbhit() & getch()
 #endif
 
 #if     defined __CYGWIN__
 char *fix_character_set (char *value);
 #endif
-
 
 /*
   String manipulation
@@ -217,9 +216,9 @@ char *fix_character_set (char *value);
 
   strtrim()   trim isspace()'s from start and end of string
 
-  get_suffix()    get suffix of filename
-  set_suffix()    set/replace suffix of filename with suffix
-                  suffix means in this case the suffix INCLUDING the dot '.'
+  get_suffix() get suffix of filename
+  set_suffix() set/replace suffix of filename with suffix
+              suffix means in this case the suffix INCLUDING the dot '.'
 
   basename()  GNU basename() clone
   realpath2() realpath() clone
@@ -299,14 +298,14 @@ extern unsigned int crc32 (unsigned int crc32, const void *buffer, unsigned int 
   Misc stuff
 
   change_mem[2]() see header of implementation for usage
-  build_cm_patterns helper function for change_mem2() to read search patterns
+  build_cm_patterns() helper function for change_mem2() to read search patterns
                   from a file
-  cleanup_cm_patterns helper function for build_cm_patterns() to free all
+  cleanup_cm_patterns() helper function for build_cm_patterns() to free all
                   memory allocated for a (list of) st_pattern_t structure(s)
-  ansi_init ()    initialize ANSI output
-  ansi_strip ()   strip ANSI codes from a string
+  ansi_init()     initialize ANSI output
+  ansi_strip()    strip ANSI codes from a string
   gauge()         init_time == time when gauge() was first started or when
-                  the transfer did start
+                  the transfer started
                   pos == current position
                   size == full size
                   gauge given these three values will calculate many

@@ -94,7 +94,7 @@ init_io (unsigned int port)
       exit (1);
     }
 
-#if     defined __unix__ || defined __BEOS__
+#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   init_conio ();
 #endif
 
@@ -106,7 +106,7 @@ void
 deinit_io (void)
 {
 // Put possible transfer cleanup stuff here
-#if     defined __unix__ || defined __BEOS__
+#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   deinit_conio ();
 #endif
 }

@@ -61,7 +61,7 @@ ffe_init_io (unsigned int port)
       exit (1);
     }
 
-#if     defined __unix__ || defined __BEOS__
+#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   init_conio ();
 #endif
 
@@ -72,8 +72,8 @@ ffe_init_io (unsigned int port)
 void
 ffe_deinit_io (void)
 {
-#if     defined __unix__ || defined __BEOS__
-  deinit_conio ();
+#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
+    deinit_conio ();
 #endif
 }
 
@@ -124,7 +124,7 @@ ffe_sendb (unsigned char byte)
   ffe_wait_for_ready ();
   outportb ((unsigned short) (ffe_port + PARPORT_DATA), byte);
   outportb ((unsigned short) (ffe_port + PARPORT_CONTROL),
-            inportb ((unsigned short) (ffe_port + PARPORT_CONTROL)) ^ STROBE_BIT); // invert strobe
+            (unsigned char) (inportb ((unsigned short) (ffe_port + PARPORT_CONTROL)) ^ STROBE_BIT)); // invert strobe
   ffe_wait_for_ready ();                        // necessary if followed by ffe_receiveb()
 }
 
@@ -155,10 +155,10 @@ ffe_receiveb (void)
 
   byte = (unsigned char) ((ffe_wait_while_busy () & INPUT_MASK) >> 3); // receive low nibble
   outportb ((unsigned short) (ffe_port + PARPORT_CONTROL),
-            inportb ((unsigned short) (ffe_port + PARPORT_CONTROL)) ^ STROBE_BIT); // invert strobe
+            (unsigned char) (inportb ((unsigned short) (ffe_port + PARPORT_CONTROL)) ^ STROBE_BIT)); // invert strobe
   byte |= (unsigned char) ((ffe_wait_while_busy () & INPUT_MASK) << 1); // receive high nibble
   outportb ((unsigned short) (ffe_port + PARPORT_CONTROL),
-            inportb ((unsigned short) (ffe_port + PARPORT_CONTROL)) ^ STROBE_BIT); // invert strobe
+            (unsigned char) (inportb ((unsigned short) (ffe_port + PARPORT_CONTROL)) ^ STROBE_BIT)); // invert strobe
 
   return byte;
 }

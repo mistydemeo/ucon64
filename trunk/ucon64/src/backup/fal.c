@@ -531,9 +531,9 @@ LinkerInit (void)               // 4027c4
     uCON64 comment:
     Accessing I/O ports with addresses higher than 0x3ff causes an access
     violation under Windows XP (NT/2000) for _Windows_ executables without the
-    use of an appropriate device driver. UserPort is an example of an
-    *inappropriate* device driver, because it enables access to I/O ports up to
-    0x3ff. For some (ridiculous) reason, DOS executables are allowed to
+    use of an appropriate I/O port driver. UserPort is an example of an
+    *inappropriate* I/O port driver, because it enables access to I/O ports up
+    to 0x3ff. For some (ridiculous) reason, DOS executables are allowed to
     _access_ at least the ECP register this code uses. That doesn't mean it
     will result in the expected behaviour like enabling EPP.
   */

@@ -76,8 +76,7 @@ char *getarg (int argc		//get arg pos from cmdline options
 
 long getarg_intval (int argc, char **argv, char *argname);
 
-int findlwr (char *str		//find any lower char in str
-  );
+int findlwr (char *str);	//find any lower char in str
 
 char *strupr (char *str);
 
@@ -86,6 +85,10 @@ char *strlwr (char *str);
 char *cmd2url (char *cmd, char *url);	//converts a commandline into an url(!)
 
 char *url2cmd (char *url, char *cmd);	//converts an url into a commandline(!)
+
+char *ip2domain (char *ip, char *domain);	//dns
+
+char *domain2ip (char *domain, char *ip);	//dns
 
 char *newext (char *filename	//replace extension of str with ext
 	      , char *ext);
@@ -96,14 +99,12 @@ int extcmp (char *filename	//compares if filename has the ext extension and retu
 int findlast (const char *str	//find last appearance of str2 in str
 	      , const char *str2);
 
-char *stpblk (char *str		//strip blanks from beginning of str
-  );
+char *stpblk (char *str);	//strip blanks from beginning of str
 
 char *strtrim (char *dest	//trim blanks from start and end of str
 	       , char *str);
 
-char *stplcr (char *str		//kill all returns at end of str
-  );
+char *stplcr (char *str);	//kill all returns at end of str
 
 char *strswap (char *str	//swap bytes in str from start for len
 	       , long start, long len);
@@ -112,14 +113,11 @@ int strhexdump (char *str	//hexdump str from start for len
 		, long start, long virtual_start	//if str is only a part of a bigger buffer you can write here the start number of the counter which is displayed left
 		, long len);
 
-int renlwr (char *dir		//rename all files in dir to lower case
-  );
+int renlwr (char *dir);		//rename all files in dir to lower case
 
-int renupr (char *dir		//rename all files in dir to upper case
-  );
+int renupr (char *dir);		//rename all files in dir to upper case
 
-long quickftell (char *filename	//return size of filename
-  );
+long quickftell (char *filename);	//return size of filename
 
 long filencmp (char *filename	//search filename for search with searchlen from start for len
 	       , long start, long len, char *search, long searchlen	//length of *search in Bytes
@@ -153,7 +151,7 @@ int filecopy (char *src		//copy src from start for len to dest
 
 char *filebackup (char *filename);
 
-char *filenameonly (char *str);
+char *filenameonly (char *str);	//extracts only the filename from a complete path
 
 unsigned long filefile (char *filename	//compare filename from start with filename2 from start2
 			, long start, char *filename2, long start2, int similar	//TRUE==find similarities; FALSE==find differences
@@ -172,6 +170,8 @@ int fileswap (char *filename	//bytesswap filename from start for len
 	      , long start, long len);
 
 char *getProperty (char *filename, char *propname, char *buffer, char *def);
+
+char **getTags (char *filename, char *tagname, char **buffer);
 
 #ifdef __DOS__
 #define FILE_SEPARATOR '\\'

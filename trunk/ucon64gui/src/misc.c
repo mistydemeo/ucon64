@@ -218,22 +218,27 @@ extcmp (char *filename, char *ext)
 char *
 cmd2url (char *cmd, char *url)
 {
-/*
-  TODO convert a command string into an url(!)
-*/
-
   return (url);
 }
 
 char *
 url2cmd (char *url, char *cmd)
 {
-/*
-  TODO convert an url into a command string(!)
-*/
-
   return (cmd);
 }
+
+char *
+ip2domain (char *ip, char *domain)
+{
+  return (domain);
+}
+
+char *
+domain2ip (char *domain, char *ip)
+{
+  return (ip);
+}
+
 
 char *
 stpblk (char *str)
@@ -964,6 +969,61 @@ getProperty (char *filename, char *propname, char *buffer, char *def)
 
   return getenv (propname) != NULL ? getenv (propname) : def;
 }
+
+char **
+getTags (char *filename, char *tagname, char **buffer)
+{
+/*
+int c=0;
+String link=null;
+
+StringBuffer buf=new StringBuffer();
+File dir=new File(name);
+
+String files[]={name};
+if(dir.isDirectory())files=dir.list();
+
+for(int x=0;x<files.length;x++)
+{
+
+	if(new File(files[x]).isDirectory())getLinks(files[x]);
+
+	try
+	{
+		FileReader fh=new FileReader(files[x]);
+
+		while((c=fh.read())!=-1)
+		{
+			if(c=='<')
+			{
+				c=fh.read();
+				if(c=='A'||c=='a')
+				{
+					link="<A";
+					while((c=fh.read())!=-1)
+					{
+						if(c=='<')
+						{
+							if(link.charAt(link.length()-1)=='>')link=link+link.substring(9,link.length()-2);
+							System.out.print(link+"</a><br>"+"\n");
+							break;
+						}
+						else link=link+(char)c;
+					}
+				}
+			}
+		}
+		fh.close();	
+	} 
+	catch(IOException e) 
+	{
+	}
+}
+return(0);
+*/
+  return (buffer);
+}
+
 
 #if     (__UNIX__  || __BEOS__)
 static int stdin_tty = 1;	// 1 => stdin is a tty, 0 => it's not

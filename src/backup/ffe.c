@@ -31,14 +31,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "quick_io.h"
 #include "ucon64_misc.h"
 #include "ffe.h"
+#include "misc_par.h"
 
 
 #ifdef PARALLEL
 
 
-#define INPUT_MASK      0x78
-#define IBUSY_BIT       0x80
-#define N_TRY_MAX       65536                   // # times to test if copier ready
+#define N_TRY_MAX          65536                // # times to test if copier ready
 
 
 static void ffe_sendb (unsigned char byte);
@@ -159,7 +158,8 @@ ffe_sendb (unsigned char byte)
   ffe_wait_for_ready ();
   outportb ((unsigned short) (ffe_port + PARPORT_DATA), byte);
   outportb ((unsigned short) (ffe_port + PARPORT_CONTROL),
-            (unsigned char) (inportb ((unsigned short) (ffe_port + PARPORT_CONTROL)) ^ STROBE_BIT)); // invert strobe
+            (unsigned char) (inportb ((unsigned short) // invert strobe
+                                      (ffe_port + PARPORT_CONTROL)) ^ PARPORT_STROBE));
   ffe_wait_for_ready ();                        // necessary if followed by ffe_receiveb()
 }
 
@@ -227,12 +227,14 @@ ffe_receiveb (void)
 {
   unsigned char byte;
 
-  byte = (unsigned char) ((ffe_wait_while_busy () & INPUT_MASK) >> 3); // receive low nibble
+  byte = (unsigned char) ((ffe_wait_while_busy () & PARPORT_INPUT_MASK) >> 3); // receive low nibble
   outportb ((unsigned short) (ffe_port + PARPORT_CONTROL),
-            (unsigned char) (inportb ((unsigned short) (ffe_port + PARPORT_CONTROL)) ^ STROBE_BIT)); // invert strobe
-  byte |= (unsigned char) ((ffe_wait_while_busy () & INPUT_MASK) << 1); // receive high nibble
+            (unsigned char) (inportb ((unsigned short) // invert strobe
+                                      (ffe_port + PARPORT_CONTROL)) ^ PARPORT_STROBE));
+  byte |= (unsigned char) ((ffe_wait_while_busy () & PARPORT_INPUT_MASK) << 1); // receive high nibble
   outportb ((unsigned short) (ffe_port + PARPORT_CONTROL),
-            (unsigned char) (inportb ((unsigned short) (ffe_port + PARPORT_CONTROL)) ^ STROBE_BIT)); // invert strobe
+            (unsigned char) (inportb ((unsigned short) // invert strobe
+                                      (ffe_port + PARPORT_CONTROL)) ^ PARPORT_STROBE));
 
   return byte;
 }
@@ -249,7 +251,7 @@ ffe_wait_while_busy (void)
       input = inportb ((unsigned short) (ffe_port + PARPORT_STATUS));
       n_try++;
     }
-  while (input & IBUSY_BIT && n_try < N_TRY_MAX);
+  while (input & PARPORT_IBUSY && n_try < N_TRY_MAX);
 
 #if 0
 /*
@@ -280,7 +282,7 @@ ffe_wait_for_ready (void)
       input = inportb ((unsigned short) (ffe_port + PARPORT_STATUS));
       n_try++;
     }
-  while (!(input & IBUSY_BIT) && n_try < N_TRY_MAX);
+  while (!(input & PARPORT_IBUSY) && n_try < N_TRY_MAX);
 
 #if 0
   if (n_try >= N_TRY_MAX)
@@ -305,3 +307,4 @@ ffe_checkabort (int status)
 }
 
 #endif // PARALLEL
+

@@ -58,6 +58,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #endif
 #include "misc.h"
+#ifdef  PARALLEL
+#include "misc_par.h"
+#endif
 #include "getopt.h"
 #include "quick_io.h"
 #include "ucon64.h"
@@ -314,6 +317,12 @@ const struct option options[] = {
 #ifdef  PARALLEL
     {"xdex", 1, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
+    {"xf2a", 0, 0, UCON64_XF2A},
+    {"xf2amulti", 1, 0, UCON64_XF2AMULTI},
+    {"xf2ab", 1, 0, UCON64_XF2AB},
+    {"xf2ac", 1, 0, UCON64_XF2AC},
+    {"xf2as", 0, 0, UCON64_XF2AS},
+    {"xf2am", 0, 0, UCON64_XF2AM},
     {"xfal", 0, 0, UCON64_XFAL},
     {"xfalmulti", 1, 0, UCON64_XFALMULTI},
     {"xfalb", 1, 0, UCON64_XFALB},
@@ -540,11 +549,9 @@ main (int argc, char **argv)
 
   // parallel port?
 #ifdef  PPDEV
-  strcpy (ucon64.parport_dev,
-          get_property (ucon64.configfile, "parport_dev", buf, "/dev/parport0"));
+  get_property (ucon64.configfile, "parport_dev", ucon64.parport_dev, "/dev/parport0");
 #elif   defined AMIGA
-  strcpy (ucon64.parport_dev,
-          get_property (ucon64.configfile, "parport_dev", buf, "parallel.device"));
+  get_property (ucon64.configfile, "parport_dev", ucon64.parport_dev, "parallel.device");
 #endif
   // use -1 (UCON64_UNKNOWN) to force probing if the config file doesn't contain
   //  a parport line
@@ -554,7 +561,7 @@ main (int argc, char **argv)
   ucon64.backup = get_property_int (ucon64.configfile, "backups", '=');
 
   // $HOME/.ucon64/ ?
-  strcpy (ucon64.configdir, get_property (ucon64.configfile, "ucon64_configdir", buf, ""));
+  get_property (ucon64.configfile, "ucon64_configdir", ucon64.configdir, "");
 #ifdef  __CYGWIN__
   strcpy (ucon64.configdir, fix_character_set (ucon64.configdir));
 #endif
@@ -563,7 +570,7 @@ main (int argc, char **argv)
 
   // DAT file handling
   ucon64.dat_enabled = 0;
-  strcpy (ucon64.datdir, get_property (ucon64.configfile, "ucon64_datdir", buf, ""));
+  get_property (ucon64.configfile, "ucon64_datdir", ucon64.datdir, "");
 #ifdef  __CYGWIN__
   strcpy (ucon64.datdir, fix_character_set (ucon64.datdir));
 #endif
@@ -1519,10 +1526,12 @@ ucon64_usage (int argc, char *argv[])
     {UCON64_GBA, {gba_usage,
 #ifdef  PARALLEL
       fal_usage,
+      f2a_usage,
 #else
       0,
+      0,
 #endif // PARALLEL
-      0, 0, 0, 0}},
+      0, 0, 0}},
     {UCON64_N64, {n64_usage,
 #ifdef  PARALLEL
       doctor64_usage,

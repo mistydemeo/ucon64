@@ -33,7 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "gd.h"
 #include "console/snes.h"                       // for snes_make_gd_names() &
-                                                //  snes_get_snes_hirom()
+#include "misc_par.h"                           //  snes_get_snes_hirom()
+
 
 const st_usage_t gd_usage[] =
   {

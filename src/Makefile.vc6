@@ -1,6 +1,7 @@
 DLOPEN=1
 #ZLIB=1
 DISCMAGE=1
+#USB=1
 
 CC=cl.exe
 CFLAGS=/nologo /I. /W3 /O2 /DHAVE_CONFIG_H
@@ -19,7 +20,7 @@ LDFLAGS=$(LDFLAGS) libdiscmage/$(LIBNAME_DM).lib
 
 
 OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
-        misc.obj getopt.obj quick_io.obj dlopen.obj \
+        misc.obj misc_par.obj getopt.obj quick_io.obj dlopen.obj \
         patch/aps.obj patch/bsl.obj patch/ips.obj patch/gg.obj patch/pal4u.obj \
         patch/ppf.obj patch/xps.obj \
         console/gb.obj console/gba.obj console/genesis.obj console/lynx.obj \
@@ -31,13 +32,17 @@ OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
         backup/fal.obj backup/fig.obj backup/fpl.obj backup/gbx.obj backup/gd.obj \
         backup/md.obj backup/mgd.obj backup/smd.obj backup/swc.obj backup/ufo.obj \
         backup/dex.obj backup/psxpblib.obj backup/mccl.obj backup/lynxit.obj \
-        backup/ffe.obj backup/msg.obj backup/smc.obj
+        backup/ffe.obj backup/msg.obj backup/smc.obj backup/f2a.obj
 !ifdef ZLIB
 LDFLAGS=$(LDFLAGS) zlib.lib
-OBJECTS=$(OBJECTS) unzip.obj map.obj miscz.obj
+OBJECTS=$(OBJECTS) unzip.obj map.obj misc_z.obj
 !endif
 !ifdef DISCMAGE
 OBJECTS=$(OBJECTS) ucon64_dm.obj
+!endif
+!ifdef USB
+LDFLAGS=$(LDFLAGS) usblib.lib
+OBJECTS=$(OBJECTS) misc_usb.obj
 !endif
 
 
@@ -99,9 +104,11 @@ UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
 
 getopt.obj: getopt.h
 unzip.obj: unzip.h config.h
-misc.obj: misc.h miscz.h config.h
+misc.obj: misc.h misc_z.h config.h
 map.obj: map.h config.h
-miscz.obj: miscz.h map.h config.h
+misc_z.obj: misc_z.h map.h config.h
+misc_par.obj: misc_par.h config.h
+misc_usb.obj: misc_usb.h config.h
 quick_io.obj: quick_io.h misc.h config.h
 dlopen.obj: dlopen.h dxedll_pub.h config.h
 ucon64.obj: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
@@ -172,3 +179,4 @@ backup/mccl.obj: backup/mccl.h $(UCON64_STD_H)
 backup/lynxit.obj: backup/lynxit.h $(UCON64_STD_H)
 backup/ffe.obj: backup/ffe.h $(UCON64_STD_H)
 backup/psxpblib.obj: backup/psxpblib.h $(UCON64_STD_H)
+backup/f2a.obj: backup/f2a.h $(UCON64_STD_H)

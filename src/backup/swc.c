@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ffe.h"
 #include "swc.h"
 #include "console/snes.h"                       // for snes_get_file_type ()
+#include "misc_par.h"
 
 
 const st_usage_t swc_usage[] =
@@ -698,7 +699,8 @@ swc_write_rom (const char *filename, unsigned int parport, int enableRTS)
   ffe_wait_for_ready ();
   outportb ((unsigned short) (parport + PARPORT_DATA), 0);
   outportb ((unsigned short) (parport + PARPORT_CONTROL),
-            (unsigned char) (inportb ((unsigned short) (parport + PARPORT_CONTROL)) ^ STROBE_BIT)); // invert strobe
+            (unsigned char) (inportb ((unsigned short) // invert strobe
+                                      (parport + PARPORT_CONTROL)) ^ PARPORT_STROBE));
 
   free (buffer);
   fclose (file);

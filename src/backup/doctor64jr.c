@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "doctor64jr.h"
+#include "misc_par.h"
 
 const st_usage_t doctor64jr_usage[] = {
   {NULL, NULL, "Doctor V64 Junior"},

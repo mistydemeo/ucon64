@@ -26,18 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"                             // st_rominfo_t
 #include "ucon64_defines.h"                     // MBIT
 
-#ifdef  PARALLEL
-// DJGPP (DOS) has these, but it's better that all code uses the same functions.
-extern unsigned char inportb (unsigned short port);
-extern unsigned short inportw (unsigned short port);
-extern void outportb (unsigned short port, unsigned char byte);
-extern void outportw (unsigned short port, unsigned short word);
-#endif // PARALLEL
-
-#define PARPORT_DATA    0                       // output
-#define PARPORT_STATUS  1                       // input
-#define PARPORT_CONTROL 2
-
 /*
   defines for unknown backup units/emulators
 */
@@ -202,8 +190,6 @@ extern int ucon64_gauge (time_t init_time, int pos, int size);
 extern int ucon64_testpad (const char *filename); // test if ROM is padded
 
 extern int ucon64_testsplit (const char *filename); // test if ROM is split
-
-extern int ucon64_parport_init (int parport);
 
 extern int ucon64_configfile (void);
 

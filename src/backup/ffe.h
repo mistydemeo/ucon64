@@ -64,8 +64,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef PARALLEL
 
-#define STROBE_BIT      1
-
 extern void ffe_init_io (unsigned int port);
 extern void ffe_deinit_io (void);
 extern void ffe_send_block (unsigned short address, unsigned char *buffer, int len);

@@ -76,6 +76,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
+/* build with (lib)usb support (default: no) */
+/* #undef HAVE_USB_H */
+
 /* Define to 1 if you have the `vprintf' function. */
 #define HAVE_VPRINTF 1
 

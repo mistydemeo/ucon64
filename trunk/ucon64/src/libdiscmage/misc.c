@@ -973,12 +973,11 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
       line_num++;
       n_sets = 0;
 
-      if (*(line + strspn (line, "\t ")) == '#')
+      ptr = line + strspn (line, "\t ");
+      if (*ptr == '#' || *ptr == '\n' || *ptr == '\r')
         continue;
       if ((ptr = strpbrk (line, "\n\r#")))      // text after # is comment
         *ptr = 0;
-      if (!strcmp (line, ""))
-        continue;
 
       requiredsize1 += sizeof (st_cm_pattern_t);
       if (requiredsize1 > currentsize1)

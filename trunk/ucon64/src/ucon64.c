@@ -472,14 +472,14 @@ main (int argc, char **argv)
   ucon64.show_nfo = TRUE;
   while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
-      for (x = 0; options2[x].option != 0 && options2[x].console != 0; x++)
-        if (options2[x].option == c)
+      for (x = 0; ucon64_wf[x].option != 0 && ucon64_wf[x].console != 0; x++)
+        if (ucon64_wf[x].option == c)
           {
             // a specific console takes precedence over unknown
-            if (options2[x].console != UCON64_UNKNOWN)
-              ucon64.console = options2[x].console;
+            if (ucon64_wf[x].console != UCON64_UNKNOWN)
+              ucon64.console = ucon64_wf[x].console;
             // FALSE takes precedence over TRUE
-            if ((options2[x].flags & WF_SHOW_NFO) == 0)
+            if ((ucon64_wf[x].flags & WF_SHOW_NFO) == 0)
               ucon64.show_nfo = FALSE;
             break;
           }
@@ -685,10 +685,10 @@ ucon64_execute_options (void)
 
 #if 1
       // "special" options
-      for (x = 0; options2[x].option != 0; x++)
-        if (options2[x].option == ucon64_option)
+      for (x = 0; ucon64_wf[x].option != 0; x++)
+        if (ucon64_wf[x].option == ucon64_option)
           {
-            if (options2[x].flags & WF_SPECIAL_OPT) // is "WF_SPECIAL_OPT" ok?
+            if (ucon64_wf[x].flags & WF_SPECIAL_OPT)
               special_option = 1;
             break;
           }

@@ -523,11 +523,15 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XGD6, UCON64_SNES, gd_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM}, // supports split files
   {UCON64_XGD6R, UCON64_SNES, gd_usage,        WF_STOP|WF_NO_ROM},
   {UCON64_XGD6S, UCON64_SNES, gd_usage,        WF_STOP|WF_NO_ROM},
+  {UCON64_XGG, UCON64_SMS, smsggpro_usage,     WF_DEFAULT|WF_STOP|WF_NO_ROM},
+  {UCON64_XGGS, UCON64_SMS, smsggpro_usage,    WF_STOP|WF_NO_ROM},
   {UCON64_XLIT, UCON64_GB, lynxit_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XMCCL, UCON64_LYNX, mccl_usage,      WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_XMD, UCON64_GEN, md_usage,           WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
-  {UCON64_XMDS, UCON64_GEN, md_usage,          WF_STOP|WF_NO_ROM},
+  {UCON64_XMD, UCON64_GEN, mdpro_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XMDS, UCON64_GEN, mdpro_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XMSG, UCON64_PCE, msg_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XPCE, UCON64_PCE, pcepro_usage,      WF_DEFAULT|WF_STOP|WF_NO_ROM},
+  {UCON64_XPCES, UCON64_PCE, pcepro_usage,     WF_STOP|WF_NO_ROM},
   {UCON64_XSMC, UCON64_NES, smc_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT}, // send only
   {UCON64_XSMCR, UCON64_NES, smc_usage,        WF_STOP|WF_NO_ROM},
 #if 1

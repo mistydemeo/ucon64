@@ -289,11 +289,15 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XGD6:
     case UCON64_XGD6R:
     case UCON64_XGD6S:
+    case UCON64_XGG:
+    case UCON64_XGGS:
     case UCON64_XLIT:
     case UCON64_XMCCL:
     case UCON64_XMD:
     case UCON64_XMDS:
     case UCON64_XMSG:
+    case UCON64_XPCE:
+    case UCON64_XPCES:
     case UCON64_XSMC:
     case UCON64_XSMCR:
     case UCON64_XSMD:
@@ -344,10 +348,10 @@ ucon64_switches (int c, const char *optarg)
       ucon64.swc_io_mode = strtol (optarg, NULL, 16);
 
       if (ucon64.swc_io_mode & SWC_IO_ALT_ROM_SIZE)
-        printf ("WARNING: I/O mode not yet implemented\n");
+        puts ("WARNING: I/O mode not yet implemented");
 #if 0 // all these constants are defined by default
       if (ucon64.swc_io_mode & (SWC_IO_SPC7110 | SWC_IO_SDD1 | SWC_IO_SA1 | SWC_IO_MMX2))
-        printf ("WARNING: Be sure to compile swc.c with the appropriate constants defined\n");
+        puts ("WARNING: Be sure to compile swc.c with the appropriate constants defined");
 #endif
 
       if (ucon64.swc_io_mode > SWC_IO_MAX)
@@ -433,8 +437,8 @@ ucon64_switches (int c, const char *optarg)
             }
 
         if (!dir)
-          printf ("WARNING: Argument for -o must be a directory\n"
-                  "         Using current directory instead\n");
+          puts ("WARNING: Argument for -o must be a directory\n"
+                "         Using current directory instead");
       }
       break;
 
@@ -640,7 +644,7 @@ ucon64_options (int c, const char *optarg)
 
       if (result == -1)
         {
-          fprintf (stderr, "ERROR: File not found/out of memory\n");
+          fputs ("ERROR: File not found/out of memory\n", stderr);
           return -1;                            // it's logical to stop for this file
         }
       else if (result == -2)
@@ -706,7 +710,7 @@ ucon64_options (int c, const char *optarg)
       if ((padded = ucon64_testpad (ucon64.rom)) != -1)
         {
           if (!padded)
-            printf ("Padded: No\n\n");
+            puts ("Padded: No\n");
           else
             printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n\n", padded,
                     (float) padded / MBIT);
@@ -935,7 +939,7 @@ ucon64_options (int c, const char *optarg)
                   if (!dm_toc_write (ucon64.image))
                     printf (ucon64_msg[WROTE], basename2 (buf));
                   else
-                    fprintf (stderr, "ERROR: Could not generate toc sheet\n");
+                    fputs ("ERROR: Could not generate toc sheet\n", stderr);
                 }
 
               if (c == UCON64_MKCUE || c == UCON64_MKSHEET)
@@ -946,7 +950,7 @@ ucon64_options (int c, const char *optarg)
                   if (!dm_cue_write (ucon64.image))
                     printf (ucon64_msg[WROTE], basename2 (buf));
                   else
-                    fprintf (stderr, "ERROR: Could not generate cue sheet\n");
+                    fputs ("ERROR: Could not generate cue sheet\n", stderr);
                 }
             }
         }
@@ -979,7 +983,7 @@ ucon64_options (int c, const char *optarg)
                       basename2 (ucon64.argv[0]));
             }
           else
-            printf (ucon64_msg[DAT_NOT_ENABLED]);
+            fputs (ucon64_msg[DAT_NOT_ENABLED], stdout);
           break;
         }
 
@@ -992,7 +996,7 @@ ucon64_options (int c, const char *optarg)
                   basename2 (ucon64.argv[0]));
         }
       else
-        printf (ucon64_msg[DAT_NOT_ENABLED]);
+        fputs (ucon64_msg[DAT_NOT_ENABLED], stdout);
       break;
 
     case UCON64_DBS:
@@ -1016,7 +1020,7 @@ ucon64_options (int c, const char *optarg)
             }
         }
       else
-        printf (ucon64_msg[DAT_NOT_ENABLED]);
+        fputs (ucon64_msg[DAT_NOT_ENABLED], stdout);
       break;
 
     case UCON64_MKDAT:
@@ -1091,7 +1095,7 @@ ucon64_options (int c, const char *optarg)
           break;
         default:
 // The next msg has already been printed
-//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
       break;
@@ -1165,7 +1169,7 @@ ucon64_options (int c, const char *optarg)
           break;
         default:
 // The next msg has already been printed
-//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
       break;
@@ -1213,9 +1217,9 @@ ucon64_options (int c, const char *optarg)
           gg_apply (ucon64.rominfo, optarg);
           break;
         default:
-          fprintf (stderr, "ERROR: Cannot apply Game Genie code for this ROM/console\n");
+          fputs ("ERROR: Cannot apply Game Genie code for this ROM/console\n", stderr);
 // The next msg has already been printed
-//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
       break;
@@ -1266,7 +1270,7 @@ ucon64_options (int c, const char *optarg)
           break;
         default:
 // The next msg has already been printed
-//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
       break;
@@ -1294,7 +1298,7 @@ ucon64_options (int c, const char *optarg)
             break;
           default:
 // The next msg has already been printed
-//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
             return -1;
         }
       break;
@@ -1330,7 +1334,7 @@ ucon64_options (int c, const char *optarg)
           break;
         default:
 // The next msg has already been printed
-//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
       break;
@@ -1371,7 +1375,7 @@ ucon64_options (int c, const char *optarg)
           break;
         default:
 // The next msg has already been printed
-//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
       break;
@@ -1448,7 +1452,7 @@ ucon64_options (int c, const char *optarg)
           break;
         default:
 // The next msg has already been printed
-//          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+//          fputs (ucon64_msg[CONSOLE_ERROR], stderr);
           return -1;
         }
       break;
@@ -1557,9 +1561,9 @@ ucon64_options (int c, const char *optarg)
       else
         {
           if (!ucon64.rominfo->interleaved)
-            fprintf (stderr,
-                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 Junior only\n"
-                     "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n");
+            fputs ("ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 Junior only\n"
+                   "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n",
+                   stderr);
           else
             doctor64jr_write (ucon64.rom, ucon64.parport);
         }
@@ -1572,12 +1576,12 @@ ucon64_options (int c, const char *optarg)
       else
         {
           if (!ucon64.rominfo->buheader_len)
-            fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to a FIG compatible format\n");
+            fputs ("ERROR: This ROM has no header. Convert to a FIG compatible format\n",
+                   stderr);
           else if (ucon64.rominfo->interleaved)
-            fprintf (stderr,
-                     "ERROR: This ROM seems to be interleaved but the FIG doesn't support\n"
-                     "       interleaved ROMs. Convert to a FIG compatible format\n");
+            fputs ("ERROR: This ROM seems to be interleaved but the FIG doesn't support\n"
+                   "       interleaved ROMs. Convert to a FIG compatible format\n",
+                   stderr);
           else // file exists -> send it to the copier
             fig_write_rom (ucon64.rom, ucon64.parport);
         }
@@ -1606,8 +1610,8 @@ ucon64_options (int c, const char *optarg)
       else
         {
           if (!ucon64.rominfo->buheader_len)
-            fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n");
+            fputs ("ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n",
+                   stderr);
           else                                  // file exists -> send it to the copier
             gd3_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo);
         }
@@ -1636,8 +1640,8 @@ ucon64_options (int c, const char *optarg)
       else
         {
           if (!ucon64.rominfo->buheader_len)
-            fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n");
+            fputs ("ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n",
+                   stderr);
           else
             gd6_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo);
         }
@@ -1660,15 +1664,44 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
+    case UCON64_XGG:
+      if (access (ucon64.rom, F_OK) != 0)
+        smsgg_read_rom (ucon64.rom, ucon64.parport, 32 * MBIT);
+      else
+        {
+          if (ucon64.rominfo->buheader_len)
+            fputs ("ERROR: This ROM has a header. Remove it with -stp or -mgd\n",
+                   stderr);
+          else if (ucon64.rominfo->interleaved)
+            fputs ("ERROR: This ROM seems to be interleaved, but uCON64 doesn't support\n"
+                   "       sending interleaved ROMs to the SMS-PRO/GG-PRO. Convert ROM with -mgd\n",
+                   stderr);
+          else
+            smsgg_write_rom (ucon64.rom, ucon64.parport);
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGGS:
+      if (access (ucon64.rom, F_OK) != 0)
+        smsgg_read_sram (ucon64.rom, ucon64.parport);
+      else
+        smsgg_write_sram (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
     case UCON64_XMD:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump flash card
-        md_read_rom (ucon64.rom, ucon64.parport, 32 * MBIT);
+        md_read_rom (ucon64.rom, ucon64.parport, 64 * MBIT); // reads 32 Mbit if Sharp card
       else                                      // file exists -> send it to the MD-PRO
         {
-          if (genesis_get_file_type () != BIN)
-            fprintf (stderr,
-                     "ERROR: This ROM is not in binary/BIN/RAW format. uCON64 only supports sending\n"
-                     "       binary files to the MD-PRO. Convert ROM with -bin\n");
+          if (ucon64.rominfo->buheader_len)     // binary with header is possible
+            fputs ("ERROR: This ROM has a header. Remove it with -stp or -bin\n",
+                   stderr);
+          else if (genesis_get_file_type () != BIN)
+            fputs ("ERROR: This ROM is not in binary/BIN/RAW format. uCON64 only supports sending\n"
+                   "       binary files to the MD-PRO. Convert ROM with -bin\n",
+                   stderr);
           else
             md_write_rom (ucon64.rom, ucon64.parport);
         }
@@ -1689,22 +1722,38 @@ ucon64_options (int c, const char *optarg)
       else
         {
           if (!ucon64.rominfo->buheader_len)
-            fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to an MSG compatible format\n");
+            fputs ("ERROR: This ROM has no header. Convert to an MSG compatible format\n",
+                   stderr);
           else if (ucon64.rominfo->interleaved)
-            fprintf (stderr,
-                     "ERROR: This ROM seems to be bit-swapped but the MSG doesn't support\n"
-                     "       bit-swapped ROMs. Convert to an MSG compatible format\n");
+            fputs ("ERROR: This ROM seems to be bit-swapped but the MSG doesn't support\n"
+                   "       bit-swapped ROMs. Convert to an MSG compatible format\n",
+                   stderr);
           else
             msg_write_rom (ucon64.rom, ucon64.parport);
         }
       fputc ('\n', stdout);
       break;
 
+    case UCON64_XPCE:
+      if (access (ucon64.rom, F_OK) != 0)
+        pce_read_rom (ucon64.rom, ucon64.parport, 32 * MBIT);
+      else
+        pce_write_rom (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XPCES:
+      if (access (ucon64.rom, F_OK) != 0)
+        pce_read_sram (ucon64.rom, ucon64.parport);
+      else
+        pce_write_sram (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
     case UCON64_XSMC: // we don't use WF_NO_ROM => no need to check for file
       if (!ucon64.rominfo->buheader_len)
-        fprintf (stderr,
-                "ERROR: This ROM has no header. Convert to an SMC compatible format with -ffe\n");
+        fputs ("ERROR: This ROM has no header. Convert to an SMC compatible format with -ffe\n",
+               stderr);
       else
         smc_write_rom (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
@@ -1724,12 +1773,12 @@ ucon64_options (int c, const char *optarg)
       else                                      // file exists -> send it to the copier
         {
           if (!ucon64.rominfo->buheader_len)
-            fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to an SMD compatible format\n");
+            fputs ("ERROR: This ROM has no header. Convert to an SMD compatible format\n",
+                   stderr);
           else if (!ucon64.rominfo->interleaved)
-            fprintf (stderr,
-                     "ERROR: This ROM doesn't seem to be interleaved but the SMD only supports\n"
-                     "       interleaved ROMs. Convert to an SMD compatible format\n");
+            fputs ("ERROR: This ROM doesn't seem to be interleaved but the SMD only supports\n"
+                   "       interleaved ROMs. Convert to an SMD compatible format\n",
+                   stderr);
           else
             smd_write_rom (ucon64.rom, ucon64.parport);
         }
@@ -1752,12 +1801,12 @@ ucon64_options (int c, const char *optarg)
       else
         {
           if (!ucon64.rominfo->buheader_len)
-            fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to an SWC compatible format\n");
+            fputs ("ERROR: This ROM has no header. Convert to an SWC compatible format\n",
+                   stderr);
           else if (ucon64.rominfo->interleaved)
-            fprintf (stderr,
-                     "ERROR: This ROM seems to be interleaved but the SWC doesn't support\n"
-                     "       interleaved ROMs. Convert to an SWC compatible format\n");
+            fputs ("ERROR: This ROM seems to be interleaved but the SWC doesn't support\n"
+                   "       interleaved ROMs. Convert to an SWC compatible format\n",
+                   stderr);
           else
             {
               if (enableRTS != 0)
@@ -1799,9 +1848,9 @@ ucon64_options (int c, const char *optarg)
       else
         {
           if (!ucon64.rominfo->interleaved)
-            fprintf (stderr,
-                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 only\n"
-                     "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n");
+            fputs ("ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 only\n"
+                   "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n",
+                   stderr);
           else
             doctor64_write (ucon64.rom, ucon64.rominfo->buheader_len,
                             ucon64.file_size, ucon64.parport);
@@ -1874,9 +1923,9 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_XGBX:
-      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge/flash card
         gbx_read_rom (ucon64.rom, ucon64.parport);
-      else                                      // file exists -> send it to the copier
+      else                                      // file exists -> send it to the programmer
         gbx_write_rom (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;

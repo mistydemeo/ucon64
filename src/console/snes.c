@@ -1821,19 +1821,24 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
 {
   int interleaved = 0;
 
-  if (banktype_score < 10)
+  // Mortal Kombat (Beta) doesn't have an internal header...
+  if (crc32 (0, rom_buffer, 512) == 0xfa83b519)
+    ;                                           // not interleaved
+  else if (crc32 (0, rom_buffer + size / 2, 512) == 0xfa83b519)
+    interleaved = 1;
+  else if (banktype_score < 10)
     /*
       A banktype_score lower than 10 indicates that no "normal" internal SNES
       header was found by check_banktype() at the normal locations. This is an
       indication the dump is an interleaved LoROM dump.
     */
     {
-      if (check_banktype (rom_buffer, size / 2) > 10)
+      if (check_banktype (rom_buffer, size / 2) >= 10)
         {
           interleaved = 1;
           snes_hirom = 0;
-          snes_hirom_changed = 1;               // keep snes_deinterleave() from
-        }                                       //  changing snes_hirom
+          snes_hirom_changed = 1;               // keep snes_deinterleave()
+        }                                       //  from changing snes_hirom
     }
   else if (!snes_hirom)
     {
@@ -2264,8 +2269,8 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
   if (UCON64_ISSET (ucon64.snes_hirom))         // -hi or -nhi switch was specified
     {
       snes_hirom = ucon64.snes_hirom;
-      snes_hirom_changed = 1;                   // keep snes_deinterleave() from
-    }                                           //  changing snes_hirom
+      snes_hirom_changed = 1;                   // keep snes_deinterleave()
+    }                                           //  from changing snes_hirom
 
   if (UCON64_ISSET (ucon64.snes_header_base))   // -erom switch was specified
     {

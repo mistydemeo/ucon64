@@ -265,6 +265,7 @@ const struct option long_options[] = {
     {"xgbx", 0, 0, UCON64_XGBX},
     {"xgbxb", 1, 0, UCON64_XGBXB},
     {"xgbxs", 0, 0, UCON64_XGBXS},
+    {"xmgd", 0, 0, UCON64_XMGD},
     {"xsmd", 0, 0, UCON64_XSMD},
     {"xsmds", 0, 0, UCON64_XSMDS},
     {"xswc", 0, 0, UCON64_XSWC},
@@ -1011,7 +1012,7 @@ ucon64_usage (int argc, char *argv[])
         UCON64_USAGE (swc_usage);
 //        UCON64_USAGE (fig_usage);
 //        UCON64_USAGE (smc_usage);
-//        UCON64_USAGE (mgd_usage);
+        UCON64_USAGE (mgd_usage);
 #endif // BACKUP
         single = 1;
         break;
@@ -1149,7 +1150,7 @@ ucon64_usage (int argc, char *argv[])
       UCON64_USAGE (swc_usage);
 //      UCON64_USAGE (fig_usage);
 //      UCON64_USAGE (smc_usage);
-//      UCON64_USAGE (mgd_usage);
+      UCON64_USAGE (mgd_usage);
 #endif // BACKUP
       printf ("\n");
 

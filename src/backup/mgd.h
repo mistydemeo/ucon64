@@ -102,8 +102,12 @@ is cat. no. 475) would look like: SF16475A.078
 */
 
 #ifdef BACKUP
+int mgd_read_rom (const char *filename, unsigned int parport);
+int mgd_write_rom (const char *filename, unsigned int parport);
+int mgd_read_sram (const char *filename, unsigned int parport);
+int mgd_write_sram (const char *filename, unsigned int parport);
 #endif // BACKUP
 
 #define MGD_HEADER_START 0
-#define MGD_HEADER_LEN 0
+#define MGD_HEADER_LEN 512
 #endif // MGD_H

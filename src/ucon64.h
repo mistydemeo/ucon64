@@ -100,7 +100,6 @@ typedef struct
 
 typedef enum { UCON64_SPP, UCON64_EPP, UCON64_ECP } parport_mode_t;
 
-
 /*
   this struct holds workflow relevant information
 */

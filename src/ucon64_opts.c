@@ -456,217 +456,6 @@ ucon64_switches (int c, const char *optarg)
 }
 
 
-static int
-ucon64_rename (int mode)
-{
-  char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1], suffix[80], *p, *p2;
-  int good_name;
-
-  buf[0] = 0;
-  strncpy (suffix, get_suffix (ucon64.rom), 80);
-  suffix[80 - 1] = 0;                           // in case suffix is >= 80 chars
-
-  switch (mode)
-    {
-      case UCON64_RROM:
-        if (ucon64.rominfo)
-          if (ucon64.rominfo->name)
-            {
-              strcpy (buf, ucon64.rominfo->name);
-              strtrim (buf);
-            }
-        break;
-
-      case UCON64_RENAME:                       // GoodXXXX style rename
-        if (ucon64.dat)
-          if (ucon64.dat->fname)
-            {
-              p = (char *) get_suffix (ucon64.dat->fname);
-              strcpy (buf, ucon64.dat->fname);
-
-              // get_suffix() never returns NULL
-              if (p[0])
-                if (strlen (p) < 5)
-                  if (!(stricmp (p, ".nes") &&  // NES
-                        stricmp (p, ".fds") &&  // NES FDS
-                        stricmp (p, ".gb") &&   // Game Boy
-                        stricmp (p, ".gbc") &&  // Game Boy Color
-                        stricmp (p, ".gba") &&  // Game Boy Advance
-                        stricmp (p, ".smc") &&  // SNES
-                        stricmp (p, ".sc") &&   // Sega Master System
-                        stricmp (p, ".sg") &&   // Sega Master System
-                        stricmp (p, ".sms") &&  // Sega Master System
-                        stricmp (p, ".gg") &&   // Game Gear
-//                      stricmp (p, ".smd") &&  // Genesis
-                        stricmp (p, ".v64")))   // Nintendo 64
-                    buf[strlen (buf) - strlen (p)] = 0;
-            }
-        break;
-
-      default:
-        return 0;                               // invalid mode
-    }
-
-  if (!buf[0])
-    return 0;
-
-  if (ucon64.fname_len == UCON64_FORCE63)
-    buf[63] = 0;
-  else if (ucon64.fname_len == UCON64_83)
-    buf[8] = 0;
-
-  // replace chars the fs might not like
-  strcpy (buf2, to_func (buf, strlen (buf), tofname));
-  strcpy (buf, basename2 (ucon64.rom));
-
-  p = (char *) get_suffix (buf);
-  // Remove the suffix from buf (ucon64.rom). Note that this isn't fool-proof.
-  //  However, this is the best solution, because several DAT files contain
-  //  "canonical" file names with a suffix. That is a STUPID bug.
-  if (p)
-    buf[strlen (buf) - strlen (p)] = 0;
-
-#ifdef  DEBUG
-//  printf ("buf: \"%s\"; buf2: \"%s\"\n", buf, buf2);
-#endif
-  if (!strcmp (buf, buf2))
-    // also process files with a correct name, so that -rename can be used to
-    //  "weed" out good dumps when -o is used (like GoodXXXX without inplace
-    //  command)
-    good_name = 1;
-  else
-    {
-      // Another test if the file already has a correct name. This is necessary
-      //  for files without a "normal" suffix (e.g. ".smc"). Take for example a
-      //  name like "Final Fantasy III (V1.1) (U) [!]".
-      strcat (buf, suffix);
-      if (!strcmp (buf, buf2))
-        {
-          good_name = 1;
-          suffix[0] = 0;                        // discard "suffix" (part after period)
-        }
-      else
-        good_name = 0;
-    }
-
-  // DON'T use set_suffix()! Consider file names (in the DAT file) like
-  //  "Final Fantasy III (V1.1) (U) [!]". The suffix is ".1) (U) [!]"...
-  strcat (buf2, suffix);
-
-  if (ucon64.fname_len == UCON64_83)
-    buf2[12] = 0;
-
-  ucon64_output_fname (buf2, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-
-  p = basename2 (ucon64.rom);
-  p2 = basename2 (buf2);
-
-  if (one_file (ucon64.rom, buf2) && !strcmp (p, p2))
-    {                                           // skip only if the letter case
-      printf ("Skipping \"%s\"\n", p);          //  also matches (Windows...)
-      return 0;
-    }
-
-  if (!good_name)
-    /*
-      Note that the previous statement causes whatever file is present in the
-      dir specified with -o (or the current dir) to be overwritten. This seems
-      bad, but is actually better than making a backup. It isn't so bad,
-      because the file that gets overwritten is either the same as the file it
-      is overwritten with or doesn't deserve its name.
-      Without this statement repeating a rename action for already renamed
-      files would result in a real mess. And I (dbjh) mean a *real* mess...
-    */
-    if (!access (buf2, F_OK))                   // a file with that name exists already?
-      ucon64_file_handler (buf2, NULL, OF_FORCE_BASENAME);
-
-  if (!good_name)
-    printf ("Renaming \"%s\" to \"%s\"\n", p, p2);
-  else
-    printf ("Moving \"%s\"\n", p);
-#ifndef DEBUG
-  rename2 (ucon64.rom, buf2);                   // rename2() must be used!
-#endif
-#ifdef  HAVE_ZLIB_H
-  unzip_current_file_nr = 0x7fffffff - 1;       // dirty hack
-#endif
-  return 0;
-}
-
-
-static int
-ucon64_e (void)
-{
-  int result, x;
-  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
-  const char *property;
-
-  if (access (ucon64.configfile, F_OK) != 0)
-    {
-      fprintf (stderr, "ERROR: %s does not exist\n", ucon64.configfile);
-      return -1;
-    }
-
-  sprintf (buf3, "emulate_%08x", ucon64.crc32);
-
-  property = get_property (ucon64.configfile, buf3, buf2, NULL); // buf2 also contains property value
-  if (property == NULL)
-    {
-      sprintf (buf3, "emulate_0x%08x", ucon64.crc32);
-      property = get_property (ucon64.configfile, buf3, buf2, NULL);
-    }
-
-  if (property == NULL)
-    {
-      for (x = 0; options[x].name; x++)
-        if (options[x].val == ucon64.console)
-          {
-            sprintf (buf3, "emulate_%s", options[x].name);
-            break;
-          }
-      property = get_property (ucon64.configfile, buf3, buf2, NULL);
-    }
-
-  if (property == NULL)
-    {
-      fprintf (stderr, "ERROR: Could not find the correct settings (%s) in\n"
-              "       %s\n"
-              "TIP:   If the wrong console was detected you might try to force recognition\n"
-              "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
-              buf3, ucon64.configfile);
-      return -1;
-    }
-
-  sprintf (buf, "%s \"%s\"", buf2, ucon64.rom);
-
-  puts (buf);
-  fflush (stdout);
-  sync ();
-
-  result = system (buf)
-#ifndef __MSDOS__
-           >> 8                                 // the exit code is coded in bits 8-15
-#endif                                          //  (that is, under non-DOS)
-           ;
-
-#if 1
-  // Snes9x (Linux) for example returns a non-zero value on a normal exit
-  //  (3)...
-  // under WinDOS, system() immediately returns with exit code 0 when
-  //  starting a Windows executable (as if fork() was called) it also
-  //  returns 0 when the exe could not be started
-  if (result != 127 && result != -1 && result != 0)        // 127 && -1 are system() errors, rest are exit codes
-    {
-      fprintf (stderr, "ERROR: The emulator returned an error (?) code: %d\n"
-               "TIP:   If the wrong emulator was used you might try to force recognition\n"
-               "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
-               result);
-    }
-#endif
-  return result;
-}
-
-
 int
 ucon64_options (int c, const char *optarg)
 {
@@ -1211,13 +1000,22 @@ ucon64_options (int c, const char *optarg)
           snes_dint (ucon64.rominfo);
           break;
         default:                                // Nintendo 64
-          puts ("Converting to deinterleaved format...");
+          puts ("Converting file...");
           ucon64_file_handler (dest_name, NULL, 0);
           q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb");
-          q_fswap (dest_name, 0, ucon64.file_size);
+          q_fswap_b (dest_name, 0, ucon64.file_size);
           printf (ucon64_msg[WROTE], dest_name);
           break;
         }
+      break;
+
+    case UCON64_SWAP2:
+      // --swap2 is currently used only for Nintendo 64
+      puts ("Converting file...");
+      ucon64_file_handler (dest_name, NULL, 0);
+      q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb");
+      q_fswap_w (dest_name, 0, ucon64.file_size);
+      printf (ucon64_msg[WROTE], dest_name);
       break;
 
     case UCON64_DMIRR:
@@ -1453,6 +1251,10 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_PASOFAMI:
       nes_pasofami ();
+      break;
+
+    case UCON64_PATTERN:
+      ucon64_pattern (ucon64.rominfo, optarg);
       break;
 
     case UCON64_POKE:

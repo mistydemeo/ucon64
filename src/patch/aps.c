@@ -154,7 +154,7 @@ readN64header (void)
   fread (buffer, 1, 8, n64aps_modfile);
   fread (APSbuffer, 1, 8, n64aps_apsfile);
   if (n64aps_magictest == 0x12408037)
-    mem_swap (buffer, 8);
+    mem_swap_b (buffer, 8);
   if (memcmp (APSbuffer, buffer, 8))
     {
       printf ("WARNING: Incorrect image\n");
@@ -354,7 +354,7 @@ writeN64header (void)
   fseek (n64aps_orgfile, 0x10, SEEK_SET);       // CRC header position
   fread (buffer, 1, 8, n64aps_orgfile);
   if (n64aps_magictest == 0x12408037)
-    mem_swap (buffer, 8);
+    mem_swap_b (buffer, 8);
 
   fwrite (buffer, 1, 8, n64aps_apsfile);
   memset (buffer, 0, 5);

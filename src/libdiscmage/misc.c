@@ -213,71 +213,6 @@ q_fsize (const char *filename)
 
 
 #if     defined _WIN32 && defined ANSI_COLOR
-#if 0
-static WORD
-ansi_parser (char *str)
-{
-  typedef struct
-    {
-      int ansi;
-      int win32;
-    } st_ansi_codes_t;
-
-  st_ansi_codes_t ansi_codes[] = {
-      {1, FOREGROUND_INTENSITY},
-
-      {30, },
-      {31, FOREGROUND_RED},
-      {32, },
-      {33, FOREGROUND_RED | FOREGROUND_GREEN},
-      {34, },
-      {35, },
-      {36, },
-      {37, },
-
-      {40, },
-      {41, },
-      {42, },
-      {43, },
-      {44, },
-      {45, },
-      {46, },
-      {47, },
-
-      {-1, -1}
-    };
-  int ansi = 0;
-  char *p = str, *s = str;
-
-  for (; *p; p++)
-    switch (*p)
-      {
-        case '\x1b':                            // escape
-          ansi = 1;
-          break;
-
-        case 'm':
-          if (ansi)
-            {
-              ansi = 0;
-              break;
-            }
-
-        default:
-          if (!ansi)
-            {
-              *s = *p;
-              s++;
-            }
-          break;
-      }
-  *s = 0;
-
-  return str;
-}
-#endif
-
-
 int
 vprintf2 (const char *format, va_list argptr)
 // Cheap hack to get the Visual C++ and MinGW ports support "ANSI colors".
@@ -698,13 +633,13 @@ strtrim (char *str)
 
 
 int
-memwcmp (const void *data, const void *search, uint32_t searchlen, int wildcard)
+memwcmp (const void *buffer, const void *search, uint32_t searchlen, int wildcard)
 {
   uint32_t n;
 
   for (n = 0; n < searchlen; n++)
     if (((uint8_t *) search)[n] != wildcard &&
-        ((uint8_t *) data)[n] != ((uint8_t *) search)[n])
+        ((uint8_t *) buffer)[n] != ((uint8_t *) search)[n])
       return -1;
 
   return 0;
@@ -726,28 +661,47 @@ mem_search (const void *buffer, uint32_t buflen,
 
 
 void *
-mem_swap (void *add, uint32_t n)
+mem_swap_b (void *buffer, uint32_t n)
 {
-  unsigned char *a = (unsigned char *) add, c;
+  uint8_t *a = (uint8_t *) buffer, byte;
 
-  for (; n > 1; a += 2, n -= 2)
+  for (; n > 1; n -= 2)
     {
-      c = *a;
+      byte = *a;
       *a = *(a + 1);
-      *(a + 1) = c;
+      *(a + 1) = byte;
+      a += 2;
     }
 
-  return add;
+  return buffer;
+}
+
+
+void *
+mem_swap_w (void *buffer, uint32_t n)
+{
+  uint16_t *a = (uint16_t *) buffer, word;
+
+  n >>= 1;                                      // # words = # bytes / 2
+  for (; n > 1; n -= 2)
+    {
+      word = *a;
+      *a = *(a + 1);
+      *(a + 1) = word;
+      a += 2;
+    }
+
+  return buffer;
 }
 
 
 void
-mem_hexdump (const void *mem, uint32_t n, int virtual_start)
+mem_hexdump (const void *buffer, uint32_t n, int virtual_start)
 // hexdump something
 {
   uint32_t pos;
   char buf[17];
-  const unsigned char *p = (const unsigned char *) mem;
+  const unsigned char *p = (const unsigned char *) buffer;
 
   buf[16] = 0;
   for (pos = 0; pos < n; pos++, p++)
@@ -1809,16 +1763,24 @@ gauge (time_t init_time, int pos, int size)
   the file system. We fix this.
   TODO: fix the same problem for other non-ASCII characters (> 127).
 */
-char *
-fix_character_set (char *value)
+unsigned char *
+fix_character_set (unsigned char *value)
 {
-  int l = strlen (value);
+  int n, l = strlen ((const char *) value);
 
-  change_mem (value, l, "\x89", 1, 0, 0, "\xeb", 1, 0); // e diaeresis
-  change_mem (value, l, "\x84", 1, 0, 0, "\xe4", 1, 0); // a diaeresis
-  change_mem (value, l, "\x8b", 1, 0, 0, "\xef", 1, 0); // i diaeresis
-  change_mem (value, l, "\x94", 1, 0, 0, "\xf6", 1, 0); // o diaeresis
-  change_mem (value, l, "\x81", 1, 0, 0, "\xfc", 1, 0); // u diaeresis
+  for (n = 0; n < l; n++)
+    {
+      if (value[n] == 0x89)                     // e diaeresis
+        value[n] = 0xeb;
+      else if (value[n] == 0x84)                // a diaeresis
+        value[n] = 0xe4;
+      else if (value[n] == 0x8b)                // i diaeresis
+        value[n] = 0xef;
+      else if (value[n] == 0x94)                // o diaeresis
+        value[n] = 0xf6;
+      else if (value[n] == 0x81)                // u diaeresis
+        value[n] = 0xfc;
+    }
 
   return value;
 }
@@ -2325,7 +2287,7 @@ uint16_t
 bswap_16 (uint16_t x)
 {
 #if 1
-  unsigned char *ptr = (unsigned char *) &x, tmp;
+  uint8_t *ptr = (uint8_t *) &x, tmp;
   tmp = ptr[0];
   ptr[0] = ptr[1];
   ptr[1] = tmp;
@@ -2340,7 +2302,7 @@ uint32_t
 bswap_32 (uint32_t x)
 {
 #if 1
-  unsigned char *ptr = (unsigned char *) &x, tmp;
+  uint8_t *ptr = (uint8_t *) &x, tmp;
   tmp = ptr[0];
   ptr[0] = ptr[3];
   ptr[3] = tmp;
@@ -2358,7 +2320,7 @@ bswap_32 (uint32_t x)
 uint64_t
 bswap_64 (uint64_t x)
 {
-  unsigned char *ptr = (unsigned char *) &x, tmp;
+  uint8_t *ptr = (uint8_t *) &x, tmp;
   tmp = ptr[0];
   ptr[0] = ptr[7];
   ptr[7] = tmp;
@@ -2551,7 +2513,7 @@ q_rfcpy (const char *src, const char *dest)
 
 
 int
-q_fswap (const char *filename, int start, int len)
+q_fswap (const char *filename, int start, int len, swap_t type)
 {
   int seg_len;
   FILE *fh;
@@ -2579,7 +2541,10 @@ q_fswap (const char *filename, int start, int len)
     {
       if (!(seg_len = fread (buf, 1, MIN (len, MAXBUFSIZE), fh)))
         break;
-      mem_swap (buf, seg_len);
+      if (type == SWAP_BYTE)
+        mem_swap_b (buf, seg_len);
+      else // SWAP_WORD
+        mem_swap_w (buf, seg_len);
       fseek (fh, -seg_len, SEEK_CUR);
       fwrite (buf, 1, seg_len, fh);
     }

@@ -91,7 +91,6 @@ extern const st_usage_t mame_usage[];
 
 extern int unknown_init (st_rominfo_t *rominfo);
 
-
 extern const st_usage_t ucon64_options_usage[];
 extern const st_usage_t ucon64_padding_usage[];
 extern const st_usage_t ucon64_patching_usage[];
@@ -139,6 +138,7 @@ extern const st_usage_t ucon64_patching_usage[];
 #define WF_NOCRC32 512
 #define WF_NO_SPLIT 1024
 #define WF_SWITCH 2048
+
 typedef struct
 {
   int option;
@@ -207,6 +207,10 @@ extern int ucon64_parport_init (int parport);
 
 extern int ucon64_configfile (void);
 
+extern int ucon64_rename (int mode);
+extern int ucon64_e (void);
+extern int ucon64_pattern (st_rominfo_t *rominfo, const char *pattern_fname);
+
 /*
   ucon64_get_options_s() returns option name
                          ucon64_get_option_s(UCON64_HELP) == "help"
@@ -217,3 +221,4 @@ extern const char *ucon64_get_option_s (int option);
 extern const char *ucon64_get_desc (int option);
 
 #endif // #ifndef UCON64_MISC_H
+

@@ -230,7 +230,7 @@ extern int kbhit (void);
 #endif
 
 #ifdef  __CYGWIN__
-extern char *fix_character_set (char *value);
+extern unsigned char *fix_character_set (unsigned char *value);
 #endif
 
 /*
@@ -309,15 +309,17 @@ extern int argz_extract2 (char **argv, char *str, const char *separator_s, int m
 
   memwcmp()    memcmp with wildcard support
   mem_search() search for a byte sequence
-  mem_swap()   swap n Bytes from add on
-  mem_hexdump() hexdump n Bytes from add on; you can use here a virtual_start for the displayed counter
+  mem_swap_b() swap n bytes of buffer
+  mem_swap_w() swap n/2 words of buffer
+  mem_hexdump() hexdump n bytes of buffer; you can use here a virtual_start for the displayed counter
   crc16()      calculate the crc16 of buffer for size bytes
   crc32()      calculate the crc32 of buffer for size bytes
 */
-extern int memwcmp (const void *data, const void *search, uint32_t searchlen, int wildcard);
+extern int memwcmp (const void *buffer, const void *search, uint32_t searchlen, int wildcard);
 extern void *mem_search (const void *buffer, uint32_t buflen, const void *search, uint32_t searchlen);
-extern void *mem_swap (void *add, uint32_t size);
-extern void mem_hexdump (const void *add, uint32_t n, int virtual_start);
+extern void *mem_swap_b (void *buffer, uint32_t n);
+extern void *mem_swap_w (void *buffer, uint32_t n);
+extern void mem_hexdump (const void *buffer, uint32_t n, int virtual_start);
 #ifdef  HAVE_BYTESWAP_H
 #include <byteswap.h>
 #else
@@ -411,7 +413,7 @@ extern void wait2 (int nmillis);
   q_fcpy()     copy src from start for len to dest with mode (fopen(..., mode))
   q_rfcpy()    copy src to dest without looking at the file data (no
                decompression like with q_fcpy())
-  q_fswap()    byteswap len bytes of file starting from start
+  q_fswap()    swap len bytes of file starting from start
   q_fcrc32()   calculate the crc32 of filename from start
   q_fbackup()
 
@@ -429,11 +431,15 @@ extern void wait2 (int nmillis);
       filename -> rename() -> buf -> return buf
 */
 // TODO: give non-q_* names
+typedef enum { SWAP_BYTE, SWAP_WORD } swap_t;
+
 extern int q_fncmp (const char *filename, int start, int len,
                     const char *search, int searchlen, int wildcard);
 extern int q_fcpy (const char *src, int start, int len, const char *dest, const char *mode);
 extern int q_rfcpy (const char *src, const char *dest);
-extern int q_fswap (const char *filename, int start, int len);
+extern int q_fswap (const char *filename, int start, int len, swap_t type);
+#define q_fswap_b(f, s, l) q_fswap(f, s, l, SWAP_BYTE)
+#define q_fswap_w(f, s, l) q_fswap(f, s, l, SWAP_WORD)
 extern int q_fcrc32 (const char *filename, int start);
 #if 1
 #define BAK_DUPE 0

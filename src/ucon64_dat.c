@@ -375,34 +375,40 @@ static st_ucon64_dat_t *
 line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 // parse a dat entry into st_ucon64_dat_t
 {
-  static const char *dat_country[] = {
-    "(1) Japan & Korea",
-    "(4) U.S.A. & Brazil NTSC",
-    "(A) Australia",
-    "(B) non U.S.A. (Genesis)",
-    "(C) China",
-    "(E) Europe",
-    "(F) France",
-    "(FC) French Canadian",
-    "(FN) Finland",
-    "(G) Germany",
-    "(GR) Greece",
-    "(HK) Hong Kong",
-    "(I) Italy",
-    "(J) Japan",
-    "(JE) Japan & Europe",
-    "(JU) Japan & U.S.A.",
-    "(JUE) Japan, U.S.A. & Europe",
-    "(K) Korea",
-    "(NL) Netherlands",
-    "(PD) Public Domain",
-    "(S) Spain",
-    "(SW) Sweden",
-    "(U) U.S.A.",
-    "(UE) U.S.A. & Europe",
-    "(UK) England",
-    "(Unk) Unknown Country",
-    NULL
+  static const char *dat_country[27][2] = {
+    {"(FC)", "French Canadian"},
+    {"(FN)", "Finland"},
+    {"(G)", "Germany"},
+    {"(GR)", "Greece"},
+    {"(HK)", "Hong Kong"},
+    {"(I)", "Italy"},
+    {"(J)", "Japan"},
+    {"(JE)", "Japan & Europe"},
+    {"(JU)", "Japan & U.S.A."},
+    {"(JUE)", "Japan, U.S.A. & Europe"},
+    {"(K)", "Korea"},
+    {"(NL)", "Netherlands"},
+    {"(PD)", "Public Domain"},
+    {"(S)", "Spain"},
+    {"(SW)", "Sweden"},
+    {"(U)", "U.S.A."},
+    {"(UE)", "U.S.A. & Europe"},
+    {"(UK)", "England"},
+    {"(Unk)", "Unknown Country"},
+    /*
+      At least (A), (B), (C), (D), (E) and (F) have to come after the other
+      countries, because some games have (A), (B) etc. in their name. For
+      example "SD Gundam Generations (A) 1 Nen Sensouki (J) (ST)" or
+      "SD Gundam Generations (B) Guripus Senki (J) (ST)" (SNES games).
+    */
+    {"(1)", "Japan & Korea"},
+    {"(4)", "U.S.A. & Brazil NTSC"},
+    {"(A)", "Australia"},
+    {"(B)", "non U.S.A. (Genesis)"},
+    {"(C)", "China"},
+    {"(E)", "Europe"},
+    {"(F)", "France"},
+    {NULL, NULL}
   };
   char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE], *p = NULL;
   uint32_t pos = 0;
@@ -459,16 +465,12 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
   p = dat->name;
   dat->country = NULL;
-  for (pos = 0; dat_country[pos]; pos++)
-    {
-      strcpy (buf, dat_country[pos]);
-      *(strchr (buf, ' ')) = 0;
-      if (stristr (p, buf))
-        {
-          dat->country = dat_country[pos];
-          break;
-        }
-    }
+  for (pos = 0; dat_country[pos][0]; pos++)
+    if (stristr (p, dat_country[pos][0]))
+      {
+        dat->country = dat_country[pos][1];
+        break;
+      }
 
   fname_to_console (dat->datfile, dat);
   dat->copier_usage = unknown_usage;
@@ -896,14 +898,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   printf ("  %s\n", dat->name);
 
   if (dat->country)
-    {
-      if (!(p = strchr (dat->country, ' '))) // start after the (country)
-        p = (char *)dat->country;
-      else
-        p++;
-
-      printf ("  %s\n", p);
-    }
+    printf ("  %s\n", dat->country);
 
   /*
     The DAT files are not consistent. Some include the file suffix, but

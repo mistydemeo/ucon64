@@ -140,6 +140,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_PAD (UCON64_OPTION + 108)
 #define UCON64_PADHD (UCON64_OPTION + 109)
 #define UCON64_PAS (UCON64_OPTION + 110)
+#define UCON64_PASOFAMI (UCON64_OPTION + 111)
 #define UCON64_PORT (UCON64_OPTION + 112)
 #define UCON64_PPF (UCON64_OPTION + 113)
 #define UCON64_RROM (UCON64_OPTION + 116)
@@ -196,6 +197,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_NBS (UCON64_OPTION + 173)
 #define UCON64_MULTI3 (UCON64_OPTION + 174)
 #define UCON64_TEST (UCON64_OPTION + 175)
+#define UCON64_CTRL (UCON64_OPTION + 176)
+#define UCON64_NTSC (UCON64_OPTION + 177)
+#define UCON64_PAL (UCON64_OPTION + 178)
+#define UCON64_BAT (UCON64_OPTION + 179)
+#define UCON64_NBAT (UCON64_OPTION + 180)
+#define UCON64_VRAM (UCON64_OPTION + 181)
+#define UCON64_NVRAM (UCON64_OPTION + 182)
+#define UCON64_MIRR (UCON64_OPTION + 183)
+#define UCON64_MAPR (UCON64_OPTION + 184)
+#define UCON64_DUMPINFO (UCON64_OPTION + 185)
 
 #define UCON64_ATARI UCON64_ATA
 #define UCON64_CD32 (UCON64_CONSOLE + 2)
@@ -245,69 +256,77 @@ typedef struct st_ucon64
   int argc;
   char **argv;
 
-  const char *rom;              //rom (cmdline) with path
-  const char *file;             //file (cmdline) with path
+  const char *rom;                              // rom (cmdline) with path
+  const char *file;                             // file (cmdline) with path
 
-  unsigned int parport;         //parallel port address
-  int parport_mode;             //parallel port mode: ECP, EPP, SPP, other
-  char configfile[FILENAME_MAX]; //path and name of the config file
+  unsigned int parport;                         // parallel port address
+  int parport_mode;                             // parallel port mode: ECP, EPP, SPP, other
+  char configfile[FILENAME_MAX];                // path and name of the config file
 
-  int backup;                   //flag if backups files (*.bak) should be created
-  int frontend;                 //flag if uCON64 was started by a frontend
+  int backup;                                   // flag if backups files should be created
+  int frontend;                                 // flag if uCON64 was started by a frontend
 
-  int show_nfo;                 //show or skip info output for ROM
+  int show_nfo;                                 // show or skip info output for ROM
 
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
-  long buheader_len;            //length of backup unit header (==0)?no bu head
-  int split;                    //rom is split
-  int snes_hirom;               //Super Nintendo ROM is HiROM
-  int bs_dump;                  //Super Nintendo "ROM" is a Broadcast Satellaview dump
-  int fal_size;                 //Flash Advance Linker cart size
-  int interleaved;              //rom is interleaved (swapped)
-  int console;                  //integer for the detected console system
-  int do_not_calc_crc;          //disable crc calculation to speed up --ls,--lsv, etc.
+  long buheader_len;                            // length of backup unit header 0 == no bu hdr
+  int split;                                    // rom is split
+  int snes_hirom;                               // Super Nintendo ROM is HiROM
+  int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
+  int fal_size;                                 // Flash Advance Linker cart size
+  int data_size;                                // data size without "red tape"
+  int controller;                               // NES UNIF
+  int tv_standard;                              // NES UNIF
+  int battery;                                  // NES UNIF/iNES/Pasofami
+  int vram;                                     // NES UNIF
+  int mirror;                                   // NES UNIF/iNES/Pasofami
+  const char *mapr;                             // NES UNIF board name or iNES mapper number
+  int use_dump_info;                            // NES UNIF
+  int interleaved;                              // rom is interleaved (swapped)
+  int console;                                  // the detected console system
+  int do_not_calc_crc;                          // disable crc calc. to speed up --ls,--lsv, etc.
 
 #define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
 #define UCON64_TYPE_ISCD(x) (x == UCON64_CD)
-  int type;                     //rom type ROM or CD image
+  int type;                                     // rom type ROM or CD image
 } st_ucon64_t;
 
 extern st_ucon64_t ucon64;
 
 typedef struct st_rominfo
 {
-  const char **console_usage;   //console system usage
-  const char **copier_usage;    //backup unit usage
+  const char **console_usage;                   // console system usage
+  const char **copier_usage;                    // backup unit usage
 
-  int interleaved;              //rom is interleaved (swapped)
-  int snes_hirom;               //super nintendo ROM is a HiROM
+  int interleaved;                              // ROM is interleaved (swapped)
+  int snes_hirom;                               // Super Nintendo ROM is HiROM
 
-  long buheader_start;          //start of backup unit header (mostly 0)
-  long buheader_len;            //length of backup unit header (==0)?no bu header
-  const void *buheader;         //(possible) header of backup unit
+  long buheader_start;                          // start of backup unit header (mostly 0)
+  long buheader_len;                            // length of backup unit header 0 == no bu hdr
+  const void *buheader;                         // (possible) header of backup unit
 
-  long header_start;            //start of internal ROM header
-  long header_len;              //length of internal ROM header (==0)?no header
-  const void *header;           //(possible) internal ROM header
+  long header_start;                            // start of internal ROM header
+  long header_len;                              // length of internal ROM header 0 == no hdr
+  const void *header;                           // (possible) internal ROM header
 
-  char name[MAXBUFSIZE];        //ROM name
-  const char *maker;            //maker name of the ROM
-  const char *country;          //country name of the ROM
-  char misc[MAXBUFSIZE];        //some miscellaneous information about the ROM in one single string
+  char name[MAXBUFSIZE];                        // internal ROM name
+  const char *maker;                            // maker name of the ROM
+  const char *country;                          // country name of the ROM
+  char misc[MAXBUFSIZE];                        // some miscellaneous information
+                                                //  about the ROM in one single string
+  unsigned long current_crc32;                  // current crc32 value of ROM
+  unsigned long db_crc32;                       // crc32 value of ROM in internal database
 
-  unsigned long current_crc32;  //current crc32 value of ROM
-  unsigned long db_crc32;       //crc32 value of ROM in internal database
+  int has_internal_crc;                         // ROM has internal CRC (SNES, Mega Drive, Gameboy)
+  unsigned long current_internal_crc;           // calculated CRC
 
-  int has_internal_crc;         //ROM has internal CRC (Super Nintendo, Mega Drive, Gameboy)
-  unsigned long current_internal_crc;   //calculated CRC
+  unsigned long internal_crc;                   // internal CRC
+  long internal_crc_start;                      // start of internal CRC in ROM header
+  int internal_crc_len;                         // length (in bytes) of internal CRC in ROM header
 
-  unsigned long internal_crc;   //internal CRC
-  long internal_crc_start;      //start of internal CRC in ROM header
-  int internal_crc_len;         //length (in bytes) of internal CRC in ROM header
-
-  char internal_crc2[MAXBUFSIZE];     //2nd or inverse internal CRC
-  long internal_crc2_start;     //start of 2nd/inverse internal CRC
-  int internal_crc2_len;        //length (in bytes) of 2nd/inverse internal CRC
+  char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal CRC
+  long internal_crc2_start;                     // start of 2nd/inverse internal CRC
+  int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal CRC
 } st_rominfo_t;
 
 extern const struct option long_options[];

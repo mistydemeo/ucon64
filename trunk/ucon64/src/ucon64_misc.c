@@ -87,7 +87,7 @@ const char *ucon64_console_error =
   "TIP:   If this is a ROM or CD IMAGE you might try to force the recognition\n"
   "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n";
 
-static char *ucon64_temp_file = 0;
+static char *ucon64_temp_file = NULL;
 
 void
 ucon64_wrote (const char *filename)
@@ -182,7 +182,7 @@ remove_temp_file (void)
     {
       printf ("Removing: %s\n", ucon64_temp_file);
       remove (ucon64_temp_file);
-      ucon64_temp_file = 0;
+      ucon64_temp_file = NULL;
     }
 }
 

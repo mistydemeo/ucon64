@@ -35,7 +35,7 @@ const char *bsl_usage[] =
   {
     NULL,
     NULL,
-    "  " OPTION_S "b           apply Baseline/BSL patch (<=vx.x); " OPTION_LONG_S "file=PATCHFILE\n",
+    "  " OPTION_S "b=PATCH     apply Baseline/BSL PATCH against ROM (BSL vx.x)\n",
     NULL
   };
 

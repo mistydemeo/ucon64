@@ -41,7 +41,7 @@ const char *doctor64_usage[] = {
   "19XX Bung Enterprises Ltd http://www.bung.com.hk",
 #ifdef PARALLEL
   "  " OPTION_LONG_S "xv64        send/receive ROM to/from Doctor V64; "
-    OPTION_LONG_S "file=PORT\n"
+    OPTION_LONG_S "port=PORT\n"
     "                  receives automatically when ROM does not exist\n",
 #endif                          // PARALLEL
   NULL

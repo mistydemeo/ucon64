@@ -56,14 +56,13 @@ const char *gameboy_usage[] =
     "  " OPTION_LONG_S "hd          force ROM has SSC header (+512 Bytes)\n"
     "  " OPTION_LONG_S "nhd         force ROM has no SSC header\n"
 #endif
-    "  " OPTION_S "n           change ROM name; " OPTION_LONG_S "file=NEWNAME\n"
+    "  " OPTION_S "n=NEWNAME   change ROM name to NEWNAME\n"
     "  " OPTION_LONG_S "mgd         convert to Multi Game*/MGD2/RAW\n"
     "  " OPTION_LONG_S "ssc         convert to Super Smart Card/SSC (+512 Bytes)\n"
     "  " OPTION_LONG_S "sgb         convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX\n"
     "  " OPTION_LONG_S "gbx         convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC\n"
-    "  " OPTION_LONG_S "n2gb        convert for use with Kami's FC emulator (NES emulator);\n"
-    "                  " OPTION_LONG_S "rom=NES_ROM " OPTION_LONG_S "file=FC.GB (the emulator)\n"
-    "                  m-kami@da2.so-net.ne.jp www.playoffline.com\n"
+    "  " OPTION_LONG_S "n2gb=EMU    convert for use with Kami's FC EMUlator (NES emulator);\n"
+    "                  " OPTION_LONG_S "rom=NES_ROM\n"
     "  " OPTION_LONG_S "chk         fix ROM checksum\n"
 #if 0
     "  " OPTION_LONG_S "gge         encode GameGenie code; " OPTION_LONG_S "rom=AAAA:VV or " OPTION_LONG_S "rom=AAAA:VV:CC\n"
@@ -115,15 +114,13 @@ static st_unknown_header_t unknown_header;
 
 
 int
-gameboy_n2gb (st_rominfo_t *rominfo)
+gameboy_n2gb (st_rominfo_t *rominfo, const char *emu_rom)
 {
 #define EMULATOR_LEN 0x10000
   int n = 0, crc = 0;
   unsigned char buf[EMULATOR_LEN];
 
-#if 0
-  printf("FC emulator for Game Boy\n");
-#endif
+//  printf("FC emulator for Game Boy\n");
 
   if (q_fsize (ucon64.rom) != EMULATOR_LEN)
     {
@@ -132,7 +129,7 @@ gameboy_n2gb (st_rominfo_t *rominfo)
     }
 
   memset (buf, 0, EMULATOR_LEN);
-  q_fread (buf, 0, EMULATOR_LEN, ucon64.file);
+  q_fread (buf, 0, EMULATOR_LEN, emu_rom);
 
   q_fread (&ines_header, 0, INES_HEADER_LEN, ucon64.rom);
 
@@ -156,8 +153,8 @@ gameboy_n2gb (st_rominfo_t *rominfo)
   buf[0x14e] = (crc >> 8) & 0xff;
   buf[0x14f] = crc & 0xff;
 
-  q_fwrite (buf, 0, EMULATOR_LEN, ucon64.file, "wb");
-  fprintf (stdout, ucon64_msg[WROTE], ucon64.file);
+  q_fwrite (buf, 0, EMULATOR_LEN, emu_rom, "wb");
+  fprintf (stdout, ucon64_msg[WROTE], emu_rom);
   return 0;
 }
 
@@ -283,12 +280,12 @@ gameboy_sgb (st_rominfo_t *rominfo)
 
 
 int
-gameboy_n (st_rominfo_t *rominfo)
+gameboy_n (st_rominfo_t *rominfo, const char *newname)
 {
   char buf[MAXBUFSIZE];
 
   memset (buf, 0L, MAXBUFSIZE);
-  strcpy (buf, ucon64.file);
+  strcpy (buf, newname);
   ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x034, 16,
                ucon64.rom, "r+b");

@@ -42,7 +42,7 @@ extern int snes_k (st_rominfo_t *rominfo);
 extern int snes_l (st_rominfo_t *rominfo);
 extern int snes_mgd (st_rominfo_t *rominfo);
 extern int snes_mgh (st_rominfo_t *rominfo);
-extern int snes_n (st_rominfo_t *rominfo);
+extern int snes_n (st_rominfo_t *rominfo, const char *newname);
 extern int snes_s (st_rominfo_t *rominfo);
 extern int snes_smc (st_rominfo_t *rominfo);
 extern int snes_swc (st_rominfo_t *rominfo);

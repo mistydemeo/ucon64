@@ -59,7 +59,8 @@ typedef struct
   */
   int console;                                  // the detected console system
 
-  const char *file;                             // FILE (cmdline) with path
+// gone for the sake of a "cleaner" getopt() use
+//  const char *file;                             // FILE (cmdline) with path
 
   char configfile[FILENAME_MAX];                // path and name of the config file
   char configdir[FILENAME_MAX];                 // directory for config and DAT files
@@ -108,6 +109,7 @@ typedef struct
   int mirror;                                   // NES UNIF/iNES/Pasofami
   const char *mapr;                             // NES UNIF board name or iNES mapper number
   int use_dump_info;                            // NES UNIF
+  const char *dump_info;                        // NES UNIF
   const char *comment;                          // NES UNIF
 } st_ucon64_t;
 

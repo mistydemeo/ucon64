@@ -48,12 +48,11 @@ const char *gba_usage[] =
     "  " OPTION_LONG_S "gba         force recognition\n"
 //    "  " OPTION_LONG_S "hd          force ROM has header (+512 Bytes)\n"
 //    "  " OPTION_LONG_S "nhd         force ROM has no header\n"
-    "  " OPTION_S "n           change ROM name; " OPTION_LONG_S "file=NEWNAME\n"
+    "  " OPTION_S "n=NEWNAME   change ROM name to NEWNAME\n"
     "  " OPTION_LONG_S "logo        restore ROM logo character data; Offset: 0x04-0x9F\n"
 //    "  " OPTION_LONG_S "chk         fix ROM header checksum\n"
     "  " OPTION_LONG_S "sram        patch ROM for SRAM saving\n"
-    "  " OPTION_LONG_S "crp         slow down Flash Advance Linker access for ROM (crash patch);\n"
-    "                  " OPTION_LONG_S "file=WAIT_TIME\n"
+    "  " OPTION_LONG_S "crp=WAIT_TIME slow down Flash Advance Linker access for ROM (crash patch);\n"
     "                  WAIT_TIME='0'  (default in most crash patches)\n"
     "                  WAIT_TIME='4'  (faster than 0, slower than 8)\n"
     "                  WAIT_TIME='8'  (faster than 4, slower than 28)\n"
@@ -63,7 +62,7 @@ const char *gba_usage[] =
     "                  WAIT_TIME='24' (fastest cartridge access speed)\n"
     "                  WAIT_TIME='28' (faster than 8 but slower than 16)\n"
 //  "n 0 and 28, with a stepping of 4. I.e 0, 4, 8, 12 ...\n"
-    "  " OPTION_LONG_S "strip       strip Bytes from end of ROM (use " OPTION_LONG_S "ispad before); " OPTION_LONG_S "file=VALUE\n"
+    "  " OPTION_LONG_S "strip=N     strip N Bytes from end of ROM (use " OPTION_LONG_S "ispad before)\n"
     "  " OPTION_LONG_S "multi=SIZE  make multirom for Flash Advance Linker, truncated to SIZE Mbit;\n"
     "                  file with loader must be specified first, then all the ROMs,\n"
     "                  multirom to create last\n"
@@ -169,12 +168,12 @@ typedef struct st_gba_header
 static st_gba_header_t gba_header;
 
 int
-gba_n (st_rominfo_t *rominfo)
+gba_n (st_rominfo_t *rominfo, const char *newname)
 {
   char buf[MAXBUFSIZE];
 
   memset(buf, 0L, MAXBUFSIZE - 1);
-  strcpy (buf, ucon64.file);
+  strcpy (buf, newname);
   ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (buf, GBA_HEADER_START + rominfo->buheader_len + 0xa0,
                0x0b, ucon64.rom, "r+b");
@@ -261,12 +260,12 @@ gba_sram (st_rominfo_t *rominfo)
 
 
 int
-gba_crp (st_rominfo_t *rominfo)
+gba_crp (st_rominfo_t *rominfo, const char *value)
 {
   FILE *srcfile, *destfile;
   int bytesread;
   char buffer[32 * 1024], backup_name[FILENAME_MAX], replace[2],
-       wait_time = atoi (ucon64.file);
+       wait_time = atoi (value);
 
   if (wait_time % 4 != 0 || wait_time > 28 || wait_time < 0)
     {

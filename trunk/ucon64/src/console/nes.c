@@ -84,8 +84,8 @@ const char *nes_usage[] =
 #if     UNIF_REVISION > 7
     "  " OPTION_LONG_S "cmnt=TEXT   specify that TEXT should be used as comment (UNIF only)\n"
 #endif
-    "  " OPTION_LONG_S "dumpinfo    use dumper info when converting to UNIF; " OPTION_LONG_S "file=INFOFILE\n"
-    "  " OPTION_S "n           change internal ROM name (UNIF only); " OPTION_LONG_S "file=NEWNAME\n"
+    "  " OPTION_LONG_S "dumpinfo=FILE use dumper info from FILE when converting to UNIF\n"
+    "  " OPTION_S "n=NEWNAME   change ROM name to NEWNAME (UNIF only)\n"
     "  " OPTION_LONG_S "fds         convert Famicom Disk System file (diskimage) from FAM to FDS\n"
     "  " OPTION_LONG_S "fdsl        list Famicom Disk System/FDS (diskimage) contents\n"
 #if 0
@@ -5311,11 +5311,11 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
   if (UCON64_ISSET (ucon64.use_dump_info))
     {
       st_dumper_info_t info;
-      if (ucon64.file != NULL && strlen (ucon64.file) > 0)
+      if (ucon64.dump_info != NULL && strlen (ucon64.dump_info) > 0)
         {
-          if (access (ucon64.file, F_OK) == 0)
+          if (access (ucon64.dump_info, F_OK) == 0)
             {
-              parse_info_file (&info, ucon64.file);
+              parse_info_file (&info, ucon64.dump_info);
 #ifdef  WORDS_BIGENDIAN
               info.year = bswap_16 (info.year);
 #endif
@@ -5326,7 +5326,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
             }
           else
             printf ("WARNING: Dumper info file %s does not exist, chunk won't be written\n",
-                    ucon64.file);
+                    ucon64.dump_info);
         }
       else                                      // Is this a warning or an error?
         printf ("WARNING: No dumper info file was specified, chunk won't be written\n");
@@ -5572,11 +5572,11 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
   if (UCON64_ISSET (ucon64.use_dump_info))
     {
       st_dumper_info_t info;
-      if (ucon64.file != NULL && strlen (ucon64.file) > 0)
+      if (ucon64.dump_info != NULL && strlen (ucon64.dump_info) > 0)
         {
-          if (access (ucon64.file, F_OK) == 0)
+          if (access (ucon64.dump_info, F_OK) == 0)
             {
-              parse_info_file (&info, ucon64.file);
+              parse_info_file (&info, ucon64.dump_info);
 /*
               printf ("Dump info:\n"
                       "  dumper: %s\n"
@@ -5596,7 +5596,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
             }
           else
             printf ("WARNING: Dumper info file %s does not exist, chunk won't be written\n",
-                    ucon64.file);
+                    ucon64.dump_info);
         }
       else                                      // Is this a warning or an error?
         printf ("WARNING: No dumper info file was specified, chunk won't be written\n");
@@ -6698,7 +6698,7 @@ nes_s (st_rominfo_t *rominfo)
 
 
 int
-nes_n (st_rominfo_t *rominfo)
+nes_n (st_rominfo_t *rominfo, const char *newname)
 {
   if (type != UNIF)
     {
@@ -6706,8 +6706,8 @@ nes_n (st_rominfo_t *rominfo)
       return -1;
     }
 
-  if (ucon64.file != NULL && strlen (ucon64.file) > 0)
-    internal_name = ucon64.file;
+  if (newname != NULL && strlen (newname) > 0)
+    internal_name = newname;
   else
     internal_name = NULL;
 

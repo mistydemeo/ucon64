@@ -79,8 +79,8 @@ const char *genesis_usage[] =
     "TODO:  " OPTION_LONG_S "gym    convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE\n"
     "TODO:  " OPTION_LONG_S "cym    convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE\n"
 #endif
-    "  " OPTION_S "n           change foreign ROM name; " OPTION_LONG_S "file=NEWNAME\n"
-    "  " OPTION_LONG_S "n2          change Japanese ROM name; " OPTION_LONG_S "file=NEWNAME\n"
+    "  " OPTION_S "n=NEWNAME   change foreign ROM name to NEWNAME\n"
+    "  " OPTION_LONG_S "n2=NEWNAME  change japanese ROM name to NEWNAME\n"
     "  " OPTION_S "j           join split ROM\n"
     "  " OPTION_S "s           split ROM into 4 Mb parts (for backup unit(s) with fdd)\n"
 // NOTE: part size number should match with size actually used
@@ -586,16 +586,16 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
 
 
 int
-genesis_n (st_rominfo_t *rominfo)
+genesis_n (st_rominfo_t *rominfo, const char *newname)
 {
-  return genesis_name (rominfo, ucon64.file, NULL);
+  return genesis_name (rominfo, newname, NULL);
 }
 
 
 int
-genesis_n2 (st_rominfo_t *rominfo)
+genesis_n2 (st_rominfo_t *rominfo, const char *newname)
 {
-  return genesis_name (rominfo, NULL, ucon64.file);
+  return genesis_name (rominfo, NULL, newname);
 }
 
 

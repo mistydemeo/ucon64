@@ -65,7 +65,7 @@ void gauge_dummy (uint32_t pos, uint32_t total)
 
 
 const char *libdm_msg[] = {
-  "ERROR: %s has been depricated\n",
+  "ERROR: %s has been deprecated\n",
   NULL
 };
 

@@ -33,7 +33,7 @@ const char *dex_usage[] =
   {
     "DexDrive",
     "19XX InterAct http://www.dexdrive.de",
-    "TEST: " OPTION_LONG_S "xdex=N  send/receive Block N to/from DexDrive; " OPTION_LONG_S "file=PORT\n"
+    "TEST: " OPTION_LONG_S "xdex=N  send/receive Block N to/from DexDrive; " OPTION_LONG_S "port=PORT\n"
     "                  receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n",
     NULL
   };

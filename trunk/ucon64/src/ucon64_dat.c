@@ -70,6 +70,7 @@ typedef struct
 static DIR *ddat = NULL;
 static FILE *fdat = NULL;
 static long filepos_line = 0;
+static int warning = 0; // show the warning only once when indexing
 
 
 static void
@@ -146,6 +147,7 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
   //  The field "refname" seems too unreliable.
   // TODO: update this list to contain only strings that real DAT filenames
   //  start with
+
   static const st_console_t console_type[] = {
     {"GoodSNES", UCON64_SNES, snes_usage},
     {"GoodNES", UCON64_NES, nes_usage},
@@ -221,7 +223,11 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
     }
   if (console_type[pos].id == 0)
     {
-      printf ("WARNING: \"%s\" is meant for a console unknown to uCON64\n\n", fname);
+      if (!warning)
+        {
+          printf ("WARNING: \"%s\" is meant for a console unknown to uCON64\n\n", fname);
+          warning = 1;
+        }
       dat->console = UCON64_UNKNOWN;
       dat->console_usage = NULL;
     }
@@ -578,6 +584,8 @@ ucon64_dat_indexer (void)
   time_t start_time = 0;
   int update = 0, n_duplicates, n;
   st_idx_entry_t *idx_entries, *idx_entry;
+
+  warning = 0; // enable warning again for DATs with unrecognized console systems
 
   if (!(idx_entries = (st_idx_entry_t *)
           malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t))))

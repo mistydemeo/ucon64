@@ -125,13 +125,13 @@ const struct option options[] = {
     {"1991", 0, 0, UCON64_1991},
     {"3do", 0, 0, UCON64_3DO},
     {"?", 0, 0, UCON64_HELP},
-    {"a", 0, 0, UCON64_A},
+    {"a", 1, 0, UCON64_A},
     {"ata", 0, 0, UCON64_ATA},
-    {"b", 0, 0, UCON64_B},
-    {"b0", 0, 0, UCON64_B0},
-    {"b1", 0, 0, UCON64_B1},
+    {"b", 1, 0, UCON64_B},
+    {"b0", 1, 0, UCON64_B0},
+    {"b1", 1, 0, UCON64_B1},
     {"bios", 0, 0, UCON64_BIOS},
-    {"bot", 0, 0, UCON64_BOT},
+    {"bot", 1, 0, UCON64_BOT},
     {"c", 1, 0, UCON64_C},
     {"disc", 0, 0, UCON64_DISC},
 //    {"cd32", 0, 0, UCON64_CD32},
@@ -142,10 +142,10 @@ const struct option options[] = {
     {"coleco", 0, 0, UCON64_COLECO},
     {"crc", 0, 0, UCON64_CRC},
     {"crchd", 0, 0, UCON64_CRCHD},
-    {"crp", 0, 0, UCON64_CRP},
+    {"crp", 1, 0, UCON64_CRP},
     {"cs", 1, 0, UCON64_CS},
     {"db", 0, 0, UCON64_DB},
-    {"dbs", 0, 0, UCON64_DBS},
+    {"dbs", 1, 0, UCON64_DBS},
     {"dbuh", 0, 0, UCON64_DBUH},
     {"dbv", 0, 0, UCON64_DBV},
     {"dc", 0, 0, UCON64_DC},
@@ -174,8 +174,8 @@ const struct option options[] = {
     {"h", 0, 0, UCON64_HELP},
     {"help", 0, 0, UCON64_HELP},
     {"hex", 0, 0, UCON64_HEX},
-    {"i", 0, 0, UCON64_I},
-    {"idppf", 0, 0, UCON64_IDPPF},
+    {"i", 1, 0, UCON64_I},
+    {"idppf", 1, 0, UCON64_IDPPF},
     {"ines", 0, 0, UCON64_INES},
     {"ineshd", 0, 0, UCON64_INESHD},
     {"ins", 0, 0, UCON64_INS},
@@ -192,22 +192,23 @@ const struct option options[] = {
     {"logo", 0, 0, UCON64_LOGO},
     {"ls", 0, 0, UCON64_LS},
     {"lsd", 0, 0, UCON64_LSD},
+    {"lsram", 1, 0, UCON64_LSRAM},
     {"lsv", 0, 0, UCON64_LSV},
     {"lynx", 0, 0, UCON64_LYNX},
     {"lyx", 0, 0, UCON64_LYX},
     {"mgd", 0, 0, UCON64_MGD},
 //    {"mgh", 0, 0, UCON64_MGH},
-    {"mka", 0, 0, UCON64_MKA},
+    {"mka", 1, 0, UCON64_MKA},
     {"mkcue", 0, 0, UCON64_MKCUE},
-    {"mki", 0, 0, UCON64_MKI},
-    {"mkppf", 0, 0, UCON64_MKPPF},
+    {"mki", 1, 0, UCON64_MKI},
+    {"mkppf", 1, 0, UCON64_MKPPF},
     {"mksheet", 0, 0, UCON64_MKSHEET},
     {"mktoc", 0, 0, UCON64_MKTOC},
     {"multi", 1, 0, UCON64_MULTI},
     {"mvs", 0, 0, UCON64_MVS},
-    {"n", 0, 0, UCON64_N},
-    {"n2", 0, 0, UCON64_N2},
-    {"n2gb", 0, 0, UCON64_N2GB},
+    {"n", 1, 0, UCON64_N},
+    {"n2", 1, 0, UCON64_N2},
+    {"n2gb", 1, 0, UCON64_N2GB},
     {"n64", 0, 0, UCON64_N64},
     {"na", 0, 0, UCON64_NA},
     {"nbak", 0, 0, UCON64_NBAK},
@@ -216,7 +217,7 @@ const struct option options[] = {
     {"nes", 0, 0, UCON64_NES},
     {"ng", 0, 0, UCON64_NG},
     {"ngp", 0, 0, UCON64_NGP},
-    {"nppf", 0, 0, UCON64_NPPF},
+    {"nppf", 1, 0, UCON64_NPPF},
     {"nrot", 0, 0, UCON64_NROT},
     {"ns", 0, 0, UCON64_NS},
     {"o", 1, 0, UCON64_O},
@@ -227,7 +228,7 @@ const struct option options[] = {
     {"pasofami", 0, 0, UCON64_PASOFAMI},
     {"pce", 0, 0, UCON64_PCE},
     {"port", 1, 0, UCON64_PORT},
-    {"ppf", 0, 0, UCON64_PPF},
+    {"ppf", 1, 0, UCON64_PPF},
     {"ps2", 0, 0, UCON64_PS2},
     {"psx", 0, 0, UCON64_PSX},
     {"q", 0, 0, UCON64_Q},
@@ -264,7 +265,7 @@ const struct option options[] = {
 #endif // DEBUG
     {"ufos", 0, 0, UCON64_UFOS},
     {"unif", 0, 0, UCON64_UNIF},
-    {"usms", 0, 0, UCON64_USMS},
+    {"usms", 1, 0, UCON64_USMS},
     {"v64", 0, 0, UCON64_V64},
     {"vboy", 0, 0, UCON64_VBOY},
     {"vec", 0, 0, UCON64_VEC},
@@ -313,7 +314,7 @@ const struct option options[] = {
     {"mirr", 1, 0, UCON64_MIRR},
     {"mapr", 1, 0, UCON64_MAPR},
     {"cmnt", 1, 0, UCON64_CMNT},                // will be active only if UNIF_REVISION > 7
-    {"dumpinfo", 0, 0, UCON64_DUMPINFO},
+    {"dumpinfo", 1, 0, UCON64_DUMPINFO},
     {"version", 0, 0, UCON64_VER},
     {0, 0, 0, 0}
   };
@@ -359,7 +360,10 @@ ucon64_exit (void)
 int
 main (int argc, char **argv)
 {
-  int c = 0, console, show_nfo, rom_index, file_message = 0;
+  int c = 0, console, show_nfo, rom_index;
+#if 0
+  int file_message = 0;
+#endif
   char buf[MAXBUFSIZE], *ptr;
 
   printf ("%s\n"
@@ -469,7 +473,7 @@ main (int argc, char **argv)
   ucon64.fname_arch[0] = 0;
 
   ucon64.rom =
-  ucon64.file =
+//  ucon64.file =
   ucon64.mapr =
   ucon64.comment = "";
 
@@ -552,7 +556,7 @@ main (int argc, char **argv)
     Note that getopt[_long_only]() sorts argv so that all switches and options
     come before all non-switches and non-options.
   */
-#if 1
+#if 0
   if (argc - rom_index == 2 && !strlen (ucon64.file))
     {
       ucon64.file = argv[argc - 1];
@@ -625,7 +629,7 @@ main (int argc, char **argv)
       rom_index++;
     }
 
-#if 1
+#if 0
   if (file_message)
     printf ("NOTE: Use --file=0 if \"%s\"\n"
             "      should NOT be interpreted as --file argument\n", ucon64.file);
@@ -1197,7 +1201,7 @@ ucon64_usage (int argc, char *argv[])
 #endif
 
   printf (
-    "Usage: %s [OPTION(S)]... [" OPTION_LONG_S "rom=][ROM]... [[" OPTION_LONG_S "file=]FILE]" /* [-o=OUTPUT_PATH] */ "\n\n"
+    "Usage: %s [OPTION(S)]... [[" OPTION_LONG_S "rom=]ROM(S)]... " /* [-o=OUTPUT_PATH] */ "\n\n"
     "Options\n"
     "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
     ANSI_COLOR_MSG
@@ -1212,8 +1216,8 @@ ucon64_usage (int argc, char *argv[])
     "                  this differs from the SNES & NES " OPTION_LONG_S "dint option\n"
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
     "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
-    "  " OPTION_LONG_S "crc         show CRC32 value of ROM; this will also force calculation for\n"
-    "                  files bigger than %d Bytes (%.4f Mb)\n"
+    "  " OPTION_LONG_S "crc         show CRC32 value of ROM\n" //; this will also force calculation for\n"
+//    "                  files bigger than %d Bytes (%.4f Mb)\n"
 
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
@@ -1224,14 +1228,14 @@ ucon64_usage (int argc, char *argv[])
 */
     HEXDUMP_MSG
     "  " OPTION_LONG_S "find=STRING find STRING in ROM (wildcard: '?')\n"
-    "  " OPTION_S "c=FILE      compare FILE with ROMs for differencies\n"
-    "  " OPTION_LONG_S "cs=FILE     compare FILE with ROMs for similarities\n"
+    "  " OPTION_S "c=FILE      compare FILE with ROM for differences\n"
+    "  " OPTION_LONG_S "cs=FILE     compare FILE with ROM for similarities\n"
     "  " OPTION_LONG_S "help        display this help and exit\n"
     "  " OPTION_LONG_S "version     output version information and exit\n"
     "  " OPTION_S "q           be quiet (don't show ROM info)\n"
 //    "  " OPTION_LONG_S "qq          be even more quiet\n"
     "\n",
-    argv[0], ucon64.configfile, MAXROMSIZE, TOMBIT_F (MAXROMSIZE));
+    argv[0], ucon64.configfile /*, MAXROMSIZE, TOMBIT_F (MAXROMSIZE) */);
 
   printf ("Padding\n"
     "  " OPTION_LONG_S "ispad       check if ROM is padded\n"
@@ -1248,9 +1252,9 @@ ucon64_usage (int argc, char *argv[])
 
 //  if (ucon64.dat_enabled)
     printf ("DATabase (support for DAT files and ROM managing)\n"
-      "  " OPTION_LONG_S "dbs         search ROM in DATabase by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
       "  " OPTION_LONG_S "db          DATabase statistics\n"
       "  " OPTION_LONG_S "dbv         like " OPTION_LONG_S "db but more verbose\n"
+      "  " OPTION_LONG_S "dbs=CRC32   search ROM with CRC32 in DATabase\n"
       "  " OPTION_LONG_S "lsd         generate ROM list for all ROMs using DATabase info; " OPTION_LONG_S "rom=DIR\n"
       "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
       "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"

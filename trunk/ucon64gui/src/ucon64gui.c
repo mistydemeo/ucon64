@@ -24,11 +24,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/swc.h"
 #include "top.h"
 #include "bottom.h"
+#include "config/config.h"
 
 #define DEBUG
 
 void h2g_system(char *query)
 {
+int len;
 char buf[MAXBUFSIZE];
 
 #ifdef DEBUG
@@ -36,7 +38,10 @@ char buf[MAXBUFSIZE];
   fflush (stdout);
 #endif // DEBUG
 
-strcpy (buf, &query[findlast(query,"=") + 1]);
+len = findlast(query,"=");
+strcpy(buf,query);
+buf[len]=0;
+
 //printf("%s\n", buf);
 //fflush (stdout);
 
@@ -51,9 +56,16 @@ if(!strdcmp(buf,"ucon64gui_root"))
   ucon64gui_root();
   return;
 }
+
 if(!strdcmp(buf,"ucon64gui_swc"))
 {
   ucon64gui_swc();
+  return;
+}
+
+if(!strdcmp(buf,"ucon64gui_config"))
+{
+  ucon64gui_config();
   return;
 }
 
@@ -109,11 +121,26 @@ if(!strdcmp(buf,"-ns"))
 int
 main (int argc, char *argv[])
 {
-#ifdef	__DOS__
-  strcpy (ucon64gui.configfile, "ucon64gui.cfg");
+  char buf2[32768];
+  
+/*
+   configfile handling
+*/
+  sprintf (ucon64gui.configfile, "%s%c"
+#ifdef  __DOS__
+  "ucon64.cfg"
 #else
-  sprintf (ucon64gui.configfile, "%s%c.ucon64guirc", getenv ("HOME"), FILE_SEPARATOR);
+  /*
+    Use getchd() here too. If this code gets compiled under Windows the compiler has to be
+    Cygwin. So, uCON64 will be a Win32 executable which will run only in an environment
+    where long filenames are available and where files can have more than three characters
+    as "extension". Under Bash HOME will be set, but most Windows people will propably run
+    uCON64 under cmd or command where HOME is not set by default. Under Windows XP/2000
+    (/NT?) USERPROFILE and/or HOMEDRIVE+HOMEPATH will be set which getchd() will "detect".
+  */
+  ".ucon64rc"
 #endif
+  , getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
 
 
   h2g_start (argc, argv);

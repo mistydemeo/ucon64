@@ -7,6 +7,7 @@ ucon64gui_top(void)
 {
 #include "xpm/trans_1x3.xpm"
 #include "xpm/open.xpm"
+#include "xpm/emulate.xpm"
 
   char buf[FILENAME_MAX];
   
@@ -14,7 +15,7 @@ ucon64gui_top(void)
 
 //<html>
 
-  h2g_input_submit ("Config", "",
+  h2g_input_submit ("Config", "ucon64gui_config",
                          buf);
   h2g_br();
   h2g_img(trans_1x3_xpm, 0, 0, 0, NULL);
@@ -23,12 +24,13 @@ ucon64gui_top(void)
 
   h2g_("$ROM: ");
 
-  h2g_input_file ("rom","", ucon64gui.rom, open_xpm);
+  h2g_input_file ("rom","", 0, 0, open_xpm, 0, 0, "Select $ROM");
   
   h2g_br();
   h2g_("$FILE:  ");
 
-  h2g_input_file ("file", "", "Select $FILE", open_xpm);
+  h2g_input_file ("file", "", 0, 0, open_xpm, 0, 0,
+    "Select $FILE or enter a value by hand");
   
   h2g_br ();
   h2g_img (trans_1x3_xpm, 0, 0, 0, NULL);
@@ -43,7 +45,7 @@ ucon64gui_top(void)
 
 
   sprintf(buf,"(-e) emulate/run ROM (see %s for more)",ucon64gui.configfile);
-  h2g_input_submit ("Emulate", "-e", buf);
+  h2g_input_image ("Emulate", "-e", emulate_xpm, 0, 0, buf);
 
   h2g_ (" ");
 

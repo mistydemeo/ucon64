@@ -65,6 +65,8 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
 Q26: <a href="#26">I tried to run the Win32 executable of uCON64 but Windows gave an
    error message that cygwin1.dll could not be found.</a><br>
 <br>
+Q27: <a href="#27">How do make uCON64 display one help screen at a time?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -336,6 +338,18 @@ Q26: <a href="#26">I tried to run the Win32 executable of uCON64 but Windows gav
    it from <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>.
    Copy the file to the same directory as the uCON64 executable or to a directory in your PATH.<br>
 <br>
+<p>
+<a name="27"><b>Q27</b>: How do make uCON64 display one help screen at a time?</a><br>
+<b>A</b>: Just as is stated in the last few lines of the help, pass the output of uCON64
+   to a program that waits for a key after one screen of text. You could use the program
+   "more". In order to pass the output of uCON64 to more you have to use the pipe symbol,
+   '|'. On an international keyboard you can type this symbol with the same key you use
+   for the backslash ('\'). For example:<br>
+   &nbsp;&nbsp; ucon64 -help|more<br>
+   To get only help on the options for a specific console, specify the console on the
+   command line. For example, to see only the help on GameBoy Advance options:<br>
+   &nbsp;&nbsp; ucon64 -help -gba|more<br>
+<p>
 <br>
 <br>
 <br>

@@ -90,8 +90,11 @@ Game Gear/Sega Master System:
 
 game size       # of files      names           MULTI-GD
 ================================================================
-2M              1               GG2XXX.000 (.040) GG2XXX
-4M              1               GG4XXX.018 (.010/.024/.048) GG4XXX
+256k            1               GG04XXX.000     GG04XXX
+512k            1               GG05XXX.000     GG05XXX
+1M              1               GG1XXX.000      GG1XXX
+2M              1               GG2XXX.024      GG2XXX
+4M              1               GG4XXX.058      GG4XXX
 6M              1               GG6XXX.078      GG6XXX
 
 

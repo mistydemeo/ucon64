@@ -1772,7 +1772,7 @@ write_prm (st_ines_header_t *header, const char *fname)
   if (mapper)                                   // bank-switched ROM?
     prm[17] = 'M';
 
-  ucon64_fbackup (NULL, fname);
+  // don't write backups of parts, because one name is used
   if (q_fwrite (prm, 0, sizeof (prm), fname, "wb") == -1)
     {
       fprintf (stderr, "ERROR: Could not write %s\n", fname);
@@ -1840,7 +1840,7 @@ nes_s (st_rominfo_t *rominfo)
   if (ines_header.ctrl1 & INES_TRAINER)
     {
       setext (dest_name, ".700");
-      ucon64_fbackup (NULL, dest_name);
+      // don't write backups of parts, because one name is used
       if (q_fwrite (trainer_data, 0, 512, dest_name, "wb") == -1)
         fprintf (stderr, "ERROR: Could not write %s\n", dest_name); // try to continue
       else
@@ -1850,7 +1850,7 @@ nes_s (st_rominfo_t *rominfo)
   if (prg_size > 0)
     {
       setext (dest_name, ".PRG");
-      ucon64_fbackup (NULL, dest_name);
+      // don't write backups of parts, because one name is used
       if (q_fwrite (prg_data, 0, prg_size, dest_name, "wb") == -1)
         fprintf (stderr, "ERROR: Could not write %s\n", dest_name); // try to continue
       else
@@ -1862,7 +1862,7 @@ nes_s (st_rominfo_t *rominfo)
   if (chr_size > 0)
     {
       setext (dest_name, ".CHR");
-      ucon64_fbackup (NULL, dest_name);
+      // don't write backups of parts, because one name is used
       if (q_fwrite (chr_data, 0, chr_size, dest_name, "wb") == -1)
         fprintf (stderr, "ERROR: Could not write %s\n", dest_name); // try to continue
       else

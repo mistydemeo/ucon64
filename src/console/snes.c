@@ -1070,8 +1070,7 @@ int
 snes_s (st_rominfo_t *rominfo)
 {
   char header[512], buf[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL;
-  int nparts, surplus, x, gd3_format, sf_romname,
-      half_size, size;
+  int nparts, surplus, x, gd3_format, sf_romname, half_size, size;
 
   size = rominfo->file_size - rominfo->buheader_len;
   sf_romname = ((ucon64.rom[0] == 'S') || (ucon64.rom[0] == 's')) &&

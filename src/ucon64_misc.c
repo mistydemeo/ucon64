@@ -246,6 +246,8 @@ ucon64_fhexdump (const char *filename, int start, int len)
 
 
 #define FILEFILE_LARGE_BUF
+// When verifying if the code produces the same output when FILEFILE_LARGE_BUF
+//  is defined as when it's not, be sure to use the same buffer size
 unsigned int
 ucon64_filefile (const char *filename1, int start1, const char *filename2, int start2,
                  int similar)
@@ -266,7 +268,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2, int s
   if (access (filename1, R_OK) != 0 || access (filename2, R_OK) != 0)
     return -1;
 
-  fsize1 = q_fsize (filename1);              // q_fsize() returns size in bytes
+  fsize1 = q_fsize (filename1);                 // q_fsize() returns size in bytes
   fsize2 = q_fsize (filename2);
   if (fsize1 < start1 || fsize2 < start2)
     return -1;

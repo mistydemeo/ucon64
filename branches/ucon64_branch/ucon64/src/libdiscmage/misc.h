@@ -423,7 +423,7 @@ extern void wait2 (int nmillis);
 */
 //TODO: give non-q_* names
 extern int q_fncmp (const char *filename, int start, int len,
-                    const char *search, int searchlen, int wildcard);
+                    const void *search, int searchlen, int wildcard);
 extern int q_fcpy (const char *src, int start, int len, const char *dest, const char *mode);
 extern int q_rfcpy (const char *src, const char *dest);
 extern int q_fswap (const char *filename, int start, int len);

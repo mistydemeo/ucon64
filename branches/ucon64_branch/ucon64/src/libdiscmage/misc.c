@@ -2564,7 +2564,7 @@ q_fswap (const char *filename, int start, int len)
 
 
 int
-q_fncmp (const char *filename, int start, int len, const char *search,
+q_fncmp (const char *filename, int start, int len, const void *search,
          int searchlen, int wildcard)
 {
   int seg_len = 0, seg_pos = 0 // position in segment

@@ -1064,7 +1064,7 @@ ucon64_usage (int argc, char *argv[])
 #if 0
     "TODO: " OPTION_LONG_S "dat     import DAT files into ROM database; " OPTION_LONG_S "rom=DAT_FILE\n"
     "                  parses all Romcenter, Goodxxxx, etc. DAT files and updates\n"
-    "                  the database cache in %scache\n"
+    "                  the database cache\n"
 #endif
 #endif  // HAVE_ZLIB_H
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
@@ -1385,7 +1385,7 @@ ucon64_usage (int argc, char *argv[])
 
   printf (
 #ifdef  HAVE_ZLIB_H
-     "Database: %d known ROMs in %scache.zip\n"
+     "Database: %d known ROMs in cache\n"
 #endif // HAVE_ZLIB_H
      "\n"
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
@@ -1400,7 +1400,6 @@ ucon64_usage (int argc, char *argv[])
      "\n"
 #ifdef  HAVE_ZLIB_H
      , ucon64_dbsize (UCON64_UNKNOWN)
-     , ucon64.cache_path
 #endif // HAVE_ZLIB_H
      , argv[0], argv[0]);
 }

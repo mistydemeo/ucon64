@@ -185,6 +185,7 @@ ucon64_switches (int c, const char *optarg)
       break;
 #endif
 
+
     case UCON64_RIP:
     case UCON64_MKTOC:
     case UCON64_MKCUE:

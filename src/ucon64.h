@@ -65,19 +65,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_VERSION "1.9.8"
 
 #ifdef __UNIX__
-  #define ucon64_TITLE "uCON64 1.9.8 UNIX 1999-2001 by (various)"
+  #define ucon64_TITLE "uCON64 1.9.8 UNIX 1999-2002 by (various)"
 #elif __DOS__
-  #define ucon64_TITLE "uCON64 1.9.8 DOS 1999-2001 by (various)"
+  #define ucon64_TITLE "uCON64 1.9.8 DOS 1999-2002 by (various)"
 #elif __BEOS__
-  #define ucon64_TITLE "uCON64 1.9.8 BeOS 1999-2001 by (various)"
+  #define ucon64_TITLE "uCON64 1.9.8 BeOS 1999-2002 by (various)"
 #elif __SOLARIS__
-  #define ucon64_TITLE "uCON64 1.9.8 Solaris 1999-2001 by (various)"
+  #define ucon64_TITLE "uCON64 1.9.8 Solaris 1999-2002 by (various)"
 #else
-  #define ucon64_TITLE "uCON64 1.9.8 1999-2001 by (various)"
+  #define ucon64_TITLE "uCON64 1.9.8 1999-2002 by (various)"
 #endif
 
 #define MBIT	131072
-#define MAXROMSIZE ( 1024 * MBIT )
+#define MAXROMSIZE ( ( 512+1 ) * MBIT )
 #define MAXBUFSIZE 32768
 
 struct ucon64_
@@ -90,10 +90,6 @@ struct ucon64_
   char file[4096];	//$FILE (cmdline) with path
   unsigned int parport;
   int parport_mode;	//parallel port mode: ECP, EPP, SPP, other
-
-//  int is_a_cd_image;    //obsolete is_a_cd_image = (rom->bytes > MAXROMSIZE) ? 1 : 0;
-//  int raw_cd_image;	//obsolete raw_cd_image = ( rom->header_start != 0x8000 ) ? 1 : 0;
-//                              or just raw_cd_image = rom->header_start
 
   long console;	//integer for the detected console system
 //  long console_forced;
@@ -116,8 +112,6 @@ struct ucon64_
     unsigned long internal_crc;	//internal CRC
     long internal_crc_start;	//start of internal CRC in ROM header
     int internal_crc_len;	//length (in bytes) of internal CRC in ROM header
-//  int has_internal_inverse_crc;	//ROM has internal inverted (Super Nintendo)
-//    unsigned long internal_inverse_crc;	//internal CRC inverted
   char internal_crc2[4096];	//2nd or inverse internal CRC
     long internal_crc2_start;	//start of 2nd/inverse internal CRC
     int internal_crc2_len;	//length (in bytes) of 2nd/inverse internal CRC

@@ -181,7 +181,7 @@ if(access(buf,F_OK)==-1)
   {
     printf("FAILED\n\n");
 
-    return -1;
+//    return -1;
   }
   else
   {
@@ -228,10 +228,12 @@ if(access(buf,F_OK)==-1)
   "#\n"
   "# --device [bus,id,lun] (cdrdao)\n"
   "#\n"
-  "cdrw_raw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
-  "cdrw_raw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
-  "cdrw_iso_read=cdrdao read-cd --device 0,0,0 --driver generic-mmc --datafile #bin and toc filenames are added by ucon64 at the end\n"
-  "cdrw_iso_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
+  "cdrw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
+  "cdrw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
+//  "cdrw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
+//  "cdrw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
+//  "cdrw_read=cdrdao read-cd --device 0,0,0 --driver generic-mmc --datafile #bin and toc filenames are added by ucon64 at the end\n"
+//  "cdrw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
 #endif
     ,fh);
 
@@ -239,7 +241,7 @@ if(access(buf,F_OK)==-1)
     printf("OK\n\n");
   }
 
-  return 0;
+//  return 0;
 }
 
   if (argc<2 ||
@@ -834,8 +836,8 @@ case ucon64_GENESIS:
     (argcmp(argc,argv,"-xsmds")) ? genesis_xsmds(&rom) :
 #endif
 #ifdef	CD
-    (argcmp(argc,argv,"-rawt")) ? genesis_rawt(&rom) :
-    (argcmp(argc,argv,"-xraw")) ? genesis_xraw(&rom) :
+    (argcmp(argc,argv,"-mktoc")) ? genesis_mktoc(&rom) :
+    (argcmp(argc,argv,"-xcdrw")) ? genesis_xcdrw(&rom) :
 #endif
     0
   );
@@ -882,8 +884,8 @@ case ucon64_NEOGEO:
     (argcmp(argc,argv,"-s")) ? neogeo_s(&rom) :
     (argcmp(argc,argv,"-sam")) ? neogeo_sam(&rom) :
 #ifdef	CD
-    (argcmp(argc,argv,"-rawt")) ? neogeo_rawt(&rom) :
-    (argcmp(argc,argv,"-xraw")) ? neogeo_xraw(&rom) :
+    (argcmp(argc,argv,"-mktoc")) ? neogeo_mktoc(&rom) :
+    (argcmp(argc,argv,"-xcdrw")) ? neogeo_xcdrw(&rom) :
 #endif
     0
   );
@@ -943,8 +945,8 @@ case ucon64_PCE:
     (argcmp(argc,argv,"-mgd")) ? pcengine_mgd(&rom) :
     (argcmp(argc,argv,"-smg")) ? pcengine_smg(&rom) :
 #ifdef	CD
-    (argcmp(argc,argv,"-rawt")) ? pcengine_rawt(&rom) :
-    (argcmp(argc,argv,"-xraw")) ? pcengine_xraw(&rom) :
+    (argcmp(argc,argv,"-mktoc")) ? pcengine_mktoc(&rom) :
+    (argcmp(argc,argv,"-xcdrw")) ? pcengine_xcdrw(&rom) :
 #endif
     0
   );
@@ -953,8 +955,8 @@ break;
 case ucon64_JAGUAR:
   return(
 #ifdef	CD
-    (argcmp(argc,argv,"-rawt")) ? jaguar_rawt(&rom) :
-    (argcmp(argc,argv,"-xraw")) ? jaguar_xraw(&rom) :
+    (argcmp(argc,argv,"-mktoc")) ? jaguar_mktoc(&rom) :
+    (argcmp(argc,argv,"-xcdrw")) ? jaguar_xcdrw(&rom) :
 #endif
     0
   );
@@ -975,10 +977,10 @@ break;
   case ucon64_DC:
     return(
       (argcmp(argc,argv,"-ip")) ? /* ip0000(char *dev,char *name) */ 0 :
-      (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
+      (argcmp(argc,argv,"-iso")) ? /* cdi2iso(rom.rom) */ :
 /*  backup */
-      (argcmp(argc,argv,"-isot")) ? dc_isot(&rom) :
-      (argcmp(argc,argv,"-xiso")) ? dc_xiso(&rom) : 0
+      (argcmp(argc,argv,"-mktoc")) ? dc_mktoc(&rom) :
+      (argcmp(argc,argv,"-xcdrw")) ? dc_xcdrw(&rom) : 0
     );
   break;
 
@@ -986,8 +988,8 @@ break;
     return(
       (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
 /*  backup */
-      (argcmp(argc,argv,"-rawt")) ? psx_rawt(&rom) :
-      (argcmp(argc,argv,"-xraw")) ? psx_xraw(&rom) : 0
+      (argcmp(argc,argv,"-mktoc")) ? psx_mktoc(&rom) :
+      (argcmp(argc,argv,"-xcdrw")) ? psx_xcdrw(&rom) : 0
     );
   break;
 
@@ -995,8 +997,8 @@ break;
     return(
       (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
 /*  backup */
-      (argcmp(argc,argv,"-rawt")) ? ps2_rawt(&rom) :
-      (argcmp(argc,argv,"-xraw")) ? ps2_xraw(&rom) : 0
+      (argcmp(argc,argv,"-mktoc")) ? ps2_mktoc(&rom) :
+      (argcmp(argc,argv,"-xcdrw")) ? ps2_xcdrw(&rom) : 0
     );
   break;
 
@@ -1004,8 +1006,8 @@ break;
     return(
       (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
 /*  backup */
-      (argcmp(argc,argv,"-rawt")) ? saturn_rawt(&rom) :
-      (argcmp(argc,argv,"-xraw")) ? saturn_xraw(&rom) : 0
+      (argcmp(argc,argv,"-mktoc")) ? saturn_mktoc(&rom) :
+      (argcmp(argc,argv,"-xcdrw")) ? saturn_xcdrw(&rom) : 0
     );
   break;
 
@@ -1013,8 +1015,8 @@ break;
     return(
       (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
 /*  backup */
-      (argcmp(argc,argv,"-rawt")) ? cdi_rawt(&rom) :
-      (argcmp(argc,argv,"-xraw")) ? cdi_xraw(&rom) : 0
+      (argcmp(argc,argv,"-mktoc")) ? cdi_mktoc(&rom) :
+      (argcmp(argc,argv,"-xcdrw")) ? cdi_xcdrw(&rom) : 0
     );
   break;
 
@@ -1022,8 +1024,8 @@ break;
     return(
       (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
 /*  backup */
-      (argcmp(argc,argv,"-rawt")) ? cd32_rawt(&rom) :
-      (argcmp(argc,argv,"-xraw")) ? cd32_xraw(&rom) : 0
+      (argcmp(argc,argv,"-mktoc")) ? cd32_mktoc(&rom) :
+      (argcmp(argc,argv,"-xcdrw")) ? cd32_xcdrw(&rom) : 0
     );
   break;
 
@@ -1031,8 +1033,8 @@ break;
     return(
       (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
 /*  backup */
-      (argcmp(argc,argv,"-rawt")) ? real3do_rawt(&rom) :
-      (argcmp(argc,argv,"-xraw")) ? real3do_rawt(&rom) : 0
+      (argcmp(argc,argv,"-mktoc")) ? real3do_mktoc(&rom) :
+      (argcmp(argc,argv,"-xcdrw")) ? real3do_xcdrw(&rom) : 0
     );
   break;
 #endif /* CD */
@@ -1044,10 +1046,8 @@ default:
  argcmp(argc,argv,"-xsmd") ||  //the SMD made backups for Genesis and Sega Master System
  argcmp(argc,argv,"-xsmds")
 #ifdef CD
- || argcmp(argc,argv,"-isot") ||  //take image for which cd-based console?
- argcmp(argc,argv,"-xiso") ||
- argcmp(argc,argv,"-rawt") ||
- argcmp(argc,argv,"-xraw")
+ ||  argcmp(argc,argv,"-mktoc") || //take image for which cd-based console?
+ argcmp(argc,argv,"-xcdrw")
 #endif
 )
   {

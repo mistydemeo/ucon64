@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.34 2003-03-29 01:42:26 dbjh Exp $
+ * $Id: gg.c,v 1.35 2003-04-16 03:08:50 dbjh Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -1039,7 +1039,7 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
 {
   int size = ucon64.file_size - rominfo->buheader_len, address, value,
       result = -1;
-  char buf[MAXBUFSIZE], dest_name[FILENAME_MAX];
+  char buf[MAXBUFSIZE], dest_name[FILENAME_MAX], src_name[FILENAME_MAX];
 
   if (ucon64.file_size > 0)                   // check if rominfo contains valid ROM info
     gg_rominfo = rominfo;
@@ -1089,9 +1089,10 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
       return -1;
     }
 
+  strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
-  ucon64_file_handler (dest_name, NULL, 0);
-  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  ucon64_file_handler (dest_name, src_name, 0);
+  q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb");
 
   printf ("\n");
   buf[0] = q_fgetc (dest_name, address + rominfo->buheader_len);
@@ -1104,5 +1105,6 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
   printf ("\n");
 
   printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }

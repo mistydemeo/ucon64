@@ -44,12 +44,14 @@ bsl_apply (const char *mod, const char *bslname)
 {
   FILE *modfile, *bslfile;
   unsigned char byte;
-  char addstr[10], datstr[10], buf[4096], modname[FILENAME_MAX];
+  char addstr[10], datstr[10], buf[4096], modname[FILENAME_MAX],
+       srcname[FILENAME_MAX];
   int dat, numdat, i, done = 0, add;
 
+  strcpy (srcname, mod);
   strcpy (modname, mod);
-  ucon64_file_handler (modname, NULL, 0);
-  q_fcpy (mod, 0, q_fsize (mod), modname, "wb");
+  ucon64_file_handler (modname, srcname, 0);
+  q_fcpy (srcname, 0, q_fsize (srcname), modname, "wb");
 
   if ((modfile = fopen (modname, "r+b")) == NULL)
     {
@@ -114,6 +116,7 @@ bsl_apply (const char *mod, const char *bslname)
 
   printf ("Patching complete\n\n");
   printf (ucon64_msg[WROTE], modname);
+  remove_temp_file ();
   printf ("\n"
           "NOTE: Sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
           "      This means you must modify for example a SNES ROM with -swc or -stp or\n"
@@ -121,7 +124,6 @@ bsl_apply (const char *mod, const char *bslname)
 
   fclose (bslfile);
   fclose (modfile);
-
   return 0;
 }
 

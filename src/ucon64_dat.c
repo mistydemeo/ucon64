@@ -73,6 +73,10 @@ const st_usage_t ucon64_dat_usage[] = {
   {"force63", NULL, "force to rename all filenames into Joliet CD format\n"
               "same as: GoodXXXX rename inplace force63 ...\n"
               "TIP: using " OPTION_LONG_S "nes would process only NES ROM(S)"},
+  {"rl", NULL, "rename all ROM(s) to lowercase"},
+#if 0
+  {"ru", NULL, "rename all ROM(s) to uppercase"},
+#endif
 
 
 //  {"good", NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed using\n"

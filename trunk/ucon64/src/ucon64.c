@@ -103,6 +103,7 @@ static void ucon64_exit (void);
 static void ucon64_usage (int argc, char *argv[]);
 
 st_ucon64_t ucon64;
+dm_image_t *image = NULL; // libdiscmage
 
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2002";
 static int ucon64_fsize = 0;
@@ -607,16 +608,18 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   else if (UCON64_TYPE_ISCD (ucon64.type))
     {
       st_iso_header_t iso_header;
-      int value;
+//      int value;
 
 //      ucon64_flush (rominfo);
 
       result = 0;
 
+      image = dm_init (romfile);
+
       q_fread (&iso_header, ISO_HEADER_START +
           UCON64_ISSET (ucon64.buheader_len) ?
             ucon64.buheader_len :
-            CDRW_HEADER_START (dm_init (romfile)),
+             CDRW_HEADER_START (image->sector_size),
               ISO_HEADER_LEN, romfile);
       rominfo->header_start = ISO_HEADER_START;
       rominfo->header_len = ISO_HEADER_LEN;
@@ -629,15 +632,16 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       rominfo->maker = iso_header.publisher_id;
 
 //misc stuff
-      value = dm_init (romfile);
-      if (value == -1)
+      if (image->sector_size == -1)
         strcpy (rominfo->misc, "Track Mode: Unknown (Maybe CDI or NRG?)\n");
       else
-        sprintf (rominfo->misc, "Track Mode: %s (cdrdao: %s)\n", track_modes[value].common, track_modes[value].cdrdao);
+        sprintf (rominfo->misc, "Track Mode: %s (cdrdao: %s)\n", image->common, image->cdrdao);
 
 //      rominfo->console_usage =
 
       rominfo->copier_usage = cdrw_usage;
+      
+      dm_close (image);
    }
   return result;
 }

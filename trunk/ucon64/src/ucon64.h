@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"                             // ANSI_COLOR
 #include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
+#include "libdiscmage/libdiscmage.h"            // dm_image_t
 
 /*
   this struct holds only workflow relevant information
@@ -126,6 +127,8 @@ typedef struct st_rominfo
   int internal_crc2_start;                      // start of 2nd/inverse internal checksum
   int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal checksum
 } st_rominfo_t;
+
+extern dm_image_t *image;
 
 extern const struct option long_options[];
 

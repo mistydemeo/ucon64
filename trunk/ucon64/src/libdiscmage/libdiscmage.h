@@ -82,9 +82,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define me2le_n(x,n) 
 #endif
 
+#define stricmp strcasecmp
+#define strnicmp strncasecmp
+
 #endif
-#include "sheets.h"
-#include "unzip.h"
 #ifdef  __linux__
 #include <linux/cdrom.h>
 #else
@@ -203,16 +204,21 @@ struct cdrom_msf
 #define	CDROM_LEADOUT		0xAA
 #endif // #ifndef __linux__
 
+#if 0
 #define MODE1_2048 0
 #define MODE1_2352 1
 #define MODE2_2336 2
 #define MODE2_2352 3
 // Macintosh
 #define MODE2_2056 4
+#endif
 
 #define DEFAULT_FORMAT   0
 #define ISO_FORMAT       1
 #define BIN_FORMAT       2
+#define CDI_FORMAT       3
+#define NRG_FORMAT       4
+#define CCD_FORMAT       5
 
 #define READ_BUF_SIZE  (1024*1024)
 #define WRITE_BUF_SIZE (1024*1024)
@@ -220,16 +226,21 @@ struct cdrom_msf
 
 typedef struct
 {
-  uint32_t mode;
-  uint32_t sector_size;
-  uint32_t seek_header;
-  uint32_t seek_ecc;
-  char *common;
-  char *cdrdao;
+  unsigned char magic[4];
+  uint32_t total_length;
+  unsigned char type[4];
+  unsigned char fmt[4];
+  uint32_t header_length;
+  unsigned short libdiscmage;
+  unsigned short channels;
+  uint32_t samplerate;
+  uint32_t bitrate;
+  unsigned short blockalign;
+  unsigned short bitspersample;
+  unsigned char data[4];
+  uint32_t data_length;
 }
-st_track_modes_t;
-
-extern const st_track_modes_t track_modes[];
+wav_header_t;
 
 
 typedef struct
@@ -265,11 +276,21 @@ typedef struct
   workflow
   TODO make this dissappear
 */
+  char filename[FILENAME_MAX];
+  FILE *fh;
+
   int32_t track_type,save_as_iso,pregap,convert, fulldata, cutall, cutfirst;
   char do_convert, do_cut;
-}
-st_image_t;
 
+  uint32_t seek_header;
+  uint32_t seek_ecc;
+  char *common;
+  char *cdrdao;
+}
+dm_image_t;
+
+
+#include "sheets.h"
 
 #include "cdi.h"
 #include "ccd.h"
@@ -285,13 +306,18 @@ extern int lba_to_msf (uint32_t lba, struct cdrom_msf * mp);
 extern uint32_t msf_to_lba (int m, int s, int f, int force_positive);
 extern int from_bcd (int b);
 extern int to_bcd (int i);
+extern int fsize (const char *filename);
 
 
 /*
-  dm_init()  this will init libdiscmage and try to recognize the image format
+  dm_init()  this will init libdiscmage and try to recognize the image format, etc.
 */
-extern int32_t dm_init (const char *image);
-
+extern dm_image_t *dm_init (const char *image_filename);
+#if 0
+extern int dm_close (dm_image_t *image);
+#else
+#define dm_close free
+#endif
 
 /*
   dm_bin2iso()  convert Mx/>2048 image to M1/2048
@@ -302,9 +328,9 @@ TODO:  dm_cdiadd()
 TODO:  dm_isofix()   fix an iso image
 TODO:  dm_cdifix()   fix a cdi image
 */
-extern int32_t dm_bin2iso (const char *image);
-extern int32_t dm_cdirip (const char *image);
-//extern int32_t dm_nerorip (const char *image);
-extern int32_t dm_cdi2nero (const char *image);
-//extern int32_t dm_isofix (const char *image);
+extern int32_t dm_bin2iso (dm_image_t *image);
+extern int32_t dm_cdirip (dm_image_t *image);
+//extern int32_t dm_nerorip (dm_image_t *image);
+extern int32_t dm_cdi2nero (dm_image_t *image);
+//extern int32_t dm_isofix (dm_image_t *image);
 #endif  // LIBDISCMAGE_H

@@ -1,5 +1,5 @@
 /*
-ucon64gui.c - a GUI for ucon64 (based on html2gui by Dirk Reinelt)
+ucon64gui.c - a GUI for ucon64
 
 written by 2002 NoisyB (noisyb@gmx.net)
            
@@ -24,4 +24,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc.h"
 
 #include "html2gui/src/html2gui_misc.h"
+
+void
+ucon64_main (void);
+
+void
+ucon64_snes (void);
+
+
 #endif /* UCON64GUI_H */

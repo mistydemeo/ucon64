@@ -1,5 +1,5 @@
 /*
-ucon64gui.c - a GUI for ucon64 (based on html2gui by Dirk Reinelt)
+ucon64gui.c - a GUI for ucon64
 
 written by 2002 NoisyB (noisyb@gmx.net)
            
@@ -67,38 +67,33 @@ ucon64_ls (void)
   strcpy (ucon64.cmd, "ucon64 -ls .");
   ucon64_system ();
 }
-void
-ucon64_main (void);
 
 void
 ucon64_snes (void)
 {
 #include "xpm/snes.xpm"
-#include "xpm/info.xpm"
-#include "xpm/icon.xpm"
-#include "xpm/back.xpm"
+//#include "xpm/icon.xpm"
 
 //<html>
   html2gui_html (640, 400, 0);
 
-  html2gui_title ("ucon64gui_snes", icon_xpm);
+//  html2gui_title ("ucon64gui_snes", icon_xpm);
 
   html2gui_img (snes_xpm, 10, 10, 0);
 
   html2gui_br ();
 
-  html2gui_button (ucon64_main, "BACK", "Return", 10, 10, back_xpm);
+  html2gui_button (ucon64_main, "Back", "Return", 10, 10, NULL);
+  
+  html2gui_br ();
 
-  html2gui_button (ucon64_nfo, "NFO", "Click here to see ROM info", 10, 10, info_xpm);
+  html2gui_button (ucon64_nfo, "Show info", "Click here to see information about ROM", 10, 10, NULL);
 //</html>
 }
 
 void
 ucon64_main (void)
 {
-#include "xpm/snes.xpm"
-#include "xpm/info.xpm"
-#include "xpm/selectrom.xpm"
 #include "xpm/icon.xpm"
 
 //<html>
@@ -108,18 +103,18 @@ ucon64_main (void)
 
   html2gui_img (icon_xpm, 1, 10, 0);
 
+  html2gui_ ("uCON64_GUI 0.1.0 by NoisyB");
+
   html2gui_br ();
   html2gui_hr ();
   html2gui_br ();
 
-  html2gui_button (ucon64_rom, "Select ROM", "Click here to open a ROM", 10, 10, selectrom_xpm);
+  html2gui_button (ucon64_rom, "Open ROM", "Click here to select a Video Game Console ROM from a FileDialog", 10, 10, NULL);
 
-  html2gui_button (ucon64_nfo, "NFO", "Click here to see information about ROM", 10, 10, info_xpm);
+  html2gui_button (ucon64_nfo, "Show info", "Click here to see information about ROM", 10, 10, NULL);
 
   html2gui_br ();
-  html2gui_button (ucon64_snes, "Super Nintendo", "Super Nintendo Options", 10, 10, snes_xpm);
-
-//  html2gui_html_end ();
+  html2gui_button (ucon64_snes, "Super Nintendo", "Super Nintendo specific options", 10, 10, NULL);
 //</html>
 }
 
@@ -134,4 +129,3 @@ main (int argc, char *argv[])
 
   return(0);
 }
-

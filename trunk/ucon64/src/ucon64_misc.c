@@ -279,11 +279,7 @@ inportb (unsigned short port)
 #else
   unsigned char byte;
 
-#ifdef __FreeBSD__
-  __asm__ __volatile__ ("inb %w1,%0":"=a" (byte):"Nd" (port));
-#else
   __asm__ __volatile__ ("inb %1, %0":"=a" (byte):"d" (port));
-#endif // __FreeBSD__
 
   return byte;
 #endif
@@ -302,11 +298,7 @@ inportw (unsigned short port)
 #else
   unsigned short word;
 
-#ifdef __FreeBSD__
-  __asm__ __volatile__ ("inw %w1, %0":"=a" (word):"Nd" (port));
-#else
   __asm__ __volatile__ ("inw %1, %0":"=a" (word):"d" (port));
-#endif // __FreeBSD__
 
   return word;
 #endif
@@ -321,8 +313,6 @@ outportb (unsigned short port, unsigned char byte)
   temp.Port = port;
   temp.Data = byte;
   ioctl (ucon64_io_fd, DRV_WRITE_IO_8, &temp, 0);
-#elif __FreeBSD__
-//  __asm__ __volatile__ ("outb %b0,%w1"::"a" (byte), "Nd" (port));
 #else
   __asm__ __volatile__ ("outb %1, %0"::"d" (port), "a" (byte));
 #endif
@@ -337,8 +327,6 @@ outportw (unsigned short port, unsigned short word)
   temp.Port = port;
   temp.Data16 = word;
   ioctl (ucon64_io_fd, DRV_WRITE_IO_16, &temp, 0);
-#elif __FreeBSD__
-//  __asm__ __volatile__ ("outw %b0,%w1"::"a" (word), "Nd" (port));
 #else
   __asm__ __volatile__ ("outw %1, %0"::"d" (port), "a" (word));
 #endif
@@ -350,8 +338,14 @@ detect_parport (unsigned int port)
 {
   int i;
 
-#ifdef  __linux__
-  if (ioperm (port, 1, 1) == -1)
+#if defined  __linux__ || defined __FreeBSD__
+  if (
+#ifdef __linux__
+  ioperm
+#else
+  i386_set_ioperm
+#endif // __linux__
+   (port, 1, 1) == -1)
     return -1;
 #endif
 
@@ -367,8 +361,14 @@ detect_parport (unsigned int port)
           break;
     }
 
-#ifdef  __linux__
-  if (ioperm (port, 1, 0) == -1)
+#if defined  __linux__ || defined __FreeBSD__
+  if (
+#ifdef __linux__
+  ioperm
+#else
+  i386_set_ioperm
+#endif // __linux__
+   (port, 1, 0) == -1)
     return -1;
 #endif
 
@@ -444,8 +444,14 @@ parport_probe (unsigned int port)
 
   if (port != 0)
     {
-#ifdef  __linux__
-      if (ioperm (port, 3, 1) == -1)            // data, status & control
+#if defined  __linux__ || defined __FreeBSD__
+  if (
+#ifdef __linux__
+  ioperm
+#else
+  i386_set_ioperm
+#endif // __linux__
+   (port, 3, 1) == -1)            // data, status & control
         {
           fprintf (stderr,
                    "Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"

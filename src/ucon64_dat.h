@@ -30,8 +30,8 @@ typedef struct
   uint32_t current_crc32;       // standard current_crc32 checksum of the ROM
   uint8_t console;              // integer for the console system
   char name[MAXBUFSIZE];        // name of the ROM
-  const char *maker;                // maker of the ROM as integer
-  const char *country;            // country of the ROM as integer
+  const char *maker;                // maker of the ROM
+  const char *country;            // country of the ROM
   char misc[MAXBUFSIZE];        // miscellaneous information about the ROM
   char fname[FILENAME_MAX];     // filename of the ROM
   uint32_t fsize;               // size in bytes
@@ -42,8 +42,10 @@ typedef struct
   char date[20];                // date of dat file
   char comment[MAXBUFSIZE];     // comment of dat file
   char refname[100];            // ref name (could this be used to find out which console system?)
-}
-ucon64_dat_t;
+  
+  const char **console_usage;   // console system usage
+  const char **copier_usage;                    // backup unit usage
+} ucon64_dat_t;
 
 extern ucon64_dat_t *ucon64_dat_search (uint32_t crc32, ucon64_dat_t *dat); //search dat files for crc and return ucon64_dat_t
 extern unsigned int ucon64_dat_total_entries (int console);       // returns # of ROMs in all DAT's

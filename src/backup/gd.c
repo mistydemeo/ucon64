@@ -205,7 +205,10 @@ gd3_send_bytes (unsigned len, unsigned char *data)
       gd3_send_byte (data[i]);
       gd_bytessend++;
       if ((gd_bytessend - GD_HEADER_LEN) % 8192 == 0)
-        ucon64_gauge (gd_starttime, gd_bytessend, gd_fsize);
+        {
+          ucon64_gauge (gd_starttime, gd_bytessend, gd_fsize);
+          gd_checkabort (2);                    // 2 to return something other than 1
+        }
     }
 }
 
@@ -380,7 +383,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
   for (i = 0; i < num_units; i++)
     {
 #ifdef  DEBUG
-      printf ("filename (%d): \"%s\", ", split, (split ? (char *) filenames[i] : filename));
+      printf ("\nfilename (%d): \"%s\", ", split, (split ? (char *) filenames[i] : filename));
       printf ("name: \"%s\", size: %d\n", gd3_dram_unit[i].name, gd3_dram_unit[i].size);
 #endif
       if (split)
@@ -420,7 +423,6 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
 
       if (split || i == num_units - 1)
         fclose (file);
-      gd_checkabort (2);                        // 2 to return something other than 1
    }
 
   free (buffer);

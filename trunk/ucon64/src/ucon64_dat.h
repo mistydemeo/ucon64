@@ -18,8 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef UCON64_DB_H
-#define UCON64_DB_H
+#ifndef UCON64_DAT_H
+#define UCON64_DAT_H
 #include "config.h"
 #include "misc.h"
 
@@ -43,10 +43,11 @@ typedef struct
 }
 ucon64_dat_t;
 
-extern ucon64_dat_t *ucon64_dbsearch (uint32_t crc32, ucon64_dat_t *dat); //search dat files for crc and return ucon64_dat_t
-extern unsigned int ucon64_dbsize (int console);       // returns # of ROMs in db
-extern int ucon64_dbview (int console);        // printf the complete dat collection
-extern int ucon64_index_cache (void);          // create or update index file
+extern ucon64_dat_t *ucon64_dat_search (uint32_t crc32, ucon64_dat_t *dat); //search dat files for crc and return ucon64_dat_t
+extern unsigned int ucon64_dat_total_entries (int console);       // returns # of ROMs in all DAT's
+extern int ucon64_dat_view (int console);        // printf the complete dat collection
+extern int ucon64_dat_indexer (void);          // create or update index file for DAT's
+extern void ucon64_dat_nfo (const ucon64_dat_t *dat); // view contents of ucon64_dat_t
 
-#endif // UCON64_DB_H
+#endif // UCON64_DAT_H
 

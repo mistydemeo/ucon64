@@ -380,7 +380,7 @@ get_dat_entry (char *fname, ucon64_dat_t * dat, uint32_t crc32)
 
 
 int
-ucon64_dbview (int console)
+ucon64_dat_view (int console)
 {
 //  char *p = "";
   char buf[FILENAME_MAX], buf2[FILENAME_MAX];
@@ -412,16 +412,16 @@ ucon64_dbview (int console)
     }
 
   printf ("Total DAT files: %d; Total entries: %d\n",
-    dat_counter, ucon64_dbsize (UCON64_UNKNOWN));
+    dat_counter, ucon64_dat_total_entries (UCON64_UNKNOWN));
 
   return 0;
 }
 
 
 unsigned int
-ucon64_dbsize (int console)
+ucon64_dat_total_entries (int console)
 {
-  uint32_t dbsize = 0;
+  uint32_t entries = 0;
   int fsize;
   char buf[FILENAME_MAX];
 
@@ -433,15 +433,15 @@ ucon64_dbsize (int console)
     {
       setext (buf, ".idx");
       fsize = q_fsize (buf);
-      dbsize += (fsize < 0 ? 0 : fsize);        // TODO: handle this case gracefully
+      entries += (fsize < 0 ? 0 : fsize);        // TODO: handle this case gracefully
     }
 
-  return (dbsize / sizeof (uint32_t));
+  return (entries / sizeof (uint32_t));
 }
 
 
 ucon64_dat_t *
-ucon64_dbsearch (uint32_t crc32, ucon64_dat_t * dat)
+ucon64_dat_search (uint32_t crc32, ucon64_dat_t * dat)
 {
   uint32_t pos = 0;
   char buf[FILENAME_MAX];
@@ -505,7 +505,7 @@ ucon64_dbsearch (uint32_t crc32, ucon64_dat_t * dat)
 
 
 int
-ucon64_index_cache (void)
+ucon64_dat_indexer (void)
 // create or update index of cache
 {
   char buf[FILENAME_MAX], buf2[FILENAME_MAX];
@@ -557,4 +557,37 @@ ucon64_index_cache (void)
 // stats
 
   return 0;
+}
+
+
+void
+ucon64_dat_nfo (const ucon64_dat_t *dat)
+{
+   if (!dat)
+     {
+       fprintf (stdout, "DAT info: ROM not found\n");
+       return;
+     }
+
+  printf ("DAT info:\n" "  %s\n", dat->name);
+
+  if (dat->misc[0])
+    printf ("  %s\n", dat->misc);
+
+  if (dat->country)
+    printf ("  Country: %s\n", dat->country);
+
+  if (stricmp (dat->name, dat->fname) != 0)
+    printf ("  Filename: %s\n", dat->fname);
+
+  printf ("  Size: %d Bytes (%.4f Mb)\n"
+          "  %s\n"
+          "  Version: %s (%s, %s)\n",
+          dat->fsize,
+          TOMBIT_F (dat->fsize),
+          dat->datfile,
+          dat->version,
+          dat->date,
+          dat->refname);
+
 }

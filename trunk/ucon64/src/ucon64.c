@@ -100,7 +100,6 @@ write programs in C
 static void ucon64_exit (void);
 static void ucon64_usage (int argc, char *argv[]);
 static int ucon64_execute_options (void);
-static void ucon64_dat_nfo (const ucon64_dat_t *dat);
 
 st_ucon64_t ucon64;
 static st_rominfo_t rom;
@@ -501,7 +500,7 @@ main (int argc, char **argv)
 #endif
 
   if (ucon64.dat_enabled)
-    ucon64_index_cache (); // update cache index file (eventually)
+    ucon64_dat_indexer (); // update cache index file (eventually)
 
   ucon64_flush (&rom);
 
@@ -802,7 +801,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       if (ucon64.dat_enabled)
         {
           memset (&dat, 0, sizeof (ucon64_dat_t));
-          ucon64_dat = ucon64_dbsearch (rominfo->current_crc32, &dat);
+          ucon64_dat = ucon64_dat_search (rominfo->current_crc32, &dat);
         }
       else ucon64_dat = NULL;
 
@@ -837,31 +836,6 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 }
 
 
-void
-ucon64_dat_nfo (const ucon64_dat_t *dat)
-{
-  printf ("DAT info:\n" "  %s\n", dat->name);
-
-  if (dat->misc[0])
-    printf ("  %s\n", dat->misc);
-
-  if (dat->country)
-    printf ("  Country: %s\n", dat->country);
-
-  if (stricmp (dat->name, dat->fname) != 0)
-    printf ("  Filename: %s\n", dat->fname);
-
-  printf ("  Size: %d Bytes (%.4f Mb)\n"
-          "  %s\n"
-          "  Version: %s (%s, %s)\n",
-          dat->fsize,
-          TOMBIT_F (dat->fsize),
-          dat->datfile,
-          dat->version,
-          dat->date,
-          dat->refname);
-
-}
 
 
 int
@@ -1019,12 +993,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
         }
 
       if (ucon64.dat_enabled)
-        {
-          if (ucon64_dat)
-            ucon64_dat_nfo (ucon64_dat);
-          else
-            printf ("DAT info: ROM not found\n");
-        }
+        ucon64_dat_nfo (ucon64_dat);
 
       if (rominfo->current_crc32)
         printf ("Checksum (CRC32): 0x%08x\n", rominfo->current_crc32);
@@ -1426,7 +1395,7 @@ ucon64_usage (int argc, char *argv[])
      "\n"
      "Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
      "\n"
-     , ucon64_dbsize (UCON64_UNKNOWN)
+     , ucon64_dat_total_entries (UCON64_UNKNOWN)
      , argv[0], argv[0]);
 }
 

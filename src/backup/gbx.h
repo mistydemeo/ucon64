@@ -21,8 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef GBX_H
 #define GBX_H
-#include "../ucon64.h"
-
 #define gbx_TITLE "GameBoy Xchanger"
 #define gbx_HEADER_START 0
 #define gbx_HEADER_LEN 0

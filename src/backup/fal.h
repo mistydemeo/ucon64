@@ -21,8 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef FAL_H
 #define FAL_H
-#include "../ucon64.h"
-
 #define fal_TITLE "Flash Advance Linker\n2001 Visoly http://www.visoly.com"
 #define fal_HEADER_START 0
 #define fal_HEADER_LEN 0

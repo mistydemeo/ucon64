@@ -20,15 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef DOCTOR64JR_H
 #define DOCTOR64JR_H
-#include "../ucon64.h"
-
-/*#include <dos.h>*/
-#include <stdio.h>
-#include <stdlib.h>
-/*#include <io.h>*/
-/*#include <dir.h>*/
-#include <unistd.h>
-
 
 //#define ai 0x37b
 //#define data 0x37c

@@ -20,8 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef DOCTOR64_H
 #define DOCTOR64_H
-#include "../ucon64.h"
-
 int syncHeader (unsigned int baseport);
 int initCommunication (unsigned int port);
 int checkSync (unsigned int baseport);

@@ -29,10 +29,24 @@ first I want to thank SiGMA SEVEN! who was my mentor and taught me how to
 write programs in C
 */
 
+#include <fcntl.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <unistd.h>             // ioperm() (libc5)
+#ifndef __FreeBSD__
+//#include <getopt.h>           // __FreeBSD__ problems
+#endif // __FreeBSD__
+
 #include "ucon64.h"
+#include "ucon64_db.h"
 #include "ucon64_misc.h"
 
-//#include "unzip.h"
 #include "snes/snes.h"
 #include "gb/gb.h"
 #include "gba/gba.h"
@@ -65,23 +79,20 @@ write programs in C
 #include "patch/ppf.h"
 #include "patch/xps.h"
 #include "patch/pal4u.h"
-
-#ifdef BACKUP_CD
-  #include "backup/cdrw.h"
-#endif
-
-
-#ifdef	BACKUP
-#include "backup/fig.h"
-#include "backup/swc.h"
-#include "backup/unknown_bu.h"
-#include "backup/unknown_bu512.h"
-#endif
-
 #include "patch/aps.h"
 #include "patch/ips.h"
 #include "patch/bsl.h"
 
+#ifdef	BACKUP
+  #include "backup/fig.h"
+  #include "backup/swc.h"
+  #include "backup/unknown_bu.h"
+  #include "backup/unknown_bu512.h"
+#endif
+
+#ifdef BACKUP_CD
+  #include "backup/cdrw.h"
+#endif
 
 struct ucon64_ rom;
 

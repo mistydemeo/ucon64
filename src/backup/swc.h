@@ -20,8 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef SWC_H
 #define SWC_H
-#include "../ucon64.h"
-
 #define swc_TITLE "Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n" \
                   "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"
 #define swc_HEADER_START 0

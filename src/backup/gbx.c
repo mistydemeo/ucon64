@@ -19,10 +19,20 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "gbx.h"
-#include <time.h>
+#include <fcntl.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+#include "../misc.h"
+#include "../ucon64.h"
+#include "../ucon64_db.h"
+#include "../ucon64_misc.h"
+#include "gbx.h"
 
 /* Modified version of gbt15.c - (C) Bung Enterprises */
 
@@ -62,9 +72,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 *                                                            *
 *************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
 //#include <zlib.h>
 #include <sys/stat.h>

@@ -420,10 +420,14 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
   strcpy (buf, dat_entry);
 
+#if 0
   for (pos = 0;
        (dat_field[pos] = strtok (!pos ? buf : NULL, DAT_FIELD_SEPARATOR_S))
        && pos < (MAX_FIELDS_IN_DAT - 1); pos++)
     ;
+#else
+  argz_extract2 (dat_field, buf, DAT_FIELD_SEPARATOR_S, MAX_FIELDS_IN_DAT);
+#endif    
 
   memset (dat, 0, sizeof (st_ucon64_dat_t));
 
@@ -486,17 +490,24 @@ line_to_crc (const char *dat_entry)
 // get crc32 of current line
 {
   char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE];
-  uint32_t pos = 0, crc32 = 0;
+#if 0
+  uint32_t pos = 0;
+#endif
+  uint32_t crc32 = 0;
 
   if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
     return 0;
 
   strcpy (buf, dat_entry);
 
+#if 0
   for (pos = 0;
        (dat_field[pos] = strtok (!pos ? buf : NULL, DAT_FIELD_SEPARATOR_S))
        && pos < (MAX_FIELDS_IN_DAT - 1); pos++)
     ;
+#else
+  argz_extract2 (dat_field, buf, DAT_FIELD_SEPARATOR_S, MAX_FIELDS_IN_DAT);
+#endif    
 
   if (dat_field[5])
     sscanf (dat_field[5], "%x", &crc32);

@@ -2699,9 +2699,9 @@ int
 argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
 {
 //TODO replace with argz_extract() 
-//#ifdef  DEBUG
+#ifdef  DEBUG
   int pos = 0;
-//#endif
+#endif
   int argc = 0;
 
   if (!str)
@@ -2712,14 +2712,14 @@ argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
   for (; (argv[argc] = (char *) strtok (!argc?str:NULL, separator_s)) &&
     argc < (max_args - 1); argc++);
 
-//#ifdef  DEBUG
+#ifdef  DEBUG
   fprintf (stderr, "argc:     %d\n", argc);
   for (pos = 0; pos < argc; pos++)
     fprintf (stderr, "argv[%d]:  %s\n", pos, argv[pos]);
   fprintf (stderr, "\n");
 
   fflush (stderr);
-//#endif
+#endif
 
   return argc;
 }

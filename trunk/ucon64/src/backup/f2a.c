@@ -768,7 +768,7 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
 int
 f2a_write_par (int n_files, char **files, unsigned int address)
 {
-  int j, fsize, size, is_sram_data = address >= 0xe000000 ? 1 : 0;;
+  int j, fsize, size, is_sram_data = address >= 0xe000000 ? 1 : 0;
   char loader_fname[FILENAME_MAX];
   unsigned char loader[LOADER_SIZE];
 

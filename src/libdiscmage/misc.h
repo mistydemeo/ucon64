@@ -55,15 +55,15 @@ extern int fputc2 (int character, FILE *file);
 
 #undef feof                                     // necessary on (at least) Cygwin
 
-#define fopen   fopen2
-#define fclose  fclose2
-#define fseek   fseek2
-#define fread   fread2
-#define fgetc   fgetc2
-#define fgets   fgets2
-#define feof    feof2
-#define fwrite  fwrite2
-#define fputc   fputc2
+#define fopen(FILE, MODE) fopen2(FILE, MODE)
+#define fclose(FILE) fclose2(FILE)
+#define fseek(FILE, OFFSET, MODE) fseek2(FILE, OFFSET, MODE)
+#define fread(BUF, SIZE, NUM, FILE) fread2(BUF, SIZE, NUM, FILE)
+#define fgetc(FILE) fgetc2(FILE)
+#define fgets(BUF, MAXLEN, FILE) fgets2(BUF, MAXLEN, FILE)
+#define feof(FILE) feof2(FILE)
+#define fwrite(BUF, SIZE, NUM, FILE) fwrite2(BUF, SIZE, NUM, FILE)
+#define fputc(CHAR, FILE) fputc2(CHAR, FILE)
 
 #endif                                          // HAVE_ZLIB_H
 
@@ -214,6 +214,10 @@ extern void init_conio (void);
 extern void deinit_conio (void);
 #endif
 
+#ifdef  __CYGWIN__
+char *cygwin_fix (char *value);
+#endif
+
 
 /*
   String manipulation
@@ -249,7 +253,8 @@ extern const char *getext (const char *filename);
 extern char *basename2 (const char *str);
 #define basename basename2
 extern char *dirname2 (char *str);
-#define dirname dirname2
+// DON'T DO THIS! Then misc.h must be included after unistd.h ...
+// #define dirname dirname2 
 extern char *realpath2 (const char *src, char *full_path);
 extern void argz_extract2 (char *cmd, size_t argc, char ***argv);
 

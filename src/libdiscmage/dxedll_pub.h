@@ -55,6 +55,10 @@ typedef struct st_symbol
   long (*ftell) (FILE *);
   size_t (*fread) (void *, size_t, size_t, FILE *);
   size_t (*fwrite) (const void *, size_t, size_t, FILE *);
+  int (*fgetc) (FILE *file);
+  char *(*fgets) (char *buffer, int maxlength, FILE *file);
+  int (*feof) (FILE *file);
+  int (*fputc) (int character, FILE *file);
   int (*fflush) (FILE *);
 
   void (*free) (void *);
@@ -72,8 +76,10 @@ typedef struct st_symbol
   char *(*strrchr) (const char *, int);
 
   int (*stat) (const char *, struct stat *);
-
   time_t (*time) (time_t *);
+  
+  char *(*basename2) (const char *);
+  char *(*setext) (char *, const char *);
 
   // Put all variables AFTER the functions. This makes it easy to catch
   //  uninitialized function pointers.

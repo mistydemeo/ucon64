@@ -1,7 +1,7 @@
 /*
 dlopen.c - DLL support code
 
-written by 2002 dbjh
+written by 2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -38,6 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  DJGPP
 #include "dxedll_pub.h"
 #include "map.h"
+#include "misc.h"                               // basename2() and setext()
 
 
 #define INITIAL_HANDLE 1
@@ -91,9 +92,13 @@ open_module (char *module_name)
   sym->fopen = fopen;
   sym->fclose = fclose;
   sym->fseek = fseek;
-  sym->ftell = ftell;
   sym->fread = fread;
+  sym->fgetc = fgetc;
+  sym->fgets = fgets;
+  sym->feof = feof;
   sym->fwrite = fwrite;
+  sym->fputc = fputc;
+  sym->ftell = ftell;
   sym->fflush = fflush;
 
   sym->free = free;
@@ -111,8 +116,10 @@ open_module (char *module_name)
   sym->strrchr = strrchr;
 
   sym->stat = stat;
-
   sym->time = time;
+  
+  sym->basename2 = basename2;
+  sym->setext = setext;
 
   // initialize variables
   sym->__dj_stdin = __dj_stdin;

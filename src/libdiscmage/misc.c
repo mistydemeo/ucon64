@@ -37,7 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <errno.h>
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
-#include <sys/stat.h>			                      // for S_IFLNK
+#include <sys/stat.h>                           // for S_IFLNK
 
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds

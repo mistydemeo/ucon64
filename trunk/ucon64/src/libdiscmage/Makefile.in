@@ -11,6 +11,7 @@ LIBTOOL = libtool
 
 CC=gcc
 CFLAGS=-I.. -I. -Wall -O3
+#CFLAGS=-I.. -I. -Wall -O3 @DEFS@
 ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif

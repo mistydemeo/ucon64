@@ -297,28 +297,15 @@ main (int argc, char *argv[])
 
   ucon64.parport = 0x378;
   ucon64_parport_probe ();
-/*
-- switches
-- db search
-- probe
-- init
-- nfo
-*/
 
   ucon64.argc = argc;
   for (x = 0; x < argc; x++)ucon64.argv[x] = argv[x];
 
-  strcpy (ucon64.file, getarg (argc, argv, ucon64_FILE));
-
-//  if (!strlen (rom.rom))//no $ROM? then just use current working dir
-//    getcwd (rom.rom, sizeof (rom.rom));
-
   ucon64_flush (argc, argv, &rom);
 
-
-  /*
-    getopt_long_only() - switches and overrides
-  */
+/*
+  getopt_long_only() - switches and overrides
+*/
   while ((c = getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
     {
       switch (c)
@@ -628,20 +615,22 @@ main (int argc, char *argv[])
     }
 
 
+  if (optind < argc)
+    strcpy(rom.rom, argv[optind++]);
+  if (optind < argc)
+    strcpy(ucon64.file, argv[optind++]);
+                                    
   if (!access (rom.rom, F_OK|R_OK))
     ucon64_init (&rom);
 
 
-  /*
-    getopt_long_only() - options
-  */
-  option_index = 0;
+/*
+  getopt_long_only() - options
+*/
+  optind = option_index = 0;//TODO is there a better way to "reset"?
 
   while ((c = getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
     {
-printf("SHIT");
-fflush(stdout);
-
       switch (c)
         {
         case ucon64_HELP:

@@ -171,8 +171,8 @@ if(argcmp(argc,argv,"-dbs"))
 	);
 
 	printf("%s\n",db.name);
-	printf("%s\n",ucon64_maker(buf,db.maker));
-	printf("%s\n",ucon64_country(buf,db.country));
+	printf("%s\n",db.maker);
+	printf("%s\n",db.country);
 	printf("%s\n\n",db.misc);
 
 	return(0);

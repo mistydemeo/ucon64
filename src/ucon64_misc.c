@@ -56,6 +56,7 @@ static int ucon64_io_fd;
 
 static void BuildCRCTable ();
 static unsigned long CalculateFileCRC (FILE * file);
+static int detect_parport (unsigned int port);
 
 extern char
 hexDigit (int value)
@@ -360,7 +361,7 @@ outportw (unsigned short port, unsigned short word)
 }
 #endif // defined __unix__ || defined __BEOS__
 
-extern int
+static int
 detect_parport (unsigned int port)
 {
   int i;

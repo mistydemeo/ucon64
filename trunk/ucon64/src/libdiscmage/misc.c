@@ -1402,31 +1402,34 @@ static const char *
 get_property2 (const char *filename, const char *propname, char divider, char *buffer, const char *def)
 // divider is the 1st char after propname ('=', ':', etc..)
 {
-  char buf[MAXBUFSIZE], *p = NULL;
+  char line[MAXBUFSIZE], *p = NULL;
   FILE *fh;
-  int prop_found = 0;
+  int prop_found = 0, i;
 
   if ((fh = fopen (filename, "r")) != 0)        // opening the file in text mode
     {                                           //  avoids trouble under DOS
-      while (fgets (buf, sizeof buf, fh) != NULL)
+      while (fgets (line, sizeof line, fh) != NULL)
         {
-          if ((p = strpbrk (buf, "\n\r")))      // strip *any* returns
+          p = line + strspn (line, "\t ");
+          if (*p == '#' || *p == '\n' || *p == '\r')
+            continue;                           // text after # is comment
+          if ((p = strpbrk (line, "\n\r#")))    // strip *any* returns
             *p = 0;
 
-          if (*(buf + strspn (buf, "\t ")) == '#')
-            continue;
-
-//          *(buf + strcspn (buf, "#")) = 0;      // comment at end of a line
-
-          if (!strnicmp (buf, propname, strlen (propname)))
+          if (!strnicmp (line, propname, strlen (propname)))
             {
-              p = strchr (buf, divider);
+              p = strchr (line, divider);
               if (p)                    // if no divider was found the propname must be
                 {                       //  a bool config entry (present or not present)
                   p++;
                   strcpy (buffer, p + strspn (p, "\t "));
-                }
+                  // strip trailing whitespace
+                  for (i = strlen (buffer) - 1;
+                       i >= 0 && (buffer[i] == '\t' || buffer[i] == ' ');
+                       i--)
+                    buffer[i] = 0;
 
+                }
               prop_found = 1;
               break;                            // an environment variable
             }                                   //  might override this
@@ -1476,8 +1479,7 @@ get_property_int (const char *filename, const char *propname, char divider)
 
   value = strtol (buf, NULL, 10);
   return value ? value : 1;                     // if buf was only text like 'Yes'
-                                                //  we'll return at least 1
-}
+}                                               //  we'll return at least 1
 
 
 static int
@@ -1516,11 +1518,11 @@ set_property2 (const char *filename, const char *propname, char divider, const c
       fclose (fh);
     }
 
-    if (!found && value != NULL)
-      {
-        sprintf (buf, "%s%c%s\n", propname, divider, value);
-        strcat (buf2, buf);
-      }
+  if (!found && value != NULL)
+    {
+      sprintf (buf, "%s%c%s\n", propname, divider, value);
+      strcat (buf2, buf);
+    }
 
   if ((fh = fopen (filename, "w")) == NULL)     // open in text mode
     return -1;

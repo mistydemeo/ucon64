@@ -46,7 +46,7 @@ extern "C" {
 #endif
 
 // WIN32 stands for __WIN32, _WIN32 and WIN32
-#if     defined __WIN32 || defined _WIN32 || defined WIN32
+#if     defined __WIN32 || defined _WIN32 || defined WIN32 || defined (_MSC_VER)
 #ifndef WIN32
 #define WIN32
 #endif

@@ -378,127 +378,15 @@ const st_usage_t ucon64_padding_usage[] = {
 const st_usage_t ucon64_patching_usage[] =
   {
     {NULL, NULL, "Patching"},
-    {"poke", "OFF:V", "change byte at file offset OFF to value V"},
+    {"poke", "OFF:V", "change byte at file offset OFF to value V (both in hexadecimal)"},
     {"patch", "PATCH", "specify the PATCH for the following options\n"
                       "use this option or uCON64 expects the last commandline\n"
                       "argument to be the name of the PATCH file"},
     {NULL, NULL, NULL}
   };
 
-#if 0
-no split roms
-  case UCON64_A:
-  case UCON64_B:
-  case UCON64_CHK:
-  case UCON64_DINT:
-  case UCON64_SWAP:
-  case UCON64_CRC:
-  case UCON64_CRCHD:                            // deprecated
-  case UCON64_GOOD:
-  case UCON64_I:
-  case UCON64_INS:
-  case UCON64_INSN:
-  case UCON64_ISPAD:
-  case UCON64_MGD:
-//  case UCON64_MGH:
-  case UCON64_MKA:
-  case UCON64_MKI:
-  case UCON64_MKPPF:
-  case UCON64_N:
-  case UCON64_NA:
-  case UCON64_NPPF:
-  case UCON64_P:
-  case UCON64_PAD:
-  case UCON64_PADHD:                            // deprecated
-  case UCON64_PPF:
-  case UCON64_RROM:
-  case UCON64_RR83:
-  case UCON64_S:
-  case UCON64_STP:
-  case UCON64_STPN:
-  case UCON64_STRIP:
-  case UCON64_SMD:
-  case UCON64_XSMD:
-  case UCON64_XSMDS:
-  case UCON64_XSWC:
-  case UCON64_XSWCS:
-  // -xgd3 handles split files. Only SNES and Genesis files can be detected as
-  //  being split. Split NES files (Pasofami format) are detected by nes_init().
-  case UCON64_XMCCL:
-
-switches
-  case UCON64_3DO:
-  case UCON64_ATA:
-  case UCON64_BAT:
-  case UCON64_BS:
-  case UCON64_CD32:
-  case UCON64_CDI:
-  case UCON64_CMNT:
-  case UCON64_COLECO:
-  case UCON64_CTRL:
-  case UCON64_CTRL2:
-  case UCON64_DC:
-  case UCON64_DUMPINFO:
-  case UCON64_FILE:
-  case UCON64_FRONTEND:
-  case UCON64_GB:
-  case UCON64_GBA:
-  case UCON64_GC:
-  case UCON64_GEN:
-  case UCON64_GP32:
-  case UCON64_GOOD:
-  case UCON64_HD:
-  case UCON64_HDN:
-  case UCON64_HELP:
-  case UCON64_HI:
-  case UCON64_INT:
-  case UCON64_INT2:
-  case UCON64_INTELLI:
-  case UCON64_JAG:
-  case UCON64_LYNX:
-  case UCON64_MAPR:
-  case UCON64_MIRR:
-  case UCON64_N64:
-  case UCON64_NBAK:
-  case UCON64_NBAT:
-  case UCON64_NBS:
-#ifdef  ANSI_COLOR
-  case UCON64_NCOL:
-#endif
-  case UCON64_NES:
-  case UCON64_NG:
-  case UCON64_NGP:
-  case UCON64_NHD:
-  case UCON64_NHI:
-  case UCON64_NINT:
-  case UCON64_NS:
-  case UCON64_NSWP:                             // deprecated
-  case UCON64_NTSC:
-  case UCON64_NVRAM:
-  case UCON64_O:
-  case UCON64_PAL:
-  case UCON64_PATCH:
-  case UCON64_PCE:
-  case UCON64_PORT:
-  case UCON64_PS2:
-  case UCON64_PSX:
-  case UCON64_Q:
-  case UCON64_QQ:
-  case UCON64_ROM:
-  case UCON64_S16:
-  case UCON64_SAT:
-  case UCON64_SMS:
-  case UCON64_SNES:
-  case UCON64_SSIZE:
-  case UCON64_SWAN:
-  case UCON64_SWP:                              // deprecated
-  case UCON64_VBOY:
-  case UCON64_VEC:
-  case UCON64_VER:
-  case UCON64_VRAM:
-  case UCON64_XBOX:
-    break;
-#endif
+// -xgd3 handles split files. Only SNES and Genesis files can be detected as
+//  being split. Split NES files (Pasofami format) are detected by nes_init().
 
 
 const st_ucon64_wf_t *
@@ -522,16 +410,11 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_1991, UCON64_GENESIS, genesis_usage, WF_DEFAULT},
   {UCON64_B0, UCON64_LYNX, lynx_usage,         WF_DEFAULT},
   {UCON64_B1, UCON64_LYNX, lynx_usage,         WF_DEFAULT},
-  {UCON64_BAT, UCON64_NES, nes_usage,          WF_DEFAULT},
   {UCON64_BIOS, UCON64_NEOGEO, neogeo_usage,   WF_DEFAULT},
   {UCON64_BOT, UCON64_N64, n64_usage,          WF_DEFAULT},
-  {UCON64_CMNT, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_CRP, UCON64_GBA, gba_usage,          WF_DEFAULT},
-  {UCON64_CTRL, UCON64_SNES, snes_usage,       WF_DEFAULT},
-  {UCON64_CTRL2, UCON64_SNES, snes_usage,      WF_DEFAULT},
   {UCON64_COL, UCON64_SNES, snes_usage,        WF_NO_ROM},
   {UCON64_DBUH, UCON64_SNES, snes_usage,       WF_DEFAULT},
-  {UCON64_DUMPINFO, UCON64_NES, nes_usage,     WF_DEFAULT},
   {UCON64_F, UCON64_SNES, snes_usage,          WF_DEFAULT},
   {UCON64_FDS, UCON64_NES, nes_usage,          WF_DEFAULT},
   {UCON64_FDSL, UCON64_NES, nes_usage,         WF_DEFAULT},
@@ -549,17 +432,11 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_LOGO, UCON64_GBA, gba_usage,         WF_DEFAULT},
   {UCON64_LSRAM, UCON64_N64, n64_usage,                 0},
   {UCON64_LYX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
-  {UCON64_MAPR, UCON64_NES, nes_usage,         WF_DEFAULT},
-  {UCON64_MIRR, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_MULTI, UCON64_GBA, gba_usage,        WF_STOP},
 //  {UCON64_MVS, UCON64_NEOGEO, neogeo_usage,    WF_DEFAULT},
   {UCON64_N2, UCON64_GENESIS, genesis_usage,   WF_DEFAULT},
   {UCON64_N2GB, UCON64_GB, gameboy_usage,      WF_DEFAULT},
-  {UCON64_NBAT, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_NROT, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
-  {UCON64_NTSC, UCON64_NES, nes_usage,         WF_DEFAULT},
-  {UCON64_NVRAM, UCON64_NES, nes_usage,        WF_DEFAULT},
-  {UCON64_PAL, UCON64_NES, nes_usage,          WF_DEFAULT},
   {UCON64_PASOFAMI, UCON64_NES, nes_usage,     WF_DEFAULT},
   {UCON64_ROTL, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
   {UCON64_ROTR, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
@@ -569,14 +446,12 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_SMG, UCON64_PCE, pcengine_usage,     WF_DEFAULT},
   {UCON64_SRAM, UCON64_GBA, gba_usage,          0},
   {UCON64_SSC, UCON64_GB, gameboy_usage,       WF_DEFAULT},
-  {UCON64_SSIZE, UCON64_SNES, snes_usage,      WF_DEFAULT},
   {UCON64_SWC, UCON64_SNES, snes_usage,        WF_DEFAULT},
   {UCON64_SWCS, UCON64_SNES, snes_usage,       0},
   {UCON64_UFOS, UCON64_SNES, snes_usage,       0},
   {UCON64_UNIF, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_USMS, UCON64_N64, n64_usage,         WF_DEFAULT},
   {UCON64_V64, UCON64_N64, n64_usage,          WF_DEFAULT},
-  {UCON64_VRAM, UCON64_NES, nes_usage,         WF_DEFAULT},
   // We have to add |WF_NO_ROM to the copier options workflow parameter in
   //  order to support dumping of cartridges or copier SRAM.
   {UCON64_XDEX, UCON64_N64, dex_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
@@ -605,7 +480,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XV64, UCON64_N64, doctor64_usage,    WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_Z64, UCON64_N64, n64_usage,          WF_DEFAULT},
 /*
-  these consoles do not (need to) know the console or work for more than one
+  these options do not (need to) know the console or work for more than one
 */
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},
   {UCON64_A, UCON64_UNKNOWN, aps_usage,        WF_STOP},
@@ -622,16 +497,14 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_DINT, UCON64_UNKNOWN, ucon64_options_usage, 0},
   {UCON64_E, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
   {UCON64_FIND, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT},
-  {UCON64_GG, UCON64_UNKNOWN, gg_usage,        WF_DEFAULT|WF_NO_SPLIT},
+  {UCON64_GG, UCON64_UNKNOWN, gg_usage,        0},
   {UCON64_GGD, UCON64_UNKNOWN, gg_usage,       0},
   {UCON64_GGE, UCON64_UNKNOWN, gg_usage,       0},
-  {UCON64_HEX, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT}, // get size only
-  {UCON64_I, UCON64_UNKNOWN, ips_usage,        WF_STOP|WF_NO_SPLIT},
+  {UCON64_HEX, UCON64_UNKNOWN, ucon64_options_usage, 0},
+  {UCON64_I, UCON64_UNKNOWN, ips_usage,        WF_STOP},
   {UCON64_IDPPF, UCON64_UNKNOWN, ppf_usage,    0},
   {UCON64_INS, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_INSN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
-  {UCON64_INT, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
-  {UCON64_INT2, UCON64_UNKNOWN, NULL,          WF_DEFAULT},
 //  {UCON64_ISO, UCON64_UNKNOWN, ucon64_options_usage, 0},
   {UCON64_ISPAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_INIT|WF_NO_SPLIT},
   {UCON64_J, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
@@ -640,10 +513,10 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_LSV, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
   {UCON64_MGD, UCON64_UNKNOWN, NULL,      WF_DEFAULT},
 //  {UCON64_MGH, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
-  {UCON64_MKA, UCON64_UNKNOWN, aps_usage,      0},
+  {UCON64_MKA, UCON64_UNKNOWN, aps_usage,      WF_STOP},
 //  {UCON64_MKCUE, UCON64_UNKNOWN, ucon64_options_usage, 0},
-  {UCON64_MKI, UCON64_UNKNOWN, ips_usage,      0},
-  {UCON64_MKPPF, UCON64_UNKNOWN, ppf_usage,    0},
+  {UCON64_MKI, UCON64_UNKNOWN, ips_usage,      WF_STOP},
+  {UCON64_MKPPF, UCON64_UNKNOWN, ppf_usage,    WF_STOP},
   {UCON64_MKSHEET, UCON64_UNKNOWN, NULL,       0},
 //  {UCON64_MKTOC, UCON64_UNKNOWN, ucon64_options_usage, 0},
   {UCON64_N, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
@@ -654,9 +527,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_PAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_DEFAULT},
   {UCON64_PADHD, UCON64_UNKNOWN, NULL,         WF_DEFAULT},
   {UCON64_PADN, UCON64_UNKNOWN, ucon64_padding_usage, WF_DEFAULT},
-  {UCON64_PATCH, UCON64_UNKNOWN, ucon64_patching_usage, WF_DEFAULT},
-  {UCON64_POKE, UCON64_UNKNOWN, ucon64_patching_usage, WF_DEFAULT},
-  {UCON64_PPF, UCON64_UNKNOWN, ppf_usage,      WF_DEFAULT|WF_STOP},
+  {UCON64_POKE, UCON64_UNKNOWN, ucon64_patching_usage, 0},
+  {UCON64_PPF, UCON64_UNKNOWN, ppf_usage,      WF_STOP},
   {UCON64_RENAME, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
   {UCON64_RROM, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
   {UCON64_RR83, UCON64_UNKNOWN, NULL,          WF_INIT|WF_PROBE|WF_NO_SPLIT},
@@ -679,8 +551,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   force recognition switches
 */
-  {UCON64_ATA, UCON64_ATARI, atari_usage,      WF_SWITCH},
   {UCON64_3DO, UCON64_REAL3DO, real3do_usage,  WF_SWITCH},
+  {UCON64_ATA, UCON64_ATARI, atari_usage,      WF_SWITCH},
 //  {UCON64_CD32, UCON64_CD32, cd32_usage,       WF_SWITCH},
 //  {UCON64_CDI, UCON64_CDI, cdi_usage,          WF_SWITCH},
   {UCON64_COLECO, UCON64_COLECO, coleco_usage, WF_SWITCH},
@@ -712,7 +584,12 @@ const st_ucon64_wf_t ucon64_wf[] = {
   other switches
 */
   {UCON64_83, UCON64_UNKNOWN, ucon64_dat_usage, WF_SWITCH},
+  {UCON64_BAT, UCON64_NES, nes_usage,          WF_SWITCH},
   {UCON64_BS, UCON64_SNES, snes_usage,         WF_SWITCH},
+  {UCON64_CMNT, UCON64_NES, nes_usage,         WF_SWITCH},
+  {UCON64_CTRL, UCON64_UNKNOWN, NULL,          WF_SWITCH}, // for NES & SNES
+  {UCON64_CTRL2, UCON64_SNES, snes_usage,      WF_SWITCH},
+  {UCON64_DUMPINFO, UCON64_NES, nes_usage,     WF_SWITCH},
   {UCON64_FILE, UCON64_UNKNOWN, NULL,          WF_SWITCH},
   {UCON64_FORCE63, UCON64_UNKNOWN, ucon64_dat_usage, WF_SWITCH},
   {UCON64_FRONTEND, UCON64_UNKNOWN, NULL,      WF_SWITCH},
@@ -720,19 +597,30 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_HD, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_HDN, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_HI, UCON64_SNES, snes_usage,         WF_SWITCH},
-  {UCON64_NBS, UCON64_SNES, snes_usage,        WF_SWITCH},
+  {UCON64_INT, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_INT2, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_MAPR, UCON64_NES, nes_usage,         WF_SWITCH},
+  {UCON64_MIRR, UCON64_NES, nes_usage,         WF_SWITCH},
   {UCON64_NBAK, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_NBAT, UCON64_NES, nes_usage,         WF_SWITCH},
+  {UCON64_NBS, UCON64_SNES, snes_usage,        WF_SWITCH},
   {UCON64_NCOL, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_NHD, UCON64_UNKNOWN, ucon64_options_usage,  WF_SWITCH},
   {UCON64_NHI, UCON64_SNES, snes_usage,        WF_SWITCH},
   {UCON64_NINT, UCON64_UNKNOWN, ucon64_options_usage,WF_SWITCH},
   {UCON64_NS, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_NTSC, UCON64_NES, nes_usage,         WF_SWITCH},
+  {UCON64_NVRAM, UCON64_NES, nes_usage,        WF_SWITCH},
   {UCON64_O, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_PAL, UCON64_NES, nes_usage,          WF_SWITCH},
+  {UCON64_PATCH, UCON64_UNKNOWN, ucon64_patching_usage, WF_SWITCH},
   {UCON64_PORT, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_Q, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_QQ, UCON64_UNKNOWN, NULL,            WF_SWITCH},
   {UCON64_ROM, UCON64_UNKNOWN, NULL,           WF_SWITCH},
+  {UCON64_SSIZE, UCON64_SNES, snes_usage,      WF_SWITCH},
   {UCON64_V, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_VRAM, UCON64_NES, nes_usage,         WF_SWITCH},
   {0, 0, NULL, 0}
 };
 
@@ -1094,11 +982,11 @@ ucon64_fhexdump (const char *filename, int start, int len)
 // When verifying if the code produces the same output when FILEFILE_LARGE_BUF
 //  is defined as when it's not, be sure to use the same buffer size
 unsigned int
-ucon64_filefile (const char *filename1, int start1, const char *filename2, int start2,
-                 int similar)
+ucon64_filefile (const char *filename1, int start1, const char *filename2,
+                 int start2, int similar)
 {
   int base, fsize1, fsize2, len, chunksize1, chunksize2, readok = 1,
-      bytesread1, bytesread2, bytesleft1, bytesleft2;
+      bytesread1, bytesread2, bytesleft1, bytesleft2, n_bytes = 0;
 #ifdef  FILEFILE_LARGE_BUF
   int bufsize = 1024 * 1024;
   unsigned char *buf1, *buf2;
@@ -1107,9 +995,13 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2, int s
   unsigned char buf1[MAXBUFSIZE], buf2[MAXBUFSIZE];
 #endif
   FILE *file1, *file2;
+  struct stat finfo1, finfo2;
 
-  if (!strcmp (filename1, filename2))
-    return 1; // similar
+  // not the name, but the combination inode & device identify a file
+  stat (filename1, &finfo1);
+  stat (filename2, &finfo2);
+  if (finfo1.st_dev == finfo2.st_dev && finfo1.st_ino == finfo2.st_ino)
+    return -2;                                  // one file
   if (access (filename1, R_OK) != 0 || access (filename2, R_OK) != 0)
     return -1;
 
@@ -1191,6 +1083,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2, int s
                       mem_hexdump (&buf2[base], len, start2 + base + bytesread2);
                       printf ("\n");
                       base += len;
+                      n_bytes += len;
                     }
                   else
                     base++;
@@ -1208,7 +1101,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2, int s
   free (buf1);
   free (buf2);
 #endif
-  return 0;
+  return n_bytes;
 }
 
 

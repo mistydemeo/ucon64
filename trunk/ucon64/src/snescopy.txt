@@ -1,7 +1,5 @@
-# Currently none of these codes are active, because they are all built in
-# uCON64. They have been put here for your convenience and as a reference
-# so that you don't have to look at the source code. Read the FAQ for the
-# format.
+# These codes have been put here for your convenience and as a reference so
+# that you don't have to look at the source code. Read the FAQ for the format.
 #
 # Of the following two groups of three only one should be enabled at one time
 # 02 01 01 70 02 01 01 70 d0 : 01:  02: ea ea : 0:   8f 9f : cf df
@@ -55,3 +53,7 @@
 # 84 26 ad 39 b5 d0 1a :       01:  02: ea ea : -1
 # 10 f8 38 ef ef ff c1 :       01:  02: ea a9 00 00 : -3
 # 10 f8 38 ef f2 fd c3 f0 :    01:  02: ea a9 00 00 80 : -4
+#
+# Tetris Attack (the two below)
+c2 30 ad fc 1f c9 50 44 d0 :   01: 02: 4c d1 80 : -6
+8f 01 01 70 af 01 01 70 c9 01 01 d0 : 01: 02: 80 : 0

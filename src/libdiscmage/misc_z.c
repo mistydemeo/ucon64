@@ -43,7 +43,7 @@ extern int errno;
 int
 q_fsize (const char *filename)
 // If HAVE_ZLIB_H is defined this function is very slow. Please avoid to use
-//  it much. Use ucon64.file_size in uCON64 code.
+//  it much.
 {
   FILE *file;
   unsigned char magic[4] = { 0 };

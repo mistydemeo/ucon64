@@ -29,21 +29,31 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "../dxedll_priv.h"
 #endif
 
-#if 0
-#define SIZERAW 2352
-#define SIZEISO_MODE1 2048
-#define SIZEISO_MODE2_RAW 2352
-#define SIZEISO_MODE2_FORM1 2048
-#define SIZEISO_MODE2_FORM2 2336
-#define AUDIO 0
-#define MODE1 1
-#define MODE2 2
-#define MODE1_2352 10
-#define MODE2_2352 20
-#define MODE1_2048 30
-#define MODE2_2336 40
-#define UNKNOWN -1
-#endif
+
+const st_track_desc_t toc_desc[] = 
+  {
+    {DM_MODE1_2048, "MODE1"}, // MODE2_FORM1
+    {DM_MODE1_2352, "MODE1_RAW"},
+    {DM_MODE2_2336, "MODE2"}, // MODE2_FORM_MIX
+    {DM_MODE2_2352, "MODE2_RAW"},
+    {DM_AUDIO, "AUDIO"},
+    {0, NULL}
+  };
+
+
+static const char *
+toc_get_desc (int id)
+{
+  int x = 0;
+  
+  for (x = 0; toc_desc[x].desc; x++)
+    if (id == toc_desc[x].id)
+      return toc_desc[x].desc;
+  return "";
+}
+
+
+
 
 
 dm_image_t *
@@ -253,7 +263,7 @@ toc_init (dm_image_t *image)
     {
       dm_track_t *track = (dm_track_t *) &image->track[t];
       
-      if (!format_track_init (track, fh))
+      if (!dm_track_init (track, fh))
         {
           track->track_len =
           track->total_len = q_fsize (image->fname) / track->sector_size;
@@ -308,9 +318,9 @@ dm_toc_write (const dm_image_t *image)
                      "TRACK %s\n"
 //                     "NO COPY\n"
                      "DATAFILE \"%s\" %u// length in bytes: %u\n",
-                     dm_get_track_desc (track->mode, track->sector_size, FALSE),
+                     toc_get_desc (track->id),
                      basename2 (image->fname),
-		     (unsigned int) (track->total_len * track->sector_size),
+                     (unsigned int) (track->total_len * track->sector_size),
                      (unsigned int) (track->total_len * track->sector_size));
               break;
 
@@ -321,9 +331,9 @@ dm_toc_write (const dm_image_t *image)
                      "TRACK %s\n"
 //                     "NO COPY\n"
                      "DATAFILE \"%s\" %u// length in bytes: %u\n",
-                     dm_get_track_desc (track->mode, track->sector_size, FALSE),
+                     toc_get_desc (track->id),
                      basename2 (image->fname),
-		     (unsigned int) (track->total_len * track->sector_size),
+                     (unsigned int) (track->total_len * track->sector_size),
                      (unsigned int) (track->total_len * track->sector_size));
             break;
             
@@ -334,9 +344,9 @@ dm_toc_write (const dm_image_t *image)
                      "TRACK %s\n"
 //                     "NO COPY\n"
                      "DATAFILE \"%s\" %u// length in bytes: %u\n",
-                     dm_get_track_desc (track->mode, track->sector_size, FALSE),
+                     toc_get_desc (track->id),
                      basename2 (image->fname),
-		     (unsigned int) (track->total_len * track->sector_size),
+                     (unsigned int) (track->total_len * track->sector_size),
                      (unsigned int) (track->total_len * track->sector_size));
             break;
         }

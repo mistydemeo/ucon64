@@ -126,6 +126,7 @@ open_module (char *module_name)
   sym->free = free;
   sym->malloc = malloc;
   sym->calloc = calloc;
+  sym->realloc = realloc;
   sym->exit = exit;
   sym->strtol = strtol;
   sym->getenv = getenv;

@@ -189,7 +189,7 @@ cdi_track_init (dm_track_t *track, FILE *fh)
 #if 0
   pos = ftell (fh);
   fseek (fh, track->track_start, SEEK_SET);
-  format_track_init (track, fh); // try to get more (precise) info from the track itself
+  dm_track_init (track, fh); // try to get more (precise) info from the track itself
   fseek (fh, pos, SEEK_SET);
 #endif
 
@@ -284,7 +284,10 @@ cdi_init (dm_image_t *image)
   image->tracks = 0;
   for (s = 0; s < image->sessions; s++)
     {
-printf ("track# offset: %lx\n", ftell (fh));
+#ifdef  DEBUG
+      printf ("track# offset: %lx\n", ftell (fh));
+      fflush (stdout);
+#endif
       fread (&value_16, 1, 2, fh); // how many tracks in this session?
 
       for (t = 0; t < value_16; t++)

@@ -1,7 +1,7 @@
 /*
 dllinit.c - DLL initialization code
 
-written by 2002 - 2003 dbjh
+written by 2002 - 2004 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -79,7 +79,7 @@ st_symbol_t import_export =
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL,
   {0, NULL, NULL, 0, 0, 0, NULL, 0}, {0, NULL, NULL, 0, 0, 0, NULL, 0},
   {0, NULL, NULL, 0, 0, 0, NULL, 0}, NULL, NULL, NULL, 0
 };
@@ -89,7 +89,7 @@ st_map_t *symbol;
 int
 dxe_init (void)
 {
-  symbol = map_create (19);
+  symbol = map_create (20);
   symbol->cmp_key = (int (*) (void *, void *)) strcmp; // How beautiful! ;-)
 
   symbol = map_put (symbol, "dm_get_version", dm_get_version);

@@ -101,102 +101,7 @@ static void set_tty (tty_t *param);
 #endif
 
 
-//#define WITH_CRC16                            // currently not used
-
-#if     !defined HAVE_ZLIB_H || defined WITH_CRC16
-
-#define CRC16_POLYNOMIAL 0xa001
-#define CRC32_POLYNOMIAL 0xedb88320
-
-
-void
-init_crc_table (void *table, unsigned int polynomial)
-{
-  unsigned int crc, i, j;
-
-  for (i = 0; i < 256; i++)
-    {
-      crc = i;
-      for (j = 8; j > 0; j--)
-        if (crc & 1)
-          crc = (crc >> 1) ^ polynomial;
-        else
-          crc >>= 1;
-
-      if (polynomial == CRC32_POLYNOMIAL)
-        ((unsigned int *) table)[i] = crc;
-      else
-        ((unsigned short *) table)[i] = (unsigned short) crc;
-    }
-}
-#endif
-
-
-#ifdef  WITH_CRC16
-
-static unsigned short *crc16_table = NULL;
-
-
-static void
-free_crc16_table (void)
-{
-  free (crc16_table);
-  crc16_table = NULL;
-}
-
-
-unsigned short
-crc16 (unsigned short crc, const void *buffer, unsigned int size)
-{
-  unsigned char *p = (unsigned char *) buffer;
-
-  if (!crc16_table)
-    {
-      crc16_table = (unsigned short *) malloc (256 * 2);
-      register_func (free_crc16_table);
-      init_crc_table (crc16_table, CRC16_POLYNOMIAL);
-    }
-
-  crc = ~crc;
-  while (size--)
-    crc = (crc >> 8) ^ crc16_table[(crc ^ *p++) & 0xff];
-  return ~crc;
-}
-#endif
-
-
 #ifndef HAVE_ZLIB_H
-
-static unsigned int *crc32_table = NULL;
-
-
-static void
-free_crc32_table (void)
-{
-  free (crc32_table);
-  crc32_table = NULL;
-}
-
-
-unsigned int
-crc32_2 (unsigned int crc, const void *buffer, unsigned int size)
-{
-  unsigned char *p = (unsigned char *) buffer;
-
-  if (!crc32_table)
-    {
-      crc32_table = (unsigned int *) malloc (256 * 4);
-      register_func (free_crc32_table);
-      init_crc_table (crc32_table, CRC32_POLYNOMIAL);
-    }
-
-  crc = ~crc;
-  while (size--)
-    crc = (crc >> 8) ^ crc32_table[(crc ^ *p++) & 0xff];
-  return ~crc;
-}
-
-
 int
 q_fsize (const char *filename)
 {
@@ -1416,13 +1321,8 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 }
 
 
-#if     defined UCON64 && !defined DLL
-// I think this function belongs here, because it is related to change_mem()
-// Be a man and accept that the world is not perfect.
-#include "ucon64_misc.h"
-
 int
-build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullfilename)
+build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, int verbose)
 /*
   This function goes a bit over the top what memory allocation technique
   concerns, but at least it's stable.
@@ -1437,17 +1337,13 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
       currentsize2, requiredsize2, currentsize3, requiredsize3;
   FILE *srcfile;
 
-  realpath2 (filename, src_name);
-  // First try the current directory, then the configuration directory
-  if (access (src_name, F_OK | R_OK) == -1)
-    sprintf (src_name, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, filename);
-  strcpy (fullfilename, src_name);
+  strcpy (src_name, filename);
   if (access (src_name, F_OK | R_OK))
     return -1;                                  // NOT an error, it's optional
 
   if ((srcfile = fopen (src_name, "r")) == NULL) // open in text mode
     {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+      fprintf (stderr, "ERROR: Can't open \"%s\" for reading\n", src_name);
       return -1;
     }
 
@@ -1470,7 +1366,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
           currentsize1 = requiredsize1 + 10 * sizeof (st_cm_pattern_t);
           if (!(*patterns = (st_cm_pattern_t *) realloc (*patterns, currentsize1)))
             {
-              fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize1);
+              fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize1);
               return -1;
             }
         }
@@ -1494,7 +1390,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
               if (!((*patterns)[n_codes].search =
                    (char *) realloc ((*patterns)[n_codes].search, currentsize2)))
                 {
-                  fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize2);
+                  fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
                   free (*patterns);
                   *patterns = NULL;
                   return -1;
@@ -1555,7 +1451,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
               if (!((*patterns)[n_codes].replace =
                    (char *) realloc ((*patterns)[n_codes].replace, currentsize2)))
                 {
-                  fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize2);
+                  fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
                   free ((*patterns)[n_codes].search);
                   free (*patterns);
                   *patterns = NULL;
@@ -1580,7 +1476,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
         }
       (*patterns)[n_codes].offset = strtol (token, NULL, 10); // yes, offset is decimal
 
-      if (ucon64.quiet == -1)
+      if (verbose)
         {
           printf ("\n"
                   "line:         %d\n"
@@ -1619,7 +1515,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
               if (!((*patterns)[n_codes].sets = (st_cm_set_t *)
                     realloc ((*patterns)[n_codes].sets, currentsize2)))
                 {
-                  fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize2);
+                  fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize2);
                   free ((*patterns)[n_codes].replace);
                   free ((*patterns)[n_codes].search);
                   free (*patterns);
@@ -1642,7 +1538,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
                   if (!((*patterns)[n_codes].sets[n_sets].data = (char *)
                         realloc ((*patterns)[n_codes].sets[n_sets].data, currentsize3)))
                     {
-                      fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize3);
+                      fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", currentsize3);
                       free ((*patterns)[n_codes].sets);
                       free ((*patterns)[n_codes].replace);
                       free ((*patterns)[n_codes].search);
@@ -1658,7 +1554,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
           while ((token = strtok (NULL, " ")));
           (*patterns)[n_codes].sets[n_sets].size = n;
 
-          if (ucon64.quiet == -1)
+          if (verbose)
             {
               printf ("set:          ");
               for (n = 0; n < (*patterns)[n_codes].sets[n_sets].size; n++)
@@ -1680,7 +1576,6 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
   fclose (srcfile);
   return n_codes;
 }
-#endif
 
 
 void
@@ -1714,7 +1609,7 @@ gauge (time_t init_time, int pos, int size)
   int curr, bps, left, p, percentage;
   char progress[MAXBUFSIZE];
 
-  if (pos > size)
+  if (pos > size || !size)
     return -1;
 
   if ((curr = time (0) - init_time) == 0)
@@ -1890,10 +1785,8 @@ getenv2 (const char *variable)
 }
 
 
-static char *
-get_property2 (const char *filename, const char *propname, char divider,
-               char *buffer, const char *def)
-// divider is the 1st char after propname ('=', ':', etc..)
+char *
+get_property (const char *filename, const char *propname, char *buffer, const char *def)
 {
   char line[MAXBUFSIZE], *p = NULL;
   FILE *fh;
@@ -1911,7 +1804,7 @@ get_property2 (const char *filename, const char *propname, char divider,
 
           if (!strnicmp (line, propname, strlen (propname)))
             {
-              p = strchr (line, divider);
+              p = strchr (line, PROPERTY_SEPARATOR);
               if (p)                    // if no divider was found the propname must be
                 {                       //  a bool config entry (present or not present)
                   p++;
@@ -1947,21 +1840,13 @@ get_property2 (const char *filename, const char *propname, char divider,
 }
 
 
-char *
-get_property (const char *filename, const char *propname, char *buffer,
-              const char *def)
-{
-  return get_property2 (filename, propname, '=', buffer, def);
-}
-
-
 int32_t
-get_property_int (const char *filename, const char *propname, char divider)
+get_property_int (const char *filename, const char *propname)
 {
   char buf[160];                                // 159 is enough for a *very* large number
   int32_t value = 0;
 
-  get_property2 (filename, propname, divider, buf, NULL);
+  get_property (filename, propname, buf, NULL);
 
   if (buf[0])
     switch (tolower (buf[0]))
@@ -1977,13 +1862,12 @@ get_property_int (const char *filename, const char *propname, char divider)
 
 
 char *
-get_property_fname (const char *filename, const char *propname, char *buffer,
-                    const char *def)
+get_property_fname (const char *filename, const char *propname, char *buffer, const char *def)
 // get a filename from file with name filename, expand it and fix characters
 {
   char tmp[FILENAME_MAX];
 
-  get_property2 (filename, propname, '=', tmp, def);
+  get_property (filename, propname, tmp, def);
 #ifdef  __CYGWIN__
   fix_character_set (tmp);
 #endif
@@ -1991,8 +1875,8 @@ get_property_fname (const char *filename, const char *propname, char *buffer,
 }
 
 
-static int
-set_property2 (const char *filename, const char *propname, char divider, const char *value)
+int
+set_property (const char *filename, const char *propname, const char *value)
 {
   int found = 0, result = 0, file_size = 0;
   char buf[MAXBUFSIZE], *buf2;
@@ -2020,7 +1904,7 @@ set_property2 (const char *filename, const char *propname, char divider, const c
               if (value == NULL)
                 continue;
 
-              sprintf (buf, "%s%c%s\n", propname, divider, value);
+              sprintf (buf, "%s" PROPERTY_SEPARATOR_S "%s\n", propname, value);
             }
           strcat (buf2, buf);
         }
@@ -2029,7 +1913,7 @@ set_property2 (const char *filename, const char *propname, char divider, const c
 
   if (!found && value != NULL)
     {
-      sprintf (buf, "%s%c%s\n", propname, divider, value);
+      sprintf (buf, "%s" PROPERTY_SEPARATOR_S "%s\n", propname, value);
       strcat (buf2, buf);
     }
 
@@ -2039,16 +1923,9 @@ set_property2 (const char *filename, const char *propname, char divider, const c
   result = fwrite (buf2, 1, strlen (buf2), fh);
   fclose (fh);
 
-//  q_fwrite (buf2, 0, strlen (buf2), filename, "wb");
+//  q_fwrite (buf2, 1, strlen (buf2), filename, "w");
 
   return result;
-}
-
-
-int
-set_property (const char *filename, const char *propname, const char *value)
-{
-  return set_property2 (filename, propname, '=', value);
 }
 
 
@@ -2464,27 +2341,6 @@ q_fbackup (const char *filename, int mode)
 
 
 int
-q_fcrc32 (const char *filename, int start)
-{
-  unsigned int n, crc = 0;                      // don't name it crc32 to avoid
-  unsigned char buffer[MAXBUFSIZE];             //  name clash with zlib's func
-  FILE *fh = fopen (filename, "rb");
-
-  if (!fh)
-    return -1;
-
-  fseek (fh, start, SEEK_SET);
-
-  while ((n = fread (buffer, 1, MAXBUFSIZE, fh)))
-    crc = crc32 (crc, buffer, n);
-
-  fclose (fh);
-
-  return crc;
-}
-
-
-int
 q_fcpy (const char *src, int start, int len, const char *dest, const char *mode)
 {
   int seg_len;
@@ -2704,9 +2560,8 @@ process_file (const char *src, int start, int len, const char *dest, const char 
 
 
 int
-argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
+strarg (char **argv, char *str, const char *separator_s, int max_args)
 {
-// TODO: replace with argz_extract()
 #ifdef  DEBUG
   int pos = 0;
 #endif
@@ -2714,11 +2569,11 @@ argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
 
   if (!str)
     return 0;
-  if (!str[0])
+  if (!*str)
     return 0;
 
-  for (; (argv[argc] = (char *) strtok (!argc?str:NULL, separator_s)) &&
-    argc < (max_args - 1); argc++);
+  for (; (argv[argc] = (char *) strtok (!argc ? str : NULL, separator_s)) &&
+       (argc < (max_args - 1)); argc++);
 
 #ifdef  DEBUG
   fprintf (stderr, "argc:     %d\n", argc);

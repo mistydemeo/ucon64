@@ -20,13 +20,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #ifndef FORMAT_H
 #define FORMAT_H
-#include "cdi.h"
-#include "cue.h"
-#include "nero.h"
-#include "other.h"
-#include "toc.h"
-#include "ccd.h"
-
 /*
   callibrate()        a brute force function that tries to find a iso header
                       or anything else that could identify a file as an
@@ -34,6 +27,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 //extern int callibrate (const char *fname, int track_num);
 
-extern int format_track_init (dm_track_t *track, FILE *fh);
-extern int format_free (dm_image_t *image);
+extern int dm_track_init (dm_track_t *track, FILE *fh);
+extern int dm_free (dm_image_t *image);
 #endif  // FORMAT_H

@@ -152,16 +152,16 @@ typedef struct
 
 
 static int f2a_boot_par (const char *ilclient2_fname, const char *illogo_fname);
-static int f2a_write_par (int files_cnt, char **files, unsigned int addr);
+static int f2a_write_par (int n_files, char **files, unsigned int address);
 static int f2a_read_par (unsigned int start, unsigned int size,
                          const char *filename);
 //static int f2a_erase_par (unsigned int start, unsigned int size);
-static int f2a_send_buffer_par (int cmd, int addr,
+static int f2a_send_buffer_par (int cmd, int address,
                                 int size, const unsigned char *resource, int head,
                                 int flip, unsigned int exec, int mode);
-static int f2a_send_cmd_par (int cmd, int addr, int size);
-static int f2a_exec_cmd_par (int cmd, int addr, int size);
-static int f2a_receive_data_par (int cmd, int addr, int size,
+static int f2a_send_cmd_par (int cmd, int address, int size);
+static int f2a_exec_cmd_par (int cmd, int address, int size);
+static int f2a_receive_data_par (int cmd, int address, int size,
                                  const char *filename, int flip);
 static int f2a_send_head_par (int cmd, int size);
 static int f2a_send_raw_par (unsigned char *buffer, int len);
@@ -202,7 +202,7 @@ static int usb_connect (void);
 static int f2a_info (recvmsg *rm);
 static int f2a_boot_usb (const char *ilclient_fname);
 static int f2a_read_usb (int address, int size, const char *filename);
-static int f2a_write_usb (int numfiles, char **files, int address);
+static int f2a_write_usb (int n_files, char **files, int address);
 
 static usb_dev_handle *f2ahandle;
 
@@ -445,11 +445,12 @@ f2a_read_usb (int address, int size, const char *filename)
 
 
 static int
-f2a_write_usb (int numfiles, char **files, int address)
+f2a_write_usb (int n_files, char **files, int address)
 {
   f2a_sendmsg_t sm;
   int i, j, fsize, size, n;
-  char buffer[1024];
+  char buffer[1024], loader_fname[FILENAME_MAX];
+  unsigned char loader[LOADER_SIZE];
   FILE *file;
 
   // initialize command buffer
@@ -458,7 +459,31 @@ f2a_write_usb (int numfiles, char **files, int address)
   sm.magic = MAGIC_NUMBER;
   sm.unknown = 0xa;                             // no idea what this is...
 
-  for (j = 0; j < numfiles; j++)
+  if (n_files > 1)
+    {
+      printf ("Uploading multiloader\n");
+      get_property_fname (ucon64.configfile, "gbaloader", loader_fname, "loader.bin");
+      if (q_fread (loader, 0, LOADER_SIZE, loader_fname) == -1)
+        {
+          fprintf (stderr, "ERROR: Unable to load loader binary (%s)\n", loader_fname);
+          return -1;
+        }
+
+      sm.size = LOADER_SIZE;
+      sm.address = address;
+      sm.sizekb = LOADER_SIZE / 1024;
+
+      if (misc_usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
+        return -1;
+
+      if (misc_usb_write (f2ahandle, (char *) loader, LOADER_SIZE) == -1)
+        {
+          fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
+          return -1;
+        }
+      address += LOADER_SIZE;
+    }
+  for (j = 0; j < n_files; j++)
     {
       if ((fsize = q_fsize (files[j])) == -1)
         {
@@ -479,7 +504,6 @@ f2a_write_usb (int numfiles, char **files, int address)
           return -1;
         }
 
-      // flash the ROM
       sm.size = size;
       sm.address = address;
       sm.sizekb = size / 1024;
@@ -738,13 +762,13 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
 
 
 int
-f2a_write_par (int files_cnt, char **files, unsigned int addr)
+f2a_write_par (int n_files, char **files, unsigned int address)
 {
   int j, fsize, size;
   char loader_fname[FILENAME_MAX];
   unsigned char loader[LOADER_SIZE];
 
-  if (files_cnt > 1)
+  if (n_files > 1)
     {
       printf ("Uploading multiloader\n");
       get_property_fname (ucon64.configfile, "gbaloader", loader_fname, "loader.bin");
@@ -753,15 +777,15 @@ f2a_write_par (int files_cnt, char **files, unsigned int addr)
           fprintf (stderr, "ERROR: Unable to load loader binary (%s)\n", loader_fname);
           return -1;
         }
-      if (f2a_send_buffer_par (PP_CMD_WRITEROM, addr, LOADER_SIZE, loader, HEAD,
-                               FLIP, 0, 0))
+      if (f2a_send_buffer_par (PP_CMD_WRITEROM, address, LOADER_SIZE, loader,
+                               HEAD, FLIP, 0, 0))
         {
           fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
           return -1;
         }
-      addr += LOADER_SIZE;
+      address += LOADER_SIZE;
     }
-  for (j = 0; j < files_cnt; j++)
+  for (j = 0; j < n_files; j++)
     {
       if ((fsize = q_fsize (files[j])) == -1)
         {
@@ -773,14 +797,14 @@ f2a_write_par (int files_cnt, char **files, unsigned int addr)
         size += 32768;
       size &= ~(32768 - 1);
       printf (f2a_msg[UPLOAD_ROM], files[j], fsize / 1024, size / 1024);
-      if (f2a_send_buffer_par (PP_CMD_WRITEROM, addr, size,
+      if (f2a_send_buffer_par (PP_CMD_WRITEROM, address, size,
                                (unsigned char *) files[j], HEAD, FLIP, 0, 1))
         {
           fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
           return -1;
         }
 
-      addr += size;
+      address += size;
     }
   return 0;
 }
@@ -789,14 +813,14 @@ f2a_write_par (int files_cnt, char **files, unsigned int addr)
 int
 f2a_erase_par (unsigned int start, unsigned int size)
 {
-  int end, addr;
+  int end, address;
 
   f2a_exec_cmd_par (PP_CMD_READDATA, ERASE_STUB, 1024);
   end = start + (size);
 
   printf ("Erase cart start=0x%08x end=0x%08x\n", start, end);
-  for (addr = start; addr < end; addr += 0x40000)
-    f2a_send_cmd_par (PP_CMD_ERASE, addr, 1024);
+  for (address = start; address < end; address += 0x40000)
+    f2a_send_cmd_par (PP_CMD_ERASE, address, 1024);
   return 0;
 }
 
@@ -846,7 +870,7 @@ f2a_send_head_par (int cmd, int size)
 
 
 static int
-f2a_exec_cmd_par (int cmd, int addr, int size)
+f2a_exec_cmd_par (int cmd, int address, int size)
 {
   unsigned char *buffer;
   f2a_msg_cmd_t msg_cmd;
@@ -854,7 +878,7 @@ f2a_exec_cmd_par (int cmd, int addr, int size)
   memset (&msg_cmd, 0, sizeof (f2a_msg_cmd_t));
   msg_cmd.magic = me2be_32 (PP_MAGIC_NUMBER);
   msg_cmd.command = me2be_32 (cmd);
-  msg_cmd.address = me2be_32 (addr);
+  msg_cmd.address = me2be_32 (address);
   msg_cmd.sizekb = me2be_32 (size / 1024);
 
   msg_cmd.exec_stub = me2be_32 (EXEC_STUB);
@@ -864,7 +888,7 @@ f2a_exec_cmd_par (int cmd, int addr, int size)
 
   if (parport_debug)
     fprintf (stderr,
-             "sending msg_cmd cmd='0x%08x' addr='0x%08x' size='0x%08x' %d bytes\n",
+             "sending msg_cmd cmd='0x%08x' address='0x%08x' size='0x%08x' %d bytes\n",
              msg_cmd.command, msg_cmd.address, msg_cmd.sizekb,
              (int) sizeof (f2a_msg_cmd_t));
 
@@ -884,7 +908,7 @@ f2a_exec_cmd_par (int cmd, int addr, int size)
 
 
 static int
-f2a_receive_data_par (int cmd, int addr, int size, const char *filename, int flip)
+f2a_receive_data_par (int cmd, int address, int size, const char *filename, int flip)
 {
   unsigned char buffer[1024], recv[4]; //, *mbuffer;
   int i, j;
@@ -894,7 +918,7 @@ f2a_receive_data_par (int cmd, int addr, int size, const char *filename, int fli
   memset (&msg_cmd, 0, sizeof (f2a_msg_cmd_t));
   msg_cmd.magic = me2be_32 (PP_MAGIC_NUMBER);
   msg_cmd.command = me2be_32 (cmd);
-  msg_cmd.address = me2be_32 (addr);
+  msg_cmd.address = me2be_32 (address);
   msg_cmd.sizekb = me2be_32 (size / 1024);
 
   if (f2a_send_head_par (PP_HEAD_READ, size))
@@ -905,7 +929,7 @@ f2a_receive_data_par (int cmd, int addr, int size, const char *filename, int fli
 
   if (parport_debug)
     fprintf (stderr,
-             "sending msg_cmd cmd='0x%08x' addr='0x%08x' size='0x%08x' %d bytes\n",
+             "sending msg_cmd cmd='0x%08x' address='0x%08x' size='0x%08x' %d bytes\n",
              msg_cmd.command, msg_cmd.address, msg_cmd.sizekb,
              (int) sizeof (f2a_msg_cmd_t));
 
@@ -969,7 +993,7 @@ f2a_receive_data_par (int cmd, int addr, int size, const char *filename, int fli
 
 
 static int
-f2a_send_cmd_par (int cmd, int addr, int size)
+f2a_send_cmd_par (int cmd, int address, int size)
 {
   unsigned char recv[4];
   f2a_msg_cmd_t msg_cmd;
@@ -977,7 +1001,7 @@ f2a_send_cmd_par (int cmd, int addr, int size)
   memset (&msg_cmd, 0, sizeof (f2a_msg_cmd_t));
   msg_cmd.magic = me2be_32 (PP_MAGIC_NUMBER);
   msg_cmd.command = me2be_32 (cmd);
-  msg_cmd.address = me2be_32 (addr);
+  msg_cmd.address = me2be_32 (address);
   msg_cmd.sizekb = me2be_32 (size / 1024);
 
   if (f2a_send_head_par (PP_HEAD_WRITE, size))
@@ -988,7 +1012,7 @@ f2a_send_cmd_par (int cmd, int addr, int size)
 
   if (parport_debug)
     fprintf (stderr,
-             "parport_send_cmd cmd='0x%08x' addr='0x%08x' size='0x%08x' %d bytes\n",
+             "parport_send_cmd cmd='0x%08x' address='0x%08x' size='0x%08x' %d bytes\n",
              msg_cmd.command, msg_cmd.address, msg_cmd.sizekb,
              (int) sizeof (f2a_msg_cmd_t));
 
@@ -999,7 +1023,7 @@ f2a_send_cmd_par (int cmd, int addr, int size)
 
 
 static int
-f2a_send_buffer_par (int cmd, int addr, int size, const unsigned char *resource,
+f2a_send_buffer_par (int cmd, int address, int size, const unsigned char *resource,
                      int head, int flip, unsigned int exec, int mode)
 {
   unsigned char recv[4], buffer[1024];
@@ -1010,7 +1034,7 @@ f2a_send_buffer_par (int cmd, int addr, int size, const unsigned char *resource,
   memset (&msg_cmd, 0, sizeof (f2a_msg_cmd_t));
   msg_cmd.magic = me2be_32 (PP_MAGIC_NUMBER);
   msg_cmd.command = me2be_32 (cmd);
-  msg_cmd.address = me2be_32 (addr);
+  msg_cmd.address = me2be_32 (address);
   msg_cmd.sizekb = me2be_32 (size / 1024);
   if (exec)
     {
@@ -1024,7 +1048,7 @@ f2a_send_buffer_par (int cmd, int addr, int size, const unsigned char *resource,
 
   if (parport_debug)
     fprintf (stderr,
-             "parport_send_buffer cmd='0x%08x' addr='0x%08x' size='0x%08x' %d bytes\n",
+             "parport_send_buffer cmd='0x%08x' address='0x%08x' size='0x%08x' %d bytes\n",
              msg_cmd.command, msg_cmd.address, msg_cmd.sizekb,
              (int) sizeof (f2a_msg_cmd_t));
 

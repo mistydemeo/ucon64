@@ -1,7 +1,7 @@
 /*
 dxedll_pub.h - DXE client support code
 
-written by 2002 - 2003 dbjh
+written by 2002 - 2004 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -91,6 +91,7 @@ typedef struct st_symbol
   void (*free) (void *);
   void *(*malloc) (size_t);
   void *(*calloc) (size_t, size_t);
+  void *(*realloc) (void *, size_t);
   void (*exit) (int) __attribute__ ((noreturn));
   long (*strtol) (const char *, char **, int);
   char *(*getenv) (const char *);

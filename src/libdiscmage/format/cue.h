@@ -20,6 +20,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #ifndef CUE_H
 #define CUE_H
+extern const st_track_desc_t cue_track_desc[];
+
 extern int dm_mkcue (const dm_image_t *image);
 extern int cue_init (dm_image_t *image);
 #endif // CUE_H

@@ -130,10 +130,10 @@ Easy CD Creator image file (*.cif)|*.cif
 
 const st_track_probe_t track_probe[] = 
   {
-    {1, 0,  2048, 0,   "MODE1/2048", "MODE1"}, // MODE2_FORM1
-    {1, 16, 2352, 288, "MODE1/2352", "MODE1_RAW"},
-    {2, 8,  2336, 280, "MODE2/2336", "MODE2"}, // MODE2_FORM_MIX
-    {2, 24, 2352, 280, "MODE2/2352", "MODE2_RAW"},
+    {1, 0,  2048, 0,   DM_MODE1_2048}, // MODE2_FORM1
+    {1, 16, 2352, 288, DM_MODE1_2352},
+    {2, 8,  2336, 280, DM_MODE2_2336}, // MODE2_FORM_MIX
+    {2, 24, 2352, 280, DM_MODE2_2352},
 #if 0
     {2, 24, 2324, 4},   // MODE2/2328, MODE2_FORM2
     {2, 0,  2340, 0},
@@ -147,37 +147,49 @@ const st_track_probe_t track_probe[] =
     {0, 0,    NULL,         "MODE0"},
     {0, 0,    NULL,         "MODE2_FORM2"},
 #endif
-    {0, 0,  2352, 0, "AUDIO", "AUDIO"},
+    {0, 0,  2352, 0, DM_AUDIO},
     // TODO: remove this!
-    {0, 0,  1, 0, "AUDIO", "AUDIO"},
-    {0, 0, 0, 0, NULL, NULL}
+    {0, 0, 1, 0, DM_AUDIO},
+    {0, 0, 0, 0, 0}
   };
 
-
-static void (* dm_ext_gauge) (int, int);
 
 
 const char *dm_msg[] = {
   "ERROR: %s has been deprecated\n",
-  "ERROR: unknown/unsupported track mode\n",
-  "ERROR: the images track mode is already MODE1/2048\n",
-  "WARNING: this function is still in ALPHA stage. It might not work properly\n",
+  "ERROR: Unknown/unsupported track mode\n",
+  "ERROR: The images track mode is already MODE1/2048\n",
+  "WARNING: This function is still in ALPHA stage. It might not work properly\n",
   NULL
 };
 
 
-const char *
-dm_get_track_desc (int mode, int sector_size, int cue)
-// if cue == TRUE return track_desc[x].cue
+int
+dm_get_track_id (int mode, int sector_size)
 {
   int x = 0;
   
   for (x = 0; track_probe[x].sector_size; x++)
     if (track_probe[x].mode == mode &&
         track_probe[x].sector_size == sector_size)
-      return (cue ? track_probe[x].cue : track_probe[x].toc);
+      return track_probe[x].id;
 
-  return NULL;
+  return 0; // no id
+}
+
+
+void
+dm_get_track_by_id (int id, int8_t *mode, uint16_t *sector_size)
+{
+  int x = 0;
+  
+  for (x = 0; track_probe[x].sector_size; x++)
+    if (track_probe[x].id == id)
+      {
+        *mode = track_probe[x].mode;
+        *sector_size = track_probe[x].sector_size;
+        return;
+      }
 }
 
 
@@ -208,7 +220,7 @@ dm_lba_to_msf (int lba, int *m0, int *s0, int *f0)
 
   m = s = f = -1;
 
-#ifdef	__follow_redbook__
+#ifdef  __follow_redbook__
   if (lba >= -150 && lba < 405000) /* lba <= 404849 */
 #else
   if (lba >= -150)
@@ -272,9 +284,9 @@ dm_msf_to_lba (int m, int s, int f, int force_positive)
 {
   long ret = (m * CD_SECS + s)
 #if 0
-   * CD_FRAMES + f;
+    * CD_FRAMES + f;
 #else
- ;
+    ;
   ret *= CD_FRAMES;
   ret += f;
 #endif
@@ -293,7 +305,7 @@ dm_msf_to_lba (int m, int s, int f, int force_positive)
 #endif
 
 
-static void
+void
 dm_clean (dm_image_t *image)
 {
   int x = 0;
@@ -304,93 +316,7 @@ dm_clean (dm_image_t *image)
 }
 
 
-
-
-dm_image_t *
-dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
-// recurses through all <image_type>_init functions to find correct image type
-{
-  typedef struct
-    {
-      int type;
-      int (* init_func) (dm_image_t *);
-      int (* track_init_func) (dm_track_t *, FILE *);
-    } st_probe_t;
-
-  static st_probe_t probe[] =
-    {
-      {DM_CDI, cdi_init, cdi_track_init},
-      {DM_NRG, nrg_init, nrg_track_init},
-//      {DM_CCD, ccd_init, ccd_track_init},
-      {DM_TOC, toc_init, format_track_init},
-      {DM_CUE, cue_init, format_track_init},
-      {DM_OTHER, other_init, format_track_init},
-      {0, NULL, NULL}
-    };
-  int x = 0, identified = 0;
-  int t = 0;
-  static dm_image_t image2;
-  FILE *fh = NULL;
-
-#ifdef  DEBUG
-  printf ("sizeof (dm_track_t) == %d\n", sizeof (dm_track_t));
-  printf ("sizeof (dm_image_t) == %d\n", sizeof (dm_image_t));
-  fflush (stdout);
-#endif
-
-  if (image)
-    format_free (image);
-
-  if (access (fname, F_OK) != 0)
-    return NULL;
-
-  if (!image)
-//    image = (dm_image_t *) malloc (sizeof (dm_image_t));
-    image = (dm_image_t *) &image2;
-  memset (image, 0, sizeof (dm_image_t));
-  if (!image)
-    return NULL;
-
-  for (x = 0; probe[x].type; x++)
-    if (probe[x].init_func)
-      {
-        dm_clean (image);
-        image->flags = flags;
-        strcpy (image->fname, fname);
-
-        if (!probe[x].init_func (image))
-          {
-            identified = 1;
-            break;
-          }
-      }
-
-  if (!identified) // unknown image
-    return NULL;
-
-  image->type = probe[x].type;
-
-  if (!(fh = fopen (image->fname, "rb")))
-    return image;
-
-  // verify header or sheet informations
-  for (t = 0; t < image->tracks; t++)
-    {
-      dm_track_t *track = (dm_track_t *) &image->track[t];
-
-      if (track->mode != 0) // AUDIO/2352 has no iso header
-        track->iso_header_start = track->track_start + (track->sector_size * (16 + track->pregap_len)) + track->seek_header;
-
-      printf ("iso header offset: %d\n\n", (int) track->iso_header_start);
-      fflush (stdout);
-
-      track->desc = dm_get_track_desc (track->mode, track->sector_size, TRUE);
-    }
-
-  fclose (fh);
-
-  return image;
-}
+void (* dm_ext_gauge) (int, int);
 
 
 int
@@ -403,19 +329,44 @@ dm_fseek (FILE *fp, int track, int how)
 }
 
 
-dm_image_t *
-dm_open (const char *fname, uint32_t flags)
+uint32_t
+dm_get_version (void)
 {
-  return dm_reopen (fname, flags, NULL);
+  static const uint32_t dm_version = LIB_VERSION (DM_VERSION_MAJOR,
+                                                  DM_VERSION_MINOR,
+                                                  DM_VERSION_STEP);
+  return dm_version;
 }
 
 
-int
-dm_close (dm_image_t *image)
+const char *
+dm_get_version_s (void)
 {
-//  dm_clean (image);
-  format_free (image);
-  return 0;
+  return "supported: BIN, ISO, CDI";
+}
+
+
+void
+dm_set_gauge (void (* gauge) (int, int))
+{
+  dm_ext_gauge = gauge;
+}
+
+
+FILE *
+dm_fdopen (dm_image_t *image, int track_num, const char *mode)
+{
+  dm_track_t *track = (dm_track_t *) &image->track[track_num];
+  FILE *fh;
+  
+  if (!(fh = fopen (image->fname, mode)))
+    return NULL;
+
+  if (!fseek (fh, track->track_start, SEEK_SET))
+    return fh;
+
+  fclose (fh);
+  return NULL;
 }
 
 
@@ -573,9 +524,11 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
           result = 0;
           result += fwrite (&sync_data, 1, 12, fh2);
 
-dm_lba_to_msf (150 + x, &m, &s, &f);
-fprintf (stderr, "%d: %d %d %d\n", track->sector_size, m, s, f);
-fflush (stderr);
+          dm_lba_to_msf (150 + x, &m, &s, &f);
+#ifdef  DEBUG
+          fprintf (stderr, "%d: %d %d %d\n", track->sector_size, m, s, f);
+          fflush (stderr);
+#endif
 
           result += fwrite (&buf2, 1, 3, fh2); //TODO: MSF
           if (fputc (track->mode, fh2))
@@ -785,97 +738,3 @@ dm_isofix (const dm_image_t * image, int start_lba, int track_num)
 }
 #endif
 
-int
-dm_disc_read (const dm_image_t *image)
-{
-  fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_read()");
-  (void) image;                                 // warning remover
-  return 0;
-}
-
-
-int
-dm_disc_write (const dm_image_t *image)
-{
-  fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_write()");
-  (void) image;                                 // warning remover
-  return 0;
-}
-
-
-uint32_t
-dm_get_version (void)
-{
-  static const uint32_t dm_version = LIB_VERSION (DM_VERSION_MAJOR,
-                                                  DM_VERSION_MINOR,
-                                                  DM_VERSION_STEP);
-  return dm_version;
-}
-
-
-const char *
-dm_get_version_s (void)
-{
-  return "0.0.5alpha";
-}
-
-
-void
-dm_set_gauge (void (* gauge) (int, int))
-{
-  dm_ext_gauge = gauge;
-}
-
-
-int
-dm_read (char *buffer, int track_num, int sector, const dm_image_t *image)
-{
-  dm_track_t *track = (dm_track_t *) &image->track[track_num];
-  FILE *fh;
-  
-  if (!(fh = fopen (image->fname, "rb")))
-    return 0;
-
-  if (fseek (fh, track->track_start + (track->sector_size * sector), SEEK_SET) != 0)
-    {
-      fclose (fh);
-      return 0;
-    }
-  
-  if (fread (buffer, track->sector_size, 1, fh) != track->sector_size)
-    {
-      fclose (fh);
-      return 0;
-    }
-
-  fclose (fh);
-  return track->sector_size;
-}
-
-
-int
-dm_write (const char *buffer, int track_num, int sector, const dm_image_t *image)
-{
-  (void) buffer;
-  (void) track_num;
-  (void) sector;
-  (void) image;
-  return 0;
-}
-
-
-FILE *
-dm_fdopen (dm_image_t *image, int track_num, const char *mode)
-{
-  dm_track_t *track = (dm_track_t *) &image->track[track_num];
-  FILE *fh;
-  
-  if (!(fh = fopen (image->fname, mode)))
-    return NULL;
-
-  if (!fseek (fh, track->track_start, SEEK_SET))
-    return fh;
-
-  fclose (fh);
-  return NULL;
-}

@@ -61,7 +61,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define ucon64_VERSION "1.9.8beta3"
 
-#ifdef  __unix__
+#ifdef  __MSDOS__                               // __MSDOS__ must come before __unix__, because DJGPP defines both
+  #define ucon64_OS "MSDOS"
+#elif  __unix__
   #ifdef  __CYGWIN__
     #define ucon64_OS "Win32"
   #elif __FreeBSD__
@@ -73,8 +75,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   #else
     #define ucon64_OS "Unix"
   #endif
-#elif   defined __MSDOS__
-  #define ucon64_OS "MSDOS"
 #elif   defined __BEOS__
   #define ucon64_OS "BeOS"
 #else

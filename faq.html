@@ -69,23 +69,33 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
    want to play all the games on the original hardware. Here you got a powerful
    tool to backup, restore games and for many other operations.
    It is just a keep-old-hardware-alive tool :-)<br>
-   But beside this it <i>can</i> operate as intelligent frontend for EVERY
+   But besides this it <i>can</i> operate as intelligent frontend for EVERY
    available emulator.<br>
 <br>
 <p>
 <a name="2"><b>Q2</b>: How do I compile uCON64?</a><br>
 <b>A</b>: You can optionally open src/config.h in an editor and change the defines.<br>
 <br>
-   Afterwards enter the following lines:<br>
+   Under DOS you'll need <a href="http://www.delorie.com/djgpp/" target="_blank">DJGPP</a>,
+   a DOS port of gcc and other GNU development tools.<br>
+   Under Windows you'll need <a href="http://www.cygwin.com" target="_blank">Cygwin</a>,
+   a Windows port of gcc and many other GNU tools and libraries. If you want to compile
+   uCON64 with Cygwin you should use Makefile.unix. Note that Cygwin's make executable is
+   named make.exe, but Makefile.unix calls gmake. Just make a symbolic link (NT/2000/XP)
+   or a copy with the name gmake.exe.<br>
+<br>
+   Then enter the following lines:<br>
 <br>
    make -f Makefile.&#60;your&nbsp;OS&#62; clean<br>
    make -f Makefile.&#60;your&nbsp;OS&#62;<br>
    make -f Makefile.&#60;your&nbsp;OS&#62; install<br>
 <br>
    Under Unix the last command will ask for root's password, because
-   uCON64 needs to be setuid root for parallel port access.
+   uCON64 needs to be setuid root for parallel port access.<br>
    Under BeOS the last command will open a dialog window. Just follow the
    instructions.<br>
+   The last command won't work with Cygwin, but isn't needed under Windows anyway. You can
+   find the binary in the directory "src".<br>
 <br>
 <p>
 <a name="3"><b>Q3</b>: How do I install uCON64?</a><br>
@@ -152,8 +162,8 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
    pin 13 &#60;-&#62; pin 13<br>
    pin 15 &#60;-&#62; pin 15<br>
    pin 25 &#60;-&#62; pin 25<br>
-   Pins 2-9 are used for output, pins 10-13 & 15 for input and pin
-   25 is ground. The other pins may be left unconnected.<br>
+   The other pins may be left unconnected. Pins 2-9 are used for output, pins 10-13 & 15 for input
+   and pin 25 is ground.<br>
 <br>
 <p>
 <a name="8"><b>Q8</b>: I have a SNES ROM of which GoodSNES says it's good, but uCON64 says it's bad.

@@ -512,7 +512,11 @@ ucon64_parport_init (unsigned int port)
       int x, found = 0;
       
       for (x = 0; x < 3; x++)
-        if ((found = ucon64_parport_probe (parport_addresses[x])) == 1) break;
+        if ((found = ucon64_parport_probe (parport_addresses[x])) == 1)
+          {
+            port = parport_addresses[x];
+            break;
+          }
       
       if (found != 1)
         {

@@ -2349,8 +2349,16 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_si
   if (rominfo->interleaved == 2)                // SFX2 games (Doom, Yoshi's Island)
     {
       for (i = 0; i < nblocks * 2; i++)
-        blocks[i] = (i & ~0x1e) | ((i & 2) << 2) | ((i & 4) << 2) |
-          ((i & 8) >> 2) | ((i & 16) >> 2);
+        {
+          blocks[i] = (i & ~0x1e) | ((i & 2) << 2) | ((i & 4) << 2) |
+                      ((i & 8) >> 2) | ((i & 16) >> 2);
+          if (blocks[i] * 0x8000 + 0x8000 > rom_size)
+            {
+              printf ("WARNING: This ROM cannot be handled as if it is in interleaved format 2\n");
+              rominfo->interleaved = 0;
+              return -1;
+            }
+        }
     }
   else // rominfo->interleaved == 1
     {

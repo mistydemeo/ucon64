@@ -941,11 +941,10 @@ ucon64_rom_handling (void)
   // "walk through" <console>_init()
   if (ucon64.flags & WF_PROBE)
     {
-      ucon64.rominfo = ucon64_probe (&rominfo); // returns console type
-
       if (ucon64.rominfo)
         {
-          // restore any overrides from st_ucon64_t
+          // Restore any overrides from st_ucon64_t
+          // We have to this *before* calling ucon64_probe(), *not* afterwards
           if (UCON64_ISSET (ucon64.buheader_len))
             rominfo.buheader_len = ucon64.buheader_len;
 
@@ -960,6 +959,7 @@ ucon64_rom_handling (void)
 
 //          ucon64.rominfo = (st_rominfo_t *) &rominfo;
         }
+      ucon64.rominfo = ucon64_probe (&rominfo); // returns console type
 
 #ifdef  DISCMAGE
       // check for disc image only if ucon64_probe() failed or --disc was used

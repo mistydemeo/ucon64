@@ -1074,8 +1074,7 @@ int ucon64_nfo(struct ucon64_ *rom)
 {
   if(rom->header_len)
   {
-//	filehexdump(rom.rom,rom->header_start+rom->buheader_len,rom->header_len);
-     strhexdump(rom->header,rom->header_start+rom->buheader_len,rom->header_start+rom->buheader_len,rom->header_len);
+     strhexdump(rom->header,0,rom->header_start+rom->buheader_len,rom->header_len);
      printf("\n");
   }	
 

@@ -21,7 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64GUI_H
 #define UCON64GUI_H
 
-//#include "ucon64.h"
+#include "ucon64_defines.h"
+
 #define UCON64GUI_HTMLTITLE "uCON64gui"
 #define UCON64GUI_FORMTARGET "file://ucon64"
 #define UCON64GUI_VERSION "0.1.0alpha2"
@@ -36,9 +37,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 typedef struct
 {
-  char cmd[FILENAME_MAX];
-  char rom[FILENAME_MAX];
-  char file[FILENAME_MAX];
+//  char cmd[FILENAME_MAX];
+  const char *rom;
+  const char *file;
 
   const char *console;
 
@@ -56,5 +57,11 @@ typedef struct
 ucon64gui_t;
 
 extern ucon64gui_t ucon64gui;
+
+extern void ucon64gui_divider (void);
+extern void ucon64gui_spacer (void);
+extern void
+emulate_property (char *property, int size);
+
 
 #endif // UCON64GUI_H

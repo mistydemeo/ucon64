@@ -25,9 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #include "html2gui/src/html2gui.h"
 #include "misc.h"
-#include "ucon64.h"
 #include "ucon64gui.h"
-#include "getopt.h"
 
 #include "top.h"
 #include "bottom.h"
@@ -291,39 +289,77 @@ html2gui_request (const char *uri, const char *query)
     {
       switch (c)
         {
+          case UCON64_ROM:
+//            ucon64gui.rom = optind;
+            return;
+            
+          case UCON64_FILE:
+//            ucon64gui.file = optind;
+            return;
+
           case UCON64_SNES:
             ucon64gui.console =  "--snes";
-            ucon64gui_snes();
+            snes_gui ();
             return;
 
           case UCON64_GB:
             ucon64gui.console =  "--gb";
-            ucon64gui_gb();
+            ucon64gui_gb ();
             return;
 
           case UCON64_N64:
             ucon64gui.console =  "--n64";
-            ucon64gui_n64();
+            ucon64gui_n64 ();
             return;
 
           case UCON64_NES:
             ucon64gui.console =  "--nes";
-            ucon64gui_nes();
+            ucon64gui_nes ();
             return;
 
           case UCON64_XCDRW:
             ucon64gui.console =  "";
-            ucon64gui_cdrw();
+            ucon64gui_cdrw ();
             return;
 
+          case UCON64_XSWC:
+            ucon64gui.console =  "";
+            ucon64gui_swc ();
+            return;
+#if 0
+          case UCON64_XSMD:
+            ucon64gui.console =  "";
+            ucon64gui_smd ();
+            return;
+
+          case UCON64_XFAL:
+            ucon64gui.console =  "";
+            ucon64gui_fal ();
+            return;
+
+          case UCON64_XGBX:
+            ucon64gui.console =  "";
+            ucon64gui_gbx ();
+            return;
+
+          case UCON64_XD64:
+            ucon64gui.console =  "";
+            ucon64gui_doctor64 ();
+            return;
+
+          case UCON64_X64JR:
+            ucon64gui.console =  "";
+            ucon64gui_doctor64jr ();
+            return;
+#endif
           case UCON64_ROOT:
             ucon64gui.console = "";
-            ucon64gui_root();
+            ucon64gui_root ();
             return;
             
           case UCON64_CONFIG:
             ucon64gui.console = "";
-            ucon64gui_config();
+            ucon64gui_config ();
             return;
 
           default:
@@ -406,8 +442,6 @@ ucon64gui_output (char *output)
 void
 ucon64gui_root (void)
 {
-#include "xpm/trans.xpm"
-
 #include "xpm/icon.xpm"
 
   h2g_html (0, 0, 0);
@@ -432,9 +466,7 @@ ucon64gui_root (void)
   h2g_input_submit ("GameBoy Advance", "--gba",
                     "(--gba) options for GameBoy Advance\n2001 Nintendo http://www.nintendo.com");
 
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
+  ucon64gui_spacer ();
 
   h2g_input_submit ("Sega Master System/Game Gear", "--sms",
                     "(--sms) options for Sega Master System(II/III)/GameGear (Handheld)\n1986/19XX SEGA http://www.sega.com");
@@ -442,9 +474,8 @@ ucon64gui_root (void)
                     "(--gen) options for Genesis/Sega Mega Drive/Sega CD/32X/Nomad\n1989/19XX/19XX SEGA http://www.sega.com");
   h2g_input_submit ("Dreamcast", "--dc",
                     "(--dc) options for Dreamcast\n1998 SEGA http://www.sega.com");
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
+
+  ucon64gui_spacer ();
 
   h2g_input_submit ("Lynx", "--lynx",
                     "(--lynx) options for Handy(prototype)/Lynx/Lynx II\n1987 Epyx/1989 Atari/1991 Atari");
@@ -467,23 +498,8 @@ ucon64gui_root (void)
   h2g_input_submit ("WonderSwan", "--wswan",
                     "(--swan) options for WonderSwan/WonderSwan Color\n19XX/19XX Bandai");
 
-  h2g_br ();
-
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
-
-//  h2g_br ();
-//  h2g_img (trans_xpm, 0, 3, 0, NULL);
-//  h2g_br ();
-
-
 #if defined BACKUP || defined BACKUP_CD
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
-  h2g_hr ();
-  h2g_br ();
-//  h2g_img (trans_xpm, 0, 3, 0, NULL);
-//  h2g_br();
+  ucon64gui_divider();
 
   h2g_ ("Backup unit specific options");
   h2g_br ();
@@ -529,9 +545,9 @@ ucon64gui_root (void)
   h2g_ (" ");
   h2g_input_submit ("Super Wild Card", "--xswc",
                     "options for Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw");
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
+
+  ucon64gui_spacer ();
+
   h2g_input_submit ("Super Magic Drive", "--xsmd",
                     "options for Super Com Pro (HK)/Super Magic Drive/SMD\n19XX Front Far East/FFE http://www.front.com.tw");
   h2g_ (" ");
@@ -546,4 +562,42 @@ ucon64gui_root (void)
   h2g_body_end ();
 
   h2g_html_end ();
+}
+
+
+void
+ucon64gui_divider (void)
+{
+#include "xpm/trans.xpm"
+  h2g_br ();
+  h2g_img (trans_xpm, 0, 3, 0, NULL);
+  h2g_br ();
+  h2g_hr ();
+  h2g_img (trans_xpm, 0, 3, 0, NULL);
+  h2g_br ();
+}
+
+
+void
+ucon64gui_spacer (void)
+{
+#include "xpm/trans.xpm"
+  h2g_br ();
+  h2g_img (trans_xpm, 0, 3, 0, NULL);
+  h2g_br ();
+}
+
+
+void
+emulate_property (char *property, int size)
+{
+  char buf2[MAXBUFSIZE];
+
+  h2g_ (property);
+  h2g_ (" = ");
+  h2g_input_text (property,
+                  getProperty (ucon64gui.configfile, property, buf2, ""),
+                  size, 0, FALSE,
+                  "uCON64 can operate as frontend for many Emulators\n"
+                  "Enter here the commandline used for the emulator the name of the ROM will be attached to it");
 }

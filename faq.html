@@ -77,6 +77,9 @@ Q30: <a href="#30">How do I convert a NES ROM from Pasofami to FFE? Or from
 <br>
 Q31: <a href="#31">How do I specify dumper information when converting to UNIF?</a><br>
 <br>
+Q32: <a href="#32">How do I specify that a NES game in UNIF format supports multiple
+   controller types?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -409,7 +412,15 @@ Q31: <a href="#31">How do I specify dumper information when converting to UNIF?<
   For an existing UNIF file you needn't specify the board name, but you might want to
   specify it if you want to change the board name in the file. Afterwards run uCON64 on the
   newly written ROM to see if you were successful. uCON64's display output should contain a
-  dump info section now.
+  dump info section now.<br>
+<br>
+<p>
+<a name="32"><b>Q32</b>: How do I specify that a NES game in UNIF format supports multiple
+   controller types?</a><br>
+<b>A</b>: Use the -ctrl switch multiple times on the <b>same</b> command line. For example,
+  to specify that a game supports the controller types "regular joypad" and "power pad"
+  you would use a command line like this:<br>
+  &nbsp;&nbsp ucon64 -unif smb.nes -mapr NROM -ctrl 0 -ctrl 4
 <br>
 <p>
 <br>

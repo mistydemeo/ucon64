@@ -41,7 +41,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <dos.h>
 #include <dpmi.h>
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -82,6 +81,7 @@ typedef struct st_symbol
   int (*fflush) (FILE *);
   int (*ferror) (FILE *);
   int (*rename) (const char *, const char *);
+  int (*remove) (const char *);
 
   void (*free) (void *);
   void *(*malloc) (size_t);
@@ -123,8 +123,11 @@ typedef struct st_symbol
   int (*chdir) (const char *);
   char *(*getcwd) (char *, size_t);
   int (*getuid) (void);
+  int (*sync) (void);
+  int (*truncate) (const char *, off_t);
 
   int (*stat) (const char *, struct stat *);
+  int (*chmod) (const char *, mode_t);
   int (*mkdir) (const char *, mode_t);
   time_t (*time) (time_t *);
   void (*delay) (unsigned);

@@ -53,7 +53,7 @@ extern "C" {
 #endif
 
 #if     defined __linux__ || defined __FreeBSD__ || \
-        defined __BEOS__ || defined __solaris__ || HAVE_INTTYPES_H
+        defined __BEOS__ || defined __solaris__ || defined HAVE_INTTYPES_H
 #include <inttypes.h>
 #elif   defined __CYGWIN__
 #include <sys/types.h>
@@ -330,6 +330,7 @@ extern uint64_t bswap_64 (uint64_t x);
 #endif
 //extern unsigned short crc16 (unsigned short crc16, const void *buffer, unsigned int size);
 #ifndef  HAVE_ZLIB_H
+// use zlib's crc32() if HAVE_ZLIB_H is defined
 extern unsigned int crc32 (unsigned int crc32, const void *buffer, unsigned int size);
 #endif
 

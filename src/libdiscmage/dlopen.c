@@ -61,9 +61,9 @@ uninit_func (void)
 void *
 open_module (char *module_name)
 {
+  void *handle;
 #ifdef  DJGPP
   static int new_handle = INITIAL_HANDLE;
-  void *handle;
   int n, m;
   st_symbol_t *sym = _dxe_load (module_name);
   /*
@@ -113,7 +113,9 @@ open_module (char *module_name)
   sym->fputc = fputc;
   sym->ftell = ftell;
   sym->fflush = fflush;
+  sym->ferror = ferror;
   sym->rename = rename;
+  sym->remove = remove;
 
   sym->free = free;
   sym->malloc = malloc;
@@ -152,8 +154,12 @@ open_module (char *module_name)
   sym->isatty = isatty;
   sym->chdir = chdir;
   sym->getcwd = getcwd;
+  sym->getuid = getuid;
+  sym->sync = sync;
+  sym->truncate = truncate;
 
   sym->stat = stat;
+  sym->chmod = chmod;
   sym->mkdir = mkdir;
   sym->time = time;
   sym->delay = delay;
@@ -176,16 +182,14 @@ open_module (char *module_name)
   dxe_map = map_put (dxe_map, (void *) new_handle, sym);
   handle = (void *) new_handle++;
 #elif   defined __unix__
-  void *handle = dlopen (module_name, RTLD_LAZY);
-  if (handle == NULL)
+  if ((handle = dlopen (module_name, RTLD_LAZY)) == NULL)
     {
       fputs (dlerror (), stderr);
       fputs ("\n", stderr);
       exit (1);
     }
 #elif   defined _WIN32
-  void *handle = LoadLibrary (module_name);
-  if (handle == NULL)
+  if ((handle = LoadLibrary (module_name)) == NULL)
     {
       LPTSTR strptr;
 
@@ -202,8 +206,7 @@ open_module (char *module_name)
       exit (1);
     }
 #elif   defined __BEOS__
-  void *handle = (void *) load_add_on (module_name);
-  if ((int) handle < B_NO_ERROR)
+  if ((int) (handle = (void *) load_add_on (module_name)) < B_NO_ERROR)
     {
       fprintf (stderr, "Error while loading add-on image: %s\n", module_name);
       exit (1);

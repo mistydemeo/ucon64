@@ -56,6 +56,7 @@ extern st_symbol_t import_export;
 #define fflush import_export.fflush
 #define ferror import_export.ferror
 #define rename import_export.rename
+#define remove import_export.remove
 
 #define free import_export.free
 #define malloc import_export.malloc
@@ -98,10 +99,13 @@ extern st_symbol_t import_export;
 #define chdir import_export.chdir
 #define getcwd import_export.getcwd
 #define getuid import_export.getuid
+#define sync import_export.sync
+#define truncate import_export.truncate
 
 // We have to do this, because there's also a struct stat
 // TODO?: do this for all #defines in this file.
 #define stat(FILE, STATBUF) import_export.stat(FILE, STATBUF)
+#define chmod import_export.chmod
 #define mkdir import_export.mkdir
 #define time import_export.time
 #define delay import_export.delay

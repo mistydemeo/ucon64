@@ -27,6 +27,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/stat.h>
 #include <time.h>
 #include <stdlib.h>
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef  _WIN32
 #include <windows.h>
 #endif

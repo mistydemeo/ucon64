@@ -443,8 +443,8 @@ swc_write_rom (const char *filename, unsigned int parport)
   ffe_send_command (6, 1 | (emu_mode_select << 8), 0);
 
   ffe_wait_for_ready ();
-  outportb (ffe_port + PARPORT_DATA, 0);
-  outportb (ffe_port + PARPORT_CONTROL, inportb (ffe_port + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
+  outportb (parport + PARPORT_DATA, 0);
+  outportb (parport + PARPORT_CONTROL, inportb (parport + PARPORT_CONTROL) ^ STROBE_BIT); // invert strobe
 
   free (buffer);
   fclose (file);

@@ -54,7 +54,11 @@ write programs in C
 #endif
 
 #ifdef  DEBUG
+#ifdef  __GNUC__
 #warning DEBUG active
+#else
+#pragma message ("DEBUG active")
+#endif
 #endif
 #include "misc.h"
 #include "getopt.h"
@@ -409,7 +413,6 @@ ucon64_runtime_debug (void)
     }
 
   printf ("DEBUG: Sanity check finished\n");
-
 }
 #endif  // DEBUG
 

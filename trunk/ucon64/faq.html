@@ -74,8 +74,9 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
    "The system cannot execute the specified program." (or something like that).
    What does that mean?</a><br>
 <br>
-Q26: <a href="#26">I tried to run the Win32 executable of uCON64 but Windows gave an
-   error message that cygwin1.dll or cygz.dll could not be found.</a><br>
+Q26: <a href="#26">I tried to run the Win32 executable of uCON64 but Windows
+   gave an error message that cygwin1.dll, cygz.dll or zlib.dll could not be
+   found.</a><br>
 <br>
 Q27: <a href="#27">How do I make uCON64 display one help screen at a time?</a><br>
 <br>
@@ -503,11 +504,16 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    2.) Rename the ROMs so that their combined names are short enough to fit into 127 characters.<br>
 <br>
 <p>
-<a name="26"><b>Q26</b>: I tried to run the Win32 executable of uCON64 but Windows gave an
-   error message that cygwin1.dll or cygz.dll could not be found.</a><br>
-<b>A</b>: The Win32 executable of uCON64 needs those DLLs in order to run. You can download
-   them from <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>.
-   Copy the files to the same directory as the uCON64 executable or to a directory in your PATH.<br>
+<a name="26"><b>Q26</b>: I tried to run the Win32 executable of uCON64 but
+   Windows gave an error message that cygwin1.dll, cygz.dll or zlib.dll could
+   not be found.</a><br>
+<b>A</b>: The Cygwin-compiled Win32 executable of uCON64 needs cygwin1.dll and
+   cygz.dll in order to run. The Visual C++-compiled Win32 executable (the
+   "official" Win32 executable) needs zlib.dll. You can download these files
+   from
+   <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>.
+   Copy the file(s) to the same directory as the uCON64 executable or to a
+   directory in your PATH.<br>
 <br>
 <p>
 <a name="27"><b>Q27</b>: How do I make uCON64 display one help screen at a time?</a><br>

@@ -7,6 +7,7 @@ written by 1999 - 2002 NoisyB (noisyb@gmx.net)
                   2002 Jan-Erik Karlsson (Amiga)
                   2003 Vojtech Pavlik (some code from jstest.c  Version 1.2)
 
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -491,6 +492,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_LNX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
   {UCON64_LSRAM, UCON64_N64, n64_usage,        WF_INIT|WF_PROBE},
   {UCON64_LYX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
+  {UCON64_MGDGG, UCON64_SMS, sms_usage,        WF_DEFAULT|WF_NO_SPLIT},
 #if 1 // -multi is now used for GBA *and* Genesis
   {UCON64_MULTI, UCON64_UNKNOWN, NULL,         WF_INIT|WF_PROBE|WF_STOP},
 #else
@@ -504,7 +506,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_ROTL, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
   {UCON64_ROTR, UCON64_LYNX, lynx_usage,       WF_DEFAULT},
   {UCON64_SAM, UCON64_NG, neogeo_usage,        WF_DEFAULT},
-  {UCON64_SCRAMBLE, UCON64_DC, dc_usage,             WF_DEFAULT},
+  {UCON64_SCRAMBLE, UCON64_DC, dc_usage,       WF_DEFAULT},
   {UCON64_SGB, UCON64_GB, gameboy_usage,       WF_DEFAULT},
   {UCON64_SMC, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
   {UCON64_SMG, UCON64_PCE, pcengine_usage,     WF_DEFAULT},
@@ -515,7 +517,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_UFO, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
   {UCON64_UFOS, UCON64_SNES, snes_usage,       0},
   {UCON64_UNIF, UCON64_NES, nes_usage,         WF_DEFAULT},
-  {UCON64_UNSCRAMBLE, UCON64_DC, dc_usage,             WF_DEFAULT},
+  {UCON64_UNSCRAMBLE, UCON64_DC, dc_usage,     WF_DEFAULT},
   {UCON64_USMS, UCON64_N64, n64_usage,         WF_DEFAULT},
   {UCON64_V64, UCON64_N64, n64_usage,          WF_DEFAULT},
   {UCON64_VMS, UCON64_DC, dc_usage,            0},
@@ -550,6 +552,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XSMDS, UCON64_UNKNOWN, smd_usage,    WF_STOP|WF_NO_ROM},
 #endif
   {UCON64_XSWC, UCON64_SNES, swc_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XSWC_SUPER, UCON64_SNES, swc_usage,  WF_STOP|WF_NO_SPLIT|WF_NO_ROM}, // receive only
   {UCON64_XSWC2, UCON64_SNES, swc_usage,       WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XSWCS, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XV64, UCON64_N64, doctor64_usage,    WF_DEFAULT|WF_STOP|WF_NO_ROM},
@@ -1266,10 +1269,8 @@ int
 ucon64_jstest (const char *device)
 {
 #define NAME_LENGTH 128
-  int fd;
-  unsigned char axes = 2;
-  unsigned char buttons = 2;
-  int version = 0x000800;
+  int fd, version = 0x000800;
+  unsigned char axes = 2, buttons = 2;
   char name[NAME_LENGTH] = "Unknown";
 
   if (!device)
@@ -1316,8 +1317,8 @@ ucon64_jstest (const char *device)
       int i;
       struct js_event js;
 
-      axis = calloc (axes, sizeof (int));
-      button = calloc (buttons, sizeof (char));
+      axis = (int *) calloc (axes, sizeof (int));
+      button = (int *) calloc (buttons, sizeof (char));
 
       while (1)
         {

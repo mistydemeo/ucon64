@@ -76,6 +76,8 @@ enum {
   UCON64_S16,
   UCON64_SAT,
   UCON64_SMS,
+  // don't mix the following with UCON64_GG (Game Genie), used only for --mgdgg
+  UCON64_GAMEGEAR,
   UCON64_SNES,
   UCON64_SWAN,
   UCON64_VBOY,
@@ -156,6 +158,7 @@ enum {
   UCON64_LYX,
   UCON64_MAPR,
   UCON64_MGD,
+  UCON64_MGDGG,
   UCON64_MGH,
   UCON64_MIRR,
   UCON64_MKA,
@@ -257,6 +260,7 @@ enum {
   UCON64_XSWC,
   UCON64_XSWC2,
   UCON64_XSWCS,
+  UCON64_XSWC_SUPER,
   UCON64_XV64,
   UCON64_Z64,
 

@@ -357,7 +357,7 @@ genesis_mgd (st_rominfo_t *rominfo)
   if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
     return -1;
 
-  mgd_make_name (ucon64.rom, "MD", genesis_rom_size, dest_name);
+  mgd_make_name (ucon64.rom, UCON64_GEN, genesis_rom_size, dest_name);
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
 
   mgd_interleave (&rom_buffer, genesis_rom_size);
@@ -481,7 +481,7 @@ genesis_s (st_rominfo_t *rominfo)
       char suffix[5], *p;
       int n, offset, size;
 
-      mgd_make_name (ucon64.rom, "MD", genesis_rom_size, dest_name);
+      mgd_make_name (ucon64.rom, UCON64_GEN, genesis_rom_size, dest_name);
       strcpy (suffix, (char *) get_suffix (dest_name));
       if ((p = strchr (dest_name, '.')))
         *p = 0;
@@ -887,9 +887,9 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
   fputc (0, destfile);                          // 0x1d = 0
   fputc (totalsize / (2 * MBIT), destfile);     // 0x1e = bank code
 
+  flags = 0x80;                                 // set F (?, default)
   if (genesis_has_ram)
     {
-      flags = sram_page++;
       if (sram_page == 3)
         file_no_sram = file_no;
       else if (sram_page > 3)
@@ -897,8 +897,9 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
           printf ("WARNING: This ROM will share SRAM with ROM %d\n", file_no_sram);
           sram_page = 3;
         }
-      if ((ucon64.file_size - rominfo->buheader_len) > 16 * MBIT)
-        flags |= 0x80;                          // set F (>16 Mb & SRAM)
+      flags |= sram_page++;
+      if ((ucon64.file_size - rominfo->buheader_len) <= 16 * MBIT)
+        flags &= ~0x80;                         // clear F (<=16 Mb & SRAM)
     }
   else
     flags |= 4;                                 // set T (no SRAM)

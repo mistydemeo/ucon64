@@ -567,13 +567,12 @@ out in your Dreamcast.
 
 #define MAXCHUNK (2048*1024)
 
-static unsigned int seed;
-
 void
 my_srand (unsigned int n)
 {
   seed = n & 0xffff;
 }
+
 
 unsigned int
 my_rand ()
@@ -581,6 +580,7 @@ my_rand ()
   seed = (seed * 2109 + 9273) & 0x7fff;
   return (seed + 0xc000) & 0xffff;
 }
+
 
 void
 load (FILE * fh, unsigned char *ptr, uint32_t sz)
@@ -591,6 +591,7 @@ load (FILE * fh, unsigned char *ptr, uint32_t sz)
       exit (1);
     }
 }
+
 
 void
 load_chunk (FILE * fh, unsigned char *ptr, uint32_t sz)
@@ -621,6 +622,7 @@ load_chunk (FILE * fh, unsigned char *ptr, uint32_t sz)
     }
 }
 
+
 void
 load_file (FILE * fh, unsigned char *ptr, uint32_t filesz)
 {
@@ -643,6 +645,7 @@ load_file (FILE * fh, unsigned char *ptr, uint32_t filesz)
     load (fh, ptr, filesz);
 }
 
+
 void
 read_file (const char *filename, unsigned char **ptr, uint32_t *sz)
 {
@@ -658,7 +661,7 @@ read_file (const char *filename, unsigned char **ptr, uint32_t *sz)
       exit (1);
     }
   *sz = ftell (fh);
-  *ptr = malloc (*sz);
+  *ptr = (unsigned char *) malloc (*sz);
   if (*ptr == NULL)
     {
       fprintf (stderr, "Out of memory.\n");
@@ -673,6 +676,7 @@ read_file (const char *filename, unsigned char **ptr, uint32_t *sz)
   fclose (fh);
 }
 
+
 void
 save (FILE * fh, unsigned char *ptr, uint32_t sz)
 {
@@ -682,6 +686,7 @@ save (FILE * fh, unsigned char *ptr, uint32_t sz)
       exit (1);
     }
 }
+
 
 void
 save_chunk (FILE * fh, unsigned char *ptr, uint32_t sz)
@@ -712,6 +717,7 @@ save_chunk (FILE * fh, unsigned char *ptr, uint32_t sz)
     }
 }
 
+
 void
 save_file (FILE * fh, unsigned char *ptr, uint32_t filesz)
 {
@@ -733,6 +739,7 @@ save_file (FILE * fh, unsigned char *ptr, uint32_t filesz)
   if (filesz)
     save (fh, ptr, filesz);
 }
+
 
 void
 write_file (char *filename, unsigned char *ptr, uint32_t sz)
@@ -792,7 +799,7 @@ scramble (const char *src, char *dst)
       exit (1);
     }
   sz = ftell (fh);
-  ptr = malloc (sz);
+  ptr = (unsigned char *) malloc (sz);
   if (ptr == NULL)
     {
       fprintf (stderr, "Out of memory.\n");

@@ -209,6 +209,7 @@ const struct option options[] = {
     {"lyx", 0, 0, UCON64_LYX},
     {"mapr", 1, 0, UCON64_MAPR},
     {"mgd", 0, 0, UCON64_MGD},
+    {"mgdgg", 0, 0, UCON64_MGDGG},
 //    {"mgh", 0, 0, UCON64_MGH},
     {"mirr", 1, 0, UCON64_MIRR},
     {"mka", 1, 0, UCON64_MKA},
@@ -343,6 +344,7 @@ const struct option options[] = {
     {"xswc", 0, 0, UCON64_XSWC},
     {"xswc2", 0, 0, UCON64_XSWC2},
     {"xswcs", 0, 0, UCON64_XSWCS},
+    {"xswc-super", 0, 0, UCON64_XSWC_SUPER},
     {"xv64", 0, 0, UCON64_XV64},
 #endif // PARALLEL
     {"z64", 0, 0, UCON64_Z64},

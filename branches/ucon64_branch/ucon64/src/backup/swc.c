@@ -45,6 +45,11 @@ const st_usage_t swc_usage[] =
     {"xswc", NULL, "send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically when ROM does not exist"},
     {"xswc2", NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)"},
+#if 0
+// hidden, undocumented option because we don't want people to "accidentally"
+//  create overdumps
+    {"xswc-super", NULL, "receive ROM (forced 32 Mb) from Super Wild Card*/(all)SWC"},
+#endif
     {"xswcs", NULL, "send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
                  OPTION_LONG_S "port=PORT\n"
                  "receives automatically when SRAM does not exist\n"
@@ -58,7 +63,7 @@ const st_usage_t swc_usage[] =
 #define BUFFERSIZE 8192                         // don't change, only 8192 works!
 
 
-static int receive_rom_info (unsigned char *buffer);
+static int receive_rom_info (unsigned char *buffer, int superdump);
 static int get_rom_size (unsigned char *info_block);
 static int check1 (unsigned char *info_block, int index);
 static int check2 (unsigned char *info_block, int index, unsigned char value);
@@ -74,7 +79,7 @@ static int hirom;                               // `hirom' was `special'
        512 bytes.
 #endif
 int
-receive_rom_info (unsigned char *buffer)
+receive_rom_info (unsigned char *buffer, int superdump)
 /*
   - returns size of ROM in Mb (128 KB) units
   - returns ROM header in buffer (index 2 (emulation mode select) is not yet
@@ -117,9 +122,18 @@ receive_rom_info (unsigned char *buffer)
       address++;
     }
 
-  size = get_rom_size (buffer);
-  if (hirom)
-    size <<= 1;
+  if (superdump)
+    {
+      // default to super HiROM dump
+      hirom = UCON64_ISSET (ucon64.snes_hirom) ? (ucon64.snes_hirom ? 1 : 0) : 1;
+      size = 32;                                // dump 32 Mbit
+    }
+  else
+    {
+      size = get_rom_size (buffer);
+      if (hirom)
+        size <<= 1;
+    }
 
   memset (buffer, 0, SWC_HEADER_LEN);
   buffer[0] = size << 4 & 0xff;                 // *16 for 8 KB units; low byte
@@ -305,7 +319,7 @@ swc_unlock (unsigned int parport)
 
 
 int
-swc_read_rom (const char *filename, unsigned int parport)
+swc_read_rom (const char *filename, unsigned int parport, int superdump)
 {
   FILE *file;
   unsigned char *buffer, byte;
@@ -326,7 +340,7 @@ swc_read_rom (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  size = receive_rom_info (buffer);
+  size = receive_rom_info (buffer, superdump);
   if (size == 0)
     {
       fprintf (stderr, "ERROR: There is no cartridge present in the Super Wild Card\n");

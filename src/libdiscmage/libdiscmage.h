@@ -1,8 +1,7 @@
 /*
-libdiscmage.h - DISCmage support routines
+libdiscmage.h - libdiscmage
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-              ? - 2002 Dext
+written by 2002 NoisyB (noisyb@gmx.net)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

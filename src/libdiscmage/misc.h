@@ -434,9 +434,6 @@ extern int set_property (const char *filename, const char *propname, const char 
                                                 //  come after <sys/types.h>. Yep, that's M$.
 #define S_IWUSR _S_IWRITE
 #define S_IRUSR _S_IREAD
-
-// Note that there is no space between the macro name and the opening brace.
-//  Visual C++ doesn't recognise it as a macro when a space is used...
 #define S_ISDIR(mode) ((mode) & _S_IFDIR ? 1 : 0)
 #define S_ISREG(mode) ((mode) & _S_IFREG ? 1 : 0)
 

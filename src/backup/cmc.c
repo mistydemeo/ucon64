@@ -6,7 +6,7 @@ Copyright (c) 1999 - 2004 Cyan Helkaraxe
 Special thanks to dbjh for helping with the uCON64 integration
 of this software, and providing the wrapping code.
 
-CMC Version: 2.3
+CMC version: 2.5
 For hardware version 1.x
 
 Copies Sega Megadrive/Genesis cartridges into .BIN format ROM files.
@@ -117,7 +117,7 @@ respective owners.
   confusion.
 */
 #define INTRO_TEXT "Cyan's Megadrive Copier             (c) 1999-2004 Cyan Helkaraxe\n" \
-                   "Software version 2.3 original, designed for hardware version 1.x\n\n"
+                   "Software version 2.5 original, designed for hardware version 1.x\n\n"
 
 
 #ifdef  HAVE_CONFIG_H
@@ -355,7 +355,10 @@ cyan_reset (unsigned int parport)
 // resets the copier
 {
   cyan_delay (0, parport);
-  cyan_write_copier (0, parport);               // zero all outputs
+  // zero all data outputs first, before going into SPP mode
+  cyan_write_copier (0, parport);
+  // reset the port to SPP, float all control lines high
+  cyan_write_copier (0, parport + PARPORT_CONTROL);
   cyan_delay (0, parport);
   cyan_write_copier (RSLO | RSHI, parport);     // both reset lines hi
   cyan_delay (0, parport);
@@ -665,7 +668,11 @@ cyan_test_copier (int test, int speed, unsigned int parport)
           if (memcmp (buffer1, buffer2, 4 * MBYTE))
             {
               // error
-              printf ("\nError detected on pass number %d\n\n", count);
+              printf ("\n"
+                      "\n"
+                      "Error detected on pass number %d\n"
+                      "\n",
+                      count);
               if (count == 2)
                 puts ("A failure this early suggests a critical fault, such as a misconfigured or\n"
                       "incompatible parallel port, extremely poor wiring, or power supply problems --\n"

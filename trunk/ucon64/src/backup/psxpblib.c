@@ -21,7 +21,9 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>             // ioperm() (libc5)
+#ifdef  HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "ucon64.h"
 #include "misc.h"
 #include "ucon64_misc.h"

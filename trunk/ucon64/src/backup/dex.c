@@ -20,7 +20,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef  HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"

@@ -23,7 +23,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#ifdef  HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"

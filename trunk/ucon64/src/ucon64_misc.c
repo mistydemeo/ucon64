@@ -29,7 +29,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <dirent.h>
 #include <limits.h>
 #include <sys/stat.h>
+#ifdef  HAVE_CONFIG_H
 #include "config.h"
+#endif
 #if     defined __unix__ || defined __BEOS__ || defined AMIGA || HAVE_UNISTD_H
   #include <unistd.h>                           // ioperm() (libc5)
 #endif

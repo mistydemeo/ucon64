@@ -32,7 +32,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <dos.h>
 #include <ctype.h>
 #include <dpmi.h>
+#ifdef  HAVE_CONFIG_H
 #include "config.h"
+#endif
 #ifdef  HAVE_ZLIB_H
 #include <zlib.h>
 #include "unzip.h"

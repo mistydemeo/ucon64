@@ -20,7 +20,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef UCON64_DAT_H
 #define UCON64_DAT_H
+#ifdef  HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "misc.h"
 
 typedef struct

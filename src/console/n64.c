@@ -43,7 +43,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/z64.h"
 
 
-#define N64_HEADER_START 0
 #define N64_HEADER_LEN (sizeof (st_n64_header_t))
 #define N64_SRAM_SIZE 512
 #define N64_NAME_LEN  20
@@ -140,37 +139,7 @@ typedef struct st_n64_chksum
 } st_n64_chksum_t;
 
 static st_n64_chksum_t n64crc;
-static int n64_chksum (st_rominfo_t *rominfo);
-
-
-// This is the support of LaC's makesram routine for uploading
-//  SRAM files to a cartridge's SRAM. The .v64 file is his work, not mine
-int
-n64_sram (st_rominfo_t *rominfo, const char *sramfile)
-{
-  char sram[N64_SRAM_SIZE], dest_name[FILENAME_MAX];
-
-  if (q_fsize (sramfile) != N64_SRAM_SIZE || ucon64.file_size != LAC_ROM_SIZE)
-    {
-      fprintf (stderr,
-        "ERROR: Check if ROM has %d Bytes and SRAM has %d Bytes\n"
-        "       or the ROM is too short to calculate checksum\n", LAC_ROM_SIZE, N64_SRAM_SIZE);
-      return -1;
-    }
-
-  q_fread (sram, 0, N64_SRAM_SIZE, sramfile);
-
-  if (rominfo->interleaved)
-    mem_swap (sram, N64_SRAM_SIZE);
-
-  strcpy (dest_name, ucon64.rom);
-  ucon64_file_handler (dest_name, NULL, 0);
-  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fwrite (sram, 0x286C0, N64_SRAM_SIZE, dest_name, "r+b");
-
-  printf (ucon64_msg[WROTE], dest_name);
-  return 0;
-}
+static int n64_chksum (st_rominfo_t *rominfo, const char *filename);
 
 
 int
@@ -223,8 +192,7 @@ n64_n (st_rominfo_t *rominfo, const char *name)
   char buf[N64_NAME_LEN], dest_name[FILENAME_MAX];
 
   memset (buf, ' ', N64_NAME_LEN);
-  strncpy (buf, name, strlen (name) > N64_NAME_LEN ?
-                        N64_NAME_LEN : strlen (name));
+  strncpy (buf, name, strlen (name) > N64_NAME_LEN ? N64_NAME_LEN : strlen (name));
 
   if (rominfo->interleaved)
     mem_swap (buf, N64_NAME_LEN);
@@ -232,8 +200,7 @@ n64_n (st_rominfo_t *rominfo, const char *name)
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 32, 20, dest_name,
-            "r+b");
+  q_fwrite (buf, rominfo->buheader_len + 32, 20, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -249,37 +216,67 @@ n64_f (st_rominfo_t *rominfo)
 }
 
 
+static void
+n64_update_chksum (st_rominfo_t *rominfo, const char *filename, char *buf)
+{
+  uint64_t crc;
+  int x;
+
+  // n64crc is set by n64_chksum() when called from n64_init()
+  crc = (((uint64_t) n64crc.crc1) << 32) | n64crc.crc2;
+  for (x = 0; x < 8; x++)
+    {
+      buf[x] = (char) (crc >> 56);
+      crc <<= 8;
+    }
+  if (rominfo->interleaved)
+    mem_swap (buf, 8);
+  q_fwrite (buf, rominfo->buheader_len + 0x10, 8, filename, "r+b");
+}
+
+
 int
 n64_chk (st_rominfo_t *rominfo)
 {
-  int x;
   char buf[8], dest_name[FILENAME_MAX];
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
-  // n64crc is set by n64_chksum() when called from n64_init()
-  for (x = 0; x < 4; x++)
-    {
-      q_fputc (dest_name,
-                  N64_HEADER_START + rominfo->buheader_len + 0x10 +
-                  (x ^ rominfo->interleaved),
-                  (n64crc.crc1 & 0xff000000) >> 24, "r+b");
-      n64crc.crc1 <<= 8;
-    }
-
-  for (x = 0; x < 4; x++)
-    {
-      q_fputc (dest_name,
-                  N64_HEADER_START + rominfo->buheader_len + 0x14 +
-                  (x ^ rominfo->interleaved),
-                  (n64crc.crc2 & 0xff000000) >> 24, "r+b");
-      n64crc.crc2 <<= 8;
-    }
-
-  q_fread (buf, 0x10 + rominfo->buheader_len, 8, dest_name);
+  n64_update_chksum (rominfo, dest_name, buf);
   mem_hexdump (buf, 8, 0x10 + rominfo->buheader_len);
+
+  printf (ucon64_msg[WROTE], dest_name);
+  return 0;
+}
+
+
+// Routine to insert an SRAM file in LaC's SRAM upload tool (which is an N64 program)
+int
+n64_sram (st_rominfo_t *rominfo, const char *sramfile)
+{
+  char sram[N64_SRAM_SIZE], dest_name[FILENAME_MAX], buf[8];
+
+  if (q_fsize (sramfile) != N64_SRAM_SIZE || ucon64.file_size != LAC_ROM_SIZE)
+    {
+      fprintf (stderr,
+        "ERROR: Check if ROM has %d Bytes and SRAM has %d Bytes\n"
+        "       or the ROM is too short to calculate checksum\n", LAC_ROM_SIZE, N64_SRAM_SIZE);
+      return -1;
+    }
+
+  q_fread (sram, 0, N64_SRAM_SIZE, sramfile);
+
+  if (rominfo->interleaved)
+    mem_swap (sram, N64_SRAM_SIZE);
+
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
+  q_fwrite (sram, 0x286C0, N64_SRAM_SIZE, dest_name, "r+b");
+  n64_chksum (rominfo, dest_name);              // calculate the checksum of the modified file
+  n64_update_chksum (rominfo, dest_name, buf);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -291,9 +288,9 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
 {
   char buf[N64_BOT_SIZE], dest_name[FILENAME_MAX];
 
-  strcpy (dest_name, ucon64.rom);
   if (!access (bootfile, F_OK))
     {
+      strcpy (dest_name, ucon64.rom);
       q_fread (buf, 0, N64_BOT_SIZE, bootfile);
 
       if (rominfo->interleaved)
@@ -301,15 +298,14 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
 
       ucon64_file_handler (dest_name, NULL, 0);
       q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-      q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 0x40,
-        N64_BOT_SIZE, dest_name, "r+b");
+      q_fwrite (buf, rominfo->buheader_len + 0x40, N64_BOT_SIZE, dest_name, "r+b");
     }
   else
     {
+      strcpy (dest_name, bootfile);
       set_suffix (dest_name, ".BOT");
-      ucon64_file_handler (dest_name, NULL, 0);
-      q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len + 0x040,
-        N64_BOT_SIZE, dest_name, "wb");
+      ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+      q_fcpy (ucon64.rom, rominfo->buheader_len + 0x040, N64_BOT_SIZE, dest_name, "wb");
 
       if (rominfo->interleaved)
         q_fswap (dest_name, 0, q_fsize (dest_name));
@@ -345,25 +341,21 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
         mem_swap (usmsbuf, size);
 
       strcpy (dest_name, "Patched.v64");
-      ucon64_file_handler (dest_name, NULL, 0);
-      q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len,
-        ucon64.file_size, dest_name, "wb");
-      q_fwrite (usmsbuf, N64_HEADER_START + rominfo->buheader_len + 0x01b410,
-        4 * MBIT, dest_name, "r+b");
+      ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+      q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
+      q_fwrite (usmsbuf, rominfo->buheader_len + 0x01b410, 4 * MBIT, dest_name, "r+b");
 
       free (usmsbuf);
       printf (ucon64_msg[WROTE], dest_name);
     }
-#if 0
-// What is this code? - dbjh
+#if 0 // What is this code? - dbjh
   else
     {
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".GG");
       ucon64_file_handler (dest_name, NULL, 0);
 
-      q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len + 0x040,
-        0x01000 - 0x040, dest_name, "wb");
+      q_fcpy (ucon64.rom, rominfo->buheader_len + 0x040, 0x01000 - 0x040, dest_name, "wb");
       if (rominfo->interleaved)
         q_fswap (dest_name, 0, q_fsize (dest_name));
 
@@ -420,11 +412,9 @@ n64_init (st_rominfo_t *rominfo)
     "Europe", NULL, NULL, "Spain", NULL,
     "Australia", NULL, NULL, "France, Germany, Holland", NULL};
 
-  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-    ucon64.buheader_len : 0;
+  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
-  q_fread (&n64_header, N64_HEADER_START + rominfo->buheader_len,
-    N64_HEADER_LEN, ucon64.rom);
+  q_fread (&n64_header, rominfo->buheader_len, N64_HEADER_LEN, ucon64.rom);
 
   value = OFFSET (n64_header, 0);
   value += OFFSET (n64_header, 1) << 8;
@@ -460,7 +450,7 @@ n64_init (st_rominfo_t *rominfo)
     result = 0;
 
   // internal ROM header
-  rominfo->header_start = N64_HEADER_START;
+  rominfo->header_start = 0;
   rominfo->header_len = N64_HEADER_LEN;
   rominfo->header = &n64_header;
 
@@ -484,7 +474,7 @@ n64_init (st_rominfo_t *rominfo)
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = rominfo->internal_crc2_len = 4;
 
-      n64_chksum (rominfo);
+      n64_chksum (rominfo, ucon64.rom);
       rominfo->current_internal_crc = n64crc.crc1;
 
       for (x = 0; x < 4; x++)
@@ -492,7 +482,6 @@ n64_init (st_rominfo_t *rominfo)
           rominfo->internal_crc <<= 8;
           rominfo->internal_crc += OFFSET (n64_header, 0x10 + (x ^ rominfo->interleaved));
         }
-
       value = 0;
       for (x = 0; x < 4; x++)
         {
@@ -549,11 +538,12 @@ cd64_usage
 #define CALC_CRC32
 
 int
-n64_chksum (st_rominfo_t *rominfo)
+n64_chksum (st_rominfo_t *rominfo, const char *filename)
 {
   unsigned char chunk[MAXBUFSIZE];
   unsigned long i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,
                 rlen = (ucon64.file_size - rominfo->buheader_len) - CHECKSUM_START;
+                // using ucon64.file_size is ok for n64_init() & n64_sram()
   unsigned int n = 0;
   FILE *file;
 #ifdef  CALC_CRC32
@@ -571,7 +561,7 @@ n64_chksum (st_rominfo_t *rominfo)
   if (rlen < 0x0100000)                         // 0x0101000
     return -1;                                  // ROM is too short
 
-  if (!(file = fopen (ucon64.rom, "rb")))
+  if (!(file = fopen (filename, "rb")))
     return -1;
 
 #ifdef  CALC_CRC32

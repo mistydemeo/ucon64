@@ -25,6 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "gb/gb.h"
 
 #include "backup/swc.h"
+#include "backup/cdrw.h"
+
 #include "top.h"
 #include "bottom.h"
 #include "config/config.h"
@@ -104,6 +106,9 @@ h2g_system (char *query)
         
       if (!strdcmp (value, "ucon64gui_swc"))
         ucon64gui_swc ();
+
+      if (!strdcmp (value, "ucon64gui_cdrw"))
+        ucon64gui_cdrw ();
 
       if (!strdcmp (value, "ucon64gui_root"))
         {
@@ -257,7 +262,7 @@ ucon64gui_output (char *output)
 
 //  h2g_br();
 
-  h2g_textarea ("output", output, 80, 20, TRUE, FALSE, NULL);
+  h2g_textarea ("output", output, 80, 25, TRUE, FALSE, NULL);
 
   ucon64gui_bottom ();
 
@@ -280,9 +285,9 @@ ucon64gui_output (char *output)
 void
 ucon64gui_root (void)
 {
-#ifdef BACKUP
-  #include "xpm/trans.xpm"
-#endif // BACKUP
+#include "xpm/trans.xpm"
+#ifdef BACKUP_CD
+#endif
 #include "xpm/icon.xpm"
 
   h2g_html (0, 0, 0);
@@ -386,7 +391,7 @@ ucon64gui_root (void)
 
   h2g_br ();
 
-#ifdef BACKUP
+#if defined BACKUP || defined BACKUP_CD
   h2g_img (trans_xpm, 0, 3, 0, NULL);
   h2g_br ();
   h2g_hr ();
@@ -396,9 +401,18 @@ ucon64gui_root (void)
 
   h2g_ ("Backup unit specific options");
   h2g_br ();
+
+#ifdef BACKUP_CD
   h2g_input_submit ("CD-Writer", "ucon64gui_cdrw",
+//  h2g_input_image ("CD-Writer", "ucon64gui_cdrw", ccd_xpm, 0, 0,
                     "options for CD-Writer\nhttp://cdrdao.sourceforge.net/ (recommended burn engine)");
-  h2g_ (" ");
+
+  h2g_br ();
+  h2g_img (trans_xpm, 0, 3, 0, NULL);
+  h2g_br ();
+#endif // BACKUP_CD
+
+#ifdef BACKUP
   h2g_input_submit ("Flash Advance Linker", "ucon64gui_fal",
                     "options for Flash Advance Linker\n2001 Visoly http://www.visoly.com");
   h2g_ (" ");
@@ -407,12 +421,12 @@ ucon64gui_root (void)
   h2g_ (" ");
   h2g_input_submit ("Doctor64 Jr", "ucon64gui_doctor64jr",
                     "options for Doctor64 Jr\n19XX Bung Enterprises Ltd http://www.bung.com.hk");
+  h2g_ (" ");
+  h2g_input_submit ("Super Wild Card", "ucon64gui_swc",
+                    "options for Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw");
   h2g_br ();
   h2g_img (trans_xpm, 0, 3, 0, NULL);
   h2g_br ();
-  h2g_input_submit ("Super Wild Card", "ucon64gui_swc",
-                    "options for Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw");
-  h2g_ (" ");
   h2g_input_submit ("Super Magic Drive", "ucon64gui_smd",
                     "options for Super Com Pro (HK)/Super Magic Drive/SMD\n19XX Front Far East/FFE http://www.front.com.tw");
   h2g_ (" ");
@@ -420,6 +434,7 @@ ucon64gui_root (void)
                     "options for GameBoy Xchanger");
 
 #endif // BACKUP
+#endif // BACKUP || BACKUP_CD
 
   ucon64gui_bottom ();
 

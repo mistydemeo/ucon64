@@ -98,8 +98,8 @@ const char *ucon64_msg[] = {
   "ERROR: Not enough memory for ROM buffer (%d bytes)\n",
   "ERROR: Not enough memory for file buffer (%d bytes)\n",
   "DAT info: No ROM with 0x%08x as checksum found\n",
-  "WARNING: Support for DAT files is disabled, because \"datdir\" (either in the\n"
-  "         configuration file or the environment) points to an incorrect\n"
+  "WARNING: Support for DAT files is disabled, because \"ucon64_datdir\" (either\n"
+  "         in the configuration file or the environment) points to an incorrect\n"
   "         directory. Read the FAQ for more information.\n",
   "Reading config file %s\n",
   "NOTE: %s not found or too old, support for discmage disabled\n",
@@ -1252,7 +1252,15 @@ unsigned short io_input_word (unsigned short port) { return PortWordIn (port); }
 void io_output_byte (unsigned short port, unsigned char byte) { PortOut (port, byte); }
 void io_output_word (unsigned short port, unsigned short word) { PortWordOut (port, word); }
 
-#if     defined _WIN32
+#if     defined __CYGWIN__ || defined __MINGW32__
+// default to functions which are always available (but which generate an
+//  exception without a "driver" such as UserPort)
+unsigned char (*input_byte) (unsigned short) = i386_input_byte;
+unsigned short (*input_word) (unsigned short) = i386_input_word;
+void (*output_byte) (unsigned short, unsigned char) = i386_output_byte;
+void (*output_word) (unsigned short, unsigned short) = i386_output_word;
+
+#elif   defined _WIN32
 // The following four functions are needed because inp{w} and outp{w} seem to be macros
 unsigned char inp_func (unsigned short port) { return (unsigned char) inp (port); }
 unsigned short inpw_func (unsigned short port) { return inpw (port); }
@@ -1266,13 +1274,6 @@ unsigned short (*input_word) (unsigned short) = inpw_func;
 void (*output_byte) (unsigned short, unsigned char) = outp_func;
 void (*output_word) (unsigned short, unsigned short) = outpw_func;
 
-#elif   defined __CYGWIN__
-// default to functions which are always available (but which generate an
-//  exception without a "driver" such as UserPort)
-unsigned char (*input_byte) (unsigned short) = i386_input_byte;
-unsigned short (*input_word) (unsigned short) = i386_input_word;
-void (*output_byte) (unsigned short, unsigned char) = i386_output_byte;
-void (*output_word) (unsigned short, unsigned short) = i386_output_word;
 #endif
 #endif // defined _WIN32 || defined __CYGWIN__
 
@@ -1652,7 +1653,9 @@ ucon64_configfile (void)
 {
   char buf[MAXBUFSIZE], *dirname;
 
-  dirname = getenv2 ("HOME");
+  dirname = getenv2 ("UCON64_HOME");
+  if (!dirname[0])
+    dirname = getenv2 ("HOME");
   sprintf (ucon64.configfile, "%s" FILE_SEPARATOR_S
 #ifdef  __MSDOS__
     "ucon64.cfg"
@@ -1702,20 +1705,20 @@ ucon64_configfile (void)
                  "#\n"
 #if     defined __MSDOS__
                  "discmage_path=~\\discmage.dxe\n" // realpath2() expands the tilde
-                 "configdir=~\n"
-                 "datdir=~\n"
+                 "ucon64_configdir=~\n"
+                 "ucon64_datdir=~\n"
 #elif   defined __CYGWIN__
                  "discmage_path=~/discmage.dll\n"
-                 "configdir=~\n"
-                 "datdir=~\n"
+                 "ucon64_configdir=~\n"
+                 "ucon64_datdir=~\n"
 #elif   defined _WIN32
                  "discmage_path=~\\discmage.dll\n"
-                 "configdir=~\n"
-                 "datdir=~\n"
+                 "ucon64_configdir=~\n"
+                 "ucon64_datdir=~\n"
 #elif   defined __unix__ || defined __BEOS__
                  "discmage_path=~/.ucon64/discmage.so\n"
-                 "configdir=~/.ucon64\n"
-                 "datdir=~/.ucon64/dat\n"
+                 "ucon64_configdir=~/.ucon64\n"
+                 "ucon64_datdir=~/.ucon64/dat\n"
 #endif
                  "#\n"
 #if     defined __MSDOS__
@@ -1852,7 +1855,7 @@ ucon64_configfile (void)
 #endif
       );
 
-      set_property (ucon64.configfile, "configdir",
+      set_property (ucon64.configfile, "ucon64_configdir",
 #if     defined __MSDOS__
         "~"                                     // realpath2() expands the tilde
 #elif   defined __CYGWIN__
@@ -1866,7 +1869,7 @@ ucon64_configfile (void)
 #endif
       );
 
-      set_property (ucon64.configfile, "datdir",
+      set_property (ucon64.configfile, "ucon64_datdir",
 #if     defined __MSDOS__
         "~"                                     // realpath2() expands the tilde
 #elif   defined __CYGWIN__

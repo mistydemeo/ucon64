@@ -247,7 +247,7 @@ get_symbol (void *handle, char *symbol_name)
       exit (1);
     }
 #elif   defined _WIN32
-  symptr = GetProcAddress (handle, symbol_name); // actually only function names
+  symptr = (void *) GetProcAddress ((HINSTANCE) handle, symbol_name); // actually only function names
   if (symptr == NULL)
     {
       LPTSTR strptr;

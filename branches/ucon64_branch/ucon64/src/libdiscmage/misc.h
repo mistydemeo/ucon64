@@ -132,7 +132,11 @@ typedef signed __int64 int64_t;
     #define CURRENT_OS_S "Unix"
   #endif
 #elif   defined _WIN32
+  #ifdef  __MINGW32__
+    #define CURRENT_OS_S "Win32 (MinGW)"
+  #else
     #define CURRENT_OS_S "Win32"
+  #endif
 #elif   defined __APPLE__
   #if   defined __POWERPC__ || defined __ppc__
     #define CURRENT_OS_S "Apple (ppc)"
@@ -488,11 +492,27 @@ extern int set_property (const char *filename, const char *propname, const char 
 
 #ifdef  _WIN32
 // Note that _WIN32 is defined by cl.exe while the other constants (like WIN32)
-//  are defined in header files.
+//  are defined in header files. MinGW's gcc.exe defines all constants.
 
+#include <sys/types.h>
+
+int truncate (const char *path, off_t size);
+int sync (void);
+
+#ifdef  ANSI_COLOR
+#include <stdarg.h>
+
+int vprintf2 (const char *format, va_list argptr);
+int printf2 (const char *format, ...);
+int fprintf2 (FILE *file, const char *format, ...);
+#define vprintf vprintf2
+#define printf  printf2
+#define fprintf fprintf2
+#endif // ANSI_COLOR
+
+#ifndef __MINGW32__
 #include <io.h>
 #include <direct.h>
-#include <sys/types.h>
 #include <sys/stat.h>                           // According to MSDN <sys/stat.h> must
                                                 //  come after <sys/types.h>. Yep, that's M$.
 #define S_IWUSR _S_IWRITE
@@ -509,17 +529,19 @@ extern int set_property (const char *filename, const char *propname, const char 
 #define STDOUT_FILENO (fileno (stdout))
 #define STDERR_FILENO (fileno (stderr))
 
-int truncate (const char *path, off_t size);
-int sync (void);
+#else
+#ifdef  DLL
+#define access  _access
+#define chmod   _chmod
+#define fileno  _fileno
+#define getcwd  _getcwd
+#define isatty  _isatty
+#define rmdir   _rmdir
+#define stat    _stat
+#define strnicmp _strnicmp
+#endif // DLL
 
-#if     defined _WIN32 && defined ANSI_COLOR
-int vprintf2 (const char *format, va_list argptr);
-int printf2 (const char *format, ...);
-int fprintf2 (FILE *file, const char *format, ...);
-#define vprintf vprintf2
-#define printf  printf2
-#define fprintf fprintf2
-#endif
+#endif // !__MINGW32__
 #endif // _WIN32
 
 #ifdef  __cplusplus

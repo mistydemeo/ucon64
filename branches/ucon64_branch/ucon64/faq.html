@@ -172,7 +172,9 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    <a href="http://www.delorie.com/djgpp/" target="_blank">http://www.delorie.com/djgpp/</a>.
    A Win32 port of GCC (and many other GNU tools and libraries) named Cygwin
    is available from
-   <a href="http://www.cygwin.com" target="_blank">http://www.cygwin.com</a>.<br>
+   <a href="http://www.cygwin.com" target="_blank">http://www.cygwin.com</a>.
+   Another Win32 port of GCC (and other tools) named MinGW is available from
+   <a href="http://www.mingw.org" target="_blank">http://www.mingw.org</a>.<br>
 <br>
    <b>Configuring uCON64</b><br>
    Some features of uCON64 are configurable (only) at compile time. They are:<br>
@@ -210,6 +212,9 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    For Windows (Visual C++) copy config.h.vc6 to config.h. Do not copy
    any of the Makefile.vc6 files. You may do so, but do not complain if these
    instructions do not seem to be right after having done that.<br>
+   To save us some work, when using MinGW we only support configuring and
+   building uCON64 from within Msys (MinGW's POSIX build environment, a port of
+   Bash).<br>
 <br>
    <b>Support for files in gzip (.gz) or zip format (.zip)</b><br>
    For gzip &amp; zip support you need zlib. If you do not have zlib you can
@@ -238,8 +243,8 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    SNES functions. Skip the next step if you do not want uCON64 to use
    discmage.<br>
 <br>
-   If you do not have a reason not to compile discmage and you are using DJGPP
-   or Cygwin you need the library libgcc.a. This library comes with those
+   If you do not have a reason not to compile discmage and you are using DJGPP,
+   Cygwin or MinGW you need the library libgcc.a. This library comes with those
    compilers but is usually not located in the standard library directory.
    However, the compiler needs to know where to find it. There are two possible
    ways to solve this problem:<br>
@@ -330,17 +335,17 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    easier to use. To install io.dll or inpout32.dll, put it in uCON64's
    configuration directory. Use the option -version to see which directory that
    is. You can change the directory by editing the configuration file or by
-   setting an environment variable with the name configdir. Note however, that
-   although inpout32.dll is even easier to use than UserPort the transfer speed
-   is much lower (about half as fast compared to the transfer speed in
-   combination with UserPort). io.dll does not have this limitation, but its
-   source code is not freely available. uCON64 will display a message if it
-   finds io.dll or inpout32.dll before communicating with a copier. It displays
-   this message before it displays file information, so you might want to use
-   the command line switch -q. Only the Windows versions of uCON64 are able to
-   use io.dll or inpout32.dll. If both inpout32.dll and io.dll are present in
-   the configuration directory, uCON64 will first try to load io.dll. If that
-   fails it will try to load inpout32.dll.<br>
+   setting an environment variable with the name ucon64_configdir. Note
+   however, that although inpout32.dll is even easier to use than UserPort the
+   transfer speed is much lower (about half as fast compared to the transfer
+   speed in combination with UserPort). io.dll does not have this limitation,
+   but its source code is not freely available. uCON64 will display a message
+   if it finds io.dll or inpout32.dll before communicating with a copier. It
+   displays this message before it displays file information, so you might want
+   to use the command line switch -q. Only the Windows versions of uCON64 are
+   able to use io.dll or inpout32.dll. If both inpout32.dll and io.dll are
+   present in the configuration directory, uCON64 will first try to load
+   io.dll. If that fails it will try to load inpout32.dll.<br>
    It <i>is</i> possible to use the DOS version of uCON64 as a transfer tool
    under Windows&nbsp;XP without GiveIO or UserPort. We have had reports from
    people who were able to send and receive ROMs under Windows&nbsp;XP as a
@@ -779,20 +784,20 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
 <b>A</b>: Yes, starting with version 1.9.8beta8 it does. First use the option
    -version to see which configuration file uCON64 uses
    (see <a href="#25">question 25</a>). Then open that file in an editor and
-   look for a line that starts with "datdir=" (without the quotes). If that
-   line is not present add one. For example on Unix:<br>
-   &nbsp;&nbsp; datdir=~/.ucon64/dat<br>
+   look for a line that starts with "ucon64_datdir=" (without the quotes). If
+   that line is not present add one. For example on Unix:<br>
+   &nbsp;&nbsp; ucon64_datdir=~/.ucon64/dat<br>
    or on Windows:<br>
-   &nbsp;&nbsp; datdir=c:\ucon64\dat<br>
+   &nbsp;&nbsp; ucon64_datdir=c:\ucon64\dat<br>
    You can use the tilde ('~') also on DOS and Windows. It will be interpreted
    by uCON64 as the "home directory". The home directory is the directory
    specified by the environment variable HOME or USERPROFILE or HOMEDRIVE and
    HOMEPATH. If none of those environment variables are set, the current
    directory will be handled as the home directory. Again, see
    <a href="#25">question 25</a>.<br>
-   You can also set an environment variable with the name datdir. Note that
-   the value of the environment variable takes precedence over the value in
-   the configuration file.<br>
+   You can also set an environment variable with the name ucon64_datdir. Note
+   that the value of the environment variable takes precedence over the value
+   in the configuration file.<br>
    Then copy all DAT files you have into that directory. You can download DAT
    files from sites like
    <a href="http://gooddat.emu-france.com/" target="_blank">http://gooddat.emu-france.com/</a>

@@ -10,7 +10,7 @@ INSTALL = install -c
 LIBTOOL = libtool
 
 CC=gcc
-CFLAGS0=-I. -Wall -W -O3 -DHAVE_CONFIG_H -I..
+CFLAGS0=-Wall -W -O3 -DHAVE_CONFIG_H
 CFLAGS=$(CFLAGS0) -DDLL
 # The order of . and .. is important if header files are specified between
 # angle brackets
@@ -28,9 +28,12 @@ else
 LIBS=
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 else
+ifeq ($(OSTYPE),msys)                   # test msys (MinGW's POSIX build env.) before DJGPP
+else
 ifdef DJGPP                             # DJGPP code in dllinit needs map code                          
 OBJECTS+=map.o
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 endif                                   # ZLIB
 
@@ -57,6 +60,19 @@ endif
 
 FULLLIBNAME=$(LIBNAME).dll
 DLLFLAGS=$(LDFLAGS) --dll -o $(LIBNAME).dll $(OBJECTS) $(LIBS) -e $(ENTRY)
+DLLTOOLFLAGS=-d tmp.def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
+ifndef DLOPEN
+DLLTOOLFLAGS+=-l $(LIBNAME).a
+endif
+
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+
+GCCA_DIR=/mingw/lib/gcc-lib/mingw32/3.2.3/
+LIBS+=-lkernel32 -lmsvcrt -L$(GCCA_DIR) -lgcc
+
+FULLLIBNAME=$(LIBNAME).dll
+DLLFLAGS=$(LDFLAGS) --dll -o $(LIBNAME).dll $(OBJECTS) $(LIBS) -e _DllMain@12
 DLLTOOLFLAGS=-d tmp.def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
 ifndef DLOPEN
 DLLTOOLFLAGS+=-l $(LIBNAME).a
@@ -94,6 +110,7 @@ endif
 DLLFLAGS+=$(LDFLAGS) -o $(FULLLIBNAME) $(OBJECTS) $(LIBS)
 
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 
 
@@ -102,6 +119,10 @@ all: $(FULLLIBNAME)
 
 clean:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	rm -f $(LIBNAME).dll $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
+              tmp.def tmp.base tmp.exp
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 	rm -f $(LIBNAME).dll $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
               tmp.def tmp.base tmp.exp
 else
@@ -114,11 +135,15 @@ endif
 else                                    # Unix or BeOS
 	rm -f *.so $(OBJECTS) *.core *.stackdump *.o
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 
 
 distclean: clean
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	rm -f Makefile config.log config.status config.cache config.h
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 	rm -f Makefile config.log config.status config.cache config.h
 else
 ifdef DJGPP
@@ -130,6 +155,7 @@ ifdef DJGPP
 else
 	rm -f Makefile config.log config.status config.cache config.h
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 
 
@@ -138,6 +164,26 @@ endif                                   # cygwin
 
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+
+ifndef DLOPEN
+$(LIBNAME).dll $(LIBNAME).a: $(OBJECTS)
+else
+$(LIBNAME).dll: $(OBJECTS)
+endif
+	echo EXPORTS > tmp.def
+#	nm $(OBJECTS) | grep ' T _' | sed 's/.* T _//' >> tmp.def
+	nm $(OBJECTS) | grep '^........ [T] _' | sed 's/[^_]*_//' >> tmp.def
+# We use nm instead of dlltool --output-def, so that we don't have to
+# specify explicitly (in the source code) which symbols should be exported
+
+	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
+	@echo "      symbols, read faq.html question 3"
+	ld --base-file tmp.base $(DLLFLAGS)
+	dlltool $(DLLTOOLFLAGS)
+	ld tmp.exp $(DLLFLAGS)
+
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 
 ifndef DLOPEN
 $(LIBNAME).dll $(LIBNAME).a: $(OBJECTS)
@@ -181,6 +227,7 @@ $(FULLLIBNAME): $(OBJECTS)
 	$(CC) $(DLLFLAGS)
 
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 
 
@@ -198,6 +245,7 @@ nero.o: libdiscmage.h misc.h $(CONFIG_H) nero.h cdi.h dxedll_priv.h
 sheets.o: libdiscmage.h misc.h dxedll_priv.h
 dllinit.o: libdiscmage.h misc.h dxedll_priv.h
 misc.o: misc.h dxedll_priv.h
+miscz.o: miscz.h misc.h dxedll_priv.h
 dxe_misc.o: $(CONFIG_H) dxedll_pub.h
 djimport.o: libdiscmage.h dlopen.h dxedll_pub.h
 dlopen.o: $(CONFIG_H) dlopen.h dxedll_pub.h

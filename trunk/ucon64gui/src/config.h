@@ -19,11 +19,37 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef CONFIG_H
 #define CONFIG_H
+#define DEBUG
+#define MAXBUFSIZE 32768
+
+/*
+sample/sample.[ch] are for consoles which have no specific support, yet
+
+it is a good start to add support for a new console
+*/
+//#define SAMPLE
+
+/*
+  enables/disables support for zip files
+
+  comment this if there is no zlib for your platform
+  NOTE: not implemented yet and has therefore no effect
+*/
+//#define UNZIP
+
+
+/*
+  enables/disables probing in <console>_init()
+  
+  it's a good idea to leave this defined/enabled
+*/
+#define CONSOLE_PROBE
+
 
 /*
   enables/disables the internal ROM database
 
-  comment this and uCON64 will be only ~200kB in size but won't recognize
+  comment this and uCON64 will be only ~160kB in size but won't recognize
   ROMs for NES and other systems where ROMs have no internal header
 */
 #define DB

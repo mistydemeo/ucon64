@@ -46,9 +46,7 @@ static void ucon64gui_root (void);
 static void ucon64gui_output (char *output);
 
 
-struct ucon64gui_ ucon64gui;
-
-#define DEBUG
+st_ucon64gui_t ucon64gui;
 
 void
 h2g_system (char *query)
@@ -65,7 +63,7 @@ h2g_system (char *query)
   fflush (stdout);
 #endif // DEBUG
 
-  len = findlast (query, "=");
+  len = strrcspn (query, "=");
   strcpy (value, query);
   value[len] = 0;
 
@@ -100,46 +98,46 @@ h2g_system (char *query)
 
   if (!strncmp (value, "ucon64gui_", 10))
     {
-      if (!strdcmp (value, "ucon64gui_gb"))
+      if (!strcmp (value, "ucon64gui_gb"))
         {
           strcpy(ucon64gui.console,"-gb"); 
           ucon64gui_gb ();
         }
-      if (!strdcmp (value, "ucon64gui_snes"))
+      if (!strcmp (value, "ucon64gui_snes"))
         {
           strcpy(ucon64gui.console,"-snes");
           ucon64gui_snes ();
         }
-      if (!strdcmp (value, "ucon64gui_n64"))
+      if (!strcmp (value, "ucon64gui_n64"))
         {
           strcpy(ucon64gui.console,"-n64");
           ucon64gui_n64 ();
         }
-      if (!strdcmp (value, "ucon64gui_nes"))
+      if (!strcmp (value, "ucon64gui_nes"))
         {
           strcpy(ucon64gui.console,"-nes");
           ucon64gui_nes ();
         }
         
-      if (!strdcmp (value, "ucon64gui_swc"))
+      if (!strcmp (value, "ucon64gui_swc"))
         ucon64gui_swc ();
 
-      if (!strdcmp (value, "ucon64gui_cdrw"))
+      if (!strcmp (value, "ucon64gui_cdrw"))
         ucon64gui_cdrw ();
 
-      if (!strdcmp (value, "ucon64gui_root"))
+      if (!strcmp (value, "ucon64gui_root"))
         {
            if(ucon64gui.sub != 0)
              {
                ucon64gui.sub = 0;
 
-               if (!strdcmp (ucon64gui.console,"-gb"))
+               if (!strcmp (ucon64gui.console,"-gb"))
                  ucon64gui_gb ();
-               if (!strdcmp (ucon64gui.console,"-snes"))
+               if (!strcmp (ucon64gui.console,"-snes"))
                  ucon64gui_snes ();
-               if (!strdcmp (ucon64gui.console,"-n64"))
+               if (!strcmp (ucon64gui.console,"-n64"))
                  ucon64gui_n64 ();
-               if (!strdcmp (ucon64gui.console,"-nes"))
+               if (!strcmp (ucon64gui.console,"-nes"))
                  ucon64gui_nes ();
 
                return;
@@ -149,7 +147,7 @@ h2g_system (char *query)
           ucon64gui_root ();
         }
 
-      if (!strdcmp (value, "ucon64gui_config"))
+      if (!strcmp (value, "ucon64gui_config"))
         {
           ucon64gui.sub = 1;
           ucon64gui_config ();
@@ -159,26 +157,26 @@ h2g_system (char *query)
     }
 
   if (!strncmp (value, "emulate_", 8) ||
-      !strncmp (value, "cdrw_", 5) || !strdcmp (value, "backups"))
+      !strncmp (value, "cdrw_", 5) || !strcmp (value, "backups"))
     {
       setProperty (ucon64gui.configfile, value, &query[len + 1]);
       return;
     }
 
 // switches/overrides
-  if (!strdcmp (name, "-hd"))
+  if (!strcmp (name, "-hd"))
     {
       ucon64gui.hd = 1;
       return;
     }
 
-  if (!strdcmp (name, "-nhd"))
+  if (!strcmp (name, "-nhd"))
     {
       ucon64gui.hd = 0;
       return;
     }
 
-  if (!strdcmp (name, "-ns"))
+  if (!strcmp (name, "-ns"))
     {
       ucon64gui.ns = (ucon64gui.ns == 1) ? 0 : 1;
       return;
@@ -223,8 +221,6 @@ h2g_system (char *query)
 int
 main (int argc, char *argv[])
 {
-  char buf2[32768];
-
 /*
    configfile handling
 */
@@ -232,17 +228,9 @@ main (int argc, char *argv[])
 #ifdef  __MSDOS__
            "ucon64.cfg"
 #else
-           /*
-              Use getchd() here too. If this code gets compiled under Windows the compiler has to be
-              Cygwin. So, uCON64 will be a Win32 executable which will run only in an environment
-              where long filenames are available and where files can have more than three characters
-              as "extension". Under Bash HOME will be set, but most Windows people will propably run
-              uCON64 under cmd or command where HOME is not set by default. Under Windows XP/2000
-              (/NT?) USERPROFILE and/or HOMEDRIVE+HOMEPATH will be set which getchd() will "detect".
-            */
            ".ucon64rc"
 #endif
-           , getchd (buf2, FILENAME_MAX));
+           , getenv2 ("HOME"));
 
 
   h2g_start (argc, argv);

@@ -21,20 +21,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64GUI_H
 #define UCON64GUI_H
 
+//#include "ucon64.h"
 #define ucon64gui_HTMLTITLE "uCON64gui"
-
 #define ucon64gui_FORMTARGET "http://ucon64"
-
-
 #define ucon64gui_VERSION "0.1.0alpha2"
-
 #define ucon64gui_TITLE "uCON64gui " ucon64gui_VERSION " (for uCON64 " ucon64_VERSION ") 2002 by NoisyB "
 
 #ifndef MAXBUFSIZE
   #define MAXBUFSIZE 32768
 #endif
 
-extern struct ucon64gui_
+typedef struct st_ucon64gui
 {
   char cmd[FILENAME_MAX];
   char rom[FILENAME_MAX];
@@ -52,6 +49,8 @@ extern struct ucon64gui_
   int ns; // not splitted
 
   char configfile[FILENAME_MAX];
-} ucon64gui;
+} st_ucon64gui_t;
+
+extern st_ucon64gui_t ucon64gui;
 
 #endif // UCON64GUI_H

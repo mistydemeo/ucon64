@@ -23,8 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc.h"
 #include "ucon64gui.h"
 #include "html2gui/src/html2gui.h"
-#include "bottom.h"
 #include "ucon64.h"
+#include "bottom.h"
 
 void
 ucon64gui_bottom (void)
@@ -39,7 +39,7 @@ ucon64gui_bottom (void)
 
 //  h2g_img (ucon64gui_xpm, 0, 0, 0, NULL);
 
-  h2g_ ( ucon64gui_TITLE );
+//  h2g_ ( ucon64gui_TITLE );
   
   h2g_input_submit ("ucon64.sf.net", "http://ucon64.sf.net", "Surf to uCON64 and uCON64gui homepage");
 //  h2g_input_image ("Emulate", "-e", emulate_xpm, 0, 0, buf);

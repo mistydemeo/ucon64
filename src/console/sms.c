@@ -83,22 +83,6 @@ MGD2 will not recognize the file.  In the case of multiple games
 being stored in a single disk, simply enter its corresponding
 MULTI-GD index into the "MULTI-GD" file.
 
-Super Famiciom:
-
-game size       # of files      names           MULTI-GD
-================================================================
-4M              1               SF4XXX.048      SF4XXX
-4M              2               SF4XXXxA.078    SF4XXXxA
-                                SF4XXXxB.078    SF4XXXxB
-8M              1               SF8XXX.058      SF8XXX
-                2               SF8XXXxA.078    SF8XXXxA
-                                SF8XXXxB.078    SF8xxxxB
-16M             2               SF16XXXA.078    SF16XXXA
-                                SF16XXXB.078    SF16XXXB
-24M             3               SF24XXXA.078    SF24XXXA
-                                SF24XXXB.078    SF24XXXB
-                                SF24XXXC.078    SF24XXXC
-
 Mega Drive:
 
 game size       # of files      names           MUTLI-GD
@@ -117,38 +101,23 @@ game size       # of files      names           MUTLI-GD
                                 MD32XXXC.038    MD32XXXC
                                 MD32XXXD.038    MD32XXXD
 
-PC Engine:
-game size       # of files      names           MUTLI-GD
-================================================================
-1M              1               PC1XXX.040      PC1XXX
-2M              1               PC2XXX.040      PC2XXX
-4M              1               PC4XXX.048      PC4XXX
-8M              1               PC8XXX.058      PC8XXX
-
-
-The Game Doctor does not use a 512 byte header like the SWC,
-instead it uses specially designed filenames to distinguish
-between multi files. I'm not sure if it used the filename for
-information about the size of the image though.
-<p>
 Usually, the filename is in the format of: SFXXYYYZ.078
-<p>
 Where SF means Super Famicom, XX refers to the size of the
 image in Mbit. If the size is only one character (i.e. 2, 4 or
 8 Mbit) then no leading "0" is inserted.
-<p>
+
 YYY refers to a catalogue number in Hong Kong shops
 identifying the game title. (0 is Super Mario World, 1 is F-
 Zero, etc). I was told that the Game Doctor copier produces a
 random number when backing up games.
-<p>
+
 Z indicates a multi file. Like XX, if it isn't used it's
 ignored.
-<p>
+
 A would indicate the first file, B the second, etc. I am told
 078 is not needed, but is placed on the end of the filename by
 systems in Asia.
-<p>
+
 e.g. The first 16Mbit file of Donkey Kong Country (assuming it
   is cat. no. 475) would look like:  SF16475A.078
 */

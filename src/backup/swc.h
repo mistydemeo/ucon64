@@ -23,32 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SWC_H
 
 extern const char *swc_usage[];
-/*
-    0      - Low byte of 8kB page count
-    1      - High byte of 8kB page count
-    2      - Emulation Mode Select
-             Bit 7 6 5 4 3 2 1 0
-                 x               : 0 = Run program in mode 1 (JMP RESET Vector)
-                                 : 1 = Run in mode 0 (JMP $8000)
-                   x             : 0 = Last file of the ROM dump (multi-file)
-                                 : 1 = Multi-file (there is another file to follow)
-                     x           : 0 = SRAM memory mapping mode 20, 1 = mode 21 (HiROM)
-                       x         : 0 = DRAM memory mapping mode 20, 1 = mode 21 (HiROM)
-                         x x     : 00 = 256kb SRAM, 01 = 64kb, 10 = 16kb, 11 = no SRAM
-                             x   : 0 = Disable, 1 = Enable external cartridge
-                               x : reserved
-    3-7    - 0, reserved
-    8      - File ID code 1 (0xaa)
-    9      - File ID code 2 (0xbb)
-    10     - File type; check this byte only if ID 1 & 2 match
-             2 : Magic Griffin program (PC Engine)
-             3 : Magic Griffin SRAM data
-             4 : SNES program
-             5 : SWC & SMC password, SRAM data
-             6 : Megadrive program
-             7 : SMD SRAM data
-    11-511 - 0, reserved
-*/
+
+// For the header format, see ffe.h
 typedef struct st_swc_header
 {
 /*

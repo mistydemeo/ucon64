@@ -23,22 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SMD_H
 extern const char *smd_usage[];
 
-/*
-    0      - Low byte of 16kB page count
-    1      - File ID code 0 (3, not high byte of 16kB page count)
-    2      - Multi
-             Bit 7 6 5 4 3 2 1 0
-                   x             : 0 = Last file of the ROM dump (multi-file)
-                                 : 1 = Multi-file (there is another file to follow)
-                 x   x x x x x x : reserved (meaning for other FFE copier types)
-    3-7    - 0, reserved
-    8      - File ID code 1 (0xaa)
-    9      - File ID code 2 (0xbb)
-    10     - File type; check this byte only if ID 1 & 2 match
-             6 : Megadrive program
-             7 : SMD SRAM data
-    11-511 - 0, reserved
-*/
+// For the header format, see ffe.h
 typedef struct st_smd_header
 {
   unsigned char size;

@@ -405,7 +405,7 @@ n64_init (st_rominfo_t *rominfo)
     NULL, NULL, NULL, NULL, "Japan",
     NULL, NULL, NULL, NULL, NULL,
     "Europe", NULL, NULL, NULL, NULL,
-    "Australia", NULL, NULL, "France, German, Dutch", NULL};
+    "Australia", NULL, NULL, "France, Germany, Holland", NULL};
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
     ucon64.buheader_len : 0;

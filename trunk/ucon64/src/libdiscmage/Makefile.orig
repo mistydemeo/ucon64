@@ -240,7 +240,7 @@ endif
 uninstall:
 ifndef DLOPEN
 	rm -f $(DESTDIR)$(libdir)/$(FULLLIBNAME)
-	rm -f $(DESTDIR)$(includedir)/$(LIBNAME).h
+	rm -f $(DESTDIR)$(includedir)/lib$(LIBNAME).h
 endif
 
 

@@ -125,6 +125,7 @@ const struct option long_options[] = {
     {"cd", 0, 0, UCON64_CD},
 //    {"cd32", 0, 0, UCON64_CD32},
 //    {"cdi", 0, 0, UCON64_CDI},
+    {"cdirip", 0, 0, UCON64_CDIRIP},
     {"chk", 0, 0, UCON64_CHK},
     {"col", 0, 0, UCON64_COL},
     {"coleco", 0, 0, UCON64_COLECO},
@@ -197,6 +198,7 @@ const struct option long_options[] = {
     {"na", 0, 0, UCON64_NA},
     {"nbak", 0, 0, UCON64_NBAK},
     {"ncol", 0, 0, UCON64_NCOL},
+    {"nero", 0, 0, UCON64_NERO},
     {"nes", 0, 0, UCON64_NES},
     {"ng", 0, 0, UCON64_NG},
     {"ngp", 0, 0, UCON64_NGP},
@@ -941,12 +943,10 @@ ucon64_usage (int argc, char *argv[])
     "                  " OPTION_LONG_S "file=TRACK_MODE is optional, uCON64 will always try to\n"
     "                  detect the correct TRACK_MODE from the CD_IMAGE itself\n"
 #ifdef TODO
-#warning TODO  --toc    convert CloneCD *.cue to cdrdao *.toc
-#warning TODO  --cue    convert cdrdao *.toc to *.cue
-#warning TODO  ISO->CDI, ISO->NRG, CDI->NRG, NRG->ISO, TOC->CUE
+#warning TODO  --toc    convert *.cue file to Cdrdao *.toc;
 #endif // TODO
-//    "TODO:  " OPTION_LONG_S "toc    convert CloneCD *.cue to cdrdao *.toc\n"
-//    "TODO:  " OPTION_LONG_S "cue    convert cdrdao *.toc to *.cue\n"
+//    "TODO:  " OPTION_LONG_S "toc    convert *.cue file to Cdrdao *.toc\n"
+//    "TODO:  " OPTION_LONG_S "cue    convert Cdrdao *.toc file to *.cue; " OPTION_LONG_S "rom=TOC_FILE\n"
     "  " OPTION_LONG_S "iso         convert BIN/RAW CD_IMAGE to MODE1 (2048 Bytes); " OPTION_LONG_S "rom=CD_IMAGE\n"
     "                  this might be useful if you made a MODE2_RAW image of a\n"
     "                  MODE1 CD and want to "
@@ -955,6 +955,11 @@ ucon64_usage (int argc, char *argv[])
 #endif
     "burn it as MODE1 (2048 Bytes)\n"
     "                  this does only work for MODE1_RAW and MODE2(_RAW) CD_IMAGEs\n"
+#if 0
+    "TEST: " OPTION_LONG_S "cdirip  rip/split track(s) from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
+    "TODO: " OPTION_LONG_S "nero    convert DiscJuggler/CDI IMAGE for use with Nero;\n"
+    "                  " OPTION_LONG_S "rom=CDI_IMAGE\n"
+#endif
     "  " OPTION_LONG_S "help        display this help and exit\n"
     "  " OPTION_LONG_S "version     output version information and exit\n"
 //    "  " OPTION_LONG_S "quiet       don't show output\n"

@@ -43,21 +43,17 @@ const char *dc_usage[] =
     "1998 SEGA http://www.sega.com",
 #ifdef TODO
 #warning TODO  --ip  extract IP.BIN; --rom=RAW_IMAGE
-#warning TODO  --iso    convert DiscJuggler/CDI IMAGE (<=v3.0) to MODE1/2048
-#warning TODO  --n2i  convert Nero IMAGE to MODE1/2048
-#warning TODO  --ip  extract/insert IP.BIN
 #endif // TODO
     "  " OPTION_LONG_S "dc          force recognition; NEEDED\n"
-//    "  " OPTION_LONG_S "iso        force image is MODE1/2048\n"
-//    "  " OPTION_LONG_S "raw        force image is MODE2_RAW/BIN\n"
-//    "TODO: " OPTION_LONG_S "ip  extract IP.BIN; " OPTION_LONG_S "rom=RAW_IMAGE\n"//from DJ3 andor Nero?
-//    "TODO: " OPTION_LONG_S "iso    convert DiscJuggler/CDI IMAGE (<=v3.0) to MODE1/2048; " OPTION_LONG_S "rom=CDI_IMAGE\n"
-//    "NOTE: MODE1/2048 backups need the Utopia BootCD\n"
-//    "TODO: " OPTION_LONG_S "n2i  convert Nero IMAGE to MODE1/2048; " OPTION_LONG_S "rom=NERO_IMAGE\n"
 #ifdef BACKUP_CD
       "                  " OPTION_LONG_S "xcdrw works currently only for MODE1/2048 backups which\n"
       "                  need the Utopia BootCD\n"
 #endif // BACKUP_CD
+#if 0
+    "TEST: " OPTION_LONG_S "cdirip  rip/split track(s) from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
+    "TODO: " OPTION_LONG_S "nero    convert DiscJuggler/CDI IMAGE for use with Nero;\n"
+    "                  " OPTION_LONG_S "rom=CDI_IMAGE\n"
+#endif
       ,
       NULL
 };

@@ -77,7 +77,9 @@ const char *ucon64_parport_error =
   "        turn off/on the backup unit\n"
   "        split ROMs must be joined first\n"
   "        use " OPTION_LONG_S "file={3bc,378,278,...} to specify your port\n"
-  "        set the port to SPP (Standard, Normal) mode in your bios\n";
+  "        set the port to SPP (Standard, Normal) mode in your bios\n"
+  "        some backup units do not support EPP and ECP style parports\n"
+  "        read the backup units manual\n";
 
 
 const char *ucon64_console_error =
@@ -475,13 +477,11 @@ parport_probe (unsigned int port)
 unsigned int
 ucon64_parport_probe (unsigned int port)
 {
-#ifdef BACKUP
 #ifdef __unix__
   uid_t uid;
   gid_t gid;
 #endif
 
-#if 0
   if (!(port = parport_probe (port)))
     ;
 /*
@@ -489,9 +489,6 @@ ucon64_parport_probe (unsigned int port)
   else
     printf ("0x%x\n\n", port);
 */
-#else
-
-#endif
 
 #ifdef  __unix__
   /*
@@ -524,7 +521,6 @@ ucon64_parport_probe (unsigned int port)
       return 1;
     }
 #endif // __unix__
-#endif // BACKUP
   return port;
 }
 #endif // BACKUP

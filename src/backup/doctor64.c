@@ -31,16 +31,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "doctor64.h"
 
-const char *doctor64_usage[] =
-  {
-    "Doctor V64",
-    "19XX Bung Enterprises Ltd http://www.bung.com.hk",
+const char *doctor64_usage[] = {
+  "Doctor V64",
+  "19XX Bung Enterprises Ltd http://www.bung.com.hk",
 #ifdef BACKUP
-    "  " OPTION_LONG_S "xv64        send/receive ROM to/from Doctor V64; " OPTION_LONG_S "file=PORT\n"
+  "  " OPTION_LONG_S "xv64        send/receive ROM to/from Doctor V64; "
+    OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when ROM does not exist\n",
-#endif // BACKUP
-    NULL
-  };
+#endif                          // BACKUP
+  NULL
+};
 
 /*
 Doctor V64
@@ -76,7 +76,6 @@ videogames and VCD.
 
 
 #ifdef BACKUP
-
 
 #define SYNC_MAX_CNT 8192
 #define SYNC_MAX_TRY 32
@@ -202,15 +201,14 @@ int
 initCommunication (unsigned int port)
 {
   int i;
-
   for (i = 0; i < SYNC_MAX_TRY; i++)
     {
       if (syncHeader (port) == 0)
         break;
     }
   if (i >= SYNC_MAX_TRY)
-    return -1;
-  return 0;
+    return (-1);
+  return (0);
 }
 
 int
@@ -238,21 +236,17 @@ checkSync (unsigned int baseport)
 }
 
 int
-sendFilename (unsigned int baseport, const char *name)
+sendFilename (unsigned int baseport, char name[])
 {
   int i;
   char *c;
-  char sname[12];
   char mname[12];
 
-  strncpy (sname, name, 12);
-  sname[12] = 0;
-
   memset (mname, ' ', 11);
-  c = (strrchr (sname, FILE_SEPARATOR));
+  c = (strrchr (name, FILE_SEPARATOR));
   if (c == NULL)
     {
-      c = sname;
+      c = name;
     }
   else
     {
@@ -272,7 +266,7 @@ sendFilename (unsigned int baseport, const char *name)
 }
 
 int
-sendUploadHeader (unsigned int baseport, const char *name, long len)
+sendUploadHeader (unsigned int baseport, char name[], long len)
 {
   char mname[12];
 
@@ -290,14 +284,13 @@ sendUploadHeader (unsigned int baseport, const char *name, long len)
     return 1;
 
   memset (mname, ' ', 11);
-//  if( 
-  sendFilename (baseport, name);
-//   != 0 ) return 1;
+  if (sendFilename (baseport, name) != 0)
+    return 1;
   return 0;
 }
 
 int
-sendDownloadHeader (unsigned int baseport, const char *name, long *len)
+sendDownloadHeader (unsigned int baseport, char name[], long *len)
 {
   char mname[12];
 
@@ -316,7 +309,7 @@ sendDownloadHeader (unsigned int baseport, const char *name, long *len)
     return 1;
   if (recbuffer[0] != 1)
     {
-      return -1;
+      return (-1);
     }
   if (parport_read ((char *) recbuffer, 15, baseport) != 0)
     return 1;
@@ -325,7 +318,7 @@ sendDownloadHeader (unsigned int baseport, const char *name, long *len)
                                                         16) | ((long)
                                                                recbuffer[3] <<
                                                                24);
-  return 0;
+  return (0);
 }
 
 
@@ -337,13 +330,15 @@ doctor64_read (const char *filename, unsigned int parport)
   unsigned long size, inittime;
 
   if (initCommunication (parport) == -1)
-    return -1;
+    return (-1);
 
   inittime = time (0);
-  if (sendDownloadHeader (parport, filename, &size) != 0)
-    return -1;
+
+  strcpy (buf, filename);
+  if (sendDownloadHeader (parport, buf, &size) != 0)
+    return (-1);
   if (!(fh = fopen (filename, "wb")))
-    return -1;
+    return (-1);
   printf ("Receive: %ld Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   for (;;)
@@ -351,36 +346,37 @@ doctor64_read (const char *filename, unsigned int parport)
       if (parport_read (buf, sizeof (buf), parport) != 0)
         {
           fclose (fh);
-          return 0;
+          return (0);
         }
       fwrite (buf, 1, sizeof (buf), fh);
       ucon64_gauge (inittime, quickftell (filename), size);
     }
   sync ();
   fclose (fh);
-  return 0;
+  return (0);
 }
 
 
 
 int
-doctor64_write (const char *filename, long start, long len, unsigned int parport)
+doctor64_write (const char *filename, long start, long len,
+                unsigned int parport)
 {
   char buf[MAXBUFSIZE];
   FILE *fh;
   unsigned long size, inittime, pos;
 
   if (initCommunication (parport) == -1)
-    return -1;
+    return (-1);
   inittime = time (0);
 
 
-  if (sendUploadHeader (parport, filename, (quickftell (filename) - start)) !=
-      0)
-    return -1;
+  strcpy (buf, filename);
+  if (sendUploadHeader (parport, buf, (quickftell (filename) - start)) != 0)
+    return (-1);
 
   if (!(fh = fopen (filename, "rb")))
-    return -1;
+    return (-1);
 
   printf ("Send: %ld Bytes (%.4f Mb)\n\n", (quickftell (filename) - start),
           (float) (quickftell (filename) - start) / MBIT);
@@ -394,11 +390,10 @@ doctor64_write (const char *filename, long start, long len, unsigned int parport
         break;
       size = size - pos;
       ucon64_gauge (inittime, (quickftell (filename) - start) - size,
-                     (quickftell (filename) - start));
+                    (quickftell (filename) - start));
     }
   fclose (fh);
-
-  return 0;
+  return (0);
 }
 
 

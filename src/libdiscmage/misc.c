@@ -70,7 +70,7 @@ typedef struct termios tty_t;
 
 #ifdef  DJGPP
 #include <dpmi.h>                               // needed for __dpmi_int() by ansi_init()
-#ifdef  DXE
+#ifdef  DLL
 #include "dxedll_priv.h"
 #endif
 #endif
@@ -930,7 +930,8 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 }
 
 
-#if     defined PARALLEL && !defined DXE // currently there is no uCON64-specific defined constant
+// currently there is no uCON64-specific defined constant
+#if     defined PARALLEL && !defined DLL
 // I think this function belongs here, because it is related to change_mem()
 // Be a man and accept that the world is not perfect.
 #include "ucon64_misc.h"
@@ -938,8 +939,8 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 int
 build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullfilename)
 /*
-  This function goes a bit over the top what memory allocation concerns, but
-  at least it's stable.
+  This function goes a bit over the top what memory allocation technique
+  concerns, but at least it's stable.
   Note the important difference between (*patterns)[0].n_sets and
   patterns[0]->n_sets (not especially that member). I (dbjh) am too ashamed too
   tell how long it took me to finally realise that...
@@ -974,7 +975,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
 
       if (*(line + strspn (line, "\t ")) == '#')
         continue;
-      if ((ptr = strpbrk (line, "\n\r#"))) // text after # is comment
+      if ((ptr = strpbrk (line, "\n\r#")))      // text after # is comment
         *ptr = 0;
       if (!strcmp (line, ""))
         continue;
@@ -1002,7 +1003,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
       // token is never NULL here (yes, tested with empty files and such)
       do
         {
-          requiredsize2 += strlen (token);
+          requiredsize2++;
           if (requiredsize2 > currentsize2)
             {
               currentsize2 = requiredsize2 + 10;
@@ -1061,7 +1062,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
       n = 0;
       do
         {
-          requiredsize2 += strlen (token);
+          requiredsize2++;
           if (requiredsize2 > currentsize2)
             {
               currentsize2 = requiredsize2 + 10;
@@ -1141,7 +1142,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
           token = strtok (token, " ");
           do
             {
-              requiredsize3 += strlen (token);
+              requiredsize3++;
               if (requiredsize3 > currentsize3)
                 {
                   currentsize3 = requiredsize3 + 10;

@@ -383,7 +383,7 @@ extern int change_mem (char *buf, int bufsize, char *searchstr, int strsize,
 extern int change_mem2 (char *buf, int bufsize, char *searchstr, int strsize,
                         char wc, char esc, char *newstr, int newsize,
                         int offset, st_cm_set_t *sets);
-#if     defined PARALLEL && !defined DXE // currently there is no uCON64-specific defined constant
+#if     defined PARALLEL && !defined DLL // currently there is no uCON64-specific defined constant
 extern int build_cm_patterns (st_cm_pattern_t **patterns, const char *filename,
                               char *fullfilename);
 #endif

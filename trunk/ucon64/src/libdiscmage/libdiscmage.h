@@ -116,6 +116,8 @@ typedef struct
 // some image formats (CDI) use embedded headers instead of TOC or CUE files
   int header_start;
   int header_len; // if header_len == 0 then no header(!)
+
+  char misc[4096]; // miscellaneous information about proprietary images (other.c)
 } dm_image_t;
 
 

@@ -55,6 +55,7 @@ extern const st_track_probe_t track_probe[];
 #define DM_CDI (2)
 #define DM_NRG (3)
 #define DM_CCD (4)
+#define DM_OTHER (5)
 
 
 /*

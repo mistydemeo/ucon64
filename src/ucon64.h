@@ -92,7 +92,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_ROM	1
 #define ucon64_FILE	2
 
-struct ucon64_
+extern struct ucon64_
 {
 //TODO get rid of argc and argv here
   int argc;
@@ -153,8 +153,8 @@ struct ucon64_
   long country_len;             //length of country name
 
   char misc[MAXBUFSIZE];        //some miscellaneous information about the ROM in one single string
-};
+} rom;
 
-extern struct ucon64_ rom;
+//extern struct ucon64_ rom;
 
 #endif // #ifndef UCON64_H

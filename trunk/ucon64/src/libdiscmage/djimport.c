@@ -35,15 +35,25 @@ char djimport_path[FILENAME_MAX] = "discmage.dxe"; // default value
 
 static void *libdm;
 static uint32_t (*dm_get_version_ptr) (void);
+static void (*dm_set_gauge_ptr) (void (*) (int, int));
+
+static FILE *(*dm_fdopen_ptr) (dm_image_t *, int, const char *);
 static dm_image_t *(*dm_open_ptr) (const char *, uint32_t);
 static dm_image_t *(*dm_reopen_ptr) (const char *, uint32_t, dm_image_t *);
 static int (*dm_close_ptr) (dm_image_t *);
-static int (*dm_rip_ptr) (const dm_image_t *, int);
+
 static int (*dm_disc_read_ptr) (const dm_image_t *);
 static int (*dm_disc_write_ptr) (const dm_image_t *);
-static int (*dm_mktoc_ptr) (const dm_image_t *);
-static int (*dm_mkcue_ptr) (const dm_image_t *);
-static void (*dm_set_gauge_ptr) (void (*) (int, int));
+
+static int (*dm_read_ptr) (char *, int, int, const dm_image_t *);
+static int (*dm_write_ptr) (const char *, int, int, const dm_image_t *);
+
+static dm_image_t *(*dm_toc_read_ptr) (dm_image_t *, const char *);
+static int (*dm_toc_write_ptr) (const dm_image_t *);
+
+static dm_image_t *(*dm_cue_read_ptr) (dm_image_t *, const char *);
+static int (*dm_cue_write_ptr) (const dm_image_t *);
+
 
 static void
 load_dxe (void)
@@ -51,20 +61,24 @@ load_dxe (void)
   libdm = open_module (djimport_path);
 
   dm_get_version_ptr = get_symbol (libdm, "dm_get_version");
+  dm_set_gauge_ptr = get_symbol (libdm, "dm_set_gauge");
 
   dm_open_ptr = get_symbol (libdm, "dm_open");
+  dm_fdopen_ptr = get_symbol (libdm, "dm_fdopen");
   dm_reopen_ptr = get_symbol (libdm, "dm_reopen");
   dm_close_ptr = get_symbol (libdm, "dm_close");
-
-  dm_rip_ptr = get_symbol (libdm, "dm_rip");
 
   dm_disc_read_ptr = get_symbol (libdm, "dm_disc_read");
   dm_disc_write_ptr = get_symbol (libdm, "dm_disc_write");
 
-  dm_mktoc_ptr = get_symbol (libdm, "dm_mktoc");
-  dm_mkcue_ptr = get_symbol (libdm, "dm_mkcue");
+  dm_read_ptr = get_symbol (libdm, "dm_read");
+  dm_write_ptr = get_symbol (libdm, "dm_write");
 
-  dm_set_gauge_ptr = get_symbol (libdm, "dm_set_gauge");
+  dm_toc_read_ptr = get_symbol (libdm, "dm_toc_read");
+  dm_toc_write_ptr = get_symbol (libdm, "dm_toc_write");
+
+  dm_cue_read_ptr = get_symbol (libdm, "dm_cue_read");
+  dm_cue_write_ptr = get_symbol (libdm, "dm_cue_write");
 }
 
 
@@ -78,6 +92,22 @@ dm_get_version (void)
 {
   CHECK
   return dm_get_version_ptr ();
+}
+
+
+void
+dm_set_gauge (void (*a) (int, int))
+{
+  CHECK
+  return dm_set_gauge_ptr (a);
+}
+
+
+FILE *
+dm_fdopen (dm_image_t *a, int b, const char *c)
+{
+  CHECK
+  return dm_fdopen_ptr (a,b,c);
 }
 
 
@@ -106,14 +136,6 @@ dm_close (dm_image_t *a)
 
 
 int
-dm_rip (const dm_image_t *a, int b)
-{
-  CHECK
-  return dm_rip_ptr (a, b);
-}
-
-
-int
 dm_disc_read (const dm_image_t *a)
 {
   CHECK
@@ -129,25 +151,49 @@ dm_disc_write (const dm_image_t *a)
 }
 
 
-int
-dm_mktoc (const dm_image_t *a)
+int 
+dm_read (char *a, int b, int c, const dm_image_t *d)
 {
   CHECK
-  return dm_mktoc_ptr (a);
+  return dm_read_ptr (a,b,c,d);
+}
+
+
+int 
+dm_write (const char *a, int b, int c, const dm_image_t *d)
+{
+  CHECK
+  return dm_write_ptr (a,b,c,d);
+}
+
+
+dm_image_t *
+dm_toc_read (dm_image_t *a, const char *b)
+{
+  CHECK
+  return dm_toc_read_ptr (a,b);
 }
 
 
 int
-dm_mkcue (const dm_image_t *a)
+dm_toc_write (dm_image_t *a)
 {
   CHECK
-  return dm_mkcue_ptr (a);
+  return dm_toc_write_ptr (a);
 }
 
 
-void
-dm_set_gauge (void (*a) (int, int))
+dm_image_t *
+dm_cue_read (dm_image_t *a, const char *b)
 {
   CHECK
-  return dm_set_gauge_ptr (a);
+  return dm_cue_read_ptr (a,b);
+}
+
+
+int
+dm_cue_write (dm_image_t *a)
+{
+  CHECK
+  return dm_cue_write_ptr (a);
 }

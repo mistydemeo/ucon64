@@ -9,8 +9,9 @@ dm_reopen
 dm_fdopen
 dm_read
 dm_write
-dm_rip
 dm_set_gauge
 dm_track_init
-dm_mkcue
-dm_mktoc
+dm_cue_read
+dm_cue_write
+dm_toc_read
+dm_toc_write

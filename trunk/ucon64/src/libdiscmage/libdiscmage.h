@@ -22,9 +22,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef LIBDISCMAGE_H
 #define LIBDISCMAGE_H
 
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
+//#ifdef  HAVE_CONFIG_H
+//#include "config.h"
+//#endif
 
 #ifdef  __cplusplus
 extern "C" {
@@ -64,8 +64,8 @@ typedef signed __int64 int64_t;
 #endif // OWN_INTTYPES
 #endif
 
-//TODO: make this dynamic
-#define DM_MAX_TRACKS (0xfff)
+// a cd can have max. 99 tracks
+#define DM_MAX_TRACKS (99)
 
 
 #define DM_UNKNOWN (-1)
@@ -78,68 +78,49 @@ typedef signed __int64 int64_t;
 #define DM_CCD (4)
 
 
-#define ISODCL(from, to) (to - from + 1)
-typedef struct
-{
-  char type[ISODCL (1, 1)];   /* 711 */
-  char id[ISODCL (2, 6)];
-  char version[ISODCL (7, 7)];        /* 711 */
-  char unused1[ISODCL (8, 8)];
-  char system_id[ISODCL (9, 40)];     /* achars */
-  char volume_id[ISODCL (41, 72)];    /* dchars */
-  char unused2[ISODCL (73, 80)];
-  char volume_space_size[ISODCL (81, 88)];    /* 733 */
-  char unused3[ISODCL (89, 120)];
-  char volume_set_size[ISODCL (121, 124)];    /* 723 */
-  char volume_sequence_number[ISODCL (125, 128)];     /* 723 */
-  char logical_block_size[ISODCL (129, 132)]; /* 723 */
-  char path_table_size[ISODCL (133, 140)];    /* 733 */
-  char type_l_path_table[ISODCL (141, 144)];  /* 731 */
-  char opt_type_l_path_table[ISODCL (145, 148)];      /* 731 */
-  char type_m_path_table[ISODCL (149, 152)];  /* 732 */
-  char opt_type_m_path_table[ISODCL (153, 156)];      /* 732 */
-  char root_directory_record[ISODCL (157, 190)];      /* 9.1 */
-  char volume_set_id[ISODCL (191, 318)];      /* dchars */
-  char publisher_id[ISODCL (319, 446)];       /* achars */
-  char preparer_id[ISODCL (447, 574)];        /* achars */
-  char application_id[ISODCL (575, 702)];     /* achars */
-  char copyright_file_id[ISODCL (703, 739)];  /* 7.5 dchars */
-  char abstract_file_id[ISODCL (740, 776)];   /* 7.5 dchars */
-  char bibliographic_file_id[ISODCL (777, 813)];      /* 7.5 dchars */
-  char creation_date[ISODCL (814, 830)];      /* 8.4.26.1 */
-  char modification_date[ISODCL (831, 847)];  /* 8.4.26.1 */
-  char expiration_date[ISODCL (848, 864)];    /* 8.4.26.1 */
-  char effective_date[ISODCL (865, 881)];     /* 8.4.26.1 */
-  char file_structure_version[ISODCL (882, 882)];     /* 711 */
-  char unused4[ISODCL (883, 883)];
-  char application_data[ISODCL (884, 1395)];
-  char unused5[ISODCL (1396, 2048)];
-} st_iso_header_t;
 
 
 typedef struct
 {
 // TODO?: replace those uint32_t with uint64_t or so...
 
-// some formats use to have the track "embedded" (like: cdi, nrg, etc..)
+// some formats use to have the tracks "embedded" (like: cdi, nrg, etc..)
 // this is the start offset inside the image
   uint32_t track_start; // in bytes
   
-  int pregap_len; // in sectors
-  int start_lba;  // in sectors?
+  int16_t pregap_len; // in sectors
+  int16_t start_lba;  // in sectors?
 
   uint32_t track_len; // in sectors
-  uint32_t total_len; // int sectors; pregap_len + track_len (less if the track is truncated)
+  uint32_t total_len; // in sectors; pregap_len + track_len == total_len 
+                           // (less if the track is truncated)
 
-  st_iso_header_t iso_header;
+// start of the iso header inside the track (inside the image)
+  int32_t iso_header_start; // if -1 then no iso header
 
-  int mode;        // 0 == AUDIO, 1 == MODE1, 2 == MODE2
-  int sector_size; // in bytes; includes seek_header + seek_ecc
-  int seek_header; // in bytes
-  int seek_ecc;    // in bytes
+  int8_t mode;        // 0 == AUDIO, 1 == MODE1, 2 == MODE2
+  uint16_t sector_size; // in bytes; includes seek_header + seek_ecc
+  int16_t seek_header; // in bytes
+  int16_t seek_ecc;    // in bytes
 
-  char *desc;
-  char *cdrdao_desc;
+
+#if 0
+// from mplayer sources
+   uint16_t mode;
+   uint16_t minute;
+   uint16_t second;
+   uint16_t frame;
+
+   /* (min*60 + sec) * 75 + fps   */
+
+   uint32_t start_sector;
+
+   /* = the sizes in bytes off all tracks bevor this one */
+   /* its needed if there are mode1 tracks befor the mpeg tracks */
+   uint32_t start_offset;
+
+   /*   unsigned char num[3]; */
+#endif
 } dm_track_t;
 
 
@@ -148,11 +129,18 @@ typedef struct
   int type;               // image type DM_CDI, DM_NRG, DM_TOC, etc.
   char *desc;             // like type but more verbose
   int flags;              // DM_FIX, ...
-  char fname[FILENAME_MAX];
-  uint32_t session[DM_MAX_TRACKS + 1]; // array with tracks per session
-  int sessions;
-  dm_track_t track[DM_MAX_TRACKS];
-  int tracks;
+  char fname[FILENAME_MAX]; // filename of image
+  uint32_t version; // version of image (used by CDI and  NRG)
+
+  int sessions; // # of sessions
+  int tracks;  // # of tracks
+
+  dm_track_t track[DM_MAX_TRACKS]; // array of dm_track_t
+  uint8_t session[DM_MAX_TRACKS + 1]; // array of uint32_t with tracks per session
+
+// some image formats (CDI) use embedded headers instead of TOC or CUE files
+  int header_start;
+  int header_len; // if header_len == 0 then no header(!)
 } dm_image_t;
 
 
@@ -182,11 +170,12 @@ TODO: DM_FILES   rip files from track instead of track
                    {
                      printf ("%d of %d done", pos, total);
                    }
-  dm_rip()       rip track from image
   dm_read()      read single sector from track (in image)
 TODO: dm_write()     write single sector to track (in image)
-  dm_mktoc()     automagically generates toc sheets
-  dm_mkcue()     automagically generates cue sheets
+  dm_toc_read()  read TOC sheet into dm_image_t
+  dm_toc_write() write dm_image_t as TOC sheet
+  dm_cue_read()  read CUE sheet into dm_image_t
+  dm_cue_write() write dm_image_t as CUE sheet
   dm_disc_read() deprecated reading or writing images is done
                  by those scripts in contrib/
   dm_disc_write()deprecated reading or writing images is done
@@ -212,10 +201,11 @@ extern FILE *dm_fdopen (dm_image_t *image, int track_num, const char *mode);
 extern int dm_read (char buffer, int track_num, int sector, const dm_image_t *image);
 extern int dm_write (const char buffer, int track_num, int sector, const dm_image_t *image);
 
-extern int dm_mktoc (const dm_image_t *image);
-extern int dm_mkcue (const dm_image_t *image);
+extern dm_image_t *dm_toc_read (dm_image_t *image, const char *toc_sheet);
+extern int dm_toc_write (const dm_image_t *image);
 
-extern int dm_rip (const dm_image_t *image, int track_num);
+extern dm_image_t *dm_cue_read (dm_image_t *image, const char *cue_sheet);
+extern int dm_cue_write (const dm_image_t *image);
 
 extern int dm_disc_read (const dm_image_t *image);
 extern int dm_disc_write (const dm_image_t *image);

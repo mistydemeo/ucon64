@@ -21,12 +21,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include <config.h>
 #endif
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifdef  DEBUG
+#ifdef  __GNUC__
+#warning DEBUG active
+#else
+#pragma message ("DEBUG active")
+#endif
+#endif
 #include "misc.h"
 #include "libdiscmage.h"
 #include "libdm_misc.h"
@@ -39,40 +49,120 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "nero.h"
 #include "sheets.h"
 
+#ifndef CD_MINS
+#define CD_MINS              74 /* max. minutes per CD, not really a limit */
+#define CD_SECS              60 /* seconds per minute */
+#define CD_FRAMES            75 /* frames per second */
+#endif
+
 static const char pvd_magic[] = {0x01, 'C', 'D', '0', '0', '1', 0x01, 0};
 static const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
 static const char vdt_magic[] = {(const char) 0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
 
+
+
 typedef struct
 {
   int mode;
-  int sector_size;
-  int seek_header;
-  int seek_ecc;
-  char *desc;
-  char *cdrdao_desc;
+  int seek_header; // sync, head, sub
+  int sector_size; // data
+  int seek_ecc;    // EDC, zero, ECC, spare
 } st_track_probe_t;
+
+
+/*
+ * A CD-ROM physical sector size is 2048, 2052, 2056, 2324, 2332, 2336, 
+ * 2340, or 2352 bytes long.  
+
+*         Sector types of the standard CD-ROM data formats:
+ *
+ * format   sector type               user data size (bytes)
+ * -----------------------------------------------------------------------------
+ *   1     (Red Book)    CD-DA          2352    (CD_FRAMESIZE_RAW)
+ *   2     (Yellow Book) Mode1 Form1    2048    (CD_FRAMESIZE)
+ *   3     (Yellow Book) Mode1 Form2    2336    (CD_FRAMESIZE_RAW0)
+ *   4     (Green Book)  Mode2 Form1    2048    (CD_FRAMESIZE)
+ *   5     (Green Book)  Mode2 Form2    2328    (2324+4 spare bytes)
+ *
+ *
+ *       The layout of the standard CD-ROM data formats:
+ * -----------------------------------------------------------------------------
+ * - audio (red):                  | audio_sample_bytes |
+ *                                 |        2352        |
+ *
+ * - data (yellow, mode1):         | sync - head - data - EDC - zero - ECC |
+ *                                 |  12  -   4  - 2048 -  4  -   8  - 276 |
+ *
+ * - data (yellow, mode2):         | sync - head - data |
+ *                                 |  12  -   4  - 2336 |
+ *
+ * - XA data (green, mode2 form1): | sync - head - sub - data - EDC - ECC |
+ *                                 |  12  -   4  -  8  - 2048 -  4  - 276 |
+ *
+ * - XA data (green, mode2 form2): | sync - head - sub - data - Spare |
+ *                                 |  12  -   4  -  8  - 2324 -  4    |
+ *
+ */
+
+/*
+  from CDmage
+  
+  m1_2048=iso
+  m1_2352=tao
+  m2_2336=mm2
+  m2_2352=tao
+  cf_2048=fcd
+  a1_2352=pcm
+  a2_2352=wav
+  cg_2448=cdg
+  ci_2336=mci
+  ci_2352=cdi
+  cv_2048=vcd
+
+CDRWin cuesheet file (*.cue)|*.cue
+M1/2048 track (*.iso)|*.iso
+M1/2352 track (*.bin;*.tao;*.iso;*.img;*.bwi)|*.bin;*.tao;*.iso;*.img;*.bwi
+M2/2336 track (*.mm2)|*.mm2
+M2/2352 track (*.bin;*.tao;*.iso;*.img;*.bwi)|*.bin;*.tao;*.iso;*.img;*.bwi
+VirtualCD uncompressed container file (*.fcd)|*.fcd
+Audio track image file (*.pcm;*.bin;*.img;*.bwi)|*.pcm;*.bin;*img;*.bwi
+Wave file 44.1KHz 16-bit stereo (*.wav)|*.wav
+Virtual Drive uncomp. container file (*.vcd)|*.vcd
+Nero Burning Rom image file (*.nrg)|*.nrg
+CloneCD image control file (*.ccd)|*.ccd
+Raw Image (*.iso;*.bin;*.tao;*.img;*.bwi;*.mm2)|*.iso;*.bin;*.tao;*.img;*.bwi;*.mm2
+BlindWrite TOC file (*.bwt)|*.bwt
+DiscJuggler CD image file (*.cdi)|*.cdi
+Gear image files (*.rdb;*.md1;*.xa)|*.rdb;*.md1;*.xa
+NTI CD image files (*.cdp;*.ncd)|*.cdp;*.ncd
+Prassi Global-CD image file (*.gcd)|*.gcd
+WinOnCD full CD image file (*.c2d)|*.c2d
+Easy CD Creator image file (*.cif)|*.cif
+*/
 
 const st_track_probe_t track_probe[] = 
   {
-    {1, 2048, 0, 0, "MODE1/2048", "MODE1"},
-    {1, 2352, 16, 288, "MODE1/2352", "MODE1_RAW"},
-    {2, 2336, 8, 280, "MODE2/2336", "MODE2"},
-    {2, 2352, 24, 280, "MODE2/2352", "MODE2_RAW"},
+    {1, 0,  2048, 0},   // MODE1/2048, MODE1
+    {1, 16, 2352, 288}, // MODE1/2352, MODE1_RAW
+    {2, 8,  2336, 280}, // MODE2/2336, MODE2
+    {2, 24, 2352, 280}, // MODE2/2352, MODE2_RAW
 #if 0
-    {2, 2340, , },
-    {2, 2368, , },
-    {2, 2448, , },
-    {2, 2646, , },
-    {2, 2647, , },
-    {2, 2336, 0, 280},  // MODE2/2336, Macintosh
-    {2, 2352, 16, 280}, // MODE2/2352, Macintosh
-    {2, 2056, 0, 0},  // MODE2/2056, Macintosh
+    {2, 24, 2324, 4},   // MODE2/2328, MODE2_FORM2
+    {2, 0,  2340, 0},
+    {2, 0,  2368, 0},
+    {2, 0,  2448, 0},
+    {2, 0,  2646, 0},
+    {2, 0,  2647, 0},
+    {2, 0,  2336, 280},  // MODE2/2336, Macintosh
+    {2, 16, 2352, 280}, // MODE2/2352, Macintosh
+    {2, 0,  2056, 0},  // MODE2/2056, Macintosh
 #endif
-    {0, 0, 0, 0, NULL, NULL}
+    {0, 0,  2352, 0},  // AUDIO/2352, AUDIO
+    {0, 0, 0, 0}
   };
 
 static void (* dm_ext_gauge) (int, int);
+
 
 const char *dm_msg[] = {
   "ERROR: %s has been deprecated\n",
@@ -82,6 +172,7 @@ const char *dm_msg[] = {
 };
 
 
+#if 0
 void
 writewavheader (FILE * fdest, int track_length)
 {
@@ -107,164 +198,197 @@ writewavheader (FILE * fdest, int track_length)
 
   fwrite (&wav_header, 1, sizeof (wav_header_t), fdest);
 }
+#endif
 
 
 int
-from_bcd (int b)
+dm_bcd_to_int (int b)
 {
   return (b & 0x0F) + 10 * (((b) >> 4) & 0x0F);
 }
 
 
-#if 1
 int
-to_bcd (int i)
+dm_int_to_bcd (int i)
 {
+#if 1
   return i % 10 | ((i / 10) % 10) << 4;
-}
 #else
-int
-to_bcd (int value)
-{
-  int a, b;
-  a = (value / 10) * 16;
-  b = value % 10;
-  return a + b;
-}
+  return ((i / 10) * 16) + (i % 10);
 #endif
+}
 
 
-/*
-  LBA libdiscmage represents the logical block address for the CD-ROM absolute
-  address field or for the offset from the beginning of the current track
-  expressed as a number of logical blocks in a CD-ROM track relative
-  address field.
-  MSF libdiscmage represents the physical address written on CD-ROM discs,
-  expressed as a sector count relative to either the beginning of the
-  medium or the beginning of the current track.
-*/
-#if 1
 int
-lba_to_msf (int lba, dm_msf_t *mp)
+dm_lba_to_msf (int lba, int *m0, int *s0, int *f0)
+#if 1
 {
-  int m;
-  int s;
-  int f;
+  static int m, s, f;
+
+  m = s = f = -1;
 
 #ifdef	__follow_redbook__
-  if (lba >= -150 && lba < 405000)
-    {                           /* lba <= 404849 */
+  if (lba >= -150 && lba < 405000) /* lba <= 404849 */
 #else
   if (lba >= -150)
-    {
 #endif
-      m = (lba + 150) / 60 / 75;
-      s = (lba + 150 - m * 60 * 75) / 75;
-      f = (lba + 150 - m * 60 * 75 - s * 75);
+    {
+      m = (lba + 150) / CD_SECS / CD_FRAMES;
+      s = (lba + 150 - m * CD_SECS * CD_FRAMES) / CD_FRAMES;
+      f = (lba + 150 - m * CD_SECS * CD_FRAMES - s * CD_FRAMES);
 
     }
   else if (lba >= -45150 && lba <= -151)
     {
-      m = (lba + 450150) / 60 / 75;
-      s = (lba + 450150 - m * 60 * 75) / 75;
-      f = (lba + 450150 - m * 60 * 75 - s * 75);
-
+      m = (lba + 450150) / CD_SECS / CD_FRAMES;
+      s = (lba + 450150 - m * CD_SECS * CD_FRAMES) / CD_FRAMES;
+      f = (lba + 450150 - m * CD_SECS * CD_FRAMES - s * CD_FRAMES);
     }
-  else
-    {
-      mp->cdmsf_min0 = (uint8_t) -1;
-      mp->cdmsf_sec0 = (uint8_t) -1;
-      mp->cdmsf_frame0 = (uint8_t) -1;
 
-      return (FALSE);
-    }
-  mp->cdmsf_min0 = m;
-  mp->cdmsf_sec0 = s;
-  mp->cdmsf_frame0 = f;
+  m0 = (int *) &m;
+  s0 = (int *) &s;
+  f0 = (int *) &f;
 
-  if (lba > 404849)             /* 404850 -> 404999: lead out */
-    return (FALSE);
-  return (TRUE);
+  if (lba > 404849 || m == -1 || s == -1 || f == -1) /* 404850 -> 404999: lead out */
+    return FALSE;
+  return TRUE;
 }
 #else
-int
-lba_to_msf (int lba, struct cdrom_msf *msf)
 {
-  if (lba >= -CD_MSF_OFFSET)
+  static int m, s, f;
+
+  m = s = f = -1;
+
+  if (lba >= -150)
     {
-      msf->cdmsf_min0 = (lba + CD_MSF_OFFSET) / (CD_SECS * CD_FRAMES);
-      lba -= (msf->cdmsf_min0) * CD_SECS * CD_FRAMES;
-      msf->cdmsf_sec0 = (lba + CD_MSF_OFFSET) / CD_FRAMES;
-      lba -= (msf->cdmsf_sec0) * CD_FRAMES;
-      msf->cdmsf_frame0 = (lba + CD_MSF_OFFSET);
+      m = (lba + 150) / (CD_SECS * CD_FRAMES);
+      lba -= m * CD_SECS * CD_FRAMES;
+      s = (lba + 150) / CD_FRAMES;
+      lba -= s * CD_FRAMES;
+      f = (lba + 150);
     }
   else
     {
-      msf->cdmsf_min0 = (lba + 450150) / (CD_SECS * CD_FRAMES);
-      lba -= (msf->cdmsf_min0) * CD_SECS * CD_FRAMES;
-      msf->cdmsf_sec0 = (lba + 450150) / CD_FRAMES;
-      lba -= (msf->cdmsf_sec0) * CD_FRAMES;
-      msf->cdmsf_frame0 = (lba + 450150);
+      m = (lba + 450150) / (CD_SECS * CD_FRAMES);
+      lba -= m * CD_SECS * CD_FRAMES;
+      s = (lba + 450150) / CD_FRAMES;
+      lba -= s * CD_FRAMES;
+      f = (lba + 450150);
     }
+
+  m0 = (int *) &m;
+  s0 = (int *) &s;
+  f0 = (int *) &f;
+
+  return TRUE;
 }
 #endif
 
 
-#if 1
 int
-msf_to_lba (int m, int s, int f, int force_positive)
+dm_msf_to_lba (int m, int s, int f, int force_positive)
+#if 1
 {
-  long ret = m * 60 + s;
+  long ret = m * CD_SECS + s;
 
-  ret *= 75;
+  ret *= CD_FRAMES;
   ret += f;
   if (m < 90 || force_positive)
     ret -= 150;
   else
     ret -= 450150;
-  return (ret);
+  return ret;
 }
 #else
-int
-msf_to_lba (struct cdrom_msf *msf)
 {
-  return (msf->cdmsf_min0 * CD_SECS * CD_FRAMES +
-          msf->cdmsf_sec0 * CD_FRAMES + msf->cdmsf_frame0);
+  return m * CD_SECS * CD_FRAMES + s * CD_FRAMES + f;
 }
 #endif
+
+
+static void
+dm_clean (dm_image_t *image)
+{
+  int x = 0;
+
+  memset (image, 0, sizeof (dm_image_t));
+  for (x = 0; x < DM_MAX_TRACKS; x++)
+    image->track[x].iso_header_start = (-1);
+}
 
 
 int
 dm_free (dm_image_t *image)
 {
+#if 0
   memset (image, 0, sizeof (dm_image_t));
+#else
+  free (image);
+#endif
+  image = NULL;
   return 0;
 }
+
+
+#if 0
+static int
+dirty_hack (const char *fname, int track_num)
+// brute force sync_data[] callibration for unknown images
+{
+  FILE *fh;
+  int32_t pos = 0;
+  const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff, 0};
+  char buf[MAXBUFSIZE];
+  int size = q_fsize (fname);
+  if (!(fh = fopen (fname, "rb")))
+    return -1;
+
+  (void) track_num;
+  
+  for (pos = 0; pos < size - 16; pos++)
+    {
+      fseek (fh, pos, SEEK_SET);
+      fread (&buf, 16, 1, fh);
+      if (!memcmp (sync_data, buf, 12))
+        {
+          printf ("%x %d\n", pos, pos);
+          break;
+        }
+    }
+
+  fclose (fh);
+  
+  return 0;
+}
+#endif
 
 
 const dm_track_t *
 dm_track_init (dm_track_t *track, FILE *fh)
 {
+  int x = 0, identified = 0;
   const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
                             (const char) 0xff, (const char) 0xff,
                             (const char) 0xff, (const char) 0xff,
                             (const char) 0xff, (const char) 0xff,
                             (const char) 0xff, (const char) 0xff, 0};
   char buf[32];
-  st_iso_header_t iso_header;
-  int x = 0, identified = 0;
 
 //TODO?: callibration?
   fread (buf, 1, 16, fh);
   if (!memcmp (sync_data, buf, 12))
-    for (x = 0; track_probe[x].mode; x++)
+    for (x = 0; track_probe[x].sector_size; x++)
       if (track_probe[x].mode == buf[15])
         {
             // search for valid PVD in sector 16 of source image
             fseek (fh, (track_probe[x].sector_size * 16) + track_probe[x].seek_header, SEEK_SET);
-            fread (&iso_header, 1, sizeof (st_iso_header_t), fh);
+            fread (buf, 1, 16, fh);
 
-            if (!memcmp (pvd_magic, &iso_header, 8))
+            if (!memcmp (pvd_magic, &buf, 8))
               {
                 identified = 1;
                 break;
@@ -275,27 +399,24 @@ dm_track_init (dm_track_t *track, FILE *fh)
   if (!identified)
     {
       x = 0;
-#ifdef  DEBUG
       if (track_probe[x].sector_size != 2048)
         fprintf (stderr, "ERROR: dm_track_init()\n");
-#endif
-      fseek (fh, (track_probe[x].sector_size * 16) + track_probe[x].seek_header, SEEK_SET);
-      fread (&iso_header, 1, sizeof (st_iso_header_t), fh);
 
-      if (!memcmp (pvd_magic, &iso_header, 8))
+      fseek (fh, (track_probe[x].sector_size * 16) + track_probe[x].seek_header, SEEK_SET);
+      fread (buf, 1, 16, fh);
+
+      if (!memcmp (pvd_magic, &buf, 8))
         identified = 1;
     }
 
   if (!identified)
     return NULL;
 
-  memcpy (&track->iso_header, &iso_header, sizeof (st_iso_header_t));
   track->sector_size = track_probe[x].sector_size;
   track->mode = track_probe[x].mode;
   track->seek_header = track_probe[x].seek_header;
   track->seek_ecc = track_probe[x].seek_ecc;
-  track->desc = track_probe[x].desc;
-  track->cdrdao_desc = track_probe[x].cdrdao_desc;
+  track->iso_header_start = (track_probe[x].sector_size * 16) + track_probe[x].seek_header;
 
   return track;
 }
@@ -309,79 +430,62 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
     {
       int type;
       int (* func) (dm_image_t *);
-      char *desc;
     } st_probe_t;
 
   static st_probe_t probe[] =
     {
-      {DM_CDI, cdi_init, "CDI (DiscJuggler) Image"},
+      {DM_SHEET, sheet_init},
+      {DM_CDI, cdi_init},
 #if 0
-      {DM_NRG, nrg_init, "NRG (Nero) Image"}, // nero
-      {DM_CCD, ccd_init, "CCD (CloneCD) Image"},
-      {DM_UNKNOWN, NULL, "Unknown Image"},
+      {DM_NRG, nrg_init}, // Nero/NRG Image
+      {DM_CCD, ccd_init}, // CloneCD/CCD Image
+      {DM_UNKNOWN, NULL}, // Unknown Image
 #endif
-      {DM_SHEET, sheet_init, "Image with external sheet file (like: CUE, TOC, ...)"},
-      {0, NULL, NULL}
+      {0, NULL}
     };
   int x = 0;
-  FILE *fh;
 
-#if 0
-  memset (&track, 0, sizeof (dm_track_t));
+#ifdef  DEBUG
+  printf ("sizeof (dm_track_t) == %d\n", sizeof (dm_track_t));
+  printf ("sizeof (dm_image_t) == %d\n", sizeof (dm_image_t));
+  fflush (stdout);
 #endif
+
+//  dirty_hack (fname, 0);
 
   if (image)
     dm_free (image);
+
+  if (access (fname, F_OK) != 0)
+    return NULL;
 
   if (!image)
     image = (dm_image_t *) malloc (sizeof (dm_image_t));
   if (!image)
     return NULL;
 
-  memset (image, 0, sizeof (dm_image_t));
-
+  dm_clean (image);
   image->flags = flags;
   strcpy (image->fname, fname);
-
   for (x = 0; probe[x].type; x++)
     if (probe[x].func)
       {
-        memset (image, 0, sizeof (dm_image_t));
-        strcpy (image->fname, fname);
-
         if (probe[x].func (image) != -1)
           {
             image->type = probe[x].type;
-            image->desc = probe[x].desc;
             break;
+          }
+        else
+          {
+            dm_clean (image);
+            image->flags = flags;
+            strcpy (image->fname, fname);
           }
       }
 
   if (!image->type) // unknown image
     return NULL;
 
-  if (!(fh = fopen (fname, "rb")))
-    return NULL;
-
-  for (x = 0; x < image->tracks; x++)
-    {
-      dm_track_t *track = (dm_track_t *) &image->track[x];
-
-      switch (image->type)
-        {
-          case DM_CDI:
-//          fseek (fh, 0, SEEK_SET);
-            dm_cdi_track_init (track, fh);
-            break;
-
-          default:
-            fseek (fh, 0, SEEK_SET);
-            dm_track_init (track, fh);
-            break;
-        }
-    }
-
-  fclose (fh);
   return image;
 }
 
@@ -406,9 +510,8 @@ dm_open (const char *fname, uint32_t flags)
 int
 dm_close (dm_image_t *image)
 {
+//  dm_clean (image);
   dm_free (image);
-//  fclose (image->fh);
-//  free (image);
   return 0;
 }
 
@@ -416,22 +519,24 @@ dm_close (dm_image_t *image)
 int
 dm_bin2iso (const dm_image_t *image, int track_num)
 {
-  dm_track_t *track = (dm_track_t *) &image->track[track_num];
-  uint32_t i, size, netto_size = 0;
+  (void) image;
+  (void) track_num;
+#if 0
+  dm_track_t *track = NULL;
+  uint32_t i, size;
   char buf[MAXBUFSIZE];
   FILE *dest, *src;
 
   if (!image)
     return -1;
 
+  track = (dm_track_t *) &image->track[track_num];
+
   if (track->mode == 1 && track->sector_size == 2048)
     {
       fprintf (stderr, dm_msg[ALREADY_2048]);
       return -1;
     }
-
-  if (!(src = fopen (image->fname, "rb")))
-    return -1;
 
   strcpy (buf, basename (image->fname));
   set_suffix (buf, ".ISO");
@@ -444,21 +549,15 @@ dm_bin2iso (const dm_image_t *image, int track_num)
 
   size = q_fsize (image->fname);
 // TODO: float point exception
-  size /= track->sector_size;
 
-  netto_size = track->sector_size - (track->seek_header + track->seek_ecc);
-
-  for (i = 0; i < size; i++)
+  for (i = 0; i < size / track->sector_size; i++)
     {
-      fseek (src, track->seek_header, SEEK_CUR);
-
-      fread (buf, 1, netto_size, src);
-      fwrite (buf, 1, netto_size, dest);
-
-      fseek (src, track->seek_ecc, SEEK_CUR);
+      if (dm_read (buf, track_num, i, image) == track->sector_size)
+        fwrite (&buf[track->seek_header], 2048, 1, dest);
+      else break; // truncated?
 
       if (!(i % 100) && dm_ext_gauge)
-        dm_ext_gauge (i * track->sector_size, size * track->sector_size);
+        dm_ext_gauge (i * track->sector_size, size);
     }
 
   if (dm_ext_gauge)
@@ -466,7 +565,7 @@ dm_bin2iso (const dm_image_t *image, int track_num)
 
   fclose (dest);
   fclose (src);
-
+#endif
   return 0;
 }
 
@@ -724,11 +823,26 @@ dm_set_gauge (void (* gauge) (int, int))
 int
 dm_read (char buffer, int track_num, int sector, const dm_image_t *image)
 {
-  (void) buffer;
-  (void) track_num;
-  (void) sector;
-  (void) image;
-  return 0;
+  dm_track_t *track = (dm_track_t *) &image->track[track_num];
+  FILE *fh;
+  
+  if (!(fh = fopen (image->fname, "rb")))
+    return 0;
+
+  if (fseek (fh, track->track_start + (track->sector_size * sector), SEEK_SET) != 0)
+    {
+      fclose (fh);
+      return 0;
+    }
+  
+  if (fread (&buffer, track->sector_size, 1, fh) != track->sector_size)
+    {
+      fclose (fh);
+      return 0;
+    }
+
+  fclose (fh);
+  return track->sector_size;
 }
 
 
@@ -746,8 +860,15 @@ dm_write (const char buffer, int track_num, int sector, const dm_image_t *image)
 FILE *
 dm_fdopen (dm_image_t *image, int track_num, const char *mode)
 {
-  (void) image;
-  (void) track_num;
-  (void) mode;
+  dm_track_t *track = (dm_track_t *) &image->track[track_num];
+  FILE *fh;
+  
+  if (!(fh = fopen (image->fname, mode)))
+    return NULL;
+
+  if (!fseek (fh, track->track_start, SEEK_SET))
+    return fh;
+
+  fclose (fh);
   return NULL;
 }

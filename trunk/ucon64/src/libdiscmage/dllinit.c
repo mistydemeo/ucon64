@@ -88,6 +88,7 @@ dxe_init (void)
   symbol->cmp_key = (int (*) (void *, void *)) strcmp; // How beautiful! ;-)
 
   symbol = map_put (symbol, "dm_get_version", dm_get_version);
+  symbol = map_put (symbol, "dm_set_gauge", dm_set_gauge);
 
   symbol = map_put (symbol, "dm_open", dm_open);
   symbol = map_put (symbol, "dm_reopen", dm_reopen);
@@ -96,15 +97,16 @@ dxe_init (void)
 
   symbol = map_put (symbol, "dm_read", dm_read);
   symbol = map_put (symbol, "dm_write", dm_write);
-  symbol = map_put (symbol, "dm_rip", dm_rip);
 
   symbol = map_put (symbol, "dm_disc_read", dm_disc_read);
   symbol = map_put (symbol, "dm_disc_write", dm_disc_write);
 
-  symbol = map_put (symbol, "dm_mktoc", dm_mktoc);
-  symbol = map_put (symbol, "dm_mkcue", dm_mkcue);
+  symbol = map_put (symbol, "dm_toc_read", dm_toc_read);
+  symbol = map_put (symbol, "dm_toc_write", dm_toc_write);
 
-  symbol = map_put (symbol, "dm_set_gauge", dm_set_gauge);
+  symbol = map_put (symbol, "dm_cue_read", dm_cue_read);
+  symbol = map_put (symbol, "dm_cue_write", dm_cue_write);
+
   return 0;
 }
 

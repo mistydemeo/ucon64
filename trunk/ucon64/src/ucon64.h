@@ -181,13 +181,17 @@ typedef struct
   st_rominfo_t *rominfo;                        // info from <console>_init()
 } st_ucon64_t;
 
-// init st_rominfo_t, st_ucon64_dat_t and st_dm_image_t
+/*
+  ucon64_init()      init st_rominfo_t, st_ucon64_dat_t and st_dm_image_t
+  ucon64_nfo()       display contents of st_rominfo_t, st_ucon64_dat_t and
+                       st_dm_image_t
+  ucon64_flush()     flush contents of st_rominfo_t, st_ucon64_dat_t and
+                       st_dm_image_t
+  ucon64_flush_rom() flush only st_rominfo_t
+*/
 extern int ucon64_init (void);
-// display contents of st_rominfo_t, st_ucon64_dat_t and st_dm_image_t
 extern int ucon64_nfo (void);
-// flush contents of st_rominfo_t, st_ucon64_dat_t and st_dm_image_t
 //extern void ucon64_flush (void);
-// flush only st_rominfo_t
 extern st_rominfo_t *ucon64_flush_rom (st_rominfo_t *);
 
 extern void ucon64_usage (int argc, char *argv[]);

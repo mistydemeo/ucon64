@@ -429,7 +429,7 @@ long filencmp(	char *filename
 	return(-1);
 }
 
-size_t quickfread(	char *dest
+size_t quickfread(	void *dest
 			,size_t start
 			,size_t len
 			,char *src
@@ -450,7 +450,7 @@ size_t quickfread(	char *dest
 
 
 
-size_t quickfwrite(	char *src
+size_t quickfwrite(	const void *src
 			,size_t start
 			,size_t len
 			,char *dest

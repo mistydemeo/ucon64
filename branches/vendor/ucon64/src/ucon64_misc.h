@@ -103,14 +103,14 @@ long filencmp(	char *filename		//search filename for search from start for len
 		,long len
 );
 
-size_t quickfread(	char *dest	//same as fread but takes start and src is a filename
+size_t quickfread(	void *dest	//same as fread but takes start and src is a filename
 			,size_t start
 			,size_t len
 			,char *src
 );
 
 
-size_t quickfwrite(	char *src	//same as fwrite but takes start and dest is a filename
+size_t quickfwrite(	const void *src	//same as fwrite but takes start and dest is a filename
 			,size_t start
 			,size_t len
 			,char *dest

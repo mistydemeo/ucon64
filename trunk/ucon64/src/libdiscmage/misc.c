@@ -2366,7 +2366,7 @@ wait2 (int nmillis)
 {
 #ifdef  __MSDOS__
   delay (nmillis);
-#elif   defined __unix__
+#elif   defined __unix__ || defined __APPLE__   // Mac OS X actually
   usleep (nmillis * 1000);
 #elif   defined __BEOS__
   snooze (nmillis * 1000);

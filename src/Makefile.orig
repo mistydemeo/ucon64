@@ -18,8 +18,8 @@ endif
 # installed both gcc (and friends) ports.
 
 GCC_WIN=0
-# test cygwin before DJGPP; OSTYPE is not a real env var on Cygwin
-ifeq ($(TERM),cygwin)                   
+# test cygwin before DJGPP; OSTYPE is not exported on Cygwin
+ifeq ($(TERM),cygwin)
 GCC_WIN=1
 endif
 # test msys before DJGPP; Msys, MinGW's POSIX build environment

@@ -683,8 +683,12 @@ ucon64_execute_options (void)
     {
 #include "options.c"
 
-#if 1
-      // "special" options
+      /*
+        "special" options
+        -multi (and -xfalmulti) takes more than one file as argument, but
+        should be executed only once.
+        stop also after sending one ROM to a copier ("multizip")
+      */
       for (x = 0; ucon64_wf[x].option != 0; x++)
         if (ucon64_wf[x].option == ucon64_option)
           {
@@ -692,37 +696,6 @@ ucon64_execute_options (void)
               special_option = 1;
             break;
           }
-#else
-      switch (ucon64_option)
-        {
-        // -multi (and -xfalmulti) takes more than one file as argument, but
-        //  should be executed only once.
-        case UCON64_MULTI:
-        // stop after sending one ROM to a copier ("multizip")
-        case UCON64_XDEX:
-        case UCON64_XDJR:
-        case UCON64_XSMD:
-        case UCON64_XSMDS:
-        case UCON64_XSWC:
-        case UCON64_XSWC2:
-        case UCON64_XSWCS:
-        case UCON64_XV64:
-        case UCON64_XFAL:
-        case UCON64_XFALMULTI:
-        case UCON64_XFALC:
-        case UCON64_XFALS:
-        case UCON64_XFALB:
-        case UCON64_XGBX:
-        case UCON64_XGBXS:
-        case UCON64_XGBXB:
-        case UCON64_XGD3:
-        case UCON64_XLIT:
-        case UCON64_XMCCL:
-          special_option = 1;                   // falling through
-        default:
-          ;
-        }
-#endif
     }
   return special_option;
 }

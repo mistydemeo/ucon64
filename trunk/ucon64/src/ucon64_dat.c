@@ -779,6 +779,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
       stricmp (p, ".fds") &&                    // NES FDS
       stricmp (p, ".gb") &&                     // Game Boy
       stricmp (p, ".gbc") &&                    // Game Boy Color
+      stricmp (p, ".gba") &&                    // Game Boy Advance
       stricmp (p, ".smc") &&                    // SNES
       stricmp (p, ".smd") &&                    // Genesis
       stricmp (p, ".v64"))                      // Nintendo 64

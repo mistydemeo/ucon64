@@ -1125,8 +1125,11 @@ ucon64_usage (int argc, char *argv[])
   char *name_exe = strrchr (argv[0], '\\') + 1;
 #endif
   // Don't use basename[2](), because it searches for FILE_SEPARATOR, which is
-  //  '\' on DOS. DJGPP's runtime system expands argv[0] to the full path, but with forward
-  //  slashes...
+  //  '\' on DOS. DJGPP's runtime system expands argv[0] to the full path, but
+  //  with forward slashes...
+
+  if (name_exe == (char *) 1)                   // argv[0] doesn't contain a
+    name_exe = argv[0];                         //  file seprarator
 
 #ifdef  ANSI_COLOR
 #define ANSI_COLOR_MSG "  " OPTION_LONG_S "ncol        disable ANSI colors in output\n"

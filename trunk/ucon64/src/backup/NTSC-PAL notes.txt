@@ -61,7 +61,7 @@ Code1   Code2   Game
 1       P29     Donkey Kong Country (V1.1) (E)
 1 + 2   N30     Donkey Kong Country (V1.1) (U)
 2       N25     Dragon - The Bruce Lee Story (U)
-2       4       Dr. Mario (J) (NP) <= 0xea 0xea
+2       N4      Dr. Mario (J) (NP) <= 0xea 0xea
 2       N27     Dual Orb 2 (J)
 1 + 2   N17     Earthbound (U) <= 0x29
 2 + 3   N1      Final Fight 3 (U) <= emulation mode select byte: 0x1c; (0xad) 0x29

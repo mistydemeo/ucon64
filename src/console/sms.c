@@ -153,7 +153,7 @@ e.g. The first 16Mbit file of Donkey Kong Country (assuming it
   is cat. no. 475) would look like:  SF16475A.078
 */
   char buf[MAXBUFSIZE];
-  char buf2[MAXBUFSIZE];
+  char buf2[MAXBUFSIZE], *p = NULL;
 
   if (!rominfo->buheader_len)
     {
@@ -161,9 +161,9 @@ e.g. The first 16Mbit file of Donkey Kong Country (assuming it
       return -1;
     }
 
-  strcpy (buf, findlwr (filename_only (ucon64.rom)) ? "gg" : "GG");
-  strcat (buf, filename_only (ucon64.rom));
-  buf[strrcspn (buf, ".")] = 0;
+  strcpy (buf, findlwr (basename (ucon64.rom)) ? "gg" : "GG");
+  strcat (buf, basename (ucon64.rom));
+  if ((p = strrchr (buf, '.'))) *p = 0;
   strcat (buf, "________");
   buf[7] = '_';
   buf[8] = 0;

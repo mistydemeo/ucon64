@@ -1726,7 +1726,7 @@ fi
 
 fi
 
-for ac_func in getcwd mkdir putenv rmdir strcspn strerror strtol
+for ac_func in getcwd mkdir putenv rmdir strcspn strerror strtol basename dirname
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:1733: checking for $ac_func" >&5

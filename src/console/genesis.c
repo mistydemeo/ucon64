@@ -210,6 +210,7 @@ genesis_mgd (st_rominfo_t *rominfo)
 {
   unsigned char src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
                 *rom_buffer = NULL, buf[FILENAME_MAX], mgh[512];
+  char *p = NULL;
   int x, y;
   const char mghcharset[1024] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -349,9 +350,9 @@ genesis_mgd (st_rominfo_t *rominfo)
     }
   load_rom_into (ucon64.rom, rom_buffer);
 
-  strcpy (buf, findlwr (filename_only (ucon64.rom)) ? "md" : "MD");
-  strcat (buf, filename_only (ucon64.rom));
-  buf[strrcspn (buf, ".")] = 0;
+  strcpy (buf, findlwr (basename (ucon64.rom)) ? "md" : "MD");
+  strcat (buf, basename (ucon64.rom));
+  if ((p = strrchr (buf, '.'))) *p = 0;
   strcat (buf, "________");
   buf[7] = '_';
   buf[8] = 0;
@@ -397,7 +398,7 @@ int
 genesis_s (st_rominfo_t *rominfo)
 {
   st_smd_header_t smd_header;
-  char buf[MAXBUFSIZE], buf2[4096];
+  char buf[MAXBUFSIZE], buf2[4096], *p = NULL;
   int x, n4Mbparts, surplus4Mb, size;
 
   size = (rominfo->file_size - rominfo->buheader_len);
@@ -406,9 +407,9 @@ genesis_s (st_rominfo_t *rominfo)
 
   if (!rominfo->buheader_len)
     {
-      strcpy (buf, findlwr (filename_only (ucon64.rom)) ? "md" : "MD");
-      strcat (buf, filename_only (ucon64.rom));
-      buf[strrcspn (buf, ".")] = 0;
+      strcpy (buf, findlwr (basename (ucon64.rom)) ? "md" : "MD");
+      strcat (buf, basename (ucon64.rom));
+      if ((p = strrchr (buf, '.'))) *p = 0;
       strcat (buf, "________");
       buf[7] = findlwr (buf) ? 'a' : 'A';
       buf[8] = 0;
@@ -420,7 +421,7 @@ genesis_s (st_rominfo_t *rominfo)
         {
           q_fcpy (ucon64.rom, x * 4 * MBIT, 4 * MBIT, ucon64_fbackup (NULL, buf2), "wb");
           ucon64_wrote (buf2);
-          buf2[strrcspn (buf2, ".") - 1]++;
+          (*(strrchr (buf2, '.') - 1))++;
         }
 
       if (surplus4Mb != 0)
@@ -449,7 +450,7 @@ genesis_s (st_rominfo_t *rominfo)
           q_fcpy (ucon64.rom, x * 4 * MBIT + rominfo->buheader_len, 4 * MBIT, buf, "ab");
           ucon64_wrote (buf);
 
-          buf[strrcspn (buf, ".") + 1]++;
+          (*(strrchr (buf, '.') + 1))++;
         }
 
       if (surplus4Mb != 0)
@@ -872,14 +873,14 @@ genesis_j (st_rominfo_t *rominfo)
       strcpy (buf, ucon64.rom);
       while (q_fcpy (buf, rominfo->buheader_len,
                       (q_fsize (buf) - rominfo->buheader_len) / 2, buf2, "ab") != -1)
-        buf[strrcspn (buf, ".") - 1]++;
-
+        (*(strrchr (buf, '.') - 1))++;
+        
       strcpy (buf, ucon64.rom);
       file_size = q_fsize (buf);
       while (q_fcpy (buf, rominfo->buheader_len + (file_size - rominfo->buheader_len) / 2,
                       (file_size - rominfo->buheader_len) / 2, buf2, "ab") != -1)
         {
-          buf[strrcspn (buf, ".") - 1]++;
+          (*(strrchr (buf, '.') - 1))++;
           file_size = q_fsize (buf);
         }
 
@@ -896,7 +897,7 @@ genesis_j (st_rominfo_t *rominfo)
       while (q_fcpy (buf, rominfo->buheader_len, file_size, buf2, "ab") != -1)
         {
           total_size += file_size - rominfo->buheader_len;
-          buf[strrcspn (buf, ".") + 1]++;
+          (*(strrchr (buf, '.') + 1))++;
           file_size = q_fsize (buf);
         }
                                                 // fix header

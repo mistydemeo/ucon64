@@ -48,7 +48,7 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(getcwd mkdir putenv rmdir strcspn strerror strtol)
+AC_CHECK_FUNCS(getcwd mkdir putenv rmdir strcspn strerror strtol basename dirname)
 
 AC_SUBST(DEFINE_ZLIB)
 AC_OUTPUT(Makefile config.h)

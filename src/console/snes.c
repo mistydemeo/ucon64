@@ -621,17 +621,17 @@ is cat. no. 475) would look like: SF16475A.078
 int
 snes_mgd (st_rominfo_t *rominfo)
 {
-  char mgh[32], buf[FILENAME_MAX], buf2[4096];
+  char mgh[32], buf[FILENAME_MAX], buf2[4096], *p = NULL;
 
   if (!rominfo->buheader_len)
     {
       fprintf (stderr, "ERROR: Already in MGD format\n");
       return -1;
     }
-  strcpy (buf, findlwr (filename_only (ucon64.rom)) ? "sf" : "SF");
+  strcpy (buf, findlwr (basename (ucon64.rom)) ? "sf" : "SF");
   strcpy (buf2, ucon64.rom);
-  strcat (buf, filename_only (buf2));
-  buf[strrcspn (buf, ".")] = 0;
+  strcat (buf, basename (buf2));
+  if ((p = strrchr (buf, '.'))) *p = 0;
   strcat (buf, "________");
   buf[7] = '_';
   buf[8] = 0;
@@ -707,7 +707,7 @@ snes_mirror (unsigned char *dstbuf, unsigned start, unsigned data_end,
 int
 snes_gd3 (st_rominfo_t *rominfo)
 {
-  char header[512], buf[FILENAME_MAX], buf2[4096];
+  char header[512], buf[FILENAME_MAX], buf2[4096], *p = NULL;
   unsigned char *srcbuf, *dstbuf;
   int pos1, n4Mbparts, surplus4Mb, total4Mbparts, size, newsize, pad;
 
@@ -722,9 +722,9 @@ snes_gd3 (st_rominfo_t *rominfo)
   surplus4Mb = size % (4 * MBIT);
   total4Mbparts = n4Mbparts + (surplus4Mb > 0 ? 1 : 0);
 
-  sprintf (buf, "%s%d", findlwr (filename_only (ucon64.rom)) ? "sf" : "SF", total4Mbparts * 4);
-  strcat (buf, filename_only (ucon64.rom));
-  buf[strrcspn (buf, ".")] = 0;
+  sprintf (buf, "%s%d", findlwr (basename (ucon64.rom)) ? "sf" : "SF", total4Mbparts * 4);
+  strcat (buf, basename (ucon64.rom));
+  if ((p = strrchr (buf, '.'))) *p = 0;
   strcat (buf, "________");
   buf[7] = 'X';
   buf[8] = 0;
@@ -902,7 +902,7 @@ snes_gdf (st_rominfo_t *rominfo)
 int
 snes_j (st_rominfo_t *rominfo)
 {
-  char buf[FILENAME_MAX], buf2[4096];
+  char buf[FILENAME_MAX], buf2[4096], *p = NULL;
   int file_size, total_size = 0;
 
   strcpy (buf, ucon64.rom);
@@ -914,10 +914,14 @@ snes_j (st_rominfo_t *rominfo)
   while (q_fcpy (buf, rominfo->buheader_len, file_size, buf2, "ab") != -1)
     {
       total_size += file_size - rominfo->buheader_len;
+      if ((p = strrchr (buf, '.'))) 
+        (*(p + (!rominfo->buheader_len ? (-1) : 1)))++;
+#if 0  
       buf[(!rominfo->buheader_len) ?
            (strrcspn (buf, ".") - 1) :          // without header (see code of "-s")
            (strrcspn (buf, ".") + 1)            // with header (see code of "-s")
          ]++;
+#endif         
     }
 
   if (rominfo->buheader_len)
@@ -935,7 +939,7 @@ snes_j (st_rominfo_t *rominfo)
 int
 snes_s (st_rominfo_t *rominfo)
 {
-  char header[512], buf[FILENAME_MAX], buf2[4096];
+  char header[512], buf[FILENAME_MAX], buf2[4096], *p = NULL;
   int n4Mbparts, surplus4Mb, x, n8Mbparts, surplus8Mb, gd3_format, sf_romname,
       half_size, size;
 
@@ -950,13 +954,13 @@ snes_s (st_rominfo_t *rominfo)
       surplus8Mb = size % (8 * MBIT);
 
       if (sf_romname)
-        strcpy (buf, filename_only (ucon64.rom));
+        strcpy (buf, basename (ucon64.rom));
       else
         {
-          strcpy (buf, findlwr (filename_only (ucon64.rom)) ? "sf" : "SF");
-          strcat (buf, filename_only (ucon64.rom));
+          strcpy (buf, findlwr (basename (ucon64.rom)) ? "sf" : "SF");
+          strcat (buf, basename (ucon64.rom));
         }
-      buf[strrcspn (buf, ".")] = 0;
+      if ((p = strrchr (buf, '.'))) *p = 0;
       strcat (buf, "________");
       buf[7] = findlwr (buf) ? 'a' : 'A';
       buf[8] = 0;
@@ -966,12 +970,15 @@ snes_s (st_rominfo_t *rominfo)
         {
           half_size = size / 2;
           // 8 Mbit or less HiRoms, X is used to pad filename to 8 (SF4###XA)
-          buf2[strrcspn (buf2, ".") - 2] = findlwr (filename_only (ucon64.rom)) ? 'x' : 'X';
+
+          *(strrchr (buf2, '.') - 2) = findlwr (basename (ucon64.rom)) ? 'x' : 'X';
+//          buf2[strrcspn (buf2, ".") - 2] = findlwr (basename (ucon64.rom)) ? 'x' : 'X';
+
           q_fcpy (ucon64.rom, 0, half_size + rominfo->buheader_len,
                     ucon64_fbackup (NULL, buf2), "wb");
           ucon64_wrote (buf2);
 
-          buf2[strrcspn (buf2, ".") - 1]++;
+          (*(strrchr (buf2, '.') - 1))++;
           q_fcpy (ucon64.rom, half_size + rominfo->buheader_len, size - half_size,
                     ucon64_fbackup (NULL, buf2), "wb");
           ucon64_wrote (buf2);
@@ -984,7 +991,7 @@ snes_s (st_rominfo_t *rominfo)
                         8 * MBIT + (x ? 0 : rominfo->buheader_len),
                         ucon64_fbackup (NULL, buf2), "wb");
               ucon64_wrote (buf2);
-              buf2[strrcspn (buf2, ".") - 1]++;
+              (*(strrchr (buf2, '.') - 1))++;
             }
 
           if (surplus8Mb != 0)
@@ -1020,7 +1027,7 @@ snes_s (st_rominfo_t *rominfo)
           q_fcpy (ucon64.rom, x * 4 * MBIT + rominfo->buheader_len, 4 * MBIT, buf, "ab");
           ucon64_wrote (buf);
 
-          buf[strrcspn (buf, ".") + 1]++;
+          (*(strrchr (buf, '.') + 1))++;
         }
 
       if (surplus4Mb != 0)

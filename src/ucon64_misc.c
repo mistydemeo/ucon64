@@ -630,6 +630,40 @@ ucon64_gauge (time_t init_time, long pos, long size)
 }
 
 
+#if 1
+int
+ucon64_testsplit (const char *filename)
+// test if ROM is split into parts
+{
+  int x, parts = 0;
+  char buf[FILENAME_MAX], *p = NULL;
+
+  if (!strchr (filename, '.'))
+    return 0;
+
+  for (x = -1; x < 2; x += 2)
+    {
+      parts = 0;
+      strcpy (buf, filename);
+      p = strrchr (buf, '.') + x;            // if x == -1 change char before '.'
+                                                // else if x == 1 change char behind '.'
+      while (!access (buf, F_OK))
+        (*p)--;                             // "rewind"
+      (*p)++;
+
+      while (!access (buf, F_OK))               // count split parts
+        {
+          (*p)++;
+          parts++;
+        }
+
+      if (parts > 1)
+        return parts;
+    }
+
+  return 0;
+}
+#else
 int
 ucon64_testsplit (const char *filename)
 // test if ROM is split into parts
@@ -662,6 +696,7 @@ ucon64_testsplit (const char *filename)
 
   return 0;
 }
+#endif
 
 
 int
@@ -712,7 +747,7 @@ ucon64_bin2iso (const char *image, int track_mode)
         return -1;
     }
 
-  strcpy (buf, filename_only(image));
+  strcpy (buf, basename(image));
   setext (buf, ".ISO");
   size = q_fsize (image) / sector_size;
 

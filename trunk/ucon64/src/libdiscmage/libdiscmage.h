@@ -38,15 +38,15 @@ typedef struct
 {
   unsigned short global_current_track;  // current track
   unsigned short number;
-  unsigned long position;
-  unsigned long mode;
-  unsigned long sector_size;
-  unsigned long sector_size_value;
-  unsigned long track_length;
-  unsigned long pregap_length;
-  unsigned long total_length;
-  unsigned long start_lba;
-  unsigned long filename_length;
+  unsigned int position;
+  unsigned int mode;
+  unsigned int sector_size;
+  unsigned int sector_size_value;
+  unsigned int track_length;
+  unsigned int pregap_length;
+  unsigned int total_length;
+  unsigned int start_lba;
+  unsigned int filename_length;
 } dm_track_t;
 
 
@@ -56,10 +56,10 @@ typedef struct
 /*
   image nfo
 */
-  unsigned long header_offset;
-  unsigned long header_position;
-  unsigned long image_length;
-  unsigned long version;
+  unsigned int header_offset;
+  unsigned int header_position;
+  unsigned int image_length;
+  unsigned int version;
   unsigned short sessions;      // # of sessions
   unsigned short tracks;        // # of tracks
   unsigned short remaining_sessions;    // sessions left
@@ -79,9 +79,9 @@ typedef struct
   int track_type, save_as_iso, pregap,convert, fulldata, cutall, cutfirst;
   char do_convert, do_cut;
 
-  unsigned long seek_header;
+  unsigned int seek_header;
   int type;
-  unsigned long seek_ecc;
+  unsigned int seek_ecc;
   char *common;
   char *cdrdao;
 } dm_image_t;
@@ -124,7 +124,7 @@ TODO:  dm_cdifix()   fix a cdi image
   dm_mktoc()  automagically generates toc sheets
   dm_mkcue()  automagically generates cue sheets
 */
-extern int dm_set_gauge (int (*gauge) (unsigned long, unsigned long));
+extern int dm_set_gauge (int (*gauge) (unsigned int, unsigned int));
 extern int dm_bin2iso (dm_image_t *image);
 extern int dm_cdirip (dm_image_t *image);
 extern int dm_nrgrip (dm_image_t *image);

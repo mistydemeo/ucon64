@@ -312,7 +312,6 @@ dm_image_t *
 dm_open (const char *image_filename)
 // recurses through all <image_type>_init functions to find correct image type
 {
-  char buf[32];
   dm_image_t *image;
   FILE *fh = NULL;
 

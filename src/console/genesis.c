@@ -89,8 +89,7 @@ const st_usage_t genesis_usage[] =
     {"multi", "SIZE", "make multi-game file for use with MD-PRO flash card,\n"
                       "truncated to SIZE Mbit; file with loader must be specified\n"
                       "first, then all the ROMs, multi-game file to create last"},
-    {"pal", NULL, "specify console to use multi-game file on is a\n"
-                  "European Mega Drive (PAL); use in combination with -multi"},
+    {"pal", NULL, "enable region function (PAL/NTSC); use with -multi"},
     {NULL, NULL, NULL}
   };
 
@@ -789,7 +788,7 @@ genesis_f (st_rominfo_t *rominfo)
     Just like with SNES we don't guarantee anything for files that needn't be
     fixed/cracked/patched.
   */
-  if (genesis_tv_standard == 0)               // NTSC (Japan or U.S.A.)
+  if (genesis_tv_standard == 0)               // NTSC (Japan, U.S.A. or Brazil)
     return genesis_fix_ntsc_protection (rominfo);
   else
     return genesis_fix_pal_protection (rominfo);
@@ -875,18 +874,21 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
   unsigned char name[0x1c], flags = 0; // SRAM/region flags: F, D (reserved), E, P, V, T, S1, S0
 
   fseek (destfile, 0x8000 + (file_no - 1) * 0x20, SEEK_SET);
+  fputc (0xff, destfile);                       // 0x0 = 0xff
   memcpy (name, rominfo->name, 0x1c);
-  fputc (0xff, destfile);                       // 0x0 = 0xff (non-zero)
   for (n = 0; n < 0x1c; n++)
-    if (!isprint ((int) name[n]))
-      name[n] = '.';
+    {
+      if (!isprint ((int) name[n]))
+        name[n] = '.';
+      else
+        name[n] = toupper (name[n]);            // according to Leo, MDPACKU4.BIN
+    }                                           //  only supports upper case characters
   fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
   fputc (0, destfile);                          // 0x1d = 0
   fputc (totalsize / (2 * MBIT), destfile);     // 0x1e = bank code
 
   if (genesis_has_ram)
     {
-      // TODO: ask Leo if this is correct use of S1 & S0
       flags = sram_page++;
       if (sram_page == 3)
         file_no_sram = file_no;
@@ -900,19 +902,20 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
     }
   else
     flags |= 4;                                 // set T (no SRAM)
-//    flags |= 84;                                // set F & T (no SRAM)
 
+  // AAAHH!!! E, P and V are driving me NUTS! I'll just wait for bug reports...
   if (genesis_tv_standard == 1)
     flags |= 0x10;                              // set P(AL)
 
-  if (ucon64.tv_standard == 1)
-    flags |= 0x20;                              // set E(uro)
-
-  if (genesis_tv_standard == 0 && ucon64.tv_standard == 1)
-//  if (OFFSET (genesis_header, 240 + x) == 'J' && ucon64.tv_standard == 1)
+  // I (dbjh) don't know if the next compound statement is correct when -ntsc
+  //  is specified
+  if (UCON64_ISSET (ucon64.tv_standard))
     {
-      flags |= 8;                               // set V (Euro console & NTSC game)
-      flags &= ~0x30;                           // clear E(uro) & P(AL)
+      flags |= 8;                               // set V (enable region function)
+      if (genesis_tv_standard == 0)
+        flags &= ~0x30;                         // clear E(uro) & P(AL)
+      else // genesis_tv_standard == 1
+        flags |= 0x30;                          // set E(uro) & P(AL)
     }
 
   fputc (flags, destfile);                      // 0x1f = flags
@@ -1318,8 +1321,8 @@ genesis_init (st_rominfo_t *rominfo)
 
       if ((x > 0 && country_code == 0) || country_code == ' ')
         continue;
-      if (country_code == 'J' || country_code == 'U') // Japan or U.S.A.
-        genesis_tv_standard = 0;
+      if (country_code == 'J' || country_code == 'U' || country_code == 'B')
+        genesis_tv_standard = 0;        // Japan, the U.S.A. and Brazil use NTSC
       strcat (country, NULL_TO_UNKNOWN_S
                (genesis_country[MIN (country_code, GENESIS_COUNTRY_MAX - 1)]));
       strcat (country, ", ");

@@ -1540,7 +1540,10 @@ ucon64_usage (int argc, char *argv[])
     {0, {0, 0, 0, 0, 0, 0}}
   };
   int x = 0, c = 0, single = 0;
-  char *name_exe = basename (argv[0]), *name_discmage;
+  char *name_exe = basename (argv[0]);
+#ifdef  DISCMAGE
+  char *name_discmage;
+#endif
   (void) argc;                                  // warning remover
 
 #ifdef  HAVE_ZLIB_H

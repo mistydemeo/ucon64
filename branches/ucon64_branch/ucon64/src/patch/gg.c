@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.36.2.7 2003-06-10 18:56:25 noisyb Exp $
+ * $Id: gg.c,v 1.36.2.8 2003-06-10 19:42:08 noisyb Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.

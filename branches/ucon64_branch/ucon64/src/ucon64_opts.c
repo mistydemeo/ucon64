@@ -98,11 +98,12 @@ ucon64_switches (int c, const char *optarg)
 #endif
 #endif
 
-
+#ifdef  GUI
 #ifdef  DLOPEN
 #define NETGUI_STATUS_MSG "netgui DLL:                        %s\n"
 #else
 #define NETGUI_STATUS_MSG "netgui DLL:                        %s, dynamically linked\n"
+#endif
 #endif
 
 #ifdef  WORDS_BIGENDIAN

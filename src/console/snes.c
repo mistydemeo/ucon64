@@ -2155,9 +2155,11 @@ snes_n (st_rominfo_t *rominfo, const char *name)
   strncpy (buf, name, strlen (name) > SNES_NAME_LEN ? SNES_NAME_LEN : strlen (name));
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
+
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fwrite (buf, rominfo->header_start + rominfo->buheader_len + 16, SNES_NAME_LEN,
-            dest_name, "r+b");
+  q_fwrite (buf, (rominfo->interleaved ?
+                   rominfo->header_start - SNES_HIROM : rominfo->header_start) +
+            rominfo->buheader_len + 16, SNES_NAME_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -2168,7 +2170,9 @@ int
 snes_chk (st_rominfo_t *rominfo)
 {
   char buf[4], dest_name[FILENAME_MAX];
-  int image = rominfo->header_start + rominfo->buheader_len;
+  int image = (rominfo->interleaved ?
+                rominfo->header_start - SNES_HIROM :
+                rominfo->header_start) + rominfo->buheader_len;
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
@@ -3095,7 +3099,6 @@ snes_init (st_rominfo_t *rominfo)
         {
           unsigned short int *bs_date_ptr = (unsigned short int *)
             (rom_buffer + snes_header_base + SNES_HEADER_START + snes_hirom + 38);
-          unsigned short int bs_date = *bs_date_ptr;
           /*
             We follow the "uCONSRT standard" for calculating the CRC32 of BS
             dumps. At the time of this writing (20 June 2003) the uCONSRT
@@ -3110,7 +3113,6 @@ snes_init (st_rominfo_t *rominfo)
           *bs_date_ptr = me2le_16 (0x0042);
           get_nsrt_info (rom_buffer, rominfo->header_start, (unsigned char *) &header);
           ucon64.crc32 = crc32 (0, rom_buffer, size);
-          *bs_date_ptr = bs_date;
         }
       else if (rominfo->interleaved || nsrt_header)
         {
@@ -3872,6 +3874,8 @@ get_nsrt_info (unsigned char *rom_buffer, int header_start, unsigned char *heade
     {
       memcpy (rom_buffer + header_start + 16, header + 0x1d1, SNES_NAME_LEN); // name
       rom_buffer[header_start + 41] = header[0x1d0] & 0x0f; // region
+      rom_buffer[header_start + 44] = ~header[0x1e6]; // inverse checksum low
+      rom_buffer[header_start + 45] = ~header[0x1e7]; // inverse checksum high
       rom_buffer[header_start + 46] = header[0x1e6]; // checksum low
       rom_buffer[header_start + 47] = header[0x1e7]; // checksum high
     }

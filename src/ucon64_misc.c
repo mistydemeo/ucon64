@@ -355,6 +355,7 @@ unsigned int parport_probe(unsigned int port)
   }
   if (atexit(close_io_port) == -1)
   {
+    close(ucon64_io_fd);
     fprintf(stderr, "Could not register function with atexit()\n");
     exit(1);
   }

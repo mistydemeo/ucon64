@@ -1750,11 +1750,11 @@ ucon64_parport_init (int port)
   ioctl (ucon64_io_fd, PPSETTIME, &t);
 /*
   ioctl (ucon64_io_fd, PPGETTIME, &t);
-  printf ("Current time-out value: %ld micro seconds\n", t.tv_usec);
+  printf ("Current time-out value: %ld microseconds\n", t.tv_usec);
+*/
 
   ioctl (ucon64_io_fd, PPGETMODES, &capabilities);
-  printf ("Capabilities: %x\n", capabilities);
-*/
+//  printf ("Capabilities: %x\n", capabilities);
   if (capabilities & PARPORT_MODE_ECP)
     ioctl (ucon64_io_fd, PPSETMODE, IEEE1284_MODE_ECP);
   else if (capabilities & PARPORT_MODE_EPP)

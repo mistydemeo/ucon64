@@ -601,78 +601,23 @@ snes_fig (st_rominfo_t *rominfo)
 }
 
 
-/*
-The MGD2 only accepts certain filenames, and these filenames
-must be specified in an index file, "MULTI-GD", otherwise the
-MGD2 will not recognize the file. In the case of multiple games
-being stored in a single disk, simply enter its corresponding
-MULTI-GD index into the "MULTI-GD" file.
-
-game size       # of files      names           MULTI-GD
-================================================================
-4M              1               SF4XXX.048      SF4XXX
-4M              2               SF4XXXxA.078    SF4XXXxA
-                                SF4XXXxB.078    SF4XXXxB
-8M              1               SF8XXX.058      SF8XXX
-                2               SF8XXXxA.078    SF8XXXxA
-                                SF8XXXxB.078    SF8xxxxB
-16M             2               SF16XXXA.078    SF16XXXA
-                                SF16XXXB.078    SF16XXXB
-24M             3               SF24XXXA.078    SF24XXXA
-                                SF24XXXB.078    SF24XXXB
-                                SF24XXXC.078    SF24XXXC
-
-Contrary to popular belief the Game Doctor *does* use a 512
-byte header like the SWC, but it also accepts headerless files.
-A header is necessary when things like SRAM size must be made
-known to the Game Doctor. The Game Doctor also uses specially
-designed filenames to distinguish between multi files.
-
-Usually, the filename is in the format of: SFXXYYYZ.078
-
-Where SF means Super Famicom, XX refers to the size of the
-image in Mbit. If the size is only one character (i.e. 2, 4 or
-8 Mbit) then no leading "0" is inserted.
-
-YYY refers to a catalogue number in Hong Kong shops
-identifying the game title. (0 is Super Mario World, 1 is F-
-Zero, etc). I was told that the Game Doctor copier produces a
-random number when backing up games.
-
-Z indicates a multi file. Like XX, if it isn't used it's
-ignored.
-
-A would indicate the first file, B the second, etc. I am told
-078 is not needed, but is placed on the end of the filename by
-systems in Asia.
-
-e.g. The first 16 Mbit file of Donkey Kong Country (assuming it
-is cat. no. 475) would look like: SF16475A.078
-*/
+// see src/backup/mgd.h for the file naming scheme
 int
 snes_mgd (st_rominfo_t *rominfo)
 {
-  char mgh[32], src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *fname;
-  int n, size = ucon64.file_size - rominfo->buheader_len;
+  char mgh[32], src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  int size = ucon64.file_size - rominfo->buheader_len;
 
   strcpy (src_name, ucon64.rom);
-  fname = basename (ucon64.rom);
-  sprintf (dest_name, "%s%d%s", is_func (fname, strlen (fname), isupper) ? "SF" : "sf",
-           size / MBIT, fname);
-  if (size < 10 * MBIT)
-    {
-      if (!strnicmp (dest_name, fname, 3))
-        strcpy (dest_name, fname);
-    }
+  mgd_make_name (ucon64.rom, "SF", size, dest_name);
+  ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
+
+  if (rominfo->interleaved)
+    write_deinterleaved_data (rominfo, src_name, dest_name, size, 0);
   else
-    {
-      if (!strnicmp (dest_name, fname, 4))
-        strcpy (dest_name, fname);
-    }
-  dest_name[8] = 0;
-  for (n = 3; n < 8; n++)
-    if (dest_name[n] == ' ')
-      dest_name[n] = '_';
+    q_fcpy (src_name, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
 
   // What is the format of this MULTI-GD file?
   mgh[0] = 'M';
@@ -682,15 +627,6 @@ snes_mgd (st_rominfo_t *rominfo)
   memset (mgh + 4, 0, 12);
   memcpy (mgh + 16, rominfo->name, 15);         // copy first 15 bytes (don't use strlen() or strcpy())
   mgh[31] = (unsigned char) 0xff;
-
-  set_suffix (dest_name, ".078");
-  ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
-  if (rominfo->interleaved)
-    write_deinterleaved_data (rominfo, src_name, dest_name, size, 0);
-  else
-    q_fcpy (src_name, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
-  printf (ucon64_msg[WROTE], dest_name);
-  remove_temp_file ();
 
   strcpy (dest_name, "MULTI-GD.MGH"); // uCON does "set_suffix (dest_name, ".MGH");" instead
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
@@ -1934,6 +1870,7 @@ af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Seiken 
 af 3f 21 00 29 10 80 2d 00 1b         af 3f 21 00 29 00 80 2d 00 1b    - Seiken Densetsu 2/Secret of Mana U
    3f 21 00 89 10 c2 XX f0               3f 21 00 89 10 c2 XX 80       - Dragon - The Bruce Lee Story U
 af 3f 21 00 XX YY 29 10 00 d0         af 3f 21 00 XX YY 29 10 00 ea ea - Fatal Fury Special ?
+   3f 21 c2 XX 29 10 00 f0               3f 21 c2 XX 29 10 00 80       - Metal Warriors
    3f 21 c2 XX 29 10 00 d0               3f 21 c2 XX 29 10 00 ea ea    - Dual Orb 2
 af 3f 21 ea 89 10 00 d0               a9 00 00 ea 89 10 00 d0          - Super Famista 3 ?
 a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country U
@@ -2016,6 +1953,7 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
       n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x29\x10\x80\x2d\x00\x1b", 10, '\x01', '\x02', "\x00", 1, -4);
       n += change_mem (buffer, bytesread, "\x3f\x21\x00\x89\x10\xc2\x01\xf0", 8, '\x01', '\x02', "\x80", 1, 0);
       n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x01\x01\x29\x10\x00\xd0", 10, '\x01', '\x02', "\xea\xea", 2, 0);
+      n += change_mem (buffer, bytesread, "\x3f\x21\xc2\x01\x29\x10\x00\xf0", 8, '\x01', '\x02', "\x80", 1, 0);
       n += change_mem (buffer, bytesread, "\x3f\x21\xc2\x01\x29\x10\x00\xd0", 8, '\x01', '\x02', "\xea\xea", 2, 0);
       n += change_mem (buffer, bytesread, "\xaf\x3f\x21\xea\x89\x10\x00\xd0", 8, '\x01', '\x02', "\xa9\x00\x00", 3, -7);
       n += change_mem (buffer, bytesread, "\xa2\x18\x01\xbd\x27\x20\x89\x10\x00\xd0\x01", 11, '*', '!', "\xea\xea", 2, -1);
@@ -2234,7 +2172,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     uCON64 detects as the interleaved dump of Shin Syogi Club (J) are identical
     to the first 512 bytes of what we detect as the uninterleaved dump of
     Kakinoki Shogi (J). We prefer uninterleaved dumps. Besides, concluding a
-    dump is interleaved if the first 512 byte have CRC32 0xbd7bc39f would mess
+    dump is interleaved if the first 512 bytes have CRC32 0xbd7bc39f would mess
     up the detection of some BS dumps. See below.
 
     0x7039388a: Ys 3 - Wanderers from Ys (J)
@@ -2246,7 +2184,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     another way, but DKM2 (40 Mbit) can't. The CRC32's are checked for below.
 
     0xdbc88ebf: BS Satella2 1 (J)
-    This game has a LoROM map type byte while it is a HiROM game
+    This game has a LoROM map type byte while it is a HiROM game.
 
     0x29226b62: BS Busters - Digital Magazine 5-24-98 (J),
                 BS Do-Re-Mi No.2 5-10 (J),

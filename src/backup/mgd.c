@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "misc.h"
 #include "quick_io.h"
 #include "ucon64.h"
@@ -45,7 +46,7 @@ const st_usage_t mgd_usage[] =
   };
 
 
-// the following three functions are used by non-transfer code in genesis.c
+// the following four functions are used by non-transfer code in genesis.c
 void
 mgd_interleave (unsigned char **buffer, int size)
 {
@@ -67,19 +68,19 @@ mgd_interleave (unsigned char **buffer, int size)
 
 
 void
-mgd_deinterleave (unsigned char **buffer, int size)
+mgd_deinterleave (unsigned char **buffer, int data_size, int buffer_size)
 {
   int n = 0, offset;
   unsigned char *src = *buffer;
 
-  if (!(*buffer = (unsigned char *) malloc (size)))
+  if (!(*buffer = (unsigned char *) malloc (buffer_size)))
     {
-      fprintf (stderr, ucon64_msg[BUFFER_ERROR], size);
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], buffer_size);
       exit (1);
     }
-  for (offset = 0; offset < size / 2; offset++)
+  for (offset = 0; offset < data_size / 2; offset++)
     {
-      (*buffer)[n++] = src[size / 2 + offset];
+      (*buffer)[n++] = src[data_size / 2 + offset];
       (*buffer)[n++] = src[offset];
     }
   free (src);
@@ -169,6 +170,130 @@ q_fread_mgd (void *buffer, size_t start, size_t len, const char *filename)
   return result;
 }
 
+
+void
+mgd_make_name (const char *filename, const char *prefix0, int size, char *name)
+{
+  char *fname, *size_str = 0, *suffix = 0, prefix[3]; // copy of prefix0 that can be modified
+  int n;
+
+  fname = basename (filename);
+  strncpy (prefix, prefix0, 3);
+  prefix[2] = 0;
+
+  if (prefix[0] == 'S' && prefix[1] == 'F')
+    {
+      if (size <= 4 * MBIT)
+        {
+          size_str = "4";
+          suffix = ".048";
+        }
+      else if (size <= 8 * MBIT)
+        {
+          size_str = "8";
+          suffix = ".058";
+        }
+      else
+        {
+          suffix = ".078";
+          if (size <= 16 * MBIT)
+            size_str = "16";
+          else if (size <= 24 * MBIT)
+            size_str = "24";
+          else // MGD supports SNES games with sizes up to 32 Mbit
+            size_str = "32";
+        }
+    }
+  else if (prefix[0] == 'M' && prefix[1] == 'D')
+    {
+      suffix = ".000";
+      if (size <= 1 * MBIT)
+        size_str = "1";
+      else if (size <= 2 * MBIT)
+        size_str = "2";
+      else if (size <= 4 * MBIT)
+        size_str = "4";
+      else
+        {
+          if (size <= 8 * MBIT)
+            {
+              size_str = "8";
+              suffix = ".008";
+            }
+          else if (size <= 16 * MBIT)
+            {
+              size_str = "16";
+              suffix = ".018";
+            }
+          else
+            {
+              suffix = ".038";
+              if (size <= 24 * MBIT)
+                size_str = "24";
+              else // MGD supports Genesis games with sizes up to 32 Mbit
+                size_str = "32";
+            }
+        }
+    }
+  else if (prefix[0] == 'P' && prefix[1] == 'C')
+    {
+      if (size <= 1 * MBIT)
+        {
+          size_str = "1";
+          suffix = ".040";
+        }
+      else if (size <= 2 * MBIT)
+        {
+          size_str = "2";
+          suffix = ".040";
+        }
+      else if (size <= 4 * MBIT)
+        {
+          size_str = "4";
+          suffix = ".048";
+        }
+      else // MGD supports SNES games with sizes up to 8 Mbit
+        {
+          size_str = "8";
+          suffix = ".058";
+        }
+    }
+  else if (prefix[0] == 'G' && prefix[1] == 'G')
+    {
+      if (size <= 2 * MBIT)
+        {
+          size_str = "2";
+          suffix = ".000";
+        }
+      else // MGD supports Game Gear games with sizes up to 4 Mbit
+        {
+          size_str = "4";
+          suffix = ".018";
+        }
+    }
+
+  sprintf (name, "%s%s%s", is_func (fname, strlen (fname), isupper) ?
+           prefix : strlwr (prefix), size_str, fname);
+  if (size < 10 * MBIT)
+    {
+      if (!strnicmp (name, fname, 3))
+        strcpy (name, fname);
+      name[6] = '0';                            // last character must be a number
+      name[7] = 0;
+    }
+  else
+    {
+      if (!strnicmp (name, fname, 4))
+        strcpy (name, fname);
+      name[7] = '0';
+      name[8] = 0;
+    }
+  for (n = 3; n < 7; n++)                       // we can skip the prefix
+    if (name[n] == ' ')
+      name[n] = '_';
+
+  set_suffix (name, suffix);
+}
 
 #ifdef PARALLEL
 #endif // PARALLEL

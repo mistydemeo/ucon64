@@ -75,12 +75,6 @@ write_frame (int frame, char *data)
                                   data);
 }
 
-int
-get_perm ()
-{
-  return psx_obtain_io_permission (print_data);
-}
-
 /*
   It will save you some work if you don't fully integrate the code above with uCON64's code,
   because it is a project separate from the uCON64 project.

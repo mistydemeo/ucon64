@@ -489,6 +489,7 @@ isfname (int c)
       // characters that are also allowed in filenames
       case '.':
       case ',':
+      case '\'':
       case '-':
       case ' ':
       case '(':

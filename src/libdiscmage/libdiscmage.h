@@ -25,21 +25,20 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 extern "C" {
 #endif
 
-#if     defined __linux__ || defined __FreeBSD__ || \
-        defined __BEOS__ || defined __solaris__ || defined HAVE_INTTYPES_H
+#ifdef  HAVE_INTTYPES_H
 #include <inttypes.h>
 #elif   defined __CYGWIN__
 #include <sys/types.h>
+#if     __GNUC__ < 3
 #ifndef OWN_INTTYPES
 #define OWN_INTTYPES                            // signal that these are defined
-#if     __GNUC__ < 3
 typedef u_int8_t uint8_t;
 typedef u_int16_t uint16_t;
 typedef u_int32_t uint32_t;
 typedef u_int64_t uint64_t;
 #endif
-#endif // OWN_INTTYPES
-#else
+#endif                                          // __GNUC__ < 3
+#else                                           // __MSDOS__, _WIN32, AMIGA
 #ifndef OWN_INTTYPES
 #define OWN_INTTYPES                            // signal that these are defined
 typedef unsigned char uint8_t;
@@ -50,6 +49,7 @@ typedef unsigned long long int uint64_t;
 #else
 typedef unsigned __int64 uint64_t;
 #endif
+#ifndef AMIGA                                   // __BIT_TYPES_DEFINED__?
 typedef signed char int8_t;
 typedef signed short int int16_t;
 typedef signed int int32_t;
@@ -58,7 +58,8 @@ typedef signed long long int int64_t;
 #else
 typedef signed __int64 int64_t;
 #endif
-#endif // OWN_INTTYPES
+#endif                                          // AMIGA
+#endif                                          // OWN_INTTYPES
 #endif
 
 #define DM_VERSION_MAJOR (0)
@@ -77,10 +78,10 @@ typedef struct
 // this is the start offset inside the image
   uint32_t track_start; // in bytes
   uint32_t track_end; // in bytes
-  
+
   int16_t pregap_len; // in sectors
   uint32_t track_len; // in sectors
-  uint32_t total_len; // in sectors; pregap_len + track_len == total_len 
+  uint32_t total_len; // in sectors; pregap_len + track_len == total_len
                            // (less if the track is truncated)
 
   int16_t postgap_len;// in sectors

@@ -653,6 +653,24 @@ seek_pvd (int sector_size, int mode, const char *filename)
 }
 
 
+char *
+ucon64_rom_in_archive (void *dp, const char *archive, char *romname,
+                       char *configfile)
+{
+#if 0
+  if (!(dp = opendir2 (archive))) return NULL;
+
+//  strcpy (romname, "");
+
+
+  closedir2 (dp);
+
+  return romname;
+#endif
+  return NULL;
+}
+
+
 int
 ucon64_trackmode_probe (const char *image)
 // tries to figure out the used track mode of the cd image

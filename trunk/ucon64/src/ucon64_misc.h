@@ -23,6 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_MISC_H
 #define UCON64_MISC_H
 
+#include "misc.h" // for DIR2_t
+
 #ifdef  BACKUP
 #ifdef  __BEOS__
 #define DRV_READ_IO_8 'r'
@@ -117,6 +119,15 @@ extern const char *ucon64_parport_error; //std. error message for parport
 extern const char *ucon64_console_error; //std. error message if the correct console couldn't be found
 
 extern void ucon64_wrote (const char *filename);
+
+/*
+  open an archive and look for a rom; if rom found return romname else
+  return (char *)archive
+
+  to delete the tempdir *dp must be closed with closedir2()
+*/
+extern char *ucon64_rom_in_archive (void *dp, const char *archive, char *romname,
+                                    char *configfile);
 
 extern int ucon64_bin2iso (const char *image, int track_mode);
 extern int ucon64_trackmode_probe (const char *image);

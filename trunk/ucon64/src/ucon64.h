@@ -26,7 +26,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_H
 #define UCON64_H
 
+#include "ucon64_misc.h"                 // for DIR2_t
 #include "getopt.h"                      // for struct option
+
 
 #define UCON64_YES 1
 #define UCON64_NO 0
@@ -237,7 +239,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_WONDERSWAN UCON64_SWAN
 #define UCON64_XBOX (UCON64_CONSOLE + 28)
 
-#define UCON64_VERSION_S "1.9.8beta3"
+#define UCON64_VERSION_S "1.9.8beta4"
 
 #define MBIT	131072
 #define TOMBIT(x) ((long)(x) / MBIT)
@@ -257,6 +259,11 @@ typedef struct st_ucon64
   char **argv;
 
   const char *rom;                              // rom (cmdline) with path
+
+  DIR2_t *dp;                                   // ptr to tempdir with archive contents
+  char rom_in_archive[FILENAME_MAX];            // filename holder if the rom comes from an archive
+                                                // (const char *)rom will point then to this
+
   const char *file;                             // file (cmdline) with path
 
   unsigned int parport;                         // parallel port address

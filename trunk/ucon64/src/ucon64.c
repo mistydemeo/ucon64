@@ -177,6 +177,8 @@ if(access(buf,F_OK)==-1)
   if(!(fh=fopen(buf,"wb")))
   {
     printf("FAILED\n\n");
+
+    return -1;
   }
   else
   {
@@ -196,38 +198,45 @@ if(access(buf,F_OK)==-1)
 "emulate_ng=\n"
 "emulate_nes=tuxnes -E2 -rx11 -v -s/dev/dsp -R44100\n"
 "emulate_pce=\n"
-"emulate_psx=\n"
-"emulate_ps2=\n"
 "emulate_snes=snes9x -tr -fs -sc -hires -dfr -r 7 -is -j\n"
-"emulate_sat=\n"
-"emulate_dc=\n"
-"emulate_cd32=\n"
-"emulate_cdi=\n"
-"emulate_3do=\n"
 "emulate_ngp=\n"
 "emulate_ata=\n"
 "emulate_s16=\n"
 "emulate_gba=vgba -scale 2 -uperiod 6\n"
-"# ...etc.\n"
-"#\n"
-"# uCON64 can operate as frontend for CD burning software to make backups\n"
-"# for CD-based consoles \n"
-"#\n"
-"# We suggest cdrdao (http://cdrdao.sourceforge.net) as burn engine for uCON64\n"
-"# Make sure you check this configfile for the right settings\n"
-"#\n"
-"# --device [bus,id,lun] (cdrdao)\n"
-"#\n"
-"cdrw_raw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
-"cdrw_raw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
-"cdrw_iso_read=cdrdao read-cd --device 0,0,0 --driver generic-mmc --datafile #bin and toc filenames are added by ucon64 at the end\n"
-"cdrw_iso_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
+"emulate_vec=\n"
+"emulate_vboy=\n"
+"emulate_swan=\n"
+"emulate_coleco=\n"
+"emulate_intelli=\n"
+#ifdef CD
+  "emulate_psx=\n"
+  "emulate_ps2=\n"
+  "emulate_sat=\n"
+  "emulate_dc=\n"
+  "emulate_cd32=\n"
+  "emulate_cdi=\n"
+  "emulate_3do=\n"
+  "#\n"
+  "# uCON64 can operate as frontend for CD burning software to make backups\n"
+  "# for CD-based consoles \n"
+  "#\n"
+  "# We suggest cdrdao (http://cdrdao.sourceforge.net) as burn engine for uCON64\n"
+  "# Make sure you check this configfile for the right settings\n"
+  "#\n"
+  "# --device [bus,id,lun] (cdrdao)\n"
+  "#\n"
+  "cdrw_raw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
+  "cdrw_raw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
+  "cdrw_iso_read=cdrdao read-cd --device 0,0,0 --driver generic-mmc --datafile #bin and toc filenames are added by ucon64 at the end\n"
+  "cdrw_iso_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
+#endif
     ,fh);
 
     fclose(fh);
     printf("OK\n\n");
-return(0);
   }
+
+  return 0;
 }
 
   if (argc<2 ||
@@ -602,10 +611,11 @@ rom.console=
   (argcmp(argc,argv,"-cd32")) ? ucon64_CD32 :
   (argcmp(argc,argv,"-3do")) ? ucon64_REAL3DO :
   (argcmp(argc,argv,"-dc")) ? ucon64_DC :
+
+  (argcmp(argc,argv,"-ip")) ? ucon64_DC :
 #endif
 (argcmp(argc,argv,"-col")) ? ucon64_SNES :
 (argcmp(argc,argv,"-n2gb")) ? ucon64_GB :
-(argcmp(argc,argv,"-ip")) ? ucon64_DC :
 (argcmp(argc,argv,"-sam")) ? ucon64_NEOGEO : ucon64_UNKNOWN;
 
 
@@ -867,16 +877,14 @@ case ucon64_COLECO:
 case ucon64_INTELLI:
 break;
 
+#ifdef CD
   case ucon64_DC:
     return(
       (argcmp(argc,argv,"-ip")) ? /* ip0000(char *dev,char *name) */ 0 :
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
-#ifdef	CD
-    (argcmp(argc,argv,"-isot")) ? dc_isot(&rom) :
-    (argcmp(argc,argv,"-xiso")) ? dc_xiso(&rom) :
-#endif
-      0
+      (argcmp(argc,argv,"-isot")) ? dc_isot(&rom) :
+      (argcmp(argc,argv,"-xiso")) ? dc_xiso(&rom) : 0
     );
   break;
 
@@ -884,11 +892,8 @@ break;
     return(
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
-#ifdef	CD
-    (argcmp(argc,argv,"-rawt")) ? psx_rawt(&rom) :
-    (argcmp(argc,argv,"-xraw")) ? psx_xraw(&rom) :
-#endif
-      0
+      (argcmp(argc,argv,"-rawt")) ? psx_rawt(&rom) :
+      (argcmp(argc,argv,"-xraw")) ? psx_xraw(&rom) : 0
     );
   break;
 
@@ -896,11 +901,8 @@ break;
     return(
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
-#ifdef	CD
-    (argcmp(argc,argv,"-rawt")) ? ps2_rawt(&rom) :
-    (argcmp(argc,argv,"-xraw")) ? ps2_xraw(&rom) :
-#endif
-      0
+      (argcmp(argc,argv,"-rawt")) ? ps2_rawt(&rom) :
+      (argcmp(argc,argv,"-xraw")) ? ps2_xraw(&rom) : 0
     );
   break;
 
@@ -908,11 +910,8 @@ break;
     return(
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
-#ifdef	CD
-    (argcmp(argc,argv,"-rawt")) ? saturn_rawt(&rom) :
-    (argcmp(argc,argv,"-xraw")) ? saturn_xraw(&rom) :
-#endif
-      0
+      (argcmp(argc,argv,"-rawt")) ? saturn_rawt(&rom) :
+      (argcmp(argc,argv,"-xraw")) ? saturn_xraw(&rom) : 0
     );
   break;
 
@@ -920,11 +919,8 @@ break;
     return(
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
-#ifdef	CD
-    (argcmp(argc,argv,"-rawt")) ? cdi_rawt(&rom) :
-    (argcmp(argc,argv,"-xraw")) ? cdi_xraw(&rom) :
-#endif
-      0
+      (argcmp(argc,argv,"-rawt")) ? cdi_rawt(&rom) :
+      (argcmp(argc,argv,"-xraw")) ? cdi_xraw(&rom) : 0
     );
   break;
 
@@ -932,11 +928,8 @@ break;
     return(
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
-#ifdef	CD
-    (argcmp(argc,argv,"-rawt")) ? cd32_rawt(&rom) :
-    (argcmp(argc,argv,"-xraw")) ? cd32_xraw(&rom) :
-#endif
-      0
+      (argcmp(argc,argv,"-rawt")) ? cd32_rawt(&rom) :
+      (argcmp(argc,argv,"-xraw")) ? cd32_xraw(&rom) : 0
     );
   break;
 
@@ -944,23 +937,24 @@ break;
     return(
       (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
 /*  backup */
-#ifdef	CD
-    (argcmp(argc,argv,"-rawt")) ? real3do_rawt(&rom) :
-    (argcmp(argc,argv,"-xraw")) ? real3do_rawt(&rom) :
-#endif
-      0
+      (argcmp(argc,argv,"-rawt")) ? real3do_rawt(&rom) :
+      (argcmp(argc,argv,"-xraw")) ? real3do_rawt(&rom) : 0
     );
   break;
+#endif /* CD */
+
 
 case ucon64_UNKNOWN:
 default:
   if(!access(rom.rom,F_OK) ||
  argcmp(argc,argv,"-xsmd") ||  //the SMD made backups for Genesis and Sega Master System
- argcmp(argc,argv,"-xsmds") ||
- argcmp(argc,argv,"-isot") ||  //take image for which cd-based console?
+ argcmp(argc,argv,"-xsmds")
+#ifdef CD
+ || argcmp(argc,argv,"-isot") ||  //take image for which cd-based console?
  argcmp(argc,argv,"-xiso") ||
  argcmp(argc,argv,"-rawt") ||
  argcmp(argc,argv,"-xraw")
+#endif
 )
   {
 //    filehexdump(rom.rom,0,512);//show possible header or maybe the internal rom header

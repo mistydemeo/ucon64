@@ -435,7 +435,7 @@ dump_buffer (void)
               else
                 printf ("%c", disp_buf[j]);
             }
-          printf ("\n");
+          fputc ('\n', stdout);
         }
     }
 }
@@ -726,7 +726,7 @@ download_n64 ()
       if (read_file () != 0)
         {
           /*fclose(fptr); */
-          printf ("\n");
+          fputc ('\n', stdout);
           return (0);
         }
       if (sel == 0)
@@ -772,7 +772,7 @@ download_n64 ()
         }
 
     }
-  printf ("\n");
+  fputc ('\n', stdout);
   /*fclose(fptr); */
   end_port ();
   return (0);

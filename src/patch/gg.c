@@ -1093,7 +1093,7 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
 
-  printf ("\n");
+  fputc ('\n', stdout);
   buf[0] = q_fgetc (dest_name, address + rominfo->buheader_len);
   mem_hexdump (buf, 1, address + rominfo->buheader_len);
 
@@ -1101,7 +1101,7 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
 
   buf[0] = value;
   mem_hexdump (buf, 1, address + rominfo->buheader_len);
-  printf ("\n");
+  fputc ('\n', stdout);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;

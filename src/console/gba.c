@@ -1082,7 +1082,7 @@ out:
   printf ("Writing %s... ", fileout);
   if (fwrite (buffer, sizeof (unsigned char), filesize, out) != filesize)
     {
-      printf ("\n");
+      fputc ('\n', stdout);
       perror ("fwrite");
       free (buffer);
       fclose (in);

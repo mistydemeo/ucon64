@@ -1163,7 +1163,7 @@ ucon64_nfo (void)
 #endif
     {
       fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
-      printf ("\n");
+      fputc ('\n', stdout);
     }
 
   if (ucon64.rominfo && ucon64.console != UCON64_UNKNOWN && !ucon64.force_disc)
@@ -1174,7 +1174,7 @@ ucon64_nfo (void)
     if (ucon64.image)
       {
         libdm_nfo (ucon64.image);
-        printf ("\n");
+        fputc ('\n', stdout);
 
         return 0; // no crc calc. for disc images and therefore no dat entry either
       }
@@ -1193,7 +1193,7 @@ ucon64_nfo (void)
     if (ucon64.dat)
       ucon64_dat_nfo (ucon64.dat, 1);
 
-  printf ("\n");
+  fputc ('\n', stdout);
 
   return 0;
 }
@@ -1213,13 +1213,13 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != UNKNOWN_HEADER_LEN)
     {
       mem_hexdump (rominfo->buheader, rominfo->buheader_len, rominfo->buheader_start);
-      printf ("\n");
+      fputc ('\n', stdout);
     }
   else
     if (rominfo->buheader_len && ucon64.quiet < 0)
       {
         ucon64_fhexdump (ucon64.rom, rominfo->buheader_start, rominfo->buheader_len);
-        printf ("\n");
+        fputc ('\n', stdout);
       }
 
   // backup unit type?
@@ -1242,7 +1242,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
     {
       mem_hexdump (rominfo->header, rominfo->header_len,
         rominfo->header_start + rominfo->buheader_len);
-      printf ("\n");
+      fputc ('\n', stdout);
     }
 
   // console type
@@ -1446,7 +1446,7 @@ ucon64_render_usage (const st_usage_t *usage)
                   printf ("%s                  ", buf);
                 }
 #endif
-              printf ("\n");
+              fputc ('\n', stdout);
             }
         }
     }
@@ -1570,16 +1570,16 @@ ucon64_usage (int argc, char *argv[])
 
   ucon64_render_usage (ucon64_options_usage);
 
-  printf ("\n");
+  fputc ('\n', stdout);
 
   ucon64_render_usage (ucon64_padding_usage);
 
-  printf ("\n");
+  fputc ('\n', stdout);
 
 //  if (ucon64.dat_enabled)
   ucon64_render_usage (ucon64_dat_usage);
 
-  printf ("\n");
+  fputc ('\n', stdout);
 
   ucon64_render_usage (ucon64_patching_usage);
 
@@ -1605,7 +1605,7 @@ ucon64_usage (int argc, char *argv[])
   if (ucon64.discmage_enabled)
     {
       ucon64_render_usage (libdm_usage);
-      printf ("\n");
+      fputc ('\n', stdout);
     }
 #endif
 
@@ -1617,9 +1617,9 @@ ucon64_usage (int argc, char *argv[])
           int y = 0;
           for (; usage_array[x].usage[y]; y++)
             ucon64_render_usage (usage_array[x].usage[y]);
-           single = 1; // we show only the usage for the specified console(s)
+          single = 1; // we show only the usage for the specified console(s)
 
-          printf ("\n");
+          fputc ('\n', stdout);
         }
 
   if (!single)
@@ -1630,7 +1630,7 @@ ucon64_usage (int argc, char *argv[])
           for (; usage_array[x].usage[y]; y++)
             ucon64_render_usage (usage_array[x].usage[y]);
 
-          printf ("\n");
+          fputc ('\n', stdout);
         }
   }
 
@@ -1658,7 +1658,7 @@ ucon64_usage (int argc, char *argv[])
   if (!ucon64.discmage_enabled)
     {
       printf (ucon64_msg[NO_LIB], name_discmage);
-      printf ("\n");
+      fputc ('\n', stdout);
     }
 #endif
     
@@ -1681,14 +1681,14 @@ ucon64_usage (int argc, char *argv[])
 #endif
 
   printf (
-     PARALLEL_MSG
-     "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
-     MORE_MSG
-     "     Give the force recognition switch a try if something went wrong\n"
-     "\n"
-     "Please report any problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
-     "\n",
-     name_exe, name_exe);
+    PARALLEL_MSG
+    "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
+    MORE_MSG
+    "     Give the force recognition switch a try if something went wrong\n"
+    "\n"
+    "Please report any problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
+    "\n",
+    name_exe, name_exe);
 }
 
 

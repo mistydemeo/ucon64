@@ -321,7 +321,7 @@ Remember to load the lowest 8 bits first, then the top 7 bits.
 
       printf ("0x%02x%02x%02x (html)\n", r, g, b);
     }
-  printf ("\n");
+  fputc ('\n', stdout);
   return 0;
 }
 

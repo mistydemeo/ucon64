@@ -163,6 +163,7 @@ const char *dm_msg[] = {
   "ERROR: %s has been deprecated\n",
   "ERROR: unknown/unsupported track mode\n",
   "ERROR: the images track mode is already MODE1/2048\n",
+  "WARNING: this function is still in ALPHA stage. It might not work properly\n",
   NULL
 };
 
@@ -227,11 +228,11 @@ dm_lba_to_msf (int lba, int *m0, int *s0, int *f0)
       f = (lba + 450150 - m * CD_SECS * CD_FRAMES - s * CD_FRAMES);
     }
 
-  m0 = (int *) &m;
-  s0 = (int *) &s;
-  f0 = (int *) &f;
+  *m0 = m;
+  *s0 = s;
+  *f0 = f;
 
-  if (lba > 404849 || m == -1 || s == -1 || f == -1) /* 404850 -> 404999: lead out */
+  if (lba > 404849 || *m0 == -1 || *s0 == -1 || *f0 == -1) /* 404850 -> 404999: lead out */
     return FALSE;
   return TRUE;
 }
@@ -258,9 +259,9 @@ dm_lba_to_msf (int lba, int *m0, int *s0, int *f0)
       f = (lba + 450150);
     }
 
-  m0 = (int *) &m;
-  s0 = (int *) &s;
-  f0 = (int *) &f;
+  *m0 = m;
+  *s0 = s;
+  *f0 = f;
 
   return TRUE;
 }
@@ -271,14 +272,20 @@ int
 dm_msf_to_lba (int m, int s, int f, int force_positive)
 #if 1
 {
-  long ret = m * CD_SECS + s;
-
+  long ret = (m * CD_SECS + s)
+#if 0
+   * CD_FRAMES + f;
+#else
+ ;
   ret *= CD_FRAMES;
   ret += f;
+#endif
+
   if (m < 90 || force_positive)
     ret -= 150;
   else
     ret -= 450150;
+
   return ret;
 }
 #else
@@ -599,6 +606,10 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
   int result = 0;
   char *p = NULL;
   FILE *fh = NULL, *fh2 = NULL;
+
+
+  if (flags & DM_FIX || flags & DM_2048)
+    fprintf (stderr, dm_msg[ALPHA]);
 
 // set dest. name
   strcpy (buf, basename (image->fname));
@@ -921,7 +932,7 @@ dm_disc_write (const dm_image_t *image)
 uint32_t
 dm_get_version (void)
 {
-  static const uint32_t dm_version = LIB_VERSION (0, 0, 3);
+  static const uint32_t dm_version = LIB_VERSION (0, 0, 4);
   return dm_version;
 }
 

@@ -30,7 +30,8 @@ enum
 {
   DEPRECATED = 0,
   UNKNOWN_IMAGE,
-  ALREADY_2048
+  ALREADY_2048,
+  ALPHA
 };
 extern const char *dm_msg[];
 

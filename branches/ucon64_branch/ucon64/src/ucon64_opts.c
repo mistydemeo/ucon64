@@ -504,7 +504,10 @@ ucon64_rename (int mode)
       case UCON64_RROM:
         if (ucon64.rominfo)
           if (ucon64.rominfo->name)
-            strcpy (buf, strtrim (ucon64.rominfo->name));
+            {
+              strcpy (buf, ucon64.rominfo->name);
+              strtrim (buf);
+            }
         break;
 
       case UCON64_RENAME:                       // GoodXXXX style rename

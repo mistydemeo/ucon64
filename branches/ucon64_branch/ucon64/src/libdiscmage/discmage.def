@@ -16,3 +16,7 @@ dm_cue_write
 dm_toc_read
 dm_toc_write
 dm_rip
+dm_lba_to_msf
+dm_msf_to_lba
+dm_bcd_to_int
+dm_int_to_bcd

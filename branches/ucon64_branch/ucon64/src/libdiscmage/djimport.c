@@ -56,6 +56,11 @@ static int (*dm_cue_write_ptr) (const dm_image_t *);
 
 static int (*dm_rip_ptr) (const dm_image_t *, int, uint32_t);
 
+static int (*dm_lba_to_msf_ptr) (int, int *, int *, int *);
+static int (*dm_msf_to_lba_ptr) (int, int, int, int);
+static int (*dm_bcd_to_int_ptr) (int);
+static int (*dm_int_to_bcd_ptr) (int);
+
 
 static void
 load_dxe (void)
@@ -83,6 +88,11 @@ load_dxe (void)
   dm_cue_write_ptr = get_symbol (libdm, "dm_cue_write");
 
   dm_rip_ptr = get_symbol (libdm, "dm_rip");
+
+  dm_lba_to_msf_ptr = get_symbol (libdm, "dm_lba_to_msf");
+  dm_msf_to_lba_ptr = get_symbol (libdm, "dm_msf_to_lba");
+  dm_bcd_to_int_ptr = get_symbol (libdm, "dm_bcd_to_int");
+  dm_int_to_bcd_ptr = get_symbol (libdm, "dm_int_to_bcd");
 }
 
 
@@ -208,4 +218,36 @@ dm_rip (const dm_image_t *a, int b, uint32_t c)
 {
   CHECK
   return dm_rip_ptr (a, b, c);
+}
+
+
+int
+dm_lba_to_msf (int lba, int *m, int *s, int *f)
+{
+  CHECK
+  return dm_lba_to_msf_ptr (lba, m, s, f);
+}
+
+
+int
+dm_msf_to_lba (int m, int s, int f, int force_positive)
+{
+  CHECK
+  return dm_msf_to_lba_ptr (m, s, f, force_positive);
+}
+
+
+int
+dm_bcd_to_int (int b)
+{
+  CHECK
+  return dm_bcd_to_int_ptr (b);
+}
+
+
+int
+dm_int_to_bcd (int i)
+{
+  CHECK
+  return dm_int_to_bcd_ptr (i);
 }

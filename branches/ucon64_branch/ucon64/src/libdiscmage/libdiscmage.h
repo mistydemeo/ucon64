@@ -76,13 +76,15 @@ typedef struct
 // some formats use to have the tracks "embedded" (like: cdi, nrg, etc..)
 // this is the start offset inside the image
   uint32_t track_start; // in bytes
+  uint32_t track_end; // in bytes
   
   int16_t pregap_len; // in sectors
-  int16_t start_lba;  // in sectors?
-
   uint32_t track_len; // in sectors
   uint32_t total_len; // in sectors; pregap_len + track_len == total_len 
                            // (less if the track is truncated)
+
+  int16_t postgap_len;// in sectors
+  int16_t start_lba;  // in sectors
 
 // start of the iso header inside the track (inside the image)
   int32_t iso_header_start; // if -1 then no iso header

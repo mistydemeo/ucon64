@@ -60,9 +60,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_lib.h"
-#ifdef  GUI
-#include "ucon64_libng.h"
-#endif
 #include "quick_io.h"
 #include "ucon64_misc.h"
 #include "console/console.h"
@@ -497,7 +494,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   these options do not (need to) know the console or work for more than one
 */
-#ifdef  DISCMAGE
   {UCON64_BIN2ISO, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
   {UCON64_MKSHEET, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
   {UCON64_MKTOC, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
@@ -505,12 +501,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_MKCUE, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
   {UCON64_RIP, UCON64_UNKNOWN, libdm_usage,    WF_DEFAULT},
   {UCON64_XCDRW, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_CDMAGE, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
-#endif
 
-#ifdef  GUI
-  {UCON64_GUI, UCON64_UNKNOWN, libng_usage,    WF_STOP},
-#endif
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},
   {UCON64_A, UCON64_UNKNOWN, aps_usage,        WF_STOP},
   {UCON64_B, UCON64_UNKNOWN, bsl_usage,        WF_STOP},
@@ -570,9 +561,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   force recognition switches
 */
-#ifdef  DISCMAGE
   {UCON64_DISC, UCON64_UNKNOWN, libdm_usage,   WF_SWITCH},
-#endif
+
   {UCON64_3DO, UCON64_3DO, real3do_usage,      WF_SWITCH},
   {UCON64_ATA, UCON64_ATA, atari_usage,        WF_SWITCH},
 //  {UCON64_CD32, UCON64_CD32, cd32_usage,       WF_SWITCH},
@@ -1723,22 +1713,18 @@ ucon64_configfile (void)
                  "#\n"
 #if     defined __MSDOS__
                  "discmage_path=~\\discmage.dxe\n" // realpath2() expands the tilde
-                 "netgui_path=~\\netgui.dxe\n"
                  "ucon64_configdir=~\n"
                  "ucon64_datdir=~\n"
 #elif   defined __CYGWIN__
                  "discmage_path=~/discmage.dll\n"
-                 "netgui_path=~/netgui.dll\n"
                  "ucon64_configdir=~\n"
                  "ucon64_datdir=~\n"
 #elif   defined _WIN32
                  "discmage_path=~\\discmage.dll\n"
-                 "netgui_path=~\\netgui.dll\n"
                  "ucon64_configdir=~\n"
                  "ucon64_datdir=~\n"
 #elif   defined __unix__ || defined __BEOS__
                  "discmage_path=~/.ucon64/discmage.so\n"
-                 "netgui_path=~/.ucon64/netgui.so\n"
                  "ucon64_configdir=~/.ucon64\n"
                  "ucon64_datdir=~/.ucon64/dat\n"
 #endif
@@ -1840,20 +1826,6 @@ ucon64_configfile (void)
         "~\\discmage.dll"
 #elif   defined __unix__ || defined __BEOS__
         "~/.ucon64/discmage.so"
-#else
-        ""
-#endif
-      );
-
-      set_property (ucon64.configfile, "netgui_path",
-#if     defined __MSDOS__
-        "~\\netgui.dxe"                       // realpath2() expands the tilde
-#elif   defined __CYGWIN__
-        "~/netgui.dll"
-#elif   defined _WIN32
-        "~\\netgui.dll"
-#elif   defined __unix__ || defined __BEOS__
-        "~/.ucon64/netgui.so"
 #else
         ""
 #endif

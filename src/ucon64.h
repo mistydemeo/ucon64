@@ -98,6 +98,7 @@ struct ucon64_
   char file[4096];              //$FILE (cmdline) with path
   unsigned int parport;
   int parport_mode;             //parallel port mode: ECP, EPP, SPP, other
+  char config_file[NAME_MAX];
 
 /*
   If ucon64 operates as backend for a front end and the commandline argument 

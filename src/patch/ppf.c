@@ -19,6 +19,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include "../ucon64.h"
+
 /*
  * MakePPF v2.0 Sourcecode by Icarus/Paradox
  * enter "gcc makeppf.c" on linux/unix to compile!
@@ -26,8 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  * Feel free to optimize speed or something!
  *
  */
-#include <stdio.h>
-#include <stdlib.h>
 
 int makeppf_main(int argc, char *argv[])
 {
@@ -227,7 +227,7 @@ char binblock[1025];
         }
 
         /* Open the bin and ppf file */
-        binfile=fopen(argv[1], "rb+");
+        binfile=fopen(filebackup(argv[1]), "rb+");
         if(binfile==null){
         printf("File %s does not exist.\n",argv[1]);
         exit(0);

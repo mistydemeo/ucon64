@@ -18,18 +18,13 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include "../ucon64.h"
+
 /* Apply an APS (Advanced Patch System) File for N64 Images
  * (C)1998 Silo / BlackBag
  *
  * Version 1.2 981217
  */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 
 #ifndef n64aps_TRUE
 #define n64aps_TRUE  1
@@ -358,7 +353,7 @@ n64aps_main (int argc, char *argv[])
 	if (!n64aps_CheckFile (File1,"rb+")) return(1);
 	if (!n64aps_CheckFile (File2,"rb")) return(1);
 
-	n64aps_ORGFile = fopen (File1,"rb+");
+	n64aps_ORGFile = fopen (filebackup(File1),"rb+");
 	n64aps_APSFile = fopen (File2,"rb");
 
 	if (!n64aps_Quiet)

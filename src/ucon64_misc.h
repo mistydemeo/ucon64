@@ -23,6 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_MISC_H
 #define UCON64_MISC_H
 
+#include <unistd.h>
+#include <fcntl.h>
 #include <ctype.h>
 #include <dirent.h>
 #include <stddef.h>

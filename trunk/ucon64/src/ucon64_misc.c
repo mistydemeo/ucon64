@@ -330,7 +330,7 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
             rominfo->file_size - (pos + buf_pos) : 0;
     }
 
-  return 0;
+  return rominfo->file_size; // the whole file is "padded"
 }
 #endif
 

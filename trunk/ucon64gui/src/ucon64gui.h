@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   #define MAXBUFSIZE 32768
 #endif
 
-struct ucon64gui_
+extern struct ucon64gui_
 {
   char cmd[FILENAME_MAX];
   char rom[FILENAME_MAX];
@@ -51,12 +51,11 @@ struct ucon64gui_
 ucon64gui;
 
 
-void ucon64gui_root (void);
+extern void ucon64gui_root (void);
 
-void ucon64gui_system (void);
+extern void ucon64gui_system (void);
 
-void
-ucon64gui_output (char *output);
+extern void ucon64gui_output (char *output);
 
 
 #endif /* UCON64GUI_H */

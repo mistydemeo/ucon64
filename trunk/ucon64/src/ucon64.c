@@ -400,41 +400,41 @@ while ((c =
   {
     switch(c)
     {
-      case 2:
-        atexit (ucon64_exit);
-        rom.frontend = 1;                         // used by ucon64_gauge()
-      break;        
-
-      case 4:
-        rom.backup = 0;
-      break;
-
-      case 1:
+      case 1://help
         ucon64_usage (argc, argv);
         return 0;
       break;
 
-      case 3:
+      case 2://frontend
+        atexit (ucon64_exit);
+        rom.frontend = 1;                         // used by ucon64_gauge()
+      break;        
+
+      case 3://crc
         printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, 0));
         return 0;
       break;
 
-      case 5:
+      case 4://nbak
+        rom.backup = 0;
+      break;
+
+      case 5://crchd
         printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, 512));
         return 0;
       break;
       
-      case 6:
+      case 6://rl
         renlwr (rom.rom);
         return 0;
       break;
 
-      case 7:
+      case 7://ru
         renupr (rom.rom);
         return 0;
       break;
       
-      case 8:
+      case 8://hex
         filehexdump (rom.rom, 0, quickftell (rom.rom));
         return 0;
       break;
@@ -445,13 +445,13 @@ while ((c =
         return 0;
       break;
             
-      case 9:
+      case 9://cs
         if (filefile (rom.rom, 0, rom.file, 0, TRUE) == -1)
           printf ("ERROR: file not found/out of memory\n");
         return 0;
       break;
       
-      case 10:
+      case 10://find
         x = 0;
         y = quickftell (rom.rom);
         while ((x =
@@ -465,26 +465,26 @@ while ((c =
         return 0;
       break;
 
-      case 11:
+      case 11://swap
         fileswap (ucon64_fbackup (&rom, rom.rom), 0, quickftell (rom.rom));
         return 0;
       break;
       
-      case 12:
+      case 12://pad
         ucon64_fbackup (&rom, rom.rom);
 
         filepad (rom.rom, 0, MBIT);
         return 0;
       break;
 
-      case 13:
+      case 13://padhd
         ucon64_fbackup (&rom, rom.rom);
 
         filepad (rom.rom, 512, MBIT);
         return 0;
       break;
 
-      case 14:
+      case 14://ispad
         if ((padded = filetestpad (rom.rom)) != -1)
           {
             if (!padded)
@@ -497,7 +497,7 @@ while ((c =
         return 0;
       break;
 
-      case 15:
+      case 15://strip
         ucon64_fbackup (&rom, rom.rom);
 
         truncate (rom.rom, quickftell (rom.rom) - atol (rom.file));
@@ -682,6 +682,7 @@ while ((c =
     }
   }
 
+//TODO to be continued...
 
   rom.console =
     (argcmp (argc, argv, "-ata")) ? ucon64_ATARI :

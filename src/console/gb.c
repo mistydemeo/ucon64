@@ -326,16 +326,18 @@ gameboy_chk (st_rominfo_t *rominfo)
 
 int
 gameboy_mgd (st_rominfo_t *rominfo)
+// TODO: convert the ROM data
 {
   char buf[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL;
 
   p = basename (ucon64.rom);
-  strcpy (buf, is_func (p, strlen (p), isupper) ? "GB" : "gb");
-  strcat (buf, p);
+  if ((p[0] == 'G' || p[0] == 'g') && (p[1] == 'B' || p[1] == 'b'))
+    strcpy (buf, p);
+  else
+    sprintf (buf, "%s%s", is_func (p, strlen (p), isupper) ? "GB" : "gb", p);
   if ((p = strrchr (buf, '.')))
     *p = 0;
-  strcat (buf, "________");
-  buf[7] = '_';
+  strcat (buf, "______");
   buf[8] = 0;
 
   sprintf (dest_name, "%s.%03u", buf, (ucon64.file_size - rominfo->buheader_len) / MBIT);
@@ -350,6 +352,7 @@ gameboy_mgd (st_rominfo_t *rominfo)
 
 int
 gameboy_ssc (st_rominfo_t *rominfo)
+// TODO: convert the ROM data
 {
   st_unknown_header_t unknown_header;
   char dest_name[FILENAME_MAX], *p = NULL;
@@ -364,8 +367,11 @@ gameboy_ssc (st_rominfo_t *rominfo)
   unknown_header.type = 2;
 
   p = basename (ucon64.rom);
-  strcpy (dest_name, is_func (p, strlen (p), isupper) ? "GB" : "gb");
-  strcat (dest_name, p);
+  // TODO: find out if this is correct (the file name prefix)
+  if ((p[0] == 'G' || p[0] == 'g') && (p[1] == 'B' || p[1] == 'b'))
+    strcpy (dest_name, p);
+  else
+    sprintf (dest_name, "%s%s", is_func (p, strlen (p), isupper) ? "GB" : "gb", p);
   set_suffix (dest_name, ".GB");
 
   ucon64_file_handler (dest_name, NULL, 0);

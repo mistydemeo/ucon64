@@ -289,12 +289,13 @@ genesis_mgd (st_rominfo_t *rominfo)
     return -1;
 
   p = basename (ucon64.rom);
-  strcpy (buf, is_func (p, strlen (p), isupper) ? "MD" : "md");
-  strcat (buf, p);
+  if ((p[0] == 'M' || p[0] == 'm') && (p[1] == 'D' || p[1] == 'd'))
+    strcpy (buf, p);
+  else
+    sprintf (buf, "%s%s", is_func (p, strlen (p), isupper) ? "MD" : "md", p);
   if ((p = strrchr (buf, '.')))
     *p = 0;
-  strcat (buf, "________");
-  buf[7] = '_';
+  strcat (buf, "______");
   buf[8] = 0;
   sprintf (dest_name, "%s.%03u", buf, genesis_rom_size / MBIT);
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
@@ -317,9 +318,9 @@ genesis_mgd (st_rominfo_t *rominfo)
   for (x = 0; x < 15; x++)
     {
       for (y = 0; y < 4; y++)
-        mgh[((x + 2) * 16) + y + 4] = mghcharset[(buf[x] * 8) + y];
+        mgh[((x + 2) * 16) + y + 4] = mghcharset[(((unsigned char *) buf)[x] * 8) + y];
       for (y = 4; y < 8; y++)
-        mgh[((x + 2) * 16) + y + 244] = mghcharset[(buf[x] * 8) + y];
+        mgh[((x + 2) * 16) + y + 244] = mghcharset[(((unsigned char *) buf)[x] * 8) + y];
     }
 
   set_suffix (dest_name, ".MGH");
@@ -358,11 +359,13 @@ genesis_s (st_rominfo_t *rominfo)
   if (type == BIN)
     {
       p = basename (ucon64.rom);
-      strcpy (buf, is_func (p, strlen (p), isupper) ? "MD" : "md");
-      strcat (buf, p);
+      if ((p[0] == 'M' || p[0] == 'm') && (p[1] == 'D' || p[1] == 'd'))
+        strcpy (buf, p);
+      else
+        sprintf (buf, "%s%s", is_func (p, strlen (p), isupper) ? "MD" : "md", p);
       if ((p = strrchr (buf, '.')))
         *p = 0;
-      strcat (buf, "________");
+      strcat (buf, "______");
       buf[7] = is_func (buf, strlen (buf), isupper) ? 'A' : 'a';
       buf[8] = 0;
 

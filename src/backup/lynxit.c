@@ -40,7 +40,7 @@ const st_usage_t lynxit_usage[] = {
     {NULL, "Lynxit (Lynx Cartridge Backup Board)"},
     {NULL, "1997 K.Wilkins (selfmade)"},
 #ifdef PARALLEL
-    {"xlit", "(TEST) receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT"},
+    {"xlit", "receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT"},
 //    "                  receives automatically when ROM does not exist\n"
 #endif // PARALLEL
     {NULL, NULL}

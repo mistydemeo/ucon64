@@ -41,9 +41,9 @@ const st_usage_t smd_usage[] =
     {NULL, "Super Com Pro (HK)/Super Magic Drive/SMD"},
     {NULL, "19XX Front Far East/FFE http://www.front.com.tw"},
 #ifdef PARALLEL
-    {"xsmd", "(TEST) send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
+    {"xsmd", "send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
                  "receives automatically when ROM does not exist"},
-    {"xsmds", "(TEST) send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
+    {"xsmds", "send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "port=PORT\n"
                  "receives automatically when SRAM does not exist"},
 #endif // PARALLEL
     {NULL, NULL}

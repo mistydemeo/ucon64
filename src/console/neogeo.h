@@ -21,12 +21,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef NEOGEO_H
 #define NEOGEO_H
 
-extern int neogeo_bios (st_rominfo_t *rominfo);
+extern int neogeo_bios (const char *fname);
 extern int neogeo_init (st_rominfo_t *rominfo);
 extern int neogeo_mgd (st_rominfo_t *rominfo);
 extern int neogeo_mvs (st_rominfo_t *rominfo);
 extern int neogeo_s (st_rominfo_t *rominfo);
-extern int neogeo_sam (st_rominfo_t *rominfo);
+extern int neogeo_sam (const char *fname);
 
 extern const st_usage_t neogeo_usage[];
 

@@ -43,7 +43,7 @@ const st_usage_t dc_usage[] = {
     {NULL, "Dreamcast"},
     {NULL, "1998 SEGA http://www.sega.com"},
     {"dc", "force recognition"},
-    {"ip=FILE", "(TEST) extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE"},
+//TODO    {"ip=FILE", "extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE"},
     {NULL, NULL}
   };
 

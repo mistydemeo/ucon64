@@ -126,7 +126,7 @@ const struct option options[] =   {
     {"b", 0, 0, UCON64_B},
     {"b0", 1, 0, UCON64_B0},
     {"b1", 1, 0, UCON64_B1},
-    {"bios", 0, 0, UCON64_BIOS},
+    {"bios", 1, 0, UCON64_BIOS},
     {"bot", 1, 0, UCON64_BOT},
     {"c", 1, 0, UCON64_C},
 //    {"cd32", 0, 0, UCON64_CD32},
@@ -237,7 +237,7 @@ const struct option options[] =   {
     {"rotr", 0, 0, UCON64_ROTR},
     {"s", 0, 0, UCON64_S},
     {"s16", 0, 0, UCON64_S16},
-    {"sam", 0, 0, UCON64_SAM},
+    {"sam", 1, 0, UCON64_SAM},
     {"sat", 0, 0, UCON64_SAT},
     {"sgb", 0, 0, UCON64_SGB},
     {"smc", 0, 0, UCON64_SMC},
@@ -1277,11 +1277,11 @@ ucon64_usage (int argc, char *argv[])
 #endif
     {"crc", "show CRC32 value of ROM"  //; this will also force calculation for\n"
                /* "files bigger than %d Bytes (%.4f Mb)" */},
-    {"ls", "generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY"},
-    {"lsv", "like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY"},
+    {"ls", "generate ROM list for all ROMs; " OPTION_LONG_S "rom=ROM|DIR"},
+    {"lsv", "like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=ROM|DIR"},
 #if 0
-    {"rl", "rename all files in DIRECTORY to lowercase; " OPTION_LONG_S "rom=DIRECTORY"},
-    {"ru", "rename all files in DIRECTORY to uppercase; " OPTION_LONG_S "rom=DIRECTORY"},
+    {"rl", "rename all files in DIR to lowercase; " OPTION_LONG_S "rom=ROM|DIR"},
+    {"ru", "rename all files in DIR to uppercase; " OPTION_LONG_S "rom=ROM|DIR"},
 #endif
 #ifdef  __MSDOS__
     {"hex", "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\""},
@@ -1326,9 +1326,9 @@ ucon64_usage (int argc, char *argv[])
 #endif
     {"dbv", "like " OPTION_LONG_S "db but more verbose"},
     {"dbs=CRC32", "search ROM with CRC32 in DATabase"},
-    {"lsd", "generate ROM list for all ROMs using DATabase info; " OPTION_LONG_S "rom=DIR"},
-    {"rrom", "rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR"},
-    {"rr83", "like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY"},
+    {"lsd", "generate ROM list for all ROMs using DATabase info; " OPTION_LONG_S "rom=ROM|DIR"},
+    {"rrom", "rename all ROMs in DIR to their internal names; " OPTION_LONG_S "rom=ROM|DIR"},
+    {"rr83", "like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=ROM|DIR"},
     {"good", "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed and sorted\n"
                 "into subdirs according to the DATabase (\"ROM manager\")"},
 /*

@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_H
 
 #include "getopt.h"                      // for struct option
+#include <dirent.h>                      // for *temp
 
 #include "ucon64_defines.h"
 
@@ -44,7 +45,7 @@ typedef struct st_ucon64
 
   const char *rom;                              // rom (cmdline) with path
 
-//  DIR2_t *dp;                                   // ptr to tempdir with archive contents
+  DIR *temp;                                    // ptr to tempdir with archive contents
   char rom_in_archive[FILENAME_MAX];            // filename holder if the rom comes from an archive
                                                 // (const char *)rom will point then to this
 

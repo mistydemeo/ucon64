@@ -653,24 +653,17 @@ seek_pvd (int sector_size, int mode, const char *filename)
 }
 
 
-#if 0
-char *
-ucon64_rom_in_archive (DIR2_t *dp, const char *archive, char *romname,
-                       char *configfile)
+const char *
+ucon64_rom_in_archive (DIR *dp, const char *archive, char *romname,
+                       const char *configfile)
 {
-#if 0
-  if (!(dp = opendir2 (archive))) return NULL;
+  if (!(dp = opendir2 (archive, configfile, "%s_extract", NULL))) return archive;
 
-//  strcpy (romname, "");
+//find rom in dp and return it as romname
 
-
-  closedir2 (dp);
-
-  return romname;
-#endif
-  return NULL;
+  return archive;
 }
-#endif
+
 
 int
 ucon64_trackmode_probe (const char *image)
@@ -1009,7 +1002,7 @@ ucon64_configfile (void)
         {
           fputs ("# uCON64 config\n"
                  "#\n"
-                 "version=198\n"
+                 "version=" UCON64_VERSION_S "\n"
                  "#\n"
                  "# create backups of files? (1=yes; 0=no)\n"
 //                 "# before processing a ROM uCON64 will make a backup of it\n"
@@ -1050,6 +1043,26 @@ ucon64_configfile (void)
                  "emulate_cdi=\n"
                  "emulate_3do=\n"
                  "emulate_gp32=\n"
+                 "#\n"
+                 "# LHA support\n"
+                 "#\n"
+                 "lha_extract=lha efi %s\n"
+                 "#\n"
+                 "# LZH support\n"
+                 "#\n"
+                 "lzh_extract=lha efi %s\n"
+                 "#\n"
+                 "# ZIP support\n"
+                 "#\n"
+                 "zip_extract=unzip -xojC %s\n"
+                 "#\n"
+                 "# RAR support\n"
+                 "#\n"
+                 "rar_extract=unrar x %s\n"
+                 "#\n"
+                 "# ACE support\n"
+                 "#\n"
+                 "ace_extract=unace e %s\n"
 #ifdef BACKUP_CD
                  "#\n"
                  "# uCON64 can operate as frontend for CD burning software to make backups\n"
@@ -1064,12 +1077,11 @@ ucon64_configfile (void)
                  "cdrw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
 #endif
                  , fh);
-
           fclose (fh);
           printf ("OK\n\n");
         }
     }
-  else if (strcmp (getProperty (ucon64.configfile, "version", buf2, "198"), "198") != 0)
+  else if (strcmp (getProperty (ucon64.configfile, "version", buf2, UCON64_VERSION_S), UCON64_VERSION_S) != 0)
     {
       strcpy (buf2, ucon64.configfile);
       setext (buf2, ".OLD");
@@ -1078,8 +1090,9 @@ ucon64_configfile (void)
 
       filecopy (ucon64.configfile, 0, quickftell (ucon64.configfile), buf2, "wb");
 
-      setProperty (ucon64.configfile, "version", "198");
+      setProperty (ucon64.configfile, "version", UCON64_VERSION_S);
 
+#if 0
       setProperty (ucon64.configfile, "backups", "1");
 
 #ifdef BACKUP
@@ -1087,16 +1100,22 @@ ucon64_configfile (void)
 #endif // BACKUP
 
       setProperty (ucon64.configfile, "emulate_gp32", "");
-
       setProperty (ucon64.configfile, "cdrw_read",
         getProperty (ucon64.configfile, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
       setProperty (ucon64.configfile, "cdrw_write",
         getProperty (ucon64.configfile, "cdrw_raw_write", buf2, "cdrdao write --device 0,0,0 --driver generic-mmc "));
+#endif
 
       DELETEPROPERTY (ucon64.configfile, "cdrw_raw_read");
       DELETEPROPERTY (ucon64.configfile, "cdrw_raw_write");
       DELETEPROPERTY (ucon64.configfile, "cdrw_iso_read");
       DELETEPROPERTY (ucon64.configfile, "cdrw_iso_write");
+
+      setProperty (ucon64.configfile, "lha_extract", "lha efi %s");
+      setProperty (ucon64.configfile, "lzh_extract", "lha efi %s");
+      setProperty (ucon64.configfile, "zip_extract", "unzip -xojC %s");
+      setProperty (ucon64.configfile, "rar_extract", "unrar x %s");
+      setProperty (ucon64.configfile, "ace_extract", "unace e %s");
 
       sync ();
       printf ("OK\n\n");

@@ -240,7 +240,7 @@ cyan_calculate_rom_size (unsigned char *buffer, int test_mode)
           else
             {
               output = stdout;
-              fputs ("WARNING: ", stdout);
+              fputs ("\nWARNING: ", stdout);
             }
 
           //     "WARNING: "
@@ -469,7 +469,7 @@ cyan_read_rom (int speed, unsigned int parport, unsigned char *buffer)
             {
               free (buffer);
               puts ("\n"
-                    "Copy aborted. Exiting...\n"
+                    "Copy aborted.\n"
                     "Don't forget to turn the ROM copier off and never insert or remove a cartridge\n"
                     "with the power on");
               break;
@@ -600,14 +600,15 @@ cyan_test_copier (int test, int speed, unsigned int parport)
     // reliability test -- note: this test may be required to run for 8 hours or more
     case 1:
       printf ("Reliability test mode selected, speed %d\n", speed);
-
       cyan_test_parport (parport);
-      puts ("Entering non-stop reliability test mode (press escape or q to exit, and turn\n"
+      puts ("\n"
+            "Entering non-stop reliability test mode (press escape or q to exit, and turn\n"
             "ROM copier off immediately afterwards)\n"
+            "\n"
             "Copy process will continue indefinitely until an error is encountered, at\n"
             "which point the program will terminate.\n"
             "A large number of passes suggests that the copier is working reliably at the\n"
-            "selected speed");
+            "selected speed\n");
       printf ("                                                                          P %2d",
               count);
       fflush (stdout);
@@ -674,7 +675,8 @@ cyan_test_copier (int test, int speed, unsigned int parport)
       if (speed != DEFAULT_SPEED)
         puts ("Ignoring specified speed; test bench mode does not require a speed setting");
       // print screen
-      puts ("Entering manual test bench mode...\n"
+      puts ("Entering manual test bench mode\n"
+            "\n"
             "Probe the board and verify that the counters are being clocked, and are\n"
             "counting correctly. The upper counter should be one count ahead of the lower\n"
             "counter, with both clocked at the same rate.\n"
@@ -689,7 +691,7 @@ cyan_test_copier (int test, int speed, unsigned int parport)
             "\n"
             "If the above didn't make any sense to you, press escape or q and turn the ROM\n"
             "copier off immediately!\n"
-            "This test is designed for advanced users only");
+            "This test is designed for advanced users only\n");
       while (1)
         {
           const char *status[2] = {"* ", ". "};
@@ -812,7 +814,6 @@ cyan_copy_rom (const char *filename, int speed, unsigned int parport)
     }
 
   fputc ('\n', stdout);
-
   romsize = cyan_calculate_rom_size (buffer, 0);
 
   fputs ("Writing ROM to disk... ", stdout);

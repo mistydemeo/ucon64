@@ -5,7 +5,24 @@ CC=gcc
 CFLAGS=-I. -Wall -O3 -DHAVE_CONFIG_H
 LDFLAGS=-s
 
+# The test for Cygwin should be done before the test for DJGPP, because the
+# environment variable DJGPP can be set under Bash for people who have
+# installed both gcc (and friends) ports.
+
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+else
+ifdef DJGPP
+else                                    # Unix or BeOS
+ifeq ($(TERM),be)                       # BeOS (untested!)
+else                                    # Unix
+LDFLAGS+=-ldl
+endif
+endif                                   # DJGPP
+endif                                   # cygwin
+
+
 OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
+        dlopen.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
@@ -22,10 +39,6 @@ ifdef ZLIB
 LDFLAGS+=-lz
 OBJECTS+=unzip.o
 endif
-LIBDISCMAGE=1
-ifdef LIBDISCMAGE
-OBJECTS+=libdiscmage/libdiscmage.o libdiscmage/cdi.o libdiscmage/nero.o libdiscmage/sheets.o
-endif
 
 TARGET=ucon64
 ifeq ($(TERM),cygwin)                   # OSTYPE is not a real env var on Cygwin
@@ -38,32 +51,33 @@ endif                                   # cygwin
 
 all: $(TARGET)
 
-# The test for Cygwin should be done before the test for DJGPP, because the
-# environment variable DJGPP can be set under Bash for people who have
-# installed both gcc (and friends) ports.
 
 clean:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
               DEADJOE */DEADJOE *~ */*~ */*/*~
+	cd libdiscmage && $(MAKE) clean
 else
 ifdef DJGPP
 	del *.o
 	del patch\*.o
 	del console\*.o
 	del backup\*.o
-	del libdis~1\*.o
 	del $(TARGET)
+	cd libdiscmage
+	$(MAKE) clean
 else                                    # Unix or BeOS
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
               DEADJOE */DEADJOE *~ */*~ */*/*~
-
+	cd libdiscmage && $(MAKE) clean
 endif                                   # DJGPP
 endif                                   # cygwin
+
 
 distclean: clean
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	rm -f Makefile config.log config.status config.cache config.h
+	cd libdiscmage && $(MAKE) distclean
 else
 ifdef DJGPP
 	del Makefile
@@ -71,8 +85,11 @@ ifdef DJGPP
 	del config.status
 	del config.cache
 	del config.h
+	cd libdiscmage
+	$(MAKE) distclean
 else
 	rm -f Makefile config.log config.status config.cache config.h
+	cd libdiscmage && $(MAKE) distclean
 endif                                   # DJGPP
 endif                                   # cygwin
 
@@ -83,6 +100,17 @@ endif                                   # cygwin
 
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	cd libdiscmage && $(MAKE)
+else
+ifdef DJGPP
+	cd libdiscmage
+	$(MAKE)
+else
+	cd libdiscmage && $(MAKE)
+endif                                   # DJGPP
+endif                                   # cygwin
+
 
 install:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
@@ -119,14 +147,12 @@ UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
 
 getopt.o: getopt.h
 unzip.o: unzip.h
-misc.o: misc.h config.h
+misc.o: map.c map.h misc.h config.h
 quick_io.o: quick_io.h misc.h config.h
-ucon64.o: switches.c options.c $(UCON64_STD_H)
-ucon64_misc.o: libdiscmage/cdi.h libdiscmage/nero.h $(UCON64_STD_H)
+dlopen.o: dlopen.h dxedll_pub.h
+ucon64.o: switches.c options.c dlopen.h $(UCON64_STD_H)
+ucon64_misc.o: libdiscmage/libdiscmage.h $(UCON64_STD_H)
 ucon64_db.o: ucon64_db.h $(UCON64_STD_H)
-libdiscmage/libdiscmage.o: libdiscmage/libdiscmage_cfg.h $(UCON64_STD_H)
-libdiscmage/nero.o: libdiscmage/nero.h libdiscmage/cdi.h config.h
-libdiscmage/cdi.o: libdiscmage/cdi.h
 console/gb.o: console/gb.h $(UCON64_STD_H)
 console/gba.o: console/gba.h $(UCON64_STD_H)
 console/genesis.o: console/genesis.h $(UCON64_STD_H)

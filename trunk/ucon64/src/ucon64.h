@@ -44,8 +44,9 @@ typedef struct st_ucon64
 
 //  char temp_file[FILENAME_MAX];
   char configfile[FILENAME_MAX];                // path and name of the config file
-  char configdir[FILENAME_MAX];                 // uCON64 cache for dat files
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
+  char discmage_path[FILENAME_MAX];             // path to the discmage DLL
+  char cache_path[FILENAME_MAX];                // path to the cache file
 
 #ifdef  ANSI_COLOR
   int ansi_color;
@@ -56,7 +57,7 @@ typedef struct st_ucon64
 
   int backup;                                   // flag if backups files should be created
   int frontend;                                 // flag if uCON64 was started by a frontend
-  int have_libdiscmage;
+  int discmage_enabled;                         // flag if discmage DLL is loaded
 
   int show_nfo;                                 // show or skip info output for ROM
 

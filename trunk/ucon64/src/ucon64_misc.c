@@ -31,7 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/stat.h>
 #include "config.h"
 #if     defined __unix__ || defined __BEOS__ || defined AMIGA || HAVE_UNISTD_H
-  #include <unistd.h>                             // ioperm() (libc5)
+  #include <unistd.h>                           // ioperm() (libc5)
 #endif
 #ifdef  BACKUP
   #ifdef  __FreeBSD__
@@ -298,9 +298,6 @@ const char *nintendo_maker[792] = {
 typedef struct st_ioport
 {
   unsigned int port;
-#if     defined AMIGA
-  //FILE *fd;
-#endif
   unsigned char data8;
   unsigned short data16;
 } st_ioport_t;
@@ -643,27 +640,17 @@ void
 close_io_port (void)
 {
   close (ucon64_io_fd);
-//  fclose (ucon64_io_fd);
 }
 #endif
 
 unsigned char
 inportb (unsigned short port)
 {
-#ifdef  __BEOS__
+#if     defined __BEOS__ || defined AMIGA
   st_ioport_t temp;
 
   temp.port = port;
   ioctl (ucon64_io_fd, 'r', &temp, 0);
-
-  return temp.data8;
-#elif   defined AMIGA
-  st_ioport_t temp;
-
-  temp.port = port;
-
-  ioctl (ucon64_io_fd, 'r', &temp, 0);
-//  fscanf (ucon64_io_fd, "%c", temp.data8);
 
   return temp.data8;
 #elif   defined __i386__
@@ -683,20 +670,11 @@ inportb (unsigned short port)
 unsigned short
 inportw (unsigned short port)
 {
-#ifdef  __BEOS__
+#if     defined __BEOS__ || defined AMIGA
   st_ioport_t temp;
 
   temp.port = port;
   ioctl (ucon64_io_fd, 'r16', &temp, 0);
-
-  return temp.data16;
-#elif   defined AMIGA
-  st_ioport_t temp;
-
-  temp.port = port;
-
-  ioctl (ucon64_io_fd, 'r16', &temp, 0);
-//  fscanf (ucon64_io_fd, "%ld",temp.data16);
 
   return temp.data16;
 #elif   defined __i386__
@@ -716,19 +694,12 @@ inportw (unsigned short port)
 void
 outportb (unsigned short port, unsigned char byte)
 {
-#ifdef  __BEOS__
+#if     defined __BEOS__ || defined AMIGA
   st_ioport_t temp;
 
   temp.port = port;
   temp.data8 = byte;
   ioctl (ucon64_io_fd, 'w', &temp, 0);
-#elif   defined AMIGA
-  st_ioport_t temp;
-
-  temp.port = port;
-  temp.data8 = byte;
-  ioctl (ucon64_io_fd, 'w', &temp, 0);
-//  fprintf (ucon64_io_fd, "%c", temp.data8);
 #elif   defined __i386__
   __asm__ __volatile__
   ("outb %1, %0"
@@ -742,19 +713,12 @@ outportb (unsigned short port, unsigned char byte)
 void
 outportw (unsigned short port, unsigned short word)
 {
-#ifdef  __BEOS__
+#if     defined __BEOS__ || defined AMIGA
   st_ioport_t temp;
 
   temp.port = port;
   temp.data16 = word;
   ioctl (ucon64_io_fd, 'w16', &temp, 0);
-#elif   defined AMIGA
-  st_ioport_t temp;
-
-  temp.port = port;
-  temp.data16 = word;
-  ioctl (ucon64_io_fd, 'w16', &temp, 0);
-//  fprintf (ucon64_io_fd, "%ld", temp.data16);
 #elif   defined __i386__
   __asm__ __volatile__
   ("outw %1, %0"
@@ -840,8 +804,6 @@ ucon64_parport_init (unsigned int port)
 #endif
 #ifdef  AMIGA
   ucon64_io_fd = open ("PAR:", O_RDWR | O_NONBLOCK);
-//  ucon64_io_fd = fopen ("PAR:", "r+");
-//  if (ucon64_io_fd == NULL)
   if (ucon64_io_fd == -1)
     {
       fprintf (stderr, "ERROR: Could not open parallel port\n");
@@ -850,7 +812,6 @@ ucon64_parport_init (unsigned int port)
   if (atexit (close_io_port) == -1)
     {
       close (ucon64_io_fd);
-//      fclose (ucon64_io_fd);
       fprintf (stderr, "ERROR: Could not register function with atexit()\n");
       exit(1);
     }
@@ -1028,7 +989,7 @@ ucon64_e (const char *romfile)
   //  returns 0 when the exe could not be started
   if (result != 127 && result != -1 && result != 0)        // 127 && -1 are system() errors, rest are exit codes
     {
-      fprintf (stderr, "ERROR: The emulator returned an error? code (%d)\n"
+      fprintf (stderr, "ERROR: The emulator returned an error (?) code: %d\n"
                "TIP:   If the wrong emulator was used you might try to force recognition\n"
                "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
                result);
@@ -1108,7 +1069,7 @@ ucon64_ls (const char *path, int mode)
           {
             if (S_ISREG (fstate.st_mode))
               {
-#ifdef  ZLIB
+#ifdef  HAVE_ZLIB_H
                 int n = unzip_get_number_entries (path), retval = 0;
                 if (n != -1)
                   {
@@ -1141,7 +1102,7 @@ ucon64_ls (const char *path, int mode)
     if (!stat (ep->d_name, &fstate))
       if (S_ISREG (fstate.st_mode))
         {
-#ifdef  ZLIB
+#ifdef  HAVE_ZLIB_H
           int n = unzip_get_number_entries (ep->d_name);
           if (n != -1)
             {
@@ -1178,15 +1139,11 @@ ucon64_configfile (void)
     ".ucon64rc"
 #endif
     , dirname);
-
-  sprintf (ucon64.configdir, "%s" FILE_SEPARATOR_S
-#ifdef  __MSDOS__
-    "ucon64" 
-#else
-    ".ucon64"
+#ifdef  DJGPP
+  // this is DJGPP specific - not necessary, but causes less confusion
+  change_string ("/", 1, 0, 0, "\\", 1, ucon64.configfile,
+    strlen (ucon64.configfile), 0);
 #endif
-    FILE_SEPARATOR_S, dirname);
-
 
   if (access (ucon64.configfile, F_OK) != 0)
     {
@@ -1209,7 +1166,7 @@ ucon64_configfile (void)
 //                 "# before processing a ROM uCON64 will make a backup of it\n"
                  "#\n"
                  "backups=1\n"
-#ifdef ANSI_COLOR
+#ifdef  ANSI_COLOR
                  "#\n"
                  "# use ANSI colors in output? (1=yes; 0=no)\n"
                  "#\n"
@@ -1220,6 +1177,16 @@ ucon64_configfile (void)
                  "#\n"
                  "#parport=378\n"
                  "#\n"
+#if     defined __MSDOS__
+                 "discmage_path=discmage.dxe\n"
+//                 "cache_path=
+#elif   defined __CYGWIN__
+                 "discmage_path=discmage.dll\n"
+//                 "cache_path=
+#elif   defined __unix__ || defined __BEOS__
+                 "discmage_path=~/discmage.so\n"
+//                 "cache_path=
+#endif
                  "# emulate_<console shortcut>=<emulator with options>\n"
                  "#\n"
                  "emulate_gb=vgb -sound -sync 50 -sgb -scale 2\n"

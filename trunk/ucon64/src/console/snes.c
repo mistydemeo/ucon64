@@ -1063,7 +1063,7 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
 // This function assumes file with name filename is in GD3 format
 {
   char dest_name[FILENAME_MAX], *p = NULL;
-  int nparts, surplus, x, sf_romname, size, n_names = 0;
+  int nparts, surplus, x, sf_romname, size, n_names = 0, len;
 
   size = rominfo->file_size - rominfo->buheader_len;
   sf_romname = (ucon64.rom[0] == 'S' || ucon64.rom[0] == 's') &&
@@ -1087,15 +1087,16 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
   strcat (dest_name, "______");
   dest_name[7] = 'A';
   dest_name[8] = 0;
+  len = strlen (dest_name);
 
   if (snes_hirom && ((nparts + ((surplus > 0) ? 1 : 0)) <= 2))
     {
       // 8 Mbit or less HiROMs, X is used to pad filename to 8 (SF4###XA)
       if (size < 10 * MBIT)
-        dest_name[strlen (dest_name) - 2] = 'X';
+        dest_name[len - 2] = 'X';
       strcpy (names[n_names++], dest_name);
 
-      dest_name[strlen (dest_name) - 1]++;
+      dest_name[len - 1]++;
       strcpy (names[n_names++], dest_name);
     }
   else
@@ -1103,7 +1104,7 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
       for (x = 0; x < nparts; x++)
         {
           strcpy (names[n_names++], dest_name);
-          dest_name[strlen (dest_name) - 1]++;
+          dest_name[len - 1]++;
         }
       if (surplus != 0)
         strcpy (names[n_names++], dest_name);

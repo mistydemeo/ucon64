@@ -1,5 +1,5 @@
 /*
-gd.c - Game Doctor for uCON64
+gd.c - Game Doctor support for uCON64
 
 written by 2002 John Weidman
            2002 dbjh
@@ -29,8 +29,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "gd.h"
-#include "console/snes.h"                       // for snes_make_gd_names()
-
+#include "console/snes.h"                       // for snes_make_gd_names() &
+                                                //  snes_get_snes_hirom()
 
 const char *gd_usage[] =
   {
@@ -56,9 +56,6 @@ const char *gd_usage[] =
 #define OK 0
 #define ERROR 1
 
-// Debug without actual copier I/O. Handy for if you don't own a GD copier, like
-//  me ;-) (dbjh)
-//#define DEBUG_NO_IO
 #define DEBUG
 
 static void init_io (unsigned int port);
@@ -177,9 +174,6 @@ gd_read_rom (const char *filename, unsigned int parport)
 void
 gd3_send_byte (unsigned char data)
 {
-#ifdef  DEBUG_NO_IO
-  return;
-#endif
   // Wait until SF3 is not busy
   while ((inportb (gd_port + PARPORT_STATUS) & 0x80) == 0)
     ;
@@ -195,9 +189,6 @@ gd3_send_bytes (unsigned len, unsigned char *data)
 {
   int i = len;
 
-#ifdef  DEBUG_NO_IO
-  return;
-#endif
   for (i = 0; i < len; i++)
     {
       gd3_send_byte (data[i]);
@@ -220,9 +211,6 @@ gd3_send_bytes (unsigned len, unsigned char *data)
 int
 gd3_send_prolog_byte (unsigned char data)
 {
-#ifdef  DEBUG_NO_IO
-  return OK;
-#endif
   // Wait until SF3 is not busy
   do
     {
@@ -244,9 +232,6 @@ gd3_send_prolog_bytes (unsigned len, unsigned char *data)
 {
   int i = len;
 
-#ifdef  DEBUG_NO_IO
-  return OK;
-#endif
   for (i = 0; i < len; i++)
     {
       if (gd3_send_prolog_byte (*data++) == ERROR)
@@ -259,9 +244,6 @@ gd3_send_prolog_bytes (unsigned len, unsigned char *data)
 int
 gd3_send_unit_prolog (int header, unsigned size)
 {
-#ifdef  DEBUG_NO_IO
-  return OK;
-#endif
   if (gd3_send_prolog_byte (0x00) == ERROR)
     return ERROR;
   if (gd3_send_prolog_byte ((header != 0) ? 0x02 : 0x00) == ERROR)
@@ -279,13 +261,16 @@ gd_add_filename (const char *filename)
 {
   char buf[FILENAME_MAX], *p;
 
-  strcpy (buf, filename);
-  p = strrchr (buf, '.');
-  if (p)
-    *p = 0;
-  strncpy (gd_names[gd_name_i], basename2 (buf), 11);;
-  gd_names[gd_name_i][11] = 0;
-  gd_name_i++;
+  if (gd_name_i < GD3_MAX_UNITS)
+    {
+      strcpy (buf, filename);
+      p = strrchr (buf, '.');
+      if (p)
+        *p = 0;
+      strncpy (gd_names[gd_name_i], basename2 (buf), 11);
+      gd_names[gd_name_i][11] = 0;
+      gd_name_i++;
+    }
   return 0;
 }
 
@@ -307,8 +292,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
   FILE *file;
   unsigned char *buffer, *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12],
                 filenames[GD3_MAX_UNITS][8 + 1 + 3 + 1]; // +1 for period, +1 for ASCII-z;
-  int num_units, i, send_header, x, split = 1;
-  int gd_hirom = snes_get_snes_hirom();
+  int num_units, i, send_header, x, split = 1, hirom = snes_get_snes_hirom();
 
   init_io (parport);
 
@@ -320,9 +304,6 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
   ucon64_testsplit_callback = gd_add_filename;
   num_units = ucon64.split = ucon64_testsplit (filename); // this will call gd_add_filename()
   ucon64_testsplit_callback = 0;
-#ifdef  DEBUG
-  printf ("ucon64.split: %d\n", ucon64.split);
-#endif
   if (!ucon64.split)
     {
       split = 0;
@@ -346,7 +327,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
       if (split)
         {
           x = q_fsize (filenames[i]);
-          if (x > 0)                            // q_fsize() return a value < 0 on error
+          if (x > 0)                            // q_fsize() returns a value < 0 on error
             gd_fsize += x;                      //  Should we act on such an error?
           gd3_dram_unit[i].size = x;
           if (i == 0)                           // Correct for header of first file
@@ -356,16 +337,14 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
         {
           if (!gd_fsize)                        // Don't call q_fsize() more
             gd_fsize = q_fsize (filename);      //  often than necessary
-          if ( gd_hirom )
-            {
-              gd3_dram_unit[i].size = (gd_fsize - GD_HEADER_LEN) / num_units;
-            }
+          if (hirom)
+            gd3_dram_unit[i].size = (gd_fsize - GD_HEADER_LEN) / num_units;
           else
             {
-              if ( ((i+1) * 8 * MBIT) <= (gd_fsize - GD_HEADER_LEN) )
+              if ((i + 1) * 8 * MBIT <= gd_fsize - GD_HEADER_LEN)
                 gd3_dram_unit[i].size = 8 * MBIT;
               else
-                gd3_dram_unit[i].size = (gd_fsize - GD_HEADER_LEN) - (i * 8 * MBIT);
+                gd3_dram_unit[i].size = gd_fsize - GD_HEADER_LEN - i * 8 * MBIT;
             }
         }
     }
@@ -425,17 +404,15 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
             io_error ();
           gd_bytessend += GD_HEADER_LEN;
         }
-      if ( split == 0 )                         // Not pre-split -- have to split it ourself
+      if (split == 0)                           // Not pre-split -- have to split it ourself
         {
-          if ( gd_hirom )
-            fseek (file, i * gd3_dram_unit[0].size + GD_HEADER_LEN, SEEK_SET );
+          if (hirom)
+            fseek (file, i * gd3_dram_unit[0].size + GD_HEADER_LEN, SEEK_SET);
           else
-            fseek (file, i * 0x100000 + GD_HEADER_LEN, SEEK_SET );
+            fseek (file, i * 0x100000 + GD_HEADER_LEN, SEEK_SET);
         }
       fread (buffer, 1, gd3_dram_unit[i].size, file);
-      // Should we just remove the field "data" and use buffer instead?
-      gd3_dram_unit[i].data = buffer;
-      gd3_send_bytes (gd3_dram_unit[i].size, gd3_dram_unit[i].data);
+      gd3_send_bytes (gd3_dram_unit[i].size, buffer);
 
       if (split || i == num_units - 1)
         fclose (file);

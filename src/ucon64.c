@@ -722,7 +722,7 @@ if (argcmp(argc, argv, "-e"))
   char *property;
 #ifdef __DOS__
   strcpy(buf, "ucon64.cfg");
-#else 
+#else
   sprintf(buf, "%s%c.ucon64rc", getenv("HOME"), FILE_SEPARATOR);
 #endif
 
@@ -773,7 +773,7 @@ if (argcmp(argc, argv, "-e"))
 #endif                                          //  (that is, under Linux & BeOS)
 
 #if 1
-  // snes9x (Linux) for example returns a non-zero values on a normal exit (3)...
+  // Snes9x (Linux) for example returns a non-zero value on a normal exit (3)...
 
   // under WinDOS, system() immediately returns with exit code 0 when starting
   //  a Windows executable (as if a fork() happened) it also returns 0 when the
@@ -835,34 +835,34 @@ int ucon64_usage(int argc,char *argv[])
 printf(/*"TODO: $ROM could also be the name of a *.ZIP archive\n"
 	"      it will automatically find and extract the ROM\n"
 	"\n"*/
-	"TODO:  -sh	use uCON64 in shell modus\n"
-	"  -e		emulate/run ROM (check INSTALL and $HOME/.ucon64rc for more)\n"
-	"  -crc		show CRC32 value of ROM\n"
-	"  -crchd	show CRC32 value of ROM (regarding to +512 Bytes header)\n"
-	"  -dbs		search ROM database (all entries) by CRC32; $ROM=0xCRC32\n"
-	"  -db		ROM database statistics (# of entries)\n"
-	"  -dbv		view ROM database (all entries)\n"
-	"  -ls		generate ROM list for all ROMs; $ROM=DIRECTORY\n"
-	"  -lsv		like -ls but more verbose; $ROM=DIRECTORY\n"
-//	"TODO:  -rrom	rename all ROMs in DIRECTORY to their internal names; $ROM=DIR\n"
-//	"		this is often used by people who loose control of their ROMs\n"
-	"  -rl		rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
-	"  -ru		rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"
+	"TODO:  -sh      use uCON64 in shell modus\n"
+	"  -e            emulate/run ROM (check INSTALL and $HOME/.ucon64rc for more)\n"
+	"  -crc          show CRC32 value of ROM\n"
+	"  -crchd        show CRC32 value of ROM (regarding to +512 Bytes header)\n"
+	"  -dbs          search ROM database (all entries) by CRC32; $ROM=0xCRC32\n"
+	"  -db           ROM database statistics (# of entries)\n"
+	"  -dbv          view ROM database (all entries)\n"
+	"  -ls           generate ROM list for all ROMs; $ROM=DIRECTORY\n"
+	"  -lsv          like -ls but more verbose; $ROM=DIRECTORY\n"
+//	"TODO:  -rrom    rename all ROMs in DIRECTORY to their internal names; $ROM=DIR\n"
+//	"                this is often used by people who loose control of their ROMs\n"
+	"  -rl           rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
+	"  -ru           rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"
 #ifdef  __DOS__
-        "  -hex		show ROM as hexdump; use \"ucon64 -hex $ROM|more\"\n"
+        "  -hex          show ROM as hexdump; use \"ucon64 -hex $ROM|more\"\n"
 #else
-        "  -hex		show ROM as hexdump; use \"ucon64 -hex $ROM|less\"\n"   // less is better ;-)
+        "  -hex          show ROM as hexdump; use \"ucon64 -hex $ROM|less\"\n"   // less is better ;-)
 #endif
-        "  -find		find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)\n"
-	"  -c		compare ROMs for differencies; $FILE=OTHER_ROM\n"
-	"  -cs		compare ROMs for similarities; $FILE=OTHER_ROM\n"
-	"  -swap		swap/(de)interleave ALL Bytes in ROM (1234<->2143)\n"
-	"  -ispad	check if ROM is padded\n"
-	"  -pad		pad ROM to full Mb\n"
-	"  -padhd	pad ROM to full Mb (regarding to +512 Bytes header)\n"
-	"  -stp		strip first 512 Bytes (possible header) from ROM\n"
-	"  -ins		insert 512 Bytes (0x00) before ROM\n"
-	"  -strip	strip Bytes from end of ROM; $FILE=VALUE\n"
+        "  -find         find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)\n"
+	"  -c            compare ROMs for differencies; $FILE=OTHER_ROM\n"
+	"  -cs           compare ROMs for similarities; $FILE=OTHER_ROM\n"
+	"  -swap         swap/(de)interleave ALL Bytes in ROM (1234<->2143)\n"
+	"  -ispad        check if ROM is padded\n"
+	"  -pad          pad ROM to full Mb\n"
+	"  -padhd        pad ROM to full Mb (regarding to +512 Bytes header)\n"
+	"  -stp          strip first 512 Bytes (possible header) from ROM\n"
+	"  -ins          insert 512 Bytes (0x00) before ROM\n"
+	"  -strip        strip Bytes from end of ROM; $FILE=VALUE\n"
 );
 
 bsl_usage( argc, argv );
@@ -939,11 +939,9 @@ printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 
 }
 
-printf(
-	"Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n"
-	,ucon64_dbsize(ucon64_UNKNOWN)
-	,ucon64_dbsize(ucon64_UNKNOWN)-ucon64_DBSIZE
-);
+printf("Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n",
+       ucon64_dbsize(ucon64_UNKNOWN),
+       ucon64_dbsize(ucon64_UNKNOWN)-ucon64_DBSIZE);
 
 printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
 #ifdef  __DOS__

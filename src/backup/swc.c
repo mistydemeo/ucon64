@@ -660,7 +660,12 @@ void swc_unlock(unsigned int parport)
 
 int swc_usage(int argc, char *argv[])
 {
+  int verbose = 0;
+
   if (argcmp(argc, argv, "-help"))
+    verbose = 1;
+
+  if (verbose)
     printf("\n%s\n", swc_TITLE);
 
   printf("  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
@@ -668,15 +673,14 @@ int swc_usage(int argc, char *argv[])
          "                Press q to abort ^C will cause invalid state of backup unit\n"
          "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
          "                receives automatically when $ROM does not exist\n"
-         "                Press q to abort ^C will cause invalid state of backup unit\n"
-#if 0
-         "\n"
-         "Press q to abort sending or receiving. Don't press Ctrl-C. If you do the copier\n"
-         "can get in an invalid state. Only press Ctrl-C when the program appears to\n"
-         "hang. The program can appear to hang if you selected the wrong port for your\n"
-         "copier or if the copier is in a wrong state.\n"
-#endif
-        );
+         "                Press q to abort ^C will cause invalid state of backup unit\n");
+
+  if (verbose)
+    printf("\n"
+           "                You only need to specify PORT if uCON64 doesn't detect the\n"
+           "                (right) parallel port. If this is the case give a hardware\n"
+           "                address, for example:\n"
+           "                ucon64 -xswc \"Super Mario World (U).swc\" 0x378\n");
   //TODO more info like technical info about cabeling and stuff for the copier
 
   return 0;

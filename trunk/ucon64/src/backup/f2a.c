@@ -2,7 +2,7 @@
 f2a.c - Flash 2 Advance support for uCON64
 
 written by 2003 Ulrich Hecht (uli@emulinks.de)
-           2003 David Voswinkel (d.voswinkel@netcologne)
+           2003 David Voswinkel (d.voswinkel@netcologne.de)
            2004 NoisyB (noisyb@gmx.net)
            2004 dbjh
 
@@ -206,14 +206,14 @@ static int f2a_boot_usb (const char *ilclient_fname);
 static int f2a_read_usb (int address, int size, const char *filename);
 static int f2a_write_usb (int numfiles, char **files, int address);
 
-usb_dev_handle *f2ahandle;
+static usb_dev_handle *f2ahandle;
 
 
 static int
 f2a_init_usb (void)
 {
   recvmsg rm;
-  char ilclient_fname[FILENAME_MAX];
+  char iclientu_fname[FILENAME_MAX];
 
 //  assert (sizeof (recvmsg) == 64);
   memset (&rm, 0, sizeof (rm));
@@ -229,8 +229,8 @@ f2a_init_usb (void)
       if (ucon64.quiet < 0)
         printf ("Please turn on GBA with SELECT and START held down\n");
 
-      get_property_fname (ucon64.configfile, "ilclient", ilclient_fname, "ilclient.bin");
-      if (f2a_boot_usb (ilclient_fname))
+      get_property_fname (ucon64.configfile, "iclientu", iclientu_fname, "iclientu.bin");
+      if (f2a_boot_usb (iclientu_fname))
         {
           fprintf (stderr, "ERROR: Booting GBA client binary was not successful\n");
           exit (1);                             // fatal
@@ -520,7 +520,7 @@ f2a_write_usb (int numfiles, char **files, int address)
 static int
 f2a_init_par (int parport, int parport_delay)
 {
-  char ilclient2_fname[FILENAME_MAX], illogo_fname[FILENAME_MAX];
+  char iclientp_fname[FILENAME_MAX], ilogo_fname[FILENAME_MAX];
 
   if (parport_init (parport, parport_delay))
     {
@@ -531,9 +531,9 @@ f2a_init_par (int parport, int parport_delay)
   if (ucon64.quiet < 0)
     printf ("Please turn on GBA with SELECT and START held down\n");
 
-  get_property_fname (ucon64.configfile, "ilclient2", ilclient2_fname, "ilclient2.bin");
-  get_property_fname (ucon64.configfile, "illogo", illogo_fname, "illogo.bin");
-  if (f2a_boot_par (ilclient2_fname, illogo_fname))
+  get_property_fname (ucon64.configfile, "iclientp", iclientp_fname, "iclientp.bin");
+  get_property_fname (ucon64.configfile, "ilogo", ilogo_fname, ""); // "ilogo.bin"
+  if (f2a_boot_par (iclientp_fname, ilogo_fname))
     {
       fprintf (stderr, "ERROR: Booting GBA client binary was not successful\n");
       exit (1);                                 // fatal
@@ -613,7 +613,7 @@ parport_init (int port, int target_delay)
   outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x00);
   if (inportb ((unsigned short) (f2a_pport + PARPORT_EDATA)) != 0xff)
     {
-      fprintf (stderr, "ERROR: EPP initialisation failed\n");
+      fprintf (stderr, "ERROR: Parallel port initialisation failed\n");
       return -1;
     }
   return 0;
@@ -621,9 +621,9 @@ parport_init (int port, int target_delay)
 
 
 int
-f2a_boot_par (const char *ilclient2_fname, const char *illogo_fname)
+f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
 {
-  unsigned char recv[4], ilclient2[BOOT_SIZE];
+  unsigned char recv[4], iclientp[BOOT_SIZE];
 
   printf ("Booting GBA\n");
   if (f2a_send_head_par (PP_HEAD_BOOT, 1))
@@ -631,17 +631,17 @@ f2a_boot_par (const char *ilclient2_fname, const char *illogo_fname)
   if (f2a_receive_raw_par (recv, 4))
     return -1;
 
-  if (illogo_fname != NULL)
+  if (ilogo_fname[0] != 0)
     {
-      unsigned char illogo[LOGO_SIZE];
+      unsigned char ilogo[LOGO_SIZE];
 
       printf ("Uploading iLinker logo\n");
-      if (q_fread (illogo, 0, LOGO_SIZE, illogo_fname) == -1)
+      if (q_fread (ilogo, 0, LOGO_SIZE, ilogo_fname) == -1)
         {
-          fprintf (stderr, "ERROR: Unable to load logo file (%s)\n", illogo_fname);
+          fprintf (stderr, "ERROR: Unable to load logo file (%s)\n", ilogo_fname);
           return -1;
         }
-      if (f2a_send_buffer_par (PP_CMD_WRITEDATA, LOGO_ADDR, LOGO_SIZE, illogo,
+      if (f2a_send_buffer_par (PP_CMD_WRITEDATA, LOGO_ADDR, LOGO_SIZE, ilogo,
                                0, 0, 0, 0))
         {
           fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
@@ -650,12 +650,12 @@ f2a_boot_par (const char *ilclient2_fname, const char *illogo_fname)
     }
 
   printf ("Uploading iLinker client\n");
-  if (q_fread (ilclient2, 0, BOOT_SIZE, ilclient2_fname) == -1)
+  if (q_fread (iclientp, 0, BOOT_SIZE, iclientp_fname) == -1)
     {
-      fprintf (stderr, "ERROR: Unable to load GBA client binary (%s)\n", ilclient2_fname);
+      fprintf (stderr, "ERROR: Unable to load GBA client binary (%s)\n", iclientp_fname);
       return -1;
     }
-  if (f2a_send_buffer_par (PP_CMD_WRITEDATA, EXEC_STUB, BOOT_SIZE, ilclient2,
+  if (f2a_send_buffer_par (PP_CMD_WRITEDATA, EXEC_STUB, BOOT_SIZE, iclientp,
                            HEAD, FLIP, EXEC, 0))
     {
       fprintf (stderr, f2a_msg[UPLOAD_FAILED]);
@@ -675,7 +675,7 @@ f2a_write_par (int files_cnt, char **files, unsigned int addr)
   if (files_cnt > 1)
     {
       printf ("Uploading multiloader\n");
-      get_property_fname (ucon64.configfile, "f2aloader", loader_fname, "loader.bin");
+      get_property_fname (ucon64.configfile, "gbaloader", loader_fname, "loader.bin");
       if (q_fread (loader, 0, LOADER_SIZE, loader_fname) == -1)
         {
           fprintf (stderr, "ERROR: Unable to load loader binary (%s)\n", loader_fname);
@@ -1069,12 +1069,6 @@ f2a_receive_raw_par (unsigned char *buffer, int len)
 {
   int err, i;
   unsigned char *ptr, nibble;
-/*
-  struct timespec t;
-
-  t.tv_sec = 0;
-  t.tv_nsec = 1;
-*/
 
   ptr = buffer;
   if (parport_debug)
@@ -1086,12 +1080,12 @@ f2a_receive_raw_par (unsigned char *buffer, int len)
       outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x04);
       parport_nop ();
       while (inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY)
-        ; //nanosleep (&t, NULL); // nanosleep() is not portable & we like busy waiting
+        ; // nanosleep() is not portable & we like busy waiting
       outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x05);
       nibble = inportb ((unsigned short) (f2a_pport + PARPORT_STATUS));
       parport_nop ();
       while (!(inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY))
-        ; //nanosleep (&t, NULL);
+        ; // see above
       if (i % 2)
         {
           *ptr |= (nibble >> 3) & 0x0f;
@@ -1118,12 +1112,6 @@ f2a_send_raw_par (unsigned char *buffer, int len)
 {
   int timeout, i;
   unsigned char *pc;
-/*
-  struct timespec t;
-
-  t.tv_sec = 0;
-  t.tv_nsec = 1;
-*/
 
   pc = buffer;
   if (parport_debug)
@@ -1141,17 +1129,17 @@ f2a_send_raw_par (unsigned char *buffer, int len)
       parport_nop ();
       while ((inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY) &&
              (timeout--) > 0)
-        ; //nanosleep (&t, NULL); // nanosleep() is not portable & we like busy waiting
+        ; // nanosleep() is not portable & we like busy waiting
       outportb ((unsigned short) (f2a_pport + PARPORT_DATA), *pc);
       parport_nop ();
       while ((inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY) &&
              (timeout--) > 0)
-        ; //nanosleep (&t, NULL);
+        ; // see above
       outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x05);
       parport_nop ();
       while ((!(inportb ((unsigned short) (f2a_pport + PARPORT_STATUS)) & PARPORT_IBUSY)) &&
              (timeout--) > 0)
-        ; //nanosleep (&t, NULL);
+        ; // see above
       pc++;
       if (timeout < 0)
         {

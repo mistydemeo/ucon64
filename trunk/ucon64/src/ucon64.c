@@ -2009,6 +2009,8 @@ ucon64_usage (int argc, char *argv[])
 
   printf ("\n");
 
+  optind = option_index = 0;//TODO is there a better way to "reset"?
+
   while ((c = getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
     {
       single = 1;

@@ -21,18 +21,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#define INPUT_MASK      0x78
-#define IBUSY_BIT       0x80
-#define STROBE_BIT      1
-
-#define N_TRY_MAX       65536                   // # times to test if SWC ready
-
-#define BUFFERSIZE      8192                    // don't change, only 8192 works!
-#define HEADERSIZE      512                     // SWC header is 512 bytes
-
 #include <fcntl.h>
 #include <ctype.h>
 #include <dirent.h>
+#include <sys/stat.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,8 +35,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "../ucon64.h"
 #include "../ucon64_db.h"
 #include "../ucon64_misc.h"
-//#include <sys/stat.h>
 #include "swc.h"
+
+
+#define INPUT_MASK      0x78
+#define IBUSY_BIT       0x80
+#define STROBE_BIT      1
+
+#define N_TRY_MAX       65536                   // # times to test if SWC ready
+
+#define BUFFERSIZE      8192                    // don't change, only 8192 works!
+#define HEADERSIZE      512                     // SWC header is 512 bytes
 
 static void init_io (unsigned int port);
 static void checkabort (int status);

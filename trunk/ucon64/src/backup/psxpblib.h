@@ -17,8 +17,6 @@
 /*
   added for uCON64 support
 */
-#include "../ucon64_misc.h"
-
 #ifdef  __MSDOS__
 #define _PSXPB_DJGPP_
 #elif   defined __UNIX__

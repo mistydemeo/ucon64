@@ -22,10 +22,6 @@
 #ifndef FLC_H
 #define FLC_H
 
-#include <limits.h>
-#include <unistd.h>
-#include <getopt.h>
-#include "misc.h"
 
 #define flc_NAME 0
 #define flc_FILE 1

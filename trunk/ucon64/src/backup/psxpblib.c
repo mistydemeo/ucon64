@@ -13,6 +13,19 @@
  *
  */
 
+#include <fcntl.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <unistd.h>             // ioperm() (libc5)
+#include "../ucon64.h"
+#include "../misc.h"
+#include "../ucon64_misc.h"
 #include "psxpblib.h"
 
 static unsigned char psx_parallel_out_0 = 0xff;

@@ -20,6 +20,15 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */ 
 
+#include <stdlib.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#ifndef __FreeBSD__
+//  #include <getopt.h>
+#endif
+#include "misc.h"
 #include "flc.h"
 
 #include "extract.h"

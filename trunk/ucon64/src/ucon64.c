@@ -29,23 +29,27 @@ first I want to thank SiGMA SEVEN! who was my mentor and taught me how to
 write programs in C
 */
 
-#include <fcntl.h>
 #include <ctype.h>
 #include <dirent.h>
-#include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <unistd.h>             // ioperm() (libc5)
+#include <stdarg.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <stdlib.h>
+#ifdef __linux__
+  #include <sys/io.h>
+#endif
 #ifndef __FreeBSD__
-//#include <getopt.h>           // __FreeBSD__ problems
+//  #include <getopt.h>           // __FreeBSD__ problems
 #endif // __FreeBSD__
 
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
+#include "misc.h"
 
 #include "snes/snes.h"
 #include "gb/gb.h"

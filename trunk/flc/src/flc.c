@@ -300,7 +300,7 @@ flc_configfile (void)
   else if (getProperty (flc.configfile, "version", buf2, NULL) == NULL)
     {
       strcpy (buf2, buf);
-      newext (buf2, ".OLD");
+      setext (buf2, ".OLD");
 
       printf ("NOTE: updating config: will be renamed to %s...", buf2);
 

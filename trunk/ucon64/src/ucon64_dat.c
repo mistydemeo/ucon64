@@ -1030,6 +1030,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
             break;
           case UCON64_N64:
             console_name = "Nintendo 64";
+            plugin = "n64.dll";
             break;
           case UCON64_NES:
             console_name = "NES";

@@ -855,14 +855,14 @@ ucon64_dat_nfo (const ucon64_dat_t *dat)
 {
   printf ("DAT: %s\n"
           "DAT: Version: %s (%s, %s)\n"
-          "DAT: Author: %s\n"
+//          "DAT: Author: %s\n"
 //          "DAT: Comment: %s\n"
           "DAT: %s\n",
           dat->datfile,
           dat->version,
           dat->date,
           dat->refname,
-          dat->author,
+//          dat->author,
 //          dat->comment,
           dat->name);
 

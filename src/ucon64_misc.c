@@ -379,10 +379,10 @@ outportw (unsigned short port, unsigned short word)
 
 
 #if 0
+  unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };
+  int i;
   if (port <= 3)
     {
-printf ("SHIT");
-fflush (stdout);
       for (i = 0; i < 3; i++)
         {
           if (detect_parport (parport_addresses[i]) == 1)
@@ -443,9 +443,7 @@ ucon64_parport_probe (unsigned int port)
 unsigned int
 ucon64_parport_init (unsigned int port)
 {
-  unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };
-  int i;
-  port = ucon64_parport_probe (port);
+//  port = ucon64_parport_probe (port);
 
 #ifdef  __BEOS__
   ucon64_io_fd = open ("/dev/misc/ioport", O_RDWR | O_NONBLOCK);

@@ -204,6 +204,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_NCOL (UCON64_OPTION + 190)
 #define UCON64_O (UCON64_OPTION + 191)
 #define UCON64_CTRL2 (UCON64_OPTION + 192)
+#define UCON64_NERO (UCON64_OPTION + 193)
+#define UCON64_CDIRIP (UCON64_OPTION + 194)
 
 #define UCON64_ATARI UCON64_ATA
 #define UCON64_CD32 (UCON64_CONSOLE + 2)
@@ -234,7 +236,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_WONDERSWAN UCON64_SWAN
 #define UCON64_XBOX (UCON64_CONSOLE + 28)
 
-#define UCON64_VERSION_S "1.9.8beta5"
+#define UCON64_VERSION_S "1.9.8beta6"
 
 /* program version counter */
 //#define UCON64_VERSION 198

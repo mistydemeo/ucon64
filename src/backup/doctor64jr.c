@@ -1,7 +1,7 @@
 /*
 doctor64jr.c - Bung Doctor 64jr support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+written by 1999 - 2002 NoisyB (noisyb@gmx.net)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -545,7 +545,7 @@ d64jr_main (int argc, char *argv[])
       return(-1);
    }
 */
-  port[0] = 0x378;
+//  port[0] = 0x378;
   port[1] = 0;
 
   if (argc == 1)
@@ -675,13 +675,25 @@ char *doctor64jr_argv[128];
 int
 doctor64jr_read (char *filename, unsigned int parport)
 {
-//TODO
+  port[0] = parport;
+/*    
+  doctor64jr_argv[0] = "jrsend";
+  doctor64jr_argv[1] = filename;
+  doctor64jr_argc = 2;
+
+  if (!d64jr_main (doctor64jr_argc, doctor64jr_argv))
+    {
+      return (0);
+    }
+*/
   return (0);
 }
 
 int
 doctor64jr_write (char *filename, long start, long len, unsigned int parport)
 {
+  port[0] = parport;
+
   doctor64jr_argv[0] = "jrsend";
   doctor64jr_argv[1] = filename;
   doctor64jr_argc = 2;
@@ -702,7 +714,8 @@ doctor64jr_usage (int argc, char *argv[])
     printf ("%s\n", doctor64jr_TITLE);
 
   printf ("  -xdjr         send/receive ROM to/from Doctor64 Jr; $FILE=PORT\n"
-          "                receives automatically when $ROM does not exist\n");
+          "                receives automatically when $ROM does not exist\n"
+          "NOTE: currently only sending is supported\n");
 
 //TODO more info like technical info about cabeling and stuff for the copier
 

@@ -69,7 +69,6 @@ const st_usage_t f2a_usage[] =
     {"xf2ab", "BANK", "send/receive SRAM to/from Flash 2 Advance (Ultra) BANK\n"
                       "BANK should be a number >= 1; " OPTION_LONG_S "port=PORT\n"
                       "receives automatically when SRAM does not exist"},
-    {"xf2am", NULL, "try to enable EPP mode, default is SPP mode"},
 #endif // PARALLEL
     {NULL, NULL, NULL}
 };
@@ -91,9 +90,11 @@ typedef struct
   // for some reason the original software uses a 63 bytes structure for outgoing messages,
   // not 64 as it does for incoming messages, hence the "-1". It all seems to work fine with
   // 64 bytes, too, and I therefore suspect this to be a bug in the original SW.
-} /*__attribute__ ((packed))*/ sendmsg; // we use SENDMSG_SIZE to solve the problem - dbjh
 
-#define SENDMSG_SIZE (sizeof (sendmsg) - 1)
+  // we use SENDMSG_SIZE to solve the problem - dbjh
+} /*__attribute__ ((packed))*/ f2a_sendmsg_t;
+
+#define SENDMSG_SIZE (sizeof (f2a_sendmsg_t) - 1)
 
 
 typedef struct
@@ -105,7 +106,7 @@ typedef struct
 #define CMD_WRITEDATA 6                 // write data to RAM/ROM/SRAM
 #define CMD_READDATA 7                  // read data from RAM/ROM/SRAM
 #define CMD_MULTIBOOT1 0xff             // boot up the GBA stage 1, no parameters
-#define CMD_MULTIBOOT2 0                // boot up the GBA stage 2, sendmsg->size has to be set
+#define CMD_MULTIBOOT2 0                // boot up the GBA stage 2, f2a_sendmsg_t.size has to be set
 
 #define MAGIC_NUMBER 0xa46e5b91         // needs to be properly set for almost all commands
 
@@ -121,8 +122,8 @@ typedef struct
 {
   unsigned int pad1[3];
   unsigned int magic;
-  unsigned int cmd;
-  unsigned int addr;
+  unsigned int command;
+  unsigned int address;
   unsigned int sizekb;
   unsigned int pad2;
   unsigned int exec;
@@ -197,10 +198,49 @@ static const char *f2a_msg[] = {
 
 #ifdef  HAVE_USB_H
 
+static int f2a_init_usb (void);
+static int usb_connect (void);
+static int f2a_info (recvmsg *rm);
+static int f2a_boot_usb (const char *ilclient_fname);
+static int f2a_read_usb (int address, int size, const char *filename);
+static int f2a_write_usb (int numfiles, char **files, int address);
+
 usb_dev_handle *f2ahandle;
 
 
-int
+static int
+f2a_init_usb (void)
+{
+  recvmsg rm;
+  char ilclient_fname[FILENAME_MAX];
+
+//  assert (sizeof (recvmsg) == 64);
+  memset (&rm, 0, sizeof (rm));
+
+  if (usb_connect ())
+    {
+      fprintf (stderr, "ERROR: Unable to connect to F2A USB linker\n");
+      exit (1);                                 // fatal
+    }
+  f2a_info (&rm);
+  if (rm.data[0] == 0)
+    {
+      if (ucon64.quiet < 0)
+        printf ("Please turn on GBA with SELECT and START held down\n");
+
+      get_property_fname (ucon64.configfile, "ilclient", ilclient_fname, "ilclient.bin");
+      if (f2a_boot_usb (ilclient_fname))
+        {
+          fprintf (stderr, "ERROR: Booting GBA client binary was not successful\n");
+          exit (1);                             // fatal
+        }
+      f2a_info (&rm);
+    }
+  return 0;
+}
+
+
+static int
 usb_connect (void)
 {
   int fp, result, firmware_loaded = 0;
@@ -281,7 +321,7 @@ find_f2a:
 static int
 f2a_info (recvmsg *rm)
 {
-  sendmsg sm;
+  f2a_sendmsg_t sm;
   unsigned int i;
 
   memset (&sm, 0, SENDMSG_SIZE);
@@ -290,9 +330,9 @@ f2a_info (recvmsg *rm)
   sm.command = CMD_GETINF;
 
 /*
-  if (usb_write (f2ahandle, (char*) &sm, SENDMSG_SIZE) == -1)
+  if (usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
     return -1;
-  if (usb_read (f2ahandle, (char*) rm, sizeof (recvmsg)) == -1)
+  if (usb_read (f2ahandle, (char *) rm, sizeof (recvmsg)) == -1)
     return -1;
 */
 
@@ -318,7 +358,7 @@ f2a_info (recvmsg *rm)
 static int
 f2a_boot_usb (const char *ilclient_fname)
 {
-  sendmsg sm;
+  f2a_sendmsg_t sm;
   unsigned int ack[16], i;
   char ilclient[16 * 1024];
 
@@ -333,10 +373,10 @@ f2a_boot_usb (const char *ilclient_fname)
   // boot the GBA
   memset (&sm, 0, SENDMSG_SIZE);
   sm.command = CMD_MULTIBOOT1;
-  usb_write (f2ahandle, (char*) &sm, SENDMSG_SIZE);
+  usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE);
   sm.command = CMD_MULTIBOOT2;
   sm.size = 16 * 1024;
-  usb_write (f2ahandle, (char*) &sm, SENDMSG_SIZE);
+  usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE);
 
   // send the multiboot image
   if (usb_write (f2ahandle, ilclient, 16 * 1024) == -1)
@@ -365,7 +405,7 @@ f2a_read_usb (int address, int size, const char *filename)
 {
   FILE *file;
   unsigned int i;
-  sendmsg sm;
+  f2a_sendmsg_t sm;
   char buffer[1024];
 
 //  assert ((size & 1023) == 0);
@@ -385,7 +425,7 @@ f2a_read_usb (int address, int size, const char *filename)
   sm.address = address;
   sm.size = size;
   sm.sizekb = size / 1024;
-  if (usb_write (f2ahandle, (char*) &sm, SENDMSG_SIZE) == -1)
+  if (usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
     return -1;
 
   for (i = 0; i < sm.sizekb; i++)
@@ -410,7 +450,7 @@ f2a_read_usb (int address, int size, const char *filename)
 static int
 f2a_write_usb (int numfiles, char **files, int address)
 {
-  sendmsg sm;
+  f2a_sendmsg_t sm;
   int i, j, fsize;
   char buffer[1024];
   FILE *file;
@@ -450,7 +490,7 @@ f2a_write_usb (int numfiles, char **files, int address)
       sm.address = address;
       sm.sizekb = fsize / 1024;
 
-      if (usb_write (f2ahandle, (char*) &sm, SENDMSG_SIZE) == -1)
+      if (usb_write (f2ahandle, (char *) &sm, SENDMSG_SIZE) == -1)
         return -1;
 
       for (i = 0; i < fsize; i += 1024)
@@ -470,38 +510,6 @@ f2a_write_usb (int numfiles, char **files, int address)
       address += fsize;
     }
 
-  return 0;
-}
-
-
-static int
-f2a_init_usb (void)
-{
-  recvmsg rm;
-  char ilclient_fname[FILENAME_MAX];
-
-//  assert (sizeof (recvmsg) == 64);
-  memset (&rm, 0, sizeof (rm));
-
-  if (usb_connect ())
-    {
-      fprintf (stderr, "ERROR: Unable to connect to F2A USB linker\n");
-      exit (1);                                 // fatal
-    }
-  f2a_info (&rm);
-  if (rm.data[0] == 0)
-    {
-      if (ucon64.quiet < 0)
-        printf ("Please turn on GBA with SELECT and START held down\n");
-
-      get_property_fname (ucon64.configfile, "ilclient", ilclient_fname, "ilclient.bin");
-      if (f2a_boot_usb (ilclient_fname))
-        {
-          fprintf (stderr, "ERROR: Booting GBA client binary was not successful\n");
-          exit (1);                             // fatal
-        }
-      f2a_info (&rm);
-    }
   return 0;
 }
 
@@ -539,7 +547,6 @@ parport_init (int port, int target_delay)
   int stat; //, ecpreg = port + 0x402, eppmode = 1;
 
   f2a_pport = port;
-  ucon64_parport_init (f2a_pport);
   parport_nop_cntr = parport_init_delay (target_delay);
 
   printf ("Using I/O port 0x%x\n", f2a_pport);
@@ -736,7 +743,7 @@ f2a_read_par (unsigned int start, unsigned int size, const char *filename)
 typedef struct
 {
   unsigned char head[16];
-  unsigned char cmd;
+  unsigned char command;
   unsigned char unknown;
   unsigned int size;
   unsigned char pad[58];
@@ -751,7 +758,7 @@ f2a_send_head_par (int cmd, int size)
   unsigned short int s;                         //  members for data streams (we don't
                                                 //  want compiler-specific stuff)
   memcpy (&msg_head, header, 16);               // .head
-  msg_head[16] = cmd;                           // .cmd
+  msg_head[16] = cmd;                           // .command
   s = size / 1024;
   msg_head[17] =                                // .unknown
     (trans[((s & 255) / 32)] << 4) | (((1023 - (s & 1023)) / 256) & 0x0f);
@@ -773,20 +780,21 @@ f2a_exec_cmd_par (int cmd, int addr, int size)
   f2a_msg_cmd_t msg_cmd;
 
   memset (&msg_cmd, 0, sizeof (f2a_msg_cmd_t));
-  msg_cmd.magic = bswap_32 (PP_MAGIC_NUMBER);
-  msg_cmd.cmd = bswap_32 (cmd);
-  msg_cmd.addr = bswap_32 (addr);
-  msg_cmd.sizekb = bswap_32 (size / 1024);
+  msg_cmd.magic = me2be_32 (PP_MAGIC_NUMBER);
+  msg_cmd.command = me2be_32 (cmd);
+  msg_cmd.address = me2be_32 (addr);
+  msg_cmd.sizekb = me2be_32 (size / 1024);
 
-  msg_cmd.exec_stub = bswap_32 (EXEC_STUB);
-  msg_cmd.exec = bswap_32 (0x08);
+  msg_cmd.exec_stub = me2be_32 (EXEC_STUB);
+  msg_cmd.exec = me2be_32 (0x08);
   f2a_send_head_par (PP_HEAD_READ, size);
   f2a_wait_par ();
 
   if (parport_debug)
     fprintf (stderr,
              "sending msg_cmd cmd='0x%08x' addr='0x%08x' size='0x%08x' %d bytes\n",
-             msg_cmd.cmd, msg_cmd.addr, msg_cmd.sizekb, sizeof (f2a_msg_cmd_t));
+             msg_cmd.command, msg_cmd.address, msg_cmd.sizekb,
+             (int) sizeof (f2a_msg_cmd_t));
 
 
   f2a_send_raw_par ((unsigned char *) &msg_cmd, sizeof (f2a_msg_cmd_t));
@@ -814,10 +822,10 @@ f2a_receive_data_par (int cmd, int addr, int size, const char *filename, int fli
   FILE *file;
 
   memset (&msg_cmd, 0, sizeof (f2a_msg_cmd_t));
-  msg_cmd.magic = bswap_32 (PP_MAGIC_NUMBER);
-  msg_cmd.cmd = bswap_32 (cmd);
-  msg_cmd.addr = bswap_32 (addr);
-  msg_cmd.sizekb = bswap_32 (size / 1024);
+  msg_cmd.magic = me2be_32 (PP_MAGIC_NUMBER);
+  msg_cmd.command = me2be_32 (cmd);
+  msg_cmd.address = me2be_32 (addr);
+  msg_cmd.sizekb = me2be_32 (size / 1024);
 
   if (f2a_send_head_par (PP_HEAD_READ, size))
     return -1;
@@ -828,8 +836,8 @@ f2a_receive_data_par (int cmd, int addr, int size, const char *filename, int fli
   if (parport_debug)
     fprintf (stderr,
              "sending msg_cmd cmd='0x%08x' addr='0x%08x' size='0x%08x' %d bytes\n",
-             msg_cmd.cmd, msg_cmd.addr, msg_cmd.sizekb,
-             sizeof (f2a_msg_cmd_t));
+             msg_cmd.command, msg_cmd.address, msg_cmd.sizekb,
+             (int) sizeof (f2a_msg_cmd_t));
 
   f2a_send_raw_par ((unsigned char *) &msg_cmd, sizeof (f2a_msg_cmd_t));
 
@@ -911,10 +919,10 @@ f2a_send_cmd_par (int cmd, int addr, int size)
   f2a_msg_cmd_t msg_cmd;
 
   memset (&msg_cmd, 0, sizeof (f2a_msg_cmd_t));
-  msg_cmd.magic = bswap_32 (PP_MAGIC_NUMBER);
-  msg_cmd.cmd = bswap_32 (cmd);
-  msg_cmd.addr = bswap_32 (addr);
-  msg_cmd.sizekb = bswap_32 (size / 1024);
+  msg_cmd.magic = me2be_32 (PP_MAGIC_NUMBER);
+  msg_cmd.command = me2be_32 (cmd);
+  msg_cmd.address = me2be_32 (addr);
+  msg_cmd.sizekb = me2be_32 (size / 1024);
 
   if (f2a_send_head_par (PP_HEAD_WRITE, size))
     return -1;
@@ -925,8 +933,8 @@ f2a_send_cmd_par (int cmd, int addr, int size)
   if (parport_debug)
     fprintf (stderr,
              "parport_send_cmd cmd='0x%08x' addr='0x%08x' size='0x%08x' %d bytes\n",
-             msg_cmd.cmd, msg_cmd.addr, msg_cmd.sizekb,
-             sizeof (f2a_msg_cmd_t));
+             msg_cmd.command, msg_cmd.address, msg_cmd.sizekb,
+             (int) sizeof (f2a_msg_cmd_t));
 
   if (f2a_send_raw_par ((unsigned char *) &msg_cmd, sizeof (f2a_msg_cmd_t)))
     return -1;
@@ -947,14 +955,14 @@ f2a_send_buffer_par (int cmd, int addr, int size, const unsigned char *resource,
   (void) progress;
 
   memset (&msg_cmd, 0, sizeof (f2a_msg_cmd_t));
-  msg_cmd.magic = bswap_32 (PP_MAGIC_NUMBER);
-  msg_cmd.cmd = bswap_32 (cmd);
-  msg_cmd.addr = bswap_32 (addr);
-  msg_cmd.sizekb = bswap_32 (size / 1024);
+  msg_cmd.magic = me2be_32 (PP_MAGIC_NUMBER);
+  msg_cmd.command = me2be_32 (cmd);
+  msg_cmd.address = me2be_32 (addr);
+  msg_cmd.sizekb = me2be_32 (size / 1024);
   if (exec)
     {
-      msg_cmd.exec_stub = bswap_32 (EXEC_STUB);
-      msg_cmd.exec = bswap_32 (0x08);
+      msg_cmd.exec_stub = me2be_32 (EXEC_STUB);
+      msg_cmd.exec = me2be_32 (0x08);
     }
   if (f2a_send_head_par (PP_HEAD_WRITE, size))
     return -1;
@@ -964,8 +972,8 @@ f2a_send_buffer_par (int cmd, int addr, int size, const unsigned char *resource,
   if (parport_debug)
     fprintf (stderr,
              "parport_send_buffer cmd='0x%08x' addr='0x%08x' size='0x%08x' %d bytes\n",
-             msg_cmd.cmd, msg_cmd.addr, msg_cmd.sizekb,
-             sizeof (f2a_msg_cmd_t));
+             msg_cmd.command, msg_cmd.address, msg_cmd.sizekb,
+             (int) sizeof (f2a_msg_cmd_t));
 
   if (f2a_send_raw_par ((unsigned char *) &msg_cmd, sizeof (f2a_msg_cmd_t)))
     return -1;
@@ -1161,7 +1169,7 @@ static int
 f2a_wait_par (void)
 {
   int stat;
-  
+
   while (1)
     {
       outportb ((unsigned short) (f2a_pport + PARPORT_CONTROL), 0x04);

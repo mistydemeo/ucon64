@@ -322,7 +322,6 @@ const struct option options[] = {
     {"xf2ab", 1, 0, UCON64_XF2AB},
     {"xf2ac", 1, 0, UCON64_XF2AC},
     {"xf2as", 0, 0, UCON64_XF2AS},
-    {"xf2am", 0, 0, UCON64_XF2AM},
     {"xfal", 0, 0, UCON64_XFAL},
     {"xfalmulti", 1, 0, UCON64_XFALMULTI},
     {"xfalb", 1, 0, UCON64_XFALB},

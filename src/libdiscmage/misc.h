@@ -261,7 +261,6 @@ extern char *strcasestr2 (const char *str, const char *search);
 #define stristr strcasestr2
 extern char *setext (char *filename, const char *ext);
 extern const char *getext (const char *filename);
-//#define EXTCMP(filename, ext) (strcasecmp (getext (filename), ext))
 extern char *basename2 (const char *str);
 /*
   the following define *IS* important since it's said that XPG basename()
@@ -358,11 +357,15 @@ extern void wait2 (int nmillis);
 
   get_property()  get value of propname from filename or return value of env
                   with name like propname or return def
+  get_property_bool()  like get_property() but returns an integer which is TRUE
+                  if the value of propname was 1, [Yy] or [Yy][Ee][Ss] and
+                  FALSE for every other case
   set_property()  set propname with value in filename
   DELETE_PROPERTY() like set_property but when value of propname is NULL the
                   whole property will disappear from filename
 */
 extern const char *get_property (const char *filename, const char *propname, char *value, const char *def);
+extern int get_property_bool (const char *filename, const char *propname);
 extern int set_property (const char *filename, const char *propname, const char *value);
 #define DELETE_PROPERTY(a, b) (set_property(a, b, NULL))
 

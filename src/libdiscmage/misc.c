@@ -922,8 +922,9 @@ getenv2 (const char *variable)
 }
 
 
-const char *
-get_property (const char *filename, const char *propname, char *buffer, const char *def)
+static const char *
+get_property2 (const char *filename, const char *propname, char divider, char *buffer, const char *def)
+// divider is the 1st char after propname ('=', ':', etc..)
 {
   char buf[MAXBUFSIZE], *p = NULL;
   FILE *fh;
@@ -943,7 +944,7 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
 
           if (!strnicmp (buf, propname, strlen (propname)))
             {
-              p = strchr (buf, '=');
+              p = strchr (buf, divider);
               p++;
               strcpy (buffer, p + strspn (p, "\t "));
 
@@ -971,8 +972,36 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
 }
 
 
+const char *
+get_property (const char *filename, const char *propname, char *buffer, const char *def)
+{
+  return get_property2 (filename, propname, '=', buffer, def);
+}
+
+
 int
-set_property (const char *filename, const char *propname, const char *value)
+get_property_bool (const char *filename, const char *propname)
+{
+  char buf[MAXBUFSIZE];
+  
+  if (!get_property2 (filename, propname, '=', buf, NULL))
+    get_property2 (filename, propname, ':', buf, NULL);
+
+  if (buf[0])
+    switch (tolower (buf[0]))
+      {
+        case '1': // 1
+        case 'y': // [Yy]es
+        case 'o': // [Oo]k
+          return TRUE;
+      }
+
+  return FALSE;
+}
+
+
+static int
+set_property2 (const char *filename, const char *propname, char divider, const char *value)
 {
   int found = 0, result = 0, file_size = 0;
   char buf[MAXBUFSIZE], *buf2;
@@ -1000,7 +1029,7 @@ set_property (const char *filename, const char *propname, const char *value)
               if (value == NULL)
                 continue;
 
-              sprintf (buf, "%s=%s\n", propname, value);
+              sprintf (buf, "%s%c%s\n", propname, divider, value);
             }
           strcat (buf2, buf);
         }
@@ -1009,7 +1038,7 @@ set_property (const char *filename, const char *propname, const char *value)
 
     if (!found && value != NULL)
       {
-        sprintf (buf, "%s=%s\n", propname, value);
+        sprintf (buf, "%s%c%s\n", propname, divider, value);
         strcat (buf2, buf);
       }
 
@@ -1022,6 +1051,13 @@ set_property (const char *filename, const char *propname, const char *value)
 //  q_fwrite (buf2, 0, strlen (buf2), filename, "wb");
 
   return result;
+}
+
+
+int
+set_property (const char *filename, const char *propname, const char *value)
+{
+  return set_property2 (filename, propname, '=', value);
 }
 
 

@@ -63,19 +63,19 @@ const st_usage_t ucon64_dat_usage[] = {
   {"db", NULL, "DATabase statistics"},
   {"dbv", NULL, "like " OPTION_LONG_S "db but more verbose"},
   {"dbs", "CRC32", "search ROM with CRC32 in DATabase"},
-  {"scan", NULL, "generate ROM list for all ROM(s) using DATabase\n"
+  {"scan", NULL, "generate ROM list for all ROMs using DATabase\n"
                     "same as: GoodXXXX scan ..."},
   {"lsd", NULL, "same as " OPTION_LONG_S "scan"},
-  {"rrom", NULL, "rename ROM(s) to their internal names"},
-  {"rename", NULL, "rename ROM(S) to their DATabase names\n"
+  {"rrom", NULL, "rename ROMs to their internal names"},
+  {"rename", NULL, "rename ROMs to their DATabase names\n"
                     "same as: GoodXXXX rename inplace ..."},
   {"83", NULL, "force to rename to 8.3 filenames"},
   {"force63", NULL, "force to rename all filenames into Joliet CD format\n"
               "same as: GoodXXXX rename inplace force63 ...\n"
-              "TIP: using " OPTION_LONG_S "nes would process only NES ROM(S)"},
-  {"rl", NULL, "rename all ROM(s) to lowercase"},
+              "TIP: using " OPTION_LONG_S "nes would process only NES ROMs"},
+  {"rl", NULL, "rename all ROMs to lowercase"},
 #if 0
-  {"ru", NULL, "rename all ROM(s) to uppercase"},
+  {"ru", NULL, "rename all ROMs to uppercase"},
 #endif
 
 
@@ -247,6 +247,12 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
     {"swan", custom_stristr, UCON64_WONDERSWAN, swan_usage},
     {"Coleco", custom_stristr, UCON64_COLECO, coleco_usage},
     {"Intelli", custom_stristr, UCON64_INTELLI, intelli_usage},
+    {"GoodVECT", custom_strnicmp, UCON64_VECTREX, vectrex_usage},
+    {"GoodWSX", custom_strnicmp, UCON64_WONDERSWAN, swan_usage},
+    {"GoodCOL", custom_strnicmp, UCON64_COLECO, coleco_usage},
+    {"GoodINTV", custom_strnicmp, UCON64_INTELLI, intelli_usage},
+    {"GoodNGPX", custom_strnicmp, UCON64_NEOGEOPOCKET, ngp_usage},
+    {"GoodVBOY", custom_strnicmp, UCON64_VIRTUALBOY, vboy_usage},
 /* TODO:
     {"psx", custom_stristr, UCON64_PSX, psx_usage},
     {"ps1", custom_stristr, UCON64_PSX, psx_usage},

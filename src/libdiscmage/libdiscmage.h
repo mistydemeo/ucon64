@@ -158,6 +158,20 @@ extern size_t dm_fwrite (const void *buffer, size_t blk_size, size_t blk_num, dm
 
 
 /*
+  get_session()
+  get_track()
+  get_num_of_sessions()
+  get_num_of_tracks()
+*/
+#if 0
+extern dm_session_t *get_session(int session);
+extern dm_track_t *get_track(int track);
+extern int get_num_of_sessions(void);
+extern int get_num_of_tracks(void);
+#endif
+
+
+/*
   some ready to use functions
 
   dm_set_gauge () enter here the name of a function that takes two integers

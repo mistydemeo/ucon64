@@ -90,12 +90,14 @@ void gauge_dummy (uint32_t pos, uint32_t total)
 }
 
 
-const char pvd_magic[8] = { 0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\x01" "CD001" "\x01" "\0";
-const char svd_magic[8] = { 0x02, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\x02" "CD001" "\x01" "\0";
-const char vdt_magic[8] = { 0xff, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\xFF" "CD001" "\x01" "\0";
-const char sub_header[8] = { 0, 0, 0x08, 0, 0, 0, 0x08, 0 };
 const char sync_data[12] =
   { 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0 };
+const char pvd_magic[8] = { 0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\x01" "CD001" "\x01" "\0";
+#if 0
+const char svd_magic[8] = { 0x02, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\x02" "CD001" "\x01" "\0";
+const char vdt_magic[8] = { 0xff, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };     //"\xFF" "CD001" "\x01" "\0";
+#endif
+const char sub_header[8] = { 0, 0, 0x08, 0, 0, 0, 0x08, 0 };
 
 #if 0
   const st_track_modes_t track_modes[] = {
@@ -321,23 +323,13 @@ dm_open (const char *image_filename)
 // recurses through all <image_type>_init functions to find correct image type
 {
   dm_image_t *image = NULL;
-  dm_track_t *track = image->track;
-  int x = 0;
+  dm_track_t *track = NULL;
+  int x = 0, identified = 0;
   char buf[MAXBUFSIZE];
-  FILE *fh = NULL;
+  FILE *fh;
 
-  if (!(fh = fopen (image->filename, "rb")))
-    {
-      free (image);
-      return NULL;
-    }
-
-  if (!(image = (dm_image_t *) malloc (sizeof (dm_image_t))))
+  if (!(fh = fopen (image_filename, "rb")))
     return NULL;
-    
-  memset (image, 0, sizeof (dm_image_t));
-
-  strcpy (image->filename, image_filename);
 
   fread (buf, 1, 16, fh);
   if (!memcmp (sync_data, buf, 12))
@@ -345,26 +337,33 @@ dm_open (const char *image_filename)
       if (probe[x].mode == buf[15])
         {
 // will search for valid PVD in sector 16 of source image
-            int start = probe[x].sector_size * 16;
-
-            if (probe[x].sector_size == 2352)
-              start += 16;                // header
-            if (probe[x].mode == 2)
-              start += 8;                 // subheader
-
-            fseek (fh, start, SEEK_SET);
+            fseek (fh, (probe[x].sector_size * 16) + probe[x].seek_header, SEEK_SET);
             fread (buf, 1, 8, fh);
 
             if (!memcmp (pvd_magic, buf, 8))
               {
-                track->sector_size = probe[x].sector_size;
-                track->mode = probe[x].mode;
-                track->seek_header = probe[x].seek_header;
-                track->seek_ecc = probe[x].seek_ecc;
+                identified = 1;
                 break;
               }
         }
+
   fclose (fh);
+
+  if (!identified) return NULL;
+
+  if (!(image = (dm_image_t *) malloc (sizeof (dm_image_t))))
+    return NULL;
+
+//  memset (image, 0, sizeof (dm_image_t));
+
+//  track = (dm_track_t *)(image->track);
+  image->track->sector_size = 0;
+//   (uint32_t)probe[x].sector_size;
+//  track->mode = 0;//probe[x].mode;
+//  track->seek_header = 0;//probe[x].seek_header;
+//  track->seek_ecc = 0;//probe[x].seek_ecc;
+
+  strcpy (image->filename, image_filename);
 
   return image;
 }
@@ -413,12 +412,14 @@ int
 dm_bin2iso (const char *fname, void (* gauge) (int, int))
 {
   dm_image_t *image = NULL;
-  dm_track_t *track = image->track;
+  dm_track_t *track = NULL;
   uint32_t i, size;
   char buf[MAXBUFSIZE];
   FILE *dest, *src;
   
   if (!(image = dm_open (fname))) return -1;
+
+  track = image->track;
 
   if (track->mode == 1 && track->sector_size == 2048)
     fprintf (stderr, libdm_msg[ALREADY_2048]);

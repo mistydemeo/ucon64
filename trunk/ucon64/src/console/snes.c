@@ -880,8 +880,7 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       if (total4Mbparts == 6)
         {
-          snes_int_blocks (srcbuf, dstbuf + 16 * MBIT, dstbuf,
-                           16 * MBIT / 0x10000);
+          snes_int_blocks (srcbuf, dstbuf + 16 * MBIT, dstbuf, 16 * MBIT / 0x10000);
           snes_int_blocks (srcbuf + 16 * MBIT, dstbuf + 12 * MBIT,
                            dstbuf + 8 * MBIT, (size - 16 * MBIT) / 0x10000);
           if (size <= 20 * MBIT)
@@ -892,7 +891,7 @@ snes_gd3 (st_rominfo_t *rominfo)
         }
       else if (total4Mbparts == 12)
         {
-          int size2 = size - 32 * MBIT,         // size of smaller ROM (16 Mbit if ToP)
+          int size2 = size - 32 * MBIT,         // size of second ROM (16 Mbit if ToP)
               newsize2 = newsize - size;
           n = size2 / 2;
           // interleave the 32 Mbit ROM
@@ -1971,15 +1970,15 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
 int
 snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
 {
-  unsigned char blocks[256], *rom_buffer2, tmp[0x8000];
+  unsigned char blocks[256], *rom_buffer2;
   int nblocks, i, j, org_hirom;
 
   org_hirom = snes_hirom;
-  nblocks = rom_size >> 16;                     // # 64 kB blocks
+  nblocks = rom_size >> 16;                     // # 32 kB blocks / 2
   if (nblocks * 2 > 256)
     return -1;                                  // file > 8 MB
 
-  if (rominfo->interleaved == 2)                // WTF is this format? Is it a format at all?
+  if (rominfo->interleaved == 2)                // SFX2 games (Doom, Yoshi's Island)
     {
       for (i = 0; i < nblocks * 2; i++)
         blocks[i] = (i & ~0x1e) | ((i & 2) << 2) | ((i & 4) << 2) |
@@ -1992,25 +1991,14 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_si
           snes_hirom = SNES_HIROM;
           snes_hirom_ok = 1;
         }
-      // TODO: replace the following code with code that fills the array
-      //       `blocks' with correct values
+
       if ((snes_hirom || snes_hirom_ok == 2) && type == GD3 && rom_size == 24 * MBIT)
-        { // Fix-up the weird 24 Mbit Game Doctor HiROM format
-          unsigned char *p1, *p2, *p3;
-
-          p1 = &(*rom_buffer)[0x180000];
-          p2 = &(*rom_buffer)[0x200000];
-          p3 = &(*rom_buffer)[0x280000];
-          for (; p1 < &(*rom_buffer)[0x200000]; p1 += 0x8000, p2 += 0x8000, p3 += 0x8000)
-            {
-              memmove (tmp, p1, 0x8000);
-              memmove (p1, p2, 0x8000);
-              memmove (p2, p3, 0x8000);
-              memmove (p3, tmp, 0x8000);
-            }
-        }
-
-      if (snes_header_base == SNES_EROM)
+        for (i = 0; i < nblocks; i++)
+          {
+            blocks[i * 2] = i + (((i < (16 * MBIT >> 16) ? 16 : 4) * MBIT) >> 15);
+            blocks[i * 2 + 1] = i;
+          }
+      else if (snes_header_base == SNES_EROM)
         {
           j = (32 * MBIT) >> 16;
           for (i = 0; i < j; i++)
@@ -2021,7 +2009,7 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_si
           j = (rom_size - (32 * MBIT)) >> 16;
           for (; i < j + ((32 * MBIT) >> 16); i++)
             {
-              blocks[i * 2] = i - ((32 * MBIT) >> 16) + j;
+              blocks[i * 2] = i + j - ((32 * MBIT) >> 16);
               blocks[i * 2 + 1] = i - ((32 * MBIT) >> 16);
             }
         }

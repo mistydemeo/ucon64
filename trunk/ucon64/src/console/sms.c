@@ -2,7 +2,7 @@
 sms.c - Sega Master System/Game Gear support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2003 dbjh
+           2003 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -197,7 +197,7 @@ sms_chk (st_rominfo_t *rominfo)
         (offset & ~0x3fff) + (offset & 0x3fff) / 2, buf[1], "r+b");
     }
   else
-    q_fwrite (buf, offset, 2, dest_name, "r+b");
+    q_fwrite (buf, rominfo->buheader_len + offset, 2, dest_name, "r+b");
 
   mem_hexdump (buf, 2, rominfo->buheader_len + offset);
 

@@ -27,6 +27,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define ucon64gui_TITLE "uCON64gui"
 
+#define ucon64gui_FORMTARGET "http://ucon64"
+
 #ifndef MAXBUFSIZE
   #define MAXBUFSIZE 32768
 #endif

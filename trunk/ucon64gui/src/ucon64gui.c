@@ -22,6 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "snes/snes.h"
 #include "n64/n64.h"
 #include "nes/nes.h"
+#include "gb/gb.h"
 
 #include "backup/swc.h"
 #include "top.h"
@@ -64,6 +65,8 @@ h2g_system (char *query)
 
   if (!strncmp (value, "ucon64gui_", 10))
     {
+      if (!strdcmp (value, "ucon64gui_gb"))
+        ucon64gui_gb ();
       if (!strdcmp (value, "ucon64gui_snes"))
         ucon64gui_snes ();
       if (!strdcmp (value, "ucon64gui_n64"))
@@ -232,11 +235,13 @@ ucon64gui_root (void)
   h2g_ ("Console specific options");
   h2g_br ();
   h2g_input_submit ("Super Nintendo", "ucon64gui_snes",
-                    "(-snes) Options for Super Nintendo");
+                    "(-snes) options for Super Nintendo");
   h2g_input_submit ("NES", "ucon64gui_nes",
-                    "(-nes) Options for Nintendo Entertainment System");
+                    "(-nes) options for Nintendo Entertainment System");
   h2g_input_submit ("Nintendo 64", "ucon64gui_n64",
-                    "(-n64) Options for Nintendo 64");
+                    "(-n64) options for Nintendo 64");
+  h2g_input_submit ("Game Boy", "ucon64gui_gb",
+                    "(-gb) options for Game Boy");
 
   h2g_br ();
 
@@ -247,7 +252,7 @@ ucon64gui_root (void)
   h2g_ ("Backup unit specific options");
   h2g_br ();
   h2g_input_submit ("Super Wild Card", "ucon64gui_swc",
-                    "Options for Super Wild Card");
+                    "options for Super Wild Card");
 
 #endif // BACKUP
 

@@ -538,6 +538,56 @@ rom.console=
 (argcmp(argc,argv,"-ip")) ? ucon64_DC :
 (argcmp(argc,argv,"-sam")) ? ucon64_NEOGEO : ucon64_UNKNOWN;
 
+
+
+
+
+
+
+
+
+
+/*
+    database functions (optionally console dependend)
+*/
+if(argcmp(argc,argv,"-db"))
+{
+	printf(
+		"Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n"
+		,ucon64_dbsize(rom.console)
+		,ucon64_dbsize(rom.console)-ucon64_DBSIZE
+	);
+
+	printf("TIP: %s -db -nes would show only the number of known NES ROMs\n\n",getarg(argc,argv,ucon64_NAME));
+	return(0);
+}
+
+if(argcmp(argc,argv,"-dbs"))
+{
+	ucon64_flush(argc,argv,&rom);
+
+	sscanf(rom.rom, "%lx", &rom.current_crc32);
+
+	ucon64_dbsearch(&rom);
+
+	ucon64_nfo(&rom);
+
+	printf("TIP: %s -dbs -nes would search only for a NES ROM\n\n",getarg(argc,argv,ucon64_NAME));
+
+	return(0);
+}
+
+if(argcmp(argc,argv,"-dbv"))
+{
+	ucon64_dbview(rom.console);
+
+	printf("\nTIP: %s -db -nes would view only NES ROMs\n\n",getarg(argc,argv,ucon64_NAME));
+	return(0);
+}
+
+
+
+
 if(!access(rom.rom,F_OK))
 {
     ucon64_init(&rom);
@@ -822,50 +872,6 @@ default:
   }
   else return(ucon64_usage(argc,argv));
 break;
-}
-
-
-
-
-
-
-
-/*
-    database functions (optionally console dependend)
-*/
-if(argcmp(argc,argv,"-db"))
-{
-	printf(
-		"Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n"
-		,ucon64_dbsize(rom.console)
-		,ucon64_dbsize(rom.console)-ucon64_DBSIZE
-	);
-
-	printf("TIP: %s -db -nes would show only the number of known NES ROMs\n\n",getarg(argc,argv,ucon64_NAME));
-	return(0);
-}
-
-if(argcmp(argc,argv,"-dbs"))
-{
-	ucon64_flush(argc,argv,&rom);
-
-	sscanf(rom.rom, "%lx", &rom.current_crc32);
-
-	ucon64_dbsearch(&rom);
-
-	ucon64_nfo(&rom);
-
-	printf("TIP: %s -dbs -nes would search only for a NES ROM\n\n",getarg(argc,argv,ucon64_NAME));
-
-	return(0);
-}
-
-if(argcmp(argc,argv,"-dbv"))
-{
-	ucon64_dbview(rom.console);
-
-	printf("\nTIP: %s -db -nes would view only NES ROMs\n\n",getarg(argc,argv,ucon64_NAME));
-	return(0);
 }
 
 if (argcmp(argc, argv, "-e"))

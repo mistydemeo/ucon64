@@ -907,7 +907,7 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
             strcpy (buf, mkfile (UCON64_UNKNOWN_S, '_'));
           if (mode == UCON64_RR83)
             buf[8] = 0;
-          strcat (buf, mkfile (GETEXT (ucon64.rom), '_'));
+          strcat (buf, GETEXT (ucon64.rom));
           if (mode == UCON64_RR83)
             buf[12] = 0;
           if (!strcmp (ucon64.rom, buf))

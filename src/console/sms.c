@@ -53,7 +53,7 @@ const st_usage_t sms_usage[] =
     {"mgdgg", NULL, "same as " OPTION_LONG_S "mgd, but gives GG name"},
     {"smd", NULL, "convert to Super Magic Drive/SMD (+512 Bytes)"},
     {"smds", NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"},
-    {"chk", NULL, "fix ROM checksum; use with care!"},
+    {"chk", NULL, "fix ROM checksum (SMS only)"},
     {NULL, NULL, NULL}
   };
 
@@ -63,13 +63,14 @@ typedef struct st_sms_header
   unsigned char pad[2];                         // 8
   unsigned char checksum_low;                   // 10
   unsigned char checksum_high;                  // 11
-  unsigned char partno_high;                    // 12
-  unsigned char partno_low;                     // 13
+  unsigned char partno_low;                     // 12
+  unsigned char partno_high;                    // 13
   unsigned char version;                        // 14
   unsigned char checksum_range;                 // 15, and country info
 } st_sms_header_t;
 
 static st_sms_header_t sms_header;
+static int is_gamegear;
 
 
 // see src/backup/mgd.h for the file naming scheme
@@ -175,6 +176,12 @@ sms_chk (st_rominfo_t *rominfo)
   char buf[2], dest_name[FILENAME_MAX];
   int offset = rominfo->header_start + 10;
 
+  if (is_gamegear)
+    {
+      fprintf (stderr, "ERROR: This option works only for SMS (not Game Gear) files\n");
+      return -1;
+    }
+
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
@@ -220,9 +227,10 @@ sms_testinterleaved (st_rominfo_t *rominfo)
 int
 sms_init (st_rominfo_t *rominfo)
 {
-  int result = -1;
+  int result = -1, x;
   unsigned char buf[16384] = { 0 }, *rom_buffer;
 
+  is_gamegear = 0;
   memset (&sms_header, 0, SMS_HEADER_LEN);
 
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
@@ -259,6 +267,28 @@ sms_init (st_rominfo_t *rominfo)
   else
     result = -1;
 
+  x = sms_header.checksum_range & 0xf0;
+  if (x == 0x50 || x == 0x60 || x == 0x70)
+    is_gamegear = 1;
+
+  switch (x)
+    {
+    case 0x30:                                  // SMS, falling through
+    case 0x50:                                  // GG
+      rominfo->country = "Japan";
+      break;
+    case 0x40:                                  // SMS, falling through
+    case 0x70:                                  // GG
+      rominfo->country = "U.S.A. & Europe";
+      break;
+    case 0x60:                                  // GG
+      rominfo->country = "Japan, U.S.A. & Europe";
+      break;
+    default:
+      rominfo->country = "Unknown";
+      break;
+    }
+
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
       int size = ucon64.file_size - rominfo->buheader_len;
@@ -276,35 +306,27 @@ sms_init (st_rominfo_t *rominfo)
         }
       ucon64.crc32 = crc32 (0, rom_buffer, size);
 
-      rominfo->has_internal_crc = 1;
-      rominfo->internal_crc_len = 2;
-      rominfo->current_internal_crc = sms_chksum (rom_buffer, size);
-      rominfo->internal_crc = sms_header.checksum_low;
-      rominfo->internal_crc += sms_header.checksum_high << 8;
+      if (!is_gamegear)
+        {
+          rominfo->has_internal_crc = 1;
+          rominfo->internal_crc_len = 2;
+          rominfo->current_internal_crc = sms_chksum (rom_buffer, size);
+          rominfo->internal_crc = sms_header.checksum_low;
+          rominfo->internal_crc += sms_header.checksum_high << 8;
+        }
 
       free (rom_buffer);
     }
 
+  sprintf ((char *) buf, "Part number: 0x%04x\n",
+    sms_header.partno_low + (sms_header.partno_high << 8));
+  strcat (rominfo->misc, (char *) buf);
+
+  sprintf ((char *) buf, "Version: %x", sms_header.version >> 4);
+  strcat (rominfo->misc, (char *) buf);
+
   rominfo->console_usage = sms_usage;
   rominfo->copier_usage = rominfo->buheader_len ? smd_usage : mgd_usage;
-
-  switch (sms_header.checksum_range & 0xf0)
-    {
-    case 0x30:                                  // SMS, falling through
-    case 0x50:                                  // GG
-      rominfo->country = "Japan";
-      break;
-    case 0x40:                                  // SMS, falling through
-    case 0x70:                                  // GG
-      rominfo->country = "U.S.A. & Europe";
-      break;
-    case 0x60:                                  // GG
-      rominfo->country = "Japan, U.S.A. & Europe";
-      break;
-    default:
-      rominfo->country = "Unknown";
-      break;
-    }
 
   return result;
 }

@@ -20,8 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef INTERCEPTOR_H
 #define INTERCEPTOR_H
-#define interceptor_TITLE "Mega Disk/Super Disk (Interceptor)\n" \
-                 "19XX Taiwan Sang Ting Co. Ltd."
+extern char *interceptor_title;
 
 #define interceptor_HEADER_START 0
 #define interceptor_HEADER_LEN 512

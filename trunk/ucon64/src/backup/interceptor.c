@@ -1,5 +1,5 @@
 /*
-yoko.h - minimal support for Yoko backup unit (Atari 2600, etc.)
+interceptor.c - Mega Disk/Super Disk Interceptor support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
 
@@ -18,10 +18,23 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef YOKO_H
-#define YOKO_H
-extern char *yoko_title;
+#include <dirent.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+#include <sys/stat.h>
+#include "config.h"
 
-#define yoko_HEADER_START 0
-#define yoko_HEADER_LEN 0
-#endif /* YOKO_H */
+#ifdef BACKUP
+
+#include "misc.h"                               // kbhit(), getch()
+#include "ucon64.h"
+#include "ucon64_misc.h"
+#include "yoko.h"
+
+
+
+char *interceptor_title = "Mega Disk/Super Disk (Interceptor)\n"
+                          "19XX Taiwan Sang Ting Co. Ltd.";
+#endif // BACKUP

@@ -32,8 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "ffe.h"
 #include "fig.h"
-#include "console/snes.h"                       // for snes_get_file_type () &&
-                                                //  snes_get_snes_hirom()
+#include "console/snes.h"                       // for snes_get_snes_hirom()
 
 
 const st_usage_t fig_usage[] =
@@ -41,13 +40,12 @@ const st_usage_t fig_usage[] =
     {NULL, NULL, "Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)"},
     {NULL, NULL, "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw"},
 #ifdef  PARALLEL
-#if 1 // dumping is not yet supported
-    {"xfig", NULL, "send ROM to *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT"},
-#else
     {"xfig", NULL, "send/receive ROM to/from *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when " OPTION_LONG_S "rom does not exist"},
+                "receives automatically when ROM does not exist"},
+    {"xfigs", NULL, "send/receive SRAM to/from *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT\n"
+                 "receives automatically when SRAM does not exist\n"
+                 "Press q to abort; ^C might cause invalid state of backup unit"},
 #endif
-#endif  // PARALLEL
     {NULL, NULL, NULL}
   };
 
@@ -57,44 +55,222 @@ const st_usage_t fig_usage[] =
 #define BUFFERSIZE      8192                    // don't change, only 8192 works!
 
 
-static void handle_fig_header (unsigned char *header);
+static int receive_rom_info (unsigned char *buffer);
+static int get_rom_size (unsigned char *info_block);
+static int check1 (unsigned char *info_block, int index);
+static int check2 (unsigned char *info_block, int index, unsigned char value);
+static int check3 (unsigned char *info_block, int index1, int index2, int size);
+#if 0 // not for FIG?
+static unsigned char get_emu_mode_select (unsigned char byte, int size);
+#endif
+
+static int hirom;
 
 
-void
-handle_fig_header (unsigned char *header)
+#if BUFFERSIZE < 512
+#error receive_rom_info() and fig_read_sram() expect BUFFERSIZE to be at least \
+       512 bytes.
+#endif
+int
+receive_rom_info (unsigned char *buffer)
+/*
+  - returns size of ROM in Mb (128 KB) units
+  - returns ROM header in buffer (index 2 (emulation mode select) is not yet
+    filled in)
+  - sets global `hirom'
+*/
 {
-  if ((header[4] == 0x77 && header[5] == 0x83) ||
-      (header[4] == 0xf7 && header[5] == 0x83) ||
-      (header[4] == 0x47 && header[5] == 0x83) ||
-      (header[4] == 0x11 && header[5] == 0x02))
-    header[2] = 0x0c;                           // 0 kB
-  else if (header[4] == 0xfd && header[5] == 0x82)
-    header[2] = 0x08;                           // 2 kB
-  else if ((header[4] == 0xdd && header[5] == 0x82) ||
-           (header[4] == 0x00 && header[5] == 0x80))
-    /*
-      8 kB *or* 2 kB (shortcoming of FIG header format). We give the emu mode
-      select byte a value as if the game uses 8 kB. At least this makes games
-      that use 8 kB work.
-    */
-    header[2] = 0x04;
-  else // if ((header[4] == 0xdd && header[5] == 0x02) ||
-       //     (header[4] == 0x00 && header[5] == 0x00))
-    header[2] = 0;                              // 32 kB
+  int n, m, size;
+  unsigned short address;
+  unsigned char byte;
 
-  if (header[3] & 0x80)                         // Pro Fighter (FIG) HiROM dump
-    header[2] |= 0x30;                          // set bit 5&4 (SRAM & DRAM mem map mode 21)
+  ffe_send_command0 (0xe00c, 0);
+  ffe_send_command (5, 3, 0);
+  ffe_send_command (1, 0xbfd5, 1);
+  byte = ffe_receiveb ();
+  if ((0x81 ^ byte) != ffe_receiveb ())
+    printf ("received data is corrupt\n");
+  hirom = byte & 1;                             // Caz (vgs '96) does (byte & 0x21) == 0x21 ? 1 : 0;
+
+  address = 0x200;
+  for (n = 0; n < (int) FIG_HEADER_LEN; n++)
+    {
+#ifdef  _WIN32
+      /*
+        Talk about strange. Somehow this loop takes unusually long (like 1
+        minute) if no Windows function is called. As a side effect (?) an
+        incorrect size value will be obtained, resulting in an overdump. For
+        example calling kbhit() or printf() solves the problem...
+      */
+      kbhit ();
+#endif
+      for (m = 0; m < 65536; m++)               // a delay is necessary here
+        ;
+      ffe_send_command (5, address, 0);
+      ffe_send_command (1, 0xa0a0, 1);
+      buffer[n] = ffe_receiveb ();
+      if ((0x81 ^ buffer[n]) != ffe_receiveb ())
+        printf ("received data is corrupt\n");
+
+      address++;
+    }
+
+  size = get_rom_size (buffer);
+  if (hirom)
+    size <<= 1;
+
+  memset (buffer, 0, FIG_HEADER_LEN);
+  buffer[0] = size << 4 & 0xff;                 // *16 for 8 KB units; low byte
+  buffer[1] = size >> 4;                        // *16 for 8 KB units /256 for high byte
+  buffer[3] = hirom ? 0x80 : 0;
+  // TODO: set SRAM/special chip bytes
+
+  return size;
 }
+
+
+int
+get_rom_size (unsigned char *info_block)
+// returns size of ROM in Mb units
+{
+  if (check1 (info_block, 0))
+    return 0;
+  if (check2 (info_block, 0x10, 0x84))
+    return 0;
+  if (check3 (info_block, 0, 0x20, 0x20))
+    return 2;
+  if (check3 (info_block, 0, 0x40, 0x20))
+    return 4;
+  if (check3 (info_block, 0x40, 0x60, 0x20))
+    return 6;
+  if (check3 (info_block, 0, 0x80, 0x10))
+    return 8;
+  if (check1 (info_block, 0x80))
+    return 8;
+  if (check3 (info_block, 0x80, 0x90, 0x10))
+    return 8;
+  if (check2 (info_block, 0x80, 0xa0))
+    return 8;
+  if (check3 (info_block, 0x80, 0xa0, 0x20))
+    return 0xa;
+  if (check1 (info_block, 0xc0))
+    return 0xc;
+  if (check2 (info_block, 0xc0, 0xb0))
+    return 0xc;
+  if (check3 (info_block, 0x80, 0xc0, 0x20))
+    return 0xc;
+  if (check3 (info_block, 0x100, 0, 0x10))
+    return 0x10;
+  if (check2 (info_block, 0x100, 0xc0))
+    return 0x10;
+  if (check3 (info_block, 0x100, 0x120, 0x10))
+    return 0x12;
+  if (check3 (info_block, 0x100, 0x140, 0x10))
+    return 0x14;
+  if (check2 (info_block, 0x140, 0xd0))
+    return 0x14;
+  if (check3 (info_block, 0x100, 0x180, 0x10))
+    return 0x18;
+  if (check2 (info_block, 0x180, 0xe0))
+    return 0x18;
+  if (check3 (info_block, 0x180, 0x1c0, 0x10))
+    return 0x1c;
+  if (check3 (info_block, 0x1f0, 0x1f0, 0x10))
+    return 0x20;
+
+  return 0;
+}
+
+
+int
+check1 (unsigned char *info_block, int index)
+{
+  int n;
+
+  for (n = 0; n < 16; n++)
+    if (info_block[n + index] != info_block[index])
+      return 0;
+
+  return 1;
+}
+
+
+int
+check2 (unsigned char *info_block, int index, unsigned char value)
+{
+  int n;
+
+  for (n = 0; n < 4; n++)
+    if (info_block[n + index] != value)
+      return 0;
+
+  return 1;
+}
+
+
+int
+check3 (unsigned char *info_block, int index1, int index2, int size)
+{
+  int n;
+
+  for (n = 0; n < size; n++)
+    if (info_block[n + index1] != info_block[n + index2])
+      return 0;
+
+  return 1;
+}
+
+
+#if 0 // not for FIG?
+unsigned char
+get_emu_mode_select (unsigned char byte, int size)
+{
+  int x;
+  unsigned char ems;
+
+  if (byte == 0)
+    x = 0xc;
+  else if (byte == 1)
+    x = 8;
+  else if (byte == 3)
+    x = 4;
+  else
+    x = 0;
+
+  if (hirom)
+    {
+      if (x == 0xc && size <= 0x1c)
+        ems = 0x1c;
+      else
+        ems = x + 0x30;
+    }
+  else
+    {
+      if (x == 0xc)
+        ems = 0x2c;
+      else
+        ems = x;
+
+      if (size <= 8)
+        ems++;
+    }
+
+  return ems;
+}
+#endif
 
 
 int
 fig_read_rom (const char *filename, unsigned int parport)
 {
-#if 0
   FILE *file;
-  unsigned char *buffer;
+  unsigned char *buffer, byte;
+  int n, size, blocksleft, bytesreceived = 0;
+  unsigned short address1, address2;
+  time_t starttime;
 
-  init_io (parport);
+  ffe_init_io (parport);
+
   if ((file = fopen (filename, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
@@ -106,16 +282,76 @@ fig_read_rom (const char *filename, unsigned int parport)
       exit (1);
     }
 
+  size = receive_rom_info (buffer);
+  if (size == 0)
+    {
+      fprintf (stderr, "ERROR: There is no cartridge present in the Pro Fighter\n");
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
+  blocksleft = size * 16;                       // 1 Mb (128 KB) unit == 16 8 KB units
+  printf ("Receive: %d Bytes (%.4f Mb)\n", size * MBIT, (float) size);
+  size *= MBIT;                                 // size in bytes for ucon64_gauge() below
+
+  ffe_send_command (5, 0, 0);
+  ffe_send_command0 (0xe00c, 0);
+  ffe_send_command0 (0xe003, 0);
+  ffe_send_command (1, 0xbfd8, 1);
+  byte = ffe_receiveb ();
+  if ((0x81 ^ byte) != ffe_receiveb ())
+    printf ("received data is corrupt\n");
+
+#if 0 // not for FIG?
+  buffer[2] = get_emu_mode_select (byte, blocksleft / 16);
+#endif
+  fwrite (buffer, 1, FIG_HEADER_LEN, file);     // write header (other necessary fields are
+                                                //  filled in by receive_rom_info())
+  if (hirom)
+    blocksleft >>= 1;                           // this must come _after_ get_emu_mode_select()!
+
+  printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
+                                                //  because if we get here q works ;-)
+  address1 = 0x300;                             // address1 = 0x100, address2 = 0 should
+  address2 = 0x200;                             //  also work
+  starttime = time (NULL);
+  while (blocksleft > 0)
+    {
+      if (hirom)
+        {
+          for (n = 0; n < 4; n++)
+            {
+              ffe_send_command (5, address1, 0);
+              ffe_receive_block (0x2000, buffer, BUFFERSIZE);
+              address1++;
+              fwrite (buffer, 1, BUFFERSIZE, file);
+
+              bytesreceived += BUFFERSIZE;
+              ucon64_gauge (starttime, bytesreceived, size);
+              ffe_checkabort (2);
+            }
+        }
+
+      for (n = 0; n < 4; n++)
+        {
+          ffe_send_command (5, address2, 0);
+          ffe_receive_block (0xa000, buffer, BUFFERSIZE);
+          blocksleft--;
+          address2++;
+          fwrite (buffer, 1, BUFFERSIZE, file);
+
+          bytesreceived += BUFFERSIZE;
+          ucon64_gauge (starttime, bytesreceived, size);
+          ffe_checkabort (2);
+        }
+    }
+  ffe_send_command (5, 0, 0);
+
   free (buffer);
   fclose (file);
-  deinit_io ();
+  ffe_deinit_io ();
 
   return 0;
-#else
-  (void) filename;                              // warning remover
-  (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented\n");
-#endif
 }
 
 
@@ -124,8 +360,7 @@ fig_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread = 0, bytessend = 0, totalblocks, blocksdone = 0, blocksleft,
-      emu_mode_select, fsize, hirom, n;
+  int bytesread = 0, bytessend, totalblocks, blocksdone = 0, blocksleft, fsize, n;
   unsigned short address;
   time_t starttime;
 
@@ -145,15 +380,16 @@ fig_write_rom (const char *filename, unsigned int parport)
   fsize = q_fsize (filename);
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
+  ffe_send_command0 (0xc008, 0);
+  fread (buffer, 1, FIG_HEADER_LEN, file);
+  ffe_send_command (5, 0, 0);
+  ffe_send_block (0x400, buffer, FIG_HEADER_LEN); // send header
+  bytessend = FIG_HEADER_LEN;
+
   hirom = snes_get_snes_hirom ();
   if (hirom)
     ffe_send_command0 (0xe00f, 0);              // seems to enable HiROM mode,
                                                 //  value doesn't seem to matter
-  fread (buffer, 1, FIG_HEADER_LEN, file);
-  if (snes_get_file_type () == FIG)
-    handle_fig_header (buffer);
-  emu_mode_select = buffer[2];                  // this byte is needed later
-
   printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
                                                 //  because if we get here q works ;-)
   totalblocks = (fsize - FIG_HEADER_LEN + BUFFERSIZE - 1) / BUFFERSIZE; // round up
@@ -199,17 +435,9 @@ fig_write_rom (const char *filename, unsigned int parport)
   if (blocksdone > 0x200)                       // ROM dump > 512 8 KB blocks (=32 Mb (=4 MB))
     ffe_send_command0 (0xc010, 2);
 
-  ffe_send_command0 (0xc008, 0);
-  fseek (file, 0, SEEK_SET);
-  fread (buffer, 1, FIG_HEADER_LEN, file);
-  ffe_send_command (5, 0, 0);
-  ffe_send_block (0x400, buffer, FIG_HEADER_LEN); // send header
-  bytessend += FIG_HEADER_LEN;
-  ucon64_gauge (starttime, bytessend, fsize);
-
   ffe_send_command (5, 0, 0);
   ffe_send_command (6, (unsigned short) (5 | (totalblocks << 8)), (unsigned short) (totalblocks >> 8)); // bytes: 6, 5, #8 K L, #8 K H, 0
-  ffe_send_command (6, (unsigned short) (1 | (emu_mode_select << 8)), 0);
+  ffe_send_command (6, 1, 0);
 
   ffe_wait_for_ready ();
   outportb ((unsigned short) (parport + PARPORT_DATA), 0);
@@ -227,11 +455,14 @@ fig_write_rom (const char *filename, unsigned int parport)
 int
 fig_read_sram (const char *filename, unsigned int parport)
 {
-#if 0
   FILE *file;
   unsigned char *buffer;
+  int blocksleft, bytesreceived = 0;
+  unsigned short address;
+  time_t starttime;
 
-  init_io (parport);
+  ffe_init_io (parport);
+
   if ((file = fopen (filename, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
@@ -243,27 +474,53 @@ fig_read_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
+  printf ("Receive: %d Bytes\n", 32 * 1024);
+  memset (buffer, 0, FIG_HEADER_LEN);
+  buffer[0] = 4;                                // 32 kB == 4*8 kB, "size_high" is already 0
+
+  fwrite (buffer, 1, FIG_HEADER_LEN, file);
+
+  ffe_send_command (5, 0, 0);
+  ffe_send_command0 (0xe00d, 0);
+  ffe_send_command0 (0xc008, 0);
+
+  printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
+                                                //  because if we get here q works ;-)
+  blocksleft = 4;                               // SRAM is 4*8 KB
+  address = 0x100;
+  starttime = time (NULL);
+  while (blocksleft > 0)
+    {
+      ffe_send_command (5, address, 0);
+      ffe_receive_block (0x2000, buffer, BUFFERSIZE);
+      blocksleft--;
+      address++;
+      fwrite (buffer, 1, BUFFERSIZE, file);
+
+      bytesreceived += BUFFERSIZE;
+      ucon64_gauge (starttime, bytesreceived, 32 * 1024);
+      ffe_checkabort (2);
+    }
+
   free (buffer);
   fclose (file);
-  deinit_io ();
+  ffe_deinit_io ();
 
   return 0;
-#else
-  (void) filename;                              // warning remover
-  (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for dumping SRAM is not yet implemented\n");
-#endif
 }
 
 
 int
 fig_write_sram (const char *filename, unsigned int parport)
 {
-#if 0
   FILE *file;
   unsigned char *buffer;
+  int bytesread, bytessend = 0, size;
+  unsigned short address;
+  time_t starttime;
 
-  init_io (parport);
+  ffe_init_io (parport);
+
   if ((file = fopen (filename, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
@@ -275,16 +532,34 @@ fig_write_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
+  size = q_fsize (filename) - FIG_HEADER_LEN;   // FIG SRAM is 4*8 KB, emu SRAM often not
+  printf ("Send: %d Bytes\n", size);
+  fseek (file, FIG_HEADER_LEN, SEEK_SET);       // skip the header
+
+  ffe_send_command (5, 0, 0);
+  ffe_send_command0 (0xe00d, 0);
+  ffe_send_command0 (0xc008, 0);
+
+  printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
+                                                //  because if we get here q works ;-)
+  address = 0x100;
+  starttime = time (NULL);
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+    {
+      ffe_send_command (5, address, 0);
+      ffe_send_block (0x2000, buffer, bytesread);
+      address++;
+
+      bytessend += bytesread;
+      ucon64_gauge (starttime, bytessend, size);
+      ffe_checkabort (2);
+    }
+
   free (buffer);
   fclose (file);
-  deinit_io ();
+  ffe_deinit_io ();
 
   return 0;
-#else
-  (void) filename;                              // warning remover
-  (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for sending SRAM is not yet implemented\n");
-#endif
 }
 
 #endif // PARALLEL

@@ -694,7 +694,7 @@ if(argcmp(argc, argv, "-sh"))
       skip_init_nfo = 1;
     }
 
-     /*
+/*
   Do the following outside the if that checks for existence of rom.rom
   (necessary for headerless SRAM files, which can't be detected without
   looking at the command line options)
@@ -776,8 +776,8 @@ if(argcmp(argc, argv, "-sh"))
 
       x = system (buf);
 #ifndef __DOS__
-      x >>= 8;			// the exit code is coded in bits 8-15
-#endif //  (that is, under Linux & BeOS)
+      x >>= 8;                                  // the exit code is coded in bits 8-15
+#endif                                          //  (that is, under Linux & BeOS)
 
 #if 1
       // Snes9x (Linux) for example returns a non-zero value on a normal exit (3)...
@@ -811,7 +811,7 @@ if(argcmp(argc, argv, "-sh"))
 	      (argcmp (argc, argv, "-sgb")) ? gameboy_sgb (&rom) :
 	      (argcmp (argc, argv, "-ssc")) ? gameboy_ssc (&rom) :
 	      (argcmp (argc, argv, "-n2gb")) ? gameboy_n2gb (&rom) :
-#ifdef	BACKUP
+#ifdef  BACKUP
 	      (argcmp (argc, argv, "-xgbx")) ? gameboy_xgbx (&rom) :
 	      (argncmp (argc, argv, "-xgbxb", 6)) ? gameboy_xgbxb (&rom) :
 	      (argcmp (argc, argv, "-xgbxs")) ? gameboy_xgbxs (&rom) :
@@ -828,7 +828,7 @@ if(argcmp(argc, argv, "-sh"))
 	      (argcmp (argc, argv, "-multi")) ? gbadvance_multi (&rom, 256 * MBIT) :
 	      (argcmp (argc, argv, "-multi1")) ? gbadvance_multi (&rom, 64 * MBIT) :
 	      (argcmp (argc, argv, "-multi2")) ? gbadvance_multi (&rom, 128 * MBIT) :
-#ifdef	BACKUP
+#ifdef  BACKUP
 	      (argcmp (argc, argv, "-xfal")) ? gbadvance_xfal (&rom) :
 	      (argncmp (argc, argv, "-xfalc", 6)) ? gbadvance_xfal (&rom) :
 	      (argncmp (argc, argv, "-xfalb", 6)) ? gbadvance_xfalb (&rom) :

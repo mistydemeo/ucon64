@@ -534,7 +534,7 @@ int
 ucon64_gauge (time_t init_time, long pos, long size)
 {
   if (!ucon64.frontend)
-    return gauge (init_time, pos, size);
+    return gauge (/* init_time, */ pos, size);
   else
     {
       int percentage = (100 * (pos >> 10)) / (size >> 10);
@@ -578,6 +578,10 @@ ucon64_testsplit (const char *filename)
 int
 ucon64_bin2iso (const char *image, int track_mode)
 {
+#ifdef TODO
+#warning TODO nrg2iso and cdi2iso
+#endif
+
   int seek_header, seek_ecc, sector_size;
   long i, size;
   char buf[MAXBUFSIZE];

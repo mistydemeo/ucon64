@@ -228,26 +228,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define UCON64_VERSION_S "1.9.8beta3"
 
-#ifdef  __MSDOS__                               // __MSDOS__ must come before __unix__, because DJGPP defines both
-  #define UCON64_OS "MSDOS"
-#elif   defined __unix__
-  #ifdef  __CYGWIN__
-    #define UCON64_OS "Win32"
-  #elif   defined __FreeBSD__
-    #define UCON64_OS "Unix (FreeBSD)"
-  #elif   defined __linux__
-    #define UCON64_OS "Unix (Linux)"
-  #elif   defined sun
-    #define UCON64_OS "Unix (Solaris)"
-  #else
-    #define UCON64_OS "Unix"
-  #endif
-#elif   defined __BEOS__
-  #define UCON64_OS "BeOS"
-#else
-  #define UCON64_OS ""
-#endif
-
 #define MBIT	131072
 #define TOMBIT(x) ((long)(x) / MBIT)
 #define TOMBIT_F(x) ((float)(x) / MBIT)

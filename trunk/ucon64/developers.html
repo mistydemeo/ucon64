@@ -66,7 +66,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
   <td><tt>d64 transfer</tt></td>
 </tr>
 <tr>
-  <td>?</td>
+  <td>Kami</td>
   <td><a href="mailto:m-kami@da2.so-net.ne.jp"><tt>m-kami@da2.so-net.ne.jp</tt></a><br>
       <a href="http://www.playoffline.com" target="_blank"><tt>http://www.playoffline.com</tt></a></td>
   <td><tt>NES emulator for GameBoy</tt></td>
@@ -201,16 +201,15 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
 <br>
 <p>
 <a name="6"><b>Q6</b>: How is the source of uCON64 organized?</a><br>
-<b>A</b>: The heart of uCON64 is ucon64.h/struct ucon64_. This struct is designed to hold all
-   information you could get from any ROM.<br>
+<b>A</b>: The heart of uCON64 is ucon64.h/st_rominfo_t. This struct is 
+   designed to hold all information you could get from any ROM.<br>
 <br>
    You start uCON64 with the name of a ROM as argument. ucon64.c/ucon64_flush()
-   will initialize struct ucon64_ with empty strings and NULL's.
+   will initialize struct st_ucon64_t and st_rominfo_t with empty strings and NULL's.
    ucon64.c/ucon64_init() will recurse into all &#60;console&#62;.c/&#60;console&#62;_init()
    functions which probe if the ROM belongs to their console. If the right
-   console was found struct ucon64_ will be filled with the right values and
-   strings. ucon64.c/ucon64_nfo() displays the values and strings of struct
-   ucon64_.<br>
+   console was found st_rominfo_t will be filled with the right values and
+   strings. ucon64.c/ucon64_nfo() displays the values and strings of st_rominfo_t.<br>
 <br>
 <p>
 <a name="7"><b>Q7</b>: What coding style is preferred?</a><br>

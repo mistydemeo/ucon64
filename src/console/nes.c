@@ -5651,7 +5651,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
     }
   else
     {
-      if (!strncmp (unif_chunk1->data, STD_COMMENT, strlen (STD_COMMENT)))
+      if (!strncmp ((const char *) unif_chunk1->data, STD_COMMENT, strlen (STD_COMMENT)))
         { // overwrite uCON64 comment -> OS and version match with the used exe
           unif_chunk1->length = strlen (unif_ucon64_sig) + 1;
           unif_chunk1->data = (char *) unif_ucon64_sig;

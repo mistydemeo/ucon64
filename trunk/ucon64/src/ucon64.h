@@ -63,6 +63,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 	#define ucon64_TITLE "uCON64 1.9.6 DOS"
 #elif __UNIX__
 	#define ucon64_TITLE "uCON64 1.9.6 Unix"
+#elif __BEOS__
+	#define ucon64_TITLE "uCON64 1.9.6 BeOS"
 #else
 	#define ucon64_TITLE "uCON64 1.9.6"
 #endif

@@ -105,10 +105,11 @@ struct ucon64_
     unsigned long internal_crc;	//internal CRC
     long internal_crc_start;	//start of internal CRC in ROM header
     int internal_crc_len;	//length (in bytes) of internal CRC in ROM header
-  int has_internal_inverse_crc;	//ROM has internal inverted (Super Nintendo)
-    unsigned long internal_inverse_crc;	//internal CRC inverted
-    long internal_inverse_crc_start;	//start of inverted internal CRC
-    int internal_inverse_crc_len;	//length (in bytes) of inverted internal CRC
+//  int has_internal_inverse_crc;	//ROM has internal inverted (Super Nintendo)
+//    unsigned long internal_inverse_crc;	//internal CRC inverted
+  char internal_crc2[4096];	//2nd or inverse internal CRC
+    long internal_crc2_start;	//start of 2nd/inverse internal CRC
+    int internal_crc2_len;	//length (in bytes) of 2nd/inverse internal CRC
 
   char buheader[512];	//(possible) header of backup unit
   long buheader_start;	//start of backup unit header (mostly 0)

@@ -168,8 +168,8 @@ typedef struct
 
 #define DM_UNKNOWN (-1)
 
-#define DM_ISO 1
-#define DM_BIN 2
+#define DM_TOC 1
+#define DM_CUE 2
 #define DM_CDI 3
 #define DM_NRG 4
 #define DM_CCD 5

@@ -599,25 +599,20 @@ ucon64_options (int c, const char *optarg)
     case UCON64_C:
     case UCON64_CS:
       result = -1;
+      x = (c == UCON64_C ? FALSE : TRUE);
       if (optarg)
-        result = ucon64_filefile (optarg, 0, ucon64.rom, 0, (c == UCON64_C ? FALSE : TRUE));
+        result = ucon64_filefile (optarg, 0, ucon64.rom, 0, x);
 
       if (result == -1)
         {
           fprintf (stderr, "ERROR: File not found/out of memory\n");
           return -1;                            // it's logical to stop for this file
         }
-#if 0
-      // TODO: make compare more verbose
-      else if (result == 1)
-        {
-          printf ("The files are similar.\n");
-        }
-      else if (!result)
-        {
-          printf ("The files are different.\n");
-        }
-#endif
+      else if (result == -2)
+        printf ("%s and %s refer to one file\n", optarg, ucon64.rom);
+      else if (result >= 0)
+        printf ("Found %d %s\n", result, x ? (result == 1 ? "similarity" : "similarities") :
+                                             (result == 1 ? "difference" : "differences"));
       break;
 
     case UCON64_FIND:

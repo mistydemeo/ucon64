@@ -38,10 +38,6 @@ write programs in C
 #include <time.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <limits.h>
-#if     defined __CYGWIN__ || defined DJGPP
-#define ARG_MAX _POSIX_ARG_MAX
-#endif
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -518,7 +514,7 @@ main (int argc, char **argv)
   memset (&arg, 0, sizeof (st_args_t) * UCON64_MAX_ARGS);
   while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
-      if (c == '?') // getopt() returns 0x3f when a unknown option was given
+      if (c == '?') // getopt() returns 0x3f ('?') when a unknown option was given
         {
           fprintf (stderr,
                "Try '%s " OPTION_LONG_S "help' for more information.\n",
@@ -532,10 +528,8 @@ main (int argc, char **argv)
           arg[x++].optarg = (optarg ? optarg : NULL);
         }
       else
-        {
-          // this shouldn't happen
-          exit (1);
-        }
+        // this shouldn't happen
+        exit (1);
     }
 
 #ifdef  DEBUG
@@ -720,7 +714,7 @@ ucon64_execute_options (void)
       if (result == -1) // no_rom but WF_NO_ROM
         return -1;
 
-      if (ucon64_options (arg[x].val, arg[x].optarg) == -1) // because we have more than 150 options
+      if (ucon64_options (arg[x].val, arg[x].optarg) == -1)
         {
           const struct option *option = ucon64_get_opt (c);
 //          const st_usage_t *p = (ucon64_get_wf (c))->usage;

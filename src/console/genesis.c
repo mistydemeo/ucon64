@@ -548,7 +548,7 @@ genesis_s (st_rominfo_t *rominfo)
 
   if (type == SMD)
     {
-      ucon64_fread (&smd_header, 0, rominfo->buheader_len, ucon64.rom);
+      ucon64_fread (&smd_header, 0, SMD_HEADER_LEN, ucon64.rom);
 
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".1");
@@ -737,15 +737,15 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
       memset (buf, ' ', GENESIS_NAME_LEN);
       strncpy (buf, name1, strlen (name1) > GENESIS_NAME_LEN ?
         GENESIS_NAME_LEN : strlen (name1));
-      memcpy (&rom_buffer[GENESIS_HEADER_START + 32], buf, GENESIS_NAME_LEN);
+      memcpy (&rom_buffer[GENESIS_HEADER_START + 32 + GENESIS_NAME_LEN], buf,
+        GENESIS_NAME_LEN);
     }
   if (name2)
     {
       memset (buf, ' ', GENESIS_NAME_LEN);
       strncpy (buf, name2, strlen (name2) > GENESIS_NAME_LEN ?
         GENESIS_NAME_LEN : strlen (name2));
-      memcpy (&rom_buffer[GENESIS_HEADER_START + 32 + GENESIS_NAME_LEN], buf,
-        GENESIS_NAME_LEN);
+      memcpy (&rom_buffer[GENESIS_HEADER_START + 32], buf, GENESIS_NAME_LEN);
     }
 
   strcpy (buf, ucon64.rom);
@@ -775,7 +775,7 @@ genesis_n2 (st_rominfo_t *rominfo, const char *name)
 int
 genesis_1991 (st_rominfo_t *rominfo)
 {
-  return genesis_name (rominfo, "(C) SEGA", "(C)SEGA");
+  return genesis_name (rominfo, "(C)SEGA", "(C) SEGA");
 }
 
 
@@ -1070,7 +1070,7 @@ genesis_multi (int truncate_size, char *fname)
       truncated = 0, paddedsize, org_do_not_calc_crc = ucon64.do_not_calc_crc;
   struct stat fstate;
   FILE *srcfile, *destfile;
-  char *destname;
+  char destname[FILENAME_MAX];
   unsigned char buffer[BUFSIZE];
 
   if (truncate_size == 0)
@@ -1081,12 +1081,12 @@ genesis_multi (int truncate_size, char *fname)
 
   if (fname != NULL)
     {
-      destname = fname;
+      strcpy(destname, fname);
       n_files = ucon64.argc;
     }
   else
     {
-      destname = ucon64.argv[ucon64.argc - 1];
+      strcpy(destname, ucon64.argv[ucon64.argc - 1]);
       n_files = ucon64.argc - 1;
     }
 

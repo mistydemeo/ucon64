@@ -4035,7 +4035,7 @@ snes_multi (int truncate_size, char *fname)
       totalsize_disk = 0, totalsize_card = 0, org_do_not_calc_crc = ucon64.do_not_calc_crc;
   struct stat fstate;
   FILE *srcfile, *destfile;
-  char *destname;
+  char destname[FILENAME_MAX];
   unsigned char buffer[BUFSIZE];
 
   if (truncate_size == 0)
@@ -4046,12 +4046,12 @@ snes_multi (int truncate_size, char *fname)
 
   if (fname != NULL)
     {
-      destname = fname;
+      strcpy (destname, fname);
       n_files = ucon64.argc;
     }
   else
     {
-      destname = ucon64.argv[ucon64.argc - 1];
+      strcpy (destname, ucon64.argv[ucon64.argc - 1]);
       n_files = ucon64.argc - 1;
     }
 

@@ -69,7 +69,7 @@ main (int argc, char *argv[])
 #include "xpm/icon.xpm"
 #include "xpm/selectrom.xpm"
 
-  gtk_init (&argc, &argv);
+  html2gui();
 
 //<html>
   html2gui_html (&index_html, 640, 400, 0);
@@ -97,7 +97,7 @@ main (int argc, char *argv[])
   html2gui_html_end (&snes_html);
 //</html>
 
-  gtk_main ();
+  html2gui_end();
 
   return (0);
 }

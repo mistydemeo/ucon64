@@ -66,9 +66,7 @@ const char *swc_usage[] =
 #define STROBE_BIT      1
 
 #define N_TRY_MAX       65536                   // # times to test if SWC ready
-
 #define BUFFERSIZE      8192                    // don't change, only 8192 works!
-#define HEADERSIZE      512                     // SWC header is 512 bytes
 
 
 static void init_io (unsigned int port);
@@ -174,9 +172,9 @@ sendb (unsigned char byte)
 }
 
 
-#if BUFFERSIZE < HEADERSIZE
+#if BUFFERSIZE < 512
 #error receive_rom_info() and swc_read_sram() expect BUFFERSIZE to be at least \
-       HEADERSIZE bytes.
+       512 bytes.
 #endif
 int
 receive_rom_info (unsigned char *buffer)
@@ -200,7 +198,7 @@ receive_rom_info (unsigned char *buffer)
   hirom = byte & 1;                             // Caz (vgs '96) does (byte & 0x21) == 0x21 ? 1 : 0;
 
   address = 0x200;
-  for (n = 0; n < HEADERSIZE; n++)
+  for (n = 0; n < SWC_HEADER_LEN; n++)
     {
       for (m = 0; m < 65536; m++)               // a delay is necessary here
         ;
@@ -217,7 +215,7 @@ receive_rom_info (unsigned char *buffer)
   if (hirom)
     size <<= 1;
 
-  memset (buffer, 0, HEADERSIZE);
+  memset (buffer, 0, SWC_HEADER_LEN);
   buffer[0] = size << 4 & 0xff;                 // *16 for 8KB units; low byte
   buffer[1] = size >> 4;                        // *16 for 8KB units /256 for high byte
   buffer[8] = 0xaa;
@@ -512,7 +510,7 @@ swc_read_rom (const char *filename, unsigned int parport)
     printf ("received data is corrupt\n");
 
   buffer[2] = get_emu_mode_select (byte, blocksleft / 16);
-  fwrite (buffer, 1, HEADERSIZE, file);         // write header (other necessary fields are
+  fwrite (buffer, 1, SWC_HEADER_LEN, file);     // write header (other necessary fields are
                                                 //  filled in by receive_rom_info())
   if (hirom)
     blocksleft >>= 1;                           // this must come _after_ get_emu_mode_select()!
@@ -588,10 +586,10 @@ swc_write_rom (const char *filename, unsigned int parport)
   printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   send_command0 (0xc008, 0);
-  fread (buffer, 1, HEADERSIZE, file);
+  fread (buffer, 1, SWC_HEADER_LEN, file);
   send_command (5, 0, 0);
-  send_block (0x400, buffer, HEADERSIZE);       // send header
-  bytessend = HEADERSIZE;
+  send_block (0x400, buffer, SWC_HEADER_LEN);   // send header
+  bytessend = SWC_HEADER_LEN;
 
   emu_mode_select = buffer[2];                  // this byte is needed later
   if (buffer[3] & 0x80)                         // Pro Fighter (FIG) HiROM dump
@@ -625,7 +623,7 @@ swc_write_rom (const char *filename, unsigned int parport)
     send_command0 (0xc010, 2);
 
   send_command (5, 0, 0);
-  totalblocks = (fsize - HEADERSIZE + BUFFERSIZE - 1) / BUFFERSIZE; // round up
+  totalblocks = (fsize - SWC_HEADER_LEN + BUFFERSIZE - 1) / BUFFERSIZE; // round up
   send_command (6, 5 | (totalblocks << 8), totalblocks >> 8); // bytes: 6, 5, #8K L, #8K H, 0
   send_command (6, 1 | (emu_mode_select << 8), 0);
 
@@ -664,11 +662,11 @@ swc_read_sram (const char *filename, unsigned int parport)
     }
 
   printf ("Receive: %d Bytes\n", 32 * 1024);
-  memset (buffer, 0, HEADERSIZE);
+  memset (buffer, 0, SWC_HEADER_LEN);
   buffer[8] = 0xaa;
   buffer[9] = 0xbb;
   buffer[10] = 5;
-  fwrite (buffer, 1, HEADERSIZE, file);
+  fwrite (buffer, 1, SWC_HEADER_LEN, file);
 
   send_command (5, 0, 0);
   send_command0 (0xe00d, 0);
@@ -722,9 +720,9 @@ swc_write_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  size = q_fsize (filename) - HEADERSIZE;     // SWC SRAM is 4*8KB, emu SRAM often not
+  size = q_fsize (filename) - SWC_HEADER_LEN;   // SWC SRAM is 4*8KB, emu SRAM often not
   printf ("Send: %d Bytes\n", size);
-  fseek (file, HEADERSIZE, SEEK_SET);           // skip the header
+  fseek (file, SWC_HEADER_LEN, SEEK_SET);       // skip the header
 
   send_command (5, 0, 0);
   send_command0 (0xe00d, 0);

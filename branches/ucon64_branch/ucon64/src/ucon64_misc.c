@@ -1743,12 +1743,14 @@ ucon64_configfile (void)
 //                   "# before processing a ROM uCON64 will make a backup of it\n"
                    "#\n"
                    "backups=1\n"
-#ifdef  ANSI_COLOR
                    "#\n"
                    "# use ANSI colors in output? (1=yes; 0=no)\n"
                    "#\n"
                    "ansi_color=1\n"
-#endif
+                   "#\n"
+                   "# file dialog path (for GUI only)\n"
+                   "#\n"
+                   "gui_path=\n"
                    "#\n"
                    "# parallel port\n"
                    "#\n"
@@ -1867,6 +1869,8 @@ ucon64_configfile (void)
       set_property (ucon64.configfile, "version", buf);
 
       set_property (ucon64.configfile, "ansi_color", "1");
+
+      set_property (ucon64.configfile, "gui_path", "");
 
       set_property (ucon64.configfile, "discmage_path",
 #if     defined __MSDOS__

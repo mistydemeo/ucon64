@@ -12,6 +12,10 @@ if [ "$areply" ==  "Install" ]; then
   if [ ! -e "$HOME/.ucon64" ]; then
     mkdir "$HOME/.ucon64"
   fi
+  if [ ! -e "$HOME/.ucon64/skin" ]; then
+    mkdir "$HOME/.ucon64/skin"
+    cp skin/*.png "$HOME/.ucon64/skin"
+  fi
   if [ ! -e "$HOME/.ucon64/dat" ]; then
     mkdir "$HOME/.ucon64/dat"
   fi

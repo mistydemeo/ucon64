@@ -1097,7 +1097,12 @@ ucon64_nfo (void)
   
   if (ucon64.discmage_enabled)
     if (ucon64.image)
-      libdm_nfo (ucon64.image);
+      {
+        libdm_nfo (ucon64.image);
+        printf ("\n");
+        
+        return 0; // no crc calc. for disc images and therefore no dat entry either
+      }
 
   // Use ucon64.fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
   printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32 ? ucon64.fcrc32 : ucon64.crc32);

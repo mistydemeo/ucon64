@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef LIBDM_MISC_H
 #define LIBDM_MISC_H
+#if 0
 // wav header
 typedef struct
 {
@@ -38,7 +39,7 @@ typedef struct
   uint8_t data[4];
   uint32_t data_length;
 } wav_header_t;
-
+#endif
 
 /*
   libdm messages
@@ -57,30 +58,30 @@ extern const char *dm_msg[];
 /*
   dm_track_init()     fillup current dm_track_t
   dm_free()           free all dm_track_t, dm_session_t and dm_image_t recursively
+  writewavheader()    write header for a wav file
 */
 extern const dm_track_t *dm_track_init (dm_track_t *track, FILE *fh);
 extern int dm_free (dm_image_t *image);
+//extern void writewavheader (FILE * fdest, int track_length);
 
 
 /*
-  dm_msf_t struct for LBA <-> MSF conversions
-
   dm_lba_to_msf() convert LBA to minutes, seconds, frames
   dm_msf_to_lba() convert minutes, seconds, frames to LBA
-  dm_from_bcd()   convert BCD to integer
-  dm_to_bcd()     convert integer to BCD
+
+  LBA represents the logical block address for the CD-ROM absolute
+  address field or for the offset from the beginning of the current track
+  expressed as a number of logical blocks in a CD-ROM track relative
+  address field.
+  MSF represents the physical address written on CD-ROM discs,
+  expressed as a sector count relative to either the beginning of the
+  medium or the beginning of the current track.
+
+  dm_bcd_to_int() convert BCD to integer
+  dm_int_to_bcd() convert integer to BCD
 */
-typedef struct
-{
-  uint8_t    cdmsf_min0;     /* start minute */
-  uint8_t    cdmsf_sec0;     /* start second */
-  uint8_t    cdmsf_frame0;   /* start frame */
-  uint8_t    cdmsf_min1;     /* end minute */
-  uint8_t    cdmsf_sec1;     /* end second */
-  uint8_t    cdmsf_frame1;   /* end frame */
-} dm_msf_t;
-extern int lba_to_msf (int lba, dm_msf_t * mp);
-extern int msf_to_lba (int m, int s, int f, int force_positive);
-extern int from_bcd (int b);
-extern int to_bcd (int i);
+extern int dm_lba_to_msf (int lba, int *m, int *s, int *f);
+extern int dm_msf_to_lba (int m, int s, int f, int force_positive);
+extern int dm_bcd_to_int (int b);
+extern int dm_int_to_bcd (int i);
 #endif  // LIBDM_MISC_H

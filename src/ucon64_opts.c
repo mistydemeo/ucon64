@@ -923,27 +923,24 @@ ucon64_options (int c, const char *optarg)
     case UCON64_MKSHEET:
       if (ucon64.discmage_enabled)
         {
-          if (ucon64.image && (c == UCON64_MKTOC || c == UCON64_MKSHEET))
-            {
-              strcpy (buf, ucon64.rom);
-              set_suffix (buf, ".TOC");
-            
-              if (!libdm_mktoc (ucon64.image))
-                printf (ucon64_msg[WROTE], buf);
-              else
-                fprintf (stderr, "ERROR: Could not generate %s\n", buf);
-            }
+          if (ucon64.image)
+          {
+            if (c == UCON64_MKTOC || c == UCON64_MKSHEET)
+              {
+                if (!libdm_toc_write (ucon64.image))
+                  printf (ucon64_msg[WROTE], "toc sheet");
+                else
+                  fprintf (stderr, "ERROR: Could not generate toc sheet\n");
+              }
 
-          if (ucon64.image && (c == UCON64_MKCUE || c == UCON64_MKSHEET))
-            {
-              strcpy (buf, ucon64.rom);
-              set_suffix (buf, ".CUE");
-
-              if (!libdm_mkcue (ucon64.image))
-                printf (ucon64_msg[WROTE], buf);
-              else
-                fprintf (stderr, "ERROR: Could not generate %s\n", buf);
-            }
+            if (c == UCON64_MKCUE || c == UCON64_MKSHEET)
+              {
+                if (!libdm_cue_write (ucon64.image))
+                  printf (ucon64_msg[WROTE], "cue sheet");
+                else
+                  fprintf (stderr, "ERROR: Could not generate cue sheet\n");
+              }
+          }
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);

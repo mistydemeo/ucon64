@@ -491,11 +491,11 @@ const st_ucon64_wf_t ucon64_wf[] = {
   these options do not (need to) know the console or work for more than one
 */
   {UCON64_BIN2ISO, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
-  {UCON64_MKSHEET, UCON64_UNKNOWN, libdm_usage, 0},
-  {UCON64_MKTOC, UCON64_UNKNOWN, libdm_usage,  0},
+  {UCON64_MKSHEET, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
+  {UCON64_MKTOC, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
   {UCON64_ISOFIX, UCON64_UNKNOWN, libdm_usage, WF_DEFAULT},
-  {UCON64_MKCUE, UCON64_UNKNOWN, libdm_usage,  0},
-  {UCON64_RIP, UCON64_UNKNOWN, libdm_usage,    0},
+  {UCON64_MKCUE, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT},
+  {UCON64_RIP, UCON64_UNKNOWN, libdm_usage,    WF_DEFAULT},
   {UCON64_XCDRW, UCON64_UNKNOWN, libdm_usage,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
 
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},

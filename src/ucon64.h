@@ -233,8 +233,8 @@ extern struct ucon64__
   int argc;
   char *argv[128];
 
-//  char rom[4096];               //$ROM (cmdline) with path
-  char file[4096];              //$FILE (cmdline) with path
+//  char rom[FILENAME_MAX];               //$ROM (cmdline) with path
+  char file[FILENAME_MAX];              //$FILE (cmdline) with path
 
   unsigned int parport;         //parallel port address
   int parport_mode;             //parallel port mode: ECP, EPP, SPP, other
@@ -260,8 +260,8 @@ extern struct ucon64__
 */
 extern struct ucon64_//TODO rom_
 {
-  char rom[4096];               //$ROM (cmdline) with path
-//  char file[4096];              //$FILE (cmdline) with path
+  char rom[FILENAME_MAX];               //$ROM (cmdline) with path
+//  char file[FILENAME_MAX];              //$FILE (cmdline) with path
 
   long console;                 //integer for the detected console system
   char title[4096];             //console system name

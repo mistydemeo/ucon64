@@ -1,5 +1,5 @@
 /*
-map.h - map (associative array) code for uCON64
+map.h - a map (associative array) implementation
 
 written by 2002 dbjh
 
@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   map_create()  create a new map (associative array)
   map_copy()    copy map src to map dest
                 dest must be a larger map than src
+                Note that this function also copies the member cmp_key.
   map_put()     put object in map under key
                 Callers should always reset the passed map pointer with the one
                 this function returns. This is necessary in case the map had to

@@ -10,7 +10,7 @@ LIBTOOL = libtool
 
 CC=gcc
 CFLAGS=-I.. -I. -Wall -O3
-ifdef   DLOPEN
+ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
 LDFLAGS=-s
@@ -28,7 +28,7 @@ ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 LIBS=-lcygwin -lkernel32
 # kernel32 for DLOPEN and DisableThreadLibraryCalls()
 
-ifdef   DLOPEN
+ifdef DLOPEN
 ENTRY=__cygwin_dll_entry@12
 else
 ENTRY=_DllMain@12
@@ -50,7 +50,7 @@ else                                    # Unix
 DLLFLAGS=-shared
 endif
 
-ifdef  DLOPEN
+ifdef DLOPEN
 FULLLIBNAME=$(LIBNAME).so
 else
 FULLLIBNAME=lib$(LIBNAME).so
@@ -68,7 +68,7 @@ ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 else
 ifdef DJGPP
 	del $(LIBNAME).dxe
-ifndef  DLOPEN
+ifndef DLOPEN
 	del $(LIBNAME).a
 endif
 	del *.o
@@ -100,7 +100,7 @@ endif                                   # cygwin
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
-ifndef  DLOPEN
+ifndef DLOPEN
 $(LIBNAME).dll $(LIBNAME).a: $(OBJECTS)
 else
 $(LIBNAME).dll: $(OBJECTS)
@@ -116,27 +116,27 @@ endif
 	dlltool $(DLLTOOLFLAGS) --base-file tmp.base
 
 	ld tmp.exp $(DLLFLAGS)
-ifndef  DLOPEN
+ifndef DLOPEN
 	dlltool $(DLLTOOLFLAGS) --output-lib $(LIBNAME).a
 endif
 
 else
 ifdef DJGPP
 
-ifndef  DLOPEN
+ifndef DLOPEN
 $(LIBNAME).dxe $(LIBNAME).a: $(OBJECTS) djimport.o dlopen.o
 else
 $(LIBNAME).dxe: $(OBJECTS)
 endif
 	dxegen $(LIBNAME).dxe _import_export $(OBJECTS)
-ifndef  DLOPEN
+ifndef DLOPEN
 	ar rs $(LIBNAME).a djimport.o dlopen.o
 endif
 
 else                                    # Unix or BeOS
 # Unix uses LD_LIBRARY_PATH for dynamic linking, BeOS LIBRARY_PATH
 
-ifndef  DLOPEN
+ifndef DLOPEN
 lib$(LIBNAME).so: $(OBJECTS)
 	$(CC) $(DLLFLAGS) $(OBJECTS) -o lib$(LIBNAME).so
 else
@@ -148,7 +148,7 @@ endif                                   # DJGPP
 endif                                   # cygwin
 
 
-#ifndef  DLOPEN
+#ifndef DLOPEN
 #install:
 #	$(LIBTOOL) --mode=install $(INSTALL) lib$(LIBNAME).so $(libdir)/lib$(LIBNAME).so
 #endif

@@ -1,5 +1,5 @@
 /*
-djimport.c - discmage import library
+djimport.c - discmage import library for DJGPP
 
 written by 2002 dbjh
 
@@ -31,7 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
     }
 
 static int dxe_loaded = 0;
-char djimport_path[FILENAME_MAX];
+char djimport_path[FILENAME_MAX] = "discmage.dxe"; // default value
 
 static void *libdm;
 static dm_image_t *(*dm_init_ptr) (const char *);

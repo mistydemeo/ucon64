@@ -128,7 +128,7 @@ struct ucon64_ rom;
 ucon64_flush(argc,argv,&rom);
 
   printf("%s\n",ucon64_TITLE);
-  printf("Uses code from various people. See 'DEVELOPERS' for more!\n");
+  printf("Uses code from various people. See 'developers.html' for more!\n");
   printf("This may be freely redistributed under the terms of the GNU Public License\n\n");
 
   if (argc<2 ||
@@ -495,27 +495,18 @@ if (setgid(gid) == -1)                          //  was used, but just in case (
 */
 if(argcmp(argc,argv,"-ata"))rom.console=ucon64_ATARI;
 if(argcmp(argc,argv,"-s16"))rom.console=ucon64_SYSTEM16;
-if(argcmp(argc,argv,"-psx"))rom.console=ucon64_PSX;
-if(argcmp(argc,argv,"-psx2"))rom.console=ucon64_PSX2;
-if(argcmp(argc,argv,"-cdi"))rom.console=ucon64_CDI;
-if(argcmp(argc,argv,"-cd32"))rom.console=ucon64_CD32;
-if(argcmp(argc,argv,"-3do"))rom.console=ucon64_REAL3DO;
 if(argcmp(argc,argv,"-coleco"))rom.console=ucon64_COLECO;
 if(argcmp(argc,argv,"-vboy"))rom.console=ucon64_VIRTUALBOY;
 if(argcmp(argc,argv,"-swan"))rom.console=ucon64_WONDERSWAN;
 if(argcmp(argc,argv,"-vec"))rom.console=ucon64_VECTREX;
 if(argcmp(argc,argv,"-int"))rom.console=ucon64_INTELLI;
 if(argcmp(argc,argv,"-lynx"))rom.console=ucon64_LYNX;
-if(argcmp(argc,argv,"-jag"))rom.console=ucon64_JAGUAR;
 if(argcmp(argc,argv,"-sms"))rom.console=ucon64_SMS;
 if(argcmp(argc,argv,"-gen"))rom.console=ucon64_GENESIS;
 if(argcmp(argc,argv,"-ngp"))rom.console=ucon64_NEOGEOPOCKET;
 if(argcmp(argc,argv,"-nes"))rom.console=ucon64_NES;
 if(argcmp(argc,argv,"-pce"))rom.console=ucon64_PCE;
-if(argcmp(argc,argv,"-sat"))rom.console=ucon64_SATURN;
-
-rom.console = (argcmp(argc,argv,"-dc") ||
-               argcmp(argc,argv,"-ip")) ? ucon64_DC : rom.console;
+if(argcmp(argc,argv,"-jag"))rom.console=ucon64_JAGUAR;
 
 rom.console = (argcmp(argc,argv,"-ng") ||
                argcmp(argc,argv,"-sam")) ? ucon64_NEOGEO : rom.console;
@@ -543,6 +534,18 @@ rom.console = (argcmp(argc,argv,"-gb") ||
                (argcmp(argc,argv,"-xgbx") && access(rom.rom,F_OK)!=0 ) ||
                argcmp(argc,argv,"-xgbxs") ||
                argncmp(argc,argv,"-xgbxb",6)) ? ucon64_GB : rom.console;
+
+//#ifdef CD
+if(argcmp(argc,argv,"-sat"))rom.console=ucon64_SATURN;
+if(argcmp(argc,argv,"-psx"))rom.console=ucon64_PSX;
+if(argcmp(argc,argv,"-psx2"))rom.console=ucon64_PS2;
+if(argcmp(argc,argv,"-cdi"))rom.console=ucon64_CDI;
+if(argcmp(argc,argv,"-cd32"))rom.console=ucon64_CD32;
+if(argcmp(argc,argv,"-3do"))rom.console=ucon64_REAL3DO;
+
+rom.console = (argcmp(argc,argv,"-dc") ||
+               argcmp(argc,argv,"-ip")) ? ucon64_DC : rom.console;
+//#endif
 
 if(argcmp(argc,argv,"-db"))
 {
@@ -619,21 +622,33 @@ break;
 case ucon64_PCE:
   pcengine_main(&rom);
 break;
-/*
+
 #ifdef BACKUP
-
-#ifdef CD
-case ucon64_PSX:
-case ucon64_PSX2:
-  playstation_main(&rom);
-break;
-case ucon64_DC:
-  dreamcast_main(&rom);
-break;
+  #ifdef CD
+    case ucon64_PS2:
+//    ps2_main(&rom);
+    break;
+    case ucon64_PSX:
+//    psx_main(&rom);
+    break;
+    case ucon64_DC:
+//    dreamcast_main(&rom);
+    break;
+    case ucon64_SATURN:
+//    saturn_main(&rom);
+    break;
+    case ucon64_CDI:
+//    cdi_main(&rom);
+    break;
+    case ucon64_CD32:
+//    cd32_main(&rom);
+    break;
+    case ucon64_REAL3DO:
+//    real3do_main(&rom);
+    break;
+  #endif
 #endif
 
-#endif
-*/
 case ucon64_SYSTEM16:
   system16_main(&rom);
 break;
@@ -663,17 +678,17 @@ case ucon64_INTELLI:
 break;
 case ucon64_UNKNOWN:
 default:
-	if(!access(rom.rom,F_OK))
-	{
-		filehexdump(rom.rom,0,512);//show possible header or maybe the internal rom header
-		printf(
-"\nERROR: unknown ROM: %s (not found in internal DB)\n"
-"TIP:   if this is a ROM you can force recognition with the -<CONSOLE> option\n"
-"       if you compiled from the sources you can add it to ucon64_db.c and\n"
-"       recompile\n"
-,rom.rom);
-}
-else ucon64_usage(argc,argv);
+  if(!access(rom.rom,F_OK))
+  {
+    filehexdump(rom.rom,0,512);//show possible header or maybe the internal rom header
+    printf(
+      "\nERROR: unknown ROM: %s (not found in internal DB)\n"
+      "TIP:   if this is a ROM you can force recognition with the -<CONSOLE> option\n"
+      "       if you compiled from the sources you can add it to ucon64_db.c and\n"
+      "       recompile\n"
+    ,rom.rom);
+  }
+  else ucon64_usage(argc,argv);
 break;
 }
 
@@ -770,14 +785,13 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
 //  for( x = 0 ; x < argc ; x++ )strcpy(rom->argv[x],argv[x]);
   for( x = 0 ; x < argc ; x++ )rom->argv[x]=argv[x];
 
-  strcpy(rom->name,"");
-//  strcpy(rom->name2,"");
-
+  rom->name[0]=0;
+//  rom->name2[0]=0;
 
   strcpy(rom->rom,getarg(argc,argv,ucon64_ROM));
   strcpy(rom->file,getarg(argc,argv,ucon64_FILE));
 
-  strcpy(rom->title,"");
+  rom->title[0]=0;
   strcpy(rom->copier,"?");
 
   rom->mbit=0;
@@ -801,7 +815,7 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
   rom->internal_crc_len=0;	//size in bytes
 //  rom->has_internal_inverse_crc=0;
 //  rom->internal_inverse_crc=0;
-  strcpy(rom->internal_crc2,"");
+  rom->internal_crc2[0]=0;
   rom->internal_crc2_start=0;
   rom->internal_crc2_len=0;		//size in bytes
 
@@ -817,15 +831,15 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
   rom->name_start=0;
   rom->name_len=0;
 	
-  strcpy(rom->manufacturer,"?");
+  strcpy(rom->manufacturer,"Unknown Manufacturer");
   rom->manufacturer_start=0;
   rom->manufacturer_len=0;
 	
-  strcpy(rom->country,"?");
+  strcpy(rom->country,"Unknown Country");
   rom->country_start=0;
   rom->country_len=0;
 	
-  strcpy(rom->misc,"");
+  rom->misc[0]=0;
 
   return(0);
 }
@@ -866,15 +880,31 @@ if(rom->console != ucon64_UNKNOWN)
   case ucon64_PCE:
     pcengine_init(rom);
   break;
-/*  ucon64 is cartridge only
-  case ucon64_PSX:
-  case ucon64_PSX2:
-    playstation_init(rom);
-  break;
-  case ucon64_DC:
-    dreamcast_init(rom);
-  break;
-*/
+//#ifdef BACKUP
+//  #ifdef CD
+    case ucon64_PS2:
+//    ps2_init(rom);
+    break;
+    case ucon64_PSX:
+//    psx_init(rom);
+    break;
+    case ucon64_DC:
+//    dreamcast_init(rom);
+    break;
+    case ucon64_SATURN:
+//    saturn_init(rom);
+    break;
+    case ucon64_CDI:
+//    cdi_init(rom);
+    break;
+    case ucon64_CD32:
+//    cd32_init(rom);
+    break;
+    case ucon64_REAL3DO:
+//    real3do_init(rom);
+    break;
+//  #endif
+//#endif
   case ucon64_SYSTEM16:
     system16_init(rom);
   break;

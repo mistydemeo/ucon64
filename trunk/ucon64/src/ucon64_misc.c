@@ -846,7 +846,7 @@ ucon64_parport_init (unsigned int port)
     }
 #endif
 #if     defined AMIGA
-  ucon64_io_fd = open ("PAR:", O_RDWR|O_NONBLOCK);
+  ucon64_io_fd = open ("PAR:", O_RDWR | O_NONBLOCK);
 //  ucon64_io_fd = fopen ("PAR:", "r+");
 //  if (ucon64_io_fd == NULL)
   if (ucon64_io_fd == -1)
@@ -1086,7 +1086,7 @@ ucon64_e (const char *romfile)
   property = get_property (ucon64.configfile, buf3, buf2, NULL);   // buf2 also contains property value
   if (property == NULL)
     {
-      fprintf (stderr, "ERROR: could not find the correct settings (%s) in\n"
+      fprintf (stderr, "ERROR: Could not find the correct settings (%s) in\n"
               "       %s\n"
               "TIP:   If the wrong console was detected you might try to force recognition\n"
               "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
@@ -1114,7 +1114,7 @@ ucon64_e (const char *romfile)
   //  returns 0 when the exe could not be started
   if (result != 127 && result != -1 && result != 0)        // 127 && -1 are system() errors, rest are exit codes
     {
-      fprintf (stderr, "ERROR: the emulator returned an error? code (%d)\n"
+      fprintf (stderr, "ERROR: The emulator returned an error? code (%d)\n"
                "TIP:   If the wrong emulator was used you might try to force recognition\n"
                "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
                result);

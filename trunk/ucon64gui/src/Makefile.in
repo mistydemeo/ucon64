@@ -1,0 +1,44 @@
+.PHONY: all clean install uninstall
+
+CC=@CC@
+
+CFLAGS=@CFLAGS@
+LDFLAGS=@LDFLAGS@
+
+OBJECTS=ucon64gui.o misc.o fopen3.o configmenu.o top.o bottom.o libhtk/libhtk.o \
+        console/snes.o console/swan.o console/gba.o console/nes.o \
+	console/n64.o console/gb.o console/sms.o \
+	console/genesis.o console/dc.o console/lynx.o \
+        console/jaguar.o console/pce.o console/neogeo.o console/ngp.o
+
+all: ucon64gui
+
+clean:
+	rm -f $(OBJECTS) DEADJOE */DEADJOE ucon64gui *~ */*~ */*/*~ *.core
+
+distclean: clean
+	rm -f Makefile config.log config.status config.cache config.h
+
+.c.o:
+	$(CC) $(CFLAGS) -c $< -o $@
+
+ucon64gui: $(OBJECTS)
+	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
+
+install:
+#	./install.sh
+
+uninstall:
+	rm -f /usr/local/bin/ucon64gui
+
+# Dependencies
+UCON64GUI_STD_H=ucon64_defines.h misc.h config.h ucon64gui.h configmenu.h
+
+misc.o: misc.h
+ucon64_gui.o: switches.c options.c libhtk/libhtk.h $(UCON64GUI_STD_H)
+libhtk/libhtk.o: libhtk/libhtk.h libhtk/libhtk_cfg.h libhtk/libhtk_defines.h libhtk/gtk.c $(UCON64GUI_STD_H)
+configmenu.o: $(UCON64GUI_STD_H)
+console/gb.o: console/gb.h $(UCON64GUI_STD_H)
+console/n64.o: console/n64.h $(UCON64GUI_STD_H)
+console/nes.o: console/nes.h $(UCON64GUI_STD_H)
+console/snes.o: console/snes.h $(UCON64GUI_STD_H)

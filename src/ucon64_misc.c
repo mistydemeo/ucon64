@@ -599,7 +599,7 @@ const st_getopt2_t ucon64_options_usage[] =
         "...}",
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
-#endif  // defined USE_PARALLEL || defined USE_USB
+#endif // defined USE_PARALLEL || defined USE_USB
     {
       "hdn", 1, 0, UCON64_HDN,
       "N", "force ROM has backup unit/emulator header with size of N Bytes",
@@ -755,42 +755,42 @@ const st_getopt2_t ucon64_options_usage[] =
 const st_getopt2_t ucon64_options_without_usage[] =
   {
     {
-      "crchd", 0, 0, UCON64_CRCHD,                // backward compat.
+      "crchd", 0, 0, UCON64_CRCHD,              // backward compat.
       NULL, NULL,
       &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_CRC32]
     },
     {
-      "file", 1, 0, UCON64_FILE,                  // obsolete?
+      "file", 1, 0, UCON64_FILE,                // obsolete?
       NULL, NULL,
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
     {
-      "frontend", 0, 0, UCON64_FRONTEND,          // no usage?
+      "frontend", 0, 0, UCON64_FRONTEND,        // no usage?
       NULL, NULL,
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
     {
-      "?", 0, 0, UCON64_HELP,                     // same as --help
+      "?", 0, 0, UCON64_HELP,                   // same as --help
       NULL, NULL,
       &ucon64_wf[WF_OBJ_ALL_STOP]
     },
     {
-      "h", 0, 0, UCON64_HELP,                     // same as --help
+      "h", 0, 0, UCON64_HELP,                   // same as --help
       NULL, NULL,
       &ucon64_wf[WF_OBJ_ALL_STOP]
     },
     {
-      "id", 0, 0, UCON64_ID,                      // currently only used in snes.c
+      "id", 0, 0, UCON64_ID,                    // currently only used in snes.c
       NULL, NULL,
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
     {
-      "rom", 0, 0, UCON64_ROM,                    // obsolete?
+      "rom", 0, 0, UCON64_ROM,                  // obsolete?
       NULL, NULL,
       &ucon64_wf[WF_OBJ_ALL_SWITCH]
     },
     {
-      "83", 0, 0, UCON64_RR83,                    // is now "rr83"
+      "83", 0, 0, UCON64_RR83,                  // is now "rr83"
       NULL, NULL,
       &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
     },
@@ -963,7 +963,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     NULL, "Warashi Inc.", NULL, "Nowpro", NULL,
     "Game Village", NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // 0Z
+    NULL,                                       // 0Z
     NULL, "Starfish", "Infocom", "Electronic Arts Japan", NULL,
     "Cobra Team", "Human/Field", "KOEI", "Hudson Soft", "S.C.P./Game Village",
     "Yanoman", NULL, "Tecmo Products", "Japan Glary Business", "Forum/OpenSystem",
@@ -971,7 +971,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     NULL, NULL, NULL, NULL, NULL,
     "Creatures Inc.", "TDK Deep Impresion", NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // 1Z
+    NULL,                                       // 1Z
     "Destination Software/KSS", "Sunsoft/Tokai Engineering",
       "POW (Planning Office Wada)/VR 1 Japan", "Micro World", NULL,
     "San-X", "Enix", "Loriciel/Electro Brain", "Kemco Japan", "Seta Co., Ltd.",
@@ -980,7 +980,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     "NEC InterChannel", "Tam", "Gajin/Jordan", "Smilesoft", NULL,
     NULL, "Mediakite", NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // 2Z
+    NULL,                                       // 2Z
     "Viacom", "Carrozzeria", "Dynamic", NULL, "Magifact",
     "Hect", "Codemasters", "Taito/GAGA Communications", "Laguna",
       "Telstar Fun & Games/Event/Taito",
@@ -990,7 +990,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // 3Z
+    NULL,                                       // 3Z
     "Seika Corp.", "UBI SOFT Entertainment Software", "Sunsoft US", NULL, "Life Fitness",
     NULL, "System 3", "Spectrum Holobyte", NULL, "IREM",
     NULL, "Raya Systems", "Renovation Products", "Malibu Games", NULL,
@@ -998,7 +998,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     "Time Warner Interactive", NULL, NULL, NULL, NULL,
     NULL, "Disney Interactive", NULL, "Black Pearl", NULL,
     "Advanced Productions", NULL, NULL, "GT Interactive", "RARE",
-    "Crave Entertainment",                        // 4Z
+    "Crave Entertainment",                      // 4Z
     "Absolute Entertainment", "Acclaim", "Activision", "American Sammy", "Take 2/GameTek",
     "Hi Tech", "LJN Ltd.", NULL, "Mattel", NULL,
     "Mindscape/Red Orb Entertainment", "Romstar", "Taxan", "Midway/Tradewest", NULL,
@@ -1006,7 +1006,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     "Hasbro", "NewKidCo", "Telegames", "Metro3D", NULL,
     "Vatical Entertainment", "LEGO Media", NULL, "Xicat Interactive", "Cryo Interactive",
     NULL, NULL, "Red Storm Entertainment", "Microids", NULL,
-    "Conspiracy/Swing",                           // 5Z
+    "Conspiracy/Swing",                         // 5Z
     "Titus", "Virgin Interactive", "Maxis", NULL, "LucasArts Entertainment",
     NULL, NULL, "Ocean", NULL, "Electronic Arts",
     NULL, "Laser Beam", NULL, NULL, "Elite Systems",
@@ -1015,7 +1015,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     NULL, "Classified Games", NULL, "TDK Mediactive", NULL,
     "DreamCatcher", "JoWood Produtions", "SEGA", "Wannado Edition",
       "LSP (Light & Shadow Prod.)",
-    "ITE Media",                                  // 6Z
+    "ITE Media",                                // 6Z
     "Infogrames", "Interplay", "JVC (US)", "Parker Brothers", NULL,
     "SCI (Sales Curve Interactive)/Storm", NULL, NULL, "THQ Software", "Accolade Inc.",
     "Triffix Entertainment", NULL, "Microprose Software",
@@ -1025,7 +1025,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
       "Empire Interactive", NULL,
     NULL, "Jester Interactive", NULL, NULL, "Scholastic",
     "Ignition Entertainment", NULL, "Stadlbauer", NULL, NULL,
-    NULL,                                         // 7Z
+    NULL,                                       // 7Z
     "Misawa", "Teichiku", "Namco Ltd.", "LOZC", "KOEI",
     NULL, "Tokuma Shoten Intermedia", "Tsukuda Original", "DATAM-Polystar", NULL,
     NULL, "Bulletproof Software", "Vic Tokai Inc.", NULL, "Character Soft",
@@ -1033,7 +1033,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     NULL, NULL, "I'Max", "Success", NULL,
     "SEGA Japan", NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // 8Z
+    NULL,                                       // 8Z
     "Takara", "Chun Soft", "Video System Co., Ltd./McO'River", "BEC", NULL,
     "Varie", "Yonezawa/S'pal", "Kaneko", NULL, "Victor Interactive Software/Pack in Video",
     "Nichibutsu/Nihon Bussan", "Tecmo", "Imagineer", NULL, NULL,
@@ -1041,7 +1041,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     NULL, "Hasbro Japan", NULL, "Marvelous Entertainment", NULL,
     "Keynet Inc.", "Hands-On Entertainment", NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // 9Z
+    NULL,                                       // 9Z
     "Telenet", "Hori", NULL, NULL, "Konami",
     "K.Amusement Leasing Co.", "Kawada", "Takara", NULL, "Technos Japan Corp.",
     "JVC (Europe/Japan)/Victor Musical Industries", NULL, "Toei Animation", "Toho", NULL,
@@ -1049,7 +1049,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     "KID", "Mediafactory", NULL, NULL, NULL,
     "Infogrames Hudson", NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // AZ
+    NULL,                                       // AZ
     "Acclaim Japan", "ASCII Co./Nexoft" /*/Activision*/, "Bandai", NULL, "Enix",
     NULL, "HAL Laboratory/Halken", "SNK", NULL, "Pony Canyon Hanbai",
     "Culture Brain", "Sunsoft", "Toshiba EMI", "Sony Imagesoft", NULL,
@@ -1057,7 +1057,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     NULL, "MTO Inc.", NULL, "Sunrise Interactive", NULL,
     "Global A Entertainment", "Fuuki", NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // BZ
+    NULL,                                       // BZ
     "Taito", NULL, "Kemco", "Square", "Tokuma Shoten",
     "Data East", "Tonkin House", NULL, "KOEI", NULL,
     "Konami/Ultra/Palcom", "NTVIC/VAP", "Use Co., Ltd.", "Meldac",
@@ -1067,7 +1067,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
       "Konami Computer Entertainment Osaka", NULL, NULL,
     "Enterbrain", NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // CZ
+    NULL,                                       // CZ
     "Taito/Disco", "Sofel", "Quest Corp.", "Sigma", "Ask Kodansha",
     NULL, "Naxat", "Copya System", "Capcom Co., Ltd.", "Banpresto",
     "TOMY", "Acclaim/LJN Japan", NULL, "NCS", "Human Entertainment",
@@ -1075,7 +1075,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     NULL, NULL, NULL, "Elf", NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // DZ
+    NULL,                                       // DZ
     "Jaleco", NULL, "Yutaka", "Varie", "T&ESoft",
     "Epoch Co., Ltd.", NULL, "Athena", "Asmik", "Natsume",
     "King Records", "Atlus", "Epic/Sony Records (Japan)", NULL,
@@ -1084,7 +1084,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     NULL, "Spike", "Konami Computer Entertainment Tokyo", "Alphadream Corp.", NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // EZ
+    NULL,                                       // EZ
     "A Wave", "Motown Software", "Left Field Entertainment", "Extreme Ent. Grp.",
       "TecMagik",
     NULL, NULL, NULL, NULL, "Cybersoft",
@@ -1093,7 +1093,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // FZ
+    NULL,                                       // FZ
     NULL, "PCCW Japan", NULL, NULL, "KiKi Co. Ltd.",
     "Open Sesame Inc.", "Sims", "Broccoli", "Avex", NULL,
     NULL, NULL, NULL, NULL, NULL,
@@ -1101,7 +1101,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // GZ
+    NULL,                                       // GZ
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
@@ -1109,7 +1109,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] =
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL,                                         // HZ
+    NULL,                                       // HZ
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL,
@@ -2488,8 +2488,8 @@ ucon64_chksum (char *sha1_s, char *md5_s, unsigned int *crc32_i, // uint16_t *cr
 }
 
 
-#if 1
-#define FILEFILE_LARGE_BUF (1024*1024)
+#if 0
+#define FILEFILE_LARGE_BUF (1024 * 1024)
 
 
 typedef struct
@@ -2590,7 +2590,7 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 #define FILEFILE_LARGE_BUF
 // When verifying if the code produces the same output when FILEFILE_LARGE_BUF
 //  is defined as when it's not, be sure to use the same buffer size
-int
+void
 ucon64_filefile (const char *filename1, int start1, const char *filename2,
                  int start2, int similar)
 {
@@ -2605,41 +2605,55 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
 #endif
   FILE *file1, *file2;
 
+  printf ("Comparing %s", basename2 (ucon64.rom));
+  if (ucon64.fname_arch[0])
+    printf (" (%s)", basename2 (ucon64.fname_arch));
+  printf (" with %s\n", filename1);
+
   if (one_file (filename1, filename2))
-    return -2;
+    {
+      printf ("%s and %s refer to one file\n\n", filename1, filename2);
+      return;
+    }
 
   fsize1 = fsizeof (filename1);                 // fsizeof() returns size in bytes
   fsize2 = fsizeof (filename2);
   if (fsize1 < start1 || fsize2 < start2)
-    return -1;
+    return;
 
 #ifdef  FILEFILE_LARGE_BUF
   if (!(buf1 = (unsigned char *) malloc (bufsize)))
-    return -1;
+    {
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], bufsize);
+      return;
+    }
 
   if (!(buf2 = (unsigned char *) malloc (bufsize)))
     {
       free (buf1);
-      return -1;
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], bufsize);
+      return;
     }
 #endif
 
   if (!(file1 = fopen (filename1, "rb")))
     {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename1);
 #ifdef  FILEFILE_LARGE_BUF
       free (buf1);
       free (buf2);
 #endif
-      return -1;
+      return ;
     }
   if (!(file2 = fopen (filename2, "rb")))
     {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename2);
       fclose (file1);
 #ifdef  FILEFILE_LARGE_BUF
       free (buf1);
       free (buf2);
 #endif
-      return -1;
+      return;
     }
 
   fseek (file1, start1, SEEK_SET);
@@ -2704,6 +2718,12 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
   free (buf1);
   free (buf2);
 #endif
-  return n_bytes;
+
+  printf ("Found %d %s\n\n",
+          n_bytes,
+          similar ? (n_bytes == 1 ? "similarity" : "similarities") :
+                    (n_bytes == 1 ? "difference" : "differences"));
+
+  return;
 }
 #endif

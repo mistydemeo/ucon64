@@ -297,7 +297,7 @@ gd6_sync_hardware (void)
       outportb ((unsigned short) gd_port, 0);
       outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
 
-      for (delay = 0x1000; delay > 0; delay--)      // A delay may not be necessary here
+      for (delay = 0x1000; delay > 0; delay--)  // A delay may not be necessary here
         ;
 
       outportb ((unsigned short) gd_port, 0xaa);
@@ -482,7 +482,7 @@ gd3_read_rom (const char *filename, unsigned int parport)
 {
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented\n");
+  return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented for the SF3\n");
 }
 
 
@@ -513,7 +513,7 @@ gd6_read_rom (const char *filename, unsigned int parport)
 #else
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented\n");
+  return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented for the SF6\n");
 #endif
 }
 
@@ -709,7 +709,7 @@ gd3_read_sram (const char *filename, unsigned int parport)
 {
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for dumping SRAM is not yet implemented\n");
+  return fprintf (stderr, "ERROR: The function for dumping SRAM is not yet implemented for the SF3\n");
 }
 
 
@@ -904,7 +904,7 @@ gd3_read_saver (const char *filename, unsigned int parport)
 {
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
-  return fprintf (stderr, "ERROR: The function for dumping Saver data is not yet implemented for the SF3\n");
+  return fprintf (stderr, "ERROR: The function for dumping saver data is not yet implemented for the SF3\n");
 }
 
 
@@ -1029,6 +1029,8 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
     It should start with SF, followed by the game ID, followed by the extension.
     The extension is of the form .S## (where # is a digit from 0-9).
     E.g., SF16123.S00
+    The saver base filename must match the base name of the game (loaded in the
+    Game Doctor) that you are loading the saver data for.
   */
 
   // Strip the path out of filename for use in the GD

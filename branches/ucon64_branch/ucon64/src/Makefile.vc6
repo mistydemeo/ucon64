@@ -8,7 +8,7 @@ LDFLAGS=/NOLOGO setargv.obj
 
 !ifdef DISCMAGE
 LIBNAME_DM=discmage
-CFLAGS=$(CFLAGS) /Ilibdiscmage
+#CFLAGS=$(CFLAGS) /Ilibdiscmage
 !endif
 
 !ifdef DISCMAGE

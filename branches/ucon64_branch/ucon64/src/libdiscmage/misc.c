@@ -697,6 +697,7 @@ mem_swap_w (void *buffer, uint32_t n)
 }
 
 
+#ifdef  DEBUG
 static void
 mem_hexdump_code (const void *buffer, uint32_t n, int virtual_start)
 // hexdump something into C code (for development)
@@ -712,6 +713,7 @@ mem_hexdump_code (const void *buffer, uint32_t n, int virtual_start)
         fprintf (stdout, "// 0x%x (%d)\n", pos + virtual_start + 1, pos + virtual_start + 1);
     }
 }
+#endif
 
 
 void

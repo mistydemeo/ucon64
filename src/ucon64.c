@@ -137,6 +137,69 @@ char *forceargs[] =
 struct ucon64_ rom;
 ucon64_flush(argc,argv,&rom);
 
+#ifdef	__DOS__
+  strcpy(buf, "ucon64.cfg");
+#else
+  sprintf(buf, "%s%c.ucon64rc", getenv("HOME"), FILE_SEPARATOR);
+#endif
+
+if(access(buf,R_OK)==-1)
+{
+  FILE *fh;
+
+  printf("ERROR: %s not found: creating...",buf);
+
+/*
+    create default configfile
+*/
+
+  if(!(fh=fopen(buf,"wb")))
+    printf("FAILED\n\n");
+  else
+  {
+    fputs(        
+"#\n"
+"#\n"
+"# emulate_<console shortcut>=<emulator with options>\n"
+"#\n"
+"emulate_gb=vgb -sound -sync 50 -sgb -scale 2\n"
+"emulate_gen=dgen -f -S 2\n"
+"emulate_sms=\n"
+"emulate_jag=\n"
+"emulate_lynx=\n"
+"emulate_n64=\n"
+"emulate_ng=\n"
+"emulate_nes=tuxnes -E2 -rx11 -v -s/dev/dsp -R44100\n"
+"emulate_pce=\n"
+"emulate_psx=\n"
+"emulate_ps2=\n"
+"emulate_snes=snes9x -tr -fs -sc -hires -dfr -r 7 -is -j\n"
+"emulate_sat=\n"
+"emulate_dc=\n"
+"emulate_cd32=\n"
+"emulate_cdi=\n"
+"emulate_3do=\n"
+"emulate_ngp=\n"
+"emulate_ata=\n"
+"emulate_s16=\n"
+"emulate_gba=vgba -scale 2 -uperiod 6\n"
+"#\n"
+"# ucon64 can operate as frontend for CD burning software to make backups\n"
+"# for CD-based consoles \n"
+"#\n"
+"# --device [bus,id,lun] (cdrdao) - The SCSI-address of the used device\n"
+"#\n"
+"cdrdao_raw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
+"cdrdao_raw_write=cdrdao write --eject --speed 12 --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
+"cdrdao_iso_read=cdrdao read-cd --device 0,0,0 --driver generic-mmc --datafile #bin and toc filenames are added by ucon64 at the end\n"
+"cdrdao_iso_write=cdrdao write --eject --speed 12 --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
+    ,fh);
+
+    fclose(fh);
+    printf("OK\n\n");
+  }
+}
+
   printf("%s\n",ucon64_TITLE);
   printf("Uses code from various people. See 'developers.html' for more!\n");
   printf("This may be freely redistributed under the terms of the GNU Public License\n\n");
@@ -789,8 +852,6 @@ break;
       (argcmp(argc,argv,"-xcdao")) ? dc_xcdao(&rom) :
 #endif
       0
-
-
     );
   break;
 
@@ -879,7 +940,7 @@ default:
     printf(
       "\nERROR: Unknown ROM: %s not found (in internal database)\n"
       "TIP:   If this is a ROM you might try to force the recognition\n"
-      "       the force recognition option for Super Nintendo would be -snes\n"
+      "       The force recognition option for Super Nintendo would be -snes\n"
       "       This is also needed for backup units which support more than one\n"
       "       console system\n"
 

@@ -18,7 +18,7 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - -xv64 shows now the filename on the Doctor instead of "UCON64" (sorry)<br>
 - removed -xmp3 option for Songboy (latest informations say that it will
   be a USB device with copyprotected MPE standard instead of MP3.. HAHAHAHA!!!)<br>
-- TODO:  -xmp3    send MP3 file(s) to SongBoy (MP3 player for Gameboy)<br>
+- TODO:  -xmp3 send MP3 file(s) to SongBoy (MP3 player for Gameboy)<br>
 - removed options which were added by mistake (like parallel transfer for Z64)<br>
 - added -ispad (looks for repeating bytes at the end of a probably padded ROM)<br>
 - added -rn (some people might find it useful)<br>
@@ -60,8 +60,8 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - added -nppf change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION<br>
 - added -mkppf create PPF patch; $ROM=ISO_IMAGE $FILE=CHANGED_IMAGE<br>
 - added -ip extract ip0000.bin (GD-ROM header/256 bytes); $ROM=/dev/&#60;cdrom&#62;<br>
-- added -fds convert FAM to Famicon DiskSystem/FDS (diskimage)<br>
-- changed the faq a bit<br>
+- added -fds convert Famicon Disk System file (diskimage) from FAM to FDS<br>
+- changed the FAQ a bit<br>
 - overworked the whole tool to make it easier to develop<br>
 - searched a new site for it (<a href="http://ucon64.sourceforge.net" target="_blank">http://ucon64.sourceforge.net</a>)<br>
 <p>
@@ -71,8 +71,6 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
   that I had to make more changes in the source starting from ucon64.c<br>
 - Gilligan wrote a nice routine to read out NeoGeo Pocket roms (added)<br>
 - reorganized the whole source<br>
-- uCON64 is from now on cartridge only/CD based console systems will be supported
-  in another project (see: <a href="http://ucon64.sourceforge.net" target="_blank">http://ucon64.sourceforge.net</a>)<br>
 - added Gameboy Advance support<br>
 - added (GBA) -n change ROM name; $FILE=NEWNAME<br>
 - added (GBA) -logo restore ROM logo character data 0x04-0x9F<br>
@@ -112,7 +110,7 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - added (SNES) -swcs convert Snes9x *.srm to Super Wild Card*/(all)SWC (by NoisyB)<br>
 <p>
 <a name="197">1.9.7</a><br>
-- added (NES) -fdsl list Famicon DiskSystem/FDS (diskimage) contents (by NoisyB)<br>
+- added (NES) -fdsl list Famicon Disk System/FDS (diskimage) contents (by NoisyB)<br>
 - updated (GBA) -xfal send/receive ROM to/from Flash Advance Linker; $FILE=PORT (by dbjh)<br>
 - added (GBA) -xfalc&#60;n&#62; specify chip size in mbits of ROM in Flash
   Advance Linker when receiving (by dbjh)<br>
@@ -200,7 +198,8 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - added --insn=N insert N Bytes (0x00) before ROM (by NoisyB)<br>
 - added --xmccl send/receive BYTES to/from Mad Catz Camera Link (experimental) (by NoisyB)<br>
 - speed --rrom, --rr83 and --ls have been sped up significantly<br>
-- updated (N64) added 512 Mb ROMs support for transfers to Doctor64Jr (by NoisyB; thanks to TenOfTen (tenoften@jahej.com))<br>
+- updated (N64) added 512 Mb ROMs support for transfers to Doctor64Jr (by NoisyB; thanks to
+  TenOfTen (tenoften@jahej.com))<br>
 - updated (SNES) fixed -fig to give the same output as a Super Pro Fighter (by dbjh;
   thanks to JohnDie for the information)<br>
 - updated (all) parallel port is only accessed for copier I/O (by dbjh)<br>
@@ -239,6 +238,8 @@ The original uCON for snes and genesis was written by chicken & chp in ~1995<br>
 - updated (GENESIS) fixed several bugs (header is correct after -j/-s, correct behaviour
   if switch -nbak is active, -smd/-mgd if already in SMD/MGD format, -lsv) (by dbjh)<br>
 - added --padn=N pad ROM to N Bytes (put Bytes with value 0x00 after end) (by dbjh)<br>
+<!-- beta4 -->
+- updated (NES) FDS images are now recognized without -fdsl (by dbjh)<br>
 <br>
 <br>
 <br>

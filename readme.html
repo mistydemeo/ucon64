@@ -1,9 +1,9 @@
 <html><head><title>README</title></head><body bgcolor="#c0c0c0" background="images/bg.jpg"><tt><pre>
-uCON64 1.9.8beta3 Unix (Linux) 1999-2002 by (various)
+uCON64 1.9.8beta5 Unix (Linux) 1999-2002 by (various)
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
-Usage: ./ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
+Usage: ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
 
   --nbak        prevents backup files (*.BAK)
   --hdn=N       force ROM has backup unit/emulator header with N Bytes size
@@ -13,9 +13,9 @@ Usage: ./ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
   --int         force ROM is interleaved (2143)
   --nint        force ROM is not interleaved (1234)
   --dint        convert ROM to (non-)interleaved format (1234 <-> 2143)
-                  this differs from the Super Nintendo & NES --dint option
+                  this differs from the SNES & NES --dint option
   --ns          force ROM is not split
-   -e           emulate/run ROM (see /root/.ucon64rc for more)
+   -e           emulate/run ROM (see /home/daniel/.ucon64rc for more)
   --crc         show CRC32 value of ROM
   --dbs         search ROM database (all entries) by CRC32; --rom=0xCRC32
   --db          ROM database statistics (# of entries)
@@ -26,9 +26,6 @@ Usage: ./ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
                   this is often used by people who lose control of their ROMs
   --rr83        like --rrom but with 8.3 filenames; --rom=DIRECTORY
   --hex         show ROM as hexdump; use "ucon64 --hex --rom=ROM|less"
-  --find        find string in ROM; --file=STRING (wildcard: '?')
-   -c           compare ROMs for differencies; --file=OTHER_ROM
-  --cs          compare ROMs for similarities; --file=OTHER_ROM
   --stpn=N      strip N Bytes from ROM beginning
   --stp         same as --stpn=512
                   most backup units use a header with 512 Bytes size
@@ -37,6 +34,7 @@ Usage: ./ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
                   most backup units use a header with 512 Bytes size
   --ispad       check if ROM is padded
    -p, --pad    pad ROM to full Mb
+  --padn=N      pad ROM to N Bytes (put Bytes with value 0x00 after end)
   --strip       strip Bytes from end of ROM; --file=VALUE
    -b           apply Baseline/BSL patch (<=vx.x); --file=PATCHFILE
    -i           apply IPS patch (<=v1.2); --file=PATCHFILE
@@ -101,14 +99,17 @@ Usage: ./ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
                   this does only work for MODE1_RAW and MODE2(_RAW) CD_IMAGEs
   --help        display this help and exit
   --version     output version information and exit
-  --test        run selftest (DEBUG)
-                  if you can read this uCON64 was compiled with active DEBUG
-                  this should only happen for development versions
 
 Dreamcast
   --dc          force recognition; NEEDED
                   --xcdrw works currently only for MODE1/2048 backups which
                   need the Utopia BootCD
+
+Playstation (One)/Playstation 2 (CD only)
+  --psx         force recognition; NEEDED
+DexDrive
+TODO: --xdex    send/receive SRAM to/from DexDrive; --file=PORT
+                  receives automatically when --rom(=SRAM) does not exist
 
 GameBoy Advance
   --gba         force recognition
@@ -129,14 +130,14 @@ GameBoy Advance
   --multi       make multirom for Flash Advance Linker; file with loader must
                   be specified first, then all the ROMs, multirom to
                   create last
-  --multi1      same as --multi, but truncate multirom size to 64Mb
-  --multi2      same as --multi, but truncate multirom size to 128Mb
-  --multi3      same as --multi, but truncate multirom size to 256Mb
+  --multi1      same as --multi, but truncate multirom size to 64 Mb
+  --multi2      same as --multi, but truncate multirom size to 128 Mb
+  --multi3      same as --multi, but truncate multirom size to 256 Mb
 Flash Advance Linker
   --xfal        send/receive ROM to/from Flash Advance Linker; --file=PORT
-                  receives automatically when ROM does not exist
-  --xfalc=SIZE  specify chip SIZE in mbits of ROM in Flash Advance Linker when
-                  receiving. SIZE can be 8,16,32,64,128 or 256. default is 32
+                  receives automatically (32 mbits) when ROM does not exist
+  --xfalc=N     receive N mbits of ROM from Flash Advance Linker; --file=PORT
+                  N can be 8, 16, 32, 64, 128 or 256
   --xfals       send/receive SRAM to/from Flash Advance Linker; --file=PORT
                   receives automatically when SRAM does not exist
   --xfalb=BANK  send/receive SRAM to/from Flash Advance Linker BANK
@@ -194,7 +195,7 @@ Super Nintendo/SNES/Super Famicon
                   this routine was used to find green colors in games and
                   to replace them with red colors (blood mode)
    -j           join split ROM
-   -s           split ROM into 4Mb parts (for backup unit(s) with fdd)
+   -s           split ROM into 4 Mb parts (for backup unit(s) with fdd)
    -k           remove protection (crack)
    -f           remove NTSC/PAL protection
    -l           convert to SlowROM
@@ -216,7 +217,7 @@ Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC
 
 Neo Geo/Neo Geo CD(Z)/MVS
   --ng          force recognition
-  --bios        convert NeoCd Bios to work with NeoCD emulator; --rom=BIOS
+  --bios        convert NeoCD BIOS to work with NeoCD emulator; --rom=BIOS
                   http://www.illusion-city.com/neo/
   --sam         convert SAM/M.A.M.E. sound to WAV; --rom=SAMFILE
 
@@ -229,9 +230,9 @@ Genesis/Sega Mega Drive/Sega CD/32X/Nomad
                   --stp just strips the first 512 bytes
   --mgd         convert to Multi Game*/MGD2/MGH/RAW
    -n           change foreign ROM name; --file=NEWNAME
-  --n2          change japanese ROM name; --file=NEWNAME
+  --n2          change Japanese ROM name; --file=NEWNAME
    -j           join split ROM
-   -s           split ROM into 4Mb parts (for backup unit(s) with fdd)
+   -s           split ROM into 4 Mb parts (for backup unit(s) with fdd)
   --chk         fix ROM checksum
   --1991        fix old third party ROMs to work with consoles build after
                   October 1991 by inserting "(C) SEGA" and "(C)SEGA"
@@ -278,6 +279,9 @@ Handy(prototype)/Lynx/Lynx II
   --rotr        set rotation right (LNX only)
   --b0          change Bank0 kBytes size (LNX only); --file={0,64,128,256,512}
   --b1          change Bank1 kBytes size (LNX only); --file={0,64,128,256,512}
+Lynxit (Lynx Cartridge Backup Board)
+TEST: --xlit    send/receive ROM to/from Lynxit interface; --file=PORT
+                  receives automatically when ROM does not exist
 
 PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))
 Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)
@@ -305,8 +309,8 @@ Nintendo Entertainment System/NES/Famicon Game Axe (Redant)
   --pasofami    convert to Pasofami/PRM/700/PRG/CHR
    -s           convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)
   --ffe         convert to FFE (+512 Bytes)
-  --mapr=NAME   specify board name or mapper number for conversion options
-                  NAME must be a string for UNIF and a number for Pasofami
+  --mapr=MAPR   specify board name or mapper number for conversion options
+                  MAPR must be a board name for UNIF and a number for Pasofami
                   and iNES
   --dint        convert ROM to non-interleaved format
   --ctrl=TYPE   specify controller type for ROM (UNIF only)
@@ -316,10 +320,10 @@ Nintendo Entertainment System/NES/Famicon Game Axe (Redant)
                   TYPE='3' Arkanoid controller
                   TYPE='4' powerpad
                   TYPE='5' four-score adapter
-  --ntsc        specify TV compatibility to NTSC (UNIF only)
-  --pal         specify TV compatibility to PAL (UNIF only)
-  --bat         specify battery backup
-  --nbat        specify no battery backup
+  --ntsc        specify TV standard as NTSC (UNIF only)
+  --pal         specify TV standard as PAL (UNIF only)
+  --bat         specify battery is present
+  --nbat        specify battery is not present
   --vram        specify VRAM override (UNIF only)
   --nvram       specify no VRAM override (UNIF only)
   --mirr=MTYPE  specify mirroring type
@@ -329,8 +333,11 @@ Nintendo Entertainment System/NES/Famicon Game Axe (Redant)
                   MTYPE='3' mirror all pages from $2400 (UNIF only)
                   MTYPE='4' four screens of VRAM
                   MTYPE='5' mirroring controlled by mapper hardware (UNIF only)
+  --cmnt=TEXT   specify that TEXT should be used as comment (UNIF only)
   --dumpinfo    use dumper info when converting to UNIF; --file=INFOFILE
    -n           change internal ROM name (UNIF only); --file=NEWNAME
+  --fds         convert Famicon Disk System file (diskimage) from FAM to FDS
+  --fdsl        list Famicon Disk System/FDS (diskimage) contents
 
 WonderSwan/WonderSwan Color/SwanCrystal
   --swan        force recognition
@@ -346,9 +353,8 @@ Database: 15216 known ROMs in db.h (+0)
 
 TIP: ./ucon64 --help --snes (would show only Super Nintendo related help)
      ./ucon64 --help|less (to see everything in less)
-     give the force recognition option a try if something went wrong
+     give the force recognition switch a try if something went wrong
 
 Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net
-
 
 </pre></tt></body></html>

@@ -446,6 +446,10 @@ gameboy_init (st_rominfo_t *rominfo)
     "ROM + MBC5 + SRAM + Battery + Rumble",
     "Nintendo Pocket Camera"},
   *gameboy_romtype2[3] = {
+    "Rocket Games",
+    NULL,
+    "Rocket Games 2-in-1"},
+  *gameboy_romtype3[3] = {
     "Bandai TAMA5",
     "Hudson HuC-3",
     "Hudson HuC-1"},
@@ -492,7 +496,15 @@ gameboy_init (st_rominfo_t *rominfo)
   else
     x = (gameboy_header.maker >> 4) * 36 + (gameboy_header.maker & 0x0f);
 
-  if (x < 0 || x >= NINTENDO_MAKER_LEN)
+  /*
+    I added the first if statement, because I didn't want to expand
+    nintendo_maker by a large amount for only one publisher and because index 0
+    is used when the publisher code is unknown (so it shouldn't be set to
+    "Rocket Games"). - dbjh
+  */
+  if (x == 33 * 36 + 33 || x == 0)              // publisher code XX/00
+    x = 2;                                      // Rocket Games
+  else if (x < 0 || x >= NINTENDO_MAKER_LEN)
     x = 0;
   rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[x]);
 
@@ -506,8 +518,10 @@ gameboy_init (st_rominfo_t *rominfo)
 
   if (gameboy_header.rom_type <= 0x1f)
     str = NULL_TO_UNKNOWN_S (gameboy_romtype1[gameboy_header.rom_type]);
+  else if (gameboy_header.rom_type >= 0x97 && gameboy_header.rom_type <= 0x99)
+    str = gameboy_romtype2[gameboy_header.rom_type - 0x97];
   else if (gameboy_header.rom_type >= 0xfd)
-    str = gameboy_romtype2[gameboy_header.rom_type - 0xfd];
+    str = gameboy_romtype3[gameboy_header.rom_type - 0xfd];
   else
     str = "Unknown";
   sprintf (buf, "ROM type: %s\n", str);

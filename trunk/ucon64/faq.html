@@ -71,10 +71,10 @@ Q: I have a SNES ROM of which GoodSNES says it's good, but uCON64 says it's bad.
 Who is right?<br />
 A: GoodSNES.<br />
 There may be several reasons why uCON64 reports that the checksum is bad. It could have
-made a mistake in determining if the ROM is a HiROM or a LoROM dump. Try the options -hi
-and -nhi and see if uCON64 reports the checksum differently. A bigger problem is that the
-interleave detection code (stolen from Snes9x ;-) is not reliable. Especially BS ROMs are
-often detected as not being interleaved while they actually are. Try the options -int
+made a mistake while determining if the ROM is a HiROM or a LoROM dump. Try the options
+-hi and -nhi and see if uCON64 reports the checksum differently. A bigger problem is that
+the interleave detection code (stolen from Snes9x ;-) is not reliable. Especially BS ROMs
+are often detected as not being interleaved while they actually are. Try the options -int
 and -int2 and see if you get better results. If the checksum is reported as good it is
 very likely that the ROM is really good. Alternatively, you may want to convert the ROM
 to a non-interleaved format with -dint and run uCON64 on the converted ROM. That gives
@@ -95,7 +95,7 @@ can that be, I did fix the ROM, right?<br />
 A: No, you did not. When you use -chk uCON64 changes four bytes in the ROM dump, so that
 they match with the calculated checksum. However, the ROM stays just as bad as it was.
 Use -chk with care. -chk might be useful if you want to store a ROM somewhere without
-using a database with it's checksum. You can then later check if the ROM is still in the
-same form as when you stored it by using the checksum that is stored in the ROM.
+using a database with its checksum. You can then later check if the ROM is still the same
+as it was when you stored it by using the checksum that is stored in the ROM.
 </tt></p>
 </tt></body></html>

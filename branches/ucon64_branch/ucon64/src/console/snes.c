@@ -198,8 +198,8 @@ static unsigned char gd3_hirom_32mb_map[GD3_HEADER_MAPSIZE] = {
 // map for Dai Kaiju Monogatari 2 (J)
 static unsigned char gd3_hirom_40mb_map[GD3_HEADER_MAPSIZE] = {
   0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-  0x21, 0x23, 0x24, 0x25, 0x21, 0x23, 0x24, 0x25,
-  0x22, 0x22, 0x22, 0x22, 0x26, 0x27, 0x28, 0x29
+  0x22, 0x23, 0x24, 0x25, 0x22, 0x23, 0x24, 0x25,
+  0x21, 0x21, 0x21, 0x21, 0x26, 0x27, 0x28, 0x29
 };
 // map for Tales of Phantasia (J)
 static unsigned char gd3_hirom_48mb_map[GD3_HEADER_MAPSIZE] = {
@@ -868,7 +868,22 @@ snes_gd3 (st_rominfo_t *rominfo)
       if (newsize > size)
         memset (dstbuf + size, 0, newsize - size);
 
-      if (total4Mbparts == 6)
+      if (snes_header_base == SNES_EROM)
+        {
+          int size2 = newsize - 32 * MBIT;      // size of second ROM (16 Mbit if ToP)
+          // interleave the 32 Mbit ROM
+          snes_int_blocks (srcbuf, dstbuf + size2 + 16 * MBIT, dstbuf + size2,
+                           32 * MBIT / 0x10000);
+          // interleave the second ROM
+          snes_int_blocks (srcbuf + 32 * MBIT, dstbuf + size2 / 2, dstbuf,
+                           size2 / 0x10000);
+          if (pad > 0)
+            {
+              snes_mirror (dstbuf, 0, 4 * MBIT, 8 * MBIT);
+              snes_mirror (dstbuf, 8 * MBIT, 12 * MBIT, 16 * MBIT);
+            }
+        }
+      else if (total4Mbparts == 6)
         {
           snes_int_blocks (srcbuf, dstbuf + 16 * MBIT, dstbuf, 16 * MBIT / 0x10000);
           snes_int_blocks (srcbuf + 16 * MBIT, dstbuf + 12 * MBIT,
@@ -877,32 +892,6 @@ snes_gd3 (st_rominfo_t *rominfo)
             {
               snes_mirror (dstbuf, 8 * MBIT, 10 * MBIT, 12 * MBIT);
               snes_mirror (dstbuf, 12 * MBIT, 14 * MBIT, 16 * MBIT);
-            }
-        }
-      else if (total4Mbparts == 10)
-        {                                       // we assume it is an Extended ROM
-          // interleave the 32 Mbit ROM
-          snes_int_blocks (srcbuf, dstbuf + 24 * MBIT, dstbuf + 4 * MBIT,
-                           8 * MBIT / 0x10000);
-          snes_int_blocks (srcbuf + 8 * MBIT, dstbuf + 28 * MBIT, dstbuf + 12 * MBIT,
-                           24 * MBIT / 0x10000);
-          // interleave the second ROM
-          snes_int_blocks (srcbuf + 32 * MBIT, dstbuf + 8 * MBIT, dstbuf,
-                           8 * MBIT / 0x10000); // size of second ROM
-        }
-      else if (total4Mbparts == 12)
-        {                                       // we assume it is an Extended ROM
-          int size2 = size - 32 * MBIT;         // size of second ROM (16 Mbit if ToP)
-          // interleave the 32 Mbit ROM
-          snes_int_blocks (srcbuf, dstbuf + 32 * MBIT, dstbuf + 16 * MBIT,
-                           32 * MBIT / 0x10000);
-          // interleave the second ROM
-          snes_int_blocks (srcbuf + 32 * MBIT, dstbuf + 8 * MBIT, dstbuf,
-                           size2 / 0x10000);
-          if (pad > 0)
-            {
-              snes_mirror (dstbuf, 0, 4 * MBIT, 8 * MBIT);
-              snes_mirror (dstbuf, 8 * MBIT, 12 * MBIT, 16 * MBIT);
             }
         }
       else
@@ -2391,34 +2380,18 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_si
             }
           else if (snes_header_base == SNES_EROM)
             {
-              if (rom_size == 40 * MBIT)
+              int size2 = rom_size - 32 * MBIT; // size of second ROM
+              j = 32 * MBIT >> 16;
+              for (i = 0; i < j; i++)
                 {
-                  for (i = 0; i < (32 * MBIT) >> 16; i++)
-                    {
-                      blocks[i * 2] = (unsigned char) (i + (24 * MBIT >> 15));
-                      blocks[i * 2 + 1] = i + ((i < (8 * MBIT >> 16) ? 4 : 8) * MBIT >> 15);
-                    }
-                  for (; i < (40 * MBIT) >> 16; i++)
-                    {
-                      blocks[i * 2] = (unsigned char) (i - (8 * MBIT >> 15));
-                      blocks[i * 2 + 1] = (unsigned char) (i - (16 * MBIT >> 15));
-                    }
+                  blocks[i * 2] = i + j + (size2 >> 15);
+                  blocks[i * 2 + 1] = i + (size2 >> 15);
                 }
-              else
+              j = size2 >> 16;
+              for (; i < j + (32 * MBIT >> 16); i++)
                 {
-                  int size2 = rom_size - 32 * MBIT; // size of second ROM
-                  j = 32 * MBIT >> 16;
-                  for (i = 0; i < j; i++)
-                    {
-                      blocks[i * 2] = i + j + (size2 >> 15);
-                      blocks[i * 2 + 1] = i + (size2 >> 15);
-                    }
-                  j = size2 >> 16;
-                  for (; i < j + (32 * MBIT >> 16); i++)
-                    {
-                      blocks[i * 2] = (unsigned char) (i + j - (32 * MBIT >> 16));
-                      blocks[i * 2 + 1] = (unsigned char) (i - (32 * MBIT >> 16));
-                    }
+                  blocks[i * 2] = (unsigned char) (i + j - (32 * MBIT >> 16));
+                  blocks[i * 2 + 1] = (unsigned char) (i - (32 * MBIT >> 16));
                 }
               blocksset = 1;
             }

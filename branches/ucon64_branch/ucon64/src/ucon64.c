@@ -73,9 +73,6 @@ write programs in C
 #ifdef  GUI
 #include "ucon64_ng.h"
 #endif
-#ifdef  GUI
-#include "ucon64_ng.h"
-#endif
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
@@ -1034,82 +1031,6 @@ ucon64_rom_handling (void)
                    basename2 (ucon64.rom));
           return -1;
         }
-
-#if 0 
-  if (!(ucon64.flags & WF_INIT))
-    return 0;
-
-  // "walk through" <console>_init()
-  if (ucon64.flags & WF_PROBE)
-    {
-      ucon64.rominfo = ucon64_probe (&rominfo); // returns console type
-
-      if (ucon64.rominfo)
-        {
-          // restore any overrides from st_ucon64_t
-          if (UCON64_ISSET (ucon64.buheader_len))
-            rominfo.buheader_len = ucon64.buheader_len;
-
-          if (UCON64_ISSET (ucon64.snes_header_base))
-            rominfo.snes_header_base = ucon64.snes_header_base;
-
-          if (UCON64_ISSET (ucon64.snes_hirom))
-            rominfo.snes_hirom = ucon64.snes_hirom;
-
-          if (UCON64_ISSET (ucon64.interleaved))
-            rominfo.interleaved = ucon64.interleaved;
-
-//          ucon64.rominfo = (st_rominfo_t *) &rominfo;
-        }
-
-#ifdef  DISCMAGE
-      // check for disc image only if ucon64_probe() failed or --disc was used
-      if (ucon64.discmage_enabled)
-//        if (!ucon64.rominfo || ucon64.force_disc)
-        if (ucon64.force_disc)
-          ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
-#endif
-    }
-  // end of WF_PROBE
-#endif
-
-#if 0 
-  if (!(ucon64.flags & WF_INIT))
-    return 0;
-
-  // "walk through" <console>_init()
-  if (ucon64.flags & WF_PROBE)
-    {
-      ucon64.rominfo = ucon64_probe (&rominfo); // returns console type
-
-      if (ucon64.rominfo)
-        {
-          // restore any overrides from st_ucon64_t
-          if (UCON64_ISSET (ucon64.buheader_len))
-            rominfo.buheader_len = ucon64.buheader_len;
-
-          if (UCON64_ISSET (ucon64.snes_header_base))
-            rominfo.snes_header_base = ucon64.snes_header_base;
-
-          if (UCON64_ISSET (ucon64.snes_hirom))
-            rominfo.snes_hirom = ucon64.snes_hirom;
-
-          if (UCON64_ISSET (ucon64.interleaved))
-            rominfo.interleaved = ucon64.interleaved;
-
-//          ucon64.rominfo = (st_rominfo_t *) &rominfo;
-        }
-
-#ifdef  DISCMAGE
-      // check for disc image only if ucon64_probe() failed or --disc was used
-      if (ucon64.discmage_enabled)
-//        if (!ucon64.rominfo || ucon64.force_disc)
-        if (ucon64.force_disc)
-          ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
-#endif
-    }
-  // end of WF_PROBE
-#endif
 
 
   /*

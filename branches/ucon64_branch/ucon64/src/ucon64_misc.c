@@ -882,7 +882,7 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
   NULL};                                        // IZ
 
 
-#if     defined PARALLEL && (defined __BEOS__ || defined AMIGA)
+#if     defined PARALLEL && (defined __BEOS__ || defined AMIGA || defined __FreeBSD__)
 typedef struct st_ioport
 {
   unsigned int port;

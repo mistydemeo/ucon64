@@ -1094,14 +1094,16 @@ if(rom->console != ucon64_UNKNOWN)
    bytes <= MAXROMSIZE ) ? gbadvance_init(rom) :
   (rom->console == ucon64_GENESIS &&
    bytes <= MAXROMSIZE ) ? genesis_init(rom) :
+  (rom->console == ucon64_N64 &&
+   bytes <= MAXROMSIZE ) ? nintendo64_init(rom) :
+  (rom->console == ucon64_SNES &&
+   bytes <= MAXROMSIZE ) ? snes_init(rom) :
   (rom->console == ucon64_SMS &&
    bytes <= MAXROMSIZE ) ? sms_init(rom) :
   (rom->console == ucon64_JAGUAR &&
    bytes <= MAXROMSIZE ) ? jaguar_init(rom) :
   (rom->console == ucon64_LYNX &&
    bytes <= MAXROMSIZE ) ? lynx_init(rom) :
-  (rom->console == ucon64_N64 &&
-   bytes <= MAXROMSIZE ) ? nintendo64_init(rom) :
   (rom->console == ucon64_NEOGEO &&
    bytes <= MAXROMSIZE ) ? neogeo_init(rom) :
   (rom->console == ucon64_NES &&
@@ -1112,8 +1114,6 @@ if(rom->console != ucon64_UNKNOWN)
    bytes <= MAXROMSIZE ) ? system16_init(rom) :
   (rom->console == ucon64_ATARI &&
    bytes <= MAXROMSIZE ) ? atari_init(rom) :
-  (rom->console == ucon64_SNES &&
-   bytes <= MAXROMSIZE ) ? snes_init(rom) :
   (rom->console == ucon64_NEOGEOPOCKET &&
    bytes <= MAXROMSIZE ) ? neogeopocket_init(rom) :
   (rom->console == ucon64_VECTREX &&

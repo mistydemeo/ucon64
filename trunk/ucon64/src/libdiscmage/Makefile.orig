@@ -16,10 +16,7 @@ endif
 LDFLAGS=-s
 
 LIBNAME=discmage
-OBJECTS=libdiscmage.o cdi.o nero.o sheets.o dllinit.o
-ifndef  DJGPP
-OBJECTS+=misc.o
-endif
+OBJECTS=libdiscmage.o cdi.o nero.o sheets.o dllinit.o misc.o
 
 
 # The test for Cygwin should be done before the test for DJGPP, because the
@@ -28,8 +25,14 @@ endif
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
-LIBS=-lcygwin -lkernel32
+GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/
+LIBS=-lcygwin -lkernel32 -L$(GCCA_DIR) -lgcc
 # kernel32 for DLOPEN and DisableThreadLibraryCalls()
+#ZLIB=1
+ifdef ZLIB
+LIBS+=-lz
+OBJECTS+=unzip.o
+endif
 
 ifdef DLOPEN
 ENTRY=__cygwin_dll_entry@12
@@ -44,6 +47,9 @@ DLLTOOLFLAGS=--dllname $(LIBNAME).dll --def tmp.def
 else
 ifdef DJGPP
 
+CFLAGS+=-DDXE
+GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/2.81
+DLLFLAGS=-L$(GCCA_DIR) -lgcc
 FULLLIBNAME=$(LIBNAME).dxe
 
 else                                    # Unix or BeOS
@@ -117,6 +123,8 @@ endif
 #	nm $(OBJECTS) | grep ' T _' | sed 's/.* T _//' >> tmp.def
 	nm $(OBJECTS) | grep '^........ [T] _' | sed 's/[^_]*_//' >> tmp.def
 
+	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
+	@echo "      symbols, read faq.html question 2"
 	ld --base-file tmp.base $(DLLFLAGS)
 	dlltool $(DLLTOOLFLAGS) --base-file tmp.base --output-exp tmp.exp
 
@@ -136,7 +144,9 @@ $(LIBNAME).dxe $(LIBNAME).a: $(OBJECTS) djimport.o dlopen.o
 else
 $(LIBNAME).dxe: $(OBJECTS)
 endif
-	dxegen $(LIBNAME).dxe _import_export $(OBJECTS)
+	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
+	@echo "      symbols, read faq.html question 2"
+	dxegen $(LIBNAME).dxe _import_export $(OBJECTS) $(DLLFLAGS)
 ifndef DLOPEN
 	ar rs $(LIBNAME).a djimport.o dlopen.o
 endif
@@ -157,8 +167,13 @@ endif                                   # cygwin
 #endif
 
 # Dependencies
-libdiscmage/libdiscmage.o: libdiscmage/libdiscmage.h libdiscmage/libdiscmage_cfg.h libdiscmage/dxedll_priv.h
-libdiscmage/nero.o: libdiscmage/libdiscmage.h libdiscmage/nero.h libdiscmage/cdi.h config.h libdiscmage/dxedll_priv.h
-libdiscmage/cdi.o: libdiscmage/libdiscmage.h libdiscmage/cdi.h libdiscmage/dxedll_priv.h
+libdiscmage/libdiscmage.o: libdiscmage/libdiscmage.h \
+                           libdiscmage/libdiscmage_cfg.h \
+                           libdiscmage/dxedll_priv.h
+libdiscmage/nero.o: libdiscmage/libdiscmage.h libdiscmage/nero.h \
+                    libdiscmage/cdi.h config.h libdiscmage/dxedll_priv.h
+libdiscmage/cdi.o: libdiscmage/libdiscmage.h libdiscmage/cdi.h \
+                   libdiscmage/dxedll_priv.h
 libdiscmage/sheets.o: libdiscmage/libdiscmage.h libdiscmage/dxedll_priv.h
 libdiscmage/dllinit.o: libdiscmage/libdiscmage.h libdiscmage/dxedll_priv.h
+libdiscmage/misc.o: libdiscmage/dxedll_priv.h

@@ -719,18 +719,13 @@ ucon64_process_rom (char *fname)
           /*
             There seems to be no other way to detect directories in ZIP files
             than by looking at the file name. Paths in ZIP files should contain
-            forward slashes. ucon64_fname_arch() calls basename2(), so
-            ucon64.fname_arch will be empty when uCON64 is compiled with a
-            compiler other than Visual C++ or MinGW. When uCON64 is compiled
-            with Visual C++ or MinGW, basename2() will not handle forward
-            slashes as file separator, so we have to check for an empty string
-            *or* a forward slash at the end of the string.
+            forward slashes. ucon64_fname_arch() changes forward slashes into
+            backslashes (FILE_SEPARATORs) when uCON64 is compiled with Visual
+            C++ or MinGW so that basename2() always produces a correct base
+            name. So, if the entry in the ZIP file is a directory
+            ucon64.fname_arch will be an empty string.
           */
-#if     !defined _WIN32
           if (strlen (ucon64.fname_arch) == 0)
-#else                                           // Visual C++ or MinGW
-          if (ucon64.fname_arch[strlen (ucon64.fname_arch) - 1] == '/')
-#endif
             continue;
 
           ucon64.rom = fname;
@@ -1394,6 +1389,14 @@ ucon64_fname_arch (const char *fname)
   unzip_goto_file (file, unzip_current_file_nr);
   unzGetCurrentFileInfo (file, NULL, name, FILENAME_MAX, NULL, 0, NULL, 0);
   unzClose (file);
+#if     defined _WIN32 || defined __MSDOS__
+  {
+    int n, l = strlen (name);
+    for (n = 0; n < l; n++)
+      if (name[n] == '/')
+        name[n] = FILE_SEPARATOR;
+  }
+#endif
   strncpy (ucon64.fname_arch, basename2 (name), FILENAME_MAX);
 }
 #endif

@@ -951,7 +951,7 @@ realpath (const char *path, char *full_path)
         int l = strlen (new_path);
         for (n = 0; n < l; n++)
           if (new_path[n] == '/')
-            new_path[n] = FILE_SEPARATOR_S;
+            new_path[n] = FILE_SEPARATOR;
       }
 #endif
       new_path += strlen (new_path);

@@ -56,7 +56,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 typedef struct
 {
   const char *id;                              // string to detect console from datfile name
-  int (*compare) (const char *, const char *); // the function which compares the id with the filename
+  int (*compare) (const void *a, const void *b); // the function which compares the id with the filename
      // compare() == 0 means success
   int8_t console;                              // UCON64_SNES, UCON64_NES, etc.
   const char **console_usage;
@@ -89,6 +89,20 @@ fclose_fdat (void)
   if (fdat)
     fclose (fdat);
   fdat = NULL;
+}
+
+
+static int
+custom_stristr (const void *a, const void *b)
+{
+  return (!stristr ((const char *)a, (const char *)b)) ? 1 : 0;
+}
+
+
+static int
+custom_strnicmp (const void *a, const void *b)
+{
+  return strnicmp ((const char *)a, (const char *)b, MIN (strlen((const char *)a), strlen ((const char *)b)));
 }
 
 
@@ -149,59 +163,58 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
   // TODO: update this list to contain only strings that real DAT filenames
   //  start with
 
-  char buf[FILENAME_MAX];
   static const st_console_t console_type[] = {
-    {"GoodSNES", stricmp, UCON64_SNES, snes_usage},
-    {"GoodNES", stricmp, UCON64_NES, nes_usage},
-    {"GoodGBA", stricmp, UCON64_GBA, gba_usage},
-    {"GoodGBX", stricmp, UCON64_GB, gameboy_usage},
-    {"GoodGEN", stricmp, UCON64_GENESIS, genesis_usage},
-    {"GoodGG", stricmp, UCON64_SMS, sms_usage},
-    {"GoodSMS", stricmp, UCON64_SMS, sms_usage},
-    {"GoodJAG", stricmp, UCON64_JAGUAR, jaguar_usage},
-    {"GoodLynx", stricmp, UCON64_LYNX, lynx_usage},
-    {"GoodN64", stricmp, UCON64_N64, n64_usage},
-    {"Neo-Geo", stricmp, UCON64_NEOGEO, neogeo_usage},
-    {"GoodPCE", stricmp, UCON64_PCE, pcengine_usage},
-    {"Good2600", stricmp, UCON64_ATARI, atari_usage},
-    {"Good5200", stricmp, UCON64_ATARI, atari_usage},
-    {"Good7800", stricmp, UCON64_ATARI, atari_usage},
-    {"MAME", stricmp, UCON64_MAME, mame_usage},
+    {"GoodSNES", custom_strnicmp, UCON64_SNES, snes_usage},
+    {"GoodNES", custom_strnicmp, UCON64_NES, nes_usage},
+    {"GoodGBA", custom_strnicmp, UCON64_GBA, gba_usage},
+    {"GoodGBX", custom_strnicmp, UCON64_GB, gameboy_usage},
+    {"GoodGEN", custom_strnicmp, UCON64_GENESIS, genesis_usage},
+    {"GoodGG", custom_strnicmp, UCON64_SMS, sms_usage},
+    {"GoodSMS", custom_strnicmp, UCON64_SMS, sms_usage},
+    {"GoodJAG", custom_strnicmp, UCON64_JAGUAR, jaguar_usage},
+    {"GoodLynx", custom_strnicmp, UCON64_LYNX, lynx_usage},
+    {"GoodN64", custom_strnicmp, UCON64_N64, n64_usage},
+    {"GoodPCE", custom_strnicmp, UCON64_PCE, pcengine_usage},
+    {"Good2600", custom_strnicmp, UCON64_ATARI, atari_usage},
+    {"Good5200", custom_strnicmp, UCON64_ATARI, atari_usage},
+    {"Good7800", custom_strnicmp, UCON64_ATARI, atari_usage},
+    {"Neo-Geo", custom_strnicmp, UCON64_NEOGEO, neogeo_usage},
+    {"MAME", custom_stristr, UCON64_MAME, mame_usage},
 /*
-    {"psx", stristr, UCON64_PSX, psx_usage},
-    {"ps1", stristr, UCON64_PSX, psx_usage},
-    {"psone", stristr, UCON64_PSX, psx_usage},
-    {"ps2", stristr, UCON64_PS2, ps2_usage},
-    {"sat", stristr, UCON64_SATURN, sat_usage},
-    {"dreamcast", stristr, UCON64_DC, dc_usage},
-    {"dc", stristr, UCON64_DC, dc_usage},
-    {"cd32", stristr, UCON64_CD32, cd32_usage},
-    {"cdi", stristr, UCON64_CDI, cdi_usage},
-    {"3do", stristr, UCON64_REAL3DO, real3do_usage},
-    {"system", stristr, UCON64_SYSTEM16, s16_usage},
-    {"pocket", stristr, UCON64_NEOGEOPOCKET, ngp_usage},
-    {"vectrex", stristr, UCON64_VECTREX, vectrex_usage},
-    {"virtual", stristr, UCON64_VIRTUALBOY, vboy_usage},
-    {"swan", stristr, UCON64_WONDERSWAN, swan_usage},
-    {"coleco", stristr, UCON64_COLECO, coleco_usage},
-    {"intelli", stristr, UCON64_INTELLI, intelli_usage},
-    {"", stristr, 0, cd32_usage},
-    {"", stristr, 0, cdi_usage},
-    {"", stristr, 0, channelf_usage},
-    {"", stristr, 0, coleco_usage},
-    {"", stristr, 0, gamecom_usage},
-    {"", stristr, 0, gc_usage},
-    {"", stristr, 0, gp32_usage},
-    {"", stristr, 0, intelli_usage},
-    {"", stristr, 0, odyssey2_usage},
-    {"", stristr, 0, odyssey_usage},
-    {"", stristr, 0, real3do_usage},
-    {"", stristr, 0, s16_usage},
-    {"", stristr, 0, sat_usage},
-    {"", stristr, 0, vboy_usage},
-    {"", stristr, 0, vc4000_usage},
-    {"", stristr, 0, vectrex_usage},
-    {"", stristr, 0, xbox_usage},
+    {"psx", custom_stristr, UCON64_PSX, psx_usage},
+    {"ps1", custom_stristr, UCON64_PSX, psx_usage},
+    {"psone", custom_stristr, UCON64_PSX, psx_usage},
+    {"ps2", custom_stristr, UCON64_PS2, ps2_usage},
+    {"sat", custom_stristr, UCON64_SATURN, sat_usage},
+    {"dreamcast", custom_stristr, UCON64_DC, dc_usage},
+    {"dc", custom_stristr, UCON64_DC, dc_usage},
+    {"cd32", custom_stristr, UCON64_CD32, cd32_usage},
+    {"cdi", custom_stristr, UCON64_CDI, cdi_usage},
+    {"3do", custom_stristr, UCON64_REAL3DO, real3do_usage},
+    {"system", custom_stristr, UCON64_SYSTEM16, s16_usage},
+    {"pocket", custom_stristr, UCON64_NEOGEOPOCKET, ngp_usage},
+    {"vectrex", custom_stristr, UCON64_VECTREX, vectrex_usage},
+    {"virtual", custom_stristr, UCON64_VIRTUALBOY, vboy_usage},
+    {"swan", custom_stristr, UCON64_WONDERSWAN, swan_usage},
+    {"coleco", custom_stristr, UCON64_COLECO, coleco_usage},
+    {"intelli", custom_stristr, UCON64_INTELLI, intelli_usage},
+    {"", custom_stristr, 0, cd32_usage},
+    {"", custom_stristr, 0, cdi_usage},
+    {"", custom_stristr, 0, channelf_usage},
+    {"", custom_stristr, 0, coleco_usage},
+    {"", custom_stristr, 0, gamecom_usage},
+    {"", custom_stristr, 0, gc_usage},
+    {"", custom_stristr, 0, gp32_usage},
+    {"", custom_stristr, 0, intelli_usage},
+    {"", custom_stristr, 0, odyssey2_usage},
+    {"", custom_stristr, 0, odyssey_usage},
+    {"", custom_stristr, 0, real3do_usage},
+    {"", custom_stristr, 0, s16_usage},
+    {"", custom_stristr, 0, sat_usage},
+    {"", custom_stristr, 0, vboy_usage},
+    {"", custom_stristr, 0, vc4000_usage},
+    {"", custom_stristr, 0, vectrex_usage},
+    {"", custom_stristr, 0, xbox_usage},
 */
     {0, 0, 0, 0}
   };
@@ -209,17 +222,7 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
 
   for (pos = 0; console_type[pos].id; pos++)
     {
-      strcpy (buf, fname);
-
-  // if we use stricmp(), strcmp(), etc. as compare() the strings must
-  //  have the same lengths. This saves us from using strnicmp(), 
-  //  strncmp(), etc. since they need a 3rd argument... 
-  // stristr() will work with this too..
-
-      if (console_type[pos].compare (buf, console_type[pos].id) != 0)
-        buf[strlen (console_type[pos].id)] = 0;
-      
-      if (!console_type[pos].compare (buf, console_type[pos].id))
+      if (!console_type[pos].compare (fname, console_type[pos].id))
         {
           dat->console = console_type[pos].console;
           dat->console_usage = console_type[pos].console_usage;

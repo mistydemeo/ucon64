@@ -7393,6 +7393,7 @@ nes_fdsl (st_rominfo_t *rominfo, char *output_str)
   if (output_str == NULL)
     puts (info);
 
+  fclose (srcfile);
   return 0;
 }
 

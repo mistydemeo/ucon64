@@ -1148,7 +1148,7 @@ realpath (const char *path, char *full_path)
   c = toupper (full_path[0]);
   n = strlen (full_path) - 1;
   // Remove trailing separator if full_path is not the root dir of a drive,
-  //  because Visual C++'s runtime system is *really* stupid
+  //  because Visual C++'s run-time system is *really* stupid
   if (full_path[n] == FILE_SEPARATOR &&
       !(c >= 'A' && c <= 'Z' && full_path[1] == ':' && full_path[3] == 0)) // && full_path[2] == FILE_SEPARATOR
     full_path[n] = 0;
@@ -1212,12 +1212,12 @@ one_file (const char *filename1, const char *filename2)
   HANDLE file1, file2;
   BY_HANDLE_FILE_INFORMATION finfo1, finfo2;
 
-  file1 = CreateFile (filename1, GENERIC_READ, FILE_SHARE_READ, NULL,
-                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  file1 = CreateFile (filename1, 0, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+                      FILE_ATTRIBUTE_NORMAL, NULL);
   if (file1 == INVALID_HANDLE_VALUE)
     return 0;
-  file2 = CreateFile (filename2, GENERIC_READ, FILE_SHARE_READ, NULL,
-                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  file2 = CreateFile (filename2, 0, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+                      FILE_ATTRIBUTE_NORMAL, NULL);
   if (file2 == INVALID_HANDLE_VALUE)
     {
       CloseHandle (file1);
@@ -1254,15 +1254,43 @@ one_filesystem (const char *filename1, const char *filename2)
   else
     return 0;
 #else
+  DWORD fattrib1, fattrib2;
+  char path1[FILENAME_MAX], path2[FILENAME_MAX], *p, d1, d2;
   HANDLE file1, file2;
   BY_HANDLE_FILE_INFORMATION finfo1, finfo2;
 
-  file1 = CreateFile (filename1, GENERIC_READ, FILE_SHARE_READ, NULL,
-                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  if ((fattrib1 = GetFileAttributes (filename1)) == (DWORD) -1)
+    return 0;
+  if ((fattrib2 = GetFileAttributes (filename2)) == (DWORD) -1)
+    return 0;
+  if (fattrib1 & FILE_ATTRIBUTE_DIRECTORY || fattrib2 & FILE_ATTRIBUTE_DIRECTORY)
+    /* 
+      We special-case directories, because we can't use
+      FILE_FLAG_BACKUP_SEMANTICS as argument to CreateFile() under
+      Windows 9x/ME. There seems to be no Win32 function other than
+      CreateFile() to obtain a handle to a directory.
+    */
+    {
+      if (GetFullPathName (filename1, FILENAME_MAX, path1, &p) == 0)
+        return 0;
+      if (GetFullPathName (filename2, FILENAME_MAX, path2, &p) == 0)
+        return 0;
+      d1 = toupper (path1[0]);
+      d2 = toupper (path2[0]);
+      if (d1 == d2 && d1 >= 'A' && d1 <= 'Z' && d2 >= 'A' && d2 <= 'Z')
+        if (strlen (path1) >= 2 && strlen (path2) >= 2)
+          // We don't handle unique volume names
+          if (path1[1] == ':' && path2[1] == ':')
+            return 1;
+      return 0;
+    }
+
+  file1 = CreateFile (filename1, 0, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+                      FILE_ATTRIBUTE_NORMAL, NULL);
   if (file1 == INVALID_HANDLE_VALUE)
     return 0;
-  file2 = CreateFile (filename2, GENERIC_READ, FILE_SHARE_READ, NULL,
-                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  file2 = CreateFile (filename2, 0, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+                      FILE_ATTRIBUTE_NORMAL, NULL);
   if (file2 == INVALID_HANDLE_VALUE)
     {
       CloseHandle (file1);
@@ -1285,16 +1313,29 @@ rename2 (const char *oldname, const char *newname)
 {
   int retval;
   char *dir1 = dirname2 (oldname), *dir2 = dirname2 (newname);
+  struct stat fstate;
 
   // We should use dirname{2}() in case oldname or newname doesn't exist yet
   if (one_filesystem (dir1, dir2))
-    retval = rename (oldname, newname);
+    {
+      if (access (newname, F_OK) == 0)
+        {
+          stat (newname, &fstate);
+          chmod (newname, fstate.st_mode | S_IWUSR);
+          remove (newname);                     // *try* to remove or rename() will fail
+        }
+      retval = rename (oldname, newname);
+    }
   else
     {
-      // don't remove unless the file can be copied
       retval = q_rfcpy (oldname, newname);
+      // don't remove unless the file can be copied
       if (retval == 0)
-        remove (oldname);
+        {
+          stat (oldname, &fstate);
+          chmod (oldname, fstate.st_mode | S_IWUSR);
+          remove (oldname);
+        }
     }
 
   free (dir1);
@@ -1883,7 +1924,7 @@ getenv2 (const char *variable)
 #if     defined __CYGWIN__ || defined __MSDOS__
 /*
   Under DOS and Windows the environment variables are not stored in a case
-  sensitive manner. The runtime systems of DJGPP and Cygwin act as if they are
+  sensitive manner. The run-time systems of DJGPP and Cygwin act as if they are
   stored in upper case. Their getenv() however *is* case sensitive. We fix this
   by changing all characters of the search string (variable) to upper case.
 
@@ -1939,9 +1980,9 @@ getenv2 (const char *variable)
           /*
             DJGPP and (yet another) Cygwin quirck
             A trailing backslash is used to check for a directory. Normally
-            DJGPP's runtime system is able to handle forward slashes in paths,
+            DJGPP's run-time system is able to handle forward slashes in paths,
             but access() won't differentiate between files and dirs if a
-            forward slash is used. Cygwin's runtime system seems to handle
+            forward slash is used. Cygwin's run-time system seems to handle
             paths with forward slashes quite different from paths with
             backslashes. This trick seems to work only if a backslash is used.
           */
@@ -1958,8 +1999,8 @@ getenv2 (const char *variable)
 
 #ifdef  __CYGWIN__
   /*
-    Under certain circumstances Cygwin's runtime system returns "/" as value of
-    HOME while that var has not been set. To specify a root dir a path like
+    Under certain circumstances Cygwin's run-time system returns "/" as value
+    of HOME while that var has not been set. To specify a root dir a path like
     /cygdrive/<drive letter> or simply a drive letter should be used.
   */
   if (!strcmp (variable, "HOME") && !strcmp (value, "/"))
@@ -2486,7 +2527,7 @@ q_fbackup (const char *filename, int mode)
   set_suffix (buf, ".BAK");
   if (strcmp (filename, buf) != 0)
     {
-      remove (buf);                             // *try* to remove or rename will fail
+      remove (buf);                             // *try* to remove or rename() will fail
       if (rename (filename, buf))               // keep file attributes like date, etc.
         {
           fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);

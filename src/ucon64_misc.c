@@ -265,13 +265,6 @@ Vectrex (1982)
 Virtual Boy
 X-Box
 XE System
-
-emuchina.net
-gameaxe.com
-gametz.com
-logiqx.com
-romcenter.com
-sys2064.com
 #endif
 
 
@@ -1317,13 +1310,6 @@ ucon64_configfile_update (void)
   sprintf (buf, "%d", UCON64_CONFIG_VERSION);
   set_property (ucon64.configfile, "version",     buf, "uCON64 configuration");
 
-  set_property (ucon64.configfile, "f2afirmware", "f2afirm.hex",  "F2A support files\n"
-                                                                  "path to F2A USB firmware");
-  set_property (ucon64.configfile, "iclientu",    "iclientu.bin", "path to GBA client binary (for USB code)");
-  set_property (ucon64.configfile, "iclientp",    "iclientp.bin", "path to GBA client binary (for parallel port code)");
-  set_property (ucon64.configfile, "ilogo",       "ilogo.bin",    "path to iLinker logo file");
-  set_property (ucon64.configfile, "gbaloader",   "loader.bin",   "path to GBA multi-game loader");
-
   return 0;
 }
 
@@ -1426,6 +1412,13 @@ ucon64_configfile_create (void)
 #endif
     "directory with DAT files");
 
+  set_property (ucon64.configfile, "f2afirmware", "f2afirm.hex",  "F2A support files\n"
+                                                                  "path to F2A USB firmware");
+  set_property (ucon64.configfile, "iclientu",    "iclientu.bin", "path to GBA client binary (for USB code)");
+  set_property (ucon64.configfile, "iclientp",    "iclientp.bin", "path to GBA client binary (for parallel port code)");
+  set_property (ucon64.configfile, "ilogo",       "ilogo.bin",    "path to iLinker logo file");
+  set_property (ucon64.configfile, "gbaloader",   "loader.bin",   "path to GBA multi-game loader");
+
   for (x = 0; emulate[x].emu; x++)
     for (y = 0; options[y].name; y++)
        if (emulate[x].id == options[y].val)
@@ -1463,10 +1456,6 @@ ucon64_configfile (void)
     ".ucon64rc"
 #endif
     , dirname);
-#ifdef  DJGPP
-  // this is DJGPP specific - not necessary, but prevents confusion
-  change_mem (ucon64.configfile, strlen (ucon64.configfile), "/", 1, 0, 0, "\\", 1, 0);
-#endif
 
 //  if (!access (ucon64.configfile, F_OK))
 //    fprintf (stderr, ucon64_msg[READ_CONFIG_FILE], ucon64.configfile);

@@ -1,5 +1,5 @@
 /*
-    flc 0.9.3 linux/unix 1999/2000/2001 by NoisyB (noisyb@gmx.net)
+    flc 1999/2000/2001 by NoisyB (noisyb@gmx.net)
     A filelisting creator which uses FILE_ID.DIZ from archives/files
     to generate a bbs style filelisting
     Copyright (C) 1999/2000/2001 by NoisyB (noisyb@gmx.net)
@@ -22,139 +22,146 @@
 #include "flc.h"
 
 #include "extract.h"
-#include "mkfl2.h"
-#include "zippy.h"
-#include "sort.h"
-#include "mkfl.h"
-#include "resortfl.h"
+//#include "sort.h"
 #include "output.h"
-#include "txtextract.h"
 
 int main(int argc,char *argv[])
 {
-long x = 0;
 char buf[4096];
 struct flc_ flc;
+struct file_ *file,*file0,file_ns;
+struct dirent *ep;
+struct stat puffer;
+long x = 0;
+DIR *dp;
+int sort=0;
 
+if (
+    argcmp(argc, argv, "-h") ||
+    argcmp(argc, argv, "-help") ||
+    argcmp(argc, argv, "-?"))
+  {
+  flc_usage(argc,argv);
+  return 0;
+}
 
-  if (argc<2 ||
-      argcmp(argc, argv, "-h") ||
-      argcmp(argc, argv, "-help") ||
-      argcmp(argc, argv, "-?"))
-    {
-    usage(argc,argv);
-    return 0;
+if(
+  argcmp(argc,argv,"-d") ||
+  argcmp(argc,argv,"-a") ||
+  argcmp(argc,argv,"-b") ||
+  argcmp(argc,argv,"-fr")
+)sort=1;
+
+flc.argc=argc;
+for( x = 0 ; x < argc ; x++ )flc.argv[x]=argv[x];
+
+flc.kb = (argcmp(argc,argv,"-k")) ? 1 : 0;
+flc.files = 0;
+
+strcpy(flc.path,getarg(argc,argv,flc_FILE));
+if(!flc.path[0])
+  getcwd(flc.path,(size_t)sizeof(flc.path));
+if(flc.path[strlen(flc.path)-1]==FILE_SEPARATOR)
+  flc.path[strlen(flc.path)-1]=0;
+
+if(!(dp=opendir(flc.path)))
+{
+  flc_usage(argc,argv);
+  return(-1);
+}
+
+if(argcmp(argc,argv,"-h"))
+  printf("<html><head><title></title></head><body><pre><tt>");
+
+if(sort)
+{
+/*
+    find out how many regular files are in the current dir
+    and malloc files*struct for them 
+*/
+
+  while((ep=readdir(dp))!=NULL)
+  {
+    stat(ep->d_name,&puffer);
+    if(S_ISREG(puffer.st_mode))flc.files++;
   }
 
-strcpy(flc.arg0,getarg(argc,argv,0));
-strcpy(flc.arg1,getarg(argc,argv,1));
-strcpy(flc.arg2,getarg(argc,argv,2));
-strcpy(flc.arg3,getarg(argc,argv,3));
-
-flc.fcount=-1;
-
-flc.kb=(argcmp(argc,argv,"-k")) ? KB : NKB;
-flc.fr=(argcmp(argc,argv,"-fr")) ? REV : NREV;
-
-flc.what=
-  (
-    (argcmp(argc,argv,"-a")) ? BYNAME :
-    (
-      (argcmp(argc,argv,"-b")) ? BYSIZE :
-      BYDATE
-    )
-  );
-
-flc.how=(argcmp(argc,argv,"-ap")) ? APPEND : WRITE;
-flc.check=(argcmp(argc,argv,"-t")) ? 1 : 0;
-flc.edit=(argcmp(argc,argv,"-ed")) ? 1 : 0;
-flc.html=(argcmp(argc,argv,"-h")) ? 1 : 0;
-
-if(strlwr(flc.arg0)[0]=='t' || argcmp(argc,argv,"-x"))
-{
-  if(txtextract(argv[argc-1])==-1)usage(argc,argv);
-  return(0);
-}
-
-if(strlwr(flc.arg0)[0]=='z' || argcmp(argc,argv,"-z"))
-{
-//		if(
-  zippysearch(argv[argc-2],argv[argc-1]);
-//==-1)usage(argc,argv);
-}
-
-if(argcmp(argc,argv,"-n"))
-{
-//sprintf(buf,"echo >%s \"Nuked with %s\n",(argv[argc-2],"flc");
-//system(buf);
-//exit(0);
-//nuke file
-  return(0);
-}
-
-if(argcmp(argc,argv,"-s")||argcmp(argc,argv,"-c")||argcmp(argc,argv,"-c2"))
-{
-  if(argcmp(argc,argv,"-s"))      resortfl(flc);
-  else if(argcmp(argc,argv,"-c")) mkfl(flc);
-  else mkfl2(flc);
-
-  if(flc.fcount==-1)usage(argc,argv);
-
-  if(remove("file_id.diz")!=0)
+  if(!(file=(struct file_ *)malloc((flc.files+2)*sizeof(struct file_))))
   {
-    remove("FILE_ID.DIZ");
-    remove("File_id.diz");
-  }	
-
-  sort(flc);
-
-//  if(how==WRITE)output(argv[argc-1],fcount,kb,edit,html,"wb");
-//  else output(argv[argc-1],fcount,kb,edit,html,"ab");
-
-  output(flc);
+    printf("%s: Error allocating memory\n",getarg(argc,argv,0));
+    (void)closedir(dp);
+    return(-1);
+  }
+  file0=file;
+  rewinddir(dp);
 }
-  exit(0);
-}
+else file=&file_ns;
 
-
-
-
-void usage(int argc, char *argv[])
+flc.files=0;
+while((ep=readdir(dp))!=NULL)
 {
-printf("\nflc 0.9.3 linux/unix 1999/2000 by NoisyB (noisyb@gmx.net)\n\
-This may be freely redistributed under the terms of the GNU Public License\n\n\
-USAGE: %s [OPTION[MODIFIERS]] ARG1 ARG2 ARG3\n\n\
-  -c		create a new file-listing;\n\
-  		$ARG1=DIRECTORY $ARG2=NEW_FILELISTING\n\
-  -c2		create a new file-listing but take the FILE_ID.DIZ out of an\n\
-  		existing file-listing;\n\
-		$ARG1=DIRECTORY $ARG2=EXISTING_FILELISTING $ARG3=NEW_FILELISTING\n\
-  -s		resort an existing file-listing;\n\
-		$ARG1=FILELISTING $ARG2=NEW_FILELISTING\n\
-TODO:  -n	nuke (be careful); $ARG1=FILENAME\n\
-TODO:  -rn	rename all files in DIRECTORY to lowercase; $ARG1=DIRECTORY
-$0=z,\n\
-  -z		zippy-search file-listing; $ARG1=PATTERN $ARG2=FILELISTING\n\
-modifiers:\n\
-  -t		also check/test every archive/file in DIRECTORY\n\
-		flags: N=not checked (default), P=passed, F=failed\n\
-  -h		output as HTML document with links to the files\n\
-TODO:  -ed	use editor for archives/files w/o FILE_ID.DIZ\n\
-  -ap		append at NEW_FILELISTING\n\
-  -d		sort chronological\n\
-  -a		sort alphabetical\n\
-  -b		sort by byte size\n\
-  -fr		sort reverse\n\
-  -k		show sizes in kilobytes\n\
-\n\
-intern FILE_ID.DIZ extract routines:\n\
-$0=txtextract,\n\
-  -x		extract FILE_ID.DIZ from plain text; $ARG1=PLAIN_TXT_FILE\n\
-TODO:		extract FILE_ID.DIZ from zip archive; $ARG1=ZIP_ARCHIVE\n\
-\n\
-Amiga version: noC-FLC Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n\
-Report problems to noisyb@gmx.net\n\n\
-",getarg(argc,argv,0));
+  sprintf(buf,"%s/%s",flc.path,ep->d_name);
+  if(stat(buf,&puffer)==-1)continue;
+  if(S_ISREG(puffer.st_mode)!=TRUE)continue;
+
+  file->date=puffer.st_mtime;
+  file->size=puffer.st_size;  
+  strcpy(file->name,ep->d_name);  
+
+  extract(&flc,file);
+
+  if(!sort)
+  {
+    output(&flc,file);
+    continue;
+  }
+
+  file++;
+  flc.files++;
+}
+(void)closedir(dp);
+file=file0;
+
+if(sort)
+{
+//  sort(&flc,file);
+for( x = 0 ; x < flc.files ; x++ )
+  output(&flc,file+x);
+
+  free(file);
+}
+
+
+printf(
+  (argcmp(argc,argv,"-h")) ?
+  "</pre></tt></body></html>\n" :
+  "\n"
+);
+
+return(0);
+}
+
+int flc_usage(int argc, char *argv[])
+{
+printf(
+  "\n%s\n"
+  "This may be freely redistributed under the terms of the GNU Public License\n\n"
+  "USAGE: %s [OPTION[MODIFIERS]] DIR\n\n"
+  "  -t		also check/test every archive/file in DIRECTORY\n"
+  "		flags: N=not checked (default), P=passed, F=failed\n"
+  "  -h		output as HTML document with links to the files\n"
+  "  -ap		append at NEW_FILELISTING\n"
+  "  -d		sort chronological\n"
+  "  -a		sort alphabetical\n"
+  "  -b		sort by byte size\n"
+  "  -fr		sort reverse\n"
+  "  -k		show sizes in kilobytes\n"
+  "\n"
+  "Amiga version: noC-FLC Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
+  "Report problems to noisyb@gmx.net\n\n"
+  ,flc_TITLE
+  ,getarg(argc,argv,flc_NAME)
+);
 
 return(0);
 }

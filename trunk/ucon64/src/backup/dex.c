@@ -25,12 +25,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
+#include "quick_io.h"
 
 const char *dex_usage[] =
   {
     "DexDrive",
     "19XX InterAct http://www.dexdrive.de",
-    "TODO: " OPTION_LONG_S "xdex    send/receive SRAM to/from DexDrive; " OPTION_LONG_S "file=PORT\n"
+    "TEST: " OPTION_LONG_S "xdex=N  send/receive Block N to/from DexDrive; " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n",
     NULL
   };
@@ -46,7 +47,6 @@ static int print_data = 0x378;
 #define TAP 1
 #define DELAY 4
 
-
 char *
 read_block (int block_num, char *data)
 {
@@ -61,6 +61,7 @@ write_block (int block_num, char *data)
                                   data);
 }
 
+#if 0
 char *
 read_frame (int frame, char *data)
 {
@@ -74,6 +75,8 @@ write_frame (int frame, char *data)
   return psx_memcard_write_frame (print_data, CONPORT, TAP, DELAY, frame,
                                   data);
 }
+#endif
+
 
 /*
   It will save you some work if you don't fully integrate the code above with uCON64's code,
@@ -81,39 +84,39 @@ write_frame (int frame, char *data)
 */
 int dex_argc;
 char *dex_argv[128];
-
+#define FRAME_SIZE 128
+#define BLOCK_SIZE (64*(FRAME_SIZE))
 
 int
-dex_read_rom (const char *filename, unsigned int parport)
+dex_read_block (const char *filename, int block_num, unsigned int parport)
 {
+  char *result = NULL;
+  char data[BLOCK_SIZE];
   print_data = parport;
-#if 0
-  dex_argv[0] = "ucon64";
-  dex_argv[1] = "READ";
-  strcpy (buf, filename);
-  dex_argv[2] = buf;
-  dex_argc = 3;
 
-  return dex_main (dex_argc, dex_argv);
-#endif  
-  return 0;
+  result = read_block (block_num, data);
+
+  q_fwrite (data, 0, BLOCK_SIZE, filename, "wb");
+
+  return result == NULL ? (-1) : 0;
 }
 
 
 int
-dex_write_rom (const char *filename, unsigned int parport)
+dex_write_block (const char *filename, int block_num, unsigned int parport)
 {
+  int result;
+  char data[BLOCK_SIZE];
   print_data = parport;
-#if 0
-  dex_argv[0] = "ucon64";
-  dex_argv[1] = "WRITE";
-  strcpy (buf, filename);
-  dex_argv[2] = buf;
-  dex_argc = 3;
 
-  return dex_main (dex_argc, dex_argv);
-#endif
-  return 0;
+  q_fread (data, 0, BLOCK_SIZE, filename);
+
+  result = write_block (block_num, data);
+
+  return result == (-1) ? (-1) : 0;
 }
+
+#undef FRAME_SIZE
+#undef BLOCK_SIZE
 
 #endif // BACKUP

@@ -26,10 +26,8 @@ extern const char *dex_usage[];
 #define DEX_HEADER_LEN 0
 
 #ifdef BACKUP
-extern char *read_block (int block_num, char *data);
-extern int write_block (int block_num, char *data);
-extern char *read_frame (int frame, char *data);
-extern int write_frame (int frame, char *data);
+extern int dex_read_block (const char *filename, int block_num, unsigned int parport);
+extern int dex_write_block (const char *filename, int block_num, unsigned int parport);
 #endif // BACKUP
 
 #endif // DEX_H

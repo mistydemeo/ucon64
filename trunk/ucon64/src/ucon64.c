@@ -254,7 +254,7 @@ const struct option long_options[] = {
     {"xcdrw", 0, 0, UCON64_XCDRW},
 #endif // BACKUP_CD
 #ifdef BACKUP
-    {"xdex", 0, 0, UCON64_XDEX},
+    {"xdex", 1, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
     {"xfal", 0, 0, UCON64_XFAL},
     {"xfalmulti", 1, 0, UCON64_XFALMULTI},

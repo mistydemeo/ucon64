@@ -42,15 +42,17 @@ write programs in C
 #ifdef __linux__
 #include <sys/io.h>
 #endif
-#ifndef __FreeBSD__
-#include <getopt.h>           // __FreeBSD__ problems
-#endif // __FreeBSD__
+
+#include "getopt.h"
+
 
 #include "config.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "misc.h"
+
+
 
 #include "snes/snes.h"
 #include "gb/gb.h"

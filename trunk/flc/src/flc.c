@@ -25,9 +25,9 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#ifndef __FreeBSD__
-//  #include <getopt.h>
-#endif
+
+#include "getopt.h"
+
 #include "misc.h"
 #include "flc.h"
 

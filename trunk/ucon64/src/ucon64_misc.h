@@ -44,10 +44,10 @@ IO_Tuple;
 
 // DJGPP (DOS) has outportX() & inportX()
 #if     defined __unix__ || defined __BEOS__
-  unsigned char inportb (unsigned short port);
-  unsigned short inportw (unsigned short port);
-  void outportb (unsigned short port, unsigned char byte);
-  void outportw (unsigned short port, unsigned short word);
+  extern unsigned char inportb (unsigned short port);
+  extern unsigned short inportw (unsigned short port);
+  extern void outportb (unsigned short port, unsigned char byte);
+  extern void outportw (unsigned short port, unsigned short word);
 #endif // defined __unix__ || defined __BEOS__
 #endif // BACKUP
 
@@ -63,12 +63,10 @@ extern int hexValue (char digit);
 //#define hexByteValue(x ,y) ((hexValue(x) << 4) + hexValue(y))
 extern int hexByteValue (char x, char y);
 
+
 // CRC32 routines
-extern void BuildCRCTable ();
 extern unsigned long CalculateBufferCRC (unsigned int count, unsigned long crc,
                                   void *buffer);
-extern unsigned long CalculateFileCRC (FILE * file);
-
 /*
   like zlib/crc32(); uCON64 has it's own crc calc. stuff
   this is just a wrapper

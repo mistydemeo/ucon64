@@ -49,7 +49,7 @@ typedef struct st_ucon64
                                                 // (const char *)rom will point then to this
   const char *file;                             // file (cmdline) with path
 
-  const char *output_path;                      // -o argument (default: cwd)
+  char output_path[FILENAME_MAX];               // -o argument (default: cwd)
   
 #ifdef  ANSI_COLOR
   int ansi_color;

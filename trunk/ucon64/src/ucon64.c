@@ -206,6 +206,7 @@ const struct option long_options[] = {
     {"nppf", 0, 0, UCON64_NPPF},
     {"nrot", 0, 0, UCON64_NROT},
     {"ns", 0, 0, UCON64_NS},
+    {"o", 1, 0, UCON64_O},
     {"p", 0, 0, UCON64_P},
     {"pad", 0, 0, UCON64_PAD},
     {"padhd", 0, 0, UCON64_PADHD},
@@ -371,6 +372,8 @@ main (int argc, char **argv)
   ucon64.file =
   ucon64.mapr =
   ucon64.comment = "";
+
+  getcwd (ucon64.output_path, FILENAME_MAX); // default output path
 
   sscanf (get_property (ucon64.configfile, "parport", buf2, "0x378"), "%x", &ucon64.parport);
 

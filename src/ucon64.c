@@ -89,7 +89,7 @@ static int ucon64_process_rom (char *fname);
 
 st_ucon64_t ucon64;                             // containes ptr to image, dat and rominfo
 
-static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2004";
+static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2005";
 
 #ifdef  AMIGA
 unsigned long __stacksize = 102400;             // doesn't work on PPC? is StormC specific?

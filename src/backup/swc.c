@@ -3,9 +3,9 @@ swc.c - Super Wild Card support for uCON64
 
 Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 Copyright (c) 2001 - 2004 dbjh
-Copyright (c)        2001 Caz
-Copyright (c)        2003 John Weidman
-Copyright (c)        2004 JohnDie
+Copyright (c) 2001        Caz
+Copyright (c) 2003        John Weidman
+Copyright (c) 2004        JohnDie
 
 
 This program is free software; you can redistribute it and/or modify

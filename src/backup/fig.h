@@ -3,7 +3,7 @@ fig.h - Super PRO Fighter support for uCON64
 
 Copyright (c) 1999 - 2002 NoisyB <noisyb@gmx.net>
 Copyright (c) 2001 - 2003 dbjh
-Copyright (c)        2003 JohnDie
+Copyright (c) 2003        JohnDie
 
 
 This program is free software; you can redistribute it and/or modify

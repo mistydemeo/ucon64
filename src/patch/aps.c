@@ -1,7 +1,7 @@
 /*
 aps.c - Advanced Patch System support for uCON64
 
-Copyright (c)        1998 Silo/BlackBag
+Copyright (c) 1998        Silo/BlackBag
 Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
 Copyright (c) 2002 - 2004 dbjh
 

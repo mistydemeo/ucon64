@@ -673,7 +673,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_HD, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_HDN, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_HI, UCON64_SNES, snes_usage,         WF_SWITCH},
-  {UCON64_INT, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_ID, UCON64_UNKNOWN, NULL,            WF_SWITCH}, // might be used for different
+  {UCON64_INT, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH}, //  consoles in the future
   {UCON64_INT2, UCON64_SNES, snes_usage, WF_SWITCH},
   {UCON64_MAPR, UCON64_NES, nes_usage,         WF_SWITCH},
   {UCON64_MIRR, UCON64_NES, nes_usage,         WF_SWITCH},

@@ -165,7 +165,7 @@ ucon64_switches (int c, const char *optarg)
               ptr,
               ucon64.discmage_enabled ? "yes" : "no",
               buf);
-#endif              
+#endif
 
       printf ("configuration directory:           %s\n"
               "DAT file directory:                %s\n"
@@ -439,6 +439,10 @@ ucon64_switches (int c, const char *optarg)
 
     case UCON64_SSIZE:
       ucon64.part_size = strtol (optarg, NULL, 10) * MBIT;
+      break;
+
+    case UCON64_ID:
+      ucon64.id = 1;
       break;
 
     default:

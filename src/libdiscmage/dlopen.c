@@ -250,7 +250,7 @@ get_symbol (void *handle, char *symbol_name)
   char *strptr;
 
   symptr = dlsym (handle, symbol_name);
-  if ((strptr = dlerror ()) != NULL)            // this is "the correct way"
+  if ((strptr = (char *) dlerror ()) != NULL)   // this is "the correct way"
     {                                           //  according to the info page
       fputs (strptr, stderr);
       fputc ('\n', stderr);

@@ -1164,7 +1164,10 @@ ucon64_nfo (void)
       }
 #endif
   // Use ucon64.fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
-  if (ucon64.fcrc32 || ucon64.crc32)
+  if (ucon64.fcrc32 && ucon64.crc32)
+    printf ("Search checksum (CRC32): 0x%08x\n"
+            "Data checksum (CRC32): 0x%08x\n", ucon64.crc32, ucon64.fcrc32);
+  else if (ucon64.fcrc32 || ucon64.crc32)
     printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32 ? ucon64.fcrc32 : ucon64.crc32);
 
   // The check for the size of the file is made, so that uCON64 won't display a

@@ -188,10 +188,7 @@ const struct option long_options[] = {
     {"mki", 0, 0, UCON64_MKI},
     {"mkppf", 0, 0, UCON64_MKPPF},
     {"mktoc", 0, 0, UCON64_MKTOC},
-    {"multi", 0, 0, UCON64_MULTI},
-    {"multi1", 0, 0, UCON64_MULTI1},
-    {"multi2", 0, 0, UCON64_MULTI2},
-    {"multi3", 0, 0, UCON64_MULTI3},
+    {"multi", 1, 0, UCON64_MULTI},
     {"mvs", 0, 0, UCON64_MVS},
     {"n", 0, 0, UCON64_N},
     {"n2", 0, 0, UCON64_N2},
@@ -260,6 +257,7 @@ const struct option long_options[] = {
     {"xdex", 0, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
     {"xfal", 0, 0, UCON64_XFAL},
+    {"xfalmulti", 1, 0, UCON64_XFALMULTI},
     {"xfalb", 1, 0, UCON64_XFALB},
     {"xfalc", 1, 0, UCON64_XFALC},
     {"xfals", 0, 0, UCON64_XFALS},
@@ -318,7 +316,7 @@ main (int argc, char **argv)
   int ucon64_argc, c = 0, result = 0, value = 0, option_index = 0;
   unsigned long padded;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE],
-       src_name[FILENAME_MAX] /*, dest_name[FILENAME_MAX]*/;
+       src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   const char *ucon64_argv[128];
   st_rominfo_t rom;
 
@@ -375,7 +373,8 @@ main (int argc, char **argv)
   if (OFFSET (ucon64.output_path, strlen (ucon64.output_path) - 1) != FILE_SEPARATOR)
     strcat (ucon64.output_path, FILE_SEPARATOR_S);
 
-  sscanf (get_property (ucon64.configfile, "parport", buf2, "0x378"), "%x", &ucon64.parport);
+  // if the config file doesn't contain a parport line use "0" to force probing
+  sscanf (get_property (ucon64.configfile, "parport", buf2, "0"), "%x", &ucon64.parport);
 
   ucon64.backup = ((!strcmp (get_property (ucon64.configfile, "backups", buf2, "1"), "1")) ?
                1 : 0);

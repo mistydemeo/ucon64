@@ -2,7 +2,8 @@
 smd.h - Super Magic Drive support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2001 dbjh
+                  2002 dbjh
+
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,7 +25,7 @@ extern const char *smd_usage[];
 
 /*
     0      - Low byte of 16kB page count
-    1      - 3 (not: High byte of 16kB page count)
+    1      - File ID code 0 (3, not high byte of 16kB page count)
     2      - Multi
              Bit 7 6 5 4 3 2 1 0
                    x             : 0 = Last file of the ROM dump (multi-file)
@@ -40,15 +41,16 @@ extern const char *smd_usage[];
 */
 typedef struct st_smd_header
 {
-  unsigned char low;
-  unsigned char high;
+  unsigned char size;
+  unsigned char id0;
   unsigned char split;
   char pad2[5];
-  unsigned char code1;
-  unsigned char code2;
+  unsigned char id1;
+  unsigned char id2;
   unsigned char type;
   char pad3[501];
 } st_smd_header_t;
+
 
 #ifdef BACKUP
 extern int smd_read_rom (const char *filename, unsigned int parport);

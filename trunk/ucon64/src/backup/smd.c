@@ -36,6 +36,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "smd.h"
+
+
 const char *smd_usage[] =
   {
     "Super Com Pro (HK)/Super Magic Drive/SMD",
@@ -46,40 +48,34 @@ const char *smd_usage[] =
     "  " OPTION_LONG_S "xsmds       send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when SRAM does not exist\n",
 #endif // BACKUP
-    NULL
-};
+    NULL};
 
 
 #ifdef BACKUP
 int
 smd_read_rom (const char *filename, unsigned int parport)
 {
-
-
   return 0;
 }
+
 
 int
 smd_write_rom (const char *filename, unsigned int parport)
 {
-
-
   return 0;
 }
+
 
 int
 smd_read_sram (const char *filename, unsigned int parport)
 {
-
-
   return 0;
 }
+
 
 int
 smd_write_sram (const char *filename, unsigned int parport)
 {
-
-
   return 0;
 }
 #endif // BACKUP

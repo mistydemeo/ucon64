@@ -9,5 +9,7 @@ chmod 4775 ucon64
 cp ucon64 /usr/local/bin
 "
 cp libdiscmage/discmage.so $HOME
+if ! test -x $HOME/.ucon64; then
 mkdir $HOME/.ucon64
 cp index cache.zip $HOME/.ucon64
+fi

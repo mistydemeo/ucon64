@@ -77,11 +77,12 @@ main (int argc, char *argv[])
 
   flc_configfile ();
 
-//  flc.tmppath = tempnam (ms_getenv("TEMP"), "flc");
+//TODO use temp dir
+//  flc.tmppath = tempnam (getenv2("TEMP"), "flc");
 
   while ((c =
           getopt_long (argc, argv, "tXSkchv", long_options,
-                            &option_index)) != -1)
+                       &option_index)) != -1)
 
     {
       switch (c)
@@ -197,8 +198,7 @@ main (int argc, char *argv[])
         {
           if (!(file = (st_file_t *) malloc (sizeof (st_file_t))))
             {
-              printf ("%s: Error allocating memory\n",
-                      argv[0]);
+              printf ("%s: Error allocating memory\n", argv[0]);
               (void) closedir (dp);
               return -1;
             }
@@ -207,12 +207,9 @@ main (int argc, char *argv[])
         }
       else
         {
-          if (!
-              ((file->next) =
-               (st_file_t *) malloc (sizeof (st_file_t))))
+          if (!((file->next) = (st_file_t *) malloc (sizeof (st_file_t))))
             {
-              printf ("%s: Error allocating memory\n",
-                      argv[0]);
+              printf ("%s: Error allocating memory\n", argv[0]);
               (void) closedir (dp);
               return -1;
             }
@@ -248,27 +245,30 @@ main (int argc, char *argv[])
   return 0;
 }
 
+
 void
 flc_usage (int argc, char *argv[])
 {
   printf ("\n%s\n"
           "This may be freely redistributed under the terms of the GNU Public License\n\n"
           "Usage: %s [OPTION]... [FILE]...\n\n"
-          "  " OPTION_S "c           also test every possible archive in DIRECTORY for errors\n"
+          "  " OPTION_S
+          "c           also test every possible archive in DIRECTORY for errors\n"
           "                return flags: N=not checked (default), P=passed, F=failed\n"
-          "  " OPTION_LONG_S "html        output as HTML document with links to the files\n"
-          "  " OPTION_S "t           sort by modification time\n"
-          "  " OPTION_S "X           sort alphabetical\n"
-          "  " OPTION_S "S           sort by byte size\n"
-          "  " OPTION_LONG_S "fr          sort reverse\n"
-          "  " OPTION_S "k           show sizes in kilobytes\n"
-          "  " OPTION_LONG_S "help        display this help and exit\n"
-          "  " OPTION_LONG_S "version     output version information and exit\n"
-          "\n"
+          "  " OPTION_LONG_S
+          "html        output as HTML document with links to the files\n" "  "
+          OPTION_S "t           sort by modification time\n" "  " OPTION_S
+          "X           sort alphabetical\n" "  " OPTION_S
+          "S           sort by byte size\n" "  " OPTION_LONG_S
+          "fr          sort reverse\n" "  " OPTION_S
+          "k           show sizes in kilobytes\n" "  " OPTION_LONG_S
+          "help        display this help and exit\n" "  " OPTION_LONG_S
+          "version     output version information and exit\n" "\n"
           "Amiga version: noC-st_flc_t Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
           "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n",
           flc_TITLE, argv[0]);
 }
+
 
 int
 flc_configfile (void)
@@ -292,7 +292,7 @@ flc_configfile (void)
             */
            ".flcrc"
 #endif
-           , ms_getenv ("HOME"));
+           , getenv2 ("HOME"));
 
 
   if (access (flc.configfile, F_OK) == -1)

@@ -18,13 +18,13 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/ 
+*/
 #ifndef FLC_H
 #define FLC_H
 
 #define MAXBUFSIZE 32768
 
-extern void flc_usage(int argc, char *argv[]);
+extern void flc_usage (int argc, char *argv[]);
 
 #define flc_VERSION "1.0.1"
 
@@ -48,14 +48,15 @@ typedef struct st_flc
   int fr;
 
   int check;
-  
+
   char tmppath[FILENAME_MAX];
 
   char path[FILENAME_MAX];
 
   char configfile[FILENAME_MAX];
   char config[4096];
-}st_flc_t;
+}
+st_flc_t;
 
 extern st_flc_t flc;
 
@@ -63,12 +64,13 @@ extern st_flc_t flc;
 
 typedef struct st_sub
 {
-  char name[FILENAME_MAX+1];
+  char name[FILENAME_MAX + 1];
   off_t size;
   unsigned long date;
   int checked;
-  char file_id[FID_LINES_MAX+1][49];
-}st_sub_t;
+  char file_id[FID_LINES_MAX + 1][49];
+}
+st_sub_t;
 
 struct st_file
 {

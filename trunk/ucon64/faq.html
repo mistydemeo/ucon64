@@ -3,10 +3,10 @@ Q: How do I compile uCON64?<br />
 A: You can optionally open the Makefile in an editor and change the defines<br />
 <br />
 "DB" enables/disables the internal ROM database<br />
-&nbsp;&nbsp; disabled with an # in front uCON64 will be only ~250kB in size!<br />
+&nbsp;&nbsp;&nbsp;&nbsp; disabled with an # in front uCON64 will be only ~250kB in size!<br />
 <br />
 "BACKUP" enables/disables support for backup units<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; disabled with an # in front<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; disabled with an # in front<br />
 <br />
 Afterwards enter the following lines<br />
 <br />
@@ -58,5 +58,11 @@ A: Well, many things could have gone wrong, but uCON64 only detects your first p
 port (it stops probing for a parallel port if it finds one). So, you should specify the
 address of the second parallel port on the command line. For example<br />
 &nbsp;&nbsp; ucon64 -xfal demo.gba 0x278<br />
+</tt></p>
+<p><tt>
+Q: I tried to dump a SNES cartridge using a Super Wild Card connected to my PC with an
+interlink cable, but it didn't work. What's wrong?<br />
+A: You shouldn't use an interlink cable, but an ordinary parallel cable. Use the options
+"-snes -help|more" to see how the pins of the connectors should be connected.<br />
 </tt></p>
 </tt></body></html>

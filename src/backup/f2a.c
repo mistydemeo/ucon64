@@ -199,10 +199,10 @@ usb_connect (void)
   struct usb_bus *bus;
   struct usb_device *dev, *f2adev = NULL;
 
-  get_property (ucon64.configfile, "f2afirmware", f2afirmware_fname, "f2afirm.hex");
+  get_property_fname (ucon64.configfile, "f2afirmware", f2afirmware_fname, "f2afirm.hex");
   if (q_fread (f2afirmware, 0, F2A_FIRM_SIZE, f2afirmware_fname) == -1)
     {
-      fprintf (stderr, "ERROR: Unable to load F2A firmware (%s)", f2afirmware_fname);
+      fprintf (stderr, "ERROR: Unable to load F2A firmware (%s)\n", f2afirmware_fname);
       return -1;
     }
 
@@ -295,7 +295,7 @@ f2a_info (recvmsg *rm)
       printf ("info:");
       for (i = 0; i < (SENDMSG_SIZE / 4); i++)
         printf (" %08X", *(((unsigned int *) (rm)) + i));
-      puts ("");
+      fputc ('\n', stdout);
     }
 
   return 0;
@@ -311,7 +311,7 @@ f2a_boot_usb (const char *ilclient_fname)
 
   if (q_fread (ilclient, 0, 16 * 1024, ilclient_fname) == -1)
     {
-      fprintf (stderr, "ERROR: Unable to load GBA client binary (%s)", ilclient_fname);
+      fprintf (stderr, "ERROR: Unable to load GBA client binary (%s)\n", ilclient_fname);
       return -1;
     }
 
@@ -335,7 +335,7 @@ f2a_boot_usb (const char *ilclient_fname)
       printf ("post-boot:");
       for (i = 0; i < 16; i++)
         printf (" %08X", ack[i]);
-      puts ("");
+      fputc ('\n', stdout);
     }
 
   return 0;
@@ -411,7 +411,7 @@ f2a_write_usb (int numfiles, char **files, int address)
 
       if ((fsize = q_fsize (files[j])) == -1)
         {
-          fprintf (stderr, "ERROR: Can't determine size of file \"%s\"", files[j]);
+          fprintf (stderr, "ERROR: Can't determine size of file \"%s\"\n", files[j]);
           return -1;
         }
 
@@ -476,7 +476,7 @@ f2a_init_usb (void)
       if (ucon64.quiet < 0)
         printf ("Please turn on GBA with SELECT and START held down\n");
 
-      get_property (ucon64.configfile, "ilclient", ilclient_fname, "ilclient.bin");
+      get_property_fname (ucon64.configfile, "ilclient", ilclient_fname, "ilclient.bin");
       f2a_boot_usb (ilclient_fname);
       f2a_info (&rm);
     }
@@ -500,8 +500,8 @@ f2a_init_par (int parport, int parport_delay)
   if (ucon64.quiet < 0)
     printf ("Please turn on GBA with SELECT and START held down\n");
 
-  get_property (ucon64.configfile, "ilclient2", ilclient2_fname, "ilclient2.bin");
-  get_property (ucon64.configfile, "illogo", illogo_fname, "illogo.bin");
+  get_property_fname (ucon64.configfile, "ilclient2", ilclient2_fname, "ilclient2.bin");
+  get_property_fname (ucon64.configfile, "illogo", illogo_fname, "illogo.bin");
   if (f2a_boot_par (ilclient2_fname, illogo_fname))
     return -1;
   return 0;
@@ -600,7 +600,7 @@ f2a_boot_par (const char *ilclient2_fname, const char *illogo_fname)
 
       if (q_fread (illogo, 0, LOGO_SIZE, illogo_fname) == -1)
         {
-          fprintf (stderr, "ERROR: Unable to load logo file (%s)", illogo_fname);
+          fprintf (stderr, "ERROR: Unable to load logo file (%s)\n", illogo_fname);
           return -1;
         }
       if (f2a_send_buffer_par (PP_CMD_WRITEDATA, LOGO_ADDR, LOGO_SIZE, illogo,
@@ -611,7 +611,7 @@ f2a_boot_par (const char *ilclient2_fname, const char *illogo_fname)
   printf ("Uploading iLinker client\n");
   if (q_fread (ilclient2, 0, BOOT_SIZE, ilclient2_fname) == -1)
     {
-      fprintf (stderr, "ERROR: Unable to load GBA client binary (%s)", ilclient2_fname);
+      fprintf (stderr, "ERROR: Unable to load GBA client binary (%s)\n", ilclient2_fname);
       return -1;
     }
   if (f2a_send_buffer_par (PP_CMD_WRITEDATA, EXEC_STUB, BOOT_SIZE, ilclient2,
@@ -634,10 +634,10 @@ f2a_write_par (int files_cnt, char **files, unsigned int addr)
   if (files_cnt > 1)
     {
       printf ("Uploading multiloader\n");
-      get_property (ucon64.configfile, "f2aloader", loader_fname, "loader.bin");
+      get_property_fname (ucon64.configfile, "f2aloader", loader_fname, "loader.bin");
       if (q_fread (loader, 0, LOADER_SIZE, loader_fname) == -1)
         {
-          fprintf (stderr, "ERROR: Unable to load loader binary (%s)", loader_fname);
+          fprintf (stderr, "ERROR: Unable to load loader binary (%s)\n", loader_fname);
           return -1;
         }
       if (f2a_send_buffer_par (PP_CMD_WRITEROM, addr, LOADER_SIZE, loader, HEAD,
@@ -649,7 +649,7 @@ f2a_write_par (int files_cnt, char **files, unsigned int addr)
     {
       if ((fsize = q_fsize (files[j])) == -1)
         {
-          fprintf (stderr, "ERROR: Can't determine size of file \"%s\"", files[j]);
+          fprintf (stderr, "ERROR: Can't determine size of file \"%s\"\n", files[j]);
           return -1;
         }
       size = fsize;
@@ -1011,7 +1011,7 @@ parport_dump_byte (unsigned char byte)
       else
         fprintf (stderr, "0");
     }
-  fprintf (stderr, "\n");
+  fputc ('\n', stderr);
 }
 #endif
 
@@ -1059,7 +1059,7 @@ f2a_receive_raw_par (unsigned char *buffer, int len)
         *ptr |= ((nibble >> 3) & 0xf) << 4;
     }
   if (parport_debug)
-    fprintf (stderr, "\n");
+    fputc ('\n', stderr);
 
   return err;
 }
@@ -1112,7 +1112,7 @@ f2a_send_raw_par (unsigned char *buffer, int len)
         }
     }
   if (parport_debug)
-    fprintf (stderr, "\n");
+    fputc ('\n', stderr);
 
   return 0;
 }

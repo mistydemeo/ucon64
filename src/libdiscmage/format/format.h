@@ -1,7 +1,7 @@
 /*
-format.h - CDI, NRG, CUE, TOC, etc. support for libdiscmage
+format.c - support of different image formats for libdiscmage
 
-written by 2003 NoisyB (noisyb@gmx.net)
+written by 2004 NoisyB (noisyb@gmx.net)
 
 
 This library is free software; you can redistribute it and/or

@@ -60,7 +60,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 #ifdef  HAVE_ZLIB_H
-#include "miscz.h"
+#include "misc_z.h"
 #endif
 #include "misc.h"
 
@@ -1890,8 +1890,9 @@ getenv2 (const char *variable)
 }
 
 
-static const char *
-get_property2 (const char *filename, const char *propname, char divider, char *buffer, const char *def)
+static char *
+get_property2 (const char *filename, const char *propname, char divider,
+               char *buffer, const char *def)
 // divider is the 1st char after propname ('=', ':', etc..)
 {
   char line[MAXBUFSIZE], *p = NULL;
@@ -1946,8 +1947,9 @@ get_property2 (const char *filename, const char *propname, char divider, char *b
 }
 
 
-const char *
-get_property (const char *filename, const char *propname, char *buffer, const char *def)
+char *
+get_property (const char *filename, const char *propname, char *buffer,
+              const char *def)
 {
   return get_property2 (filename, propname, '=', buffer, def);
 }
@@ -1956,7 +1958,7 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
 int32_t
 get_property_int (const char *filename, const char *propname, char divider)
 {
-  char buf[MAXBUFSIZE];
+  char buf[160];                                // 159 is enough for a *very* large number
   int32_t value = 0;
 
   get_property2 (filename, propname, divider, buf, NULL);
@@ -1972,6 +1974,21 @@ get_property_int (const char *filename, const char *propname, char divider)
   value = strtol (buf, NULL, 10);
   return value ? value : 1;                     // if buf was only text like 'Yes'
 }                                               //  we'll return at least 1
+
+
+char *
+get_property_fname (const char *filename, const char *propname, char *buffer,
+                    const char *def)
+// get a filename from file with name filename, expand it and fix characters
+{
+  char tmp[FILENAME_MAX];
+
+  get_property2 (filename, propname, '=', tmp, def);
+#ifdef  __CYGWIN__
+  fix_character_set (tmp);
+#endif
+  return realpath2 (tmp, buffer);
+}
 
 
 static int

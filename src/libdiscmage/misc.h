@@ -38,7 +38,7 @@ extern "C" {
 #include <dirent.h>
 #endif
 #ifdef  HAVE_ZLIB_H
-#include "miscz.h"
+#include "misc_z.h"
 #endif                                          // HAVE_ZLIB_H
 
 #ifdef __sun
@@ -464,12 +464,19 @@ extern int q_fsize (const char *filename);
   get_property_int()  like get_property() but returns an integer which is 0
                   if the value of propname was 0, [Nn] or [Nn][Oo] and an
                   integer or at least 1 for every other case
+  get_property_fname()  like get_property() but specifically for filenames,
+                  i.e., it runs realpath2() on the filename and fixes the
+                  characters if necessary (Cygwin)
   set_property()  set propname with value in filename
   DELETE_PROPERTY() like set_property but when value of propname is NULL the
                   whole property will disappear from filename
 */
-extern const char *get_property (const char *filename, const char *propname, char *value, const char *def);
-extern int32_t get_property_int (const char *filename, const char *propname, char divider);
+extern char *get_property (const char *filename, const char *propname, char *value,
+                           const char *def);
+extern int32_t get_property_int (const char *filename, const char *propname,
+                                 char divider);
+extern char *get_property_fname (const char *filename, const char *propname,
+                                 char *buffer, const char *def);
 extern int set_property (const char *filename, const char *propname, const char *value);
 #define DELETE_PROPERTY(a, b) (set_property(a, b, NULL))
 
@@ -484,7 +491,7 @@ extern int truncate (const char *path, off_t size);
 extern int sync (void);
 // For MinGW popen() and pclose() are unavailable for DLL's. For DLL's _popen()
 //  and _pclose() should be used. Visual C++ only has the latter two.
-#ifndef pclose                                  // miscz.h's definition gets higher "precedence"
+#ifndef pclose                                  // misc_z.h's definition gets higher "precedence"
 #define pclose  _pclose
 #endif
 #ifndef popen                                   // idem
@@ -539,7 +546,7 @@ extern int fprintf2 (FILE *file, const char *format, ...);
 #elif   defined AMIGA                           // _WIN32
 // custom _popen() and _pclose(), because the standard ones (named popen() and
 //  pclose()) are buggy
-#ifndef pclose                                  // miscz.h's definition gets higher "precedence"
+#ifndef pclose                                  // misc_z.h's definition gets higher "precedence"
 #define pclose  _pclose
 #endif
 #ifndef popen                                   // idem

@@ -636,7 +636,7 @@ main (int argc, char **argv)
                     closedir (dp);
                   }
 #else
-                sprintf (search_pattern, "%s" FILE_SEPARATOR_S "*", buf);
+                sprintf (search_pattern, "%s%s*", buf, p);
                 if ((dp = FindFirstFile (search_pattern, &find_data)) != INVALID_HANDLE_VALUE)
                   {
                     do

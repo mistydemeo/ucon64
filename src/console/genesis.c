@@ -609,7 +609,7 @@ genesis_1991 (st_rominfo_t *rominfo)
 int
 genesis_chk (st_rominfo_t *rominfo)
 {
-  unsigned char *rom_buffer, buf[FILENAME_MAX];
+  unsigned char *rom_buffer;
   int chksum = 0;
 
   if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
@@ -632,7 +632,7 @@ genesis_chk (st_rominfo_t *rominfo)
     {
       st_smd_header_t smd_header;
 
-      q_fread (&smd_header, 0, rominfo->buheader_len, buf);
+      q_fread (&smd_header, 0, rominfo->buheader_len, ucon64.rom);
       save_smd (ucon64.rom, rom_buffer, &smd_header, genesis_rom_size);
     }
   else

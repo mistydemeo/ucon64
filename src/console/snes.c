@@ -2408,21 +2408,22 @@ snes_init (st_rominfo_t *rominfo)
 
   bs_dump = snes_check_bs ();
   if (!bs_dump)
-  {
-    // Might have to check the other header location
-    if (!snes_hirom)
     {
-      memcpy (&snes_header, rom_buffer + rominfo->header_start + SNES_HIROM, rominfo->header_len);
-      if (snes_check_bs ())
-      {
-        bs_dump = 1;
-        snes_hirom = SNES_HIROM;
-        rominfo->header_start += SNES_HIROM;
-      }
-      else
-        memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
+      // we might have to check the other header location
+      if (!snes_hirom)
+        {
+          memcpy (&snes_header, rom_buffer + rominfo->header_start + SNES_HIROM,
+                  rominfo->header_len);
+          if (snes_check_bs ())
+            {
+              bs_dump = 1;
+              snes_hirom = SNES_HIROM;
+              rominfo->header_start += SNES_HIROM;
+            }
+          else
+            memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
+        }
     }
-  }
   if (UCON64_ISSET (ucon64.bs_dump))            // -bs or -nbs option was specified
     bs_dump = ucon64.bs_dump;
 

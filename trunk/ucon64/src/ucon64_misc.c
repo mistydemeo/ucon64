@@ -1033,7 +1033,7 @@ ucon64_configfile (void)
         {
           printf ("FAILED\n\n");
 
-//          return -1;
+          return -1;
         }
       else
         {

@@ -21,6 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
+
+#ifdef BACKUP
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
@@ -30,12 +32,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 int
 fig_usage (int argc, char *argv[])
 {
-#ifdef BACKUP
 #if 0
     printf (fig_TITLE "\n"
     "TODO:  -xfig	send/receive ROM to/from *Pro Fighter* /(all)FIG; $FILE=PORT\n"
      "		receives automatically when $ROM does not exist\n");
 #endif
-#endif
   return 0;
 }
+#endif // BACKUP

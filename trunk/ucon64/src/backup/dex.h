@@ -22,15 +22,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define DEX_H
 #define dex_TITLE "DexDrive\nInterAct http://www.dexdrive.de"
 
-extern int dex_usage (int argc, char *argv[]);
 #define dex_HEADER_START 0
 #define dex_HEADER_LEN 0
 
-
+#ifdef BACKUP
+extern int dex_usage (int argc, char *argv[]);
 extern char *read_block (int block_num, char *data);
 extern int write_block (int block_num, char *data);
 extern char *read_frame (int frame, char *data);
 extern int write_frame (int frame, char *data);
-//int get_perm ();
+#endif // BACKUP
 
 #endif // DEX_H

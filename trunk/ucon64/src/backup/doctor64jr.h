@@ -21,15 +21,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef DOCTOR64JR_H
 #define DOCTOR64JR_H
 
+#ifdef BACKUP
 extern int doctor64jr_read (char *filename, unsigned int parport);
 
 extern int doctor64jr_write (char *filename, long start, long len,
                       unsigned int parport);
-
+extern int doctor64jr_usage (int argc, char *argv[]);
+#endif // BACKUP
 
 #define doctor64jr_TITLE "Doctor64 Jr\n19XX Bung Enterprises Ltd http://www.bung.com.hk"
 
-extern int doctor64jr_usage (int argc, char *argv[]);
 #define doctor64jr_HEADER_START 0
 #define doctor64jr_HEADER_LEN 0
 #endif /* DOCTOR64JR_H */

@@ -28,12 +28,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include "config.h"
+
+#ifdef BACKUP
+
 #include "misc.h"                               // kbhit(), getch()
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "swc.h"
 
-#ifdef BACKUP
 
 #define INPUT_MASK      0x78
 #define IBUSY_BIT       0x80
@@ -401,7 +403,6 @@ checkabort (int status)
     }
 //  send_command (5, 0, 0);                       // vgs: when sending/receiving a ROM
 }
-#endif // BACKUP
 
 void
 swc_unlock (unsigned int parport)
@@ -410,17 +411,14 @@ swc_unlock (unsigned int parport)
   gives the same result.
 */
 {
-#ifdef BACKUP
   init_io (parport);
 
   send_command (6, 0, 0);
-#endif // BACKUP
 }
 
 int
 swc_read_rom (char *filename, unsigned int parport)
 {
-#ifdef BACKUP
   FILE *file;
   unsigned char *buffer, byte;
   int n, size, blocksleft, bytesreceived = 0;
@@ -505,9 +503,6 @@ swc_read_rom (char *filename, unsigned int parport)
 
   free (buffer);
   fclose (file);
-#else
-  printf("NOTE: this version was compiled without backup support\n\n");
-#endif // BACKUP
 
   return 0;
 }
@@ -515,7 +510,6 @@ swc_read_rom (char *filename, unsigned int parport)
 int
 swc_write_rom (char *filename, unsigned int parport)
 {
-#ifdef BACKUP
   FILE *file;
   unsigned char *buffer;
   int bytesread, bytessend, totalblocks, blocksdone = 0, emu_mode_select;
@@ -587,9 +581,6 @@ swc_write_rom (char *filename, unsigned int parport)
 
   free (buffer);
   fclose (file);
-#else
-  printf("NOTE: this version was compiled without backup support\n\n");
-#endif // BACKUP
 
   return 0;
 }
@@ -597,7 +588,6 @@ swc_write_rom (char *filename, unsigned int parport)
 int
 swc_read_sram (char *filename, unsigned int parport)
 {
-#ifdef BACKUP
   FILE *file;
   unsigned char *buffer;
   int blocksleft, bytesreceived = 0;
@@ -648,9 +638,6 @@ swc_read_sram (char *filename, unsigned int parport)
 
   free (buffer);
   fclose (file);
-#else
-  printf("NOTE: this version was compiled without backup support\n\n");
-#endif // BACKUP
 
   return 0;
 }
@@ -658,7 +645,6 @@ swc_read_sram (char *filename, unsigned int parport)
 int
 swc_write_sram (char *filename, unsigned int parport)
 {
-#ifdef BACKUP
   FILE *file;
   unsigned char *buffer;
   int bytesread, bytessend = 0, size;
@@ -705,33 +691,30 @@ swc_write_sram (char *filename, unsigned int parport)
 
   free (buffer);
   fclose (file);
-#else
-  printf("NOTE: this version was compiled without backup support\n\n");
-#endif // BACKUP
+
   return 0;
 }
 
 int
 swc_usage (int argc, char *argv[])
 {
-#ifdef BACKUP
-  printf (swc_TITLE "\n"
-          "  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
-          "                receives automatically when $ROM does not exist\n"
-          "                Press q to abort ^C will cause invalid state of backup unit\n"
-          "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
-          "                receives automatically when $ROM(=SRAM) does not exist\n"
-          "                Press q to abort ^C will cause invalid state of backup unit\n"
-          "\n"
-          "                You only need to specify PORT if uCON64 doesn't detect the\n"
-          "                (right) parallel port. If that is the case give a hardware\n"
-          "                address, for example:\n"
-          "                ucon64 -xswc \"Super Mario World (U).swc\" 0x378\n"
-          "\n"
-          "                In order to connect the Super Wild Card to a PC's parallel port\n"
-          "                you need a standard bidirectional parallel cable like for the\n"
-          "                most backup units\n"
+  printf ( swc_TITLE "\n"
+
+    "  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
+     "                receives automatically when $ROM does not exist\n"
+     "                Press q to abort ^C will cause invalid state of backup unit\n"
+     "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
+     "                receives automatically when $ROM(=SRAM) does not exist\n"
+     "                Press q to abort ^C will cause invalid state of backup unit\n"
+
+"NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
+"      parallel port. If that is the case give a hardware address:\n"
+"      ucon64 -xswc \"Super Mario World (U).swc\" 0x378\n"
+"      In order to connect the Super Wild Card to a PC's parallel port you\n"
+"      need a standard bidirectional parallel cable like for the most backup\n"
+"      units\n"
          );
-#endif // BACKUP
   return 0;
 }
+
+#endif // BACKUP

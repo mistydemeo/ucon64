@@ -21,6 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
+
+#ifdef BACKUP
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
@@ -1197,14 +1199,12 @@ main (int argc, char *argv[])
 int
 cd64_usage (int argc, char *argv[])
 {
-#ifdef BACKUP
 #if 0
 
     printf ("%s\n", cd64_TITLE);
   printf ("TODO:  -xcd64	send/receive ROM to/from CD64; $FILE=PORT\n"
           "		receives automatically when $ROM does not exist\n");
 #endif
-#endif // BACKUP
   return 0;
 }
 
@@ -1271,3 +1271,5 @@ int cd64_write_sram(char *filename, unsigned int parport)
   return 0;
 }
 */
+
+#endif // BACKUP

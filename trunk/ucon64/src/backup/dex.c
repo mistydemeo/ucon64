@@ -21,14 +21,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
+
+#ifdef BACKUP
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "dex.h"
 #include "psxpblib.h"
-
-#ifdef BACKUP
 
 #define BASE_ADDR 0x378
 #define CONPORT 1
@@ -71,12 +71,9 @@ get_perm ()
   return psx_obtain_io_permission (BASE_ADDR);
 }
 
-#endif // BACKUP
-
 int
 dex_usage (int argc, char *argv[])
 {
-#ifdef BACKUP
 #if 0
     printf ("%s\n", dex_TITLE);
 
@@ -85,6 +82,6 @@ dex_usage (int argc, char *argv[])
     ("TODO:  -xdex    send/receive SRAM to/from DexDrive; $FILE=PORT\n"
      "		receives automatically when $ROM(=SRAM) does not exist\n");
 #endif
-#endif // BACKUP
   return 0;
 }
+#endif // BACKUP

@@ -34,7 +34,9 @@ ifdef DLOPEN
 FULLLIBNAME=$(LIBNAME).so
 
 ifneq ($(OSTYPE),beos)
+ifneq ($(OSTYPE),FreeBSD)
 LDFLAGS+=-ldl
+endif
 endif
 
 else

@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "config.h"
 #include "misc.h"
 #include "ucon64.h"
@@ -39,6 +40,10 @@ const char *doctor64jr_usage[] =
 #endif // BACKUP
     NULL
   };
+
+static unsigned long inittime = time (0), size = 0, pos = 0;
+
+
 
 #if 0
 drjr transfer protocol
@@ -160,7 +165,9 @@ void mainproc(void *arg) {
 }
 #endif
 
+
 #ifdef BACKUP
+
 /**************************************
 *        program name: v64jr.c          *
 *  N64 cart emulator transfer program *
@@ -199,6 +206,7 @@ unsigned short int port_8,port_9,port_a,port_b,port_c;
 unsigned char disp_buf[16];
 short int i,j,page,sel,err,wv_mode;
 char ch=' ';
+
 
 #if 0
 unsigned char inportb(arg1)
@@ -320,10 +328,8 @@ char write_32k(unsigned short int hi_word, unsigned short int lo_word)
    unsigned short int i,j;
    unsigned short int fix,temp;
    init_port();
-
    set_ai_data(3,0x10|(hi_word>>8));
    set_ai_data(2,(hi_word & 0xff));
-
    for (i=0;i<0x40;i++){
       unpass=3;
       while(unpass){
@@ -340,7 +346,7 @@ char write_32k(unsigned short int hi_word, unsigned short int lo_word)
 	    for (j=0;j<256;j++){
 	       temp=inportw(port_c);
 	       if(mix.bufferx[j+fix]!=temp){
-		  printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
+//		  printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
 		  break;
 	       }
 	    }
@@ -350,13 +356,13 @@ char write_32k(unsigned short int hi_word, unsigned short int lo_word)
 	    for (j=0;j<4;j++){
 	       temp=inportw(port_c);
 	       if(mix.bufferx[j+fix]!=temp){
-		  printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
+//		  printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
 		  pass1=0;
 		  break;
 	       }
 	    }
 	    if (pass1) {
-	       printf("@");
+//	       printf("@");
 	       set_ai_data(1,((i<<1)|lo_word|1));
 	       set_ai_data(0,0xf8);
 	       set_ai(4);
@@ -364,7 +370,7 @@ char write_32k(unsigned short int hi_word, unsigned short int lo_word)
 	       for (j=252;j<256;j++){
 		  temp=inportw(port_c);
 		  if(mix.bufferx[j+fix]!=temp){
-		     printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
+//		     printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
 		     break;
 		  }
 	       }
@@ -376,7 +382,7 @@ char write_32k(unsigned short int hi_word, unsigned short int lo_word)
 	    unpass--;
 //	    printf("counter=%x ",inportb(data));
 	    outportb(port_a,0x0b);	// set all pin=0 for debug
-	    if (disp_on) printf("*");
+//	    if (disp_on) printf("*");
 	    init_port();
 	    set_ai_data(3,0x10|(hi_word>>8));
 	    set_ai_data(2,(hi_word & 0xff));
@@ -419,7 +425,7 @@ char verify_32k(unsigned short int hi_word, unsigned short int lo_word)
 //	       printf("verify error!!!\07\n");
 //	       printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
 	       outportb(port_a,0x0b);	// all pin=0 for debug
-	       if (disp_on) printf("#");
+//	       if (disp_on) printf("#");
 	       init_port();
 	       set_ai_data(3,0x10|(hi_word>>8));
 	       set_ai_data(2,(hi_word & 0xff));
@@ -507,8 +513,12 @@ short int read_file(void)
       fclose(fptr);	/* read data error */
       return(-1);
       }
-   printf(".");
-   fflush(stdout);
+#if 0
+  printf(".");
+  fflush(stdout);
+#endif
+  pos += trans_size;
+  ucon64_gauge (init_time, pos, size);
    return(0);
 }
 
@@ -519,6 +529,8 @@ short int download_n64()
       printf("open error !!!\07\n");
       return(-1);
       }
+   size = quickftell (file_name);
+
    if (sel==0)
       printf("Downloading");
    else

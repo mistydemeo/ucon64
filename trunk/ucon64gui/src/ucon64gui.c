@@ -34,6 +34,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "n64/n64.h"
 #include "nes/nes.h"
 #include "gb/gb.h"
+#include "swan/swan.h"
+#include "gba/gba.h"
+#include "sms/sms.h"
+#include "genesis/genesis.h"
+#include "dc/dc.h"
+#include "lynx/lynx.h"
+#include "jaguar/jaguar.h"
+#include "pce/pce.h"
+#include "neogeo/neogeo.h"
+#include "ngp/ngp.h"
 
 const char *ucon64gui_title = "uCON64gui " UCON64GUI_VERSION " (for uCON64 " UCON64_VERSION_S ") 2002 by NoisyB ";
 
@@ -271,14 +281,14 @@ html2gui_request (const char *uri, const char *query)
 
   if (ucon64gui.rom[0])
     {
-      strcat (buf, " --rom=\"");
+      strcat (buf, " " OPTION_LONG_S "rom=\"");
       strcat (buf, ucon64gui.rom);
       strcat (buf, "\"");
     }
 
   if (ucon64gui.file[0])
     {
-      strcat (buf, " --file=\"");
+      strcat (buf, " " OPTION_LONG_S "file=\"");
       strcat (buf, ucon64gui.file);
       strcat (buf, "\"");
     }
@@ -291,36 +301,98 @@ html2gui_request (const char *uri, const char *query)
         {
           case UCON64_ROM:
             strcpy (ucon64gui.rom, optindex);
+            ucon64gui.sub = 0;
             ucon64gui_root ();
             return;
             
           case UCON64_FILE:
             strcpy (ucon64gui.file, optindex);
+            ucon64gui.sub = 0;
             ucon64gui_root ();
             return;
 
           case UCON64_SNES:
             ucon64gui.sub = 1;
-            ucon64gui.console =  "--snes";
+            ucon64gui.console =  OPTION_LONG_S "snes";
             snes_gui ();
             return;
 
           case UCON64_GB:
             ucon64gui.sub = 1;
-            ucon64gui.console =  "--gb";
-            ucon64gui_gb ();
+            ucon64gui.console =  OPTION_LONG_S "gb";
+            gb_gui ();
             return;
 
           case UCON64_N64:
             ucon64gui.sub = 1;
-            ucon64gui.console =  "--n64";
-            ucon64gui_n64 ();
+            ucon64gui.console =  OPTION_LONG_S "n64";
+            n64_gui ();
             return;
 
           case UCON64_NES:
             ucon64gui.sub = 1;
-            ucon64gui.console =  "--nes";
-            ucon64gui_nes ();
+            ucon64gui.console =  OPTION_LONG_S "nes";
+            nes_gui ();
+            return;
+
+          case UCON64_SWAN:
+            ucon64gui.sub = 1;
+            ucon64gui.console =  OPTION_LONG_S "swan";
+            swan_gui ();
+            return;
+
+          case UCON64_GBA:
+            ucon64gui.sub = 1;
+            ucon64gui.console =  OPTION_LONG_S "gba";
+            gba_gui ();
+            return;
+
+          case UCON64_SMS:
+            ucon64gui.sub = 1;
+            ucon64gui.console =  OPTION_LONG_S "sms";
+            sms_gui ();
+            return;
+
+          case UCON64_GEN:
+            ucon64gui.sub = 1;
+            ucon64gui.console =  OPTION_LONG_S "gen";
+            genesis_gui ();
+            return;
+
+          case UCON64_DC:
+            ucon64gui.sub = 1;
+            ucon64gui.console =  OPTION_LONG_S "dc";
+            dc_gui ();
+            return;
+
+          case UCON64_LYNX:
+            ucon64gui.sub = 1;
+            ucon64gui.console =  OPTION_LONG_S "lynx";
+            lynx_gui ();
+            return;
+
+          case UCON64_JAGUAR:
+            ucon64gui.sub = 1;
+            ucon64gui.console =  OPTION_LONG_S "jaguar";
+            jaguar_gui ();
+            return;
+
+          case UCON64_PCE:
+            ucon64gui.sub = 1;
+            ucon64gui.console =  OPTION_LONG_S "pce";
+            pce_gui ();
+            return;
+
+          case UCON64_NEOGEO:
+            ucon64gui.sub = 1;
+            ucon64gui.console =  OPTION_LONG_S "neogeo";
+            neogeo_gui ();
+            return;
+
+          case UCON64_NGP:
+            ucon64gui.sub = 1;
+            ucon64gui.console =  OPTION_LONG_S "ngp";
+            ngp_gui ();
             return;
 
           case UCON64_XCDRW:
@@ -422,7 +494,7 @@ ucon64gui_output (char *output)
   h2g_head_end ();
   h2g_body (NULL, "#c0c0c0");
 
-  h2g_input_image ("Back", "--root", back_xpm, 0, 0, "Back");
+  h2g_input_image ("Back", OPTION_LONG_S "root", back_xpm, 0, 0, "Back");
 
 //  h2g_br();
 
@@ -454,78 +526,78 @@ ucon64gui_root (void)
   h2g_ ("Console specific options");
   h2g_br ();
 #if 0
-  h2g_input_submit ("NES", "--nes",
-                    "(--nes) options for Nintendo Entertainment System/NES\n1983 Nintendo http://www.nintendo.com");
-  h2g_input_submit ("GameBoy", "--gb",
-                    "(--gb) options for GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance)\n1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com");
-  h2g_input_submit ("Super Nintendo", "--snes",
-                    "(--snes) options for Super Nintendo/SNES/Super Famicon\n1990 Nintendo http://www.nintendo.com");
-  h2g_input_submit ("Nintendo 64", "--n64",
-                    "(--n64) options for Nintendo 64\n1996 Nintendo http://www.nintendo.com");
-  h2g_input_submit ("GameBoy Advance", "--gba",
-                    "(--gba) options for GameBoy Advance\n2001 Nintendo http://www.nintendo.com");
+  h2g_input_submit ("NES", OPTION_LONG_S "nes",
+                    "(" OPTION_LONG_S "nes) options for Nintendo Entertainment System/NES\n1983 Nintendo http://www.nintendo.com");
+  h2g_input_submit ("GameBoy", OPTION_LONG_S "gb",
+                    "(" OPTION_LONG_S "gb) options for GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance)\n1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com");
+  h2g_input_submit ("Super Nintendo", OPTION_LONG_S "snes",
+                    "(" OPTION_LONG_S "snes) options for Super Nintendo/SNES/Super Famicon\n1990 Nintendo http://www.nintendo.com");
+  h2g_input_submit ("Nintendo 64", OPTION_LONG_S "n64",
+                    "(" OPTION_LONG_S "n64) options for Nintendo 64\n1996 Nintendo http://www.nintendo.com");
+  h2g_input_submit ("GameBoy Advance", OPTION_LONG_S "gba",
+                    "(" OPTION_LONG_S "gba) options for GameBoy Advance\n2001 Nintendo http://www.nintendo.com");
 
   ucon64gui_spacer ();
 
-  h2g_input_submit ("Sega Master System/Game Gear", "--sms",
-                    "(--sms) options for Sega Master System(II/III)/GameGear (Handheld)\n1986/19XX SEGA http://www.sega.com");
-  h2g_input_submit ("Genesis", "--gen",
-                    "(--gen) options for Genesis/Sega Mega Drive/Sega CD/32X/Nomad\n1989/19XX/19XX SEGA http://www.sega.com");
-  h2g_input_submit ("Dreamcast", "--dc",
-                    "(--dc) options for Dreamcast\n1998 SEGA http://www.sega.com");
+  h2g_input_submit ("Sega Master System/Game Gear", OPTION_LONG_S "sms",
+                    "(" OPTION_LONG_S "sms) options for Sega Master System(II/III)/GameGear (Handheld)\n1986/19XX SEGA http://www.sega.com");
+  h2g_input_submit ("Genesis", OPTION_LONG_S "gen",
+                    "(" OPTION_LONG_S "gen) options for Genesis/Sega Mega Drive/Sega CD/32X/Nomad\n1989/19XX/19XX SEGA http://www.sega.com");
+  h2g_input_submit ("Dreamcast", OPTION_LONG_S "dc",
+                    "(" OPTION_LONG_S "dc) options for Dreamcast\n1998 SEGA http://www.sega.com");
 
   ucon64gui_spacer ();
 
-  h2g_input_submit ("Lynx", "--lynx",
-                    "(--lynx) options for Handy(prototype)/Lynx/Lynx II\n1987 Epyx/1989 Atari/1991 Atari");
-  h2g_input_submit ("Jaguar", "--jag",
-                    "(--jag) options for Panther(32bit prototype)/Jaguar64/Jaguar64 CD\n1989 Flare2/1993 Atari/1995 Atari");
+  h2g_input_submit ("Lynx", OPTION_LONG_S "lynx",
+                    "(" OPTION_LONG_S "lynx) options for Handy(prototype)/Lynx/Lynx II\n1987 Epyx/1989 Atari/1991 Atari");
+  h2g_input_submit ("Jaguar", OPTION_LONG_S "jag",
+                    "(" OPTION_LONG_S "jag) options for Panther(32bit prototype)/Jaguar64/Jaguar64 CD\n1989 Flare2/1993 Atari/1995 Atari");
 
   h2g_ (" ");
-  h2g_input_submit ("PC-Engine", "--pce",
-                    "(--pce) options for PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))/Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)\n1987/19XX/19XX NEC");
-
-  h2g_ (" ");
-
-  h2g_input_submit ("Neo Geo", "--ng",
-                    "(--ng) options for Neo Geo/Neo Geo CD(Z)/MVS\n1990/1994 SNK http://www.neogeo.co.jp");
-  h2g_input_submit ("Neo Geo Pocket", "--ngp",
-                    "(--ngp) options for Neo Geo Pocket/Neo Geo Pocket Color\n1998/1999 SNK http://www.neogeo.co.jp");
+  h2g_input_submit ("PC-Engine", OPTION_LONG_S "pce",
+                    "(" OPTION_LONG_S "pce) options for PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))/Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)\n1987/19XX/19XX NEC");
 
   h2g_ (" ");
 
-  h2g_input_submit ("WonderSwan", "--wswan",
-                    "(--swan) options for WonderSwan/WonderSwan Color\n19XX/19XX Bandai");
+  h2g_input_submit ("Neo Geo", OPTION_LONG_S "ng",
+                    "(" OPTION_LONG_S "ng) options for Neo Geo/Neo Geo CD(Z)/MVS\n1990/1994 SNK http://www.neogeo.co.jp");
+  h2g_input_submit ("Neo Geo Pocket", OPTION_LONG_S "ngp",
+                    "(" OPTION_LONG_S "ngp) options for Neo Geo Pocket/Neo Geo Pocket Color\n1998/1999 SNK http://www.neogeo.co.jp");
+
+  h2g_ (" ");
+
+  h2g_input_submit ("WonderSwan", OPTION_LONG_S "wswan",
+                    "(" OPTION_LONG_S "swan) options for WonderSwan/WonderSwan Color\n19XX/19XX Bandai");
 #else
   h2g_select ("page", 0, 0, "Choose your console system here",
     "NES",
-    "--nes", 
+    OPTION_LONG_S "nes", 
     "GameBoy",
-    "--gb", 
+    OPTION_LONG_S "gb", 
     "Super Nintendo",
-    "--snes",
+    OPTION_LONG_S "snes",
     "Nintendo 64",
-    "--n64", 
+    OPTION_LONG_S "n64", 
     "GameBoy Advance", 
-    "--gba", 
+    OPTION_LONG_S "gba", 
     "Sega Master System/Game Gear",
-    "--sms",
+    OPTION_LONG_S "sms",
     "Genesis",
-    "--gen",
+    OPTION_LONG_S "gen",
     "Dreamcast",
-    "--dc",
+    OPTION_LONG_S "dc",
     "Lynx",
-    "--lynx",
+    OPTION_LONG_S "lynx",
     "Jaguar",
-    "--jag",
+    OPTION_LONG_S "jag",
     "PC-Engine",
-    "--pce",
+    OPTION_LONG_S "pce",
     "Neo Geo",
-    "--ng",
+    OPTION_LONG_S "ng",
     "Neo Geo Pocket",
-    "--ngp",
+    OPTION_LONG_S "ngp",
     "WonderSwan",
-    "--wswan",
+    OPTION_LONG_S "swan",
     0);
 #endif
 

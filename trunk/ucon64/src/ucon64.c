@@ -101,10 +101,12 @@ static int ucon64_usage (int argc, char *argv[]);
 static int ucon64_init (struct ucon64_ *rom);
 static int ucon64_nfo (struct ucon64_ *rom);
 static int ucon64_flush (int argc, char *argv[], struct ucon64_ *rom);
+static void ucon64_exit (void);
+
 
 struct ucon64_ rom;
 
-void
+static void
 ucon64_exit (void)
 {
   printf ("+++EOF");
@@ -1118,7 +1120,7 @@ while ((c =
 }
 
 
-int
+static int
 ucon64_init (struct ucon64_ *rom)
 {
   long bytes = 0;
@@ -1318,7 +1320,7 @@ ucon64_init (struct ucon64_ *rom)
 }
 
 
-int
+static int
 ucon64_usage (int argc, char *argv[])
 {
   printf ("USAGE: %s [OPTION(S)] ROM [FILE]\n\n",
@@ -1552,7 +1554,7 @@ emuchina.net
 /*
     this is the now centralized nfo output for all kinds of ROMs
 */
-int
+static int
 ucon64_nfo (struct ucon64_ *rom)
 {
   char buf[4096];
@@ -1639,7 +1641,7 @@ ucon64_nfo (struct ucon64_ *rom)
 /*
     flush the ucon64 struct with default values
 */
-int
+static int
 ucon64_flush (int argc, char *argv[], struct ucon64_ *rom)
 {
   long x = 0;

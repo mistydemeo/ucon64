@@ -43,37 +43,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "cdi.h"
 #include "nero.h"
 
+static const char pvd_magic[] = {0x01, 'C', 'D', '0', '0', '1', 0x01, 0};
+static const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
+static const char vdt_magic[] = {0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
 
-// the version
-const uint32_t dm_version = LIB_VERSION (0, 0, 2);
+static void (* ext_gauge) (int, int);
 
-
-// "proposal" for a usage
-const st_dm_usage_t dm_usage[] = {
-#if 0
-  {"cdirip", "N", "rip/dump track N from DiscJuggler/CDI IMAGE"},
-  {"nrgrip", "N", "rip/dump track N from Nero/NRG IMAGE"},
-  {"rip", NULL, "rip/dump file(s) from a TRACK"},
-#endif
-  {"bin2iso", NULL, "convert binary TRACK to ISO (if possible)"},
-  {"mktoc", NULL, "generate TOC sheet for IMAGE or existing CUE sheet"},
-  {"mkcue", NULL, "generate CUE sheet for IMAGE or existing TOC sheet"},
-  {"mksheet", NULL, "same as " OPTION_LONG_S "mktoc and " OPTION_LONG_S "mkcue combined"},
-  {NULL, NULL, NULL}
-};
-
-
-static void (* external_gauge) (int, int);
-
-void
-dm_set_gauge (void (* ptr) (int, int))
-{
-//  external_gauge = &ptr;
-}
-
-
-// msgs
-const char *libdm_msg[] = {
+const char *dm_msg[] = {
   "ERROR: %s has been deprecated\n",
   "ERROR: unknown/unsupported track mode\n",
   "ERROR: the images track mode is already MODE1/2048\n",
@@ -82,21 +58,15 @@ const char *libdm_msg[] = {
 
 
 int
-fsize (const char *filename)
+fsize (const char *fname)
 {
   struct stat fstate;
 
-  if (!stat (filename, &fstate))
+  if (!stat (fname, &fstate))
     return fstate.st_size;
 
   return -1;
 }
-
-
-const char pvd_magic[] = {0x01, 'C', 'D', '0', '0', '1', 0x01, 0};
-const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
-const char vdt_magic[] = {0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
-
 
 
 void
@@ -251,7 +221,6 @@ msf_to_lba (struct cdrom_msf *msf)
 #endif
 
 
-
 #if 0
 int32_t
 read_raw_frame (int32_t fd, int32_t lba, unsigned char *buf)
@@ -299,10 +268,10 @@ dm_track_init (dm_track_t *track, FILE *fh)
       {2, 2448, , },
       {2, 2646, , },
       {2, 2647, , },
-#endif
       {2, 2336, 0, 280},  // MODE2/2336, Macintosh
       {2, 2352, 16, 280}, // MODE2/2352, Macintosh
-//      {2, 2056, 0, 0},  // MODE2/2056, Macintosh
+      {2, 2056, 0, 0},  // MODE2/2056, Macintosh
+#endif
       {0, 0, 0, 0}
     };
   const char sync_data[] = {0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0};
@@ -335,58 +304,11 @@ dm_track_init (dm_track_t *track, FILE *fh)
   track->seek_ecc = probe[x].seek_ecc;
 
   return track;
-#if 0
-  fread (buf, 1, 16, src);
-  if (!memcmp (sync_data, buf, 12))  // raw (2352)
-    {
-      sector_size = 2352;
-      switch (buf[15])
-        {
-        case 2:
-          mode = 2;
-          break;
-        case 1:
-          mode = 1;
-          break;
-        default:
-          {
-            printf ("Unsupported track mode (%d)", buf[15]);
-            return -1;
-          }
-        }
-      if (seek_pvd (2352, mode, image->filename) == 0)
-        {
-          printf ("Could not find PVD!\n");
-          return -1;
-        }
-    }
-  else if (seek_pvd (2048, 1, image->filename))
-    {
-      sector_size = 2048;
-      mode = 1;
-    }
-  else if (seek_pvd (2336, 2, image->filename))
-    {
-      sector_size = 2336;
-      mode = 2;
-    }
-  else if (seek_pvd (2056, 2, image->filename))
-    {
-      sector_size = 2056;
-      mode = 2;
-      maclibdiscmage = TRUE;
-    }
-  else
-    {
-      fprintf (stderr, "ERROR: Could not find PVD\n");
-      return -1;
-    }
-#endif
 }
 
 
 dm_image_t *
-dm_open (const char *image_filename)
+dm_reopen (const char *fname, dm_image_t *image_p)
 // recurses through all <image_type>_init functions to find correct image type
 {
   typedef struct
@@ -399,20 +321,22 @@ dm_open (const char *image_filename)
   static st_probe_t probe[] = 
     {
       {DM_CDI, cdi_init, "CDI (DiscJuggler) Image"},
-//      {DM_ISO, iso_init, "ISO Image"},
-//      {DM_BIN, bin_init, "BIN Image"},
-//      {DM_NRG, nrg_init, "NRG (Nero) Image"}, // nero
-//      {DM_CCD, ccd_init, "CCD (CloneCD) Image"},
-//      {DM_UNKNOWN, NULL, "Unknown Image"},
+#if 0
+      {DM_ISO, iso_init, "ISO Image"},
+      {DM_BIN, bin_init, "BIN Image"},
+      {DM_NRG, nrg_init, "NRG (Nero) Image"}, // nero
+      {DM_CCD, ccd_init, "CCD (CloneCD) Image"},
+      {DM_UNKNOWN, NULL, "Unknown Image"},
+#endif
       {0, NULL, NULL}
     };
   static dm_image_t image; //TODO: malloc
   static dm_track_t track; //TODO: malloc
   int x = 0, identified = 0;
   FILE *fh;
-
+  
   memset (&image, 0, sizeof (dm_image_t));
-  strcpy (image.filename, image_filename);
+  strcpy (image.fname, fname);
 
   for (x = 0; probe[x].type; x++)
     if (probe[x].func)
@@ -427,15 +351,13 @@ dm_open (const char *image_filename)
 
   image.type = probe[x].type;
   image.desc = probe[x].desc;
-  strcpy (image.layout, "|            |           |            |");
-  strcpy (image.layout_ansi, "\x1b[32;42m|            |           |            |\x1b[0m");
 
-  if (!(fh = fopen (image_filename, "rb")))
+  if (!(fh = fopen (fname, "rb")))
     return NULL;
 
-//  for (session = 0; session < image->session; session++)
+//  for (x = 0; x < image.tracks; x++)
     {
-//get start pos from track
+//      dm_fseek (fh, x, SEEK_SET);
       dm_track_init (&track, fh);
       mem_hexdump (&track, sizeof (dm_track_t), 0);
       image.track = (dm_track_t *) &track;
@@ -447,35 +369,24 @@ dm_open (const char *image_filename)
 
 
 int
+dm_fseek (FILE *fp, int track, int how)
+{
+ return 0;
+}
+
+
+dm_image_t *
+dm_open (const char *fname)
+{
+  return dm_reopen (fname, NULL);
+}
+
+
+int
 dm_close (dm_image_t *image)
 {
 //  fclose (image->fh);
 //  free (image);
-  return 0;
-}
-
-
-#if 0
-static int32_t
-sector_read (char *buffer, dm_track_t *track, FILE * fsource)
-// will put user data into buffer no matter the source libdiscmage
-{
-  int status;
-
-  fseek (fsource, track->seek_header, SEEK_CUR);
-
-  status = fread (buffer, 2048, 1, fsource);
-
-  fseek (fsource, track->seek_ecc, SEEK_CUR);
-
-  return status;
-}
-#endif
-
-
-int32_t
-dm_nrgrip (dm_image_t *image)
-{
   return 0;
 }
 
@@ -502,14 +413,14 @@ dm_bin2iso (dm_image_t *image)
     
   if (track->mode == 1 && track->sector_size == 2048)
     {
-      fprintf (stderr, libdm_msg[ALREADY_2048]);
+      fprintf (stderr, dm_msg[ALREADY_2048]);
       return -1;
     }
 
-  if (!(src = fopen (image->filename, "rb")))
+  if (!(src = fopen (image->fname, "rb")))
     return -1;
 
-  strcpy (buf, basename (image->filename));
+  strcpy (buf, basename (image->fname));
   set_suffix (buf, ".ISO");
 
   if (!(dest = fopen (buf, "wb")))
@@ -518,7 +429,8 @@ dm_bin2iso (dm_image_t *image)
       return -1;
     }
 
-  size = fsize (image->filename);
+  size = fsize (image->fname);
+// TODO: float point exception
   size /= track->sector_size;
 
   netto_size = track->sector_size - (track->seek_header + track->seek_ecc);
@@ -532,20 +444,16 @@ dm_bin2iso (dm_image_t *image)
 
       fseek (src, track->seek_ecc, SEEK_CUR);
 
-//      external_gauge (i * track->sector_size, size * track->sector_size);
-      external_gauge (1,100);
+      if (!(i % 100) && ext_gauge)
+        ext_gauge (i * track->sector_size, size * track->sector_size);
     }
+
+  if (ext_gauge)
+    ext_gauge (i * track->sector_size, size * track->sector_size);
 
   fclose (dest);
   fclose (src);
 
-  return 0;
-}
-
-
-int32_t
-dm_cdi2nero (dm_image_t * image)
-{
   return 0;
 }
 
@@ -575,10 +483,10 @@ dm_isofix (dm_image_t * image, int start_lba)
   track = image->track;
   mac = (track->sector_size == 2056 ? TRUE : FALSE);
     
-  if (!(src = fopen (image->filename, "rb")))
+  if (!(src = fopen (image->fname, "rb")))
     return -1;
 
-  strcpy (buf2, basename (image->filename));
+  strcpy (buf2, basename (image->fname));
   set_suffix (buf2, ".FIX");
   if (!(dest = fopen (buf2, "wb")))
     {
@@ -728,7 +636,7 @@ int
 dm_disc_read (dm_image_t *image)
 {
 #if 1
-  fprintf (stderr, libdm_msg[DEPRECATED], "dm_disc_read()");
+  fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_read()");
 #else 
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
 
@@ -757,7 +665,7 @@ int
 dm_disc_write (dm_image_t *image)
 {
 #if 1
-  fprintf (stderr, libdm_msg[DEPRECATED], "dm_disc_write()");
+  fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_write()");
 #else
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
 
@@ -788,12 +696,13 @@ dm_disc_write (dm_image_t *image)
 uint32_t
 dm_get_version (void)
 {
+  static const uint32_t dm_version = LIB_VERSION (0, 0, 2);
   return dm_version;
 }
 
 
-st_dm_usage_t *
-dm_get_usage (void)
+void
+dm_set_gauge (void (* gauge) (int, int))
 {
-  return (st_dm_usage_t *) dm_usage;
+  ext_gauge = gauge;
 }

@@ -35,15 +35,14 @@ char djimport_path[FILENAME_MAX] = "discmage.dxe"; // default value
 
 static void *libdm;
 static uint32_t (*dm_get_version_ptr) (void);
-static st_dm_usage_t *(*dm_get_usage_ptr) (void);
 static dm_image_t *(*dm_open_ptr) (const char *);
+static dm_image_t *(*dm_reopen_ptr) (const char *, dm_image_t *);
 static int (*dm_close_ptr) (dm_image_t *);
 static int32_t (*dm_rip_ptr) (dm_image_t *);
 static int32_t (*dm_cdirip_ptr) (dm_image_t *);
 static int32_t (*dm_nrgrip_ptr) (dm_image_t *);
 static int (*dm_disc_read_ptr) (dm_image_t *);
 static int (*dm_disc_write_ptr) (dm_image_t *);
-static int32_t (*dm_mksheets_ptr) (dm_image_t *);
 static int32_t (*dm_mktoc_ptr) (dm_image_t *);
 static int32_t (*dm_mkcue_ptr) (dm_image_t *);
 static int32_t (*dm_bin2iso_ptr) (dm_image_t *);
@@ -56,9 +55,9 @@ load_dxe (void)
   libdm = open_module (djimport_path);
 
   dm_get_version_ptr = get_symbol (libdm, "dm_get_version");
-  dm_get_usage_ptr = get_symbol (libdm, "dm_get_usage");
 
   dm_open_ptr = get_symbol (libdm, "dm_open");
+  dm_reopen_ptr = get_symbol (libdm, "dm_reopen");
   dm_close_ptr = get_symbol (libdm, "dm_close");
 
   dm_rip_ptr = get_symbol (libdm, "dm_rip");
@@ -68,7 +67,6 @@ load_dxe (void)
   dm_disc_read_ptr = get_symbol (libdm, "dm_disc_read");
   dm_disc_write_ptr = get_symbol (libdm, "dm_disc_write");
 
-  dm_mksheets_ptr = get_symbol (libdm, "dm_mksheets");
   dm_mktoc_ptr = get_symbol (libdm, "dm_mktoc");
   dm_mkcue_ptr = get_symbol (libdm, "dm_mkcue");
 
@@ -83,20 +81,11 @@ dm_get_version (void)
 /*
   Our DXE code can export (pointers to) variables. However, Windows DLLs can
   only export (pointers to) functions. To avoid platform-specific code we
-  let all code use these functions in libdiscmage (dm_get_version() and
-  dm_get_usage()).
+  let all code use these functions in libdiscmage (dm_get_version()).
 */
 {
   CHECK
   return dm_get_version_ptr ();
-}
-
-
-st_dm_usage_t *
-dm_get_usage (void)
-{
-  CHECK
-  return dm_get_usage_ptr ();
 }
 
 
@@ -105,6 +94,14 @@ dm_open (const char *a)
 {
   CHECK
   return dm_open_ptr (a);
+}
+
+
+dm_image_t *
+dm_reopen (const char *a, dm_image_t *b)
+{
+  CHECK
+  return dm_reopen_ptr (a, b);
 }
 
 
@@ -153,14 +150,6 @@ dm_disc_write (dm_image_t *a)
 {
   CHECK
   return dm_disc_write_ptr (a);
-}
-
-
-int32_t
-dm_mksheets (dm_image_t *a)
-{
-  CHECK
-  return dm_mksheets_ptr (a);
 }
 
 

@@ -76,9 +76,9 @@ dxe_init (void)
   symbol->cmp_key = (int (*) (void *, void *)) strcmp; // How beautiful! ;-)
 
   symbol = map_put (symbol, "dm_get_version", dm_get_version);
-  symbol = map_put (symbol, "dm_get_usage", dm_get_usage);
 
   symbol = map_put (symbol, "dm_open", dm_open);
+  symbol = map_put (symbol, "dm_reopen", dm_reopen);
   symbol = map_put (symbol, "dm_close", dm_close);
 
   symbol = map_put (symbol, "dm_rip", dm_rip);

@@ -130,7 +130,7 @@ extern int to_bcd (int i);
 /*
   libdm messages
   
-  usage example: fprintf (stdout, libdm_msg[DEPRECATED], filename);
+  usage example: fprintf (stdout, dm_msg[DEPRECATED], filename);
 */
 enum
 {
@@ -138,7 +138,7 @@ enum
   UNKNOWN_IMAGE,
   ALREADY_2048
 };
-extern const char *libdm_msg[];
+extern const char *dm_msg[];
 
 // get file size of fname
 extern int fsize (const char *fname);

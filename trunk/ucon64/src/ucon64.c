@@ -500,17 +500,23 @@ if the wrong ROM/console type was detected\n",buf3,getenv("HOME"));
 		return(-1);
 	}
 
-	sprintf(buf,"%s %s \"%s\"",buf2,ucon64_file(),ucon64_rom());
+	sprintf(buf,"%s %s",buf2,ucon64_file());
 
 	for( x=0 ; x < argc ; x++ )
 	{
 		if(	strdcmp(argv[x],"-e") &&
 			strdcmp(argv[x],ucon64_name()) &&
-			strdcmp(argv[x],ucon64_rom()) &&
 			strdcmp(argv[x],ucon64_file())
 		)
 		{
-			sprintf(buf2," %s",argv[x]);
+			sprintf(	buf2
+					,(
+						(!strdcmp(argv[x],ucon64_rom())) ?
+						" \"%s\"" :
+						" %s"
+					)
+					,argv[x]
+			);
 			strcat(buf,buf2);
 		}
 	}

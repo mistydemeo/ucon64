@@ -90,7 +90,7 @@ lynx_lnx (st_rominfo_t *rominfo)
 {
   st_lnx_header_t header;
   char dest_name[FILENAME_MAX];
-  int size = q_fsize (ucon64.rom);
+  int size = ucon64.file_size;
 
   if (rominfo->buheader_len != 0)
     {

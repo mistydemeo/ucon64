@@ -616,7 +616,7 @@ pcengine_smg (st_rominfo_t *rominfo)
 {
   char dest_name[FILENAME_MAX];
   st_unknown_header_t header;
-  int size = q_fsize (ucon64.rom) - rominfo->buheader_len;
+  int size = ucon64.file_size - rominfo->buheader_len;
 
   if (rominfo->buheader_len != 0)
     {
@@ -690,7 +690,7 @@ random number when backing up games.
   sprintf (buf2, "%s.%03u", buf, (ucon64.file_size - rominfo->buheader_len) / MBIT);
 
   ucon64_file_handler (buf2, NULL, 0);
-  q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), buf2, "wb");
+  q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, buf2, "wb");
 
   printf (ucon64_msg[WROTE], buf2);
   return 0;
@@ -826,7 +826,7 @@ pcengine_chksum (st_rominfo_t *rominfo)
   if (!(fh = fopen (ucon64.rom, "rb")))
     return -1;
 
-  taille = q_fsize (ucon64.rom) - rominfo->buheader_len;
+  taille = ucon64.file_size - rominfo->buheader_len;
   size = taille & 0xfffff000;
 //  if ((taille & 0x0fff) == 0)
 //    rominfo->buheader_len = 0;

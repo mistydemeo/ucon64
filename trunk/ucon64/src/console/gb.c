@@ -105,7 +105,7 @@ gameboy_n2gb (st_rominfo_t *rominfo, const char *emu_rom)
   int n = 0, crc = 0;
   unsigned char buf[EMULATOR_LEN];
 
-  if (q_fsize (ucon64.rom) != EMULATOR_LEN)
+  if (ucon64.file_size != EMULATOR_LEN)
     return -1;
 
   memset (buf, 0, EMULATOR_LEN);

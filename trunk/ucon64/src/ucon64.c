@@ -127,25 +127,31 @@ const struct option options[] =   {
     {"b", 0, 0, UCON64_B},
     {"b0", 1, 0, UCON64_B0},
     {"b1", 1, 0, UCON64_B1},
+    {"bat", 0, 0, UCON64_BAT},
     {"bios", 1, 0, UCON64_BIOS},
     {"bot", 1, 0, UCON64_BOT},
+    {"bs", 0, 0, UCON64_BS},
     {"c", 1, 0, UCON64_C},
 //    {"cd32", 0, 0, UCON64_CD32},
 //    {"cdi", 0, 0, UCON64_CDI},
     {"cdirip", 0, 0, UCON64_CDIRIP},
     {"chk", 0, 0, UCON64_CHK},
+    {"cmnt", 1, 0, UCON64_CMNT},                // will be active only if UNIF_REVISION > 7
     {"col", 1, 0, UCON64_COL},
     {"coleco", 0, 0, UCON64_COLECO},
     {"crc", 0, 0, UCON64_CRC},
     {"crchd", 0, 0, UCON64_CRCHD},
     {"crp", 1, 0, UCON64_CRP},
     {"cs", 1, 0, UCON64_CS},
+    {"ctrl", 1, 0, UCON64_CTRL},
+    {"ctrl2", 1, 0, UCON64_CTRL2},
     {"db", 0, 0, UCON64_DB},
     {"dbs", 1, 0, UCON64_DBS},
     {"dbuh", 0, 0, UCON64_DBUH},
     {"dbv", 0, 0, UCON64_DBV},
     {"dc", 0, 0, UCON64_DC},
     {"dint", 0, 0, UCON64_DINT},
+    {"dumpinfo", 1, 0, UCON64_DUMPINFO},
     {"e", 0, 0, UCON64_E},
     {"f", 0, 0, UCON64_F},
     {"fds", 0, 0, UCON64_FDS},
@@ -168,14 +174,19 @@ const struct option options[] =   {
     {"gp32", 0, 0, UCON64_GP32},
     {"good", 0, 0, UCON64_GOOD},
     {"h", 0, 0, UCON64_HELP},
+    {"hd", 0, 0, UCON64_HD},
+    {"hdn", 1, 0, UCON64_HDN},
     {"help", 0, 0, UCON64_HELP},
     {"hex", 0, 0, UCON64_HEX},
+    {"hi", 0, 0, UCON64_HI},
     {"i", 0, 0, UCON64_I},
     {"idppf", 1, 0, UCON64_IDPPF},
     {"ines", 0, 0, UCON64_INES},
     {"ineshd", 0, 0, UCON64_INESHD},
     {"ins", 0, 0, UCON64_INS},
     {"insn", 1, 0, UCON64_INSN},
+    {"int", 0, 0, UCON64_INT},
+    {"int2", 0, 0, UCON64_INT2},
     {"intelli", 0, 0, UCON64_INTELLI},
     {"ip", 0, 0, UCON64_IP},
     {"iso", 0, 0, UCON64_ISO},
@@ -192,8 +203,10 @@ const struct option options[] =   {
     {"lsv", 0, 0, UCON64_LSV},
     {"lynx", 0, 0, UCON64_LYNX},
     {"lyx", 0, 0, UCON64_LYX},
+    {"mapr", 1, 0, UCON64_MAPR},
     {"mgd", 0, 0, UCON64_MGD},
 //    {"mgh", 0, 0, UCON64_MGH},
+    {"mirr", 1, 0, UCON64_MIRR},
     {"mka", 1, 0, UCON64_MKA},
     {"mkcue", 0, 0, UCON64_MKCUE},
     {"mki", 1, 0, UCON64_MKI},
@@ -208,19 +221,27 @@ const struct option options[] =   {
     {"n64", 0, 0, UCON64_N64},
     {"na", 1, 0, UCON64_NA},
     {"nbak", 0, 0, UCON64_NBAK},
+    {"nbat", 0, 0, UCON64_NBAT},
+    {"nbs", 0, 0, UCON64_NBS},
     {"ncol", 0, 0, UCON64_NCOL},
-    {"nrgrip", 0, 0, UCON64_NRGRIP},
     {"nes", 0, 0, UCON64_NES},
+    {"nhd", 0, 0, UCON64_NHD},
+    {"nhi", 0, 0, UCON64_NHI},
+    {"nint", 0, 0, UCON64_NINT},
     {"ng", 0, 0, UCON64_NG},
     {"ngp", 0, 0, UCON64_NGP},
     {"nppf", 1, 0, UCON64_NPPF},
+    {"nrgrip", 0, 0, UCON64_NRGRIP},
     {"nrot", 0, 0, UCON64_NROT},
     {"ns", 0, 0, UCON64_NS},
+    {"ntsc", 0, 0, UCON64_NTSC},
+    {"nvram", 0, 0, UCON64_NVRAM},
     {"o", 1, 0, UCON64_O},
     {"p", 0, 0, UCON64_P},
     {"pad", 0, 0, UCON64_PAD},
     {"padhd", 0, 0, UCON64_PADHD},
     {"padn", 1, 0, UCON64_PADN},
+    {"pal", 0, 0, UCON64_PAL},
     {"pasofami", 0, 0, UCON64_PASOFAMI},
     {"patch", 1, 0, UCON64_PATCH},
     {"pce", 0, 0, UCON64_PCE},
@@ -230,8 +251,8 @@ const struct option options[] =   {
     {"psx", 0, 0, UCON64_PSX},
     {"q", 0, 0, UCON64_Q},
     {"qq", 0, 0, UCON64_QQ},
-    {"rrom", 0, 0, UCON64_RROM},
     {"rr83", 0, 0, UCON64_RR83},
+    {"rrom", 0, 0, UCON64_RROM},
     {"rl", 0, 0, UCON64_RL},
     {"rom", 1, 0, UCON64_ROM},
     {"rotl", 0, 0, UCON64_ROTL},
@@ -266,6 +287,8 @@ const struct option options[] =   {
     {"v64", 0, 0, UCON64_V64},
     {"vboy", 0, 0, UCON64_VBOY},
     {"vec", 0, 0, UCON64_VEC},
+    {"version", 0, 0, UCON64_VER},
+    {"vram", 0, 0, UCON64_VRAM},
     {"xbox", 0, 0, UCON64_XBOX},
     {"xcdrw", 0, 0, UCON64_XCDRW},
 #ifdef  PARALLEL
@@ -290,29 +313,6 @@ const struct option options[] =   {
     {"xv64", 0, 0, UCON64_XV64},
 #endif // PARALLEL
     {"z64", 0, 0, UCON64_Z64},
-    {"hd", 0, 0, UCON64_HD},
-    {"hdn", 1, 0, UCON64_HDN},
-    {"nhd", 0, 0, UCON64_NHD},
-    {"int", 0, 0, UCON64_INT},
-    {"int2", 0, 0, UCON64_INT2},
-    {"nint", 0, 0, UCON64_NINT},
-    {"hi", 0, 0, UCON64_HI},
-    {"nhi", 0, 0, UCON64_NHI},
-    {"bs", 0, 0, UCON64_BS},
-    {"nbs", 0, 0, UCON64_NBS},
-    {"ctrl", 1, 0, UCON64_CTRL},
-    {"ctrl2", 1, 0, UCON64_CTRL2},
-    {"ntsc", 0, 0, UCON64_NTSC},
-    {"pal", 0, 0, UCON64_PAL},
-    {"bat", 0, 0, UCON64_BAT},
-    {"nbat", 0, 0, UCON64_NBAT},
-    {"vram", 0, 0, UCON64_VRAM},
-    {"nvram", 0, 0, UCON64_NVRAM},
-    {"mirr", 1, 0, UCON64_MIRR},
-    {"mapr", 1, 0, UCON64_MAPR},
-    {"cmnt", 1, 0, UCON64_CMNT},                // will be active only if UNIF_REVISION > 7
-    {"dumpinfo", 1, 0, UCON64_DUMPINFO},
-    {"version", 0, 0, UCON64_VER},
     {0, 0, 0, 0}
   };
 
@@ -1310,7 +1310,7 @@ ucon64_usage (int argc, char *argv[])
   char *name_exe = basename (argv[0]), *name_discmage;
 
   printf (
-    "Usage: %s [OPTION(S)]... [[" OPTION_LONG_S "rom=]ROM(S)]... " /* [-o=OUTPUT_PATH] */ "\n\n", name_exe);
+    "Usage: %s [OPTION(S)]... [[" OPTION_LONG_S "rom=]ROM(S)]...\n\n", name_exe);
 
   ucon64_render_usage (ucon64_options_usage);
 
@@ -1360,7 +1360,7 @@ ucon64_usage (int argc, char *argv[])
 #endif
 #endif
 
-  printf ("All DISC-based consoles (using %s)\n", name_discmage);
+  printf ("All disc-based consoles (using %s)\n", name_discmage);
   if (!ucon64.discmage_enabled)
     printf (ucon64_msg[NO_LIB], name_discmage);
   else

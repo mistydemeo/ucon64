@@ -126,7 +126,7 @@ e.g. The first 16Mbit file of Donkey Kong Country (assuming it
   sprintf (buf2, "%s.%03u", buf, (ucon64.file_size - rominfo->buheader_len) / MBIT);
 
   ucon64_file_handler (buf2, NULL, 0);
-  q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), buf2, "wb");
+  q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, buf2, "wb");
 
   printf (ucon64_msg[WROTE], buf2);
   return 0;

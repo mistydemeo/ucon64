@@ -647,9 +647,7 @@ RestoreSRAM (FILE * fp, int StartOS)
   int m = ((StartOS - 1) << 1);
   int byteswritten = 0;
   time_t starttime;
-  int fsize;
 
-  fsize = q_fsize (ucon64.rom);
   starttime = time (NULL);
 
   i = fgetc (fp);
@@ -677,7 +675,7 @@ RestoreSRAM (FILE * fp, int StartOS)
             }
           byteswritten += 256;
           if ((byteswritten & 0x1fff) == 0)     // call ucon64_gauge() after sending 8kB
-            ucon64_gauge (starttime, byteswritten, fsize);
+            ucon64_gauge (starttime, byteswritten, ucon64.file_size);
         }
       m++;
     }

@@ -162,8 +162,8 @@ A would indicate the first file, B the second, etc. I am told
 078 is not needed, but is placed on the end of the filename by
 systems in Asia.
 
-e.g. The first 16 Mbit file of Donkey Kong Country (assuming it
-is cat. no. 475) would look like: SF16475A.078
+e.g. The first 8 Mbit file of Donkey Kong Country (assuming it
+is cat. no. 475) would look like: SF32475A.078
 */
 
 #ifdef PARALLEL

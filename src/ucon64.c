@@ -588,9 +588,9 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 
   printf ("%s\n\n", ucon64.rom);
 
-  if (rominfo->buheader_len != 0 && rominfo->buheader_len != SMC_HEADER_LEN)
+  if (rominfo->buheader_len && rominfo->buheader_len != SMC_HEADER_LEN)
     {
-      memhexdump (rominfo->buheader, rominfo->buheader_start, rominfo->buheader_len);
+      memhexdump (rominfo->buheader, rominfo->buheader_len, rominfo->buheader_start);
       printf ("\n");
     }
 

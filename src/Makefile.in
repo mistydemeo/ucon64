@@ -38,7 +38,7 @@ all: $(TARGET)
 clean:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
-              DEADJOE */DEADJOE *~ */*~ */*/*~
+              DEADJOE */DEADJOE *~ */*~ */*/*~ Makefile
 else
 ifdef DJGPP
 	del *.o
@@ -174,24 +174,3 @@ backup/cdrw.o: backup/cdrw.h $(UCON64_STD_H)
 backup/dex.o: backup/dex.h backup/psxpblib.h $(UCON64_STD_H)
 backup/mccl.o: backup/mccl.h $(UCON64_STD_H)
 backup/lynxit.o: backup/lynxit.h $(UCON64_STD_H)
-
-
-# with this"make" will automatically reconfigure if the .in' files change.
-
-# automatic re-running of configure if the ocnfigure.in file has changed
-${SRCDIR}/configure: configure.in
-	cd ${SRCDIR} && autoconf
-
-# autoheader might not change config.h.in, so touch a stamp file
-${SRCDIR}/config.h.in: stamp-h.in
-${SRCDIR}/stamp-h.in: configure.in
-	cd ${SRCDIR} && autoheader
-	echo timestamp > ${SRCDIR}/stamp-h.in
-
-config.h: stamp-h
-stamp-h: config.h.in config.status
-	./config.status
-Makefile: Makefile.in config.status
-	./config.status
-config.status: configure
-	./config.status --recheck

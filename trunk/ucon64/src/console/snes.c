@@ -1171,6 +1171,10 @@ becomes:8F/9F xx xx 30/31/32/33 AF xx xx 30/31/32/33 C9 xx xx 80
                                                 - Super Metroid
         a9 00 00 a2 fe 1f df 00 00 70 d0        // lda #$0000; ldx #$1ffe; cmp $700000,x; bne ...
 becomes:a9 00 00 a2 fe 1f df 00 00 70 ea ea     // lda #$0000; ldx #$1ffe; cmp $700000,x; nop; nop
+
+                                                - Killer Instinct
+        5c 7f d0 83 18 fb 78 c2 30              // jmp $83d07f; clc; xce; sei; rep #$30
+becomes:ea ea ea ea ea ea ea ea ea              // nop; nop; nop; nop; nop; nop; nop; nop; nop
 */
   char header[512], buffer[32 * 1024], backup_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
@@ -1216,6 +1220,8 @@ becomes:a9 00 00 a2 fe 1f df 00 00 70 ea ea     // lda #$0000; ldx #$1ffe; cmp $
 
       // uCON64
       change_string ("\xa9\x00\x00\xa2\xfe\x1f\xdf\x00\x00\x70\xd0", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("\x5c\x7f\xd0\x83\x18\xfb\x78\xc2\x30", 9, '*', '!',
+                     "\xea\xea\xea\xea\xea\xea\xea\xea\xea", 9, buffer, bytesread, -8);
 
       fwrite (buffer, 1, bytesread, destfile);
     }

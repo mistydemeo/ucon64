@@ -555,7 +555,7 @@ genesis_j (st_rominfo_t *rominfo)
       */
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".TMP");           // users should use -mgd to get
-      ucon64_file_handler (dest_name, NULL, 0); //  a correct name again
+      ucon64_file_handler (dest_name, NULL, 0); //  a correct name
       remove (dest_name);
 
       strcpy (src_name, ucon64.rom);

@@ -1806,6 +1806,23 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_siz
           snes_hirom = snes_hirom ? 0 : SNES_HIROM;
           snes_hirom_changed = 1;
         }
+      if ( snes_hirom && (type == GD3) && (rom_size == 0x300000) )
+        {
+          // Fix-up the weird 24Mbit Game Doctor HiRom format
+ 
+          unsigned char *p1, *p2, *p3;
+
+          p1 = &rom_buffer[0x180000];
+          p2 = &rom_buffer[0x200000];
+          p3 = &rom_buffer[0x280000];
+          for ( ; p1 < &rom_buffer[0x200000]; p1 += 0x8000, p2 += 0x8000, p3 += 0x8000 )
+            {
+              memmove( tmp, p1, 0x8000 );
+              memmove( p1, p2, 0x8000 );
+              memmove( p2, p3, 0x8000 );
+              memmove( p3, tmp, 0x8000 );
+            }
+        }
       for (i = 0; i < nblocks; i++)
         {
           blocks[i * 2] = i + nblocks;

@@ -160,6 +160,31 @@ output (const st_sub_t *file)
 }
 
 
+static int
+compare (st_file_t *a, st_file_t *b)
+{
+#if 1
+  return (flc.fr ?
+    ((flc.bydate && a->sub.date < b->sub.date) ||
+     (flc.byname && (a->sub.name)[0] < (b->sub.name)[0]) ||
+     (flc.bysize && a->sub.size < b->sub.size)) :
+    ((flc.bydate && a->sub.date > b->sub.date) ||
+     (flc.byname && (a->sub.name)[0] > (b->sub.name)[0]) ||
+     (flc.bysize && a->sub.size > b->sub.size))) ? 1 : 0;
+#else
+  if (flc.bysize)
+    return (flc.fr && *(uint32_t *)a < *(uint32_t *)b) ||
+      *(uint32_t *)a > *(uint32_t *)b ? 1 : 0;
+  else if (flc.bydate)
+    return (flc.fr && *(uint32_t *)a < *(uint32_t *)b) ||
+      *(uint32_t *)a > *(uint32_t *)b ? 1 : 0;
+//  else if (flc.byname) // default
+    return (flc.fr && *(const char *)a < *(const char *)b) ||
+      *(const char *)a > *(const char *)b ? 1 : 0;
+#endif
+}
+
+
 #if 1
 int
 sort (st_file_t * file)
@@ -203,31 +228,10 @@ sort (st_file_t * file)
 {
   st_file_t *file_p;
   st_sub_t sub;
-  int sub_size;
+  uint32_t size = sizeof (st_sub_t);
 
-  sub_size = sizeof (st_sub_t);
-/* qsort example */
-#include <stdio.h>
-#include <stdlib.h>
+  qsort (file, flc.files, size, compare);
 
-  int values[] = { 40, 10, 100, 90, 20, 25 };
-
-  int compare (const void *a, const void *b)
-  {
-    return (*(int *) a - *(int *) b);
-  }
-
-  int main ()
-  {
-    int *pItem;
-    int n;
-    qsort (values, 6, sizeof (int), compare);
-    for (n = 0; n < 6; n++)
-      {
-        printf ("%d ", values[n]);
-      }
-    return 0;
-  }
   return 0;
 }
 #endif

@@ -42,6 +42,8 @@ typedef struct st_flc
   int byname;
   int fr;
 
+  int files;
+
   char configfile[FILENAME_MAX];
 } st_flc_t;
 

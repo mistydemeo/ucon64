@@ -236,6 +236,7 @@ main (int argc, char *argv[])
       strcpy (file_p->sub.fullpath, buf);
       strcpy (file_p->sub.name, basename (buf));
       extract (&file_p->sub);
+      flc.files++;
     }
   (void) closedir (dp);
   chdir (cwd);

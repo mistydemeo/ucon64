@@ -383,7 +383,7 @@ const st_usage_t ucon64_patching_usage[] =
   };
 
 
-const st_option2_t options2[] = {
+const st_ucon64_wf_t ucon64_wf[] = {
 //  {option, console, (const st_usage_t *)usage, flags},
   {UCON64_1991, UCON64_GENESIS, genesis_usage, WF_SHOW_NFO|WF_ROM_REQUIRED},
   {UCON64_3DO, UCON64_REAL3DO, real3do_usage,  WF_SHOW_NFO},

@@ -97,21 +97,38 @@ extern const st_usage_t ucon64_padding_usage[];
 extern const st_usage_t ucon64_patching_usage[];
 
 
+
+/*
+  uCON64 workflow flags for st_ucon64_wf_t
+
+  WF_SHOW_NFO       show nfo output before processing rom
+  WF_SHOW_NFO_AFTER show nfo output after processing rom
+  WF_ROM_REQUIRED   for this option a [--rom=]ROM is required
+  WF_SPECIAL_OPT    a "special" option:
+                    -multi (and -xfalmulti) takes more than one file as
+                    argument, but should be executed only once.
+                    stop after sending one ROM to a copier ("multizip")
+  ...
+
+  example:
+  WF_SHOW_NFO|WF_SHOW_NFO_AFTER|WF_ROM_REQUIRED 
+                    a ROM is required and nfo will be shown before and after
+                    it has been processed
+*/
 #define WF_SHOW_NFO 1
 #define WF_SHOW_NFO_AFTER 2
 #define WF_ROM_REQUIRED 4
 #define WF_SPECIAL_OPT 8
 typedef struct
-// more workflow related stuff
 {
   int option;
   int console;                                // UCON64_SNES, ...
   const st_usage_t *usage;
   uint32_t flags;                             // flags for workflow, etc..
-} st_option2_t;
+} st_ucon64_wf_t;
 
 
-extern const st_option2_t options2[];
+extern const st_ucon64_wf_t ucon64_wf[];
 extern char *ucon64_temp_file;
 extern int (*ucon64_testsplit_callback) (const char *filename);
 extern const char *nintendo_maker[];

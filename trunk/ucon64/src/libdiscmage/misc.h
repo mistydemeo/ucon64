@@ -135,7 +135,7 @@ typedef signed __int64 int64_t;
   #ifdef  __MINGW32__
     #define CURRENT_OS_S "Win32 (MinGW)"
   #else
-    #define CURRENT_OS_S "Win32 (Visual C++)"
+    #define CURRENT_OS_S "Win32"
   #endif
 #elif   defined __APPLE__
   #if   defined __POWERPC__ || defined __ppc__

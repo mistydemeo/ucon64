@@ -117,7 +117,7 @@ static st_ucon64_dat_t dat;
 st_ucon64_dat_t *ucon64_dat = NULL;
 dm_image_t *image = NULL;
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
-static int ucon64_fsize = 0, ucon64_option = 0;
+static int ucon64_fsize = 0, ucon64_option = 0, ucon64_parport_needed = 0;
 const struct option options[] =   {
     {"1991", 0, 0, UCON64_1991},
     {"3do", 0, 0, UCON64_3DO},
@@ -489,6 +489,14 @@ main (int argc, char **argv)
 
 #include "switches.c"
     }
+
+  // the copier options need root privileges for ucon64_parport_init()
+  if (ucon64_parport_needed)
+    ucon64.parport = ucon64_parport_init (ucon64.parport);
+#if     defined __unix__ && !defined __MSDOS__
+  // now we can drop privileges
+  drop_privileges ();
+#endif
 
   if (!strlen (ucon64.rom) && optind < argc)
     ucon64.rom = argv[optind];

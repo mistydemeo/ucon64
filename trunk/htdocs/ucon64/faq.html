@@ -219,7 +219,7 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    &amp; zip support)<br>
    1.) Run the configure script "configure".<br>
    If you want default settings type:<br>
-   &nbsp;&nbsp; ./configure<br>
+   &nbsp;&nbsp; ./configure<br>
    Otherwise you have to pass options to the configure script. To see which
    features can be controlled with the configure script, type:<br>
    &nbsp;&nbsp; ./configure --help<br>
@@ -467,7 +467,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <br>
 <table border="1">
   <tr>
-    <th><tt>variable name<tt></th>
+    <th><tt>variable name</tt></th>
     <th><tt>meaning</tt></th>
   </tr>
   <tr>
@@ -743,7 +743,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    </td></tr>
    </table>
    </form>
-   <tt><br>
+   <br>
 <br>
 <p>
 <a name="17"><b>Q17</b>: Where do I get ROMs/Games?</a><br>
@@ -961,7 +961,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <p>
 <a name="33"><b>Q33</b>: How do I specify that a NES game in UNIF format
    supports multiple controller types?</a><br>
-<b>A</b>: Use the -ctrl switch multiple times on the <b>same</b> command line.
+<b>A</b>: Use the -ctrl switch multiple times on the <i>same</i> command line.
    For example, to specify that a game supports the controller types "regular
    joypad" and "power pad" you should use a command line like this:<br>
    &nbsp;&nbsp; ucon64 -unif smb.nes -mapr NROM -ctrl 0 -ctrl 4<br>
@@ -1263,7 +1263,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <br>
 <table border="1">
   <tr>
-    <th><tt>console<tt></th>
+    <th><tt>console</tt></th>
     <th><tt>DAT file name prefix</tt></th>
   </tr>
   <tr>
@@ -1369,7 +1369,6 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
   </tr>
 -->
 </table>
-</tt><tt> <!-- browser bug? -->
 <br>
    You can create a DAT file from a subset of the files in a directory by
    explicitly specifying the files on the command line:<br>
@@ -1582,8 +1581,8 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    Afterwards you can find a file in Game Doctor format in the directory
    convert and the split parts in the directory split. Modify the scripts above
    if you want them to make uCON64 write its output to other directories. Do
-   *not* make GD3DIR or SPLITDIR point to the current directory or to your SNES
-   ROM directory as the scripts will remove all files in the directories
+   <i>not</i> make GD3DIR or SPLITDIR point to the current directory or to your
+   SNES ROM directory as the scripts will remove all files in the directories
    pointed to by GD3DIR or SPLITDIR. Starting with empty directories is the
    main reason why the scripts work (actually, this is only true for GD3DIR).<br>
 <br>
@@ -1673,7 +1672,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    path</i>. It is the path to follow in the directory structure to get to the
    file Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc. "..\.." is a <i>relative
    path</i>. In c:\roms\snes "..\.." refers to another directory than in
-   c:\roms\snes\gd3 (c:\ and c:\roms repectively). To change the current
+   c:\roms\snes\gd3 (c:\ and c:\roms respectively). To change the current
    directory to c:\roms\snes type:<br>
    &nbsp;&nbsp;cd ..<br>
    Say you want to convert Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc to
@@ -1713,7 +1712,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    First the current directory is changed to c:\. Then the directory "test" is
    created. Then the current directory is changed to "test". Then the file
    c:\roms\snes\Secret&nbsp;of&nbsp;Mana&nbsp;(U).swc is copied to the file
-   mana.swc. Then an evironment variable with the name parport is set to the
+   mana.swc. Then an environment variable with the name parport is set to the
    value 378. Then uCON64 is used to transfer mana.swc to a Super Wild Card
    while using parallel port address 0x378. Then the file mana.swc is removed.
    Finally the directory "test" is removed.<br>

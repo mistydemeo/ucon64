@@ -2838,23 +2838,23 @@ strurl (st_strurl_t *url, const char *url_s)
   memset (url, 0, sizeof (st_strurl_t));
   strcpy (url->url_s, url_s);
   url->port = -1;
-  
-// look for "://"
+
+  // look for "://"
   if ((p = strstr (url_s, "://")))
     {
-// extract the protocol
+      // extract the protocol
       pos = p - url_s;
       strncpy (url->protocol, url_s, pos);
       url->protocol[pos] = 0;
 
-// jump the "://"
+      // jump the "://"
       p += 3;
       pos += 3;
     }
   else
     p = (char *) url_s;
 
-// check if a user:pass is given
+  // check if a user:pass is given
   if ((p2 = strchr (p, '@')))
     {
       int len = p2 - p;
@@ -2874,18 +2874,18 @@ strurl (st_strurl_t *url, const char *url_s)
       pos = p - url_s;
     }
 
-// look if the port is given
-  p2 = strchr (p, ':');  // If the : is after the first / it isn't the port
+  // look if the port is given
+  p2 = strchr (p, ':');                 // If the : is after the first / it isn't the port
   p3 = strchr (p, '/');
   if (p3 && p3 - p2 < 0)
     p2 = NULL;
-  if (!p2) 
+  if (!p2)
     {
-      pos2 = 
-        (p2 = strchr (p, '/')) ?  // Look if a path is given
-        (p2 - url_s) :  // We have an URL like http://www.hostname.com/file.txt
-        strlen (url_s);  // No path/filename
-                         // So we have an URL like http://www.hostname.com
+      pos2 =
+        (p2 = strchr (p, '/')) ?        // Look if a path is given
+        (p2 - url_s) :                  // We have an URL like http://www.hostname.com/file.txt
+        (int) strlen (url_s);           // No path/filename
+                                        // So we have an URL like http://www.hostname.com
     }
   else
     {
@@ -2894,20 +2894,20 @@ strurl (st_strurl_t *url, const char *url_s)
       pos2 = p2 - url_s;
     }
 
-// copy the hostname into st_strurl_t
+  // copy the hostname into st_strurl_t
   strncpy (url->host, p, pos2 - pos);
   url->host[pos2 - pos] = 0;
 
-// look if a path is given
+  // look if a path is given
   if ((p2 = strchr (p, '/')))
-    if (strlen (p2) > 1)  // A path/filename is given check if it's not a trailing '/'
+    if (strlen (p2) > 1)                // A path/filename is given check if it's not a trailing '/'
 #if 1
-      strunesc (url->file, p2); // copy the path/filename into st_strurl_t
+      strunesc (url->file, p2);         // copy the path/filename into st_strurl_t
 #else
-      strcpy (url->file, p2);  // copy the path/filename into st_strurl_t
+      strcpy (url->file, p2);           // copy the path/filename into st_strurl_t
 #endif
 
-// defaults
+  // defaults
   if (!url->protocol[0])
     strcpy (url->protocol, "http");
 #if 0
@@ -2918,12 +2918,12 @@ strurl (st_strurl_t *url, const char *url_s)
 #endif
   if (!url->host)
     strcpy (url->host, LOCALHOST_S);
-  if (url->port == -1 && !strnicmp (url->protocol, "http", 3)) 
+  if (url->port == -1 && !strnicmp (url->protocol, "http", 3))
     url->port = 80;
 #if 0
   if (!url->file[0])
     strcpy (url->file, "/");
-#endif    
+#endif
 
 //#ifdef  DEBUG
   strurl_test (url);

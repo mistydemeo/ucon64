@@ -150,7 +150,7 @@ typedef struct
   int quiet;                                    // quiet == -1 means verbose + 1
 
   int force_disc;                               // --disc was used
-  uint32_t flags;                                 // detect and init ROM info
+  uint32_t flags;                               // detect and init ROM info
 
   // has higher priority than crc_big_files!
   int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.

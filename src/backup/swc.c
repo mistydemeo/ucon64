@@ -687,7 +687,7 @@ int swc_usage(int argc, char *argv[])
   {
     printf("\n"
            "                You only need to specify PORT if uCON64 doesn't detect the\n"
-           "                (right) parallel port. If this is the case give a hardware\n"
+           "                (right) parallel port. If that is the case give a hardware\n"
            "                address, for example:\n"
            "                ucon64 -xswc \"Super Mario World (U).swc\" 0x378\n");
     printf("\n"

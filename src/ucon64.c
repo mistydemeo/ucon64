@@ -140,7 +140,7 @@ if(argcmp(argc, argv, "-sh"))
 
 	for(;;)
 	{
-		
+
 	}
 	return(0);
 }
@@ -178,7 +178,7 @@ else
   Some code needs us to switch to the real uid and gid. However, other code needs access to
   I/O ports other than the standard printer port registers. We just do an iopl(3) and all
   code should be happy. Using iopl(3) enables users to run all code without being root (of
-  course with the ucon64 executable setuid root). Anyone a better idea?
+  course with the uCON64 executable setuid root). Anyone a better idea?
 */
 #ifdef __linux__
 if (iopl(3) == -1)
@@ -562,6 +562,8 @@ if(argcmp(argc,argv,"-xfal"))rom.console=ucon64_GBA;
 if(argcmp(argc,argv,"-xswc"))rom.console=ucon64_SNES;
 if(argcmp(argc,argv,"-xswcs"))rom.console=ucon64_SNES;
 if(argcmp(argc,argv,"-swcs"))rom.console=ucon64_SNES;
+if(argcmp(argc,argv,"-figs"))rom.console=ucon64_SNES;
+if(argcmp(argc,argv,"-ufos"))rom.console=ucon64_SNES;
 if(argcmp(argc,argv,"-xfalm"))rom.console=ucon64_GBA;
 if(argncmp(argc,argv,"-xfalc",6))rom.console=ucon64_GBA;
 if(argcmp(argc,argv,"-xgbx"))rom.console=ucon64_GB;

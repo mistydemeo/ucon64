@@ -901,6 +901,7 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
               if (mode == UCON64_RR83) buf[8] = 0;
               strcat (buf, mkfile (GETEXT (ucon64.rom), '_'));
               if (mode == UCON64_RR83) buf[12] = 0;
+              if (!strcmp (ucon64.rom, buf)) break;
               printf ("Renaming %s to %s\n", ucon64.rom, buf);
               remove (buf);
               rename (ucon64.rom, buf);

@@ -58,7 +58,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
   <td><tt>Marat Fayzullin</tt></td>
   <td><a href="mailto:fms@cs.umd.edu"><tt>fms@cs.umd.edu</tt></a><br>
       <a href="http://www.komkon.org/fms/" target="_blank"><tt>http://www.komkon.org/fms/</tt></a></td>
-  <td><tt>some Famicon Disk System routines / PSG&nbsp;player / NESLIST</tt></td>
+  <td><tt>some Famicon Disk System routines / NESLIST</tt></td>
 </tr>
 <tr>
   <td><tt>Andreas Sterbenz</tt></td>
@@ -241,9 +241,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    Then uCON64 starts scanning the command line for options. This code can be
    found in options.c. From this code almost all operations of uCON64 are
    executed. Under Unix this is also the point where root privileges are given
-   up if uCON64 had them and a "normal", i.e. non-copier I/O, option was
-   specified. If a copier I/O option was specified under Unix, root privileges
-   will be given up by the function ucon64.c/ucon64_parport_probe().<br>
+   up with a call to misc.c/drop_privileges().<br>
 <br>
 <p>
 <a name="7"><b>Q7</b>: What coding style is preferred?</a><br>

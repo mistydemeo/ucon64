@@ -28,7 +28,7 @@ extern const char *fal_usage[];
 
 #ifdef BACKUP
 extern int fal_read_rom (const char *filename, unsigned int parport, int size);
-extern int fal_write_rom (const char *filename, unsigned int parport, int size);
+extern int fal_write_rom (const char *filename, unsigned int parport);
 extern int fal_read_sram (const char *filename, unsigned int parport, int bank);
 extern int fal_write_sram (const char *filename, unsigned int parport, int bank);
 #endif // BACKUP

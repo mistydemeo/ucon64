@@ -144,13 +144,21 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
    &nbsp;&nbsp; ucon64 -snes "Super Aleste (J) [t1].swc"<br>
 <br>
 <p>
-<a name="6"><b>Q6</b>: I have two parallel ports in my PC and my Flash Advance Linker is connected to the
-   second. However, when I try to use uCON64 to send a demo to the FAL something goes wrong.
-   What happened?</a><br>
+<a name="6"><b>Q6</b>: I have two parallel ports in my PC and my Flash Advance Linker is
+   connected to the second. However, when I try to use uCON64 to send a demo to the FAL
+   something goes wrong. What happened?</a><br>
 <b>A</b>: Well, many things could have gone wrong, but uCON64 only detects your first parallel
    port (it stops probing for a parallel port if it finds one). So, you should specify the
    address of the second parallel port on the command line. For example:<br>
    &nbsp;&nbsp; ucon64 -xfal demo.gba 0x278<br>
+<br>
+   The I/O address of the parallel port can be 0x3bc, 0x378 or 0x278. If you don't want to
+   type the address of the parallel port everytime you want to transfer something to your FAL
+   (or another copier) edit .ucon64rc or ucon64.cfg (for the DOS version) and remove the hash
+   symbol in front of the line that starts with "parport=" (without the quotes). If that line
+   isn't present add one. If you specify an I/O address in the configuration file, you don't
+   have to use the prefix 0x. For example:<br>
+   &nbsp;&nbsp; parport=278
 <br>
 <p>
 <a name="7"><b>Q7</b>: I tried to dump a SNES cartridge using a Super Wild Card connected to my PC with an
@@ -195,7 +203,7 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
 <a name="9"><b>Q9</b>: I have a SNES ROM of which Snes9x and ZSNES say it's bad, but uCON64 says it's good.
    Who is right?</a><br>
 <b>A</b>: uCON64, probably :-)<br>
-   Neither Snes9x 1.39 nor ZSNES 1.35 calculate the checksum correctly for BS ROMs, so you
+   Neither Snes9x 1.39 nor ZSNES 1.36 calculate the checksum correctly for BS ROMs, so you
    can be pretty sure the ROM is good if it's a BS ROM. See previous answer.<br>
 <br>
 <p>
@@ -219,8 +227,9 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
    correct. You can make uCON64 rewrite the header with -swc or -fig (the SWC send code of
    uCON64 supports Pro Fighter dumps). uCON64 uses the information in the ROM dump's header,
    so this is important! You can also try to rewrite the header with the option -hi or -nhi to
-   force uCON64 to handle it as a HiROM or a LoROM dump. For example:<br>
-   &nbsp;&nbsp; ucon64 -swc -hi "Chrono Trigger (U).swc"<br>
+   force uCON64 to handle it as a HiROM or a LoROM dump. Additionally you could use the option
+   -hd, -nhd or -hdn. For example:<br>
+   &nbsp;&nbsp; ucon64 -swc -hi -hd "Chrono Trigger (U).swc"<br>
    There are many (good) ROMs on the internet with incorrect headers, so this might well solve
    the problem.<br>
    Several games contain a copy protection that prevents them from running on a backup unit,
@@ -368,7 +377,7 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
    0 [main] ucon64 356 handle_exceptions: Exception: STATUS_PRIVILEGED_INSTRUCTION<br>
    5570 [main] ucon64 356 open_stackdumpfile: Dumping stack trace to ucon64.exe.stackdump<br>
 <br>
-   then you didn't install an I/O driver. See <a href="#3">question 3</a>.<br>
+   then you didn't install an I/O driver (correctly). See <a href="#3">question 3</a>.<br>
 <br>
 <p>
 <a name="29"><b>Q29</b>: I want to convert a NES ROM in iNES format to UNIF. How do I know
@@ -393,7 +402,7 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
 <b>A</b>: Create a text file with three lines. The first line should contain the name (or
   "handle") of the person who dumped the cartridge. This line may be 99 characters long at
   maximum. The next line should contain the date when the cartridge was dumped. The format is
-  dd-mm-yyyy. Instead of the hyphen (-) you may also use the slash (/). If day or month
+  dd-mm-yyyy. Instead of the hyphen ('-') you may also use the slash ('/'). If day or month
   is smaller than 10 you may use 1 or 2 digits, for example:<br>
   &nbsp;&nbsp; 02/02/2002<br>
   or<br>

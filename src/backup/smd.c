@@ -50,8 +50,45 @@ const st_usage_t smd_usage[] =
   };
 
 
-#ifdef PARALLEL
+// the following two functions are used by non-transfer code in genesis.c and sms.c
+void
+smd_interleave (unsigned char *buffer, int size)
+// Convert binary data to the SMD interleaved format
+{
+  int count, offset;
+  unsigned char block[16384];
 
+  for (count = 0; count < size / 16384; count++)
+    {
+      memcpy (block, &buffer[count * 16384], 16384);
+      for (offset = 0; offset < 8192; offset++)
+        {
+          buffer[(count * 16384) + 8192 + offset] = block[offset << 1];
+          buffer[(count * 16384) + offset] = block[(offset << 1) + 1];
+        }
+    }
+}
+
+
+void
+smd_deinterleave (unsigned char *buffer, int size)
+{
+  int count, offset;
+  unsigned char block[16384];
+
+  for (count = 0; count < size / 16384; count++)
+    {
+      memcpy (block, &buffer[count * 16384], 16384);
+      for (offset = 0; offset < 8192; offset++)
+        {
+          buffer[(count * 16384) + (offset << 1)] = block[offset + 8192];
+          buffer[(count * 16384) + (offset << 1) + 1] = block[offset];
+        }
+    }
+}
+
+
+#ifdef PARALLEL
 
 #define BUFFERSIZE      16384
 

@@ -21,7 +21,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "ucon64_misc.h"
-#include "ucon64.h"
 
 #define MAXBUFSIZE 32768
 #define DETECT_MAX_CNT 1000
@@ -194,8 +193,10 @@ fileCRC32 (char *filename, long start)
 }
 
 char *
-ucon64_fbackup (char *filename)
+ucon64_fbackup (struct ucon64_ *rom, char *filename)
 {
+  if(!rom->backup) return (filename);
+
   printf ("Writing backup of: %s\n\n", filename);
   fflush (stdout);
   return filebackup (filename);
@@ -523,6 +524,19 @@ testsplit (char *filename)
 }
 
 int
+trackmode (long imagesize)
+// tries to figure out the used track mode of the cd image
+{
+  return ((!(imagesize % 2048)) ? 2048 :        // MODE1, MODE2_FORM1
+          (!(imagesize % 2324)) ? 2324 :        // MODE2_FORM2
+          (!(imagesize % 2336)) ? 2336 :        // MODE2, MODE2_FORM_MIX
+          (!(imagesize % 2352)) ? 2352 :        // AUDIO, MODE1_RAW, MODE2_RAW
+          -1                    // unknown
+    );
+}
+
+
+int
 raw2iso (char *filename)
 // convert MODE1_RAW, MODE2_RAW, MODE2 and MODE2_FORM_MIX to ISO9660
 {
@@ -545,124 +559,3 @@ raw2iso (char *filename)
 #endif
   return 0;
 }
-
-int
-trackmode (long imagesize)
-// tries to figure out the used track mode of the cd image
-{
-  return ((!(imagesize % 2048)) ? 2048 :        // MODE1, MODE2_FORM1
-          (!(imagesize % 2324)) ? 2324 :        // MODE2_FORM2
-          (!(imagesize % 2336)) ? 2336 :        // MODE2, MODE2_FORM_MIX
-          (!(imagesize % 2352)) ? 2352 :        // AUDIO, MODE1_RAW, MODE2_RAW
-          -1                    // unknown
-    );
-}
-
-/*
-#ifdef __linux__
-  #include <linux/limits.h>
-  #define _MAX_PATH PATH_MAX
-  #define stricmp strcasecmp
-#endif
-
-// BIN2ISO (C) 2000 by DeXT
-//
-// This is a very simple utility to convert a BIN image (either RAW/2352 or Mode2/2336 format)
-// to standard ISO format (2048 b/s). Structure of images are as follows:
-//
-// Mode 1 (2352): Sync (12), Address (3), Mode (1), Data (2048), ECC (288)
-// Mode 2 (2352): Sync (12), Address (3), Mode (1), Subheader (8), Data (2048), ECC (280)
-// Mode 2 (2336): Subheader (8), Data (2048), ECC (280)
-//
-// Mode2/2336 is the same as Mode2/2352 but without header (sync+addr+mode)
-// Sector size is detected by the presence of Sync data
-// Mode is detected from Mode field
-//
-// Tip for Mac users: for Mode2 tracks preserve Subheader
-// (sub 8 from seek_header and write 2056 bytes per sector)
-//
-//
-// Changelog:
-//
-// 2000/11/16 - added mode detection for RAW data images (adds Mode2/2352 support)
-//
-//
-
-int main( int argc, char **argv )
-{
-	int   seek_header, seek_ecc, sector_size;
-	long  i, source_length;
-	char  buf[2352], destfilename[_MAX_PATH];
-	const char SYNC_HEADER[12] = { 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0 };
-	FILE  *fdest, *fsource;
-
-if (argc < 2)
-   {
-   	printf("Error: bad syntax\n\nUsage is: bin2iso image.bin [image.iso]\n");
-   	exit(EXIT_FAILURE);
-   }
-
-if (argc >= 3)
-   {
-	strcpy(destfilename, argv[2]);
-   }
-else
-   {
-   	strcpy(destfilename, argv[1]);
-   	if (strlen(argv[1]) < 5 || stricmp(destfilename+strlen(argv[1])-4, ".bin"))
-   		strcpy(destfilename+strlen(argv[1]), ".iso");
-   	else
-   		strcpy(destfilename+strlen(argv[1])-4, ".iso");
-   }
-
-fsource = fopen(argv[1],"rb");
-fdest = fopen(destfilename,"wb");
-
-fread(buf, sizeof(char), 16, fsource);
-
-if (memcmp(SYNC_HEADER, buf, 12))
-   {
-	seek_header = 8;		// Mode2/2336    // ** Mac: change to 0
-	seek_ecc = 280;
-	sector_size = 2336;
-   }
-else
-   {
-	switch(buf[15])
-	   {
-	   case 2:
-		seek_header = 24;	// Mode2/2352    // ** Mac: change to 16
-		seek_ecc = 280;
-		sector_size = 2352;
-		break;
-	   case 1:
-		seek_header = 16;	// Mode1/2352
-		seek_ecc = 288;
-		sector_size = 2352;
-		break;
-	   default:
-		printf("Error: Unsupported track mode");
-		exit(EXIT_FAILURE);
-	   }
-   }
-
-fseek(fsource, 0L, SEEK_END);
-source_length = ftell(fsource)/sector_size;
-fseek(fsource, 0L, SEEK_SET);
-
-for(i = 0; i < source_length; i++)
-   {
-	fseek(fsource, seek_header, SEEK_CUR);
-	fread(buf, sizeof(char), 2048, fsource);    // ** Mac: change to 2056 for Mode2
-	fwrite(buf, sizeof(char), 2048, fdest);     // ** same as above
-	fseek(fsource, seek_ecc, SEEK_CUR);
-   }
-
-fclose(fdest);
-fclose(fsource);
-
-exit(EXIT_SUCCESS);
-}
-
-
-*/

@@ -33,6 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>             // ioperm() (libc5)
+#include "ucon64.h"
 #include "misc.h"
 
 #ifdef  BACKUP
@@ -85,7 +86,7 @@ unsigned long CalculateFileCRC (FILE * file);
 unsigned long fileCRC32 (char *filename, long start);   // calculate CRC32 of filename beginning from start
 
 //ucon64 specific wrapper for misc.c/filebackup()
-char *ucon64_fbackup (char *filename);
+char *ucon64_fbackup (struct ucon64_ *rom, char *filename);
 
 size_t filepad (char *filename, long start, long unit);//pad a ROM in Mb
 long filetestpad (char *filename); //test if a ROM is padded
@@ -105,7 +106,8 @@ unsigned int parport_probe (unsigned int parport);
 int fparport_gauge (FILE *output, time_t init_time, long pos, long size);
 #define parport_gauge(a, b, c) (fparport_gauge(frontend_file, a, b, c))
 
-int raw2iso (char *filename);
 int trackmode (long imagesize);
+
+int raw2iso (char *filename);
 
 #endif // #ifndef UCON64_MISC_H

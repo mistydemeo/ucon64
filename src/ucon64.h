@@ -26,9 +26,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_H
 #define UCON64_H
 
+#include <fcntl.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <unistd.h>             // ioperm() (libc5)
 //#include "config.h"
 
-#include "ucon64_misc.h"
 #include "ucon64_db.h"
 
 //#define ucon64_KNOWN          -1
@@ -100,6 +109,7 @@ struct ucon64_
   int parport_mode;             //parallel port mode: ECP, EPP, SPP, other
   char config_file[NAME_MAX];   //path and name of the config file
 
+  int backup;			//flag if backups files (*.bak) should be created
 /*
   If ucon64 operates as backend for a front end and the commandline argument 
   -frontend was given output will contain a pointer to an existing file 
@@ -158,6 +168,8 @@ struct ucon64_
 
 extern int frontend;
 extern FILE *frontend_file;
+
+#include "ucon64_misc.h"
 
 int ucon64_usage (int argc, char *argv[]);
 int ucon64_init (struct ucon64_ *rom);

@@ -74,7 +74,7 @@ else
 ifdef DJGPP
 	del ..\bin\$(TARGET) Makefile config.log config.status config.cache
 else
-	rm -f ../bin/$(TARGET) Makefile config.log
+	rm -f ../bin/$(TARGET) Makefile config.log config.status config.cache
 endif                                   # DJGPP
 endif                                   # cygwin
 

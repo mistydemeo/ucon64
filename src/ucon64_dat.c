@@ -248,7 +248,7 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t * dat)
 
   if (dat_field[5])
     sscanf (dat_field[5], "%x", &dat->current_crc32);
-      
+
   if (dat_field[3])
     strcpy (dat->name, dat_field[3]);
 
@@ -259,21 +259,22 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t * dat)
     strcpy (dat->fname, dat_field[4]);
 
   p = dat->name;
-  sprintf (buf2, 
+  // Often flags contain numbers, so don't search for the closing bracket
+  sprintf (buf2,
     "%s%s%s%s%s%s%s%s%s%s",
-    (strstr (p, "[a]") ? "Alternate, " : ""),
-    (strstr (p, "[p]") ? "Pirate, " : ""),
-    (strstr (p, "[b]") ? "Bad Dump, " : ""),
-    (strstr (p, "[t]") ? "Trained, " : ""),
-    (strstr (p, "[f]") ? "Fixed, " : ""),
-    (strstr (p, "[T]") ? "Translation, " : ""),
-    (strstr (p, "[h]") ? "Hack, " : ""),
-    (strstr (p, "[x]") ? "Bad Checksum, " : ""),
-    (strstr (p, "[o]") ? "Overdump, " : ""),
-    (strstr (p, "[!]") ? "Verified Good Dump, " : ""));
+    (strstr (p, "[a") ? "Alternate, " : ""),
+    (strstr (p, "[p") ? "Pirate, " : ""),
+    (strstr (p, "[b") ? "Bad Dump, " : ""),
+    (strstr (p, "[t") ? "Trained, " : ""),
+    (strstr (p, "[f") ? "Fixed, " : ""),
+    (strstr (p, "[T") ? "Translation, " : ""),
+    (strstr (p, "[h") ? "Hack, " : ""),
+    (strstr (p, "[x") ? "Bad Checksum, " : ""),
+    (strstr (p, "[o") ? "Overdump, " : ""),
+    (strstr (p, "[!]") ? "Verified Good Dump, " : "")); // [!] is ok
   if (buf2[0])
     {
-      if ((p = strrchr (buf2, ','))) 
+      if ((p = strrchr (buf2, ',')))
         *p = 0;
       sprintf (dat->misc, "Flags: %s", buf2);
     }

@@ -199,7 +199,7 @@ static unsigned char gd3_hirom_40mb_map[GD3_HEADER_MAPSIZE] = {
   0x21, 0x23, 0x24, 0x25, 0x21, 0x23, 0x24, 0x25,
   0x22, 0x22, 0x22, 0x22, 0x26, 0x27, 0x28, 0x29
 };
-// map for Tales of Phantasia
+// map for Tales of Phantasia (J)
 static unsigned char gd3_hirom_48mb_map[GD3_HEADER_MAPSIZE] = {
   0x20, 0x21, 0x20, 0x21, 0x20, 0x21, 0x40, 0x40,
   0x24, 0x25, 0x26, 0x27, 0x24, 0x25, 0x26, 0x27,
@@ -760,8 +760,7 @@ snes_gd3 (st_rominfo_t *rominfo)
   else if (n > 40 && n < 48)
     n = 48;
 #endif
-  sprintf (dest_name, "%s%d", is_func (p, strlen (p), isupper) ? "SF" : "sf", n);
-  strcat (dest_name, p);
+  sprintf (dest_name, "%s%d%s", is_func (p, strlen (p), isupper) ? "SF" : "sf", n, p);
   if ((p = strrchr (dest_name, '.')))
     *p = 0;
   strcat (dest_name, "_____");
@@ -1005,10 +1004,7 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
   if (sf_romname)
     strcpy (dest_name, p);
   else
-    {
-      strcpy (dest_name, "SF");
-      strcat (dest_name, p);
-    }
+    sprintf (dest_name, "SF%d%s", size / MBIT, p);
   strupr (dest_name);
   if ((p = strrchr (dest_name, '.')))
     *p = 0;
@@ -1016,7 +1012,7 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
   dest_name[7] = 'A';
   dest_name[8] = 0;
   // avoid trouble with filenames containing spaces
-  for (n = 3; n < 7; n++)                       // skip "sf" and first digit
+  for (n = 3; n < 7; n++)                       // skip "SF" and first digit
     if (dest_name[n] == ' ')
       dest_name[n] = '_';
 
@@ -1041,7 +1037,7 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
         strcpy (names[n_names++], dest_name);
     }
   if (n_names == 1)
-    names[0][7] = ' ';                          // has to be a space, '_' does not work
+    names[0][7] = 0;                            // 'A' causes trouble for 1-part split files
   return n_names;
 }
 
@@ -1939,19 +1935,34 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     0x05926d17: Shaq Fu (J)(NG-Dump Known)
     0x3e2e5619: Super Adventure Island II (Beta)
     0x023e1298: Super Air Driver (E) [b]
-    These games have a HiROM map type byte while they are LoROM games
+    0x89d09a77: Infernal's Evil Demo! (PD)
+    0xd3095af3: Legend - SNDS Info, Incredible Hulk Walkthru (PD)
+    0x0f802e41: Mortal Kombat 3 Final (Anthrox Beta Hack)
+    0x6910700a: Rock Fall (PD)
+    0x447df9d5: SM Choukyousi Hitomi (PD)
+    0x422c95c4: Time Slip (Beta)
+    0xf423997a: World of Manga 2 (PD)
+    These games/dumps have a HiROM map type byte while they are LoROM games
 
     0xf3aa1eca: Power Piggs of the Dark Age (Pre-Release) {[h1]}
     0xaad23842/0x5ee74558: Super Wild Card DX DOS ROM V1.122/interleaved
     0x7a44bd18: Total Football (E)(NG-Dump Known)
+    0xf0bf8d7c/0x92180571: Utyu no Kishi Tekkaman Blade (Beta) {[h1]}/interleaved
+    0x8e1933d0: Wesley Orangee Hotel (PD)
+    0xe2b95725/0x9ca5ed58: Zool (Sample Cart)
     These games have garbage in their header
   */
   if (crc == 0xfa83b519 || crc == 0x9b161d4d || crc == 0xf3aa1eca ||
       crc == 0xbd8f1b20 || crc == 0x05926d17 || crc == 0x3e2e5619 ||
-      crc == 0x023e1298 || crc == 0xaad23842 || crc == 0x7a44bd18)
+      crc == 0x023e1298 || crc == 0xaad23842 || crc == 0x7a44bd18 ||
+      crc == 0x89d09a77 || crc == 0xd3095af3 || crc == 0x0f802e41 ||
+      crc == 0x6910700a || crc == 0x447df9d5 || crc == 0x422c95c4 ||
+      crc == 0xf0bf8d7c || crc == 0x8e1933d0 || crc == 0xf423997a ||
+      crc == 0xe2b95725)
     check_map_type = 0;                         // not interleaved
   else if (crc == 0x65485afb || crc == 0x9b4638d0 || crc == 0x7039388a ||
-           crc == 0xdbc88ebf || crc == 0x5ee74558)
+           crc == 0xdbc88ebf || crc == 0x5ee74558 || crc == 0x92180571 ||
+           crc == 0x9ca5ed58)
     {
       interleaved = 1;
       snes_hirom = 0;
@@ -2189,9 +2200,8 @@ snes_buheader_info (st_rominfo_t *rominfo)
           if ((header[4] == 0x77 && header[5] == 0x83) ||
               (header[4] == 0xf7 && header[5] == 0x83))
             y = 0;
-          else if (header[4] == 0xfd && header[5] == 0x82)
-            y = 2 * 1024;
-          else if (header[4] == 0xdd && header[5] == 0x82)
+          else if ((header[4] == 0xfd && header[5] == 0x82) ||
+                   (header[4] == 0xdd && header[5] == 0x82))
             y = 8 * 1024; // or 2 * 1024
           else if (header[4] == 0xdd && header[5] == 0x02)
             y = 32 * 1024;
@@ -2352,7 +2362,7 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
         rominfo->buheader_len = SWC_HEADER_LEN;
       else
         {
-          int surplus = ucon64.file_size % MBIT;
+          int surplus = ucon64.file_size % 32768;
           if (surplus == 0)
             // most likely we guessed the copier type wrong
             {

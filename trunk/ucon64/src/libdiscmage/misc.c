@@ -759,6 +759,8 @@ dirname2 (const char *path)
 
 #ifndef HAVE_REALPATH
 #undef realpath
+// TODO (Visual C++): Find out if GetFullPathName() is as good as "our"
+//                    realpath() implementation 
 char *
 realpath (const char *path, char *full_path)
 {
@@ -794,7 +796,7 @@ realpath (const char *path, char *full_path)
     {
       getcwd (new_path, FILENAME_MAX - 1);
 #ifdef  DJGPP
-      // DJGPP's getcwd() retuns a path with forward slashes
+      // DJGPP's getcwd() returns a path with forward slashes
       change_mem (new_path, strlen (new_path), "/", 1, 0, 0, FILE_SEPARATOR_S, 1, 0);
 #endif
       new_path += strlen (new_path);

@@ -199,8 +199,12 @@ get_next_file (char *fname)
       sprintf (search_pattern, "%s" FILE_SEPARATOR_S "*.dat", ucon64.datdir);
       if ((ddat = FindFirstFile (search_pattern, &find_data)) == INVALID_HANDLE_VALUE)
         {
-          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.datdir);
-          return NULL;
+          // Not being able to find a DAT file is not a real error
+          if (GetLastError () != ERROR_FILE_NOT_FOUND)
+            {
+              fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.datdir);
+              return NULL;
+            }
         }
       else
         {

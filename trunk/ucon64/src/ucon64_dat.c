@@ -107,16 +107,14 @@ get_dat_header (char *fname, ucon64_dat_t * dat)
 //hell yes!!! i use get_property() here... 
 
   strncpy (dat->author, get_property (fname, "author", buf, "Unknown"), sizeof (dat->author));
-  dat->author[sizeof (dat->author)] = 0;
+  dat->author[sizeof (dat->author) - 1] = 0;
   strncpy (dat->version, get_property (fname, "version", buf, "?"), sizeof (dat->version));
-  dat->version[sizeof (dat->version)] = 0;
+  dat->version[sizeof (dat->version) - 1] = 0;
   strncpy (dat->refname, get_property (fname, "refname", buf, ""), sizeof (dat->refname));
-  dat->refname[sizeof (dat->refname)] = 0;
-
-  strcpy (dat->comment, get_property (fname, "comment", buf, ""));
-
+  dat->refname[sizeof (dat->refname) - 1] = 0;
+  strcpy (dat->comment, get_property (fname, "comment", buf, "!!!"));
   strncpy (dat->date, get_property (fname, "date", buf, "?"), sizeof (dat->date));
-  dat->date[sizeof (dat->date)] = 0;
+  dat->date[sizeof (dat->date) - 1] = 0;
 
   return dat;
 }
@@ -404,7 +402,7 @@ ucon64_dat_view (int console)
         "  Version: %s (%s, %s)\n"
         "  Author: %s\n"
         "  Comment: %s\n"
-        "  Entries: %d\n",
+        "  Entries: %d\n\n",
         basename2 (buf),
         dat.version,
         dat.date,

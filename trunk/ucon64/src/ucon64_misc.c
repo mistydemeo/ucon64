@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/stat.h>
 #include <limits.h>
 
-#if     defined __unix__ || defined __BEOS__
+#if     defined __unix__ || defined __BEOS__ || defined AMIGA
 #include <unistd.h>                             // ioperm() (libc5)
 #endif
 
@@ -43,6 +43,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #elif   defined __BEOS__
 #include <fcntl.h>
+#elif   defined AMIGA
+#include <fcntl.h>
+#include <sys/ioctl.h>
 #endif
 #endif // BACKUP
 
@@ -280,15 +283,21 @@ ucon64_wrote (const char *filename)
 }
 
 
-#if     defined BACKUP && defined __BEOS__
+#if     defined BACKUP && (defined __BEOS__ || defined AMIGA)
 typedef struct st_ioport
 {
   unsigned int port;
+#if     defined AMIGA
+  FILE *fd;
+#endif
   unsigned char data8;
   unsigned short data16;
 } st_ioport_t;
 
 static int ucon64_io_fd;
+#if     defined AMIGA
+//static FILE *ucon64_io_fd;
+#endif
 #endif
 
 const char *unknown_usage[] =
@@ -631,11 +640,12 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 
 
 #ifdef  BACKUP
-#ifdef  __BEOS__
+#if     defined __BEOS__ || defined AMIGA
 void
 close_io_port (void)
 {
   close (ucon64_io_fd);
+//  fclose (ucon64_io_fd);
 }
 #endif
 
@@ -649,6 +659,15 @@ inportb (unsigned short port)
   temp.port = port;
   ioctl (ucon64_io_fd, 'r', &temp, 0);
 
+  return temp.data8;
+#elif   defined AMIGA
+  st_ioport_t temp;
+  
+  temp.port = port;
+          
+  ioctl (ucon64_io_fd, 'r', &temp, 0);
+//  fscanf (ucon64_io_fd, "%c", temp.data8);
+                  
   return temp.data8;
 #elif   defined __i386__
   unsigned char byte;
@@ -674,6 +693,15 @@ inportw (unsigned short port)
   ioctl (ucon64_io_fd, 'r16', &temp, 0);
 
   return temp.data16;
+#elif   defined AMIGA
+  st_ioport_t temp;
+        
+  temp.port = port;
+                
+  ioctl (ucon64_io_fd, 'r16', &temp, 0);
+//  fscanf (ucon64_io_fd, "%ld",temp.data16);
+
+  return temp.data16;
 #elif   defined __i386__
   unsigned short word;
 
@@ -697,6 +725,13 @@ outportb (unsigned short port, unsigned char byte)
   temp.port = port;
   temp.data8 = byte;
   ioctl (ucon64_io_fd, 'w', &temp, 0);
+#elif   defined AMIGA
+  st_ioport_t temp;
+        
+  temp.port = port;
+  temp.data8 = byte;
+  ioctl (ucon64_io_fd, 'w', &temp, 0);
+//  fprintf (ucon64_io_fd, "%c", temp.data8);
 #elif   defined __i386__
   __asm__ __volatile__
   ("outb %1, %0"
@@ -716,6 +751,13 @@ outportw (unsigned short port, unsigned short word)
   temp.port = port;
   temp.data16 = word;
   ioctl (ucon64_io_fd, 'w16', &temp, 0);
+#elif   defined AMIGA
+  st_ioport_t temp;
+  
+  temp.port = port;
+  temp.data16 = word;
+  ioctl (ucon64_io_fd, 'w16', &temp, 0);
+//  fprintf (ucon64_io_fd, "%ld", temp.data16);
 #elif   defined __i386__
   __asm__ __volatile__
   ("outw %1, %0"
@@ -797,6 +839,23 @@ ucon64_parport_init (unsigned int port)
       close (ucon64_io_fd);
       fprintf (stderr, "ERROR: Could not register function with atexit()\n");
       exit (1);
+    }
+#endif
+#if     defined AMIGA
+  ucon64_io_fd = open ("PAR:", O_RDWR|O_NONBLOCK);
+//  ucon64_io_fd = fopen ("PAR:", "r+");
+//  if (ucon64_io_fd == NULL)
+  if (ucon64_io_fd == -1)
+    {
+      fprintf (stderr, "ERROR: Could not open parallel port\n");
+      exit (1);
+    }
+  if ( atexit (close_io_port) == -1)
+    {
+      close (ucon64_io_fd);
+//      fclose (ucon64_io_fd);
+      fprintf (stderr, "ERROR: Could not register function with atexit()\n");
+      exit(1);
     }
 #endif
 #ifdef  __i386__                                // 0x3bc, 0x378, 0x278

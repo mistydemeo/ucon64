@@ -107,7 +107,7 @@ FILE *
 dm_fdopen (dm_image_t *a, int b, const char *c)
 {
   CHECK
-  return dm_fdopen_ptr (a,b,c);
+  return dm_fdopen_ptr (a, b, c);
 }
 
 
@@ -151,19 +151,19 @@ dm_disc_write (const dm_image_t *a)
 }
 
 
-int 
+int
 dm_read (char *a, int b, int c, const dm_image_t *d)
 {
   CHECK
-  return dm_read_ptr (a,b,c,d);
+  return dm_read_ptr (a, b, c, d);
 }
 
 
-int 
+int
 dm_write (const char *a, int b, int c, const dm_image_t *d)
 {
   CHECK
-  return dm_write_ptr (a,b,c,d);
+  return dm_write_ptr (a, b, c, d);
 }
 
 
@@ -171,12 +171,12 @@ dm_image_t *
 dm_toc_read (dm_image_t *a, const char *b)
 {
   CHECK
-  return dm_toc_read_ptr (a,b);
+  return dm_toc_read_ptr (a, b);
 }
 
 
 int
-dm_toc_write (dm_image_t *a)
+dm_toc_write (const dm_image_t *a)
 {
   CHECK
   return dm_toc_write_ptr (a);
@@ -187,12 +187,12 @@ dm_image_t *
 dm_cue_read (dm_image_t *a, const char *b)
 {
   CHECK
-  return dm_cue_read_ptr (a,b);
+  return dm_cue_read_ptr (a, b);
 }
 
 
 int
-dm_cue_write (dm_image_t *a)
+dm_cue_write (const dm_image_t *a)
 {
   CHECK
   return dm_cue_write_ptr (a);

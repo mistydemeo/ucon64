@@ -1032,7 +1032,7 @@ ucon64_fhexdump (const char *filename, int start, int len)
   for (pos = 0; pos < len; pos += buf_size)
     {
       value = fread (buf, 1, MIN (len, buf_size), fh);
-      mem_hexdump (buf, value, pos + start);
+      mem_hexdump_code (buf, value, pos + start);
     }
 
   fclose (fh);

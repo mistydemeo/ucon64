@@ -866,7 +866,7 @@ int ucon64_init(struct ucon64_ *rom)
   if(!rom->current_crc32)rom->current_crc32=fileCRC32(rom->rom,rom->buheader_len);
 
   rom->bytes=quickftell(rom->rom);
-  rom->mbit=(float)((rom->bytes-rom->buheader_len)/MBIT);
+  rom->mbit=(rom->bytes-rom->buheader_len)/(float) MBIT;
 
   rom->padded=filetestpad(rom->rom);
   rom->intro=(rom->bytes-rom->buheader_len)&MBIT;

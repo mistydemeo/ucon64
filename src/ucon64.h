@@ -26,9 +26,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_H
 #define UCON64_H
 
-#include "getopt.h"                      // for struct option
 #include <dirent.h>                      // for *temp
-
+#include "getopt.h"                      // for struct option
 #include "ucon64_defines.h"
 
 
@@ -72,6 +71,7 @@ typedef struct st_ucon64
   int mirror;                                   // NES UNIF/iNES/Pasofami
   const char *mapr;                             // NES UNIF board name or iNES mapper number
   int use_dump_info;                            // NES UNIF
+  const char *comment;                          // NES UNIF
   int interleaved;                              // rom is interleaved (swapped)
   int console;                                  // the detected console system
   int do_not_calc_crc;                          // disable crc calc. to speed up --ls,--lsv, etc.

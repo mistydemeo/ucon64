@@ -291,6 +291,7 @@ const struct option long_options[] = {
     {"nvram", 0, 0, UCON64_NVRAM},
     {"mirr", 1, 0, UCON64_MIRR},
     {"mapr", 1, 0, UCON64_MAPR},
+    {"cmnt", 1, 0, UCON64_CMNT},                // will be active only if UNIF_REVISION > 7
     {"dumpinfo", 0, 0, UCON64_DUMPINFO},
     {"version", 0, 0, UCON64_VERSION},
     {0, 0, 0, 0}
@@ -330,10 +331,12 @@ main (int argc, char **argv)
 
   memset (&ucon64, 0L, sizeof (st_ucon64_t));
 
+#ifdef  __unix__
   // We need to modify the umask, because the configfile is made while we are
   //  still running in root mode. Maybe 0 is even better (in case root did
   //  `chmod +s').
   umask (002);
+#endif
 
   ucon64_configfile ();
 
@@ -356,7 +359,8 @@ main (int argc, char **argv)
 
   ucon64.rom =
   ucon64.file =
-  ucon64.mapr = "";
+  ucon64.mapr =
+  ucon64.comment = "";
 
   sscanf (getProperty (ucon64.configfile, "parport", buf2, "0x378"), "%x", &ucon64.parport);
 
@@ -710,7 +714,8 @@ ucon64_nfo (const st_rominfo_t *rominfo)
         printf ("Padded: Maybe, %ld Bytes (%.4f Mb)\n", padded,
                 TOMBIT_F (padded));
 
-      if (intro)
+      // nes.c determines itself whether or not there is a trainer
+      if (intro && ucon64.console != UCON64_NES)
         printf ("Intro/Trainer: Maybe, %ld Bytes\n", intro);
 
       if (rominfo->interleaved != UCON64_UNKNOWN)
@@ -735,7 +740,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
           printf ("Split: Yes, %d part%s\n", split, (split != 1) ? "s" : "");
           // nes.c calculates the correct checksum for split ROMs (=Pasofami
           // format), so there is no need to join the files
-          if (UCON64_ISSET (ucon64.console) && ucon64.console != UCON64_NES)
+          if (ucon64.console != UCON64_NES)
             printf ("NOTE: to get the correct checksum the ROM must be joined\n");
         }
     }

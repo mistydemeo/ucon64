@@ -23,6 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <stdlib.h>
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -54,8 +55,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 typedef struct
 {
-  const char *id;   // strings to detect console from refname or datfile
-  uint8_t console;  // UCON64_SNES, UCON64_NES, etc.
+  const char *id; // strings to detect console from the datfile name
+  uint8_t console; // UCON64_SNES, UCON64_NES, etc.
   const char **console_usage;
 } console_t;
 
@@ -175,8 +176,8 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t *dat)
     {"snes", UCON64_SNES, snes_usage},
     {"super nintendo", UCON64_SNES, snes_usage},
     {"goodnes", UCON64_NES, nes_usage},
-    {" nes", UCON64_NES, nes_usage},
-    {" gb", UCON64_GB, gameboy_usage},
+    {"nes", UCON64_NES, nes_usage},
+    {"gb", UCON64_GB, gameboy_usage},
     {"gbx", UCON64_GB, gameboy_usage},
     {"genesis", UCON64_GENESIS, genesis_usage},
     {"gen", UCON64_GENESIS, genesis_usage},
@@ -211,7 +212,25 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t *dat)
     {"swan", UCON64_WONDERSWAN, swan_usage},
     {"coleco", UCON64_COLECO, coleco_usage},
     {"intelli", UCON64_INTELLI, intelli_usage},
-// TODO add more; see ucon64_misc.c/*_usage[]
+#if 0
+    {"", 0, cd32_usage},
+    {"", 0, cdi_usage},
+    {"", 0, channelf_usage},
+    {"", 0, coleco_usage},
+    {"", 0, gamecom_usage},
+    {"", 0, gc_usage},
+    {"", 0, gp32_usage},
+    {"", 0, intelli_usage},
+    {"", 0, odyssey2_usage},
+    {"", 0, odyssey_usage},
+    {"", 0, real3do_usage},
+    {"", 0, s16_usage},
+    {"", 0, sat_usage},
+    {"", 0, vboy_usage},
+    {"", 0, vc4000_usage},
+    {"", 0, vectrex_usage},
+    {"", 0, xbox_usage},
+#endif
     {0, 0, 0}
   };
 
@@ -287,8 +306,7 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t *dat)
     {
       for (pos = 0; console_type[pos].id; pos++)
       {
-        if (stristr (dat->datfile, console_type[pos].id) ||
-            stristr (dat->refname, console_type[pos].id))
+        if (stristr (dat->datfile, console_type[pos].id))
           {
             dat->console = console_type[pos].console;
             dat->console_usage = console_type[pos].console_usage;
@@ -585,6 +603,9 @@ ucon64_dat_nfo (const ucon64_dat_t *dat)
           dat->fsize,
           TOMBIT_F (dat->fsize));
 
+  if (dat->misc[0])
+    printf ("  %s\n", dat->misc);
+
   if (stristr (dat->datfile, dat->version))
     printf ("  %s (%s, %s)\n",
       dat->datfile,
@@ -596,7 +617,4 @@ ucon64_dat_nfo (const ucon64_dat_t *dat)
       dat->version,
       dat->date,
       dat->refname);
-
-  if (dat->misc[0])
-    printf ("  %s\n", dat->misc);
 }

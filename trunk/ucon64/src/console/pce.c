@@ -88,6 +88,7 @@ typedef struct
   uint8_t  maker;
   const char *serial;
   const char *date;
+//  uint32_t date;
   const char *comment;
 } pce_data_t;
 
@@ -591,7 +592,7 @@ static pce_data_t pce_data[] = {
   {0xfde08d6d, 48, "NX91002", "22-03-91", "2p"},
   {0xff898f87, 52, "NAPH-1010", "31-08-90", NULL},
   {0xffd92458, 22, "T4955754200953", NULL, "1p"},
-  {0, 0, 0}
+  {0, 0, 0, 0, 0}
 };
 
 

@@ -1891,17 +1891,22 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   /*
     Special case hell
 
+    0x4a70ad38: Double Dragon, Return of (J), Super Double Dragon (E/U) {[!], [a1]}
+    0x348b5357: King of Rally, The (J)
     0x9b4638d0: Street Fighter Alpha 2 (E/U) {[b1]}, Street Fighter Zero 2 (J)
     Only really necessary for (U). The other versions can be detected because
     one of the two internal headers has checksum bytes ff ff 00 00.
+    0x0085b742: Super Bowling (U)
+    0x30cbf83c: Super Bowling (J)
+    These games have two headers.
+
+    0x7039388a: Ys 3 - Wanderers from Ys (J)
+    This game has 31 internal headers...
 
     0xd7470b37: Dai Kaiju Monogatari 2 (J)
     0xa2c5fd29: Tales of Phantasia (J)
     These are Extended HiROM games. By "coincidence" ToP can be detected in
     another way, but DKM2 (40 Mbit) can't. The CRC32's are checked for below.
-
-    0x7039388a: Ys 3 - Wanderers from Ys (J)
-    This game has 31 internal headers...
 
     0xdbc88ebf: BS Satella2 1 (J)
     This game has a LoROM map type byte while it is a HiROM game
@@ -1930,7 +1935,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     0x447df9d5: SM Choukyousi Hitomi (PD)
     0x02f401df: SM Choukyousi Hitomi Vol 2 (PD)
     0xf423997a: World of Manga 2 (PD)
-    These games/dumps have a HiROM map type byte while they are LoROM
+    These games/dumps have a HiROM map type byte while they are LoROM.
 
     0x0f802e41: Mortal Kombat 3 Final (Anthrox Beta Hack)
     0xbd8f1b20: Rise of the Robots (Beta)
@@ -1950,7 +1955,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     0xf0bf8d7c/0x92180571: Utyu no Kishi Tekkaman Blade (Beta) {[h1]}/interleaved
     0x8e1933d0: Wesley Orangee Hotel (PD)
     0xe2b95725/0x9ca5ed58: Zool (Sample Cart)/interleaved
-    These games/dumps have garbage in their header
+    These games/dumps have garbage in their header.
   */
   if (crc == 0xc3194ad7
 #ifdef  DETECT_NOTGOOD_DUMPS
@@ -1963,8 +1968,9 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
 #endif
      )
     check_map_type = 0;                         // not interleaved
-  else if (crc == 0x9b4638d0 || crc == 0x7039388a || crc == 0xdbc88ebf ||
-           crc == 0x2a4c6a9b
+  else if (crc == 0x4a70ad38 || crc == 0x348b5357 || crc == 0x9b4638d0 ||
+           crc == 0x0085b742 || crc == 0x30cbf83c || crc == 0x7039388a ||
+           crc == 0xdbc88ebf || crc == 0x2a4c6a9b
 #ifdef  DETECT_NOTGOOD_DUMPS
            ||
            crc == 0x65485afb || crc == 0x5ee74558 || crc == 0x92180571 ||

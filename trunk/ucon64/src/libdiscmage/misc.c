@@ -741,7 +741,7 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
   for (pos = 0; pos < n; pos++, p++)
     {
       if (!(pos & 15))
-        printf ("%08x  ", pos + virtual_start);
+        printf ("%08x  ", (unsigned int) (pos + virtual_start));
       printf ((pos + 1) & 3 ? "%02x " : "%02x  ", *p);
 
       *(buf + (pos & 15)) = isprint (*p) ? *p : '.';

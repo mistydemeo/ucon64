@@ -1266,13 +1266,13 @@ knowing when that is necessary.
 
    lda $0080XX/lda $0080XX,x; cmp $408000/cmp $408000,x; beq ...
 
-- Mega Man X
-   af XX YY 84 cf XX YY 84 f0
-=> af XX YY 84 cf XX YY 84 ea ea
+- Demon's Crest (af, 80, cf) / Breath of Fire II (bf, c0, df)
+   af/bf XX ff 80/c0 cf/df XX ff 40 f0
+=> af/bf XX ff 80/c0 cf/df XX ff 40 80
 
-- Demon's Crest (af, cf)
-   af/bf XX ff 80 cf/df XX ff 40 f0
-=> af/bf XX ff 80 cf/df XX ff 40 80
+- Breath of Fire II (bf, 30, df, 31)
+   af/bf XX YY 30/31/32/33 cf/df XX YY 30/31/32/33 f0
+=> af/bf XX YY 30/31/32/33 cf/df XX YY 30/31/32/33 80
 
 - Super Metroid
    a9 00 00 a2 fe 1f df 00 00 70 d0     lda #$0000; ldx #$1ffe; cmp $700000,x; bne ...
@@ -1311,6 +1311,11 @@ TODO: make sense of Diddy's Kong Quest codes
 - most probably only BS The Legend of Zelda Remix (enables music)
    29 ff 00 c9 07 00 90 16
 => 29 ff 00 c9 00 00 90 16
+
+- most probably only Kirby's Dream Course
+   9c 0b 42 9c 0c 42 a9 01 8d
+=> 9c 0b 42 9c 0c 42 a9 01 9c
+I'm not sure what this is for, but it does break the menu controls.
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
@@ -1339,39 +1344,53 @@ TODO: make sense of Diddy's Kong Quest codes
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
     {                                           // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
-      if (snes_sramsize == 8 * 1024)            // 8 kB == 64 kb
-        change_string ("!**\x70!**\x70\xd0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
-                       "\x8f\x9f", 2, "\xcf\xdf", 2);
+      // SRAM                                   // 8 kB == 64 kb
+      if (snes_sramsize == 8 * 1024)
+        {
+          // unknown
+          change_string ("!**\x70!**\x70\xd0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
+                         "\x8f\x9f", 2, "\xcf\xdf", 2);
+          // actually Kirby's Dream Course, Lufia II - Rise of the Sinistrals
+          change_string ("!**\x70!**\x70\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
+                        "\x8f\x9f", 2, "\xcf\xdf", 2);
+          // actually Earthbound
+          change_string ("!**!!**!\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
+                        "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
+        }
       else
-        change_string ("!**\x70!**\x70\xd0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                       "\x8f\x9f", 2, "\xcf\xdf", 2);
+        {
+          // unknown
+          change_string ("!**\x70!**\x70\xd0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
+                        "\x8f\x9f", 2, "\xcf\xdf", 2);
+          // Mega Man X
+          change_string ("!**\x70!**\x70\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
+                        "\x8f\x9f", 2, "\xcf\xdf", 2);
 
-      // uCON64
+          change_string ("!**!!**!\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
+                        "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
+        }
+
       change_string ("!!!!!!\x60!\xd0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
                      "\x8f\x9f", 2, "\x57\x59", 2, "\x60\x68", 2, "\x30\x31\x32\x33", 4,
                      "\xcf\xdf", 2, "\x57\x59", 2, "\x30\x31\x32\x33", 4);
 
-      // uCON
       change_string ("!**!!**!\xd0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                     "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
-      change_string ("!**!!**!\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
                      "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
       change_string ("!**!\xaf**!\xc9**\xd0", 12, '*', '!', "\x80", 1, buffer, bytesread, 0,
                      "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\x30\x31\x32\x33", 4);
-
-      // uCON64
-      change_string ("!**\x70!**\x70\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
-                     "\x8f\x9f", 2, "\xcf\xdf", 2);
-
       change_string ("\xa9\x00\x00\xa2\xfe\x1f\xdf\x00\x00\x70\xd0", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, 0);
-      change_string ("\x5c\x7f\xd0\x83\x18\xfb\x78\xc2\x30", 9, '*', '!',
-                     "\xea\xea\xea\xea\xea\xea\xea\xea\xea", 9, buffer, bytesread, -8);
+      change_string ("!**!!**!\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
+                     "\xaf\xbf", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
 
+      // mirroring
       change_string ("!*\x80\x00!*\x80\x40\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
                      "\xaf\xbf", 2, "\xcf\xdf", 2);
-      change_string ("!*\xff\x80!*\xff\x40\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                     "\xaf\xbf", 2, "\xcf\xdf", 2);
-      change_string ("\xaf**\x84\xcf**\x84\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("!*\xff!!*\xff\x40\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
+                     "\xaf\xbf", 2, "\x80\xc0", 2, "\xcf\xdf", 2);
+
+      // game specific
+      change_string ("\x5c\x7f\xd0\x83\x18\xfb\x78\xc2\x30", 9, '*', '!',
+                     "\xea\xea\xea\xea\xea\xea\xea\xea\xea", 9, buffer, bytesread, -8);
 
       change_string ("KONG\x00\xf8\xf7", 7, '*', '!', "\xf8", 1, buffer, bytesread, 0);
       change_string ("\x26\x38\xe9\x48\x12\xc9\xaf\x71\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0);
@@ -1382,6 +1401,7 @@ TODO: make sense of Diddy's Kong Quest codes
       change_string ("\xda\xe2\x30\xc9\x01\xf0\x18\xc9\x02", 9, '*', '!',
                                      "\x09\xf0\x18\xc9\x07", 5, buffer, bytesread, -4);
       change_string ("\x29\xff\x00\xc9\x07\x00\x90\x16", 8, '*', '!', "\x00", 1, buffer, bytesread, -3);
+//      change_string ("\x9c\x0b\x42\x9c\x0c\x42\xa9\x01\x8d", 9, '*', '!', "\x9c", 1, buffer, bytesread, 0);
 
       fwrite (buffer, 1, bytesread, destfile);
     }
@@ -1418,8 +1438,8 @@ ad 3f 21 29 10 c9 00 f0         ad 3f 21 29 10 c9 00 80         - PAL
 af 3f 21 00 29/89 10 00 f0      af 3f 21 00 29/89 10 00 80      - PAL
 ad 3f 21 29 10 cf bd ff 80 f0   ad 3f 21 29 10 cf bd ff 80 80   - PAL Konami Ganbare Goemon 2
 af 3f 21 ea 89 10 00 d0         a9 00 00 ea 89 10 00 d0         - PAL Super Famista 3
-ad 3f 21 8d xx xx 29 10 8d      ad 3f 21 8d xx xx 29 00 8d      - PAL DragonBallZ 2
-af 3f 21 00 xx xx 29 10 00 d0   af 3f 21 00 xx xx 29 10 00 ea ea- PAL Fatal Fury Special J
+ad 3f 21 8d XX YY 29 10 8d      ad 3f 21 8d XX YY 29 00 8d      - PAL DragonBallZ 2
+af 3f 21 00 XX YY 29 10 00 d0   af 3f 21 00 XX YY 29 10 00 ea ea- PAL Fatal Fury Special J
 ad 3f 21 29 10 cf bd ff 00 f0   ad 3f 21 29 10 cf bd ff 00 80   - NTSC Tiny Toons Wacky Sports
 
 (uCON64)
@@ -1430,6 +1450,10 @@ ad 3f 21 29 10 c9 00 d0               ad 3f 21 29 10 c9 00 80
 ad 3f 21 29 10 c9 10 f0               ad 3f 21 29 10 c9 10 80
 ad 3f 21 29 10 c9 10 d0               ad 3f 21 29 10 c9 10 ea ea
 a2 18 01 bd 27 20 89 10 00 f0/d0 01   a2 18 01 bd 27 20 89 10 00 ea ea - Donkey Kong Country E/U
+3f 21 00 29/89 10 d0                  3f 21 00 29/89 10 ea ea          - Final Fight Guy (89)
+3f 21 29 10 cf XX YY 80 f0            3f 21 29 10 cf XX YY 80 80       - Gokujyou Parodius/Tokimeki Memorial
+3f 21 89 10 c2 XX d0                  3f 21 89 10 c2 XX 80             - Robotrek
+af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Seiken Densetsu 3
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
@@ -1468,7 +1492,12 @@ a2 18 01 bd 27 20 89 10 00 f0/d0 01   a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
                      "\x29\x89", 2);
       change_string ("\xad\x3f\x21\x29\x10\x00\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
       change_string ("\xad\x3f\x21\x89\x10\x00\xd0", 7, '\x01', '\x02', "\xa9\x10\x00", 3, buffer, bytesread, -6);
-      change_string ("\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+
+      if (snes_sramsize == 2 * 1024)            // actually Kirby No Kira Kizzu
+        change_string ("\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      else
+        change_string ("\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+
       change_string ("\xaf\x3f\x21\x00\x29\x10\x00\xd0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\xad\x3f\x21\x29\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\xad\x3f\x21\x29\x10\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
@@ -1491,6 +1520,11 @@ a2 18 01 bd 27 20 89 10 00 f0/d0 01   a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
       change_string ("\xad\x3f\x21\x29\x10\xc9\x10\xd0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\xa2\x18\x01\xbd\x27\x20\x89\x10\x00!\x01", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, -1,
                      "\xf0\xd0", 2);
+      change_string ("\x3f\x21\x00\x02\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0,
+                     "\x29\x89", 2);
+      change_string ("\x3f\x21\x29\x10\xcf\x01\x01\x80\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\x3f\x21\x89\x10\xc2\x01\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("\xaf\x3f\x21\x00\x29\x01\xc9\x01\xf0", 9, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
 
       fwrite (buffer, 1, bytesread, destfile);
     }
@@ -1800,16 +1834,16 @@ snes_init (st_rominfo_t *rominfo)
     "UBI SOFT Entertainment Software", NULL, NULL, NULL, NULL,
     "System 3", "Spectrum Holobyte", NULL, "Irem", NULL,
     "Raya Systems/Sculptured Software", "Renovation Products", "Malibu Games/Black Pearl",
-        NULL, "U.S. Gold",
-    "Absolute Entertainment", "Acclaim", "Activision", "American Sammy",
+      NULL, "U.S. Gold",
+    "Absolute Entertainment", "Acclaim/LJN Ltd.", "Activision", "American Sammy",
       "Time Warner Interactive/Bitmasters" /*"GameTek"*/,
     "Hi Tech Expressions", "LJN Ltd.", NULL, NULL, NULL,
     "Mindscape", NULL, NULL, "Tradewest", NULL,
     "American Softworks Corp.", "Titus", "Virgin Interactive Entertainment",
-        "Maxis", "Origin/FCI/Pony Canyon",
+      "Maxis", "Origin/FCI/Pony Canyon",
     NULL, NULL, NULL, "Ocean", NULL,
     "Electronic Arts", NULL, "Laser Beam", NULL, NULL,
-    "Elite", "Electro Brain", "Infogrames", "Interplay", "LucasArts",
+    "Elite", "Electro Brain", "Infogrames", "Interplay", "LucasArts Entertainment",
     "Parker Brothers", "Konami", "STORM", NULL, NULL,
     "THQ Software", "Accolade Inc.", "Triffix Entertainment", NULL, "Microprose",
     NULL, NULL, "Kemco", "Misawa", "Teichio",
@@ -1818,7 +1852,7 @@ snes_init (st_rominfo_t *rominfo)
     "Vic Tokai", NULL, "Character Soft", "I'Max", "Takara",
     "CHUN Soft", "Video System Co., Ltd.", "BEC", NULL, "Varie",
     NULL, "Kaneco", NULL, "Pack In Video", "Nichibutsu",
-    "Tecmo", "Imagineer Co.", NULL, NULL, NULL,
+    "Tecmo", "Imagineer", NULL, NULL, NULL,
     "Telenet", "Hori", NULL, NULL, "Konami",
     "K. Amusement Leasing Co.", NULL, "Takara", NULL, "Technos",
     "JVC", NULL, "Toei Animation", "Toho", NULL,
@@ -1828,15 +1862,16 @@ snes_init (st_rominfo_t *rominfo)
     NULL, "Sammy", "Taito", NULL, "Kemco",
     "Square", "Tokuma Soft", "Data East", "Tonkin House", NULL,
     "Falcom" /*"KOEI"*/, NULL, "Konami USA", "NTVIC", NULL,
-    "Meldac", "Pony Canyon", "Sotsu Agency/Sunrise", "Disco/Taito", "Sofel",
+    "Meldac", "Origin/FCI/Pony Canyon", "Angel/Sotsu Agency/Sunrise", "Disco/Taito",
+      "Sofel",
     "Quest Corp.", "Sigma", NULL, NULL, "Naxat",
     NULL, "Capcom", "Banpresto", "Tomy", "Acclaim",
     NULL, "NCS", "Human Entertainment", "Altron", "Jaleco",
     NULL, "Yutaka", NULL, "T&Esoft", "Epoch Co., Ltd.",
     NULL, "Athena", "Asmik", "Natsume", "King Records",
     "Atlus", "Sony Music Entertainment", NULL, "IGS", NULL,
-    NULL, "Motown Software", "Left Field Entertainment", "Beam Software/Extreme",
-        "Tec Magik",
+    NULL, "Motown Software", "Left Field Entertainment",
+      "Beam Software/Extreme Ent. Grp.", "Tec Magik",
     NULL, NULL, NULL, NULL, "Cybersoft",
     NULL, NULL, NULL, NULL, "Davidson",
     "Hudson Soft"},
@@ -2076,7 +2111,7 @@ snes_init (st_rominfo_t *rominfo)
     }
 
   // ROM maker
-  if (snes_header.maker == 0x33)
+  if (snes_header.maker == 0x33 || bs_dump)
     {
 #if 1
       x = (snes_header.maker_high - '0') * 36 + snes_header.maker_low - '0';

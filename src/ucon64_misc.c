@@ -650,7 +650,7 @@ ucon64_bin2iso (const char *image, int track_mode)
         seek_ecc = 288;
         sector_size = 2352;
         break;
-      
+
       case MODE2_2336:
 #ifdef __MAC__ // macintosh
         seek_header = 0;
@@ -954,39 +954,39 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
   ucon64_flush (&rominfo);
 
   result = ucon64_init (ucon64.rom, &rominfo);
-    switch (mode)
-      {
-        case UCON64_LSV:
-          if (!result) ucon64_nfo (&rominfo);
-          break;
+  switch (mode)
+    {
+    case UCON64_LSV:
+      if (!result) ucon64_nfo (&rominfo);
+        break;
 
-        case UCON64_RROM:
-        case UCON64_RR83:
-          if (ucon64.console != UCON64_UNKNOWN)
-            {
-              strcpy (buf, mkfile (strtrim (rominfo.name), '_'));
-              if (!buf[0])
-                strcpy (buf, mkfile (UCON64_UNKNOWN_S, '_'));
-              if (mode == UCON64_RR83)
-                buf[8] = 0;
-              strcat (buf, mkfile (GETEXT (ucon64.rom), '_'));
-              if (mode == UCON64_RR83)
-                buf[12] = 0;
-              if (!strcmp (ucon64.rom, buf))
-                break;
-              printf ("Renaming %s to %s\n", ucon64.rom, buf);
-              remove (buf);
-              rename (ucon64.rom, buf);
-            }
-          break;
+    case UCON64_RROM:
+    case UCON64_RR83:
+      if (ucon64.console != UCON64_UNKNOWN)
+        {
+          strcpy (buf, mkfile (strtrim (rominfo.name), '_'));
+          if (!buf[0])
+            strcpy (buf, mkfile (UCON64_UNKNOWN_S, '_'));
+          if (mode == UCON64_RR83)
+            buf[8] = 0;
+          strcat (buf, mkfile (GETEXT (ucon64.rom), '_'));
+          if (mode == UCON64_RR83)
+            buf[12] = 0;
+          if (!strcmp (ucon64.rom, buf))
+            break;
+          printf ("Renaming %s to %s\n", ucon64.rom, buf);
+          remove (buf);
+          rename (ucon64.rom, buf);
+        }
+      break;
 
-        case UCON64_LS:
-        default:
-          strftime (buf, 13, "%b %d %H:%M", localtime (&puffer->st_mtime));
-          printf ("%-31.31s %10ld %s %s\n", mkprint(rominfo.name, ' '),
+    case UCON64_LS:
+    default:
+      strftime (buf, 13, "%b %d %H:%M", localtime (&puffer->st_mtime));
+      printf ("%-31.31s %10ld %s %s\n", mkprint(rominfo.name, ' '),
             (long) puffer->st_size, buf, ucon64.rom);
-          fflush (stdout);
-          break;
+      fflush (stdout);
+      break;
     }
   return 0;
 }
@@ -1021,7 +1021,7 @@ ucon64_ls (const char *path, int mode)
   if ((dp = opendir (dir)) == NULL)
     return -1;
 
-  getcwd (old_dir,FILENAME_MAX); // remember current dir
+  getcwd (old_dir, FILENAME_MAX); // remember current dir
   chdir (dir);
 
   while ((ep = readdir (dp)))
@@ -1045,7 +1045,7 @@ ucon64_configfile (void)
 {
   char buf2[MAXBUFSIZE], *dirname;
 
-  dirname = getenv2 ("HOME"); 
+  dirname = getenv2 ("HOME");
   sprintf (ucon64.configfile, "%s" FILE_SEPARATOR_S
 #ifdef  __MSDOS__
   "ucon64.cfg"

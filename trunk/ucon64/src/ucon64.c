@@ -39,6 +39,7 @@ write programs in C
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #ifdef  __linux__
 #include <sys/io.h>
 #endif
@@ -306,6 +307,11 @@ main (int argc, char **argv)
 
   memset (&ucon64, 0L, sizeof (st_ucon64_t));
 
+  // We need to modify the umask, because the configfile is made while we are
+  //  still running in root mode. Maybe 0 is even better (in case root did
+  //  `chmod +s').
+  umask (002);
+
   ucon64_configfile ();
 
   ucon64.show_nfo = UCON64_YES;
@@ -392,105 +398,105 @@ ucon64_console_probe (st_rominfo_t *rominfo)
 {
   switch (ucon64.console)
     {
-      case UCON64_GB:
-        gameboy_init (rominfo);
-        break;
+    case UCON64_GB:
+      gameboy_init (rominfo);
+      break;
 
-      case UCON64_GBA:
-        gba_init (rominfo);
-        break;
+    case UCON64_GBA:
+      gba_init (rominfo);
+      break;
 
-      case UCON64_GENESIS:
-        genesis_init (rominfo);
-        break;
+    case UCON64_GENESIS:
+      genesis_init (rominfo);
+      break;
 
-      case UCON64_N64:
-        n64_init (rominfo);
-        break;
+    case UCON64_N64:
+      n64_init (rominfo);
+      break;
 
-      case UCON64_SNES:
-        snes_init (rominfo);
-        break;
+    case UCON64_SNES:
+      snes_init (rominfo);
+      break;
 
-      case UCON64_SMS:
-        sms_init (rominfo);
-        break;
+    case UCON64_SMS:
+      sms_init (rominfo);
+      break;
 
-      case UCON64_LYNX:
-        lynx_init (rominfo);
-        break;
+    case UCON64_LYNX:
+      lynx_init (rominfo);
+      break;
 
-      case UCON64_NEOGEO:
-        neogeo_init (rominfo);
-        break;
+    case UCON64_NEOGEO:
+      neogeo_init (rominfo);
+      break;
 
-      case UCON64_NES:
-        nes_init (rominfo);
-        break;
+    case UCON64_NES:
+      nes_init (rominfo);
+      break;
 
-      case UCON64_PCE:
-        pcengine_init (rominfo);
-        break;
+    case UCON64_PCE:
+      pcengine_init (rominfo);
+      break;
 
-      case UCON64_NEOGEOPOCKET:
-        ngp_init (rominfo);
-        break;
+    case UCON64_NEOGEOPOCKET:
+      ngp_init (rominfo);
+      break;
 
-      case UCON64_WONDERSWAN:
-        swan_init (rominfo);
-        break;
+    case UCON64_WONDERSWAN:
+      swan_init (rominfo);
+      break;
 
-      case UCON64_DC:
-        dc_init (rominfo);
-        break;
+    case UCON64_DC:
+      dc_init (rominfo);
+      break;
 
-      case UCON64_JAGUAR:
-        jaguar_init (rominfo);
-        break;
+    case UCON64_JAGUAR:
+      jaguar_init (rominfo);
+      break;
 
-      case UCON64_SATURN:
-      case UCON64_CDI:
-      case UCON64_CD32:
-      case UCON64_PSX:
-      case UCON64_GAMECUBE:
-      case UCON64_XBOX:
-      case UCON64_GP32:
-      case UCON64_REAL3DO:
-      case UCON64_COLECO:
-      case UCON64_INTELLI:
-      case UCON64_PS2:
-      case UCON64_SYSTEM16:
-      case UCON64_ATARI:
-      case UCON64_VECTREX:
-      case UCON64_VIRTUALBOY:
+    case UCON64_SATURN:
+    case UCON64_CDI:
+    case UCON64_CD32:
+    case UCON64_PSX:
+    case UCON64_GAMECUBE:
+    case UCON64_XBOX:
+    case UCON64_GP32:
+    case UCON64_REAL3DO:
+    case UCON64_COLECO:
+    case UCON64_INTELLI:
+    case UCON64_PS2:
+    case UCON64_SYSTEM16:
+    case UCON64_ATARI:
+    case UCON64_VECTREX:
+    case UCON64_VIRTUALBOY:
 #ifdef SAMPLE
-        sample_init (rominfo);
+      sample_init (rominfo);
 #endif // SAMPLE
-        break;
+      break;
 
-      case UCON64_UNKNOWN:
-        if (UCON64_TYPE_ISROM (ucon64.type))
-          ucon64.console =
+    case UCON64_UNKNOWN:
+      if (UCON64_TYPE_ISROM (ucon64.type))
+        ucon64.console =
 #ifdef CONSOLE_PROBE
-            (!nes_init (ucon64_flush (rominfo))) ? UCON64_NES :
-            (!gba_init (ucon64_flush (rominfo))) ? UCON64_GBA :
-            (!n64_init (ucon64_flush (rominfo))) ? UCON64_N64 :
-            (!genesis_init (ucon64_flush (rominfo))) ? UCON64_GENESIS :
-            (!snes_init (ucon64_flush (rominfo))) ? UCON64_SNES :
-            (!gameboy_init (ucon64_flush (rominfo))) ? UCON64_GB :
-            (!lynx_init (ucon64_flush (rominfo))) ? UCON64_LYNX :
-            (!ngp_init (ucon64_flush (rominfo))) ? UCON64_NEOGEOPOCKET :
-            (!swan_init (ucon64_flush (rominfo))) ? UCON64_WONDERSWAN :
-            (!jaguar_init (ucon64_flush (rominfo))) ? UCON64_JAGUAR :
+          (!nes_init (ucon64_flush (rominfo))) ? UCON64_NES :
+          (!gba_init (ucon64_flush (rominfo))) ? UCON64_GBA :
+          (!n64_init (ucon64_flush (rominfo))) ? UCON64_N64 :
+          (!genesis_init (ucon64_flush (rominfo))) ? UCON64_GENESIS :
+          (!snes_init (ucon64_flush (rominfo))) ? UCON64_SNES :
+          (!gameboy_init (ucon64_flush (rominfo))) ? UCON64_GB :
+          (!lynx_init (ucon64_flush (rominfo))) ? UCON64_LYNX :
+          (!ngp_init (ucon64_flush (rominfo))) ? UCON64_NEOGEOPOCKET :
+          (!swan_init (ucon64_flush (rominfo))) ? UCON64_WONDERSWAN :
+          (!jaguar_init (ucon64_flush (rominfo))) ? UCON64_JAGUAR :
 #endif // CONSOLE_PROBE
-                UCON64_UNKNOWN;
+          UCON64_UNKNOWN;
 
-            return (ucon64.console == UCON64_UNKNOWN) ? (-1) : 0;
+          return (ucon64.console == UCON64_UNKNOWN) ? (-1) : 0;
 
-        default:
-          ucon64.console = UCON64_UNKNOWN;
-          return -1;
-      }
+    default:
+      ucon64.console = UCON64_UNKNOWN;
+      return -1;
+    }
   return 0;
 }
 

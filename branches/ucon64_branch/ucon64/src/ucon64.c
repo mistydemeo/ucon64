@@ -66,6 +66,7 @@ write programs in C
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
+#include "ucon64_opts.h"
 #include "ucon64_lib.h"
 #ifdef  GUI
 #include "ucon64_libng.h"

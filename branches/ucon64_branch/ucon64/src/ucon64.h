@@ -52,7 +52,6 @@ typedef struct
 #include "ucon64_libng.h"
 #endif
 
-
 /*
   This struct contains very specific informations only <console>_init() can
   supply after the correct console type was identified.

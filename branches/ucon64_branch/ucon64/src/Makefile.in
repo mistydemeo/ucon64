@@ -168,6 +168,7 @@ endif                                   # msys
 endif                                   # cygwin
 
 all: libdiscmage/$(FULLLIBNAME_DM) libnetgui/$(FULLLIBNAME_NG) $(TARGET)
+all: libdiscmage/$(FULLLIBNAME_DM) $(TARGET)
 
 
 clean:
@@ -213,6 +214,10 @@ ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 	rm -f Makefile config.log config.status config.cache config.h
 	cd libdiscmage && $(MAKE) distclean
         cd libnetgui && $(MAKE) distclean
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+	rm -f Makefile config.log config.status config.cache config.h
+	cd libdiscmage && $(MAKE) distclean
 else
 ifdef DJGPP
 	del Makefile

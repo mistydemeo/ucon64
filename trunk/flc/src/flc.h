@@ -19,8 +19,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */ 
-#ifndef FLC_H
-#define FLC_H
+#ifndef st_flc_t_H
+#define st_flc_t_H
 
 #define MAXBUFSIZE 32768
 
@@ -30,7 +30,7 @@ extern void flc_usage(int argc, char *argv[]);
 
 #define flc_TITLE "flc " flc_VERSION " 1999-2002 by NoisyB (noisyb@gmx.net)"
 
-extern struct flc_
+typedef struct st_flc
 {
   int argc;
   //  char argv[128][4096];
@@ -53,24 +53,28 @@ extern struct flc_
 
   char configfile[MAXBUFSIZE];
   char config[4096];
-}flc;
+}st_flc_t;
+
+extern st_flc_t flc;
 
 #define FID_LINES_MAX 20
 
-struct sub_
+typedef struct st_sub
 {
   char name[FILENAME_MAX+1];
   off_t size;
   unsigned long date;
   int checked;
   char file_id[FID_LINES_MAX+1][49];
-};
+}st_sub_t;
 
-struct file_
+struct st_file
 {
-  struct file_ *next;
+  struct st_file *next;
 
-  struct sub_ sub;
+  st_sub_t sub;
 };
+
+typedef struct st_file st_file_t;
 
 #endif

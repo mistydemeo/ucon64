@@ -36,7 +36,7 @@
 static void flc_exit (void);
 static int flc_configfile (void);
 
-struct flc_ flc;
+st_flc_t flc;
 
 void
 flc_exit (void)
@@ -49,7 +49,7 @@ int
 main (int argc, char *argv[])
 {
   char buf[FILENAME_MAX + 1];
-  struct file_ *file0 = NULL, *file = NULL, file_ns;
+  st_file_t *file0 = NULL, *file = NULL, file_ns;
   struct dirent *ep;
   struct stat puffer;
   long x = 0;
@@ -57,7 +57,7 @@ main (int argc, char *argv[])
   DIR *dp;
   int c;
   int option_index = 0;
-  struct option long_options[] = {
+  const struct option long_options[] = {
     {"frontend", 0, 0, 1},
     {"t", 0, 0, 't'},
     {"X", 0, 0, 'X'},
@@ -73,7 +73,7 @@ main (int argc, char *argv[])
     {0, 0, 0, 0}
   };
 
-  memset (&flc, 0, sizeof (struct flc_));
+  memset (&flc, 0, sizeof (st_flc_t));
 
   flc_configfile ();
 
@@ -193,7 +193,7 @@ main (int argc, char *argv[])
 
       if (file0 == NULL)
         {
-          if (!(file = (struct file_ *) malloc (sizeof (struct file_))))
+          if (!(file = (st_file_t *) malloc (sizeof (st_file_t))))
             {
               printf ("%s: Error allocating memory\n",
                       argv[0]);
@@ -207,7 +207,7 @@ main (int argc, char *argv[])
         {
           if (!
               ((file->next) =
-               (struct file_ *) malloc (sizeof (struct file_))))
+               (st_file_t *) malloc (sizeof (st_file_t))))
             {
               printf ("%s: Error allocating memory\n",
                       argv[0]);
@@ -263,7 +263,7 @@ flc_usage (int argc, char *argv[])
           "  " OPTION_LONG_S "help        display this help and exit\n"
           "  " OPTION_LONG_S "version     output version information and exit\n"
           "\n"
-          "Amiga version: noC-FLC Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
+          "Amiga version: noC-st_flc_t Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
           "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n",
           flc_TITLE, argv[0]);
 }

@@ -882,7 +882,7 @@ ucon64_options (int c, const char *optarg)
     case UCON64_RIP:
       if (ucon64.discmage_enabled)
         {
-          uint32_t flags = DM_RDONLY; // just read sectors
+          uint32_t flags = 0;
 
           switch (c)
             {
@@ -895,7 +895,7 @@ ucon64_options (int c, const char *optarg)
                 break;
             }
 
-          ucon64.image = libdm_reopen (ucon64.rom, flags, ucon64.image);
+          ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
           if (ucon64.image)
             {
               int track = strtol (optarg, NULL, 10);
@@ -903,7 +903,8 @@ ucon64_options (int c, const char *optarg)
                 track = 1;
 
               libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
-              libdm_rip (ucon64.image, track);
+              libdm_rip (ucon64.image, track, flags);
+              printf ("\n");
             }
         }
       else

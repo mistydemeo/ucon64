@@ -107,6 +107,8 @@ dxe_init (void)
   symbol = map_put (symbol, "dm_cue_read", dm_cue_read);
   symbol = map_put (symbol, "dm_cue_write", dm_cue_write);
 
+  symbol = map_put (symbol, "dm_rip", dm_rip);
+
   return 0;
 }
 

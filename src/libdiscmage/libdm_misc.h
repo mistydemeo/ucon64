@@ -21,26 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef LIBDM_MISC_H
 #define LIBDM_MISC_H
-#if 0
-// wav header
-typedef struct
-{
-  uint8_t magic[4];
-  uint32_t total_length;
-  uint8_t type[4];
-  uint8_t fmt[4];
-  uint32_t header_length;
-  uint16_t format;
-  uint16_t channels;
-  uint32_t samplerate;
-  uint32_t bitrate;
-  uint16_t blockalign;
-  uint16_t bitspersample;
-  uint8_t data[4];
-  uint32_t data_length;
-} wav_header_t;
-#endif
-
 /*
   libdm messages
 

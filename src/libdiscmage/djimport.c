@@ -54,6 +54,8 @@ static int (*dm_toc_write_ptr) (const dm_image_t *);
 static dm_image_t *(*dm_cue_read_ptr) (dm_image_t *, const char *);
 static int (*dm_cue_write_ptr) (const dm_image_t *);
 
+static int (*dm_rip_ptr) (const dm_image_t *, int, uint32_t);
+
 
 static void
 load_dxe (void)
@@ -79,6 +81,8 @@ load_dxe (void)
 
   dm_cue_read_ptr = get_symbol (libdm, "dm_cue_read");
   dm_cue_write_ptr = get_symbol (libdm, "dm_cue_write");
+
+  dm_rip_ptr = get_symbol (libdm, "dm_rip");
 }
 
 
@@ -196,4 +200,12 @@ dm_cue_write (const dm_image_t *a)
 {
   CHECK
   return dm_cue_write_ptr (a);
+}
+
+
+int
+dm_rip (const dm_image_t *a, int b, uint32_t c);
+{
+  CHECK
+  return dm_rip_ptr (a,b,c);
 }

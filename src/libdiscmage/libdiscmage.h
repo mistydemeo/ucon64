@@ -149,32 +149,14 @@ TODO: dm_write()     write single sector to track (in image)
                    by those scripts in contrib/
   dm_disc_write()deprecated reading or writing images is done
                    by those scripts in contrib/
-  dm_rip()       a (example) routine that uses dm_open() and dm_read() to
-                   perform different tasks as specified by the flags
-
-TODO: DM_FILES   rip files from track instead of track
-  DM_2048        (bin2iso) convert binary sector_size to 2048 bytes
-                   (could result in a malformed output image)
-  DM_FIX         (isofix) takes an ISO image with PVD pointing
-                   to bad DR offset and add padding data so actual DR
-                   gets located in right absolute address.
-                   Original boot area, PVD, SVD and VDT are copied to
-                   the start of new, fixed ISO image.
-                   Supported input images are: 2048, 2336,
-                   2352 and 2056 bytes per sector. All of them are
-                   converted to 2048 bytes per sector when writing
-                   excluding 2056 image which is needed by Mac users.
 */
 extern uint32_t dm_get_version (void);
 extern void dm_set_gauge (void (*gauge) (int, int));
 
 #define DM_RDONLY (1)
-//#define DM_WRONLY (2)
-//#define DM_RDWR (4)
-//#define DM_CREAT (8)
-#define DM_FIX (16)
-#define DM_2048 (32)
-//#define DM_FILES (64)
+#define DM_WRONLY (2)
+#define DM_RDWR (4)
+#define DM_CREAT (8)
 extern dm_image_t *dm_open (const char *fname, uint32_t flags);
 extern dm_image_t *dm_reopen (const char *fname, uint32_t flags, dm_image_t *image);
 extern int dm_close (dm_image_t *image);
@@ -193,6 +175,28 @@ extern int dm_cue_write (const dm_image_t *image);
 
 extern int dm_disc_read (const dm_image_t *image);
 extern int dm_disc_write (const dm_image_t *image);
+
+/*
+  dm_rip()       convert/rip a track from an image
+TODO: DM_FILES   rip files from track instead of track
+  DM_WAV         convert possible audio track to wav (instead of raw)
+  DM_2048        (bin2iso) convert binary sector_size to 2048 bytes
+                   (could result in a malformed output image)
+TODO: DM_FIX     (isofix) takes an ISO image with PVD pointing
+                   to bad DR offset and add padding data so actual DR
+                   gets located in right absolute address.
+                   Original boot area, PVD, SVD and VDT are copied to
+                   the start of new, fixed ISO image.
+                   Supported input images are: 2048, 2336,
+                   2352 and 2056 bytes per sector. All of them are
+                   converted to 2048 bytes per sector when writing
+                   excluding 2056 image which is needed by Mac users.
+*/
+#define DM_FILES (1)
+#define DM_WAV (2)
+#define DM_2048 (4)
+#define DM_FIX (8)
+extern int dm_rip (const dm_image_t *image, int track_num, uint32_t flags);
 
 #ifdef  __cplusplus
 }

@@ -412,6 +412,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     {"(F)", "France"},
     {NULL, NULL}
   };
+  // Often flags contain numbers, so don't search for the closing bracket
   static const char *dat_flags[][2] = {
     {"[a", "Alternate"},
     {"[p", "Pirate"},
@@ -434,14 +435,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
   strcpy (buf, dat_entry);
 
-#if 0
-  for (pos = 0;
-       (dat_field[pos] = strtok (!pos ? buf : NULL, DAT_FIELD_SEPARATOR_S))
-       && pos < (MAX_FIELDS_IN_DAT - 1); pos++)
-    ;
-#else
   argz_extract2 (dat_field, buf, DAT_FIELD_SEPARATOR_S, MAX_FIELDS_IN_DAT);
-#endif    
 
   memset (dat, 0, sizeof (st_ucon64_dat_t));
 
@@ -462,27 +456,10 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
   else
     sscanf (dat_field[6], "%d", &dat->fsize);
 
-#if 0
-  p = dat->name;
-  // Often flags contain numbers, so don't search for the closing bracket
-  sprintf (buf,
-    "%s%s%s%s%s%s%s%s%s%s",
-    (strstr (p, "[a") ? "Alternate, " : ""),
-    (strstr (p, "[p") ? "Pirate, " : ""),
-    (strstr (p, "[b") ? "Bad dump, " : ""),
-    (strstr (p, "[t") ? "Trained, " : ""),
-    (strstr (p, "[f") ? "Fixed, " : ""),
-    (strstr (p, "[T") ? "Translation, " : ""),
-    (strstr (p, "[h") ? "Hack, " : ""),
-    (strstr (p, "[x") ? "Bad checksum, " : ""),
-    (strstr (p, "[o") ? "Overdump, " : ""),
-    (strstr (p, "[!]") ? "Verified good dump, " : "")); // [!] is ok
-#else
   *buf = 0;
   for (x = 0, p = buf; dat_flags[x][0]; x++, p += strlen (p))
     if (strstr (dat->name, dat_flags[x][0]))
       sprintf (p, "%s, ", dat_flags[x][1]);
-#endif
   if (buf[0])
     {
       if ((p = strrchr (buf, ',')))
@@ -511,9 +488,6 @@ line_to_crc (const char *dat_entry)
 // get crc32 of current line
 {
   char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL }, buf[MAXBUFSIZE];
-#if 0
-  uint32_t pos = 0;
-#endif
   uint32_t crc32 = 0;
 
   if ((unsigned char) dat_entry[0] != DAT_FIELD_SEPARATOR)
@@ -521,14 +495,7 @@ line_to_crc (const char *dat_entry)
 
   strcpy (buf, dat_entry);
 
-#if 0
-  for (pos = 0;
-       (dat_field[pos] = strtok (!pos ? buf : NULL, DAT_FIELD_SEPARATOR_S))
-       && pos < (MAX_FIELDS_IN_DAT - 1); pos++)
-    ;
-#else
   argz_extract2 (dat_field, buf, DAT_FIELD_SEPARATOR_S, MAX_FIELDS_IN_DAT);
-#endif    
 
   if (dat_field[5])
     sscanf (dat_field[5], "%x", &crc32);
@@ -792,11 +759,7 @@ ucon64_dat_indexer (void)
       start_time = time (0);
       size = q_fsize (fname_dat);
 
-#if 0 // PR decision
-      printf ("%s: %s\n", "Create", basename (fname_index));
-#else
       printf ("%s: %s\n", (update ? "Update" : "Create"), basename (fname_index));
-#endif
       pos = 0;
       n_duplicates = 0;
       errorfile = NULL;

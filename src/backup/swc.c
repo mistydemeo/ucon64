@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define BUFFERSIZE      8192                    // don't change, only 8192 works!
 #define HEADERSIZE      512                     // swc header is 512 bytes
 
-#ifdef  __UNIX__
+#ifndef __DOS__
 #define STDERR          stderr
 #else
 #define STDERR          stdout                  // Stupid DOS has no error
@@ -77,7 +77,7 @@ void init_io(unsigned int port)
     exit(1);
   }
 
-#ifdef  __UNIX__
+#if     (__UNIX__ || __BEOS__)
   init_conio();
 #endif
 

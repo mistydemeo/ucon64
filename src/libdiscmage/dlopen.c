@@ -101,6 +101,7 @@ open_module (char *module_name)
   sym->sprintf = sprintf;
   sym->vsprintf = vsprintf;
   sym->fputs = fputs;
+  sym->sscanf = sscanf;
   sym->fopen = fopen;
   sym->fdopen = fdopen;
   sym->popen = popen;
@@ -147,6 +148,7 @@ open_module (char *module_name)
   sym->strlen = strlen;
   sym->strstr = strstr;
   sym->strdup = strdup;
+  sym->strtok = strtok;
 
   sym->tolower = tolower;
   sym->toupper = toupper;

@@ -36,6 +36,7 @@ extern st_symbol_t import_export;
 #define sprintf import_export.sprintf
 #define vsprintf import_export.vsprintf
 #define fputs import_export.fputs
+#define sscanf import_export.sscanf
 
 #if 0
 // These are now defined in dxe_misc.c
@@ -87,6 +88,7 @@ extern st_symbol_t import_export;
 #define strlen import_export.strlen
 #define strstr import_export.strstr
 #define strdup import_export.strdup
+#define strtok import_export.strtok
 
 #undef  tolower
 #define tolower import_export.tolower

@@ -47,7 +47,6 @@ typedef struct st_ucon64
   DIR *temp;                                    // ptr to tempdir with archive contents
   char rom_in_archive[FILENAME_MAX];            // filename holder if the rom comes from an archive
                                                 // (const char *)rom will point then to this
-
   const char *file;                             // file (cmdline) with path
 
 #ifdef  ANSI_COLOR
@@ -97,12 +96,12 @@ typedef struct st_rominfo
   int data_size;                                // ROM data size without "red tape"
   int file_size;                                // (uncompressed) ROM file size
 
-  long buheader_start;                          // start of backup unit header (mostly 0)
-  long buheader_len;                            // length of backup unit header 0 == no bu hdr
+  int buheader_start;                           // start of backup unit header (mostly 0)
+  int buheader_len;                             // length of backup unit header 0 == no bu hdr
   const void *buheader;                         // (possible) header of backup unit
 
-  long header_start;                            // start of internal ROM header
-  long header_len;                              // length of internal ROM header 0 == no hdr
+  int header_start;                             // start of internal ROM header
+  int header_len;                               // length of internal ROM header 0 == no hdr
   const void *header;                           // (possible) internal ROM header
 
   char name[MAXBUFSIZE];                        // internal ROM name
@@ -110,18 +109,18 @@ typedef struct st_rominfo
   const char *country;                          // country name of the ROM
   char misc[MAXBUFSIZE];                        // some miscellaneous information
                                                 //  about the ROM in one single string
-  unsigned long current_crc32;                  // current crc32 value of ROM
-  unsigned long db_crc32;                       // crc32 value of ROM in internal database
+  unsigned int current_crc32;                   // current crc32 value of ROM
+  unsigned int db_crc32;                        // crc32 value of ROM in internal database
 
   int has_internal_crc;                         // ROM has internal CRC (SNES, Mega Drive, Gameboy)
-  unsigned long current_internal_crc;           // calculated CRC
+  unsigned int current_internal_crc;            // calculated CRC
 
-  unsigned long internal_crc;                   // internal CRC
-  long internal_crc_start;                      // start of internal CRC in ROM header
+  unsigned int internal_crc;                    // internal CRC
+  int internal_crc_start;                       // start of internal CRC in ROM header
   int internal_crc_len;                         // length (in bytes) of internal CRC in ROM header
 
   char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal CRC
-  long internal_crc2_start;                     // start of 2nd/inverse internal CRC
+  int internal_crc2_start;                      // start of 2nd/inverse internal CRC
   int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal CRC
 } st_rominfo_t;
 

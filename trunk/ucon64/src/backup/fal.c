@@ -37,9 +37,9 @@ const char *fal_usage[] =
     "2001 Visoly http://www.visoly.com",
 #ifdef BACKUP
     "  " OPTION_LONG_S "xfal        send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
-    "                  receives automatically when ROM does not exist\n"
+    "                  receives automatically (32 mbits) when ROM does not exist\n"
     "  " OPTION_LONG_S "xfalc=N     receive N mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
-    "                  N can be 8, 16, 32, 64, 128 or 256. default is 32\n"
+    "                  N can be 8, 16, 32, 64, 128 or 256\n"
 #if 0
     "  " OPTION_LONG_S "xfalm       use SPP mode, default is EPP\n"
 #endif
@@ -1640,7 +1640,7 @@ fal_read_rom (const char *filename, unsigned int parport, int size)
       else
         {
           fprintf (stderr, "ERROR: Invalid argument for -xfalc=n\n"
-                           "       n can be 8, 16, 32, 64, 128 or 256; default is 32\n");
+                           "       n can be 8, 16, 32, 64, 128 or 256\n");
           exit (1);
         }
     }

@@ -722,7 +722,7 @@ swc_write_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  size = file_size (filename) - HEADERSIZE;    // SWC SRAM is 4*8KB, emu SRAM often not
+  size = file_size (filename) - HEADERSIZE;     // SWC SRAM is 4*8KB, emu SRAM often not
   printf ("Send: %d Bytes\n", size);
   fseek (file, HEADERSIZE, SEEK_SET);           // skip the header
 

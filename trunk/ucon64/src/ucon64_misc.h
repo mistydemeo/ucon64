@@ -27,7 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  __BEOS__
 typedef struct st_ioport
 {
-  unsigned long port;
+  unsigned int port;
   unsigned char data8;
   unsigned short data16;
 } st_ioport_t;
@@ -58,8 +58,8 @@ extern const st_track_modes_t track_modes[];
 
 #define MBIT 131072
 
-#define PARPORT_DATA    0       // output
-#define PARPORT_STATUS  1       // input
+#define PARPORT_DATA    0                       // output
+#define PARPORT_STATUS  1                       // input
 #define PARPORT_CONTROL 2
 /*
   defines for unknown backup units/emulators

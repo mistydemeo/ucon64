@@ -98,25 +98,26 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
    Under Windows you'll need <a href="http://www.cygwin.com" target="_blank">Cygwin</a>,
    a Windows port of gcc and many other GNU tools and libraries.<br>
 <br>
-   If you have autoconf installed first enter the following line:<br>
+   If you use a Bash compatible shell first enter the following line:<br>
    &nbsp;&nbsp; ./configure<br>
 <br>
    You may want to enable gzip support by passing the option --with-zlib to the configure
    script. zlib is available from
-   <a href="http://www.gzip.org/zlib" target="_blank">http://www.gzip.org/zlib</a>.<br>
-   If you don't have autoconf installed, copy config.h.orig to config.h and Makefile.orig
-   to Makefile.<br>
+   <a href="http://www.gzip.org/zlib/" target="_blank">http://www.gzip.org/zlib/</a>.<br>
+   If you don't use a Bash compatible shell (like command.com or cmd.exe), copy config.h.orig
+   to config.h and Makefile.orig to Makefile.<br>
    Now you can optionally open config.h in an editor and change the defines. Then enter
    the following lines:<br>
    &nbsp;&nbsp; make clean<br>
    &nbsp;&nbsp; make<br>
    &nbsp;&nbsp; make install<br>
 <br>
-   Under Unix the last command will ask for root's password, because
-   uCON64 needs to be setuid root for parallel port access.
-   Under BeOS the last command will open a dialog window. Just follow the
-   instructions.
-   Under DOS and Windows you can find the executable in the directory "bin".<br>
+   Under Unix the last command will ask for root's password, because uCON64 needs to be
+   setuid root for parallel port access. Under BeOS the last command will open a dialog
+   window. Just follow the instructions. Under DOS and Windows (but also under Unix and
+   BeOS) you can find the executable in the directory "bin".
+   You might want to use UPX to compress the executable. UPX is available from
+   <a href="http://upx.sourceforge.net" target="_blank">http://upx.sourceforge.net</a>.<br>
    On Unix systems other than Linux you might need to use 'gmake' instead of 'make'.<br>
 <br>
 <p>

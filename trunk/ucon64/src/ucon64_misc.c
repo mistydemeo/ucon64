@@ -104,7 +104,6 @@ static int ucon64_io_fd;
 #define DETECT_MAX_CNT 1000
 
 
-
 const char *unknown_usage[] =
   {
     "Unknown backup unit/Emulator",
@@ -199,12 +198,12 @@ filepad (const char *filename, int start, int size)
   int oldsize = file_size (filename) - start, sizeleft;
   unsigned char padbuffer[MAXBUFSIZE];
 
-  // Now we can also "pad" to smaller sizes
+  // now we can also "pad" to smaller sizes
   if (oldsize > size)
     truncate (filename, size + start);
   else if (oldsize < size)
     {
-      // Don't use truncate() to enlarge files, because the result is undefined (by POSIX)
+      // don't use truncate() to enlarge files, because the result is undefined (by POSIX)
       if ((file = fopen (filename, "ab")) == NULL)
         {
           fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
@@ -230,9 +229,12 @@ long
 file_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
-  long size = rominfo->file_size, pos = size - 2;
-  int c = quick_fgetc (filename, size - 1);
+  int size, pos, c;
   char *buf;
+
+  size = rominfo->file_size;
+  pos = size - 2;
+  c = quick_fgetc (filename, size - 1);
 
   if (!(buf = (char *) malloc ((size + 2) * sizeof (char))))
     return -1;
@@ -254,21 +256,22 @@ long
 file_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
-  long pos = rominfo->file_size - 2;
-  int c = quick_fgetc (filename, pos + 1);
+  int pos, c;
   char buf[MAXBUFSIZE];
 
-  while (quick_fread (buf, pos - (pos % MAXBUFSIZE),
-      pos % MAXBUFSIZE, filename) > 0)
-    {
+  pos = rominfo->file_size - 2;
+  c = quick_fgetc (filename, pos + 1);
 
-     while ((pos % MAXBUFSIZE) >= 0)
-       {
+  while (quick_fread (buf, pos - (pos % MAXBUFSIZE),
+           pos % MAXBUFSIZE, filename) > 0)
+    {
+      while ((pos % MAXBUFSIZE) >= 0)
+        {
           if (c != buf[pos % MAXBUFSIZE])
             return rominfo->file_size - pos + 1;
           pos--;
-       }
-   }
+        }
+    }
 
   return 0;
 }
@@ -378,7 +381,7 @@ detect_parport (unsigned int port)
 {
   int i;
 
-#if     defined  __linux__
+#if     defined __linux__
   if (ioperm (port, 1, 1) == -1)
     return -1;
 #elif   defined __FreeBSD__
@@ -398,7 +401,7 @@ detect_parport (unsigned int port)
           break;
     }
 
-#if     defined  __linux__
+#if     defined __linux__
   if (ioperm (port, 1, 0) == -1)
     return -1;
 #elif   defined __FreeBSD__
@@ -470,7 +473,7 @@ parport_probe (unsigned int port)
 
   if (port != 0)
     {
-#if     defined  __linux__ || defined __FreeBSD__
+#if     defined __linux__ || defined __FreeBSD__
 #ifdef  __linux__
       if (ioperm (port, 3, 1) == -1)            // data, status & control
 #else
@@ -484,8 +487,7 @@ parport_probe (unsigned int port)
           exit (1);                             // Don't return, if ioperm() fails port access
         }                                       //  causes core dump
 #endif
-      outportb (port + PARPORT_CONTROL,
-                inportb (port + PARPORT_CONTROL) & 0x0f);
+      outportb (port + PARPORT_CONTROL, inportb (port + PARPORT_CONTROL) & 0x0f);
     }                                           // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 
   return port;
@@ -511,7 +513,7 @@ ucon64_parport_probe (unsigned int port)
     users to run all code without being root (of course with the uCON64
     executable setuid root). Anyone a better idea?
   */
-#if     defined  __linux__ || defined __FreeBSD__
+#if     defined __linux__ || defined __FreeBSD__
 #ifdef  __linux__
   if (iopl (3) == -1)
 #else
@@ -549,24 +551,23 @@ int
 ucon64_testsplit (const char *filename)
 // test if ROM is split into parts
 {
-  signed int x;
-  int parts = 0;
+  int x, parts = 0, pos = 0;
   char buf[FILENAME_MAX];
-  int pos = 0;
 
-  if (!strchr (filename, '.')) return 0;
+  if (!strchr (filename, '.'))
+    return 0;
 
   for (x = -1; x < 2; x += 2)
     {
       parts = 0;
       strcpy (buf, filename);
-      pos = strrcspn (buf, ".") + x; /* x == -1 change char before '.'
-                                        else x == 1 change char behind '.' */
-
-      while (!access (buf, F_OK))buf[pos]--;  /* "rewind" */
+      pos = strrcspn (buf, ".") + x;            // if x == -1 change char before '.'
+                                                // else if x == 1 change char behind '.'
+      while (!access (buf, F_OK))
+        buf[pos]--;                             // "rewind"
       buf[pos]++;
 
-      while (!access (buf, F_OK)) /* count split parts */
+      while (!access (buf, F_OK))               // count split parts
         {
           buf[pos]++;
           parts++;
@@ -586,12 +587,10 @@ ucon64_bin2iso (const char *image, int track_mode)
 #ifdef TODO
 #warning TODO nrg2iso and cdi2iso
 #endif
-  int seek_header, seek_ecc, sector_size;
-  long i, size;
+  int seek_header, seek_ecc, sector_size, i, size;
   char buf[MAXBUFSIZE];
   FILE *dest, *src;
   time_t starttime = time (NULL);
-
 
   switch (track_mode)
     {
@@ -606,17 +605,17 @@ ucon64_bin2iso (const char *image, int track_mode)
         break;
 
       case MODE2_2336:
-#ifdef __MAC__ // macintosh
+#ifdef  __MAC__ // macintosh
         seek_header = 0;
 #else
         seek_header = 8;
-#endif      
+#endif
         seek_ecc = 280;
         sector_size = 2336;
-        break;        
+        break;
 
       case MODE2_2352:
-#ifdef __MAC__ // macintosh
+#ifdef  __MAC__ // macintosh
         seek_header = 16;
 #else
         seek_header = 24;
@@ -634,7 +633,8 @@ ucon64_bin2iso (const char *image, int track_mode)
   setext (buf, ".ISO");
   size = file_size (image) / sector_size;
 
-  if (!(src = fopen (image, "rb"))) return -1;
+  if (!(src = fopen (image, "rb")))
+    return -1;
   if (!(dest = fopen (buf, "wb")))
     {
       fclose (src);
@@ -644,7 +644,7 @@ ucon64_bin2iso (const char *image, int track_mode)
   for (i = 0; i < size; i++)
     {
       fseek (src, seek_header, SEEK_CUR);
-#ifdef __MAC__
+#ifdef  __MAC__
       if (track_mode == MODE2_2336 || track_mode == MODE2_2352)
         {
           fread (buf, sizeof (char), 2056, src);
@@ -669,7 +669,6 @@ ucon64_bin2iso (const char *image, int track_mode)
 
 
 // seek_pvd() will search for valid PVD in sector 16 of source image
-
 int
 seek_pvd (int sector_size, int mode, const char *filename)
 {
@@ -693,7 +692,7 @@ seek_pvd (int sector_size, int mode, const char *filename)
   quick_fread (buf, 16 * sector_size
     + ((sector_size == 2352) ? 16 : 0) // header
     + ((mode == 2) ? 8 : 0)            // subheader
-    ,8 , filename);
+    , 8, filename);
 
   if (!memcmp (PVD_STRING, buf, 8)
 #if 0
@@ -719,8 +718,7 @@ ucon64_rom_in_archive (DIR **dp, const char *archive, char *romname,
 #ifdef UNZIP
   if (!stricmp (getext (archive), ".zip"))
     {
-//use libz
-
+//use zlib
     }
 #endif // UNZIP
 
@@ -758,7 +756,7 @@ ucon64_trackmode_probe (const char *image)
 #ifdef TODO
 #warning TODO support image == /dev/<cdrom>
 #endif
-  int result = -1; 
+  int result = -1;
 #if 0
   const char PVD_STRING[8] = { 0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };      //"\x01" "CD001" "\x01" "\0";
   const char SVD_STRING[8] = { 0x02, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0 };      //"\x02" "CD001" "\x01" "\0";
@@ -766,7 +764,7 @@ ucon64_trackmode_probe (const char *image)
   const char SYNC_DATA[12] =
     { 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0 };
   const char SUB_HEADER[8] = { 0, 0, 0x08, 0, 0, 0, 0x08, 0 };
-#endif  
+#endif
   const char SYNC_HEADER[12] =
     { 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0 };
   char buf[MAXBUFSIZE];
@@ -805,7 +803,7 @@ ucon64_trackmode_probe (const char *image)
            (seek_pvd (2056, 2, image)) ? MODE2_2056 :
 #endif
   (-1);
-  
+
   return result;
 }
 
@@ -902,7 +900,6 @@ int ucon64_e (const char *romfile)
       return -1;
     }
 
-
   property = get_property (ucon64.configfile, buf3, buf2, NULL);   // buf2 also contains property value
   if (property == NULL)
     {
@@ -931,9 +928,9 @@ int ucon64_e (const char *romfile)
   if (result != 127 && result != -1 && result != 0)        // 127 && -1 are system() errors, rest are exit codes
     {
       fprintf (stderr, "ERROR: the Emulator returned an error code (%d)\n"
-              "TIP:   If the wrong emulator was used you might try to force recognition\n"
-              "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n",
-              (int) result);
+               "TIP:   If the wrong emulator was used you might try to force recognition\n"
+               "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n",
+               result);
     }
 #endif
   return result;
@@ -997,12 +994,11 @@ ucon64_ls (const char *path, int mode)
 {
   struct dirent *ep;
   struct stat fstate;
-  char dir[FILENAME_MAX];
-  char old_dir[FILENAME_MAX];
+  char dir[FILENAME_MAX], old_dir[FILENAME_MAX];
   DIR *dp;
   int console = ucon64.console;
 
-  dir[0]=0;
+  dir[0] = 0;
 
   if (path)
     if (path[0])
@@ -1021,7 +1017,7 @@ ucon64_ls (const char *path, int mode)
   if ((dp = opendir (dir)) == NULL)
     return -1;
 
-  getcwd (old_dir, FILENAME_MAX); // remember current dir
+  getcwd (old_dir, FILENAME_MAX);               // remember current dir
   chdir (dir);
 
   while ((ep = readdir (dp)))
@@ -1043,17 +1039,16 @@ ucon64_ls (const char *path, int mode)
 int
 ucon64_configfile (void)
 {
-  char buf[256];
-  char buf2[MAXBUFSIZE], *dirname;
+  char buf[256], buf2[MAXBUFSIZE], *dirname;
 
   dirname = getenv2 ("HOME");
   sprintf (ucon64.configfile, "%s" FILE_SEPARATOR_S
 #ifdef  __MSDOS__
-  "ucon64.cfg"
+    "ucon64.cfg"
 #else
-  ".ucon64rc"
+    ".ucon64rc"
 #endif
-  , dirname);
+    , dirname);
   free (dirname);
 
   if (access (ucon64.configfile, F_OK) != 0)
@@ -1136,7 +1131,7 @@ ucon64_configfile (void)
                  "ace_extract=unace e \"%%s\"\n"
 #endif
 #endif
-#ifdef BACKUP_CD
+#ifdef  BACKUP_CD
                  "#\n"
                  "# uCON64 can operate as frontend for CD burning software to make backups\n"
                  "# for CD-based consoles \n"
@@ -1217,7 +1212,7 @@ static int VERBOSE = 1;
   Toc *toc;
 
   PRGNAME = *argv;
-  
+
   Msf start, end;
   const Track *trun;
   int trackNr;
@@ -1246,53 +1241,51 @@ static int VERBOSE = 1;
     }
 
     for (strun = stitr.first(), stcount = 0;
-	 strun != NULL;
-	 strun = stitr.next(), stcount++) {
+         strun != NULL;
+         strun = stitr.next(), stcount++)
+      {
 
       // store types of first two sub-tracks for later evaluation
       switch (stcount) {
       case 0:
-	sttype1 = strun->TrackData::type();
-	break;
+        sttype1 = strun->TrackData::type();
+        break;
       case 1:
-	sttype2 = strun->TrackData::type();
-	break;
+        sttype2 = strun->TrackData::type();
+        break;
       }
 
       // check if whole toc-file just references a single bin file
       if (strun->TrackData::type() == TrackData::DATAFILE) {
-	if (binFileName == NULL) {
-	  binFileName = strdupCC(strun->filename());
-	}
-	else {
-	  if (strcmp(binFileName, strun->filename()) != 0) {
-	    message(-2, "Cannot convert: toc-file references multiple data files.");
-	    err = 1;
-	  }
-	}
+        if (binFileName == NULL)
+          binFileName = strdupCC(strun->filename());
+        else {
+          if (strcmp(binFileName, strun->filename()) != 0) {
+            message(-2, "Cannot convert: toc-file references multiple data files.");
+            err = 1;
+          }
+        }
       }
     }
 
     switch (stcount) {
     case 0:
       message(-2, "Cannot convert: track %d references no data file.",
-	      trackNr);
+             trackNr);
       err = 1;
       break;
 
     case 1:
       if (sttype1 != TrackData::DATAFILE) {
-	message(-2, "Cannot convert: track %d references no data file.",
-	      trackNr);
-	err = 1;
+        message(-2, "Cannot convert: track %d references no data file.", trackNr);
+        err = 1;
       }
       break;
 
     case 2:
       if (sttype1 != TrackData::ZERODATA || sttype2 != TrackData::DATAFILE) {
-	message(-2, "Cannot convert: track %d has unsupported layout.",
-		trackNr);
-	err = 1;
+        message(-2, "Cannot convert: track %d has unsupported layout.", trackNr);
+        err = 1;
       }
       break;
 
@@ -1316,8 +1309,7 @@ static int VERBOSE = 1;
   ofstream out(cueFile);
 
   if (!out) {
-    message(-2, "Cannot open cue file \'%s\' for writing: %s", cueFile,
-	    strerror(errno));
+    message(-2, "Cannot open cue file \'%s\' for writing: %s", cueFile, strerror(errno));
     exit(1);
   }
 
@@ -1352,7 +1344,7 @@ static int VERBOSE = 1;
     default:
       break;
     }
-    
+
     out << endl;
 
     const SubTrack *strun;
@@ -1361,26 +1353,26 @@ static int VERBOSE = 1;
 
     for (strun = stitr.first(); strun != NULL; strun = stitr.next()) {
       if (strun->TrackData::type() == TrackData::ZERODATA) {
-	out << "    PREGAP " << trun->start().str() << endl;
-	pregap = 1;
+        out << "    PREGAP " << trun->start().str() << endl;
+        pregap = 1;
       }
       else {
-	if (!pregap && trun->start().lba() != 0) {
-	  out << "    INDEX 00 " << Msf(offset).str() << endl;
-	  out << "    INDEX 01 " 
-	      << Msf(offset + trun->start().lba()).str() << endl;
-	}
-	else {
-	  out << "    INDEX 01 " << Msf(offset).str() << endl;
-	}
+        if (!pregap && trun->start().lba() != 0) {
+          out << "    INDEX 00 " << Msf(offset).str() << endl;
+          out << "    INDEX 01 "
+              << Msf(offset + trun->start().lba()).str() << endl;
+        }
+        else {
+          out << "    INDEX 01 " << Msf(offset).str() << endl;
+        }
 
-	offset += trun->length().lba();
+        offset += trun->length().lba();
 
-	if (pregap)
-	  offset -= trun->start().lba();
+        if (pregap)
+          offset -= trun->start().lba();
       }
     }
-  } 
+  }
 
 
   fprintf (stderr, "NOTE: the resulting cue file is only valid if the\n"

@@ -1134,72 +1134,72 @@ while ((c =
 int
 ucon64_init (struct ucon64_ *rom)
 {
-  long bytes = quickftell (rom->rom);
+  rom->bytes = quickftell (rom->rom);
 
   // call testsplit() before any <CONSOLE>_init() function to provide for a
   // possible override in those functions
 
-  if (rom->console != ucon64_UNKNOWN && bytes <= MAXROMSIZE)
+  if (rom->console != ucon64_UNKNOWN)
     {
-          switch (rom->console)
-            {
-            case ucon64_GB:
-              gameboy_init (rom);
-              break;
-            case ucon64_GBA:
-              gbadvance_init (rom);
-              break;
-            case ucon64_GENESIS:
-              genesis_init (rom);
-              break;
-            case ucon64_N64:
-              nintendo64_init (rom);
-              break;
-            case ucon64_SNES:
-              snes_init (rom);
-              break;
-            case ucon64_SMS:
-              sms_init (rom);
-              break;
-            case ucon64_JAGUAR:
-              jaguar_init (rom);
-              break;
-            case ucon64_LYNX:
-              lynx_init (rom);
-              break;
-            case ucon64_NEOGEO:
-              neogeo_init (rom);
-              break;
-            case ucon64_NES:
-              nes_init (rom);
-              break;
-            case ucon64_PCE:
-              pcengine_init (rom);
-              break;
-            case ucon64_SYSTEM16:
-              system16_init (rom);
-              break;
-            case ucon64_ATARI:
-              atari_init (rom);
-              break;
-            case ucon64_NEOGEOPOCKET:
-              neogeopocket_init (rom);
-              break;
-            case ucon64_VECTREX:
-              vectrex_init (rom);
-              break;
-            case ucon64_VIRTUALBOY:
-              virtualboy_init (rom);
-              break;
-            case ucon64_WONDERSWAN:
-              wonderswan_init (rom);
-              break;
-            case ucon64_COLECO:
-              coleco_init (rom);
-              break;
-            case ucon64_INTELLI:
-              intelli_init (rom);
-              break;
+      switch (rom->console)
+        {
+        case ucon64_GB:
+          gameboy_init (rom);
+          break;
+        case ucon64_GBA:
+          gbadvance_init (rom);
+          break;
+        case ucon64_GENESIS:
+          genesis_init (rom);
+          break;
+        case ucon64_N64:
+          nintendo64_init (rom);
+          break;
+        case ucon64_SNES:
+          snes_init (rom);
+          break;
+        case ucon64_SMS:
+          sms_init (rom);
+          break;
+        case ucon64_JAGUAR:
+          jaguar_init (rom);
+          break;
+        case ucon64_LYNX:
+          lynx_init (rom);
+          break;
+        case ucon64_NEOGEO:
+          neogeo_init (rom);
+          break;
+        case ucon64_NES:
+          nes_init (rom);
+          break;
+        case ucon64_PCE:
+          pcengine_init (rom);
+          break;
+        case ucon64_SYSTEM16:
+          system16_init (rom);
+          break;
+        case ucon64_ATARI:
+          atari_init (rom);
+          break;
+        case ucon64_NEOGEOPOCKET:
+          neogeopocket_init (rom);
+          break;
+        case ucon64_VECTREX:
+          vectrex_init (rom);
+          break;
+        case ucon64_VIRTUALBOY:
+          virtualboy_init (rom);
+          break;
+        case ucon64_WONDERSWAN:
+          wonderswan_init (rom);
+          break;
+        case ucon64_COLECO:
+          coleco_init (rom);
+          break;
+        case ucon64_INTELLI:
+          intelli_init (rom);
+          break;
         case ucon64_PS2:
           ps2_init (rom);
           break;
@@ -1224,21 +1224,25 @@ ucon64_init (struct ucon64_ *rom)
         case ucon64_XBOX:
           xbox_init (rom);
           break;
+
         default:
-            rom->console = ucon64_UNKNOWN;
-            break;
+          break;
         }
     }
-else 
+else if(rom->bytes <= MAXROMSIZE)
+  {
     if ((snes_init (rom) == -1) &&
         (genesis_init (rom) == -1) &&
         (nintendo64_init (rom) == -1) &&
         (gameboy_init (rom) == -1) &&
         (gbadvance_init (rom) == -1) &&
+        (nes_init (rom) == -1) &&
+        (jaguar_init (rom) == -1)
+#ifdef DB
+                              &&
+//the following consoles will only be detected if the ROM is present in the DB
         (atari_init (rom) == -1) &&
         (lynx_init (rom) == -1) &&
-        (nes_init (rom) == -1) &&
-        (jaguar_init (rom) == -1) &&
         (pcengine_init (rom) == -1) &&
         (neogeo_init (rom) == -1) &&
         (neogeopocket_init (rom) == -1) &&
@@ -1248,17 +1252,31 @@ else
         (vectrex_init (rom) == -1) &&
         (coleco_init (rom) == -1) &&
         (intelli_init (rom) == -1) &&
+        (wonderswan_init (rom) == -1) 
+#endif // DB
+/*
+//detection for the current consoles is not implemented yet
+                                    &&
         (gamecube_init (rom) == -1) &&
         (xbox_init (rom) == -1) &&
         (gp32_init (rom) == -1) &&
-        (wonderswan_init (rom) == -1))
+        (cd32_init (rom) == -1) &&
+        (cdi_init (rom) == -1) &&
+        (dc_init (rom) == -1) &&
+        (ps2_init (rom) == -1) &&
+        (psx_init (rom) == -1) &&
+        (real3do_init (rom) == -1) &&
+        (saturn_init (rom) == -1) &&
+        (cd32_init (rom) == -1)*/
+        )
       rom->console = ucon64_UNKNOWN;
-
+    }
+    
   quickfread (rom->buheader, rom->buheader_start, rom->buheader_len,
               rom->rom);
 //  quickfread(rom->header, rom->header_start, rom->header_len, rom->rom);
 
-  rom->bytes = quickftell (rom->rom);
+//  rom->bytes = quickftell (rom->rom);
   rom->mbit = (rom->bytes - rom->buheader_len) / (float) MBIT;
 
   rom->splitted[0] = (argcmp (rom->argc, rom->argv, "-ns")) ? 0 :
@@ -1285,7 +1303,7 @@ else
         if (rom->bytes > MAXROMSIZE) return 0;
       
       default:
-        rom->current_crc32 = (bytes <= MAXROMSIZE) ? 
+        rom->current_crc32 = (rom->bytes <= MAXROMSIZE) ? 
           fileCRC32 (rom->rom, rom->buheader_len) : 0;
     }
 
@@ -1648,11 +1666,12 @@ ucon64_nfo (struct ucon64_ *rom)
       if (rom->internal_crc2[0])
         printf ("%s\n", rom->internal_crc2);
     }
-  if (rom->splitted[0])
-    printf ("NOTE: to get the correct checksum the ROM must be joined\n");
 
   if (rom->current_crc32 != 0)
     printf ("Checksum (CRC32): 0x%08lx\n", rom->current_crc32);
+
+  if (rom->splitted[0])
+    printf ("NOTE: to get the correct checksum the ROM must be joined\n");
 
   printf ("\n");
 

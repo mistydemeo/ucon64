@@ -170,9 +170,9 @@ typedef struct st_snes_header
 
 st_snes_header_t snes_header;
 
-static int snes_split, force_interleaved, bs_dump, rom_is_top,  // flag for interleaved ROM dump
-           snes_sramsize, snes_hirom, snes_hirom_changed,       //  of "Tales of Phantasia"
-           nsrt_header, snes_header_base;
+static int snes_split, force_interleaved, bs_dump, st_dump,
+           snes_sramsize, nsrt_header, rom_is_top,           // flag for interleaved ROM dump
+           snes_header_base, snes_hirom, snes_hirom_changed; //  of "Tales of Phantasia"
 /*
   The flag `snes_hirom_changed' is necessary for ROMs that are in the normal
   interleaved format (type 1). The variable `snes_hirom' changes the first time
@@ -1880,7 +1880,7 @@ snes_testinterleaved (st_rominfo_t *rominfo)
           switch (snes_header.map_type & 0xf)
             {
             case 1:
-              if (strncmp (rominfo->name, "TREASURE HUNTER G", 17) != 0)
+              if (strncmp (rominfo->name, "TREASURE HUNTER G", 17))
                 interleaved = 1;
               break;
             case 5:
@@ -1993,8 +1993,8 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_siz
   lo_score = check_banktype (rom_buffer, snes_header_base + 0);
 
   if (!force_interleaved &&
-       ((snes_hirom && (lo_score >= hi_score || hi_score < 0)) ||
-         (!snes_hirom && (hi_score > lo_score || lo_score < 0))))
+       ((snes_hirom && (lo_score >= hi_score)) ||
+        (!snes_hirom && (hi_score > lo_score))))
     {                                           // ROM seems to be non-interleaved after all
       q_fread (rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
       rominfo->interleaved = 0;
@@ -2297,6 +2297,7 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
       !strncmp ((char *) rom_buffer + SNES_HEADER_START + 16, "ADD-ON BASE CASSETE", 19))
     { // A Sufami Turbo dump contains 4 copies of the ST BIOS, which is 2 Mbit.
       //  After the BIOS comes the game data.
+      st_dump = 1;
       snes_header_base = 8 * MBIT;
       x = 8 * MBIT + SNES_HIROM;
     }
@@ -2372,6 +2373,7 @@ snes_init (st_rominfo_t *rominfo)
   snes_sramsize = 0;                            // idem
   type = SMC;                                   // idem, SMC indicates unknown copier type
   bs_dump = 0;                                  // for -lsv, but also just to init it
+  st_dump = 0;                                  // idem
 
   q_fread (&header, UNKNOWN_HEADER_START, UNKNOWN_HEADER_LEN, ucon64.rom);
   if (header.id1 == 0xaa && header.id2 == 0xbb && header.type == 5)
@@ -2451,11 +2453,17 @@ snes_init (st_rominfo_t *rominfo)
     ucon64.interleaved : snes_testinterleaved (rominfo);
 
   // internal ROM name
-  memcpy (rominfo->name, snes_header.name, SNES_NAME_LEN);
-  for (x = 0; x < SNES_NAME_LEN; x++)
-    if (!isprint ((int) rominfo->name[x]))      // we can't use mkprint(), because it skips \n
-      rominfo->name[x] = '.';
-  rominfo->name[bs_dump ? 16 : SNES_NAME_LEN] = 0; // terminate string (at 1st byte _after_ string)
+  if (!bs_dump && st_dump)
+    memcpy (rominfo->name, rom_buffer + 8 * MBIT + 16, SNES_NAME_LEN);
+  else
+    {
+      memcpy (rominfo->name, snes_header.name, SNES_NAME_LEN);
+      for (x = 0; x < SNES_NAME_LEN; x++)
+        if (!isprint ((int) rominfo->name[x]))  // we can't use mkprint(), because it skips \n
+          rominfo->name[x] = '.';
+    }
+  rominfo->name[(bs_dump || st_dump) ? 16 : SNES_NAME_LEN] = 0;
+  // terminate string (at 1st byte _after_ string)
 
   rominfo->console_usage = snes_usage;
   if (!rominfo->buheader_len)
@@ -2488,6 +2496,8 @@ snes_init (st_rominfo_t *rominfo)
     }
   else if (snes_header.maker != 0)
     x = (snes_header.maker >> 4) * 36 + (snes_header.maker & 0x0f);
+  else
+    x = 0;                                      // warning remover
 
   if (x < 0 || x >= NINTENDO_MAKER_LEN)
     x = 0;
@@ -2827,7 +2837,8 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
   if (!bs_dump && snes_header.rom_size <= 13)   // largest known cart size is 64 Mbit
     internal_rom_size = 1 << (snes_header.rom_size + 10);
   else
-    internal_rom_size = rom_size;
+    internal_rom_size = st_dump ? rom_size - 8 * MBIT : rom_size;
+
   half_internal_rom_size = internal_rom_size >> 1;
 
   sum1 = 0;
@@ -2849,7 +2860,7 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
       // Handle split files. Don't make this dependent of ucon64.split as
       //  the last file doesn't get detected as being split. Besides, we don't
       //  want to crash on *any* input data.
-      int i_start = snes_header_base == 8 * MBIT ? 8 * MBIT : 0,
+      int i_start = st_dump ? 8 * MBIT : 0,
           i_end = i_start +
                   (half_internal_rom_size > rom_size ? rom_size : half_internal_rom_size);
 
@@ -2955,7 +2966,7 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
     }
   else
     {
-      int i_start = snes_header_base == 8 * MBIT ? 8 * MBIT : 0;
+      int i_start = st_dump ? 8 * MBIT : 0;
       for (i = i_start; i < internal_rom_size; i++)
         sum += (*rom_buffer)[i];
     }

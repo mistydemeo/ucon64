@@ -24,8 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include "config.h"
 #include "ucon64gui.h"
-#include "getopt.h"
-#include "libhtmltk/libhtmltk.h"
 #include "misc.h"
 #include "url.h"
 
@@ -48,6 +46,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/neogeo.h"
 #include "console/ngp.h"
 
+#include "libhtmltk/libhtmltk.h"
+
+
 const char *ucon64gui_title = "uCON64gui " UCON64GUI_VERSION " (for uCON64 " UCON64_VERSION_S ") 2002 by NoisyB ";
 
 
@@ -56,7 +57,7 @@ static void ucon64gui_root (void);
 static void ucon64gui_output (char *output);
 ucon64gui_t ucon64gui;
 
-const struct option long_options[] = {
+const struct htk_option long_options[] = {
   {"1991", 0, 0, UCON64_1991},
   {"3do", 0, 0, UCON64_3DO},
   {"?", 0, 0, UCON64_HELP},
@@ -248,7 +249,7 @@ const struct option long_options[] = {
 
 
 void
-libhtmltk_request (const char *uri, const char *query)
+htk_request (const char *uri, const char *query)
 {
   FILE *fh;
   int len;
@@ -294,7 +295,7 @@ libhtmltk_request (const char *uri, const char *query)
     }
 
 //  while ((
-  c = libhtmltk_getopt (uri, query, long_options, &option_index);
+  c = htk_getopt_long_only (uri, query, long_options, &option_index);
 //  ) != -1)
     {
       switch (c)

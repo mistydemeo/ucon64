@@ -1,0 +1,327 @@
+.PHONY: all clean distclean install uninstall
+
+@DEFINE_DLOPEN_MAKE@
+@DEFINE_ZLIB_MAKE@
+@DEFINE_DISCMAGE_MAKE@
+
+CC=@CC@
+CFLAGS=-I. @CFLAGS@ @DEFS@
+LDFLAGS=@LDFLAGS@
+
+ifdef DISCMAGE
+LIBNAME_DM=discmage
+endif
+
+# The test for Cygwin should be done before the test for DJGPP, because the
+# environment variable DJGPP can be set under Bash for people who have
+# installed both gcc (and friends) ports.
+
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+
+ifdef DISCMAGE
+FULLLIBNAME_DM=$(LIBNAME_DM).dll
+ifndef DLOPEN
+LDFLAGS+=libdiscmage/$(LIBNAME_DM).a 
+endif
+endif
+
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+
+ifdef DISCMAGE
+FULLLIBNAME_DM=$(LIBNAME_DM).dll
+ifndef DLOPEN
+LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
+endif
+endif
+
+else
+ifdef DJGPP
+
+ifdef DISCMAGE
+FULLLIBNAME_DM=$(LIBNAME_DM).dxe
+ifndef DLOPEN
+LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
+endif
+endif
+
+else                                    # Unix or BeOS
+
+ifdef DLOPEN
+
+ifdef DISCMAGE
+FULLLIBNAME_DM=$(LIBNAME_DM).so
+endif
+
+ifneq ($(OSTYPE),beos)
+ifneq ($(OSTYPE),FreeBSD)
+LDFLAGS+=-ldl
+endif
+endif
+
+else                                    # DLOPEN
+ifdef DISCMAGE
+FULLLIBNAME_DM=lib$(LIBNAME_DM).so
+LDFLAGS+=-Llibdiscmage -l$(LIBNAME_DM)
+endif
+
+endif
+
+endif                                   # DJGPP
+endif                                   # msys
+endif                                   # cygwin
+
+
+OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
+        misc.o getopt.o quick_io.o \
+        patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
+        patch/ppf.o patch/xps.o \
+        console/gb.o console/gba.o console/genesis.o console/lynx.o \
+        console/n64.o console/neogeo.o console/nes.o console/ngp.o \
+        console/pce.o console/sms.o console/psx.o console/snes.o \
+        console/swan.o console/dc.o console/jaguar.o \
+        backup/yoko.o backup/ssc.o backup/interceptor.o \
+        backup/z64.o backup/cd64.o backup/doctor64.o backup/doctor64jr.o \
+        backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/gd.o \
+        backup/md.o backup/mgd.o backup/smd.o backup/swc.o backup/ufo.o \
+        backup/dex.o backup/psxpblib.o backup/mccl.o backup/lynxit.o \
+        backup/ffe.o
+ifdef ZLIB
+OBJECTS+=unzip.o map.o miscz.o
+endif
+ifdef DISCMAGE
+OBJECTS+=ucon64_dm.o
+endif
+
+ifdef DLOPEN
+OBJECTS+=dlopen.o
+ifndef ZLIB
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+else
+ifeq ($(OSTYPE),msys)
+else
+ifdef DJGPP                             # DJGPP code in dlopen needs map code
+OBJECTS+=map.o
+endif                                   # DJGPP
+endif                                   # msys
+endif                                   # cygwin
+endif                                   # ZLIB
+else
+ifeq ($(TERM),cygwin)                   # Cygwin code in ucon64_misc needs dlopen code
+OBJECTS+=dlopen.o
+else
+ifeq ($(OSTYPE),msys)
+OBJECTS+=dlopen.o
+endif                                   # msys
+endif                                   # cygwin
+endif                                   # DLOPEN
+
+
+TARGET=ucon64
+ifeq ($(TERM),cygwin)                   # OSTYPE is not a real env var on Cygwin
+TARGET:=$(addsuffix .exe, $(TARGET))    # GNU specific: "simply expanded variable"
+else                                    # adding .exe avoids "problems" with Cygwin
+ifeq ($(OSTYPE),msys)                   # Msys, MinGW's POSIX build environment
+TARGET:=$(addsuffix .exe, $(TARGET))
+else
+ifdef DJGPP                             # OSTYPE is not defined by default under DOS
+TARGET:=$(addsuffix .exe, $(TARGET))
+endif                                   # DJGPP
+endif                                   # msys
+endif                                   # cygwin
+
+all: libdiscmage/$(FULLLIBNAME_DM) $(TARGET)
+
+
+CLEAN_CMD=rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~; \
+cd libdiscmage && $(MAKE) clean
+
+clean:
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	$(CLEAN_CMD)
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+	$(CLEAN_CMD)
+else
+ifdef DJGPP
+	del *.o
+	del patch\*.o
+	del console\*.o
+	del backup\*.o
+	del $(TARGET)
+	cd libdiscmage
+	$(MAKE) clean
+	cd ..
+else                                    # Unix or BeOS
+	$(CLEAN_CMD)
+endif                                   # DJGPP
+endif                                   # msys
+endif                                   # cygwin
+
+
+DISTCLEAN_CMD=rm -f Makefile config.log config.status config.cache config.h; \
+cd libdiscmage && $(MAKE) distclean
+
+distclean: clean
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	$(DISTCLEAN_CMD)
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+	$(DISTCLEAN_CMD)
+else
+ifdef DJGPP
+	del Makefile
+	del config.log
+	del config.status
+	del config.cache
+	del config.h
+	cd libdiscmage
+	$(MAKE) distclean
+	cd ..
+else
+	$(DISTCLEAN_CMD)
+endif                                   # DJGPP
+endif                                   # msys
+endif                                   # cygwin
+
+
+.c.o:
+	$(CC) $(CFLAGS) -c $< -o $@
+
+
+ifdef DISCMAGE
+libdiscmage/$(FULLLIBNAME_DM):
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	cd libdiscmage && $(MAKE)
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+	cd libdiscmage && $(MAKE)
+else
+ifdef DJGPP
+	cd libdiscmage
+	$(MAKE)
+	cd ..
+else
+	cd libdiscmage && $(MAKE)
+endif                                   # DJGPP
+endif                                   # msys
+endif                                   # cygwin
+endif                                   # DISCMAGE
+
+$(TARGET): $(OBJECTS)
+	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
+
+
+install:
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+else
+ifdef DJGPP
+else
+ifeq ($(OSTYPE),beos)
+	./install_beos.sh
+else
+	./install.sh
+endif                                   # beos
+endif                                   # DJGPP
+endif                                   # msys
+endif                                   # cygwin
+#	cd libdiscmage && $(MAKE) install
+
+
+uninstall:
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+else
+ifdef DJGPP
+else
+ifeq ($(OSTYPE),beos)
+	rm -f $(HOME)/config/bin/$(TARGET)
+else
+	rm -f /usr/local/bin/$(TARGET)
+endif                                   # beos
+endif                                   # DJGPP
+endif                                   # msys
+endif                                   # cygwin
+#	cd libdiscmage && $(MAKE) uninstall
+
+
+# Dependencies
+
+# Most source files include these
+UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
+
+getopt.o: getopt.h
+unzip.o: unzip.h
+misc.o: misc.h miscz.h config.h
+map.o: map.h
+miscz.o: miscz.h map.h config.h
+quick_io.o: quick_io.h misc.h config.h
+dlopen.o: dlopen.h dxedll_pub.h config.h
+ucon64.o: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
+          console/snes.h console/gb.h console/gba.h console/n64.h \
+          console/lynx.h console/sms.h console/nes.h console/genesis.h \
+          console/pce.h console/neogeo.h console/ngp.h console/swan.h \
+          console/dc.h console/jaguar.h console/psx.h \
+          patch/ppf.h patch/xps.h patch/pal4u.h patch/aps.h patch/ips.h \
+          patch/bsl.h patch/gg.h \
+          backup/fig.h backup/swc.h backup/doctor64jr.h backup/doctor64.h \
+          backup/smd.h backup/fal.h backup/gbx.h backup/cd64.h backup/dex.h \
+          backup/fpl.h backup/mgd.h backup/gd.h backup/mccl.h backup/lynxit.h \
+          $(UCON64_STD_H)
+ucon64_opts.o: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
+               console/snes.h console/gb.h console/gba.h console/n64.h \
+               console/lynx.h console/sms.h console/nes.h console/genesis.h \
+               console/pce.h console/neogeo.h console/ngp.h console/swan.h \
+               console/dc.h console/jaguar.h console/psx.h \
+               patch/ppf.h patch/xps.h patch/pal4u.h patch/aps.h patch/ips.h \
+               patch/bsl.h patch/gg.h \
+               backup/fig.h backup/swc.h backup/doctor64jr.h \
+               backup/doctor64.h backup/smd.h backup/fal.h backup/gbx.h \
+               backup/cd64.h backup/dex.h backup/fpl.h backup/mgd.h \
+               backup/gd.h backup/mccl.h backup/lynxit.h $(UCON64_STD_H)
+ucon64_misc.o: dlopen.h $(UCON64_STD_H)
+ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)
+ucon64_dm.o: ucon64_dm.h dlopen.h $(UCON64_STD_H)
+console/gb.o: console/gb.h backup/mgd.h $(UCON64_STD_H)
+console/gba.o: console/gba.h $(UCON64_STD_H)
+console/genesis.o: console/genesis.h backup/smd.h backup/mgd.h $(UCON64_STD_H)
+console/jaguar.o: console/jaguar.h $(UCON64_STD_H)
+console/lynx.o: console/lynx.h $(UCON64_STD_H)
+console/n64.o: console/n64.h $(UCON64_STD_H)
+console/neogeo.o: console/neogeo.h $(UCON64_STD_H)
+console/nes.o: console/nes.h $(UCON64_STD_H)
+console/ngp.o: console/ngp.h $(UCON64_STD_H)
+console/pce.o: console/pce.h backup/mgd.h $(UCON64_STD_H)
+console/sms.o: console/sms.h backup/smd.h backup/mgd.h $(UCON64_STD_H)
+console/snes.o: console/snes.h backup/mgd.h $(UCON64_STD_H)
+console/swan.o: console/swan.h $(UCON64_STD_H)
+console/dc.o: console/dc.h $(UCON64_STD_H)
+console/psx.o: console/psx.h $(UCON64_STD_H)
+patch/aps.o: patch/aps.h $(UCON64_STD_H)
+patch/bsl.o: patch/bsl.h $(UCON64_STD_H)
+patch/ips.o: patch/ips.h $(UCON64_STD_H)
+patch/ppf.o: patch/ppf.h $(UCON64_STD_H)
+patch/xps.o: patch/xps.h $(UCON64_STD_H)
+patch/pal4u.o: patch/pal4u.h $(UCON64_STD_H)
+patch/gg.o: patch/gg.h $(UCON64_STD_H)
+backup/doctor64.o: backup/doctor64.h $(UCON64_STD_H)
+backup/doctor64jr.o: backup/doctor64jr.h $(UCON64_STD_H)
+backup/fal.o: backup/fal.h backup/cartlib.c $(UCON64_STD_H)
+backup/fig.o: backup/fig.h console/snes.h $(UCON64_STD_H)
+backup/fpl.o: backup/fpl.h $(UCON64_STD_H)
+backup/gbx.o: backup/gbx.h $(UCON64_STD_H)
+backup/gd.o: backup/gd.h console/snes.h $(UCON64_STD_H)
+backup/md.o: backup/md.h $(UCON64_STD_H)
+backup/mgd.o: backup/mgd.h $(UCON64_STD_H)
+backup/smd.o: backup/smd.h backup/ffe.h $(UCON64_STD_H)
+backup/swc.o: backup/swc.h backup/ffe.h console/snes.h $(UCON64_STD_H)
+backup/ufo.o: backup/ufo.h $(UCON64_STD_H)
+backup/cd64.o: backup/cd64.h $(UCON64_STD_H)
+backup/dex.o: backup/dex.h backup/psxpblib.h $(UCON64_STD_H)
+backup/mccl.o: backup/mccl.h $(UCON64_STD_H)
+backup/lynxit.o: backup/lynxit.h $(UCON64_STD_H)
+backup/ffe.o: backup/ffe.h $(UCON64_STD_H)
+backup/psxpblib.o: backup/psxpblib.h $(UCON64_STD_H)

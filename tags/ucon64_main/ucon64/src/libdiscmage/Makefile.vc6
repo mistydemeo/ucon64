@@ -1,0 +1,60 @@
+DLOPEN=1
+#ZLIB=1
+
+CC=cl.exe
+CFLAGS=/nologo /W3 /O2 /DHAVE_CONFIG_H /DDLL
+!ifdef DLOPEN
+CFLAGS=$(CFLAGS) /DDLOPEN
+!endif
+
+LIBNAME=discmage
+OBJECTS=libdm_misc.obj cdi.obj nero.obj sheets.obj other.obj dllinit.obj misc.obj
+!ifdef ZLIB
+LIBS=zlib.lib
+OBJECTS=$(OBJECTS) unzip.obj map.obj miscz.obj
+!else
+LIBS=
+!endif
+
+
+FULLLIBNAME=$(LIBNAME).dll
+DLLFLAGS=/NOLOGO /DLL /OUT:$(LIBNAME).dll $(OBJECTS) $(LIBS) /DEF:$(LIBNAME).def
+
+
+all: $(FULLLIBNAME)
+
+
+clean:
+	del $(LIBNAME).dll
+	del $(LIBNAME).lib
+	del *.obj
+	del $(LIBNAME).exp
+
+
+distclean: clean
+	del config.h
+
+
+.c.obj:
+	$(CC) $(CFLAGS) /c $< /Fo$@
+
+
+$(LIBNAME).dll: $(OBJECTS)
+	link.exe $(DLLFLAGS)
+# link.exe automatically creates the import library. "/IMPLIB:filename.lib"
+#  could be used to give the import library another name
+#	lib.exe $(DLLFLAGS) /OUT:$(LIBNAME).lib
+
+
+# Dependencies
+libdm_misc.obj: libdiscmage.h misc.h dxedll_priv.h
+cdi.obj: libdiscmage.h misc.h cdi.h dxedll_priv.h
+nero.obj: libdiscmage.h misc.h nero.h dxedll_priv.h
+sheets.obj: libdiscmage.h misc.h sheets.h dxedll_priv.h
+other.obj: libdiscmage.h misc.h other.h dxedll_priv.h
+dllinit.obj: libdiscmage.h misc.h dxedll_priv.h
+misc.obj: misc.h dxedll_priv.h
+miscz.obj: miscz.h misc.h dxedll_priv.h
+dxe_misc.obj: $(CONFIG_H) dxedll_pub.h
+djimport.obj: libdiscmage.h dlopen.h dxedll_pub.h
+dlopen.obj: $(CONFIG_H) dlopen.h dxedll_pub.h

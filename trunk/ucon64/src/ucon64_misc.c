@@ -1,7 +1,7 @@
 /*
 ucon64_misc.c - miscellaneous functions for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh
                   2001 Caz
 
@@ -62,7 +62,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "jaguar/jaguar.h"
 #include "sample/sample.h"
 
-  
+
 const st_track_modes_t track_modes[] = {
   {"MODE1/2048", "MODE1"},
   {"MODE1/2352", "MODE1_RAW"},
@@ -533,7 +533,7 @@ ucon64_gauge (time_t init_time, long pos, long size)
     return gauge (init_time, pos, size);
   else
     {
-      int percentage = (100 * (pos >> 10)) / (size >> 10);
+      int percentage = 100 * pos/size;
 
       printf ("%u\n", percentage);
       fflush (stdout);
@@ -557,7 +557,8 @@ ucon64_testsplit (const char *filename)
       parts++;
     }
 
-  if (parts) return parts + 1;
+  if (parts)
+    return parts + 1;
 
   strcpy (buf, filename);
   buf[strrcspn (buf, ".") + 1]++;
@@ -612,7 +613,7 @@ ucon64_bin2iso (const char *image, int track_mode)
         seek_header = 16;
 #else
         seek_header = 24;
-#endif      
+#endif
         seek_ecc = 280;
         sector_size = 2352;
         break;
@@ -802,12 +803,12 @@ ucon64_mkcue (st_rominfo_t *rominfo)
 
   sprintf (buf, "FILE \"%s\" BINARY\n"
            "  TRACK 01 %s\n"
-           "    INDEX 01 00:00:00\n"
-           ,ucon64.rom
-  ,(!stricmp (ucon64.file, "MODE1") || !stricmp (ucon64.file, "MODE2_FORM1")) ? "MODE1/2048" :
-  (!stricmp (ucon64.file, "MODE1_RAW")) ? "MODE1/2352" :
-  (!stricmp (ucon64.file, "MODE2") || !stricmp (ucon64.file, "MODE2_FORM_MIX")) ? "MODE2/2336" :
-  (result != -1) ? track_modes[result].common : "MODE2/2352");
+           "    INDEX 01 00:00:00\n",
+           ucon64.rom,
+           (!stricmp (ucon64.file, "MODE1") || !stricmp (ucon64.file, "MODE2_FORM1")) ? "MODE1/2048" :
+           (!stricmp (ucon64.file, "MODE1_RAW")) ? "MODE1/2352" :
+           (!stricmp (ucon64.file, "MODE2") || !stricmp (ucon64.file, "MODE2_FORM_MIX")) ? "MODE2/2336" :
+           (result != -1) ? track_modes[result].common : "MODE2/2352");
 
   printf ("%s\n", buf);
 
@@ -911,11 +912,15 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
           if (ucon64.console != UCON64_UNKNOWN)
             {
               strcpy (buf, mkfile (strtrim (rominfo.name), '_'));
-              if (!buf[0]) strcpy (buf, mkfile (UCON64_UNKNOWN_S, '_'));
-              if (mode == UCON64_RR83) buf[8] = 0;
+              if (!buf[0])
+                strcpy (buf, mkfile (UCON64_UNKNOWN_S, '_'));
+              if (mode == UCON64_RR83)
+                buf[8] = 0;
               strcat (buf, mkfile (GETEXT (ucon64.rom), '_'));
-              if (mode == UCON64_RR83) buf[12] = 0;
-              if (!strcmp (ucon64.rom, buf)) break;
+              if (mode == UCON64_RR83)
+                buf[12] = 0;
+              if (!strcmp (ucon64.rom, buf))
+                break;
               printf ("Renaming %s to %s\n", ucon64.rom, buf);
               remove (buf);
               rename (ucon64.rom, buf);

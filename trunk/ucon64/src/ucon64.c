@@ -96,7 +96,7 @@ static void ucon64_usage (int argc, char *argv[]);
 
 st_ucon64_t ucon64;
 
-static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS 
+static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS
                               " 1999-2002 by (various)";
 
 const struct option long_options[] = {
@@ -289,7 +289,7 @@ main (int argc, char **argv)
   int ucon64_argc;
   int c = 0, result = 0;
   long size = 0;
-  int value = 0;  
+  int value = 0;
   unsigned long padded;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
   const char *ucon64_argv[128];
@@ -526,7 +526,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 #endif
 
       rominfo->current_crc32 = fileCRC32 (romfile, rominfo->buheader_len);
-      
+
 #ifdef DB
       switch (ucon64.console)
         {
@@ -537,7 +537,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
           case UCON64_N64:
 //These ROMs have internal headers with name, country, maker, etc.
             break;
-            
+
           default:
             ucon64_dbsearch (rominfo);
             break;
@@ -806,7 +806,7 @@ ucon64_usage (int argc, char *argv[])
   UCON64_USAGE (ppf_usage);
   UCON64_USAGE (xps_usage);
   UCON64_USAGE (gg_usage);
-  
+
   printf ("                  supported are:\n"
     "                  %s,\n"
     "                  %s,\n"
@@ -814,12 +814,12 @@ ucon64_usage (int argc, char *argv[])
     "                  %s,\n"
     "                  and %s\n",
     gameboy_usage[0], sms_usage[0], genesis_usage[0], nes_usage[0], snes_usage[0]);
-  
+
   printf (
     "  " OPTION_LONG_S "cd          force recognition (of CD IMAGES)\n"
     "                  this is the support for the most CD-based consoles\n"
     );
-    
+
 //  UCON64_USAGE (cdrw_usage);
   printf ("%s", cdrw_usage[2]);
 
@@ -846,7 +846,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "iso         convert BIN/RAW CD_IMAGE to MODE1 (2048 Bytes); " OPTION_LONG_S "rom=CD_IMAGE\n"
     "                  this might be useful if you made a MODE2_RAW image of a\n"
     "                  MODE1 CD and want to "
-#ifdef __linux__
+#ifdef __unix__
     "mount or "
 #endif
     "burn it as MODE1 (2048 Bytes)\n"
@@ -872,7 +872,7 @@ ucon64_usage (int argc, char *argv[])
   while (!single && (c = getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
     {
 //      if (single) break;
-      
+
       switch (c)
         {
       case UCON64_GBA:
@@ -995,7 +995,7 @@ ucon64_usage (int argc, char *argv[])
 #ifdef SAMPLE
         UCON64_USAGE (sample_usage);
         single = 1;
-#endif // SAMPLE        
+#endif // SAMPLE
         break;
 
       default:
@@ -1008,7 +1008,7 @@ ucon64_usage (int argc, char *argv[])
     {
       UCON64_USAGE (dc_usage);
       printf("\n");
-      
+
       UCON64_USAGE (gba_usage);
 #ifdef BACKUP
       UCON64_USAGE (fal_usage);
@@ -1035,7 +1035,7 @@ ucon64_usage (int argc, char *argv[])
 
       UCON64_USAGE (neogeo_usage);
       printf ("\n");
-      
+
       UCON64_USAGE (genesis_usage);
 #ifdef BACKUP
       UCON64_USAGE (smd_usage);
@@ -1089,7 +1089,7 @@ ucon64_usage (int argc, char *argv[])
   printf (
 #ifdef DB
      "Database: %ld known ROMs in db.h (%+ld)\n"
-#endif // DB     
+#endif // DB
      "\n"
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only Super Nintendo related help)\n"
 #ifdef	__MSDOS__

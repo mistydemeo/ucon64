@@ -804,7 +804,7 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
   rom->console=ucon64_UNKNOWN;	//integer for the console system
 
   rom->swapped=0;
-//  for( x = 0 ; x < sizeof( rom->splitted ) / sizeof( rom->splitted[0] ) ; x++ )rom->splitted[x]=0;
+  for( x = 0 ; x < sizeof( rom->splitted ) / sizeof( rom->splitted[0] ) ; x++ )rom->splitted[x]=0;
   rom->padded=0;
   rom->intro=0;
 
@@ -872,19 +872,23 @@ int ucon64_init(struct ucon64_ *rom)
     rom->console=ucon64_UNKNOWN;
     return(-1);
   }
-  else
-  {
-    quickfread(rom->buheader,rom->buheader_start,rom->buheader_len,rom->rom);
-    quickfread(rom->header,rom->header_start,rom->header_len,rom->rom);
 
-    if(!rom->current_crc32)rom->current_crc32=fileCRC32(rom->rom,rom->buheader_len);
+  quickfread(rom->buheader,rom->buheader_start,rom->buheader_len,rom->rom);
+  quickfread(rom->header,rom->header_start,rom->header_len,rom->rom);
 
-    rom->bytes=quickftell(rom->rom);
-    rom->mbit=(float)((rom->bytes-rom->buheader_len)/MBIT);
+  if(!rom->current_crc32)rom->current_crc32=fileCRC32(rom->rom,rom->buheader_len);
 
-    rom->padded=filetestpad(rom->rom);
-    rom->intro=(rom->bytes-rom->buheader_len)&MBIT;
-  }
+  rom->bytes=quickftell(rom->rom);
+  rom->mbit=(float)((rom->bytes-rom->buheader_len)/MBIT);
+
+  rom->padded=filetestpad(rom->rom);
+  rom->intro=(rom->bytes-rom->buheader_len)&MBIT;
+
+  rom->splitted[0] = testsplit(rom->rom);
+  if (argcmp(rom->argc, rom->argv, "-ns"))
+    rom->splitted[0] = 0;
+
+
   return(0);
 }
 
@@ -1052,6 +1056,9 @@ int ucon64_nfo(struct ucon64_ *rom)
 
   if(!rom->intro)printf("Intro/Trainer: No\n");
   else if(rom->intro)printf("Intro/Trainer: Maybe, %ld Bytes\n",rom->intro);
+
+  if(!rom->splitted[0])printf("Splitted: No\n");
+  else if(rom->splitted[0])printf("Splitted: Yes, %d parts (Note: for most options the ROM must be joined)\n",rom->splitted[0]);
 
   if(rom->misc[0])printf("%s\n",rom->misc);
 

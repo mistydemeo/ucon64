@@ -527,7 +527,7 @@ while(	!access(buf,F_OK) &&
 	x++;
 }
 
-if(x!=0)return(x);
+if(x!=0)return(x+1);
 
 strcpy(buf,filename);
 buf[findlast(buf,".")+1]++;
@@ -539,5 +539,5 @@ while(	!access(buf,F_OK) &&
 	x++;
 }
 
-return(x);
+return( ( x != 0 ) ? ( x + 1 ) : 0 );
 }

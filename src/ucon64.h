@@ -93,7 +93,7 @@ struct ucon64_
   int swapped;
   unsigned long padded;
   unsigned long intro;
-//  int splitted[128];
+  int splitted[128];
 
   unsigned long current_crc32;	//current crc32 value of ROM
   unsigned long db_crc32;	//crc32 value of ROM in internal database

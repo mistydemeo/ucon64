@@ -1133,7 +1133,7 @@ ucon64_usage (int argc, char *argv[])
     "\n");
 
 //  if (ucon64.dat_enabled)
-    printf ("DATabase (support for DAT files)\n"
+    printf ("DATabase (support for DAT files and ROM managing)\n"
       "  " OPTION_LONG_S "dbs         search ROM in DATabase by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
       "  " OPTION_LONG_S "db          DATabase statistics\n"
       "  " OPTION_LONG_S "dbv         like " OPTION_LONG_S "db but more verbose\n"

@@ -878,7 +878,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
   if (rominfo->name[0] == 0)
     rominfo->name[0] = 'D';                     // if table[0] == 0 => no next game
   for (m = 0; m < 0x1d; m++)
-    if (!isprint (rominfo->name[m]))
+    if (!isprint ((int) rominfo->name[m]))
       rominfo->name[m] = '.';
   fwrite (rominfo->name, 1, 0x1d, destfile);    // 0x0 - 0x1c = name
   fputc (0, destfile);                          // 0x1d = 0

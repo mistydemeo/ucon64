@@ -27,28 +27,28 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 
-void ucon64_bottom(void)
+void
+ucon64_bottom (void)
 {
 
-  html2gui_br();
-  html2gui_img(trans_1x3_xpm,0,0,0);
-  html2gui_br();  
-  html2gui_textarea (ucon64gui.ucon64_output  ,80,30);
-  
-  html2gui_br();
-  html2gui_img(trans_1x3_xpm,0,0,0);
-  html2gui_br();  
-  html2gui_textarea (ucon64gui.cmd  ,80,1);
-  html2gui_br();
+  html2gui_br ();
+  html2gui_img (trans_1x3_xpm, 0, 0, 0);
+  html2gui_br ();
+  html2gui_textarea (ucon64gui.ucon64_output, 80, 30);
+
+  html2gui_br ();
+  html2gui_img (trans_1x3_xpm, 0, 0, 0);
+  html2gui_br ();
+  html2gui_textarea (ucon64gui.cmd, 80, 1);
+  html2gui_br ();
   html2gui_img (icon_16x16_xpm, 48, 48, 0);
 
   html2gui_ ("uCON64gui "
 #ifdef __GTK_GUI__
-  "(GTK) "
+             "(GTK) "
 #endif
-"0.1.0 2002 by NoisyB "
-  );
-  html2gui_a ("http://ucon64.sf.net");
+             "0.1.0 2002 by NoisyB ");
+  html2gui_a ("http://ucon64.sf.net", _blank);
 
 }
 
@@ -59,48 +59,48 @@ ucon64_system (void)
   FILE *fh;
   char buf[4096];
 
-  switch(ucon64gui.console)
-  {
+  switch (ucon64gui.console)
+    {
     case ucon64_SNES:
-      strcat(ucon64gui.cmd," -snes");
-    break;
-    
+      strcat (ucon64gui.cmd, " -snes");
+      break;
+
     default:
-    break;
-  }
+      break;
+    }
 
 //TODO pipe? ucon64gui.ucon64_output
 //  system (ucon64gui.cmd);
-  if(!(fh=popen(ucon64gui.cmd,"r")))
-  {
-    strcpy(ucon64gui.ucon64_output,"");
-    return;
-  }
-  
+  if (!(fh = popen (ucon64gui.cmd, "r")))
+    {
+      strcpy (ucon64gui.ucon64_output, "");
+      return;
+    }
+
   while (fgets (buf, sizeof buf, fh) != NULL)
-  {
-    strcat(ucon64gui.ucon64_output,buf);
-  }  
-  pclose(fh);
+    {
+      strcat (ucon64gui.ucon64_output, buf);
+    }
+  pclose (fh);
 }
 
 void
 ucon64_rom (void)
 {
-  html2gui_file ("Select ROM", ucon64gui.rom);
+  html2gui_input_file ("Select ROM", ucon64gui.rom);
 }
 
 void
 ucon64_file (void)
 {
 //_text nutzen?
-  html2gui_file ("Select ROM", ucon64gui.file);
+  html2gui_input_file ("Select ROM", ucon64gui.file);
 }
 
 void
 ucon64_info (void)
 {
-  strcpy(ucon64gui.rom, html2gui_filename);
+  strcpy (ucon64gui.rom, html2gui_filename);
   sprintf (ucon64gui.cmd, "ucon64 \"%s\"", ucon64gui.rom);
   ucon64_system ();
 }
@@ -115,7 +115,7 @@ ucon64_ls (void)
 void
 ucon64_e (void)
 {
-  strcpy(ucon64gui.rom, html2gui_filename);
+  strcpy (ucon64gui.rom, html2gui_filename);
   sprintf (ucon64gui.cmd, "ucon64 -e \"%s\"", ucon64gui.rom);
   ucon64_system ();
 }
@@ -125,7 +125,7 @@ void
 ucon64_root (void)
 {
 
-ucon64gui.console = ucon64_UNKNOWN;
+  ucon64gui.console = ucon64_UNKNOWN;
 
 //<html>
   html2gui_html (640, 400, 0);
@@ -133,15 +133,19 @@ ucon64gui.console = ucon64_UNKNOWN;
   html2gui_title ("ucon64gui", icon_xpm);
 
 
-  html2gui_button (ucon64_rom, "Open ROM", "Open ROM", 100, 50, open_xpm);
-  html2gui_button (ucon64_e, "Emulate", "Run ROM in an emulator", 100, 50,NULL);
+  html2gui_input_submit (ucon64_rom, "Open ROM", "Open ROM", 100, 50,
+                         open_xpm);
+  html2gui_input_submit (ucon64_e, "Emulate", "Run ROM in an emulator", 100,
+                         50, NULL);
 
-  html2gui_img (trans_1x3_xpm,0,0,0);
-   html2gui_br();
+  html2gui_img (trans_1x3_xpm, 0, 0, 0);
+  html2gui_br ();
 
-  html2gui_("Miscellaneous options");
-  html2gui_br();
-  html2gui_button (ucon64_info, "Show info", "Click here to see information about ROM", 10, 10, NULL);
+  html2gui_ ("Miscellaneous options");
+  html2gui_br ();
+  html2gui_input_submit (ucon64_info, "Show info",
+                         "Click here to see information about ROM", 10, 10,
+                         NULL);
 
 /*
   -e            emulate/run ROM (see $HOME/.ucon64rc for more)
@@ -176,21 +180,23 @@ ucon64gui.console = ucon64_UNKNOWN;
   -nppf		change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION
   -idppf	change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ
 */
-  html2gui_br();
-  html2gui_img (trans_1x3_xpm,0,0,0);
+  html2gui_br ();
+  html2gui_img (trans_1x3_xpm, 0, 0, 0);
 //  html2gui_hr ();
-  html2gui_("Console specific options");
-  html2gui_br();
-  html2gui_button (ucon64_snes, "Super Nintendo", "Options for Super Nintendo", 10, 10, NULL);
+  html2gui_ ("Console specific options");
+  html2gui_br ();
+  html2gui_input_submit (ucon64_snes, "Super Nintendo",
+                         "Options for Super Nintendo", 10, 10, NULL);
 
-  html2gui_br();
-  html2gui_img (trans_1x3_xpm,0,0,0);
+  html2gui_br ();
+  html2gui_img (trans_1x3_xpm, 0, 0, 0);
 //  html2gui_hr ();
-  html2gui_("Backup unit specific options");
-  html2gui_br();
-  html2gui_button (ucon64_swc, "Super Wild Card", "Options for Super Wild Card", 10, 10, NULL);
+  html2gui_ ("Backup unit specific options");
+  html2gui_br ();
+  html2gui_input_submit (ucon64_swc, "Super Wild Card",
+                         "Options for Super Wild Card", 10, 10, NULL);
 
-  ucon64_bottom();
+  ucon64_bottom ();
 
 //</html>
 }
@@ -198,13 +204,13 @@ ucon64gui.console = ucon64_UNKNOWN;
 int
 main (int argc, char *argv[])
 {
-  html2gui_start(argc, argv);
+  html2gui_start (argc, argv);
 
-  ucon64_root();
+  ucon64_root ();
 
-  html2gui_end();
+  html2gui_end ();
 
-  return(0);
+  return (0);
 }
 
 

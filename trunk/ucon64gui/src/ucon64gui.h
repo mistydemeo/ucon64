@@ -38,7 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "xpm/icon_16x16.xpm"
 
 #ifndef MAXBUFSIZE
-  #define MAXBUFSIZE 32768
+#define MAXBUFSIZE 32768
 #endif
 
 struct ucon64gui_
@@ -55,31 +55,23 @@ struct ucon64gui_
 ucon64gui;
 
 
-void
-ucon64_root (void);
+void ucon64_root (void);
 
-void ucon64_bottom(void);
+void ucon64_bottom (void);
 
-void
-ucon64_system (void);
+void ucon64_system (void);
 
-void
-ucon64_rom (void);
+void ucon64_rom (void);
 
-void
-ucon64_file (void);
+void ucon64_file (void);
 
-void
-ucon64_info (void);
+void ucon64_info (void);
 
-void
-ucon64_ls (void);
+void ucon64_ls (void);
 
-void
-ucon64_e (void);
+void ucon64_e (void);
 
-void
-ucon64_root (void);
+void ucon64_root (void);
 
 
 #endif /* UCON64GUI_H */

@@ -286,7 +286,7 @@ html2gui_request (const char *uri, const char *query)
     }
 
 //  while ((
-  c = html2gui_getopt (uri, query, long_options, option_index);
+  c = html2gui_getopt (uri, query, long_options, &option_index);
 //  ) != -1)
     {
       switch (c)
@@ -294,17 +294,37 @@ html2gui_request (const char *uri, const char *query)
           case UCON64_SNES:
             ucon64gui.console =  "--snes";
             ucon64gui_snes();
-            break;
+            return;
+
+          case UCON64_GB:
+            ucon64gui.console =  "--gb";
+            ucon64gui_gb();
+            return;
+
+          case UCON64_N64:
+            ucon64gui.console =  "--n64";
+            ucon64gui_n64();
+            return;
+
+          case UCON64_NES:
+            ucon64gui.console =  "--nes";
+            ucon64gui_nes();
+            return;
+
+          case UCON64_XCDRW:
+            ucon64gui.console =  "";
+            ucon64gui_cdrw();
+            return;
 
           case UCON64_ROOT:
             ucon64gui.console = "";
             ucon64gui_root();
-            break;
+            return;
             
           case UCON64_CONFIG:
             ucon64gui.console = "";
             ucon64gui_config();
-            break;
+            return;
 
           default:
 #if 0
@@ -322,9 +342,7 @@ html2gui_request (const char *uri, const char *query)
   printf ("system (%s);\n\n", buf);
   fflush (stdout);
 
-//              ucon64gui.sub = 1;
-//            ucon64gui_output(ucon64gui.ucon64_output);
-//  ucon64gui_root();
+  ucon64gui_output(ucon64gui.ucon64_output);
           break;
         }
     }

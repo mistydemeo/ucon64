@@ -555,8 +555,12 @@ ucon64_parport_probe (unsigned int port)
     users to run all code without being root (of course with the uCON64
     executable setuid root). Anyone a better idea?
   */
+#if     defined  __linux__ || defined __FreeBSD__
 #ifdef  __linux__
   if (iopl (3) == -1)
+#else
+  if (i386_iopl (3) == -1)
+#endif
     {
       fprintf (stderr, "Could not set the I/O privilege level to 3\n"
                        "(This program needs root privileges)\n");
@@ -948,7 +952,7 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
   ucon64.rom = filename;
   ucon64.type = (quickftell (ucon64.rom) <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
   ucon64_flush (&rominfo);
-  
+
   result = ucon64_init (ucon64.rom, &rominfo);
     switch (mode)
       {
@@ -1011,12 +1015,13 @@ ucon64_ls (const char *path, int mode)
         strcpy (dir, path);
       }
 
-  if (!dir[0]) getcwd (dir, FILENAME_MAX);
-    
+  if (!dir[0])
+    getcwd (dir, FILENAME_MAX);
+
   if ((dp = opendir (dir)) == NULL)
     return -1;
 
-  getcwd (old_dir,FILENAME_MAX); // remember current dir 
+  getcwd (old_dir,FILENAME_MAX); // remember current dir
   chdir (dir);
 
   while ((ep = readdir (dp)))

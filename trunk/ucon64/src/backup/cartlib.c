@@ -348,7 +348,7 @@ EraseNintendoFlashBlocks (u32 StartAddr, u32 BlockCount)
       while ((j & 0x80) == 0);
       WriteFlash (i, SHARP28F_BLOCKERASE);      // Erase a 64k byte block
       WriteFlash (i, SHARP28F_CONFIRM); // Comfirm block erase
-      ucon64_gauge (&rom, starttime, (k + 1) * 64 * 1024, BlockCount * 64 * 1024);
+      ucon64_gauge (starttime, (k + 1) * 64 * 1024, BlockCount * 64 * 1024);
     }
 
   do
@@ -432,7 +432,7 @@ EraseNonTurboFABlocks (u32 StartAddr, u32 BlockCount)
         }
       else
         break;
-      ucon64_gauge (&rom, starttime, (k + 1) * 128 * 1024,
+      ucon64_gauge (starttime, (k + 1) * 128 * 1024,
                      BlockCount * 128 * 1024);
     }
 
@@ -523,7 +523,7 @@ EraseTurboFABlocks (u32 StartAddr, u32 BlockCount)
         }
       else
         break;
-      ucon64_gauge (&rom, starttime, (k + 1) * 256 * 1024,
+      ucon64_gauge (starttime, (k + 1) * 256 * 1024,
                      BlockCount * 256 * 1024);
     }
 

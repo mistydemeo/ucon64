@@ -57,6 +57,17 @@ IO_Tuple;
 #define PARPORT_STATUS  1       // input
 #define PARPORT_CONTROL 2
 
+/*
+  defines for unknown backup units
+*/
+extern char *unknown_bu_title;
+#define unknown_bu_HEADER_START 0
+#define unknown_bu_HEADER_LEN 0
+
+extern char *unknown_bu512_title;
+#define unknown_bu512_HEADER_START 0
+#define unknown_bu512_HEADER_LEN 512
+
 // GameGenie "codec" routines
 extern char hexDigit (int value);
 extern int hexValue (char digit);
@@ -75,18 +86,18 @@ extern unsigned long CalculateBufferCRC (unsigned int count, unsigned long crc,
 extern unsigned long fileCRC32 (char *filename, long start);   // calculate CRC32 of filename beginning from start
 
 //ucon64 specific wrapper for misc.c/filebackup()
-extern char *ucon64_fbackup (struct ucon64_ *rom, char *filename);
+extern char *ucon64_fbackup (char *filename);
 
 extern size_t filepad (char *filename, long start, long unit);//pad a ROM in Mb
 extern long filetestpad (char *filename); //test if a ROM is padded
 
-extern int testsplit (char *filename);//test if a ROM is splitted
+extern int ucon64_testsplit (char *filename);//test if a ROM is splitted
 
 extern unsigned int parport_probe (unsigned int parport);
 
 //ucon64 specific wrapper for misc.c/gauge()
-extern int ucon64_gauge (struct ucon64_ *rom, time_t init_time, long pos, long size);
+extern int ucon64_gauge (time_t init_time, long pos, long size);
 
-extern int trackmode_probe (long imagesize);
+extern int ucon64_trackmode_probe (long imagesize);
 
 #endif // #ifndef UCON64_MISC_H

@@ -20,11 +20,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef SMD_H
 #define SMD_H
-#define smd_TITLE "Super Com Pro (HK)/Super Magic Drive/SMD\n" \
-                   "19XX Front Far East/FFE http://www.front.com.tw"
+extern char *smd_title;
 
 #ifdef BACKUP
-extern int smd_usage (int argc, char *argv[]);
+extern void smd_usage (void);
 extern int smd_read_rom (char *filename, unsigned int parport);
 extern int smd_write_rom (char *filename, unsigned int parport);
 extern int smd_read_sram (char *filename, unsigned int parport);

@@ -28,12 +28,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ips.h"
 
+void
+ips_usage (void)
+{
+  printf ("  " OPTION_S "i            apply IPS patch (<=1.2); $FILE=PATCHFILE\n"
+           "  "OPTION_LONG_S "mki          create IPS patch; $FILE=CHANGED_ROM\n");
+}
+
+
 /*
 
   IPS v1.0 for UNIX by madman
 
 */
-
 int
 ips_main (int argc, char *argv[])
 {
@@ -352,10 +359,3 @@ cips (char *name, char *option2)
 
 
 
-int
-ips_usage (int argc, char *argv[])
-{
-  printf ("  -i            apply IPS patch (<=1.2); $FILE=PATCHFILE\n"
-           "  -mki          create IPS patch; $FILE=CHANGED_ROM\n");
-  return 0;
-}

@@ -20,10 +20,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef FIG_H
 #define FIG_H
-#define fig_TITLE "Super Pro Fighter (Q)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)/FIG\n1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw"
+extern char *fig_title;
 
 #ifdef BACKUP
-extern int fig_usage (int argc, char *argv[]);
+extern void fig_usage (void);
 #endif // BACKUP
 
 #define fig_HEADER_START 0

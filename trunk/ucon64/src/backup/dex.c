@@ -35,6 +35,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define TAP 1
 #define DELAY 4
 
+char *dex_title = "DexDrive\n"
+                  "InterAct http://www.dexdrive.de";
 
 
 char *
@@ -71,17 +73,16 @@ get_perm ()
   return psx_obtain_io_permission (BASE_ADDR);
 }
 
-int
-dex_usage (int argc, char *argv[])
+void
+dex_usage (void)
 {
 #if 0
-    printf ("%s\n", dex_TITLE);
+    printf ("%s\n", dex_title);
 
 
   printf
     ("TODO:  -xdex    send/receive SRAM to/from DexDrive; $FILE=PORT\n"
      "		receives automatically when $ROM(=SRAM) does not exist\n");
 #endif
-  return 0;
 }
 #endif // BACKUP

@@ -27,6 +27,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "bsl.h"
 
+
+void
+bsl_usage (void)
+{
+  printf("  " OPTION_S "b            apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE\n");
+}
+
+
 int
 bsl (char *name, char *option2)
 {
@@ -119,11 +127,5 @@ bsl (char *name, char *option2)
 }
 
 
-int
-bsl_usage (int argc, char *argv[])
-{
-  printf ("  -b            apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE\n");
-  return 0;
-}
 
 //TODO make bsl patch

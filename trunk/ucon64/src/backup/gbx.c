@@ -31,6 +31,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "gbx.h"
 
+char *gbx_title = "GameBoy Xchanger/GBDoctor\n"
+                  "19XX Bung Enterprises Ltd http://www.bung.com.hk";
+
+
 /* Modified version of gbt15.c - (C) Bung Enterprises */
 
 
@@ -1543,7 +1547,7 @@ write_cart_from_file (void)
           return -1;
         }
       nbytes += 16 * 1024;
-      ucon64_gauge (&rom, starttime, nbytes, filesize);
+      ucon64_gauge (starttime, nbytes, filesize);
     }
   //printf("write cart ok\n");
   fclose (fptr);
@@ -1571,7 +1575,7 @@ write_cart_from_file (void)
           return -1;
         }
       nbytes += 16 * 1024;
-      ucon64_gauge (&rom, starttime, nbytes, filesize);
+      ucon64_gauge (starttime, nbytes, filesize);
     }
   // printf("verify cart ok\n");
   fclose (fptr);
@@ -1627,7 +1631,7 @@ backup_rom (void)               //no_page=how many 32K
           return -1;
         }
       nbytes += 16 * 1024;
-      ucon64_gauge (&rom, starttime, nbytes, totalbytes);
+      ucon64_gauge (starttime, nbytes, totalbytes);
     }
   fclose (fptr);
 
@@ -2254,7 +2258,7 @@ read_all_sram_to_file (void)
             }
         }
       nbytes += 8 * 1024;
-      ucon64_gauge (&rom, starttime, nbytes, totalbytes);
+      ucon64_gauge (starttime, nbytes, totalbytes);
     }
   fclose (fptr);
 
@@ -2314,7 +2318,7 @@ read_8k_sram_to_file (void)
       }
   }
   nbytes += 8 * 1024;           // should this be in loop? (dbjh)
-  ucon64_gauge (&rom, starttime, nbytes, 8 * 1024);
+  ucon64_gauge (starttime, nbytes, 8 * 1024);
 
   if (write_sram_xxk (0x2000) != 0)
     {
@@ -2371,7 +2375,7 @@ write_all_sram_from_file (void)
           idx = idx + 256;
         }
       nbytes += 8 * 1024;
-      ucon64_gauge (&rom, starttime, nbytes, totalbytes);
+      ucon64_gauge (starttime, nbytes, totalbytes);
     }
   fclose (fptr);
 
@@ -2435,7 +2439,7 @@ write_8k_sram_from_file (void)
       }
   }
   nbytes += 8 * 1024;           // should this be in loop? (dbjh)
-  ucon64_gauge (&rom, starttime, nbytes, 8 * 1024);
+  ucon64_gauge (starttime, nbytes, 8 * 1024);
 
   printf ("\nwrite sram 64kbits at bank %d ok\n", sram_bank_num);
 
@@ -2624,22 +2628,20 @@ gbx_write_sram (char *filename, unsigned int parport, int bank)
   return 0;
 }
 
-int
-gbx_usage (int argc, char *argv[])
+void
+gbx_usage (void)
 {
-  printf (gbx_TITLE "\n"
-          "  -xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
+  printf ("%s\n"
+          "  " OPTION_LONG_S "xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
           "                receives automatically when $ROM does not exist\n"
-          "  -xgbxs        send/receive SRAM to/from GB Xchanger; $FILE=PORT\n"
+          "  " OPTION_LONG_S "xgbxs        send/receive SRAM to/from GB Xchanger; $FILE=PORT\n"
           "                receives automatically when $ROM(=SRAM) does not exist\n"
-          "  -xgbxb <n>    send/receive 64kbits SRAM to/from GB Xchanger bank n\n"
+          "  " OPTION_LONG_S "xgbxb <n>    send/receive 64kbits SRAM to/from GB Xchanger bank n\n"
           "                n can be a number from 0 to 15\n"
           "                $FILE=PORT; receives automatically when $ROM does not exist\n"
-          "\n"
           "                You only need to specify PORT if uCON64 doesn't detect the\n"
           "                (right) parallel port. If that is the case give a hardware\n"
           "                address, for example:\n"
-          "                ucon64 -xgbx \"Pokemon (Green).gb\" 0x378\n");
-  return 0;
+          "                ucon64 " OPTION_LONG_S "xgbx \"Pokemon (Green).gb\" 0x378\n", gbx_title);
 }
 #endif // BACKUP

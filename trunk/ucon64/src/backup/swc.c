@@ -46,6 +46,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define BUFFERSIZE      8192                    // don't change, only 8192 works!
 #define HEADERSIZE      512                     // SWC header is 512 bytes
 
+char *swc_title = "Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n"
+                  "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw";
+
+
 static void init_io (unsigned int port);
 static void checkabort (int status);
 static void send_block (unsigned short address, unsigned char *buffer, int len);
@@ -396,7 +400,7 @@ wait_for_ready (void)
 void
 checkabort (int status)
 {
-  if (((!rom.frontend) ? kbhit () : 0) && getch () == 'q')
+  if (((!ucon64.frontend) ? kbhit () : 0) && getch () == 'q')
     {
       puts ("\nProgram aborted");
       exit (status);
@@ -481,7 +485,7 @@ swc_read_rom (char *filename, unsigned int parport)
               fwrite (buffer, 1, BUFFERSIZE, file);
 
               bytesreceived += BUFFERSIZE;
-              ucon64_gauge (&rom, starttime, bytesreceived, size);
+              ucon64_gauge (starttime, bytesreceived, size);
               checkabort (2);
             }
         }
@@ -495,7 +499,7 @@ swc_read_rom (char *filename, unsigned int parport)
           fwrite (buffer, 1, BUFFERSIZE, file);
 
           bytesreceived += BUFFERSIZE;
-          ucon64_gauge (&rom, starttime, bytesreceived, size);
+          ucon64_gauge (starttime, bytesreceived, size);
           checkabort (2);
         }
     }
@@ -563,7 +567,7 @@ swc_write_rom (char *filename, unsigned int parport)
       blocksdone++;
 
       bytessend += bytesread;
-      ucon64_gauge (&rom, starttime, bytessend, fstate.st_size);
+      ucon64_gauge (starttime, bytessend, fstate.st_size);
       checkabort (2);
     }
 
@@ -632,7 +636,7 @@ swc_read_sram (char *filename, unsigned int parport)
       fwrite (buffer, 1, BUFFERSIZE, file);
 
       bytesreceived += BUFFERSIZE;
-      ucon64_gauge (&rom, starttime, bytesreceived, 32 * 1024);
+      ucon64_gauge (starttime, bytesreceived, 32 * 1024);
       checkabort (2);
     }
 
@@ -685,7 +689,7 @@ swc_write_sram (char *filename, unsigned int parport)
       address++;
 
       bytessend += bytesread;
-      ucon64_gauge (&rom, starttime, bytessend, size);
+      ucon64_gauge (starttime, bytessend, size);
       checkabort (2);
     }
 
@@ -695,24 +699,23 @@ swc_write_sram (char *filename, unsigned int parport)
   return 0;
 }
 
-int
-swc_usage (int argc, char *argv[])
+void
+swc_usage (void)
 {
-  printf (swc_TITLE "\n"
-          "  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
+  printf ("%s\n"
+          "  " OPTION_LONG_S "xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
           "                receives automatically when $ROM does not exist\n"
           "                Press q to abort ^C will cause invalid state of backup unit\n"
-          "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
+          "  " OPTION_LONG_S "xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
           "                receives automatically when $ROM(=SRAM) does not exist\n"
           "                Press q to abort ^C will cause invalid state of backup unit\n"
           "\n"
           "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
           "      parallel port. If that is the case give a hardware address:\n"
-          "      ucon64 -xswc \"Super Mario World (U).swc\" 0x378\n"
+          "      ucon64 " OPTION_LONG_S "xswc \"Super Mario World (U).swc\" 0x378\n"
           "      In order to connect the Super Wild Card to a PC's parallel port you\n"
           "      need a standard bidirectional parallel cable like for the most backup\n"
-          "      units\n");
-  return 0;
+          "      units\n", swc_title);
 }
 
 #endif // BACKUP

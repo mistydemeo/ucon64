@@ -21,7 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef GBX_H
 #define GBX_H
-#define gbx_TITLE "GameBoy Xchanger/GBDoctor\n19XX Bung Enterprises Ltd http://www.bung.com.hk"
+
+extern char *gbx_title;
+
 #define gbx_HEADER_START 0
 #define gbx_HEADER_LEN 0
 
@@ -30,7 +32,7 @@ extern int gbx_read_rom (char *filename, unsigned int parport);
 extern int gbx_write_rom (char *filename, unsigned int parport);
 extern int gbx_read_sram (char *filename, unsigned int parport, int bank);
 extern int gbx_write_sram (char *filename, unsigned int parport, int bank);
-extern int gbx_usage (int argc, char *argv[]);
+extern void gbx_usage (void);
 #endif // BACKUP
 
 #endif /* GBX_H */

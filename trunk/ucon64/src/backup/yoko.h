@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef YOKO_H
 #define YOKO_H
 #define yoko_TITLE "YOKO backup unit"
+extern char *yoko_title;
 
 #define yoko_HEADER_START 0
 #define yoko_HEADER_LEN 0

@@ -29,14 +29,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "fig.h"
 
-int
-fig_usage (int argc, char *argv[])
+char *fig_title = "Super Pro Fighter (Q)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)/FIG\n"
+                  "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw";
+
+void
+fig_usage (void)
 {
 #if 0
-    printf (fig_TITLE "\n"
+    printf (fig_title "\n"
     "TODO:  -xfig	send/receive ROM to/from *Pro Fighter* /(all)FIG; $FILE=PORT\n"
      "		receives automatically when $ROM does not exist\n");
 #endif
-  return 0;
 }
 #endif // BACKUP

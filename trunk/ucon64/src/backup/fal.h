@@ -21,7 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef FAL_H
 #define FAL_H
-#define fal_TITLE "Flash Advance Linker\n2001 Visoly http://www.visoly.com"
+extern char *fal_title;
+
 #define fal_HEADER_START 0
 #define fal_HEADER_LEN 0
 
@@ -30,7 +31,7 @@ extern int fal_read_rom (char *filename, unsigned int parport, int size);
 extern int fal_write_rom (char *filename, unsigned int parport, int size);
 extern int fal_read_sram (char *filename, unsigned int parport, int bank);
 extern int fal_write_sram (char *filename, unsigned int parport, int bank);
-extern int fal_usage (int argc, char *argv[]);
+extern void fal_usage (void);
 #endif // BACKUP
 
 #endif /* FAL_H */

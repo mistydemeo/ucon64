@@ -33,6 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "fal.h"
 
+char *fal_title = "Flash Advance Linker\n"
+                  "2001 Visoly http://www.visoly.com";
 
 /********************************************************/
 /* Flash Linker Advance                                 */
@@ -602,7 +604,7 @@ BackupSRAM (FILE * fp, int StartOS, int Size)   // 4046f4
             }
           bytesread += 256;
           if ((bytesread & 0x1fff) == 0)        // call ucon64_gauge() after receiving 8kB
-            ucon64_gauge (&rom, starttime, bytesread, size);
+            ucon64_gauge (starttime, bytesread, size);
         }
     }
 }
@@ -647,7 +649,7 @@ RestoreSRAM (FILE * fp, int StartOS)
             }
           byteswritten += 256;
           if ((byteswritten & 0x1fff) == 0)     // call ucon64_gauge() after sending 8kB
-            ucon64_gauge (&rom, starttime, byteswritten, fstate.st_size);
+            ucon64_gauge (starttime, byteswritten, fstate.st_size);
         }
       m++;
     }
@@ -679,7 +681,7 @@ BackupROM (FILE * fp, int SizekW)
         }
       bytesread += 256 << 1;    // 256 words
       if ((bytesread & 0xffff) == 0)    // call ucon64_gauge() after receiving 64kB
-        ucon64_gauge (&rom, starttime, bytesread, size);
+        ucon64_gauge (starttime, bytesread, size);
     }
 }
 
@@ -970,7 +972,7 @@ ProgramNonTurboIntelFlash (FILE * fp)
 
               addr += 16;
               if ((addr & 0x3fff) == 0) // call ucon64_gauge() after sending 32kB
-                ucon64_gauge (&rom, starttime, addr << 1, FileSize);
+                ucon64_gauge (starttime, addr << 1, FileSize);
 
               PPWriteWord (INTEL28F_CONFIRM);   // Comfirm block write
 
@@ -1012,7 +1014,7 @@ ProgramNonTurboIntelFlash (FILE * fp)
         }
 
       printf ("\r                                                                              \r"); // remove last gauge
-      ucon64_gauge (&rom, starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
+      ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
@@ -1106,7 +1108,7 @@ ProgramTurboIntelFlash (FILE * fp)
                 }
               addr += 32;
               if ((addr & 0x3fff) == 0) // call ucon64_gauge() after sending 32kB
-                ucon64_gauge (&rom, starttime, addr << 1, FileSize);
+                ucon64_gauge (starttime, addr << 1, FileSize);
               PPWriteWord (INTEL28F_CONFIRM);   // Comfirm block write
               PPWriteWord (INTEL28F_CONFIRM);   // Comfirm block write
 
@@ -1132,7 +1134,7 @@ ProgramTurboIntelFlash (FILE * fp)
         }
 
       printf ("\r                                                                              \r"); // remove last gauge
-      ucon64_gauge (&rom, starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
+      ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
       WriteFlash (1, INTEL28F_READARRAY);
@@ -1198,11 +1200,11 @@ ProgramSharpFlash (FILE * fp)
 
           j = GetFileByte (fp);
           if ((addr & 0x3fff) == 0)     // call ucon64_gauge() after sending 32kB
-            ucon64_gauge (&rom, starttime, addr << 1, FileSize);
+            ucon64_gauge (starttime, addr << 1, FileSize);
         }
 
       printf ("\r                                                                              \r"); // remove last gauge
-      ucon64_gauge (&rom, starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
+      ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
@@ -1729,27 +1731,26 @@ fal_write_sram (char *filename, unsigned int parport, int bank)
   return -1;
 }
 
-int
-fal_usage (int argc, char *argv[])
+void
+fal_usage (void)
 {
-  printf (fal_TITLE "\n"
-          "  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
+  printf ("%s\n"
+          "  " OPTION_LONG_S "xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
           "                receives automatically when $ROM does not exist\n"
-          "  -xfalc <n>    specify chip size in mbits of ROM in Flash Advance Linker when\n"
+          "  " OPTION_LONG_S "xfalc <n>    specify chip size in mbits of ROM in Flash Advance Linker when\n"
           "                receiving. n can be 8,16,32,64,128 or 256. default is 32\n"
 #if 0
-          "  -xfalm        use SPP mode, default is EPP\n"
+          "  " OPTION_LONG_S "xfalm        use SPP mode, default is EPP\n"
 #endif
-          "  -xfals        send/receive SRAM to/from Flash Advance Linker; $FILE=PORT\n"
+          "  " OPTION_LONG_S "xfals        send/receive SRAM to/from Flash Advance Linker; $FILE=PORT\n"
           "                receives automatically when $ROM(=SRAM) does not exist\n"
-          "  -xfalb <n>    send/receive SRAM to/from Flash Advance Linker bank n\n"
+          "  " OPTION_LONG_S "xfalb <n>    send/receive SRAM to/from Flash Advance Linker bank n\n"
           "                n can be 1, 2, 3 or 4\n"
           "                $FILE=PORT; receives automatically when SRAM does not exist\n"
           "\n"
           "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
           "      parallel port. If that is the case give a hardware address:\n"
-          "      ucon64 -xfal \"0087 - Mario Kart Super Circuit (U).gba\" 0x378\n");
-
-  return 0;
+          "      ucon64 " OPTION_LONG_S "xfal \"0087 - Mario Kart Super Circuit (U).gba\" 0x378\n"
+          , fal_title);
 }
 #endif // BACKUP

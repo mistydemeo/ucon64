@@ -24,5 +24,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern int ips_main (int argc, char *argv[]);
 extern int ips (char *name, char *option2);
 extern int cips (char *name, char *option2);
-extern int ips_usage (int argc, char *argv[]);
+extern void ips_usage (void);
 #endif /* IPS_H */

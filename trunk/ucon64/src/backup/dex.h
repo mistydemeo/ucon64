@@ -20,13 +20,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef DEX_H
 #define DEX_H
-#define dex_TITLE "DexDrive\nInterAct http://www.dexdrive.de"
+extern char *dex_title;
 
 #define dex_HEADER_START 0
 #define dex_HEADER_LEN 0
 
 #ifdef BACKUP
-extern int dex_usage (int argc, char *argv[]);
+extern void dex_usage (void);
 extern char *read_block (int block_num, char *data);
 extern int write_block (int block_num, char *data);
 extern char *read_frame (int frame, char *data);

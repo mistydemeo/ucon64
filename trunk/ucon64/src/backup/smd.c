@@ -62,6 +62,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "smd.h"
 
+char *smd_title = "Super Com Pro (HK)/Super Magic Drive/SMD\n"
+                  "19XX Front Far East/FFE http://www.front.com.tw";
+
+
 #ifndef __BEOS__
 typedef unsigned char uint8;
 typedef unsigned short int uint16;
@@ -468,7 +472,7 @@ load_smd (char *filename)
   for (count = 0; count < header[0]; count += 1)
     {
 //        printf("Sending block %d of %d\r", 1+count, header[0]);
-      ucon64_gauge (&rom, starttime, (1 + count) * 16384, header[0] * 16384);
+      ucon64_gauge (starttime, (1 + count) * 16384, header[0] * 16384);
       fflush (stdout);
       smd_send_command (0x05, count, 0x00);
       smd_send_command (0x00, 0x8000, 0x4000);
@@ -540,7 +544,7 @@ save_smd (char *filename)
 
   for (count = 0; count < header[0]; count += 1)
     {
-      ucon64_gauge (&rom, starttime, (1 + count) * 16384, header[0] * 16384);
+      ucon64_gauge (starttime, (1 + count) * 16384, header[0] * 16384);
 //        printf("Recieving block %d of %d\r", 1+count, header[0]);
       fflush (stdout);
       smd_send_command (0x05, count, 0x00);
@@ -584,13 +588,13 @@ load_sram (char *filename)
   starttime = time (NULL);
 
 
-  ucon64_gauge (&rom, starttime, 0x4000, 0x8000);
+  ucon64_gauge (starttime, 0x4000, 0x8000);
   fflush (stdout);
   smd_send_command (0x00, 0x4000, 0x4000);
   fread (block, 0x4000, 1, fd);
   smd_send_block (0x4000, block);
 
-  ucon64_gauge (&rom, starttime, 0x8000, 0x8000);
+  ucon64_gauge (starttime, 0x8000, 0x8000);
   fflush (stdout);
   smd_send_command (0x00, 0x8000, 0x4000);
   fread (block, 0x4000, 1, fd);
@@ -637,14 +641,14 @@ save_sram (char *filename)
   starttime = time (NULL);
 
 //    printf("Saving SRAM block 1\r");
-  ucon64_gauge (&rom, starttime, 0x4000, 0x8000);
+  ucon64_gauge (starttime, 0x4000, 0x8000);
   fflush (stdout);
   smd_send_command (0x01, 0x4000, 0x4000);
   smd_recieve_block (0x4000, block);
   fwrite (block, 0x4000, 1, fd);
 
 //    printf("Saving SRAM block 2\r");
-  ucon64_gauge (&rom, starttime, 0x8000, 0x8000);
+  ucon64_gauge (starttime, 0x8000, 0x8000);
   fflush (stdout);
   smd_send_command (0x01, 0x8000, 0x4000);
   smd_recieve_block (0x4000, block);
@@ -693,17 +697,15 @@ dump_bios (char *filename)
   return 1;
 }
 
-int
-smd_usage (int argc, char *argv[])
+void
+smd_usage (void)
 {
 
-    printf (smd_TITLE "\n"
-    "  -xsmd         send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT\n"
+    printf ("%s\n"
+    "  " OPTION_LONG_S "xsmd         send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT\n"
      "                receives automatically when $ROM does not exist\n"
-     "  -xsmds        send/receive SRAM to/from Super Magic Drive/SMD; $FILE=PORT\n"
-     "                receives automatically when $ROM(=SRAM) does not exist\n");
-
-  return 0;
+     "  " OPTION_LONG_S "xsmds        send/receive SRAM to/from Super Magic Drive/SMD; $FILE=PORT\n"
+     "                receives automatically when $ROM(=SRAM) does not exist\n", smd_title);
 }
 
 int

@@ -22,5 +22,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define APS_H
 extern int n64aps_main (int argc, char *argv[]);
 extern int n64caps_main (int argc, char *argv[]);
-extern int aps_usage (int argc, char *argv[]);
+extern void aps_usage (void);
 #endif

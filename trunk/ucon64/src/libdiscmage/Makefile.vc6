@@ -8,6 +8,9 @@ CFLAGS=$(CFLAGS) /DDLOPEN
 !endif
 
 LIBNAME=discmage
+# SHAME ON YOU!
+#OBJECTS=libdm_misc.obj dllinit.obj misc.obj misc_wav.obj format/format.obj format/cdi.obj \
+#        format/nero.obj format/cue.obj format/toc.obj format/other.obj
 OBJECTS=libdm_misc.obj dllinit.obj misc.obj format/format.obj format/cdi.obj \
         format/nero.obj format/cue.obj format/toc.obj format/other.obj
 !ifdef USE_ZLIB
@@ -62,6 +65,7 @@ format/nero.obj: format/nero.h $(LIBDM_STD_H)
 format/cue.obj: format/cue.h $(LIBDM_STD_H)
 format/toc.obj: format/toc.h $(LIBDM_STD_H)
 format/other.obj: format/other.h $(LIBDM_STD_H)
+misc_wav.obj: $(LIBDM_STD_H)
 dllinit.obj: $(LIBDM_STD_H)
 misc.obj: misc.h dxedll_priv.h
 misc_z.obj: misc_z.h misc.h dxedll_priv.h

@@ -158,7 +158,7 @@ md_read_rom (const char *filename, unsigned int parport, int size)
     size = 64 * MBIT;
 #endif
 
-  printf ("Receive: %d Bytes (%.4f Mb)\n", size * MBIT, (float) size);
+  printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   blocksleft = size >> 8;
   eep_reset ();
@@ -193,7 +193,7 @@ md_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int fsize, address = 0, bytessend = 0;
+  int size, address = 0, bytesread, bytessend = 0;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
   (void) write_rom_by_byte;
@@ -210,8 +210,8 @@ md_write_rom (const char *filename, unsigned int parport)
     }
   ttt_init_io (parport);
 
-  fsize = q_fsize (filename);
-  printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
+  size = q_fsize (filename);
+  printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   starttime = time (NULL);
   eep_reset ();
@@ -219,15 +219,15 @@ md_write_rom (const char *filename, unsigned int parport)
   if ((md_id == 0xb0d0) || (md_id == 0x8917))   // Sharp 32M, Intel 64J3
     {
       eep_reset ();
-      while (fread (buffer, 1, 0x4000, file))
+      while ((bytesread = fread (buffer, 1, 0x4000, file)))
         {
           mem_swap_b (buffer, 0x4000);
           if ((((address & 0xffff) == 0) && (md_id == 0xb0d0)) ||
               (((address & 0x1ffff) == 0) && (md_id == 0x8917)))
             ttt_erase_block (address);
           write_block (&address, buffer);
-          bytessend += 0x4000;
-          ucon64_gauge (starttime, bytessend, fsize);
+          bytessend += bytesread;
+          ucon64_gauge (starttime, bytessend, size);
         }
     }
   else
@@ -270,7 +270,7 @@ md_read_sram (const char *filename, unsigned int parport)
     }
   ttt_init_io (parport);
 
-  printf ("Receive: %d Bytes\n", size);
+  printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   if (read_block == ttt_read_ram_w)
     {
@@ -309,7 +309,7 @@ md_write_sram (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int size, bytessend = 0, address = 0;
+  int size, bytesread, bytessend = 0, address = 0;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_ram_by_byte; // write_ram_by_page
   (void) write_ram_by_page;
@@ -327,13 +327,13 @@ md_write_sram (const char *filename, unsigned int parport)
   ttt_init_io (parport);
 
   size = q_fsize (filename);
-  printf ("Send: %d Bytes\n", size);
+  printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   starttime = time (NULL);
-  while (fread (buffer, 1, 0x4000, file))
+  while ((bytesread = fread (buffer, 1, 0x4000, file)))
     {
       write_block (&address, buffer);
-      bytessend += 0x4000;
+      bytessend += bytesread;
       ucon64_gauge (starttime, bytessend, size);
     }
 

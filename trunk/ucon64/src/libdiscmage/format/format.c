@@ -193,8 +193,8 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
       {DM_CDI, cdi_init, cdi_track_init},
       {DM_NRG, nrg_init, nrg_track_init},
 //      {DM_CCD, ccd_init, ccd_track_init},
-      {DM_TOC, toc_init, dm_track_init},
       {DM_CUE, cue_init, dm_track_init},
+      {DM_TOC, toc_init, dm_track_init},
       {DM_OTHER, other_init, dm_track_init},
       {0, NULL, NULL}
     };

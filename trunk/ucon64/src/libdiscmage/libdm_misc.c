@@ -44,6 +44,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifdef  DJGPP                                   // DXE's are specific to DJGPP
 #include "dxedll_priv.h"
 #endif
+#if 0 // SHAME ON YOU!
+#include "misc_wav.h"
+#endif
 
 #ifndef CD_MINS
 #define CD_MINS              74 /* max. minutes per CD, not really a limit */
@@ -239,18 +242,30 @@ dm_get_track_mode_by_id (int id, int8_t *mode, uint16_t *sector_size)
 int
 dm_bcd_to_int (int b)
 {
-  return (b & 0x0F) + 10 * (((b) >> 4) & 0x0F);
+//  return (b & 0x0F) + 10 * (((b) >> 4) & 0x0F);
+  return (b & 15) + ((b & 240) >> 4) * 10;
 }
 
 
 int
 dm_int_to_bcd (int i)
 {
+#if 0
 #if 1
   return i % 10 | ((i / 10) % 10) << 4;
 #else
   return ((i / 10) * 16) + (i % 10);
 #endif
+#else
+  return ((i / 10) << 4) | (i % 10);
+#endif
+}
+
+
+int
+dm_is_bcd (int b)
+{
+  return ((b & 15) < 10) && ((b >> 4) < 10);
 }
 
 
@@ -407,47 +422,6 @@ dm_fdopen (dm_image_t *image, int track_num, const char *mode)
 }
 
 
-static void
-writewavheader (FILE * fh, int track_length)
-{
-  typedef struct
-    {
-      uint8_t magic[4];
-      uint32_t total_length;
-      uint8_t type[4];
-      uint8_t fmt[4];
-      uint32_t header_length;
-      uint16_t format;
-      uint16_t channels;
-      uint32_t samplerate;
-      uint32_t bitrate;
-      uint16_t blockalign;
-      uint16_t bitspersample;
-      uint8_t data[4];
-      uint32_t data_length;
-    } st_wav_header_t;
-
-  st_wav_header_t wav_header;
-  memset (&wav_header, 0, sizeof (st_wav_header_t));
-
-  strcpy ((char *) wav_header.magic, "RIFF");
-  strcpy ((char *) wav_header.type, "WAVE");
-  strcpy ((char *) wav_header.fmt, "fmt ");
-  strcpy ((char *) wav_header.data, "data");
-
-  wav_header.header_length = me2le_32 (16);
-  wav_header.format = me2le_16 (1);
-  wav_header.channels = me2le_16 (2);
-  wav_header.samplerate = me2le_32 (44100);
-  wav_header.bitrate = me2le_32 (176400);
-  wav_header.blockalign = me2le_16 (4);
-  wav_header.bitspersample = me2le_16 (16);
-
-  wav_header.data_length = me2le_32 (track_length * 2352);
-  wav_header.total_length = me2le_32 (wav_header.data_length + 8 + 16 + 12);
-
-  fwrite (&wav_header, 1, sizeof (st_wav_header_t), fh);
-}
 
 
 int
@@ -531,8 +505,10 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
       return -1;
     }
 
+#if 0 // SHAME ON YOU!
   if (!track->mode && flags & DM_WAV)
     writewavheader (fh2, track->track_len);
+#endif
 
   fseek (fh, track->track_start, SEEK_SET); // start of track
   // skip pregap (always?)
@@ -779,6 +755,7 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
   char buf[MAXBUFSIZE];
   st_iso_header_t iso_header;
   FILE *fh = NULL;
+  int result = -1;
 
 #ifndef USE_ANSI_COLOR
   (void) ansi_color;                            // warning remover
@@ -858,7 +835,7 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
       printf ("Track: %d %s", t + 1, buf);
 
       dm_lba_to_msf (track->track_len, &min, &sec, &frames);
-      printf ("\n  %d Sectors, %d:%02d.%02d MSF, %d Bytes (%.4f Mb)",
+      printf ("\n  %d Sectors, %d:%02d/%02d MSF, %d Bytes (%.4f Mb)",
         (int) track->total_len,
         min, sec, frames,
         (int) (track->total_len * track->sector_size),
@@ -868,21 +845,22 @@ dm_nfo (const dm_image_t *image, int verbose, int ansi_color)
 
       if (verbose)
         {
-          printf ("  Pregap/Pause: %d, Start Sector: %d, End Sector: %d, Postgap: %d\n",
+          printf ("  Pregap: %d, Start Sector: %d, End Sector: %d, Postgap: %d\n",
             track->pregap_len,
-            (int) (track->track_start / track->sector_size + track->pregap_len),
-            (int) ((track->track_start / track->sector_size + track->pregap_len) +
-            track->track_len - track->postgap_len - 1),
+            (int) (track->track_start / track->sector_size),
+            (int) ((track->track_start / track->sector_size) + track->total_len),
             track->postgap_len);
 
           dm_lba_to_msf (track->track_len, &min, &sec, &frames);
-          printf ("  Total Time: %d:%02d.%02d MSF, File Start Pos: %d, End Pos: %d\n",
+          printf ("  Total Time: %d:%02d/%02d MSF, File Start Pos: %d, End Pos: %d\n",
             min, sec, frames,
             (int) track->track_start,
             (int) track->track_end);
         }
 
       memset (&iso_header, 0, sizeof (st_iso_header_t));
+      result = -1;
+
       if (track->iso_header_start != -1)
         if ((fh = fopen (image->fname, "rb")))
           if (fread (&iso_header, track->iso_header_start, sizeof (st_iso_header_t), fh))

@@ -1,5 +1,5 @@
 /*
-cue.c - suppert of ISO/BIN Tracks with external cue files
+cue.c - CUE support for libdiscmage
 
 written by 2002 - 2003 NoisyB (noisyb@gmx.net)
 
@@ -32,11 +32,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 const st_track_desc_t cue_desc[] = 
   {
-    {DM_MODE1_2048, "MODE1/2048"}, // MODE2_FORM1
-    {DM_MODE1_2352, "MODE1/2352"},
-    {DM_MODE2_2336, "MODE2/2336"}, // MODE2_FORM_MIX
-    {DM_MODE2_2352, "MODE2/2352"},
-    {DM_AUDIO, "AUDIO"},
+    {DM_MODE1_2048, "MODE1/2048"}, // CD-ROM Mode1 Data (cooked)
+    {DM_MODE1_2352, "MODE1/2352"}, // CD-ROM Mode1 Data (raw)
+    {DM_MODE2_2336, "MODE2/2336"}, // CD-ROM XA Mode2 Data
+    {DM_MODE2_2352, "MODE2/2352"}, // CD-ROM XA Mode2 Data
+    {DM_AUDIO, "AUDIO"},           // Audio/Music (2352)
+#if 0
+    {DM_UNKNOWN, "CDG"},           // Karaoke CD+G (2448)
+    {DM_UNKNOWN, "CDI/2336"},      // CD-I Mode2 Data
+    {DM_UNKNOWN, "CDI/2352"},      // CD-I Mode2 Data
+#endif
     {0, NULL}
   };
 
@@ -53,25 +58,8 @@ cue_get_desc (int id)
 }
 
 
-#if 0
-static struct cue_track_pos
-{
-  int track;
-  unsigned short mode;
-  unsigned short minute;
-  unsigned short second;
-  unsigned short frame;
-}
-cue_current_pos;
-
-
-/* number of tracks on the cd */
-static int nTracks = 0;
-#endif
-
-
 dm_image_t *
-dm_cue_read (dm_image_t *image, const char *cue_cue)
+dm_cue_read (dm_image_t *image, const char *cue_file)
 {
   char buf[MAXBUFSIZE];
 #if 0
@@ -85,19 +73,19 @@ dm_cue_read (dm_image_t *image, const char *cue_cue)
   int t = 0, x = 0;
   FILE *fh = NULL;
 
-  if (!(fh = fopen (cue_cue, "rb")))
-    return NULL; // cue_cue not found
+  if (!(fh = fopen (cue_file, "rb")))
+    return NULL; // cue_file not found
 
-  while (fgets (buf, MAXBUFSIZE, fh))
+  for (; fgets (buf, MAXBUFSIZE, fh); t++)
     {
-      if (strstr (buf, " TRACK ")) // a new track entry
+      if (strstr (buf, " TRACK "))
         {
           dm_track_t *track = (dm_track_t *) &image->track[t];
 
           track->sector_size = track->mode = 0;
             
-          for (x = 0; track_probe[x].sector_size; x++)
-            if (strstr (buf, cue_desc[x].desc))
+          for (x = 0; cue_desc[x].desc; x++)
+            if (stristr (buf, cue_desc[x].desc))
               {
                 dm_get_track_mode_by_id (cue_desc[x].id, &track->mode, &track->sector_size);
                 break;
@@ -108,16 +96,9 @@ dm_cue_read (dm_image_t *image, const char *cue_cue)
               fclose (fh);
               return !t ? NULL : image;
             }
-
-          // get the track indexes
-          while (fgets (buf, MAXBUFSIZE, fh))
-            {
-              if (strstr (buf, "TRACK "))
-                break;
+        }
 #if 0
-
-      /* Track 0 or 1, take the first an get fill the values */
-      if (strncmp (&buf[4], "INDEX ", 6) == 0)
+      else if (strstr (buf, " INDEX "))
         {
           /* check stuff here so if the answer is false the else stuff below won't be executed */
           strncpy (inum, &buf[10], 2);
@@ -136,83 +117,26 @@ dm_cue_read (dm_image_t *image, const char *cue_cue)
               track->frame = (((fps >> 4) * 10) + (fps & 0xf));
             }
         }
-      else if (strncmp (&buf[4], "PREGAP ", 7) == 0)
+      else if (strstr (buf, "PREGAP "))
         {
         }
-      else if (strncmp (&buf[4], "FLAGS ", 6) == 0)
+      else if (strstr (buf, "POSTGAP "))
         {
         }
 #endif
-        }
-      }
     }
-  return 0;
-}
-
-
-int
-cue_init (dm_image_t *image)
-{
-  int t = 0;
-  FILE *fh = NULL;
-  char buf[FILENAME_MAX];
-
-  strcpy (buf, image->fname);
-  set_suffix (buf, ".CUE");
-  if (!dm_cue_read (image, buf)) // read cue cue into dm_image_t
-    {
-      if (!(fh = fopen (image->fname, "rb"))) // no cue; try the image itself
-        return -1;
-    }
-
-#if 1
-  image->sessions =
-  image->tracks =
-  image->session[0] = 1;
-#endif
-
-  for (t = 0; t < image->tracks; t++)
-    {
-      dm_track_t *track = (dm_track_t *) &image->track[t];
-
-      if (!dm_track_init (track, fh))
-        {
-          track->track_len =
-          track->total_len = q_fsize (image->fname) / track->sector_size;
-        }
-      else
-        {
-          fclose (fh);
-          return !t ? (-1) : 0;
-        }
-    }
-
-  image->desc = "ISO/BIN track";
 
   fclose (fh);
-  return 0;
+
+  return image;
 }
 
 
-
-/*
-  NOTE: TOC -> CUE conversion
-  the resulting cue file is only valid if the
-  toc-file was created with cdrdao using the commands 'read-toc'
-  or 'read-cd'. For manually created or edited toc-files the
-  cue file may not be correct. This program just checks for
-  the most obvious toc-file features that cannot be converted to
-  a cue file.
-  Furthermore, if the toc-file contains audio tracks the byte
-  order of the image file will be wrong which results in static
-  noise when the resulting cue file is used for recording
-  (even with cdrdao itself).
-*/
 int
 dm_cue_write (const dm_image_t *image)
 {
   int result = (-1), t = 0;
-        
+
   for (t = 0; t < image->tracks; t++)
     {
 #if     FILENAME_MAX > MAXBUFSIZE
@@ -222,6 +146,7 @@ dm_cue_write (const dm_image_t *image)
 #endif
 //      char buf2[MAXBUFSIZE];
       dm_track_t *track = (dm_track_t *) &image->track[t];
+      int m = 0, s = 0, f = 0;
       FILE *fh = NULL;
 
       strcpy (buf, image->fname);
@@ -243,43 +168,106 @@ dm_cue_write (const dm_image_t *image)
       switch (track->mode)
         {
           case 0: // audio
-            fprintf (fh,
-                     "FILE \"%s\" WAVE\r\n"
-                     "  TRACK %02d %s\r\n",
-                     image->fname, t + 1,
-                     cue_get_desc (track->id));
-
-#if 0
-            if (/* t + 1 > 1 && */
-                track->pregap_len > 0)
-              fprintf (fh, "    PREGAP 00:02:00\r\n");
-#endif
+            // TODO: WAVE, AIFF, ...
+            fprintf (fh, "FILE \"%s\" WAVE\r\n", image->fname);
             break;
 
           case 1: // iso
-          fprintf (fh,
-                   "FILE \"%s\" BINARY\r\n"
-                   "  TRACK %02d %s\r\n",
-                   image->fname, t + 1,
-                   cue_get_desc (track->id));
+            fprintf (fh, "FILE \"%s\" BINARY\r\n", image->fname);
             break;
 
           default: // bin
-          fprintf (fh,
-                   "FILE \"%s\" BINARY\r\n"
-                   "  TRACK %02d %s\r\n",
-                   image->fname, t + 1,
-                   cue_get_desc (track->id));
+            fprintf (fh, "FILE \"%s\" BINARY\r\n", image->fname);
             break;
         }
 
-      fprintf (fh, "    INDEX 01 00:00:00\r\n");
-#if 0
-      if (/* discmage.pregap &&*/ track->mode && t + 1 == image->tracks)   // instead of saving pregap
-        fprintf (fh, "  POSTGAP 00:02:00\r\n");
-#endif
+      fprintf (fh, "  TRACK %02d %s\r\n",
+               t + 1,
+               cue_get_desc (track->id));
+
+      /*
+        You can use the PREGAP command to specify the length of a track
+        pre-gap. CDRWIN internally generates the pre-gap data. No data is
+        consumed from the current data file.
+      */
+      if (track->pregap_len > 0)
+        {
+          dm_lba_to_msf (track->pregap_len, &m, &s, &f);
+          fprintf (fh, "    PREGAP %02d:%02d:%02d\r\n", m, s, f);
+        }
+
+      /*
+        You can use the INDEX command to specify indexes (or
+        subindexes) within a track.
+      */
+      fprintf (fh, "    INDEX 01 00:00:00\r\n"); // default
+
+
+      /*
+        You can use the POSTGAP command to specify the length of a
+        track post-gap. CDRWIN internally generates the post-gap data.
+        No data is consumed from the current data file.
+      */
+      if (track->postgap_len > 0)
+        {
+          dm_lba_to_msf (track->postgap_len, &m, &s, &f);
+          fprintf (fh, "    POSTGAP %02d:%02d:%02d\r\n", m, s, f);
+        }
+
       fclose (fh);
     }
 
   return result;
+}
+
+
+int
+cue_init (dm_image_t *image)
+{
+  int t = 0;
+  FILE *fh = NULL;
+#if 0
+  char buf[FILENAME_MAX];
+  
+  strcpy (buf, image->fname);
+  set_suffix (buf, ".CUE");
+  if (dm_cue_read (image, buf)) // read and parse cue into dm_image_t
+    {
+      image->desc = "ISO/BIN track (with CUE file)";
+      return 0;
+    }
+#endif
+
+#if 1
+  image->sessions =
+  image->tracks =
+  image->session[0] = 1;
+#endif
+
+  // missing or invalid cue? try the image itself
+  if (!(fh = fopen (image->fname, "rb")))
+    return -1;
+
+  for (t = 0; t < image->tracks; t++)
+    {
+      dm_track_t *track = (dm_track_t *) &image->track[t];
+      
+      if (!dm_track_init (track, fh))
+        {
+          track->track_len =
+          track->total_len = q_fsize (image->fname) / track->sector_size;
+        }
+      else
+        {
+          fclose (fh);
+          return !t ? (-1) : 0;
+        }
+    }
+
+  dm_cue_write (image); // write the missing cue
+
+  image->desc = "ISO/BIN track (missing CUE file created)";
+
+  fclose (fh);
+  return 0;
 }

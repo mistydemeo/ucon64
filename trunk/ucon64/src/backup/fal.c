@@ -173,23 +173,6 @@ void l40226c (void);
 static int debug, verbose, DataSize16, Device, EPPMode, RepairHeader,
            VisolyTurbo, WaitDelay, FileHeader[0xc0], HeaderBad, Complement = 0;
 
-#if 0 // we use the one in gba.c
-const u8 GoodHeader[] = {
-  46, 0, 0, 234, 36, 255, 174, 81, 105, 154, 162, 33, 61, 132, 130, 10,
-  132, 228, 9, 173, 17, 36, 139, 152, 192, 129, 127, 33, 163, 82, 190, 25,
-  147, 9, 206, 32, 16, 70, 74, 74, 248, 39, 49, 236, 88, 199, 232, 51,
-  130, 227, 206, 191, 133, 244, 223, 148, 206, 75, 9, 193, 148, 86, 138, 192,
-  19, 114, 167, 252, 159, 132, 77, 115, 163, 202, 154, 97, 88, 151, 163, 39,
-  252, 3, 152, 118, 35, 29, 199, 97, 3, 4, 174, 86, 191, 56, 132, 0,
-  64, 167, 14, 253, 255, 82, 254, 3, 111, 149, 48, 241, 151, 251, 192, 133,
-  96, 214, 128, 37, 169, 99, 190, 3, 1, 78, 56, 226, 249, 162, 52, 255,
-  187, 62, 3, 68, 120, 0, 144, 203, 136, 17, 58, 148, 101, 192, 124, 99,
-  135, 240, 60, 175, 214, 37, 228, 139, 56, 10, 172, 114, 33, 212, 248, 7
-// 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,48,49,150,0,0,0,0,0,
-// 0,0,0,0,0,240,0,0
-};
-#endif
-
 
 void
 iodelay (void)
@@ -271,41 +254,13 @@ usage (char *name)
 void
 InitPort (int port)
 {
-//   int ECPRegECR;
-
-#if 1 // uCON64 comment: see the comment in fal_main() where port is initialised
+  // uCON64 comment: see the comment in fal_main() where port is initialised
   SPPDataPort = port;
-#else
-  switch (port)
-    {
-    case 2:
-      SPPDataPort = 0x278;
-      break;
-    case 3:
-      SPPDataPort = 0x3bc;
-      break;
-    default:
-      SPPDataPort = 0x378;
-    }
-#endif
-
-//   if (port == 1)
-//       SPPDataPort = 0x378;
-//   else
-//       SPPDataPort = 0x278;
-
   SPPStatPort = SPPDataPort + 1;
   SPPCtrlPort = SPPDataPort + 2;
   EPPAddrPort = SPPDataPort + 3;
   EPPDataPort = SPPDataPort + 4;
   ECPRegECR = SPPDataPort + 0x402;
-
-//#ifndef __linux__
-//   if (EPPMode)
-//      { outpb (ECPRegECR, 4); }             // Set EPP mode for ECP chipsets
-//   else
-//      { outpb (ECPRegECR, 0); }             // Set SPP mode for ECP chipsets
-//#endif
 }
 
 
@@ -578,7 +533,7 @@ LinkerInit (void)               // 4027c4
         {
           // Linker found using EPP mode.
           linker_found = 1;
-          printf ("Linker found. EPP found\n");
+          puts ("Linker found. EPP found");
 
           if (SPPDataPort == 0x3bc)
             return;
@@ -595,11 +550,11 @@ LinkerInit (void)               // 4027c4
 
       EPPMode = 0;
       if (LookForLinker ())
-        printf ("Linker found. EPP not found or not enabled - SPP used\n");
+        puts ("Linker found. EPP not found or not enabled - SPP used");
       else
         {
-          fprintf (stderr,
-                   "ERROR: Flash Advance Linker not found or not turned on\n");
+          fputs ("ERROR: Flash Advance Linker not found or not turned on\n",
+                 stderr);
           ProgramExit (1);
         }
     }
@@ -618,47 +573,20 @@ ReadStatusRegister (int addr)   // 402dd8
 }
 
 
-//void OldDumpSRAM (void)                    // 4046f4
-//   {
-//   int i,j,k,v;
-//
-//   i=1;
-//   SetVisolyBackupRWMode (i>>1);
-//   l402234 ();
-//
-//   for (j=0; j<0x80; j++)
-//      {
-//      l402200 (0, 0);
-//      if (i==1)
-//         l402200 (1, j);
-//      else
-//         l402200 (1, j|0x80);
-//      l402200 (2, 0);
-//      l4021d0 (3);
-//      outpb (SPPCtrlPort, 0);
-//
-//      for (k=0; k<0x100; k++)
-//         {
-//         v = PPReadByte ();
-//         printf ("%x ", v);
-//         }
-//      }
-//   fputc ('\n', stdout);
-//   }
-
 // StartOffSet: 1 = 0, 2 = 64k, 3 = 128k, 4 = 192k
 // Size: 1 = 32k, 2 = 64k, 3 = 128k, 4 = 256k
-
-
 void
-BackupSRAM (FILE * fp, int StartOS, int Size)   // 4046f4
+BackupSRAM (FILE *fp, int StartOS, int Size)   // 4046f4
 {
   int j, k, v;
   int m;
   int n = 1 << (Size - 1);
   int size = n * 32 * 1024, bytesread = 0;
-  time_t starttime = time (NULL);
+  time_t starttime;
 
+  printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
+
+  starttime = time (NULL);
   for (m = ((StartOS - 1) << 1); m < (((StartOS - 1) << 1) + n); m++)
     {
       if ((m & 1) == 0)
@@ -691,7 +619,7 @@ BackupSRAM (FILE * fp, int StartOS, int Size)   // 4046f4
 
 // StartOffSet: 1 = 0, 2 = 64k, 3 = 128k, 4 = 192k
 void
-RestoreSRAM (FILE * fp, int StartOS)
+RestoreSRAM (FILE *fp, int StartOS)
 {
   int i;
   int j, k;
@@ -699,8 +627,10 @@ RestoreSRAM (FILE * fp, int StartOS)
   int byteswritten = 0;
   time_t starttime;
 
-  starttime = time (NULL);
+  printf ("Send: %d Bytes (%.4f Mb)\n\n", ucon64.file_size,
+          (float) ucon64.file_size / MBIT);
 
+  starttime = time (NULL);
   i = fgetc (fp);
   while (!feof (fp))
     {
@@ -734,13 +664,15 @@ RestoreSRAM (FILE * fp, int StartOS)
 
 
 void
-BackupROM (FILE * fp, int SizekW)
+BackupROM (FILE *fp, int SizekW)
 {
   u16 valw;
   u32 i, j;
   int size = SizekW << 1, bytesread = 0;
   time_t starttime;
 
+  printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
+  
   WriteFlash (0, INTEL28F_READARRAY);   // Set flash (intel 28F640J3A) Read Mode
 
   starttime = time (NULL);
@@ -786,9 +718,9 @@ dump (u8 BaseAdr)
       if (First == 1)
         {
           if (i * 2 < 256)
-            printf ("0");
+            fputc ('0', stdout);
           if (i * 2 < 16)
-            printf ("0");
+            fputc ('0', stdout);
           printf ("%hx - ", (i * 2));
           First = 0;
         }
@@ -803,7 +735,7 @@ dump (u8 BaseAdr)
         Display[(i & 7) * 2] = 46;
 
       if (val1 < 16)
-        printf ("0");
+        fputc ('0', stdout);
       printf ("%hx ", val1);
 
       if ((val2 > 31) & (val2 < 127))
@@ -813,7 +745,7 @@ dump (u8 BaseAdr)
         Display[(i & 7) * 2 + 1] = 46;
 
       if (val2 < 16)
-        printf ("0");
+        fputc ('0', stdout);
       printf ("%hx ", val2);
 
       if ((i & 7) == 7)
@@ -829,11 +761,6 @@ void
 CheckForFC (void)
 {
   LinkerInit ();
-//   if (LinkerInit () == 0)
-//      {
-//      fprintf (stderr, "ERROR: Flash Advance Linker not found or not turned on\n");
-//      ProgramExit (1);
-//      }
 
   SetVisolyFlashRWMode ();
   Device = CartTypeDetect ();
@@ -844,37 +771,37 @@ CheckForFC (void)
   switch (Device)
     {
     case 0x16:
-      printf ("FA 32M (i28F320J3A)");
+      fputs ("FA 32M (i28F320J3A)", stdout);
       break;
     case 0x17:
-      printf ("FA 64M (i28F640J3A)");
+      fputs ("FA 64M (i28F640J3A)", stdout);
       break;
     case 0x18:
-      printf ("FA 128M (i28F128J3A)");
+      fputs ("FA 128M (i28F128J3A)", stdout);
       break;
     case 0x2e:
-      printf ("Standard ROM");
+      fputs ("Standard ROM", stdout);
       break;
     case 0x96:
-      printf ("Turbo FA 64M (2 x i28F320J3A)");
+      fputs ("Turbo FA 64M (2 x i28F320J3A)", stdout);
       VisolyTurbo = 1;
       break;
     case 0x97:
-      printf ("Turbo FA 128M (2 x i28F640J3A)");
+      fputs ("Turbo FA 128M (2 x i28F640J3A)", stdout);
       VisolyTurbo = 1;
       break;
     case 0x98:
-      printf ("Turbo FA 256M (2 x i28F128J3A");
+      fputs ("Turbo FA 256M (2 x i28F128J3A", stdout);
       VisolyTurbo = 1;
       break;
     case 0xdc:
-      printf ("Hudson");
+      fputs ("Hudson", stdout);
       break;
     case 0xe2:
-      printf ("Nintendo Flash Card (LH28F320BJE)");
+      fputs ("Nintendo Flash Card (LH28F320BJE)", stdout);
       break;
     default:
-      printf ("Unknown");
+      fputs ("Unknown", stdout);
       break;
     }
   fputc ('\n', stdout);
@@ -882,7 +809,7 @@ CheckForFC (void)
 
 
 int
-GetFileByte (FILE * fp)
+GetFileByte (FILE *fp)
 {
   static int FilePos = 0;
   int i = 0;
@@ -921,7 +848,7 @@ GetFileByte (FILE * fp)
 
 
 int
-GetFileSize2 (FILE * fp)
+GetFileSize2 (FILE *fp)
 /*
   The name "GetFileSize" conflicts with a Windows function.
   For some odd reason Jeff Frohwein returned the file size minus 1. I (dbjh)
@@ -942,19 +869,9 @@ GetFileSize2 (FILE * fp)
 
       if (feof (fp))
         {
-          fprintf (stderr, "ERROR: File must be 192 bytes or larger\n");
+          fputs ("ERROR: File must be 192 bytes or larger\n", stderr);
           ProgramExit (1);
         }
-#if 0
-      else
-        FileSize--;
-
-      while (!feof (fp))
-        {
-          (void) fgetc (fp);
-          FileSize++;
-        }
-#endif
 
       HeaderBad = 0;
       i = 4;
@@ -965,7 +882,7 @@ GetFileSize2 (FILE * fp)
           i++;
         }
       if (HeaderBad)
-        printf ("Fixing logo area\n");
+        puts ("NOTE: Fixing logo area");
 
       Complement = 0;
       FileHeader[0xb2] = 0x96;  // Required
@@ -975,34 +892,21 @@ GetFileSize2 (FILE * fp)
       //printf("[Complement = 0x%x]", (int)Complement);
       //printf("[HeaderComp = 0x%x]", (int)FileHeader[0xbd]);
       if (FileHeader[0xbd] != Complement)
-        printf ("Fixing complement check\n");
+        puts ("NOTE: Fixing complement check");
 
       rewind (fp);
     }
   else
-    {
-#if 0
-      FileSize = -1;
-      while (!feof (fp))
-        {
-          (void) fgetc (fp);
-          FileSize++;
-        }
-#endif
-      rewind (fp);
-    }
-#if 1
+    rewind (fp);
+
   return ucon64.file_size;
-#else
-  return FileSize;
-#endif
 }
 
 
 // Program older (non-Turbo) Visoly flash card
 // (Single flash chip)
 void
-ProgramNonTurboIntelFlash (FILE * fp)
+ProgramNonTurboIntelFlash (FILE *fp)
 {
   int i, j, k;
   int addr = 0;
@@ -1014,17 +918,19 @@ ProgramNonTurboIntelFlash (FILE * fp)
   // Get file size
   FileSize = GetFileSize2 (fp);
 
-  printf ("Erasing Visoly non-turbo flash card...\n");
+  puts ("Erasing Visoly non-turbo flash card...");
 
   // Erase as many 128k blocks as are required
   Ready = EraseNonTurboFABlocks (0, ((FileSize - 1) >> 17) + 1);
 
-  printf ("\r                                                                              \r");     // remove "erase gauge"
+  // remove "erase gauge"
+  fputs ("\r                                                                              \r",
+         stdout);
   if (Ready)
     {
-      printf ("Programming Visoly non-turbo flash card...\n");
-      //403018
+      printf ("Send: %d Bytes (%.4f Mb)\n\n", FileSize, (float) FileSize / MBIT);
 
+      //403018
       starttime = time (NULL);
       j = GetFileByte (fp);
 
@@ -1102,25 +1008,27 @@ ProgramNonTurboIntelFlash (FILE * fp)
             break;
         }
 
-      printf ("\r                                                                              \r"); // remove last gauge
+      // remove last gauge
+      fputs ("\r                                                                              \r",
+             stdout);
       ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32 k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
       if (Ready)
-        ; //printf ("\n\nDone\n");
+        ;
       else
-        printf ("\nFlash card write failed!\n");
+        fputs ("\nERROR: Flash card write failed\n", stderr);
     }
   else
-    printf ("\nFlash card erase failed!\n");
+    fputs ("\nERROR: Flash card erase failed\n", stderr);
 }
 
 
 // Program newer (Turbo) Visoly flash card
 // (Dual chip / Interleave)
 void
-ProgramTurboIntelFlash (FILE * fp)
+ProgramTurboIntelFlash (FILE *fp)
 {
   int i, j = 0;
   int k;                        //z;
@@ -1134,15 +1042,18 @@ ProgramTurboIntelFlash (FILE * fp)
   // Get file size
   FileSize = GetFileSize2 (fp);
 
-  printf ("Erasing Visoly turbo flash card...\n");
+  puts ("Erasing Visoly turbo flash card...");
 
   // Erase as many 256k blocks as are required
   Ready = EraseTurboFABlocks (0, ((FileSize - 1) >> 18) + 1);
 
-  printf ("\r                                                                              \r");     // remove "erase gauge"
+  // remove "erase gauge"
+  fputs ("\r                                                                              \r",
+         stdout);
   if (Ready)
     {
-      printf ("Programming Visoly turbo flash card...\n");
+      printf ("Send: %d Bytes (%.4f Mb)\n\n", FileSize, (float) FileSize / MBIT);
+
       //403018
       starttime = time (NULL);
       j = GetFileByte (fp);
@@ -1218,7 +1129,9 @@ ProgramTurboIntelFlash (FILE * fp)
             break;
         }
 
-      printf ("\r                                                                              \r"); // remove last gauge
+      // remove last gauge
+      fputs ("\r                                                                              \r",
+             stdout);
       ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32 k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
@@ -1226,22 +1139,22 @@ ProgramTurboIntelFlash (FILE * fp)
       outpb (SPPCtrlPort, 0);
 
       if (Ready)
-        ; //printf ("\n\nDone\n");
+        ;
       else
         {
           WriteFlash (0, INTEL28F_CLEARSR);
           PPWriteWord (INTEL28F_CLEARSR);
-          printf ("\nFlash card write failed!\n");
+          fputs ("\nERROR: Flash card write failed\n", stderr);
         }
     }
   else
-    printf ("\nFlash card erase failed!\n");
+    fputs ("\nERROR: Flash card erase failed\n", stderr);
 }
 
 
 // Program official Nintendo flash card
 void
-ProgramSharpFlash (FILE * fp)
+ProgramSharpFlash (FILE *fp)
 {
   int i, j;
   int k = 0;
@@ -1253,15 +1166,17 @@ ProgramSharpFlash (FILE * fp)
   // Get file size
   FileSize = GetFileSize2 (fp);
 
-  printf ("Erasing flash card...\n");
+  puts ("Erasing Nintendo flash card...");
 
   // Erase as many 64k blocks as are required
   Ready = EraseNintendoFlashBlocks (0, ((FileSize - 1) >> 16) + 1);
 
-  printf ("\r                                                                              \r");     // remove "erase gauge"
+  // remove "erase gauge"
+  fputs ("\r                                                                              \r",
+         stdout);
   if (Ready)
     {
-      printf ("Programming Nintendo flash card...\n");
+      printf ("Send: %d Bytes (%.4f Mb)\n\n", FileSize, (float) FileSize / MBIT);
 
       starttime = time (NULL);
       j = GetFileByte (fp);
@@ -1285,20 +1200,21 @@ ProgramSharpFlash (FILE * fp)
             ucon64_gauge (starttime, addr << 1, FileSize);
         }
 
-      printf ("\r                                                                              \r"); // remove last gauge
+      // remove last gauge
+      fputs ("\r                                                                              \r",
+             stdout);
       ucon64_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32 k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
-
-      //printf ("\n\nDone\n");
     }
   else
-    printf ("\nFlash card erase failed!\n");
+    fputs ("\nERROR: Flash card erase failed\n", stderr);
 }
 
 
+#if 0 // not used
 void
-VerifyFlash (FILE * fp)
+VerifyFlash (FILE *fp)
 {
   int addr = 0;
   int CompareFail = 0;
@@ -1349,6 +1265,7 @@ VerifyFlash (FILE * fp)
   if (CompareFail == 0)
     printf ("%d bytes compared OK\n", addr);
 }
+#endif
 
 
 void
@@ -1356,8 +1273,7 @@ SpaceCheck (char c)
 {
   if (c != 0)
     {
-      fprintf (stderr,
-               "ERROR: Space required between option and parameter\n");
+      fputs ("ERROR: Space required between option and parameter\n", stderr);
       ProgramExit (1);
     }
 }
@@ -1415,17 +1331,16 @@ fal_main (int argc, char **argv)
           if ((BackupMemSize < 1) || (BackupMemSize > 4) ||
               (BackupMemOffset < 1) || (BackupMemOffset > 4))
             {
-              fprintf (stderr,
-                       "ERROR: -b parameter values must be between 1-4\n");
+              fputs ("ERROR: -b parameter values must be between 1-4\n", stderr);
               ProgramExit (1);
             }
-//                    printf ("Param val = %x\n", param);
           SpaceCheck (argv[arg][1]);
           strcpy (fname, argv[++arg]);
           OptB = 1;
           break;
         case '2':
-          // 16bit EPP support enable
+          // 16-bit EPP support enable (doesn't work with
+          //  "Turbo FA 128M (2 x i28F640J3A)" - dbjh)
           DataSize16 = 1;
           break;
         case 'c':
@@ -1437,8 +1352,7 @@ fal_main (int argc, char **argv)
               (ChipSize != 32) &&
               (ChipSize != 64) && (ChipSize != 128) && (ChipSize != 256))
             {
-              fprintf (stderr,
-                       "ERROR: Chip size must be 8,16,32,64,128 or 256\n");
+              fputs ("ERROR: Chip size must be 8,16,32,64,128 or 256\n", stderr);
               ProgramExit (1);
             }
           break;
@@ -1465,16 +1379,11 @@ fal_main (int argc, char **argv)
         case 'r':
           SpaceCheck (argv[arg][2]);
           BackupMemOffset = *(char *) argv[++arg] - 0x30;
-//                    SpaceCheck (argv[arg][1]);
-//                    BackupMemSize = *(char *)argv[++arg] - 0x30;
-//                    if ( (BackupMemSize<1) || (BackupMemSize>4) ||
           if ((BackupMemOffset < 1) || (BackupMemOffset > 4))
             {
-              fprintf (stderr,
-                       "ERROR: -r parameter value must be between 1-4\n");
+              fputs ("ERROR: -r parameter value must be between 1-4\n", stderr);
               ProgramExit (1);
             }
-//                    printf ("Param val = %x\n", param);
           SpaceCheck (argv[arg][1]);
           strcpy (fname, argv[++arg]);
           OptR = 1;
@@ -1488,20 +1397,12 @@ fal_main (int argc, char **argv)
         case 'l':
           SpaceCheck (argv[arg][2]);
           i = atoi (argv[++arg]);
-// uCON64 comment: we want to support non-standard parallel port addresses too
-//  So, instead of passing a number from 1 to 4, we pass the address itself
-#if 1
+          /*
+            uCON64 comment: we want to support non-standard parallel port
+            addresses too. So, instead of passing a number from 1 to 4, we pass
+            the address itself
+          */
           port = i;
-#else
-          if ((i > 0) && (i < 4))
-            port = i;
-          else
-            {
-              fprintf (stderr,
-                       "ERROR: Only LPT1, LPT2, & LPT3 are supported");
-              ProgramExit (1);
-            }
-#endif
           break;
         case 'm':
           // uCON64 comment: See comment in LinkerInit(). Note that we reverse
@@ -1532,17 +1433,11 @@ fal_main (int argc, char **argv)
   if (OptB)
     {
       //DumpSRAM ();
-#if 0
-      if (strchr (fname, '.') == NULL)
-        strcat (fname, ".sav");
-#endif
       if ((fp = fopen (fname, "wb")) == NULL)
         {
-          fprintf (stderr, "ERROR: Can't open file \"%s\"\n", fname);
+          fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], fname);
           ProgramExit (1);
         }
-      printf ("Backing up backup SRAM to file \"%s\". Please wait...\n\n",
-              fname);
 
       BackupSRAM (fp, BackupMemOffset, BackupMemSize);
       fputc ('\n', stdout);
@@ -1554,50 +1449,30 @@ fal_main (int argc, char **argv)
 
   if ((OptP) && ((Device == 0) || (Device == 0x2e) || (Device == 0xff)))
     {
-      fprintf (stderr, "ERROR: Device type not recognized as programmable\n");
+      fputs ("ERROR: Device type not recognized as programmable\n", stderr);
       ProgramExit (1);
     }
 
   if (OptR)
     {
-#if 0
-      if (strchr (fname, '.') == NULL)
-        strcat (fname, ".sav");
-#endif
       if ((fp = fopen (fname, "rb")) == NULL)
         {
-          fprintf (stderr, "ERROR: Can't open file \"%s\"\n", fname);
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname);
           ProgramExit (1);
         }
-      printf ("Restoring backup SRAM from file \"%s\". Please wait...\n\n",
-              fname);
 
-      RestoreSRAM (fp, BackupMemOffset);        //, BackupMemSize);
+      RestoreSRAM (fp, BackupMemOffset);
       fputc ('\n', stdout);
       fclose (fp);
     }
 
-//   if (OptD) dump (Base);
-
-//   if ( (OptP) &&
-//        ((Device == 0) || (Device == 0x2e) || (Device == 0xff)) )
-//      {
-//      fprintf (stderr, "ERROR: Device type not recognized as programmable\n");
-//      ProgramExit (1);
-//      }
-//
   if (OptP)
     {
-#if 0
-      if (strchr (fname, '.') == NULL)
-        strcat (fname, ".gba");
-#endif
       if ((fp = fopen (fname, "rb")) == NULL)
         {
-          fprintf (stderr, "ERROR: Can't open file \"%s\"\n", fname);
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname);
           ProgramExit (1);
         }
-      printf ("Programming flash with file \"%s\"\n", fname);
 
       if (Device == 0xe2)
         ProgramSharpFlash (fp);
@@ -1614,45 +1489,30 @@ fal_main (int argc, char **argv)
 
   if (OptS)
     {
-#if 0
-      if (strchr (fname, '.') == NULL)
-        strcat (fname, ".gba");
-#endif
       if ((fp = fopen (fname, "wb")) == NULL)
         {
-          fprintf (stderr, "ERROR: Can't open file \"%s\"\n", fname);
+          fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], fname);
           ProgramExit (1);
         }
-      printf ("Backing up %d Mbits of ROM to file \"%s\". Please wait...\n\n",
-              ChipSize, fname);
 
       BackupROM (fp, ChipSize << 16);
       fputc ('\n', stdout);
       fclose (fp);
     }
 
+#if 0
   if (OptV)
     {
-#if 0
-      if (strchr (fname2, '.') == NULL)
-        strcat (fname2, ".gba");
-#endif
       if ((fp = fopen (fname2, "rb")) == NULL)
         {
-          fprintf (stderr, "ERROR: Can't open file \"%s\"\n", fname2);
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname2);
           ProgramExit (1);
         }
-      printf ("Comparing flash with file \"%s\"\n", fname2);
 
       VerifyFlash (fp);
       fclose (fp);
     }
-
-//   if (OptZ)
-//      {
-//      printf("Erase N blocks\n");
-//      EraseNintendoFlashBlocks (0, 2);
-//      }
+#endif
 
   ProgramExit (0);
   exit (0);
@@ -1674,13 +1534,6 @@ fal_args (unsigned int parport)
   misc_parport_print_info ();
 
   fal_argv[fal_argc++] = "fl";
-#if 0 // we want to support non-standard parallel port addresses
-  if (parport != 0x3bc && parport != 0x378 && parport != 0x278)
-    {
-      fprintf (stderr, "ERROR: PORT must be 0x3bc, 0x378 or 0x278\n");
-      exit (1);
-    }
-#endif
   fal_argv[fal_argc++] = "-l";
   sprintf (parport_str, "%d", parport); // don't use %x, as Jeff Frohwein uses atoi()
   fal_argv[fal_argc++] = parport_str;
@@ -1701,8 +1554,8 @@ fal_read_rom (const char *filename, unsigned int parport, int size)
   if (size != 8 && size != 16 && size != 32 && size != 64 && size != 128 &&
       size != 256)
     {
-      fprintf (stderr, "ERROR: Invalid argument for -xfalc=n\n"
-                       "       n can be 8, 16, 32, 64, 128 or 256\n");
+      fputs ("ERROR: Invalid argument for -xfalc=n\n"
+             "       n can be 8, 16, 32, 64, 128 or 256\n", stderr);
       exit (1);
     }
   sprintf (size_str, "%d", size);
@@ -1749,7 +1602,7 @@ fal_read_sram (const char *filename, unsigned int parport, int bank)
     {
       if (bank < 1 || bank > 4)
         {
-          fprintf (stderr, "ERROR: Bank must be 1, 2, 3 or 4\n");
+          fputs ("ERROR: Bank must be 1, 2, 3 or 4\n", stderr);
           exit (1);
         }
       bank_str[0] = '0' + bank;
@@ -1780,7 +1633,7 @@ fal_write_sram (const char *filename, unsigned int parport, int bank)
     {
       if (bank < 1 || bank > 4)
         {
-          fprintf (stderr, "ERROR: Bank must be 1, 2, 3 or 4\n");
+          fputs ("ERROR: Bank must be 1, 2, 3 or 4\n", stderr);
           exit (1);
         }
       bank_str[0] = '0' + bank;

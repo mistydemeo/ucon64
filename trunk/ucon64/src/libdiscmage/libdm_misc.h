@@ -87,12 +87,10 @@ enum {
 
 
 /*
-  writewavheader()    write header for a wav file
-  dm_get_track_desc() returns a string like "MODE1/2352" depending on the
+  dm_get_track_desc() returns a string like "MODE1/2352" depending on the 
                       mode and sector_size specified; if cue == FALSE
                       it will return the string in TOC format
 */
-//extern void writewavheader (FILE * fdest, int track_length);
 extern int dm_get_track_mode_id (int mode, int sector_size);
 extern void dm_get_track_mode_by_id (int id, int8_t *mode, uint16_t *sector_size);
 extern void dm_clean (dm_image_t *image);

@@ -137,7 +137,7 @@ pce_read_rom (const char *filename, unsigned int parport, int size)
     }
   ttt_init_io (parport);
 
-  printf ("Receive: %d Bytes (%.4f Mb)\n", size * MBIT, (float) size);
+  printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   blocksleft = size >> 8;
   eep_reset ();
@@ -170,7 +170,7 @@ pce_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int fsize, size, address = 0, bytessend = 0;
+  int size, fsize, address = 0, bytesread, bytessend = 0;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_rom_by_page; // write_rom_by_byte
   (void) write_rom_by_byte;
@@ -190,14 +190,14 @@ pce_write_rom (const char *filename, unsigned int parport)
   size = fsize = q_fsize (filename);
   if (fsize == 4 * MBIT)
     size += 2 * MBIT;
-  printf ("Send: %d Bytes (%.4f Mb)\n", size, (float) size / MBIT);
+  printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   starttime = time (NULL);
   eep_reset ();
   if (ttt_get_id () == 0xb0d0)
     {
       eep_reset ();
-      while (fread (buffer, 1, 0x4000, file))
+      while ((bytesread = fread (buffer, 1, 0x4000, file)))
         {
           if ((address & 0xffff) == 0)
             ttt_erase_block (address);
@@ -207,7 +207,7 @@ pce_write_rom (const char *filename, unsigned int parport)
           if ((fsize == 4 * MBIT) && (address == 4 * MBIT))
             fseek (file, 2 * MBIT, SEEK_SET);
 
-          bytessend += 0x4000;
+          bytessend += bytesread;
           ucon64_gauge (starttime, bytessend, size);
         }
     }
@@ -239,7 +239,7 @@ pce_read_sram (const char *filename, unsigned int parport)
     }
   ttt_init_io (parport);
 
-  printf ("Receive: %d Bytes\n", size);
+  printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   if (read_block == ttt_read_ram_w)
     {
@@ -274,7 +274,7 @@ pce_write_sram (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int size, bytessend = 0, address = 0;
+  int size, bytesread, bytessend = 0, address = 0;
   time_t starttime;
   void (*write_block) (int *, unsigned char *) = write_ram_by_byte; // write_ram_by_page
   (void) write_ram_by_page;
@@ -292,13 +292,13 @@ pce_write_sram (const char *filename, unsigned int parport)
   ttt_init_io (parport);
 
   size = q_fsize (filename);
-  printf ("Send: %d Bytes\n", size);
+  printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
   starttime = time (NULL);
-  while (fread (buffer, 1, 0x4000, file))
+  while ((bytesread = fread (buffer, 1, 0x4000, file)))
     {
       write_block (&address, buffer);
-      bytessend += 0x4000;
+      bytessend += bytesread;
       ucon64_gauge (starttime, bytessend, size);
     }
 

@@ -163,6 +163,7 @@ genesis_smds (st_rominfo_t *rominfo)
 
   memset (&header, 0, SMD_HEADER_LEN);
   memset (&buf, 0, 32768);
+  q_fread (buf, 0, ucon64.file_size, ucon64.rom);
 
   header.id1 = 0xaa;
   header.id2 = 0xbb;
@@ -172,7 +173,6 @@ genesis_smds (st_rominfo_t *rominfo)
   set_suffix (dest_name, ".SAV");
   ucon64_file_handler (dest_name, NULL, 0);
 
-  q_fread (buf, 0, ucon64.file_size, ucon64.rom);
   save_smd (dest_name, buf, &header, 32768);   // SMD SRAM files are interleaved
 
   printf (ucon64_msg[WROTE], dest_name);

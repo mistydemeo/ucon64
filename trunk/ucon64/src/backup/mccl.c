@@ -66,7 +66,7 @@ Data Read Procedure:
 const char *mccl_usage[] = {
   "Mad Catz Camera Link (GameBoy Camera)",
   "XXXX Mad Catz Inc. http://www.madcatz.com",
-  "TEST: " OPTION_LONG_S "xmccl  send/receive BYTES to/from Mad Catz Camera Link; " OPTION_LONG_S "file=PORT\n"
+  "TEST: " OPTION_LONG_S "xmccl   send/receive BYTES to/from Mad Catz Camera Link; " OPTION_LONG_S "file=PORT\n"
   "                  currently only receiving is supported\n",
   NULL
 };

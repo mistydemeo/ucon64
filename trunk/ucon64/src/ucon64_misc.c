@@ -203,7 +203,7 @@ ucon64_fbackup (const char *filename)
       printf ("Writing backup of: %s\n", filename);
       fflush (stdout);
     }
-  return filebackup (filename);
+  return filebackup (filename, NULL);
 }
 
 size_t

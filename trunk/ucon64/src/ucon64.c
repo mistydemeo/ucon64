@@ -154,6 +154,7 @@ const struct option long_options[] = {
     {"ines", 0, 0, UCON64_INES},
     {"ineshd", 0, 0, UCON64_INESHD},
     {"ins", 0, 0, UCON64_INS},
+    {"insn", 1, 0, UCON64_INSN},
     {"intelli", 0, 0, UCON64_INTELLI},
     {"ip", 0, 0, UCON64_IP},
     {"iso", 0, 0, UCON64_ISO},
@@ -221,6 +222,7 @@ const struct option long_options[] = {
     {"sram", 0, 0, UCON64_SRAM},
     {"ssc", 0, 0, UCON64_SSC},
     {"stp", 0, 0, UCON64_STP},
+    {"stpn", 1, 0, UCON64_STPN},
     {"strip", 0, 0, UCON64_STRIP},
     {"swan", 0, 0, UCON64_SWAN},
     {"swap", 0, 0, UCON64_SWAP},
@@ -703,17 +705,10 @@ ucon64_usage (int argc, char *argv[])
   printf (
     "Usage: %s [OPTION]... [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE]\n\n"
     "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
-    "  " OPTION_LONG_S "hdn=BYTES   force ROM has backup unit/emulator header with BYTES size\n"
+    "  " OPTION_LONG_S "hdn=N       force ROM has backup unit/emulator header with N Bytes size\n"
     "  " OPTION_LONG_S "hd          same as " OPTION_LONG_S "hdn=512\n"
-#if 0
-    "TODO: " OPTION_LONG_S "hdn=TYPE     force ROM has TYPE backup unit/emulator header:\n"
-    "                  FFE, SMC, FIG, SWC, SMD, SMG, SSC or LNX\n"
-#endif
     "                  most backup units use a header with 512 Bytes size\n"
     "  " OPTION_LONG_S "nhd         force ROM has no backup unit/emulator header\n"
-    "  " OPTION_LONG_S "stp         strip 512 Bytes (header) from ROM beginning\n"
-    "  " OPTION_LONG_S "ins         insert 512 Bytes (empty header) before ROM\n"
-    "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
     "  " OPTION_LONG_S "int         force ROM is interleaved (2143)\n"
     "  " OPTION_LONG_S "nint        force ROM is not interleaved (1234)\n"
     "  " OPTION_LONG_S "dint        convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
@@ -745,8 +740,15 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "find        find string in ROM; " OPTION_LONG_S "file=STRING (wildcard: '?')\n"
     "  " OPTION_S "c           compare ROMs for differencies; " OPTION_LONG_S "file=OTHER_ROM\n"
     "  " OPTION_LONG_S "cs          compare ROMs for similarities; " OPTION_LONG_S "file=OTHER_ROM\n"
+    "  " OPTION_LONG_S "stpn=N      strip N Bytes from ROM beginning\n"
+    "  " OPTION_LONG_S "stp         same as " OPTION_LONG_S "stpn=512\n"
+    "                  most backup units use a header with 512 Bytes size\n"
+    "  " OPTION_LONG_S "insn=N      insert N Bytes (0x00) before ROM\n"
+    "  " OPTION_LONG_S "ins         same as " OPTION_LONG_S "insn=512\n"
+    "                  most backup units use a header with 512 Bytes size\n"
     "  " OPTION_LONG_S "ispad       check if ROM is padded\n"
     "  " OPTION_S "p, " OPTION_LONG_S "pad    pad ROM to full Mb\n"
+    "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
     , argv[0], ucon64.configfile
   );
 

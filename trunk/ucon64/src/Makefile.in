@@ -29,7 +29,7 @@ else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 
 ifdef DISCMAGE
-FULLLIBNAME=$(LIBNAME_DM).dll
+FULLLIBNAME_DM=$(LIBNAME_DM).dll
 ifndef DLOPEN
 LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
 endif
@@ -59,11 +59,11 @@ LDFLAGS+=-ldl
 endif
 endif
 
-else
+else                                    # DLOPEN
 ifdef DISCMAGE
 FULLLIBNAME_DM=lib$(LIBNAME_DM).so
 LDFLAGS+=-Llibdiscmage -l$(LIBNAME_DM)
-endif                                   # DISCMAGE
+endif
 
 endif
 
@@ -132,14 +132,15 @@ endif                                   # cygwin
 all: libdiscmage/$(FULLLIBNAME_DM) $(TARGET)
 
 
+CLEAN_CMD=rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~; \
+cd libdiscmage && $(MAKE) clean; cd ..; \
+
 clean:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~
-	cd libdiscmage && $(MAKE) clean
+	$(CLEAN_CMD)
 else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
-	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~
-	cd libdiscmage && $(MAKE) clean
+	$(CLEAN_CMD)
 else
 ifdef DJGPP
 	del *.o
@@ -151,22 +152,22 @@ ifdef DJGPP
 	$(MAKE) clean
 	cd ..
 else                                    # Unix or BeOS
-	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
-              DEADJOE */DEADJOE
-	cd libdiscmage && $(MAKE) clean
+	$(CLEAN_CMD)
 endif                                   # DJGPP
 endif                                   # msys
 endif                                   # cygwin
 
 
+DISTCLEAN_CMD=rm -f Makefile config.log config.status config.cache config.h; \
+cd libdiscmage && $(MAKE) distclean; cd ..; \
+cd libnetgui && $(MAKE) distclean
+
 distclean: clean
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f Makefile config.log config.status config.cache config.h
-	cd libdiscmage && $(MAKE) distclean
+	$(DISTCLEAN_CMD)
 else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
-	rm -f Makefile config.log config.status config.cache config.h
-	cd libdiscmage && $(MAKE) distclean
+	$(DISTCLEAN_CMD)
 else
 ifdef DJGPP
 	del Makefile
@@ -178,8 +179,7 @@ ifdef DJGPP
 	$(MAKE) distclean
 	cd ..
 else
-	rm -f Makefile config.log config.status config.cache config.h
-	cd libdiscmage && $(MAKE) distclean
+	$(DISTCLEAN_CMD)
 endif                                   # DJGPP
 endif                                   # msys
 endif                                   # cygwin

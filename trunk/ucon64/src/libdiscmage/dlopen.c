@@ -103,7 +103,9 @@ open_module (char *module_name)
   sym->fputs = fputs;
   sym->fopen = fopen;
   sym->fdopen = fdopen;
+  sym->popen = popen;
   sym->fclose = fclose;
+  sym->pclose = pclose;
   sym->fseek = fseek;
   sym->ftell = ftell;
   sym->rewind = rewind;
@@ -126,11 +128,13 @@ open_module (char *module_name)
   sym->getenv = getenv;
   sym->srand = srand;
   sym->rand = rand;
+  sym->atoi = atoi;
 
   sym->memcpy = memcpy;
   sym->memset = memset;
   sym->strcmp = strcmp;
   sym->strcpy = strcpy;
+  sym->strncpy = strncpy;
   sym->strcat = strcat;
   sym->strncat = strncat;
   sym->strcasecmp = strcasecmp;
@@ -141,6 +145,8 @@ open_module (char *module_name)
   sym->strspn = strspn;
   sym->strcspn = strcspn;
   sym->strlen = strlen;
+  sym->strstr = strstr;
+  sym->strdup = strdup;
 
   sym->tolower = tolower;
   sym->toupper = toupper;

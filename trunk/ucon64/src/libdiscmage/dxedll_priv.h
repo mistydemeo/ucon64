@@ -41,6 +41,8 @@ extern st_symbol_t import_export;
 // These are now defined in dxe_misc.c
 #define fopen import_export.fopen
 #define fclose import_export.fclose
+#define popen import_export.popen
+#define pclose import_export.pclose
 #define fseek import_export.fseek
 #define fread import_export.fread
 #define fgetc import_export.fgetc
@@ -66,11 +68,13 @@ extern st_symbol_t import_export;
 #define getenv import_export.getenv
 #define srand import_export.srand
 #define rand import_export.rand
+#define atoi import_export.atoi
 
 #define memcpy import_export.memcpy
 #define memset import_export.memset
 #define strcmp import_export.strcmp
 #define strcpy import_export.strcpy
+#define strncpy import_export.strncpy
 #define strcat import_export.strcat
 #define strncat import_export.strncat
 #define strcasecmp import_export.strcasecmp
@@ -81,6 +85,8 @@ extern st_symbol_t import_export;
 #define strspn import_export.strspn
 #define strcspn import_export.strcspn
 #define strlen import_export.strlen
+#define strstr import_export.strstr
+#define strdup import_export.strdup
 
 #undef  tolower
 #define tolower import_export.tolower

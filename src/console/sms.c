@@ -2,7 +2,7 @@
 sms.c - Sega Master System/Game Gear support for uCON64
 
 Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
-Copyright (c) 2003 - 2004 dbjh
+Copyright (c) 2003 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -485,7 +485,7 @@ sms_testinterleaved (st_rominfo_t *rominfo)
   unsigned char buf[0x4000] = { 0 };
 
   ucon64_fread (buf, rominfo->buheader_len + 0x4000, // header in 2nd 16 kB block
-           0x2000 + (SMS_HEADER_START - 0x4000 + 8) / 2, ucon64.rom);
+    0x2000 + (SMS_HEADER_START - 0x4000 + 8) / 2, ucon64.rom);
   if (!(memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SEGA", 8) &&
         memcmp (buf + SMS_HEADER_START - 0x4000, "TMR ALVS", 8) && // SMS
         memcmp (buf + SMS_HEADER_START - 0x4000, "TMR SMSC", 8) && // SMS (unofficial)
@@ -525,16 +525,31 @@ sms_header_len (void)
     return SMD_HEADER_LEN;
   else
     {
-      char buffer[SEARCHBUFSIZE], *ptr, search_str[N_SEARCH_STR][9] =
-             { "TMR SEGA", "TMR ALVS", "TMR SMSC", "TMG SEGA" };
+      char buffer[SEARCHBUFSIZE] = { 0 }, *ptr, *ptr2 = NULL,
+           search_str[N_SEARCH_STR][9] = { "TMR SEGA", "TMR ALVS", "TMR SMSC",
+             "TMG SEGA" };
       int n;
 
       ucon64_fread (buffer, 0, SEARCHBUFSIZE, ucon64.rom);
 
       for (n = 0; n < N_SEARCH_STR; n++)
-        if ((ptr = (char *)
-               memmem2 (buffer, SEARCHBUFSIZE, search_str[n], 8, 0)) != NULL)
-          return ptr - buffer - SMS_HEADER_START;
+        {
+          ptr = buffer;
+          /*
+            A few games contain the search string twice (Alien 3 (UE) [!],
+            Back to the Future 3 (UE) [!]), with the last occurrence being the
+            correct one. It's probably best to search for the last occurrence
+            (instead of searching twice).
+          */
+          while ((ptr = (char *) memmem2 (ptr, SEARCHBUFSIZE - (ptr - buffer),
+                   search_str[n], 8, 0)) != NULL)
+            ptr2 = ptr++;
+          if (ptr2)
+            {
+              n = ptr2 - buffer - SMS_HEADER_START;
+              return n < 0 ? 0 : n;
+            }
+        }
 
       n = ucon64.file_size % (16 * 1024);       // SMD_HEADER_LEN
       if (ucon64.file_size > n)

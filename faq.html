@@ -110,9 +110,14 @@ Q33: <a href="#33">How do I enable or disable colors in the display output of
    enable gzip &amp; zip support. zlib is available from
    <a href="http://www.gzip.org/zlib/" target="_blank">http://www.gzip.org/zlib/</a>.<br>
    If you use a Bash incompatible shell (like command.com or cmd.exe), copy 
-   config.h.orig to config.h and Makefile.orig to Makefile.<br>
-   Now you can optionally open config.h in an editor and change the defines. 
-   Then enter the following lines:<br>
+   Makefile.orig to Makefile, 
+   config.h.orig to config.h, 
+   ucon64_cfg.h.orig to ucon64_cfg.h,
+   libdiscmage/libdiscmage_cfg.h.orig to libdiscmage/libdiscmage_cfg.h and
+   libdiscmage/config.h.orig to libdiscmage/config.h.<br>
+   Now you can optionally open Makefile, config.h, ucon64_cfg.h, 
+   libdiscmage/libdiscmage_cfg.h or libdiscmage/config.h in an editor and 
+   change the defines. Then enter the following lines:<br>
    &nbsp;&nbsp; make clean<br>
    &nbsp;&nbsp; make<br>
    &nbsp;&nbsp; make install<br>

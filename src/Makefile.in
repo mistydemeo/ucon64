@@ -63,7 +63,8 @@ endif                                   # cygwin
 
 distclean: clean
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f Makefile config.log config.status config.cache config.h ucon64_cfg.h libdiscmage/libdiscmage_cfg.h libdiscmage/config.h 
+	rm -f Makefile config.log config.status config.cache config.h \
+	      ucon64_cfg.h libdiscmage/libdiscmage_cfg.h libdiscmage/config.h
 else
 ifdef DJGPP
 	del Makefile
@@ -72,10 +73,11 @@ ifdef DJGPP
 	del config.cache
 	del config.h
 	del ucon64_cfg.h
-	del libdiscmage/libdiscmage_cfg.h
-	del libdiscmage/config.h
+	del libdis~1\libdis~2.h
+	del libdis~1\config.h
 else
-	rm -f Makefile config.log config.status config.cache config.h ucon64_cfg.h libdiscmage/libdiscmage_cfg.h libdiscmage/config.h
+	rm -f Makefile config.log config.status config.cache config.h \
+	      ucon64_cfg.h libdiscmage/libdiscmage_cfg.h libdiscmage/config.h
 endif                                   # DJGPP
 endif                                   # cygwin
 

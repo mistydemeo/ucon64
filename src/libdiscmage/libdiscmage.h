@@ -19,17 +19,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef LIBDISCMAGE_H
 #define LIBDISCMAGE_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "libdiscmage_cfg.h"
 #include "config.h"
-#if     defined HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#if     defined HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
+#include "misc.h"                               // YES NoisyB, MISC.H! (dbjh)
+
 #if     defined __linux__ || defined HAVE_LINUX_CDROM_H
 #include <linux/cdrom.h>
 #else
@@ -39,14 +36,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 /*
  * -- <linux/cdrom.h>
- * General header file for linux CD-ROM drivers 
+ * General header file for linux CD-ROM drivers
  * Copyright (C) 1992         David Giller, rafetmad@oxy.edu
  *               1994, 1995   Eberhard Moenkeberg, emoenke@gwdg.de
  *               1996         David van Leeuwen, david@tm.tno.nl
  *               1997, 1998   Erik Andersen, andersee@debian.org
  *               1998-2000    Jens Axboe, axboe@suse.de
  */
- 
+
 /*******************************************************
  * CDROM IOCTL structures
  *******************************************************/

@@ -12,6 +12,7 @@ uCON64 - THE tool for all video game consoles. Its main features are:
   support from internal ROM database (like Romcenter or Goodutil), CRC32
   calculation, ROM comparison, modification (strip, pad, etc), SRAM conversion
   (emulator &#60;-&#62; backup unit), DiscJuggler, Nero and ISO2BIN conversions.
+- Gzip and ZIP support for all file-related funtions.
 - Support for new formats and headers like UNIF (NES) and NSRT (SNES).
 
 For console specific options check the following usage:
@@ -220,6 +221,7 @@ Super Nintendo Entertainment System/SNES/Super Famicom
                   to replace them with red colors (blood mode)
    -j           join split ROM
    -s           split ROM into 8 Mb parts (for backup unit(s) with fdd)
+  --ssize=SIZE  specify split part size in Mbit (not for Game Doctor SF3)
    -k           remove protection (crack)
    -f           remove NTSC/PAL protection
    -l           remove SlowROM checks

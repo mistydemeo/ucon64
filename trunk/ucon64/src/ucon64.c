@@ -236,6 +236,7 @@ const struct option long_options[] = {
     {"snes", 0, 0, UCON64_SNES},
     {"sram", 0, 0, UCON64_SRAM},
     {"ssc", 0, 0, UCON64_SSC},
+    {"ssize", 1, 0, UCON64_SSIZE},
     {"stp", 0, 0, UCON64_STP},
     {"stpn", 1, 0, UCON64_STPN},
     {"strip", 0, 0, UCON64_STRIP},
@@ -448,6 +449,7 @@ main (int argc, char **argv)
   ucon64.buheader_len =
   ucon64.interleaved =
   ucon64.split =
+  ucon64.part_size =
   ucon64.snes_hirom =
   ucon64.bs_dump =
   ucon64.controller =
@@ -527,7 +529,7 @@ main (int argc, char **argv)
       ucon64.file = argv[argc - 1];
       if (!access (ucon64.file, F_OK))
         file_message = 1;
-      argc--;
+      argc--;                                   // use argc, NOT ucon64.argc!
     }
 
 #ifdef  BACKUP
@@ -537,7 +539,7 @@ main (int argc, char **argv)
 
   console = ucon64.console;
   show_nfo = ucon64.show_nfo;
-  while (rom_index < argc)
+  while (rom_index < argc)                      // use argc, NOT ucon64.argc!
     {
       ucon64.rom = argv[rom_index];
       ucon64.console = console;

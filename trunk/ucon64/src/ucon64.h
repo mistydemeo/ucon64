@@ -6,7 +6,7 @@ handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2002 dbjh
+           2001 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -64,6 +64,7 @@ typedef struct st_ucon64
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
   int buheader_len;                             // length of backup unit header 0 == no bu hdr
   int split;                                    // ROM is split
+  int part_size;                                // SNES split part size
   int snes_hirom;                               // SNES ROM is HiROM
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
   int controller;                               // NES UNIF & SNES NSRT

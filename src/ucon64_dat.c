@@ -194,13 +194,14 @@ get_next_file (char *fname)
 
   if (!ddat)
     {
-      sprintf (search_pattern, "%s" FILE_SEPARATOR_S "*", ucon64.datdir);
+      // Note that FindFirstFile() & FindNextFile() are case insensitive
+      sprintf (search_pattern, "%s" FILE_SEPARATOR_S "*.dat", ucon64.datdir);
       if ((ddat = FindFirstFile (search_pattern, &find_data)) == INVALID_HANDLE_VALUE)
         {
           fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.datdir);
           return NULL;
         }
-      else if (!stricmp (get_suffix (find_data.cFileName), ".dat"))
+      else
         {
           sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
           return fname;
@@ -208,11 +209,8 @@ get_next_file (char *fname)
     }
   while (FindNextFile (ddat, &find_data))
     {
-      if (!stricmp (get_suffix (find_data.cFileName), ".dat"))
-        {
-          sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
-          return fname;
-        }
+      sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir, find_data.cFileName);
+      return fname;
     }
 #endif
   closedir_ddat ();

@@ -108,6 +108,13 @@ ftell (FILE *file)
 }
 
 
+void
+rewind (FILE *file)
+{
+  return import_export.rewind (file);
+}
+
+
 // The functions below are only necessary if zlib support is enabled. They are
 //  used by zlib and/or unzip.c.
 void
@@ -224,13 +231,6 @@ int
 mkdir (const char *path, mode_t mode)
 {
   return import_export.mkdir (path, mode);
-}
-
-
-void
-rewind (FILE *file)
-{
-  return import_export.rewind (file);
 }
 
 

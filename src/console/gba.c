@@ -63,7 +63,7 @@ const st_usage_t gba_usage[] =
     {"strip", "N", "strip N Bytes from end of ROM (use " OPTION_LONG_S "ispad before)"},
     {"multi", "SIZE", "make multirom for Flash Advance Linker, truncated to SIZE Mbit;\n"
                       "file with loader must be specified first, then all the ROMs,\n"
-                      "multirom to create last"},
+                      "multirom to create last; use -o to specify output directory"},
     {NULL, NULL, NULL}
   };
 

@@ -157,6 +157,7 @@ const struct option options[] = {
     {"ffe", 0, 0, UCON64_FFE},
     {"fig", 0, 0, UCON64_FIG},
     {"figs", 0, 0, UCON64_FIGS},
+    {"file", 1, 0, UCON64_FILE},
     {"find", 1, 0, UCON64_FIND},
     {"frontend", 0, 0, UCON64_FRONTEND},
     {"gb", 0, 0, UCON64_GB},
@@ -567,7 +568,7 @@ main (int argc, char **argv)
 #endif
 
   // no ROM or FILE argument (for example -dbv)
-    if (rom_index == argc)
+  if (rom_index == argc)
     ucon64_execute_options ();
 
   console = ucon64.console;

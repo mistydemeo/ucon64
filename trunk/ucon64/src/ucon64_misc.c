@@ -600,7 +600,7 @@ ucon64_output_fname (char *requested_fname, int force_requested_fname)
 
   // force_requested_fname is necessary for options like -gd3. Of course that
   //  code should handle archives and come up with unique filenames for
-  //  "multizip" files.
+  //  archives with more than one file.
   if (!ucon64.fname_arch[0] || force_requested_fname)
     {
       strcpy (fname, basename (requested_fname));

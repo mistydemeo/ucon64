@@ -60,7 +60,7 @@ static int score_hirom (unsigned char *rom_buffer, int rom_size);
 
 const char *snes_usage[] =
   {
-    "Super Nintendo/SNES/Super Famicon",
+    "Super Nintendo/SNES/Super Famicom",
     "1990 Nintendo http://www.nintendo.com",
     "  " OPTION_LONG_S "snes        force recognition"
 #ifndef CONSOLE_PROBE
@@ -599,7 +599,7 @@ designed filenames to distinguish between multi files.
 
 Usually, the filename is in the format of: SFXXYYYZ.078
 
-Where SF means Super Famicon, XX refers to the size of the
+Where SF means Super Famicom, XX refers to the size of the
 image in Mbit. If the size is only one character (i.e. 2, 4 or
 8 Mbit) then no leading "0" is inserted.
 
@@ -631,7 +631,8 @@ snes_mgd (st_rominfo_t *rominfo)
   strcpy (buf, findlwr (basename (ucon64.rom)) ? "sf" : "SF");
   strcpy (buf2, ucon64.rom);
   strcat (buf, basename (buf2));
-  if ((p = strrchr (buf, '.'))) *p = 0;
+  if ((p = strrchr (buf, '.')))
+    *p = 0;
   strcat (buf, "________");
   buf[7] = '_';
   buf[8] = 0;
@@ -724,7 +725,8 @@ snes_gd3 (st_rominfo_t *rominfo)
 
   sprintf (buf, "%s%d", findlwr (basename (ucon64.rom)) ? "sf" : "SF", total4Mbparts * 4);
   strcat (buf, basename (ucon64.rom));
-  if ((p = strrchr (buf, '.'))) *p = 0;
+  if ((p = strrchr (buf, '.')))
+    *p = 0;
   strcat (buf, "________");
   buf[7] = 'X';
   buf[8] = 0;
@@ -914,14 +916,11 @@ snes_j (st_rominfo_t *rominfo)
   while (q_fcpy (buf, rominfo->buheader_len, file_size, buf2, "ab") != -1)
     {
       total_size += file_size - rominfo->buheader_len;
-      if ((p = strrchr (buf, '.'))) 
-        (*(p + (!rominfo->buheader_len ? (-1) : 1)))++;
-#if 0  
-      buf[(!rominfo->buheader_len) ?
-           (strrcspn (buf, ".") - 1) :          // without header (see code of "-s")
-           (strrcspn (buf, ".") + 1)            // with header (see code of "-s")
-         ]++;
-#endif         
+      if ((p = strrchr (buf, '.')))
+        (*(p + (!rominfo->buheader_len ?
+                 -1 :                           // without header (see code of "-s")
+                 1                              // with header (see code of "-s")
+               )))++;
     }
 
   if (rominfo->buheader_len)
@@ -960,7 +959,8 @@ snes_s (st_rominfo_t *rominfo)
           strcpy (buf, findlwr (basename (ucon64.rom)) ? "sf" : "SF");
           strcat (buf, basename (ucon64.rom));
         }
-      if ((p = strrchr (buf, '.'))) *p = 0;
+      if ((p = strrchr (buf, '.')))
+        *p = 0;
       strcat (buf, "________");
       buf[7] = findlwr (buf) ? 'a' : 'A';
       buf[8] = 0;
@@ -1671,7 +1671,7 @@ snes_init (st_rominfo_t *rominfo)
                (header.emulation1 == 0x00 && header.emulation2 == 0x80) ||
 #if 1
                // This makes NES FFE ROMs & GameBoy ROMs be detected as SNES
-               //  ROMs, see src/nes/nes.c & src/gb/gb.c
+               //  ROMs, see src/console/nes.c & src/console/gb.c
                (header.emulation1 == 0x00 && header.emulation2 == 0x00) ||
 #endif
                (header.emulation1 == 0x47 && header.emulation2 == 0x83) ||
@@ -1710,7 +1710,7 @@ snes_init (st_rominfo_t *rominfo)
     rominfo->buheader_len = ucon64.buheader_len;
 
   size = rominfo->file_size - rominfo->buheader_len;
-  if (size < 0xff00)
+  if (size < 0xfffd)
     return -1;                                  // don't continue (seg faults!)
   if (ucon64.console == UCON64_SNES || (type != SMC && size <= 16 * 1024 * 1024))
     result = 0;                                 // it seems to be a SNES ROM dump

@@ -132,7 +132,7 @@ information about the size of the image though.
 <p>
 Usually, the filename is in the format of: SFXXYYYZ.078
 <p>
-Where SF means Super Famicon, XX refers to the size of the
+Where SF means Super Famicom, XX refers to the size of the
 image in Mbit. If the size is only one character (i.e. 2, 4 or
 8 Mbit) then no leading "0" is inserted.
 <p>

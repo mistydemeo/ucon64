@@ -234,10 +234,10 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    Then uCON64 calls ucon64.c/ucon64_init() which calls
    ucon64.c/ucon64_console_probe(). The latter calls the init function for all
    the supported console types if the user didn't use a force console switch.
-   For example the init function for SNES is snes/snes.c/snes_init(), for NES
-   nes/nes.c/nes_init(). Each init function tries to determine if the ROM file
-   belongs to its console type. If that is the case it returns 0, otherwise
-   -1.<br>
+   For example the init function for SNES is console/snes.c/snes_init(), for
+   NES console/nes.c/nes_init(). Each init function tries to determine if the
+   ROM file belongs to its console type. If that is the case it returns 0,
+   otherwise -1.<br>
    Some ROM file types contain information such as the internal name, country
    and creator of the game that can be used to fill ucon64.c/main()/rom. SNES
    ROM files are an example of this type of file. For other ROM file types this

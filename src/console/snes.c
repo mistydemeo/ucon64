@@ -1801,7 +1801,7 @@ Search for                            Replace with
 ad 3f 21 89 10 d0                     ad 3f 21 89 10 80                - Terranigma
 ad 3f 21 29 10 00 d0                  ad 3f 21 29 10 00 80
 ad 3f 21 89 10 00 d0                  a9 10 00 89 10 00 d0             - Eric Cantona Football ?
-ad 3f 21 29 10 cf bd ff 00 f0         ad 3f 21 29 10 cf bd ff 00 80    - Tiny Toons - Wild and Wacky Sports ?
+ad 3f 21 29 10 cf bd ff XX f0         ad 3f 21 29 10 cf bd ff XX 80    - Pop'n Twinbee E
 af 3f 21 00 29 10 d0                  af 3f 21 00 29 10 80
 af 3f 21 00 29 10 00 d0               af 3f 21 00 29 10 00 ea ea
 af 3f 21 00 29 XX c9 XX f0            af 3f 21 00 29 XX c9 XX 80       - Secret of Mana E
@@ -1859,7 +1859,7 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
       n += change_mem (buffer, bytesread, "\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, 0);
       n += change_mem (buffer, bytesread, "\xad\x3f\x21\x29\x10\x00\xd0", 7, '\x01', '\x02', "\x80", 1, 0);
       n += change_mem (buffer, bytesread, "\xad\x3f\x21\x89\x10\x00\xd0", 7, '\x01', '\x02', "\xa9\x10\x00", 3, -6);
-      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x29\x10\xcf\xbd\xff\x00\xf0", 10, '\x01', '\x02', "\x80", 1, 0);
+      n += change_mem (buffer, bytesread, "\xad\x3f\x21\x29\x10\xcf\xbd\xff\x01\xf0", 10, '\x01', '\x02', "\x80", 1, 0);
       n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\x80", 1, 0);
       n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x29\x10\x00\xd0", 8, '\x01', '\x02', "\xea\xea", 2, 0);
       n += change_mem (buffer, bytesread, "\xaf\x3f\x21\x00\x29\x01\xc9\x01\xf0", 9, '\x01', '\x02', "\x80", 1, 0);

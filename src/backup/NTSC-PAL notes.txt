@@ -15,7 +15,7 @@ Legend for Code2:
 N1  = 3f 21 29/89 10 f0                     3f 21 29/89 10 80
 N2  = ad 3f 21 29 10 d0                     ad 3f 21 29 10 ea ea
 P3  = ad 3f 21 89 10 d0                     ad 3f 21 89 10 80                - Terranigma
-N4  = ad 3f 21 89 10 d0                     ad 3f 21 89 10 80/(ea ea)        - Live A Live (J)
+N4  = ad 3f 21 89 10 d0                     ad 3f 21 89 10 80/(ea ea)        - Live A Live
 N5  = 3f 21 29/89 10 00 f0                  3f 21 29/89 10 00 80             - Clock Tower
 N6  = 3f 21 29/89 10 00 d0                  3f 21 29/89 10 00 ea ea          - Mario no Super Picross
 P7  = ad 3f 21 29 10 00 d0                  ad 3f 21 29 10 00 80
@@ -26,7 +26,7 @@ N11 = 3f 21 29/89 10 c9 10 f0               3f 21 29/89 10 c9 10 80
 N12 = ad 3f 21 29 10 c9 00 f0               ad 3f 21 29 10 c9 00 80/(ea ea) <= original uCON used 80
 N13 = ad 3f 21 29 10 c9 00 d0               ad 3f 21 29 10 c9 00 80
 N14 = ad 3f 21 29 10 c9 10 d0               ad 3f 21 29 10 c9 10 ea ea
-P15 = ad 3f 21 29 10 cf bd ff 00 f0         ad 3f 21 29 10 cf bd ff 00 80    - Tiny Toons - Wild and Wacky Sports ?
+P15 = ad 3f 21 29 10 cf bd ff XX f0         ad 3f 21 29 10 cf bd ff XX 80    - Pop'n Twinbee E
 N16 =    3f 21 29 10 cf XX YY 80 f0            3f 21 29 10 cf XX YY 80 80    - Gokujyou Parodius/Tokimeki Memorial
 N17 = ad 3f 21 8d XX YY 29 10 8d            ad 3f 21 8d XX YY 29 00 8d       - Dragon Ball Z - Super Butoden 2 ?
 N18 = 3f 21 00 29/89 10 f0                  3f 21 00 29/89 10 80             - Kirby's Dream Course U
@@ -91,6 +91,8 @@ Code1   Code2   Game
 2       N28     Metal Warriors (U)
 2 + 3   N1 + N2 Mickey to Donald Magical Adventure 3 (J) <= emulation mode select byte: 0x1c; (0xad) 0x29
 2       N2      Ninja Gaiden Trilogy (U)
+0       P15     Pop'n Twinbee (E) <= 0x80
+0       P15     Pop'n Twinbee - Rainbow Bell Adventures (E) <= 0x00
 2       N10     Robotrek (U) <= 0x20
 2       N18     Romancing Sa-Ga 2 (J) <= 0x89
 2       N18     Romancing Sa-Ga 3 (J) (V1.0) <= 0x89

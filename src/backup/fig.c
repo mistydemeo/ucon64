@@ -36,6 +36,6 @@ fig_usage (int argc, char *argv[])
     "TODO:  -xfig	send/receive ROM to/from *Pro Fighter* /(all)FIG; $FILE=PORT\n"
      "		receives automatically when $ROM does not exist\n");
 #endif
-#endif BACKUP
+#endif
   return 0;
 }

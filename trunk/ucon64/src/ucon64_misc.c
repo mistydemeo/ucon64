@@ -219,6 +219,15 @@ long filetestpad(	char *filename
 #ifdef BACKUP
 unsigned char inportb(unsigned short port)
 {
+#ifdef __BEOS__
+	IO_Tuple temp;
+        
+	temp.Port = port;
+                
+	ioctl(fd, DRV_READ_IO_8, &temp, 0);
+                        
+	return (temp.Data);
+#else
   unsigned char byte;
 
   __asm__ __volatile__
@@ -228,10 +237,19 @@ unsigned char inportb(unsigned short port)
   );
 
   return byte;
+#endif
 }
 
 unsigned short inportw(unsigned short port)
 {
+#ifdef __BEOS__
+	IO_Tuple temp;
+
+	temp.Port = port;
+	ioctl(fd, DRV_READ_IO_16, &temp, 0);
+
+	return (temp.Data16);
+#else
   unsigned short word;
 
   __asm__ __volatile__
@@ -241,24 +259,45 @@ unsigned short inportw(unsigned short port)
   );
 
   return word;
+#endif
 }
 
 void outportb(unsigned short port, unsigned char byte)
 {
+#ifdef __BEOS__
+	IO_Tuple temp;
+
+	temp.Port = port;
+	temp.Data = byte;
+	ioctl(fd, DRV_WRITE_IO_8, &temp, 0);
+                            
+	return;
+#else
   __asm__ __volatile__
   ("outb %1, %0"
     :
     : "d" (port), "a" (byte)
   );
+#endif
 }
 
 void outportw(unsigned short port, unsigned short word)
 {
+#ifdef __BEOS__
+	IO_Tuple temp;
+        
+	temp.Port = port;
+	temp.Data16 = word;
+	ioctl(fd, DRV_WRITE_IO_16, &temp, 0);
+                                
+	return;
+#else
   __asm__ __volatile__
   ("outw %1, %0"
     :
     : "d" (port), "a" (word)
   );
+#endif
 }
 
 #define DETECT_MAX_CNT 1000
@@ -299,6 +338,10 @@ int detectParPort(unsigned int port)
 #define getParPort(x) parport_probe(x)
 unsigned int parport_probe(unsigned int port)
 {
+#ifdef __BEOS__
+//TODO uhm..
+	fd = open("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
+#else
   unsigned int parPortAddresses[] = {0x3bc, 0x378, 0x278};
   int i;
 
@@ -339,6 +382,7 @@ unsigned int parport_probe(unsigned int port)
   }                                             // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 
   return port;
+#endif
 }
 
 int parport_gauge(time_t init_time, long pos, long size)

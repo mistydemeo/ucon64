@@ -96,7 +96,7 @@ extern const char *unknown_usage[];
   if move_name != NULL then filename will just be moved (renamed) and NOT
   duplicated (faster); move_name will contain the new name then
 */
-extern const char *ucon64_fbackup (char *move_name, const char *filename);
+extern char *ucon64_fbackup (char *move_name, const char *filename);
 extern void handle_existing_file (const char *dest, char *src);
 extern void remove_temp_file (void); // possible temp file created by handle_existing_file()
 
@@ -105,7 +105,7 @@ extern void remove_temp_file (void); // possible temp file created by handle_exi
 */
 extern int ucon64_gauge (time_t init_time, long pos, long size);
 
-extern size_t filepad (const char *filename, long start, long unit);//pad a ROM in Mb
+extern int filepad (const char *filename, int start, int size); // pad a ROM to a certain size
 extern long filetestpad (const char *filename, st_rominfo_t *rominfo); //test if a ROM is padded
 
 extern int ucon64_testsplit (const char *filename);//test if a ROM is split

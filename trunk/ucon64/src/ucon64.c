@@ -208,6 +208,7 @@ const struct option long_options[] = {
     {"p", 0, 0, UCON64_P},
     {"pad", 0, 0, UCON64_PAD},
     {"padhd", 0, 0, UCON64_PADHD},
+    {"padn", 1, 0, UCON64_PADN},
     {"pasofami", 0, 0, UCON64_PASOFAMI},
     {"pce", 0, 0, UCON64_PCE},
     {"port", 1, 0, UCON64_PORT},
@@ -313,7 +314,7 @@ int
 main (int argc, char **argv)
 {
   int ucon64_argc, c = 0, result = 0, value = 0, option_index = 0;
-  unsigned long padded, size = 0;
+  unsigned long padded;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
   const char *ucon64_argv[128];
   st_rominfo_t rom;
@@ -886,6 +887,7 @@ ucon64_usage (int argc, char *argv[])
     "                  most backup units use a header with 512 Bytes size\n"
     "  " OPTION_LONG_S "ispad       check if ROM is padded\n"
     "  " OPTION_S "p, " OPTION_LONG_S "pad    pad ROM to full Mb\n"
+    "  " OPTION_LONG_S "padn=N      pad ROM to N Bytes (put Bytes with value 0x00 after end)\n"
     "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
     , argv[0], ucon64.configfile
   );

@@ -43,15 +43,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  and 24MB copiers.
 */
 
-#include <fcntl.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
-#include <unistd.h>
 #include "../misc.h"
 #include "../ucon64.h"
 #include "../ucon64_db.h"

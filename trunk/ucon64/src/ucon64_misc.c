@@ -219,6 +219,7 @@ fileCRC32 (char *filename, long start)
   like zlib/crc32(); uCON64 has it's own crc calc. stuff
   this is just a wrapper
 */
+/*
 unsigned long
 unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size)
 {
@@ -226,6 +227,7 @@ unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size)
 
   return CalculateBufferCRC ((unsigned int) size, crc, (void *) prg_code);
 }
+*/
 
 char *
 ucon64_fbackup (struct ucon64_ *rom, char *filename)

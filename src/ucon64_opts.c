@@ -624,7 +624,7 @@ ucon64_e (void)
 
   sprintf (buf, "%s \"%s\"", buf2, ucon64.rom);
 
-  printf ("%s\n", buf);
+  puts (buf);
   fflush (stdout);
   sync ();
 

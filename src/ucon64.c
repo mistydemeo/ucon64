@@ -1152,7 +1152,7 @@ ucon64_probe (st_rominfo_t * rominfo)
 int
 ucon64_nfo (void)
 {
-  printf ("%s\n", ucon64.rom);
+  puts (ucon64.rom);
   if (ucon64.fname_arch[0])
     printf ("  (%s)\n", ucon64.fname_arch);
   fputc ('\n', stdout);
@@ -1249,7 +1249,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   if (rominfo->console_usage != NULL)
     {
       strcpy (buf, rominfo->console_usage[0].desc);
-      printf ("%s\n", to_func (buf, strlen (buf), toprint2));
+      puts (to_func (buf, strlen (buf), toprint2));
 
 #if 0
       if (rominfo->console_usage[1].desc)
@@ -1317,7 +1317,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   if (rominfo->misc[0])
     {
       strcpy (buf, rominfo->misc);
-      printf ("%s\n", to_func (buf, strlen (buf), toprint2));
+      puts (to_func (buf, strlen (buf), toprint2));
     }
 
   // internal checksums?
@@ -1355,7 +1355,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
       if (rominfo->internal_crc2[0])
         {
           strcpy (buf, rominfo->internal_crc2);
-          printf ("%s\n", to_func (buf, strlen (buf), toprint2));
+          puts (to_func (buf, strlen (buf), toprint2));
         }
     }
 
@@ -1399,7 +1399,7 @@ ucon64_render_usage (const st_usage_t *usage)
       if (!usage[x].option_s) // title
         {
           if (!x) // do not show date, manufacturer, etc..
-            printf ("%s\n", usage[x].desc);
+            puts (usage[x].desc);
         }
       else  // options
         {

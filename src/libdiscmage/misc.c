@@ -746,12 +746,12 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
 
       *(buf + (pos & 15)) = isprint (*p) ? *p : '.';
       if (!(pos + 1 & 15))
-        printf ("%s\n", buf);
+        puts (buf);
     }
   if (pos & 15)
     {
       *(buf + (pos & 15)) = 0;
-      printf ("%s\n", buf);
+      puts (buf);
     }
 }
 

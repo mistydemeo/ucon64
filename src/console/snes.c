@@ -1828,14 +1828,14 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   else
     {
       int org_snes_header_base = snes_header_base;
-      check_map_type = 0;
       snes_header_base = size / 2;
-      if (check_banktype (rom_buffer, snes_header_base) > banktype_score)
+      if (check_banktype (rom_buffer, size / 2) > banktype_score)
         {
           interleaved = 1;
           snes_hirom = 0;
           snes_hirom_changed = 1;               // keep snes_deinterleave()
-        }                                       //  from changing snes_hirom
+          check_map_type = 0;                   //  from changing snes_hirom
+        }
       snes_header_base = org_snes_header_base;
     }
   if (check_map_type && !snes_hirom)

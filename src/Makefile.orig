@@ -5,7 +5,7 @@ DLOPEN=1
 CC=gcc
 
 CFLAGS=-I. -Wall -O3 -DHAVE_CONFIG_H
-LDFLAGS=-s -lz
+LDFLAGS=-s
 
 LIBNAME=discmage
 
@@ -58,8 +58,9 @@ OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
         backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/gd.o \
         backup/mgd.o backup/smc.o backup/smd.o backup/swc.o backup/dex.o \
         backup/psxpblib.o backup/mccl.o backup/lynxit.o backup/ffe.o
-ZLIB=1
+#ZLIB=1
 ifdef ZLIB
+LDFLAGS+=-lz
 OBJECTS+=unzip.o
 endif
 ifdef DLOPEN

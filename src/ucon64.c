@@ -102,7 +102,8 @@ static int ucon64_init (struct ucon64_ *rom);
 static int ucon64_nfo (struct ucon64_ *rom);
 static int ucon64_flush (int argc, char *argv[], struct ucon64_ *rom);
 static void ucon64_exit (void);
-
+static int ucon64_ls (void);
+static int ucon64_e (void);
 
 struct ucon64_ rom;
 
@@ -392,6 +393,10 @@ main (int argc, char *argv[])
        return 0;
     }
 
+//TODO do the rom.rom and rom.file checking first! ucon64_e() etc. needs this
+
+
+
 /*
   getopt_long_only()
 */
@@ -627,52 +632,7 @@ while ((c =
 
       case 25://ls
       case 26://lsv
-        if (access (rom.rom, R_OK) != 0 || (dp = opendir (rom.rom)) == NULL)
-          return -1;
-
-        getcwd (current_dir, FILENAME_MAX);
-        chdir (rom.rom);
-
-        while ((ep = readdir (dp)) != 0)
-          {
-            if (!stat (ep->d_name, &puffer))
-              {
-                if (S_ISREG (puffer.st_mode))
-                  {
-                    ucon64_argv[0] = "ucon64";
-                    ucon64_argv[1] = ep->d_name;
-                    ucon64_argc = 2;
-
-                    ucon64_flush (ucon64_argc, ucon64_argv, &rom);
-                    strcpy (rom.rom, ep->d_name);
-                    ucon64_init (&rom);
-
-                    if (argcmp (argc, argv, "-ls"))
-                      {
-                        strftime (buf, 13, "%b %d %H:%M",
-                                  localtime (&puffer.st_mtime));
-                        printf ("%-31.31s %10d %s %s\n", rom.name,
-                                (int) puffer.st_size, buf, rom.rom);
-                      }
-                    else if (argcmp (argc, argv, "-lsv"))
-                      ucon64_nfo (&rom);
-/*        
-                    else if (argcmp (argc, argv, "-rrom") &&
-                             rom.console != ucon64_UNKNOWN)
-                             // && rom.console != ucon64_KNOWN)
-                      {
-                        strcpy (buf, &rom.rom[findlast (rom.rom, ".") + 1]);
-                        printf ("%s.%s\n", rom.name, buf);
-                      }
-*/
-                    fflush (stdout);
-                  }
-              }
-          }
-        closedir (dp);
-        chdir (current_dir);
-
-        return 0;
+        return ucon64_ls ();
       break;
 
       default:
@@ -803,76 +763,7 @@ while ((c =
     }
 
   if (argcmp (argc, argv, "-e"))
-    {
-      char *property;
-
-      if (rom.console != ucon64_UNKNOWN /* && rom.console != ucon64_KNOWN */ )
-        sprintf (buf3, "emulate_%s", &forceargs[rom.console][1]);
-      else
-        {
-          printf ("ERROR: could not auto detect the right ROM/console type\n"
-                  "TIP:   If this is a ROM you might try to force the recognition\n"
-                  "       The force recognition option for Super Nintendo would be -snes\n");
-          return -1;
-        }
-
-      if (access (rom.config_file, F_OK) != 0)
-        {
-          printf ("ERROR: %s does not exist\n", rom.config_file);
-          return -1;
-        }
-
-      property = getProperty (rom.config_file, buf3, buf2, NULL);   // buf2 also contains property value
-      if (property == NULL)
-        {
-          printf ("ERROR: could not find the correct settings (%s) in\n"
-                  "       %s\n"
-                  "TIP:   If the wrong console was detected you might try to force recognition\n"
-                  "       The force recognition option for Super Nintendo would be -snes\n",
-                  buf3, rom.config_file);
-          return -1;
-        }
-
-      sprintf (buf, "%s %s", buf2, rom.file);
-      for (x = 0; x < argc; x++)
-        {
-          if (strdcmp (argv[x], "-e")
-              && strdcmp (argv[x], getarg (argc, argv, ucon64_NAME))
-              && strdcmp (argv[x], rom.file))
-            {
-              sprintf (buf2, ((!strdcmp (argv[x], rom.rom)) ? " \"%s\"" :       /*" %s" */
-                              ""), argv[x]);
-              strcat (buf, buf2);
-            }
-        }
-
-      printf ("%s\n", buf);
-      fflush (stdout);
-      sync ();
-
-      x = system (buf);
-#ifndef __MSDOS__
-      x >>= 8;                  // the exit code is coded in bits 8-15
-#endif                          //  (that is, under Unix & BeOS)
-
-#if 1
-      // Snes9x (Linux) for example returns a non-zero value on a normal exit
-      //  (3)...
-      // under WinDOS, system() immediately returns with exit code 0 when
-      //  starting a Windows executable (as if fork() was called) it also
-      //  returns 0 when the exe could not be started
-      if (x != 127 && x != -1 && x != 0)        // 127 && -1 are system() errors, rest are exit codes
-        {
-          printf ("ERROR: the Emulator returned an error code (%d)\n"
-                  "TIP:   If the wrong emulator was used you might try to force recognition\n"
-                  "       The force recognition option for Super Nintendo would be -snes\n",
-                  (int) x);
-          return x;
-        }
-#endif
-
-      return 0;
-    }
+    ucon64_e();
 
   switch (rom.console)
     {
@@ -1723,9 +1614,128 @@ ucon64_flush (int argc, char *argv[], struct ucon64_ *rom)
   return 0;
 }
 
+int ucon64_e(void)
+    {
+      char *property;
 
+      if (rom.console != ucon64_UNKNOWN /* && rom.console != ucon64_KNOWN */ )
+        sprintf (buf3, "emulate_%s", &forceargs[rom.console][1]);
+      else
+        {
+          printf ("ERROR: could not auto detect the right ROM/console type\n"
+                  "TIP:   If this is a ROM you might try to force the recognition\n"
+                  "       The force recognition option for Super Nintendo would be -snes\n");
+          return -1;
+        }
 
+      if (access (rom.config_file, F_OK) != 0)
+        {
+          printf ("ERROR: %s does not exist\n", rom.config_file);
+          return -1;
+        }
 
+      property = getProperty (rom.config_file, buf3, buf2, NULL);   // buf2 also contains property value
+      if (property == NULL)
+        {
+          printf ("ERROR: could not find the correct settings (%s) in\n"
+                  "       %s\n"
+                  "TIP:   If the wrong console was detected you might try to force recognition\n"
+                  "       The force recognition option for Super Nintendo would be -snes\n",
+                  buf3, rom.config_file);
+          return -1;
+        }
+
+      sprintf (buf, "%s %s", buf2, rom.file);
+      for (x = 0; x < argc; x++)
+        {
+          if (strdcmp (argv[x], "-e")
+              && strdcmp (argv[x], getarg (argc, argv, ucon64_NAME))
+              && strdcmp (argv[x], rom.file))
+            {
+              sprintf (buf2, ((!strdcmp (argv[x], rom.rom)) ? " \"%s\"" :       /*" %s" */
+                              ""), argv[x]);
+              strcat (buf, buf2);
+            }
+        }
+
+      printf ("%s\n", buf);
+      fflush (stdout);
+      sync ();
+
+      x = system (buf);
+#ifndef __MSDOS__
+      x >>= 8;                  // the exit code is coded in bits 8-15
+#endif                          //  (that is, under Unix & BeOS)
+
+#if 1
+      // Snes9x (Linux) for example returns a non-zero value on a normal exit
+      //  (3)...
+      // under WinDOS, system() immediately returns with exit code 0 when
+      //  starting a Windows executable (as if fork() was called) it also
+      //  returns 0 when the exe could not be started
+      if (x != 127 && x != -1 && x != 0)        // 127 && -1 are system() errors, rest are exit codes
+        {
+          printf ("ERROR: the Emulator returned an error code (%d)\n"
+                  "TIP:   If the wrong emulator was used you might try to force recognition\n"
+                  "       The force recognition option for Super Nintendo would be -snes\n",
+                  (int) x);
+          return x;
+        }
+#endif
+
+      return 0;
+    }
+
+int ucon64_ls(void)
+{
+        if (access (rom.rom, R_OK) != 0 || (dp = opendir (rom.rom)) == NULL)
+          return -1;
+
+        getcwd (current_dir, FILENAME_MAX);
+        chdir (rom.rom);
+
+        while ((ep = readdir (dp)) != 0)
+          {
+            if (!stat (ep->d_name, &puffer))
+              {
+                if (S_ISREG (puffer.st_mode))
+                  {
+                    ucon64_argv[0] = "ucon64";
+                    ucon64_argv[1] = ep->d_name;
+                    ucon64_argc = 2;
+
+                    ucon64_flush (ucon64_argc, ucon64_argv, &rom);
+                    strcpy (rom.rom, ep->d_name);
+                    ucon64_init (&rom);
+
+                    if (argcmp (argc, argv, "-ls"))
+                      {
+                        strftime (buf, 13, "%b %d %H:%M",
+                                  localtime (&puffer.st_mtime));
+                        printf ("%-31.31s %10d %s %s\n", rom.name,
+                                (int) puffer.st_size, buf, rom.rom);
+                      }
+                    else if (argcmp (argc, argv, "-lsv"))
+                      ucon64_nfo (&rom);
+/*TODO renamer!
+                    else if (argcmp (argc, argv, "-rrom") &&
+                             rom.console != ucon64_UNKNOWN)
+                             // && rom.console != ucon64_KNOWN)
+                      {
+                        strcpy (buf, &rom.rom[findlast (rom.rom, ".") + 1]);
+                        printf ("%s.%s\n", rom.name, buf);
+                      }
+*/
+                    fflush (stdout);
+                  }
+              }
+          }
+        closedir (dp);
+        chdir (current_dir);
+
+        return 0;
+
+}
 
 
 

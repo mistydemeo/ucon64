@@ -1,7 +1,7 @@
 /*
-pce.c - PC-Engine support for uCON64
+swc.h - Magic Super Griffin support for uCON64
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+written by 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -18,13 +18,29 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef PCE_H
-#define PCE_H
-extern const st_usage_t pcengine_usage[];
+#ifndef MSG_H
+#define MSG_H
 
-extern int pcengine_init (st_rominfo_t *rominfo);
-extern int pcengine_mgd (st_rominfo_t *rominfo);
-extern int pcengine_msg (st_rominfo_t *rominfo);
-extern int pcengine_swap (st_rominfo_t *rominfo);
+extern const st_usage_t msg_usage[];
 
-#endif // PCE_H
+// For the header format, see ffe.h
+typedef struct st_msg_header
+{
+  unsigned char size;
+  unsigned char emulation;
+  unsigned char pad[6];
+  unsigned char id1;
+  unsigned char id2;
+  unsigned char type;
+  unsigned char pad2[501];
+} st_msg_header_t;
+
+#define MSG_HEADER_START 0
+#define MSG_HEADER_LEN (sizeof (st_msg_header_t))
+
+#ifdef PARALLEL
+extern int msg_read_rom (const char *filename, unsigned int parport);
+extern int msg_write_rom (const char *filename, unsigned int parport);
+#endif // PARALLEL
+
+#endif // MSG_H

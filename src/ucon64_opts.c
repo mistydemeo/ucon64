@@ -269,6 +269,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XMCCL:
     case UCON64_XMD:
     case UCON64_XMDS:
+    case UCON64_XMSG:
     case UCON64_XSMD:
     case UCON64_XSMDS:
     case UCON64_XSWC:
@@ -1354,6 +1355,10 @@ ucon64_options (int c, const char *optarg)
         }
       break;
 
+    case UCON64_LSRAM:
+      n64_sram (ucon64.rominfo, optarg);
+      break;
+
     case UCON64_LYX:
       lynx_lyx (ucon64.rominfo);
       break;
@@ -1388,6 +1393,10 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_MGDGG:
       sms_mgd (ucon64.rominfo, UCON64_GAMEGEAR);
+      break;
+
+    case UCON64_MSG:
+      pcengine_msg (ucon64.rominfo);
       break;
 
     case UCON64_N:
@@ -1536,16 +1545,8 @@ ucon64_options (int c, const char *optarg)
         }
       break;
 
-    case UCON64_SMG:
-      pcengine_smg (ucon64.rominfo);
-      break;
-
     case UCON64_SRAM:
       gba_sram ();
-      break;
-
-    case UCON64_LSRAM:
-      n64_sram (ucon64.rominfo, optarg);
       break;
 
     case UCON64_SSC:
@@ -1587,32 +1588,32 @@ ucon64_options (int c, const char *optarg)
       checks if an option was used that should stop uCON64.
     */
     case UCON64_XDEX:
-      if (!access (ucon64.rom, F_OK))
+      if (access (ucon64.rom, F_OK) != 0)
         {
-          if (dex_write_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport) != 0)
+          if (dex_read_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       else
         {
-          if (dex_read_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport) != 0)
+          if (dex_write_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       fputc ('\n', stdout);
       break;
 
     case UCON64_XDJR:
-      if (!access (ucon64.rom, F_OK))
+      if (access (ucon64.rom, F_OK) != 0)
         {
-          if (!ucon64.rominfo->interleaved)
-            fprintf (stderr,
-                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 Junior only\n"
-                     "       supports interleaved ROMs. Convert to a Doctor V64 compatible format.\n");
-          else if (doctor64jr_write (ucon64.rom, ucon64.parport) != 0)
+          if (doctor64jr_read (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       else
         {
-          if (doctor64jr_read (ucon64.rom, ucon64.parport) != 0)
+          if (!ucon64.rominfo->interleaved)
+            fprintf (stderr,
+                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 Junior only\n"
+                     "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n");
+          else if (doctor64jr_write (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       fputc ('\n', stdout);
@@ -1625,11 +1626,11 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to a FIG compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to a FIG compatible format\n");
           else if (ucon64.rominfo->interleaved)
             fprintf (stderr,
                      "ERROR: This ROM seems to be interleaved but the FIG doesn't support\n"
-                     "       interleaved ROMs. Convert to a FIG compatible format.\n");
+                     "       interleaved ROMs. Convert to a FIG compatible format\n");
           else // file exists -> send it to the copier
             fig_write_rom (ucon64.rom, ucon64.parport);
         }
@@ -1651,7 +1652,7 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n");
           else
             gd3_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo); // file exists -> send it to the copier
         }
@@ -1673,7 +1674,7 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n");
           else
             gd6_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo);
         }
@@ -1696,7 +1697,7 @@ ucon64_options (int c, const char *optarg)
           if (genesis_get_file_type () != BIN)
             fprintf (stderr,
                      "ERROR: This ROM is not in binary/BIN/RAW format. uCON64 only supports sending\n"
-                     "       binary files to the MD-PRO. Convert ROM with -bin.\n");
+                     "       binary files to the MD-PRO. Convert ROM with -bin\n");
           else
             md_write_rom (ucon64.rom, ucon64.parport);
         }
@@ -1711,6 +1712,24 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
+    case UCON64_XMSG:
+      if (access (ucon64.rom, F_OK) != 0)
+        msg_read_rom (ucon64.rom, ucon64.parport);
+      else
+        {
+          if (!ucon64.rominfo->buheader_len)
+            fprintf (stderr,
+                     "ERROR: This ROM has no header. Convert to an MSG compatible format\n");
+          else if (ucon64.rominfo->interleaved)
+            fprintf (stderr,
+                     "ERROR: This ROM seems to be bit-swapped but the MSG doesn't support\n"
+                     "       bit-swapped ROMs. Convert to an MSG compatible format\n");
+          else
+            msg_write_rom (ucon64.rom, ucon64.parport);
+        }
+      fputc ('\n', stdout);
+      break;
+
     case UCON64_XSMD:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
         smd_read_rom (ucon64.rom, ucon64.parport);
@@ -1718,11 +1737,11 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to an SMD compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to an SMD compatible format\n");
           else if (!ucon64.rominfo->interleaved)
             fprintf (stderr,
                      "ERROR: This ROM doesn't seem to be interleaved but the SMD only supports\n"
-                     "       interleaved ROMs. Convert to an SMD compatible format.\n");
+                     "       interleaved ROMs. Convert to an SMD compatible format\n");
           else
             smd_write_rom (ucon64.rom, ucon64.parport);
         }
@@ -1754,11 +1773,11 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to an SWC compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to an SWC compatible format\n");
           else if (ucon64.rominfo->interleaved)
             fprintf (stderr,
                      "ERROR: This ROM seems to be interleaved but the SWC doesn't support\n"
-                     "       interleaved ROMs. Convert to an SWC compatible format.\n");
+                     "       interleaved ROMs. Convert to an SWC compatible format\n");
           else
             {
               if (enableRTS != 0)
@@ -1787,19 +1806,19 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_XV64:
-      if (!access (ucon64.rom, F_OK))
+      if (access (ucon64.rom, F_OK) != 0)
         {
-          if (!ucon64.rominfo->interleaved)
-            fprintf (stderr,
-                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 only\n"
-                     "       supports interleaved ROMs. Convert to a Doctor V64 compatible format.\n");
-          else if (doctor64_write (ucon64.rom, ucon64.rominfo->buheader_len,
-                                   ucon64.file_size, ucon64.parport) != 0)
+          if (doctor64_read (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       else
         {
-          if (doctor64_read (ucon64.rom, ucon64.parport) != 0)
+          if (!ucon64.rominfo->interleaved)
+            fprintf (stderr,
+                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 only\n"
+                     "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n");
+          else if (doctor64_write (ucon64.rom, ucon64.rominfo->buheader_len,
+                                   ucon64.file_size, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       fputc ('\n', stdout);

@@ -484,6 +484,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_LSRAM, UCON64_N64, n64_usage,        WF_INIT|WF_PROBE},
   {UCON64_LYX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
   {UCON64_MGDGG, UCON64_SMS, sms_usage,        WF_DEFAULT|WF_NO_SPLIT},
+  {UCON64_MSG, UCON64_PCE, pcengine_usage,     WF_DEFAULT},
 #if 1 // -multi is now used for GBA *and* Genesis
   {UCON64_MULTI, UCON64_UNKNOWN, NULL,         WF_INIT|WF_PROBE|WF_STOP},
 #else
@@ -499,7 +500,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_SAM, UCON64_NG, neogeo_usage,        WF_DEFAULT},
   {UCON64_SGB, UCON64_GB, gameboy_usage,       WF_DEFAULT},
   {UCON64_SMC, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
-  {UCON64_SMG, UCON64_PCE, pcengine_usage,     WF_DEFAULT},
   {UCON64_SRAM, UCON64_GBA, gba_usage,         0},
   {UCON64_SSC, UCON64_GB, gameboy_usage,       WF_DEFAULT},
   {UCON64_SWC, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
@@ -532,6 +532,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XMCCL, UCON64_LYNX, mccl_usage,      WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_XMD, UCON64_GEN, md_usage,           WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XMDS, UCON64_GEN, md_usage,          WF_STOP|WF_NO_ROM},
+  {UCON64_XMSG, UCON64_PCE, pcengine_usage,    WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
 #if 1
   {UCON64_XSMD, UCON64_GEN, smd_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XSMDS, UCON64_GEN, smd_usage,        WF_STOP|WF_NO_ROM},
@@ -540,8 +541,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XSMDS, UCON64_UNKNOWN, smd_usage,    WF_STOP|WF_NO_ROM},
 #endif
   {UCON64_XSWC, UCON64_SNES, swc_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
-  {UCON64_XSWC_SUPER, UCON64_SNES, swc_usage,  WF_STOP|WF_NO_SPLIT|WF_NO_ROM}, // receive only
   {UCON64_XSWC2, UCON64_SNES, swc_usage,       WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XSWC_SUPER, UCON64_SNES, swc_usage,  WF_STOP|WF_NO_SPLIT|WF_NO_ROM}, // receive only
   {UCON64_XSWCR, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XSWCS, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XV64, UCON64_N64, doctor64_usage,    WF_DEFAULT|WF_STOP|WF_NO_ROM},

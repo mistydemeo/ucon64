@@ -213,6 +213,7 @@ const struct option options[] = {
     {"mksheet", 0, 0, UCON64_MKSHEET},
     {"mktoc", 0, 0, UCON64_MKTOC},
 #endif
+    {"msg", 0, 0, UCON64_MSG},
     {"multi", 1, 0, UCON64_MULTI},
 //    {"mvs", 0, 0, UCON64_MVS},
     {"n", 1, 0, UCON64_N},
@@ -277,7 +278,6 @@ const struct option options[] = {
     {"smc", 0, 0, UCON64_SMC},
     {"smd", 0, 0, UCON64_SMD},
     {"smds", 0, 0, UCON64_SMDS},
-    {"smg", 0, 0, UCON64_SMG},
     {"sms", 0, 0, UCON64_SMS},
     {"snes", 0, 0, UCON64_SNES},
     {"sram", 0, 0, UCON64_SRAM},
@@ -326,13 +326,14 @@ const struct option options[] = {
     {"xmccl", 0, 0, UCON64_XMCCL},
     {"xmd", 0, 0, UCON64_XMD},
     {"xmds", 0, 0, UCON64_XMDS},
+    {"xmsg", 0, 0, UCON64_XMSG},
     {"xsmd", 0, 0, UCON64_XSMD},
     {"xsmds", 0, 0, UCON64_XSMDS},
     {"xswc", 0, 0, UCON64_XSWC},
     {"xswc2", 0, 0, UCON64_XSWC2},
+    {"xswc-super", 0, 0, UCON64_XSWC_SUPER},
     {"xswcr", 0, 0, UCON64_XSWCR},
     {"xswcs", 0, 0, UCON64_XSWCS},
-    {"xswc-super", 0, 0, UCON64_XSWC_SUPER},
     {"xv64", 0, 0, UCON64_XV64},
 #endif // PARALLEL
     {"z64", 0, 0, UCON64_Z64},
@@ -1526,9 +1527,9 @@ ucon64_usage (int argc, char *argv[])
 //      cd64_usage,
       dex_usage,
 #else
-      0, 0, 0, 0,
+      0, 0, 0,
 #endif // PARALLEL
-      0}},
+      0, 0}},
     {UCON64_SNES, {snes_usage,
 #ifdef  PARALLEL
       swc_usage,
@@ -1542,17 +1543,17 @@ ucon64_usage (int argc, char *argv[])
     {UCON64_NG, {neogeo_usage, 0, 0, 0, 0, 0}},
     {UCON64_GEN, {genesis_usage,
 #ifdef  PARALLEL
-        smd_usage,
-        md_usage,
-//        mgd_usage,
+      smd_usage,
+      md_usage,
+//      mgd_usage,
 #else
       0, 0,
 #endif // PARALLEL
       0, 0, 0}},
     {UCON64_GB, {gameboy_usage,
 #ifdef  PARALLEL
-        gbx_usage,
-        mccl_usage,
+      gbx_usage,
+      mccl_usage,
 #else
       0, 0,
 #endif // PARALLEL
@@ -1566,7 +1567,10 @@ ucon64_usage (int argc, char *argv[])
       0, 0, 0, 0}},
     {UCON64_PCE, {pcengine_usage,
 #ifdef  PARALLEL
-//        mgd_usage,
+      msg_usage,
+//      mgd_usage,
+#else
+      0, 0,
 #endif // PARALLEL
       0, 0, 0, 0}},
     {UCON64_SMS, {sms_usage, 0, 0, 0, 0, 0}},

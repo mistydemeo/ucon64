@@ -5,7 +5,7 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-written by 1999 - 2001 NoisyB (noisyb@gmx.net)
+written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh
 
 
@@ -25,7 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
-first i want to thank SiGMA SEVEN! who was my mentor and teached me how to
+first I want to thank SiGMA SEVEN! who was my mentor and taught me how to
 write programs in C
 */
 
@@ -92,7 +92,7 @@ ucon64_exit (void)
   if (frontend)
     {
       fclose (frontend_file);
-      remove (FRONTEND_FILENAME);
+//      remove (FRONTEND_FILENAME);
     }
 }
 
@@ -136,16 +136,77 @@ main (int argc, char *argv[])
     "-gc",
     "-xbox"
   };
-
-#ifdef	BACKUP
-#ifdef	__UNIX__
+#if     defined BACKUP && defined __UNIX__
   uid_t uid;
   gid_t gid;
 #endif
+  struct ucon64_ rom;
+
+
+  ucon64_flush (argc, argv, &rom);
+  if (!strlen (rom.rom))
+    getcwd (rom.rom, sizeof (rom.rom));
+
+  printf ("%s\n", ucon64_TITLE);
+  printf ("Uses code from various people. See 'developers.html' for more!\n");
+  printf ("This may be freely redistributed under the terms of the GNU Public License\n\n");
+
+  if (argc < 2 ||
+      argcmp (argc, argv, "-h") ||
+      argcmp (argc, argv, "-help") ||
+      argcmp (argc, argv, "-?"))
+    {
+      ucon64_usage (argc, argv);
+      return (0);
+    }
+
+#ifdef  BACKUP
+  if (rom.file[0])
+    {
+//      strcpy(buf, rom.file);
+      sscanf (rom.file, "%x", &rom.parport);
+    }
+
+  if (!(rom.parport = parport_probe (rom.parport)))
+    ;
+/*
+    printf ("ERROR: no parallel port 0x%s found\n\n", strupr (buf));
+  else
+    printf ("0x%x\n\n", rom.parport);
+*/
+
+#ifdef  __UNIX__
+/*
+  Some code needs us to switch to the real uid and gid. However, other code needs access to
+  I/O ports other than the standard printer port registers. We just do an iopl(3) and all
+  code should be happy. Using iopl(3) enables users to run all code without being root (of
+  course with the uCON64 executable setuid root). Anyone a better idea?
+*/
+#ifdef  __linux__
+  if (iopl (3) == -1)
+    {
+      fprintf (stderr, "Could not set the I/O privilege level to 3\n"
+                       "(This program needs root privileges)\n");
+      return (1);
+    }
 #endif
 
+  // now we can drop privileges
+  uid = getuid ();
+  if (setuid (uid) == -1)
+    {
+      fprintf (stderr, "Could not set uid\n");
+      return (1);
+    }
+  gid = getgid ();                              // This shouldn't be necessary if `make install'
+  if (setgid (gid) == -1)                       //  was used, but just in case (root did `chmod +s')
+    {
+      fprintf (stderr, "Could not set gid\n");
+      return (1);
+    }
+#endif
 
-  struct ucon64_ rom;
+#endif
 
 
 /*
@@ -163,28 +224,22 @@ main (int argc, char *argv[])
 #endif
     }
 
-  ucon64_flush (argc, argv, &rom);
-
-  printf ("%s\n", ucon64_TITLE);
-  printf ("Uses code from various people. See 'developers.html' for more!\n");
-  printf ("This may be freely redistributed under the terms of the GNU Public License\n\n");
-
 
 /*
    configfile handling
 */
-#ifdef	__DOS__
+#ifdef  __DOS__
   strcpy (buf, "ucon64.cfg");
 #else
   sprintf (buf, "%s%c.ucon64rc", getenv ("HOME"), FILE_SEPARATOR);
 #endif
 
-
   if (access (buf, F_OK) == -1)
-    printf ("ERROR: %s not found: creating...", buf);
-  else if (strcmp (getProperty (buf, "version", buf2, NULL), "198") != 0)
+    printf ("WARNING: %s not found: creating...", buf);
+  else if (strcmp (getProperty (buf, "version", buf2, ""), "198") != 0)
     {
-/*      strcpy (buf2, buf);
+/*
+      strcpy (buf2, buf);
       newext (buf2, ".OLD");
 
       printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
@@ -207,6 +262,7 @@ main (int argc, char *argv[])
 
       printf ("OK\n\n");
 */
+      printf("ERROR: old config file (<1.9.8) found (%s), please remove it\n", buf);
       return 0;
     }
 
@@ -271,82 +327,17 @@ main (int argc, char *argv[])
           printf ("OK\n\n");
         }
 
-//  return 0;
+//      return 0;
     }
 
-  if (argc < 2 ||
-      argcmp (argc, argv, "-h") ||
-      argcmp (argc, argv, "-help") || argcmp (argc, argv, "-?"))
+/*
+// TODO shell modus
+  if (argcmp (argc, argv, "-sh"))
     {
-      ucon64_usage (argc, argv);
+      for (;;)
+        printf ("ucon64>");
       return (0);
     }
-
-#ifdef	BACKUP
-  if (rom.file[0])
-    {
-//  strcpy(buf, rom.file);
-      sscanf (rom.file, "%x", &rom.parport);
-    }
-
-  if (!(rom.parport = parport_probe (rom.parport)))
-    ;
-/*
-  printf("ERROR: no parallel port 0x%s found\n\n",strupr(buf));
-else
-  printf("0x%x\n\n",rom.parport);
-*/
-
-#ifdef	__UNIX__
-/*
-  Some code needs us to switch to the real uid and gid. However, other code needs access to
-  I/O ports other than the standard printer port registers. We just do an iopl(3) and all
-  code should be happy. Using iopl(3) enables users to run all code without being root (of
-  course with the uCON64 executable setuid root). Anyone a better idea?
-*/
-#ifdef	__linux__
-  if (iopl (3) == -1)
-    {
-      fprintf (stderr, "Could not set the I/O privilege level to 3\n"
-               "(This program needs root privileges)\n");
-      return (1);
-    }
-#endif
-
-  uid = getuid ();
-  if (setuid (uid) == -1)
-    {
-      fprintf (stderr, "Could not set uid\n");
-      return (1);
-    }
-  gid = getgid ();              // This shouldn't be necessary if `make install'
-  if (setgid (gid) == -1)       //  was used, but just in case (root did `chmod +s')
-    {
-      fprintf (stderr, "Could not set gid\n");
-      return (1);
-    }
-#endif
-
-#endif
-
-
-
-  strcpy (rom.rom, getarg (argc, argv, ucon64_ROM));
-  if (!strlen (rom.rom))
-    getcwd (rom.rom, sizeof (rom.rom));
-
-  strcpy (rom.file, getarg (argc, argv, ucon64_FILE));
-
-/*
-if(argcmp(argc, argv, "-sh"))
-{
-//TODO shell modus
-  for(;;)
-  {
-    printf("ucon64>");
-  }
-  return(0);
-}
 */
 
   if (argcmp (argc, argv, "-crc"))
@@ -360,7 +351,6 @@ if(argcmp(argc, argv, "-sh"))
       printf ("Checksum: %08lx\n\n", fileCRC32 (rom.rom, 512));
       return (0);
     }
-
 
   if (argcmp (argc, argv, "-rl"))
     {
@@ -538,7 +528,7 @@ if(argcmp(argc, argv, "-sh"))
       return (0);
     }
 
-#ifdef	CD
+#ifdef  CD
 
   if (argcmp (argc, argv, "-ppf"))
     {
@@ -1631,9 +1621,6 @@ ucon64_flush (int argc, char *argv[], struct ucon64_ *rom)
 //  for( x = 0 ; x < argc ; x++ )strcpy(rom->argv[x],argv[x]);
   for (x = 0; x < argc; x++)
     rom->argv[x] = argv[x];
-
-  strcpy (rom->name, "");
-//  strcpy(rom->name2,"");
 
   rom->name[0] = 0;
 //  rom->name2[0]=0;

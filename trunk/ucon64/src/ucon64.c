@@ -88,6 +88,7 @@ write programs in C
 #include "backup/smc.h"
 #include "backup/fpl.h"
 #include "backup/mgd.h"
+#include "backup/gbcamera.h"
 
 static void ucon64_exit (void);
 static void usage (const char **usage);
@@ -225,7 +226,6 @@ const struct option long_options[] = {
     {"swap", 0, 0, UCON64_SWAP},
     {"swc", 0, 0, UCON64_SWC},
     {"swcs", 0, 0, UCON64_SWCS},
-    {"tm", 0, 0, UCON64_TM},
     {"ufos", 0, 0, UCON64_UFOS},
     {"unif", 0, 0, UCON64_UNIF},
     {"usms", 0, 0, UCON64_USMS},
@@ -242,6 +242,7 @@ const struct option long_options[] = {
     {"xfalb", 1, 0, UCON64_XFALB},
     {"xfalc", 1, 0, UCON64_XFALC},
     {"xfals", 0, 0, UCON64_XFALS},
+    {"xgbcam", 0, 0, UCON64_XGBCAM},
     {"xgbx", 0, 0, UCON64_XGBX},
     {"xgbxb", 1, 0, UCON64_XGBXB},
     {"xgbxs", 0, 0, UCON64_XGBXS},
@@ -769,6 +770,27 @@ ucon64_usage (int argc, char *argv[])
   printf (cdrw_usage[2]);
 
   printf (
+    "  " OPTION_LONG_S "mktoc       generate TOC file for Cdrdao; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
+    "  " OPTION_LONG_S "mkcue       generate CUE file; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
+//    "                TRACK_MODE='CD_DA'     (2352 Bytes; AUDIO)\n"
+    "                  TRACK_MODE='MODE2_RAW' (2352 Bytes; default)\n"
+    "                  TRACK_MODE='MODE1'     (2048 Bytes; standard ISO9660)\n"
+    "                  TRACK_MODE='MODE1_RAW' (2352 Bytes)\n"
+    "                  TRACK_MODE='MODE2'     (2336 Bytes)\n"
+//    "                TRACK_MODE='MODE2_FORM1'    (2048 Bytes)\n"
+//    "                TRACK_MODE='MODE2_FORM2'    (2324 Bytes)\n"
+//    "                TRACK_MODE='MODE2_FORM_MIX' (2336 Bytes)\n"
+//    "NOTE: " OPTION_LONG_S "file=TRACK_MODE is optional and MODE2_RAW the default\n"
+//    "NOTE: currently Cdrdao (http://cdrdao.sf.net) is used as burn engine\n"
+//    "TODO:  " OPTION_LONG_S "toc    convert CloneCD *.cue to cdrdao *.toc\n"
+//    "TODO:  " OPTION_LONG_S "cue    convert cdrdao *.toc to *.cue\n"
+    "  " OPTION_LONG_S "iso         convert MODE1_RAW/MODE2(_RAW) to MODE1/2048; " OPTION_LONG_S "rom=CD_IMAGE\n"
+    "                  this might be useful if you made a MODE2_RAW image of a\n"
+    "                  MODE1/2048 CD and want to "
+#ifdef __linux__
+    "mount or "
+#endif
+    "burn it as MODE1/2048\n"
     "  " OPTION_LONG_S "help        display this help and exit\n"
     "  " OPTION_LONG_S "version     output version information and exit\n"
 //    "  " OPTION_LONG_S "quiet       don't show output\n"
@@ -846,6 +868,7 @@ ucon64_usage (int argc, char *argv[])
         usage (gameboy_usage);
 #ifdef BACKUP
         usage (gbx_usage);
+        usage (gbcamera_usage);
 #endif // BACKUP
         single = 1;
         break;
@@ -955,6 +978,7 @@ ucon64_usage (int argc, char *argv[])
       usage (gameboy_usage);
 #ifdef BACKUP
       usage (gbx_usage);
+      usage (gbcamera_usage);
 #endif // BACKUP
       printf ("\n");
 

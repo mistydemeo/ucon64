@@ -696,7 +696,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_Q, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_QQ, UCON64_UNKNOWN, NULL,            WF_SWITCH},
   {UCON64_ROM, UCON64_UNKNOWN, NULL,           WF_SWITCH},
-  {UCON64_SSIZE, UCON64_SNES, snes_usage,      WF_SWITCH},
+  {UCON64_SSIZE, UCON64_UNKNOWN, NULL,         WF_SWITCH}, // for SNES & Genesis
   {UCON64_V, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_VRAM, UCON64_NES, nes_usage,         WF_SWITCH},
 #ifdef  PARALLEL

@@ -134,8 +134,26 @@ Q25: <a href="#25">When I try to create a multirom under Windows I get the messa
 <p>
 <a name="7"><b>Q7</b>: I tried to dump a SNES cartridge using a Super Wild Card connected to my PC with an
    interlink cable, but it didn't work. What's wrong?</a><br>
-<b>A</b>: You shouldn't use an interlink cable, but an ordinary parallel cable. Look at the end of
-   the source file src/backup/swc.c to see how the pins of the connectors should be connected.<br>
+<b>A</b>: You shouldn't use an interlink cable, but a standard bidirectional parallel cable,
+   i.e., a cable with male DB-25 connectors at both ends where the pins are connected in the
+   following way:<br>
+   pin 1&nbsp; &#60;-&#62; pin 1<br>
+   pin 2&nbsp; &#60;-&#62; pin 2<br>
+   pin 3&nbsp; &#60;-&#62; pin 3<br>
+   pin 4&nbsp; &#60;-&#62; pin 4<br>
+   pin 5&nbsp; &#60;-&#62; pin 5<br>
+   pin 6&nbsp; &#60;-&#62; pin 6<br>
+   pin 7&nbsp; &#60;-&#62; pin 7<br>
+   pin 8&nbsp; &#60;-&#62; pin 8<br>
+   pin 9&nbsp; &#60;-&#62; pin 9<br>
+   pin 10 &#60;-&#62; pin 10<br>
+   pin 11 &#60;-&#62; pin 11<br>
+   pin 12 &#60;-&#62; pin 12<br>
+   pin 13 &#60;-&#62; pin 13<br>
+   pin 15 &#60;-&#62; pin 15<br>
+   pin 25 &#60;-&#62; pin 25<br>
+   Pins 2-9 are used for output, pins 10-13 & 15 for input and pin
+   25 is ground. The other pins may be left unconnected.<br>
 <br>
 <p>
 <a name="8"><b>Q8</b>: I have a SNES ROM of which GoodSNES says it's good, but uCON64 says it's bad.

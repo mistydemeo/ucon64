@@ -1,3 +1,4 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
 /*
 config.h - config file for uCON64
 
@@ -38,7 +39,7 @@ it is also a good start to add support for a new console
 
   comment this to disable it even if the configure script found zlib
 */
-@DEFINE_ZLIB@
+
 
 
 /*
@@ -83,10 +84,9 @@ it is also a good start to add support for a new console
 */
 #define ANSI_COLOR
 
-/* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define to empty if the keyword does not work.  */
-#undef const
+//#undef const
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef gid_t
@@ -114,6 +114,14 @@ it is also a good start to add support for a new console
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef uid_t
+
+/* Define if you have the basename function.  */
+#ifndef HAVE_BASENAME
+#undef HAVE_BASENAME
+#endif
+
+/* Define if you have the dirname function.  */
+#undef HAVE_DIRNAME
 
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD

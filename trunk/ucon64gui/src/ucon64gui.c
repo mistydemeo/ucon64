@@ -3,8 +3,6 @@
 struct html2gui_ index_html;
 struct html2gui_ snes_html;
 
-GtkWidget *file;
-
 struct ucon64gui_
 {
 
@@ -24,28 +22,15 @@ ucon64_system (void)
 }
 
 void
-ucon64_rom_ (void)
-{
-  strcpy (ucon64.rom, gtk_file_selection_get_filename (GTK_FILE_SELECTION (file)));
-}
-
-void
 ucon64_rom (void)
 {
-  file = html2gui_file (ucon64_rom_, ucon64.rom);
-}
-
-void
-ucon64_file_ (void)
-{
-//better use an input box than a filedialog
-
-  strcpy (ucon64.rom, gtk_file_selection_get_filename (GTK_FILE_SELECTION (file)));
+  html2gui_file (&index_html, "Select ROM", ucon64.rom);
 }
 
 void
 ucon64_nfo (void)
 {
+  strcpy(ucon64.rom, html2gui_filename);
   sprintf (ucon64.cmd, "ucon64 \"%s\"", ucon64.rom);
   ucon64_system ();
 }
@@ -78,6 +63,8 @@ main (int argc, char *argv[])
   html2gui_br (&index_html);
 
   html2gui_button (&index_html, ucon64_ls, "ROM list", "Click here to see romlist of current dir", 10, 10, icon_xpm);
+
+  html2gui_html_end (&index_html);
 //</html>
 
 //<html>
@@ -86,6 +73,8 @@ main (int argc, char *argv[])
   html2gui_title (&snes_html, "ucon64gui", icon_xpm);
 
   html2gui_button (&snes_html, ucon64_nfo, "NFO", "Click here to see ROM info", 10, 10, icon_xpm);
+
+  html2gui_html_end (&snes_html);
 //</html>
 
   gtk_main ();

@@ -61,3 +61,6 @@
 #
 # Dixie Kong's Double Trouble E. U version looks like it already has been "patched"
 # a9 c3 80 dd ff ff f0 6c :      01:  02: f0 cc ff ff 80 7d : -5
+#
+# Front Mission - Gun Hazard
+d0 f4 ab cf ae ff 00 d0 01:  03: 04:  00:     0

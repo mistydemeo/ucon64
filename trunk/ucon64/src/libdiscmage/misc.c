@@ -376,16 +376,17 @@ strcasestr2 (const char *str, const char *search)
 char *
 set_suffix (char *filename, const char *suffix)
 {
-  char suffix2[FILENAME_MAX],
-       *p = basename (filename) ? basename (filename) : filename,
-       *p2 = NULL;
+  char suffix2[FILENAME_MAX], *p, *p2 = NULL;
+
+  p = basename (filename);
+  if (!p)
+    p = filename;
 
   if ((p2 = strrchr (p, '.')))
     if (strcmp (p2 ,p) != 0)                    // some files start with '.'
       *p2 = 0;
 
   strcpy (suffix2, suffix);
-
   p = basename (filename);
   strcat (filename, is_func (p, strlen (p), isupper) ? strupr (suffix2) : strlwr (suffix2));
 

@@ -86,12 +86,15 @@ remove_destfile (void)
 
 // based on IPS v1.0 for UNIX by madman
 int
-ips_apply (const char *modname, const char *ipsname)
+ips_apply (const char *mod, const char *ipsname)
 {
   unsigned char byte, byte2, byte3, magic[6];
+  char modname[FILENAME_MAX];
   unsigned int offset, length, i;
 
-  ucon64_file_handler (modname, NULL, 0);
+  strcpy (modname, mod);
+  if (!ucon64_file_handler (modname, NULL, 0))
+    q_fcpy (mod, 0, q_fsize (mod), modname, "wb");
 
   if ((modfile = fopen (modname, "rb+")) == NULL)
     {

@@ -266,15 +266,17 @@ gameboy_sgb (st_rominfo_t *rominfo)
 int
 gameboy_n (st_rominfo_t *rominfo, const char *name)
 {
-  char buf[MAXBUFSIZE];
+  char buf[MAXBUFSIZE], dest_name[FILENAME_MAX];
 
   memset (buf, 0, MAXBUFSIZE);
   strcpy (buf, name);
-  ucon64_file_handler (ucon64.rom, NULL, 0);
+  strcpy (dest_name, ucon64.rom);
+  if (!ucon64_file_handler (dest_name, NULL, 0))
+    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
   q_fwrite (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x034, 16,
-            ucon64.rom, "r+b");
+            dest_name, "r+b");
 
-  printf (ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -282,24 +284,26 @@ gameboy_n (st_rominfo_t *rominfo, const char *name)
 int
 gameboy_chk (st_rominfo_t *rominfo)
 {
-  char buf[4];
+  char buf[4], dest_name[FILENAME_MAX];
 
-  ucon64_file_handler (ucon64.rom, NULL, 0);
+  strcpy (dest_name, ucon64.rom);
+  if (!ucon64_file_handler (dest_name, NULL, 0))
+    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
 
-  q_fputc (ucon64.rom,
+  q_fputc (dest_name,
               GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d,
               checksum.complement, "r+b");
-  q_fputc (ucon64.rom,
+  q_fputc (dest_name,
               GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4e,
               (rominfo->current_internal_crc & 0xff00) >> 8, "r+b");
-  q_fputc (ucon64.rom, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4f,
+  q_fputc (dest_name, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4f,
               rominfo->current_internal_crc & 0xff, "r+b");
 
-  q_fread (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d, 3, ucon64.rom);
+  q_fread (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d, 3, dest_name);
 
   mem_hexdump (buf, 3, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d);
 
-  printf (ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 

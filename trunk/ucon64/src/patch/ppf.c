@@ -140,14 +140,17 @@ AREA, because it is located after the patch data!
 
 // based on source code of ApplyPPF v2.0 for Linux/Unix by Icarus/Paradox
 int
-ppf_apply (const char *modname, const char *ppfname)
+ppf_apply (const char *mod, const char *ppfname)
 {
   FILE *modfile, *ppffile;
-  char desc[50 + 1], diz[MAX_ID_SIZE + 1], buffer[1024], ppfblock[1024];
+  char desc[50 + 1], diz[MAX_ID_SIZE + 1], buffer[1024], ppfblock[1024],
+       modname[FILENAME_MAX];
   int x, method, dizlen = 0, modlen, ppfsize, bytes_to_skip = 0, n_changes;
   unsigned int pos;
 
-  ucon64_file_handler (modname, NULL, 0);
+  strcpy (modname, mod);
+  if (!ucon64_file_handler (modname, NULL, 0))
+    q_fcpy (mod, 0, q_fsize (mod), modname, "wb");
 
   if ((modfile = fopen (modname, "rb+")) == NULL)
     {
@@ -425,13 +428,15 @@ ppf_create (const char *orgname, const char *modname)
 
 
 int
-ppf_set_desc (const char *ppfname, const char *description)
+ppf_set_desc (const char *ppf, const char *description)
 {
-  char desc[50];
+  char desc[50], ppfname[FILENAME_MAX];
 
+  strcpy (ppfname, ppf);
   memset (desc, ' ', 50);
   strncpy (desc, description, strlen (description));
-  ucon64_file_handler (ppfname, NULL, 0);
+  if (!ucon64_file_handler (ppfname, NULL, 0))
+    q_fcpy (ppf, 0, q_fsize (ppf), ppfname, "wb");
   q_fwrite (desc, 6, 50, ppfname, "r+b");
   printf (ucon64_msg[WROTE], ppfname);
 
@@ -440,12 +445,15 @@ ppf_set_desc (const char *ppfname, const char *description)
 
 
 int
-ppf_set_fid (const char *ppfname, const char *fidname)
+ppf_set_fid (const char *ppf, const char *fidname)
 {
   int fidsize, ppfsize, pos;
-  char fidbuf[MAX_ID_SIZE + 34 + 1] = "@BEGIN_FILE_ID.DIZ"; // +1 for string terminator
+  char ppfname[FILENAME_MAX],
+       fidbuf[MAX_ID_SIZE + 34 + 1] = "@BEGIN_FILE_ID.DIZ"; // +1 for string terminator
 
-  ucon64_file_handler (ppfname, NULL, 0);
+  strcpy (ppfname, ppf);
+  if (!ucon64_file_handler (ppfname, NULL, 0))
+    q_fcpy (ppf, 0, q_fsize (ppf), ppfname, "wb");
 
   printf ("Adding file_id.diz (%s)...\n", fidname);
   fidsize = q_fread (fidbuf + 18, 0, MAX_ID_SIZE, fidname);

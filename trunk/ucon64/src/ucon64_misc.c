@@ -788,8 +788,8 @@ static int ucon64_io_fd;
 #endif
 
 
-void
-ucon64_file_handler (const char *dest, char *src, int flags)
+int
+ucon64_file_handler (char *dest, char *src, int flags)
 /*
   We have to handle the following cases (for example -swc and rom.swc exists):
   1) ucon64 -swc rom.swc
@@ -806,13 +806,14 @@ ucon64_file_handler (const char *dest, char *src, int flags)
     b) with backup creation disabled
        Do nothing
        postcondition: src == rom.fig
+
+  This function returns 1 if dest existed (in the directory specified with -o).
+  Otherwise it returns 0;
 */
 {
   struct stat src_info, dest_info;
 
-#if 0
-  ucon64_output_fname (dest_name, flags);       // call this function unconditionally
-#endif
+  ucon64_output_fname (dest, flags);            // call this function unconditionally
 
   ucon64_temp_file = NULL;
   if (!access (dest, F_OK))
@@ -826,7 +827,7 @@ ucon64_file_handler (const char *dest, char *src, int flags)
         {
           if (ucon64.backup)
             printf ("Wrote backup to: %s\n", q_fbackup (dest, BAK_DUPE));
-          return;
+          return 1;
         }
 
       // Check if src and dest are the same file based on the inode and device info,
@@ -850,7 +851,9 @@ ucon64_file_handler (const char *dest, char *src, int flags)
           if (ucon64.backup)                    // case 2a
             printf ("Wrote backup to: %s\n", q_fbackup (dest, BAK_DUPE));
         }
+      return 1;
     }
+  return 0;
 }
 
 

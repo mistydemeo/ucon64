@@ -6657,7 +6657,7 @@ nes_s (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".PRM");
-  ucon64_file_handler (dest_name, NULL, 0);
+  ucon64_output_fname (dest_name, 0);
   write_prm (&ines_header, dest_name);
 
   if (ines_header.ctrl1 & INES_TRAINER)

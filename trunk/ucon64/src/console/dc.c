@@ -132,7 +132,7 @@ trim (char *str)
 
 
 int
-parse_input (FILE * fh, char *ip)
+parse_input (FILE *fh, char *ip)
 {
   static char buf[80];
   int i;
@@ -221,7 +221,7 @@ update_crc (char *ip)
 
 
 int
-dc_mkip (st_rominfo_t * rominfo, const char *ip_file)  /* make ip */
+dc_mkip (st_rominfo_t *rominfo, const char *ip_file)  /* make ip */
 {
 /* in
 Hardware ID   : SEGA SEGAKATANA
@@ -236,25 +236,22 @@ Boot Filename : 1ST_READ.BIN
 SW Maker Name : YOUR NAME HERE
 Game Title    : TITLE OF THE SOFTWARE
 */
-  const char *in = NULL;
   FILE *fh;
-  static char ip[0x8000];
+  char ip[0x8000], dest_name[FILENAME_MAX], *in = NULL; // TODO: something that sets this var :-)
 
   if (!(fh = fopen (in, "rb")))
     return -1;
-
   if (!parse_input (fh, ip))
     return -1;
 
   fclose (fh);
-
   update_crc (ip);
 
-  ucon64_file_handler (ip_file, NULL, 0);
-  q_fwrite (ip, 0, 0x8000, ip_file, "wb");
+  strcpy (dest_name, ip_file);
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fwrite (ip, 0, 0x8000, dest_name, "wb");
 
-  printf (ucon64_msg[WROTE], ip_file);
-
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 

@@ -257,9 +257,14 @@ readpatch (void)
 
 // based on source code (version 1.2 981217) by Silo / BlackBag
 int
-aps_apply (const char *modname, const char *apsname)
+aps_apply (const char *mod, const char *apsname)
 {
-  ucon64_file_handler (modname, NULL, 0);
+  char modname[FILENAME_MAX];
+  int size = q_fsize (mod);
+
+  strcpy (modname, mod);
+  if (!ucon64_file_handler (modname, NULL, 0))
+    q_fcpy (mod, 0, size, modname, "wb");
 
   if ((n64aps_modfile = fopen (modname, "rb+")) == NULL)
     {
@@ -274,7 +279,7 @@ aps_apply (const char *modname, const char *apsname)
 
   readstdheader ();
   readN64header ();
-  readsizeheader (q_fsize (modname));
+  readsizeheader (size);
 
   readpatch ();
 
@@ -518,13 +523,15 @@ aps_create (const char *orgname, const char *modname)
 
 
 int
-aps_set_desc (const char *apsname, const char *description)
+aps_set_desc (const char *aps, const char *description)
 {
-  char desc[50];
+  char desc[50], apsname[FILENAME_MAX];
 
+  strcpy (apsname, aps);
   memset (desc, ' ', 50);
   strncpy (desc, description, strlen (description));
-  ucon64_file_handler (apsname, NULL, 0);
+  if (!ucon64_file_handler (apsname, NULL, 0))
+    q_fcpy (aps, 0, q_fsize (aps), apsname, "wb");
   q_fwrite (desc, 7, 50, apsname, "r+b");
   printf (ucon64_msg[WROTE], apsname);
 

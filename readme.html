@@ -1,11 +1,12 @@
 <html><head><title>README</title></head><body bgcolor="#c0c0c0" background="images/bg.jpg"><tt><pre>
-uCON64 1.9.8beta5 Unix (Linux) 1999-2002 by (various)
+uCON64 1.9.8beta6 Unix (Linux) 1999-2002
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
 Usage: ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
 
   --nbak        prevents backup files (*.BAK)
+  --ncol        disable ANSI colors in output
   --hdn=N       force ROM has backup unit/emulator header with N Bytes size
   --hd          same as --hdn=512
                   most backup units use a header with 512 Bytes size
@@ -26,6 +27,9 @@ Usage: ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
                   this is often used by people who lose control of their ROMs
   --rr83        like --rrom but with 8.3 filenames; --rom=DIRECTORY
   --hex         show ROM as hexdump; use "ucon64 --hex --rom=ROM|less"
+  --find        find string in ROM; --file=STRING (wildcard: '?')
+   -c           compare ROMs for differencies; --file=OTHER_ROM
+  --cs          compare ROMs for similarities; --file=OTHER_ROM
   --stpn=N      strip N Bytes from ROM beginning
   --stp         same as --stpn=512
                   most backup units use a header with 512 Bytes size
@@ -71,8 +75,8 @@ Usage: ucon64 [OPTION]... [--rom=]ROM [[--file=]FILE]
                   supported are:
                   GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance),
                   Sega Master System(II/III)/GameGear (Handheld),
-                  Nintendo Entertainment System/NES/Famicom Game Axe (Redant),
-                  and Super Nintendo/SNES/Super Famicom
+                  Nintendo Entertainment System/NES/Famicom/Game Axe (Redant),
+                  and Super Nintendo Entertainment System/SNES/Super Famicom
   --cd          force recognition (of CD IMAGES)
                   this is the support for the most CD-based consoles
   --xcdrw       read/write IMAGE from/to CD-Writer;
@@ -107,8 +111,10 @@ Dreamcast
 
 Playstation (One)/Playstation 2 (CD only)
   --psx         force recognition; NEEDED
+                  --xcdrw combined with MODE2_RAW (default) will most likely
+                  do the job
 DexDrive
-TODO: --xdex    send/receive SRAM to/from DexDrive; --file=PORT
+TEST: --xdex=N  send/receive Block N to/from DexDrive; --file=PORT
                   receives automatically when --rom(=SRAM) does not exist
 
 GameBoy Advance
@@ -127,15 +133,15 @@ GameBoy Advance
                   WAIT_TIME='24' (fastest cartridge access speed)
                   WAIT_TIME='28' (faster than 8 but slower than 16)
   --strip       strip Bytes from end of ROM (use --ispad before); --file=VALUE
-  --multi       make multirom for Flash Advance Linker; file with loader must
-                  be specified first, then all the ROMs, multirom to
-                  create last
-  --multi1      same as --multi, but truncate multirom size to 64 Mb
-  --multi2      same as --multi, but truncate multirom size to 128 Mb
-  --multi3      same as --multi, but truncate multirom size to 256 Mb
+  --multi=SIZE  make multirom for Flash Advance Linker, truncated to SIZE Mbit;
+                  file with loader must be specified first, then all the ROMs,
+                  multirom to create last
 Flash Advance Linker
   --xfal        send/receive ROM to/from Flash Advance Linker; --file=PORT
                   receives automatically (32 mbits) when ROM does not exist
+  --xfalmulti=SIZE send multiple ROMs to Flash Advance Linker (makes temporary
+                  multirom truncated to SIZE Mbit); file with loader must be
+                  specified first, then all the ROMs; --file=PORT
   --xfalc=N     receive N mbits of ROM from Flash Advance Linker; --file=PORT
                   N can be 8, 16, 32, 64, 128 or 256
   --xfals       send/receive SRAM to/from Flash Advance Linker; --file=PORT
@@ -167,8 +173,11 @@ Doctor V64
 Doctor64 Jr
   --xdjr        send/receive ROM to/from Doctor64 Jr; --file=PORT
                   currently only sending is supported
+DexDrive
+TEST: --xdex=N  send/receive Block N to/from DexDrive; --file=PORT
+                  receives automatically when --rom(=SRAM) does not exist
 
-Super Nintendo/SNES/Super Famicom
+Super Nintendo Entertainment System/SNES/Super Famicom
   --snes        force recognition
   --hi          force ROM is HiROM
   --nhi         force ROM is not HiROM
@@ -191,6 +200,20 @@ Super Nintendo/SNES/Super Famicom
   --stp         convert SRAM from backup unit for use with an Emulator
                   --stp just strips the first 512 bytes
   --dint        convert ROM to non-interleaved format
+  --ctrl=TYPE   specify type of controller in port 1 for emu when converting
+                  TYPE='0' gamepad
+                  TYPE='1' mouse
+                  TYPE='2' mouse / gamepad
+                  TYPE='6' multitap
+  --ctrl2=TYPE  specify type of controller in port 2 for emu when converting
+                  TYPE='0' gamepad
+                  TYPE='1' mouse
+                  TYPE='2' mouse / gamepad
+                  TYPE='3' super scope
+                  TYPE='4' super scope / gamepad
+                  TYPE='5' Konami's justifier
+                  TYPE='6' multitap
+                  TYPE='7' mouse / super scope / gamepad
   --col         convert 0xRRGGBB (html) <-> 0xXXXX (snes); --rom=0xCOLOR
                   this routine was used to find green colors in games and
                   to replace them with red colors (blood mode)
@@ -237,9 +260,9 @@ Genesis/Sega Mega Drive/Sega CD/32X/Nomad
   --1991        fix old third party ROMs to work with consoles build after
                   October 1991 by inserting "(C) SEGA" and "(C)SEGA"
 Super Com Pro (HK)/Super Magic Drive/SMD
-  --xsmd        send/receive ROM to/from Super Magic Drive/SMD; --file=PORT
+TEST: --xsmd    send/receive ROM to/from Super Magic Drive/SMD; --file=PORT
                   receives automatically when ROM does not exist
-  --xsmds       send/receive SRAM to/from Super Magic Drive/SMD; --file=PORT
+TEST: --xsmds   send/receive SRAM to/from Super Magic Drive/SMD; --file=PORT
                   receives automatically when SRAM does not exist
 
 GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance)
@@ -295,12 +318,12 @@ Sega Master System(II/III)/GameGear (Handheld)
   --smd         convert to Super Magic Drive/SMD (+512 Bytes)
   --smds        convert Emulator (*.srm) SRAM to Super Magic Drive/SMD
 Super Com Pro (HK)/Super Magic Drive/SMD
-  --xsmd        send/receive ROM to/from Super Magic Drive/SMD; --file=PORT
+TEST: --xsmd    send/receive ROM to/from Super Magic Drive/SMD; --file=PORT
                   receives automatically when ROM does not exist
-  --xsmds       send/receive SRAM to/from Super Magic Drive/SMD; --file=PORT
+TEST: --xsmds   send/receive SRAM to/from Super Magic Drive/SMD; --file=PORT
                   receives automatically when SRAM does not exist
 
-Nintendo Entertainment System/NES/Famicom Game Axe (Redant)
+Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)
   --nes         force recognition
   --unif        convert to UNIF format/UNF (uses default values)
   --ines        convert to iNES format/NES (uses default values)
@@ -308,20 +331,20 @@ Nintendo Entertainment System/NES/Famicom Game Axe (Redant)
    -j           join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)
   --pasofami    convert to Pasofami/PRM/700/PRG/CHR
    -s           convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)
-  --ffe         convert to FFE (+512 Bytes)
+  --ffe         convert to FFE format
   --mapr=MAPR   specify board name or mapper number for conversion options
-                  MAPR must be a board name for UNIF and a number for Pasofami
+                  MAPR must be a board name for UNIF or a number for Pasofami
                   and iNES
-  --dint        convert ROM to non-interleaved format
-  --ctrl=TYPE   specify controller type for ROM (UNIF only)
+  --dint        convert to non-interleaved format
+  --ctrl=TYPE   specify controller type (UNIF only)
                   TYPE='0' regular joypad
                   TYPE='1' zapper
                   TYPE='2' R.O.B.
                   TYPE='3' Arkanoid controller
                   TYPE='4' powerpad
                   TYPE='5' four-score adapter
-  --ntsc        specify TV standard as NTSC (UNIF only)
-  --pal         specify TV standard as PAL (UNIF only)
+  --ntsc        specify TV standard is NTSC (UNIF only)
+  --pal         specify TV standard is PAL (UNIF only)
   --bat         specify battery is present
   --nbat        specify battery is not present
   --vram        specify VRAM override (UNIF only)
@@ -349,10 +372,10 @@ Panther(32bit prototype)/Jaguar64/Jaguar64 CD
 Neo Geo Pocket/Neo Geo Pocket Color
   --ngp         force recognition
 
-Database: 15216 known ROMs in db.h (+0)
+Database: 15880 known ROMs in db.c (+0)
 
-TIP: ./ucon64 --help --snes (would show only Super Nintendo related help)
-     ./ucon64 --help|less (to see everything in less)
+TIP: ucon64 --help --snes (would show only Super Nintendo related help)
+     ucon64 --help|less (to see everything in less)
      give the force recognition switch a try if something went wrong
 
 Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net

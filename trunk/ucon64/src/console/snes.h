@@ -1,5 +1,5 @@
 /*
-snes.h - Super Nintendo support for uCON64
+snes.h - Super NES support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
 

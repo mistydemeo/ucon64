@@ -82,7 +82,7 @@ const char *ucon64_parport_error =
 const char *ucon64_console_error =
   "ERROR: Could not auto detect the right ROM/IMAGE/console type\n"
   "TIP:   If this is a ROM or CD IMAGE you might try to force the recognition\n"
-  "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n";
+  "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n";
 
 char *ucon64_temp_file = NULL;
 
@@ -845,7 +845,7 @@ ucon64_parport_init (unsigned int port)
       fprintf (stderr, "ERROR: Could not open parallel port\n");
       exit (1);
     }
-  if ( atexit (close_io_port) == -1)
+  if (atexit (close_io_port) == -1)
     {
       close (ucon64_io_fd);
 //      fclose (ucon64_io_fd);
@@ -890,9 +890,8 @@ ucon64_parport_init (unsigned int port)
         }                                       //  causes core dump
 #endif // __linux__ || __FreeBSD__
 
-  outportb (port + PARPORT_CONTROL,
-    inportb (port + PARPORT_CONTROL) & 0x0f);   // bit 4 = 0 -> IRQ disable for
-                                                //  ACK, bit 5-7 unused
+  outportb (port + PARPORT_CONTROL, inportb (port + PARPORT_CONTROL) & 0x0f);
+  // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 
 #if     defined __linux__ || defined __FreeBSD__
   /*
@@ -1051,7 +1050,7 @@ ucon64_testsplit (const char *filename)
 }
 
 
-int 
+int
 ucon64_e (const char *romfile)
 {
   int result, x;
@@ -1081,7 +1080,7 @@ ucon64_e (const char *romfile)
       fprintf (stderr, "ERROR: could not find the correct settings (%s) in\n"
               "       %s\n"
               "TIP:   If the wrong console was detected you might try to force recognition\n"
-              "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n",
+              "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
               buf3, ucon64.configfile);
       return -1;
     }
@@ -1108,7 +1107,7 @@ ucon64_e (const char *romfile)
     {
       fprintf (stderr, "ERROR: the emulator returned an error code (%d)\n"
                "TIP:   If the wrong emulator was used you might try to force recognition\n"
-               "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n",
+               "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
                result);
     }
 #endif
@@ -1234,7 +1233,6 @@ ucon64_ls (const char *path, int mode)
         }
 
   closedir (dp);
-
   chdir (old_dir);
 
   return 0;
@@ -1267,7 +1265,6 @@ ucon64_configfile (void)
       if (!(fh = fopen (ucon64.configfile, "wb")))
         {
           printf ("FAILED\n\n");
-
           return -1;
         }
       else

@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const char *lynx_usage[] =
   {
-    "Handy(prototype)/Lynx/Lynx II",
+    "Handy (prototype)/Lynx/Lynx II",
     "1987 Epyx/1989 Atari/1991 Atari",
     "  " OPTION_LONG_S "lynx        force recognition"
 #ifndef DB

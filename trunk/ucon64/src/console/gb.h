@@ -1,5 +1,5 @@
 /*
-gb.h - GameBoy support for uCON64
+gb.h - Game Boy support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
 
@@ -30,6 +30,5 @@ extern int gameboy_n2gb (st_rominfo_t *rominfo);
 extern int gameboy_sgb (st_rominfo_t *rominfo);
 extern int gameboy_ssc (st_rominfo_t *rominfo);
 extern int gameboy_init (st_rominfo_t *rominfo);
-
 
 #endif // GB_H

@@ -1,5 +1,5 @@
 /*
-snes.c - Super Nintendo support for uCON64
+snes.c - Super NES support for uCON64
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh
@@ -108,7 +108,7 @@ const char *snes_usage[] =
     "                  TYPE='5' Konami's justifier\n"
     "                  TYPE='6' multitap\n"
     "                  TYPE='7' mouse / super scope / gamepad\n"
-    "  " OPTION_LONG_S "col         convert 0xRRGGBB (html) <-> 0xXXXX (snes); " OPTION_LONG_S "rom=0xCOLOR\n"
+    "  " OPTION_LONG_S "col         convert 0xRRGGBB (html) <-> 0xXXXX (SNES); " OPTION_LONG_S "rom=0xCOLOR\n"
     "                  this routine was used to find green colors in games and\n"
     "                  to replace them with red colors (blood mode)\n"
 #if 0
@@ -125,7 +125,7 @@ const char *snes_usage[] =
 #endif
     "  " OPTION_S "k           remove protection (crack)\n"
     "  " OPTION_S "f           remove NTSC/PAL protection\n"
-    "  " OPTION_S "l           convert to SlowROM\n"
+    "  " OPTION_S "l           remove SlowROM checks\n"
     "  " OPTION_LONG_S "chk         fix ROM checksum\n"
     ,
     NULL
@@ -1494,7 +1494,7 @@ A9 01 8F 0D 42 00               A9 00 8F 0D 42 00
   FILE *srcfile, *destfile;
   int bytesread;
 
-  puts ("Attempting slowROM fix...");
+  puts ("Attempting SlowROM fix...");
 
   strcpy (src_name, ucon64.rom);
   handle_existing_file (ucon64.rom, src_name);
@@ -1897,7 +1897,7 @@ snes_init (st_rominfo_t *rominfo)
              ((header.emulation1 == 0x77 && header.emulation2 == 0x83) ||
               (header.emulation1 == 0x00 && header.emulation2 == 0x80) ||
 #if 1
-              // This makes NES FFE ROMs & GameBoy ROMs be detected as SNES
+              // This makes NES FFE ROMs & Game Boy ROMs be detected as SNES
               //  ROMs, see src/console/nes.c & src/console/gb.c
               (header.emulation1 == 0x00 && header.emulation2 == 0x00) ||
 #endif
@@ -2095,7 +2095,7 @@ snes_init (st_rominfo_t *rominfo)
           else if (snes_header.rom_type == 0x55)
             str = "S-RTC";
           else if (snes_header.rom_type == 0xe3)
-            str = "GameBoy data";
+            str = "Game Boy data";
           else if (snes_header.rom_type == 0xf3)
             str = "C4";
           else if (snes_header.rom_type == 0xf5 || snes_header.rom_type == 0xf9)

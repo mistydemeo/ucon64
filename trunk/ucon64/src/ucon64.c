@@ -104,11 +104,7 @@ static void ucon64_usage (int argc, char *argv[]);
 
 st_ucon64_t ucon64;
 
-static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S
-#if 0
-                             "/" CURRENT_ENDIAN_S
-#endif
-                             " 1999-2002";
+static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2002";
 static int ucon64_fsize = 0;
 
 const struct option long_options[] = {
@@ -938,7 +934,7 @@ ucon64_usage (int argc, char *argv[])
 
 
   printf (
-    "  " OPTION_LONG_S "mktoc       generate TOC file for Cdrdao; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
+    "  " OPTION_LONG_S "mktoc       generate TOC file for cdrdao; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
     "  " OPTION_LONG_S "mkcue       generate CUE file; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
 //    "                TRACK_MODE='CD_DA'     (2352 Bytes; AUDIO)\n"
     "                  TRACK_MODE='MODE2_RAW' (2352 Bytes; default)\n"
@@ -1221,7 +1217,7 @@ ucon64_usage (int argc, char *argv[])
      "Database: %d known ROMs in db.c (%+d)\n"
 #endif // DB
      "\n"
-     "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only Super Nintendo related help)\n"
+     "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
 #ifdef	__MSDOS__
      "     %s " OPTION_LONG_S "help|more (to see everything in more)\n"
 #else
@@ -1256,6 +1252,6 @@ _ __ ________________________________________________________________ __ _
  /____/    /_________/     /·aBn/fAZ!/nB·_________/_____/_____/_________/
 - -- /_____\--------/_____/------------------------------------------ -- -
 4 Nodes USRobotics & Isdn Power     All Releases Since Day 0 Are Available
- Snes/Sega/GameBoy/GameGear/Ultra 64/PSX/Jaguar/Saturn/Engine/Lynx/NeoGeo
+ SNES/Sega/Game Boy/GameGear/Ultra 64/PSX/Jaguar/Saturn/Engine/Lynx/NeoGeo
 - -- ---------------------------------------------------------------- -- -
 */

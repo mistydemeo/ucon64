@@ -1,5 +1,5 @@
 /*
-gba.c - GameBoy Advance support for uCON64
+gba.c - Game Boy Advance support for uCON64
 
 written by 2001        NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh
@@ -39,7 +39,7 @@ static int gbautil (const unsigned char *filein, const unsigned char *fileout);
 
 const char *gba_usage[] =
   {
-    "GameBoy Advance",
+    "Game Boy Advance",
     "2001 Nintendo http://www.nintendo.com",
     "  " OPTION_LONG_S "gba         force recognition\n"
 //    "  " OPTION_LONG_S "hd          force ROM has header (+512 Bytes)\n"
@@ -113,7 +113,7 @@ Offset b2h-b2h - 96h - Fixed 96h byte without any useful information.
 
 Offset b3h-b3h - Main  unit  code  -  This hexadecimal byte is the destination
                  hardware  code.  It  is always 00h at the moment as it stands
-                 for  GameBoy Advance, so it won't change in the future either
+                 for  Game Boy Advance, so it won't change in the future either
                  unless  a  higher hardware with backwards compatibility won't
                  be  introduced and this byte could hold some more infos about
                  it.  There's  no  reason  to  change  this or write something

@@ -21,7 +21,7 @@ ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 ifdef DISCMAGE
 FULLLIBNAME_DM=$(LIBNAME_DM).dll
 ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME_DM).a 
+LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
 endif
 endif
 
@@ -54,7 +54,7 @@ FULLLIBNAME_DM=$(LIBNAME_DM).so
 endif
 
 ifneq ($(OSTYPE),beos)
-ifneq ($(OSTYPE),FreeBSD)
+ifeq ($(findstring freebsd,$(OSTYPE)),) # false if OSTYPE contains "freebsd"
 LDFLAGS+=-ldl
 endif
 endif

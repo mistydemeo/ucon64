@@ -38,7 +38,10 @@ struct ucon64gui_
 
   char ucon64_output[MAXBUFSIZE];
 
-  int console;
+  int page; //current "html page"
+
+  int hd; // header
+  int ns; // not splitted
 
   char configfile[FILENAME_MAX];
 }

@@ -36,48 +36,48 @@ char buf[MAXBUFSIZE];
   fflush (stdout);
 #endif // DEBUG
 
-if(!strdcmp(value,"ucon64gui_rom"))
+if(!strdcmp(query,"ucon64gui_rom"))
 {
   h2g_input_file ("rom", ucon64gui.rom, "Select $ROM");
   return;
 }
 
-if(!strdcmp(value,"ucon64gui_file"))
+if(!strdcmp(query,"ucon64gui_file"))
 {
   h2g_input_file ("file", ucon64gui.file, "Select $FILE");
   return;
 }
 
-if(!strdcmp(value,"ucon64gui_snes"))
+if(!strdcmp(query,"ucon64gui_snes"))
 {
   ucon64gui_snes();
   return;
 }
-if(!strdcmp(value,"ucon64gui_root"))
+if(!strdcmp(query,"ucon64gui_root"))
 {
   ucon64gui_root();
   return;
 }
-if(!strdcmp(value,"ucon64gui_swc"))
+if(!strdcmp(query,"ucon64gui_swc"))
 {
   ucon64gui_swc();
   return;
 }
 
 // switches/overrides
-if(!strdcmp(value,"-hd"))
+if(!strdcmp(query,"-hd"))
 {
   ucon64gui.hd = 1;
   return;
 }
 
-if(!strdcmp(value,"-nhd"))
+if(!strdcmp(query,"-nhd"))
 {
   ucon64gui.hd = 0;
   return;
 }
 
-if(!strdcmp(value,"-ns"))
+if(!strdcmp(query,"-ns"))
 {
   ucon64gui.ns = (ucon64gui.ns == 1) ? 0 : 1;
   return;
@@ -86,7 +86,7 @@ if(!strdcmp(value,"-ns"))
 /*
   options
 */
-  sprintf(buf,"xterm -e \"ucon64 %s %s %s\" &", value
+  sprintf(buf,"xterm -e \"ucon64 %s %s %s\" &", query
   , (ucon64gui.rom != NULL) ? ucon64gui.rom : ""
   , (ucon64gui.file != NULL) ? ucon64gui.file : ""
   );

@@ -96,7 +96,7 @@ static void ucon64_usage (int argc, char *argv[]);
 static int ucon64_init (char *romfile, struct rom_ *rombuf);
 static int ucon64_nfo (struct rom_ *rombuf);
 static void ucon64_exit (void);
-static int ucon64_ls (char *path, int verbose);
+static int ucon64_ls (char *path, int mode);
 static int ucon64_e (struct rom_ *rombuf);
 static int ucon64_configfile (void);
 static int ucon64_console_probe (struct rom_ *rombuf);
@@ -204,6 +204,7 @@ static struct option long_options[] = {
     {"ppf", 0, 0, ucon64_PPF},
     {"ps2", 0, 0, ucon64_PS2},
     {"psx", 0, 0, ucon64_PSX},
+    {"ren", 0, 0, ucon64_REN},
     {"rl", 0, 0, ucon64_RL},
     {"rom", 1, 0, ucon64_ROM},
     {"rotl", 0, 0, ucon64_ROTL},
@@ -407,6 +408,7 @@ main (int argc, char *argv[])
         case ucon64_PAD:
         case ucon64_PADHD://obsolete only for compat.
         case ucon64_PPF:
+        case ucon64_REN:
         case ucon64_RL:
         case ucon64_RU:
         case ucon64_S:
@@ -836,10 +838,13 @@ main (int argc, char *argv[])
           return addppfid (rom.rom);
   
         case ucon64_LS:
-          return ucon64_ls (rom.rom, 0);
+          return ucon64_ls (rom.rom, ucon64_LS);
   
         case ucon64_LSV:
-          return ucon64_ls (rom.rom, 1);
+          return ucon64_ls (rom.rom, ucon64_LSV);
+  
+        case ucon64_REN:
+          return ucon64_ls (rom.rom, ucon64_REN);
   
         case ucon64_ISO:
           return bin2iso (rom.rom);
@@ -1735,12 +1740,13 @@ int ucon64_e (struct rom_ *rombuf)
   return result;
 }
 
-int ucon64_ls (char *path, int verbose)
+int ucon64_ls (char *path, int mode)
 {
   int ucon64_argc;
   struct dirent *ep;
   struct stat puffer;
   struct rom_ rom;
+  int single_file = 0;
   char current_dir[FILENAME_MAX];
   DIR *dp;
   char buf[MAXBUFSIZE], *ucon64_argv[128];
@@ -1770,9 +1776,24 @@ int ucon64_ls (char *path, int verbose)
 
               ucon64_init (NULL, &rom);
               if (ucon64_init (ep->d_name, &rom) != -1)
-                {
-                  if (verbose == 0)
-                    {
+                switch (mode)
+                  {
+                    case ucon64_LSV:
+                      ucon64_nfo (&rom);
+                      fflush (stdout);
+                      break;
+/*TODO renamer!
+                    case ucon64_REN:
+                      if (rom.console != ucon64_UNKNOWN)
+//                        && rom.console != ucon64_KNOWN)
+                        {
+                          strcpy (buf, &rom.rom[findlast (rom.rom, ".") + 1]);
+                          printf ("%s.%s\n", rom.name, buf);
+                        }
+                    break;
+*/
+                    default:
+                    case ucon64_LS:
                       strftime (buf, 13, "%b %d %H:%M",
                                 localtime (&puffer.st_mtime));
 //                      printf ("%-31.31s %10d %s %s\n", rom.name,
@@ -1780,21 +1801,7 @@ int ucon64_ls (char *path, int verbose)
                       printf ("%-31.31s %10d %s %s\n", str2filename(rom.name),
                               (int) puffer.st_size, buf, rom.rom);
                       fflush (stdout);
-                    }
-                  else if (verbose == 1)
-                    {
-                      ucon64_nfo (&rom);
-                      fflush (stdout);
-                    }
-/*TODO renamer!
-                  else if (argcmp (argc, argv, "-rrom") &&
-                           rom.console != ucon64_UNKNOWN)
-                       // && rom.console != ucon64_KNOWN)
-                    {
-                      strcpy (buf, &rom.rom[findlast (rom.rom, ".") + 1]);
-                      printf ("%s.%s\n", rom.name, buf);
-                    }
-*/
+                      break;
                 }
             }
         }

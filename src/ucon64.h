@@ -143,6 +143,7 @@ enum
   ucon64_PS2,
   ucon64_PSX,
   ucon64_REAL3DO,
+  ucon64_REN,
   ucon64_RL,
   ucon64_ROM,
   ucon64_ROTL,

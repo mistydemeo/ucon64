@@ -3916,7 +3916,7 @@ handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
       "Mouse / Super Scope / Gamepad", "Unknown"
     };
   int x = header[0x1ed], ctrl1 = x >> 4, ctrl2 = x & 0xf,
-      name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN;;
+      name_len = (bs_dump || st_dump) ? 16 : SNES_NAME_LEN;
 
   memcpy (name, header + 0x1d1, name_len);
   name[name_len] = 0;

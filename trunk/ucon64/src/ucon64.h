@@ -46,8 +46,6 @@ typedef struct
                                                   // 0 = OK, 1 = TODO, 2 = TEST
 } st_usage_t;
 
-#include "ucon64_dat.h"
-
 
 /*
   This struct contains very specific informations only <console>_init() can
@@ -93,6 +91,9 @@ typedef struct
   int internal_crc2_start;                      // start of 2nd/inverse internal checksum
   int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal checksum
 } st_rominfo_t;
+
+
+#include "ucon64_dat.h"
 
 
 typedef enum { UCON64_SPP, UCON64_EPP, UCON64_ECP } parport_mode_t;

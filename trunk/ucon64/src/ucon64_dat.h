@@ -2,6 +2,7 @@
 ucon64_dat.h - support for DAT files as known from RomCenter, GoodXXXX, etc.
 
 written by 1999 - 2003 NoisyB (noisyb@gmx.net)
+                  2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -64,6 +65,8 @@ extern int ucon64_dat_view (int console, int verbose);
 extern int ucon64_dat_indexer (void);
 extern st_ucon64_dat_t *ucon64_dat_flush (st_ucon64_dat_t *dat);
 extern void ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version);
+extern int ucon64_create_dat (const char *dat_file_name, const char *filename,
+                              st_rominfo_t *rominfo);
 
 #endif // UCON64_DAT_H
 

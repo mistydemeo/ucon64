@@ -192,6 +192,15 @@ size_t filepad(	char *filename
 	return(size);
 }
 
+char *ucon64_fbackup(	char *filename
+)
+{
+	printf("Writing backup of: %s\n\n",filename);
+	fflush(stdout);
+	return(filebackup(filename));
+}
+
+
 long filetestpad(	char *filename
 )
 {

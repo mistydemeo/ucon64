@@ -94,6 +94,9 @@ unsigned long fileCRC32(	char *filename	//calculate CRC32 of filename beginning 
 				,long start
 );
 
+char *ucon64_fbackup(   char *filename
+);
+
 size_t filepad(	char *filename	//pad file (if necessary) from start
 		,long start	//ignore start bytes (if file has header or something)
 		,long unit	//size of block (example: MBIT)

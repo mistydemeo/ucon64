@@ -40,31 +40,21 @@ const st_usage_t gd_usage[] =
     {NULL, NULL, "Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"},
     {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef PARALLEL
-#if 1 // dumping is not yet supported (probably never)
     {"xgd3", NULL, "send ROM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
-#else
-    {"xgd3", NULL, "send/receive ROM to/from Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when ROM does not exist\n"
-#endif
-                "this option uses the Game Doctor SF3 protocol"},
+                   "this option uses the Game Doctor SF3 protocol"},
 #if 1 // dumping is not yet supported (might happen soon)
     {"xgd6", NULL, "send ROM to Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
 #else
     {"xgd6", NULL, "send/receive ROM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when ROM does not exist\n"
+                   "receives automatically when ROM does not exist\n"
 #endif
-                "this option uses the Game Doctor SF6 protocol"},
-#if 1 // dumping is not yet supported (probably never)
+                   "this option uses the Game Doctor SF6 protocol"},
     {"xgd3s", NULL, "send SRAM to Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT"},
-#else
-    {"xgd3s", NULL, "send/receive SRAM to/from Game Doctor SF3/SF6/SF7; " OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when SRAM does not exist"},
-#endif
     {"xgd6s", NULL, "send/receive SRAM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
                     "receives automatically when SRAM does not exist"},
-    {"xgd6r", NULL, "send/receive Saver (RTS) data to/from Game Doctor SF6/SF7;\n"
-                 OPTION_LONG_S "port=PORT\n"
-                 "receives automatically when Saver file does not exist"},
+    {"xgd6r", NULL, "send/receive saver (RTS) data to/from Game Doctor SF6/SF7;\n"
+                    OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when saver file does not exist"},
 #endif // PARALLEL
     {NULL, NULL, NULL}
   };
@@ -109,7 +99,7 @@ static int gd_write_rom (const char *filename, unsigned int parport,
 static int gd_write_sram (const char *filename, unsigned int parport,
                           const char *prolog_str);
 static int gd_write_saver (const char *filename, unsigned int parport,
-			  const char *prolog_str);
+                           const char *prolog_str);
 
 
 typedef struct st_gd3_memory_unit
@@ -479,7 +469,7 @@ gd_add_filename (const char *filename)
       p = strrchr (buf, '.');
       if (p)
         *p = 0;
-      strncpy (gd_names[gd_name_i], basename (buf), 11);
+      strncpy (gd_names[gd_name_i], basename2 (buf), 11);
       gd_names[gd_name_i][11] = 0;
       gd_name_i++;
     }
@@ -953,10 +943,11 @@ gd6_read_saver (const char *filename, unsigned int parport)
   /*
     TODO: Graceful handling of an abort because of a name error?
           Currently we fail with a generic error.
-  */
 
-  // TODO: we could make a GD file name from the real one but a valid dummy name seems to work OK here
-  //       the user must have the proper game selected in the SF7 menu even if the real name is used.
+    TODO: We could make a GD file name from the real one but a valid dummy name
+          seems to work OK here. The user must have the proper game selected in
+          the SF7 menu even if the real name is used.
+  */
   strcpy ((char *) gdfilename, "SF16497 S00");
   if (gd6_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
     io_error ();
@@ -1027,43 +1018,28 @@ int
 gd_write_saver (const char *filename, unsigned int parport, const char *prolog_str)
 {
   FILE *file;
-  unsigned char *buffer;
+  unsigned char *buffer, gdfilename[12], *p;
   int bytesread, bytessend = 0, size, fn_length, i;
   time_t starttime;
-  unsigned char gdfilename[12];
-  unsigned char *p1;
-  const unsigned char *p2;
 
   init_io (parport);
-  
+
   /*
     Check that filename is a valid Game Doctor saver filename.
     It should start with SF, followed by the game ID, followed by the extension.
     The extension is of the form .S## (where # is a digit from 0-9).
-    I.e., SF16123.S00
+    E.g., SF16123.S00
   */
 
   // Strip the path out of filename for use in the GD
-  fn_length = strlen (filename);
-  p2 = filename + fn_length;
-  for ( i = fn_length; i > 0; i-- )
-    {
-        p2--;
-        if ( *p2 == '/'  || *p2 == '\\' )
-        {
-            p2++;
-            break;
-        }
-    }
-  fn_length = strlen (p2);
+  p = basename2 (filename);
+  fn_length = strlen (p);
 
-  if ( fn_length < 6
-        || fn_length > 11
-        || toupper(p2[0]) != 'S' || toupper(p2[1]) != 'F'
-        || p2[fn_length - 4] != '.'
-        || (p2[fn_length - 3] != 'S' && p2[fn_length - 3] != 's')  )
+  if (fn_length < 6 || fn_length > 11
+      || toupper (p[0]) != 'S' || toupper (p[1]) != 'F'
+      || p[fn_length - 4] != '.' || toupper (p[fn_length - 3]) != 'S')
     {
-      fprintf (stderr, "Error: filename (%s), not a saver filename (SF*.S##)\n", p2);
+      fprintf (stderr, "Error: Filename (%s) is not a saver filename (SF*.S##)\n", p);
       exit (1);
     }
 
@@ -1080,21 +1056,18 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
 
   size = q_fsize (filename);
 
-  if (size != 0x38000)                    // GD Saver size is always 0x38000 bytes -- no header
+  if (size != 0x38000)                  // GD saver size is always 0x38000 bytes -- no header
     {
-      fprintf (stderr, "ERROR: GD Saver file size must be 0x38000 bytes\n");
+      fprintf (stderr, "ERROR: GD saver file size must be 0x38000 bytes\n");
       exit (1);
     }
 
   // Make a GD file name from the real one
-  memset (gdfilename, ' ', 11);          // "pad" with spaces
-  gdfilename[11] = 0;                    // Terminate string
-  p1 = gdfilename;
-  i = fn_length;
-  while ( (i-- > 0) && ((*p1++ = *p2++) != '.') )
-    ;
-  memcpy ( &gdfilename[8], "S00", 3);  // Copy extension S00
-  (void) strupr ( gdfilename );
+  memset (gdfilename, ' ', 11);                 // "pad" with spaces
+  gdfilename[11] = 0;                           // terminate string
+  memcpy (gdfilename, p, fn_length - 4);        // copy name except extension
+  memcpy (&gdfilename[8], "S00", 3);            // copy extension S00
+  strupr (gdfilename);
 
   printf ("Send: %d Bytes\n", size);
   fseek (file, (size_t) 0, SEEK_SET);

@@ -42,7 +42,7 @@ const st_usage_t swc_usage[] =
     {NULL, NULL, "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
 #ifdef PARALLEL
     {"xswc", NULL, "send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically when ROM does not exist"},
+                   "receives automatically when ROM does not exist"},
     {"xswc2", NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)"},
 #if 0
 // hidden, undocumented option because we don't want people to "accidentally"
@@ -50,11 +50,11 @@ const st_usage_t swc_usage[] =
     {"xswc-super", NULL, "receive ROM (forced 32 Mb) from Super Wild Card*/(all)SWC"},
 #endif
     {"xswcs", NULL, "send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
-                 OPTION_LONG_S "port=PORT\n"
-                 "receives automatically when SRAM does not exist"},
+                    OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when SRAM does not exist"},
     {"xswcr", NULL, "send/receive RTS data to/from Super Wild Card*/(all)SWC;\n"
-                 OPTION_LONG_S "port=PORT\n"
-                 "receives automatically when RTS file does not exist"},
+                    OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when RTS file does not exist"},
 #endif // PARALLEL
     {NULL, NULL, NULL}
   };
@@ -97,18 +97,27 @@ receive_rom_info (unsigned char *buffer, int superdump)
 
 //#define DUMP_MMX2
 #ifdef  DUMP_MMX2
+  /*
+    MMX2 can be dumped after writing a 0 to SNES register 0x7f52. Before we can
+    write to that register we have to enable cartridge page mapping. That is
+    done by writing to SWC register 0xe00c. When cartridge page mapping is
+    enabled we can access SNES registers by reading or writing to the SWC
+    address range 0x2000-0x3fff. Before reading or writing to an address in that
+    range we have to "announce" the address to the SWC (via command 5). Because
+    we access a SNES register we only set the page number bits (0-1).
+  */
   address = 0x7f52;
   ffe_send_command0 (0xe00c, 0);
 
   ffe_send_command (5, address / 0x2000, 0);
-  ffe_receive_block (address, buffer, 8);
+  ffe_receive_block ((address & 0x1fff) + 0x2000, buffer, 8);
   mem_hexdump (buffer, 8, address);
 
   ffe_send_command (5, address / 0x2000, 0);
-  ffe_send_command0 (address, 0);
+  ffe_send_command0 ((address & 0x1fff) + 0x2000, 0);
 
   ffe_send_command (5, address / 0x2000, 0);
-  ffe_receive_block (address, buffer, 8);
+  ffe_receive_block ((address & 0x1fff) + 0x2000, buffer, 8);
   mem_hexdump (buffer, 8, address);
 #endif
 

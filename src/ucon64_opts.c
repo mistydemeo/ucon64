@@ -262,6 +262,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XGBXS:
     case UCON64_XGBXB:
     case UCON64_XGD3:
+    case UCON64_XGD3R:
     case UCON64_XGD3S:
     case UCON64_XGD6:
     case UCON64_XGD6R:

@@ -2,7 +2,7 @@
 nes.h - Nintendo Entertainment System support for uCON64
 
 Copyright (c) 1999 - 2001 NoisyB <noisyb@gmx.net>
-Copyright (c) 2002 - 2003 dbjh
+Copyright (c) 2002 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -53,7 +53,12 @@ extern const st_getopt2_t nes_usage[];
     |        |      |    |  |  |+- 1=VS Unisystem arcade       |
     |        |      |    |  |  +-- 1=Playchoice-10 arcade      |
     |        |      |    +--+----- Mapper # (upper 4-bits)     |
-    |  8-15  |  8   | $00                                      |
+    |   8    |  1   | 8K RAM page count (assume 1 when 0)      |
+    |   9    |  1   | ROM Control Byte #3                      |
+    |        |      |   %0000000V                              |
+    |        |      |           +- 0=NTSC cartridge            |
+    |        |      |              1=PAL cartridge             |
+    | 10-15  |  6   | $00                                      |
     | 16-..  |      | Actual 16K PRG-ROM pages (in linear      |
     |  ...   |      | order). If a trainer exists, it precedes |
     |  ...   |      | the first PRG-ROM bank.                  |
@@ -73,6 +78,9 @@ extern const st_getopt2_t nes_usage[];
 #define INES_TRAINER    0x04
 #define INES_4SCREEN    0x08
 
+// flags in st_ines_header_t.ctrl3
+#define INES_TVID       0x01
+
 #define INES_HEADER_START 0
 #define INES_HEADER_LEN (sizeof (st_ines_header_t))
 
@@ -83,8 +91,9 @@ typedef struct
   unsigned char chr_size;                       // # 8 kB banks
   unsigned char ctrl1;
   unsigned char ctrl2;
-  unsigned int reserved1;                       // 0
-  unsigned int reserved2;                       // 0
+  unsigned char ram_size;                       // # 8 kB RAM banks
+  unsigned char ctrl3;
+  unsigned char reserved[6];                    // 0
 } st_ines_header_t;
 
 

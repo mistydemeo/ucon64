@@ -1103,7 +1103,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    the DAT files dramatically. Now uCON64 uses the information inside the DAT
    files to identify or rename ROMs without an internal header.<br>
    Starting with version 1.9.8beta8 uCON64 does not have an internal database
-   anymore, so you will <b>need</b> DAT files for files like NES ROM dumps.<br>
+   anymore, so you will <i>need</i> DAT files for files like NES ROM dumps.<br>
    You can check which DAT files are used by uCON64 with the option -db. You
    can view or list all DAT entries with the option -dbv. You can search for a
    specific CRC32 value with the option -dbs. The force-console-type options
@@ -1542,7 +1542,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    internal SNES header at a fixed offset relative to the end of the bank.
    However, because the bank sizes differ for HiROM and LoROM the absolute
    locations differ for the two in non-interleaved dumps. If dumps are
-   interleaved the absolute locations are te same.<br>
+   interleaved the absolute locations are the same.<br>
    The interleaved format was probably introduced so that a copier <i>can</i>
    (the Game Doctor does only if the dump has no header) always check the same
    location in a dump to tell whether it should handle it as a LoROM or a HiROM
@@ -1584,7 +1584,7 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <b>A</b>: If you see lines in the display output of uCON64 that look like
    these:<br>
    &nbsp;&nbsp;Create: ntuser.idx<br>
-   &nbsp;&nbsp;ERROR: Can't open "C:\Documents and Settings\Daniël\ntuser.dat" for reading<br>
+   &nbsp;&nbsp;ERROR: Can't open "C:\Documents and Settings\Daniel\ntuser.dat" for reading<br>
    you should modify the configuration file so that ucon64_datdir points to
    another directory.<br>
    By default uCON64 will use the home directory as the directory where it
@@ -1834,21 +1834,23 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
    uploading, set ilogo.<br>
    The USB version of the F2A is currently only supported under GNU/Linux. If
    you want to use the USB version, you should set at least the variables
-   f2afirmware and iclientu. If you want to send multiple files to your F2A, set
-   gbaloader. Additional requirements are:<br>
-   - <a href="http://libusb.sourceforge.net/" target="_blank">libusb</a> (included in recent
-   GNU/Linux distributions)<br>
-   - usbdevfs has to be mounted (most (?) distributions have usbdevfs mounted by
-   default, but you can do it manually with "mount -t usbdevfs none /proc/bus/usb")<br>
-   - if you use Linux 2.4 or older then the EZUSB2131 firmware upload driver has
-   to be loaded, see <a href="http://ezusb2131.sourceforge.net/" target="_blank">http://ezusb2131.sourceforge.net/</a><br>
+   f2afirmware and iclientu. If you want to send multiple files to your F2A, 
+   set gbaloader. Additional requirements are:<br>
+   - <a href="http://libusb.sourceforge.net/" target="_blank">libusb</a> 
+   (included in recent GNU/Linux distributions)<br>
+   - usbdevfs has to be mounted (most (?) distributions have usbdevfs mounted 
+   by default, but you can do it manually with "mount -t usbdevfs none 
+   /proc/bus/usb")<br>
+   - if you use Linux 2.4 or older then the EZUSB2131 firmware upload driver 
+   has to be loaded, see <a href="http://ezusb2131.sourceforge.net/" target="_blank">http://ezusb2131.sourceforge.net/</a><br>
    - if you use Linux 2.5 or later fxload should be present in /sbin<br>
-   - you need to have read/write access to /proc/ezusb and /proc/bus/usb, so you
-   have to run uCON64 as root (or setuid root) for the USB version of the F2A<br>
+   - you need to have read/write access to /proc/ezusb and /proc/bus/usb, so 
+   you have to run uCON64 as root (or setuid root) for the USB version of the 
+   F2A<br>
 <br>
    By default, uCON64 tries to access a parallel port to communicate with an
-   F2A. In order to make uCON64 communicate with an F2A connected to a USB port,
-   use the switch -port. For example:<br>
+   F2A. In order to make uCON64 communicate with an F2A connected to a USB 
+   port, use the switch -port. For example:<br>
    &nbsp;&nbsp;ucon64 -xf2a "Wario Ware Inc.zip" -port=usb<br>
    uCON64 detects to which USB port the F2A is connected, so you do not have to
    specify a specific port.<br>
@@ -1857,20 +1859,21 @@ Q52: <a href="#52">What is the option --xreset for? In what case should it be
 <a name="52"><b>Q52</b>: What is the option --xreset for? In what case should it
    be used?</a><br>
 <b>A</b>: Simply put, this option removes power from the parallel port, until
-   you next use the parallel port (it sets all data lines low).<br>
+   you next use the parallel port (it sets all data lines low, to avoid
+   latch-up).<br>
    Before running uCON64, power is sometimes present on the parallel port. If
-   power is present and you connect a device that is not switched on, power will
-   "back-feed" into the device from the parallel port, potentially damaging the
-   device and the PC.<br>
+   power is present and you connect a device that is not switched on, power
+   will "back-feed" into the device from the parallel port, potentially 
+   damaging the device and the PC.<br>
    By using the --xreset command <i>before</i> attaching your device, power is
    removed from the parallel port, eliminating the hazard.<br>
-   Likewise, a danger exists when you have finished using your device and switch
-   the power off.<br>
+   Likewise, a danger exists when you have finished using your device and 
+   switch the power off.<br>
    Normally, uCON64 will remove power from the parallel port when the transfer
    has finished, but if you abort uCON64 part-way, power may still be present.
    In this case, use --xreset before switching the device off.<br>
-   Additionally, after switching the device off, aim to disconnect it as soon as
-   possible. Printing, rebooting, and running certain applications may cause
+   Additionally, after switching the device off, aim to disconnect it as soon 
+   as possible. Printing, rebooting, and running certain applications may cause
    power to be re-applied to the parallel port -- a back-feed hazard.<br>
 <br>
 <p>

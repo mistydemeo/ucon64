@@ -397,7 +397,6 @@ change_mem (char *buf, int bufsize, char *searchstr, int strsize,
   int i, n_esc = 0, retval;
   st_cm_set_t *sets;
 
-  va_start (argptr, offset);
   for (i = 0; i < strsize; i++)
     if (searchstr[i] == esc)
       n_esc++;

@@ -559,8 +559,8 @@ snes_set_fig_header (st_rominfo_t *rominfo, st_fig_header_t *header)
   header->multi = snes_split ? 0x40 : 0;
   header->hirom = snes_hirom ? 0x80 : 0;
 
-  uses_DSP = snes_header.rom_type == 3 || snes_header.rom_type == 4 ||
-             snes_header.rom_type == 5 || snes_header.rom_type == 0xf6;
+  uses_DSP = snes_header.rom_type == 3 || snes_header.rom_type == 5 ||
+             snes_header.rom_type == 0xf6;
 
   if ((snes_header.rom_type & 0xf0) == 0x10)    // uses FX(2) chip
     {
@@ -1087,8 +1087,8 @@ snes_ufo (st_rominfo_t *rominfo)
       if (snes_sramsize == 0)
         {
           // check if the game uses a DSP chip
-          if (snes_header.rom_type == 3 || snes_header.rom_type == 4 ||
-              snes_header.rom_type == 5 || snes_header.rom_type == 0xf6)
+          if (snes_header.rom_type == 3 || snes_header.rom_type == 5 ||
+              snes_header.rom_type == 0xf6)
             {
               header.sram_a15 = 1;
               header.sram_a20_a21 = 0x0c;

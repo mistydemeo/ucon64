@@ -881,6 +881,9 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   if (dat->console_usage != NULL)
     {
       strcpy (buf, dat->console_usage[0].desc);
+      // fix ugly multi-line console "usages" (PC Engine)
+      if ((p = strchr (buf, '\n')) != NULL)
+        *p = 0;
       printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0

@@ -847,11 +847,11 @@ pcengine_init (st_rominfo_t *rominfo)
   */
 #if 1
   // I don't feel like writing a new memory search function at the moment...
-  if (q_fncmp (ucon64.rom, rominfo->buheader_len, 8192, "\x94\x02\x0f", 3, 0) != -1 ||
-      q_fncmp (ucon64.rom, rominfo->buheader_len, 8192, "\x94\x02\x01", 3, 0) != -1)
+  if (q_fncmp (ucon64.rom, rominfo->buheader_len, 32768, "\x94\x02\x0f", 3, 0) != -1 ||
+      q_fncmp (ucon64.rom, rominfo->buheader_len, 32768, "\x94\x02\x01", 3, 0) != -1)
 #else
-  if (change_mem ((char *) rom_buffer, 8192, "\x94\x02\x0f", 3, 0, 0, "\x0f", 1, 0) > 0 ||
-      change_mem ((char *) rom_buffer, 8192, "\x94\x02\x01", 3, 0, 0, "\x01", 1, 0) > 0)
+  if (change_mem ((char *) rom_buffer, 32768, "\x94\x02\x0f", 3, 0, 0, "\x0f", 1, 0) > 0 ||
+      change_mem ((char *) rom_buffer, 32768, "\x94\x02\x01", 3, 0, 0, "\x01", 1, 0) > 0)
 #endif
     swapped = 1;
   if (UCON64_ISSET (ucon64.interleaved))

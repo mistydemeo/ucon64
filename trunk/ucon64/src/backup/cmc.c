@@ -701,50 +701,50 @@ cyan_test_copier (int test, int speed, unsigned int parport)
           cyan_write_copier (0, parport);
           cyan_delay (1, parport);
           count = cyan_read_copier (parport);
-          fputs (status[(count ^ INLO) >> 6], stdout);
-          fputs (status[(count ^ INHI) >> 4], stdout);
+          fputs (status[((count ^ INLO) >> 6) & 1], stdout);
+          fputs (status[((count ^ INHI) >> 4) & 1], stdout);
 
           cyan_write_copier (CNLO | CNHI, parport);
           cyan_delay (1, parport);
           count = cyan_read_copier (parport);
-          fputs (status[(count ^ INLO) >> 6], stdout);
-          fputs (status[(count ^ INHI) >> 4], stdout);
+          fputs (status[((count ^ INLO) >> 6) & 1], stdout);
+          fputs (status[((count ^ INHI) >> 4) & 1], stdout);
 
           cyan_write_copier (0, parport);
           cyan_delay (1, parport);
           count = cyan_read_copier (parport);
-          fputs (status[(count ^ INLO) >> 6], stdout);
-          fputs (status[(count ^ INHI) >> 4], stdout);
+          fputs (status[((count ^ INLO) >> 6) & 1], stdout);
+          fputs (status[((count ^ INHI) >> 4) & 1], stdout);
 
           cyan_write_copier (CNLO | CNHI, parport);
           cyan_delay (1, parport);
           count = cyan_read_copier (parport);
-          fputs (status[(count ^ INLO) >> 6], stdout);
-          fputs (status[(count ^ INHI) >> 4], stdout);
+          fputs (status[((count ^ INLO) >> 6) & 1], stdout);
+          fputs (status[((count ^ INHI) >> 4) & 1], stdout);
 
           cyan_write_copier (0, parport);
           cyan_delay (1, parport);
           count = cyan_read_copier (parport);
-          fputs (status[(count ^ INLO) >> 6], stdout);
-          fputs (status[(count ^ INHI) >> 4], stdout);
+          fputs (status[((count ^ INLO) >> 6) & 1], stdout);
+          fputs (status[((count ^ INHI) >> 4) & 1], stdout);
 
           cyan_write_copier (CNLO | CNHI, parport);
           cyan_delay (1, parport);
           count = cyan_read_copier (parport);
-          fputs (status[(count ^ INLO) >> 6], stdout);
-          fputs (status[(count ^ INHI) >> 4], stdout);
+          fputs (status[((count ^ INLO) >> 6) & 1], stdout);
+          fputs (status[((count ^ INHI) >> 4) & 1], stdout);
 
           cyan_write_copier (0, parport);
           cyan_delay (1, parport);
           count = cyan_read_copier (parport);
-          fputs (status[(count ^ INLO) >> 6], stdout);
-          fputs (status[(count ^ INHI) >> 4], stdout);
+          fputs (status[((count ^ INLO) >> 6) & 1], stdout);
+          fputs (status[((count ^ INHI) >> 4) & 1], stdout);
 
           cyan_write_copier (CNLO | CNHI, parport);
           cyan_delay (1, parport);
           count = cyan_read_copier (parport);
-          fputs (status[(count ^ INLO) >> 6], stdout);
-          fputs (status[(count ^ INHI) >> 4], stdout);
+          fputs (status[((count ^ INLO) >> 6) & 1], stdout);
+          fputs (status[((count ^ INHI) >> 4) & 1], stdout);
 
           cyan_write_copier (0, parport);
           cyan_delay (1, parport);
@@ -833,8 +833,8 @@ cyan_copy_rom (const char *filename, int speed, unsigned int parport)
       exit (1);
     }
   fclose (f);
-  printf("%d kBytes OK\n"
-         "Verifying checksum... ", (int) (romsize / 1024));
+  printf ("%d kBytes OK\n"
+          "Verifying checksum... ", (int) (romsize / 1024));
   fflush (stdout);
 
   if (cyan_checksum_rom (buffer))

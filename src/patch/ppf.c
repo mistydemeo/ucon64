@@ -274,6 +274,8 @@ ppf_apply (const char *mod, const char *ppfname)
   printf ("Done\n");
   fclose (ppffile);
   fclose (modfile);
+
+  printf (ucon64_msg[WROTE], modname);
   return 0;
 }
 
@@ -421,8 +423,8 @@ ppf_create (const char *orgname, const char *modname)
   fclose (ppffile);
   fclose (orgfile);
   fclose (modfile);
-  printf (ucon64_msg[WROTE], ppfname);
 
+  printf (ucon64_msg[WROTE], ppfname);
   return 0;
 }
 
@@ -438,8 +440,8 @@ ppf_set_desc (const char *ppf, const char *description)
   if (!ucon64_file_handler (ppfname, NULL, 0))
     q_fcpy (ppf, 0, q_fsize (ppf), ppfname, "wb");
   q_fwrite (desc, 6, 50, ppfname, "r+b");
-  printf (ucon64_msg[WROTE], ppfname);
 
+  printf (ucon64_msg[WROTE], ppfname);
   return 0;
 }
 
@@ -471,7 +473,7 @@ ppf_set_fid (const char *ppf, const char *fidname)
   fidsize = bswap_32 (fidsize);                 // Write file size in little-endian format
 #endif
   q_fwrite (&fidsize, pos, 4, ppfname, "r+b");
-  printf ("Done\n");
 
+  printf (ucon64_msg[WROTE], ppfname);
   return 0;
 }

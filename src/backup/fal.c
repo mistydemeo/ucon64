@@ -1047,7 +1047,7 @@ ProgramNonTurboIntelFlash (FILE * fp)
       outpb (SPPCtrlPort, 0);
 
       if (Ready)
-        printf ("\n\nDone.\n");
+        ; //printf ("\n\nDone.\n");
       else
         {
           printf ("\n\nFlash cart write failed!\n");
@@ -1169,7 +1169,7 @@ ProgramTurboIntelFlash (FILE * fp)
       outpb (SPPCtrlPort, 0);
 
       if (Ready)
-        printf ("\n\nDone.\n");
+        ; //printf ("\n\nDone.\n");
       else
         {
           WriteFlash (0, INTEL28F_CLEARSR);
@@ -1236,7 +1236,7 @@ ProgramSharpFlash (FILE * fp)
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
-      printf ("\n\nDone.\n");
+      //printf ("\n\nDone.\n");
     }
   else
     printf ("\n\nFlash cart erase failed!\n");

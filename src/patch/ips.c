@@ -168,13 +168,16 @@ ips_apply (const char *mod, const char *ipsname)
       printf ("File truncated to %.4f MBit\n", length / (float) MBIT);
     }
 
-  printf ("Patching complete\n\n"
+  printf ("Patching complete\n\n");
+  printf (ucon64_msg[WROTE], modname);
+  printf ("\n"
           "NOTE: Sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
-          "      This means you must convert for example a SNES ROM with -swc or -mgd or\n"
+          "      This means you must modify for example a SNES ROM with -swc or -stp or\n"
           "      the patch will not work\n");
 
   unregister_func (remove_destfile);            // unregister _after_ possible padding
   fclose (ipsfile);
+
   return 0;
 }
 
@@ -487,7 +490,7 @@ next_byte:
   fclose (orgfile);
   fclose (modfile);
   fclose (ipsfile);
-  printf (ucon64_msg[WROTE], ipsname);
 
+  printf (ucon64_msg[WROTE], ipsname);
   return 0;
 }

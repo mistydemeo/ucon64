@@ -952,7 +952,6 @@ static waitstate waitstates[] = {
       printf ("SRAM patch applied.\n");
     }
 
-
   if (switches & SWITCH_CRASH_PATCH)
     {
       for (i = 0; i < CP_PATTERN_SIZE; i++)
@@ -1042,6 +1041,6 @@ out:
   free (buffer);
   fclose (in);
   fclose (out);
-  printf ("done\n");
+//  printf ("Done\n");
   return 0;
 }

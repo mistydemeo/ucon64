@@ -1172,8 +1172,7 @@ snes_s (st_rominfo_t *rominfo)
       if (size <= 4 * MBIT)
         {
           printf (
-            "NOTE: ROM size is smaller than or equal to 4 Mbit -- won't be split\n",
-            4 * MBIT);
+            "NOTE: ROM size is smaller than or equal to 4 Mbit -- won't be split\n");
           return -1;
         }
     }

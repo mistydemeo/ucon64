@@ -65,7 +65,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_VERSION "1.9.8beta2"
 
 #ifdef __UNIX__
-#ifdef __SOLARIS__		// Hmmm, Solaris *is* a UNIX
+#ifdef __SOLARIS__              // Hmmm, Solaris *is* a UNIX
 #define ucon64_TITLE "uCON64 1.9.8beta2 Solaris 1999-2002 by (various)"
 #else
 #define ucon64_TITLE "uCON64 1.9.8beta2 UNIX 1999-2002 by (various)"
@@ -88,57 +88,57 @@ struct ucon64_
   int argc;
   char *argv[128];
 
-  char rom[4096];		//$ROM (cmdline) with path
-  char file[4096];		//$FILE (cmdline) with path
+  char rom[4096];               //$ROM (cmdline) with path
+  char file[4096];              //$FILE (cmdline) with path
   unsigned int parport;
-  int parport_mode;		//parallel port mode: ECP, EPP, SPP, other
+  int parport_mode;             //parallel port mode: ECP, EPP, SPP, other
 
-  long console;			//integer for the detected console system
+  long console;                 //integer for the detected console system
 //  long console_forced;
 //  int show_nfo;
 
   char title[4096];
   char copier[4096];
-  unsigned long bytes;		//size in bytes
-  float mbit;			//size in mbit
+  unsigned long bytes;          //size in bytes
+  float mbit;                   //size in mbit
   int interleaved;
   unsigned long padded;
   unsigned long intro;
   int splitted[128];
 
-  unsigned long current_crc32;	//current crc32 value of ROM
-  unsigned long db_crc32;	//crc32 value of ROM in internal database
+  unsigned long current_crc32;  //current crc32 value of ROM
+  unsigned long db_crc32;       //crc32 value of ROM in internal database
 
-  int has_internal_crc;		//ROM has internal CRC (Super Nintendo, Mega Drive, Gameboy)
-  unsigned long current_internal_crc;	//calculated CRC
-  unsigned long internal_crc;	//internal CRC
-  long internal_crc_start;	//start of internal CRC in ROM header
-  int internal_crc_len;		//length (in bytes) of internal CRC in ROM header
-  char internal_crc2[4096];	//2nd or inverse internal CRC
-  long internal_crc2_start;	//start of 2nd/inverse internal CRC
-  int internal_crc2_len;	//length (in bytes) of 2nd/inverse internal CRC
+  int has_internal_crc;         //ROM has internal CRC (Super Nintendo, Mega Drive, Gameboy)
+  unsigned long current_internal_crc;   //calculated CRC
+  unsigned long internal_crc;   //internal CRC
+  long internal_crc_start;      //start of internal CRC in ROM header
+  int internal_crc_len;         //length (in bytes) of internal CRC in ROM header
+  char internal_crc2[4096];     //2nd or inverse internal CRC
+  long internal_crc2_start;     //start of 2nd/inverse internal CRC
+  int internal_crc2_len;        //length (in bytes) of 2nd/inverse internal CRC
 
-  unsigned char buheader[512];	//(possible) header of backup unit
-  long buheader_start;		//start of backup unit header (mostly 0)
-  long buheader_len;		//length of backup unit header (==0)?no bu header
+  unsigned char buheader[512];  //(possible) header of backup unit
+  long buheader_start;          //start of backup unit header (mostly 0)
+  long buheader_len;            //length of backup unit header (==0)?no bu header
 
-  unsigned char header[MAXBUFSIZE];	//(possible) internal ROM header
-  long header_start;		//start of internal ROM header
-  long header_len;		//length of internal ROM header (==0)?no header
+  unsigned char header[MAXBUFSIZE];     //(possible) internal ROM header
+  long header_start;            //start of internal ROM header
+  long header_len;              //length of internal ROM header (==0)?no header
 
-  char name[4096];		//ROM name
-  long name_start;		//start of internal ROM name (==0)?name comes from database
-  long name_len;		//length of ROM name
+  char name[4096];              //ROM name
+  long name_start;              //start of internal ROM name (==0)?name comes from database
+  long name_len;                //length of ROM name
 
-  char manufacturer[4096];	//manufacturer name of the ROM
-  long manufacturer_start;	//start of internal manufacturer name (==0)?manufacturer comes from database
-  long manufacturer_len;	//length of manufacturer name
+  char manufacturer[4096];      //manufacturer name of the ROM
+  long manufacturer_start;      //start of internal manufacturer name (==0)?manufacturer comes from database
+  long manufacturer_len;        //length of manufacturer name
 
-  char country[4096];		//country name of the ROM
-  long country_start;		//start of internal country name (==0)? country comes from database
-  long country_len;		//length of country name
+  char country[4096];           //country name of the ROM
+  long country_start;           //start of internal country name (==0)? country comes from database
+  long country_len;             //length of country name
 
-  char misc[MAXBUFSIZE];	//some miscellaneous information about the ROM in one single string
+  char misc[MAXBUFSIZE];        //some miscellaneous information about the ROM in one single string
 };
 
 

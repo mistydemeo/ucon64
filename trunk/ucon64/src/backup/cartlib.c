@@ -82,9 +82,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 // To reduce the library size and remove support for any
 // of the following types, comment out one or more of
 // the following lines using //
-#define NONTURBO_FA_SUPPORT 1	// Visoly Non-Turbo flash carts
-#define TURBO_FA_SUPPORT 1	// Visoly Turbo flash carts
-#define NOA_FLASH_CART_SUPPORT 1	// Official Nintendo flash carts
+#define NONTURBO_FA_SUPPORT 1   // Visoly Non-Turbo flash carts
+#define TURBO_FA_SUPPORT 1      // Visoly Turbo flash carts
+#define NOA_FLASH_CART_SUPPORT 1        // Official Nintendo flash carts
 //#define SET_CL_SECTION 1           // Enable setting code section for cartlib
 
 //
@@ -139,9 +139,9 @@ WriteRepeat (int addr, int data, int count)
 #else
  // GBA in-system programming defines
 #define _MEM_INC 2
-#define FP_TIMEOUT1 0x4000	// Probably could be MUCH smaller
-#define FP_TIMEOUT2 0x8000	// Probably could be MUCH smaller
-#define FP_TIMEOUT3 0x80000	// Probably could be MUCH smaller
+#define FP_TIMEOUT1 0x4000      // Probably could be MUCH smaller
+#define FP_TIMEOUT2 0x8000      // Probably could be MUCH smaller
+#define FP_TIMEOUT3 0x80000     // Probably could be MUCH smaller
 #define INTEL28F_BLOCKERASE 0x20
 #define INTEL28F_CLEARSR    0x50
 #define INTEL28F_CONFIRM    0xD0
@@ -200,9 +200,9 @@ WriteFlash (u32 addr, u16 data)
      u32 EraseNonTurboFABlocks (u32 StartAddr, u32 BlockCount) CL_SECTION;
      u32 EraseTurboFABlocks (u32 StartAddr, u32 BlockCount) CL_SECTION;
      u32 WriteNintendoFlashCart (u32 SrcAddr, u32 FlashAddr,
-				 u32 Length) CL_SECTION;
+                                 u32 Length) CL_SECTION;
      u32 WriteNonTurboFACart (u32 SrcAddr, u32 FlashAddr,
-			      u32 Length) CL_SECTION;
+                              u32 Length) CL_SECTION;
      u32 WriteTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length) CL_SECTION;
 #endif
 
@@ -228,7 +228,7 @@ WriteRepeat (u32 addr, u16 data, u16 count)
 
 #ifdef COMMON_FA_SUPPORT
 void
-VisolyModePreamble (void)	// 402438
+VisolyModePreamble (void)       // 402438
 {
   FLINKER_SET;
   WriteRepeat (0x987654, 0x5354, 1);
@@ -252,7 +252,7 @@ SetVisolyFlashRWMode (void)
 }
 
 void
-SetVisolyBackupRWMode (int i)	// 402550
+SetVisolyBackupRWMode (int i)   // 402550
 {
   VisolyModePreamble ();
   WriteRepeat (0xa12345, i, 1);
@@ -272,50 +272,50 @@ CartTypeDetect (void)
   u8 type = 0xff;
   u16 Manuf, Device;
 
-  WriteFlash (_CART_START, INTEL28F_RIC);	// Read Identifier codes from flash.
+  WriteFlash (_CART_START, INTEL28F_RIC);       // Read Identifier codes from flash.
   // Works for intel 28F640J3A & Sharp LH28F320BJE.
   Manuf = ReadFlash (_CART_START);
   Device = ReadFlash (_CART_START + _MEM_INC);
 
   switch (Manuf)
     {
-    case 0:			// Hudson Cart
+    case 0:                    // Hudson Cart
       type = 0xdc;
       break;
-    case 0x2e:			// Standard ROM
+    case 0x2e:                 // Standard ROM
       type = Manuf;
       break;
-    case 0x89:			// Intel chips
+    case 0x89:                 // Intel chips
       switch (Device)
-	{
-	case 0x16:		// i28F320J3A
-	case 0x17:		// i28F640J3A
-	case 0x18:		// i28F128J3A
-	  type = Device;
-	  break;
-	default:
-	  // Check to see if this is a Visoly "Turbo" cart
-	  Device = ReadFlash (_CART_START + _MEM_INC + _MEM_INC);
-	  switch (Device)
-	    {
-	    case 0x16:		// 2 x i28F320J3A
-	    case 0x17:		// 2 x i28F640J3A
-	    case 0x18:		// 2 x i28F128J3A
-	      type = Device + 0x80;
-	      break;
-	    }
-	}
+        {
+        case 0x16:             // i28F320J3A
+        case 0x17:             // i28F640J3A
+        case 0x18:             // i28F128J3A
+          type = Device;
+          break;
+        default:
+          // Check to see if this is a Visoly "Turbo" cart
+          Device = ReadFlash (_CART_START + _MEM_INC + _MEM_INC);
+          switch (Device)
+            {
+            case 0x16:         // 2 x i28F320J3A
+            case 0x17:         // 2 x i28F640J3A
+            case 0x18:         // 2 x i28F128J3A
+              type = Device + 0x80;
+              break;
+            }
+        }
       break;
-    case 0xb0:			// Sharp chips
+    case 0xb0:                 // Sharp chips
       switch (Device)
-	{
-	case 0xe2:
-	  type = Device;
-	  break;
-	}
+        {
+        case 0xe2:
+          type = Device;
+          break;
+        }
       break;
     }
-  WriteFlash (_CART_START, INTEL28F_READARRAY);	// Set flash to normal read mode
+  WriteFlash (_CART_START, INTEL28F_READARRAY); // Set flash to normal read mode
   return (type);
 }
 
@@ -336,12 +336,12 @@ EraseNintendoFlashBlocks (u32 StartAddr, u32 BlockCount)
       i = StartAddr + (k * 32768 * _MEM_INC);
 
       do
-	{
-	  READ_NTURBO_SR (i, j);
-	}
+        {
+          READ_NTURBO_SR (i, j);
+        }
       while ((j & 0x80) == 0);
-      WriteFlash (i, SHARP28F_BLOCKERASE);	// Erase a 64k byte block
-      WriteFlash (i, SHARP28F_CONFIRM);	// Comfirm block erase
+      WriteFlash (i, SHARP28F_BLOCKERASE);      // Erase a 64k byte block
+      WriteFlash (i, SHARP28F_CONFIRM); // Comfirm block erase
       parport_gauge (starttime, (k + 1) * 64 * 1024, BlockCount * 64 * 1024);
     }
 
@@ -350,7 +350,7 @@ EraseNintendoFlashBlocks (u32 StartAddr, u32 BlockCount)
       READ_NTURBO_SR (i, j);
     }
   while ((j & 0x80) == 0);
-  WriteFlash (i, SHARP28F_READARRAY);	// Set normal read mode
+  WriteFlash (i, SHARP28F_READARRAY);   // Set normal read mode
   return (1);
 }
 #endif
@@ -378,64 +378,65 @@ EraseNonTurboFABlocks (u32 StartAddr, u32 BlockCount)
       Timeout = FP_TIMEOUT2;
 
       while ((Ready == 0) && (Timeout != 0))
-	{
-	  READ_NTURBO_SR (_CART_START, Ready);
-	  Ready &= 0x80;
-	  Timeout--;
-	}
+        {
+          READ_NTURBO_SR (_CART_START, Ready);
+          Ready &= 0x80;
+          Timeout--;
+        }
 
       if (Ready)
-	{
-	  WriteFlash (i, INTEL28F_BLOCKERASE);	// Erase a 128k byte block
-	  Ready = 0;
-	  Timeout = FP_TIMEOUT3;
+        {
+          WriteFlash (i, INTEL28F_BLOCKERASE);  // Erase a 128k byte block
+          Ready = 0;
+          Timeout = FP_TIMEOUT3;
 
-	  while ((!Ready) && (Timeout != 0))
-	    {
-	      READ_NTURBO_S (Ready);
-	      Ready = (Ready == 0x80);
-	      Timeout--;
-	    }
+          while ((!Ready) && (Timeout != 0))
+            {
+              READ_NTURBO_S (Ready);
+              Ready = (Ready == 0x80);
+              Timeout--;
+            }
 
-	  if (Ready)
-	    {
-	      WriteFlash (i, INTEL28F_CONFIRM);	// Comfirm block erase
-	      Ready = 0;
-	      Timeout = FP_TIMEOUT3;
+          if (Ready)
+            {
+              WriteFlash (i, INTEL28F_CONFIRM); // Comfirm block erase
+              Ready = 0;
+              Timeout = FP_TIMEOUT3;
 
-	      while ((!Ready) && (Timeout != 0))
-		{
-		  READ_NTURBO_S (Ready);
-		  Ready = (Ready == 0x80);
-		  Timeout--;
-		}
+              while ((!Ready) && (Timeout != 0))
+                {
+                  READ_NTURBO_S (Ready);
+                  Ready = (Ready == 0x80);
+                  Timeout--;
+                }
 
-	      if (Ready)
-		{
-		  READ_NTURBO_SR (_CART_START, Ready);
-		  Ready = (Ready == 0x80);
+              if (Ready)
+                {
+                  READ_NTURBO_SR (_CART_START, Ready);
+                  Ready = (Ready == 0x80);
 
-		  if (!Ready)
-		    break;
-		}
-	      else
-		break;
-	    }
-	  else
-	    break;
-	}
+                  if (!Ready)
+                    break;
+                }
+              else
+                break;
+            }
+          else
+            break;
+        }
       else
-	break;
-      parport_gauge (starttime, (k + 1) * 128 * 1024, BlockCount * 128 * 1024);
+        break;
+      parport_gauge (starttime, (k + 1) * 128 * 1024,
+                     BlockCount * 128 * 1024);
     }
 
   if (!Ready)
     {
-      WriteFlash (i, INTEL28F_CLEARSR);	// Clear flash status register
+      WriteFlash (i, INTEL28F_CLEARSR); // Clear flash status register
     }
 
-  WriteFlash (i, INTEL28F_READARRAY);	// Set flash to normal read mode
-  WriteFlash (i, INTEL28F_READARRAY);	// Set flash to normal read mode
+  WriteFlash (i, INTEL28F_READARRAY);   // Set flash to normal read mode
+  WriteFlash (i, INTEL28F_READARRAY);   // Set flash to normal read mode
 
   return (Ready != 0);
 }
@@ -465,58 +466,59 @@ EraseTurboFABlocks (u32 StartAddr, u32 BlockCount)
       Timeout = FP_TIMEOUT2;
 
       while ((!Ready) && (Timeout != 0))
-	{
-	  READ_TURBO_SR (j);
-	  Ready = (j == 0x8080);
-	  Timeout--;
-	}
+        {
+          READ_TURBO_SR (j);
+          Ready = (j == 0x8080);
+          Timeout--;
+        }
 
       if (Ready)
-	{
-	  done1 = 0;
-	  done2 = 0;
-	  Ready = 0;
-	  Timeout = FP_TIMEOUT3;
+        {
+          done1 = 0;
+          done2 = 0;
+          Ready = 0;
+          Timeout = FP_TIMEOUT3;
 
-	  while ((!Ready) && (Timeout != 0))
-	    {
-	      if (done1 == 0)
-		WriteFlash (i, INTEL28F_BLOCKERASE);	// Erase a 128k byte block in flash #1
-	      if (done2 == 0)
-		WriteFlash (i + _MEM_INC, INTEL28F_BLOCKERASE);	// Erase a 128k byte block in flash #2
+          while ((!Ready) && (Timeout != 0))
+            {
+              if (done1 == 0)
+                WriteFlash (i, INTEL28F_BLOCKERASE);    // Erase a 128k byte block in flash #1
+              if (done2 == 0)
+                WriteFlash (i + _MEM_INC, INTEL28F_BLOCKERASE); // Erase a 128k byte block in flash #2
 
-	      READ_TURBO_S2 (_CART_START, done1, done2);
-	      Ready = ((done1 + done2) == 0x100);
+              READ_TURBO_S2 (_CART_START, done1, done2);
+              Ready = ((done1 + done2) == 0x100);
 
-	      Timeout--;
-	    }
+              Timeout--;
+            }
 
-	  if (Ready)
-	    {
-	      WriteFlash (i, INTEL28F_CONFIRM);	// Comfirm block erase in flash #1
-	      WriteFlash (i + _MEM_INC, INTEL28F_CONFIRM);	// Comfirm block erase in flash #2
+          if (Ready)
+            {
+              WriteFlash (i, INTEL28F_CONFIRM); // Comfirm block erase in flash #1
+              WriteFlash (i + _MEM_INC, INTEL28F_CONFIRM);      // Comfirm block erase in flash #2
 
-	      Ready = 0;
-	      Timeout = FP_TIMEOUT3;
-	      j = 0;
+              Ready = 0;
+              Timeout = FP_TIMEOUT3;
+              j = 0;
 
-	      while (((j & 0x8080) != 0x8080) && (Timeout != 0))
-		{
-		  READ_TURBO_S (j);
-		  Ready = (j == 0x8080);
+              while (((j & 0x8080) != 0x8080) && (Timeout != 0))
+                {
+                  READ_TURBO_S (j);
+                  Ready = (j == 0x8080);
 
-		  Timeout--;
-		}
+                  Timeout--;
+                }
 
-	      if (!Ready)
-		break;
-	    }
-	  else
-	    break;
-	}
+              if (!Ready)
+                break;
+            }
+          else
+            break;
+        }
       else
-	break;
-      parport_gauge (starttime, (k + 1) * 256 * 1024, BlockCount * 256 * 1024);
+        break;
+      parport_gauge (starttime, (k + 1) * 256 * 1024,
+                     BlockCount * 256 * 1024);
     }
 
   if (!Ready)
@@ -547,9 +549,9 @@ WriteNintendoFlashCart (u32 SrcAddr, u32 FlashAddr, u32 Length)
   while (LoopCount < Length)
     {
       do
-	{
-	  READ_NTURBO_SR (FlashAddr, j);
-	}
+        {
+          READ_NTURBO_SR (FlashAddr, j);
+        }
       while ((j & 0x80) == 0);
 
       WriteFlash (FlashAddr, SHARP28F_WORDWRITE);
@@ -588,69 +590,69 @@ WriteNonTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
       Timeout = FP_TIMEOUT1;
 
       while ((Ready == 0) && (Timeout != 0))
-	{
-	  WriteFlash (FlashAddr, INTEL28F_WRTOBUF);
-	  READ_NTURBO_S (Ready);
-	  Ready &= 0x80;
+        {
+          WriteFlash (FlashAddr, INTEL28F_WRTOBUF);
+          READ_NTURBO_S (Ready);
+          Ready &= 0x80;
 
-	  Timeout--;
-	}
+          Timeout--;
+        }
 
       if (Ready)
-	{
-	  int i;
+        {
+          int i;
 
-	  WriteFlash (FlashAddr, 15);	// Write 15+1 16bit words
+          WriteFlash (FlashAddr, 15);   // Write 15+1 16bit words
 
-	  SET_CART_ADDR (FlashAddr);
+          SET_CART_ADDR (FlashAddr);
 
-	  for (i = 0; i < 16; i++)
-	    {
-	      WRITE_FLASH_NEXT (FlashAddr, *(u16 *) SrcAddr);
-	      SrcAddr += 2;
-	      FlashAddr += _MEM_INC;
-	    }
+          for (i = 0; i < 16; i++)
+            {
+              WRITE_FLASH_NEXT (FlashAddr, *(u16 *) SrcAddr);
+              SrcAddr += 2;
+              FlashAddr += _MEM_INC;
+            }
 
-	  WRITE_FLASH_NEXT (FlashAddr, INTEL28F_CONFIRM);
+          WRITE_FLASH_NEXT (FlashAddr, INTEL28F_CONFIRM);
 
-	  Ready = 0;
-	  Timeout = FP_TIMEOUT1;
+          Ready = 0;
+          Timeout = FP_TIMEOUT1;
 
-	  while ((Ready == 0) && (Timeout != 0))
-	    {
-	      READ_NTURBO_SR (_CART_START, i);
-	      Ready = i & 0x80;
+          while ((Ready == 0) && (Timeout != 0))
+            {
+              READ_NTURBO_SR (_CART_START, i);
+              Ready = i & 0x80;
 
-	      Timeout--;
-	    }
+              Timeout--;
+            }
 
-	  if (Ready)
-	    {
-	      if (i & 0x7f)
-		{
-		  // One or more status register error bits are set
-		  CTRL_PORT_1;
-		  WriteFlash (0, INTEL28F_CLEARSR);
-		  Ready = 0;
-		  break;
-		}
-	    }
-	  else
-	    {
-	      CTRL_PORT_1;
-	      WriteFlash (0, INTEL28F_CLEARSR);
-	      break;
-	    }
-	}
+          if (Ready)
+            {
+              if (i & 0x7f)
+                {
+                  // One or more status register error bits are set
+                  CTRL_PORT_1;
+                  WriteFlash (0, INTEL28F_CLEARSR);
+                  Ready = 0;
+                  break;
+                }
+            }
+          else
+            {
+              CTRL_PORT_1;
+              WriteFlash (0, INTEL28F_CLEARSR);
+              break;
+            }
+        }
       else
-	{
-	  break;
-	}
+        {
+          break;
+        }
 
       LoopCount++;
     }
-  WriteFlash (_CART_START, INTEL28F_READARRAY);	// Set flash to normal read mode
-  WriteFlash (_CART_START, INTEL28F_READARRAY);	// Set flash to normal read mode
+  WriteFlash (_CART_START, INTEL28F_READARRAY); // Set flash to normal read mode
+  WriteFlash (_CART_START, INTEL28F_READARRAY); // Set flash to normal read mode
   return (Ready != 0);
 }
 #endif
@@ -676,53 +678,53 @@ WriteTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
       Timeout = 0x4000;
 
       while ((!Ready) && (Timeout != 0))
-	{
-	  if (done1 == 0)
-	    WriteFlash (FlashAddr, INTEL28F_WRTOBUF);
-	  if (done2 == 0)
-	    WriteFlash (FlashAddr + _MEM_INC, INTEL28F_WRTOBUF);
+        {
+          if (done1 == 0)
+            WriteFlash (FlashAddr, INTEL28F_WRTOBUF);
+          if (done2 == 0)
+            WriteFlash (FlashAddr + _MEM_INC, INTEL28F_WRTOBUF);
 
-	  SET_CART_ADDR (FlashAddr);
-	  READ_TURBO_S2 (FlashAddr, done1, done2);
+          SET_CART_ADDR (FlashAddr);
+          READ_TURBO_S2 (FlashAddr, done1, done2);
 
-	  Ready = ((done1 + done2) == 0x100);
+          Ready = ((done1 + done2) == 0x100);
 
-	  Timeout--;
-	}
+          Timeout--;
+        }
 
       if (Ready)
-	{
-	  WriteFlash (FlashAddr, 15);	// Write 15+1 16bit words
-	  WRITE_FLASH_NEXT (FlashAddr + _MEM_INC, 15);	// Write 15+1 16bit words
+        {
+          WriteFlash (FlashAddr, 15);   // Write 15+1 16bit words
+          WRITE_FLASH_NEXT (FlashAddr + _MEM_INC, 15);  // Write 15+1 16bit words
 
-	  SET_CART_ADDR (FlashAddr);
+          SET_CART_ADDR (FlashAddr);
 
-	  for (i = 0; i < 32; i++)
-	    {
-	      WRITE_FLASH_NEXT (FlashAddr, *(u16 *) SrcAddr);
-	      SrcAddr += 2;
-	      FlashAddr += _MEM_INC;
-	    }
-	  WRITE_FLASH_NEXT (FlashAddr, INTEL28F_CONFIRM);
-	  WRITE_FLASH_NEXT (FlashAddr + _MEM_INC, INTEL28F_CONFIRM);
+          for (i = 0; i < 32; i++)
+            {
+              WRITE_FLASH_NEXT (FlashAddr, *(u16 *) SrcAddr);
+              SrcAddr += 2;
+              FlashAddr += _MEM_INC;
+            }
+          WRITE_FLASH_NEXT (FlashAddr, INTEL28F_CONFIRM);
+          WRITE_FLASH_NEXT (FlashAddr + _MEM_INC, INTEL28F_CONFIRM);
 
-	  Ready = 0;
-	  Timeout = 0x4000;
-	  k = 0;
+          Ready = 0;
+          Timeout = 0x4000;
+          k = 0;
 
-	  while (((k & 0x8080) != 0x8080) && (Timeout != 0))
-	    {
-	      READ_TURBO_S (k);
-	      Ready = (k == 0x8080);
+          while (((k & 0x8080) != 0x8080) && (Timeout != 0))
+            {
+              READ_TURBO_S (k);
+              Ready = (k == 0x8080);
 
-	      Timeout--;
-	    }
+              Timeout--;
+            }
 
-	  if (!Ready)
-	    break;
-	}
+          if (!Ready)
+            break;
+        }
       else
-	break;
+        break;
       LoopCount++;
     }
 

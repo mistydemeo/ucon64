@@ -126,7 +126,7 @@ makeppf_main (int argc, char *argv[])
   char obuf[512];
   char pbuf[512];
   char cbuf[512];
-  unsigned char anz;		/* Hell YES! UNSIGNED CHAR! */
+  unsigned char anz;            /* Hell YES! UNSIGNED CHAR! */
   int i, z, a, x, y, osize, psize, fsize, seekpos = 0, pos;
 
 
@@ -166,19 +166,19 @@ makeppf_main (int argc, char *argv[])
     {
       fileid = fopen (argv[4], "rb");
       if (fileid == null)
-	{
-	  printf ("File %s does not exist. (File_id.diz)\n", argv[4]);
-	  fclose (patchedbin);
-	  fclose (originalbin);
-	  exit (0);
-	}
+        {
+          printf ("File %s does not exist. (File_id.diz)\n", argv[4]);
+          fclose (patchedbin);
+          fclose (originalbin);
+          exit (0);
+        }
     }
   ppffile = fopen (argv[3], "wb+");
   if (ppffile == null)
     {
       printf ("Could not create file %s\n", argv[3]);
       if (argc >= 5)
-	fclose (fileid);
+        fclose (fileid);
       fclose (patchedbin);
       fclose (originalbin);
       exit (0);
@@ -191,13 +191,13 @@ makeppf_main (int argc, char *argv[])
 
   /* creating PPF2.0 header */
   printf ("Creating PPF2.0 header data.. ");
-  fwrite ("PPF20", 5, 1, ppffile);	/* Magic (PPF20) */
-  fwrite (&enc, 1, 1, ppffile);	/* Enc.Method (0x01) */
-  fwrite (desc, 50, 1, ppffile);	/* Description line */
-  fwrite (&osize, 4, 1, ppffile);	/* BINfile size */
+  fwrite ("PPF20", 5, 1, ppffile);      /* Magic (PPF20) */
+  fwrite (&enc, 1, 1, ppffile); /* Enc.Method (0x01) */
+  fwrite (desc, 50, 1, ppffile);        /* Description line */
+  fwrite (&osize, 4, 1, ppffile);       /* BINfile size */
   fseek (originalbin, 0x9320, SEEK_SET);
   fread (block, 1024, 1, originalbin);
-  fwrite (block, 1024, 1, ppffile);	/* 1024 byte block */
+  fwrite (block, 1024, 1, ppffile);     /* 1024 byte block */
   printf ("done!\n");
 
   printf ("Writing patchdata, please wait.. ");
@@ -215,28 +215,28 @@ makeppf_main (int argc, char *argv[])
       x = 0;
       pos = 0;
       do
-	{
-	  if (obuf[x] != pbuf[x])
-	    {
-	      pos = seekpos + x;
-	      y = 0;
-	      anz = 0;
-	      do
-		{
-		  cbuf[y] = pbuf[x];
-		  anz++;
-		  x++;
-		  y++;
-		}
-	      while (x != 255 && obuf[x] != pbuf[x]);
-	      fwrite (&pos, 4, 1, ppffile);
-	      fwrite (&anz, 1, 1, ppffile);
-	      fwrite (cbuf, anz, 1, ppffile);
-	    }
-	  else
-	    x++;
+        {
+          if (obuf[x] != pbuf[x])
+            {
+              pos = seekpos + x;
+              y = 0;
+              anz = 0;
+              do
+                {
+                  cbuf[y] = pbuf[x];
+                  anz++;
+                  x++;
+                  y++;
+                }
+              while (x != 255 && obuf[x] != pbuf[x]);
+              fwrite (&pos, 4, 1, ppffile);
+              fwrite (&anz, 1, 1, ppffile);
+              fwrite (cbuf, anz, 1, ppffile);
+            }
+          else
+            x++;
 
-	}
+        }
       while (x != 255);
 
       seekpos += 255;
@@ -253,27 +253,27 @@ makeppf_main (int argc, char *argv[])
       x = 0;
       pos = 0;
       do
-	{
-	  if (obuf[x] != pbuf[x])
-	    {
-	      pos = seekpos + x;
-	      y = 0;
-	      anz = 0;
-	      do
-		{
-		  cbuf[y] = pbuf[x];
-		  anz++;
-		  x++;
-		  y++;
-		}
-	      while (x != a && obuf[x] != pbuf[x]);
-	      fwrite (&pos, 4, 1, ppffile);
-	      fwrite (&anz, 1, 1, ppffile);
-	      fwrite (cbuf, anz, 1, ppffile);
-	    }
-	  else
-	    x++;
-	}
+        {
+          if (obuf[x] != pbuf[x])
+            {
+              pos = seekpos + x;
+              y = 0;
+              anz = 0;
+              do
+                {
+                  cbuf[y] = pbuf[x];
+                  anz++;
+                  x++;
+                  y++;
+                }
+              while (x != a && obuf[x] != pbuf[x]);
+              fwrite (&pos, 4, 1, ppffile);
+              fwrite (&anz, 1, 1, ppffile);
+              fwrite (cbuf, anz, 1, ppffile);
+            }
+          else
+            x++;
+        }
       while (x != a);
     }
   printf ("done!\n");
@@ -286,16 +286,16 @@ makeppf_main (int argc, char *argv[])
       fsize = ftell (fileid);
       fseek (fileid, 0, SEEK_SET);
       if (fsize > 3072)
-	fsize = 3072;		/* File id only up to 3072 bytes! */
+        fsize = 3072;           /* File id only up to 3072 bytes! */
       fread (fileidbuf, fsize, 1, fileid);
-      fwrite ("@BEGIN_FILE_ID.DIZ", 18, 1, ppffile);	/* Write the shit! */
+      fwrite ("@BEGIN_FILE_ID.DIZ", 18, 1, ppffile);    /* Write the shit! */
       fwrite (fileidbuf, fsize, 1, ppffile);
       fwrite ("@END_FILE_ID.DIZ", 16, 1, ppffile);
       fwrite (&fsize, 4, 1, ppffile);
       printf ("done!\n");
     }
 
-  fclose (ppffile);		/* Thats it! */
+  fclose (ppffile);             /* Thats it! */
   fclose (originalbin);
   fclose (patchedbin);
   return 0;
@@ -375,7 +375,7 @@ applyppf_main (int argc, char *argv[])
     case 0:
       /* Show PPF-Patchinformation. */
       /* This is a PPF 1.0 Patch! */
-      fseek (ppffile, 6, SEEK_SET);	/* Read Desc.line */
+      fseek (ppffile, 6, SEEK_SET);     /* Read Desc.line */
       fread (desc, 50, 1, ppffile);
       printf ("\nFilename       : %s\n", argv[2]);
       printf ("Enc. Method    : %d (PPF1.0)\n", method);
@@ -404,33 +404,33 @@ applyppf_main (int argc, char *argv[])
 
       /* Is there a File id ?! */
       if (strncmp (".DIZ", buffer, 4))
-	{
-	  printf ("File_id.diz    : no\n\n");
-	  dizyn = 0;
-	}
+        {
+          printf ("File_id.diz    : no\n\n");
+          dizyn = 0;
+        }
       else
-	{
-	  printf ("File_id.diz    : yes, showing...\n");
-	  fread (&dizlen, 4, 1, ppffile);
-	  fseek (ppffile, -dizlen - 20, SEEK_END);
-	  fread (diz, dizlen, 1, ppffile);
-	  diz[dizlen - 7] = '\0';
-	  printf ("%s\n", diz);
-	  dizyn = 1;
-	  dizlensave = dizlen;
-	}
+        {
+          printf ("File_id.diz    : yes, showing...\n");
+          fread (&dizlen, 4, 1, ppffile);
+          fseek (ppffile, -dizlen - 20, SEEK_END);
+          fread (diz, dizlen, 1, ppffile);
+          diz[dizlen - 7] = '\0';
+          printf ("%s\n", diz);
+          dizyn = 1;
+          dizlensave = dizlen;
+        }
       /* Do the BINfile size check! */
       fseek (ppffile, 56, SEEK_SET);
       fread (&dizlen, 4, 1, ppffile);
       fseek (binfile, 0, SEEK_END);
       binlen = ftell (binfile);
       if (dizlen != binlen)
-	{
-	  printf ("ERROR: the size of the IMAGE is not %d Bytes\n", dizlen);
-	  fclose (ppffile);
-	  fclose (binfile);
-	  return -1;
-	}
+        {
+          printf ("ERROR: the size of the IMAGE is not %d Bytes\n", dizlen);
+          fclose (ppffile);
+          fclose (binfile);
+          return -1;
+        }
 
       /* do the Binaryblock check! this check is 100% secure! */
       fseek (ppffile, 60, SEEK_SET);
@@ -439,29 +439,29 @@ applyppf_main (int argc, char *argv[])
       fread (binblock, 1024, 1, binfile);
       in = memcmp (ppfblock, binblock, 1024);
       if (in != 0)
-	{
-	  printf ("ERROR: this patch does not belong to this IMAGE\n");
-	  fclose (ppffile);
-	  fclose (binfile);
-	  return -1;
-	}
+        {
+          printf ("ERROR: this patch does not belong to this IMAGE\n");
+          fclose (ppffile);
+          fclose (binfile);
+          return -1;
+        }
 
       /* Calculate the count for patching the image later */
       fseek (ppffile, 0, SEEK_END);
       count = ftell (ppffile);
 
       if (dizyn == 0)
-	{
-	  count -= 1084;
-	  seekpos = 1084;
-	}
+        {
+          count -= 1084;
+          seekpos = 1084;
+        }
       else
-	{
-	  count -= 1084;
-	  count -= 38;
-	  count -= dizlensave;
-	  seekpos = 1084;
-	}
+        {
+          count -= 1084;
+          count -= 38;
+          count -= dizlensave;
+          seekpos = 1084;
+        }
       printf ("Patching ... ");
       fflush (stdout);
       break;
@@ -479,19 +479,19 @@ applyppf_main (int argc, char *argv[])
 
   do
     {
-      fseek (ppffile, seekpos, SEEK_SET);	/* seek to patchdataentry */
-      fread (&pos, 4, 1, ppffile);	/* Get POS for binfile */
+      fseek (ppffile, seekpos, SEEK_SET);       /* seek to patchdataentry */
+      fread (&pos, 4, 1, ppffile);      /* Get POS for binfile */
 
-      fread (&anz, 1, 1, ppffile);	/* How many byte do we have to write? */
-      fread (ppfmem, anz, 1, ppffile);	/* And this is WHAT we have to write */
-      fseek (binfile, pos, SEEK_SET);	/* Go to the right position in the BINfile */
-      fwrite (ppfmem, anz, 1, binfile);	/* write 'anz' bytes to that pos from our ppfmem */
-      seekpos = seekpos + 5 + anz;	/* calculate next patchentry! */
-      count = count - 5 - anz;	/* have we reached the end of the PPFfile?? */
+      fread (&anz, 1, 1, ppffile);      /* How many byte do we have to write? */
+      fread (ppfmem, anz, 1, ppffile);  /* And this is WHAT we have to write */
+      fseek (binfile, pos, SEEK_SET);   /* Go to the right position in the BINfile */
+      fwrite (ppfmem, anz, 1, binfile); /* write 'anz' bytes to that pos from our ppfmem */
+      seekpos = seekpos + 5 + anz;      /* calculate next patchentry! */
+      count = count - 5 - anz;  /* have we reached the end of the PPFfile?? */
     }
-  while (count != 0);		/* if not -> LOOOOOP! */
+  while (count != 0);           /* if not -> LOOOOOP! */
 
-  printf ("DONE..\n");		/* byebye :) */
+  printf ("DONE..\n");          /* byebye :) */
   fclose (ppffile);
   fclose (binfile);
   return 0;
@@ -513,7 +513,7 @@ addppfid (int argc, char *argv[])
   printf ("Adding file_id.diz .. ");
   fsize = quickftell (filename);
   if (fsize > 3072)
-    fsize = 3072;		/* File id only up to 3072 bytes! */
+    fsize = 3072;               /* File id only up to 3072 bytes! */
   quickfread (fileidbuf, 0, fsize, getarg (argc, argv, ucon64_FILE));
   fileidbuf[fsize] = 0;
   sprintf (buf, "@BEGIN_FILE_ID.DIZ%s@END_FILE_ID.DIZ", fileidbuf);

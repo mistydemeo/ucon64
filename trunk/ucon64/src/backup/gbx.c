@@ -85,11 +85,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define data port_c
 #define trans_size 32768
 //#define set_ai_write outportb(port_a,5); // ninit=1, nwrite=0
-#define set_data_read outportb(port_a,0);	// nastb=1,nib_sel=0,ndstb=1,nwrite=1
-#define set_data_write outportb(port_a,1);	// nastb=1,nib_sel=0,ndstb=1,nwrite=0
+#define set_data_read outportb(port_a,0);       // nastb=1,nib_sel=0,ndstb=1,nwrite=1
+#define set_data_write outportb(port_a,1);      // nastb=1,nib_sel=0,ndstb=1,nwrite=0
 //#define set_data_write outportb(port_a,1);    // ninit=0, nwrite=0
 //#define set_data_read outportb(port_a,0);     // ninit=0, nwrite=1
-#define set_normal outportb(port_a,4);	// ninit=1, nwrite=1
+#define set_normal outportb(port_a,4);  // ninit=1, nwrite=1
 #define retry_time 3;
 unsigned long time_out;
 unsigned int port_8, port_9, port_a, port_b, port_c;
@@ -97,7 +97,7 @@ unsigned int bank, bank_size;
 
 unsigned long maxfilesize;
 char *file_name = NULL;
-unsigned char cmd, eeprom_type;	// command
+unsigned char cmd, eeprom_type; // command
 FILE *fptr;
 union mix_buffer
 {
@@ -110,9 +110,9 @@ unsigned char temp, mbc1_exp;
 static unsigned long filesize;
 
 unsigned char header_ok, cart_type, rom_size, ram_size, sram_bank_num;
-char port_type = 0;		// 0=epp, 1=spp
+char port_type = 0;             // 0=epp, 1=spp
 char epp_spp = 0;
-char pocket_camera = 0;		// 0=not pocket camera sram(1Mbits)
+char pocket_camera = 0;         // 0=not pocket camera sram(1Mbits)
 /**************************************
 *               Subroutine            *
 **************************************/
@@ -136,47 +136,47 @@ disp_buffer (unsigned int disp_len)
   for (i = 0; i < disp_len; i++)
     {
       if ((i & 0xf) == 0)
-	printf ("%04x: ", i & 0xfff0);
+        printf ("%04x: ", i & 0xfff0);
       if ((i & 0xf) == 8)
-	printf ("- ");
+        printf ("- ");
       printf ("%02x ", mix.buffer[i]);
       if ((i & 0xf) == 0xf)
-	{
-	  printf ("-> ");
-	  for (j = 0; j < 16; j++)
-	    {
-	      if (mix.buffer[(i & 0xfff0) + j] < 0x20
-		  || mix.buffer[(i & 0xfff0) + j] > 0x80)
-		printf (".");
-	      else
-		printf ("%c", mix.buffer[(i & 0xfff0) + j]);
-	    }
-	  printf ("\n");
-	}
+        {
+          printf ("-> ");
+          for (j = 0; j < 16; j++)
+            {
+              if (mix.buffer[(i & 0xfff0) + j] < 0x20
+                  || mix.buffer[(i & 0xfff0) + j] > 0x80)
+                printf (".");
+              else
+                printf ("%c", mix.buffer[(i & 0xfff0) + j]);
+            }
+          printf ("\n");
+        }
     }
 
   y = disp_len & 0xf;
   if (y)
-    {				/* not equal 16*?? */
+    {                           /* not equal 16*?? */
       for (x = y; x < 16; x++)
-	{
-	  if ((x & 0xf) == 8)
-	    printf ("- ");
-	  printf ("   ");
-	  if ((x & 0xf) == 0xf)
-	    {
-	      printf ("-> ");
-	      for (j = 0; j < y; j++)
-		{
-		  if (mix.buffer[(i & 0xfff0) + j] < 0x20
-		      || mix.buffer[(i & 0xfff0) + j] > 0x80)
-		    printf (".");
-		  else
-		    printf ("%c", mix.buffer[(i & 0xfff0) + j]);
-		}
-	      printf ("\n");
-	    }
-	}
+        {
+          if ((x & 0xf) == 8)
+            printf ("- ");
+          printf ("   ");
+          if ((x & 0xf) == 0xf)
+            {
+              printf ("-> ");
+              for (j = 0; j < y; j++)
+                {
+                  if (mix.buffer[(i & 0xfff0) + j] < 0x20
+                      || mix.buffer[(i & 0xfff0) + j] > 0x80)
+                    printf (".");
+                  else
+                    printf ("%c", mix.buffer[(i & 0xfff0) + j]);
+                }
+              printf ("\n");
+            }
+        }
     }
 }
 
@@ -194,9 +194,9 @@ spp_set_ai (unsigned char _ai)
 {
   set_data_write
 //   outportb(port_a,1);                // nastb=1,nib_sel=0,ndstb=1,nwrite=0
-    outportb (port_8, _ai);	// put ai at data bus
-  outportb (port_a, 9);		// nastb=0,nib_sel=0,ndstb=1,nwrite=0
-  outportb (port_a, 1);		// nastb=1,nib_sel=0,ndstb=1,nwrite=0
+    outportb (port_8, _ai);     // put ai at data bus
+  outportb (port_a, 9);         // nastb=0,nib_sel=0,ndstb=1,nwrite=0
+  outportb (port_a, 1);         // nastb=1,nib_sel=0,ndstb=1,nwrite=0
   // nastb ~~~~|___|~~~~
 }
 
@@ -204,9 +204,9 @@ void
 spp_write_data (unsigned char _data)
 {
 //   outportb(port_a,1);                // nastb=1,nib_sel=0,ndstb=1,nwrite=0
-  outportb (port_8, _data);	// put data at data bus
-  outportb (port_a, 3);		// nastb=1,nib_sel=0,ndstb=0,nwrite=0
-  outportb (port_a, 1);		// nastb=1,nib_sel=0,ndstb=1,nwrite=0
+  outportb (port_8, _data);     // put data at data bus
+  outportb (port_a, 3);         // nastb=1,nib_sel=0,ndstb=0,nwrite=0
+  outportb (port_a, 1);         // nastb=1,nib_sel=0,ndstb=1,nwrite=0
   // ndstb ~~~~|___|~~~~
 }
 
@@ -221,11 +221,11 @@ char
 spp_read_data (void)
 {
   char low_nibble, high_nibble, temp;
-  set_data_read outportb (port_a, 2);	// nastb=1,nib_sel=0,ndstb=0,nwrite=1
+  set_data_read outportb (port_a, 2);   // nastb=1,nib_sel=0,ndstb=0,nwrite=1
   low_nibble = inportb (port_9);
-  outportb (port_a, 6);		// nastb=1,nib_sel=1,ndstb=0,nwrite=1
+  outportb (port_a, 6);         // nastb=1,nib_sel=1,ndstb=0,nwrite=1
   high_nibble = inportb (port_9);
-  outportb (port_a, 0);		// nastb=1,nib_sel=0,ndstb=1,nwrite=1
+  outportb (port_a, 0);         // nastb=1,nib_sel=0,ndstb=1,nwrite=1
   // nibble_sel ___|~~~ and ndstb ~~~~|___|~~~~
   temp = (((high_nibble << 1) & 0xf0) | ((low_nibble >> 3) & 0x0f));
 //   printf("temp=%x",temp);
@@ -259,42 +259,42 @@ void
 set_ai_data (unsigned char _ai, unsigned char _data)
 {
   if (port_type)
-    spp_set_ai_data (_ai, _data);	// spp mode
+    spp_set_ai_data (_ai, _data);       // spp mode
   else
-    epp_set_ai_data (_ai, _data);	// epp mode
+    epp_set_ai_data (_ai, _data);       // epp mode
 }
 
 void
 write_data (unsigned char _data)
 {
   if (port_type)
-    spp_write_data (_data);	// spp write data
+    spp_write_data (_data);     // spp write data
   else
-    outportb (data, _data);	// epp write data
+    outportb (data, _data);     // epp write data
 }
 
 unsigned char
 read_data (void)
 {
   if (port_type)
-    return spp_read_data ();	// spp read data
+    return spp_read_data ();    // spp read data
   else
-    return inportb (data);	// epp read data
+    return inportb (data);      // epp read data
 }
 
 void
 init_port (void)
 {
-  outportb (port_9, 1);		// clear EPP time flag
-  set_ai_data (2, 0);		// rst=0, wei=0(dis.), rdi=0(dis.)
-  set_ai_data (2, 0x80);	// rst=1, wei=0(dis.), rdi=0(dis.)
+  outportb (port_9, 1);         // clear EPP time flag
+  set_ai_data (2, 0);           // rst=0, wei=0(dis.), rdi=0(dis.)
+  set_ai_data (2, 0x80);        // rst=1, wei=0(dis.), rdi=0(dis.)
 }
 
 void
 end_port (void)
 {
-  set_ai_data (2, 0);		// rst=0, wei=0(dis.), rdi=0(dis.)
-  set_normal			// ninit=1, nWrite=1
+  set_ai_data (2, 0);           // rst=0, wei=0(dis.), rdi=0(dis.)
+  set_normal                    // ninit=1, nWrite=1
 }
 
 
@@ -304,7 +304,7 @@ write_32k_file (void)
   if (fwrite ((char *) mix.buffer, sizeof (char), trans_size, fptr) !=
       trans_size)
     {
-      fclose (fptr);		/* write data error */
+      fclose (fptr);            /* write data error */
       return 1;
     }
 //   printf(".");
@@ -317,7 +317,7 @@ read_8k_file ()
   if (fread ((char *) mix.buffer, sizeof (char), 0x2000, fptr) != 0x2000)
     {
       printf ("read error\n");
-      fclose (fptr);		/* read data error */
+      fclose (fptr);            /* read data error */
       return 1;
     }
 //   printf(".");
@@ -330,7 +330,7 @@ read_16k_file ()
   if (fread ((char *) mix.buffer, sizeof (char), 0x4000, fptr) != 0x4000)
     {
       printf ("read error\n");
-      fclose (fptr);		/* read data error */
+      fclose (fptr);            /* read data error */
       return 1;
     }
 //   printf(".");
@@ -344,7 +344,7 @@ read_32k_file ()
       trans_size)
     {
       printf ("read error\n");
-      fclose (fptr);		/* read data error */
+      fclose (fptr);            /* read data error */
       return 1;
     }
   //printf(".");
@@ -352,13 +352,13 @@ read_32k_file ()
 }
 
 void
-set_adr (unsigned int adr)	// *****
+set_adr (unsigned int adr)      // *****
 {
 //unsigned char temp;
-  set_ai_data (0, (adr & 0xff));	// a[7..0]
-  set_ai_data (1, ((adr >> 8) & 0xff));	// a[15..8]
+  set_ai_data (0, (adr & 0xff));        // a[7..0]
+  set_ai_data (1, ((adr >> 8) & 0xff)); // a[15..8]
   set_ai (3);
-  set_data_read			// ninit=0, nWrite=1
+  set_data_read                 // ninit=0, nWrite=1
 }
 
 int
@@ -367,7 +367,7 @@ write_file_32k (void)
   if (fwrite ((char *) mix.buffer, sizeof (char), trans_size, fptr) !=
       trans_size)
     {
-      fclose (fptr);		/* write data error */
+      fclose (fptr);            /* write data error */
       return -1;
     }
   //printf(".");
@@ -380,7 +380,7 @@ write_file_xxk (unsigned int write_size)
   if (fwrite ((char *) mix.buffer, sizeof (char), write_size, fptr) !=
       write_size)
     {
-      fclose (fptr);		/* write data error */
+      fclose (fptr);            /* write data error */
       return -1;
     }
   //printf(".");
@@ -391,11 +391,11 @@ void
 set_bank (unsigned int adr, unsigned char bank)
 {
 //   printf("adr=%x bank=%x\n",adr,bank);
-  set_ai_data (2, 0x80);	// disable inc
-  set_ai_data (0, (adr & 0xff));	// a[7..0]
-  set_ai_data (1, ((adr >> 8) & 0x7f));	// a[15..8]
-  set_ai_data (3, bank);	// write bank no
-  set_data_read			// ninit=0, nWrite=1
+  set_ai_data (2, 0x80);        // disable inc
+  set_ai_data (0, (adr & 0xff));        // a[7..0]
+  set_ai_data (1, ((adr >> 8) & 0x7f)); // a[15..8]
+  set_ai_data (3, bank);        // write bank no
+  set_data_read                 // ninit=0, nWrite=1
 }
 
 void
@@ -403,9 +403,9 @@ set_rom_bank (unsigned char bank)
 {
 // cart_type <4 is MCB1, other is MCB2
   if (cart_type < 4)
-    set_bank (0x2000, bank);	// for MCB1
+    set_bank (0x2000, bank);    // for MCB1
   else
-    set_bank (0x2100, bank);	// for MCB2
+    set_bank (0x2100, bank);    // for MCB2
 }
 
 
@@ -415,7 +415,7 @@ delay_10us ()
 //  waits for a number of milliseconds... Better use the same code on all platforms.
 {
   long x;
-  for (x = 0; x < 0x3000; x++);	// 0x2000
+  for (x = 0; x < 0x3000; x++); // 0x2000
 }
 
 volatile void
@@ -435,13 +435,13 @@ delay_100us ()
 void
 out_byte_eeprom (unsigned char d)
 {
-  set_ai_data (2, 0x82);	// wei enable
-  set_ai (3);			// default write mode
+  set_ai_data (2, 0x82);        // wei enable
+  set_ai (3);                   // default write mode
 //   set_data_read              // ninit=0, nWrite=1
-  set_data_write write_data (d);	// out data
+  set_data_write write_data (d);        // out data
 //   outportb(data,d);          // out data
-  set_ai_data (2, 0x80);	// wei disable
-  set_ai (3);			// default write mode
+  set_ai_data (2, 0x80);        // wei disable
+  set_ai (3);                   // default write mode
 }
 
 void
@@ -449,7 +449,7 @@ out_byte (unsigned char d)
 {
   set_ai (3);
 //   set_data_read              // ninit=0, nWrite=1
-  set_data_write write_data (d);	// out data
+  set_data_write write_data (d);        // out data
 //   outportb(data,d);          // out data
 }
 
@@ -459,92 +459,92 @@ void
 out_data (unsigned char h, unsigned char m, unsigned char l, unsigned char d)
 {
 // ai[]=2 w control d7=rs,d1=xwe_en,d0=cs_en
-  h = ((h << 2) | (m >> 6)) & 0x1f;	// maximum bank is 1f
+  h = ((h << 2) | (m >> 6)) & 0x1f;     // maximum bank is 1f
   if (h)
-    m = (m & 0x3f) | 0x40;	// >bank 0
+    m = (m & 0x3f) | 0x40;      // >bank 0
   else
-    m = m & 0x3f;		// bank 0
+    m = m & 0x3f;               // bank 0
 
 
-  set_adr (0x2000);		// write 2000:h
-  set_data_write write_data (h);	// set rom bank value
+  set_adr (0x2000);             // write 2000:h
+  set_data_write write_data (h);        // set rom bank value
 //   outportb(data,h);          // set rom bank value
-  set_ai_data (1, m);		// a[15..8]
-  set_ai_data (0, l);		// a[7..0]
-  out_byte_eeprom (d);		// write data to eeprom
+  set_ai_data (1, m);           // a[15..8]
+  set_ai_data (0, l);           // a[7..0]
+  out_byte_eeprom (d);          // write data to eeprom
 }
 
 
 void
-out_adr2_data (unsigned long adr, unsigned char d)	// address shift 1 bit
+out_adr2_data (unsigned long adr, unsigned char d)      // address shift 1 bit
 {
   unsigned char h, m, l;
-  set_ai_data (2, 0x80);	// disable wr/rd inc.
-  adr <<= 1;			// adr x 2
-  l = adr & 0xff;		// a7~a0
-  m = (adr >> 8) & 0x3f;	// a13~a8
-  h = (adr >> 14) & 0xff;	// a21~a13
+  set_ai_data (2, 0x80);        // disable wr/rd inc.
+  adr <<= 1;                    // adr x 2
+  l = adr & 0xff;               // a7~a0
+  m = (adr >> 8) & 0x3f;        // a13~a8
+  h = (adr >> 14) & 0xff;       // a21~a13
   if (h)
-    m |= 0x40;			// >bank 0
+    m |= 0x40;                  // >bank 0
 
-  set_adr (0x2000);		// write 2000:h
-  set_data_write write_data (h);	// set rom bank value
+  set_adr (0x2000);             // write 2000:h
+  set_data_write write_data (h);        // set rom bank value
 //   outportb(data,h);          // set rom bank value
-  set_ai_data (1, m);		// a[15..8]
-  set_ai_data (0, l);		// a[7..0]
-  out_byte_eeprom (d);		// write data to eeprom
+  set_ai_data (1, m);           // a[15..8]
+  set_ai_data (0, l);           // a[7..0]
+  out_byte_eeprom (d);          // write data to eeprom
 }
 
 
 void
-out_adr_data (unsigned long adr, unsigned char d)	// real address
+out_adr_data (unsigned long adr, unsigned char d)       // real address
 {
   unsigned char xh, h, m, l;
-  set_ai_data (2, 0x80);	// disable wr/rd inc.
-  l = adr & 0xff;		// a7~a0
-  m = (adr >> 8) & 0x3f;	// a13~a8
-  h = (adr >> 14) & 0xff;	// a21~a13
-  xh = (adr >> 22) & 0x7;	// max. 256Mbit
+  set_ai_data (2, 0x80);        // disable wr/rd inc.
+  l = adr & 0xff;               // a7~a0
+  m = (adr >> 8) & 0x3f;        // a13~a8
+  h = (adr >> 14) & 0xff;       // a21~a13
+  xh = (adr >> 22) & 0x7;       // max. 256Mbit
   if (h | xh)
-    m |= 0x40;			// >bank 0
+    m |= 0x40;                  // >bank 0
 
-  set_adr (0x3000);		// write 3000:sh
-  set_data_write write_data (xh);	// set rom bank extend value
-  set_adr (0x2000);		// write 2000:h
-  set_data_write write_data (h);	// set rom bank value
+  set_adr (0x3000);             // write 3000:sh
+  set_data_write write_data (xh);       // set rom bank extend value
+  set_adr (0x2000);             // write 2000:h
+  set_data_write write_data (h);        // set rom bank value
 //   outportb(data,h);          // set rom bank value
-  set_ai_data (1, m);		// a[15..8]
-  set_ai_data (0, l);		// a[7..0]
-  out_byte_eeprom (d);		// write data to eeprom
+  set_ai_data (1, m);           // a[15..8]
+  set_ai_data (0, l);           // a[7..0]
+  out_byte_eeprom (d);          // write data to eeprom
 }
 
 void
-set_adr_long (unsigned long adr)	// real address
+set_adr_long (unsigned long adr)        // real address
 {
   unsigned char xh, h, m, l;
-  set_ai_data (2, 0x80);	// disable wr/rd inc.
-  l = adr & 0xff;		// a7~a0
-  m = (adr >> 8) & 0x3f;	// a13~a8
-  h = (adr >> 14) & 0xff;	// a21~a13
-  xh = (adr >> 22) & 0x7;	// max. 256Mbit
+  set_ai_data (2, 0x80);        // disable wr/rd inc.
+  l = adr & 0xff;               // a7~a0
+  m = (adr >> 8) & 0x3f;        // a13~a8
+  h = (adr >> 14) & 0xff;       // a21~a13
+  xh = (adr >> 22) & 0x7;       // max. 256Mbit
   if (h | xh)
-    m |= 0x40;			// >bank 0
+    m |= 0x40;                  // >bank 0
 
-  set_adr (0x3000);		// write 3000:sh
-  set_data_write write_data (xh);	// set rom bank extend value
-  set_adr (0x2000);		// write 2000:h
-  set_data_write write_data (h);	// set rom bank value
+  set_adr (0x3000);             // write 3000:sh
+  set_data_write write_data (xh);       // set rom bank extend value
+  set_adr (0x2000);             // write 2000:h
+  set_data_write write_data (h);        // set rom bank value
 //   outportb(data,h);          // set rom bank value
-  set_ai_data (1, m);		// a[15..8]
-  set_ai_data (0, l);		// a[7..0]
+  set_ai_data (1, m);           // a[15..8]
+  set_ai_data (0, l);           // a[7..0]
 }
 
 
 unsigned char
 read_byte (void)
 {
-  set_ai (3);			// default write mode
-  set_data_read			// ninit=0, nWrite=1
+  set_ai (3);                   // default write mode
+  set_data_read                 // ninit=0, nWrite=1
     return read_data ();
 //   return inportb(data);
 }
@@ -553,7 +553,7 @@ void
 enable_protection (void)
 {
 //   set_bank(0x2000,0);                // set bank 0
-  out_data (0, 0x55, 0x55, 0xaa);	/* adr2,adr1,adr0,data 05555:aa */
+  out_data (0, 0x55, 0x55, 0xaa);       /* adr2,adr1,adr0,data 05555:aa */
   out_data (0, 0x2a, 0xaa, 0x55);
   out_data (0, 0x55, 0x55, 0xa0);
 }
@@ -561,7 +561,7 @@ enable_protection (void)
 void
 disable_protection (void)
 {
-  out_data (0, 0x55, 0x55, 0xaa);	/* adr2,adr1,adr0,data 05555:aa */
+  out_data (0, 0x55, 0x55, 0xaa);       /* adr2,adr1,adr0,data 05555:aa */
   out_data (0, 0x2a, 0xaa, 0x55);
   out_data (0, 0x55, 0x55, 0x80);
   out_data (0, 0x55, 0x55, 0xaa);
@@ -579,8 +579,8 @@ data_polling_data (unsigned char last_data)
   loop = 1;
   while ((timeout < 0x07ffffff) && (loop))
     {
-      if (((read_byte () ^ last_data) & 0x80) == 0)	// end wait
-	loop = 0;		// ready to exit the while loop
+      if (((read_byte () ^ last_data) & 0x80) == 0)     // end wait
+        loop = 0;               // ready to exit the while loop
       timeout++;
     }
 //   printf("timeout = %x\n",timeout);
@@ -599,7 +599,7 @@ data_polling (void)
     {
       currdata = read_byte () & 0x40;
       if (predata == currdata)
-	loop = 0;		// ready to exit the while loop
+        loop = 0;               // ready to exit the while loop
       predata = currdata;
       timeout++;
     }
@@ -608,20 +608,20 @@ data_polling (void)
 }
 
 void
-reset_to_read (void)		// return to read mode
+reset_to_read (void)            // return to read mode
 {
-  out_adr2_data (0x5555, 0xaa);	// 5555:aa adr2,adr1,adr0,data
-  out_adr2_data (0x2aaa, 0x55);	// 2aaa:55
-  out_adr2_data (0x5555, 0xf0);	// 5555:f0
+  out_adr2_data (0x5555, 0xaa); // 5555:aa adr2,adr1,adr0,data
+  out_adr2_data (0x2aaa, 0x55); // 2aaa:55
+  out_adr2_data (0x5555, 0xf0); // 5555:f0
 }
 
 
 void
 read_status_reg_cmd (void)
 {
-  out_adr2_data (0x5555, 0xaa);	// 5555:aa adr2,adr1,adr0,data
-  out_adr2_data (0x2aaa, 0x55);	// 2aaa:55
-  out_adr2_data (0x5555, 0x70);	// 5555:70
+  out_adr2_data (0x5555, 0xaa); // 5555:aa adr2,adr1,adr0,data
+  out_adr2_data (0x2aaa, 0x55); // 2aaa:55
+  out_adr2_data (0x5555, 0x70); // 5555:70
 }
 
 
@@ -631,22 +631,22 @@ char
 wait_status (void)
 {
   unsigned temp;
-  temp = read_byte ();		// read first status byte
+  temp = read_byte ();          // read first status byte
 //      printf("temp=%x ",temp);        /* TODO: is 16meg status different? */
 
   while ((temp & 0xfc) != 0x80)
     {
 //      printf("temp=%x ",temp);
       if ((temp & 0x20) == 0x20)
-	{
-	  printf ("Fail in erase\n");	/* had to comment out because this wouldnt work on 16 meg */
-	  return -1;
-	}
+        {
+          printf ("Fail in erase\n");   /* had to comment out because this wouldnt work on 16 meg */
+          return -1;
+        }
       if ((temp & 0x10) == 0x10)
-	{
-	  printf ("Fail in program\n");
-	  return -2;
-	}
+        {
+          printf ("Fail in program\n");
+          return -2;
+        }
       temp = read_data ();
 //      temp=inportb(data);
     }
@@ -658,12 +658,12 @@ wait_status (void)
 char
 mx_erase (void)
 {
-  out_adr2_data (0x5555, 0xaa);	// 5555:aa adr2,adr1,adr0,data
-  out_adr2_data (0x2aaa, 0x55);	// 2aaa:55
-  out_adr2_data (0x5555, 0x80);	// 5555:80
-  out_adr2_data (0x5555, 0xaa);	// 5555:aa
-  out_adr2_data (0x2aaa, 0x55);	// 2aaa:55
-  out_adr2_data (0x5555, 0x10);	// 5555:10
+  out_adr2_data (0x5555, 0xaa); // 5555:aa adr2,adr1,adr0,data
+  out_adr2_data (0x2aaa, 0x55); // 2aaa:55
+  out_adr2_data (0x5555, 0x80); // 5555:80
+  out_adr2_data (0x5555, 0xaa); // 5555:aa
+  out_adr2_data (0x2aaa, 0x55); // 2aaa:55
+  out_adr2_data (0x5555, 0x10); // 5555:10
 
   delay_100us ();
 //   read_status_reg_cmd();             // send read status reg. cmd
@@ -684,7 +684,7 @@ mx_erase (void)
 char
 win_erase (void)
 {
-  out_data (0, 0x55, 0x55, 0xaa);	/* adr2,adr1,adr0,data 05555:aa */
+  out_data (0, 0x55, 0x55, 0xaa);       /* adr2,adr1,adr0,data 05555:aa */
   out_data (0, 0x2a, 0xaa, 0x55);
   out_data (0, 0x55, 0x55, 0x80);
   out_data (0, 0x55, 0x55, 0xaa);
@@ -707,7 +707,7 @@ win_erase (void)
 unsigned char
 intel_read_status (void)
 {
-  out_adr_data (0, 0x70);	// read status command
+  out_adr_data (0, 0x70);       // read status command
   return read_byte ();
 
 }
@@ -720,12 +720,12 @@ intel_check_status (void)
     {
       time_out--;
       if (time_out == 0)
-	{
-	  printf ("Intel read status time out\n");
-	  printf ("status = %x\n", intel_read_status ());
-	  out_adr_data (0, 0x50);	// clear status register
-	  return -1;
-	}
+        {
+          printf ("Intel read status time out\n");
+          printf ("status = %x\n", intel_read_status ());
+          out_adr_data (0, 0x50);       // clear status register
+          return -1;
+        }
     }
   return 0;
 }
@@ -739,26 +739,26 @@ intel_block_erase (unsigned long block)
     {
       time_out--;
       if (time_out == 0)
-	{
-	  printf ("Intel Block erase time out\n");
-	  printf ("status = %x\n", intel_read_status ());
-	  return -1;
-	}
+        {
+          printf ("Intel Block erase time out\n");
+          printf ("status = %x\n", intel_read_status ());
+          return -1;
+        }
     }
-  out_adr_data (block, 0x20);	// Block erase
-  out_adr_data (block, 0xd0);	// write confirm
+  out_adr_data (block, 0x20);   // Block erase
+  out_adr_data (block, 0xd0);   // write confirm
   time_out = 0x8000;
   while (!(intel_read_status () & 0x80))
     {
       time_out--;
       if (time_out == 0)
-	{
-	  printf ("Intel Block erase time out at %lx\n", block);
-	  printf ("status = %x\n", intel_read_status ());
-	  out_adr_data (block, 0x50);	// clear status register
-	  printf ("status = %x\n", intel_read_status ());
-	  return -1;
-	}
+        {
+          printf ("Intel Block erase time out at %lx\n", block);
+          printf ("status = %x\n", intel_read_status ());
+          out_adr_data (block, 0x50);   // clear status register
+          printf ("status = %x\n", intel_read_status ());
+          return -1;
+        }
     }
 
   if ((intel_read_status ()) == 0x80)
@@ -770,9 +770,9 @@ intel_block_erase (unsigned long block)
     {
       printf ("Intel Block erase error at %lx\n", block);
       printf ("status = %x\n", intel_read_status ());
-      out_adr_data (block, 0x50);	// clear status register
+      out_adr_data (block, 0x50);       // clear status register
       printf ("status = %x\n", intel_read_status ());
-      out_adr_data (0x0000, 0xff);	// read array
+      out_adr_data (0x0000, 0xff);      // read array
       return -1;
     }
 }
@@ -786,7 +786,7 @@ intel_erase (void)
   for (block = 0; block < 64; block++)
     {
       if (intel_block_erase (block * 0x20000))
-	return -1;		// something error
+        return -1;              // something error
     }
   printf ("Erase completed\n");
   return 0;
@@ -810,12 +810,12 @@ erase (void)
 char
 sector_erase (unsigned long sector)
 {
-  out_adr2_data (0x5555, 0xaa);	// 5555:aa adr2,adr1,adr0,data
-  out_adr2_data (0x2aaa, 0x55);	// 2aaa:55
-  out_adr2_data (0x5555, 0x80);	// 5555:80
-  out_adr2_data (0x5555, 0xaa);	// 5555:aa
-  out_adr2_data (0x2aaa, 0x55);	// 2aaa:55
-  out_adr2_data (sector, 0x30);	// sector:30
+  out_adr2_data (0x5555, 0xaa); // 5555:aa adr2,adr1,adr0,data
+  out_adr2_data (0x2aaa, 0x55); // 2aaa:55
+  out_adr2_data (0x5555, 0x80); // 5555:80
+  out_adr2_data (0x5555, 0xaa); // 5555:aa
+  out_adr2_data (0x2aaa, 0x55); // 2aaa:55
+  out_adr2_data (sector, 0x30); // sector:30
 
   delay_100us ();
 //   read_status_reg_cmd();             // send read status reg. cmd
@@ -837,34 +837,34 @@ sector_erase (unsigned long sector)
 void
 mx_id (void)
 {
-  out_adr2_data (0x5555, 0xaa);	/* softwave product ID entry */
-  out_adr2_data (0x2aaa, 0x55);	/* adr2,adr1,adr0,data */
-  out_adr2_data (0x5555, 0x90);	/* adr2,adr1,adr0,data */
+  out_adr2_data (0x5555, 0xaa); /* softwave product ID entry */
+  out_adr2_data (0x2aaa, 0x55); /* adr2,adr1,adr0,data */
+  out_adr2_data (0x5555, 0x90); /* adr2,adr1,adr0,data */
 //   delay_10us();
-  set_adr (0);			/* adr2,adr1,adr0 */
+  set_adr (0);                  /* adr2,adr1,adr0 */
   printf ("Manufacturer Code: %x\n", read_byte ());
-  set_adr (2);			/* adr2,adr1,adr0 */
+  set_adr (2);                  /* adr2,adr1,adr0 */
   printf ("Device Code: %x\n", read_byte ());
-  set_adr (4);			/* adr2,adr1,adr0 */
+  set_adr (4);                  /* adr2,adr1,adr0 */
   printf ("First 16k protection Code: %x\n", read_byte ());
-  reset_to_read ();		// reset to read mode
+  reset_to_read ();             // reset to read mode
 }
 
 
 void
 win_id (void)
 {
-  out_data (0, 0x55, 0x55, 0xaa);	/* softwave product ID entry */
-  out_data (0, 0x2a, 0xaa, 0x55);	/* adr2,adr1,adr0,data */
-  out_data (0, 0x55, 0x55, 0x80);	/* adr2,adr1,adr0,data */
-  out_data (0, 0x55, 0x55, 0xaa);	/* adr2,adr1,adr0,data */
-  out_data (0, 0x2a, 0xaa, 0x55);	/* adr2,adr1,adr0,data */
-  out_data (0, 0x55, 0x55, 0x60);	/* adr2,adr1,adr0,data */
+  out_data (0, 0x55, 0x55, 0xaa);       /* softwave product ID entry */
+  out_data (0, 0x2a, 0xaa, 0x55);       /* adr2,adr1,adr0,data */
+  out_data (0, 0x55, 0x55, 0x80);       /* adr2,adr1,adr0,data */
+  out_data (0, 0x55, 0x55, 0xaa);       /* adr2,adr1,adr0,data */
+  out_data (0, 0x2a, 0xaa, 0x55);       /* adr2,adr1,adr0,data */
+  out_data (0, 0x55, 0x55, 0x60);       /* adr2,adr1,adr0,data */
 
   delay_10us ();
-  set_adr (0);			/* adr2,adr1,adr0 */
+  set_adr (0);                  /* adr2,adr1,adr0 */
   printf ("Manufacturer Code: %x\n", read_byte ());
-  set_adr (1);			/* adr2,adr1,adr0 */
+  set_adr (1);                  /* adr2,adr1,adr0 */
   printf ("Device Code: %x\n", read_byte ());
 //   set_adr(2);                        /* adr2,adr1,adr0 */
 //   printf("First 16k protection Code : %x\n",read_byte());
@@ -872,19 +872,19 @@ win_id (void)
 //   set_adr(0x7ff2);                   /* adr2,adr1,adr0=0x7fff2 */
 //   printf("Last 16k protection Code : %x\n",read_byte());
 
-  out_data (0, 0x55, 0x55, 0xaa);	/* softwave product ID exit */
-  out_data (0, 0x2a, 0xaa, 0x55);	/* adr2,adr1,adr0,data */
-  out_data (0, 0x55, 0x55, 0xf0);	/* adr2,adr1,adr0,data */
+  out_data (0, 0x55, 0x55, 0xaa);       /* softwave product ID exit */
+  out_data (0, 0x2a, 0xaa, 0x55);       /* adr2,adr1,adr0,data */
+  out_data (0, 0x55, 0x55, 0xf0);       /* adr2,adr1,adr0,data */
 }
 
 
 void
 intel_id (void)
 {
-  out_adr_data (0, 0x98);	// Read Query
+  out_adr_data (0, 0x98);       // Read Query
   for (i = 0; i < 128; i += 2)
     {
-      set_adr (i);		/* adr2,adr1,adr0 */
+      set_adr (i);              /* adr2,adr1,adr0 */
       mix.buffer[i / 2] = read_byte ();
     }
 //   disp_buffer(64);
@@ -909,8 +909,8 @@ disp_id (void)
 void
 out_adr_data_32k (unsigned int adr, unsigned char data)
 {
-  set_adr (adr);		// write adr:data
-  out_byte_eeprom (data);	// write data to eeprom
+  set_adr (adr);                // write adr:data
+  out_byte_eeprom (data);       // write data to eeprom
 }
 
 char
@@ -924,7 +924,7 @@ check_eeprom (void)
 //   out_data(0,0x2a,0xaa,0x55);        /* adr2,adr1,adr0,data */
 //   out_data(0,0x55,0x55,0x60);        /* adr2,adr1,adr0,data */
 
-  out_adr_data_32k (0x5555, 0xaa);	// softwave product ID entry
+  out_adr_data_32k (0x5555, 0xaa);      // softwave product ID entry
   out_adr_data_32k (0x2aaa, 0x55);
   out_adr_data_32k (0x5555, 0x80);
   out_adr_data_32k (0x5555, 0xaa);
@@ -932,12 +932,12 @@ check_eeprom (void)
   out_adr_data_32k (0x5555, 0x60);
 
   delay_10us ();
-  set_adr (0);			/* adr2,adr1,adr0 */
+  set_adr (0);                  /* adr2,adr1,adr0 */
 //   printf("Manufacturer Code : %x\n",read_byte());
 
   if (read_byte () != 0xda)
     goto check_16m;
-  set_adr (1);			/* adr2,adr1,adr0 */
+  set_adr (1);                  /* adr2,adr1,adr0 */
 //   printf("Device Code : %x\n",read_byte());
   if (read_byte () != 0x46)
     goto check_16m;
@@ -945,21 +945,21 @@ check_eeprom (void)
 //   out_data(0,0x55,0x55,0xaa);        /* softwave product ID exit */
 //   out_data(0,0x2a,0xaa,0x55);        /* adr2,adr1,adr0,data */
 //   out_data(0,0x55,0x55,0xf0);        /* adr2,adr1,adr0,data */
-  out_adr_data_32k (0x5555, 0xaa);	/* softwave product ID exit */
-  out_adr_data_32k (0x2aaa, 0x55);	/* adr2,adr1,adr0,data */
-  out_adr_data_32k (0x5555, 0xf0);	/* adr2,adr1,adr0,data */
-  eeprom_type = 4;		// windbond 4M flash
+  out_adr_data_32k (0x5555, 0xaa);      /* softwave product ID exit */
+  out_adr_data_32k (0x2aaa, 0x55);      /* adr2,adr1,adr0,data */
+  out_adr_data_32k (0x5555, 0xf0);      /* adr2,adr1,adr0,data */
+  eeprom_type = 4;              // windbond 4M flash
   return 0;
 
 
 // 16M flash
 check_16m:
-  out_adr2_data (0x5555, 0xaa);	/* 5555:aa softwave product ID entry */
-  out_adr2_data (0x2aaa, 0x55);	/* 2aaa:55 adr2,adr1,adr0,data */
-  out_adr2_data (0x5555, 0x90);	/* 5555:90 adr2,adr1,adr0,data */
+  out_adr2_data (0x5555, 0xaa); /* 5555:aa softwave product ID entry */
+  out_adr2_data (0x2aaa, 0x55); /* 2aaa:55 adr2,adr1,adr0,data */
+  out_adr2_data (0x5555, 0x90); /* 5555:90 adr2,adr1,adr0,data */
 
 //   delay_10us();
-  set_adr (0);			/* adr2,adr1,adr0 */
+  set_adr (0);                  /* adr2,adr1,adr0 */
 //   printf("Manufacturer Code : %x\n",read_byte());
   if (read_byte () != 0xc2)
     {
@@ -967,7 +967,7 @@ check_16m:
       goto check_64m;
 //      return 1;
     }
-  set_adr (2);			/* adr2,adr1,adr0 */
+  set_adr (2);                  /* adr2,adr1,adr0 */
 //   printf("Device Code : %x\n",read_byte());
   if (read_byte () != 0xf1)
     {
@@ -975,16 +975,16 @@ check_16m:
       goto check_64m;
 //      return 1;
     }
-  reset_to_read ();		// reset to read mode
-  eeprom_type = 16;		// MX 16M flash
+  reset_to_read ();             // reset to read mode
+  eeprom_type = 16;             // MX 16M flash
   return 0;
 
 check_64m:
   init_port ();
-  out_adr_data (0x0000, 0x98);	// Read Query
+  out_adr_data (0x0000, 0x98);  // Read Query
   for (i = 0; i < 128; i += 2)
     {
-      set_adr (i);		/* adr2,adr1,adr0 */
+      set_adr (i);              /* adr2,adr1,adr0 */
       mix.buffer[i / 2] = read_byte ();
     }
 //   disp_buffer(64);
@@ -993,7 +993,7 @@ check_64m:
       && mix.buffer[0x12] == 'Y')
     {
       eeprom_type = 64;
-      out_adr_data (0x0000, 0xff);	// read array
+      out_adr_data (0x0000, 0xff);      // read array
       return 0;
     }
   else
@@ -1007,8 +1007,8 @@ check_64m:
 void
 set_sram_bank (unsigned char bank)
 {
-  set_adr (0x4000);		// set sram adr
-  out_byte (bank);		// sram bank 0
+  set_adr (0x4000);             // set sram adr
+  out_byte (bank);              // sram bank 0
 }
 
 
@@ -1020,31 +1020,31 @@ read_eeprom_16k (unsigned int bank_16k)
 
   if (mbc1_exp)
     {
-      set_bank (0x6000, 0);	// for MCB1 expand bank
+      set_bank (0x6000, 0);     // for MCB1 expand bank
       if ((bank_16k & 0x1f) == 0)
-	{
-	  set_sram_bank ((bank_16k >> 5) & 0x3);	// use sram bank intend rom bank
+        {
+          set_sram_bank ((bank_16k >> 5) & 0x3);        // use sram bank intend rom bank
 //       printf("^");
-	}
+        }
       bank_16k = bank_16k & 0x1f;
     }
-  set_bank (0x2000, bank_16k);	// for MCB1 16k bank
+  set_bank (0x2000, bank_16k);  // for MCB1 16k bank
   for (j = 0; j < 64; j++)
-    {				// 16k bytes = 64 x 256 bytes
+    {                           // 16k bytes = 64 x 256 bytes
       if (bank_16k)
-	set_ai_data (1, (j | 0x40));	// set adr[15..8]
+        set_ai_data (1, (j | 0x40));    // set adr[15..8]
       else
-	set_ai_data (1, j);	// a[15..0]
-      set_ai_data (0, 0);	// a[7..0]
-      set_ai_data (2, 0x81);	// enable read inc.
-      set_ai (3);		// read/write data
+        set_ai_data (1, j);     // a[15..0]
+      set_ai_data (0, 0);       // a[7..0]
+      set_ai_data (2, 0x81);    // enable read inc.
+      set_ai (3);               // read/write data
       set_data_read for (i = 0; i < 256; i++)
-	{			// page=256
+        {                       // page=256
 //       set_ai_data(0,i);              // a[7..0]
 //       mix.buffer[idx+i]=read_byte();
-	  mix.buffer[idx + i] = read_data ();
+          mix.buffer[idx + i] = read_data ();
 //       mix.buffer[idx+i]=inportb(data);
-	}
+        }
       idx = idx + 256;
     }
 //   printf(" ok\n");
@@ -1059,37 +1059,37 @@ verify_eeprom_16k (unsigned int bank_16k)
 
   if (mbc1_exp)
     {
-      set_bank (0x6000, 0);	// for MCB1 expand bank
+      set_bank (0x6000, 0);     // for MCB1 expand bank
       if ((bank_16k & 0x1f) == 0)
-	{
-	  set_sram_bank ((bank_16k >> 5) & 0x3);	// use sram bank intend rom bank
+        {
+          set_sram_bank ((bank_16k >> 5) & 0x3);        // use sram bank intend rom bank
 //       printf("^");
-	}
+        }
       bank_16k = bank_16k & 0x1f;
     }
 
-  set_bank (0x3000, (bank_16k >> 8) & 0xff);	// for MCB1 16k bank
-  set_bank (0x2000, bank_16k & 0xff);	// for MCB1 16k bank
+  set_bank (0x3000, (bank_16k >> 8) & 0xff);    // for MCB1 16k bank
+  set_bank (0x2000, bank_16k & 0xff);   // for MCB1 16k bank
   for (j = 0; j < 64; j++)
-    {				// 16k bytes = 64 x 256 bytes
+    {                           // 16k bytes = 64 x 256 bytes
       if (bank_16k)
-	set_ai_data (1, (j | 0x40));	/* set adr[15..8] */
+        set_ai_data (1, (j | 0x40));    /* set adr[15..8] */
       else
-	set_ai_data (1, j);
-      set_ai_data (0, 0);	// a[7..0]
-      set_ai_data (2, 0x81);	// enable read inc.
-      set_ai (3);		// read/write data
+        set_ai_data (1, j);
+      set_ai_data (0, 0);       // a[7..0]
+      set_ai_data (2, 0x81);    // enable read inc.
+      set_ai (3);               // read/write data
       set_data_read for (i = 0; i < 256; i++)
-	{
-	  temp = read_data ();
+        {
+          temp = read_data ();
 //       temp=inportb(data);
-	  if (temp != mix.buffer[idx + i])
-	    {
+          if (temp != mix.buffer[idx + i])
+            {
 //init_port();
-	      printf (" error at %ulx\n", (bank_16k * 16384) + (j * 256) + i);
-	      return -1;
-	    }
-	}
+              printf (" error at %ulx\n", (bank_16k * 16384) + (j * 256) + i);
+              return -1;
+            }
+        }
       idx = idx + 256;
     }
 //   printf(" ok\n");
@@ -1098,11 +1098,11 @@ verify_eeprom_16k (unsigned int bank_16k)
 
 
 void
-set_page_write (void)		// start page write command
+set_page_write (void)           // start page write command
 {
-  out_adr2_data (0x5555, 0xaa);	// 5555:aa adr2,adr1,adr0,data
-  out_adr2_data (0x2aaa, 0x55);	// 2aaa:55
-  out_adr2_data (0x5555, 0xa0);	// 5555:a0
+  out_adr2_data (0x5555, 0xaa); // 5555:aa adr2,adr1,adr0,data
+  out_adr2_data (0x2aaa, 0x55); // 2aaa:55
+  out_adr2_data (0x5555, 0xa0); // 5555:a0
 }
 
 
@@ -1113,73 +1113,73 @@ page_write_128 (unsigned int bank_16k, unsigned char hi_lo)
   retry = retry_time;
   while (retry)
     {
-      set_page_write ();	// each page is 128 bytes
-      set_bank (0x2000, bank_16k);	// for MCB1 16k bank
+      set_page_write ();        // each page is 128 bytes
+      set_bank (0x2000, bank_16k);      // for MCB1 16k bank
       if (bank_16k)
-	set_ai_data (1, (j | 0x40));	// set adr[15..8]
+        set_ai_data (1, (j | 0x40));    // set adr[15..8]
       else
-	set_ai_data (1, j);
+        set_ai_data (1, j);
 
-      set_ai_data (0, hi_lo);	// a[7..0]
-      set_ai_data (2, 0x83);	// enable flash write inc.
-      set_ai (3);		// read/write data
+      set_ai_data (0, hi_lo);   // a[7..0]
+      set_ai_data (2, 0x83);    // enable flash write inc.
+      set_ai (3);               // read/write data
       for (i = 0; i < 128; i++)
-	{
+        {
 //          outportb(port_8,mix.buffer[idx+i]);
 //          outportb(port_a,0x03);      // ndstb=0
 //          outportb(port_a,0x01);      // ndstb=1
-	  write_data (mix.buffer[idx + i]);	// write data to eeprom
+          write_data (mix.buffer[idx + i]);     // write data to eeprom
 //          outportb(data,mix.buffer[idx+i]);// write data to eeprom
-	}
-      set_ai_data (2, 0x80);	// disable wr/rd inc.
+        }
+      set_ai_data (2, 0x80);    // disable wr/rd inc.
       delay_10us ();
 //       delay_20ms();
 //       set_ai_data(1,0x00);           // ce=lo
 //       set_ai_data(0,hi_lo|0x7f);     // point to last address
       if (wait_status ())
-	{
-	  printf ("write error\n");
-	  return -1;
-	}
+        {
+          printf ("write error\n");
+          return -1;
+        }
 // verify data
-      reset_to_read ();		// return to read mode
+      reset_to_read ();         // return to read mode
 //return 0;
-      verify_ok = 1;		// verify ok
-      set_bank (0x2000, bank_16k);	// for MCB1 16k bank
+      verify_ok = 1;            // verify ok
+      set_bank (0x2000, bank_16k);      // for MCB1 16k bank
       if (bank_16k)
-	set_ai_data (1, (j | 0x40));	// set adr[15..8]
+        set_ai_data (1, (j | 0x40));    // set adr[15..8]
       else
-	set_ai_data (1, j);
+        set_ai_data (1, j);
 
-      set_ai_data (0, hi_lo);	// a[7..0]
-      set_ai_data (2, 0x81);	// enable inc.
-      set_ai (3);		// read/write data
+      set_ai_data (0, hi_lo);   // a[7..0]
+      set_ai_data (2, 0x81);    // enable inc.
+      set_ai (3);               // read/write data
       set_data_read for (i = 0; i < 128; i++)
-	{			// page=128
-	  temp = read_data ();
+        {                       // page=128
+          temp = read_data ();
 //          temp=inportb(data);
-	  if (temp != mix.buffer[idx + i])
-	    {
+          if (temp != mix.buffer[idx + i])
+            {
 //          printf(" %x(%x)[%x] ",i,temp,mix.buffer[idx+i]);
-	      verify_ok = 0;	// verify error
-	      i = 128;
-	    }
-	}
+              verify_ok = 0;    // verify error
+              i = 128;
+            }
+        }
       if (verify_ok)
-	break;
+        break;
       else
-	{
+        {
 //          printf("%d",retry);
-	  retry--;
-	  if (retry == 0)
-	    {
-	      printf ("retry write error\n");
+          retry--;
+          if (retry == 0)
+            {
+              printf ("retry write error\n");
 //read_status_reg_cmd();
 //wait_status();
 //reset_to_read();
-	      return -1;
-	    }
-	}
+              return -1;
+            }
+        }
     }
   idx += 128;
 //   printf("idx=%x",idx);
@@ -1196,69 +1196,69 @@ win_write_eeprom_16k (unsigned int bank_16k)
   idx = 0;
 
   for (j = 0; j < 64; j++)
-    {				// 16k bytes = 64 x 256 bytes
-      err_cnt = 16;		// retry write counter
+    {                           // 16k bytes = 64 x 256 bytes
+      err_cnt = 16;             // retry write counter
       wr_done = 1;
       while (wr_done)
-	{
+        {
 //       set_ai_data(2,0x80);           // disable wr/rd inc.
-	  enable_protection ();
+          enable_protection ();
 // write 256 byte
-	  set_bank (0x2000, bank_16k);	// for MCB1 16k bank
-	  if (bank_16k)
-	    set_ai_data (1, (j | 0x40));	// set adr[15..8]
-	  else
-	    set_ai_data (1, j);
+          set_bank (0x2000, bank_16k);  // for MCB1 16k bank
+          if (bank_16k)
+            set_ai_data (1, (j | 0x40));        // set adr[15..8]
+          else
+            set_ai_data (1, j);
 
-	  set_ai_data (0, 0);	// a[7..0]
+          set_ai_data (0, 0);   // a[7..0]
 //       set_ai_data(2,0x82);           // enable flash write
-	  set_ai_data (2, 0x83);	// enable flash write inc.
-	  set_ai (3);		// read/write data
+          set_ai_data (2, 0x83);        // enable flash write inc.
+          set_ai (3);           // read/write data
 //       set_ai_data(2,0x80);
 
-	  for (i = 0; i < 256; i++)
-	    {
+          for (i = 0; i < 256; i++)
+            {
 //          set_ai_data(0,i);
 //          set_ai(3);                  // read/write data
 //          out_byte_eeprom(mix.buffer[idx+i]);// write data to eeprom
-	      write_data (mix.buffer[idx + i]);	// write data to eeprom
+              write_data (mix.buffer[idx + i]); // write data to eeprom
 //          outportb(data,mix.buffer[idx+i]);// write data to eeprom
-	    }
-	  set_ai_data (2, 0x80);	// disable wr/rd inc.
-	  set_ai_data (0, 0xff);	// point to xxff
-	  if (data_polling ())
-	    printf ("write error check(d6)\n");
+            }
+          set_ai_data (2, 0x80);        // disable wr/rd inc.
+          set_ai_data (0, 0xff);        // point to xxff
+          if (data_polling ())
+            printf ("write error check(d6)\n");
 
-	  wr_done = 0;
+          wr_done = 0;
 //   delay_20ms();
 
 // verify 256 byte
-	  set_ai_data (0, 0);	// a[7..0]
-	  set_ai_data (2, 0x81);	// enable read inc.
-	  set_ai (3);		// read/write data
-	  set_data_read for (i = 0; i < 256; i++)
-	    {
+          set_ai_data (0, 0);   // a[7..0]
+          set_ai_data (2, 0x81);        // enable read inc.
+          set_ai (3);           // read/write data
+          set_data_read for (i = 0; i < 256; i++)
+            {
 //          set_ai_data(0,i);           // a[7..0]
-	      temp = read_data ();
+              temp = read_data ();
 //          temp=inportb(data);
 //          printf("%x ",temp);
-	      if (temp != mix.buffer[idx + i])
-		{
-		  err_cnt--;
+              if (temp != mix.buffer[idx + i])
+                {
+                  err_cnt--;
 //init_port();
 //printf("temp=%x buf=%x idx=%x j=%x i=%x\n",temp,mix.buffer[idx+i],idx,j,i);
 //             printf("X");
 //   delay_20ms();
-		  wr_done = 1;
-		  i = 256;
-		}
-	    }
-	  if (err_cnt == 0)
-	    {
-	      printf ("retry write error\n");
-	      return -1;
-	    }
-	}
+                  wr_done = 1;
+                  i = 256;
+                }
+            }
+          if (err_cnt == 0)
+            {
+              printf ("retry write error\n");
+              return -1;
+            }
+        }
       idx = idx + 256;
     }
 //   printf(" ok\n");
@@ -1277,13 +1277,13 @@ mx_write_eeprom_16k (unsigned int bank_16k)
   idx = 0;
 
   for (j = 0; j < 64; j++)
-    {				// 16k bytes = 64 x 256 bytes
-      if (page_write_128 (bank_16k, 0))	// write first 128 bytes
-	return -1;
-      if (page_write_128 (bank_16k, 0x80))	// write second 128 bytes
-	return -1;
+    {                           // 16k bytes = 64 x 256 bytes
+      if (page_write_128 (bank_16k, 0)) // write first 128 bytes
+        return -1;
+      if (page_write_128 (bank_16k, 0x80))      // write second 128 bytes
+        return -1;
     }
-  reset_to_read ();		// return to read mode
+  reset_to_read ();             // return to read mode
 //   printf(" ok\n");
 //   return 0;
   return verify_eeprom_16k (bank_16k);
@@ -1310,60 +1310,60 @@ intel_byte_write_32 (unsigned long block_adr)
 {
   for (i = 0; i < 32; i++)
     {
-      out_adr_data (block_adr + idx + i, 0x40);	// Write byte command
-      out_adr_data (block_adr + idx + i, mix.buffer[idx + i]);	// Write data
+      out_adr_data (block_adr + idx + i, 0x40); // Write byte command
+      out_adr_data (block_adr + idx + i, mix.buffer[idx + i]);  // Write data
       time_out = 0x8000;
 
       if (intel_check_status ())
-	{
-	  printf ("Intel byte write command time out\n");
-	  printf ("status = %x\n", intel_read_status ());
+        {
+          printf ("Intel byte write command time out\n");
+          printf ("status = %x\n", intel_read_status ());
 //          dump_intel_data();
-	  return -1;
-	}
+          return -1;
+        }
     }
   if (intel_read_status () == 0x80)
     return 0;
   else
-    return -1;			// error
+    return -1;                  // error
 }
 
 
 char
 intel_buffer_write_32 (unsigned long block_adr)
 {
-  out_adr_data (block_adr + idx, 0xe8);	// Write buffer command
-  set_ai_data (2, 0x82);	// wei enable
-  set_ai (3);			// default write mode
+  out_adr_data (block_adr + idx, 0xe8); // Write buffer command
+  set_ai_data (2, 0x82);        // wei enable
+  set_ai (3);                   // default write mode
 //   write_data(0xe8);          // Write buffer command
-  set_data_read			// ninit=0, nWrite=1
+  set_data_read                 // ninit=0, nWrite=1
     time_out = 0x80000;
 //   while(!(read_byte() & 0x80)){
   while (!(read_data () & 0x80))
     {
       time_out--;
       if (time_out == 0)
-	{
-	  printf ("Intel buffer write command time out\n");
-	  printf ("status = %x\n", intel_read_status ());
+        {
+          printf ("Intel buffer write command time out\n");
+          printf ("status = %x\n", intel_read_status ());
 //       dump_intel_data();
-	  return -1;
-	}
-      set_data_write write_data (0xe8);	// out data
+          return -1;
+        }
+      set_data_write write_data (0xe8); // out data
       set_data_read
 //      out_byte_eeprom(0xe8);  // write buffer command
     }
 
 //   out_byte_eeprom(0x1f);     // set write byte count command
-  write_data (0x1f);		// out data
+  write_data (0x1f);            // out data
 
-  set_ai_data (2, 0x83);	// enable flash write inc.
+  set_ai_data (2, 0x83);        // enable flash write inc.
   set_ai (3);
   for (i = 0; i < 32; i++)
     {
-      write_data (mix.buffer[idx + i]);	// write data to eeprom
+      write_data (mix.buffer[idx + i]); // write data to eeprom
     }
-  write_data (0xd0);		// write confirm command
+  write_data (0xd0);            // write confirm command
   return 0;
 }
 
@@ -1374,26 +1374,26 @@ intel_write_eeprom_16k (unsigned int bank_16k)
   unsigned long block_adr;
 
   block_adr = bank_16k;
-  block_adr = block_adr << 14;	// convert to real address
+  block_adr = block_adr << 14;  // convert to real address
   if ((bank_16k & 0x07) == 0)
     {
       if (intel_block_erase (block_adr))
-	return -1;
+        return -1;
     }
   //printf("w");
 
 //   set_adr_long(block_adr);   // set real address
   for (j = 0; j < 512; j++)
-    {				// 16k bytes = 512 X 32 bytes
+    {                           // 16k bytes = 512 X 32 bytes
 //      time_out=0x8000;
       idx = j * 32;
 //      if(intel_byte_write_32(block_adr)) return -1;
       if (intel_buffer_write_32 (block_adr))
-	{
-	  printf ("write error\n");
-	  printf ("status = %x\n", intel_read_status ());
-	  return -1;
-	}
+        {
+          printf ("write error\n");
+          printf ("status = %x\n", intel_read_status ());
+          return -1;
+        }
     }
 
 
@@ -1405,11 +1405,11 @@ intel_write_eeprom_16k (unsigned int bank_16k)
       return -1;
     }
   if (intel_read_status () != 0x80)
-    return -1;			// error
+    return -1;                  // error
 
 
 
-  out_adr_data (0, 0xff);	// read array
+  out_adr_data (0, 0xff);       // read array
   set_data_read
 //   printf(" ok\n");
 //   return 0;
@@ -1429,7 +1429,7 @@ chk_dsp_name (char chk)
   cart_type = mix.buffer[0x147];
   rom_size = mix.buffer[0x148];
   if (cart_type > 0 && cart_type < 4 && rom_size > 4 && chk)
-    {				// mbc1 8M/16M
+    {                           // mbc1 8M/16M
       mbc1_exp = 1;
 //      printf("mbc1_exp=1\n");
     }
@@ -1456,10 +1456,10 @@ verify_cart_from_file (void)
       printf ("filesize error\n");
       return -1;
     }
-  num_page = (filesize / 0x8000) * 2;	// how many 16k banks
+  num_page = (filesize / 0x8000) * 2;   // how many 16k banks
 //   printf("num_page=%d\n",num_page);
   if ((fptr = fopen (file_name, "rb")) == NULL)
-    {				/* open error */
+    {                           /* open error */
       printf ("open error\n");
       return -1;
     }
@@ -1467,19 +1467,19 @@ verify_cart_from_file (void)
   for (page = 0; page < num_page; page++)
     {
       if (read_16k_file () != 0)
-	{
-	  printf ("load file error\n");
-	  fclose (fptr);
-	  return -1;
-	}
+        {
+          printf ("load file error\n");
+          fclose (fptr);
+          return -1;
+        }
       if (page == 0)
-	chk_dsp_name (1);	// display game name and check mbc1_exp
+        chk_dsp_name (1);       // display game name and check mbc1_exp
       if (verify_eeprom_16k (page))
-	{
-	  printf ("verify cart error at bank = %x\n", page);
-	  fclose (fptr);
-	  return -1;
-	}
+        {
+          printf ("verify cart error at bank = %x\n", page);
+          fclose (fptr);
+          return -1;
+        }
     }
   printf ("verify cart ok\n");
   fclose (fptr);
@@ -1490,11 +1490,11 @@ verify_cart_from_file (void)
 char
 write_eeprom_16k (unsigned int bank_16k)
 {
-  if (eeprom_type == 4)		// winbond 4Mbits eeprom
+  if (eeprom_type == 4)         // winbond 4Mbits eeprom
     return win_write_eeprom_16k (bank_16k);
-  if (eeprom_type == 16)	// MX 16Mbits eeprom
+  if (eeprom_type == 16)        // MX 16Mbits eeprom
     return mx_write_eeprom_16k (bank_16k);
-  if (eeprom_type == 64)	// Intel 64Mbits eeprom
+  if (eeprom_type == 64)        // Intel 64Mbits eeprom
     return intel_write_eeprom_16k (bank_16k);
   return -1;
 }
@@ -1523,21 +1523,21 @@ write_cart_from_file (void)
       return -1;
     }
 
-  num_page = (filesize / 0x8000) * 2;	// how many 16k banks
+  num_page = (filesize / 0x8000) * 2;   // how many 16k banks
 //   printf("num_page=%d\n",num_page);
   if ((fptr = fopen (file_name, "rb")) == NULL)
-    {				/* open error */
+    {                           /* open error */
       printf ("open error\n");
       return -1;
     }
 
   if (eeprom_type == 16)
-    {				// erase 16M flash
+    {                           // erase 16M flash
       if (erase ())
-	{			// erase error
-	  fclose (fptr);	// close file handle
-	  return -1;
-	}
+        {                       // erase error
+          fclose (fptr);        // close file handle
+          return -1;
+        }
     }
 
   printf ("Writing Cart...\n");
@@ -1546,29 +1546,29 @@ write_cart_from_file (void)
   for (page = 0; page < num_page; page++)
     {
       if (read_16k_file () != 0)
-	{
-	  printf ("\nload file error\n");
-	  fclose (fptr);
-	  return -1;
-	}
+        {
+          printf ("\nload file error\n");
+          fclose (fptr);
+          return -1;
+        }
       if (page == 0)
-	{
-	  chk_dsp_name (0);	// display game name only
-	  fputc ('\n', stdout);
-	}
+        {
+          chk_dsp_name (0);     // display game name only
+          fputc ('\n', stdout);
+        }
       if (write_eeprom_16k (page))
-	{
-	  printf ("\nwrite cart error at bank = %x\n", page);
-	  fclose (fptr);
-	  return -1;
-	}
+        {
+          printf ("\nwrite cart error at bank = %x\n", page);
+          fclose (fptr);
+          return -1;
+        }
       nbytes += 16 * 1024;
       parport_gauge (starttime, nbytes, filesize);
     }
   //printf("write cart ok\n");
   fclose (fptr);
   if ((fptr = fopen (file_name, "rb")) == NULL)
-    {				/* open error */
+    {                           /* open error */
       printf ("open error\n");
       return -1;
     }
@@ -1579,17 +1579,17 @@ write_cart_from_file (void)
   for (page = 0; page < num_page; page++)
     {
       if (read_16k_file () != 0)
-	{
-	  printf ("\nload file error\n");
-	  fclose (fptr);
-	  return -1;
-	}
+        {
+          printf ("\nload file error\n");
+          fclose (fptr);
+          return -1;
+        }
       if (verify_eeprom_16k (page))
-	{
-	  printf ("\nverify cart error at bank = %x\n", page);
-	  fclose (fptr);
-	  return -1;
-	}
+        {
+          printf ("\nverify cart error at bank = %x\n", page);
+          fclose (fptr);
+          return -1;
+        }
       nbytes += 16 * 1024;
       parport_gauge (starttime, nbytes, filesize);
     }
@@ -1602,7 +1602,7 @@ write_cart_from_file (void)
 }
 
 char
-backup_rom (void)		//no_page=how many 32K
+backup_rom (void)               //no_page=how many 32K
 // 0    "256kBit = 32kB = 2 banks",
 // 1    "512kBit = 64kB = 4 banks",
 // 2    "1MBit = 128kB = 8 banks",
@@ -1619,11 +1619,11 @@ backup_rom (void)		//no_page=how many 32K
   if (cmd == 'B')
     {
       if (eeprom_type == 4)
-	max_bank = 32;		// backup 4M
+        max_bank = 32;          // backup 4M
       if (eeprom_type == 16)
-	max_bank = 128;		// backup 16M
+        max_bank = 128;         // backup 16M
       if (eeprom_type == 64)
-	max_bank = 512;		// backup 64M
+        max_bank = 512;         // backup 64M
     }
 //   printf("max_bank=%d\n",max_bank);
 
@@ -1635,17 +1635,17 @@ backup_rom (void)		//no_page=how many 32K
     {
       read_eeprom_16k (rom_bank);
       if (verify_eeprom_16k (rom_bank))
-	{
-	  printf ("\nverify cart error at bank = %x\n", rom_bank);
+        {
+          printf ("\nverify cart error at bank = %x\n", rom_bank);
 //                      fclose(fptr);
 //                      return -1;              // dbjh: why not return?
-	}
+        }
 
       if (write_file_xxk (0x4000) != 0)
-	{
-	  fclose (fptr);
-	  return -1;
-	}
+        {
+          fclose (fptr);
+          return -1;
+        }
       nbytes += 16 * 1024;
       parport_gauge (starttime, nbytes, totalbytes);
     }
@@ -1657,8 +1657,8 @@ backup_rom (void)		//no_page=how many 32K
 char
 check_card (void)
 {
-  unsigned int sum = 0xd3;	// magic code = 0xd3
-  unsigned char cts[64];	// cart type string
+  unsigned int sum = 0xd3;      // magic code = 0xd3
+  unsigned char cts[64];        // cart type string
   unsigned char check_header[48] = {
     0xce, 0xed, 0x66, 0x66, 0xcc, 0x0d, 0x00, 0x0b,
     0x03, 0x73, 0x00, 0x83, 0x00, 0x0c, 0x00, 0x0d,
@@ -1691,10 +1691,10 @@ check_card (void)
   for (i = 0; i < 48; i++)
     {
       if (mix.buffer[i + 4] != check_header[i])
-	{
-	  header_ok = 0;
-	  break;
-	}
+        {
+          header_ok = 0;
+          break;
+        }
     }
   if (!header_ok)
     {
@@ -1713,7 +1713,7 @@ check_card (void)
     {
     case 0x00:
       strcpy (cts, "ROM only");
-      break;			// cart type string
+      break;                    // cart type string
     case 0x01:
       strcpy (cts, "ROM+MBC1");
       break;
@@ -1813,7 +1813,7 @@ check_card (void)
   //   printf("Ram size(%d) = %s\n",ram_size,ram_size_define[ram_size]);
 
   if (cart_type > 0 && cart_type < 4 && rom_size > 4)
-    {				// mbc1 8M/16M
+    {                           // mbc1 8M/16M
       mbc1_exp = 1;
 //      printf("mbc1_exp=1\n");
     }
@@ -1824,7 +1824,7 @@ check_card (void)
   if ((sum + mix.buffer[0x4d]) & 0xff)
     {
       printf ("Error Complement($%x), Correct Complement($%x)\n",
-	      mix.buffer[0x4d], (0x100 - (sum & 0xff)));
+              mix.buffer[0x4d], (0x100 - (sum & 0xff)));
 
     }
   return 0;
@@ -1851,7 +1851,7 @@ open_read ()
 //   num_page=(filesize/0x8000)*2;      // how many 16k banks
 //   printf("num_page=%d\n",num_page);
   if ((fptr = fopen (file_name, "rb")) == NULL)
-    {				/* open error */
+    {                           /* open error */
       printf ("open error\n");
       return -1;
     }
@@ -1871,23 +1871,23 @@ char
 check_header (char mode)
 {
   if (mode)
-    {				// check game cart
+    {                           // check game cart
       for (i = 0x100; i < 0x150; i++)
-	{			// read 0x100~0x150 to buffer
-	  set_adr (i);
-	  mix.buffer[i - 0x100] = read_data ();
+        {                       // read 0x100~0x150 to buffer
+          set_adr (i);
+          mix.buffer[i - 0x100] = read_data ();
 //       mix.buffer[i-0x100]=inportb(data);
-	}
+        }
     }
   else
     {
 
       if (open_read ())
-	return -1;
+        return -1;
       for (i = 0; i < 0x50; i++)
-	{
-	  mix.buffer[i] = mix.buffer[i + 0x100];
-	}
+        {
+          mix.buffer[i] = mix.buffer[i + 0x100];
+        }
 
     }
   return check_card ();
@@ -1912,10 +1912,10 @@ chk_gcrc (void)
       printf ("filesize error\n");
       return -1;
     }
-  num_page = (filesize / 0x8000) * 2;	// how many 16k banks
+  num_page = (filesize / 0x8000) * 2;   // how many 16k banks
 //   printf("num_page=%d\n",num_page);
   if ((fptr = fopen (file_name, "rb")) == NULL)
-    {				/* open error */
+    {                           /* open error */
       printf ("open error\n");
       return -1;
     }
@@ -1924,22 +1924,22 @@ chk_gcrc (void)
   for (page = 0; page < num_page; page++)
     {
       if (read_16k_file () != 0)
-	{
-	  printf ("load file error\n");
-	  fclose (fptr);
-	  return -1;
-	}
+        {
+          printf ("load file error\n");
+          fclose (fptr);
+          return -1;
+        }
       if (page == 0)
-	{
-	  for (i = 0; i < 0x4000; i++)
-	    if (i < 0x14e || i > 0x14f)	// skip gcrc
-	      sum_gcrc += mix.buffer[i];
-	}
+        {
+          for (i = 0; i < 0x4000; i++)
+            if (i < 0x14e || i > 0x14f) // skip gcrc
+              sum_gcrc += mix.buffer[i];
+        }
       else
-	{
-	  for (i = 0; i < 0x4000; i++)
-	    sum_gcrc += mix.buffer[i];
-	}
+        {
+          for (i = 0; i < 0x4000; i++)
+            sum_gcrc += mix.buffer[i];
+        }
     }
 
   sum_gcrc &= 0xFFFF;
@@ -1954,12 +1954,12 @@ void
 backup (void)
 {
   if (check_header (1))
-    {				// something error
+    {                           // something error
 //      disp_buffer(0x50);
       return;
     }
   if ((fptr = fopen (file_name, "w+b")) == NULL)
-    {				/* open error */
+    {                           /* open error */
       printf ("open error\n");
       return;
     }
@@ -1981,33 +1981,33 @@ SetSramBank (void)
     }
   bank_size = 0;
   if (eeprom_type == 4)
-    bank_size = 4;		// 4 x 8K =32K
+    bank_size = 4;              // 4 x 8K =32K
   if (eeprom_type == 16 || eeprom_type == 64)
-    bank_size = 16;		// 16 x 8K =128K
+    bank_size = 16;             // 16 x 8K =128K
 }
 
 void
 enable_sram_bank (void)
 {
   init_port ();
-  set_adr (0x0);		// write 0000:0x0a default read mode
-  out_byte (0x0a);		// enable sram
-  out_byte (0xc0);		// disable sram
+  set_adr (0x0);                // write 0000:0x0a default read mode
+  out_byte (0x0a);              // enable sram
+  out_byte (0xc0);              // disable sram
   set_adr (0xa000);
-  out_byte (0xa0);		// ctr index
+  out_byte (0xa0);              // ctr index
   set_adr (0xa100);
 //   out_byte(0x00);            // ram_off,ram_bank_disable,MBC1
-  out_byte (0xc0);		// ram_on,ram_bank_enable,MBC1
+  out_byte (0xc0);              // ram_on,ram_bank_enable,MBC1
 
-  set_adr (0x0);		// write 0000:0x0a
-  out_byte (0x0a);		// enable sram
+  set_adr (0x0);                // write 0000:0x0a
+  out_byte (0x0a);              // enable sram
 }
 
 void
 gen_pat (unsigned int offset)
 {
   for (i = 0; i < 0x2000; i++)
-    {				// 8k word = 16k bytes
+    {                           // 8k word = 16k bytes
       mix.bufferx[i] = i + offset;
     }
 }
@@ -2024,25 +2024,25 @@ test_sram_v (void)
       set_sram_bank (bank);
       gen_pat (bank);
       for (j = 0; j < 0x20; j++)
-	{			// 32 x 256 = 8192(8kbytes)
-	  set_ai_data (1, (0xa0 + j));	// sram at 0xa000~bfff
-	  set_ai_data (0, 0);	// a[7..0]=0
-	  set_ai_data (2, 0x81);	// enable inc
-	  set_ai (3);		// point to data r/w port
-	  set_data_read for (i = 0; i < 256; i++)
-	    {
-	      temp = read_data ();
+        {                       // 32 x 256 = 8192(8kbytes)
+          set_ai_data (1, (0xa0 + j));  // sram at 0xa000~bfff
+          set_ai_data (0, 0);   // a[7..0]=0
+          set_ai_data (2, 0x81);        // enable inc
+          set_ai (3);           // point to data r/w port
+          set_data_read for (i = 0; i < 256; i++)
+            {
+              temp = read_data ();
 //          temp=inportb(data);
-	      if (mix.buffer[i + idx] != temp)
-		{
-		  printf ("sram verify error\n");
+              if (mix.buffer[i + idx] != temp)
+                {
+                  printf ("sram verify error\n");
 //             printf("sram verify error! bank=%x j=%x i=%x temp=%x pat=%x\n",bank,j,i,temp,mix.buffer[idx+i]);
-		  return -1;
-		}
-	    }
-	  set_ai_data (2, 0x80);	// disable inc
-	  idx = idx + 256;
-	}
+                  return -1;
+                }
+            }
+          set_ai_data (2, 0x80);        // disable inc
+          idx = idx + 256;
+        }
     }
   if (bank_size == 4)
     printf ("256k sram verify ok\n");
@@ -2065,19 +2065,19 @@ test_sram_wv (void)
       gen_pat (bank);
 //      disp_buffer(0x10);
       for (j = 0; j < 0x20; j++)
-	{			// 32 x 256 = 8192(8kbytes)
-	  set_ai_data (1, (0xa0 + j));	// sram at 0xa000~bfff
-	  set_ai_data (0, 0);	// a[7..0]=0
-	  set_ai_data (2, 0x81);	// enable inc
-	  set_ai (3);		// point to data r/w port
-	  set_data_write for (i = 0; i < 256; i++)
-	    {
-	      write_data (mix.buffer[i + idx]);
+        {                       // 32 x 256 = 8192(8kbytes)
+          set_ai_data (1, (0xa0 + j));  // sram at 0xa000~bfff
+          set_ai_data (0, 0);   // a[7..0]=0
+          set_ai_data (2, 0x81);        // enable inc
+          set_ai (3);           // point to data r/w port
+          set_data_write for (i = 0; i < 256; i++)
+            {
+              write_data (mix.buffer[i + idx]);
 //          outportb(data,mix.buffer[i+idx]);
-	    }
-	  set_ai_data (2, 0x80);	// disable inc
-	  idx = idx + 256;
-	}
+            }
+          set_ai_data (2, 0x80);        // disable inc
+          idx = idx + 256;
+        }
     }
   if (bank_size == 4)
     printf ("256k sram pattern written\n");
@@ -2123,11 +2123,11 @@ check_port_xpp (void)
   set_ai_data (1, 0x12);
   set_ai_data (0, 0x34);
   set_ai (1);
-  set_data_read			// ninit=0, nwrite=1
+  set_data_read                 // ninit=0, nwrite=1
     if (read_data () != 0x12)
     return 1;
   set_ai (0);
-  set_data_read			// ninit=0, nwrite=1
+  set_data_read                 // ninit=0, nwrite=1
     if (read_data () != 0x34)
     return 1;
   end_port ();
@@ -2137,26 +2137,26 @@ check_port_xpp (void)
 char
 check_port (void)
 {
-  port_type = 1;		// 0=epp, 1=spp
+  port_type = 1;                // 0=epp, 1=spp
   if (check_port_xpp () == 0)
     {
-      epp_spp = 1;		// epp port present
+      epp_spp = 1;              // epp port present
     }
   if (port_8 == 0x3bc)
-    {				// if port=0x3bc skip epp test
+    {                           // if port=0x3bc skip epp test
       return !epp_spp;
     }
   port_type = 0;
   if (check_port_xpp ())
     {
       if (epp_spp)
-	{
-	  port_type = 1;
-	  end_port ();
-	  return 0;
-	}
+        {
+          port_type = 1;
+          end_port ();
+          return 0;
+        }
       else
-	return 1;		// no port found
+        return 1;               // no port found
     }
   return 0;
 }
@@ -2178,31 +2178,31 @@ open_read_sram ()
 
 
   if (cmd == 'L')
-    {				// check file size 256k/1Mbits
+    {                           // check file size 256k/1Mbits
       if ((filesize / 0x2000) > bank_size)
-	{
-	  printf ("filesize error\n");
-	  return -1;
-	}
+        {
+          printf ("filesize error\n");
+          return -1;
+        }
 
 
     }
   else
     {
       if (filesize != 0x2000)
-	{			// check file size 8kBytes
-	  printf ("filesize error\n");
-	  return -1;
-	}
+        {                       // check file size 8kBytes
+          printf ("filesize error\n");
+          return -1;
+        }
     }
 
   if ((fptr = fopen (file_name, "rb")) == NULL)
-    {				/* open error */
+    {                           /* open error */
       printf ("open error\n");
       return -1;
     }
 
-  bank_size = filesize / 0x2000;	// overwrite bank_size
+  bank_size = filesize / 0x2000;        // overwrite bank_size
   if (cmd == 'L')
     {
       return 0;
@@ -2210,11 +2210,11 @@ open_read_sram ()
   else
     {
       if (read_8k_file () != 0)
-	{
-	  printf ("load file error\n");
-	  fclose (fptr);
-	  return -1;
-	}
+        {
+          printf ("load file error\n");
+          fclose (fptr);
+          return -1;
+        }
     }
   fclose (fptr);
   return 0;
@@ -2224,7 +2224,7 @@ char
 write_sram_xxk (unsigned int length)
 {
   if ((fptr = fopen (file_name, "w+b")) == NULL)
-    {				/* open error */
+    {                           /* open error */
       printf ("open error\n");
       return -1;
     }
@@ -2246,7 +2246,7 @@ read_all_sram_to_file (void)
 
   enable_sram_bank ();
   if ((fptr = fopen (file_name, "w+b")) == NULL)
-    {				/* open error */
+    {                           /* open error */
       printf ("open error\n");
       return -1;
     }
@@ -2257,31 +2257,31 @@ read_all_sram_to_file (void)
   for (bank = 0; bank < bank_size; bank++)
     {
       if ((bank & 3) == 0)
-	idx = 0;
+        idx = 0;
       set_sram_bank (bank);
       for (j = 0; j < 0x20; j++)
-	{			// 32 x 256 = 8192(8kbytes)
-	  set_ai_data (1, (0xa0 + j));	// sram at 0xa000~bfff
-	  set_ai_data (0, 0);	// a[7..0]=0
-	  set_ai_data (2, 0x81);	// enable inc
-	  set_ai (3);		// point to data r/w port
-	  set_data_read for (i = 0; i < 256; i++)
-	    {
-	      mix.buffer[i + idx] = read_data ();
+        {                       // 32 x 256 = 8192(8kbytes)
+          set_ai_data (1, (0xa0 + j));  // sram at 0xa000~bfff
+          set_ai_data (0, 0);   // a[7..0]=0
+          set_ai_data (2, 0x81);        // enable inc
+          set_ai (3);           // point to data r/w port
+          set_data_read for (i = 0; i < 256; i++)
+            {
+              mix.buffer[i + idx] = read_data ();
 //          mix.buffer[i+idx]=inportb(data);
-	    }
-	  set_ai_data (2, 0x80);	// disable inc
-	  idx = idx + 256;
-	}
+            }
+          set_ai_data (2, 0x80);        // disable inc
+          idx = idx + 256;
+        }
       if ((bank & 3) == 3)
-	{
-	  if (write_file_xxk (0x8000) != 0)
-	    {
-	      printf ("\nwrite file error\n");
-	      fclose (fptr);
-	      return -1;
-	    }
-	}
+        {
+          if (write_file_xxk (0x8000) != 0)
+            {
+              printf ("\nwrite file error\n");
+              fclose (fptr);
+              return -1;
+            }
+        }
       nbytes += 8 * 1024;
       parport_gauge (starttime, nbytes, totalbytes);
     }
@@ -2304,18 +2304,18 @@ read_8k_sram_to_file (void)
   if (bank_size == 4)
     {
       if (sram_bank_num > 3)
-	{
-	  printf ("bank number error\n");
-	  return -1;
-	}
+        {
+          printf ("bank number error\n");
+          return -1;
+        }
     }
   else
     {
       if (sram_bank_num > 15)
-	{
-	  printf ("bank number error\n");
-	  return -1;
-	}
+        {
+          printf ("bank number error\n");
+          return -1;
+        }
     }
 
   enable_sram_bank ();
@@ -2327,21 +2327,21 @@ read_8k_sram_to_file (void)
   {
     set_sram_bank (bank);
     for (j = 0; j < 0x20; j++)
-      {				// 32 x 256 = 8192(8kbytes)
-	set_ai_data (1, (0xa0 + j));	// sram at 0xa000~bfff
-	set_ai_data (0, 0);	// a[7..0]=0
-	set_ai_data (2, 0x81);	// enable inc
-	set_ai (3);		// point to data r/w port
-	set_data_read for (i = 0; i < 256; i++)
-	  {
-	    mix.buffer[i + idx] = read_data ();
+      {                         // 32 x 256 = 8192(8kbytes)
+        set_ai_data (1, (0xa0 + j));    // sram at 0xa000~bfff
+        set_ai_data (0, 0);     // a[7..0]=0
+        set_ai_data (2, 0x81);  // enable inc
+        set_ai (3);             // point to data r/w port
+        set_data_read for (i = 0; i < 256; i++)
+          {
+            mix.buffer[i + idx] = read_data ();
 //          mix.buffer[i+idx]=inportb(data);
-	  }
-	set_ai_data (2, 0x80);	// disable inc
-	idx = idx + 256;
+          }
+        set_ai_data (2, 0x80);  // disable inc
+        idx = idx + 256;
       }
   }
-  nbytes += 8 * 1024;		// dbjh: should this be in loop?
+  nbytes += 8 * 1024;           // dbjh: should this be in loop?
   parport_gauge (starttime, nbytes, 8 * 1024);
 
   if (write_sram_xxk (0x2000) != 0)
@@ -2363,7 +2363,7 @@ write_all_sram_from_file (void)
   time_t starttime;
 
   enable_sram_bank ();
-  if (open_read_sram () != 0)	// read sram data from file to buffer
+  if (open_read_sram () != 0)   // read sram data from file to buffer
     return -1;
 
   totalbytes = bank_size * 8 * 1024;
@@ -2372,33 +2372,33 @@ write_all_sram_from_file (void)
   for (bank = 0; bank < bank_size; bank++)
     {
       if ((bank & 3) == 0)
-	{
-	  idx = 0;
-	  if (read_32k_file () != 0)
-	    {
-	      printf ("load file error\n");
-	      fclose (fptr);
-	      return -1;
-	    }
+        {
+          idx = 0;
+          if (read_32k_file () != 0)
+            {
+              printf ("load file error\n");
+              fclose (fptr);
+              return -1;
+            }
 
-	}
+        }
 //      printf("w");
       set_sram_bank (bank);
 //      disp_buffer(0x10);
       for (j = 0; j < 0x20; j++)
-	{			// 32 x 256 = 8192(8kbytes)
-	  set_ai_data (1, (0xa0 + j));	// sram at 0xa000~bfff
-	  set_ai_data (0, 0);	// a[7..0]=0
-	  set_ai_data (2, 0x81);	// enable inc
-	  set_ai (3);		// point to data r/w port
-	  set_data_write for (i = 0; i < 256; i++)
-	    {
-	      write_data (mix.buffer[i + idx]);
+        {                       // 32 x 256 = 8192(8kbytes)
+          set_ai_data (1, (0xa0 + j));  // sram at 0xa000~bfff
+          set_ai_data (0, 0);   // a[7..0]=0
+          set_ai_data (2, 0x81);        // enable inc
+          set_ai (3);           // point to data r/w port
+          set_data_write for (i = 0; i < 256; i++)
+            {
+              write_data (mix.buffer[i + idx]);
 //          outportb(data,mix.buffer[i+idx]);
-	    }
-	  set_ai_data (2, 0x80);	// disable inc
-	  idx = idx + 256;
-	}
+            }
+          set_ai_data (2, 0x80);        // disable inc
+          idx = idx + 256;
+        }
       nbytes += 8 * 1024;
       parport_gauge (starttime, nbytes, totalbytes);
     }
@@ -2421,22 +2421,22 @@ write_8k_sram_from_file (void)
   if (bank_size == 4)
     {
       if (sram_bank_num > 3)
-	{
-	  printf ("bank number error\n");
-	  return -1;
-	}
+        {
+          printf ("bank number error\n");
+          return -1;
+        }
     }
   else
     {
       if (sram_bank_num > 15)
-	{
-	  printf ("bank number error\n");
-	  return -1;
-	}
+        {
+          printf ("bank number error\n");
+          return -1;
+        }
     }
 
   enable_sram_bank ();
-  if (open_read_sram () != 0)	// read sram data from file to buffer
+  if (open_read_sram () != 0)   // read sram data from file to buffer
     return -1;
 
   nbytes = 0;
@@ -2448,21 +2448,21 @@ write_8k_sram_from_file (void)
     set_sram_bank (bank);
 //      disp_buffer(0x10);
     for (j = 0; j < 0x20; j++)
-      {				// 32 x 256 = 8192(8kbytes)
-	set_ai_data (1, (0xa0 + j));	// sram at 0xa000~bfff
-	set_ai_data (0, 0);	// a[7..0]=0
-	set_ai_data (2, 0x81);	// enable inc
-	set_ai (3);		// point to data r/w port
-	set_data_write for (i = 0; i < 256; i++)
-	  {
-	    write_data (mix.buffer[i + idx]);
+      {                         // 32 x 256 = 8192(8kbytes)
+        set_ai_data (1, (0xa0 + j));    // sram at 0xa000~bfff
+        set_ai_data (0, 0);     // a[7..0]=0
+        set_ai_data (2, 0x81);  // enable inc
+        set_ai (3);             // point to data r/w port
+        set_data_write for (i = 0; i < 256; i++)
+          {
+            write_data (mix.buffer[i + idx]);
 //          outportb(data,mix.buffer[i+idx]);
-	  }
-	set_ai_data (2, 0x80);	// disable inc
-	idx = idx + 256;
+          }
+        set_ai_data (2, 0x80);  // disable inc
+        idx = idx + 256;
       }
   }
-  nbytes += 8 * 1024;		// dbjh: should this be in loop?
+  nbytes += 8 * 1024;           // dbjh: should this be in loop?
   parport_gauge (starttime, nbytes, 8 * 1024);
 
   printf ("\nwrite sram 64kbits at bank %d ok\n", sram_bank_num);
@@ -2473,10 +2473,10 @@ write_8k_sram_from_file (void)
 void
 try_read (void)
 {
-  set_ai_data (0, 0);		// a[7..0]=0
+  set_ai_data (0, 0);           // a[7..0]=0
   set_ai_data (1, 0x40);
-  set_ai_data (2, 0x81);	// enable inc
-  set_ai (3);			// point to data r/w port
+  set_ai_data (2, 0x81);        // enable inc
+  set_ai (3);                   // point to data r/w port
   for (i = 0; i < 16; i++)
 //      mix.buffer[i]=inportb(data);
     mix.buffer[i] = read_data ();
@@ -2514,15 +2514,15 @@ try_read0 (void)
 void
 test_intel (void)
 {
-  out_adr2_data (0x0000, 0x90);	/* softwave product ID entry */
+  out_adr2_data (0x0000, 0x90); /* softwave product ID entry */
   for (i = 0; i < 128; i += 2)
     {
-      set_adr (i);		/* adr2,adr1,adr0 */
+      set_adr (i);              /* adr2,adr1,adr0 */
       mix.buffer[i / 2] = read_byte ();
     }
   disp_buffer (64);
 
-  out_adr2_data (0x0000, 0x70);	// read status register
+  out_adr2_data (0x0000, 0x70); // read status register
 
   printf ("status register = %x\n", read_byte ());
 
@@ -2539,7 +2539,7 @@ gbx_init (unsigned int parport, char *filename)
   pocket_camera = 0;
   mbc1_exp = 0;
   eeprom_type = 0;
-  maxfilesize = 8 * 1024 * 1024;	// 64Mb
+  maxfilesize = 8 * 1024 * 1024;        // 64Mb
   file_name = filename;
 
   port_8 = parport;
@@ -2562,11 +2562,11 @@ gbx_init (unsigned int parport, char *filename)
   init_port ();
   check_eeprom ();
   if (eeprom_type == 4)
-    maxfilesize = 512 * 1024;	// 4Mb
+    maxfilesize = 512 * 1024;   // 4Mb
   if (eeprom_type == 16)
-    maxfilesize = 2 * 1024 * 1024;	// 16Mb
+    maxfilesize = 2 * 1024 * 1024;      // 16Mb
   if (eeprom_type == 64)
-    maxfilesize = 8 * 1024 * 1024;	// 64Mb
+    maxfilesize = 8 * 1024 * 1024;      // 64Mb
 }
 
 int
@@ -2632,9 +2632,9 @@ gbx_write_sram (char *filename, unsigned int parport, int bank)
     sram_bank_num = bank;
 
   if (check_eeprom () != 0)
-    bank_size = 4;		// no flash card -> 4*8kB = 32kB sram
+    bank_size = 4;              // no flash card -> 4*8kB = 32kB sram
   else
-    SetSramBank ();		// set bank_size = 4/16 banks of 8kB
+    SetSramBank ();             // set bank_size = 4/16 banks of 8kB
 
   stat (filename, &fstat);
   if (fstat.st_size == 8 * 1024 || bank != -1)
@@ -2664,18 +2664,18 @@ gbx_usage (int argc, char *argv[])
     printf ("%s\n", gbx_TITLE);
 
   printf ("  -xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
-	  "                receives automatically when $ROM does not exist\n"
-	  "  -xgbxs        send/receive SRAM to/from GB Xchanger; $FILE=PORT\n"
-	  "                receives automatically when $ROM(=SRAM) does not exist\n"
-	  "  -xgbxb<n>     send/receive 64kbits SRAM to/from GB Xchanger bank n\n"
-	  "                $FILE=PORT; receives automatically when $ROM does not exist\n");
+          "                receives automatically when $ROM does not exist\n"
+          "  -xgbxs        send/receive SRAM to/from GB Xchanger; $FILE=PORT\n"
+          "                receives automatically when $ROM(=SRAM) does not exist\n"
+          "  -xgbxb<n>     send/receive 64kbits SRAM to/from GB Xchanger bank n\n"
+          "                $FILE=PORT; receives automatically when $ROM does not exist\n");
 
   if (verbose)
     printf ("\n"
-	    "                You only need to specify PORT if uCON64 doesn't detect the\n"
-	    "                (right) parallel port. If that is the case give a hardware\n"
-	    "                address, for example:\n"
-	    "                ucon64 -xgbx \"Pokemon (Green).gb\" 0x378\n");
+            "                You only need to specify PORT if uCON64 doesn't detect the\n"
+            "                (right) parallel port. If that is the case give a hardware\n"
+            "                address, for example:\n"
+            "                ucon64 -xgbx \"Pokemon (Green).gb\" 0x378\n");
   // TODO more info like technical info about cabeling and stuff for the copier
 
   return 0;

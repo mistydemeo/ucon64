@@ -39,11 +39,11 @@ bsl (char *name, char *option2)
 
   printf ("BSL/Baseline\n");
   printf ("%ld (%.4f Mb)\n", quickftell (option2),
-	  (float) quickftell (option2) / MBIT);
+          (float) quickftell (option2) / MBIT);
   printf ("\n"
-	  "NOTE: sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
-	  "      This means you must convert for example a Super Nintendo ROM with -swc\n"
-	  "      or -mgd or the patch will not work\n");
+          "NOTE: sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
+          "      This means you must convert for example a Super Nintendo ROM with -swc\n"
+          "      or -mgd or the patch will not work\n");
 
 //      printf("Internal Size: %.4f Mb\n",fsize(romname,8));
 //      printf("Version: 1.%d\n","?");
@@ -65,15 +65,15 @@ bsl (char *name, char *option2)
       inchar[0] = dat;
 
       if ((add == -1) && (dat == -1))
-	done = 1;
+        done = 1;
 
       if (done == 0)
-	{
+        {
 //                printf("(Offset:  %lX)\n", add);
 
-	  fseek (fh, add, SEEK_SET);
-	  fwrite (inchar, sizeof (inchar), 1, fh);
-	}
+          fseek (fh, add, SEEK_SET);
+          fwrite (inchar, sizeof (inchar), 1, fh);
+        }
     }
 
   memset (addstr, ' ', sizeof (addstr));
@@ -92,19 +92,19 @@ bsl (char *name, char *option2)
   if (numdat > 0)
     {
       while (numdat > 4096)
-	{
+        {
 //                        printf("(Offset:  %lX)\n", add);
-	  fread (inchar2, sizeof (inchar2), 1, fh2);
-	  fwrite (inchar2, sizeof (inchar2), 1, fh);
-	  numdat = numdat - 4096;
-	  add = add + 4096;
-	}
+          fread (inchar2, sizeof (inchar2), 1, fh2);
+          fwrite (inchar2, sizeof (inchar2), 1, fh);
+          numdat = numdat - 4096;
+          add = add + 4096;
+        }
       for (i = 0; i < (numdat + 1); i++)
-	{
+        {
 //                        printf("(Offset:  %lX)\n", (add+i));
-	  fread (inchar, sizeof (inchar), 1, fh2);
-	  fwrite (inchar, sizeof (inchar), 1, fh);
-	}
+          fread (inchar, sizeof (inchar), 1, fh2);
+          fwrite (inchar, sizeof (inchar), 1, fh);
+        }
     }
 
   fclose (fh2);

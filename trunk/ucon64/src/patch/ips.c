@@ -60,7 +60,7 @@ ips_main (int argc, char *argv[])
 
   fgets (patch, 6, ipsfile);
   if (strcmp (patch, "PATCH") != 0)
-    {				//make sure its a valid IPS
+    {                           //make sure its a valid IPS
       printf ("Invalid IPS File!\n");
       exit (0);
     }
@@ -70,71 +70,71 @@ ips_main (int argc, char *argv[])
     {
       fread (&byte, 1, 1, ipsfile);
       if ((add2 = byte) < 0)
-	add2 += 256;
+        add2 += 256;
       fread (&byte, 1, 1, ipsfile);
       if ((add1 = byte) < 0)
-	add1 += 256;
+        add1 += 256;
       fread (&byte, 1, 1, ipsfile);
       if ((add0 = byte) < 0)
-	add0 += 256;
+        add0 += 256;
       offset = ((add2 * 256 * 256) + (add1 * 256) + add0);
       if (offset == 4542278)
-	{
-	  done = 1;
-	  break;
-	}
+        {
+          done = 1;
+          break;
+        }
       fseek (patchee, offset, SEEK_SET);
       fread (&byte, 1, 1, ipsfile);
       if ((len1 = byte) < 0)
-	len1 += 256;
+        len1 += 256;
       fread (&byte, 1, 1, ipsfile);
       if ((len0 = byte) < 0)
-	len0 += 256;
+        len0 += 256;
       length = ((len1 * 256) + len0);
 
       if (length == 0)
-	{			//code for RLE compressed block
-	  fread (&byte, 1, 1, ipsfile);
-	  if ((len1 = byte) < 0)
-	    len1 += 256;
-	  fread (&byte, 1, 1, ipsfile);
-	  if ((len0 = byte) < 0)
-	    len0 += 256;
-	  length = ((len1 * 256) + len0);
-	  fread (&byte, 1, 1, ipsfile);
-	  for (i = 0; i < length; i++)
-	    fwrite (&byte, 1, 1, patchee);
-	}
+        {                       //code for RLE compressed block
+          fread (&byte, 1, 1, ipsfile);
+          if ((len1 = byte) < 0)
+            len1 += 256;
+          fread (&byte, 1, 1, ipsfile);
+          if ((len0 = byte) < 0)
+            len0 += 256;
+          length = ((len1 * 256) + len0);
+          fread (&byte, 1, 1, ipsfile);
+          for (i = 0; i < length; i++)
+            fwrite (&byte, 1, 1, patchee);
+        }
       else
-	{			//non compressed
-	  for (i = 0; i < length; i++)
-	    {
-	      fread (&byte, 1, 1, ipsfile);
-	      fwrite (&byte, 1, 1, patchee);
-	    }
-	}
+        {                       //non compressed
+          for (i = 0; i < length; i++)
+            {
+              fread (&byte, 1, 1, ipsfile);
+              fwrite (&byte, 1, 1, patchee);
+            }
+        }
     }
 
   fread (&byte, 1, 1, ipsfile);
   if (!feof (ipsfile))
-    {				//IPS2 stuff     
+    {                           //IPS2 stuff     
       if ((len2 = byte) < 0)
-	len2 += 256;
+        len2 += 256;
       fread (&byte, 1, 1, ipsfile);
       if ((len1 = byte) < 0)
-	len1 += 256;
+        len1 += 256;
       fread (&byte, 1, 1, ipsfile);
       if ((len0 = byte) < 0)
-	len0 += 256;
+        len0 += 256;
       length = ((len2 * 256 * 256) + (len1 * 256) + len0);
       truncate (argv[2], length);
       printf ("File truncated to %ld MBit\n", (length / 1048576) * 8);
     }
 
   printf ("Patching complete!\n\n"
-	  "NOTE: sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
-	  "      This means you must convert for example a Super Nintendo ROM with -swc\n"
-	  "      or -mgd or the patch will not work\n");
+          "NOTE: sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
+          "      This means you must convert for example a Super Nintendo ROM with -swc\n"
+          "      or -mgd or the patch will not work\n");
   fclose (patchee);
   fclose (ipsfile);
   return (0);
@@ -279,61 +279,61 @@ cips (char *name, char *option2)
       infp = fgetc (fp);
       infp2 = fgetc (fp2);
       if (infp != infp2)
-	{
+        {
 
-	  /* Save current pos in patch file */
-	  /* Go through a loop until infp is equal to infp2 */
-	  if (filepos < 256)
-	    {
-	      add2 = add1 = 0;
-	      add0 = filepos;
-	      fprintf (fp3, "%c%c%c", 0, 0, (char) filepos);
-	    }
-	  else if (filepos < 65536)
-	    {
-	      add2 = 0;
-	      add1 = filepos / 256;
-	      add0 = filepos % 256;
-	      fprintf (fp3, "%c%c%c", 0, (char) (filepos / 256),
-		       (char) (filepos % 256));
-	    }
-	  else if (filepos < 16711680)
-	    {
-	      add2 = filepos / 65536;
-	      add1 = (filepos % 65536) / 256;
-	      add0 = ((filepos % 65536) % 256);
-	      fprintf (fp3, "%c%c%c", (char) (filepos / 65536),
-		       (char) ((filepos % 65536) / 256),
-		       (char) ((filepos % 65536) % 256));
-	    }
+          /* Save current pos in patch file */
+          /* Go through a loop until infp is equal to infp2 */
+          if (filepos < 256)
+            {
+              add2 = add1 = 0;
+              add0 = filepos;
+              fprintf (fp3, "%c%c%c", 0, 0, (char) filepos);
+            }
+          else if (filepos < 65536)
+            {
+              add2 = 0;
+              add1 = filepos / 256;
+              add0 = filepos % 256;
+              fprintf (fp3, "%c%c%c", 0, (char) (filepos / 256),
+                       (char) (filepos % 256));
+            }
+          else if (filepos < 16711680)
+            {
+              add2 = filepos / 65536;
+              add1 = (filepos % 65536) / 256;
+              add0 = ((filepos % 65536) % 256);
+              fprintf (fp3, "%c%c%c", (char) (filepos / 65536),
+                       (char) ((filepos % 65536) / 256),
+                       (char) ((filepos % 65536) % 256));
+            }
 
-	  diffcount = 0;
-	  diffdone = 0;
-	  while (!diffdone)
-	    {
-	      buf[diffcount++] = infp2;
-	      infp = fgetc (fp);
-	      infp2 = fgetc (fp2);
-	      if (feof (fp2))
-		{
-		  diffdone = 1;
-		  continue;
-		}
-	      filepos++;
-	      if ((!feof (fp) && (infp == infp2)) || (diffcount >= 65535))
-		{
-		  diffdone = 1;
-		  continue;
-		}
-	    }
-	  fprintf (fp3, "%c%c",
-		   (char) ((diffcount > 256) ? (diffcount / 256) : 0),
-		   (char) ((diffcount >
-			    256) ? (diffcount % 256) : diffcount));
-	  fwrite (buf, diffcount, 1, fp3);
-	}
+          diffcount = 0;
+          diffdone = 0;
+          while (!diffdone)
+            {
+              buf[diffcount++] = infp2;
+              infp = fgetc (fp);
+              infp2 = fgetc (fp2);
+              if (feof (fp2))
+                {
+                  diffdone = 1;
+                  continue;
+                }
+              filepos++;
+              if ((!feof (fp) && (infp == infp2)) || (diffcount >= 65535))
+                {
+                  diffdone = 1;
+                  continue;
+                }
+            }
+          fprintf (fp3, "%c%c",
+                   (char) ((diffcount > 256) ? (diffcount / 256) : 0),
+                   (char) ((diffcount >
+                            256) ? (diffcount % 256) : diffcount));
+          fwrite (buf, diffcount, 1, fp3);
+        }
       if (feof (fp2))
-	done = 1;
+        done = 1;
       filepos++;
     }
   fprintf (fp3, "EOF");

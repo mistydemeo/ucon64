@@ -30,10 +30,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#define ai 0x37b
 //#define data 0x37c
 #define trans_size 32768
-#define set_ai_write outportb(port_a,5);	// ninit=1, nwrite=0
-#define set_data_write outportb(port_a,1);	// ninit=0, nwrite=0
-#define set_data_read outportb(port_a,0);	// ninit=0, nwrite=1
-#define set_normal outportb(port_a,4);	// ninit=1, nwrite=1
+#define set_ai_write outportb(port_a,5);        // ninit=1, nwrite=0
+#define set_data_write outportb(port_a,1);      // ninit=0, nwrite=0
+#define set_data_read outportb(port_a,0);       // ninit=0, nwrite=1
+#define set_normal outportb(port_a,4);  // ninit=1, nwrite=1
 
 /**************************************
 *               Subroutine            *
@@ -91,24 +91,24 @@ dump_buffer (void)
       j = i & 0x0f;
       disp_buf[j] = mix.buffer[i];
       if (j == 15)
-	{
-	  printf ("%04x : ", i & 0xfff0);
-	  for (j = 0; j < 16; j++)
-	    {
-	      if (j == 8)
-		printf ("- ");
-	      printf ("%02x ", disp_buf[j]);
-	    }
-	  printf ("-> ");
-	  for (j = 0; j < 16; j++)
-	    {
-	      if (disp_buf[j] < 0x20 || disp_buf[j] > 0x80)
-		printf (".");
-	      else
-		printf ("%c", disp_buf[j]);
-	    }
-	  printf ("\n");
-	}
+        {
+          printf ("%04x : ", i & 0xfff0);
+          for (j = 0; j < 16; j++)
+            {
+              if (j == 8)
+                printf ("- ");
+              printf ("%02x ", disp_buf[j]);
+            }
+          printf ("-> ");
+          for (j = 0; j < 16; j++)
+            {
+              if (disp_buf[j] < 0x20 || disp_buf[j] > 0x80)
+                printf (".");
+              else
+                printf ("%c", disp_buf[j]);
+            }
+          printf ("\n");
+        }
     }
 }
 
@@ -126,78 +126,78 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
     {
       unpass = 3;
       while (unpass)
-	{
-	  drjr_set_ai_data (1, ((i << 1) | lo_word));
-	  drjr_set_ai_data (0, 0);
-	  drjr_set_ai (4);	// set address index=4
-	  set_data_write	// ninit=0, nWrite=0
-	    fix = i << 8;
-	  for (j = 0; j < 256; j++)
-	    {
-	      outportw (port_c, mix.bufferx[j + fix]);
-	    }
-	  set_data_read		// ninit=0, nWrite=1
-	    if (wv_mode)
-	    {
-	      for (j = 0; j < 256; j++)
-		{
-		  temp = inportw (port_c);
-		  if (mix.bufferx[j + fix] != temp)
-		    {
+        {
+          drjr_set_ai_data (1, ((i << 1) | lo_word));
+          drjr_set_ai_data (0, 0);
+          drjr_set_ai (4);      // set address index=4
+          set_data_write        // ninit=0, nWrite=0
+            fix = i << 8;
+          for (j = 0; j < 256; j++)
+            {
+              outportw (port_c, mix.bufferx[j + fix]);
+            }
+          set_data_read         // ninit=0, nWrite=1
+            if (wv_mode)
+            {
+              for (j = 0; j < 256; j++)
+                {
+                  temp = inportw (port_c);
+                  if (mix.bufferx[j + fix] != temp)
+                    {
 //                printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
-		      break;
-		    }
-		}
-	    }
-	  else
-	    {
-	      pass1 = 1;
-	      for (j = 0; j < 4; j++)
-		{
-		  temp = inportw (port_c);
-		  if (mix.bufferx[j + fix] != temp)
-		    {
+                      break;
+                    }
+                }
+            }
+          else
+            {
+              pass1 = 1;
+              for (j = 0; j < 4; j++)
+                {
+                  temp = inportw (port_c);
+                  if (mix.bufferx[j + fix] != temp)
+                    {
 //                printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
-		      pass1 = 0;
-		      break;
-		    }
-		}
-	      if (pass1)
-		{
+                      pass1 = 0;
+                      break;
+                    }
+                }
+              if (pass1)
+                {
 //             printf("@");
-		  drjr_set_ai_data (1, ((i << 1) | lo_word | 1));
-		  drjr_set_ai_data (0, 0xf8);
-		  drjr_set_ai (4);
-		  set_data_read	// ninit=0, nWrite=1
-		    for (j = 252; j < 256; j++)
-		    {
-		      temp = inportw (port_c);
-		      if (mix.bufferx[j + fix] != temp)
-			{
+                  drjr_set_ai_data (1, ((i << 1) | lo_word | 1));
+                  drjr_set_ai_data (0, 0xf8);
+                  drjr_set_ai (4);
+                  set_data_read // ninit=0, nWrite=1
+                    for (j = 252; j < 256; j++)
+                    {
+                      temp = inportw (port_c);
+                      if (mix.bufferx[j + fix] != temp)
+                        {
 //                   printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
-			  break;
-			}
-		    }
-		}
-	    }
-	  drjr_set_ai (0);
-	  set_data_read		// ninit=0, nwrite=1
-	    if (inportb (port_c) != 0x00)
-	    {
-	      unpass--;
+                          break;
+                        }
+                    }
+                }
+            }
+          drjr_set_ai (0);
+          set_data_read         // ninit=0, nwrite=1
+            if (inportb (port_c) != 0x00)
+            {
+              unpass--;
 //          printf("counter=%x ",inportb(data));
-	      outportb (port_a, 0x0b);	// set all pin=0 for debug
-	      if (disp_on)
-		printf ("*");
-	      drjr_init_port ();
-	      drjr_set_ai_data (3, 0x10 | (hi_word >> 8));
-	      drjr_set_ai_data (2, (hi_word & 0xff));
-	      if (unpass == 0)
-		return (1);
-	    }
-	  else
-	    unpass = 0;
-	}
+              outportb (port_a, 0x0b);  // set all pin=0 for debug
+              if (disp_on)
+                printf ("*");
+              drjr_init_port ();
+              drjr_set_ai_data (3, 0x10 | (hi_word >> 8));
+              drjr_set_ai_data (2, (hi_word & 0xff));
+              if (unpass == 0)
+                return (1);
+            }
+          else
+            unpass = 0;
+        }
     }
 //   outportb(ai,0);
 //   printf("\na[7..0]=%02x\n",inportb(data));
@@ -222,35 +222,35 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
     {
       unpass = 3;
       while (unpass)
-	{
-	  drjr_set_ai_data (1, ((i << 1) | lo_word));
-	  drjr_set_ai_data (0, 0);
-	  drjr_set_ai (4);
-	  set_data_read		// ninit=0, nwrite=1
-	    fix = i << 8;
-	  for (j = 0; j < 256; j++)
-	    {
-	      temp = inportw (port_c);
-	      if (temp != mix.bufferx[j + fix])
-		{
+        {
+          drjr_set_ai_data (1, ((i << 1) | lo_word));
+          drjr_set_ai_data (0, 0);
+          drjr_set_ai (4);
+          set_data_read         // ninit=0, nwrite=1
+            fix = i << 8;
+          for (j = 0; j < 256; j++)
+            {
+              temp = inportw (port_c);
+              if (temp != mix.bufferx[j + fix])
+                {
 //             printf("verify error!!!\07\n");
 //             printf("%2x%2x dram=%x, buffer=%x\n",i,j*2,temp,mix.bufferx[j+fix]);
-		  outportb (port_a, 0x0b);	// all pin=0 for debug
-		  if (disp_on)
-		    printf ("#");
-		  drjr_init_port ();
-		  drjr_set_ai_data (3, 0x10 | (hi_word >> 8));
-		  drjr_set_ai_data (2, (hi_word & 0xff));
-		  unpass--;
-		  if (unpass == 0)
-		    return (1);
-		  else
-		    break;
-		}
-	    }
-	  if (j == 256)
-	    break;
-	}
+                  outportb (port_a, 0x0b);      // all pin=0 for debug
+                  if (disp_on)
+                    printf ("#");
+                  drjr_init_port ();
+                  drjr_set_ai_data (3, 0x10 | (hi_word >> 8));
+                  drjr_set_ai_data (2, (hi_word & 0xff));
+                  unpass--;
+                  if (unpass == 0)
+                    return (1);
+                  else
+                    break;
+                }
+            }
+          if (j == 256)
+            break;
+        }
     }
 //   outportb(ai,0);
 //   printf("\na[7..0]=%02x\n",inportb(data));
@@ -263,20 +263,20 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
 void
 read_adr (void)
 {
-  drjr_set_ai_data (6, 0x0a);	// enable pc mode
-  drjr_set_ai_data (7, 0x05);	// enable pc mode
+  drjr_set_ai_data (6, 0x0a);   // enable pc mode
+  drjr_set_ai_data (7, 0x05);   // enable pc mode
   printf ("\na[31..0]=");
   drjr_set_ai (3);
-  set_data_read			// ninit=0, nwrite=1
+  set_data_read                 // ninit=0, nwrite=1
     printf ("%02x", inportb (port_c));
   drjr_set_ai (2);
-  set_data_read			// ninit=0, nwrite=1
+  set_data_read                 // ninit=0, nwrite=1
     printf ("%02x", inportb (port_c));
   drjr_set_ai (1);
-  set_data_read			// ninit=0, nwrite=1
+  set_data_read                 // ninit=0, nwrite=1
     printf ("%02x", inportb (port_c));
   drjr_set_ai (0);
-  set_data_read			// ninit=0, nwrite=1
+  set_data_read                 // ninit=0, nwrite=1
     printf ("%02x\n", inportb (port_c));
   drjr_end_port ();
 }
@@ -290,7 +290,7 @@ read_some (void)
   drjr_set_ai_data (2, 0);
   drjr_set_ai_data (3, 0x10);
   drjr_set_ai (4);
-  set_data_read			// ninit=0, nWrite=1
+  set_data_read                 // ninit=0, nWrite=1
     for (i = 0; i < 64; i++)
     {
       mix.bufferx[i] = inportw (port_c);
@@ -308,19 +308,19 @@ drjr_check_card (void)
   drjr_set_ai_data (1, 0x56);
   drjr_set_ai_data (0, 0x78);
   drjr_set_ai (3);
-  set_data_read			// ninit=0, nwrite=1
+  set_data_read                 // ninit=0, nwrite=1
     if ((inportb (port_c) & 0x1f) != 0x12)
     return (1);
   drjr_set_ai (2);
-  set_data_read			// ninit=0, nwrite=1
+  set_data_read                 // ninit=0, nwrite=1
     if (inportb (port_c) != 0x34)
     return (1);
   drjr_set_ai (1);
-  set_data_read			// ninit=0, nwrite=1
+  set_data_read                 // ninit=0, nwrite=1
     if (inportb (port_c) != 0x56)
     return (1);
   drjr_set_ai (0);
-  set_data_read			// ninit=0, nwrite=1
+  set_data_read                 // ninit=0, nwrite=1
     if (inportb (port_c) != 0x78)
     return (1);
   drjr_end_port ();
@@ -333,7 +333,7 @@ read_file (void)
   if (fread ((char *) mix.buffer, sizeof (char), trans_size, fptr) !=
       trans_size)
     {
-      fclose (fptr);		/* read data error */
+      fclose (fptr);            /* read data error */
       return (-1);
     }
   printf (".");
@@ -345,7 +345,7 @@ short int
 download_n64 ()
 {
   if ((fptr = fopen (drjr_file_name, "rb")) == NULL)
-    {				/* open error */
+    {                           /* open error */
       printf ("open error !!!\07\n");
       return (-1);
     }
@@ -356,52 +356,52 @@ download_n64 ()
   for (page = 0; page < 0x200; page++)
     {
       if (read_file () != 0)
-	{
-	  /*fclose(fptr); */
-	  printf ("\n");
-	  return (0);
-	}
+        {
+          /*fclose(fptr); */
+          printf ("\n");
+          return (0);
+        }
       if (sel == 0)
-	{
-	  if (write_32k (page, 0))
-	    {
-	      read_adr ();
-	      /*fclose(fptr); */
-	      return (-1);
-	    }
-	}
+        {
+          if (write_32k (page, 0))
+            {
+              read_adr ();
+              /*fclose(fptr); */
+              return (-1);
+            }
+        }
       else
-	{
-	  if (verify_32k (page, 0))
-	    {
-	      read_adr ();
-	      /*fclose(fptr); */
-	      return (-1);
-	    }
-	}
+        {
+          if (verify_32k (page, 0))
+            {
+              read_adr ();
+              /*fclose(fptr); */
+              return (-1);
+            }
+        }
       if (read_file () != 0)
-	{
-	  /*fclose(fptr); */
-	  return (-1);
-	}
+        {
+          /*fclose(fptr); */
+          return (-1);
+        }
       if (sel == 0)
-	{
-	  if (write_32k (page, 0x80))
-	    {
-	      read_adr ();
-	      /*fclose(fptr); */
-	      return (-1);
-	    }
-	}
+        {
+          if (write_32k (page, 0x80))
+            {
+              read_adr ();
+              /*fclose(fptr); */
+              return (-1);
+            }
+        }
       else
-	{
-	  if (verify_32k (page, 0x80))
-	    {
-	      read_adr ();
-	      /*fclose(fptr); */
-	      return (-1);
-	    }
-	}
+        {
+          if (verify_32k (page, 0x80))
+            {
+              read_adr ();
+              /*fclose(fptr); */
+              return (-1);
+            }
+        }
 
     }
   printf ("\n");
@@ -424,8 +424,8 @@ unsigned short int
 test_dram (void)
 {
   unsigned short int pages;
-  disp_on = 0;			// display off
-  sel = 0;			//write 32k dram data
+  disp_on = 0;                  // display off
+  sel = 0;                      //write 32k dram data
   gen_pat_32k (0x0000);
   write_32k (0, 0);
   gen_pat_32k (0x8000);
@@ -433,12 +433,12 @@ test_dram (void)
   gen_pat_32k (0x0000);
   pages = 0;
   if (verify_32k (0, 0) == 0)
-    {				// find lower 128Mbits
+    {                           // find lower 128Mbits
       pages = 0x100;
     }
   gen_pat_32k (0x8000);
   if (verify_32k (0x100, 0) == 0)
-    {				// find upper 128Mbits
+    {                           // find upper 128Mbits
       pages = 0x200;
     }
   printf ("DRAM testing...");
@@ -446,30 +446,30 @@ test_dram (void)
     {
       gen_pat_32k (page * 2);
       if (write_32k (page, 0))
-	return (0);
+        return (0);
       else
-	printf ("w");
+        printf ("w");
       fflush (stdout);
       gen_pat_32k (page * 2 + 1);
       if (write_32k (page, 0x80))
-	return (0);
+        return (0);
       else
-	printf ("w");
+        printf ("w");
       fflush (stdout);
     }
   for (page = 0; page < pages; page++)
     {
       gen_pat_32k (page * 2);
       if (verify_32k (page, 0))
-	return (0);
+        return (0);
       else
-	printf ("v");
+        printf ("v");
       fflush (stdout);
       gen_pat_32k (page * 2 + 1);
       if (verify_32k (page, 0x80))
-	return (0);
+        return (0);
       else
-	printf ("v");
+        printf ("v");
       fflush (stdout);
     }
   return (pages);
@@ -494,7 +494,7 @@ d64jr_usage (char *progname)
 void
 drjr_set_ai (unsigned char _ai)
 {
-  set_ai_write			// ninit=1, nwrite=0
+  set_ai_write                  // ninit=1, nwrite=0
     outportb (port_b, _ai);
 }
 
@@ -502,29 +502,29 @@ void
 drjr_set_ai_data (unsigned char _ai, unsigned char _data)
 {
   drjr_set_ai (_ai);
-  set_data_write		// ninit=0, nwrite=0
+  set_data_write                // ninit=0, nwrite=0
     outportb (port_c, _data);
 }
 
 void
 drjr_init_port (void)
 {
-  outportb (port_9, 1);		// clear EPP time flag
+  outportb (port_9, 1);         // clear EPP time flag
   drjr_set_ai_data (6, 0x0a);
-  drjr_set_ai_data (7, 0x05);	// 6==0x0a, 7==0x05 is pc_control mode
+  drjr_set_ai_data (7, 0x05);   // 6==0x0a, 7==0x05 is pc_control mode
 //   drjr_set_ai(5);
 //   set_data_read
 //   write_en=inportb(port_c);
-  drjr_set_ai_data (5, write_en);	// d0=0 is write protect mode
+  drjr_set_ai_data (5, write_en);       // d0=0 is write protect mode
 }
 
 void
 drjr_end_port (void)
 {
-  drjr_set_ai_data (5, write_en);	// d0=0 is write protect mode
-  drjr_set_ai_data (7, 0);	// release pc mode
-  drjr_set_ai_data (6, 0);	// 6==0x0a, 7==0x05 is pc_control mode
-  set_normal			// ninit=1, nWrite=1
+  drjr_set_ai_data (5, write_en);       // d0=0 is write protect mode
+  drjr_set_ai_data (7, 0);      // release pc mode
+  drjr_set_ai_data (6, 0);      // 6==0x0a, 7==0x05 is pc_control mode
+  set_normal                    // ninit=1, nWrite=1
 }
 
 /*************************************************
@@ -553,48 +553,48 @@ d64jr_main (int argc, char *argv[])
   for (i = 1; i < argc; i++)
     {
       if (argv[i][0] == '-')
-	{
-	  char *c = argv[i] + 1;
-	  if (*(c + 1) != '\0')
-	    d64jr_usage (progname);
-	  switch (*c)
-	    {
-	    case 'w':
-	      write_en = 1;
-	      break;
-	    case 'v':
-	      verify_en = 1;
-	      break;
-	    case 't':
-	      test_en = 1;
-	      break;
-	    case 'W':
-	      write_en = 1;
-	      break;
-	    case 'V':
-	      verify_en = 1;
-	      break;
-	    case 'T':
-	      test_en = 1;
-	      break;
-	    case 'a':
-	      write_en = 3;
-	      break;
-	    default:
-	      d64jr_usage (progname);
-	    }
-	}
+        {
+          char *c = argv[i] + 1;
+          if (*(c + 1) != '\0')
+            d64jr_usage (progname);
+          switch (*c)
+            {
+            case 'w':
+              write_en = 1;
+              break;
+            case 'v':
+              verify_en = 1;
+              break;
+            case 't':
+              test_en = 1;
+              break;
+            case 'W':
+              write_en = 1;
+              break;
+            case 'V':
+              verify_en = 1;
+              break;
+            case 'T':
+              test_en = 1;
+              break;
+            case 'a':
+              write_en = 3;
+              break;
+            default:
+              d64jr_usage (progname);
+            }
+        }
       else
-	{
-	  if (drjr_file_name == NULL)
-	    {
-	      drjr_file_name = argv[i];
-	    }
-	  else
-	    {
-	      d64jr_usage (progname);
-	    }
-	}
+        {
+          if (drjr_file_name == NULL)
+            {
+              drjr_file_name = argv[i];
+            }
+          else
+            {
+              d64jr_usage (progname);
+            }
+        }
     }
 //   printf("program name=%s\n",progname);
 //   printf("write_en=%x, verify=%x, test=%x\n",write_en,verify_en,test_en);
@@ -602,17 +602,17 @@ d64jr_main (int argc, char *argv[])
 
   wv_mode = 0;
   if (verify_en)
-    {				// if sel=2 for write/verify
-      sel = 1;			// sel=1 for verify
+    {                           // if sel=2 for write/verify
+      sel = 1;                  // sel=1 for verify
     }
   else
     {
-      sel = 0;			// sel=0 for write
+      sel = 0;                  // sel=0 for write
     }
   if (port[1] == 0)
-    port_no = 1;		// only one printer port
+    port_no = 1;                // only one printer port
   else
-    port_no = 2;		// two printer port
+    port_no = 2;                // two printer port
   card_present = 0;
   for (i = 0; i < port_no; i++)
     {
@@ -622,10 +622,10 @@ d64jr_main (int argc, char *argv[])
       port_b = port_a + 1;
       port_c = port_b + 1;
       if (drjr_check_card () == 0)
-	{
-	  card_present = 1;
-	  break;
-	}
+        {
+          card_present = 1;
+          break;
+        }
     }
 
   if (card_present == 0)
@@ -644,19 +644,19 @@ d64jr_main (int argc, char *argv[])
     {
       dram_size = test_dram ();
       if (dram_size)
-	{
-	  printf ("\nDRAM size=%dMbits\n", (dram_size / 2));
-	}
+        {
+          printf ("\nDRAM size=%dMbits\n", (dram_size / 2));
+        }
       else
-	{
-	  printf ("Error!!!\07\n");
-	}
+        {
+          printf ("Error!!!\07\n");
+        }
     }
-  disp_on = 1;			// display #/*
+  disp_on = 1;                  // display #/*
   if (drjr_file_name != NULL)
     {
       if (download_n64 () != 0)
-	printf ("download error !!!\n");
+        printf ("download error !!!\n");
     }
   if (write_en)
     printf ("dram write protect disable\n");
@@ -703,7 +703,7 @@ doctor64jr_usage (int argc, char *argv[])
     printf ("%s\n", doctor64jr_TITLE);
 
   printf ("TEST:  -xdjr    send/receive ROM to/from Doctor64 Jr; $FILE=PORT\n"
-	  "  		receives automatically when $ROM does not exist\n");
+          "  		receives automatically when $ROM does not exist\n");
 
   if (argcmp (argc, argv, "-help"))
     {

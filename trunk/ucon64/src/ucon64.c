@@ -106,8 +106,8 @@ static void ucon64_rom_nfo (const st_rominfo_t *rominfo);
 
 st_ucon64_t ucon64;
 static st_rominfo_t rom;
-static ucon64_dat_t dat;
-ucon64_dat_t *ucon64_dat = NULL;
+static st_ucon64_dat_t dat;
+st_ucon64_dat_t *ucon64_dat = NULL;
 dm_image_t *image = NULL;
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
 static int ucon64_fsize = 0, ucon64_option = 0;
@@ -813,7 +813,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 
       if (ucon64.dat_enabled)
         {
-          memset (&dat, 0, sizeof (ucon64_dat_t));
+          memset (&dat, 0, sizeof (st_ucon64_dat_t));
           ucon64_dat = ucon64_dat_search (ucon64.crc32, &dat);
         }
       else
@@ -873,7 +873,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
         ucon64_rom_nfo (rominfo);
     }
 
-  if (ucon64.fcrc32)                            // SNES interleaved ROMs
+  if (ucon64.fcrc32)                    // SNES & Genesis interleaved/N64 non-interleaved
     printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32);
   else if (ucon64.crc32)
     printf ("Checksum (CRC32): 0x%08x\n", ucon64.crc32);

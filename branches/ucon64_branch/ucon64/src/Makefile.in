@@ -11,12 +11,12 @@ LDFLAGS=@LDFLAGS@
 
 ifdef DISCMAGE
 LIBNAME_DM=discmage
-CFLAGS+=-Ilibdiscmage/
+CFLAGS+=-Ilibdiscmage
 endif
 
 ifdef GUI
 LIBNAME_NG=netgui
-CFLAGS+=-Ilibnetgui/
+CFLAGS+=-Ilibnetgui
 endif
 
 CFLAGS+=@CFLAGS@ @DEFS@

@@ -15,18 +15,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
-#include <stdarg.h>                             /* va_arg() */
+#include <string.h>
+#include <stdarg.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #if defined __unix__ || defined __BEOS__
 #include <unistd.h>
 #endif
-#include <string.h>
-
-#ifdef DJGPP
-#include <time.h>
-#endif
-
 #if (defined _WIN32 && !defined __CYGWIN__) || defined __MSDOS__
 #include <sys/timeb.h>
 #else
@@ -676,6 +671,73 @@ int cd64_upload_mempak(struct cd64_t *cd64, FILE *infile, int8_t which) {
 		cd64_send_byte(cd64, GHEMOR_RESTORE_MEMPAK);
 		cd64_send_byte(cd64, which);
 		return cd64_ghemor_send(cd64, infile, CONTROLLER_MEMPAK_LENGTH, NULL);
+	}
+	cd64->notice_callback2("Operation not supported by protocol.");
+	return 0;
+}
+
+int cd64_upload_sram(struct cd64_t *cd64, FILE *infile) {
+
+	if (cd64->protocol == CD64BIOS) {
+		cd64->notice_callback("Choose CD64 Tools->Pro Comms Link.");
+		return cd64_bios_send(cd64, infile, 0xa8000000, CART_SRAM_LENGTH,
+		                      NULL, BIOS_TRANSFER_PI);
+	}
+	else if (cd64->protocol == GHEMOR) {
+		cd64_bios_sync(cd64);
+		cd64_send_byte(cd64, GHEMOR_RESTORE_SRAM);
+		return cd64_ghemor_send(cd64, infile, CART_SRAM_LENGTH, NULL);
+	}
+	cd64->notice_callback2("Operation not supported by protocol.");
+	return 0;
+}
+
+int cd64_upload_flashram(struct cd64_t *cd64, FILE *infile) {
+
+	/* Urm, we need to figure out if this really works.  Probably, CTR
+	 * needs to release a new Ghemor version.  Maybe it works with
+	 * CD64 BIOS but probably not. */
+
+	if (cd64->protocol == CD64BIOS) {
+		cd64->notice_callback("Choose CD64 Tools->Pro Comms Link.");
+		return cd64_bios_send(cd64, infile, 0xa8000000, CART_FLASHRAM_LENGTH,
+		                      NULL, BIOS_TRANSFER_PI);
+	}
+	else if (cd64->protocol == GHEMOR) {
+		cd64_bios_sync(cd64);
+		cd64_send_byte(cd64, GHEMOR_RESTORE_FLASHRAM);
+		return cd64_ghemor_send(cd64, infile, CART_FLASHRAM_LENGTH, NULL);
+	}
+	cd64->notice_callback2("Operation not supported by protocol.");
+	return 0;
+}
+
+int cd64_upload_eeprom(struct cd64_t *cd64, FILE *infile) {
+
+	/* Check the size of the EEPROM data first */
+
+	int32_t origpos = cd64->tell_callback(infile);
+	int32_t length;
+
+	if (cd64->protocol == CD64BIOS) {
+		cd64->notice_callback2("CD64 BIOS can only transfer EEPROM through BRAM Manager.");
+		return 0;
+	}
+
+	cd64->seek_callback(infile, 0, SEEK_END);
+	length = cd64->tell_callback(infile);
+	cd64->seek_callback(infile, origpos, SEEK_SET);
+
+	if (length != CART_EEPROM_LENGTH && length != CART_2XEEPROM_LENGTH) {
+		char buf[200];
+		snprintf(buf, 200, "Wrong length of EEPROM data: %d bytes", length);
+		cd64->notice_callback2(buf);
+		return 0;
+	}
+	else if (cd64->protocol == GHEMOR) {
+		cd64_bios_sync(cd64);
+		cd64_send_byte(cd64, GHEMOR_RESTORE_EEPROM);
+		return cd64_ghemor_send(cd64, infile, length, NULL);
 	}
 	cd64->notice_callback2("Operation not supported by protocol.");
 	return 0;

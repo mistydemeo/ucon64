@@ -59,22 +59,19 @@ const st_getopt2_t cd64_usage[] =
     },
     {
       "xcd64s", 0, 0, UCON64_XCD64S,
-      NULL, "receive SRAM from CD64; " OPTION_LONG_S "port=PORT\n"
-//      NULL, "send/receive SRAM to/from CD64; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive SRAM to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when SRAM file does not exist",
       (void *) (UCON64_N64|WF_STOP|WF_NO_ROM)
     },
     {
       "xcd64f", 0, 0, UCON64_XCD64F,
-      NULL, "receive flash RAM from CD64; " OPTION_LONG_S "port=PORT\n"
-//      NULL, "send/receive flash RAM to/from CD64; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive flash RAM to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when flash RAM file does not exist",
       (void *) (UCON64_N64|WF_STOP|WF_NO_ROM)
     },
     {
       "xcd64e", 0, 0, UCON64_XCD64E,
-      NULL, "receive EEPROM data from CD64; " OPTION_LONG_S "port=PORT\n"
-//      NULL, "send/receive EEPROM data to/from CD64; " OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive EEPROM data to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when EEPROM file does not exist",
       (void *) (UCON64_N64|WF_STOP|WF_NO_ROM)
     },
@@ -349,9 +346,7 @@ cd64_write_sram (const char *filename)
     }
 
   cd64_starttime = time (NULL);
-//  cd64_upload_sram (cd64, file);
-  fputs ("ERROR: The function for uploading SRAM is not yet implemented for the CD64\n",
-         stderr);
+  cd64_upload_sram (cd64, file);
 
   cd64->devclose (cd64);
   fclose (file);
@@ -397,9 +392,7 @@ cd64_write_flashram (const char *filename)
     }
 
   cd64_starttime = time (NULL);
-//  cd64_upload_flashram (cd64, file);
-  fputs ("ERROR: The function for uploading flash RAM data is not yet implemented for\n"
-         "       the CD64\n", stderr);
+  cd64_upload_flashram (cd64, file);
 
   cd64->devclose (cd64);
   fclose (file);
@@ -445,9 +438,7 @@ cd64_write_eeprom (const char *filename)
     }
 
   cd64_starttime = time (NULL);
-//  cd64_upload_eeprom (cd64, file);
-  fputs ("ERROR: The function for uploading EEPROM data is not yet implemented for\n"
-         "       the CD64\n", stderr);
+  cd64_upload_eeprom (cd64, file);
 
   cd64->devclose (cd64);
   fclose (file);

@@ -69,18 +69,6 @@ typedef struct st_ioport {
 
 #endif /* CD64_USE_RAWIO */
 
-int debug(const char *format, ...) {
-
-	va_list argptr;
-	int n_chars;
-
-	va_start(argptr, format);
-	n_chars = vfprintf(stderr, format, argptr);
-	va_end(argptr);
-
-	return n_chars;
-}
-
 int cd64_send_byte(struct cd64_t *cd64, uint8_t what) {
 	return cd64->xfer(cd64, &what, NULL, 0);
 }
@@ -136,7 +124,7 @@ int cd64_open_ieee1284(struct cd64_t *cd64) {
 	if (cd64->ppdev || !cd64->using_ppa) return 0;
 
 	if (ieee1284_find_ports(&pplist, 0) < 0) {
-		debug("couldn't get port list\n");
+		cd64->notice_callback2("couldn't get port list\n");
 		return 0;
 	}
 
@@ -155,7 +143,7 @@ int cd64_open_ieee1284(struct cd64_t *cd64) {
 
 	if (cd64->ppdev) {
 		if (ieee1284_open(cd64->ppdev, ppflags, &ppcaps) < 0) {
-			debug("failed opening ieee1284 port %d\n", cd64->port);
+			cd64->notice_callback2("failed opening ieee1284 port %d\n", cd64->port);
 			cd64->ppdev = NULL;
 		}
 		else {
@@ -270,7 +258,6 @@ int cd64_open_ppdev(struct cd64_t *cd64) {
 	if (cd64->port > PARPORT_MAX) return 0;
 
 	snprintf(realdev, 128, device, cd64->port);
-	realdev[128] = 0;
 
 	if ((cd64->ppdevfd = open(realdev, O_RDWR)) == -1) {
 		cd64->notice_callback2("open: %s", strerror(errno));
@@ -323,7 +310,7 @@ static INLINE int cd64_wait_ppdev(struct cd64_t *cd64) {
 	i = 0;
 
 	if (ioctl(cd64->ppdevfd, PPRSTATUS, &status) != 0) cd64->notice_callback2("PPRSTATUS: %s", strerror(errno));
-  
+
 	while(status & 0x80) {
 		i++;
 		if (i >= BUSY_THRESHOLD) {

@@ -66,16 +66,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef  __UNIX__
 #ifdef  __SOLARIS__                             // Hmmm, Solaris *is* a UNIX
-#define ucon64_TITLE "uCON64 1.9.8beta2 Solaris 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 " ucon64_VERSION " Solaris 1999-2002 by (various)"
 #else
-#define ucon64_TITLE "uCON64 1.9.8beta2 UNIX 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 " ucon64_VERSION " UNIX 1999-2002 by (various)"
 #endif
 #elif   defined __DOS__
-#define ucon64_TITLE "uCON64 1.9.8beta2 DOS 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 " ucon64_VERSION " DOS 1999-2002 by (various)"
 #elif   defined __BEOS__
-#define ucon64_TITLE "uCON64 1.9.8beta2 BeOS 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 " ucon64_VERSION " BeOS 1999-2002 by (various)"
 #else
-#define ucon64_TITLE "uCON64 1.9.8beta2 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 " ucon64_VERSION " 1999-2002 by (various)"
 #endif
 
 #define MBIT	131072
@@ -98,7 +98,7 @@ struct ucon64_
   char file[4096];              //$FILE (cmdline) with path
   unsigned int parport;
   int parport_mode;             //parallel port mode: ECP, EPP, SPP, other
-  char config_file[NAME_MAX];
+  char config_file[NAME_MAX];   //path and name of the config file
 
 /*
   If ucon64 operates as backend for a front end and the commandline argument 

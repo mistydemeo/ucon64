@@ -63,12 +63,11 @@ const st_usage_t f2a_usage[] =
                           "must be specified first, then all the ROMs; " OPTION_LONG_S "port=PORT"},
 */
     {"xf2ac", "N", "receive N Mbits of ROM from Flash 2 Advance (Ultra);\n"
-                   OPTION_LONG_S "port=PORT\n"
-                   "N can be 8, 16, 32, 64, 128 or 256"},
+                   OPTION_LONG_S "port=PORT"},
     {"xf2as", NULL, "send/receive SRAM to/from Flash 2 Advance (Ultra); " OPTION_LONG_S "port=PORT\n"
                     "receives automatically when SRAM does not exist"},
     {"xf2ab", "BANK", "send/receive SRAM to/from Flash 2 Advance (Ultra) BANK\n"
-                      "BANK can be 1, 2, 3 or 4; " OPTION_LONG_S "port=PORT\n"
+                      "BANK should be a number >= 1; " OPTION_LONG_S "port=PORT\n"
                       "receives automatically when SRAM does not exist"},
     {"xf2am", NULL, "try to enable EPP mode, default is SPP mode"},
 #endif // PARALLEL
@@ -110,8 +109,7 @@ typedef struct
 
 #define MAGIC_NUMBER 0xa46e5b91         // needs to be properly set for almost all commands
 
-// TODO: replace with ucon64.quiet
-static int verbose = 1, f2a_pport;
+static int f2a_pport;
 static time_t starttime = 0;
 #ifdef  DEBUG
 static int parport_debug = 1;
@@ -292,7 +290,7 @@ f2a_info (recvmsg *rm)
 
   return 0;
 
-  if (verbose >= 2)
+  if (ucon64.quiet < 0)
     {
       printf ("info:");
       for (i = 0; i < (SENDMSG_SIZE / 4); i++)
@@ -332,7 +330,7 @@ f2a_boot_usb (const char *ilclient_fname)
   if (usb_read (f2ahandle, (char *) ack, 16 * 4) == -1)
     return -1;
 
-  if (verbose >= 2)
+  if (ucon64.quiet < 0)
     {
       printf ("post-boot:");
       for (i = 0; i < 16; i++)
@@ -408,7 +406,7 @@ f2a_write_usb (int numfiles, char **files, int address)
 
   for (j = 0; j < numfiles; j++)
     {
-      if (verbose)
+      if (ucon64.quiet < 1)
         printf ("Sending file %d: %s\n", j, files[j]);
 
       if ((fsize = q_fsize (files[j])) == -1)
@@ -475,7 +473,7 @@ f2a_init_usb (void)
   f2a_info (&rm);
   if (rm.data[0] == 0)
     {
-      if (verbose)
+      if (ucon64.quiet < 0)
         printf ("Please turn on GBA with SELECT and START held down\n");
 
       get_property (ucon64.configfile, "ilclient", ilclient_fname, "ilclient.bin");
@@ -499,7 +497,7 @@ f2a_init_par (int parport, int parport_delay)
       return -1;
     }
 
-  if (verbose)
+  if (ucon64.quiet < 0)
     printf ("Please turn on GBA with SELECT and START held down\n");
 
   get_property (ucon64.configfile, "ilclient2", ilclient2_fname, "ilclient2.bin");
@@ -1227,12 +1225,9 @@ parport_out91 (unsigned char val)
 
 
 int
-f2a_read_rom (const char *filename, unsigned int parport, int n)
+f2a_read_rom (const char *filename, unsigned int parport, int size)
 {
-  int size = 8 /* 8 Mbit/kbit */, offset = 0; // offset in Mbit (ROM) or kbit (SRAM)
-
-  (void) n;
-  (void) offset;
+  int offset = 0;
 
   starttime = time (NULL);
 #ifdef  HAVE_USB_H
@@ -1246,7 +1241,7 @@ f2a_read_rom (const char *filename, unsigned int parport, int n)
 #endif
     {
       f2a_init_par (parport, 10);
-      f2a_read_par (0x08000000, size * MBIT, filename);
+      f2a_read_par (0x08000000 + offset * MBIT, size * MBIT, filename);
     }
   return 0;
 }
@@ -1255,7 +1250,7 @@ f2a_read_rom (const char *filename, unsigned int parport, int n)
 int
 f2a_write_rom (const char *filename, unsigned int parport)
 {
-  int /*size = 8, */ /* 8 Mbit/kbit */ offset = 0; // offset in Mbit (ROM) or kbit (SRAM)
+  int offset = 0;
   char *files[1] = { (char *) filename };
 
   starttime = time (NULL);
@@ -1271,7 +1266,7 @@ f2a_write_rom (const char *filename, unsigned int parport)
     {
       f2a_init_par (parport, 10);
 //      f2a_erase_par (0x08000000, size * MBIT);
-      f2a_write_par (1, files, 0x8000000 + offset);
+      f2a_write_par (1, files, 0x8000000 + offset * MBIT);
     }
   return 0;
 }
@@ -1280,24 +1275,38 @@ f2a_write_rom (const char *filename, unsigned int parport)
 int
 f2a_read_sram (const char *filename, unsigned int parport, int bank)
 {
-  int size = 8 /* 8 Mbit/kbit */, offset = 0; // offset in Mbit (ROM) or kbit (SRAM)
+  int size;
 
-  (void) bank;
-  (void) offset;
+  if (bank == UCON64_UNKNOWN)
+    {
+      bank = 1;
+      size = 256 * 1024;
+    }
+  else
+    {
+      if (bank < 1) // || bank > 4)
+        {
+//          fprintf (stderr, "ERROR: Bank must be 1, 2, 3 or 4\n");
+          fprintf (stderr, "ERROR: Bank must be a number larger than or equal to 1\n");
+          exit (1);
+        }
+      size = 64 * 1024;
+    }
+  bank--;
 
   starttime = time (NULL);
 #ifdef  HAVE_USB_H
   if (ucon64.usbport)
     {
       f2a_init_usb ();
-      f2a_read_usb (0xe000000 + offset * 128, size * 128, filename);
+      f2a_read_usb (0xe000000 + bank * 64 * 1024, size, filename);
       usb_disconnect (f2ahandle);
     }
   else
 #endif
     {
       f2a_init_par (parport, 10);
-      f2a_read_par (0xe000000, size * MBIT, filename);
+      f2a_read_par (0xe000000 + bank * 64 * 1024, size, filename);
     }
   return 0;
 }
@@ -1306,17 +1315,26 @@ f2a_read_sram (const char *filename, unsigned int parport, int bank)
 int
 f2a_write_sram (const char *filename, unsigned int parport, int bank)
 {
-  int /*size = 8, */ /* 8 Mbit/kbit */ offset = 0; // offset in Mbit (ROM) or kbit (SRAM)
   char *files[1] = { (char *) filename };
 
-  (void) bank;
+  // define one bank as a 64 kilobyte unit
+  if (bank == UCON64_UNKNOWN)
+    bank = 1;
+  else
+    if (bank < 1) // || bank > 4)
+      {
+//        fprintf (stderr, "ERROR: Bank must be 1, 2, 3 or 4\n");
+        fprintf (stderr, "ERROR: Bank must be a number larger than or equal to 1\n");
+        exit (1);
+      }
+  bank--;
 
   starttime = time (NULL);
 #ifdef  HAVE_USB_H
   if (ucon64.usbport)
     {
       f2a_init_usb ();
-      f2a_write_usb (1, files, 0xe000000 + offset * 128);
+      f2a_write_usb (1, files, 0xe000000 + bank * 64 * 1024);
       usb_disconnect (f2ahandle);
     }
   else
@@ -1324,7 +1342,7 @@ f2a_write_sram (const char *filename, unsigned int parport, int bank)
     {
       f2a_init_par (parport, 10);
 //      f2a_erase_par (0xe000000, size * MBIT);
-      f2a_write_par (1, files, 0xe000000 + offset);
+      f2a_write_par (1, files, 0xe000000 + bank * 64 * 1024);
     }
   return 0;
 }

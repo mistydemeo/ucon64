@@ -15,7 +15,7 @@ endif
 
 # The test for Cygwin should be done before the test for DJGPP, because the
 # environment variable DJGPP can be set under Bash for people who have
-# installed both gcc (and friends) ports.
+# installed both GCC (and friends) ports.
 
 GCC_WIN=0
 # test cygwin before DJGPP; OSTYPE is not exported on Cygwin

@@ -1,4 +1,4 @@
-<html><head><title>LICENSE</title></head><body bgcolor="#c0c0c0"><tt><pre>
+<html><head><title>README</title></head><body bgcolor="#c0c0c0"><tt><pre>
 uCON64 1.9.7 Unix 1999-2001 by (various)
 Uses code from various people. See 'DEVELOPERS' for more!
 This may be freely redistributed under the terms of the GNU Public License
@@ -19,20 +19,20 @@ USAGE: ucon64 [OPTION(S)] ROM [FILE]
   -find         find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)
   -c            compare ROMs for differencies; $FILE=OTHER_ROM
   -cs           compare ROMs for similarities; $FILE=OTHER_ROM
-  -swap         swap/(de)interleave ALL Bytes in ROM (1234<->2143)
+  -swap         swap/(de)interleave ALL Bytes in ROM (1234&#60;-&#62;2143)
   -ispad        check if ROM is padded
   -pad          pad ROM to full Mb
   -padhd        pad ROM to full Mb (regarding to +512 Bytes header)
   -stp          strip first 512 Bytes (possible header) from ROM
   -ins          insert 512 Bytes (0x00) before ROM
   -strip        strip Bytes from end of ROM; $FILE=VALUE
-  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
-  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -b		apply Baseline/BSL patch (&#60;=x.x); $FILE=PATCHFILE
+  -i		apply IPS patch (&#60;=1.2); $FILE=PATCHFILE
   -mki		create IPS patch; $FILE=CHANGED_ROM
-  -a		apply APS patch (<=1.2); $FILE=PATCHFILE
+  -a		apply APS patch (&#60;=1.2); $FILE=PATCHFILE
   -mka		create APS patch; $FILE=CHANGED_ROM
   -na		change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION
-  -ppf		apply PPF patch (<=2.0); $ROM=ISO_IMAGE $FILE=PATCHFILE
+  -ppf		apply PPF patch (&#60;=2.0); $ROM=ISO_IMAGE $FILE=PATCHFILE
   -mkppf	create PPF patch; $ROM=ISO_IMAGE $FILE=CHANGED_IMAGE
   -nppf		change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION
   -idppf	change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ
@@ -60,11 +60,11 @@ GameBoy Advance
                 $FILE=24 (fastest cartridge access speed)
                 $FILE=28 (faster than 8 but slower than 16)
   -strip        strip Bytes from end of ROM (use -ispad before); $FILE=VALUE
-  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -i		apply IPS patch (&#60;=1.2); $FILE=PATCHFILE
   -mki		create IPS patch; $FILE=CHANGED_ROM
   -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT
                 receives automatically when $ROM does not exist
-  -xfalc<n>     specify chip size in mbits of ROM in Flash Advance Linker when
+  -xfalc&#60;n&#62;     specify chip size in mbits of ROM in Flash Advance Linker when
                 receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32
   -xfalm        use SPP mode, default is EPP
 
@@ -83,13 +83,13 @@ Nintendo 64
   -sram         LAC's Makesram; $ROM=(LAC's SRAM ROM image) $FILE=SRAMFILE
                 the SRAMFILE must have a size of 512 Bytes
   -usms         Jos Kwanten's ultraSMS (Sega Master System/GameGear Emulator);
-                $ROM=(Jos Kwanten's ultraSMS ROM image) $FILE=SMSROM(<=4Mb)
+                $ROM=(Jos Kwanten's ultraSMS ROM image) $FILE=SMSROM(&#60;=4Mb)
   -chk          fix ROM checksum
   -p            pad ROM to full Mb
-  -a		apply APS patch (<=1.2); $FILE=PATCHFILE
+  -a		apply APS patch (&#60;=1.2); $FILE=PATCHFILE
   -mka		create APS patch; $FILE=CHANGED_ROM
   -na		change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION
-  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -i		apply IPS patch (&#60;=1.2); $FILE=PATCHFILE
   -mki		create IPS patch; $FILE=CHANGED_ROM
   -xv64		send/receive ROM to/from Doctor V64; $FILE=PORT
 		receives automatically when $ROM does not exist
@@ -121,7 +121,7 @@ Super Nintendo/SNES/Super Famicon
   -gd3          convert to Professor SF(2) Game Doctor SF3/6/7
   -ufos         convert Snes9x/ZSNES *.srm (SRAM) to Super UFO
   -dint         convert ROM to non-interleaved format
-  -col          convert 0xRRGGBB (html) <-> 0xXXXX (snes); $ROM=0xCOLOR
+  -col          convert 0xRRGGBB (html) &#60;-&#62; 0xXXXX (snes); $ROM=0xCOLOR
                 this routine was used to find green colors in games and
                 to replace them with red colors (blood mode)
   -j            join splitted ROM
@@ -134,8 +134,8 @@ Super Nintendo/SNES/Super Famicon
   -gge          encode GameGenie code; $ROM=AAAAAA:VV
   -ggd          decode GameGenie code; $ROM=XXXX-XXXX
   -gg           apply GameGenie code (permanent); $FILE=XXXX-XXXX
-  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
-  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -b		apply Baseline/BSL patch (&#60;=x.x); $FILE=PATCHFILE
+  -i		apply IPS patch (&#60;=1.2); $FILE=PATCHFILE
   -mki		create IPS patch; $FILE=CHANGED_ROM
   -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT
                 receives automatically when $ROM does not exist
@@ -186,8 +186,8 @@ TODO:  -chk     fix ROM checksum
   -gge          encode GameGenie code; $ROM=AAAAAA:VVVV
   -ggd          decode GameGenie code; $ROM=XXXX-XXXX
 TODO:  -gg      apply GameGenie code (permanent); $FILE=XXXX-XXXX
-  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
-  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -b		apply Baseline/BSL patch (&#60;=x.x); $FILE=PATCHFILE
+  -i		apply IPS patch (&#60;=1.2); $FILE=PATCHFILE
   -mki		create IPS patch; $FILE=CHANGED_ROM
 TODO:  -xsmd    send/receive ROM to/from Super Magicom Drive/SMD; $FILE=PORT
 		receives automatically when $ROM does not exist
@@ -213,14 +213,14 @@ GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance)
   -ggd		decode GameGenie code; $ROM=XXX-XXX or $ROM=XXX-XXX-XXX
   -gg		apply GameGenie code (permanent);
 		$FILE=XXX-XXX or $FILE=XXX-XXX-XXX
-  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
-  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -b		apply Baseline/BSL patch (&#60;=x.x); $FILE=PATCHFILE
+  -i		apply IPS patch (&#60;=1.2); $FILE=PATCHFILE
   -mki		create IPS patch; $FILE=CHANGED_ROM
   -xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT
                 receives automatically when $ROM does not exist
   -xgbxs        send/receive SRAM to/from GB Xchanger; $FILE=PORT
                 receives automatically when $ROM does not exist
-  -xgbxb<n>     send/receive 64kbits SRAM to/from GB Xchanger bank n
+  -xgbxb&#60;n&#62;     send/receive 64kbits SRAM to/from GB Xchanger bank n
                 $FILE=PORT; receives automatically when $ROM does not exist
 
 Panther(32bit prototype)/Jaguar64/(Jaguar64 CD)

@@ -91,7 +91,8 @@ endif
 
 ifeq ($(findstring OpenBSD,$(OSTYPE)),OpenBSD)
 # i386_iopl() is located in libi386.a (note the .a)
-LIBS+=-L/usr/lib -li386
+LIBS+=/usr/lib/libi386.a
+LDFLAGS+=-L/usr/lib -li386
 RAWIO=1
 endif
 
@@ -116,7 +117,8 @@ endif # DEFAULT_BUILD = 1
 
 ifdef LIBIEEE1284
 CFLAGS+=-DCD64_USE_LIBIEEE1284
-LIBS+=-lieee1284
+LIBS+=/usr/lib/libieee1284.a
+LDFLAGS+=-lieee1284
 endif
 
 ifdef PPDEV
@@ -156,7 +158,6 @@ libcd64.a: cd64lib.o cd64io.o
 #	rm -f $@
 	ar crs $@ $*.o
 
-LDFLAGS+=$(LIBS)
 ifeq ($(GCC_WIN),1)
 cd64.dll: cd64lib.o cd64io.o
 else

@@ -71,6 +71,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define MBIT	131072
 
+#define MAXBUFSIZE 32768
+
 #define ucon64_NAME	0
 #define ucon64_ROM	1
 #define ucon64_FILE	2

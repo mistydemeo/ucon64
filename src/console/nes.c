@@ -5351,7 +5351,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
       write_chunk (&unif_chunk, destfile);
     }
 
-  x = mem_crc32 (prg_size, 0, prg_data);
+  x = crc32 (0, prg_data, prg_size);
   unif_chunk.id = PCK0_ID;
   unif_chunk.length = 4;
 #ifdef  WORDS_BIGENDIAN
@@ -5367,7 +5367,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
 
   if (chr_size > 0)
     {
-      x = mem_crc32 (chr_size, 0, chr_data);
+      x = crc32 (0, chr_data, chr_size);
       unif_chunk.id = CCK0_ID;
       unif_chunk.length = 4;
 #ifdef  WORDS_BIGENDIAN
@@ -5640,7 +5640,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
         {
           if ((unif_chunk3 = read_chunk (unif_pck_ids[n], rom_buffer, 0)) == NULL)
             {
-              x = mem_crc32 (unif_chunk1->length, 0, unif_chunk1->data);
+              x = crc32 (0, unif_chunk1->data, unif_chunk1->length);
               unif_chunk2.id = unif_pck_ids[n];
               unif_chunk2.length = 4;
 #ifdef  WORDS_BIGENDIAN
@@ -5651,7 +5651,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
             }
           else
             {
-              x = mem_crc32 (unif_chunk1->length, 0, unif_chunk1->data);
+              x = crc32 (0, unif_chunk1->data, unif_chunk1->length);
 #ifdef  WORDS_BIGENDIAN
               x = bswap_32 (x);
 #endif
@@ -5674,7 +5674,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
         {
           if ((unif_chunk3 = read_chunk (unif_cck_ids[n], rom_buffer, 0)) == NULL)
             {
-              x = mem_crc32 (unif_chunk1->length, 0, unif_chunk1->data);
+              x = crc32 (0, unif_chunk1->data, unif_chunk1->length);
               unif_chunk2.id = unif_cck_ids[n];
               unif_chunk2.length = 4;
 #ifdef  WORDS_BIGENDIAN
@@ -5685,7 +5685,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
             }
           else
             {
-              x = mem_crc32 (unif_chunk1->length, 0, unif_chunk1->data);
+              x = crc32 (0, unif_chunk1->data, unif_chunk1->length);
 #ifdef  WORDS_BIGENDIAN
               x = bswap_32 (x);
 #endif
@@ -6986,13 +6986,13 @@ nes_init (st_rominfo_t *rominfo)
         {
           if ((unif_chunk = read_chunk (unif_prg_ids[n], rom_buffer, 0)) != NULL)
             {
-              crc = mem_crc32 (unif_chunk->length, crc, unif_chunk->data);
+              crc = crc32 (crc, unif_chunk->data, unif_chunk->length);
               size += unif_chunk->length;
               if ((unif_chunk2 = read_chunk (unif_pck_ids[n], rom_buffer, 0)) == NULL)
                 str = "not available";
               else
                 {
-                  x = mem_crc32 (unif_chunk->length, 0, unif_chunk->data);
+                  x = crc32 (0, unif_chunk->data, unif_chunk->length);
 #ifdef  WORDS_BIGENDIAN
                   x = bswap_32 (x);
 #endif
@@ -7020,13 +7020,13 @@ nes_init (st_rominfo_t *rominfo)
         {
           if ((unif_chunk = read_chunk (unif_chr_ids[n], rom_buffer, 0)) != NULL)
             {
-              crc = mem_crc32 (unif_chunk->length, crc, unif_chunk->data);
+              crc = crc32 (crc, unif_chunk->data, unif_chunk->length);
               size += unif_chunk->length;
               if ((unif_chunk2 = read_chunk (unif_cck_ids[n], rom_buffer, 0)) == NULL)
                 str = "not available";
               else
                 {
-                  x = mem_crc32 (unif_chunk->length, 0, unif_chunk->data);
+                  x = crc32 (0, unif_chunk->data, unif_chunk->length);
 #ifdef  WORDS_BIGENDIAN
                   x = bswap_32 (x);
 #endif
@@ -7117,7 +7117,7 @@ nes_init (st_rominfo_t *rominfo)
                              ((ines_header.ctrl1 & INES_TRAINER) ? 512 : 0);
       if (x == 0)
         {                                       // use buf only if it could be allocated
-          ucon64.crc32 = mem_crc32 (rominfo->data_size, 0, rom_buffer);
+          ucon64.crc32 = crc32 (0, rom_buffer, rominfo->data_size);
           free (rom_buffer);
         }
 

@@ -47,7 +47,7 @@ endif                                   # cygwin
 
 
 OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
-	ucon64_lib.o misc.o miscz.o getopt.o quick_io.o \
+	ucon64_lib.o misc.o getopt.o quick_io.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
@@ -61,7 +61,7 @@ OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
         backup/psxpblib.o backup/mccl.o backup/lynxit.o backup/ffe.o
 @DEFINE_ZLIB_MAKE@
 ifdef ZLIB
-OBJECTS+=unzip.o
+OBJECTS+=unzip.o miscz.o
 endif
 ifdef DLOPEN
 OBJECTS+=dlopen.o

@@ -866,7 +866,7 @@ ucon64_rom_handling (void)
     CRC32
     
     Calculating the CRC32 checksum for the ROM data of a UNIF file (NES)
-    shouldn't be done with q_fcrc32(). nes_init() uses mem_crc32().
+    shouldn't be done with q_fcrc32(). nes_init() uses crc32().
     The CRC32 checksum is used to search in the DAT files, but at the time
     of this writing (Februari the 7th 2003) all DAT files contain checksums
     of files in only one format. This matters for SNES and Genesis ROMs in

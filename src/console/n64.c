@@ -582,10 +582,10 @@ n64_chksum (st_rominfo_t *rominfo)
   fread (crc32_mem, 1, CHECKSUM_START, file);
   if (!rominfo->interleaved)
     {
-      fcrc32 = mem_crc32 (CHECKSUM_START, 0, crc32_mem);
+      fcrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
       mem_swap (crc32_mem, CHECKSUM_START);
     }
-  scrc32 = mem_crc32 (CHECKSUM_START, 0, crc32_mem);
+  scrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
 #else
   fseek (file, CHECKSUM_START + rominfo->buheader_len, SEEK_SET);
 #endif
@@ -601,10 +601,10 @@ n64_chksum (st_rominfo_t *rominfo)
           if (!rominfo->interleaved)
             {
               memcpy (crc32_mem, chunk, n);
-              fcrc32 = mem_crc32 (n, fcrc32, crc32_mem);
+              fcrc32 = crc32 (fcrc32, crc32_mem, n);
               mem_swap (crc32_mem, n);
             }
-          scrc32 = mem_crc32 (n, scrc32, crc32_mem);
+          scrc32 = crc32 (scrc32, crc32_mem, n);
 #endif
         }
       else
@@ -654,10 +654,10 @@ n64_chksum (st_rominfo_t *rominfo)
     {
       if (!rominfo->interleaved)
         {
-          fcrc32 = mem_crc32 (n, fcrc32, crc32_mem);
+          fcrc32 = crc32 (fcrc32, crc32_mem, n);
           mem_swap (crc32_mem, n);
         }
-      scrc32 = mem_crc32 (n, scrc32, crc32_mem);
+      scrc32 = crc32 (scrc32, crc32_mem, n);
     }
 
   ucon64.crc32 = scrc32;

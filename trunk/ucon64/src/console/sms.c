@@ -130,8 +130,8 @@ e.g. The first 16Mbit file of Donkey Kong Country (assuming it
       return -1;
     }
 
-  strcpy (buf, areupper (basename2 (ucon64.rom)) ? "GG" : "gg");
-  strcat (buf, basename2 (ucon64.rom));
+  strcpy (buf, areupper (basename (ucon64.rom)) ? "GG" : "gg");
+  strcat (buf, basename (ucon64.rom));
   if ((p = strrchr (buf, '.')))
     *p = 0;
   strcat (buf, "________");

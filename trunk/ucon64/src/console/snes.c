@@ -756,7 +756,7 @@ snes_mgd (st_rominfo_t *rominfo)
   char mgh[32], dest_name[FILENAME_MAX], *fname;
   int n, len;
 
-  fname = basename2 (ucon64.rom);
+  fname = basename (ucon64.rom);
   sprintf (dest_name, "%s%d", areupper (fname) ? "SF" : "sf",
     (rominfo->file_size - rominfo->buheader_len) / MBIT);
   strncat (dest_name, fname, 5);
@@ -789,9 +789,9 @@ snes_mgd (st_rominfo_t *rominfo)
 #else
   char mgh[32], buf[FILENAME_MAX], buf2[FILENAME_MAX], *p = NULL;
 
-  strcpy (buf, areupper (basename2 (ucon64.rom)) ? "SF" : "sf");
+  strcpy (buf, areupper (basename (ucon64.rom)) ? "SF" : "sf");
   strcpy (buf2, ucon64.rom);
-  strcat (buf, basename2 (buf2));
+  strcat (buf, basename (buf2));
   if ((p = strrchr (buf, '.')))
     *p = 0;
   strcat (buf, "________");
@@ -885,7 +885,7 @@ snes_gd3 (st_rominfo_t *rominfo)
   surplus4Mb = size % (4 * MBIT);
   total4Mbparts = n4Mbparts + (surplus4Mb > 0 ? 1 : 0);
 
-  p = basename2 (ucon64.rom);
+  p = basename (ucon64.rom);
   sprintf (dest_name, "%s%d", areupper (p) ? "SF" : "sf", total4Mbparts * 4);
   strcat (dest_name, p);
   // avoid trouble with filenames containing spaces
@@ -1094,11 +1094,11 @@ snes_s (st_rominfo_t *rominfo)
       surplus = size % (8 * MBIT);              //  I (dbjh) don't know if other sizes
                                                 //  are also valid
       if (sf_romname)
-        strcpy (buf, basename2 (ucon64.rom));
+        strcpy (buf, basename (ucon64.rom));
       else
         {
-          strcpy (buf, areupper (basename2 (ucon64.rom)) ? "SF" : "sf");
-          strcat (buf, basename2 (ucon64.rom));
+          strcpy (buf, areupper (basename (ucon64.rom)) ? "SF" : "sf");
+          strcat (buf, basename (ucon64.rom));
         }
       if ((p = strrchr (buf, '.')))
         *p = 0;
@@ -1112,8 +1112,8 @@ snes_s (st_rominfo_t *rominfo)
           half_size = size / 2;
           // 8 Mbit or less HiROMs, X is used to pad filename to 8 (SF4###XA)
 
-          *(strrchr (dest_name, '.') - 2) = areupper (basename2 (ucon64.rom)) ? 'X' : 'x';
-//          dest_name[strrcspn (dest_name, ".") - 2] = areupper (basename2 (ucon64.rom)) ? 'X' : 'x';
+          *(strrchr (dest_name, '.') - 2) = areupper (basename (ucon64.rom)) ? 'X' : 'x';
+//          dest_name[strrcspn (dest_name, ".") - 2] = areupper (basename (ucon64.rom)) ? 'X' : 'x';
 
           // don't write backups of parts, because one name is used
           q_fcpy (ucon64.rom, 0, half_size + rominfo->buheader_len, dest_name, "wb");

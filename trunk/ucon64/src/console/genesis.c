@@ -346,8 +346,8 @@ genesis_mgd (st_rominfo_t *rominfo)
     }
   load_rom (rominfo, ucon64.rom, rom_buffer);
 
-  strcpy (buf, areupper (basename2 (ucon64.rom)) ? "MD" : "md");
-  strcat (buf, basename2 (ucon64.rom));
+  strcpy (buf, areupper (basename (ucon64.rom)) ? "MD" : "md");
+  strcat (buf, basename (ucon64.rom));
   if ((p = strrchr (buf, '.')))
     *p = 0;
   strcat (buf, "________");
@@ -405,8 +405,8 @@ genesis_s (st_rominfo_t *rominfo)
 
   if (type == BIN)
     {
-      strcpy (buf, areupper (basename2 (ucon64.rom)) ? "MD" : "md");
-      strcat (buf, basename2 (ucon64.rom));
+      strcpy (buf, areupper (basename (ucon64.rom)) ? "MD" : "md");
+      strcat (buf, basename (ucon64.rom));
       if ((p = strrchr (buf, '.')))
         *p = 0;
       strcat (buf, "________");

@@ -1248,7 +1248,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-          ac_config_headers="$ac_config_headers config.h"
+                    ac_config_headers="$ac_config_headers config.h libdiscmage/config.h"
 
 
 CFLAGS="-I. -Wall -O3"
@@ -2713,7 +2713,8 @@ done
 
 
 
-for ac_header in fcntl.h limits.h unistd.h
+
+for ac_header in fcntl.h limits.h unistd.h byteswap.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
@@ -4034,6 +4035,7 @@ do
   "ucon64_cfg.h" ) CONFIG_FILES="$CONFIG_FILES ucon64_cfg.h" ;;
   "libdiscmage/libdiscmage_cfg.h" ) CONFIG_FILES="$CONFIG_FILES libdiscmage/libdiscmage_cfg.h" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
+  "libdiscmage/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS libdiscmage/config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;

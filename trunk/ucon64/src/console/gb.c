@@ -199,7 +199,7 @@ gameboy_gbx (st_rominfo_t *rominfo)
     0x53, 0x5B, 0x43, 0x4B
   };
 
-  strcat (buf, basename2 (ucon64.rom));
+  strcat (buf, basename (ucon64.rom));
   setext (buf, ((OFFSET (buf, strlen (buf) - 2) == 'B' ||
                  OFFSET (buf, strlen (buf) - 2) == 'b') ? ".GBC" : ".GB"));
 
@@ -259,7 +259,7 @@ gameboy_sgb (st_rominfo_t *rominfo)
     0x09, 0x29, 0x49, 0x69
   };
 
-  strcat (buf, basename2 (ucon64.rom));
+  strcat (buf, basename (ucon64.rom));
   setext (buf, ((OFFSET (buf, strlen (buf) - 2) == 'B' ||
                  OFFSET (buf, strlen (buf) - 2) == 'b') ? ".GBX" : ".GX"));
 
@@ -330,8 +330,8 @@ gameboy_mgd (st_rominfo_t *rominfo)
       return -1;
     }
 
-  strcpy (buf, areupper (basename2 (ucon64.rom)) ? "GB" : "gb");
-  strcat (buf, basename2 (ucon64.rom));
+  strcpy (buf, areupper (basename (ucon64.rom)) ? "GB" : "gb");
+  strcat (buf, basename (ucon64.rom));
   if ((p = strrchr (buf, '.')))
     *p = 0;
   strcat (buf, "________");
@@ -371,8 +371,8 @@ gameboy_ssc (st_rominfo_t *rominfo)
   unknown_header.id2 = 0xbb;
   unknown_header.type = 2;
 
-  strcpy (buf, areupper (basename2 (ucon64.rom)) ? "GB" : "gb");
-  strcat (buf, basename2 (ucon64.rom));
+  strcpy (buf, areupper (basename (ucon64.rom)) ? "GB" : "gb");
+  strcat (buf, basename (ucon64.rom));
   setext (buf, ".GB");
 
   ucon64_fbackup (NULL, buf);

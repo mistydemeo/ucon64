@@ -1,7 +1,8 @@
 /*
     flc 1999/2000/2001 by NoisyB (noisyb@gmx.net)
-    A filelisting creator which uses FILE_ID.DIZ from archives/files
-    to generate a bbs style filelisting
+    flc lists information about the FILEs (the current directory by default)
+    But most important it shows the FILE_ID.DIZ of every file (if present)
+    Very useful for FTP Admins or people who have a lot to do with FILE_ID.DIZ
     Copyright (C) 1999/2000/2001 by NoisyB (noisyb@gmx.net)
 
     This program is free software; you can redistribute it and/or modify

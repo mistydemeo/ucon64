@@ -1,13 +1,14 @@
-# Currently none of these codes are active, because they are all built in uCON64
-# The have been put here for your convenience and as a reference without having
-# to look at the source code.
+# Currently none of these codes are active, because they are all built in
+# uCON64. The have been put here for your convenience and as a reference
+# so that you don't have to look at the source code. See the document
+# "NTSC-PAL notes.txt" for more detailed information.
 #
 # 3f 21 02 10 f0:                   01: 02:  80:        0: 29 89
 # ad 3f 21 29 10 d0:                01: 02:  ea ea:     0
 # ad 3f 21 89 10 d0:                01: 02:  ea ea:     0
 # The next code could be the alternative for the previous one. Leave it
 #  disabled until we find a game that needs it.
-# ad 3f 21 89 10 d0:               01: 02:  80:        0
+# ad 3f 21 89 10 d0:                01: 02:  80:        0
 # 3f 21 02 10 00 f0:                01: 02:  80:        0: 29 89
 # 3f 21 02 10 00 d0:                01: 02:  ea ea:     0: 29 89
 # 3f 21 89 10 c2 01 d0:             01: 02:  ea ea:     0

@@ -930,6 +930,283 @@ change_mem2 (char *buf, int bufsize, char *searchstr, int strsize, char wc,
 }
 
 
+#if     defined PARALLEL && !defined DXE // currently there is no uCON64-specific defined constant
+// I think this function belongs here, because it is related to change_mem()
+// Be a man and accept that the world is not perfect.
+#include "ucon64_misc.h"
+
+int
+build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullfilename)
+/*
+  This function goes a bit over the top what memory allocation concerns, but
+  at least it's stable.
+  Note the important difference between (*patterns)[0].n_sets and
+  patterns[0]->n_sets (not especially that member). I (dbjh) am too ashamed too
+  tell how long it took me to finally realise that...
+*/
+{
+  char src_name[FILENAME_MAX], line[MAXBUFSIZE], buffer[MAXBUFSIZE],
+       *token, *last, *ptr;
+  int line_num = 0, n_sets, n_codes = 0, n, currentsize1, requiredsize1,
+      currentsize2, requiredsize2, currentsize3, requiredsize3;
+  FILE *srcfile;
+
+  strcpy (src_name, filename);
+  // First try the current directory, then the configuration directory
+  if (access (src_name, F_OK | R_OK) == -1)
+    sprintf (src_name, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, filename);
+  strcpy (fullfilename, src_name);
+  if (access (src_name, F_OK | R_OK))
+    return -1;                                  // NOT an error, it's optional
+
+  if ((srcfile = fopen (src_name, "r")) == NULL) // open in text mode
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+      return -1;
+    }
+
+  *patterns = NULL;
+  currentsize1 = requiredsize1 = 0;
+  while (fgets (line, sizeof line, srcfile) != NULL)
+    {
+      line_num++;
+      n_sets = 0;
+
+      if (*(line + strspn (line, "\t ")) == '#')
+        continue;
+      if ((ptr = strpbrk (line, "\n\r#"))) // text after # is comment
+        *ptr = 0;
+      if (!strcmp (line, ""))
+        continue;
+
+      requiredsize1 += sizeof (st_cm_pattern_t);
+      if (requiredsize1 > currentsize1)
+        {
+          currentsize1 = requiredsize1 + 10 * sizeof (st_cm_pattern_t);
+          if (!(*patterns = (st_cm_pattern_t *) realloc (*patterns, currentsize1)))
+            {
+              fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize1);
+              return -1;
+            }
+        }
+
+      (*patterns)[n_codes].search = NULL;
+      currentsize2 = 0;
+      requiredsize2 = 1;                        // for string terminator
+      n = 0;
+      strcpy (buffer, line);
+      token = strtok (buffer, ":");
+      token = strtok (token, " ");
+//      printf ("token: \"%s\"\n", token);
+      last = token;
+      // token is never NULL here (yes, tested with empty files and such)
+      do
+        {
+          requiredsize2 += strlen (token);
+          if (requiredsize2 > currentsize2)
+            {
+              currentsize2 = requiredsize2 + 10;
+              if (!((*patterns)[n_codes].search =
+                   (char *) realloc ((*patterns)[n_codes].search, currentsize2)))
+                {
+                  fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize2);
+                  return -1;
+                }
+            }
+          (*patterns)[n_codes].search[n] = (unsigned char) strtol (token, NULL, 16);
+          n++;
+        }
+      while ((token = strtok (NULL, " ")));
+      (*patterns)[n_codes].search_size = n;     // size in bytes
+
+      strcpy (buffer, line);
+      token = strtok (last, ":");
+      token = strtok (NULL, ":");
+      token = strtok (token, " ");
+      last = token;
+      if (!token)
+        {
+          printf ("WARNING: Line %d is invalid, no wildcard character is specified\n",
+                  line_num);
+          continue;
+        }
+      (*patterns)[n_codes].wildcard = strtol (token, NULL, 16);
+
+      strcpy (buffer, line);
+      token = strtok (last, ":");
+      token = strtok (NULL, ":");
+      token = strtok (token, " ");
+      last = token;
+      if (!token)
+        {
+          printf ("WARNING: Line %d is invalid, no escape character is specified\n",
+                  line_num);
+          continue;
+        }
+      (*patterns)[n_codes].escape = strtol (token, NULL, 16);
+
+      strcpy (buffer, line);
+      token = strtok (last, ":");
+      token = strtok (NULL, ":");
+      token = strtok (token, " ");
+      last = token;
+      if (!token)
+        {
+          printf ("WARNING: Line %d is invalid, no replacement is specified\n", line_num);
+          continue;
+        }
+      (*patterns)[n_codes].replace = NULL;
+      currentsize2 = 0;
+      requiredsize2 = 1;                        // for string terminator
+      n = 0;
+      do
+        {
+          requiredsize2 += strlen (token);
+          if (requiredsize2 > currentsize2)
+            {
+              currentsize2 = requiredsize2 + 10;
+              if (!((*patterns)[n_codes].replace =
+                   (char *) realloc ((*patterns)[n_codes].replace, currentsize2)))
+                {
+                  fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize2);
+                  return -1;
+                }
+            }
+          (*patterns)[n_codes].replace[n] = (unsigned char) strtol (token, NULL, 16);
+          n++;
+        }
+      while ((token = strtok (NULL, " ")));
+      (*patterns)[n_codes].replace_size = n;  // size in bytes
+
+      strcpy (buffer, line);
+      token = strtok (last, ":");
+      token = strtok (NULL, ":");
+      token = strtok (token, " ");
+      last = token;
+      if (!token)
+        {
+          printf ("WARNING: Line %d is invalid, no offset is specified\n", line_num);
+          continue;
+        }
+      (*patterns)[n_codes].offset = strtol (token, NULL, 10); // yes, offset is decimal
+
+      if (ucon64.quiet == -1)
+        {
+          printf ("\n"
+                  "line:         %d\n"
+                  "searchstring: ",
+                  line_num);
+          for (n = 0; n < (*patterns)[n_codes].search_size; n++)
+            printf ("%02x ", (unsigned char) (*patterns)[n_codes].search[n]);
+          printf ("(%d)\n"
+                  "wildcard:     %02x\n"
+                  "escape:       %02x\n"
+                  "replacement:  ",
+                  (*patterns)[n_codes].search_size,
+                  (*patterns)[n_codes].wildcard,
+                  (*patterns)[n_codes].escape);
+          for (n = 0; n < (*patterns)[n_codes].replace_size; n++)
+            printf ("%02x ", (unsigned char) (*patterns)[n_codes].replace[n]);
+          printf ("(%d)\n"
+                  "offset:       %d\n",
+                  (*patterns)[n_codes].replace_size,
+                  (*patterns)[n_codes].offset);
+        }
+
+      (*patterns)[n_codes].sets = NULL;
+      currentsize2 = 0;
+      requiredsize2 = 1;                        // for string terminator
+      strcpy (buffer, line);
+      token = strtok (last, ":");
+      token = strtok (NULL, ":");
+      last = token;
+      while (token)
+        {
+          requiredsize2 += sizeof (st_cm_set_t);
+          if (requiredsize2 > currentsize2)
+            {
+              currentsize2 = requiredsize2 + 10 * sizeof (st_cm_set_t);
+              if (!((*patterns)[n_codes].sets = (st_cm_set_t *)
+                    realloc ((*patterns)[n_codes].sets, currentsize2)))
+                {
+                  fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize2);
+                  return -1;
+                }
+            }
+
+          (*patterns)[n_codes].sets[n_sets].data = NULL;
+          currentsize3 = 0;
+          requiredsize3 = 1;                    // for string terminator
+          n = 0;
+          token = strtok (token, " ");
+          do
+            {
+              requiredsize3 += strlen (token);
+              if (requiredsize3 > currentsize3)
+                {
+                  currentsize3 = requiredsize3 + 10;
+                  if (!((*patterns)[n_codes].sets[n_sets].data = (char *)
+                        realloc ((*patterns)[n_codes].sets[n_sets].data, currentsize3)))
+                    {
+                      fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize3);
+                      return -1;
+                    }
+                }
+              (*patterns)[n_codes].sets[n_sets].data[n] =
+                (unsigned char) strtol (token, NULL, 16);
+              n++;
+            }
+          while ((token = strtok (NULL, " ")));
+          (*patterns)[n_codes].sets[n_sets].size = n;
+
+          if (ucon64.quiet == -1)
+            {
+              printf ("set:          ");
+              for (n = 0; n < (*patterns)[n_codes].sets[n_sets].size; n++)
+                printf ("%02x ", (unsigned char) (*patterns)[n_codes].sets[n_sets].data[n]);
+              printf ("(%d)\n", (*patterns)[n_codes].sets[n_sets].size);
+            }
+
+          strcpy (buffer, line);
+          token = strtok (last, ":");
+          token = strtok (NULL, ":");
+          last = token;
+
+          n_sets++;
+        }
+      (*patterns)[n_codes].n_sets = n_sets;
+
+      n_codes++;
+    }
+  fclose (srcfile);
+  return n_codes;
+}
+#endif
+
+
+void
+cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns)
+{
+  int n, m;
+  for (n = 0; n < n_patterns; n++)
+    {
+      free ((*patterns)[n].search);
+      (*patterns)[n].search = NULL;
+      free ((*patterns)[n].replace);
+      (*patterns)[n].replace = NULL;
+      for (m = 0; m < (*patterns)[n].n_sets; m++)
+        {
+          free ((*patterns)[n].sets[m].data);
+          (*patterns)[n].sets[m].data = NULL;
+        }
+      free ((*patterns)[n].sets);
+      (*patterns)[n].sets = NULL;
+    }
+  free (*patterns);
+  *patterns = NULL;
+}
+
+
 int
 gauge (time_t init_time, int pos, int size)
 {

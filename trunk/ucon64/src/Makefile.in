@@ -38,7 +38,7 @@ all: $(TARGET)
 clean:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
-              DEADJOE */DEADJOE *~ */*~ */*/*~ Makefile
+              DEADJOE */DEADJOE *~ */*~ */*/*~
 else
 ifdef DJGPP
 	del *.o
@@ -69,12 +69,12 @@ endif                                   # cygwin
 
 distclean: clean
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f ../bin/$(TARGET)
+	rm -f ../bin/$(TARGET) Makefile
 else
 ifdef DJGPP
-	del ..\bin\$(TARGET)
+	del ..\bin\$(TARGET) Makefile
 else
-	rm -f ../bin/$(TARGET)
+	rm -f ../bin/$(TARGET) Makefile
 endif                                   # DJGPP
 endif                                   # cygwin
 

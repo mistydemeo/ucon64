@@ -102,9 +102,10 @@ extern unsigned long fileCRC32 (const char *filename, long start);   // calculat
 /*
   wrapper for misc.c/filebackup()
 
-TODO:  mode: "move" (rename) and NULL or "copy"
+  if move_name != NULL then filename will just be moved (renamed) and NOT
+  duplicated (faster); move_name will contain the new name then 
 */
-extern const char *ucon64_fbackup (const char *filename);//, int mode);
+extern const char *ucon64_fbackup (char *move_name, const char *filename);
 /*
   wrapper for misc.c/gauge()
 */

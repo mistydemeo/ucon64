@@ -80,8 +80,7 @@ const st_getopt2_t cd64_usage[] =
     },
     {
       "xcd64m", 1, 0, UCON64_XCD64M,
-      "INDEX", "receive memory pack data from CD64; " OPTION_LONG_S "port=PORT\n"
-//      "INDEX", "send/receive memory pack data to/from CD64; " OPTION_LONG_S "port=PORT\n"
+      "INDEX", "send/receive memory pack data to/from CD64; " OPTION_LONG_S "port=PORT\n"
       "INDEX is ignored for CD64 BIOS protocol\n"
       "receives automatically when memory pack file does not exist",
       (void *) (UCON64_N64|WF_STOP|WF_NO_ROM)
@@ -154,6 +153,34 @@ cd64_notice2 (const char *format, ...)
 }
 
 
+static int
+fread_wrapper (void *io_id, void *buffer, uint32_t size)
+{
+  return fread (buffer, 1, size, (FILE *) io_id);
+}
+
+
+static int
+fwrite_wrapper (void *io_id, void *buffer, uint32_t size)
+{
+  return fwrite (buffer, 1, size, (FILE *) io_id);
+}
+
+
+static int32_t
+ftell_wrapper (void *io_id)
+{
+  return (int32_t) ftell ((FILE *) io_id);
+}
+
+
+static int
+fseek_wrapper (void *io_id, int32_t offset, int whence)
+{
+  return fseek ((FILE *) io_id, offset, whence);
+}
+
+
 static struct cd64_t *
 cd64_init (void)
 {
@@ -193,10 +220,10 @@ cd64_init (void)
       exit (1);
     }
 
-  cd64->read_callback = (int (*) (void *, void *, uint32_t)) fread;   // actually f*2(), if zlib
-  cd64->write_callback = (int (*) (void *, void *, uint32_t)) fwrite; //  support is enabled
-  cd64->tell_callback = (int32_t (*) (void *)) ftell;
-  cd64->seek_callback = (int (*) (void *, int32_t, int)) fseek;
+  cd64->read_callback = fread_wrapper;          // actually f*2(), if zlib
+  cd64->write_callback = fwrite_wrapper;        //  support is enabled
+  cd64->tell_callback = ftell_wrapper;
+  cd64->seek_callback = fseek_wrapper;
   cd64->progress_callback = cd64_progress;
   strcpy (cd64->io_driver_dir, ucon64.configdir);
 

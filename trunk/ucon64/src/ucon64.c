@@ -399,7 +399,7 @@ main (int argc, char *argv[])
         case ucon64_FIGS:
         case ucon64_UFOS:
         case ucon64_COL:
-          ucon64.skip_init_nfo = 1;
+          ucon64.show_nfo = 1;
         case ucon64_HI:
           rom.snes_hirom = 1;
         case ucon64_NHI:
@@ -521,7 +521,7 @@ main (int argc, char *argv[])
         case ucon64_MULTI:
         case ucon64_MULTI1:
         case ucon64_MULTI2:
-          ucon64.skip_init_nfo = 1;      // This gets rid of nonsense GBA info on a GBA multirom loader binary
+          ucon64.show_nfo = 1;      // This gets rid of nonsense GBA info on a GBA multirom loader binary
 #ifdef BACKUP
         case ucon64_XFAL:
         case ucon64_XFALS:
@@ -620,6 +620,17 @@ main (int argc, char *argv[])
   if (!access (rom.rom, F_OK|R_OK))
     ucon64_init (&rom);
 
+#if 0
+  int show_nfo;                 //show or skip info output for ROM
+                                //values:
+                                //0 show before processing of ROM (default)
+                                //1 skip before and after processing of ROM
+                                //2 show after processing of ROM
+                                //3 show before and after processing of ROM
+#endif
+  if (!access (rom.rom, F_OK|R_OK) &&
+    (!ucon64.show_nfo || ucon64.show_nfo == 3))
+      ucon64_nfo (&rom);
 
 /*
   getopt_long_only() - options
@@ -882,8 +893,6 @@ main (int argc, char *argv[])
           return snes_ufos (&rom);
   
         case ucon64_E:
-          printf("SHIT");
-          fflush(stdout);
           return ucon64_e (&rom);
 
         case ucon64_1991:
@@ -1281,10 +1290,17 @@ main (int argc, char *argv[])
     }
 
 
-  if (!access (rom.rom, F_OK|R_OK) && !ucon64.skip_init_nfo)
+#if 0
+  int show_nfo;                 //show or skip info output for ROM
+                                //values:
+                                //0 show before processing of ROM (default)
+                                //1 skip before and after processing of ROM
+                                //2 show after processing of ROM
+                                //3 show before and after processing of ROM
+#endif
+  if (!access (rom.rom, F_OK|R_OK) && ucon64.show_nfo >= 2)
     {
-//        ucon64_init (&rom);
-//        if (rom.console != ucon64_UNKNOWN)
+//          if (rom.console == ucon64_UNKNOWN) ucon64_init (&rom);
           ucon64_nfo (&rom);
     }
 
@@ -1490,8 +1506,6 @@ ucon64_init (struct ucon64_ *rom)
         }
       }
 
-printf("%ld", rom->console);
-fflush (stdout);
   return (rom->console == ucon64_UNKNOWN) ? -1 : 0;
 }
 
@@ -1585,80 +1599,73 @@ ucon64_nfo (struct ucon64_ *rom)
 
 int ucon64_e(struct ucon64_ *rom)
 {
-  long x;
+  int result, x;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[4096];
   char *property;
 
-      if (rom->console != ucon64_UNKNOWN /* && rom->console != ucon64_KNOWN */ )
-{
-  for (x = 0;x < sizeof (long_options); x++)
-    if (long_options[x].val == rom->console)
-sprintf (buf3, "emulate_%s", long_options[x].name);
-}
-      else
-        {
-          printf ("ERROR: could not auto detect the right ROM/console type\n"
-                  "TIP:   If this is a ROM you might try to force the recognition\n"
-                  "       The force recognition option for Super Nintendo would be -snes\n");
-          return -1;
-        }
+  if (rom->console == ucon64_UNKNOWN)
+    {
+       printf ("ERROR: could not auto detect the right ROM/console type\n"
+               "TIP:   If this is a ROM you might try to force the recognition\n"
+               "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n");
+       return -1;
+    }
+ 
+  x = 0;
+  while (long_options[x].name)
+    {
+      if (long_options[x].val == rom->console)
+      {
+        sprintf (buf3, "emulate_%s", long_options[x].name);
+        break;
+      }
+      x++;
+    }
 
-      if (access (ucon64.configfile, F_OK) != 0)
-        {
-          printf ("ERROR: %s does not exist\n", ucon64.configfile);
-          return -1;
-        }
+  if (access (ucon64.configfile, F_OK) != 0)
+    {
+      printf ("ERROR: %s does not exist\n", ucon64.configfile);
+      return -1;
+    }
 
-      property = getProperty (ucon64.configfile, buf3, buf2, NULL);   // buf2 also contains property value
-      if (property == NULL)
-        {
-          printf ("ERROR: could not find the correct settings (%s) in\n"
-                  "       %s\n"
-                  "TIP:   If the wrong console was detected you might try to force recognition\n"
-                  "       The force recognition option for Super Nintendo would be -snes\n",
-                  buf3, ucon64.configfile);
-          return -1;
-        }
+  property = getProperty (ucon64.configfile, buf3, buf2, NULL);   // buf2 also contains property value
+  if (property == NULL)
+    {
+      printf ("ERROR: could not find the correct settings (%s) in\n"
+              "       %s\n"
+              "TIP:   If the wrong console was detected you might try to force recognition\n"
+              "       The force recognition option for Super Nintendo would be -snes\n",
+              buf3, ucon64.configfile);
+      return -1;
+    }
 
-      sprintf (buf, "%s %s", buf2, ucon64.file);
-/*      for (x = 0; x < argc; x++)
-        {
-          if (strdcmp (argv[x], "-e")
-              && strdcmp (argv[x], getarg (argc, argv, ucon64_NAME))
-              && strdcmp (argv[x], ucon64.file))
-            {
-              sprintf (buf2, ((!strdcmp (argv[x], rom.rom)) ? " \"%s\"" :
-                              ""), argv[x]);
-              strcat (buf, buf2);
-            }
-        }
-*/
-      printf ("%s\n", buf);
-      fflush (stdout);
-      sync ();
+  sprintf (buf, "%s %s", buf2, ucon64.file);
 
-      x = system (buf);
+  printf ("%s\n", buf);
+  fflush (stdout);
+  sync ();
+
+  result = system (buf);
 #ifndef __MSDOS__
-      x >>= 8;                  // the exit code is coded in bits 8-15
+  result >>= 8;                  // the exit code is coded in bits 8-15
 #endif                          //  (that is, under Unix & BeOS)
 
 #if 1
-      // Snes9x (Linux) for example returns a non-zero value on a normal exit
-      //  (3)...
-      // under WinDOS, system() immediately returns with exit code 0 when
-      //  starting a Windows executable (as if fork() was called) it also
-      //  returns 0 when the exe could not be started
-      if (x != 127 && x != -1 && x != 0)        // 127 && -1 are system() errors, rest are exit codes
-        {
-          printf ("ERROR: the Emulator returned an error code (%d)\n"
-                  "TIP:   If the wrong emulator was used you might try to force recognition\n"
-                  "       The force recognition option for Super Nintendo would be -snes\n",
-                  (int) x);
-          return x;
-        }
+  // Snes9x (Linux) for example returns a non-zero value on a normal exit
+  //  (3)...
+  // under WinDOS, system() immediately returns with exit code 0 when
+  //  starting a Windows executable (as if fork() was called) it also
+  //  returns 0 when the exe could not be started
+  if (result != 127 && result != -1 && result != 0)        // 127 && -1 are system() errors, rest are exit codes
+    {
+      printf ("ERROR: the Emulator returned an error code (%d)\n"
+              "TIP:   If the wrong emulator was used you might try to force recognition\n"
+              "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n",
+              (int) result);
+    }
 #endif
 
-  return 0;
+  return result;
 }
 
 int ucon64_ls(int verbose)

@@ -846,9 +846,11 @@ ucon64_usage (int argc, char *argv[])
 #else
     "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\"\n"       // less is more ;-)
 #endif
+#if __MSDOS__
     "  " OPTION_LONG_S "find        find string in ROM; " OPTION_LONG_S "file=STRING (wildcard: '?')\n"
     "  " OPTION_S "c           compare ROMs for differencies; " OPTION_LONG_S "file=OTHER_ROM\n"
     "  " OPTION_LONG_S "cs          compare ROMs for similarities; " OPTION_LONG_S "file=OTHER_ROM\n"
+#endif
     "  " OPTION_LONG_S "stpn=N      strip N Bytes from ROM beginning\n"
     "  " OPTION_LONG_S "stp         same as " OPTION_LONG_S "stpn=512\n"
     "                  most backup units use a header with 512 Bytes size\n"

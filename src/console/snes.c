@@ -1931,11 +1931,25 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     tool that was used to create GoodSNES - 0.999.5 for RC 2.5.dat, does not.
     This has been verified on a real SNES for the games with crc 0x29226b62 and
     0x4ef3d27b. The games with crc 0xbd7bc39f don't seem to run on a copier.
+
+    0x9b161d4d: Pop 'N Twinbee Sample (J)
+    0xbd8f1b20: Rise of the Robots (Beta)
+    0x05926d17: Shaq Fu (J)(NG-Dump Known)
+    0x3e2e5619: Super Adventure Island II (Beta)
+    0x023e1298: Super Air Driver (E) [b]
+    These games have a HiROM map type byte while they are LoROM games
+
+    0xf3aa1eca: Power Piggs of the Dark Age (Pre-Release) {[h1]}
+    0xaad23842/0x5ee74558: Super Wild Card DX DOS ROM V1.122/interleaved
+    0x7a44bd18: Total Football (E)(NG-Dump Known)
+    These games have garbage in their header
   */
-  if (crc == 0xfa83b519)
+  if (crc == 0xfa83b519 || crc == 0x9b161d4d || crc == 0xf3aa1eca ||
+      crc == 0xbd8f1b20 || crc == 0x05926d17 || crc == 0x3e2e5619 ||
+      crc == 0x023e1298 || crc == 0xaad23842 || crc == 0x7a44bd18)
     check_map_type = 0;                         // not interleaved
   else if (crc == 0x65485afb || crc == 0x9b4638d0 || crc == 0x7039388a ||
-           crc == 0xdbc88ebf)
+           crc == 0xdbc88ebf || crc == 0x5ee74558)
     {
       interleaved = 1;
       snes_hirom = 0;

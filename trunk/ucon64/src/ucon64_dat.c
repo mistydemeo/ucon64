@@ -72,11 +72,12 @@ static DIR *ddat = NULL;
 static HANDLE ddat = NULL;
 #endif
 static FILE *fdat = NULL;
-static long filepos_line = 0;
+static int filepos_line = 0;
 static int warning = 1;                         // show the warning only once when indexing
 static FILE *ucon64_datfile;
 static char ucon64_dat_fname[FILENAME_MAX];
 static st_mkdat_entry_t *ucon64_mkdat_entries = NULL;
+static int ucon64_n_files = 0;
 
 const st_usage_t ucon64_dat_usage[] = {
   {NULL, NULL, "DATabase (support for DAT files)"},
@@ -958,11 +959,20 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
 static void
 ucon64_close_datfile (void)
 {
+  int n;
+
   if (ucon64_datfile)
     {
       fclose (ucon64_datfile);
       printf (ucon64_msg[WROTE], ucon64_dat_fname);
       ucon64_datfile = NULL;
+
+      for (n = 0; n < ucon64_n_files; n++)
+        {
+          free (ucon64_mkdat_entries[n].fname);
+          ucon64_mkdat_entries[n].fname = NULL;
+        }
+      ucon64_n_files = 0;
     }
 }
 
@@ -971,7 +981,7 @@ int
 ucon64_create_dat (const char *dat_file_name, const char *filename,
                    st_rominfo_t *rominfo)
 {
-  static int first_file = 1, console, n_files = 0;
+  static int first_file = 1, console;
   int n, x;
   static char *console_name;
   char fname[FILENAME_MAX], *ptr;
@@ -1116,7 +1126,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                                console_name);
     } // first_file
 
-  if (n_files == MAX_GAMES_FOR_CONSOLE)
+  if (ucon64_n_files == MAX_GAMES_FOR_CONSOLE)
     {
       fprintf (stderr,
                "INTERNAL ERROR: MAX_GAMES_FOR_CONSOLE is too small (%d)\n",
@@ -1140,10 +1150,10 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
       //  RomCenter...
       // Yes, a plain and simple linear search. Analysing the files is orders
       //  of magnitude slower than this search
-      for (; n < n_files; n++)
+      for (; n < ucon64_n_files; n++)
         if (ucon64_mkdat_entries[n].crc32 == ucon64.crc32)
           break;
-      if (n != n_files)
+      if (n != ucon64_n_files)
         {
           if (ucon64.quiet < 1)                 // better print this by default
             printf ("WARNING: Skipping (duplicate) ");
@@ -1160,7 +1170,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
 
   if (ucon64.console != console)                // ucon64.quiet == -1
     return -1;
-  if (n != n_files)
+  if (n != ucon64_n_files)
     {
       if (ucon64.quiet < 1)                     // better print this by default
         printf ("         First file with this CRC32 (0x%x) is:\n"
@@ -1169,19 +1179,19 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
     }
 
   // Store the CRC32 to check if a file is unique
-  ucon64_mkdat_entries[n_files].crc32 = ucon64.crc32;
+  ucon64_mkdat_entries[ucon64_n_files].crc32 = ucon64.crc32;
   /*
     Also store the name of the file to display a helpful error message if a
     file is not unique (a duplicate). We store the current filename inside the
     archive as well, to be even more helpful :-)
   */
   x = strlen (fname) + (ucon64.fname_arch[0] ? strlen (ucon64.fname_arch) + 4 : 1);
-  if (!(ucon64_mkdat_entries[n_files].fname = (char *) malloc (x))) // + 3 for " ()"
-    {                                                               //  + 1 for ASCII-z
-      fprintf (stderr, ucon64_msg[BUFFER_ERROR], x);
+  if (!(ucon64_mkdat_entries[ucon64_n_files].fname = (char *) malloc (x)))
+    {                                                 // + 3 for " ()"
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], x);  //  + 1 for ASCII-z
       exit (1);
     }
-  sprintf (ucon64_mkdat_entries[n_files].fname, "%s%s%s%s",
+  sprintf (ucon64_mkdat_entries[ucon64_n_files].fname, "%s%s%s%s",
     fname,
     ucon64.fname_arch[0] ? " (" : "",
     ucon64.fname_arch[0] ? ucon64.fname_arch : "",
@@ -1207,6 +1217,6 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                            fname,
                            ucon64.crc32,
                            ucon64.file_size - (rominfo ? rominfo->buheader_len : 0));
-  n_files++;
+  ucon64_n_files++;
   return 0;
 }

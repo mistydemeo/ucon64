@@ -1053,7 +1053,6 @@ while ((c =
       return ((argcmp (argc, argv, "-ip")) ?
               /* ip0000(char *dev,char *name) */ 0 :
               (argcmp (argc, argv, "-iso")) ? /* cdi2iso(rom.rom) */ :
-              (argcmp (argc, argv, "-mktoc")) ? dc_mktoc (&rom) :
 #ifdef BACKUP_CD
               (argcmp (argc, argv, "-xcdrw")) ? dc_xcdrw (&rom) :
 #endif // BACKUP_CD

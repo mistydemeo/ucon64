@@ -523,6 +523,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 
       rominfo->current_crc32 = fileCRC32 (romfile, rominfo->buheader_len);
       
+#ifdef DB
       switch (ucon64.console)
         {
           case UCON64_SNES:
@@ -530,12 +531,14 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
           case UCON64_GB:
           case UCON64_GBA:
           case UCON64_N64:
+//These ROMs have internal headers with name, country, maker, etc.
             break;
             
           default:
             ucon64_dbsearch (rominfo);
             break;
         }
+#endif // DB
     }
   else if (UCON64_TYPE_ISCD (ucon64.type))
     {
@@ -1062,7 +1065,11 @@ ucon64_usage (int argc, char *argv[])
 #endif // SAMPLE
   }
 
-  printf ("Database: %ld known ROMs in db.h (%+ld)\n\n"
+  printf (
+#ifdef DB
+     "Database: %ld known ROMs in db.h (%+ld)\n"
+#endif // DB     
+     "\n"
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only Super Nintendo related help)\n"
 #ifdef	__MSDOS__
      "     %s " OPTION_LONG_S "help|more (to see everything in more)\n"
@@ -1073,8 +1080,10 @@ ucon64_usage (int argc, char *argv[])
      "\n"
      "Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
      "\n"
+#ifdef DB
      , ucon64_dbsize (UCON64_UNKNOWN)
      , ucon64_dbsize (UCON64_UNKNOWN) - UCON64_DBSIZE
+#endif // DB
      , argv[0], argv[0]
    );
 }

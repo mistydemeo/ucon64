@@ -706,7 +706,9 @@ usage (const char **usage)
   if (usage[0])
     printf ("%s\n" , usage[0]);
   if (usage[1])
-    printf ("  %s\n%s", usage[1], NULL_TO_EMPTY (usage[2]));
+    printf ("  %s\n", usage[1]);
+
+  printf (NULL_TO_EMPTY (usage[2]));
 }
 
 

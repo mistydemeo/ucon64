@@ -68,13 +68,17 @@ Q26: <a href="#26">I tried to run the Win32 executable of uCON64 but Windows gav
 Q27: <a href="#27">How do I make uCON64 display one help screen at a time?</a><br>
 <br>
 <br>
+Q28: <a href="#28">I tried to send a ROM dump to my copier under Windows&nbsp;XP
+   (NT/2000), but uCON64 crashed. What's wrong?</a><br>
+<br>
+<br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
 <b>A</b>: uCON64 was designed for people who don't care about emulators because they
    want to play all the games on the original hardware. Here you got a powerful
    tool to backup, restore games and for many other operations.
    It is just a keep-old-hardware-alive tool :-)<br>
-   But besides this it <i>can</i> operate as intelligent frontend for EVERY
+   But besides this it <i>can</i> operate as an intelligent frontend for every
    available emulator.<br>
 <br>
 <p>
@@ -100,7 +104,7 @@ Q27: <a href="#27">How do I make uCON64 display one help screen at a time?</a><b
    Under BeOS the last command will open a dialog window. Just follow the
    instructions.<br>
    The last command won't work with Cygwin, but isn't needed under Windows anyway. You can
-   find the executable in the directory "src".<br>
+   find the executable in the directory "bin".<br>
    On Unix systems other than Linux you might need to use 'gmake' instead of 'make'.<br>
 <br>
 <p>
@@ -231,7 +235,8 @@ Q27: <a href="#27">How do I make uCON64 display one help screen at a time?</a><b
 <p>
 <a name="13"><b>Q13</b>: I use Windows&nbsp;XP (NT/2000). When I try to run ucon64.exe under command.com (start -> Run...
    -> command) uCON64 crashes. What do I do wrong?</a><br>
-<b>A</b>: You shouldn't use command, use cmd instead.<br>
+<b>A</b>: You shouldn't use command, use cmd instead. However, starting from version 1.9.8 uCON64 should run fine
+   under command.com.<br>
 <br>
 <p>
 <a name="14"><a name="frontend"><b>Q14</b>: I don't like the command line. Are there graphical frontends available?</a><br>
@@ -347,9 +352,19 @@ Q27: <a href="#27">How do I make uCON64 display one help screen at a time?</a><b
    To get only help on the options for a specific console, specify the console on the
    command line. For example, to see only the help on GameBoy Advance options:<br>
    &nbsp;&nbsp; ucon64 -help -gba|more<br>
+   Press the space bar to see the next help screen, the enter key to see the next line
+   or q to quit.<br>
 <p>
 <br>
+<a name="28"><b>Q28</b>: I tried to send a ROM dump to my copier under Windows&nbsp;XP
+   (NT/2000), but uCON64 crashed. What's wrong?</a><br>
+<b>A</b>: If the message looks like this:<br>
 <br>
+   0 [main] ucon64 356 handle_exceptions: Exception: STATUS_PRIVILEGED_INSTRUCTION<br>
+   5570 [main] ucon64 356 open_stackdumpfile: Dumping stack trace to ucon64.exe.stackdump<br>
+<br>
+   You didn't install an I/O driver. See <a href="#3">question 3</a>.<br>
+<p>
 <br>
 <br>
 <br>

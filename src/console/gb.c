@@ -57,8 +57,7 @@ const st_usage_t gameboy_usage[] =
     {"ssc", NULL, "convert to Super Smart Card/SSC (+512 Bytes)"},
     {"sgb", NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX"},
     {"gbx", NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC"},
-    {"n2gb", "EMU", "convert for use with Kami's FC EMUlator (NES emulator);\n"
-                    OPTION_LONG_S "rom" OPTARG_S "NES_ROM"},
+    {"n2gb", "EMU", "convert for use with Kami's FC EMUlator (NES emulator)"},
     {"chk", NULL, "fix ROM checksum"},
     {NULL, NULL, NULL}
   };

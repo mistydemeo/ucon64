@@ -85,14 +85,12 @@ const st_usage_t snes_usage[] =
     {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
     {"smc", NULL, "convert to Super Magicom/SMC"},
     {"fig", NULL, "convert to *Pro Fighter*/(all)FIG"},
-    {"figs", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG;\n"
-                OPTION_LONG_S "rom=SRAM"},
+    {"figs", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG"},
     {"swc", NULL, "convert to Super Wild Card*/(all)SWC"},
-    {"swcs", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to Super Wild Card*/(all)SWC;\n"
-                OPTION_LONG_S "rom=SRAM"},
+    {"swcs", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to Super Wild Card*/(all)SWC"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
     {"gd3", NULL, "convert to Professor SF(2) Game Doctor SF3/6/7"},
-    {"ufos", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to Super UFO; " OPTION_LONG_S "rom=SRAM"},
+    {"ufos", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to Super UFO"},
     {"stp", NULL, "convert SRAM from backup unit for use with an emulator\n"
                OPTION_LONG_S "stp just strips the first 512 bytes"},
     {"dbuh", NULL, "display (relevant part of) backup unit header"},

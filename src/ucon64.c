@@ -57,67 +57,42 @@ write programs in C
 #include "misc.h"
 #include "quick_io.h"
 #include "ucon64.h"
+#include "switches.h"
+#include "options.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
-#ifdef  DLOPEN
-#include "dlopen.h"
-#endif
-#include "libdiscmage/libdiscmage.h"
-
-#include "console/snes.h"
-#include "console/gb.h"
-#include "console/gba.h"
-#include "console/n64.h"
-#include "console/lynx.h"
-#include "console/sms.h"
-#include "console/nes.h"
-#include "console/genesis.h"
-#include "console/pce.h"
-#include "console/neogeo.h"
-#include "console/ngp.h"
-#include "console/swan.h"
-#include "console/dc.h"
-#include "console/jaguar.h"
-#include "console/psx.h"
-
-#include "patch/ppf.h"
-#include "patch/xps.h"
-#include "patch/pal4u.h"
-#include "patch/aps.h"
-#include "patch/ips.h"
-#include "patch/bsl.h"
-#include "patch/gg.h"
-
-#include "backup/fig.h"
-#include "backup/swc.h"
-#include "backup/doctor64jr.h"
-#include "backup/doctor64.h"
-#include "backup/smd.h"
-#include "backup/fal.h"
-#include "backup/gbx.h"
-#include "backup/cd64.h"
-#include "backup/dex.h"
-#include "backup/fpl.h"
-#include "backup/mgd.h"
-#include "backup/gd.h"
-#include "backup/mccl.h"
-#include "backup/lynxit.h"
+#include "ucon64_lib.h"
+#include "console/console.h"
+#include "patch/patch.h"
+#include "backup/backup.h"
 
 
 static void ucon64_exit (void);
-static void ucon64_usage (int argc, char *argv[]);
-static int ucon64_process_rom (const char *fname, int console, int show_nfo);
 static int ucon64_execute_options (void);
 static void ucon64_rom_nfo (const st_rominfo_t *rominfo);
-static int ucon64_discmage (void);
+static st_rominfo_t *ucon64_probe (st_rominfo_t *rominfo);
+static int ucon64_rom_handling (void);
+static void ucon64_render_usage (const st_usage_t *usage);
+static int ucon64_process_rom (char *fname); 
 
-st_ucon64_t ucon64;
-static st_rominfo_t rom;
-static st_ucon64_dat_t dat;
-st_ucon64_dat_t *ucon64_dat = NULL;
-dm_image_t *image = NULL;
+
+static st_rominfo_t *
+ucon64_rom_flush (st_rominfo_t * rominfo)
+{
+  if (rominfo)
+    memset (rominfo, 0L, sizeof (st_rominfo_t));
+
+  ucon64.rominfo = NULL;
+  rominfo->data_size = UCON64_UNKNOWN;
+
+  return rominfo;
+}
+
+
+st_ucon64_t ucon64;               // containes ptr to image, dat and rominfo
+
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
-static int ucon64_fsize = 0, ucon64_option = 0, ucon64_parport_needed = 0;
+//static int ucon64_fsize = 0;
 const struct option options[] =   {
     {"1991", 0, 0, UCON64_1991},
     {"3do", 0, 0, UCON64_3DO},
@@ -188,8 +163,7 @@ const struct option options[] =   {
     {"int", 0, 0, UCON64_INT},
     {"int2", 0, 0, UCON64_INT2},
     {"intelli", 0, 0, UCON64_INTELLI},
-    {"ip", 0, 0, UCON64_IP},
-    {"iso", 0, 0, UCON64_ISO},
+//    {"ip", 0, 0, UCON64_IP},
     {"ispad", 0, 0, UCON64_ISPAD},
     {"j", 0, 0, UCON64_J},
     {"jag", 0, 0, UCON64_JAG},
@@ -200,21 +174,21 @@ const struct option options[] =   {
     {"ls", 0, 0, UCON64_LS},
     {"lsd", 0, 0, UCON64_LSD},
     {"lsram", 1, 0, UCON64_LSRAM},
-    {"lsv", 0, 0, UCON64_LSV},
+//    {"lsv", 0, 0, UCON64_LSV},
     {"lynx", 0, 0, UCON64_LYNX},
     {"lyx", 0, 0, UCON64_LYX},
     {"mapr", 1, 0, UCON64_MAPR},
-    {"mgd", 0, 0, UCON64_MGD},
+//    {"mgd", 0, 0, UCON64_MGD},
 //    {"mgh", 0, 0, UCON64_MGH},
     {"mirr", 1, 0, UCON64_MIRR},
     {"mka", 1, 0, UCON64_MKA},
-    {"mkcue", 0, 0, UCON64_MKCUE},
+//    {"mkcue", 0, 0, UCON64_MKCUE},
     {"mki", 1, 0, UCON64_MKI},
     {"mkppf", 1, 0, UCON64_MKPPF},
     {"mksheet", 0, 0, UCON64_MKSHEET},
-    {"mktoc", 0, 0, UCON64_MKTOC},
+//    {"mktoc", 0, 0, UCON64_MKTOC},
     {"multi", 1, 0, UCON64_MULTI},
-    {"mvs", 0, 0, UCON64_MVS},
+//    {"mvs", 0, 0, UCON64_MVS},
     {"n", 1, 0, UCON64_N},
     {"n2", 1, 0, UCON64_N2},
     {"n2gb", 1, 0, UCON64_N2GB},
@@ -252,16 +226,20 @@ const struct option options[] =   {
     {"psx", 0, 0, UCON64_PSX},
     {"q", 0, 0, UCON64_Q},
     {"qq", 0, 0, UCON64_QQ},
+    {"rename", 0, 0, UCON64_RENAME},
     {"rr83", 0, 0, UCON64_RR83},
     {"rrom", 0, 0, UCON64_RROM},
     {"rl", 0, 0, UCON64_RL},
-    {"rom", 1, 0, UCON64_ROM},
+// yes, in reality --rom doesn't take an argument... it's just a dummy to make
+// the usage easier to understand and might be gone soon...
+    {"rom", 0, 0, UCON64_ROM},
     {"rotl", 0, 0, UCON64_ROTL},
     {"rotr", 0, 0, UCON64_ROTR},
     {"s", 0, 0, UCON64_S},
     {"s16", 0, 0, UCON64_S16},
     {"sam", 1, 0, UCON64_SAM},
     {"sat", 0, 0, UCON64_SAT},
+    {"scan", 0, 0, UCON64_SCAN},
     {"sgb", 0, 0, UCON64_SGB},
     {"smc", 0, 0, UCON64_SMC},
     {"smd", 0, 0, UCON64_SMD},
@@ -279,19 +257,17 @@ const struct option options[] =   {
     {"swap", 0, 0, UCON64_SWAP},
     {"swc", 0, 0, UCON64_SWC},
     {"swcs", 0, 0, UCON64_SWCS},
-#ifdef  DEBUG
-    {"test", 0, 0, UCON64_TEST},
-#endif // DEBUG
     {"ufos", 0, 0, UCON64_UFOS},
     {"unif", 0, 0, UCON64_UNIF},
     {"usms", 1, 0, UCON64_USMS},
+    {"v", 0, 0, UCON64_V},
     {"v64", 0, 0, UCON64_V64},
     {"vboy", 0, 0, UCON64_VBOY},
     {"vec", 0, 0, UCON64_VEC},
     {"version", 0, 0, UCON64_VER},
     {"vram", 0, 0, UCON64_VRAM},
     {"xbox", 0, 0, UCON64_XBOX},
-    {"xcdrw", 0, 0, UCON64_XCDRW},
+//    {"xcdrw", 0, 0, UCON64_XCDRW},
 #ifdef  PARALLEL
     {"xdex", 1, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
@@ -312,45 +288,97 @@ const struct option options[] =   {
     {"xswc2", 0, 0, UCON64_XSWC2},
     {"xswcs", 0, 0, UCON64_XSWCS},
     {"xv64", 0, 0, UCON64_XV64},
+//    {"z64", 0, 0, UCON64_Z64},
 #endif // PARALLEL
-    {"z64", 0, 0, UCON64_Z64},
     {0, 0, 0, 0}
   };
 
-#ifdef  DLOPEN
-void *libdm;
 
-#define dm_get_version dm_get_version_ptr
-uint32_t (*dm_get_version_ptr) (void) = NULL;
+static const struct option *
+ucon64_get_opt (const int option)
+{
+  int x = 0;
 
-#define dm_get_usage dm_get_usage_ptr
-st_dm_usage_t *(*dm_get_usage_ptr) (void) = NULL;
+  for (x = 0; options[x].val != 0; x++)
+    if (options[x].val == option)
+      return (struct option *) &options[x];
+      
+  return NULL;
+}
 
-#define dm_open dm_open_ptr
-#define dm_close dm_close_ptr
-dm_image_t *(*dm_open_ptr) (const char *) = NULL;
-int (*dm_close_ptr) (dm_image_t *) = NULL;
 
-#define dm_rip dm_rip_ptr
-#define dm_cdirip dm_cdirip_ptr
-#define dm_nrgrip dm_nrgrip_ptr
-int32_t (*dm_rip_ptr) (dm_image_t *) = NULL;
-int32_t (*dm_cdirip_ptr) (dm_image_t *) = NULL;
-int32_t (*dm_nrgrip_ptr) (dm_image_t *) = NULL;
+#ifdef  DEBUG
+static void
+ucon64_runtime_debug (void)
+{
+  int x = 0, y = 0;
+  char buf[MAXBUFSIZE];
 
-#define dm_disc_read dm_disc_read_ptr
-#define dm_disc_write dm_disc_write_ptr
-int (*dm_disc_read_ptr) (dm_image_t *) = NULL;
-int (*dm_disc_write_ptr) (dm_image_t *) = NULL;
+// sanity check at runtime 
+// does ucon64_wf cover all getopt() options and vice versa?
+  for (x = 0; options[x].val; x++)
+    if (!ucon64_get_wf (options[x].val)) // compare options with workflow
+      {
+        fprintf (stderr, "DEBUG: sanity check failed (option \"%s\" in (struct option *) options)\n", options[x].name);
+        exit (1);
+      }
 
-#define dm_mksheets dm_mksheets_ptr
-int32_t (*dm_mksheets_ptr) (dm_image_t *) = NULL;
+// how many option do we have?
+  printf ("DEBUG: Total options: %d\n", x);
 
-#define dm_mktoc dm_mktoc_ptr
-#define dm_mkcue dm_mkcue_ptr
-int32_t (*dm_mktoc_ptr) (dm_image_t *) = NULL;
-int32_t (*dm_mkcue_ptr) (dm_image_t *) = NULL;
-#endif
+// the other way
+  for (x = 0; ucon64_wf[x].option; x++)
+    if (!ucon64_get_opt (ucon64_wf[x].option)) // compare workflow with options
+      {
+        fprintf (stderr, "DEBUG: sanity check failed (entry %d in ucon64_wf with value %d)\n", x, ucon64_wf[x].option);
+        exit (1);
+      }
+
+// any duplicates in ucon64_wf?
+  for (x = 0; ucon64_wf[x].option; x++)
+    {
+      for (y = 0; ucon64_wf[y].option; y++)
+        if (ucon64_wf[x].option == ucon64_wf[y].option && x != y) break;
+
+      if (ucon64_wf[x].option == ucon64_wf[y].option && x != y)
+        {
+          fprintf (stderr, "DEBUG: sanity check failed (entry %d in ucon64_wf with value %d is a dupe)\n", x, ucon64_wf[x].option);
+          exit (1);
+        }
+    }
+
+// check for wrong usage assignments in ucon64_wf
+  for (x = 0; ucon64_wf[x].option; x++)
+    if (ucon64_wf[x].usage)
+      {
+        const st_usage_t *p = ucon64_wf[x].usage;
+
+        strcpy (buf, (ucon64_get_opt (ucon64_wf[x].option))->name);
+
+        for (y = 0; p[y].option_s || p[y].desc; y++)
+          if (p[y].option_s) 
+            if (!stricmp (buf, p[y].option_s)) break;
+
+
+        if (p[y].option_s)
+          if (stricmp (buf, p[y].option_s) != 0 || (!p[y].option_s && !p[y].desc))
+            {
+              fprintf (stderr, "DEBUG: wrong usage assigned (option: %s in ucon64_wf)\n", buf);
+              exit (1);
+            }
+
+          if (!p[y].option_s && !p[y].desc)
+            {
+              fprintf (stderr, "DEBUG: wrong usage assigned (option: %s in ucon64_wf)\n", buf);
+              exit (1);
+            }
+      }
+    else
+      printf ("DEBUG: no usage assigned (option: %d in ucon64_wf)\n", x);
+
+  printf ("DEBUG: sanity check finished\n");
+}
+#endif  // DEBUG
 
 
 void
@@ -364,8 +392,8 @@ ucon64_exit (void)
 int
 main (int argc, char **argv)
 {
-  int x = 0, c = 0, console, show_nfo, rom_index;
-  char buf[MAXBUFSIZE], *ptr = NULL;
+  int rom_index = 0, c = 0;
+  static char buf[MAXBUFSIZE];
   struct stat fstate;
 
   printf ("%s\n"
@@ -373,13 +401,31 @@ main (int argc, char **argv)
     "This may be freely redistributed under the terms of the GNU Public License\n\n",
     ucon64_title);
 
+#ifdef  DEBUG
+  ucon64_runtime_debug ();
+#endif  
+
   if (atexit (ucon64_exit) == -1)
     {
       fprintf (stderr, "ERROR: Could not register function with atexit()\n");
       exit (1);
     }
 
+  // flush st_ucon64_t
   memset (&ucon64, 0, sizeof (st_ucon64_t));
+
+  ucon64.parport = 0x378;
+  ucon64.rom = 
+  ucon64.file =
+  ucon64.mapr =
+  ucon64.comment = "";
+
+  ucon64.flags = WF_DEFAULT;
+
+  ucon64.fname_arch[0] = 0;
+
+  ucon64.argc = argc;
+  ucon64.argv = argv;                           // must be set prior to calling
 
 #ifdef  __unix__
   // We need to modify the umask, because the configfile is made while we are
@@ -387,20 +433,175 @@ main (int argc, char **argv)
   //  `chmod +s').
   umask (002);
 #endif
-
-  ucon64.argc = argc;
-  ucon64.argv = argv;                           // must be set prior to calling
-                                                //  ucon64_discmage()
   ucon64_configfile ();
-  ucon64.discmage_enabled = ucon64_discmage ();
-
-  ucon64.show_nfo = TRUE;
 
 #ifdef  ANSI_COLOR
+// ansi colors?
   ucon64.ansi_color = get_property_int (ucon64.configfile, "ansi_color", '=');
+  if (ucon64.ansi_color)
+    ucon64.ansi_color = ansi_init ();
 #endif
 
-//  ucon64.type =
+// parallel port?
+  // Use "0" to force probing if the config file doesn't contain a parport line
+  sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
+
+// make backups?
+  ucon64.backup = get_property_int (ucon64.configfile, "backups", '=');
+
+// $HOME/.ucon64/ ?
+  strcpy (ucon64.configdir, get_property (ucon64.configfile, "configdir", buf, ""));
+#ifdef  __CYGWIN__
+  strcpy (ucon64.configdir, cygwin_fix (ucon64.configdir));
+#endif
+  strcpy (buf, ucon64.configdir);
+  realpath2 (buf, ucon64.configdir);
+
+// DAT file handling
+  ucon64.dat_enabled = 0;
+  strcpy (ucon64.datdir, get_property (ucon64.configfile, "datdir", buf, ""));
+#ifdef  __CYGWIN__
+  strcpy (ucon64.datdir, cygwin_fix (ucon64.datdir));
+#endif
+  strcpy (buf, ucon64.datdir);
+  realpath2 (buf, ucon64.datdir);
+
+// we use ucon64.datdir as path to the dats
+  if (!access (ucon64.datdir, R_OK | W_OK | X_OK))
+    if (!stat (ucon64.datdir, &fstate))
+      if (S_ISDIR (fstate.st_mode))
+        ucon64.dat_enabled = 1;
+        
+  if (!ucon64.dat_enabled)
+    if (!access (ucon64.configdir, R_OK | W_OK | X_OK))
+      if (!stat (ucon64.configdir, &fstate))
+        if (S_ISDIR (fstate.st_mode))
+          {
+//            fprintf (stderr, "Please move your DAT files from %s to %s\n\n", ucon64.configdir, ucon64.datdir);
+            strcpy (ucon64.datdir, ucon64.configdir); // use .ucon64/ instead of .ucon64/dat/
+            ucon64.dat_enabled = 1;
+          }
+
+  if (ucon64.dat_enabled)
+    ucon64_dat_indexer ();  // update cache (index) files if necessary
+
+// load libdiscmage
+  ucon64.discmage_enabled = ucon64_load_discmage ();
+
+// ucon64.dat_enabled and ucon64.discmage_enabled can affect the usage output
+  if (argc < 2)
+    {
+      ucon64_usage (argc, argv);
+      return 0;
+    }
+
+  optind = 0;
+// TODO?: the getopt() is only left here to produce rom_index
+  while ((c = getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1);
+
+  rom_index = optind;                           // save index of first file
+#if 1
+  if (rom_index == argc)
+    ucon64_execute_options();
+  else 
+    for (; rom_index < argc; rom_index++)
+#else
+    for (; rom_index < argc; rom_index++)
+#endif
+    {
+      int result = 0;
+      struct dirent *ep;
+      DIR *dp;
+
+      char *path = argv[rom_index];
+      if (stat (path, &fstate) != -1)
+        {
+          if (S_ISREG (fstate.st_mode))
+            result = ucon64_process_rom (argv[rom_index]);
+          else if (S_ISDIR (fstate.st_mode)) // a dir!?
+            {
+              if ((dp = opendir (path)))
+                while ((ep = readdir (dp)))
+                  {
+                    sprintf (buf, "%s" FILE_SEPARATOR_S "%s", path, ep->d_name);
+                    if (stat (buf, &fstate) != -1)
+                      if (S_ISREG (fstate.st_mode))
+                        {
+                          result = ucon64_process_rom (buf);
+                          if (result == 1)
+                            break;
+                        }
+                  }
+                closedir (dp);
+            }
+          else
+            result = ucon64_process_rom(argv[rom_index]);
+        }
+      else
+        result = ucon64_process_rom(argv[rom_index]);
+        
+      if (result == 1) 
+        break;
+    }
+
+  return 0;
+}
+
+
+int
+ucon64_process_rom (char *fname)
+{
+#ifdef  HAVE_ZLIB_H
+  int n_entries = unzip_get_number_entries (fname);
+
+  if (n_entries != -1)                      // it's a zip file
+    {
+      for (unzip_current_file_nr = 0; unzip_current_file_nr < n_entries;
+           unzip_current_file_nr++)
+        {
+          ucon64_fname_arch (fname);
+          ucon64.rom = fname;
+
+          ucon64_execute_options();
+
+          if (ucon64.flags & WF_STOP)
+            break;
+        }
+      unzip_current_file_nr = 0;
+      ucon64.fname_arch[0] = 0;
+
+      if (ucon64.flags & WF_STOP)
+        return 1;
+    }
+  else
+#endif
+    {
+      ucon64.rom = fname;
+
+      ucon64_execute_options();
+      if (ucon64.flags & WF_STOP)
+        return 1;
+    }
+
+  return 0;
+}
+
+
+int
+ucon64_execute_options (void)
+// execute all options for a single file
+// PLEASE!!! if you experience problems then try your luck with the flags
+// in ucon64_misc.c/ucon64_wf[] before changing things here or in ucon64_rom_handling()
+{
+  int c = 0, result = 0;
+  int opts = 0;
+  const st_ucon64_wf_t *wf = NULL;
+  
+  ucon64.console = UCON64_UNKNOWN;
+  ucon64.dat = NULL;
+  ucon64.image = NULL;
+  ucon64.rominfo = NULL;
+
   ucon64.buheader_len =
   ucon64.interleaved =
   ucon64.split =
@@ -418,379 +619,282 @@ main (int argc, char **argv)
   ucon64.do_not_calc_crc =
   ucon64.crc_big_files = UCON64_UNKNOWN;
 
-  ucon64.good_enabled = 0; // --good
-  ucon64.fname_arch[0] = 0;
+  ucon64.file_size =
+  ucon64.crc32 =
+  ucon64.fcrc32 = 0;
 
-  ucon64.rom =
-  ucon64.file =
-  ucon64.mapr =
-  ucon64.comment = "";
-
-#if 0
-  // It's not necessary to fill ucon64.output_path with the absolute path to
-  //  the current working directory. If the path to the cwd is long setting
-  //  ucon64.output_path makes the output confusing.
-  getcwd (ucon64.output_path, FILENAME_MAX);    // default output path
-  if (OFFSET (ucon64.output_path, strlen (ucon64.output_path) - 1) != FILE_SEPARATOR)
-    strcat (ucon64.output_path, FILE_SEPARATOR_S);
-#endif
-
-  strcpy (ucon64.configdir, get_property (ucon64.configfile, "configdir", buf, ""));
-#ifdef  __CYGWIN__
-  strcpy (ucon64.configdir, cygwin_fix (ucon64.configdir));
-#endif
-  strcpy (buf, ucon64.configdir);
-  realpath2 (buf, ucon64.configdir);
-
-  ucon64.dat_enabled = 0;
-  if (!access (ucon64.configdir, R_OK | W_OK | X_OK))
-    if (!stat (ucon64.configdir, &fstate))
-      if (S_ISDIR (fstate.st_mode))
-        ucon64.dat_enabled = 1;
-
-//  if (!access (ucon64.configfile, F_OK))
-//    printf (ucon64_msg[READ_CONFIG_FILE], ucon64.configfile);
-
-  // Use "0" to force probing if the config file doesn't contain a parport line
-  sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
-
-  ucon64.backup = get_property_int (ucon64.configfile, "backups", '=');
-
-  if (argc < 2)
+// switches
+// TODO?: more "elegance" needed or merge them into options?
+  optind = 0;
+  while ((c = getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
     {
-      ucon64_usage (argc, argv);
-      return 0;
-    }
+      wf = ucon64_get_wf (c); // get workflow for that option
 
-#ifdef  ANSI_COLOR
-  if (ucon64.ansi_color)
-    ucon64.ansi_color = ansi_init ();
-#endif
-
-  if (ucon64.dat_enabled)
-    ucon64_dat_indexer ();                      // update cache (index) files if necessary
-
-  ucon64_flush (&rom);
-
-  ucon64.show_nfo = TRUE;
-  while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
-    {
-      for (x = 0; ucon64_wf[x].option != 0 && ucon64_wf[x].console != 0; x++)
-        if (ucon64_wf[x].option == c)
-          {
-            // a specific console takes precedence over unknown
-            if (ucon64_wf[x].console != UCON64_UNKNOWN)
-              ucon64.console = ucon64_wf[x].console;
-            // FALSE takes precedence over TRUE
-            if ((ucon64_wf[x].flags & WF_SHOW_NFO) == 0)
-              ucon64.show_nfo = FALSE;
-            break;
-          }
-
-#include "switches.c"
-    }
-
-  // the copier options need root privileges for ucon64_parport_init()
-  if (ucon64_parport_needed)
-    ucon64.parport = ucon64_parport_init (ucon64.parport);
-#if     defined __unix__ && !defined __MSDOS__
-  // now we can drop privileges
-  drop_privileges ();
-#endif
-
-  if (!strlen (ucon64.rom) && optind < argc)
-    ucon64.rom = argv[optind];
-  if (!strlen (ucon64.rom))
-    return 1;                                   // options or switches but no file or dir
-
-  rom_index = optind;                           // save index of first file
-
-  // no ROM or FILE argument (for example -dbv)
-  if (rom_index == argc)
-    ucon64_execute_options ();
-
-  console = ucon64.console;
-  show_nfo = ucon64.show_nfo;
-  for (; rom_index < argc; rom_index++)
-    {
-#ifdef  HAVE_ZLIB_H
-      int n_entries;
-#endif
-
-#if 0 // TODO: detect nonsense arguments. Using access() requires users to
-      //       always specify -rom or -port, which is annoying.
-      if (access (argv[rom_index], F_OK) != 0)
-        continue;
-#endif
-
-#ifdef  HAVE_ZLIB_H
-      n_entries = unzip_get_number_entries (argv[rom_index]);
-      if (n_entries != -1)                      // it's a zip file
+      if (wf)
         {
-          int stop = 0;
+          if (wf->console != UCON64_UNKNOWN)
+            ucon64.console = wf->console;
 
-          for (unzip_current_file_nr = 0; unzip_current_file_nr < n_entries;
-               unzip_current_file_nr++)
-            {
-              ucon64_fname_arch (argv[rom_index]);
-              if ((stop = ucon64_process_rom (argv[rom_index], console, show_nfo)))
-                break;
-            }
-          unzip_current_file_nr = 0;
-          ucon64.fname_arch[0] = 0;
-          if (stop)
-            break;
+          ucon64.flags = wf->flags;
         }
-      else
-#endif
-      if (ucon64_process_rom (argv[rom_index], console, show_nfo))
-        break;
+
+//        if (wf->flags & WF_SWITCH)
+          ucon64_switches (c);
     }
 
-  return 0;
-}
-
-
-int
-ucon64_discmage (void)
-{
-  uint32_t version;
-#ifdef  DLOPEN
-  char buf[MAXBUFSIZE];
-
-  strcpy (ucon64.discmage_path, get_property (ucon64.configfile, "discmage_path", buf, ""));
-#ifdef  __CYGWIN__
-  strcpy (ucon64.discmage_path, cygwin_fix (ucon64.discmage_path));
-#endif
-  strcpy (buf, ucon64.discmage_path);
-  realpath2 (buf, ucon64.discmage_path);
-
-  // if ucon64.discmage_path points to an existing file then load it
-  if (!access (ucon64.discmage_path, F_OK))
-    {
-      libdm = open_module (ucon64.discmage_path);
-
-      dm_get_version = get_symbol (libdm, "dm_get_version");
-      version = dm_get_version ();
-      if (version < LIB_VERSION (0, 0, 2))
-        {
-          fprintf (stderr,
-                   "ERROR: Your libdiscmage is too old (%d.%d.%d)\n"
-                   "       You need at least version %d.%d.%d\n\n",
-                   version >> 16, (version >> 8) & 0xff, version & 0xff,
-                   0, 0, 2);
-          return 0;
-        }
-      else
-        {
-          dm_get_usage = get_symbol (libdm, "dm_get_usage");
-
-          dm_open = get_symbol (libdm, "dm_open");
-          dm_close = get_symbol (libdm, "dm_close");
-
-          dm_rip = get_symbol (libdm, "dm_rip");
-          dm_cdirip = get_symbol (libdm, "dm_cdirip");
-          dm_nrgrip = get_symbol (libdm, "dm_nrgrip");
-
-          dm_disc_read = get_symbol (libdm, "dm_disc_read");
-          dm_disc_write = get_symbol (libdm, "dm_disc_write");
-
-          dm_mksheets = get_symbol (libdm, "dm_mksheets");
-          dm_mktoc = get_symbol (libdm, "dm_mktoc");
-          dm_mkcue = get_symbol (libdm, "dm_mkcue");
-
-          return 1;
-        }
-    }
-  else
-    return 0;
-#else // !defined DLOPEN
-#ifdef  DJGPP
-  {
-    /*
-      The following piece of code makes the DLL "search" behaviour a bit like
-      the search behaviour for Windows programs. A bit, because the import
-      library just opens the file with the name that is stored in
-      djimport_path. It won't search for the DXE in the Windows system
-      directory, nor will it search the directories of the PATH environment
-      variable.
-    */
-    extern char djimport_path[FILENAME_MAX];
-    char *p = dirname (ucon64.argv[0]);
-
-    sprintf (djimport_path, "%s"FILE_SEPARATOR_S"%s", p, "discmage.dxe");
-    free (p);
-  }
-#endif // DJGPP
-  version = dm_get_version ();
-  if (version < LIB_VERSION (0, 0, 2))
-    {
-      fprintf (stderr,
-               "ERROR: Your libdiscmage is too old (%d.%d.%d)\n"
-               "       You need at least version %d.%d.%d\n\n",
-               version >> 16, (version >> 8) & 0xff, version & 0xff,
-               0, 0, 2);
-      return 0;
-    }
-  else
-    return 1;
-#endif // !defined DLOPEN
-}
-
-
-#ifdef  HAVE_ZLIB_H
-void
-ucon64_fname_arch (const char *fname)
-{
-  unzFile file = unzOpen (fname);
-  unzip_goto_file (file, unzip_current_file_nr);
-  unzGetCurrentFileInfo (file, NULL, ucon64.fname_arch, FILENAME_MAX,
-                         NULL, 0, NULL, 0);
-  unzClose (file);
-}
-#endif
-
-
-int
-ucon64_process_rom (const char *fname, int console, int show_nfo)
-{
-  int special_option;
-
-  ucon64.rom = fname;
-  ucon64.console = console;
-  ucon64.show_nfo = show_nfo;
-
-  ucon64_init (ucon64.rom, &rom);
-  if (ucon64.show_nfo == TRUE)
-    ucon64_nfo (&rom);
-  ucon64.show_nfo = FALSE;
-
-  special_option = ucon64_execute_options ();
-
-  if (ucon64.show_nfo == TRUE)
-    {
-      ucon64_init (ucon64.rom, &rom);
-      ucon64_nfo (&rom);
-    }
-
-  return special_option;
-}
-
-
-int
-ucon64_execute_options (void)
-// execute all options for a single file
-{
-  int c, result = 0, value = 0, special_option = 0, x = 0;
-  unsigned int padded;
-  char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   optind = 0;                                   // start with first option
-  while ((ucon64_option = c =
-            getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
+  while ((c = getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
     {
-#include "options.c"
+      wf = ucon64_get_wf (c); // get workflow for that option
+
+      if (wf)
+        if (wf->flags & WF_SWITCH)
+          continue;
+
+      if (wf)
+        {
+          if (ucon64.console == UCON64_UNKNOWN)
+            ucon64.console = wf->console;
+
+          ucon64.flags = wf->flags;
+        }
+
+      opts++;
+
+      // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
+      result = ucon64_rom_handling (); 
+
+      if (result == -1) // no_rom but WF_ROM_REQ
+        return -1;
+
+      if (ucon64_options (c) == -1) // because we have more than 180 options
+        {
+//          const st_usage_t *p = (ucon64_get_wf (c))->usage;
+          const char *opt = (ucon64_get_opt (c))->name;
+
+          fprintf (stderr, "ERROR: %s%s returned a problem\n", 
+                           opt ? (!opt[1] ? OPTION_S : OPTION_LONG_S) : "", 
+                           opt ? opt : "uCON64");
+ 
+//          if (p)
+//            ucon64_render_usage (p);
+
+          fprintf (stderr, "       Is the option you used available for the current console system?\n"
+                           "       Please report bugs to noisyb@gmx.net\n\n");
+
+          return -1;
+        }
+
+#if 0
+      // WF_NFO_AFTER?!
+      if (!result && (ucon64.flags & WF_NFO_AFTER) && ucon64.quiet < 1)
+        ucon64_rom_handling (); 
+#endif
 
       /*
-        "special" options:
+        "stop" options:
         - -multi (and -xfalmulti) takes more than one file as argument, but
           should be executed only once.
         - stop after sending one ROM to a copier ("multizip")
         - stop after applying a patch so that the patch file won't be
           interpreted as ROM
       */
-      for (x = 0; ucon64_wf[x].option != 0; x++)
-        if (ucon64_wf[x].option == ucon64_option)
-          {
-            if (ucon64_wf[x].flags & WF_SPECIAL_OPT)
-              special_option = 1;
-            break;
-          }
+      if (ucon64.flags & WF_STOP)
+        break;
     }
-  return special_option;
-}
 
+  if (!opts) // no options == just view the roms
+    {
+      ucon64.flags = WF_DEFAULT;
 
-st_rominfo_t *
-ucon64_flush (st_rominfo_t *rominfo)
-{
-  memset (rominfo, 0L, sizeof (st_rominfo_t));
-  rominfo->data_size = UCON64_UNKNOWN;
-  ucon64.file_size = ucon64_fsize;
-  // We *have* to reset these in a central place or else in *every* init function
-  ucon64.crc32 = ucon64.fcrc32 = 0;
-#if 0
-  rominfo->maker = rominfo->country = "";
-  rominfo->console_usage = rominfo->copier_usage = NULL;
-#endif
+      // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
+      if (ucon64_rom_handling () == -1)
+        return -1; // no_rom but WF_ROM_REQ
+    }
 
-  // restore the overrides from st_ucon64_t
-  if (UCON64_ISSET (ucon64.buheader_len))
-    rominfo->buheader_len = ucon64.buheader_len;
+  fflush (stdout);
 
-  if (UCON64_ISSET (ucon64.snes_hirom))
-    rominfo->snes_hirom = ucon64.snes_hirom;
-
-  if (UCON64_ISSET (ucon64.interleaved))
-    rominfo->interleaved = ucon64.interleaved;
-
-  return rominfo;
-}
-
-
-static int
-unknown_init (st_rominfo_t *rominfo)
-{
-  ucon64_flush (rominfo);
-  return 0;
-}
-
-
-static int
-disc_init (st_rominfo_t *rominfo)
-{
-// TODO: dm_init()
-  return -1;
+  return 0;    
 }
 
 
 int
-ucon64_console_probe (st_rominfo_t *rominfo)
+ucon64_rom_handling (void)
+{
+  int no_rom = 0;
+  static st_rominfo_t rominfo;
+  struct stat fstate;
+
+  ucon64_rom_flush (&rominfo);
+
+// a ROM (File)?
+  if (!ucon64.rom)
+    no_rom = 1;
+  else if (!ucon64.rom[0])
+    no_rom = 1;
+  else if (access (ucon64.rom, F_OK | R_OK) == -1 && (ucon64.flags & WF_ROM_REQ))
+    {
+      fprintf (stderr, "ERROR: Could not open %s\n", ucon64.rom);
+      no_rom = 1;
+    }
+  else if (stat (ucon64.rom, &fstate) == -1)
+    no_rom = 1;
+  else if (S_ISREG (fstate.st_mode) != TRUE)
+    no_rom = 1;
+  else if (!fstate.st_size)
+    no_rom = 1; 
+    
+  if (no_rom)
+    {
+      if (ucon64.flags & WF_ROM_REQ)
+        {
+          fprintf (stderr, "ERROR: a ROM is required for this option\n");
+          return -1;
+        }
+      return 0;
+    }
+
+// does the option allow split ROMs?
+  if (ucon64.flags & WF_NO_SPLIT)
+    if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.rom))
+      {
+        fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n", basename2 (ucon64.rom));
+        return -1;
+      }
+    
+  if (!(ucon64.flags & WF_INIT))
+    return 0;
+
+  ucon64.file_size = q_fsize (ucon64.rom);
+  ucon64.crc32 = ucon64.fcrc32 = 0;
+
+// "walk through" <console>_init()
+  if (ucon64.flags & WF_PROBE)
+    {
+      ucon64.rominfo = ucon64_probe (&rominfo); // returns console type
+
+      if (ucon64.rominfo)
+        {
+          // restore any overrides from st_ucon64_t
+          if (UCON64_ISSET (ucon64.buheader_len))
+            rominfo.buheader_len = ucon64.buheader_len;
+
+          if (UCON64_ISSET (ucon64.snes_hirom))
+            rominfo.snes_hirom = ucon64.snes_hirom;
+ 
+          if (UCON64_ISSET (ucon64.interleaved))
+            rominfo.interleaved = ucon64.interleaved;
+        
+//          ucon64.rominfo = (st_rominfo_t *) &rominfo;
+        }
+    }
+//end of WF_PROBE
+
+
+  /*
+    CRC32
+    
+    Calculating the CRC32 checksum for the ROM data of a UNIF file (NES)
+    shouldn't be done with q_fcrc32(). nes_init() uses mem_crc32().
+    The CRC32 checksum is used to search in the DAT files, but at the time
+    of this writing (Februari the 7th 2003) all DAT files contain checksums
+    of files in only one format. This matters for SNES and Genesis ROMs in
+    interleaved format and Nintendo 64 ROMs in non-interleaved format. The
+    corresponding initialization functions calculate the CRC32 checksum of
+    the data in the format of which the checksum is stored in the DAT
+    files. For these "problematic" files, their "real" checksum is stored
+    in ucon64.fcrc32.
+  */
+  switch (ucon64.console)
+    {
+      case UCON64_NES:
+        break;
+
+      default:
+        if (ucon64.crc32 == 0)
+          if (!(ucon64.flags & WF_NOCRC32) || ucon64.file_size < MAXROMSIZE)
+            ucon64.crc32 = q_fcrc32 (ucon64.rom, ucon64.rominfo ? ucon64.rominfo->buheader_len : 0);
+        break;
+    }
+
+
+// DAtabase
+  ucon64.dat = NULL;
+  if (ucon64.crc32 != 0 && ucon64.dat_enabled)
+    {
+      ucon64.dat = ucon64_dat_search (ucon64.crc32, NULL);
+
+      if (ucon64.dat)
+        switch (ucon64.console)
+          {
+            case UCON64_SNES:
+            case UCON64_GENESIS:
+            case UCON64_GB:
+            case UCON64_GBA:
+            case UCON64_N64:
+                  // These ROMs have internal headers with name, country, maker, etc.
+              break;
+    
+            default:
+              // Use dat instead of ucon64.dat_enabled in case the index
+              //  file could not be created/opened -> no segmentation fault
+              if (ucon64.dat && ucon64.rominfo && ucon64.console == UCON64_NES &&
+                  (nes_get_file_type () == UNIF ||
+                   nes_get_file_type () == INES ||
+                   nes_get_file_type () == PASOFAMI ||
+                   nes_get_file_type () == FDS))
+                strcpy ((char *) ucon64.rominfo->name, NULL_TO_EMPTY (ucon64.dat->name));
+              break;
+          }
+    }
+      
+// display info
+  if ((ucon64.flags & WF_NFO || ucon64.flags & WF_NFO_AFTER) && ucon64.quiet < 1)
+    ucon64_nfo ();
+
+  return 0;
+}
+
+
+st_rominfo_t *
+ucon64_probe (st_rominfo_t * rominfo)
 {
   typedef struct
     {
       int console;
       int (*init) (st_rominfo_t *);
-#define AUTO_RECOGNITION (1)
-//...
       uint32_t flags;
     } st_probe_t;
+
+//auto recognition
+#define AUTO (1)
 
   int x = 0;
   st_probe_t probe[] =
     {
-      {UCON64_GBA, gba_init, AUTO_RECOGNITION},
-      {UCON64_N64, n64_init, AUTO_RECOGNITION},
-      {UCON64_GENESIS, genesis_init, AUTO_RECOGNITION},
-      {UCON64_LYNX, lynx_init, AUTO_RECOGNITION},
-      {UCON64_GB, gameboy_init, AUTO_RECOGNITION},
-      {UCON64_SNES, snes_init, AUTO_RECOGNITION},
-      {UCON64_NES, nes_init, AUTO_RECOGNITION},
-      {UCON64_NEOGEOPOCKET, ngp_init, AUTO_RECOGNITION},
-      {UCON64_SWAN, swan_init, AUTO_RECOGNITION},
-      {UCON64_JAGUAR, jaguar_init, AUTO_RECOGNITION},
+      {UCON64_GBA, gba_init, AUTO},
+      {UCON64_N64, n64_init, AUTO},
+      {UCON64_GENESIS, genesis_init, AUTO},
+      {UCON64_LYNX, lynx_init, AUTO},
+      {UCON64_GB, gameboy_init, AUTO},
+      {UCON64_SNES, snes_init, AUTO},
+      {UCON64_NES, nes_init, AUTO},
+      {UCON64_NEOGEOPOCKET, ngp_init, AUTO},
+      {UCON64_SWAN, swan_init, AUTO},
+      {UCON64_JAGUAR, jaguar_init, AUTO},
       {UCON64_SMS, sms_init, 0},
       {UCON64_NEOGEO, neogeo_init, 0},
       {UCON64_PCE, pcengine_init, 0},
       {UCON64_WONDERSWAN, swan_init, 0},
       {UCON64_DC, dc_init, 0},
       {UCON64_PSX, psx_init, 0},
-      {UCON64_SATURN, disc_init, 0},
-      {UCON64_CDI, disc_init, 0},
-      {UCON64_CD32, disc_init, 0},
-      {UCON64_REAL3DO, disc_init, 0},
-      {UCON64_PS2, disc_init, 0},
-      {UCON64_XBOX, disc_init, 0},
+      {UCON64_SATURN, ucon64_libdm_init, 0},
+      {UCON64_CDI, ucon64_libdm_init, 0},
+      {UCON64_CD32, ucon64_libdm_init, 0},
+      {UCON64_REAL3DO, ucon64_libdm_init, 0},
+      {UCON64_PS2, ucon64_libdm_init, 0},
+      {UCON64_XBOX, ucon64_libdm_init, 0},
 #if 0
       {UCON64_GAMECUBE, NULL, 0},
       {UCON64_GP32, NULL, 0},
@@ -802,7 +906,7 @@ ucon64_console_probe (st_rominfo_t *rominfo)
       {UCON64_VIRTUALBOY, NULL, 0},
 #endif
       {UCON64_UNKNOWN, unknown_init, 0},
-      {0, NULL}
+      {0, NULL, 0}
     };
 
   if (ucon64.console != UCON64_UNKNOWN) //  force recognition option was used
@@ -810,133 +914,34 @@ ucon64_console_probe (st_rominfo_t *rominfo)
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].console == ucon64.console)
           {
-            ucon64_flush (rominfo);
+            ucon64_rom_flush (rominfo); 
+
             probe[x].init (rominfo);
-            break;
+
+            return rominfo;
           }
     }
-  else // give auto_recognition a try
+  else if (ucon64.file_size < MAXROMSIZE) // give auto_recognition a try
     {
-      if (UCON64_TYPE_ISROM (ucon64.type))      // TODO: still needed?
-        for (x = 0; probe[x].console != 0; x++)
-          if (probe[x].flags & AUTO_RECOGNITION)
-            {
-              ucon64_flush (rominfo);
-              if (!probe[x].init (rominfo))
-                {
-                  ucon64.console = probe[x].console;
-                  break;
-                }
-            }
-    }
-
-  return (ucon64.console == UCON64_UNKNOWN) ? (-1) : 0;
-}
-
-
-int
-ucon64_init (const char *romfile, st_rominfo_t *rominfo)
-{
-  int result = -1;
-  struct stat fstate;
-
-  if (access (romfile, F_OK | R_OK) == -1)
-    return -1;
-  if (stat (romfile, &fstate) == -1)
-    return -1;
-  if (S_ISREG (fstate.st_mode) != TRUE)
-    return -1;
-
-  ucon64_fsize = q_fsize (ucon64.rom);          // save size in ucon64_fsize
-  ucon64.file_size = ucon64_fsize;
-
-  // What media type? Do not calculate CRC32 checksum and stuff for DISC images (speed!)
-  ucon64.type = (ucon64.file_size <= MAXROMSIZE) ? UCON64_TYPE_ROM : UCON64_TYPE_DISC;
-
-  if (ucon64.discmage_enabled)
-    {
-#if 0
-      image = dm_open (ucon64.rom);
-      ucon64.type = (image ? UCON64_TYPE_DISC : UCON64_TYPE_ROM);
-      dm_close (image);
-#endif
-      image = NULL;
-    }
-
-  if (UCON64_TYPE_ISROM (ucon64.type))
-    {
-      ucon64_flush (rominfo); // clear rominfo
-      result = ucon64_console_probe (rominfo);
-
-      /*
-        Calculating the CRC32 checksum for the ROM data of a UNIF file (NES)
-        shouldn't be done with q_fcrc32(). nes_init() uses mem_crc32().
-        The CRC32 checksum is used to search in the DAT files, but at the time
-        of this writing (Februari the 7th 2003) all DAT files contain checksums
-        of files in only one format. This matters for SNES and Genesis ROMs in
-        interleaved format and Nintendo 64 ROMs in non-interleaved format. The
-        corresponding initialization functions calculate the CRC32 checksum of
-        the data in the format of which the checksum is stored in the DAT
-        files. For these "problematic" files, their "real" checksum is stored
-        in ucon64.fcrc32.
-      */
-      if (ucon64.crc32 == 0)
-//        if (ucon64.do_not_calc_crc != UCON64_UNKNOWN)
-          if (ucon64.crc_big_files != UCON64_UNKNOWN ||
-              UCON64_TYPE_ISROM (ucon64.type))
-        ucon64.crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
-
-      if (ucon64.dat_enabled)
-        {
-          memset (&dat, 0, sizeof (st_ucon64_dat_t));
-          ucon64_dat = ucon64_dat_search (ucon64.crc32, &dat);
-        }
-      else
-        ucon64_dat = NULL;
-
-      switch (ucon64.console)
-        {
-          case UCON64_SNES:
-          case UCON64_GENESIS:
-          case UCON64_GB:
-          case UCON64_GBA:
-          case UCON64_N64:
-            // These ROMs have internal headers with name, country, maker, etc.
-            break;
-
-          default:
-            // Use ucon64_dat instead of ucon64.dat_enabled in case the index
-            //  file could not be created/opened -> no segmentation fault
-            if (ucon64_dat && ucon64.console == UCON64_NES &&
-                (nes_get_file_type () == UNIF ||
-                 nes_get_file_type () == INES ||
-                 nes_get_file_type () == PASOFAMI ||
-                 nes_get_file_type () == FDS))
-              strcpy ((char *) rominfo->name, NULL_TO_EMPTY (ucon64_dat->name));
-
-            if (ucon64_dat)
+      for (x = 0; probe[x].console != 0; x++)
+        if (probe[x].flags & AUTO)
+          {
+            ucon64_rom_flush (rominfo); 
+            
+            if (!probe[x].init (rominfo))
               {
-//                strcpy (rominfo->name, ucon64_dat->name);
-
-//                if (ucon64.console == UCON64_UNKNOWN)
-//                  ucon64.console = ucon64_dat->console;
+                ucon64.console = probe[x].console;
+                return rominfo;
               }
-            break;
-        }
-    }
-  else if (UCON64_TYPE_ISDISC (ucon64.type))
-    {
-#if 0
-#endif
-      result = -1;
+          }
     }
 
-  return result;
+  return NULL;
 }
 
 
 int
-ucon64_nfo (const st_rominfo_t *rominfo)
+ucon64_nfo (void)
 {
   printf ("%s\n", ucon64.rom);
   if (ucon64.fname_arch[0])
@@ -949,16 +954,12 @@ ucon64_nfo (const st_rominfo_t *rominfo)
       printf ("\n");
     }
 
-  if (UCON64_TYPE_ISDISC (ucon64.type))
-    {
-//      if (ucon64.discmage_enabled)
-//        dm_image_nfo (image);
-    }
-  else if (UCON64_TYPE_ISROM (ucon64.type))
-    {
-      if (rominfo && ucon64.console != UCON64_UNKNOWN)
-        ucon64_rom_nfo (rominfo);
-    }
+  if (ucon64.discmage_enabled)
+    if (ucon64.image)
+      ucon64_libdm_nfo (ucon64.image);
+
+  if (ucon64.rominfo && ucon64.console != UCON64_UNKNOWN)
+    ucon64_rom_nfo (ucon64.rominfo);
 
   if (ucon64.fcrc32)                    // SNES & Genesis interleaved/N64 non-interleaved
     printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32);
@@ -969,7 +970,8 @@ ucon64_nfo (const st_rominfo_t *rominfo)
   //  (nonsense) DAT info line when dumping a ROM (file doesn't exist and has
   //  size 0).
   if (ucon64.file_size > 0 && ucon64.dat_enabled)
-    ucon64_dat_nfo (ucon64_dat, 1);
+    if (ucon64.dat)
+      ucon64_dat_nfo (ucon64.dat, 1);
 
   printf ("\n");
 
@@ -980,7 +982,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 void
 ucon64_rom_nfo (const st_rominfo_t *rominfo)
 {
-  unsigned int padded = ucon64_testpad (ucon64.rom, (st_rominfo_t *) rominfo),
+  unsigned int padded = ucon64_testpad (ucon64.rom),
     intro = ((ucon64.file_size - rominfo->buheader_len) > MBIT) ?
       ((ucon64.file_size - rominfo->buheader_len) % MBIT) : 0;
   int x, split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
@@ -988,11 +990,18 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   char buf[MAXBUFSIZE];
 
   // backup unit header
+  
   if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != SWC_HEADER_LEN)
     {
       mem_hexdump (rominfo->buheader, rominfo->buheader_len, rominfo->buheader_start);
       printf ("\n");
     }
+  else 
+    if (rominfo->buheader_len && ucon64.quiet < 0)
+      {
+        ucon64_fhexdump (ucon64.rom, rominfo->buheader_start, rominfo->buheader_len);
+        printf ("\n");
+      }
 
   // backup unit type?
   if (rominfo->copier_usage != NULL)
@@ -1138,7 +1147,20 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
 }
 
 
-static void
+#ifdef  HAVE_ZLIB_H
+void
+ucon64_fname_arch (const char *fname)
+{
+  unzFile file = unzOpen (fname);
+  unzip_goto_file (file, unzip_current_file_nr);
+  unzGetCurrentFileInfo (file, NULL, ucon64.fname_arch, FILENAME_MAX,
+                         NULL, 0, NULL, 0);
+  unzClose (file);
+}
+#endif
+
+
+void
 ucon64_render_usage (const st_usage_t *usage)
 {
 // TODO speed up
@@ -1212,16 +1234,15 @@ ucon64_render_usage (const st_usage_t *usage)
 }
 
 
-typedef struct
-{
-  int console;
-  const st_usage_t *usage[6];
-} st_usage_array_t;
-
-
 void
 ucon64_usage (int argc, char *argv[])
 {
+  typedef struct
+    {
+      int console;
+      const st_usage_t *usage[6];
+    } st_usage_array_t;
+
   int x = 0, c = 0, single = 0;
   st_usage_array_t usage_array[] = {
     {UCON64_DC, {dc_usage, 0, 0, 0, 0, 0}},
@@ -1288,13 +1309,7 @@ ucon64_usage (int argc, char *argv[])
 //        mgd_usage,
 #endif // PARALLEL
       0, 0, 0, 0}},
-    {UCON64_SMS, {sms_usage,
-#ifdef  PARALLEL
-      smd_usage,
-#else
-      0,
-#endif // PARALLEL
-      0, 0, 0, 0}},
+    {UCON64_SMS, {sms_usage, 0, 0, 0, 0, 0}},
     {UCON64_NES, {nes_usage, 0, 0, 0, 0, 0}},
     {UCON64_SWAN, {swan_usage, 0, 0, 0, 0, 0}},
     {UCON64_JAG, {jaguar_usage, 0, 0, 0, 0, 0}},
@@ -1324,7 +1339,7 @@ ucon64_usage (int argc, char *argv[])
   char *name_exe = basename (argv[0]), *name_discmage;
 
   printf (
-    "Usage: %s [OPTION(S)]... [[" OPTION_LONG_S "rom=]ROM(S)]...\n\n", name_exe);
+    "Usage: %s [OPTION(S)]... [ROM(S)|SRAM(S)|FILE(S)]...\n\n", name_exe);
 
   ucon64_render_usage (ucon64_options_usage);
 
@@ -1378,7 +1393,7 @@ ucon64_usage (int argc, char *argv[])
   if (!ucon64.discmage_enabled)
     printf (ucon64_msg[NO_LIB], name_discmage);
   else
-    ucon64_render_usage ((const st_usage_t *) dm_get_usage ());
+    ucon64_render_usage (ucon64_libdm_get_usage ());
   printf ("\n");
 
   optind = 0;
@@ -1440,7 +1455,7 @@ ucon64_usage (int argc, char *argv[])
      "Please report any problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
      "\n",
      ucon64_dat_total_entries (UCON64_UNKNOWN),
-     ucon64.configdir,
+     ucon64.datdir,
      name_exe, name_exe);
 }
 

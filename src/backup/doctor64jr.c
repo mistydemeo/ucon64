@@ -168,9 +168,7 @@ void mainproc(void *arg) {
 
 #ifdef PARALLEL
 
-#ifdef TODO
-#warning TODO doctor64jr.c sram routines
-#endif
+//TODO doctor64jr.c sram routines
 
 #if 0
 

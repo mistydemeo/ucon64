@@ -32,22 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "misc.h"
 #include "quick_io.h"
-
-#include "console/snes.h"
-#include "console/gb.h"
-#include "console/gba.h"
-#include "console/n64.h"
-#include "console/lynx.h"
-#include "console/sms.h"
-#include "console/nes.h"
-#include "console/genesis.h"
-#include "console/pce.h"
-#include "console/neogeo.h"
-#include "console/ngp.h"
-#include "console/swan.h"
-#include "console/dc.h"
-#include "console/jaguar.h"
-#include "console/psx.h"
+#include "console/console.h"
 
 #define MAX_FIELDS_IN_DAT 32
 #define DAT_FIELD_SEPARATOR (0xac)
@@ -73,17 +58,19 @@ static FILE *fdat = NULL;
 static long filepos_line = 0;
 static int warning = 0;                         // show the warning only once when indexing
 
-
 const st_usage_t ucon64_dat_usage[] = {
   {NULL, NULL, "DATabase (support of DAT files)"},
   {"db", NULL, "DATabase statistics"},
   {"dbv", NULL, "like " OPTION_LONG_S "db but more verbose"},
   {"dbs", "CRC32", "search ROM with CRC32 in DATabase"},
-  {"lsd", NULL, "generate ROM list for all ROMs using DATabase; " OPTION_LONG_S "rom" OPTARG_S "ROM or DIR"},
-  {"rrom", NULL, "rename ROMs in DIR to their internal names; " OPTION_LONG_S "rom" OPTARG_S "ROM or DIR"},
-  {"rr83", NULL, "like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom" OPTARG_S "ROM or DIR"},
-  {"good", NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed and sorted\n"
-              "into subdirs according to the DATabase (\"ROM manager\")"},
+  {"lsd", NULL, "generate ROM list for all ROM(s) using DATabase"},
+  {"rrom", NULL, "rename ROM(s) to their internal names"},
+  {"rr83", NULL, "like " OPTION_LONG_S "rrom but with 8.3 filenames"},
+  {"good", NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed using\n"
+              "the DATabase"},
+  {"scan", NULL, "same as: GoodXXXX scan ..."},
+  {"rename", NULL, "same as: GoodXXXX rename inplace ...\n"
+              "TIP: using " OPTION_LONG_S "nes would process only NES ROM(S)"},
 /*
 GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
 *visit NEWNet #rareroms*
@@ -171,16 +158,16 @@ get_next_file (char *fname)
   struct dirent *ep;
 
   if (!ddat)
-    if (!(ddat = opendir (ucon64.configdir)))
+    if (!(ddat = opendir (ucon64.datdir)))
       {
-        fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.configdir);
+        fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.datdir);
         return NULL;
       }
 
   while ((ep = readdir (ddat)) != NULL)
     if (!stricmp (get_suffix (ep->d_name), ".dat"))
       {
-        sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir,
+        sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.datdir,
                  ep->d_name);
         return fname;
       }
@@ -578,12 +565,16 @@ idx_compare (const void *key, const void *found)
 
 
 st_ucon64_dat_t *
-ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
+ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
 {
   char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX], *fname;
   unsigned char *p = NULL;
   uint32_t fsize = 0;
   st_idx_entry_t *idx_entry, key;
+  static st_ucon64_dat_t dat;
+  st_ucon64_dat_t *dat_p = NULL;
+
+  memset (&dat, 0, sizeof (st_ucon64_dat_t));
 
   if (!crc32)
     return NULL;
@@ -591,8 +582,9 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
   while (get_next_file (fname_dat))
     {
       fname = basename (fname_dat);
+
       if (ucon64.console != UCON64_UNKNOWN)
-        if (fname_to_console (fname, dat) != ucon64.console)
+        if (fname_to_console (fname, &dat) != ucon64.console)
           continue;
 
       strcpy (fname_index, fname_dat);
@@ -621,21 +613,27 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
                            sizeof (st_idx_entry_t), idx_compare);
       if (idx_entry)                            // crc32 found
         {
+          if (!datinfo)
+            dat_p = (st_ucon64_dat_t *) &dat; // TODO?: malloc()
+          else
+            dat_p = (st_ucon64_dat_t *) &datinfo;
+
           // open dat file and read entry
-          if (get_dat_entry (fname_dat, dat, crc32, idx_entry->filepos))
-            if (crc32 == dat->crc32)
+          if (get_dat_entry (fname_dat, dat_p, crc32, idx_entry->filepos))
+            if (crc32 == dat_p->crc32)
               {
-                strcpy (dat->datfile, basename (fname_dat));
-                get_dat_header (fname_dat, dat);
+                strcpy (dat_p->datfile, basename (fname_dat));
+                get_dat_header (fname_dat, dat_p);
                 closedir_ddat ();
                 fclose_fdat ();
                 free (p);
-                return dat;
+                return dat_p;
               }
           fclose_fdat ();
         }
       free (p);
     }
+
   return NULL;
 }
 
@@ -777,6 +775,15 @@ ucon64_dat_indexer (void)
 }
 
 
+st_ucon64_dat_t *
+ucon64_dat_flush (st_ucon64_dat_t *dat)
+{
+  memset (dat, 0, sizeof (st_ucon64_dat_t));
+  ucon64.dat = NULL;
+  return NULL;
+}  
+
+
 void
 ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
 {
@@ -866,3 +873,5 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
           dat->refname);
     }
 }
+
+

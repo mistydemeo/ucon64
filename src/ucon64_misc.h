@@ -92,35 +92,56 @@ extern const st_usage_t vectrex_usage[];
 extern const st_usage_t xbox_usage[];
 extern const st_usage_t mame_usage[];
 
+extern int unknown_init (st_rominfo_t *rominfo);
+
+
 extern const st_usage_t ucon64_options_usage[];
 extern const st_usage_t ucon64_padding_usage[];
 extern const st_usage_t ucon64_patching_usage[];
 
 
-
 /*
   uCON64 workflow flags for st_ucon64_wf_t
 
-  WF_SHOW_NFO       show nfo output before processing rom
-  WF_SHOW_NFO_AFTER show nfo output after processing rom
-  WF_ROM_REQUIRED   for this option a [--rom=]ROM is required
-  WF_SPECIAL_OPT    a "special" option:
+  WF_PROBE          probe for console type
+  WF_INIT           init ROM nfo (ucon64_init()) necessary
+                      w/o this flag WF_NFO and WF_NFO_AFTER
+                      will be ignored
+  WF_NFO            show nfo output before processing rom
+  WF_NFO_AFTER      show nfo output AFTER processing rom
+  WF_ROM_REQ        for this option a [--rom=]ROM is required
+  WF_NOCRC32        no CRC32 calculation necessary for this option this
+                      overrides even WF_INIT, WF_NFO and WF_NFO_AFTER
+  WF_STOP           a "stop" option:
                     - -multi (and -xfalmulti) takes more than one file as
                       argument, but should be executed only once.
                     - stop after sending one ROM to a copier ("multizip")
                     - stop after applying a patch so that the patch file won't
                       be interpreted as ROM
-  ...
+  WF_PAR            this option requires a parallel port
+  WF_USB            this option requires a USB port
+  WF_SERIAL         this option requires a serial port
+  WF_NO_SPLIT       these options do not work with split ROMs
+  WF_DEFAULT        same as WF_PROBE|WF_INIT|WF_NFO (default workflow)
 
   example:
-  WF_SHOW_NFO|WF_SHOW_NFO_AFTER|WF_ROM_REQUIRED 
+  WF_NFO|WF_MFO_AFTER|WF_ROM_REQ
                     a ROM is required and nfo will be shown before and after
                     it has been processed
 */
-#define WF_SHOW_NFO 1
-#define WF_SHOW_NFO_AFTER 2
-#define WF_ROM_REQUIRED 4
-#define WF_SPECIAL_OPT 8
+#define WF_DEFAULT (WF_PROBE|WF_INIT|WF_NFO)
+#define WF_PROBE 1
+#define WF_INIT 2
+#define WF_NFO 4
+#define WF_STOP 8
+#define WF_NFO_AFTER 16
+#define WF_ROM_REQ 32
+#define WF_PAR 64
+#define WF_USB 128
+#define WF_SERIAL 256
+#define WF_NOCRC32 512
+#define WF_NO_SPLIT 1024
+#define WF_SWITCH 2048
 typedef struct
 {
   int option;
@@ -129,8 +150,9 @@ typedef struct
   uint32_t flags;                             // flags for workflow, etc..
 } st_ucon64_wf_t;
 
-
+extern const st_ucon64_wf_t *ucon64_get_wf (const int option); // get workflow struct for option
 extern const st_ucon64_wf_t ucon64_wf[];
+
 extern char *ucon64_temp_file;
 extern int (*ucon64_testsplit_callback) (const char *filename);
 extern const char *nintendo_maker[];
@@ -176,27 +198,15 @@ extern char *ucon64_output_fname (char *requested_fname, int flags);
 extern int ucon64_fhexdump (const char *filename, int start, int len);
 extern unsigned int ucon64_filefile (const char *filename1, int start1, const char *filename2, int start2, int similar);
 
-/*
-  wrapper for misc.c/gauge()
-*/
+//  wrapper for misc.c/gauge()
 extern int ucon64_gauge (time_t init_time, int pos, int size);
-/*
-  libdiscmage can use a gauge function
-
-  unlike ucon64_gauge() the timer will reset if pos == 0
-*/
-extern int ucon64_libdm_gauge (int pos, int size);
-
 extern int ucon64_pad (const char *filename, int start, int size); // pad ROM to a certain size
-extern int ucon64_testpad (const char *filename, st_rominfo_t *rominfo); // test if ROM is padded
+extern int ucon64_testpad (const char *filename); // test if ROM is padded
 
 extern int ucon64_testsplit (const char *filename); // test if ROM is split
 
 extern unsigned int ucon64_parport_init (unsigned int parport);
 
-
-extern int ucon64_e (const char *rominfo);
-extern int ucon64_ls (const char *path, int mode);
 extern int ucon64_configfile (void);
 
 #endif // #ifndef UCON64_MISC_H

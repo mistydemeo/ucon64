@@ -48,87 +48,7 @@ typedef struct
 #include "misc.h"
 #include "libdiscmage/libdiscmage.h"            // dm_image_t
 
-/*
-  this struct holds workflow relevant information
-*/
-typedef struct
-{
-  int argc;
-  char **argv;
-
-  const char *rom;                              // ROM (cmdline) with path
-  char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
-  int file_size;                                // (uncompressed) ROM file size
-  unsigned int crc32;                           // crc32 value of ROM (used for DAT files)
-  unsigned int fcrc32;                          // if non-zero: crc32 of ROM as it is on disk
-
-#define UCON64_TYPE_ISUNKNOWN(x) (x == UCON64_TYPE_UNKNOWN)
-#define UCON64_TYPE_ISROM(x) (x == UCON64_TYPE_ROM)
-#define UCON64_TYPE_ISDISC(x) (x == UCON64_TYPE_DISC)
-#define UCON64_TYPE_ISPATCH(x) (x == UCON64_TYPE_PATCH)
-#define UCON64_TYPE_ISSRAM(x) (x == UCON64_TYPE_SRAM)
-  int type;                                     // file type (rom, disc, patch or sram)
-
-  /*
-    if console == UCON64_UNKNOWN or st_rominfo_t == NULL ucon64_rom_nfo() won't
-    be shown
-  */
-  int console;                                  // the detected console system
-
-  const char *file;                             // FILE (cmdline) with path
-
-  char configfile[FILENAME_MAX];                // path and name of the config file
-  char configdir[FILENAME_MAX];                 // directory for config and DAT files
-  char output_path[FILENAME_MAX];               // -o argument (default: cwd)
-  char discmage_path[FILENAME_MAX];             // path to the discmage DLL
-
-  unsigned int parport;                         // parallel port address
-  int parport_mode;                             // parallel port mode: ECP, EPP, SPP, other
-
-#ifdef  ANSI_COLOR
-  int ansi_color;
-#endif
-  int backup;                                   // flag if backups files should be created
-  int frontend;                                 // flag if uCON64 was started by a frontend
-  int discmage_enabled;                         // flag if discmage DLL is loaded
-  int dat_enabled;                              // flag if DAT file(s) are usable/enabled
-  int good_enabled;                             // --good was used
-
-  int show_nfo;                                 // show or skip info output for ROM
-
-  // has higher priority than crc_big_files!
-  int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
-
-  // only used in switches.c for --crc (!)
-  int crc_big_files;                            // enable checksum calc. for files bigger than MAXROMSIZE (512Mb)
-
-#define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
-  /*
-    These values override values in st_rominfo_t. Use UCON64_ISSET()
-    to check them. When adding new ones don't forget to update ucon64_flush()
-    too.
-  */
-  int buheader_len;                             // length of backup unit header 0 == no bu hdr
-  int snes_hirom;                               // SNES ROM is HiROM
-  int interleaved;                              // ROM is interleaved (swapped)
-
-  // the following values are for the SNES, NES and the Genesis
-  int part_size;                                // SNES split part size
-  int split;                                    // ROM is split
-  int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
-  int controller;                               // NES UNIF & SNES NSRT
-  int controller2;                              // SNES NSRT
-  int tv_standard;                              // NES UNIF
-  int battery;                                  // NES UNIF/iNES/Pasofami
-  int vram;                                     // NES UNIF
-  int mirror;                                   // NES UNIF/iNES/Pasofami
-  const char *mapr;                             // NES UNIF board name or iNES mapper number
-  int use_dump_info;                            // NES UNIF
-  const char *dump_info;                        // NES UNIF
-  const char *comment;                          // NES UNIF
-} st_ucon64_t;
-
-extern st_ucon64_t ucon64;
+extern int ucon64_parport_needed;
 
 
 /*
@@ -177,15 +97,100 @@ typedef struct
 } st_rominfo_t;
 
 
-extern dm_image_t *image;                       // DISC image (libdiscmage)
-extern st_ucon64_dat_t *ucon64_dat;             // info from DAT
+/*
+  this struct holds workflow relevant information
+*/
+typedef struct
+{
+  int argc;
+  char **argv;
+
+  const char *rom;                              // ROM (cmdline) with path
+  char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
+  int file_size;                                // (uncompressed) ROM file size
+  unsigned int crc32;                           // crc32 value of ROM (used for DAT files)
+  unsigned int fcrc32;                          // if non-zero: crc32 of ROM as it is on disk
+
+  /*
+    if console == UCON64_UNKNOWN or st_rominfo_t == NULL ucon64_rom_nfo() won't
+    be shown
+  */
+  int console;                                  // the detected console system
+
+  const char *file;                             // FILE (cmdline) with path
+
+  char configfile[FILENAME_MAX];                // path and name of the config file
+  char configdir[FILENAME_MAX];                 // directory for config
+  char datdir[FILENAME_MAX];                    // directory for DAT files
+  char output_path[FILENAME_MAX];               // -o argument (default: cwd)
+  char discmage_path[FILENAME_MAX];             // path to the discmage DLL
+
+  unsigned int parport;                         // parallel port address
+  int parport_mode;                             // parallel port mode: ECP, EPP, SPP, other
+
+#ifdef  ANSI_COLOR
+  int ansi_color;
+#endif
+  int backup;                                   // flag if backups files should be created
+  int frontend;                                 // flag if uCON64 was started by a frontend
+  int discmage_enabled;                         // flag if discmage DLL is loaded
+  int dat_enabled;                              // flag if DAT file(s) are usable/enabled
+  int good_enabled;                             // --good was used
+  int quiet;                                    // quiet == -1 means verbose + 1
+
+  uint32_t flags;                                 // detect and init ROM info
+
+  // has higher priority than crc_big_files!
+  int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
+
+  // only used in switches.c for --crc (!)
+  int crc_big_files;                            // enable checksum calc. for files bigger than MAXROMSIZE (512Mb)
+
+#define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
+  /*
+    These values override values in st_rominfo_t. Use UCON64_ISSET()
+    to check them. When adding new ones don't forget to update ucon64_flush()
+    too.
+  */
+  int buheader_len;                             // length of backup unit header 0 == no bu hdr
+  int snes_hirom;                               // SNES ROM is HiROM
+  int interleaved;                              // ROM is interleaved (swapped)
+
+  // the following values are for the SNES, NES and the Genesis
+  int part_size;                                // SNES split part size
+  int split;                                    // ROM is split
+  int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
+  int controller;                               // NES UNIF & SNES NSRT
+  int controller2;                              // SNES NSRT
+  int tv_standard;                              // NES UNIF
+  int battery;                                  // NES UNIF/iNES/Pasofami
+  int vram;                                     // NES UNIF
+  int mirror;                                   // NES UNIF/iNES/Pasofami
+  const char *mapr;                             // NES UNIF board name or iNES mapper number
+  int use_dump_info;                            // NES UNIF
+  const char *dump_info;                        // NES UNIF
+  const char *comment;                          // NES UNIF
+
+  dm_image_t *image;                            // info from libdiscmage
+  st_ucon64_dat_t *dat;                         // info from DATabase
+  st_rominfo_t *rominfo;                        // info from <console>_init()
+} st_ucon64_t;
+
+extern st_ucon64_t ucon64;
 
 extern const struct option options[];
 
-extern int ucon64_nfo (const st_rominfo_t *);
-extern int ucon64_init (const char *romfile, st_rominfo_t *);
-extern st_rominfo_t *ucon64_flush (st_rominfo_t *);
-extern int ucon64_console_probe (st_rominfo_t *);
+// init st_rominfo_t, st_ucon64_dat_t and st_dm_image_t
+extern int ucon64_init (void);
+// display contents of st_rominfo_t, st_ucon64_dat_t and st_dm_image_t
+extern int ucon64_nfo (void);
+// flush contents of st_rominfo_t, st_ucon64_dat_t and st_dm_image_t
+//extern void ucon64_flush (void);
+// flush only st_rominfo_t
+extern st_rominfo_t *ucon64_flush_rom (st_rominfo_t *);
+
+
+extern void ucon64_usage (int argc, char *argv[]);
 #ifdef  HAVE_ZLIB_H
 extern void ucon64_fname_arch (const char *fname);
 #endif

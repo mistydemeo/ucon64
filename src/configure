@@ -842,7 +842,6 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-todo           enable todo output (default: no)
   --enable-debug          enable debug output (default: no)
   --enable-parallel       enable support for parallel port backup units
                           (default: yes)
@@ -2242,26 +2241,6 @@ echo "${ECHO_T}$ac_cv_prog_gcc_traditional" >&6
   fi
 fi
 
-
-
-echo "$as_me:$LINENO: checking whether todo output is enabled" >&5
-echo $ECHO_N "checking whether todo output is enabled... $ECHO_C" >&6
-# Check whether --enable-todo or --disable-todo was given.
-if test "${enable_todo+set}" = set; then
-  enableval="$enable_todo"
-  enable_todo=$enableval
-else
-  enable_todo=no
-fi;
-if test $enable_todo = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define TODO 1
-_ACEOF
-
-fi
-echo "$as_me:$LINENO: result: $enable_todo" >&5
-echo "${ECHO_T}$enable_todo" >&6
 
 
 echo "$as_me:$LINENO: checking whether debug output is enabled" >&5

@@ -2231,7 +2231,7 @@ ucon64_rename (int mode)
       files would result in a real mess. And I (dbjh) mean a *real* mess...
     */
     if (!access (buf2, F_OK))                   // a file with that name exists already?
-      ucon64_file_handler (buf2, NULL, OF_FORCE_BASENAME);
+      ucon64_file_handler (buf2, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
 
   if (!good_name)
     printf ("Renaming \"%s\" to \"%s\"\n", p, p2);

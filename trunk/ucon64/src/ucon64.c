@@ -1129,21 +1129,13 @@ while ((c =
 int
 ucon64_init (struct ucon64_ *rom)
 {
-  long bytes = 0;
-  int other_console = 0;
-
-  bytes = quickftell (rom->rom);
+  long bytes = quickftell (rom->rom);
 
   // call testsplit() before any <CONSOLE>_init() function to provide for a
   // possible override in those functions
-  rom->splitted[0] = testsplit (rom->rom);
-  if (argcmp (rom->argc, rom->argv, "-ns"))
-    rom->splitted[0] = 0;
 
-  if (rom->console != ucon64_UNKNOWN)
+  if (rom->console != ucon64_UNKNOWN && bytes <= MAXROMSIZE)
     {
-      if (bytes <= MAXROMSIZE)
-        {
           switch (rom->console)
             {
             case ucon64_GB:
@@ -1161,7 +1153,6 @@ ucon64_init (struct ucon64_ *rom)
             case ucon64_SNES:
               snes_init (rom);
               break;
-// ROMs for the following consoles can be only detected by their CRC32
             case ucon64_SMS:
               sms_init (rom);
               break;
@@ -1204,13 +1195,6 @@ ucon64_init (struct ucon64_ *rom)
             case ucon64_INTELLI:
               intelli_init (rom);
               break;
-            default:
-              other_console = 1;
-            }
-        }
-      // now check if it's one of the CD based consoles
-      switch (rom->console)
-        {
         case ucon64_PS2:
           ps2_init (rom);
           break;
@@ -1236,12 +1220,11 @@ ucon64_init (struct ucon64_ *rom)
           xbox_init (rom);
           break;
         default:
-          if (other_console)
             rom->console = ucon64_UNKNOWN;
+            break;
         }
     }
-
-  if (rom->console == ucon64_UNKNOWN && bytes <= MAXROMSIZE)
+else 
     if ((snes_init (rom) == -1) &&
         (genesis_init (rom) == -1) &&
         (nintendo64_init (rom) == -1) &&
@@ -1266,25 +1249,6 @@ ucon64_init (struct ucon64_ *rom)
         (wonderswan_init (rom) == -1))
       rom->console = ucon64_UNKNOWN;
 
-  /*
-    Calculate the CRC32 after rom->buheader_len has been initialized.
-    In this way we can call fileCRC32() with the right value for `start'
-    so that we disregard the header (if there is one).
-  */
-  if (bytes <= MAXROMSIZE &&
-      rom->console != ucon64_PS2 &&
-      rom->console != ucon64_DC &&
-      rom->console != ucon64_SATURN &&
-      rom->console != ucon64_CDI &&
-      rom->console != ucon64_CD32 &&
-      rom->console != ucon64_PSX &&
-      rom->console != ucon64_GAMECUBE &&
-      rom->console != ucon64_XBOX)
-    rom->current_crc32 = fileCRC32 (rom->rom, rom->buheader_len);
-
-  if (rom->console == ucon64_UNKNOWN)
-    return -1;
-
   quickfread (rom->buheader, rom->buheader_start, rom->buheader_len,
               rom->rom);
 //  quickfread(rom->header, rom->header_start, rom->header_len, rom->rom);
@@ -1292,30 +1256,32 @@ ucon64_init (struct ucon64_ *rom)
   rom->bytes = quickftell (rom->rom);
   rom->mbit = (rom->bytes - rom->buheader_len) / (float) MBIT;
 
-  if (rom->console == ucon64_PS2 ||
-      rom->console == ucon64_PSX ||
-      rom->console == ucon64_DC ||
-      rom->console == ucon64_SATURN ||
-      rom->console == ucon64_CDI ||
-      rom->console == ucon64_CD32 ||
-      rom->console == ucon64_REAL3DO ||
-      rom->console == ucon64_XBOX ||
-      rom->console == ucon64_GAMECUBE ||
-      rom->bytes > MAXROMSIZE)
-    {
-/*
-  this doesn't work really..
+  rom->splitted[0] = (argcmp (rom->argc, rom->argv, "-ns")) ? 0 :
+      testsplit (rom->rom);
 
-    strcat(rom->misc,"\nTrackmode: ");
-    strcat(rom->misc,
-      (!(rom->bytes%2048)) ? "MODE1, MODE2_FORM1 (2048 Bytes)" :
-      (!(rom->bytes%2324)) ? "MODE2_FORM2 (2324 Bytes)" :
-      (!(rom->bytes%2336)) ? "MODE2 or MODE2_FORM_MIX (2336 Bytes)" :
-      (!(rom->bytes%2352)) ? "AUDIO, MODE1_RAW or MODE2_RAW (2352 Bytes)" :
-                             "Unknown"
-    );
-*/
-      return 0;
+
+  /*
+    Calculate the CRC32 after rom->buheader_len has been initialized.
+    In this way we can call fileCRC32() with the right value for `start'
+    so that we disregard the header (if there is one).
+  */
+  switch (rom->console)
+    {
+      case ucon64_PS2:
+      case ucon64_PSX:
+      case ucon64_DC:
+      case ucon64_SATURN:
+      case ucon64_CDI:
+      case ucon64_CD32:
+      case ucon64_REAL3DO:
+      case ucon64_XBOX:
+      case ucon64_GAMECUBE:
+//the following stuff is not relevant for potential CD images
+        if (rom->bytes > MAXROMSIZE) return 0;
+      
+      default:
+        rom->current_crc32 = (bytes <= MAXROMSIZE) ? 
+          fileCRC32 (rom->rom, rom->buheader_len) : 0;
     }
 
   rom->padded = filetestpad (rom->rom);

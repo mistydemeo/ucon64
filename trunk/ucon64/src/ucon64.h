@@ -76,7 +76,11 @@ typedef struct
 
   int show_nfo;                                 // show or skip info output for ROM
 
+// has higher priority than crc_big_files!
   int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
+
+// only used in switches.c for --crc(!)
+  int crc_big_files;                            // enable checksum calc. for files bigger than MAXROMSIZE (512Mb)
 
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
 /*

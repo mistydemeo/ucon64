@@ -52,10 +52,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_NEOGEOPOCKET	20
 #define ucon64_GBA		21
 
-//char *forceargs[];
-
-
-
 
 #define ucon64_VERSION "1.9.7"
 
@@ -85,5 +81,6 @@ int ucon64_probe(int argc,char *argv[]);
 int ucon64_main(int argc,char *argv[]);
 
 unsigned int ucon64_parport;
+
 
 #endif                                          // #ifndef UCON64_H

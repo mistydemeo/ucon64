@@ -67,7 +67,9 @@ else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 
 GCCA_DIR=/mingw/lib/gcc-lib/mingw32/3.2.3/
-LIBS+=-lkernel32 -lmsvcrt -L$(GCCA_DIR) -lgcc
+LIBS+=-L/mingw/lib -lkernel32 -lmsvcrt -L$(GCCA_DIR) -lgcc
+# Msys problem: Specifying the library directory is necessary when compiling on
+# a different filesystem than the filesystem that MinGW is installed on.
 
 FULLLIBNAME=$(LIBNAME).dll
 DLLFLAGS=$(LDFLAGS) --dll -o $(LIBNAME).dll $(OBJECTS) $(LIBS) -e _DllMain@12

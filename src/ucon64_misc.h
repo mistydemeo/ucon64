@@ -3,7 +3,8 @@ ucon64_misc.h - miscellaneous functions for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
                   2001 dbjh
-
+                  2001 Caz
+                  
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

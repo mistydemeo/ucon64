@@ -281,6 +281,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XSWC2:
     case UCON64_XSWCR:
     case UCON64_XSWCS:
+    case UCON64_XSWCC:
     case UCON64_XV64:
       /*
         We want to make this possible:
@@ -1655,6 +1656,14 @@ ucon64_options (int c, const char *optarg)
         swc_read_sram (ucon64.rom, ucon64.parport);
       else
         swc_write_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSWCC:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        swc_read_cart_sram (ucon64.rom, ucon64.parport);
+      else
+        swc_write_cart_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
       fputc ('\n', stdout);
       break;
 

@@ -52,6 +52,8 @@ extern int swc_read_sram (const char *filename, unsigned int parport);
 extern int swc_write_sram (const char *filename, unsigned int parport);
 extern int swc_read_rts (const char *filename, unsigned int parport);
 extern int swc_write_rts (const char *filename, unsigned int parport);
+extern int swc_read_cart_sram (const char *filename, unsigned int parport);
+extern int swc_write_cart_sram (const char *filename, unsigned int parport);
 extern void swc_unlock (unsigned int parport);
 #endif // PARALLEL
 

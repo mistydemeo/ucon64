@@ -107,7 +107,7 @@ typedef struct
   dm_open()  this is the first function to call with the filename of the
              image; it will try to recognize the image format, etc.
   dm_close() the last function; close image
-  
+
   dm_image_t *img;
   if (!(img = dm_open("image")))
     {
@@ -123,7 +123,7 @@ extern int dm_close (dm_image_t *image);
   some ready to use functions
 
   dm_set_gauge () enter here the name of a function that takes two integers
-    
+
     gauge (pos, total)
       {
         printf ("%d of %d done", pos, total);
@@ -166,7 +166,7 @@ extern int32_t dm_mksheets (dm_image_t *image);
 
 
 /*
-  dm_disc_read() and dm_disc_write() are depricated
+  dm_disc_read() and dm_disc_write() are deprecated
   reading or writing images is done by those scripts in contrib/
 */
 extern int32_t dm_disc_read (dm_image_t *image);

@@ -74,7 +74,7 @@ endif
 
 FULLLIBNAME=$(LIBNAME).dll
 DLLFLAGS=$(LDFLAGS) --dll $(OBJECTS) $(LIBS) -e $(ENTRY) -o $(LIBNAME).dll
-DLLTOOLFLAGS=-d tmp.def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
+DLLTOOLFLAGS=-d $(LIBNAME).def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
 ifndef DLOPEN
 DLLTOOLFLAGS+=-l $(LIBNAME).a
 endif
@@ -89,7 +89,7 @@ LIBS+=-L/mingw/lib -lkernel32 -lmsvcrt -L$(GCCA_DIR) -lgcc
 
 FULLLIBNAME=$(LIBNAME).dll
 DLLFLAGS=$(LDFLAGS) --dll $(OBJECTS) $(LIBS) -e _DllMain@12 -o $(LIBNAME).dll
-DLLTOOLFLAGS=-d tmp.def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
+DLLTOOLFLAGS=-d $(LIBNAME).def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
 ifndef DLOPEN
 DLLTOOLFLAGS+=-l $(LIBNAME).a
 endif
@@ -146,7 +146,7 @@ all: $(FULLLIBNAME)
 clean:
 ifeq ($(GCC_WIN),1)
 	rm -f $(FULLLIBNAME) $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
-              tmp.def tmp.base tmp.exp
+              tmp.*
 else
 ifdef DJGPP
 	del $(FULLLIBNAME)
@@ -188,11 +188,13 @@ $(LIBNAME).dll $(LIBNAME).a: $(OBJECTS)
 else
 $(LIBNAME).dll: $(OBJECTS)
 endif
-	echo EXPORTS > tmp.def
-#	nm $(OBJECTS) | grep ' T _' | sed 's/.* T _//' >> tmp.def
-	nm $(OBJECTS) | grep '^........ [T] _' | sed 's/[^_]*_//' >> tmp.def
+#	echo EXPORTS > tmp.def
+##	nm $(OBJECTS) | grep ' T _' | sed 's/.* T _//' >> tmp.def
+#	nm $(OBJECTS) | grep '^........ [T] _' | sed 's/[^_]*_//' >> tmp.def
 # We use nm instead of dlltool --output-def, so that we don't have to
 # specify explicitly (in the source code) which symbols should be exported
+# We don't create the .def file automatically anymore. Using nm resulted in a
+# (too large?) .def file which resulted in a non-working DLL when using Cygwin
 
 	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
 	@echo "      symbols, read faq.html question 3"

@@ -1273,11 +1273,11 @@ int fal_usage(int argc, char *argv[])
   if (argcmp(argc, argv, "-help"))
     printf("\n%s\n", fal_TITLE);
 
-  printf("  -xfal	  send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
-         "		  receives automatically when $ROM does not exist\n"
-         "  -xfalc<n>	  specify chip size in mbits of ROM in Flash Advance Linker when\n"
-         "		  receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32\n"
-         "  -xfalm	  use SPP mode, default is EPP\n");
+  printf("  -xfal		send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
+         "		receives automatically when $ROM does not exist\n"
+         "  -xfalc<n>	specify chip size in mbits of ROM in Flash Advance Linker when\n"
+         "		receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32\n"
+         "  -xfalm	use SPP mode, default is EPP\n");
 
   if (argcmp(argc, argv, "-help"))
   {

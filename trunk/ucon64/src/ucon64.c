@@ -868,6 +868,9 @@ ucon64_dat_nfo (const ucon64_dat_t *dat)
 //          dat->comment,
           dat->name);
 
+  if (dat->misc[0])
+    printf ("  %s\n", dat->misc);
+
   if (stricmp (dat->name, dat->fname) != 0)
     printf ("  Filename: %s\n", dat->fname);
 
@@ -1036,7 +1039,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
           if (rominfo->dat) // a dat file entry was found
             ucon64_dat_nfo (rominfo->dat);
           else
-            printf ("DAT: ROM not found\n");
+            printf ("DAT info: ROM not found\n");
         }
 
       if (rominfo->current_crc32)

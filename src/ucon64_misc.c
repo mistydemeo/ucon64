@@ -42,6 +42,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif // BACKUP
 #include "ucon64.h"
 #include "misc.h"
+#include "bin2iso.h"
 #include "ucon64_misc.h"
 
 #define MAXBUFSIZE 32768
@@ -559,4 +560,15 @@ ucon64_trackmode_probe (long imagesize)
          (!(imagesize % 2352)) ? 2352 :        // AUDIO, MODE1_RAW, MODE2_RAW
          -1                    // unknown
     ;
+}
+
+int bin2iso(char *image)
+{
+  int argc = 2;
+  char *argv[128];
+
+  argv[0] = "bin2iso";
+  argv[1] = image;
+
+  return bin2iso_main(argc, argv);
 }

@@ -35,7 +35,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const char *fig_usage[] =
   {
-    "Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)/FIG",
+    "Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)",
+    // adding "/FIG" causes a wrap around on 80 column terminals (DOS!) which is ugly
     "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw",
 #ifdef TODO
 #warning TODO --xfig        send/receive ROM to/from *Pro Fighter* /(all)FIG

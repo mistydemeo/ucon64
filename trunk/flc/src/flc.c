@@ -56,7 +56,7 @@ if(argcmp(argc, argv, "-frontend"))atexit(flc_exit);
    configfile handling
 */
   sprintf (flc.configfile, "%s%c"
-#ifdef  __DOS__
+#ifdef  __MSDOS__
   "flc.cfg"
 #else
   /*

@@ -23,6 +23,8 @@
 #define FLC_H
 
 #include <limits.h>
+#include <unistd.h>
+#include <getopt.h>
 #include "misc.h"
 
 #define flc_NAME 0

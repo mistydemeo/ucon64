@@ -22,7 +22,7 @@
 #include "flc.h"
 
 #include "extract.h"
-//#include "sort.h"
+#include "sort.h"
 #include "output.h"
 
 int main(int argc,char *argv[])
@@ -49,7 +49,14 @@ if(
   argcmp(argc,argv,"-a") ||
   argcmp(argc,argv,"-b") ||
   argcmp(argc,argv,"-fr")
-)flc.sort=1;
+)
+{
+  flc.sort=1;
+//  if(argcmp(argc,argv,"-d"))
+//  if(argcmp(argc,argv,"-a"))
+//  if(argcmp(argc,argv,"-b"))
+  flc.fr = (argcmp(argc,argv,"-fr")) ? 1 : 0 ;
+}
 
 flc.argc=argc;
 for( x = 0 ; x < argc ; x++ )flc.argv[x]=argv[x];
@@ -115,6 +122,7 @@ while((ep=readdir(dp))!=NULL)
     continue;
   }
 
+  file->pos=flc.files;
   file++;
   flc.files++;
 }
@@ -123,9 +131,9 @@ file=file0;
 
 if(flc.sort)
 {
-//  sort(&flc,file);
+  sort(&flc,file);
 for( x = 0 ; x < flc.files ; x++ )
-  output(&flc,file+x);
+  output(&flc,file+(file+x)->pos);
 
   free(file);
 }

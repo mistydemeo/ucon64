@@ -40,6 +40,7 @@ struct flc_
   int kb;
   int files;
   int sort;
+  int fr;
   char path[4096];
 };
 
@@ -48,7 +49,7 @@ struct file_
   unsigned long pos;
   char name[NAME_MAX+1];
   off_t size;
-  time_t date;
+  unsigned long date;
   int checked;
 #define FID_LINES_MAX 20
   char file_id[FID_LINES_MAX+1][49];

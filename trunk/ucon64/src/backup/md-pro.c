@@ -229,7 +229,7 @@ md_write_rom (const char *filename, unsigned int parport)
         }
     }
   else
-    fprintf (stderr, "ERROR: MD-PRO flash card (programmer) not detected\n");
+    fputs ("ERROR: MD-PRO flash card (programmer) not detected\n", stderr);
 
   fclose (file);
   ttt_deinit_io ();

@@ -64,9 +64,9 @@ const st_usage_t gba_usage[] =
                          "WAIT_TIME=24 fastest cartridge access speed\n"
                          "WAIT_TIME=28 faster than 8 but slower than 16", NULL},
 //  "n 0 and 28, with a stepping of 4. I.e. 0, 4, 8, 12 ...\n"
-    {"multi", 1, "SIZE", "make multirom for Flash Advance Linker, truncated to SIZE Mbit;\n"
-                      "file with loader must be specified first, then all the ROMs,\n"
-                      "multirom to create last; use -o to specify output directory", NULL},
+    {"multi", 1, "SIZE", "make multi-game file for use with FAL/F2A flash card, truncated\n"
+                         "to SIZE Mbit; file with loader must be specified first, then\n"
+                         "all the ROMs, multi-game file to create last", NULL},
     {NULL, 0, NULL, NULL, NULL}
   };
 
@@ -464,7 +464,7 @@ gba_chksum (void)
 
 int
 gba_multi (int truncate_size, char *multi_fname)
-// TODO: Check if 1024 Mbit multiroms are supported by the FAL code
+// TODO: Check if 1024 Mbit multi-game files are supported by the FAL code
 {
 #define BUFSIZE (32 * 1024)
   int n, n_files, file_no, bytestowrite, byteswritten, totalsize = 0, done,
@@ -476,7 +476,7 @@ gba_multi (int truncate_size, char *multi_fname)
 
   if (truncate_size == 0)
     {
-      fprintf (stderr, "ERROR: Can't make multirom of 0 bytes\n");
+      fprintf (stderr, "ERROR: Can't make multi-game file of 0 bytes\n");
       return -1;
     }
 
@@ -507,7 +507,7 @@ gba_multi (int truncate_size, char *multi_fname)
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], destname);
       return -1;
     }
-  printf ("Creating multirom file: %s\n", destname);
+  printf ("Creating multi-game file for FAL/F2A: %s\n", destname);
 
   file_no = 0;
   for (n = 1; n < n_files; n++)
@@ -583,7 +583,7 @@ gba_multi (int truncate_size, char *multi_fname)
 
   /*
     Display a notification if a truncate size was specified that is not exactly
-    the size of one of the Flash Card sizes.
+    the size of one of the flash card sizes.
   */
   n = truncate_size;
   while (n >>= 1)
@@ -599,7 +599,7 @@ gba_multi (int truncate_size, char *multi_fname)
 
   if (totalsize > 64 * MBIT && !truncate_size_ispow2)
     printf("\n"
-           "NOTE: This multirom can only be written to a card >= %d Mbit.\n"
+           "NOTE: This multi-game file can only be written to a card >= %d Mbit.\n"
            "      Use -multi=%d to create a file truncated to %d Mbit.\n"
            "      Current size is %.5f Mbit\n", // 5 digits to have 1 byte resolution
            size_pow2 / MBIT, size_pow2_lesser / MBIT, size_pow2_lesser / MBIT,

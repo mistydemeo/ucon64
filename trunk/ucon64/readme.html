@@ -186,9 +186,9 @@ Game Boy Advance
                   WAIT_TIME=20 default in most original carts
                   WAIT_TIME=24 fastest cartridge access speed
                   WAIT_TIME=28 faster than 8 but slower than 16
-  --multi=SIZE  make multirom for Flash Advance Linker, truncated to SIZE Mbit;
-                  file with loader must be specified first, then all the ROMs,
-                  multirom to create last; use -o to specify output directory
+  --multi=SIZE  make multi-game file for use with FAL/F2A flash card, truncated
+                  to SIZE Mbit; file with loader must be specified first, then
+                  all the ROMs, multi-game file to create last
 Flash 2 Advance (Ultra)
   --xf2a        send/receive ROM to/from Flash 2 Advance (Ultra); --port=PORT
                   receives automatically (32 Mbits) when ROM does not exist
@@ -205,8 +205,8 @@ Flash Advance Linker
   --xfal        send/receive ROM to/from Flash Advance Linker; --port=PORT
                   receives automatically (32 Mbits) when ROM does not exist
   --xfalmulti=SIZE send multiple ROMs to Flash Advance Linker (makes temporary
-                  multirom truncated to SIZE Mbit); specify a loader in the
-                  configuration file; --port=PORT
+                  multi-game file truncated to SIZE Mbit); specify a loader in
+                  the configuration file; --port=PORT
   --xfalc=N     receive N Mbits of ROM from Flash Advance Linker; --port=PORT
                   N can be 8, 16, 32, 64, 128 or 256
   --xfals       send/receive SRAM to/from Flash Advance Linker; --port=PORT
@@ -363,9 +363,9 @@ Genesis/Sega Mega Drive/Sega CD/32X/Nomad
   --chk         fix ROM checksum
   --1991        fix old third party ROMs to work with consoles build after
                   October 1991 by inserting "(C) SEGA" and "(C)SEGA"
-  --multi=SIZE  make multi-game file for use with MD-PRO flash card,
-                  truncated to SIZE Mbit; file with loader must be specified
-                  first, then all the ROMs, multi-game file to create last
+  --multi=SIZE  make multi-game file for use with MD-PRO flash card, truncated
+                  to SIZE Mbit; file with loader must be specified first, then
+                  all the ROMs, multi-game file to create last
   --region=CODE enable region function; use with -multi
                   CODE=0 force NTSC/Japan for all games
                   CODE=1 force NTSC/U.S.A. for all games
@@ -435,9 +435,9 @@ Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)
   --mgd         convert to Multi Game Doctor*/MGD2/RAW
   --swap        swap bits of all bytes in file (TurboGrafx-16 &#60;-&#62; PC-Engine)
    -f           fix region protection
-  --multi=SIZE  make multi-game file for use with PCE-PRO flash card,
-                  truncated to SIZE Mbit; file with loader must be specified
-                  first, then all the ROMs, multi-game file to create last
+  --multi=SIZE  make multi-game file for use with PCE-PRO flash card, truncated
+                  to SIZE Mbit; file with loader must be specified first, then
+                  all the ROMs, multi-game file to create last
 Magic Super Griffin/MSG
   --xmsg        send/receive ROM to/from Magic Super Griffin/MSG; --port=PORT
                   receives automatically when ROM does not exist

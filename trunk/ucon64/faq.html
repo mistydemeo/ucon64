@@ -65,8 +65,9 @@ Q20: <a href="#20">How do I specify a bank number for the GB Xchanger?</a><br>
 Q21: <a href="#21">What is the difference between the Flash Advance Linker
    options -xfals and -xfalb &#60;n&#62;?</a><br>
 <br>
-Q22: <a href="#22">uCON64 exits with the message "Flash cart erase failed!"
-   when I try to write a multirom to my flash card. What is wrong?</a><br>
+Q22: <a href="#22">uCON64 exits with the message "ERROR: Flash card erase
+   failed" when I try to write a multi-game file to my flash card. What is
+   wrong?</a><br>
 <br>
 Q23: <a href="#23">Where can I get that loader or "game pack" file?</a><br>
 <br>
@@ -76,12 +77,12 @@ Q25: <a href="#25">Why does uCON64 create ucon64.cfg (DOS executable) or
    .ucon64rc (Win32 executable) files all over the place under DOS and
    Windows&nbsp;9x (command.com)?</a><br>
 <br>
-Q26: <a href="#26">When I try to create a multirom under Windows I get the
-   message "The system cannot execute the specified program." (or something
+Q26: <a href="#26">When I try to create a multi-game file under Windows I get
+   the message "The system cannot execute the specified program." (or something
    similar). What does that mean?</a><br>
 <br>
-Q27: <a href="#27">I tried to run the Win32 executable of uCON64 but Windows
-   gave an error message that cygwin1.dll, cygz.dll or zlib.dll could not be
+Q27: <a href="#27">I tried to run a Win32 executable of uCON64 but Windows gave
+   an error message that cygwin1.dll, cygz.dll or zlib.dll could not be
    found.</a><br>
 <br>
 Q28: <a href="#28">How do I make uCON64 display one help screen at a time?</a><br>
@@ -840,32 +841,33 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <b>A</b>: When saving -xfals saves all 256 kB while -xfalb &#60;n&#62; saves
    only the 64 kB of bank n. When restoring -xfals starts restoring the SRAM in
    bank 1 while -xfalb &#60;n&#62; starts in bank n. For example, if you have
-   Super Mario Advance 2 (J) in your Flash Card in "ROM bank" 4 (GBA Pack) and
-   would like to save/restore SRAM bank 4 you should do something like:<br>
+   Super Mario Advance 2 (J) on your flash card in "ROM bank" 4 and would like
+   to save/restore SRAM bank 4 you should do something like:<br>
    &nbsp;&nbsp; ucon64 -xfalb 4 "Super Mario Advance 2 (J).sav"<br>
    The file size determines how many bytes are restored, even when you use
    -xfalb &#60;n&#62;. So, if the file is greater than 64 kB more than one bank
    will be written to.<br>
 <br>
 <p>
-<a name="22"><b>Q22</b>: uCON64 exits with the message "Flash cart erase
-   failed!" when I try to write a multirom to my flash card. What is wrong?</a><br>
-<b>A</b>: The multirom file you created is too large for your flash card. When
-   you make a multirom file do not forget that the loader or "game pack" file
-   also needs some space (32 kB) on the flash card. Do not pass a size to
-   -multi that is larger than your flash card. Passing a smaller size is
-   correct though. For example, to create a multirom that fits on a 128 Mb (16
+<a name="22"><b>Q22</b>: uCON64 exits with the message "ERROR: Flash card erase
+   failed" when I try to write a multi-game file to my flash card. What is
+   wrong?</a><br>
+<b>A</b>: The multi-game file you created is too large for your flash card. When
+   you make a multi-game file do not forget that the loader or "game pack" file
+   also needs some space (32 kB) on the flash card. Do not pass a size to -multi
+   that is larger than your flash card. Passing a smaller size is correct
+   though. For example, to create a multi-game file that fits on a 128 Mb (16
    MB) card use a command line like this:<br>
    &nbsp;&nbsp; ucon64 -gba -multi=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba multi.bin<br>
    You can also send it directly by using -xfalmulti:<br>
    &nbsp;&nbsp; ucon64 -xfalmulti=128 rom1.gba rom2.gba rom3.gba rom4.gba<br>
    Please note that when using -multi you have to specify a loader and the name
-   of the multirom file to create, while when using -xfalmulti you must omit
+   of the multi-game file to create, while when using -xfalmulti you must omit
    them. -xfalmulti uses the variable gbaloader to find the loader. See
    <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
    Just like sometimes happens with Visoly's tool it is possible to get the
-   same message when the multirom is small enough. It will probably work when
-   you try again (with the same multirom).<br>
+   same message when the multi-game file is small enough. It will probably work when
+   you try again (with the same multi-game file).<br>
 <br>
 <p>
 <a name="23"><b>Q23</b>: Where can I get that loader or "game pack" file?</a><br>
@@ -914,20 +916,20 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    -version on the command line.<br>
 <br>
 <p>
-<a name="26"><b>Q26</b>: When I try to create a multirom under Windows I get
-   the message "The system cannot execute the specified program." (or something
-   similar). What does that mean?</a><br>
+<a name="26"><b>Q26</b>: When I try to create a multi-game file under Windows I
+   get the message "The system cannot execute the specified program." (or
+   something similar). What does that mean?</a><br>
 <b>A</b>: You can get that message with the DOS executable if you pass more
    than 127 characters as argument to uCON64. There are two solutions:<br>
-   1.) Use the Win32 executable (download it from
+   1.) Use a Win32 executable (download one from
    <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64
    homepage</a>).<br>
    2.) Rename the ROMs so that their combined names are short enough to fit
    into 127 characters.<br>
 <br>
 <p>
-<a name="27"><b>Q27</b>: I tried to run the Win32 executable of uCON64 but
-   Windows gave an error message that cygwin1.dll, cygz.dll or zlib.dll could
+<a name="27"><b>Q27</b>: I tried to run a Win32 executable of uCON64 but Windows
+   gave an error message that cygwin1.dll, cygz.dll or zlib.dll could
    not be found.</a><br>
 <b>A</b>: The Cygwin-compiled Win32 executable of uCON64 needs cygwin1.dll and
    cygz.dll in order to run. The Visual C++-compiled Win32 executable needs

@@ -84,15 +84,15 @@ const st_usage_t genesis_usage[] =
     {"f", 0, NULL, "remove NTSC/PAL protection", NULL},
     {"chk", 0, NULL, "fix ROM checksum", NULL},
     {"1991", 0, NULL, "fix old third party ROMs to work with consoles build after\n"
-                "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\"", NULL},
-    {"multi", 1, "SIZE", "make multi-game file for use with MD-PRO flash card,\n"
-                      "truncated to SIZE Mbit; file with loader must be specified\n"
-                      "first, then all the ROMs, multi-game file to create last", NULL},
+                      "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\"", NULL},
+    {"multi", 1, "SIZE", "make multi-game file for use with MD-PRO flash card, truncated\n"
+                         "to SIZE Mbit; file with loader must be specified first, then\n"
+                         "all the ROMs, multi-game file to create last", NULL},
     {"region", 1, "CODE", "enable region function; use with -multi\n"
-                       "CODE=0 force NTSC/Japan for all games\n"
-                       "CODE=1 force NTSC/U.S.A. for all games\n"
-                       "CODE=2 force PAL for all games\n"
-                       "CODE=x use whatever setting games expect", NULL},
+                          "CODE=0 force NTSC/Japan for all games\n"
+                          "CODE=1 force NTSC/U.S.A. for all games\n"
+                          "CODE=2 force PAL for all games\n"
+                          "CODE=x use whatever setting games expect", NULL},
     {NULL, 0, NULL, NULL, NULL}
   };
 
@@ -1011,7 +1011,7 @@ genesis_multi (int truncate_size, char *fname)
         printf ("WARNING: Invalid region code specified, using values games expect\n");
       }
 
-  printf ("Creating multi-game file: %s\n", destname);
+  printf ("Creating multi-game file for MD-PRO: %s\n", destname);
 
   file_no = 0;
   for (n = 1; n < n_files; n++)

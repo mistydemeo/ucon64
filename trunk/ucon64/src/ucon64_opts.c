@@ -1248,8 +1248,8 @@ ucon64_options (int c, const char *optarg)
       break;
 
 #if 0
-        case UCON64_IP:
-          break;
+    case UCON64_IP:
+      break;
 #endif
 
     case UCON64_VMS:
@@ -1902,6 +1902,7 @@ ucon64_options (int c, const char *optarg)
         }
       if (gba_multi (strtol (optarg, NULL, 10) * MBIT, src_name) == 0)
         { // Don't try to start a transfer if there was a problem
+          fputc ('\n', stdout);
           ucon64.file_size = q_fsize (src_name);
           fal_write_rom (src_name, ucon64.parport);
         }

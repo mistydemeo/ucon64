@@ -58,8 +58,8 @@ const st_usage_t sms_usage[] =
     {"smds", 0, NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD", NULL},
     {"chk", 0, NULL, "fix ROM checksum (SMS only)", NULL},
     {"multi", 1, "SIZE", "make multi-game file for use with SMS-PRO/GG-PRO flash card,\n"
-                      "truncated to SIZE Mbit; file with loader must be specified\n"
-                      "first, then all the ROMs, multi-game file to create last", NULL},
+                         "truncated to SIZE Mbit; file with loader must be specified\n"
+                         "first, then all the ROMs, multi-game file to create last", NULL},
     {NULL, 0, NULL, NULL, NULL}
   };
 
@@ -300,7 +300,7 @@ sms_multi (int truncate_size, char *fname)
       return -1;
     }
 
-  printf ("Creating multi-game file: %s\n", destname);
+  printf ("Creating multi-game file for SMS-PRO/GG-PRO: %s\n", destname);
 
   file_no = 0;
   for (n = 1; n < n_files; n++)

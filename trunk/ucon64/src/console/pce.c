@@ -58,9 +58,9 @@ const st_usage_t pcengine_usage[] =
     {"mgd", 0, NULL, "convert to Multi Game Doctor*/MGD2/RAW", NULL},
     {"swap", 0, NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)", NULL},
     {"f", 0, NULL, "fix region protection", NULL},
-    {"multi", 1, "SIZE", "make multi-game file for use with PCE-PRO flash card,\n"
-                      "truncated to SIZE Mbit; file with loader must be specified\n"
-                      "first, then all the ROMs, multi-game file to create last", NULL},
+    {"multi", 1, "SIZE", "make multi-game file for use with PCE-PRO flash card, truncated\n"
+                         "to SIZE Mbit; file with loader must be specified first, then\n"
+                         "all the ROMs, multi-game file to create last", NULL},
     {NULL, 0, NULL, NULL, NULL}
 };
 
@@ -856,7 +856,7 @@ pcengine_multi (int truncate_size, char *fname)
       return -1;
     }
 
-  printf ("Creating multi-game file: %s\n", destname);
+  printf ("Creating multi-game file for PCE-PRO: %s\n", destname);
 
   file_no = 0;
   for (n = 1; n < n_files; n++)

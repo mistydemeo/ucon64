@@ -43,8 +43,8 @@ const st_usage_t fal_usage[] =
     {"xfal", 0, NULL, "send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically (32 Mbits) when ROM does not exist", NULL},
     {"xfalmulti", 1, "SIZE", "send multiple ROMs to Flash Advance Linker (makes temporary\n"
-                          "multirom truncated to SIZE Mbit); specify a loader in the\n"
-                          "configuration file; " OPTION_LONG_S "port=PORT", NULL},
+                          "multi-game file truncated to SIZE Mbit); specify a loader in\n"
+                          "the configuration file; " OPTION_LONG_S "port=PORT", NULL},
     {"xfalc", 1, "N", "receive N Mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
                    "N can be 8, 16, 32, 64, 128 or 256", NULL},
     {"xfals", 0, NULL, "send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"

@@ -4,10 +4,12 @@ DLOPEN=1
 #USE_ZLIB=1
 USE_DISCMAGE=1
 #USE_USB=1
+USE_LIBCD64=1
 
 CC=gcc
 CFLAGS=-I. -Wall -W -O3 -DHAVE_CONFIG_H
 LDFLAGS=-s
+TARGETS=
 
 ifdef USE_DISCMAGE
 LIBNAME_DM=discmage
@@ -82,6 +84,14 @@ endif
 endif                                   # DJGPP
 endif                                   # GCC_WIN
 
+TARGETS+=libdiscmage/$(FULLLIBNAME_DM)
+
+
+ifdef USE_LIBCD64
+LDFLAGS+=backup/libcd64/libcd64.a
+TARGETS+=backup/libcd64/libcd64.a
+endif
+
 
 OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
         misc.o misc_chk.o misc_par.o getopt.o \
@@ -135,12 +145,14 @@ ifdef DJGPP                             # OSTYPE is not defined by default under
 TARGET:=$(addsuffix .exe,$(TARGET))
 endif                                   # DJGPP
 endif                                   # GCC_WIN
+TARGETS+=$(TARGET)
 
-all: libdiscmage/$(FULLLIBNAME_DM) $(TARGET)
+all: $(TARGETS)
 
 
 CLEAN_CMD=rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~; \
-cd libdiscmage && $(MAKE) clean
+cd libdiscmage && $(MAKE) clean; \
+cd ../backup/libcd64 && $(MAKE) clean
 
 clean:
 ifeq ($(GCC_WIN),1)
@@ -154,7 +166,9 @@ ifdef DJGPP
 	del $(TARGET)
 	cd libdiscmage
 	$(MAKE) clean
-	cd ..
+	cd ../backup/libcd64
+	$(MAKE) clean
+	cd ../..
 else                                    # Unix, BeOS or Mac OS X (Darwin)
 	$(CLEAN_CMD)
 endif                                   # DJGPP
@@ -162,7 +176,9 @@ endif                                   # GCC_WIN
 
 
 DISTCLEAN_CMD=rm -f Makefile config.log config.status config.cache config.h; \
-cd libdiscmage && $(MAKE) distclean
+cd libdiscmage && $(MAKE) distclean; \
+cd ../backup/libcd64 && $(MAKE) clean
+# libcd64 Makefile has no distclean target
 
 distclean: clean
 ifeq ($(GCC_WIN),1)
@@ -176,7 +192,9 @@ ifdef DJGPP
 	del config.h
 	cd libdiscmage
 	$(MAKE) distclean
-	cd ..
+	cd ../backup/libcd64
+	$(MAKE) clean
+	cd ../..
 else
 	$(DISTCLEAN_CMD)
 endif                                   # DJGPP
@@ -185,6 +203,9 @@ endif                                   # GCC_WIN
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@
+
+backup/cd64.o: backup/cd64.c
+	$(CC) $(CFLAGS) -Ibackup/libcd64 -c $< -o $@
 
 
 ifdef USE_DISCMAGE
@@ -198,6 +219,21 @@ ifdef DJGPP
 	cd ..
 else
 	cd libdiscmage && $(MAKE)
+endif                                   # DJGPP
+endif                                   # GCC_WIN
+endif                                   # USE_DISCMAGE
+
+ifdef USE_LIBCD64
+backup/libcd64/libcd64.a:
+ifeq ($(GCC_WIN),1)
+	cd backup/libcd64 && $(MAKE)
+else
+ifdef DJGPP
+	cd backup/libcd64
+	$(MAKE)
+	cd ../..
+else
+	cd backup/libcd64 && $(MAKE)
 endif                                   # DJGPP
 endif                                   # GCC_WIN
 endif                                   # USE_DISCMAGE

@@ -2,6 +2,8 @@
 cd64.h - CD64 support for uCON64
 
 written by 2001 NoisyB (noisyb@gmx.net)
+           2004 dbjh
+
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,10 +23,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define CD64_H
 
 extern const st_getopt2_t cd64_usage[];
-#define CD64_HEADER_START 0
-#define CD64_HEADER_LEN 0
 
-#ifdef USE_PARALLEL
+#if     defined USE_PARALLEL && defined USE_LIBCD64
+extern int cd64_read_rom(const char *filename, int size);
+extern int cd64_write_rom(const char *filename);
+extern int cd64_write_bootemu (const char *filename);
+extern int cd64_read_sram(const char *filename);
+extern int cd64_write_sram(const char *filename);
+extern int cd64_read_flashram(const char *filename);
+extern int cd64_write_flashram(const char *filename);
+extern int cd64_read_eeprom(const char *filename);
+extern int cd64_write_eeprom(const char *filename);
+extern int cd64_read_mempack(const char *filename, int index);
+extern int cd64_write_mempack(const char *filename, int index);
 #endif // USE_PARALLEL
 
 #endif // CD64_H

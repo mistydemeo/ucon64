@@ -2,10 +2,12 @@ DLOPEN=1
 #USE_ZLIB=1
 USE_DISCMAGE=1
 #USE_USB=1
+USE_LIBCD64=1
 
 CC=cl.exe
 CFLAGS=/nologo /I. /W3 /O2 /DHAVE_CONFIG_H
 LDFLAGS=/NOLOGO setargv.obj
+TARGETS=
 
 !ifdef USE_DISCMAGE
 LIBNAME_DM=discmage
@@ -16,6 +18,14 @@ FULLLIBNAME_DM=$(LIBNAME_DM).dll
 !ifndef DLOPEN
 LDFLAGS=$(LDFLAGS) libdiscmage/$(LIBNAME_DM).lib
 !endif
+!endif
+
+TARGETS=$(TARGETS) libdiscmage/$(FULLLIBNAME_DM)
+
+
+!ifdef USE_LIBCD64
+LDFLAGS=$(LDFLAGS) backup/libcd64/cd64.lib
+TARGETS=$(TARGETS) backup/libcd64/cd64.lib
 !endif
 
 
@@ -49,8 +59,9 @@ OBJECTS=$(OBJECTS) misc_usb.obj
 
 
 TARGET=ucon64.exe
+TARGETS=$(TARGETS) $(TARGET)
 
-all: libdiscmage/$(FULLLIBNAME_DM) $(TARGET)
+all: $(TARGETS)
 
 
 clean:
@@ -61,18 +72,26 @@ clean:
 	del $(TARGET)
 	cd libdiscmage
 	$(MAKE) /NOLOGO /f Makefile.vc6 clean
-	cd ..
+	cd ..\backup\libcd64
+	$(MAKE) /NOLOGO /f Makefile.vc6 clean
+	cd ..\..
 
 
 distclean: clean
 	del config.h
 	cd libdiscmage
 	$(MAKE) /NOLOGO /f Makefile.vc6 distclean
-	cd ..
+	cd ..\backup\libcd64
+# libcd64 Makefile has no distclean target
+	$(MAKE) /NOLOGO /f Makefile.vc6 clean
+	cd ..\..
 
 
 .c.obj:
 	$(CC) $(CFLAGS) /c $< /Fo$@
+
+backup/cd64.obj:
+	$(CC) $(CFLAGS) /Ibackup/libcd64 /c $*.c /Fo$@
 
 
 !ifdef USE_DISCMAGE
@@ -80,6 +99,13 @@ libdiscmage/$(FULLLIBNAME_DM):
 	cd libdiscmage
 	$(MAKE) /NOLOGO /f Makefile.vc6
 	cd ..
+!endif
+
+!ifdef USE_LIBCD64
+backup/libcd64/cd64.lib:
+	cd backup/libcd64
+	$(MAKE) /NOLOGO /f Makefile.vc6
+	cd ../..
 !endif
 
 

@@ -96,6 +96,9 @@
 /* enable libdiscmage (default: yes) */
 #undef USE_DISCMAGE
 
+/* enable libcd64 (default: no) */
+#undef USE_LIBCD64
+
 /* enable support for parallel port backup units (default: yes) */
 #undef USE_PARALLEL
 

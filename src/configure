@@ -833,6 +833,7 @@ Optional Features:
   --enable-dload          enable dynamic loading of add-on libraries (default:
                           yes)
   --enable-discmage       enable libdiscmage (default: yes)
+  --enable-libcd64        enable libcd64 (default: no)
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -2161,6 +2162,28 @@ _ACEOF
 fi
 echo "$as_me:$LINENO: result: $enable_discmage" >&5
 echo "${ECHO_T}$enable_discmage" >&6
+
+
+
+echo "$as_me:$LINENO: checking whether libcd64 is enabled" >&5
+echo $ECHO_N "checking whether libcd64 is enabled... $ECHO_C" >&6
+# Check whether --enable-libcd64 or --disable-libcd64 was given.
+if test "${enable_libcd64+set}" = set; then
+  enableval="$enable_libcd64"
+  enable_libcd64=$enableval
+else
+  enable_libcd64=no
+fi;
+if test $enable_libcd64 = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define USE_LIBCD64 1
+_ACEOF
+
+  DEFINE_LIBCD64_MAKE="USE_LIBCD64=1"
+fi
+echo "$as_me:$LINENO: result: $enable_libcd64" >&5
+echo "${ECHO_T}$enable_libcd64" >&6
 
 
 
@@ -4484,6 +4507,7 @@ s,@OBJEXT@,$OBJEXT,;t t
 s,@CPP@,$CPP,;t t
 s,@DEFINE_DLOPEN_MAKE@,$DEFINE_DLOPEN_MAKE,;t t
 s,@DEFINE_DISCMAGE_MAKE@,$DEFINE_DISCMAGE_MAKE,;t t
+s,@DEFINE_LIBCD64_MAKE@,$DEFINE_LIBCD64_MAKE,;t t
 s,@DEFINE_ZLIB_MAKE@,$DEFINE_ZLIB_MAKE,;t t
 s,@DEFINE_USB_MAKE@,$DEFINE_USB_MAKE,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t

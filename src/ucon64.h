@@ -158,13 +158,14 @@ typedef struct
   int interleaved;                              // ROM is interleaved (swapped)
   int id;                                       // generate unique name (currently
                                                 //  only used by snes_gd3())
-  // the following values are for SNES, NES and Genesis
+  // the following values are for SNES, NES, Genesis and Nintendo 64
   int battery;                                  // NES UNIF/iNES/Pasofami
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
   const char *comment;                          // NES UNIF
   int controller;                               // NES UNIF & SNES NSRT
   int controller2;                              // SNES NSRT
   const char *dump_info;                        // NES UNIF
+  int io_mode;                                  // SNES SWC & Nintendo 64 CD64
   const char *mapr;                             // NES UNIF board name or iNES mapper number
   int mirror;                                   // NES UNIF/iNES/Pasofami
   int part_size;                                // SNES/Genesis split part size
@@ -172,7 +173,6 @@ typedef struct
   int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
   int snes_hirom;                               // SNES ROM is HiROM
   int split;                                    // ROM is split
-  int swc_io_mode;                              // SNES SWC
   int tv_standard;                              // NES UNIF
   int use_dump_info;                            // NES UNIF
   int vram;                                     // NES UNIF

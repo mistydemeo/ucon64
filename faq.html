@@ -23,19 +23,19 @@ Q6: <a href="#6">I have two parallel ports in my PC and my Flash Advance Linker 
    What happened?</a><br>
 <br>
 Q7: <a href="#7">I tried to dump a SNES cartridge using a Super Wild Card connected to my PC with an
-   interlink cable, but it didn't work. What's wrong?</a><br>
+   interlink cable, but it did not work. What is wrong?</a><br>
 <br>
-Q8: <a href="#8">I have a SNES ROM of which GoodSNES says it's good, but uCON64 says it's bad.
+Q8: <a href="#8">I have a SNES ROM of which GoodSNES says it is good, but uCON64 says it is bad.
    Who is right?</a><br>
 <br>
-Q9: <a href="#9">I have a SNES ROM of which Snes9x and ZSNES say it's bad, but uCON64 says it's good.
+Q9: <a href="#9">I have a SNES ROM of which Snes9x and ZSNES say it is bad, but uCON64 says it is good.
    Who is right?</a><br>
 <br>
 Q10: <a href="#10">I have a SNES ROM of which uCON64 said it was bad, so I used the -chk option. Now
-   uCON64, Snes9x and ZSNES all say the ROM is good, but GoodSNES still says it's bad. How
+   uCON64, Snes9x and ZSNES all say the ROM is good, but GoodSNES still says it is bad. How
    can that be, I did fix the ROM, right?</a><br>
 <br>
-Q11: <a href="#11">Some SNES games don't work on my Super Wild Card. What can I
+Q11: <a href="#11">Some SNES games do not work on my Super Wild Card. What can I
    do about that?</a><br>
 <br>
 Q12: <a href="#12">Which backup devices are supported by uCON64?</a><br>
@@ -44,7 +44,7 @@ Q13: <a href="#13">I use Windows&nbsp;XP (NT/2000). When I try to run
    ucon64.exe under command.com (start -&#62; Run... -&#62; command) uCON64
    crashes. What do I do wrong?</a><br>
 <br>
-Q14: <a href="#14">I don't like the command line. Are there graphical frontends available?</a><br>
+Q14: <a href="#14">I do not like the command line. Are there graphical frontends available?</a><br>
 <br>
 Q15: <a href="#15">Where do I get PPF, APS or IPS patches?</a><br>
 <br>
@@ -57,11 +57,11 @@ Q18: <a href="#18">Why is my backup unit (still) not supported?</a><br>
 <br>
 Q19: <a href="#19">How do I specify a bank number for the GB Xchanger?</a><br>
 <br>
-Q20: <a href="#20">What's the difference between the Flash Advance Linker
+Q20: <a href="#20">What is the difference between the Flash Advance Linker
    options -xfals and -xfalb &#60;n&#62;?</a><br>
 <br>
 Q21: <a href="#21">uCON64 exits with the message "Flash cart erase failed!" when I try
-   to write a multirom to my flash card. What's wrong?</a><br>
+   to write a multirom to my flash card. What is wrong?</a><br>
 <br>
 Q22: <a href="#22">Where can I get that loader or "game pack" file?</a><br>
 <br>
@@ -82,7 +82,7 @@ Q26: <a href="#26">I tried to run the Win32 executable of uCON64 but Windows
 Q27: <a href="#27">How do I make uCON64 display one help screen at a time?</a><br>
 <br>
 Q28: <a href="#28">I tried to send a ROM dump to my copier under
-   Windows&nbsp;XP (NT/2000), but uCON64 crashed. What's wrong?</a><br>
+   Windows&nbsp;XP (NT/2000), but uCON64 crashed. What is wrong?</a><br>
 <br>
 Q29: <a href="#29">I want to convert a NES ROM in iNES format to UNIF. How do I know
    what board name to use?</a><br>
@@ -103,7 +103,7 @@ Q34: <a href="#34">When I try to convert a large number of files using
 <br>
 Q35: <a href="#35">Does uCON64 support DAT (GoodXXXX, RomCenter, etc.) files?</a><br>
 <br>
-Q36: <a href="#36">Some SNES games don't work on my Super Pro Fighter Q(+).
+Q36: <a href="#36">Some SNES games do not work on my Super Pro Fighter Q(+).
    What can I do about that?</a><br>
 <br>
 Q37: <a href="#37">uCON64 displays too many lines for my DOS-box. What can I do
@@ -111,7 +111,7 @@ Q37: <a href="#37">uCON64 displays too many lines for my DOS-box. What can I do
 <br>
 Q38: <a href="#38">When will the next version of uCON64 be released? I
    have heard the next version is able to crack my favourite SNES game, but I
-   don't know how to use a compiler.</a><br>
+   do not know how to use a compiler.</a><br>
 <br>
 Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
 <br>
@@ -129,11 +129,17 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <br>
 <p>
 <a name="2"><b>Q2</b>: How do I compile uCON64?</a><br>
-<b>A</b>: You'll need either GCC or Visual C++. uCON64 can be compiled for Unix
-   (GNU/Linux, Solaris, FreeBSD), DOS, BeOS and Windows (95/98/NT/2000/XP). It
-   should also be possible to compile uCON64 for AmigaOS, but that port is not
-   directly supported by us, because we don't have access to a machine running
-   AmigaOS. The Amiga port is being maintained by Jan-Erik Karlsson.<br>
+<b>A</b>: To compile uCON64 you need a compiler :-) You can use either GCC (GNU
+   Compiler Collection) or the Visual C++ compiler. GCC can be freely
+   downloaded from
+   <a href="http://www.gnu.org/order/ftp.html" target="_blank">http://www.gnu.org/order/ftp.html</a>.
+   Visual C++ can be bought for about 60 euro (at 15 May 2003) in most computer
+   shops.<br>
+   uCON64 can be compiled for Unix (GNU/Linux, Solaris, FreeBSD), DOS, BeOS and
+   Windows (95/98/NT/2000/XP). It should also be possible to compile uCON64 for
+   AmigaOS, but that port is not directly supported by us, because we do not
+   have access to a machine running AmigaOS. The Amiga port is being maintained
+   by Jan-Erik Karlsson.<br>
    A DOS port of GCC (and other GNU development tools) named DJGPP is
    available from
    <a href="http://www.delorie.com/djgpp/" target="_blank">http://www.delorie.com/djgpp/</a>.
@@ -141,32 +147,39 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    is available from
    <a href="http://www.cygwin.com" target="_blank">http://www.cygwin.com</a>.<br>
 <br>
-   Some properties of uCON64 are configurable (only) at compile time. For
-   example whether uCON64 will be able to read zip files or whether it will be
-   able to communicate with backup devices connected to a parallel port. The
-   presence of these features is controlled by the header file config.h in
-   combination with the makefiles. There are two ways to create a config.h and
-   makefiles for uCON64:<br>
+   Some properties of uCON64 are configurable (only) at compile time. The
+   features that can be controlled at compile time are:<br>
+   - whether uCON64 will produce debug output<br>
+   - whether uCON64 will have support for parallel port backup units<br>
+   - whether uCON64 will use color in its display output<br>
+   - whether uCON64 will be able to read .gz and .zip files<br>
+   - whether add-on libraries will be dynamically loaded or linked<br>
+<br>
+   The presence or settings of these features is controlled by the header file
+   config.h in combination with the makefiles. There are two ways to create a
+   config.h and makefiles for uCON64:<br>
    1.) Run the configure script "configure".<br>
    You can do that with:<br>
    &nbsp;&nbsp; ./configure<br>
-<br>
-   However, the configure script can't be executed (directly) from command.com
-   or cmd.exe. command.com is the default shell on Windows&nbsp;9x, cmd.exe is
-   the default shell on Windows&nbsp;XP (NT/2000). So, the second way to get a
-   config.h and the accompanying makefiles is:<br>
+   To see which features can be controlled with the configure script type:<br>
+   &nbsp;&nbsp; ./configure --help<br>
    2.) Copy a tried-and-tested config.h "template" to a file config.h and copy
    a Makefile "template" to a file Makefile.<br>
-   For DOS (DJGPP) copy config.h.orig to config.h, Makefile.orig to Makefile
-   and libdiscmage/Makefile.orig to libdiscmage/Makefile. You can do the same
-   for Cygwin, but since you can run configure in Cygwin's Bash this is not the
-   preferred way for Cygwin.<br>
-   For Windows (Visual C++) copy config.h.vc6 to config.h. Don't copy
-   any of the Makefile.vc6 files. You may do so, but don't complain if these
-   instructions don't seem to be right after having done that.<br>
 <br>
-   Pass the option --without-zlib to the configure script if you don't want to
-   enable gzip &amp; zip support. zlib is available from
+   The first way doesn't work under command.com or cmd.exe as these shells
+   cannot (directly) execute Bash shell scripts. command.com is the default
+   shell on Windows&nbsp;9x, cmd.exe is the default shell on Windows&nbsp;XP
+   (NT/2000).<br>
+   So, for DOS (DJGPP) copy config.h.orig to config.h, Makefile.orig to
+   Makefile and libdiscmage/Makefile.orig to libdiscmage/Makefile. You can do
+   the same for Cygwin, but in Cygwin you can get the same effect much easier
+   by just running the configure script.<br>
+   For Windows (Visual C++) copy config.h.vc6 to config.h. Do not copy
+   any of the Makefile.vc6 files. You may do so, but do not complain if these
+   instructions do not seem to be right after having done that.<br>
+<br>
+   If you do not want to enable gzip &amp; zip support pass the option
+   --without-zlib to the configure script. zlib is available from
    <a href="http://www.gzip.org/zlib/" target="_blank">http://www.gzip.org/zlib/</a>.
    If you want to enable zlib support under DOS or Windows (Visual C++) you
    have to define the constant HAVE_ZLIB_H in config.h (remove the "//" in
@@ -175,19 +188,22 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    If you want to change other things in config.h or the makefiles do so before
    proceeding to the next step.<br>
 <br>
+   You have finished the configuration steps now. The next instructions will
+   tell you how to compile uCON64 with the settings you just made.<br>
    By default the library discmage will also be compiled. Discmage is used for
-   several CD-related functions in uCON64, but isn't required for non
+   several CD-related functions in uCON64, but is not required for non
    CD-related functions. For example, you won't need discmage for any of the
-   SNES functions. So, if you don't have a reason to not compile discmage do
-   the following for DJGPP and Cygwin:<br>
-   - either copy the file libgcc.a to the standard library directory<br>
-   - or edit libdiscmage/Makefile so that the variable GCCA_DIR points to the
-   directory containing libgcc.a<br>
+   SNES functions. So, if you do not have a reason to not compile discmage do
+   the following for DJGPP and Cygwin. Either:<br>
+   - copy the file libgcc.a to the standard library directory<br>
+   or:<br>
+   - edit the file libdiscmage/Makefile so that the variable GCCA_DIR points
+   to the directory containing libgcc.a<br>
    The first technique (copying the file) is prefered.<br>
-   If you don't intend to use the functionality that libdiscmage provides you
-   could skip the previous step and pass the argument "ucon64" (without the
-   quotes) as argument to make ("ucon64.exe" on WinDOS).<br>
-   Now read the relevant section for the compiler you're using.<br>
+   If you do not intend to use the functionality that libdiscmage provides you
+   could skip the previous step and pass "ucon64" (without the quotes) as
+   argument to make ("ucon64.exe" on WinDOS).<br>
+   Now read the relevant section for the compiler you are using.<br>
 <br>
    <b>GCC</b> (including DJGPP and Cygwin)<br>
 <br>
@@ -196,14 +212,14 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <br>
    If you want to compile the source code including discmage type:<br>
    &nbsp;&nbsp; make<br>
-   If you don't want to compile discmage the last command would like this for
-   DJGPP and Cygwin:<br>
+   If you do not want to compile discmage the last command should look like
+   this for DJGPP and Cygwin:<br>
    &nbsp;&nbsp; make ucon64.exe<br>
-   Otherwise it would like this:<br>
+   Otherwise it should look like this:<br>
    &nbsp;&nbsp; make ucon64<br>
 <br>
-   On Unix systems other than GNU/Linux you might need to use 'gmake' (GNU
-   make) instead of 'make'. If the last command has been successfully executed
+   On Unix systems other than GNU/Linux you might need to use "gmake" (GNU
+   make) instead of "make". If the last command has been successfully executed
    you can find the executable in the directory where you ran make. For DOS and
    Cygwin you are now ready to proceed to <a href="#3">question 3</a>. For the
    other platforms one extra command is needed (or simply handy):<br>
@@ -211,7 +227,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <br>
    Under Unix this command will ask for root's password, because uCON64 needs
    to be setuid root for parallel port access. If you configured uCON64 without
-   support for parallel port backup units, uCON64 needn't be setuid root. Just
+   support for parallel port backup units, uCON64 need not be setuid root. Just
    copy ucon64 to any directory you like. "make install" also creates a
    configuration directory for uCON64 and copies discmage.so to it, so you
    might find it easier to use it.<br>
@@ -226,7 +242,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <br>
    If you want to compile the source code including discmage type:<br>
    &nbsp;&nbsp; nmake -f Makefile.vc6<br>
-   If you don't want to compile discmage the last command would like this:<br>
+   If you do not want to compile discmage the last command should like this:<br>
    &nbsp;&nbsp; nmake -f Makefile.vc6 ucon64.exe<br>
 <br>
    Under GNU/Linux, DOS and Windows you could use UPX to compress the
@@ -237,12 +253,12 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <a name="3"><b>Q3</b>: How do I install uCON64?</a><br>
 <b>A</b>: You already did (for Unix and BeOS) if you followed the directions in
    the previous answer (you downloaded the source package). If you downloaded
-   the binary package you can ignore the previous question. If you don't use
+   the binary package you can ignore the previous question. If you do not use
    WinDOS run install.sh (Unix) or install_beos.sh (BeOS) and edit
    $HOME/.ucon64rc. If you use WinDOS you may want to copy ucon64.exe to a
    directory in your PATH and maybe edit ucon64.cfg (DOS version) or .ucon64rc
-   (Win32 version). uCON64 will create a configuration file if it can't find
-   one. If you use DOS or Windows&nbsp;9x and don't want uCON64 to create
+   (Win32 version). uCON64 will create a configuration file if it cannot find
+   one. If you use DOS or Windows&nbsp;9x and do not want uCON64 to create
    ucon64.cfg or .ucon64rc files all over the place (current directories) see
    <a href="#24">question 24</a>.<br>
    You might also want to make use of DAT files. See
@@ -270,8 +286,8 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    setting an environment variable with the name configdir. Note however, that
    although inpout32.dll is even easier to use than UserPort the transfer speed
    is much lower (about half as fast compared to the transfer speed in
-   combination with UserPort). io.dll doesn't have this limitation, but its
-   source code isn't freely available. uCON64 will display a message if it
+   combination with UserPort). io.dll does not have this limitation, but its
+   source code is not freely available. uCON64 will display a message if it
    finds io.dll or inpout32.dll before communicating with a copier. It displays
    this message before it displays file information, so you might want to use
    the command line switch -q. Only the Windows versions of uCON64 are able to
@@ -286,7 +302,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <p>
 <a name="4"><b>Q4</b>: Sometimes my terminal seems to be locked after "ucon64 -xswc &#60;file&#62; | more"</a><br>
 <b>A</b>: You are right, it <u>seems</u> to be locked, but the only thing that happened is
-   that the character echoing of the terminal is disabled by more. Just don't do that ;-)<br>
+   that the character echoing of the terminal is disabled by more. Just do not do that ;-)<br>
 <br>
 <p>
 <a name="5"><b>Q5</b>: How do I make uCON64 display only information about a ROM?</a><br>
@@ -307,11 +323,11 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    &nbsp;&nbsp; ucon64 -xfal demo.gba -port 0x278<br>
 <br>
    The I/O address of the parallel port can be 0x3bc, 0x378 or 0x278. If you
-   don't want to type the address of the parallel port everytime you want to
+   do not want to type the address of the parallel port everytime you want to
    transfer something to your FAL (or another copier) edit .ucon64rc or
    ucon64.cfg (for the DOS version) and remove the hash symbol in front of the
-   line that starts with "parport=" (without the quotes). If that line isn't
-   present add one. You don't have to use the prefix 0x. For example:<br>
+   line that starts with "parport=" (without the quotes). If that line is not
+   present add one. You do not have to use the prefix 0x. For example:<br>
    &nbsp;&nbsp; parport=278<br>
    You can also set an environment variable with the name parport to the right
    value. Note that the value of the environment variable takes precedence over
@@ -319,8 +335,8 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <br>
 <p>
 <a name="7"><b>Q7</b>: I tried to dump a SNES cartridge using a Super Wild Card connected to my PC with an
-   interlink cable, but it didn't work. What's wrong?</a><br>
-<b>A</b>: You shouldn't use an interlink cable, but a standard bidirectional parallel cable,
+   interlink cable, but it did not work. What is wrong?</a><br>
+<b>A</b>: You should not use an interlink cable, but a standard bidirectional parallel cable,
    i.e., a cable with male DB-25 connectors at both ends where the pins are connected in the
    following way:<br>
    pin 1&nbsp; &#60;-&#62; pin 1<br>
@@ -342,8 +358,8 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    and pin 25 is ground.<br>
 <br>
 <p>
-<a name="8"><b>Q8</b>: I have a SNES ROM of which GoodSNES says it's good, but
-   uCON64 says it's bad. Who is right?</a><br>
+<a name="8"><b>Q8</b>: I have a SNES ROM of which GoodSNES says it is good, but
+   uCON64 says it is bad. Who is right?</a><br>
 <b>A</b>: GoodSNES.<br>
    There may be several reasons why uCON64 reports that the checksum is bad.
    It could have made a mistake while determining if the ROM is a HiROM or a
@@ -355,20 +371,20 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    reported as good it is very likely that the ROM is really good.
    Alternatively, you may want to convert the ROM to a non-interleaved format
    with -dint and run uCON64 on the converted ROM. That gives the best results.
-   Luckily you won't find many interleaved ROM dumps that uCON64 can't
-   handle, probably because Snes9x and ZSNES often can't handle them either.<br>
+   Luckily you won't find many interleaved ROM dumps that uCON64 cannot
+   handle, probably because Snes9x and ZSNES often cannot handle them either.<br>
 <br>
 <p>
-<a name="9"><b>Q9</b>: I have a SNES ROM of which Snes9x and ZSNES say it's bad, but uCON64 says it's good.
+<a name="9"><b>Q9</b>: I have a SNES ROM of which Snes9x and ZSNES say it is bad, but uCON64 says it is good.
    Who is right?</a><br>
 <b>A</b>: uCON64, probably :-)<br>
    Neither Snes9x 1.39 nor ZSNES 1.36 calculate the checksum correctly for BS ROMs, so you
-   can be pretty sure the ROM is good if it's a BS ROM. See previous answer.<br>
+   can be pretty sure the ROM is good if it is a BS ROM. See previous answer.<br>
 <br>
 <p>
 <a name="10"><b>Q10</b>: I have a SNES ROM of which uCON64 said it was bad, so
    I used the -chk option. Now uCON64, Snes9x and ZSNES all say the ROM is
-   good, but GoodSNES still says it's bad. How can that be, I did fix the ROM,
+   good, but GoodSNES still says it is bad. How can that be, I did fix the ROM,
    right?</a><br>
 <b>A</b>: No, you did not. When you use -chk uCON64 changes four bytes in the
    ROM dump, so that they match with the calculated checksum. However, the ROM
@@ -379,11 +395,11 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    checksum that is stored in the ROM.<br>
 <br>
 <p>
-<a name="11"><b>Q11</b>: Some SNES games don't work on my Super Wild Card.
+<a name="11"><b>Q11</b>: Some SNES games do not work on my Super Wild Card.
    What can I do about that?</a><br>
 <b>A</b>: You can do several things. First make sure the original game
-   cartridge doesn't contain any special chips that your Super Wild Card
-   doesn't support (look at the ROM type information). For example, if you are
+   cartridge does not contain any special chips that your Super Wild Card
+   does not support (look at the ROM type information). For example, if you are
    trying to upload a game like Super Mario Kart (which uses a DSP chip) your
    Super Wild Card should have an extension with the correct DSP chip (or have
    the right cartridge with that chip plugged in your SWC). Then, make sure you
@@ -399,7 +415,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    There are many (good) ROMs on the internet with incorrect headers, so this
    might well solve the problem.<br>
    Several games contain a copy protection that prevents them from running on
-   a backup unit, so this can also be a reason why the game doesn't work. You
+   a backup unit, so this can also be a reason why the game does not work. You
    can try -k to remove that protection. Several games also check if they are
    running on a PAL or an NTSC SNES. Use -f to remove that form of copy
    protection. Some other games check the ROM speed. You can use -l for those.
@@ -410,7 +426,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    update or improve the options -k, -f and -l without having to (re)compile
    the source code.<br>
 <br>
-   Some games seem to work, but after a while it becomes clear that they don't
+   Some games seem to work, but after a while it becomes clear that they do not
    run as was intended. Two examples of such games are Demon's Crest and Mega
    Man X. Here follows an explanation on how to get them to work. All credits
    go to Gideon Zhi for sharing this info on cherryroms. Start with ROM images
@@ -431,7 +447,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    example:<br>
    &nbsp;&nbsp; copy /b "Mega Man X.swc" + "Mega Man X.swc" "Mega Man X (SWC-fix).swc"<br>
 <br>
-   However, starting from version 1.9.8beta6 the method described above isn't
+   However, starting from version 1.9.8beta6 the method described above is not
    necessary anymore for Demon's Crest. Use the option -k instead. For
    Mega Man X you will need version 1.9.8beta7 or later.<br>
 <br>
@@ -448,11 +464,11 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <a name="13"><b>Q13</b>: I use Windows&nbsp;XP (NT/2000). When I try to run
    ucon64.exe under command.com (start -&#62; Run... -&#62; command) uCON64
    crashes. What do I do wrong?</a><br>
-<b>A</b>: You shouldn't use command, use cmd instead. However, starting from version 1.9.8 uCON64 should run fine
+<b>A</b>: You should not use command, use cmd instead. However, starting from version 1.9.8 uCON64 should run fine
    under command.com.<br>
 <br>
 <p>
-<a name="14"><a name="frontend"><b>Q14</b>: I don't like the command line. Are there graphical frontends available?</a><br>
+<a name="14"><a name="frontend"><b>Q14</b>: I do not like the command line. Are there graphical frontends available?</a><br>
 <b>A</b>: Yes, have a look at <a href="http://ucon64.sourceforge.net/index2.html#ucon64gui" target="_blank">http://ucon64.sourceforge.net/index2.html#ucon64gui</a><br>
 <br>
 <p>
@@ -483,19 +499,19 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <br>
 <p>
 <a name="18"><b>Q18</b>: Why is my backup unit (still) not supported?</a><br>
-<b>A</b>: Get us the protocol or the sources of existing transfer tools and you'll
+<b>A</b>: Get us the protocol or the sources of existing transfer tools and you will
    see what happens. uCON64 already supports all important backup units which
    were and are available. Manufacturers of devices which are still not
    supported are welcome to contact us.<br>
 <br>
 <p>
 <a name="19"><b>Q19</b>: How do I specify a bank number for the GB Xchanger?</a><br>
-<b>A</b>: ucon64 -xgbxb &#60;0&#62; "Pokemon (Green).sav" wouldn't work.
+<b>A</b>: ucon64 -xgbxb &#60;0&#62; "Pokemon (Green).sav" would not work.
    You should leave out those angle brackets. This should work:<br>
    &nbsp;&nbsp; ucon64 -xgbxb 0 "Pokemon (Green).sav"<br>
 <br>
 <p>
-<a name="20"><b>Q20</b>: What's the difference between the Flash Advance Linker
+<a name="20"><b>Q20</b>: What is the difference between the Flash Advance Linker
    options -xfals and -xfalb &#60;n&#62;?</a><br>
 <b>A</b>: When saving -xfals saves all 256 kB while -xfalb &#60;n&#62; saves
    only the 64 kB of bank n. When restoring -xfals starts restoring the SRAM in
@@ -509,10 +525,10 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <br>
 <p>
 <a name="21"><b>Q21</b>: uCON64 exits with the message "Flash cart erase failed!" when I try
-   to write a multirom to my flash card. What's wrong?</a><br>
+   to write a multirom to my flash card. What is wrong?</a><br>
 <b>A</b>: The multirom file you created is too large for your flash card. When you make a
-   multirom file don't forget that the loader or "game pack" file also needs some space (32
-   kB) on the flash card. Don't pass a size to -multi that is larger than your flash card.
+   multirom file do not forget that the loader or "game pack" file also needs some space (32
+   kB) on the flash card. Do not pass a size to -multi that is larger than your flash card.
    Passing a smaller size is correct too. For example, to create a multirom that fits on a
    128 Mb (16 MB) card use a command line like this:<br>
    &nbsp;&nbsp; ucon64 -multi=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba multi.bin<br>
@@ -524,7 +540,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <p>
 <a name="22"><b>Q22</b>: Where can I get that loader or "game pack" file?</a><br>
 <b>A</b>: You can get it from <a href="http://www.visoly.com" target="_blank">Visoly's site</a>.
-   It's in a file with a name like <a href="http://www.visoly.com/download/preboot32.zip">preboot32.zip</a>.<br>
+   It is in a file with a name like <a href="http://www.visoly.com/download/preboot32.zip">preboot32.zip</a>.<br>
 <br>
 <p>
 <a name="23"><b>Q23</b>: What is the meaning of the -col option (SNES)?</a><br>
@@ -532,7 +548,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    You can use a GFX or HTML editor to find an identical green color and
    write down the color values in HTML style (#RRGGBB). Now you run
    "ucon64 -col #RRGGBB" and it will calculate the hex value for the corresponding
-   SNES color. Ok? No? Then you don't need this option :-)<br>
+   SNES color. Ok? No? Then you do not need this option :-)<br>
 <br>
 <p>
 <a name="24"><b>Q24</b>: Why does uCON64 create ucon64.cfg (DOS executable) or
@@ -542,13 +558,13 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    directory where it can create one. It checks the environment for a variable
    with the name HOME, USERPROFILE or HOMEDRIVE and HOMEPATH (in that order).
    Under Unix HOME is normally set. Under Windows&nbsp;XP and 2000 (NT?)
-   USERPROFILE, HOMEDRIVE and HOMEPATH are usually set. If uCON64 can't find
+   USERPROFILE, HOMEDRIVE and HOMEPATH are usually set. If uCON64 cannot find
    one of those environment variables it will look for the configuration file
-   in the current directory. If it can't find a configuration file it will
+   in the current directory. If it cannot find a configuration file it will
    create one. Under DOS and Windows&nbsp;9x none of those environment
    variables are usually set. So, if you run uCON64 under DOS or
    Windows&nbsp;9x in a directory where no configuration file exists it will
-   create one there. If you don't like this behaviour you should set one of the
+   create one there. If you do not like this behaviour you should set one of the
    mentioned environment variables yourself. You can do that by adding the
    following line to the end of the file c:\autoexec.bat:<br>
    &nbsp;&nbsp; set HOME=c:\ucon64<br>
@@ -602,13 +618,13 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <br>
 <p>
 <a name="28"><b>Q28</b>: I tried to send a ROM dump to my copier under
-   Windows&nbsp;XP (NT/2000), but uCON64 crashed. What's wrong?</a><br>
+   Windows&nbsp;XP (NT/2000), but uCON64 crashed. What is wrong?</a><br>
 <b>A</b>: If the message looks like this (for the Win32 (Cygwin) executable):<br>
    &nbsp;&nbsp; 0 [main] ucon64 356 handle_exceptions: Exception: STATUS_PRIVILEGED_INSTRUCTION<br>
    5570 [main] ucon64 356 open_stackdumpfile: Dumping stack trace to ucon64.exe.stackdump<br>
    or like this:<br>
    &nbsp;&nbsp; Illegal instruction (core dumped)<br>
-   then you didn't install an I/O driver (correctly). Note that in this case
+   then you did not install an I/O driver (correctly). Note that in this case
    "install" means that the I/O driver is running at the time uCON64 tries to
    access the parallel port. See <a href="#3">question 3</a>.<br>
    You will also see this message if you tried to enable EPP mode for the FAL
@@ -661,7 +677,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    &nbsp;&nbsp; ucon64 -unif smb.nes -mapr NROM -dumpinfo info.txt<br>
    If you already have a UNIF file the command line looks almost the same:<br>
    &nbsp;&nbsp; ucon64 -unif smb.unf -dumpinfo info.txt<br>
-   For an existing UNIF file you needn't specify the board name, but you might
+   For an existing UNIF file you need not specify the board name, but you might
    want to specify it if you want to change the board name in the file.
    Afterwards run uCON64 on the newly written ROM to see if you were
    successful. uCON64's display output should contain a dump info section then.<br>
@@ -671,7 +687,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    supports multiple controller types?</a><br>
 <b>A</b>: Use the -ctrl switch multiple times on the <b>same</b> command line.
    For example, to specify that a game supports the controller types "regular
-   joypad" and "power pad" you would use a command line like this:<br>
+   joypad" and "power pad" you should use a command line like this:<br>
    &nbsp;&nbsp; ucon64 -unif smb.nes -mapr NROM -ctrl 0 -ctrl 4<br>
 <br>
 <p>
@@ -696,7 +712,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <p>
 <a name="34"><b>Q34</b>: When I try to convert a large number of files using
    wildcards, uCON64 will only convert the first file. Is this a bug?</a><br>
-<b>A</b>: No, it isn't. uCON64 versions before 1.9.8beta7 just don't support
+<b>A</b>: No, it is not. uCON64 versions before 1.9.8beta7 just do not support
    wildcards. For example, to convert all files with the suffix (M$ speak:
    extension) .mgd to Super Wild Card format, try this in Bash:<br>
    &nbsp;&nbsp; find -name \*.mgd -exec ucon64 --snes --swc {} \;<br>
@@ -716,7 +732,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    -version to see which configuration file uCON64 uses
    (see <a href="#24">question 24</a>). Then open that file in an editor and
    look for a line that starts with "datdir=" (without the quotes). If that
-   line isn't present add one. For example on Unix:<br>
+   line is not present add one. For example on Unix:<br>
    &nbsp;&nbsp; datdir=~/.ucon64/dat<br>
    or on Windows:<br>
    &nbsp;&nbsp; datdir=c:\ucon64\dat<br>
@@ -737,12 +753,12 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    uCON64 will automatically create index files which speed up the access to
    the DAT files dramatically. Now uCON64 uses the information inside the DAT
    files to identify or rename ROMs without an internal header.<br>
-   Note that starting with version 1.9.8beta8 uCON64 doesn't have an internal
-   database anymore, so you'll <b>need</b> DAT files for files like NES ROM
+   Note that starting with version 1.9.8beta8 uCON64 does not have an internal
+   database anymore, so you will <b>need</b> DAT files for files like NES ROM
    dumps.<br>
 <br>
 <p>
-<a name="36"><b>Q36</b>: Some SNES games don't work on my Super Pro Fighter Q(+).
+<a name="36"><b>Q36</b>: Some SNES games do not work on my Super Pro Fighter Q(+).
    What can I do about that?</a><br>
 <b>A</b>: First read the answer to <a href="#11">question 11</a>.
    Starting with versions after 1.9.8beta8 you can send (and dump) games with
@@ -770,7 +786,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <p>
 <a name="38"><b>Q38</b>: When will the next version of uCON64 be released? I
    have heard the next version is able to crack my favourite SNES game, but I
-   don't know how to use CVS or a compiler.</a><br>
+   do not know how to use CVS or a compiler.</a><br>
 <b>A</b>: We know when we will release a new version only just before we do so.
    But starting with uCON64 1.9.8beta8 this is not a problem for you at all.
    The only requirement is that you are able to read and use a text editor ;-)<br>
@@ -788,11 +804,11 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    find this text in the comments:<br>
    &nbsp;&nbsp; af/bf XX 80 00 cf/df XX 80 40 f0<br>
    =&#62; af/bf XX 80 00 cf/df XX 80 40 80<br>
-   Then you could search for the sequence \x80\x40\xf0. It's just a subset of
+   Then you could search for the sequence \x80\x40\xf0. It is just a subset of
    the search pattern with each element prefixed with "\x". Searching for
    \xaf/\xbf won't bring you far. Searching for \xXX\x80 neither. It takes a
    bit too much text to explain all the details, so just follow the directions.
-   Note that I didn't advise to search for \x80\x40\x80, because that's what
+   Note that I did not advise to search for \x80\x40\x80, because that is what
    the sequence should be after uCON64 has cracked or fixed the game.<br>
    For Mega Man X you will find the lines:<br>
    &nbsp;&nbsp; n += change_mem (buffer, bytesread, "!*\x80\x00!*\x80\x40\xf0", 9, '*', '!', "\x80", 1, 0,<br>
@@ -813,14 +829,14 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    parameter of change_mem(), respectively. In our example the 5th parameter is
    '*', so the wildcard character is: *. The 6th parameter is '!', so the
    escape character is: !. And now the last step: replace the wildcard and
-   escape characters with a (hexadecimal) number that doesn't occur in the rest
+   escape characters with a (hexadecimal) number that does not occur in the rest
    of the character sequence (except other wildcards and escape symbols or
    values). Be sure to have at least one space between the numbers. In our
    example we could choose the values 1 and 2. In that case the finished line
    would look like this:<br>
    &nbsp;&nbsp; 2 1 80 00 2 1 80 40 f0: 1: 2:  80: 0:  af bf:  cf df<br>
    If for example the 5th parameter would have been \x01, the wildcard would be
-   01. In that case you wouldn't have to change it, because it's already a
+   01. In that case you would not have to change it, because it is already a
    number.<br>
    Now save the changed file and place it either in the directory from where
    you will run uCON64 (note that this is not necessarily the same directory as
@@ -831,8 +847,8 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    mistake with escape symbols uCON64 might very well crash. You can use the
    switch -v (in combination with -k, -f or -l) to make uCON64 display what
    information it reads from the file.<br>
-   If you can't find which line you need you will either have to add a line to
-   snescopy.txt, snespal.txt or snesntsc.txt for every code that isn't already
+   If you cannot find which line you need you will either have to add a line to
+   snescopy.txt, snespal.txt or snesntsc.txt for every code that is not already
    mentioned in those files or ask someone else to do it for you. For example
    on an emulation web forum like
    the <a href="http://www.cherryroms.com/" target="_blank">cherryroms</a>
@@ -849,7 +865,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    the search pattern. uCON64 does not accept this information to be specified
    across several lines. All values should be specified in hexadecimal, except
    the offset.<br>
-   If the search pattern doesn't contain any escape bytes, you needn't specify
+   If the search pattern does not contain any escape bytes, you need not specify
    a set as it won't be used. If it does contain escape bytes you will have to
    specify a set for each one of them. Take for example the pattern:<br>
    &nbsp;&nbsp; 01 00 01 00 42 84 ff 75 : ff : 00 : 02 03 : -6 : 22 11 : 19 75<br>
@@ -881,7 +897,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    save it to a file named dumpsram.bat. Then you can dump the SRAM of the Pro
    Fighter with a command line like:<br>
    &nbsp;&nbsp;dumpsram save1.sav<br>
-   You don't have to check if save1.sav exists anymore as the batch file will
+   You do not have to check if save1.sav exists anymore as the batch file will
    do it for you.<br>
    Here is the Bash script equivalent of the above batch file:<br>
    &nbsp;&nbsp;#! /bin/bash<br>
@@ -890,7 +906,7 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    &nbsp;&nbsp;exit<br>
    &nbsp;&nbsp;fi<br>
    &nbsp;&nbsp;ucon64 -xfigs "$1"<br>
-   You don't have to give the file a specific name. Just don't forget to make
+   You do not have to give the file a specific name. Just do not forget to make
    the file executable. Say you name it dumpsram, then you could make it
    executable with:<br>
    &nbsp;&nbsp;chmod +x dumpsram<br>

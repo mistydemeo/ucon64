@@ -450,8 +450,11 @@ ucon64_get_wf (const int option)
 }
 
 
-// -xgd3 handles split files. Only SNES and Genesis files can be detected as
-//  being split. Split NES files (Pasofami format) are detected by nes_init().
+/*
+  -xgd3 & -xgd6 handle split files. Only SNES and Genesis files can be detected
+  as being split (by ucon64_testsplit()). Split NES files (Pasofami format) are
+  detected by nes_init().
+*/
 const st_ucon64_wf_t ucon64_wf[] = {
 //  {option, console, usage, flags},
 /*
@@ -466,7 +469,11 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_COL, UCON64_SNES, snes_usage,        WF_NO_ROM},
   {UCON64_DBUH, UCON64_SNES, snes_usage,       WF_DEFAULT},
   {UCON64_DMIRR, UCON64_SNES, snes_usage,      WF_DEFAULT},
+#if 1 // -f is now used for SNES *and* Genesis
+  {UCON64_F, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
+#else
   {UCON64_F, UCON64_SNES, snes_usage,          WF_DEFAULT},
+#endif
   {UCON64_FDS, UCON64_NES, nes_usage,          WF_DEFAULT},
   {UCON64_FDSL, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_FFE, UCON64_NES, nes_usage,          WF_DEFAULT},
@@ -482,7 +489,11 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_LNX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
   {UCON64_LSRAM, UCON64_N64, n64_usage,        WF_INIT|WF_PROBE},
   {UCON64_LYX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
+#if 1 // -multi is now used for GBA *and* Genesis
+  {UCON64_MULTI, UCON64_UNKNOWN, NULL,         WF_INIT|WF_PROBE|WF_STOP},
+#else
   {UCON64_MULTI, UCON64_GBA, gba_usage,        WF_STOP},
+#endif
 //  {UCON64_MVS, UCON64_NG, neogeo_usage,        WF_DEFAULT},
   {UCON64_N2, UCON64_GEN, genesis_usage,       WF_DEFAULT},
   {UCON64_N2GB, UCON64_GB, gameboy_usage,      WF_DEFAULT},
@@ -521,6 +532,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XGBXS, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_ROM},
   {UCON64_XGD3, UCON64_SNES, gd_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM}, // supports split files
   {UCON64_XGD3S, UCON64_SNES, fig_usage,       WF_STOP|WF_NO_ROM},
+  {UCON64_XGD6, UCON64_SNES, gd_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM}, // supports split files
   {UCON64_XGD6S, UCON64_SNES, fig_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XLIT, UCON64_GB, lynxit_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XMCCL, UCON64_LYNX, mccl_usage,      WF_DEFAULT|WF_STOP|WF_NO_ROM},

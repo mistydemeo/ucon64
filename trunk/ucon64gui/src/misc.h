@@ -34,18 +34,7 @@ extern "C" {
 #include <limits.h>
 #include <time.h>                               // gauge() prototype contains time_t
 #include <dirent.h>
-
-#if 1
 #include "config.h"                             // ZLIB, ANSI_COLOR, NETWORK support
-#else
-/*
-  if no config.h is present you may set the defines here
-*/
-#define ZLIB                                    // ZLIB support
-#define ANSI_COLOR                              // support for ANSI color
-#define NETWORK                                 // support for network 
-                                          // (http_open(), ftp_open(), etc...)
-#endif
 
 #ifdef  ZLIB
 #include <zlib.h>
@@ -62,17 +51,21 @@ extern int fputc2 (int character, FILE *file);
 
 #undef feof                                     // necessary on (at least) Cygwin
 
-#define fopen                           fopen2
-#define fclose                          fclose2
-#define fseek                           fseek2
-#define fread                           fread2
-#define fgetc                           fgetc2
-#define fgets                           fgets2
-#define feof                            feof2
-#define fwrite                          fwrite2
-#define fputc                           fputc2
+#define fopen   fopen2
+#define fclose  fclose2
+#define fseek   fseek2
+#define fread   fread2
+#define fgetc   fgetc2
+#define fgets   fgets2
+#define feof    feof2
+#define fwrite  fwrite2
+#define fputc   fputc2
 
 #endif
+
+#define getenv getenv2
+#define stricmp strcasecmp
+#define strnicmp strncasecmp
 
 #ifndef FALSE
 #define FALSE 0
@@ -86,10 +79,6 @@ extern int fputc2 (int character, FILE *file);
 #define MAXBUFSIZE 32768
 #endif // MAXBUFSIZE
 
-#ifndef MAX_HOSTNAME
-#define MAX_HOSTNAME 256
-#endif // MAX_HOSTNAME
-
 #ifndef ARGS_MAX
 #define ARGS_MAX 128
 #endif // ARGS_MAX
@@ -102,9 +91,9 @@ extern int fputc2 (int character, FILE *file);
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #endif
 
-#define NULL_TO_EMPTY(str) ((str)?(str):"")
+#define NULL_TO_EMPTY(str) ((str) ? (str) : "")
 
-#define RANDOM(min, max) ((rand () + min) % max)
+#define RANDOM(min, max) ((rand () % max) + min)
 
 #define OFFSET(a, offset) ((((unsigned char *)&(a))+(offset))[0])
 
@@ -113,12 +102,14 @@ extern int fputc2 (int character, FILE *file);
 #endif
 
 #if     defined _LIBC || defined __GLIBC__
-#include <endian.h>
-#if __BYTE_ORDER == __BIG_ENDIAN
-#define WORDS_BIGENDIAN 1
-#endif
+  #include <endian.h>
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    #define WORDS_BIGENDIAN 1
+  #endif
+#elif   defined AMIGA
+  #define WORDS_BIGENDIAN 1
 #elif   defined __sparc__
-#define WORDS_BIGENDIAN 1
+  #define WORDS_BIGENDIAN 1
 #endif
 
 #ifdef  __MSDOS__                               // __MSDOS__ must come before __unix__,
@@ -139,6 +130,8 @@ extern int fputc2 (int character, FILE *file);
   #else
     #define CURRENT_OS_S "Unix"
   #endif
+#elif   defined AMIGA
+  #define CURRENT_OS_S "Amiga"
 #elif   defined __BEOS__
   #define CURRENT_OS_S "BeOS"
 #else
@@ -163,15 +156,20 @@ typedef struct st_func_node
   struct st_func_node *next;
 } st_func_node_t;
 
-#define stricmp strcasecmp
-#define strnicmp strncasecmp
 
-#if     defined __unix__ || defined __BEOS__
+#if     (defined __unix__ || defined __BEOS__)
+#ifndef __MSDOS__
 #define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
+extern int kbhit (void);                        // may only be used after init_conio()!
+#else
+#include <conio.h>                              // getch()
+#include <pc.h>                                 // kbhit()
+#endif
 
+// Should we leave these prototypes visible to the DOS code? The advantage 
+//  would be a few less #ifdef's
 extern void init_conio (void);
 extern void deinit_conio (void);
-extern int kbhit (void);                        // may only be used after init_conio()!
 #endif
 
 
@@ -194,107 +192,58 @@ extern unsigned long long int bswap_64 (unsigned long long int x);
   getext() get extension of filename
     extension means in this case the extension INCLUDING the dot '.'
 
-  filename_only() returns only the filename from a complete path
+  basename2() GNU basename() clone
 */
 extern char *setext (char *filename, const char *ext);
 extern const char *getext (const char *filename);
-#define EXTCMP(filename, ext) (stricmp (getext (filename), ext))
-extern const char *filename_only (const char *str);
+#define EXTCMP(filename, ext) (strcasecmp (getext (filename), ext))
+
+extern char *basename2 (const char *str);
 
 
 /*
-  Advanced string manipulation
+  String manipulation
 
-  strupr()
-  strlwr()
-  stpblk()   strip blanks/spaces/tabs from start of str
-  strtrim()  trim blanks/spaces/tabs from start and end
-  stpclr()   kill all returns at end of str
   areprint() like isprint() but for a whole string
-  mkprint()  convert any str with ctrl chars to a clean string
-  mkfile()   like mkprint but the resulting string could be used as a filename too
-  strrcspn() same as strcspn() but looks for the LAST appearance of str2 and returns
-             the position; if str2 could'nt be found strlen() will be returned
-             example: strrcspn (".1234.6789",".") == 5
-  findlwr()  test str for ANY lowercase characters
+  areupper() like isupper() but for a whole string
+
+  strupr()   convert string to upper-case
+  strlwr()   convert string to lower-case
+
+  mkprint()  convert all chars to isprint()'s
+  mkfile()   convert string into a correct file name
+
+  strtrim()  trim isspace()'s from start and end of string
 */
+extern int areupper (const char *str);
+extern int areprint (const char *str, int size);
+
 extern char *strupr (char *str);
 extern char *strlwr (char *str);
-extern char *stpblk (char *str);
+
 extern char *strtrim (char *str);
-extern char *stplcr (char *str);
-extern int areprint (const char *str, int size);
-extern char *mkprint (char *str, const char replacement);
-extern char *mkfile (char *str, const char replacement);
-extern int strrcspn (const char *str, const char *str2);
-extern int findlwr (const char *str);
+extern char *mkprint (char *str, const unsigned char replacement);
+extern char *mkfile (char *str, const unsigned char replacement);
 
 
 /*
-  Advanced mem functions
+  mem functions
 
   memwcmp()    memcmp with wildcard support
-  memswap()    swap n Bytes from add on
+  mem_swap()    swap n Bytes from add on
   mem_hexdump() hexdump n Bytes from add on; you can use here a virtual_start for the displayed counter
   mem_crc16()  calculate the crc16 of buffer for size bytes
   mem_crc32()  calculate the crc32 of buffer for size bytes
 */
 extern int memwcmp (const void *add, const void *add_with_wildcards, size_t n, int wildcard);
-extern void *memswap (void *add, size_t n);
+extern void *mem_swap (void *add, size_t n);
 extern void mem_hexdump (const void *add, size_t n, long virtual_start);
 extern unsigned short mem_crc16 (unsigned int size, unsigned short crc16, const void *buffer);
-#ifdef ZLIB
+#ifdef  ZLIB
 #define mem_crc32(SIZE, CRC, BUF)       crc32(CRC, BUF, SIZE)
 #else
 extern unsigned int mem_crc32 (unsigned int size, unsigned int crc32, const void *buffer);
 #endif
-
-
-/*
-  Quick IO functions
-
-  quick_fread()  same as fread but takes start and src is a filename
-  quick_fwrite() same as fwrite but takes start and dest is a filename; mode
-                is the same as fopen() modes
-  quick_fgetc()  same as fgetc but takes filename instead of FILE and a pos
-  quick_fputc()  same as fputc but takes filename instead of FILE and a pos
-*/
-extern size_t quick_fread (void *dest, size_t start, size_t len, const char *src);
-extern size_t quick_fwrite (const void *src, size_t start, size_t len, const char *dest, const char *mode);
-extern int quick_fgetc (const char *filename, long pos);
-extern int quick_fputc (const char *filename, long pos, int c, const char *mode);
-
-
-/*
-  Advanced IO functions
-
-  file_size()  return size of file
-  filencmp()    search in filename from start for len for the first appearance
-                of search which has searchlen wildcard could be one character
-                or -1 (wildcard off)
-  filecopy()    copy src from start for len to dest with mode (fopen(..., mode))
-  file_backup()  backup filename; if (move_name != NULL) filename will just be
-                moved (renamed) and NOT duplicated (faster); move_name will
-                contain the new name then
-  fileswap()    byteswap file from start for len
-  file_hexdump() hexdump file from start for len (looks same as mem_hexdump())
-  filefile()    compare two files for diff's or similarities
-                similar must be TRUE or FALSE; TRUE==find similarities;
-                FALSE==find differences
-  file_replace() search filename from start for search which has slen and
-                replace with replace which has rlen
-  file_crc32()  calculate the crc32 of filename from start
-*/
-extern int file_size (const char *filename);
-extern long filencmp (const char *filename, long start, long len,
-  const char *search, long searchlen, int wildcard);
-extern int filecopy (const char *src, long start, long len, const char *dest, const char *mode);
-extern char *file_backup (char *move_name, const char *filename);
-extern int fileswap (const char *filename, long start, long len);
-extern int file_hexdump (const char *filename, long start, long len);
-extern unsigned long filefile (const char *filename, long start, const char *filename2, long start2, int similar);
-extern int file_replace (const char *filename, long start, const char *search, long slen, const char *replace, long rlen);
-extern unsigned int file_crc32 (const char *filename, int start);
 
 
 /*
@@ -319,9 +268,9 @@ extern unsigned int file_crc32 (const char *filename, int start);
                   type not supported
   closedir2()     closedir() wrapper, recursively deletes temp_dir which was
                   created by opendir2()
-  rmdir_R()       remove non-empty directory
+  rmdir2()        like rmdir but removes non-empty directories recursively
   renlwr()        rename all files in dir to lowercase
-  fsystem()       system (or popen) wrapper, FILE *output could be stderr or
+  system2()       system (or popen) wrapper, FILE *output could be stderr or
                   stdout or a filepointer
   drop_privileges() switch to the real user and group id (leave "root mode")
   tmpnam2()       replacement for buggy tmpnam() temp must have the size of FILENAME_MAX
@@ -343,10 +292,10 @@ extern char *getenv2 (const char *variable);
 extern char *tmpnam2 (char *temp);
 extern DIR *opendir2 (char *archive_or_dir, const char *config_file, const char *property_format, const char *filename);
 extern int closedir2 (DIR *p);
-int rmdir_R (const char *path);
+extern int rmdir2 (const char *path);
 extern int renlwr (const char *dir);
-extern int fsystem (FILE *output, const char *cmdline);
-#ifdef  __unix__
+//extern int system2 (FILE *output, const char *cmdline, int wait);
+#if     defined __unix__ && !defined __MSDOS__
 extern int drop_privileges (void);
 #endif
 extern int register_func (void (*func) (void));
@@ -374,7 +323,8 @@ extern void handle_registered_funcs (void);
 
   NOTE: Currently the map functions are only used by the zlib wrapper
         functions, so they are only available if ZLIB is defined.
-        Remove the #ifdef ZLIB if other code should use them.
+        Remove the #ifdef ZLIB in this file and in misc.c if other code should
+        use them.
 */
 #ifdef  ZLIB
 
@@ -393,12 +343,12 @@ typedef struct st_map
 } st_map_t;
 
 
-st_map_t *map_create (int n_elements);
-void map_copy (st_map_t *dest, st_map_t *src);
-st_map_t *map_put (st_map_t *map, void *key, void *object);
-void *map_get (st_map_t *map, void *key);
-void map_del (st_map_t *map, void *key);
-void map_dump (st_map_t *map);
+extern st_map_t *map_create (int n_elements);
+extern void map_copy (st_map_t *dest, st_map_t *src);
+extern st_map_t *map_put (st_map_t *map, void *key, void *object);
+extern void *map_get (st_map_t *map, void *key);
+extern void map_del (st_map_t *map, void *key);
+extern void map_dump (st_map_t *map);
 #endif // ZLIB
 
 /*
@@ -414,44 +364,6 @@ extern const char *get_property (const char *filename, const char *propname, cha
 extern int set_property (const char *filename, const char *propname, const char *value);
 #define DELETE_PROPERTY(a, b) (set_property(a, b, NULL))
 
-
-/*
-  Network specific stuff
-
-  url_parser()         splits any url into parts and returns st_url_t
-
-  tcp_open()           open tcp socket, returns (int) file ptr
-  udp_open()           open udp socket, returns (int) file ptr
-*/
-//extern int tag_to_cmd (char *str, const char *html_tag);
-typedef struct st_url
-{
-/*
-  [protocol://]host[:port][/path][?query]
-*/
-  char protocol[MAX_HOSTNAME];
-  char host[MAX_HOSTNAME];
-  int port;
-  char path[FILENAME_MAX]; // uri
-  char query[MAXBUFSIZE];
-
-  char cmd[MAXBUFSIZE]; // the query parsed into a cmdline compatible string
-
-/*
-  [/path][?query] will be transformed into argc and argv for main() or getopt()
-  by doing this http request's could be handled with getopt()
-
-  (path == argv[0])
-*/
-  int argc;
-  char *argv[ARGS_MAX];
-} st_url_t;
-
-extern st_url_t *url_parser (st_url_t *url_p, const char *url);
-#ifdef NETWORK
-extern int tcp_open (char *address, int port);
-extern int udp_open (char *address, int port);
-#endif // NETWORK
 
 #ifdef __cplusplus
 }

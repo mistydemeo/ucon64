@@ -9,7 +9,8 @@ CC=@CC@
 CFLAGS=-I. -I./html2gui/src/ -Wall -O3
 LDFLAGS=-s
 
-OBJECTS=ucon64gui.o misc.o snes/snes.o top.o bottom.o swan/swan.o gba/gba.o \
+OBJECTS=ucon64gui.o misc.o network.o \
+        snes/snes.o top.o bottom.o swan/swan.o gba/gba.o \
         configmenu/configmenu.o nes/nes.o n64/n64.o gb/gb.o sms/sms.o \
 	html2gui/src/html2gui.o genesis/genesis.o dc/dc.o lynx/lynx.o \
         jaguar/jaguar.o pce/pce.o neogeo/neogeo.o ngp/ngp.o

@@ -20,7 +20,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include <stddef.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -31,17 +30,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdarg.h>                             // va_arg()
 #include <limits.h>                             // opendir2()
 #include <sys/stat.h>
+
+#ifdef  __unix__
+#include <unistd.h>
+#include <signal.h>                             // kill()
+#endif
+
 #ifdef  __CYGWIN__                              // under Cygwin (gcc for Windows) we
 #define USE_POLL                                //  need poll() for kbhit(). poll()
 #include <sys/poll.h>                           //  is available on Linux, not on
 #endif                                          //  BeOS. DOS already has kbhit()
 
-#ifdef __MSDOS__
-#include <conio.h>                              // getch()
-#include <pc.h>                                 // kbhit()
-#endif
-
-#if     defined __unix__ || defined __BEOS__
+#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
 #include <termios.h>
 
 typedef struct termios tty_t;
@@ -66,17 +66,15 @@ typedef struct termios tty_t;
 extern int errno;
 static st_func_node_t func_list = { NULL, NULL };
 static int func_list_locked = 0;
-
-#if     defined __unix__ || defined __BEOS__
-static void set_tty (tty_t param);
-#endif
-
-#ifdef __CYGWIN__
-static char *cygwin_fix (char *value);
-#endif
-
 static int misc_ansi_color = 0;
 
+#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
+static void set_tty (tty_t *param);
+#endif
+
+#ifdef  __CYGWIN__
+static char *cygwin_fix (char *value);
+#endif
 
 #if 0                                           // currently not used
 /*
@@ -137,7 +135,7 @@ mem_crc16 (unsigned int size, unsigned short crc16, const void *buf)
 
   replacement for zlib's crc32() stuff
 */
-#define CRC32_POLYNOMIAL     0xEDB88320L
+#define CRC32_POLYNOMIAL     0xedb88320L
 
 static unsigned int crc32_table[256];
 static int crc32_table_built = 0;
@@ -249,32 +247,29 @@ ansi_strip (char *str)
 
 
 #if 0
-/*
-  Copy into a malloced string
-*/
+#if	 defined(HPUX) || defined(sun) && defined(__svr4__)
+/* setenv is missing on solaris and HPUX */
 void
-strmcpy (char **t, const char *s)
+setenv(const char *name, const char *val, int _xx)
 {
-  if (*t != NULL)
-    free (*t);
+  int len  = strlen (name) + strlen (val) + 2;
+  char *env = malloc (len);
 
-  *t = malloc (strlen (s) + 1);
-  if (*t == NULL)
+  if (env != NULL)
     {
-      perror ("strmcpy");
-      exit (1);
+      strcpy (env, name);
+      strcat (env, "=");
+      strcat (env, val);
+      putenv (env);
     }
-
-  (void) strcpy (*t, s);
 }
+#endif
 #endif
 
 
-/*
-  like isprint() but for strings
-*/
 int
 areprint (const char *str, int size)
+// like isprint() but for strings
 {
   while (size > 0)
     {
@@ -286,147 +281,66 @@ areprint (const char *str, int size)
 
 
 char *
-mkprint (char *str, const char replacement)
+mkprint (char *str, const unsigned char replacement)
 {
-  char *str1 = str;
+  char *p = str;
 
-  while (*str)
-    {
-      switch (*str)
-        {
-          case '\n':
+  for (; *p; p++)
+    switch (*p)
+      {
+        case '\n':
+          break;
+
+        case '\x1b':                          // escape
+          if (misc_ansi_color)
             break;
 
-          case '\x1b':                          // escape
-            if (misc_ansi_color)
-              break;
+        default:
+          if (iscntrl (*p))
+            *p = replacement;
+          break;
+      }
 
-          default:
-            if (iscntrl ((int) *str))
-              *str = replacement;
-            break;
-        }
-      str++;
-    }
-
-  return str1;
+  return str;
 }
 
 
 char *
-mkfile (char *str, const char replacement)
+mkfile (char *str, const unsigned char replacement)
 {
   int pos = 0;
-  char *str1 = str;
+  char *p = str;
 
-  while (*str)
-    {
-      if (pos == FILENAME_MAX)
-        {
-          str = 0;
+  for (; *p && pos < FILENAME_MAX; p++, pos++)
+    switch (*p)
+      {
+        case '.':
+        case '-':
+        case ' ':
           break;
-        }
 
-      switch (*str)
-        {
-          case '.':
-          case '-':
-            break;
+        default:
+          if (!isalnum (*p))
+            *p = replacement;
+          break;
+      }
 
-          case ' ':
-            *str = replacement;
-            break;
+  *p = 0;
 
-          default:
-            if (!isalnum ((int) *str))
-              *str = replacement;
-            break;
-        }
-      str++;
-      pos++;
-    }
-
-  return str1;
-}
-
-
-#if 0
-/*
-  Description
-
-  stricmp() and strnicmp() functions lexicographically compare the nullterminated
-  strings s1 and s2 case independent
-
-  Return Values
-
-  The strimp() and strnicmp() return an integer greater than, equal to, or less
-  than 0, according as the string s1 is greater than, equal to, or less than the
-  string s2. The comparison is done using unsigned characters, so that '\\200'
-  is greater than '\\0'.
-
-  The strnicmp() compares not more than n characters.
-*/
-#define TOLOWER(a) (((a > 'A') && (a < 'Z')) ? ((a) + 0x20) : (a))
-#define TOUPPER(a) (((a > 'a') && (a < 'z')) ? ((a) - 0x20) : (a))
-
-int
-strnicmp (const char *s1, const char *s2, size_t n)
-{
-  if (!strcmp (s1, s2))
-    return 0;
-
-  for (;n ;n--)
-    if (TOLOWER (s1[n]) != TOLOWER (s2[n])) return -1;
-
-  return 0;
+  return str;
 }
 
 
 int
-stricmp (const char *s1, const char *s2)
-{
-  size_t l1 = strlen (s1), l2 = strlen (s2);
-
-  return strnicmp (s1, s2, (l1 > l2) ? l1 : l2);
-}
-#endif
-
-
-int
-findlwr (const char *str)
+areupper (const char *str)
 // searches the string for ANY lowercase char
 {
   const char *p = str;
 
-//TODO filenames which have only numbers
+  for (; *p; p++)
+    if (islower (*p)) return FALSE;
 
-  while (*p)
-    {
-      if (islower ((int) *p))
-        return TRUE;
-      p++;
-    }
-
-  return FALSE;
-}
-
-
-int
-strrcspn (const char *str, const char *str2)
-/*
-  same as strcspn() but looks for the LAST appearance of str2
-  strrcspn (".1234.6789",".") == 5
-*/
-{
-  int len = strlen (str) - 1, len2 = strlen (str2);
-
-  while (len > -1)
-    if (!strncmp (&str[len], str2, len2))
-      return len;
-    else
-      len--;
-
-  return strlen (str);
+  return TRUE;
 }
 
 
@@ -435,11 +349,8 @@ strupr (char *str)
 {
   char *p = str;
 
-  while (*p)
-    {
-      *p = toupper (*p);
-      p++;
-    }
+  for (; *p; p++)
+    *p = toupper (*p);
 
   return str;
 }
@@ -450,16 +361,29 @@ strlwr (char *str)
 {
   char *p = str;
 
-  while (*p)
-    {
-      *p = tolower (*p);
-      p++;
-    }
+  for (; *p; p++)
+    *p = tolower (*p);
 
   return str;
 }
 
 
+#if 1
+char *
+setext (char *filename, const char *ext)
+{
+  char ext2[FILENAME_MAX], *p = basename2 (filename);
+  
+  if ((p = strrchr (p, '.')))
+    if (p > basename2 (filename)) // some files start with a '.'
+      *p = 0;
+
+  strcpy (ext2, ext);
+  strcat (filename, areupper (basename2 (filename)) ? strupr (ext2) : strlwr (ext2));
+
+  return filename;
+}
+#else
 char *
 setext (char *filename, const char *ext)
 {
@@ -471,10 +395,11 @@ setext (char *filename, const char *ext)
   filename[pos] = 0;
 
   strcpy (ext2, ext);
-  strcat (filename, findlwr (filename_only (filename)) ? strlwr (ext2) : strupr (ext2));
+  strcat (filename, areupper (basename2 (filename)) ? strupr (ext2) : strlwr (ext2));
 
   return filename;
 }
+#endif
 
 
 const char *
@@ -492,37 +417,15 @@ getext (const char *filename)
 
 
 char *
-stpblk (char *str)
-{
-  while (*str == '\t' || *str == 32)
-    str++;
-  return str;
-}
-
-
-char *
 strtrim (char *str)
 {
-  long x = strlen (str) - 1;
+  int x = strlen (str);
 
-  while (x && str[x] == 32)
-    x--;
-  str[x + 1] = 0;
+  while (x && isspace (str[--x]));
 
-  return stpblk (str);
-}
+  str[++x] = 0;
 
-
-char *
-stplcr (char *str)
-{
-  char *p = str;
-
-  while (*p != 0x00 && *p != 0x0a && *p != 0x0d)
-    p++;
-  *p = 0;
-
-  return str;
+  return str + strspn (str, "\t ");
 }
 
 
@@ -546,18 +449,16 @@ memwcmp (const void *add, const void *add_with_wildcards, size_t n, int wildcard
 
 
 void *
-memswap (void *add, size_t n)
+mem_swap (void *add, size_t n)
 {
   size_t pos = 0;
   unsigned char *a = add, c;
 
-  while (pos + 1 < n)
+  for (; pos + 1 < n; pos += 2)
     {
       c = a[pos];
       a[pos] = a[pos + 1];
       a[pos + 1] = c;
-
-      pos += 2;
     }
 
   return add;
@@ -618,644 +519,18 @@ renlwr (const char *dir)
 }
 
 
-int
-file_size (const char *filename)
-// If ZLIB is defined this function is very slow. Please avoid to use it much.
-{
-#ifndef  ZLIB
-  struct stat fstate;
-
-  if (!stat (filename, &fstate))
-    return fstate.st_size;
-
-  errno = ENOENT;
-  return -1;
-#else
-  FILE *file1;
-  gzFile file2;
-  unsigned char magic[3] = { 0 };
-  int size = 0;
-  struct stat fstate;
-
-#undef  fopen
-#undef  fread
-#undef  fclose
-  if ((file1 = fopen (filename, "rb")) == NULL)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-  fread (magic, 1, sizeof (magic), file1);
-  fclose (file1);
-#define fopen                           fopen2
-#define fclose                          fclose2
-#define fread                           fread2
-  // ID1, ID2 and CM. gzip uses Compression Method 8
-  if (magic[0] != 0x1f || magic[1] != 0x8b || magic[2] != 0x08)
-    {
-      stat (filename, &fstate);
-      return fstate.st_size;
-    }
-
-  // it appears to be a gzipped file
-  if ((file2 = gzopen (filename, "rb")) == NULL)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
-#if 1
-  // This is not much faster than the other method
-  while (!gzeof (file2))
-    gzseek (file2, 1024 * 1024, SEEK_CUR);
-  size = gztell (file2);
-#else
-  // Is there a more efficient way to determine the uncompressed size?
-  while ((bytesread = gzread (file2, buf, MAXBUFSIZE)) > 0)
-    size += bytesread;
-#endif
-
-  gzclose (file2);
-  return size;
-#endif
-}
-
-
-unsigned int
-file_crc32 (const char *filename, int start)
-{
-  unsigned int count, crc = 0;                  // don't name it crc32 to avoid
-  unsigned char buffer[512];                    //  name clash with zlib's func
-  FILE *fh = fopen (filename, "rb");
-
-  if (!fh)
-    return -1;
-
-  fseek (fh, start, SEEK_SET);
-
-  while ((count = fread (buffer, 1, 512, fh)))
-    crc = mem_crc32 (count, crc, buffer);       // zlib: crc32 (crc32, buffer, count);
-
-  fclose (fh);
-
-  return crc;
-}
-
-
-long
-filencmp (const char *filename, long start, long len, const char *search,
-          long searchlen, int wildcard)
-{
-  int seg_len = 0 /* segment length */, seg_pos = 0, // position in segment
-      size = file_size (filename);
-  char buf[MAXBUFSIZE];
-
-  if (searchlen >= MAXBUFSIZE)
-    return -1;
-
-  if (access (filename, R_OK) != 0)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
-  if ((size - start) < len)
-    len = size - start;
-
-  while (1)
-    {
-      seg_len = (len >= MAXBUFSIZE) ? MAXBUFSIZE : len;
-
-      if (!quick_fread (buf, start, seg_len, filename))
-        break;
-
-      for (seg_pos = 0; seg_pos < seg_len; seg_pos++)
-        if (!memwcmp (&buf[seg_pos], search, searchlen, wildcard))
-          return start + seg_pos;
-
-      start += seg_len;
-      len -= seg_len;
-    }
-  return -1;
-}
-
-
-#if 0
-long
-filencmp (const char *filename, long start, long len, const char *search, long searchlen, const char wildcard)
-// searchlen is length of *search in bytes
-{
-  int x, y, size = file_size (filename);
-  char *buf;
-
-  if (access (filename, R_OK) != 0)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
-  x = 0;
-  if (!(buf = (char *) malloc ((size - start + 2) * sizeof (char))))
-    {
-      errno = ENOMEM;
-      return -1;
-    }
-
-  if (!quick_fread (buf, start, size, filename))
-    {
-      errno = ENOMEM;
-      free (buf);
-      return -1;
-    }
-
-  while ((x + searchlen + start) < size)
-    {
-      for (y = 0; y < searchlen; y++)
-        if (search[y] != wildcard)
-          {
-            if (buf[x + y] != search[y])
-              break;
-            if (y == searchlen - 1)
-              {
-                free (buf);
-                return x + start;
-              }
-          }
-      x++;
-    }
-  free (buf);
-  return -1;
-}
-#endif
-
-
-size_t
-quick_fread (void *dest, size_t start, size_t len, const char *src)
-{
-  size_t result = 0;
-  FILE *fh;
-
-  if ((fh = fopen (src, "rb")) == NULL)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
-  fseek (fh, start, SEEK_SET);
-  result = fread (dest, 1, len, fh);
-  fclose (fh);
-
-  return result;
-}
-
-
-size_t
-quick_fwrite (const void *src, size_t start, size_t len, const char *dest, const char *mode)
-{
-  size_t result = 0;
-  FILE *fh;
-
-  if ((fh = fopen (dest, mode)) == NULL)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
-  fseek (fh, start, SEEK_SET);
-  result = fwrite (src, 1, len, fh);
-  fclose (fh);
-
-  return result;
-}
-
-
-int
-quick_fgetc (const char *filename, long pos)
-{
-  int c;
-  FILE *fh = fopen (filename, "rb");
-
-  if ((!fh) || fseek (fh, pos, SEEK_SET) != 0)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
-  c = fgetc (fh);
-  fclose (fh);
-
-  return c;
-}
-
-
-int
-quick_fputc (const char *filename, long pos, int c, const char *mode)
-{
-  int result;
-  FILE *fh = fopen (filename, mode);
-
-  if ((!fh) || fseek (fh, pos, SEEK_SET) != 0)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
-  result = fputc (c, fh);
-  fclose (fh);
-
-  return result;
-}
-
-
-int
-file_hexdump (const char *filename, long start, long len)
-{
-  int x, size = file_size (filename), dump;
-  char buf[MAXBUFSIZE];
-  FILE *fh = fopen (filename, "rb");
-
-  if (!fh)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-  if ((size - start) < len)
-    len = size - start;
-
-  fseek (fh, start, SEEK_SET);
-  for (x = 0; x < len; x++)
-    {
-      if (!(x % 16))
-        printf ("%s%s%08lx  ", x?buf:"", x?"\n":"", x + start);
-
-      dump = fgetc (fh);
-      printf ("%02x %s", dump & 0xff, !((x + 1) % 4) ? " " : "");
-      sprintf (&buf[x % 16], "%c", isprint (dump) ? ((char) dump) : '.');
-    }
-  printf ("%s\n", buf);
-  fclose (fh);
-
-  return 0;
-}
-
-
-int
-filecopy (const char *src, long start, long len, const char *dest, const char *mode)
-{
-  int seg_len = 0, size = file_size (src);
-  char buf[MAXBUFSIZE];
-  FILE *fh, *fh2;
-
-  if (!strcmp (dest, src))
-    return -1;
-
-  if (!(fh = fopen (src, "rb")))
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
-  if (!(fh2 = fopen (dest, mode)))
-    {
-      errno = ENOENT;
-      fclose (fh);
-      return -1;
-    }
-
-  if ((size - start) < len)
-    len = size - start;
-
-  fseek (fh, start, SEEK_SET);
-  fseek (fh2, 0, SEEK_END);
-
-  while (1)
-    {
-      seg_len = (len >= MAXBUFSIZE) ? MAXBUFSIZE : len;
-
-      if (!fread (buf, seg_len, 1, fh))
-        break;
-      fwrite (buf, seg_len, 1, fh2);
-
-      len -= seg_len;
-    }
-
-  fclose (fh);
-  fclose (fh2);
-
-  sync ();
-  return 0;
-}
-
-
-#if 0
-const char *
-file_backup (char *filename, long mode)
-/*
-  We have to handle the following cases (for example -swc and rom.swc exists):
-  1) ucon64 -swc rom.swc
-
-    a) backup = 1
-       Create backup of rom.swc
-       postcondition: src == name of backup
-
-    b) backup = 0
-       Create temporary backup of rom.swc by renaming rom.swc
-       postcondition: src == name of backup
-
-  2) ucon64 -swc rom.fig
-
-    a) backup = 1
-       Create backup of rom.swc
-       postcondition: src == rom.fig
-
-    b) backup = 0
-       Do nothing
-       postcondition: src == rom.fig
-*/
-{
-  char buf[FILENAME_MAX];
-
-  if (access (filename, F_OK) == -1)
-    return dest;                                // does not exist == no backup necessary
-
-  strcpy (buf, filename);
-  setext (buf, ".BAK");
-
-  if (!access (buf, F_OK))
-    remove (buf);
-
-  if (src)
-    rename (filename, buf);                     // keep file attributes like date, etc.
-  else
-    return filename;
-
-  filecopy (src, 0, file_size (src), dest, "wb");
-  sync ();
-
-  return src;
-}
-#endif
-
-
-/*
-  Return type is not const char *, because it may return move_name, which is
-  not a pointer to constant characters.
-*/
 char *
-file_backup (char *move_name, const char *filename)
+basename2 (const char *str)
+//GNU basename() clone
 {
-  char buf[FILENAME_MAX];
+  char *p;
 
-  if (access (filename, R_OK) != 0)
-    return (char *) filename;
-
-  strcpy (buf, filename);
-  setext (buf, ".BAK");
-  if (strcmp (filename, buf))
-    {
-      remove (buf);                             // try to remove or rename will fail
-      rename (filename, buf);                   // keep file attributes like date, etc.
-    }
-
-  if (move_name == NULL)
-    {
-      filecopy (buf, 0, file_size (buf), filename, "wb");
-      sync ();
-      return (char *) filename;
-    }
-
-  strcpy (move_name, buf);
-  return move_name;
-}
-
-
-const char *
-filename_only (const char *str)
-{
-  const char *str2;
-
-  if (!(str2 = strrchr (str, FILE_SEPARATOR)))
-    str2 = str;                                 // strip path if it is a filename
+  if (!(p = strrchr (str, FILE_SEPARATOR)))
+    p = (char *)str;                                // strip path if it is a filename
   else
-    str2++;
+    p++;
 
-  return str2;
-}
-
-
-#if 0
-unsigned long
-filefile (const char *filename, long start, const char *filename2, long start2, int similar)
-{
-  int fsize = file_size (filename), fsize2 = file_size (filename2), pos = 0,
-      base, len, chunksize, chunksize2, readok = 1,
-      bytesread, bytesread2, bytesleft, bytesleft2;
-  unsigned char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
-  FILE *file, *file2;
-
-  if (!strcmp (filename, filename2))
-    return 0;
-
-  if (access (filename, R_OK) != 0 || access (filename2, R_OK) != 0)
-    {
-      errno = ENOENT;
-      return -1;
-
-    }
-
-  if (fsize < start || fsize2 < start2)
-    return -1;
-
-  if (!(file = fopen (filename, "rb")))
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
-  if (!(file2 = fopen (filename2, "rb")))
-    {
-      errno = ENOENT;
-      fclose (file);
-      return -1;
-    }
-
-  fseek (file, start, SEEK_SET);
-  fseek (file2, start2, SEEK_SET);
-
-  while (fread (buf, 1, MAXBUFSIZE, file) && fread (buf2, 1, MAXBUFSIZE, file2))
-    {
-      for (pos = 0; pos < MAXBUFSIZE; pos++)
-        {
-          if ((similar == FALSE && buf[pos] != buf2[pos]) ||
-              (similar == TRUE && buf[pos] == buf2[pos]))
-            {
-              len = 0;
-              while ((similar == TRUE) ?
-                     (buf[pos + len] == buf2[pos + len]) :
-                     (buf[pos + len] != buf2[pos + len]))
-                {
-                  len++;
-                  if (pos + len >= MAXBUFSIZE)
-                    break;
-                }
-
-              printf ("%s:\n", filename);
-              mem_hexdump (&buf[pos], len, start + pos + bytesread2);
-              printf ("%s:\n", filename2);
-              mem_hexdump (&buf2[pos], len, start2 + pos + bytesread2);
-              printf ("\n");
-              pos += len;
-            }
-        }
-
-    }
-
-  fclose (file);
-  fclose (file2);
-
-  return 0;
-}
-#endif
-
-
-unsigned long
-filefile (const char *filename1, long start1, const char *filename2, long start2, int similar)
-{
-  int base, fsize1, fsize2, len, chunksize1, chunksize2, readok = 1,
-      bytesread1, bytesread2, bytesleft1, bytesleft2, bufsize = 1024 * 1024;
-  unsigned char *buf1, *buf2;
-  FILE *file1, *file2;
-
-  if (!strcmp (filename1, filename2))
-    return 0;
-  if (access (filename1, R_OK) != 0 || access (filename2, R_OK) != 0)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
-  fsize1 = file_size (filename1);              // file_size() returns size in bytes
-  fsize2 = file_size (filename2);
-  if (fsize1 < start1 || fsize2 < start2)
-    return -1;
-
-  if (!(buf1 = (unsigned char *) malloc (bufsize)))
-    {
-      errno = ENOMEM;
-      return -1;
-    }
-
-  if (!(buf2 = (unsigned char *) malloc (bufsize)))
-    {
-      errno = ENOMEM;
-      free (buf1);
-      return -1;
-    }
-
-  if (!(file1 = fopen (filename1, "rb")))
-    {
-      errno = ENOENT;
-      free (buf1);
-      free (buf2);
-      return -1;
-    }
-  if (!(file2 = fopen (filename2, "rb")))
-    {
-      errno = ENOENT;
-      fclose (file1);
-      free (buf1);
-      free (buf2);
-      return -1;
-    }
-
-  fseek (file1, start1, SEEK_SET);
-  fseek (file2, start2, SEEK_SET);
-  bytesleft1 = fsize1;
-  bytesread1 = 0;
-  bytesleft2 = fsize2;
-  bytesread2 = 0;
-
-  while (bytesleft1 > 0 && bytesread1 < fsize2 && readok)
-    {
-      chunksize1 = fread (buf1, 1, bufsize, file1);
-      if (chunksize1 == 0)
-        readok = 0;
-      else
-        {
-          bytesread1 += chunksize1;
-          bytesleft1 -= chunksize1;
-        }
-
-      while (bytesleft2 > 0 && bytesread2 < bytesread1 && readok)
-        {
-          chunksize2 = fread (buf2, 1, chunksize1, file2);
-          if (chunksize2 == 0)
-            readok = 0;
-          else
-            {
-              base = 0;
-              while (base < chunksize2)
-                {
-                  if ((similar == FALSE && buf1[base] != buf2[base]) ||
-                      (similar == TRUE && buf1[base] == buf2[base]))
-                    {
-                      len = 0;
-                      while ((similar == TRUE) ?
-                             (buf1[base + len] == buf2[base + len]) :
-                             (buf1[base + len] != buf2[base + len]))
-                        {
-                          len++;
-                          if (base + len >= chunksize2)
-                            break;
-                        }
-
-                      printf ("%s:\n", filename1);
-                      mem_hexdump (&buf1[base], len, start1 + base + bytesread2);
-                      printf ("%s:\n", filename2);
-                      mem_hexdump (&buf2[base], len, start2 + base + bytesread2);
-                      printf ("\n");
-                      base += len;
-                    }
-                  else
-                    base++;
-                }
-
-              bytesread2 += chunksize2;
-              bytesleft2 -= chunksize2;
-            }
-        }
-    }
-
-  fclose (file1);
-  fclose (file2);
-  free (buf1);
-  free (buf2);
-  return 0;
-}
-
-
-int
-file_replace (const char *filename, long start, const char *search, long slen,
-             const char *replace, long rlen)
-{
-  int size = file_size (filename);
-
-  if (access (filename, R_OK) != 0)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
-  for (;;)
-    {
-      if ((start = filencmp (filename, start, size, search, slen, -1)) == -1)
-        return 0;
-      file_hexdump (filename, start, slen);
-      quick_fwrite (replace, start, rlen, filename, "r+b");
-      file_hexdump (filename, start, rlen);
-      printf ("\n");
-      start++;
-    }
+  return p;
 }
 
 
@@ -1391,88 +666,11 @@ change_string (char *searchstr, int strsize, char wc, char esc,
 
 
 int
-fileswap (const char *filename, long start, long len)
-{
-  int seg_len = 0, size = file_size (filename);
-  FILE *fh;
-  char buf[MAXBUFSIZE];
-
-  if (!(fh = fopen (filename, "r+b")))
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
-  if ((size - start) < len)
-    len = size - start;
-
-  fseek (fh, start, SEEK_SET);
-
-  while (1)
-    {
-      seg_len = (len >= MAXBUFSIZE) ? MAXBUFSIZE : len;
-
-      if (!fread (buf, 1, seg_len, fh))
-        break;
-
-      memswap (buf, seg_len);
-
-      fseek (fh, -(seg_len), SEEK_CUR);
-      fwrite (buf, 1, seg_len, fh);
-
-      len -= seg_len;
-    }
-
-  fclose (fh);
-  sync ();
-
-  return 0;
-}
-
-
-int
 gauge (time_t init_time, int pos, int size)
 {
 #define GAUGE_LENGTH 24LL
   int curr, bps, left, p, percentage;
   char progress[MAXBUFSIZE];
-#ifdef  ANSI_COLOR
-  const char *ansi_gauge = {
-    "\x1b[37m-"
-    "\x1b[37m-"
-    "\x1b[37m-"
-
-    "\x1b[36m-"
-
-    "\x1b[37m-"
-    "\x1b[37m-"
-
-    "\x1b[36m-"
-    "\x1b[36m-"
-
-    "\x1b[37m-"
-
-    "\x1b[36m-"
-    "\x1b[36m-"
-    "\x1b[36m-"
-    "\x1b[36m-"
-    "\x1b[36m-"
-    "\x1b[36m-"
-
-    "\x1b[37m-"
-
-    "\x1b[36m-"
-    "\x1b[36m-"
-
-    "\x1b[37m-"
-    "\x1b[37m-"
-
-    "\x1b[36m-"
-
-    "\x1b[37m-"
-    "\x1b[37m-"
-    "\x1b[37m-"};
-#endif
 
   if (pos > size)
     return -1;
@@ -1493,20 +691,19 @@ gauge (time_t init_time, int pos, int size)
     {
       progress[p] = 0;
       if (p < GAUGE_LENGTH)
-        strcat(progress, &ansi_gauge[p * 6]);
+        strcat(progress, "\x1b[31;41m");
     }
-  else
 #endif
-    strncat (&progress[p], "------------------------", GAUGE_LENGTH - p);
 
-  percentage = (100LL * pos) / size;            // DON'T make precision worse,
-                                                //  by shifting pos or size
+  strncat (&progress[p], "------------------------", GAUGE_LENGTH - p);
+
+  percentage = (100LL * pos) / size;
+
+    printf (
 #ifdef ANSI_COLOR
-  if (misc_ansi_color)
-    printf ("\r%10d Bytes \x1b[01;34m[\x1b[35m%s\x1b[34m]\x1b[0m %d%%, BPS=%d, ", pos, progress, percentage, bps);
-  else
+    misc_ansi_color ? "\r%10d Bytes [\x1b[32;42m%s\x1b[0m] %d%%, BPS=%d, " :
 #endif
-    printf ("\r%10d Bytes [%s] %d%%, BPS=%d, ", pos, progress, percentage, bps);
+    "\r%10d Bytes [%s] %d%%, BPS=%d, ", pos, progress, percentage, bps);
 
   if (pos == size)
     printf ("TOTAL=%03d:%02d", curr / 60, curr % 60); // DON'T print a newline
@@ -1544,17 +741,19 @@ cygwin_fix (char *value)
 
 
 /*
-  getenv() suitable for enviroments w/o HOME, TMP or TEMP variables
-  The caller is responsible for freeing the memory of string. Note that
-  this function should NEVER return NULL.
+  getenv() suitable for enviroments w/o HOME, TMP or TEMP variables.
+  The caller should copy the returned string to it's own memory, because this
+  function will overwrite that memory on the next call.
+  Note that this function never returns NULL.
 */
 char *
 getenv2 (const char *variable)
 {
-  char *tmp, *value;
+#undef getenv
+  char *tmp;
+  static char value[FILENAME_MAX];
 
-  value = (char *) malloc (FILENAME_MAX);       // ALWAYS use value, so that the
-  value[0] = 0;                                 //  caller can always use free()
+  value[0] = 0;
 
   if ((tmp = getenv (variable)) != NULL)
     strcpy (value, tmp);
@@ -1596,6 +795,8 @@ getenv2 (const char *variable)
         {
           if ((tmp = getenv (variable)) != NULL)
             strcpy (value, tmp);
+          else if (access ("/tmp/", R_OK | W_OK) == 0)  // trailing slash to force
+            strcpy (value, "/tmp");                     //  it to be a directory
           else
             getcwd (value, FILENAME_MAX);
         }
@@ -1606,30 +807,33 @@ getenv2 (const char *variable)
 #else
   return value;
 #endif
+#define getenv getenv2
 }
 
 
 const char *
 get_property (const char *filename, const char *propname, char *buffer, const char *def)
 {
-  char buf[MAXBUFSIZE], *ptr;
+  char buf[MAXBUFSIZE], *p = NULL;
   FILE *fh;
 
   if ((fh = fopen (filename, "rb")) != 0)
     {
       while (fgets (buf, sizeof buf, fh) != NULL)
         {
-          stplcr (buf);
-          if (stpblk (buf)[0] == '#')
+          if ((p = strpbrk (buf, "\x0a\x0d"))) // strip any returns
+             *p = 0;
+
+          if (*(buf + strspn (buf, "\t ")) == '#')
             continue;
 
-          buf[strcspn (buf, "#")] = 0;          // comment at end of a line
+          *(buf + strcspn (buf, "#")) = 0;          // comment at end of a line
 
-          if (!strncmp (buf, propname, strlen (propname)))
+          if (!strnicmp (buf, propname, strlen (propname)))
             {
-              ptr = strchr (buf, '=');
-              ptr++;
-              strcpy (buffer, stpblk (ptr));
+              p = strchr (buf, '=');
+              p++;
+              strcpy (buffer, p + strspn (p, "\t "));
 
               fclose (fh);
               return buffer;
@@ -1638,8 +842,8 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
       fclose (fh);
     }
 
-  ptr = getenv2 (propname);
-  if (ptr[0] == 0)                              // getenv2() never returns NULL
+  p = getenv2 (propname);
+  if (p[0] == 0)                              // getenv2() never returns NULL
     {
       if (def)
         strcpy (buffer, def);
@@ -1647,8 +851,7 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
         buffer = (char *) def;                  // buffer won't be changed
     }                                           //  after this func (=ok)
   else
-    strcpy (buffer, ptr);
-  free (ptr);
+    strcpy (buffer, p);
   return buffer;
 }
 
@@ -1656,11 +859,15 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
 int
 set_property (const char *filename, const char *propname, const char *value)
 {
-  int found = 0;
+  int found = 0, result = 0, file_size = 0;
   char buf[MAXBUFSIZE], *buf2;
   FILE *fh;
-
-  if (!(buf2 = (char *) malloc ((file_size (filename) + MAXBUFSIZE) * sizeof (char))))
+  struct stat fstate;
+  
+  if (stat (filename, &fstate) != 0)
+    file_size = fstate.st_size;
+        
+  if (!(buf2 = (char *) malloc ((file_size + MAXBUFSIZE) * sizeof (char))))
     {
       errno = ENOMEM;
       return -1;
@@ -1672,12 +879,13 @@ set_property (const char *filename, const char *propname, const char *value)
     {
       while (fgets (buf, sizeof buf, fh) != NULL)
         {
-          if (!strncmp (buf, propname, strlen (propname)))
+          if (!strncasecmp (buf, propname, strlen (propname)))
             {
               found = 1;
               if (value == NULL)
                 continue;
-              sprintf (buf, "%s=%s\n", propname, value);
+
+                sprintf (buf, "%s=%s\n", propname, value);
             }
           strcat (buf2, buf);
         }
@@ -1690,50 +898,20 @@ set_property (const char *filename, const char *propname, const char *value)
         strcat (buf2, buf);
       }
 
-    quick_fwrite (buf2, 0, strlen (buf2), filename, "wb");
+  if ((fh = fopen (filename, "wb")) == NULL) return -1;
+                      
+  result = fwrite (buf2, 1, strlen (buf2), fh);
+  fclose (fh); 
 
-    return 0;
+//  q_fwrite (buf2, 0, strlen (buf2), filename, "wb");
+
+  return result;
 }
 
 
 #if 0
-static int
-my_system (const char *command)
-{
-  int pid, status;
-
-  if (command == 0)
-    return 1;
-  pid = fork ();
-  if (pid == -1)
-    return -1;
-  if (pid == 0)
-    {
-      char *argv[4];
-      argv[0] = "sh";
-      argv[1] = "-c";
-      argv[2] = (char *) command;
-      argv[3] = 0;
-      execve ("/bin/sh", argv, environ);
-      exit (127);
-    }
-  do
-    {
-      if (waitpid (pid, &status, 0) == -1)
-        {
-          if (errno != EINTR)
-            return -1;
-        }
-      else
-        return status;
-    }
-  while (1);
-}
-#endif
-
-
 int
-fsystem (FILE *output, const char *cmdline)
+system2 (FILE *output, const char *cmdline, int wait)
 {
   int result = -1;
   FILE *fh;
@@ -1745,8 +923,6 @@ fsystem (FILE *output, const char *cmdline)
       >> 8                                      // the exit code is coded in bits 8-15
 #endif                                          //  (that is, under non-DOS)
 /*
-  // Snes9x (Linux) for example returns a non-zero value on a normal exit (3)...
-
   // under WinDOS, system() immediately returns with exit code 0 when starting
   //  a Windows executable (as if a fork() happened) it also returns 0 when the
   //  exe could not be started
@@ -1765,10 +941,68 @@ fsystem (FILE *output, const char *cmdline)
 
   return result;
 }
+//#else
+int
+system2 (FILE *output, const char *cmdline, int wait)
+{
+  static int pid = 0;
+  int result = -1, argc = 0;
+  FILE *fh;
+  char buf[MAXBUFSIZE];
+  char *argv[ARGS_MAX];
+
+  if (!cmdline) return -1;
+//  if (cmdline[0]) return -1;
+
+  if (!wait)
+    {
+      strcpy (buf, cmdline);
+      while ((argv[argc] = strtok (!argc?buf:NULL, " ")) && argc < (ARGS_MAX - 1)) argc++;
+
+      if (pid) kill (pid, SIGTERM);
+  
+      pid = fork ();
+    
+      if (pid == -1) return -1;
+
+      if (!pid) // child
+        {
+           execvp (*argv, argv);
+           exit (0);
+        }
+      return 0;
+    }
+          
+  if (output == stdout)
+    return system (cmdline)
+#ifndef __MSDOS__
+      >> 8                                      // the exit code is coded in bits 8-15
+#endif                                          //  (that is, under non-DOS)
+/*
+  // under WinDOS, system() immediately returns with exit code 0 when starting
+  //  a Windows executable (as if a fork() happened) it also returns 0 when the
+  //  exe could not be started
+*/
+    ;
+
+  if (!(fh = popen (cmdline, "r"))) 
+    return -1;
+
+  while (fgets (buf, MAXBUFSIZE, fh) != NULL)
+    if (output)
+      fprintf (output, buf);
+
+  result = pclose (fh);
+  if (output)
+    fsync (fileno (output));
+
+  return result;
+}
+#endif
 
 
 int
-rmdir_R (const char *path)
+rmdir2 (const char *path)
 {
   char cwd[FILENAME_MAX];
   struct dirent *ep;
@@ -1788,8 +1022,8 @@ rmdir_R (const char *path)
 
       if (S_ISDIR (fstate.st_mode))
         {
-          if (strcmp (ep->d_name, "..") != 0 &&
-            strcmp (ep->d_name, ".") != 0) rmdir_R (ep->d_name);
+          if (strcmp (ep->d_name, "..") != 0 && strcmp (ep->d_name, ".") != 0)
+            rmdir2 (ep->d_name);
         }
       else
         remove (ep->d_name);
@@ -1803,14 +1037,14 @@ rmdir_R (const char *path)
 
 
 char *
-tmpnam2 (char *temp) // tmpnam() replacement
+tmpnam2 (char *temp)
+// tmpnam() clone
 {
   char *p = getenv2 ("TEMP");
+
   temp[0] = 0;
- 
-  while (!temp[0] || !access (temp, F_OK))
-    sprintf (temp, "%s%s%08x.tmp", NULL_TO_EMPTY (p),
-      (p?FILE_SEPARATOR_S:""), RANDOM (0x10000000, 0xffffffff));
+  while (!temp[0] || !access (temp, F_OK)) // must work for files AND dirs
+    sprintf (temp, "%s%s%08x.tmp", p, FILE_SEPARATOR_S, RANDOM (0x10000000, 0xffffffff));
 
   return temp;
 }
@@ -1828,7 +1062,7 @@ static DIR2 misc_dir2[FOPEN_MAX];
 DIR *
 opendir2 (char *archive_or_dir, const char *config_file, const char *property_format, const char *filename)
 {
-  int pos = 0;
+  int pos = 0, result = 0;
   struct stat fstate;
 //  char temp[FILENAME_MAX];
   char *temp, property_name[MAXBUFSIZE], buf[MAXBUFSIZE], buf2[MAXBUFSIZE],
@@ -1867,7 +1101,11 @@ opendir2 (char *archive_or_dir, const char *config_file, const char *property_fo
   getcwd (cwd, FILENAME_MAX);
   chdir (temp);
 
-  fsystem (stderr, buf);
+  result = system (buf)
+#ifndef __MSDOS__
+      >> 8                                      // the exit code is coded in bits 8-15
+#endif                                          //  (that is, under non-DOS)
+    ;
   sync ();
 
   chdir (cwd);
@@ -1887,7 +1125,7 @@ int closedir2 (DIR *dir)
     if (misc_dir2[pos].dir == dir)
       {
         if (misc_dir2[pos].temp[0])
-          rmdir_R (misc_dir2[pos].temp);
+          rmdir2 (misc_dir2[pos].temp);
 
         misc_dir2[pos].dir = NULL;
         misc_dir2[pos].temp[0] = 0;
@@ -1898,279 +1136,33 @@ int closedir2 (DIR *dir)
 }
 
 
-#if 0
-char *
-html_parser (const char *filename, char *buffer)
-{
-  int tag = 0;
-  char c = 0, buf[2];
-  FILE *fh;
-
-  if (!(fh = fopen (filename, "rb")))
-    {
-      errno = ENOENT;
-      return buffer;
-    }
-
-  buffer[0] = 0;
-  while ((c = fgetc (fh)) != EOF)
-    {
-      switch (c)
-        {
-          case '<':
-            tag = 1;
-            break;
-            
-          case '>':
-            tag = 0;
-            break;
-            
-          default:
-            if (!tag) switch (c)
-              {            
-//                case '\n':
-//                  strcat (buffer, "<BR>");
-//                  break;
-               
-                default:
-                  sprintf (buf, "%c", c);
-                  strcat (buffer, buf);
-                  break;
-              }
-    
-            if (tag) switch (c)
-              {
-                default:
-                  break;
-              }
-
-            break;
-        }
-    }
-
-  fclose (fh);
-
-  return buffer;
-}
-#endif
-
-
-st_url_t *
-url_parser (st_url_t *url_p, const char *url)
-{
-/*
-  possible (tested) url's
-  
-  host
-  host:80
-  host/path/index.html
-  host:80/path/index.html
-  host?query&query2
-  host:80?query&query2
-  host/path/index.html?query&query2
-  host:80/path/index.html?query&query2
-  
-  all of these w/ or w/o 'protocol://' in front
-*/
-  char buf[MAXBUFSIZE];
-  char *p = NULL;
-  int x = 0, c = 0;
-    
-  memset (url_p, 0, sizeof (st_url_t));
-
-/*
-  protocol
-*/
-  strcpy (buf, url);
-  if ((p = strstr (buf, "://")) != NULL)
-    {
-      *p = 0;
-      strcpy (url_p->protocol, buf);
-    }
-
-#ifdef DEBUG
-  fprintf (stderr, "%s\n", url_p->protocol);
-  fflush (stderr);
-#endif // DEBUG  
-
-/*
-  host
-*/
-  strcpy (buf, url);
-
-  if ((p = strstr (buf, "://")) != NULL) p += 3;
-  else p = buf;
-  
-  p[strcspn (p, ":/?")] = 0;
-
-  strcpy (url_p->host, p);
-  
-
-#ifdef DEBUG
-  fprintf (stderr, "%s\n", url_p->host);
-  fflush (stderr);
-#endif // DEBUG  
-
-/*
-  port
-*/
-  strcpy (buf, url);
-
-  if (strchr (buf, ':'))
-    {
-      p = buf;
-      while (strchr (p, ':') != NULL)
-        {
-          p = strchr (p, ':');
-          p++;
-        }
-    }
-  else p = NULL;
-  
-  if (p)
-    {
-      p[strspn (p, "0123456789")] = 0;
-
-      url_p->port = strtol (p, NULL, 10);
-    }
-
-  if (!url_p->port)
-    {
-      if (!stricmp (url_p->protocol, "http")) url_p->port = 80;
-      else if (!stricmp (url_p->protocol, "ftp")) url_p->port = 21;
-    }
-
-#ifdef DEBUG
-  fprintf (stderr, "%d\n", url_p->port);
-  fflush (stderr);
-#endif // DEBUG  
-
-/*
-  path
-*/
-  strcpy (buf, url);
-  p = strstr (buf, url_p->host) + strlen (url_p->host);
-
-  if ((p = strchr (p, '/')) != NULL)
-    {
-      if (strchr (p, '&') || strchr (p, '?')) p[strcspn (p, "?&")] = 0;
-      strcpy (url_p->path, p);
-    }
-
-#ifdef DEBUG
-  fprintf (stderr, "%s\n", url_p->path);
-  fflush (stderr);
-#endif // DEBUG  
-
-/*
-  query
-*/
-  strcpy (buf, url);
-  if ((p = strchr (buf, '?')) != NULL)
-    strcpy (url_p->query, p);
-    
-#ifdef DEBUG
-  fprintf (stderr, "%s\n", url_p->query);
-  fflush (stderr);
-#endif // DEBUG  
-
-/*
-  cmdline
-*/
-  if (url_p->path[0]) /* argv[0] */
-    strcpy (url_p->cmd, url_p->path);
-
-  if (url_p->query[0])
-    {
-      strcat (url_p->cmd, " ");
-
-      for (x = 0; x < strlen (url_p->query); x++)
-        {
-          p = NULL;
-          switch (url_p->query[x])
-            {
-              case '?':
-                p = "";
-                break;
-                
-              case '&':
-              case '+':
-                p = " ";
-                break;
-
-              case '%':
-                sscanf (&url_p->query[x+1], "%02x", &c);
-                sprintf (buf, "%c", c);
-                x += 2;
-                break;
-
-              default:
-                sprintf (buf, "%c", url_p->query[x]);
-                break;
-            }
-
-            strcat (url_p->cmd, p?p:buf);
-         }
-    }
-
-#ifdef DEBUG
-  fprintf (stderr, "%s\n", url_p->cmd);
-  fflush (stderr);
-#endif // DEBUG  
-
-/*
-  args
-*/
-  if (url_p->cmd[0])
-    {
-      strcpy (buf, url_p->cmd);
-
-      while ((url_p->argv[url_p->argc] = strtok (!url_p->argc?buf:NULL, " ")) && url_p->argc < (ARGS_MAX - 1))
-        url_p->argc++;
-    }
-
-#ifdef DEBUG
-  for (x = 0; x < url_p->argc; x++)
-    fprintf (stderr, "%d:%s\n", x, url_p->argv[x]);
-  fflush (stderr);
-
-/*
-  again
-*/
-  fprintf (stderr, "----\n%s\n", url_p->protocol);
-  fprintf (stderr, "%s\n", url_p->host);
-  fprintf (stderr, "%d\n", url_p->port);
-  fprintf (stderr, "%s\n", url_p->path);
-  fprintf (stderr, "%s\n", url_p->query);
-  fprintf (stderr, "%s\n", url_p->cmd);
-  for (x = 0; x < url_p->argc; x++)
-    fprintf (stderr, "%d:%s\n", x, url_p->argv[x]);
-  fflush (stderr);
-#endif // DEBUG
-
-  return url_p;
-}
-
-
 #if     defined __unix__ || defined __BEOS__
+#ifndef __MSDOS__
 static int oldtty_set = 0, stdin_tty = 1;       // 1 => stdin is a tty, 0 => it's not
 static tty_t oldtty, newtty;
 
 
 void
-set_tty (tty_t param)
+set_tty (tty_t *param)
 {
-  if (stdin_tty && tcsetattr (STDIN_FILENO, TCSANOW, &param) == -1)
+  if (stdin_tty && tcsetattr (STDIN_FILENO, TCSANOW, param) == -1)
     {
       fprintf (stderr, "ERROR: Could not set tty parameters\n");
       exit (100);
     }
 }
+#endif
 
 
 void
 init_conio (void)
 {
+#ifndef __MSDOS__
+/*
+  This code compiles with DJGPP, but is not neccesary. Our kbhit() conflicts
+  with DJGPP's one, so it won't be used for that function. Perhaps it works
+  for making getchar() behave like getch(), but that's a bit pointless.
+*/
   if (!isatty (STDIN_FILENO))
     {
       stdin_tty = 0;
@@ -2196,21 +1188,25 @@ init_conio (void)
   newtty.c_cc[VMIN] = 1;                        // if VMIN != 0, read calls
   newtty.c_cc[VTIME] = 0;                       //  block (wait for input)
 
-  set_tty (newtty);
+  set_tty (&newtty);
+#endif
 }
 
 
 void
 deinit_conio (void)
 {
+#ifndef __MSDOS__
   if (oldtty_set)
     tcsetattr (STDIN_FILENO, TCSAFLUSH, &oldtty);
+#endif
 }
 
 
 #if     defined __CYGWIN__ && !defined USE_POLL
 #warning kbhit() does not work properly in Cygwin executable if USE_POLL is not defined
 #endif
+#ifndef __MSDOS__                               // this kbhit() conflicts with DJGPP's one
 int
 kbhit (void)
 {
@@ -2227,7 +1223,7 @@ kbhit (void)
   int ch, key_pressed;
 
   tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected under
-  set_tty(tmptty);                              //  Cygwin (define USE_POLL)
+  set_tty(&tmptty);                             //  Cygwin (define USE_POLL)
 
   if ((ch = fgetc (stdin)) != EOF)
     {
@@ -2237,15 +1233,16 @@ kbhit (void)
   else
     key_pressed = 0;
 
-  set_tty (newtty);
+  set_tty (&newtty);
 
   return key_pressed;
 #endif
 }
+#endif                                          // !__MSDOS__
 #endif                                          // __unix__ || __BEOS__
 
 
-#ifdef  __unix__
+#if     defined __unix__ && !defined __MSDOS__
 int
 drop_privileges (void)
 {
@@ -2426,7 +1423,9 @@ map_dump (st_map_t *map)
   was opened with a "w" in the mode string, but we want to control whether we
   write compressed data. Note that for the mode string "w+", zlib ignores the
   '+'. zlib does the same for "r+".
-  Currently we never write compressed data.
+  Currently we never write compressed data. That is, no code fopen()s files
+  with a mode string containing 'f', 'h' or a number, but writing compressed
+  output does work.
 */
 st_map_t *fh_map = NULL;                        // associative array: file handle -> file mode
 
@@ -2745,500 +1744,3 @@ bswap_64 (unsigned long long int x)
   ptr[4] = tmp;
   return x;
 }
-
-
-#ifdef NETWORK
-int
-is_address_multicast (unsigned long address)
-{
-  if ((address & 255) >= 224 && (address & 255) <= 239)
-    return 1;
-  return 0;
-}
-
-#ifndef USE_IPV6
-
-/* =================== IPV4 ================== */
-
-int
-tcp_open (char *address, int port)
-{
-  struct sockaddr_in stAddr;
-  struct hostent *host;
-  int sock;
-  struct linger l;
-
-  memset (&stAddr, 0, sizeof (stAddr));
-  stAddr.sin_family = AF_INET;
-  stAddr.sin_port = htons (port);
-
-  if ((host = gethostbyname (address)) == NULL)
-    return 0;
-
-  stAddr.sin_addr = *((struct in_addr *) host->h_addr_list[0]);
-
-  if ((sock = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
-    return 0;
-
-  l.l_onoff = 1;
-  l.l_linger = 5;
-  if (setsockopt (sock, SOL_SOCKET, SO_LINGER, (char *) &l, sizeof (l)) < 0)
-    return 0;
-
-  if (connect (sock, (struct sockaddr *) &stAddr, sizeof (stAddr)) < 0)
-    return 0;
-
-  return sock;
-}
-
-
-int
-udp_open (char *address, int port)
-{
-  int enable = 1L;
-  struct sockaddr_in stAddr;
-  struct sockaddr_in stLclAddr;
-  struct ip_mreq stMreq;
-  struct hostent *host;
-  int sock;
-
-  stAddr.sin_family = AF_INET;
-  stAddr.sin_port = htons (port);
-
-  if ((host = gethostbyname (address)) == NULL)
-    return 0;
-
-  stAddr.sin_addr = *((struct in_addr *) host->h_addr_list[0]);
-
-  /* Create a UDP socket */
-  if ((sock = socket (AF_INET, SOCK_DGRAM, 0)) < 0)
-    return 0;
-
-  /* Allow multiple instance of the client to share the same address and port */
-  if (setsockopt
-      (sock, SOL_SOCKET, SO_REUSEADDR, (char *) &enable,
-       sizeof (unsigned long int)) < 0)
-    return 0;
-
-  /* If the address is multicast, register to the multicast group */
-  if (is_address_multicast (stAddr.sin_addr.s_addr))
-    {
-      /* Bind the socket to port */
-      stLclAddr.sin_family = AF_INET;
-      stLclAddr.sin_addr.s_addr = htonl (INADDR_ANY);
-      stLclAddr.sin_port = stAddr.sin_port;
-      if (bind (sock, (struct sockaddr *) &stLclAddr, sizeof (stLclAddr)) < 0)
-        return 0;
-
-      /* Register to a multicast address */
-      stMreq.imr_multiaddr.s_addr = stAddr.sin_addr.s_addr;
-      stMreq.imr_interface.s_addr = INADDR_ANY;
-      if (setsockopt
-          (sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *) &stMreq,
-           sizeof (stMreq)) < 0)
-        return 0;
-    }
-  else
-    {
-      /* Bind the socket to port */
-      stLclAddr.sin_family = AF_INET;
-      stLclAddr.sin_addr.s_addr = htonl (INADDR_ANY);
-      stLclAddr.sin_port = htons (0);
-      if (bind (sock, (struct sockaddr *) &stLclAddr, sizeof (stLclAddr)) < 0)
-        return 0;
-    }
-
-  return sock;
-}
-
-#else
-
-/* =================== IPV6 ================== */
-
-int
-tcp_open (char *address, int port)
-{
-  struct addrinfo hints, *res, *res_tmp;
-  int sock;
-  struct linger l;
-  char ipstring[MAX_HOSTNAME];
-  char portstring[MAX_HOSTNAME];
-
-  sprintf (portstring, "%d", port);
-
-  memset (&hints, 0, sizeof (hints));
-  /*
-   * hints.ai_protocol  = 0;
-   * hints.ai_addrlen   = 0;
-   * hints.ai_canonname = NULL;
-   * hints.ai_addr      = NULL;
-   * hints.ai_next      = NULL;
-   */
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_socktype = SOCK_STREAM;
-
-
-
-  if (getaddrinfo (address, portstring, &hints, &res) != 0)
-    return 0;
-
-  for (res_tmp = res; res_tmp != NULL; res_tmp = res_tmp->ai_next)
-    {
-      if ((res_tmp->ai_family != AF_INET) && (res_tmp->ai_family != AF_INET6))
-        continue;
-      if ((sock = socket (res_tmp->ai_family, res_tmp->ai_socktype,
-                          res_tmp->ai_protocol)) == -1)
-        {
-          sock = 0;
-          continue;
-        }
-
-      l.l_onoff = 1;
-      l.l_linger = 5;
-      if (setsockopt (sock, SOL_SOCKET, SO_LINGER, (char *) &l, sizeof (l)) <
-          0)
-        {
-          /* return 0; */
-          sock = 0;
-          continue;
-        }
-
-      if (connect (sock, res_tmp->ai_addr, res_tmp->ai_addrlen) == -1)
-        {
-          close (sock);
-          sock = 0;
-          continue;
-        }
-
-      ipstring[0] = 0;
-      getnameinfo (res_tmp->ai_addr, res_tmp->ai_addrlen, ipstring,
-                   sizeof (ipstring), NULL, 0, NI_NUMERICHOST);
-
-      if (ipstring == NULL)
-        sock = 0;
-
-      break;
-    }
-
-  freeaddrinfo (res);
-  return sock;
-}
-
-
-int
-udp_open (char *address, int port)
-{
-  int enable = 1L;
-  struct addrinfo hints, *res, *res_tmp;
-  int sock;
-  struct linger l;
-  char ipstring[MAX_HOSTNAME];
-  char portstring[MAX_HOSTNAME];
-  struct ipv6_mreq imr6;
-  struct ip_mreq imr;
-
-  sprintf (portstring, "%d", port);
-
-  memset (&hints, 0, sizeof (hints));
-  /*
-   * hints.ai_protocol  = 0;
-   * hints.ai_addrlen   = 0;
-   * hints.ai_canonname = NULL;
-   * hints.ai_addr      = NULL;
-   * hints.ai_next      = NULL;
-   */
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_socktype = SOCK_DGRAM;
-
-  if (getaddrinfo (address, portstring, &hints, &res) != 0)
-    return 0;
-
-  for (res_tmp = res; res_tmp != NULL; res_tmp = res_tmp->ai_next)
-    {
-      if ((res_tmp->ai_family != AF_INET) && (res_tmp->ai_family != AF_INET6))
-        continue;
-      if ((sock = socket (res_tmp->ai_family, res_tmp->ai_socktype,
-                          res_tmp->ai_protocol)) < 0)
-        {
-          sock = 0;
-          continue;
-        }
-      /* Allow multiple instance of the client to share the same address and port */
-      if (setsockopt (sock, SOL_SOCKET, SO_REUSEADDR,
-                      (char *) &enable, sizeof (unsigned long int)) < 0)
-        {
-          sock = 0;
-          continue;
-        }
-
-      /* If the address is multicast, register to the multicast group */
-      if ((res_tmp->ai_family == AF_INET6) &&
-          IN6_IS_ADDR_MULTICAST (&
-                                 (((struct sockaddr_in6 *) res_tmp->ai_addr)->
-                                  sin6_addr)))
-        {
-          /* Bind the socket to port */
-          if (bind (sock, res_tmp->ai_addr, res_tmp->ai_addrlen) < 0)
-            {
-              close (sock);
-              sock = 0;
-              continue;
-            }
-
-          imr6.ipv6mr_multiaddr =
-            ((struct sockaddr_in6 *) res_tmp->ai_addr)->sin6_addr;
-          imr6.ipv6mr_interface = INADDR_ANY;
-          if (setsockopt (sock,
-                          IPPROTO_IPV6,
-                          IPV6_ADD_MEMBERSHIP,
-                          (char *) &imr6, sizeof (struct ipv6_mreq)) < 0)
-            return 0;
-        }
-      else if ((res_tmp->ai_family == AF_INET) &&
-               IN_MULTICAST (ntohl ((((struct sockaddr_in *) res_tmp->
-                                      ai_addr)->sin_addr.s_addr))))
-        {
-          /* Bind the socket to port */
-          if (bind (sock, res_tmp->ai_addr, res_tmp->ai_addrlen) < 0)
-            {
-              close (sock);
-              sock = 0;
-              continue;
-            }
-
-          imr.imr_multiaddr =
-            ((struct sockaddr_in *) res_tmp->ai_addr)->sin_addr;
-          imr.imr_interface.s_addr = INADDR_ANY;
-
-          if (setsockopt (sock,
-                          IPPROTO_IP,
-                          IP_ADD_MEMBERSHIP,
-                          (char *) &imr, sizeof (struct ip_mreq)) < 0)
-            return 0;
-        }
-      else
-        {
-          /* Bind the socket to port */
-          if (bind (sock, res_tmp->ai_addr, res_tmp->ai_addrlen) < 0)
-            {
-              close (sock);
-              sock = 0;
-              continue;
-            }
-        }
-    }
-
-  freeaddrinfo (res);
-  return sock;
-}
-
-#endif
-
-static int
-ftp_get_reply (int tcp_sock)
-{
-  int i;
-  char c;
-  char answer[1024];
-
-  do
-    {
-      /* Read a line */
-      for (i = 0, c = 0; i < 1024 && c != '\n'; i++)
-        {
-          read (tcp_sock, &c, sizeof (char));
-          answer[i] = c;
-        }
-      answer[i] = 0;
-      fprintf (stderr, "%s", answer + 4);
-    }
-  while (answer[3] == '-');
-
-  answer[3] = 0;
-
-  return atoi (answer);
-}
-
-
-int network_open (char *url)
-{
-  int fd = 0;
-  char *p = NULL;
-  char host[MAX_HOSTNAME];
-//  int port = url_to_host_and_port (host, url);
-  int port = 0;
-  char http_request[PATH_MAX];
-  char filename[PATH_MAX];
-  switch (port)
-    {
-      case 21:
-        if (!(fd = tcp_open (host, port))) return -1;
-        return fd;
-      
-      case 80:
-      case 8080:
-        if (!(fd = tcp_open (host, port))) return -1;
-      
-        p = strchr (url, '/');
-
-        if (p) while (strchr (p, '/'))
-          {
-            p = strchr (p, '/');
-            p++;
-          }
-printf ("%s\n",p);
-fflush (stdout);  
-
-        strcpy (filename, p);
-
-      /* Send HTTP GET request
-         Please don't use a Agent know by shoutcast (Lynx, Mozilla) seems to
-         be reconized and print a html page and not the stream */
-        snprintf (http_request, sizeof (http_request), "GET /%s HTTP/1.0\r\n"
-//          "User-Agent: Mozilla/2.0 (Win95; I)\r\n"
-          "Pragma: no-cache\r\n" "Host: %s\r\n" "Accept: */*\r\n" "\r\n",
-          filename, host);
-
-        send (fd, http_request, strlen (http_request), 0);
-
-        return fd;
-      
-      default:
-//        if (!(fd = udp_open (host, port))) return -1;
-        if (!(fd = tcp_open (host, port))) return -1;
-        return fd;
-    }
-
-  return -1;
-}
-
-#if 0
-
-int
-http_read (void *dest, size_t start, size_t len, const char *url)
-{
-  char *host;
-  int port;
-  char *request;
-  int fd;
-  char *p;
-  char http_request[PATH_MAX];
-  char filename[PATH_MAX];
-  char c;
-
-  if (!(fd = network_open (url))) return -1;
-
-  p = strchr (arg, '/');
-  if (p)
-    {
-  while (strchr (p, '/')){ p = strchr (p, '/'); p++;}
-
-  strcpy (filename, p);
-  printf ("%s\n", filename);
-  fflush (stdout);
-}
-}
-
-
-
-
-
-int
-ftp_open (char *arg)
-{
-  char *host;
-  int port;
-  char *dir;
-  char *file;
-  int tcp_sock;
-  int data_sock;
-  char ftp_request[PATH_MAX];
-  struct sockaddr_in stLclAddr;
-  socklen_t namelen;
-  int i;
-
-  if ((dir = strchr (arg, '/')) == NULL)
-    return 0;
-  *dir++ = 0;
-  if ((file = strrchr (dir, '/')) == NULL)
-    {
-      file = dir;
-      dir = NULL;
-    }
-  else
-    *file++ = 0;
-
-  /* Open a TCP socket */
-  if (!(tcp_sock = network_open (url))) return -1;
-
-  /* Send FTP USER and PASS request */
-  ftp_get_reply (tcp_sock);
-
-  sprintf (ftp_request, "USER anonymous\r\n");
-  send (tcp_sock, ftp_request, strlen (ftp_request), 0);
-
-  if (ftp_get_reply (tcp_sock) != 331)
-    return 0;
-
-  sprintf (ftp_request, "PASS smpeguser@\r\n");
-  send (tcp_sock, ftp_request, strlen (ftp_request), 0);
-
-  if (ftp_get_reply (tcp_sock) != 230)
-    return 0;
-
-  sprintf (ftp_request, "TYPE I\r\n");
-  send (tcp_sock, ftp_request, strlen (ftp_request), 0);
-
-  if (ftp_get_reply (tcp_sock) != 200)
-    return 0;
-
-  if (dir != NULL)
-    {
-      snprintf (ftp_request, sizeof (ftp_request), "CWD %s\r\n", dir);
-      send (tcp_sock, ftp_request, strlen (ftp_request), 0);
-
-      if (ftp_get_reply (tcp_sock) != 250)
-        return 0;
-    }
-
-  /* Get interface address */
-  namelen = sizeof (stLclAddr);
-  if (getsockname (tcp_sock, (struct sockaddr *) &stLclAddr, &namelen) < 0)
-    return 0;
-
-  /* Open data socket */
-  if ((data_sock = socket (PF_INET, SOCK_STREAM, 0)) < 0)
-    return 0;
-
-  stLclAddr.sin_family = AF_INET;
-
-  /* Get the first free port */
-  for (i = 0; i < 0xC000; i++)
-    {
-      stLclAddr.sin_port = htons (0x4000 + i);
-      if (bind (data_sock, (struct sockaddr *) &stLclAddr, sizeof (stLclAddr))
-          >= 0)
-        break;
-    }
-  port = 0x4000 + i;
-
-  if (listen (data_sock, 1) < 0)
-    return 0;
-
-  i = ntohl (stLclAddr.sin_addr.s_addr);
-  sprintf (ftp_request, "PORT %d,%d,%d,%d,%d,%d\r\n",
-           (i >> 24) & 0xFF, (i >> 16) & 0xFF,
-           (i >> 8) & 0xFF, i & 0xFF, (port >> 8) & 0xFF, port & 0xFF);
-  send (tcp_sock, ftp_request, strlen (ftp_request), 0);
-  if (ftp_get_reply (tcp_sock) != 200)
-    return 0;
-
-  snprintf (ftp_request, sizeof (ftp_request), "RETR %s\r\n", file);
-  send (tcp_sock, ftp_request, strlen (ftp_request), 0);
-  if (ftp_get_reply (tcp_sock) != 150)
-    return 0;
-
-  return accept (data_sock, NULL, NULL);
-}
-#endif
-#endif // NETWORK

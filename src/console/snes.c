@@ -1910,25 +1910,31 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     0x0c0bc8c5: Street Fighter Zero 2 (J)
     These games have two nearly identical headers which can't be used to
     determine whether the dump is interleaved or not.
-    
+
     0x39b94597: BS Satella2 1 (J) has a LoROM map type byte while it's a HiROM
     game
-    
+
     0xd7470b37: Dai Kaiju Monogatari 2 (J)
     0xa2c5fd29: Tales of Phantasia (J)
     These are Extended HiROM games. By "coincidence" ToP can be detected in
-    another way, but DKM2 can't. The CRC32's are checked for below.
+    another way, but DKM2 (40 Mbit) can't. The CRC32's are checked for below.
+
+    0x7039388a: Ys 3 - Wanderers from Ys (J)
+    This game has 31 internal headers...
   */
   if (crc1 == 0xfa83b519 || crc1 == 0x4a54adc7)
     check_map_type = 0;                         // not interleaved
   else if (crc2 == 0x4a54adc7 || crc2 == 0xe43491b8 || crc2 == 0x44ca1045 ||
-           crc2 == 0x0c0bc8c5 || crc2 == 0x39b94597)
+           crc2 == 0x0c0bc8c5 || crc2 == 0x39b94597 || crc1 == 0x7039388a) // yes, crc1
     {
       interleaved = 1;
       snes_hirom = 0;
       snes_hirom_ok = 1;
       check_map_type = 0;                       // interleaved
     }
+  // WARNING: st_dump won't be set if it's an interleaved dump
+  else if (st_dump)
+    check_map_type = 0;
   else
     {
       org_snes_header_base = snes_header_base;

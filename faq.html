@@ -127,6 +127,8 @@ Q42: <a href="#42">Why does uCON64 support DAT files?</a><br>
 <br>
 Q43: <a href="#43">How should the option --mkdat be used?</a><br>
 <br>
+Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -906,11 +908,12 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
 <b>A</b>: We know when we will release a new version only just before we do so.
    But starting with uCON64 1.9.8beta8 this is not a problem for you at all.
    The only requirement is that you are able to read and use a text editor ;-)<br>
-   First visit the uCON64 homepage and from there follow a link to the uCON64
-   sourceforge page. You should be able to find a page where you can browse the
-   CVS repository. Download the latest version of the file snes.c. Open the
-   file in an editor and search for the text snes_k. If you are looking for
-   NTSC or PAL fixes search either for snes_fix_pal_protection or
+   First visit the uCON64 homepage and from there follow a link to the
+   <a href="http://sourceforge.net/projects/ucon64" target="_blank">
+   uCON64 SourceForge page</a>. You should be able to find a page where you can
+   browse the CVS repository. Download the latest version of the file snes.c.
+   Open the file in an editor and search for the text snes_k. If you are
+   looking for NTSC or PAL fixes search either for snes_fix_pal_protection or
    snes_fix_ntsc_protection, depending on what you need. For example, you will
    have to search for snes_fix_pal_protection, if you want to fix a game so
    that it will run on an NTSC SNES.<br>
@@ -1225,6 +1228,22 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    If you had to specify a first file you could suppress the warning about a
    duplicate by using the switch -q. For example:<br>
    &nbsp;&nbsp;ucon64 --mkdat=n64-02062003.dat c:\rom\mario64.v64 c:\rom -q<br>
+<br>
+<p>
+<a name="44"><b>Q44</b>: What tools do you recommend besides uCON64?</a><br>
+<b>A</b>: For SNES, only <a href="http://nsrt.znes.org" target="_blank">NSRT</a>
+   (Nach's SNES ROM Tools). That is, starting from version 3.0 Release
+   Candidate 1. NSRT has some features that uCON64 does not have. The two most
+   interesting features are arguably that it is able to fix some hacked ROM
+   dumps and that it has an internal database which is spend a lot of effort on
+   to have it contain only correct entries (as opposed to GoodSNES and the
+   GoodSNES DAT files). What the second feature is concerned let us remind you
+   that the quality of uCON64's ROM database support stands or falls with the
+   quality of the DAT files. So, if you would create a DAT file of a ROM dump
+   collection processed with NSRT uCON64 would get a SNES database that is
+   similar to the one in NSRT. See <a href="#43">question 43</a>. Another
+   advantage NSRT has over uCON64 (as seen from a SNES user's viewpoint) is
+   that it is written only for SNES.<br>
 <br>
 <br>
 <br>

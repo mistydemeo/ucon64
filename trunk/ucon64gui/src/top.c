@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "html2gui/src/html2gui.h"
 #include "top.h"
 #include "misc.h"
+#include "backup/cdrw.h"
 
 void
 ucon64gui_top (void)
@@ -47,9 +48,6 @@ ucon64gui_top (void)
   h2g_body (NULL, "#c0c0c0");
 
   h2g_form (UCON64GUI_FORMTARGET);
-
-  if (ucon64gui.sub)
-    h2g_input_image ("Back",  OPTION_LONG_S "root", back_xpm, 0, 0, "Back");
 
   h2g_input_submit ("Config", "--config", buf);
   h2g_br ();
@@ -87,9 +85,6 @@ ucon64gui_top (void)
 
   h2g_input_submit ("CRC32", "--crc", "(--crc) show CRC32 value of ROM");
 
-  h2g_input_submit ("CRC32 (w/ hd)", "--crchd",
-                    "(--crchd) show CRC32 value of ROM (regarding to +512 Bytes header)");
-
   h2g_ (" ");
 
   h2g_input_submit ("Strip", "--stp",
@@ -116,15 +111,26 @@ ucon64gui_top (void)
 
   ucon64gui_spacer ();
 
-  h2g_ ("List ROMs: ");
+  h2g_ ("List/Rename: ");
 
-  h2g_input_submit ("verbose", "--ls",
+  h2g_input_submit ("Normal", "--ls",
                     "(--ls) generate ROM list for all ROMs; $ROM=DIRECTORY");
 
-  h2g_input_submit ("VERBOSE", "-lsv",
-                    "(--lsv) like [ROM list] but more verbose; $ROM=DIRECTORY");
+  h2g_input_submit ("Verbose", "--lsv",
+                    "(--lsv) generate more verbose ROM list; $ROM=DIRECTORY");
 
-  h2g_ (" Compare ROMs: ");
+  h2g_input_submit ("FILE_ID.DIZ", "--lsfid",
+                    "(--lsfid) generate ROM list with FILE_ID.DIZ; $ROM=DIRECTORY");
+
+  h2g_input_submit ("Rename", "--rrom",
+                    "(--rrom) rename all ROMs in DIRECTORY to their internal names; --rom=DIR");
+
+  h2g_input_submit ("Rename 8.3", "--rr83",
+                    "(--rr83) rename all ROMs in DIRECTORY to their internal names in 8.3 format; --rom=DIR");
+
+  ucon64gui_spacer ();
+
+  h2g_ ("Compare: ");
 
   h2g_input_submit ("differencies", "--c",
                     "(--c) compare ROMs for differencies; $FILE=OTHER_ROM");
@@ -156,10 +162,17 @@ ucon64gui_top (void)
 
   h2g_input_submit ("Pad ROM", "--pad", "(--pad) pad ROM to full Mb");
 
-  h2g_input_submit ("Pad ROM (w/ hd)", "--padhd",
-                    "(--padhd) pad ROM to full Mb (regarding to +512 Bytes header)");
-
   h2g_input_submit ("Check", "--ispad", "(--ispad) check if ROM is padded");
+
+
+#ifdef BACKUP_CD
+  h2g_br ();
+
+  ucon64gui_spacer();
+
+  ucon64gui_cdrw ();
+#endif // BACKUP_CD
+
 
   ucon64gui_divider ();
 
@@ -226,4 +239,9 @@ ucon64gui_top (void)
                     "(--gg) apply GameGenie code (permanent); $FILE=XXXX-XXXX");
 
   ucon64gui_divider ();
+
+  if (ucon64gui.sub)
+    h2g_input_image ("Back",  OPTION_LONG_S "root", back_xpm, 0, 0, "Back");
+
+  h2g_br ();
 }

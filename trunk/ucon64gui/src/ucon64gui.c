@@ -324,45 +324,24 @@ html2gui_request (const char *uri, const char *query)
             return;
 
           case UCON64_XCDRW:
-            ucon64gui.sub = 1;
-            ucon64gui.console = NULL;
-            ucon64gui_cdrw ();
             return;
 
           case UCON64_XSWC:
-            ucon64gui.sub = 1;
-            ucon64gui.console = NULL;
-            ucon64gui_swc ();
             return;
 #if 0
           case UCON64_XSMD:
-            ucon64gui.sub = 1;
-            ucon64gui.console = NULL;
-            ucon64gui_smd ();
             return;
 
           case UCON64_XFAL:
-            ucon64gui.sub = 1;
-            ucon64gui.console = NULL;
-            ucon64gui_fal ();
             return;
 
           case UCON64_XGBX:
-            ucon64gui.sub = 1;
-            ucon64gui.console = NULL;
-            ucon64gui_gbx ();
             return;
 
           case UCON64_XD64:
-            ucon64gui.sub = 1;
-            ucon64gui.console = NULL;
-            ucon64gui_doctor64 ();
             return;
 
           case UCON64_X64JR:
-            ucon64gui.sub = 1;
-            ucon64gui.console = NULL;
-            ucon64gui_doctor64jr ();
             return;
 #endif
           case UCON64_ROOT:
@@ -546,11 +525,6 @@ ucon64gui_root (void)
     0);
 #endif
 
-#ifdef BACKUP_CD
-  ucon64gui_divider();
-
-  ucon64gui_cdrw ();
-#endif // BACKUP_CD
 
   ucon64gui_bottom ();
 
@@ -584,16 +558,3 @@ ucon64gui_spacer (void)
 }
 
 
-void
-emulate_property (char *property, int size)
-{
-  char buf2[MAXBUFSIZE];
-
-  h2g_ (property);
-  h2g_ (" = ");
-  h2g_input_text (property,
-                  getProperty (ucon64gui.configfile, property, buf2, ""),
-                  size, 0, FALSE,
-                  "uCON64 can operate as frontend for many Emulators\n"
-                  "Enter here the commandline used for the emulator the name of the ROM will be attached to it");
-}

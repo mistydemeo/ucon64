@@ -63,7 +63,6 @@ extern ucon64gui_t ucon64gui;
 
 extern void ucon64gui_divider (void);
 extern void ucon64gui_spacer (void);
-extern void emulate_property (char *property, int size);
 
 
 #endif // UCON64GUI_H

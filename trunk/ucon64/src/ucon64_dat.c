@@ -69,9 +69,9 @@ const st_usage_t ucon64_dat_usage[] = {
   {"rrom", NULL, "rename ROM(s) to their internal names"},
   {"rename", NULL, "rename ROM(S) to their DATabase names\n"
                     "same as: GoodXXXX rename inplace ..."},
-  {"83", NULL, "force to rename to 8.3 filenames\n"
-//  {"force63", NULL, "force to rename all filenames into Joliet CD format\n"
-//              "same as: GoodXXXX rename inplace force63 ...\n"
+  {"83", NULL, "force to rename to 8.3 filenames"},
+  {"force63", NULL, "force to rename all filenames into Joliet CD format\n"
+              "same as: GoodXXXX rename inplace force63 ...\n"
               "TIP: using " OPTION_LONG_S "nes would process only NES ROM(S)"},
 
 

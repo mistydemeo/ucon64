@@ -136,6 +136,7 @@ const struct option options[] =   {
     {"figs", 0, 0, UCON64_FIGS},
     {"file", 1, 0, UCON64_FILE},
     {"find", 1, 0, UCON64_FIND},
+    {"force63", 0, 0, UCON64_FORCE63},
     {"frontend", 0, 0, UCON64_FRONTEND},
     {"gb", 0, 0, UCON64_GB},
     {"gba", 0, 0, UCON64_GBA},

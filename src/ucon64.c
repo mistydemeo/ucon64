@@ -1439,7 +1439,7 @@ main (int argc, char **argv)
        case UCON64_SHOW_NFO_AFTER:
          if (!ucon64_init (ucon64.rom, &rom)) ucon64_nfo (&rom);
          break;
-    
+
        case UCON64_SHOW_NFO_BEFORE:
        case UCON64_SHOW_NFO_NEVER:
        default:

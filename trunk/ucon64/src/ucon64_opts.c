@@ -259,6 +259,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XGBXB:
     case UCON64_XGD3:
     case UCON64_XGD6:
+    case UCON64_XGD6S:
     case UCON64_XLIT:
     case UCON64_XMCCL:
     case UCON64_XMD:
@@ -1618,6 +1619,14 @@ ucon64_options (int c, const char *optarg)
           else
             gd6_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo); // file exists -> send it to the copier
         }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGD6S:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
+        gd6_read_sram (ucon64.rom, ucon64.parport); // dumping is not yet supported
+      else
+        gd6_write_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
       fputc ('\n', stdout);
       break;
 

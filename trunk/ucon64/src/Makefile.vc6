@@ -20,7 +20,7 @@ LDFLAGS=$(LDFLAGS) libdiscmage/$(LIBNAME_DM).lib
 
 
 OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
-        misc.obj misc_chk.obj misc_par.obj getopt.obj \
+        misc.obj misc_chk.obj misc_par.obj getopt.obj dlopen.obj \
         patch/aps.obj patch/bsl.obj patch/gg.obj patch/ips.obj patch/pal4u.obj \
         patch/ppf.obj patch/xps.obj \
         console/dc.obj console/gb.obj console/gba.obj console/genesis.obj \

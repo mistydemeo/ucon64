@@ -423,7 +423,7 @@ parport_probe (unsigned int port)
         {
           fprintf (stderr,
                    "Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
-                   "(This program needs root privileges)\n",
+                   "(This program needs root privileges for the requested action)\n",
                    port + PARPORT_DATA, port + PARPORT_STATUS, port + PARPORT_CONTROL);
           exit (1);                             // Don't return, if ioperm() fails port access
         }                                       //  causes core dump
@@ -463,7 +463,7 @@ ucon64_parport_probe (unsigned int port)
 #endif
     {
       fprintf (stderr, "Could not set the I/O privilege level to 3\n"
-                       "(This program needs root privileges)\n");
+                       "(This program needs root privileges for the requested action)\n");
       return 1;
     }
 #endif

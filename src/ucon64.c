@@ -405,7 +405,7 @@ main (int argc, char **argv)
   if (ucon64.show_nfo == UCON64_YES)
     if (!ucon64_init (ucon64.rom, &rom))
       ucon64_nfo (&rom);
-      
+
   return 0;
 }
 
@@ -1161,7 +1161,7 @@ ucon64_usage (int argc, char *argv[])
 #else
      "     %s " OPTION_LONG_S "help|less (to see everything in less)\n" // less is more ;-)
 #endif
-     "     give the force recognition option a try if something went wrong\n"
+     "     give the force recognition switch a try if something went wrong\n"
      "\n"
      "Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
      "\n"

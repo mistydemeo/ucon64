@@ -395,9 +395,9 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     {"(U)", "U.S.A."},
     {"(UE)", "U.S.A. & Europe"},
     {"(UK)", "England"},
-    {"(Unk)", "Unknown Country"},
+    {"(Unk)", "Unknown country"},
     /*
-      At least (A), (B), (C), (D), (E) and (F) have to come after the other
+      At least (A), (B), (C), (E) and (F) have to come after the other
       countries, because some games have (A), (B) etc. in their name (the
       non-country part). For example, the SNES games
       "SD Gundam Generations (A) 1 Nen Sensouki (J) (ST)" or
@@ -513,6 +513,11 @@ get_dat_entry (char *fname, st_ucon64_dat_t *dat, uint32_t crc32, long start)
     if (!(fdat = fopen (fname, "rb")))
       {
         fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname);
+#if     defined _WIN32 || defined __CYGWIN__ || defined __MSDOS__
+        if (!stricmp (basename2 (fname), "ntuser.dat"))
+          fprintf (stderr, "       Please see the FAQ, question 47 & 36\n");
+          //               "ERROR: "
+#endif
         return NULL;
       }
 
@@ -881,7 +886,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   if (dat->console_usage != NULL)
     {
       strcpy (buf, dat->console_usage[0].desc);
-      // fix ugly multi-line console "usages" (PC Engine)
+      // fix ugly multi-line console "usages" (PC-Engine)
       if ((p = strchr (buf, '\n')) != NULL)
         *p = 0;
       printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
@@ -1047,7 +1052,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
             console_name = "Neo Geo Pocket";
             break;
           case UCON64_PCE:
-            console_name = "PC Engine";
+            console_name = "PC-Engine";
             break;
           case UCON64_PS2:
             console_name = "Playstation 2";

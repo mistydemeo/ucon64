@@ -43,6 +43,7 @@ extern int snes_f (st_rominfo_t *rominfo);
 extern int snes_fig (st_rominfo_t *rominfo);
 extern int snes_figs (void);
 extern int snes_gd3 (st_rominfo_t *rominfo);
+extern int snes_gd3s (void);
 extern int snes_get_snes_hirom (void);
 extern int snes_init (st_rominfo_t *rominfo);
 extern int snes_j (st_rominfo_t *rominfo);

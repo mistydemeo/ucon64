@@ -31,13 +31,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#ifdef  DEBUG
-#ifdef  __GNUC__
-#warning DEBUG active
-#else
-#pragma message ("DEBUG active")
-#endif
-#endif
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,8 +52,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  _WIN32
 #include <windows.h>
 #endif
-#ifdef  DISCMAGE
-#include "libdiscmage/libdiscmage.h"
+
+#ifdef  DEBUG
+#ifdef  __GNUC__
+#warning DEBUG active
+#else
+#pragma message ("DEBUG active")
+#endif
 #endif
 #include "misc.h"
 #include "getopt.h"
@@ -69,15 +67,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "ucon64_opts.h"
-#include "console/console.h"
-#include "patch/patch.h"
-#include "backup/backup.h"
 #ifdef  DISCMAGE
 #include "ucon64_dm.h"
 #endif
 #ifdef  GUI
 #include "ucon64_ng.h"
 #endif
+#include "console/console.h"
+#include "patch/patch.h"
+#include "backup/backup.h"
 
 
 static void ucon64_exit (void);
@@ -92,6 +90,12 @@ static int ucon64_process_rom (char *fname);
 st_ucon64_t ucon64;                             // containes ptr to image, dat and rominfo
 
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
+
+#ifdef  AMIGA
+unsigned long __stacksize = 102400;             // doesn't work on PPC? is StormC specific?
+//unsigned long __stack = 102400;               // for SAS/C, DICE, GCC etc.?
+char vers[] = "$VER: uCON64 "UCON64_VERSION_S" "CURRENT_OS_S" ("__DATE__") ("__TIME__")";
+#endif
 
 typedef struct
 {
@@ -165,6 +169,7 @@ const struct option options[] = {
     {"gbx", 0, 0, UCON64_GBX},
     {"gc", 0, 0, UCON64_GC},
     {"gd3", 0, 0, UCON64_GD3},
+    {"gd3s", 0, 0, UCON64_GD3S},
     {"gen", 0, 0, UCON64_GEN},
     {"gg", 1, 0, UCON64_GG},
     {"ggd", 1, 0, UCON64_GGD},
@@ -196,9 +201,6 @@ const struct option options[] = {
     {"ispad", 0, 0, UCON64_ISPAD},
     {"j", 0, 0, UCON64_J},
     {"jag", 0, 0, UCON64_JAG},
-#ifdef  GUI
-    {"js", 2, 0, UCON64_JS},
-#endif
     {"k", 0, 0, UCON64_K},
     {"l", 0, 0, UCON64_L},
     {"lnx", 0, 0, UCON64_LNX},
@@ -225,6 +227,7 @@ const struct option options[] = {
     {"mksheet", 0, 0, UCON64_MKSHEET},
     {"mktoc", 0, 0, UCON64_MKTOC},
 #endif
+    {"msg", 0, 0, UCON64_MSG},
     {"multi", 1, 0, UCON64_MULTI},
 //    {"mvs", 0, 0, UCON64_MVS},
     {"n", 1, 0, UCON64_N},
@@ -257,6 +260,7 @@ const struct option options[] = {
     {"pal", 0, 0, UCON64_PAL},
     {"pasofami", 0, 0, UCON64_PASOFAMI},
     {"patch", 1, 0, UCON64_PATCH},
+    {"pattern", 1, 0, UCON64_PATTERN},
     {"pce", 0, 0, UCON64_PCE},
     {"poke", 1, 0, UCON64_POKE},
 #ifdef  PARALLEL
@@ -290,7 +294,6 @@ const struct option options[] = {
     {"smc", 0, 0, UCON64_SMC},
     {"smd", 0, 0, UCON64_SMD},
     {"smds", 0, 0, UCON64_SMDS},
-    {"smg", 0, 0, UCON64_SMG},
     {"sms", 0, 0, UCON64_SMS},
     {"snes", 0, 0, UCON64_SNES},
     {"sram", 0, 0, UCON64_SRAM},
@@ -301,6 +304,7 @@ const struct option options[] = {
     {"strip", 1, 0, UCON64_STRIP},
     {"swan", 0, 0, UCON64_SWAN},
     {"swap", 0, 0, UCON64_SWAP},
+    {"swap2", 0, 0, UCON64_SWAP2},
     {"swc", 0, 0, UCON64_SWC},
     {"swcs", 0, 0, UCON64_SWCS},
     {"ufo", 0, 0, UCON64_UFO},
@@ -334,19 +338,25 @@ const struct option options[] = {
     {"xgbxb", 1, 0, UCON64_XGBXB},
     {"xgbxs", 0, 0, UCON64_XGBXS},
     {"xgd3", 0, 0, UCON64_XGD3},
+    {"xgd3r", 0, 0, UCON64_XGD3R},
     {"xgd3s", 0, 0, UCON64_XGD3S},
     {"xgd6", 0, 0, UCON64_XGD6},
+    {"xgd6r", 0, 0, UCON64_XGD6R},
     {"xgd6s", 0, 0, UCON64_XGD6S},
     {"xlit", 0, 0, UCON64_XLIT},
     {"xmccl", 0, 0, UCON64_XMCCL},
     {"xmd", 0, 0, UCON64_XMD},
     {"xmds", 0, 0, UCON64_XMDS},
+    {"xmsg", 0, 0, UCON64_XMSG},
+    {"xsmc", 0, 0, UCON64_XSMC},
+    {"xsmcr", 0, 0, UCON64_XSMCR},
     {"xsmd", 0, 0, UCON64_XSMD},
     {"xsmds", 0, 0, UCON64_XSMDS},
     {"xswc", 0, 0, UCON64_XSWC},
     {"xswc2", 0, 0, UCON64_XSWC2},
-    {"xswcs", 0, 0, UCON64_XSWCS},
     {"xswc-super", 0, 0, UCON64_XSWC_SUPER},
+    {"xswcr", 0, 0, UCON64_XSWCR},
+    {"xswcs", 0, 0, UCON64_XSWCS},
     {"xv64", 0, 0, UCON64_XV64},
 #endif // PARALLEL
     {"z64", 0, 0, UCON64_Z64},
@@ -545,8 +555,13 @@ main (int argc, char **argv)
 #endif
 
   // parallel port?
-  // Use "0" to force probing if the config file doesn't contain a parport line
-  sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
+#ifdef  AMIGA
+  strcpy (ucon64.parport_dev,
+          get_property (ucon64.configfile, "parport_dev", buf, "parallel.device"));
+#endif
+  // use -1 (UCON64_UNKNOWN) to force probing if the config file doesn't contain
+  //  a parport line
+  sscanf (get_property (ucon64.configfile, "parport", buf, "-1"), "%x", &ucon64.parport);
 
   // make backups?
   ucon64.backup = get_property_int (ucon64.configfile, "backups", '=');
@@ -554,7 +569,7 @@ main (int argc, char **argv)
   // $HOME/.ucon64/ ?
   strcpy (ucon64.configdir, get_property (ucon64.configfile, "ucon64_configdir", buf, ""));
 #ifdef  __CYGWIN__
-  fix_character_set (ucon64.configdir);
+  strcpy (ucon64.configdir, fix_character_set (ucon64.configdir));
 #endif
   strcpy (buf, ucon64.configdir);
   realpath2 (buf, ucon64.configdir);
@@ -562,7 +577,7 @@ main (int argc, char **argv)
 #ifdef  GUI
   strcpy (ucon64.skindir, get_property (ucon64.configfile, "ucon64_skindir", buf, ""));
 #ifdef  __CYGWIN__
-  fix_character_set (ucon64.skindir);
+  strcpy (ucon64.skindir, fix_character_set (ucon64.skindir));
 #endif
   strcpy (buf, ucon64.skindir);
   realpath2 (buf, ucon64.skindir);
@@ -572,7 +587,7 @@ main (int argc, char **argv)
   ucon64.dat_enabled = 0;
   strcpy (ucon64.datdir, get_property (ucon64.configfile, "ucon64_datdir", buf, ""));
 #ifdef  __CYGWIN__
-  fix_character_set (ucon64.datdir);
+  strcpy (ucon64.datdir, fix_character_set (ucon64.datdir));
 #endif
   strcpy (buf, ucon64.datdir);
   realpath2 (buf, ucon64.datdir);
@@ -1018,12 +1033,6 @@ ucon64_rom_handling (void)
           if (UCON64_ISSET (ucon64.buheader_len))
             rominfo.buheader_len = ucon64.buheader_len;
 
-          if (UCON64_ISSET (ucon64.snes_header_base))
-            rominfo.snes_header_base = ucon64.snes_header_base;
-
-          if (UCON64_ISSET (ucon64.snes_hirom))
-            rominfo.snes_hirom = ucon64.snes_hirom;
-
           if (UCON64_ISSET (ucon64.interleaved))
             rominfo.interleaved = ucon64.interleaved;
 
@@ -1071,18 +1080,10 @@ ucon64_rom_handling (void)
     files. For these "problematic" files, their "real" checksum is stored
     in ucon64.fcrc32.
   */
-  switch (ucon64.console)
-    {
-      case UCON64_NES:
-        break;
-
-      default:
-        if (ucon64.crc32 == 0)
-          if (!ucon64.force_disc) // NOT for disc images
-            if (!(ucon64.flags & WF_NOCRC32) || ucon64.file_size < MAXROMSIZE)
-              ucon64.crc32 = q_fcrc32 (ucon64.rom, ucon64.rominfo ? ucon64.rominfo->buheader_len : 0);
-        break;
-    }
+  if (ucon64.crc32 == 0)
+    if (!ucon64.force_disc) // NOT for disc images
+      if (!(ucon64.flags & WF_NOCRC32) || ucon64.file_size <= MAXROMSIZE)
+        ucon64.crc32 = q_fcrc32 (ucon64.rom, ucon64.rominfo ? ucon64.rominfo->buheader_len : 0);
 
 
   // DATabase
@@ -1107,21 +1108,17 @@ ucon64_rom_handling (void)
               //  file could not be created/opened -> no segmentation fault
               if (ucon64.dat && ucon64.rominfo)
                 {
-                  if (ucon64.console == UCON64_NES)
-                    {
+                  if (!ucon64.rominfo->name[0])
+                    strcpy (ucon64.rominfo->name, NULL_TO_EMPTY (ucon64.dat->name));
+                  else if (ucon64.console == UCON64_NES)
+                    { // override the three-character FDS or FAM name
                       int t = nes_get_file_type ();
-                      if (t == UNIF || t == INES || t == PASOFAMI || t == FDS)
-                        strcpy ((char *) ucon64.rominfo->name,
-                                NULL_TO_EMPTY (ucon64.dat->name));
-                      if (!ucon64.rominfo->country)
-                        ucon64.rominfo->country = NULL_TO_EMPTY (ucon64.dat->country);
+                      if (t == FDS || t == FAM)
+                        strcpy (ucon64.rominfo->name, NULL_TO_EMPTY (ucon64.dat->name));
                     }
-                  else if (ucon64.console == UCON64_SMS)
-                    {
-                      strcpy ((char *) ucon64.rominfo->name,
-                              NULL_TO_EMPTY (ucon64.dat->name));
-                      ucon64.rominfo->country = NULL_TO_EMPTY (ucon64.dat->country);
-                    }
+
+                  if (!ucon64.rominfo->country)
+                    ucon64.rominfo->country = NULL_TO_EMPTY (ucon64.dat->country);
                 }
               break;
           }
@@ -1163,7 +1160,7 @@ ucon64_probe (st_rominfo_t * rominfo)
       {UCON64_GEN, genesis_init, AUTO},
       {UCON64_LYNX, lynx_init, AUTO},
       {UCON64_GB, gameboy_init, AUTO},
-      {UCON64_SMS, sms_init, AUTO},             // only auto for SMD files
+      {UCON64_SMS, sms_init, AUTO},
       {UCON64_SNES, snes_init, AUTO},
       {UCON64_NES, nes_init, AUTO},
       {UCON64_NGP, ngp_init, AUTO},
@@ -1200,7 +1197,7 @@ ucon64_probe (st_rominfo_t * rominfo)
             return rominfo;
           }
     }
-  else if (ucon64.file_size < MAXROMSIZE)       // give auto_recognition a try
+  else if (ucon64.file_size <= MAXROMSIZE)       // give auto_recognition a try
     {
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].flags & AUTO)
@@ -1246,7 +1243,7 @@ ucon64_nfo (void)
         return 0; // no crc calc. for disc images and therefore no dat entry either
       }
 #endif
-  // Use ucon64.fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
+  // Use ucon64.fcrc32 for SNES, Genesis & SMS interleaved/N64 non-interleaved
   if (ucon64.fcrc32 && ucon64.crc32)
     printf ("Search checksum (CRC32): 0x%08x\n"
             "Data checksum (CRC32): 0x%08x\n", ucon64.crc32, ucon64.fcrc32);
@@ -1572,9 +1569,9 @@ ucon64_usage (int argc, char *argv[])
 //      cd64_usage,
       dex_usage,
 #else
-      0, 0, 0, 0,
+      0, 0, 0,
 #endif // PARALLEL
-      0}},
+      0, 0}},
     {UCON64_SNES, {snes_usage,
 #ifdef  PARALLEL
       swc_usage,
@@ -1588,17 +1585,17 @@ ucon64_usage (int argc, char *argv[])
     {UCON64_NG, {neogeo_usage, 0, 0, 0, 0, 0}},
     {UCON64_GEN, {genesis_usage,
 #ifdef  PARALLEL
-        smd_usage,
-        md_usage,
-//        mgd_usage,
+      smd_usage,
+      md_usage,
+//      mgd_usage,
 #else
       0, 0,
 #endif // PARALLEL
       0, 0, 0}},
     {UCON64_GB, {gameboy_usage,
 #ifdef  PARALLEL
-        gbx_usage,
-        mccl_usage,
+      gbx_usage,
+      mccl_usage,
 #else
       0, 0,
 #endif // PARALLEL
@@ -1612,11 +1609,20 @@ ucon64_usage (int argc, char *argv[])
       0, 0, 0, 0}},
     {UCON64_PCE, {pcengine_usage,
 #ifdef  PARALLEL
-//        mgd_usage,
+      msg_usage,
+//      mgd_usage,
+#else
+      0,
+#endif // PARALLEL
+      0, 0, 0, 0}},
+    {UCON64_NES, {nes_usage,
+#ifdef  PARALLEL
+      smc_usage,
+#else
+      0,
 #endif // PARALLEL
       0, 0, 0, 0}},
     {UCON64_SMS, {sms_usage, 0, 0, 0, 0, 0}},
-    {UCON64_NES, {nes_usage, 0, 0, 0, 0, 0}},
     {UCON64_SWAN, {swan_usage, 0, 0, 0, 0, 0}},
     {UCON64_JAG, {jaguar_usage, 0, 0, 0, 0, 0}},
     {UCON64_NGP, {ngp_usage,
@@ -1785,19 +1791,19 @@ ucon64_usage (int argc, char *argv[])
 _ __ ________________________________________________________________ __ _
                                                       ___
     .,,,,     .---._ Oo  .::::. .::::. :::   :::    __\__\
-    ( oo)__   (¯oo) /..\ ::  :: ::  :: :::   :::    \ / Oo\o  (\(\
+    ( oo)__   ( oo) /..\ ::  :: ::  :: :::   :::    \ / Oo\o  (\(\
    /\_  \__) /\_  \/\_,/ ::  .. ::..:: ::'   ::'    _\\`--_/ o/oO \
    \__)_/   _\__)_/_/    :::::: :::::: ::....::.... \_ \  \  \.--'/
-   /_/_/    \ /_/_//     `::::' ::  :: `:::::`:::::: /_/__/   /¯\ \___
+   /_/_/    \ /_/_//     `::::' ::  :: `:::::`:::::: /_/__/   / \ \___
  _(__)_)_,   (__)_/  .::::.                      ;::  |_|_    \_/_/\_/\
-  o    o      (__)) ,:' `::::::::::::::::::::::::::' (__)_)___(_(_)  ¯¯
+  o    o      (__)) ,:' `::::::::::::::::::::::::::' (__)_)___(_(_)
      ________  ________  _____ _____________________/   __/_  __/_________
     _\___   /__\___   /_/____/_\    __________     /    ___/  ______     /
    /    /    /    /    /     /  \      \/    /    /     /     /    /    /
   /    /    /         /     /          /    _____/_    /_    /_   _____/_
- /____/    /_________/     /·aBn/fAZ!/nB·_________/_____/_____/_________/
+ /____/    /_________/     /-aBn/fAZ!/nB-_________/_____/_____/_________/
 - -- /_____\--------/_____/------------------------------------------ -- -
 4 Nodes USRobotics & Isdn Power     All Releases Since Day 0 Are Available
- SNES/Sega/Game Boy/GameGear/Ultra 64/PSX/Jaguar/Saturn/Engine/Lynx/NeoGeo
+ Snes/Sega/GameBoy/GameGear/Ultra 64/PSX/Jaguar/Saturn/Engine/Lynx/NeoGeo
 - -- ---------------------------------------------------------------- -- -
 */

@@ -24,7 +24,8 @@ extern const st_usage_t pcengine_usage[];
 
 extern int pcengine_init (st_rominfo_t *rominfo);
 extern int pcengine_mgd (st_rominfo_t *rominfo);
-extern int pcengine_smg (st_rominfo_t *rominfo);
+extern int pcengine_msg (st_rominfo_t *rominfo);
 extern int pcengine_swap (st_rominfo_t *rominfo);
+extern int pcengine_f (st_rominfo_t *rominfo);
 
 #endif // PCE_H

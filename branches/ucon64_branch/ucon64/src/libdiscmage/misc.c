@@ -3,7 +3,7 @@ misc.c - miscellaneous functions
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2003 dbjh
-                  2002 Jan-Erik Karlsson (Amiga)
+           2002 - 2003 Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -47,6 +47,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <OS.h>                                 // snooze(), microseconds
 // Include OS.h before misc.h, because OS.h includes StorageDefs.h which
 //  includes param.h which unconditionally defines MIN and MAX.
+#elif   defined AMIGA
+#include <unistd.h>
+#include <fcntl.h>
+#include <dos/dos.h>
+#include <dos/var.h>
+#include <libraries/lowlevel.h>                 // GetKey()
+#include <proto/dos.h>
+#include <proto/lowlevel.h>
 #elif   defined _WIN32
 #include <windows.h>                            // Sleep(), milliseconds
 #endif
@@ -61,7 +69,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/poll.h>                           //  is available on Linux, not on
 #endif                                          //  BeOS. DOS already has kbhit()
 
-#if     (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
+#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
 #include <termios.h>
 typedef struct termios tty_t;
 #endif
@@ -86,7 +94,7 @@ static st_func_node_t func_list = { NULL, NULL };
 static int func_list_locked = 0;
 static int misc_ansi_color = 0;
 
-#if     (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
+#if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
 static void set_tty (tty_t *param);
 #endif
 
@@ -207,71 +215,6 @@ q_fsize (const char *filename)
 
 
 #if     defined _WIN32 && defined ANSI_COLOR
-#if 0
-static WORD
-ansi_parser (char *str)
-{
-  typedef struct
-    {
-      int ansi;
-      int win32;
-    } st_ansi_codes_t;
-
-  st_ansi_codes_t ansi_codes[] = {
-      {1, FOREGROUND_INTENSITY},
-
-      {30, },
-      {31, FOREGROUND_RED},
-      {32, },
-      {33, FOREGROUND_RED | FOREGROUND_GREEN},
-      {34, },
-      {35, },
-      {36, },
-      {37, },
-
-      {40, },
-      {41, },
-      {42, },
-      {43, },
-      {44, },
-      {45, },
-      {46, },
-      {47, },
-
-      {-1, -1}
-    };
-  int ansi = 0;
-  char *p = str, *s = str;
-
-  for (; *p; p++)
-    switch (*p)
-      {
-        case '\x1b':                            // escape
-          ansi = 1;
-          break;
-
-        case 'm':
-          if (ansi)
-            {
-              ansi = 0;
-              break;
-            }
-
-        default:
-          if (!ansi)
-            {
-              *s = *p;
-              s++;
-            }
-          break;
-      }
-  *s = 0;
-
-  return str;
-}
-#endif
-
-
 int
 vprintf2 (const char *format, va_list argptr)
 // Cheap hack to get the Visual C++ and MinGW ports support "ANSI colors".
@@ -407,7 +350,7 @@ fprintf2 (FILE *file, const char *format, ...)
     n_chars = vfprintf (file, format, argptr);
   else
     n_chars = vprintf2 (format, argptr);
-  va_end (argptr);      
+  va_end (argptr);
   return n_chars;
 }
 #endif // defined _WIN32 && defined ANSI_COLOR
@@ -586,14 +529,12 @@ strcasestr2 (const char *str, const char *search)
 char *
 set_suffix (char *filename, const char *suffix)
 {
-  char suffix2[FILENAME_MAX], *p, *p2 = NULL;
+  char suffix2[FILENAME_MAX], *p, *p2;
 
-  p = basename (filename);
-  if (!p)
+  if (!(p = basename (filename)))
     p = filename;
-
   if ((p2 = strrchr (p, '.')))
-    if (strcmp (p2 ,p) != 0)                    // some files start with '.'
+    if (p2 != p)                                // files can start with '.'
       *p2 = 0;
 
   strcpy (suffix2, suffix);
@@ -606,14 +547,12 @@ set_suffix (char *filename, const char *suffix)
 char *
 set_suffix_i (char *filename, const char *suffix)
 {
-  char *p, *p2 = NULL;
+  char *p, *p2;
 
-  p = basename (filename);
-  if (!p)
+  if (!(p = basename (filename)))
     p = filename;
-
   if ((p2 = strrchr (p, '.')))
-    if (strcmp (p2 ,p) != 0)                    // some files start with '.'
+    if (p2 != p)                                // files can start with '.'
       *p2 = 0;
 
   strcat (filename, suffix);
@@ -626,14 +565,16 @@ const char *
 get_suffix (const char *filename)
 // Note that get_suffix() never returns NULL. Other code relies on that!
 {
-  const char *p = NULL;
+  char *p, *p2;
 
-  if (!(p = strrchr (filename, FILE_SEPARATOR)))
-    p = filename;
-  if (!(p = strrchr (p, '.')))
-    p = "";
-
-  return p;
+  if (!(p = basename (filename)))
+    p = (char *) filename;
+  if (!(p2 = strrchr (p, '.')))
+    p2 = "";
+  if (p2 == p)
+    p2 = "";                                    // files can start with '.'; be
+                                                //  consistent with set_suffix[_i]()
+  return p2;
 }
 
 
@@ -694,28 +635,13 @@ strtrim (char *str)
 
 
 int
-memwcmp (const void *data, const void *search, uint32_t searchlen, int wildcard)
+memwcmp (const void *buffer, const void *search, uint32_t searchlen, int wildcard)
 {
   uint32_t n;
 
   for (n = 0; n < searchlen; n++)
     if (((uint8_t *) search)[n] != wildcard &&
-        ((uint8_t *) data)[n] != ((uint8_t *) search)[n])
-      return -1;
-
-  return 0;
-}
-
-
-int
-memwrcmp (const void *data, const void *search, uint32_t searchlen, int wildcard)
-// TODO: make it like memwcmp() that looks also for shifted/relative similarities
-{
-  uint32_t n;
-
-  for (n = 0; n < searchlen; n++)
-    if (((uint8_t *) search)[n] != wildcard &&
-        ((uint8_t *) data)[n] != ((uint8_t *) search)[n])
+        ((uint8_t *) buffer)[n] != ((uint8_t *) search)[n])
       return -1;
 
   return 0;
@@ -723,28 +649,81 @@ memwrcmp (const void *data, const void *search, uint32_t searchlen, int wildcard
 
 
 void *
-mem_swap (void *add, uint32_t n)
+mem_search (const void *buffer, uint32_t buflen,
+            const void *search, uint32_t searchlen)
 {
-  unsigned char *a = (unsigned char *) add, c;
+  int32_t n;
 
-  for (; n > 1; a += 2, n -= 2)
+  for (n = 0; n <= (int32_t) (buflen - searchlen); n++)
+    if (memcmp ((uint8_t *) buffer + n, search, searchlen) == 0)
+      return (uint8_t *) buffer + n;
+
+  return 0;
+}
+
+
+void *
+mem_swap_b (void *buffer, uint32_t n)
+{
+  uint8_t *a = (uint8_t *) buffer, byte;
+
+  for (; n > 1; n -= 2)
     {
-      c = *a;
+      byte = *a;
       *a = *(a + 1);
-      *(a + 1) = c;
+      *(a + 1) = byte;
+      a += 2;
     }
 
-  return add;
+  return buffer;
+}
+
+
+void *
+mem_swap_w (void *buffer, uint32_t n)
+{
+  uint16_t *a = (uint16_t *) buffer, word;
+
+  n >>= 1;                                      // # words = # bytes / 2
+  for (; n > 1; n -= 2)
+    {
+      word = *a;
+      *a = *(a + 1);
+      *(a + 1) = word;
+      a += 2;
+    }
+
+  return buffer;
+}
+
+
+static void
+mem_hexdump_code (const void *buffer, uint32_t n, int virtual_start)
+// hexdump something into C code (for development)
+{
+  uint32_t pos;
+  const unsigned char *p = (const unsigned char *) buffer;
+
+  for (pos = 0; pos < n; pos++, p++)
+    {
+      printf ("0x%02x, ", *p);
+
+      if (!((pos + 1) & 7))
+        fprintf (stdout, "// 0x%x (%d)\n", pos + virtual_start + 1, pos + virtual_start + 1);
+    }
 }
 
 
 void
-mem_hexdump (const void *mem, uint32_t n, int virtual_start)
+mem_hexdump (const void *buffer, uint32_t n, int virtual_start)
 // hexdump something
 {
+#ifdef  DEBUG
+  mem_hexdump_code (buffer, n, virtual_start);
+#else
   uint32_t pos;
   char buf[17];
-  const unsigned char *p = (const unsigned char *) mem;
+  const unsigned char *p = (const unsigned char *) buffer;
 
   buf[16] = 0;
   for (pos = 0; pos < n; pos++, p++)
@@ -762,26 +741,8 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
       *(buf + (pos & 15)) = 0;
       puts (buf);
     }
+#endif
 }
-
-
-//#ifdef  DEBUG
-void
-mem_hexdump_code (const void *mem, uint32_t n, int virtual_start)
-// hexdump something into C code (for development)
-{
-  uint32_t pos;
-  const unsigned char *p = (const unsigned char *) mem;
-
-  for (pos = 0; pos < n; pos++, p++)
-    {
-      printf ("0x%02x, ", *p);
-
-      if (!((pos + 1) & 7))
-        fprintf (stdout, "// 0x%x (%d)\n", pos + virtual_start + 1, pos + virtual_start + 1);
-    }
-}
-//#endif
 
 
 #if 0                                           // currently not used
@@ -935,7 +896,7 @@ dirname2 (const char *path)
 char *
 realpath (const char *path, char *full_path)
 {
-#ifndef _WIN32
+#if     defined __unix__ || defined __BEOS__ || defined __MSDOS__
 /*
   Keep the "defined _WIN32"'s in this code in case GetFullPathName() turns out
   to have some unexpected problems. This code works for Visual C++, but it
@@ -1109,7 +1070,7 @@ realpath (const char *path, char *full_path)
   strcpy (full_path, got_path);
 
   return full_path;
-#else
+#elif   defined _WIN32
   char *p, c;
   int n;
 
@@ -1125,7 +1086,10 @@ realpath (const char *path, char *full_path)
     full_path[n] = 0;
 
   return full_path;
-#endif // _WIN32
+#elif   defined AMIGA
+  strcpy (full_path, path);
+  return full_path;
+#endif
 }
 #endif
 
@@ -1774,7 +1738,7 @@ gauge (time_t init_time, int pos, int size)
   int curr, bps, left, p, percentage;
   char progress[MAXBUFSIZE];
 
-  if (pos > size || pos + size == 0)
+  if (pos > size)
     return -1;
 
   if ((curr = time (0) - init_time) == 0)
@@ -1823,17 +1787,26 @@ gauge (time_t init_time, int pos, int size)
   TODO: fix the same problem for other non-ASCII characters (> 127).
 */
 char *
-fix_character_set (char *value)
+fix_character_set (char *str)
 {
-  int l = strlen (value);
+  int n, l = strlen (str);
+  unsigned char *ptr = (unsigned char *) str;
 
-  change_mem (value, l, "\x89", 1, 0, 0, "\xeb", 1, 0); // e diaeresis
-  change_mem (value, l, "\x84", 1, 0, 0, "\xe4", 1, 0); // a diaeresis
-  change_mem (value, l, "\x8b", 1, 0, 0, "\xef", 1, 0); // i diaeresis
-  change_mem (value, l, "\x94", 1, 0, 0, "\xf6", 1, 0); // o diaeresis
-  change_mem (value, l, "\x81", 1, 0, 0, "\xfc", 1, 0); // u diaeresis
+  for (n = 0; n < l; n++)
+    {
+      if (ptr[n] == 0x89)                       // e diaeresis
+        ptr[n] = 0xeb;
+      else if (ptr[n] == 0x84)                  // a diaeresis
+        ptr[n] = 0xe4;
+      else if (ptr[n] == 0x8b)                  // i diaeresis
+        ptr[n] = 0xef;
+      else if (ptr[n] == 0x94)                  // o diaeresis
+        ptr[n] = 0xf6;
+      else if (ptr[n] == 0x81)                  // u diaeresis
+        ptr[n] = 0xfc;
+    }
 
-  return value;
+  return str;
 }
 #endif
 
@@ -1907,7 +1880,7 @@ getenv2 (const char *variable)
 #if     defined __MSDOS__ || defined __CYGWIN__
           /*
             DJGPP and (yet another) Cygwin quirck
-            A trailing backslash is used to check for a directory. Normally 
+            A trailing backslash is used to check for a directory. Normally
             DJGPP's runtime system is able to handle forward slashes in paths,
             but access() won't differentiate between files and dirs if a
             forward slash is used. Cygwin's runtime system seems to handle
@@ -1917,8 +1890,8 @@ getenv2 (const char *variable)
           if (access ("\\tmp\\", R_OK | W_OK) == 0)
 #else
           // trailing file separator to force it to be a directory
-          if (access (FILE_SEPARATOR_S"tmp"FILE_SEPARATOR_S, R_OK | W_OK) == 0) 
-#endif  
+          if (access (FILE_SEPARATOR_S"tmp"FILE_SEPARATOR_S, R_OK | W_OK) == 0)
+#endif
             strcpy (value, FILE_SEPARATOR_S"tmp");
           else
             getcwd (value, FILENAME_MAX);
@@ -2144,8 +2117,7 @@ tmpnam2 (char *temp)
 }
 
 
-#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
-        defined AMIGA
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__
 static int oldtty_set = 0, stdin_tty = 1;       // 1 => stdin is a tty, 0 => it's not
 static tty_t oldtty, newtty;
 
@@ -2244,7 +2216,13 @@ kbhit (void)
   return key_pressed;
 #endif
 }
-#endif                                          // (__unix__ && !__MSDOS__) || __BEOS__ || AMIGA
+#elif   defined AMIGA                           // (__unix__ && !__MSDOS__) || __BEOS__
+int
+kbhit (void)
+{
+  return GetKey () != 0xff ? 1 : 0;
+}
+#endif                                          // AMIGA
 
 
 #if     defined __unix__ && !defined __MSDOS__
@@ -2333,7 +2311,7 @@ uint16_t
 bswap_16 (uint16_t x)
 {
 #if 1
-  unsigned char *ptr = (unsigned char *) &x, tmp;
+  uint8_t *ptr = (uint8_t *) &x, tmp;
   tmp = ptr[0];
   ptr[0] = ptr[1];
   ptr[1] = tmp;
@@ -2348,7 +2326,7 @@ uint32_t
 bswap_32 (uint32_t x)
 {
 #if 1
-  unsigned char *ptr = (unsigned char *) &x, tmp;
+  uint8_t *ptr = (uint8_t *) &x, tmp;
   tmp = ptr[0];
   ptr[0] = ptr[3];
   ptr[3] = tmp;
@@ -2366,7 +2344,7 @@ bswap_32 (uint32_t x)
 uint64_t
 bswap_64 (uint64_t x)
 {
-  unsigned char *ptr = (unsigned char *) &x, tmp;
+  uint8_t *ptr = (uint8_t *) &x, tmp;
   tmp = ptr[0];
   ptr[0] = ptr[7];
   ptr[7] = tmp;
@@ -2389,10 +2367,12 @@ wait2 (int nmillis)
 {
 #ifdef  __MSDOS__
   delay (nmillis);
-#elif   defined __unix__ || defined AMIGA
+#elif   defined __unix__
   usleep (nmillis * 1000);
 #elif   defined __BEOS__
   snooze (nmillis * 1000);
+#elif   defined AMIGA
+  Delay (nmillis * 1000);
 #elif   defined _WIN32
   Sleep (nmillis);
 #else
@@ -2423,7 +2403,7 @@ q_fbackup (const char *filename, int mode)
       remove (buf);                             // *try* to remove or rename will fail
       if (rename (filename, buf))               // keep file attributes like date, etc.
         {
-          fprintf (stderr, "ERROR: Can't rename %s to %s\n", filename, buf);
+          fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
           exit (1);
         }
     }
@@ -2433,7 +2413,7 @@ q_fbackup (const char *filename, int mode)
       strcpy (buf, basename (tmpnam2 (buf)));
       if (rename (filename, buf))
         {
-          fprintf (stderr, "ERROR: Can't rename %s to %s\n", filename, buf);
+          fprintf (stderr, "ERROR: Can't rename \"%s\" to \"%s\"\n", filename, buf);
           exit (1);
         }
     }
@@ -2447,7 +2427,7 @@ q_fbackup (const char *filename, int mode)
       default:
         if (q_fcpy (buf, 0, q_fsize (buf), filename, "wb"))
           {
-            fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
+            fprintf (stderr, "ERROR: Can't open \"%s\" for writing\n", filename);
             exit (1);
           }
         sync ();
@@ -2557,7 +2537,7 @@ q_rfcpy (const char *src, const char *dest)
 
 
 int
-q_fswap (const char *filename, int start, int len)
+q_fswap (const char *filename, int start, int len, swap_t type)
 {
   int seg_len;
   FILE *fh;
@@ -2585,7 +2565,10 @@ q_fswap (const char *filename, int start, int len)
     {
       if (!(seg_len = fread (buf, 1, MIN (len, MAXBUFSIZE), fh)))
         break;
-      mem_swap (buf, seg_len);
+      if (type == SWAP_BYTE)
+        mem_swap_b (buf, seg_len);
+      else // SWAP_WORD
+        mem_swap_w (buf, seg_len);
       fseek (fh, -seg_len, SEEK_CUR);
       fwrite (buf, 1, seg_len, fh);
     }
@@ -2687,13 +2670,42 @@ process_file (const char *src, int start, int len, const char *dest, const char 
 #endif
 
 
+int
+argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
+{
+// TODO: replace with argz_extract()
+#ifdef  DEBUG
+  int pos = 0;
+#endif
+  int argc = 0;
+
+  if (!str)
+    return 0;
+  if (!str[0])
+    return 0;
+
+  for (; (argv[argc] = (char *) strtok (!argc?str:NULL, separator_s)) &&
+    argc < (max_args - 1); argc++);
+
+#ifdef  DEBUG
+  fprintf (stderr, "argc:     %d\n", argc);
+  for (pos = 0; pos < argc; pos++)
+    fprintf (stderr, "argv[%d]:  %s\n", pos, argv[pos]);
+
+  fflush (stderr);
+#endif
+
+  return argc;
+}
+
+
 #ifdef  _WIN32
 int
 truncate (const char *path, off_t size)
 {
   int retval;
-  HANDLE file = CreateFile (path, GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
-                            FILE_ATTRIBUTE_NORMAL, NULL);
+  HANDLE file = CreateFile (path, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+                            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   if (file == INVALID_HANDLE_VALUE)
     return -1;
 
@@ -2724,70 +2736,85 @@ fdopen (int fd, const char *mode)
 }
 #endif
 
-#endif // _WIN32
+
+#elif   defined AMIGA                           // _WIN32
+int
+truncate (const char *path, off_t size)
+{
+  return 0;
+}
 
 
 int
-argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
-#if 1
+chmod (const char *path, mode_t mode)
 {
-// TODO: replace with argz_extract()
-#ifdef  DEBUG
-  int x = 0;
-#endif
-  int argc = 0;
-
-  if (!str)
+  if (!SetProtection ((STRPTR) path,
+                      ((mode & S_IRUSR ? 0 : FIBF_READ) |
+                       (mode & S_IWUSR ? 0 : FIBF_WRITE | FIBF_DELETE) |
+                       (mode & S_IXUSR ? 0 : FIBF_EXECUTE) |
+                       (mode & S_IRGRP ? FIBF_GRP_READ : 0) |
+                       (mode & S_IWGRP ? FIBF_GRP_WRITE | FIBF_GRP_DELETE: 0) |
+                       (mode & S_IXGRP ? FIBF_GRP_EXECUTE : 0) |
+                       (mode & S_IROTH ? FIBF_OTR_READ : 0) |
+                       (mode & S_IWOTH ? FIBF_OTR_WRITE | FIBF_OTR_DELETE : 0) |
+                       (mode & S_IXOTH ? FIBF_OTR_EXECUTE : 0))))
+    return -1;
+  else
     return 0;
-  if (!str[0])
-    return 0;
-
-  for (; (argv[argc] = (char *) strtok (!argc?str:NULL, separator_s)) &&
-    argc < (max_args - 1); argc++);
-
-#ifdef  DEBUG
-  fprintf (stderr, "0: %d\n", argc);
-  for (x = 0; x < argc; x++)
-    fprintf (stderr, "0: argv[%d]==\"%s\"\n", x, argv[x]);
-
-  fflush (stderr);
-#endif
-  return argc;
 }
-#else
+
+
+void
+sync (void)
 {
-// TODO: replace with argz_extract()
-//#ifdef  DEBUG
-  int x = 0;
-//#endif
-  int argc = 0;
-  char *p = NULL;
+}
 
-  if (!str)
-    return 0;
-  if (!str[0])
-    return 0;
 
-// does strtok use malloc or some kind of internal state information?
-  for (p = str; argc < max_args; argc++)
+int
+readlink (const char *path, char *buf, int bufsize)
+{
+  // always return -1 as if anything passed to it isn't a soft link
+  return -1;
+}
+
+
+// custom _popen() and _pclose(), because the standard ones (named popen() and
+//  pclose()) are buggy
+FILE *
+_popen (const char *path, const char *mode)
+{
+  int fd;
+  BPTR fh;
+  long fdflags, fhflags;
+  char *apipe = malloc (strlen (path) + 7);
+
+  if (!apipe)
+    return NULL;
+
+  strcpy (apipe, "APIPE:");
+  strcat (apipe, path);
+
+  if (*mode == 'w')
     {
-      int len = strcspn (p, separator_s);
-
-      if (!len)
-        break;
-
-      argv[argc] = p;
-      p += (len + 1);
-      *(p - 1) = 0; // terminate
+      fdflags = 2;
+      fhflags = MODE_NEWFILE;
+    }
+  else
+    {
+      fdflags = 1;
+      fhflags = MODE_OLDFILE;
     }
 
-#ifdef  DEBUG
-  fprintf (stderr, "0: %d\n", argc);
-  for (x = 0; x < argc; x++)
-    fprintf (stderr, "0: argv[%d]==\"%s\"\n", x, argv[x]);
+  if (!(fh = Open (apipe, fhflags)))
+    return NULL;
 
-  fflush (stderr);
-#endif
-  return argc;
+  return fdopen (fd, mode);
 }
-#endif
+
+
+int
+_pclose (FILE *stream)
+{
+  return fclose (stream);
+}
+#endif                                          // AMIGA

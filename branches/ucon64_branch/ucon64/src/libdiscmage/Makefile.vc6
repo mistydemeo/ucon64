@@ -18,7 +18,7 @@ LIBS=
 
 
 FULLLIBNAME=$(LIBNAME).dll
-DLLFLAGS=/NOLOGO /DLL /OUT:$(LIBNAME).dll $(OBJECTS) $(LIBS) /DEF:$(LIBNAME).def
+DLLFLAGS=/NOLOGO /DLL $(OBJECTS) $(LIBS) /DEF:$(LIBNAME).def /OUT:$(LIBNAME).dll
 
 
 all: $(FULLLIBNAME)
@@ -47,6 +47,7 @@ $(LIBNAME).dll: $(OBJECTS)
 
 
 # Dependencies
+
 libdm_misc.obj: libdiscmage.h misc.h dxedll_priv.h
 cdi.obj: libdiscmage.h misc.h cdi.h dxedll_priv.h
 nero.obj: libdiscmage.h misc.h nero.h dxedll_priv.h

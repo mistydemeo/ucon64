@@ -1,10 +1,10 @@
 /*
 ucon64_misc.c - miscellaneous functions for uCON64
 
-written by 1999 - 2002 NoisyB (noisyb@gmx.net)
+written by 1999 - 2003 NoisyB (noisyb@gmx.net)
            2001 - 2003 dbjh
                   2001 Caz
-                  2002 Jan-Erik Karlsson (Amiga)
+           2002 - 2003 Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -43,8 +43,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  PARALLEL
 #if     defined __linux__ && defined __GLIBC__
 #include <sys/io.h>                             // ioperm() (glibc)
-#elif   defined __BEOS__ || defined AMIGA || defined __FreeBSD__
+#elif   defined __BEOS__ || defined __FreeBSD__
 #include <fcntl.h>
+#elif   defined AMIGA
+#include <fcntl.h>
+#include <exec/types.h>
+#include <exec/io.h>
+#include <exec/ports.h>
+#include <dos/dos.h>
+#include <dos/var.h>
+#include <devices/parallel.h>
 #elif   defined _WIN32
 #include <conio.h>                              // inp{w}() & outp{w}()
 #include "dlopen.h"
@@ -277,7 +285,7 @@ Coleco Vision
 Colecovision (1982)
 Dreamcast
 FC Channel F
-G7400+/Odyssey² (1978)
+G7400+/Odyssey2 (1978)
 GameBoy
 Game.com ? Tiger
 Game Cube
@@ -425,6 +433,7 @@ const st_usage_t ucon64_padding_usage[] = {
 const st_usage_t ucon64_patching_usage[] = {
   {NULL, NULL, "Patching"},
   {"poke", "OFF:V", "change byte at file offset OFF to value V (both in hexadecimal)"},
+  {"pattern", "FILE", "change ROM based on patterns specified in FILE"},
   {"patch", "PATCH", "specify the PATCH for the following options\n"
                     "use this option or uCON64 expects the last commandline\n"
                     "argument to be the name of the PATCH file"},
@@ -464,7 +473,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_COL, UCON64_SNES, snes_usage,        WF_NO_ROM},
   {UCON64_DBUH, UCON64_SNES, snes_usage,       WF_DEFAULT},
   {UCON64_DMIRR, UCON64_SNES, snes_usage,      WF_DEFAULT},
-#if 1 // -f is now used for SNES *and* Genesis
+#if 1 // -f is now used for SNES, Genesis and PC-Engine
   {UCON64_F, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
 #else
   {UCON64_F, UCON64_SNES, snes_usage,          WF_DEFAULT},
@@ -476,6 +485,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_FIGS, UCON64_SNES, snes_usage,       0},
   {UCON64_GBX, UCON64_GB, gameboy_usage,       WF_DEFAULT},
   {UCON64_GD3, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
+  {UCON64_GD3S, UCON64_SNES, snes_usage,       0},
   {UCON64_INES, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_INESHD, UCON64_NES, nes_usage,       WF_DEFAULT},
 //  {UCON64_IP, UCON64_DC, dc_usage,             WF_DEFAULT},
@@ -485,6 +495,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_LSRAM, UCON64_N64, n64_usage,        WF_INIT|WF_PROBE},
   {UCON64_LYX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
   {UCON64_MGDGG, UCON64_SMS, sms_usage,        WF_DEFAULT|WF_NO_SPLIT},
+  {UCON64_MSG, UCON64_PCE, pcengine_usage,     WF_DEFAULT},
 #if 1 // -multi is now used for GBA *and* Genesis
   {UCON64_MULTI, UCON64_UNKNOWN, NULL,         WF_INIT|WF_PROBE|WF_STOP},
 #else
@@ -501,7 +512,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_SCRAMBLE, UCON64_DC, dc_usage,       WF_DEFAULT},
   {UCON64_SGB, UCON64_GB, gameboy_usage,       WF_DEFAULT},
   {UCON64_SMC, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
-  {UCON64_SMG, UCON64_PCE, pcengine_usage,     WF_DEFAULT},
   {UCON64_SRAM, UCON64_GBA, gba_usage,         0},
   {UCON64_SSC, UCON64_GB, gameboy_usage,       WF_DEFAULT},
   {UCON64_SWC, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
@@ -512,7 +522,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_UNSCRAMBLE, UCON64_DC, dc_usage,     WF_DEFAULT},
   {UCON64_USMS, UCON64_N64, n64_usage,         WF_DEFAULT},
   {UCON64_V64, UCON64_N64, n64_usage,          WF_DEFAULT},
-  {UCON64_VMS, UCON64_DC, dc_usage,            0},
 #ifdef  PARALLEL
   // We have to add |WF_NO_ROM to the copier options workflow parameter in
   //  order to support dumping of cartridges or copier SRAM.
@@ -529,13 +538,18 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XGBXB, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_ROM},
   {UCON64_XGBXS, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_ROM},
   {UCON64_XGD3, UCON64_SNES, gd_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM}, // supports split files
-  {UCON64_XGD3S, UCON64_SNES, fig_usage,       WF_STOP|WF_NO_ROM},
+  {UCON64_XGD3R, UCON64_SNES, gd_usage,        WF_STOP|WF_NO_ROM},
+  {UCON64_XGD3S, UCON64_SNES, gd_usage,        WF_STOP|WF_NO_ROM},
   {UCON64_XGD6, UCON64_SNES, gd_usage,         WF_DEFAULT|WF_STOP|WF_NO_ROM}, // supports split files
-  {UCON64_XGD6S, UCON64_SNES, fig_usage,       WF_STOP|WF_NO_ROM},
+  {UCON64_XGD6R, UCON64_SNES, gd_usage,        WF_STOP|WF_NO_ROM},
+  {UCON64_XGD6S, UCON64_SNES, gd_usage,        WF_STOP|WF_NO_ROM},
   {UCON64_XLIT, UCON64_GB, lynxit_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XMCCL, UCON64_LYNX, mccl_usage,      WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_XMD, UCON64_GEN, md_usage,           WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XMDS, UCON64_GEN, md_usage,          WF_STOP|WF_NO_ROM},
+  {UCON64_XMSG, UCON64_PCE, pcengine_usage,    WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XSMC, UCON64_NES, nes_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT}, // send only
+  {UCON64_XSMCR, UCON64_NES, nes_usage,        WF_STOP|WF_NO_ROM},
 #if 1
   {UCON64_XSMD, UCON64_GEN, smd_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XSMDS, UCON64_GEN, smd_usage,        WF_STOP|WF_NO_ROM},
@@ -544,8 +558,9 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XSMDS, UCON64_UNKNOWN, smd_usage,    WF_STOP|WF_NO_ROM},
 #endif
   {UCON64_XSWC, UCON64_SNES, swc_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
-  {UCON64_XSWC_SUPER, UCON64_SNES, swc_usage,  WF_STOP|WF_NO_SPLIT|WF_NO_ROM}, // receive only
   {UCON64_XSWC2, UCON64_SNES, swc_usage,       WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
+  {UCON64_XSWC_SUPER, UCON64_SNES, swc_usage,  WF_STOP|WF_NO_SPLIT|WF_NO_ROM}, // receive only
+  {UCON64_XSWCR, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XSWCS, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XV64, UCON64_N64, doctor64_usage,    WF_DEFAULT|WF_STOP|WF_NO_ROM},
 #endif
@@ -563,6 +578,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XCDRW, UCON64_UNKNOWN, NULL,  WF_DEFAULT|WF_STOP|WF_NO_ROM},
   {UCON64_CDMAGE, UCON64_UNKNOWN, NULL,  WF_DEFAULT},
 #endif
+
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},
   {UCON64_A, UCON64_UNKNOWN, aps_usage,        WF_STOP},
   {UCON64_B, UCON64_UNKNOWN, bsl_usage,        WF_STOP},
@@ -589,9 +605,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_INSN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_ISPAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_INIT|WF_NO_SPLIT},
   {UCON64_J, UCON64_UNKNOWN, NULL,             WF_INIT|WF_PROBE},
-#ifdef  GUI
-  {UCON64_JS, UCON64_UNKNOWN, ucon64_options_usage, WF_STOP|WF_NO_ROM},
-#endif
   {UCON64_LOGO, UCON64_UNKNOWN, NULL,          WF_DEFAULT},
   {UCON64_LS, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
   {UCON64_LSD, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE},
@@ -609,6 +622,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_PAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_DEFAULT},
   {UCON64_PADHD, UCON64_UNKNOWN, NULL,         WF_DEFAULT},
   {UCON64_PADN, UCON64_UNKNOWN, ucon64_padding_usage, WF_DEFAULT},
+  {UCON64_PATTERN, UCON64_UNKNOWN, ucon64_patching_usage, WF_INIT|WF_PROBE},
   {UCON64_POKE, UCON64_UNKNOWN, ucon64_patching_usage, 0},
   {UCON64_PPF, UCON64_UNKNOWN, ppf_usage,      WF_STOP},
   {UCON64_RENAME, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
@@ -624,6 +638,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_STPN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_STRIP, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_SWAP, UCON64_UNKNOWN, NULL,          WF_INIT|WF_PROBE},
+  {UCON64_SWAP2, UCON64_UNKNOWN, NULL,         0},
   {UCON64_VER, UCON64_UNKNOWN, ucon64_options_usage, WF_STOP},
 /*
   force recognition switches
@@ -886,7 +901,11 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
   NULL};                                        // IZ
 
 
-#if     defined PARALLEL && (defined __BEOS__ || defined AMIGA || defined __FreeBSD__)
+#ifdef   PARALLEL
+
+#if     defined __BEOS__ || defined __FreeBSD__
+static int ucon64_io_fd;
+
 typedef struct st_ioport
 {
   unsigned int port;
@@ -894,7 +913,11 @@ typedef struct st_ioport
   unsigned short data16;
 } st_ioport_t;
 
-static int ucon64_io_fd;
+#elif   defined AMIGA
+static struct IOStdReq *ucon64_io_req;
+static struct MsgPort *ucon64_parport;
+#endif
+
 #endif
 
 
@@ -1037,7 +1060,7 @@ ucon64_fhexdump (const char *filename, int start, int len)
   for (pos = 0; pos < len; pos += buf_size)
     {
       value = fread (buf, 1, MIN (len, buf_size), fh);
-      mem_hexdump_code (buf, value, pos + start);
+      mem_hexdump (buf, value, pos + start);
     }
 
   fclose (fh);
@@ -1360,7 +1383,14 @@ void (*output_word) (unsigned short, unsigned short) = outpw_func;
 void
 close_io_port (void)
 {
+#ifdef  AMIGA
+  CloseDevice ((struct IORequest *) ucon64_io_req);
+  DeleteExtIO ((struct IOExtPar *) ucon64_io_req);
+  DeletePort (ucon64_parport);
+  ucon64_io_req = NULL;
+#else
   close (ucon64_io_fd);
+#endif
 }
 #endif
 
@@ -1368,13 +1398,41 @@ close_io_port (void)
 unsigned char
 inportb (unsigned short port)
 {
-#if     defined __BEOS__ || defined AMIGA
+#if     defined __BEOS__
   st_ioport_t temp;
 
   temp.port = port;
   ioctl (ucon64_io_fd, 'r', &temp, 0);
 
   return temp.data8;
+#elif   defined AMIGA
+  ULONG wait_mask;
+  (void) port;                                  // warning remover
+
+  ucon64_io_req->io_Length = 1;
+  ucon64_io_req->io_Command = CMD_READ;
+
+/*
+  SendIO ((struct IORequest *) ucon64_io_req);
+
+  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
+  if (Wait (wait_mask) & (SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F))
+    AbortIO ((struct IORequest *) ucon64_io_req);
+  WaitIO ((struct IORequest *) ucon64_io_req);
+*/
+
+  /*
+    The difference between using SendIO() and DoIO(), is that DoIO() handles
+    messages etc. by itself but it will not return until the IO is done.
+
+    Probably have to do more error handling here :-)
+
+    Can one CTRL-C a DoIO() request? (Or for that matter a SendIO().)
+  */
+
+  DoIO ((struct IORequest *) ucon64_io_req);
+
+  return (unsigned char) ucon64_io_req->io_Data;
 #elif   defined _WIN32 || defined __CYGWIN__
   return input_byte (port);
 #elif   defined __i386__
@@ -1386,13 +1444,32 @@ inportb (unsigned short port)
 unsigned short
 inportw (unsigned short port)
 {
-#if     defined __BEOS__ || defined AMIGA
+#if     defined __BEOS__
   st_ioport_t temp;
 
   temp.port = port;
   ioctl (ucon64_io_fd, 'r16', &temp, 0);
 
   return temp.data16;
+#elif   defined AMIGA
+  ULONG wait_mask;
+  (void) port;                                  // warning remover
+  
+  ucon64_io_req->io_Length = 2;
+  ucon64_io_req->io_Command = CMD_READ;
+
+/*
+  SendIO ((struct IORequest *) ucon64_io_req);
+
+  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
+  if (Wait (wait_mask) & (SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F))
+    AbortIO ((struct IORequest *) ucon64_io_req);
+  WaitIO ((struct IORequest *) ucon64_io_req);
+*/
+
+  DoIO ((struct IORequest *) ucon64_io_req);
+
+  return (unsigned short) ucon64_io_req->io_Data;
 #elif   defined _WIN32 || defined __CYGWIN__
   return input_word (port);
 #elif   defined __i386__
@@ -1404,12 +1481,30 @@ inportw (unsigned short port)
 void
 outportb (unsigned short port, unsigned char byte)
 {
-#if     defined __BEOS__ || defined AMIGA
+#if     defined __BEOS__
   st_ioport_t temp;
 
   temp.port = port;
   temp.data8 = byte;
   ioctl (ucon64_io_fd, 'w', &temp, 0);
+#elif   defined AMIGA
+  ULONG wait_mask;
+  (void) port;                                  // warning remover
+  
+  ucon64_io_req->io_Length = 1;
+  ucon64_io_req->io_Data = byte;
+  ucon64_io_req->io_Command = CMD_WRITE;
+
+/*
+  SendIO ((struct IORequest *) ucon64_io_req);
+
+  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
+  if (Wait (wait_mask) & (SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F))
+    AbortIO ((struct IORequest *) ucon64_io_req);
+  WaitIO ((struct IORequest *) ucon64_io_req);
+*/
+
+  DoIO ((struct IORequest *) ucon64_io_req);
 #elif   defined _WIN32 || defined __CYGWIN__
   output_byte (port, byte);
 #elif   defined __i386__
@@ -1421,12 +1516,30 @@ outportb (unsigned short port, unsigned char byte)
 void
 outportw (unsigned short port, unsigned short word)
 {
-#if     defined __BEOS__ || defined AMIGA
+#if     defined __BEOS__
   st_ioport_t temp;
 
   temp.port = port;
   temp.data16 = word;
   ioctl (ucon64_io_fd, 'w16', &temp, 0);
+#elif   defined AMIGA
+  ULONG wait_mask;
+  (void) port;                                  // warning remover
+  
+  ucon64_io_req->io_Length = 2;
+  ucon64_io_req->io_Data = word;
+  ucon64_io_req->io_Command = CMD_WRITE;
+
+/*
+  SendIO ((struct IORequest *) ucon64_io_req);
+
+  wait_mask = SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F | 1L << ucon64_parport->mp_SigBit;
+  if (Wait (wait_mask) & (SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_F) )
+    AbortIO ((struct IORequest *) ucon64_io_req);
+  WaitIO ((struct IORequest *) ucon64_io_req);
+*/
+
+  DoIO ((struct IORequest *) ucon64_io_req);
 #elif   defined _WIN32 || defined __CYGWIN__
   output_word (port, word);
 #elif   defined __i386__
@@ -1461,8 +1574,8 @@ ucon64_parport_probe (unsigned int port)
 }
 
 
-unsigned int
-ucon64_parport_init (unsigned int port)
+int
+ucon64_parport_init (int port)
 {
 #if     defined __BEOS__
   ucon64_io_fd = open ("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
@@ -1485,10 +1598,46 @@ ucon64_parport_init (unsigned int port)
         }
     }
 #elif   defined AMIGA
-  ucon64_io_fd = open ("PAR:", O_RDWR | O_NONBLOCK);
-  if (ucon64_io_fd == -1)
+  int x;
+
+  ucon64_parport = CreatePort (NULL, 0);
+  if (ucon64_parport == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open parallel port\n");
+      fprintf (stderr, "ERROR: Could not create the MsgPort\n");
+      exit (1);
+    }
+  ucon64_io_req = CreateExtIO (ucon64_parport, sizeof (struct IOExtPar));
+  if (ucon64_io_req == NULL)
+    {
+      fprintf (stderr, "ERROR: Could not create the I/O request structure\n");
+      DeletePort (ucon64_parport);
+      ucon64_io_req = NULL;
+      exit (1);
+    }
+
+  // Is it possible to probe for the correct port?
+  if (port == UCON64_UNKNOWN)
+    port = 0;
+
+  x = OpenDevice (ucon64.parport_dev, port, (struct IORequest *) ucon64_io_req,
+                  (ULONG) 0);
+  if (x != 0)
+    {
+      fprintf (stderr, "ERROR: Could not open parallel port (%s, %x)\n",
+               ucon64.parport_dev, port);
+      DeleteExtIO ((struct IOExtPar *) ucon64_io_req);
+      DeletePort (ucon64_parport);
+      exit (1);
+    }
+
+  if (atexit (close_io_port) == -1)
+    {
+      //AbortIO ((struct IORequest *) ucon64_io_req); // should not be necessary with DoIO()
+      CloseDevice ((struct IORequest *) ucon64_io_req);
+      DeleteExtIO (ucon64_io_req);
+      DeletePort (ucon64_parport);
+      ucon64_io_req = NULL;
+      fprintf (stderr, "ERROR: Could not register function with atexit()\n");
       exit (1);
     }
 #elif   defined __FreeBSD__
@@ -1500,7 +1649,7 @@ ucon64_parport_init (unsigned int port)
       exit (1);
     }
 #endif
-#if     defined __BEOS__ || defined AMIGA || defined __FreeBSD__
+#if     defined __BEOS__ || defined __FreeBSD__
   if (atexit (close_io_port) == -1)
     {
       close (ucon64_io_fd);
@@ -1613,7 +1762,7 @@ ucon64_parport_init (unsigned int port)
     }
 #endif // _WIN32 || __CYGWIN__
 
-  if (!port)                                    // no port specified or forced?
+  if (port == UCON64_UNKNOWN)                   // no port specified or forced?
     {
       unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };
       int x, found = 0;
@@ -1759,7 +1908,12 @@ ucon64_configfile (void)
                    "#\n"
                    "# parallel port\n"
                    "#\n"
+#ifdef  AMIGA
+                   "#parport_dev=parallel.device\n"
+                   "#parport=0\n"
+#else
                    "#parport=378\n"
+#endif
                    "#\n"
 #if     defined __MSDOS__
                    "discmage_path=~\\discmage.dxe\n" // realpath2() expands the tilde
@@ -1951,3 +2105,309 @@ ucon64_configfile (void)
     }
   return 0;
 }
+
+
+int
+ucon64_rename (int mode)
+{
+  char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1], suffix[80], *p, *p2;
+  int good_name;
+
+  buf[0] = 0;
+  strncpy (suffix, get_suffix (ucon64.rom), 80);
+  suffix[80 - 1] = 0;                           // in case suffix is >= 80 chars
+
+  switch (mode)
+    {
+      case UCON64_RROM:
+        if (ucon64.rominfo)
+          if (ucon64.rominfo->name)
+            {
+              strcpy (buf, ucon64.rominfo->name);
+              strtrim (buf);
+            }
+        break;
+
+      case UCON64_RENAME:                       // GoodXXXX style rename
+        if (ucon64.dat)
+          if (ucon64.dat->fname)
+            {
+              p = (char *) get_suffix (ucon64.dat->fname);
+              strcpy (buf, ucon64.dat->fname);
+
+              // get_suffix() never returns NULL
+              if (p[0])
+                if (strlen (p) < 5)
+                  if (!(stricmp (p, ".nes") &&  // NES
+                        stricmp (p, ".fds") &&  // NES FDS
+                        stricmp (p, ".gb") &&   // Game Boy
+                        stricmp (p, ".gbc") &&  // Game Boy Color
+                        stricmp (p, ".gba") &&  // Game Boy Advance
+                        stricmp (p, ".smc") &&  // SNES
+                        stricmp (p, ".sc") &&   // Sega Master System
+                        stricmp (p, ".sg") &&   // Sega Master System
+                        stricmp (p, ".sms") &&  // Sega Master System
+                        stricmp (p, ".gg") &&   // Game Gear
+//                      stricmp (p, ".smd") &&  // Genesis
+                        stricmp (p, ".v64")))   // Nintendo 64
+                    buf[strlen (buf) - strlen (p)] = 0;
+            }
+        break;
+
+      default:
+        return 0;                               // invalid mode
+    }
+
+  if (!buf[0])
+    return 0;
+
+  if (ucon64.fname_len == UCON64_FORCE63)
+    buf[63] = 0;
+  else if (ucon64.fname_len == UCON64_83)
+    buf[8] = 0;
+
+  // replace chars the fs might not like
+  strcpy (buf2, to_func (buf, strlen (buf), tofname));
+  strcpy (buf, basename2 (ucon64.rom));
+
+  p = (char *) get_suffix (buf);
+  // Remove the suffix from buf (ucon64.rom). Note that this isn't fool-proof.
+  //  However, this is the best solution, because several DAT files contain
+  //  "canonical" file names with a suffix. That is a STUPID bug.
+  if (p)
+    buf[strlen (buf) - strlen (p)] = 0;
+
+#ifdef  DEBUG
+//  printf ("buf: \"%s\"; buf2: \"%s\"\n", buf, buf2);
+#endif
+  if (!strcmp (buf, buf2))
+    // also process files with a correct name, so that -rename can be used to
+    //  "weed" out good dumps when -o is used (like GoodXXXX without inplace
+    //  command)
+    good_name = 1;
+  else
+    {
+      // Another test if the file already has a correct name. This is necessary
+      //  for files without a "normal" suffix (e.g. ".smc"). Take for example a
+      //  name like "Final Fantasy III (V1.1) (U) [!]".
+      strcat (buf, suffix);
+      if (!strcmp (buf, buf2))
+        {
+          good_name = 1;
+          suffix[0] = 0;                        // discard "suffix" (part after period)
+        }
+      else
+        good_name = 0;
+    }
+
+  // DON'T use set_suffix()! Consider file names (in the DAT file) like
+  //  "Final Fantasy III (V1.1) (U) [!]". The suffix is ".1) (U) [!]"...
+  strcat (buf2, suffix);
+
+  if (ucon64.fname_len == UCON64_83)
+    buf2[12] = 0;
+
+  ucon64_output_fname (buf2, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+
+  p = basename2 (ucon64.rom);
+  p2 = basename2 (buf2);
+
+  if (one_file (ucon64.rom, buf2) && !strcmp (p, p2))
+    {                                           // skip only if the letter case
+      printf ("Skipping \"%s\"\n", p);          //  also matches (Windows...)
+      return 0;
+    }
+
+  if (!good_name)
+    /*
+      Note that the previous statement causes whatever file is present in the
+      dir specified with -o (or the current dir) to be overwritten. This seems
+      bad, but is actually better than making a backup. It isn't so bad,
+      because the file that gets overwritten is either the same as the file it
+      is overwritten with or doesn't deserve its name.
+      Without this statement repeating a rename action for already renamed
+      files would result in a real mess. And I (dbjh) mean a *real* mess...
+    */
+    if (!access (buf2, F_OK))                   // a file with that name exists already?
+      ucon64_file_handler (buf2, NULL, OF_FORCE_BASENAME);
+
+  if (!good_name)
+    printf ("Renaming \"%s\" to \"%s\"\n", p, p2);
+  else
+    printf ("Moving \"%s\"\n", p);
+#ifndef DEBUG
+  rename2 (ucon64.rom, buf2);                   // rename2() must be used!
+#endif
+#ifdef  HAVE_ZLIB_H
+  unzip_current_file_nr = 0x7fffffff - 1;       // dirty hack
+#endif
+  return 0;
+}
+
+
+int
+ucon64_e (void)
+{
+  int result, x;
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
+  const char *property;
+
+  if (access (ucon64.configfile, F_OK) != 0)
+    {
+      fprintf (stderr, "ERROR: %s does not exist\n", ucon64.configfile);
+      return -1;
+    }
+
+  sprintf (buf3, "emulate_%08x", ucon64.crc32);
+
+  property = get_property (ucon64.configfile, buf3, buf2, NULL); // buf2 also contains property value
+  if (property == NULL)
+    {
+      sprintf (buf3, "emulate_0x%08x", ucon64.crc32);
+      property = get_property (ucon64.configfile, buf3, buf2, NULL);
+    }
+
+  if (property == NULL)
+    {
+      for (x = 0; options[x].name; x++)
+        if (options[x].val == ucon64.console)
+          {
+            sprintf (buf3, "emulate_%s", options[x].name);
+            break;
+          }
+      property = get_property (ucon64.configfile, buf3, buf2, NULL);
+    }
+
+  if (property == NULL)
+    {
+      fprintf (stderr, "ERROR: Could not find the correct settings (%s) in\n"
+              "       %s\n"
+              "TIP:   If the wrong console was detected you might try to force recognition\n"
+              "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
+              buf3, ucon64.configfile);
+      return -1;
+    }
+
+  sprintf (buf, "%s \"%s\"", buf2, ucon64.rom);
+
+  puts (buf);
+  fflush (stdout);
+  sync ();
+
+  result = system (buf)
+#ifndef __MSDOS__
+           >> 8                                 // the exit code is coded in bits 8-15
+#endif                                          //  (that is, under non-DOS)
+           ;
+
+#if 1
+  // Snes9x (Linux) for example returns a non-zero value on a normal exit
+  //  (3)...
+  // under WinDOS, system() immediately returns with exit code 0 when
+  //  starting a Windows executable (as if fork() was called) it also
+  //  returns 0 when the exe could not be started
+  if (result != 127 && result != -1 && result != 0)        // 127 && -1 are system() errors, rest are exit codes
+    {
+      fprintf (stderr, "ERROR: The emulator returned an error (?) code: %d\n"
+               "TIP:   If the wrong emulator was used you might try to force recognition\n"
+               "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
+               result);
+    }
+#endif
+  return result;
+}
+
+
+#define PATTERN_BUFSIZE (64 * 1024)
+// TODO: handle more exotic cases like large (negative) offsets, replacements in
+//       the overlap area, etc.
+int
+ucon64_pattern (st_rominfo_t *rominfo, const char *pattern_fname)
+{
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
+       buffer[PATTERN_BUFSIZE];
+  FILE *srcfile, *destfile;
+  int bytesread, n, n_found = 0, n_patterns, overlap = 0;
+  st_cm_pattern_t *patterns = NULL;
+
+  n_patterns = build_cm_patterns (&patterns, pattern_fname, src_name);
+  if (n_patterns == 0)
+    {
+      fprintf (stderr, "ERROR: No patterns found in %s\n", src_name);
+      cleanup_cm_patterns (&patterns, n_patterns);
+      return -1;
+    }
+
+  printf ("Found %d pattern%s in %s\n", n_patterns, n_patterns != 1 ? "s" : "", src_name);
+
+  for (n = 0; n < n_patterns; n++)
+    if (patterns[n].search_size > overlap)
+      {
+        overlap = patterns[n].search_size;
+        if (overlap > PATTERN_BUFSIZE)
+          {
+            fprintf (stderr, "ERROR: Pattern %d is too large, specify a shorter pattern\n", n);
+            cleanup_cm_patterns (&patterns, n_patterns);
+            return -1;
+          }
+      }
+  overlap--;
+
+  puts ("Searching for patterns...");
+
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, src_name, 0);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+      return -1;
+    }
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+  if (rominfo->buheader_len)                    // copy header (if present)
+    {
+      n = rominfo->buheader_len;
+      while ((bytesread = fread (buffer, 1, MIN (n, PATTERN_BUFSIZE), srcfile)))
+        {
+          fwrite (buffer, 1, bytesread, destfile);
+          n -= bytesread;
+        }
+    }
+
+  bytesread = fread (buffer, 1, overlap, srcfile);
+//  if (feof (srcfile)
+    fwrite (buffer, 1, bytesread, destfile);
+  while ((bytesread = fread (buffer + overlap, 1, PATTERN_BUFSIZE - overlap, srcfile)))
+    {
+      for (n = 0; n < n_patterns; n++)
+        {
+          int x = overlap + 1 - patterns[n].search_size;
+          n_found += change_mem2 (buffer + x,
+                                  bytesread + overlap - x,
+                                  patterns[n].search,
+                                  patterns[n].search_size,
+                                  patterns[n].wildcard,
+                                  patterns[n].escape,
+                                  patterns[n].replace,
+                                  patterns[n].replace_size,
+                                  patterns[n].offset,
+                                  patterns[n].sets);
+        }
+
+      fwrite (buffer + overlap, 1, bytesread, destfile);
+      memmove (buffer, buffer + PATTERN_BUFSIZE - overlap, overlap);
+    }
+  fclose (srcfile);
+  fclose (destfile);
+  cleanup_cm_patterns (&patterns, n_patterns);
+
+  printf ("Found %d pattern%s\n", n_found, n_found != 1 ? "s" : "");
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+  return n_found;
+}
+#undef PATTERN_BUFSIZE

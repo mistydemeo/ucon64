@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "pce.h"
 #include "backup/mgd.h"
+#include "backup/msg.h"
 
 
 #define PCENGINE_HEADER_START 0x448
@@ -49,20 +50,14 @@ const st_usage_t pcengine_usage[] =
     {NULL, NULL, "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\nSuper Grafx/Turbo (Grafx(16)/CD/DUO/Express)"},
     {NULL, NULL, "1987/19XX/19XX NEC"},
     {"pce", NULL, "force recognition"},
-    {"int", NULL, "force ROM is in interleaved format"},
-    {"nint", NULL, "force ROM is not in interleaved format"},
-    {"smg", NULL, "convert to Super Magic Griffin/SMG"},
+    {"int", NULL, "force ROM is in interleaved (bit-swapped) format"},
+    {"nint", NULL, "force ROM is not in interleaved (bit-swapped) format"},
+    {"msg", NULL, "convert to Magic Super Griffin/MSG"},
     {"mgd", NULL, "convert to Multi Game Doctor*/MGD2/RAW"},
     {"swap", NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)"},
+    {"f", NULL, "fix region protection"},
     {NULL, NULL, NULL}
 };
-
-const st_usage_t smg_usage[] =
-  {
-    {NULL, NULL, "Super Magic Griffin"},
-    {NULL, NULL, "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
-    {NULL, NULL, NULL}
-  };
 
 #define PCE_MAKER_MAX 86
 static const char *pce_maker[PCE_MAKER_MAX] = {
@@ -639,39 +634,39 @@ swapbits (unsigned char *buffer, int size)
 
 // header format is specified in src/backup/ffe.h
 int
-pcengine_smg (st_rominfo_t *rominfo)
+pcengine_msg (st_rominfo_t *rominfo)
 {
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
-  st_unknown_header_t header;
+  st_msg_header_t header;
   int size = ucon64.file_size - rominfo->buheader_len;
 
-  if (!rominfo->interleaved)
+  if (rominfo->interleaved)
     if (!(rom_buffer = (unsigned char *) malloc (size)))
       {
         fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
         return -1;
       }
 
-  memset (&header, 0, UNKNOWN_HEADER_LEN);
-  header.size_low = size / 8192;
-  header.size_high = size / 8192 >> 8;
+  memset (&header, 0, MSG_HEADER_LEN);
+  header.size = size / 8192;
+  header.emulation = size == 3 * MBIT ? 1 : 0;
   header.id1 = 0xaa;
   header.id2 = 0xbb;
   header.type = 2;
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".SMG");
+  set_suffix (dest_name, ".MSG");
   ucon64_file_handler (dest_name, src_name, 0);
 
-  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
-  if (!rominfo->interleaved)
+  q_fwrite (&header, 0, MSG_HEADER_LEN, dest_name, "wb");
+  if (rominfo->interleaved)
     {
-      // That Super Magic Griffin files should be interleaved is just a guess - dbjh
+      // Magic Super Griffin files should not be "interleaved"
       q_fread (rom_buffer, rominfo->buheader_len, size, src_name);
       swapbits (rom_buffer, size);
-      q_fwrite (rom_buffer, UNKNOWN_HEADER_LEN, size, dest_name, "ab");
+      q_fwrite (rom_buffer, MSG_HEADER_LEN, size, dest_name, "ab");
       free (rom_buffer);
     }
   else
@@ -691,7 +686,7 @@ pcengine_mgd (st_rominfo_t *rominfo)
   unsigned char *rom_buffer = NULL;
   int size = ucon64.file_size - rominfo->buheader_len;
 
-  if (rominfo->interleaved)
+  if (!rominfo->interleaved)
     if (!(rom_buffer = (unsigned char *) malloc (size)))
       {
         fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
@@ -702,7 +697,9 @@ pcengine_mgd (st_rominfo_t *rominfo)
   mgd_make_name (ucon64.rom, UCON64_PCE, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
-  if (rominfo->interleaved)
+  // bit-swapping images for the MGD2 only makes sense for owners of a TG-16
+  //  (American version of the PCE)
+  if (!rominfo->interleaved)
     {
       q_fread (rom_buffer, rominfo->buheader_len, size, src_name);
       swapbits (rom_buffer, size);
@@ -751,6 +748,43 @@ pcengine_swap (st_rominfo_t *rominfo)
 
 
 int
+pcengine_f (st_rominfo_t *rominfo)
+/*
+  Region protection codes are found in (American) TurboGrafx-16 games. It
+  prevents those games from running on a PC-Engine. One search pattern seems
+  sufficient to fix/crack all TG-16 games. In addition to that, the protection
+  code appears to be always somewhere in the first 32 kB.
+*/
+{
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], buffer[32 * 1024];
+  int bytesread, n;
+
+  puts ("Attempting to fix region protection code...");
+
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, src_name, 0);
+  q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb"); // no copy if one file
+
+  if ((bytesread = q_fread (buffer, rominfo->buheader_len, 32 * 1024, src_name)) <= 0)
+    return -1;
+
+  // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
+  if (rominfo->interleaved)
+    n = change_mem (buffer, bytesread, "\x94\x02\x0f", 3, '*', '!', "\x01", 1, 0);
+  else
+    n = change_mem (buffer, bytesread, "\x29\x40\xf0", 3, '*', '!', "\x80", 1, 0);
+
+  q_fwrite (buffer, rominfo->buheader_len, 32 * 1024, dest_name, "r+b");
+
+  printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+  return n;
+}
+
+
+static int
 pcengine_check (unsigned char *buf, unsigned int len)
 // This function was contributed by Cowering. Comments are his unless stated
 //  otherwise.
@@ -816,7 +850,7 @@ pcengine_check (unsigned char *buf, unsigned int len)
 int
 pcengine_init (st_rominfo_t *rominfo)
 {
-  int result = -1, size, swapped;
+  int result = -1, size, swapped, x;
   unsigned char *rom_buffer;
   st_pce_data_t *info, key;
 
@@ -843,16 +877,17 @@ pcengine_init (st_rominfo_t *rominfo)
 
     According to Cowering 2 or 3 games don't use these opcodes to check if a
     Japanese game is running on an American console. If they are present then
-    it is in the first 500 bytes.
+    it is in the first 500 (or so) bytes.
+    The check for "A..Z" is a fix for Puzznic (J). The check for "HESM" a fix
+    for:
+    Fire Pro Wrestling - 2nd Bout Sounds
+    Fire Pro Wrestling 3 - Legend Bout Sounds
   */
-#if 1
-  // I don't feel like writing a new memory search function at the moment...
-  if (q_fncmp (ucon64.rom, rominfo->buheader_len, 32768, "\x94\x02\x0f", 3, 0) != -1 ||
-      q_fncmp (ucon64.rom, rominfo->buheader_len, 32768, "\x94\x02\x01", 3, 0) != -1)
-#else
-  if (change_mem ((char *) rom_buffer, 32768, "\x94\x02\x0f", 3, 0, 0, "\x0f", 1, 0) > 0 ||
-      change_mem ((char *) rom_buffer, 32768, "\x94\x02\x01", 3, 0, 0, "\x01", 1, 0) > 0)
-#endif
+  x = size > 32768 ? 32768 : size;
+  if ((mem_search (rom_buffer, x, "\x94\x02\x0f", 3) ||
+       mem_search (rom_buffer, x, "\x94\x02\x01", 3)) &&
+       mem_search (rom_buffer, x, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 26) == 0 &&
+       memcmp (rom_buffer, "HESM", 4))
     swapped = 1;
   if (UCON64_ISSET (ucon64.interleaved))
     swapped = ucon64.interleaved;
@@ -879,13 +914,10 @@ pcengine_init (st_rominfo_t *rominfo)
   if (ucon64.console == UCON64_PCE)
     result = 0;
 
-  memcpy (&pce_header, rom_buffer + PCENGINE_HEADER_START, PCENGINE_HEADER_LEN);
-
   rominfo->header_start = PCENGINE_HEADER_START;
   rominfo->header_len = PCENGINE_HEADER_LEN;
-  rominfo->header = &pce_header;
   rominfo->console_usage = pcengine_usage;
-  rominfo->copier_usage = rominfo->buheader_len ? smg_usage : mgd_usage;
+  rominfo->copier_usage = rominfo->buheader_len ? msg_usage : mgd_usage;
 
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
     {
@@ -937,3 +969,4 @@ pcengine_init (st_rominfo_t *rominfo)
   free (rom_buffer);
   return result;
 }
+

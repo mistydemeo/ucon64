@@ -56,7 +56,7 @@ const st_usage_t gameboy_usage[] =
     {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
     {"logo", NULL, "restore ROM logo character data (offset: 0x104-0x134)"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/RAW"},
-    {"ssc", NULL, "convert to Super Smart Card/SSC (+512 Bytes)"},
+    {"ssc", NULL, "convert to Super Smart Card/SSC"},
     {"sgb", NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX"},
     {"gbx", NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC"},
     {"n2gb", "NESROM", "KAMI's FC EMUlator (NES emulator);\n"
@@ -161,8 +161,8 @@ gameboy_n2gb (st_rominfo_t *rominfo, const char *nesrom)
         crc += buf[rominfo->buheader_len + n];
     }
 
-  buf[rominfo->buheader_len + 0x14e] = (crc >> 8) & 0xff;
-  buf[rominfo->buheader_len + 0x14f] = crc & 0xff;
+  buf[rominfo->buheader_len + 0x14e] = crc >> 8;
+  buf[rominfo->buheader_len + 0x14f] = crc;
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fwrite (buf, 0, ucon64.file_size, dest_name, "wb");
@@ -314,8 +314,8 @@ gameboy_chk (st_rominfo_t *rominfo)
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
   buf[0] = checksum.complement;
-  buf[1] = (rominfo->current_internal_crc & 0xff00) >> 8;
-  buf[2] = rominfo->current_internal_crc & 0xff;
+  buf[1] = rominfo->current_internal_crc >> 8;
+  buf[2] = rominfo->current_internal_crc;
   q_fwrite (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d, 3, dest_name, "r+b");
 
   mem_hexdump (buf, 3, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d);
@@ -348,17 +348,19 @@ int
 gameboy_ssc (st_rominfo_t *rominfo)
 // TODO: convert the ROM data
 {
-  st_unknown_header_t unknown_header;
+  st_unknown_header_t header;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL;
   int size = ucon64.file_size - rominfo->buheader_len;
 
-  memset (&unknown_header, 0, UNKNOWN_HEADER_LEN);
+  memset (&header, 0, UNKNOWN_HEADER_LEN);
 
-  unknown_header.size_low = size / 8192;
-  unknown_header.size_high = size / 8192 >> 8;
-  unknown_header.id1 = 0xaa;
-  unknown_header.id2 = 0xbb;
-  unknown_header.type = 2;
+  header.size_low = size / 8192;
+  header.size_high = size / 8192 >> 8;
+  header.id1 = 0xaa;
+  header.id2 = 0xbb;
+#if 0 // TODO: find out correct value. 2 is used for Magic Super Griffin
+  header.type = 2;
+#endif
 
   strcpy (src_name, ucon64.rom);
   p = basename (ucon64.rom);
@@ -370,7 +372,7 @@ gameboy_ssc (st_rominfo_t *rominfo)
   set_suffix (dest_name, ".GB");
 
   ucon64_file_handler (dest_name, src_name, 0);
-  q_fwrite (&unknown_header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
+  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
   q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -499,7 +501,7 @@ gameboy_init (st_rominfo_t *rominfo)
   rominfo->maker = NULL_TO_UNKNOWN_S (nintendo_maker[x]);
 
   // ROM country
-  rominfo->country = gameboy_header.country == 0 ? "Japan" : "U.S.A./Europe";
+  rominfo->country = gameboy_header.country == 0 ? "Japan" : "U.S.A. & Europe";
 
   // misc stuff
   sprintf (buf, "ROM type: %s\n",

@@ -60,6 +60,7 @@ static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer,
                               int rom_size);
 static unsigned short int get_internal_sums (st_rominfo_t *rominfo);
 static int snes_check_bs (void);
+static int snes_isprint (int c);
 static int check_banktype (unsigned char *rom_buffer, int header_offset);
 static void reset_header (void *header);
 static void set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header);
@@ -89,14 +90,15 @@ const st_usage_t snes_usage[] =
     {"nbs", NULL, "force ROM is a regular cartridge dump"},
     {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
     {"fig", NULL, "convert to *Pro Fighter*/(all)FIG"},
-    {"figs", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG"},
+    {"figs", NULL, "convert emulator *.srm (SRAM) to *Pro Fighter*/(all)FIG"},
     {"gd3", NULL, "convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"},
+    {"gd3s", NULL, "convert emulator *.srm (SRAM) to GD SF3(SF6/SF7)/Professor SF*"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
     {"smc", NULL, "convert to Super Magicom/SMC"},
     {"swc", NULL, "convert to Super Wild Card*/(all)SWC"},
-    {"swcs", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to Super Wild Card*/(all)SWC"},
+    {"swcs", NULL, "convert emulator *.srm (SRAM) to Super Wild Card*/(all)SWC"},
     {"ufo", NULL, "convert to Super UFO"},
-    {"ufos", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to Super UFO"},
+    {"ufos", NULL, "convert emulator *.srm (SRAM) to Super UFO"},
     {"stp", NULL, "convert SRAM from backup unit for use with an emulator\n"
                OPTION_LONG_S "stp just strips the first 512 bytes"},
     {"dbuh", NULL, "display (relevant part of) backup unit header"},
@@ -115,11 +117,10 @@ const st_usage_t snes_usage[] =
                       "TYPE='5' Konami's justifier\n"
                       "TYPE='6' multitap\n"
                       "TYPE='7' mouse / super scope / gamepad"},
-    {"col", "0xCOLOR", "convert 0xRRGGBB (html) <-> 0xXXXX (SNES)\n"
-                       "this routine was used to find green colors in games and\n"
-                       "to replace them with red colors (blood mode)"},
-#if 0
-//TODO
+    {"col", "0xCOLOR", "convert 0xRRGGBB (HTML) <-> 0xXXXX (SNES)"},
+//                       "this routine was used to find green colors in games and\n"
+//                       "to replace them with red colors (blood mode)"},
+#if 0 // TODO
     {"sx", "convert to Snes9X (emulator)/S9X save state; " OPTION_LONG_S "rom=SAVESTATE"},
     {"zs", "convert to ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE"},
     {"xzs", "extract GFX from ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE"},
@@ -333,11 +334,28 @@ snes_convert_sramfile (const void *header)
 {
   FILE *srcfile, *destfile;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], buf[32 * 1024];
-  unsigned int blocksize, byteswritten;
+  unsigned int blocksize, byteswritten, header_len;
 
   strcpy (src_name, ucon64.rom);
-  strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".SAV");
+  if (header)
+    {
+      header_len = SWC_HEADER_LEN;
+      strcpy (dest_name, ucon64.rom);
+      set_suffix (dest_name, ".SAV");
+    }
+  else // code for Game Doctor SRAM file
+    {
+      int n;
+
+      header_len = 0;
+      sprintf (dest_name, "SF8%.3s", basename2 (ucon64.rom));
+      strupr (dest_name);
+      // avoid trouble with filenames containing spaces
+      for (n = 3; n < 6; n++)                       // skip "SF" and first digit
+        if (dest_name[n] == ' ')
+          dest_name[n] = '_';
+      set_suffix_i (dest_name, ".B00");
+    }
   ucon64_file_handler (dest_name, src_name, 0);
 
   if ((srcfile = fopen (src_name, "rb")) == NULL)
@@ -351,17 +369,21 @@ snes_convert_sramfile (const void *header)
       return -1;
     }
 
-  fwrite (header, 1, SWC_HEADER_LEN, destfile); // write header
-  byteswritten = SWC_HEADER_LEN;
+  if (header)
+    {
+      fwrite (header, 1, SWC_HEADER_LEN, destfile); // write header
+      byteswritten = SWC_HEADER_LEN;
+    }
+  else
+    byteswritten = 0;
 
   blocksize = fread (buf, 1, 32 * 1024, srcfile); // read 32 kB at max
-  while (byteswritten < 32 * 1024 + SWC_HEADER_LEN)
+  while (byteswritten < 32 * 1024 + header_len)
     {
-      // Pad SRAM to 32.5 kB by repeating the SRAM data. At least the SWC DX2
-      //  does something similar.
-      fwrite (buf, 1, byteswritten + blocksize <= 32 * 1024 + SWC_HEADER_LEN ?
-                blocksize : 32 * 1024 + SWC_HEADER_LEN - byteswritten,
-              destfile);
+      // Pad SRAM data to 32 kB by repeating it. At least the SWC DX2 does
+      //  something similar.
+      fwrite (buf, 1, byteswritten + blocksize <= 32 * 1024 + header_len ?
+                blocksize : 32 * 1024 + header_len - byteswritten, destfile);
       byteswritten += blocksize;
     }
 
@@ -408,6 +430,13 @@ snes_ufos (void)
   memcpy (&header[8], "SUPERUFO", 8);
 
   return snes_convert_sramfile (&header);
+}
+
+
+int
+snes_gd3s (void)
+{
+  return snes_convert_sramfile (NULL);
 }
 
 
@@ -733,7 +762,7 @@ make_gd_name (const char *filename, st_rominfo_t *rominfo, char *name,
       p = id_str;
     }
   else
-    p = basename (filename);
+    p = basename2 (filename);
 
   sprintf (name, "%s%d%s", is_func (p, strlen (p), isupper) ? "SF" : "sf",
            newsize / MBIT, p);
@@ -1672,25 +1701,23 @@ Same here.
       // SRAM
       if (snes_sramsize == 8 * 1024)            // 8 kB == 64 kb
         {
-          // unknown
           n += change_mem (buffer, bytesread, "!**\x70!**\x70\xd0", 9, '*', '!', "\xea\xea", 2, 0,
                            "\x8f\x9f", 2, "\xcf\xdf", 2);
           // actually Kirby's Dream Course, Lufia II - Rise of the Sinistrals
           n += change_mem (buffer, bytesread, "!**\x70!**\x70\xf0", 9, '*', '!', "\x80", 1, 0,
                            "\x8f\x9f", 2, "\xcf\xdf", 2);
-          // actually Earthbound
+#if 1 // TODO: check which games really need this
           n += change_mem (buffer, bytesread, "!**!!**!\xf0", 9, '*', '!', "\x80", 1, 0,
                            "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
+#endif
         }
       else
         {
-          // unknown
           n += change_mem (buffer, bytesread, "!**\x70!**\x70\xd0", 9, '*', '!', "\x80", 1, 0,
                            "\x8f\x9f", 2, "\xcf\xdf", 2);
           // Mega Man X
           n += change_mem (buffer, bytesread, "!**\x70!**\x70\xf0", 9, '*', '!', "\xea\xea", 2, 0,
                            "\x8f\x9f", 2, "\xcf\xdf", 2);
-
           n += change_mem (buffer, bytesread, "!**!!**!\xf0", 9, '*', '!', "\xea\xea", 2, 0,
                            "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
         }
@@ -2246,13 +2273,13 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
      )
     check_map_type = 0;                         // not interleaved
   else if (crc == 0x4a70ad38 || crc == 0x0b34ddad || crc == 0x348b5357 ||
-           crc == 0xc39b8d3a || crc == 0x9b4638d0 || crc == 0x0085b742 ||
-           crc == 0x30cbf83c || crc == 0x7039388a || crc == 0xdbc88ebf ||
-           crc == 0x2a4c6a9b
+            crc == 0xc39b8d3a || crc == 0x9b4638d0 || crc == 0x0085b742 ||
+            crc == 0x30cbf83c || crc == 0x7039388a || crc == 0xdbc88ebf ||
+            crc == 0x2a4c6a9b
 #ifdef  DETECT_NOTGOOD_DUMPS
-           ||
-           crc == 0x65485afb || crc == 0x5ee74558 || crc == 0x92180571 ||
-           crc == 0x9ca5ed58
+            ||
+            crc == 0x65485afb || crc == 0x5ee74558 || crc == 0x92180571 ||
+            crc == 0x9ca5ed58
 #endif
           )
     {
@@ -2708,7 +2735,9 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
     not a guarantee that rominfo->buheader_len already has the right value
     (e.g. Earthworm Jim (U), Alfred Chicken (U|E), Soldiers of Fortune (U)).
   */
+#if 0
   if (type != MGD_SNES) // don't do "&& type != SMC" or we'll miss a lot of PD ROMs
+#endif
     {
       y = ((header->size_high << 8) + header->size_low) * 8 * 1024;
       y += SWC_HEADER_LEN;                      // if SWC-like header -> hdr[1] high byte,
@@ -2880,19 +2909,31 @@ snes_init (st_rominfo_t *rominfo)
   st_dump = 0;                                  // idem
 
   q_fread (&header, UNKNOWN_HEADER_START, UNKNOWN_HEADER_LEN, ucon64.rom);
-  if (header.id1 == 0xaa && header.id2 == 0xbb && header.type == 5)
+  if (header.id1 == 0xaa && header.id2 == 0xbb)
     {
-      rominfo->buheader_len = SWC_HEADER_LEN;
-      strcpy (rominfo->name, "Name: N/A");
-      rominfo->console_usage = NULL;
-      rominfo->copier_usage = swc_usage;
-      rominfo->maker = "Publisher: You?";
-      rominfo->country = "Country: Your country?";
-      rominfo->has_internal_crc = 0;
-      strcat (rominfo->misc, "Type: Super Wild Card SRAM file\n");
-      ucon64.split = 0;                         // SRAM files are never split
-      type = SWC;
-      return 0;                                 // rest is nonsense for SRAM file
+      if (header.type == 5 || header.type == 8)
+        {
+          rominfo->buheader_len = SWC_HEADER_LEN;
+          strcpy (rominfo->name, "Name: N/A");
+          rominfo->console_usage = NULL;
+          rominfo->copier_usage = swc_usage;
+          rominfo->maker = "Publisher: You?";
+          rominfo->country = "Country: Your country?";
+          rominfo->has_internal_crc = 0;
+          ucon64.split = 0;                     // SRAM & RTS files are never split
+          type = SWC;
+        }
+
+      if (header.type == 5)
+        {
+          strcat (rominfo->misc, "Type: Super Wild Card SRAM file\n");
+          return 0;                             // rest is nonsense for SRAM file
+        }
+      else if (header.type == 8)
+        {
+          strcat (rominfo->misc, "Type: Super Wild Card RTS file\n");
+          return 0;                             // rest is nonsense for RTS file
+        }
     }
 
   /*
@@ -3454,6 +3495,15 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
 
 
 int
+snes_isprint (int c)
+// we don't want to get different results of check_banktype() for different
+//  locale settings
+{
+  return c >= 0x20 && c <= 0x7e ? 1 : 0;
+}
+
+
+int
 check_banktype (unsigned char *rom_buffer, int header_offset)
 /*
   This function is used to check if the value of header_offset is a good guess
@@ -3468,13 +3518,14 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
 //               SNES_HEADER_LEN, SNES_HEADER_START + header_offset);
 
   // game ID info (many games don't have useful info here)
-  if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset + 2, 4, isprint))
+  if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset + 2, 4,
+               snes_isprint))
     score += 1;
 
   if (!bs_dump)
     {
       if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset + 16,
-                   SNES_NAME_LEN, isprint))
+                   SNES_NAME_LEN, snes_isprint))
         score += 1;
 
       // map type
@@ -3512,7 +3563,8 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
   if (rom_buffer[SNES_HEADER_START + header_offset + 42] == 0x33)
     score += 2;
   else // publisher code
-    if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset, 2, isprint))
+    if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset, 2,
+                 snes_isprint))
       score += 2;
 
   // version

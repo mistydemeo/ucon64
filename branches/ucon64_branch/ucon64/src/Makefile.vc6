@@ -31,7 +31,7 @@ OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
         backup/fal.obj backup/fig.obj backup/fpl.obj backup/gbx.obj backup/gd.obj \
         backup/md.obj backup/mgd.obj backup/smd.obj backup/swc.obj backup/ufo.obj \
         backup/dex.obj backup/psxpblib.obj backup/mccl.obj backup/lynxit.obj \
-        backup/ffe.obj
+        backup/ffe.obj backup/msg.obj backup/smc.obj
 !ifdef ZLIB
 LDFLAGS=$(LDFLAGS) zlib.lib
 OBJECTS=$(OBJECTS) unzip.obj map.obj miscz.obj
@@ -77,7 +77,7 @@ libdiscmage/$(FULLLIBNAME_DM):
 
 
 $(TARGET): $(OBJECTS)
-	link.exe /OUT:$@ $(OBJECTS) $(LDFLAGS)
+	link.exe $(OBJECTS) $(LDFLAGS) /OUT:$@
 
 
 install:
@@ -98,9 +98,9 @@ uninstall:
 UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
 
 getopt.obj: getopt.h
-unzip.obj: unzip.h
+unzip.obj: unzip.h config.h
 misc.obj: misc.h miscz.h config.h
-map.obj: map.h
+map.obj: map.h config.h
 miscz.obj: miscz.h map.h config.h
 quick_io.obj: quick_io.h misc.h config.h
 dlopen.obj: dlopen.h dxedll_pub.h config.h
@@ -114,7 +114,7 @@ ucon64.obj: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
             backup/fig.h backup/swc.h backup/doctor64jr.h backup/doctor64.h \
             backup/smd.h backup/fal.h backup/gbx.h backup/cd64.h backup/dex.h \
             backup/fpl.h backup/mgd.h backup/gd.h backup/mccl.h backup/lynxit.h \
-            $(UCON64_STD_H)
+            backup/msg.h backup/smc.h $(UCON64_STD_H)
 ucon64_opts.obj: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
                  console/snes.h console/gb.h console/gba.h console/n64.h \
                  console/lynx.h console/sms.h console/nes.h console/genesis.h \
@@ -125,7 +125,8 @@ ucon64_opts.obj: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
                  backup/fig.h backup/swc.h backup/doctor64jr.h \
                  backup/doctor64.h backup/smd.h backup/fal.h backup/gbx.h \
                  backup/cd64.h backup/dex.h backup/fpl.h backup/mgd.h \
-                 backup/gd.h backup/mccl.h backup/lynxit.h $(UCON64_STD_H)
+                 backup/gd.h backup/mccl.h backup/lynxit.h backup/msg.h \
+                 backup/smc.h $(UCON64_STD_H)
 ucon64_misc.obj: dlopen.h $(UCON64_STD_H)
 ucon64_dat.obj: ucon64_dat.h $(UCON64_STD_H)
 ucon64_dm.obj: ucon64_dm.h dlopen.h $(UCON64_STD_H)
@@ -158,8 +159,10 @@ backup/fig.obj: backup/fig.h console/snes.h $(UCON64_STD_H)
 backup/fpl.obj: backup/fpl.h $(UCON64_STD_H)
 backup/gbx.obj: backup/gbx.h $(UCON64_STD_H)
 backup/gd.obj: backup/gd.h console/snes.h $(UCON64_STD_H)
-backup/md.o: backup/md.h $(UCON64_STD_H)
+backup/md.obj: backup/md.h $(UCON64_STD_H)
 backup/mgd.obj: backup/mgd.h $(UCON64_STD_H)
+backup/msg.obj: backup/msg.h backup/ffe.h $(UCON64_STD_H)
+backup/smc.obj: backup/smc.h backup/ffe.h $(UCON64_STD_H)
 backup/smd.obj: backup/smd.h backup/ffe.h $(UCON64_STD_H)
 backup/swc.obj: backup/swc.h backup/ffe.h console/snes.h $(UCON64_STD_H)
 backup/ufo.obj: backup/ufo.h $(UCON64_STD_H)

@@ -188,20 +188,26 @@ ucon64_switches (int c, const char *optarg)
               "platform:                          %s\n"
               "endianess:                         %s\n"
               "debug:                             %s\n"
-              "parallel port backup unit support: %s\n"
-              "ANSI colors enabled:               %s\n"
-              "gzip and zip support:              %s\n"
-              "configuration file %s  %s\n",
+              "parallel port backup unit support: %s\n",
               UCON64_VERSION_S, __DATE__,
               CURRENT_OS_S,
               ENDIANESS_STATUS,
               DEBUG_STATUS,
-              PARALLEL_STATUS,
+              PARALLEL_STATUS);
+
+#if     defined AMIGA && defined PARALLEL
+      printf ("parallel port device:              %s\n", ucon64.parport_dev);
+#endif
+
+      printf ("ANSI colors enabled:               %s\n"
+              "gzip and zip support:              %s\n"
+              "configuration file %s  %s\n",
               ANSI_COLOR_STATUS,
               ZLIB_STATUS,
               // display the existence only for the config file (really helps solving problems)
               access (ucon64.configfile, F_OK) ? "(not present):" : "(present):    ",
               ucon64.configfile);
+
 
 #ifdef  DISCMAGE
       printf (DISCMAGE_STATUS_MSG
@@ -311,18 +317,24 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XGBXS:
     case UCON64_XGBXB:
     case UCON64_XGD3:
+    case UCON64_XGD3R:
     case UCON64_XGD3S:
     case UCON64_XGD6:
+    case UCON64_XGD6R:
     case UCON64_XGD6S:
     case UCON64_XLIT:
     case UCON64_XMCCL:
     case UCON64_XMD:
     case UCON64_XMDS:
+    case UCON64_XMSG:
+    case UCON64_XSMC:
+    case UCON64_XSMCR:
     case UCON64_XSMD:
     case UCON64_XSMDS:
     case UCON64_XSWC:
     case UCON64_XSWC_SUPER:
     case UCON64_XSWC2:
+    case UCON64_XSWCR:
     case UCON64_XSWCS:
     case UCON64_XV64:
       /*
@@ -331,7 +343,7 @@ ucon64_switches (int c, const char *optarg)
           2.) ucon64 <transfer option> <rom> <parallel port address>
           3.) ucon64 <transfer option> <rom> --port=<parallel port address>
       */
-      if (!ucon64.parport)
+      if (ucon64.parport == UCON64_UNKNOWN)
         if (ucon64.argc >= 4)
           if (access (ucon64.argv[ucon64.argc - 1], F_OK))
             // Yes, we don't get here if ucon64.argv[ucon64.argc - 1] is [0x]278,
@@ -498,217 +510,6 @@ ucon64_switches (int c, const char *optarg)
     }
 
   return 0;
-}
-
-
-static int
-ucon64_rename (int mode)
-{
-  char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1], suffix[80], *p, *p2;
-  int good_name;
-
-  buf[0] = 0;
-  strncpy (suffix, get_suffix (ucon64.rom), 80);
-  suffix[80 - 1] = 0;                           // in case suffix is >= 80 chars
-
-  switch (mode)
-    {
-      case UCON64_RROM:
-        if (ucon64.rominfo)
-          if (ucon64.rominfo->name)
-            {
-              strcpy (buf, ucon64.rominfo->name);
-              strtrim (buf);
-            }
-        break;
-
-      case UCON64_RENAME:                       // GoodXXXX style rename
-        if (ucon64.dat)
-          if (ucon64.dat->fname)
-            {
-              p = (char *) get_suffix (ucon64.dat->fname);
-              strcpy (buf, ucon64.dat->fname);
-
-              // get_suffix() never returns NULL
-              if (p[0])
-                if (strlen (p) < 5)
-                  if (!(stricmp (p, ".nes") &&  // NES
-                        stricmp (p, ".fds") &&  // NES FDS
-                        stricmp (p, ".gb") &&   // Game Boy
-                        stricmp (p, ".gbc") &&  // Game Boy Color
-                        stricmp (p, ".gba") &&  // Game Boy Advance
-                        stricmp (p, ".smc") &&  // SNES
-                        stricmp (p, ".sc") &&   // Sega Master System
-                        stricmp (p, ".sg") &&   // Sega Master System
-                        stricmp (p, ".sms") &&  // Sega Master System
-                        stricmp (p, ".gg") &&   // Game Gear
-//                      stricmp (p, ".smd") &&  // Genesis
-                        stricmp (p, ".v64")))   // Nintendo 64
-                    buf[strlen (buf) - strlen (p)] = 0;
-            }
-        break;
-
-      default:
-        return 0;                               // invalid mode
-    }
-
-  if (!buf[0])
-    return 0;
-
-  if (ucon64.fname_len == UCON64_FORCE63)
-    buf[63] = 0;
-  else if (ucon64.fname_len == UCON64_83)
-    buf[8] = 0;
-
-  // replace chars the fs might not like
-  strcpy (buf2, to_func (buf, strlen (buf), tofname));
-  strcpy (buf, basename2 (ucon64.rom));
-
-  p = (char *) get_suffix (buf);
-  // Remove the suffix from buf (ucon64.rom). Note that this isn't fool-proof.
-  //  However, this is the best solution, because several DAT files contain
-  //  "canonical" file names with a suffix. That is a STUPID bug.
-  if (p)
-    buf[strlen (buf) - strlen (p)] = 0;
-
-#ifdef  DEBUG
-//  printf ("buf: \"%s\"; buf2: \"%s\"\n", buf, buf2);
-#endif
-  if (!strcmp (buf, buf2))
-    // also process files with a correct name, so that -rename can be used to
-    //  "weed" out good dumps when -o is used (like GoodXXXX without inplace
-    //  command)
-    good_name = 1;
-  else
-    {
-      // Another test if the file already has a correct name. This is necessary
-      //  for files without a "normal" suffix (e.g. ".smc"). Take for example a
-      //  name like "Final Fantasy III (V1.1) (U) [!]".
-      strcat (buf, suffix);
-      if (!strcmp (buf, buf2))
-        {
-          good_name = 1;
-          suffix[0] = 0;                        // discard "suffix" (part after period)
-        }
-      else
-        good_name = 0;
-    }
-
-  // DON'T use set_suffix()! Consider file names (in the DAT file) like
-  //  "Final Fantasy III (V1.1) (U) [!]". The suffix is ".1) (U) [!]"...
-  strcat (buf2, suffix);
-
-  if (ucon64.fname_len == UCON64_83)
-    buf2[12] = 0;
-
-  ucon64_output_fname (buf2, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-
-  p = basename2 (ucon64.rom);
-  p2 = basename2 (buf2);
-
-  if (one_file (ucon64.rom, buf2) && !strcmp (p, p2))
-    {                                           // skip only if the letter case
-      printf ("Skipping \"%s\"\n", p);          //  also matches (Windows...)
-      return 0;
-    }
-
-  if (!good_name)
-    /*
-      Note that the previous statement causes whatever file is present in the
-      dir specified with -o (or the current dir) to be overwritten. This seems
-      bad, but is actually better than making a backup. It isn't so bad,
-      because the file that gets overwritten is either the same as the file it
-      is overwritten with or doesn't deserve its name.
-      Without this statement repeating a rename action for already renamed
-      files would result in a real mess. And I (dbjh) mean a *real* mess...
-    */
-    if (!access (buf2, F_OK))                   // a file with that name exists already?
-      ucon64_file_handler (buf2, NULL, OF_FORCE_BASENAME);
-
-  if (!good_name)
-    printf ("Renaming \"%s\" to \"%s\"\n", p, p2);
-  else
-    printf ("Moving \"%s\"\n", p);
-#ifndef DEBUG
-  rename2 (ucon64.rom, buf2);                   // rename2() must be used!
-#endif
-#ifdef  HAVE_ZLIB_H
-  unzip_current_file_nr = 0x7fffffff - 1;       // dirty hack
-#endif
-  return 0;
-}
-
-
-static int
-ucon64_e (void)
-{
-  int result, x;
-  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
-  const char *property;
-
-  if (access (ucon64.configfile, F_OK) != 0)
-    {
-      fprintf (stderr, "ERROR: %s does not exist\n", ucon64.configfile);
-      return -1;
-    }
-
-  sprintf (buf3, "emulate_%08x", ucon64.crc32);
-
-  property = get_property (ucon64.configfile, buf3, buf2, NULL); // buf2 also contains property value
-  if (property == NULL)
-    {
-      sprintf (buf3, "emulate_0x%08x", ucon64.crc32);
-      property = get_property (ucon64.configfile, buf3, buf2, NULL);
-    }
-
-  if (property == NULL)
-    {
-      for (x = 0; options[x].name; x++)
-        if (options[x].val == ucon64.console)
-          {
-            sprintf (buf3, "emulate_%s", options[x].name);
-            break;
-          }
-      property = get_property (ucon64.configfile, buf3, buf2, NULL);
-    }
-
-  if (property == NULL)
-    {
-      fprintf (stderr, "ERROR: Could not find the correct settings (%s) in\n"
-              "       %s\n"
-              "TIP:   If the wrong console was detected you might try to force recognition\n"
-              "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
-              buf3, ucon64.configfile);
-      return -1;
-    }
-
-  sprintf (buf, "%s \"%s\" &", buf2, ucon64.rom);
-
-  puts (buf);
-  fflush (stdout);
-  sync ();
-
-  result = system (buf)
-#ifndef __MSDOS__
-           >> 8                                 // the exit code is coded in bits 8-15
-#endif                                          //  (that is, under non-DOS)
-           ;
-
-#if 1
-  // Snes9x (Linux) for example returns a non-zero value on a normal exit
-  //  (3)...
-  // under WinDOS, system() immediately returns with exit code 0 when
-  //  starting a Windows executable (as if fork() was called) it also
-  //  returns 0 when the exe could not be started
-  if (result != 127 && result != -1 && result != 0)        // 127 && -1 are system() errors, rest are exit codes
-    {
-      fprintf (stderr, "ERROR: The emulator returned an error (?) code: %d\n"
-               "TIP:   If the wrong emulator was used you might try to force recognition\n"
-               "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
-               result);
-    }
-#endif
-  return result;
 }
 
 
@@ -1227,6 +1028,9 @@ ucon64_options (int c, const char *optarg)
         case UCON64_N64:
           n64_chk (ucon64.rominfo);
           break;
+        case UCON64_SMS:
+          sms_chk (ucon64.rominfo);
+          break;
         case UCON64_SNES:
           snes_chk (ucon64.rominfo);
           break;
@@ -1256,23 +1060,32 @@ ucon64_options (int c, const char *optarg)
     case UCON64_DINT:
       switch (ucon64.console)
         {
-        case UCON64_SNES:
-          snes_dint (ucon64.rominfo);
-          break;
         case UCON64_NES:
           nes_dint ();
           break;
         case UCON64_PCE:
           pcengine_swap (ucon64.rominfo);
           break;
+        case UCON64_SNES:
+          snes_dint (ucon64.rominfo);
+          break;
         default:                                // Nintendo 64
-          puts ("Converting to deinterleaved format...");
+          puts ("Converting to file...");
           ucon64_file_handler (dest_name, NULL, 0);
           q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb");
-          q_fswap (dest_name, 0, ucon64.file_size);
+          q_fswap_b (dest_name, 0, ucon64.file_size);
           printf (ucon64_msg[WROTE], dest_name);
           break;
         }
+      break;
+
+    case UCON64_SWAP2:
+      // --swap2 is currently used only for Nintendo 64
+      puts ("Converting file...");
+      ucon64_file_handler (dest_name, NULL, 0);
+      q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb");
+      q_fswap_w (dest_name, 0, ucon64.file_size);
+      printf (ucon64_msg[WROTE], dest_name);
       break;
 
     case UCON64_DMIRR:
@@ -1287,6 +1100,9 @@ ucon64_options (int c, const char *optarg)
           break;
         case UCON64_N64:
           n64_f (ucon64.rominfo);
+          break;
+        case UCON64_PCE:
+          pcengine_f (ucon64.rominfo);
           break;
         case UCON64_SNES:
           snes_f (ucon64.rominfo);
@@ -1326,13 +1142,17 @@ ucon64_options (int c, const char *optarg)
       snes_gd3 (ucon64.rominfo);
       break;
 
+    case UCON64_GD3S:
+      snes_gd3s ();
+      break;
+
     case UCON64_GG:
       switch (ucon64.console)
         {
         case UCON64_GB:
-        case UCON64_SMS:
         case UCON64_GEN:
         case UCON64_NES:
+        case UCON64_SMS:
         case UCON64_SNES:
           gg_apply (ucon64.rominfo, optarg);
           break;
@@ -1387,12 +1207,6 @@ ucon64_options (int c, const char *optarg)
         }
       break;
 
-#ifdef  GUI
-    case UCON64_JS:
-//      libng_jstest (optarg);
-      break;
-#endif
-
     case UCON64_K:
       snes_k (ucon64.rominfo);
       break;
@@ -1421,6 +1235,10 @@ ucon64_options (int c, const char *optarg)
         }
       break;
 
+    case UCON64_LSRAM:
+      n64_sram (ucon64.rominfo, optarg);
+      break;
+
     case UCON64_LYX:
       lynx_lyx (ucon64.rominfo);
       break;
@@ -1437,14 +1255,14 @@ ucon64_options (int c, const char *optarg)
         case UCON64_NG:
           neogeo_mgd ();
           break;
+        case UCON64_PCE:
+          pcengine_mgd (ucon64.rominfo);
+          break;
         case UCON64_SMS:
           sms_mgd (ucon64.rominfo, UCON64_SMS);
           break;
         case UCON64_SNES:
           snes_mgd (ucon64.rominfo);
-          break;
-        case UCON64_PCE:
-          pcengine_mgd (ucon64.rominfo);
           break;
         default:
 // The next msg has already been printed
@@ -1455,6 +1273,10 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_MGDGG:
       sms_mgd (ucon64.rominfo, UCON64_GAMEGEAR);
+      break;
+
+    case UCON64_MSG:
+      pcengine_msg (ucon64.rominfo);
       break;
 
     case UCON64_N:
@@ -1508,6 +1330,10 @@ ucon64_options (int c, const char *optarg)
       nes_pasofami ();
       break;
 
+    case UCON64_PATTERN:
+      ucon64_pattern (ucon64.rominfo, optarg);
+      break;
+
     case UCON64_POKE:
       ucon64_file_handler (dest_name, src_name, 0);
       q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb");
@@ -1547,11 +1373,11 @@ ucon64_options (int c, const char *optarg)
         case UCON64_GEN:
           genesis_s (ucon64.rominfo);
           break;
-        case UCON64_NG:
-          neogeo_s ();
-          break;
         case UCON64_NES:
           nes_s ();
+          break;
+        case UCON64_NG:
+          neogeo_s ();
           break;
         case UCON64_SNES:
           snes_s (ucon64.rominfo);
@@ -1607,16 +1433,8 @@ ucon64_options (int c, const char *optarg)
         }
       break;
 
-    case UCON64_SMG:
-      pcengine_smg (ucon64.rominfo);
-      break;
-
     case UCON64_SRAM:
       gba_sram ();
-      break;
-
-    case UCON64_LSRAM:
-      n64_sram (ucon64.rominfo, optarg);
       break;
 
     case UCON64_SSC:
@@ -1662,32 +1480,32 @@ ucon64_options (int c, const char *optarg)
       checks if an option was used that should stop uCON64.
     */
     case UCON64_XDEX:
-      if (!access (ucon64.rom, F_OK))
+      if (access (ucon64.rom, F_OK) != 0)
         {
-          if (dex_write_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport) != 0)
+          if (dex_read_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       else
         {
-          if (dex_read_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport) != 0)
+          if (dex_write_block (ucon64.rom, strtol (optarg, NULL, 10), ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       fputc ('\n', stdout);
       break;
 
     case UCON64_XDJR:
-      if (!access (ucon64.rom, F_OK))
+      if (access (ucon64.rom, F_OK) != 0)
+        {
+          if (doctor64jr_read (ucon64.rom, ucon64.parport) != 0)
+            fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
+        }
+      else
         {
           if (!ucon64.rominfo->interleaved)
             fprintf (stderr,
                      "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 Junior only\n"
                      "       supports interleaved ROMs. Convert to a Doctor V64 compatible format.\n");
           else if (doctor64jr_write (ucon64.rom, ucon64.parport) != 0)
-            fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
-        }
-      else
-        {
-          if (doctor64jr_read (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       fputc ('\n', stdout);
@@ -1700,11 +1518,11 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to a FIG compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to a FIG compatible format\n");
           else if (ucon64.rominfo->interleaved)
             fprintf (stderr,
                      "ERROR: This ROM seems to be interleaved but the FIG doesn't support\n"
-                     "       interleaved ROMs. Convert to a FIG compatible format.\n");
+                     "       interleaved ROMs. Convert to a FIG compatible format\n");
           else // file exists -> send it to the copier
             fig_write_rom (ucon64.rom, ucon64.parport);
         }
@@ -1726,7 +1544,7 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n");
           else
             gd3_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo); // file exists -> send it to the copier
         }
@@ -1741,6 +1559,14 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
+    case UCON64_XGD3R:
+      if (access (ucon64.rom, F_OK) != 0)
+        gd3_read_saver (ucon64.rom, ucon64.parport);
+      else
+        gd3_write_saver (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
     case UCON64_XGD6:
       if (access (ucon64.rom, F_OK) != 0)
         gd6_read_rom (ucon64.rom, ucon64.parport); // dumping is not yet supported
@@ -1748,7 +1574,7 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n");
           else
             gd6_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo);
         }
@@ -1763,6 +1589,14 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
+    case UCON64_XGD6R:
+      if (access (ucon64.rom, F_OK) != 0)
+        gd6_read_saver (ucon64.rom, ucon64.parport);
+      else
+        gd6_write_saver (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
     case UCON64_XMD:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump flash card
         md_read_rom (ucon64.rom, ucon64.parport, 32 * MBIT);
@@ -1771,7 +1605,7 @@ ucon64_options (int c, const char *optarg)
           if (genesis_get_file_type () != BIN)
             fprintf (stderr,
                      "ERROR: This ROM is not in binary/BIN/RAW format. uCON64 only supports sending\n"
-                     "       binary files to the MD-PRO. Convert ROM with -bin.\n");
+                     "       binary files to the MD-PRO. Convert ROM with -bin\n");
           else
             md_write_rom (ucon64.rom, ucon64.parport);
         }
@@ -1786,6 +1620,41 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
+    case UCON64_XMSG:
+      if (access (ucon64.rom, F_OK) != 0)
+        msg_read_rom (ucon64.rom, ucon64.parport);
+      else
+        {
+          if (!ucon64.rominfo->buheader_len)
+            fprintf (stderr,
+                     "ERROR: This ROM has no header. Convert to an MSG compatible format\n");
+          else if (ucon64.rominfo->interleaved)
+            fprintf (stderr,
+                     "ERROR: This ROM seems to be bit-swapped but the MSG doesn't support\n"
+                     "       bit-swapped ROMs. Convert to an MSG compatible format\n");
+          else
+            msg_write_rom (ucon64.rom, ucon64.parport);
+        }
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSMC: // we don't use WF_NO_ROM => no need to check for file
+      if (!ucon64.rominfo->buheader_len)
+        fprintf (stderr,
+                "ERROR: This ROM has no header. Convert to an SMC compatible format with -ffe\n");
+      else
+        smc_write_rom (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XSMCR:
+      if (access (ucon64.rom, F_OK) != 0)
+        smc_read_rts (ucon64.rom, ucon64.parport);
+      else
+        smc_write_rts (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
     case UCON64_XSMD:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
         smd_read_rom (ucon64.rom, ucon64.parport);
@@ -1793,11 +1662,11 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to an SMD compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to an SMD compatible format\n");
           else if (!ucon64.rominfo->interleaved)
             fprintf (stderr,
                      "ERROR: This ROM doesn't seem to be interleaved but the SMD only supports\n"
-                     "       interleaved ROMs. Convert to an SMD compatible format.\n");
+                     "       interleaved ROMs. Convert to an SMD compatible format\n");
           else
             smd_write_rom (ucon64.rom, ucon64.parport);
         }
@@ -1829,11 +1698,11 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
-                     "ERROR: This ROM has no header. Convert to an SWC compatible format.\n");
+                     "ERROR: This ROM has no header. Convert to an SWC compatible format\n");
           else if (ucon64.rominfo->interleaved)
             fprintf (stderr,
                      "ERROR: This ROM seems to be interleaved but the SWC doesn't support\n"
-                     "       interleaved ROMs. Convert to an SWC compatible format.\n");
+                     "       interleaved ROMs. Convert to an SWC compatible format\n");
           else
             {
               if (enableRTS != 0)
@@ -1853,20 +1722,28 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
+    case UCON64_XSWCR:
+      if (access (ucon64.rom, F_OK) != 0)
+        swc_read_rts (ucon64.rom, ucon64.parport);
+      else
+        swc_write_rts (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
     case UCON64_XV64:
-      if (!access (ucon64.rom, F_OK))
+      if (access (ucon64.rom, F_OK) != 0)
         {
-          if (!ucon64.rominfo->interleaved)
-            fprintf (stderr,
-                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 only\n"
-                     "       supports interleaved ROMs. Convert to a Doctor V64 compatible format.\n");
-          else if (doctor64_write (ucon64.rom, ucon64.rominfo->buheader_len,
-                                   ucon64.file_size, ucon64.parport) != 0)
+          if (doctor64_read (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       else
         {
-          if (doctor64_read (ucon64.rom, ucon64.parport) != 0)
+          if (!ucon64.rominfo->interleaved)
+            fprintf (stderr,
+                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 only\n"
+                     "       supports interleaved ROMs. Convert to a Doctor V64 compatible format\n");
+          else if (doctor64_write (ucon64.rom, ucon64.rominfo->buheader_len,
+                                   ucon64.file_size, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }
       fputc ('\n', stdout);

@@ -3,7 +3,7 @@ misc.h - miscellaneous functions
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
            2001 - 2003 dbjh
-                  2002 Jan-Erik Karlsson (Amiga)
+           2002 - 2003 Jan-Erik Karlsson (Amiga)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -60,8 +60,8 @@ typedef u_int16_t uint16_t;
 typedef u_int32_t uint32_t;
 typedef u_int64_t uint64_t;
 #endif
-#endif // OWN_INTTYPES
-#else
+#endif                                          // OWN_INTTYPES
+#else                                           // __MSDOS__, _WIN32, AMIGA
 #ifndef OWN_INTTYPES
 #define OWN_INTTYPES                            // signal that these are defined
 typedef unsigned char uint8_t;
@@ -72,6 +72,7 @@ typedef unsigned long long int uint64_t;
 #else
 typedef unsigned __int64 uint64_t;
 #endif
+#ifndef AMIGA                                   // __BIT_TYPES_DEFINED__?
 typedef signed char int8_t;
 typedef signed short int int16_t;
 typedef signed int int32_t;
@@ -80,7 +81,8 @@ typedef signed long long int int64_t;
 #else
 typedef signed __int64 int64_t;
 #endif
-#endif // OWN_INTTYPES
+#endif                                          // AMIGA
+#endif                                          // OWN_INTTYPES
 #endif
 
 #if     (!defined TRUE || !defined FALSE)
@@ -109,7 +111,8 @@ typedef signed __int64 int64_t;
   #if __BYTE_ORDER == __BIG_ENDIAN
     #define WORDS_BIGENDIAN 1
   #endif
-#elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || defined __APPLE__
+#elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || \
+        defined __APPLE__
   #define WORDS_BIGENDIAN 1
 #endif
 
@@ -137,7 +140,7 @@ typedef signed __int64 int64_t;
   #else
     #define CURRENT_OS_S "Win32 (Visual C++)"
   #endif
-#elif   defined __APPLE__ || defined macintosh
+#elif   defined __APPLE__
   #if   defined __POWERPC__ || defined __ppc__
     #define CURRENT_OS_S "Apple (ppc)"
   #else
@@ -147,9 +150,9 @@ typedef signed __int64 int64_t;
   #define CURRENT_OS_S "BeOS"
 #elif   defined AMIGA
   #if defined __PPC__
-    #define CURRENT_OS_S "Amiga (ppc)"
+    #define CURRENT_OS_S "AmigaPPC"
   #else
-    #define CURRENT_OS_S "Amiga (68k)"
+    #define CURRENT_OS_S "Amiga"                // 68k
   #endif
 #else
   #define CURRENT_OS_S "?"
@@ -183,8 +186,8 @@ typedef signed __int64 int64_t;
 #define le2me_64(x) (x)
 #endif
 
-#if     ((defined __unix__ || defined __BEOS__) && !defined __MSDOS__)
-// Cygwin, GNU/Linux, Solaris, FreeBSD, BeOS
+#if     (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
+// Cygwin, GNU/Linux, Solaris, FreeBSD, BeOS, Amiga
 #define FILE_SEPARATOR '/'
 #define FILE_SEPARATOR_S "/"
 #else // DJGPP, Win32
@@ -206,7 +209,7 @@ typedef signed __int64 int64_t;
 #define ARGS_MAX 128
 #endif // ARGS_MAX
 
-#if (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || defined AMIGA
+#if (defined __unix__ && !defined __MSDOS__) || defined __BEOS__
 extern void init_conio (void);
 extern void deinit_conio (void);
 #define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
@@ -218,10 +221,14 @@ extern int kbhit (void);                        // may only be used after init_c
 
 #elif   defined _WIN32
 #include <conio.h>                              // kbhit() & getch()
+
+#elif   defined AMIGA
+extern int kbhit (void);
+#define getch           getchar
 #endif
 
 #ifdef  __CYGWIN__
-char *fix_character_set (char *value);
+extern char *fix_character_set (char *value);
 #endif
 
 /*
@@ -299,21 +306,18 @@ extern int argz_extract2 (char **argv, char *str, const char *separator_s, int m
   mem functions
 
   memwcmp()    memcmp with wildcard support
-TODO:  memwrcmp()   like memwcmp() but looks also for shifted/relative similarities
-  mem_swap()   swap n Bytes from add on
-  mem_hexdump() hexdump n Bytes from add on; you can use here a virtual_start for the displayed counter
-  mem_hexdump_code() like mem_hexdump() but output can be used in C code
+  mem_search() search for a byte sequence
+  mem_swap_b() swap n bytes of buffer
+  mem_swap_w() swap n/2 words of buffer
+  mem_hexdump() hexdump n bytes of buffer; you can use here a virtual_start for the displayed counter
   crc16()      calculate the crc16 of buffer for size bytes
   crc32()      calculate the crc32 of buffer for size bytes
 */
-extern int memwcmp (const void *data, const void *search, uint32_t searchlen, int wildcard);
-extern int memwrcmp (const void *data, const void *search, uint32_t searchlen, int wildcard);
-extern void mem_hexdump (const void *add, uint32_t n, int virtual_start);
-//#ifdef  DEBUG
-// only for development
-extern void mem_hexdump_code (const void *add, uint32_t n, int virtual_start);
-//#endif
-extern void *mem_swap (void *add, uint32_t size);
+extern int memwcmp (const void *buffer, const void *search, uint32_t searchlen, int wildcard);
+extern void *mem_search (const void *buffer, uint32_t buflen, const void *search, uint32_t searchlen);
+extern void *mem_swap_b (void *buffer, uint32_t n);
+extern void *mem_swap_w (void *buffer, uint32_t n);
+extern void mem_hexdump (const void *buffer, uint32_t n, int virtual_start);
 #ifdef  HAVE_BYTESWAP_H
 #include <byteswap.h>
 #else
@@ -407,7 +411,7 @@ extern void wait2 (int nmillis);
   q_fcpy()     copy src from start for len to dest with mode (fopen(..., mode))
   q_rfcpy()    copy src to dest without looking at the file data (no
                decompression like with q_fcpy())
-  q_fswap()    byteswap len bytes of file starting from start
+  q_fswap()    swap len bytes of file starting from start
   q_fcrc32()   calculate the crc32 of filename from start
   q_fbackup()
 
@@ -424,12 +428,16 @@ extern void wait2 (int nmillis);
 
       filename -> rename() -> buf -> return buf
 */
-//TODO: give non-q_* names
+// TODO: give non-q_* names
+typedef enum { SWAP_BYTE, SWAP_WORD } swap_t;
+
 extern int q_fncmp (const char *filename, int start, int len,
                     const char *search, int searchlen, int wildcard);
 extern int q_fcpy (const char *src, int start, int len, const char *dest, const char *mode);
 extern int q_rfcpy (const char *src, const char *dest);
-extern int q_fswap (const char *filename, int start, int len);
+extern int q_fswap (const char *filename, int start, int len, swap_t type);
+#define q_fswap_b(f, s, l) q_fswap(f, s, l, SWAP_BYTE)
+#define q_fswap_w(f, s, l) q_fswap(f, s, l, SWAP_WORD)
 extern int q_fcrc32 (const char *filename, int start);
 #if 1
 #define BAK_DUPE 0
@@ -467,8 +475,8 @@ extern int set_property (const char *filename, const char *propname, const char 
 
 #include <sys/types.h>
 
-int truncate (const char *path, off_t size);
-int sync (void);
+extern int truncate (const char *path, off_t size);
+extern int sync (void);
 // For MinGW popen() and pclose() are unavailable for DLL's. For DLL's _popen()
 //  and _pclose() should be used. Visual C++ only has the latter two.
 #ifndef pclose                                  // miscz.h's definition gets higher "precedence"
@@ -481,9 +489,9 @@ int sync (void);
 #ifdef  ANSI_COLOR
 #include <stdarg.h>
 
-int vprintf2 (const char *format, va_list argptr);
-int printf2 (const char *format, ...);
-int fprintf2 (FILE *file, const char *format, ...);
+extern int vprintf2 (const char *format, va_list argptr);
+extern int printf2 (const char *format, ...);
+extern int fprintf2 (FILE *file, const char *format, ...);
 #define vprintf vprintf2
 #define printf  printf2
 #define fprintf fprintf2
@@ -522,7 +530,19 @@ int fprintf2 (FILE *file, const char *format, ...);
 #endif // DLL
 
 #endif // !__MINGW32__
-#endif // _WIN32
+
+#elif   defined AMIGA                           // _WIN32
+// custom _popen() and _pclose(), because the standard ones (named popen() and
+//  pclose()) are buggy
+#ifndef pclose                                  // miscz.h's definition gets higher "precedence"
+#define pclose  _pclose
+#endif
+#ifndef popen                                   // idem
+#define popen   _popen
+#endif
+extern FILE *_popen (const char *path, const char *mode);
+extern int _pclose (FILE *stream);
+#endif                                          // AMIGA
 
 #ifdef  __cplusplus
 }

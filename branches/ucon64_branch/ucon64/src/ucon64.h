@@ -34,6 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_defines.h"
 #include "misc.h"
 
+
 typedef struct
 {
   const char *option_s;                         // "chk", ...
@@ -52,6 +53,7 @@ typedef struct
 #include "ucon64_ng.h"
 #endif
 
+
 /*
   This struct contains very specific informations only <console>_init() can
   supply after the correct console type was identified.
@@ -68,9 +70,6 @@ typedef struct
   const st_usage_t *copier_usage;               // backup unit usage
 
   int interleaved;                              // ROM is interleaved (swapped)
-  int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
-  int snes_hirom;                               // SNES ROM is HiROM
-
   int data_size;                                // ROM data size without "red tape"
 
   int buheader_start;                           // start of backup unit header (mostly 0)
@@ -104,7 +103,6 @@ typedef struct
 
 typedef enum { UCON64_SPP, UCON64_EPP, UCON64_ECP } parport_mode_t;
 
-
 /*
   this struct holds workflow relevant information
 */
@@ -117,7 +115,7 @@ typedef struct
   const char *rom;                              // ROM (cmdline) with path
 
   int fname_len;                                // force fname output format for --rrom, --rename, etc...
-        // fname_len can be UCON64_83 (8.3) or UCON64_FORCE63 (63.x)
+  // fname_len can be UCON64_83 (8.3) or UCON64_FORCE63 (63.x)
   char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
   int file_size;                                // (uncompressed) ROM file size
   unsigned int crc32;                           // crc32 value of ROM (used for DAT files)
@@ -145,7 +143,10 @@ typedef struct
   char netgui_path[FILENAME_MAX];               // path to the netgui DLL
   char gui_path[FILENAME_MAX];                  // remember the current path and file for the GUI
 #endif
-  unsigned int parport;                         // parallel port address
+#ifdef  AMIGA
+  char parport_dev[80];                         // parallel port device (e.g. "parallel.device")
+#endif
+  int parport;                                  // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
 
 #ifdef  ANSI_COLOR
@@ -169,7 +170,7 @@ typedef struct
   int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
 
   // only used in switches.c for --crc (!)
-  int crc_big_files;                            // enable checksum calc. for files bigger than MAXROMSIZE (512Mb)
+  int crc_big_files;                            // enable checksum calc. for files larger than MAXROMSIZE (512Mb)
 
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
   /*
@@ -181,7 +182,7 @@ typedef struct
   int interleaved;                              // ROM is interleaved (swapped)
   int id;                                       // generate unique name (currently
                                                 //  only used by snes_gd3())
-  // the following values are for the SNES, NES and the Genesis
+  // the following values are for SNES, NES and the Genesis
   int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
   int snes_hirom;                               // SNES ROM is HiROM
   int part_size;                                // SNES/Genesis split part size

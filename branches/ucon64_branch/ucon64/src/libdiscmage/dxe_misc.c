@@ -177,7 +177,7 @@ ftell (FILE *file)
 void
 rewind (FILE *file)
 {
-  return import_export.rewind (file);
+  import_export.rewind (file);
 }
 
 
@@ -254,7 +254,7 @@ remove (const char *filename)
 void
 free (void *mem)
 {
-  return import_export.free (mem);
+  import_export.free (mem);
 }
 
 
@@ -296,17 +296,19 @@ getenv (const char *name)
 void
 srand (unsigned seed)
 {
-  return import_export.srand (seed);
+  import_export.srand (seed);
 }
 
 
-int rand (void)
+int
+rand (void)
 {
   return import_export.rand ();
 }
 
 
-int atoi (const char *str)
+int
+atoi (const char *str)
 {
   return import_export.atoi (str);
 }
@@ -570,7 +572,7 @@ time (time_t *t)
 void
 delay (unsigned nmillis)
 {
-  return import_export.delay (nmillis);
+  import_export.delay (nmillis);
 }
 
 

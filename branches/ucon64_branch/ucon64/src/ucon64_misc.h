@@ -91,7 +91,6 @@ extern const st_usage_t mame_usage[];
 
 extern int unknown_init (st_rominfo_t *rominfo);
 
-
 extern const st_usage_t ucon64_options_usage[];
 extern const st_usage_t ucon64_padding_usage[];
 extern const st_usage_t ucon64_patching_usage[];
@@ -139,6 +138,7 @@ extern const st_usage_t ucon64_patching_usage[];
 #define WF_NOCRC32 512
 #define WF_NO_SPLIT 1024
 #define WF_SWITCH 2048
+
 typedef struct
 {
   int option;
@@ -197,16 +197,19 @@ extern char *ucon64_output_fname (char *requested_fname, int flags);
 extern int ucon64_fhexdump (const char *filename, int start, int len);
 extern int ucon64_filefile (const char *filename1, int start1, const char *filename2, int start2, int similar);
 
-
 //  wrapper for misc.c/gauge()
 extern int ucon64_gauge (time_t init_time, int pos, int size);
 extern int ucon64_testpad (const char *filename); // test if ROM is padded
 
 extern int ucon64_testsplit (const char *filename); // test if ROM is split
 
-extern unsigned int ucon64_parport_init (unsigned int parport);
+extern int ucon64_parport_init (int parport);
 
 extern int ucon64_configfile (void);
+
+extern int ucon64_rename (int mode);
+extern int ucon64_e (void);
+extern int ucon64_pattern (st_rominfo_t *rominfo, const char *pattern_fname);
 
 /*
   ucon64_get_options_s() returns option name
@@ -218,3 +221,4 @@ extern const char *ucon64_get_option_s (int option);
 extern const char *ucon64_get_desc (int option);
 
 #endif // #ifndef UCON64_MISC_H
+

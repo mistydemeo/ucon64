@@ -21,7 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef UCON64_DEFINES_H
 #define UCON64_DEFINES_H
-// please make sure that NO definition except FALSE has 0 as value
+
+// Please make sure that NO definition except FALSE has 0 as value!
 
 /*
   maximum # of arguments uCON64 takes
@@ -33,7 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_UNKNOWN_S "Unknown"
 #define NULL_TO_UNKNOWN_S(str) ((str) ? (str) : (UCON64_UNKNOWN_S))
 
-#define UCON64_VERSION_S "1.9.9-1"
+#define UCON64_VERSION_S "1.9.8-3"
 
 /* program version counter */
 //#define UCON64_VERSION (198)
@@ -45,7 +46,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define TOMBIT(x) ((int)(x) / MBIT)
 #define TOMBIT_F(x) ((float)(x) / MBIT)
 
-#define MAXROMSIZE ((512 * MBIT) + 1)
+#define MAXROMSIZE (512 * MBIT)
 
 #define UCON64_OPTION (1000)
 #define UCON64_CONSOLE (0)
@@ -127,6 +128,7 @@ enum {
   UCON64_FRONTEND,
   UCON64_GBX,
   UCON64_GD3,
+  UCON64_GD3S,
   UCON64_GG,
   UCON64_GGD,
   UCON64_GGE,
@@ -165,6 +167,7 @@ enum {
   UCON64_MKDAT,
   UCON64_MKI,
   UCON64_MKPPF,
+  UCON64_MSG,
   UCON64_MULTI,
 //  UCON64_MVS,
   UCON64_N,
@@ -192,6 +195,7 @@ enum {
   UCON64_PAL,
   UCON64_PASOFAMI,
   UCON64_PATCH,
+  UCON64_PATTERN,
   UCON64_POKE,
   UCON64_PORT,
   UCON64_PPF,
@@ -213,7 +217,6 @@ enum {
   UCON64_SMC,
   UCON64_SMD,
   UCON64_SMDS,
-  UCON64_SMG,
   UCON64_SRAM,
   UCON64_SSC,
   UCON64_SSIZE,
@@ -221,6 +224,7 @@ enum {
   UCON64_STPN,
   UCON64_STRIP,
   UCON64_SWAP,
+  UCON64_SWAP2,
   UCON64_SWC,
   UCON64_SWCS,
   UCON64_SWP,
@@ -248,19 +252,25 @@ enum {
   UCON64_XGBXB,
   UCON64_XGBXS,
   UCON64_XGD3,
+  UCON64_XGD3R,
   UCON64_XGD3S,
   UCON64_XGD6,
+  UCON64_XGD6R,
   UCON64_XGD6S,
   UCON64_XLIT,
   UCON64_XMCCL,
   UCON64_XMD,
   UCON64_XMDS,
+  UCON64_XMSG,
+  UCON64_XSMC,
+  UCON64_XSMCR,
   UCON64_XSMD,
   UCON64_XSMDS,
   UCON64_XSWC,
   UCON64_XSWC2,
-  UCON64_XSWCS,
   UCON64_XSWC_SUPER,
+  UCON64_XSWCR,
+  UCON64_XSWCS,
   UCON64_XV64,
   UCON64_Z64,
 
@@ -269,13 +279,8 @@ enum {
   UCON64_FINDR,
   UCON64_VMS,
 
-
   // Keep this (libnetgui) option separate
   UCON64_GUI,
-#ifdef GUI
-  UCON64_JS,
-#endif
-
 
   // Keep these (libdiscmage) options separate
   UCON64_DISC = UCON64_OPTION + 250,

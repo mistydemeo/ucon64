@@ -1,7 +1,7 @@
 /*
 ffe.c - General Front Far East copier routines for uCON64
 
-written by 2002 dbjh
+written by 2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -96,12 +96,42 @@ ffe_send_block (unsigned short address, unsigned char *buffer, int len)
 
 
 void
+ffe_send_block2 (unsigned short address, unsigned char *buffer, int len)
+{
+  int checksum = 0x81, n;
+
+  ffe_send_command (2, address, (unsigned short) len);
+  for (n = 0; n < len; n++)
+    {
+      ffe_sendb (buffer[n]);
+      checksum ^= buffer[n];
+    }
+  ffe_sendb ((unsigned char) checksum);
+}
+
+
+void
 ffe_send_command0 (unsigned short address, unsigned char byte)
 // command 0 for 1 byte
 {
   ffe_send_command (0, address, 1);
   ffe_sendb (byte);
   ffe_sendb ((unsigned char) (0x81 ^ byte));
+}
+
+
+unsigned char
+ffe_send_command1 (unsigned short address)
+// command 1 for 1 byte
+{
+  unsigned char byte;
+
+  ffe_send_command (1, address, 1);
+  byte = ffe_receiveb ();
+  if ((0x81 ^ byte) != ffe_receiveb ())
+    printf ("received data is corrupt\n");
+
+  return byte;
 }
 
 
@@ -137,6 +167,25 @@ ffe_receive_block (unsigned short address, unsigned char *buffer, int len)
   int checksum = 0x81, n, m;
 
   ffe_send_command (1, address, (unsigned short) len);
+  for (n = 0; n < len; n++)
+    {
+      buffer[n] = ffe_receiveb ();
+      checksum ^= buffer[n];
+    }
+  if (checksum != ffe_receiveb ())
+    printf ("\nreceived data is corrupt\n");
+
+  for (m = 0; m < 65536; m++)                   // a delay is necessary here
+    ;
+}
+
+
+void
+ffe_receive_block2 (unsigned short address, unsigned char *buffer, int len)
+{
+  int checksum = 0x81, n, m;
+
+  ffe_send_command (3, address, (unsigned short) len);
   for (n = 0; n < len; n++)
     {
       buffer[n] = ffe_receiveb ();

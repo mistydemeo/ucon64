@@ -1449,6 +1449,7 @@ while ((c =
       break;
 
     default:
+      single = 0;
       break;
     }
   }

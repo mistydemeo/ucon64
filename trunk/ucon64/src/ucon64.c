@@ -513,7 +513,7 @@ if the wrong ROM/console type was detected\n",buf3,getenv("HOME"));
 					,(
 						(!strdcmp(argv[x],ucon64_rom())) ?
 						" \"%s\"" :
-						" %s"
+						/*" %s"*/""
 					)
 					,argv[x]
 			);

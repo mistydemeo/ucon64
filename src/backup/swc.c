@@ -690,12 +690,6 @@ swc_unlock (unsigned int parport)
 int
 swc_usage (int argc, char *argv[])
 {
-  int verbose = 0;
-
-  if (argcmp (argc, argv, "-help"))
-    verbose = 1;
-
-  if (verbose)
     printf ("%s\n", swc_TITLE);
 
   printf
@@ -706,8 +700,6 @@ swc_usage (int argc, char *argv[])
      "                receives automatically when $ROM(=SRAM) does not exist\n"
      "                Press q to abort ^C will cause invalid state of backup unit\n");
 
-  if (verbose)
-    {
       printf ("\n"
               "                You only need to specify PORT if uCON64 doesn't detect the\n"
               "                (right) parallel port. If that is the case give a hardware\n"
@@ -715,27 +707,29 @@ swc_usage (int argc, char *argv[])
               "                ucon64 -xswc \"Super Mario World (U).swc\" 0x378\n");
       printf ("\n"
               "                In order to connect the Super Wild Card to a PC's parallel port\n"
-              "                you need a parallel cable, i.e. a cable with male DB-25\n"
-              "                connectors at both ends where the pins are connected in the\n"
-              "                following way:\n"
-              "                pin 1  <-> pin 1\n"
-              "                pin 2  <-> pin 2\n"
-              "                pin 3  <-> pin 3\n"
-              "                pin 4  <-> pin 4\n"
-              "                pin 5  <-> pin 5\n"
-              "                pin 6  <-> pin 6\n"
-              "                pin 7  <-> pin 7\n"
-              "                pin 8  <-> pin 8\n"
-              "                pin 9  <-> pin 9\n"
-              "                pin 10 <-> pin 10\n"
-              "                pin 11 <-> pin 11\n"
-              "                pin 12 <-> pin 12\n"
-              "                pin 13 <-> pin 13\n"
-              "                pin 15 <-> pin 15\n"
-              "                pin 25 <-> pin 25\n"
-              "                Pins 2-9 are used for output, pins 10-13 & 15 for input and pin\n"
-              "                25 is ground. The other pins may be left unconnected.\n");
-    }
+              "                you need a standart bidirectional parallel cable like for the\n"
+              "                most backup units\n"//, i.e. a cable with male DB-25\n"
+//              "                connectors at both ends where the pins are connected in the\n"
+//              "                following way:\n"
+//
+//              "                pin 1  <-> pin 1\n"
+//              "                pin 2  <-> pin 2\n"
+//              "                pin 3  <-> pin 3\n"
+//              "                pin 4  <-> pin 4\n"
+//              "                pin 5  <-> pin 5\n"
+//              "                pin 6  <-> pin 6\n"
+//              "                pin 7  <-> pin 7\n"
+//              "                pin 8  <-> pin 8\n"
+//              "                pin 9  <-> pin 9\n"
+//              "                pin 10 <-> pin 10\n"
+//              "                pin 11 <-> pin 11\n"
+//              "                pin 12 <-> pin 12\n"
+//              "                pin 13 <-> pin 13\n"
+//              "                pin 15 <-> pin 15\n"
+//              "                pin 25 <-> pin 25\n"
+//              "                Pins 2-9 are used for output, pins 10-13 & 15 for input and pin\n"
+//              "                25 is ground. The other pins may be left unconnected.\n"
+);
 
   return 0;
 }

@@ -2655,12 +2655,7 @@ gbx_write_sram (char *filename, unsigned int parport, int bank)
 int
 gbx_usage (int argc, char *argv[])
 {
-  int verbose = 0;
 
-  if (argcmp (argc, argv, "-help"))
-    verbose = 1;
-
-  if (verbose)
     printf ("%s\n", gbx_TITLE);
 
   printf ("  -xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
@@ -2671,7 +2666,6 @@ gbx_usage (int argc, char *argv[])
           "                n can be a number from 0 to 15\n"
           "                $FILE=PORT; receives automatically when $ROM does not exist\n");
 
-  if (verbose)
     printf ("\n"
             "                You only need to specify PORT if uCON64 doesn't detect the\n"
             "                (right) parallel port. If that is the case give a hardware\n"

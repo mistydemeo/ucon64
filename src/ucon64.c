@@ -225,8 +225,9 @@ main (int argc, char *argv[])
 /*
    configfile handling
 */
+  sprintf (rom.config_file, "%s%c"
 #ifdef  __DOS__
-  sprintf (rom.config_file, "%s%cucon64.cfg", getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
+  "ucon64.cfg"
 #else
   /*
     Use getchd() here too. If this code gets compiled under Windows the compiler has to be
@@ -236,8 +237,9 @@ main (int argc, char *argv[])
     uCON64 under cmd or command where HOME is not set by default. Under Windows XP/2000
     (/NT?) USERPROFILE and/or HOMEDRIVE+HOMEPATH will be set which getchd() will "detect".
   */
-  sprintf (rom.config_file, "%s%c.ucon64rc", getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
+  ".ucon64rc"
 #endif
+  , getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
 
   if (access (rom.config_file, F_OK) != 0)
     {
@@ -319,7 +321,9 @@ main (int argc, char *argv[])
       filecopy (rom.config_file, 0, quickftell (rom.config_file), buf2, "wb");
 
       setProperty (rom.config_file, "version", "198");
+
       setProperty (rom.config_file, "backups", "1");
+
       setProperty (rom.config_file, "cdrw_read",
         getProperty (rom.config_file, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
       setProperty (rom.config_file, "cdrw_write",

@@ -699,16 +699,12 @@ doctor64jr_write (char *filename, long start, long len, unsigned int parport)
 int
 doctor64jr_usage (int argc, char *argv[])
 {
-  if (argcmp (argc, argv, "-help"))
     printf ("%s\n", doctor64jr_TITLE);
 
   printf ("  -xdjr         send/receive ROM to/from Doctor64 Jr; $FILE=PORT\n"
           "                receives automatically when $ROM does not exist\n");
 
-  if (argcmp (argc, argv, "-help"))
-    {
 //TODO more info like technical info about cabeling and stuff for the copier
 
-    }
   return (0);
 }

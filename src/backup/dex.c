@@ -30,19 +30,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 int
 dex_usage (int argc, char *argv[])
 {
-  if (argcmp (argc, argv, "-help"))
-    printf ("%s\n", dex_TITLE);
+//    printf ("%s\n", dex_TITLE);
 
 /*
   printf
     ("TODO:  -xdex    send/receive SRAM to/from DexDrive; $FILE=PORT\n"
      "		receives automatically when $ROM(=SRAM) does not exist\n");
 */
-  if (argcmp (argc, argv, "-help"))
-    {
 //TODO more info like technical info about cabeling and stuff for the copier
 
-    }
   return (0);
 }
 

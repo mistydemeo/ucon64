@@ -737,7 +737,6 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
   strcpy(rom->name,"");
   strcpy(rom->name2,"");
 
-  rom->bytes=quickftell(rom->rom);
 
   strcpy(rom->rom,getarg(argc,argv,ucon64_ROM));
   strcpy(rom->file,getarg(argc,argv,ucon64_FILE));
@@ -746,7 +745,8 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
   strcpy(rom->copier,"?");
 
   rom->mbit=0;
-  rom->bytes=0;
+//  rom->bytes=0;
+  rom->bytes=quickftell(rom->rom);
 
   rom->console=ucon64_UNKNOWN;	//integer for the console system
 

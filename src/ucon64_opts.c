@@ -36,9 +36,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_lib.h"
 #include "ucon64_opts.h"
 #include "quick_io.h"
-#ifdef  DLOPEN
-#include "dlopen.h"
-#endif
 #include "libdiscmage/libdiscmage.h"
 #include "console/console.h"
 #include "patch/patch.h"
@@ -583,6 +580,11 @@ ucon64_options (int c, const char *optarg)
     case UCON64_CRC:
       if (!value)
         value = ucon64.rominfo ? ucon64.rominfo->buheader_len : ucon64.buheader_len;
+      printf ("%s", basename2 (ucon64.rom));
+      if (ucon64.fname_arch[0])
+        printf (" (%s)\n", basename2 (ucon64.fname_arch));
+      else
+        fputc ('\n', stdout);
       printf ("Checksum (CRC32): 0x%08x\n\n", q_fcrc32 (ucon64.rom, value));
       break;
 

@@ -30,24 +30,24 @@ extern const st_usage_t ucon64_dat_usage[];
 
 typedef struct
 {
-  uint32_t crc32;                       // "official" CRC32 checksum of the ROM
-  uint8_t console;                      // integer for the console system
-  char name[2 * 80];                    // name of the ROM
-  const char *maker;                    // maker of the ROM
-  const char *country;                  // country of the ROM
-  char misc[25 * 80];                   // miscellaneous information about the ROM
-  char fname[FILENAME_MAX];             // filename of the ROM
-  uint32_t fsize;                       // size in bytes
+  uint32_t crc32;                               // "official" CRC32 checksum of the ROM
+  uint8_t console;                              // integer for the console system
+  char name[2 * 80];                            // name of the ROM
+  const char *maker;                            // maker of the ROM
+  const char *country;                          // country of the ROM
+  char misc[25 * 80];                           // miscellaneous information about the ROM
+  char fname[FILENAME_MAX];                     // filename of the ROM
+  uint32_t fsize;                               // size in bytes
 
-  char datfile[FILENAME_MAX];           // name of the dat file
-  char author[100];                     // author of dat file
-  char version[100];                    // version of dat file
-  char date[20];                        // date of dat file
-  char comment[25 * 80];                // comment of dat file
-  char refname[100];                    // ref name
+  char datfile[FILENAME_MAX];                   // name of the dat file
+  char author[100];                             // author of dat file
+  char version[100];                            // version of dat file
+  char date[20];                                // date of dat file
+  char comment[25 * 80];                        // comment of dat file
+  char refname[100];                            // ref name
 
-  const st_usage_t *console_usage;                    // console system usage
-  const st_usage_t *copier_usage;                     // backup unit usage
+  const st_usage_t *console_usage;              // console system usage
+  const st_usage_t *copier_usage;               // backup unit usage
 } st_ucon64_dat_t;
 
 /*

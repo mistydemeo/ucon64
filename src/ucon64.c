@@ -72,20 +72,7 @@ static void ucon64_rom_nfo (const st_rominfo_t *rominfo);
 static st_rominfo_t *ucon64_probe (st_rominfo_t *rominfo);
 static int ucon64_rom_handling (void);
 static void ucon64_render_usage (const st_usage_t *usage);
-static int ucon64_process_rom (char *fname); 
-
-
-static st_rominfo_t *
-ucon64_rom_flush (st_rominfo_t * rominfo)
-{
-  if (rominfo)
-    memset (rominfo, 0L, sizeof (st_rominfo_t));
-
-  ucon64.rominfo = NULL;
-  rominfo->data_size = UCON64_UNKNOWN;
-
-  return rominfo;
-}
+static int ucon64_process_rom (char *fname);
 
 
 st_ucon64_t ucon64;                             // containes ptr to image, dat and rominfo
@@ -93,11 +80,11 @@ st_ucon64_t ucon64;                             // containes ptr to image, dat a
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
 
 typedef struct
-  {
-    int val; // option
-//    const 
-      char *optarg; // option argument
-  } st_args_t;
+{
+  int val; // option
+//    const
+  char *optarg; // option argument
+} st_args_t;
 
 static st_args_t arg[UCON64_MAX_ARGS];
 
@@ -304,6 +291,19 @@ const struct option options[] =   {
   };
 
 
+static st_rominfo_t *
+ucon64_rom_flush (st_rominfo_t * rominfo)
+{
+  if (rominfo)
+    memset (rominfo, 0L, sizeof (st_rominfo_t));
+
+  ucon64.rominfo = NULL;
+  rominfo->data_size = UCON64_UNKNOWN;
+
+  return rominfo;
+}
+
+
 static const struct option *
 ucon64_get_opt (const int option)
 {
@@ -312,7 +312,7 @@ ucon64_get_opt (const int option)
   for (x = 0; options[x].val != 0; x++)
     if (options[x].val == option)
       return (struct option *) &options[x];
-      
+
   return NULL;
 }
 
@@ -335,14 +335,15 @@ ucon64_runtime_debug (void)
 
   // How many option do we have?
   printf ("DEBUG: Total options: %d\n", x);
-  printf ("DEBUG: UCON64_MAX_ARGS == %d, %s \n", UCON64_MAX_ARGS, 
-    (x < UCON64_MAX_ARGS ? "good" : "\nERROR: too few. Must be more than options"));
+  printf ("DEBUG: UCON64_MAX_ARGS == %d, %s \n", UCON64_MAX_ARGS,
+    (x < UCON64_MAX_ARGS ? "good" : "\nERROR:   too small; must be larger than options"));
 
   // the other way
   for (x = 0; ucon64_wf[x].option; x++)
     if (!ucon64_get_opt (ucon64_wf[x].option)) // compare workflow with options
       {
-        fprintf (stderr, "DEBUG: Sanity check failed (entry %d in ucon64_wf with value %d)\n", x, ucon64_wf[x].option);
+        strcpy (buf, (ucon64_get_opt (ucon64_wf[x].option))->name);
+        fprintf (stderr, "DEBUG: Sanity check failed (option \"%s\" in ucon64_wf)\n", buf);
         exit (1);
       }
 
@@ -355,39 +356,41 @@ ucon64_runtime_debug (void)
 
       if (ucon64_wf[x].option == ucon64_wf[y].option && x != y)
         {
-          fprintf (stderr, "DEBUG: Sanity check failed (entry %d in ucon64_wf with value %d is a dupe)\n", x, ucon64_wf[x].option);
+          strcpy (buf, (ucon64_get_opt (ucon64_wf[x].option))->name);
+          fprintf (stderr, "DEBUG: Sanity check failed (option \"%s\" in ucon64_wf is a dupe)\n", buf);
           exit (1);
         }
     }
 
   // Check for wrong usage assignments in ucon64_wf
   for (x = 0; ucon64_wf[x].option; x++)
-    if (ucon64_wf[x].usage)
-      {
-        const st_usage_t *p = ucon64_wf[x].usage;
+    {
+      strcpy (buf, (ucon64_get_opt (ucon64_wf[x].option))->name);
+      if (ucon64_wf[x].usage)
+        {
+          const st_usage_t *p = ucon64_wf[x].usage;
 
-        strcpy (buf, (ucon64_get_opt (ucon64_wf[x].option))->name);
+          for (y = 0; p[y].option_s || p[y].desc; y++)
+            if (p[y].option_s)
+              if (!stricmp (buf, p[y].option_s))
+                break;
 
-        for (y = 0; p[y].option_s || p[y].desc; y++)
-          if (p[y].option_s) 
-            if (!stricmp (buf, p[y].option_s))
-              break;
+          if (p[y].option_s)
+            if (stricmp (buf, p[y].option_s) != 0 || (!p[y].option_s && !p[y].desc))
+              {
+                fprintf (stderr, "DEBUG: Wrong usage assigned (option \"%s\" in ucon64_wf)\n", buf);
+                exit (1);
+              }
 
-        if (p[y].option_s)
-          if (stricmp (buf, p[y].option_s) != 0 || (!p[y].option_s && !p[y].desc))
-            {
-              fprintf (stderr, "DEBUG: Wrong usage assigned (option: %s in ucon64_wf)\n", buf);
-              exit (1);
-            }
-
-          if (!p[y].option_s && !p[y].desc)
-            {
-              fprintf (stderr, "DEBUG: Wrong usage assigned (option: %s in ucon64_wf)\n", buf);
-              exit (1);
-            }
-      }
-    else
-      printf ("DEBUG: No usage assigned (option: %d in ucon64_wf)\n", x);
+            if (!p[y].option_s && !p[y].desc)
+              {
+                fprintf (stderr, "DEBUG: Wrong usage assigned (option \"%s\" in ucon64_wf)\n", buf);
+                exit (1);
+              }
+        }
+      else
+        printf ("DEBUG: No usage assigned (option \"%s\" in ucon64_wf)\n", buf);
+    }
 
   printf ("DEBUG: Sanity check finished\n");
 

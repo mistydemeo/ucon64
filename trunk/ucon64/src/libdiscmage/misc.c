@@ -150,7 +150,7 @@ crc16 (unsigned short crc16, const void *buf, unsigned int size)
 /*
   crc32 routines
 */
-#define CRC32_POLYNOMIAL     0xedb88320L
+#define CRC32_POLYNOMIAL     0xedb88320
 
 static unsigned int crc32_table[256];
 static int crc32_table_built = 0;
@@ -180,20 +180,15 @@ unsigned int
 crc32 (unsigned int crc32, const void *buffer, unsigned int size)
 {
   unsigned char *p;
-  unsigned int temp1, temp2;
 
   if (!crc32_table_built)
     build_crc32_table ();
 
-  crc32 ^= 0xffffffffL;
+  crc32 ^= 0xffffffff;
   p = (unsigned char *) buffer;
   while (size-- != 0)
-    {
-      temp1 = (crc32 >> 8) & 0x00ffffffL;
-      temp2 = crc32_table[((int) crc32 ^ *p++) & 0xff];
-      crc32 = temp1 ^ temp2;
-    }
-  return crc32 ^ 0xffffffffL;
+    crc32 = (crc32 >> 8) ^ crc32_table[(crc32 ^ *p++) & 0xff];
+  return crc32 ^ 0xffffffff;
 }
 
 

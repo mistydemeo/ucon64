@@ -155,11 +155,7 @@ handle_existing_file (const char *dest, char *src)
           if (ucon64.backup)
             {                                   // case 1a
               ucon64_fbackup (NULL, dest);
-#ifdef __MSDOS__
               setext (src, ".BAK");
-#else
-              strcat (src, (findlwr (FILENAME_ONLY (src)) ? ".bak" : ".BAK"));
-#endif
             }                                   // must match with what filebackup() does
           else
             {                                   // case 1b

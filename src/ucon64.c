@@ -926,6 +926,7 @@ ucon64_usage (int argc, char *argv[])
 //    genesis_usage[0],
     nes_usage[0], snes_usage[0]);
 
+#if 0
   printf ("\n"
     "%s\n", cdrw_usage[0]);
 
@@ -969,15 +970,8 @@ ucon64_usage (int argc, char *argv[])
     "TODO: " OPTION_LONG_S "nero    convert DiscJuggler/CDI IMAGE for use with Nero;\n"
     "                  " OPTION_LONG_S "rom=CDI_IMAGE\n"
 #endif
-#if 0
-#ifdef DEBUG
-    "  " OPTION_LONG_S "test        run selftest (DEBUG)\n"
-    "                  if you can read this uCON64 was compiled with active DEBUG\n"
-    "                  this should only happen for development versions\n"
-#endif // DEBUG
-#endif
     "\n");
-
+#endif
   optind = option_index = 0;
   single = 0;
 

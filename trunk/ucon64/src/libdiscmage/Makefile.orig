@@ -10,7 +10,7 @@ INSTALL = install -c
 LIBTOOL = libtool
 
 CC=gcc
-CFLAGS=-I.. -I. -Wall -O3
+CFLAGS=-I.. -I. -Wall -O3 -DHAVE_CONFIG_H
 ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
@@ -49,7 +49,7 @@ ifdef DJGPP
 
 OBJECTS+=dxe_misc.o
 # This file is only really necessary when zlib support is/should be enabled,
-# but it's wise to use as little conditionally compiled code as possible.
+# but it's wise to have as little conditionally compiled code as possible.
 # Besides it currently gets used even if zlib support is disabled.
 
 GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/2.953
@@ -192,3 +192,5 @@ sheets.o: libdiscmage.h misc.h dxedll_priv.h
 dllinit.o: libdiscmage.h misc.h dxedll_priv.h
 misc.o: misc.h dxedll_priv.h
 dxe_misc.o: dxedll_pub.h
+djimport.o: libdiscmage.h dlopen.h dxedll_pub.h
+dlopen.o: ../config.h dlopen.h dxedll_pub.h

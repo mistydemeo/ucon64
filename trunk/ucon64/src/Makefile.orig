@@ -185,7 +185,7 @@ getopt.o: getopt.h
 unzip.o: unzip.h
 misc.o: map.c map.h misc.h config.h
 quick_io.o: quick_io.h misc.h config.h
-dlopen.o: dlopen.h dxedll_pub.h
+dlopen.o: dlopen.h dxedll_pub.h config.h
 ucon64.o: switches.c options.c dlopen.h $(UCON64_STD_H)
 ucon64_misc.o: libdiscmage/libdiscmage.h $(UCON64_STD_H)
 ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)

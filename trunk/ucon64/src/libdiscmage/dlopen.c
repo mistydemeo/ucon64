@@ -181,6 +181,7 @@ open_module (char *module_name)
   sym->__dj_ctype_flags = __dj_ctype_flags;
   sym->__dj_ctype_tolower = __dj_ctype_tolower;
   sym->__dj_ctype_toupper = __dj_ctype_toupper;
+  sym->errno = errno;
 
   // initialize the DXE module
   sym->dxe_init ();
@@ -190,9 +191,7 @@ open_module (char *module_name)
   dxe_map = map_put (dxe_map, (void *) new_handle, sym);
   handle = (void *) new_handle++;
 #elif   defined __unix__
-  void *handle;
-
-  handle = dlopen (module_name, RTLD_LAZY);
+  void *handle = dlopen (module_name, RTLD_LAZY);
   if (handle == NULL)
     {
       fputs (dlerror (), stderr);

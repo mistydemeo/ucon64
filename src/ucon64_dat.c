@@ -57,10 +57,8 @@ fclose_fdat (void)
 static uint32_t
 get_uint32 (const void *buf)
 {
-  uint32_t      ret;
-  unsigned char *tmp;
-    
-  tmp = (unsigned char *) buf;
+  uint32_t ret;
+  unsigned char *tmp = (unsigned char *) buf;
       
   ret = tmp[3] & 0xff;
   ret = (ret << 8) + (tmp[2] & 0xff);

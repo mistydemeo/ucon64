@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 int mgd_usage(int argc,char *argv[])
 {
-if(argcmp(argc,argv,"-help"))printf("\n%s\n",mgd_TITLE);
+if(argcmp(argc,argv,"-help"))printf("%s\n",mgd_TITLE);
 
 
 printf(

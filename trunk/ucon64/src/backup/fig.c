@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 int fig_usage(int argc,char *argv[])
 {
-if(argcmp(argc,argv,"-help"))printf("\n%s\n",fig_TITLE);
+if(argcmp(argc,argv,"-help"))printf("%s\n",fig_TITLE);
 
 
 printf( "TODO:  -xfig	send/receive ROM to/from *Pro Fighter*/(all)FIG; $FILE=PORT\n"

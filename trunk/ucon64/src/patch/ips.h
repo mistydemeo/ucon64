@@ -1,5 +1,5 @@
 /*
-ips.c - IPS support for uCON64
+ips.h - IPS support for uCON64
 
 written by ???? - ???? madman
            1999 - 2001 NoisyB (noisyb@gmx.net)

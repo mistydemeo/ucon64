@@ -2520,7 +2520,7 @@ snes_buheader_info (st_rominfo_t *rominfo)
     {
       unsigned char sram_sizes[] = {0, 2, 8, 32};
 
-      printf ("[2:7]    Run program in mode: %d\n", (header[2] & 0x80) >> 7);
+      printf ("[2:7]    Run program in mode: %d\n", (header[2] ^ 0x80) >> 7);
 
       y = header[2] & 0x40 ? 1 : 0;
       printf ("[2:6]    Split: %s => %s\n",

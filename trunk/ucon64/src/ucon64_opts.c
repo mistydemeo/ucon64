@@ -1199,14 +1199,14 @@ ucon64_options (int c, const char *optarg)
     case UCON64_DINT:
       switch (ucon64.console)
         {
-        case UCON64_SNES:
-          snes_dint (ucon64.rominfo);
-          break;
         case UCON64_NES:
           nes_dint ();
           break;
         case UCON64_PCE:
           pcengine_swap (ucon64.rominfo);
+          break;
+        case UCON64_SNES:
+          snes_dint (ucon64.rominfo);
           break;
         default:                                // Nintendo 64
           puts ("Converting to deinterleaved format...");
@@ -1230,6 +1230,9 @@ ucon64_options (int c, const char *optarg)
           break;
         case UCON64_N64:
           n64_f (ucon64.rominfo);
+          break;
+        case UCON64_PCE:
+          pcengine_f (ucon64.rominfo);
           break;
         case UCON64_SNES:
           snes_f (ucon64.rominfo);
@@ -1273,9 +1276,9 @@ ucon64_options (int c, const char *optarg)
       switch (ucon64.console)
         {
         case UCON64_GB:
-        case UCON64_SMS:
         case UCON64_GEN:
         case UCON64_NES:
+        case UCON64_SMS:
         case UCON64_SNES:
           gg_apply (ucon64.rominfo, optarg);
           break;
@@ -1375,14 +1378,14 @@ ucon64_options (int c, const char *optarg)
         case UCON64_NG:
           neogeo_mgd ();
           break;
+        case UCON64_PCE:
+          pcengine_mgd (ucon64.rominfo);
+          break;
         case UCON64_SMS:
           sms_mgd (ucon64.rominfo, UCON64_SMS);
           break;
         case UCON64_SNES:
           snes_mgd (ucon64.rominfo);
-          break;
-        case UCON64_PCE:
-          pcengine_mgd (ucon64.rominfo);
           break;
         default:
 // The next msg has already been printed
@@ -1489,11 +1492,11 @@ ucon64_options (int c, const char *optarg)
         case UCON64_GEN:
           genesis_s (ucon64.rominfo);
           break;
-        case UCON64_NG:
-          neogeo_s ();
-          break;
         case UCON64_NES:
           nes_s ();
+          break;
+        case UCON64_NG:
+          neogeo_s ();
           break;
         case UCON64_SNES:
           snes_s (ucon64.rominfo);

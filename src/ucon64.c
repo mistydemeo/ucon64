@@ -1085,14 +1085,16 @@ int ucon64_nfo(struct ucon64_ *rom)
   if(!rom->padded)printf("Padded: No\n");
   else if(rom->padded)printf("Padded: Maybe, %ld Bytes (%.4f Mb)\n",rom->padded,(float)rom->padded/MBIT);
 
-  if(!rom->intro)printf("Intro/Trainer: No\n");
-  else if(rom->intro)printf("Intro/Trainer: Maybe, %ld Bytes\n",rom->intro);
+//  if(!rom->intro)printf("Intro/Trainer: No\n");
+//  else 
+if(rom->intro)printf("Intro/Trainer: Maybe, %ld Bytes\n",rom->intro);
 
-  if(!rom->buheader_len)printf("Backup Unit Header: No\n");
-  else if(rom->buheader_len)printf("Backup Unit Header: Yes, %ld Bytes\n",rom->buheader_len);
+//  if(!rom->buheader_len)printf("Backup Unit Header: No\n");
+//  else if(rom->buheader_len)printf("Backup Unit Header: Yes, %ld Bytes\n",rom->buheader_len);
 
-  if(!rom->splitted[0])printf("Splitted: No\n");
-  else if(rom->splitted[0])printf("Splitted: Yes, %d parts (Note: for most options the ROM must be joined)\n",rom->splitted[0]);
+//  if(!rom->splitted[0])printf("Splitted: No\n");
+//  else 
+if(rom->splitted[0])printf("Splitted: Yes, %d parts (Note: for most options the ROM must be joined)\n",rom->splitted[0]);
 
   if(rom->misc[0])printf("%s\n",rom->misc);
 

@@ -373,29 +373,11 @@ main (int argc, char **argv)
 #ifdef  DLOPEN
   strcpy (ucon64.discmage_path, get_property (ucon64.configfile, "discmage_path", buf, ""));
   if (strlen (ucon64.discmage_path) >= 3)
-    // There should be some standard C library function that does this...
-    //  (filename expansion)
     {
-#if 1
       strcpy (buf, ucon64.discmage_path);
       realpath2 (buf, ucon64.discmage_path);
-#else
-      char path1[FILENAME_MAX], path2[FILENAME_MAX];
-      if (ucon64.discmage_path[0] == '~' && ucon64.discmage_path[1] == FILE_SEPARATOR)
-        {
-          strcpy (path1, getenv2 ("HOME"));
-          strcpy (path2, &ucon64.discmage_path[2]);
-          sprintf (ucon64.discmage_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
-        }
-      if (ucon64.discmage_path[0] == '.' && ucon64.discmage_path[1] == FILE_SEPARATOR)
-        {
-          getcwd (path1, FILENAME_MAX);
-          strcpy (path2, &ucon64.discmage_path[2]);
-          sprintf (ucon64.discmage_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
-        }
-#endif
     }
-    
+
   // if ucon64.discmage_path points to an existing file then load it
   if (!access (ucon64.discmage_path, F_OK))
     {
@@ -404,9 +386,9 @@ main (int argc, char **argv)
       dm_open = get_symbol (libdm, "dm_open");
       dm_close = get_symbol (libdm, "dm_close");
 
+      dm_rip = get_symbol (libdm, "dm_rip");
       dm_cdirip = get_symbol (libdm, "dm_cdirip");
       dm_nrgrip = get_symbol (libdm, "dm_nrgrip");
-      dm_rip = get_symbol (libdm, "dm_rip");
 
       dm_disc_read = get_symbol (libdm, "dm_disc_read");
       dm_disc_write = get_symbol (libdm, "dm_disc_write");
@@ -476,7 +458,13 @@ main (int argc, char **argv)
   getcwd (ucon64.output_path, FILENAME_MAX); // default output path
   if (OFFSET (ucon64.output_path, strlen (ucon64.output_path) - 1) != FILE_SEPARATOR)
     strcat (ucon64.output_path, FILE_SEPARATOR_S);
+
   strcpy (ucon64.cache_path, get_property (ucon64.configfile, "cache_path", buf, ""));
+  if (strlen (ucon64.cache_path) >= 3)
+    {
+      strcpy (buf, ucon64.cache_path);
+      realpath2 (buf, ucon64.cache_path);
+    }
 
   // if the config file doesn't contain a parport line use "0" to force probing
   sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
@@ -764,7 +752,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   if (ucon64.discmage_enabled)
     if (ucon64.type == UCON64_UNKNOWN)
       {
-        image = dm_init (romfile);
+        image = dm_open (romfile);
         ucon64.type = image ? UCON64_CD : UCON64_ROM;
         if (image)
           dm_close (image);
@@ -809,7 +797,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 
       result = 0;
 
-      image = dm_init (romfile);
+      image = dm_open (romfile);
 
       q_fread (&iso_header, ISO_HEADER_START +
           UCON64_ISSET (ucon64.buheader_len) ?

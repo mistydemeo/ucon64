@@ -476,16 +476,16 @@ Q43: <a href="#43">How should the option --mkdat be used?</a><br>
    Super Wild Card should have an extension with the correct DSP chip (or have
    the right cartridge with that chip plugged in your SWC). Then make sure you
    are using a good dump (look at the check sum information). After you have
-   done that check if the file is interleaved (look at the line that starts
-   with "Interleaved/Swapped:"). If the file is interleaved deinterleave it by
-   using the option -dint. Also verify that the backup unit header is correct.
-   The option -dbuh can be helpful for that. You can make uCON64 rewrite the
-   header with -swc. uCON64 uses the information in the ROM dump's header when
-   sending the file to the Super Wild Card, so this is important! You can also
-   try to rewrite the header while using one of the switches -hi or -nhi to
-   force uCON64 to handle it as a HiROM or a LoROM dump. Additionally you could
-   use one of the switches -hd, -nhd or -hdn to specify the backup unit header
-   size. For example:<br>
+   done that, check if the file is interleaved (look at the line that starts
+   with "Interleaved/Swapped:"). If the file is interleaved convert it to Super
+   Wild Card format (deinterleaved) by using the option -swc. Also verify that
+   the backup unit header is correct. The option -dbuh can be helpful with
+   that. You can make uCON64 rewrite the header also with -swc. uCON64 uses the
+   information in the ROM dump's header when sending the file to the Super Wild
+   Card, so this is important! You can also try to rewrite the header while
+   using one of the switches -hi or -nhi to force uCON64 to handle it as a
+   HiROM or a LoROM dump. Additionally you could use one of the switches -hd,
+   -nhd or -hdn to specify the backup unit header size. For example:<br>
    &nbsp;&nbsp; ucon64 -swc -nhi -hd "Batman Revenge of the Joker (U).swc"<br>
    There are many (good) ROMs on the internet with incorrect headers, so this
    might well solve the problem.<br>

@@ -795,8 +795,8 @@ ucon64_rom_handling (void)
   else if (S_ISREG (fstate.st_mode) != TRUE)
     no_rom = 1;
   else if (!fstate.st_size)
-    no_rom = 1; 
-    
+    no_rom = 1;
+
   if (no_rom)
     {
       if (!(ucon64.flags & WF_NO_ROM))
@@ -806,6 +806,11 @@ ucon64_rom_handling (void)
         }
       return 0;
     }
+
+  // the next two statements are important and should be executed as soon as
+  //  possible in this function
+  ucon64.file_size = q_fsize (ucon64.rom);
+  ucon64.crc32 = ucon64.fcrc32 = 0;
 
   // Does the option allow split ROMs?
   if (ucon64.flags & WF_NO_SPLIT)
@@ -817,9 +822,6 @@ ucon64_rom_handling (void)
 
   if (!(ucon64.flags & WF_INIT))
     return 0;
-
-  ucon64.file_size = q_fsize (ucon64.rom);
-  ucon64.crc32 = ucon64.fcrc32 = 0;
 
   // "walk through" <console>_init()
   if (ucon64.flags & WF_PROBE)
@@ -834,10 +836,10 @@ ucon64_rom_handling (void)
 
           if (UCON64_ISSET (ucon64.snes_hirom))
             rominfo.snes_hirom = ucon64.snes_hirom;
- 
+
           if (UCON64_ISSET (ucon64.interleaved))
             rominfo.interleaved = ucon64.interleaved;
-        
+
 //          ucon64.rominfo = (st_rominfo_t *) &rominfo;
         }
     }
@@ -846,7 +848,7 @@ ucon64_rom_handling (void)
 
   /*
     CRC32
-    
+
     Calculating the CRC32 checksum for the ROM data of a UNIF file (NES)
     shouldn't be done with q_fcrc32(). nes_init() uses crc32().
     The CRC32 checksum is used to search in the DAT files, but at the time

@@ -666,7 +666,7 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    &nbsp;&nbsp; af/bf XX 80 00 cf/df XX 80 40 f0<br>
    =&#62; af/bf XX 80 00 cf/df XX 80 40 80<br>
    Then you could search for the sequence \x80\x40\xf0. It's just a subset of
-   the search pattern with each element suffixed with "\x". Searching for
+   the search pattern with each element prefixed with "\x". Searching for
    \xaf/\xbf won't bring you far. Searching for \xXX\x80 neither. It takes a
    bit too much text to explain all the details, so just follow the directions.
    Note that I didn't advise to search for \x80\x40\x80, because that's what

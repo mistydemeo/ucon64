@@ -19,16 +19,29 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "misc.h"
-#include "ucon64.h"
+#include <stddef.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <time.h>
 #include <stdarg.h>                             // va_arg()
-#include <string.h>                             // strncpy(), strstr()
+
+#ifdef __MSDOS__
+  #include <conio.h>                              // getch()
+  #include <pc.h>                                 // kbhit()
+#endif
+
+#include "misc.h"
 
 #define MAXBUFSIZE 32768
 
 #if     defined __UNIX__ || defined __BEOS__
 #include <stdlib.h>                             // atexit()
-#include <unistd.h>                             // tcsetattr()
+//#include <unistd.h>                             // tcsetattr()
 #include <termios.h>
 
 typedef struct termios tty_t;
@@ -1051,7 +1064,11 @@ getchd (char *buffer, size_t buffer_size)
       strcat (homedir, getenv ("HOMEPATH"));
     }
   else
+#ifdef __MSDOS__
+    strcpy (homedir, "C:");
+#else
     getcwd (homedir, buffer_size);
+#endif // __MSDOS__
 
 #ifdef __CYGWIN__
   /*
@@ -1279,9 +1296,6 @@ kbhit (void)
 #else
   tty_t tmptty = newtty;
   int ch, key_pressed;
-
-  if (frontend)
-    return 0;
 
   tmptty.c_cc[VMIN] = 0;                        // doesn't work as expected under
   set_tty(tmptty);                              //   Cygwin (define USE_POLL)

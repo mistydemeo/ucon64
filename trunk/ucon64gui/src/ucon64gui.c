@@ -18,6 +18,19 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include <ctype.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include "misc.h"
+#include "ucon64.h"
+#include "html2gui/src/html2gui.h"
 #include "ucon64gui.h"
 #include "snes/snes.h"
 #include "n64/n64.h"
@@ -278,7 +291,65 @@ void
 ucon64gui_root (void)
 {
 #include "xpm/trans.xpm"
-#ifdef BACKUP_CD
+#ifdef BACKUP
+/*
+  h2g_input_submit ("Flash Advance Linker", "ucon64gui_fal",
+                    "options for Flash Advance Linker\n2001 Visoly http://www.visoly.com");
+  h2g_input_submit ("Doctor V64", "ucon64gui_doctor64",
+                    "options for Doctor V64\n19XX Bung Enterprises Ltd http://www.bung.com.hk");
+  h2g_input_submit ("Doctor64 Jr", "ucon64gui_doctor64jr",
+                    "options for Doctor64 Jr\n19XX Bung Enterprises Ltd http://www.bung.com.hk");
+  h2g_input_submit ("Super Wild Card", "ucon64gui_swc",
+                    "options for Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw");
+  h2g_input_submit ("Super Magic Drive", "ucon64gui_smd",
+                    "options for Super Com Pro (HK)/Super Magic Drive/SMD\n19XX Front Far East/FFE http://www.front.com.tw");
+  h2g_input_submit ("GameBoy Xchanger", "ucon64gui_gbx",
+                    "options for GameBoy Xchanger");
+
+*/
+  char *backup_unit_options[]={
+"Flash Advance Linker","Doctor V64","Doctor64 Jr","Super Wild Card", 
+"Super Magic Drive","GameBoy Xchanger",NULL
+};
+  char *backup_unit_values[]={
+"ucon64gui_fal","ucon64gui_doctor64","ucon64gui_doctor64jr",
+"ucon64gui_swc","ucon64gui_smd","ucon64gui_gbx",
+NULL
+};
+
+/*
+  h2g_input_submit ("PC-Engine", "ucon64gui_pce",
+                    "(-pce) options for PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))/Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)\n1987/19XX/19XX NEC");
+  h2g_input_submit ("Neo Geo", "ucon64gui_ng",
+                    "(-ng) options for Neo Geo/Neo Geo CD(Z)/MVS\n1990/1994 SNK http://www.neogeo.co.jp");
+  h2g_input_submit ("Neo Geo Pocket", "ucon64gui_ngp",
+                    "(-ngp) options for Neo Geo Pocket/Neo Geo Pocket Color\n1998/1999 SNK http://www.neogeo.co.jp");
+  h2g_input_submit ("WonderSwan", "ucon64gui_wswan",
+                    "(-swan) options for WonderSwan/WonderSwan Color\n19XX/19XX Bandai");
+  h2g_input_submit ("Real3DO", "ucon64gui_3do",
+                    "(-3do) options for Real3DO\n1993");
+  h2g_input_submit ("CD32", "ucon64gui_cd32",
+                    "(-cd32) options for CD32\n1993 Commodore");
+  h2g_input_submit ("CD-i", "ucon64gui_cdi",
+                    "(-cdi) options for CD-i\n1991");
+  h2g_input_submit ("Vectrex", "ucon64gui_vectrex",
+                    "(-vec) options for Vectrex\n1982");
+  h2g_input_submit ("ColecoVision", "ucon64gui_coleco",
+                    "(-coleco) options for ColecoVision\n1982");
+  h2g_input_submit ("Intellivision", "ucon64gui_intelli",
+                    "(-intelli) options for Intellivision\n1979 Mattel");
+*/
+  char *console_options[]={
+"PC-Engine","Neo Geo","Neo Geo Pocket","WonderSwan", "Real3DO","CD32","CD-i",
+"Vectrex","ColecoVision","Intellivision",NULL
+};
+  char *console_values[]={
+"ucon64gui_pce","ucon64gui_ng","ucon64gui_ngp","ucon64gui_wswan",
+"ucon64gui_3do","ucon64gui_cd32","ucon64gui_cdi","ucon64gui_vectrex","ucon64gui_coleco",
+"ucon64gui_intelli",NULL
+
+};
+
 #endif
 #include "xpm/icon.xpm"
 
@@ -340,6 +411,15 @@ ucon64gui_root (void)
   h2g_input_submit ("Jaguar", "ucon64gui_jag",
                     "(-jag) options for Panther(32bit prototype)/Jaguar64/Jaguar64 CD\n1989 Flare2/1993 Atari/1995 Atari");
 
+  h2g_br();
+  h2g_("Others: ");
+
+  h2g_select ("page", console_options, console_values, 0, 0,
+"Choose the desired console here"//\n"
+ );
+
+
+/*
   h2g_ (" ");
 
   h2g_input_submit ("PC-Engine", "ucon64gui_pce",
@@ -382,6 +462,7 @@ ucon64gui_root (void)
                     "(-intelli) options for Intellivision\n1979 Mattel");
 
   h2g_br ();
+*/
 
 #if defined BACKUP || defined BACKUP_CD
   h2g_img (trans_xpm, 0, 3, 0, NULL);
@@ -396,16 +477,23 @@ ucon64gui_root (void)
 #endif // BACKUP || BACKUP_CD
 
 #ifdef BACKUP_CD
+  h2g_ ("CD's: ");
+
   h2g_input_submit ("CD-Writer", "ucon64gui_cdrw",
 //  h2g_input_image ("CD-Writer", "ucon64gui_cdrw", ccd_xpm, 0, 0,
                     "options for CD-Writer\nhttp://cdrdao.sourceforge.net/ (recommended burn engine)");
 
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
 #endif // BACKUP_CD
 
 #ifdef BACKUP
+
+  h2g_ (" Cartridges: ");
+
+  h2g_select ("page", backup_unit_options, backup_unit_values, 0, 0,
+"Choose the desired backup unit here"//\n"
+ );
+
+/*
   h2g_input_submit ("Flash Advance Linker", "ucon64gui_fal",
                     "options for Flash Advance Linker\n2001 Visoly http://www.visoly.com");
   h2g_ (" ");
@@ -425,7 +513,7 @@ ucon64gui_root (void)
   h2g_ (" ");
   h2g_input_submit ("GameBoy Xchanger", "ucon64gui_gbx",
                     "options for GameBoy Xchanger");
-
+*/
 #endif // BACKUP
 
   ucon64gui_bottom ();

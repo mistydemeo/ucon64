@@ -21,10 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64GUI_H
 #define UCON64GUI_H
 
-#include "misc.h"
-#include "ucon64.h"
-#include "html2gui/src/html2gui.h"
-
 #define ucon64gui_TITLE "uCON64gui"
 
 #define ucon64gui_FORMTARGET "http://ucon64"

@@ -1,3 +1,14 @@
+#include <stddef.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <stdarg.h>                             // va_arg()
+#include "misc.h"
 #include "ucon64gui.h"
 #include "html2gui/src/html2gui.h"
 #include "bottom.h"

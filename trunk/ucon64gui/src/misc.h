@@ -22,22 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef MISC_H
 #define MISC_H
 
-#include <assert.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <unistd.h>
-
-#ifdef __MSDOS__
-#include <conio.h>                              // getch()
-#include <pc.h>                                 // kbhit()
-#endif
-
 #ifndef FALSE
 #define FALSE 0
 #endif

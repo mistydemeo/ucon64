@@ -409,7 +409,7 @@ set_sa1_map (unsigned short chunk)
 
   // map the 8 Mbit ROM chunk specified by chunk into the F0 bank
   ffe_send_command (5, 1, 0);
-  ffe_send_command0 (0x2223, chunk);            // $00:2223
+  ffe_send_command0 (0x2223, (unsigned char) chunk);            // $00:2223
   for (m = 0; m < 65536; m++)
     ;
 }
@@ -426,7 +426,7 @@ set_sdd1_map (unsigned short chunk)
 
   // map the 8 Mbit ROM chunk specified by chunk into the F0 bank
   ffe_send_command (5, 2, 0);
-  ffe_send_command0 (0x2807, chunk);            // $00:4807
+  ffe_send_command0 (0x2807, (unsigned char) chunk);            // $00:4807
   for (m = 0; m < 65536; m++)
     ;
 }

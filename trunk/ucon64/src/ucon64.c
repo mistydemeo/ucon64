@@ -256,7 +256,8 @@ static struct option long_options[] = {
     {"xv64", 0, 0, ucon64_XV64},
 #endif // BACKUP
     {"z64", 0, 0, ucon64_Z64},
-    {"hd", 1, 0, ucon64_HD},
+    {"hd", 0, 0, ucon64_HD},
+    {"hdn", 1, 0, ucon64_HDN},
     {"nhd", 0, 0, ucon64_NHD},
     {"int", 0, 0, ucon64_INT},
     {"int2", 0, 0, ucon64_INT2},
@@ -290,7 +291,7 @@ main (int argc, char *argv[])
 
   memset (&ucon64, 0L, sizeof (struct ucon64_));
 /*
-  if these values are != -1 before <console>_init() then --hd=n, --nhd, etc.
+  if these values are != -1 before <console>_init() then --hdn=n, --nhd, etc.
   were used...
 */
   ucon64.buheader_len =
@@ -335,9 +336,17 @@ main (int argc, char *argv[])
           break;
 
         case ucon64_HD:
+          ucon64.buheader_len = unknown_HEADER_LEN;
+          strcpy (rom.copier, unknown_title);
+          break;
+
+        case ucon64_HDN:
           ucon64.buheader_len = atoi (optarg);
+          strcpy (rom.copier, unknown_title);
+          break;
+
         case ucon64_NHD:
-//          rom.buheader_start = 0;
+          ucon64.buheader_len = 0;
           strcpy (rom.copier, unknown_title);
           break;
 
@@ -871,15 +880,17 @@ main (int argc, char *argv[])
 
 #ifdef BACKUP_CD
         case ucon64_XCDRW:
+#if 0
           switch (rom.console)
             {
-            case ucon64_DC:      //Dreamcast NOTE: CDI
+            case ucon64_DC:
               return dc_xcdrw (&rom);
   
             default:
+#endif
               return (!access (rom.rom, F_OK)) ? cdrw_write (&rom) :
                 cdrw_read (&rom);
-            }
+//            }
 #endif // BACKUP_CD
   
         case ucon64_DB:
@@ -1328,6 +1339,7 @@ main (int argc, char *argv[])
         case ucon64_INT:
         case ucon64_NINT:
         case ucon64_HD:
+        case ucon64_HDN:
         case ucon64_NHD:
         case ucon64_HI:
         case ucon64_NHI:
@@ -1388,6 +1400,8 @@ main (int argc, char *argv[])
 int
 ucon64_init (char *romfile, struct rom_ *rombuf)
 {
+  int result = 0;
+
   if (romfile == NULL)
 //  flush struct rombuf_
     {
@@ -1401,14 +1415,16 @@ ucon64_init (char *romfile, struct rom_ *rombuf)
 
   rombuf->bytes = quickftell (rombuf->rom);
 
-  ucon64_console_probe(rombuf);
+  result = ucon64_console_probe (rombuf);
+printf ("!!%d!!", result);
+fflush (stdout);
 
   if (rombuf->console == ucon64_UNKNOWN)
     {
        printf ("ERROR: could not auto detect the right ROM/console type\n"
                "TIP:   If this is a ROM you might try to force the recognition\n"
                "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n");
-       return -1;
+       result = -1;
     }
 
   if (ucon64.buheader_len != -1)
@@ -1442,7 +1458,7 @@ ucon64_init (char *romfile, struct rom_ *rombuf)
       ucon64_dbsearch (rombuf);
     }
 
-  return 0;
+  return result;
 }
 
 
@@ -1571,7 +1587,7 @@ ucon64_console_probe (struct rom_ *rombuf)
         if(rombuf->bytes <= MAXROMSIZE)
           rombuf->console =
             (!genesis_init (rombuf)) ? ucon64_GENESIS ://TODO correct defines assigned?
-            (!snes_init (rombuf)) ? ucon64_SNES :
+//            (!snes_init (rombuf)) ? ucon64_SNES :
             (!nintendo64_init (rombuf)) ? ucon64_N64 :
 //            (!gameboy_init (rombuf)) ? ucon64_GB :
             (!gbadvance_init (rombuf)) ? ucon64_GBA :
@@ -1601,7 +1617,16 @@ ucon64_console_probe (struct rom_ *rombuf)
             (!psx_init (rombuf)) ? ucon64_PSX :
             (!real3do_init (rombuf)) ? ucon64_REAL3DO :
             (!saturn_init (rombuf)) ? ucon64_SATURN : ucon64_UNKNOWN;
-
+if (rombuf->console == ucon64_UNKNOWN)
+{
+  printf ("SHIT");
+  fflush (stdout);
+}
+else
+{
+  printf ("NOSHIT");
+  fflush (stdout);
+}
             return (rombuf->console == ucon64_UNKNOWN) ? -1 : 0;
           
         default:
@@ -1984,9 +2009,10 @@ ucon64_usage (int argc, char *argv[])
 
   printf ("USAGE: %s [OPTION(S)] [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE]\n\n"
            "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
-           "  " OPTION_LONG_S "hd=BYTES    force ROM has backup unit/emulator header with BYTES size\n"
-           "TODO: " OPTION_LONG_S "hd=TYPE     force ROM has TYPE backup unit/emulator header:\n"
-           "                  FFE, SMC, FIG, SWC, SMD, SMG, SSC or LNX\n"
+           "  " OPTION_LONG_S "hdn=BYTES   force ROM has backup unit/emulator header with BYTES size\n"
+           "  " OPTION_LONG_S "hd          same as " OPTION_LONG_S "hdn=512\n"
+//           "TODO: " OPTION_LONG_S "hdn=TYPE     force ROM has TYPE backup unit/emulator header:\n"
+//           "                  FFE, SMC, FIG, SWC, SMD, SMG, SSC or LNX\n"
            "                  most backup units use a header with 512 Bytes size\n"
            "  " OPTION_LONG_S "nhd         force ROM has no backup unit/emulator header\n"
            "  " OPTION_LONG_S "stp         strip header from ROM; default size 512 Bytes\n"
@@ -1994,7 +2020,7 @@ ucon64_usage (int argc, char *argv[])
            "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
            "  " OPTION_LONG_S "int         force ROM is interleaved (2143)\n"
            "  " OPTION_LONG_S "nint        force ROM is not interleaved (1234)\n"
-           "  " OPTION_LONG_S "dint        convert ROM to (non-)interleaved format\n"
+           "  " OPTION_LONG_S "dint        convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
            "                  this differs from the Super Nintendo " OPTION_LONG_S "dint option\n"
            "  " OPTION_LONG_S "ns          force ROM is not splitted\n"
 #ifdef	__MSDOS__
@@ -2183,9 +2209,9 @@ ucon64_usage (int argc, char *argv[])
       printf ("%s\n%s\n%s\n%s\n%s\n%s\n"
               "  " OPTION_LONG_S "xbox, " OPTION_LONG_S "ps2, " OPTION_LONG_S "sat, " OPTION_LONG_S "3do, " OPTION_LONG_S "cd32, " OPTION_LONG_S "cdi\n"
               "                force recognition; NEEDED\n"
-//            "  " OPTION_LONG_S "iso         force image is ISO9660\n"
+//            "  " OPTION_LONG_S "iso         force image is MODE1/2048\n"
 //            "  " OPTION_LONG_S "raw         force image is MODE2_RAW/BIN\n"
-              "  " OPTION_LONG_S "iso         convert RAW/BIN to ISO9660; " OPTION_LONG_S "rom=RAW_IMAGE\n",
+              "  " OPTION_LONG_S "iso         convert RAW/BIN to MODE1/2048; " OPTION_LONG_S "rom=RAW_IMAGE\n",
               xbox_title,
               ps2_title, saturn_title, real3do_title, cd32_title,
               cdi_title);

@@ -26,6 +26,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_H
 #define UCON64_H
 
+/*
+  enables probing in <console>_init(), it's a good idea to leave this defined
+*/
+#define CONSOLE_PROBE
+
 enum
 {
   ucon64_1991 = 1,
@@ -79,6 +84,7 @@ enum
   ucon64_GP32,
   ucon64_H,
   ucon64_HD,
+  ucon64_HDN,
   ucon64_HELP,
   ucon64_HEX,
   ucon64_HI,
@@ -270,8 +276,10 @@ struct rom_
   char rom[FILENAME_MAX];               //rom (cmdline) with path
 
   long console;                 //integer for the detected console system
-  char title[4096];             //console system name
-  char copier[4096];            //name of backup unit
+//  char title[4096];             //console system name
+  char *title;
+//  char copier[4096];            //name of backup unit
+  char *copier;
   unsigned long bytes;          //size in bytes
   float mbit;                   //size in mbit
   int interleaved;              //rom is interleaved (swapped)

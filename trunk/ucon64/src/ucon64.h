@@ -89,6 +89,7 @@ struct ucon64_
   char file[4096];	//$FILE (cmdline) with path
   unsigned int parport;
 
+//  int is_a_cd_image;    //obsolete is_a_cd_image = (rom->bytes > MAXROMSIZE) ? 1 : 0;
 
   long console;	//integer for the detected console system
 //  long console_forced;

@@ -127,4 +127,6 @@ int parport_gauge(	time_t init_time
 			,long size
 );
 
+int raw2iso(char *filename);	//convert RAW (2352 Bytes/Sector) images to ISO9660 (2048 Bytes/Sector) images
+
 #endif                                          // #ifndef UCON64_MISC_H

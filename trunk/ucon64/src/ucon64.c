@@ -779,10 +779,11 @@ case ucon64_COLECO:
 case ucon64_INTELLI:
 break;
 
-#ifdef	CD
   case ucon64_DC:
     return(
       (argcmp(argc,argv,"-ip")) ? /* ip0000(char *dev,char *name) */ 0 :
+      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+/*  backup */
 #ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? dc_cdaot(&rom) :
       (argcmp(argc,argv,"-xcdao")) ? dc_xcdao(&rom) :
@@ -795,6 +796,8 @@ break;
 
   case ucon64_PSX:
     return(
+      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+/*  backup */
 #ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? psx_cdaot(&rom) :
       (argcmp(argc,argv,"-xcdao")) ? psx_xcdao(&rom) :
@@ -805,6 +808,8 @@ break;
 
   case ucon64_PS2:
     return(
+      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+/*  backup */
 #ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? ps2_cdaot(&rom) :
       (argcmp(argc,argv,"-xcdao")) ? ps2_xcdao(&rom) :
@@ -815,6 +820,8 @@ break;
 
   case ucon64_SATURN:
     return(
+      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+/*  backup */
 #ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? saturn_cdaot(&rom) :
       (argcmp(argc,argv,"-xcdao")) ? saturn_xcdao(&rom) :
@@ -825,6 +832,8 @@ break;
 
   case ucon64_CDI:
     return(
+      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+/*  backup */
 #ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? cdi_cdaot(&rom) :
       (argcmp(argc,argv,"-xcdao")) ? cdi_xcdao(&rom) :
@@ -835,6 +844,8 @@ break;
 
   case ucon64_CD32:
     return(
+      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+/*  backup */
 #ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? cd32_cdaot(&rom) :
       (argcmp(argc,argv,"-xcdao")) ? cd32_xcdao(&rom) :
@@ -845,6 +856,8 @@ break;
 
   case ucon64_REAL3DO:
     return(
+      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+/*  backup */
 #ifdef	CD
       (argcmp(argc,argv,"-cdaot")) ? real3do_cdaot(&rom) :
       (argcmp(argc,argv,"-xcdao")) ? real3do_xcdao(&rom) :
@@ -852,8 +865,6 @@ break;
       0
     );
   break;
-
-#endif
 
 case ucon64_UNKNOWN:
 default:
@@ -1213,8 +1224,8 @@ else if(argcmp(argc,argv,"-intelli"))intelli_usage(argc,argv);
 #endif
 else
 {
-#ifdef	CD
-  dc_usage(argc,argv);
+#ifdef CD
+//  dc_usage(argc,argv);
   psx_usage(argc,argv);
 /*
   ps2_usage(argc,argv);
@@ -1223,10 +1234,14 @@ else
   cd32_usage(argc,argv);
   cdi_usage(argc,argv);
 */
-  printf("%s\n%s\n%s\n%s\n%s\n"
-	"  -ps2, -sat, -3do, -cd32, -cdi\n"
-	"		force recognition; NEEDED"
-	"\n  *		show info (default); ONLY $ROM=RAW_IMAGE\n"
+  printf("%s\n%s\n%s\n%s\n%s\n%s\n"
+	"  -dc, -ps2, -sat, -3do, -cd32, -cdi\n"
+	"		force recognition; NEEDED\n"
+	"  -iso		force image is ISO9660 (2048 Bytes/Sector)\n"
+	"  -raw		force image is RAW (2352 Bytes/Sector)\n"
+	"  *		show info (default); ONLY $ROM=RAW_IMAGE\n"
+	"  -r2i		convert RAW to ISO9660; $ROM=RAW_IMAGE\n"
+  ,dc_TITLE
   ,ps2_TITLE
   ,saturn_TITLE
   ,real3do_TITLE
@@ -1237,9 +1252,9 @@ else
 //  ppf_usage( argc, argv );
 //  xps_usage( argc, argv );
 
-  #ifdef	BACKUP
-    cdrdao_usage(argc,argv);
-    cdrecord_usage(argc,argv);
+  #ifdef BACKUP
+//    cdrdao_usage(argc,argv);
+//    cdrecord_usage(argc,argv);
   #endif
   printf("\n");
 #endif
@@ -1311,6 +1326,15 @@ Intellivision (1979)
 G7400+/Odyssey² (1978)
 Channel F (1976)
 Odyssey (Ralph Baer/USA/1972)
+
+gametz.com
+gameaxe.com
+sys2064.com
+logiqx.com
+romcenter.com
+emuchina.net
+
+
 */
 }
 
@@ -1351,7 +1375,9 @@ char buf[4096];
     ,rom->bytes-rom->buheader_len
     ,rom->mbit
   );
-        
+
+if( rom->bytes <= MAXROMSIZE ) //if it is no CD image
+{        
   if(!rom->padded)printf("Padded: No\n");
   else if(rom->padded)printf("Padded: Maybe, %ld Bytes (%.4f Mb)\n",rom->padded,(float)rom->padded/MBIT);
 
@@ -1366,7 +1392,7 @@ if(rom->buheader_len)printf("Backup Unit Header: Yes, %ld Bytes\n"/* (use -nhd t
 //  if(!rom->splitted[0])printf("Splitted: No\n");
 //  else 
 if(rom->splitted[0])printf("Splitted: Yes, %d parts (recommended: use -j to join)\n",rom->splitted[0]);
-
+}
   if(rom->misc[0])printf("%s\n",rom->misc);
 
   if(rom->has_internal_crc)

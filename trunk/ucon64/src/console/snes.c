@@ -476,21 +476,31 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
 }
 
 
-// header format is specified in src/backup/smc.h
-int
-snes_smc (st_rominfo_t *rominfo)
+static int
+snes_ffe (st_rominfo_t *rominfo, char *ext, int smc)
 {
-  st_smc_header_t header;
+  st_swc_header_t header;
   int size;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
-  if (snes_hirom)
+  if (snes_hirom && smc)
     printf ("NOTE: This game might not work with a Super Magicom because it's HiROM\n");
 
-  memset (&header, 0, SMC_HEADER_LEN);
+  memset (&header, 0, SWC_HEADER_LEN);
   size = rominfo->file_size - rominfo->buheader_len;
   header.size_low = size / 8192;
   header.size_high = size / 8192 >> 8;
+
+  header.emulation = snes_split ? 0x40 : 0;
+  header.emulation |= snes_hirom ? 0x30 : 0;    // TODO: check if this is ok on an SMC
+  // bit 3 & 2 are already ok for 32 kB SRAM size
+  if (snes_sramsize == 8 * 1024)
+    header.emulation |= 0x04;
+  else if (snes_sramsize == 2 * 1024)
+    header.emulation |= 0x08;
+  else if (snes_sramsize == 0)
+    header.emulation |= 0x0c;
+
   header.id1 = 0xaa;
   header.id2 = 0xbb;
   header.type = 4;
@@ -498,15 +508,31 @@ snes_smc (st_rominfo_t *rominfo)
   set_nsrt_info (rominfo, &header);
 
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".SMC");
+  setext (dest_name, ext);
   strcpy (src_name, ucon64.rom);
   handle_existing_file (dest_name, src_name);
-  q_fwrite (&header, 0, SMC_HEADER_LEN, dest_name, "wb");
+  q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
   q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
   ucon64_wrote (dest_name);
   remove_temp_file ();
 
   return 0;
+}
+
+
+// header format is specified in src/backup/smc.h
+int
+snes_smc (st_rominfo_t *rominfo)
+{
+  return snes_ffe (rominfo, ".SMC", 1);
+}
+
+
+// header format is specified in src/backup/swc.h
+int
+snes_swc (st_rominfo_t *rominfo)
+{
+  return snes_ffe (rominfo, ".SWC", 0);
 }
 
 
@@ -571,48 +597,6 @@ snes_fig (st_rominfo_t *rominfo)
   strcpy (src_name, ucon64.rom);
   handle_existing_file (dest_name, src_name);
   q_fwrite (&header, 0, FIG_HEADER_LEN, dest_name, "wb");
-  q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
-  ucon64_wrote (dest_name);
-  remove_temp_file ();
-
-  return 0;
-}
-
-
-// header format is specified in src/backup/swc.h
-int
-snes_swc (st_rominfo_t *rominfo)
-{
-  st_swc_header_t header;
-  int size;
-  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-
-  memset (&header, 0, SWC_HEADER_LEN);
-  size = rominfo->file_size - rominfo->buheader_len;
-  header.size_low = size / 8192;
-  header.size_high = size / 8192 >> 8;
-
-  header.emulation = snes_split ? 0x40 : 0;
-  header.emulation |= snes_hirom ? 0x30 : 0;
-  // bit 3 & 2 are already ok for 32 kB SRAM size
-  if (snes_sramsize == 8 * 1024)
-    header.emulation |= 0x04;
-  else if (snes_sramsize == 2 * 1024)
-    header.emulation |= 0x08;
-  else if (snes_sramsize == 0)
-    header.emulation |= 0x0c;
-
-  header.id1 = 0xaa;
-  header.id2 = 0xbb;
-  header.type = 4;
-
-  set_nsrt_info (rominfo, &header);
-
-  strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".SWC");
-  strcpy (src_name, ucon64.rom);
-  handle_existing_file (dest_name, src_name);
-  q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
   q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
   ucon64_wrote (dest_name);
   remove_temp_file ();
@@ -1762,28 +1746,27 @@ snes_init (st_rominfo_t *rominfo)
     type = SWC;
   else if (!strncmp ((char *) &header, "GAME DOCTOR SF 3", 0x10))
     type = GD3;
-  else if (rominfo->buheader_len == 0 && x == 0xffff)
-    type = MGD;
-  else if (rominfo->buheader_len != 0 &&
-            ((header.hirom == 0x80 &&            // HiROM
-              ((header.emulation1 == 0x77 && header.emulation2 == 0x83) ||
-               (header.emulation1 == 0xdd && header.emulation2 == 0x82) ||
-               (header.emulation1 == 0xdd && header.emulation2 == 0x02) ||
-               (header.emulation1 == 0xf7 && header.emulation2 == 0x83) ||
-               (header.emulation1 == 0xfd && header.emulation2 == 0x82)))
+  else if ((header.hirom == 0x80 &&            // HiROM
+             ((header.emulation1 == 0x77 && header.emulation2 == 0x83) ||
+              (header.emulation1 == 0xdd && header.emulation2 == 0x82) ||
+              (header.emulation1 == 0xdd && header.emulation2 == 0x02) ||
+              (header.emulation1 == 0xf7 && header.emulation2 == 0x83) ||
+              (header.emulation1 == 0xfd && header.emulation2 == 0x82)))
             ||
-            (header.hirom == 0x00 &&            // LoROM
-              ((header.emulation1 == 0x77 && header.emulation2 == 0x83) ||
-               (header.emulation1 == 0x00 && header.emulation2 == 0x80) ||
+           (header.hirom == 0x00 &&            // LoROM
+             ((header.emulation1 == 0x77 && header.emulation2 == 0x83) ||
+              (header.emulation1 == 0x00 && header.emulation2 == 0x80) ||
 #if 1
-               // This makes NES FFE ROMs & GameBoy ROMs be detected as SNES
-               //  ROMs, see src/console/nes.c & src/console/gb.c
-               (header.emulation1 == 0x00 && header.emulation2 == 0x00) ||
+              // This makes NES FFE ROMs & GameBoy ROMs be detected as SNES
+              //  ROMs, see src/console/nes.c & src/console/gb.c
+              (header.emulation1 == 0x00 && header.emulation2 == 0x00) ||
 #endif
-               (header.emulation1 == 0x47 && header.emulation2 == 0x83) ||
-               (header.emulation1 == 0x11 && header.emulation2 == 0x02))))
+              (header.emulation1 == 0x47 && header.emulation2 == 0x83) ||
+              (header.emulation1 == 0x11 && header.emulation2 == 0x02)))
           )
     type = FIG;
+  else if (rominfo->buheader_len == 0 && x == 0xffff)
+    type = MGD;
   else if (rominfo->buheader_len != 0 && x == 0xffff)
     type = SMC;
 

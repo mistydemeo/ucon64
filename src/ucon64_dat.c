@@ -287,8 +287,6 @@ line_to_dat (const char *dat_entry, ucon64_dat_t * dat)
   if (dat_field[5])
     sscanf (dat_field[5], "%x", &dat->current_crc32);
       
-  dat->console = (uint8_t) ucon64.console;  // important
-
   if (dat_field[3])
     strcpy (dat->name, dat_field[3]);
 
@@ -299,7 +297,6 @@ line_to_dat (const char *dat_entry, ucon64_dat_t * dat)
     strcpy (dat->fname, dat_field[4]);
 
   p = dat->name;
-  
   sprintf (buf2, 
     "%s%s%s%s%s%s%s%s%s%s",
     (strstr (p, "[a]") ? "Alternate, " : ""),
@@ -313,8 +310,13 @@ line_to_dat (const char *dat_entry, ucon64_dat_t * dat)
     (strstr (p, "[o]") ? "Overdump, " : ""),
     (strstr (p, "[!]") ? "Verified Good Dump, " : ""));
   if (buf2[0])
-    sprintf (dat->misc, "Flags: %s", buf2);
+    {
+      if ((p = strrchr (buf2, ','))) 
+        *p = 0;
+      sprintf (dat->misc, "Flags: %s", buf2);
+    }
 
+  p = dat->name; 
   dat->country = NULL;
   for (pos = 0; dat_country[pos]; pos++)
     {
@@ -327,7 +329,9 @@ line_to_dat (const char *dat_entry, ucon64_dat_t * dat)
         }
     }
 
-  dat->console = UCON64_UNKNOWN;
+  dat->console = (uint8_t) ucon64.console;  // important
+
+//  dat->console = UCON64_UNKNOWN;
 
   return dat;
 }
@@ -550,6 +554,7 @@ ucon64_dat_indexer (void)
          if (!(pos % 20)) ucon64_gauge (start_time, ftell (fdat), size);
          pos++;
        }
+     ucon64_gauge (start_time, ftell (fdat), size);
      fprintf (stdout, "\n\n");
      fclose (fh);
    }

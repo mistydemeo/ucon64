@@ -545,7 +545,7 @@ n64_chksum (st_rominfo_t *rominfo)
 {
   char readchunk3[MAXBUFSIZE];
   unsigned long i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,
-                rlen = (rominfo->file_size - rominfo->buheader_len) - CHECKSUM_START,
+                rlen = (ucon64.file_size - rominfo->buheader_len) - CHECKSUM_START,
                 sum1, sum2;
   unsigned int n;
   FILE *fh;

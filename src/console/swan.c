@@ -50,7 +50,7 @@ typedef struct st_swan_header
 {
   char pad[10];
 } st_swan_header_t;
-#define SWAN_HEADER_START (rominfo->file_size - 10)
+#define SWAN_HEADER_START (ucon64.file_size - 10)
 #define SWAN_HEADER_LEN (sizeof (st_swan_header_t))
 
 st_swan_header_t swan_header;
@@ -146,12 +146,12 @@ Byte6 - Additional capabilities(?)
 10 - ?? (SUN003)
 */
 
-  if (!(rom_buffer = (unsigned char *) malloc (rominfo->file_size)))
+  if (!(rom_buffer = (unsigned char *) malloc (ucon64.file_size)))
     {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rominfo->file_size);
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], ucon64.file_size);
       return -1;
     }
-  q_fread (rom_buffer, 0, rominfo->file_size, ucon64.rom);
+  q_fread (rom_buffer, 0, ucon64.file_size, ucon64.rom);
 
   rominfo->has_internal_crc = 1;
   rominfo->internal_crc_len = rominfo->internal_crc2_len = 2;
@@ -181,10 +181,10 @@ swan_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer)
   int t;
   unsigned char *ptr;
 
-  if (rominfo->file_size % 4)
+  if (ucon64.file_size % 4)
     return -1;
 
-  t = rominfo->file_size - 3;
+  t = ucon64.file_size - 3;
   ptr = rom_buffer;
   while (t >= 0)
     {

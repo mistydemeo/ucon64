@@ -1893,12 +1893,6 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   /*
     Special case hell
 
-    0xfa83b519: Mortal Kombat (Beta) doesn't have an internal header...
-    By coincidence no special if statement is needed for the interleaved dump
-
-    0x65485afb: Super Aleste (J) [t1] has its header overwritten with the
-    trainer. The CRC is the same as for Super Aleste (J) (1st 512 bytes)
-
     0x9b4638d0: Street Fighter Alpha 2 (E/U) {[b1]}, Street Fighter Zero 2 (J)
     These games have two nearly identical headers which can't be used to
     determine whether the dump is interleaved or not.
@@ -1948,25 +1942,26 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     These are also not special cases (not: HiROM map type byte + LoROM game).
     GoodSNES - 0.999.5 for RC 2.5.dat simply contains bugs.
 
+    0xfa83b519: Mortal Kombat (Beta)
     0xf3aa1eca: Power Piggs of the Dark Age (Pre-Release) {[h1]}
+    0x65485afb: Super Aleste (J) {[t1]} <= header == trainer
     0xaad23842/0x5ee74558: Super Wild Card DX DOS ROM V1.122/interleaved
     0x422c95c4: Time Slip (Beta)
+    0x7a44bd18: Total Football (E)(NG-Dump Known)
     0xf0bf8d7c/0x92180571: Utyu no Kishi Tekkaman Blade (Beta) {[h1]}/interleaved
     0x8e1933d0: Wesley Orangee Hotel (PD)
     0xe2b95725/0x9ca5ed58: Zool (Sample Cart)/interleaved
     These games/dumps have garbage in their header
-
-    0x7a44bd18: Total Football (E)(NG-Dump Known)
-    Garbage in header, but not a special case
   */
-  if (crc == 0xfa83b519 || crc == 0x9b161d4d || crc == 0xf3aa1eca ||
-      crc == 0xaad23842 || crc == 0x89d09a77 || crc == 0xd3095af3 ||
-      crc == 0x6910700a || crc == 0x447df9d5 || crc == 0x422c95c4 ||
-      crc == 0xf0bf8d7c || crc == 0x8e1933d0 || crc == 0xf423997a ||
-      crc == 0xe2b95725 || crc == 0x02f401df || crc == 0xc3194ad7)
+  if (crc == 0xc3194ad7 || crc == 0x89d09a77 || crc == 0xd3095af3 ||
+      crc == 0x9b161d4d || crc == 0x6910700a || crc == 0x447df9d5 ||
+      crc == 0x02f401df || crc == 0xf423997a || crc == 0xfa83b519 ||
+      crc == 0xf3aa1eca || crc == 0xaad23842 || crc == 0x422c95c4 ||
+      crc == 0x7a44bd18 || crc == 0xf0bf8d7c || crc == 0x8e1933d0 ||
+      crc == 0xe2b95725)
     check_map_type = 0;                         // not interleaved
-  else if (crc == 0x65485afb || crc == 0x9b4638d0 || crc == 0x7039388a ||
-           crc == 0xdbc88ebf || crc == 0x5ee74558 || crc == 0x92180571 ||
+  else if (crc == 0x9b4638d0 || crc == 0x7039388a || crc == 0xdbc88ebf ||
+           crc == 0x65485afb || crc == 0x5ee74558 || crc == 0x92180571 ||
            crc == 0x9ca5ed58)
     {
       interleaved = 1;

@@ -42,6 +42,18 @@ typedef struct
   char **argv;
 
   const char *rom;                              // ROM (cmdline) with path
+  int file_size;                                // (uncompressed) ROM file size
+  unsigned int crc32;                           // current crc32 value of ROM
+#define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
+#define UCON64_TYPE_ISDISC(x) (x == UCON64_DISC)
+  int type;                                     // ROM type ROM or CD image
+
+/*
+  if console == UCON64_UNKNOWN or st_rominfo_t == NULL ucon64_rom_nfo() won't
+  be shown
+*/
+  int console;                                  // the detected console system
+
   const char *file;                             // file (cmdline) with path
 
   char configfile[FILENAME_MAX];                // path and name of the config file
@@ -49,13 +61,12 @@ typedef struct
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
   char discmage_path[FILENAME_MAX];             // path to the discmage DLL
 
-#ifdef  ANSI_COLOR
-  int ansi_color;
-#endif
-
   unsigned int parport;                         // parallel port address
   int parport_mode;                             // parallel port mode: ECP, EPP, SPP, other
 
+#ifdef  ANSI_COLOR
+  int ansi_color;
+#endif
   int backup;                                   // flag if backups files should be created
   int frontend;                                 // flag if uCON64 was started by a frontend
   int discmage_enabled;                         // flag if discmage DLL is loaded
@@ -63,7 +74,6 @@ typedef struct
 
   int show_nfo;                                 // show or skip info output for ROM
 
-  int console;                                  // the detected console system
   int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
 
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
@@ -89,14 +99,20 @@ typedef struct
   const char *mapr;                             // NES UNIF board name or iNES mapper number
   int use_dump_info;                            // NES UNIF
   const char *comment;                          // NES UNIF
-
-#define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
-#define UCON64_TYPE_ISCD(x) (x == UCON64_CD)
-  int type;                                     // ROM type ROM or CD image
 } st_ucon64_t;
 
 extern st_ucon64_t ucon64;
 
+/*
+  this struct contains very specific informations only <console>_init() can
+  supply after the correct console type was identified
+  
+  dbjh: file_size and current_crc32 are not console specific and were moved
+        to st_ucon64_t
+        
+  if all <console>_init()'s faild just ucon64_flush() this and ucon64_rom_nfo()
+  won't be shown..
+*/
 typedef struct
 {
   const char **console_usage;                   // console system usage
@@ -104,8 +120,8 @@ typedef struct
 
   int interleaved;                              // ROM is interleaved (swapped)
   int snes_hirom;                               // SNES ROM is HiROM
+
   int data_size;                                // ROM data size without "red tape"
-  int file_size;                                // (uncompressed) ROM file size
 
   int buheader_start;                           // start of backup unit header (mostly 0)
   int buheader_len;                             // length of backup unit header 0 == no bu hdr
@@ -120,8 +136,6 @@ typedef struct
   const char *country;                          // country name of the ROM
   char misc[MAXBUFSIZE];                        // some miscellaneous information
                                                 //  about the ROM in one single string
-  unsigned int current_crc32;                   // current crc32 value of ROM
-
   int has_internal_crc;                         // ROM has internal checksum (SNES, Mega Drive, Game Boy)
   unsigned int current_internal_crc;            // calculated checksum
 

@@ -100,6 +100,7 @@ write programs in C
 static void ucon64_exit (void);
 static void ucon64_usage (int argc, char *argv[]);
 static int ucon64_execute_options (void);
+static void ucon64_rom_nfo (const st_rominfo_t *rominfo);
 
 st_ucon64_t ucon64;
 static st_rominfo_t rom;
@@ -122,7 +123,7 @@ const struct option options[] = {
     {"bios", 0, 0, UCON64_BIOS},
     {"bot", 0, 0, UCON64_BOT},
     {"c", 0, 0, UCON64_C},
-    {"cd", 0, 0, UCON64_CD},
+    {"disc", 0, 0, UCON64_DISC},
 //    {"cd32", 0, 0, UCON64_CD32},
 //    {"cdi", 0, 0, UCON64_CDI},
     {"cdirip", 0, 0, UCON64_CDIRIP},
@@ -179,7 +180,7 @@ const struct option options[] = {
     {"lnx", 0, 0, UCON64_LNX},
     {"logo", 0, 0, UCON64_LOGO},
     {"ls", 0, 0, UCON64_LS},
-    {"lsdat", 0, 0, UCON64_LSDAT},
+    {"lsd", 0, 0, UCON64_LSD},
     {"lsv", 0, 0, UCON64_LSV},
     {"lynx", 0, 0, UCON64_LYNX},
     {"lyx", 0, 0, UCON64_LYX},
@@ -559,7 +560,8 @@ main (int argc, char **argv)
       ucon64.console = console;
 
       ucon64.show_nfo = show_nfo;
-      if (!ucon64_init (ucon64.rom, &rom))
+//      if (!ucon64_init (ucon64.rom, &rom))
+      ucon64_init (ucon64.rom, &rom);
         if (ucon64.show_nfo == UCON64_YES)
           ucon64_nfo (&rom);
 
@@ -568,8 +570,11 @@ main (int argc, char **argv)
       ucon64_execute_options ();
 
       if (ucon64.show_nfo == UCON64_YES)
-        if (!ucon64_init (ucon64.rom, &rom))
+        {
+//          if (!ucon64_init (ucon64.rom, &rom))
+          ucon64_init (ucon64.rom, &rom);
           ucon64_nfo (&rom);
+        }
 
       /*
         Some options take more than one file as argument, but should be
@@ -623,7 +628,7 @@ ucon64_flush (st_rominfo_t *rominfo)
 {
   memset (rominfo, 0L, sizeof (st_rominfo_t));
   rominfo->data_size = UCON64_UNKNOWN;
-  rominfo->file_size = ucon64_fsize;
+  ucon64.file_size = ucon64_fsize;
 #if 0
   rominfo->maker = rominfo->country = "";
   rominfo->console_usage = rominfo->copier_usage = NULL;
@@ -772,22 +777,20 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   ucon64_flush (rominfo); // clear rominfo
 
   ucon64_fsize = q_fsize (ucon64.rom);          // save size in ucon64_fsize
-  rominfo->file_size = ucon64_fsize;
+  ucon64.file_size = ucon64_fsize;
 
 //  what media type? do not calc crc32 and stuff for DISC images (speed!)
-  ucon64.type = UCON64_ROM;
+  ucon64.type = (ucon64.file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_DISC;
 
   if (ucon64.discmage_enabled)
     {
 #if 0
       image = dm_open (ucon64.rom);
-      ucon64.type = (image ? UCON64_CD : UCON64_ROM);
+      ucon64.type = (image ? UCON64_DISC : UCON64_ROM);
       dm_close (image);
 #endif      
+      image = NULL;
     }
-
-  if (UCON64_TYPE_ISROM (ucon64.type))
-    ucon64.type = (rominfo->file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
 
   if (UCON64_TYPE_ISROM (ucon64.type))
     {
@@ -795,13 +798,13 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 
       // Calculating the CRC for the ROM data of a UNIF file (NES) shouldn't
       //  be done with q_fcrc32(). nes_init() uses mem_crc32().
-      if (rominfo->current_crc32 == 0)
-        rominfo->current_crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
+      if (ucon64.crc32 == 0)
+        ucon64.crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
 
       if (ucon64.dat_enabled)
         {
           memset (&dat, 0, sizeof (ucon64_dat_t));
-          ucon64_dat = ucon64_dat_search (rominfo->current_crc32, &dat);
+          ucon64_dat = ucon64_dat_search (ucon64.crc32, &dat);
         }
       else
         ucon64_dat = NULL;
@@ -827,12 +830,13 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
             break;
         }
     }
-  else if (UCON64_TYPE_ISCD (ucon64.type))
+  else if (UCON64_TYPE_ISDISC (ucon64.type))
     {
 #if 0
 #endif
       result = -1;
     }
+
   return result;
 }
 
@@ -840,17 +844,56 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 int
 ucon64_nfo (const st_rominfo_t *rominfo)
 {
+  printf ("%s\n\n", ucon64.rom);
+
+  if (ucon64.console == UCON64_UNKNOWN)
+    {
+      fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+      printf ("\n");
+    }
+
+  if (UCON64_TYPE_ISDISC (ucon64.type))
+    {
+//      if (ucon64.discmage_enabled)
+//        dm_image_nfo (image);
+    }
+  else if (UCON64_TYPE_ISROM (ucon64.type))
+    {        
+      if (rominfo && ucon64.console != UCON64_UNKNOWN)
+        ucon64_rom_nfo (rominfo);
+    }
+
+  if (ucon64.crc32)
+    printf ("Checksum (CRC32): 0x%08x\n", ucon64.crc32);
+
+  if (ucon64.dat_enabled)
+    ucon64_dat_nfo (ucon64_dat);
+
+  printf ("\n");
+
+  return 0;
+}
+
+
+void
+ucon64_rom_nfo (const st_rominfo_t *rominfo)
+{
+  unsigned int padded = ucon64_testpad (ucon64.rom, (st_rominfo_t *) rominfo);
+  unsigned int intro = ((ucon64.file_size - rominfo->buheader_len) > MBIT) ?
+    ((ucon64.file_size - rominfo->buheader_len) % MBIT) : 0;
+  int split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
+    ucon64_testsplit (ucon64.rom);
   char buf[MAXBUFSIZE];
   int x;
 
-  printf ("%s\n\n", ucon64.rom);
-
+// backup unit header
   if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != SWC_HEADER_LEN)
     {
       mem_hexdump (rominfo->buheader, rominfo->buheader_len, rominfo->buheader_start);
       printf ("\n");
     }
 
+// backup unit type?
   if (rominfo->copier_usage != NULL)
     {
       strcpy (buf, rominfo->copier_usage[0]);
@@ -866,6 +909,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
       printf ("\n");
     }
 
+// ROM header
   if (rominfo->header && rominfo->header_len)
     {
       mem_hexdump (rominfo->header, rominfo->header_len,
@@ -873,6 +917,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
       printf ("\n");
     }
 
+// console type?
   if (rominfo->console_usage != NULL)
     {
       strcpy (buf, rominfo->console_usage[0]);
@@ -887,10 +932,11 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 #endif
     }
 
+// maker, country and size
   strcpy (buf, NULL_TO_EMPTY (rominfo->name));
   x = UCON64_ISSET (rominfo->data_size) ?
     rominfo->data_size :
-    rominfo->file_size - rominfo->buheader_len;
+    ucon64.file_size - rominfo->buheader_len;
   printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
           // some ROMs have a name with control chars in it -> replace control chars
           mkprint (buf, '.'),
@@ -899,28 +945,20 @@ ucon64_nfo (const st_rominfo_t *rominfo)
           x,
           TOMBIT_F (x));
 
-  if (UCON64_TYPE_ISCD (ucon64.type))
-    {
-//   toc header,track mode, etc.
-    }
-  else if (UCON64_TYPE_ISROM (ucon64.type))
-    {
-      unsigned int padded = ucon64_testpad (ucon64.rom, (st_rominfo_t *) rominfo);
-      unsigned int intro = ((rominfo->file_size - rominfo->buheader_len) > MBIT) ?
-        ((rominfo->file_size - rominfo->buheader_len) % MBIT) : 0;
-      int split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
-        ucon64_testsplit (ucon64.rom);
 
+// padded?
       if (!padded)
         printf ("Padded: No\n");
       else
         printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n", padded,
                 TOMBIT_F (padded));
 
+// intro, trainer?
       // nes.c determines itself whether or not there is a trainer
       if (intro && ucon64.console != UCON64_NES)
         printf ("Intro/Trainer: Maybe, %d Bytes\n", intro);
 
+// interleaved?
       if (rominfo->interleaved != UCON64_UNKNOWN)
         // printing this is handy for SNES, N64 & Genesis ROMs, but maybe
         //  nonsense for others
@@ -931,6 +969,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
               "Yes") :
             "No");
 
+// backup unit header?
       if (rominfo->buheader_len)
         printf ("Backup unit/emulator header: Yes, %d Bytes\n",
           rominfo->buheader_len);
@@ -939,6 +978,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
         printf ("Backup unit/emulator header: No\n"); // printing No is handy for SNES ROMs
 // for NoisyB: <read only mode OFF>
 
+// split?
       if (split)
         {
           printf ("Split: Yes, %d part%s\n", split, (split != 1) ? "s" : "");
@@ -947,16 +987,16 @@ ucon64_nfo (const st_rominfo_t *rominfo)
           if (ucon64.console != UCON64_NES)
             printf ("NOTE: to get the correct checksum the ROM must be joined\n");
         }
-    }
 
+
+// miscellaneous info
   if (rominfo->misc[0])
     {
       strcpy (buf, rominfo->misc);
       printf ("%s\n", mkprint (buf, '.'));
     }
 
-  if (UCON64_TYPE_ISROM (ucon64.type))
-    {
+// internal checksums?
       if (rominfo->has_internal_crc)
         {
           char *fstr;
@@ -991,21 +1031,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
             }
         }
 
-      if (ucon64.dat_enabled)
-        ucon64_dat_nfo (ucon64_dat);
-
-      if (rominfo->current_crc32)
-        printf ("Checksum (CRC32): 0x%08x\n", rominfo->current_crc32);
-
-      printf ("\n");
-
-      if (ucon64.console == UCON64_UNKNOWN)
-        fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
-    }
-
   fflush (stdout);
-
-  return 0;
 }
 
 
@@ -1048,18 +1074,14 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "dint        convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
     "                  this differs from the SNES & NES " OPTION_LONG_S "dint option\n"
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
-#ifdef  __MSDOS__
     "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
-#else
-    "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
-#endif
     "  " OPTION_LONG_S "crc         show CRC32 value of ROM\n"
     "  " OPTION_LONG_S "dbs         search ROM database (all entries) by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
     "  " OPTION_LONG_S "db          ROM database statistics (# of entries)\n"
     "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
-    "TODO:  " OPTION_LONG_S "lsdat  like " OPTION_LONG_S "ls but uses only DAT files as source\n"
+    "  " OPTION_LONG_S "lsd         like " OPTION_LONG_S "ls but uses only DAT info; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
     "                  this is often used by people who lose control of their ROMs\n"
     "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"

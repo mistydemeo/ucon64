@@ -49,9 +49,9 @@ Q19: <a href="#19">How do I specify a bank number for the GB Xchanger?</a><br>
 Q20: <a href="#20">What's the difference between the Flash Advance Linker options -xfals and -xfalb&#60;n&#62;?</a><br>
 <br>
 Q21: <a href="#21">uCON64 exits with the message "Flash cart erase failed!" when I try
-   to write a multirom to my 128Mb flash card. What's wrong?</a><br>
+   to write a multirom to my flash card. What's wrong?</a><br>
 <br>
-Q22: <a href="#21">Q22: Where can I get that loader or "game pack" file?</a><br>
+Q22: <a href="#22">Q22: Where can I get that loader or "game pack" file?</a><br>
 <br>
 <br>
 <br>
@@ -246,11 +246,12 @@ A: When saving -xfals saves all 256kB while -xfalb&#60;n&#62; saves only the 64k
 <br>
 <br>
 <a name="21">Q21: uCON64 exits with the message "Flash cart erase failed!" when I try
-   to write a multirom to my 128Mb flash card. What's wrong?</a><br>
-A: The multirom file you created is too large for your flash card. This is caused by the loader
-   or "game pack" file which also needs some space (32kB) on the flash card. Use -multi2 to create
-   a multirom that is truncated to 128Mb (16MB). Note that uCON64 always truncates multirom files
-   to 256Mb (32MB).<br>
+   to write a multirom to my flash card. What's wrong?</a><br>
+A: The multirom file you created is too large for your flash card. When you make a multirom
+   file don't forget that the loader or "game pack" file also needs some space (32kB) on the
+   flash card. Use -multi1 or -multi2 to create a multirom that is truncated to 64Mb (8MB) or
+   128Mb (16MB) respectively. Note that uCON64 always truncates multirom files to 256Mb
+   (32MB).<br>
 <br>
 <br>
 <a name="22">Q22: Where can I get that loader or "game pack" file?</a><br>

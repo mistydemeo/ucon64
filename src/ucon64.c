@@ -74,7 +74,7 @@ int main(int argc,char *argv[])
     ucon64_usage(argc,argv);
     return 0;
   }
-
+/*
 if(argcmp(argc, argv, "-sh"))
 {
 //TODO shell modus
@@ -99,7 +99,7 @@ if(argcmp(argc, argv, "-sh"))
 	}
 	return(0);
 }
-
+*/
   return(ucon64_main(argc,argv));
 }
 

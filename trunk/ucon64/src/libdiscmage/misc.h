@@ -224,7 +224,7 @@ extern int kbhit (void);                        // may only be used after init_c
 
 #elif   defined AMIGA
 extern int kbhit (void);
-#define getch           getchar
+//#define getch           getchar             //gonna use my fake one. might work better and more like the real getch()
 #endif
 
 #ifdef  __CYGWIN__

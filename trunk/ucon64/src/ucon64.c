@@ -374,6 +374,9 @@ main (int argc, char **argv)
   ucon64.comment = "";
 
   getcwd (ucon64.output_path, FILENAME_MAX); // default output path
+  if (OFFSET (ucon64.output_path, strlen (ucon64.output_path) - 1)
+        != FILE_SEPARATOR)
+  strcat (ucon64.output_path, FILE_SEPARATOR_S);
 
   sscanf (get_property (ucon64.configfile, "parport", buf2, "0x378"), "%x", &ucon64.parport);
 

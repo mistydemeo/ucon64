@@ -138,7 +138,7 @@ AREA, because it is located after the patch data!
 */
 
 
-// based on sourcecode of ApplyPPF v2.0 for Linux/Unix by Icarus/Paradox
+// based on source code of ApplyPPF v2.0 for Linux/Unix by Icarus/Paradox
 int
 ppf_apply (const char *modname, const char *ppfname)
 {
@@ -225,7 +225,7 @@ ppf_apply (const char *modname, const char *ppfname)
       fseek (ppffile, 56, SEEK_SET);
       fread (&x, 4, 1, ppffile);
 #ifdef  WORDS_BIGENDIAN
-      x = bswap_32 (len);                       // file size is stored in little-endian format
+      x = bswap_32 (x);                         // file size is stored in little-endian format
 #endif
       modlen = q_fsize (modname);
       if (x != modlen)
@@ -433,6 +433,7 @@ ppf_set_desc (const char *ppfname, const char *description)
   strncpy (desc, description, strlen (description));
   handle_existing_file (ppfname, NULL);
   q_fwrite (desc, 6, 50, ppfname, "r+b");
+  fprintf (stdout, ucon64_msg[WROTE], ppfname);
 
   return 0;
 }

@@ -206,7 +206,7 @@ const struct option options[] =   {
     {"n2", 1, 0, UCON64_N2},
     {"n2gb", 1, 0, UCON64_N2GB},
     {"n64", 0, 0, UCON64_N64},
-    {"na", 0, 0, UCON64_NA},
+    {"na", 1, 0, UCON64_NA},
     {"nbak", 0, 0, UCON64_NBAK},
     {"ncol", 0, 0, UCON64_NCOL},
     {"nrgrip", 0, 0, UCON64_NRGRIP},
@@ -984,11 +984,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   // backup unit type?
   if (rominfo->copier_usage != NULL)
     {
-// TODO: Dirk, you shouldn't use st_usage_t for copier info...
-      if (rominfo->copier_usage[0].desc != NULL)
-        strcpy (buf, rominfo->copier_usage[0].desc);
-      else
-        strcpy (buf, rominfo->copier_usage[0].optarg);
+      strcpy (buf, rominfo->copier_usage[0].desc);
       printf ("%s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
@@ -1012,11 +1008,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   // console type
   if (rominfo->console_usage != NULL)
     {
-// TODO: Dirk, you shouldn't use st_usage_t for copier info...
-      if (rominfo->console_usage[0].desc != NULL)
-        strcpy (buf, rominfo->console_usage[0].desc);
-      else
-        strcpy (buf, rominfo->console_usage[0].optarg);
+      strcpy (buf, rominfo->console_usage[0].desc);
       printf ("%s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0

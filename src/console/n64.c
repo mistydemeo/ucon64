@@ -320,10 +320,9 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
 int
 n64_usms (st_rominfo_t *rominfo, const char *smsrom)
 {
-  char *usmsbuf, buf[FILENAME_MAX];
-
   if (!access (smsrom, F_OK))
     {
+      char *usmsbuf, dest_name[FILENAME_MAX];
       long size = q_fsize (smsrom);
       // must be smaller than 4 Mbit, 524288 bytes will be inserted
       //  from 1b410 to 9b40f (7ffff)
@@ -340,15 +339,18 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
       if (rominfo->interleaved != 0)
         mem_swap (usmsbuf, size);
 
-      handle_existing_file ("patched.v64", NULL);
+      strcpy (dest_name, "patched.v64");
+      handle_existing_file (dest_name, NULL);
       q_fwrite (usmsbuf, N64_HEADER_START + rominfo->buheader_len + 0x01b410,
-        size, "patched.v64", "r+b");
-      fprintf (stdout, ucon64_msg[WROTE], "patched.v64");
+        size, dest_name, "r+b");
+      fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
       free (usmsbuf);
     }
   else
     {
+      char buf[FILENAME_MAX];
+
       strcpy (buf, ucon64.rom);
       set_suffix (buf, ".GG");
       handle_existing_file (buf, NULL);

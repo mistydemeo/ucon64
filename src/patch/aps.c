@@ -1,9 +1,9 @@
 /*
 aps.c - APS support for uCON64
 
-written by 1998 - Silo / BlackBag
+written by        1998 Silo / BlackBag
            1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2002 dbjh
+           2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -33,8 +33,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc.h"
 #include "quick_io.h"
 #include "ucon64.h"
+#include "ucon64_misc.h"
 #include "aps.h"
 
+
+#define N64APS_DESCRIPTION_LEN 50
+#define N64APS_BUFFERSIZE 255
+#define N64APS_MAGICLENGTH 5
 
 const st_usage_t aps_usage[] =
   {
@@ -43,649 +48,488 @@ const st_usage_t aps_usage[] =
     {"na", "DESC", "change APS single line DESCRIPTION"},
     {NULL, NULL, NULL}
   };
-  
-/* Apply an APS (Advanced Patch System) File for N64 Images
- * (C)1998 Silo / BlackBag
- *
- * Version 1.2 981217
- */
 
-#ifndef n64aps_TRUE
-#define n64aps_TRUE  1
-#define n64aps_FALSE !n64aps_TRUE
+char n64aps_magic[] = "APS10";
+unsigned char n64aps_patchtype = 1, n64aps_encodingmethod = 0;
+FILE *n64aps_apsfile, *n64aps_orgfile, *n64aps_modfile;
+int n64aps_changefound;
+
+
+static void
+readstdheader (void)
+{
+  char magic[N64APS_MAGICLENGTH], description[N64APS_DESCRIPTION_LEN + 1];
+
+  fread (magic, 1, N64APS_MAGICLENGTH, n64aps_apsfile);
+  if (strncmp (magic, n64aps_magic, N64APS_MAGICLENGTH) != 0)
+    {
+      fprintf (stderr, "ERROR: Not a valid APS file\n");
+      fclose (n64aps_modfile);
+      fclose (n64aps_apsfile);
+      exit (1);
+    }
+  n64aps_patchtype = fgetc (n64aps_apsfile);
+  if (n64aps_patchtype != 1)                    // N64 patch
+    {
+      fprintf (stderr, "ERROR: Unable to process patch file\n");
+      fclose (n64aps_modfile);
+      fclose (n64aps_apsfile);
+      exit (1);
+    }
+  n64aps_encodingmethod = fgetc (n64aps_apsfile);
+  if (n64aps_encodingmethod != 0)               // simple encoding
+    {
+      fprintf (stderr, "ERROR: Unknown or new encoding method\n");
+      fclose (n64aps_modfile);
+      fclose (n64aps_apsfile);
+      exit (1);
+    }
+
+  memset (description, ' ', N64APS_DESCRIPTION_LEN);
+  fread (description, 1, N64APS_DESCRIPTION_LEN, n64aps_apsfile);
+  description[N64APS_DESCRIPTION_LEN] = 0;
+  printf ("Description: %s\n", description);
+}
+
+
+static void
+readN64header ()
+{
+  unsigned int n64aps_magictest;
+  unsigned char buffer[8], APSbuffer[8], cartid[2], temp, teritory, APSteritory;
+
+  fseek (n64aps_modfile, 0, SEEK_SET);
+  fread (&n64aps_magictest, 4, 1, n64aps_modfile);
+#ifdef  WORDS_BIGENDIAN
+  n64aps_magictest = bswap_32 (n64aps_magictest);
 #endif
+  buffer[0] = fgetc (n64aps_apsfile);           // APS format
+  if (((n64aps_magictest == 0x12408037) && (buffer[0] == 1)) ||
+      ((n64aps_magictest != 0x12408037 && (buffer[0] == 0))))
+      // 0 for Doctor format, 1 for everything else
+    {
+      fprintf (stderr, "ERROR: Image is in the wrong format\n");
+      fclose (n64aps_modfile);
+      fclose (n64aps_apsfile);
+      exit (1);
+    }
 
-#define n64aps_MESSAGE   "\nN64APS v1.2 (BETA) Build 981217\n"
-#define n64aps_COPYRIGHT "(C)1998 Silo/BlackBag (Silo@BlackBag.org)\n\n"
+  fseek (n64aps_modfile, 60, SEEK_SET);         // cart id
+  fread (cartid, 1, 2, n64aps_modfile);
+  fread (buffer, 1, 2, n64aps_apsfile);
+  if (n64aps_magictest == 0x12408037)
+    {
+      temp = cartid[0];
+      cartid[0] = cartid[1];
+      cartid[1] = temp;
+    }
+  if ((buffer[0] != cartid[0]) || (buffer[1] != cartid[1]))
+    {
+      fprintf (stderr, "ERROR: This patch does not belong to this image\n");
+      fclose (n64aps_modfile);
+      fclose (n64aps_apsfile);
+      exit (1);
+    }
 
-#define n64aps_BUFFERSIZE 255
-
-char n64aps_Magic[] = "APS10";
-#define n64aps_MagicLength 5
-
-#define n64aps_TYPE_N64 1
-unsigned char n64aps_PatchType = n64aps_TYPE_N64;
-
-#define n64aps_DESCRIPTION_LEN 50
-
-#define n64aps_ENCODINGMETHOD 0 // Very Simplistic Method
-
-unsigned char n64aps_EncodingMethod = n64aps_ENCODINGMETHOD;
-
-FILE *n64aps_APSFile, *n64aps_ORGFile, *n64aps_NEWFile;
-int n64aps_Quiet = n64aps_FALSE;
-
-
-void
-n64aps_syntax (void)
-{
-/*
-  printf ("%s", n64aps_MESSAGE);
-  printf ("%s", n64aps_COPYRIGHT);
-  printf ("N64APS <options> <Original File> <APS File>\n");
-  printf (" -f                 : Force Patching Over Incorrect Image\n");
-  printf (" -q                 : Quiet Mode\n");
-*/
-  fflush (stdout);
-}
-
-
-int
-n64aps_CheckFile (char *Filename, char *mode)
-{
-  FILE *fp;
-
-  fp = fopen (Filename, mode);
-  if (fp == NULL)
-    return n64aps_FALSE;
+  if (n64aps_magictest == 0x12408037)
+    fseek (n64aps_modfile, 63, SEEK_SET);       // teritory
   else
+    fseek (n64aps_modfile, 62, SEEK_SET);
+
+  teritory = fgetc (n64aps_modfile);
+  APSteritory = fgetc (n64aps_apsfile);
+  if (teritory != APSteritory)
     {
-      fclose (fp);
-      if (mode[0] == 'w')
-        unlink (Filename);
-      return n64aps_TRUE;
-    }
-}
-
-
-void
-ReadStdHeader ()
-{
-  char an64aps_Magic[n64aps_MagicLength], Description[n64aps_DESCRIPTION_LEN + 1];
-
-  fread (an64aps_Magic, 1, n64aps_MagicLength, n64aps_APSFile);
-  if (strncmp (an64aps_Magic, n64aps_Magic, n64aps_MagicLength) != 0)
-    {
-      printf ("Not a Valid Patch File\n");
-      fclose (n64aps_ORGFile);
-      fclose (n64aps_APSFile);
-      exit (1);
-    }
-  fread (&n64aps_PatchType, sizeof (n64aps_PatchType), 1, n64aps_APSFile);
-  if (n64aps_PatchType != 1)    // N64 Patch
-    {
-      printf ("Unable to Process Patch File\n");
-      fclose (n64aps_ORGFile);
-      fclose (n64aps_APSFile);
-      exit (1);
-    }
-  fread (&n64aps_EncodingMethod, sizeof (n64aps_EncodingMethod), 1, n64aps_APSFile);
-  if (n64aps_EncodingMethod != 0)       // Simple Encoding
-    {
-      printf ("Unknown or New Encoding Method\n");
-      fclose (n64aps_ORGFile);
-      fclose (n64aps_APSFile);
-      exit (1);
-    }
-
-  fread (Description, 1, n64aps_DESCRIPTION_LEN, n64aps_APSFile);
-  Description[n64aps_DESCRIPTION_LEN] = 0;
-  if (!n64aps_Quiet)
-    {
-      printf ("Description : %s\n", Description);
-      fflush (stdout);
-    }
-}
-
-
-void
-ReadN64Header (int Force)
-{
-  unsigned long n64aps_MagicTest;
-  unsigned char Buffer[8], APSBuffer[8], CartID[2], Temp, Teritory,
-                APSTeritory, APSFormat;
-  int c;
-
-
-  fseek (n64aps_ORGFile, 0, SEEK_SET);
-  fread (&n64aps_MagicTest, sizeof (n64aps_MagicTest), 1, n64aps_ORGFile);
-  fread (Buffer, 1, 1, n64aps_APSFile);
-  APSFormat = Buffer[0];
-
-  if (((n64aps_MagicTest == 0x12408037) && (Buffer[0] == 1)) || ((n64aps_MagicTest != 0x12408037 && (Buffer[0] == 0)))) // 0 for Doctor Format, 1 for Everything Else
-    {
-      printf ("Image is in the wrong format\n");
-      fclose (n64aps_ORGFile);
-      fclose (n64aps_APSFile);
-      exit (1);
-    }
-
-  fseek (n64aps_ORGFile, 60, SEEK_SET); // Cart ID
-  fread (CartID, 1, 2, n64aps_ORGFile);
-  fread (Buffer, 1, 2, n64aps_APSFile);
-  if (n64aps_MagicTest == 0x12408037)   // Doc
-    {
-      Temp = CartID[0];
-      CartID[0] = CartID[1];
-      CartID[1] = Temp;
-    }
-  if ((Buffer[0] != CartID[0]) || (Buffer[1] != CartID[1]))
-    {
-      printf ("Not the Same Image\n");
-      fclose (n64aps_ORGFile);
-      fclose (n64aps_APSFile);
-      exit (1);
-    }
-
-  if (n64aps_MagicTest == 0x12408037)
-    fseek (n64aps_ORGFile, 63, SEEK_SET);       // Teritory
-  else
-    fseek (n64aps_ORGFile, 62, SEEK_SET);
-
-  fread (&Teritory, sizeof (Teritory), 1, n64aps_ORGFile);
-  fread (&APSTeritory, sizeof (APSTeritory), 1, n64aps_APSFile);
-  if (Teritory != APSTeritory)
-    {
-      printf ("Wrong Country\n");
-      if (!Force)
+      printf ("WARNING: Wrong country\n");
+#if 0
+      if (!force)
         {
-          fclose (n64aps_ORGFile);
-          fclose (n64aps_APSFile);
+          fclose (n64aps_modfile);
+          fclose (n64aps_apsfile);
           exit (1);
         }
+#endif
     }
 
-  fseek (n64aps_ORGFile, 0x10, SEEK_SET);       // CRC Header Position
-  fread (Buffer, 1, 8, n64aps_ORGFile);
-  fread (APSBuffer, 1, 8, n64aps_APSFile);
-
-  if (n64aps_MagicTest == 0x12408037)   // Doc
+  fseek (n64aps_modfile, 16, SEEK_SET);       // CRC header position
+  fread (buffer, 1, 8, n64aps_modfile);
+  fread (APSbuffer, 1, 8, n64aps_apsfile);
+  if (n64aps_magictest == 0x12408037)
     {
-      Temp = Buffer[0];
-      Buffer[0] = Buffer[1];
-      Buffer[1] = Temp;
-      Temp = Buffer[2];
-      Buffer[2] = Buffer[3];
-      Buffer[3] = Temp;
-      Temp = Buffer[4];
-      Buffer[4] = Buffer[5];
-      Buffer[5] = Temp;
-      Temp = Buffer[6];
-      Buffer[6] = Buffer[7];
-      Buffer[7] = Temp;
+      temp = buffer[0];
+      buffer[0] = buffer[1];
+      buffer[1] = temp;
+      temp = buffer[2];
+      buffer[2] = buffer[3];
+      buffer[3] = temp;
+      temp = buffer[4];
+      buffer[4] = buffer[5];
+      buffer[5] = temp;
+      temp = buffer[6];
+      buffer[6] = buffer[7];
+      buffer[7] = temp;
     }
-
-  if ((APSBuffer[0] != Buffer[0]) || (APSBuffer[1] != Buffer[1]) ||
-      (APSBuffer[2] != Buffer[2]) || (APSBuffer[3] != Buffer[3]) ||
-      (APSBuffer[4] != Buffer[4]) || (APSBuffer[5] != Buffer[5]) ||
-      (APSBuffer[6] != Buffer[6]) || (APSBuffer[7] != Buffer[7]))
+  if (memcmp (APSbuffer, buffer, 8))
     {
-      if (!n64aps_Quiet)
+      printf ("WARNING: Incorrect image\n");
+#if 0
+      if (!force)
         {
-          printf ("Incorrect Image\n");
-          fflush (stdout);
-        }
-      if (!Force)
-        {
-          fclose (n64aps_ORGFile);
-          fclose (n64aps_APSFile);
+          fclose (n64aps_modfile);
+          fclose (n64aps_apsfile);
           exit (1);
         }
+#endif
     }
 
-  fseek (n64aps_ORGFile, 0, SEEK_SET);
-
-  c = fgetc (n64aps_APSFile);
-  c = fgetc (n64aps_APSFile);
-  c = fgetc (n64aps_APSFile);
-  c = fgetc (n64aps_APSFile);
-  c = fgetc (n64aps_APSFile);
+  fseek (n64aps_apsfile, 5, SEEK_CUR);
+  fseek (n64aps_modfile, 0, SEEK_SET);
 }
 
 
-void
-ReadSizeHeader (char *File1)
+static void
+readsizeheader (int modsize)
 {
-  long OrigSize, APSOrigSize, i;
-  unsigned char t;
+  int orgsize, i;
 
-  OrigSize = q_fsize (File1);
-  fread (&APSOrigSize, sizeof (APSOrigSize), 1, n64aps_APSFile);
-
-  if (OrigSize != APSOrigSize)  // Do File Resize
+  fread (&orgsize, 4, 1, n64aps_apsfile);
+#ifdef  WORDS_BIGENDIAN
+  orgsize = bswap_32 (orgsize);
+#endif
+  if (modsize != orgsize)                       // resize file
     {
-      if (APSOrigSize < OrigSize)
+      if (orgsize < modsize)
         {
-          if (ftruncate (fileno (n64aps_ORGFile), APSOrigSize) != 0)
-            printf ("Trunacte Failed\n");
-          fflush (n64aps_ORGFile);
+          if (ftruncate (fileno (n64aps_modfile), orgsize) != 0)
+            fprintf (stderr, "ERROR: Truncate failed\n");
+          fflush (n64aps_modfile);
         }
       else
         {
-          t = 0;
-          for (i = 0; i < (APSOrigSize - OrigSize); i++)
-            fputc (t, n64aps_ORGFile);
+          fseek (n64aps_modfile, 0, SEEK_END);
+          for (i = 0; i < (orgsize - modsize); i++)
+            fputc (0, n64aps_modfile);
         }
     }
-//  fseek (n64aps_ORGFile, 0, SEEK_SET);
+//  fseek (n64aps_modfile, 0, SEEK_SET);
 }
 
 
-void
-ReadPatch ()
+static void
+readpatch (void)
 {
-  int APSReadLen, Finished = n64aps_FALSE;
-  unsigned char Buffer[256], Size;
-  long Offset;
+  int APSreadlen, offset;
+  unsigned char buffer[N64APS_BUFFERSIZE], size;
 
-  while (!Finished)
+  while ((APSreadlen = fread (&offset, 1, 4, n64aps_apsfile)))
     {
-      APSReadLen = fread (&Offset, sizeof (Offset), 1, n64aps_APSFile);
-      if (APSReadLen == 0)
+#ifdef  WORDS_BIGENDIAN
+      offset = bswap_32 (offset);
+#endif
+      if ((size = fgetc (n64aps_apsfile)))
         {
-          Finished = n64aps_TRUE;
+          fread (buffer, 1, size, n64aps_apsfile);
+          if ((fseek (n64aps_modfile, offset, SEEK_SET)) != 0)
+            {
+              fprintf (stderr, "ERROR: Seek failed\n");
+              exit (1);
+            }
+          fwrite (buffer, 1, size, n64aps_modfile);
         }
-      else
+      else // apply an RLE block
         {
-          fread (&Size, sizeof (Size), 1, n64aps_APSFile);
-          if (Size != 0)
+          unsigned char data, len;
+          int i;
+
+          data = fgetc (n64aps_apsfile),
+          len = fgetc (n64aps_apsfile);
+
+          if ((fseek (n64aps_modfile, offset, SEEK_SET)) != 0)
             {
-              fread (Buffer, 1, Size, n64aps_APSFile);
-              if ((fseek (n64aps_ORGFile, Offset, SEEK_SET)) != 0)
-                {
-                  printf ("Seek Failed\n");
-                  fflush (stdout);
-                  exit (1);
-                }
-              fwrite (Buffer, 1, Size, n64aps_ORGFile);
+              fprintf (stderr, "ERROR: Seek failed\n");
+              exit (1);
             }
-          else
-            {
-              unsigned char data, len;
-              int i;
-
-              fread (&data, sizeof (data), 1, n64aps_APSFile);
-              fread (&len, sizeof (data), 1, n64aps_APSFile);
-
-              if ((fseek (n64aps_ORGFile, Offset, SEEK_SET)) != 0)
-                {
-                  printf ("Seek Failed\n");
-                  fflush (stdout);
-                  exit (1);
-                }
-
-              for (i = 0; i < len; i++)
-                fputc (data, n64aps_ORGFile);
-            }
+          for (i = 0; i < len; i++)
+            fputc (data, n64aps_modfile);
         }
     }
 }
 
 
+// based on source code (version 1.2 981217) by Silo / BlackBag
 int
-n64aps_main (int argc, const char *argv[])
+aps_apply (const char *modname, const char *apsname)
 {
-  char File1[FILENAME_MAX], File2[FILENAME_MAX];
-  int Force = n64aps_TRUE;
+  handle_existing_file (modname, NULL);
 
-  strcpy (File1, argv[2]);
-  strcpy (File2, argv[3]);
-
-  if (!n64aps_CheckFile (File1, "rb+"))
-    return 1;
-  if (!n64aps_CheckFile (File2, "rb"))
-    return 1;
-
-  n64aps_ORGFile = fopen (File1, "rb+");
-  n64aps_APSFile = fopen (File2, "rb");
-
-  if (!n64aps_Quiet)
+  if ((n64aps_modfile = fopen (modname, "rb+")) == NULL)
     {
-//              printf ("%s", n64aps_MESSAGE);
-//              printf ("%s", n64aps_COPYRIGHT);
-      fflush (stdout);
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], modname);
+      return -1;
+    }
+  if ((n64aps_apsfile = fopen (apsname, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], apsname);
+      return -1;
     }
 
-  ReadStdHeader ();
-  ReadN64Header (Force);
-  ReadSizeHeader (File1);
+  readstdheader ();
+  readN64header ();
+  readsizeheader (q_fsize (modname));
 
-  ReadPatch ();
+  readpatch ();
 
-//      fclose (n64aps_NEWFile);
-  fclose (n64aps_ORGFile);
-  fclose (n64aps_APSFile);
+  fclose (n64aps_modfile);
+  fclose (n64aps_apsfile);
+  printf (ucon64_msg[WROTE], modname);
 
   return 0;
 }
 
 
-/* Create APS (Advanced Patch System) for N64 Images
- * (C)1998 Silo / BlackBag
- *
- * Version 1.2 981217
- */
+static int
+n64caps_checkfile (FILE *file, const char *filename)
+{
+  unsigned int n64aps_magictest;
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-#ifndef n64caps_TRUE
-#define n64caps_TRUE  1
-#define n64caps_FALSE !n64caps_TRUE
+  fread (&n64aps_magictest, 4, 1, file);
+#ifdef  WORDS_BIGENDIAN
+  n64aps_magictest = bswap_32 (n64aps_magictest);
 #endif
 
-#define n64caps_MESSAGE   "\nN64CAPS v1.2 (BETA) Build 981217\n"
-#define n64caps_COPYRIGHT "(C)1998 Silo/BlackBag (Silo@BlackBag.org)\n\n"
-
-#define n64caps_BUFFERSIZE 255
-
-char n64caps_Magic[] = "APS10";
-#define n64caps_MagicLength 5
-
-#define n64caps_TYPE_N64 1
-unsigned char n64caps_PatchType = n64caps_TYPE_N64;
-
-#define n64caps_DESCRIPTION_LEN 50
-#define n64caps_ENCODINGMETHOD 0        // Very Simplistic Method
-
-unsigned char n64caps_EncodingMethod = n64caps_ENCODINGMETHOD;
-FILE *n64caps_APSFile, *n64caps_ORGFile, *n64caps_NEWFile;
-int n64caps_Quiet = n64caps_FALSE, n64caps_ChangeFound;
+  if (n64aps_magictest != 0x12408037 && n64aps_magictest != 0x40123780)
+    {
+      fprintf (stderr, "ERROR: %s is an invalid N64 image\n", filename);
+      return FALSE;
+    }
+  else
+    return TRUE;
+}
 
 
-void
-n64caps_syntax (void)
+static void
+writestdheader (void)
 {
-/*
-  printf ("%s", n64caps_MESSAGE);
-  printf ("%s", n64caps_COPYRIGHT);
-  printf ("N64CAPS <options> <Original File> <Modified File> <Output APS File>\n");
-  printf (" -d %c<Image Title>%c : Description\n", 34, 34);
-  printf (" -q                 : Quiet Mode\n");
-*/
+  char description[N64APS_DESCRIPTION_LEN];
+
+  fwrite (n64aps_magic, 1, N64APS_MAGICLENGTH, n64aps_apsfile);
+  fputc (n64aps_patchtype, n64aps_apsfile);
+  fputc (n64aps_encodingmethod, n64aps_apsfile);
+
+  memset (description, ' ', N64APS_DESCRIPTION_LEN);
+  fwrite (description, 1, N64APS_DESCRIPTION_LEN, n64aps_apsfile);
+}
+
+
+static void
+writeN64header ()
+{
+  unsigned int n64aps_magictest;
+  unsigned char buffer[8], teritory, cartid[2], temp;
+
+  fread (&n64aps_magictest, 4, 1, n64aps_orgfile);
+#ifdef  WORDS_BIGENDIAN
+  n64aps_magictest = bswap_32 (n64aps_magictest);
+#endif
+
+  if (n64aps_magictest == 0x12408037)           // 0 for Doctor format, 1 for everything else
+    fputc (0, n64aps_apsfile);
+  else
+    fputc (1, n64aps_apsfile);
+
+  fseek (n64aps_orgfile, 60, SEEK_SET);
+  fread (cartid, 1, 2, n64aps_orgfile);
+  if (n64aps_magictest == 0x12408037)
+    {
+      temp = cartid[0];
+      cartid[0] = cartid[1];
+      cartid[1] = temp;
+    }
+  fwrite (cartid, 1, 2, n64aps_apsfile);
+
+  if (n64aps_magictest == 0x12408037)
+    fseek (n64aps_orgfile, 63, SEEK_SET);
+  else
+    fseek (n64aps_orgfile, 62, SEEK_SET);
+  teritory = fgetc (n64aps_orgfile);
+  fputc (teritory, n64aps_apsfile);
+
+  fseek (n64aps_orgfile, 0x10, SEEK_SET);       // CRC header position
+  fread (buffer, 1, 8, n64aps_orgfile);
+
+  if (n64aps_magictest == 0x12408037)
+    {
+      temp = buffer[0];
+      buffer[0] = buffer[1];
+      buffer[1] = temp;
+      temp = buffer[2];
+      buffer[2] = buffer[3];
+      buffer[3] = temp;
+      temp = buffer[4];
+      buffer[4] = buffer[5];
+      buffer[5] = temp;
+      temp = buffer[6];
+      buffer[6] = buffer[7];
+      buffer[7] = temp;
+    }
+
+  fwrite (buffer, 1, 8, n64aps_apsfile);
+  fputc (0, n64aps_apsfile);   // pad
+  fputc (0, n64aps_apsfile);
+  fputc (0, n64aps_apsfile);
+  fputc (0, n64aps_apsfile);
+  fputc (0, n64aps_apsfile);
+
+  fseek (n64aps_orgfile, 0, SEEK_SET);
+}
+
+
+static void
+writesizeheader (int orgsize, int newsize)
+{
+  if (orgsize != newsize)
+    n64aps_changefound = TRUE;
+
+#ifdef  WORDS_BIGENDIAN
+  newsize = bswap_32 (newsize);
+#endif
+  fwrite (&newsize, 4, 1, n64aps_apsfile);
+}
+
+
+static void
+writepatch (void)
+// currently RLE is not supported
+{
+  int orgreadlen, newreadlen, filepos, changedstart = 0, changedoffset = 0,
+      i, changedlen = 0, changefound = 0;
+  unsigned char orgbuffer[N64APS_BUFFERSIZE], newbuffer[N64APS_BUFFERSIZE];
+
+  fseek (n64aps_orgfile, 0, SEEK_SET);
+  fseek (n64aps_modfile, 0, SEEK_SET);
+
+  filepos = 0;
+  while ((newreadlen = fread (newbuffer, 1, N64APS_BUFFERSIZE, n64aps_modfile)))
+    {
+      orgreadlen = fread (orgbuffer, 1, N64APS_BUFFERSIZE, n64aps_orgfile);
+      for (i = orgreadlen; i < newreadlen; i++)
+        orgbuffer[i] = 0;
+
+      for (i = 0; i < newreadlen; i++)
+        {
+          if (newbuffer[i] != orgbuffer[i])
+            {
+              if (!changefound)
+                {
+                  changedstart = filepos + i;
+                  changedoffset = i;
+                  changedlen = 0;
+                  changefound = TRUE;
+                  n64aps_changefound = TRUE;
+                }
+              changedlen++;
+            }
+          else if (changefound)
+            {
+#ifdef  WORDS_BIGENDIAN
+              changedstart = bswap_32 (changedstart);
+#endif
+              fwrite (&changedstart, 4, 1, n64aps_apsfile);
+              fputc (changedlen, n64aps_apsfile);
+              fwrite (newbuffer + changedoffset, 1, changedlen, n64aps_apsfile);
+              changefound = FALSE;
+            }
+        }
+
+      if (changefound)
+        {
+#ifdef  WORDS_BIGENDIAN
+          changedstart = bswap_32 (changedstart);
+#endif
+          fwrite (&changedstart, 4, 1, n64aps_apsfile);
+          fputc (changedlen, n64aps_apsfile);
+          fwrite (newbuffer + changedoffset, 1, changedlen, n64aps_apsfile);
+          changefound = FALSE;
+        }
+
+      filepos += newreadlen;
+    }
+}
+
+
+// based on source code (version 1.2 981217) by Silo / BlackBag
+int
+aps_create (const char *orgname, const char *modname)
+{
+  char apsname[FILENAME_MAX];
+
+  if ((n64aps_orgfile = fopen (orgname, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], orgname);
+      return -1;
+    }
+  if ((n64aps_modfile = fopen (modname, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], modname);
+      fclose (n64aps_orgfile);
+      return -1;
+    }
+  strcpy (apsname, orgname);
+  set_suffix (apsname, ".APS");
+  handle_existing_file (apsname, NULL);
+  if ((n64aps_apsfile = fopen (apsname, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], apsname);
+      fclose (n64aps_modfile);
+      fclose (n64aps_orgfile);
+      return -1;
+    }
+
+  if (!n64caps_checkfile (n64aps_orgfile, orgname) ||
+      !n64caps_checkfile (n64aps_modfile, modname))
+    {
+      fclose (n64aps_orgfile);
+      fclose (n64aps_modfile);
+      return -1;
+    }
+
+  n64aps_changefound = FALSE;
+
+  writestdheader ();
+  writeN64header ();
+  writesizeheader (q_fsize (orgname), q_fsize (modname));
+
+  printf ("Finding changes...");
   fflush (stdout);
+  writepatch ();
+  printf (" Done\n");
+
+  fclose (n64aps_modfile);
+  fclose (n64aps_orgfile);
+  fclose (n64aps_apsfile);
+
+  if (!n64aps_changefound)
+    {
+      printf ("No changes found\n");
+      remove (apsname);
+    }
+  else
+    printf (ucon64_msg[WROTE], apsname);
+
+  return 0;
 }
 
 
 int
-n64caps_CheckFile (char *Filename, char *mode, int Image)
+aps_set_desc (const char *apsname, const char *description)
 {
-  FILE *fp;
-  unsigned long n64caps_MagicTest;
+  char desc[50];
 
-  fp = fopen (Filename, mode);
-  if (fp == NULL)
-    return n64caps_FALSE;
-  else
-    {
-      if (Image)
-        {
-          fread (&n64caps_MagicTest, sizeof (n64caps_MagicTest), 1, fp);
-
-          fclose (fp);
-          if (mode[0] == 'w')
-            unlink (Filename);
-
-          if (n64caps_MagicTest != 0x12408037 && n64caps_MagicTest != 0x40123780)       // Invalid Image
-            {
-              if (!n64caps_Quiet)
-                {
-                  printf ("%s is an Invalid Image\n", Filename);
-                  fflush (stdout);
-                }
-              return n64caps_FALSE;
-            }
-          return n64caps_TRUE;
-        }
-    }
-  return n64caps_TRUE;
-}
-
-
-void
-WriteStdHeader (char *Desc)
-{
-  char Description[n64caps_DESCRIPTION_LEN];
-
-  fwrite (n64caps_Magic, 1, n64caps_MagicLength, n64caps_APSFile);
-  fwrite (&n64caps_PatchType, sizeof (n64caps_PatchType), 1, n64caps_APSFile);
-  fwrite (&n64caps_EncodingMethod, sizeof (n64caps_EncodingMethod), 1,
-          n64caps_APSFile);
-
-  memset (Description, ' ', n64caps_DESCRIPTION_LEN);
-  strcpy (Description, Desc);
-  Description[strlen (Desc)] = ' ';
-
-  fwrite (Description, 1, n64caps_DESCRIPTION_LEN, n64caps_APSFile);
-
-}
-
-
-void
-WriteN64Header ()
-{
-  unsigned long n64caps_MagicTest;
-  unsigned char Buffer[8], Teritory, CartID[2], Temp;
-
-  fread (&n64caps_MagicTest, sizeof (n64caps_MagicTest), 1, n64caps_ORGFile);
-
-  if (n64caps_MagicTest == 0x12408037)  // 0 for Doctor Format, 1 for Everything Else
-    fputc (0, n64caps_APSFile);
-  else
-    fputc (1, n64caps_APSFile);
-
-  fseek (n64caps_ORGFile, 60, SEEK_SET);
-  fread (CartID, 1, 2, n64caps_ORGFile);
-  if (n64caps_MagicTest == 0x12408037)  // Doc
-    {
-      Temp = CartID[0];
-      CartID[0] = CartID[1];
-      CartID[1] = Temp;
-    }
-  fwrite (CartID, 1, 2, n64caps_APSFile);
-
-  if (n64caps_MagicTest == 0x12408037)  // Doc
-    fseek (n64caps_ORGFile, 63, SEEK_SET);
-  else
-    fseek (n64caps_ORGFile, 62, SEEK_SET);
-  fread (&Teritory, sizeof (Teritory), 1, n64caps_ORGFile);
-  fwrite (&Teritory, sizeof (Teritory), 1, n64caps_APSFile);
-
-  fseek (n64caps_ORGFile, 0x10, SEEK_SET);      // CRC Header Position
-  fread (Buffer, 1, 8, n64caps_ORGFile);
-
-  if (n64caps_MagicTest == 0x12408037)  // Doc
-    {
-      Temp = Buffer[0];
-      Buffer[0] = Buffer[1];
-      Buffer[1] = Temp;
-      Temp = Buffer[2];
-      Buffer[2] = Buffer[3];
-      Buffer[3] = Temp;
-      Temp = Buffer[4];
-      Buffer[4] = Buffer[5];
-      Buffer[5] = Temp;
-      Temp = Buffer[6];
-      Buffer[6] = Buffer[7];
-      Buffer[7] = Temp;
-    }
-
-  fwrite (Buffer, 1, 8, n64caps_APSFile);
-
-  fseek (n64caps_ORGFile, 0, SEEK_SET);
-
-  fputc (0, n64caps_APSFile);   // PAD
-  fputc (0, n64caps_APSFile);   // PAD
-  fputc (0, n64caps_APSFile);   // PAD
-  fputc (0, n64caps_APSFile);   // PAD
-  fputc (0, n64caps_APSFile);   // PAD
-}
-
-
-void
-WriteSizeHeader (long ORGSize, long NEWSize)
-{
-  fwrite (&NEWSize, sizeof (NEWSize), 1, n64caps_APSFile);
-  if (ORGSize != NEWSize)
-    n64caps_ChangeFound = n64caps_TRUE;
-}
-
-
-void
-WritePatch ()
-{
-  long ORGReadLen, NEWReadLen, FilePos, ChangedStart = 0, ChangedOffset = 0;
-  int Finished = n64caps_FALSE, i, ChangedLen = 0, State;
-  unsigned char ORGBuffer[n64caps_BUFFERSIZE], NEWBuffer[n64caps_BUFFERSIZE];
-
-  fseek (n64caps_ORGFile, 0, SEEK_SET);
-  fseek (n64caps_NEWFile, 0, SEEK_SET);
-
-  FilePos = 0;
-
-  while (!Finished)
-    {
-      ORGReadLen = fread (ORGBuffer, 1, n64caps_BUFFERSIZE, n64caps_ORGFile);
-      NEWReadLen = fread (NEWBuffer, 1, n64caps_BUFFERSIZE, n64caps_NEWFile);
-
-      if (ORGReadLen != NEWReadLen)
-        {
-          int a;
-
-          for (a = ORGReadLen; a < NEWReadLen; a++)
-            ORGBuffer[a] = 0;
-        }
-
-      i = 0;
-      State = 0;
-
-      if (NEWReadLen != 0)
-        {
-          while (i < NEWReadLen)
-            {
-              switch (State)
-                {
-                case 0:
-                  if (NEWBuffer[i] != ORGBuffer[i])
-                    {
-                      State = 1;
-                      ChangedStart = FilePos + i;
-                      ChangedOffset = i;
-                      ChangedLen = 1;
-                      n64caps_ChangeFound = n64caps_TRUE;
-                    }
-                  i++;
-                  break;
-                case 1:
-                  if (NEWBuffer[i] != ORGBuffer[i])
-                    {
-                      ChangedLen++;
-                      i++;
-                    }
-                  else
-                    State = 2;
-                  break;
-                case 2:
-                  fwrite (&ChangedStart, sizeof (ChangedStart), 1,
-                          n64caps_APSFile);
-                  fputc ((ChangedLen & 0xff), n64caps_APSFile);
-                  fwrite (NEWBuffer + (ChangedOffset), 1, ChangedLen,
-                          n64caps_APSFile);
-                  State = 0;
-                  break;
-                }
-            }
-        }
-
-      if (State != 0)
-        {
-          if (ChangedLen == 0)
-            ChangedLen = 255;
-          fwrite (&ChangedStart, sizeof (ChangedStart), 1, n64caps_APSFile);
-          fputc ((ChangedLen & 0xff), n64caps_APSFile);
-          fwrite (NEWBuffer + (ChangedOffset), 1, ChangedLen,
-                  n64caps_APSFile);
-        }
-
-      if (NEWReadLen == 0)
-        Finished = n64caps_TRUE;
-      FilePos += NEWReadLen;
-    }
-}
-
-
-int
-n64caps_main (int argc, const char *argv[])
-{
-  char File1[FILENAME_MAX], File2[FILENAME_MAX], OutFile[FILENAME_MAX],
-       Description[81];
-
-  n64caps_ChangeFound = n64caps_FALSE;
-  Description[0] = 0;
-
-  strcpy (File1, argv[2]);
-  strcpy (File2, argv[3]);
-  strcpy (OutFile, argv[4]);
-
-  if (!n64caps_CheckFile (File1, "rb", n64caps_TRUE))
-    return 1;
-  if (!n64caps_CheckFile (File2, "rb", n64caps_TRUE))
-    return 1;
-  if (!n64caps_CheckFile (OutFile, "wb", n64caps_FALSE))
-    return 1;
-
-  n64caps_APSFile = fopen (OutFile, "wb");
-  n64caps_ORGFile = fopen (File1, "rb");
-  n64caps_NEWFile = fopen (File2, "rb");
-
-  if (!n64caps_Quiet)
-    {
-//              printf ("%s", n64caps_MESSAGE);
-//              printf ("%s", n64caps_COPYRIGHT);
-      printf ("Writing Headers...");
-      fflush (stdout);
-    }
-
-  WriteStdHeader (Description);
-  WriteN64Header ();
-  WriteSizeHeader (q_fsize (File1), q_fsize (File2));
-
-  if (!n64caps_Quiet)
-    {
-      printf ("Done\nFinding Changes...");
-      fflush (stdout);
-    }
-
-  WritePatch ();
-
-  if (!n64caps_Quiet)
-    {
-      printf ("Done\n");
-      fflush (stdout);
-    }
-
-  fclose (n64caps_NEWFile);
-  fclose (n64caps_ORGFile);
-  fclose (n64caps_APSFile);
-
-  if (!n64caps_Quiet && !n64caps_ChangeFound)
-    {
-      printf ("No Changes Found\n");
-      fflush (stdout);
-      unlink (OutFile);
-    }
+  memset (desc, ' ', 50);
+  strncpy (desc, description, strlen (description));
+  handle_existing_file (apsname, NULL);
+  q_fwrite (desc, 7, 50, apsname, "r+b");
+  printf (ucon64_msg[WROTE], apsname);
 
   return 0;
 }

@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.2 2002-06-04 21:17:42 dbjh Exp $
+ * $Id: gg.c,v 1.3 2002-06-06 14:15:09 dbjh Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.  
  * All rights reserved. Distributed under the BSD Software License.
@@ -260,7 +260,7 @@ gameGenieDecodeGameBoy (const char *in, char *out)
       return -1;
     }
   for (i = 0; i < strlen (in); ++i)
-    if (in[i] != '-' && !isxdigit (in[i]))
+    if (in[i] != '-' && !isxdigit ((int) in[i]))
       return -1;
   if (hexValue (in[6]) < 8)
     return -1;
@@ -308,7 +308,7 @@ gameGenieEncodeGameBoy (const char *in, char *out)
       return -1;
     }
   for (i = 0; i < strlen (in); ++i)
-    if (in[i] != ':' && !isxdigit (in[i]))
+    if (in[i] != ':' && !isxdigit ((int) in[i]))
       return -1;
   if (hexValue (in[0]) > 7)
     return -1;
@@ -414,7 +414,7 @@ gameGenieEncodeMegadrive (const char *in, char *out)
   if (strlen (in) != 11 || in[6] != ':')
     return -1;
   for (i = 0; i < 11; ++i)
-    if (in[i] != ':' && !isxdigit (in[i]))
+    if (in[i] != ':' && !isxdigit ((int) in[i]))
       return -1;
 
   sscanf (in, "%x:%x", &address, &value);
@@ -638,7 +638,7 @@ gameGenieEncodeNES (const char *in, char *out)
       return -1;
     }
   for (i = 0; i < strlen (in); ++i)
-    if (in[i] != ':' && !isxdigit (in[i]))
+    if (in[i] != ':' && !isxdigit ((int) in[i]))
       return -1;
 
   if (haveCheck)
@@ -807,11 +807,11 @@ gameGenieDecodeSNES (const char *in, char *out)
 //  int i;
 //  int b;
 
-  if (!isxdigit (in[0]) || !isxdigit (in[1]) ||
-      !isxdigit (in[2]) || !isxdigit (in[3]) ||
+  if (!isxdigit ((int) in[0]) || !isxdigit ((int) in[1]) ||
+      !isxdigit ((int) in[2]) || !isxdigit ((int) in[3]) ||
       in[4] != '-' ||
-      !isxdigit (in[5]) || !isxdigit (in[6]) ||
-      !isxdigit (in[7]) || !isxdigit (in[8]) || in[9] != 0)
+      !isxdigit ((int) in[5]) || !isxdigit ((int) in[6]) ||
+      !isxdigit ((int) in[7]) || !isxdigit ((int) in[8]) || in[9] != 0)
     return -1;
 
   value = hexByteValue (unmapSnesChar (in[0]), unmapSnesChar (in[1]));
@@ -851,10 +851,10 @@ gameGenieEncodeSNES (const char *in, char *out)
 //  int i;
 //  int b;
 
-  if (!isxdigit (in[0]) || !isxdigit (in[1]) ||
-      !isxdigit (in[2]) || !isxdigit (in[3]) ||
-      !isxdigit (in[4]) || !isxdigit (in[5]) ||
-      in[6] != ':' || !isxdigit (in[7]) || !isxdigit (in[8]) || in[9] != 0)
+  if (!isxdigit ((int) in[0]) || !isxdigit ((int) in[1]) ||
+      !isxdigit ((int) in[2]) || !isxdigit ((int) in[3]) ||
+      !isxdigit ((int) in[4]) || !isxdigit ((int) in[5]) ||
+      in[6] != ':' || !isxdigit ((int) in[7]) || !isxdigit ((int) in[8]) || in[9] != 0)
     return -1;
 
   value = hexByteValue (mapSnesChar (in[7]), mapSnesChar (in[8]));

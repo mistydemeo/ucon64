@@ -1325,8 +1325,7 @@ else
   ppf_usage( argc, argv );
   xps_usage( argc, argv );
 
-  cdrw_iso_usage(argc,argv);
-  cdrw_raw_usage(argc,argv);
+  cdrw_usage(argc,argv);
 
   printf("\n");
 #endif

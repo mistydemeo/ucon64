@@ -668,7 +668,7 @@ snes_mgd (st_rominfo_t *rominfo)
   mgh[2] = 'H';
   mgh[3] = 0x1a;
   memset (mgh + 4, 0, 12);
-  memcpy (mgh + 16, rominfo->name, 15);         // copy first 15 bytes (don't use strlen())
+  memcpy (mgh + 16, rominfo->name, 15);         // copy first 15 bytes (don't use strlen() or strcpy())
   mgh[31] = (unsigned char) 0xff;
 
   set_suffix (dest_name, ".078");

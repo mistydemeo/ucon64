@@ -147,13 +147,13 @@ void mainproc(void *arg) {
 const st_usage_t doctor64jr_usage[] = {
   {NULL, NULL, "Doctor V64 Junior"},
   {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
-#ifdef PARALLEL
+#ifdef  USE_PARALLEL
   {"xdjr", NULL, "send ROM to Doctor V64 Junior; " OPTION_LONG_S "port=PORT"},
 #if 0
   {"xdjrs", NULL, "send/receive SRAM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically when SRAM does not exist"},
 #endif
-#endif                          // PARALLEL
+#endif // USE_PARALLEL
   {NULL, NULL, NULL}
 };
 
@@ -203,7 +203,7 @@ set_ai_data (unsigned char ai, unsigned char data)
 void
 init_port (int enable_write)
 {
-#ifndef PPDEV // probably #if 0, but first test if this works with ppdev - dbjh
+#ifndef USE_PPDEV // probably #if 0, but first test if this works with ppdev - dbjh
   outportb (port_9, 1);                         // clear EPP time flag
 #endif
   set_ai_data (6, 0x0a);

@@ -494,7 +494,7 @@ ReadFlash (int addr)
 void
 l402684 (void)
 {
-#ifndef PPDEV // probably #if 0, but first test if this works with ppdev - dbjh
+#ifndef USE_PPDEV // probably #if 0, but first test if this works with ppdev - dbjh
   outpb (SPPStatPort, 1);
 #endif
   l40226c ();
@@ -543,7 +543,7 @@ LinkerInit (void)               // 4027c4
   */
   if (EPPMode)
     {
-#ifndef PPDEV
+#ifndef USE_PPDEV
       outpb (ECPRegECR, 4);     // Set EPP mode for ECP chipsets
 #endif
       if (LookForLinker ())
@@ -560,7 +560,7 @@ LinkerInit (void)               // 4027c4
   if (!linker_found)
     {
       // Look for linker in SPP mode.
-#ifndef PPDEV
+#ifndef USE_PPDEV
       if (EPPMode)
         outpb (ECPRegECR, 0);   // Set SPP mode for ECP chipsets
 #endif

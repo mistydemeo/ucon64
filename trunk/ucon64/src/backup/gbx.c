@@ -336,7 +336,7 @@ read_data (void)
 void
 init_port (void)
 {
-#ifndef PPDEV // probably #if 0, but first test if this works with ppdev - dbjh
+#ifndef USE_PPDEV // probably #if 0, but first test if this works with ppdev - dbjh
   outportb ((unsigned short) port_9, 1); // clear EPP time flag
 #endif
   set_ai_data ((unsigned char) 2, 0); // rst=0, wei=0(dis.), rdi=0(dis.)

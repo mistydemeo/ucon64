@@ -19,37 +19,20 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef LIBDISCMAGE_H
-#define LIBDISCMAGE_H
+#ifndef LIBDM_MISC_H
+#define LIBDM_MISC_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "config.h"
-#include "libdm_cfg.h"
+#include "libdiscmage_cfg.h"
 #include "misc.h"                               // or let every source file include
+
+
 
 
 //  version of this libdiscmage
 extern const char *dm_version;
-
-
-/*
-  track nfo
-*/
-typedef struct
-{
-  unsigned short global_current_track;  // current track
-  unsigned short number;
-  uint32_t position;
-  uint32_t mode;
-  uint32_t sector_size;
-  uint32_t sector_size_value;
-  uint32_t track_length;
-  uint32_t pregap_length;
-  uint32_t total_length;
-  uint32_t start_lba;
-  uint32_t filename_length;
-} dm_track_t;
 
 
 // this struct contains all important data and is init'ed by dm_open()
@@ -67,9 +50,21 @@ typedef struct
   unsigned short remaining_sessions;    // sessions left
   unsigned short remaining_tracks;      // tracks left
   unsigned short global_current_session;        // current session
-
-  dm_track_t *track; // TODO make an array of this
-
+/*
+  track nfo
+  TODO make an array of this
+*/
+  unsigned short global_current_track;  // current track
+  unsigned short number;
+  uint32_t position;
+  uint32_t mode;
+  uint32_t sector_size;
+  uint32_t sector_size_value;
+  uint32_t track_length;
+  uint32_t pregap_length;
+  uint32_t total_length;
+  uint32_t start_lba;
+  uint32_t filename_length;
 /*
   workflow
   TODO make this dissappear
@@ -158,8 +153,8 @@ extern int32_t dm_to_bcd (int32_t i);
 
 extern int32_t dm_mktoc (dm_image_t *image);
 extern int32_t dm_mkcue (dm_image_t *image);
-extern int32_t dm_mksheets (dm_image_t *image);
-//#define dm_mksheets(i) (MIN(dm_mktoc(i),dm_mkcue(i)))
+//extern int32_t dm_mksheets (dm_image_t *image);
+#define dm_mksheets(i) (MIN(dm_mktoc(i),dm_mkcue(i)))
 
 
 /*
@@ -169,4 +164,24 @@ extern int32_t dm_mksheets (dm_image_t *image);
 extern int32_t dm_disc_read (dm_image_t *image);
 extern int32_t dm_disc_write (dm_image_t *image);
 
-#endif  // LIBDISCMAGE_H
+#if 0
+extern int32_t cdi_init (dm_image_t *image);
+
+extern int32_t ask_type (FILE * fsource, int32_t header_position);
+extern int32_t cdi_read_track (dm_image_t * cdi_image);
+extern void cdi_get_sessions (dm_image_t * cdi_image);
+extern void cdi_get_tracks (dm_image_t * cdi_image);
+extern void cdi_skip_next_session (dm_image_t * cdi_image);
+
+extern int32_t nrg_init (dm_image_t * image);
+
+extern void nrg_write_cues_hdr (char *fcues, int32_t *fcues_i, dm_image_t * image);
+extern void nrg_write_daoi_hdr (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image);
+extern void nrg_write_cues_track (char *fcues, int32_t *fcues_i, dm_image_t * image);
+extern void nrg_write_daoi_track (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image, int32_t nrg_offset);
+extern void nrg_write_cues_tail (char *fcues, int32_t *fcues_i, dm_image_t * image);
+extern void nrg_write_sinf (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image);
+extern void nrg_write_etnf_hdr (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image);
+extern void nrg_write_etnf_track (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image, int32_t nrg_offset);
+#endif
+#endif  // LIBDM_MISC_H

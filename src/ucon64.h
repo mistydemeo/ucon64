@@ -34,9 +34,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "libdiscmage/libdiscmage.h"            // dm_image_t
 
 /*
-  this struct holds only workflow relevant information
+  this struct holds workflow relevant information
 */
-typedef struct st_ucon64
+typedef struct
 {
   int argc;
   char **argv;
@@ -44,11 +44,8 @@ typedef struct st_ucon64
   const char *rom;                              // ROM (cmdline) with path
   const char *file;                             // file (cmdline) with path
 
-//  char temp_file[FILENAME_MAX];
-
   char configfile[FILENAME_MAX];                // path and name of the config file
-  char configdir[FILENAME_MAX];                 // directory for config
-  
+  char configdir[FILENAME_MAX];                 // directory for config and DAT files
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
   char discmage_path[FILENAME_MAX];             // path to the discmage DLL
 
@@ -62,15 +59,26 @@ typedef struct st_ucon64
   int backup;                                   // flag if backups files should be created
   int frontend;                                 // flag if uCON64 was started by a frontend
   int discmage_enabled;                         // flag if discmage DLL is loaded
-  int dat_enabled;                            // flag if cache file(s) are usable/enabled
+  int dat_enabled;                              // flag if DAT file(s) are usable/enabled
 
   int show_nfo;                                 // show or skip info output for ROM
 
+  int console;                                  // the detected console system
+  int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
+
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
+/*
+  these values override values in st_rominfo_t use UCON64_ISSET()
+  to check them; when adding new ones.. dont forget to update ucon64_flush()
+  too
+*/
   int buheader_len;                             // length of backup unit header 0 == no bu hdr
-  int split;                                    // ROM is split
-  int part_size;                                // SNES split part size
   int snes_hirom;                               // SNES ROM is HiROM
+  int interleaved;                              // ROM is interleaved (swapped)
+
+//  the following values are for the SNES and NES
+  int part_size;                                // SNES split part size
+  int split;                                    // ROM is split
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
   int controller;                               // NES UNIF & SNES NSRT
   int controller2;                              // SNES NSRT
@@ -81,9 +89,6 @@ typedef struct st_ucon64
   const char *mapr;                             // NES UNIF board name or iNES mapper number
   int use_dump_info;                            // NES UNIF
   const char *comment;                          // NES UNIF
-  int interleaved;                              // ROM is interleaved (swapped)
-  int console;                                  // the detected console system
-  int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
 
 #define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
 #define UCON64_TYPE_ISCD(x) (x == UCON64_CD)
@@ -92,7 +97,7 @@ typedef struct st_ucon64
 
 extern st_ucon64_t ucon64;
 
-typedef struct st_rominfo
+typedef struct
 {
   const char **console_usage;                   // console system usage
   const char **copier_usage;                    // backup unit usage
@@ -111,13 +116,11 @@ typedef struct st_rominfo
   const void *header;                           // (possible) internal ROM header
 
   char name[MAXBUFSIZE];                        // internal ROM name
-  char fname[FILENAME_MAX];			// ROM name according to DAT file
   const char *maker;                            // maker name of the ROM
   const char *country;                          // country name of the ROM
   char misc[MAXBUFSIZE];                        // some miscellaneous information
                                                 //  about the ROM in one single string
   unsigned int current_crc32;                   // current crc32 value of ROM
-  unsigned int db_crc32;                        // crc32 value of ROM in internal database
 
   int has_internal_crc;                         // ROM has internal checksum (SNES, Mega Drive, Game Boy)
   unsigned int current_internal_crc;            // calculated checksum
@@ -129,11 +132,10 @@ typedef struct st_rominfo
   char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal checksum
   int internal_crc2_start;                      // start of 2nd/inverse internal checksum
   int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal checksum
-  dm_image_t *image;                            // DISC image
-  ucon64_dat_t *dat;                            // info from dat
 } st_rominfo_t;
 
-//extern dm_image_t *image;
+extern dm_image_t *image;       // DISC image (libdiscmage)
+extern ucon64_dat_t *ucon64_dat;       // info from DAT
 
 //extern const option_t options[];
 extern const struct option options[];

@@ -1025,7 +1025,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
     case UCON64_RR83:
       if (ucon64.console != UCON64_UNKNOWN && !ucon64_testsplit (filename))
         {
-          strcpy (buf, mkfile (strtrim (rominfo.fname[0] ? rominfo.fname : rominfo.name), '_'));
+          strcpy (buf, mkfile (strtrim (ucon64_dat ? ucon64_dat->fname : rominfo.name), '_'));
           if (!buf[0])
             strcpy (buf, mkfile (UCON64_UNKNOWN_S, '_'));
           if (mode == UCON64_RR83)

@@ -1203,6 +1203,9 @@ ucon64_options (int c, const char *optarg)
     case UCON64_F:
       switch (ucon64.console)
         {
+        case UCON64_GEN:
+          genesis_f (ucon64.rominfo);
+          break;
         case UCON64_N64:
           n64_f (ucon64.rominfo);
           break;

@@ -1634,6 +1634,10 @@ I don't know what this does, but it isn't necessary to start the game.
    10 f8 38 ef f2 fd c3 f0
 => 10 f8 38 ea a9 00 00 80
 Same here.
+
+- Dixie Kong's Double Trouble E. U version looks like it already has been "patched"
+   a9 c3 80 dd ff ff f0 6c
+=> a9 c3 f0 cc ff ff 80 7d
 */
   char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
        buffer[32 * 1024];
@@ -1755,6 +1759,7 @@ Same here.
                                                       "\xea\xa9\x00\x00\x80", 5, -4);
 
       n += change_mem (buffer, bytesread, "\xc2\x30\xad\xfc\x1f\xc9\x50\x44\xd0", 9, '*', '!', "\x4c\xd1\x80", 3, -6);
+      n += change_mem (buffer, bytesread, "\xa9\xc3\x80\xdd\xff\xff\xf0\x6c", 8, '*', '!', "\xf0\xcc\xff\xff\x80\x7d", 6, -5);
 
       fwrite (buffer, 1, bytesread, destfile);
     }
@@ -1993,8 +1998,8 @@ snes_f (st_rominfo_t *rominfo)
     {
     // In the Philipines the television standard is NTSC, but do games made
     //  for the Philipines exist?
-    case 0:                                   // Japan
-    case 1:                                   // U.S.A.
+    case 0:                                     // Japan
+    case 1:                                     // U.S.A.
       return snes_fix_ntsc_protection (rominfo);
     default:
       return snes_fix_pal_protection (rominfo);
@@ -2939,7 +2944,16 @@ snes_init (st_rominfo_t *rominfo)
 
   size = ucon64.file_size - rominfo->buheader_len;
   if (size < 0xfffd)
-    return -1;                                  // don't continue (seg faults!)
+    {
+      if (UCON64_ISSET (ucon64.snes_hirom))     // see snes_set_hirom()
+        {
+          snes_hirom = ucon64.snes_hirom;
+          snes_hirom_ok = 1;
+        }
+      if (UCON64_ISSET (ucon64.interleaved))
+        rominfo->interleaved = ucon64.interleaved;
+      return -1;                                // don't continue (seg faults!)
+    }
   if (ucon64.console == UCON64_SNES || (type != SMC && size <= 16 * 1024 * 1024))
     result = 0;                                 // it seems to be a SNES ROM dump
 

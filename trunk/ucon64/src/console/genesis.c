@@ -76,6 +76,7 @@ const st_usage_t genesis_usage[] =
 #if 0
     {"p", NULL, "pad ROM to full Mb"},
 #endif
+    {"f", NULL, "remove NTSC/PAL protection"},
     {"chk", NULL, "fix ROM checksum"},
     {"1991", NULL, "fix old third party ROMs to work with consoles build after\n"
                 "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\""},
@@ -596,6 +597,164 @@ genesis_chk (st_rominfo_t *rominfo)
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
+}
+
+
+static int
+genesis_fix_pal_protection (st_rominfo_t *rominfo)
+{
+/*
+  This function searches for PAL protection codes. If it finds one it will
+  fix the code so that the game will run on a Genesis (NTSC).
+*/
+  char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
+       buffer[16 * 1024];
+  FILE *srcfile, *destfile;
+  int bytesread, n = 0, n_extra_patterns, n2;
+  st_cm_pattern_t *patterns = NULL;
+
+  n_extra_patterns = build_cm_patterns (&patterns, "genpal.txt", src_name);
+  if (n_extra_patterns >= 0)
+    printf ("Found %d additional code%s in %s\n",
+            n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
+
+  puts ("Attempting to fix PAL protection code...");
+
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, src_name, 0);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+      return -1;
+    }
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+  if (rominfo->buheader_len)                    // copy header (if present)
+    {
+      fread (header, 1, SMD_HEADER_LEN, srcfile);
+      fseek (srcfile, rominfo->buheader_len, SEEK_SET);
+      fwrite (header, 1, SMD_HEADER_LEN, destfile);
+    }
+
+  while ((bytesread = fread (buffer, 1, 16 * 1024, srcfile)))
+    {
+      for (n2 = 0; n2 < n_extra_patterns; n2++)
+        n += change_mem2 (buffer, bytesread,
+                          patterns[n2].search,
+                          patterns[n2].search_size,
+                          patterns[n2].wildcard,
+                          patterns[n2].escape,
+                          patterns[n2].replace,
+                          patterns[n2].replace_size,
+                          patterns[n2].offset,
+                          patterns[n2].sets);
+      fwrite (buffer, 1, bytesread, destfile);
+    }
+  fclose (srcfile);
+  fclose (destfile);
+  cleanup_cm_patterns (&patterns, n_extra_patterns);
+
+  printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+  return n;
+}
+
+
+static int
+genesis_fix_ntsc_protection (st_rominfo_t *rominfo)
+{
+/*
+  This function searches for NTSC protection codes. If it finds one it will
+  fix the code so that the game will run on a Megadrive (PAL).
+*/
+  char header[512], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
+       buffer[16 * 1024];
+  FILE *srcfile, *destfile;
+  int bytesread, n = 0, n_extra_patterns, n2;
+  st_cm_pattern_t *patterns = NULL;
+
+  n_extra_patterns = build_cm_patterns (&patterns, "mdntsc.txt", src_name);
+  if (n_extra_patterns >= 0)
+    printf ("Found %d additional code%s in %s\n",
+            n_extra_patterns, n_extra_patterns != 1 ? "s" : "", src_name);
+
+  puts ("Attempting to fix NTSC protection code...");
+
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, src_name, 0);
+  if ((srcfile = fopen (src_name, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], src_name);
+      return -1;
+    }
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+  if (rominfo->buheader_len)                    // copy header (if present)
+    {
+      fread (header, 1, SMD_HEADER_LEN, srcfile);
+      fseek (srcfile, rominfo->buheader_len, SEEK_SET);
+      fwrite (header, 1, SMD_HEADER_LEN, destfile);
+    }
+
+  while ((bytesread = fread (buffer, 1, 16 * 1024, srcfile)))
+    {
+      for (n2 = 0; n2 < n_extra_patterns; n2++)
+        n += change_mem2 (buffer, bytesread,
+                          patterns[n2].search,
+                          patterns[n2].search_size,
+                          patterns[n2].wildcard,
+                          patterns[n2].escape,
+                          patterns[n2].replace,
+                          patterns[n2].replace_size,
+                          patterns[n2].offset,
+                          patterns[n2].sets);
+      fwrite (buffer, 1, bytesread, destfile);
+    }
+  fclose (srcfile);
+  fclose (destfile);
+  cleanup_cm_patterns (&patterns, n_extra_patterns);
+
+  printf ("Found %d pattern%s\n", n, n != 1 ? "s" : "");
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
+  return n;
+}
+
+
+int
+genesis_f (st_rominfo_t *rominfo)
+{
+  if (rominfo->interleaved)
+    {
+      if (ucon64.quiet <= 0)
+        fprintf (stderr, "ERROR: This option works only on non-interleaved files\n"
+                         "TIP: Create a deinterleaved file with -mgd\n");
+      return -1;
+    }
+
+  switch (OFFSET (genesis_header, 240))
+    {
+    /*
+      In the Philipines the television standard is NTSC, but do games made
+      for the Philipines exist?
+      Yes, we only check the first country code. Just like with SNES we don't
+      guarantee anything for files that needn't be fixed/cracked/patched.
+    */
+    case 74:                                    // Japan
+    case 85:                                    // U.S.A.
+      return genesis_fix_ntsc_protection (rominfo);
+    default:
+      return genesis_fix_pal_protection (rominfo);
+    }
 }
 
 

@@ -414,9 +414,9 @@ ppf_create (const char *orgname, const char *modname)
       fwrite ("@BEGIN_FILE_ID.DIZ", 18, 1, ppffile);
       fwrite (buffer, fsize, 1, ppffile);
       fwrite ("@END_FILE_ID.DIZ", 16, 1, ppffile);
- #ifdef  WORDS_BIGENDIAN
+#ifdef  WORDS_BIGENDIAN
       fsize = bswap_32 (fsize);                 // Write file size in little-endian format
- #endif
+#endif
       fwrite (&fsize, 4, 1, ppffile);
     }
 #endif

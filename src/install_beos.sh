@@ -1,8 +1,8 @@
 #!/bin/sh
-# BeOS R5 install script for ucon64
+# BeOS R5 install script for uCON64
 cd $(dirname "$0")
 
-areply=$(alert "This will start installation of ucon64 in a BeOS system.
+areply=$(alert "This will start installation of uCON64 in a BeOS system.
 
 ucon64 will be installed in $HOME/config/bin and .ucon64rc copied to $HOME.
 
@@ -14,9 +14,9 @@ if [ "$areply" ==  "Install" ]; then
 	fi
 	cp $(pwd)/.ucon64rc $HOME
 	# ask for ioport driver installation
-	drreply=$(alert "For parallel port access with ucon64, you have to install the BeOS ioport driver by Caz Jones.
+	drreply=$(alert "uCON64 needs the BeOS ioport driver by Caz Jones.
 
-Would you like to do that?" "No" "Yes, install driver")
+Would you like to do install it?" "No" "Yes, install driver")
 	if [ "$drreply" ==  "Yes, install driver" ]; then
 		if [ -e "$HOME/ioport" ]; then
 			cd "$HOME/ioport/driver"
@@ -35,7 +35,7 @@ and copy it to $HOME. Then retry to install the driver."
 			fi
 		fi
 	fi
-	
+
 	alert "Done.
 You can use ucon64 from the terminal now."
 fi

@@ -1,7 +1,7 @@
 A Super Wild Card compatibility list
-Version: 1.24
+Version: 1.25
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 16 August 2003
+Date: 30 August 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
 Software: uCON64 1.9.8-2
 
@@ -44,6 +44,7 @@ For games marked with an asterisk uCON64 1.9.8-2 is required.
 
 
 Code    Game
+8 + 9 - Ace wo Nerae! (J) <= it does work with Super Mario Kart (E) plugged in
 0 -     7th Saga, The (U)
 0 -     AAAHH!!! Real Monsters (U)
 0 -     ActRaiser 2 (E)
@@ -135,7 +136,7 @@ Code    Game
 1 -     Donkey Kong Country (E) (V1.1)
 1 + 2 - Donkey Kong Country (U) (V1.0)
 1 + 2 - Donkey Kong Country (U) (V1.1)
-9 -     Doom (U) [b1]
+9 -     Doom (U)
 0 -     Doraemon - Nobita to Yosei no Kuni (J)
 0 -     Dragon Quest I & II (J)
 0 -     Dragon Quest III (J)
@@ -151,6 +152,7 @@ Code    Game
 0 -     Earthworm Jim 2 (U)
 0 -     Earthworm Jim (U)
 0 -     Eek! The Cat (E)
+0 -     E.V.O. Search For Eden (U)
 0 -     F-1 Grand Prix (J)
 8 + 9 - F1 ROC II - Race of Champions (U) <= course is not visible
 0 -     Final Fantasy III (U) (V1.0)
@@ -217,6 +219,7 @@ Code    Game
 1 + 2 - Mario no Super Picross (J)
 0 -     Mario Paint (E) <= idem
 0 -     Mario & Wario (J) <= I don't have a SNES mouse...
+9 -     Masou Kishin - Super Robot Taisen Gaiden - The Lord of Elemental (J)
 2 -     Mega Man's Soccer (U)
 2 -     Mega Man VII (U)
 2 + 9 - Mega Man X 2 (U) <= the intro can be viewed
@@ -257,6 +260,7 @@ Code    Game
 0 -     Prince of Persia (E)
 0 -     Prince of Persia (J)
 0 -     Push-Over (E)
+0 -     Puzzle Bobble (E)
 0 -     Ranma Nibun no Ichi - Akanekodan no Hihou (J)
 0 -     Ranma Nibun no Ichi - Hard Battle (U)
 2 -     Robotrek (U)
@@ -270,6 +274,7 @@ Code    Game
 0 -     RPG Tsukuru 2 (J)
 0 -     R-Type III - The Third Lightning (E) (21451)
 0 -     Rudra no Hihou (J)
+0 -     Sanrio World Smash Ball! (J)
 0 -     Secret of Evermore (U)
 0 -     Secret of Mana (E) (V1.0)
 0 -     Secret of Mana (E) (V1.1)
@@ -277,17 +282,20 @@ Code    Game
 2 -     Seiken Densetsu 2 (J)
 0 -     Seiken Densetsu 3 (J) (Sample)
 2 -     Seiken Densetsu 3 (J)
+0 -     Shadowrun (E)
 0 -     Shin Megami Tensei (J) (V1.0)
 0 -     Sim Ant (U) (37113)
 0 -     Sim City (E)
 0 -     Sim City (U)
 0 -     Simpsons, The - Bart's Nightmare (U)
+0 -     Smash Tennis (E)
 0 -     Smurfs, The (E)
 0 -     Soldiers of Fortune (U)
 0 -     Sonic the Hedgehog (Unl) [p1][h1]
 0 -     Soul Blazer (U)
 0 -     Spider-Man and the X-Men in Arcade's Revenge (E)
 9 -     Star Fox 2 (Beta)
+9 -     Star Fox 2 (Beta TD)
 9 -     Star Fox Super Weekend Competition (U)
 9 -     Star Fox (U) (V1.0)
 9 -     Star Fox (U) (V1.2)
@@ -344,6 +352,7 @@ Code    Game
 9 -     Super Power League 4 (J) <= halts on "SPC7110 check program v3.0"
 0 -     Super Probotector - The Alien Rebels (E)
 0 -     Super Punch-Out!! (U)
+0 -     Super Puyo Puyo (J) (V1.2)
 0 -     Super R-Type (E)
 0 -     Super R-Type (U)
 0 -     Super Smash T.V. (E)
@@ -357,6 +366,7 @@ Code    Game
 0 -     Super Street Fighter II - The New Challengers (E)
 0 -     Super Tennis (E) (V1.0)
 0 -     Super Turrican (E)
+0 -     Syndicate (E)
 0 -     T2 - The Arcade Game (U)
 0 -     Tactics Ogre - Let Us Cling Together (J) (V1.2)
 9 -     Tales of Phantasia (J) <= works on an SWC DX2 64 Mbit PAL
@@ -385,6 +395,7 @@ Code    Game
 0 -     Ultima VII - The Black Gate (U)
 1 -     Uniracers (U)
 1 -     Unirally (E)
+0 -     U.N. Squadron (E)
 9 -     Vortex (E)
 0 -     Wario's Woods (U)
 0 -     Wolfenstein 3D (E)
@@ -396,6 +407,7 @@ Code    Game
 0 -     X-Men - Mutant Apocalypse (E)
 2 -     Yoshi's Safari (U) <= I don't have a Super Scope...
 2 -     Ys V - Expert (J)
+2 -     Yuu Yuu Hakusho - Tokubetsuhen (J)
 0 -     Zelda no Densetsu - Kamigami no Triforce (J) (V1.0)
 0 -     Zombies (E)
 

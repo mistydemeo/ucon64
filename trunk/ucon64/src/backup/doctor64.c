@@ -276,8 +276,8 @@ FILE *fh;
 unsigned long size,inittime,pos;
 
 if(initCommunication(parport)==-1)return(-1);
-
 inittime=time(0);
+
 
   	if(sendUploadHeader(parport,filename,(quickftell(filename)-start))!=0)return(-1);
 	

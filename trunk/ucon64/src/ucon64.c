@@ -481,7 +481,10 @@ if(argcmp(argc,argv,"-mka"))
 	ucon64_argv[1]="-d \"\"";
 	ucon64_argv[2]=rom.rom;
 	ucon64_argv[3]=rom.file;
-	ucon64_argv[4]="test";
+  strcpy(buf,rom.rom);
+  newext(buf,".APS");
+
+	ucon64_argv[4]=buf;
 	ucon64_argc=5;
 
 	n64caps_main(ucon64_argc,ucon64_argv);
@@ -658,6 +661,8 @@ if(argcmp(argc,argv,"-dbs"))
 
 	ucon64_nfo(&rom);
 
+	ucon64_dbview(rom.console);
+
 	printf("TIP: %s -dbs -nes would search only for a NES ROM\n\n",getarg(argc,argv,ucon64_NAME));
 
 	return(0);
@@ -670,7 +675,6 @@ if(argcmp(argc,argv,"-dbv"))
 	printf("\nTIP: %s -db -nes would view only NES ROMs\n\n",getarg(argc,argv,ucon64_NAME));
 	return(0);
 }
-
 
 if(!access(rom.rom,F_OK))
 {
@@ -1285,8 +1289,8 @@ else
   printf("%s\n%s\n%s\n%s\n%s\n%s\n"
 	"  -xbox, -ps2, -sat, -3do, -cd32, -cdi\n"
 	"		force recognition; NEEDED\n"
-	"  -iso		force image is ISO9660\n"
-	"  -raw		force image is MODE2_RAW/BIN\n"
+//	"  -iso		force image is ISO9660\n"
+//	"  -raw		force image is MODE2_RAW/BIN\n"
 	"  *		show info (default); ONLY $ROM=RAW_IMAGE\n"
 	"  -r2i          convert MODE2_RAW/BIN to ISO9660; $ROM=RAW_IMAGE\n"
   ,xbox_TITLE
@@ -1468,6 +1472,10 @@ int ucon64_nfo(struct ucon64_ *rom)
     if (rom->internal_crc2[0])
       printf("%s\n", rom->internal_crc2);
   }
+  if (rom->splitted[0])
+    printf("NOTE: to get the correct checksum the ROM must be joined\n");
+
+
   if (rom->current_crc32 != 0)
     printf("Checksum (CRC32): 0x%08lx\n", rom->current_crc32);
 

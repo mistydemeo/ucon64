@@ -331,7 +331,11 @@ Genesis/Sega Mega Drive/Sega CD/32X/Nomad
   --multi=SIZE  make multi-game file for use with MD-PRO flash card,
                   truncated to SIZE Mbit; file with loader must be specified
                   first, then all the ROMs, multi-game file to create last
-  --pal         enable region function (PAL/NTSC); use with -multi
+  --region=CODE enable region function; use with -multi
+                  CODE='0' force NTSC/Japan for all games
+                  CODE='1' force NTSC/U.S.A. for all games
+                  CODE='2' force PAL for all games
+                  CODE='x' use whatever setting games expect
 Super Com Pro/Super Magic Drive/SMD
   --xsmd        send/receive ROM to/from Super Magic Drive/SMD; --port=PORT
                   receives automatically when ROM does not exist

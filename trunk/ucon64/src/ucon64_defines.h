@@ -1,3 +1,4 @@
+
 /*
 ucon64_defines.h - definitions for uCON64
 
@@ -38,9 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define UCON64_OPTION (1000)
 #define UCON64_CONSOLE (0)
-
-#define UCON64_GETOPT_ERROR ('?')               // getopt() returns 0x3f when a unknown option was given
-
 
 // Keep these (libdiscmage) options separate
 #define UCON64_CDIRIP (UCON64_OPTION + 270)

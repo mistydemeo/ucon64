@@ -505,13 +505,13 @@ main (int argc, char **argv)
       return 0;
     }
 
-// parse the cmdline
+  // getopt() is utilized to make uCON64 handle/parse cmdlines in a sane
+  // and expected way
   x = optind = 0;
   memset (&arg, 0, sizeof (st_args_t) * ARG_MAX);
-// getopt() is utilized to make uCON64 handle cmdlines in a sane and expected way
   while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
-      if (c == UCON64_GETOPT_ERROR)
+      if (c == '?') // getopt() returns 0x3f when a unknown option was given
         {
           fprintf (stderr,
                "Try '%s " OPTION_LONG_S "help' for more information.\n",

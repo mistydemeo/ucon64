@@ -47,6 +47,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "f2a.h"
 #include "console/gba.h"
 #ifdef  USE_USB
+#include <stdarg.h>
+#include <sys/wait.h>
+#include <sys/utsname.h>
 #include "misc_usb.h"
 #endif
 #ifdef  USE_PARALLEL
@@ -208,6 +211,65 @@ static const char *f2a_msg[] = {
 
 #ifdef  USE_USB
 
+int
+exec (const char *program, int argc, ...)
+/*
+  This function is needed in order to execute a program with the same
+  permissions as we have. In this way a suid root uCON64 executable can execute
+  programs that require root privileges. We cannot use system(), because it
+  might drop privileges.
+  argc should be the number of _arguments_ (excluding the program name itself).
+  DON'T move this function to misc.c. It's only necessary under Linux 2.6 (and
+  later) for the USB version of the F2A. It's hard to be more system dependent
+  than that. - dbjh
+*/
+{
+  va_list argptr;
+  int status;
+
+  argc++;
+  va_start (argptr, argc);
+  if (fork () == 0)
+    {
+      int n, size;
+      char *argv[argc + 1], *arg;
+
+      size = strlen (program) + 1;
+      if ((argv[0] = (char *) malloc (size)) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[BUFFER_ERROR], size);
+          exit (1);
+        }
+      strcpy (argv[0], program);
+
+      for (n = 1; n < argc; n++)
+        {
+          arg = (char *) va_arg (argptr, char *); // get next argument
+          size = strlen (arg) + 1;
+          if ((argv[n] = (char *) malloc (size)) == NULL)
+            {
+              fprintf (stderr, ucon64_msg[BUFFER_ERROR], size);
+              exit (1);
+            }
+          strcpy (argv[n], arg);
+        }
+      argv[n] = 0;
+
+      setuid (geteuid ());
+      setgid (getegid ());
+      if (execv (argv[0], (char **) argv))
+        { // error in info page: return value can be != 1
+//          fprintf (stderr, "ERROR: %s\n", strerror (errno));
+          exit (1);
+        }
+    }
+  wait (&status);
+  va_end (argptr);
+
+  return status;
+}
+
+
 static int
 f2a_init_usb (void)
 {
@@ -255,8 +317,7 @@ f2a_connect_usb (void)
   int fp, result, firmware_loaded = 0;
   unsigned char f2afirmware[F2A_FIRM_SIZE];
   char f2afirmware_fname[FILENAME_MAX];
-  struct usb_bus *busses;
-  struct usb_bus *bus;
+  struct usb_bus *busses, *bus;
   struct usb_device *dev, *f2adev = NULL;
 
   get_property_fname (ucon64.configfile, "f2afirmware", f2afirmware_fname, "f2afirm.hex");
@@ -283,17 +344,63 @@ find_f2a:
           if ((dev->descriptor.idVendor == 0x547) &&
               (dev->descriptor.idProduct == 0x2131) && !firmware_loaded)
             {
-              if ((fp = open (EZDEV, O_WRONLY)) != -1)
+              struct utsname info;
+              int version;
+
+              if (uname (&info) == -1)
                 {
+                  fputs ("ERROR: Unable to determine version of the running kernel\n", stderr);
+                  return -1;
+                }
+
+              version = strtol (&info.release[0], NULL, 10) * 10 +
+                        strtol (&info.release[2], NULL, 10);
+              // example contents of info.release: "2.4.18-14custom"
+              if (version >= 25)                // Linux kernel 2.5 or higher
+                {
+                  // use fxload to upload the F2A firmware
+                  char device_path[160];
+                  int exitstatus;
+
+                  snprintf (device_path, 160, "/proc/bus/usb/%s/%s",
+                            bus->dirname, dev->filename);
+                  exitstatus = exec ("/sbin/fxload", 7, "-D", device_path, "-I",
+                                     f2afirmware_fname, "-vv", "-t", "an21");
+                  if (WEXITSTATUS (exitstatus))
+                    {
+                      char cmd[10 * 80];
+
+                      snprintf (cmd, 10 * 80, "/sbin/fxload -D %s -I %s -vv -t an21",
+                                device_path, f2afirmware_fname);
+                      fprintf (stderr, "ERROR: Unable to upload EZUSB firmware using fxload. Command:\n"
+                                       "       %s\n", cmd);
+                      return -1;
+                    }
+                  firmware_loaded = 1;
+                  wait2 (2000);                 // give the EZUSB some time to renumerate
+                  goto find_f2a;
+                }
+              else
+                {
+                  int wrote, w;
+
+                  // Linux kernel version 2.4 or older (2.2.16 is supported by
+                  //  the EZUSB2131 driver)
+                  if ((fp = open (EZDEV, O_WRONLY)) == -1)
+                    {
+                      fprintf (stderr, "ERROR: Unable to upload EZUSB firmware (opening "
+                               EZDEV": %s)\n", strerror (errno));
+                      return -1;
+                    }
+
                   // The EZUSB2131 driver (version 1.0) only accepts one line of
                   //  an Intel hex record file at a time...
-                  int wrote, w;
                   for (wrote = 0; wrote < F2A_FIRM_SIZE; wrote += w)
                     {
                       if ((w = write (fp, f2afirmware + wrote, F2A_FIRM_SIZE - wrote)) == -1)
                         {
-                          fprintf (stderr, "ERROR: Unable to upload F2A firmware (writing "
-                                             EZDEV": %s)\n", strerror (errno));
+                          fprintf (stderr, "ERROR: Unable to upload EZUSB firmware (writing "
+                                    EZDEV": %s)\n", strerror (errno));
                           return -1;
                         }
                       if (ucon64.quiet < 0)
@@ -301,16 +408,10 @@ find_f2a:
                                 w, wrote, wrote + w, F2A_FIRM_SIZE);
                     }
                   close (fp);
+                  firmware_loaded = 1;
+                  wait2 (2000);                 // give the EZUSB some time to renumerate
+                  goto find_f2a;
                 }
-              else
-                {
-                  fprintf (stderr, "ERROR: Unable to upload F2A firmware (opening "
-                                     EZDEV": %s)\n", strerror (errno)); // was: "[...] EZUSB firmware"
-                  return -1;
-                }
-              firmware_loaded = 1;
-              wait2 (2000);                     // give the EZUSB some time to renumerate
-              goto find_f2a;
             }
         }
     }

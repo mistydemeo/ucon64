@@ -44,7 +44,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 static int gba_chksum (void);
-static int gbautil (const char *filein, const char *fileout);
 
 const st_getopt2_t gba_usage[] =
   {
@@ -86,7 +85,7 @@ const st_getopt2_t gba_usage[] =
       "WAIT_TIME=8  faster than 4, slower than 28\n"
       "WAIT_TIME=12 slowest cartridge access speed\n"
       "WAIT_TIME=16 faster than 28, but slower than 20\n"
-      "WAIT_TIME=20 default in most original carts\n"
+      "WAIT_TIME=20 default in most original cartridges\n"
       "WAIT_TIME=24 fastest cartridge access speed\n"
       "WAIT_TIME=28 faster than 8 but slower than 16",
       (void *) (UCON64_GBA|WF_DEFAULT)
@@ -212,7 +211,7 @@ typedef struct st_gba_header
 
 static st_gba_header_t gba_header;
 const unsigned char gba_logodata[] = {          // Note: not a static variable
-  0x24, 0xff, 0xae, 0x51,
+                          0x24, 0xff, 0xae, 0x51,
   0x69, 0x9a, 0xa2, 0x21, 0x3d, 0x84, 0x82, 0x0a,
   0x84, 0xe4, 0x09, 0xad, 0x11, 0x24, 0x8b, 0x98,
   0xc0, 0x81, 0x7f, 0x21, 0xa3, 0x52, 0xbe, 0x19,
@@ -291,24 +290,227 @@ gba_chk (st_rominfo_t *rominfo)
 
 int
 gba_sram (void)
+// This function is based on Omar Kilani's gbautil 1.1
 {
-  char buf[MAXBUFSIZE], dest_name[FILENAME_MAX];
+  unsigned char st_orig[2][10] =
+    {
+      { 0x0E, 0x48, 0x39, 0x68, 0x01, 0x60, 0x0E, 0x48, 0x79, 0x68 },
+      { 0x13, 0x4B, 0x18, 0x60, 0x13, 0x48, 0x01, 0x60, 0x13, 0x49 }
+    },
+    st_repl[2][10] =
+    {
+      { 0x00, 0x48, 0x00, 0x47, 0x01, 0xFF, 0xFF, 0x08, 0x79, 0x68 },
+      { 0x01, 0x4C, 0x20, 0x47, 0x00, 0x00, 0x01, 0xFF, 0xFF, 0x08 }
+    },
+    fl_orig[2][24] =
+    {
+      {
+        0xD0, 0x20, 0x00, 0x05, 0x01, 0x88, 0x01, 0x22, 0x08, 0x1C,
+        0x10, 0x40, 0x02, 0x1C, 0x11, 0x04, 0x08, 0x0C, 0x00, 0x28,
+        0x01, 0xD0, 0x1B, 0xE0
+      },
+      {
+        0xD0, 0x21, 0x09, 0x05, 0x01, 0x23, 0x0C, 0x4A, 0x08, 0x88,
+        0x18, 0x40, 0x00, 0x28, 0x08, 0xD1, 0x10, 0x78, 0x00, 0x28,
+        0xF8, 0xD0, 0x08, 0x88
+      }
+    },
+    fl_repl[2][24] =
+    {
+      {
+        0xE0, 0x20, 0x00, 0x05, 0x01, 0x88, 0x01, 0x22, 0x08, 0x1C,
+        0x10, 0x40, 0x02, 0x1C, 0x11, 0x04, 0x08, 0x0C, 0x00, 0x28,
+        0x01, 0xD0, 0x1B, 0xE0
+      },
+      {
+        0xE0, 0x21, 0x09, 0x05, 0x01, 0x23, 0x0C, 0x4A, 0x08, 0x88,
+        0x18, 0x40, 0x00, 0x28, 0x08, 0xD1, 0x10, 0x78, 0x00, 0x28,
+        0xF8, 0xD0, 0x08, 0x88
+      }
+    },
+    p_repl[2][188] =
+    {
+      {
+        0x39, 0x68, 0x27, 0x48, 0x81, 0x42, 0x23, 0xD0, 0x89, 0x1C,
+        0x08, 0x88, 0x01, 0x28, 0x02, 0xD1, 0x24, 0x48, 0x78, 0x60,
+        0x33, 0xE0, 0x00, 0x23, 0x00, 0x22, 0x89, 0x1C, 0x10, 0xB4,
+        0x01, 0x24, 0x08, 0x68, 0x20, 0x40, 0x5B, 0x00, 0x03, 0x43,
+        0x89, 0x1C, 0x52, 0x1C, 0x06, 0x2A, 0xF7, 0xD1, 0x10, 0xBC,
+        0x39, 0x60, 0xDB, 0x01, 0x02, 0x20, 0x00, 0x02, 0x1B, 0x18,
+        0x0E, 0x20, 0x00, 0x06, 0x1B, 0x18, 0x7B, 0x60, 0x39, 0x1C,
+        0x08, 0x31, 0x08, 0x88, 0x09, 0x38, 0x08, 0x80, 0x16, 0xE0,
+        0x15, 0x49, 0x00, 0x23, 0x00, 0x22, 0x10, 0xB4, 0x01, 0x24,
+        0x08, 0x68, 0x20, 0x40, 0x5B, 0x00, 0x03, 0x43, 0x89, 0x1C,
+        0x52, 0x1C, 0x06, 0x2A, 0xF7, 0xD1, 0x10, 0xBC, 0xDB, 0x01,
+        0x02, 0x20, 0x00, 0x02, 0x1B, 0x18, 0x0E, 0x20, 0x00, 0x06,
+        0x1B, 0x18, 0x08, 0x3B, 0x3B, 0x60, 0x0B, 0x48, 0x39, 0x68,
+        0x01, 0x60, 0x0A, 0x48, 0x79, 0x68, 0x01, 0x60, 0x0A, 0x48,
+        0x39, 0x1C, 0x08, 0x31, 0x0A, 0x88, 0x80, 0x21, 0x09, 0x06,
+        0x0A, 0x43, 0x02, 0x60, 0x07, 0x48, 0x00, 0x47, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x0D, 0x00, 0x00, 0x00, 0x0E, 0x04, 0x00,
+        0x00, 0x0E, 0xD4, 0x00, 0x00, 0x04, 0xD8, 0x00, 0x00, 0x04,
+        0xDC, 0x00, 0x00, 0x04, 0xFF, 0xFF, 0xFF, 0x08
+      },
+      {
+        0x22, 0x4C, 0x84, 0x42, 0x20, 0xD0, 0x80, 0x1C, 0x04, 0x88,
+        0x01, 0x25, 0x2C, 0x40, 0x01, 0x2C, 0x02, 0xD1, 0x80, 0x1E,
+        0x1E, 0x49, 0x2E, 0xE0, 0x00, 0x23, 0x00, 0x24, 0x80, 0x1C,
+        0x40, 0xB4, 0x01, 0x26, 0x05, 0x68, 0x35, 0x40, 0x5B, 0x00,
+        0x2B, 0x43, 0x80, 0x1C, 0x64, 0x1C, 0x06, 0x2C, 0xF7, 0xD1,
+        0x40, 0xBC, 0xDB, 0x01, 0x02, 0x24, 0x24, 0x02, 0x1B, 0x19,
+        0x0E, 0x24, 0x24, 0x06, 0x1B, 0x19, 0x19, 0x1C, 0x09, 0x3A,
+        0x16, 0xE0, 0x12, 0x48, 0x00, 0x23, 0x00, 0x24, 0x40, 0xB4,
+        0x01, 0x26, 0x05, 0x68, 0x35, 0x40, 0x5B, 0x00, 0x2B, 0x43,
+        0x80, 0x1C, 0x64, 0x1C, 0x06, 0x2C, 0xF7, 0xD1, 0x40, 0xBC,
+        0xDB, 0x01, 0x02, 0x24, 0x24, 0x02, 0x1B, 0x19, 0x0E, 0x24,
+        0x24, 0x06, 0x1B, 0x19, 0x08, 0x3B, 0x18, 0x1C, 0x08, 0x4C,
+        0x20, 0x60, 0x08, 0x4C, 0x21, 0x60, 0x08, 0x49, 0x80, 0x20,
+        0x00, 0x06, 0x02, 0x43, 0x0A, 0x60, 0x06, 0x4C, 0x20, 0x47,
+        0x00, 0x00, 0x00, 0x0D, 0x00, 0x00, 0x00, 0x0E, 0x04, 0x00,
+        0x00, 0x0E, 0xD4, 0x00, 0x00, 0x04, 0xD8, 0x00, 0x00, 0x04,
+        0xDC, 0x00, 0x00, 0x04, 0xFF, 0xFF, 0xFF, 0x08
+      }
+    },
+    major, minor, micro, *buffer, *bufferptr, *ptr, value;
+  char dest_name[FILENAME_MAX];
+  int p_size[2] = { 188, 168 }, p_off, st_off;
+  unsigned int fsize = ucon64.file_size;
+  FILE *destfile;
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
-  strcpy (buf, dest_name);
-  set_suffix (buf, ".TMP");
-  rename (dest_name, buf);
+  if ((destfile = fopen (dest_name, "rb+")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
+      return -1;
+    }
+  if (!(buffer = (unsigned char *) calloc (1, fsize + 1)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], fsize);
+      fclose (destfile);
+      exit (1);
+    }
+  if (fread (buffer, 1, fsize, destfile) != fsize)
+    {
+      fprintf (stderr, ucon64_msg[READ_ERROR], dest_name);
+      free (buffer);
+      fclose (destfile);
+      return -1;
+    }
 
-  gbautil ((const char *) buf, (const char *) dest_name);
+  bufferptr = buffer + 160 + 12 + 4;
 
-  if (access (dest_name, F_OK) != 0)
-    rename (buf, dest_name);
-  else
-    remove (buf);
+  ptr = (unsigned char *) mem_search (bufferptr, fsize, "EEPROM_", 7);
+  if (ptr == 0)
+    {
+      printf ("This ROM does not appear to use EEPROM saving\n");
+      free (buffer);
+      fclose (destfile);
+      return -1;
+    }
+  major = ptr[8] - '0';
+  minor = ptr[9] - '0';
+  micro = ptr[10] - '0';
+  if (ucon64.quiet < 0)
+    printf ("version: %d.%d.%d; offset: 0x%08x\n", major, minor, micro, ptr - buffer);
+  if (minor > 2)
+    {
+      fputs ("ERROR: ROMs with an EEPROM minor version higher than 2 are not yet supported\n", stderr);
+      free (buffer);
+      fclose (destfile);
+      return -1;
+    }
 
+  ptr = (unsigned char *) mem_search (bufferptr, fsize,
+                                      fl_orig[minor - 1], sizeof (fl_orig[minor - 1]));
+  if (ptr == 0)
+    {
+      fputs ("ERROR: Could not find fl pattern. Perhaps this file is already patched?\n", stderr);
+      free (buffer);
+      fclose (destfile);
+      return -1;
+    }
+  if (ucon64.quiet < 0)
+    printf ("fl offset: 0x%08x\n", ptr - buffer);
+  fseek (destfile, ptr - buffer, SEEK_SET);
+  fwrite (fl_repl[minor - 1], 1, sizeof (fl_repl[minor - 1]), destfile);
+
+  ptr = buffer + fsize - 1;
+  value = *ptr;
+  do
+    ptr--;
+  while (*ptr == value && ptr - buffer > 0);
+
+  p_off = (ptr - buffer + 0xff) & ~0xff;        // align at 256 byte boundary
+  if (ucon64.quiet < 0)
+    printf ("p_off: 0x%08x\n", p_off);
+  // if the SRAM function won't fit at the end of the ROM, abort
+  if ((minor == 1 && (int) (fsize - 188) < p_off) ||
+      (minor == 2 && (int) (fsize - 168) < p_off))
+    {
+      fputs ("ERROR: Not enough room for SRAM function at end of ROM\n", stderr);
+      free (buffer);
+      fclose (destfile);
+      return -1;
+    }
+
+  ptr = (unsigned char *) mem_search (bufferptr, fsize,
+                                      st_orig[minor - 1], sizeof (st_orig[minor - 1]));
+  if (ptr == 0)
+    {
+      fputs ("ERROR: Could not find st pattern\n", stderr);
+      free (buffer);
+      fclose (destfile);
+      return -1;
+    }
+  st_off = ptr - buffer;
+  if (ucon64.quiet < 0)
+    printf ("st offset: 0x%08x\n", st_off);
+
+  bufferptr = buffer + p_off;
+  switch (minor)
+    {
+    case 1:
+      // these are the offsets to the caller function, it handles all saving and
+      //  is at st_off
+      p_repl[minor - 1][184] = (unsigned char) (st_off + 0x21);
+      p_repl[minor - 1][186] = (unsigned char) (st_off >> 16);
+
+      if (*--bufferptr == 0xff)
+        p_repl[minor - 1][185] = (unsigned char) (st_off >> 8);
+      else
+        {
+          st_off += 0x1f;
+          p_repl[minor - 1][185] = (unsigned char) (st_off >> 8);
+        }
+
+      // tell the calling function where the SRAM function is (p_off)
+      st_repl[minor - 1][5] = (unsigned char) (p_off >> 8);
+      st_repl[minor - 1][6] = (unsigned char) (p_off >> 16);
+      bufferptr++;
+      break;
+    case 2:
+      // offsets to the caller function
+      p_repl[minor - 1][164] = (unsigned char) (st_off + 0x13);
+      p_repl[minor - 1][165] = (unsigned char) (st_off >> 8);
+      p_repl[minor - 1][166] = (unsigned char) (st_off >> 16);
+
+      // tell the calling function where the SRAM function is (p_off)
+      st_repl[minor - 1][7] = (unsigned char) (p_off >> 8);
+      st_repl[minor - 1][8] = (unsigned char) (p_off >> 16);
+      break;
+    }
+  fseek (destfile, st_off, SEEK_SET);
+  fwrite (st_repl[minor - 1], 1, sizeof (st_repl[minor - 1]), destfile);
+  fseek (destfile, p_off, SEEK_SET);
+  fwrite (p_repl[minor - 1], 1, p_size[minor - 1], destfile);
+
+  free (buffer);
+  fclose (destfile);
+
+  puts ("SRAM patch applied");
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
@@ -324,7 +526,7 @@ gba_crp (st_rominfo_t *rominfo, const char *value)
 
   if (wait_time % 4 != 0 || wait_time > 28 || wait_time < 0)
     {
-      fprintf (stderr, "ERROR: You specified a wrong WAIT_TIME value\n");
+      fprintf (stderr, "ERROR: You specified an incorrect WAIT_TIME value\n");
       return -1;
     }
 
@@ -343,7 +545,7 @@ gba_crp (st_rominfo_t *rominfo, const char *value)
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], dest_name);
       return -1;
     }
-  if (rominfo->buheader_len)        // copy header (if present)
+  if (rominfo->buheader_len)                    // copy header (if present)
     {
       fread (buffer, 1, rominfo->buheader_len, srcfile);
       fwrite (buffer, 1, rominfo->buheader_len, destfile);
@@ -430,10 +632,10 @@ gba_init (st_rominfo_t *rominfo)
     "Unknown country";
 
   // misc stuff
-  sprintf (buf, "Version: %02x\n", gba_header.version);
+  sprintf (buf, "Version: %d\n", gba_header.version);
   strcat (rominfo->misc, buf);
 
-  sprintf (buf, "Device type: %02x\n", gba_header.device_type);
+  sprintf (buf, "Device type: 0x%02x\n", gba_header.device_type);
   strcat (rominfo->misc, buf);
 
   /*
@@ -442,7 +644,7 @@ gba_init (st_rominfo_t *rominfo)
   */
   value = 0x8000008 +
           (gba_header.start[2] << 18 | gba_header.start[1] << 10 | gba_header.start[0] << 2);
-  sprintf (buf, "Start address: %08x\n", value);
+  sprintf (buf, "Start address: 0x%08x\n", value);
   strcat (rominfo->misc, buf);
 
   strcat (rominfo->misc, "Logo data: ");
@@ -641,507 +843,5 @@ gba_multi (int truncate_size, char *multi_fname)
            size_pow2 / MBIT, size_pow2_lesser / MBIT, size_pow2_lesser / MBIT,
            totalsize / (float) MBIT);
 
-  return 0;
-}
-
-
-// TODO: Integrate the code below. This is ridiculous... - dbjh
-int
-gbautil (const char *filein, const char *fileout)
-/* gbautil version 1.1
- * SRAM, Wait State Patch, and FF Trimming Utility for Game Boy Advance
- *
- * Copyright (C) 2001 Omar Kilani <gbautil@aurore.net>
- *
- * NOTICE: You should only use this program on games you actually own.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
- */
-{
-unsigned char version[8] = {
-  0x45, 0x45, 0x50, 0x52, 0x4F, 0x4D, 0x5F
-};
-
-unsigned char st_orig[2][10] = {
-  {0x0E, 0x48, 0x39, 0x68, 0x01, 0x60, 0x0E, 0x48, 0x79, 0x68},
-  {0x13, 0x4B, 0x18, 0x60, 0x13, 0x48, 0x01, 0x60, 0x13, 0x49}
-};
-
-unsigned char st_repl[2][10] = {
-  {0x00, 0x48, 0x00, 0x47, 0x01, 0xFF, 0xFF, 0x08, 0x79, 0x68},
-  {0x01, 0x4C, 0x20, 0x47, 0x00, 0x00, 0x01, 0xFF, 0xFF, 0x08}
-};
-
-unsigned char fl_orig[2][24] = {
-  {0xD0, 0x20, 0x00, 0x05, 0x01, 0x88, 0x01, 0x22, 0x08, 0x1C, 0x10,
-   0x40, 0x02, 0x1C, 0x11, 0x04, 0x08, 0x0C, 0x00, 0x28, 0x01, 0xD0,
-   0x1B, 0xE0},
-  {0xD0, 0x21, 0x09, 0x05, 0x01, 0x23, 0x0C, 0x4A, 0x08, 0x88, 0x18,
-   0x40, 0x00, 0x28, 0x08, 0xD1, 0x10, 0x78, 0x00, 0x28, 0xF8, 0xD0,
-   0x08, 0x88}
-};
-
-unsigned char fl_repl[2][24] = {
-  {0xE0, 0x20, 0x00, 0x05, 0x01, 0x88, 0x01, 0x22, 0x08, 0x1C, 0x10,
-   0x40, 0x02, 0x1C, 0x11, 0x04, 0x08, 0x0C, 0x00, 0x28, 0x01, 0xD0,
-   0x1B, 0xE0},
-  {0xE0, 0x21, 0x09, 0x05, 0x01, 0x23, 0x0C, 0x4A, 0x08, 0x88, 0x18,
-   0x40, 0x00, 0x28, 0x08, 0xD1, 0x10, 0x78, 0x00, 0x28, 0xF8, 0xD0,
-   0x08, 0x88}
-};
-
-unsigned char p_repl[2][188] = {
-  {0x39, 0x68, 0x27, 0x48, 0x81, 0x42, 0x23, 0xD0, 0x89, 0x1C, 0x08,
-   0x88, 0x01, 0x28, 0x02, 0xD1, 0x24, 0x48, 0x78, 0x60, 0x33, 0xE0,
-   0x00, 0x23, 0x00, 0x22, 0x89, 0x1C, 0x10, 0xB4, 0x01, 0x24, 0x08,
-   0x68, 0x20, 0x40, 0x5B, 0x00, 0x03, 0x43, 0x89, 0x1C, 0x52, 0x1C,
-   0x06, 0x2A, 0xF7, 0xD1, 0x10, 0xBC, 0x39, 0x60, 0xDB, 0x01, 0x02,
-   0x20, 0x00, 0x02, 0x1B, 0x18, 0x0E, 0x20, 0x00, 0x06, 0x1B, 0x18,
-   0x7B, 0x60, 0x39, 0x1C, 0x08, 0x31, 0x08, 0x88, 0x09, 0x38, 0x08,
-   0x80, 0x16, 0xE0, 0x15, 0x49, 0x00, 0x23, 0x00, 0x22, 0x10, 0xB4,
-   0x01, 0x24, 0x08, 0x68, 0x20, 0x40, 0x5B, 0x00, 0x03, 0x43, 0x89,
-   0x1C, 0x52, 0x1C, 0x06, 0x2A, 0xF7, 0xD1, 0x10, 0xBC, 0xDB, 0x01,
-   0x02, 0x20, 0x00, 0x02, 0x1B, 0x18, 0x0E, 0x20, 0x00, 0x06, 0x1B,
-   0x18, 0x08, 0x3B, 0x3B, 0x60, 0x0B, 0x48, 0x39, 0x68, 0x01, 0x60,
-   0x0A, 0x48, 0x79, 0x68, 0x01, 0x60, 0x0A, 0x48, 0x39, 0x1C, 0x08,
-   0x31, 0x0A, 0x88, 0x80, 0x21, 0x09, 0x06, 0x0A, 0x43, 0x02, 0x60,
-   0x07, 0x48, 0x00, 0x47, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00,
-   0x00, 0x00, 0x0E, 0x04, 0x00, 0x00, 0x0E, 0xD4, 0x00, 0x00, 0x04,
-   0xD8, 0x00, 0x00, 0x04, 0xDC, 0x00, 0x00, 0x04, 0xFF, 0xFF, 0xFF,
-   0x08},
-  {0x22, 0x4C, 0x84, 0x42, 0x20, 0xD0, 0x80, 0x1C, 0x04, 0x88, 0x01,
-   0x25, 0x2C, 0x40, 0x01, 0x2C, 0x02, 0xD1, 0x80, 0x1E, 0x1E, 0x49,
-   0x2E, 0xE0, 0x00, 0x23, 0x00, 0x24, 0x80, 0x1C, 0x40, 0xB4, 0x01,
-   0x26, 0x05, 0x68, 0x35, 0x40, 0x5B, 0x00, 0x2B, 0x43, 0x80, 0x1C,
-   0x64, 0x1C, 0x06, 0x2C, 0xF7, 0xD1, 0x40, 0xBC, 0xDB, 0x01, 0x02,
-   0x24, 0x24, 0x02, 0x1B, 0x19, 0x0E, 0x24, 0x24, 0x06, 0x1B, 0x19,
-   0x19, 0x1C, 0x09, 0x3A, 0x16, 0xE0, 0x12, 0x48, 0x00, 0x23, 0x00,
-   0x24, 0x40, 0xB4, 0x01, 0x26, 0x05, 0x68, 0x35, 0x40, 0x5B, 0x00,
-   0x2B, 0x43, 0x80, 0x1C, 0x64, 0x1C, 0x06, 0x2C, 0xF7, 0xD1, 0x40,
-   0xBC, 0xDB, 0x01, 0x02, 0x24, 0x24, 0x02, 0x1B, 0x19, 0x0E, 0x24,
-   0x24, 0x06, 0x1B, 0x19, 0x08, 0x3B, 0x18, 0x1C, 0x08, 0x4C, 0x20,
-   0x60, 0x08, 0x4C, 0x21, 0x60, 0x08, 0x49, 0x80, 0x20, 0x00, 0x06,
-   0x02, 0x43, 0x0A, 0x60, 0x06, 0x4C, 0x20, 0x47, 0x00, 0x00, 0x00,
-   0x0D, 0x00, 0x00, 0x00, 0x0E, 0x04, 0x00, 0x00, 0x0E, 0xD4, 0x00,
-   0x00, 0x04, 0xD8, 0x00, 0x00, 0x04, 0xDC, 0x00, 0x00, 0x04, 0xFF,
-   0xFF, 0xFF, 0x08}
-};
-
-int p_size[2] = { 188, 168 };
-
-#define CP_PATTERN_SIZE 5
-
-unsigned char c_orig[CP_PATTERN_SIZE][6] = {
-  {0x04, 0x02, 0x00, 0x04, 0x14, 0x40},
-  {0x02, 0x00, 0x04, 0x14, 0x40, 0x00},
-  {0x04, 0x02, 0x00, 0x04, 0xB4, 0x45},
-  {0x3E, 0xE0, 0x00, 0x00, 0xB4, 0x45},
-  {0x04, 0x02, 0x00, 0x04, 0x94, 0x44}
-};
-
-unsigned char c_repl[CP_PATTERN_SIZE][6] = {
-  {0x04, 0x02, 0x00, 0x04, 0x00, 0x40},
-  {0x02, 0x00, 0x04, 0x00, 0x40, 0x00},
-  {0x04, 0x02, 0x00, 0x04, 0x00, 0x40},
-  {0x3E, 0xE0, 0x00, 0x00, 0x00, 0x40},
-  {0x04, 0x02, 0x00, 0x04, 0x00, 0x40}
-};
-
-typedef struct
-{
-  int speed;
-  unsigned char hex;
-}
-waitstate;
-
-static waitstate waitstates[] = {
-  {0, 0x00},                    /* default in most crash patches */
-  {4, 0x04},                    /* faster than 0, slower than 8 */
-  {8, 0x08},                    /* faster than 4, slower than 28 */
-  {12, 0x0C},                   /* slowest cartridge access speed */
-  {16, 0x10},                   /* faster than 28, but slower than 20 */
-  {20, 0x14},                   /* default in most original carts */
-  {24, 0x18},                   /* fastest cartridge access speed */
-  {28, 0x1C}                    /* faster than 8 but slower than 16 */
-};
-
-#define WAITSTATE_SIZE (sizeof (waitstates) / sizeof (waitstate))
-#define MAX_WAITSTATE waitstates[WAITSTATE_SIZE-1].speed
-
-
-#define SWITCH_CRASH_PATCH 0x00000002
-#define SWITCH_TRIM_FF 0x00000004
-#define SWITCH_EEPROM_PATCH 0x00000008
-#define SWITCH_DEFAULT SWITCH_EEPROM_PATCH
-  unsigned short ff, major, minor, micro, i, switches, patched;
-  unsigned long filesize, stloc, flloc, ploc, cloc;
-  unsigned char title[13], mkcode[5];
-  unsigned char *buffer, *bufferptr, *stptr, *cptr;
-  int /* c, */ waitspeed = 0;
-  FILE *in, *out;
-
-  in = out = NULL;
-  buffer = NULL;
-  ff = i = major = minor = micro = patched = switches = 0;
-  filesize = stloc = flloc = ploc = cloc = 0;
-
-#if 0
-    if (argc < 3) {
-        cptr = (strchr(argv[0], FILE_SEPARATOR) == NULL) ? argv[0] : strchr(argv[0], FILE_SEPARATOR);
-        printf("GBAUtil 1.0\n\n");
-        printf("Usage:\t%s [-c] [-p] [-t] rominfo-in.gba rominfo-out.gba\n\n", cptr);
-        printf("To patch a ROM for SRAM saving:\n");
-        printf("\t%s -p rominfo-in.gba rominfo-out.gba\n\n", cptr);
-        printf("To slow down flash access for a ROM (i.e, \"crash patch\"):\n");
-        printf("\t%s -c 0 rominfo-in.gba rominfo-out.gba\n\n", cptr);
-        printf("To trim a ROM so that you can flash multiple ROMs:\n");
-        printf("\t%s -t rominfo-in.gba rominfo-out.gba\n\n", cptr);
-        printf("You can combine two or more options, for example:\n");
-        printf("\t%s -c 0 t rominfo-in.gba rominfo-out.gba\n\n", cptr);
-        printf("Will both crash patch a ROM and trim it.\n\n");
-        printf("The default action is to patch the ROM for SRAM saving.\n\n");
-        printf("The wait state (argument to the -c flag) can be any number between 0 and 28, with a stepping of 4. I.e 0, 4, 8, 12 ...\n");
-        printf("For a standard crash patch, use 0. If that does not help, try other arguments.\n\n");
-        printf("NOTICE: You should only use this program on games you actually own.\n");
-        return -1;
-    }
-
-    while ((c = getoptx(argc,argv,"tc:p")) != -1) {
-        if (c == '?') {
-                return -1;
-        }
-        switch(c) {
-                case 'c':
-                        if (isdigit(*optarg)) {
-                        waitspeed = atol(optarg);
-                        printf("Wait Speed = %d\n", waitspeed);
-                        switches |= SWITCH_CRASH_PATCH;
-                        } else {
-                        fprintf(stderr, "You must specify a time with the -c flag.\n");
-                        exit(1);
-                        }
-                        break;
-                case 'p':
-                        switches |= SWITCH_EEPROM_PATCH;
-                        break;
-                case 't':
-                        switches |= SWITCH_TRIM_FF;
-                        break;
-        }
-    }
-#endif
-  if (switches == 0)
-    {
-      switches |= SWITCH_DEFAULT;
-    }
-
-  if (strncmp (filein, fileout, strlen (filein)) == 0)
-    {
-      printf ("Input and output filenames must differ.\n");
-      return -1;
-    }
-
-  in = fopen (filein, "rb");
-  if (in == NULL)
-    {
-      perror ("fopen");
-      return -1;
-    }
-
-  filesize = q_fsize (filein);
-  if ((filesize % 1024) != 0 || filesize == 0)
-    {
-      fprintf (stderr, "ROM dimensions do not seem correct.\n");
-      fprintf (stderr, "Size %ld is not cleanly divisable by 1024\n",
-               filesize);
-      fflush (stderr);
-      fclose (in);
-      return -1;
-    }
-
-//    printf("size = %.2fMBit\n", ((float) 8 * filesize / 1024 / 1024));
-  buffer = (unsigned char *) calloc (filesize + 1, sizeof (unsigned char));
-  if (buffer == NULL)
-    {
-      fprintf (stderr,
-               "Failed to allocate %ld bytes.\nTry again after you have freed some memory.\n",
-               filesize);
-      fflush (stderr);
-      fclose (in);
-      return -1;
-    }
-
-  if (fread (buffer, sizeof (unsigned char), filesize, in) != filesize)
-    {
-      perror ("fread");
-      fclose (in);
-      return -1;
-    }
-
-  bufferptr = buffer;
-  bufferptr += 160;
-  strncpy ((char *) title, (const char *) bufferptr, 12);
-  title[12] = 0;
-//    printf("title = %s\n", title);
-  bufferptr += 12;
-  strncpy ((char *) mkcode, (const char *) bufferptr, 4);
-  mkcode[4] = 0;
-//    printf("gamecode = %s\n", mkcode);
-  bufferptr += 4;
-  stptr = bufferptr;
-  cloc = flloc = stloc = 160 + 12 + 4;
-  cptr = bufferptr;
-
-  if (switches & SWITCH_EEPROM_PATCH)
-    {
-      while (cptr++, cloc++)
-        {
-          if (cloc == filesize)
-            {
-              printf ("This file does not contain EEPROM saving.\n");
-              free (buffer);
-              fclose (in);
-              return -1;
-            }
-          if (*cptr == version[0])
-            {
-              if (memcmp (cptr, version, 7) == 0)
-                {
-                  printf ("version location = 0x%08lX (%ld)\n", cloc, cloc);
-                  cptr += 8;
-                  major = *cptr++ - '0';
-                  minor = *cptr++ - '0';
-                  micro = *cptr - '0';
-                  break;
-                }
-            }
-        }
-
-      printf ("major = %d, minor = %d, micro = %d\n", major, minor, micro);
-
-      while (stptr++, stloc++)
-        {
-          if (stloc == filesize)
-            {
-              printf ("You have previously patched this file.\n");
-              free (buffer);
-              fclose (in);
-              return -1;
-            }
-          if (*stptr == st_orig[minor - 1][0])
-            {
-              if (memcmp
-                  (stptr, st_orig[minor - 1],
-                   sizeof (st_orig[minor - 1]) / sizeof (unsigned char)) == 0)
-                {
-                  printf ("st location = 0x%08lX (%ld)\n", stloc, stloc);
-                  break;
-                }
-            }
-        }
-
-      /* these are the offsets to the caller function, it handles all saving
-         * and is at stloc */
-      switch (minor)
-        {
-        case 1:
-          p_repl[minor - 1][184] = (unsigned char) (stloc + 0x21);
-          p_repl[minor - 1][186] = (unsigned char) (stloc >> 16);
-          break;
-        case 2:
-          p_repl[minor - 1][164] = (unsigned char) (stloc + 0x13);
-          p_repl[minor - 1][165] = (unsigned char) (stloc >> 8);
-          p_repl[minor - 1][166] = (unsigned char) (stloc >> 16);
-          break;
-        default:
-          free (buffer);
-          fclose (in);
-          return -1;
-        }
-
-      bufferptr = stptr;
-      flloc = stloc;
-      while (bufferptr++, flloc++)
-        {
-          if (*bufferptr == fl_orig[minor - 1][0])
-            {
-              if (memcmp
-                  (bufferptr, fl_orig[minor - 1],
-                   sizeof (fl_orig[minor - 1]) / sizeof (unsigned char)) == 0)
-                {
-                  printf ("fl location = 0x%08lX (%ld)\n", flloc, flloc);
-                  break;
-                }
-            }
-        }
-      memcpy (bufferptr, fl_repl[minor - 1],
-              sizeof (fl_repl[minor - 1]) / sizeof (unsigned char));
-
-      bufferptr = buffer + filesize - 1;
-      ploc = filesize;
-
-      /* here we skip all extrenouos 0xFF's (if the last byte in file is 0xFF)
-         * we stop at the first difference in the pattern, and then we skip
-         * x bytes so that we're aligned with a 256 byte code block */
-      ff = (*bufferptr == 0xFF);
-      while (*bufferptr == 0xFF || *bufferptr == 0x00)
-        {
-          ploc--;
-          if (ff && *bufferptr == 0x00)
-            {
-              break;
-            }
-          bufferptr--;
-        }
-
-      ploc += (256 - (ploc % 256));
-      /* if the sram function won't fit at the end of the ROM, abort */
-      if ((minor == 1 && filesize - 188 < ploc)
-          || (minor == 2 && filesize - 168 < ploc))
-        {
-          printf ("Not enough room at end of ROM, aborting ...\n");
-          free (buffer);
-          fclose (in);
-          return -1;
-        }
-
-      bufferptr = buffer;
-      bufferptr += (int) ploc;
-      printf ("ploc = 0x%08lX (%ld)\n", ploc, ploc);
-
-      /* tell the calling function where the sram function is (ploc) */
-      switch (minor)
-        {
-        case 1:
-          if (*--bufferptr == 0xFF)
-            {
-              p_repl[minor - 1][185] = (unsigned char) (stloc >> 8);
-            }
-          else
-            {
-              stloc += 0x1F;
-              p_repl[minor - 1][185] = (unsigned char) (stloc >> 8);
-            }
-          st_repl[minor - 1][5] = (unsigned char) (ploc >> 8);
-          st_repl[minor - 1][6] = (unsigned char) (ploc >> 16);
-          bufferptr++;
-          break;
-        case 2:
-          st_repl[minor - 1][7] = (unsigned char) (ploc >> 8);
-          st_repl[minor - 1][8] = (unsigned char) (ploc >> 16);
-          break;
-        default:
-          free (buffer);
-          fclose (in);
-          return -1;
-        }
-      memcpy (stptr, st_repl[minor - 1],
-              sizeof (st_repl[minor - 1]) / sizeof (unsigned char));
-      memcpy (bufferptr, p_repl[minor - 1], p_size[minor - 1]);
-      printf ("SRAM patch applied.\n");
-    }
-
-  if (switches & SWITCH_CRASH_PATCH)
-    {
-      for (i = 0; i < CP_PATTERN_SIZE; i++)
-        {
-          cloc = 160 + 12 + 4;
-          cptr = buffer + (int) cloc;
-          while (cptr++, cloc++)
-            {
-              if (cloc == filesize)
-                {
-                  if (i == (CP_PATTERN_SIZE - 1) && patched == 0)
-                    {
-                      printf
-                        ("This file has been previously crash patched.\n");
-                      printf
-                        ("Or, there is no support for this particular ROM.\n"
-                         "Report it to gbautil@aurore.net\n");
-                      if (switches == SWITCH_CRASH_PATCH)
-                        {
-                          free (buffer);
-                          fclose (in);
-                          return -1;
-                        }
-                      else
-                        {
-                          goto out;
-                        }
-                    }
-                  else
-                    {
-                      break;
-                    }
-                }
-              if (*cptr == c_orig[i][0])
-                {
-                  if (memcmp (cptr, c_orig[i], 6) == 0)
-                    {
-                      printf ("i = %d, c location = 0x%08lX (%ld)\n", i, cloc,
-                              cloc);
-                      patched++;
-                      break;
-                    }
-                }
-            }
-          c_repl[0][4] = waitstates[waitspeed].hex;
-          c_repl[1][3] = waitstates[waitspeed].hex;
-          c_repl[2][4] = waitstates[waitspeed].hex;
-          c_repl[3][4] = waitstates[waitspeed].hex;
-          c_repl[4][4] = waitstates[waitspeed].hex;
-          memcpy (cptr, c_repl[i], 6);
-        }
-      printf ("Crash patch applied.\n");
-    }
-out:
-
-  if (switches & SWITCH_TRIM_FF)
-    {
-      bufferptr = buffer + filesize - 1;
-      while (*bufferptr == 0xFF)
-        {
-          *bufferptr-- = 0;
-        }
-      printf ("File trimmed.\n");
-    }
-
-  out = fopen (fileout, "wb+");
-  if (out == NULL)
-    {
-      perror ("fopen");
-      free (buffer);
-      fclose (in);
-      return -1;
-    }
-
-  rewind (out);
-  printf ("Writing %s... ", fileout);
-  if (fwrite (buffer, sizeof (unsigned char), filesize, out) != filesize)
-    {
-      fputc ('\n', stdout);
-      perror ("fwrite");
-      free (buffer);
-      fclose (in);
-      fclose (out);
-      return -1;
-    }
-
-  free (buffer);
-  fclose (in);
-  fclose (out);
-//  printf ("Done\n");
   return 0;
 }

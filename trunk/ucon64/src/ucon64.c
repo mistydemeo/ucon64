@@ -1,10 +1,15 @@
 /*
-uCON64 1.9.6 by NoisyB (noisyb@gmx.net)
+uCON64 1.9.6
+
 uCON64 is a tool to modify video game ROMs and to transfer ROMs to the
 different backup units/emulators that exist. It is based on the old uCON but
-with completely new src. It supports N64, PSX, JAG, SNES, NG,
-SEGA, GB, LYNX, PCE, SMS, GG, C64, NES, ATARI and backup units.
-Copyright (C) 1999/2000/2001 NoisyB (noisyb@gmx.net)
+with completely new source. It aims to support all cartridge consoles and
+handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
+their backup units
+
+Copyright (C) 1999 - 2001 NoisyB (noisyb@gmx.net)
+
+
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

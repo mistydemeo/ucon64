@@ -55,11 +55,13 @@ ffe_init_io (unsigned int port)
 */
 {
   ffe_port = port;
+#if 0 // we want to support non-standard parallel port addresses
   if (ffe_port != 0x3bc && ffe_port != 0x378 && ffe_port != 0x278)
     {
       fprintf (stderr, "ERROR: PORT must be 0x3bc, 0x378 or 0x278\n");
       exit (1);
     }
+#endif
 
 #if     (defined __unix__ || defined __BEOS__) && !defined __MSDOS__
   init_conio ();

@@ -41,11 +41,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 #ifdef  PARALLEL
-#ifdef  __FreeBSD__
-#include <machine/sysarch.h>
-#elif   defined __linux__ && defined __GLIBC__
+#if     defined __linux__ && defined __GLIBC__
 #include <sys/io.h>                             // ioperm() (glibc)
-#elif   defined __BEOS__ || defined AMIGA
+#elif   defined __BEOS__ || defined AMIGA || defined __FreeBSD__
 #include <fcntl.h>
 #elif   defined _WIN32
 #include <conio.h>                              // inp{w}() & outp{w}()
@@ -374,9 +372,9 @@ const st_usage_t ucon64_options_usage[] = {
 #ifdef  PARALLEL
   {"port", "PORT", "specify parallel PORT={3bc, 378, 278, ...}"},
 #endif
-  {"hdn", "N", "force ROM has backup unit/emulator header with N Bytes size"},
+  {"hdn", "N", "force ROM has backup unit/emulator header with size of N Bytes"},
   {"hd", NULL, "same as " OPTION_LONG_S "hdn=512\n"
-                   "most backup units use a header with 512 Bytes size"},
+                   "most backup units use a header with a size of 512 Bytes"},
   {"nhd", NULL, "force ROM has no backup unit/emulator header"},
   {"int", NULL, "force ROM is interleaved (2143)"},
   {"nint", NULL, "force ROM is not interleaved (1234)"},
@@ -416,12 +414,12 @@ const st_usage_t ucon64_padding_usage[] = {
   {"p", NULL, "same as " OPTION_LONG_S "pad"},
   {"padn", "N", "pad ROM to N Bytes (put Bytes with value 0x00 after end)"},
   {"strip", "N", "strip N Bytes from end of ROM"},
-  {"stpn", "N", "strip N Bytes from ROM beginning"},
+  {"stpn", "N", "strip N Bytes from start of ROM"},
   {"stp", NULL, "same as " OPTION_LONG_S "stpn=512\n"
-            "most backup units use a header with 512 Bytes size"},
+            "most backup units use a header with a size of 512 Bytes"},
   {"insn", "N", "insert N Bytes (0x00) before ROM"},
   {"ins", NULL, "same as " OPTION_LONG_S "insn=512\n"
-             "most backup units use a header with 512 Bytes size"},
+             "most backup units use a header with a size of 512 Bytes"},
   {NULL, NULL, NULL}
 };
 
@@ -689,9 +687,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
 #ifdef  PARALLEL
   {UCON64_XFALM, UCON64_GBA, fal_usage,        WF_SWITCH},
 #endif
-#ifdef  GUI
-  {UCON64_GUI, UCON64_UNKNOWN, libng_usage,  WF_DEFAULT},
-#endif  
   {0, 0, NULL, 0}
 };
 
@@ -1337,7 +1332,7 @@ void (*output_word) (unsigned short, unsigned short) = outpw_func;
 #endif // defined _WIN32 || defined __CYGWIN__
 
 
-#if     defined __BEOS__ || defined AMIGA
+#if     defined __BEOS__ || defined AMIGA || defined __FreeBSD__
 void
 close_io_port (void)
 {
@@ -1422,14 +1417,6 @@ ucon64_parport_probe (unsigned int port)
 {
   int i = 0;
 
-#ifdef  __FreeBSD__
-  if (i386_set_ioperm (port, 1, 1) == -1)
-    return -1;
-#elif   defined __linux__
-  if (ioperm (port, 1, 1) == -1)
-    return -1;
-#endif
-
   outportb ((unsigned short) port, 0xaa);
   for (i = 0; i < DETECT_MAX_CNT; i++)
     if (inportb ((unsigned short) port) == 0xaa)
@@ -1443,14 +1430,6 @@ ucon64_parport_probe (unsigned int port)
           break;
     }
 
-#ifdef  __FreeBSD__
-  if (i386_set_ioperm (port, 1, 0) == -1)
-    return -1;
-#elif   defined __linux__
-  if (ioperm (port, 1, 0) == -1)
-    return -1;
-#endif
-
   if (i >= DETECT_MAX_CNT)
     return 0;
 
@@ -1461,7 +1440,7 @@ ucon64_parport_probe (unsigned int port)
 unsigned int
 ucon64_parport_init (unsigned int port)
 {
-#ifdef  __BEOS__
+#if     defined __BEOS__
   ucon64_io_fd = open ("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
   if (ucon64_io_fd == -1)
     {
@@ -1481,21 +1460,23 @@ ucon64_parport_init (unsigned int port)
                   "         http://ucon64.sourceforge.net\n\n");
         }
     }
-
-  if (atexit (close_io_port) == -1)
-    {
-      close (ucon64_io_fd);
-      fprintf (stderr, "ERROR: Could not register function with atexit()\n");
-      exit (1);
-    }
-#endif
-#ifdef  AMIGA
+#elif   defined AMIGA
   ucon64_io_fd = open ("PAR:", O_RDWR | O_NONBLOCK);
   if (ucon64_io_fd == -1)
     {
       fprintf (stderr, "ERROR: Could not open parallel port\n");
       exit (1);
     }
+#elif   defined __FreeBSD__
+  ucon64_io_fd = open ("/dev/io", O_RDWR);
+  if (ucon64_io_fd == -1)
+    {
+      fprintf (stderr, "ERROR: Could not open I/O port device (/dev/io)\n"
+                       "       (This program needs root privileges for the requested action)\n");
+      exit (1);
+    }
+#endif
+#if     defined __BEOS__ || defined AMIGA || defined __FreeBSD__
   if (atexit (close_io_port) == -1)
     {
       close (ucon64_io_fd);
@@ -1503,6 +1484,28 @@ ucon64_parport_init (unsigned int port)
       exit(1);
     }
 #endif
+
+#ifdef  __linux__
+  /*
+    Some code needs us to switch to the real uid and gid. However, other code
+    needs access to I/O ports other than the standard printer port registers.
+    We just do an iopl(3) and all code should be happy. Using iopl(3) enables
+    users to run all code without being root (of course with the uCON64
+    executable setuid root).
+    Another reason to use iopl() and not ioperm() is that the former enables
+    access to all I/O ports, while the latter enables access to ports up to
+    0x3ff. For the standard parallel port hardware addresses this is not a
+    problem. It *is* a problem for add-on parallel port cards which can be
+    mapped to I/O addresses above 0x3ff.
+  */
+  if (iopl (3) == -1) // __NetBSD__ => (i386_iopl (3) != 0), add after feature request ;-)
+    {
+      fprintf (stderr, "ERROR: Could not set the I/O privilege level to 3\n"
+                       "       (This program needs root privileges for the requested action)\n");
+      exit (1);                                 // Don't return, if iopl() fails port access
+    }                                           //  causes core dump
+#endif // __linux__
+
 #if     defined __i386__ || defined _WIN32
 
 #if     defined _WIN32 || defined __CYGWIN__
@@ -1515,7 +1518,7 @@ ucon64_parport_init (unsigned int port)
   */
   char fname[FILENAME_MAX];
   int driver_found = 0;
-  
+
   sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, "io.dll");
 #if 0 // We must not do this for Cygwin or access() won't "find" the file
   change_mem (fname, strlen (fname), "/", 1, 0, 0, "\\", 1, 0);
@@ -1524,7 +1527,7 @@ ucon64_parport_init (unsigned int port)
     {
       io_driver = open_module (fname);
 
-      IsDriverInstalled = 
+      IsDriverInstalled =
 #ifdef  __cplusplus // this is really nice: gcc wants something else than g++...
                           (short int (WINAPI *) ())
 #endif
@@ -1534,12 +1537,12 @@ ucon64_parport_init (unsigned int port)
           driver_found = 1;
           printf ("Using %s\n", fname);
 
-          PortIn = 
+          PortIn =
 #ifdef  __cplusplus
                    (char (WINAPI *) (short int))
 #endif
                    get_symbol (io_driver, "PortIn");
-          PortWordIn = 
+          PortWordIn =
 #ifdef  __cplusplus
                        (short int (WINAPI *) (short int))
 #endif
@@ -1569,7 +1572,7 @@ ucon64_parport_init (unsigned int port)
           driver_found = 1;
           printf ("Using %s\n", fname);
           io_driver = open_module (fname);
-          Inp32 = 
+          Inp32 =
 #ifdef  __cplusplus
                   (unsigned char (__stdcall *) (unsigned short))
 #endif
@@ -1605,42 +1608,11 @@ ucon64_parport_init (unsigned int port)
           exit (1);
         }
     }
-#endif // __i386__
+#endif // __i386__ || _WIN32
 
-#if     defined __linux__ || defined __FreeBSD__
-#ifdef  __FreeBSD__
-  if (i386_set_ioperm (port, 3, 1) == -1)       // data, status & control
-#else
-  if (ioperm (port, 3, 1) == -1)                // data, status & control
-#endif
-    {
-      fprintf (stderr,
-              "ERROR: Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
-              "       (This program needs root privileges for the requested action)\n",
-              port + PARPORT_DATA, port + PARPORT_STATUS, port + PARPORT_CONTROL);
-      exit (1);                                 // Don't return, if ioperm() fails port access
-    }                                           //  causes core dump
-#endif // __linux__ || __FreeBSD__
-
-  outportb ((unsigned short) (port + PARPORT_CONTROL), 
+  outportb ((unsigned short) (port + PARPORT_CONTROL),
             (unsigned char) (inportb ((unsigned short) (port + PARPORT_CONTROL)) & 0x0f));
   // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
-
-#ifdef  __linux__
-  /*
-    Some code needs us to switch to the real uid and gid. However, other code
-    needs access to I/O ports other than the standard printer port registers.
-    We just do an iopl(3) and all code should be happy. Using iopl(3) enables
-    users to run all code without being root (of course with the uCON64
-    executable setuid root). Anyone a better idea?
-  */
-  if (iopl (3) == -1)
-    {
-      fprintf (stderr, "ERROR: Could not set the I/O privilege level to 3\n"
-                       "       (This program needs root privileges for the requested action)\n");
-      return 1;
-    }
-#endif // __linux__
 
   return port;
 }

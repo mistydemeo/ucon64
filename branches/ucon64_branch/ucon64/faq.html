@@ -334,10 +334,10 @@ Q44: <a href="#44">What tools do you recommend besides uCON64?</a><br>
    to be done on the command line. You could also use a program with a GUI
    (Graphical User Interface) like KDE's ark or a similar program.<br>
    After you have extracted the package install uCON64 by running the install
-   script. If you do not have root access on Unix, copy the uCON64 executable
+   script. On Unix, if you do not have root access, copy the uCON64 executable
    to a directory in your PATH. If you do have root access, run the shell
-   script install.sh on Unix or install_beos.sh on BeOS. So, for Unix do
-   something like this:<br>
+   script install.sh. On BeOS just run the script install_beos.sh. So, for Unix
+   do something like this:<br>
    &nbsp;&nbsp; cd ucon64-1.9.8-1-linux-bin<br>
    &nbsp;&nbsp; ./install.sh<br>
 <br>
@@ -540,7 +540,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    command line. For example:<br>
    &nbsp;&nbsp; ucon64 -xfal demo.gba -port 0x278<br>
 <br>
-   The I/O address of the parallel port can be 0x3bc, 0x378 or 0x278. If you
+   The I/O address of the parallel port could be 0x3bc, 0x378 or 0x278. If you
    do not want to type the address of the parallel port everytime you want to
    transfer something to your FAL (or another copier) edit .ucon64rc or
    ucon64.cfg (for the DOS version) and remove the hash symbol in front of the

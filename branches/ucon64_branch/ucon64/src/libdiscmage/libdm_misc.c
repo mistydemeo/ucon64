@@ -478,6 +478,7 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
   if (!image)
 //    image = (dm_image_t *) malloc (sizeof (dm_image_t));
     image = (dm_image_t *) &image2;
+  memset (image, 0, sizeof (dm_image_t));
   if (!image)
     return NULL;
 
@@ -510,9 +511,10 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
 
       if (track->mode != 0) // AUDIO/2352 has no iso header
         track->iso_header_start = track->track_start + (track->sector_size * (16 + track->pregap_len)) + track->seek_header;
-#ifdef  DEBUG
+
       printf ("iso header offset: %d\n\n", track->iso_header_start);
-#endif
+      fflush (stdout);
+
       track->desc = dm_get_track_desc (track->mode, track->sector_size, TRUE);
     }
 
@@ -689,7 +691,7 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
 
       if (flags & DM_2048)
         result = fwrite (&buf[track->seek_header], 1, 2048, fh2);
-      else if (flags & DM_CDMAGE) // cdmage compat. flag
+      else // if (flags & DM_CDMAGE) // cdmage compat. flag
         {
           const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
                             (const char) 0xff, (const char) 0xff,
@@ -708,8 +710,8 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
           result += fwrite (&buf, 1, track->sector_size, fh2);
           result += fwrite (&buf2, 1, track->seek_ecc, fh2); // padding
         }
-      else
-        result = fwrite (&buf, 1, track->sector_size, fh2);
+//      else
+//        result = fwrite (&buf, 1, track->sector_size, fh2);
 
       if (!result)
         {

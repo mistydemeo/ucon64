@@ -350,7 +350,7 @@ f2a_connect_usb (void)
   struct usb_device *dev, *f2adev = NULL;
 
   get_property_fname (ucon64.configfile, "f2afirmware", f2afirmware_fname, "f2afirm.hex");
-  if (ucon64_fread (f2afirmware, 0, F2A_FIRM_SIZE, f2afirmware_fname) == -1)
+  if (ucon64_fread (f2afirmware, 0, F2A_FIRM_SIZE, f2afirmware_fname) <= 0)
     {
       fprintf (stderr, "ERROR: Could not load F2A firmware (%s)\n", f2afirmware_fname);
       exit (1);                                 // fatal
@@ -534,7 +534,7 @@ f2a_boot_usb (const char *ilclient_fname)
           "Uploading iLinker client\n"
           "Please turn OFF, then ON your GBA with SELECT and START held down\n");
 
-  if (ucon64_fread (ilclient, 0, 16 * 1024, ilclient_fname) == -1)
+  if (ucon64_fread (ilclient, 0, 16 * 1024, ilclient_fname) <= 0)
     {
       fprintf (stderr, "ERROR: Could not load GBA client binary (%s)\n", ilclient_fname);
       return -1;
@@ -635,7 +635,7 @@ f2a_write_usb (int n_files, char **files, int address)
     {
       printf ("Uploading multiloader\n");
       get_property_fname (ucon64.configfile, "gbaloader", loader_fname, "loader.bin");
-      if (ucon64_fread (loader, 0, LOADER_SIZE, loader_fname) == -1)
+      if (ucon64_fread (loader, 0, LOADER_SIZE, loader_fname) <= 0)
         {
           fprintf (stderr, "ERROR: Could not load loader binary (%s)\n", loader_fname);
           return -1;
@@ -933,7 +933,7 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
       unsigned char ilogo[LOGO_SIZE];
 
       printf ("Uploading iLinker logo\n");
-      if (ucon64_fread (ilogo, 0, LOGO_SIZE, ilogo_fname) == -1)
+      if (ucon64_fread (ilogo, 0, LOGO_SIZE, ilogo_fname) <= 0)
         {
           fprintf (stderr, "ERROR: Could not load logo file (%s)\n", ilogo_fname);
           return -1;
@@ -947,7 +947,7 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
     }
 
   printf ("Uploading iLinker client\n");
-  if (ucon64_fread (iclientp, 0, BOOT_SIZE, iclientp_fname) == -1)
+  if (ucon64_fread (iclientp, 0, BOOT_SIZE, iclientp_fname) <= 0)
     {
       fprintf (stderr, "ERROR: Could not load GBA client binary (%s)\n", iclientp_fname);
       return -1;
@@ -973,7 +973,7 @@ f2a_write_par (int n_files, char **files, unsigned int address)
     {
       printf ("Uploading multiloader\n");
       get_property_fname (ucon64.configfile, "gbaloader", loader_fname, "loader.bin");
-      if (ucon64_fread (loader, 0, LOADER_SIZE, loader_fname) == -1)
+      if (ucon64_fread (loader, 0, LOADER_SIZE, loader_fname) <= 0)
         {
           fprintf (stderr, "ERROR: Could not load loader binary (%s)\n", loader_fname);
           return -1;

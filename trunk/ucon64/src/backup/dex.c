@@ -21,30 +21,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
+#include "misc.h"
+#include "ucon64.h"
+#include "ucon64_db.h"
+#include "ucon64_misc.h"
+
 const char *dex_usage[] =
   {
     "DexDrive",
-    "InterAct http://www.dexdrive.de",
-#ifdef TODO
-#warning TODO  -xdex    send/receive SRAM to/from DexDrive
-#endif // TODO
-#if 0
-    "TODO:  -xdex    send/receive SRAM to/from DexDrive; " OPTION_LONG_S "file=PORT\n"
-    "		receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n",
-#endif
+    "19XX InterAct http://www.dexdrive.de",
+    "TODO: " OPTION_LONG_S "xdex    send/receive SRAM to/from DexDrive; " OPTION_LONG_S "file=PORT\n"
+    "                  receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n",
     NULL
   };
 
 
 #ifdef BACKUP
-#include "misc.h"
-#include "ucon64.h"
-#include "ucon64_db.h"
-#include "ucon64_misc.h"
 #include "dex.h"
 #include "psxpblib.h"
 
-#define BASE_ADDR 0x378
+static int print_data = 0x378;
+
 #define CONPORT 1
 #define TAP 1
 #define DELAY 4
@@ -53,35 +50,76 @@ const char *dex_usage[] =
 char *
 read_block (int block_num, char *data)
 {
-  data = psx_memcard_read_block (BASE_ADDR, CONPORT, TAP, DELAY, block_num);
+  data = psx_memcard_read_block (print_data, CONPORT, TAP, DELAY, block_num);
   return data;
 }
 
 int
 write_block (int block_num, char *data)
 {
-  return psx_memcard_write_block (BASE_ADDR, CONPORT, TAP, DELAY, block_num,
+  return psx_memcard_write_block (print_data, CONPORT, TAP, DELAY, block_num,
                                   data);
 }
 
 char *
 read_frame (int frame, char *data)
 {
-  data = psx_memcard_read_frame (BASE_ADDR, CONPORT, TAP, DELAY, frame);
+  data = psx_memcard_read_frame (print_data, CONPORT, TAP, DELAY, frame);
   return data;
 }
 
 int
 write_frame (int frame, char *data)
 {
-  return psx_memcard_write_frame (BASE_ADDR, CONPORT, TAP, DELAY, frame,
+  return psx_memcard_write_frame (print_data, CONPORT, TAP, DELAY, frame,
                                   data);
 }
 
 int
 get_perm ()
 {
-  return psx_obtain_io_permission (BASE_ADDR);
+  return psx_obtain_io_permission (print_data);
+}
+
+/*
+  It will save you some work if you don't fully integrate the code above with uCON64's code,
+  because it is a project separate from the uCON64 project.
+*/
+int dex_argc;
+char *dex_argv[128];
+
+
+int
+dex_read_rom (const char *filename, unsigned int parport)
+{
+  print_data = parport;
+#if 0
+  dex_argv[0] = "ucon64";
+  dex_argv[1] = "READ";
+  strcpy (buf, filename);
+  dex_argv[2] = buf;
+  dex_argc = 3;
+
+  return dex_main (dex_argc, dex_argv);
+#endif  
+  return 0;
+}
+
+
+int
+dex_write_rom (const char *filename, unsigned int parport)
+{
+  print_data = parport;
+#if 0
+  dex_argv[0] = "ucon64";
+  dex_argv[1] = "WRITE";
+  strcpy (buf, filename);
+  dex_argv[2] = buf;
+  dex_argc = 3;
+
+  return dex_main (dex_argc, dex_argv);
+#endif
+  return 0;
 }
 
 #endif // BACKUP

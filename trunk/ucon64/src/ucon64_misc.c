@@ -663,13 +663,44 @@ seek_pvd (int sector_size, int mode, const char *filename)
 
 
 const char *
-ucon64_rom_in_archive (DIR *dp, const char *archive, char *romname,
+ucon64_rom_in_archive (DIR **dp, const char *archive, char *romname,
                        const char *configfile)
 {
-  if (!(dp = opendir2 (archive, configfile, "%s_extract", NULL))) return archive;
+#if 0
+  struct dirent *ep;
+  struct stat puffer;
+  char buf[FILENAME_MAX], cwd[FILENAME_MAX];
 
-//find rom in dp and return it as romname
+#ifdef UNZIP
+  if (!stricmp (GETEXT (archive), ".zip"))
+    {
+//use libz
 
+    }
+#endif // UNZIP
+
+#ifndef __MSDOS__ 
+  getcwd (cwd, FILENAME_MAX);
+  sprintf (buf, "%s" FILE_SEPARATOR_S "%s", cwd, archive);
+//  strcpy (buf, archive);
+
+  if (!(*dp = opendir2 (buf, configfile, NULL, NULL))) return archive;
+
+  chdir (buf);
+
+  while ((ep = readdir (*dp)))  //find rom in dp and return it as romname
+    if (!stat (ep->d_name, &puffer))
+      if (S_ISREG (puffer.st_mode))
+        {
+          sprintf (romname, "%s" FILE_SEPARATOR_S "%s", buf, ep->d_name);
+          chdir (cwd);
+
+          return romname;
+        }
+
+  chdir (cwd);
+#endif
+#endif
   return archive;
 }
 
@@ -1051,6 +1082,7 @@ ucon64_configfile (void)
                  "emulate_cdi=\n"
                  "emulate_3do=\n"
                  "emulate_gp32=\n"
+#ifndef __MSDOS__
                  "#\n"
                  "# LHA support\n"
                  "#\n"
@@ -1071,6 +1103,7 @@ ucon64_configfile (void)
                  "# ACE support\n"
                  "#\n"
                  "ace_extract=unace e %s\n"
+#endif
 #ifdef BACKUP_CD
                  "#\n"
                  "# uCON64 can operate as frontend for CD burning software to make backups\n"
@@ -1128,5 +1161,203 @@ ucon64_configfile (void)
       sync ();
       printf ("OK\n\n");
     }
+  return 0;
+}
+
+
+int
+toc2cue (char *filename)
+{
+#if 0
+#include "util.h"
+#include "Toc.h"
+
+static const char *PRGNAME = NULL;
+static int VERBOSE = 1;
+
+//  message(0, "\nUsage: %s [-v #] { -V | input-toc-file output-cue-file}", PRGNAME);
+#endif
+#if 0
+  char *tocFile, *cueFile;
+  Toc *toc;
+
+  PRGNAME = *argv;
+  
+  Msf start, end;
+  const Track *trun;
+  int trackNr;
+  TrackIterator titr(toc);
+  char *binFileName = NULL;
+  int err = 0;
+
+  // first make some consistency checks, surely not complete to identify
+  // toc-files that can be correctly converted to cue files
+  for (trun = titr.first(start, end), trackNr = 1;
+       trun != NULL;
+       trun = titr.next(start, end), trackNr++) {
+    const SubTrack *strun;
+    int stcount;
+    TrackData::Type sttype1, sttype2;
+    SubTrackIterator stitr(trun);
+
+    switch (trun->type()) {
+    case TrackData::MODE0:
+    case TrackData::MODE2_FORM2:
+      message(-2, "Cannot convert: track %d has unsupported mode.", trackNr);
+      err = 1;
+      break;
+    default:
+      break;
+    }
+
+    for (strun = stitr.first(), stcount = 0;
+	 strun != NULL;
+	 strun = stitr.next(), stcount++) {
+
+      // store types of first two sub-tracks for later evaluation
+      switch (stcount) {
+      case 0:
+	sttype1 = strun->TrackData::type();
+	break;
+      case 1:
+	sttype2 = strun->TrackData::type();
+	break;
+      }
+
+      // check if whole toc-file just references a single bin file
+      if (strun->TrackData::type() == TrackData::DATAFILE) {
+	if (binFileName == NULL) {
+	  binFileName = strdupCC(strun->filename());
+	}
+	else {
+	  if (strcmp(binFileName, strun->filename()) != 0) {
+	    message(-2, "Cannot convert: toc-file references multiple data files.");
+	    err = 1;
+	  }
+	}
+      }
+    }
+
+    switch (stcount) {
+    case 0:
+      message(-2, "Cannot convert: track %d references no data file.",
+	      trackNr);
+      err = 1;
+      break;
+
+    case 1:
+      if (sttype1 != TrackData::DATAFILE) {
+	message(-2, "Cannot convert: track %d references no data file.",
+	      trackNr);
+	err = 1;
+      }
+      break;
+
+    case 2:
+      if (sttype1 != TrackData::ZERODATA || sttype2 != TrackData::DATAFILE) {
+	message(-2, "Cannot convert: track %d has unsupported layout.",
+		trackNr);
+	err = 1;
+      }
+      break;
+
+    default:
+      message(-2, "Cannot convert: track %d has unsupported layout.", trackNr);
+      err = 1;
+      break;
+    }
+  }
+
+  if (binFileName == NULL) {
+    message(-2, "Cannot convert: toc-file references no data file.");
+    err = 1;
+  }
+
+  if (err) {
+    message(-2, "Cannot convert toc-file '%s' to a cue file.", tocFile);
+    exit(1);
+  }
+
+  ofstream out(cueFile);
+
+  if (!out) {
+    message(-2, "Cannot open cue file \'%s\' for writing: %s", cueFile,
+	    strerror(errno));
+    exit(1);
+  }
+
+  out << "FILE \"" << binFileName << "\" BINARY" << endl;
+
+  long offset = 0;
+
+  for (trun = titr.first(start, end), trackNr = 1;
+       trun != NULL;
+       trun = titr.next(start, end), trackNr++) {
+    out << "  TRACK ";
+    out.form("%02d ", trackNr);
+
+    switch (trun->type()) {
+    case TrackData::AUDIO:
+      out << "AUDIO";
+      break;
+    case TrackData::MODE1:
+    case TrackData::MODE2_FORM1:
+      out << "MODE1/2048";
+      break;
+    case TrackData::MODE2:
+    case TrackData::MODE2_FORM_MIX:
+      out << "MODE2/2336";
+      break;
+    case TrackData::MODE1_RAW:
+      out << "MODE1/2352";
+      break;
+    case TrackData::MODE2_RAW:
+      out << "MODE2/2352";
+      break;
+    default:
+      break;
+    }
+    
+    out << endl;
+
+    const SubTrack *strun;
+    SubTrackIterator stitr(trun);
+    int pregap = 0;
+
+    for (strun = stitr.first(); strun != NULL; strun = stitr.next()) {
+      if (strun->TrackData::type() == TrackData::ZERODATA) {
+	out << "    PREGAP " << trun->start().str() << endl;
+	pregap = 1;
+      }
+      else {
+	if (!pregap && trun->start().lba() != 0) {
+	  out << "    INDEX 00 " << Msf(offset).str() << endl;
+	  out << "    INDEX 01 " 
+	      << Msf(offset + trun->start().lba()).str() << endl;
+	}
+	else {
+	  out << "    INDEX 01 " << Msf(offset).str() << endl;
+	}
+
+	offset += trun->length().lba();
+
+	if (pregap)
+	  offset -= trun->start().lba();
+      }
+    }
+  } 
+
+
+  fprintf (stderr, "NOTE: the resulting cue file is only valid if the\n"
+    "      toc-file was created with cdrdao using the commands 'read-toc'\n"
+    "      or 'read-cd'. For manually created or edited toc-files the\n"
+    "      cue file may not be correct. This program just checks for\n"
+    "      the most obvious toc-file features that cannot be converted to\n"
+    "      a cue file.\n"
+    "      Furthermore, if the toc-file contains audio tracks the byte\n"
+    "      order of the image file will be wrong which results in static\n"
+    "      noise when the resulting cue file is used for recording\n"
+    "      (even with cdrdao itself).");
+#endif
   return 0;
 }

@@ -24,17 +24,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <time.h>
 #include "config.h"                             // config.h might define BACKUP
-#ifdef  __unix__
-#include <unistd.h>                             // usleep(), microseconds
-#elif   defined __MSDOS__
-#include <dos.h>                                // delay(), milliseconds
-#elif   defined __BEOS__
-#include <OS.h>                                 // snooze(), microseconds
-#endif
 #include "misc.h"                               // including misc.h after OS.h
-#include "ucon64.h"                             //  avoids warnings about MIN & MAX
+#include "quick_io.h"                           //  avoids warnings about MIN & MAX
+#include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
+#include "ffe.h"
 #include "smd.h"
 
 
@@ -52,9 +47,80 @@ const char *smd_usage[] =
 
 
 #ifdef BACKUP
+
+
+#define BUFFERSIZE      16384
+
+
 int
 smd_read_rom (const char *filename, unsigned int parport)
 {
+  FILE *file;
+  unsigned char *buffer, byte;
+  int size, blocksdone = 0, blocksleft, bytesreceived = 0;
+  time_t starttime;
+
+  ffe_init_io (parport);
+
+  if ((file = fopen (filename, "wb")) == NULL)
+    {
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      exit (1);
+    }
+
+  ffe_send_command (1, 0xdff1, 1);
+  byte = ffe_receiveb ();
+  if ((0x81 ^ byte) != ffe_receiveb ())
+    printf ("received data is corrupt\n");
+
+  blocksleft = 8 * byte;
+  if (blocksleft == 0)
+    {
+      fprintf (stderr, "ERROR: There is no cartridge present in the Super Magic Drive\n");
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
+
+  memset (buffer, 0, SMD_HEADER_LEN);
+  buffer[0] = blocksleft;
+  buffer[1] = 3;
+  buffer[8] = 0xaa;
+  buffer[9] = 0xbb;
+  buffer[10] = 6;
+
+  size = blocksleft * 16384;                    // size in bytes for ucon64_gauge() below
+  printf ("Receive: %d Bytes (%.4f Mb)\n", size, (float) size / MBIT);
+
+  wait (32);
+  ffe_send_command0 (0x2001, 0);
+
+  fwrite (buffer, 1, SMD_HEADER_LEN, file);     // write header
+  printf ("Press q to abort\n\n");
+
+  starttime = time (NULL);
+  while (blocksleft > 0)
+    {
+      ffe_send_command (5, blocksdone, 0);
+      ffe_receive_block (0x4000, buffer, BUFFERSIZE);
+      blocksdone++;
+      blocksleft--;
+      fwrite (buffer, 1, BUFFERSIZE, file);
+
+      bytesreceived += BUFFERSIZE;
+      ucon64_gauge (starttime, bytesreceived, size);
+      ffe_checkabort (2);
+    }
+
+  free (buffer);
+  fclose (file);
+  ffe_deinit_io ();
+
   return 0;
 }
 
@@ -62,6 +128,54 @@ smd_read_rom (const char *filename, unsigned int parport)
 int
 smd_write_rom (const char *filename, unsigned int parport)
 {
+  FILE *file;
+  unsigned char *buffer;
+  int bytesread, bytessend, blocksdone = 0, fsize;
+  time_t starttime;
+
+  ffe_init_io (parport);
+
+  if ((file = fopen (filename, "rb")) == NULL)
+    {
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      exit (1);
+    }
+
+  fsize = q_fsize (filename);
+  printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
+
+  fread (buffer, 1, SMD_HEADER_LEN, file);
+  ffe_send_block (0xdc00, buffer, SMD_HEADER_LEN); // send header
+  bytessend = SMD_HEADER_LEN;
+
+  ffe_send_command0 (0x2001, 0);
+
+  printf ("Press q to abort\n\n");
+
+  starttime = time (NULL);
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+    {
+      ffe_send_command (5, blocksdone, 0);
+      ffe_send_block (0x8000, buffer, bytesread);
+      blocksdone++;
+
+      bytessend += bytesread;
+      ucon64_gauge (starttime, bytessend, fsize);
+      ffe_checkabort (2);
+    }
+
+  // ROM dump > 128 16KB blocks? (=16Mb (=2MB))
+  ffe_send_command0 (0x2001, blocksdone > 0x80 ? 7 : 3);
+
+  free (buffer);
+  fclose (file);
+  ffe_deinit_io ();
+
   return 0;
 }
 

@@ -49,7 +49,7 @@ ips_main (int argc, char* argv[])
       exit(0);
    }
    
-   patchee=fopen(argv[2], "r+");
+   patchee=fopen(filebackup(argv[2]), "r+");
    if (patchee==NULL) {
       printf("Could not open the file %s\n", argv[2]);
       exit(0);
@@ -111,7 +111,11 @@ ips_main (int argc, char* argv[])
       printf("File truncated to %ld MBit\n", (length/1048576)*8);
    }
    
-   printf("Patching complete!\n");
+   printf("Patching complete!\n\n"
+"NOTE: sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
+"      This means you must convert for example a Super Nintendo ROM with -swc\n"
+"      or -mgd or the patch will not work\n"
+);
    fclose(patchee);
    fclose(ipsfile);
 	return(0);

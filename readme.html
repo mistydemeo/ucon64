@@ -1,10 +1,11 @@
 <html><head><title>README</title></head><body bgcolor="#c0c0c0" background="images/bg.jpg"><tt><pre>
-uCON64 1.9.8 UNIX 1999-2002 by (various)
+uCON64 1.9.8beta2 UNIX 1999-2002 by (various)
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
 USAGE: ucon64 [OPTION(S)] ROM [FILE]
 
+  -nbak         prevents backup files (*.bak)
   -e            emulate/run ROM (see $HOME/.ucon64rc for more)
   -crc          show CRC32 value of ROM
   -crchd        show CRC32 value of ROM (regarding to +512 Bytes header)
@@ -26,57 +27,55 @@ USAGE: ucon64 [OPTION(S)] ROM [FILE]
   -stp          strip first 512 Bytes (possible header) from ROM
   -ins          insert 512 Bytes (0x00) before ROM
   -strip        strip Bytes from end of ROM; $FILE=VALUE
-  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
-  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
-  -mki		create IPS patch; $FILE=CHANGED_ROM
-  -a		apply APS patch (<=1.2); $FILE=PATCHFILE
-  -mka		create APS patch; $FILE=CHANGED_ROM
-  -na		change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION
-  -ppf		apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE
-  -mkppf	create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE
-  -nppf		change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION
-  -idppf	change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ
+  -b            apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
+  -i            apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -mki          create IPS patch; $FILE=CHANGED_ROM
+  -a            apply APS patch (<=1.2); $FILE=PATCHFILE
+  -mka          create APS patch; $FILE=CHANGED_ROM
+  -na           change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION
+  -ppf          apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE
+  -mkppf        create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE
+  -nppf         change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION
+  -idppf        change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ
 
 Dreamcast
 1998 SEGA http://www.sega.com
   -dc           force recognition; NEEDED
-  *		show info (default); ONLY $ROM=ISO_IMAGE
-TODO:  -iso     convert DiscJuggler3/CDI IMAGE to MODE2/2336; $ROM=CDI_IMAGE
-  -ppf		apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE
-  -mkppf	create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE
-  -nppf		change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION
-  -idppf	change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ
-  -xcdrw        read/write ISO/RAW/BIN IMAGE; $ROM=CD_IMAGE $FILE=TRACK_MODE
+  *             show info (default); ONLY $ROM=ISO_IMAGE
+  -ppf          apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE
+  -mkppf        create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE
+  -nppf         change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION
+  -idppf        change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ
+  -xcdrw        read/write IMAGE from/to CD-Writer; $ROM=CD_IMAGE
                 reads automatically when $ROM does not exist
-                $FILE="MODE1"          (2048 Bytes; standart ISO9660)
+                $FILE="MODE1"          (2048 Bytes; standard ISO9660)
                 $FILE="MODE1_RAW"      (2352 Bytes)
                 $FILE="MODE2"          (2336 Bytes)
                 $FILE="MODE2_FORM1"    (2048 Bytes)
                 $FILE="MODE2_FORM2"    (2324 Bytes)
                 $FILE="MODE2_FORM_MIX" (2336 Bytes)
                 $FILE="MODE2_RAW"      (2352 Bytes; default)
-  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE $FILE=TRACK_MODE
+  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE
+NOTE: -xcdrw works currently only for backups which need the Utopia BootCD
 
 Playstation (One)/Playstation 2 (CD only)
 1994/(2000) Sony http://www.playstation.com
-  -psx		force recognition; NEEDED
-  *		show info (default); ONLY $ROM=RAW_IMAGE
-  -ppf		apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE
-  -mkppf	create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE
-  -nppf		change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION
-  -idppf	change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ
-  -xcdrw        read/write ISO/RAW/BIN IMAGE; $ROM=CD_IMAGE $FILE=TRACK_MODE
+  -psx          force recognition; NEEDED
+  *             show info (default); ONLY $ROM=RAW_IMAGE
+  -ppf          apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE
+  -mkppf        create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE
+  -nppf         change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION
+  -idppf        change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ
+  -xcdrw        read/write IMAGE from/to CD-Writer; $ROM=CD_IMAGE
                 reads automatically when $ROM does not exist
-                $FILE="MODE1"          (2048 Bytes; standart ISO9660)
+                $FILE="MODE1"          (2048 Bytes; standard ISO9660)
                 $FILE="MODE1_RAW"      (2352 Bytes)
                 $FILE="MODE2"          (2336 Bytes)
                 $FILE="MODE2_FORM1"    (2048 Bytes)
                 $FILE="MODE2_FORM2"    (2324 Bytes)
                 $FILE="MODE2_FORM_MIX" (2336 Bytes)
                 $FILE="MODE2_RAW"      (2352 Bytes; default)
-  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE $FILE=TRACK_MODE
-TODO:  -xdex    send/receive SRAM to/from DexDrive; $FILE=PORT
-		receives automatically when $ROM(=SRAM) does not exist
+  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE
 
 Playstation 2
 2000 Sony http://www.playstation.com
@@ -89,23 +88,23 @@ CD32
 CD-i
 1991
   -ps2, -sat, -3do, -cd32, -cdi
-		force recognition; NEEDED
-  *		show info (default); ONLY $ROM=RAW_IMAGE
+                force recognition; NEEDED
+  *             show info (default); ONLY $ROM=RAW_IMAGE
   -iso          convert RAW/BIN to ISO9660; $ROM=RAW_IMAGE
-  -ppf		apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE
-  -mkppf	create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE
-  -nppf		change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION
-  -idppf	change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ
-  -xcdrw        read/write ISO/RAW/BIN IMAGE; $ROM=CD_IMAGE $FILE=TRACK_MODE
+  -ppf          apply PPF patch (<=2.0); $ROM=RAW_IMAGE $FILE=PATCHFILE
+  -mkppf        create PPF patch; $ROM=RAW_IMAGE $FILE=CHANGED_IMAGE
+  -nppf         change PPF description; $ROM=PATCHFILE $FILE=DESCRIPTION
+  -idppf        change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ
+  -xcdrw        read/write IMAGE from/to CD-Writer; $ROM=CD_IMAGE
                 reads automatically when $ROM does not exist
-                $FILE="MODE1"          (2048 Bytes; standart ISO9660)
+                $FILE="MODE1"          (2048 Bytes; standard ISO9660)
                 $FILE="MODE1_RAW"      (2352 Bytes)
                 $FILE="MODE2"          (2336 Bytes)
                 $FILE="MODE2_FORM1"    (2048 Bytes)
                 $FILE="MODE2_FORM2"    (2324 Bytes)
                 $FILE="MODE2_FORM_MIX" (2336 Bytes)
                 $FILE="MODE2_RAW"      (2352 Bytes; default)
-  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE $FILE=TRACK_MODE
+  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE
 
 GameBoy Advance
 2001 Nintendo http://www.nintendo.com
@@ -127,15 +126,20 @@ GameBoy Advance
                 $FILE=24 (fastest cartridge access speed)
                 $FILE=28 (faster than 8 but slower than 16)
   -strip        strip Bytes from end of ROM (use -ispad before); $FILE=VALUE
-  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
-  -mki		create IPS patch; $FILE=CHANGED_ROM
+  -multi        make multirom for Flash Advance Linker; file with loader must
+                be specified first, then all the ROMs, multirom to create last
+  -multi1       same as -multi, but truncate multirom size to 64Mb
+  -multi2       same as -multi, but truncate multirom size to 128Mb
+  -i            apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -mki          create IPS patch; $FILE=CHANGED_ROM
   -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT
                 receives automatically when $ROM does not exist
-  -xfalc<n>     specify chip size in mbits of ROM in Flash Advance Linker when
+  -xfalc&#60;n&#62;     specify chip size in mbits of ROM in Flash Advance Linker when
                 receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32
   -xfals        send/receive SRAM to/from Flash Advance Linker; $FILE=PORT
                 receives automatically when $ROM(=SRAM) does not exist
-  -xfalb<n>     send/receive SRAM to/from Flash Advance Linker bank n
+  -xfalb&#60;n&#62;     send/receive SRAM to/from Flash Advance Linker bank n
+                n can be 1, 2, 3 or 4
                 $FILE=PORT; receives automatically when SRAM does not exist
 
 Nintendo 64
@@ -156,19 +160,15 @@ Nintendo 64
   -chk          fix ROM checksum
 NOTE: supports only 6101 and 6102 boot codes
   -p            pad ROM to full Mb
-  -a		apply APS patch (<=1.2); $FILE=PATCHFILE
-  -mka		create APS patch; $FILE=CHANGED_ROM
-  -na		change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION
-  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
-  -mki		create IPS patch; $FILE=CHANGED_ROM
-  -xv64		send/receive ROM to/from Doctor V64; $FILE=PORT
-		receives automatically when $ROM does not exist
-TEST:  -xdjr    send/receive ROM to/from Doctor64 Jr; $FILE=PORT
-  		receives automatically when $ROM does not exist
-TODO:  -xcd64	send/receive ROM to/from CD64; $FILE=PORT
-		receives automatically when $ROM does not exist
-TODO:  -xdex    send/receive SRAM to/from DexDrive; $FILE=PORT
-		receives automatically when $ROM(=SRAM) does not exist
+  -a            apply APS patch (<=1.2); $FILE=PATCHFILE
+  -mka          create APS patch; $FILE=CHANGED_ROM
+  -na           change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION
+  -i            apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -mki          create IPS patch; $FILE=CHANGED_ROM
+  -xv64         send/receive ROM to/from Doctor V64; $FILE=PORT
+                receives automatically when $ROM does not exist
+  -xdjr         send/receive ROM to/from Doctor64 Jr; $FILE=PORT
+                receives automatically when $ROM does not exist
 
 Super Nintendo/SNES/Super Famicon
 1990 Nintendo http://www.nintendo.com
@@ -185,16 +185,16 @@ Super Nintendo/SNES/Super Famicon
   -n            change ROM name; $FILE=NEWNAME
   -smc          convert to Super Magicom/SMC
   -fig          convert to *Pro Fighter*/(all)FIG
-  -figs         convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG
+  -figs         convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG;
                 $ROM=SRAM
   -swc          convert to Super Wild Card*/(all)SWC
-  -swcs         convert Snes9x/ZSNES *.srm (SRAM) to Super Wild Card*/(all)SWC
+  -swcs         convert Snes9x/ZSNES *.srm (SRAM) to Super Wild Card*/(all)SWC;
                 $ROM=SRAM
   -mgd          convert to Multi Game*/MGD2/MGH/RAW
   -gd3          convert to Professor SF(2) Game Doctor SF3/6/7
-  -ufos         convert Snes9x/ZSNES *.srm (SRAM) to Super UFO
+  -ufos         convert Snes9x/ZSNES *.srm (SRAM) to Super UFO;
                 $ROM=SRAM
-  -stp          convert SRAM from backup unit for use with Snes9x/ZSNES
+  -stp          convert SRAM from backup unit for use with Snes9x/ZSNES;
                 $ROM=SRAM
 NOTE: -stp just strips the first 512 bytes
   -dint         convert ROM to non-interleaved format
@@ -211,47 +211,39 @@ NOTE: -stp just strips the first 512 bytes
   -gge          encode GameGenie code; $ROM=AAAAAA:VV
   -ggd          decode GameGenie code; $ROM=XXXX-XXXX
   -gg           apply GameGenie code (permanent); $FILE=XXXX-XXXX
-  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
-  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
-  -mki		create IPS patch; $FILE=CHANGED_ROM
+  -b            apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
+  -i            apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -mki          create IPS patch; $FILE=CHANGED_ROM
   -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT
                 receives automatically when $ROM does not exist
                 Press q to abort ^C will cause invalid state of backup unit
   -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT
                 receives automatically when $ROM(=SRAM) does not exist
                 Press q to abort ^C will cause invalid state of backup unit
-TODO:  -xfig	send/receive ROM to/from *Pro Fighter*/(all)FIG; $FILE=PORT
-		receives automatically when $ROM does not exist
-TODO:  -xsmc	send/receive ROM to/from Super Magicom/SMC; $FILE=PORT
-		receives automatically when $ROM does not exist
-TODO:  -xmgd    send/receive ROM to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT
-		receives automatically when $ROM does not exist
 
 Neo Geo Pocket/Neo Geo Pocket Color
 1998/1999 SNK http://www.neogeo.co.jp
-  -ngp		force recognition
-  *		show info (default)
-TODO:  -xfpl    send/receive ROM to/from Flash Pocket Linker; $FILE=PORT
-		receives automatically when $ROM does not exist
+  -ngp          force recognition
+  *             show info (default)
 
 Neo Geo/Neo Geo CD(Z)/MVS
 1990/1994 SNK http://www.neogeo.co.jp
-  -ng		force recognition
-  -ns		force ROM is not splitted
-  *		show info (default)
-  -bios		convert NeoCd Bios to work with NeoCD emulator; $ROM=BIOS
-		http://www.illusion-city.com/neo/
-  -sam		convert SAM/M.A.M.E. sound to WAV; $ROM=SAMFILE
-  -xcdrw        read/write ISO/RAW/BIN IMAGE; $ROM=CD_IMAGE $FILE=TRACK_MODE
+  -ng           force recognition
+  -ns           force ROM is not splitted
+  *             show info (default)
+  -bios         convert NeoCd Bios to work with NeoCD emulator; $ROM=BIOS
+                http://www.illusion-city.com/neo/
+  -sam          convert SAM/M.A.M.E. sound to WAV; $ROM=SAMFILE
+  -xcdrw        read/write IMAGE from/to CD-Writer; $ROM=CD_IMAGE
                 reads automatically when $ROM does not exist
-                $FILE="MODE1"          (2048 Bytes; standart ISO9660)
+                $FILE="MODE1"          (2048 Bytes; standard ISO9660)
                 $FILE="MODE1_RAW"      (2352 Bytes)
                 $FILE="MODE2"          (2336 Bytes)
                 $FILE="MODE2_FORM1"    (2048 Bytes)
                 $FILE="MODE2_FORM2"    (2324 Bytes)
                 $FILE="MODE2_FORM_MIX" (2336 Bytes)
                 $FILE="MODE2_RAW"      (2352 Bytes; default)
-  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE $FILE=TRACK_MODE
+  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE
 
 Genesis/Sega Mega Drive/Sega CD/32X/Nomad
 1989/19XX/19XX SEGA http://www.sega.com
@@ -276,126 +268,123 @@ NOTE: -stp just strips the first 512 bytes
                 October 1991 by inserting "(C) SEGA" and "(C)SEGA"
   -gge          encode GameGenie code; $ROM=AAAAAA:VVVV
   -ggd          decode GameGenie code; $ROM=XXXX-XXXX
-  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
-  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
-  -mki		create IPS patch; $FILE=CHANGED_ROM
-TEST:  -xsmd    send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT
+  -b            apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
+  -i            apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -mki          create IPS patch; $FILE=CHANGED_ROM
+  -xsmd         send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT
                 receives automatically when $ROM does not exist
-TEST:  -xsmds   send/receive SRAM to/from Super Magic Drive/SMD; $FILE=PORT
+  -xsmds        send/receive SRAM to/from Super Magic Drive/SMD; $FILE=PORT
                 receives automatically when $ROM(=SRAM) does not exist
-TODO:  -xmgd    send/receive ROM to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT
-		receives automatically when $ROM does not exist
-  -xcdrw        read/write ISO/RAW/BIN IMAGE; $ROM=CD_IMAGE $FILE=TRACK_MODE
+  -xcdrw        read/write IMAGE from/to CD-Writer; $ROM=CD_IMAGE
                 reads automatically when $ROM does not exist
-                $FILE="MODE1"          (2048 Bytes; standart ISO9660)
+                $FILE="MODE1"          (2048 Bytes; standard ISO9660)
                 $FILE="MODE1_RAW"      (2352 Bytes)
                 $FILE="MODE2"          (2336 Bytes)
                 $FILE="MODE2_FORM1"    (2048 Bytes)
                 $FILE="MODE2_FORM2"    (2324 Bytes)
                 $FILE="MODE2_FORM_MIX" (2336 Bytes)
                 $FILE="MODE2_RAW"      (2352 Bytes; default)
-  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE $FILE=TRACK_MODE
+  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE
 
 GameBoy/(Super GB)/GB Pocket/Color GB/(GB Advance)
 1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com
-  -gb		force recognition
-  -hd		force ROM has SSC header (+512 Bytes)
-  -nhd		force ROM has no SSC header
-  *		show info (default)
-  -n		change ROM name; $FILE=NEWNAME
-  -mgd		convert to Multi Game*/MGD2/RAW
-  -ssc		convert to Super Smart Card/SSC (+512 Bytes)
-  -sgb		convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX
-  -gbx		convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC
-  -n2gb		convert for use with Kami's FC Emulator (NES Emulator);
-		$ROM=NES_ROM $FILE=FC.GB (the Emulator)
-		m-kami@da2.so-net.ne.jp www.playoffline.com
-  -chk		fix ROM checksum
-  -gge		encode GameGenie code; $ROM=AAAA:VV or $ROM=AAAA:VV:CC
-  -ggd		decode GameGenie code; $ROM=XXX-XXX or $ROM=XXX-XXX-XXX
-  -gg		apply GameGenie code (permanent);
-		$FILE=XXX-XXX or $FILE=XXX-XXX-XXX
-  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
-  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE
-  -mki		create IPS patch; $FILE=CHANGED_ROM
+  -gb           force recognition
+  -hd           force ROM has SSC header (+512 Bytes)
+  -nhd          force ROM has no SSC header
+  *             show info (default)
+  -n            change ROM name; $FILE=NEWNAME
+  -mgd          convert to Multi Game*/MGD2/RAW
+  -ssc          convert to Super Smart Card/SSC (+512 Bytes)
+  -sgb          convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX
+  -gbx          convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC
+  -n2gb         convert for use with Kami's FC Emulator (NES Emulator);
+                $ROM=NES_ROM $FILE=FC.GB (the Emulator)
+                m-kami@da2.so-net.ne.jp www.playoffline.com
+  -chk          fix ROM checksum
+  -gge          encode GameGenie code; $ROM=AAAA:VV or $ROM=AAAA:VV:CC
+  -ggd          decode GameGenie code; $ROM=XXX-XXX or $ROM=XXX-XXX-XXX
+  -gg           apply GameGenie code (permanent);
+                $FILE=XXX-XXX or $FILE=XXX-XXX-XXX
+  -b            apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE
+  -i            apply IPS patch (<=1.2); $FILE=PATCHFILE
+  -mki          create IPS patch; $FILE=CHANGED_ROM
   -xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT
                 receives automatically when $ROM does not exist
   -xgbxs        send/receive SRAM to/from GB Xchanger; $FILE=PORT
                 receives automatically when $ROM(=SRAM) does not exist
   -xgbxb<n>     send/receive 64kbits SRAM to/from GB Xchanger bank n
+                n can be a number from 0 to 15
                 $FILE=PORT; receives automatically when $ROM does not exist
 
 Panther(32bit prototype)/Jaguar64/Jaguar64 CD
 1989 Flare2/1993 Atari/1995 Atari
-  -jag		force recognition
-  -hd		force ROM has header (+512 Bytes)
-  -nhd		force ROM has no header
-  *		show info (default)
-  -xcdrw        read/write ISO/RAW/BIN IMAGE; $ROM=CD_IMAGE $FILE=TRACK_MODE
+  -jag          force recognition
+  -hd           force ROM has header (+512 Bytes)
+  -nhd          force ROM has no header
+  *             show info (default)
+  -xcdrw        read/write IMAGE from/to CD-Writer; $ROM=CD_IMAGE
                 reads automatically when $ROM does not exist
-                $FILE="MODE1"          (2048 Bytes; standart ISO9660)
+                $FILE="MODE1"          (2048 Bytes; standard ISO9660)
                 $FILE="MODE1_RAW"      (2352 Bytes)
                 $FILE="MODE2"          (2336 Bytes)
                 $FILE="MODE2_FORM1"    (2048 Bytes)
                 $FILE="MODE2_FORM2"    (2324 Bytes)
                 $FILE="MODE2_FORM_MIX" (2336 Bytes)
                 $FILE="MODE2_RAW"      (2352 Bytes; default)
-  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE $FILE=TRACK_MODE
+  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE
 
 Handy(prototype)/Lynx/Lynx II
 1987 Epyx/1989 Atari/1991 Atari
-  -lynx		force recognition
-  -hd		force ROM has LNX header (+64 Bytes)
-  -nhd		force ROM has no LNX header
-  *		show info (default)
+  -lynx         force recognition
+  -hd           force ROM has LNX header (+64 Bytes)
+  -nhd          force ROM has no LNX header
+  *             show info (default)
 TODO:  -o2lyx        convert *.O file to LYX format (for developers)
-  -lyx		convert to LYX/RAW (strip 64 Bytes LNX header)
-  -lnx		convert to LNX (uses default values for the header);
-		adjust the LNX header with the following options
-  -n		change ROM name (LNX only); $FILE=NEWNAME
-  -nrot		set no rotation (LNX only)
-  -rotl		set rotation left (LNX only)
-  -rotr		set rotation right (LNX only)
-  -b0		change Bank0 kBytes size (LNX only); $FILE={0,64,128,256,512}
-  -b1		change Bank1 kBytes size (LNX only); $FILE={0,64,128,256,512}
+  -lyx          convert to LYX/RAW (strip 64 Bytes LNX header)
+  -lnx          convert to LNX (uses default values for the header);
+                adjust the LNX header with the following options
+  -n            change ROM name (LNX only); $FILE=NEWNAME
+  -nrot         set no rotation (LNX only)
+  -rotl         set rotation left (LNX only)
+  -rotr         set rotation right (LNX only)
+  -b0           change Bank0 kBytes size (LNX only); $FILE={0,64,128,256,512}
+  -b1           change Bank1 kBytes size (LNX only); $FILE={0,64,128,256,512}
 
 PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))
 Super Grafx/Turbo (Grafx(16)/CD/DUO/Express)
 1987/19XX/19XX NEC
-  -pce		force recognition
-  -hd		force ROM has SMG header (+512 Bytes)
-  -nhd		force ROM has no SMG header (MGD2/RAW)
-  *		show info (default)
-  -smg		convert to Super Magic Griffin/SMG
-  -mgd		convert to Multi Game Doctor*/MGD2/RAW
-TODO:  -xmgd    send/receive ROM to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT
-		receives automatically when $ROM does not exist
-  -xcdrw        read/write ISO/RAW/BIN IMAGE; $ROM=CD_IMAGE $FILE=TRACK_MODE
+  -pce          force recognition
+  -hd           force ROM has SMG header (+512 Bytes)
+  -nhd          force ROM has no SMG header (MGD2/RAW)
+  *             show info (default)
+  -smg          convert to Super Magic Griffin/SMG
+  -mgd          convert to Multi Game Doctor*/MGD2/RAW
+  -xcdrw        read/write IMAGE from/to CD-Writer; $ROM=CD_IMAGE
                 reads automatically when $ROM does not exist
-                $FILE="MODE1"          (2048 Bytes; standart ISO9660)
+                $FILE="MODE1"          (2048 Bytes; standard ISO9660)
                 $FILE="MODE1_RAW"      (2352 Bytes)
                 $FILE="MODE2"          (2336 Bytes)
                 $FILE="MODE2_FORM1"    (2048 Bytes)
                 $FILE="MODE2_FORM2"    (2324 Bytes)
                 $FILE="MODE2_FORM_MIX" (2336 Bytes)
                 $FILE="MODE2_RAW"      (2352 Bytes; default)
-  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE $FILE=TRACK_MODE
+  -mktoc        generate TOC file for cdrdao; $ROM=CD_IMAGE
 
 Sega Master System(II/III)/GameGear (Handheld)
 1986/19XX SEGA http://www.sega.com
-  -sms		force recognition
-  -hd		force ROM has header (+512 Bytes)
-  -nhd		force ROM has no header (MGD2/MGH/RAW)
-  *		show info (default)
-  -mgd		convert to Multi Game*/MGD2/MGH/RAW
-  -smd		convert to Super Magic Drive/SMD (+512 Bytes)
+  -sms          force recognition
+  -hd           force ROM has header (+512 Bytes)
+  -nhd          force ROM has no header (MGD2/MGH/RAW)
+  *             show info (default)
+  -mgd          convert to Multi Game*/MGD2/MGH/RAW
+  -smd          convert to Super Magic Drive/SMD (+512 Bytes)
   -smds         convert Emulator (*.srm) SRAM to Super Magic Drive/SMD
-  -gge		encode GameGenie code; $ROM=AAAA:VV or $ROM=AAAA:VV:CC
-  -ggd		decode GameGenie code; $ROM=XXX-XXX or $ROM=XXX-XXX-XXX
-  -gg		apply GameGenie code (permanent); $FILE=CODE-CODE
-TEST:  -xsmd    send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT
+  -gge          encode GameGenie code; $ROM=AAAA:VV or $ROM=AAAA:VV:CC
+  -ggd          decode GameGenie code; $ROM=XXX-XXX or $ROM=XXX-XXX-XXX
+  -gg           apply GameGenie code (permanent); $FILE=CODE-CODE
+  -xsmd         send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT
                 receives automatically when $ROM does not exist
-TEST:  -xsmds   send/receive SRAM to/from Super Magic Drive/SMD; $FILE=PORT
+  -xsmds        send/receive SRAM to/from Super Magic Drive/SMD; $FILE=PORT
                 receives automatically when $ROM(=SRAM) does not exist
 
 Nintendo Entertainment System/NES
@@ -404,12 +393,9 @@ Nintendo Entertainment System/NES
   *             show info/contents (default)
   -hd           force ROM has FFE header (+512 Bytes)
   -nhd          force ROM has no FFE header
-  -ns           force ROM is not splitted
   -ffe          convert to FFE (+512 Bytes)
-  -ines         convert to iNES(Emu)/RAW
+  -ines         convert to iNES(Emu)/NES/RAW
   -ineshd       extract iNES header from ROM (16 Bytes)
-TODO:  -unif    convert to UNIF format/UNF
-  -j            join Pasofami/PRM/PRG/CHR/700/splitted ROM
   -gge          encode GameGenie code; $ROM=AAAA:VV or $ROM=AAAA:VV:CC
   -ggd          decode GameGenie code; $ROM=XXXXXX or $ROM=XXXXXXXX
   -gg           apply GameGenie code (permanent);
@@ -417,9 +403,9 @@ TODO:  -unif    convert to UNIF format/UNF
 
 WonderSwan/WonderSwan Color
 19XX/19XX Bandai
-  -swan		force recognition
+  -swan         force recognition
   *             show info (default)
-TODO:  -chk     fix ROM checksum
+  -chk          fix ROM checksum
 
 Sega System 16(A/B)/Sega System 18/dual 68000
 1987/19XX/19XX SEGA http://www.sega.com
@@ -434,7 +420,7 @@ Vectrex
 Intellivision
 1979 Mattel
   -s16, -ata, -coleco, -vboy, -vec, -intelli
-		force recognition
+                force recognition
   -hd           force ROM has header (+512 Bytes)
   -nhd          force ROM has no header
   *             show info (default)

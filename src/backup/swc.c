@@ -5,6 +5,7 @@ written by 1999 - 2001 NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh
                   2001 Caz
 
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -83,7 +84,7 @@ init_io (unsigned int port)
 }
 
 int
-swc_write_rom (char *filename, unsigned int parport, int sram_size)
+swc_write_rom (char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
@@ -117,8 +118,8 @@ swc_write_rom (char *filename, unsigned int parport, int sram_size)
   emu_mode_select = buffer[2];                  // this byte is needed later
   if (buffer[3] & 0x80)                         // Pro Fighter (FIG) HiROM dump
     emu_mode_select |= 0x30;                    // set bit 5&4 (SRAM & DRAM mem map mode 21)
-  if (sram_size == 0)
-    {
+  if ((emu_mode_select & 0x0c) == 0x0c)         // 0x0c == no SRAM; we use the header, so
+    {                                           //  that the user can override this
       if (emu_mode_select & 0x10)               // bit 4 == 1 => DRAM mode 21 (HiROM)
         emu_mode_select &= ~0x20;               // disable SRAM by setting SRAM mem map mode 20
       else                                      // bit 4 == 0 => DRAM mode 20 (LoROM)
@@ -178,8 +179,7 @@ swc_write_sram (char *filename, unsigned int parport)
     }
   if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
     {
-      fprintf (STDERR, "Not enough memory for file buffer (%d bytes)\n",
-               BUFFERSIZE);
+      fprintf (STDERR, "Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
       exit (1);
     }
 
@@ -690,7 +690,7 @@ swc_unlock (unsigned int parport)
 int
 swc_usage (int argc, char *argv[])
 {
-    printf ("%s\n", swc_TITLE);
+  printf ("%s\n", swc_TITLE);
 
   printf
     ("  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
@@ -700,36 +700,38 @@ swc_usage (int argc, char *argv[])
      "                receives automatically when $ROM(=SRAM) does not exist\n"
      "                Press q to abort ^C will cause invalid state of backup unit\n");
 
-      printf ("\n"
-              "                You only need to specify PORT if uCON64 doesn't detect the\n"
-              "                (right) parallel port. If that is the case give a hardware\n"
-              "                address, for example:\n"
-              "                ucon64 -xswc \"Super Mario World (U).swc\" 0x378\n");
-      printf ("\n"
-              "                In order to connect the Super Wild Card to a PC's parallel port\n"
-              "                you need a standart bidirectional parallel cable like for the\n"
-              "                most backup units\n"//, i.e. a cable with male DB-25\n"
-//              "                connectors at both ends where the pins are connected in the\n"
-//              "                following way:\n"
-//
-//              "                pin 1  <-> pin 1\n"
-//              "                pin 2  <-> pin 2\n"
-//              "                pin 3  <-> pin 3\n"
-//              "                pin 4  <-> pin 4\n"
-//              "                pin 5  <-> pin 5\n"
-//              "                pin 6  <-> pin 6\n"
-//              "                pin 7  <-> pin 7\n"
-//              "                pin 8  <-> pin 8\n"
-//              "                pin 9  <-> pin 9\n"
-//              "                pin 10 <-> pin 10\n"
-//              "                pin 11 <-> pin 11\n"
-//              "                pin 12 <-> pin 12\n"
-//              "                pin 13 <-> pin 13\n"
-//              "                pin 15 <-> pin 15\n"
-//              "                pin 25 <-> pin 25\n"
-//              "                Pins 2-9 are used for output, pins 10-13 & 15 for input and pin\n"
-//              "                25 is ground. The other pins may be left unconnected.\n"
-);
+  printf ("\n"
+          "                You only need to specify PORT if uCON64 doesn't detect the\n"
+          "                (right) parallel port. If that is the case give a hardware\n"
+          "                address, for example:\n"
+          "                ucon64 -xswc \"Super Mario World (U).swc\" 0x378\n");
+  printf ("\n"
+          "                In order to connect the Super Wild Card to a PC's parallel port\n"
+          "                you need a standard bidirectional parallel cable like for the\n"
+          "                most backup units\n"
+/*
+                           , i.e. a cable with male DB-25\n"
+          "                connectors at both ends where the pins are connected in the\n"
+          "                following way:\n"
+          "                pin 1  <-> pin 1\n"
+          "                pin 2  <-> pin 2\n"
+          "                pin 3  <-> pin 3\n"
+          "                pin 4  <-> pin 4\n"
+          "                pin 5  <-> pin 5\n"
+          "                pin 6  <-> pin 6\n"
+          "                pin 7  <-> pin 7\n"
+          "                pin 8  <-> pin 8\n"
+          "                pin 9  <-> pin 9\n"
+          "                pin 10 <-> pin 10\n"
+          "                pin 11 <-> pin 11\n"
+          "                pin 12 <-> pin 12\n"
+          "                pin 13 <-> pin 13\n"
+          "                pin 15 <-> pin 15\n"
+          "                pin 25 <-> pin 25\n"
+          "                Pins 2-9 are used for output, pins 10-13 & 15 for input and pin\n"
+          "                25 is ground. The other pins may be left unconnected.\n"
+*/
+         );
 
   return 0;
 }

@@ -61,6 +61,18 @@ typedef struct IO_Tuple
 }
 IO_Tuple;
 #endif // __BEOS__
+
+#define out1byte(p,x)   outportb(p,x)
+#define in1byte(p)      inportb(p)
+
+// DJGPP (DOS) has outportX() & inportX()
+#if     defined __UNIX__ || defined __BEOS__
+unsigned char inportb (unsigned short port);
+unsigned short inportw (unsigned short port);
+void outportb (unsigned short port, unsigned char byte);
+void outportw (unsigned short port, unsigned short word);
+#endif
+
 #endif // BACKUP
 
 #define MBIT 131072
@@ -68,9 +80,6 @@ IO_Tuple;
 #define PARPORT_DATA    0       // output
 #define PARPORT_STATUS  1       // input
 #define PARPORT_CONTROL 2
-
-#define out1byte(p,x)   outportb(p,x)
-#define in1byte(p)      inportb(p)
 
 // GameGenie "codec" routines
 char hexDigit (int value);
@@ -88,8 +97,7 @@ unsigned long CalculateFileCRC (FILE * file);
   like zlib/crc32(); uCON64 has it's own crc calc. stuff
   this is just a wrapper
 */
-unsigned long
-unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size);
+unsigned long unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size);
 
 unsigned long fileCRC32 (char *filename, long start);   // calculate CRC32 of filename beginning from start
 
@@ -100,14 +108,6 @@ size_t filepad (char *filename, long start, long unit);//pad a ROM in Mb
 long filetestpad (char *filename); //test if a ROM is padded
 
 int testsplit (char *filename);//test if a ROM is splitted
-
-// DJGPP (DOS) has outportX() & inportX()
-#if     defined __UNIX__ || defined __BEOS__
-unsigned char inportb (unsigned short port);
-unsigned short inportw (unsigned short port);
-void outportb (unsigned short port, unsigned char byte);
-void outportw (unsigned short port, unsigned short word);
-#endif
 
 unsigned int parport_probe (unsigned int parport);
 

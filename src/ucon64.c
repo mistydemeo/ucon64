@@ -589,7 +589,7 @@ main (int argc, char *argv[])
     {
       char current_dir[FILENAME_MAX];
 
-      if (access (rom.rom, R_OK) == -1 || (dp = opendir (rom.rom)) == NULL)
+      if (access (rom.rom, R_OK) != 0 || (dp = opendir (rom.rom)) == NULL)
         return (-1);
 
       getcwd (current_dir, FILENAME_MAX);
@@ -768,7 +768,7 @@ main (int argc, char *argv[])
           return (-1);
         }
 
-      if (access (rom.config_file, F_OK) == -1)
+      if (access (rom.config_file, F_OK) != 0)
         {
           printf ("ERROR: %s does not exist\n", rom.config_file);
           return (-1);

@@ -1,5 +1,5 @@
 /*
-fal.c - Flash Linker Advance support for uCON64
+fal.h - Flash Linker Advance support for uCON64
 
 written by 2001        Jeff Frohwein
            2001        NoisyB (noisyb@gmx.net)

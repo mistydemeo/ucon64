@@ -93,6 +93,7 @@ smd_read_rom (const char *filename, unsigned int parport)
   buffer[8] = 0xaa;
   buffer[9] = 0xbb;
   buffer[10] = 6;
+  fwrite (buffer, 1, SMD_HEADER_LEN, file);     // write header
 
   size = blocksleft * 16384;                    // size in bytes for ucon64_gauge() below
   printf ("Receive: %d Bytes (%.4f Mb)\n", size, (float) size / MBIT);
@@ -100,7 +101,6 @@ smd_read_rom (const char *filename, unsigned int parport)
   wait (32);
   ffe_send_command0 (0x2001, 0);
 
-  fwrite (buffer, 1, SMD_HEADER_LEN, file);     // write header
   printf ("Press q to abort\n\n");
 
   starttime = time (NULL);
@@ -169,7 +169,7 @@ smd_write_rom (const char *filename, unsigned int parport)
       ffe_checkabort (2);
     }
 
-  // ROM dump > 128 16KB blocks? (=16Mb (=2MB))
+  // ROM dump > 128 16 KB blocks? (=16 Mb (=2 MB))
   ffe_send_command0 (0x2001, blocksdone > 0x80 ? 7 : 3);
 
   free (buffer);
@@ -183,6 +183,55 @@ smd_write_rom (const char *filename, unsigned int parport)
 int
 smd_read_sram (const char *filename, unsigned int parport)
 {
+  FILE *file;
+  unsigned char *buffer;
+  int blocksleft, bytesreceived = 0;
+  unsigned short address;
+  time_t starttime;
+
+  ffe_init_io (parport);
+
+  if ((file = fopen (filename, "wb")) == NULL)
+    {
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      exit (1);
+    }
+
+  printf ("Receive: %d Bytes\n", 32 * 1024);
+  memset (buffer, 0, SMD_HEADER_LEN);
+  buffer[8] = 0xaa;
+  buffer[9] = 0xbb;
+  buffer[10] = 7;
+  fwrite (buffer, 1, SMD_HEADER_LEN, file);
+
+  ffe_send_command0 (0x2001, 4);
+
+  printf ("Press q to abort\n\n");
+
+  blocksleft = 2;                               // SRAM is 2*16 KB
+  address = 0x4000;
+  starttime = time (NULL);
+  while (blocksleft > 0)
+    {
+      ffe_receive_block (address, buffer, BUFFERSIZE);
+      blocksleft--;
+      address += 0x4000;
+      fwrite (buffer, 1, BUFFERSIZE, file);
+
+      bytesreceived += BUFFERSIZE;
+      ucon64_gauge (starttime, bytesreceived, 32 * 1024);
+      ffe_checkabort (2);
+    }
+
+  free (buffer);
+  fclose (file);
+  ffe_deinit_io ();
+
   return 0;
 }
 
@@ -190,6 +239,49 @@ smd_read_sram (const char *filename, unsigned int parport)
 int
 smd_write_sram (const char *filename, unsigned int parport)
 {
+  FILE *file;
+  unsigned char *buffer;
+  int bytesread, bytessend = 0, size;
+  unsigned short address;
+  time_t starttime;
+
+  ffe_init_io (parport);
+
+  if ((file = fopen (filename, "rb")) == NULL)
+    {
+      fprintf (stderr, "ERROR: Can't open %s for reading\n", filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, "ERROR: Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
+      exit (1);
+    }
+
+  size = q_fsize (filename) - SMD_HEADER_LEN;
+  printf ("Send: %d Bytes\n", size);
+  fseek (file, SMD_HEADER_LEN, SEEK_SET);       // skip the header
+
+  ffe_send_command0 (0x2001, 4);
+
+  printf ("Press q to abort\n\n");
+
+  address = 0x4000;
+  starttime = time (NULL);
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+    {
+      ffe_send_block (address, buffer, bytesread);
+      address += 0x4000;
+
+      bytessend += bytesread;
+      ucon64_gauge (starttime, bytessend, size);
+      ffe_checkabort (2);
+    }
+
+  free (buffer);
+  fclose (file);
+  ffe_deinit_io ();
+
   return 0;
 }
 #endif // BACKUP

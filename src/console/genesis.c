@@ -39,11 +39,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 static void interleave_buffer (unsigned char *buffer, int size);
 static void deinterleave_chunk (unsigned char *dest, unsigned char *src);
 static int genesis_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
-static int load_smd_into (const char *name, unsigned char *into);
-static int load_bin_into (const char *name, unsigned char *into);
-static int load_rom_into (const char *name, unsigned char *into);
-static int save_smd_from (const char *name, unsigned char *from, st_smd_header_t *header, long size);
-static int save_bin_from (const char *name, unsigned char *from, long size);
+static int load_smd (const char *name, unsigned char *rom_buffer, int buheader_len);
+static int load_bin (const char *name, unsigned char *rom_buffer);
+static int load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer);
+static int save_smd (const char *name, unsigned char *rom_buffer, st_smd_header_t *header, long size);
+static int save_bin (const char *name, unsigned char *rom_buffer, long size);
 
 
 const char *genesis_usage[] =
@@ -157,7 +157,7 @@ genesis_smd (st_rominfo_t *rominfo)
       fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n", genesis_rom_size);
       return -1;
     }
-  load_rom_into (ucon64.rom, rom_buffer);
+  load_rom (rominfo, ucon64.rom, rom_buffer);
 
   memset (&header, 0, SMD_HEADER_LEN);
   header.size = genesis_rom_size / 16384;
@@ -170,7 +170,7 @@ genesis_smd (st_rominfo_t *rominfo)
   setext (dest_name, ".SMD");
   ucon64_fbackup (src_name, dest_name);         // src_name is a dummy
 
-  save_smd_from (dest_name, rom_buffer, &header, genesis_rom_size);
+  save_smd (dest_name, rom_buffer, &header, genesis_rom_size);
   ucon64_wrote (dest_name);
   free (rom_buffer);
 
@@ -194,7 +194,7 @@ genesis_smds (st_rominfo_t *rominfo)
   header.type = 7;                              // SRAM file
 
   strcpy (buf, ucon64.rom);
-  setext (buf, ".TMP");
+  setext (buf, ".SAV");
 
   q_fwrite (&header, 0, SMD_HEADER_LEN, buf, "wb");
   q_fcpy (ucon64.rom, 0, rominfo->file_size, buf, "ab");
@@ -348,7 +348,7 @@ genesis_mgd (st_rominfo_t *rominfo)
       fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n", genesis_rom_size);
       return -1;
     }
-  load_rom_into (ucon64.rom, rom_buffer);
+  load_rom (rominfo, ucon64.rom, rom_buffer);
 
   strcpy (buf, areupper (basename2 (ucon64.rom)) ? "MD" : "md");
   strcat (buf, basename2 (ucon64.rom));
@@ -360,7 +360,7 @@ genesis_mgd (st_rominfo_t *rominfo)
   sprintf (dest_name, "%s.%03u", buf, genesis_rom_size / MBIT);
   ucon64_fbackup (src_name, dest_name);         // src_name is a dummy
 
-  save_bin_from (dest_name, rom_buffer, genesis_rom_size);
+  save_bin (dest_name, rom_buffer, genesis_rom_size);
   ucon64_wrote (dest_name);
   free (rom_buffer);
 
@@ -483,7 +483,7 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
       fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n", genesis_rom_size);
       return -1;
     }
-  load_rom_into (ucon64.rom, rom_buffer);
+  load_rom (rominfo, ucon64.rom, rom_buffer);
 
   if (name1)
     {
@@ -503,11 +503,11 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
     {
       st_smd_header_t smd_header;
 
-      q_fread (&smd_header, 0, SMD_HEADER_LEN, buf);
-      save_smd_from (ucon64.rom, rom_buffer, &smd_header, genesis_rom_size);
+      q_fread (&smd_header, 0, rominfo->buheader_len, buf);
+      save_smd (ucon64.rom, rom_buffer, &smd_header, genesis_rom_size);
     }
   else
-    save_bin_from (ucon64.rom, rom_buffer, genesis_rom_size);
+    save_bin (ucon64.rom, rom_buffer, genesis_rom_size);
 
   ucon64_wrote (ucon64.rom);
   free (rom_buffer);
@@ -548,7 +548,7 @@ genesis_chk (st_rominfo_t *rominfo)
       fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n", genesis_rom_size);
       return -1;
     }
-  load_rom_into (ucon64.rom, rom_buffer);
+  load_rom (rominfo, ucon64.rom, rom_buffer);
 
   mem_hexdump (&rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e);
 
@@ -563,16 +563,31 @@ genesis_chk (st_rominfo_t *rominfo)
     {
       st_smd_header_t smd_header;
 
-      q_fread (&smd_header, 0, SMD_HEADER_LEN, buf);
-      save_smd_from (ucon64.rom, rom_buffer, &smd_header, genesis_rom_size);
+      q_fread (&smd_header, 0, rominfo->buheader_len, buf);
+      save_smd (ucon64.rom, rom_buffer, &smd_header, genesis_rom_size);
     }
   else
-    save_bin_from (ucon64.rom, rom_buffer, genesis_rom_size);
+    save_bin (ucon64.rom, rom_buffer, genesis_rom_size);
 
   ucon64_wrote (ucon64.rom);
   free (rom_buffer);
 
   return 0;
+}
+
+
+static int
+genesis_testinterleaved (st_rominfo_t *rominfo)
+{
+  unsigned char buf[8192 + (GENESIS_HEADER_START + 4) / 2], buf2[16384];
+
+  q_fread (buf, rominfo->buheader_len, 8192 + (GENESIS_HEADER_START + 4) / 2, ucon64.rom);
+  deinterleave_chunk (buf2, buf);
+
+  if (!memcmp (buf2 + GENESIS_HEADER_START, "SEGA", 4))
+    return 1;
+  else
+    return 0;
 }
 
 
@@ -679,34 +694,59 @@ genesis_init (st_rominfo_t *rominfo)
   type = BIN;                                   // init this var here, for -lsv
   genesis_rom_size = rominfo->file_size;
 
-#ifdef CONSOLE_PROBE
   q_fread (&buf, 0, 11, ucon64.rom);
+  if (buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 7)
+    {
+      rominfo->buheader_len = SMD_HEADER_LEN;
+      strcpy (rominfo->name, "Name: N/A");
+      rominfo->console_usage = NULL;
+      rominfo->copier_usage = smd_usage;
+      rominfo->maker = "Manufacturer: You?";
+      rominfo->country = "Country: Your country?";
+      rominfo->has_internal_crc = 0;
+      strcat (rominfo->misc, "Type: Super Magic Drive SRAM file\n");
+      ucon64.split = 0;                         // SRAM files are never split
+      type = SMD;
+      return 0;                                 // rest is nonsense for SRAM file
+    }
+
+#ifdef CONSOLE_PROBE
   if (buf[8] == 0xaa && buf[9] == 0xbb && buf[10] == 6)
     {
       type = SMD;
       rominfo->buheader_len = SMD_HEADER_LEN;
-      genesis_rom_size = ((rominfo->file_size - SMD_HEADER_LEN) / 16384) * 16384;
-      if (genesis_rom_size != rominfo->file_size - SMD_HEADER_LEN)
+    }
+  else
+    type = BIN;
+#endif // CONSOLE_PROBE
+
+  if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
+    rominfo->buheader_len = ucon64.buheader_len;
+
+  rominfo->interleaved = (UCON64_ISSET (ucon64.interleaved)) ?
+    ucon64.interleaved : genesis_testinterleaved (rominfo);
+
+#ifdef CONSOLE_PROBE
+  if (type == SMD || rominfo->interleaved)
+    {
+      type = SMD;                               // if only rominfo->interleaved
+      genesis_rom_size = ((rominfo->file_size - rominfo->buheader_len) / 16384) * 16384;
+      if (genesis_rom_size != rominfo->file_size - rominfo->buheader_len)
         rominfo->data_size = genesis_rom_size;
 
-      q_fread (buf, rominfo->buheader_len, 16384, ucon64.rom);
+      q_fread (buf, rominfo->buheader_len,
+        8192 + (GENESIS_HEADER_START + GENESIS_HEADER_LEN) / 2, ucon64.rom);
       deinterleave_chunk (buf2, buf);           // buf2 will contain the deinterleaved data
       memcpy (&genesis_header, buf2 + GENESIS_HEADER_START, GENESIS_HEADER_LEN);
     }
   else
-    {
-      type = BIN;
-      q_fread (&genesis_header, GENESIS_HEADER_START, GENESIS_HEADER_LEN, ucon64.rom);
-    }
+    q_fread (&genesis_header, GENESIS_HEADER_START, GENESIS_HEADER_LEN, ucon64.rom);
 
   if (!memcmp (&OFFSET (genesis_header, 0), "SEGA", 4))
     result = 0;
   else
     result = -1;
 #endif // CONSOLE_PROBE
-
-  if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn option was specified
-    rominfo->buheader_len = ucon64.buheader_len;
 
   if (ucon64.console == UCON64_GENESIS)
     result = 0;
@@ -826,7 +866,7 @@ genesis_init (st_rominfo_t *rominfo)
             genesis_rom_size);
           return -1;
         }
-      load_rom_into (ucon64.rom, rom_buffer);
+      load_rom (rominfo, ucon64.rom, rom_buffer);
 
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 2;
@@ -881,7 +921,7 @@ genesis_j (st_rominfo_t *rominfo)
       while (q_fcpy (buf, rominfo->buheader_len,
                       (q_fsize (buf) - rominfo->buheader_len) / 2, buf2, "ab") != -1)
         (*(strrchr (buf, '.') - 1))++;
-        
+
       strcpy (buf, ucon64.rom);
       file_size = q_fsize (buf);
       while (q_fcpy (buf, rominfo->buheader_len + (file_size - rominfo->buheader_len) / 2,
@@ -924,7 +964,7 @@ genesis_j (st_rominfo_t *rominfo)
 
 
 int
-load_bin_into (const char *name, unsigned char *into)
+load_bin (const char *name, unsigned char *rom_buffer)
 {
   FILE *file;
   int bytesread, pos = 0;
@@ -935,7 +975,7 @@ load_bin_into (const char *name, unsigned char *into)
 
   while ((bytesread = fread (buf, 1, MAXBUFSIZE, file)))
     {
-      memcpy (into + pos, buf, bytesread);
+      memcpy (rom_buffer + pos, buf, bytesread);
       pos += bytesread;
     }
 
@@ -945,7 +985,7 @@ load_bin_into (const char *name, unsigned char *into)
 
 
 int
-load_smd_into (const char *name, unsigned char *into)
+load_smd (const char *name, unsigned char *rom_buffer, int buheader_len)
 {
   unsigned char buf[16384];
   FILE *file;
@@ -953,7 +993,7 @@ load_smd_into (const char *name, unsigned char *into)
 
   if ((file = fopen (name, "rb")) == NULL)
     return -1;
-  fseek (file, SMD_HEADER_LEN, SEEK_SET);
+  fseek (file, buheader_len, SEEK_SET);
 
   /*
     Note the order of arguments 16384 and 1 of fread(). If the file data size
@@ -963,7 +1003,7 @@ load_smd_into (const char *name, unsigned char *into)
   while (fread (buf, 16384, 1, file))
     {
       // Deinterleave each 16KB chunk
-      deinterleave_chunk (into + pos, buf);
+      deinterleave_chunk (rom_buffer + pos, buf);
       pos += 16384;
     }
 
@@ -973,28 +1013,29 @@ load_smd_into (const char *name, unsigned char *into)
 
 
 int
-load_rom_into (const char *name, unsigned char *into)
+load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
 {
   switch (type)
     {
     case SMD:
-      return load_smd_into (name, into);
+      return load_smd (name, rom_buffer, rominfo->buheader_len);
     case BIN:
-      return load_bin_into (name, into);
+      return load_bin (name, rom_buffer);
     }
   return -1;
 }
 
 
-int save_smd_from (const char *name, unsigned char *from, st_smd_header_t *header, long size)
+int save_smd (const char *name, unsigned char *rom_buffer,
+              st_smd_header_t *header, long size)
 {
-  interleave_buffer (from, size);
+  interleave_buffer (rom_buffer, size);
   q_fwrite (header, 0, SMD_HEADER_LEN, name, "wb");
-  return q_fwrite (from, SMD_HEADER_LEN, size, name, "ab");
+  return q_fwrite (rom_buffer, SMD_HEADER_LEN, size, name, "ab");
 }
 
 
-int save_bin_from (const char *name, unsigned char *from, long size)
+int save_bin (const char *name, unsigned char *rom_buffer, long size)
 {
-  return q_fwrite (from, 0, size, name, "wb");
+  return q_fwrite (rom_buffer, 0, size, name, "wb");
 }

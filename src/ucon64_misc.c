@@ -139,37 +139,39 @@ handle_existing_file (const char *dest, char *src)
        postcondition: src == rom.fig
 */
 {
+  struct stat src_info, dest_info;
+
   ucon64_temp_file = NULL;
   if (!access (dest, F_OK))
     {
-      if (ucon64.backup)
-        {
-          printf ("Writing backup of: %s\n", dest); // verbose
-          fflush (stdout);
-        }
-
       if (src == NULL)
         {
-          q_fbackup (dest, BAK_DUPE);
+          if (ucon64.backup)
+            printf ("Wrote backup to: %s\n", q_fbackup (dest, BAK_DUPE));
           return;
         }
 
+#if 1
+      // Check if src and dest are the same file based on the inode and device info,
+      //  not the filenames
+      stat (src, &src_info);
+      stat (dest, &dest_info);
+      if (src_info.st_dev == dest_info.st_dev && src_info.st_ino == dest_info.st_ino)
+#else
       if (!strcmp (dest, src))
+#endif
         {                                       // case 1
           if (ucon64.backup)
             {                                   // case 1a
               strcpy (src, q_fbackup (dest, BAK_DUPE));
-#ifdef  DEBUG
-              printf ("case: 1a, src: %s\n", src ? src : "NULL");
-              fflush (stdout);
-#endif
+              printf ("Wrote backup to: %s\n", src);
             }
           else
             {                                   // case 1b
               strcpy (src, q_fbackup (dest, BAK_MOVE));
               ucon64_temp_file = src;
 #ifdef  DEBUG
-              printf ("case: 1b, src: %s\n", src ? src : "NULL");
+              printf ("case 1b, src: %s\n", src);
               fflush (stdout);
 #endif
             }
@@ -177,20 +179,14 @@ handle_existing_file (const char *dest, char *src)
       else
         {
           if (ucon64.backup)
-            {
-              q_fbackup (dest, BAK_DUPE);
+            printf ("Wrote backup to: %s\n", q_fbackup (dest, BAK_DUPE));
 #ifdef  DEBUG
-              printf ("case: 2a, src: %s\n", src ? src : "NULL");
-              fflush (stdout);
-#endif
-            }
           else
             {
-#ifdef  DEBUG
-              printf ("case: 2b, src: %s\n", src ? src : "NULL");
+              printf ("case 2b, src: %s\n", src);
               fflush (stdout);
-#endif
             }
+#endif
         }
     }
 }
@@ -759,6 +755,7 @@ ucon64_parport_init (unsigned int port)
 #endif // BACKUP
 
 
+#if 0
 const char *
 ucon64_extract (const char *archive)
 {
@@ -820,15 +817,11 @@ ucon64_extract (const char *archive)
         if (!stat (path, &fstate))
           if (S_ISREG (fstate.st_mode) && fstate.st_size >= MBIT)
             {
-
 #ifdef  DEBUG
-  fprintf (stderr, "%s\n\n", path);
+              fprintf (stderr, "%s\n\n", path);
 #endif
-
               q_fcpy (path, 0, q_fsize (path), ucon64.rom_in_archive, "wb");
-
               rmdir2 (temp);
-
               return ucon64.rom_in_archive;
             }
       }
@@ -836,6 +829,7 @@ ucon64_extract (const char *archive)
 #endif
   return archive;
 }
+#endif
 
 
 int

@@ -2,7 +2,7 @@
 smd.h - Super Magic Drive support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2002 dbjh
+           2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -43,6 +43,9 @@ extern int smd_write_rom (const char *filename, unsigned int parport);
 extern int smd_read_sram (const char *filename, unsigned int parport);
 extern int smd_write_sram (const char *filename, unsigned int parport);
 #endif // PARALLEL
+// the following two functions are used by non-transfer code in genesis.c and sms.c
+extern void smd_interleave (unsigned char *buffer, int size);
+extern void smd_deinterleave (unsigned char *buffer, int size);
 
 #define SMD_HEADER_START 0
 #define SMD_HEADER_LEN (sizeof (st_smd_header_t))

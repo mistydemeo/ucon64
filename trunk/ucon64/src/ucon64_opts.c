@@ -1662,6 +1662,10 @@ ucon64_options (int c, const char *optarg)
     case UCON64_XV64:
       if (!access (ucon64.rom, F_OK))
         {
+          if (!ucon64.rominfo->interleaved)
+            fprintf (stderr,
+                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 only\n"
+                     "       supports interleaved ROMs. Convert to a Doctor V64 compatible format.\n");
           if (doctor64_write (ucon64.rom, ucon64.rominfo->buheader_len,
                               ucon64.file_size, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);

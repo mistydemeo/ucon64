@@ -25,8 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
-first I want to thank SiGMA SEVEN! who was my mentor and taught me how to
-write programs in C
+  first I want to thank SiGMA SEVEN! who was my mentor and taught me how to
+  write programs in C
 */
 #ifdef  HAVE_CONFIG_H
 #include "config.h"

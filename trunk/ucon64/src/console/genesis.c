@@ -43,8 +43,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GENESIS_HEADER_LEN (sizeof (st_genesis_header_t))
 #define GENESIS_NAME_LEN 48
 
-static void interleave_buffer (unsigned char *buffer, int size);
-static void deinterleave_chunk (unsigned char *dest, unsigned char *src);
 static int genesis_chksum (unsigned char *rom_buffer);
 static unsigned char *load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer);
 static int save_smd (const char *name, unsigned char *buffer, st_smd_header_t *header, long size);
@@ -92,41 +90,6 @@ typedef struct st_genesis_header
 st_genesis_header_t genesis_header;
 enum { SMD, BIN } type;
 static int genesis_rom_size;
-
-
-void
-interleave_buffer (unsigned char *buffer, int size)
-// Convert binary data to the SMD interleaved format
-{
-  unsigned char block[16384];
-  int count, offset;
-
-  for (count = 0; count < size / 16384; count++)
-    {
-      memcpy (block, &buffer[count * 16384], 16384);
-
-      for (offset = 0; offset < 8192; offset++)
-        {
-          buffer[(count * 16384) + 8192 + offset] =
-            block[offset << 1];
-          buffer[(count * 16384) + offset] =
-            block[(offset << 1) + 1];
-        }
-    }
-}
-
-
-void
-deinterleave_chunk (unsigned char *dest, unsigned char *src)
-// Deinterleave the 16 KB memory chunk src and write the deinterleaved data to dest
-{
-  int offset;
-  for (offset = 0; offset < 8192; offset++)
-    {
-      dest[offset << 1] = src[offset + 8192];   // set all bytes with even addresses
-      dest[(offset << 1) + 1] = src[offset];    // set all bytes with odd addresses
-    }
-}
 
 
 int
@@ -497,6 +460,8 @@ genesis_j (st_rominfo_t *rominfo)
     }
   else
     {
+      char buf[3];
+
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".SMD");
       strcpy (src_name, ucon64.rom);
@@ -512,12 +477,14 @@ genesis_j (st_rominfo_t *rominfo)
           block_size = q_fsize (src_name) - rominfo->buheader_len;
         }
                                                 // fix header
-      q_fputc (dest_name, 0, total_size / 16384, "r+b"); // # 16K blocks
-      q_fputc (dest_name, 1, 3, "r+b");         // ID 0
-      q_fputc (dest_name, 2, 0, "r+b");         // last file -> clear bit 6
-      q_fputc (dest_name, 8, 0xaa, "r+b");      // ID 1
-      q_fputc (dest_name, 9, 0xbb, "r+b");      // ID 2
-      q_fputc (dest_name, 10, 6, "r+b");        // type Genesis
+      buf[0] = total_size / 16384;		// # 16K blocks
+      buf[1] = 3;				// ID 0
+      buf[2] = 0;				// last file -> clear bit 6
+      q_fwrite (buf, 0, 3, dest_name, "r+b");
+      buf[0] = 0xaa;				// ID 1
+      buf[1] = 0xbb;				// ID 2
+      buf[2] = 6;				// type Genesis
+      q_fwrite (buf, 8, 3, dest_name, "r+b");
 
       printf (ucon64_msg[WROTE], dest_name);
     }
@@ -628,7 +595,6 @@ load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
 {
   FILE *file;
   int bytesread, pos = 0, calc_fcrc32 = !ucon64.fcrc32;
-  unsigned char buf[16384];
 
   if ((file = fopen (name, "rb")) == NULL)
     return NULL;
@@ -649,24 +615,21 @@ load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
         size (size without header) is not a multiple of 16 KB, the excess bytes
         will be discarded (which is what we want).
       */
-      while (fread (buf, 16384, 1, file))
+      while (fread (rom_buffer + pos, 16384, 1, file))
         {
           // Use calc_fcrc32, because the first iteration ucon64.fcrc32 is zero
           //  while the next it's non-zero.
           if (calc_fcrc32)
-            ucon64.fcrc32 = crc32 (ucon64.fcrc32, buf, 16384);
-          // Deinterleave each 16 KB chunk
-          deinterleave_chunk (rom_buffer + pos, buf);
+            ucon64.fcrc32 = crc32 (ucon64.fcrc32, rom_buffer + pos, 16384);
+          // Deinterleave each 16 kB chunk
+          smd_deinterleave (rom_buffer + pos, 16384);
           pos += 16384;
         }
     }
   else // if (type == BIN)
     {
-      while ((bytesread = fread (buf, 1, 16384, file)))
-        {
-          memcpy (rom_buffer + pos, buf, bytesread);
-          pos += bytesread;
-        }
+      while ((bytesread = fread (rom_buffer + pos, 1, 16384, file)))
+        pos += bytesread;
     }
 
   if (ucon64.crc32 == 0)                        // Calculate the CRC32 only once
@@ -681,7 +644,7 @@ int
 save_smd (const char *name, unsigned char *buffer, st_smd_header_t *header,
           long size)
 {
-  interleave_buffer (buffer, size);
+  smd_interleave (buffer, size);
   q_fwrite (header, 0, SMD_HEADER_LEN, name, "wb");
   return q_fwrite (buffer, SMD_HEADER_LEN, size, name, "ab");
 }
@@ -697,33 +660,15 @@ save_bin (const char *name, unsigned char *buffer, long size)
 static int
 genesis_testinterleaved (st_rominfo_t *rominfo)
 {
-  unsigned char *buf, *buf2;
-
-  /*
-    Allocate memory for buf and buf2 from the heap and not from the stack,
-    because there seems to be a problem with an older version of DJGPP (gcc
-    2.95.2).
-  */
-  if (!(buf = (unsigned char *) malloc (2 * 16384)))
-    {
-      fprintf (stderr, ucon64_msg[BUFFER_ERROR], 2 * 16384);
-      return -1;
-    }
-  buf2 = buf + 16384;
+  unsigned char buf[16384];
 
   q_fread (buf, rominfo->buheader_len, 8192 + (GENESIS_HEADER_START + 4) / 2, ucon64.rom);
-  deinterleave_chunk (buf2, buf);
+  smd_deinterleave (buf, 16384);
 
-  if (!memcmp (buf2 + GENESIS_HEADER_START, "SEGA", 4))
-    {
-      free (buf);
-      return 1;
-    }
+  if (!memcmp (buf + GENESIS_HEADER_START, "SEGA", 4))
+    return 1;
   else
-    {
-      free (buf);
-      return 0;
-    }
+    return 0;
 }
 
 
@@ -731,7 +676,7 @@ int
 genesis_init (st_rominfo_t *rominfo)
 {
   int result = -1, value = 0, x;
-  unsigned char *rom_buffer = NULL, buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
+  unsigned char *rom_buffer = NULL, buf[MAXBUFSIZE], name[GENESIS_NAME_LEN + 1];
   static char maker[9], country[200]; // 200 characters should be enough for 5 country names
   static const char *genesis_maker[0x100] = {
     NULL, "Accolade", "Virgin Games", "Parker Brothers", "Westone",
@@ -868,8 +813,8 @@ genesis_init (st_rominfo_t *rominfo)
 
       q_fread (buf, rominfo->buheader_len,
         8192 + (GENESIS_HEADER_START + GENESIS_HEADER_LEN) / 2, ucon64.rom);
-      deinterleave_chunk (buf2, buf);           // buf2 will contain the deinterleaved data
-      memcpy (&genesis_header, buf2 + GENESIS_HEADER_START, GENESIS_HEADER_LEN);
+      smd_deinterleave (buf, 16384);            // buf will contain the deinterleaved data
+      memcpy (&genesis_header, buf + GENESIS_HEADER_START, GENESIS_HEADER_LEN);
     }
   else                                          // type == BIN
     {
@@ -932,9 +877,9 @@ genesis_init (st_rominfo_t *rominfo)
   rominfo->country = country;
 
   // misc stuff
-  memcpy (buf2, &OFFSET (genesis_header, 80), GENESIS_NAME_LEN);
-  buf2[GENESIS_NAME_LEN] = 0;
-  sprintf ((char *) buf, "Overseas game name: %s\n", buf2);
+  memcpy (name, &OFFSET (genesis_header, 80), GENESIS_NAME_LEN);
+  name[GENESIS_NAME_LEN] = 0;
+  sprintf ((char *) buf, "Overseas game name: %s\n", name);
   strcat (rominfo->misc, (const char *) buf);
 
 #if 0
@@ -1031,7 +976,7 @@ genesis_chksum (unsigned char *rom_buffer)
   unsigned short checksum = 0;
 
   for (i = 512; i <= len; i += 2)
-    checksum += (rom_buffer[i + 0] << 8) + (rom_buffer[i + 1]);
+    checksum += (rom_buffer[i] << 8) + (rom_buffer[i + 1]);
 
   return checksum;
 }

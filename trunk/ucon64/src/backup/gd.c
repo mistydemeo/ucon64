@@ -62,6 +62,9 @@ const st_usage_t gd_usage[] =
 #endif
     {"xgd6s", NULL, "send/receive SRAM to/from Game Doctor SF6/SF7; " OPTION_LONG_S "port=PORT\n"
                     "receives automatically when SRAM does not exist"},
+    {"xgd6r", NULL, "send/receive Saver (RTS) data to/from Game Doctor SF6/SF7;\n"
+                 OPTION_LONG_S "port=PORT\n"
+                 "receives automatically when Saver file does not exist"},
 #endif // PARALLEL
     {NULL, NULL, NULL}
   };
@@ -105,6 +108,9 @@ static int gd_write_rom (const char *filename, unsigned int parport,
                          st_rominfo_t *rominfo, const char *prolog_str);
 static int gd_write_sram (const char *filename, unsigned int parport,
                           const char *prolog_str);
+static int gd_write_saver (const char *filename, unsigned int parport,
+			  const char *prolog_str);
+
 
 typedef struct st_gd3_memory_unit
 {
@@ -880,6 +886,235 @@ gd_write_sram (const char *filename, unsigned int parport, const char *prolog_st
     extension of .B## (where # is a digit from 0-9)
   */
   strcpy ((char *) gdfilename, "SF8123  B00"); // TODO: we might need to make a GD file name from the real one
+  if (gd_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
+    io_error ();
+
+  printf ("Press q to abort\n\n");              // print here, NOT before first GD I/O,
+                                                //  because if we get here q works ;-)
+  starttime = time (NULL);
+  while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+    {
+      if (gd_send_bytes (buffer, bytesread) == GD_ERROR)
+        io_error ();
+
+      bytessend += bytesread;
+      ucon64_gauge (starttime, bytessend, size);
+      gd_checkabort (2);
+    }
+
+  free (buffer);
+  fclose (file);
+  deinit_io ();
+
+  return 0;
+}
+
+
+int
+gd3_read_saver (const char *filename, unsigned int parport)
+{
+  (void) filename;                              // warning remover
+  (void) parport;                               // warning remover
+  return fprintf (stderr, "ERROR: The function for dumping Saver data is not yet implemented for the SF3\n");
+}
+
+
+int
+gd6_read_saver (const char *filename, unsigned int parport)
+{
+  FILE *file;
+  unsigned char *buffer, gdfilename[12];
+  int len, bytesreceived = 0, transfer_size;
+  time_t starttime;
+
+  init_io (parport);
+
+  if ((file = fopen (filename, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
+      exit (1);
+    }
+
+  // Be nice to the user and automatically remove the file on an error (or abortion)
+  gd_destfname = filename;
+  gd_destfile = file;
+  register_func (remove_destfile);
+
+  if (gd6_sync_hardware () == GD_ERROR)
+    io_error ();
+  if (gd6_send_prolog_bytes ((unsigned char *) GD6_WRITE_PROLOG_STRING, 4) == GD_ERROR)
+    io_error ();
+
+  /*
+    TODO: Graceful handling of an abort because of a name error?
+          Currently we fail with a generic error.
+  */
+
+  // TODO: we could make a GD file name from the real one but a valid dummy name seems to work OK here
+  //       the user must have the proper game selected in the SF7 menu even if the real name is used.
+  strcpy ((char *) gdfilename, "SF16497 S00");
+  if (gd6_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
+    io_error ();
+
+  if (gd6_sync_receive_start () == GD_ERROR)
+    io_error ();
+
+  if (gd6_receive_bytes (buffer, 16) == GD_ERROR)
+    io_error ();
+
+  transfer_size = buffer[1] | (buffer[2] << 8) | (buffer[3] << 16) | (buffer[4] << 24);
+  if (transfer_size != 0x38000)
+    {
+      fprintf (stderr, "ERROR: Saver transfer size from Game Doctor != 0x38000 bytes\n");
+      exit (1);
+    }
+
+  printf ("Receive: %d Bytes\n", transfer_size);
+  printf ("Press q to abort\n\n");
+
+  starttime = time (NULL);
+  while (bytesreceived < transfer_size)
+    {
+      if (transfer_size - bytesreceived >= BUFFERSIZE)
+        len = BUFFERSIZE;
+      else
+        len = transfer_size - bytesreceived;
+
+      if (gd6_receive_bytes (buffer, len) == GD_ERROR)
+        io_error ();
+      fwrite (buffer, 1, len, file);
+
+      bytesreceived += len;
+      ucon64_gauge (starttime, bytesreceived, 32 * 1024);
+      gd_checkabort (2);
+    }
+
+  unregister_func (remove_destfile);
+  free (buffer);
+  fclose (file);
+  deinit_io ();
+
+  return 0;
+}
+
+
+int
+gd3_write_saver (const char *filename, unsigned int parport)
+{
+  gd_send_prolog_bytes = gd3_send_prolog_bytes;
+  gd_send_bytes = gd3_send_bytes;
+
+  return gd_write_saver (filename, parport, GD3_PROLOG_STRING);
+}
+
+
+int
+gd6_write_saver (const char *filename, unsigned int parport)
+{
+  gd_send_prolog_bytes = gd6_send_prolog_bytes;
+  gd_send_bytes = gd6_send_bytes;
+
+  return gd_write_saver (filename, parport, GD6_READ_PROLOG_STRING);
+}
+
+
+int
+gd_write_saver (const char *filename, unsigned int parport, const char *prolog_str)
+{
+  FILE *file;
+  unsigned char *buffer;
+  int bytesread, bytessend = 0, size, fn_length, i;
+  time_t starttime;
+  unsigned char gdfilename[12];
+  unsigned char *p1;
+  const unsigned char *p2;
+
+  init_io (parport);
+  
+  /*
+    Check that filename is a valid Game Doctor saver filename.
+    It should start with SF, followed by the game ID, followed by the extension.
+    The extension is of the form .S## (where # is a digit from 0-9).
+    I.e., SF16123.S00
+  */
+
+  // Strip the path out of filename for use in the GD
+  fn_length = strlen (filename);
+  p2 = filename + fn_length;
+  for ( i = fn_length; i > 0; i-- )
+    {
+        p2--;
+        if ( *p2 == '/'  || *p2 == '\\' )
+        {
+            p2++;
+            break;
+        }
+    }
+  fn_length = strlen (p2);
+
+  if ( fn_length < 6
+        || fn_length > 11
+        || toupper(p2[0]) != 'S' || toupper(p2[1]) != 'F'
+        || p2[fn_length - 4] != '.'
+        || (p2[fn_length - 3] != 'S' && p2[fn_length - 3] != 's')  )
+    {
+      fprintf (stderr, "Error: filename (%s), not a saver filename (SF*.S##)\n", p2);
+      exit (1);
+    }
+
+  if ((file = fopen (filename, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
+      exit (1);
+    }
+
+  size = q_fsize (filename);
+
+  if (size != 0x38000)                    // GD Saver size is always 0x38000 bytes -- no header
+    {
+      fprintf (stderr, "ERROR: GD Saver file size must be 0x38000 bytes\n");
+      exit (1);
+    }
+
+  // Make a GD file name from the real one
+  memset (gdfilename, ' ', 11);          // "pad" with spaces
+  gdfilename[11] = 0;                    // Terminate string
+  p1 = gdfilename;
+  i = fn_length;
+  while ( (i-- > 0) && ((*p1++ = *p2++) != '.') )
+    ;
+  memcpy ( &gdfilename[8], "S00", 3);  // Copy extension S00
+  (void) strupr ( gdfilename );
+
+  printf ("Send: %d Bytes\n", size);
+  fseek (file, (size_t) 0, SEEK_SET);
+
+  if (memcmp (prolog_str, GD6_READ_PROLOG_STRING, 4) == 0)
+    if (gd6_sync_hardware () == GD_ERROR)
+      io_error ();
+  memcpy (buffer, prolog_str, 4);
+  buffer[4] = 1;
+  if (gd_send_prolog_bytes (buffer, 5) == GD_ERROR)
+    io_error ();
+
+  // Transfer 0x38000 bytes
+  buffer[0] = 0x00;
+  buffer[1] = 0x80;
+  buffer[2] = 0x03;
+  buffer[3] = 0x00;
+  if (gd_send_prolog_bytes (buffer, 4) == GD_ERROR)
+    io_error ();
+
   if (gd_send_prolog_bytes (gdfilename, 11) == GD_ERROR)
     io_error ();
 

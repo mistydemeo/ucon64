@@ -94,7 +94,6 @@ extern char *basename2 (const char *str);
 #define me2le_64(x) (x)
 #endif
 
-
 #if     defined __linux__ || defined HAVE_LINUX_CDROM_H
 #include <linux/cdrom.h>
 #else
@@ -211,7 +210,45 @@ struct cdrom_msf
 
 /* The leadout track is always 0xAA, regardless of # of tracks on disc */
 #define	CDROM_LEADOUT		0xAA
-#endif                                          // #ifdef __linux__
+#endif
+
+#if 0 
+//disabled.. linux FIRST
+#ifdef  DJGPP
+typedef struct st_symbol
+{
+  // functions exported by the DXE module
+  int (*dxe_init) (void);
+  void *(*dxe_symbol) (char *symbol_name);
+
+  /*
+     functions imported by the DXE module
+     Note that _every_ function used by the DXE module and not defined in it
+     should be listed here. That includes standard C library functions and 
+     variables.
+  */
+  int (*printf) (const char *, ...);
+  int (*fprintf) (FILE *, const char *, ...);
+
+  void (*free) (void *);
+  void *(*malloc) (size_t);
+  void (*exit) (int);
+
+  void *(*memcpy) (void *, const void *, size_t);
+  void *(*memset) (void *, int, size_t);
+
+  int (*strcmp) (const char *, const char *);
+
+  // Put all variables AFTER the functions. This makes it easy to catch 
+  //  uninitialized function pointers.
+  FILE __dj_stdin, __dj_stdout, __dj_stderr;
+} st_symbol_t;
+#elif   defined __BEOS__ && !defined DLOPEN
+// Strangely enough this doesn't seem to be necessary
+__declspec(dllimport) int function1(int);
+__declspec(dllimport) int function2(int);
+#endif
+#endif
 
 #if 0
 #define MODE1_2048 0
@@ -320,11 +357,8 @@ extern int fsize (const char *filename);
   dm_init()  this will init libdiscmage and try to recognize the image format, etc.
 */
 extern dm_image_t *dm_init (const char *image_filename);
-#if 0
 extern int dm_close (dm_image_t *image);
-#else
-#define dm_close free
-#endif
+
 
 /*
   dm_bin2iso()  convert Mx/>2048 image to M1/2048

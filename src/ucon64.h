@@ -40,12 +40,11 @@ typedef struct st_ucon64
   char **argv;
 
   const char *rom;                              // ROM (cmdline) with path
-//  char rom_in_archive[FILENAME_MAX];            // filename holder if the ROM comes from an archive
-
   const char *file;                             // file (cmdline) with path
 
 //  char temp_file[FILENAME_MAX];
-
+  char configfile[FILENAME_MAX];                // path and name of the config file
+  char configdir[FILENAME_MAX];                 // uCON64 cache for dat files
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
 
 #ifdef  ANSI_COLOR
@@ -54,10 +53,10 @@ typedef struct st_ucon64
 
   unsigned int parport;                         // parallel port address
   int parport_mode;                             // parallel port mode: ECP, EPP, SPP, other
-  char configfile[FILENAME_MAX];                // path and name of the config file
 
   int backup;                                   // flag if backups files should be created
   int frontend;                                 // flag if uCON64 was started by a frontend
+  int have_libdiscmage;
 
   int show_nfo;                                 // show or skip info output for ROM
 
@@ -122,9 +121,7 @@ typedef struct st_rominfo
   char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal checksum
   int internal_crc2_start;                      // start of 2nd/inverse internal checksum
   int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal checksum
-#ifdef  LIBDISCMAGE
-//  st_dm_image_t *image;                         // CD image?
-#endif
+//  dm_image_t *image;                         // DISC image
 } st_rominfo_t;
 
 extern dm_image_t *image;

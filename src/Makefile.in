@@ -6,6 +6,7 @@ CFLAGS=@CFLAGS@ @DEFS@
 LDFLAGS=@LDFLAGS@
 
 OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
+        dlopen.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
@@ -20,10 +21,6 @@ OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
 @DEFINE_ZLIB_MAKE@
 ifdef ZLIB
 OBJECTS+=unzip.o
-endif
-@DEFINE_LIBDISCMAGE_MAKE@
-ifdef LIBDISCMAGE
-OBJECTS+=libdiscmage/libdiscmage.o libdiscmage/cdi.o libdiscmage/nero.o libdiscmage/sheets.o
 endif
 
 TARGET=ucon64
@@ -56,9 +53,9 @@ ifdef DJGPP
 else                                    # Unix or BeOS
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
               DEADJOE */DEADJOE *~ */*~ */*/*~
-
 endif                                   # DJGPP
 endif                                   # cygwin
+	cd libdiscmage && $(MAKE) clean
 
 distclean: clean
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
@@ -74,6 +71,7 @@ else
 	rm -f Makefile config.log config.status config.cache config.h
 endif                                   # DJGPP
 endif                                   # cygwin
+	cd libdiscmage && $(MAKE) distclean
 
 
 .c.o:
@@ -82,6 +80,7 @@ endif                                   # cygwin
 
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
+	cd libdiscmage && $(MAKE)
 
 install:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
@@ -95,7 +94,7 @@ else
 endif                                   # beos
 endif                                   # DJGPP
 endif                                   # cygwin
-
+#	cd libdiscmage && $(MAKE) install
 
 uninstall:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
@@ -109,23 +108,20 @@ else
 endif                                   # beos
 endif                                   # DJGPP
 endif                                   # cygwin
-
+#	cd libdiscmage && $(MAKE) uninstall
 
 # Dependencies
 
 # Most source files include these
-UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
+UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h dlopen.h
 
 getopt.o: getopt.h
 unzip.o: unzip.h
 misc.o: misc.h config.h
 quick_io.o: quick_io.h misc.h config.h
-ucon64.o: switches.c options.c $(UCON64_STD_H)
+ucon64.o: switches.c options.c dlopen.h $(UCON64_STD_H)
 ucon64_misc.o: libdiscmage/cdi.h libdiscmage/nero.h $(UCON64_STD_H)
 ucon64_db.o: ucon64_db.h $(UCON64_STD_H)
-libdiscmage/libdiscmage.o: libdiscmage/libdiscmage_cfg.h $(UCON64_STD_H)
-libdiscmage/nero.o: libdiscmage/nero.h libdiscmage/cdi.h config.h
-libdiscmage/cdi.o: libdiscmage/cdi.h
 console/gb.o: console/gb.h $(UCON64_STD_H)
 console/gba.o: console/gba.h $(UCON64_STD_H)
 console/genesis.o: console/genesis.h $(UCON64_STD_H)

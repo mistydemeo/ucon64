@@ -12,6 +12,9 @@
 /* enable debug output (default: no) */
 #undef DEBUG
 
+/* enable support for dlopen() (default: yes) */
+#undef DLOPEN
+
 /* Define to 1 if you have the `basename' function. */
 #undef HAVE_BASENAME
 
@@ -24,6 +27,9 @@
 
 /* Define to 1 if you have the `dirname' function. */
 #undef HAVE_DIRNAME
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
 
 /* Define to 1 if you don't have `vprintf' but do have `_doprnt.' */
 #undef HAVE_DOPRNT
@@ -95,9 +101,6 @@
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H
-
-/* enable support for DISC-based consoles (default: yes) */
-#undef LIBDISCMAGE
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT

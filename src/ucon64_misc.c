@@ -1179,6 +1179,15 @@ ucon64_configfile (void)
 #endif
     , dirname);
 
+  sprintf (ucon64.configdir, "%s" FILE_SEPARATOR_S
+#ifdef  __MSDOS__
+    "ucon64" 
+#else
+    ".ucon64"
+#endif
+    FILE_SEPARATOR_S, dirname);
+
+
   if (access (ucon64.configfile, F_OK) != 0)
     {
       FILE *fh;

@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.16 2002-11-05 15:02:29 dbjh Exp $
+ * $Id: gg.c,v 1.17 2002-11-07 09:36:35 dbjh Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -98,6 +98,7 @@ const char *gg_usage[] = {
 
 
 static st_rominfo_t *gg_rominfo;
+static int CPUaddress;
 
 
 /*********************************************************************
@@ -302,8 +303,6 @@ gameGenieDecodeGameBoy (const char *in, char *out)
 int
 gameGenieEncodeGameBoy (const char *in, char *out)
 {
-//  int address = 0;
-//  int value = 0;
   int check = 0;
   int haveCheck = 0;
   int i;
@@ -801,11 +800,9 @@ unmapSnesChar (char genie)
 int
 gameGenieDecodeSNES (const char *in, char *out)
 {
-  int value;
+  int value, hirom;
   long address;
   long transposed;
-//  int i;
-//  int b;
 
   if (!isxdigit ((int) in[0]) || !isxdigit ((int) in[1]) ||
       !isxdigit ((int) in[2]) || !isxdigit ((int) in[3]) ||
@@ -838,24 +835,30 @@ gameGenieDecodeSNES (const char *in, char *out)
   decodeSNES (11, 6);
 
   if (gg_rominfo != 0)
+    hirom = gg_rominfo->header_start > SNES_HEADER_START ? 1 : 0;
+  // if a ROM was specified snes.c will handle ucon64.snes_hirom
+  else if (UCON64_ISSET (ucon64.snes_hirom))    // -hi or -nhi option was specified
+    hirom = ucon64.snes_hirom;
+  else
+    hirom = 1;                                  // I am less sure about the LoROM
+                                                //  CPU -> ROM address conversion
+  CPUaddress = address;
+  if (hirom)
     {
-      if (gg_rominfo->header_start > SNES_HEADER_START)
-        {                                           // HiROM
-          if (address >= 0xc00000 && address <= 0xffffff)
-            address -= 0xc00000;
-          else if (address >= 0x800000 && address <= 0xbfffff)
-            address -= 0x800000;
-          else if (address >= 0x400000 && address <= 0x7fffff)
-            address -= 0x400000;
-        }
-      else                                          // LoROM
-        {
-          if (address >= 0x808000)
-            address -= 0x808000;
-          else if (address >= 0x008000)
-            address -= 0x008000;
-          address = (address & 0x7fff) | ((address & 0xff0000) >> 1);
-        }
+      if (address >= 0xc00000 && address <= 0xffffff)
+        address -= 0xc00000;
+      else if (address >= 0x800000 && address <= 0xbfffff)
+        address -= 0x800000;
+      else if (address >= 0x400000 && address <= 0x7fffff)
+        address -= 0x400000;
+    }
+  else
+    {
+      if (address >= 0x808000)
+        address -= 0x808000;
+      else if (address >= 0x008000)
+        address -= 0x008000;
+      address = (address & 0x7fff) | ((address & 0xff0000) >> 1);
     }
 
   sprintf (out, "%06lX:%02X", address, value);
@@ -870,8 +873,6 @@ gameGenieEncodeSNES (const char *in, char *out)
   int value;
   long address;
   long transposed;
-//  int i;
-//  int b;
 
   if (!isxdigit ((int) in[0]) || !isxdigit ((int) in[1]) ||
       !isxdigit ((int) in[2]) || !isxdigit ((int) in[3]) ||
@@ -981,15 +982,20 @@ gg_main (int argc, const char **argv)
       if (result != 0)
         printf ("%-12s is badly formed\n", argv[i]);
       else
-        printf ("%-12s = %s\n", argv[i], buffer);
+        {
+          if (CPUaddress != -1)                 // SNES decode specific
+            printf ("%-12s = %s (CPU address: %06X)\n", argv[i], buffer, CPUaddress);
+          else
+            printf ("%-12s = %s\n", argv[i], buffer);
+        }
     }
   return 0;
 }
 
 
 /*
-  It will save you some work if you don't fully integrate the code above with uCON64's code,
-  because it is a project separate from the uCON64 project.
+  It will save you some work if you don't fully integrate the code above with
+  uCON64's code, because it is a project separate from the uCON64 project.
 */
 int gg_argc;
 const char *gg_argv[128];
@@ -1026,13 +1032,13 @@ gg_display (st_rominfo_t *rominfo, const char *code)
       return -1;
     }
   gg_argv[2] = code;
-
   gg_argc = 3;
 
   if (rominfo->file_size > 0)                   // check if rominfo contains valid ROM info
     gg_rominfo = rominfo;
   else
     gg_rominfo = 0;
+  CPUaddress = -1;
   gg_main (gg_argc, gg_argv);
 
   return 0;
@@ -1054,19 +1060,22 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
       return -1;
     }
 
+  CPUaddress = -1;
   switch (ucon64.console)
     {
+      // interleaved images (GD3 (SNES) & SMD (Genesis) should be allowed to
+      //  be patched
       case UCON64_GB:
       case UCON64_SMS:
         result = gameGenieDecodeGameBoy (code, buf);
         break;
-      case UCON64_GENESIS:                      // smd?
+      case UCON64_GENESIS:
         result = gameGenieDecodeMegadrive (code, buf);
         break;
       case UCON64_NES:
         result = gameGenieDecodeNES (code, buf);
         break;
-      case UCON64_SNES:                         // interleaved?
+      case UCON64_SNES:
         result = gameGenieDecodeSNES (code, buf);
         break;
       default:
@@ -1079,7 +1088,10 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
       return -1;
     }
 
-  printf ("%-12s = %s\n", code, buf);
+  if (CPUaddress != -1)                         // SNES decode specific
+    printf ("%-12s = %s (CPU address: %06X)\n", code, buf, CPUaddress);
+  else
+    printf ("%-12s = %s\n", code, buf);
   sscanf (buf, "%lx:%lx:*", &address, &value);
 
   if (address > size)

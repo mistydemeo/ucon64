@@ -1982,7 +1982,7 @@ snes_init (st_rominfo_t *rominfo)
 
   // step 3.
   if (UCON64_ISSET (ucon64.snes_hirom))          // -hi or -nhi option was specified
-    snes_hirom = (ucon64.snes_hirom) ? SNES_HIROM : 0;
+    snes_hirom = ucon64.snes_hirom ? SNES_HIROM : 0;
 
   rominfo->header_start = SNES_HEADER_START + snes_hirom;
   /*
@@ -2006,8 +2006,8 @@ snes_init (st_rominfo_t *rominfo)
   rominfo->header = &snes_header;
 
   // step 4.
-  force_interleaved = (UCON64_ISSET (ucon64.interleaved)) ? 1 : 0;
-  rominfo->interleaved = (UCON64_ISSET (ucon64.interleaved)) ?
+  force_interleaved = UCON64_ISSET (ucon64.interleaved) ? 1 : 0;
+  rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
     ucon64.interleaved : snes_testinterleaved (rominfo);
 
   bs_dump = snes_check_bs ();
@@ -2038,7 +2038,7 @@ snes_init (st_rominfo_t *rominfo)
           rominfo->copier_usage = fig_usage;
           break;
         default:
-          rominfo->copier_usage = (!snes_hirom) ? smc_usage : fig_usage;
+          rominfo->copier_usage = !snes_hirom ? smc_usage : fig_usage;
         }
     }
 
@@ -2062,7 +2062,7 @@ snes_init (st_rominfo_t *rominfo)
 #endif
     }
   else
-    rominfo->maker = (snes_header.maker == 0) ? "Demo or Beta ROM?" :
+    rominfo->maker = snes_header.maker == 0 ? "Demo or Beta ROM?" :
       NULL_TO_UNKNOWN_S (snes_maker[snes_header.maker]);
 
   if (!bs_dump)

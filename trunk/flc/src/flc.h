@@ -53,7 +53,7 @@ typedef struct st_sub
   char name[FILENAME_MAX + 1];
   char fullpath[FILENAME_MAX + 1];
   off_t size;
-  unsigned long date;
+  unsigned int date;
   int checked;
   char file_id[FID_LINES_MAX + 1][49];
 }

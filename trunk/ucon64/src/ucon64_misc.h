@@ -114,7 +114,10 @@ long filetestpad (char *filename); //test if a ROM is padded
 int testsplit (char *filename);//test if a ROM is splitted
 
 unsigned int parport_probe (unsigned int parport);
-int parport_gauge (time_t init_time, long pos, long size);
+
+//ucon64 specific wrapper for misc.c/gauge()
+int
+ucon64_gauge (struct ucon64_ *rom, time_t init_time, long pos, long size);
 
 int trackmode (long imagesize);
 

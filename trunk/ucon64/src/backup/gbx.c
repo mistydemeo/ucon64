@@ -1539,7 +1539,7 @@ write_cart_from_file (void)
           return -1;
         }
       nbytes += 16 * 1024;
-      parport_gauge (starttime, nbytes, filesize);
+      ucon64_gauge (&rom, starttime, nbytes, filesize);
     }
   //printf("write cart ok\n");
   fclose (fptr);
@@ -1567,7 +1567,7 @@ write_cart_from_file (void)
           return -1;
         }
       nbytes += 16 * 1024;
-      parport_gauge (starttime, nbytes, filesize);
+      ucon64_gauge (&rom, starttime, nbytes, filesize);
     }
   // printf("verify cart ok\n");
   fclose (fptr);
@@ -1623,7 +1623,7 @@ backup_rom (void)               //no_page=how many 32K
           return -1;
         }
       nbytes += 16 * 1024;
-      parport_gauge (starttime, nbytes, totalbytes);
+      ucon64_gauge (&rom, starttime, nbytes, totalbytes);
     }
   fclose (fptr);
 
@@ -2250,7 +2250,7 @@ read_all_sram_to_file (void)
             }
         }
       nbytes += 8 * 1024;
-      parport_gauge (starttime, nbytes, totalbytes);
+      ucon64_gauge (&rom, starttime, nbytes, totalbytes);
     }
   fclose (fptr);
 
@@ -2310,7 +2310,7 @@ read_8k_sram_to_file (void)
       }
   }
   nbytes += 8 * 1024;           // should this be in loop? (dbjh)
-  parport_gauge (starttime, nbytes, 8 * 1024);
+  ucon64_gauge (&rom, starttime, nbytes, 8 * 1024);
 
   if (write_sram_xxk (0x2000) != 0)
     {
@@ -2367,7 +2367,7 @@ write_all_sram_from_file (void)
           idx = idx + 256;
         }
       nbytes += 8 * 1024;
-      parport_gauge (starttime, nbytes, totalbytes);
+      ucon64_gauge (&rom, starttime, nbytes, totalbytes);
     }
   fclose (fptr);
 
@@ -2431,7 +2431,7 @@ write_8k_sram_from_file (void)
       }
   }
   nbytes += 8 * 1024;           // should this be in loop? (dbjh)
-  parport_gauge (starttime, nbytes, 8 * 1024);
+  ucon64_gauge (&rom, starttime, nbytes, 8 * 1024);
 
   printf ("\nwrite sram 64kbits at bank %d ok\n", sram_bank_num);
 

@@ -292,7 +292,7 @@ doctor64_read (char *filename, unsigned int parport)
           return (0);
         }
       fwrite (buf, 1, sizeof (buf), fh);
-      parport_gauge (inittime, quickftell (filename), size);
+      ucon64_gauge (&rom, inittime, quickftell (filename), size);
     }
   sync ();
   fclose (fh);
@@ -331,7 +331,7 @@ doctor64_write (char *filename, long start, long len, unsigned int parport)
       if (parport_write (buf, pos, parport) != 0)
         break;
       size = size - pos;
-      parport_gauge (inittime, (quickftell (filename) - start) - size,
+      ucon64_gauge (&rom, inittime, (quickftell (filename) - start) - size,
                      (quickftell (filename) - start));
     }
   fclose (fh);

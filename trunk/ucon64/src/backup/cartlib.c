@@ -316,7 +316,7 @@ CartTypeDetect (void)
       break;
     }
   WriteFlash (_CART_START, INTEL28F_READARRAY); // Set flash to normal read mode
-  return (type);
+  return type;
 }
 
 #ifdef NOA_FLASH_CART_SUPPORT
@@ -342,7 +342,7 @@ EraseNintendoFlashBlocks (u32 StartAddr, u32 BlockCount)
       while ((j & 0x80) == 0);
       WriteFlash (i, SHARP28F_BLOCKERASE);      // Erase a 64k byte block
       WriteFlash (i, SHARP28F_CONFIRM); // Comfirm block erase
-      parport_gauge (starttime, (k + 1) * 64 * 1024, BlockCount * 64 * 1024);
+      ucon64_gauge (&rom, starttime, (k + 1) * 64 * 1024, BlockCount * 64 * 1024);
     }
 
   do
@@ -351,7 +351,7 @@ EraseNintendoFlashBlocks (u32 StartAddr, u32 BlockCount)
     }
   while ((j & 0x80) == 0);
   WriteFlash (i, SHARP28F_READARRAY);   // Set normal read mode
-  return (1);
+  return 1;
 }
 #endif
 
@@ -426,7 +426,7 @@ EraseNonTurboFABlocks (u32 StartAddr, u32 BlockCount)
         }
       else
         break;
-      parport_gauge (starttime, (k + 1) * 128 * 1024,
+      ucon64_gauge (&rom, starttime, (k + 1) * 128 * 1024,
                      BlockCount * 128 * 1024);
     }
 
@@ -438,7 +438,7 @@ EraseNonTurboFABlocks (u32 StartAddr, u32 BlockCount)
   WriteFlash (i, INTEL28F_READARRAY);   // Set flash to normal read mode
   WriteFlash (i, INTEL28F_READARRAY);   // Set flash to normal read mode
 
-  return (Ready != 0);
+  return Ready != 0;
 }
 #endif
 
@@ -517,7 +517,7 @@ EraseTurboFABlocks (u32 StartAddr, u32 BlockCount)
         }
       else
         break;
-      parport_gauge (starttime, (k + 1) * 256 * 1024,
+      ucon64_gauge (&rom, starttime, (k + 1) * 256 * 1024,
                      BlockCount * 256 * 1024);
     }
 
@@ -532,7 +532,7 @@ EraseTurboFABlocks (u32 StartAddr, u32 BlockCount)
   WriteFlash (_CART_START, INTEL28F_READARRAY);
   WriteFlash (_CART_START + _MEM_INC, INTEL28F_READARRAY);
 
-  return (Ready != 0);
+  return Ready != 0;
 }
 #endif
 
@@ -569,7 +569,7 @@ WriteNintendoFlashCart (u32 SrcAddr, u32 FlashAddr, u32 Length)
 
   WriteFlash (_CART_START, SHARP28F_READARRAY);
 //   CTRL_PORT_0;
-  return (1);
+  return 1;
 }
 #endif
 
@@ -653,7 +653,7 @@ WriteNonTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
     }
   WriteFlash (_CART_START, INTEL28F_READARRAY); // Set flash to normal read mode
   WriteFlash (_CART_START, INTEL28F_READARRAY); // Set flash to normal read mode
-  return (Ready != 0);
+  return Ready != 0;
 }
 #endif
 
@@ -738,6 +738,6 @@ WriteTurboFACart (u32 SrcAddr, u32 FlashAddr, u32 Length)
       WriteFlash (_CART_START, INTEL28F_CLEARSR);
       WriteFlash (_CART_START + _MEM_INC, INTEL28F_CLEARSR);
     }
-  return (Ready != 0);
+  return Ready != 0;
 }
 #endif

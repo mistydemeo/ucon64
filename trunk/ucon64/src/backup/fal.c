@@ -304,7 +304,7 @@ SPPReadByte (void)              // 402124
   v += (((inpb (SPPStatPort)) << 1) & 0xf0);
   outpb (SPPCtrlPort, 0);
 
-  return (v);
+  return v;
 }
 
 void
@@ -403,7 +403,7 @@ PPReadByte (void)               // 40234c
   else
     v = SPPReadByte ();
 
-  return (v);
+  return v;
 }
 
 int
@@ -426,7 +426,7 @@ PPReadWord (void)               // 402368  // ReadFlash
       v = SPPReadByte ();       //402124
       v += (SPPReadByte () << 8);
     }
-  return (v);
+  return v;
 }
 
 void
@@ -451,7 +451,7 @@ ReadFlash (int addr)
   SetCartAddr (addr);
   l4021d0 (3);
   outpb (SPPCtrlPort, 0);
-  return (PPReadWord ());
+  return PPReadWord ();
 }
 
 void
@@ -471,20 +471,20 @@ LookForLinker (void)            // 4026a8
   l4021d0 (2);
   outpb (SPPCtrlPort, 0);
   if (PPReadByte () != 0x12)    // 40234c
-    return (0);
+    return 0;
 
   l4021d0 (1);
   outpb (SPPCtrlPort, 0);
   if (PPReadByte () != 0x34)
-    return (0);
+    return 0;
 
   l4021d0 (0);
   outpb (SPPCtrlPort, 0);
   if (PPReadByte () != 0x56)
-    return (0);
+    return 0;
 
   outpb (SPPCtrlPort, 4);
-  return (1);
+  return 1;
 }
 
 void
@@ -528,7 +528,7 @@ ReadStatusRegister (int addr)   // 402dd8
   outpb (SPPCtrlPort, 0);
   v = PPReadWord ();            // & 0xff;
   v = PPReadWord ();            // & 0xff;
-  return (v);
+  return v;
 }
 
 //void OldDumpSRAM (void)                    // 4046f4
@@ -594,8 +594,8 @@ BackupSRAM (FILE * fp, int StartOS, int Size)   // 4046f4
               fputc (v, fp);
             }
           bytesread += 256;
-          if ((bytesread & 0x1fff) == 0)        // call parport_gauge() after receiving 8kB
-            parport_gauge (starttime, bytesread, size);
+          if ((bytesread & 0x1fff) == 0)        // call ucon64_gauge() after receiving 8kB
+            ucon64_gauge (&rom, starttime, bytesread, size);
         }
     }
 }
@@ -639,8 +639,8 @@ RestoreSRAM (FILE * fp, int StartOS)
               i = fgetc (fp);
             }
           byteswritten += 256;
-          if ((byteswritten & 0x1fff) == 0)     // call parport_gauge() after sending 8kB
-            parport_gauge (starttime, byteswritten, fstate.st_size);
+          if ((byteswritten & 0x1fff) == 0)     // call ucon64_gauge() after sending 8kB
+            ucon64_gauge (&rom, starttime, byteswritten, fstate.st_size);
         }
       m++;
     }
@@ -671,8 +671,8 @@ BackupROM (FILE * fp, int SizekW)
           fputc (valw >> 8, fp);
         }
       bytesread += 256 << 1;    // 256 words
-      if ((bytesread & 0xffff) == 0)    // call parport_gauge() after receiving 64kB
-        parport_gauge (starttime, bytesread, size);
+      if ((bytesread & 0xffff) == 0)    // call ucon64_gauge() after receiving 64kB
+        ucon64_gauge (&rom, starttime, bytesread, size);
     }
 }
 
@@ -827,7 +827,7 @@ GetFileByte (FILE * fp)
     i = fgetc (fp);
 
   FilePos++;
-  return (i);
+  return i;
 }
 
 int
@@ -895,7 +895,7 @@ GetFileSize (FILE * fp)
         }
       rewind (fp);
     }
-  return (FileSize);
+  return FileSize;
 }
 
 // Program older (non-Turbo) Visoly flash cart
@@ -962,8 +962,8 @@ ProgramNonTurboIntelFlash (FILE * fp)
                 }
 
               addr += 16;
-              if ((addr & 0x3fff) == 0) // call parport_gauge() after sending 32kB
-                parport_gauge (starttime, addr << 1, FileSize);
+              if ((addr & 0x3fff) == 0) // call ucon64_gauge() after sending 32kB
+                ucon64_gauge (&rom, starttime, addr << 1, FileSize);
 
               PPWriteWord (INTEL28F_CONFIRM);   // Comfirm block write
 
@@ -1005,7 +1005,7 @@ ProgramNonTurboIntelFlash (FILE * fp)
         }
 
       printf ("\r                                                                              \r"); // remove last gauge
-      parport_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
+      ucon64_gauge (&rom, starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
@@ -1098,8 +1098,8 @@ ProgramTurboIntelFlash (FILE * fp)
                     j = GetFileByte (fp);
                 }
               addr += 32;
-              if ((addr & 0x3fff) == 0) // call parport_gauge() after sending 32kB
-                parport_gauge (starttime, addr << 1, FileSize);
+              if ((addr & 0x3fff) == 0) // call ucon64_gauge() after sending 32kB
+                ucon64_gauge (&rom, starttime, addr << 1, FileSize);
               PPWriteWord (INTEL28F_CONFIRM);   // Comfirm block write
               PPWriteWord (INTEL28F_CONFIRM);   // Comfirm block write
 
@@ -1125,7 +1125,7 @@ ProgramTurboIntelFlash (FILE * fp)
         }
 
       printf ("\r                                                                              \r"); // remove last gauge
-      parport_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
+      ucon64_gauge (&rom, starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
       WriteFlash (1, INTEL28F_READARRAY);
@@ -1190,12 +1190,12 @@ ProgramSharpFlash (FILE * fp)
           addr += 1;
 
           j = GetFileByte (fp);
-          if ((addr & 0x3fff) == 0)     // call parport_gauge() after sending 32kB
-            parport_gauge (starttime, addr << 1, FileSize);
+          if ((addr & 0x3fff) == 0)     // call ucon64_gauge() after sending 32kB
+            ucon64_gauge (&rom, starttime, addr << 1, FileSize);
         }
 
       printf ("\r                                                                              \r"); // remove last gauge
-      parport_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
+      ucon64_gauge (&rom, starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 

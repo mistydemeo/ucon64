@@ -39,7 +39,7 @@ dex_usage (int argc, char *argv[])
 */
 //TODO more info like technical info about cabeling and stuff for the copier
 
-  return (0);
+  return 0;
 }
 
 char *

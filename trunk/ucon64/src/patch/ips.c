@@ -137,7 +137,7 @@ ips_main (int argc, char *argv[])
           "      or -mgd or the patch will not work\n");
   fclose (patchee);
   fclose (ipsfile);
-  return (0);
+  return 0;
 }
 
 /*
@@ -252,13 +252,13 @@ cips (char *name, char *option2)
 
   if (!(fp = fopen (name, "rb")))
     {
-      return (-1);
+      return -1;
     }
 
   if (!(fp2 = fopen (option2, "rb")))
     {
       fclose (fp);
-      return (-1);
+      return -1;
     }
 
   strcpy (buf, name);
@@ -268,7 +268,7 @@ cips (char *name, char *option2)
     {
       fclose (fp);
       fclose (fp2);
-      return (-1);
+      return -1;
     }
 
   fprintf (fp3, "PATCH");
@@ -340,7 +340,7 @@ cips (char *name, char *option2)
   fclose (fp3);
   fclose (fp2);
   fclose (fp);
-  return (0);
+  return 0;
 }
 
 
@@ -351,5 +351,5 @@ ips_usage (int argc, char *argv[])
   printf ("  -i		apply IPS patch (<=1.2); $FILE=PATCHFILE\n\
   -mki		create IPS patch; $FILE=CHANGED_ROM\n\
 ");
-  return (0);
+  return 0;
 }

@@ -134,7 +134,7 @@ swc_write_rom (char *filename, unsigned int parport)
       blocksdone++;
 
       bytessend += bytesread;
-      parport_gauge (starttime, bytessend, fstate.st_size);
+      ucon64_gauge (&rom, starttime, bytessend, fstate.st_size);
       checkabort (2);
     }
 
@@ -198,7 +198,7 @@ swc_write_sram (char *filename, unsigned int parport)
       address++;
 
       bytessend += bytesread;
-      parport_gauge (starttime, bytessend, size);
+      ucon64_gauge (&rom, starttime, bytessend, size);
       checkabort (2);
     }
 
@@ -285,7 +285,7 @@ swc_read_rom (char *filename, unsigned int parport)
     }
   blocksleft = size * 16;                       // 1 Mb (128KB) unit == 16 8KB units
   printf ("Receive: %d Bytes (%.4f Mb)\n", size * MBIT, (float) size);
-  size *= MBIT;                                 // size in bytes for parport_gauge() below
+  size *= MBIT;                                 // size in bytes for ucon64_gauge() below
 
   send_command (5, 0, 0);
   send_command0 (0xe00c, 0);
@@ -318,7 +318,7 @@ swc_read_rom (char *filename, unsigned int parport)
               fwrite (buffer, 1, BUFFERSIZE, file);
 
               bytesreceived += BUFFERSIZE;
-              parport_gauge (starttime, bytesreceived, size);
+              ucon64_gauge (&rom, starttime, bytesreceived, size);
               checkabort (2);
             }
         }
@@ -332,7 +332,7 @@ swc_read_rom (char *filename, unsigned int parport)
           fwrite (buffer, 1, BUFFERSIZE, file);
 
           bytesreceived += BUFFERSIZE;
-          parport_gauge (starttime, bytesreceived, size);
+          ucon64_gauge (&rom, starttime, bytesreceived, size);
           checkabort (2);
         }
     }
@@ -567,7 +567,7 @@ swc_read_sram (char *filename, unsigned int parport)
       fwrite (buffer, 1, BUFFERSIZE, file);
 
       bytesreceived += BUFFERSIZE;
-      parport_gauge (starttime, bytesreceived, 32 * 1024);
+      ucon64_gauge (&rom, starttime, bytesreceived, 32 * 1024);
       checkabort (2);
     }
 
@@ -662,7 +662,9 @@ wait_for_ready (void)
 void
 checkabort (int status)
 {
-  if (kbhit () && getch () == 'q')
+  if (
+       ((!rom.frontend) ? kbhit () : 0)
+       && getch () == 'q')
     {
       puts ("\nProgram aborted");
       exit (status);

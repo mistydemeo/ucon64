@@ -201,7 +201,7 @@ smd_main (int argc, char **argv)
         }
     }
 
-  return (0);
+  return 0;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -263,7 +263,7 @@ smd_recieve_byte (void)
   /* Invert PC busy flag */
   outportb (lpt + PARPORT_CONTROL, inportb (lpt + PARPORT_CONTROL) ^ 1);
 
-  return (temp);
+  return temp;
 }
 
 void
@@ -326,7 +326,7 @@ smd_recieve_block (uint32 length, uint8 * buffer)
   checksum = smd_recieve_byte ();
 
   /* Were the checksums the same? */
-  return (checksum);
+  return checksum;
 }
 
 
@@ -363,7 +363,7 @@ smd_peek (uint16 address)
   uint8 temp[1];
   smd_send_command (0x01, address, 1);
   smd_recieve_block (1, temp);
-  return (temp[0]);
+  return temp[0];
 }
 
 /*--------------------------------------------------------------------------*/
@@ -405,7 +405,7 @@ load_smd (char *filename)
   /* Attempt to open file */
   fd = fopen (filename, "rb");
   if (!fd)
-    return (0);
+    return 0;
 
   /* Get file size */
   fseek (fd, 0, SEEK_END);
@@ -424,7 +424,7 @@ load_smd (char *filename)
   block_size = (file_size / 0x4000) + ((file_size & 0x3FFF) ? 1 : 0);
   buf = malloc (block_size * 0x4000);
   if (!buf)
-    return (0);
+    return 0;
   memset (buf, 0, block_size * 0x4000);
   fread (buf, file_size, 1, fd);
   fclose (fd);
@@ -460,7 +460,7 @@ load_smd (char *filename)
   for (count = 0; count < header[0]; count += 1)
     {
 //        printf("Sending block %d of %d\r", 1+count, header[0]);
-      parport_gauge (starttime, (1 + count) * 16384, header[0] * 16384);
+      ucon64_gauge (&rom, starttime, (1 + count) * 16384, header[0] * 16384);
       fflush (stdout);
       smd_send_command (0x05, count, 0x00);
       smd_send_command (0x00, 0x8000, 0x4000);
@@ -497,7 +497,7 @@ load_smd (char *filename)
   if (buf)
     free (buf);
 
-  return (1);
+  return 1;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -514,7 +514,7 @@ save_smd (char *filename)
 
   fd = fopen (filename, "wb");
   if (!fd)
-    return (0);
+    return 0;
 
   /* The BIOS stores the cartridge size (in blocks) at $DFF1 */
   memset (header, 0, 0x200);
@@ -532,7 +532,7 @@ save_smd (char *filename)
 
   for (count = 0; count < header[0]; count += 1)
     {
-      parport_gauge (starttime, (1 + count) * 16384, header[0] * 16384);
+      ucon64_gauge (&rom, starttime, (1 + count) * 16384, header[0] * 16384);
 //        printf("Recieving block %d of %d\r", 1+count, header[0]);
       fflush (stdout);
       smd_send_command (0x05, count, 0x00);
@@ -547,7 +547,7 @@ save_smd (char *filename)
 
   printf ("\n");
   fclose (fd);
-  return (1);
+  return 1;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -564,7 +564,7 @@ load_sram (char *filename)
   /* Attempt to open file */
   fd = fopen (filename, "rb");
   if (!fd)
-    return (0);
+    return 0;
 
   /* Load header */
   fread (header, 0x200, 1, fd);
@@ -576,13 +576,13 @@ load_sram (char *filename)
   starttime = time (NULL);
 
 
-  parport_gauge (starttime, 0x4000, 0x8000);
+  ucon64_gauge (&rom, starttime, 0x4000, 0x8000);
   fflush (stdout);
   smd_send_command (0x00, 0x4000, 0x4000);
   fread (block, 0x4000, 1, fd);
   smd_send_block (0x4000, block);
 
-  parport_gauge (starttime, 0x8000, 0x8000);
+  ucon64_gauge (&rom, starttime, 0x8000, 0x8000);
   fflush (stdout);
   smd_send_command (0x00, 0x8000, 0x4000);
   fread (block, 0x4000, 1, fd);
@@ -596,7 +596,7 @@ load_sram (char *filename)
   /* Un-map SRAM */
   smd_poke (0x2001, 0x00);
 
-  return (1);
+  return 1;
 }
 
 
@@ -610,7 +610,7 @@ save_sram (char *filename)
   /* Attempt to open file */
   fd = fopen (filename, "wb");
   if (!fd)
-    return (0);
+    return 0;
 
   /* Set up header */
   memset (header, 0, 0x200);
@@ -629,14 +629,14 @@ save_sram (char *filename)
   starttime = time (NULL);
 
 //    printf("Saving SRAM block 1\r");
-  parport_gauge (starttime, 0x4000, 0x8000);
+  ucon64_gauge (&rom, starttime, 0x4000, 0x8000);
   fflush (stdout);
   smd_send_command (0x01, 0x4000, 0x4000);
   smd_recieve_block (0x4000, block);
   fwrite (block, 0x4000, 1, fd);
 
 //    printf("Saving SRAM block 2\r");
-  parport_gauge (starttime, 0x8000, 0x8000);
+  ucon64_gauge (&rom, starttime, 0x8000, 0x8000);
   fflush (stdout);
   smd_send_command (0x01, 0x8000, 0x4000);
   smd_recieve_block (0x4000, block);
@@ -650,7 +650,7 @@ save_sram (char *filename)
   /* Advance to next line */
   printf ("\n");
 
-  return (1);
+  return 1;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -665,7 +665,7 @@ dump_bios (char *filename)
   /* Attempt to open file */
   fd = fopen (filename, "wb");
   if (!fd)
-    return (0);
+    return 0;
 
   /* Map SRAM */
   smd_poke (0x2000, 0x00);
@@ -682,7 +682,7 @@ dump_bios (char *filename)
   /* Advance to next line */
   printf ("\n");
 
-  return (1);
+  return 1;
 }
 
 int

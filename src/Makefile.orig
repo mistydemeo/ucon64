@@ -9,9 +9,10 @@ LDFLAGS=-s
 OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
-        gb/gb.o gba/gba.o genesis/genesis.o lynx/lynx.o n64/n64.o \
-        neogeo/neogeo.o nes/nes.o ngp/ngp.o pce/pce.o sms/sms.o psx/psx.o \
-        snes/snes.o swan/swan.o dc/dc.o jaguar/jaguar.o sample/sample.o \
+        console/gb.o console/gba.o console/genesis.o console/lynx.o \
+        console/n64.o console/neogeo.o console/nes.o console/ngp.o \
+        console/pce.o console/sms.o console/psx.o console/snes.o \
+        console/swan.o console/dc.o console/jaguar.o console/sample.o \
         backup/yoko.o backup/ssc.o backup/interceptor.o backup/cdrw.o \
         backup/z64.o backup/cd64.o backup/doctor64.o backup/doctor64jr.o \
         backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/mgd.o \
@@ -42,22 +43,7 @@ else
 ifdef DJGPP
 	del *.o
 	del patch\*.o
-	del gb\*.o
-	del genesis\*.o
-	del jaguar\*.o
-	del lynx\*.o
-	del n64\*.o
-	del neogeo\*.o
-	del nes\*.o
-	del ngp\*.o
-	del pce\*.o
-	del sms\*.o
-	del snes\*.o
-	del gba\*.o
-	del dc\*.o
-	del swan\*.o
-	del psx\*.o
-	del sample\*.o
+	del console\*.o
 	del backup\*.o
 	del $(TARGET)
 else                                    # Unix or BeOS
@@ -68,6 +54,20 @@ endif                                   # DJGPP
 endif                                   # cygwin
 
 distclean: clean
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	rm -f Makefile config.log config.status config.cache config.h
+else
+ifdef DJGPP
+	del Makefile
+	del config.log
+	del config.status
+	del config.cache
+	del config.h
+else
+	rm -f Makefile config.log config.status config.cache config.h
+endif                                   # DJGPP
+endif                                   # cygwin
+
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -110,25 +110,25 @@ endif                                   # cygwin
 UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h
 
 getopt.o: getopt.h
-misc.o: misc.h
+misc.o: misc.h config.h
 ucon64.o: switches.c options.c $(UCON64_STD_H)
 ucon64_misc.o: $(UCON64_STD_H)
 ucon64_db.o: ucon64_db.h $(UCON64_STD_H)
-gb/gb.o: gb/gb.h $(UCON64_STD_H)
-gba/gba.o: gba/gba.h $(UCON64_STD_H)
-genesis/genesis.o: genesis/genesis.h $(UCON64_STD_H)
-jaguar/jaguar.o: jaguar/jaguar.h $(UCON64_STD_H)
-lynx/lynx.o: lynx/lynx.h $(UCON64_STD_H)
-n64/n64.o: n64/n64.h $(UCON64_STD_H)
-neogeo/neogeo.o: neogeo/neogeo.h $(UCON64_STD_H)
-nes/nes.o: nes/nes.h $(UCON64_STD_H)
-ngp/ngp.o: ngp/ngp.h $(UCON64_STD_H)
-pce/pce.o: pce/pce.h $(UCON64_STD_H)
-sms/sms.o: sms/sms.h $(UCON64_STD_H)
-snes/snes.o: snes/snes.h $(UCON64_STD_H)
-swan/swan.o: swan/swan.h $(UCON64_STD_H)
-dc/dc.o: dc/dc.h $(UCON64_STD_H)
-psx/psx.o: psx/psx.h $(UCON64_STD_H)
+console/gb.o: console/gb.h $(UCON64_STD_H)
+console/gba.o: console/gba.h $(UCON64_STD_H)
+console/genesis.o: console/genesis.h $(UCON64_STD_H)
+console/jaguar.o: console/jaguar.h $(UCON64_STD_H)
+console/lynx.o: console/lynx.h $(UCON64_STD_H)
+console/n64.o: console/n64.h $(UCON64_STD_H)
+console/neogeo.o: console/neogeo.h $(UCON64_STD_H)
+console/nes.o: console/nes.h $(UCON64_STD_H)
+console/ngp.o: console/ngp.h $(UCON64_STD_H)
+console/pce.o: console/pce.h $(UCON64_STD_H)
+console/sms.o: console/sms.h $(UCON64_STD_H)
+console/snes.o: console/snes.h $(UCON64_STD_H)
+console/swan.o: console/swan.h $(UCON64_STD_H)
+console/dc.o: console/dc.h $(UCON64_STD_H)
+console/psx.o: console/psx.h $(UCON64_STD_H)
 patch/aps.o: patch/aps.h $(UCON64_STD_H)
 patch/bsl.o: patch/bsl.h $(UCON64_STD_H)
 patch/ips.o: patch/ips.h $(UCON64_STD_H)

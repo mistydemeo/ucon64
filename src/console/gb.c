@@ -30,10 +30,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "gb.h"
-#include "nes/nes.h"
+
+#include "console/nes.h"
+
 #include "backup/gbx.h"
 #include "backup/mgd.h"
 #include "backup/ssc.h"
+
 #include "patch/ips.h"
 #include "patch/bsl.h"
 

@@ -86,7 +86,8 @@ enum
   OPEN_WRITE_ERROR,
   BUFFER_ERROR,                                 // not enough memory
   ROM_BUFFER_ERROR,
-  FILE_BUFFER_ERROR
+  FILE_BUFFER_ERROR,
+  DAT_ERROR
 };
 
 extern const char *ucon64_msg[];

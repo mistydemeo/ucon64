@@ -848,8 +848,12 @@ printf(/*"TODO: $ROM could also be the name of a *.ZIP archive\n"
 //	"		this is often used by people who loose control of their ROMs\n"
 	"  -rl		rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
 	"  -ru		rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"
-	"  -hex		show ROM as hexdump; use \"ucon64 -hex $ROM|less\"\n"
-	"  -find		find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)\n"
+#ifdef  __DOS__
+        "  -hex		show ROM as hexdump; use \"ucon64 -hex $ROM|more\"\n"
+#else
+        "  -hex		show ROM as hexdump; use \"ucon64 -hex $ROM|less\"\n"   // less is better ;-)
+#endif
+        "  -find		find string in ROM; $FILE=STRING ('?'==wildcard for ONE char!)\n"
 	"  -c		compare ROMs for differencies; $FILE=OTHER_ROM\n"
 	"  -cs		compare ROMs for similarities; $FILE=OTHER_ROM\n"
 	"  -swap		swap/(de)interleave ALL Bytes in ROM (1234<->2143)\n"
@@ -897,7 +901,7 @@ else if(argcmp(argc,argv,"-vboy"))virtualboy_usage(argc,argv);
 else if(argcmp(argc,argv,"-swan"))wonderswan_usage(argc,argv);
 else if(argcmp(argc,argv,"-vec"))vectrex_usage(argc,argv);
 else if(argcmp(argc,argv,"-int"))intelli_usage(argc,argv);
-else 
+else
 {
 	gbadvance_usage(argc,argv);
 	nintendo64_usage(argc,argv);
@@ -942,8 +946,12 @@ printf(
 );
 
 printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
-	"     %s -help|less (to see everything in less)\n"
-	"     give the force recognition option a try if something went wrong\n"
+#ifdef  __DOS__
+        "     %s -help|more (to see everything in more)\n"
+#else
+        "     %s -help|less (to see everything in less)\n"      // less is better ;-)
+#endif
+        "     give the force recognition option a try if something went wrong\n"
 	"\n"
 	"All CD-based consoles are supported by uCONCD; go to http://ucon64.sf.net\n"
 	"Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"

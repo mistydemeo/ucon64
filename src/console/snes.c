@@ -119,8 +119,7 @@ const st_usage_t snes_usage[] =
     {"col", "0xCOLOR", "convert 0xRRGGBB (html) <-> 0xXXXX (SNES)\n"
                        "this routine was used to find green colors in games and\n"
                        "to replace them with red colors (blood mode)"},
-#if 0
-//TODO
+#if 0 // TODO
     {"sx", "convert to Snes9X (emulator)/S9X save state; " OPTION_LONG_S "rom=SAVESTATE"},
     {"zs", "convert to ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE"},
     {"xzs", "extract GFX from ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE"},
@@ -1673,25 +1672,23 @@ Same here.
       // SRAM
       if (snes_sramsize == 8 * 1024)            // 8 kB == 64 kb
         {
-          // unknown
           n += change_mem (buffer, bytesread, "!**\x70!**\x70\xd0", 9, '*', '!', "\xea\xea", 2, 0,
                            "\x8f\x9f", 2, "\xcf\xdf", 2);
           // actually Kirby's Dream Course, Lufia II - Rise of the Sinistrals
           n += change_mem (buffer, bytesread, "!**\x70!**\x70\xf0", 9, '*', '!', "\x80", 1, 0,
                            "\x8f\x9f", 2, "\xcf\xdf", 2);
-          // actually Earthbound
+#if 1 // TODO: check which games really need this
           n += change_mem (buffer, bytesread, "!**!!**!\xf0", 9, '*', '!', "\x80", 1, 0,
                            "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
+#endif
         }
       else
         {
-          // unknown
           n += change_mem (buffer, bytesread, "!**\x70!**\x70\xd0", 9, '*', '!', "\x80", 1, 0,
                            "\x8f\x9f", 2, "\xcf\xdf", 2);
           // Mega Man X
           n += change_mem (buffer, bytesread, "!**\x70!**\x70\xf0", 9, '*', '!', "\xea\xea", 2, 0,
                            "\x8f\x9f", 2, "\xcf\xdf", 2);
-
           n += change_mem (buffer, bytesread, "!**!!**!\xf0", 9, '*', '!', "\xea\xea", 2, 0,
                            "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
         }

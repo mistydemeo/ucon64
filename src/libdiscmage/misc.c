@@ -37,7 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <errno.h>
 #include <time.h>
 #include <stdarg.h>                             // va_arg()
-#include <sys/stat.h>
+#include <sys/stat.h>			/* for S_IFLNK */
 
 #ifdef  __MSDOS__
 #include <dos.h>                                // delay(), milliseconds
@@ -763,80 +763,171 @@ dirname2 (const char *path)
 }
 
 
-char *
-realpath2 (const char *src, char *full_path)
-// clone of realpath() which returns the absolute path of a file
-#if 0
+#ifndef HAVE_REALPATH
+#undef realpath
+static char *
+realpath (const char *path, char *full_path)
 {
-  char path1[FILENAME_MAX], path2[FILENAME_MAX];
+#define MAX_READLINKS 32
+  char copy_path[FILENAME_MAX];
+  char link_path[FILENAME_MAX];
+  char got_path[FILENAME_MAX];
+  char *new_path = got_path;
+  char *max_path;
+  int readlinks = 0;
+  int n;
 
-  if (src[0] == '~')
+  // Make a copy of the source path since we may need to modify it.
+  if (strlen (path) >= FILENAME_MAX - 2)
+    return NULL;
+
+  strcpy (copy_path, path);
+  path = copy_path;
+  max_path = copy_path + FILENAME_MAX - 2;
+  if (*path != '/')
     {
-      if (src[1] == FILE_SEPARATOR)
-        {
-          strcpy (path1, getenv2 ("HOME"));
-          strcpy (path2, &src[2]);
-          sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
-        }
-      else if (src[1] == 0)
-        strcpy (full_path, getenv2 ("HOME"));
+      getcwd (new_path, FILENAME_MAX - 1);
+      new_path += strlen (new_path);
+      if (new_path[-1] != '/')
+        *new_path++ = '/';
     }
-  else if (src[0] == '.')
-    {
-      if (src[1] == FILE_SEPARATOR)
-        {
-          getcwd (path1, FILENAME_MAX);
-          strcpy (path2, &src[2]);
-          sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
-        }
-      else if (src[1] == 0)
-        getcwd (full_path, FILENAME_MAX);       // callers should always pass
-    }                                           //  arrays that are large enough
   else
-    strcpy (full_path, src);
+    {
+      *new_path++ = '/';
+      path++;
+    }
+  // Expand each slash-separated pathname component.
+  while (*path != '\0')
+    {
+      // Ignore stray "/".
+      if (*path == '/')
+        {
+          path++;
+          continue;
+        }
+      if (*path == '.')
+        {
+          // Ignore ".".
+          if (path[1] == '\0' || path[1] == '/')
+            {
+              path++;
+              continue;
+            }
+          if (path[1] == '.')
+            {
+              if (path[2] == '\0' || path[2] == '/')
+                {
+                  path += 2;
+                  // Ignore ".." at root.
+                  if (new_path == got_path + 1)
+                    continue;
+                  // Handle ".." by backing up.
+                  while ((--new_path)[-1] != '/');
+                  continue;
+                }
+            }
+        }
+      // Safely copy the next pathname component.
+      while (*path != '\0' && *path != '/')
+        {
+          if (path > max_path)
+            return NULL;
 
+          *new_path++ = *path++;
+        }
+#ifdef S_IFLNK
+      // Protect against infinite loops.
+      if (readlinks++ > MAX_READLINKS)
+        return NULL;
+
+      // See if latest pathname component is a symlink.
+      *new_path = '\0';
+      n = readlink (got_path, link_path, FILENAME_MAX - 1);
+      if (n < 0)
+        {
+          // EINVAL means the file exists but isn't a symlink.
+          if (errno != EINVAL)
+            {
+              // Make sure it's null terminated.
+              *new_path = '\0';
+              strcpy (full_path, got_path);
+              return NULL;
+            }
+        }
+      else
+        {
+          // Note: readlink doesn't add the null byte.
+          link_path[n] = '\0';
+          if (*link_path == '/')
+            // Start over for an absolute symlink.
+            new_path = got_path;
+          else
+            // Otherwise back up over this component.
+            while (*(--new_path) != '/');
+          // Safe sex check.
+          if (strlen (path) + n >= FILENAME_MAX - 2)
+            return NULL;
+          // Insert symlink contents into path.
+          strcat (link_path, path);
+          strcpy (copy_path, link_path);
+          path = copy_path;
+        }
+#endif // S_IFLNK
+      *new_path++ = '/';
+    }
+  // Delete trailing slash but don't whomp a lone slash.
+  if (new_path != got_path + 1 && new_path[-1] == '/')
+    new_path--;
+  // Make sure it's null terminated.
+  *new_path = '\0';
+  strcpy (full_path, got_path);
   return full_path;
 }
-#else
+#endif
+
+
+char *
+realpath2 (const char *path, char *full_path)
+// enhanced realpath() which returns the absolute path of a file
 {
   char path1[FILENAME_MAX], path2[FILENAME_MAX];
-#ifndef HAVE_REALPATH
+#if 0
   char *p = NULL, *p2 = NULL;
   int x = 0;
 #endif
 
-  if (src[0] == '~')
+  if (path[0] == '~')
     {
-      if (src[1] == FILE_SEPARATOR)
+      if (path[1] == FILE_SEPARATOR)
         {
           strcpy (path1, getenv2 ("HOME"));
-          strcpy (path2, &src[2]);
+          strcpy (path2, &path[2]);
           sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
         }
-      else if (src[1] == 0)
+      else if (path[1] == 0)
         strcpy (full_path, getenv2 ("HOME"));
     }
-  else if (src[0] == '.')
+  else if (path[0] == '.')
     {
-#ifdef  HAVE_REALPATH
-      realpath (src, full_path);
+#if 1
+      realpath (path, full_path);
 #else
-      for (x = 0; src[x] == '.'; x++);
+      for (x = 0; path[x] == '.'; x++);
 
-      if (src[x] == FILE_SEPARATOR)
+      if (path[x] == FILE_SEPARATOR)
         {
           getcwd (path1, FILENAME_MAX);
-          strcpy (path2, &src[x + 1]);
+          strcpy (path2, &path[x + 1]);
           sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
         }
-      else if (src[x] == 0)
+      else if (path[x] == 0)
         getcwd (full_path, FILENAME_MAX);       // callers should always pass
 #endif
     }                                           //  arrays that are large enough
   else
-    strcpy (full_path, src);
+    strcpy (full_path, path);
 
-#ifdef  HAVE_REALPATH
+#if 1
   strcpy (path1, full_path);
   return realpath (path1, full_path);
 #else
@@ -858,7 +949,6 @@ realpath2 (const char *src, char *full_path)
   return NULL;
 #endif
 }
-#endif
 
 
 int

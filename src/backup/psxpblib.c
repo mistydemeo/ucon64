@@ -245,7 +245,7 @@ psx_delay (int base, int delay)
     }
 }
 
-/* 
+/*
  *
  * send byte as a command to conport connected to parallel port base
  * assumes clock high and the attention for conport 
@@ -285,11 +285,13 @@ psx_obtain_io_permission (int base)
       return 1;
     }
   // return 1 if successful, otherwise, 0
+#if 0                                           // uCON64 already enabled access to I/O ports
 #ifdef _PSX_LINUX_
   if (ioperm (base, 3, 1))
     {
       return 0;
     }
+#endif
 #endif
   already = 1;
   return 1;

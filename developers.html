@@ -12,7 +12,7 @@ Q5: <a href="#5">How do I connect to CVS as developer with read/write access?</a
 Q6: <a href="#6">How is the source of uCON64 organized?</a><br>
 <br>
 <br>
-<br>
+<p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1">Q1: Who develops uCON64?</a><br>
 A: Written/modified by:<br>
    1999 - 2002 NoisyB (Dirk) <a href="mailto:noisyb@gmx.net">noisyb@gmx.net</a><br>
@@ -121,13 +121,13 @@ A: Written/modified by:<br>
 </table><br>
 </tt><tt><br>
    and others...<br>
-<br>
+<p>
 <a name="2">Q2: How can I take part?</a><br>
 A: Install CVS and checkout the latest version from
    <a href="http://ucon64.sourceforge.net" target="_blank">http://ucon64.sourceforge.net</a>. Then make your changes and email <a href="mailto:noisyb@gmx.net">noisyb@gmx.net</a>
    and you will be named in this file and in the sources of course. Just the typical way
    of open source development.<br>
-<br>
+<p>
 <a name="3"></a><a name="cvs"></a>Q3: <a href="http://www.cvshome.org" target="_blank">CVS</a>?<br>
 A: For read-only access you must have CVS installed. Continue at How do I connect to
    CVS as anonymous?<br>
@@ -136,12 +136,12 @@ A: For read-only access you must have CVS installed. Continue at How do I connec
    environment variable CVS_RSH=ssh. Then contact
    <a href="mailto:noisyb@gmx.net">noisyb@gmx.net</a> and he will add you
    to the developers.<br>
-<br>
+<p>
 <a name="4">Q4: How do I connect to CVS as anonymous?</a><br>
 A: cvs -d:pserver:anonymous@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 login<br>
    &#60;return at password prompt&#62;<br>
    cvs -d:pserver:anonymous@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 checkout -PR ucon64<br>
-<br>
+<p>
 <a name="5">Q5: How do I connect to CVS as developer with read/write access?</a><br>
 A: cvs -d:ext:&#60;name&#62;@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 checkout -PR ucon64<br>
    &#60;enter password at prompt&#62;<br>
@@ -156,7 +156,7 @@ A: cvs -d:ext:&#60;name&#62;@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 checkout
 <br>
    because -d:ext:&#60;name&#62;@cvs.ucon64.sourceforge.net:/cvsroot/ucon64 is stored
    in the CVS directories then.<br>
-<br>
+<p>
 <a name="6">Q6: How is the source of uCON64 organized?</a><br>
 A: The heart of uCON64 is ucon64.h/struct ucon64_. This struct is designed to hold all
    information you could get from any ROM.<br>

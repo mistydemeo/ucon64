@@ -90,7 +90,7 @@ unsigned int parport_probe (unsigned int parport);
 int
 ucon64_gauge (struct ucon64_ *rom, time_t init_time, long pos, long size);
 
-int trackmode (long imagesize);
+int trackmode_probe (long imagesize);
 
 int raw2iso (char *filename);
 

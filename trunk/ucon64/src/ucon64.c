@@ -802,7 +802,6 @@ ucon64_execute_options (void)
   ucon64.console =
   ucon64.controller =
   ucon64.controller2 =
-  ucon64.crc_big_files =
   ucon64.do_not_calc_crc =
   ucon64.id =
   ucon64.interleaved =
@@ -1039,7 +1038,7 @@ ucon64_rom_handling (void)
   */
   if (ucon64.crc32 == 0)
     if (!ucon64.force_disc) // NOT for disc images
-      if (!(ucon64.flags & WF_NOCRC32) || ucon64.file_size <= MAXROMSIZE)
+      if (!(ucon64.flags & WF_NOCRC32) && ucon64.file_size <= MAXROMSIZE)
         ucon64.crc32 = q_fcrc32 (ucon64.rom, ucon64.rominfo ? ucon64.rominfo->buheader_len : 0);
 
 

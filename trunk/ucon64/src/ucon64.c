@@ -179,18 +179,35 @@ main (int argc, char *argv[])
   sprintf (buf, "%s%c.ucon64rc", getenv ("HOME"), FILE_SEPARATOR);
 #endif
 
+
   if (access (buf, F_OK) == -1)
     printf ("ERROR: %s not found: creating...", buf);
-  else if (getProperty (buf, "version", buf2, NULL) == NULL)
+  else if (strcmp(getProperty (buf, "version", buf2, NULL),"198")!=0)
     {
-      strcpy (buf2, buf);
+/*      strcpy (buf2, buf);
       newext (buf2, ".OLD");
 
-      printf ("NOTE: updating config: will be renamed to %s...", buf2);
+      printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
 
-      rename (buf, buf2);
+      filecopy (buf, 0, quickftell(buf), buf2, "wb");
+
+      setProperty(buf,"version","198");
+
+      setProperty(buf,"cdrw_read",
+         getProperty (buf, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
+      setProperty(buf,"cdrw_write",
+         getProperty (buf, "cdrw_raw_write", buf2, "cdrdao write --device 0,0,0 --driver generic-mmc "));
+
+      deleteProperty(buf,"cdrw_raw_read");
+      deleteProperty(buf,"cdrw_raw_write");
+      deleteProperty(buf,"cdrw_iso_read");
+      deleteProperty(buf,"cdrw_iso_write");
 
       sync ();
+      
+      printf ("OK\n\n");
+*/
+      return 0;
     }
 
   if (access (buf, F_OK) == -1)
@@ -247,10 +264,6 @@ main (int argc, char *argv[])
                  "#\n"
                  "cdrw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
                  "cdrw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
-//  "cdrw_read=cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile #bin and toc filenames are added by ucon64 at the end\n"
-//  "cdrw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
-//  "cdrw_read=cdrdao read-cd --device 0,0,0 --driver generic-mmc --datafile #bin and toc filenames are added by ucon64 at the end\n"
-//  "cdrw_write=cdrdao write --device 0,0,0 --driver generic-mmc #toc filename is added by ucon64 at the end\n"
 #endif
                  , fh);
 

@@ -1,7 +1,7 @@
 /*
 ffe.c - General Front Far East copier routines for uCON64
 
-written by 2002 dbjh
+written by 2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

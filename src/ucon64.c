@@ -164,6 +164,7 @@ const struct option options[] = {
     {"gbx", 0, 0, UCON64_GBX},
     {"gc", 0, 0, UCON64_GC},
     {"gd3", 0, 0, UCON64_GD3},
+    {"gd3s", 0, 0, UCON64_GD3S},
     {"gen", 0, 0, UCON64_GEN},
     {"gg", 1, 0, UCON64_GG},
     {"ggd", 1, 0, UCON64_GGD},

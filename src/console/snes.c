@@ -90,14 +90,15 @@ const st_usage_t snes_usage[] =
     {"nbs", NULL, "force ROM is a regular cartridge dump"},
     {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
     {"fig", NULL, "convert to *Pro Fighter*/(all)FIG"},
-    {"figs", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG"},
+    {"figs", NULL, "convert emulator *.srm (SRAM) to *Pro Fighter*/(all)FIG"},
     {"gd3", NULL, "convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"},
+    {"gd3s", NULL, "convert emulator *.srm (SRAM) to GD SF3(SF6/SF7)/Professor SF*"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
     {"smc", NULL, "convert to Super Magicom/SMC"},
     {"swc", NULL, "convert to Super Wild Card*/(all)SWC"},
-    {"swcs", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to Super Wild Card*/(all)SWC"},
+    {"swcs", NULL, "convert emulator *.srm (SRAM) to Super Wild Card*/(all)SWC"},
     {"ufo", NULL, "convert to Super UFO"},
-    {"ufos", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to Super UFO"},
+    {"ufos", NULL, "convert emulator *.srm (SRAM) to Super UFO"},
     {"stp", NULL, "convert SRAM from backup unit for use with an emulator\n"
                OPTION_LONG_S "stp just strips the first 512 bytes"},
     {"dbuh", NULL, "display (relevant part of) backup unit header"},
@@ -116,9 +117,9 @@ const st_usage_t snes_usage[] =
                       "TYPE='5' Konami's justifier\n"
                       "TYPE='6' multitap\n"
                       "TYPE='7' mouse / super scope / gamepad"},
-    {"col", "0xCOLOR", "convert 0xRRGGBB (html) <-> 0xXXXX (SNES)\n"
-                       "this routine was used to find green colors in games and\n"
-                       "to replace them with red colors (blood mode)"},
+    {"col", "0xCOLOR", "convert 0xRRGGBB (HTML) <-> 0xXXXX (SNES)"},
+//                       "this routine was used to find green colors in games and\n"
+//                       "to replace them with red colors (blood mode)"},
 #if 0 // TODO
     {"sx", "convert to Snes9X (emulator)/S9X save state; " OPTION_LONG_S "rom=SAVESTATE"},
     {"zs", "convert to ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE"},
@@ -333,11 +334,28 @@ snes_convert_sramfile (const void *header)
 {
   FILE *srcfile, *destfile;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], buf[32 * 1024];
-  unsigned int blocksize, byteswritten;
+  unsigned int blocksize, byteswritten, header_len;
 
   strcpy (src_name, ucon64.rom);
-  strcpy (dest_name, ucon64.rom);
-  set_suffix (dest_name, ".SAV");
+  if (header)
+    {
+      header_len = SWC_HEADER_LEN;
+      strcpy (dest_name, ucon64.rom);
+      set_suffix (dest_name, ".SAV");
+    }
+  else // code for Game Doctor SRAM file
+    {
+      int n;
+
+      header_len = 0;
+      sprintf (dest_name, "SF8%.3s", basename2 (ucon64.rom));
+      strupr (dest_name);
+      // avoid trouble with filenames containing spaces
+      for (n = 3; n < 6; n++)                       // skip "SF" and first digit
+        if (dest_name[n] == ' ')
+          dest_name[n] = '_';
+      set_suffix_i (dest_name, ".B00");
+    }
   ucon64_file_handler (dest_name, src_name, 0);
 
   if ((srcfile = fopen (src_name, "rb")) == NULL)
@@ -351,17 +369,21 @@ snes_convert_sramfile (const void *header)
       return -1;
     }
 
-  fwrite (header, 1, SWC_HEADER_LEN, destfile); // write header
-  byteswritten = SWC_HEADER_LEN;
+  if (header)
+    {
+      fwrite (header, 1, SWC_HEADER_LEN, destfile); // write header
+      byteswritten = SWC_HEADER_LEN;
+    }
+  else
+    byteswritten = 0;
 
   blocksize = fread (buf, 1, 32 * 1024, srcfile); // read 32 kB at max
-  while (byteswritten < 32 * 1024 + SWC_HEADER_LEN)
+  while (byteswritten < 32 * 1024 + header_len)
     {
-      // Pad SRAM to 32.5 kB by repeating the SRAM data. At least the SWC DX2
-      //  does something similar.
-      fwrite (buf, 1, byteswritten + blocksize <= 32 * 1024 + SWC_HEADER_LEN ?
-                blocksize : 32 * 1024 + SWC_HEADER_LEN - byteswritten,
-              destfile);
+      // Pad SRAM data to 32 kB by repeating it. At least the SWC DX2 does
+      //  something similar.
+      fwrite (buf, 1, byteswritten + blocksize <= 32 * 1024 + header_len ?
+                blocksize : 32 * 1024 + header_len - byteswritten, destfile);
       byteswritten += blocksize;
     }
 
@@ -408,6 +430,13 @@ snes_ufos (void)
   memcpy (&header[8], "SUPERUFO", 8);
 
   return snes_convert_sramfile (&header);
+}
+
+
+int
+snes_gd3s (void)
+{
+  return snes_convert_sramfile (NULL);
 }
 
 
@@ -733,7 +762,7 @@ make_gd_name (const char *filename, st_rominfo_t *rominfo, char *name,
       p = id_str;
     }
   else
-    p = basename (filename);
+    p = basename2 (filename);
 
   sprintf (name, "%s%d%s", is_func (p, strlen (p), isupper) ? "SF" : "sf",
            newsize / MBIT, p);

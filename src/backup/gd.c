@@ -1035,7 +1035,7 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
   p = basename2 (filename);
   fn_length = strlen (p);
 
-  if (fn_length < 6 || fn_length > 11
+  if (fn_length < 6 || fn_length > 11 // 7 ("base") + 1 (period) + 3 (extension)
       || toupper (p[0]) != 'S' || toupper (p[1]) != 'F'
       || p[fn_length - 4] != '.' || toupper (p[fn_length - 3]) != 'S')
     {
@@ -1055,7 +1055,6 @@ gd_write_saver (const char *filename, unsigned int parport, const char *prolog_s
     }
 
   size = q_fsize (filename);
-
   if (size != 0x38000)                  // GD saver size is always 0x38000 bytes -- no header
     {
       fprintf (stderr, "ERROR: GD saver file size must be 0x38000 bytes\n");

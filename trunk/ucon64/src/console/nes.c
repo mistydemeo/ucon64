@@ -6751,11 +6751,12 @@ nes_init (st_rominfo_t *rominfo)
     }
 
   if (type == PASOFAMI)                         // INES, UNIF, FDS and FAM are much
-    {                                           //  more reliable than EXTCMP()s
-      if (!EXTCMP (ucon64.rom, ".prm") ||
-          !EXTCMP (ucon64.rom, ".700") ||
-          !EXTCMP (ucon64.rom, ".prg") ||
-          !EXTCMP (ucon64.rom, ".chr"))
+    {                                           //  more reliable than stricmp()s
+      str = (char *) getext (ucon64.rom);
+      if (!stricmp (str, ".prm") ||
+          !stricmp (str, ".700") ||
+          !stricmp (str, ".prg") ||
+          !stricmp (str, ".chr"))
         {
           type = PASOFAMI;
           result = 0;

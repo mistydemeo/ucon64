@@ -337,9 +337,9 @@ const st_usage_t ucon64_options_usage[] = {
 #ifdef  PARALLEL
   {"port", "PORT", "specify parallel PORT={3bc, 378, 278, ...}"},
 #endif
-  {"hdn", "N", "force ROM has backup unit/emulator header with N Bytes size"},
+  {"hdn", "N", "force ROM has backup unit/emulator header with size of N Bytes"},
   {"hd", NULL, "same as " OPTION_LONG_S "hdn=512\n"
-                   "most backup units use a header with 512 Bytes size"},
+                   "most backup units use a header with a size of 512 Bytes"},
   {"nhd", NULL, "force ROM has no backup unit/emulator header"},
   {"int", NULL, "force ROM is interleaved (2143)"},
   {"nint", NULL, "force ROM is not interleaved (1234)"},
@@ -379,12 +379,12 @@ const st_usage_t ucon64_padding_usage[] = {
   {"p", NULL, "same as " OPTION_LONG_S "pad"},
   {"padn", "N", "pad ROM to N Bytes (put Bytes with value 0x00 after end)"},
   {"strip", "N", "strip N Bytes from end of ROM"},
-  {"stpn", "N", "strip N Bytes from ROM beginning"},
+  {"stpn", "N", "strip N Bytes from start of ROM"},
   {"stp", NULL, "same as " OPTION_LONG_S "stpn=512\n"
-            "most backup units use a header with 512 Bytes size"},
+            "most backup units use a header with a size of 512 Bytes"},
   {"insn", "N", "insert N Bytes (0x00) before ROM"},
   {"ins", NULL, "same as " OPTION_LONG_S "insn=512\n"
-             "most backup units use a header with 512 Bytes size"},
+             "most backup units use a header with a size of 512 Bytes"},
   {NULL, NULL, NULL}
 };
 

@@ -51,9 +51,9 @@ Options
   --nbak        prevents backup files (*.BAK)
   --ncol        disable ANSI colors in output
   --port=PORT   specify parallel PORT={3bc, 378, 278, ...}
-  --hdn=N       force ROM has backup unit/emulator header with N Bytes size
+  --hdn=N       force ROM has backup unit/emulator header with size of N Bytes
   --hd          same as --hdn=512
-                  most backup units use a header with 512 Bytes size
+                  most backup units use a header with a size of 512 Bytes
   --nhd         force ROM has no backup unit/emulator header
   --int         force ROM is interleaved (2143)
   --nint        force ROM is not interleaved (1234)
@@ -79,12 +79,12 @@ Padding
    -p           same as --pad
   --padn=N      pad ROM to N Bytes (put Bytes with value 0x00 after end)
   --strip=N     strip N Bytes from end of ROM
-  --stpn=N      strip N Bytes from ROM beginning
+  --stpn=N      strip N Bytes from start of ROM
   --stp         same as --stpn=512
-                  most backup units use a header with 512 Bytes size
+                  most backup units use a header with a size of 512 Bytes
   --insn=N      insert N Bytes (0x00) before ROM
   --ins         same as --insn=512
-                  most backup units use a header with 512 Bytes size
+                  most backup units use a header with a size of 512 Bytes
 
 DATabase (support for DAT files)
   --db          DATabase statistics

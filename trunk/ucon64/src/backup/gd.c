@@ -81,7 +81,7 @@ const st_usage_t gd_usage[] =
 #define GD6_SYNC_RETRIES 16
 
 #if     defined _WIN32 && !defined __MINGW32__
- // somebody please explain why this isn't proof that VC++ 6 is broken
+// somebody please explain why this isn't proof that VC++ 6 is broken
 #define inline __inline
 #endif
 
@@ -408,32 +408,9 @@ gd_add_filename (const char *filename)
 int
 gd3_read_rom (const char *filename, unsigned int parport)
 {
-#if 0
-  FILE *file;
-  unsigned char *buffer;
-
-  init_io (parport);
-  if ((file = fopen (filename, "wb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
-      exit (1);
-    }
-  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
-      exit (1);
-    }
-
-  free (buffer);
-  fclose (file);
-  deinit_io ();
-
-  return 0;
-#else
   (void) filename;                              // warning remover
   (void) parport;                               // warning remover
   return fprintf (stderr, "ERROR: The function for dumping a cartridge is not yet implemented\n");
-#endif
 }
 
 

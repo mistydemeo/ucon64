@@ -21,10 +21,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #ifndef LIBDISCMAGE_H
 #define LIBDISCMAGE_H
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -65,9 +61,13 @@ typedef signed __int64 int64_t;
 #endif // OWN_INTTYPES
 #endif
 
+#define DM_VERSION_MAJOR (0)
+#define DM_VERSION_MINOR (0)
+#define DM_VERSION_STEP (5)
+
+
 // a CD can have max. 99 tracks; this value might change in the future
 #define DM_MAX_TRACKS (99)
-
 
 typedef struct
 {
@@ -193,7 +193,7 @@ TODO: DM_FIX     (isofix) takes an ISO image with PVD pointing
 #define DM_WAV (2)
 #define DM_2048 (4)
 #define DM_FIX (8)
-#define DM_CDMAGE (16)
+//#define DM_CDMAGE (16)
 extern int dm_rip (const dm_image_t *image, int track_num, uint32_t flags);
 
 

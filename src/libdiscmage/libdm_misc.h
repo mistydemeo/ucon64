@@ -47,31 +47,26 @@ typedef struct
 extern const st_track_probe_t track_probe[];
 
 
-#define DM_UNKNOWN (-1)
-
-#define DM_SHEET (1)
-#define DM_CUE (DM_SHEET)
-#define DM_TOC (DM_SHEET)
-#define DM_CDI (2)
-#define DM_NRG (3)
-#define DM_CCD (4)
-#define DM_OTHER (5)
-
+enum {
+  DM_UNKNOWN = -1,
+  DM_CUE = 1,
+  DM_TOC,
+  DM_CDI,
+  DM_NRG,
+//  DM_CCD,
+  DM_OTHER
+};
 
 /*
-  dm_track_init()     fillup current dm_track_t
-  dm_free()           free all dm_track_t, dm_session_t and dm_image_t recursively
   writewavheader()    write header for a wav file
   dm_get_track_desc() returns a string like "MODE1/2352" depending on the 
-                        mode and sector_size specified; if cue == FALSE
-                        it will return the string in TOC format
-  callibrate()        a brute force function that tries to find a iso header
-                        or anything else that could identify a file as an
-                        image (can be very slow)
+                      mode and sector_size specified; if cue == FALSE
+                      it will return the string in TOC format
 */
-extern const dm_track_t *dm_track_init (dm_track_t *track, FILE *fh);
-extern int dm_free (dm_image_t *image);
 //extern void writewavheader (FILE * fdest, int track_length);
 extern const char *dm_get_track_desc (int mode, int sector_size, int cue);
-//extern int callibrate (const char *fname, int track_num);
+
+extern const char pvd_magic[];
+extern const char svd_magic[];
+extern const char vdt_magic[];
 #endif  // LIBDM_MISC_H

@@ -697,7 +697,7 @@ main (int argc, char *argv[])
 
       ucon64_nfo (&rom);
 
-      ucon64_dbview (rom.console);
+//      ucon64_dbview (rom.console);
 
       printf ("TIP: %s -dbs -nes would search only for a NES ROM\n\n",
               getarg (argc, argv, ucon64_NAME));

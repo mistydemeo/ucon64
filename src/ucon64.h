@@ -48,7 +48,7 @@ typedef struct st_ucon64
   const char *file;                             // file (cmdline) with path
 
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
-  
+
 #ifdef  ANSI_COLOR
   int ansi_color;
 #endif
@@ -67,7 +67,8 @@ typedef struct st_ucon64
   int split;                                    // rom is split
   int snes_hirom;                               // Super Nintendo ROM is HiROM
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
-  int controller;                               // NES UNIF
+  int controller;                               // NES UNIF & SNES NSRT
+  int controller2;                              // SNES NSRT
   int tv_standard;                              // NES UNIF
   int battery;                                  // NES UNIF/iNES/Pasofami
   int vram;                                     // NES UNIF

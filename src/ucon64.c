@@ -284,6 +284,7 @@ const struct option long_options[] = {
     {"bs", 0, 0, UCON64_BS},
     {"nbs", 0, 0, UCON64_NBS},
     {"ctrl", 1, 0, UCON64_CTRL},
+    {"ctrl2", 1, 0, UCON64_CTRL2},
     {"ntsc", 0, 0, UCON64_NTSC},
     {"pal", 0, 0, UCON64_PAL},
     {"bat", 0, 0, UCON64_BAT},
@@ -352,6 +353,7 @@ main (int argc, char **argv)
   ucon64.snes_hirom =
   ucon64.bs_dump =
   ucon64.controller =
+  ucon64.controller2 =
   ucon64.tv_standard =
   ucon64.battery =
   ucon64.vram =

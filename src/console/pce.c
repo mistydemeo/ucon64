@@ -791,6 +791,10 @@ pcengine_check (unsigned char *buf, unsigned int len)
 {
   int i, f1 = 0, f2 = 0, f3 = 0, f4 = 0, f5 = 0;
 
+  // don't crash for too small (non-PCE) files - dbjh
+  if (len < 0x200)
+    return 0;
+
   // Directly look for swapped dead moon (U). Lots of zeroes at file start
   //  fakes out header detector.
   // We probably don't need this (no "header detector") - dbjh
@@ -854,8 +858,9 @@ pcengine_init (st_rominfo_t *rominfo)
   unsigned char *rom_buffer;
   st_pce_data_t *info, key;
 
+  x = ucon64.file_size % (16 * 1024);
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-    ucon64.buheader_len : ucon64.file_size % (16 * 1024);
+    ucon64.buheader_len : (ucon64.file_size > x ? x : 0);
 
   size = ucon64.file_size - rominfo->buheader_len;
   if (!(rom_buffer = (unsigned char *) malloc (size)))

@@ -2766,7 +2766,8 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
             with Still Picture (PD)". Don't do <= 16384 or else "Super Wild
             Card V2.255 DOS ROM (BIOS)" won't be detected if it has no header.
           */
-          else if ((surplus % SWC_HEADER_LEN) == 0 && surplus < 16384)
+          else if (surplus % SWC_HEADER_LEN == 0 && surplus < 16384 &&
+                   ucon64.file_size > surplus)
             rominfo->buheader_len = surplus;
           // special case for Infinity Demo (PD)... Don't add "|| type == FIG"
           //  as it is too unreliable

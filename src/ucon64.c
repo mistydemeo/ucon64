@@ -405,6 +405,27 @@ main (int argc, char **argv)
   ucon64.argc = argc;
   ucon64.argv = argv;                           // must be set prior to calling
                                                 //  ucon64_load_discmage() (for DOS)
+
+  // convert (st_getopt2_t **) to (st_getopt2_t *)
+  memset (&options, 0, sizeof (st_getopt2_t) * UCON64_MAX_ARGS);
+  for (c = x = 0; option[x]; x++)
+    for (y = 0; option[x][y].name || option[x][y].help; y++)
+      if (c < UCON64_MAX_ARGS)
+        {
+          options[c].name = option[x][y].name;
+          options[c].has_arg = option[x][y].has_arg;
+          options[c].flag = option[x][y].flag;
+          options[c].val = option[x][y].val;
+          options[c].arg_name = option[x][y].arg_name;
+          options[c].help = option[x][y].help;
+          options[c].object = option[x][y].object;
+          c++;
+        }
+
+#ifdef  DEBUG
+  ucon64_runtime_debug (); // check (st_getopt2_t *) options consistency
+#endif
+
 #ifdef  __unix__
   // We need to modify the umask, because the configfile is made while we are
   //  still running in root mode. Maybe 0 is even better (in case root did
@@ -471,25 +492,6 @@ main (int argc, char **argv)
 #ifdef  USE_DISCMAGE
   // load libdiscmage
   ucon64.discmage_enabled = ucon64_load_discmage ();
-#endif
-
-  // convert (st_getopt2_t **) to (st_getopt2_t *)
-  memset (&options, 0, sizeof (st_getopt2_t) * UCON64_MAX_ARGS);
-  for (c = x = 0; option[x]; x++)
-    for (y = 0; option[x][y].name || option[x][y].help; y++)
-      if (c < UCON64_MAX_ARGS)
-        {
-          options[c].name = option[x][y].name;
-          options[c].has_arg = option[x][y].has_arg;
-          options[c].flag = option[x][y].flag;
-          options[c].val = option[x][y].val;
-          options[c].arg_name = option[x][y].arg_name;
-          options[c].help = option[x][y].help;
-          options[c++].object = option[x][y].object;
-        }
-
-#ifdef  DEBUG
-  ucon64_runtime_debug (); // check (st_getopt2_t *) options consistency
 #endif
 
   if (argc < 2)
@@ -1346,7 +1348,7 @@ ucon64_usage (int argc, char *argv[])
 #endif
   printf (USAGE_S, name_exe);
 
-  //single usage
+  // single usage
   for (x = 0; arg[x].val; x++)
     if (arg[x].console) // IS console
       {

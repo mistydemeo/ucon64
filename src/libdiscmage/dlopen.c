@@ -100,6 +100,7 @@ open_module (char *module_name)
   sym->vfprintf = vfprintf;
   sym->sprintf = sprintf;
   sym->vsprintf = vsprintf;
+  sym->puts = puts;
   sym->fputs = fputs;
   sym->sscanf = sscanf;
   sym->fopen = fopen;

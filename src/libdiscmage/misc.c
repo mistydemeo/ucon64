@@ -742,10 +742,10 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
     {
       if (!(pos & 15))
         printf ("%08x  ", pos + virtual_start);
-      printf (pos + 1 & 3 ? "%02x " : "%02x  ", *p);
+      printf ((pos + 1) & 3 ? "%02x " : "%02x  ", *p);
 
       *(buf + (pos & 15)) = isprint (*p) ? *p : '.';
-      if (!(pos + 1 & 15))
+      if (!((pos + 1) & 15))
         puts (buf);
     }
   if (pos & 15)

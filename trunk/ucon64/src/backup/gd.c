@@ -45,7 +45,7 @@ const char *gd_usage[] =
     "  " OPTION_LONG_S "xgd3        send ROM to Game Doctor SF3(SF6/SF7); " OPTION_LONG_S "file=PORT\n",
 #else
     "  " OPTION_LONG_S "xgd3        send/receive ROM to/from Game Doctor SF3(SF6/SF7); " OPTION_LONG_S "file=PORT\n"
-    "                  receives automatically when " OPTION_LONG_S "rom does not exist\n",
+    "                  receives automatically when " OPTION_LONG_S "ROM does not exist\n",
 #endif
 
 #else
@@ -279,8 +279,8 @@ gd_add_filename (const char *filename)
 /*
 Note: On most Game Doctor's the way you enter link mode to be able to upload
       the ROM to the unit is to hold down the R key on the controller while
-      resetting the SNES.  You will see the Game Doctor menu has a message
-      that says "LINKING.."
+      resetting the SNES. You will see the Game Doctor menu has a message that
+      says "LINKING.."
 */
 /*
   This function only supports the SF3 protocol. If we know the details about
@@ -304,7 +304,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
   gd_names = (char **) names;
   ucon64_testsplit_callback = gd_add_filename;
   num_units = ucon64.split = ucon64_testsplit (filename); // this will call gd_add_filename()
-  ucon64_testsplit_callback = 0;
+  ucon64_testsplit_callback = NULL;
   if (!ucon64.split)
     {
       split = 0;
@@ -351,7 +351,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
 
   if ((buffer = (unsigned char *) malloc (8 * MBIT)) == NULL)
     { // a DRAM unit can hold 8 MBit at maximum
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], gd_fsize - GD_HEADER_LEN);
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], 8 * MBIT);
       exit (1);
     }
 

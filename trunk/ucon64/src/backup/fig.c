@@ -639,7 +639,7 @@ fig_read_cart_sram (const char *filename, unsigned int parport)
   while (bytesreceived < size)
     {
       ffe_send_command (5, address, 0);
-      ffe_receive_block (hirom ? 0x6000 : 0x2000, buffer, BUFFERSIZE);
+      ffe_receive_block ((unsigned short) (hirom ? 0x6000 : 0x2000), buffer, BUFFERSIZE);
       fwrite (buffer, 1, BUFFERSIZE, file);
       address += hirom ? 4 : 1;
 
@@ -709,7 +709,7 @@ fig_write_cart_sram (const char *filename, unsigned int parport)
   while ((bytessend < size) && (bytesread = fread (buffer, 1, MIN (size, BUFFERSIZE), file)))
     {
       ffe_send_command (5, address, 0);
-      ffe_send_block (hirom ? 0x6000 : 0x2000, buffer, bytesread);
+      ffe_send_block ((unsigned short) (hirom ? 0x6000 : 0x2000), buffer, bytesread);
       address += hirom ? 4 : 1;
 
       bytessend += bytesread;

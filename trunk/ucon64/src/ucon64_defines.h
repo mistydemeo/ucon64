@@ -169,7 +169,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_V64 (UCON64_OPTION + 149)
 #define UCON64_VBOY (UCON64_OPTION + 150)
 #define UCON64_VEC (UCON64_OPTION + 151)
-#define UCON64_VERSION (UCON64_OPTION + 153)
+#define UCON64_VER (UCON64_OPTION + 153)
 #define UCON64_XCDRW (UCON64_OPTION + 157)
 #define UCON64_XDJR (UCON64_OPTION + 158)
 #define UCON64_XFAL (UCON64_OPTION + 159)
@@ -235,6 +235,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_XBOX (UCON64_CONSOLE + 28)
 
 #define UCON64_VERSION_S "1.9.8beta4"
+#define UCON64_VERSION 199
 
 #define MBIT	131072
 #define TOMBIT(x) ((long)(x) / MBIT)

@@ -51,7 +51,7 @@ const st_usage_t sms_usage[] =
     {"nint", NULL, "force ROM is not in interleaved format (RAW)"},
     {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW (gives SMS name)"},
     {"mgdgg", NULL, "same as " OPTION_LONG_S "mgd, but gives GG name"},
-    {"smd", NULL, "convert to Super Magic Drive/SMD (+512 Bytes)"},
+    {"smd", NULL, "convert to Super Magic Drive/SMD"},
     {"smds", NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"},
     {"chk", NULL, "fix ROM checksum (SMS only)"},
     {NULL, NULL, NULL}

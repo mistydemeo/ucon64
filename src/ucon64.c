@@ -327,6 +327,8 @@ const struct option options[] = {
     {"xmd", 0, 0, UCON64_XMD},
     {"xmds", 0, 0, UCON64_XMDS},
     {"xmsg", 0, 0, UCON64_XMSG},
+    {"xsmc", 0, 0, UCON64_XSMC},
+    {"xsmcr", 0, 0, UCON64_XSMCR},
     {"xsmd", 0, 0, UCON64_XSMD},
     {"xsmds", 0, 0, UCON64_XSMDS},
     {"xswc", 0, 0, UCON64_XSWC},
@@ -1029,18 +1031,10 @@ ucon64_rom_handling (void)
     files. For these "problematic" files, their "real" checksum is stored
     in ucon64.fcrc32.
   */
-  switch (ucon64.console)
-    {
-      case UCON64_NES:
-        break;
-
-      default:
-        if (ucon64.crc32 == 0)
-          if (!ucon64.force_disc) // NOT for disc images
-            if (!(ucon64.flags & WF_NOCRC32) || ucon64.file_size < MAXROMSIZE)
-              ucon64.crc32 = q_fcrc32 (ucon64.rom, ucon64.rominfo ? ucon64.rominfo->buheader_len : 0);
-        break;
-    }
+  if (ucon64.crc32 == 0)
+    if (!ucon64.force_disc) // NOT for disc images
+      if (!(ucon64.flags & WF_NOCRC32) || ucon64.file_size < MAXROMSIZE)
+        ucon64.crc32 = q_fcrc32 (ucon64.rom, ucon64.rominfo ? ucon64.rominfo->buheader_len : 0);
 
 
   // DATabase
@@ -1570,11 +1564,17 @@ ucon64_usage (int argc, char *argv[])
       msg_usage,
 //      mgd_usage,
 #else
-      0, 0,
+      0,
+#endif // PARALLEL
+      0, 0, 0, 0}},
+    {UCON64_NES, {nes_usage,
+#ifdef  PARALLEL
+      smc_usage,
+#else
+      0,
 #endif // PARALLEL
       0, 0, 0, 0}},
     {UCON64_SMS, {sms_usage, 0, 0, 0, 0, 0}},
-    {UCON64_NES, {nes_usage, 0, 0, 0, 0, 0}},
     {UCON64_SWAN, {swan_usage, 0, 0, 0, 0, 0}},
     {UCON64_JAG, {jaguar_usage, 0, 0, 0, 0, 0}},
     {UCON64_NGP, {ngp_usage,
@@ -1738,19 +1738,19 @@ ucon64_usage (int argc, char *argv[])
 _ __ ________________________________________________________________ __ _
                                                       ___
     .,,,,     .---._ Oo  .::::. .::::. :::   :::    __\__\
-    ( oo)__   (oo) /..\ ::  :: ::  :: :::   :::    \ / Oo\o  (\(\
+    ( oo)__   ( oo) /..\ ::  :: ::  :: :::   :::    \ / Oo\o  (\(\
    /\_  \__) /\_  \/\_,/ ::  .. ::..:: ::'   ::'    _\\`--_/ o/oO \
    \__)_/   _\__)_/_/    :::::: :::::: ::....::.... \_ \  \  \.--'/
-   /_/_/    \ /_/_//     `::::' ::  :: `:::::`:::::: /_/__/   /\ \___
+   /_/_/    \ /_/_//     `::::' ::  :: `:::::`:::::: /_/__/   / \ \___
  _(__)_)_,   (__)_/  .::::.                      ;::  |_|_    \_/_/\_/\
-  o    o      (__)) ,:' `::::::::::::::::::::::::::' (__)_)___(_(_)  
+  o    o      (__)) ,:' `::::::::::::::::::::::::::' (__)_)___(_(_)
      ________  ________  _____ _____________________/   __/_  __/_________
     _\___   /__\___   /_/____/_\    __________     /    ___/  ______     /
    /    /    /    /    /     /  \      \/    /    /     /     /    /    /
   /    /    /         /     /          /    _____/_    /_    /_   _____/_
- /____/    /_________/     /aBn/fAZ!/nB_________/_____/_____/_________/
+ /____/    /_________/     /-aBn/fAZ!/nB-_________/_____/_____/_________/
 - -- /_____\--------/_____/------------------------------------------ -- -
 4 Nodes USRobotics & Isdn Power     All Releases Since Day 0 Are Available
- SNES/Sega/Game Boy/GameGear/Ultra 64/PSX/Jaguar/Saturn/Engine/Lynx/NeoGeo
+ Snes/Sega/GameBoy/GameGear/Ultra 64/PSX/Jaguar/Saturn/Engine/Lynx/NeoGeo
 - -- ---------------------------------------------------------------- -- -
 */

@@ -89,7 +89,7 @@ game size       # of files      names           MULTI-GD
                                 MD32XXX#C.038   MD32XXX#C
                                 MD32XXX#D.038   MD32XXX#D
 
-PC Engine:
+PC-Engine:
 
 game size       # of files      names           MULTI-GD
 ================================================================

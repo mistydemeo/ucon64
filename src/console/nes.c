@@ -36,6 +36,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "nes.h"
+#include "backup/smc.h"
+
 
 #define STD_COMMENT     "Written with uCON64 "  // first part of text to put in READ chunk
 
@@ -52,7 +54,7 @@ const st_usage_t nes_usage[] =
     {"j", NULL, "join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)"},
     {"pasofami", NULL, "convert to Pasofami/PRM/700/PRG/CHR"},
     {"s", NULL, "convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)"},
-    {"ffe", NULL, "convert to FFE format"},
+    {"ffe", NULL, "convert to FFE format (Super Magic Card)"},
     {"mapr", "MAPR", "specify board name or mapper number for conversion options\n"
                      "MAPR must be a board name for UNIF or a number for Pasofami\n"
                      "and iNES"},
@@ -210,7 +212,7 @@ const char *nes_boardtypes = {
   static const char *nes_country[NES_COUNTRY_MAX] = {
     "Japan",
     "U.S.A.",
-    "Europe, Oceania and Asia",                 // Australia is part of Oceania
+    "Europe, Oceania & Asia",                   // Australia is part of Oceania
     NULL
   };
 
@@ -4951,11 +4953,6 @@ static const st_usage_t unif_usage[] = {
     {NULL, NULL, NULL}
   };
 
-static const st_usage_t ffe_usage[] = {
-    {NULL, NULL, "FFE header"},
-    {NULL, NULL, NULL}
-  };
-
 static const st_usage_t pasofami_usage[] = {
     {NULL, NULL, "Pasofami file"},
     {NULL, NULL, NULL}
@@ -4968,7 +4965,7 @@ static const st_usage_t fds_usage[] = {
 
 static st_ines_header_t ines_header;
 static st_unif_header_t unif_header;
-static st_unknown_header_t ffe_header;
+static st_smc_header_t ffe_header;
 
 #if     UNIF_REVISION > 7
 static const char unif_ucon64_sig[] =
@@ -5178,7 +5175,7 @@ parse_info_file (st_dumper_info_t *info, const char *fname)
 
   <newline> can be \n (Unix), \r\n (DOS) or \r (Macintosh)
 
-  examples of valid date line:
+  examples of valid date lines:
   22-11-1975
   1/1/01
 */
@@ -6251,9 +6248,10 @@ nes_pasofami (void)
 int
 nes_ffe (st_rominfo_t *rominfo)
 {
-  st_unknown_header_t header;
-  char dest_name[FILENAME_MAX];
-  int size = ucon64.file_size - rominfo->buheader_len;
+  st_smc_header_t smc_header;
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  int size = ucon64.file_size - rominfo->buheader_len, mapper,
+      prg_size, chr_size, new_prg_size = -1;
 
   if (type != INES)
     {
@@ -6261,22 +6259,156 @@ nes_ffe (st_rominfo_t *rominfo)
       return -1;
     }
 
+  q_fread (&ines_header, 0, INES_HEADER_LEN, ucon64.rom);
+
+  mapper = ines_header.ctrl1 >> 4 | (ines_header.ctrl2 & 0xf0);
+  prg_size = ines_header.prg_size << 14;
+  if (prg_size > size)
+    prg_size = size;
+  chr_size = ines_header.chr_size << 13;
+
+  memset (&smc_header, 0, SMC_HEADER_LEN);
+
+  switch (mapper)
+    {
+    case 0:
+      if ((prg_size == 32 * 1024 || prg_size == 16 * 1024) && chr_size == 8 * 1024)
+        {
+          if (prg_size == 16 * 1024)
+            new_prg_size = 32 * 1024;
+          smc_header.emulation1 = 0x80;
+          smc_header.emulation2 = 0xea;
+        }
+      else if (prg_size == 32 * 1024 && chr_size == 16 * 1024)
+        {
+          smc_header.emulation1 = 0x80;
+          smc_header.emulation2 = 0xce;
+        }
+      break;
+    case 2:
+    case 71:
+      /*
+        Some mapper 71 games need to be patched before they work:
+        [0x0e] <= 0x40
+        [0x12] <= 0x50
+      */
+      if (prg_size == 128 * 1024 && chr_size == 0)
+        {
+          smc_header.emulation1 = 0x80;
+          smc_header.emulation2 = 0;
+        }
+      else if (prg_size == 256 * 1024 && chr_size == 0)
+        {
+          smc_header.emulation1 = 0x80;
+          smc_header.emulation2 = 0x40;
+        }
+      break;
+    case 3:
+      if (prg_size == 32 * 1024 && chr_size == 32 * 1024)
+        {
+          smc_header.emulation1 = 0x80;
+          smc_header.emulation2 = 0xb7;
+        }
+      break;
+#if 0
+    case ?:
+      if (prg_size == 128 * 1024 && chr_size == 32 * 1024)
+        {
+          smc_header.emulation1 = 0x80;
+          smc_header.emulation2 = 0x80;
+        }
+      break;
+#endif
+    case 6:                                     // falling through
+    case 8:                                     // falling through
+    case 12:
+      /*
+        According to kyuusaku the following headers only apply to "trained"
+        dumps. "Trainers tell the copier how to play the game and how many rom
+        banks there are and where they are on a game by game basis."
+        However, I (dbjh) subtracted 0x40 from emulation1 and moved the code
+        that sets bit SMC_TRAINER (0x40) to general code.
+        Note that we discard trainer data when converting to iNES and UNIF.
+      */
+      if (size == 1 * MBIT)
+        {
+          smc_header.emulation1 = 0x80;
+          smc_header.emulation2 = 0;
+        }
+      else if (size == 2 * MBIT)
+        {
+          smc_header.emulation1 = 0x80;
+          smc_header.emulation2 = 0x20;
+        }
+      else if (size == 3 * MBIT)
+        {
+          smc_header.emulation1 = 0xa0;
+          smc_header.emulation2 = 0x20;
+        }
+      else if (size == 4 * MBIT)
+        {
+          smc_header.emulation1 = 0xb0;
+          smc_header.emulation2 = 0x20;
+        }
+      break;
+    }
+
+  if (ines_header.ctrl1 & INES_TRAINER)
+    smc_header.emulation1 |= SMC_TRAINER;
+
+  smc_header.id1 = 0xaa;
+  smc_header.id2 = 0xbb;
+#if 0                                           // already set to 0 by memset()
+  smc_header.type = 0;
+#endif
+
+  strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".FFE");
+  ucon64_file_handler (dest_name, src_name, 0);
 
-  memset (&header, 0, UNKNOWN_HEADER_LEN);
-  header.size_low = size / 8192;
-  header.size_high = size / 8192 >> 8;
-#if 1
-  // TODO: verify if this is correct. It seems logical though.
-  header.id1 = 0xaa;
-  header.id2 = 0xbb;
-#endif
-  ucon64_file_handler (dest_name, NULL, 0);
-  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
-  q_fcpy (ucon64.rom, rominfo->buheader_len, size, dest_name, "ab");
+  if (new_prg_size == -1)                       // don't resize PRG block
+    {
+      q_fwrite (&smc_header, 0, SMC_HEADER_LEN, dest_name, "wb");
+      q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
+    }
+  else
+    {
+      unsigned char *prg_data = (unsigned char *) malloc (new_prg_size);
+      int offset;
+
+      if (prg_data == NULL)
+        {
+          fprintf (stderr, ucon64_msg[BUFFER_ERROR], new_prg_size);
+          exit (1);
+        }
+      memset (prg_data, 0, new_prg_size);       // pad with zeroes
+      q_fread (prg_data, rominfo->buheader_len, prg_size, src_name);
+
+      // write header
+      q_fwrite (&smc_header, 0, SMC_HEADER_LEN, dest_name, "wb");
+
+      // copy trainer data if present
+      if (ines_header.ctrl1 & INES_TRAINER)
+        {
+          q_fcpy (src_name, rominfo->buheader_len, 512, dest_name, "ab");
+          offset = 512;
+        }
+      else
+        offset = 0;
+
+      // write resized PRG block
+      q_fwrite (prg_data, SMC_HEADER_LEN + offset, new_prg_size, dest_name, "ab");
+
+      // copy CHR block
+      q_fcpy (src_name, rominfo->buheader_len + offset + prg_size,
+              size - offset - prg_size, dest_name, "ab");
+
+      free (prg_data);
+    }
 
   printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }
 
@@ -6789,16 +6921,10 @@ nes_init (st_rominfo_t *rominfo)
           type = PASOFAMI;
           result = 0;
         }
-      else                                      // TODO: finding a reliable means
-        {                                       //  for detecting FFE images
-          x = magic[0] * 8192;
-          x += magic[1] * 8192 << 8;
-          if (ucon64.file_size - UNKNOWN_HEADER_LEN == (unsigned int) x &&
-              magic[8] == 0xaa && magic[9] == 0xbb)
-            {
-              type = FFE;
-              result = 0;
-            }
+      else if (magic[8] == 0xaa && magic[9] == 0xbb)
+        {                                       // TODO: finding a reliable means
+          type = FFE;                           //  for detecting FFE images
+          result = 0;
         }
     }
   if (ucon64.console == UCON64_NES)
@@ -7166,6 +7292,20 @@ nes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, buf);
       break;
     case FFE:
+      if (magic[10] == 1)
+        {
+          rominfo->buheader_len = SMC_HEADER_LEN;
+          strcpy (rominfo->name, "Name: N/A");
+          rominfo->console_usage = NULL;
+          rominfo->copier_usage = smc_usage;
+          rominfo->maker = "Publisher: You?";
+          rominfo->country = "Country: Your country?";
+          rominfo->has_internal_crc = 0;
+          ucon64.split = 0;                     // RTS files are never split
+          strcat (rominfo->misc, "Type: Super Magic Card RTS file\n");
+          return 0;                             // rest is nonsense for RTS file
+        }
+
       /*
         512-byte header
         512-byte trainer (optional)
@@ -7175,15 +7315,16 @@ nes_init (st_rominfo_t *rominfo)
         It makes no sense to make a temporary iNES image here. It makes sense
         for Pasofami, because there might be a .PRM file and because there is
         still other information about the image structure.
-        FFE as we now know it (probably incomplete) is a plain stupid format,
-        because there is no information about the image other than it's size
-        and CRC.
       */
-      rominfo->copier_usage = ffe_usage;
-      rominfo->buheader_start = UNKNOWN_HEADER_START;
-      rominfo->buheader_len = UNKNOWN_HEADER_LEN;
-      q_fread (&ffe_header, UNKNOWN_HEADER_START, UNKNOWN_HEADER_LEN, ucon64.rom);
+      rominfo->copier_usage = smc_usage;
+      rominfo->buheader_start = SMC_HEADER_START;
+      rominfo->buheader_len = SMC_HEADER_LEN;
+      q_fread (&ffe_header, SMC_HEADER_START, SMC_HEADER_LEN, ucon64.rom);
       rominfo->buheader = &ffe_header;
+
+      sprintf (buf, "512-byte trainer: %s",
+        (ffe_header.emulation1 & SMC_TRAINER) ? "Yes" : "No");
+      strcat (rominfo->misc, buf);
       break;
     case FDS:
       rominfo->copier_usage = fds_usage;

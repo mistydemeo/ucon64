@@ -85,7 +85,7 @@ OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
         backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/gd.o \
         backup/md.o backup/mgd.o backup/smd.o backup/swc.o backup/ufo.o \
         backup/dex.o backup/psxpblib.o backup/mccl.o backup/lynxit.o \
-        backup/ffe.o backup/msg.o
+        backup/ffe.o backup/msg.o backup/smc.o
 ifdef ZLIB
 OBJECTS+=unzip.o map.o miscz.o
 endif
@@ -209,7 +209,7 @@ endif                                   # cygwin
 endif                                   # DISCMAGE
 
 $(TARGET): $(OBJECTS)
-	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
 
 install:
@@ -270,7 +270,7 @@ ucon64.o: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
           backup/fig.h backup/swc.h backup/doctor64jr.h backup/doctor64.h \
           backup/smd.h backup/fal.h backup/gbx.h backup/cd64.h backup/dex.h \
           backup/fpl.h backup/mgd.h backup/gd.h backup/mccl.h backup/lynxit.h \
-          backup/msg.h $(UCON64_STD_H)
+          backup/msg.h backup/smc.h $(UCON64_STD_H)
 ucon64_opts.o: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
                console/snes.h console/gb.h console/gba.h console/n64.h \
                console/lynx.h console/sms.h console/nes.h console/genesis.h \
@@ -282,7 +282,7 @@ ucon64_opts.o: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
                backup/doctor64.h backup/smd.h backup/fal.h backup/gbx.h \
                backup/cd64.h backup/dex.h backup/fpl.h backup/mgd.h \
                backup/gd.h backup/mccl.h backup/lynxit.h backup/msg.h \
-               $(UCON64_STD_H)
+               backup/smc.h $(UCON64_STD_H)
 ucon64_misc.o: dlopen.h $(UCON64_STD_H)
 ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)
 ucon64_dm.o: ucon64_dm.h dlopen.h $(UCON64_STD_H)
@@ -318,6 +318,7 @@ backup/gd.o: backup/gd.h console/snes.h $(UCON64_STD_H)
 backup/md.o: backup/md.h $(UCON64_STD_H)
 backup/mgd.o: backup/mgd.h $(UCON64_STD_H)
 backup/msg.o: backup/msg.h backup/ffe.h $(UCON64_STD_H)
+backup/smc.o: backup/smc.h backup/ffe.h $(UCON64_STD_H)
 backup/smd.o: backup/smd.h backup/ffe.h $(UCON64_STD_H)
 backup/swc.o: backup/swc.h backup/ffe.h console/snes.h $(UCON64_STD_H)
 backup/ufo.o: backup/ufo.h $(UCON64_STD_H)

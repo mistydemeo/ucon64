@@ -148,7 +148,7 @@ static int n64_chksum (st_rominfo_t *rominfo);
 int
 n64_sram (st_rominfo_t *rominfo, const char *sramfile)
 {
-  char sram[N64_SRAM_SIZE];
+  char sram[N64_SRAM_SIZE], dest_name[FILENAME_MAX];
 
   if (q_fsize (sramfile) != N64_SRAM_SIZE ||
       q_fsize (ucon64.rom) != LAC_ROM_SIZE)
@@ -164,10 +164,12 @@ n64_sram (st_rominfo_t *rominfo, const char *sramfile)
   if (rominfo->interleaved != 0)
     mem_swap (sram, N64_SRAM_SIZE);
 
-  ucon64_file_handler (ucon64.rom, NULL, 0);
-  q_fwrite (sram, 0x286C0, N64_SRAM_SIZE, ucon64.rom, "r+b");
-  printf (ucon64_msg[WROTE], ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  if (!ucon64_file_handler (dest_name, NULL, 0))
+    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
+  q_fwrite (sram, 0x286C0, N64_SRAM_SIZE, dest_name, "r+b");
 
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -221,7 +223,7 @@ n64_z64 (st_rominfo_t *rominfo)
 int
 n64_n (st_rominfo_t *rominfo, const char *name)
 {
-  char buf[N64_NAME_LEN];
+  char buf[N64_NAME_LEN], dest_name[FILENAME_MAX];
 
   memset (buf, ' ', N64_NAME_LEN);
   strncpy (buf, name, strlen (name) > N64_NAME_LEN ?
@@ -230,11 +232,13 @@ n64_n (st_rominfo_t *rominfo, const char *name)
   if (rominfo->interleaved != 0)
     mem_swap (buf, N64_NAME_LEN);
 
-  ucon64_file_handler (ucon64.rom, NULL, 0);
-  q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 32, 20, ucon64.rom,
+  strcpy (dest_name, ucon64.rom);
+  if (!ucon64_file_handler (dest_name, NULL, 0))
+    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
+  q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 32, 20, dest_name,
             "r+b");
 
-  printf (ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -251,14 +255,16 @@ int
 n64_chk (st_rominfo_t *rominfo)
 {
   int x;
-  char buf[8];
+  char buf[8], dest_name[FILENAME_MAX];
 
-  ucon64_file_handler (ucon64.rom, NULL, 0);
+  strcpy (dest_name, ucon64.rom);
+  if (!ucon64_file_handler (dest_name, NULL, 0))
+    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
 
   // n64crc is set by n64_checksum() when called from n64_init()
   for (x = 0; x < 4; x++)
     {
-      q_fputc (ucon64.rom,
+      q_fputc (dest_name,
                   N64_HEADER_START + rominfo->buheader_len + 0x10 +
                   (x ^ rominfo->interleaved),
                   (n64crc.crc1 & 0xff000000) >> 24, "r+b");
@@ -267,14 +273,14 @@ n64_chk (st_rominfo_t *rominfo)
 
   for (x = 0; x < 4; x++)
     {
-      q_fputc (ucon64.rom,
+      q_fputc (dest_name,
                   N64_HEADER_START + rominfo->buheader_len + 0x14 +
                   (x ^ rominfo->interleaved),
                   (n64crc.crc2 & 0xff000000) >> 24, "r+b");
       n64crc.crc2 <<= 8;
     }
 
-  q_fread (buf, 0x10 + rominfo->buheader_len, 8, ucon64.rom);
+  q_fread (buf, 0x10 + rominfo->buheader_len, 8, dest_name);
   mem_hexdump (buf, 8, 0x10 + rominfo->buheader_len);
 
   return 0;
@@ -284,8 +290,9 @@ n64_chk (st_rominfo_t *rominfo)
 int
 n64_bot (st_rominfo_t *rominfo, const char *bootfile)
 {
-  char buf[FILENAME_MAX];
+  char buf[FILENAME_MAX], dest_name[FILENAME_MAX];
 
+  strcpy (dest_name, ucon64.rom);
   if (!access (bootfile, F_OK))
     {
       q_fread (buf, 0, N64_BOT_SIZE, bootfile);
@@ -293,24 +300,23 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
       if (rominfo->interleaved != 0)
         mem_swap (buf, N64_BOT_SIZE);
 
-      ucon64_file_handler (ucon64.rom, NULL, 0);
+      if (!ucon64_file_handler (dest_name, NULL, 0))
+        q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
       q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 0x40,
-        N64_BOT_SIZE, ucon64.rom, "r+b");
+        N64_BOT_SIZE, dest_name, "r+b");
     }
   else
     {
-      strcpy (buf, ucon64.rom);
-      set_suffix (buf, ".BOT");
-
-      ucon64_file_handler (buf, NULL, 0);
+      set_suffix (dest_name, ".BOT");
+      ucon64_file_handler (dest_name, NULL, 0);
       q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len + 0x040,
-        N64_BOT_SIZE, buf, "wb");
+        N64_BOT_SIZE, dest_name, "wb");
 
       if (rominfo->interleaved != 0)
-        q_fswap (buf, 0, q_fsize (buf));
+        q_fswap (dest_name, 0, q_fsize (dest_name));
     }
 
-  printf (ucon64_msg[WROTE], buf);
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 

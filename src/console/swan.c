@@ -56,15 +56,16 @@ st_swan_header_t swan_header;
 int
 swan_chk (st_rominfo_t *rominfo)
 {
-  char buf[3];
-  ucon64_file_handler (ucon64.rom, NULL, 0);
+  char buf[3], dest_name[FILENAME_MAX];
 
-  q_fputc (ucon64.rom, SWAN_HEADER_START + 8,
-    rominfo->current_internal_crc, "r+b");      // low byte
-  q_fputc (ucon64.rom, SWAN_HEADER_START + 9,
-    rominfo->current_internal_crc >> 8, "r+b"); // high byte
+  strcpy (dest_name, ucon64.rom);
+  if (!ucon64_file_handler (dest_name, NULL, 0))
+    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
 
-  q_fread (buf, SWAN_HEADER_START + 8, 2, ucon64.rom);
+  q_fputc (dest_name, SWAN_HEADER_START + 8, rominfo->current_internal_crc, "r+b"); // low byte
+  q_fputc (dest_name, SWAN_HEADER_START + 9, rominfo->current_internal_crc >> 8, "r+b"); // high byte
+
+  q_fread (buf, SWAN_HEADER_START + 8, 2, dest_name);
   mem_hexdump (buf, 2, SWAN_HEADER_START + 8);
 
   return 0;

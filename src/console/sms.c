@@ -174,7 +174,7 @@ int
 sms_smds (st_rominfo_t *rominfo)
 {
   st_smd_header_t header;
-  char buf[MAXBUFSIZE];
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   memset (&header, 0, SMD_HEADER_LEN);
 
@@ -185,16 +185,15 @@ sms_smds (st_rominfo_t *rominfo)
   header.id2 = 0xbb;
   header.type = 7;                              // SRAM file
 
-  strcpy (buf, ucon64.rom);
-  set_suffix (buf, ".TMP");
-  ucon64_file_handler (ucon64.rom, NULL, 0);
-  rename (ucon64.rom, buf);
+  strcpy (src_name, ucon64.rom);
+  strcpy (dest_name, ucon64.rom);
+  set_suffix (dest_name, ".SAV");
+  ucon64_file_handler (dest_name, src_name, 0);
 
-  q_fwrite (&header, 0, SMD_HEADER_LEN, ucon64.rom, "wb");
-  q_fcpy (buf, 0, q_fsize (ucon64.rom), ucon64.rom, "ab");
-  printf (ucon64_msg[WROTE], ucon64.rom);
-
-  remove (buf);
+  q_fwrite (&header, 0, SMD_HEADER_LEN, dest_name, "wb");
+  q_fcpy (src_name, 0, q_fsize (src_name), dest_name, "ab");
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }
 

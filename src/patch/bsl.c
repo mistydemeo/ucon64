@@ -40,13 +40,16 @@ const st_usage_t bsl_usage[] =
 
 
 int
-bsl_apply (const char *modname, const char *bslname)
+bsl_apply (const char *mod, const char *bslname)
 {
   FILE *modfile, *bslfile;
   unsigned char byte, addstr[10], datstr[10], buf[4096];
+  char modname[FILENAME_MAX];
   int dat, numdat, i, done = 0, add;
 
-  ucon64_file_handler (modname, NULL, 0);
+  strcpy (modname, mod);
+  if (!ucon64_file_handler (modname, NULL, 0))
+    q_fcpy (mod, 0, q_fsize (mod), modname, "wb");
 
   if ((modfile = fopen (modname, "r+b")) == NULL)
     {

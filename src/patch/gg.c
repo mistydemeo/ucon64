@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.27 2003-03-01 09:38:50 noisyb Exp $
+ * $Id: gg.c,v 1.28 2003-03-01 14:22:38 dbjh Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -1046,7 +1046,7 @@ int
 gg_apply (st_rominfo_t *rominfo, const char *code)
 {
   long size = ucon64.file_size - rominfo->buheader_len, address, value;
-  char buf[MAXBUFSIZE];
+  char buf[MAXBUFSIZE], dest_name[FILENAME_MAX];
   int result = -1;
 
   if (ucon64.file_size > 0)                   // check if rominfo contains valid ROM info
@@ -1097,12 +1097,15 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
       return -1;
     }
 
+  strcpy (dest_name, ucon64.rom);
+  if (!ucon64_file_handler (dest_name, NULL, 0))
+    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
+
   printf ("\n");
-  buf[0] = q_fgetc (ucon64.rom, address + rominfo->buheader_len);
+  buf[0] = q_fgetc (dest_name, address + rominfo->buheader_len);
   mem_hexdump (buf, 1, address + rominfo->buheader_len);
 
-  ucon64_file_handler (ucon64.rom, NULL, 0);
-  q_fputc (ucon64.rom, address + rominfo->buheader_len, (unsigned char) value, "r+b");
+  q_fputc (dest_name, address + rominfo->buheader_len, (unsigned char) value, "r+b");
 
   buf[0] = value;
   mem_hexdump (buf, 1, address + rominfo->buheader_len);

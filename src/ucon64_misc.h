@@ -162,16 +162,16 @@ extern const char *ucon64_msg[];
 
 
 /*
-  ucon64_file_handler() handels backups (before modifying the ROM) and ROMs
+  ucon64_file_handler() handles backups (before modifying the ROM) and ROMs
                         inside archives. Read the comment at the header to
                         see how it and the flags work
   remove_temp_file()    remove possible temp file created by ucon64_file_handler()
 */
 #define OF_FORCE_BASENAME 1
 #define OF_FORCE_SUFFIX   2
-extern void ucon64_file_handler (const char *dest, char *src, int flags);
+extern int ucon64_file_handler (char *dest, char *src, int flags);
 extern void remove_temp_file (void);
-//extern char *ucon64_output_fname (char *requested_fname, int flags);
+extern char *ucon64_output_fname (char *requested_fname, int flags);
 
 extern int ucon64_fhexdump (const char *filename, int start, int len);
 extern unsigned int ucon64_filefile (const char *filename1, int start1, const char *filename2, int start2, int similar);

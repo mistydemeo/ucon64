@@ -402,7 +402,7 @@ genesis_s (st_rominfo_t *rominfo)
 
       sprintf (dest_name, "%s.%03lu", buf,
                (unsigned long) (ucon64.file_size - rominfo->buheader_len) / MBIT);
-      ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
+      ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
 
       if (surplus)
         nparts++;
@@ -424,7 +424,7 @@ genesis_s (st_rominfo_t *rominfo)
 
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".1");
-      ucon64_file_handler (dest_name, NULL, 0);
+      ucon64_output_fname (dest_name, 0);
 
       smd_header.size = PARTSIZE / 16384;
       smd_header.id0 = 3;
@@ -544,18 +544,20 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
       memcpy (&rom_buffer[GENESIS_HEADER_START + 32 + 48], buf, 48);
     }
 
-  ucon64_file_handler (ucon64.rom, NULL, 0);
+  strcpy (buf, ucon64.rom);
+  if (!ucon64_file_handler (buf, NULL, 0))
+    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), buf, "wb");
   if (type == SMD)
     {
       st_smd_header_t smd_header;
 
       q_fread (&smd_header, 0, rominfo->buheader_len, ucon64.rom);
-      save_smd (ucon64.rom, rom_buffer, &smd_header, genesis_rom_size);
+      save_smd (buf, rom_buffer, &smd_header, genesis_rom_size);
     }
   else
-    save_bin (ucon64.rom, rom_buffer, genesis_rom_size);
+    save_bin (buf, rom_buffer, genesis_rom_size);
 
-  printf (ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], buf);
   free (rom_buffer);
 
   return 0;
@@ -587,6 +589,7 @@ int
 genesis_chk (st_rominfo_t *rominfo)
 {
   unsigned char *rom_buffer = NULL;
+  char dest_name[FILENAME_MAX];
 
   if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
     return -1;
@@ -596,18 +599,20 @@ genesis_chk (st_rominfo_t *rominfo)
 
   mem_hexdump (&rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e);
 
-  ucon64_file_handler (ucon64.rom, NULL, 0);
+  strcpy (dest_name, ucon64.rom);
+  if (!ucon64_file_handler (dest_name, NULL, 0))
+    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
   if (type == SMD)
     {
       st_smd_header_t smd_header;
 
       q_fread (&smd_header, 0, rominfo->buheader_len, ucon64.rom);
-      save_smd (ucon64.rom, rom_buffer, &smd_header, genesis_rom_size);
+      save_smd (dest_name, rom_buffer, &smd_header, genesis_rom_size);
     }
   else
-    save_bin (ucon64.rom, rom_buffer, genesis_rom_size);
+    save_bin (dest_name, rom_buffer, genesis_rom_size);
 
-  printf (ucon64_msg[WROTE], ucon64.rom);
+  printf (ucon64_msg[WROTE], dest_name);
   free (rom_buffer);
 
   return 0;

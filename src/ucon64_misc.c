@@ -600,7 +600,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XSWC2, UCON64_SNES, swc_usage,       WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
   {UCON64_XSWCS, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_SPLIT},
   {UCON64_XV64, UCON64_N64, doctor64_usage,    WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
-  {UCON64_Z64, UCON64_N64, z64_usage,          WF_DEFAULT},
+//  {UCON64_Z64, UCON64_N64, z64_usage,          WF_DEFAULT},
 /*
   these consoles do not (need to) know the console or work for more than one
 */

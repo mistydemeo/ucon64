@@ -46,7 +46,7 @@ int ucon64_parport_needed = 0;
 
 
 int
-ucon64_switches (int c)
+ucon64_switches (int c, const char *optarg)
 {
   char *ptr = NULL;
 
@@ -555,7 +555,7 @@ ucon64_e (void)
 
 
 int
-ucon64_options (int c)
+ucon64_options (int c, const char *optarg)
 {
 #ifdef  PARALLEL
   int enableRTS = -1;                             // for UCON64_XSWC & UCON64_XSWC2

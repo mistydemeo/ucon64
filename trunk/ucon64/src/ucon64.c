@@ -31,13 +31,6 @@ write programs in C
 
 #include "ucon64.h"
 
-void
-ucon64_exit (void)
-{
-  printf ("+++EOF");
-  fflush (stdout);
-}
-
 //#include "unzip.h"
 #include "snes/snes.h"
 #include "gb/gb.h"
@@ -88,6 +81,21 @@ ucon64_exit (void)
 #include "patch/ips.h"
 #include "patch/bsl.h"
 
+int frontend = 0;
+FILE *frontend_file;
+
+void
+ucon64_exit (void)
+{
+  printf ("+++EOF");
+  fflush (stdout);
+  if (frontend)
+    {
+      fclose (frontend_file);
+      remove (FRONTEND_FILENAME);
+    }
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -124,7 +132,9 @@ main (int argc, char *argv[])
     "-vboy",
     "-swan",
     "-coleco",
-    "-intelli", "-gc", "-xbox"
+    "-intelli",
+    "-gc",
+    "-xbox"
   };
 
 #ifdef	BACKUP
@@ -142,14 +152,22 @@ main (int argc, char *argv[])
     support for frontends
 */
   if (argcmp (argc, argv, "-frontend"))
-    atexit (ucon64_exit);
+    {
+      atexit (ucon64_exit);
+#ifndef __BEOS__ // keep behaviour like 1.9.7 under BeOS until BeOS frontend is updated
+      frontend = 1;
+      // if we can't create a file to write the parport_gauge() status to, set
+      // frontend to 0, so we won't accidentily write to frontend_file
+      if ((frontend_file = fopen (FRONTEND_FILENAME, "wt")) == NULL)
+        frontend = 0;
+#endif
+    }
 
   ucon64_flush (argc, argv, &rom);
 
   printf ("%s\n", ucon64_TITLE);
   printf ("Uses code from various people. See 'developers.html' for more!\n");
-  printf
-    ("This may be freely redistributed under the terms of the GNU Public License\n\n");
+  printf ("This may be freely redistributed under the terms of the GNU Public License\n\n");
 
 
 /*
@@ -189,7 +207,7 @@ main (int argc, char *argv[])
         {
           fputs ("# uCON64 config\n"
                  "#\n"
-                 "version=197\n"
+                 "version=198\n"
                  "#\n"
                  "# emulate_<console shortcut>=<emulator with options>\n"
                  "#\n"
@@ -702,12 +720,12 @@ if(argcmp(argc, argv, "-sh"))
   rom.console =
     (argcmp (argc, argv, "-xdjr") ||
      argcmp (argc, argv, "-xv64")) ? ucon64_N64 :
-    (argcmp (argc, argv, "-xgbx") ||
+     (argcmp (argc, argv, "-xgbx") ||
      argncmp (argc, argv, "-xgbxb", 6) ||
      argcmp (argc, argv, "-xgbxs")) ? ucon64_GB :
-    (argcmp (argc, argv, "-xswc") ||
+     (argcmp (argc, argv, "-xswc") ||
      argcmp (argc, argv, "-xswcs")) ? ucon64_SNES :
-    (argcmp (argc, argv, "-multi") ||
+     (argcmp (argc, argv, "-multi") ||
      argcmp (argc, argv, "-multi1") ||
      argcmp (argc, argv, "-multi2") ||
      argcmp (argc, argv, "-xfal") ||

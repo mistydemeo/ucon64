@@ -4,7 +4,7 @@ cd $(dirname "$0")
 
 areply=$(alert "This will start installation of uCON64 in a BeOS system.
 
-ucon64 will be installed in $HOME/config/bin.
+uCON64 will be installed in $HOME/config/bin.
 
 Do you want to continue?" "Cancel" "Install")
 if [ "$areply" ==  "Install" ]; then
@@ -33,5 +33,5 @@ and copy it to $HOME. Then retry to install the driver."
 	fi
 
 	alert "Done.
-You can use ucon64 from the terminal now."
+You can use uCON64 from the terminal now."
 fi

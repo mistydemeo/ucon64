@@ -65,7 +65,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_VERSION "1.9.8beta2"
 
 #ifdef __UNIX__
-#ifdef __SOLARIS__              // Hmmm, Solaris *is* a UNIX
+#ifdef __SOLARIS__                              // Hmmm, Solaris *is* a UNIX
 #define ucon64_TITLE "uCON64 1.9.8beta2 Solaris 1999-2002 by (various)"
 #else
 #define ucon64_TITLE "uCON64 1.9.8beta2 UNIX 1999-2002 by (various)"
@@ -81,6 +81,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MBIT	131072
 #define MAXROMSIZE ( ( 512+1 ) * MBIT )
 #define MAXBUFSIZE 32768
+
+#define ucon64_NAME	0
+#define ucon64_ROM	1
+#define ucon64_FILE	2
+
+#define FRONTEND_FILENAME "frontend.txt"
 
 struct ucon64_
 {
@@ -142,9 +148,8 @@ struct ucon64_
 };
 
 
-#define ucon64_NAME	0
-#define ucon64_ROM	1
-#define ucon64_FILE	2
+extern int frontend;
+extern FILE *frontend_file;
 
 int ucon64_usage (int argc, char *argv[]);
 int ucon64_init (struct ucon64_ *rom);

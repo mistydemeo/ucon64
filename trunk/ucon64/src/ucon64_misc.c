@@ -21,12 +21,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "ucon64_misc.h"
+#include "ucon64.h"
 
 #define MAXBUFSIZE 32768
 #define DETECT_MAX_CNT 1000
 #define CRC32_POLYNOMIAL     0xEDB88320L
 
 unsigned long CRCTable[256];
+
 #ifdef  BACKUP
 #ifdef  __BEOS__
 static int ucon64_io_fd;
@@ -397,7 +399,7 @@ parport_probe (unsigned int port)
           exit (1);
         }
       else
-        {                       // print warning, but continue
+        {                                       // print warning, but continue
           fprintf (stderr,
                    "Support for the driver parnew is deprecated. Future versions of uCON64 might\n"
                    "not support this driver. You can download the latest ioport driver from\n"
@@ -428,25 +430,25 @@ parport_probe (unsigned int port)
     }
   else
     if ((port != parport_addresses[0]) &&
-        (port != parport_addresses[1]) && (port != parport_addresses[2]))
+        (port != parport_addresses[1]) &&
+        (port != parport_addresses[2]))
     return 0;
 
   if (port != 0)
     {
 #ifdef  __linux__
-      if (ioperm (port, 3, 1) == -1)    // data, status & control
+      if (ioperm (port, 3, 1) == -1)            // data, status & control
         {
           fprintf (stderr,
                    "Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
                    "(This program needs root privileges)\n",
-                   port + PARPORT_DATA, port + PARPORT_STATUS,
-                   port + PARPORT_CONTROL);
-          exit (1);             // Don't return, if ioperm() fails port access
-        }                       //  causes core dump
+                   port + PARPORT_DATA, port + PARPORT_STATUS, port + PARPORT_CONTROL);
+          exit (1);                             // Don't return, if ioperm() fails port access
+        }                                       //  causes core dump
 #endif
       outportb (port + PARPORT_CONTROL,
                 inportb (port + PARPORT_CONTROL) & 0x0f);
-    }                           // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
+    }                                           // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 
   return port;
 }
@@ -455,31 +457,41 @@ int
 parport_gauge (time_t init_time, long pos, long size)
 {
   long cps;
+  int p, percentage;
   time_t curr, left;
-  char buf[2 * 24 + 1];
+  char progress[24 + 1];
 
-  if ((curr = time (0) - init_time) == 0)
-    curr = 1;                   // `round up' to at least 1 sec (no division
-  if (pos > size)               //  by zero below)
-    return -1;
-
-  cps = pos / curr;             // # bytes/second (average transfer speed)
-  left = (size - pos) / cps;
-
-  buf[0] = 0;
-  strncat (buf, "========================", (size_t) (24L * pos / size));
-  strcat (buf, "------------------------");
-  buf[24] = 0;
-
-  printf ("\r%10lu Bytes [%s] %lu%%, CPS=%lu, ",
-          pos, buf, (unsigned long) 100 * pos / size, (unsigned long) cps);
-
-  if (pos == size)
-    printf ("TOTAL=%03ld:%02ld", (long) curr / 60, (long) curr % 60);   // DON'T print a newline -> gauge can be cleared
+  percentage = 100 * pos / size;
+  if (frontend)
+    {
+      fprintf (frontend_file, "%u\n", percentage);
+      fflush (frontend_file);
+    }
   else
-    printf ("ETA=%03ld:%02ld   ", (long) left / 60, (long) left % 60);
+    {
+      if ((curr = time (0) - init_time) == 0)
+        curr = 1;                               // `round up' to at least 1 sec (no division
+      if (pos > size)                           //  by zero below)
+        return -1;
 
-  fflush (stdout);
+      cps = pos / curr;                         // # bytes/second (average transfer speed)
+      left = (size - pos) / cps;
+
+      p = 24 * pos / size;
+      progress[0] = 0;
+      strncat (progress, "========================", p);
+      strncat (&progress[p], "------------------------", 24 - p);
+
+      printf ("\r%10lu Bytes [%s] %u%%, CPS=%lu, ",
+              pos, progress, percentage, (unsigned long) cps);
+
+      if (pos == size)
+        printf ("TOTAL=%03ld:%02ld", (long) curr / 60, (long) curr % 60); // DON'T print a newline
+      else                                                                //  -> gauge can be cleared
+        printf ("ETA=%03ld:%02ld   ", (long) left / 60, (long) left % 60);
+
+      fflush (stdout);
+    }
 
   return 0;
 }

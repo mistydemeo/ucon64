@@ -940,7 +940,7 @@ ProgramNonTurboIntelFlash (FILE * fp)
   // Erase as many 128k blocks as are required
   Ready = EraseNonTurboFABlocks (0, ((FileSize - 1) >> 17) + 1);
 
-  printf ("\r                                        " "                                      \r");     // remove "erase gauge"
+  printf ("\r                                                                              \r");     // remove "erase gauge"
   if (Ready)
     {
       printf ("Programming Visoly non-turbo flash cart...\n\n");
@@ -1025,7 +1025,7 @@ ProgramNonTurboIntelFlash (FILE * fp)
             }
         }
 
-      printf ("\r                                        " "                                      \r"); // remove last gauge
+      printf ("\r                                                                              \r"); // remove last gauge
       parport_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
@@ -1066,7 +1066,7 @@ ProgramTurboIntelFlash (FILE * fp)
   // Erase as many 256k blocks as are required
   Ready = EraseTurboFABlocks (0, ((FileSize - 1) >> 18) + 1);
 
-  printf ("\r                                        " "                                      \r");     // remove "erase gauge"
+  printf ("\r                                                                              \r");     // remove "erase gauge"
   if (Ready)
     {
       printf ("Programming Visoly turbo flash cart...\n\n");
@@ -1145,7 +1145,7 @@ ProgramTurboIntelFlash (FILE * fp)
             break;
         }
 
-      printf ("\r                                        " "                                      \r"); // remove last gauge
+      printf ("\r                                                                              \r"); // remove last gauge
       parport_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
@@ -1187,7 +1187,7 @@ ProgramSharpFlash (FILE * fp)
   // Erase as many 64k blocks as are required
   Ready = EraseNintendoFlashBlocks (0, ((FileSize - 1) >> 16) + 1);
 
-  printf ("\r                                        " "                                      \r");     // remove "erase gauge"
+  printf ("\r                                                                              \r");     // remove "erase gauge"
   if (Ready)
     {
       printf ("Programming Nintendo flash cart...\n\n");
@@ -1215,7 +1215,7 @@ ProgramSharpFlash (FILE * fp)
             parport_gauge (starttime, addr << 1, FileSize);
         }
 
-      printf ("\r                                        " "                                      \r"); // remove last gauge
+      printf ("\r                                                                              \r"); // remove last gauge
       parport_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);

@@ -1,6 +1,6 @@
 /*
  *
- * PSX Peripheral Bus Library v1.4 17/01/00 Richard Davies 
+ * PSX Peripheral Bus Library v1.4 17/01/00 Richard Davies
  * <http://www.debaser.force9.co.uk/>
  * <mailto:richard@debaser.force9.co.uk>
  *
@@ -8,7 +8,7 @@
  * v1.4 - 17/01/00 Win32 / Win32 DLL support and bug fixes
  * v1.3 - 21/12/99 Linux support and bug fixes
  * v1.1 - 26/09/99 Minor Controller detection improvements.
- * v1.0  - 17/07/99 Initial release (based on PSXTest v1.1 by me).
+ * v1.0 - 17/07/99 Initial release (based on PSXTest v1.1 by me).
  *
  * see psxpblib.txt for details.
  *
@@ -17,36 +17,34 @@
 /*
   added for uCON64 support
 */
+#include "../ucon64_misc.h"
+
 #ifdef __DOS__
 #define _PSXPB_DJGPP_
-#else
+#elif __UNIX__
 #define _PSXPB_LINUX_
+#elif __BEOS__
+#define _PSXPB_BEOS_
 #endif
 
 
-#ifdef _PSXPB_WIN32_
-#include <string.h>
-#include <conio.h>
-#define psx_outportb(P, B) _outp((unsigned short)(P), B)
-#define psx_inportb(P) _inp((unsigned short)(P))
+// outportb() and inportb() are only present in uCON64 if BACKUP is defined
+#ifndef BACKUP
+#error  outportb() and inportb() must be present. Define BACKUP in appropriate Makefile
+#else
+#define psx_outportb(P, B) outportb(P, B)
+#define psx_inportb(P) inportb(P)
 #endif
 
 #ifdef _PSXPB_DJGPP_
 #include <stdlib.h>
 #include <pc.h>
-#define psx_outportb(P, B) outportb(P, B)
-#define psx_inportb(P) inportb(P)
 #endif
 
-#ifdef _PSXPB_LINUX_
+#if defined(_PSXPB_LINUX_) || defined(_PSXPB_BEOS_)
 #include <string.h>
-//#include <sys/io.h>
-#include "../ucon64_misc.h"
 #include <unistd.h>
-#define	psx_outportb(P, B) outportb(B, P)
-#define psx_inportb(P) inportb(P)
 #endif
-
 
 
 #define LPT1_BASE 0x378
@@ -87,7 +85,7 @@
 #define PSX_DIGITAL      4      /* SCPH-1010 SCPH 1080 E Controller
                                    SCPH-1110 SCPH-????   Analog Joystick - Digital Mode
                                    SCPH-???? SCPH-1180 E Analog Controller - Digital Mode
-                                   SCPH-1150 SCPH-1200 E Dual Shock Analog Controller - Digital Mode 
+                                   SCPH-1150 SCPH-1200 E Dual Shock Analog Controller - Digital Mode
                                    SLPH-???? SLEH-0011   Ascii Resident Evil Pad
                                    SLPH-???? SLEH-0004   Namco Arcade Stick (untested)
                                    Twin Stick

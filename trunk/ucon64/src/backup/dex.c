@@ -19,6 +19,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "dex.h"
+#include "psxpblib.h"
+
+#define BASE_ADDR 0x378
+#define CONPORT 1
+#define TAP 1
+#define DELAY 4
+
 
 int
 dex_usage (int argc, char *argv[])
@@ -38,19 +45,6 @@ dex_usage (int argc, char *argv[])
     }
   return (0);
 }
-
-#ifdef __DOS__
-#define _PSXPB_DJGPP_
-#else
-#define _PSXPB_LINUX_
-#endif
-
-#include "psxpblib.h"
-
-#define BASE_ADDR 0x378
-#define CONPORT 1
-#define TAP 1
-#define DELAY 4
 
 char *
 read_block (int block_num, char *data)

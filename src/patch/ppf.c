@@ -6,6 +6,8 @@
  *
  */
 #include <stdio.h>
+#include <stdlib.h>
+
 int makeppf_main(int argc, char *argv[])
 {
 #define null 0
@@ -13,7 +15,7 @@ int makeppf_main(int argc, char *argv[])
 FILE *originalbin;
 FILE *patchedbin;
 FILE *ppffile;
-FILE *fileid;
+FILE *fileid = NULL;
 char desc[52];
 char block[1025];
 char fileidbuf[3073];
@@ -190,7 +192,7 @@ char buffer[5];
 char method, in;
 char desc[50];
 char diz[3072];
-int  dizlen, binlen, dizyn, dizlensave;
+int  dizlen, binlen, dizyn, dizlensave = 0;
 char ppfmem[512];
 int  count, seekpos, pos, anz;
 char ppfblock[1025];

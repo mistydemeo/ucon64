@@ -40,11 +40,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 // #include <ncurses/curses.h>
 
  #include <signal.h>
- #include <asm/io.h>
+// #include <asm/io.h>
 
-
- #define outp(p,v)  out1byte(p,v); iodelay()
- #define inp(p)   in1byte(p)
+ #define outp(p,v)  outportb(p,v); iodelay()
+ #define inp(p)   inportb(p)
  #define getchr cnt_getch
  //ioctl_getch
 #endif

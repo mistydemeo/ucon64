@@ -34,10 +34,9 @@ void init_xchanger(void);
 int gbx_read(	char *filename
 			,unsigned int parport
 );
-                        
+
 int gbx_write(	char *filename
 			,long start
 			,long len
 			,unsigned int parport
 );
-                                                                                                

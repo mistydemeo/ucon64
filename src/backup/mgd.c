@@ -368,7 +368,7 @@ mgd_make_name (const char *filename, const char *prefix, int size, char *name)
   n = strlen (name);
   if (n > 7)
     n = 7;
-  name[n] = '0';                                // last character must be a number
+  name[n] = 'X';
   name[n + 1] = 0;
   for (n = 3; n < 7; n++)                       // we can skip the prefix
     if (name[n] == ' ')

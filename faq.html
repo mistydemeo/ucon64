@@ -201,31 +201,36 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    available at
    <a href="http://www.infernal.currantbun.com" target="_blank">http://www.infernal.currantbun.com</a>.<br>
    Windows&nbsp;NT/2000/XP users might also need a driver (only necessary for
-   copier I/O). You could use GiveIO, UserPort or inpout32.dll. At
+   copier I/O). You could use GiveIO, UserPort, io.dll or inpout32.dll. At
    <a href="http://www.devrs.com/gba/files/mbv2faqs.php" target="_blank">http://www.devrs.com/gba/files/mbv2faqs.php</a>
-   you can find links to GiveIO and UserPort. You can find inpout32.dll in a
-   file named parport.zip at
+   you can find links to GiveIO and UserPort. You can find io.dll in a
+   file named io.zip at
+   <a href="http://www.geekhideout.com/iodll.shtml" target="_blank">http://www.geekhideout.com/iodll.shtml</a>
+   and you can find inpout32.dll in a file named parport.zip at
    <a href="http://www.logix4u.cjb.net" target="_blank">http://www.logix4u.cjb.net</a>
    or
    <a href="http://www.geocities.com/logix4u/" target="_blank">http://www.geocities.com/logix4u/</a>.
-   GiveIO is plainly horrible to configure. We recommend UserPort and
+   GiveIO is plainly horrible to configure. We recommend UserPort, io.dll and
    inpout32.dll. They are also included with the binary release. With GiveIO
    sending ROMs seems to go faster than with UserPort, but UserPort is much
-   easier to use. To install inpout32.dll, put it in uCON64's configuration
-   directory. Use the option -version to see which directory that is. You can
-   change the directory by editing the configuration file or by setting an
-   environment variable with the name configdir. Note however, that although
-   inpout32.dll is even easier to use than UserPort the transfer speed is much
-   lower (about half as fast compared to the transfer speed in combination with
-   UserPort). uCON64 will display a message if it finds inpout32.dll before
-   communicating with a copier. It displays this message before it displays
-   file information, so you might want to use the command line switch -q. Only
-   the Windows versions of uCON64 are able to use inpout32.dll.<br>
+   easier to use. To install io.dll or inpout32.dll, put it in uCON64's
+   configuration directory. Use the option -version to see which directory that
+   is. You can change the directory by editing the configuration file or by
+   setting an environment variable with the name configdir. Note however, that
+   although inpout32.dll is even easier to use than UserPort the transfer speed
+   is much lower (about half as fast compared to the transfer speed in
+   combination with UserPort). io.dll doesn't have this limitation, but its
+   source code isn't freely available. uCON64 will display a message if it
+   finds io.dll or inpout32.dll before communicating with a copier. It displays
+   this message before it displays file information, so you might want to use
+   the command line switch -q. Only the Windows versions of uCON64 are able to
+   use io.dll or inpout32.dll. If both inpout32.dll and io.dll are present in
+   the configuration directory, uCON64 will first try to load io.dll. If that
+   fails it will try to load inpout32.dll.<br>
    It <i>is</i> possible to use the DOS version of uCON64 as a transfer tool
-   under Windows&nbsp;XP without GiveIO, UserPort or inpout32.dll. We have had
-   reports from people who were able to send and receive ROMs under
-   Windows&nbsp;XP as a regular user (no Administrator rights and not "Power
-   Users").<br>
+   under Windows&nbsp;XP without GiveIO or UserPort. We have had reports from
+   people who were able to send and receive ROMs under Windows&nbsp;XP as a
+   regular user (no Administrator rights and not "Power Users").<br>
 <br>
 <p>
 <a name="4"><b>Q4</b>: Sometimes my terminal seems to be locked after "ucon64 -xswc &#60;file&#62; | more"</a><br>
@@ -560,7 +565,8 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    an appropriate I/O port driver. UserPort is <i>inappropriate</i> for this,
    because it enables access to I/O ports up to 0x3ff. However, in order to
    enable EPP mode the FAL code tries to access an I/O port with an address
-   higher than 0x3ff. If you want to be able to use EPP mode try inpout32.dll.<br>
+   higher than 0x3ff. If you want to be able to use EPP mode try io.dll or
+   inpout32.dll.<br>
 <br>
 <p>
 <a name="29"><b>Q29</b>: I want to convert a NES ROM in iNES format to UNIF. How do I know

@@ -2,7 +2,7 @@
 fig.h - Super PRO Fighter support for uCON64
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2002 dbjh
+           2001 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -85,4 +85,12 @@ typedef struct st_fig_header
 
 #define FIG_HEADER_START 0
 #define FIG_HEADER_LEN (sizeof (st_fig_header_t))
+
+#ifdef PARALLEL
+extern int fig_read_rom (const char *filename, unsigned int parport);
+extern int fig_write_rom (const char *filename, unsigned int parport);
+extern int fig_read_sram (const char *filename, unsigned int parport);
+extern int fig_write_sram (const char *filename, unsigned int parport);
+#endif // PARALLEL
+
 #endif // FIG_H

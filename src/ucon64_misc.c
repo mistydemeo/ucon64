@@ -531,7 +531,6 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_XMDS, UCON64_GEN, mdpro_usage,       WF_STOP|WF_NO_ROM},
   {UCON64_XMSG, UCON64_PCE, msg_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM},
   {UCON64_XPCE, UCON64_PCE, pcepro_usage,      WF_DEFAULT|WF_STOP|WF_NO_ROM},
-  {UCON64_XPCES, UCON64_PCE, pcepro_usage,     WF_STOP|WF_NO_ROM},
   {UCON64_XSMC, UCON64_NES, smc_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT}, // send only
   {UCON64_XSMCR, UCON64_NES, smc_usage,        WF_STOP|WF_NO_ROM},
 #if 1

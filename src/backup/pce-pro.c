@@ -42,9 +42,6 @@ const st_usage_t pcepro_usage[] =
     {"xpce", 0, NULL, "send/receive ROM to/from PCE-PRO flash card programmer\n"
                       OPTION_LONG_S "port=PORT\n"
                       "receives automatically (32 Mbits) when ROM does not exist", NULL},
-    {"xpces", 0, NULL, "send/receive SRAM to/from PCE-PRO flash card programmer\n"
-                       OPTION_LONG_S "port=PORT\n"
-                       "receives automatically when SRAM does not exist", NULL},
 #endif // USE_PARALLEL
     {NULL, 0, NULL, NULL, NULL}
   };
@@ -213,94 +210,6 @@ pce_write_rom (const char *filename, unsigned int parport)
     }
   else
     fprintf (stderr, "ERROR: PCE-PRO flash card (programmer) not detected\n");
-
-  free (buffer);
-  fclose (file);
-  ttt_deinit_io ();
-
-  return 0;
-}
-
-
-int
-pce_read_sram (const char *filename, unsigned int parport)
-{
-  FILE *file;
-  unsigned char buffer[0x100];
-  int blocksleft, address = 0, size = 256 * 1024;
-  time_t starttime;
-  void (*read_block) (int, unsigned char *) = ttt_read_ram_b; // ttt_read_ram_w
-  // This function does not seem to work if ttt_read_ram_w() is used
-
-  if ((file = fopen (filename, "wb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
-      exit (1);
-    }
-  ttt_init_io (parport);
-
-  printf ("Receive: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
-
-  if (read_block == ttt_read_ram_w)
-    {
-      ttt_ram_enable ();
-      ttt_set_ai_data (6, 0x98);        // rst=1, wei=0(dis.), rdi=0(dis.), inc mode, rom_CS
-    }
-//  else
-//    ttt_set_ai_data (6, 0x94);          // rst=1, wei=0(dis.), rdi=0(dis.), inc mode, rom_CS
-
-  blocksleft = size >> 8;
-  starttime = time (NULL);
-  while (blocksleft-- > 0)
-    {
-      read_block (address, buffer);             // 0x100 bytes read
-      fwrite (buffer, 1, 0x100, file);
-      address += 0x100;
-      if ((address & 0x3fff) == 0)
-        ucon64_gauge (starttime, address, size);
-    }
-  if (read_block == ttt_read_ram_w)
-    ttt_ram_disable ();
-
-  fclose (file);
-  ttt_deinit_io ();
-
-  return 0;
-}
-
-
-int
-pce_write_sram (const char *filename, unsigned int parport)
-{
-  FILE *file;
-  unsigned char *buffer;
-  int size, bytesread, bytessend = 0, address = 0;
-  time_t starttime;
-  void (*write_block) (int *, unsigned char *) = write_ram_by_byte; // write_ram_by_page
-  (void) write_ram_by_page;
-
-  if ((file = fopen (filename, "rb")) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
-      exit (1);
-    }
-  if ((buffer = (unsigned char *) malloc (0x4000)) == NULL)
-    {
-      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], 0x4000);
-      exit (1);
-    }
-  ttt_init_io (parport);
-
-  size = q_fsize (filename);
-  printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
-
-  starttime = time (NULL);
-  while ((bytesread = fread (buffer, 1, 0x4000, file)))
-    {
-      write_block (&address, buffer);
-      bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, size);
-    }
 
   free (buffer);
   fclose (file);

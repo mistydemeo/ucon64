@@ -518,7 +518,7 @@ doctor64jr_write (const char *filename, unsigned int parport)
     }
 
   size = q_fsize (filename);
-  printf ("Send: %d Bytes (%.4f Mb)\n", size, (float) size / MBIT);
+  printf ("Send: %d Bytes (%.4f Mb)\n\n", size, (float) size / MBIT);
 
 #if 0
   if (dram_test)

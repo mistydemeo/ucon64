@@ -350,7 +350,6 @@ const struct option options[] = {
     {"xmds", 0, 0, UCON64_XMDS},
     {"xmsg", 0, 0, UCON64_XMSG},
     {"xpce", 0, 0, UCON64_XPCE},
-    {"xpces", 0, 0, UCON64_XPCES},
     {"xsmc", 0, 0, UCON64_XSMC},
     {"xsmcr", 0, 0, UCON64_XSMCR},
     {"xsmd", 0, 0, UCON64_XSMD},

@@ -7192,7 +7192,7 @@ nes_init (st_rominfo_t *rominfo)
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
 
       /*
-        The current DAT file (2.2A as of Febrary 18 2003) contains only CRC32
+        The current DAT file (2.2A as of February 18 2003) contains only CRC32
         checksums where the emulator header was also used in the calculation!
         However, instead of propagating this error by adding the line:
           ucon64.crc32 = q_fcrc32 (ucon64.rom, 0);

@@ -1479,10 +1479,10 @@ ucon64_parport_init (unsigned int port)
         }
     }
 #elif   defined AMIGA
-  ucon64_io_fd = open ("PAR:", O_RDWR | O_NONBLOCK);
+  ucon64_io_fd = open (ucon64.parport_dev, O_RDWR | O_NONBLOCK);
   if (ucon64_io_fd == -1)
     {
-      fprintf (stderr, "ERROR: Could not open parallel port\n");
+      fprintf (stderr, "ERROR: Could not open parallel port (%s)\n", ucon64.parport_dev);
       exit (1);
     }
 #elif   defined __FreeBSD__
@@ -1749,6 +1749,9 @@ ucon64_configfile (void)
                    "#\n"
                    "# parallel port\n"
                    "#\n"
+#ifdef  AMIGA
+                   "#parport_dev=PAR:\n"
+#endif
                    "#parport=378\n"
                    "#\n"
 #if     defined __MSDOS__

@@ -525,6 +525,10 @@ main (int argc, char **argv)
 #endif
 
   // parallel port?
+#ifdef  AMIGA
+  strcpy (ucon64.parport_dev,
+          get_property (ucon64.configfile, "parport_dev", buf, "PAR:"));
+#endif
   // Use "0" to force probing if the config file doesn't contain a parport line
   sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
 

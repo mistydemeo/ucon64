@@ -777,7 +777,7 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
 }
 
 
-#ifdef  DEBUG
+//#ifdef  DEBUG
 void
 mem_hexdump_code (const void *mem, uint32_t n, int virtual_start)
 // hexdump something into C code (for development)
@@ -793,7 +793,7 @@ mem_hexdump_code (const void *mem, uint32_t n, int virtual_start)
         fprintf (stdout, "// 0x%x (%d)\n", pos + virtual_start + 1, pos + virtual_start + 1);
     }
 }
-#endif
+//#endif
 
 
 #if 0                                           // currently not used

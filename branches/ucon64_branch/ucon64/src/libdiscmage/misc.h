@@ -292,9 +292,6 @@ extern int mkdir2 (const char *name);
 extern int rename2 (const char *oldname, const char *newname);
 extern int truncate2 (const char *filename, int size);
 extern int argz_extract2 (char **argv, char *str, const char *separator_s, int max_args);
-#define AZ_CMD 1
-#define AZ_URL 2
-#define argz_extract3(a,c,m) argz_extract2(a,c," ",m)
 
 
 /*
@@ -311,10 +308,10 @@ TODO:  memwrcmp()   like memwcmp() but looks also for shifted/relative similarit
 extern int memwcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildcard);
 extern int memwrcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildcard);
 extern void mem_hexdump (const void *add, uint32_t n, int virtual_start);
-#ifdef  DEBUG
+//#ifdef  DEBUG
 // only for development
 extern void mem_hexdump_code (const void *add, uint32_t n, int virtual_start);
-#endif
+//#endif
 extern void *mem_swap (void *add, uint32_t size);
 #ifdef  HAVE_BYTESWAP_H
 #include <byteswap.h>

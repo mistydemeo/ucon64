@@ -2887,7 +2887,7 @@ snes_check_bs (void)
         return 2;                               // BS add-on cartridge dump
       else if (date == 0xffff ||
                ((snes_header.bs_month & 0xf) == 0 &&
-               ((unsigned int) ((snes_header.bs_month >> 4) - 1)) < 12))
+                ((unsigned int) ((snes_header.bs_month >> 4) - 1)) < 12))
         return 1;                               // BS dump (via BSX)
     }
   return 0;

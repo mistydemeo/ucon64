@@ -1777,7 +1777,6 @@ fal_usage (int argc, char *argv[])
      "                n can be 1, 2, 3 or 4\n"
      "                $FILE=PORT; receives automatically when SRAM does not exist\n"
 
-    "\n"
             "                You only need to specify PORT if uCON64 doesn't detect the\n"
             "                (right) parallel port. If that is the case give a hardware\n"
             "                address, for example:\n"

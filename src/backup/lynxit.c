@@ -1,0 +1,926 @@
+#include <stdio.h>
+#include <string.h>
+#include <dos.h>
+#include <bios.h>
+
+
+typedef unsigned char  UBYTE;
+typedef signed char    SBYTE;
+typedef unsigned short UWORD;
+typedef signed short   SWORD;
+typedef unsigned long  ULONG;
+typedef signed long    SLONG;
+typedef unsigned short BOOL;
+
+
+typedef struct
+{
+   UBYTE   magic[4];
+   UWORD   page_size_bank0;
+   UWORD   page_size_bank1;
+   UWORD   version;
+   UBYTE   cartname[32];
+   UBYTE   manufname[16];
+   UBYTE   spare[6];
+}LYNX_HEADER;
+
+#define TRUE   1
+#define FALSE  0
+
+#define MAGIC_STRING           "LYNX"
+#define FILE_FORMAT_VERSION    0x0001
+
+
+//
+// Some basic cartidge definitions
+//
+
+#define MAX_PAGE_SIZE  0x1000  // Must be 2x largest page
+
+#define CART_PAGE_64K  0x100  // 256 Bytes per page
+#define CART_PAGE_128K 0x200  // 512 Bytes per page
+#define CART_PAGE_256K 0x400  // 1024 Bytes per page
+#define CART_PAGE_512K 0x800  // 2048 Bytes per page
+
+#define BANK0  0
+#define BANK1  1
+
+
+//
+// DEFINE CENTRONICS PORT MASKS & PORTS
+//
+
+#define    PORT_BASE   0x80    // Keep the power on 8-)
+#define    CTRL_STB    0x01
+#define    DATA_OUT    0x02
+#define    DATA_CLK    0x04
+#define    DATA_STB    0x08
+#define    DATA_OE     0x10
+#define    DATA_LOAD   0x20
+#define    PAGE_STB    0x40
+
+UWORD  printer_port=1;
+
+UWORD  print_data=0;
+UWORD  print_ctrl=0;
+UWORD  print_stat=0;
+
+UBYTE  cartname[32];
+UBYTE  manufname[16];
+
+//
+// CONTROL REGISTER DEFINITIONS
+//
+
+
+#define    CTRL_BANK0B     0x01
+#define    CTRL_BANK1B     0x02
+#define    CTRL_WR_EN      0x04
+#define    CTRL_CTR_CLKB   0x40
+#define    CTRL_CTR_RST    0x80
+
+#define    CTRL_INACTIVE   (CTRL_BANK0B|CTRL_BANK1B|CTRL_CTR_CLKB)
+
+
+// Make cart strobes inactive & counter clock & reset inactive 
+
+UBYTE  control_register=CTRL_INACTIVE;
+
+
+//
+// Global control vars
+//
+
+BOOL   debug=FALSE;
+BOOL   quiet=FALSE;
+BOOL   verify=TRUE;
+
+
+
+
+#define  DEBUG(body)   if(debug) printf body
+#define  MESSAGE(body) if(!quiet) printf body
+
+#define  INPUT(port)       inp(port)
+#define  OUTPUT(port,data) outp(port,data)
+
+
+void usage(void)
+{
+   MESSAGE(("\nUsage: lynxit [-pX] [-d] [-q] <command> <filename> [cartname] [manuf]\n"));
+   MESSAGE(("\n"));
+   MESSAGE(("   Commands = read/write/verify/test\n"));
+   MESSAGE(("        -pX = Use printer port LPTX: (Default LPT1:)\n"));
+   MESSAGE(("        -d  = Debug mode enable\n"));
+   MESSAGE(("        -q  = Quiet mode\n"));
+   MESSAGE(("        -n  = Don't verify read/write operations\n"));
+   MESSAGE(("        -h  = Print this text\n"));
+}
+
+
+
+BOOL ptr_port_init(UWORD port)
+{
+   if(port<1 && port>4) return FALSE;
+
+   print_data=*(UWORD far *)MK_FP(0x0040,6+(2*port));
+
+   if(!print_data) return FALSE;
+
+   print_stat=print_data+1;
+   print_ctrl=print_data+2;
+
+   DEBUG(("\nPrinter port initialised OK: LPT%d\n",port));
+   DEBUG(("Data    I/O 0x%04x\n",print_data));
+   DEBUG(("Status  I/O 0x%04x\n",print_stat));
+   DEBUG(("Control I/O 0x%04x\n\n",print_ctrl));
+
+   lynxit_write_control(control_register);
+
+   return TRUE;
+}
+
+
+void lynxit_shift_out_byte(UBYTE data)
+{
+   UWORD   loop;
+   UBYTE   outbyte,dbgdata;
+
+   dbgdata=data;
+
+   OUTPUT(print_data,PORT_BASE);            // Set inactive
+
+   for(loop=0;loop<8;loop++)
+   {
+       outbyte=PORT_BASE;
+       outbyte|=(data&0x80)?DATA_OUT:0;
+       OUTPUT(print_data,outbyte);         // Output data; clock low
+       data=data<<1;
+       outbyte|=DATA_CLK;
+       OUTPUT(print_data,outbyte);         // clock high
+   }
+
+   OUTPUT(print_data,PORT_BASE);           // Leave outputs low
+
+   DEBUG(("lynxit_shift_out_byte() - Wrote %02x\n",dbgdata));
+}
+
+
+UBYTE lynxit_shift_in_byte(void)
+{
+   UWORD   loop;
+   UBYTE   data=0;
+
+   OUTPUT(print_data,PORT_BASE);           // Set inactive
+
+   for(loop=0;loop<8;loop++)
+   {
+       data|=( ((INPUT(print_stat))&0x80)?0:1)<<(7-loop);
+       DEBUG(("Status port returned %02x\n",INPUT(print_stat)));
+
+       OUTPUT(print_data,PORT_BASE|DATA_CLK);  // clock high
+       OUTPUT(print_data,PORT_BASE);           // clock low
+   }
+
+   DEBUG(("lynxit_shift_in_byte() - Read %02x\n",data));
+   return(data);
+}
+
+
+void lynxit_write_control(UBYTE data)
+{
+   DEBUG(("lynxit_write_control()  - Set to %02x\n",data));
+   lynxit_shift_out_byte(data);
+
+   OUTPUT(print_data,PORT_BASE);           // clock low; strobe low
+   OUTPUT(print_data,PORT_BASE|CTRL_STB);  // clock low; strobe high
+   OUTPUT(print_data,PORT_BASE);           // clock low; strobe low
+
+   control_register=data;
+}
+   
+
+void lynxit_write_page(UBYTE page)
+{
+   DEBUG(("lynxit_write_page()  - Set to %02x\n",page));
+   lynxit_shift_out_byte(page);
+   lynxit_shift_out_byte(0);
+
+   OUTPUT(print_data,PORT_BASE);           // clock low; strobe low
+   OUTPUT(print_data,PORT_BASE|PAGE_STB);  // clock low; strobe high
+   OUTPUT(print_data,PORT_BASE);           // clock low; strobe low
+}
+
+
+void lynxit_counter_reset(void)
+{
+   lynxit_write_control(control_register|CTRL_CTR_RST);
+   lynxit_write_control(control_register&(CTRL_CTR_RST^0xff));
+}
+
+
+void lynxit_counter_increment(void)
+{
+   lynxit_write_control(control_register&(CTRL_CTR_CLKB^0xff));
+   lynxit_write_control(control_register|CTRL_CTR_CLKB);
+}
+
+
+UBYTE cart_read_byte(UWORD cart)
+{
+   UBYTE data;
+
+   // Clear relevant cart strobe to activate read
+
+   if(cart==BANK0)
+   {
+       lynxit_write_control(control_register&(0xff^CTRL_BANK0B));
+   }
+   else
+   {
+       lynxit_write_control(control_register&(0xff^CTRL_BANK1B));
+   }
+
+   // Clock byte into shift register with load
+   //
+   // Note 500ns read cycle for ROM == 5x125ns out cycles
+
+
+   OUTPUT(print_data,PORT_BASE);                       // clock low
+   OUTPUT(print_data,PORT_BASE);                       // clock low
+   OUTPUT(print_data,PORT_BASE);                       // clock low
+   OUTPUT(print_data,PORT_BASE);                       // clock low
+   OUTPUT(print_data,PORT_BASE|DATA_LOAD);             // Parallel load
+   OUTPUT(print_data,PORT_BASE|DATA_LOAD);             // Parallel load
+   OUTPUT(print_data,PORT_BASE);                       // Clear load
+
+   // This must be done before strobe is cleared as data will be
+   // destoryed bye setting control reg
+
+   data=lynxit_shift_in_byte();
+
+   // Clear the cartridge strobe
+
+   if(cart==BANK0)
+   {
+       lynxit_write_control(control_register|CTRL_BANK0B);
+   }
+   else
+   {
+       lynxit_write_control(control_register|CTRL_BANK1B);
+   }
+
+   DEBUG(("cart_read_byte() - Returning %02x\n",data)); 
+
+//   MESSAGE(("%c",data));
+
+   return(data);
+}
+
+
+void cart_write_byte(UWORD cart,UBYTE data)
+{
+   DEBUG(("cart_write_byte() - Set to %02x\n",data));
+
+   // Shift data to correct position
+
+   lynxit_shift_out_byte(data);
+   lynxit_shift_out_byte(0);
+   lynxit_shift_out_byte(0);
+
+   // Strobe byte to be written into the data register
+
+   OUTPUT(print_data,PORT_BASE);           // clock low; strobe low
+   OUTPUT(print_data,PORT_BASE|DATA_STB);  // clock low; strobe high
+   OUTPUT(print_data,PORT_BASE);           // clock low; strobe low
+
+   // Assert write enable (active low)
+
+   lynxit_write_control(control_register&(0xff^CTRL_WR_EN));
+
+   // Assert output enable
+
+   OUTPUT(print_data,PORT_BASE|DATA_OE);
+
+   // Assert cartridge strobe LOW to write then HIGH
+
+   if(cart==BANK0)
+   {
+       lynxit_write_control(control_register&(0xff^CTRL_BANK0B));
+       lynxit_write_control(control_register|CTRL_BANK0B);
+   }
+   else
+   {
+       lynxit_write_control(control_register&(0xff^CTRL_BANK1B));
+       lynxit_write_control(control_register|CTRL_BANK1B);
+   }
+
+   // Clear output enable
+
+   OUTPUT(print_data,PORT_BASE);
+
+   // Clear write enable
+
+   lynxit_write_control(control_register|CTRL_WR_EN);
+
+}
+
+
+void cart_read_page(UWORD cart,UWORD page_number,UWORD page_size,UBYTE *page_ptr)
+{
+   UWORD   loop;
+
+   lynxit_write_page(page_number);
+   lynxit_counter_reset();
+
+   for(loop=0;loop<page_size;loop++)
+   {
+       *page_ptr=cart_read_byte(cart);
+       page_ptr++;
+       lynxit_counter_increment();
+   }
+}
+
+
+void cart_write_page(UWORD cart,UWORD page_number,UWORD page_size,UBYTE *page_ptr)
+{
+}
+
+
+SWORD cart_analyse(cart)
+{
+   UBYTE   image[MAX_PAGE_SIZE];
+   UWORD   page=0;
+   UBYTE   test=0;
+   UWORD   loop=0;
+
+   MESSAGE(("ANALYSE  : BANK%d ",cart));
+
+   for(;;)
+   {
+       // Read a page - start at zero, try a max of 8 pages
+
+       if(page>8)
+       {
+           MESSAGE(("N/A\n"));
+           return FALSE;
+       }
+
+       cart_read_page(cart,page++,CART_PAGE_512K*2,image);
+
+       // Explicit check for no bank
+
+       test=0xff;
+       for(loop=0;loop<CART_PAGE_512K;loop++) test&=image[loop];
+
+       if(test==0xff)
+       {
+           MESSAGE(("N/A\n"));
+           return FALSE;
+       }
+
+       // Check bytes are not all same
+
+       for(loop=1;loop<CART_PAGE_512K;loop++)
+       {
+           if(image[loop]!=image[0]) break;
+       }
+
+       // If we are at end of loop then buffer is all same
+
+       if(loop!=CART_PAGE_512K) break;
+   }
+
+//   {
+//       FILE *fp;
+//       fp=fopen("TEST.IMG","wb");
+//       fwrite(image,sizeof(UBYTE),MAX_PAGE_SIZE,fp);
+//       fclose(fp);
+//   {
+
+   // Check for 64K Cart
+
+   for(loop=0;loop<CART_PAGE_64K;loop++)
+   {
+       if(image[loop]!=image[loop+CART_PAGE_64K]) break;
+   }
+
+   if(loop==CART_PAGE_64K)
+   {
+       MESSAGE(("64K\n"));
+       return CART_PAGE_64K;
+   }
+
+   // Check for 128K Cart
+
+   for(loop=0;loop<CART_PAGE_128K;loop++)
+   {
+       if(image[loop]!=image[loop+CART_PAGE_128K]) break;
+   }
+
+   if(loop==CART_PAGE_128K)
+   {
+       MESSAGE(("128K\n"));
+       return CART_PAGE_128K;
+   }
+ 
+   // Check for 256K Cart
+
+   for(loop=0;loop<CART_PAGE_256K;loop++)
+   {
+       if(image[loop]!=image[loop+CART_PAGE_256K]) break;
+   }
+
+   if(loop==CART_PAGE_256K)
+   {
+       MESSAGE(("256K\n"));
+       return CART_PAGE_256K;
+   }
+
+   // Check for 512K Cart
+
+   for(loop=0;loop<CART_PAGE_512K;loop++)
+   {
+       if(image[loop]!=image[loop+CART_PAGE_512K]) break;
+   }
+
+   if(loop==CART_PAGE_512K)
+   {
+       MESSAGE(("512K\n"));
+       return CART_PAGE_512K;
+   }
+
+   // Must be no cart situation -  floating data !!!)
+
+   MESSAGE(("Bad cartridge\n"));
+
+   return FALSE;
+}
+
+
+#define  MAX_ERRORS    16
+
+BOOL cart_verify(UBYTE *filename)
+{
+   UBYTE       image1[MAX_PAGE_SIZE];
+   UBYTE       image2[MAX_PAGE_SIZE];
+   UWORD       offset=0;
+   UWORD       loop=0;
+   FILE        *fp;
+   LYNX_HEADER header;
+   UWORD       result0=MAX_ERRORS;
+   UWORD       result1=MAX_ERRORS;
+
+
+   DEBUG(("cart_verify() called with <%s>\n\n",filename));
+
+   if((fp=fopen(filename,"rb"))==NULL)
+   {
+       MESSAGE(("ERROR    : Could not open %s\n",filename));
+       return FALSE;
+   }
+
+   if(fread(&header,sizeof(LYNX_HEADER),1,fp)!=1)
+   {
+       MESSAGE(("ERROR    : Disk read operation failed on %s\n",filename));
+       fclose(fp);
+       return FALSE;
+   }
+
+   if(strcmp(header.magic,"LYNX")!=0)
+   {
+       MESSAGE(("ERROR    : %s is not a lynx image\n"));
+       fclose(fp);
+       return FALSE;
+   }
+
+   if(header.version!=FILE_FORMAT_VERSION)
+   {
+       MESSAGE(("ERROR    : %s has wrong version information\n"));
+       fclose(fp);
+       return FALSE;
+   }
+
+   if(header.page_size_bank0!=cart_analyse(BANK0))
+   {
+       MESSAGE(("ERROR    : Cartridge BANK0 size mismatch\n"));
+       fclose(fp);
+       return FALSE;
+   }
+
+   if(header.page_size_bank1!=cart_analyse(BANK1))
+   {
+       MESSAGE(("ERROR    : Cartridge BANK1 size mismatch\n"));
+       fclose(fp);
+       return FALSE;
+   }
+
+
+   if(header.page_size_bank0)
+   {
+       for(loop=0;loop<256;loop++)
+       {
+           MESSAGE(("Verifying BANK0: Page <%03d> of <256>",loop+1));
+           cart_read_page(BANK0,loop,header.page_size_bank0,image1);
+           MESSAGE(("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"));
+           if(fread(image2,sizeof(UBYTE),header.page_size_bank0,fp)!=header.page_size_bank0)
+           {
+               MESSAGE(("\nERROR    : Disk read operation failed on %s\n",filename));
+               fclose(fp);
+               return FALSE;
+           }
+
+           for(offset=0;offset<header.page_size_bank0;offset++)
+           {
+               if(image1[offset]!=image2[offset])
+               {
+                   MESSAGE(("VERIFY   : Mismatch in BANK<0>:PAGE<%02x>:OFFSET<%03x>\n",loop,offset));
+                   if(!(--result0))
+                   {
+                       MESSAGE(("VERIFY   : Too many errors in BANK0, aborting\n"));
+                       loop=256;
+                       break;
+                   }
+               }
+           }
+       }
+   }
+
+   if(header.page_size_bank1)
+   {
+       for(loop=0;loop<256;loop++)
+       {
+           MESSAGE(("Verifying BANK1: Page <%03d> of <256>",loop+1));
+           cart_read_page(BANK1,loop,header.page_size_bank1,image1);
+           MESSAGE(("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"));
+           if(fread(image2,sizeof(UBYTE),header.page_size_bank1,fp)!=header.page_size_bank1)
+           {
+               MESSAGE(("\nERROR    : Disk read operation failed on %s\n",filename));
+               fclose(fp);
+               return FALSE;
+           }
+
+           for(offset=0;offset<header.page_size_bank0;offset++)
+           {
+               if(image1[offset]!=image2[offset])
+               {
+                   MESSAGE(("VERIFY   : Mismatch in BANK<1>:PAGE<%02x>:OFFSET<%03x>\n",loop,offset));
+                   if(!(--result1))
+                   {
+                       MESSAGE(("VERIFY   : Too many errors in BANK1, aborting\n"));
+                       break;
+                   }
+               }
+           }
+       }
+   }
+
+   fclose(fp);
+
+   if(result0!=MAX_ERRORS || result1!=MAX_ERRORS)
+   {
+       MESSAGE(("VERIFY   : FAILED                   \n"));
+       return FALSE;
+   }
+   else
+   {
+       MESSAGE(("VERIFY   : OK                       \n"));
+       return TRUE;
+   }
+}
+
+
+BOOL cart_read(UBYTE *filename)
+{
+   UBYTE       image[MAX_PAGE_SIZE];
+   UWORD       page=0;
+   UWORD       loop=0;
+   FILE        *fp;
+   LYNX_HEADER header;
+
+   DEBUG(("read_cart() called with <%s>\n\n",filename));
+
+   memset(&header,0,sizeof(LYNX_HEADER));
+   strcpy(header.magic,MAGIC_STRING);
+   strcpy(header.cartname,cartname);
+   strcpy(header.manufname,manufname);
+   header.page_size_bank0=cart_analyse(BANK0);
+   header.page_size_bank1=cart_analyse(BANK1);
+   header.version=FILE_FORMAT_VERSION;
+
+   if((fp=fopen(filename,"wb"))==NULL) return FALSE;
+
+   if(fwrite(&header,sizeof(LYNX_HEADER),1,fp)!=1)
+   {
+       MESSAGE(("ERROR    : Disk write operation failed on %s\n",filename));
+       fclose(fp);
+       return FALSE;
+   }
+
+   if(header.page_size_bank0)
+   {
+       for(loop=0;loop<256;loop++)
+       {
+           MESSAGE(("Reading BANK0: Page <%03d> of <256>",loop+1));
+           cart_read_page(BANK0,loop,header.page_size_bank0,image);
+           MESSAGE(("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"));
+           if(fwrite(image,sizeof(UBYTE),header.page_size_bank0,fp)!=header.page_size_bank0)
+           {
+               MESSAGE(("\nERROR    : Disk write operation failed on %s\n",filename));
+               fclose(fp);
+               return FALSE;
+           }
+       }
+   }
+
+   if(header.page_size_bank1)
+   {
+       for(loop=0;loop<256;loop++)
+       {
+           MESSAGE(("Reading BANK1: Page <%03d> of <256>",loop+1));
+           cart_read_page(BANK1,loop,header.page_size_bank1,image);
+           MESSAGE(("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"));
+           if(fwrite(image,sizeof(UBYTE),header.page_size_bank1,fp)!=header.page_size_bank1)
+           {
+               MESSAGE(("\nERROR    : Disk write operation failed on %s\n",filename));
+               fclose(fp);
+               return FALSE;
+           }
+       }
+   }
+
+   MESSAGE(("READ     : OK                         \n"));
+
+   fclose(fp);
+
+   if(verify) return(cart_verify(filename)); else return TRUE;
+}
+
+
+BOOL cart_write(UBYTE *filename)
+{
+   DEBUG(("write_cart() called with <%s>\n\n",filename));
+   return TRUE;
+}
+
+
+
+BOOL perform_test(UBYTE *testname)
+{
+   if(strcmp(testname,"LOOPBACK")==0)
+   {
+       UWORD   loop;
+
+       for(loop=0;loop<256;loop++)
+       {
+           lynxit_shift_out_byte((UBYTE)loop);
+           lynxit_shift_out_byte(0);
+           lynxit_shift_out_byte(0);
+           lynxit_shift_out_byte(0);
+       
+           if(lynxit_shift_in_byte()!=(UBYTE)loop)
+           {
+               MESSAGE(("LOOPBACK : FAILED\n"));
+               return FALSE;
+           }
+       }
+       MESSAGE(("LOOPBACK : OK\n"));
+       return TRUE;
+   }
+   else if(strncmp(testname,"SIZE",4)==0)
+   {
+       if(perform_test("LOOPBACK")==FALSE) return FALSE;
+       cart_analyse(BANK0);
+       cart_analyse(BANK1);
+       return TRUE;
+   }
+   else if(strncmp(testname,"CART",4)==0)
+   {
+       UWORD   page,offset;
+       UBYTE   image1[CART_PAGE_128K];
+       UBYTE   image2[CART_PAGE_128K];
+       BOOL    result=TRUE;
+
+       if(perform_test("LOOPBACK")==FALSE) return FALSE;
+       cart_analyse(BANK0);
+
+       for(page=0;page<256;page++)
+       {
+           MESSAGE(("Testing BANK0: Page <%03d> of <256>",page+1));
+
+           cart_read_page(BANK0,page,CART_PAGE_128K,image1);
+           cart_read_page(BANK0,page,CART_PAGE_128K,image2);
+
+           MESSAGE(("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"));
+
+           for(offset=0;offset<CART_PAGE_128K;offset++)
+           {
+               if(image1[offset]!=image2[offset])
+               {
+                   MESSAGE(("CARTRIDGE: Bad read on PAGE %02x               \n",page));
+                   result=FALSE;
+                   break;
+               }
+           }
+       }
+       if(!result)
+       {
+           MESSAGE(("CARTRIDGE: FAILED                         \n"));
+           return FALSE;
+       }
+       else
+       {
+           MESSAGE(("CARTRIDGE: OK                             \n"));
+           return TRUE;
+       }
+   }
+   else if(strcmp(testname,"INPORT")==0)
+   {
+       do
+       {
+           MESSAGE(("INPORT   : Read %02x\n",INPUT(print_stat)));
+       }while(!kbhit());
+       return TRUE;
+   }
+   else if(strcmp(testname,"PAGE")==0)
+   {
+       do
+       {
+           lynxit_write_page(0xaa);
+           MESSAGE(("PAGE     : Wrote 0xAA to page\n"));
+           getch();
+           lynxit_write_page(0x55);
+           MESSAGE(("PAGE     : Wrote 0x55 to page\n"));
+       }
+       while(getch()!='q');
+       return TRUE;
+   }
+   else if(strcmp(testname,"COUNTER")==0)
+   {
+       BOOL stepmode=TRUE;
+
+       MESSAGE(("\nPress <space> key to step counter U5\n\n"));
+       MESSAGE(("  'q' - Quit to DOS\n"));
+       MESSAGE(("  's' - Step mode (default)\n"));
+       MESSAGE(("  'r' - Run mode\n"));
+       MESSAGE(("  'c' - Clear counter\n\n"));
+
+       lynxit_counter_reset();
+       for(;;)
+       {
+           lynxit_counter_increment();
+
+           MESSAGE(("COUNTER  : increment\n"));
+
+           if(kbhit() || stepmode)
+           {
+               switch(getch())
+               {
+                   case 'q':
+                       return TRUE;
+                   case 's':
+                       stepmode=TRUE;
+                       break;
+                   case 'r':
+                       stepmode=FALSE;
+                       break;
+                   case 'c':
+                       lynxit_counter_reset();
+                       MESSAGE(("COUNTER  : reset\n"));
+                       break;
+                   default:
+                       break;
+               }
+           }
+       }
+       return TRUE;
+   }
+   else
+   {
+       return FALSE;
+   }
+}
+
+
+
+//
+//
+// MAIN CODE
+//
+//
+
+void main(SWORD argc,UBYTE **argv)
+{
+   SWORD loop;
+
+   // Handle argument list
+
+   for(loop=0;loop<argc;loop++) strupr(argv[loop]);
+
+   for(loop=1;loop<argc;loop++)
+   {
+       if(argv[loop][0]!='-')
+       {
+           break;
+       }
+
+       if(strlen(argv[loop])>3)
+       {
+           usage();
+           printf("\nInvalid argument %d <%s>\n",loop,argv[loop]);
+           exit(FALSE);
+       }
+
+       switch(argv[loop][1])
+       {
+           case'P':
+               printer_port=(UWORD)argv[loop][2]-'0';
+               break;
+           case'D':
+               debug=TRUE;
+               break;
+           case'Q':
+               quiet=FALSE;
+               break;
+           case'N':
+               verify=FALSE;
+               break;
+           case'H':
+               usage();
+               exit(FALSE);
+           default:
+               usage();
+               printf("\nUnrecognised argument %d <%s>\n",loop,argv[loop]);
+               exit(FALSE);
+       }
+   }
+
+   // Check there are 2 spare arguments
+
+   if(loop+1>=argc)
+   {
+       usage();
+       MESSAGE(("\nERROR    : Missing command/filename\n"));
+       exit(FALSE);
+   }
+
+   // Initialise the printer port
+
+   if(!ptr_port_init(printer_port))
+   {
+       MESSAGE(("ERROR    : Couldn't initialise printer port LPT%d\n",printer_port));
+       exit(FALSE);
+   }
+
+   // Perform loopback tests to prove operation
+
+   if(!debug && strcmp(argv[loop],"TEST")!=0 && !perform_test("LOOPBACK"))
+   {
+       MESSAGE(("ERROR    : LYNXIT doesn't appear to be working ????\n"));
+       MESSAGE(("ERROR    : (Check its plugged in and switched on)\n"));
+       exit(FALSE);
+   }
+
+   if(strcmp(argv[loop],"READ")==0)
+   {
+       if(loop+3>=argc)
+       {
+           MESSAGE(("ERROR    : Missing Cartname/Manufacturer arguments\n"));
+           exit(FALSE);
+       }
+       strcpy(cartname,argv[argc-2]);
+       strcpy(manufname,argv[argc-1]);
+       if(strlen(cartname)>32 || strlen(manufname)>16)
+       {
+           MESSAGE(("ERROR    : Cartname/Manufacturer arguments too long (32/16)\n"));
+           exit(FALSE);
+       }
+
+       if(cart_read(argv[++loop])==FALSE)
+       {
+           MESSAGE(("ERROR    : Cartridge read failed\n"));
+           exit(FALSE);
+       }
+   }
+   else if(strcmp(argv[loop],"WRITE")==0)
+   {
+       cart_write(argv[++loop]);
+   }
+   else if(strcmp(argv[loop],"VERIFY")==0)
+   {
+       cart_verify(argv[++loop]);
+   }
+   else if(strcmp(argv[loop],"TEST")==0)
+   {
+       perform_test(argv[++loop]);
+   }
+   else
+   {
+       usage();
+       printf("\nInvalid command argument - Use READ/WRITE/VERIFY/TEST\n");
+       exit(FALSE);
+   }
+
+   exit(TRUE);
+}
+

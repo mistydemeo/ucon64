@@ -52,8 +52,6 @@ const st_usage_t pcepro_usage[] =
 static void eep_reset (void);
 static void write_rom_by_byte (int *addr, unsigned char *buf);
 static void write_rom_by_page (int *addr, unsigned char *buf);
-static void write_ram_by_byte (int *addr, unsigned char *buf);
-static void write_ram_by_page (int *addr, unsigned char *buf);
 
 
 void
@@ -88,32 +86,6 @@ write_rom_by_page (int *addr, unsigned char *buf)
     {
       ttt_write_page_rom (*addr, buf);
       (*addr) += 0x20;
-    }
-}
-
-
-void
-write_ram_by_byte (int *addr, unsigned char *buf)
-{
-  int x;
-
-  for (x = 0; x < 0x4000; x++)
-    {
-      ttt_write_byte_ram (*addr, buf[*addr & 0x3fff]);
-      (*addr)++;
-    }
-}
-
-
-void
-write_ram_by_page (int *addr, unsigned char *buf)
-{
-  int x;
-
-  for (x = 0; x < 0x40; x++)
-    {
-      ttt_write_page_ram (*addr, buf);
-      (*addr) += 0x100;
     }
 }
 

@@ -37,11 +37,11 @@ const st_usage_t doctor64jr_usage[] = {
   {NULL, NULL, "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
 #ifdef PARALLEL
   {"xdjr", NULL, "send/receive ROM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
-//          "                receives automatically when ROM does not exist\n"
-              "currently only sending is supported"},
+//                "receives automatically when ROM does not exist\n"
+                "currently only sending is supported"},
 #if 0
-  {"xdjrs", NULL, "send/receive SRAM to/from Doctor64 Jr; " OPTION_LONG_S "port=PORT\n"
-    "                  receives automatically when SRAM does not exist"},
+  {"xdjrs", NULL, "send/receive SRAM to/from Doctor V64 Junior; " OPTION_LONG_S "port=PORT\n"
+                "receives automatically when SRAM does not exist"},
 #endif
 #endif                          // PARALLEL
   {NULL, NULL, NULL}

@@ -1553,8 +1553,8 @@ ucon64_options (int c, const char *optarg)
         {
           if (!ucon64.rominfo->interleaved)
             fprintf (stderr,
-                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor64 Jr. only\n"
-                     "       supports interleaved ROMs. Convert to a Doctor64 Jr. compatible format.\n");
+                     "ERROR: This ROM doesn't seem to be interleaved but the Doctor V64 Junior only\n"
+                     "       supports interleaved ROMs. Convert to a Doctor V64 compatible format.\n");
           else if (doctor64jr_write (ucon64.rom, ucon64.parport) != 0)
             fprintf (stderr, ucon64_msg[PARPORT_ERROR]);
         }

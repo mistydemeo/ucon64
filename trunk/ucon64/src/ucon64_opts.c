@@ -628,12 +628,14 @@ ucon64_options (int c, const char *optarg)
       strcpy (buf, ucon64.rom);
       strlwr (basename2 (buf));
       rename (ucon64.rom, buf);
+      strcpy ((char *) ucon64.rom, buf);
       break;
 
     case UCON64_RU:
       strcpy (buf, ucon64.rom);
       strupr (basename2 (buf));
       rename (ucon64.rom, buf);
+      strcpy ((char *) ucon64.rom, buf);
       break;
 
     case UCON64_HEX:

@@ -25,6 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include "config.h"
+char *interceptor_title = "Mega Disk/Super Disk (Interceptor)\n"
+                          "19XX Taiwan Sang Ting Co. Ltd.";
 
 #ifdef BACKUP
 
@@ -35,6 +37,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 
-char *interceptor_title = "Mega Disk/Super Disk (Interceptor)\n"
-                          "19XX Taiwan Sang Ting Co. Ltd.";
 #endif // BACKUP

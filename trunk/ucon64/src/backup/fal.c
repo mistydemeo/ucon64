@@ -25,6 +25,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include "config.h"
+char *fal_title = "Flash Advance Linker\n"
+                  "2001 Visoly http://www.visoly.com";
+
 
 #ifdef BACKUP
 #include "misc.h"
@@ -32,9 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
 #include "fal.h"
-
-char *fal_title = "Flash Advance Linker\n"
-                  "2001 Visoly http://www.visoly.com";
 
 /********************************************************/
 /* Flash Linker Advance                                 */

@@ -21,6 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
+char *dex_title = "DexDrive\n"
+                  "InterAct http://www.dexdrive.de";
+
 
 #ifdef BACKUP
 #include "misc.h"
@@ -34,9 +37,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define CONPORT 1
 #define TAP 1
 #define DELAY 4
-
-char *dex_title = "DexDrive\n"
-                  "InterAct http://www.dexdrive.de";
 
 
 char *

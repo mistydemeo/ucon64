@@ -28,6 +28,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include "config.h"
+char *swc_title = "Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n"
+                  "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw";
+
 
 #ifdef BACKUP
 
@@ -45,9 +48,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define BUFFERSIZE      8192                    // don't change, only 8192 works!
 #define HEADERSIZE      512                     // SWC header is 512 bytes
-
-char *swc_title = "Super WildCard 1.6XC/Super WildCard 2.8CC/Super Wild Card DX(2)/SWC\n"
-                  "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw";
 
 
 static void init_io (unsigned int port);

@@ -21,6 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
+char *doctor64jr_title = "Doctor64 Jr\n"
+                         "19XX Bung Enterprises Ltd http://www.bung.com.hk";
 
 #ifdef BACKUP
 #include "misc.h"
@@ -30,8 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "doctor64jr.h"
 
 
-char *doctor64jr_title = "Doctor64 Jr\n"
-                         "19XX Bung Enterprises Ltd http://www.bung.com.hk";
 
 
 //#define ai 0x37b

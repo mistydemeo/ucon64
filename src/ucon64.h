@@ -26,11 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_H
 #define UCON64_H
 
-/*
-  enables probing in <console>_init(), it's a good idea to leave this defined
-*/
-#define CONSOLE_PROBE
-
 #define UCON64_YES 1
 #define UCON64_NO 0
 
@@ -260,13 +255,13 @@ typedef struct st_ucon64
   int backup;			//flag if backups files (*.bak) should be created
   int frontend;			//flag if uCON64 was started by a frontend
 
+#define UCON64_SHOW_NFO_NEVER -1
+#define UCON64_SHOW_NFO_BEFORE 0
+#define UCON64_SHOW_NFO_AFTER 1
+#define UCON64_SHOW_NFO_BEFORE_AND_AFTER 2
   int show_nfo;                 //show or skip info output for ROM
-                                //values:
-                                //0 show before processing of ROM (default)
-                                //1 skip before and after processing of ROM
-                                //2 show after processing of ROM
-                                //3 show before and after processing of ROM
 
+#define ISSET(x) (x != -1)
   long buheader_len;            //length of backup unit header (==0)?no bu head
   int splitted;                 //rom is splitted
   int snes_hirom;               //super nintendo ROM is a HiROM

@@ -22,6 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define INTERCEPTOR_H
 extern const char *interceptor_title;
 
+typedef struct st_interceptor_header
+{
+  char pad[512];
+} st_interceptor_header_t;
+
+
 #define INTERCEPTOR_HEADER_START 0
-#define INTERCEPTOR_HEADER_LEN 512
+#define INTERCEPTOR_HEADER_LEN (sizeof (st_interceptor_header_t))
 #endif // INTERCEPTOR_H

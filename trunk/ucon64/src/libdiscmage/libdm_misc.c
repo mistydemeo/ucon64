@@ -294,6 +294,21 @@ dm_track_init (dm_track_t *track, FILE *fh)
               }
         }
 
+  // no sync_data found? probably MODE1/2048
+  if (!identified)
+    {
+      x = 0;
+#ifdef  DEBUG
+      if (track_probe[x].sector_size != 2048)
+        fprintf (stderr, "ERROR: dm_track_init()\n");
+#endif
+      fseek (fh, (track_probe[x].sector_size * 16) + track_probe[x].seek_header, SEEK_SET);
+      fread (&iso_header, 1, sizeof (st_iso_header_t), fh);
+
+      if (!memcmp (pvd_magic, &iso_header, 8))
+        identified = 1;
+    }
+
   if (!identified)
     return NULL;
 
@@ -336,6 +351,8 @@ dm_reopen (const char *fname, dm_image_t *image_p)
   int x = 0, identified = 0;
   FILE *fh;
   
+  memset (&track, 0, sizeof (dm_track_t));
+
   memset (&image, 0, sizeof (dm_image_t));
   strcpy (image.fname, fname);
 

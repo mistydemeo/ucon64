@@ -561,71 +561,6 @@ if(console==ucon64_UNKNOWN)
 }
 
 
-if(argcmp(argc,argv,"-e"))
-{
-#ifdef __DOS__
-	strcpy(buf,"ucon64.cfg");
-#else 
-	sprintf(buf,"%s%c.ucon64rc",getenv("HOME"),FILE_SEPARATOR);
-#endif
-
-
-	if( console!=ucon64_UNKNOWN && console!=ucon64_KNOWN )
-	{
-		sprintf(buf3,"emulate_%s",&forceargs[console][1]);
-	}
-	else
-	{
-		printf("ERROR: could not auto detect the right ROM/console type; please use the\n"
-	"\"-<CONSOLE> force recognition\" option next time\n"
-	"");
-		return(-1);
-	}
-
-	
-	if(!strlen(getProperty(buf,buf3,buf2,NULL)))
-	{
-		printf("ERROR: could not find the correct settings (%s) in %s/.ucon64rc\n"
-	"please fix that or use the \"-<CONSOLE> force recognition\" option next time\n"
-	"if the wrong ROM/console type was detected\n",buf3,getenv("HOME"));
-		return(-1);
-	}
-
-	sprintf(buf,"%s %s",buf2,ucon64_file());
-
-	for( x=0 ; x < argc ; x++ )
-	{
-		if(	strdcmp(argv[x],"-e") &&
-			strdcmp(argv[x],ucon64_name()) &&
-			strdcmp(argv[x],ucon64_file())
-		)
-		{
-			sprintf(	buf2
-					,(
-						(!strdcmp(argv[x],ucon64_rom())) ?
-						" \"%s\"" :
-						/*" %s"*/""
-					)
-					,argv[x]
-			);
-			strcat(buf,buf2);
-		}
-	}
-
-
-	printf("%s\n",buf);
-	fflush(stdout);
-	sync();
-	
-	if((x=system(buf))!=0)
-	{
-		printf("ERROR: the Emulator returned a error code (%d) maybe %s is corrupt...\n"
-	"       or use the \"-<CONSOLE> force recognition\" option next time\n",(int)  x,ucon64_rom());
-		return(x);
-	}
-	return(0);
-}
-
 
 
 //here could be global overrides
@@ -711,6 +646,74 @@ default:
 //	ucon64_usage(argc,argv);
 break;
 }
+
+
+if(argcmp(argc,argv,"-e"))
+{
+#ifdef __DOS__
+	strcpy(buf,"ucon64.cfg");
+#else 
+	sprintf(buf,"%s%c.ucon64rc",getenv("HOME"),FILE_SEPARATOR);
+#endif
+
+
+	if( console!=ucon64_UNKNOWN && console!=ucon64_KNOWN )
+	{
+		sprintf(buf3,"emulate_%s",&forceargs[console][1]);
+	}
+	else
+	{
+		printf("ERROR: could not auto detect the right ROM/console type; please use the\n"
+	"\"-<CONSOLE> force recognition\" option next time\n"
+	"");
+		return(-1);
+	}
+
+	
+	if(!strlen(getProperty(buf,buf3,buf2,NULL)))
+	{
+		printf("ERROR: could not find the correct settings (%s) in %s/.ucon64rc\n"
+	"please fix that or use the \"-<CONSOLE> force recognition\" option next time\n"
+	"if the wrong ROM/console type was detected\n",buf3,getenv("HOME"));
+		return(-1);
+	}
+
+	sprintf(buf,"%s %s",buf2,ucon64_file());
+
+	for( x=0 ; x < argc ; x++ )
+	{
+		if(	strdcmp(argv[x],"-e") &&
+			strdcmp(argv[x],ucon64_name()) &&
+			strdcmp(argv[x],ucon64_file())
+		)
+		{
+			sprintf(	buf2
+					,(
+						(!strdcmp(argv[x],ucon64_rom())) ?
+						" \"%s\"" :
+						/*" %s"*/""
+					)
+					,argv[x]
+			);
+			strcat(buf,buf2);
+		}
+	}
+
+
+	printf("%s\n",buf);
+	fflush(stdout);
+	sync();
+	
+	if((x=system(buf))!=0)
+	{
+		printf("ERROR: the Emulator returned a error code (%d) maybe %s is corrupt...\n"
+	"       or use the \"-<CONSOLE> force recognition\" option next time\n",(int)  x,ucon64_rom());
+		return(x);
+	}
+	return(0);
+}
+
+
 
 return(0);
 }

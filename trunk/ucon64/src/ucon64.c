@@ -525,15 +525,15 @@ main (int argc, char **argv)
                argv[0]);
           exit (1);
         }
-        
-      if (x < UCON64_MAX_ARGS) 
+
+      if (x < UCON64_MAX_ARGS)
         {
           arg[x].val = c;
           arg[x++].optarg = (optarg ? optarg : NULL);
         }
       else
         {
-// this shouldn't happen
+          // this shouldn't happen
           exit (1);
         }
     }
@@ -558,7 +558,7 @@ main (int argc, char **argv)
           {
             if (S_ISREG (fstate.st_mode))
               result = ucon64_process_rom (argv[rom_index]);
-            else if (S_ISDIR (fstate.st_mode))    // a dir!?
+            else if (S_ISDIR (fstate.st_mode))  // a dir!?
               {
                 if ((dp = opendir (path)))
                   while ((ep = readdir (dp)))
@@ -629,19 +629,18 @@ ucon64_process_rom (char *fname)
 int
 ucon64_execute_options (void)
 /*
-  execute all options for a single file
-  PLEASE!!! if you experience problems then try your luck with the flags
+  Execute all options for a single file.
+  Please, if you experience problems then try your luck with the flags
   in ucon64_misc.c/ucon64_wf[] before changing things here or in
   ucon64_rom_handling()
 */
 {
-  int c = 0, result = 0, x = 0;
-  int opts = 0;
+  int c = 0, result = 0, x = 0, opts = 0;
 #if     defined __unix__ && !defined __MSDOS__
   static int privileges_droppped = 0;
 #endif
   const st_ucon64_wf_t *wf = NULL;
-  
+
   ucon64.console = UCON64_UNKNOWN;
   ucon64.dat = NULL;
   ucon64.image = NULL;
@@ -669,16 +668,8 @@ ucon64_execute_options (void)
   ucon64.fcrc32 = 0;
 
   // switches
-#if 0
-  optind = 0;
-  while ((c = getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
-    {
-      if ((wf = ucon64_get_wf (c))) // get workflow for that option
-#else
   for (x = 0; arg[x].val; x++)
     {
-#endif
-
       if ((wf = ucon64_get_wf (arg[x].val)))    // get workflow for that option
         {
           if (wf->console != UCON64_UNKNOWN)
@@ -708,18 +699,9 @@ ucon64_execute_options (void)
 #endif
 
 
-#if 0
-  optind = 0;                                   // start with first option
-  while ((c = getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
-    {
-      wf = ucon64_get_wf (c); // get workflow for that option
-#else
   for (x = 0; arg[x].val; x++)
     {
-      wf = ucon64_get_wf (arg[x].val); // get workflow for that option
-#endif
-
-      if (wf)
+      if ((wf = ucon64_get_wf (arg[x].val)))    // get workflow for that option
         if (wf->flags & WF_SWITCH)
           continue;
 
@@ -727,27 +709,27 @@ ucon64_execute_options (void)
         {
           if (ucon64.console == UCON64_UNKNOWN)
             ucon64.console = wf->console;
-
           ucon64.flags = wf->flags;
         }
 
       opts++;
 
       // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
-      result = ucon64_rom_handling (); 
+      result = ucon64_rom_handling ();
 
       if (result == -1) // no_rom but WF_NO_ROM
         return -1;
 
       if (ucon64_options (arg[x].val, arg[x].optarg) == -1) // because we have more than 150 options
         {
+          const struct option *option = ucon64_get_opt (c);
 //          const st_usage_t *p = (ucon64_get_wf (c))->usage;
-          const char *opt = (ucon64_get_opt (c))->name;
+          const char *opt = option ? option->name : NULL;
 
-          fprintf (stderr, "ERROR: %s%s returned a problem\n", 
-                           opt ? (!opt[1] ? OPTION_S : OPTION_LONG_S) : "", 
+          fprintf (stderr, "ERROR: %s%s returned a problem\n",
+                           opt ? (!opt[1] ? OPTION_S : OPTION_LONG_S) : "",
                            opt ? opt : "uCON64");
- 
+
 //          if (p)
 //            ucon64_render_usage (p);
 
@@ -760,7 +742,7 @@ ucon64_execute_options (void)
 #if 0
       // WF_NFO_AFTER?!
       if (!result && (ucon64.flags & WF_NFO_AFTER) && ucon64.quiet < 1)
-        ucon64_rom_handling (); 
+        ucon64_rom_handling ();
 #endif
 
       /*
@@ -778,7 +760,6 @@ ucon64_execute_options (void)
   if (!opts) // no options == just view the roms
     {
       ucon64.flags = WF_DEFAULT;
-
       // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
       if (ucon64_rom_handling () == -1)
         return -1; // no_rom but WF_NO_ROM
@@ -786,7 +767,7 @@ ucon64_execute_options (void)
 
   fflush (stdout);
 
-  return 0;    
+  return 0;
 }
 
 
@@ -833,7 +814,7 @@ ucon64_rom_handling (void)
         fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n", basename2 (ucon64.rom));
         return -1;
       }
-    
+
   if (!(ucon64.flags & WF_INIT))
     return 0;
 

@@ -464,12 +464,12 @@ genesis_j (st_rominfo_t *rominfo)
 
   if (type == BIN)
     {
-/*
+      /*
         file1 file2 file3 file4
         1/2   3/4   5/6   7/8 (1st half/2nd half)
         joined file
         1/3/5/7/2/4/6/8
-*/
+      */
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".078");
       ucon64_file_handler (dest_name, NULL, 0);

@@ -1,4 +1,15 @@
 /*
+  if (optind < argc)
+    {
+      printf (" non - option ARGV - elements : ");
+      while (optind < argc)
+        printf ("%s ", argv[optind++]);
+      printf ("\n");
+    }
+  exit (0);
+}
+*/
+/*
     flc 1999-2002 by NoisyB (noisyb@gmx.net)
     flc lists information about the FILEs (the current directory by default)
     But most important it shows the FILE_ID.DIZ of every file (if present)
@@ -18,7 +29,7 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/ 
+*/
 
 #include <stdlib.h>
 #include <dirent.h>
@@ -33,274 +44,329 @@
 #include "sort.h"
 #include "output.h"
 
-static void flc_exit(void);
+static void flc_exit (void);
+static int flc_configfile (void);
 
+struct flc_ flc;
 
-
-void flc_exit(void)
+void
+flc_exit (void)
 {
-  printf("+++EOF");
-  fflush(stdout);
+  printf ("+++EOF");
+  fflush (stdout);
 }
 
-int main(int argc,char *argv[])
+int
+main (int argc, char *argv[])
 {
-char buf[FILENAME_MAX+1];
-char buf2[FILENAME_MAX];
-struct flc_ flc;
-struct file_ *file0=NULL,*file=NULL,file_ns;
-struct dirent *ep;
-struct stat puffer;
-long x = 0;
+  char buf[FILENAME_MAX + 1];
+  struct file_ *file0 = NULL, *file = NULL, file_ns;
+  struct dirent *ep;
+  struct stat puffer;
+  long x = 0;
 //int single_file=0;
-DIR *dp;
+  DIR *dp;
+  int c;
+  int option_index = 0;
+  struct option long_options[] = {
+    {"frontend", 0, 0, 1},
+    {"t", 0, 0, 't'},
+    {"X", 0, 0, 'X'},
+    {"S", 0, 0, 'S'},
+    {"fr", 0, 0, 2},
+    {"k", 0, 0, 'k'},
+    {"html", 0, 0, 3},
+    {"c", 0, 0, 'c'},
+    {"h", 0, 0, '?'},
+    {"help", 0, 0, '?'},
+    {"?", 0, 0, '?'},
+    {0, 0, 0, 0}
+  };
 
+  flc_configfile ();
+
+
+  while ((c =
+          getopt_long_only (argc, argv, "", long_options,
+                            &option_index)) != -1)
+
+    {
+      switch (c)
+        {
+        case 1:
+          atexit (flc_exit);
+//        return 0;
+          break;
+
+        case 't':
+          flc.sort = 1;
+          flc.bydate = 1;
+          break;
+
+        case 'X':
+          flc.sort = 1;
+          flc.byname = 1;
+          break;
+
+        case 'S':
+          flc.sort = 1;
+          flc.bysize = 1;
+          break;
+
+        case 2:
+          if (flc.sort)
+            flc.fr = 1;
+          break;
+
+        case 'k':
+          flc.kb = 1;
+          break;
+
+        case 3:
+          flc.html = 1;
+          break;
+
+        case 'c':
+          flc.check = 1;
+          break;
+
+        case '?':
+        default:
+          flc_usage (argc, argv);
+          return 0;
+          break;
+        }
+    }
+
+  flc.argc = argc;
+  for (x = 0; x < argc; x++)
+    flc.argv[x] = argv[x];
+
+
+  strcpy (flc.path, getarg (argc, argv, flc_FILE));
+  getProperty (flc.configfile, "file_id_diz", flc.config, "file_id.diz");
+
+  if (flc.html)
+    printf ("<html><head><title></title></head><body><pre><tt>");
+
+  if (!flc.path[0])
+    getcwd (flc.path, (size_t) sizeof (flc.path));
+  if (flc.path[strlen (flc.path) - 1] == FILE_SEPARATOR
+      && strlen (flc.path) != 1)
+    flc.path[strlen (flc.path) - 1] = 0;
 
 /*
-    support for frontends
+    single file handling
 */
-if(argcmp(argc, argv, "-frontend"))atexit(flc_exit);
+  if (stat (flc.path, &puffer) != -1 && S_ISREG (puffer.st_mode) == TRUE)
+    {
+      file = &file_ns;
 
+      file->next = NULL;
+      (file->sub).date = puffer.st_mtime;
+      (file->sub).size = puffer.st_size;
+      (file->sub).checked = 'N';
+      strcpy ((file->sub).name, flc.path);
+      flc.path[0] = 0;
+
+      extract (&file->sub);
+
+      output (&file->sub);
+
+      return 0;
+    }
+
+  if (!(dp = opendir (flc.path)))
+    {
+      flc_usage (argc, argv);
+      return -1;
+    }
+
+  while ((ep = readdir (dp)) != NULL)
+    {
+      sprintf (buf, "%s/%s", flc.path, ep->d_name);
+
+      if (stat (buf, &puffer) == -1)
+        continue;
+      if (S_ISREG (puffer.st_mode) != TRUE)
+        continue;
+
+      if (file0 == NULL)
+        {
+          if (!(file = (struct file_ *) malloc (sizeof (struct file_))))
+            {
+              printf ("%s: Error allocating memory\n",
+                      getarg (argc, argv, 0));
+              (void) closedir (dp);
+              return -1;
+            }
+
+          file0 = file;
+        }
+      else
+        {
+          if (!
+              ((file->next) =
+               (struct file_ *) malloc (sizeof (struct file_))))
+            {
+              printf ("%s: Error allocating memory\n",
+                      getarg (argc, argv, 0));
+              (void) closedir (dp);
+              return -1;
+            }
+          file = file->next;
+        }
+
+      (file->sub).date = puffer.st_mtime;
+      (file->sub).size = puffer.st_size;
+      (file->sub).checked = 'N';
+      strcpy ((file->sub).name, ep->d_name);
+      extract (&file->sub);
+    }
+
+  (void) closedir (dp);
+  file->next = NULL;
+  file = file0;
+
+  if (flc.sort)
+    sort (file);
+
+  for (;;)
+    {
+      output (&file->sub);
+      if (file->next == NULL)
+        break;
+      file = file->next;
+    }
+  free (file0);
+
+  if (flc.html)
+    printf ("</pre></tt></body></html>\n");
+
+  return 0;
+}
+
+int
+flc_usage (int argc, char *argv[])
+{
+  printf ("\n%s\n"
+          "This may be freely redistributed under the terms of the GNU Public License\n\n"
+          "USAGE: %s [OPTION]... [FILE]...\n\n"
+          "  -c            also test every possible archive in DIRECTORY for errors\n"
+          "                return flags: N=not checked (default), P=passed, F=failed\n"
+          "  --html        output as HTML document with links to the files\n"
+          "  -t            sort by modification time\n"
+          "  -X            sort alphabetical\n"
+          "  -S            sort by byte size\n"
+          "  --fr          sort reverse\n"
+          "  -k            show sizes in kilobytes\n"
+          "\n"
+          "Amiga version: noC-FLC Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
+          "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n",
+          flc_TITLE, getarg (argc, argv, flc_NAME));
+
+  return 0;
+}
+
+int
+flc_configfile (void)
+{
+  char buf[FILENAME_MAX + 1];
+  char buf2[FILENAME_MAX];
 /*
    configfile handling
 */
   sprintf (flc.configfile, "%s" FILE_SEPARATOR_S
 #ifdef  __MSDOS__
-  "flc.cfg"
+           "flc.cfg"
 #else
-  /*
-    Use getchd() here too. If this code gets compiled under Windows the compiler has to be
-    Cygwin. So, uCON64 will be a Win32 executable which will run only in an environment
-    where long filenames are available and where files can have more than three characters
-    as "extension". Under Bash HOME will be set, but most Windows people will propably run
-    uCON64 under cmd or command where HOME is not set by default. Under Windows XP/2000
-    (/NT?) USERPROFILE and/or HOMEDRIVE+HOMEPATH will be set which getchd() will "detect".
-  */
-  ".flcrc"
+           /*
+              Use getchd() here too. If this code gets compiled under Windows the compiler has to be
+              Cygwin. So, uCON64 will be a Win32 executable which will run only in an environment
+              where long filenames are available and where files can have more than three characters
+              as "extension". Under Bash HOME will be set, but most Windows people will propably run
+              uCON64 under cmd or command where HOME is not set by default. Under Windows XP/2000
+              (/NT?) USERPROFILE and/or HOMEDRIVE+HOMEPATH will be set which getchd() will "detect".
+            */
+           ".flcrc"
 #endif
-  , getchd (buf2, FILENAME_MAX));
+           , getchd (buf2, FILENAME_MAX));
 
 
-if(access(flc.configfile,F_OK)==-1)printf("ERROR: %s not found: creating...",flc.configfile);
-else if(getProperty(flc.configfile, "version", buf2, NULL) == NULL)
-{
-  strcpy(buf2,buf);
-  newext(buf2,".OLD");
-
-  printf("NOTE: updating config: will be renamed to %s...",buf2);
-
-  rename(flc.configfile,buf2);
-
-  sync();
-}
-
-if(access(flc.configfile,F_OK)==-1)
-{
-  FILE *fh;
-
-  if(!(fh=fopen(flc.configfile,"wb")))
-  {
-    printf("FAILED\n\n");
-
-    return -1;
-  }
-  else
-  {
-    fputs(       
-"# flc config\n"
-"#\n"
-"version=101\n"
-"#\n"
-"# LHA support\n"
-"#\n"
-"lha_test=lha t\n"
-"lha_extract=lha efi \n"
-"#lha_extract=lha e \n"
-"#\n"
-"# LZH support\n"
-"#\n"
-"lzh_test=lha t\n"
-"lzh_extract=lha efi\n"
-"#lzh_extract=lha e\n"
-"#\n"
-"# ZIP support\n"
-"#\n"
-"zip_test=unzip -t\n"
-"zip_extract=unzip -xojC\n"
-"#zip_extract=unzip -xoj\n"
-"#\n"
-"# RAR support\n"
-"#\n"
-"rar_test=unrar t\n"
-"rar_extract=unrar x\n"
-"#\n"
-"# ACE support\n"
-"#\n"
-"ace_test=unace t\n"
-"ace_extract=unace e\n"
-"#\n"
-"# TXT/NFO/FAQ support\n"
-"#\n"
-"txt_extract=txtextract\n"
-"nfo_extract=txtextract\n"
-"faq_extract=txtextract\n"
-"#\n"
-"# FILE_ID.DIZ names/synonyms\n"
-"#\n"
-"file_id_diz=*_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
-    ,fh);
-
-    fclose(fh);
-    printf("OK\n\n");
-  }
-
-  return 0;
-}
-
-if (
-    argcmp(argc, argv, "-h") ||
-    argcmp(argc, argv, "-help") ||
-    argcmp(argc, argv, "-?"))
-  {
-  flc_usage(argc,argv);
-  return 0;
-}
-
-if(
-  argcmp(argc,argv,"-t") ||
-  argcmp(argc,argv,"-X") ||
-  argcmp(argc,argv,"-S") ||
-  argcmp(argc,argv,"-fr")
-)
-{
-  flc.sort=1;
-  flc.bydate = (argcmp(argc,argv,"-t")) ? 1 : 0;
-  flc.byname = (argcmp(argc,argv,"-X")) ? 1 : 0;
-  flc.bysize = (argcmp(argc,argv,"-S")) ? 1 : 0;
-  flc.fr = (argcmp(argc,argv,"-fr")) ? 1 : 0 ;
-}
-
-flc.argc=argc;
-for( x = 0 ; x < argc ; x++ )flc.argv[x]=argv[x];
-
-flc.kb = (argcmp(argc,argv,"-k")) ? 1 : 0;
-flc.html = (argcmp(argc,argv,"-html")) ? 1 : 0 ;
-
-strcpy(flc.path,getarg(argc,argv,flc_FILE));
-getProperty(flc.configfile,"file_id_diz",flc.config,"file_id.diz");
-
-if(flc.html)  printf("<html><head><title></title></head><body><pre><tt>");
-
-if(!flc.path[0])
-  getcwd(flc.path,(size_t)sizeof(flc.path));
-if(flc.path[strlen(flc.path)-1]==FILE_SEPARATOR && strlen(flc.path) != 1)
-  flc.path[strlen(flc.path)-1]=0;
-
-/*
-    single file handling
-*/
-if(stat(flc.path,&puffer)!=-1 &&
-   S_ISREG(puffer.st_mode)==TRUE)
-{
-  file=&file_ns;
-
-  file->next=NULL;
-  (file->sub).date=puffer.st_mtime;
-  (file->sub).size=puffer.st_size;  
-  (file->sub).checked='N';
-  strcpy((file->sub).name,flc.path);
-  flc.path[0]=0;
-
-  extract(&flc,&file->sub);
-
-  output(&flc,&file->sub);
-
-  return 0;
-}
-
-if(!(dp=opendir(flc.path)))
-{
-  flc_usage(argc,argv);
-  return -1;
-}
-
-while((ep=readdir(dp))!=NULL)
-{
-  sprintf(buf,"%s/%s",flc.path,ep->d_name);
-
-  if(stat(buf,&puffer)==-1)continue;
-  if(S_ISREG(puffer.st_mode)!=TRUE)continue;
-
-  if(file0==NULL)
-  {
-    if(!(file=(struct file_ *)malloc(sizeof(struct file_))))
+  if (access (flc.configfile, F_OK) == -1)
+    printf ("ERROR: %s not found: creating...", flc.configfile);
+  else if (getProperty (flc.configfile, "version", buf2, NULL) == NULL)
     {
-      printf("%s: Error allocating memory\n",getarg(argc,argv,0));
-      (void)closedir(dp);
-      return -1;
+      strcpy (buf2, buf);
+      newext (buf2, ".OLD");
+
+      printf ("NOTE: updating config: will be renamed to %s...", buf2);
+
+      rename (flc.configfile, buf2);
+
+      sync ();
     }
 
-    file0=file;
-  }
-  else
-  {
-    if(!((file->next)=(struct file_ *)malloc(sizeof(struct file_))))
+  if (access (flc.configfile, F_OK) == -1)
     {
-      printf("%s: Error allocating memory\n",getarg(argc,argv,0));
-      (void)closedir(dp);
-      return -1;
+      FILE *fh;
+
+      if (!(fh = fopen (flc.configfile, "wb")))
+        {
+          printf ("FAILED\n\n");
+
+          return -1;
+        }
+      else
+        {
+          fputs ("# flc config\n"
+                 "#\n"
+                 "version=101\n"
+                 "#\n"
+                 "# LHA support\n"
+                 "#\n"
+                 "lha_test=lha 2>&1 >/dev/null t\n"
+                 "lha_extract=lha 2>&1 >/dev/null efi \n"
+                 "#lha_extract=lha 2>&1 >/dev/null e \n"
+                 "#\n"
+                 "# LZH support\n"
+                 "#\n"
+                 "lzh_test=lha 2>&1 >/dev/null t\n"
+                 "lzh_extract=lha 2>&1 >/dev/null efi\n"
+                 "#lzh_extract=lha 2>&1 >/dev/null e\n"
+                 "#\n"
+                 "# ZIP support\n"
+                 "#\n"
+                 "zip_test=unzip 2>&1 >/dev/null -t\n"
+                 "zip_extract=unzip 2>&1 >/dev/null -xojC\n"
+                 "#zip_extract=unzip 2>&1 >/dev/null -xoj\n"
+                 "#\n"
+                 "# RAR support\n"
+                 "#\n"
+                 "rar_test=unrar 2>&1 >/dev/null t\n"
+                 "rar_extract=unrar 2>&1 >/dev/null x\n"
+                 "#\n"
+                 "# ACE support\n"
+                 "#\n"
+                 "ace_test=unace 2>&1 >/dev/null t\n"
+                 "ace_extract=unace 2>&1 >/dev/null e\n"
+                 "#\n"
+                 "# TXT/NFO/FAQ support\n"
+                 "#\n"
+                 "txt_extract=txtextract\n"
+                 "nfo_extract=txtextract\n"
+                 "faq_extract=txtextract\n"
+                 "#\n"
+                 "# FILE_ID.DIZ names/synonyms\n"
+                 "#\n"
+                 "file_id_diz=*_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n",
+                 fh);
+
+          fclose (fh);
+          printf ("OK\n\n");
+        }
+
+      return 0;
     }
-    file=file->next;
-  }
-
-  (file->sub).date=puffer.st_mtime;
-  (file->sub).size=puffer.st_size;  
-  (file->sub).checked='N';
-  strcpy((file->sub).name,ep->d_name);
-  extract(&flc,&file->sub);
-}
-
-(void)closedir(dp);
-file->next=NULL;
-file=file0;
-
-if(flc.sort)sort(&flc,file);
-
-for(;;)
-{
-  output(&flc,&file->sub);
-  if(file->next==NULL)break;
-  file=file->next;
-}
-free(file0);
-
-if(flc.html)printf(
-  "</pre></tt></body></html>\n"
-);
-
-return 0;
-}
-
-int flc_usage(int argc, char *argv[])
-{
-printf(
-  "\n%s\n"
-  "This may be freely redistributed under the terms of the GNU Public License\n\n"
-  "USAGE: %s [OPTION]... [FILE]...\n\n"
-  "  -c            also test every possible archive in DIRECTORY for errors\n"
-  "                return flags: N=not checked (default), P=passed, F=failed\n"
-  "  -html         output as HTML document with links to the files\n"
-  "  -t            sort by modification time\n"
-  "  -X            sort alphabetical\n"
-  "  -S            sort by byte size\n"
-  "  -fr           sort reverse\n"
-  "  -k            show sizes in kilobytes\n"
-  "\n"
-  "Amiga version: noC-FLC Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
-  "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n"
-  ,flc_TITLE
-  ,getarg(argc,argv,flc_NAME)
-);
-
-return 0; 
+  return 0;
 }

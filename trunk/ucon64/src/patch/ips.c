@@ -15,10 +15,10 @@ ips_main (int argc, char* argv[])
    int done=0, add2, add1, add0, len2, len1, len0;
    unsigned long offset, length, i;
    
-   printf("IPS Patcher v1.0 for UNIX by madman\n\n");
+//   printf("IPS Patcher v1.0 for UNIX by madman\n\n");
    
    if (argc<3) {
-      printf ("Usage: %s <patchfile> <file_to_patch>\n", argv[0]);
+//      printf ("Usage: %s <patchfile> <file_to_patch>\n", argv[0]);
       exit(0);
    }
    

@@ -41,12 +41,12 @@ int		 n64aps_Quiet=n64aps_FALSE;
 void
 n64aps_syntax (void)
 {
-	printf ("%s", n64aps_MESSAGE);
+/*	printf ("%s", n64aps_MESSAGE);
 	printf ("%s", n64aps_COPYRIGHT);
 	printf ("N64APS <options> <Original File> <APS File>\n");
     printf (" -f                 : Force Patching Over Incorrect Image\n");
 	printf (" -q                 : Quiet Mode\n");
-	fflush (stdout);
+*/	fflush (stdout);
 }
 
 int n64aps_CheckFile (char *Filename,char *mode)
@@ -343,8 +343,8 @@ n64aps_main (int argc, char *argv[])
 
 	if (!n64aps_Quiet)
 	{
-		printf ("%s", n64aps_MESSAGE);
-		printf ("%s", n64aps_COPYRIGHT);
+//		printf ("%s", n64aps_MESSAGE);
+//		printf ("%s", n64aps_COPYRIGHT);
 		fflush (stdout);
 	}
 
@@ -404,12 +404,12 @@ int		n64caps_ChangeFound;
 void
 n64caps_syntax (void)
 {
-	printf ("%s", n64caps_MESSAGE);
+/*	printf ("%s", n64caps_MESSAGE);
 	printf ("%s", n64caps_COPYRIGHT);
 	printf ("N64CAPS <options> <Original File> <Modified File> <Output APS File>\n");
 	printf (" -d %c<Image Title>%c : Description\n", 34, 34);
 	printf (" -q                 : Quiet Mode\n");
-	fflush (stdout);
+*/	fflush (stdout);
 }
 
 int n64caps_CheckFile (char *Filename,char *mode,int Image)
@@ -682,8 +682,8 @@ n64caps_main (int argc, char *argv[])
 
 	if (!n64caps_Quiet)
 	{
-		printf ("%s", n64caps_MESSAGE);
-		printf ("%s", n64caps_COPYRIGHT);
+//		printf ("%s", n64caps_MESSAGE);
+//		printf ("%s", n64caps_COPYRIGHT);
 		printf ("Writing Headers...");
 		fflush (stdout);
 	}

@@ -27,9 +27,9 @@ unsigned char anz; /* Hell YES! UNSIGNED CHAR! */
 int i, z, a, x, y, osize, psize, fsize, seekpos=0, pos;
 
 
-        printf("MakePPF v2.0 Linux/Unix by Icarus/Paradox\n");
+//        printf("MakePPF v2.0 Linux/Unix by Icarus/Paradox\n");
         if(argc==1||argc<4){
-        printf("Usage: MakePPF <Original Bin> <Patched Bin> <ppffile> [file_id.diz]\n");
+//        printf("Usage: MakePPF <Original Bin> <Patched Bin> <ppffile> [file_id.diz]\n");
         exit(0);
         }
 
@@ -199,9 +199,9 @@ char ppfblock[1025];
 char binblock[1025];
 
 	
-        printf("ApplyPPF v2.0 for Linux/Unix (c) Icarus/Paradox\n");
+//        printf("ApplyPPF v2.0 for Linux/Unix (c) Icarus/Paradox\n");
         if(argc==1){
-        printf("Usage: ApplyPPF <Binfile> <PPF-File>\n");
+//        printf("Usage: ApplyPPF <Binfile> <PPF-File>\n");
         exit(0);
         }
 

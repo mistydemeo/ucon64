@@ -13,9 +13,6 @@
 /* enable dynamic loading of add-on libraries (default: yes) */
 #define DLOPEN 1
 
-/* Define to 1 if you have the `basename' function. */
-/* #undef HAVE_BASENAME */
-
 /* Define to 1 if you have the <byteswap.h> header file. */
 /* #undef HAVE_BYTESWAP_H */
 
@@ -23,38 +20,23 @@
    */
 #define HAVE_DIRENT_H 1
 
-/* Define to 1 if you have the `dirname' function. */
-/* #undef HAVE_DIRNAME */
-
 /* Define to 1 if you don't have `vprintf' but do have `_doprnt.' */
 /* #undef HAVE_DOPRNT */
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
 
-/* Define to 1 if you have the `getcwd' function. */
-#define HAVE_GETCWD 1
-
 /* Define to 1 if you have the <inttypes.h> header file. */
 /* #undef HAVE_INTTYPES_H */
 
-/* Define to 1 if you have the <limits.h> header file. */
-#define HAVE_LIMITS_H 1
-
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
-
-/* Define to 1 if you have the `mkdir' function. */
-#define HAVE_MKDIR 1
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 /* #undef HAVE_NDIR_H */
 
 /* Define to 1 if you have the `realpath' function. */
 /* #undef HAVE_REALPATH */
-
-/* Define to 1 if you have the `rmdir' function. */
-#define HAVE_RMDIR 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 /* #undef HAVE_STDINT_H */
@@ -65,9 +47,6 @@
 /* Define to 1 if you have the `strcasestr' function. */
 /* #undef HAVE_STRCASESTR */
 
-/* Define to 1 if you have the `strcspn' function. */
-#define HAVE_STRCSPN 1
-
 /* Define to 1 if you have the `strftime' function. */
 #define HAVE_STRFTIME 1
 
@@ -76,9 +55,6 @@
 
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
-
-/* Define to 1 if you have the `strtol' function. */
-#define HAVE_STRTOL 1
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */

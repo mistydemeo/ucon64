@@ -568,9 +568,8 @@ swc_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend, totalblocks, blocksdone = 0, emu_mode_select;
+  int bytesread, bytessend, totalblocks, blocksdone = 0, emu_mode_select, fsize;
   unsigned short address;
-  struct stat fstate;
   time_t starttime;
 
   init_io (parport);
@@ -586,8 +585,8 @@ swc_write_rom (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  stat (filename, &fstate);
-  printf ("Send: %d Bytes (%.4f Mb)\n", (int) fstate.st_size, (float) fstate.st_size / MBIT);
+  fsize = quickftell (filename);
+  printf ("Send: %d Bytes (%.4f Mb)\n", fsize, (float) fsize / MBIT);
 
   send_command0 (0xc008, 0);
   fread (buffer, 1, HEADERSIZE, file);
@@ -619,7 +618,7 @@ swc_write_rom (const char *filename, unsigned int parport)
       blocksdone++;
 
       bytessend += bytesread;
-      ucon64_gauge (starttime, bytessend, fstate.st_size);
+      ucon64_gauge (starttime, bytessend, fsize);
       checkabort (2);
     }
 
@@ -627,7 +626,7 @@ swc_write_rom (const char *filename, unsigned int parport)
     send_command0 (0xc010, 2);
 
   send_command (5, 0, 0);
-  totalblocks = (fstate.st_size - HEADERSIZE + BUFFERSIZE - 1) / BUFFERSIZE; // round up
+  totalblocks = (fsize - HEADERSIZE + BUFFERSIZE - 1) / BUFFERSIZE; // round up
   send_command (6, 5 | (totalblocks << 8), totalblocks >> 8); // bytes: 6, 5, #8K L, #8K H, 0
   send_command (6, 1 | (emu_mode_select << 8), 0);
 
@@ -709,7 +708,6 @@ swc_write_sram (const char *filename, unsigned int parport)
   unsigned char *buffer;
   int bytesread, bytessend = 0, size;
   unsigned short address;
-  struct stat fstate;
   time_t starttime;
 
   init_io (parport);
@@ -725,8 +723,7 @@ swc_write_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  stat (filename, &fstate);                     // SWC SRAM is 4*8KB, emu SRAM often not
-  size = fstate.st_size - HEADERSIZE;
+  size = quickftell (filename) - HEADERSIZE;    // SWC SRAM is 4*8KB, emu SRAM often not
   printf ("Send: %d Bytes\n", size);
   fseek (file, HEADERSIZE, SEEK_SET);           // skip the header
 

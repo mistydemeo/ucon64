@@ -415,22 +415,12 @@ extern void wait2 (int nmillis);
 typedef struct
 {
   char url_s[STRURL_MAX];       // default: "http://localhost:80/"
-
   char protocol[STRURL_MAX];    // default: "http"
   char user[STRURL_MAX];        // default: ""
   char pass[STRURL_MAX];        // default: ""
   char host[STRURL_MAX];        // default: localhost
   int port;                   // default: 80
   char file[STRURL_MAX];        // default: "/"
-
-/*
-  Special
-  transform the url into a shell cmdline(!) if url_s is already a cmdline
-  it will be transformed into a url (see above)
-*/
-  char cmd_s[STRURL_MAX];       // default: "/"
-  int argc;                            // default: 1
-  char *argv[STRURL_MAX];  // default: "/"
 } st_strurl_t;
 extern st_strurl_t *strurl (st_strurl_t *url, const char *url_s);
 

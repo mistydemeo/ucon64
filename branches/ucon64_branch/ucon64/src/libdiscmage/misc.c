@@ -2701,6 +2701,9 @@ int
 argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
 {
 //TODO replace with argz_extract() 
+//#ifdef  DEBUG
+  int pos = 0;
+//#endif
   int argc = 0;
 
   if (!str)
@@ -2710,6 +2713,15 @@ argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
 
   for (; (argv[argc] = (char *) strtok (!argc?str:NULL, separator_s)) &&
     argc < (max_args - 1); argc++);
+
+//#ifdef  DEBUG
+  fprintf (stderr, "argc:     %d\n", argc);
+  for (pos = 0; pos < argc; pos++)
+    fprintf (stderr, "argv[%d]:  %s\n", pos, argv[pos]);
+  fprintf (stderr, "\n");
+
+  fflush (stderr);
+//#endif
 
   return argc;
 }
@@ -2791,8 +2803,6 @@ stresc (char *dest, const char *src)
 static void
 strurl_test (st_strurl_t *url)
 {
-  int pos = 0;
-
   fprintf (stderr, "url_s:    %s\n", url->url_s);
   fprintf (stderr, "protocol: %s\n", url->protocol);
   fprintf (stderr, "hostname: %s\n", url->host);
@@ -2800,12 +2810,6 @@ strurl_test (st_strurl_t *url)
   fprintf (stderr, "port:     %d\n", url->port);
   fprintf (stderr, "user:     %s\n", url->user);
   fprintf (stderr, "pass:     %s\n", url->pass);
-
-  fprintf (stderr, "cmd_s:    %s\n", url->cmd_s);
-  fprintf (stderr, "argc:     %d\n", url->argc);
-  for (pos = 0; pos < url->argc; pos++)
-    fprintf (stderr, "argv[%d]:  %s\n", pos, url->argv[pos]);
-  fprintf (stderr, "\n");
 
   fflush (stderr);
 }
@@ -2903,12 +2907,6 @@ strurl (st_strurl_t *url, const char *url_s)
       strcpy (url->file, p2);  // copy the path/filename into st_strurl_t
 #endif
 
-// Special
-  strcpy (url->cmd_s, url->file);
-  url->argc = argz_extract2 (url->argv, url->cmd_s, "?&+", STRURL_MAX);
-  for (pos = 0, p = url->cmd_s; pos < url->argc; pos++, p += strlen (p))
-    sprintf (p, "%s ", url->argv[pos]);
-
 // defaults
   if (!url->protocol[0])
     strcpy (url->protocol, "http");
@@ -2925,14 +2923,6 @@ strurl (st_strurl_t *url, const char *url_s)
 #if 0
   if (!url->file[0])
     strcpy (url->file, "/");
-
-// Special    
-  if (!url->cmd_s[0])
-    strcpy (url->cmd_s, "/");
-  if (!url->argc)
-    url->argc = 1;
-  if (!url->argv[0][0])
-    strcpy (url->argv[0], "/");
 #endif    
 
 //#ifdef  DEBUG
@@ -2941,5 +2931,3 @@ strurl (st_strurl_t *url, const char *url_s)
 
   return url;
 }
-
-

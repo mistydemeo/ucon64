@@ -251,6 +251,7 @@ const struct option options[] = {
     {"pal", 0, 0, UCON64_PAL},
     {"pasofami", 0, 0, UCON64_PASOFAMI},
     {"patch", 1, 0, UCON64_PATCH},
+    {"pattern", 1, 0, UCON64_PATTERN},
     {"pce", 0, 0, UCON64_PCE},
     {"poke", 1, 0, UCON64_POKE},
 #ifdef  PARALLEL
@@ -293,6 +294,7 @@ const struct option options[] = {
     {"strip", 1, 0, UCON64_STRIP},
     {"swan", 0, 0, UCON64_SWAN},
     {"swap", 0, 0, UCON64_SWAP},
+    {"swap2", 0, 0, UCON64_SWAP2},
     {"swc", 0, 0, UCON64_SWC},
     {"swcs", 0, 0, UCON64_SWCS},
     {"ufo", 0, 0, UCON64_UFO},

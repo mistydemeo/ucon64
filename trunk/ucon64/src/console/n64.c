@@ -54,14 +54,14 @@ const st_usage_t n64_usage[] =
     {NULL, NULL, "Nintendo 64"},
     {NULL, NULL, "1996 Nintendo http://www.nintendo.com"},
     {"n64", NULL, "force recognition"},
-    // unlike for SNES ROMs we can't make a mistake about this, but we support it anyway
     {"int", NULL, "force ROM is in interleaved format (2143, V64)"},
     {"nint", NULL, "force ROM is not in interleaved format (1234, Z64)"},
     {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
     {"v64", NULL, "convert to Doctor V64 (and compatibles/interleaved)"},
     {"z64", NULL, "convert to Mr. Backup Z64 (not interleaved)"},
     {"dint", NULL, "convert ROM to (non-)interleaved format (1234 <-> 2143)"},
-    {"swap", NULL, "same as " OPTION_LONG_S "dint"},
+    {"swap", NULL, "same as " OPTION_LONG_S "dint, byte-swap ROM"},
+    {"swap2", NULL, "word-swap ROM (1234 <-> 3412)"},
 #if 0
     {"f", NULL, "remove NTSC/PAL protection"},
 #endif
@@ -157,7 +157,7 @@ n64_v64 (st_rominfo_t *rominfo)
   set_suffix (dest_name, ".V64");
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fswap (dest_name, 0, ucon64.file_size);
+  q_fswap_b (dest_name, 0, ucon64.file_size);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -179,7 +179,7 @@ n64_z64 (st_rominfo_t *rominfo)
   set_suffix (dest_name, ".Z64");
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  q_fswap (dest_name, 0, ucon64.file_size);
+  q_fswap_b (dest_name, 0, ucon64.file_size);
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -195,7 +195,7 @@ n64_n (st_rominfo_t *rominfo, const char *name)
   strncpy (buf, name, strlen (name) > N64_NAME_LEN ? N64_NAME_LEN : strlen (name));
 
   if (rominfo->interleaved)
-    mem_swap (buf, N64_NAME_LEN);
+    mem_swap_b (buf, N64_NAME_LEN);
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
@@ -230,7 +230,7 @@ n64_update_chksum (st_rominfo_t *rominfo, const char *filename, char *buf)
       crc <<= 8;
     }
   if (rominfo->interleaved)
-    mem_swap (buf, 8);
+    mem_swap_b (buf, 8);
   q_fwrite (buf, rominfo->buheader_len + 0x10, 8, filename, "r+b");
 }
 
@@ -269,7 +269,7 @@ n64_sram (st_rominfo_t *rominfo, const char *sramfile)
   q_fread (sram, 0, N64_SRAM_SIZE, sramfile);
 
   if (rominfo->interleaved)
-    mem_swap (sram, N64_SRAM_SIZE);
+    mem_swap_b (sram, N64_SRAM_SIZE);
 
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
@@ -294,7 +294,7 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
       q_fread (buf, 0, N64_BOT_SIZE, bootfile);
 
       if (rominfo->interleaved)
-        mem_swap (buf, N64_BOT_SIZE);
+        mem_swap_b (buf, N64_BOT_SIZE);
 
       ucon64_file_handler (dest_name, NULL, 0);
       q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
@@ -308,7 +308,7 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
       q_fcpy (ucon64.rom, rominfo->buheader_len + 0x040, N64_BOT_SIZE, dest_name, "wb");
 
       if (rominfo->interleaved)
-        q_fswap (dest_name, 0, q_fsize (dest_name));
+        q_fswap_b (dest_name, 0, q_fsize (dest_name));
     }
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -341,7 +341,7 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
       q_fread (usmsbuf, 0, size, smsrom);
 
       if (rominfo->interleaved)
-        mem_swap (usmsbuf, size);
+        mem_swap_b (usmsbuf, size);
 
       strcpy (dest_name, "Patched.v64");
       ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
@@ -360,7 +360,7 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
 
       q_fcpy (ucon64.rom, rominfo->buheader_len + 0x040, 0x01000 - 0x040, dest_name, "wb");
       if (rominfo->interleaved)
-        q_fswap (dest_name, 0, q_fsize (dest_name));
+        q_fswap_b (dest_name, 0, q_fsize (dest_name));
 
       printf (ucon64_msg[WROTE], dest_name);
     }
@@ -423,27 +423,22 @@ n64_init (st_rominfo_t *rominfo)
   value += OFFSET (n64_header, 1) << 8;
   value += OFFSET (n64_header, 2) << 16;
   value += OFFSET (n64_header, 3) << 24;
-  if (value == 0x40123780) // 0x80371240
+  /*
+    0x41123780 and 0x12418037 can be found in te following files:
+    2 Blokes & An Armchair - Nintendo 64 Remix Remix (PD)
+    Zelda Boot Emu V1 (PD)
+    Zelda Boot Emu V2 (PD)
+  */
+  if (value == 0x40123780 || value == 0x41123780) // 0x80371240, 0x80371241
     {
       rominfo->interleaved = 0;
       result = 0;
     }
-  else if (value == 0x12408037) // 0x37804012
+  else if (value == 0x12408037 || value == 0x12418037) // 0x37804012, 0x37804112
     {
       rominfo->interleaved = 1;
       result = 0;
     }
-#if 0
-  /*
-    What format is this?
-    Conversion: 1234 -> 3412
-  */
-  else if (value == 0x80371240) // 0x40123780
-    {
-      rominfo->interleaved = 2;
-      result = 0;
-    }
-#endif
   else
     result = -1;
 
@@ -460,7 +455,7 @@ n64_init (st_rominfo_t *rominfo)
   // internal ROM name
   strncpy (rominfo->name, (char *) &OFFSET (n64_header, 32), N64_NAME_LEN);
   if (rominfo->interleaved)
-    mem_swap (rominfo->name, N64_NAME_LEN);
+    mem_swap_b (rominfo->name, N64_NAME_LEN);
   rominfo->name[N64_NAME_LEN] = 0;
 
   // ROM maker
@@ -513,12 +508,7 @@ n64_init (st_rominfo_t *rominfo)
 
   rominfo->console_usage = n64_usage;
   rominfo->copier_usage = (!rominfo->buheader_len ?
-    ((!rominfo->interleaved) ? z64_usage : doctor64_usage
-#if 0
-doctor64jr_usage
-cd64_usage
-#endif
-    ) : unknown_usage);
+    ((!rominfo->interleaved) ? z64_usage : doctor64_usage) : unknown_usage);
 
   return result;
 }
@@ -538,7 +528,7 @@ cd64_usage
 #define CHECKSUM_LENGTH 0x100000L
 #define CHECKSUM_HEADERPOS 0x10
 #define CHECKSUM_STARTVALUE 0xf8ca4ddc
-#define CALC_CRC32
+#define CALC_CRC32                              // see this as a marker, don't disable
 
 int
 n64_chksum (st_rominfo_t *rominfo, const char *filename)
@@ -562,7 +552,25 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
   t6 = CHECKSUM_STARTVALUE;
 
   if (rlen < 0x0100000)                         // 0x0101000
-    return -1;                                  // ROM is too short
+    {
+#ifdef  CALC_CRC32
+      n = ucon64.file_size - rominfo->buheader_len;
+      if ((crc32_mem = (unsigned char *) malloc (n)) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[BUFFER_ERROR], n);
+          return -1;
+        }
+      q_fread (crc32_mem, rominfo->buheader_len, n, filename);
+      if (!rominfo->interleaved)
+        {
+          ucon64.fcrc32 = crc32 (0, crc32_mem, n);
+          mem_swap_b (crc32_mem, n);
+        }
+      ucon64.crc32 = crc32 (0, crc32_mem, n);
+      free (crc32_mem);
+#endif
+      return -1;                                // ROM is too small
+    }
 
   if (!(file = fopen (filename, "rb")))
     return -1;
@@ -585,7 +593,7 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
   if (!rominfo->interleaved)
     {
       fcrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
-      mem_swap (crc32_mem, CHECKSUM_START);
+      mem_swap_b (crc32_mem, CHECKSUM_START);
     }
   scrc32 = crc32 (0, crc32_mem, CHECKSUM_START);
 #else
@@ -595,7 +603,7 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
   for (;;)
     {
       if (rlen > 0)
-        {          
+        {
           if ((n = fread (chunk, 1, MIN (sizeof (chunk), clen), file)))
             {
               if ((n & 3) != 0)
@@ -605,7 +613,7 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
                 {
                   memcpy (crc32_mem, chunk, n);
                   fcrc32 = crc32 (fcrc32, crc32_mem, n);
-                  mem_swap (crc32_mem, n);
+                  mem_swap_b (crc32_mem, n);
                 }
               scrc32 = crc32 (scrc32, crc32_mem, n);
 #endif
@@ -659,7 +667,7 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
       if (!rominfo->interleaved)
         {
           fcrc32 = crc32 (fcrc32, crc32_mem, n);
-          mem_swap (crc32_mem, n);
+          mem_swap_b (crc32_mem, n);
         }
       scrc32 = crc32 (scrc32, crc32_mem, n);
     }

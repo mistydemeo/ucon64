@@ -98,7 +98,7 @@ static int ucon64_e (const st_rom_t *rominfo);
 
 static int ucon64_init (const char *romfile, st_rom_t *rominfo);
 
-static int ucon64_ls (const char *path, int mode);
+static int ucon64_ls (st_rom_t *rominfo, int mode);
 static int ucon64_configfile (void);
 static void ucon64_exit (void);
 static void ucon64_usage (int argc, char *argv[]);
@@ -530,7 +530,7 @@ main (int argc, char *argv[])
         case UCON64_ATA:
           rom.console = UCON64_ATARI;
           break;
-  
+
         case UCON64_S16:
           rom.console = UCON64_SYSTEM16;
           break;
@@ -584,12 +584,12 @@ main (int argc, char *argv[])
         case UCON64_UNIF:
           rom.console = UCON64_NES;
           break;
-  
+
         case UCON64_SMG:
         case UCON64_PCE:
           rom.console = UCON64_PCE;
           break;
-  
+
         case UCON64_JAG:
           rom.console = UCON64_JAGUAR;
           break;
@@ -638,7 +638,7 @@ main (int argc, char *argv[])
         case UCON64_SAT:
           rom.console = UCON64_SATURN;
           break;
-  
+
         case UCON64_PSX:
           rom.console = UCON64_PSX;
           break;
@@ -701,7 +701,7 @@ main (int argc, char *argv[])
          case UCON64_SHOW_NFO_BEFORE_AND_AFTER:
            ucon64_nfo (&rom);
            break;
-    
+
          case UCON64_SHOW_NFO_AFTER:
          case UCON64_SHOW_NFO_NEVER:
          default:
@@ -764,7 +764,7 @@ main (int argc, char *argv[])
               printf ("\n");
             }
           return 0;
-  
+
 
         case UCON64_PADHD://deprecated
           rom.buheader_len = UNKNOWN_HEADER_LEN;
@@ -782,10 +782,10 @@ main (int argc, char *argv[])
                         (float) padded / MBIT);
             }
           return 0;
-  
+
         case UCON64_STRIP:
           ucon64_fbackup (ucon64.rom);
-  
+
           return truncate (ucon64.rom, quickftell (ucon64.rom) - atol (ucon64.file));
 
         case UCON64_STP:
@@ -821,7 +821,7 @@ main (int argc, char *argv[])
           ucon64_argc = 3;
   
           ucon64_fbackup (ucon64.rom);
-  
+
           ips_main (ucon64_argc, ucon64_argv);
           break;
   
@@ -838,7 +838,7 @@ main (int argc, char *argv[])
 
         case UCON64_MKI:
           return cips (ucon64.rom, ucon64.file);
-  
+
         case UCON64_MKA:
           ucon64_argv[0] = "ucon64";
           ucon64_argv[1] = "-d \"\"";
@@ -851,12 +851,12 @@ main (int argc, char *argv[])
           ucon64_argc = 5;
   
           return n64caps_main (ucon64_argc, ucon64_argv);
-  
+
         case UCON64_NA:
           memset (buf2, ' ', 50);
           strncpy (buf2, ucon64.file, strlen (ucon64.file));
           return quickfwrite (buf2, 7, 50, ucon64_fbackup (ucon64.rom), "r+b");
-  
+
         case UCON64_PPF:
           ucon64_argv[0] = "ucon64";
           ucon64_argv[1] = ucon64.rom;
@@ -869,10 +869,10 @@ main (int argc, char *argv[])
           ucon64_argv[0] = "ucon64";
           ucon64_argv[1] = ucon64.rom;
           ucon64_argv[2] = ucon64.file;
-  
+
           strcpy (buf, ucon64.file);
           setext (buf, ".PPF");
-  
+
           ucon64_argv[3] = buf;
           ucon64_argc = 4;
 
@@ -885,16 +885,19 @@ main (int argc, char *argv[])
 
         case UCON64_IDPPF:
           return addppfid (ucon64.rom);
-  
+
         case UCON64_LS:
-          return ucon64_ls (ucon64.rom, UCON64_LS);
-  
+          strcpy (rom.rom, ucon64.rom);
+          return ucon64_ls (&rom, UCON64_LS);
+
         case UCON64_LSV:
-          return ucon64_ls (ucon64.rom, UCON64_LSV);
-  
+          strcpy (rom.rom, ucon64.rom);
+          return ucon64_ls (&rom, UCON64_LSV);
+
         case UCON64_REN:
-          return ucon64_ls (ucon64.rom, UCON64_REN);
-  
+          strcpy (rom.rom, ucon64.rom);
+          return ucon64_ls (&rom, UCON64_REN);
+
         case UCON64_ISO:
           return ucon64_bin2iso (ucon64.rom, ucon64_trackmode_probe (ucon64.rom));
 
@@ -1288,7 +1291,7 @@ main (int argc, char *argv[])
   
         case UCON64_V64:
           return n64_v64 (&rom);
-  
+
 #ifdef BACKUP
         case UCON64_XDJR:
           return n64_xdjr (&rom);
@@ -1824,21 +1827,20 @@ int ucon64_e (const st_rom_t *rominfo)
 }
 
 
-int ucon64_ls (const char *path, int mode)
+int ucon64_ls (st_rom_t *rominfo, int mode)
 {
+//  int single_file = 0;
+  int forced_console;
+  char dir[FILENAME_MAX], buf[MAXBUFSIZE];
   struct dirent *ep;
   struct stat puffer;
-  st_rom_t rom;
-//  int single_file = 0;
-  char dir[FILENAME_MAX];
   DIR *dp;
-  char buf[MAXBUFSIZE];
 
 //TODO dir or single file?
 
-    strcpy (dir, path);
-    
-  if (stat (path, &puffer) == -1)
+  strcpy (dir, rominfo->rom);
+
+  if (stat (rominfo->rom, &puffer) == -1)
     getcwd (dir, FILENAME_MAX);
   else if (S_ISDIR (puffer.st_mode) != TRUE)
     getcwd (dir, FILENAME_MAX);
@@ -1846,9 +1848,10 @@ int ucon64_ls (const char *path, int mode)
   if ((dp = opendir (dir)) == NULL)
     return -1;
 
-  getcwd (dir,FILENAME_MAX);
-  chdir (path);
+  getcwd (dir, FILENAME_MAX);
+  chdir (rominfo->rom);
 
+  forced_console = rominfo->console;
 #define UCON64_LS_SAVE
 #ifdef UCON64_LS_SAVE
   while ((ep = readdir (dp)) != 0)
@@ -1863,21 +1866,26 @@ int ucon64_ls (const char *path, int mode)
           S_ISREG (puffer.st_mode))
     {
 #endif // UCON64_LS_SAVE
-              ucon64_init (NULL, &rom);
-              if (ucon64_init (ep->d_name, &rom) != -1)
+              // ucon64_init(NULL,...) sets rominfo->rom to UCON64_UNKNOWN, but
+	      //  we have to remember a possible force recoginition option
+              if (forced_console == UCON64_UNKNOWN)
+                ucon64_init (NULL, rominfo);
+              else
+                rominfo->console = forced_console;
+              if (ucon64_init (ep->d_name, rominfo) != -1)
                 switch (mode)
                   {
                     case UCON64_LSV:
-                      ucon64_nfo (&rom);
+                      ucon64_nfo (rominfo);
                       fflush (stdout);
                       break;
 /*TODO renamer!
                     case UCON64_REN:
-                      if (rom.console != UCON64_UNKNOWN)
-//                        && rom.console != UCON64_KNOWN)
+                      if (rominfo->console != UCON64_UNKNOWN)
+//                        && rominfo->console != UCON64_KNOWN)
                         {
                           strcpy (buf, &ucon64.rom[findlast (ucon64.rom, ".") + 1]);
-                          printf ("%s.%s\n", rom.name, buf);
+                          printf ("%s.%s\n", rominfo->name, buf);
                         }
                       break;
 */
@@ -1887,7 +1895,7 @@ int ucon64_ls (const char *path, int mode)
                                 localtime (&puffer.st_mtime));
 //                      printf ("%-31.31s %10d %s %s\n", rom.name,
 //                              (int) puffer.st_size, buf, ucon64.rom);
-                      printf ("%-31.31s %10d %s %s\n", mkprint(rom.name, ' '),
+                      printf ("%-31.31s %10d %s %s\n", mkprint(rominfo->name, ' '),
                               (int) puffer.st_size, buf, ucon64.rom);
                       fflush (stdout);
                       break;
@@ -1900,7 +1908,7 @@ int ucon64_ls (const char *path, int mode)
   closedir (dp);
 
   chdir (dir);
-  
+
   return 0;
 }
 

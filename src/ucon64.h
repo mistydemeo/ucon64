@@ -275,11 +275,11 @@ extern st_ucon64_t ucon64;
 */
 typedef struct st_rom
 {
-  char rom[FILENAME_MAX];               //rom (cmdline) with path
+  char rom[FILENAME_MAX];       //rom (cmdline) with path
 
   long console;                 //integer for the detected console system
-  const char *title;                  //console system name
-  const char *copier;                 //name of backup unit
+  const char *title;            //console system name
+  const char *copier;           //name of backup unit
   unsigned long bytes;          //size in bytes
   float mbit;                   //size in mbit
   int interleaved;              //rom is interleaved (swapped)
@@ -311,8 +311,8 @@ typedef struct st_rom
   long header_len;              //length of internal ROM header (==0)?no header
 
   char name[4096];              //ROM name
-  const char *maker;      //maker name of the ROM
-  const char *country;           //country name of the ROM
+  const char *maker;            //maker name of the ROM
+  const char *country;          //country name of the ROM
   char misc[MAXBUFSIZE];        //some miscellaneous information about the ROM in one single string
 } st_rom_t;
 

@@ -708,7 +708,7 @@ printf("TODO: $ROM could also be the name of a *.ZIP archive\n"
 	"  -strip	strip Bytes from end of ROM; $FILE=VALUE\n"
 	"  -stp		strip first 512 Bytes (possible header) from ROM\n"
 	"  -ins		insert 512 Bytes (0x00) before ROM\n"
-	"");
+);
 
 bsl_usage( argc, argv );
 ips_usage( argc, argv );

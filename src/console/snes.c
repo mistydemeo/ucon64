@@ -1227,47 +1227,47 @@ know it's running on a backup unit and stop to prevent people copying the
 games. However, the newer copiers get around this detection somehow.
 
 (original uCON)
-   8F/9F xx xx 70 CF/DF xx xx 70 D0
-=> 8F/9F xx xx 70 CF/DF xx xx 70 EA EA          if snes_sramsize == 64 kbits
-=> 8F/9F xx xx 70 CF/DF xx xx 70 80
+   8f/9f XX YY 70 cf/df XX YY 70 d0
+=> 8f/9f XX YY 70 cf/df XX YY 70 ea ea          if snes_sramsize == 64 kbits
+=> 8f/9f XX YY 70 cf/df XX YY 70 80
 
-   sta $70xxxx/sta $70xxxx,x; cmp $70xxxx/cmp $70xxxx,x; bne
+   sta $70YYXX/sta $70YYXX,x; cmp $70YYXX/cmp $70YYXX,x; bne
 
 TODO: The following three codes should be verfied for many games. For example,
 the first code replaces D0 (bne) with 80 (bra), but for some games (like Donkey
 Kong Country (U|E)) it should do the opposite, i.e., writing EA EA (nop nop).
-   8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 D0
-=> 8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 80
+   8f/9f XX YY 30/31/32/33 cf/df XX YY 30/31/32/33 d0
+=> 8f/9f XX YY 30/31/32/33 cf/df XX YY 30/31/32/33 80
 
-   8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 F0     beq
-=> 8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 EA EA  nop; nop
+   8f/9f XX YY 30/31/32/33 cf/df XX YY 30/31/32/33 f0     beq
+=> 8f/9f XX YY 30/31/32/33 cf/df XX YY 30/31/32/33 ea ea  nop; nop
 
-   8F/9F xx xx 30/31/32/33 AF xx xx 30/31/32/33 C9 xx xx D0   bne
-=> 8F/9F xx xx 30/31/32/33 AF xx xx 30/31/32/33 C9 xx xx 80   bra
+   8f/9f XX YY 30/31/32/33 af XX YY 30/31/32/33 c9 XX YY d0   bne
+=> 8f/9f XX YY 30/31/32/33 af XX YY 30/31/32/33 c9 XX YY 80   bra
 
 (uCON64)
 - Mega Man X
-   8f/9f xx xx 70 cf/df xx xx 70 f0
-=> 8f/9f xx xx 70 cf/df xx xx 70 ea ea
+   8f/9f XX YY 70 cf/df XX YY 70 f0
+=> 8f/9f XX YY 70 cf/df XX YY 70 ea ea
 The code above could be combined with the first original uCON code. However, we
 don't want to copy (or remove) the SRAM size determined behaviour, without
 knowing when that is necessary.
 
 - Mega Man X
-   af/bf xx 80 00 cf/df xx 80 40 f0
-=> af/bf xx 80 00 cf/df xx 80 40 80
+   af/bf XX 80 00 cf/df XX 80 40 f0
+=> af/bf XX 80 00 cf/df XX 80 40 80
 
-   lda $0080xx/lda $0080xx,x; cmp $408000/cmp $408000,x; beq ...
+   lda $0080XX/lda $0080XX,x; cmp $408000/cmp $408000,x; beq ...
 
 - Mega Man X
-   af xx xx 84 cf xx xx 84 f0
-=> af xx xx 84 cf xx xx 84 ea ea
+   af XX YY 84 cf XX YY 84 f0
+=> af XX YY 84 cf XX YY 84 ea ea
 
 - Super Metroid
    a9 00 00 a2 fe 1f df 00 00 70 d0     lda #$0000; ldx #$1ffe; cmp $700000,x; bne ...
 => a9 00 00 a2 fe 1f df 00 00 70 ea ea  lda #$0000; ldx #$1ffe; cmp $700000,x; nop; nop
 
-- Killer Instinct
+- most probably only Killer Instinct
    5c 7f d0 83 18 fb 78 c2 30           jmp $83d07f; clc; xce; sei; rep #$30
 => ea ea ea ea ea ea ea ea ea           nop; nop; nop; nop; nop; nop; nop; nop; nop
 
@@ -1288,6 +1288,18 @@ Note that this code must be searched for before the less specific uCON code.
    'K' 'O' 'N' 'G' 00 f8 f7
 => 'K' 'O' 'N' 'G' 00 f8 f8
 TODO: make sense of Diddy's Kong Quest codes
+
+- most probably only BS The Legend of Zelda Remix
+   22 08 5c 10 b0 28                    jsl $105c08; bcs ...
+=> ea ea ea ea ea ea                    nop; nop; nop; nop; nop; nop
+
+- most probably only BS The Legend of Zelda Remix (enables sound)
+   da e2 30 c9 01 f0 18 c9 02
+=> da e2 30 c9 09 f0 18 c9 07
+
+- most probably only BS The Legend of Zelda Remix (enables sound)
+   29 ff 00 c9 07 00 90 16
+=> 29 ff 00 c9 00 00 90 16
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
@@ -1350,6 +1362,12 @@ TODO: make sense of Diddy's Kong Quest codes
       change_string ("\x26\x38\xe9\x48\x12\xc9\xaf\x71\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0);
       change_string ("\xa0\x5c\x2f\x77\x32\xe9\xc7\x04\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0);
 
+      change_string ("\x22\x08\x5c\x10\xb0\x28", 6, '*', '!',
+                     "\xea\xea\xea\xea\xea\xea", 6, buffer, bytesread, -5);
+      change_string ("\xda\xe2\x30\xc9\x01\xf0\x18\xc9\x02", 9, '*', '!',
+                                     "\x09\xf0\x18\xc9\x07", 5, buffer, bytesread, -4);
+      change_string ("\x29\xff\x00\xc9\x07\x00\x90\x16", 8, '*', '!', "\x00", 1, buffer, bytesread, -3);
+
       fwrite (buffer, 1, bytesread, destfile);
     }
   fclose (srcfile);
@@ -1370,24 +1388,24 @@ The order is important. Don't touch this code if you don't know what you're doin
 
 Search for                      Replace with
 (original uCON)
-3F 21 29/89 10 C9 10 F0         3F 21 29/89 10 C9 10 80
-3F 21 29/89 10 F0               3F 21 29/89 10 80
-3F 21 00 29/89 10 F0            3F 21 00 29/89 10 80
-3F 21 29/89 10 00 F0            3F 21 29/89 10 00 80
-AD 3F 21 29 10 00 D0            AD 3F 21 29 10 00 80            - NTSC
-AD 3F 21 89 10 00 D0            A9 10 00 89 10 00 D0            - NTSC Eric Cantona Football Challenge
-AF 3F 21 00 29 10 D0            AF 3F 21 00 29 10 80            - NTSC
-AF 3F 21 00 29 10 00 D0         AF 3F 21 00 29 10 00 EA EA      - NTSC
-AD 3F 21 29 10 D0               AD 3F 21 29 10 EA EA            - PAL
-AD 3F 21 29 10 F0               AD 3F 21 29 10 80               - PAL
-AD 3F 21 89 10 D0               AD 3F 21 89 10 80               - PAL
-AD 3F 21 29 10 C9 00 F0         AD 3F 21 29 10 C9 00 80         - PAL
-AF 3F 21 00 29/89 10 00 F0      AF 3F 21 00 29/89 10 00 80      - PAL
-AD 3F 21 29 10 CF BD FF 80 F0   AD 3F 21 29 10 CF BD FF 80 80   - PAL Konami Ganbare Goemon 2
-AF 3F 21 EA 89 10 00 D0         A9 00 00 EA 89 10 00 D0         - PAL Super Famista 3
-AD 3F 21 8D xx xx 29 10 8D      AD 3F 21 8D xx xx 29 00 8D      - PAL DragonBallZ 2
-AF 3F 21 00 xx xx 29 10 00 D0   AF 3F 21 00 xx xx 29 10 00 EA EA- PAL Fatal Fury Special J
-AD 3F 21 29 10 CF BD FF 00 F0   AD 3F 21 29 10 CF BD FF 00 80   - NTSC Tiny Toons Wacky Sports
+3f 21 29/89 10 c9 10 f0         3f 21 29/89 10 c9 10 80
+3f 21 29/89 10 f0               3f 21 29/89 10 80
+3f 21 00 29/89 10 f0            3f 21 00 29/89 10 80
+3f 21 29/89 10 00 f0            3f 21 29/89 10 00 80
+ad 3f 21 29 10 00 d0            ad 3f 21 29 10 00 80            - NTSC
+ad 3f 21 89 10 00 d0            a9 10 00 89 10 00 d0            - NTSC Eric Cantona Football Challenge
+af 3f 21 00 29 10 d0            af 3f 21 00 29 10 80            - NTSC
+af 3f 21 00 29 10 00 d0         af 3f 21 00 29 10 00 ea ea      - NTSC
+ad 3f 21 29 10 d0               ad 3f 21 29 10 ea ea            - PAL
+ad 3f 21 29 10 f0               ad 3f 21 29 10 80               - PAL
+ad 3f 21 89 10 d0               ad 3f 21 89 10 80               - PAL
+ad 3f 21 29 10 c9 00 f0         ad 3f 21 29 10 c9 00 80         - PAL
+af 3f 21 00 29/89 10 00 f0      af 3f 21 00 29/89 10 00 80      - PAL
+ad 3f 21 29 10 cf bd ff 80 f0   ad 3f 21 29 10 cf bd ff 80 80   - PAL Konami Ganbare Goemon 2
+af 3f 21 ea 89 10 00 d0         a9 00 00 ea 89 10 00 d0         - PAL Super Famista 3
+ad 3f 21 8d xx xx 29 10 8d      ad 3f 21 8d xx xx 29 00 8d      - PAL DragonBallZ 2
+af 3f 21 00 xx xx 29 10 00 d0   af 3f 21 00 xx xx 29 10 00 ea ea- PAL Fatal Fury Special J
+ad 3f 21 29 10 cf bd ff 00 f0   ad 3f 21 29 10 cf bd ff 00 80   - NTSC Tiny Toons Wacky Sports
 
 (uCON64)
 ad 3f 21 89 10 d0                     ad 3f 21 89 10 ea ea
@@ -1425,29 +1443,29 @@ a2 18 01 bd 27 20 89 10 00 f0/d0 01   a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
     {
-      change_string ("\x3F\x21\x02\x10\xC9\x10\xF0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
+      change_string ("\x3f\x21\x02\x10\xc9\x10\xf0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
                      "\x29\x89", 2);
-      change_string ("\x3F\x21\x02\x10\xF0", 5, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
+      change_string ("\x3f\x21\x02\x10\xf0", 5, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
                      "\x29\x89", 2);
-      change_string ("\x3F\x21\x00\x02\x10\xF0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
+      change_string ("\x3f\x21\x00\x02\x10\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
                      "\x29\x89", 2);
-      change_string ("\x3F\x21\x02\x10\x00\xF0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
+      change_string ("\x3f\x21\x02\x10\x00\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
                      "\x29\x89", 2);
-      change_string ("\xAD\x3F\x21\x29\x10\x00\xD0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xAD\x3F\x21\x89\x10\x00\xD0", 7, '\x01', '\x02', "\xA9\x10\x00", 3, buffer, bytesread, -6);
-      change_string ("\xAF\x3F\x21\x00\x29\x10\xD0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xAF\x3F\x21\x00\x29\x10\x00\xD0", 8, '\x01', '\x02', "\xEA\xEA", 2, buffer, bytesread, 0);
-      change_string ("\xAD\x3F\x21\x29\x10\xD0", 6, '\x01', '\x02', "\xEA\xEA", 2, buffer, bytesread, 0);
-      change_string ("\xAD\x3F\x21\x29\x10\xF0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xAD\x3F\x21\x89\x10\xD0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xAD\x3F\x21\x29\x10\xC9\x00\xF0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xAF\x3F\x21\x00\x02\x10\x00\xF0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
+      change_string ("\xad\x3f\x21\x29\x10\x00\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xad\x3f\x21\x89\x10\x00\xd0", 7, '\x01', '\x02', "\xa9\x10\x00", 3, buffer, bytesread, -6);
+      change_string ("\xaf\x3f\x21\x00\x29\x10\xd0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xaf\x3f\x21\x00\x29\x10\x00\xd0", 8, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("\xad\x3f\x21\x29\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("\xad\x3f\x21\x29\x10\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xad\x3f\x21\x29\x10\xc9\x00\xf0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xaf\x3f\x21\x00\x02\x10\x00\xf0", 8, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
                      "\x29\x89", 2);
-      change_string ("\xAD\x3F\x21\x29\x10\xCF\xBD\xFF\x80\xF0", 10, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
-      change_string ("\xAF\x3F\x21\xEA\x89\x10\x00\xD0", 8, '\x01', '\x02', "\xA9\x00\x00", 3, buffer, bytesread, -7);
-      change_string ("\xAD\x3F\x21\x8D\x01\x01\x29\x10\x8D", 9, '\x01', '\x02', "\x00", 1, buffer, bytesread, -1);
-      change_string ("\xAF\x3F\x21\x00\x01\x01\x29\x10\x00\xD0", 10, '\x01', '\x02', "\xEA\xEA", 2, buffer, bytesread, 0);
-      change_string ("\xAD\x3F\x21\x29\x10\xCF\xBD\xFF\x00\xF0", 10, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xad\x3f\x21\x29\x10\xcf\xbd\xff\x80\xf0", 10, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xaf\x3f\x21\xea\x89\x10\x00\xd0", 8, '\x01', '\x02', "\xa9\x00\x00", 3, buffer, bytesread, -7);
+      change_string ("\xad\x3f\x21\x8d\x01\x01\x29\x10\x8d", 9, '\x01', '\x02', "\x00", 1, buffer, bytesread, -1);
+      change_string ("\xaf\x3f\x21\x00\x01\x01\x29\x10\x00\xd0", 10, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
+      change_string ("\xad\x3f\x21\x29\x10\xcf\xbd\xff\x00\xf0", 10, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
 
       // uCON64
       change_string ("\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
@@ -1486,9 +1504,9 @@ a2 01 86 0d                     a2 00 86 0d
 a0 01 84 0d                     a0 00 84 0d
 
 (original uCON)
-A9/A2 01 8D/8E 0D 42            A9/A2 00 8D/8E 0D 42
-A9 01 00 8D 0D 42               A9 00 00 8D 0D 42
-A9 01 8F 0D 42 00               A9 00 8F 0D 42 00
+a9/a2 01 8d/8e 0d 42            a9/a2 00 8d/8e 0d 42
+a9 01 00 8d 0d 42               a9 00 00 8d 0d 42
+a9 01 8f 0d 42 00               a9 00 8f 0d 42 00
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
@@ -1525,10 +1543,10 @@ A9 01 8F 0D 42 00               A9 00 8F 0D 42 00
       change_string ("\xa0\x01\x84\x0d", 4, '*', '!', "\x00", 1, buffer, bytesread, -2);
 
       // original uCON
-      change_string ("!\x01!\x0D\x42", 5, '*', '!', "\x00", 1, buffer, bytesread, -3,
-                     "\xA9\xA2", 2, "\x8D\x8E", 2);
-      change_string ("\xA9\x01\x00\x8D\x0D\x42", 6, '*', '!', "\x00", 1, buffer, bytesread, -4);
-      change_string ("\xA9\x01\x8F\x0D\x42\x00", 6, '*', '!', "\x00", 1, buffer, bytesread, -4);
+      change_string ("!\x01!\x0d\x42", 5, '*', '!', "\x00", 1, buffer, bytesread, -3,
+                     "\xa9\xa2", 2, "\x8d\x8e", 2);
+      change_string ("\xa9\x01\x00\x8d\x0d\x42", 6, '*', '!', "\x00", 1, buffer, bytesread, -4);
+      change_string ("\xa9\x01\x8f\x0d\x42\x00", 6, '*', '!', "\x00", 1, buffer, bytesread, -4);
 
       fwrite (buffer, 1, bytesread, destfile);
     }

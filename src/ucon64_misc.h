@@ -31,6 +31,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifdef __FreeBSD__
+  #include <machine/sysarch.h>
+#endif
 #include <time.h>
 #include <unistd.h>             // ioperm() (libc5)
 #include "ucon64.h"
@@ -71,10 +74,6 @@ unsigned char inportb (unsigned short port);
 unsigned short inportw (unsigned short port);
 void outportb (unsigned short port, unsigned char byte);
 void outportw (unsigned short port, unsigned short word);
-
-#ifdef __FreeBSD__
-  #define ioperm(p,x,y) (i386_set_ioperm(p,x,y))
-#endif // __FreeBSD__
 
 #endif
 

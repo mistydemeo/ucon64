@@ -931,8 +931,11 @@ main (int argc, char *argv[])
       break;
 
     case ucon64_NES:
-      return ((argcmp (argc, argv, "-fds")) ? nes_fds (&rom) :
+      return (
+#if 0
+              (argcmp (argc, argv, "-fds")) ? nes_fds (&rom) :
               (argcmp (argc, argv, "-fdsl")) ? nes_fdsl (&rom) :
+#endif              
               (argcmp (argc, argv, "-ffe")) ? nes_ffe (&rom) :
               (argcmp (argc, argv, "-gg")) ? nes_gg (&rom) :
               (argcmp (argc, argv, "-ggd")) ? nes_ggd (&rom) :
@@ -943,7 +946,7 @@ main (int argc, char *argv[])
               (argcmp (argc, argv, "-pas")) ? nes_pas (&rom) :
               (argcmp (argc, argv, "-unif")) ? nes_unif (&rom) :
               (argcmp (argc, argv, "-s")) ? nes_s (&rom) :
-              (argcmp (argc, argv, "-n")) ? nes_n (&rom) :
+//              (argcmp (argc, argv, "-n")) ? nes_n (&rom) :
                0);
       break;
 
@@ -1079,12 +1082,19 @@ main (int argc, char *argv[])
 
     case ucon64_UNKNOWN:
     default:
+#ifdef	BACKUP_CD
+      if(argcmp (argc, argv, "-mktoc"))
+        {
+          return (cdrw_mktoc (&rom));
+        }
+        
+      if (argcmp (argc, argv, "-xcdrw"))
+        {
+          return ((!access (rom.rom, F_OK)) ? cdrw_write (&rom) : cdrw_read (&rom));
+        }
+#endif
       if (!access (rom.rom, F_OK) || argcmp (argc, argv, "-xsmd") ||    //the SMD made backups for Genesis and Sega Master System
           argcmp (argc, argv, "-xsmds")
-#ifdef BACKUP_CD
-          || argcmp (argc, argv, "-mktoc") ||   //take image for which cd-based console?
-          argcmp (argc, argv, "-xcdrw")
-#endif
         )
         {
 //    filehexdump(rom.rom,0,512);//show possible header or maybe the internal rom header

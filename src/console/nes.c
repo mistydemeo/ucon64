@@ -38,7 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const char *nes_usage[] =
   {
-    "Nintendo Entertainment System/NES/Famicon Game Axe (Redant)",
+    "Nintendo Entertainment System/NES/Famicom Game Axe (Redant)",
     "1983 Nintendo http://www.nintendo.com",
     "  " OPTION_LONG_S "nes         force recognition\n"
 #if 0
@@ -82,10 +82,10 @@ const char *nes_usage[] =
 #endif
     "  " OPTION_LONG_S "dumpinfo    use dumper info when converting to UNIF; " OPTION_LONG_S "file=INFOFILE\n"
     "  " OPTION_S "n           change internal ROM name (UNIF only); " OPTION_LONG_S "file=NEWNAME\n"
-    "  " OPTION_LONG_S "fds         convert Famicon Disk System file (diskimage) from FAM to FDS\n"
-    "  " OPTION_LONG_S "fdsl        list Famicon Disk System/FDS (diskimage) contents\n"
+    "  " OPTION_LONG_S "fds         convert Famicom Disk System file (diskimage) from FAM to FDS\n"
+    "  " OPTION_LONG_S "fdsl        list Famicom Disk System/FDS (diskimage) contents\n"
 #if 0
-    "TODO  " OPTION_LONG_S "fam     convert Famicon Disk System file (diskimage) from FDS to FAM\n"
+    "TODO  " OPTION_LONG_S "fam     convert Famicom Disk System file (diskimage) from FDS to FAM\n"
     "TODO:  " OPTION_LONG_S "tr     truncate doubled PRG/CHR\n"
     "TODO:  " OPTION_LONG_S "nfs    convert NFS sound to WAV; " OPTION_LONG_S "rom=NFSFILE\n"
     "  " OPTION_LONG_S "gge         encode GameGenie code; " OPTION_LONG_S "rom=AAAA:VV or " OPTION_LONG_S "rom=AAAA:VV:CC\n"
@@ -171,7 +171,7 @@ static const char *ines_usage[] = {"iNES header", NULL},
                   *unif_usage[] = {"UNIF header", NULL},
                   *ffe_usage[] = {"FFE header", NULL},
                   *pasofami_usage[] = {"Pasofami file", NULL},
-                  *fds_usage[] = {"Famicon Disk System file (diskimage)", NULL};
+                  *fds_usage[] = {"Famicom Disk System file (diskimage)", NULL};
 
 static st_ines_header_t ines_header;
 static st_unif_header_t unif_header;
@@ -1413,7 +1413,7 @@ nes_ines (st_rominfo_t *rominfo)
 int
 nes_pasofami (st_rominfo_t *rominfo)
 {
-  // nes_s () does iNES -> Pasofami. nes_s () checks for type
+  // nes_s() does iNES -> Pasofami. nes_s() checks for type
   return nes_s (rominfo);
 }
 

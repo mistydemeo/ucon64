@@ -39,7 +39,7 @@ it is also a good start to add support for a new console
 
   comment this to disable it even if the configure script found zlib
 */
-
+@DEFINE_ZLIB@
 
 
 /*

@@ -594,9 +594,11 @@ toprint (int c)
   if (isprint (c))
     return c;
 
-  // characters that also work with printf
+  // characters that also work with printf()
+#ifdef  USE_ANSI_COLOR
   if (c == '\x1b')
     return ucon64.ansi_color ? c : '.';
+#endif
 
   return strchr ("\t\n\r", c) ? c : '.';
 }

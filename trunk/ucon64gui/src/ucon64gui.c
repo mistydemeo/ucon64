@@ -36,36 +36,41 @@ char buf[MAXBUFSIZE];
   fflush (stdout);
 #endif // DEBUG
 
-if(!strdcmp(query,"ucon64gui_snes"))
+strcpy (buf, &query[findlast(query,"=") + 1]);
+//printf("%s\n", buf);
+//fflush (stdout);
+
+
+if(!strdcmp(buf,"ucon64gui_snes"))
 {
   ucon64gui_snes();
   return;
 }
-if(!strdcmp(query,"ucon64gui_root"))
+if(!strdcmp(buf,"ucon64gui_root"))
 {
   ucon64gui_root();
   return;
 }
-if(!strdcmp(query,"ucon64gui_swc"))
+if(!strdcmp(buf,"ucon64gui_swc"))
 {
   ucon64gui_swc();
   return;
 }
 
 // switches/overrides
-if(!strdcmp(query,"-hd"))
+if(!strdcmp(buf,"-hd"))
 {
   ucon64gui.hd = 1;
   return;
 }
 
-if(!strdcmp(query,"-nhd"))
+if(!strdcmp(buf,"-nhd"))
 {
   ucon64gui.hd = 0;
   return;
 }
 
-if(!strdcmp(query,"-ns"))
+if(!strdcmp(buf,"-ns"))
 {
   ucon64gui.ns = (ucon64gui.ns == 1) ? 0 : 1;
   return;
@@ -75,7 +80,7 @@ if(!strdcmp(query,"-ns"))
   options
 */
 
-  sprintf(buf,"xterm -e \"ucon64 %s %s %s\" &", query
+  sprintf(buf,"xterm -e \"ucon64 %s %s %s\" &", buf
   , (ucon64gui.rom != NULL) ? ucon64gui.rom : ""
   , (ucon64gui.file != NULL) ? ucon64gui.file : ""
   );

@@ -55,8 +55,6 @@ const char *gd_usage[] =
 #define BUFFERSIZE      8192
 #define OK 0
 #define ERROR 1
-#define GD3_MAX_UNITS 16                        // Maximum that the hardware supports
-// Each logical memory unit is 8Mbit in size (internally it's 2*4Mbit)
 
 // Debug without actual copier I/O. Handy for if you don't own a GD copier, like
 //  me ;-) (dbjh)
@@ -307,14 +305,14 @@ int
 gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
 {
   FILE *file;
-  unsigned char *buffer, *names[4], names_mem[4][12],
-                filenames[4][8 + 1 + 3 + 1];    // +1 for period, +1 for ASCII-z;
+  unsigned char *buffer, *names[GD3_MAX_UNITS], names_mem[GD3_MAX_UNITS][12],
+                filenames[GD3_MAX_UNITS][8 + 1 + 3 + 1]; // +1 for period, +1 for ASCII-z;
   int num_units, i, send_header, x, split = 1;
 
   init_io (parport);
 
-  // We don't want to malloc() ridiculous small chunks (of 12 bytes)
-  for (i = 0; i < 4; i++)
+  // We don't want to malloc() ridiculously small chunks (of 12 bytes)
+  for (i = 0; i < GD3_MAX_UNITS; i++)
     names[i] = names_mem[i];
 
   gd_names = (char **) names;

@@ -1109,7 +1109,8 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
 int
 snes_s (st_rominfo_t *rominfo)
 {
-  char header[512], dest_name[FILENAME_MAX], *names[4], names_mem[4][12];
+  char header[512], dest_name[FILENAME_MAX], *names[GD3_MAX_UNITS],
+       names_mem[GD3_MAX_UNITS][12];
   int nparts, surplus, x, half_size, size, name_i = 0;
 
   size = rominfo->file_size - rominfo->buheader_len;
@@ -1120,8 +1121,8 @@ snes_s (st_rominfo_t *rominfo)
       nparts = size / (8 * MBIT);
       surplus = size % (8 * MBIT);
 
-      // We don't want to malloc() ridiculous small chunks (of 12 bytes)
-      for (x = 0; x < 4; x++)
+      // We don't want to malloc() ridiculously small chunks (of 12 bytes)
+      for (x = 0; x < GD3_MAX_UNITS; x++)
         names[x] = names_mem[x];
       snes_make_gd_names (ucon64.rom, rominfo, (char **) names);
 

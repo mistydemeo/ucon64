@@ -24,6 +24,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 extern const char *gd_usage[];
 
+#define GD_HEADER_START 0
+#define GD_HEADER_LEN 512
+#define GD3_MAX_UNITS 16                        // Maximum that the hardware supports
+// Each logical memory unit is 8Mbit in size (internally it's 2*4Mbit)
 
 #ifdef BACKUP
 int gd_read_rom (const char *filename, unsigned int parport);
@@ -33,6 +37,4 @@ int gd_read_sram (const char *filename, unsigned int parport);
 int gd_write_sram (const char *filename, unsigned int parport);
 #endif // BACKUP
 
-#define GD_HEADER_START 0
-#define GD_HEADER_LEN 512
 #endif // MGD_H

@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 static void set_data_read (void);
-static void set_data_write (void);
+//static void set_data_write (void);
 static void set_ai (unsigned char ai);
 static void init_port (void);
 static void deinit_port (void);
@@ -85,11 +85,13 @@ set_data_read (void)                            // original name: set_data_read
 }
 
 
+#if 0
 void
 set_data_write (void)                           // original name: set_data_write
 {
   outportb (port_a, 1);                         // nastb=1,nib_sel=0,ndstb=1,nwrite=0
 }
+#endif
 
 
 void
@@ -335,7 +337,7 @@ ttt_write_byte_intel (int addr, unsigned char b) // original name: writeIntelEEP
 void
 ttt_write_page_rom (int addr, unsigned char *buf) // original name: writeEEPDataPAGE
 {
-  unsigned char i;
+  int i;
 
   // send command 0xe8
   ttt_rom_enable ();
@@ -378,7 +380,7 @@ ttt_write_byte_ram (int addr, unsigned char b)  // original name: writeRAMDataB
 void
 ttt_write_page_ram (int addr, unsigned char *buf) // original name: writeRAMDataPAGE
 {
-  unsigned char i;
+  int i;
 
   ttt_ram_enable ();
   ttt_set_ai_data (6, 0x98);
@@ -392,7 +394,7 @@ ttt_write_page_ram (int addr, unsigned char *buf) // original name: writeRAMData
 void
 ttt_write_page_ram2 (int addr, unsigned char *buf) // original name: writeRAMDBDataPAGE
 {                                               // MD-PRO function
-  unsigned char i;
+  int i;
 
   ttt_ram_enable ();
   ttt_set_ai_data (6, 0x98);

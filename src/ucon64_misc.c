@@ -170,8 +170,9 @@ size_t filepad(	char *filename
 {
 	size_t size;
 
-	size=(quickftell(filename)-start);
+	size=quickftell(filename)-start;
 
+/*
 	if(!(size%unit))return(size);
 
 	size=(size_t)size/unit;
@@ -179,6 +180,15 @@ size_t filepad(	char *filename
 	size=size*unit;
 
 	truncate(filename,size+start);
+*/
+	if((size%unit)!=0)
+	{
+		size/=unit;
+		size+=1;
+		size*=unit;
+
+		truncate(filename,size+start);
+	}
 	return(size);
 }
 

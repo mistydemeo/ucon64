@@ -441,7 +441,11 @@ if(argcmp(argc,argv,"-mkppf"))
 	ucon64_argv[0]=ucon64_name();
 	ucon64_argv[1]=ucon64_rom();
 	ucon64_argv[2]=ucon64_file();
-	ucon64_argv[3]="test";
+
+	strcpy(buf,ucon64_file());
+	newext(buf,".PPF");
+
+	ucon64_argv[3]=buf;
 	ucon64_argc=4;
 
 	return(makeppf_main(ucon64_argc,ucon64_argv));

@@ -649,6 +649,7 @@ static const st_nes_data_t nes_data[] = {
   {0x161d717b, 46, 1, 790},
   {0x16342ad0, 178, 0, 0},
   {0x16388a44, 126, 1, 0},
+  {0x163a5eda, 0, 0, 93}, // Batman 3 [p1]
   {0x163e86c0, 126, 1, 1189},
   {0x163eccae, 100, 0, 0},
   {0x1644c162, 39, 0, 0},
@@ -1570,7 +1571,7 @@ static const st_nes_data_t nes_data[] = {
   {0x481608a9, 117, 0, 0},
   {0x4819a595, 160, 0, 0},
   {0x4823eefe, 57, 1, 193},
-  {0x48349b0b, 53, 0, 0},
+  {0x48349b0b, 53, 0, 87}, // Dragon Quest 2 (J)
   {0x485ac098, 37, 0, 0},
   {0x4864c304, 126, 1, 686},
   {0x489d19ab, 77, 0, 0},
@@ -1579,7 +1580,7 @@ static const st_nes_data_t nes_data[] = {
   {0x48c8de53, 46, 0, 0},
   {0x48dc9540, 97, 0, 0},
   {0x48dc9e6a, 178, 0, 0},
-  {0x48e904d0, 188, 1, 490},
+  {0x48e904d0, 188, 1, 490}, // Snake's Revenge (U)
   {0x48ecc48a, 188, 1, 289},
   {0x48f68d40, 126, 1, 1085},
   {0x48f6a8e2, 62, 0, 0},
@@ -2240,7 +2241,7 @@ static const st_nes_data_t nes_data[] = {
   {0x6ee4bb0a, 34, 1, 1287},
   {0x6ee68312, 77, 1, 690},
   {0x6ee94d32, 4, 1, 991},
-  {0x6f10097d, 0, 1, 0},
+  {0x6f10097d, 4, 1, 91}, // Simpsons - Bart Vs the Space Mutants, The (U)
   {0x6f27300b, 129, 2, 0},
   {0x6f365e7b, 156, 0, 0},
   {0x6f3d2737, 4, 1, 991},
@@ -2394,6 +2395,7 @@ static const st_nes_data_t nes_data[] = {
   {0x772513f4, 161, 0, 0},
   {0x77415ad3, 178, 0, 0},
   {0x77512388, 69, 0, 0},
+  {0x7751588d, 126, 2, 0}, // Metroid (E) [!]
   {0x77540bb5, 143, 1, 788},
   {0x775b8ed9, 89, 0, 0},
   {0x77833016, 24, 1, 1086},
@@ -2459,6 +2461,7 @@ static const st_nes_data_t nes_data[] = {
   {0x7a76e057, 39, 0, 0},
   {0x7a8ae523, 117, 0, 0},
   {0x7ae0bf3c, 126, 0, 0},
+  {0x7ae5c002, 77, 2, 91}, // Jackie Chan's Action Kung Fu (E)
   {0x7aee2161, 179, 0, 0},
   {0x7af3afb7, 156, 0, 0},
   {0x7af8204a, 77, 0, 0},
@@ -3488,7 +3491,7 @@ static const st_nes_data_t nes_data[] = {
   {0xb14e668e, 37, 0, 0},
   {0xb14ea4d2, 143, 1, 788},
   {0xb1612fe6, 77, 1, 490},
-  {0xb174b680, 117, 0, 0},
+  {0xb174b680, 117, 0, 0}, // Dig Dug (J)
   {0xb17574f3, 0, 1, 0},
   {0xb184060a, 47, 0, 0},
   {0xb1849d4e, 69, 0, 0},
@@ -3771,6 +3774,7 @@ static const st_nes_data_t nes_data[] = {
   {0xc1d7ab1d, 24, 0, 0},
   {0xc1d9abbf, 24, 0, 0},
   {0xc1dc5b12, 124, 0, 0},
+  {0xc1e91d3f, 97, 2, 90}, // Spy Vs Spy (E) [!]
   {0xc1fbf659, 100, 0, 0},
   {0xc2222bb1, 92, 0, 0},
   {0xc22c23ab, 39, 0, 0},
@@ -4054,6 +4058,7 @@ static const st_nes_data_t nes_data[] = {
   {0xd131bf15, 34, 1, 8},
   {0xd1397940, 89, 0, 0},
   {0xd152fb02, 173, 1, 790},
+  {0xd153caf6, 88, 2, 90}, // Swords and Serpents (E) [!]
   {0xd161888b, 84, 2, 0},
   {0xd1691028, 117, 0, 0},
   {0xd175b0cb, 191, 0, 0},
@@ -4465,6 +4470,7 @@ static const st_nes_data_t nes_data[] = {
   {0xe6f08e93, 126, 1, 387},
   {0xe6f5fdd2, 92, 0, 0},
   {0xe713f464, 156, 0, 0},
+  {0xe71d034e, 100, 2, 91}, // Snake's Revenge (E) [!]
   {0xe737a11f, 0, 1, 0},
   {0xe73e7260, 166, 1, 0},
   {0xe74a91bb, 12, 1, 690},
@@ -4514,6 +4520,7 @@ static const st_nes_data_t nes_data[] = {
   {0xe943ec4d, 24, 1, 791},
   {0xe949ef8a, 1, 0, 0},
   {0xe94d5181, 128, 0, 0},
+  {0xe94e883d, 126, 2, 88}, // Super Mario Bros 2 (E) [!]
   {0xe95454fc, 102, 0, 0},
   {0xe95752bd, 0, 1, 0},
   {0xe98ab943, 158, 1, 1193},
@@ -7181,8 +7188,7 @@ nes_init (st_rominfo_t *rominfo)
         if (info->maker)
           rominfo->maker = NULL_TO_UNKNOWN_S (nes_maker[MIN (info->maker, NES_MAKER_MAX - 1)]);
 
-        if (info->country)
-          rominfo->country = NULL_TO_UNKNOWN_S (nes_country[MIN (info->country, NES_COUNTRY_MAX - 1)]);
+        rominfo->country = NULL_TO_UNKNOWN_S (nes_country[MIN (info->country, NES_COUNTRY_MAX - 1)]);
 
         if (info->date)
           {

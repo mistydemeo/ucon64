@@ -37,7 +37,6 @@ extern st_symbol_t import_export;
 #define vsprintf import_export.vsprintf
 #define fputs import_export.fputs
 
-#ifndef HAVE_ZLIB_H
 #if 0
 // These are now defined in dxe_misc.c
 #define fopen import_export.fopen
@@ -50,7 +49,6 @@ extern st_symbol_t import_export;
 #define fwrite import_export.fwrite
 #define fputc import_export.fputc
 #define ftell import_export.ftell
-#endif
 #endif
 
 #define fdopen import_export.fdopen

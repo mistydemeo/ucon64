@@ -592,8 +592,6 @@ ucon64_process_rom (char *fname)
 {
 #ifdef  HAVE_ZLIB_H
   int n_entries = unzip_get_number_entries (fname);
-printf ("SHIT");
-
   if (n_entries != -1)                      // it's a zip file
     {
       for (unzip_current_file_nr = 0; unzip_current_file_nr < n_entries;

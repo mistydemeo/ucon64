@@ -39,10 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 #ifdef  DJGPP
-#ifdef  HAVE_ZLIB_H
-#include <zlib.h>
-#include "unzip.h"
-#endif
 #include "dxedll_pub.h"
 #include "map.h"
 
@@ -162,36 +158,6 @@ open_module (char *module_name)
   sym->time = time;
   sym->delay = delay;
   sym->__dpmi_int = __dpmi_int;
-
-#ifdef  HAVE_ZLIB_H
-#if 0
-  // zlib functions
-  sym->gzopen = gzopen;
-  sym->gzclose = gzclose;
-  sym->gzwrite = gzwrite;
-  sym->gzgets = gzgets;
-  sym->gzeof = gzeof;
-  sym->gzseek = gzseek;
-  sym->gzputc = gzputc;
-  sym->gzread = gzread;
-  sym->gzgetc = gzgetc;
-  sym->gzrewind = gzrewind;
-  sym->gztell = gztell;
-
-  // unzip functions
-  sym->unzOpen = unzOpen;
-  sym->unzOpenCurrentFile = unzOpenCurrentFile;
-  sym->unzGoToFirstFile = unzGoToFirstFile;
-  sym->unzClose = unzClose;
-  sym->unzGetGlobalInfo = unzGetGlobalInfo;
-  sym->unzGoToNextFile = unzGoToNextFile;
-  sym->unzCloseCurrentFile = unzCloseCurrentFile;
-  sym->unzeof = unzeof;
-  sym->unzReadCurrentFile = unzReadCurrentFile;
-  sym->unztell = unztell;
-  sym->unzGetCurrentFileInfo = unzGetCurrentFileInfo;
-#endif
-#endif
 
   // initialize variables
   sym->__dj_stdin = __dj_stdin;

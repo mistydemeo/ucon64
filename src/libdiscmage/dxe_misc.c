@@ -33,10 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdio.h>
 #include "dxedll_pub.h"
-#ifdef  HAVE_ZLIB_H
-#include <zlib.h>
-#include "unzip.h"
-#endif
 
 extern st_symbol_t import_export;
 int errno = 0; // TODO: verify how dangerous this is (is it?)

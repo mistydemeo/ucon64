@@ -220,10 +220,11 @@ extern int kbhit (void);                        // may only be used after init_c
 #include <pc.h>                                 // kbhit()
 
 #elif   defined _WIN32
-#include <conio.h>                              // kbhit() & getch()
+#include <conio.h>                               // kbhit() & getch()
 
 #elif   defined AMIGA
 extern int kbhit (void);
+#define getch           getchar
 #endif
 
 #ifdef  __CYGWIN__

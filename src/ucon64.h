@@ -134,7 +134,7 @@ typedef struct
   char discmage_path[FILENAME_MAX];             // path to the discmage DLL
 #endif
 #ifdef  AMIGA
-  char parport_dev[80];                         // parallel port device (e.g. "PAR:")
+  char parport_dev[80];                         // parallel port device (e.g. "parallel.device")
 #endif
   int parport;                                  // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP

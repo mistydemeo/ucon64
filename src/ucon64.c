@@ -89,7 +89,8 @@ st_ucon64_t ucon64;                             // containes ptr to image, dat a
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
 
 #ifdef  AMIGA
-unsigned long __stack = 0x40000L;
+unsigned long __stacksize = 102400;            // doesn't work on PPC? is StormC specific?
+//unsigned long __stack = 102400;              // for SAS/C, DICE, GCC etc.?
 char vers[] = "$VER: uCON64 "UCON64_VERSION_S" "CURRENT_OS_S" ("__DATE__") ("__TIME__")";
 #endif
 

@@ -39,6 +39,6 @@ int doctor64_write(	char *filename
 
 int doctor64_usage(int argc, char *argv[]);
 
-#define doctor64_TITLE "Doctor V64\nBung Enterprises Ltd http://www.bung.com.hk"
+#define doctor64_TITLE "Doctor V64\n19XX Bung Enterprises Ltd http://www.bung.com.hk"
 #define doctor64_HEADER_START 0
 #define doctor64_HEADER_LEN 0

@@ -79,7 +79,7 @@ int doctor64jr_write(	char *filename
 );
 
 
-#define doctor64jr_TITLE "Doctor64 Jr\nBung Enterprises Ltd http://www.bung.com.hk"
+#define doctor64jr_TITLE "Doctor64 Jr\n19XX Bung Enterprises Ltd http://www.bung.com.hk"
 
 int doctor64jr_usage(int argc,char *argv[]);
 #define doctor64jr_HEADER_START 0

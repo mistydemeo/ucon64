@@ -1013,7 +1013,10 @@ one_file (const char *filename1, const char *filename2)
   file2 = CreateFile (filename2, GENERIC_READ, FILE_SHARE_READ, NULL,
                       OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   if (file2 == INVALID_HANDLE_VALUE)
-    return 0;
+    {
+      CloseHandle (file1);
+      return 0;
+    }
   GetFileInformationByHandle (file1, &finfo1);
   GetFileInformationByHandle (file2, &finfo2);
   CloseHandle (file1);

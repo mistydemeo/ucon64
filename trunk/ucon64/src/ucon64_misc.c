@@ -1334,8 +1334,6 @@ ucon64_configfile (void)
                  "#\n"
                  "ace_extract=unace e \"%%s\"\n"
 #endif
-#endif
-#ifdef  LIBDISCMAGE
                  "#\n"
                  "# uCON64 can operate as frontend for CD burning software to make backups\n"
                  "# for CD-based consoles \n"
@@ -1366,25 +1364,11 @@ ucon64_configfile (void)
       set_property (ucon64.configfile, "version", buf);
 
       set_property (ucon64.configfile, "ansi_color", "1");
-#if 0
-
-#ifdef BACKUP
-      set_property (ucon64.configfile, "parport", "0x378");
-#endif // BACKUP
-
-      set_property (ucon64.configfile, "emulate_gp32", "");
-      set_property (ucon64.configfile, "cdrw_read",
-        get_property (ucon64.configfile, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
-      set_property (ucon64.configfile, "cdrw_write",
-        get_property (ucon64.configfile, "cdrw_raw_write", buf2, "cdrdao write --device 0,0,0 --driver generic-mmc "));
-#endif
-
-      DELETE_PROPERTY (ucon64.configfile, "cdrw_raw_read");
-      DELETE_PROPERTY (ucon64.configfile, "cdrw_raw_write");
-      DELETE_PROPERTY (ucon64.configfile, "cdrw_iso_read");
-      DELETE_PROPERTY (ucon64.configfile, "cdrw_iso_write");
 
 #if 0
+      DELETE_PROPERTY (ucon64.configfile, "cdrw_read");
+      DELETE_PROPERTY (ucon64.configfile, "cdrw_write");
+
       set_property (ucon64.configfile, "lha_extract", "lha efi \"%s\"");
       set_property (ucon64.configfile, "lzh_extract", "lha efi \"%s\"");
       set_property (ucon64.configfile, "zip_extract", "unzip -xojC \"%s\"");

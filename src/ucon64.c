@@ -576,6 +576,7 @@ main (int argc, char **argv)
     for (; rom_index < argc; rom_index++)
       {
         int result = 0;
+        char buf2[FILENAME_MAX], buf3[FILENAME_MAX];
 #ifndef _WIN32
         struct dirent *ep;
         DIR *dp;
@@ -597,8 +598,6 @@ main (int argc, char **argv)
                   {
                     while ((ep = readdir (dp)))
                       {
-                        char buf2[FILENAME_MAX], buf3[FILENAME_MAX];
-                        
                         sprintf (buf2, "%s" FILE_SEPARATOR_S "%s", buf, ep->d_name);
                         realpath2 (buf2, buf3);
 

@@ -153,7 +153,7 @@ ucon64_switches (int c, const char *optarg)
       if (ucon64.discmage_enabled)
         {
           x = libdm_get_version();
-          sprintf (buf, "%d.%d.%d", x >> 16, x >> 8, x);
+          sprintf (buf, "%d.%d.%d (%s)", x >> 16, x >> 8, x, libdm_get_version_s());
         }
       else
         strcpy (buf, "not available");
@@ -178,7 +178,7 @@ ucon64_switches (int c, const char *optarg)
       if (ucon64.netgui_enabled)
         {
           x = libng_get_version();
-          sprintf (buf2, "%d.%d.%d (supported: %s)", x >> 16, x >> 8, x, libng_get_version_s());
+          sprintf (buf2, "%d.%d.%d (%s)", x >> 16, x >> 8, x, libng_get_version_s());
         }
       else
         strcpy (buf2, "not available");

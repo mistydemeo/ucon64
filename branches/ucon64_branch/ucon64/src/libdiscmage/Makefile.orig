@@ -3,15 +3,15 @@
 DLOPEN=1
 #ZLIB=1
 
-prefix = /usr/local
-exec_prefix = ${prefix}
-includedir = ${prefix}/include
-libdir =  ${exec_prefix}/lib
+prefix=/usr/local
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
 
-INSTALL = /usr/bin/install -c
-INSTALL_PROGRAM = ${INSTALL}
-INSTALL_DATA = ${INSTALL} -m 644
-#RANLIB = ranlib
+INSTALL=/usr/bin/install -c
+INSTALL_PROGRAM=${INSTALL}
+INSTALL_DATA=${INSTALL} -m 644
+#RANLIB=ranlib
 
 CC=gcc
 CFLAGS0=-Wall -W -O3 -DHAVE_CONFIG_H
@@ -36,7 +36,8 @@ GCC_WIN=1
 endif
 
 LIBNAME=discmage
-OBJECTS=libdm_misc.o cdi.o nero.o sheets.o other.o dllinit.o misc.o
+OBJECTS=libdm_misc.o dllinit.o misc.o format/format.o format/cdi.o \
+        format/nero.o format/cue.o format/toc.o format/other.o
 ifdef ZLIB
 LIBS=-lz
 OBJECTS+=unzip.o map.o miscz.o
@@ -149,6 +150,7 @@ ifndef DLOPEN
 	del $(LIBNAME).a
 endif
 	del *.o
+	del format\*.o
 else                                    # Unix, BeOS or Mac OS X (Darwin)
 	rm -f $(FULLLIBNAME) $(OBJECTS) *.core *.stackdump *.o
 endif                                   # DJGPP

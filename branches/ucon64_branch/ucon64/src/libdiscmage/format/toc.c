@@ -307,10 +307,11 @@ dm_toc_write (const dm_image_t *image)
                      "\n"
                      "TRACK %s\n"
 //                     "NO COPY\n"
-                     "DATAFILE \"%s\" %d// length in bytes: %d\n",
+                     "DATAFILE \"%s\" %u// length in bytes: %u\n",
                      dm_get_track_desc (track->mode, track->sector_size, FALSE),
-                     basename2 (image->fname), track->total_len * track->sector_size,
-                     track->total_len * track->sector_size);
+                     basename2 (image->fname),
+		     (unsigned int) (track->total_len * track->sector_size),
+                     (unsigned int) (track->total_len * track->sector_size));
               break;
 
           case 1: // mode1
@@ -319,10 +320,11 @@ dm_toc_write (const dm_image_t *image)
                      "\n"
                      "TRACK %s\n"
 //                     "NO COPY\n"
-                     "DATAFILE \"%s\" %d// length in bytes: %d\n",
+                     "DATAFILE \"%s\" %u// length in bytes: %u\n",
                      dm_get_track_desc (track->mode, track->sector_size, FALSE),
-                     basename2 (image->fname), track->total_len * track->sector_size,
-                     track->total_len * track->sector_size);
+                     basename2 (image->fname),
+		     (unsigned int) (track->total_len * track->sector_size),
+                     (unsigned int) (track->total_len * track->sector_size));
             break;
             
           default: // mode2
@@ -331,10 +333,11 @@ dm_toc_write (const dm_image_t *image)
                      "\n"
                      "TRACK %s\n"
 //                     "NO COPY\n"
-                     "DATAFILE \"%s\" %d// length in bytes: %d\n",
+                     "DATAFILE \"%s\" %u// length in bytes: %u\n",
                      dm_get_track_desc (track->mode, track->sector_size, FALSE),
-                     basename2 (image->fname), track->total_len * track->sector_size,
-                     track->total_len * track->sector_size);
+                     basename2 (image->fname),
+		     (unsigned int) (track->total_len * track->sector_size),
+                     (unsigned int) (track->total_len * track->sector_size));
             break;
         }
 

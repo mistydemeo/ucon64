@@ -3,58 +3,35 @@
 DLOPEN=1
 #ZLIB=1
 DISCMAGE=1
-#GUI=1
 
 CC=gcc
-CFLAGS=-I.
+CFLAGS=-I. -Wall -W -O3 -DHAVE_CONFIG_H
 LDFLAGS=-s
 
 ifdef DISCMAGE
 LIBNAME_DM=discmage
-#CFLAGS+=-Ilibdiscmage
 endif
-
-ifdef GUI
-LIBNAME_NG=netgui
-#CFLAGS+=-Ilibnetgui
-endif
-
-CFLAGS+=-Wall -W -O3 -DHAVE_CONFIG_H
 
 # The test for Cygwin should be done before the test for DJGPP, because the
 # environment variable DJGPP can be set under Bash for people who have
 # installed both gcc (and friends) ports.
 
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-
-ifdef DISCMAGE
-FULLLIBNAME_DM=$(LIBNAME_DM).dll
-ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME_DM).a 
+GCC_WIN=0
+# test cygwin before DJGPP; OSTYPE is not a real env var on Cygwin
+ifeq ($(TERM),cygwin)                   
+GCC_WIN=1
 endif
-endif
-
-ifdef GUI
-FULLLIBNAME_NG=$(LIBNAME_NG).dll
-ifndef DLOPEN
-LDFLAGS+=libnetgui/$(LIBNAME_NG).a 
-endif
+# test msys before DJGPP; Msys, MinGW's POSIX build environment
+ifeq ($(OSTYPE),msys)
+GCC_WIN=1
 endif
 
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(GCC_WIN),1)
 
 ifdef DISCMAGE
 FULLLIBNAME_DM=$(LIBNAME_DM).dll
 ifndef DLOPEN
 LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
-endif
-endif
-
-ifdef GUI
-FULLLIBNAME_NG=$(LIBNAME_NG).dll
-ifndef DLOPEN
-LDFLAGS+=libnetgui/$(LIBNAME_NG).a
 endif
 endif
 
@@ -68,24 +45,17 @@ LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
 endif
 endif
 
-ifdef GUI
-FULLLIBNAME_NG=$(LIBNAME_NG).dxe
-ifndef DLOPEN
-LDFLAGS+=libnetgui/$(LIBNAME_NG).a
-endif
-endif
-
-else                                    # Unix or BeOS
-
-ifdef DLOPEN
+else                                    # Unix, BeOS or Mac OS X (Darwin)
 
 ifdef DISCMAGE
+ifeq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
+FULLLIBNAME_DM=$(LIBNAME_DM).dylib
+else
 FULLLIBNAME_DM=$(LIBNAME_DM).so
 endif
-
-ifdef GUI
-FULLLIBNAME_NG=$(LIBNAME_NG).so
 endif
+
+ifdef DLOPEN
 
 ifneq ($(OSTYPE),beos)
 ifeq ($(findstring freebsd,$(OSTYPE)),) # false if OSTYPE contains "freebsd"
@@ -94,21 +64,15 @@ endif
 endif
 
 else                                    # DLOPEN
-ifdef DISCMAGE
-FULLLIBNAME_DM=lib$(LIBNAME_DM).so
+ifdef DISCMAGE                          # GNU specific: "simply expanded variable"
+FULLLIBNAME_DM:=$(addprefix lib,$(FULLLIBNAME_DM))
 LDFLAGS+=-Llibdiscmage -l$(LIBNAME_DM)
-endif
-
-ifdef GUI
-FULLLIBNAME_NG=lib$(LIBNAME_NG).so
-LDFLAGS+=-Llibnetgui -l$(LIBNAME_NG)
 endif
 
 endif
 
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
 
 OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
@@ -132,59 +96,41 @@ endif
 ifdef DISCMAGE
 OBJECTS+=ucon64_dm.o
 endif
-ifdef GUI
-OBJECTS+=ucon64_ng.o
-endif
 
 ifdef DLOPEN
 OBJECTS+=dlopen.o
 ifndef ZLIB
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-else
-ifeq ($(OSTYPE),msys)
+ifeq ($(GCC_WIN),1)
 else
 ifdef DJGPP                             # DJGPP code in dlopen needs map code
 OBJECTS+=map.o
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 endif                                   # ZLIB
 else
-ifeq ($(TERM),cygwin)                   # Cygwin code in ucon64_misc needs dlopen code
+ifeq ($(GCC_WIN),1)                     # Cygwin/MinGW code in ucon64_misc needs dlopen code
 OBJECTS+=dlopen.o
-else
-ifeq ($(OSTYPE),msys)
-OBJECTS+=dlopen.o
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 endif                                   # DLOPEN
 
 
 TARGET=ucon64
-ifeq ($(TERM),cygwin)                   # OSTYPE is not a real env var on Cygwin
-TARGET:=$(addsuffix .exe, $(TARGET))    # GNU specific: "simply expanded variable"
-else                                    # adding .exe avoids "problems" with Cygwin
-ifeq ($(OSTYPE),msys)                   # Msys, MinGW's POSIX build environment
-TARGET:=$(addsuffix .exe, $(TARGET))
+ifeq ($(GCC_WIN),1)
+TARGET:=$(addsuffix .exe,$(TARGET))     # adding .exe avoids "problems" with Cygwin/MinGW
 else
 ifdef DJGPP                             # OSTYPE is not defined by default under DOS
-TARGET:=$(addsuffix .exe, $(TARGET))
+TARGET:=$(addsuffix .exe,$(TARGET))
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
-all: libdiscmage/$(FULLLIBNAME_DM) libnetgui/$(FULLLIBNAME_NG) $(TARGET)
+all: libdiscmage/$(FULLLIBNAME_DM) $(TARGET)
 
 
 CLEAN_CMD=rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~; \
-cd libdiscmage && $(MAKE) clean; cd ..; \
-cd libnetgui && $(MAKE) clean
+cd libdiscmage && $(MAKE) clean
 
 clean:
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	$(CLEAN_CMD)
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(GCC_WIN),1)
 	$(CLEAN_CMD)
 else
 ifdef DJGPP
@@ -196,25 +142,17 @@ ifdef DJGPP
 	cd libdiscmage
 	$(MAKE) clean
 	cd ..
-	cd libnetgui
-	$(MAKE) clean
-	cd ..
-else                                    # Unix or BeOS
+else                                    # Unix, BeOS or Mac OS X (Darwin)
 	$(CLEAN_CMD)
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
 
 DISTCLEAN_CMD=rm -f Makefile config.log config.status config.cache config.h; \
-cd libdiscmage && $(MAKE) distclean; cd ..; \
-cd libnetgui && $(MAKE) distclean
+cd libdiscmage && $(MAKE) distclean
 
 distclean: clean
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	$(DISTCLEAN_CMD)
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(GCC_WIN),1)
 	$(DISTCLEAN_CMD)
 else
 ifdef DJGPP
@@ -226,14 +164,10 @@ ifdef DJGPP
 	cd libdiscmage
 	$(MAKE) distclean
 	cd ..
-	cd libnetgui
-	$(MAKE) distclean
-	cd ..
 else
 	$(DISTCLEAN_CMD)
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
 
 .c.o:
@@ -242,10 +176,7 @@ endif                                   # cygwin
 
 ifdef DISCMAGE
 libdiscmage/$(FULLLIBNAME_DM):
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	cd libdiscmage && $(MAKE)
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(GCC_WIN),1)
 	cd libdiscmage && $(MAKE)
 else
 ifdef DJGPP
@@ -255,28 +186,8 @@ ifdef DJGPP
 else
 	cd libdiscmage && $(MAKE)
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 endif                                   # DISCMAGE
-
-ifdef GUI
-libnetgui/$(FULLLIBNAME_NG):
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	cd libnetgui && $(MAKE)
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
-	cd libnetgui && $(MAKE)
-else
-ifdef DJGPP
-	cd libnetgui
-	$(MAKE)
-	cd ..
-else
-	cd libnetgui && $(MAKE)
-endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
-endif                                   # GUI
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
@@ -297,8 +208,7 @@ endif                                   # beos
 endif                                   # DJGPP
 endif                                   # msys
 endif                                   # cygwin
-#	cd libdiscmage && $(MAKE) install
-#	cd libnetgui && $(MAKE) install
+	cd libdiscmage && $(MAKE) install
 
 
 uninstall:
@@ -316,8 +226,7 @@ endif                                   # beos
 endif                                   # DJGPP
 endif                                   # msys
 endif                                   # cygwin
-#	cd libdiscmage && $(MAKE) uninstall
-#	cd libnetgui && $(MAKE) uninstall
+	cd libdiscmage && $(MAKE) uninstall
 
 
 # Dependencies
@@ -358,7 +267,6 @@ ucon64_opts.o: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
 ucon64_misc.o: dlopen.h $(UCON64_STD_H)
 ucon64_dat.o: ucon64_dat.h $(UCON64_STD_H)
 ucon64_dm.o: ucon64_dm.h dlopen.h $(UCON64_STD_H)
-ucon64_ng.o: ucon64_dm.h dlopen.h $(UCON64_STD_H)
 console/gb.o: console/gb.h backup/mgd.h $(UCON64_STD_H)
 console/gba.o: console/gba.h $(UCON64_STD_H)
 console/genesis.o: console/genesis.h backup/smd.h backup/mgd.h $(UCON64_STD_H)

@@ -35,6 +35,7 @@ char djimport_path[FILENAME_MAX] = "discmage.dxe"; // default value
 
 static void *libdm;
 static uint32_t (*dm_get_version_ptr) (void);
+static const char *(*dm_get_version_s_ptr) (void);
 static void (*dm_set_gauge_ptr) (void (*) (int, int));
 
 static FILE *(*dm_fdopen_ptr) (dm_image_t *, int, const char *);
@@ -68,6 +69,7 @@ load_dxe (void)
   libdm = open_module (djimport_path);
 
   dm_get_version_ptr = get_symbol (libdm, "dm_get_version");
+  dm_get_version_s_ptr = get_symbol (libdm, "dm_get_version_s");
   dm_set_gauge_ptr = get_symbol (libdm, "dm_set_gauge");
 
   dm_open_ptr = get_symbol (libdm, "dm_open");
@@ -106,6 +108,19 @@ dm_get_version (void)
 {
   CHECK
   return dm_get_version_ptr ();
+}
+
+
+const char *
+dm_get_version_s (void)
+/*
+  Our DXE code can export (pointers to) variables. However, Windows DLLs can
+  only export (pointers to) functions. To avoid platform-specific code we
+  let all code use these functions in libdiscmage (dm_get_version()).
+*/
+{
+  CHECK
+  return dm_get_version_s_ptr ();
 }
 
 

@@ -381,7 +381,7 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
       if (track->mode != 0) // AUDIO/2352 has no iso header
         track->iso_header_start = track->track_start + (track->sector_size * (16 + track->pregap_len)) + track->seek_header;
 
-      printf ("iso header offset: %d\n\n", track->iso_header_start);
+      printf ("iso header offset: %d\n\n", (int) track->iso_header_start);
       fflush (stdout);
 
       track->desc = dm_get_track_desc (track->mode, track->sector_size, TRUE);
@@ -805,6 +805,13 @@ dm_get_version (void)
                                                   DM_VERSION_MINOR,
                                                   DM_VERSION_STEP);
   return dm_version;
+}
+
+
+const char *
+dm_get_version_s (void)
+{
+  return "0.0.5alpha";
 }
 
 

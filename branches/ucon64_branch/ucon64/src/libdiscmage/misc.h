@@ -1,7 +1,7 @@
 /*
 misc.h - miscellaneous functions
 
-written by 1999 - 2002 NoisyB (noisyb@gmx.net)
+written by 1999 - 2004 NoisyB (noisyb@gmx.net)
            2001 - 2004 dbjh
            2002 - 2003 Jan-Erik Karlsson (Amiga)
 
@@ -96,7 +96,7 @@ typedef signed __int64 int64_t;
 #ifndef MAX
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #endif
-
+#define SAFE_STRCPY(a,b) if(a){strncpy(a,b?b:"",sizeof(a)-1);a[sizeof(a)-1]=0;}
 #define LIB_VERSION(ver, rel, seq) (((ver) << 16) | ((rel) << 8) | (seq))
 #define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
 //#define RANDOM(min, max) ((rand () % (max - min)) + min)

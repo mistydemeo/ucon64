@@ -1076,9 +1076,9 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
     "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
     "  " OPTION_LONG_S "crc         show CRC32 value of ROM\n"
-    "  " OPTION_LONG_S "dbs         search ROM database (all entries) by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
-    "  " OPTION_LONG_S "db          ROM database statistics (# of entries)\n"
-    "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
+    "  " OPTION_LONG_S "dbs         search ROM in all DAT files by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
+    "  " OPTION_LONG_S "db          DAT file statistics (DAT files: %s)\n"
+    "  " OPTION_LONG_S "dbv         like " OPTION_LONG_S "db but more verbose\n"
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsd         like " OPTION_LONG_S "ls but uses only DAT info; " OPTION_LONG_S "rom=DIRECTORY\n"
@@ -1112,7 +1112,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_S "q           be quiet (don't show ROM info)\n"
 //    "  " OPTION_LONG_S "qq          be even more quiet\n"
     "\n"
-    , argv[0], ucon64.configfile);
+    , argv[0], ucon64.configfile, ucon64.configdir);
 
   printf ("Patching\n");
 

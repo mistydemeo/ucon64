@@ -68,7 +68,8 @@ typedef struct
   unsigned short remaining_tracks;      // tracks left
   unsigned short global_current_session;        // current session
 
-  dm_track_t *track; // TODO make an array of this
+//  dm_track_t **track; // TODO make an array of this
+  dm_track_t *track;
 
 /*
   workflow

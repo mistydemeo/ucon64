@@ -1418,7 +1418,7 @@ nes_ffe (st_rominfo_t *rominfo)
 {
   st_unknown_header_t header;
   char buf[MAXBUFSIZE];
-  long size = rominfo->file_size - rominfo->buheader_len;
+  long size = ucon64.file_size - rominfo->buheader_len;
 
   if (type != INES)
     {
@@ -1934,7 +1934,7 @@ nes_init (st_rominfo_t *rominfo)
     }
   else if (memcmp (magic, "\x01*NINTENDO-HVC*", 15) == 0) // "headerless" FDS/FAM file
     {
-      if (rominfo->file_size % 65500 == 192)
+      if (ucon64.file_size % 65500 == 192)
         type = FAM;
       else
         type = FDS;
@@ -1955,7 +1955,7 @@ nes_init (st_rominfo_t *rominfo)
         {                                       //  for detecting FFE images
           x = q_fgetc (ucon64.rom, 0) * 8192;
           x += q_fgetc (ucon64.rom, 1) * 8192 << 8;
-          if (rominfo->file_size - UNKNOWN_HEADER_LEN == x &&
+          if (ucon64.file_size - UNKNOWN_HEADER_LEN == x &&
               q_fgetc (ucon64.rom, 8) == 0xaa && q_fgetc (ucon64.rom, 9) == 0xbb)
             {
               type = FFE;
@@ -2022,7 +2022,7 @@ nes_init (st_rominfo_t *rominfo)
       q_fread (&unif_header, UNIF_HEADER_START, UNIF_HEADER_LEN, ucon64.rom);
       rominfo->buheader = &unif_header;
 
-      rom_size = rominfo->file_size - UNIF_HEADER_LEN;
+      rom_size = ucon64.file_size - UNIF_HEADER_LEN;
       if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
@@ -2225,7 +2225,7 @@ nes_init (st_rominfo_t *rominfo)
             }
           free (unif_chunk);
         }
-      rominfo->current_crc32 = crc;
+      ucon64.crc32 = crc;
       rominfo->data_size = size;
 
       // Don't introduce extra code just to make this line be printed above
@@ -2294,7 +2294,7 @@ nes_init (st_rominfo_t *rominfo)
                              ((ines_header.ctrl1 & INES_TRAINER) ? 512 : 0);
       if (x == 0)
         {                                       // use buf only if it could be allocated
-          rominfo->current_crc32 = mem_crc32 (rominfo->data_size, 0, rom_buffer);
+          ucon64.crc32 = mem_crc32 (rominfo->data_size, 0, rom_buffer);
           free (rom_buffer);
         }
 
@@ -2356,7 +2356,7 @@ nes_init (st_rominfo_t *rominfo)
       rominfo->country = "Japan";
 
       // FAM files don't have a header. Instead they seem to have a 192 byte trailer.
-      rominfo->buheader_start = rominfo->file_size - FAM_HEADER_LEN;
+      rominfo->buheader_start = ucon64.file_size - FAM_HEADER_LEN;
       rominfo->buheader_len = FAM_HEADER_LEN;
 
       // we use ffe_header to save some space
@@ -2399,8 +2399,8 @@ nes_fdsl (st_rominfo_t *rominfo, char *output_str)
       return -1;
     }
 
-  n_disks = (rominfo->file_size - rominfo->buheader_len) / 65500;
-  x = (rominfo->file_size - rominfo->buheader_len) % 65500;
+  n_disks = (ucon64.file_size - rominfo->buheader_len) / 65500;
+  x = (ucon64.file_size - rominfo->buheader_len) % 65500;
   if (x)
     {
       sprintf (line, "WARNING: %d excessive bytes\n", x);

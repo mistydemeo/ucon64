@@ -194,7 +194,7 @@ genesis_smds (st_rominfo_t *rominfo)
   setext (buf, ".SAV");
 
   q_fwrite (&header, 0, SMD_HEADER_LEN, buf, "wb");
-  q_fcpy (ucon64.rom, 0, rominfo->file_size, buf, "ab");
+  q_fcpy (ucon64.rom, 0, ucon64.file_size, buf, "ab");
 
   fprintf (stdout, ucon64_msg[WROTE], buf);
 
@@ -399,7 +399,7 @@ genesis_s (st_rominfo_t *rominfo)
   char buf[MAXBUFSIZE], dest_name[FILENAME_MAX], *p = NULL;
   int x, nparts, surplus, size;
 
-  size = (rominfo->file_size - rominfo->buheader_len);
+  size = (ucon64.file_size - rominfo->buheader_len);
   nparts = size / PARTSIZE;
   surplus = size % PARTSIZE;
 
@@ -422,7 +422,7 @@ genesis_s (st_rominfo_t *rominfo)
       buf[8] = 0;
 
       sprintf (dest_name, "%s.%03lu", buf,
-               (unsigned long) (rominfo->file_size - rominfo->buheader_len) / MBIT);
+               (unsigned long) (ucon64.file_size - rominfo->buheader_len) / MBIT);
 
       if (surplus)
         nparts++;
@@ -867,8 +867,8 @@ genesis_init (st_rominfo_t *rominfo)
   if (type == SMD || rominfo->interleaved)
     {
       type = SMD;                               // if only rominfo->interleaved
-      genesis_rom_size = ((rominfo->file_size - rominfo->buheader_len) / 16384) * 16384;
-      if (genesis_rom_size != rominfo->file_size - rominfo->buheader_len)
+      genesis_rom_size = ((ucon64.file_size - rominfo->buheader_len) / 16384) * 16384;
+      if (genesis_rom_size != ucon64.file_size - rominfo->buheader_len)
         rominfo->data_size = genesis_rom_size;
 
       q_fread (buf, rominfo->buheader_len,
@@ -880,7 +880,7 @@ genesis_init (st_rominfo_t *rominfo)
     {
       // We use rominfo->buheader_len to make it user controllable. Normally it
       //  should be 0 for BIN.
-      genesis_rom_size = rominfo->file_size - rominfo->buheader_len;
+      genesis_rom_size = ucon64.file_size - rominfo->buheader_len;
       q_fread (&genesis_header, rominfo->buheader_len + GENESIS_HEADER_START,
         GENESIS_HEADER_LEN, ucon64.rom);
     }

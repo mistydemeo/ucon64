@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.19 2002-12-13 00:08:20 dbjh Exp $
+ * $Id: gg.c,v 1.20 2003-01-23 13:02:21 noisyb Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -1032,7 +1032,7 @@ gg_display (st_rominfo_t *rominfo, const char *code)
   gg_argv[2] = code;
   gg_argc = 3;
 
-  if (rominfo->file_size > 0)                   // check if rominfo contains valid ROM info
+  if (ucon64.file_size > 0)                   // check if rominfo contains valid ROM info
     gg_rominfo = rominfo;
   else
     gg_rominfo = 0;
@@ -1046,11 +1046,11 @@ gg_display (st_rominfo_t *rominfo, const char *code)
 int
 gg_apply (st_rominfo_t *rominfo, const char *code)
 {
-  long size = rominfo->file_size - rominfo->buheader_len, address, value;
+  long size = ucon64.file_size - rominfo->buheader_len, address, value;
   char buf[MAXBUFSIZE];
   int result = -1;
 
-  if (rominfo->file_size > 0)                   // check if rominfo contains valid ROM info
+  if (ucon64.file_size > 0)                   // check if rominfo contains valid ROM info
     gg_rominfo = rominfo;
   else
     {

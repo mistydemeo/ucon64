@@ -583,7 +583,7 @@ int
 ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
-  int pos = rominfo->file_size - 1;
+  int pos = ucon64.file_size - 1;
   int buf_pos = pos % MAXBUFSIZE;
   int c = q_fgetc (filename, pos);
   unsigned char buf[MAXBUFSIZE];
@@ -602,23 +602,23 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
           {
             fclose (fh);
 
-            return rominfo->file_size - (pos + buf_pos) > 1 ?
-              rominfo->file_size - (pos + buf_pos) : 0;
+            return ucon64.file_size - (pos + buf_pos) > 1 ?
+              ucon64.file_size - (pos + buf_pos) : 0;
           }
     }
 
   fclose (fh);
 
-  return rominfo->file_size;                    // the whole file is "padded"
+  return ucon64.file_size;                    // the whole file is "padded"
 }
 #else
 int
 ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
-  int size = rominfo->file_size;
-  int pos = rominfo->file_size - 2;
-  int c = q_fgetc (filename, rominfo->file_size - 1);
+  int size = ucon64.file_size;
+  int pos = ucon64.file_size - 2;
+  int c = q_fgetc (filename, ucon64.file_size - 1);
   unsigned char *buf;
 
   if (!(buf = (unsigned char *) malloc ((size + 2) * sizeof (unsigned char))))
@@ -1014,14 +1014,25 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
   ucon64.rom = filename;
   ucon64_flush (&rominfo);
   result = ucon64_init (ucon64.rom, &rominfo);
-  ucon64.type = (rominfo.file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
+  ucon64.type = (ucon64.file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_DISC;
 
   switch (mode)
     {
     case UCON64_LSV:
       if (!result)
         ucon64_nfo (&rominfo);
-        break;
+      break;
+
+    case UCON64_LSD:
+      if (ucon64.crc32)
+        {
+          printf ("%s\n", ucon64.rom);
+          printf ("Checksum (CRC32): 0x%08x\n", ucon64.crc32);
+          ucon64_dat_nfo (ucon64_dat);
+          printf ("\n");
+          ucon64_flush (&rominfo);
+        }
+      break;
 
     case UCON64_RROM:
     case UCON64_RR83:
@@ -1038,8 +1049,8 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
           if (!strcmp (ucon64.rom, buf))
             break;
           printf ("Renaming %s to %s\n", ucon64.rom, buf);
-          remove (buf);
-          rename (ucon64.rom, buf);
+//          remove (buf);
+//          rename (ucon64.rom, buf);
         }
       break;
 
@@ -1047,7 +1058,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
     default:
       strftime (buf, 13, "%b %d %H:%M", localtime (&fstate->st_mtime));
       printf ("%-31.31s %10d %s %s\n", mkprint (rominfo.name, ' '),
-              rominfo.file_size, buf, ucon64.rom);
+              ucon64.file_size, buf, ucon64.rom);
       fflush (stdout);
       break;
     }

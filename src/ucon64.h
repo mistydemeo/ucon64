@@ -281,6 +281,7 @@ typedef struct st_ucon64
   int bs_dump;                  //Super Nintendo "ROM" is a Broadcast Satellaview dump
   int interleaved;              //rom is interleaved (swapped)
   int console;                  //integer for the detected console system
+  int do_not_calc_crc;          //disable crc calculation to speed up --ls,--lsv, etc.
 
 #define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
 #define UCON64_TYPE_ISCD(x) (x == UCON64_CD)

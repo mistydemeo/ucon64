@@ -310,7 +310,8 @@ main (int argc, char **argv)
   ucon64.split =
   ucon64.snes_hirom =
   ucon64.bs_dump =
-  ucon64.console = UCON64_UNKNOWN;
+  ucon64.console =
+  ucon64.do_not_calc_crc = UCON64_UNKNOWN;
 
   ucon64.rom =
   ucon64.file = "";

@@ -31,7 +31,6 @@ write programs in C
 
 #include "ucon64.h"
 
-#include "usage.h"
 //#include "unzip.h"
 #include "snes/snes.h"
 #include "gb/gb.h"
@@ -60,8 +59,6 @@ write programs in C
 
 #define MAXBUFSIZE 32768
 
-int ucon64_usage(int argc,char *argv[]);
-int ucon64_probe(int argc,char *argv[]);
 
 
 int main(int argc,char *argv[])
@@ -113,7 +110,7 @@ if(	argc<2 ||
 	argcmp(argc,argv,"-?")
 )
 {
-	usage_main(argc,argv);
+	ucon64_usage(argc,argv);
 	return(0);
 }
 
@@ -141,7 +138,7 @@ if(argcmp(argc,argv,"-db")||argcmp(argc,argv,"-dbv"))
 
 if(!ucon64_rom()[0])
 {
-	usage_main(argc,argv);
+	ucon64_usage(argc,argv);
 	return(0);
 }
 
@@ -601,7 +598,7 @@ case ucon64_UNKNOWN:
 default:
 	filehexdump(ucon64_rom(),0,512);//show possible header or maybe the internal rom header
 	printf("\nERROR: unknown file %s\n       USE -<CONSOLE> force recognition OPTION\n\n",ucon64_rom());
-//	usage_main(argc,argv);
+//	ucon64_usage(argc,argv);
 break;
 }
 
@@ -637,12 +634,13 @@ int ucon64_shell(int argc,char *argv[])
 	return(0);
 }
 
-
-
-
-
 int ucon64_usage(int argc,char *argv[])
 {
+	printf("USAGE: %s [OPTION(S)] ROM [FILE]\n\
+\n"
+,ucon64_name()
+);
+
 printf("TODO: $ROM could also be the name of a *.ZIP archive\n\
       it will automatically find and extract the ROM\n\
 \n\
@@ -678,9 +676,55 @@ xps_usage( argc, argv );
 printf("\n");
 
 
-return(0);
+/*
+if(argcmp(argc,argv,"-dc"))dreamcast_usage(argc,argv);
+else */
+if(argcmp(argc,argv,"-gba"))gbadvance_usage(argc,argv);
+else if(argcmp(argc,argv,"-n64"))nintendo64_usage(argc,argv);
+/*
+else if(argcmp(argc,argv,"-psx") ||
+	argcmp(argc,argv,"-psx2"))playstation_usage(argc,argv);
+*/
+else if(argcmp(argc,argv,"-jag"))jaguar_usage(argc,argv);
+else if(argcmp(argc,argv,"-snes"))supernintendo_usage(argc,argv);
+else if(argcmp(argc,argv,"-ng"))neogeo_usage(argc,argv);
+else if(argcmp(argc,argv,"-ngp"))neogeopocket_usage(argc,argv);
+else if(argcmp(argc,argv,"-gen"))genesis_usage(argc,argv);
+else if(argcmp(argc,argv,"-gb"))gameboy_usage(argc,argv);
+else if(argcmp(argc,argv,"-lynx"))lynx_usage(argc,argv);
+else if(argcmp(argc,argv,"-pce"))pcengine_usage(argc,argv);
+else if(argcmp(argc,argv,"-sms"))sms_usage(argc,argv);
+//else if(argcmp(argc,argv,"-c64"))commodore_usage(argc,argv);
+else if(argcmp(argc,argv,"-nes"))nes_usage(argc,argv);
+else if(argcmp(argc,argv,"-s16"))sys16_usage(argc,argv);
+else if(argcmp(argc,argv,"-ata"))atari_usage(argc,argv);
+else 
+{
+	gbadvance_usage(argc,argv);
+	nintendo64_usage(argc,argv);
+	jaguar_usage(argc,argv);
+	supernintendo_usage(argc,argv);
+	neogeo_usage(argc,argv);
+	neogeopocket_usage(argc,argv);
+	genesis_usage(argc,argv);
+	gameboy_usage(argc,argv);
+	lynx_usage(argc,argv);
+	pcengine_usage(argc,argv);
+	sms_usage(argc,argv);
+	nes_usage(argc,argv);
+	sys16_usage(argc,argv);
+	atari_usage(argc,argv);
 }
 
+printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n\
+     %s -help|less (to see everything in less)\n\
+\n\
+Report problems/ideas/fixes to noisyb@gmx.net\n\
+\n"
+,ucon64_name(),ucon64_name()
+);
+	return(0);
+}
 
 
 

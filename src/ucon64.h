@@ -44,21 +44,22 @@ typedef struct
   char **argv;
 
   const char *rom;                              // ROM (cmdline) with path
+  char fname_arch[FILENAME_MAX];                // filename in archive (currently only for zip)
   int file_size;                                // (uncompressed) ROM file size
   unsigned int crc32;                           // crc32 value of ROM (used for DAT files)
-  unsigned int fcrc32;                          // crc32 value of ROM (as it is on disk)
+  unsigned int fcrc32;                          // if non-zero: crc32 of ROM as it is on disk
 
 #define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
 #define UCON64_TYPE_ISDISC(x) (x == UCON64_DISC)
   int type;                                     // ROM type ROM or CD image
 
-/*
-  if console == UCON64_UNKNOWN or st_rominfo_t == NULL ucon64_rom_nfo() won't
-  be shown
-*/
+  /*
+    if console == UCON64_UNKNOWN or st_rominfo_t == NULL ucon64_rom_nfo() won't
+    be shown
+  */
   int console;                                  // the detected console system
 
-  const char *file;                             // file (cmdline) with path
+  const char *file;                             // FILE (cmdline) with path
 
   char configfile[FILENAME_MAX];                // path and name of the config file
   char configdir[FILENAME_MAX];                 // directory for config and DAT files
@@ -79,23 +80,23 @@ typedef struct
 
   int show_nfo;                                 // show or skip info output for ROM
 
-// has higher priority than crc_big_files!
+  // has higher priority than crc_big_files!
   int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
 
-// only used in switches.c for --crc(!)
+  // only used in switches.c for --crc (!)
   int crc_big_files;                            // enable checksum calc. for files bigger than MAXROMSIZE (512Mb)
 
 #define UCON64_ISSET(x) (x != UCON64_UNKNOWN)
-/*
-  These values override values in st_rominfo_t. Use UCON64_ISSET()
-  to check them. When adding new ones don't forget to update ucon64_flush()
-  too.
-*/
+  /*
+    These values override values in st_rominfo_t. Use UCON64_ISSET()
+    to check them. When adding new ones don't forget to update ucon64_flush()
+    too.
+  */
   int buheader_len;                             // length of backup unit header 0 == no bu hdr
   int snes_hirom;                               // SNES ROM is HiROM
   int interleaved;                              // ROM is interleaved (swapped)
 
-//  the following values are for the SNES and NES
+  // the following values are for the SNES and NES
   int part_size;                                // SNES split part size
   int split;                                    // ROM is split
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump

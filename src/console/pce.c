@@ -754,11 +754,12 @@ pcengine_init (st_rominfo_t *rominfo)
           int day = info->date / 10000, month = (info->date % 10000) / 100,
               year = info->date % 100;
 
+          buf[0] = 0;
           if (day)
             sprintf (buf, "\nDate: %d/%d/19%d", day, month, year);
           else if (month)
             sprintf (buf, "\nDate: %d/19%d", month, year);
-          else
+          else if (year)
             sprintf (buf, "\nDate: 19%d", year);
           strcat (rominfo->misc, buf);
         }

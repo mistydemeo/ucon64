@@ -94,7 +94,7 @@ fclose_fdat (void)
 static uint32_t
 get_uint32 (unsigned char *buf)
 {
-  return (uint32_t) (buf[3] << 24) + (buf[2] << 16) + (buf[1] << 8) + buf[0];
+  return (uint32_t) (buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
 }
 
 
@@ -133,7 +133,7 @@ get_dat_header (char *fname, st_ucon64_dat_t *dat)
   char buf[MAXBUFSIZE];
 #endif
 
-  // Hell yes!!! I use get_property() here...
+  // Hell yes!!! I (NoisyB) use get_property() here...
   strncpy (dat->author, get_property (fname, "author", buf, "Unknown"), sizeof (dat->author));
   dat->author[sizeof (dat->author) - 1] = 0;
   strncpy (dat->version, get_property (fname, "version", buf, "?"), sizeof (dat->version));
@@ -577,14 +577,14 @@ ucon64_dat_indexer (void)
   time_t start_time = 0;
   int update = 0;
 #ifdef  NEW_CODE
-#define MAX_GAMES_FOR_CONSOLE 50000
+#define MAX_GAMES_FOR_CONSOLE 50000             // TODO?: dynamic size
   st_idx_entry_t *idx_entries, *idx_entry;
   int duplicates, n;
   FILE *errorfile;
   char errorfname[FILENAME_MAX];
 
   if (!(idx_entries = (st_idx_entry_t *)
-        malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t)))) // TODO?: dynamic size
+          malloc (MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t))))
     {
       fprintf (stderr, ucon64_msg[BUFFER_ERROR],
         MAX_GAMES_FOR_CONSOLE * sizeof (st_idx_entry_t));
@@ -627,6 +627,15 @@ ucon64_dat_indexer (void)
       while (get_dat_entry (buf, &dat, 0, -1))
         {
 #ifdef  NEW_CODE
+          if (pos == MAX_GAMES_FOR_CONSOLE)
+            {
+              fprintf (stderr,
+                       "\n"
+                       "INTERNAL ERROR: MAX_GAMES_FOR_CONSOLE is too small (%d)\n",
+                       MAX_GAMES_FOR_CONSOLE);
+              break;
+            }
+
           /*
             Doing a linear search removes the need of using the slow qsort()
             function inside the loop. Doing a binary search doesn't improve the
@@ -657,10 +666,11 @@ ucon64_dat_indexer (void)
               strcpy (current_name, dat.name);
               get_dat_entry (buf, &dat, 0, idx_entry->filepos);
               fprintf (errorfile,
-                       "\nWarning: DAT file contains a duplicate CRC32 (0x%x)!\n"
+                       "\n"
+                       "WARNING: DAT file contains a duplicate CRC32 (0x%x)!\n"
                        "  First game with this CRC32: \"%s\"\n"
                        "  Ignoring game:              \"%s\"\n",
-                      dat.current_crc32, dat.name, current_name);
+                       dat.current_crc32, dat.name, current_name);
 
               duplicates++;
               fseek (fdat, current_filepos, SEEK_SET);
@@ -669,13 +679,6 @@ ucon64_dat_indexer (void)
 
           idx_entries[pos].crc32 = dat.current_crc32;
           idx_entries[pos].filepos = filepos_line;
-          if (pos == MAX_GAMES_FOR_CONSOLE - 1)
-            {
-              fprintf (stderr,
-                       "\nINTERNAL ERROR: MAX_GAMES_FOR_CONSOLE is too small (%d)\n",
-                       MAX_GAMES_FOR_CONSOLE);
-              break;
-            }
 #else
           fwrite (&dat.current_crc32, sizeof (uint32_t), 1, fh);
 #endif
@@ -691,7 +694,9 @@ ucon64_dat_indexer (void)
 
 #ifdef  NEW_CODE
       if (duplicates > 0)
-        printf ("\n\nWarning: DAT file contains %d duplicate CRC32%s\n"
+        printf ("\n"
+                "\n"
+                "WARNING: DAT file contains %d duplicate CRC32%s\n"
                 "         Warnings have been written to \"%s\"",
                 duplicates, duplicates != 1 ? "s" : "", errorfname);
       if (errorfile)

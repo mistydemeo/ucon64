@@ -1,5 +1,5 @@
 /*
-psx.c - Dreamcast support for uCON64
+psx.c - Playstation support for uCON64
 
 written by 2001 NoisyB (noisyb@gmx.net)
 

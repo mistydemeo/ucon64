@@ -5,7 +5,7 @@ with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
-written by 1999 - 2002 NoisyB (noisyb@gmx.net)
+written by 1999 - 2003 NoisyB (noisyb@gmx.net)
            2001 - 2003 dbjh
 
 
@@ -101,6 +101,7 @@ write programs in C
 
 static void ucon64_exit (void);
 static void ucon64_usage (int argc, char *argv[]);
+static int ucon64_process_rom (const char *fname, int console, int show_nfo);
 static int ucon64_execute_options (void);
 static void ucon64_rom_nfo (const st_rominfo_t *rominfo);
 
@@ -351,7 +352,7 @@ ucon64_exit (void)
 int
 main (int argc, char **argv)
 {
-  int c = 0, console, show_nfo, rom_index, file_message = 0;
+  int c = 0, console, show_nfo, rom_index, file_message = 0, n_entries;
   char buf[MAXBUFSIZE], *ptr;
 
   printf ("%s\n"
@@ -461,13 +462,14 @@ main (int argc, char **argv)
   ucon64.crc_big_files = UCON64_UNKNOWN;
 
   ucon64.good_enabled = 0; // --good
+  ucon64.fname_arch[0] = 0;
 
   ucon64.rom =
   ucon64.file =
   ucon64.mapr =
   ucon64.comment = "";
 
-  getcwd (ucon64.output_path, FILENAME_MAX); // default output path
+  getcwd (ucon64.output_path, FILENAME_MAX);    // default output path
   if (OFFSET (ucon64.output_path, strlen (ucon64.output_path) - 1) != FILE_SEPARATOR)
     strcat (ucon64.output_path, FILE_SEPARATOR_S);
 
@@ -486,7 +488,7 @@ main (int argc, char **argv)
   else
     ucon64.dat_enabled = 0;
 
-  // if the config file doesn't contain a parport line use "0" to force probing
+  // Use "0" to force probing if the config file doesn't contain a parport line
   sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
 
   ucon64.backup = ((!strcmp (get_property (ucon64.configfile, "backups", buf, "1"), "1")) ?
@@ -494,8 +496,8 @@ main (int argc, char **argv)
 
   if (argc < 2)
     {
-       ucon64_usage (argc, argv);
-       return 0;
+      ucon64_usage (argc, argv);
+      return 0;
     }
 
   ucon64.argc = argc;
@@ -507,7 +509,7 @@ main (int argc, char **argv)
 #endif
 
   if (ucon64.dat_enabled)
-    ucon64_dat_indexer (); // update cache index file (eventually)
+    ucon64_dat_indexer ();                      // update cache (index) files if necessary
 
   ucon64_flush (&rom);
 
@@ -562,48 +564,101 @@ main (int argc, char **argv)
   show_nfo = ucon64.show_nfo;
   while (rom_index < argc)                      // use argc, NOT ucon64.argc!
     {
-      ucon64.rom = argv[rom_index];
-      ucon64.console = console;
-
-      ucon64.show_nfo = show_nfo;
-//      if (!ucon64_init (ucon64.rom, &rom))
-      ucon64_init (ucon64.rom, &rom);
-        if (ucon64.show_nfo == UCON64_YES)
-          ucon64_nfo (&rom);
-
-      ucon64.show_nfo = UCON64_NO;
-
-      ucon64_execute_options ();
-
-      if (ucon64.show_nfo == UCON64_YES)
-        {
-//          if (!ucon64_init (ucon64.rom, &rom))
-          ucon64_init (ucon64.rom, &rom);
-          ucon64_nfo (&rom);
-        }
+#ifdef  HAVE_ZLIB_H
+      int process_multizips;
 
       /*
-        Some options take more than one file as argument, but should be
-        executed only once. Options that use the --file argument, needn't be
-        specified here, because argc has already been decremented. See the code
-        that sets ucon64.file.
+        See the comment in ucon64_process_rom(). I (dbjh) prefer the GBA
+        multirom creation code to handle several zip files instead of stopping
+        after the first one. The disadvantage is that users can't create a
+        multirom by passing one zip with all the games. It's not so bad,
+        because it's probably more common for zip files to contain only a
+        single game.
       */
       switch (ucon64_option)
         {
         case UCON64_MULTI:                      // falling through
         case UCON64_XFALMULTI:
-          rom_index = argc;                     // this will stop the main loop
+          process_multizips = 0;
           break;
         default:
-          ;
+          process_multizips = 1;
         }
 
+      n_entries = unzip_get_number_entries (argv[rom_index]);
+      if (n_entries != -1 && process_multizips) // it's a zip file
+        {
+          unzFile file;
+          int stop = 0;
+
+          for (unzip_current_file_nr = 0; unzip_current_file_nr < n_entries;
+               unzip_current_file_nr++)
+            {
+              file = unzOpen (argv[rom_index]);
+              unzip_goto_file (file, unzip_current_file_nr);
+              unzGetCurrentFileInfo (file, NULL, ucon64.fname_arch, FILENAME_MAX,
+                                     NULL, 0, NULL, 0);
+              unzClose (file);
+
+              if ((stop = ucon64_process_rom (argv[rom_index], console, show_nfo)))
+                break;
+            }
+          unzip_current_file_nr = 0;
+          if (stop)
+            break;
+        }
+      else
+#endif
+        if (ucon64_process_rom (argv[rom_index], console, show_nfo))
+          break;
+
+      ucon64.fname_arch[0] = 0;
       rom_index++;
     }
 
   if (file_message)
     printf ("NOTE: Use --file=0 if \"%s\"\n"
             "      should NOT be interpreted as --file argument\n", ucon64.file);
+
+  return 0;
+}
+
+
+int
+ucon64_process_rom (const char *fname, int console, int show_nfo)
+{
+  ucon64.rom = fname;
+  ucon64.console = console;
+  ucon64.show_nfo = show_nfo;
+
+  ucon64_init (ucon64.rom, &rom);
+  if (ucon64.show_nfo == UCON64_YES)
+    ucon64_nfo (&rom);
+  ucon64.show_nfo = UCON64_NO;
+
+  ucon64_execute_options ();
+
+  if (ucon64.show_nfo == UCON64_YES)
+    {
+      ucon64_init (ucon64.rom, &rom);
+      ucon64_nfo (&rom);
+    }
+
+  /*
+    Some options take more than one file as argument, but should be
+    executed only once. Options that use the --file argument, needn't be
+    specified here, because argc has already been decremented. See the code
+    that sets ucon64.file (in main()).
+  */
+  switch (ucon64_option)
+    {
+    case UCON64_MULTI:                      // falling through
+    case UCON64_XFALMULTI:
+      return 1;
+      break;
+    default:
+      ;
+    }
 
   return 0;
 }
@@ -642,7 +697,7 @@ ucon64_flush (st_rominfo_t *rominfo)
   rominfo->console_usage = rominfo->copier_usage = NULL;
 #endif
 
-// restoring the overrides from st_ucon64_t
+  // restore the overrides from st_ucon64_t
   if (UCON64_ISSET (ucon64.buheader_len))
     rominfo->buheader_len = ucon64.buheader_len;
 
@@ -785,7 +840,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   ucon64_fsize = q_fsize (ucon64.rom);          // save size in ucon64_fsize
   ucon64.file_size = ucon64_fsize;
 
-//  what media type? do not calc crc32 and stuff for DISC images (speed!)
+  // What media type? Do not calculate CRC32 checksum and stuff for DISC images (speed!)
   ucon64.type = (ucon64.file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_DISC;
 
   if (ucon64.discmage_enabled)
@@ -803,8 +858,18 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       ucon64_flush (rominfo); // clear rominfo
       result = ucon64_console_probe (rominfo);
 
-      // Calculating the CRC for the ROM data of a UNIF file (NES) shouldn't
-      //  be done with q_fcrc32(). nes_init() uses mem_crc32().
+      /*
+        Calculating the CRC32 checksum for the ROM data of a UNIF file (NES)
+        shouldn't be done with q_fcrc32(). nes_init() uses mem_crc32().
+        The CRC32 checksum is used to search in the DAT files, but at the time
+        of this writing (Februari the 7th 2003) all DAT files contain checksums
+        of files in only one format. This matters for SNES and Genesis ROMs in
+        interleaved format and Nintendo 64 ROMs in non-interleaved format. The
+        corresponding initialization functions calculate the CRC32 checksum of
+        the data in the format of which the checksum is stored in the DAT
+        files. For these "problematic" files, their "real" checksum is stored
+        in ucon64.fcrc32.
+      */
       if (ucon64.crc32 == 0)
 //        if (ucon64.do_not_calc_crc != UCON64_UNKNOWN)
           if (ucon64.crc_big_files != UCON64_UNKNOWN ||
@@ -826,7 +891,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
           case UCON64_GB:
           case UCON64_GBA:
           case UCON64_N64:
-// These ROMs have internal headers with name, country, maker, etc.
+          // These ROMs have internal headers with name, country, maker, etc.
             break;
 
           default:
@@ -862,7 +927,10 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 int
 ucon64_nfo (const st_rominfo_t *rominfo)
 {
-  printf ("%s\n\n", ucon64.rom);
+  printf ("%s\n", ucon64.rom);
+  if (ucon64.fname_arch[0])
+    printf ("  (%s)\n", ucon64.fname_arch);
+  fputc ('\n', stdout);
 
   if (ucon64.console == UCON64_UNKNOWN)
     {
@@ -902,17 +970,17 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
     intro = ((ucon64.file_size - rominfo->buheader_len) > MBIT) ?
       ((ucon64.file_size - rominfo->buheader_len) % MBIT) : 0;
   int x, split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
-    ucon64_testsplit (ucon64.rom);
+           ucon64_testsplit (ucon64.rom);
   char buf[MAXBUFSIZE];
 
-// backup unit header
+  // backup unit header
   if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != SWC_HEADER_LEN)
     {
       mem_hexdump (rominfo->buheader, rominfo->buheader_len, rominfo->buheader_start);
       printf ("\n");
     }
 
-// backup unit type?
+  // backup unit type?
   if (rominfo->copier_usage != NULL)
     {
       strcpy (buf, rominfo->copier_usage[0]);
@@ -928,7 +996,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
       printf ("\n");
     }
 
-// ROM header
+  // ROM header
   if (rominfo->header && rominfo->header_len)
     {
       mem_hexdump (rominfo->header, rominfo->header_len,
@@ -936,7 +1004,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
       printf ("\n");
     }
 
-// console type?
+  // console type
   if (rominfo->console_usage != NULL)
     {
       strcpy (buf, rominfo->console_usage[0]);
@@ -951,7 +1019,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
 #endif
     }
 
-// maker, country and size
+  // name, maker, country and size
   strcpy (buf, NULL_TO_EMPTY (rominfo->name));
   x = UCON64_ISSET (rominfo->data_size) ?
     rominfo->data_size :
@@ -964,19 +1032,19 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
           x,
           TOMBIT_F (x));
 
-// padded?
+  // padded?
   if (!padded)
     printf ("Padded: No\n");
   else
     printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n", padded,
             TOMBIT_F (padded));
 
-// intro, trainer?
+  // intro, trainer?
   // nes.c determines itself whether or not there is a trainer
   if (intro && ucon64.console != UCON64_NES)
     printf ("Intro/Trainer: Maybe, %d Bytes\n", intro);
 
-// interleaved?
+  // interleaved?
   if (rominfo->interleaved != UCON64_UNKNOWN)
     // printing this is handy for SNES, N64 & Genesis ROMs, but maybe
     //  nonsense for others
@@ -987,7 +1055,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
           "Yes") :
         "No");
 
-// backup unit header?
+  // backup unit header?
   if (rominfo->buheader_len)
     printf ("Backup unit/emulator header: Yes, %d Bytes\n",
       rominfo->buheader_len);
@@ -996,7 +1064,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
     printf ("Backup unit/emulator header: No\n"); // printing No is handy for SNES ROMs
 // for NoisyB: <read only mode OFF>
 
-// split?
+  // split?
   if (split)
     {
       printf ("Split: Yes, %d part%s\n", split, (split != 1) ? "s" : "");
@@ -1006,14 +1074,14 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
         printf ("NOTE: to get the correct checksum the ROM must be joined\n");
     }
 
-// miscellaneous info
+  // miscellaneous info
   if (rominfo->misc[0])
     {
       strcpy (buf, rominfo->misc);
       printf ("%s\n", to_func (buf, strlen (buf), toprint2));
     }
 
-// internal checksums?
+  // internal checksums?
   if (rominfo->has_internal_crc)
     {
       char *fstr;

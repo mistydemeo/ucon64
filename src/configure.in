@@ -11,6 +11,9 @@ AC_PROG_CC(gcc egcs cc)
 AC_PROG_GCC_TRADITIONAL
 
 
+AC_DEFINE(UCON64,1,[indicate it's uCON64 source code])
+
+
 AC_MSG_CHECKING(whether debug output is enabled)
 AC_ARG_ENABLE(debug,
               AC_HELP_STRING([--enable-debug],

@@ -121,12 +121,12 @@ extern const st_usage_t ucon64_patching_usage[];
   WF_PAR            this option requires a parallel port
   WF_USB            this option requires a USB port
   WF_SERIAL         this option requires a serial port
-  WF_NO_SPLIT       these options do not work with split ROMs
+  WF_NO_SPLIT       this option does not work with split ROMs
   WF_DEFAULT        same as WF_PROBE|WF_INIT|WF_NFO
 
   example:
-  WF_NFO|WF_MFO_AFTER|WF_NO_ROM
-                    a ROM is not required and info will be shown before and
+  WF_NFO|WF_MFO_AFTER
+                    a ROM is required and info will be shown before and
                     after it has been processed
 */
 #define WF_DEFAULT (WF_PROBE|WF_INIT|WF_NFO)

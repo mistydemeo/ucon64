@@ -1025,6 +1025,7 @@ lynxit_main (int argc, char **argv)
   exit (TRUE);
 }
 
+
 /*
   It will save you some work if you don't fully integrate the code above with
   uCON64's code, because it is a project separate from the uCON64 project.

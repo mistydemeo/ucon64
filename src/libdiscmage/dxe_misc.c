@@ -23,9 +23,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   The original reason this file was created was because we can do the
   (re)definition of the names of the buffered file I/O functions only once.
   For a DXE they would have to be (re)defined twice if we want to be able to
-  use the zlib & unzip code in misc.c; once to substitute the names to make
+  use the zlib & unzip code in miscz.c; once to substitute the names to make
   code use the import/export "table" and once to make code use the f*2()
-  functions in misc.c.
+  functions in miscz.c.
 */
 
 #ifdef  HAVE_CONFIG_H

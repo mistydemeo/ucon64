@@ -54,8 +54,8 @@ ucon64_switches (int c, const char *optarg)
     Handle options or switches that cause other _options_ to be ignored except
     other options of the same class (so the order in which they were specified
     matters).
-    We have to do this here (not in options.c) or else other options might be
-    executed before these.
+    We have to do this here (not in ucon64_options()) or else other options
+    might be executed before these.
   */
   switch (c)
     {
@@ -236,8 +236,8 @@ ucon64_switches (int c, const char *optarg)
       if (!ucon64.parport)
         if (ucon64.argc >= 4)
           if (access (ucon64.argv[ucon64.argc - 1], F_OK))
-            // Yes, we don't get here if ucon64.argv[ucon64.argc - 1] is [0x]278, [0x]378 or
-            //  [0x]3bc and a file with the same name (path) exists.
+            // Yes, we don't get here if ucon64.argv[ucon64.argc - 1] is [0x]278,
+            //  [0x]378 or [0x]3bc and a file with the same name (path) exists.
             ucon64.parport = strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
       ucon64_parport_needed = 1;
       break;
@@ -401,8 +401,8 @@ ucon64_switches (int c, const char *optarg)
 static int
 ucon64_rename (int mode)
 {
-  char buf[FILENAME_MAX + 1], *suffix = (char *) get_suffix (ucon64.rom),
-       buf2[FILENAME_MAX + 1];
+  char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1],
+       *suffix = (char *) get_suffix (ucon64.rom), *p;
 
   buf[0] = 0;
 
@@ -411,28 +411,26 @@ ucon64_rename (int mode)
       if (ucon64.rominfo->name)
         strcpy (buf, strtrim (ucon64.rominfo->name));
 
-
   if (!buf[0] || mode == UCON64_RENAME) // GoodXXXX mode
     if (ucon64.dat)
       if (ucon64.dat->fname)
         {
-          char *p = (char *) get_suffix (ucon64.dat->fname);
+          p = (char *) get_suffix (ucon64.dat->fname);
           strcpy (buf, ucon64.dat->fname);
 
-          if (p)
-            if (p[0])
-              if (strlen (p) < 5) // TODO: what is a suffix and what is a dot in a name?
-                if (stricmp (p, ".nes") &&      // NES
+          // get_suffix() never returns NULL
+          if (p[0])
+            if (strlen (p) < 5)
+              if (!(stricmp (p, ".nes") &&      // NES
                     stricmp (p, ".fds") &&      // NES FDS
 //                    stricmp (p, ".smd") &&      // Genesis
                     stricmp (p, ".gb") &&       // Game Boy
                     stricmp (p, ".gbc") &&      // Game Boy Color
                     stricmp (p, ".gba") &&      // Game Boy Advance
                     stricmp (p, ".smc") &&      // SNES
-                    stricmp (p, ".v64"))        // Nintendo 64
+                    stricmp (p, ".v64")))        // Nintendo 64
                 {
-                  buf[strlen (buf) - strlen (suffix)] = 0;
-                  suffix = p;
+                  buf[strlen (buf) - strlen (p)] = 0;
                 }
         }
 
@@ -444,14 +442,22 @@ ucon64_rename (int mode)
   else if (ucon64.fname_len == 1)
     buf[8] = 0;
 
-  set_suffix (buf, suffix);
+  // replace chars the fs might not like
+  strcpy (buf2, to_func (buf, strlen (buf), tofname));
+  strcpy (buf, basename2 (ucon64.rom));
 
-  if (ucon64.fname_len == 1)
-    buf[12] = 0;
+  // WARNING: use of an "undocumented" feature of get_suffix()
+  p = (char *) get_suffix (buf);
+  // Remove the suffix from ucon64.rom. Note that this isn't fool-proof.
+  //  However, this is the best solution, because several DAT files contain
+  //  "canonical" file names with a suffix. That is a STUPID bug.
+  if (p[0] != 0)
+    *p = 0;
 
-  strcpy (buf2, to_func (buf, strlen (buf), tofname)); // replace chars the fs might not like
-
-  if (!strcmp (basename2 (ucon64.rom), basename2 (buf2)))
+#ifdef  DEBUG
+  printf ("buf: \"%s\"; buf2: \"%s\"\n", buf, buf2);
+#endif
+  if (!strcmp (buf, buf2))
     {
 #ifdef  DEBUG
       printf ("Found \"%s\"\n", ucon64.rom);
@@ -459,7 +465,13 @@ ucon64_rename (int mode)
       return 0;
     }
 
-//  if (access (buf2, F_OK))
+  // DON'T use set_suffix()! Consider file names like
+  //  "Final Fantasy III (V1.1) (U) [!]". The suffix is ".1) (U) [!]"...
+  strcat (buf2, suffix);
+  if (ucon64.fname_len == 1)
+    buf2[12] = 0;
+
+  if (access (buf2, F_OK))
     { // file with name buf doesn't exist
       printf ("Renaming \"%s\" to \"%s\"\n", basename2 (ucon64.rom),
               basename2 (buf2));
@@ -467,16 +479,21 @@ ucon64_rename (int mode)
       rename (ucon64.rom, buf2);
 #endif
     }
-#if 0
-  // nb: we already do this with the strcmp() above...
   else
     {
-      // TODO: here should come some code that checks if buf is really
+      // TODO: Here should come some code that checks if <buf2> is really
       //       the file that its name suggests
-      //       DON'T remove file with name buf! That would be stupid.
+      //       DON'T remove file with name <buf2>! That would be stupid.
+      //       For the simple-minded:
+      //         The file name is NOT what identifies a ROM! A file with name
+      //         <buf2> could already exist, but the CRC32 should be calculated
+      //         to determine if it "deserves" its name. This problem can be
+      //         solved in several ways:
+      //           - Move "good" files to another (new) directory.
+      //           - Rename files that don't deserve their name. For example by
+      //             giving them the suffix ".bad".
       printf ("File \"%s\" already exists, skipping\n", buf2);
     }
-#endif
 
   return 0;
 }
@@ -672,7 +689,7 @@ ucon64_options (int c, const char *optarg)
             printf ("Padded: No\n\n");
           else
             printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n\n", padded,
-                  (float) padded / MBIT);
+                    (float) padded / MBIT);
         }
       break;
 
@@ -978,19 +995,19 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_MULTI:
-      gba_multi (ucon64.rominfo, strtol (optarg, NULL, 10) * MBIT, NULL);
+      gba_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
       break;
 
     case UCON64_SWCS:
-      snes_swcs (ucon64.rominfo);
+      snes_swcs ();
       break;
 
     case UCON64_FIGS:
-      snes_figs (ucon64.rominfo);
+      snes_figs ();
       break;
 
     case UCON64_UFOS:
-      snes_ufos (ucon64.rominfo);
+      snes_ufos ();
       break;
 
     case UCON64_E:
@@ -1354,7 +1371,7 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_SRAM:
-      gba_sram (ucon64.rominfo);
+      gba_sram ();
       break;
 
     case UCON64_LSRAM:
@@ -1385,7 +1402,7 @@ ucon64_options (int c, const char *optarg)
     /*
       It doesn't make sense to continue after executing a (send) backup option
       ("multizip"). Don't return, but use break instead. ucon64_execute_options()
-      checks if a copier option was used.
+      checks if an option was used that should stop uCON64.
     */
     case UCON64_XDEX:
       if (!access (ucon64.rom, F_OK))
@@ -1535,7 +1552,7 @@ ucon64_options (int c, const char *optarg)
       tmpnam2 (src_name);
       ucon64_temp_file = src_name;
       register_func (remove_temp_file);
-      gba_multi (ucon64.rominfo, strtol (optarg, NULL, 10) * MBIT, src_name);
+      gba_multi (strtol (optarg, NULL, 10) * MBIT, src_name);
       fal_write_rom (src_name, ucon64.parport);
       unregister_func (remove_temp_file);
       remove_temp_file ();

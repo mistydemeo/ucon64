@@ -271,7 +271,7 @@ extern char ***strargv (int *argc, char ***argv, char *cmdline, int separator_ch
 #ifdef  WIN32
 /*
   VC++ support (MinGW lite; mainly unistd.h and dirent.h)
-  
+
   access()  see libc documentation
 */
 #ifndef R_OK
@@ -383,7 +383,7 @@ extern int change_mem (char *buf, int bufsize, char *searchstr, int strsize,
 extern int change_mem2 (char *buf, int bufsize, char *searchstr, int strsize,
                         char wc, char esc, char *newstr, int newsize,
                         int offset, st_cm_set_t *sets);
-#if     defined PARALLEL && !defined DLL // currently there is no uCON64-specific defined constant
+#if     defined UCON64 && !defined DLL
 extern int build_cm_patterns (st_cm_pattern_t **patterns, const char *filename,
                               char *fullfilename);
 #endif

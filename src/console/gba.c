@@ -240,7 +240,7 @@ gba_chk (st_rominfo_t *rominfo)
 
 
 int
-gba_sram (st_rominfo_t *rominfo)
+gba_sram (void)
 {
   char buf[MAXBUFSIZE], dest_name[FILENAME_MAX];
 
@@ -427,7 +427,7 @@ gba_chksum (st_rominfo_t *rominfo)
 
 
 int
-gba_multi (st_rominfo_t *rominfo, int truncate_size, char *fname)
+gba_multi (int truncate_size, char *fname)
 // TODO: Check if 1024 Mbit multiroms are supported by the FAL code
 {
   int n, n_files, file_no, bytestowrite, byteswritten, bufsize = 32 * 1024,

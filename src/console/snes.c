@@ -1373,7 +1373,7 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
 
 static void
 snes_split_smc (st_rominfo_t *rominfo, int size, int part_size)
-// this function splits both SWC as well as FIG files
+// this function splits both SWC and FIG files
 {
   char header[512], dest_name[FILENAME_MAX];
   int nparts, surplus, n;
@@ -2765,7 +2765,7 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
             rominfo->buheader_len = surplus;
           // special case for Infinity Demo (PD)... Don't add "|| type == FIG"
           //  as it is too unreliable
-          else if (type == SWC || type == GD3)
+          else if (type == SWC || type == GD3 || type == UFO)
             rominfo->buheader_len = SWC_HEADER_LEN;
         }
     }

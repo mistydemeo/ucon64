@@ -598,6 +598,7 @@ main (int argc, char *argv[])
           rom.console = ucon64_GP32;
           break;
 
+        case ucon64_GETOPT_ERROR:
         default:
           fprintf (STDERR, "Try '%s " OPTION_LONG_S "help' for more information.\n", argv[0]);
           return -1;
@@ -712,12 +713,11 @@ main (int argc, char *argv[])
           if ((padded = filetestpad (rom.rom)) != -1)
             {
               if (!padded)
-                printf ("Padded: No\n");
+                printf ("Padded: No\n\n");
               else
-                printf ("Padded: Maybe, %ld Bytes (%.4f Mb)\n", padded,
+                printf ("Padded: Maybe, %ld Bytes (%.4f Mb)\n\n", padded,
                         (float) padded / MBIT);
             }
-          printf ("\n");
           return 0;
   
         case ucon64_STRIP:
@@ -1293,6 +1293,7 @@ main (int argc, char *argv[])
         case ucon64_NBAK:
           break;
 
+        case ucon64_GETOPT_ERROR:
         default:
           fprintf (STDERR, "Try '%s " OPTION_LONG_S "help' for more information.\n", argv[0]);
           return -1;
@@ -1336,9 +1337,7 @@ ucon64_init (char *romfile, struct rom_ *rom)
 {
 
   if (romfile == NULL)
-/*
-    flush struct rom_
-*/
+//  flush struct rom_
     {
       memset (rom, 0L, sizeof (struct rom_));
     

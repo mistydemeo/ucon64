@@ -268,20 +268,20 @@ receive_rom_info (unsigned char *buffer, int io_mode)
 #ifdef  DUMP_SPC7110
   // Fix up size for SPC7110 chips
   if (snes_spc7110)
-  {
-    byte = read_cartridge1 (0x00ffd7);
-    switch (byte)
-      {
-      case 0x0c:
-        size = 24;
-        break;
-      case 0x0d:
-        size = 40;
-        break;
-      default:
-        break;
-      }
-  }
+    {
+      byte = read_cartridge1 (0x00ffd7);
+      switch (byte)
+        {
+        case 0x0c:
+          size = 24;
+          break;
+        case 0x0d:
+          size = 40;
+          break;
+        default:
+          break;
+        }
+    }
 #endif
 
   memset (buffer, 0, SWC_HEADER_LEN);
@@ -318,31 +318,31 @@ get_rom_size (unsigned char *info_block)
   if (check2 (info_block, 0x80, 0xa0))
     return 8;
   if (check3 (info_block, 0x80, 0xa0, 0x20))
-    return 0xa;
+    return 10;
   if (check1 (info_block, 0xc0))
-    return 0xc;
+    return 12;
   if (check2 (info_block, 0xc0, 0xb0))
-    return 0xc;
+    return 12;
   if (check3 (info_block, 0x80, 0xc0, 0x20))
-    return 0xc;
+    return 12;
   if (check3 (info_block, 0x100, 0, 0x10))
-    return 0x10;
+    return 16;
   if (check2 (info_block, 0x100, 0xc0))
-    return 0x10;
+    return 16;
   if (check3 (info_block, 0x100, 0x120, 0x10))
-    return 0x12;
+    return 18;
   if (check3 (info_block, 0x100, 0x140, 0x10))
-    return 0x14;
+    return 20;
   if (check2 (info_block, 0x140, 0xd0))
-    return 0x14;
+    return 20;
   if (check3 (info_block, 0x100, 0x180, 0x10))
-    return 0x18;
+    return 24;
   if (check2 (info_block, 0x180, 0xe0))
-    return 0x18;
+    return 24;
   if (check3 (info_block, 0x180, 0x1c0, 0x10))
-    return 0x1c;
+    return 28;
   if (check3 (info_block, 0x1f0, 0x1f0, 0x10))
-    return 0x20;
+    return 32;
 
   return 0;
 }
@@ -1252,7 +1252,6 @@ swc_write_cart_sram (const char *filename, unsigned int parport, int io_mode)
     {
       fprintf (stderr, "ERROR: There is no cartridge present in the Super Wild Card\n");
       fclose (file);
-      remove (filename);
       exit (1);
     }
 

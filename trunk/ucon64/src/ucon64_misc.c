@@ -316,9 +316,9 @@ long
 ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
-  int pos = rominfo->file_size - 2;
+  int pos = rominfo->file_size - 1;
   int buf_pos = pos % MAXBUFSIZE;
-  int c = q_fgetc (filename, rominfo->file_size - 1);
+  int c = q_fgetc (filename, pos);
   unsigned char buf[MAXBUFSIZE];
 
   for (pos -= buf_pos; q_fread (buf, pos, buf_pos, filename) > 0 && pos > -1;
@@ -326,7 +326,8 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
     {
       for (; buf_pos > 0; buf_pos--)
         if (buf[buf_pos - 1] != c) 
-          return rominfo->file_size - (pos + buf_pos);
+          return rominfo->file_size - (pos + buf_pos) > 1 ?
+            rominfo->file_size - (pos + buf_pos) : 0;
     }
 
   return 0;

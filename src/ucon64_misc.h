@@ -25,17 +25,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef  BACKUP
 #ifdef  __BEOS__
-#define DRV_READ_IO_8 'r'
-#define DRV_WRITE_IO_8 'w'
-#define DRV_READ_IO_16 'r16'
-#define DRV_WRITE_IO_16 'w16'
-
-typedef struct IO_Tuple
+typedef struct st_ioport
 {
-  unsigned long Port;
-  unsigned char Data;
-  unsigned short Data16;
-} IO_Tuple;
+  unsigned long port;
+  unsigned char data8;
+  unsigned short data16;
+} st_ioport_t;
 #endif // __BEOS__
 
 #define out1byte(p,x)   outportb(p,x)
@@ -51,10 +46,10 @@ extern void outportw (unsigned short port, unsigned short word);
 #endif // BACKUP
 
 typedef struct st_track_modes
-  {
-    char *common;
-    char *cdrdao;
-  } st_track_modes_t;
+{
+  char *common;
+  char *cdrdao;
+} st_track_modes_t;
 #define MODE1_2048 0
 #define MODE1_2352 1
 #define MODE2_2336 2
@@ -69,7 +64,8 @@ extern const st_track_modes_t track_modes[];
 /*
   defines for unknown backup units/emulators
 */
-typedef struct st_unknown_header // uses SWC header layout ("hirom" is a FIG field)
+typedef struct st_unknown_header
+// uses SWC/FIG header layout ("hirom", "emulation1" and "emulation2" are FIG fields)
 {
 /*
   Don't create fields that are larger than one byte! For example size_low and size_high
@@ -80,7 +76,9 @@ typedef struct st_unknown_header // uses SWC header layout ("hirom" is a FIG fie
   unsigned char size_high;
   unsigned char emulation;
   unsigned char hirom;
-  unsigned char pad[4];
+  unsigned char emulation1;
+  unsigned char emulation2;
+  unsigned char pad[2];
   unsigned char id_code1;
   unsigned char id_code2;
   unsigned char type;

@@ -199,7 +199,7 @@ static unsigned char gd3_hirom_40mb_map[GD3_HEADER_MAPSIZE] = {
   0x21, 0x23, 0x24, 0x25, 0x21, 0x23, 0x24, 0x25,
   0x22, 0x22, 0x22, 0x22, 0x26, 0x27, 0x28, 0x29
 };
-// map for Tales of Phantasia
+// map for Tales of Phantasia (J)
 static unsigned char gd3_hirom_48mb_map[GD3_HEADER_MAPSIZE] = {
   0x20, 0x21, 0x20, 0x21, 0x20, 0x21, 0x40, 0x40,
   0x24, 0x25, 0x26, 0x27, 0x24, 0x25, 0x26, 0x27,
@@ -760,8 +760,7 @@ snes_gd3 (st_rominfo_t *rominfo)
   else if (n > 40 && n < 48)
     n = 48;
 #endif
-  sprintf (dest_name, "%s%d", is_func (p, strlen (p), isupper) ? "SF" : "sf", n);
-  strcat (dest_name, p);
+  sprintf (dest_name, "%s%d%s", is_func (p, strlen (p), isupper) ? "SF" : "sf", n, p);
   if ((p = strrchr (dest_name, '.')))
     *p = 0;
   strcat (dest_name, "_____");
@@ -1005,10 +1004,7 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
   if (sf_romname)
     strcpy (dest_name, p);
   else
-    {
-      strcpy (dest_name, "SF");
-      strcat (dest_name, p);
-    }
+    sprintf (dest_name, "SF%d%s", size / MBIT, p);
   strupr (dest_name);
   if ((p = strrchr (dest_name, '.')))
     *p = 0;
@@ -1016,7 +1012,7 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
   dest_name[7] = 'A';
   dest_name[8] = 0;
   // avoid trouble with filenames containing spaces
-  for (n = 3; n < 7; n++)                       // skip "sf" and first digit
+  for (n = 3; n < 7; n++)                       // skip "SF" and first digit
     if (dest_name[n] == ' ')
       dest_name[n] = '_';
 
@@ -1040,6 +1036,8 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
       if (surplus != 0)
         strcpy (names[n_names++], dest_name);
     }
+  if (n_names == 1)
+    names[0][7] = 0;                            // 'A' causes trouble for 1-part split files
   return n_names;
 }
 
@@ -1895,12 +1893,6 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   /*
     Special case hell
 
-    0xfa83b519: Mortal Kombat (Beta) doesn't have an internal header...
-    By coincidence no special if statement is needed for the interleaved dump
-
-    0x65485afb: Super Aleste (J) [t1] has its header overwritten with the
-    trainer. The CRC is the same as for Super Aleste (J) (1st 512 bytes)
-
     0x9b4638d0: Street Fighter Alpha 2 (E/U) {[b1]}, Street Fighter Zero 2 (J)
     These games have two nearly identical headers which can't be used to
     determine whether the dump is interleaved or not.
@@ -1932,24 +1924,45 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     This has been verified on a real SNES for the games with crc 0x29226b62 and
     0x4ef3d27b. The games with crc 0xbd7bc39f don't seem to run on a copier.
 
+    0xc3194ad7: Yu Yu No Quiz De Go! Go! (J)
+    0x89d09a77: Infernal's Evil Demo! (PD)
+    0xd3095af3: Legend - SNDS Info, Incredible Hulk Walkthru (PD)
     0x9b161d4d: Pop 'N Twinbee Sample (J)
+    0x6910700a: Rock Fall (PD)
+    0x447df9d5: SM Choukyousi Hitomi (PD)
+    0x02f401df: SM Choukyousi Hitomi Vol 2 (PD)
+    0xf423997a: World of Manga 2 (PD)
+    These games/dumps have a HiROM map type byte while they are LoROM
+
+    0x0f802e41: Mortal Kombat 3 Final (Anthrox Beta Hack)
     0xbd8f1b20: Rise of the Robots (Beta)
-    0x05926d17: Shaq Fu (J)(NG-Dump Known)
+    0x05926d17: Shaq Fu (E)/(J)(NG-Dump Known)
     0x3e2e5619: Super Adventure Island II (Beta)
     0x023e1298: Super Air Driver (E) [b]
-    These games have a HiROM map type byte while they are LoROM games
+    These are also not special cases (not: HiROM map type byte + LoROM game).
+    GoodSNES - 0.999.5 for RC 2.5.dat simply contains bugs.
 
+    0xfa83b519: Mortal Kombat (Beta)
     0xf3aa1eca: Power Piggs of the Dark Age (Pre-Release) {[h1]}
+    0x65485afb: Super Aleste (J) {[t1]} <= header == trainer
     0xaad23842/0x5ee74558: Super Wild Card DX DOS ROM V1.122/interleaved
+    0x422c95c4: Time Slip (Beta)
     0x7a44bd18: Total Football (E)(NG-Dump Known)
-    These games have garbage in their header
+    0xf0bf8d7c/0x92180571: Utyu no Kishi Tekkaman Blade (Beta) {[h1]}/interleaved
+    0x8e1933d0: Wesley Orangee Hotel (PD)
+    0xe2b95725/0x9ca5ed58: Zool (Sample Cart)/interleaved
+    These games/dumps have garbage in their header
   */
-  if (crc == 0xfa83b519 || crc == 0x9b161d4d || crc == 0xf3aa1eca ||
-      crc == 0xbd8f1b20 || crc == 0x05926d17 || crc == 0x3e2e5619 ||
-      crc == 0x023e1298 || crc == 0xaad23842 || crc == 0x7a44bd18)
+  if (crc == 0xc3194ad7 || crc == 0x89d09a77 || crc == 0xd3095af3 ||
+      crc == 0x9b161d4d || crc == 0x6910700a || crc == 0x447df9d5 ||
+      crc == 0x02f401df || crc == 0xf423997a || crc == 0xfa83b519 ||
+      crc == 0xf3aa1eca || crc == 0xaad23842 || crc == 0x422c95c4 ||
+      crc == 0x7a44bd18 || crc == 0xf0bf8d7c || crc == 0x8e1933d0 ||
+      crc == 0xe2b95725)
     check_map_type = 0;                         // not interleaved
-  else if (crc == 0x65485afb || crc == 0x9b4638d0 || crc == 0x7039388a ||
-           crc == 0xdbc88ebf || crc == 0x5ee74558)
+  else if (crc == 0x9b4638d0 || crc == 0x7039388a || crc == 0xdbc88ebf ||
+           crc == 0x65485afb || crc == 0x5ee74558 || crc == 0x92180571 ||
+           crc == 0x9ca5ed58)
     {
       interleaved = 1;
       snes_hirom = 0;
@@ -2187,9 +2200,8 @@ snes_buheader_info (st_rominfo_t *rominfo)
           if ((header[4] == 0x77 && header[5] == 0x83) ||
               (header[4] == 0xf7 && header[5] == 0x83))
             y = 0;
-          else if (header[4] == 0xfd && header[5] == 0x82)
-            y = 2 * 1024;
-          else if (header[4] == 0xdd && header[5] == 0x82)
+          else if ((header[4] == 0xfd && header[5] == 0x82) ||
+                   (header[4] == 0xdd && header[5] == 0x82))
             y = 8 * 1024; // or 2 * 1024
           else if (header[4] == 0xdd && header[5] == 0x02)
             y = 32 * 1024;
@@ -2350,7 +2362,7 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
         rominfo->buheader_len = SWC_HEADER_LEN;
       else
         {
-          int surplus = ucon64.file_size % MBIT;
+          int surplus = ucon64.file_size > 32768 ? ucon64.file_size % 32768 : 0;
           if (surplus == 0)
             // most likely we guessed the copier type wrong
             {
@@ -2359,6 +2371,8 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
             }
           else if ((surplus % SWC_HEADER_LEN) == 0 && surplus < MAXBUFSIZE)
             rominfo->buheader_len = surplus;
+          else if (type == SWC || type == GD3)  // special case for Infinity Demo (PD)...
+            rominfo->buheader_len = SWC_HEADER_LEN;
         }
     }
   if (UCON64_ISSET (ucon64.buheader_len))       // -hd, -nhd or -hdn switch was specified

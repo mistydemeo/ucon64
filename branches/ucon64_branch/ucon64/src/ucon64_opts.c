@@ -787,7 +787,7 @@ ucon64_options (int c, const char *optarg)
         {
           ucon64_fhexdump (ucon64.rom, value, strlen (optarg) + 16);
           printf ("\n");                        // + 16 gives a bit of context
-          value++;
+          value += strlen (optarg);
         }
       break;
 

@@ -49,8 +49,10 @@ int ucon64_parport_needed = 0;
 int
 ucon64_switches (int c, const char *optarg)
 {
+#ifdef  DISCMAGE
   char *ptr = NULL, buf[MAXBUFSIZE];
   int x = 0;
+#endif
 
   /*
     Handle options or switches that cause other _options_ to be ignored except
@@ -111,6 +113,7 @@ ucon64_switches (int c, const char *optarg)
 #define ZLIB_STATUS "no"
 #endif
 
+#ifdef  DISCMAGE
       ptr =
 #ifdef  DLOPEN
         ucon64.discmage_path;
@@ -136,7 +139,7 @@ ucon64_switches (int c, const char *optarg)
         }
       else
         strcpy (buf, "not available");
-
+#endif
 
       printf ("version:                           %s (%s)\n"
               "platform:                          %s\n"
@@ -145,14 +148,7 @@ ucon64_switches (int c, const char *optarg)
               "parallel port backup unit support: %s\n"
               "ANSI colors enabled:               %s\n"
               "gzip and zip support:              %s\n"
-              "configuration file %s  %s\n"
-              DISCMAGE_STATUS_MSG
-              "discmage enabled:                  %s\n"
-              "discmage version:                  %s\n"
-              "configuration directory:           %s\n"
-              "DAT file directory:                %s\n"
-              "entries in DATabase:               %d\n"
-              "DATabase enabled:                  %s\n",
+              "configuration file %s  %s\n",
               UCON64_VERSION_S, __DATE__,
               CURRENT_OS_S,
               ENDIANESS_STATUS,
@@ -161,15 +157,27 @@ ucon64_switches (int c, const char *optarg)
               ANSI_COLOR_STATUS,
               ZLIB_STATUS,
               // display the existence only for the config file (really helps solving problems)
-              access (ucon64.configfile, F_OK) ? "(not present):" : "(present):    ", ucon64.configfile,
+              access (ucon64.configfile, F_OK) ? "(not present):" : "(present):    ",
+              ucon64.configfile);
+
+#ifdef  DISCMAGE
+      printf (DISCMAGE_STATUS_MSG
+              "discmage enabled:                  %s\n"
+              "discmage version:                  %s\n",
               ptr,
               ucon64.discmage_enabled ? "yes" : "no",
-              buf,
+              buf
+              );
+#endif              
+
+      printf ("configuration directory:           %s\n"
+              "DAT file directory:                %s\n"
+              "entries in DATabase:               %d\n"
+              "DATabase enabled:                  %s\n",
               ucon64.configdir,
               ucon64.datdir,
               ucon64_dat_total_entries (),
-              ucon64.dat_enabled ? "yes" : "no"
-      );
+              ucon64.dat_enabled ? "yes" : "no");
       exit (0);
       break;
 

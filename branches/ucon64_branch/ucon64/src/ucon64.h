@@ -192,13 +192,8 @@ typedef struct
 
 #ifdef  GUI
   netgui_t *netgui;                             // pointer to netgui GUI
-<<<<<<< ucon64.h
-#endif
-
-=======
 #endif
 #ifdef  DISCMAGE
->>>>>>> 1.177.2.5
   dm_image_t *image;                            // info from libdiscmage
 #endif
   st_ucon64_dat_t *dat;                         // info from DATabase

@@ -429,6 +429,9 @@ int parport_gauge(time_t init_time, long pos, long size)
   strcat(buf, "------------------------");
   buf[24] = 0;
 
+/*
+    the first character here produces a CR w/o LF
+*/
   printf("\r%10lu Bytes [%s] %lu%%, CPS=%lu, ",
          pos, buf, (unsigned long) 100*pos/size, (unsigned long) cps);
 

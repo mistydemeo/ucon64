@@ -863,9 +863,9 @@ ucon64_output_fname (char *requested_fname, int force_flags)
 {
   char ext[80], fname[FILENAME_MAX];
 
-  // We have to make a copy, because getext() returns a pointer to a location
+  // We have to make a copy, because get_suffix() returns a pointer to a location
   //  in the original string
-  strcpy (ext, getext (requested_fname));
+  strcpy (ext, get_suffix (requested_fname));
 
   // force_requested_fname is necessary for options like -gd3. Of course that
   //  code should handle archives and come up with unique filenames for
@@ -890,7 +890,7 @@ ucon64_output_fname (char *requested_fname, int force_flags)
   */
   if (!(force_flags & OF_FORCE_SUFFIX) && !stricmp (ext, ".zip"))
     strcpy (ext, ".tmp");
-  setext (requested_fname, ext);
+  set_suffix (requested_fname, ext);
 
   return requested_fname;
 }
@@ -1591,7 +1591,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
                 if (ucon64_dat->fname)
                   {
                     n = strlen (ucon64_dat->fname);
-                    p = (char *) getext (ucon64_dat->fname);
+                    p = (char *) get_suffix (ucon64_dat->fname);
                     if (stricmp (p, ".nes") &&                    // NES
                         stricmp (p, ".fds") &&                    // NES FDS
                         stricmp (p, ".gb") &&                     // Game Boy
@@ -1622,7 +1622,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
               strcpy (buf, to_func (buf2, strlen (buf2), tofname)); // replace chars the fs might not like
               if (mode == UCON64_RR83)
                 buf[8] = 0;
-              strcat (buf, getext (ucon64.rom));
+              strcat (buf, get_suffix (ucon64.rom));
               if (mode == UCON64_RR83)
                 buf[12] = 0;
               if (!strcmp (ucon64.rom, buf))
@@ -1867,7 +1867,7 @@ ucon64_configfile (void)
   else if (strtol (get_property (ucon64.configfile, "version", buf2, "0"), NULL, 10) < UCON64_CONFIG_VERSION)
     {
       strcpy (buf2, ucon64.configfile);
-      setext (buf2, ".OLD");
+      set_suffix (buf2, ".OLD");
 
       printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
 

@@ -75,7 +75,7 @@ lynx_lyx (st_rominfo_t *rominfo)
     }
 
   strcpy (buf, ucon64.rom);
-  setext (buf, ".LYX");
+  set_suffix (buf, ".LYX");
 
   ucon64_fbackup (NULL, buf);
   q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), buf, "wb");
@@ -121,7 +121,7 @@ lynx_lnx (st_rominfo_t *rominfo)
   strcpy (header.manufname, "Atari");
 
   strcpy (buf, ucon64.rom);
-  setext (buf, ".LNX");
+  set_suffix (buf, ".LNX");
 
   ucon64_fbackup (NULL, buf);
   q_fwrite (&header, 0, sizeof (st_lnx_header_t), buf, "wb");

@@ -359,7 +359,7 @@ ips_create (const char *orgname, const char *modname)
       exit (1);
     }
   strcpy (ipsname, orgname);
-  setext (ipsname, ".IPS");
+  set_suffix (ipsname, ".IPS");
   ucon64_fbackup (NULL, ipsname);
   if ((ipsfile = fopen (ipsname, "wb")) == NULL)
     {

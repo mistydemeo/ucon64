@@ -254,7 +254,7 @@ snes_dint (st_rominfo_t *rominfo)
       exit (1);
     }
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".TMP");
+  set_suffix (dest_name, ".TMP");
   strcpy (src_name, ucon64.rom);
   ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
@@ -395,7 +395,7 @@ snes_convert_sramfile (const void *header)
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".SAV");
+  set_suffix (dest_name, ".SAV");
   ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
 
@@ -618,7 +618,7 @@ snes_ffe (st_rominfo_t *rominfo, char *ext)
   set_nsrt_info (rominfo, (unsigned char *) &header);
 
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ext);
+  set_suffix (dest_name, ext);
   strcpy (src_name, ucon64.rom);
   ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
@@ -710,7 +710,7 @@ snes_fig (st_rominfo_t *rominfo)
   set_nsrt_info (rominfo, (unsigned char *) &header);
 
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".FIG");
+  set_suffix (dest_name, ".FIG");
   strcpy (src_name, ucon64.rom);
   ucon64_output_fname (dest_name, 0);
   handle_existing_file (dest_name, src_name);
@@ -801,7 +801,7 @@ snes_mgd (st_rominfo_t *rominfo)
   mgh[31] = 0xff;
   memcpy (&mgh[16], dest_name, strlen (dest_name));
 
-  setext (dest_name, ".078");
+  set_suffix (dest_name, ".078");
   ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
   ucon64_fbackup (NULL, dest_name);
   q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
@@ -840,7 +840,7 @@ snes_mgd (st_rominfo_t *rominfo)
   memcpy (&mgh[16], snes_header.name, 15);
 
   strcpy (buf, buf2);
-  setext (buf, ".MGH");
+  set_suffix (buf, ".MGH");
   q_fwrite (&mgh, 0, sizeof (mgh), buf, "wb");
 
   fprintf (stdout, ucon64_msg[WROTE], buf);
@@ -1237,7 +1237,7 @@ snes_s (st_rominfo_t *rominfo)
       surplus = size % part_size;
 
       strcpy (dest_name, ucon64.rom);
-      setext (dest_name, ".1");
+      set_suffix (dest_name, ".1");
 
       q_fread (header, 0, SWC_HEADER_LEN, ucon64.rom);
       header[0] = part_size / 8192;
@@ -1283,7 +1283,7 @@ snes_j (st_rominfo_t *rominfo)
 
   strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".TMP");
+  set_suffix (dest_name, ".TMP");
 
   ucon64_output_fname (dest_name, 0);
   ucon64_fbackup (NULL, dest_name);

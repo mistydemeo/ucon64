@@ -374,9 +374,9 @@ strcasestr2 (const char *str, const char *search)
 
 
 char *
-setext (char *filename, const char *ext)
+set_suffix (char *filename, const char *suffix)
 {
-  char ext2[FILENAME_MAX],
+  char suffix2[FILENAME_MAX],
        *p = basename (filename) ? basename (filename) : filename,
        *p2 = NULL;
 
@@ -384,17 +384,17 @@ setext (char *filename, const char *ext)
     if (strcmp (p2 ,p) != 0)                    // some files start with '.'
       *p2 = 0;
 
-  strcpy (ext2, ext);
+  strcpy (suffix2, suffix);
 
   p = basename (filename);
-  strcat (filename, is_func (p, strlen (p), isupper) ? strupr (ext2) : strlwr (ext2));
+  strcat (filename, is_func (p, strlen (p), isupper) ? strupr (suffix2) : strlwr (suffix2));
 
   return filename;
 }
 
 
 const char *
-getext (const char *filename)
+get_suffix (const char *filename)
 {
   const char *p = NULL;
 

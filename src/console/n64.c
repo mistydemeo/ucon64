@@ -194,7 +194,7 @@ n64_v64 (st_rominfo_t *rominfo)
     }
 
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".V64");
+  set_suffix (dest_name, ".V64");
   ucon64_output_fname (dest_name, 0);
   ucon64_fbackup (NULL, dest_name);
   q_fcpy (ucon64.rom, 0, size, dest_name, "wb");
@@ -218,7 +218,7 @@ n64_z64 (st_rominfo_t *rominfo)
     }
 
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".Z64");
+  set_suffix (dest_name, ".Z64");
   ucon64_output_fname (dest_name, 0);
   ucon64_fbackup (NULL, dest_name);
   q_fcpy (ucon64.rom, 0, size, dest_name, "wb");
@@ -311,7 +311,7 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
   else
     {
       strcpy (buf, ucon64.rom);
-      setext (buf, ".BOT");
+      set_suffix (buf, ".BOT");
 
       ucon64_fbackup (NULL, buf);
       q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len + 0x040,
@@ -359,7 +359,7 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
   else
     {
       strcpy (buf, ucon64.rom);
-      setext (buf, ".GG");
+      set_suffix (buf, ".GG");
       ucon64_fbackup (NULL, buf);
 
       q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len + 0x040,

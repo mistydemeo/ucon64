@@ -163,7 +163,7 @@ genesis_smd (st_rominfo_t *rominfo)
   header.type = 6;
 
   strcpy (dest_name, ucon64.rom);
-  setext (dest_name, ".SMD");
+  set_suffix (dest_name, ".SMD");
   ucon64_output_fname (dest_name, 0);
   ucon64_fbackup (NULL, dest_name);
 
@@ -191,7 +191,7 @@ genesis_smds (st_rominfo_t *rominfo)
   header.type = 7;                              // SRAM file
 
   strcpy (buf, ucon64.rom);
-  setext (buf, ".SAV");
+  set_suffix (buf, ".SAV");
 
   q_fwrite (&header, 0, SMD_HEADER_LEN, buf, "wb");
   q_fcpy (ucon64.rom, 0, ucon64.file_size, buf, "ab");
@@ -377,7 +377,7 @@ genesis_mgd (st_rominfo_t *rominfo)
         mgh[((x + 2) * 16) + y + 244] = mghcharset[(buf[x] * 8) + y];
     }
 
-  setext (dest_name, ".MGH");
+  set_suffix (dest_name, ".MGH");
   /*
     If a backup would be created it would overwrite the backup of the ROM. The
     ROM backup is more important, so we don't write a backup of the MGH file.
@@ -443,7 +443,7 @@ genesis_s (st_rominfo_t *rominfo)
       q_fread (&smd_header, 0, rominfo->buheader_len, ucon64.rom);
 
       strcpy (dest_name, ucon64.rom);
-      setext (dest_name, ".1");
+      set_suffix (dest_name, ".1");
       ucon64_output_fname (dest_name, 0);
 
       smd_header.size = PARTSIZE / 16384;
@@ -493,7 +493,7 @@ genesis_j (st_rominfo_t *rominfo)
         1/3/5/7/2/4/6/8
 */
       strcpy (dest_name, ucon64.rom);
-      setext (dest_name, ".078");
+      set_suffix (dest_name, ".078");
       ucon64_output_fname (dest_name, 0);
       ucon64_fbackup (NULL, dest_name);
       remove (dest_name);
@@ -516,7 +516,7 @@ genesis_j (st_rominfo_t *rominfo)
   else
     {
       strcpy (dest_name, ucon64.rom);
-      setext (dest_name, ".SMD");
+      set_suffix (dest_name, ".SMD");
       strcpy (src_name, ucon64.rom);
       ucon64_output_fname (dest_name, 0);
       ucon64_fbackup (NULL, dest_name);

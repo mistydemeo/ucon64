@@ -243,7 +243,7 @@ gba_sram (st_rominfo_t *rominfo)
 
   ucon64_fbackup (NULL, ucon64.rom);
   strcpy (buf, ucon64.rom);
-  setext (buf, ".TMP");
+  set_suffix (buf, ".TMP");
   rename (ucon64.rom, buf);
 
   gbautil (buf, ucon64.rom);
@@ -275,7 +275,7 @@ gba_crp (st_rominfo_t *rominfo, const char *value)
   puts ("Applying crash patch...");
 
   strcpy (backup_name, ucon64.rom);
-  setext (backup_name, ".BAK");
+  set_suffix (backup_name, ".BAK");
   rename (ucon64.rom, backup_name);
   if ((srcfile = fopen (backup_name, "rb")) == NULL)
     {

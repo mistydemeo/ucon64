@@ -210,7 +210,7 @@ const st_getopt2_t lf[] = {
   lf,
   ngp_usage,
 #ifdef  USE_PARALLEL
-//  fpl_usage,
+  pl_usage,
 #endif
   lf,
   atari_usage,

@@ -93,6 +93,14 @@ const char *ucon64_msg[] = {
   NULL
 };
 
+const char *unknown_usage[] =
+{
+  "Unknown backup unit/emulator",
+  NULL,
+  NULL,
+  NULL
+};
+
 char *ucon64_temp_file = NULL;
 
 // maker strings for SNES, GB, GBC and GBA games
@@ -298,14 +306,6 @@ typedef struct st_ioport
 
 static int ucon64_io_fd;
 #endif
-
-const char *unknown_usage[] =
-{
-  "Unknown backup unit/emulator",
-  NULL,
-  NULL,
-  NULL
-};
 
 
 void

@@ -37,14 +37,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 typedef struct st_ucon64
 {
-#ifdef TODO
-//#warning TODO get rid of argc and argv here
-#endif // TODO
   int argc;
   char **argv;
 
-  const char *rom;                              // ROM (cmdline) with path
-  char rom_in_archive[FILENAME_MAX];            // filename holder if the ROM comes from an archive
+  const char *rom;                              // rom (cmdline) with path
+//  char rom_in_archive[FILENAME_MAX];            // filename holder if the rom comes from an archive
 
   const char *file;                             // file (cmdline) with path
 
@@ -85,7 +82,7 @@ typedef struct st_ucon64
 
 #define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
 #define UCON64_TYPE_ISCD(x) (x == UCON64_CD)
-  int type;                                     // ROM type ROM or CD image
+  int type;                                     // rom type ROM or CD image
 } st_ucon64_t;
 
 extern st_ucon64_t ucon64;
@@ -126,6 +123,9 @@ typedef struct st_rominfo
   char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal checksum
   int internal_crc2_start;                      // start of 2nd/inverse internal checksum
   int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal checksum
+#ifdef  LIBDISCMAGE
+//  st_dm_image_t *image;                         // cd image?
+#endif  
 } st_rominfo_t;
 
 extern dm_image_t *image;

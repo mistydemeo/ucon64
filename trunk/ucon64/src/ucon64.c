@@ -66,7 +66,7 @@ write programs in C
 #include "patch/xps.h"
 #include "patch/pal4u.h"
 
-#ifdef BACKUP_CD 
+#ifdef BACKUP_CD
   #include "backup/cdrw.h"
 #endif
 

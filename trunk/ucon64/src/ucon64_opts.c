@@ -676,7 +676,7 @@ ucon64_options (int c, const char *optarg)
     case UCON64_CRC:
       if (!value)
         value = ucon64.rominfo ? ucon64.rominfo->buheader_len : ucon64.buheader_len;
-      printf ("%s", basename2 (ucon64.rom));
+      fputs (basename2 (ucon64.rom), stdout);
       if (ucon64.fname_arch[0])
         printf (" (%s)\n", basename2 (ucon64.fname_arch));
       else
@@ -883,7 +883,7 @@ ucon64_options (int c, const char *optarg)
         {
           if (ucon64.crc32)
             {
-              printf ("%s", basename2 (ucon64.rom));
+              fputs (basename2 (ucon64.rom), stdout);
               if (ucon64.fname_arch[0])
                 printf (" (%s)\n", basename2 (ucon64.fname_arch));
               else

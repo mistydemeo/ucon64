@@ -1,7 +1,7 @@
 A Super Wild Card compatibility list
-Version: 1.25
+Version: 1.26
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 30 August 2003
+Date: 15 November 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
 Software: uCON64 1.9.8-2
 
@@ -167,6 +167,7 @@ Code    Game
 2 -     Final Fight Guy (U)
 2 + 3 - Final Fight Tough (J) <= emulation mode select byte: 0x1c
 0 -     Final Fight (U)
+0 -     Flashback (E) (M2)
 0 -     Frogger (U)
 0 -     Front Mission (J) (V1.0)
 0 -     F-Zero (E)

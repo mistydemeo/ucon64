@@ -120,80 +120,10 @@ void iodelay (void)
       }
    }
 
-#ifdef __linux__
-static int mbquit = 0;
-static struct termios orig, new;
-static int peek = -1;
-
-void control_c(int n)
-   {
-   mbquit = 1;
-   }
-
-void InitLinuxKbhit (init)
-   {
-   if (init)
-      {
-      tcgetattr(0, &orig);
-      new = orig;
-      new.c_lflag &= ~ICANON;
-      new.c_lflag &= ~ECHO;
-      new.c_lflag &= ~ISIG;
-      new.c_cc[VMIN] = 1;
-      new.c_cc[VTIME] = 0;
-      tcsetattr(0, TCSANOW, &new);
-      }
-   else
-      {
-      tcsetattr(0,TCSANOW, &orig);
-      }
-   }
-
-int kbhit()
-   {
-   char ch;
-   int nread;
-
-   if (peek != -1) return 1;
-   new.c_cc[VMIN]=0;
-   tcsetattr(0, TCSANOW, &new);
-   nread = read(0,&ch,1);
-   new.c_cc[VMIN]=1;
-   tcsetattr(0, TCSANOW, &new);
-
-   if (nread == 1)
-      {
-      peek = ch;
-      return 1;
-      }
-
-   return 0;
-   }
-
-int cnt_getch()
-   {
-   char ch;
-
-   if (peek != -1)
-      {
-      ch = peek;
-      peek = -1;
-      return ch;
-      }
-
-   read(0,&ch,1);
-   return ch;
-   }
-
-#endif
-
-void ProgramExit (int code)
-   {
-#ifdef __linux__
-   InitLinuxKbhit (0);
-#endif
-   exit(code);
-   }
+void ProgramExit(int code)
+{
+  exit(code);
+}
 
 void usage(char *name)
    {
@@ -1050,16 +980,6 @@ void VerifyFlash (FILE *fp)
       printf("%d bytes compared ok.\n", addr);
    }
 
-#ifdef __linux__
-void *old = NULL;
-
-void clear_sig(void)
-   {
-   if (old)
-      signal(SIGINT, old);
-   }
-#endif
-
 int fal_main(int argc, char **argv)
    {
    int arg,i;
@@ -1073,10 +993,6 @@ int fal_main(int argc, char **argv)
    int OptV = 0;
    int port = 1;
    int ChipSize = 32;
-
-#ifdef __linux__
-   InitLinuxKbhit (1);
-#endif
 
    if (argc < 2)
       {
@@ -1168,22 +1084,6 @@ int fal_main(int argc, char **argv)
          }
       }
 
-#ifdef __linux__
-    atexit(clear_sig);
-    old = signal(SIGINT, control_c);
-    if (getuid() && geteuid()) {
-        printf("ERROR: No privileges to use I/O. Obtain root access & retry\n");
-        exit(1);
-    }
-    ioperm((port == 1) ? 0x378 : 0x278, 5, 1);
-    iopl (3);  // Get access to ECP ECR reg = SPPDataPort + 0x402
-    if (getgid() && !getegid())
-        setegid(getgid());
-
-    if (getuid() && !geteuid())
-        seteuid(getuid());
-#endif
-
    InitPort(port);
 
    CheckForFC ();
@@ -1265,9 +1165,9 @@ int fal_main(int argc, char **argv)
    ProgramExit(0);
    exit(0);
    }
-   
-   
-   
+
+
+
 int fal_argc;
 char *fal_argv[128];
 
@@ -1282,7 +1182,7 @@ int fal_read(	char *filename
 	fal_argv[1]="-s";
 	fal_argv[2]=filename;
 	fal_argc=3;
-	
+
 	if(!fal_main(	fal_argc, fal_argv ))
 	{
 		return(0);
@@ -1298,12 +1198,12 @@ int fal_write(	char *filename
 )
 {
 
-//TODO more opitons
+//TODO more options
 	fal_argv[0]="fal";
 	fal_argv[1]="-p";
 	fal_argv[2]=filename;
 	fal_argc=3;
-	
+
 	if(!fal_main(	fal_argc, fal_argv ))
 	{
 		return(0);

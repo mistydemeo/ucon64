@@ -18,6 +18,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifndef UCON64_MISC_H
+#define UCON64_MISC_H
+
 #include <ctype.h>
 #include <dirent.h>
 #include <stddef.h>
@@ -35,7 +38,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   #endif
 #endif
 #include <sys/stat.h>
-//#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>				// ioperm() (libc5)
 
@@ -129,3 +131,4 @@ int parport_gauge(	time_t init_time
 			,long size
 );
 
+#endif                                          // #ifndef UCON64_MISC_H

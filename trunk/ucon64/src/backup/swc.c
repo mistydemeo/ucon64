@@ -35,33 +35,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif                                          //  stream (direct video writes)
                                                 //  this makes redir possible
 #include "swc.h"
+#include "../misc.h"                            // kbhit(), getch()
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <unistd.h>                             // access(), STDIN_FILENO, isatty(), ioperm() (libc5)
 #include <time.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-
-#ifdef __linux__
-#ifdef __GLIBC__
-#include <sys/io.h>				// ioperm() (glibc)
-#endif
-#endif
-
-#ifdef  __UNIX__
-#include <termios.h>
-
-typedef struct termios tty_t;
-
-#define getch           getchar
-#endif
-#ifdef DJGPP
-#include <conio.h>                              // getch()
-#include <pc.h>                                 // kbhit(), inportb()
-#endif
 
 static void init_io(unsigned int port);
 static void checkabort(int status);
@@ -79,13 +58,6 @@ static void receive_block(unsigned short address, unsigned char *buffer, int len
 static unsigned char receiveb(void);
 static inline unsigned char wait_while_busy(void);
 static inline void wait_for_ready(void);
-
-#ifdef  __UNIX__
-static void init_conio(void);
-static void deinit_conio(void);
-static void set_tty(tty_t param);
-static int kbhit(void);
-#endif
 
 static int swc_port, interleaved;       	// the name `interleaved' is just a guess :)
 
@@ -367,7 +339,7 @@ int receive_rom_info(unsigned char *buffer)
     2 * real size)
   - returns ROM header in buffer (index 2 (emulation mode select) is not yet
     filled in)
-  - sets global interleaved
+  - sets global `interleaved'
 */
 {
   int n, m, size;
@@ -407,9 +379,9 @@ int receive_rom_info(unsigned char *buffer)
   memset(buffer, 0, HEADERSIZE);
   buffer[0] = size << 4 & 0xff;                 // *16 for 8KB units; low byte
   buffer[1] = size >> 4;                        // *16 for 8KB units /256 for high byte
-  buffer[8] = (unsigned char) 0xaa;
-  buffer[9] = (unsigned char) 0xbb;
-  buffer[10] = (unsigned char) 4;
+  buffer[8] = 0xaa;
+  buffer[9] = 0xbb;
+  buffer[10] = 4;
 
   return size;
 }
@@ -556,9 +528,9 @@ int swc_read_sram(char *filename, unsigned int parport)
 
   printf("Receive: %d Bytes\n\n", 32*1024);
   memset(buffer, 0, HEADERSIZE);
-  buffer[8] = (unsigned char) 0xaa;
-  buffer[9] = (unsigned char) 0xbb;
-  buffer[10] = (unsigned char) 5;
+  buffer[8] = 0xaa;
+  buffer[9] = 0xbb;
+  buffer[10] = 5;
   fwrite(buffer, 1, HEADERSIZE, file);
 
   send_command(5, 0, 0);
@@ -679,7 +651,7 @@ void checkabort(int status)
 //  send_command(5, 0, 0);                      // vgs: when sending/receiving a rom
 }
 
-int swc_usage(int argc,char *argv[])
+int swc_usage(int argc, char *argv[])
 {
 if (argcmp(argc,argv, "-help"))
     printf("\n%s\n", swc_TITLE);
@@ -699,72 +671,3 @@ if (argcmp(argc,argv, "-help"))
 
   return 0;
 }
-
-#ifdef  __UNIX__
-int stdin_tty = 1;                              // 1 => stdin is a tty, 0 => it's not
-tty_t oldtty, newtty;
-
-void set_tty(tty_t param)
-{
-  if (stdin_tty && tcsetattr(STDIN_FILENO, TCSANOW, &param) == -1)
-  {
-    fprintf(stderr, "Could not set tty parameters\n");
-    exit(100);
-  }
-}
-
-void init_conio(void)
-{
-  if (!isatty(STDIN_FILENO))
-  {
-    stdin_tty = 0;
-    return;                                     // rest is nonsense if not a tty
-  }
-
-  if (tcgetattr(STDIN_FILENO, &oldtty) == -1)
-  {
-    fprintf(stderr, "Could not get tty parameters\n");
-    exit(101);
-  }
-
-  if (atexit(deinit_conio) == -1)
-  {
-    fprintf(stderr, "Could not register function with atexit()\n");
-    exit(102);
-  }
-
-  newtty = oldtty;
-  newtty.c_lflag &= ~(ICANON | ECHO);
-  newtty.c_lflag |= ISIG;
-  newtty.c_cc[VMIN] = 1;                        // if VMIN != 0, read calls
-  newtty.c_cc[VTIME] = 0;                       //  block (wait for input)
-
-  set_tty(newtty);
-}
-
-void deinit_conio(void)
-{
-  tcsetattr(STDIN_FILENO, TCSAFLUSH, &oldtty);
-}
-
-int kbhit(void)
-{
-  tty_t tmptty = newtty;
-  int ch, key_pressed;
-
-  tmptty.c_cc[VMIN] = 0;
-  set_tty(tmptty);
-
-  if ((ch = fgetc(stdin)) != EOF)
-  {
-    key_pressed = 1;
-    ungetc(ch, stdin);
-  }
-  else
-    key_pressed = 0;
-
-  set_tty(newtty);
-
-  return key_pressed;
-}
-#endif

@@ -25,28 +25,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 /*#include <io.h>*/
 /*#include <dir.h>*/
-#ifdef __linux__
-#ifdef __GLIBC__
-#include <sys/io.h>				// ioperm() (glibc)
-#else
-#include <unistd.h>				// ioperm() (libc5)
-#endif
-#endif
 
 
 //#define ai 0x37b
 //#define data 0x37c
 #define trans_size 32768
-#define set_ai_write outportb(port_a,5);		// ninit=1, nwrite=0
+#define set_ai_write outportb(port_a,5);	// ninit=1, nwrite=0
 #define set_data_write outportb(port_a,1);	// ninit=0, nwrite=0
 #define set_data_read outportb(port_a,0);	// ninit=0, nwrite=1
 #define set_normal outportb(port_a,4);		// ninit=1, nwrite=1
-/*
-unsigned char inportb(arg1);
-unsigned char outportb(arg1,arg2);
-unsigned short int inport(unsigned int arg1);
-unsigned short int outport(unsigned int arg1,unsigned int arg2);
-*/
 
 /**************************************
 *               Subroutine            *
@@ -70,12 +57,10 @@ short int i,j,page,sel,err,wv_mode;
 char ch=' ';
 
 
-
 void drjr_set_ai(unsigned char _ai);
 void drjr_set_ai_data(unsigned char _ai,unsigned char _data);
 void drjr_init_port(void);
 void drjr_end_port(void);
-#
 void dump_buffer(void);
 char write_32k(unsigned short int hi_word, unsigned short int lo_word);
 char verify_32k(unsigned short int hi_word, unsigned short int lo_word);
@@ -92,42 +77,6 @@ void d64jr_usage(char *progname);
 *  N64 cart emulator transfer program *
 **************************************/
 
-/*
-unsigned char inportb(arg1)
-{
-  __asm__("
-  movl    8(%ebp),%edx
-  inb     %dx,%al
-  movzbl  %al,%eax                  
-  ");
-}
-
-unsigned char outportb(arg1,arg2)
-{
-  __asm__("
-  movl    0x8(%ebp),%edx
-  movl    0xc(%ebp),%eax
-  outb    %al,%dx
-  ");
-}
-
-unsigned short int inport(unsigned int arg1)
-{
-  __asm__("
-  movl    8(%ebp),%edx
-  inw     %dx,%ax
-  ");
-}
-
-unsigned short int outport(unsigned int arg1,unsigned int arg2)
-{
-  __asm__("
-  movl    0x8(%ebp),%edx
-  movl    0xc(%ebp),%eax
-  outw    %ax,%dx
-  ");
-}
-*/
 
 /**************************************
 *               Subroutine            *
@@ -537,10 +486,6 @@ int d64jr_main(int argc, char *argv[])
 */
    port[0]=0x378;
    port[1]=0;
-
-#ifdef __linux__
-   ioperm(0x378, 6, 1);
-#endif
 
     if (argc==1) d64jr_usage(progname);
     for( i=1; i<argc; i++ ) {

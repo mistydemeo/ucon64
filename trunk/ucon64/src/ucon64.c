@@ -63,105 +63,130 @@ write programs in C
 
 int main(int argc,char *argv[])
 {
-long x,y=0;
-char buf[MAXBUFSIZE],buf2[4096],buf3[4096];
-long console=ucon64_UNKNOWN;
-struct dirent *ep;
-struct stat puffer;
-DIR *dp;
-char *forceargs[]={
-""
-,"-gb"
-,"-gen"
-,"-sms"
-,"-jag"
-,"-lynx"
-,"-n64"
-,"-ng"
-,"-nes"
-,"-pce"
-,"-psx"
-,"-psx2"
-,"-snes"
-,"-sat"
-,"-dc"
-,"-cd32"
-,"-cdi"
-,"-3do"
-,"-ata"
-,"-s16"
-,"-ngp"
-,"-gba"
-};
-
-
-int ucon64_argc;
-char *ucon64_argv[128];
-
-printf("%s\n",ucon64_TITLE);
-printf("Uses code from various people. See 'DEVELOPERS' for more!\n");
-printf("This may be freely redistributed under the terms of the GNU Public License\n\n");
-
-if(	argc<2 ||
-	argcmp(argc,argv,"-h") ||
-	argcmp(argc,argv,"--help") ||
-	argcmp(argc,argv,"-?")
-)
-{
-	ucon64_usage(argc,argv);
-	return(0);
-}
-
-
-
-
-if(argcmp(argc,argv,"-db")||argcmp(argc,argv,"-dbv"))
-{
-	atari_main(argc,argv);
-//	gameboy_main(argc,argv);
-//	genesis_main(argc,argv);
-	jaguar_main(argc,argv);
-	lynx_main(argc,argv);
-//	nintendo64_main(argc,argv);
-	neogeo_main(argc,argv);
-	nes_main(argc,argv);
-	pcengine_main(argc,argv);
-	sms_main(argc,argv);
-//	supernintendo_main(argc,argv);
-	system16_main(argc,argv);
-
-	printf("\n");
-	return(0);
-}
-
-if(!ucon64_rom()[0])
-{
-	ucon64_usage(argc,argv);
-	return(0);
-}
-
-if(ucon64_file()[0])
-{
-	strcpy(buf,ucon64_file());
-	sscanf(buf,"%x",&ucon64_parport);
-}
-
-
-#ifdef BACKUP
-if(!(ucon64_parport=parport_probe(ucon64_parport)))
-{
-//	printf("ERROR: no parallel port 0x%s found\n\n",strupr(buf));
-}
-//else printf("0x%x\n\n",ucon64_parport);
+  long x, y = 0, console=ucon64_UNKNOWN;
+  int ucon64_argc;
+  struct dirent *ep;
+  struct stat puffer;
+  DIR *dp;
+  char buf[MAXBUFSIZE], buf2[4096], buf3[4096], *ucon64_argv[128], *forceargs[] =
+  {
+    "",
+    "-gb",
+    "-gen",
+    "-sms",
+    "-jag",
+    "-lynx",
+    "-n64",
+    "-ng",
+    "-nes",
+    "-pce",
+    "-psx",
+    "-psx2",
+    "-snes",
+    "-sat",
+    "-dc",
+    "-cd32",
+    "-cdi",
+    "-3do",
+    "-ata",
+    "-s16",
+    "-ngp",
+    "-gba"
+  };
+#ifdef	__UNIX__
+  uid_t uid;
+  gid_t gid;
 #endif
 
+  printf("%s\n",ucon64_TITLE);
+  printf("Uses code from various people. See 'DEVELOPERS' for more!\n");
+  printf("This may be freely redistributed under the terms of the GNU Public License\n\n");
 
+  if (argc<2 ||
+      argcmp(argc, argv, "-h") ||
+      argcmp(argc, argv, "--help") ||
+      argcmp(argc, argv, "-?"))
+  {
+    ucon64_usage(argc,argv);
+    return 0;
+  }
 
-if(argcmp(argc,argv,"-crc"))
-{
-	printf("Checksum: %08lx\n\n",fileCRC32(ucon64_rom(),0));
-	return(0);
+  if (argcmp(argc, argv, "-db") || argcmp(argc, argv, "-dbv"))
+  {
+    atari_main(argc,argv);
+//    gameboy_main(argc,argv);
+//    genesis_main(argc,argv);
+    jaguar_main(argc,argv);
+    lynx_main(argc,argv);
+//    nintendo64_main(argc,argv);
+    neogeo_main(argc,argv);
+    nes_main(argc,argv);
+    pcengine_main(argc,argv);
+    sms_main(argc,argv);
+//    supernintendo_main(argc,argv);
+    system16_main(argc,argv);
+
+    printf("\n");
+    return 0;
 }
+
+  if (!ucon64_rom()[0])
+  {
+    ucon64_usage(argc,argv);
+    return 0;
+  }
+
+  if (ucon64_file()[0])
+  {
+    strcpy(buf, ucon64_file());
+    sscanf(buf, "%x", &ucon64_parport);
+  }
+
+#ifdef BACKUP
+  if (!(ucon64_parport = parport_probe(ucon64_parport)))
+/*
+    printf("ERROR: no parallel port 0x%s found\n\n",strupr(buf));
+  else
+    printf("0x%x\n\n",ucon64_parport);
+*/
+
+#ifdef __UNIX__
+/*
+  Some code needs us to switch to the real uid and gid. However, other code needs access to
+  I/O ports other than the standard printer port registers. We just do an iopl(3) and all
+  code should be happy. Using iopl(3) enables users to run all code without being root (of
+  course with the ucon64 executable setuid root). Anyone a better idea?
+*/
+#ifdef __linux__
+  if (iopl(3) == -1)
+  {
+    fprintf(stderr, "Could not set the I/O privilege level to 3\n"
+                    "(This program needs root privileges)\n");
+    exit(1);
+  }
+#endif
+
+  uid = getuid();
+  if (setuid(uid) == -1)
+  {
+    fprintf(stderr, "Could not set uid\n");
+    exit(1);
+  }
+  gid = getgid();                               // This shouldn't be necessary if `make install'
+  if (setgid(uid) == -1)                        //  was used, but just in case (root did `chmod +s')
+  {
+    fprintf(stderr, "Could not set gid\n");
+    exit(1);
+  }
+#endif
+
+#endif
+
+  if (argcmp(argc, argv, "-crc"))
+  {
+    printf("Checksum: %08lx\n\n", fileCRC32(ucon64_rom(), 0));
+    return 0;
+  }
 
 if(argcmp(argc,argv,"-crchd"))
 {
@@ -206,7 +231,7 @@ while((ep=readdir(dp))!=0)
 			sprintf(buf,"%s %s",argv[0],ep->d_name);
 			system(buf);
 		}
-	}                
+	}
 }
 (void)closedir(dp);
 
@@ -261,7 +286,7 @@ if(argcmp(argc,argv,"-padhd"))
 if(argcmp(argc,argv,"-ispad"))
 {
 	unsigned long padded;
-	
+
 	if((padded=filetestpad(ucon64_rom()))!=-1)
 	{
 		if(!padded)printf("Padded: No\n");

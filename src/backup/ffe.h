@@ -1,7 +1,7 @@
 /*
 ffe.h - General Front Far East copier routines for uCON64
 
-written by 2002 - 2003 dbjh
+written by 2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -29,24 +29,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
              Magic Griffin: Emulation mode select, first byte?
     2      - Emulation mode select (SWC/SMC/Magic Griffin, second byte?)
              Bit 7 6 5 4 3 2 1 0
-                 x               : 0 = Run program in mode 1 (JMP RESET Vector)
-                                 : 1 = Run in mode 0 (JMP $8000)
+                 x               : 1 = Run in mode 0 (JMP $8000) (higher precedence than bit 1)
                    x             : 0 = Last file of the ROM dump (multi-file)
                                  : 1 = Multi-file (there is another file to follow)
                      x           : SWC & SMC:
-                                     0 = SRAM mapping mode 20 (LoROM)
-                                     1 = mode 21 (HiROM)
+                                     0 = SRAM mapping mode 1 (LoROM)
+                                     1 = mode 2 (HiROM)
                        x         : SWC & SMC:
                                      0 = DRAM mapping mode 20 (LoROM)
                                      1 = mode 21 (HiROM)
-                         x x     : SWC & SMC:
-                                     00 = 256 kb SRAM, 01 = 64 kb, 10 = 16 kb, 11 = no SRAM
-                                   Magic Griffin (bit 2):
+                         x x     : SWC & SMC (SRAM size):
+                                     00 = 256 kb, 01 = 64 kb, 10 = 16 kb, 11 = no SRAM
+                             x   : SWC & SMC:
                                      0 = Run in mode 3
-                                     1 = Run in mode 2 (JMP Reset)
-                             x   : 0 = Disable, 1 = Enable external cartridge memory
-                                   image at bank 205F,A0 system mode 2/3)
-                               x : reserved
+                                     1 = Run in mode 2 (JMP RESET)
+                               x : 0 = Disable, 1 = Enable external cartridge memory
+                                   image at bank 20-5F,A0-DF in system mode 2/3)
     3-7    - 0, reserved
     8      - File ID code 1 (0xaa)
     9      - File ID code 2 (0xbb)

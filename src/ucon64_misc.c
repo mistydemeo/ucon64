@@ -40,7 +40,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  USE_DISCMAGE
 #include "ucon64_dm.h"
 #endif
-#include "quick_io.h"
 #include "ucon64_misc.h"
 #include "console/console.h"
 #include "backup/backup.h"
@@ -108,9 +107,9 @@ const st_usage_t s16_usage[] =
 
 const st_usage_t atari_usage[] =
   {
-    {NULL, NULL, "Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr\n"},
-    {NULL, NULL, "1977/1982/1984/1986 Atari\n"},
-    {"ata", NULL, "force recognition\n"},
+    {NULL, NULL, "Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr"},
+    {NULL, NULL, "1977/1982/1984/1986 Atari"},
+    {"ata", NULL, "force recognition"},
     {NULL, NULL, NULL}
   };
 
@@ -1332,11 +1331,12 @@ ucon64_configfile_update (void)
   sprintf (buf, "%d", UCON64_CONFIG_VERSION);
   set_property (ucon64.configfile, "version",     buf, "uCON64 configuration");
 
-  set_property (ucon64.configfile, "f2afirmware", "f2afirm.hex", "F2A support files");
-  set_property (ucon64.configfile, "iclientu",    "iclientu.bin", NULL);
-  set_property (ucon64.configfile, "iclientp",    "iclientp.bin", NULL);
-  set_property (ucon64.configfile, "ilogo",       "ilogo.bin",    NULL);
-  set_property (ucon64.configfile, "gbaloader",   "loader.bin",   NULL);
+  set_property (ucon64.configfile, "f2afirmware", "f2afirm.hex",  "F2A support files\n"
+                                                                  "path to F2A USB firmware");
+  set_property (ucon64.configfile, "iclientu",    "iclientu.bin", "path to GBA client binary (for USB code)");
+  set_property (ucon64.configfile, "iclientp",    "iclientp.bin", "path to GBA client binary (for parallel port code)");
+  set_property (ucon64.configfile, "ilogo",       "ilogo.bin",    "path to iLinker logo file");
+  set_property (ucon64.configfile, "gbaloader",   "loader.bin",   "path to GBA multi-game loader");
 
   return 0;
 }

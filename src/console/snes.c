@@ -2482,6 +2482,7 @@ matches_deviates (int equal)
 
 int
 snes_buheader_info (st_rominfo_t *rominfo)
+// -dbuh
 {
   unsigned char header[512];
   int x, y;
@@ -2506,7 +2507,7 @@ snes_buheader_info (st_rominfo_t *rominfo)
 
   q_fread (&header, 0, 512, ucon64.rom);
   mem_hexdump (header, 48, 0);                  // show only the part that is
-  puts ("");                                    //  interpreted by copier
+  fputc ('\n', stdout);                         //  interpreted by copier
 
   if (type == SWC || type == FIG || type == SMC || type == UFO)
     {
@@ -2518,9 +2519,21 @@ snes_buheader_info (st_rominfo_t *rominfo)
 
   if (type == SWC || type == SMC)
     {
+      int z;
       unsigned char sram_sizes[] = {0, 2, 8, 32};
 
-      printf ("[2:7]    Run program in mode: %d\n", (header[2] ^ 0x80) >> 7);
+      if (header[2] & 0x80)                     // bit 7 has higher precedence
+        z = 0;                                  //  than bit 1
+      else if (header[2] & 0x02)
+        z = 2;
+      else
+        z = 3;
+
+      printf ("[2:7]    Run program in mode: %d", z);
+      if (z == 2)
+        printf (" (bit 1=1)\n");
+      else
+        fputc ('\n', stdout);
 
       y = header[2] & 0x40 ? 1 : 0;
       printf ("[2:6]    Split: %s => %s\n",
@@ -2539,13 +2552,14 @@ snes_buheader_info (st_rominfo_t *rominfo)
       printf ("[2:3-2]  SRAM size: %d kB => %s\n",
         y, matches_deviates (snes_sramsize == y * 1024));
 
-      printf ("[2:1]    External cartridge memory: %s\n",
-        header[2] & 0x02 ? "Enabled" : "Disabled");
+      printf ("[2:1]    Run program in mode: %d", z);
+      if (z == 0)
+        printf (" (bit 7=1)\n");
+      else
+        fputc ('\n', stdout);
 
-      y = header[2] & 0x01;
-      printf ("[2:0]    (Reserved): %d\n", y);
-      if (y)
-        printf ("WARNING: [2:0] is set while it is a reserved bit\n");
+      printf ("[2:0]    External cartridge memory: %s\n",
+        header[2] & 0x01 ? "Enabled" : "Disabled");
     }
   else if (type == FIG)
     {
@@ -2949,11 +2963,11 @@ snes_init (st_rominfo_t *rominfo)
   x = 0;
   q_fread (&header, UNKNOWN_HEADER_START, UNKNOWN_HEADER_LEN, ucon64.rom);
   if (header.id1 == 0xaa && header.id2 == 0xbb)
-    x = (int) SWC;
+    x = SWC;
   else if (!strncmp ((char *) &header + 8, "SUPERUFO", 8))
-    x = (int) UFO;
-  if ((x == (int) SWC && (header.type == 5 || header.type == 8)) ||
-      (x == (int) UFO && (OFFSET (header, 0x10) == 0)))
+    x = UFO;
+  if ((x == SWC && (header.type == 5 || header.type == 8)) ||
+      (x == UFO && (OFFSET (header, 0x10) == 0)))
     {
       rominfo->buheader_len = SWC_HEADER_LEN;
       strcpy (rominfo->name, "Name: N/A");
@@ -2962,7 +2976,7 @@ snes_init (st_rominfo_t *rominfo)
       rominfo->country = "Country: Your country?";
       rominfo->has_internal_crc = 0;
       ucon64.split = 0;                         // SRAM & RTS files are never split
-      if (x == (int) SWC)
+      if (x == SWC)
         {
           rominfo->copier_usage = swc_usage;
           type = SWC;
@@ -2971,7 +2985,7 @@ snes_init (st_rominfo_t *rominfo)
           else if (header.type == 8)
             strcat (rominfo->misc, "Type: Super Wild Card RTS file\n");
         }
-      else if (x == (int) UFO)
+      else if (x == UFO)
         {
           rominfo->copier_usage = ufo_usage;
           type = UFO;

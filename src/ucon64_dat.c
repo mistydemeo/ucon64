@@ -512,8 +512,8 @@ get_dat_entry (char *fname, st_ucon64_dat_t *dat, uint32_t crc32, long start)
         fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], fname);
 #if     defined _WIN32 || defined __CYGWIN__ || defined __MSDOS__
         if (!stricmp (basename2 (fname), "ntuser.dat"))
-          fprintf (stderr, "       Please see the FAQ, question 47 & 36\n");
-          //               "ERROR: "
+          fputs ("       Please see the FAQ, question 47 & 36\n", stderr);
+          //     "ERROR: "
 #endif
         return NULL;
       }
@@ -599,7 +599,7 @@ ucon64_dat_view (int console, int verbose)
               printf ("Checksum (CRC32): 0x%08x\n", (unsigned int) idx_entry->crc32);
               if (get_dat_entry (fname_dat, &dat, idx_entry->crc32, idx_entry->filepos))
                 ucon64_dat_nfo (&dat, 0);
-              puts ("");
+              fputc ('\n', stdout);
             }
           fclose_fdat ();
         }
@@ -849,7 +849,7 @@ ucon64_dat_indexer (void)
           fclose (errorfile);
           errorfile = NULL;
         }
-      printf ("\n\n");
+      fputs ("\n\n", stdout);
     }
   free (idx_entries);
 
@@ -878,7 +878,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
       return;
     }
 
-  printf ("DAT info:\n");
+  fputs ("DAT info:\n", stdout);
   // console type?
   if (dat->console_usage != NULL)
     {
@@ -1083,7 +1083,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
             console_name = "XBox";
             break;
           default:
-            fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
+            fputs (ucon64_msg[CONSOLE_ERROR], stderr);
             exit (1);
             break;
         }
@@ -1160,7 +1160,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
       if (n != ucon64_n_files)
         {
           if (ucon64.quiet < 1)                 // better print this by default
-            printf ("WARNING: Skipping (duplicate) ");
+            fputs ("WARNING: Skipping (duplicate) ", stdout);
           else
             return -1;
         }

@@ -91,9 +91,20 @@ const st_usage_t gbx_usage[] =
 #define set_data_write outportb (port_a, 1);    // ninit=0, nastb=1, nib_sel=0, ndstb=1, nwrite=0
 //#define set_normal outportb (port_a, 4);      // ninit=1, nwrite=1
 
+typedef enum { UNKNOWN_MBC, BUNG, ROM, MBC1, MBC2, MBC3, MBC5, CAMERA, ROCKET } mbc_t;
+typedef enum { UNKNOWN_EEPROM, WINBOND, MX, INTEL } eeprom_t;
+
 static unsigned short int port_8, port_9, port_a, port_b, port_c;
-static unsigned char buffer[32768];
-static int mbc1_exp, eeprom_type;
+static unsigned char buffer[32768], rocket_logodata[] = {
+  0x11, 0x23, 0xf1, 0x1e, 0x01, 0x22, 0xf0, 0x00,
+  0x08, 0x99, 0x78, 0x00, 0x08, 0x11, 0x9a, 0x48,
+  0x11, 0x23, 0xf0, 0x0e, 0x70, 0x01, 0xf8, 0x80,
+  0x22, 0x44, 0x44, 0x22, 0x22, 0x21, 0x00, 0x1e,
+  0x99, 0x10, 0x00, 0x1e, 0x19, 0x22, 0x44, 0x22,
+  0x22, 0x47, 0x00, 0x0e, 0x11, 0x22, 0x00, 0x00
+};
+mbc_t mbc_type;
+eeprom_t eeprom_type;
 static parport_mode_t port_mode = UCON64_EPP;
 
 
@@ -404,7 +415,7 @@ data_polling_data (unsigned char last_data)
   while (timeout++ < 0x07ffffff)
     if (((read_byte () ^ last_data) & 0x80) == 0)
       return 0;
-  return 1;                                  // ready to exit the while loop
+  return 1;                                     // ready to exit the while loop
 }
 #endif
 
@@ -455,15 +466,13 @@ wait_status (void)
   while ((temp & 0xfc) != 0x80)
     {
       if ((temp & 0x20) == 0x20)
-        // Original comment was: "had to comment out because this wouldnt work on 16 meg"
-        // TODO: Test with a 16 Mbit flash card!?
         {
-          fprintf (stderr, "ERROR: Erase failed\n");
+          fputs ("ERROR: Erase failed\n", stderr);
           return -1;
         }
       if ((temp & 0x10) == 0x10)
         {
-          fprintf (stderr, "ERROR: Programming failed\n");
+          fputs ("ERROR: Programming failed\n", stderr);
           return -2;
         }
       temp = read_data ();
@@ -502,11 +511,11 @@ win_erase (void)
   out_data (0, 0x55, 0x55, 0xaa);
   out_data (0, 0x2a, 0xaa, 0x55);
   out_data (0, 0x55, 0x55, 0x10);
-  
+
   delay_us (20000);
   if (data_polling ())
     {
-      fprintf (stderr, "ERROR: Erase failed\n");
+      fputs ("ERROR: Erase failed\n", stderr);
       return -1;
     }
   else
@@ -602,14 +611,14 @@ intel_erase (void)
 static int
 erase (void)
 {
-  if (eeprom_type == 4)
+  if (eeprom_type == WINBOND)
     return win_erase ();
-  if (eeprom_type == 16)
+  if (eeprom_type == MX)
     return mx_erase ();
-  if (eeprom_type == 64)
+  if (eeprom_type == INTEL)
     return intel_erase ();
 
-  fprintf (stderr, "ERROR: Unknown EEPROM type\n");
+  fputs ("ERROR: Unknown EEPROM type\n", stderr);
   return -1;
 
 }
@@ -638,7 +647,7 @@ check_eeprom (void)
           out_adr_data_32k (0x5555, 0xaa);      // software product ID exit
           out_adr_data_32k (0x2aaa, 0x55);      // adr2,adr1,adr0,data
           out_adr_data_32k (0x5555, 0xf0);      // adr2,adr1,adr0,data
-          eeprom_type = 4;                      // Winbond 4M flash
+          eeprom_type = WINBOND;                // Winbond 4 Mbit flash
           return 0;
         }
     }
@@ -655,7 +664,7 @@ check_eeprom (void)
       if (read_byte () == 0xf1)                 // device code
         {
           reset_to_read ();                     // reset to read mode
-          eeprom_type = 16;                     // MX 16M flash
+          eeprom_type = MX;                     // MX 16 Mbit flash
           return 0;
         }
     }
@@ -675,39 +684,165 @@ check_eeprom (void)
       && buffer[0x10] == 'Q' && buffer[0x11] == 'R' && buffer[0x12] == 'Y')
     {
       out_adr_data (0x0000, 0xff);              // read array
-      eeprom_type = 64;
+      eeprom_type = INTEL;                      // Intel 64 Mbit flash
       return 0;
     }
 
-//  eeprom_type = 0;
+//  eeprom_type = UNKNOWN_EEPROM;
   return 1;
 }
 
 
 static void
-set_sram_bank (unsigned char bank)
+check_mbc (void)
+// determine memory bank controller type
 {
-  set_adr (0x4000);                             // set SRAM adr
-  out_byte (bank);                              // SRAM bank 0
+  if (eeprom_type != UNKNOWN_EEPROM)
+    mbc_type = BUNG;
+  else
+    {
+      unsigned char rom_type = buffer[0x47];
+
+      if (memcmp (buffer + 4, rocket_logodata, GB_LOGODATA_LEN) == 0)
+        mbc_type = ROCKET;
+      else if (rom_type == 0)
+        mbc_type = ROM;
+      else if ((rom_type >= 1 && rom_type <= 3) || rom_type == 0xff)
+        mbc_type = MBC1;
+      else if (rom_type == 5 || rom_type == 6)
+        mbc_type = MBC2;
+      else if (rom_type >= 0x0f && rom_type <= 0x13)
+        mbc_type = MBC3;
+      else if (rom_type >= 0x19 && rom_type <= 0x1e)
+        mbc_type = MBC5;
+      else if (rom_type == 0x1f)
+        mbc_type = CAMERA;
+      else
+        mbc_type = UNKNOWN_MBC;
+    }
+}
+
+
+static int
+check_card (void)
+/*
+  16 kB ROM = 1 bank
+  8 kB RAM = 1 bank
+*/
+{
+  unsigned char sum = 0;
+  char game_name[16];
+  int i;
+
+  fputs ("Checking ROM data...\n", stdout);
+
+  if (mbc_type == ROCKET)
+    fputs ("NOTE: Rocket Games cartridge detected\n", stdout);
+  else if (memcmp (buffer + 4, gb_logodata, GB_LOGODATA_LEN) != 0)
+    {
+      fputs ("NOTE: Cartridge does not contain official Nintendo logo data\n", stdout);
+      mem_hexdump (buffer, 0x50, 0x100);
+    }
+
+  memcpy (game_name, buffer + 0x34, 15);
+  game_name[15] = 0;
+  printf ("Game name: \"%s\"\n", game_name);
+
+  if (buffer[0x48] > 8)                         // ROM size
+    printf ("NOTE: Strange ROM size byte value in header (0x%x)\n", buffer[0x48]);
+
+  if (buffer[0x49] > 5)                         // SRAM size
+    printf ("NOTE: Strange RAM size byte value in header (0x%x)\n", buffer[0x49]);
+
+/*
+  // [47] = ROM type
+  if (buffer[0x47] > 0 && buffer[0x47] < 4 && buffer[0x48] > 4)
+    mbc1_exp = 1;                               // MBC1 8 Mbit/16 Mbit
+*/
+
+  for (i = 0x34; i < 0x4d; i++)
+    sum += ~buffer[i];
+  if (buffer[0x4d] != sum)
+    printf ("NOTE: Incorrect header checksum (0x%x), should be 0x%x\n",
+            buffer[0x4d], sum);
+
+  return (1 << (buffer[0x48] > 8 ? 9 : buffer[0x48])) * 32 * 1024;
 }
 
 
 static void
-read_eeprom_16k (unsigned int bank_16k)
+set_sram_bank (unsigned char bank)
+// original code only did "set_adr (0x4000); out_byte (bank);"
+{
+  if (eeprom_type != UNKNOWN_EEPROM)
+    {                                               // flash card
+      set_adr (0x4000);                             // set SRAM adr
+      out_byte (bank);                              // SRAM bank 0
+      // this should be equivalent to the code above: set_bank (0x4000, bank)
+    }
+  else
+    {                                               // game cartridge
+      switch (mbc_type)
+        {
+        case MBC1:
+          set_bank (0x6000, 1);
+          set_bank (0x4000, bank & 3);
+          break;
+        case MBC3:
+        case MBC5:
+          set_bank (0x4000, bank);
+          break;
+        default:
+          break;
+        }
+    }
+}
+
+
+static void
+set_bank2 (unsigned int bank)
+{
+  switch (mbc_type)
+    {
+    case BUNG:
+    case UNKNOWN_MBC:
+    case MBC5:
+      set_bank (0x2000, bank);
+      if (eeprom_type != WINBOND)
+        set_bank (0x3000, bank >> 8);
+      break;
+    case MBC1:
+      set_bank (0x6000, 0);
+      set_bank (0x2000, (unsigned char) (bank & 0x1f));
+      set_bank (0x4000, (unsigned char) ((bank >> 5) & 3)); // (bank & 0x60) >> 5
+      break;
+    case MBC2:
+      set_bank (0x2100, (unsigned char) (bank & 0x0f));
+      break;
+    case MBC3:
+      set_bank (0x2000, (unsigned char) bank);
+      break;
+    case CAMERA:
+      set_bank (0x4000, (unsigned char) bank);
+      break;
+    case ROCKET:
+      set_bank (0x3f00, (unsigned char) bank);
+      break;
+    default:
+      break;
+    }
+}
+
+
+static void
+read_eeprom_16k (unsigned int bank)
 {
   int idx = 0, i, j;
 
-  if (mbc1_exp)
-    {
-      set_bank (0x6000, 0);                     // for MCB1 expand bank
-      if ((bank_16k & 0x1f) == 0)
-        set_sram_bank ((unsigned char) ((bank_16k >> 5) & 0x3)); // use SRAM bank intend ROM bank
-      bank_16k &= 0x1f;
-    }
-  set_bank (0x2000, (unsigned char) bank_16k);  // for MCB1 16k bank
+  set_bank2 (bank);
   for (j = 0; j < 64; j++)
     {                                           // 16k bytes = 64 x 256 bytes
-      if (bank_16k)
+      if (bank)
         set_ai_data ((unsigned char) 1, (unsigned char) (j | 0x40)); // set adr[15..8]
       else
         set_ai_data ((unsigned char) 1, (unsigned char) j); // a[15..0]
@@ -723,23 +858,14 @@ read_eeprom_16k (unsigned int bank_16k)
 
 
 static int
-verify_eeprom_16k (unsigned int bank_16k)
+verify_eeprom_16k (unsigned int bank)
 {
-  int i, j, idx = 0;
+  int idx = 0, i, j;
 
-  if (mbc1_exp)
-    {
-      set_bank (0x6000, (unsigned char) 0);     // for MCB1 expand bank
-      if ((bank_16k & 0x1f) == 0)
-        set_sram_bank ((unsigned char) ((bank_16k >> 5) & 0x3)); // use SRAM bank intend ROM bank
-      bank_16k &= 0x1f;
-    }
-
-  set_bank (0x3000, (unsigned char) (bank_16k >> 8)); // for MCB1 16k bank
-  set_bank (0x2000, (unsigned char) bank_16k);  // for MCB1 16k bank
+  set_bank2 (bank);
   for (j = 0; j < 64; j++)
     {                                           // 16k bytes = 64 x 256 bytes
-      if (bank_16k)
+      if (bank)
         set_ai_data ((unsigned char) 1, (unsigned char) (j | 0x40)); // set adr[15..8]
       else
         set_ai_data ((unsigned char) 1, (unsigned char) j);
@@ -752,7 +878,7 @@ verify_eeprom_16k (unsigned int bank_16k)
           if (read_data () != buffer[idx + i])
             {
               printf ("WARNING: Verify error at %ulx\n",
-                      (bank_16k * 16384) + (j * 256) + i);
+                      (bank * 16384) + (j * 256) + i);
               return -1;
             }
         }
@@ -764,7 +890,7 @@ verify_eeprom_16k (unsigned int bank_16k)
 
 
 static int
-win_write_eeprom_16k (unsigned int bank_16k)
+win_write_eeprom_16k (unsigned int bank)
 {
   int wr_done, err_cnt, idx = 0, i, j;
 
@@ -778,8 +904,8 @@ win_write_eeprom_16k (unsigned int bank_16k)
         {
           enable_protection ();
           // write 256 bytes
-          set_bank (0x2000, (unsigned char) bank_16k); // for MCB1 16k bank
-          if (bank_16k)
+          set_bank (0x2000, (unsigned char) bank); // for MCB1 16k bank
+          if (bank)
             set_ai_data ((unsigned char) 1, (unsigned char) (j | 0x40)); // set adr[15..8]
           else
             set_ai_data ((unsigned char) 1, (unsigned char) j);
@@ -795,7 +921,7 @@ win_write_eeprom_16k (unsigned int bank_16k)
           set_ai_data ((unsigned char) 2, 0x80); // disable wr/rd inc.
           set_ai_data ((unsigned char) 0, 0xff); // point to xxff
           if (data_polling ())
-            printf ("WARNING: Write error\n"); // was: "Write error check (d6)"
+            fputs ("WARNING: Write error\n", stdout);  // was: "Write error check (d6)"
 
           wr_done = 0;
 
@@ -815,7 +941,7 @@ win_write_eeprom_16k (unsigned int bank_16k)
             }
           if (err_cnt == 0)
             {
-              fprintf (stderr, "ERROR: Programming failed after retry\n");
+              fputs ("ERROR: Programming failed after retry\n", stderr);
               return -1;
             }
         }
@@ -826,7 +952,7 @@ win_write_eeprom_16k (unsigned int bank_16k)
   disable_protection();
   delay_us (20000);
 */
-  return verify_eeprom_16k (bank_16k);
+  return verify_eeprom_16k (bank);
 }
 
 
@@ -840,15 +966,15 @@ set_page_write (void)                           // start page write command
 
 
 static int
-page_write_128 (unsigned int bank_16k, unsigned char hi_lo, int j, int idx)
+page_write_128 (unsigned int bank, unsigned char hi_lo, int j, int idx)
 {
   int retry = 3, verify_ok, i;
 
   while (retry)
     {
       set_page_write ();                        // each page is 128 bytes
-      set_bank (0x2000, (unsigned char) bank_16k); // for MCB1 16k bank
-      if (bank_16k)
+      set_bank (0x2000, (unsigned char) bank);  // for MCB1 16k bank
+      if (bank)
         set_ai_data ((unsigned char) 1, (unsigned char) (j | 0x40)); // set adr[15..8]
       else
         set_ai_data ((unsigned char) 1, (unsigned char) j);
@@ -866,8 +992,8 @@ page_write_128 (unsigned int bank_16k, unsigned char hi_lo, int j, int idx)
       // verify data
       reset_to_read ();                         // return to read mode
       verify_ok = 1;                            // verify ok
-      set_bank (0x2000, (unsigned char) bank_16k); // for MCB1 16k bank
-      if (bank_16k)
+      set_bank (0x2000, (unsigned char) bank);  // for MCB1 16k bank
+      if (bank)
         set_ai_data ((unsigned char) 1, (unsigned char) (j | 0x40)); // set adr[15..8]
       else
         set_ai_data ((unsigned char) 1, (unsigned char) j);
@@ -880,7 +1006,7 @@ page_write_128 (unsigned int bank_16k, unsigned char hi_lo, int j, int idx)
         {                                       // page=128
           if (read_data () != buffer[idx + i])
             {
-              verify_ok = 0;    // verify error
+              verify_ok = 0;                    // verify error
               break;
             }
         }
@@ -891,7 +1017,7 @@ page_write_128 (unsigned int bank_16k, unsigned char hi_lo, int j, int idx)
           retry--;
           if (retry == 0)
             {
-              fprintf (stderr, "ERROR: Programming failed after retry\n");
+              fputs ("ERROR: Programming failed after retry\n", stderr);
               return -1;
             }
         }
@@ -901,21 +1027,21 @@ page_write_128 (unsigned int bank_16k, unsigned char hi_lo, int j, int idx)
 
 
 static int
-mx_write_eeprom_16k (unsigned int bank_16k)
+mx_write_eeprom_16k (unsigned int bank)
 {
   int idx = 0, j;
 
   for (j = 0; j < 64; j++)
     {                                           // 16k bytes = 64 x 256 bytes
-      if (page_write_128 (bank_16k, 0, j, idx)) // write first 128 bytes
+      if (page_write_128 (bank, 0, j, idx))     // write first 128 bytes
         return -1;
       idx += 128;
-      if (page_write_128 (bank_16k, 0x80, j, idx)) // write second 128 bytes
+      if (page_write_128 (bank, 0x80, j, idx))  // write second 128 bytes
         return -1;
       idx += 128;
     }
   reset_to_read ();                             // return to read mode
-  return verify_eeprom_16k (bank_16k);
+  return verify_eeprom_16k (bank);
 }
 
 
@@ -923,6 +1049,8 @@ mx_write_eeprom_16k (unsigned int bank_16k)
 static void
 dump_intel_data (void)
 {
+  int i;
+
   out_adr_data (0, 0xff);                       // read array command
   for (i = 0; i < 64; i++)
     {                                           // read 0x100-0x150 to buffer
@@ -936,18 +1064,18 @@ dump_intel_data (void)
 static int
 intel_byte_write_32 (unsigned int block_adr, int idx)
 {
-  unsigned int time_out;
+  int time_out, i;
 
   for (i = 0; i < 32; i++)
     {
       out_adr_data (block_adr + idx + i, 0x40); // Write byte command
-      out_adr_data (block_adr + idx + i, buffer[idx + i]);  // Write data
+      out_adr_data (block_adr + idx + i, buffer[idx + i]); // Write data
       time_out = 0x8000;
 
       if (intel_check_status ())
         {
-          printf ("Intel byte write command time out\n");
-          printf ("Status = %x\n", intel_read_status ());
+          fprintf (stderr, "ERROR: Intel byte write command time out\n"
+                           "       Status = %x\n", intel_read_status ());
 //          dump_intel_data ();
           return -1;
         }
@@ -1000,12 +1128,12 @@ intel_buffer_write_32 (unsigned int block_adr, int idx)
 
 
 static int
-intel_write_eeprom_16k (unsigned int bank_16k)
+intel_write_eeprom_16k (unsigned int bank)
 {
-  unsigned int block_adr = bank_16k << 14;      // convert to real address
+  unsigned int block_adr = bank << 14;          // convert to real address
   int idx, j;
 
-  if ((bank_16k & 0x07) == 0)
+  if ((bank & 0x07) == 0)
     {
       if (intel_block_erase (block_adr))
         return -1;
@@ -1036,67 +1164,20 @@ intel_write_eeprom_16k (unsigned int bank_16k)
 
   out_adr_data (0, 0xff);                       // read array
   set_data_read
-  return verify_eeprom_16k (bank_16k);
+  return verify_eeprom_16k (bank);
 }
 
 
 static int
-write_eeprom_16k (unsigned int bank_16k)
+write_eeprom_16k (unsigned int bank)
 {
-  if (eeprom_type == 4)                         // Winbond 4 Mbits EEPROM
-    return win_write_eeprom_16k (bank_16k);
-  if (eeprom_type == 16)                        // MX 16 Mbits EEPROM
-    return mx_write_eeprom_16k (bank_16k);
-  if (eeprom_type == 64)                        // Intel 64 Mbits EEPROM
-    return intel_write_eeprom_16k (bank_16k);
+  if (eeprom_type == WINBOND)                   // Winbond 4 Mbits EEPROM
+    return win_write_eeprom_16k (bank);
+  if (eeprom_type == MX)                        // MX 16 Mbits EEPROM
+    return mx_write_eeprom_16k (bank);
+  if (eeprom_type == INTEL)                     // Intel 64 Mbits EEPROM
+    return intel_write_eeprom_16k (bank);
   return -1;
-}
-
-
-static int
-check_card (void)
-{
-/*
-  16 kB ROM = 1 bank
-  2 kB RAM = 1 bank
-*/
-  unsigned char sum = 0;
-  char game_name[16];
-  int i;
-
-  for (i = 0x100; i < 0x150; i++)
-    {                                           // read 0x100-0x150 to buffer
-      set_adr (i);
-      buffer[i - 0x100] = read_data ();
-    }
-
-  printf ("Checking ROM data...\n");
-  if (memcmp (buffer + 4, gb_logodata, GB_LOGODATA_LEN) != 0)
-    {
-      printf ("NOTE: Cartridge does not contain official Nintendo logo data\n");
-      mem_hexdump (buffer, 0x50, 0x100);
-    }
-  memcpy (game_name, buffer + 0x34, 15);
-  game_name[15] = 0;
-  printf ("Game name: \"%s\"\n", game_name);
-
-  if (buffer[0x48] > 8)                         // ROM size
-    printf ("NOTE: Strange ROM size byte value in header (0x%x)\n", buffer[0x48]);
-
-  if (buffer[0x49] > 4)                         // SRAM size
-    printf ("NOTE: Strange RAM size byte value in header (0x%x)\n", buffer[0x49]);
-
-  // [47] = ROM type
-  if (buffer[0x47] > 0 && buffer[0x47] < 4 && buffer[0x48] > 4)
-    mbc1_exp = 1;                               // MBC1 8 Mbit/16 Mbit
-
-  for (i = 0x34; i < 0x4d; i++)
-    sum += ~buffer[i];
-  if (buffer[0x4d] != sum)
-    printf ("NOTE: Incorrect header checksum (0x%x), should be 0x%x\n",
-            buffer[0x4d], sum);
-
-  return (1 << (buffer[0x48] > 8 ? 9 : buffer[0x48])) * 32 * 1024;
 }
 
 
@@ -1176,12 +1257,12 @@ check_port (void)
         return 1;
       else
         {
-          printf ("GBX found. EPP not found - SPP used\n");
+          fputs ("GBX found. EPP not found - SPP used\n", stdout);
           end_port ();
         }
     }
   else
-    printf ("GBX found. EPP found\n");
+    fputs ("GBX found. EPP found\n", stdout);
 
   return 0;
 }
@@ -1255,11 +1336,11 @@ intel_id (void)
 static void
 disp_id (void)
 {
-  if (eeprom_type == 4)
+  if (eeprom_type == WINBOND)
     win_id ();
-  if (eeprom_type == 16)
+  if (eeprom_type == MX)
     mx_id ();
-  if (eeprom_type == 64)
+  if (eeprom_type == INTEL)
     intel_id ();
 }
 
@@ -1296,7 +1377,7 @@ test_sram_v (int n_banks)
             {
               if (read_data () != buffer[i + idx])
                 {
-                  fprintf (stderr, "ERROR: SRAM verify error\n");
+                  fputs ("ERROR: SRAM verify error\n", stderr);
                   return -1;
                 }
             }
@@ -1323,7 +1404,7 @@ test_sram_wv (int n_banks)
       for (j = 0; j < 0x20; j++)
         {                                       // 32 x 256 = 8192(8kbytes)
           set_ai_data ((unsigned char) 1, (unsigned char) (0xa0 + j)); // SRAM at 0xa000-0xbfff
-          set_ai_data ((unsigned char) 0, 0); // a[7..0]=0
+          set_ai_data ((unsigned char) 0, 0);   // a[7..0]=0
           set_ai_data ((unsigned char) 2, 0x81); // enable inc
           set_ai (3);                           // point to data r/w port
           set_data_write
@@ -1342,11 +1423,11 @@ int cart_type = 0;                              // should be set to value of ROM
 static void
 set_rom_bank (unsigned char bank)
 {
-// cart_type < 4 is MCB1, other is MCB2
+  // cart_type < 4 is MCB1, other is MCB2
   if (cart_type < 4)
-    set_bank (0x2000, bank);    // for MCB1
+    set_bank (0x2000, bank);                    // for MCB1
   else
-    set_bank (0x2100, bank);    // for MCB2
+    set_bank (0x2100, bank);                    // for MCB2
 }
 
 
@@ -1377,14 +1458,14 @@ try_read0 (void)
       try_read ();
     }
   set_bank (0x6000, (unsigned char) 1);
-  printf ("6000:1\n");
+  fputs ("6000:1\n", stdout);
   for (j = 0; j < 4; j++)
     {
       set_sram_bank ((unsigned char) j);
       try_read ();
     }
   set_bank (0x6000, (unsigned char) 0);
-  printf ("6000:0\n");
+  fputs ("6000:0\n", stdout);
   for (j = 0; j < 4; j++)
     {
       set_sram_bank ((unsigned char) j);
@@ -1411,7 +1492,7 @@ test_intel (void)
 }
 
 
-static void gbx_init (unsigned int parport);
+static void gbx_init (unsigned int parport, int read_header);
 
 static int
 verify_card_from_file (const char *filename, unsigned int parport)
@@ -1420,11 +1501,11 @@ verify_card_from_file (const char *filename, unsigned int parport)
   FILE *file;
   time_t starttime;
 
-  gbx_init (parport);
+  gbx_init (parport, 1);
   filesize = q_fsize (filename);
   if ((filesize < 0x8000) || (filesize & 0x7fff) || (filesize > 64 * MBIT))
     {
-      fprintf (stderr, "ERROR: File size error\n");
+      fputs ("ERROR: File size error\n", stderr);
       exit (1);
     }
   if ((file = fopen (filename, "rb")) == NULL)
@@ -1443,12 +1524,14 @@ verify_card_from_file (const char *filename, unsigned int parport)
           fclose (file);
           exit (1);
         }
+/*
       if (bank == 0)
         {
           // [0x147] = ROM type; [0x148] = ROM size
           if (buffer[0x147] > 0 && buffer[0x147] < 4 && buffer[0x148] > 4)
             mbc1_exp = 1;                       // MBC1 8 Mbit/16 Mbit
         }
+*/
       if (verify_eeprom_16k (bank))
         {
           printf ("\nVerify card error at bank %x\n", bank);
@@ -1458,7 +1541,7 @@ verify_card_from_file (const char *filename, unsigned int parport)
       ucon64_gauge (starttime, (bank + 1) * 0x4000, filesize);
     }
   fclose (file);
-  printf ("\nVerify card OK\n");
+  fputs ("\nVerify card OK\n", stdout);
 
   return 0;
 }
@@ -1466,10 +1549,11 @@ verify_card_from_file (const char *filename, unsigned int parport)
 
 
 static void
-gbx_init (unsigned int parport)
+gbx_init (unsigned int parport, int read_header)
 {
-  mbc1_exp = 0;
-  eeprom_type = 0;
+  int i;
+
+  eeprom_type = UNKNOWN_EEPROM;
 
   port_8 = parport;
   port_9 = parport + 1;
@@ -1481,11 +1565,24 @@ gbx_init (unsigned int parport)
 
   if (check_port () != 0)
     {
-      fprintf (stderr, "ERROR: No GBX card present\n");
+      fputs ("ERROR: No GBX card present\n", stderr);
       exit (1);
     }
   init_port ();
   check_eeprom ();
+
+  if (read_header)
+    for (i = 0x100; i < 0x150; i++)
+      {                                         // read 0x100-0x150 to buffer
+        set_adr (i);
+        buffer[i - 0x100] = read_data ();
+      }
+  /*
+    buffer is undefined if read_header == 0. This is not a problem as
+    read_header is only 0 if a flash card should be programmed
+    (gbx_write_rom()). In that case check_mbc() won't use buffer.
+  */
+  check_mbc ();
 }
 
 
@@ -1496,30 +1593,31 @@ gbx_read_rom (const char *filename, unsigned int parport)
   time_t starttime;
   FILE *file;
 
+  gbx_init (parport, 1);
+  rom_size = check_card ();
+
   if ((file = fopen (filename, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
+      end_port ();
       exit (1);
     }
 
-  gbx_init (parport);
-  rom_size = check_card ();
-
   /*
-    0  256 kBit = 32 kB  = 2 banks"
-    1  512 kBit = 64 kB  = 4 banks"
-    2  1 MBit   = 128 kB = 8 banks"
-    3  2 MBit   = 256 kB = 16 banks"
-    4  4 MBit   = 512 kB = 32 banks"
-    5  8 MBit   = 1 MB   = 64 banks"
-    6  16 MBit  = 2 MB   = 128 banks"
+    0  256 kbit = 32 kB  = 2 banks
+    1  512 kbit = 64 kB  = 4 banks
+    2  1 Mbit   = 128 kB = 8 banks
+    3  2 Mbit   = 256 kB = 16 banks
+    4  4 Mbit   = 512 kB = 32 banks
+    5  8 Mbit   = 1 MB   = 64 banks
+    6  16 Mbit  = 2 MB   = 128 banks
   */
   n_banks = rom_size / (16 * 1024);
-  if (eeprom_type == 4)
+  if (eeprom_type == WINBOND)
     n_banks = 32;                               // backup 4 Mbit
-  if (eeprom_type == 16)
+  if (eeprom_type == MX)
     n_banks = 128;                              // backup 16 Mbit
-  if (eeprom_type == 64)
+  if (eeprom_type == INTEL)
     n_banks = 512;                              // backup 64 Mbit
 
   totalbytes = n_banks * 16 * 1024;
@@ -1551,16 +1649,10 @@ gbx_write_rom (const char *filename, unsigned int parport)
   time_t starttime;
   FILE *file;
 
-  if ((file = fopen (filename, "rb")) == NULL)
+  gbx_init (parport, 0);
+  if (eeprom_type == UNKNOWN_EEPROM)
     {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
-      exit (1);
-    }
-
-  gbx_init (parport);
-  if (eeprom_type == 0)
-    {
-      fprintf (stderr, "ERROR: Unknown EEPROM type\n");
+      fputs ("ERROR: Unknown EEPROM type\n", stderr);
       end_port ();
       exit (1);
     }
@@ -1568,18 +1660,25 @@ gbx_write_rom (const char *filename, unsigned int parport)
   filesize = q_fsize (filename);
   if ((filesize < 0x8000) || (filesize & 0x7fff) || (filesize > 64 * MBIT))
     {
-      fprintf (stderr, "ERROR: File size error\n");
+      fputs ("ERROR: File size error\n", stderr);
       exit (1);
     }
   n_banks = (filesize / 0x8000) * 2;            // how many 16k banks (rounded
                                                 //  down to 32k boundary)
-  if (eeprom_type == 16)
+  if (eeprom_type == MX)
     if (mx_erase ())                            // erase 16M flash
       {
         // wait_status() prints error message
         end_port ();
         exit (1);
       }
+
+  if ((file = fopen (filename, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
+      end_port ();
+      exit (1);
+    }
 
   printf ("Send: %d Bytes (%.4f Mb)\n\n",
           n_banks * 0x4000, (float) (n_banks * 0x4000) / MBIT);
@@ -1607,7 +1706,7 @@ gbx_write_rom (const char *filename, unsigned int parport)
 
 #if 0 // write_eeprom_16k() already calls verify_eeprom_16k() (indirectly)...
   printf ("\r                                                                              \r"); // remove last gauge
-  printf ("Verifying card...\n");
+  fputs ("Verifying card...\n", stdout);
   fseek (file, 0, SEEK_SET);
   n_bytes = 0;
   starttime = time (NULL);
@@ -1640,24 +1739,21 @@ gbx_write_rom (const char *filename, unsigned int parport)
 
 
 static int
-sram_size_banks (int pocket_camera)
-/*
-  This function needs the GB header to determine the SRAM size for game
-  cartridges. So, if there's a game cartridge plugged in the GBX call it with
-  buffer filled with the GB internal header.
-*/
+sram_size_banks (int pocket_camera, unsigned char sram_size_byte)
 {
   int n_banks;
 
-  if (eeprom_type == 0)
+  if (eeprom_type == UNKNOWN_EEPROM)
     {
-      // it seems reasonable that eeprom_type == 0 when a pocket carmera
-      //  (1 Mbit SRAM) is plugged in the GBX
+      // it seems reasonable that eeprom_type == UNKNOWN_EEPROM when a pocket
+      //  camera (1 Mbit SRAM) is plugged in the GBX
       if (pocket_camera)
         n_banks = 16;
       else // no flash card, must be game cartridge
         {
-          int x = (buffer[0x49] & 7) << 1;
+          int x = (sram_size_byte & 7) << 1;
+          if (x > 5)
+            x = 6;
           if (x)
             x = 1 << (x - 1);                   // SRAM size in kB
           n_banks = (x + 8192 - 1) / 8192;      // round up to 1 bank if it's 2 kB
@@ -1665,11 +1761,11 @@ sram_size_banks (int pocket_camera)
     }
   else
     {
-      // if eeprom_type != 0, it has to be 4, 16 or 64 (no need to set bank_size
-      //  to a default value)
-      if (eeprom_type == 4)
+      // if eeprom_type != UNKNOWN_EEPROM, it has to be WINBOND, MX or INTEL (no
+      //  need to set bank_size to a default value)
+      if (eeprom_type == WINBOND)
         n_banks = 4;                            // 4 x 8 kB = 32 kB
-      else // if (eeprom_type == 16 || eeprom_type == 64)
+      else // if (eeprom_type == MX || eeprom_type == INTEL)
         n_banks = 16;                           // 16 x 8 kB = 128 kB
     }
 
@@ -1678,64 +1774,41 @@ sram_size_banks (int pocket_camera)
 
 
 int
-gbx_read_sram (const char *filename, unsigned int parport, int bank_no)
+gbx_read_sram (const char *filename, unsigned int parport, int start_bank)
 {
-  int pocket_camera = 0, start_bank, bank, n_banks, n_bytes = 0, totalbytes,
-      idx, i, j;
+  int bank, n_banks, n_bytes = 0, totalbytes, idx, i, j;
   time_t starttime;
   FILE *file;
+
+  gbx_init (parport, 1);
+
+  n_banks = sram_size_banks (buffer[0x47] == 0x1f, buffer[0x49]);
+  if (!n_banks)
+    {
+      fputs ("ERROR: No SRAM available\n", stderr);
+      end_port ();
+      exit (1);
+    }
+
+  if (start_bank == -1)
+    start_bank = 0;
+  else
+    {
+      if (start_bank >= n_banks)
+        {
+          fprintf (stderr, "ERROR: Bank must be a value 0 - %d (for this card)\n",
+                   n_banks - 1);
+          end_port ();
+          exit (1);
+        }
+      n_banks = 1;
+    }
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
+      end_port ();
       exit (1);
-    }
-
-  gbx_init (parport);
-  check_card ();
-  if (buffer[0x47] == 0x1f)
-    pocket_camera = 1;
-
-  if (bank_no == -1)
-    {
-      start_bank = 0;
-      n_banks = sram_size_banks (pocket_camera);
-      if (!n_banks)
-        {
-          fprintf (stderr, "ERROR: No SRAM available\n");
-          end_port ();
-          exit (1);
-        }
-    }
-  else
-    {
-      start_bank = bank_no;
-      n_banks = sram_size_banks (pocket_camera);
-      if (!n_banks)
-        {
-          fprintf (stderr, "ERROR: No SRAM available\n");
-          end_port ();
-          exit (1);
-        }
-      else if (n_banks == 4)
-        {
-          if (start_bank > 3)
-            {
-              fprintf (stderr, "ERROR: Bank must be a value 0 - 3 (for this card)\n");
-              end_port ();
-              exit (1);
-            }
-        }
-      else // n_banks == 16
-        {
-          if (start_bank > 15)
-            {
-              fprintf (stderr, "ERROR: Bank must be a value 0 - 15 (for this card)\n");
-              end_port ();
-              exit (1);
-            }
-        }
-      n_banks = 1;
     }
 
   memset (buffer, 0, 8192);
@@ -1744,14 +1817,14 @@ gbx_read_sram (const char *filename, unsigned int parport, int bank_no)
 
   enable_sram_bank ();
   starttime = time (NULL);
-  for (bank = start_bank; bank < n_banks; bank++)
+  for (bank = start_bank; bank < start_bank + n_banks; bank++)
     {
       idx = 0;
       set_sram_bank ((unsigned char) bank);
       for (j = 0; j < 32; j++)
         {                                       // 32 x 256 = 8192 (8 kbytes)
           set_ai_data ((unsigned char) 1, (unsigned char) (0xa0 + j)); // SRAM at 0xa000-0xbfff
-          set_ai_data ((unsigned char) 0, 0); // a[7..0]=0
+          set_ai_data ((unsigned char) 0, 0);   // a[7..0]=0
           set_ai_data ((unsigned char) 2, 0x81); // enable inc
           set_ai (3);                           // point to data r/w port
           set_data_read
@@ -1772,66 +1845,45 @@ gbx_read_sram (const char *filename, unsigned int parport, int bank_no)
 
 
 int
-gbx_write_sram (const char *filename, unsigned int parport, int bank_no)
+gbx_write_sram (const char *filename, unsigned int parport, int start_bank)
 {
-  int pocket_camera = 0, start_bank, bank, n_banks, n_bytes = 0, totalbytes,
-      idx, i, j;
+  int bank, n_banks, n_bytes = 0, totalbytes, idx, i, j;
   time_t starttime;
   FILE *file;
+
+  gbx_init (parport, 1);
+
+  n_banks = sram_size_banks (buffer[0x47] == 0x1f, buffer[0x49]);
+  if (!n_banks)
+    {
+      fputs ("ERROR: No SRAM to write to\n", stderr);
+      end_port ();
+      exit (1);
+    }
+
+  if (start_bank == -1)
+    {
+      start_bank = 0;
+      i = q_fsize (filename);
+      n_banks = MIN (n_banks, (i + 8192 - 1) / 8192); // "+ 8192 - 1" to round up
+    }
+  else
+    {
+      if (start_bank >= n_banks)
+        {
+          fprintf (stderr, "ERROR: Bank must be a value 0 - %d (for this card)\n",
+                   n_banks - 1);
+          end_port ();
+          exit (1);
+        }
+      n_banks = 1;
+    }
 
   if ((file = fopen (filename, "rb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
+      end_port ();
       exit (1);
-    }
-
-  gbx_init (parport);
-  check_card ();
-  if (buffer[0x47] == 0x1f)
-    pocket_camera = 1;
-
-  if (bank_no == -1)
-    {
-      start_bank = 0;
-      i = sram_size_banks (pocket_camera);
-      if (!i)
-        {
-          fprintf (stderr, "ERROR: No SRAM to write to\n");
-          end_port ();
-          exit (1);
-        }
-      j = q_fsize (filename);
-      n_banks = MIN (i, (j + 8192 - 1) / 8192); // "+ 8192 - 1" to round up
-    }
-  else
-    {
-      start_bank = bank_no;
-      n_banks = sram_size_banks (pocket_camera);
-      if (!n_banks)
-        {
-          fprintf (stderr, "ERROR: No SRAM to write to\n");
-          end_port ();
-          exit (1);
-        }
-      else if (n_banks == 4)
-        {
-          if (start_bank > 3)
-            {
-              fprintf (stderr, "ERROR: Bank must be a value 0 - 3 (for this card)\n");
-              end_port ();
-              exit (1);
-            }
-        }
-      else // n_banks == 16
-        {
-          if (start_bank > 15)
-            {
-              fprintf (stderr, "ERROR: Bank must be a value 0 - 15 (for this card)\n");
-              end_port ();
-              exit (1);
-            }
-        }
-      n_banks = 1;
     }
 
   memset (buffer, 0, 8192);
@@ -1840,7 +1892,7 @@ gbx_write_sram (const char *filename, unsigned int parport, int bank_no)
 
   enable_sram_bank ();
   starttime = time (NULL);
-  for (bank = start_bank; bank < n_banks; bank++)
+  for (bank = start_bank; bank < start_bank + n_banks; bank++)
     {
       idx = 0;
       if (!fread (buffer, 1, 8192, file))
@@ -1851,7 +1903,7 @@ gbx_write_sram (const char *filename, unsigned int parport, int bank_no)
           exit (1);
         }
       set_sram_bank ((unsigned char) bank);
-      for (j = 0; j < 0x20; j++)
+      for (j = 0; j < 32; j++)
         {                                       // 32 x 256 = 8192 (8 kbytes)
           set_ai_data ((unsigned char) 1, (unsigned char) (0xa0 + j)); // SRAM at 0xa000-0xbfff
           set_ai_data ((unsigned char) 0, 0);   // a[7..0]=0

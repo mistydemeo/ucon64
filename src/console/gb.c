@@ -412,7 +412,7 @@ gameboy_init (st_rominfo_t *rominfo)
 {
   int result = -1, value, x;
   char buf[MAXBUFSIZE];
-  static const char *gameboy_romtype[0x100] = {
+  static const char *gameboy_romtype1[0x20] = {
     "ROM only",
     "ROM + MBC1",
     "ROM + MBC1 + RAM",
@@ -434,9 +434,9 @@ gameboy_init (st_rominfo_t *rominfo)
     "ROM + MBC3 + RAM",
     "ROM + MBC3 + RAM + Battery",
     NULL,
-    NULL, //"ROM + MBC4",
-    NULL, //"ROM + MBC4 + RAM",
-    NULL, //"ROM + MBC4 + RAM + Battery",
+    NULL,
+    NULL,
+    NULL,
     NULL,
     "ROM + MBC5",
     "ROM + MBC5 + RAM",
@@ -444,33 +444,12 @@ gameboy_init (st_rominfo_t *rominfo)
     "ROM + MBC5 + Rumble",
     "ROM + MBC5 + SRAM + Rumble",
     "ROM + MBC5 + SRAM + Battery + Rumble",
-    "Nintendo Pocket Camera",
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL,
+    "Nintendo Pocket Camera"},
+  *gameboy_romtype2[3] = {
     "Bandai TAMA5",
     "Hudson HuC-3",
-    "Hudson HuC-1"};
+    "Hudson HuC-1"},
+  *str;
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ? ucon64.buheader_len : 0;
 
@@ -525,15 +504,20 @@ gameboy_init (st_rominfo_t *rominfo)
   sprintf (buf, "Internal size: %.4f Mb\n", (1 << gameboy_header.rom_size) / 4.0f);
   strcat (rominfo->misc, buf);
 
-  sprintf (buf, "ROM type: %s\n",
-           NULL_TO_UNKNOWN_S (gameboy_romtype[gameboy_header.rom_type]));
+  if (gameboy_header.rom_type <= 0x1f)
+    str = NULL_TO_UNKNOWN_S (gameboy_romtype1[gameboy_header.rom_type]);
+  else if (gameboy_header.rom_type >= 0xfd)
+    str = gameboy_romtype2[gameboy_header.rom_type - 0xfd];
+  else
+    str = "Unknown";
+  sprintf (buf, "ROM type: %s\n", str);
   strcat (rominfo->misc, buf);
 
   if (!gameboy_header.sram_size)
     sprintf (buf, "Save RAM: No\n");
   else
     {
-      value = (gameboy_header.sram_size & 7) << 1; // 0/1/2/4
+      value = (gameboy_header.sram_size & 7) << 1; // 0/1/2/4/5
       if (value)
         value = 1 << (value - 1);
 

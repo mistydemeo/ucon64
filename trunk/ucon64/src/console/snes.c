@@ -47,7 +47,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 static int snes_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
 static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_size);
-static int snes_convert_sramfile (st_rominfo_t *rominfo, const void *header);
+static int snes_convert_sramfile (const void *header);
 static int get_internal_sums (st_rominfo_t *rominfo);
 //static int snes_special_bs (void);
 static int snes_bs_name(void);
@@ -369,7 +369,7 @@ Remember to load the lowest 8 bits first, then the top 7 bits.
 
 
 int
-snes_convert_sramfile (st_rominfo_t *rominfo, const void *header)
+snes_convert_sramfile (const void *header)
 {
   FILE *srcfile, *destfile;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], buf[32 * 1024];
@@ -418,7 +418,7 @@ snes_swcs (st_rominfo_t *rominfo)
   header.id2 = 0xbb;
   header.type = 5;                              // size doesn't need to be set for the SWC
 
-  return snes_convert_sramfile (rominfo, &header);
+  return snes_convert_sramfile (&header);
 }
 
 
@@ -430,7 +430,7 @@ snes_figs (st_rominfo_t *rominfo)
   memset (&header, 0, FIG_HEADER_LEN);
   header.size_low = 4;                          // 32 kB == 4*8 kB, size_high is already 0
 
-  return snes_convert_sramfile (rominfo, &header);
+  return snes_convert_sramfile (&header);
 }
 
 
@@ -442,7 +442,7 @@ snes_ufos (st_rominfo_t *rominfo)
   memset (&header, 0, SMC_HEADER_LEN);
   memcpy (&header[8], "SUPERUFO", 8);
 
-  return snes_convert_sramfile (rominfo, &header);
+  return snes_convert_sramfile (&header);
 }
 
 
@@ -1275,6 +1275,19 @@ knowing when that is necessary.
 Note that this code must be searched for before the less specific uCON code.
    8f/9f 57/59 60/68 30/31/32/33 cf/df 57/59 60 30/31/32/33 d0
 => 8f/9f 57/59 60/68 30/31/32/33 cf/df 57/59 60 30/31/32/33 ea ea
+
+- most probably only Diddy's Kong Quest
+   26 38 e9 48 12 c9 af 71 f0
+=> 26 38 e9 48 12 c9 af 71 80
+
+- most probably only Diddy's Kong Quest
+   a0 5c 2f 77 32 e9 c7 04 f0
+=> a0 5c 2f 77 32 e9 c7 04 80
+
+- most probably only Diddy's Kong Quest
+   'K' 'O' 'N' 'G' 00 f8 f7
+=> 'K' 'O' 'N' 'G' 00 f8 f8
+TODO: make sense of Diddy's Kong Quest codes
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
@@ -1332,6 +1345,10 @@ Note that this code must be searched for before the less specific uCON code.
       change_string ("!*\x80\x00!*\x80\x40\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
                      "\xaf\xbf", 2, "\xcf\xdf", 2);
       change_string ("\xaf**\x84\xcf**\x84\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0);
+
+      change_string ("KONG\x00\xf8\xf7", 7, '*', '!', "\xf8", 1, buffer, bytesread, 0);
+      change_string ("\x26\x38\xe9\x48\x12\xc9\xaf\x71\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0);
+      change_string ("\xa0\x5c\x2f\x77\x32\xe9\xc7\x04\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0);
 
       fwrite (buffer, 1, bytesread, destfile);
     }

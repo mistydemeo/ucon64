@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.15 2002-11-05 02:57:59 dbjh Exp $
+ * $Id: gg.c,v 1.16 2002-11-05 15:02:29 dbjh Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -91,7 +91,7 @@ const char *gg_usage[] = {
   "                    GG_CODE='XXXXXX' or GG_CODE='XXXXXXXX'\n"
   "                  " OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "snes\n"
   "                    GG_CODE='XXXX-XXXX'\n"
-  "  " OPTION_LONG_S "gg=GG_CODE  apply GameGenie code (permanently)\n"
+  "  " OPTION_LONG_S "gg=GG_CODE  apply Game Genie code (permanently)\n"
   "                  example: like above but " OPTION_LONG_S "rom is required\n",
   NULL
 };
@@ -843,6 +843,8 @@ gameGenieDecodeSNES (const char *in, char *out)
         {                                           // HiROM
           if (address >= 0xc00000 && address <= 0xffffff)
             address -= 0xc00000;
+          else if (address >= 0x800000 && address <= 0xbfffff)
+            address -= 0x800000;
           else if (address >= 0x400000 && address <= 0x7fffff)
             address -= 0x400000;
         }
@@ -1040,7 +1042,7 @@ gg_display (st_rominfo_t *rominfo, const char *code)
 int
 gg_apply (st_rominfo_t *rominfo, const char *code)
 {
-  long size = rominfo->file_size - rominfo->buheader_len, add, value;
+  long size = rominfo->file_size - rominfo->buheader_len, address, value;
   char buf[MAXBUFSIZE];
   int result = -1;
 
@@ -1073,31 +1075,28 @@ gg_apply (st_rominfo_t *rominfo, const char *code)
 
   if (result != 0)
     {
-      fprintf (stderr, "ERROR: GameGenie code %s is badly formed\n", ucon64.file);
+      fprintf (stderr, "ERROR: Game Genie code %s is badly formed\n", code);
       return -1;
     }
 
   printf ("%-12s = %s\n", code, buf);
+  sscanf (buf, "%lx:%lx:*", &address, &value);
 
-  sscanf (buf, "%lx:%lx:*", &add, &value);
-
-  if (add > size)
+  if (address > size)
     {
-      fprintf (stderr, "ERROR: ROM is smaller than %ld Bytes\n", add);
+      fprintf (stderr, "ERROR: ROM is smaller than %ld Bytes\n", address);
       return -1;
     }
 
   printf ("\n");
-  buf[0] = q_fgetc (ucon64.rom, add + rominfo->buheader_len);
-  mem_hexdump (buf, 1, add + rominfo->buheader_len);
+  buf[0] = q_fgetc (ucon64.rom, address + rominfo->buheader_len);
+  mem_hexdump (buf, 1, address + rominfo->buheader_len);
 
   ucon64_fbackup (NULL, ucon64.rom);
-
-  q_fputc (ucon64.rom, add + rominfo->buheader_len, (unsigned char) value, "r+b");
+  q_fputc (ucon64.rom, address + rominfo->buheader_len, (unsigned char) value, "r+b");
 
   buf[0] = value;
-  mem_hexdump (buf, 1, add + rominfo->buheader_len);
-
+  mem_hexdump (buf, 1, address + rominfo->buheader_len);
   printf ("\n");
 
   return 0;

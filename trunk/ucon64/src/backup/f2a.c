@@ -297,15 +297,15 @@ find_f2a:
   result = usb_claim_interface (f2ahandle, 0x4);
   if (result == -1)
     {
-      fprintf (stderr, "ERROR: Could not claim USB interface\n");
-      fprintf (stderr, "       %s\n", usb_strerror ());
+      fprintf (stderr, "ERROR: Could not claim USB interface\n"
+                       "       %s\n", usb_strerror ());
       return -1;
     }
   result = usb_claim_interface (f2ahandle, 0x83);
   if (result == -1)
     {
-      fprintf (stderr, "ERROR: Could not claim USB interface\n");
-      fprintf (stderr, "       %s\n", usb_strerror ());
+      fprintf (stderr, "ERROR: Could not claim USB interface\n"
+                       "       %s\n", usb_strerror ());
       return -1;
     }
 

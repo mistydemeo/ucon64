@@ -145,8 +145,8 @@ ucon64_switches (int c, const char *optarg)
 #endif // DLOPEN
       if (ucon64.discmage_enabled)
         {
-          x = libdm_get_version();
-          sprintf (buf, "%d.%d.%d (%s)", x >> 16, x >> 8, x, libdm_get_version_s());
+          x = dm_get_version ();
+          sprintf (buf, "%d.%d.%d (%s)", x >> 16, x >> 8, x, dm_get_version_s ());
         }
       else
         strcpy (buf, "not available");
@@ -305,6 +305,9 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XSWCS:
     case UCON64_XSWCC:
     case UCON64_XV64:
+#ifdef  HAVE_USB_H
+      if (!ucon64.usbport)                      // no pport I/O if F2A option and USB F2A
+#endif
       ucon64_parport_needed = 1;
       /*
         We want to make this possible:
@@ -884,11 +887,11 @@ ucon64_options (int c, const char *optarg)
           switch (c)
             {
               case UCON64_BIN2ISO:
-                flags |= DM_2048; // DM_RDONLY|DM_2048 read sectors and convert to 2048 Bytes
+                flags |= DM_2048; // DM_2048 read sectors and convert to 2048 Bytes
                 break;
 
               case UCON64_ISOFIX:
-                flags |= DM_FIX; // DM_RDONLY|DM_FIX read sectors and fix (if needed/possbile)
+                flags |= DM_FIX; // DM_FIX read sectors and fix (if needed/possible)
                 break;
 
               case UCON64_CDMAGE:
@@ -896,18 +899,18 @@ ucon64_options (int c, const char *optarg)
                 break;
             }
 
-          ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);
+          ucon64.image = dm_reopen (ucon64.rom, 0, ucon64.image);
           if (ucon64.image)
             {
               int track = strtol (optarg, NULL, 10);
               if (track < 1)
                 track = 1;
-              track--; // decrement for libdm_rip()
+              track--; // decrement for dm_rip()
 
               printf ("Writing track: %d\n\n", track + 1);
 
-              libdm_set_gauge ((void (*)(int, int)) &libdm_gauge);
-              libdm_rip (ucon64.image, track, flags);
+              dm_set_gauge ((void (*)(int, int)) &libdm_gauge);
+              dm_rip (ucon64.image, track, flags);
               fputc ('\n', stdout);
             }
         }
@@ -930,7 +933,7 @@ ucon64_options (int c, const char *optarg)
                   set_suffix (buf, ".TOC");
                   ucon64_file_handler (buf, NULL, 0);
 
-                  if (!libdm_toc_write (ucon64.image))
+                  if (!dm_toc_write (ucon64.image))
                     printf (ucon64_msg[WROTE], basename2 (buf));
                   else
                     fprintf (stderr, "ERROR: Could not generate toc sheet\n");
@@ -941,7 +944,7 @@ ucon64_options (int c, const char *optarg)
                   set_suffix (buf, ".CUE");
                   ucon64_file_handler (buf, NULL, 0);
 
-                  if (!libdm_cue_write (ucon64.image))
+                  if (!dm_cue_write (ucon64.image))
                     printf (ucon64_msg[WROTE], basename2 (buf));
                   else
                     fprintf (stderr, "ERROR: Could not generate cue sheet\n");
@@ -955,11 +958,11 @@ ucon64_options (int c, const char *optarg)
     case UCON64_XCDRW:
       if (ucon64.discmage_enabled)
         {
-//          libdm_set_gauge ((void *) &libdm_gauge);
+//          dm_set_gauge ((void *) &libdm_gauge);
           if (!access (ucon64.rom, F_OK))
-            libdm_disc_write (ucon64.image);
+            dm_disc_write (ucon64.image);
           else
-            libdm_disc_read (ucon64.image);
+            dm_disc_read (ucon64.image);
         }
       else
         printf (ucon64_msg[NO_LIB], ucon64.discmage_path);

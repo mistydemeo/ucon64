@@ -1,7 +1,7 @@
 /*
 libdm_misc.c - libdiscmage miscellaneous
 
-written by 2002 - 2004 NoisyB (noisyb@gmx.net)
+Copyright (c) 2002 - 2004 NoisyB (noisyb@gmx.net)
 
 
 This library is free software; you can redistribute it and/or

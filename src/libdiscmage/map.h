@@ -1,7 +1,7 @@
 /*
 map.h - a map (associative array) implementation
 
-written by 2002 dbjh
+Copyright (c) 2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

@@ -1,8 +1,8 @@
 /*
 other.h - other/proprietary image support for libdiscmage
 
+Copyright (c) 2003 NoisyB (noisyb@gmx.net)
 Gamecube support is based on specs from GC-NFO.COM - [w] / GC-NFO
-written by 2003 NoisyB (noisyb@gmx.net)
 
 
 This library is free software; you can redistribute it and/or
@@ -24,4 +24,3 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 extern int other_init (dm_image_t *image);
 //extern int other_track_init (dm_track_t *track, FILE *fh);
 #endif // OTHER_H
-

@@ -1,7 +1,7 @@
 /*
 format.c - support of different image formats for libdiscmage
 
-written by 2004 NoisyB (noisyb@gmx.net)
+Copyright (c) 2004 NoisyB (noisyb@gmx.net)
 
 
 This library is free software; you can redistribute it and/or
@@ -351,10 +351,8 @@ dm_disc_write (const dm_image_t *image)
 int
 dm_seek (dm_image_t *image, int track_num, int sector)
 {
- (void) image;                                  // warning remover
- (void) track_num;                              // warning remover
- (void) sector;                                 // warning remover
- return 0;
+  (void) image;                                 // warning remover
+  (void) track_num;                             // warning remover
+  (void) sector;                                // warning remover
+  return 0;
 }
-
-

@@ -1,8 +1,8 @@
 /*
 other.c - other/proprietary image support for libdiscmage
 
+Copyright (c) 2003 NoisyB (noisyb@gmx.net)
 Gamecube support is based on specs from GC-NFO.COM - [w] / GC-NFO
-written by 2003 NoisyB (noisyb@gmx.net)
 
 
 This library is free software; you can redistribute it and/or

@@ -1,9 +1,9 @@
 /*
 misc.c - miscellaneous functions
 
-written by 1999 - 2004 NoisyB (noisyb@gmx.net)
-           2001 - 2004 dbjh
-           2002 - 2004 Jan-Erik Karlsson (Amiga)
+Copyright (c) 1999 - 2004 NoisyB <noisyb@gmx.net>
+Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -222,18 +222,18 @@ string_code (char *d, const char *s)
   for (; *s; s++)
     switch (*s)
       {
-        case '\n':
-          strcat (p, "\\n\"\n  \"");
-          break;
+      case '\n':
+        strcat (p, "\\n\"\n  \"");
+        break;
 
-        case '\"':
-          strcat (p, "\\\"");
-          break;
+      case '\"':
+        strcat (p, "\\\"");
+        break;
 
-        default:
-          p = strchr (p, 0);
-          *p = *s;
-          *(++p) = 0;
+      default:
+        p = strchr (p, 0);
+        *p = *s;
+        *(++p) = 0;
       }
 
   return d;
@@ -384,14 +384,15 @@ getopt2_short (char *short_option, const st_getopt2_t *option, int n)
             *p++ = option[i].name[0];
             switch (option[i].has_arg)
               {
-                case 2:                         // falling through
-                case 1:
-                  *p++ = ':';
-                case 0:
-                  break;
+              case 2:
+                *p++ = ':';
+              case 1:                           // falling through
+                *p++ = ':';
+              case 0:
+                break;
 #ifdef  DEBUG
-                default:
-                  fprintf (stderr, "ERROR: getopt2_short(): unexpected has_arg value (%d)\n", option[i].has_arg);
+              default:
+                fprintf (stderr, "ERROR: getopt2_short(): unexpected has_arg value (%d)\n", option[i].has_arg);
 #endif // DEBUG
               }
             *p = 0;
@@ -2033,7 +2034,7 @@ gauge (time_t init_time, int pos, int size)
   if (pos == size)
     printf ("TOTAL=%03d:%02d", curr / 60, curr % 60); // DON'T print a newline
   else                                                //  -> gauge can be cleared
-    printf ("ETA=%03d:%02d   ", left / 60, left % 60);
+    printf ("ETA=%03d:%02d  ", left / 60, left % 60);
 
   fflush (stdout);
 
@@ -2074,14 +2075,14 @@ fix_character_set (char *str)
 #endif
 
 
+char *
+getenv2 (const char *variable)
 /*
   getenv() suitable for enviroments w/o HOME, TMP or TEMP variables.
   The caller should copy the returned string to it's own memory, because this
   function will overwrite that memory on the next call.
   Note that this function never returns NULL.
 */
-char *
-getenv2 (const char *variable)
 {
   char *tmp;
   static char value[MAXBUFSIZE];

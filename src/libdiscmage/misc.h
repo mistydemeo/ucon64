@@ -1,9 +1,9 @@
 /*
 misc.h - miscellaneous functions
 
-written by 1999 - 2004 NoisyB (noisyb@gmx.net)
-           2001 - 2004 dbjh
-           2002 - 2004 Jan-Erik Karlsson (Amiga)
+Copyright (c) 1999 - 2004 NoisyB <noisyb@gmx.net>
+Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 2002 - 2004 Jan-Erik Karlsson (Amiga code)
 
 
 This program is free software; you can redistribute it and/or modify
@@ -614,4 +614,4 @@ extern int _pclose (FILE *stream);
 }
 #endif
 
-#endif // #ifndef MISC_H
+#endif // MISC_H

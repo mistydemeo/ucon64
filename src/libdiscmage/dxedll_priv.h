@@ -1,7 +1,7 @@
 /*
 dxedll_priv.h - DXE support (code/data private to DXE)
 
-written by 2002 - 2003 dbjh
+Copyright (c) 2002 - 2003 dbjh
 
 
 This library is free software; you can redistribute it and/or

@@ -463,11 +463,15 @@ ucon64_rename (int mode)
                 if (strlen (p) < 5)
                   if (!(stricmp (p, ".nes") &&  // NES
                         stricmp (p, ".fds") &&  // NES FDS
-//                        stricmp (p, ".smd") &&  // Genesis
                         stricmp (p, ".gb") &&   // Game Boy
                         stricmp (p, ".gbc") &&  // Game Boy Color
                         stricmp (p, ".gba") &&  // Game Boy Advance
                         stricmp (p, ".smc") &&  // SNES
+                        stricmp (p, ".sc") &&   // Sega Master System
+                        stricmp (p, ".sg") &&   // Sega Master System
+                        stricmp (p, ".sms") &&  // Sega Master System
+                        stricmp (p, ".gg") &&   // GameGear
+//                      stricmp (p, ".smd") &&  // Genesis
                         stricmp (p, ".v64")))   // Nintendo 64
                     buf[strlen (buf) - strlen (p)] = 0;
             }
@@ -552,7 +556,7 @@ ucon64_rename (int mode)
   else
     printf ("Moving \"%s\"\n", basename2 (ucon64.rom));
 #ifndef DEBUG
-  rename (ucon64.rom, buf2);
+  rename2 (ucon64.rom, buf2);                   // rename2() must be used!
 #endif
 #ifdef  HAVE_ZLIB_H
   unzip_current_file_nr = 0x7fffffff - 1;       // dirty hack, will be removed later

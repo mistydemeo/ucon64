@@ -58,8 +58,9 @@ IO_Tuple;
 #define PARPORT_CONTROL 2
 
 /*
-  defines for unknown backup units
+  defines for unknown backup units/emulators
 */
+#define unknown_HEADER_START 0
 #define unknown_HEADER_LEN 512
 extern char *unknown_title;
 

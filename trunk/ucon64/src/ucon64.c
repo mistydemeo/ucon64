@@ -285,12 +285,6 @@ main (int argc, char *argv[])
   printf ("Uses code from various people. See 'developers.html' for more!\n");
   printf ("This may be freely redistributed under the terms of the GNU Public License\n\n");
 
-  if (argc < 2)
-    {
-       ucon64_usage (argc, argv);
-       return 0;
-    }
-
   memset (&ucon64, 0L, sizeof (struct ucon64_));
 
   ucon64_configfile ();
@@ -300,6 +294,12 @@ main (int argc, char *argv[])
 
   ucon64.argc = argc;
   for (x = 0; x < argc; x++)ucon64.argv[x] = argv[x];
+
+  if (argc < 2)
+    {
+       ucon64_usage (argc, argv);
+       return 0;
+    }
 
   ucon64_init (NULL, &rom);
 
@@ -1905,9 +1905,9 @@ ucon64_usage (int argc, char *argv[])
            "  " OPTION_LONG_S "nint        force ROM is not interleaved (1234)\n"
            "  " OPTION_LONG_S "ns          force ROM is not splitted\n"
 #ifdef	__MSDOS__
-           "  " OPTION_S "e           emulate/run ROM (see ucon64.cfg for more)\n"
+           "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
 #else
-           "  " OPTION_S "e           emulate/run ROM (see $HOME/.ucon64rc for more)\n"
+           "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
 #endif
            "  " OPTION_LONG_S "crc         show CRC32 value of ROM\n"
 //obsolete since -hd and -nhd are global   "  " OPTION_LONG_S "crchd       show CRC32 value of ROM (regarding to +512 Bytes header)\n"
@@ -1936,7 +1936,7 @@ ucon64_usage (int argc, char *argv[])
            "  " OPTION_LONG_S "stp         strip first 512 Bytes (possible header) from ROM\n"
            "  " OPTION_LONG_S "ins         insert 512 Bytes (0x00) before ROM\n"
            "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
-           ,argv[0]);
+           , argv[0], ucon64.configfile);
 
   bsl_usage ();
   ips_usage ();

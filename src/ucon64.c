@@ -322,6 +322,7 @@ const struct option options[] = {
     {"xfalm", 0, 0, UCON64_XFALM},
     {"xfig", 0, 0, UCON64_XFIG},
     {"xfigs", 0, 0, UCON64_XFIGS},
+    {"xfigc", 0, 0, UCON64_XFIGC},
     {"xgbx", 0, 0, UCON64_XGBX},
     {"xgbxb", 1, 0, UCON64_XGBXB},
     {"xgbxs", 0, 0, UCON64_XGBXS},

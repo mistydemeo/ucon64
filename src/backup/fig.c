@@ -45,6 +45,8 @@ const st_usage_t fig_usage[] =
                    "receives automatically when ROM does not exist"},
     {"xfigs", NULL, "send/receive SRAM to/from *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT\n"
                     "receives automatically when SRAM does not exist"},
+    {"xfigc", NULL, "send/receive SRAM to/from cart in *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when SRAM does not exist"},
 //                    "Press q to abort; ^C might cause invalid state of backup unit"},
 #endif
     {NULL, NULL, NULL}
@@ -569,6 +571,174 @@ fig_write_sram (const char *filename, unsigned int parport)
       bytessend += bytesread;
       ucon64_gauge (starttime, bytessend, size);
       ffe_checkabort (2);
+    }
+
+  free (buffer);
+  fclose (file);
+  ffe_deinit_io ();
+
+  return 0;
+}
+
+
+int
+fig_read_cart_sram (const char *filename, unsigned int parport)
+{
+  FILE *file;
+  unsigned char *buffer;
+  int blocksleft, bytesreceived = 0, size;
+  unsigned short address;
+  time_t starttime;
+
+  ffe_init_io (parport);
+
+  if ((file = fopen (filename, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
+      exit (1);
+    }
+
+  size = receive_rom_info (buffer);
+  if (size == 0)
+    {
+      fprintf (stderr, "ERROR: There is no cartridge present in the Pro Fighter\n");
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
+
+  printf ("Receive: %d Bytes\n", 32 * 1024);
+  memset (buffer, 0, FIG_HEADER_LEN);
+#if 0 // Not needed for FIG, as size is always 4 blocks
+  buffer[0] = 4;                                // 32 kB == 4*8 kB, "size_high" is already 0
+#endif
+  fwrite (buffer, 1, FIG_HEADER_LEN, file);
+
+  ffe_send_command (5, 0, 0);
+  ffe_send_command0 (0xe00c, 0);
+//  ffe_send_command0 (0xc008, 0);
+
+  printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
+                                                //  because if we get here q works ;-)
+  blocksleft = 4;                               // SRAM is 4*8 kB
+  starttime = time (NULL);
+
+  if (hirom)
+    {
+      address = 0x0c0;
+      while (blocksleft > 0)
+        {
+          ffe_send_command (5, address, 0);
+          ffe_receive_block (0x6000, buffer, BUFFERSIZE);
+          blocksleft--;
+          address += 4;
+          fwrite (buffer, 1, BUFFERSIZE, file);
+
+          bytesreceived += BUFFERSIZE;
+          ucon64_gauge (starttime, bytesreceived, 32 * 1024);
+          ffe_checkabort (2);
+        }
+    }
+  else
+    {
+      address = 0x1c0;
+      while (blocksleft > 0)
+        {
+          ffe_send_command (5, address, 0);
+          ffe_receive_block (0x2000, buffer, BUFFERSIZE);
+          blocksleft--;
+          address++;
+          fwrite (buffer, 1, BUFFERSIZE, file);
+
+          bytesreceived += BUFFERSIZE;
+          ucon64_gauge (starttime, bytesreceived, 32 * 1024);
+          ffe_checkabort (2);
+        }
+    }
+
+  free (buffer);
+  fclose (file);
+  ffe_deinit_io ();
+
+  return 0;
+}
+
+
+int
+fig_write_cart_sram (const char *filename, unsigned int parport)
+{
+  FILE *file;
+  unsigned char *buffer;
+  int bytesread, bytessend = 0, size;
+  unsigned short address;
+  time_t starttime;
+
+  ffe_init_io (parport);
+
+  if ((file = fopen (filename, "rb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], filename);
+      exit (1);
+    }
+  if ((buffer = (unsigned char *) malloc (BUFFERSIZE)) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[FILE_BUFFER_ERROR], BUFFERSIZE);
+      exit (1);
+    }
+
+  size = receive_rom_info (buffer);
+  if (size == 0)
+    {
+      fprintf (stderr, "ERROR: There is no cartridge present in the Pro Fighter\n");
+      fclose (file);
+      remove (filename);
+      exit (1);
+    }
+
+  size = q_fsize (filename) - FIG_HEADER_LEN;   // FIG SRAM is 4*8 kB, emu SRAM often not
+  printf ("Send: %d Bytes\n", size);
+  fseek (file, FIG_HEADER_LEN, SEEK_SET);       // skip the header
+
+  ffe_send_command (5, 0, 0);
+  ffe_send_command0 (0xe00c, 0);
+//  ffe_send_command0 (0xc008, 0);
+
+  printf ("Press q to abort\n\n");              // print here, NOT before first FIG I/O,
+                                                //  because if we get here q works ;-)
+  starttime = time (NULL);
+
+  if (hirom)
+    {
+      address = 0x0c0;
+      while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+        {
+          ffe_send_command (5, address, 0);
+          ffe_send_block (0x6000, buffer, bytesread);
+          address += 4;
+
+          bytessend += bytesread;
+          ucon64_gauge (starttime, bytessend, size);
+          ffe_checkabort (2);
+        }
+    }
+  else
+    {
+      address = 0x1c0;
+      while ((bytesread = fread (buffer, 1, BUFFERSIZE, file)))
+        {
+          ffe_send_command (5, address, 0);
+          ffe_send_block (0x2000, buffer, bytesread);
+          address++;
+
+          bytessend += bytesread;
+          ucon64_gauge (starttime, bytessend, size);
+          ffe_checkabort (2);
+        }
     }
 
   free (buffer);

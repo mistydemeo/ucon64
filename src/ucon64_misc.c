@@ -195,20 +195,21 @@ fileCRC32 (char *filename, long start)
 char *
 ucon64_fbackup (struct ucon64_ *rom, char *filename)
 {
-  if(!rom->backup) return (filename);
+  if (!rom->backup)
+    return (filename);
 
-  if (!access(filename, F_OK))
-  {
-    printf ("Writing backup of: %s\n\n", filename);
-    fflush (stdout);
-  }
+  if (!access (filename, F_OK))
+    {
+      printf ("Writing backup of: %s\n\n", filename);
+      fflush (stdout);
+    }
   return filebackup (filename);
 }
 
 size_t
 filepad (char *filename, long start, long unit)
 /*
-  pad file (if necessary) from start  size_t size;
+  pad file (if necessary) from start size_t size;
   ignore start bytes (if file has header or something)
   unit is size of block (example: MBIT)
 */

@@ -1930,6 +1930,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     This has been verified on a real SNES for the games with crc 0x29226b62 and
     0x4ef3d27b. The games with crc 0xbd7bc39f don't seem to run on a copier.
 
+    0xc3194ad7: Yu Yu No Quiz De Go! Go! (J)
     0x89d09a77: Infernal's Evil Demo! (PD)
     0xd3095af3: Legend - SNDS Info, Incredible Hulk Walkthru (PD)
     0x9b161d4d: Pop 'N Twinbee Sample (J)
@@ -1962,7 +1963,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
       crc == 0xaad23842 || crc == 0x89d09a77 || crc == 0xd3095af3 ||
       crc == 0x6910700a || crc == 0x447df9d5 || crc == 0x422c95c4 ||
       crc == 0xf0bf8d7c || crc == 0x8e1933d0 || crc == 0xf423997a ||
-      crc == 0xe2b95725 || crc == 0x02f401df)
+      crc == 0xe2b95725 || crc == 0x02f401df || crc == 0xc3194ad7)
     check_map_type = 0;                         // not interleaved
   else if (crc == 0x65485afb || crc == 0x9b4638d0 || crc == 0x7039388a ||
            crc == 0xdbc88ebf || crc == 0x5ee74558 || crc == 0x92180571 ||

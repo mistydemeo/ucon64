@@ -589,7 +589,7 @@ cyan_test_parport (unsigned int parport)
 static int
 cyan_test_copier (int test, int speed, unsigned int parport)
 {
-  unsigned char *buffer1, *buffer2;
+  unsigned char *buffer1, *buffer2 = NULL;
   int count = 1;
 
   fputs (INTRO_TEXT, stdout);
@@ -619,13 +619,13 @@ cyan_test_copier (int test, int speed, unsigned int parport)
 
       while (1)
         {
-          count++;
           clear_line ();                        // remove last gauge
           printf ("Pass %2d OK\n", count);
+          count++;
           printf ("                                                                          P %2d",
                   count);
           fflush (stdout);
-          buffer2 = cyan_read_rom (speed, parport, NULL);
+          buffer2 = cyan_read_rom (speed, parport, buffer2);
           if (!buffer2)
             {
               free (buffer1);

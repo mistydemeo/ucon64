@@ -340,7 +340,7 @@ n64aps_main (int argc, char *argv[])
   if (!n64aps_CheckFile (File2, "rb"))
     return (1);
 
-  n64aps_ORGFile = fopen (filebackup (File1), "rb+");
+  n64aps_ORGFile = fopen (File1, "rb+");
   n64aps_APSFile = fopen (File2, "rb");
 
   if (!n64aps_Quiet)

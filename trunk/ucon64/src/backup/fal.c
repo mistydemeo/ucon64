@@ -36,7 +36,7 @@ const char *fal_usage[] =
   {
     "Flash Advance Linker",
     "2001 Visoly http://www.visoly.com",
-#ifdef BACKUP
+#ifdef PARALLEL
     "  " OPTION_LONG_S "xfal        send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically (32 Mbits) when ROM does not exist\n"
     "  " OPTION_LONG_S "xfalmulti=SIZE send multiple ROMs to Flash Advance Linker (makes temporary\n"
@@ -55,12 +55,12 @@ const char *fal_usage[] =
     "                  You only need to specify PORT if uCON64 doesn't detect the\n"
     "                  (right) parallel port. If that is the case give a hardware\n"
     "                  address: ucon64 " OPTION_LONG_S "xfal \"rom.gba\" 0x378\n",
-#endif // BACKUP
+#endif // PARALLEL
     NULL
 };
 
 
-#ifdef BACKUP
+#ifdef PARALLEL
 
 /********************************************************/
 /* Flash Linker Advance                                 */
@@ -1753,4 +1753,4 @@ fal_write_sram (const char *filename, unsigned int parport, int bank)
   return -1;
 }
 
-#endif // BACKUP
+#endif // PARALLEL

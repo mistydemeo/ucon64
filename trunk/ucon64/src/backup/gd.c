@@ -36,7 +36,7 @@ const char *gd_usage[] =
   {
     "Game Doctor SF3(SF6/SF7)",
     "19XX Bung Enterprises Ltd http://www.bung.com.hk",
-#ifdef BACKUP
+#ifdef PARALLEL
 
 #if 1 // dumping is not yet supported
     "  " OPTION_LONG_S "xgd3        send ROM to Game Doctor SF3(SF6/SF7); " OPTION_LONG_S "file=PORT\n",
@@ -47,11 +47,11 @@ const char *gd_usage[] =
 
 #else
     "",
-#endif // BACKUP
+#endif // PARALLEL
     NULL
   };
 
-#ifdef BACKUP
+#ifdef PARALLEL
 #define BUFFERSIZE      8192
 #define OK 0
 #define ERROR 1
@@ -484,4 +484,4 @@ gd_write_sram (const char *filename, unsigned int parport)
 #endif
 }
 
-#endif // BACKUP
+#endif // PARALLEL

@@ -24,7 +24,7 @@ extern const char *cd64_usage[];
 #define CD64_HEADER_START 0
 #define CD64_HEADER_LEN 0
 
-#ifdef BACKUP
-#endif // BACKUP
+#ifdef PARALLEL
+#endif // PARALLEL
 
 #endif // CD64_H

@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #if     defined __unix__ || defined __BEOS__ || defined AMIGA || HAVE_UNISTD_H
   #include <unistd.h>                           // ioperm() (libc5)
 #endif
-#ifdef  BACKUP
+#ifdef  PARALLEL
   #ifdef  __FreeBSD__
     #include <machine/sysarch.h>
   #elif   defined __linux__
@@ -43,7 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   #elif   defined __BEOS__ || defined AMIGA
     #include <fcntl.h>
   #endif
-#endif // BACKUP
+#endif // PARALLEL
 
 #include "ucon64.h"
 #include "misc.h"
@@ -294,7 +294,7 @@ const char *nintendo_maker[792] = {
   NULL};                                        // LZ
 
 
-#if     defined BACKUP && (defined __BEOS__ || defined AMIGA)
+#if     defined PARALLEL && (defined __BEOS__ || defined AMIGA)
 typedef struct st_ioport
 {
   unsigned int port;
@@ -634,7 +634,7 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 #endif
 
 
-#ifdef  BACKUP
+#ifdef  PARALLEL
 #if     defined __BEOS__ || defined AMIGA
 void
 close_io_port (void)
@@ -874,7 +874,7 @@ ucon64_parport_init (unsigned int port)
 
   return port;
 }
-#endif // BACKUP
+#endif // PARALLEL
 
 
 int

@@ -15,7 +15,7 @@
  */
 
 #include "../config.h"
-#ifdef BACKUP
+#ifdef PARALLEL
 
 /*
   added for uCON64 support
@@ -30,7 +30,7 @@
 
 
 
-// outportb() and inportb() are only present in uCON64 if BACKUP is defined
+// outportb() and inportb() are only present in uCON64 if PARALLEL is defined
 
 #define psx_outportb(P, B) outportb(P, B)
 #define psx_inportb(P) inportb(P)
@@ -230,4 +230,4 @@ PSX_MCB_INFO *psx_mcb_info_merge (PSX_MCB_INFO_DIR mcb_info_dir,
 PSX_MCB_INFO *psx_mcb_read_info (int base, int conport, int tap, int delay,
                                  int block);
 
-#endif // BACKUP
+#endif // PARALLEL

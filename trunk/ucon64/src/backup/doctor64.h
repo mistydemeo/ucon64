@@ -21,13 +21,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef DOCTOR64_H
 #define DOCTOR64_H
 
-#ifdef BACKUP
+#ifdef PARALLEL
 extern int doctor64_read (const char *filename, unsigned int parport);
 
 extern int doctor64_write (const char *filename, long start, long len,
                     unsigned int parport);
 
-#endif // BACKUP
+#endif // PARALLEL
 
 extern const char *doctor64_usage[];
 

@@ -35,19 +35,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 const char *lynxit_usage[] = {
     "Lynxit (Lynx Cartridge Backup Board)",
     "1997 K.Wilkins (selfmade)",
-#ifdef BACKUP
+#ifdef PARALLEL
     "TEST: " OPTION_LONG_S "xlit    receive ROM from Lynxit interface; " OPTION_LONG_S "file=PORT\n"
 //    "                  receives automatically when ROM does not exist\n"
 #else
     ""
-#endif // BACKUP
+#endif // PARALLEL
     ,
     NULL,
     NULL,
     NULL
   };
 
-#ifdef BACKUP
+#ifdef PARALLEL
 
 #define MAGIC_STRING           "LYNX"
 #define FILE_FORMAT_VERSION    0x0001
@@ -1063,4 +1063,4 @@ lynxit_write_rom (const char *filename, unsigned int parport)
   return lynxit_main (lynxit_argc, lynxit_argv);
 }
 #endif
-#endif // BACKUP 
+#endif // PARALLEL 

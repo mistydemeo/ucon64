@@ -38,7 +38,7 @@ const char *lynx_usage[] =
     "Handy (prototype)/Lynx/Lynx II",
     "1987 Epyx/1989 Atari/1991 Atari",
     "  " OPTION_LONG_S "lynx        force recognition"
-#ifndef DB
+#ifndef HAVE_ZLIB_H
     "; NEEDED"
 #endif
     "\n"

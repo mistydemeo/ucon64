@@ -38,7 +38,7 @@ const char *swc_usage[] =
   {
     "Super Wild Card 1.6XC/Super Wild Card 2.8CC/Super Wild Card DX(2)/SWC",
     "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw",
-#ifdef BACKUP
+#ifdef PARALLEL
     "  " OPTION_LONG_S "xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when ROM does not exist\n"
     "                  Press q to abort; ^C will cause invalid state of backup unit\n"
@@ -55,11 +55,11 @@ const char *swc_usage[] =
     "                  for the most backup units\n",
 #else
     "",
-#endif // BACKUP
+#endif // PARALLEL
     NULL
   };
 
-#ifdef BACKUP
+#ifdef PARALLEL
 
 
 #define BUFFERSIZE      8192                    // don't change, only 8192 works!
@@ -564,4 +564,4 @@ swc_write_sram (const char *filename, unsigned int parport)
   return 0;
 }
 
-#endif // BACKUP
+#endif // PARALLEL

@@ -38,7 +38,7 @@ const char *sms_usage[] =
     "Sega Master System(II/III)/GameGear (Handheld)",
     "1986/19XX SEGA http://www.sega.com",
     "  " OPTION_LONG_S "sms         force recognition"
-#ifndef DB
+#ifndef HAVE_ZLIB_H
     "; NEEDED"
 #endif
     "\n"

@@ -101,8 +101,8 @@ e.g. The first 16 Mbit file of Donkey Kong Country (assuming it
 is cat. no. 475) would look like: SF16475A.078
 */
 
-#ifdef BACKUP
-#endif // BACKUP
+#ifdef PARALLEL
+#endif // PARALLEL
 
 #define MGD_HEADER_START 0
 #define MGD_HEADER_LEN 512

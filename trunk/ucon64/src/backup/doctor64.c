@@ -35,16 +35,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 const char *doctor64_usage[] = {
   "Doctor V64",
   "19XX Bung Enterprises Ltd http://www.bung.com.hk",
-#ifdef BACKUP
+#ifdef PARALLEL
   "  " OPTION_LONG_S "xv64        send/receive ROM to/from Doctor V64; "
     OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when ROM does not exist\n",
-#endif                          // BACKUP
+#endif                          // PARALLEL
   NULL
 };
 
 
-#ifdef BACKUP
+#ifdef PARALLEL
 
 #define SYNC_MAX_CNT 8192
 #define SYNC_MAX_TRY 32
@@ -363,4 +363,4 @@ doctor64_write (const char *filename, long start, long len, unsigned int parport
   return 0;
 }
 
-#endif // BACKUP
+#endif // PARALLEL

@@ -35,28 +35,16 @@ fi
 AC_MSG_RESULT($enable_debug)
 
 
-AC_MSG_CHECKING(whether the internal database is enabled)
-AC_ARG_ENABLE(db,
-              AC_HELP_STRING([--enable-db],
-                             [enable internal database (default: yes)]),
-              enable_db=$enableval,
-              enable_db=yes)
-if test $enable_db = yes; then
-  AC_DEFINE(DB,1,[enable internal database (default: yes)])
-fi
-AC_MSG_RESULT($enable_db)
-
-
 AC_MSG_CHECKING(whether support for parallel port backup units is enabled)
-AC_ARG_ENABLE(backup,
-              AC_HELP_STRING([--enable-backup],
+AC_ARG_ENABLE(parallel,
+              AC_HELP_STRING([--enable-parallel],
                              [enable support for parallel port backup units (default: yes)]),
-              enable_backup=$enableval,
-              enable_backup=yes)
-if test $enable_backup = yes; then
-  AC_DEFINE(BACKUP,1,[enable support for parallel port backup units (default: yes)])
+              enable_parallel=$enableval,
+              enable_parallel=yes)
+if test $enable_parallel = yes; then
+  AC_DEFINE(PARALLEL,1,[enable support for parallel port backup units (default: yes)])
 fi
-AC_MSG_RESULT($enable_backup)
+AC_MSG_RESULT($enable_parallel)
 
 
 AC_MSG_CHECKING(whether add-on libraries are dynamically loaded)

@@ -34,7 +34,7 @@ const char *gbx_usage[] =
   {
     "Game Boy Xchanger/GBDoctor",
     "19XX Bung Enterprises Ltd http://www.bung.com.hk",
-#ifdef BACKUP
+#ifdef PARALLEL
     "  " OPTION_LONG_S "xgbx        send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "file=PORT\n"
     "                  receives automatically when ROM does not exist\n"
     "  " OPTION_LONG_S "xgbxs       send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "file=PORT\n"
@@ -45,11 +45,11 @@ const char *gbx_usage[] =
     "                  You only need to specify PORT if uCON64 doesn't detect the\n"
     "                  (right) parallel port. If that is the case give a hardware\n"
     "                  address: ucon64 " OPTION_LONG_S "xgbx \"rom.gb\" 0x378\n",
-#endif // BACKUP
+#endif // PARALLEL
     NULL
   };
   
-#ifdef BACKUP
+#ifdef PARALLEL
 static void set_ai_data (unsigned char _ai, unsigned char _data);
 static char check_card (void);
 static void set_ai(unsigned char _ai);
@@ -2656,4 +2656,4 @@ gbx_write_sram (const char *filename, unsigned int parport, int bank)
   return 0;
 }
 
-#endif // BACKUP
+#endif // PARALLEL

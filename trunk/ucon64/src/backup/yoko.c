@@ -30,7 +30,7 @@ const char *yoko_usage[] =
     NULL
   };
 
-#ifdef BACKUP
+#ifdef PARALLEL
 
 #include "misc.h"                               // kbhit(), getch()
 #include "ucon64.h"
@@ -39,4 +39,4 @@ const char *yoko_usage[] =
 
 
 
-#endif // BACKUP
+#endif // PARALLEL

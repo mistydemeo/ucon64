@@ -37,12 +37,12 @@ typedef struct st_smd_header
 } st_smd_header_t;
 
 
-#ifdef BACKUP
+#ifdef PARALLEL
 extern int smd_read_rom (const char *filename, unsigned int parport);
 extern int smd_write_rom (const char *filename, unsigned int parport);
 extern int smd_read_sram (const char *filename, unsigned int parport);
 extern int smd_write_sram (const char *filename, unsigned int parport);
-#endif // BACKUP
+#endif // PARALLEL
 
 #define SMD_HEADER_START 0
 #define SMD_HEADER_LEN (sizeof (st_smd_header_t))

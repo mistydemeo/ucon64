@@ -1070,10 +1070,11 @@ ucon64_rom_handling (void)
       if (ucon64.dat)
         {
           // detected file size must match DAT file size
-          int size = UCON64_ISSET (ucon64.rominfo->data_size) ?
-                       ucon64.rominfo->data_size :
-                       ucon64.file_size - (ucon64.rominfo ?
-                                             ucon64.rominfo->buheader_len : 0);
+          int size = ucon64.rominfo ?
+                       UCON64_ISSET (ucon64.rominfo->data_size) ?
+                         ucon64.rominfo->data_size :
+                         ucon64.file_size - ucon64.rominfo->buheader_len :
+                       ucon64.file_size;
           if ((int) ucon64.dat->fsize != size)
             ucon64.dat = NULL;
         }

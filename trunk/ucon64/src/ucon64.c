@@ -54,6 +54,8 @@ write programs in C
 
 #include "backup/fig.h"
 #include "backup/swc.h"
+#include "backup/unknown_bu.h"
+#include "backup/unknown_bu512.h"
 
 #include "patch/aps.h"
 #include "patch/ips.h"
@@ -790,8 +792,6 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
   return(0);
 }
 
-#include "backup/unknown_bu.h"
-#include "backup/unknown_bu512.h"
 
 int ucon64_init_(struct ucon64_ *rom)
 {
@@ -823,6 +823,7 @@ if(rom->db_crc32==0)
 int ucon64_init(struct ucon64_ *rom)
 {
   if(
+//    (ucon64_init_(rom)==-1) &&
     (supernintendo_init(rom)==-1) &&
     (genesis_init(rom)==-1) &&
     (nintendo64_init(rom)==-1) &&
@@ -835,8 +836,6 @@ int ucon64_init(struct ucon64_ *rom)
     (pcengine_init(rom)==-1) &&
     (neogeo_init(rom)==-1) &&
     (neogeopocket_init(rom)==-1) &&
-    (ucon64_init_(rom)==-1)
-/*
     (sms_init(rom)==-1) &&
     (system16_init(rom)==-1) &&
     (virtualboy_init(rom)==-1) &&
@@ -844,7 +843,6 @@ int ucon64_init(struct ucon64_ *rom)
     (coleco_init(rom)==-1) &&
     (intelli_init(rom)==-1) &&
     (wonderswan_init(rom)==-1)
-    */
   )
   {
     rom->console=ucon64_UNKNOWN;
@@ -1058,6 +1056,28 @@ int ucon64_nfo(struct ucon64_ *rom)
 
   return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 _ __ ________________________________________________________________ __ _

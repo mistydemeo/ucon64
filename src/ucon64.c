@@ -1111,7 +1111,7 @@ if(rom->intro)printf("Intro/Trainer: Maybe, %ld Bytes\n",rom->intro);
 
 //  if(!rom->buheader_len)printf("Backup Unit Header: No\n");
 //  else 
-if(rom->buheader_len)printf("Backup Unit Header: Yes, %ld Bytes (use -nhd to override)\n",rom->buheader_len);
+if(rom->buheader_len)printf("Backup Unit Header: Yes, %ld Bytes\n"/* (use -nhd to override)\n"*/,rom->buheader_len);
 
 //  if(!rom->splitted[0])printf("Splitted: No\n");
 //  else 

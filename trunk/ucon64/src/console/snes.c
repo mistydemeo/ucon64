@@ -637,7 +637,10 @@ snes_fig (st_rominfo_t *rominfo)
 int
 snes_mgd (st_rominfo_t *rominfo)
 {
-  char mgh[32], src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+#if 0 // TODO: We need more info about the Multi Game Hunter
+  char mgh[32];
+#endif
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   int size = ucon64.file_size - rominfo->buheader_len;
 
   if (snes_hirom)
@@ -654,7 +657,8 @@ snes_mgd (st_rominfo_t *rominfo)
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
 
-  // What is the format of this MULTI-GD file?
+#if 0 // TODO: We need more info about the Multi Game Hunter (and a new option)
+  // What is the format of this index file?
   mgh[0] = 'M';
   mgh[1] = 'G';
   mgh[2] = 'H';
@@ -666,7 +670,8 @@ snes_mgd (st_rominfo_t *rominfo)
   strcpy (dest_name, "MULTI-GD" /*.MGH"*/); // uCON does "set_suffix (dest_name, ".MGH");" instead
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
   q_fwrite (&mgh, 0, sizeof (mgh), dest_name, "wb");
-  printf (ucon64_msg[WROTE], dest_name);
+#endif
+  mgd_write_index_file (basename2 (dest_name), 1);
 
   return 0;
 }
@@ -1222,13 +1227,18 @@ snes_split_gd3 (st_rominfo_t *rominfo, int size)
           printf (ucon64_msg[WROTE], dest_name);
         }
     }
+
+  // An index file is not used by the GD, but by the MGD. We don't have a
+  //  special function for splitting MGD files, so we do it here.
+  if (!rominfo->buheader_len)
+    mgd_write_index_file (names, name_i);
 }
 
 
 static void
 snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
 {
-  char header[512], dest_name[FILENAME_MAX];
+  char header[512], dest_name[FILENAME_MAX], *p;
   int nparts, surplus, n, nbytesdone;
 
   if (snes_hirom)
@@ -1244,6 +1254,9 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
 
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".1GM");
+  ucon64_output_fname (dest_name, 0);
+  p = strrchr (dest_name, '.') + 1;
+
   q_fread (header, 0, UFO_HEADER_LEN, ucon64.rom);
 
   if (snes_hirom)
@@ -1309,13 +1322,12 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
           if (surplus == 0 && n == nparts - 1)
             header[2] = 0;                      // last file -> clear bit 6
 
-          ucon64_output_fname (dest_name, 0);
           q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
           q_fcpy (ucon64.rom, nbytesdone, part_size, dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
 
           nbytesdone += part_size;
-          (*(strrchr (dest_name, '.') + 1))++;
+          (*p)++;
         }
     }
   else
@@ -1333,13 +1345,12 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
           if (surplus == 0 && n == nparts - 1)
             header[2] = 0;                      // last file -> clear bit 6
 
-          ucon64_output_fname (dest_name, 0);
           q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
           q_fcpy (ucon64.rom, nbytesdone, part_size, dest_name, "ab");
           printf (ucon64_msg[WROTE], dest_name);
 
           nbytesdone += part_size;
-          (*(strrchr (dest_name, '.') + 1))++;
+          (*p)++;
         }
     }
 
@@ -1349,7 +1360,6 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
       header[1] = surplus / 8192 >> 8;
       header[2] = 0;                            // last file -> clear bit 6
 
-      ucon64_output_fname (dest_name, 0);
       q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
       q_fcpy (ucon64.rom, nbytesdone, surplus, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);
@@ -1361,7 +1371,7 @@ static void
 snes_split_smc (st_rominfo_t *rominfo, int size, int part_size)
 // this function splits both SWC and FIG files
 {
-  char header[512], dest_name[FILENAME_MAX];
+  char header[512], dest_name[FILENAME_MAX], *p;
   int nparts, surplus, n;
 
   nparts = size / part_size;
@@ -1369,6 +1379,8 @@ snes_split_smc (st_rominfo_t *rominfo, int size, int part_size)
 
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".1");
+  ucon64_output_fname (dest_name, 0);
+  p = strrchr (dest_name, '.') + 1;
 
   q_fread (header, 0, SWC_HEADER_LEN, ucon64.rom);
   header[0] = part_size / 8192;
@@ -1382,12 +1394,11 @@ snes_split_smc (st_rominfo_t *rominfo, int size, int part_size)
         header[2] &= ~0x40;                     // last file -> clear bit 6
 
       // don't write backups of parts, because one name is used
-      ucon64_output_fname (dest_name, 0);
       q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
       q_fcpy (ucon64.rom, n * part_size + rominfo->buheader_len, part_size, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);
 
-      (*(strrchr (dest_name, '.') + 1))++;
+      (*p)++;
     }
 
   if (surplus != 0)
@@ -1397,7 +1408,6 @@ snes_split_smc (st_rominfo_t *rominfo, int size, int part_size)
       header[2] &= ~0x40;                       // last file -> clear bit 6
 
       // don't write backups of parts, because one name is used
-      ucon64_output_fname (dest_name, 0);
       q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
       q_fcpy (ucon64.rom, n * part_size + rominfo->buheader_len, surplus, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);

@@ -2,7 +2,7 @@
 pce.c - PC-Engine support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2003 dbjh
+           2003 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -711,6 +711,8 @@ pcengine_mgd (st_rominfo_t *rominfo)
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
+
+  mgd_write_index_file (basename2 (dest_name), 1);
   return 0;
 }
 

@@ -1020,7 +1020,7 @@ ucon64_output_fname (char *requested_fname, int flags)
   //  archives with more than one file.
   if (!ucon64.fname_arch[0] || (flags & OF_FORCE_BASENAME))
     {
-      strcpy (fname, basename (requested_fname));
+      strcpy (fname, basename2 (requested_fname));
       sprintf (requested_fname, "%s%s", ucon64.output_path, fname);
     }
   else                                          // an archive (for now: zip file)

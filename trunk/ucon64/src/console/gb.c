@@ -2,7 +2,7 @@
 gb.c - Game Boy support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
+           2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -364,6 +364,8 @@ gameboy_mgd (st_rominfo_t *rominfo)
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
+
+  mgd_write_index_file (basename2 (dest_name), 1);
   return 0;
 }
 
@@ -387,7 +389,7 @@ gameboy_ssc (st_rominfo_t *rominfo)
 #endif
 
   strcpy (src_name, ucon64.rom);
-  p = basename (ucon64.rom);
+  p = basename2 (ucon64.rom);
   // TODO: find out if this is correct (giving the file name a prefix)
   if ((p[0] == 'G' || p[0] == 'g') && (p[1] == 'B' || p[1] == 'b'))
     strcpy (dest_name, p);

@@ -2,7 +2,7 @@
 ucon64_dat.c - support for DAT files as known from RomCenter, GoodXXXX, etc.
 
 written by 1999 - 2003 NoisyB (noisyb@gmx.net)
-           2002 - 2003 dbjh
+           2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -439,7 +439,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
   memset (dat, 0, sizeof (st_ucon64_dat_t));
 
-  strcpy (dat->datfile, basename (fname));
+  strcpy (dat->datfile, basename2 (fname));
 
   if (dat_field[3])
     strcpy (dat->name, dat_field[3]);
@@ -550,7 +550,7 @@ ucon64_dat_view (int console, int verbose)
 
   while (get_next_file (fname_dat))
     {
-      fname = basename (fname_dat);
+      fname = basename2 (fname_dat);
       if (console != UCON64_UNKNOWN)
         if (fname_to_console (fname, &dat) != console)
           continue;
@@ -668,7 +668,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
 
   while (get_next_file (fname_dat))
     {
-      fname = basename (fname_dat);
+      fname = basename2 (fname_dat);
 
       if (ucon64.console != UCON64_UNKNOWN)
         if (fname_to_console (fname, &dat) != ucon64.console)
@@ -711,7 +711,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *datinfo)
           if (get_dat_entry (fname_dat, dat_p, crc32, idx_entry->filepos))
             if (crc32 == dat_p->crc32)
               {
-                strcpy (dat_p->datfile, basename (fname_dat));
+                strcpy (dat_p->datfile, basename2 (fname_dat));
                 get_dat_header (fname_dat, dat_p);
                 closedir_ddat ();
                 fclose_fdat ();
@@ -764,7 +764,7 @@ ucon64_dat_indexer (void)
       start_time = time (0);
       size = q_fsize (fname_dat);
 
-      printf ("%s: %s\n", (update ? "Update" : "Create"), basename (fname_index));
+      printf ("%s: %s\n", (update ? "Update" : "Create"), basename2 (fname_index));
       pos = 0;
       n_duplicates = 0;
       errorfile = NULL;
@@ -1140,7 +1140,7 @@ ucon64_create_dat (const char *dat_file_name, const char *filename,
                MAX_GAMES_FOR_CONSOLE);
       exit (1);
     }
-  strcpy (fname, basename (filename));
+  strcpy (fname, basename2 (filename));
 
   // Check the console type
   n = 0;

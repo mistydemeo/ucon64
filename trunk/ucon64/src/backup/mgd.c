@@ -2,7 +2,7 @@
 mgd.c - Multi Game Doctor/Hunter support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
+           2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -366,7 +366,7 @@ mgd_make_name (const char *filename, int console, int size, char *name)
       break;
     }
 
-  fname = basename (filename);
+  fname = basename2 (filename);
   // Do NOT mess with prefix (strupr()/strlwr()). See below (remove_mgd_id()).
   sprintf (name, "%s%s%s", prefix, size_str, fname);
   if (size >= 10 * MBIT)
@@ -414,6 +414,44 @@ mgd_make_name (const char *filename, int console, int size, char *name)
 
   set_suffix (name, suffix);
 }
+
+
+void
+mgd_write_index_file (void *ptr, int n_names)
+{
+  char buf[100 * 10], *p, name[16], dest_name[FILENAME_MAX];
+  // one line in the index file takes 10 bytes at max (name (8) + "\r\n" (2)),
+  //  so buf is large enough for 44 files of 1/4 Mbit (max for 1 diskette)
+
+  if (n_names == 1)
+    {
+      strcpy (name, (char *) ptr);
+      if ((p = strrchr (name, '.')))
+        *p = 0;
+      sprintf (buf, "%s\r\n", name);            // DOS text file format
+    }
+  else if (n_names > 1)
+    {
+      int n = 0, offset = 0;
+
+      for (; n < n_names; n++)
+        {
+          strcpy (name, ((char **) ptr)[n]);
+          if ((p = strrchr (name, '.')))
+            *p = 0;
+          sprintf (buf + offset, "%s\r\n", name);
+          offset += strlen (name) + 2;          // + 2 for "\r\n"
+        }
+    }
+  else // n_names <= 0
+    return;
+
+  strcpy (dest_name, "MULTI-GD");
+  ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
+  q_fwrite (buf, 0, strlen (buf), dest_name, "wb");
+  printf (ucon64_msg[WROTE], dest_name);
+}
+
 
 #ifdef PARALLEL
 #endif // PARALLEL

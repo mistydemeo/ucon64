@@ -284,19 +284,32 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XSWCS:
     case UCON64_XSWCC:
     case UCON64_XV64:
+      ucon64_parport_needed = 1;
       /*
         We want to make this possible:
           1.) ucon64 <transfer option> <rom>
-          2.) ucon64 <transfer option> <rom> <parallel port address>
-          3.) ucon64 <transfer option> <rom> --port=<parallel port address>
+          2.) ucon64 <transfer option> <rom> --port=<parallel port address>
+        The above works "automatically". The following type of command used to
+        be possible, but has been deprecated:
+          3.) ucon64 <transfer option> <rom> <parallel port address>
+        It has been removed, because it caused problems when specifying additional
+        switches without specifying the parallel port address. For example:
+          ucon64 -xfal -xfalm <rom>
+        This would be interpreted as:
+          ucon64 -xfal -xfalm <rom as file> <rom as parallel port address>
+        If <rom> has a name that starts with a number an I/O port associated
+        with that number will be accessed which might well have unwanted
+        results. We cannot check for valid I/O port numbers, because the I/O
+        port of the parallel port can be mapped to almost any 16-bit number.
       */
+#if 0
       if (ucon64.parport == UCON64_UNKNOWN)
         if (ucon64.argc >= 4)
           if (access (ucon64.argv[ucon64.argc - 1], F_OK))
             // Yes, we don't get here if ucon64.argv[ucon64.argc - 1] is [0x]278,
             //  [0x]378 or [0x]3bc and a file with the same name (path) exists.
             ucon64.parport = strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
-      ucon64_parport_needed = 1;
+#endif
       break;
 
     case UCON64_XFALM:

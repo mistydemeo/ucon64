@@ -242,7 +242,7 @@ sms_header_len (void)
   interleaved :-) Of course we could assume the header has an even size, but it
   turns out that that is not always the case. For example, there is a copy of
   GG Shinobi (E) [b1] floating around with a "header" of 5 bytes.
-  In short: this function works works only for files that are not interleaved.
+  In short: this function works only for files that are not interleaved.
 */
 {
   // first two hacks for Majesco Game Gear BIOS (U) [!]

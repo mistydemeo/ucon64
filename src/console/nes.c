@@ -6791,10 +6791,10 @@ nes_init (st_rominfo_t *rominfo)
         }
       else                                      // TODO: finding a reliable means
         {                                       //  for detecting FFE images
-          x = q_fgetc (ucon64.rom, 0) * 8192;
-          x += q_fgetc (ucon64.rom, 1) * 8192 << 8;
+          x = magic[0] * 8192;
+          x += magic[1] * 8192 << 8;
           if (ucon64.file_size - UNKNOWN_HEADER_LEN == (unsigned int) x &&
-              q_fgetc (ucon64.rom, 8) == 0xaa && q_fgetc (ucon64.rom, 9) == 0xbb)
+              magic[8] == 0xaa && magic[9] == 0xbb)
             {
               type = FFE;
               result = 0;

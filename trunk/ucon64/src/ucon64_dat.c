@@ -239,12 +239,6 @@ get_next_file (char *fname)
 static st_ucon64_dat_t *
 get_dat_header (char *fname, st_ucon64_dat_t *dat)
 {
-#if     (MAXBUFSIZE < FILENAME_MAX)
-  char buf[FILENAME_MAX];
-#else
-  char buf[MAXBUFSIZE];
-#endif
-
   // Hell yes! I (NoisyB) use get_property() here...
   get_property (fname, "author", dat->author, "Unknown");
   get_property (fname, "version", dat->version, "?");

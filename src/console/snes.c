@@ -222,7 +222,7 @@ snes_dint (st_rominfo_t *rominfo)
   st_unknown_header_t header;
   FILE *srcfile, *destfile;
   unsigned char *buffer;
-  char src_name[FILENAME_MAX];
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   int size = rominfo->file_size - rominfo->buheader_len, success = 1;
 
   puts ("Converting to deinterleaved format...");
@@ -231,16 +231,18 @@ snes_dint (st_rominfo_t *rominfo)
       fprintf (stderr, "ERROR: Not enough memory for ROM buffer (%d bytes)\n", size);
       exit (1);
     }
+  strcpy (dest_name, ucon64.rom);
+  setext (dest_name, ".TMP");
   strcpy (src_name, ucon64.rom);
-  handle_existing_file (ucon64.rom, src_name);
+  handle_existing_file (dest_name, src_name);
   if ((srcfile = fopen (src_name, "rb")) == NULL)
     {
       fprintf (stderr, "ERROR: Could not open %s\n", src_name);
       return -1;
     }
-  if ((destfile = fopen (ucon64.rom, "wb")) == NULL)
+  if ((destfile = fopen (dest_name, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", ucon64.rom);
+      fprintf (stderr, "ERROR: Could not open %s\n", dest_name);
       return -1;
     }
 
@@ -272,7 +274,7 @@ snes_dint (st_rominfo_t *rominfo)
   fclose (srcfile);
   fclose (destfile);
 
-  ucon64_wrote (ucon64.rom);
+  ucon64_wrote (dest_name);
   remove_temp_file ();
 
   return 0;
@@ -443,11 +445,9 @@ static void
 set_nsrt_checksum (unsigned char *header)
 {
   int n;
-  char checksum = -1;                           // byte => no need to take the modulus of 256
+  char checksum = -1;
 
-  header[0x1ee] = 0;
-  header[0x1ef] = 0;
-  for (n = 0x1d0; n <= 0x1ef; n++)
+  for (n = 0x1d0; n <= 0x1ed; n++)
     checksum += header[n];
   header[0x1ee] = checksum;
   header[0x1ef] = ~checksum;
@@ -485,7 +485,7 @@ set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header)
   0x1ee                 NSRT header checksum
                         the checksum is calculated by adding all bytes of the
                         NSRT header (except the checksum bytes themselves)
-                        subtracting 1 and then taking the modulus of 256
+                        and then subtracting 1
   0x1ef                 inverse NSRT header checksum
 */
 {

@@ -361,7 +361,7 @@ fig_write_rom (const char *filename, unsigned int parport)
   FILE *file;
   unsigned char *buffer;
   int bytesread = 0, bytessend, totalblocks, blocksdone = 0, blocksleft, fsize, n;
-  unsigned short address;
+  unsigned short address1, address2;
   time_t starttime;
 
   ffe_init_io (parport);
@@ -394,7 +394,8 @@ fig_write_rom (const char *filename, unsigned int parport)
                                                 //  because if we get here q works ;-)
   totalblocks = (fsize - FIG_HEADER_LEN + BUFFERSIZE - 1) / BUFFERSIZE; // round up
   blocksleft = totalblocks;
-  address = 0x200;
+  address1 = 0x300;
+  address2 = 0x200;
   starttime = time (NULL);
   while (blocksleft > 0)
     {
@@ -404,9 +405,9 @@ fig_write_rom (const char *filename, unsigned int parport)
             {
               bytesread = fread (buffer, 1, BUFFERSIZE, file);
               ffe_send_command0 ((unsigned short) 0xc010, (unsigned char) (blocksdone >> 9));
-              ffe_send_command (5, address + 0x100, 0);
+              ffe_send_command (5, address1, 0);
               ffe_send_block (0x0000, buffer, bytesread);
-              address++;
+              address1++;
               blocksleft--;
               blocksdone++;
 
@@ -420,9 +421,9 @@ fig_write_rom (const char *filename, unsigned int parport)
         {
           bytesread = fread (buffer, 1, BUFFERSIZE, file);
           ffe_send_command0 ((unsigned short) 0xc010, (unsigned char) (blocksdone >> 9));
-          ffe_send_command (5, address, 0);
+          ffe_send_command (5, address2, 0);
           ffe_send_block (0x8000, buffer, bytesread);
-          address++;
+          address2++;
           blocksleft--;
           blocksdone++;
 
@@ -436,7 +437,6 @@ fig_write_rom (const char *filename, unsigned int parport)
     ffe_send_command0 (0xc010, 2);
 
   ffe_send_command (5, 0, 0);
-  ffe_send_command (6, (unsigned short) (5 | (totalblocks << 8)), (unsigned short) (totalblocks >> 8)); // bytes: 6, 5, #8 K L, #8 K H, 0
   ffe_send_command (6, 1, 0);
 
   ffe_wait_for_ready ();
@@ -476,7 +476,9 @@ fig_read_sram (const char *filename, unsigned int parport)
 
   printf ("Receive: %d Bytes\n", 32 * 1024);
   memset (buffer, 0, FIG_HEADER_LEN);
+#if 0	// Not needed for FIG, as size is always 4 blocks
   buffer[0] = 4;                                // 32 kB == 4*8 kB, "size_high" is already 0
+#endif
 
   fwrite (buffer, 1, FIG_HEADER_LEN, file);
 

@@ -631,7 +631,7 @@ main (int argc, char *argv[])
       if (!stat (rom.rom, &puffer))
         if (S_ISREG (puffer.st_mode))  
           {
-            ucon64_init (rom.rom, &rom);
+            if (ucon64_init (rom.rom, &rom) == -1) ucon64.show_nfo = 1;
 #if 0
   int show_nfo;                 //show or skip info output for ROM
                                 //values:
@@ -658,6 +658,7 @@ main (int argc, char *argv[])
           return 0;
 
         case ucon64_CRCHD://obsolete only for compat.
+          rom.buheader_len = unknown_HEADER_LEN;
         case ucon64_CRC:
           printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, rom.buheader_len));
           return 0;
@@ -707,6 +708,7 @@ main (int argc, char *argv[])
           return result;
   
         case ucon64_PADHD:
+          rom.buheader_len = unknown_HEADER_LEN;
         case ucon64_PAD:
           ucon64_fbackup (rom.rom);
           return filepad (rom.rom, rom.buheader_len, MBIT);
@@ -1327,7 +1329,12 @@ main (int argc, char *argv[])
                                 //2 show after processing of ROM
                                 //3 show before and after processing of ROM
 #endif
-//          if (rom.console == ucon64_UNKNOWN) ucon64_init (rom.rom, &rom);
+/*
+            if (rom.console == ucon64_UNKNOWN) 
+              {
+                if (ucon64_init (rom.rom, &rom) == -1) ucon64.show_nfo = 1;
+              }
+*/              
             if (!ucon64.show_nfo || ucon64.show_nfo == 3)
               ucon64_nfo (&rom);
           }
@@ -1536,8 +1543,14 @@ ucon64_init (char *romfile, struct rom_ *rom)
           break;
         }
 
-
-  return (rom->console == ucon64_UNKNOWN) ? -1 : 0;
+  if (rom->console == ucon64_UNKNOWN)
+    {
+       printf ("ERROR: could not auto detect the right ROM/console type\n"
+               "TIP:   If this is a ROM you might try to force the recognition\n"
+               "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n");
+       return -1;
+    }
+  return 0;
 }
 
 

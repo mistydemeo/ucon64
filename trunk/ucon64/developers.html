@@ -216,33 +216,34 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    initializes ucon64.c/ucon64, based on the switches. This code can be found
    in switches.c. This is also the place where ucon64.show_nfo is set. This
    variable determines whether or not uCON64 displays ROM information.<br>
-   Then uCON64 calls ucon64_init() which calls ucon64_console_probe(). The
-   latter calls the init function for all the supported console types if the
-   user didn't use a force console switch. For example the init function for
-   SNES is snes/snes_init(), for NES nes/nes_init(). Each init function tries
-   to determine if the ROM file belongs to its console type. If that is the
-   case it returns 0, otherwise -1.<br>
+   Then uCON64 calls ucon64.c/ucon64_init() which calls
+   ucon64.c/ucon64_console_probe(). The latter calls the init function for all
+   the supported console types if the user didn't use a force console switch.
+   For example the init function for SNES is snes/snes_init(), for NES
+   nes/nes_init(). Each init function tries to determine if the ROM file
+   belongs to its console type. If that is the case it returns 0, otherwise
+   -1.<br>
    Some ROM file types contain much information such as the internal name,
    country and creator of the game that can be used to fill
    ucon64.c/main()/rom. SNES ROM files are an example of this type of file. For
    other ROM file types this information is not present inside the ROM file.
    NES ROMs are an example of that type. In that case uCON64 uses a large
    database in db.h to make it possible to display the country, creator and
-   full name of the game. ucon64_init() calls the function ucon64_dbsearch()
-   that uses the CRC32 of the ROM file data to find the required information in
-   the database. If the information could be found ucon64_dbsearch() fills
-   ucon64.c/main()/rom with it.<br>
+   full name of the game. ucon64.c/ucon64_init() calls the function
+   ucon64_db.c/ucon64_dbsearch() that uses the CRC32 of the ROM file data to
+   find the required information in the database. If the information could be
+   found ucon64_db.c/ucon64_dbsearch() fills ucon64.c/main()/rom with it.<br>
    After that if ucon64.show_nfo has the value UCON64_YES uCON64 will call
-   ucon64_nfo() which displays the values and strings of ucon64.c/main()/rom.
-   For some options it doesn't make sense to display ROM info. If one of those
-   options has been specified on the command line ucon64.show_nfo will be set
-   to UCON64_NO.<br>
+   ucon64.c/ucon64_nfo() which displays the values and strings of
+   ucon64.c/main()/rom. For some options it doesn't make sense to display ROM
+   info. If one of those options has been specified on the command line
+   ucon64.show_nfo will be set to UCON64_NO.<br>
    Then uCON64 starts scanning the command line for options. This code can be
    found in options.c. From this code allmost all operations of uCON64 are
    executed. Under Unix this is also the point where root privileges are given
    up if uCON64 had them and a "normal", i.e. non-copier I/O, option was
    specified. If a copier I/O option was specified under Unix, root privileges
-   will be given up by the function ucon64_parport_probe().<br>
+   will be given up by the function ucon64.c/ucon64_parport_probe().<br>
 <br>
 <p>
 <a name="7"><b>Q7</b>: What coding style is preferred?</a><br>

@@ -540,21 +540,21 @@ Q34: <a href="#34">When I try to convert a large number of files using
 <b>A</b>: No, it isn't. uCON64 1.9.8beta6 just doesn't support wildcards. For
    example, to convert all files with the suffix (M$ speak: extension) .mgd
    to Super Wild Card format, try this in Bash:<br>
-   &nbsp;&nbsp; find -name \*.mgd -exec ucon64 --snes --swc {} \;<br>
+   &nbsp;&nbsp; find -name \*.mgd -exec ucon64 --snes --swc {} \;<br>
    or this in command.com or cmd.exe:<br>
-   &nbsp;&nbsp; for %f in (*.mgd) do ucon64 --snes --swc "%f"<br>
+   &nbsp;&nbsp; for %f in (*.mgd) do ucon64 --snes --swc "%f"<br>
    However, this funtionality has been added to uCON64 1.9.8beta7. With that
    version you can do the same thing with:<br>
-   &nbsp;&nbsp; ucon64 --snes --swc *.mgd<br>
+   &nbsp;&nbsp; ucon64 --snes --swc *.mgd<br>
    In case something goes terribly wrong and uCON64 crashes it might still be
    necessary to use one of the previous methods, because every file will be
    processed and not only the files before the crash.<br>
    Note that uCON64 will interpret the second file as the --file argument if
    only two files match with the wildcard. uCON64 will display a message in
    that case. Just as is stated in that message, you should use the --file
-   option if you don't want uCON64 to do this. You can use a dummy argument
+   option if you don't want uCON64 to do this. You could use a dummy argument
    like 0. For example:<br>
-   &nbsp;&nbsp; ucon64 --snes --swc *.mgd --file=0<br>
+   &nbsp;&nbsp; ucon64 --snes --swc *.mgd --file=0<br>
 <br>
 <p>
 <br>

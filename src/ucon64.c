@@ -230,7 +230,6 @@ return(0);
   }
 }
 
-
   if (argc<2 ||
       argcmp(argc, argv, "-h") ||
       argcmp(argc, argv, "-help") ||
@@ -1378,62 +1377,75 @@ emuchina.net
 */
 int ucon64_nfo(struct ucon64_ *rom)
 {
-char buf[4096];
+  char buf[4096];
+  int n;
 
-  printf("%s\n%s\n\n"
-    ,rom->rom
-    ,rom->copier
-  );
-  
-  if(rom->header_len)
+  printf("%s\n%s\n\n", rom->rom, rom->copier);
+
+  if (rom->header_len)
   {
-     strhexdump(rom->header,0,rom->header_start+rom->buheader_len,rom->header_len);
+     strhexdump(rom->header, 0, rom->header_start+rom->buheader_len, rom->header_len);
      printf("\n");
   }
 
-  printf("%s\n%s\n%s%s%s\n%s\n%ld bytes (%.4f Mb)\n\n"
-    ,rom->title
-    ,rom->name
-//    ,rom->name2,(rom->name2[0])?"\n":""
-  ,"",""
-    ,rom->manufacturer
-    ,rom->country
-    ,rom->bytes-rom->buheader_len
-    ,rom->mbit
-  );
+  // some ROMs have a name with control chars in it -> replace control chars
+  for (n = 0; n < strlen(rom->name); n++)
+    buf[n] = isprint(rom->name[n]) ? rom->name[n] : '.';
+  buf[n] = 0;                           // terminate string
 
-if( rom->bytes <= MAXROMSIZE ) //if it is no CD image
-{        
-  if(!rom->padded)printf("Padded: No\n");
-  else if(rom->padded)printf("Padded: Maybe, %ld Bytes (%.4f Mb)\n",rom->padded,(float)rom->padded/MBIT);
+  printf("%s\n%s\n%s%s%s\n%s\n%ld bytes (%.4f Mb)\n\n",
+         rom->title,
+         buf,
+//         rom->name2, (rom->name2[0]) ? "\n": "",
+         "", "",
+         rom->manufacturer,
+         rom->country,
+         rom->bytes-rom->buheader_len,
+         rom->mbit);
 
-//  if(!rom->intro)printf("Intro/Trainer: No\n");
-//  else 
-if(rom->intro)printf("Intro/Trainer: Maybe, %ld Bytes\n",rom->intro);
-
-//  if(!rom->buheader_len)printf("Backup Unit Header: No\n");
-//  else 
-if(rom->buheader_len)printf("Backup Unit Header: Yes, %ld Bytes\n"/* (use -nhd to override)\n"*/,rom->buheader_len);
-
-//  if(!rom->splitted[0])printf("Splitted: No\n");
-//  else 
-if(rom->splitted[0])printf("Splitted: Yes, %d parts (recommended: use -j to join)\n",rom->splitted[0]);
-}
-  if(rom->misc[0])printf("%s\n",rom->misc);
-
-  if(rom->has_internal_crc)
+  if (rom->bytes <= MAXROMSIZE)         // if it is no CD image
   {
-    sprintf(buf,"Checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)\n"
-             ,rom->internal_crc_len*2,rom->internal_crc_len*2);
+    if (!rom->padded)
+      printf("Padded: No\n");
+    else if (rom->padded)
+      printf("Padded: Maybe, %ld Bytes (%.4f Mb)\n", rom->padded, (float) rom->padded/MBIT);
+
+//    if (!rom->intro)
+//      printf("Intro/Trainer: No\n");
+//    else
+    if (rom->intro)
+      printf("Intro/Trainer: Maybe, %ld Bytes\n", rom->intro);
+
+//    if (!rom->buheader_len)
+//      printf("Backup Unit Header: No\n");
+//    else
+    if (rom->buheader_len)
+      printf("Backup Unit Header: Yes, %ld Bytes\n"/* (use -nhd to override)\n"*/, rom->buheader_len);
+
+//    if (!rom->splitted[0])
+//      printf("Splitted: No\n");
+//    else
+    if (rom->splitted[0])
+      printf("Splitted: Yes, %d parts (recommended: use -j to join)\n", rom->splitted[0]);
+  }
+  if (rom->misc[0])
+    printf("%s\n", rom->misc);
+
+  if (rom->has_internal_crc)
+  {
+    sprintf(buf, "Checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)\n",
+            rom->internal_crc_len*2,rom->internal_crc_len*2);
     printf(buf,
            (rom->current_internal_crc == rom->internal_crc) ? "ok" : "bad (use -chk to fix)",
            rom->current_internal_crc,
            (rom->current_internal_crc == rom->internal_crc) ? "=" : "!",
            rom->internal_crc);
 
-    if(rom->internal_crc2[0])printf("%s\n",rom->internal_crc2);
+    if (rom->internal_crc2[0])
+      printf("%s\n", rom->internal_crc2);
   }
-  if(rom->current_crc32 != 0)printf("Checksum (CRC32): 0x%08lx\n",rom->current_crc32);
+  if (rom->current_crc32 != 0)
+    printf("Checksum (CRC32): 0x%08lx\n", rom->current_crc32);
 
   printf("\n");
 

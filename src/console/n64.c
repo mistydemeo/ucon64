@@ -48,10 +48,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 #define N64_HEADER_LEN (sizeof (st_n64_header_t))
-#define N64_SRAM_SIZE 512
-#define N64_NAME_LEN  20
-#define N64_BOT_SIZE 4032
-#define LAC_ROM_SIZE  1310720
+#define N64_SRAM_SIZE  512
+#define N64_NAME_LEN   20
+#define N64_BOT_SIZE   4032
+#define LAC_ROM_SIZE   1310720
 
 const st_getopt2_t n64_usage[] =
   {
@@ -170,31 +170,6 @@ typedef struct st_n64_header
   unsigned char countrycode;
   unsigned char pad4;
 #endif
-#if 0
-  rominfo.validation           = *(tr_u16 *)(rom.header + (0x00 ^ 0x02));
-  rominfo.compression          = *(tr_u8 *) (rom.header + (0x02 ^ 0x03));
-  rominfo.unknown1             = *(tr_u8 *) (rom.header + (0x03 ^ 0x03));
-  rominfo.clockrate            = *(tr_u32 *) (rom.header +  0x04);
-  rominfo.programcounter       = *(tr_u32 *) (rom.header +  0x08);
-  rominfo.release              = *(tr_u32 *) (rom.header +  0x0c);
-  rominfo.crc1                 = *(tr_u32 *) (rom.header +  0x10);
-  rominfo.crc2                 = *(tr_u32 *) (rom.header +  0x14);
-  rominfo.unknown2_h           = *(tr_u32 *) (rom.header +  0x18);
-  rominfo.unknown2_l           = *(tr_u32 *) (rom.header +  0x1c);
-  for (i=0; i < 20; i++)
-    rominfo.name[i ^ 0x03] = rom.header[i + 0x20];
-  rominfo.unknown3             = *(tr_u8 *) (rom.header + (0x34 ^ 0x03));
-  rominfo.unknown4             = *(tr_u8 *) (rom.header + (0x35 ^ 0x03));
-  rominfo.unknown5             = *(tr_u8 *) (rom.header + (0x36 ^ 0x03));
-  rominfo.unknown6             = *(tr_u8 *) (rom.header + (0x37 ^ 0x03));
-  rominfo.unknown7             = *(tr_u8 *) (rom.header + (0x38 ^ 0x03));
-  rominfo.unknown8             = *(tr_u8 *) (rom.header + (0x39 ^ 0x03));
-  rominfo.unknown9             = *(tr_u8 *) (rom.header + (0x3a ^ 0x03));
-  rominfo.makerid              = *(tr_u8 *) (rom.header + (0x3b ^ 0x03));
-  rominfo.cartridgeid          = *(tr_u16 *)(rom.header + (0x3c ^ 0x02));
-  rominfo.countrycode          = *(tr_u8 *) (rom.header + (0x3e ^ 0x03));
-  rominfo.unknown10            = *(tr_u8 *) (rom.header + (0x3f ^ 0x03));
-#endif
 } st_n64_header_t;
 
 st_n64_header_t n64_header;
@@ -217,7 +192,7 @@ n64_v64 (st_rominfo_t *rominfo)
   if (rominfo->interleaved)
     {
       fprintf (stderr, "ERROR: Already in V64 format\n");
-      return -1;
+      exit (1);
     }
 
   strcpy (dest_name, ucon64.rom);
@@ -239,7 +214,7 @@ n64_z64 (st_rominfo_t *rominfo)
   if (!rominfo->interleaved)
     {
       fprintf (stderr, "ERROR: Already in Z64 format\n");
-      return -1;
+      exit (1);
     }
 
   strcpy (dest_name, ucon64.rom);
@@ -267,7 +242,7 @@ n64_n (st_rominfo_t *rominfo, const char *name)
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   fcopy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
-  ucon64_fwrite (buf, rominfo->buheader_len + 32, 20, dest_name, "r+b");
+  ucon64_fwrite (buf, rominfo->buheader_len + 32, N64_NAME_LEN, dest_name, "r+b");
 
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
@@ -279,6 +254,7 @@ n64_f (st_rominfo_t *rominfo)
 {
   // TODO: PAL/NTSC fix
   (void) rominfo;                               // warning remover
+  fputs ("ERROR: The function for cracking N64 region protections is not yet implemented\n", stderr);
   return 0;
 }
 
@@ -326,13 +302,17 @@ n64_sram (st_rominfo_t *rominfo, const char *sramfile)
 {
   char sram[N64_SRAM_SIZE], dest_name[FILENAME_MAX], buf[8];
 
+  if (access (sramfile, F_OK))
+    {
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], sramfile);
+      exit (1);
+    }
+
   if (fsizeof (sramfile) != N64_SRAM_SIZE || ucon64.file_size != LAC_ROM_SIZE)
     {
-      fprintf (stderr,
-        "ERROR: Check if ROM has %d Bytes and SRAM has %d Bytes\n"
-        "       or the ROM is too short to calculate checksum\n",
-        LAC_ROM_SIZE, N64_SRAM_SIZE);
-      return -1;
+      fprintf (stderr, "ERROR: ROM is not %d bytes and/or SRAM is not %d bytes\n",
+               LAC_ROM_SIZE, N64_SRAM_SIZE);
+      exit (1);
     }
 
   ucon64_fread (sram, 0, N64_SRAM_SIZE, sramfile);
@@ -372,8 +352,8 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
   else
     {
       strcpy (dest_name, bootfile);
-      set_suffix (dest_name, ".bot");
-      ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+//      set_suffix (dest_name, ".bot");
+      ucon64_file_handler (dest_name, NULL, 0); // OF_FORCE_BASENAME | OF_FORCE_SUFFIX
       fcopy (ucon64.rom, rominfo->buheader_len + 0x040, N64_BOT_SIZE, dest_name, "wb");
 
       if (rominfo->interleaved)
@@ -388,52 +368,43 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
 int
 n64_usms (st_rominfo_t *rominfo, const char *smsrom)
 {
-  char dest_name[FILENAME_MAX];
-  if (!access (smsrom, F_OK))
+  char dest_name[FILENAME_MAX], *usmsbuf;
+  int size;
+
+  if (access (smsrom, F_OK))
     {
-      char *usmsbuf;
-      int size = fsizeof (smsrom);
-      // must be smaller than 4 Mbit, 524288 bytes will be inserted
-      //  from 1b410 to 9b40f (7ffff)
-      if (size > 4 * MBIT)
-        {
-          fprintf (stderr, "ERROR: The Sega Master System/Game Gear ROM must be 524288 Bytes or less\n");
-          return -1;
-        }
-
-      if (!(usmsbuf = (char *) malloc (4 * MBIT)))
-        {
-          fprintf (stderr, ucon64_msg[BUFFER_ERROR], 4 * MBIT);
-          return -1;
-        }
-      memset (usmsbuf, 0xff, 4 * MBIT);
-      ucon64_fread (usmsbuf, 0, size, smsrom);
-
-      if (rominfo->interleaved)
-        ucon64_bswap16_n (usmsbuf, size);
-
-      strcpy (dest_name, "Patched.v64");
-      ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
-      fcopy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
-      ucon64_fwrite (usmsbuf, rominfo->buheader_len + 0x01b410, 4 * MBIT, dest_name, "r+b");
-
-      free (usmsbuf);
-      printf (ucon64_msg[WROTE], dest_name);
+      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], smsrom);
+      exit (1);
     }
-#if 0 // What is this code? - dbjh
-  else
+
+  size = fsizeof (smsrom);
+  // must be smaller than 4 Mbit, 524288 bytes will be inserted
+  //  from 0x1b410 to 0x9b40f (0x7ffff)
+  if (size > 4 * MBIT)
     {
-      strcpy (dest_name, ucon64.rom);
-      set_suffix (dest_name, ".gg");
-      ucon64_file_handler (dest_name, NULL, 0);
-
-      fcopy (ucon64.rom, rominfo->buheader_len + 0x040, 0x01000 - 0x040, dest_name, "wb");
-      if (rominfo->interleaved)
-        ucon64_fbswap16 (dest_name, 0, fsizeof (dest_name));
-
-      printf (ucon64_msg[WROTE], dest_name);
+      fprintf (stderr, "ERROR: The Sega Master System/Game Gear ROM must be 524288 bytes or less\n");
+      exit (1);
     }
-#endif
+
+  if (!(usmsbuf = (char *) malloc (4 * MBIT)))
+    {
+      fprintf (stderr, ucon64_msg[BUFFER_ERROR], 4 * MBIT);
+      exit (1);
+    }
+  memset (usmsbuf, 0xff, 4 * MBIT);
+  ucon64_fread (usmsbuf, 0, size, smsrom);
+
+  if (rominfo->interleaved)
+    ucon64_bswap16_n (usmsbuf, size);
+
+  // Jos Kwanten's rominserter.exe produces a file named Patched.v64
+  strcpy (dest_name, "Patched.v64");
+  ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+  fcopy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
+  ucon64_fwrite (usmsbuf, rominfo->buheader_len + 0x01b410, 4 * MBIT, dest_name, "r+b");
+
+  free (usmsbuf);
+  printf (ucon64_msg[WROTE], dest_name);
 
   return 0;
 }
@@ -694,7 +665,7 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
       if ((n == 0) || ((n & 3) != 0))
         {
           if ((clen != 0) || (n != 0))
-            printf ("WARNING: Short read, checksum may be incorrect.\n");
+            printf ("WARNING: Short read, checksum may be incorrect\n");
           break;
         }
       for (i = 0; i < n; i += 4)

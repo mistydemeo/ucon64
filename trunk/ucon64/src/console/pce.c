@@ -611,18 +611,13 @@ pce_compare (const void *key, const void *found)
 }
 
 
+// header format is specified in src/backup/ffe.h
 int
 pcengine_smg (st_rominfo_t *rominfo)
 {
-  char dest_name[FILENAME_MAX];
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   st_unknown_header_t header;
   int size = ucon64.file_size - rominfo->buheader_len;
-
-  if (rominfo->buheader_len != 0)
-    {
-      fprintf (stderr, "ERROR: Already in SMG format\n");
-      return -1;
-    }
 
   memset (&header, 0, UNKNOWN_HEADER_LEN);
   header.size_low = size / 8192;
@@ -631,69 +626,34 @@ pcengine_smg (st_rominfo_t *rominfo)
   header.id2 = 0xbb;
   header.type = 2;
 
+  strcpy (src_name, ucon64.rom);
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".SMG");
+  ucon64_file_handler (dest_name, src_name, 0);
 
-  ucon64_file_handler (dest_name, NULL, 0);
   q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
-  q_fcpy (ucon64.rom, 0, size, dest_name, "ab");
+  q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }
 
 
+// see src/backup/mgd.h for the file naming scheme
 int
 pcengine_mgd (st_rominfo_t *rominfo)
 {
-/*
-The MGD2 only accepts certain filenames, and these filenames
-must be specified in an index file, "MULTI-GD", otherwise the
-MGD2 will not recognize the file.  In the case of multiple games
-being stored in a single disk, simply enter its corresponding
-MULTI-GD index into the "MULTI-GD" file.
+  char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
+  int size = ucon64.file_size - rominfo->buheader_len;
 
-PC Engine:
-game size       # of files      names           MUTLI-GD
-================================================================
-1M              1               PC1XXX.040      PC1XXX
-2M              1               PC2XXX.040      PC2XXX
-4M              1               PC4XXX.048      PC4XXX
-8M              1               PC8XXX.058      PC8XXX
+  strcpy (src_name, ucon64.rom);
+  mgd_make_name (ucon64.rom, "PC", size, dest_name);
+  ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
+  q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "wb");
 
-Usually, the filename is in the format of: PCXXYYY.040
-Where PC means PC Engine, XX refers to the size of the
-image in Mbit. If the size is only one character (i.e. 2, 4 or
-8 Mbit) then no leading "0" is inserted.
-
-YYY refers to a catalogue number in Hong Kong shops
-identifying the game title. (0 is Super Mario World, 1 is F-
-Zero, etc). I was told that the Game Doctor copier produces a
-random number when backing up games.
-*/
-  char buf[FILENAME_MAX], buf2[FILENAME_MAX], *p = NULL;
-
-  if (!rominfo->buheader_len)
-    {
-      fprintf (stderr, "ERROR: Already in MGD format\n");
-      return -1;
-    }
-
-  p = basename (ucon64.rom);
-  if ((p[0] == 'P' || p[0] == 'p') && (p[1] == 'C' || p[1] == 'c'))
-    strcpy (buf, p);
-  else
-    sprintf (buf, "%s%s", is_func (p, strlen (p), isupper) ? "PC" : "pc", p);
-  if ((p = strrchr (buf, '.')))
-    *p = 0;
-  strcat (buf, "______");
-  buf[8] = 0;
-  sprintf (buf2, "%s.%03u", buf, (ucon64.file_size - rominfo->buheader_len) / MBIT);
-
-  ucon64_file_handler (buf2, NULL, 0);
-  q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, buf2, "wb");
-
-  printf (ucon64_msg[WROTE], buf2);
+  printf (ucon64_msg[WROTE], dest_name);
+  remove_temp_file ();
   return 0;
 }
 

@@ -196,13 +196,14 @@ genesis_bin (st_rominfo_t *rominfo)
 }
 
 
+// see src/backup/mgd.h for the file naming scheme
 int
 genesis_mgd (st_rominfo_t *rominfo)
 {
 #define CC (const char)
   int x, y;
   unsigned char *rom_buffer = NULL;
-  char dest_name[FILENAME_MAX], buf[FILENAME_MAX], mgh[512], *p = NULL;
+  char dest_name[FILENAME_MAX], buf[FILENAME_MAX], mgh[512];
   const char mghcharset[1024] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -334,26 +335,29 @@ genesis_mgd (st_rominfo_t *rominfo)
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   };
 
+  // pad the file to the next valid MGD2 size if it doesn't have a valid size
+  if (genesis_rom_size <= 1 * MBIT)
+    genesis_rom_size = 1 * MBIT;
+  else if (genesis_rom_size <= 2 * MBIT)
+    genesis_rom_size = 2 * MBIT;
+  else if (genesis_rom_size <= 4 * MBIT)
+    genesis_rom_size = 4 * MBIT;
+  else if (genesis_rom_size <= 8 * MBIT)
+    genesis_rom_size = 8 * MBIT;
+  else if (genesis_rom_size <= 16 * MBIT)
+    genesis_rom_size = 16 * MBIT;
+  else if (genesis_rom_size <= 24 * MBIT)
+    genesis_rom_size = 24 * MBIT;
+  else
+    genesis_rom_size = 32 * MBIT;
+
   if ((rom_buffer = load_rom (rominfo, ucon64.rom, rom_buffer)) == NULL)
     return -1;
 
-  p = basename (ucon64.rom);
-  if ((p[0] == 'M' || p[0] == 'm') && (p[1] == 'D' || p[1] == 'd'))
-    strcpy (buf, p);
-  else
-    sprintf (buf, "%s%s", is_func (p, strlen (p), isupper) ? "MD" : "md", p);
-  if ((p = strrchr (buf, '.')))
-    *p = 0;
-  strcat (buf, "______");
-  buf[8] = 0;
-  // avoid trouble with filenames containing spaces
-  for (x = 2; x < 8; x++)                       // skip "md"
-    if (buf[x] == ' ')
-      buf[x] = '_';
-  sprintf (dest_name, "%s.%03u", buf, genesis_rom_size / MBIT);
+  mgd_make_name (ucon64.rom, "MD", genesis_rom_size, dest_name);
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
 
-  save_mgd (dest_name, &rom_buffer, genesis_rom_size); // uCON does something like save_bin()
+  save_mgd (dest_name, &rom_buffer, genesis_rom_size);
   printf (ucon64_msg[WROTE], dest_name);
   free (rom_buffer);
 
@@ -396,7 +400,7 @@ int
 genesis_s (st_rominfo_t *rominfo)
 {
   st_smd_header_t smd_header;
-  char buf[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL;
+  char dest_name[FILENAME_MAX];
   int x, nparts, surplus, size = ucon64.file_size - rominfo->buheader_len,
       part_size;
 
@@ -469,19 +473,13 @@ genesis_s (st_rominfo_t *rominfo)
     }
   else // type == MGD_GEN
     {
-      p = basename (ucon64.rom);
-      if ((p[0] == 'M' || p[0] == 'm') && (p[1] == 'D' || p[1] == 'd'))
-        strcpy (buf, p);
-      else
-        sprintf (buf, "%s%s", is_func (p, strlen (p), isupper) ? "MD" : "md", p);
-      if ((p = strrchr (buf, '.')))
-        *p = 0;
-      strcat (buf, "______");
-      buf[7] = is_func (buf, strlen (buf), isupper) ? 'A' : 'a';
-      buf[8] = 0;
+      char suffix[5];
 
-      sprintf (dest_name, "%s.%03lu", buf,
-               (unsigned long) (ucon64.file_size - rominfo->buheader_len) / MBIT);
+      mgd_make_name (ucon64.rom, "MD", genesis_rom_size, dest_name);
+      strcpy (suffix, (char *) get_suffix (dest_name));
+      dest_name[7] = is_func (dest_name, strlen (dest_name), isupper) ? 'A' : 'a';
+      dest_name[8] = 0;
+      strcat (dest_name, suffix);
       ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
 
       if (surplus)
@@ -556,8 +554,8 @@ genesis_j (st_rominfo_t *rominfo)
         1/3/5/7/2/4/6/8
       */
       strcpy (dest_name, ucon64.rom);
-      set_suffix (dest_name, ".078");
-      ucon64_file_handler (dest_name, NULL, 0);
+      set_suffix (dest_name, ".TMP");           // users should use -mgd to get
+      ucon64_file_handler (dest_name, NULL, 0); //  a correct name again
       remove (dest_name);
 
       strcpy (src_name, ucon64.rom);
@@ -851,6 +849,8 @@ load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
     }
   fseek (file, rominfo->buheader_len, SEEK_SET); // don't do this only for SMD!
   bytesread = fread (rom_buffer, 1, genesis_rom_size, file);
+  if (bytesread < genesis_rom_size)
+    memset (rom_buffer + bytesread, 0, genesis_rom_size - bytesread);
 
   if (type != BIN)
     {
@@ -860,7 +860,7 @@ load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
       if (type == SMD)
         smd_deinterleave (rom_buffer, bytesread);
       else // type == MGD_GEN
-        mgd_deinterleave (&rom_buffer, bytesread);
+        mgd_deinterleave (&rom_buffer, bytesread, genesis_rom_size);
     }
 
   if (ucon64.crc32 == 0)                        // Calculate the CRC32 only once

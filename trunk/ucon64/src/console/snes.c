@@ -1316,6 +1316,20 @@ TODO: make sense of Diddy's Kong Quest codes
    9c 0b 42 9c 0c 42 a9 01 8d
 => 9c 0b 42 9c 0c 42 a9 01 9c
 I'm not sure what this is for, but it does break the menu controls.
+
+- probably only Earthbound
+   84 26 ad 39 b5 d0 1a
+=> 84 26 ad 39 b5 ea ea
+I don't know what this does, but it isn't necessary to start the game.
+
+- probably only Earthbound
+   10 f8 38 ef ef ff c1
+=> 10 f8 38 ea a9 00 00
+
+- probably only Earthbound
+   10 f8 38 ef f2 fd c3 f0
+=> 10 f8 38 ea a9 00 00 80
+Same here.
 */
   char header[512], buffer[32 * 1024], src_name[FILENAME_MAX];
   FILE *srcfile, *destfile;
@@ -1352,22 +1366,22 @@ I'm not sure what this is for, but it does break the menu controls.
                          "\x8f\x9f", 2, "\xcf\xdf", 2);
           // actually Kirby's Dream Course, Lufia II - Rise of the Sinistrals
           change_string ("!**\x70!**\x70\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                        "\x8f\x9f", 2, "\xcf\xdf", 2);
+                         "\x8f\x9f", 2, "\xcf\xdf", 2);
           // actually Earthbound
           change_string ("!**!!**!\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                        "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
+                         "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
         }
       else
         {
           // unknown
           change_string ("!**\x70!**\x70\xd0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
-                        "\x8f\x9f", 2, "\xcf\xdf", 2);
+                         "\x8f\x9f", 2, "\xcf\xdf", 2);
           // Mega Man X
           change_string ("!**\x70!**\x70\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
-                        "\x8f\x9f", 2, "\xcf\xdf", 2);
+                         "\x8f\x9f", 2, "\xcf\xdf", 2);
 
           change_string ("!**!!**!\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
-                        "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
+                         "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
         }
 
       change_string ("!!!!!!\x60!\xd0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
@@ -1402,6 +1416,12 @@ I'm not sure what this is for, but it does break the menu controls.
                                      "\x09\xf0\x18\xc9\x07", 5, buffer, bytesread, -4);
       change_string ("\x29\xff\x00\xc9\x07\x00\x90\x16", 8, '*', '!', "\x00", 1, buffer, bytesread, -3);
 //      change_string ("\x9c\x0b\x42\x9c\x0c\x42\xa9\x01\x8d", 9, '*', '!', "\x9c", 1, buffer, bytesread, 0);
+
+      change_string ("\x84\x26\xad\x39\xb5\xd0\x1a", 7, '*', '!', "\xea\xea", 2, buffer, bytesread, -1);
+      change_string ("\x10\xf8\x38\xef\xef\xff\xc1", 7, '*', '!',
+                                 "\xea\xa9\x00\x00", 4, buffer, bytesread, -3);
+      change_string ("\x10\xf8\x38\xef\xf2\xfd\xc3\xf0", 8, '*', '!',
+                                 "\xea\xa9\x00\x00\x80", 5, buffer, bytesread, -4);
 
       fwrite (buffer, 1, bytesread, destfile);
     }

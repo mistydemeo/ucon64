@@ -793,7 +793,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
     {
       result = ucon64_console_probe (rominfo);
 
-      // TODO Calculating the CRC for the ROM data of a UNIF file (NES) shouldn't
+      // Calculating the CRC for the ROM data of a UNIF file (NES) shouldn't
       //  be done with q_fcrc32(). nes_init() uses mem_crc32().
       if (rominfo->current_crc32 == 0)
         rominfo->current_crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
@@ -803,7 +803,8 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
           memset (&dat, 0, sizeof (ucon64_dat_t));
           ucon64_dat = ucon64_dat_search (rominfo->current_crc32, &dat);
         }
-      else ucon64_dat = NULL;
+      else
+        ucon64_dat = NULL;
 
       switch (ucon64.console)
         {
@@ -834,8 +835,6 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
     }
   return result;
 }
-
-
 
 
 int

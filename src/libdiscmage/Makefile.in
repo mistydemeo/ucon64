@@ -48,7 +48,7 @@ else
 ifdef DJGPP
 
 OBJECTS+=dxe_misc.o
-# This file is only really necessary when zlib support is/should be enabled, 
+# This file is only really necessary when zlib support is/should be enabled,
 # but it's wise to use as little conditionally compiled code as possible.
 # Besides it currently gets used even if zlib support is disabled.
 
@@ -185,9 +185,10 @@ endif                                   # cygwin
 #endif
 
 # Dependencies
-libdiscmage.o: libdiscmage.h misc.h dxedll_priv.h
-nero.o: libdiscmage.h misc.h ../config.h nero.h cdi.h dxedll_priv.h
+libdm_misc.o: libdiscmage.h misc.h dxedll_priv.h
 cdi.o: libdiscmage.h misc.h cdi.h dxedll_priv.h
+nero.o: libdiscmage.h misc.h ../config.h nero.h cdi.h dxedll_priv.h
 sheets.o: libdiscmage.h misc.h dxedll_priv.h
 dllinit.o: libdiscmage.h misc.h dxedll_priv.h
 misc.o: misc.h dxedll_priv.h
+dxe_misc.o: dxedll_pub.h

@@ -2,7 +2,7 @@
 genesis.c - Sega Genesis/Mega Drive support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2003 dbjh
+           2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -572,7 +572,7 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
     {
       st_smd_header_t smd_header;
 
-      q_fread (&smd_header, 0, rominfo->buheader_len, buf);
+      q_fread (&smd_header, 0, rominfo->buheader_len, ucon64.rom);
       save_smd (ucon64.rom, rom_buffer, &smd_header, genesis_rom_size);
     }
   else

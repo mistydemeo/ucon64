@@ -2,7 +2,7 @@
 nes.c - Nintendo Entertainment System support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2002 dbjh
+           2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -1777,7 +1777,7 @@ write_prm (st_ines_header_t *header, const char *fname)
   // don't write backups of parts, because one name is used
   if (q_fwrite (prm, 0, sizeof (prm), fname, "wb") == -1)
     {
-      fprintf (stderr, "ERROR: Can't write %s\n", fname);
+      fprintf (stderr, ucon64_msg[WRITE_ERROR], fname);
       return -1;                                // try to continue
     }
   else
@@ -1844,7 +1844,7 @@ nes_s (st_rominfo_t *rominfo)
       setext (dest_name, ".700");
       // don't write backups of parts, because one name is used
       if (q_fwrite (trainer_data, 0, 512, dest_name, "wb") == -1)
-        fprintf (stderr, "ERROR: Can't write %s\n", dest_name); // try to continue
+        fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name); // try to continue
       else
         fprintf (stdout, ucon64_msg[WROTE], dest_name);
     }
@@ -1854,7 +1854,7 @@ nes_s (st_rominfo_t *rominfo)
       setext (dest_name, ".PRG");
       // don't write backups of parts, because one name is used
       if (q_fwrite (prg_data, 0, prg_size, dest_name, "wb") == -1)
-        fprintf (stderr, "ERROR: Can't write %s\n", dest_name); // try to continue
+        fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name); // try to continue
       else
         fprintf (stdout, ucon64_msg[WROTE], dest_name);
     }
@@ -1866,7 +1866,7 @@ nes_s (st_rominfo_t *rominfo)
       setext (dest_name, ".CHR");
       // don't write backups of parts, because one name is used
       if (q_fwrite (chr_data, 0, chr_size, dest_name, "wb") == -1)
-        fprintf (stderr, "ERROR: Can't write %s\n", dest_name); // try to continue
+        fprintf (stderr, ucon64_msg[WRITE_ERROR], dest_name); // try to continue
       else
         fprintf (stdout, ucon64_msg[WROTE], dest_name);
     }

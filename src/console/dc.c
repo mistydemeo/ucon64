@@ -138,39 +138,39 @@ parse_input (FILE * fh, char *ip)
       trim (buf);
       if (*buf)
         {
-        if ((p = strchr (buf, ':')))
-          {
-            *p++ = '\0';
-            trim (buf);
-            for (i = 0; i < NUM_FIELDS; i++)
-              if (!strcmp (buf, fields[i].name))
-                break;
-            if (i >= NUM_FIELDS)
-              {
-                fprintf (stderr, "Unknown field \"%s\".\n", buf);
+          if ((p = strchr (buf, ':')))
+            {
+              *p++ = '\0';
+              trim (buf);
+              for (i = 0; i < NUM_FIELDS; i++)
+                if (!strcmp (buf, fields[i].name))
+                  break;
+              if (i >= NUM_FIELDS)
+                {
+                  fprintf (stderr, "Unknown field \"%s\".\n", buf);
+                  return 0;
+                }
+              memset (ip + fields[i].pos, ' ', fields[i].len);
+              while (*p == ' ' || *p == '\t')
+                p++;
+              if (strlen (p) > fields[i].len)
+                {
+                  fprintf (stderr, "Data for field \"%s\" is too long.\n",
+                           fields[i].name);
+                  return 0;
+                }
+              memcpy (ip + fields[i].pos, p, strlen (p));
+              if (fields[i].extra_check != NULL &&
+                  !(*fields[i].extra_check) (ip + fields[i].pos, &fields[i]))
                 return 0;
-              }
-            memset (ip + fields[i].pos, ' ', fields[i].len);
-            while (*p == ' ' || *p == '\t')
-              p++;
-            if (strlen (p) > fields[i].len)
-              {
-                fprintf (stderr, "Data for field \"%s\" is too long.\n",
-                         fields[i].name);
-                return 0;
-              }
-            memcpy (ip + fields[i].pos, p, strlen (p));
-            if (fields[i].extra_check != NULL &&
-                !(*fields[i].extra_check) (ip + fields[i].pos, &fields[i]))
+              filled_in[i] = 1;
+            }
+          else
+            {
+              fprintf (stderr, "Missing : on line.\n");
               return 0;
-            filled_in[i] = 1;
-          }
-        else
-          {
-            fprintf (stderr, "Missing : on line.\n");
-            return 0;
-          }
-       }
+            }
+        }
     }
 
   for (i = 0; i < NUM_FIELDS; i++)
@@ -233,7 +233,8 @@ Game Title    : TITLE OF THE SOFTWARE
   FILE *fh;
   static char ip[0x8000];
 
-  if (!(fh = fopen (in, "r"))) return -1;
+  if (!(fh = fopen (in, "rb")))
+    return -1;
 
   if (!parse_input (fh, ip))
     return -1;

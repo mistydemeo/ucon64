@@ -84,6 +84,8 @@ enum
   WROTE,
   OPEN_READ_ERROR,
   OPEN_WRITE_ERROR,
+  READ_ERROR,
+  WRITE_ERROR,
   BUFFER_ERROR,                                 // not enough memory
   ROM_BUFFER_ERROR,
   FILE_BUFFER_ERROR,

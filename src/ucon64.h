@@ -134,8 +134,8 @@ typedef struct
   int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal checksum
 } st_rominfo_t;
 
-extern dm_image_t *image;       // DISC image (libdiscmage)
-extern ucon64_dat_t *ucon64_dat;       // info from DAT
+extern dm_image_t *image;                       // DISC image (libdiscmage)
+extern ucon64_dat_t *ucon64_dat;                // info from DAT
 
 //extern const option_t options[];
 extern const struct option options[];

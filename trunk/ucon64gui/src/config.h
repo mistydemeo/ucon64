@@ -14,6 +14,9 @@
 /* Define to 1 if you have the `getcwd' function. */
 #define HAVE_GETCWD 1
 
+/* whether we build using GTK or not */
+#define HAVE_GTK 1
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 

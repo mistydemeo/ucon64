@@ -230,8 +230,8 @@ htk_parser (const char *html)
 #endif
 
 
-#if     defined GTK
+#if     defined HAVE_GTK
 #include "gtk.c"
 #else
-#include "curses.c"
+#include "html.c"
 #endif

@@ -1,8 +1,8 @@
 /*
-libhtk_cfg.h - configfile for libhtk
+dlopen.h - DLL support code
 
-written by 2002 Dirk Reinelt (d_i_r_k_@gmx.net)
-           
+written by 2002 dbjh
+
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,18 +18,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef LIBHTK_CFG_H
-#define LIBHTK_CFG_H
-#ifndef MAXBUFSIZE
-#define MAXBUFSIZE 32768
-#endif // MAXBUFSIZE
 
-//#define USE_GETOPT  // crashes
-//#define USE_HTML4
+#ifndef DLOPEN_H
+#define DLOPEN_H
 
-#ifdef HAVE_GTK
-#define img_src *img_src
-#endif
+void *open_module (char *module_name);
+void *get_symbol (void *handle, char *symbol_name);
 
-
-#endif // LIBHTK_CFG_H
+#endif // DLOPEN_H

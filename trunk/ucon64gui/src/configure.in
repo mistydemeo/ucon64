@@ -51,9 +51,15 @@ AC_MSG_RESULT($enable_ansi_color)
 # Checks for libraries.
 AC_PATH_PROG(gtkpath, gtk-config)
 AC_MSG_CHECKING(for GTK compile flags)
+if test -x $gtkpath; then
+  AC_DEFINE(HAVE_GTK,1,[whether we build using GTK or not])
 GTK_CFLAGS=`$gtkpath --cflags 2>/dev/null`
 GTK_LDFLAGS=`$gtkpath --libs gthread 2>/dev/null`
+fi
 AC_MSG_RESULT(ok)
+
+AC_PATH_PROG(apxspath, apxs)
+
 
 # Checks for header files.
 AC_HEADER_DIRENT

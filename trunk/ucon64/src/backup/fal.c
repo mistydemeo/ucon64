@@ -513,7 +513,7 @@ LinkerInit (void)               // 4027c4
         }
       else
         {
-          fprintf (STDERR,
+          fprintf (stdout,              // stdout for frontend
                    "ERROR: Flash Advance Linker not found or not turned on.\n");
           ProgramExit (1);
         }
@@ -1437,7 +1437,7 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname, "wb")) == NULL)
         {
-          fprintf (STDERR, "ERROR trying to open file '%s'\n", fname);
+          fprintf (stdout, "ERROR trying to open file '%s'\n", fname); // stdout for frontend
           ProgramExit (1);
         }
       printf ("Backing up backup SRAM to file '%s'. Please wait...\n\n",
@@ -1453,7 +1453,7 @@ fal_main (int argc, char **argv)
 
   if ((OptP) && ((Device == 0) || (Device == 0x2e) || (Device == 0xff)))
     {
-      fprintf (STDERR, "ERROR: Device type not recognized as programmable\n");
+      fprintf (stdout, "ERROR: Device type not recognized as programmable\n"); // stdout for frontend
       ProgramExit (1);
     }
 
@@ -1465,7 +1465,7 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname, "rb")) == NULL)
         {
-          fprintf (STDERR, "ERROR trying to open file '%s'\n", fname);
+          fprintf (stdout, "ERROR trying to open file '%s'\n", fname); // stdout for frontend
           ProgramExit (1);
         }
       printf ("Restoring backup SRAM from file '%s'. Please wait...\n\n",
@@ -1493,7 +1493,7 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname, "rb")) == NULL)
         {
-          fprintf (STDERR, "ERROR trying to open file '%s'\n", fname);
+          fprintf (stdout, "ERROR trying to open file '%s'\n", fname); // stdout for frontend
           ProgramExit (1);
         }
       printf ("Programming flash with file '%s'.\n", fname);
@@ -1518,7 +1518,7 @@ fal_main (int argc, char **argv)
 #endif
       if ((fp = fopen (fname, "wb")) == NULL)
         {
-          fprintf (STDERR, "ERROR trying to open file '%s'\n", fname);
+          fprintf (stdout, "ERROR trying to open file '%s'\n", fname); // stdout for frontend
           ProgramExit (1);
         }
       printf ("Backing up %d mbits of ROM to file '%s'. Please wait...\n\n",
@@ -1569,8 +1569,7 @@ fal_args (unsigned int parport)
   fal_argv[0] = "fl";
   if (parport != 0x3bc && parport != 0x378 && parport != 0x278)
     {
-      fprintf (STDERR, "PORT must be 0x3bc, 0x378 or 0x278\n");
-      fflush (stdout);
+      printf ("PORT must be 0x3bc, 0x378 or 0x278\n"); // stdout for frontend
       exit (1);
     }
   fal_argv[1] = "-l";
@@ -1637,7 +1636,7 @@ fal_write_rom (char *filename, unsigned int parport, int argc, char *argv[])
 
   if (argncmp (argc, argv, "-xfalc", 6))        // strlen("-xfalc") == 6
     {
-      fprintf (STDERR, "-xfalc<n> can only be used when receiving a ROM\n");
+      printf ("-xfalc<n> can only be used when receiving a ROM\n"); // stdout for frontend
       exit (1);
     }
 

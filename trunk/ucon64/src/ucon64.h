@@ -259,7 +259,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 typedef struct st_ucon64
 {
-//TODO get rid of argc and argv here
+#ifdef TODO
+//#warning TODO get rid of argc and argv here
+#endif // TODO
   int argc;
   char **argv;
 

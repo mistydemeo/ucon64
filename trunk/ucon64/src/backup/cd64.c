@@ -25,6 +25,9 @@ const char *cd64_usage[] =
   {
     "CD64",
     "19XX UFO http://www.cd64.com",
+#ifdef TODO
+#warning TODO -xcd64        send/receive ROM to/from CD64
+#endif // TODO
 #ifdef BACKUP
 #if 0
     "TODO:  -xcd64        send/receive ROM to/from CD64; " OPTION_LONG_S "file=PORT\n"

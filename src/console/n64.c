@@ -594,19 +594,21 @@ n64_chksum (st_rominfo_t *rominfo, const char *filename)
   for (;;)
     {
       if (rlen > 0)
-        {
-          n = fread (chunk, 1, MIN (sizeof (chunk), clen), file);
-          if ((n & 3) != 0)
-            n += fread (chunk + n, 1, 4 - (n & 3), file);
-#ifdef  CALC_CRC32
-          if (!rominfo->interleaved)
+        {          
+          if ((n = fread (chunk, 1, MIN (sizeof (chunk), clen), file)))
             {
-              memcpy (crc32_mem, chunk, n);
-              fcrc32 = crc32 (fcrc32, crc32_mem, n);
-              mem_swap (crc32_mem, n);
-            }
-          scrc32 = crc32 (scrc32, crc32_mem, n);
+              if ((n & 3) != 0)
+                n += fread (chunk + n, 1, 4 - (n & 3), file);
+#ifdef  CALC_CRC32
+              if (!rominfo->interleaved)
+                {
+                  memcpy (crc32_mem, chunk, n);
+                  fcrc32 = crc32 (fcrc32, crc32_mem, n);
+                  mem_swap (crc32_mem, n);
+                }
+              scrc32 = crc32 (scrc32, crc32_mem, n);
 #endif
+            }
         }
       else
         n = MIN (sizeof (chunk), clen);

@@ -157,12 +157,4 @@ struct ucon64_
 
 extern struct ucon64_ rom;
 
-
-int ucon64_usage (int argc, char *argv[]);
-int ucon64_init (struct ucon64_ *rom);
-int ucon64_main (int argc, char *argv[]);
-int ucon64_nfo (struct ucon64_ *rom);
-
-int ucon64_flush (int argc, char *argv[], struct ucon64_ *rom);
-
 #endif // #ifndef UCON64_H

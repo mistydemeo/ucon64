@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "../config.h"
+#include "config.h"
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
@@ -506,7 +506,7 @@ applyppf_main (int argc, char *argv[])
   return 0;
 }
 
-#include "../ucon64.h"
+#include "ucon64.h"
 int
 addppfid (int argc, char *argv[])
 {

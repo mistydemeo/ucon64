@@ -25,10 +25,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define gbx_HEADER_START 0
 #define gbx_HEADER_LEN 0
 
-int gbx_read_rom (char *filename, unsigned int parport);
-int gbx_write_rom (char *filename, unsigned int parport);
-int gbx_read_sram (char *filename, unsigned int parport, int bank);
-int gbx_write_sram (char *filename, unsigned int parport, int bank);
-int gbx_usage (int argc, char *argv[]);
+extern int gbx_read_rom (char *filename, unsigned int parport);
+extern int gbx_write_rom (char *filename, unsigned int parport);
+extern int gbx_read_sram (char *filename, unsigned int parport, int bank);
+extern int gbx_write_sram (char *filename, unsigned int parport, int bank);
+extern int gbx_usage (int argc, char *argv[]);
 
 #endif /* GBX_H */

@@ -19,6 +19,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
+This cable is made by Mad Catz, Inc. and has a Gameboy link connector on one end and a parallel port connector on the other. It is designed to interface with the Gameboy Camera cart and comes
+with included software for this. It works by simulating the Gameboy Printer with a PIC chip inside the parallel connector shell. It doesn't do a particularly good job at that so it pretty much only
+works with the Gameboy Camera. 
+
 Mad Catz Camera Link Communications Protocol
 
 Printer IO Ports:

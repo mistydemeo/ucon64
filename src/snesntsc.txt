@@ -8,7 +8,7 @@
 # ad 3f 21 29 10 d0:                01: 02:  ea ea:     0
 # ad 3f 21 89 10 d0:                01: 02:  ea ea:     0
 # The next code could be the alternative for the previous one. Leave it
-#  disabled until we find a game that needs it.
+# disabled until we find a game that needs it.
 # ad 3f 21 89 10 d0:                01: 02:  80:        0
 # 3f 21 02 10 00 f0:                01: 02:  80:        0: 29 89
 # 3f 21 02 10 00 d0:                01: 02:  ea ea:     0: 29 89

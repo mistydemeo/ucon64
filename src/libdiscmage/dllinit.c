@@ -38,9 +38,11 @@ DECLARE_CYGWIN_DLL(DllMain);
 extern "C" BOOL WINAPI DllMain (HINSTANCE h, DWORD reason, LPVOID ptr);
 #endif
 
-// Visual C++ (at least the command line tools) seem to require that this
-//  function is named DllMain or else it won't be called at load time.
-//  This applies regardless whether DLOPEN is defined.
+/*
+  When this function is explicitly specified as entry point (for example by
+  using the option /ENTRY of link.exe) printf() does not produce output when
+  called from this function.
+*/
 BOOL WINAPI
 DllMain (HINSTANCE h, DWORD reason, LPVOID ptr)
 {

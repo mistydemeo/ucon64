@@ -2898,7 +2898,7 @@ snes_check_bs (void)
 #endif
 
 
-#if 0
+#if 1
 int
 snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
 // Calculate the checksum of a SNES ROM.
@@ -2929,14 +2929,24 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
 //          internal_rom_size, rom_size);
   if (internal_rom_size > rom_size)
     {
+      int blocksize;
+      unsigned char *ptr;
+
       if (!(*rom_buffer = (unsigned char *) realloc (*rom_buffer, internal_rom_size)))
         {
           fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], internal_rom_size);
-          return -1;                                // don't exit(), we might've been
-        }                                           //  called with -lsv
-      memcpy (*rom_buffer + rom_size,
-              *rom_buffer + (rom_size - (internal_rom_size - rom_size)),
-              internal_rom_size - rom_size);
+          return -1;                            // don't exit(), we might've been
+        }                                       //  called with -lsv
+      blocksize = internal_rom_size - rom_size;
+      ptr = *rom_buffer + rom_size;
+      if (blocksize % (3 * MBIT) == 0)          // 6 (16 - 10), 12 (32 - 20), 24 (64 - 40)
+        {
+          blocksize /= 3;
+          for (i = 0; i < 3; i++)
+            memcpy (ptr + i * blocksize, ptr - blocksize, blocksize);
+        }
+      else
+        memcpy (ptr, ptr - blocksize, blocksize);
     }
 
   sum = 0;

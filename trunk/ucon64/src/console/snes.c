@@ -303,8 +303,7 @@ Examples:
          00000 00000 00000 = $0000 (Black)
          11111 11111 11111 = $7FFF (White)
 
-Easy, isn't it?? (But remember to load the lowest 8 bits first, then the top
-                  7 bits).
+Remember to load the lowest 8 bits first, then the top 7 bits.
 */
   int r, g, b;
   unsigned int col;
@@ -620,14 +619,46 @@ is cat. no. 475) would look like: SF16475A.078
 */
 int
 snes_mgd (st_rominfo_t *rominfo)
+// What should we do with this funtcion? snes_gd3() is probably sufficient
+//  (and tested on a real Game Doctor!).
 {
+#if 1
+  char mgh[32], dest_name[FILENAME_MAX], *fname;
+  int n, len;
+
+  fname = basename2 (ucon64.rom);
+  sprintf (dest_name, "%s%d", areupper (fname) ? "SF" : "sf",
+    (rominfo->file_size - rominfo->buheader_len) / MBIT);
+  strncat (dest_name, fname, 5);
+  dest_name[8] = 0;
+
+  len = strlen (dest_name);
+  for (n = 0; n < len; n++)
+    if (dest_name[n] == ' ')
+      dest_name[n] = '_';
+
+  // What is the format of this MULTI-GD file?
+  memset (mgh, 0, sizeof (mgh));
+  mgh[0] = 'M';
+  mgh[1] = 'G';
+  mgh[2] = 'H';
+  mgh[3] = 0x1a;
+  mgh[31] = 0xff;
+  memcpy (&mgh[16], dest_name, strlen (dest_name));
+
+  setext (dest_name, ".078");
+  ucon64_fbackup (NULL, dest_name);
+  q_fcpy (ucon64.rom, rominfo->buheader_len, rominfo->file_size, dest_name, "wb");
+  ucon64_wrote (dest_name);
+
+  strcpy (dest_name, "MULTI-GD.MGH");
+  q_fwrite (&mgh, 0, sizeof (mgh), dest_name, "wb");
+  ucon64_wrote (dest_name);
+
+  return 0;
+#else
   char mgh[32], buf[FILENAME_MAX], buf2[4096], *p = NULL;
 
-  if (!rominfo->buheader_len)
-    {
-      fprintf (stderr, "ERROR: Already in MGD format\n");
-      return -1;
-    }
   strcpy (buf, areupper (basename2 (ucon64.rom)) ? "SF" : "sf");
   strcpy (buf2, ucon64.rom);
   strcat (buf, basename2 (buf2));
@@ -639,8 +670,7 @@ snes_mgd (st_rominfo_t *rominfo)
   sprintf (buf2, "%s.%03u", buf, (rominfo->file_size - rominfo->buheader_len) / MBIT);
 
   ucon64_fbackup (NULL, buf2);
-  q_fcpy (ucon64.rom, rominfo->buheader_len, rominfo->file_size,
-            buf2, "wb");
+  q_fcpy (ucon64.rom, rominfo->buheader_len, rominfo->file_size, buf2, "wb");
   ucon64_wrote (buf2);
 
   // create MGH name file
@@ -650,7 +680,7 @@ snes_mgd (st_rominfo_t *rominfo)
   mgh[2] = 'H';
   mgh[3] = 0x1a;
   mgh[31] = 0xff;
-  memcpy (&mgh[16], &snes_header.name[16], 15);
+  memcpy (&mgh[16], snes_header.name, 15);
 
   strcpy (buf, buf2);
   setext (buf, ".MGH");
@@ -659,6 +689,7 @@ snes_mgd (st_rominfo_t *rominfo)
   ucon64_wrote (buf);
 
   return 0;
+#endif
 }
 
 
@@ -709,9 +740,9 @@ snes_mirror (unsigned char *dstbuf, unsigned start, unsigned data_end,
 int
 snes_gd3 (st_rominfo_t *rominfo)
 {
-  char header[512], buf[FILENAME_MAX], buf2[4096], *p = NULL;
+  char header[512], dest_name[FILENAME_MAX], *p = NULL;
   unsigned char *srcbuf, *dstbuf;
-  int pos1, n4Mbparts, surplus4Mb, total4Mbparts, size, newsize, pad;
+  int n, len, n4Mbparts, surplus4Mb, total4Mbparts, size, newsize, pad;
 
   if (rominfo->interleaved)
     {
@@ -724,14 +755,19 @@ snes_gd3 (st_rominfo_t *rominfo)
   surplus4Mb = size % (4 * MBIT);
   total4Mbparts = n4Mbparts + (surplus4Mb > 0 ? 1 : 0);
 
-  sprintf (buf, "%s%d", areupper (basename2 (ucon64.rom)) ? "SF" : "sf", total4Mbparts * 4);
-  strcat (buf, basename2 (ucon64.rom));
-  if ((p = strrchr (buf, '.')))
+  p = basename2 (ucon64.rom);
+  sprintf (dest_name, "%s%d", areupper (p) ? "SF" : "sf", total4Mbparts * 4);
+  strcat (dest_name, p);
+  // avoid trouble with filenames containing spaces
+  len = strlen (dest_name);
+  for (n = 0; n < len; n++)
+    if (dest_name[n] == ' ')
+      dest_name[n] = '_';
+  if ((p = strrchr (dest_name, '.')))
     *p = 0;
-  strcat (buf, "________");
-  buf[7] = 'X';
-  buf[8] = 0;
-  strcpy (buf2, buf);
+  strcat (dest_name, "________");
+  dest_name[7] = 'X';
+  dest_name[8] = 0;
 
   if (snes_hirom)
     {
@@ -800,14 +836,14 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       if (total4Mbparts != 6)
         {
-          pos1 = newsize / 2;
-          snes_int_blocks (srcbuf, &dstbuf[pos1], dstbuf, size / 0x10000);
+          n = newsize / 2;
+          snes_int_blocks (srcbuf, &dstbuf[n], dstbuf, size / 0x10000);
           if (pad > 0)
             {
               snes_mirror (dstbuf, (size / 2) & ~0x7ffff,
                            (size / 2 + 0x1ffff) & ~0x1ffff, newsize / 2);
-              snes_mirror (dstbuf, pos1 + (size / 2 & ~0x7ffff),
-                           pos1 + ((size / 2 + 0x1ffff) & ~0x1ffff), newsize);
+              snes_mirror (dstbuf, n + (size / 2 & ~0x7ffff),
+                           n + ((size / 2 + 0x1ffff) & ~0x1ffff), newsize);
             }
         }
       else
@@ -824,10 +860,10 @@ snes_gd3 (st_rominfo_t *rominfo)
         }
 
       // write it out
-      ucon64_fbackup (NULL, buf2);
-      q_fwrite (header, 0, SMC_HEADER_LEN, buf2, "wb");
-      q_fwrite (dstbuf, SMC_HEADER_LEN, newsize, buf2, "ab");
-      ucon64_wrote (buf2);
+      ucon64_fbackup (NULL, dest_name);
+      q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
+      q_fwrite (dstbuf, SMC_HEADER_LEN, newsize, dest_name, "ab");
+      ucon64_wrote (dest_name);
 
       free (srcbuf);
       free (dstbuf);
@@ -869,10 +905,10 @@ snes_gd3 (st_rominfo_t *rominfo)
           header[0x28] = 0x40;
         }
 
-      ucon64_fbackup (NULL, buf2);
-      q_fwrite (header, 0, SMC_HEADER_LEN, buf2, "wb");
-      q_fcpy (ucon64.rom, rominfo->buheader_len, size, buf2, "ab");
-      ucon64_wrote (buf2);
+      ucon64_fbackup (NULL, dest_name);
+      q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
+      q_fcpy (ucon64.rom, rominfo->buheader_len, size, dest_name, "ab");
+      ucon64_wrote (dest_name);
 
       rominfo->buheader_len = SMC_HEADER_LEN;   // Now we can update it
       rominfo->interleaved = 1;
@@ -980,14 +1016,12 @@ snes_s (st_rominfo_t *rominfo)
 //          buf2[strrcspn (buf2, ".") - 2] = areupper (basename2 (ucon64.rom)) ? 'X' : 'x';
 
           ucon64_fbackup (NULL, buf2);
-          q_fcpy (ucon64.rom, 0, half_size + rominfo->buheader_len,
-                    buf2, "wb");
+          q_fcpy (ucon64.rom, 0, half_size + rominfo->buheader_len, buf2, "wb");
           ucon64_wrote (buf2);
 
           (*(strrchr (buf2, '.') - 1))++;
           ucon64_fbackup (NULL, buf2);
-          q_fcpy (ucon64.rom, half_size + rominfo->buheader_len, size - half_size,
-                    buf2, "wb");
+          q_fcpy (ucon64.rom, half_size + rominfo->buheader_len, size - half_size, buf2, "wb");
           ucon64_wrote (buf2);
         }
       else
@@ -996,8 +1030,7 @@ snes_s (st_rominfo_t *rominfo)
             {
               ucon64_fbackup (NULL, buf2);
               q_fcpy (ucon64.rom, x * 8 * MBIT + (x ? rominfo->buheader_len : 0),
-                        8 * MBIT + (x ? 0 : rominfo->buheader_len),
-                        buf2, "wb");
+                        8 * MBIT + (x ? 0 : rominfo->buheader_len), buf2, "wb");
               ucon64_wrote (buf2);
               (*(strrchr (buf2, '.') - 1))++;
             }
@@ -1006,8 +1039,7 @@ snes_s (st_rominfo_t *rominfo)
             {
               ucon64_fbackup (NULL, buf2);
               q_fcpy (ucon64.rom, x * 8 * MBIT + (x ? rominfo->buheader_len : 0),
-                        surplus8Mb + (x ? 0 : rominfo->buheader_len),
-                        buf2, "wb");
+                        surplus8Mb + (x ? 0 : rominfo->buheader_len), buf2, "wb");
               ucon64_wrote (buf2);
             }
         }
@@ -1830,7 +1862,7 @@ snes_init (st_rominfo_t *rominfo)
         {
           if (snes_header.rom_type == 3 || snes_header.rom_type == 4 ||
               snes_header.rom_type == 5)
-            str = "DSP1";
+            str = "DSP";
           else if (snes_header.rom_type == 0x13)
             str = "SuperFX";
           else if ((snes_header.rom_type & 0xf0) == 0x10) // 0x14, 0x15 or 0x1a
@@ -1850,7 +1882,7 @@ snes_init (st_rominfo_t *rominfo)
           else if (snes_header.rom_type == 0xf5 || snes_header.rom_type == 0xf9)
             str = "SPC7110";
           else if (snes_header.rom_type == 0xf6)
-            str = "DSP2";                       // NSNESRT says "Seta's DSP"
+            str = "DSP2";                       // NSRT says "Seta's DSP"
           else
             str = "unknown";
           sprintf (buf, " and %s", str);

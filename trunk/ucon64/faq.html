@@ -80,6 +80,9 @@ Q31: <a href="#31">How do I specify dumper information when converting to UNIF?<
 Q32: <a href="#32">How do I specify that a NES game in UNIF format supports multiple
    controller types?</a><br>
 <br>
+Q33: <a href="#33">How do I enable or disable colors in the display output of
+   uCON64?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Why uCON64?</a><br>
@@ -256,13 +259,13 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
 <br>
    Demon's Crest:<br>
    &nbsp;&nbsp; ucon64 -stp "Demon's Crest.swc"<br>
-   &nbsp;&nbsp; cat "Demon's Crest.swc" "Demon's Crest.swc" > "Demon's Crest (SWC-fix).swc"<br>
+   &nbsp;&nbsp; cat "Demon's Crest.swc" "Demon's Crest.swc" &#62; "Demon's Crest (SWC-fix).swc"<br>
    &nbsp;&nbsp; ucon64 -swc "Demon's Crest (SWC-fix).swc"<br>
 <br>
    Mega Man X:<br>
    &nbsp;&nbsp; ucon64 -stp "Mega Man X.swc"<br>
    &nbsp;&nbsp; ucon64 -padn=2097152 "Mega Man X.swc"<br>
-   &nbsp;&nbsp; cat "Mega Man X.swc" "Mega Man X.swc" > "Mega Man X (SWC-fix).swc"<br>
+   &nbsp;&nbsp; cat "Mega Man X.swc" "Mega Man X.swc" &#62; "Mega Man X (SWC-fix).swc"<br>
    &nbsp;&nbsp; ucon64 -swc "Mega Man X (SWC-fix).swc"<br>
 <br>
    WinDOS users without the program cat should use the command copy. For example:<br>
@@ -352,24 +355,32 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
    Super Nintendo color. Ok? No? Then you don't need this option :-)<br>
 <br>
 <p>
-<a name="24"><b>Q24</b>: Why does uCON64 create ucon64.cfg (DOS executable) or .ucon64rc (Win32 executable)
-   files all over the place under DOS and Windows&nbsp;9x (command.com)?</a><br>
-<b>A</b>: uCON64 needs to know where it can find the configuration file or a directory where it can create one.
-   It checks the environment for a variable with the name HOME, USERPROFILE or HOMEDRIVE and HOMEPATH
-   (in that order). Under Unix HOME is normally set. Under Windows&nbsp;XP and 2000 (NT?) USERPROFILE,
-   HOMEDRIVE and HOMEPATH are usually set. If uCON64 can't find one of those environment variables
-   it will look for the configuration file in the current directory. If it can't find a configuration
-   file it will create one. Under DOS and Windows&nbsp;9x none of those environment variables are usually set.
-   So, if you run uCON64 under DOS or Windows&nbsp;9x in a directory where no configuration file exists
-   it will create one there. If you don't like this behaviour you should set one of the mentioned
-   environment variables yourself. You can do that by adding the following line to the end of the file
-   c:\autoexec.bat:<br>
+<a name="24"><b>Q24</b>: Why does uCON64 create ucon64.cfg (DOS executable) or
+   .ucon64rc (Win32 executable) files all over the place under DOS and
+   Windows&nbsp;9x (command.com)?</a><br>
+<b>A</b>: uCON64 needs to know where it can find the configuration file or a
+   directory where it can create one. It checks the environment for a variable
+   with the name HOME, USERPROFILE or HOMEDRIVE and HOMEPATH (in that order).
+   Under Unix HOME is normally set. Under Windows&nbsp;XP and 2000 (NT?)
+   USERPROFILE, HOMEDRIVE and HOMEPATH are usually set. If uCON64 can't find
+   one of those environment variables it will look for the configuration file
+   in the current directory. If it can't find a configuration file it will
+   create one. Under DOS and Windows&nbsp;9x none of those environment
+   variables are usually set. So, if you run uCON64 under DOS or
+   Windows&nbsp;9x in a directory where no configuration file exists it will
+   create one there. If you don't like this behaviour you should set one of the
+   mentioned environment variables yourself. You can do that by adding the
+   following line to the end of the file c:\autoexec.bat:<br>
    set HOME=c:\ucon64<br>
-   and reboot. You can also type that line on the command line. The directory c:\ucon64 must exist, of course.
-   If you want uCON64 to use another directory you should change c:\ucon64 to a directory of your choice.<br>
-   If you have Cygwin installed, the Cygwin runtime system will create an internal environment for the uCON64
-   executable with HOME set to Cygwin's home directory if it has not already been set. You can override this
-   value with the method mentioned earlier.<br>
+   and reboot. You can also type that line on the command line. The directory
+   c:\ucon64 must exist, of course. If you want uCON64 to use another directory
+   you should change c:\ucon64 to a directory of your choice. Note that you
+   should not let the last character of the environment variable be a forward
+   or backward slash.<br>
+   If you have Cygwin installed, the Cygwin runtime system will create an
+   internal environment for the uCON64 executable with HOME set to Cygwin's
+   home directory if it has not already been set. You can override this value
+   with the method mentioned earlier.<br>
 <br>
 <p>
 <a name="25"><b>Q25</b>: When I try to create a multirom under Windows I get the message
@@ -441,15 +452,15 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
   &nbsp;&nbsp; 2-2-2002<br>
   The third and last line should contain information about the dumping means that was used.
   This line may also contain 99 characters at maximum. Here is an example info file:<br>
-  &nbsp;&nbsp Dirk &#60;noisyb@gmx.net&#62;<br>
-  &nbsp;&nbsp 26-7-2002<br>
-  &nbsp;&nbsp Custom built hardware<br>
+  &nbsp;&nbsp; Dirk &#60;noisyb@gmx.net&#62;<br>
+  &nbsp;&nbsp; 26-7-2002<br>
+  &nbsp;&nbsp; Custom built hardware<br>
   To get this information in a UNIF file, you should use the -dumpinfo switch in combination
   with the -unif option. Say you store the dumper information in the file info.txt. This
   would get the info in a UNIF file:<br>
-  &nbsp;&nbsp ucon64 -unif smb.nes -mapr NROM -dumpinfo info.txt<br>
+  &nbsp;&nbsp; ucon64 -unif smb.nes -mapr NROM -dumpinfo info.txt<br>
   If you already have a UNIF file the command line looks almost the same:<br>
-  &nbsp;&nbsp ucon64 -unif smb.unf -dumpinfo info.txt<br>
+  &nbsp;&nbsp; ucon64 -unif smb.unf -dumpinfo info.txt<br>
   For an existing UNIF file you needn't specify the board name, but you might want to
   specify it if you want to change the board name in the file. Afterwards run uCON64 on the
   newly written ROM to see if you were successful. uCON64's display output should contain a
@@ -461,9 +472,26 @@ Q32: <a href="#32">How do I specify that a NES game in UNIF format supports mult
 <b>A</b>: Use the -ctrl switch multiple times on the <b>same</b> command line. For example,
   to specify that a game supports the controller types "regular joypad" and "power pad"
   you would use a command line like this:<br>
-  &nbsp;&nbsp ucon64 -unif smb.nes -mapr NROM -ctrl 0 -ctrl 4
+  &nbsp;&nbsp; ucon64 -unif smb.nes -mapr NROM -ctrl 0 -ctrl 4<br>
 <br>
 <p>
+<a name="33"><b>Q33</b>: How do I enable or disable colors in the display
+   output of uCON64?</a><br>
+<b>A</b>: For the Windows and Unix executables colors are enabled by default.
+   For the DOS executable ANSI.SYS must be loaded. Under DOS and
+   Windows&nbsp;9x ANSI.SYS can be loaded by adding a line to the end of
+   c:\config.sys of the format "device=&#60;full path of ANSI.SYS&#62;".
+   Say ANSI.SYS is located in the directory c:\windows\command, then the line
+   would have to look like this:<br>
+   &nbsp;&nbsp; device=c:\windows\command\ansi.sys<br>
+   Under Windows&nbsp;XP/NT you should add a similar line to your
+   %SystemRoot%\system32\CONFIG.NT:<br>
+   &nbsp;&nbsp; device=%SystemRoot%\system32\ansi.sys<br>
+   The use of color can be disabled by specifying the switch -ncol on the
+   command line.<br>
+<br>
+<p>
+<br>
 <br>
 <br>
 <br>

@@ -6,7 +6,7 @@ handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-
+                  2001 dbjh
 
 
 This program is free software; you can redistribute it and/or modify

@@ -35,13 +35,15 @@
 #include "sort.h"
 #include "output.h"
 
+static void flc_exit(void);
 
-void flc_exit(void)
+
+
+static void flc_exit(void)
 {
   printf("+++EOF");
   fflush(stdout);
 }
-
 
 int main(int argc,char *argv[])
 {
@@ -64,7 +66,7 @@ if(argcmp(argc, argv, "-frontend"))atexit(flc_exit);
 /*
    configfile handling
 */
-  sprintf (flc.configfile, "%s%c"
+  sprintf (flc.configfile, "%s" FILE_SEPARATOR_S
 #ifdef  __MSDOS__
   "flc.cfg"
 #else
@@ -78,7 +80,7 @@ if(argcmp(argc, argv, "-frontend"))atexit(flc_exit);
   */
   ".flcrc"
 #endif
-  , getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
+  , getchd (buf2, FILENAME_MAX));
 
 
 if(access(flc.configfile,F_OK)==-1)printf("ERROR: %s not found: creating...",flc.configfile);
@@ -284,7 +286,7 @@ return 0;
 
 
 
-int flc_usage(int argc, char *argv[])
+extern int flc_usage(int argc, char *argv[])
 {
 printf(
   "\n%s\n"

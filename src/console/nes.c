@@ -6237,7 +6237,7 @@ int
 nes_ffe (st_rominfo_t *rominfo)
 {
   st_unknown_header_t header;
-  char dest_name[MAXBUFSIZE];
+  char dest_name[FILENAME_MAX];
   int size = ucon64.file_size - rominfo->buheader_len;
 
   if (type != INES)

@@ -60,7 +60,7 @@ swan_chk (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
+    q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
 
   q_fputc (dest_name, SWAN_HEADER_START + 8, rominfo->current_internal_crc, "r+b"); // low byte
   q_fputc (dest_name, SWAN_HEADER_START + 9, rominfo->current_internal_crc >> 8, "r+b"); // high byte

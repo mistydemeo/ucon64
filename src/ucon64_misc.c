@@ -315,6 +315,7 @@ sys2064.com
 
 const st_usage_t ucon64_options_usage[] = {
   {NULL, NULL, "Options"},
+  {"o", "DIRECTORY", "specify output directory"},
   {"nbak", NULL, "prevents backup files (*.BAK)"},
 #ifdef  ANSI_COLOR
   {"ncol", NULL, "disable ANSI colors in output"},

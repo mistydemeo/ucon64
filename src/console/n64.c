@@ -150,8 +150,7 @@ n64_sram (st_rominfo_t *rominfo, const char *sramfile)
 {
   char sram[N64_SRAM_SIZE], dest_name[FILENAME_MAX];
 
-  if (q_fsize (sramfile) != N64_SRAM_SIZE ||
-      q_fsize (ucon64.rom) != LAC_ROM_SIZE)
+  if (q_fsize (sramfile) != N64_SRAM_SIZE || ucon64.file_size != LAC_ROM_SIZE)
     {
       fprintf (stderr,
         "ERROR: Check if ROM has %d Bytes and SRAM has %d Bytes\n"

@@ -183,7 +183,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
   comfort (by NoisyB)<br>
 - added (WS/WSC) -chk fix ROM checksum (for WonderSwan(Color)) (by NoisyB; thanks to dox)<br>
 - updated (SNES) changed -swcs, -figs and -ufos to always create a file of 32.5 kB. This solves
-  some problems where SRAM files created with an emulator would not work on a copier. (by dbjh;
+  some problems where SRAM files created with an emulator would not work on a copier (by dbjh;
   thanks to Caz for investigating the problem and providing a solution)<br>
 - added -mkcue generate CUE file; --rom=CD_IMAGE --file=TRACK_MODE (by NoisyB)<br>
 - ported the whole project to FreeBSD (by NoisyB)<br>
@@ -247,7 +247,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - removed (GBA) -multi{1,2,3}, -multi can be used instead (by dbjh)<br>
 - some code clean ups (by NoisyB)<br>
 - added read-only zip support (by dbjh) Note that only the first file inside the zip
-  archive will be looked at. Use -ls{v} to see info about all files in the zip archive.<br>
+  archive will be looked at. Use -ls{v} to see info about all files in the zip archive<br>
 - added (SNES) NSRT header support (by dbjh)<br>
 - updated (SNES) fixed an SWC problem for HiROM games without SRAM (by dbjh)<br>
 - updated (SNES) -k now also cracks Killer Instinct (by dbjh)<br>
@@ -333,6 +333,8 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
   Dragon - The Bruce Lee Story (U) and Wolfenstein 3D (U) (by dbjh)<br>
 - fixed (N64) now APS code works correctly and generates correct patches on
   big-endian machines (by dbjh)<br>
+- added (all) -o specify output directory. Note that now uCON64 by default
+  writes its output files to the current directory (by NoisyB and dbjh)<br>
 <!--
 - replaced internal handling/conversion of DiscJuggler and Nero images with
   libdiscmage from http://discmage.sourceforge.net (by NoisyB)<br>

@@ -2478,7 +2478,6 @@ q_fcpy (const char *src, int start, int len, const char *dest, const char *mode)
 
   fclose (fh);
   fclose (fh2);
-
   sync ();
   return 0;
 }
@@ -2527,7 +2526,7 @@ q_rfcpy (const char *src, const char *dest)
 int
 q_fswap (const char *filename, int start, int len)
 {
-  int seg_len = 0, size = q_fsize (filename);
+  int seg_len;
   FILE *fh;
   char buf[MAXBUFSIZE];
   struct stat fstate;
@@ -2549,24 +2548,17 @@ q_fswap (const char *filename, int start, int len)
 
   fseek (fh, start, SEEK_SET);
 
-  len = MIN (len, size - start);
-
-  for (; ; len -= seg_len)
+  for (; len > 0; len -= seg_len)
     {
-      seg_len = MIN (len, MAXBUFSIZE);
-
-      if (!fread (buf, 1, seg_len, fh))
+      if (!(seg_len = fread (buf, 1, MIN (len, MAXBUFSIZE), fh)))
         break;
-
       mem_swap (buf, seg_len);
-
       fseek (fh, -seg_len, SEEK_CUR);
       fwrite (buf, 1, seg_len, fh);
     }
 
   fclose (fh);
   sync ();
-
   return 0;
 }
 
@@ -2625,13 +2617,13 @@ q_fncmp (const char *filename, int start, int len, const char *search,
 
 #if 0
 int
-process_file (const char *fname, int start, int len, int (*func) (char *, const char*))
+process_file (const char *src, int start, int len, const char *dest, const char *mode, int (*func) (char *, int))
 {
-  int seg_len = 0, size = q_fsize (src);
+  int seg_len;
   char buf[MAXBUFSIZE];
   FILE *fh, *fh2;
 
-  if (!strcmp (dest, src))
+  if (one_file (dest, src))
     return -1;
 
   if (!(fh = fopen (src, "rb")))
@@ -2639,7 +2631,6 @@ process_file (const char *fname, int start, int len, int (*func) (char *, const 
       errno = ENOENT;
       return -1;
     }
-
   if (!(fh2 = fopen (dest, mode)))
     {
       errno = ENOENT;
@@ -2650,19 +2641,16 @@ process_file (const char *fname, int start, int len, int (*func) (char *, const 
   fseek (fh, start, SEEK_SET);
   fseek (fh2, 0, SEEK_END);
 
-  len = MIN (len, size - start);
-
-  for (; ; len -= seg_len)
+  for (; len > 0; len -= seg_len)
     {
-      seg_len = MIN (len, MAXBUFSIZE);
-      if (!fread (buf, seg_len, 1, fh))
+      if (!(seg_len = fread (buf, 1, MIN (len, MAXBUFSIZE), fh)))
         break;
-      fwrite (buf, seg_len, 1, fh2);
+      func (buf, seg_len);
+      fwrite (buf, 1, seg_len, fh2);
     }
 
   fclose (fh);
   fclose (fh2);
-
   sync ();
   return 0;
 }

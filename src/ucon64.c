@@ -96,9 +96,9 @@ typedef struct
 static st_args_t arg[UCON64_MAX_ARGS];
 
 const struct option options[] = {
-    {"83", 0, 0, UCON64_83},
     {"1991", 0, 0, UCON64_1991},
     {"3do", 0, 0, UCON64_3DO},
+    {"83", 0, 0, UCON64_83},
     {"?", 0, 0, UCON64_HELP},
     {"a", 0, 0, UCON64_A},
     {"ata", 0, 0, UCON64_ATA},
@@ -204,7 +204,9 @@ const struct option options[] = {
     {"nbak", 0, 0, UCON64_NBAK},
     {"nbat", 0, 0, UCON64_NBAT},
     {"nbs", 0, 0, UCON64_NBS},
+#ifdef  ANSI_COLOR
     {"ncol", 0, 0, UCON64_NCOL},
+#endif
     {"nes", 0, 0, UCON64_NES},
     {"nhd", 0, 0, UCON64_NHD},
     {"nhi", 0, 0, UCON64_NHI},
@@ -226,7 +228,9 @@ const struct option options[] = {
     {"patch", 1, 0, UCON64_PATCH},
     {"pce", 0, 0, UCON64_PCE},
     {"poke", 1, 0, UCON64_POKE},
+#ifdef  PARALLEL
     {"port", 1, 0, UCON64_PORT},
+#endif
     {"ppf", 0, 0, UCON64_PPF},
     {"ps2", 0, 0, UCON64_PS2},
     {"psx", 0, 0, UCON64_PSX},
@@ -343,14 +347,14 @@ ucon64_runtime_debug (void)
       y++;
 
   fprintf (stderr, "DEBUG: %d consoles found\n", y);
-      
+
   // sanity check at runtime
   // Does ucon64_wf cover all getopt() options and vice versa?
   for (x = 0; options[x].val; x++)
     if (!ucon64_get_wf (options[x].val)) // compare options with workflow
       {
         fprintf (stderr, "DEBUG: Sanity check failed (option \"%s\" in (struct option *) options)\n", options[x].name);
-        exit (1);
+//        exit (1);
       }
 
   // How many option do we have?
@@ -378,7 +382,7 @@ ucon64_runtime_debug (void)
         {
           strcpy (buf, (ucon64_get_opt (ucon64_wf[x].option))->name);
           fprintf (stderr, "DEBUG: Sanity check failed (option \"%s\" in ucon64_wf is a dupe)\n", buf);
-          exit (1);
+//          exit (1);
         }
     }
 
@@ -399,13 +403,13 @@ ucon64_runtime_debug (void)
             if (stricmp (buf, p[y].option_s) != 0 || (!p[y].option_s && !p[y].desc))
               {
                 fprintf (stderr, "DEBUG: Wrong usage assigned (option \"%s\" in ucon64_wf)\n", buf);
-                exit (1);
+//                exit (1);
               }
 
             if (!p[y].option_s && !p[y].desc)
               {
                 fprintf (stderr, "DEBUG: Wrong usage assigned (option \"%s\" in ucon64_wf)\n", buf);
-                exit (1);
+//                exit (1);
               }
         }
       else
@@ -725,8 +729,10 @@ ucon64_execute_options (void)
 //      if (wf->flags & WF_SWITCH)
         ucon64_switches (arg[x].val, arg[x].optarg);
     }
+#ifdef  ANSI_COLOR
   if (ucon64.ansi_color && first_call)
     ucon64.ansi_color = ansi_init ();
+#endif
 
 #ifdef  PARALLEL
   /*

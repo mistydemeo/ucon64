@@ -355,7 +355,7 @@ dm_reopen (const char *fname, dm_image_t *image_p)
   int x = 0, identified = 0;
   FILE *fh;
 
-  x = image_p != NULL ? 1 : 0;                  // warning remover
+  (void) image_p;                               // warning remover
 
   memset (&track, 0, sizeof (dm_track_t));
 
@@ -394,9 +394,9 @@ dm_reopen (const char *fname, dm_image_t *image_p)
 int
 dm_fseek (FILE *fp, int track, int how)
 {
- fp = (FILE *) NULL;                            // warning remover
- track = 0;                                     // warning remover
- how = 0;                                       // warning remover
+ (void) fp;                                     // warning remover
+ (void) track;                                  // warning remover
+ (void) how;                                    // warning remover
  return 0;
 }
 
@@ -413,7 +413,7 @@ dm_close (dm_image_t *image)
 {
 //  fclose (image->fh);
 //  free (image);
-  image = NULL;                                 // warning remover
+  (void) image;                                 // warning remover
   return 0;
 }
 
@@ -421,7 +421,7 @@ dm_close (dm_image_t *image)
 int
 dm_rip (const dm_image_t *image)
 {
-  image = NULL;                                 // warning remover
+  (void) image;                                 // warning remover
   return 0;
 }
 
@@ -664,7 +664,7 @@ dm_disc_read (const dm_image_t *image)
 {
 #if 1
   fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_read()");
-  if (!image) return -1;                        // warning remover
+  (void) image;                                 // warning remover
 #else
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
 
@@ -694,7 +694,7 @@ dm_disc_write (const dm_image_t *image)
 {
 #if 1
   fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_write()");
-  if (!image) return -1;                        // warning remover
+  (void) image;                                 // warning remover
 #else
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
 

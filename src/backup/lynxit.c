@@ -145,7 +145,7 @@ ptr_port_init (unsigned int port)
   if (!print_data)
     return FALSE;
 #else
-  port = ucon64.parport;                        // warning remover
+  (void) port;                                  // warning remover
 #endif
   print_stat = print_data + 1;
   print_ctrl = print_data + 2;

@@ -158,7 +158,8 @@ gd_read_rom (const char *filename, unsigned int parport)
 
   return 0;
 #else
-  parport = filename[strlen (filename) - 1];    // warning remover
+  (void) filename;                              // warning remover
+  (void) parport;                               // warning remover
   return fprintf (stderr, "ERROR: This function is not yet implemented\n");
 #endif
 }
@@ -451,7 +452,8 @@ gd_read_sram (const char *filename, unsigned int parport)
 
   return 0;
 #else
-  parport = filename[strlen (filename) - 1];    // warning remover
+  (void) filename;                              // warning remover
+  (void) parport;                               // warning remover
   return fprintf (stderr, "ERROR: This function is not yet implemented\n");
 #endif
 }
@@ -482,7 +484,8 @@ gd_write_sram (const char *filename, unsigned int parport)
 
   return 0;
 #else
-  parport = filename[strlen (filename) - 1];    // warning remover
+  (void) filename;                              // warning remover
+  (void) parport;                               // warning remover
   return fprintf (stderr, "ERROR: This function is not yet implemented\n");
 #endif
 }

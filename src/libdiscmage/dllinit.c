@@ -40,6 +40,7 @@ DECLARE_CYGWIN_DLL(DllMain);
 BOOL WINAPI
 DllMain (HINSTANCE h, DWORD reason, LPVOID ptr)
 {
+  (void) ptr;                                   // warning remover
   switch (reason)
     {
     case DLL_PROCESS_ATTACH:
@@ -64,7 +65,19 @@ DllMain (HINSTANCE h, DWORD reason, LPVOID ptr)
 int dxe_init (void);
 void *dxe_symbol (char *symbol_name);
 
-st_symbol_t import_export = {dxe_init, dxe_symbol, sizeof (st_symbol_t)};
+st_symbol_t import_export =
+{
+  dxe_init, dxe_symbol, sizeof (st_symbol_t),
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL,
+  {0, NULL, NULL, 0, 0, 0, NULL, 0}, {0, NULL, NULL, 0, 0, 0, NULL, 0},
+  {0, NULL, NULL, 0, 0, 0, NULL, 0}, NULL, NULL, NULL, 0
+};
 st_map_t *symbol;
 
 

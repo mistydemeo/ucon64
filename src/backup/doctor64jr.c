@@ -40,10 +40,127 @@ const char *doctor64jr_usage[] = {
   NULL
 };
 
+#if 0
+drjr transfer protocol
+
+
+DB25  pin name
+p2~p9 pd[7:0]  XXXXXXXXXXX  ai  XXXXX  data  XXXX
+p1    nwrite   ~~~~~~~~~|_____________________|~~
+p14   ndstb    ~~~~~~~~~~~~~~~~~~~~~~~~~|_|~~~~~~
+p17   nastb    ~~~~~~~~~~~~~|_|~~~~~~~~~~~~~~~~~~
+
+
+ai[]=0	r/w a[7..0]
+ai[]=1	r/w a[15..8]
+ai[]=2	r/w a[23..16]
+ai[]=3	w a[28..24]
+ai[]=3  r (rst,wdf,wcf,a[28..24])
+ai[]=4	r/w data
+ai[]=5	w mode
+ai[]=6	w en_1
+ai[]=7	w en_0 
+*remark 
+	a[8..1] support page count up
+
+	ai[3]d7:0=N64 power off, 1=N64 power on
+             d6:0=no dram data written, 1=dram data written
+             d5:0=no data write in b4000000~b7ffffff, 1=some data written in b4000000~b7ffffff
+
+	mode d0:0=dram read only and clear wdf, 1=dram write enable
+	     d1:0=disable cartridge read and clear wcf flag,
+                1=enable cartridge read(write b4000000~b7ffffff will switch off dram and cartridge will present at b0000000~b3ffffff)
+
+	en_0=05 and en_1=0a is enable port control
+
+
+
+
+
+
+
+mode:q0              0                   1                  0                    1
+mode:q1              0                   0                  1                    1
+b7ff ffff
+b400 0000      dram read only         dram r/w        cartridge read     cartridge read(* write this area will switch off dram)
+
+b3ff ffff
+b000 0000      dram read only         dram r/w        dram read only        dram r/w
+
+
+
+eg:enable port control
+
+DB25  pin name
+p2~p9 pd[7:0]  XXXXXXXXXXX 07 XX 05 XXXX 06 XX 0a XXXXXXXXXXXX
+p1    nwrite   ~~~~~~~~~|_____________________________|~~~~~~~
+p14   ndstb    ~~~~~~~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~
+p17   nastb    ~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~~~~~~
+                            en_0=05       en_1=0a  
+
+
+
+eg:write adr $b0123456, data $a55a,$1234..
+
+DB25  pin name
+p2~p9 pd[7:0]  XXXXXXXXXXX 00 XX 56 XXXX 01 XX 34 XXXX 02 XX 12 XXXX 03 XX b0 XXXXXX 04 XX 5a XX a5 XX 34 XX 12 XXXXXXXXXXX
+p1    nwrite   ~~~~~~~~~|_______________________________________________________________________________________|~~~~~~~~~~
+p14   ndstb    ~~~~~~~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~|_|~~~|_|~~~|_|~~~|_|~~~~~~~~~~~
+p17   nastb    ~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~|_|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                              set adr word low            set adr word high                wdata a55a  wdata 1234 (after write adr=b012345a) 
+
+
+
+eg:read adr $b0123400~$b01235ff, 512 data
+
+DB25  pin name
+p2~p9 pd[7:0]  XXXXXXXXXXX 00 XX 00 XXXX 01 XX 34 XXXX 02 XX 12 XXXX 03 XX b0 XXXXXX 04 XX data0 XX data1 X ... X data510 XX data511 XXXXX
+p1    nwrite   ~~~~~~~~~|________________________________________________________________~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+p14   ndstb    ~~~~~~~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~~|_|~~~~~~|_|~~~ ~~~ ~~~~|_|~~~~~~~~|_|~~~~~~~~
+p17   nastb    ~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~|_|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                              set adr word low            set adr word high                (after 512 read adr=b0123400) 
+
+
+eg:dram write protect, disable N64 access to cartridge and disable port control
+
+DB25  pin name
+p2~p9 pd[7:0]  XXXXXXXXXXX 05 XX 00 XXXX 07 XX 00 XXXX 06 XX 00 XXXXXXXXXXXX
+p1    nwrite   ~~~~~~~~~|________________________________________|~~~~~~~~~~
+p14   ndstb    ~~~~~~~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~
+p17   nastb    ~~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~|_|~~~~~~~~~~~~~~~~~~
+                            mode=00       en_0=00       en_1=00  
+
+
+
+
+simple backup rountine for N64
+
+void writePI(unsigned long addr, unsigned long value)
+{
+	do {} while (*(volatile unsigned long *) (0xa4600010) & 3);     // check parallel interface not busy
+	addr &=0xbffffffc;
+	*(unsigned long *)(addr)=value;
+}
+
+unsigned long readPI(unsigned long addr)
+{
+	do {} while (*(volatile unsigned long *) (0xa4600010) & 3);     // check parallel interface not busy
+	addr &=0xbffffffc;
+	return *(unsigned long *)(addr);
+}
+
+/*-------------------------
+MAIN -- START OF USER CODE
+--------------------------*/
+void mainproc(void *arg) {
+    u32 base_adr;
+    for (base_adr=0;base_adr<0x1000000;base_adr++){			// backup 128Mbits
+       writePI(0xb0000000+base_adr,readPI(0xb4000000 + base_adr));       // write data
+    }
+}
+#endif
+
 #ifdef BACKUP
-
-
-
 
 /**************************************
 *        program name: v64jr.c          *
@@ -488,7 +605,7 @@ download_n64 ()
         {
           if (write_32k (page, 0x80))
             {
-              read_adr ();
+//              read_adr ();
               /*fclose(fptr); */
               return (-1);
             }
@@ -708,8 +825,8 @@ doctor64jr_main (int argc, char *argv[])
 
 
 #ifdef DEBUG
-  dram_size = test_dram ();
-  printf ("\nDRAM size: %d Mb\n", (dram_size / 2));
+//  dram_size = test_dram ();
+//  printf ("\nDRAM size: %d Mb\n", (dram_size / 2));
 #endif
   disp_on = 1;                  // display #/*
   if (file_name != NULL)

@@ -95,29 +95,29 @@ if test $enable_gui = yes; then
   AC_SUBST(DEFINE_WXW_MAKE)
 
   dnl check for SDL
+  dnl AC_CHECK_LIB (sdl, SDL_Init, have_sdl="yes")
   DEFINE_SDL_MAKE=""
   dnl AM_PATH_SDL(1.2.4, DEFINE_SDL_MAKE="SDL=1")
   AC_SUBST(DEFINE_SDL_MAKE)
 
   dnl check for PNG
-  AC_CHECK_LIB(png, png_create_read_struct, have_libpng=yes, , -lz)
-  if test $have_libpng == yes; then
+  AC_CHECK_LIB(png, png_create_read_struct, have_libpng="yes", , -lz)
+  if test x$have_libpng == xyes; then
   DEFINE_PNG_MAKE="PNG=1"
   else
   DEFINE_PNG_MAKE=""
-  AC_MSG_WARN([*** Unable to find PNG library (http://www.libpng.org/pub/png/libpng.html)])
+  dnl AC_MSG_WARN([*** Unable to find PNG library (http://www.libpng.org/pub/png/libpng.html)])
   fi
   AC_SUBST(DEFINE_PNG_MAKE)
 
-  dnl AC_CHECK_LIB(z, uncompress, have_libz=yes)
-  dnl if test x$have_libz != xyes; then
-  dnl AC_MSG_WARN([*** Unable to find Zlib library (http://www.gzip.org/zlib/)])
-  dnl fi
-
-  dnl if test x$have_libpng = xyes -a x$have_libz = xyes; then
-  dnl CFLAGS="$CFLAGS -DLOAD_PNG"
-  dnl IMG_LIBS="$IMG_LIBS -lpng -lz"
-  dnl fi
+  AC_CHECK_LIB(odbc, SQLDisconnect, have_odbc="yes")
+  if test x$have_odbc == xyes; then
+  DEFINE_ODBC_MAKE="ODBC=1"
+  else
+  DEFINE_ODBC_MAKE=""
+  dnl AC_MSG_WARN([*** Unable to find unixODBC library (http://www.unixODBC.org)])
+  fi
+  AC_SUBST(DEFINE_ODBC_MAKE)
 
   AC_HAVE_LIBRARY(socket)
   AC_HAVE_LIBRARY(nsl)
@@ -167,6 +167,7 @@ AC_MSG_RESULT($enable_ansi_color)
 
 
 dnl Checks for libraries.
+DEFINE_ZLIB_MAKE=""
 AC_MSG_CHECKING(for zlib)
 AC_ARG_WITH(zlib,
             AC_HELP_STRING([--with-zlib],
@@ -175,11 +176,15 @@ AC_ARG_WITH(zlib,
             with_zlib=yes)
 if test $with_zlib = yes; then
   AC_TRY_COMPILE([#include <zlib.h>], , with_zlib=yes, with_zlib=no)
+else
+  AC_MSG_WARN([*** Unable to find Zlib library (http://www.gzip.org/zlib/)])
 fi
 if test $with_zlib = yes; then
   AC_DEFINE(HAVE_ZLIB_H,1,[build with gzip and zip support (default: yes)])
   LDFLAGS="$LDFLAGS -lz"
   DEFINE_ZLIB_MAKE="ZLIB=1"
+else
+  AC_MSG_WARN([*** Unable to find Zlib library (http://www.gzip.org/zlib/)])
 fi
 AC_MSG_RESULT($with_zlib)
 AC_SUBST(DEFINE_ZLIB_MAKE)

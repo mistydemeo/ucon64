@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP GTK_CONFIG GTK_CFLAGS GTK_LIBS DEFINE_GTK_MAKE DEFINE_GTK_HTML_MAKE GDK_PIXBUF_CONFIG GDK_PIXBUF_CFLAGS GDK_PIXBUF_LIBS DEFINE_GDK_PIXBUF_MAKE DEFINE_WXW_MAKE DEFINE_SDL_MAKE DEFINE_PNG_MAKE DEFINE_GUI_MAKE DEFINE_DISCMAGE_MAKE DEFINE_DLOPEN_MAKE DEFINE_ZLIB_MAKE LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP GTK_CONFIG GTK_CFLAGS GTK_LIBS DEFINE_GTK_MAKE DEFINE_GTK_HTML_MAKE GDK_PIXBUF_CONFIG GDK_PIXBUF_CFLAGS GDK_PIXBUF_LIBS DEFINE_GDK_PIXBUF_MAKE DEFINE_WXW_MAKE DEFINE_SDL_MAKE DEFINE_PNG_MAKE DEFINE_ODBC_MAKE DEFINE_GUI_MAKE DEFINE_DISCMAGE_MAKE DEFINE_DLOPEN_MAKE DEFINE_ZLIB_MAKE LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -2909,7 +2909,7 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
     DEFINE_WXW_MAKE=""
 
 
-    DEFINE_SDL_MAKE=""
+      DEFINE_SDL_MAKE=""
 
 
     echo "$as_me:$LINENO: checking for png_create_read_struct in -lpng" >&5
@@ -2967,18 +2967,79 @@ fi
 echo "$as_me:$LINENO: result: $ac_cv_lib_png_png_create_read_struct" >&5
 echo "${ECHO_T}$ac_cv_lib_png_png_create_read_struct" >&6
 if test $ac_cv_lib_png_png_create_read_struct = yes; then
-  have_libpng=yes
+  have_libpng="yes"
 fi
 
-  if test $have_libpng == yes; then
+  if test x$have_libpng == xyes; then
   DEFINE_PNG_MAKE="PNG=1"
   else
   DEFINE_PNG_MAKE=""
-  { echo "$as_me:$LINENO: WARNING: *** Unable to find PNG library (http://www.libpng.org/pub/png/libpng.html)" >&5
-echo "$as_me: WARNING: *** Unable to find PNG library (http://www.libpng.org/pub/png/libpng.html)" >&2;}
-  fi
+    fi
 
 
+  echo "$as_me:$LINENO: checking for SQLDisconnect in -lodbc" >&5
+echo $ECHO_N "checking for SQLDisconnect in -lodbc... $ECHO_C" >&6
+if test "${ac_cv_lib_odbc_SQLDisconnect+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lodbc  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char SQLDisconnect ();
+int
+main ()
+{
+SQLDisconnect ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_odbc_SQLDisconnect=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_odbc_SQLDisconnect=no
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_odbc_SQLDisconnect" >&5
+echo "${ECHO_T}$ac_cv_lib_odbc_SQLDisconnect" >&6
+if test $ac_cv_lib_odbc_SQLDisconnect = yes; then
+  have_odbc="yes"
+fi
+
+  if test x$have_odbc == xyes; then
+  DEFINE_ODBC_MAKE="ODBC=1"
+  else
+  DEFINE_ODBC_MAKE=""
+    fi
 
 
 
@@ -3169,6 +3230,7 @@ echo "$as_me:$LINENO: result: $enable_ansi_color" >&5
 echo "${ECHO_T}$enable_ansi_color" >&6
 
 
+DEFINE_ZLIB_MAKE=""
 echo "$as_me:$LINENO: checking for zlib" >&5
 echo $ECHO_N "checking for zlib... $ECHO_C" >&6
 
@@ -3216,6 +3278,9 @@ sed 's/^/| /' conftest.$ac_ext >&5
 with_zlib=no
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
+else
+  { echo "$as_me:$LINENO: WARNING: *** Unable to find Zlib library (http://www.gzip.org/zlib/)" >&5
+echo "$as_me: WARNING: *** Unable to find Zlib library (http://www.gzip.org/zlib/)" >&2;}
 fi
 if test $with_zlib = yes; then
 
@@ -3225,6 +3290,9 @@ _ACEOF
 
   LDFLAGS="$LDFLAGS -lz"
   DEFINE_ZLIB_MAKE="ZLIB=1"
+else
+  { echo "$as_me:$LINENO: WARNING: *** Unable to find Zlib library (http://www.gzip.org/zlib/)" >&5
+echo "$as_me: WARNING: *** Unable to find Zlib library (http://www.gzip.org/zlib/)" >&2;}
 fi
 echo "$as_me:$LINENO: result: $with_zlib" >&5
 echo "${ECHO_T}$with_zlib" >&6
@@ -5308,6 +5376,7 @@ s,@DEFINE_GDK_PIXBUF_MAKE@,$DEFINE_GDK_PIXBUF_MAKE,;t t
 s,@DEFINE_WXW_MAKE@,$DEFINE_WXW_MAKE,;t t
 s,@DEFINE_SDL_MAKE@,$DEFINE_SDL_MAKE,;t t
 s,@DEFINE_PNG_MAKE@,$DEFINE_PNG_MAKE,;t t
+s,@DEFINE_ODBC_MAKE@,$DEFINE_ODBC_MAKE,;t t
 s,@DEFINE_GUI_MAKE@,$DEFINE_GUI_MAKE,;t t
 s,@DEFINE_DISCMAGE_MAKE@,$DEFINE_DISCMAGE_MAKE,;t t
 s,@DEFINE_DLOPEN_MAKE@,$DEFINE_DLOPEN_MAKE,;t t

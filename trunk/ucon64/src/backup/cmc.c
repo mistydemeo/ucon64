@@ -6,7 +6,7 @@ Copyright (c) 1999 - 2004 Cyan Helkaraxe
 Special thanks to dbjh for helping with the uCON64 integration
 of this software, and providing the wrapping code.
 
-CMC Version: 2.2
+CMC Version: 2.3
 For hardware version 1.x
 
 Copies Sega Megadrive/Genesis cartridges into .BIN format ROM files.
@@ -117,7 +117,7 @@ respective owners.
   confusion.
 */
 #define INTRO_TEXT "Cyan's Megadrive Copier             (c) 1999-2004 Cyan Helkaraxe\n" \
-                   "Software version 2.2, designed for hardware version 1.x\n\n"
+                   "Software version 2.3, designed for hardware version 1.x\n\n"
 
 
 #ifdef  HAVE_CONFIG_H
@@ -181,13 +181,13 @@ cyan_verify_copier (unsigned int parport)
 /**** non-hardware, non-accessing ****/
 
 static unsigned long
-cyan_calculate_rom_size (unsigned char *buffer, int mode)
+cyan_calculate_rom_size (unsigned char *buffer, int test_mode)
 /*
   Calculate the ROM size, by looking at the ROM size entry in the ROM 'header',
   and the overall structure.
   This function always returns a value rounded to a power of two between 128
-  kbytes and 4 Mbytes. It also inspects the ROM for 0's or ffh's. If mode is 1
-  it causes an error on that condition, frees the buffer and exits.
+  kbytes and 4 Mbytes. It also inspects the ROM for 0's or ffh's. If test_mode
+  is 1 it causes an error on that condition, frees the buffer and exits.
 */
 {
   unsigned long i = 0x80000000, reported_size;
@@ -232,10 +232,10 @@ cyan_calculate_rom_size (unsigned char *buffer, int mode)
         {
           FILE *output;
 
-          if (mode)
+          if (test_mode)
             {
               output = stderr;
-              fputs ("ERROR:   ", stderr);
+              fputs ("\nERROR:   ", stderr);
             }
           else
             {
@@ -250,7 +250,7 @@ cyan_calculate_rom_size (unsigned char *buffer, int mode)
                  "         copier. Is it getting power? Is a cartridge inserted? Is it properly\n"
                  "         attached to the PC?\n",
                  output);
-          if (mode)
+          if (test_mode)
             {
               free (buffer);
               exit (1);
@@ -593,6 +593,7 @@ cyan_test_copier (int test, int speed, unsigned int parport)
   int count = 1;
 
   fputs (INTRO_TEXT, stdout);
+  misc_parport_print_info ();
 
   switch (test)
     {
@@ -634,7 +635,7 @@ cyan_test_copier (int test, int speed, unsigned int parport)
           if (memcmp (buffer1, buffer2, 4 * MBYTE))
             {
               // error
-              printf ("Error detected on pass number %d\n\n", count);
+              printf ("\nError detected on pass number %d\n\n", count);
               if (count == 2)
                 puts ("A failure this early suggests a critical fault, such as a misconfigured or\n"
                       "incompatible parallel port, extremely poor wiring, or power supply problems --\n"
@@ -778,6 +779,7 @@ cyan_copy_rom (const char *filename, int speed, unsigned int parport)
   FILE *f;
 
   fputs (INTRO_TEXT, stdout);
+  misc_parport_print_info ();
 
   if (!strlen (filename))
     {
@@ -788,7 +790,6 @@ cyan_copy_rom (const char *filename, int speed, unsigned int parport)
     }
 
   printf ("Speed %d selected\n", speed);
-
   cyan_test_parport (parport);
   printf ("Destination file: %s\n", filename);
 
@@ -799,7 +800,9 @@ cyan_copy_rom (const char *filename, int speed, unsigned int parport)
     }
   fclose (f);
 
-  puts ("Press escape or q to abort");
+  puts ("NOTE: Dumping copier's full address space (file will be automatically trimmed\n"
+        "      after dumping)\n"
+        "Press escape or q to abort\n");
 
   buffer = cyan_read_rom (speed, parport, NULL);
   if (!buffer)

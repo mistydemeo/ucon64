@@ -212,7 +212,7 @@ ucon64_fbackup (struct ucon64_ *rom, char *filename)
 
   if (!access (filename, F_OK))
     {
-      printf ("Writing backup of: %s\n\n", filename);
+      printf ("Writing backup of: %s\n", filename);
       fflush (stdout);
     }
   return filebackup (filename);

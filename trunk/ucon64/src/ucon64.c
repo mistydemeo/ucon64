@@ -222,7 +222,6 @@ main (int argc, char *argv[])
         frontend_file = stdout;
     }
 
-
 /*
    configfile handling
 */
@@ -337,7 +336,7 @@ main (int argc, char *argv[])
 
   rom.backup = (argcmp (argc, argv, "-nbak")) ? 0 :
     (
-      (!strcmp( getProperty (rom.config_file, "backups", buf2, "1"), "1")) ? 1 : 0
+      (!strcmp (getProperty (rom.config_file, "backups", buf2, "1"), "1")) ? 1 : 0
     );
 
   if (argcmp (argc, argv, "-crc"))

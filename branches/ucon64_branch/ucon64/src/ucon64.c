@@ -1343,7 +1343,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
       rominfo->buheader_len);
   else
 // for NoisyB: <read only mode ON>
-    puts ("Backup unit/emulator header: No"); // printing No is handy for SNES ROMs
+    puts ("Backup unit/emulator header: No");   // printing No is handy for SNES ROMs
 // for NoisyB: <read only mode OFF>
 
   // split?

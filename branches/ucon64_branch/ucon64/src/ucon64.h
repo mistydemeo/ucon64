@@ -135,7 +135,7 @@ typedef struct
   char configdir[FILENAME_MAX];                 // directory for config
   char datdir[FILENAME_MAX];                    // directory for DAT files
 #ifdef  GUI
-  char skindir[FILENAME_MAX];                 // path to the pictures used with the netgui DLL
+  char skindir[FILENAME_MAX];                   // path to the pictures used with the netgui DLL
 #endif
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
 #ifdef  DISCMAGE
@@ -162,7 +162,7 @@ typedef struct
   int quiet;                                    // quiet == -1 means verbose + 1
 
   int force_disc;                               // --disc was used
-  uint32_t flags;                                 // detect and init ROM info
+  uint32_t flags;                               // detect and init ROM info
 
   // has higher priority than crc_big_files!
   int do_not_calc_crc;                          // disable checksum calc. to speed up --ls,--lsv, etc.
@@ -179,13 +179,11 @@ typedef struct
   int buheader_len;                             // length of backup unit header 0 == no bu hdr
   int interleaved;                              // ROM is interleaved (swapped)
   int id;                                       // generate unique name (currently
-                                                  //  only used by snes_gd3())
+                                                //  only used by snes_gd3())
   // the following values are for the SNES, NES and the Genesis
   int snes_header_base;                         // SNES ROM is "Extended" (or Sufami Turbo)
   int snes_hirom;                               // SNES ROM is HiROM
-
-  // the following values are for the SNES, NES and the Genesis
-  int part_size;                                // SNES split part size
+  int part_size;                                // SNES/Genesis split part size
   int split;                                    // ROM is split
   int bs_dump;                                  // SNES "ROM" is a Broadcast Satellaview dump
   int controller;                               // NES UNIF & SNES NSRT

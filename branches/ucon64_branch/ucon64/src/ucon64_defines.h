@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_UNKNOWN_S "Unknown"
 #define NULL_TO_UNKNOWN_S(str) ((str) ? (str) : (UCON64_UNKNOWN_S))
 
-#define UCON64_VERSION_S "1.9.9beta1"
+#define UCON64_VERSION_S "1.9.9-1"
 
 /* program version counter */
 //#define UCON64_VERSION (198)
@@ -50,6 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_OPTION (1000)
 #define UCON64_CONSOLE (0)
 
+// options (consoles)
 enum {
   UCON64_3DO = UCON64_CONSOLE + 1,
   UCON64_ATA,

@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(uCON64, 1.9.9beta1, noisyb@gmx.net)
+AC_INIT(uCON64, 1.9.9-1, noisyb@gmx.net)
 AC_CONFIG_HEADER(config.h libnetgui/config.h libdiscmage/config.h)
 
 

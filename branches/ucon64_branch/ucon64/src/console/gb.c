@@ -618,4 +618,3 @@ gameboy_logo (st_rominfo_t *rominfo)
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
- 

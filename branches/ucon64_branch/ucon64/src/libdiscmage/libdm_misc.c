@@ -40,15 +40,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "misc.h"
 #include "libdiscmage.h"
 #include "libdm_misc.h"
-#ifdef  DJGPP                                   // DXE's are specific to DJGPP
-// It's important that this file is included _after_ the headers of code
-//  external to the DXE!
-#include "dxedll_priv.h"
-#endif
 #include "cdi.h"
 #include "nero.h"
 #include "sheets.h"
 #include "other.h"
+#ifdef  DJGPP                                   // DXE's are specific to DJGPP
+#include "dxedll_priv.h"
+#endif
 
 #ifndef CD_MINS
 #define CD_MINS              74 /* max. minutes per CD, not really a limit */

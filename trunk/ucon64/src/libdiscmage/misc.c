@@ -2793,7 +2793,7 @@ _popen (const char *path, const char *mode)
   if (!(fh = Open (apipe, fhflags)))
     return NULL;
 
-  return fdopen (fd, mode));
+  return (fdopen (fd, mode));
 }
 
 

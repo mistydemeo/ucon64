@@ -69,14 +69,14 @@ DllMain (HINSTANCE h, DWORD reason, LPVOID ptr)
 int dxe_init (void);
 void *dxe_symbol (char *symbol_name);
 
-st_symbol_t import_export = {dxe_init, dxe_symbol};
+st_symbol_t import_export = {dxe_init, dxe_symbol, sizeof (st_symbol_t)};
 st_map_t *symbol;
 
 
 int
 dxe_init (void)
 {
-  symbol = map_create (10);                     // Read comment in map.h!
+  symbol = map_create (12);                     // Read comment in map.h!
   symbol->cmp_key = (int (*) (void *, void *)) strcmp; // How beautiful! ;-)
 
   symbol = map_put (symbol, "dm_get_version", dm_get_version);
@@ -85,9 +85,9 @@ dxe_init (void)
   symbol = map_put (symbol, "dm_open", dm_open);
   symbol = map_put (symbol, "dm_close", dm_close);
 
-  symbol = map_put (symbol, "dm_rip", dm_bin2iso);
+  symbol = map_put (symbol, "dm_rip", dm_rip);
   symbol = map_put (symbol, "dm_cdirip", dm_cdirip);
-  symbol = map_put (symbol, "dm_nrgrip", dm_cdi2nero);
+  symbol = map_put (symbol, "dm_nrgrip", dm_nrgrip);
 
   symbol = map_put (symbol, "dm_disc_read", dm_disc_read);
   symbol = map_put (symbol, "dm_disc_write", dm_disc_write);

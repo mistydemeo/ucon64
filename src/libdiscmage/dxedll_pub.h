@@ -56,6 +56,9 @@ typedef struct st_symbol
   int (*dxe_init) (void);
   void *(*dxe_symbol) (char *symbol_name);
 
+  // variables exported by the DXE module
+  int size;                                     // yes, this var needs to be here
+                                                //  (or it could be a function)
   /*
      functions imported by the DXE module
      Note that _every_ function used by the DXE module and not defined in it

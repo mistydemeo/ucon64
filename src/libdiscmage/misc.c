@@ -556,7 +556,7 @@ mkdir2 (const char *name)
 
 char *
 basename2 (const char *path)
-// basename() clone
+// basename() clone (differs from Linux' basename())
 {
   char *p1;
 #if     defined DJGPP || defined __CYGWIN__
@@ -567,8 +567,8 @@ basename2 (const char *path)
     return NULL;
 
 #if     defined DJGPP || defined __CYGWIN__
-  // Yes, DJGPP, not __MSDOS__, because DJGPP's dirname() behaves the same
-  // __CYGWIN__ has no dirname()
+  // Yes, DJGPP, not __MSDOS__, because DJGPP's basename() behaves the same
+  // __CYGWIN__ has no basename()
   p1 = strrchr (path, '/');
   p2 = strrchr (path, '\\');
   if (p2 > p1)                                  // use the last separator in path
@@ -585,7 +585,7 @@ basename2 (const char *path)
 
 char *
 dirname2 (const char *path)
-// dirname() clone
+// dirname() clone (differs from Linux' dirname())
 {
   char *p1, *dir;
 #if     defined DJGPP || defined __CYGWIN__

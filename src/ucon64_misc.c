@@ -97,6 +97,9 @@ const char *ucon64_msg[] = {
   "ERROR: Not enough memory for ROM buffer (%d bytes)\n",
   "ERROR: Not enough memory for file buffer (%d bytes)\n",
   "DAT info: No ROM with 0x%08x as checksum found\n",
+  "WARNING: Support for DAT files is disabled, because \"configdir\" (either in the\n"
+  "         configuration file or the environment) points to an incorrect\n"
+  "         directory. Read the FAQ for more information.\n",
   "Reading config file %s\n",
   NULL
 };
@@ -371,9 +374,9 @@ const st_usage_t ucon64_padding_usage[] = {
              "most backup units use a header with 512 Bytes size"},
   {NULL, NULL}
 };
-  
 
-const st_usage_t ucon64_patching_usage[] = 
+
+const st_usage_t ucon64_patching_usage[] =
   {
     {NULL, "Patching"},
     {"patch=PATCH", "specify the PATCH for the following options\n"
@@ -384,13 +387,13 @@ const st_usage_t ucon64_patching_usage[] =
 
 
 const st_ucon64_wf_t ucon64_wf[] = {
-//  {option, console, (const st_usage_t *)usage, flags},
+//  {option, console, usage, flags},
   {UCON64_1991, UCON64_GENESIS, genesis_usage, WF_SHOW_NFO|WF_ROM_REQUIRED},
   {UCON64_3DO, UCON64_REAL3DO, real3do_usage,  WF_SHOW_NFO},
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          0},
-  {UCON64_A, UCON64_UNKNOWN, NULL,             WF_SHOW_NFO_AFTER|WF_ROM_REQUIRED},
+  {UCON64_A, UCON64_UNKNOWN, NULL,             WF_SHOW_NFO_AFTER|WF_ROM_REQUIRED|WF_SPECIAL_OPT},
   {UCON64_ATA, UCON64_ATARI, atari_usage,      WF_SHOW_NFO},
-  {UCON64_B, UCON64_UNKNOWN, NULL,             WF_SHOW_NFO_AFTER|WF_ROM_REQUIRED},
+  {UCON64_B, UCON64_UNKNOWN, NULL,             WF_SHOW_NFO_AFTER|WF_ROM_REQUIRED|WF_SPECIAL_OPT},
   {UCON64_B0, UCON64_LYNX, lynx_usage,         WF_SHOW_NFO|WF_ROM_REQUIRED},
   {UCON64_B1, UCON64_LYNX, lynx_usage,         WF_SHOW_NFO|WF_ROM_REQUIRED},
   {UCON64_BAT, UCON64_NES, nes_usage,          WF_SHOW_NFO|WF_ROM_REQUIRED},
@@ -445,7 +448,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          0},
   {UCON64_HEX, UCON64_UNKNOWN, NULL,           0},
   {UCON64_HI, UCON64_UNKNOWN, NULL,            WF_SHOW_NFO|WF_ROM_REQUIRED},
-  {UCON64_I, UCON64_UNKNOWN, NULL,             0},
+  {UCON64_I, UCON64_UNKNOWN, NULL,             WF_SPECIAL_OPT},
   {UCON64_IDPPF, UCON64_UNKNOWN, NULL,         0},
   {UCON64_INES, UCON64_NES, nes_usage,         WF_SHOW_NFO|WF_ROM_REQUIRED},
   {UCON64_INESHD, UCON64_NES, nes_usage,       WF_SHOW_NFO|WF_ROM_REQUIRED},
@@ -512,7 +515,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_PATCH, UCON64_UNKNOWN, NULL,         WF_SHOW_NFO|WF_ROM_REQUIRED},
   {UCON64_PCE, UCON64_PCE, pcengine_usage,     WF_SHOW_NFO|WF_ROM_REQUIRED},
   {UCON64_PORT, UCON64_UNKNOWN, NULL,          WF_SHOW_NFO|WF_ROM_REQUIRED},
-  {UCON64_PPF, UCON64_UNKNOWN, NULL,           0},
+  {UCON64_PPF, UCON64_UNKNOWN, NULL,           WF_SPECIAL_OPT},
   {UCON64_PS2, UCON64_PS2, ps2_usage,          WF_SHOW_NFO|WF_ROM_REQUIRED},
   {UCON64_PSX, UCON64_PSX, psx_usage,          WF_SHOW_NFO|WF_ROM_REQUIRED},
   {UCON64_Q, UCON64_UNKNOWN, NULL,             WF_SHOW_NFO|WF_ROM_REQUIRED},

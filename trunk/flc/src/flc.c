@@ -30,110 +30,96 @@
 #include "output.h"
 #include "txtextract.h"
 
-
 int main(int argc,char *argv[])
 {
-register long x=0;
-long fcount=-1;
+long x = 0;
 char buf[4096];
-int kb=NKB,fr=NREV,what=BYDATE,how=WRITE,check=0;
-int edit=0,html=0;
+struct flc_ flc;
 
-//fgauge(START,0);
 
-//strcpy(arg,argv[0]);
-//arg=argv[0];
+  if (argc<2 ||
+      argcmp(argc, argv, "-h") ||
+      argcmp(argc, argv, "-help") ||
+      argcmp(argc, argv, "-?"))
+    {
+    usage(argc,argv);
+    return 0;
+  }
 
-if(argc<2||(argv[1][0]=='-'&&argv[1][1]=='-'&&(argv[1][2]=='?'||argv[1][2]=='h')))usage();
+strcpy(flc.arg0,getarg(argc,argv,0));
+strcpy(flc.arg1,getarg(argc,argv,1));
+strcpy(flc.arg2,getarg(argc,argv,2));
+strcpy(flc.arg3,getarg(argc,argv,3));
 
-//for(x=1;x<argc+1;x++)
-//{
-//	if(x==argc)usage();
-//	if(argv[x][0]=='-')break;
-//}
+flc.fcount=-1;
 
-if(argv[0][0]=='t'||argv[0][0]=='T')
+flc.kb=(argcmp(argc,argv,"-k")) ? KB : NKB;
+flc.fr=(argcmp(argc,argv,"-fr")) ? REV : NREV;
+
+flc.what=
+  (
+    (argcmp(argc,argv,"-a")) ? BYNAME :
+    (
+      (argcmp(argc,argv,"-b")) ? BYSIZE :
+      BYDATE
+    )
+  );
+
+flc.how=(argcmp(argc,argv,"-ap")) ? APPEND : WRITE;
+flc.check=(argcmp(argc,argv,"-t")) ? 1 : 0;
+flc.edit=(argcmp(argc,argv,"-ed")) ? 1 : 0;
+flc.html=(argcmp(argc,argv,"-h")) ? 1 : 0;
+
+if(strlwr(flc.arg0)[0]=='t' || argcmp(argc,argv,"-x"))
 {
-	if(txtextract(argv[argc-1])==-1)usage();
-	exit(0);
-}
-if(argv[0][0]=='z'||argv[0][0]=='Z')
-{
-//	if(
-zippysearch(argv[argc-2],argv[argc-1]);
-//==-1)usage();
-	exit(0);
-}
-
-for(x=1;x<argc;x++)if(argv[x][0]=='-')
-{
-        strcpy(buf,&argv[x][1]);
-
-	if(!strdcmp(buf,"ap"))how=APPEND;
-	if(!strdcmp(buf,"d"))what=BYDATE;
-	if(!strdcmp(buf,"a"))what=BYNAME;
-	if(!strdcmp(buf,"b"))what=BYSIZE;
-	if(!strdcmp(buf,"k"))kb=KB;
-	if(!strdcmp(buf,"h"))html=1;
-	if(!strdcmp(buf,"ed"))edit=1;
-	if(!strdcmp(buf,"t"))check=1;
-	if(!strdcmp(buf,"fr"))fr=REV;
-//	if(!strdcmp(buf,"ng0"))fgauge(NOANIM,0);
+  if(txtextract(argv[argc-1])==-1)usage(argc,argv);
+  return(0);
 }
 
-for(x=1;x<argc;x++)if(argv[x][0]=='-')
+if(strlwr(flc.arg0)[0]=='z' || argcmp(argc,argv,"-z"))
 {
-//todo: kind of $ARG overrides $OPTION !!!
-
-        strcpy(buf,&argv[x][1]);
-        
-	if(!strdcmp(buf,"z"))
-	{
 //		if(
-zippysearch(argv[argc-2],argv[argc-1]);
-//==-1)usage();
-	}
-	if(!strdcmp(buf,"x"))
-	{
-		if(txtextract(argv[argc-1])==-1)usage();
-//more...
-	}
-	if(!strdcmp(buf,"s")||!strdcmp(buf,"c")||!strdcmp(buf,"c2"))
-	{
-		if(!strdcmp(buf,"n"))
-		{
+  zippysearch(argv[argc-2],argv[argc-1]);
+//==-1)usage(argc,argv);
+}
+
+if(argcmp(argc,argv,"-n"))
+{
 //sprintf(buf,"echo >%s \"Nuked with %s\n",(argv[argc-2],"flc");
 //system(buf);
 //exit(0);
 //nuke file
-		}
-		if(!strdcmp(buf,"s"))fcount=resortfl(argv[argc-2]);
-		if(!strdcmp(buf,"c"))fcount=mkfl(argv[argc-2],check);
-		if(!strdcmp(buf,"c2"))fcount=mkfl2(argv[argc-3],argv[argc-2],check);
-		if(fcount==-1)usage();
+  return(0);
+}
 
-if(remove("file_id.diz")!=0)
+if(argcmp(argc,argv,"-s")||argcmp(argc,argv,"-c")||argcmp(argc,argv,"-c2"))
 {
-	remove("FILE_ID.DIZ");
-	remove("File_id.diz");
-}	
+  if(argcmp(argc,argv,"-s"))      resortfl(flc);
+  else if(argcmp(argc,argv,"-c")) mkfl(flc);
+  else mkfl2(flc);
 
+  if(flc.fcount==-1)usage(argc,argv);
 
-		sort(fcount,fr,what);
-		printf("\n");
+  if(remove("file_id.diz")!=0)
+  {
+    remove("FILE_ID.DIZ");
+    remove("File_id.diz");
+  }	
 
-		if(how==WRITE)output(argv[argc-1],fcount,kb,edit,html,"wb");
-		else output(argv[argc-1],fcount,kb,edit,html,"ab");
-		exit(0);
-	}
+  sort(flc);
+
+//  if(how==WRITE)output(argv[argc-1],fcount,kb,edit,html,"wb");
+//  else output(argv[argc-1],fcount,kb,edit,html,"ab");
+
+  output(flc);
 }
-exit(0);
+  exit(0);
 }
 
 
 
 
-void usage(void)
+void usage(int argc, char *argv[])
 {
 printf("\nflc 0.9.3 linux/unix 1999/2000 by NoisyB (noisyb@gmx.net)\n\
 This may be freely redistributed under the terms of the GNU Public License\n\n\
@@ -168,9 +154,7 @@ TODO:		extract FILE_ID.DIZ from zip archive; $ARG1=ZIP_ARCHIVE\n\
 \n\
 Amiga version: noC-FLC Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n\
 Report problems to noisyb@gmx.net\n\n\
-","");
+",getarg(argc,argv,0));
 
-
-
-	exit(0);
+return(0);
 }

@@ -15,3 +15,19 @@ struct stat puffer;
 void usage(void);
 
 #define flc_TITLE "flc 0.9.3 1999/2000/2001 by NoisyB (noisyb@gmx.net)\nThis may be freely redistributed under the terms of the GNU Public License"
+
+struct flc_
+{
+  int argc;
+  //  char argv[128][4096];
+  char *argv[128];
+
+  long fcount;
+  int kb;
+  int fr;
+  int what;
+  int how;
+  int check;
+  int edit;
+  int html;
+};

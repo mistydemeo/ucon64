@@ -1436,8 +1436,10 @@ ucon64_parport_init (unsigned int port)
       printf ("Using %s!\n", fname);
       inpout32 = open_module (fname);
       // note that inport_word and output_word keep their default value...
-      input_byte = get_symbol (inpout32, "Inp32");
-      output_byte = get_symbol (inpout32, "Out32");
+      input_byte = (unsigned char (__stdcall *) (unsigned short))
+                   get_symbol (inpout32, "Inp32");
+      output_byte = (void (__stdcall *) (unsigned short, unsigned char))
+                    get_symbol (inpout32, "Out32");
     }
 #endif // _WIN32 || __CYGWIN__
 

@@ -21,8 +21,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef LIBDISCMAGE_H
 #define LIBDISCMAGE_H
+
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#ifdef  __cplusplus
+extern "C" {
 #endif
 
 #if     defined __linux__ || defined __FreeBSD__ || \
@@ -187,5 +192,9 @@ extern int dm_mktoc (const dm_image_t *image);
 extern int dm_mkcue (const dm_image_t *image);
 extern int dm_disc_read (const dm_image_t *image);
 extern int dm_disc_write (const dm_image_t *image);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif  // LIBDISCMAGE_H

@@ -345,8 +345,8 @@ genesis_mgd (st_rominfo_t *rominfo)
   mgh[2] = 'H';
   mgh[3] = 0x1a;
   mgh[4] = 0x06;
-  mgh[5] = 0xf0;
-  mgh[31] = 0xff;
+  mgh[5] = (char) 0xf0;
+  mgh[31] = (char) 0xff;
 
   strcpy (buf, (const char *) &OFFSET (genesis_header, 32)); // name
   for (x = 0; x < 15; x++)

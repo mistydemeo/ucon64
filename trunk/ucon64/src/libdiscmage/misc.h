@@ -22,12 +22,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef MISC_H
 #define MISC_H
+
 #ifdef  HAVE_CONFIG_H
 #include "config.h"                             // HAVE_ZLIB_H, ANSI_COLOR support
 #endif
-#ifdef __cplusplus
+
+#ifdef  __cplusplus
 extern "C" {
 #endif
+
 #include <string.h>
 #include <time.h>                               // gauge() prototype contains time_t
 #include <stdio.h>
@@ -459,7 +462,8 @@ int fprintf2 (FILE *file, const char *format, ...);
 #endif
 #endif // _WIN32
 
-#ifdef __cplusplus
+#ifdef  __cplusplus
 }
 #endif
+
 #endif // #ifndef MISC_H

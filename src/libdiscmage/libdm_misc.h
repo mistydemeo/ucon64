@@ -59,10 +59,14 @@ extern const char *dm_msg[];
   dm_track_init()     fillup current dm_track_t
   dm_free()           free all dm_track_t, dm_session_t and dm_image_t recursively
   writewavheader()    write header for a wav file
+  dm_get_track_desc() returns a string like "MODE1/2352" depending on the 
+                        mode and sector_size specified; if cue == FALSE
+                        it will return the string in TOC format
 */
 extern const dm_track_t *dm_track_init (dm_track_t *track, FILE *fh);
 extern int dm_free (dm_image_t *image);
 //extern void writewavheader (FILE * fdest, int track_length);
+extern const char *dm_get_track_desc (int mode, int sector_size, int cue);
 
 
 /*

@@ -53,9 +53,10 @@ write programs in C
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
-#ifdef  LIBDISCMAGE
-#include "libdiscmage/libdiscmage.h"
+#ifdef  DLOPEN
+#include "dlopen.h"
 #endif
+#include "libdiscmage/libdiscmage.h"
 
 #include "console/snes.h"
 #include "console/gb.h"
@@ -130,6 +131,7 @@ const struct option long_options[] = {
     {"crchd", 0, 0, UCON64_CRCHD},
     {"crp", 0, 0, UCON64_CRP},
     {"cs", 0, 0, UCON64_CS},
+    {"dat", 0, 0, UCON64_DAT},
     {"db", 0, 0, UCON64_DB},
     {"dbs", 0, 0, UCON64_DBS},
     {"dbuh", 0, 0, UCON64_DBUH},
@@ -250,9 +252,7 @@ const struct option long_options[] = {
     {"vboy", 0, 0, UCON64_VBOY},
     {"vec", 0, 0, UCON64_VEC},
     {"xbox", 0, 0, UCON64_XBOX},
-#ifdef LIBDISCMAGE
     {"xcdrw", 0, 0, UCON64_XCDRW},
-#endif // LIBDISCMAGE
 #ifdef BACKUP
     {"xdex", 1, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
@@ -317,6 +317,24 @@ main (int argc, char **argv)
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], src_name[FILENAME_MAX];
   const char *ucon64_argv[128];
   st_rominfo_t rom;
+#ifdef  DLOPEN
+  void *libdm;
+
+  dm_image_t *(*dm_init) (const char *) = NULL;
+  int (*dm_close) (dm_image_t *) = NULL;
+    
+  int32_t (*dm_bin2iso) (dm_image_t *) = NULL;
+  int32_t (*dm_cdirip) (dm_image_t *) = NULL;
+  int32_t (*dm_cdi2nero) (dm_image_t *) = NULL;
+    
+  int (*dm_disc_read) (dm_image_t *) = NULL;
+  int (*dm_disc_write) (dm_image_t *) = NULL;
+    
+  int32_t (*dm_mksheets) (dm_image_t *) = NULL;
+   
+  int32_t (*dm_mktoc) (dm_image_t *) = NULL;
+  int32_t (*dm_mkcue) (dm_image_t *) = NULL;
+#endif        
 
   printf ("%s\n"
     "Uses code from various people. See 'developers.html' for more!\n"
@@ -339,6 +357,47 @@ main (int argc, char **argv)
 #endif
 
   ucon64_configfile ();
+
+
+#ifdef  DLOPEN
+
+#if     defined __CYGWIN__ || defined _WIN32
+#define MODULE_NAME     "libdiscmage.dll"
+#elif   defined DJGPP
+#define MODULE_NAME     "libdiscmage.dxe"
+#elif   defined __unix__ || defined __BEOS__
+#define MODULE_NAME     "libdiscmage.so"
+#endif
+  sprintf (buf, "%s" MODULE_NAME, ucon64.configdir);
+
+#ifdef  DEBUG
+  fprintf (stderr, "DLOPEN code is active\n\n%s\n\n", buf);
+  fflush (stderr);
+#endif
+
+  if ((libdm = open_module (buf)) != NULL)
+    {
+      ucon64.have_libdiscmage = 1;
+          
+      dm_init = load_symbol (libdm, "dm_init");
+      dm_close = load_symbol (libdm, "dm_close");
+
+      dm_bin2iso = load_symbol (libdm, "dm_bin2iso");
+      dm_cdirip = load_symbol (libdm, "dm_cdirip");
+      dm_cdi2nero = load_symbol (libdm, "dm_cdi2nero");
+
+      dm_disc_read = load_symbol (libdm, "dm_disc_read");
+      dm_disc_write = load_symbol (libdm, "dm_disc_write");
+
+      dm_mksheets = load_symbol (libdm, "dm_mksheets");
+      dm_mktoc = load_symbol (libdm, "dm_mktoc");
+      dm_mkcue = load_symbol (libdm, "dm_mkcue");
+    }
+  else
+    ucon64.have_libdiscmage = 0;
+#elif   DEBUG
+  fprintf (stderr, "DLOPEN code is not active\n\n");
+#endif
 
   ucon64.show_nfo = UCON64_YES;
 
@@ -598,15 +657,14 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 #if 1
   ucon64.type = (rominfo->file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
 #else
-#ifdef  LIBDISCMAGE
-  if (ucon64.type == UCON64_UNKNOWN)
-    {
-      image = dm_init (romfile);
-      ucon64.type = image ? UCON64_CD : UCON64_ROM;
-      if (image)
-        dm_close (image);
-    }
-#endif
+  if (ucon64.have_libdiscmage)
+    if (ucon64.type == UCON64_UNKNOWN)
+      {
+        image = dm_init (romfile);
+        ucon64.type = image ? UCON64_CD : UCON64_ROM;
+        if (image)
+          dm_close (image);
+      }
 #endif
 
   ucon64_flush (rominfo);
@@ -900,6 +958,11 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "dbs         search ROM database (all entries) by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
     "  " OPTION_LONG_S "db          ROM database statistics (# of entries)\n"
     "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
+#ifdef  DB
+    "TODO: " OPTION_LONG_S "dat     import DAT files into ROM database; " OPTION_LONG_S "rom=DAT_FILE\n"
+    "                  parses all Romcenter, Goodxxxx, etc. DAT files and updates\n"
+    "                  the database cache in %scache\n"
+#endif  // DB
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
@@ -931,7 +994,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "version     output version information and exit\n"
 //    "  " OPTION_LONG_S "quiet       don't show output\n"
     "\n"
-    , argv[0], ucon64.configfile);
+    , argv[0], ucon64.configfile, ucon64.configdir);
 
   printf ("Patching\n");
 
@@ -953,26 +1016,25 @@ ucon64_usage (int argc, char *argv[])
 //    genesis_usage[0],
     nes_usage[0], snes_usage[0]);
 
-#ifdef  LIBDISCMAGE
-  printf (
-    "\n"
-    "All DISC-based consoles (using libdiscmage)\n"
-    "  " OPTION_LONG_S "mksheet     generate TOC and CUE sheet files for CD_IMAGE; " OPTION_LONG_S "rom=CD_IMAGE\n"
-//    "                  " OPTION_LONG_S "rom could also be an existing TOC or CUE file\n"
-    "TODO: " OPTION_LONG_S "cdirip=Nrip/dump track N from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
-    "TODO: " OPTION_LONG_S "nrgrip=Nrip/dump track N from Nero/NRG IMAGE; " OPTION_LONG_S "rom=NRG_IMAGE\n"
-    "TODO: " OPTION_LONG_S "rip     rip/dump file(s) from a track; " OPTION_LONG_S "rom=TRACK\n"
+  if (ucon64.have_libdiscmage)
+    printf (
+      "\n"
+      "All DISC-based consoles (using libdiscmage)\n"
+      "  " OPTION_LONG_S "mksheet     generate TOC and CUE sheet files for CD_IMAGE; " OPTION_LONG_S "rom=CD_IMAGE\n"
+//      "                  " OPTION_LONG_S "rom could also be an existing TOC or CUE file\n"
+      "TODO: " OPTION_LONG_S "cdirip=Nrip/dump track N from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
+      "TODO: " OPTION_LONG_S "nrgrip=Nrip/dump track N from Nero/NRG IMAGE; " OPTION_LONG_S "rom=NRG_IMAGE\n"
+      "TODO: " OPTION_LONG_S "rip     rip/dump file(s) from a track; " OPTION_LONG_S "rom=TRACK\n"
 #if 0
-  OPTION_LONG_S "file=SECTOR_SIZE\n"
-    "TODO: " OPTION_LONG_S "iso     strip SECTOR_SIZE of any CD_IMAGE to MODE1/2048; " OPTION_LONG_S "rom=CD_IMAGE\n"
-    "                  " OPTION_LONG_S "file=SECTOR_SIZE\n"
-    "                  " OPTION_LONG_S "file=SECTOR_SIZE is optional, uCON64 will always try to\n"
-    "                  detect the correct SECTOR_SIZE from the CD_IMAGE itself\n"
-    "                  SECTOR_SIZE can be 2048, 2052, 2056, 2324, 2332, 2336, 2340,\n"
-    "                  2352 (default), or custom values\n"
+    OPTION_LONG_S "file=SECTOR_SIZE\n"
+      "TODO: " OPTION_LONG_S "iso     strip SECTOR_SIZE of any CD_IMAGE to MODE1/2048; " OPTION_LONG_S "rom=CD_IMAGE\n"
+      "                  " OPTION_LONG_S "file=SECTOR_SIZE\n"
+      "                  " OPTION_LONG_S "file=SECTOR_SIZE is optional, uCON64 will always try to\n"
+      "                  detect the correct SECTOR_SIZE from the CD_IMAGE itself\n"
+      "                  SECTOR_SIZE can be 2048, 2052, 2056, 2324, 2332, 2336, 2340,\n"
+      "                  2352 (default), or custom values\n"
 #endif
-    "\n");
-#endif // LIBDISCMAGE
+      "\n");
 
   optind = option_index = 0;
   single = 0;
@@ -1215,7 +1277,7 @@ ucon64_usage (int argc, char *argv[])
 
   printf (
 #ifdef DB
-     "Database: %d known ROMs in db.c (%+d)\n"
+     "Database: %d known ROMs in %scache (%+d)\n"
 #endif // DB
      "\n"
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
@@ -1230,6 +1292,7 @@ ucon64_usage (int argc, char *argv[])
      "\n"
 #ifdef DB
      , ucon64_dbsize (UCON64_UNKNOWN)
+     , ucon64.configdir
      , ucon64_dbsize (UCON64_UNKNOWN) - UCON64_DBSIZE
 #endif // DB
      , argv[0], argv[0]);

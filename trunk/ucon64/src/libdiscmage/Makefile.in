@@ -1,0 +1,66 @@
+.PHONY: all clean install
+
+DLOPEN=1
+
+libdir = @libdir@
+#INSTALL = @INSTALL@
+#LIBTOOL = @LIBTOOL@
+INSTALL = install -c
+LIBTOOL = libtool
+
+CC=gcc
+CFLAGS=-I.. -I. -Wall -O3
+ifdef   DLOPEN
+CFLAGS+=-DDLOPEN
+endif
+LDFLAGS=-rdynamic -s
+# For -rdynamic, see info page of dlopen().
+
+LIBNAME=libdiscmage
+OBJECTS=libdiscmage.o cdi.o nero.o sheets.o
+ifdef   DLOPEN
+LIBS=-ldl
+else
+LDFLAGS+=-L.
+LIBS=-l$(LIBNAME)
+endif
+
+
+ifndef  DLOPEN
+all: lib$(LIBNAME).so
+else
+all: $(LIBNAME).so
+endif
+
+
+clean:
+	rm -f *.so $(OBJECTS) *.core *.stackdump *.o
+
+
+#main.o: main.c
+#	$(CC) $(CFLAGS) -c $< -o $@
+#dlopen.o: dlopen.c
+#	$(CC) $(CFLAGS) -c $< -o $@
+
+
+.c.o:
+	$(CC) $(CFLAGS) -fPIC -c $< -o $@
+
+
+ifndef  DLOPEN
+lib$(LIBNAME).so: $(OBJECTS)
+	$(CC) -shared $(OBJECTS) -o lib$(LIBNAME).so
+else
+$(LIBNAME).so: $(OBJECTS)
+	$(CC) -shared $(OBJECTS) -o $(LIBNAME).so
+endif
+
+ifndef  DLOPEN
+install:
+	$(LIBTOOL)  --mode=install $(INSTALL) lib$(LIBNAME).so $(libdir)/lib$(LIBNAME).so
+endif
+
+# Dependencies
+libdiscmage/libdiscmage.o: libdiscmage/libdiscmage_cfg.h
+libdiscmage/nero.o: libdiscmage/nero.h libdiscmage/cdi.h config.h
+libdiscmage/cdi.o: libdiscmage/cdi.h

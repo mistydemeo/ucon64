@@ -1,6 +1,7 @@
 #!/bin/sh
 # BeOS R5 install script for uCON64
 cd $(dirname "$0")
+CONFIG_DIR=~/.ucon64
 
 areply=$(alert "This will start installation of uCON64 in a BeOS system.
 
@@ -31,6 +32,11 @@ and copy it to $HOME. Then retry to install the driver."
 			fi
 		fi
 	fi
+
+if test ! -e $CONFIG_DIR; then
+  mkdir $CONFIG_DIR
+fi
+cp libdiscmage/libdiscmage.so $CONFIG_DIR
 
 	alert "Done.
 You can use uCON64 from the terminal now."

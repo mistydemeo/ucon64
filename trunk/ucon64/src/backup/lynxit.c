@@ -36,8 +36,8 @@ const char *lynxit_usage[] = {
     "Lynxit (Lynx Cartridge Backup Board)",
     "1997 K.Wilkins (selfmade)",
 #ifdef BACKUP
-    "TEST: " OPTION_LONG_S "xlit    send/receive ROM to/from Lynxit interface; " OPTION_LONG_S "file=PORT\n"
-    "                  receives automatically when ROM does not exist\n"
+    "TEST: " OPTION_LONG_S "xlit    receive ROM from Lynxit interface; " OPTION_LONG_S "file=PORT\n"
+//    "                  receives automatically when ROM does not exist\n"
 #else
     ""
 #endif // BACKUP
@@ -1048,7 +1048,7 @@ lynxit_read_rom (const char *filename, unsigned int parport)
   return lynxit_main (lynxit_argc, lynxit_argv);
 }
 
-
+#if 0
 int
 lynxit_write_rom (const char *filename, unsigned int parport)
 {
@@ -1062,5 +1062,5 @@ lynxit_write_rom (const char *filename, unsigned int parport)
 
   return lynxit_main (lynxit_argc, lynxit_argv);
 }
-
+#endif
 #endif // BACKUP 

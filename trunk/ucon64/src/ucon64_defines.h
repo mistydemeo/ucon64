@@ -214,6 +214,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define UCON64_MKTOC (UCON64_OPTION + 168)
 
+#define UCON64_DAT (UCON64_OPTION + 200)
+
 
 #define UCON64_ATARI (UCON64_CONSOLE + 1) // UCON64_ATA
 #define UCON64_CD32 (UCON64_CONSOLE + 2)

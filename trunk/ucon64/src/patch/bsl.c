@@ -40,22 +40,19 @@ const char *bsl_usage[] =
 int
 bsl (const char *name, const char *option2)
 {
-  FILE *fh;
-  FILE *fh2;
+  FILE *fh, *fh2;
   char inchar[1], addstr[10], datstr[10], inchar2[4096];
-  long numdat, i;
-  long done = 0, add;
-  int dat;
+  long numdat, i, done = 0, add;
+  int dat, fsize;
 
   if (!(fh = fopen (name, "r+b")))
     return -1;
   if (!(fh2 = fopen (option2, "rb")))
     return -1;
 
-
+  fsize = quickftell (option2);
   printf ("BSL/Baseline\n");
-  printf ("%ld (%.4f Mb)\n", quickftell (option2),
-          (float) quickftell (option2) / MBIT);
+  printf ("%d (%.4f Mb)\n", fsize, (float) fsize / MBIT);
   printf ("\n"
           "NOTE: sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
           "      This means you must convert for example a Super Nintendo ROM with -swc\n"

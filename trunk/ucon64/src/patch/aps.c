@@ -3,6 +3,7 @@ aps.c - APS support for uCON64
 
 written by 1998 Silo / BlackBag
            1999 - 2001 NoisyB (noisyb@gmx.net)
+                  2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -24,6 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include "config.h"
 #include "misc.h"
 #include "ucon64.h"
@@ -68,21 +70,23 @@ unsigned char n64aps_PatchType = n64aps_TYPE_N64;
 
 unsigned char n64aps_EncodingMethod = n64aps_ENCODINGMETHOD;
 
-FILE *n64aps_APSFile;
-FILE *n64aps_ORGFile;
-FILE *n64aps_NEWFile;
+FILE *n64aps_APSFile, *n64aps_ORGFile, *n64aps_NEWFile;
 int n64aps_Quiet = n64aps_FALSE;
+
 
 void
 n64aps_syntax (void)
 {
-/*	printf ("%s", n64aps_MESSAGE);
-	printf ("%s", n64aps_COPYRIGHT);
-	printf ("N64APS <options> <Original File> <APS File>\n");
-    printf (" -f                 : Force Patching Over Incorrect Image\n");
-	printf (" -q                 : Quiet Mode\n");
-*/ fflush (stdout);
+/*
+  printf ("%s", n64aps_MESSAGE);
+  printf ("%s", n64aps_COPYRIGHT);
+  printf ("N64APS <options> <Original File> <APS File>\n");
+  printf (" -f                 : Force Patching Over Incorrect Image\n");
+  printf (" -q                 : Quiet Mode\n");
+*/
+  fflush (stdout);
 }
+
 
 int
 n64aps_CheckFile (char *Filename, char *mode)
@@ -101,11 +105,11 @@ n64aps_CheckFile (char *Filename, char *mode)
     }
 }
 
+
 void
 ReadStdHeader ()
 {
-  char an64aps_Magic[n64aps_MagicLength];
-  char Description[n64aps_DESCRIPTION_LEN + 1];
+  char an64aps_Magic[n64aps_MagicLength], Description[n64aps_DESCRIPTION_LEN + 1];
 
   fread (an64aps_Magic, 1, n64aps_MagicLength, n64aps_APSFile);
   if (strncmp (an64aps_Magic, n64aps_Magic, n64aps_MagicLength) != 0)
@@ -123,8 +127,7 @@ ReadStdHeader ()
       fclose (n64aps_APSFile);
       exit (1);
     }
-  fread (&n64aps_EncodingMethod, sizeof (n64aps_EncodingMethod), 1,
-         n64aps_APSFile);
+  fread (&n64aps_EncodingMethod, sizeof (n64aps_EncodingMethod), 1, n64aps_APSFile);
   if (n64aps_EncodingMethod != 0)       // Simple Encoding
     {
       printf ("Unknown or New Encoding Method\n");
@@ -142,16 +145,14 @@ ReadStdHeader ()
     }
 }
 
+
 void
 ReadN64Header (int Force)
 {
   unsigned long n64aps_MagicTest;
-  unsigned char Buffer[8];
-  unsigned char APSBuffer[8];
+  unsigned char Buffer[8], APSBuffer[8], CartID[2], Temp, Teritory,
+                APSTeritory, APSFormat;
   int c;
-  unsigned char CartID[2], Temp;
-  unsigned char Teritory, APSTeritory;
-  unsigned char APSFormat;
 
 
   fseek (n64aps_ORGFile, 0, SEEK_SET);
@@ -253,30 +254,19 @@ ReadN64Header (int Force)
 void
 ReadSizeHeader (char *File1)
 {
-  long OrigSize;
-  long APSOrigSize;
+  long OrigSize, APSOrigSize, i;
   unsigned char t;
-  long i;
 
-  fseek (n64aps_ORGFile, 0, SEEK_END);
-
-  OrigSize = ftell (n64aps_ORGFile);
-
+  OrigSize = quickftell (File1);
   fread (&APSOrigSize, sizeof (APSOrigSize), 1, n64aps_APSFile);
 
   if (OrigSize != APSOrigSize)  // Do File Resize
     {
       if (APSOrigSize < OrigSize)
         {
-          int x;
-          fclose (n64aps_ORGFile);
-          x = open (File1, O_WRONLY);
-          if (ftruncate (x, APSOrigSize) != 0)
-            {
-              printf ("Trunacte Failed\n");
-            }
-          close (x);
-          n64aps_ORGFile = fopen (File1, "rb+");
+          if (ftruncate (fileno (n64aps_ORGFile), APSOrigSize) != 0)
+            printf ("Trunacte Failed\n");
+          fflush (n64aps_ORGFile);
         }
       else
         {
@@ -285,19 +275,16 @@ ReadSizeHeader (char *File1)
             fputc (t, n64aps_ORGFile);
         }
     }
-
-  fseek (n64aps_ORGFile, 0, SEEK_SET);
+//  fseek (n64aps_ORGFile, 0, SEEK_SET);
 }
 
 
 void
 ReadPatch ()
 {
-  int APSReadLen;
-  int Finished = n64aps_FALSE;
-  unsigned char Buffer[256];
+  int APSReadLen, Finished = n64aps_FALSE;
+  unsigned char Buffer[256], Size;
   long Offset;
-  unsigned char Size;
 
   while (!Finished)
     {
@@ -322,8 +309,7 @@ ReadPatch ()
             }
           else
             {
-              unsigned char data;
-              unsigned char len;
+              unsigned char data, len;
               int i;
 
               fread (&data, sizeof (data), 1, n64aps_APSFile);
@@ -347,10 +333,8 @@ ReadPatch ()
 int
 n64aps_main (int argc, const char *argv[])
 {
-  char File1[256];
-  char File2[256];
+  char File1[FILENAME_MAX], File2[FILENAME_MAX];
   int Force = n64aps_TRUE;
-
 
   strcpy (File1, argv[2]);
   strcpy (File2, argv[3]);
@@ -371,7 +355,6 @@ n64aps_main (int argc, const char *argv[])
     }
 
   ReadStdHeader ();
-
   ReadN64Header (Force);
   ReadSizeHeader (File1);
 
@@ -383,6 +366,7 @@ n64aps_main (int argc, const char *argv[])
 
   return 0;
 }
+
 
 /* Create APS (Advanced Patch System) for N64 Images
  * (C)1998 Silo / BlackBag
@@ -412,27 +396,26 @@ char n64caps_Magic[] = "APS10";
 unsigned char n64caps_PatchType = n64caps_TYPE_N64;
 
 #define n64caps_DESCRIPTION_LEN 50
-
 #define n64caps_ENCODINGMETHOD 0        // Very Simplistic Method
 
 unsigned char n64caps_EncodingMethod = n64caps_ENCODINGMETHOD;
+FILE *n64caps_APSFile, *n64caps_ORGFile, *n64caps_NEWFile;
+int n64caps_Quiet = n64caps_FALSE, n64caps_ChangeFound;
 
-FILE *n64caps_APSFile;
-FILE *n64caps_ORGFile;
-FILE *n64caps_NEWFile;
-int n64caps_Quiet = n64caps_FALSE;
-int n64caps_ChangeFound;
 
 void
 n64caps_syntax (void)
 {
-/*	printf ("%s", n64caps_MESSAGE);
-	printf ("%s", n64caps_COPYRIGHT);
-	printf ("N64CAPS <options> <Original File> <Modified File> <Output APS File>\n");
-	printf (" -d %c<Image Title>%c : Description\n", 34, 34);
-	printf (" -q                 : Quiet Mode\n");
-*/ fflush (stdout);
+/*
+  printf ("%s", n64caps_MESSAGE);
+  printf ("%s", n64caps_COPYRIGHT);
+  printf ("N64CAPS <options> <Original File> <Modified File> <Output APS File>\n");
+  printf (" -d %c<Image Title>%c : Description\n", 34, 34);
+  printf (" -q                 : Quiet Mode\n");
+*/
+  fflush (stdout);
 }
+
 
 int
 n64caps_CheckFile (char *Filename, char *mode, int Image)
@@ -468,6 +451,7 @@ n64caps_CheckFile (char *Filename, char *mode, int Image)
   return n64caps_TRUE;
 }
 
+
 void
 WriteStdHeader (char *Desc)
 {
@@ -486,13 +470,12 @@ WriteStdHeader (char *Desc)
 
 }
 
+
 void
 WriteN64Header ()
 {
   unsigned long n64caps_MagicTest;
-  unsigned char Buffer[8];
-  unsigned char Teritory;
-  unsigned char CartID[2], Temp;
+  unsigned char Buffer[8], Teritory, CartID[2], Temp;
 
   fread (&n64caps_MagicTest, sizeof (n64caps_MagicTest), 1, n64caps_ORGFile);
 
@@ -500,7 +483,6 @@ WriteN64Header ()
     fputc (0, n64caps_APSFile);
   else
     fputc (1, n64caps_APSFile);
-
 
   fseek (n64caps_ORGFile, 60, SEEK_SET);
   fread (CartID, 1, 2, n64caps_ORGFile);
@@ -554,37 +536,25 @@ void
 WriteSizeHeader ()
 {
   long NEWSize, ORGSize;
+  struct stat fstate;
 
-  fseek (n64caps_NEWFile, 0, SEEK_END);
-  fseek (n64caps_ORGFile, 0, SEEK_END);
-
-  NEWSize = ftell (n64caps_NEWFile);
-  ORGSize = ftell (n64caps_ORGFile);
+  fstat (fileno (n64caps_NEWFile), &fstate);
+  NEWSize = fstate.st_size;
+  fstat (fileno (n64caps_ORGFile), &fstate);
+  ORGSize = fstate.st_size;
 
   fwrite (&NEWSize, sizeof (NEWSize), 1, n64caps_APSFile);
-
   if (ORGSize != NEWSize)
     n64caps_ChangeFound = n64caps_TRUE;
-
-  fseek (n64caps_NEWFile, 0, SEEK_SET);
-  fseek (n64caps_ORGFile, 0, SEEK_SET);
 }
 
 
 void
 WritePatch ()
 {
-  long ORGReadLen;
-  long NEWReadLen;
-  int Finished = n64caps_FALSE;
-  unsigned char ORGBuffer[n64caps_BUFFERSIZE];
-  unsigned char NEWBuffer[n64caps_BUFFERSIZE];
-  long FilePos;
-  int i;
-  long ChangedStart = 0;
-  long ChangedOffset = 0;
-  int ChangedLen = 0;
-  int State;
+  long ORGReadLen, NEWReadLen, FilePos, ChangedStart = 0, ChangedOffset = 0;
+  int Finished = n64caps_FALSE, i, ChangedLen = 0, State;
+  unsigned char ORGBuffer[n64caps_BUFFERSIZE], NEWBuffer[n64caps_BUFFERSIZE];
 
   fseek (n64caps_ORGFile, 0, SEEK_SET);
   fseek (n64caps_NEWFile, 0, SEEK_SET);
@@ -665,15 +635,11 @@ WritePatch ()
 int
 n64caps_main (int argc, const char *argv[])
 {
-  char File1[256];
-  char File2[256];
-  char OutFile[256];
-  char Description[81];
+  char File1[FILENAME_MAX], File2[FILENAME_MAX], OutFile[FILENAME_MAX],
+       Description[81];
 
   n64caps_ChangeFound = n64caps_FALSE;
-
   Description[0] = 0;
-
 
   strcpy (File1, argv[2]);
   strcpy (File2, argv[3]);
@@ -699,9 +665,7 @@ n64caps_main (int argc, const char *argv[])
     }
 
   WriteStdHeader (Description);
-
   WriteN64Header ();
-
   WriteSizeHeader ();
 
   if (!n64caps_Quiet)

@@ -102,12 +102,15 @@ static void ucon64_exit (void);
 static void ucon64_usage (int argc, char *argv[]);
 
 st_ucon64_t ucon64;
-
+#ifdef  ANSI_COLOR
+int ucon64_ansi_color = 0;
+#endif
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S
 #if 0
                              "/" CURRENT_ENDIAN_S
 #endif
                              " 1999-2002 by (various)";
+static int ucon64_fsize;
 
 const struct option long_options[] = {
     {"1991", 0, 0, UCON64_1991},
@@ -272,7 +275,6 @@ const struct option long_options[] = {
     {"xv64", 0, 0, UCON64_XV64},
 #endif // BACKUP
     {"z64", 0, 0, UCON64_Z64},
-
     {"hd", 0, 0, UCON64_HD},
     {"hdn", 1, 0, UCON64_HDN},
     {"nhd", 0, 0, UCON64_NHD},
@@ -318,6 +320,10 @@ main (int argc, char **argv)
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
   const char *ucon64_argv[128];
   st_rominfo_t rom;
+
+#ifdef  ANSI_COLOR
+  ucon64_ansi_color = isatty (STDOUT_FILENO);
+#endif
 
   printf ("%s\n"
     "Uses code from various people. See 'developers.html' for more!\n"
@@ -398,6 +404,9 @@ main (int argc, char **argv)
     sscanf (ucon64.file, "%x", &ucon64.parport);
 #endif
 
+  ucon64_fsize = quickftell (ucon64.rom);
+  rom.file_size = ucon64_fsize;                 // ugly!
+
   if (!ucon64_init (ucon64.rom, &rom))
     if (ucon64.show_nfo == UCON64_YES)
       ucon64_nfo (&rom);
@@ -423,6 +432,7 @@ ucon64_flush (st_rominfo_t *rominfo)
 {
   memset (rominfo, 0L, sizeof (st_rominfo_t));
   rominfo->data_size = UCON64_UNKNOWN;
+  rominfo->file_size = ucon64_fsize;
 #if 0
   rominfo->maker = rominfo->country = "";
   rominfo->console_usage = rominfo->copier_usage = NULL;
@@ -547,17 +557,17 @@ int
 ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 {
   int result = -1;
-  struct stat puffer;
+  struct stat fstate;
   long size;
 
   if (access (romfile, F_OK | R_OK) == -1)
     return result;
-  if (!stat (romfile, &puffer) == -1)
+  if (!stat (romfile, &fstate) == -1)
     return result;
-  if (S_ISREG (puffer.st_mode) != TRUE)
+  if (S_ISREG (fstate.st_mode) != TRUE)
     return result;
 
-  size = quickftell (romfile);
+  size = fstate.st_size;
 
 /*
   currently the media type is determined by its size
@@ -636,7 +646,7 @@ int
 ucon64_nfo (const st_rominfo_t *rominfo)
 {
   char buf[MAXBUFSIZE];
-  int size = quickftell (ucon64.rom), x;
+  int x;
 
   printf ("%s\n\n", ucon64.rom);
 
@@ -683,7 +693,9 @@ ucon64_nfo (const st_rominfo_t *rominfo)
     }
 
   strcpy (buf, NULL_TO_EMPTY (rominfo->name));
-  x = UCON64_ISSET (rominfo->data_size) ? rominfo->data_size : size - rominfo->buheader_len,
+  x = UCON64_ISSET (rominfo->data_size) ?
+    rominfo->data_size :
+    rominfo->file_size - rominfo->buheader_len,
   printf ("%s\n%s\n%s\n%d Bytes (%.4f Mb)\n\n",
           // some ROMs have a name with control chars in it -> replace control chars
           mkprint (buf, '.'),
@@ -698,9 +710,9 @@ ucon64_nfo (const st_rominfo_t *rominfo)
     }
   else if (UCON64_TYPE_ISROM (ucon64.type))
     {
-      unsigned long padded = filetestpad (ucon64.rom);
-      unsigned long intro = ((size - rominfo->buheader_len) > MBIT) ?
-        ((size - rominfo->buheader_len) % MBIT) : 0;
+      unsigned long padded = filetestpad (ucon64.rom, (st_rominfo_t *) rominfo);
+      unsigned long intro = ((rominfo->file_size - rominfo->buheader_len) > MBIT) ?
+        ((rominfo->file_size - rominfo->buheader_len) % MBIT) : 0;
       int split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
         ucon64_testsplit (ucon64.rom);
 
@@ -763,7 +775,15 @@ ucon64_nfo (const st_rominfo_t *rominfo)
           sprintf (buf, fstr,
             rominfo->internal_crc_len * 2, rominfo->internal_crc_len * 2);
           printf (buf,
+#ifdef  ANSI_COLOR
+            ucon64_ansi_color ?
+              ((rominfo->current_internal_crc == rominfo->internal_crc) ?
+                "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
+              :
+              ((rominfo->current_internal_crc == rominfo->internal_crc) ? "ok" : "bad"),
+#else
             (rominfo->current_internal_crc == rominfo->internal_crc) ? "ok" : "bad",
+#endif
             rominfo->current_internal_crc,
             (rominfo->current_internal_crc == rominfo->internal_crc) ? "=" : "!",
             rominfo->internal_crc);

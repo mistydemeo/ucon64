@@ -106,7 +106,7 @@ extern void remove_temp_file (void); // possible temp file created by handle_exi
 extern int ucon64_gauge (time_t init_time, long pos, long size);
 
 extern size_t filepad (const char *filename, long start, long unit);//pad a ROM in Mb
-extern long filetestpad (const char *filename); //test if a ROM is padded
+extern long filetestpad (const char *filename, st_rominfo_t *rominfo); //test if a ROM is padded
 
 extern int ucon64_testsplit (const char *filename);//test if a ROM is split
 

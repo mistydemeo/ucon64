@@ -26,10 +26,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_H
 #define UCON64_H
 
-#include <dirent.h>                      // for *temp
-#include "getopt.h"                      // for struct option
+#include <dirent.h>                             // for *temp
+#include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
-
+#include "config.h"                             // ANSI_COLOR
 
 /*
   this struct holds only workflow relevant information
@@ -91,6 +91,7 @@ typedef struct st_rominfo
   int interleaved;                              // ROM is interleaved (swapped)
   int snes_hirom;                               // Super Nintendo ROM is HiROM
   int data_size;                                // ROM data size without "red tape"
+  int file_size;                                // (uncompressed) ROM file size
 
   long buheader_start;                          // start of backup unit header (mostly 0)
   long buheader_len;                            // length of backup unit header 0 == no bu hdr
@@ -121,6 +122,9 @@ typedef struct st_rominfo
 } st_rominfo_t;
 
 extern const struct option long_options[];
+#ifdef  ANSI_COLOR
+extern int ucon64_ansi_color;
+#endif
 
 extern int ucon64_nfo (const st_rominfo_t *);
 extern int ucon64_init (const char *romfile, st_rominfo_t *);

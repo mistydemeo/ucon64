@@ -534,7 +534,7 @@ int
 ucon64_gauge (time_t init_time, long pos, long size)
 {
   if (!ucon64.frontend)
-    return gauge (/* init_time, */ pos, size);
+    return gauge (init_time, pos, size);
   else
     {
       int percentage = (100 * (pos >> 10)) / (size >> 10);

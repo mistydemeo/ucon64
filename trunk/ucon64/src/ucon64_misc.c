@@ -309,6 +309,7 @@ emuchina.net
 char *ucon64_temp_file = NULL;
 int (*ucon64_testsplit_callback) (const char *filename) = 0;
 
+
 // maker/publisher strings for SNES, GB, GBC and GBA games
 const char *nintendo_maker[792] = {
   NULL, "Nintendo", "Rocket Games/Ajinomoto", "Imagineer-Zoom", "Gray Matter",

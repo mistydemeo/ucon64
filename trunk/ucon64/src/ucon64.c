@@ -1033,14 +1033,26 @@ ucon64_rom_handling (void)
               break;
 
             default:
-              // Use dat instead of ucon64.dat_enabled in case the index
+              // Use ucon64.dat instead of ucon64.dat_enabled in case the index
               //  file could not be created/opened -> no segmentation fault
-              if (ucon64.dat && ucon64.rominfo && ucon64.console == UCON64_NES &&
-                  (nes_get_file_type () == UNIF ||
-                   nes_get_file_type () == INES ||
-                   nes_get_file_type () == PASOFAMI ||
-                   nes_get_file_type () == FDS))
-                strcpy ((char *) ucon64.rominfo->name, NULL_TO_EMPTY (ucon64.dat->name));
+              if (ucon64.dat && ucon64.rominfo)
+                {
+                  if (ucon64.console == UCON64_NES)
+                    {
+                      int t = nes_get_file_type ();
+                      if (t == UNIF || t == INES || t == PASOFAMI || t == FDS)
+                        strcpy ((char *) ucon64.rominfo->name,
+                                NULL_TO_EMPTY (ucon64.dat->name));
+                      if (!ucon64.rominfo->country)
+                        ucon64.rominfo->country = NULL_TO_EMPTY (ucon64.dat->country);
+                    }
+                  else if (ucon64.console == UCON64_SMS)
+                    {
+                      strcpy ((char *) ucon64.rominfo->name,
+                              NULL_TO_EMPTY (ucon64.dat->name));
+                      ucon64.rominfo->country = NULL_TO_EMPTY (ucon64.dat->country);
+                    }
+                }
               break;
           }
     }
@@ -1069,17 +1081,24 @@ ucon64_probe (st_rominfo_t * rominfo)
   int x = 0;
   st_probe_t probe[] =
     {
+      /*
+        The order of the init functions is important. snes_init() must be
+        called before nes_init(), but after gameboy_init() and sms_init().
+        sms_init() must be called before snes_init(), but after genesis_init().
+        There may be more dependencies, so don't change the order unless you
+        can verify it won't break anything.
+      */
       {UCON64_GBA, gba_init, AUTO},
       {UCON64_N64, n64_init, AUTO},
       {UCON64_GEN, genesis_init, AUTO},
       {UCON64_LYNX, lynx_init, AUTO},
       {UCON64_GB, gameboy_init, AUTO},
+      {UCON64_SMS, sms_init, AUTO},
       {UCON64_SNES, snes_init, AUTO},
       {UCON64_NES, nes_init, AUTO},
       {UCON64_NGP, ngp_init, AUTO},
       {UCON64_SWAN, swan_init, AUTO},
       {UCON64_JAG, jaguar_init, AUTO},
-      {UCON64_SMS, sms_init, 0},
       {UCON64_NG, neogeo_init, 0},
       {UCON64_PCE, pcengine_init, 0},
       {UCON64_SWAN, swan_init, 0},
@@ -1099,7 +1118,7 @@ ucon64_probe (st_rominfo_t * rominfo)
       {0, NULL, 0}
     };
 
-  if (ucon64.console != UCON64_UNKNOWN) //  force recognition option was used
+  if (ucon64.console != UCON64_UNKNOWN)         // force recognition option was used
     {
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].console == ucon64.console)
@@ -1111,7 +1130,7 @@ ucon64_probe (st_rominfo_t * rominfo)
             return rominfo;
           }
     }
-  else if (ucon64.file_size < MAXROMSIZE) // give auto_recognition a try
+  else if (ucon64.file_size < MAXROMSIZE)       // give auto_recognition a try
     {
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].flags & AUTO)
@@ -1191,7 +1210,6 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   char buf[MAXBUFSIZE];
 
   // backup unit header
-
   if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != UNKNOWN_HEADER_LEN)
     {
       mem_hexdump (rominfo->buheader, rominfo->buheader_len, rominfo->buheader_start);
@@ -1208,7 +1226,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   if (rominfo->copier_usage != NULL)
     {
       strcpy (buf, rominfo->copier_usage[0].desc);
-      printf ("%s\n", to_func (buf, strlen (buf), toprint2));
+      printf ("%s\n\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
       if (rominfo->copier_usage[1].desc)
@@ -1273,9 +1291,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
     //  nonsense for others
     printf ("Interleaved/Swapped: %s\n",
       rominfo->interleaved ?
-        (rominfo->interleaved > 1 ?
-          "Yes (2)" :
-          "Yes") :
+        (rominfo->interleaved > 1 ? "Yes (2)" : "Yes") :
         "No");
 
   // backup unit header?
@@ -1352,7 +1368,7 @@ void
 ucon64_fname_arch (const char *fname)
 {
   char name[FILENAME_MAX];
-  
+
   unzFile file = unzOpen (fname);
   unzip_goto_file (file, unzip_current_file_nr);
   unzGetCurrentFileInfo (file, NULL, name, FILENAME_MAX, NULL, 0, NULL, 0);

@@ -743,7 +743,6 @@ int ucon64_probe(int argc,char *argv[])
 	else if(vectrex_probe(argc,argv)!=-1)console=ucon64_VECTREX;
 	else if(wonderswan_probe(argc,argv)!=-1)console=ucon64_WONDERSWAN;
 	else console=ucon64_UNKNOWN;
-
 	return(console);
 }
 

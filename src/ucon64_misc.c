@@ -86,7 +86,7 @@ const char *ucon64_console_error =
   "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n";
 
 void
-ucon64_wrote (char *filename)
+ucon64_wrote (const char *filename)
 {
   printf ("Wrote output to: %s\n", filename);
 }

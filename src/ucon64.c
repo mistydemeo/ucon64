@@ -44,7 +44,7 @@ write programs in C
   #include <sys/io.h>
 #endif
 #ifndef __FreeBSD__
-//  #include <getopt.h>           // __FreeBSD__ problems
+  #include <getopt.h>           // __FreeBSD__ problems
 #endif // __FreeBSD__
 
 #include "ucon64.h"
@@ -109,7 +109,7 @@ int
 main (int argc, char *argv[])
 {
   long x, y = 0;
-  int ucon64_argc, skip_init_nfo = 0;
+  int ucon64_argc, skip_init_nfo = 0, c = 0;
   struct dirent *ep;
   struct stat puffer;
   DIR *dp;
@@ -151,84 +151,23 @@ main (int argc, char *argv[])
   gid_t gid;
 #endif
 
-/*
   int option_index = 0;
   struct option long_options[] = {
-    {"test", 1, 0, 1},
+    {"h", 0, 0, 1},
+    {"?", 0, 0, 1},
+    {"help", 0, 0, 1},
+    {"frontend", 0, 0, 2},
+    {"crc", 0, 0, 3},
     {0, 0, 0, 0}
   };
-*/
-
-  ucon64_flush (argc, argv, &rom);
-  if (!strlen (rom.rom))
-    getcwd (rom.rom, sizeof (rom.rom));
 
   printf ("%s\n", ucon64_TITLE);
   printf ("Uses code from various people. See 'developers.html' for more!\n");
   printf ("This may be freely redistributed under the terms of the GNU Public License\n\n");
 
-  if (argc < 2 ||
-      argcmp (argc, argv, "-h") ||
-      argcmp (argc, argv, "-help") ||
-      argcmp (argc, argv, "-?"))
-    {
-      ucon64_usage (argc, argv);
-      return 0;
-    }
-
-#ifdef  BACKUP
-  if (rom.file[0])
-    sscanf (rom.file, "%x", &rom.parport);
-
-  if (!(rom.parport = parport_probe (rom.parport)))
-    ;
-/*
-    printf ("ERROR: no parallel port 0x%s found\n\n", strupr (buf));
-  else
-    printf ("0x%x\n\n", rom.parport);
-*/
-
-#ifdef  __unix__
-  /*
-    Some code needs us to switch to the real uid and gid. However, other code
-    needs access to I/O ports other than the standard printer port registers.
-    We just do an iopl(3) and all code should be happy. Using iopl(3) enables
-    users to run all code without being root (of course with the uCON64
-    executable setuid root). Anyone a better idea?
-  */
-#ifdef  __linux__
-  if (iopl (3) == -1)
-    {
-      fprintf (stderr, "Could not set the I/O privilege level to 3\n"
-                       "(This program needs root privileges)\n");
-      return 1;
-    }
-#endif
-
-  // now we can drop privileges
-  uid = getuid ();
-  if (setuid (uid) == -1)
-    {
-      fprintf (stderr, "Could not set uid\n");
-      return 1;
-    }
-  gid = getgid ();                              // This shouldn't be necessary
-  if (setgid (gid) == -1)                       //  if `make install' was
-    {                                           //  used, but just in case
-      fprintf (stderr, "Could not set gid\n");  //  (root did `chmod +s')
-      return 1;
-    }
-#endif // __unix__
-#endif // BACKUP
-
-/*
-    support for frontends
-*/
-  if (argcmp (argc, argv, "-frontend"))
-    {
-      atexit (ucon64_exit);
-      rom.frontend = 1;                         // used by ucon64_gauge()
-    }
+  ucon64_flush (argc, argv, &rom);
+  if (!strlen (rom.rom))
+    getcwd (rom.rom, sizeof (rom.rom));
 
 /*
    configfile handling
@@ -334,6 +273,8 @@ main (int argc, char *argv[])
 
       setProperty (rom.config_file, "backups", "1");
 
+      setProperty (rom.config_file, "emulate_gp32", "");
+
       setProperty (rom.config_file, "cdrw_read",
         getProperty (rom.config_file, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
       setProperty (rom.config_file, "cdrw_write",
@@ -348,16 +289,101 @@ main (int argc, char *argv[])
       printf ("OK\n\n");
     }
 
+/*
+  parallel port probing and handling
+*/
+#ifdef  BACKUP
+  if (rom.file[0])
+    sscanf (rom.file, "%x", &rom.parport);
+
+  if (!(rom.parport = parport_probe (rom.parport)))
+    ;
+/*
+    printf ("ERROR: no parallel port 0x%s found\n\n", strupr (buf));
+  else
+    printf ("0x%x\n\n", rom.parport);
+*/
+
+#ifdef  __unix__
+  /*
+    Some code needs us to switch to the real uid and gid. However, other code
+    needs access to I/O ports other than the standard printer port registers.
+    We just do an iopl(3) and all code should be happy. Using iopl(3) enables
+    users to run all code without being root (of course with the uCON64
+    executable setuid root). Anyone a better idea?
+  */
+#ifdef  __linux__
+  if (iopl (3) == -1)
+    {
+      fprintf (stderr, "Could not set the I/O privilege level to 3\n"
+                       "(This program needs root privileges)\n");
+      return 1;
+    }
+#endif
+
+  // now we can drop privileges
+  uid = getuid ();
+  if (setuid (uid) == -1)
+    {
+      fprintf (stderr, "Could not set uid\n");
+      return 1;
+    }
+  gid = getgid ();                              // This shouldn't be necessary
+  if (setgid (gid) == -1)                       //  if `make install' was
+    {                                           //  used, but just in case
+      fprintf (stderr, "Could not set gid\n");  //  (root did `chmod +s')
+      return 1;
+    }
+#endif // __unix__
+#endif // BACKUP
+
+  if (argcmp (argc, argv, "-frontend"))
+    {
+      atexit (ucon64_exit);
+      rom.frontend = 1;                         // used by ucon64_gauge()
+    }
+
+  if (argc < 2)
+    {
+       ucon64_usage (argc, argv);
+       return 0;
+    }
+
+/*
+  getopt_long_only () - uCON64 has many options
+*/
+while ((c =
+        getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
+  {
+    switch(c)
+    {
+      case 1:
+        ucon64_usage (argc, argv);
+        return 0;
+      break;
+
+      case 2:
+        atexit (ucon64_exit);
+        rom.frontend = 1;                         // used by ucon64_gauge()
+      break;        
+
+      case 3:
+        printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, 0));
+        return 0;
+      break;
+
+
+//TODO ...to be continued 
+
+      default:
+      break;
+    }
+  }
+
   rom.backup = (argcmp (argc, argv, "-nbak")) ? 0 :
     (
       (!strcmp (getProperty (rom.config_file, "backups", buf2, "1"), "1")) ? 1 : 0
     );
-
-  if (argcmp (argc, argv, "-crc"))
-    {
-      printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, 0));
-      return 0;
-    }
 
   if (argcmp (argc, argv, "-crchd"))
     {

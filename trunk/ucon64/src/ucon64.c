@@ -549,9 +549,9 @@ if(argcmp(argc,argv,"-idppf"))
 #endif
 
 if (argcmp(argc, argv, "-ls") ||
-    argcmp(argc, argv, "-lsv") ||
+    argcmp(argc, argv, "-lsv") /*||
     argcmp(argc,argv,  "-rrom") ||
-    argcmp(argc,argv,  "-rr83")
+    argcmp(argc,argv,  "-rr83")*/
 )
 {
 
@@ -585,12 +585,12 @@ if (argcmp(argc, argv, "-ls") ||
         }
         else if (argcmp(argc, argv, "-lsv"))
           ucon64_nfo(&rom);
-        else if (argcmp(argc, argv, "-rrom") && rom.console != ucon64_UNKNOWN /* && rom.console != ucon64_KNOWN */ )
+/*        else if (argcmp(argc, argv, "-rrom") && rom.console != ucon64_UNKNOWN )// && rom.console != ucon64_KNOWN
         {
           strcpy(buf,&rom.rom[findlast(rom.rom,".")+1]);
           printf("%s.%s\n",rom.name,buf);
         }
-	fflush(stdout);
+*/	fflush(stdout);
       }
     }
   }
@@ -1097,12 +1097,15 @@ if(rom->console != ucon64_UNKNOWN)
    bytes <= MAXROMSIZE ) ? nintendo64_init(rom) :
   (rom->console == ucon64_SNES &&
    bytes <= MAXROMSIZE ) ? snes_init(rom) :
-/*
+/*                                  (rom->console = ucon64_UNKNOWN);
+}
     ROMs for the following consoles can be only detected by their CRC32
 
   if( bytes <= MAXROMSIZE )
     rom->current_crc32=fileCRC32(rom->rom,0);
-*/
+
+if(rom->console != ucon64_UNKNOWN)
+{*/
   (rom->console == ucon64_SMS &&
    bytes <= MAXROMSIZE ) ? sms_init(rom) :
   (rom->console == ucon64_JAGUAR &&
@@ -1192,7 +1195,20 @@ if(rom->console == ucon64_UNKNOWN && bytes <= MAXROMSIZE )
       rom->console == ucon64_XBOX ||
       rom->console == ucon64_GAMECUBE ||
       rom->bytes > MAXROMSIZE
-  )return(0);
+  )
+  {
+/*this doesn't work really..
+
+    strcat(rom->misc,"\nTrackmode: ");
+    strcat(rom->misc,
+      (!(rom->bytes%2048)) ? "MODE1, MODE2_FORM1 (2048 Bytes)" :
+      (!(rom->bytes%2324)) ? "MODE2_FORM2 (2324 Bytes)" :
+      (!(rom->bytes%2336)) ? "MODE2 or MODE2_FORM_MIX (2336 Bytes)" :
+      (!(rom->bytes%2352)) ? "AUDIO, MODE1_RAW or MODE2_RAW (2352 Bytes)" :
+                             "Unknown"
+    );*/
+    return(0);
+  }
 #endif
 
   rom->padded=filetestpad(rom->rom);

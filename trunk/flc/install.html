@@ -1,9 +1,100 @@
 <html><head><title>INSTALL</title></head><body bgcolor="#c0c0c0"><tt><pre>
-Q: How do I compile flc?
+Q: <a href="#1">How do I compile flc?</a>
+
+Q: <a href="#2">How do I install flc?</a>
+
+Q: <a href="#3">How do I add support for a new archive type?</a>
+
+
+
+<a name="1">Q: How do I compile flc?
 A: make clean;make;make install 
 
-Q: How do I install flc?
+<a name="2">Q: How do I install flc?
 A: run install[_&#60;your OS&#62;].sh and edit $HOME/.flcrc or flc.cfg (DOS)
-
    (DOS version is not available yet)
+
+<a name="3">Q: How do I add support for a new archive type?
+A: open the config file and add the following lines
+   &#60;extension&#62;_extract=&#60;command&#62;
+   &#60;extension&#62;_test=&#60;command&#62;
+
+   &#60;extension&#62; stands for the extension of the filename. The extension
+   of test.zip would be "zip".
+
+   &#60;command&#62; stands for the archiver commandline.
+   
+   Example: ZIP_test=zip t
+
+   flc will add the archive name to that commandline and execute it.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </pre></tt></body></html>

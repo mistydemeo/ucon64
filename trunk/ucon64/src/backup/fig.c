@@ -211,6 +211,54 @@ check3 (unsigned char *info_block, int index1, int index2, int size)
 }
 
 
+void
+handle_swc_header (unsigned char *header)
+{
+  if ((header[2] & 0x10) == 0x10)
+    {                                            // HiROM
+      header[3] |= 0x80;
+
+      if ((header[2] & 0x0c) == 0x0c)            // 0 Kbit SRAM
+        {
+          header[4] = 0x77;
+          header[5] = 0x83;
+        }
+      else if (((header[2] & 0x0c) == 0x08) ||   // 16 *or* 64 Kbit SRAM
+               ((header[2] & 0x0c) == 0x04))
+        {
+          header[4] = 0xdd;
+          header[5] = 0x82;
+        }
+      else                                       // 256 Kbit SRAM
+        {
+          header[4] = 0xdd;
+          header[5] = 0x02;
+        }
+    }
+  else
+    {                                            // LoROM
+      header[3] &= 0x7f;
+
+      if ((header[2] & 0x0c) == 0x0c)            // 0 Kbit SRAM
+        {
+          header[4] = 0x77;
+          header[5] = 0x83;
+        }
+      else if (((header[2] & 0x0c) == 0x08) ||   // 16 *or* 64 Kbit SRAM
+               ((header[2] & 0x0c) == 0x04))
+        {
+          header[4] = 0x00;
+          header[5] = 0x80;
+        }
+      else                                       // 256 Kbit SRAM
+        {
+          header[4] = 0x00;
+          header[5] = 0x00;
+        }
+    }
+}
+
+
 int
 fig_read_rom (const char *filename, unsigned int parport)
 {
@@ -329,7 +377,7 @@ fig_write_rom (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread = 0, bytessend, totalblocks, blocksdone = 0, blocksleft, fsize, n;
+  int bytesread = 0, bytessend, totalblocks, blocksdone = 0, blocksleft, fsize, n, emu_mode_select;
   unsigned short address1, address2;
   time_t starttime;
 
@@ -351,6 +399,11 @@ fig_write_rom (const char *filename, unsigned int parport)
 
   ffe_send_command0 (0xc008, 0);
   fread (buffer, 1, FIG_HEADER_LEN, file);
+
+  if (snes_get_file_type () == SWC)
+    handle_swc_header (buffer);
+  emu_mode_select = buffer[2];                  // this byte is needed later
+
   ffe_send_command (5, 0, 0);
   ffe_send_block (0x400, buffer, FIG_HEADER_LEN); // send header
   bytessend = FIG_HEADER_LEN;
@@ -406,7 +459,7 @@ fig_write_rom (const char *filename, unsigned int parport)
     ffe_send_command0 (0xc010, 2);
 
   ffe_send_command (5, 0, 0);
-  ffe_send_command (6, 1, 0);
+  ffe_send_command (6, (unsigned short) (1 | (emu_mode_select << 8)), 0);
 
   ffe_wait_for_ready ();
   outportb ((unsigned short) (parport + PARPORT_DATA), 0);

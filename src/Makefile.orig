@@ -16,7 +16,7 @@ OBJECTS=ucon64.o ucon64_misc.o ucon64_db.o misc.o getopt.o quick_io.o \
         console/n64.o console/neogeo.o console/nes.o console/ngp.o \
         console/pce.o console/sms.o console/psx.o console/snes.o \
         console/swan.o console/dc.o console/jaguar.o console/other.o \
-        backup/yoko.o backup/ssc.o backup/interceptor.o backup/cdrw.o \
+        backup/yoko.o backup/ssc.o backup/interceptor.o \
         backup/z64.o backup/cd64.o backup/doctor64.o backup/doctor64jr.o \
         backup/fal.o backup/fig.o backup/fpl.o backup/gbx.o backup/mgd.o \
         backup/smc.o backup/smd.o backup/swc.o backup/dex.o backup/psxpblib.o \
@@ -161,7 +161,6 @@ backup/smc.o: backup/smc.h $(UCON64_STD_H)
 backup/smd.o: backup/smd.h $(UCON64_STD_H)
 backup/swc.o: backup/swc.h $(UCON64_STD_H)
 backup/cd64.o: backup/cd64.h $(UCON64_STD_H)
-backup/cdrw.o: backup/cdrw.h $(UCON64_STD_H)
 backup/dex.o: backup/dex.h backup/psxpblib.h $(UCON64_STD_H)
 backup/mccl.o: backup/mccl.h $(UCON64_STD_H)
 backup/lynxit.o: backup/lynxit.h $(UCON64_STD_H)

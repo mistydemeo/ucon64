@@ -1614,6 +1614,24 @@ ucon64_configfile (void)
                  "datdir=~/.ucon64/dat\n"
 #endif
                  "#\n"
+#if     defined __MSDOS__
+                 "netgui_path=~\\netgui.dxe\n" // realpath2() expands the tilde
+                 "configdir=~\n"
+                 "datdir=~\n"
+#elif   defined __CYGWIN__
+                 "netgui_path=~/netgui.dll\n"
+                 "configdir=~\n"
+                 "datdir=~\n"
+#elif   defined _WIN32
+                 "netgui_path=~\\netgui.dll\n"
+                 "configdir=~\n"
+                 "datdir=~\n"
+#elif   defined __unix__ || defined __BEOS__
+                 "netgui_path=~/.ucon64/netgui.so\n"
+                 "configdir=~/.ucon64\n"
+                 "datdir=~/.ucon64/dat\n"
+#endif
+                 "#\n"
                  "# emulate_<console shortcut>=<emulator with options>\n"
                  "#\n"
                  "# You can also use CRC32 values for ROM specific emulation options:\n"
@@ -1711,6 +1729,20 @@ ucon64_configfile (void)
         "~\\discmage.dll"
 #elif   defined __unix__ || defined __BEOS__
         "~/.ucon64/discmage.so"
+#else
+        ""
+#endif
+      );
+
+      set_property (ucon64.configfile, "netgui_path",
+#if     defined __MSDOS__
+        "~\\netgui.dxe"                       // realpath2() expands the tilde
+#elif   defined __CYGWIN__
+        "~/netgui.dll"
+#elif   defined _WIN32
+        "~\\netgui.dll"
+#elif   defined __unix__ || defined __BEOS__
+        "~/.ucon64/netgui.so"
 #else
         ""
 #endif

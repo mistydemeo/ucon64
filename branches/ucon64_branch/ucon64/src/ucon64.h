@@ -34,7 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_defines.h"
 #include "misc.h"
 #include "libdiscmage/libdiscmage.h"            // dm_image_t
-
+#include "libnetgui/libnetgui.h"
 
 typedef struct
 {
@@ -129,6 +129,7 @@ typedef struct
   char datdir[FILENAME_MAX];                    // directory for DAT files
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
   char discmage_path[FILENAME_MAX];             // path to the discmage DLL
+  char netgui_path[FILENAME_MAX];               // path to the netgui DLL
 
   unsigned int parport;                         // parallel port address
   parport_mode_t parport_mode;                  // parallel port mode: ECP, EPP, SPP
@@ -139,6 +140,7 @@ typedef struct
   int backup;                                   // flag if backups files should be created
   int frontend;                                 // flag if uCON64 was started by a frontend
   int discmage_enabled;                         // flag if discmage DLL is loaded
+  int netgui_enabled;                           // flag if netgui DLL is loaded
   int dat_enabled;                              // flag if DAT file(s) are usable/enabled
   int quiet;                                    // quiet == -1 means verbose + 1
 
@@ -175,6 +177,8 @@ typedef struct
   int use_dump_info;                            // NES UNIF
   const char *dump_info;                        // NES UNIF
   const char *comment;                          // NES UNIF
+
+  netgui_t *netgui;                             // pointer to netgui GUI
 
   dm_image_t *image;                            // info from libdiscmage
   st_ucon64_dat_t *dat;                         // info from DATabase

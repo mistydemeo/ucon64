@@ -15,5 +15,6 @@ mkdir $HOME/.ucon64/dat
 echo "You can copy/move your DAT file collection to $HOME/.ucon64/dat"
 fi
 cp libdiscmage/discmage.so $HOME/.ucon64
+cp libnetgui/netgui.so $HOME/.ucon64
 echo "Be sure to check $HOME/.ucon64rc for some options"
 echo

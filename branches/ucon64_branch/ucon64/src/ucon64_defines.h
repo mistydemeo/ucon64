@@ -39,7 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //#define UCON64_VERSION (198)
 
 /* version of config file layout */
-#define UCON64_CONFIG_VERSION (204)
+#define UCON64_CONFIG_VERSION (205)
 
 #define MBIT (131072)
 #define TOMBIT(x) ((int)(x) / MBIT)
@@ -123,7 +123,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_GGD (UCON64_OPTION + 43)
 #define UCON64_GGE (UCON64_OPTION + 44)
 #define UCON64_GP32 (UCON64_OPTION + 45)
-//#define UCON64_GOOD (UCON64_OPTION + 46)
+#define UCON64_GUI (UCON64_OPTION + 46)
 #define UCON64_HD (UCON64_OPTION + 47)
 #define UCON64_HDN (UCON64_OPTION + 48)
 #define UCON64_HELP (UCON64_OPTION + 49)

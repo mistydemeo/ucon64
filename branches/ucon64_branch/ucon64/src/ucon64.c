@@ -152,7 +152,7 @@ const struct option options[] = {
     {"ggd", 1, 0, UCON64_GGD},
     {"gge", 1, 0, UCON64_GGE},
     {"gp32", 0, 0, UCON64_GP32},
-//    {"good", 0, 0, UCON64_GOOD},
+    {"gui", 1, 0, UCON64_GUI},
     {"h", 0, 0, UCON64_HELP},
     {"hd", 0, 0, UCON64_HD},
     {"hdn", 1, 0, UCON64_HDN},
@@ -426,6 +426,11 @@ ucon64_exit (void)
   if (ucon64.discmage_enabled)
     if (ucon64.image)
       libdm_close (ucon64.image);
+
+  if (ucon64.netgui_enabled)
+    if (ucon64.netgui)
+      libng_close (ucon64.netgui);
+      
   handle_registered_funcs ();
   fflush (stdout);
 }
@@ -541,6 +546,9 @@ main (int argc, char **argv)
 
   // load libdiscmage
   ucon64.discmage_enabled = ucon64_load_discmage ();
+
+  // load libnetgui
+  ucon64.netgui_enabled = ucon64_load_netgui ();
 
   // ucon64.dat_enabled and ucon64.discmage_enabled can affect the usage output
   if (argc < 2)
@@ -1490,6 +1498,12 @@ ucon64_usage (int argc, char *argv[])
 #define USAGE_S "Usage: %s [OPTION]... [ROM|IMAGE|SRAM|FILE|DIR]...\n\n"
 #endif
   printf (USAGE_S, name_exe);
+
+  if (ucon64.netgui_enabled)
+    {
+      ucon64_render_usage (libng_usage);
+      printf ("\n");
+    }
 
   ucon64_render_usage (ucon64_options_usage);
 

@@ -8,6 +8,7 @@ CFLAGS=@CFLAGS@ @DEFS@
 LDFLAGS=@LDFLAGS@
 
 LIBNAME=discmage
+LIBNAME2=netgui
 
 # The test for Cygwin should be done before the test for DJGPP, because the
 # environment variable DJGPP can be set under Bash for people who have
@@ -16,22 +17,25 @@ LIBNAME=discmage
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
 FULLLIBNAME=$(LIBNAME).dll
+FULLLIBNAME2=$(LIBNAME2).dll
 ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME).a
+LDFLAGS+=libdiscmage/$(LIBNAME).a libnetgui/$(LIBNAME2).a
 endif
 
 else
 ifdef DJGPP
 
 FULLLIBNAME=$(LIBNAME).dxe
+FULLLIBNAME2=$(LIBNAME2).dxe
 ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME).a
+LDFLAGS+=libdiscmage/$(LIBNAME).a libnetgui/$(LIBNAME2).a
 endif
 
 else                                    # Unix or BeOS
 
 ifdef DLOPEN
 FULLLIBNAME=$(LIBNAME).so
+FULLLIBNAME2=$(LIBNAME2).so
 
 ifneq ($(OSTYPE),beos)
 ifneq ($(OSTYPE),FreeBSD)
@@ -41,7 +45,9 @@ endif
 
 else
 FULLLIBNAME=lib$(LIBNAME).so
-LDFLAGS+=-Llibdiscmage -l$(LIBNAME)
+FULLLIBNAME2=lib$(LIBNAME2).so
+
+LDFLAGS+=-Llibdiscmage -l$(LIBNAME) -Llibnetgui -l$(LIBNAME2)
 endif
 
 endif                                   # DJGPP
@@ -91,7 +97,7 @@ TARGET:=$(addsuffix .exe, $(TARGET))
 endif                                   # DJGPP
 endif                                   # cygwin
 
-all: libdiscmage/$(FULLLIBNAME) $(TARGET)
+all: libdiscmage/$(FULLLIBNAME) libnetgui/$(FULLLIBNAME2) $(TARGET)
 
 
 clean:
@@ -99,6 +105,7 @@ ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
               DEADJOE */DEADJOE *~ */*~ */*/*~
 	cd libdiscmage && $(MAKE) clean
+        cd libnetgui && $(MAKE) clean
 else
 ifdef DJGPP
 	del *.o
@@ -108,11 +115,15 @@ ifdef DJGPP
 	del $(TARGET)
 	cd libdiscmage
 	$(MAKE) clean
+        cd ..
+        cd libnetgui
+        $(MAKE) clean
 	cd ..
 else                                    # Unix or BeOS
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
               DEADJOE */DEADJOE *~ */*~ */*/*~
 	cd libdiscmage && $(MAKE) clean
+	cd libnetgui && $(MAKE) clean
 endif                                   # DJGPP
 endif                                   # cygwin
 
@@ -121,6 +132,7 @@ distclean: clean
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	rm -f Makefile config.log config.status config.cache config.h
 	cd libdiscmage && $(MAKE) distclean
+	cd libnetgui && $(MAKE) distclean
 else
 ifdef DJGPP
 	del Makefile
@@ -131,9 +143,13 @@ ifdef DJGPP
 	cd libdiscmage
 	$(MAKE) distclean
 	cd ..
+	cd libnetgui
+	$(MAKE) distclean
+	cd ..
 else
 	rm -f Makefile config.log config.status config.cache config.h
 	cd libdiscmage && $(MAKE) distclean
+	cd libnetgui && $(MAKE) distclean
 endif                                   # DJGPP
 endif                                   # cygwin
 
@@ -156,6 +172,20 @@ endif                                   # DJGPP
 endif                                   # cygwin
 
 
+libnetgui/$(FULLLIBNAME2):
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	cd libnetgui && $(MAKE)
+else
+ifdef DJGPP
+	cd libnetgui
+	$(MAKE)
+	cd ..
+else
+	cd libnetgui && $(MAKE)
+endif                                   # DJGPP
+endif                                   # cygwin
+
+
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
 
@@ -173,6 +203,7 @@ endif                                   # beos
 endif                                   # DJGPP
 endif                                   # cygwin
 #	cd libdiscmage && $(MAKE) install
+#	cd libnetgui && $(MAKE) install
 
 
 uninstall:
@@ -188,6 +219,7 @@ endif                                   # beos
 endif                                   # DJGPP
 endif                                   # cygwin
 #	cd libdiscmage && $(MAKE) uninstall
+#	cd libnetgui && $(MAKE) uninstall
 
 
 # Dependencies

@@ -37,6 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_opts.h"
 #include "quick_io.h"
 #include "libdiscmage/libdiscmage.h"
+#include "libnetgui/libnetgui.h"
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
@@ -48,7 +49,8 @@ int ucon64_parport_needed = 0;
 int
 ucon64_switches (int c, const char *optarg)
 {
-  char *ptr = NULL, buf[MAXBUFSIZE];
+  char *ptr = NULL, *ptr2 = NULL, buf[MAXBUFSIZE];
+  char buf2[MAXBUFSIZE];
   int x = 0;
 
   /*
@@ -68,6 +70,12 @@ ucon64_switches (int c, const char *optarg)
       ucon64_usage (ucon64.argc, ucon64.argv);
       exit (0);
 
+    case UCON64_GUI:
+      if (ucon64.netgui_enabled)
+        if (optarg)
+          ucon64.netgui = libng_open (optarg, NG_RDWR);
+      exit (0);
+
     /*
       It's also common to exit after displaying version information.
       On some configurations printf is a macro (Red Hat Linux 6.2 + GCC 3.2),
@@ -78,6 +86,12 @@ ucon64_switches (int c, const char *optarg)
 #define DISCMAGE_STATUS_MSG "discmage DLL:                      %s\n"
 #else
 #define DISCMAGE_STATUS_MSG "discmage DLL:                      %s, dynamically linked\n"
+#endif
+
+#ifdef  DLOPEN
+#define NETGUI_STATUS_MSG "netgui DLL:                        %s\n"
+#else
+#define NETGUI_STATUS_MSG "netgui DLL:                        %s, dynamically linked\n"
 #endif
 
 #ifdef  WORDS_BIGENDIAN
@@ -132,6 +146,28 @@ ucon64_switches (int c, const char *optarg)
       else
         strcpy (buf, "not available");
 
+      ptr2 =
+#ifdef  DLOPEN
+        ucon64.netgui_path;
+#else
+#if     defined __MSDOS__
+        "netgui.dxe";
+#elif   defined __CYGWIN__ || defined _WIN32
+        "netgui.dll";
+#elif   defined __unix__ || defined __BEOS__
+        "libnetgui.so";
+#else
+        "unknown";
+#endif
+#endif // DLOPEN
+      if (ucon64.netgui_enabled)
+        {
+          x = libng_get_version();
+          sprintf (buf2, "%d.%d.%d", x >> 16, x >> 8, x);
+        }
+      else
+        strcpy (buf2, "not available");
+
       printf ("version:                           %s (%s)\n"
               "platform:                          %s\n"
               "endianess:                         %s\n"
@@ -143,6 +179,9 @@ ucon64_switches (int c, const char *optarg)
               DISCMAGE_STATUS_MSG
               "discmage enabled:                  %s\n"
               "discmage version:                  %s\n"
+              NETGUI_STATUS_MSG
+              "netgui enabled:                    %s\n"
+              "netgui version:                    %s\n"
               "configuration directory:           %s\n"
               "DAT file directory:                %s\n"
               "entries in DATabase:               %d\n"
@@ -159,6 +198,9 @@ ucon64_switches (int c, const char *optarg)
               ptr,
               ucon64.discmage_enabled ? "yes" : "no",
               buf,
+              ptr2,
+              ucon64.netgui_enabled ? "yes" : "no",
+              buf2,
               ucon64.configdir,
               ucon64.datdir,
               ucon64_dat_total_entries (),

@@ -336,6 +336,7 @@ const struct option options[] = {
     {"xgbx", 0, 0, UCON64_XGBX},
     {"xgbxb", 1, 0, UCON64_XGBXB},
     {"xgbxs", 0, 0, UCON64_XGBXS},
+    {"xgbxm", 0, 0, UCON64_XGBXM},
     {"xgd3", 0, 0, UCON64_XGD3},
     {"xgd3r", 0, 0, UCON64_XGD3R},
     {"xgd3s", 0, 0, UCON64_XGD3S},

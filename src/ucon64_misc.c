@@ -71,7 +71,6 @@ const st_track_modes_t track_modes[] = {
   {NULL, NULL}
 };
 
-
 const char *ucon64_parport_error =
   "ERROR: please check cables and connection\n"
   "       turn the backup unit off and on\n"
@@ -81,14 +80,12 @@ const char *ucon64_parport_error =
   "       some backup units do not support EPP and ECP style parports\n"
   "       read the backup unit's manual\n";
 
-
 const char *ucon64_console_error =
   "ERROR: could not auto detect the right ROM/IMAGE/console type\n"
   "TIP:   If this is a ROM or CD IMAGE you might try to force the recognition\n"
   "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n";
 
 static char *ucon64_temp_file = NULL;
-
 
 void
 ucon64_wrote (const char *filename)
@@ -100,8 +97,6 @@ ucon64_wrote (const char *filename)
 #if     defined BACKUP && defined __BEOS__
 static int ucon64_io_fd;
 #endif
-
-
 
 const char *unknown_usage[] =
 {
@@ -293,7 +288,7 @@ ucon64_pad (const char *filename, int start, int size)
 }
 
 
-#if 1
+#if 0
 long
 ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
@@ -322,24 +317,15 @@ ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
   int pos = rominfo->file_size - 2;
+  int buf_pos = pos % MAXBUFSIZE;
   int c = q_fgetc (filename, rominfo->file_size - 1);
-  char buf[MAXBUFSIZE];
+  unsigned char buf[MAXBUFSIZE];
 
-  while (q_fread (buf, pos - (pos % MAXBUFSIZE),
-           pos % MAXBUFSIZE, filename) > 0)
+  for (pos -= buf_pos; q_fread (buf, pos, buf_pos, filename) > 0 && pos > -1;
+        pos -= MAXBUFSIZE, buf_pos = MAXBUFSIZE)
     {
-      while (1)
-        {
-          if (OFFSET (buf, (pos % MAXBUFSIZE) - 1) != c)
-            return rominfo->file_size - pos + 1;
-
-          if (!(pos % MAXBUFSIZE))
-            {
-              pos--;
-              break;
-            }
-          pos--;
-        }
+      for (; buf_pos > 0; buf_pos--)
+        if (buf[buf_pos - 1] != c) return rominfo->file_size - (pos + buf_pos);
     }
 
   return 0;
@@ -581,6 +567,49 @@ ucon64_parport_init (unsigned int port)
 #endif // BACKUP
 
 
+const char *
+ucon64_rom_in_archive (DIR **dp, const char *archive, char *romname,
+                       const char *configfile)
+{
+#if 0
+  struct dirent *ep;
+  struct stat fstate;
+  char buf[FILENAME_MAX], cwd[FILENAME_MAX];
+
+#ifdef UNZIP
+  if (!stricmp (getext (archive), ".zip"))
+    {
+//use zlib
+    }
+#endif // UNZIP
+
+#ifndef __MSDOS__
+  getcwd (cwd, FILENAME_MAX);
+  sprintf (buf, "%s" FILE_SEPARATOR_S "%s", cwd, archive);
+//  strcpy (buf, archive);
+
+  if (!(*dp = opendir2 (buf, configfile, NULL, NULL)))
+    return archive;
+
+  chdir (buf);
+
+  while ((ep = readdir (*dp)))  //find rom in dp and return it as romname
+    if (!stat (ep->d_name, &fstate))
+      if (S_ISREG (fstate.st_mode))
+        {
+          sprintf (romname, "%s" FILE_SEPARATOR_S "%s", buf, ep->d_name);
+          chdir (cwd);
+
+          return romname;
+        }
+
+  chdir (cwd);
+#endif
+#endif
+  return archive;
+}
+
+
 int
 ucon64_gauge (time_t init_time, long pos, long size)
 {
@@ -753,49 +782,6 @@ seek_pvd (int sector_size, int mode, const char *filename)
     return 1;
 
   return 0;
-}
-
-
-const char *
-ucon64_rom_in_archive (DIR **dp, const char *archive, char *romname,
-                       const char *configfile)
-{
-#if 0
-  struct dirent *ep;
-  struct stat fstate;
-  char buf[FILENAME_MAX], cwd[FILENAME_MAX];
-
-#ifdef UNZIP
-  if (!stricmp (getext (archive), ".zip"))
-    {
-//use zlib
-    }
-#endif // UNZIP
-
-#ifndef __MSDOS__
-  getcwd (cwd, FILENAME_MAX);
-  sprintf (buf, "%s" FILE_SEPARATOR_S "%s", cwd, archive);
-//  strcpy (buf, archive);
-
-  if (!(*dp = opendir2 (buf, configfile, NULL, NULL)))
-    return archive;
-
-  chdir (buf);
-
-  while ((ep = readdir (*dp)))  //find rom in dp and return it as romname
-    if (!stat (ep->d_name, &fstate))
-      if (S_ISREG (fstate.st_mode))
-        {
-          sprintf (romname, "%s" FILE_SEPARATOR_S "%s", buf, ep->d_name);
-          chdir (cwd);
-
-          return romname;
-        }
-
-  chdir (cwd);
-#endif
-#endif
-  return archive;
 }
 
 

@@ -708,6 +708,7 @@ strtrim (char *str)
 st_url_t *
 strurl (st_url_t *url, const char *url_s)
 {
+  (void) url_s;                                 // warning remover
   strcpy (url->url, "http://localhost:80/");
   strcpy (url->protocol, "http");
   url->user = NULL;

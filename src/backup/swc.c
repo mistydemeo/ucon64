@@ -136,6 +136,7 @@ int swc_write_rom(char *filename, unsigned int parport)
 
   wait_for_ready();
   outportb(swc_port + PARPORT_DATA, 0);
+  outportb(swc_port + PARPORT_CONTROL, inportb(swc_port + PARPORT_CONTROL)^STROBE_BIT); // invert strobe
 
   free(buffer);
   fclose(file);
@@ -234,7 +235,7 @@ void sendb(unsigned char byte)
 {
   wait_for_ready();
   outportb(swc_port + PARPORT_DATA, byte);
-  outportb(swc_port + PARPORT_CONTROL, inportb(swc_port + PARPORT_CONTROL)^STROBE_BIT);
+  outportb(swc_port + PARPORT_CONTROL, inportb(swc_port + PARPORT_CONTROL)^STROBE_BIT); // invert strobe
   wait_for_ready();                             // necessary if followed by receiveb()
 }
 
@@ -594,9 +595,9 @@ unsigned char receiveb(void)
   unsigned char byte;
 
   byte = (wait_while_busy() & INPUT_MASK) >> 3; // receive low nibble
-  outportb(swc_port + PARPORT_CONTROL, inportb(swc_port + PARPORT_CONTROL)^STROBE_BIT); // reverse strobe
+  outportb(swc_port + PARPORT_CONTROL, inportb(swc_port + PARPORT_CONTROL)^STROBE_BIT); // invert strobe
   byte |= (wait_while_busy() & INPUT_MASK) << 1; // receive high nibble
-  outportb(swc_port + PARPORT_CONTROL, inportb(swc_port + PARPORT_CONTROL)^STROBE_BIT); // reverse strobe
+  outportb(swc_port + PARPORT_CONTROL, inportb(swc_port + PARPORT_CONTROL)^STROBE_BIT); // invert strobe
 
   return byte;
 }

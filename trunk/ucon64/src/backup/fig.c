@@ -81,21 +81,20 @@ receive_rom_info (unsigned char *buffer)
 */
 {
   int n, m, size;
-  unsigned short address;
   unsigned char byte;
 
   ffe_send_command0 (0xe00c, 0);
-  ffe_send_command (5, 3, 0);
 
-  byte = ffe_send_command1 (0xbfd5);
-  // I don't know if it's okay to skip the above call to ffe_send_command1() if
-  //  ucon64.snes_hirom is set - dbjh
   if (UCON64_ISSET (ucon64.snes_hirom))
     hirom = ucon64.snes_hirom ? 1 : 0;
-  else if ((byte & 1 && byte != 0x23) || byte == 0x3a) // & 1 => 0x21, 0x31, 0x35
-    hirom = 1;
+  else
+    {
+      ffe_send_command (5, 3, 0);
+      byte = ffe_send_command1 (0xbfd5);
+      if ((byte & 1 && byte != 0x23) || byte == 0x3a) // & 1 => 0x21, 0x31, 0x35
+        hirom = 1;
+    }
 
-  address = 0x200;
   for (n = 0; n < (int) FIG_HEADER_LEN; n++)
     {
 #ifdef  _WIN32
@@ -109,10 +108,8 @@ receive_rom_info (unsigned char *buffer)
 #endif
       for (m = 0; m < 65536; m++)               // a delay is necessary here
         ;
-      ffe_send_command (5, address, 0);
+      ffe_send_command (5, 0x200 + n, 0);
       buffer[n] = ffe_send_command1 (0xa0a0);
-
-      address++;
     }
 
   size = get_rom_size (buffer);

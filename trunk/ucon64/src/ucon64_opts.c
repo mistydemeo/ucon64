@@ -340,44 +340,44 @@ ucon64_switches (int c, const char *optarg)
       ucon64.parport_mode = UCON64_EPP;
       break;
 
-    case UCON64_XSWC_DM:
-      ucon64.swc_dumping_mode = strtol (optarg, NULL, 16);
+    case UCON64_XSWC_IO:
+      ucon64.swc_io_mode = strtol (optarg, NULL, 16);
 
-      if (ucon64.swc_dumping_mode &
-          (SWC_DM_ALT_ROM_SIZE | SWC_DM_SUPER_FX | SWC_DM_SPC7110 | SWC_DM_DX2_TRICK))
-        printf ("WARNING: Dumping mode(s) not yet implemented\n");
-      // NOTE: The next message only applies to the current (old) version of swc.c
-      if (ucon64.swc_dumping_mode & (SWC_DM_SDD1 | SWC_DM_SA1 | SWC_DM_MMX2))
+      if (ucon64.swc_io_mode & SWC_IO_ALT_ROM_SIZE)
+        printf ("WARNING: I/O mode not yet implemented\n");
+#if 0 // all these constants are defined by default
+      if (ucon64.swc_io_mode & (SWC_IO_SPC7110 | SWC_IO_SDD1 | SWC_IO_SA1 | SWC_IO_MMX2))
         printf ("WARNING: Be sure to compile swc.c with the appropriate constants defined\n");
+#endif
 
-      if (ucon64.swc_dumping_mode > SWC_DM_MAX)
+      if (ucon64.swc_io_mode > SWC_IO_MAX)
         {
-          printf ("WARNING: Invalid value for MODE (0x%x), using 0\n", ucon64.swc_dumping_mode);
-          ucon64.swc_dumping_mode = 0;
+          printf ("WARNING: Invalid value for MODE (0x%x), using 0\n", ucon64.swc_io_mode);
+          ucon64.swc_io_mode = 0;
         }
       else
         {
-          printf ("Dumping mode: 0x%02x", ucon64.swc_dumping_mode);
-          if (ucon64.swc_dumping_mode)
+          printf ("I/O mode: 0x%02x", ucon64.swc_io_mode);
+          if (ucon64.swc_io_mode)
             {
               char flagstr[100];
 
               flagstr[0] = 0;
-              if (ucon64.swc_dumping_mode & SWC_DM_FORCE_32MBIT)
+              if (ucon64.swc_io_mode & SWC_IO_FORCE_32MBIT)
                 strcat (flagstr, "force 32 Mbit, ");
-              if (ucon64.swc_dumping_mode & SWC_DM_ALT_ROM_SIZE)
+              if (ucon64.swc_io_mode & SWC_IO_ALT_ROM_SIZE)
                 strcat (flagstr, "alternative ROM size method, ");
-              if (ucon64.swc_dumping_mode & SWC_DM_SUPER_FX)
+              if (ucon64.swc_io_mode & SWC_IO_SUPER_FX)
                 strcat (flagstr, "Super FX, ");
-              if (ucon64.swc_dumping_mode & SWC_DM_SDD1)
+              if (ucon64.swc_io_mode & SWC_IO_SDD1)
                 strcat (flagstr, "S-DD1, ");
-              if (ucon64.swc_dumping_mode & SWC_DM_SA1)
+              if (ucon64.swc_io_mode & SWC_IO_SA1)
                 strcat (flagstr, "SA-1, ");
-              if (ucon64.swc_dumping_mode & SWC_DM_SPC7110)
+              if (ucon64.swc_io_mode & SWC_IO_SPC7110)
                 strcat (flagstr, "SPC7110, ");
-              if (ucon64.swc_dumping_mode & SWC_DM_DX2_TRICK)
+              if (ucon64.swc_io_mode & SWC_IO_DX2_TRICK)
                 strcat (flagstr, "DX2 trick, ");
-              if (ucon64.swc_dumping_mode & SWC_DM_MMX2)
+              if (ucon64.swc_io_mode & SWC_IO_MMX2)
                 strcat (flagstr, "Mega Man X 2, ");
 
               if (flagstr[0])
@@ -386,9 +386,6 @@ ucon64_switches (int c, const char *optarg)
             }
           fputc ('\n', stdout);
         }
-
-      if (!access (ucon64.rom, F_OK))
-        printf ("WARNING: Dumping mode flags are ignored, because file already exists\n");
       break;
 #endif // PARALLEL
 
@@ -1578,16 +1575,16 @@ ucon64_options (int c, const char *optarg)
     case UCON64_XFIGS:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
         fig_read_sram (ucon64.rom, ucon64.parport);
-      else
-        fig_write_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
+      else                                      // file exists -> restore SRAM
+        fig_write_sram (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XFIGC:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cart SRAM contents
         fig_read_cart_sram (ucon64.rom, ucon64.parport);
-      else
-        fig_write_cart_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
+      else                                      // file exists -> restore SRAM
+        fig_write_cart_sram (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;
 
@@ -1599,8 +1596,8 @@ ucon64_options (int c, const char *optarg)
           if (!ucon64.rominfo->buheader_len)
             fprintf (stderr,
                      "ERROR: This ROM has no header. Convert to a Game Doctor compatible format\n");
-          else
-            gd3_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo); // file exists -> send it to the copier
+          else                                  // file exists -> send it to the copier
+            gd3_write_rom (ucon64.rom, ucon64.parport, ucon64.rominfo);
         }
       fputc ('\n', stdout);
       break;
@@ -1608,8 +1605,8 @@ ucon64_options (int c, const char *optarg)
     case UCON64_XGD3S:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
         gd3_read_sram (ucon64.rom, ucon64.parport); // dumping is not yet supported
-      else
-        gd3_write_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
+      else                                      // file exists -> restore SRAM
+        gd3_write_sram (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;
 
@@ -1739,7 +1736,7 @@ ucon64_options (int c, const char *optarg)
       enableRTS = 0;                            // falling through
     case UCON64_XSWC2:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
-        swc_read_rom (ucon64.rom, ucon64.parport, ucon64.swc_dumping_mode);
+        swc_read_rom (ucon64.rom, ucon64.parport, ucon64.swc_io_mode);
       else
         {
           if (!ucon64.rominfo->buheader_len)
@@ -1763,16 +1760,16 @@ ucon64_options (int c, const char *optarg)
     case UCON64_XSWCS:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
         swc_read_sram (ucon64.rom, ucon64.parport);
-      else
-        swc_write_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
+      else                                      // file exists -> restore SRAM
+        swc_write_sram (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;
 
     case UCON64_XSWCC:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump SRAM contents
-        swc_read_cart_sram (ucon64.rom, ucon64.parport);
-      else
-        swc_write_cart_sram (ucon64.rom, ucon64.parport); // file exists -> restore SRAM
+        swc_read_cart_sram (ucon64.rom, ucon64.parport, ucon64.swc_io_mode);
+      else                                      // file exists -> restore SRAM
+        swc_write_cart_sram (ucon64.rom, ucon64.parport, ucon64.swc_io_mode);
       fputc ('\n', stdout);
       break;
 

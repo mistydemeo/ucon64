@@ -22,16 +22,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SWC_H
 #define SWC_H
 
-#define SWC_DM_FORCE_32MBIT 0x01
-#define SWC_DM_ALT_ROM_SIZE 0x02
-#define SWC_DM_SUPER_FX     0x04
-#define SWC_DM_SDD1         0x08
-#define SWC_DM_SA1          0x10
-#define SWC_DM_SPC7110      0x20
-#define SWC_DM_DX2_TRICK    0x40
-#define SWC_DM_MMX2         0x80
+#define SWC_IO_FORCE_32MBIT 0x01
+#define SWC_IO_ALT_ROM_SIZE 0x02
+#define SWC_IO_SUPER_FX     0x04
+#define SWC_IO_SDD1         0x08
+#define SWC_IO_SA1          0x10
+#define SWC_IO_SPC7110      0x20
+#define SWC_IO_DX2_TRICK    0x40
+#define SWC_IO_MMX2         0x80
 
-#define SWC_DM_MAX          0xff                // highest valid dumping mode value
+#define SWC_IO_MAX          0xff                // highest valid dumping mode value
 
 extern const st_usage_t swc_usage[];
 
@@ -57,14 +57,14 @@ typedef struct st_swc_header
 #define SWC_HEADER_LEN (sizeof (st_swc_header_t))
 
 #ifdef PARALLEL
-extern int swc_read_rom (const char *filename, unsigned int parport, int dumping_mode);
+extern int swc_read_rom (const char *filename, unsigned int parport, int io_mode);
 extern int swc_write_rom (const char *filename, unsigned int parport, int enableRTS);
 extern int swc_read_sram (const char *filename, unsigned int parport);
 extern int swc_write_sram (const char *filename, unsigned int parport);
 extern int swc_read_rts (const char *filename, unsigned int parport);
 extern int swc_write_rts (const char *filename, unsigned int parport);
-extern int swc_read_cart_sram (const char *filename, unsigned int parport);
-extern int swc_write_cart_sram (const char *filename, unsigned int parport);
+extern int swc_read_cart_sram (const char *filename, unsigned int parport, int io_mode);
+extern int swc_write_cart_sram (const char *filename, unsigned int parport, int io_mode);
 extern void swc_unlock (unsigned int parport);
 #endif // PARALLEL
 

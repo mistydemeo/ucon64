@@ -1151,8 +1151,8 @@ ucon64_configfile (void)
 
       printf ("WARNING: %s not found: creating...", ucon64.configfile);
 
-      if (!(fh = fopen (ucon64.configfile, "wb")))
-        {
+      if (!(fh = fopen (ucon64.configfile, "w"))) // opening the file in text mode
+        {                                         //  avoids trouble under DOS
           printf ("FAILED\n\n");
           return -1;
         }
@@ -1187,6 +1187,7 @@ ucon64_configfile (void)
                  "discmage_path=~/discmage.so\n"
 //                 "cache_path=
 #endif
+                 "#\n"
                  "# emulate_<console shortcut>=<emulator with options>\n"
                  "#\n"
                  "emulate_gb=vgb -sound -sync 50 -sgb -scale 2\n"
@@ -1263,7 +1264,7 @@ ucon64_configfile (void)
 
       printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
 
-      q_fcpy (ucon64.configfile, 0, q_fsize (ucon64.configfile), buf2, "wb");
+      q_fcpy (ucon64.configfile, 0, q_fsize (ucon64.configfile), buf2, "wb"); // "wb" is correct for copying
 
       sprintf (buf, "%d", UCON64_CONFIG_VERSION);
       set_property (ucon64.configfile, "version", buf);

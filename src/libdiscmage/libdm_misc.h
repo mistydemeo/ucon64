@@ -97,7 +97,6 @@ extern int dm_get_track_mode_id (int mode, int sector_size);
 extern void dm_get_track_mode_by_id (int id, int8_t *mode, uint16_t *sector_size);
 extern void dm_clean (dm_image_t *image);
 extern void dm_gauge (int, int);
-extern int dm_gauge_set;
 
 extern const char pvd_magic[];
 extern const char svd_magic[];

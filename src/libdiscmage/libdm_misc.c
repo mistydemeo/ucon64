@@ -203,8 +203,14 @@ const char *dm_msg[] = {
   NULL
 };
 
-static void (*dm_gauge_ptr) (int pos, int size);
-int dm_gauge_set;
+static void (*dm_gauge_ptr) (int pos, int size) = NULL;
+/*
+  dm_gauge_set MUST be static (hidden) on Mac OS X or we get a strange error
+  about common symbols (?) not being allowed with MH_DYLIB output format. This
+  is a bit strange, because other (non-basic type) symbols don't result in that
+  warning message. It's probably my ignorance. - dbjh
+*/
+static int dm_gauge_set = 0;
 
 
 int
@@ -387,7 +393,8 @@ dm_set_gauge (void (*gauge) (int, int))
 void
 dm_gauge (int pos, int size)
 {
-  dm_gauge_ptr (pos, size);
+  if (dm_gauge_set)
+    dm_gauge_ptr (pos, size);
 }
 
 
@@ -581,12 +588,11 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
           return -1;
         }
 
-      if (!(x % 100) && dm_gauge_set)
+      if (!(x % 100))
         dm_gauge (x * track->sector_size, track->track_len * track->sector_size);
     }
                   
-  if (dm_gauge_set)
-    dm_gauge (x * track->sector_size, track->track_len * track->sector_size);
+  dm_gauge (x * track->sector_size, track->track_len * track->sector_size);
                         
 //  fseek (fh, track->total_len * track->sector_size, SEEK_CUR);
 

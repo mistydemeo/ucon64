@@ -31,7 +31,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#if     defined _WIN32 || defined __MSDOS__
 #include <sys/timeb.h>
+#else
+#include <sys/time.h>
+#endif
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -636,39 +640,54 @@ parport_init (int port, int target_delay)
 static int
 parport_init_delay (int n_micros)
 /*
-  We only have millisecond accuracy, while we have to determine the correct
-  initial loop counter value for a number of microseconds. Luckily, the function
-  of time against the initial loop counter value is linear (provided that the
-  initial counter value is large enough), so we can just divide the found loop
-  value by 1000.
+  We only have millisecond accuracy on DOS, while we have to determine the
+  correct initial loop counter value for a number of microseconds. Luckily, the
+  function of time against the initial loop counter value is linear (provided
+  that the initial counter value is large enough), so we can just divide the
+  found loop value by 1000. Of course, in reality we don't get millisecond
+  accuracy...
+  TODO: Find the equivalent of gettimeofday() for MinGW and Visual C++
 */
 {
 #define N_CHECKS  10
 #define N_HITSMAX 10
+#if     defined _WIN32 || defined __MSDOS__
   struct timeb t0, t1;
-  int n_millis = 0, n, n_hits = 0, loop = 10000, loop_sum = 0;
+#else
+  struct timeval t0, t1;
+#endif
+  int n_ticks = 0, n, n_hits = 0, loop = 10000, loop_sum = 0;
   volatile int m;                               // volatile is necessary for Visual C++...
 
   printf ("Determining delay loop value for %d microseconds...", n_micros);
   fflush (stdout);
   while (n_hits < N_HITSMAX)
     {
-      n_millis = 0;
+      n_ticks = 0;
       for (n = 0; n < N_CHECKS; n++)
         {
           m = loop;
+#if     defined _WIN32 || defined __MSDOS__
           ftime (&t0);
+#else
+          gettimeofday (&t0, NULL);
+#endif
           while (m--)
             ;
+#if     defined _WIN32 || defined __MSDOS__
           ftime (&t1);
-          n_millis += (t1.time * 1000 + t1.millitm) - (t0.time * 1000 + t0.millitm);
+          n_ticks += (t1.time * 1000 + t1.millitm) - (t0.time * 1000 + t0.millitm);
+#else
+          gettimeofday (&t1, NULL);
+          n_ticks += (t1.tv_sec * 1000000 + t1.tv_usec) - (t0.tv_sec * 1000000 + t0.tv_usec);
+#endif
         }
-      n_millis /= N_CHECKS;
+      n_ticks /= N_CHECKS;
 
 #ifndef DJGPP
-      if (n_millis - n_micros == 0)             // we are aiming at microsecond accuracy...
+      if (n_ticks - n_micros == 0)              // we are aiming at microsecond accuracy...
 #else // DJGPP's runtime system is quite inaccurate under Windows XP
-      n = n_millis - n_micros;
+      n = n_ticks - n_micros;
       if (n < 0)
         n = -n;
       if (n <= 1)                               // allow a deviation of 1 ms?
@@ -680,13 +699,17 @@ parport_init_delay (int n_micros)
           continue;
         }
 
-      if (n_millis == 0)
+      if (n_ticks == 0)
         loop <<= 1;
       else
-        loop = (int) (n_micros / ((float) n_millis / loop));
+        loop = (int) (n_micros / ((float) n_ticks / loop));
     }
 
-  n = loop_sum / (1000 * N_HITSMAX);            // we summed N_HITSMAX loop values
+#if     defined _WIN32 || defined __MSDOS__
+  n = loop_sum / (1000 * N_HITSMAX);            // divide by 1000
+#else
+  n = loop_sum / N_HITSMAX;                     // we summed N_HITSMAX loop values
+#endif
   printf ("done (%d)\n", n);
   return n;
 }

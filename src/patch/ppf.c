@@ -5,7 +5,7 @@ written by ???? - ???? Icarus/Paradox
                   2001 NoisyB (noisyb@gmx.net)
            2002 - 2003 dbjh
 
-                  
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -88,7 +88,7 @@ const st_usage_t ppf_usage[] =
 @END_PPF20HEADER - total headersize = 1084 bytes.
 
 
-2. The PPF 2.0 Patch Itself (Encoding method #1)
+2. The PPF 2.0 patch itself (encoding method #1)
 
 @START_PPF20PATCH
 FORMAT : xxxx,y,zzzz
@@ -143,13 +143,11 @@ int
 ppf_apply (const char *modname, const char *ppfname)
 {
   FILE *modfile, *ppffile;
-  char method, desc[50 + 1], diz[MAX_ID_SIZE + 1], buffer[1024], ppfblock[1024];
-  int x, dizlen = 0, modlen, ppfsize, bytes_to_skip = 0, n_changes;
+  char desc[50 + 1], diz[MAX_ID_SIZE + 1], buffer[1024], ppfblock[1024];
+  int x, method, dizlen = 0, modlen, ppfsize, bytes_to_skip = 0, n_changes;
   unsigned int pos;
 
   ucon64_fbackup (NULL, modname);
-  // print a newline between backup message and PPF info
-  fputc ('\n', stdout);
 
   if ((modfile = fopen (modname, "rb+")) == NULL)
     {
@@ -172,7 +170,7 @@ ppf_apply (const char *modname, const char *ppfname)
       return -1;
     }
 
-  // What encoding Method? PPF1.0 or PPF2.0?
+  // What encoding method? PPF 1.0 or PPF 2.0?
   fseek (ppffile, 5, SEEK_SET);
   method = fgetc (ppffile);
   if (method != 0 && method != 1)
@@ -189,7 +187,8 @@ ppf_apply (const char *modname, const char *ppfname)
   fseek (ppffile, 6, SEEK_SET);                 // Read description line
   fread (desc, 50, 1, ppffile);
   desc[50] = 0;                                 // terminate string
-  printf ("Filename        : %s\n", ppfname);
+  printf ("\n"                                  // print a newline between
+          "Filename        : %s\n", ppfname);   //  backup message and PPF info
   printf ("Encoding method : %d (PPF %d.0)\n", method, method + 1);
   printf ("Description     : %s\n", desc);
 
@@ -285,7 +284,7 @@ ppf_create (const char *orgname, const char *modname)
 #if 0
   char *fidname = "FILE_ID.DIZ";
 #endif
-  int x, osize, msize, blocksize, n_blocks, n_changes;
+  int x, osize, msize, blocksize, n_changes;
   unsigned int seekpos = 0, pos;
 
   osize = q_fsize (orgname);
@@ -320,7 +319,7 @@ ppf_create (const char *orgname, const char *modname)
       return -1;
     }
 
-  // creating PPF2.0 header
+  // creating PPF 2.0 header
   fwrite ("PPF20", 5, 1, ppffile);              // magic
   fputc (1, ppffile);                           // encoding method
   memset (buffer, ' ', 50);
@@ -338,7 +337,6 @@ ppf_create (const char *orgname, const char *modname)
 
   printf ("Writing patch data, please wait...\n");
   // finding changes
-  n_blocks = (osize + 254) / 255;
   fseek (orgfile, 0, SEEK_SET);
   fseek (modfile, 0, SEEK_SET);
   while ((blocksize = fread (obuf, 1, 255, orgfile)))

@@ -43,7 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_NES		8
 #define ucon64_PCE		9
 #define ucon64_PSX		10
-#define ucon64_PSX2		11
+#define ucon64_PS2		11
 #define ucon64_SNES		12
 #define ucon64_SATURN		13
 #define ucon64_DC		14

@@ -3,6 +3,7 @@ swc.c - Super Wild Card support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
                   2001 dbjh
+                  2001 Caz
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -278,14 +279,9 @@ int swc_read_rom(char *filename, unsigned int parport)
     exit(1);
   }
   blocksleft = size * 16;                       // 1 Mb (128KB) unit == 16 8KB units
-  if (special)
-    size >>= 1;
   printf("Receive: %d Bytes (%.4f Mb) %s\n",
          size*MBIT, (float) size, special ?  "SPECIAL" : "");
-  if (special)                                  // size in bytes for parport_gauge() below
-    size *= MBIT * 2;
-  else
-    size *= MBIT;
+  size *= MBIT;                                 // size in bytes for parport_gauge() below
 
   send_command(5, 0, 0);
   send_command0(0xe00c, 0);
@@ -299,7 +295,7 @@ int swc_read_rom(char *filename, unsigned int parport)
   fwrite(buffer, 1, HEADERSIZE, file);          // write header (other necessary fields are
                                                 //  filled in by receive_rom_info())
   if (special)
-    blocksleft >>= 1;                           // this must come after get_emu_mode_select()!
+    blocksleft >>= 1;                           // this must come _after_ get_emu_mode_select()!
 
   printf("Press q to abort\n\n");               // print here, NOT before first swc I/O
                                                 //  because if we get here q works ;)

@@ -1589,29 +1589,29 @@ fal_args (unsigned int parport)
 }
 
 int
-fal_read_rom (char *filename, unsigned int parport, int argc, char *argv[])
+fal_read_rom (char *filename, unsigned int parport, int size)
 {
   fal_args (parport);
 
   fal_argv[3] = "-c";
-  if (argncmp (argc, argv, "-xfalc", 6))        // strlen("-xfalc") == 6
+  if (size != -1)
     {
-      if (argcmp (argc, argv, "-xfalc8"))
+      if (size == 8)
         fal_argv[4] = "8";
-      else if (argcmp (argc, argv, "-xfalc16"))
+      else if (size == 16)
         fal_argv[4] = "16";
-      else if (argcmp (argc, argv, "-xfalc32"))
+      else if (size == 32)
         fal_argv[4] = "32";
-      else if (argcmp (argc, argv, "-xfalc64"))
+      else if (size == 64)
         fal_argv[4] = "64";
-      else if (argcmp (argc, argv, "-xfalc128"))
+      else if (size == 128)
         fal_argv[4] = "128";
-      else if (argcmp (argc, argv, "-xfalc256"))
+      else if (size == 256)
         fal_argv[4] = "256";
       else
         {
-          fprintf (STDERR, "Invalid argument for -xfalc<n>\n"
-                   "n can be 8, 16, 32, 64, 128 or 256; default is -xfalc32\n");
+          fprintf (STDERR, "Invalid argument for -xfalc <n>\n"
+                   "n can be 8, 16, 32, 64, 128 or 256; default is 32\n");
           exit (1);
         }
     }
@@ -1637,13 +1637,13 @@ fal_read_rom (char *filename, unsigned int parport, int argc, char *argv[])
 }
 
 int
-fal_write_rom (char *filename, unsigned int parport, int argc, char *argv[])
+fal_write_rom (char *filename, unsigned int parport, int size)
 {
   fal_args (parport);
 
-  if (argncmp (argc, argv, "-xfalc", 6))        // strlen("-xfalc") == 6
+  if (size != -1)
     {
-      printf ("-xfalc<n> can only be used when receiving a ROM\n"); // stdout for frontend
+      printf ("-xfalc <n> can only be used when receiving a ROM\n"); // stdout for frontend
       exit (1);
     }
 
@@ -1735,20 +1735,20 @@ fal_usage (int argc, char *argv[])
   printf (fal_TITLE "\n"
           "  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
           "                receives automatically when $ROM does not exist\n"
-          "  -xfalc<n>     specify chip size in mbits of ROM in Flash Advance Linker when\n"
-          "                receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32\n"
+          "  -xfalc <n>    specify chip size in mbits of ROM in Flash Advance Linker when\n"
+          "                receiving. n can be 8,16,32,64,128 or 256. default is 32\n"
 #if 0
           "  -xfalm        use SPP mode, default is EPP\n"
 #endif
-     "  -xfals        send/receive SRAM to/from Flash Advance Linker; $FILE=PORT\n"
-     "                receives automatically when $ROM(=SRAM) does not exist\n"
-     "  -xfalb<n>     send/receive SRAM to/from Flash Advance Linker bank n\n"
-     "                n can be 1, 2, 3 or 4\n"
-     "                $FILE=PORT; receives automatically when SRAM does not exist\n"
-
-"NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
-"      parallel port. If that is the case give a hardware address:\n"
-"      ucon64 -xfal \"0087 - Mario Kart Super Circuit (U).gba\" 0x378\n");
+          "  -xfals        send/receive SRAM to/from Flash Advance Linker; $FILE=PORT\n"
+          "                receives automatically when $ROM(=SRAM) does not exist\n"
+          "  -xfalb <n>    send/receive SRAM to/from Flash Advance Linker bank n\n"
+          "                n can be 1, 2, 3 or 4\n"
+          "                $FILE=PORT; receives automatically when SRAM does not exist\n"
+          "\n"
+          "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n"
+          "      parallel port. If that is the case give a hardware address:\n"
+          "      ucon64 -xfal \"0087 - Mario Kart Super Circuit (U).gba\" 0x378\n");
 
   return 0;
 }

@@ -280,9 +280,8 @@ main (int argc, char *argv[])
 
   ucon64_configfile ();
 
-  rom.backup =     (
-      (!strcmp (getProperty (rom.config_file, "backups", buf2, "1"), "1")) ? 1 : 0
-    );
+  rom.backup = ((!strcmp (getProperty (rom.config_file, "backups", buf2, "1"), "1")) ?
+               1 : 0);
 
   ucon64_parport_probe ();
 
@@ -302,9 +301,7 @@ main (int argc, char *argv[])
     getcwd (rom.rom, sizeof (rom.rom));
 
   if (!access (rom.rom, F_OK|R_OK))
-    {
-      ucon64_init (&rom);
-    }
+    ucon64_init (&rom);
 
   /*
     getopt_long_only()
@@ -315,24 +312,24 @@ main (int argc, char *argv[])
         {
         case 'h':                //help
           return ucon64_usage (argc, argv);
-  
+
         case 130:                //frontend
           atexit (ucon64_exit);
           rom.frontend = 1;       // used by ucon64_gauge()
           break;
-  
+
         case 131:                //crc
           printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, 0));
           return 0;
-  
+
         case 132:                //nbak
           rom.backup = 0;
           break;
-  
+
         case 133:                //crchd
           printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, 512));
           return 0;
-  
+
         case 134:                //rl
           return renlwr (rom.rom);
   
@@ -378,7 +375,7 @@ main (int argc, char *argv[])
   
         case 141:                //padhd
           ucon64_fbackup (&rom, rom.rom);
-  
+
           return filepad (rom.rom, 512, MBIT);
   
         case 142:                //ispad
@@ -395,7 +392,7 @@ main (int argc, char *argv[])
   
         case 143:                //strip
           ucon64_fbackup (&rom, rom.rom);
-  
+
           return truncate (rom.rom, quickftell (rom.rom) - atol (rom.file));
   
         case 144:                //stp
@@ -423,7 +420,7 @@ main (int argc, char *argv[])
           if ((result = bsl (rom.rom, rom.file)) != 0)
             printf ("ERROR: failed\n");
           return result;
-  
+
         case 'i':
           ucon64_argv[0] = "ucon64";
           ucon64_argv[1] = rom.file;
@@ -441,11 +438,11 @@ main (int argc, char *argv[])
           ucon64_argv[2] = rom.rom;
           ucon64_argv[3] = rom.file;
           ucon64_argc = 4;
-  
+
           ucon64_fbackup (&rom, rom.rom);
   
           return n64aps_main (ucon64_argc, ucon64_argv);
-  
+
         case 146:                //mki
           return cips (rom.rom, rom.file);
   
@@ -487,12 +484,12 @@ main (int argc, char *argv[])
           ucon64_argc = 4;
   
           return makeppf_main (ucon64_argc, ucon64_argv);
-  
+
         case 151:                //nppf
           memset (buf2, ' ', 50);
           strncpy (buf2, rom.file, strlen (rom.file));
           return quickfwrite (buf2, 6, 50, ucon64_fbackup (&rom, rom.rom), "r+b");
-  
+
         case 152:                //idppf
           return addppfid (argc, argv);
   
@@ -510,7 +507,7 @@ main (int argc, char *argv[])
   
         case 157:                //mkcue
           return cdrw_mkcue (&rom);
-  
+
 #ifdef BACKUP_CD
         case 158:                //xcdrw
           switch (rom.console)
@@ -533,7 +530,7 @@ main (int argc, char *argv[])
             ("TIP: %s -db -nes would show only the number of known NES ROMs\n\n",
              getarg (argc, argv, ucon64_NAME));
           break;
-  
+
         case 160:                //dbs
           ucon64_flush (argc, argv, &rom);
           sscanf (rom.rom, "%lx", &rom.current_crc32);
@@ -556,12 +553,12 @@ main (int argc, char *argv[])
           rom.console = ucon64_GBA;
           skip_init_nfo = 1;      // This gets rid of nonsense GBA info on a GBA multirom loader binary
           return gbadvance_multi (&rom, 256 * MBIT);
-  
+
         case 163:                //multi1
           rom.console = ucon64_GBA;
           skip_init_nfo = 1;      // This gets rid of nonsense GBA info on a GBA multirom loader binary
           return gbadvance_multi (&rom, 64 * MBIT);
-  
+
         case 164:                //multi2
           rom.console = ucon64_GBA;
           skip_init_nfo = 1;      // This gets rid of nonsense GBA info on a GBA multirom loader binary
@@ -584,7 +581,7 @@ main (int argc, char *argv[])
   
         case 'e':
           return ucon64_e ();
-  
+
         case 168:                //1991
           return genesis_1991 (&rom);
   
@@ -739,13 +736,13 @@ main (int argc, char *argv[])
 //TODO error
               return -1;
             }
-  
+
         case 'k':
           return snes_k (&rom);
   
         case 'l':
           return snes_l (&rom);
-  
+
         case 192:                //lnx
           return lynx_lnx (&rom);
   
@@ -809,7 +806,7 @@ main (int argc, char *argv[])
   
         case 199:                //nrot
           return lynx_nrot (&rom);
-  
+
         case 'p':
           switch (rom.console)
             {
@@ -832,7 +829,7 @@ main (int argc, char *argv[])
   
         case 202:                //rotr
           return lynx_rotr (&rom);
-  
+
         case 's':
           switch (rom.console)
             {
@@ -855,13 +852,13 @@ main (int argc, char *argv[])
   
         case 204:                //sgb
           return gameboy_sgb (&rom);
-  
+
         case 205:                //smc
           return snes_smc (&rom);
   
         case 206:                //smd
           return genesis_smd (&rom);
-  
+
         case 207:                //smds
           return genesis_smds (&rom);
   
@@ -902,12 +899,12 @@ main (int argc, char *argv[])
   
         case 219:                //xfal
           rom.console = ucon64_GBA;
-          return gbadvance_xfal (&rom);
-  
+          return gbadvance_xfal (&rom, -1);
+
         case 220:                //xfals
           rom.console = ucon64_GBA;
           return gbadvance_xfals (&rom);
-  
+
         case 221:                //xgbx
           rom.console = ucon64_GB;
           return gameboy_xgbx (&rom);
@@ -923,7 +920,7 @@ main (int argc, char *argv[])
         case 224:                //xsmds
   //        rom.console = ucon64_GENESIS;//could be SMS too
           return genesis_xsmds (&rom);
-  
+
         case 225:                //xswc
           rom.console = ucon64_SNES;
           return snes_xswc (&rom);
@@ -945,16 +942,16 @@ main (int argc, char *argv[])
   */
 #ifdef BACKUP
         case 230:                //xfalb
-          rom.console = ucon64_GBA;
-          return gbadvance_xfalb (&rom);
-  
+          rom.console = ucon64_GBA;             // getopt() guarantees optarg != NULL
+          return gbadvance_xfalb (&rom, strtol (optarg, NULL, 10));
+
         case 231:                //xfalc
-          rom.console = ucon64_GBA;
-          return gbadvance_xfal (&rom);
-  
+          rom.console = ucon64_GBA;             // getopt() guarantees optarg != NULL
+          return gbadvance_xfal (&rom, strtol (optarg, NULL, 10));
+
         case 232:                //xgbxb
-          rom.console = ucon64_GB;
-          return gameboy_xgbxb (&rom);
+          rom.console = ucon64_GB;             // getopt() guarantees optarg != NULL
+          return gameboy_xgbxb (&rom, strtol (optarg, NULL, 10));
 #endif // BACKUP
   
         case 233:                //ata
@@ -976,7 +973,7 @@ main (int argc, char *argv[])
         case 237:                //swan
           rom.console = ucon64_WONDERSWAN;
           break;
-  
+
         case 238:                //vec
           rom.console = ucon64_VECTREX;
           break;
@@ -1044,7 +1041,7 @@ main (int argc, char *argv[])
         case 249:                //ps2
           rom.console = ucon64_PS2;
           break;
-  
+
         case 250:                //cdi
           rom.console = ucon64_CDI;
           break;
@@ -1068,15 +1065,15 @@ main (int argc, char *argv[])
         case 255:                //gc
           rom.console = ucon64_GAMECUBE;
           break;
-  
+
         case 129:                //gp32
           rom.console = ucon64_GP32;
           break;
-  
+
         case 256:                //ns
           rom.splitted[0] = 0;
           break;
-  
+
         default:
           fprintf (STDERR, "Try '%s --help' for more information.\n", argv[0]);
           return -1;
@@ -1086,7 +1083,7 @@ main (int argc, char *argv[])
 
   if (!access (rom.rom, F_OK))
     {
-      if(!skip_init_nfo)
+      if (!skip_init_nfo)
       {
 //        ucon64_init (&rom);
         if (rom.console != ucon64_UNKNOWN)
@@ -1615,9 +1612,7 @@ ucon64_nfo (struct ucon64_ *rom)
       if (!rom->buheader_len)
         printf ("Backup Unit Header: No\n");    // printing this is handy for
       else if (rom->buheader_len)               //  SNES ROMs
-        printf ("Backup Unit Header: Yes, %ld Bytes\n"
-                /* (use -nhd to override)\n" */ ,
-                rom->buheader_len);
+        printf ("Backup Unit Header: Yes, %ld Bytes\n", rom->buheader_len);
 
 //    if (!rom->splitted[0])
 //      printf("Splitted: No\n");

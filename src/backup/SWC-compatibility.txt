@@ -1,9 +1,9 @@
 A Super Wild Card Card compatibility list
-Version: 1.0
-Author: dbjh "of uCON64" with great help from CL "of NSRT"
-Date: 6 december 2002
+Version: 1.2
+Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
+Date: 10 december 2002
 Hardware: Super Wild Card 2.8cc 32 MBit PAL
-Software: uCON64 1.9.8beta7 (in CVS repository as of 6 december 2002)
+Software: uCON64 1.9.8beta7 (in CVS repository as of 10 december 2002)
 
 
 Legend:
@@ -109,7 +109,7 @@ Code    Game
 0 -     Contra III - The Alien Wars (U) [!]
 0 -     Cybernator (U)
 0 -     Daffy Duck - The Marvin Missions (U)
-9 -     Dai Kaiju Monogatari 2 (J) [!] <= as The Dumper already mentioned on an SWC with more memory it could work
+9 -     Dai Kaiju Monogatari 2 (J) [!] <= according to The Dumper on an SWC with more memory it works
 0 -     Darius Twin (U)
 1 -     Demon's Crest (U)
 0 -     Der Langrisser (V1.1) (J)
@@ -136,7 +136,7 @@ Code    Game
 0 -     Dragon - The Bruce Lee Story (E) [a1]
 7 -     Dragon - The Bruce Lee Story (U)
 7 -     Dr. Mario (J) (NP)
-1* + 2 + 6 - Earthbound (U)
+1* + 2 - Earthbound (U)
 0 -     Earthworm Jim 2 (U) [!]
 0 -     Earthworm Jim (U)
 0 -     Eek! the Cat (E)
@@ -163,6 +163,7 @@ Code    Game
 0 -     Gradius III (U) [!]
 0 -     Harvest Moon (U)
 9 -     Hoshi no Kirby 3 (J)
+2 -     Illusion of Gaia (U).swc
 0 -     International Superstar Soccer Deluxe (E)
 0 -     International Superstar Soccer (E)
 2* + 9 - Jikkyou Oshaberi Parodius (J)
@@ -174,8 +175,8 @@ Code    Game
 0 -     Kikikaikai - Nazo no Kuro Manto (J)
 1 -     Killer Instinct (E) [!]
 2* -    Kirby No Kira Kizzu (J) (NP)
-1* + 4 - Kirby's Dream Course (E)
-1* + 2 + 4 - Kirby's Dream Course (U)
+1* -    Kirby's Dream Course (E)
+1* + 2 - Kirby's Dream Course (U)
 9 -     Kirby's Dream Land 3 (U)
 9 -     Kirby's Fun Pak (E) [!]
 0 -     Kirby's Ghost Trap (E)
@@ -325,7 +326,7 @@ Code    Game
 0 -     Super Turrican (E)
 0 -     T2 - The Arcade Game (U)
 0 -     Tactics Ogre (V1.2) (J)
-9 -     Tales of Phantasia (J)
+9 -     Tales of Phantasia (J) <= according to The Dumper on an SWC with more memory it works
 0 -     Teenage Mutant Hero Turtles IV - Turtles in Time (E)
 0 -     Teenage Mutant Hero Turtles - Tournament Fighters (E)
 0 -     Teenage Mutant Ninja Turtles IV - Turtles in Time (U) (Beta)
@@ -343,8 +344,8 @@ Code    Game
 0 -     Ultimate Mortal Kombat 3 (U)
 0 -     Ultima VII - The Black Gate (Beta)
 0 -     Ultima VII - The Black Gate (U)
-6 -     Uniracers (U)
-6 -     Unirally (E) [!]
+1* -    Uniracers (U)
+1* -    Unirally (E) [!]
 9 -     Vortex (E)
 0 -     Wario's Woods (U)
 0 -     Williams Arcade's Greatest Hits (E) [!]

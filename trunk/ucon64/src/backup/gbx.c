@@ -369,7 +369,7 @@ void set_rom_bank(unsigned char bank)
 
 volatile void delay_10us()
 // Hmmm, usleep() can be used on UNIX, but default under DOS is delay() which
-//  waits for a number of milliseconds... Best use the same code on all platforms.
+//  waits for a number of milliseconds... Better use the same code on all platforms.
 {
 	long x;
 	for(x = 0; x < 0x3000; x++);            // 0x2000
@@ -1477,8 +1477,6 @@ char backup_rom(void)			//no_page=how many 32K
 	}
 	fclose(fptr);
 
-        printf("\nBackup Successful\n");
-
 	return 0;
 }
 
@@ -1753,18 +1751,19 @@ char chk_gcrc(void)
 
 void backup(void)
 {
-	if(check_header(1)) {		// something error
+	if (check_header(1)) {		// something error
 //      disp_buffer(0x50);
 		return;
 	}
-	if((fptr = fopen(file_name, "w+b")) == NULL) {	/* open error */
+	if ((fptr = fopen(file_name, "w+b")) == NULL) {	/* open error */
 		printf("open error\n");
 		return;
 	}
-	if(backup_rom())
-		printf("Backup Error\n");
+	if (backup_rom())
+		printf("\nBackup Error\n");
 	else
-		printf("Backup Rom success\n");
+                printf("\nBackup Successful\n");
+
 	return;
 }
 
@@ -1876,7 +1875,8 @@ char test_all(void)
 	return test_sram_wv();
 }
 
-/*void usage(char *progname)
+/*
+void usage(char *progname)
 {
 	fprintf(stderr, "Usage: %s [-option] <Filename>\n", progname);
 	fprintf(stderr, "-l   : load ROM file to GB Card.\n");
@@ -1896,6 +1896,7 @@ char test_all(void)
 	exit(2);
 }
 */
+
 char check_port_xpp(void)
 {
 	init_port();
@@ -2258,17 +2259,6 @@ void test_intel(void)
 /*
   uCON64 code below
 */
-
-int prog_func(int p)
-{
-  putchar('.');
-  return 0;
-}
-
-void status_func(char *line)
-{
-  printf("%s\n", line);
-}
 
 void gbx_init(unsigned int parport, char *filename)
 {

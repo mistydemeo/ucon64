@@ -13,15 +13,18 @@ the original uCON for snes and genesis was written by chicken & chp in ~1995
 
 1.9.2   started to add missing Sega System16(A/B)/System 18/dual 68000 support
 	-xv64 shows now the filename on the Doctor instead of "UCON64" (sorry)
-	removed -xmp3 option for Songboy (latest informations say that it will be a USB device with copyprotected MPE standard instead of MP3.. HAHAHAHA!!!)
+	removed -xmp3 option for Songboy (latest informations say that it will be a USB
+          device with copyprotected MPE standard instead of MP3.. HAHAHAHA!!!)
 	(TODO:  -xmp3    send MP3 file(s) to SongBoy (MP3 player for Gameboy))
-	removed options which were added by mistake (like parallel transfer for Z64) 
+	removed options which were added by mistake (like parallel transfer for Z64)
 	added -ispad (looks for repeating bytes at the end of a probably padded ROM)
 	added -rn (some people might find it useful)
 	added -mg, -bin and 'show ROM' support for PC-Engine
-	added -usms for Jos Kwanten's ultraSMS an Sega Master System/GameGear Emulator for the Nintendo 64
+	added -usms for Jos Kwanten's ultraSMS an Sega Master System/GameGear Emulator
+          for the Nintendo 64
 	fixed aps (GRRNNNNN!!!)
-	added an universal frontend (in java) for all platforms and all programs that need a filename
+	added an universal frontend (in java) for all platforms and all programs that
+          need a filename
 	added CD32, CD-i and Real 3DO support
 	added -bin and -ffe option for Sega Master System/GameGear
 	added database for NES roms (that enlarged the ucon64 executable by 190kb grnnn...)
@@ -38,12 +41,14 @@ the original uCON for snes and genesis was written by chicken & chp in ~1995
 	added -gg gamegenie support for Super Nintendo
 	cleaned up the usage output
 	added -chk fix checksum for Super Nintendo/Super Famicon
-	removed most CDROM based consoles from usage since ucon64 could support them only by showing some informations about the CDROM itself (option -cdrom)
+	removed most CDROM based consoles from usage since ucon64 could support them only
+          by showing some informations about the CDROM itself (option -cdrom)
 	added -gd3 convert to Professor SF(2) Game Doctor SF3/6/7 (autojoin)
 	added -gdf fix Professor SF(2) Game Doctor SF3/6/7 savegame problems
 
-1.9.4	included all databases for every console system that has ROMs without a header with text
-	added 324 entries to sms database	
+1.9.4	included all databases for every console system that has ROMs without a header
+          with text
+	added 324 entries to sms database
 	added -sam convert SAM/M.A.M.E. sound to WAV; $ROM=SAMFILE
 	added -b2i convert BIN/RAW(2352)/Mode2(2336) to ISO; $ROM=BIN_IMAGE
 	added -ppf apply PPF patch (<=2.0); $ROM=ISO_IMAGE $FILE=PATCHFILE
@@ -60,7 +65,8 @@ the original uCON for snes and genesis was written by chicken & chp in ~1995
 	that i had to make more changes in the source starting from ucon64.c
 	Gilligan wrote a nice routine to read out NeoGeo Pocket roms (added)
 	reorganized the whole source
-	uCON64 is from now on cartridge only/CD based console systems will be supported in another project (see: ucon64.sourceforge.net)
+	uCON64 is from now on cartridge only/CD based console systems will be
+          supported in another project (see: ucon64.sourceforge.net)
 	added Gameboy Advance support
 	added (GBA) -n change ROM name; $FILE=NEWNAME
 	added (GBA) -logo restore ROM logo character data 0x04-0x9F
@@ -85,10 +91,14 @@ the original uCON for snes and genesis was written by chicken & chp in ~1995
 	added (GBA) -xfal send/receive to/from Flash Advance Linker; $FILE=PORT
 
 1.9.6   this release brings you full support for the Super Wildcard
-	added (SNES) -xswc send/receive to/from Super Wild Card*/(all)SWC; $FILE=PORT (by dbjh)
-	added (SNES) -xswcs send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT (by dbjh)
-	added (GameBoy) -sgb convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX (by NoisyB)
-	added (GameBoy) -gbx convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC (by NoisyB)
+	added (SNES) -xswc send/receive to/from Super Wild Card*/(all)SWC; $FILE=PORT (by
+          dbjh)
+	added (SNES) -xswcs send/receive SRAM to/from Super Wild Card*/(all)SWC;
+          $FILE=PORT (by dbjh)
+	added (GameBoy) -sgb convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX
+          (by NoisyB)
+	added (GameBoy) -gbx convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC
+          (by NoisyB)
 	made a few small bug fixes and code cleanups (by NoisyB; thanks to dbjh)
 	DOS port of uCON64 available (by dbjh)
 	BeOS port of uCON64 available (by dbjh)
@@ -97,22 +107,27 @@ the original uCON for snes and genesis was written by chicken & chp in ~1995
 	added (SNES) -swcs convert Snes9x *.srm to Super Wild Card*/(all)SWC (by NoisyB)
 
 1.9.7	added (NES) -fdsl list Famicon DiskSystem/FDS (diskimage) contents (by NoisyB)
-	updated (GBA) -xfal send/receive ROM to/from Flash Advance Linker; $FILE=PORT (by dbjh)
-	added (GBA) -xfalc<n> specify chip size in mbits of ROM in Flash Advance Linker when receiving (by dbjh)
+	updated (GBA) -xfal send/receive ROM to/from Flash Advance Linker; $FILE=PORT (by
+          dbjh)
+	added (GBA) -xfalc<n> specify chip size in mbits of ROM in Flash Advance Linker
+          when receiving (by dbjh)
 	added (GBA) -xfalm use SPP mode, default is EPP (by dbjh)
-	added (NEOGEO) -bios convert NeoCd Bios to work with NeoCD emulator (by NoisyB; thanks to Caz)
+	added (NEOGEO) -bios convert NeoCd Bios to work with NeoCD emulator (by NoisyB;
+          thanks to Caz)
 	changed the whole internal ROM database code (by NoisyB)
 	added -dbs search ROM database (all entries) by CRC32; $ROM=0xCRC32 (by NoisyB)
 	added (Virtual Boy) show info (by NoisyB)
 	added (Wonder Swan) show info (by NoisyB)
 	added (ColecoVision) show info (by NoisyB)
 	added (Vectrex) show info (by NoisyB)
-	added ROMs to database for Virtual Boy, Wonder Swan, ColecoVision and Vectrex  (by NoisyB)
+	added ROMs to database for Virtual Boy, Wonder Swan, ColecoVision and Vectrex (by
+          NoisyB)
 	added (Intellivision) show info (by NoisyB)
-	made the internal ROM Database optional; compiled without DB uCON64 will be only ~250kB in size! (by NoisyB)
+	made the internal ROM Database optional; compiled without DB uCON64 will be only
+          ~250kB in size! (by NoisyB)
 	updated (all) fixed -cs (file compare) (by dbjh)
-	updated (SNES) fixed dumping of `special' SNES cartridges (for the meaning of special,
-	  see src/backup/swc.c) (by dbjh; thanks to Caz)
+	updated (SNES) fixed dumping of `special' SNES cartridges (for the meaning of
+          special, see src/backup/swc.c) (by dbjh; thanks to Caz)
 	updated (SNES) fixed -k (crack) (by dbjh)
 	updated (SNES) fixed -f (NTSC/PAL fix) (by dbjh)
 	uCON64 will recognize *ANY* kind of ROM or Console System via DB now...
@@ -120,10 +135,14 @@ the original uCON for snes and genesis was written by chicken & chp in ~1995
 	updated the internal DB; it can recognize now 12387 different ROMs (by NoisyB)
 	updated (SNES) fixed -s (split ROM) (by dbjh)
 	updated (GENESIS) fixed -s (by NoisyB)
-	updated (all) fixed -swc & -ins (and others) for files with a size a multiple of 32kB (by dbjh)
-	updated (SNES) fixed -swc when ROM file has a name that already has the extension .swc
-	  fixed the same problem for -smc and -fig (by dbjh)
+	updated (all) fixed -swc & -ins (and others) for files with a size a multiple of
+          32kB (by dbjh)
+	updated (SNES) fixed -swc when ROM file has a name that already has the extension
+          .swc fixed the same problem for -smc and -fig (by dbjh)
 	added -lsv like -ls but more verbose; $ROM=DIRECTORY (by NoisyB)
-	fixed (SNES) checksum output (by NoisyB)
+	updated (SNES) fixed checksum output (by NoisyB)
 	updated (SNES) fixed -j (join multi files) (by dbjh)
+        updated (SNES) fixed checksum output for Broadcast Satellaview ROMs (by dbjh;
+          thanks to Cowering)
+
 </pre></tt></body></html>

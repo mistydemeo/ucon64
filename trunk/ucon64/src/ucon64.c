@@ -1,5 +1,5 @@
 /*
-uCON64 1.9.6 - a tool to modify video game ROMs and to transfer ROMs to the
+uCON64 1.9.7 - a tool to modify video game ROMs and to transfer ROMs to the
 different backup units/emulators that exist. It is based on the old uCON but
 with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
@@ -246,25 +246,25 @@ if(argcmp(argc,argv,"-dbv"))
 	return(0);
 }
 
-  if (!strlen(ucon64_rom()))
-  {
-    ucon64_usage(argc,argv);
-    return 0;
-  }
+if (!strlen(ucon64_rom()))
+{
+  ucon64_usage(argc,argv);
+  return 0;
+}
 
-  if (strlen( ucon64_file() ))
-  {
-    strcpy(buf, ucon64_file());
-    sscanf(buf, "%x", &ucon64_parport);
-  }
+if (strlen( ucon64_file() ))
+{
+  strcpy(buf, ucon64_file());
+  sscanf(buf, "%x", &ucon64_parport);
+}
 
 #ifdef BACKUP
-  if (!(ucon64_parport = parport_probe(ucon64_parport)))
-    ;
+if (!(ucon64_parport = parport_probe(ucon64_parport)))
+  ;
 /*
-    printf("ERROR: no parallel port 0x%s found\n\n",strupr(buf));
-  else
-    printf("0x%x\n\n",ucon64_parport);
+  printf("ERROR: no parallel port 0x%s found\n\n",strupr(buf));
+else
+  printf("0x%x\n\n",ucon64_parport);
 */
 
 #ifdef __UNIX__
@@ -275,35 +275,35 @@ if(argcmp(argc,argv,"-dbv"))
   course with the ucon64 executable setuid root). Anyone a better idea?
 */
 #ifdef __linux__
-  if (iopl(3) == -1)
-  {
-    fprintf(stderr, "Could not set the I/O privilege level to 3\n"
-                    "(This program needs root privileges)\n");
-    exit(1);
-  }
+if (iopl(3) == -1)
+{
+  fprintf(stderr, "Could not set the I/O privilege level to 3\n"
+                  "(This program needs root privileges)\n");
+  exit(1);
+}
 #endif
 
-  uid = getuid();
-  if (setuid(uid) == -1)
-  {
-    fprintf(stderr, "Could not set uid\n");
-    exit(1);
-  }
-  gid = getgid();                               // This shouldn't be necessary if `make install'
-  if (setgid(gid) == -1)                        //  was used, but just in case (root did `chmod +s')
-  {
-    fprintf(stderr, "Could not set gid\n");
-    exit(1);
-  }
+uid = getuid();
+if (setuid(uid) == -1)
+{
+  fprintf(stderr, "Could not set uid\n");
+  exit(1);
+}
+gid = getgid();                                 // This shouldn't be necessary if `make install'
+if (setgid(gid) == -1)                          //  was used, but just in case (root did `chmod +s')
+{
+  fprintf(stderr, "Could not set gid\n");
+  exit(1);
+}
 #endif
 
 #endif
 
-  if (argcmp(argc, argv, "-crc"))
-  {
-    printf("Checksum: %08lx\n\n", fileCRC32(ucon64_rom(), 0));
-    return 0;
-  }
+if (argcmp(argc, argv, "-crc"))
+{
+  printf("Checksum: %08lx\n\n", fileCRC32(ucon64_rom(), 0));
+  return 0;
+}
 
 if(argcmp(argc,argv,"-crchd"))
 {
@@ -565,15 +565,14 @@ if(argcmp(argc,argv,"-mka"))
 	return(n64caps_main(ucon64_argc,ucon64_argv));
 }
 
-if(argcmp(argc,argv,"-na"))
+if (argcmp(argc, argv, "-na"))
 {
-	strcpy(buf2,ucon64_file());
-	strcat(buf2
-,"                                                            ");
-                                                            
-                quickfwrite(buf2,7,50,filebackup(ucon64_rom()),"r+b");
-                
-		return(0);
+  strcpy(buf2, ucon64_file());
+  strcat(buf2, "                                                            ");
+
+  quickfwrite(buf2, 7, 50, filebackup(ucon64_rom()), "r+b");
+
+  return 0;
 }
 
 if(argcmp(argc,argv,"-mkppf"))
@@ -591,14 +590,13 @@ if(argcmp(argc,argv,"-mkppf"))
 	return(makeppf_main(ucon64_argc,ucon64_argv));
 }
 
-if(argcmp(argc,argv,"-nppf"))
+if (argcmp(argc, argv, "-nppf"))
 {
-	strcpy(buf2,ucon64_file());
-	strcat(buf2
-,"                                                            ");
-                                                            
-	quickfwrite(buf2,6,50,filebackup(ucon64_rom()),"r+b");
-	return(0);
+  strcpy(buf2, ucon64_file());
+  strcat(buf2, "                                                            ");
+
+  quickfwrite(buf2, 6, 50, filebackup(ucon64_rom()), "r+b");
+  return 0;
 }
 
 

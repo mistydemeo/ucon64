@@ -451,9 +451,12 @@ if(argcmp(argc,argv,"-idppf"))
 
 if (argcmp(argc, argv, "-ls") || argcmp(argc, argv, "-lsv"))
 {
+  char current_dir[FILENAME_MAX];
+
   if (access(rom.rom, R_OK) == -1 || (dp = opendir(rom.rom)) == NULL)
     return -1;
 
+  getcwd(current_dir, FILENAME_MAX);
   chdir(rom.rom);
 
   while ((ep = readdir(dp)) != 0)
@@ -475,6 +478,7 @@ if (argcmp(argc, argv, "-ls") || argcmp(argc, argv, "-lsv"))
     }
   }
   closedir(dp);
+  chdir(current_dir);
 
   return 0;
 }
@@ -1083,23 +1087,23 @@ int ucon64_nfo(struct ucon64_ *rom)
 
   if(rom->misc[0])printf("%s\n",rom->misc);
 
-if(rom->has_internal_crc)
-{
-  printf("Checksum: %s, %04lx %s= %04lx\n",
-  	 (rom->current_internal_crc == rom->internal_crc) ? "ok" : "bad",
-         rom->current_internal_crc,
-         (rom->current_internal_crc == rom->internal_crc) ? "" : "!",
-         rom->internal_crc);
-  printf("Inverse checksum: %s, %04lx + %04lx = %04lx %s\n",
-  	 (rom->current_internal_crc + rom->internal_inverse_crc == 0xffff) ? "ok" : "bad",
-	 rom->current_internal_crc, rom->internal_inverse_crc, rom->current_internal_crc + rom->internal_inverse_crc,
-	 (rom->current_internal_crc + rom->internal_inverse_crc == 0xffff) ? "" : "~0xffff");
-}
-  printf("CheckSum (CRC32): %08lx\n",rom->current_crc32);
+  if(rom->has_internal_crc)
+  {
+    printf("Checksum: %s, %04lx %s= %04lx\n",
+           (rom->current_internal_crc == rom->internal_crc) ? "ok" : "bad",
+           rom->current_internal_crc,
+           (rom->current_internal_crc == rom->internal_crc) ? "" : "!",
+           rom->internal_crc);
+    printf("Inverse checksum: %s, %04lx + %04lx = %04lx %s\n",
+           (rom->current_internal_crc + rom->internal_inverse_crc == 0xffff) ? "ok" : "bad",
+           rom->current_internal_crc, rom->internal_inverse_crc, rom->current_internal_crc + rom->internal_inverse_crc,
+           (rom->current_internal_crc + rom->internal_inverse_crc == 0xffff) ? "" : "~0xffff");
+  }
+  printf("Checksum (CRC32): %08lx\n",rom->current_crc32);
 
   printf("\n");
 
-  return(0);
+  return 0;
 }
 
 /*

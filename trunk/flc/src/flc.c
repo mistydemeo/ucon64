@@ -113,6 +113,14 @@ if(flc.sort && !single_file)
     stat(ep->d_name,&puffer);
     if(S_ISREG(puffer.st_mode))flc.files++;
   }
+
+  if(!(files=(struct files_ *)malloc((flc.files+2)*sizeof(struct files_))))
+  {
+    printf("%s: Error allocating memory\n",getarg(argc,argv,0));
+    (void)closedir(dp);
+    return(-1);
+  }
+  file0=files;
   rewinddir(dp);
 }
 else files=&file_ns;
@@ -128,22 +136,12 @@ while( (!single_file) ?
   if(stat(buf,&puffer)==-1)continue;
   if(S_ISREG(puffer.st_mode)!=TRUE)continue;
 
-
-  if(!(files=(struct files_ *)malloc((flc.files+2)*sizeof(struct files_))))
-  {
-    printf("%s: Error allocating memory\n",getarg(argc,argv,0));
-    (void)closedir(dp);
-    return(-1);
-  }
-  file0=files;
   files->pos=flc.files;
-//  files->date=puffer.st_mtime;
-//  files->size=puffer.st_size;  
-//  files->checked='N';
-//  strcpy(files->name,(!single_file) ? ep->d_name : flc.path);  
-//  if(single_file)flc.path[0]=0;
-printf("%s\n",files->name);
-fflush(stdout);
+  files->date=puffer.st_mtime;
+  files->size=puffer.st_size;  
+  files->checked='N';
+  strcpy(files->name,(!single_file) ? ep->d_name : flc.path);  
+  if(single_file)flc.path[0]=0;
 
 //  extract(&flc,files);
 
@@ -155,13 +153,10 @@ fflush(stdout);
   }
 
   flc.files++;
-//  files++;//=(int)(sizeof(struct files_));
+  files++;
 }
 if(!single_file)(void)closedir(dp);
 files=file0;
-
-printf("OK");
-fflush(stdout);
 
 if(flc.sort)
 {

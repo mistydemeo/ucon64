@@ -1,4 +1,4 @@
-.PHONY: all clean distclean install flc txtextract id3extract uninstall
+.PHONY: all clean distclean install flc txtextract id3extract metextract uninstall
 CC=@CC@
 
 CFLAGS=@CFLAGS@
@@ -7,11 +7,12 @@ LDFLAGS=@LDFLAGS@
 OBJECTS=flc.o getopt.o misc.o flc_misc.o
 OBJECTS_TXT=misc.o txtextract.o
 OBJECTS_ID3=misc.o id3extract.o
+OBJECTS_MET=misc.o metextract.o
 
-all: flc txtextract id3extract
+all: flc txtextract id3extract metextract
 
 clean:
-	rm -f $(OBJECTS) $(OBJECTS_TXT) $(OBJECTS_ID3) DEADJOE flc txtextract id3extract *~ */*~ */*/*~ *.core 
+	rm -f $(OBJECTS) $(OBJECTS_TXT) $(OBJECTS_ID3) $(OBJECTS_MET) DEADJOE flc txtextract id3extract metextract *~ */*~ */*/*~ *.core 
 
 distclean: clean
 	rm -f Makefile config.log config.status config.cache config.h
@@ -25,6 +26,9 @@ txtextract: $(OBJECTS_TXT)
 id3extract: $(OBJECTS_ID3)
 	$(CC) -o $@ $(OBJECTS_ID3)  $(LDFLAGS)
 
+metextract: $(OBJECTS_MET)
+	$(CC) -o $@ $(OBJECTS_MET)  $(LDFLAGS)
+
 install:
 	./install.sh
 
@@ -32,6 +36,7 @@ uninstall:
 	rm -f /usr/local/bin/flc
 	rm -f /usr/local/bin/txtextract
 	rm -f /usr/local/bin/id3extract
+	rm -f /usr/local/bin/metextract
 
 # Dependencies
 
@@ -44,3 +49,4 @@ flc.o: flc_misc.h getopt.h $(FLC_STD_H)
 flc_misc.o: $(FLC_STD_H)
 txtextract.o: misc.h $(FLC_STD_H)
 id3extract.o: misc.h $(FLC_STD_H)
+metextract.o: misc.h $(FLC_STD_H)

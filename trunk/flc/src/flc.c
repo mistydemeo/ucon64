@@ -364,7 +364,10 @@ flc_configfile (void)
          "#\n"
          "# MP3 (ID3) support\n"
          "#\n"
-         "mp3_extract=id3extract \"%%s\"\n",
+         "mp3_extract=id3extract \"%%s\"\n"
+         "# MET eDonkey or Overnet MET file support\n"
+         "#\n"
+         "met_extract=metextract \"%%s\"\n",
          FLC_CONFIG_VERSION);
 
   fclose (fh);

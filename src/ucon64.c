@@ -349,8 +349,6 @@ main (int argc, char **argv)
 #ifdef  ANSI_COLOR
   ucon64.ansi_color = ((!strcmp (get_property (ucon64.configfile, "ansi_color", buf2, "1"), "1")) ?
                1 : 0);
-  if (ucon64.ansi_color)
-    ucon64.ansi_color = ansi_init ();
 #endif
 
   ucon64.type =
@@ -398,6 +396,9 @@ main (int argc, char **argv)
     {
 #include "switches.c"
     }
+
+  if (ucon64.ansi_color)
+    ucon64.ansi_color = ansi_init ();
 
   if (optind < argc)
     ucon64.rom = argv[optind++];

@@ -1785,7 +1785,11 @@ ucon64_pattern (st_rominfo_t *rominfo, const char *pattern_fname)
   int bytesread = 0, n, n_found = 0, n_patterns, overlap = 0;
   st_cm_pattern_t *patterns = NULL;
 
-  n_patterns = build_cm_patterns (&patterns, pattern_fname, src_name);
+  realpath2 (pattern_fname, src_name);
+  // First try the current directory, then the configuration directory
+  if (access (src_name, F_OK | R_OK) == -1)
+    sprintf (src_name, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, pattern_fname);
+  n_patterns = build_cm_patterns (&patterns, src_name, ucon64.quiet == -1 ? 1 : 0);
   if (n_patterns == 0)
     {
       fprintf (stderr, "ERROR: No patterns found in %s\n", src_name);

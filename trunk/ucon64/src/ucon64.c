@@ -541,7 +541,7 @@ main (int argc, char **argv)
 
 #ifdef  ANSI_COLOR
   // ANSI colors?
-  ucon64.ansi_color = get_property_int (ucon64.configfile, "ansi_color", '=');
+  ucon64.ansi_color = get_property_int (ucon64.configfile, "ansi_color");
   // the conditional call to ansi_init() has to be done *after* the check for
   //  the switch -ncol
 #endif
@@ -557,7 +557,7 @@ main (int argc, char **argv)
   sscanf (get_property (ucon64.configfile, "parport", buf, "-1"), "%x", &ucon64.parport);
 
   // make backups?
-  ucon64.backup = get_property_int (ucon64.configfile, "backups", '=');
+  ucon64.backup = get_property_int (ucon64.configfile, "backups");
 
   // $HOME/.ucon64/ ?
   get_property_fname (ucon64.configfile, "ucon64_configdir", ucon64.configdir, "");

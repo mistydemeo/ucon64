@@ -53,14 +53,14 @@ clean:
 	del backup\*.obj
 	del $(TARGET)
 	cd libdiscmage
-	$(MAKE) /nologo -f Makefile.vc6 clean
+	$(MAKE) /NOLOGO -f Makefile.vc6 clean
 	cd ..
 
 
 distclean: clean
 	del config.h
 	cd libdiscmage
-	$(MAKE) /nologo -f Makefile.vc6 distclean
+	$(MAKE) /NOLOGO -f Makefile.vc6 distclean
 	cd ..
 
 
@@ -71,7 +71,7 @@ distclean: clean
 !ifdef DISCMAGE
 libdiscmage/$(FULLLIBNAME_DM):
 	cd libdiscmage
-	$(MAKE) /nologo -f Makefile.vc6
+	$(MAKE) /NOLOGO -f Makefile.vc6
 	cd ..
 !endif
 
@@ -82,13 +82,13 @@ $(TARGET): $(OBJECTS)
 
 install:
 #	cd libdiscmage
-#	$(MAKE) /nologo -f Makefile.vc6 install
+#	$(MAKE) /NOLOGO -f Makefile.vc6 install
 #	cd ..
 
 
 uninstall:
 #	cd libdiscmage
-#	$(MAKE) /nologo -f Makefile.vc6 uninstall
+#	$(MAKE) /NOLOGO -f Makefile.vc6 uninstall
 #	cd ..
 
 

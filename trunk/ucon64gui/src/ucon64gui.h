@@ -38,8 +38,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 typedef struct
 {
 //  char cmd[FILENAME_MAX];
-  const char *rom;
-  const char *file;
+//  const char *rom;
+//  const char *file;
+  char rom[FILENAME_MAX];
+  char file[FILENAME_MAX];
 
   const char *console;
 
@@ -60,8 +62,7 @@ extern ucon64gui_t ucon64gui;
 
 extern void ucon64gui_divider (void);
 extern void ucon64gui_spacer (void);
-extern void
-emulate_property (char *property, int size);
+extern void emulate_property (char *property, int size);
 
 
 #endif // UCON64GUI_H

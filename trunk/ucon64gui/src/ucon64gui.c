@@ -288,14 +288,15 @@ html2gui_request (const char *uri, const char *query)
     {
       switch (c)
         {
+#if 0
           case UCON64_ROM:
-//            ucon64gui.rom = optind;
+            ucon64gui.rom = optind;
             return;
             
           case UCON64_FILE:
-//            ucon64gui.file = optind;
+            ucon64gui.file = optind;
             return;
-
+#endif
           case UCON64_SNES:
             ucon64gui.console =  "--snes";
             snes_gui ();

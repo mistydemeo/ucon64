@@ -11,20 +11,20 @@ Its main features are:
   Game Genie
   *) with RLE compression
 - Support for RomCenter Data files
-- Support for 10+ different backup units to backup/restore ROM(s), disc(s) and
-  SRAM(s) like: Flash Advance Linker, Flash 2 Advance, Doctor V64 (Junior),
-  Super Wild Card, Game Doctor, Dexdrive, Super Magic Drive, Game Boy Xchanger,
-  Mad Catz Camera Link, Lynxit, MD-PRO, SMS-PRO, PCE-PRO, GG-PRO, Super Flash
-  and your CD-writer.
+- Support for more than 20 different backup units to backup/restore ROM(s),
+  disc(s) and SRAM(s) like: Flash Advance Linker, Flash 2 Advance, Doctor V64
+  (Junior), Super Wild Card, Game Doctor, Dexdrive, Super Magic Drive, Game Boy
+  Xchanger, Mad Catz Camera Link, Lynxit, MD-PRO, SMS-PRO, PCE-PRO, GG-PRO,
+  Super Flash and more.
 - Finally 150+(!) different options/features for every kind of ROM
   handling/management known to man :-)
 <!-- 120 options, 62 switches last time I counted them -->
   Including:
   *VERY* verbose ROM information for ALL systems, detection of bad dumps using
-  internal checksums or DAT files, CRC32 calculation, ROM comparison,
-  modification (strip, pad, etc...), SRAM conversion (emulator &#60;-&#62; backup
-  unit), DiscJuggler and Nero image conversions, complete gzip and zip support
-  for all file-related funtions, etc...
+  internal checksums or DAT files, CRC32, SHA1 and MD5 calculation, ROM
+  comparison, modification (strip, pad, etc...), SRAM conversion (emulator
+  &#60;-&#62; backup unit), DiscJuggler and Nero image conversions, complete
+  gzip and zip support for all file-related funtions, etc...
 - Always up-to-date with support for new trends, formats, and headers like UNIF
   (NES), NSRT (SNES), etc...
 
@@ -503,8 +503,8 @@ Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)
                   TYPE=3 Arkanoid controller
                   TYPE=4 powerpad
                   TYPE=5 four-score adapter
-  --ntsc        specify TV standard is NTSC (UNIF only)
-  --pal         specify TV standard is PAL (UNIF only)
+  --ntsc        specify TV standard is NTSC (UNIF/iNES only)
+  --pal         specify TV standard is PAL (UNIF/iNES only)
   --bat         specify battery is present
   --nbat        specify battery is not present
   --vram        specify VRAM override (UNIF only)
@@ -566,7 +566,7 @@ Pocket Linker
 Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr
   --ata         force recognition
 
-DATabase: 32626 known ROMs (DAT files: /mnt/hd2-1/home/daniel/.ucon64/dat)
+DATabase: 41983 known ROMs (DAT files: /home/daniel/.ucon64/dat)
 
 NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)
       parallel port. If that is the case give a hardware address. For example:

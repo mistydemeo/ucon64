@@ -1,7 +1,7 @@
 /*
 map.h - a map (associative array) implementation
 
-Copyright (c) 2002 dbjh
+Copyright (c) 2002 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@ extern "C" {
 
 /*
   map_create()  create a new map (associative array)
+  map_resize()  resize map
   map_copy()    copy map src to map dest
                 dest must be a larger map than src
                 Note that this function also copies the member cmp_key.

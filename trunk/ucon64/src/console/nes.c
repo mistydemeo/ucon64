@@ -2,7 +2,7 @@
 nes.c - Nintendo Entertainment System support for uCON64
 
 Copyright (c) 1999 - 2003 NoisyB <noisyb@gmx.net>
-Copyright (c) 2002 - 2004 dbjh
+Copyright (c) 2002 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -126,12 +126,12 @@ const st_getopt2_t nes_usage[] =
     },
     {
       "ntsc", 0, 0, UCON64_NTSC,
-      NULL, "specify TV standard is NTSC (UNIF only)",
+      NULL, "specify TV standard is NTSC (UNIF/iNES only)",
       &ucon64_wf[WF_OBJ_NES_SWITCH]
     },
     {
       "pal", 0, 0, UCON64_PAL,
-      NULL, "specify TV standard is PAL (UNIF only)",
+      NULL, "specify TV standard is PAL (UNIF/iNES only)",
       &ucon64_wf[WF_OBJ_NES_SWITCH]
     },
     {
@@ -5413,13 +5413,13 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
       write_chunk (&unif_chunk, destfile);
     }
 
-  // WRTR chunk can be helpful when debugging
+  // WRTR chunk can be helpful for debugging
   unif_chunk.id = WRTR_ID;
   unif_chunk.length = strlen (unif_ucon64_sig) + 1;
   unif_chunk.data = (char *) unif_ucon64_sig;
   write_chunk (&unif_chunk, destfile);
 #else
-  // READ chunk can be helpful when debugging
+  // READ chunk can be helpful for debugging
   unif_chunk.id = READ_ID;
   unif_chunk.length = strlen (unif_ucon64_sig) + 1;
   unif_chunk.data = (char *) unif_ucon64_sig;   // assume ASCII-z (spec is not clear)
@@ -5427,13 +5427,13 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
 #endif
 
   if (UCON64_ISSET (ucon64.tv_standard))
-    {
-      unif_chunk.id = TVCI_ID;
-      unif_chunk.length = 1;
-      b = ucon64.tv_standard;                   // necessary for big endian machines
-      unif_chunk.data = &b;
-      write_chunk (&unif_chunk, destfile);
-    }
+    b = ucon64.tv_standard;                     // necessary for big endian machines
+  else
+    b = ines_header.ctrl3 & INES_TVID;
+  unif_chunk.id = TVCI_ID;
+  unif_chunk.length = 1;
+  unif_chunk.data = &b;
+  write_chunk (&unif_chunk, destfile);
 
   if (UCON64_ISSET (ucon64.use_dump_info))
     {
@@ -5512,16 +5512,14 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
     write_chunk (&unif_chunk, destfile);
 
   if (UCON64_ISSET (ucon64.vram))
-    {
-      if (ucon64.vram)
-        {
-          b = 0;                                // this is a dummy
-          unif_chunk.id = VROR_ID;
-          unif_chunk.length = 1;
-          unif_chunk.data = &b;
-          write_chunk (&unif_chunk, destfile);
-        }
-    }
+    if (ucon64.vram)
+      {
+        b = 0;                                  // this is a dummy
+        unif_chunk.id = VROR_ID;
+        unif_chunk.length = 1;
+        unif_chunk.data = &b;
+        write_chunk (&unif_chunk, destfile);
+      }
 
   unif_chunk.id = MIRR_ID;
   unif_chunk.length = 1;
@@ -5604,10 +5602,9 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       unif_chunk2.data = (void *) ucon64.comment;
       write_chunk (&unif_chunk2, destfile);
     }
-  else
+  else if ((unif_chunk1 = read_chunk (READ_ID, rom_buffer, 0)) != NULL)
     {
-      if ((unif_chunk1 = read_chunk (READ_ID, rom_buffer, 0)) != NULL)
-        write_chunk (unif_chunk1, destfile);
+      write_chunk (unif_chunk1, destfile);
       free (unif_chunk1);
     }
 
@@ -5660,8 +5657,8 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
           unif_chunk1->data = (char *) unif_ucon64_sig;
         }
       write_chunk (unif_chunk1, destfile);
+      free (unif_chunk1);
     }
-  free (unif_chunk1);
 #endif
 
   if (internal_name != NULL)
@@ -5671,10 +5668,9 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       unif_chunk2.data = (char *) internal_name;
       write_chunk (&unif_chunk2, destfile);     // assume ASCII-z (spec is not clear)
     }
-  else
+  else if ((unif_chunk1 = read_chunk (NAME_ID, rom_buffer, 0)) != NULL)
     {
-      if ((unif_chunk1 = read_chunk (NAME_ID, rom_buffer, 0)) != NULL)
-        write_chunk (unif_chunk1, destfile);
+      write_chunk (unif_chunk1, destfile);
       free (unif_chunk1);
     }
 
@@ -5686,10 +5682,9 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       unif_chunk2.data = &b;
       write_chunk (&unif_chunk2, destfile);
     }
-  else
+  else if ((unif_chunk1 = read_chunk (TVCI_ID, rom_buffer, 0)) != NULL)
     {
-      if ((unif_chunk1 = read_chunk (TVCI_ID, rom_buffer, 0)) != NULL)
-        write_chunk (unif_chunk1, destfile);
+      write_chunk (unif_chunk1, destfile);
       free (unif_chunk1);
     }
 
@@ -5725,10 +5720,9 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       else                                      // Is this a warning or an error?
         printf ("WARNING: No dumper info file was specified, chunk won't be written\n");
     }
-  else
+  else if ((unif_chunk1 = read_chunk (DINF_ID, rom_buffer, 0)) != NULL)
     {
-      if ((unif_chunk1 = read_chunk (DINF_ID, rom_buffer, 0)) != NULL)
-        write_chunk (unif_chunk1, destfile);
+      write_chunk (unif_chunk1, destfile);
       free (unif_chunk1);
     }
 
@@ -5740,80 +5734,75 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       unif_chunk2.data = &b;
       write_chunk (&unif_chunk2, destfile);
     }
-  else
+  else if ((unif_chunk1 = read_chunk (CTRL_ID, rom_buffer, 0)) != NULL)
     {
-      if ((unif_chunk1 = read_chunk (CTRL_ID, rom_buffer, 0)) != NULL)
-        write_chunk (unif_chunk1, destfile);
+      write_chunk (unif_chunk1, destfile);
       free (unif_chunk1);
     }
 
   // copy PRG chunks
   for (n = 0; n < 16; n++)
-    {
-      if ((unif_chunk1 = read_chunk (unif_prg_ids[n], rom_buffer, 0)) != NULL)
-        {
-          if ((unif_chunk3 = read_chunk (unif_pck_ids[n], rom_buffer, 0)) == NULL)
-            {
-              x = crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
-              unif_chunk2.id = unif_pck_ids[n];
-              unif_chunk2.length = 4;
+    if ((unif_chunk1 = read_chunk (unif_prg_ids[n], rom_buffer, 0)) != NULL)
+      {
+        if ((unif_chunk3 = read_chunk (unif_pck_ids[n], rom_buffer, 0)) == NULL)
+          {
+            x = crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
+            unif_chunk2.id = unif_pck_ids[n];
+            unif_chunk2.length = 4;
 #ifdef  WORDS_BIGENDIAN
-              x = bswap_32 (x);
+            x = bswap_32 (x);
 #endif
-              unif_chunk2.data = &x;
-              write_chunk (&unif_chunk2, destfile);
-            }
-          else
-            {
-              x = crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
+            unif_chunk2.data = &x;
+            write_chunk (&unif_chunk2, destfile);
+          }
+        else
+          {
+            x = crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
 #ifdef  WORDS_BIGENDIAN
-              x = bswap_32 (x);
+            x = bswap_32 (x);
 #endif
-              if (x != *((int *) unif_chunk3->data))
-                printf ("WARNING: PRG chunk %d has a bad checksum, writing new checksum\n", n);
-              unif_chunk3->length = 4;
-              unif_chunk3->data = &x;
-              write_chunk (unif_chunk3, destfile);
-            }
-          free (unif_chunk3);
-          write_chunk (unif_chunk1, destfile);
-        }
-      free (unif_chunk1);
-    }
+            if (x != *((int *) unif_chunk3->data))
+              printf ("WARNING: PRG chunk %d has a bad checksum, writing new checksum\n", n);
+            unif_chunk3->length = 4;
+            unif_chunk3->data = &x;
+            write_chunk (unif_chunk3, destfile);
+            free (unif_chunk3);
+          }
+        write_chunk (unif_chunk1, destfile);
+        free (unif_chunk1);
+      }
 
   // copy CHR chunks
   for (n = 0; n < 16; n++)
-    {
-      if ((unif_chunk1 = read_chunk (unif_chr_ids[n], rom_buffer, 0)) != NULL)
-        {
-          if ((unif_chunk3 = read_chunk (unif_cck_ids[n], rom_buffer, 0)) == NULL)
-            {
-              x = crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
-              unif_chunk2.id = unif_cck_ids[n];
-              unif_chunk2.length = 4;
+    if ((unif_chunk1 = read_chunk (unif_chr_ids[n], rom_buffer, 0)) != NULL)
+      {
+        if ((unif_chunk3 = read_chunk (unif_cck_ids[n], rom_buffer, 0)) == NULL)
+          {
+            x = crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
+            unif_chunk2.id = unif_cck_ids[n];
+            unif_chunk2.length = 4;
 #ifdef  WORDS_BIGENDIAN
-              x = bswap_32 (x);
+            x = bswap_32 (x);
 #endif
-              unif_chunk2.data = &x;
-              write_chunk (&unif_chunk2, destfile);
-            }
-          else
-            {
-              x = crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
+            unif_chunk2.data = &x;
+            write_chunk (&unif_chunk2, destfile);
+          }
+        else
+          {
+            x = crc32 (0, (unsigned char *) unif_chunk1->data, unif_chunk1->length);
 #ifdef  WORDS_BIGENDIAN
-              x = bswap_32 (x);
+            x = bswap_32 (x);
 #endif
-              if (x != *((int *) unif_chunk3->data))
-                printf ("WARNING: CHR chunk %d has a bad checksum, writing new checksum\n", n);
-              unif_chunk3->length = 4;
-              unif_chunk3->data = &x;
-              write_chunk (unif_chunk3, destfile);
-            }
-          free (unif_chunk3);
-          write_chunk (unif_chunk1, destfile);
-        }
-      free (unif_chunk1);
-    }
+            if (x != *((int *) unif_chunk3->data))
+              printf ("WARNING: CHR chunk %d has a bad checksum, writing new checksum\n", n);
+            unif_chunk3->length = 4;
+            unif_chunk3->data = &x;
+            write_chunk (unif_chunk3, destfile);
+            free (unif_chunk3);
+          }
+        write_chunk (unif_chunk1, destfile);
+        free (unif_chunk1);
+      }
 
   if (UCON64_ISSET (ucon64.battery))
     {
@@ -5826,10 +5815,9 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
           write_chunk (&unif_chunk2, destfile);
         }
     }
-  else
+  else if ((unif_chunk1 = read_chunk (BATR_ID, rom_buffer, 0)) != NULL)
     {
-      if ((unif_chunk1 = read_chunk (BATR_ID, rom_buffer, 0)) != NULL)
-        write_chunk (unif_chunk1, destfile);
+      write_chunk (unif_chunk1, destfile);
       free (unif_chunk1);
     }
 
@@ -5844,10 +5832,9 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
           write_chunk (&unif_chunk2, destfile);
         }
     }
-  else
+  else if ((unif_chunk1 = read_chunk (VROR_ID, rom_buffer, 0)) != NULL)
     {
-      if ((unif_chunk1 = read_chunk (VROR_ID, rom_buffer, 0)) != NULL)
-        write_chunk (unif_chunk1, destfile);
+      write_chunk (unif_chunk1, destfile);
       free (unif_chunk1);
     }
 
@@ -5865,10 +5852,9 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
       unif_chunk2.data = &b;
       write_chunk (&unif_chunk2, destfile);
     }
-  else
+  else if ((unif_chunk1 = read_chunk (MIRR_ID, rom_buffer, 0)) != NULL)
     {
-      if ((unif_chunk1 = read_chunk (MIRR_ID, rom_buffer, 0)) != NULL)
-        write_chunk (unif_chunk1, destfile);
+      write_chunk (unif_chunk1, destfile);
       free (unif_chunk1);
     }
 
@@ -6053,6 +6039,11 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
   ines_header.prg_size = prg_size >> 14;
   ines_header.chr_size = chr_size >> 13;
 
+  ines_header.ctrl3 = 0;                        // clear undefined bits
+  if (UCON64_ISSET (ucon64.tv_standard))
+    if (ucon64.tv_standard == 1)                // value can be 0, 1 or 2
+      ines_header.ctrl3 |= INES_TVID;
+
   if (UCON64_ISSET (ucon64.battery))
     {
       if (ucon64.battery)
@@ -6074,8 +6065,7 @@ nes_ines_ines (FILE *srcfile, FILE *destfile, int deinterleave)
         printf ("WARNING: Invalid mirroring type specified, using \"0\"\n");
     }
 
-  ines_header.reserved1 = 0;
-  ines_header.reserved2 = 0;
+  memset (ines_header.reserved, 0, sizeof (ines_header.reserved));
   fwrite (&ines_header, 1, INES_HEADER_LEN, destfile);
   fwrite (prg_data, 1, prg_size, destfile);
   fwrite (chr_data, 1, chr_size, destfile);
@@ -6178,6 +6168,18 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
   else                                          // mapper specified
     set_mapper (&ines_header, strtol (ucon64.mapr, NULL, 10));
 
+  if (UCON64_ISSET (ucon64.tv_standard))
+    {
+      if (ucon64.tv_standard == 1)              // value can be 0, 1 or 2
+        ines_header.ctrl3 |= INES_TVID;
+    }
+  else if ((unif_chunk = read_chunk (TVCI_ID, rom_buffer, 0)) != NULL)
+    {
+      ines_header.ctrl3 |= *((unsigned char *) unif_chunk->data) == 1 ?
+        INES_TVID : 0;
+      free (unif_chunk);
+    }
+
   if (UCON64_ISSET (ucon64.battery))
     {
       if (ucon64.battery)
@@ -6185,10 +6187,9 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
       else
         ines_header.ctrl1 &= ~INES_SRAM;
     }
-  else
+  else if ((unif_chunk = read_chunk (BATR_ID, rom_buffer, 0)) != NULL)
     {
-      if ((unif_chunk = read_chunk (BATR_ID, rom_buffer, 0)) != NULL)
-        ines_header.ctrl1 |= INES_SRAM;
+      ines_header.ctrl1 |= INES_SRAM;
       free (unif_chunk);
     }
 
@@ -6235,11 +6236,15 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
   for (n = 0; n < 16; n++)
     {
       if ((unif_chunk = read_chunk (unif_prg_ids[n], rom_buffer, 0)) != NULL)
-        prg_size += unif_chunk->length;
-      free (unif_chunk);
+        {
+          prg_size += unif_chunk->length;
+          free (unif_chunk);
+        }
       if ((unif_chunk = read_chunk (unif_chr_ids[n], rom_buffer, 0)) != NULL)
-        chr_size += unif_chunk->length;
-      free (unif_chunk);
+        {
+          chr_size += unif_chunk->length;
+          free (unif_chunk);
+        }
     }
 
   // write header
@@ -6249,19 +6254,19 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
 
   // copy PRG data
   for (n = 0; n < 16; n++)
-    {
-      if ((unif_chunk = read_chunk (unif_prg_ids[n], rom_buffer, 0)) != NULL)
+    if ((unif_chunk = read_chunk (unif_prg_ids[n], rom_buffer, 0)) != NULL)
+      {
         fwrite (unif_chunk->data, 1, unif_chunk->length, destfile);
-      free (unif_chunk);
-    }
+        free (unif_chunk);
+      }
 
   // copy CHR data
   for (n = 0; n < 16; n++)
-    {
-      if ((unif_chunk = read_chunk (unif_chr_ids[n], rom_buffer, 0)) != NULL)
+    if ((unif_chunk = read_chunk (unif_chr_ids[n], rom_buffer, 0)) != NULL)
+      {
         fwrite (unif_chunk->data, 1, unif_chunk->length, destfile);
-      free (unif_chunk);
-    }
+        free (unif_chunk);
+      }
 
   return 0;
 }
@@ -6744,7 +6749,7 @@ nes_j (unsigned char **mem_image)
         printf ("WARNING: No mapper number specified, writing \"%d\"\n",
                 (ines_header.ctrl1 >> 4) | (ines_header.ctrl2 & 0xf0));
     }
-  else  // mapper specified (override unreliable value from .PRM file)
+  else // mapper specified (override unreliable value from .PRM file)
     set_mapper (&ines_header, strtol (ucon64.mapr, NULL, 10));
 
   size = prg_size + chr_size + ((ines_header.ctrl1 & INES_TRAINER) ? 512 : 0);
@@ -7069,6 +7074,10 @@ nes_init (st_rominfo_t *rominfo)
         sprintf (buf, "Memory mapper (iNES): %d\n", x);
       strcat (rominfo->misc, buf);
 
+      sprintf (buf, "Television standard: %s\n",
+        ines_header.ctrl3 & INES_TVID ? "PAL" : "NTSC");
+      strcat (rominfo->misc, buf);
+      
       if (ines_header.ctrl1 & INES_MIRROR)
         str = "Vertical";
       else if (ines_header.ctrl1 & INES_4SCREEN)
@@ -7078,11 +7087,15 @@ nes_init (st_rominfo_t *rominfo)
       sprintf (buf, "Mirroring: %s\n", str);
       strcat (rominfo->misc, buf);
 
+      sprintf (buf, "Cartridge RAM: %d kBytes\n", ines_header.ram_size ?
+        ines_header.ram_size * 8 : 8);
+      strcat (rominfo->misc, buf);
+
       sprintf (buf, "Save RAM: %s\n", (ines_header.ctrl1 & INES_SRAM) ? "Yes" : "No");
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "512-byte trainer: %s\n",
-                (ines_header.ctrl1 & INES_TRAINER) ? "Yes" : "No");
+        (ines_header.ctrl1 & INES_TRAINER) ? "Yes" : "No");
       strcat (rominfo->misc, buf);
 
       sprintf (buf, "VS-System: %s", (ines_header.ctrl2 & 0x01) ? "Yes" : "No");
@@ -7108,18 +7121,12 @@ nes_init (st_rominfo_t *rominfo)
       sprintf (buf, "UNIF revision: %d\n", x);
       strcpy (rominfo->misc, buf);
 
-      if ((unif_chunk = read_chunk (MAPR_ID, rom_buffer, 0)) != NULL)
-        {
-          sprintf (buf, "Board name: %s\n", (char *) unif_chunk->data);
-          strcat (rominfo->misc, buf);
-        }
-      free (unif_chunk);
       if ((unif_chunk = read_chunk (READ_ID, rom_buffer, 0)) != NULL)
         {
           sprintf (buf, "Comment: %s\n", (char *) unif_chunk->data);
           strcat (rominfo->misc, buf);
+          free (unif_chunk);
         }
-      free (unif_chunk);
 #if     UNIF_REVISION > 7
       if ((unif_chunk = read_chunk (WRTR_ID, rom_buffer, 0)) != NULL)
         {
@@ -7167,27 +7174,6 @@ nes_init (st_rominfo_t *rominfo)
           strcat (rominfo->misc, "\n");
         }
 #endif
-      if ((unif_chunk = read_chunk (NAME_ID, rom_buffer, 0)) != NULL)
-        {
-#if 0
-          sprintf (buf, "Internal name: %s\n", (char *) unif_chunk->data);
-          strcat (rominfo->misc, buf);
-#endif
-          memcpy (rominfo->name, unif_chunk->data,
-                  unif_chunk->length > sizeof rominfo->name ?
-                    sizeof rominfo->name : unif_chunk->length);
-        }
-      free (unif_chunk);
-      if ((unif_chunk = read_chunk (TVCI_ID, rom_buffer, 0)) != NULL)
-        {
-          str_list[0] = "NTSC";
-          str_list[1] = "PAL";
-          str_list[2] = "NTSC/PAL";
-          x = *((unsigned char *) unif_chunk->data);
-          sprintf (buf, "Television standard: %s\n", x > 2 ? "Unknown" : str_list[x]);
-          strcat (rominfo->misc, buf);
-        }
-      free (unif_chunk);
       if ((unif_chunk = read_chunk (DINF_ID, rom_buffer, 0)) != NULL)
         {
           st_dumper_info_t *info = (st_dumper_info_t *) unif_chunk->data;
@@ -7199,8 +7185,130 @@ nes_init (st_rominfo_t *rominfo)
                         info->day, info->month, le2me_16 (info->year),
                         info->dumper_agent);
           strcat (rominfo->misc, buf);
+          free (unif_chunk);
         }
-      free (unif_chunk);
+
+      size = 0;
+      // PRG chunk info
+      for (n = 0; n < 16; n++)
+        if ((unif_chunk = read_chunk (unif_prg_ids[n], rom_buffer, 0)) != NULL)
+          {
+            crc = crc32 (crc, (unsigned char *) unif_chunk->data, unif_chunk->length);
+            size += unif_chunk->length;
+            if ((unif_chunk2 = read_chunk (unif_pck_ids[n], rom_buffer, 0)) == NULL)
+              str = "not available";
+            else
+              {
+                x = crc32 (0, (unsigned char *) unif_chunk->data, unif_chunk->length);
+#ifdef  WORDS_BIGENDIAN
+                x = bswap_32 (x);
+#endif
+                str = (char *)
+#ifdef  USE_ANSI_COLOR
+                  (ucon64.ansi_color ?
+                    ((x == *((int *) unif_chunk2->data)) ?
+                      "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
+                    :
+                    ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad"));
+#else
+                    ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad");
+#endif
+                free (unif_chunk2);
+              }
+            sprintf (buf, "PRG%X: %.4f Mb, checksum %s\n", n,
+              TOMBIT_F (unif_chunk->length), str);
+            strcat (rominfo->misc, buf);
+            free (unif_chunk);
+          }
+
+      // CHR chunk info
+      for (n = 0; n < 16; n++)
+        if ((unif_chunk = read_chunk (unif_chr_ids[n], rom_buffer, 0)) != NULL)
+          {
+            crc = crc32 (crc, (unsigned char *) unif_chunk->data, unif_chunk->length);
+            size += unif_chunk->length;
+            if ((unif_chunk2 = read_chunk (unif_cck_ids[n], rom_buffer, 0)) == NULL)
+              str = "not available";
+            else
+              {
+                x = crc32 (0, (unsigned char *) unif_chunk->data, unif_chunk->length);
+#ifdef  WORDS_BIGENDIAN
+                x = bswap_32 (x);
+#endif
+                str = (char *)
+#ifdef  USE_ANSI_COLOR
+                  (ucon64.ansi_color ?
+                    ((x == *((int *) unif_chunk2->data)) ?
+                      "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
+                    :
+                    ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad"));
+#else
+                    ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad");
+#endif
+                free (unif_chunk2);
+              }
+            sprintf (buf, "CHR%X: %.4f Mb, checksum %s\n", n,
+              TOMBIT_F (unif_chunk->length), str);
+            strcat (rominfo->misc, buf);
+            free (unif_chunk);
+          }
+      ucon64.crc32 = crc;
+      rominfo->data_size = size;
+      // Don't introduce extra code just to make this line be printed above
+      //  the previous two line types (PRG & CHR)
+      sprintf (buf, "Size: %.4f Mb\n", TOMBIT_F (rominfo->data_size));
+      strcat (rominfo->misc, buf);
+
+      if ((unif_chunk = read_chunk (MAPR_ID, rom_buffer, 0)) != NULL)
+        {
+          sprintf (buf, "Board name: %s\n", (char *) unif_chunk->data);
+          strcat (rominfo->misc, buf);
+          free (unif_chunk);
+        }
+      if ((unif_chunk = read_chunk (NAME_ID, rom_buffer, 0)) != NULL)
+        {
+#if 0
+          sprintf (buf, "Internal name: %s\n", (char *) unif_chunk->data);
+          strcat (rominfo->misc, buf);
+#endif
+          memcpy (rominfo->name, unif_chunk->data,
+                  unif_chunk->length > sizeof rominfo->name ?
+                    sizeof rominfo->name : unif_chunk->length);
+          free (unif_chunk);
+        }
+      if ((unif_chunk = read_chunk (TVCI_ID, rom_buffer, 0)) != NULL)
+        {
+          str_list[0] = "NTSC";
+          str_list[1] = "PAL";
+          str_list[2] = "NTSC/PAL";
+          x = *((unsigned char *) unif_chunk->data);
+          sprintf (buf, "Television standard: %s\n", x > 2 ? "Unknown" : str_list[x]);
+          strcat (rominfo->misc, buf);
+          free (unif_chunk);
+        }
+      if ((unif_chunk = read_chunk (MIRR_ID, rom_buffer, 0)) != NULL)
+        {
+          str_list[0] = "Horizontal (hard wired)";
+          str_list[1] = "Vertical (hard wired)";
+          str_list[2] = "All pages from $2000 (hard wired)";
+          str_list[3] = "All pages from $2400 (hard wired)";
+          str_list[4] = "Four screens of VRAM (hard wired)";
+          str_list[5] = "Controlled by mapper hardware";
+          x = *((unsigned char *) unif_chunk->data);
+          sprintf (buf, "Mirroring: %s\n", x > 5 ? "Unknown" : str_list[x]);
+          strcat (rominfo->misc, buf);
+          free (unif_chunk);
+        }
+
+      x = 0;
+      if ((unif_chunk = read_chunk (BATR_ID, rom_buffer, 0)) != NULL)
+        {
+          x = 1;
+          free (unif_chunk);
+        }
+      sprintf (buf, "Save RAM: %s\n", x ? "Yes" : "No");
+      strcat (rominfo->misc, buf);
+
       if ((unif_chunk = read_chunk (CTRL_ID, rom_buffer, 0)) != NULL)
         {
           str_list[0] = "Regular joypad";
@@ -7225,110 +7333,17 @@ nes_init (st_rominfo_t *rominfo)
               }
           sprintf (buf, "Supported controllers: %s\n", ctrl_str);
           strcat (rominfo->misc, buf);
-        }
-      free (unif_chunk);
-
-      size = 0;
-      // PRG chunk info
-      for (n = 0; n < 16; n++)
-        {
-          if ((unif_chunk = read_chunk (unif_prg_ids[n], rom_buffer, 0)) != NULL)
-            {
-              crc = crc32 (crc, (unsigned char *) unif_chunk->data, unif_chunk->length);
-              size += unif_chunk->length;
-              if ((unif_chunk2 = read_chunk (unif_pck_ids[n], rom_buffer, 0)) == NULL)
-                str = "not available";
-              else
-                {
-                  x = crc32 (0, (unsigned char *) unif_chunk->data, unif_chunk->length);
-#ifdef  WORDS_BIGENDIAN
-                  x = bswap_32 (x);
-#endif
-                  str = (char *)
-#ifdef  USE_ANSI_COLOR
-                    (ucon64.ansi_color ?
-                      ((x == *((int *) unif_chunk2->data)) ?
-                        "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
-                      :
-                      ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad"));
-#else
-                      ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad");
-#endif
-                }
-              sprintf (buf, "PRG%X: %.4f Mb, checksum %s\n", n,
-                TOMBIT_F (unif_chunk->length), str);
-              strcat (rominfo->misc, buf);
-              free (unif_chunk2);
-            }
           free (unif_chunk);
         }
 
-      // CHR chunk info
-      for (n = 0; n < 16; n++)
-        {
-          if ((unif_chunk = read_chunk (unif_chr_ids[n], rom_buffer, 0)) != NULL)
-            {
-              crc = crc32 (crc, (unsigned char *) unif_chunk->data, unif_chunk->length);
-              size += unif_chunk->length;
-              if ((unif_chunk2 = read_chunk (unif_cck_ids[n], rom_buffer, 0)) == NULL)
-                str = "not available";
-              else
-                {
-                  x = crc32 (0, (unsigned char *) unif_chunk->data, unif_chunk->length);
-#ifdef  WORDS_BIGENDIAN
-                  x = bswap_32 (x);
-#endif
-                  str = (char *)
-#ifdef  USE_ANSI_COLOR
-                    (ucon64.ansi_color ?
-                      ((x == *((int *) unif_chunk2->data)) ?
-                        "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
-                      :
-                      ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad"));
-#else
-                      ((x == *((int *) unif_chunk2->data)) ? "ok" : "bad");
-#endif
-                }
-              sprintf (buf, "CHR%X: %.4f Mb, checksum %s\n", n,
-                TOMBIT_F (unif_chunk->length), str);
-              strcat (rominfo->misc, buf);
-              free (unif_chunk2);
-            }
-          free (unif_chunk);
-        }
-      ucon64.crc32 = crc;
-      rominfo->data_size = size;
-
-      // Don't introduce extra code just to make this line be printed above
-      //  the previous two line types (PRG & CHR)
-      sprintf (buf, "Size: %.4f Mb\n", TOMBIT_F (rominfo->data_size));
-      strcat (rominfo->misc, buf);
-
-      x = 0;
-      if ((unif_chunk = read_chunk (BATR_ID, rom_buffer, 0)) != NULL)
-        x = 1;
-      sprintf (buf, "Save RAM: %s\n", x ? "Yes" : "No");
-      strcat (rominfo->misc, buf);
-      free (unif_chunk);
-      if ((unif_chunk = read_chunk (MIRR_ID, rom_buffer, 0)) != NULL)
-        {
-          str_list[0] = "Horizontal (hard wired)";
-          str_list[1] = "Vertical (hard wired)";
-          str_list[2] = "All pages from $2000 (hard wired)";
-          str_list[3] = "All pages from $2400 (hard wired)";
-          str_list[4] = "Four screens of VRAM (hard wired)";
-          str_list[5] = "Controlled by mapper hardware";
-          x = *((unsigned char *) unif_chunk->data);
-          sprintf (buf, "Mirroring: %s\n", x > 5 ? "Unknown" : str_list[x]);
-          strcat (rominfo->misc, buf);
-        }
-      free (unif_chunk);
       x = 0;
       if ((unif_chunk = read_chunk (VROR_ID, rom_buffer, 0)) != NULL)
-        x = 1;
+        {
+          x = 1;
+          free (unif_chunk);
+        }
       sprintf (buf, "VRAM override: %s", x ? "Yes" : "No");
       strcat (rominfo->misc, buf);
-      free (unif_chunk);
 
       free (rom_buffer);
       break;

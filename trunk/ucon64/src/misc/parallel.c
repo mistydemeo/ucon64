@@ -606,7 +606,13 @@ parport_open (int port)
     }
 
   ioctl (parport_io_fd, PPEXCL);                // disable sharing
-  ioctl (parport_io_fd, PPCLAIM);
+  if (ioctl (parport_io_fd, PPCLAIM) == -1)     // claim the device
+    {
+      fprintf (stderr, "ERROR: Could not get exclusive access to parallel port device (%s)\n"
+                       "       Check if another module (like lp) uses the module parport\n",
+                       ucon64.parport_dev);
+      exit (1);
+    }
   t.tv_sec = 0;
   t.tv_usec = 500 * 1000;                       // set time-out to 500 milliseconds
   ioctl (parport_io_fd, PPSETTIME, &t);

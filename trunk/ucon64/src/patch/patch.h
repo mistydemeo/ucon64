@@ -27,6 +27,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ips.h"
 #include "pal4u.h"
 #include "ppf.h"
-#include "xps.h"
 
 #endif

@@ -2,7 +2,7 @@
 ucon64_opts.c - switch()'es for all uCON64 options
 
 Copyright (c) 2002 - 2004 NoisyB <noisyb@gmx.net>
-Copyright (c) 2002 - 2004 dbjh
+Copyright (c) 2002 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -510,14 +510,14 @@ ucon64_switches (st_ucon64_t *p)
       if (!UCON64_ISSET (ucon64.tv_standard))
         ucon64.tv_standard = 0;
       else if (ucon64.tv_standard == 1)
-        ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF)
+        ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF/iNES)
       break;
 
     case UCON64_PAL:
       if (!UCON64_ISSET (ucon64.tv_standard))
         ucon64.tv_standard = 1;
       else if (ucon64.tv_standard == 0)
-        ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF)
+        ucon64.tv_standard = 2;                 // code for NTSC/PAL (NES UNIF/iNES)
       break;
 
     case UCON64_BAT:
@@ -1687,6 +1687,7 @@ ucon64_options (st_ucon64_t *p)
 #endif
 
     case UCON64_XRESET:
+      parport_print_info ();
       fputs ("Resetting parallel port...", stdout);
       outportb ((unsigned short) (ucon64.parport + PARPORT_DATA), 0);
       outportb ((unsigned short) (ucon64.parport + PARPORT_CONTROL), 0);

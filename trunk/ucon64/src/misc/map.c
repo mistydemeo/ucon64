@@ -1,7 +1,7 @@
 /*
 map.c - a map (associative array) implementation
 
-Copyright (c) 2002 - 2003 dbjh
+Copyright (c) 2002 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -46,6 +46,25 @@ map_create (int n_elements)
 }
 
 
+st_map_t *
+map_resize (st_map_t *map, int n_elements)
+{
+  int size = sizeof (st_map_t) + n_elements * sizeof (st_map_element_t);
+
+  if ((map = (st_map_t *) realloc (map, size)) == NULL)
+    {
+      fprintf (stderr, "ERROR: Not enough memory for buffer (%d bytes)\n", size);
+      exit (1);
+    }
+  map->data = (st_map_element_t *) (((unsigned char *) map) + sizeof (st_map_t));
+  if (n_elements > map->size)
+    memset(((unsigned char *) map->data) + map->size * sizeof (st_map_element_t),
+           MAP_FREE_KEY, (n_elements - map->size) * sizeof (st_map_element_t));
+  map->size = n_elements;
+  return map;
+}
+
+
 void
 map_copy (st_map_t *dest, st_map_t *src)
 {
@@ -71,15 +90,7 @@ map_put (st_map_t *map, void *key, void *object)
     n++;
 
   if (n == map->size)                           // current map is full
-    {
-      int new_size = map->size + 20;
-      st_map_t *map2;
-
-      map2 = map_create (new_size);
-      map_copy (map2, map);
-      free (map);
-      map = map2;
-    }
+    map = map_resize (map, map->size + 20);
 
   map->data[n].key = key;
   map->data[n].object = object;
@@ -93,7 +104,8 @@ map_get (st_map_t *map, void *key)
 {
   int n = 0;
 
-  while (n < map->size && map->cmp_key (map->data[n].key, key))
+  while (n < map->size && (map->data[n].key == MAP_FREE_KEY ||
+         map->cmp_key (map->data[n].key, key)))
     n++;
 
   if (n == map->size)
@@ -108,7 +120,8 @@ map_del (st_map_t *map, void *key)
 {
   int n = 0;
 
-  while (n < map->size && map->cmp_key (map->data[n].key, key))
+  while (n < map->size && (map->data[n].key == MAP_FREE_KEY ||
+         map->cmp_key (map->data[n].key, key)))
     n++;
 
   if (n < map->size)

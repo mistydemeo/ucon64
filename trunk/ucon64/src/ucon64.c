@@ -6,7 +6,7 @@ handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
 their backup units
 
 Copyright (c) 1999 - 2004 NoisyB <noisyb@gmx.net>
-Copyright (c) 2001 - 2004 dbjh
+Copyright (c) 2001 - 2005 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -129,7 +129,6 @@ static const st_getopt2_t lf[] =
     aps_usage,
     pal4u_usage,
     ppf_usage,
-    xps_usage,
     gg_usage,
     lf,
 #ifdef  USE_DISCMAGE

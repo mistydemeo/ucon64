@@ -116,13 +116,13 @@
 #define PACKAGE_NAME "uCON64"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "uCON64 1.9.8beta9"
+#define PACKAGE_STRING "uCON64 1.9.8-2"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "ucon64"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.9.8beta9"
+#define PACKAGE_VERSION "1.9.8-2"
 
 /* enable support for parallel port backup units (default: yes) */
 #define PARALLEL 1

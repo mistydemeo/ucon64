@@ -26,6 +26,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <ctype.h>
 #include "config.h"
 #include "misc.h"
 #include "flc.h"

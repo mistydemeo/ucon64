@@ -58,8 +58,8 @@ void
 eep_reset (void)
 {
   ttt_rom_enable ();
-  ttt_write_mem (0x000000, 0xff);               // reset EPP
-  ttt_write_mem (0x200000, 0xff);               // reset EPP
+  ttt_write_mem (0x000000, 0xff);               // reset EEP
+  ttt_write_mem (0x200000, 0xff);               // reset EEP
   ttt_rom_disable ();
 }
 

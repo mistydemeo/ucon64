@@ -1035,6 +1035,12 @@ ucon64_options (int c, const char *optarg)
         case UCON64_GEN:
           genesis_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
           break;
+        case UCON64_PCE:
+          pcengine_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          break;
+        case UCON64_SMS:                        // Sega Master System *and* Game Gear
+          sms_multi (strtol (optarg, NULL, 10) * MBIT, NULL);
+          break;
         default:
           return -1;
         }

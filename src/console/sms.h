@@ -2,7 +2,7 @@
 sms.h - Sega Master System/Game Gear support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2003 dbjh
+           2003 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -32,4 +32,5 @@ extern int sms_mgd (st_rominfo_t *rominfo, int console);
 extern int sms_smd (st_rominfo_t *rominfo);
 extern int sms_smds (void);
 extern int sms_chk (st_rominfo_t *rominfo);
+extern int sms_multi (int truncate_size, char *fname);
 #endif // SMS_H

@@ -22,13 +22,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <ctype.h>
+#include <sys/stat.h>
 #include "misc.h"
 #include "misc_chk.h"
 #include "ucon64.h"
@@ -57,6 +58,9 @@ const st_usage_t pcengine_usage[] =
     {"mgd", 0, NULL, "convert to Multi Game Doctor*/MGD2/RAW", NULL},
     {"swap", 0, NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)", NULL},
     {"f", 0, NULL, "fix region protection", NULL},
+    {"multi", 1, "SIZE", "make multi-game file for use with PCE-PRO flash card,\n"
+                      "truncated to SIZE Mbit; file with loader must be specified\n"
+                      "first, then all the ROMs, multi-game file to create last", NULL},
     {NULL, 0, NULL, NULL, NULL}
 };
 
@@ -784,6 +788,181 @@ pcengine_f (st_rominfo_t *rominfo)
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
   return n;
+}
+
+
+static void
+write_game_table_entry (FILE *destfile, int file_no, int totalsize)
+{
+  int n;
+  unsigned char name[0x1c];
+  char *p;
+
+  fseek (destfile, 0xb000 + (file_no - 1) * 0x20, SEEK_SET);
+  fputc (0xff, destfile);                       // 0x0 = 0xff
+
+  memset (name, ' ', 0x1c);
+  p = basename2 (ucon64.rom);
+  n = strlen (p);
+  if (n > 0x1c)
+    n = 0x1c;
+  memcpy (name, p, n);
+  for (n = 0; n < 0x1c; n++)
+    {
+      if (!isprint ((int) name[n]))
+        name[n] = '.';
+      else
+        name[n] = toupper (name[n]);            // loader only supports upper case characters
+    }
+  fwrite (name, 1, 0x1c, destfile);             // 0x1 - 0x1c = name
+  fputc (0, destfile);                          // 0x1d = 0
+  fputc (totalsize / MBIT, destfile);           // 0x1e = bank code
+  fputc (0, destfile);                          // 0x1f = flags (x, D (reserved), x, x, x, x, x, x)
+}
+
+
+int
+pcengine_multi (int truncate_size, char *fname)
+{
+#define BUFSIZE (32 * 1024)
+  int n, n_files, file_no, bytestowrite, byteswritten, totalsize = 0, done,
+      truncated = 0, paddedsize, org_do_not_calc_crc = ucon64.do_not_calc_crc;
+  struct stat fstate;
+  FILE *srcfile, *destfile;
+  char *destname;
+  unsigned char buffer[BUFSIZE];
+
+  if (truncate_size == 0)
+    {
+      fprintf (stderr, "ERROR: Can't make multi-game file of 0 bytes\n");
+      return -1;
+    }
+
+  if (fname != NULL)
+    {
+      destname = fname;
+      n_files = ucon64.argc;
+    }
+  else
+    {
+      destname = ucon64.argv[ucon64.argc - 1];
+      n_files = ucon64.argc - 1;
+    }
+
+  ucon64_file_handler (destname, NULL, OF_FORCE_BASENAME);
+  if ((destfile = fopen (destname, "wb")) == NULL)
+    {
+      fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], destname);
+      return -1;
+    }
+
+  printf ("Creating multi-game file: %s\n", destname);
+
+  file_no = 0;
+  for (n = 1; n < n_files; n++)
+    {
+      if (access (ucon64.argv[n], F_OK))
+        continue;                               // "file" does not exist (option)
+      stat (ucon64.argv[n], &fstate);
+      if (!S_ISREG (fstate.st_mode))
+        continue;
+      if (file_no == 32)                        // loader + 31 games
+        {
+          printf ("WARNING: A multi-game file can contain a maximum of 31 games. The other files\n"
+                  "         are ignored.\n");
+          break;
+        }
+
+      ucon64.console = UCON64_UNKNOWN;
+      ucon64.rom = ucon64.argv[n];
+      ucon64.file_size = q_fsize (ucon64.rom);
+      // DON'T use fstate.st_size, because file could be compressed
+      ucon64.rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
+                                       ucon64.buheader_len : 0;
+      ucon64.rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
+                                       ucon64.interleaved : 0;
+      ucon64.do_not_calc_crc = 1;
+      if (pcengine_init (ucon64.rominfo) != 0)
+        printf ("WARNING: %s does not appear to be a PC-Engine ROM\n", ucon64.rom);
+
+      if ((srcfile = fopen (ucon64.rom, "rb")) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.rom);
+          continue;
+        }
+      if (ucon64.rominfo->buheader_len)
+        fseek (srcfile, ucon64.rominfo->buheader_len, SEEK_SET);
+
+      if (file_no == 0)
+        {
+          printf ("Loader: %s\n", ucon64.rom);
+          if (ucon64.file_size - ucon64.rominfo->buheader_len != 7 * 8192)
+            printf ("WARNING: Are you sure %s is a loader binary?\n", ucon64.rom);
+        }
+      else
+        {
+          printf ("ROM%d: %s\n", file_no, ucon64.rom);
+          write_game_table_entry (destfile, file_no, totalsize);
+          fseek (destfile, totalsize, SEEK_SET); // restore file pointer
+        }
+      file_no++;
+
+      done = 0;
+      byteswritten = 0;                         // # of bytes written per file
+      while (!done)
+        {
+          bytestowrite = fread (buffer, 1, BUFSIZE, srcfile);
+          if (totalsize + bytestowrite > truncate_size)
+            {
+              bytestowrite = truncate_size - totalsize;
+              done = 1;
+              truncated = 1;
+              printf ("Output file is %d Mbit, truncating %s, skipping %d bytes\n",
+                      truncate_size / MBIT, ucon64.rom, ucon64.file_size -
+                        ucon64.rominfo->buheader_len - (byteswritten + bytestowrite));
+            }
+          totalsize += bytestowrite;
+          if (bytestowrite == 0)
+            done = 1;
+          fwrite (buffer, 1, bytestowrite, destfile);
+          byteswritten += bytestowrite;
+        }
+      fclose (srcfile);
+      if (truncated)
+        break;
+
+      // games have to be aligned to (start at) a 1 Mbit boundary
+      paddedsize = (totalsize + MBIT - 1) & ~(MBIT - 1);
+//      printf ("paddedsize: %d (%f); totalsize: %d (%f)\n",
+//              paddedsize, paddedsize / (1.0 * MBIT), totalsize, totalsize / (1.0 * MBIT));
+      if (paddedsize > totalsize)
+        {
+          if (paddedsize > truncate_size)
+            {
+              truncated = 1;                    // not *really* truncated
+              paddedsize = truncate_size;
+            }
+
+          memset (buffer, 0, BUFSIZE);
+          while (totalsize < paddedsize)
+            {
+              bytestowrite = paddedsize - totalsize > BUFSIZE ?
+                              BUFSIZE : paddedsize - totalsize;
+              fwrite (buffer, 1, bytestowrite, destfile);
+              totalsize += bytestowrite;
+            }
+        }
+      if (truncated)
+        break;
+    }
+  // fill the next game table entry
+  fseek (destfile, 0xb000 + (file_no - 1) * 0x20, SEEK_SET);
+  fputc (0, destfile);                          // indicate no next game
+  fclose (destfile);
+  ucon64.console = UCON64_PCE;
+  ucon64.do_not_calc_crc = org_do_not_calc_crc;
+
+  return 0;
 }
 
 

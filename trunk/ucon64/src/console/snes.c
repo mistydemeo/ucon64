@@ -150,8 +150,8 @@ typedef struct st_snes_header
   unsigned char game_id_country;                // 5
   // 'E' = USA, 'F' = France, 'G' = Germany, 'J' = Japan, 'P' = Europe, 'S' = Spain
   unsigned char pad1[7];                        // 6
-  unsigned char sfx_sram_size;			// 13
-  unsigned char pad2[2];			// 14
+  unsigned char sfx_sram_size;                  // 13
+  unsigned char pad2[2];                        // 14
   unsigned char name[SNES_NAME_LEN];            // 16
   unsigned char map_type;                       // 37, a.k.a. ROM makeup
   unsigned char rom_type;                       // 38
@@ -2284,13 +2284,13 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
      )
     check_map_type = 0;                         // not interleaved
   else if (crc == 0x4a70ad38 || crc == 0x0b34ddad || crc == 0x348b5357 ||
-            crc == 0xc39b8d3a || crc == 0x9b4638d0 || crc == 0x0085b742 ||
-            crc == 0x30cbf83c || crc == 0x7039388a || crc == 0xdbc88ebf ||
-            crc == 0x2a4c6a9b
+           crc == 0xc39b8d3a || crc == 0x9b4638d0 || crc == 0x0085b742 ||
+           crc == 0x30cbf83c || crc == 0x7039388a || crc == 0xdbc88ebf ||
+           crc == 0x2a4c6a9b
 #ifdef  DETECT_NOTGOOD_DUMPS
-            ||
-            crc == 0x65485afb || crc == 0x5ee74558 || crc == 0x92180571 ||
-            crc == 0x9ca5ed58
+           ||
+           crc == 0x65485afb || crc == 0x5ee74558 || crc == 0x92180571 ||
+           crc == 0x9ca5ed58
 #endif
           )
     {
@@ -3215,11 +3215,11 @@ snes_init (st_rominfo_t *rominfo)
       if (snes_header.rom_type == 0x13 || snes_header.rom_type == 0x1a ||
           snes_header.rom_type == 0x14 || snes_header.rom_type == 0x15)
         {
-          snes_sramsize = 32*1024;
+          snes_sramsize = 32 * 1024;
           if (snes_header.maker == 0x33)
             snes_sfx_sramsize = snes_header.sfx_sram_size ? 1 << (snes_header.sfx_sram_size + 10) : 0;
           else
-            snes_sfx_sramsize = 32*1024;
+            snes_sfx_sramsize = 32 * 1024;
         }
       else
         {

@@ -457,8 +457,8 @@ if(argcmp(argc,argv,"-mka"))
 if(argcmp(argc,argv,"-na"))
 {
 	strcpy(buf2,ucon64_file());
-strcat(buf2,"\
-                                                            ");
+	strcat(buf2
+,"                                                            ");
                                                             
                 quickfwrite(buf2,7,50,filebackup(ucon64_rom()),"r+b");
                 
@@ -479,8 +479,8 @@ if(argcmp(argc,argv,"-mkppf"))
 if(argcmp(argc,argv,"-nppf"))
 {
 	strcpy(buf2,ucon64_file());
-strcat(buf2,"\
-                                                            ");
+	strcat(buf2
+,"                                                            ");
                                                             
 	quickfwrite(buf2,6,50,filebackup(ucon64_rom()),"r+b");
 	return(0);
@@ -571,20 +571,18 @@ if(argcmp(argc,argv,"-e"))
 	}
 	else
 	{
-		printf("\
-ERROR: could not auto detect the right ROM/console type; please use the\n\
-\"-<CONSOLE> force recognition\" option next time\n\
-");
+		printf("ERROR: could not auto detect the right ROM/console type; please use the\n"
+	"\"-<CONSOLE> force recognition\" option next time\n"
+	"");
 		return(-1);
 	}
 
 	
 	if(!strlen(getProperty(buf,buf3,buf2,NULL)))
 	{
-		printf("\
-ERROR: could not find the correct settings (%s) in %s/.ucon64rc\n\
-please fix that or use the \"-<CONSOLE> force recognition\" option next time\n\
-if the wrong ROM/console type was detected\n",buf3,getenv("HOME"));
+		printf("ERROR: could not find the correct settings (%s) in %s/.ucon64rc\n"
+	"please fix that or use the \"-<CONSOLE> force recognition\" option next time\n"
+	"if the wrong ROM/console type was detected\n",buf3,getenv("HOME"));
 		return(-1);
 	}
 
@@ -616,9 +614,8 @@ if the wrong ROM/console type was detected\n",buf3,getenv("HOME"));
 	
 	if((x=system(buf))!=0)
 	{
-		printf("\
-ERROR: the Emulator returned a error code (%d) maybe %s is corrupt...\n\
-       or use the \"-<CONSOLE> force recognition\" option next time\n",(int)  x,ucon64_rom());
+		printf("ERROR: the Emulator returned a error code (%d) maybe %s is corrupt...\n"
+	"       or use the \"-<CONSOLE> force recognition\" option next time\n",(int)  x,ucon64_rom());
 		return(x);
 	}
 	return(0);
@@ -729,36 +726,36 @@ int ucon64_shell(int argc,char *argv[])
 
 int ucon64_usage(int argc,char *argv[])
 {
-	printf("USAGE: %s [OPTION(S)] ROM [FILE]\n\
-\n"
+	printf("USAGE: %s [OPTION(S)] ROM [FILE]\n"
+	"\n"
 ,ucon64_name()
 );
 
-printf("TODO: $ROM could also be the name of a *.ZIP archive\n\
-      it will automatically find and extract the ROM\n\
-\n\
-TODO:  -sh	use uCON64 in shell modus\n\
-  -e		emulate/run ROM (check INSTALL and $HOME/.ucon64rc for more)\n\
-  -db		ROM database statistics (# of entries)\n\
-  -dbv		view ROM database (all entries)\n\
-  -crc		show CRC32 value of ROM\n\
-  -crchd	show CRC32 value of ROM (regarding to +512 Bytes header)\n\
-TODO:  -dbs	search ROM database (all entries) by CRC32; $ROM=CRC32\n\
-  -rl		rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n\
-  -ru		rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n\
-  -hex		show ROM as hexdump; use \"ucon64 -hex $ROM|less\"\n\
-  -ls		generate ROM list for all ROMs; $ROM=DIRECTORY\n\
-  -c		compare ROMs; $FILE=OTHER_ROM\n\
-  -cs		compare ROMs for similarities; $FILE=OTHER_ROM\n\
-  -find		find string in ROM; $FILE=STRING\n\
-  -swap		swap/(de)interleave (ALL) Bytes in ROM (1234<->2143)\n\
-  -pad		pad ROM to full Mb\n\
-  -padhd	pad ROM to full Mb (regarding to +512 Bytes header)\n\
-  -ispad	check if ROM is padded\n\
-  -strip	strip Bytes from end of ROM; $FILE=VALUE\n\
-  -stp		strip first 512 Bytes (possible header) from ROM\n\
-  -ins		insert 512 Bytes (0x00) before ROM\n\
-");
+printf("TODO: $ROM could also be the name of a *.ZIP archive\n"
+	"      it will automatically find and extract the ROM\n"
+	"\n"
+	"TODO:  -sh	use uCON64 in shell modus\n"
+	"  -e		emulate/run ROM (check INSTALL and $HOME/.ucon64rc for more)\n"
+	"  -db		ROM database statistics (# of entries)\n"
+	"  -dbv		view ROM database (all entries)\n"
+	"  -crc		show CRC32 value of ROM\n"
+	"  -crchd	show CRC32 value of ROM (regarding to +512 Bytes header)\n"
+	"TODO:  -dbs	search ROM database (all entries) by CRC32; $ROM=CRC32\n"
+	"  -rl		rename all files in DIRECTORY to lowercase; $ROM=DIRECTORY\n"
+	"  -ru		rename all files in DIRECTORY to uppercase; $ROM=DIRECTORY\n"
+	"  -hex		show ROM as hexdump; use \"ucon64 -hex $ROM|less\"\n"
+	"  -ls		generate ROM list for all ROMs; $ROM=DIRECTORY\n"
+	"  -c		compare ROMs; $FILE=OTHER_ROM\n"
+	"  -cs		compare ROMs for similarities; $FILE=OTHER_ROM\n"
+	"  -find		find string in ROM; $FILE=STRING\n"
+	"  -swap		swap/(de)interleave (ALL) Bytes in ROM (1234<->2143)\n"
+	"  -pad		pad ROM to full Mb\n"
+	"  -padhd	pad ROM to full Mb (regarding to +512 Bytes header)\n"
+	"  -ispad	check if ROM is padded\n"
+	"  -strip	strip Bytes from end of ROM; $FILE=VALUE\n"
+	"  -stp		strip first 512 Bytes (possible header) from ROM\n"
+	"  -ins		insert 512 Bytes (0x00) before ROM\n"
+	"");
 
 bsl_usage( argc, argv );
 ips_usage( argc, argv );
@@ -809,11 +806,11 @@ else
 	atari_usage(argc,argv);
 }
 
-printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n\
-     %s -help|less (to see everything in less)\n\
-\n\
-Report problems/ideas/fixes to noisyb@gmx.net\n\
-\n"
+printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
+	"     %s -help|less (to see everything in less)\n"
+	"\n"
+	"Report problems/ideas/fixes to noisyb@gmx.net\n"
+	"\n"
 ,ucon64_name(),ucon64_name()
 );
 	return(0);

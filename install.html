@@ -1,14 +1,22 @@
 <html><head><title>INSTALL</title></head><body bgcolor="#c0c0c0"><tt><pre>
-To install uCON64 just enter
+Q: How do I compile uCON64?
+A: you can optionally open the Makefile in an editor and change the defines
 
-make -f Makefile.&#60;your OS&#62; clean
-make -f Makefile.&#60;your OS&#62;
-make -f Makefile.&#60;your OS&#62; install
+   DB     enables/disables the internal ROM database
+          disabled with an # in front uCON64 will be only ~250kB in size!
 
-then
+   BACKUP enables/disables support for backup units
+          disabled with an # in front
 
-edit $HOME/.ucon64rc or ucon64.cfg (DOS)
+   afterwards enter the following lines
 
-BeOS users will also need Caz's driver inside ioport.zip or available at
-http://www.infernal.currantbun.com
+   make -f Makefile.&#60;your OS&#62; clean
+   make -f Makefile.&#60;your OS&#62;
+   make -f Makefile.&#60;your OS&#62; install
+
+Q: How do I install uCON64?
+A: run install[_&#60;your OS&#62;].sh and edit $HOME/.ucon64rc or ucon64.cfg (DOS)
+
+   BeOS users will also need Caz's driver inside ioport.zip or available at
+   http://www.infernal.currantbun.com
 </pre></tt></body></html>

@@ -869,7 +869,8 @@ int ucon64_init(struct ucon64_ *rom)
   rom->mbit=(rom->bytes-rom->buheader_len)/(float) MBIT;
 
   rom->padded=filetestpad(rom->rom);
-  rom->intro=(rom->bytes-rom->buheader_len)%MBIT;
+  rom->intro= ((rom->bytes-rom->buheader_len)>MBIT) ?
+                 ((rom->bytes-rom->buheader_len)%MBIT)  : 0;
 
   rom->splitted[0] = testsplit(rom->rom);
   if (argcmp(rom->argc, rom->argv, "-ns"))

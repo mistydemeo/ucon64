@@ -64,7 +64,7 @@ bsl_apply (const char *mod, const char *bslname)
     }
 
   printf ("Applying BSL/Baseline patch...\n");
-  
+
   while (!feof (bslfile))                       // we could use 1, but feof() makes it fail-safe
     {
       fscanf (bslfile, "%d\n", &offset);
@@ -87,8 +87,8 @@ bsl_apply (const char *mod, const char *bslname)
           fwrite (buf, 4096, 1, modfile);
           nbytes -= 4096;
         }
-      while (nbytes-- >= 0)
-        {
+      while (nbytes-- >= 0)                     // yes, one byte more than the
+        {                                       //  _value_ read from the BSL file
           byte = fgetc (bslfile);
           fputc (byte, modfile);
         }

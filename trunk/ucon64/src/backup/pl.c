@@ -49,13 +49,13 @@ const st_getopt2_t pl_usage[] =
 #ifdef  USE_PARALLEL
     {
       "xpl", 0, 0, UCON64_XPL,
-      NULL, "send/receive ROM to/from Pocket Linker;" OPTION_LONG_S "port=PORT\n"
+      NULL, "send/receive ROM to/from Pocket Linker; " OPTION_LONG_S "port=PORT\n"
       "receives automatically when ROM does not exist",
       &ucon64_wf[WF_OBJ_NGP_DEFAULT_STOP_NO_ROM]
     },
     {
       "xpli", 0, 0, UCON64_XPLI,
-      NULL, "show information about inserted cartridge;" OPTION_LONG_S "port=PORT",
+      NULL, "show information about inserted cartridge; " OPTION_LONG_S "port=PORT",
       &ucon64_wf[WF_OBJ_NGP_STOP_NO_ROM]
     },
     {

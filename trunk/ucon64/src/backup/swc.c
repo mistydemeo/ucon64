@@ -673,7 +673,7 @@ int swc_usage(int argc, char *argv[])
          "                receives automatically when $ROM does not exist\n"
          "                Press q to abort ^C will cause invalid state of backup unit\n"
          "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
-         "                receives automatically when $ROM does not exist\n"
+         "                receives automatically when $ROM(=SRAM) does not exist\n"
          "                Press q to abort ^C will cause invalid state of backup unit\n");
 
   if (verbose)

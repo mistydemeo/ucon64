@@ -65,12 +65,12 @@ int ucon64_exit(int value,struct ucon64_ *rom)
 #include "backup/swc.h"
 #include "backup/unknown_bu.h"
 #include "backup/unknown_bu512.h"
-#ifdef BACKUP
+//#ifdef BACKUP
   #ifdef CD
     #include "backup/cdrecord.h"
     #include "backup/cdrdao.h"
   #endif
-#endif
+//#endif
 
 #include "patch/aps.h"
 #include "patch/ips.h"
@@ -502,11 +502,14 @@ if(argcmp(argc,argv,"-vec"))rom.console=ucon64_VECTREX;
 if(argcmp(argc,argv,"-int"))rom.console=ucon64_INTELLI;
 if(argcmp(argc,argv,"-lynx"))rom.console=ucon64_LYNX;
 if(argcmp(argc,argv,"-sms"))rom.console=ucon64_SMS;
-if(argcmp(argc,argv,"-gen"))rom.console=ucon64_GENESIS;
 if(argcmp(argc,argv,"-ngp"))rom.console=ucon64_NEOGEOPOCKET;
 if(argcmp(argc,argv,"-nes"))rom.console=ucon64_NES;
 if(argcmp(argc,argv,"-pce"))rom.console=ucon64_PCE;
 if(argcmp(argc,argv,"-jag"))rom.console=ucon64_JAGUAR;
+
+rom.console = (argcmp(argc,argv,"-gen") ||
+               (argcmp(argc,argv,"-xsmd") && access(rom.rom,F_OK)!=0 ) ||
+               argcmp(argc,argv,"-xsmds")) ? ucon64_GENESIS : rom.console;
 
 rom.console = (argcmp(argc,argv,"-ng") ||
                argcmp(argc,argv,"-sam")) ? ucon64_NEOGEO : rom.console;
@@ -623,7 +626,7 @@ case ucon64_PCE:
   pcengine_main(&rom);
 break;
 
-#ifdef BACKUP
+//#ifdef BACKUP
   #ifdef CD
     case ucon64_PS2:
 //    ps2_main(&rom);
@@ -647,7 +650,7 @@ break;
 //    real3do_main(&rom);
     break;
   #endif
-#endif
+//#endif
 
 case ucon64_SYSTEM16:
   system16_main(&rom);
@@ -1054,15 +1057,39 @@ else if(argcmp(argc,argv,"-vboy"))virtualboy_usage(argc,argv);
 else if(argcmp(argc,argv,"-swan"))wonderswan_usage(argc,argv);
 else if(argcmp(argc,argv,"-vec"))vectrex_usage(argc,argv);
 else if(argcmp(argc,argv,"-int"))intelli_usage(argc,argv);
-#ifdef BACKUP
+//#ifdef BACKUP
 #ifdef CD
 else if(argcmp(argc,argv,"-dc"));
 else if(argcmp(argc,argv,"-psx"));
 else if(argcmp(argc,argv,"-psx2"));
 #endif
-#endif
+//#endif
 else
 {
+//#ifdef BACKUP
+
+#ifdef CD
+printf("%s\n%s\n%s\n"
+	"  -dc, -psx, -psx2\n"
+	"		force recognition; NEEDED"
+	"\n  *		show info (default)\n"
+,system16_TITLE
+,atari_TITLE
+,coleco_TITLE
+);
+
+ppf_usage( argc, argv );
+xps_usage( argc, argv );
+
+cdrdao_usage(argc,argv);
+cdrecord_usage(argc,argv);
+
+printf("\n");
+#endif
+
+//#endif
+
+
 	gbadvance_usage(argc,argv);
 	nintendo64_usage(argc,argv);
 	snes_usage(argc,argv);
@@ -1084,6 +1111,7 @@ else
 	vectrex_usage(argc,argv);
 	intelli_usage(argc,argv);
 */
+
 printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 	"  -s16, -ata, -coleco, -vboy, -swan, -vec, -int\n"
 	"		force recognition"
@@ -1100,25 +1128,6 @@ printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 ,intelli_TITLE
 );
 
-#ifdef BACKUP
-
-#ifdef CD
-printf("%s\n%s\n%s\n"
-	"  -dc, -psx, -psx2\n"
-	"		force recognition; NEEDED"
-	"\n  *		show info (default)\n"
-        "  -xcd\n\n"
-,system16_TITLE
-,atari_TITLE
-,coleco_TITLE
-);
-
-cdrdao_usage(argc,argv);
-cdrecord_usage(argc,argv);
-#endif
-
-#endif
-
 }
 
 printf("Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n",
@@ -1133,7 +1142,9 @@ printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
 #endif
         "     give the force recognition option a try if something went wrong\n"
 	"\n"
+#ifndef CD
 	"All CD-based consoles are supported by uCONCD; go to http://ucon64.sf.net\n"
+#endif	
 	"Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
 	"\n"
 ,getarg(argc,argv,ucon64_NAME),getarg(argc,argv,ucon64_NAME)

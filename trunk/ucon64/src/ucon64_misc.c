@@ -62,13 +62,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "jaguar/jaguar.h"
 #include "sample/sample.h"
 
-
-const char *track_modes[] = {
-  "MODE1/2048",
-  "MODE1/2352",
-  "MODE2/2336",
-  "MODE2/2352"
+  
+const st_track_modes_t track_modes[] = {
+  {"MODE1/2048", "MODE1"},
+  {"MODE1/2352", "MODE1_RAW"},
+  {"MODE2/2336", "MODE2"},
+  {"MODE2/2352", "MODE2_RAW"},
+  {NULL, NULL}
 };
+
 
 const char *ucon64_parport_error =
   "ERROR:  please check cables and connection\n"
@@ -554,6 +556,7 @@ ucon64_testsplit (const char *filename)
   return (x != 0) ? (x + 1) : 0;
 }
 
+
 int
 ucon64_bin2iso (const char *image, int track_mode)
 {
@@ -561,6 +564,7 @@ ucon64_bin2iso (const char *image, int track_mode)
   long i, size;
   char buf[MAXBUFSIZE];
   FILE *dest, *src;
+//  time_t starttime = time (NULL);
 
   switch (track_mode)
     {
@@ -599,7 +603,7 @@ ucon64_bin2iso (const char *image, int track_mode)
         return -1;
     }
 
-  strcpy (buf, image);
+  strcpy (buf, filenameonly(image));
   setext (buf, ".ISO");
   size = quickftell (image) / sector_size;
 
@@ -626,6 +630,8 @@ ucon64_bin2iso (const char *image, int track_mode)
           fwrite (buf, sizeof (char), 2048, dest);
         }
       fseek (src, seek_ecc, SEEK_CUR);
+
+//      ucon64_gauge (starttime, i * sector_size, size * sector_size);
     }
 
   fclose (dest);
@@ -647,10 +653,16 @@ ucon64_trackmode_probe (const char *image)
 
   quickfread (buf, 0, 16, image);
 
+#ifdef DEBUG
+printf("DEBUG:");
+strhexdump(buf,0,0,16);
+#endif
+
   if (memcmp (SYNC_HEADER, buf, 12))
-{
-    result = MODE2_2336;
- } else
+    {
+      result = MODE1_2048;
+    } 
+  else
     switch (buf[15])
       {
         case 2:
@@ -661,16 +673,81 @@ ucon64_trackmode_probe (const char *image)
           result = MODE1_2352;
           break;
 
-        case 0://TODO test this... at least we know MODE1_2048 has no sync headers
-          result = MODE1_2048;
+        case 0:
+          result = MODE2_2336;
           break;
           
         default:
-          printf ("\n");
-          strhexdump (buf, 0, 0, 16);
-          printf ("\n");
+          result = MODE1_2048;
           break;
         }
+  return result;
+}
+
+
+int
+ucon64_mktoc (st_rominfo_t *rominfo)
+{
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
+  FILE *fh;
+  int result;
+
+  result = ucon64_trackmode_probe (ucon64.rom);
+
+  sprintf (buf, "%s\n" "\n" "\n" "// Track 1\n"
+           "TRACK %s\n"
+           "NO COPY\n"
+           "DATAFILE \"%s\" %ld// length in bytes: %ld\n",
+           (!strnicmp (ucon64.file, "MODE1", 5) ? "CD_ROM" : "CD_ROM_XA"),
+           (!strnicmp (ucon64.file, "MODE", 4) ? ucon64.file : 
+           (result != -1) ? track_modes[result].cdrdao : "MODE2_RAW"),
+           ucon64.rom, quickftell (ucon64.rom), quickftell (ucon64.rom));
+  printf ("%s\n", buf);
+
+  strcpy (buf2, ucon64.rom);
+  setext (buf2, ".TOC");
+
+  if (!access (buf2, F_OK))
+    ucon64_fbackup(buf2);
+
+  if (!(fh = fopen (buf2, "wb")))
+    return -1;
+  result = fputs (buf, fh);
+  fclose (fh);
+
+  return result;
+}
+
+int
+ucon64_mkcue (st_rominfo_t *rominfo)
+{
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE];
+  FILE *fh;
+  int result;
+  result = ucon64_trackmode_probe (ucon64.rom);
+
+  sprintf (buf, "FILE \"%s\" BINARY\n"
+           "  TRACK 01 %s\n"
+           "    INDEX 01 00:00:00\n"
+           ,ucon64.rom
+  ,(!stricmp (ucon64.file, "MODE1") || !stricmp (ucon64.file, "MODE2_FORM1")) ? "MODE1/2048" :
+  (!stricmp (ucon64.file, "MODE1_RAW")) ? "MODE1/2352" :
+  (!stricmp (ucon64.file, "MODE2") || !stricmp (ucon64.file, "MODE2_FORM_MIX")) ? "MODE2/2336" :
+  (result != -1) ? track_modes[result].common : "MODE2/2352");
+
+  printf ("%s\n", buf);
+
+  strcpy (buf2, ucon64.rom);
+  setext (buf2, ".CUE");
+
+  if (!access (buf2, F_OK))
+    ucon64_fbackup(buf2);
+
+  if (!(fh = fopen (buf2, "wb")))
+    return -1;
+  result = fputs (buf, fh);
+  fclose (fh);
+
   return result;
 }
 

@@ -30,24 +30,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <limits.h>
 
 #if     defined __unix__ || defined __BEOS__ || defined AMIGA
-#include <unistd.h>                             // ioperm() (libc5)
+  #include <unistd.h>                             // ioperm() (libc5)
 #endif
 
 #include "config.h"
 
 #ifdef  BACKUP
-#ifdef  __FreeBSD__
-#include <machine/sysarch.h>
-#elif   defined __linux__
-#ifdef  __GLIBC__
-#include <sys/io.h>                             // ioperm() (glibc)
-#endif
-#elif   defined __BEOS__
-#include <fcntl.h>
-#elif   defined AMIGA
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#endif
+  #ifdef  __FreeBSD__
+    #include <machine/sysarch.h>
+  #elif   defined __linux__
+    #ifdef  __GLIBC__
+      #include <sys/io.h>                             // ioperm() (glibc)
+    #endif
+  #elif   defined __BEOS__ || defined AMIGA
+    #include <fcntl.h>
+  #endif
 #endif // BACKUP
 
 #include "ucon64.h"

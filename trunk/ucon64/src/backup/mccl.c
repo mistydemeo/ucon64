@@ -69,7 +69,7 @@ Data Read Procedure:
 const st_usage_t mccl_usage[] = {
   {NULL, "Mad Catz Camera Link (Game Boy Camera)"},
   {NULL, "XXXX Mad Catz Inc. http://www.madcatz.com"},
-  {"xmccl", "(TEST) send/receive BYTES to/from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT\n"
+  {"xmccl", "send/receive BYTES to/from Mad Catz Camera Link; " OPTION_LONG_S "port=PORT\n"
               "currently only receiving is supported"},
   {NULL, NULL}
 };

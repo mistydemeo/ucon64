@@ -44,14 +44,14 @@ const st_usage_t neogeo_usage[] =
     "TODO:  " OPTION_LONG_S "mgd   convert to Multi Game Doctor/MGD2/RAW\n"
     "TODO:  " OPTION_LONG_S "mvs   convert to Arcade/MVS\n"
 #endif
-    {"bios", "convert NeoCD BIOS to work with NeoCD emulator; " OPTION_LONG_S "rom=BIOS\n"
-               "http://www.illusion-city.com/neo/"},
+    {"bios=BIOS", "convert NeoCD BIOS to work with NeoCD emulator" /*;\n"
+               "http://www.illusion-city.com/neo/"*/},
 #if 0
     "TODO:  " OPTION_S "j     join split ROM"
     "TODO:  " OPTION_S "s     split ROM into 4Mb parts (for backup unit(s) with fdd)"
     "TODO:  " OPTION_LONG_S "ngs   convert Neo Geo sound to WAV; " OPTION_LONG_S "rom=*_m1.rom or *_v*.rom"
 #endif
-    {"sam", "convert SAM/M.A.M.E. sound to WAV; " OPTION_LONG_S "rom=SAMFILE"},
+    {"sam=SAMFILE", "convert SAM/M.A.M.E. sound to WAV"},
 //    "TODO: " OPTION_LONG_S "chkm    check/fix Multiple Arcade Machine Emulator/M.A.M.E. ROMs;\n"
 //    "                  " OPTION_LONG_S "rom=DIRECTORY"
 //    "INFO: actually this option does the same as Goodxxxx, Romcenter, etc.\n"
@@ -67,14 +67,14 @@ static int sam2wav (const char *filename);
 
 
 int
-neogeo_bios (st_rominfo_t *rominfo)
+neogeo_bios (const char *fname)
 {
   char buf[MAXBUFSIZE];
-  strcpy (buf, ucon64.rom);
+  strcpy (buf, fname);
   setext (buf, ".NEW");
 
   ucon64_fbackup (NULL, buf);
-  q_fcpy (ucon64.rom, 0, MBIT, buf, "wb");
+  q_fcpy (fname, 0, MBIT, buf, "wb");
   q_fswap (buf, 0, MBIT);
 
   return 0;
@@ -82,12 +82,11 @@ neogeo_bios (st_rominfo_t *rominfo)
 
 
 int
-neogeo_sam (st_rominfo_t *rominfo)
+neogeo_sam (const char *fname)
 {
-  if (sam2wav (ucon64.rom) == -1)
-    {
-      fprintf (stderr, "ERROR: SAM header seems to be corrupt\n");
-    }
+  if (sam2wav (fname) == -1)
+    fprintf (stderr, "ERROR: SAM header seems to be corrupt\n");
+
   return 0;
 }
 

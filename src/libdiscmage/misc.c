@@ -157,9 +157,10 @@ crc16 (unsigned short crc, const void *buffer, unsigned int size)
       init_crc_table (crc16_table, CRC16_POLYNOMIAL);
     }
 
+  crc = ~crc;
   while (size--)
     crc = (crc >> 8) ^ crc16_table[(crc ^ *p++) & 0xff];
-  return crc;
+  return ~crc;
 }
 #endif
 
@@ -189,10 +190,10 @@ crc32_2 (unsigned int crc, const void *buffer, unsigned int size)
       init_crc_table (crc32_table, CRC32_POLYNOMIAL);
     }
 
-  crc ^= 0xffffffff;
+  crc = ~crc;
   while (size--)
     crc = (crc >> 8) ^ crc32_table[(crc ^ *p++) & 0xff];
-  return crc ^ 0xffffffff;
+  return ~crc;
 }
 
 

@@ -118,7 +118,7 @@ const char *snes_usage[] =
 #endif
     "  " OPTION_S "j           join split ROM\n"
     "  " OPTION_S "s           split ROM into 8 Mb parts (for backup unit(s) with fdd)\n"
-// NOTE: part size number should match with size actually used
+    "  " OPTION_LONG_S "ssize=SIZE  specify split part size in Mbit (not for Game Doctor SF3)\n"
 #if 0
     "  " OPTION_S "p           pad ROM to full Mb\n"
 #endif
@@ -1006,7 +1006,7 @@ snes_gd3 (st_rominfo_t *rominfo)
     {
       if (total4Mbparts > 8)
         {
-          fprintf (stderr, "ERROR: This ROM > 32 Mbit LoRom -- can't convert\n");
+          fprintf (stderr, "ERROR: This ROM > 32 Mbit LoROM -- can't convert\n");
           return -1;
         }
 
@@ -1113,18 +1113,54 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
 }
 
 
-#define PARTSIZE  (8 * MBIT)
+#define PARTSIZE  (8 * MBIT)                    // default split part size
 int
 snes_s (st_rominfo_t *rominfo)
 {
   char header[512], dest_name[FILENAME_MAX], *names[GD3_MAX_UNITS],
        names_mem[GD3_MAX_UNITS][12];
-  int nparts, surplus, x, half_size, size, name_i = 0;
+  int nparts, surplus, x, half_size, size, name_i = 0, part_size;
 
   size = rominfo->file_size - rominfo->buheader_len;
+
+  if (UCON64_ISSET (ucon64.part_size))
+    {
+      part_size = ucon64.part_size;
+      /*
+        Don't allow too small part sizes, because then the files that come
+        after the file with suffix ".9" will get filenames that can't be stored
+        on a FAT filesystem (filesystem that SWC requires to be on diskette).
+        For example the first file after the file with suffix ".9" will get
+        suffix ".:". The SWC does ask for that filename though.
+        Also don't base the minimum part size on the actual file size, because
+        that will probably only confuse users.
+        We ignore the few ROMs that are greater than 32 MBit.
+      */
+      if (part_size < 4 * MBIT)
+        {
+          fprintf (stderr,
+            "ERROR: Split part size must be larger than or equal to 4 Mbit\n");
+          return -1;
+        }
+    }
+  else
+    part_size = PARTSIZE;
+
+  if (size <= part_size)
+    {
+      printf (
+        "NOTE: ROM size is smaller than or equal to %d Mbit -- won't be split\n",
+        part_size / MBIT);
+      return -1;
+    }
+
   if (!rominfo->buheader_len || type == GD3)    // GD3 format
     {
-      // Don't use PARTSIZE here, because the Game Doctor doesn't support
+      if (UCON64_ISSET (ucon64.part_size))
+        printf (
+          "WARNING: ROM will be split as Game Doctor SF3 ROM, ignoring switch "OPTION_LONG_S"ssize\n");
+
+      // Don't use part_size here, because the Game Doctor doesn't support
       //  arbitrary part sizes
       nparts = size / (8 * MBIT);
       surplus = size % (8 * MBIT);
@@ -1171,15 +1207,15 @@ snes_s (st_rominfo_t *rominfo)
     }
   else
     {
-      nparts = size / PARTSIZE;
-      surplus = size % PARTSIZE;
+      nparts = size / part_size;
+      surplus = size % part_size;
 
       strcpy (dest_name, ucon64.rom);
       setext (dest_name, ".1");
 
       q_fread (header, 0, SMC_HEADER_LEN, ucon64.rom);
-      header[0] = PARTSIZE / 8192;
-      header[1] = PARTSIZE / 8192 >> 8;
+      header[0] = part_size / 8192;
+      header[1] = part_size / 8192 >> 8;
       // if header[2], bit 6 == 0 -> SWC/FIG knows this is the last file of the ROM
       header[2] |= 0x40;
       for (x = 0; x < nparts; x++)
@@ -1189,7 +1225,7 @@ snes_s (st_rominfo_t *rominfo)
 
           // don't write backups of parts, because one name is used
           q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
-          q_fcpy (ucon64.rom, x * PARTSIZE + rominfo->buheader_len, PARTSIZE, dest_name, "ab");
+          q_fcpy (ucon64.rom, x * part_size + rominfo->buheader_len, part_size, dest_name, "ab");
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
           (*(strrchr (dest_name, '.') + 1))++;
@@ -1203,7 +1239,7 @@ snes_s (st_rominfo_t *rominfo)
 
           // don't write backups of parts, because one name is used
           q_fwrite (header, 0, SMC_HEADER_LEN, dest_name, "wb");
-          q_fcpy (ucon64.rom, x * PARTSIZE + rominfo->buheader_len, surplus, dest_name, "ab");
+          q_fcpy (ucon64.rom, x * part_size + rominfo->buheader_len, surplus, dest_name, "ab");
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
         }
 
@@ -1938,7 +1974,7 @@ snes_buheader_info (st_rominfo_t *rominfo)
 
       y = header[2] & 0x40 ? 1 : 0;
       printf ("[2:6]   Split: %s => %s\n",
-        y ? "Yes" : "No", matches_deviates (snes_split == y));
+        y ? "Yes" : "No", matches_deviates ((snes_split ? 1 : 0) == y));
 
       printf ("[2:7]   Run program in mode: %d\n", (header[2] & 0x80) >> 7);
     }
@@ -1946,7 +1982,7 @@ snes_buheader_info (st_rominfo_t *rominfo)
     {
       y = header[2] & 0x40 ? 1 : 0;
       printf ("[2]     Split: %s => %s\n",
-        y ? "Yes" : "No", matches_deviates (snes_split == y));
+        y ? "Yes" : "No", matches_deviates ((snes_split ? 1 : 0) == y));
 
       y = header[3] & 0x80 ? 1 : 0;
       printf ("[3]     Memory mapping mode: %s => %s\n",

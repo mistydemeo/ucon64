@@ -41,6 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
+#include "misc_chk.h"
 
 
 int ucon64_parport_needed = 0;
@@ -190,6 +191,8 @@ ucon64_switches (int c, const char *optarg)
       break;
 
     case UCON64_CRC:
+    case UCON64_SHA1:
+    case UCON64_MD5:
       break;
 
     case UCON64_NBAK:
@@ -541,6 +544,30 @@ ucon64_options (int c, const char *optarg)
       else
         fputc ('\n', stdout);
       printf ("Checksum (CRC32): 0x%08x\n\n", q_fcrc32 (ucon64.rom, value));
+      break;
+
+    case UCON64_SHA1:
+      if (!value)
+        value = ucon64.rominfo ? ucon64.rominfo->buheader_len : ucon64.buheader_len;
+      fputs (basename2 (ucon64.rom), stdout);
+      if (ucon64.fname_arch[0])
+        printf (" (%s)\n", basename2 (ucon64.fname_arch));
+      else
+        fputc ('\n', stdout);
+      q_fsha1 (buf, ucon64.rom, value);
+      printf ("Checksum (SHA1): 0x%s\n\n", buf);
+      break;
+
+    case UCON64_MD5:
+      if (!value)
+        value = ucon64.rominfo ? ucon64.rominfo->buheader_len : ucon64.buheader_len;
+      fputs (basename2 (ucon64.rom), stdout);
+      if (ucon64.fname_arch[0])
+        printf (" (%s)\n", basename2 (ucon64.fname_arch));
+      else
+        fputc ('\n', stdout);
+      q_fmd5 (buf, ucon64.rom, value);
+      printf ("Checksum (MD5): 0x%s\n\n", buf);
       break;
 
     case UCON64_RL:

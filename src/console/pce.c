@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <ctype.h>
 #include "misc.h"
+#include "misc_chk.h"
 #include "quick_io.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"

@@ -61,6 +61,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  PARALLEL
 #include "misc_par.h"
 #endif
+#include "misc_chk.h"
 #include "getopt.h"
 #include "quick_io.h"
 #include "ucon64.h"
@@ -205,6 +206,7 @@ const struct option options[] = {
     {"lynx", 0, 0, UCON64_LYNX},
     {"lyx", 0, 0, UCON64_LYX},
     {"mapr", 1, 0, UCON64_MAPR},
+    {"md5", 0, 0, UCON64_MD5},
     {"mgd", 0, 0, UCON64_MGD},
     {"mgdgg", 0, 0, UCON64_MGDGG},
 //    {"mgh", 0, 0, UCON64_MGH},
@@ -284,6 +286,7 @@ const struct option options[] = {
     {"sat", 0, 0, UCON64_SAT},
     {"scan", 0, 0, UCON64_SCAN},
     {"sgb", 0, 0, UCON64_SGB},
+    {"sha1", 0, 0, UCON64_SHA1},
     {"smc", 0, 0, UCON64_SMC},
     {"smd", 0, 0, UCON64_SMD},
     {"smds", 0, 0, UCON64_SMDS},

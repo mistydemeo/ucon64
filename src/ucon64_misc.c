@@ -384,8 +384,10 @@ const st_usage_t ucon64_options_usage[] = {
 #else
   {"e", NULL, "emulate/run ROM (check .ucon64rc for more)"},
 #endif
-  {"crc", NULL, "show CRC32 value of ROM"  //; this will also force calculation for\n"
+  {"crc", NULL, "show CRC32 value of FILE"  //; this will also force calculation for\n"
              /* "files bigger than %d Bytes (%.4f Mb)" */},
+  {"sha1", NULL, "show SHA1 value of FILE"},
+  {"md5", NULL, "show MD5 value of FILE"},
   {"ls", NULL, "generate ROM list for all recognized ROMs"},
   {"lsv", NULL, "like " OPTION_LONG_S "ls but more verbose"},
 #ifdef  __MSDOS__
@@ -604,6 +606,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_LS, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
   {UCON64_LSD, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE},
   {UCON64_LSV, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
+  {UCON64_MD5, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NOCRC32},
   {UCON64_MGD, UCON64_UNKNOWN, NULL,           WF_DEFAULT|WF_NO_SPLIT},
 //  {UCON64_MGH, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
   {UCON64_MKA, UCON64_UNKNOWN, aps_usage,      WF_STOP},
@@ -627,6 +630,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_RU, UCON64_UNKNOWN, NULL,            0},
   {UCON64_S, UCON64_UNKNOWN, NULL,             WF_DEFAULT|WF_NO_SPLIT},
   {UCON64_SCAN, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
+  {UCON64_SHA1, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NOCRC32},
   {UCON64_SMD, UCON64_UNKNOWN, NULL,           WF_DEFAULT|WF_NO_SPLIT}, // Genesis AND Sega Master System
   {UCON64_SMDS, UCON64_UNKNOWN, NULL,          0}, // Genesis AND Sega Master System
   {UCON64_STP, UCON64_UNKNOWN, ucon64_padding_usage, 0},

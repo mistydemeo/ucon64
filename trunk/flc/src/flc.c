@@ -55,7 +55,7 @@ main (int argc, char *argv[])
   char buf[FILENAME_MAX + 1];
   char temp[FILENAME_MAX];
   char cwd[FILENAME_MAX];
-  st_file_t file, *file_p = NULL;
+  st_file_t file, *file_p = NULL, *file_0 = NULL;
   char path[FILENAME_MAX];
   struct dirent *ep;
   struct stat puffer;
@@ -151,33 +151,32 @@ main (int argc, char *argv[])
   if (!path[0])
     getcwd (path, FILENAME_MAX);
   else 
-    if (stat (path, &puffer) != -1 && S_ISREG (puffer.st_mode) == TRUE)
-    {
+    if (stat (path, &puffer) != -1)
+      if (S_ISREG (puffer.st_mode) == TRUE)
+      {
 /*
     single file handling
 */
-      file.next = NULL;
-      file.sub.date = puffer.st_mtime;
-      file.sub.size = puffer.st_size;
-      file.sub.checked = 'N';
-      strcpy (file.sub.name, path);
+        file.next = NULL;
+        file.sub.date = puffer.st_mtime;
+        file.sub.size = puffer.st_size;
+        file.sub.checked = 'N';
+        strcpy (file.sub.name, path);
 
-      extract (&file.sub);
+        extract (&file.sub);
 
-      output (&file.sub);
+        output (&file.sub);
 
-      return 0;
-    }
-  else path[strlen (path) - strlen (FILENAME_ONLY (path))] = 0;
+        return 0;
+      }
 
-  if (!tmpnam2 (temp))
-    {
-      fprintf (stderr, "ERROR: could not create temp dir");
-      return -1;
-    }
-  mkdir (temp, S_IRUSR|S_IWUSR);
+/*
+  turn relative path into absolute path
+*/
   getcwd (cwd, FILENAME_MAX);
-  chdir (temp);
+  chdir (path);
+  getcwd (path, FILENAME_MAX);
+  chdir (cwd);
 
 /*
   multiple file handling
@@ -188,6 +187,17 @@ main (int argc, char *argv[])
       return -1;
     }
 
+  if (!tmpnam2 (temp))
+    {
+      fprintf (stderr, "ERROR: could not create temp dir");
+      return -1;
+    }
+  mkdir (temp, S_IRUSR|S_IWUSR);
+  getcwd (cwd, FILENAME_MAX);
+  chdir (temp);
+
+  file_0 = file_p = NULL;
+
   while ((ep = readdir (dp)) != NULL)
     {
       sprintf (buf, "%s/%s", path, ep->d_name);
@@ -197,7 +207,7 @@ main (int argc, char *argv[])
       if (S_ISREG (puffer.st_mode) != TRUE)
         continue;
 
-      if (!file_p) file_p = &file;
+      if (!file_p) file_0 = file_p = (st_file_t *) malloc (sizeof (st_file_t));
       else
         {
           file_p->next = (st_file_t *) malloc (sizeof (st_file_t));
@@ -221,8 +231,8 @@ main (int argc, char *argv[])
   (void) closedir (dp);
   chdir (cwd);
   rmdir_R (temp);
-  file_p->next = NULL;
-  file_p = &file;
+  if (file_p) file_p->next = NULL;
+  file_p = file_0;
 
   if (flc.sort) sort (file_p);
 
@@ -232,7 +242,7 @@ main (int argc, char *argv[])
       file_p = file_p->next;
     }
 
-  free (file.next);
+  free (file_p);
 
   if (flc.html)
     printf ("</pre></tt></body></html>\n");

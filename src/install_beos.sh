@@ -10,8 +10,10 @@ Do you want to continue?" "Cancel" "Install")
 if [ "$areply" ==  "Install" ]; then
 	cp $(pwd)/ucon64 $HOME/config/bin
 	cp $(pwd)/libdiscmage/discmage.so $HOME
-        mkdir $HOME/.ucon64
-        cp index cache.zip $HOME/.ucon64
+	if ! test -x $HOME/.ucon64; then
+	mkdir $HOME/.ucon64
+	cp index cache.zip $HOME/.ucon64
+	fi
 	# ask for ioport driver installation
 	drreply=$(alert "uCON64 needs the BeOS ioport driver by Caz Jones.
 

@@ -47,6 +47,30 @@ fi
 AC_MSG_RESULT($enable_parallel)
 
 
+dnl AC_MSG_CHECKING(whether support for serial port backup units is enabled)
+dnl AC_ARG_ENABLE(serial,
+dnl              AC_HELP_STRING([--enable-serial],
+dnl                              [enable support for serial port backup units (default: yes)]),
+dnl               enable_serial=$enableval,
+dnl               enable_serial=yes)
+dnl if test $enable_serial = yes; then
+dnl   AC_DEFINE(SERIAL,1,[enable support for serial port backup units (default: yes)])
+dnl fi
+dnl AC_MSG_RESULT($enable_serial)
+
+
+dnl AC_MSG_CHECKING(whether support for usb port backup units is enabled)
+dnl AC_ARG_ENABLE(usb,
+dnl               AC_HELP_STRING([--enable-usb],
+dnl                              [enable support for usb port backup units (default: yes)]),
+dnl               enable_usb=$enableval,
+dnl               enable_usb=yes)
+dnl if test $enable_usb = yes; then
+dnl   AC_DEFINE(USB,1,[enable support for usb port backup units (default: yes)])
+dnl fi
+dnl AC_MSG_RESULT($enable_usb)
+
+
 AC_MSG_CHECKING(whether add-on libraries are dynamically loaded)
 AC_ARG_ENABLE(dload,
               AC_HELP_STRING([--enable-dload],

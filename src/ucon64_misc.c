@@ -589,6 +589,41 @@ remove_temp_file (void)
 }
 
 
+char *
+ucon64_output_fname (char *requested_fname, int force_requested_fname)
+{
+  char ext[80], fname[FILENAME_MAX];
+
+  // We have to make a copy, because getext() returns a pointer to a location
+  //  in the original string
+  strcpy (ext, getext (requested_fname));
+
+  // force_requested_fname is necessary for options like -gd3. Of course that
+  //  code should handle archives and come up with unique filenames for
+  //  "multizip" files.
+  if (!ucon64.fname_arch[0] || force_requested_fname)
+    {
+      strcpy (fname, basename (requested_fname));
+      sprintf (requested_fname, "%s%s", ucon64.output_path, fname);
+    }
+  else                                          // an archive (for now: zip file)
+    sprintf (requested_fname, "%s%s", ucon64.output_path, ucon64.fname_arch);
+
+  /*
+    Keep the requested suffix, but only if it isn't ".zip". This because we
+    currently don't write to zip files. Otherwise the output file would have
+    the suffix ".zip" while it isn't a zip file. uCON64 handles such files
+    correctly, because it looks at the file data itself, but many programs
+    don't.
+  */
+  if (!stricmp (ext, ".zip"))
+    strcpy (ext, ".tmp");
+  setext (requested_fname, ext);
+
+  return requested_fname;
+}
+
+
 int
 ucon64_fhexdump (const char *filename, int start, int len)
 {
@@ -1337,26 +1372,8 @@ ucon64_ls (const char *path, int mode)
     if (path[0])
       {
         if (!stat (path, &fstate))
-          {
-            if (S_ISREG (fstate.st_mode))
-              {
-#ifdef  HAVE_ZLIB_H
-                int n = unzip_get_number_entries (path), retval = 0;
-                if (n != -1)
-                  {
-                    for (unzip_current_file_nr = 0; unzip_current_file_nr < n;
-                         unzip_current_file_nr++)
-                      retval = ucon64_ls_main (path, &fstate, mode, console);
-                    unzip_current_file_nr = 0;
-                  }
-                else
-                  retval = ucon64_ls_main (path, &fstate, mode, console);
-                return retval;
-#else
-                return ucon64_ls_main (path, &fstate, mode, console);
-#endif
-              }
-          }
+          if (S_ISREG (fstate.st_mode))
+            return ucon64_ls_main (path, &fstate, mode, console);
         strcpy (dir, path);
       }
 

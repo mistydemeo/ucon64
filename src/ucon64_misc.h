@@ -130,6 +130,8 @@ extern void handle_existing_file (const char *dest, char *src);
 #define ucon64_fbackup(a,b) (handle_existing_file(b,a))
 extern void remove_temp_file (void); // possible temp file created by handle_existing_file()
 
+extern char *ucon64_output_fname (char *requested_fname, int force_requested_fname);
+
 extern int ucon64_fhexdump (const char *filename, int start, int len);
 
 extern unsigned int ucon64_filefile (const char *filename1, int start1, const char *filename2, int start2, int similar);

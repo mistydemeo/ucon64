@@ -108,6 +108,9 @@ static void ucon64_usage (int argc, char *argv[]);
 static int ucon64_process_rom (const char *fname, int console, int show_nfo);
 static int ucon64_execute_options (void);
 static void ucon64_rom_nfo (const st_rominfo_t *rominfo);
+#ifdef  HAVE_ZLIB_H
+static void ucon64_fname_arch (const char *fname);
+#endif
 
 st_ucon64_t ucon64;
 static st_rominfo_t rom;
@@ -469,9 +472,14 @@ main (int argc, char **argv)
   ucon64.mapr =
   ucon64.comment = "";
 
+#if 0
+  // It's not necessary to fill ucon64.output_path with the absolute path to
+  //  the current working directory. If the path to the cwd is long setting
+  //  ucon64.output_path makes the output confusing.
   getcwd (ucon64.output_path, FILENAME_MAX);    // default output path
   if (OFFSET (ucon64.output_path, strlen (ucon64.output_path) - 1) != FILE_SEPARATOR)
     strcat (ucon64.output_path, FILE_SEPARATOR_S);
+#endif
 
   strcpy (ucon64.configdir, get_property (ucon64.configfile, "configdir", buf, ""));
 #ifdef  __CYGWIN__
@@ -559,7 +567,7 @@ main (int argc, char **argv)
 #endif
 
   // no ROM or FILE argument (for example -dbv)
-  if (rom_index == argc)
+    if (rom_index == argc)
     ucon64_execute_options ();
 
   console = ucon64.console;
@@ -588,20 +596,18 @@ main (int argc, char **argv)
         }
 
       n_entries = unzip_get_number_entries (argv[rom_index]);
-      if (n_entries != -1 && process_multizips) // it's a zip file
+      if (n_entries != -1)                      // it's a zip file
+        ucon64_fname_arch (argv[rom_index]);
+      if (n_entries != -1 && process_multizips) // yes, repeat the check on n_entries
         {
-          unzFile file;
           int stop = 0;
 
-          for (unzip_current_file_nr = 0; unzip_current_file_nr < n_entries;
-               unzip_current_file_nr++)
+          if ((stop = ucon64_process_rom (argv[rom_index], console, show_nfo)))
+            break;
+          for (unzip_current_file_nr = 1; unzip_current_file_nr < n_entries;
+              unzip_current_file_nr++)
             {
-              file = unzOpen (argv[rom_index]);
-              unzip_goto_file (file, unzip_current_file_nr);
-              unzGetCurrentFileInfo (file, NULL, ucon64.fname_arch, FILENAME_MAX,
-                                     NULL, 0, NULL, 0);
-              unzClose (file);
-
+              ucon64_fname_arch (argv[rom_index]);
               if ((stop = ucon64_process_rom (argv[rom_index], console, show_nfo)))
                 break;
             }
@@ -625,6 +631,19 @@ main (int argc, char **argv)
 #endif
   return 0;
 }
+
+
+#ifdef  HAVE_ZLIB_H
+void
+ucon64_fname_arch (const char *fname)
+{
+  unzFile file = unzOpen (fname);
+  unzip_goto_file (file, unzip_current_file_nr);
+  unzGetCurrentFileInfo (file, NULL, ucon64.fname_arch, FILENAME_MAX,
+                         NULL, 0, NULL, 0);
+  unzClose (file);
+}
+#endif
 
 
 int
@@ -673,7 +692,7 @@ ucon64_execute_options (void)
 {
   int ucon64_argc, c, result = 0, value = 0;
   unsigned int padded;
-  char buf[MAXBUFSIZE], src_name[FILENAME_MAX];
+  char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   const char *ucon64_argv[128];
 
   optind = 0;                                   // start with first option

@@ -184,7 +184,7 @@ int
 n64_v64 (st_rominfo_t *rominfo)
 {
   long size = q_fsize (ucon64.rom);
-  char buf[FILENAME_MAX];
+  char dest_name[FILENAME_MAX];
 
   if (rominfo->interleaved)
     {
@@ -192,14 +192,14 @@ n64_v64 (st_rominfo_t *rominfo)
       return -1;
     }
 
-  strcpy (buf, ucon64.rom);
-  setext (buf, ".V64");
+  strcpy (dest_name, ucon64.rom);
+  setext (dest_name, ".V64");
+  ucon64_output_fname (dest_name, 0);
+  ucon64_fbackup (NULL, dest_name);
+  q_fcpy (ucon64.rom, 0, size, dest_name, "wb");
+  q_fswap (dest_name, 0, size);
 
-  ucon64_fbackup (NULL, buf);
-  q_fcpy (ucon64.rom, 0, size, buf, "wb");
-  q_fswap (buf, 0, size);
-
-  fprintf (stdout, ucon64_msg[WROTE], buf);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -208,7 +208,7 @@ int
 n64_z64 (st_rominfo_t *rominfo)
 {
   long size = q_fsize (ucon64.rom);
-  char buf[FILENAME_MAX];
+  char dest_name[FILENAME_MAX];
 
   if (!rominfo->interleaved)
     {
@@ -216,14 +216,14 @@ n64_z64 (st_rominfo_t *rominfo)
       return -1;
     }
 
-  strcpy (buf, ucon64.rom);
-  setext (buf, ".Z64");
+  strcpy (dest_name, ucon64.rom);
+  setext (dest_name, ".Z64");
+  ucon64_output_fname (dest_name, 0);
+  ucon64_fbackup (NULL, dest_name);
+  q_fcpy (ucon64.rom, 0, size, dest_name, "wb");
+  q_fswap (dest_name, 0, size);
 
-  ucon64_fbackup (NULL, buf);
-  q_fcpy (ucon64.rom, 0, size, buf, "wb");
-  q_fswap (buf, 0, size);
-
-  fprintf (stdout, ucon64_msg[WROTE], buf);
+  fprintf (stdout, ucon64_msg[WROTE], dest_name);
   return 0;
 }
 

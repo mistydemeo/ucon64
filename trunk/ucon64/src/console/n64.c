@@ -148,7 +148,7 @@ static int n64_chksum (st_rominfo_t *rominfo);
 
 
 // This is the support of LaC's makesram routine for uploading
-//  SRAM files to a Cart SRAM.  The .v64 file is his work, not mine
+//  SRAM files to a Cart SRAM. The .v64 file is his work, not mine
 int
 n64_sram (st_rominfo_t *rominfo)
 {
@@ -435,8 +435,10 @@ n64_init (st_rominfo_t *rominfo)
       result = 0;
     }
 #if 0
-  // What format is this?
-  // Conversion: 1234 -> 3412
+  /*
+    What format is this?
+    Conversion: 1234 -> 3412
+  */
   else if (value == 0x80371240) // 0x40123780
     {
       rominfo->interleaved = 2;

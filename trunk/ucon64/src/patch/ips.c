@@ -68,14 +68,15 @@ read_byte (FILE *file)
 }
 
 
-static void remove_destfile (void)
+static void
+remove_destfile (void)
 {
   if (destfname)
     {
       printf ("Removing: %s\n", destfname);
       fclose (destfile);                        // necessary under DOS/Win9x for DJGPP port
       remove (destfname);
-      destfile = NULL;
+      destfname = NULL;
     }
 }
 

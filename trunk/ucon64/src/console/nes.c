@@ -205,14 +205,15 @@ static int rom_size;
 static FILE *nes_destfile;
 
 
-static void remove_destfile (void)
+static void
+remove_destfile (void)
 {
   if (nes_destfname)
     {
       printf ("Removing: %s\n", nes_destfname);
       fclose (nes_destfile);                    // necessary under DOS/Win9x for DJGPP port
       remove (nes_destfname);
-      nes_destfile = NULL;
+      nes_destfname = NULL;
     }
 }
 

@@ -337,15 +337,11 @@ handle_existing_file (const char *dest, char *src)
           return;
         }
 
-#if 1
       // Check if src and dest are the same file based on the inode and device info,
       //  not the filenames
       stat (src, &src_info);
       stat (dest, &dest_info);
       if (src_info.st_dev == dest_info.st_dev && src_info.st_ino == dest_info.st_ino)
-#else
-      if (!strcmp (dest, src))
-#endif
         {                                       // case 1
           if (ucon64.backup)
             {                                   // case 1a
@@ -356,23 +352,12 @@ handle_existing_file (const char *dest, char *src)
             {                                   // case 1b
               strcpy (src, q_fbackup (dest, BAK_MOVE));
               ucon64_temp_file = src;
-#ifdef  DEBUG
-              printf ("case 1b, src: %s\n", src);
-              fflush (stdout);
-#endif
             }
         }
       else
-        {
-          if (ucon64.backup)
+        {                                       // case 2
+          if (ucon64.backup)                    // case 2a
             printf ("Wrote backup to: %s\n", q_fbackup (dest, BAK_DUPE));
-#ifdef  DEBUG
-          else
-            {
-              printf ("case 2b, src: %s\n", src);
-              fflush (stdout);
-            }
-#endif
         }
     }
 }

@@ -1,7 +1,8 @@
 <html><head>
 <link rel="icon" href="images/icon.png" type="image/png">
 <title>uCON64 - Changes</title></head><body bgcolor="#ffffff"><tt><br>
-The original uCON for SNES and Genesis was written by Chicken &amp; chp in ~1995<br>
+The original uCON for SNES and Genesis was written by Chicken &amp; chp in
+1993-1995<br>
 <br>
 <p>
 <a name="190">1.9.0</a><br>
@@ -619,6 +620,16 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   correct index files (MULTI-GD) (by dbjh)<br>
 - updated (SNES &amp; Genesis) -s produces an index file if the ROM dump is in
   MGD format (by dbjh)<br>
+- added support for ppdev (currently GNU/Linux-only) (by dbjh)<br>
+  This solves two problems:<br>
+  1.) It's no longer necessary for uCON64 to be setuid root in order to
+  communicate with a backup unit. Just make sure /dev/parport&#60;n&#62; has the
+  right permissions or get yourself added to the correct group<br>
+  2.) Non-standard parallel port addresses do not have to be specified. uCON64
+  still uses the first parallel port by default. It's possible to override that
+  by setting parport_dev in the configuration file or to set an environment
+  variable<br>
+  Use the configure option --enable-ppdev to enable the code
 <br>
 <br>
 <br>
@@ -662,4 +673,3 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 <br>
 <br>
 </tt></body></html>
-

@@ -539,7 +539,10 @@ main (int argc, char **argv)
 #endif
 
   // parallel port?
-#ifdef  AMIGA
+#ifdef  PPDEV
+  strcpy (ucon64.parport_dev,
+          get_property (ucon64.configfile, "parport_dev", buf, "/dev/parport0"));
+#elif   defined AMIGA
   strcpy (ucon64.parport_dev,
           get_property (ucon64.configfile, "parport_dev", buf, "parallel.device"));
 #endif

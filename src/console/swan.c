@@ -175,23 +175,16 @@ swan_init (st_rominfo_t *rominfo)
 
 
 int
-swan_chksum (unsigned char *rom_buffer)
+swan_chksum (unsigned char *ptr)
 {
-  unsigned int csum = 0;
-  int t;
-  unsigned char *ptr;
+  unsigned int csum = 0, t;
 
   if (ucon64.file_size % 4)
     return -1;
 
-  t = ucon64.file_size - 3;
-  ptr = rom_buffer;
-  while (t >= 0)
-    {
-      csum += *ptr++;
-      t--;
-    }
-  csum &= 0xffff;
+  t = ucon64.file_size - 2;
+  while (t-- > 0)
+    csum += *ptr++;
 
-  return csum;
+  return csum & 0xffff;;
 }

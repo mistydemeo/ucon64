@@ -1079,6 +1079,10 @@ return(0);
 
 int ucon64_init(struct ucon64_ *rom)
 {
+  if( quickftell(rom->rom) <= MAXROMSIZE )
+    rom->current_crc32=fileCRC32(rom->rom,0);
+
+
 if(rom->console != ucon64_UNKNOWN)
 {
   if( quickftell(rom->rom) <= MAXROMSIZE )
@@ -1122,6 +1126,7 @@ if(rom->console != ucon64_UNKNOWN)
 
 if(rom->console == ucon64_UNKNOWN && rom->bytes <= MAXROMSIZE )
 {
+
   if(
     (snes_init(rom)==-1) &&
     (genesis_init(rom)==-1) &&
@@ -1178,7 +1183,7 @@ if(rom->console == ucon64_UNKNOWN && rom->bytes <= MAXROMSIZE )
   if (argcmp(rom->argc, rom->argv, "-ns"))
     rom->splitted[0] = 0;
 
-  if(!rom->current_crc32)rom->current_crc32=fileCRC32(rom->rom,rom->buheader_len);
+//  if(!rom->current_crc32)rom->current_crc32=fileCRC32(rom->rom,rom->buheader_len);
 
   return(0);
 }

@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 typedef struct
 {
-  uint32_t current_crc32;               // standard current_crc32 checksum of the ROM
+  uint32_t crc32;                       // "official" CRC32 checksum of the ROM
   uint8_t console;                      // integer for the console system
   char name[2 * 80];                    // name of the ROM
   const char *maker;                    // maker of the ROM
@@ -42,7 +42,7 @@ typedef struct
   char version[100];                    // version of dat file
   char date[20];                        // date of dat file
   char comment[25 * 80];                // comment of dat file
-  char refname[100];                    // ref name (could this be used to find out which console system?)
+  char refname[100];                    // ref name
 
   const st_usage_t *console_usage;                    // console system usage
   const st_usage_t *copier_usage;                     // backup unit usage

@@ -74,9 +74,8 @@ typedef struct
   */
   int console;                                  // the detected console system
 
-// gone for the sake of a "cleaner" getopt() use
 //  const char *file;                             // FILE (cmdline) with path
-  const char *patch_file;
+  const char *file;
  
   char configfile[FILENAME_MAX];                // path and name of the config file
   char configdir[FILENAME_MAX];                 // directory for config and DAT files

@@ -594,7 +594,8 @@ snes_ffe (st_rominfo_t *rominfo, char *ext)
   int size;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
-  q_fread (&header, 0, rominfo->buheader_len, ucon64.rom);
+  q_fread (&header, 0, rominfo->buheader_len > SWC_HEADER_LEN ?
+                         SWC_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
   size = ucon64.file_size - rominfo->buheader_len;
   header.size_low = size / 8192;
@@ -654,11 +655,12 @@ snes_swc (st_rominfo_t *rominfo)
 int
 snes_fig (st_rominfo_t *rominfo)
 {
+  st_fig_header_t header;
   int size, uses_DSP;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-  st_fig_header_t header;
 
-  q_fread (&header, 0, rominfo->buheader_len, ucon64.rom);
+  q_fread (&header, 0, rominfo->buheader_len > FIG_HEADER_LEN ?
+                         FIG_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
   size = ucon64.file_size - rominfo->buheader_len;
   header.size_low = size / 8192;
@@ -939,7 +941,8 @@ snes_gd3 (st_rominfo_t *rominfo)
         }
 
       // create the header
-      q_fread (header, 0, rominfo->buheader_len, ucon64.rom);
+      q_fread (header, 0, rominfo->buheader_len > 512 ? 512 : rominfo->buheader_len,
+               ucon64.rom);
       reset_header (header);
       memcpy (header, "GAME DOCTOR SF 3", 0x10);
 
@@ -1035,7 +1038,8 @@ snes_gd3 (st_rominfo_t *rominfo)
           return -1;
         }
 
-      q_fread (header, 0, rominfo->buheader_len, ucon64.rom);
+      q_fread (header, 0, rominfo->buheader_len > 512 ? 512 : rominfo->buheader_len,
+               ucon64.rom);
       reset_header (header);
       memcpy (header, "GAME DOCTOR SF 3", 0x10);
 

@@ -446,7 +446,6 @@ main (int argc, char **argv)
     char *p;
 
     strcpy (buf, argv[0]);
-    // the next statement is not necessary, but will avoid confusion
     change_string ("/", 1, 0, 0, FILE_SEPARATOR_S, 1, buf, strlen (buf), 0);
     if ((p = strrchr (buf, FILE_SEPARATOR)))
       *p = 0;
@@ -484,7 +483,7 @@ main (int argc, char **argv)
   ucon64.fname_arch[0] = 0;
 
   ucon64.rom =
-  ucon64.patch_file =
+  ucon64.file =
   ucon64.mapr =
   ucon64.comment = "";
 
@@ -568,7 +567,7 @@ main (int argc, char **argv)
 
       // Was the last argument the name of a (the) patch file?
       if (rom_index == argc - 1)
-        if (!strcmp (argv[rom_index], ucon64.patch_file))
+        if (!strcmp (argv[rom_index], ucon64.file))
           break;
 #if 0 // TODO: detect nonsense arguments. Using access() requires users to
       //       always specify -rom or -port, which is annoying.
@@ -590,15 +589,14 @@ main (int argc, char **argv)
                 break;
             }
           unzip_current_file_nr = 0;
+          ucon64.fname_arch[0] = 0;
           if (stop)
             break;
         }
       else
 #endif
-        if (ucon64_process_rom (argv[rom_index], console, show_nfo))
-          break;
-
-      ucon64.fname_arch[0] = 0;
+      if (ucon64_process_rom (argv[rom_index], console, show_nfo))
+        break;
     }
 
   return 0;
@@ -658,21 +656,37 @@ ucon64_execute_options (void)
             getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
     {
 #include "options.c"
-      /*
-        Some options take more than one file as argument, but should be
-        executed only once.
-      */
+      // "special" options
       switch (ucon64_option)
         {
-        case UCON64_MULTI:                      // falling through
+        // -multi (and -xfalmulti) takes more than one file as argument, but
+        //  should be executed only once.
+        case UCON64_MULTI:
+        // stop after sending one ROM to a copier ("multizip")
+        case UCON64_XDEX:
+        case UCON64_XDJR:
+        case UCON64_XSMD:
+        case UCON64_XSMDS:
+        case UCON64_XSWC:
+        case UCON64_XSWC2:
+        case UCON64_XSWCS:
+        case UCON64_XV64:
+        case UCON64_XFAL:
         case UCON64_XFALMULTI:
-          special_option = 1;
-          break;
+        case UCON64_XFALC:
+        case UCON64_XFALS:
+        case UCON64_XFALB:
+        case UCON64_XGBX:
+        case UCON64_XGBXS:
+        case UCON64_XGBXB:
+        case UCON64_XGD3:
+        case UCON64_XLIT:
+        case UCON64_XMCCL:
+          special_option = 1;                   // falling through
         default:
           ;
         }
     }
-
   return special_option;
 }
 
@@ -729,7 +743,7 @@ ucon64_console_probe (st_rominfo_t *rominfo)
       int (*init) (st_rominfo_t *);
       uint8_t auto_recognition;
     } st_probe_t;
-  
+
   int x = 0;
   st_probe_t probe[] =
     {
@@ -786,7 +800,7 @@ ucon64_console_probe (st_rominfo_t *rominfo)
           if (probe[x].auto_recognition)
             {
               ucon64_flush (rominfo);
-              if (!probe[x].init (rominfo)) 
+              if (!probe[x].init (rominfo))
                 {
                   ucon64.console = probe[x].console;
                   break;

@@ -361,7 +361,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     strcpy (dat->fname, dat_field[4]);
 
   if (dat_field[5])
-    sscanf (dat_field[5], "%x", &dat->current_crc32);
+    sscanf (dat_field[5], "%x", &dat->crc32);
 
   if (dat_field[6][0] == 'N' && dat_field[7][0] == 'O')
     // e.g. GoodSNES bad crc & Nintendo FDS DAT
@@ -623,7 +623,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
         {
           // open dat file and read entry
           if (get_dat_entry (fname_dat, dat, crc32, idx_entry->filepos))
-            if (crc32 == dat->current_crc32)
+            if (crc32 == dat->crc32)
               {
                 strcpy (dat->datfile, basename (fname_dat));
                 get_dat_header (fname_dat, dat);
@@ -706,7 +706,7 @@ ucon64_dat_indexer (void)
           */
           idx_entry = NULL;
           for (n = 0; n < pos; n++)
-            if (idx_entries[n].crc32 == dat.current_crc32)
+            if (idx_entries[n].crc32 == dat.crc32)
               idx_entry = &idx_entries[n];
           if (idx_entry)
             {
@@ -732,14 +732,14 @@ ucon64_dat_indexer (void)
                        "WARNING: DAT file contains a duplicate CRC32 (0x%x)!\n"
                        "  First game with this CRC32: \"%s\"\n"
                        "  Ignoring game:              \"%s\"\n",
-                       dat.current_crc32, dat.name, current_name);
+                       dat.crc32, dat.name, current_name);
 
               n_duplicates++;
               fseek (fdat, current_filepos, SEEK_SET);
               continue;
             }
 
-          idx_entries[pos].crc32 = dat.current_crc32;
+          idx_entries[pos].crc32 = dat.crc32;
           idx_entries[pos].filepos = filepos_line;
 
           if (!(pos % 20))

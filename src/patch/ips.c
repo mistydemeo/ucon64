@@ -51,7 +51,7 @@ const char *ips_usage[] =
 
 static FILE *orgfile, *modfile, *ipsfile, *destfile;
 static int ndiffs = 0, address = -1, rle_value = NO_RLE, filepos = 0;
-static char ipsname[FILENAME_MAX], *destfname = NULL;
+static const char *destfname = NULL;
 
 
 static unsigned char
@@ -69,31 +69,46 @@ read_byte (FILE *file)
 }
 
 
+static void remove_destfile (void)
+{
+  if (destfname)
+    {
+      printf ("Removing: %s\n", destfname);
+      fclose (destfile);                        // necessary under DOS/Win9x for DJGPP port
+      remove (destfname);
+      destfile = NULL;
+    }
+}
+
+
 // based on IPS v1.0 for UNIX by madman
 int
-ips_apply (const char *destname, const char *patchname)
+ips_apply (const char *modname, const char *ipsname)
 {
-  FILE *destfile;
   unsigned char byte, byte2, byte3, magic[6];
   unsigned int offset, length, i;
 
-  ucon64_fbackup (NULL, destname);
+  ucon64_fbackup (NULL, modname);
 
-  if ((destfile = fopen (destname, "rb+")) == NULL)
+  if ((modfile = fopen (modname, "rb+")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", destname);
+      fprintf (stderr, "ERROR: Could not open %s\n", modname);
       exit (1);
     }
-  if ((ipsfile = fopen (patchname, "rb")) == NULL)
+  if ((ipsfile = fopen (ipsname, "rb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", patchname);
+      fprintf (stderr, "ERROR: Could not open %s\n", ipsname);
       exit (1);
     }
+
+  destfname = modname;
+  destfile = modfile;
+  register_func (remove_destfile);
 
   fgets (magic, 6, ipsfile);
   if (strcmp (magic, "PATCH") != 0)
     {                                           // do at least one check for validity
-      fprintf (stderr, "ERROR: %s is not a valid IPS file\n", patchname);
+      fprintf (stderr, "ERROR: %s is not a valid IPS file\n", ipsname);
       exit (1);
     }
 
@@ -106,7 +121,7 @@ ips_apply (const char *destname, const char *patchname)
       offset = (byte << 16) + (byte2 << 8) + byte3;
       if (offset == 0x454f46)                   // numerical representation of ASCII "EOF"
         break;
-      fseek (destfile, offset, SEEK_SET);
+      fseek (modfile, offset, SEEK_SET);
 
       byte = read_byte (ipsfile);
       byte2 = read_byte (ipsfile);
@@ -121,7 +136,7 @@ ips_apply (const char *destname, const char *patchname)
           printf ("[%02x] <= %02x (* %d)\n", offset, byte, length);
 #endif
           for (i = 0; i < length; i++)
-            fputc (byte, destfile);
+            fputc (byte, modfile);
         }
       else
         {                                       // non compressed
@@ -131,11 +146,11 @@ ips_apply (const char *destname, const char *patchname)
 #ifdef  DEBUG_IPS
               printf ("[%02x] <= %02x\n", offset + i, byte);
 #endif
-              fputc (byte, destfile);
+              fputc (byte, modfile);
             }
         }
     }
-  fclose (destfile);                            // commit changes before calling ucon64_pad()
+  fclose (modfile);                             // commit changes before calling ucon64_pad()
 
   byte = fgetc (ipsfile);                       // don't use read_byte() here;
   if (!feof (ipsfile))                          //  this part is optional
@@ -143,7 +158,7 @@ ips_apply (const char *destname, const char *patchname)
       byte2 = read_byte (ipsfile);
       byte3 = read_byte (ipsfile);
       length = (byte << 16) + (byte2 << 8) + byte3;
-      ucon64_pad (destname, 0, length);
+      ucon64_pad (modname, 0, length);
       printf ("File truncated to %.4f MBit\n", length / (float) MBIT);
     }
 
@@ -152,6 +167,7 @@ ips_apply (const char *destname, const char *patchname)
           "      This means you must convert for example a Super Nintendo ROM with -swc\n"
           "      or -mgd or the patch will not work\n");
 
+  unregister_func (remove_destfile);            // unregister _after_ possible padding
   fclose (ipsfile);
   return 0;
 }
@@ -159,7 +175,7 @@ ips_apply (const char *destname, const char *patchname)
 
 // TODO: cleaning up most of the IPS creation code
 static void
-write_address (FILE *file, const char *name, int new_address)
+write_address (int new_address)
 {
   address = new_address;
   if (address < 16777216)
@@ -168,37 +184,35 @@ write_address (FILE *file, const char *name, int new_address)
       that is an artificial limit.
     */
     {
-      fputc (address >> 16, file);
-      fputc (address >> 8, file);
-      fputc (address, file);
+      fputc (address >> 16, ipsfile);
+      fputc (address >> 8, ipsfile);
+      fputc (address, ipsfile);
     }
   else
     {
       fprintf (stderr, "ERROR: IPS doesn't support addresses greater than 16777215\n"
                        "       Consider using another patch format\n");
-      fclose (file);
-      remove (name);
-      exit (1);
+      exit (1);                                 // will call remove_destfile() (indirectly)
     }
 }
 
 
 static void
-write_block (FILE *file, int ndiffs, unsigned char *buffer, int rle_value)
+write_block (int ndiffs, unsigned char *buffer, int rle_value)
 {
   if (rle_value == NO_RLE)
     {
-      fputc (ndiffs >> 8, file);
-      fputc (ndiffs, file);
-      fwrite (buffer, 1, ndiffs, file);
+      fputc (ndiffs >> 8, ipsfile);
+      fputc (ndiffs, ipsfile);
+      fwrite (buffer, 1, ndiffs, ipsfile);
     }
   else
     {
-      fputc (0, file);
-      fputc (0, file);
-      fputc (ndiffs >> 8, file);
-      fputc (ndiffs, file);
-      fputc (rle_value, file);
+      fputc (0, ipsfile);
+      fputc (0, ipsfile);
+      fputc (ndiffs >> 8, ipsfile);
+      fputc (ndiffs, ipsfile);
+      fputc (rle_value, ipsfile);
 #ifdef  DEBUG_IPS
       printf ("RLE ");
 #endif
@@ -214,7 +228,7 @@ flush_diffs (unsigned char *buffer)
 {
   if (ndiffs)
     {
-      write_block (ipsfile, ndiffs, buffer, rle_value);
+      write_block (ndiffs, buffer, rle_value);
       ndiffs = 0;
       rle_value = NO_RLE;
       address = -1;
@@ -273,7 +287,7 @@ check_for_rle (unsigned char byte, unsigned char *buf)
               fseek (modfile, filepos, SEEK_SET);
 
               flush_diffs (buf);
-              write_address (ipsfile, ipsname, filepos);
+              write_address (filepos);
               retval = 1;
 #ifdef  DEBUG_IPS
               printf ("restart (%x)\n", address);
@@ -326,23 +340,11 @@ check_for_rle (unsigned char byte, unsigned char *buf)
 }
 
 
-static void remove_destfile (void)
-{
-  if (destfname)
-    {
-      printf ("Removing: %s\n", destfname);
-      fclose (destfile);                        // necessary under DOS/Win9x for DJGPP port
-      remove (destfname);
-      destfile = NULL;
-    }
-}
-
-
 int
 ips_create (const char *orgname, const char *modname)
 {
   int i, orgfilesize, modfilesize;
-  unsigned char byte, byte2, buf[65535];
+  unsigned char ipsname[FILENAME_MAX], byte, byte2, buf[65535];
 
   if ((orgfile = fopen (orgname, "rb")) == NULL)
     {
@@ -394,7 +396,7 @@ next_byte:
           if (address < 0 || address + ndiffs != 0x454f46 - 1 || ndiffs > 65535 - 2)
             {
               flush_diffs (buf);                // commit any pending data
-              write_address (ipsfile, ipsname, 0x454f46 - 1);
+              write_address (0x454f46 - 1);
             }
           // write 2 patch bytes (for offsets 0x454f45 and 0x454f46)
           buf[ndiffs++] = byte2;
@@ -418,7 +420,7 @@ next_byte:
           if (address < 0)
             {
               flush_diffs (buf);                // commit previous block
-              write_address (ipsfile, ipsname, filepos - 1);
+              write_address (filepos - 1);
             }
 
           buf[ndiffs++] = byte2;
@@ -475,7 +477,7 @@ next_byte:
   flush_diffs (buf);
   fprintf (ipsfile, "EOF");
   if (modfilesize < orgfilesize)
-    write_address (ipsfile, ipsname, modfilesize);
+    write_address (modfilesize);
 
   unregister_func (remove_destfile);
   fclose (orgfile);

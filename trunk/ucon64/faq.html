@@ -563,9 +563,9 @@ Q37: <a href="#37">uCON64 displays too many lines for my DOS-box. What can I do
 <p>
 <a name="34"><b>Q34</b>: When I try to convert a large number of files using
    wildcards, uCON64 will only convert the first file. Is this a bug?</a><br>
-<b>A</b>: No, it isn't. uCON64 1.9.8beta6 just doesn't support wildcards. For
-   example, to convert all files with the suffix (M$ speak: extension) .mgd
-   to Super Wild Card format, try this in Bash:<br>
+<b>A</b>: No, it isn't. uCON64 versions before 1.9.8beta7 just don't support
+   wildcards. For example, to convert all files with the suffix (M$ speak:
+   extension) .mgd to Super Wild Card format, try this in Bash:<br>
    &nbsp;&nbsp; find -name \*.mgd -exec ucon64 --snes --swc {} \;<br>
    or this in command.com or cmd.exe:<br>
    &nbsp;&nbsp; for %f in (*.mgd) do ucon64 --snes --swc "%f"<br>
@@ -577,29 +577,36 @@ Q37: <a href="#37">uCON64 displays too many lines for my DOS-box. What can I do
    processed and not only the files before the crash.<br>
 <br>
 <p>
-<a name="35"><b>Q35</b>: Does uCON64 support DAT (Goodxxxx, RomCenter, etc.) files?</a><br>
+<a name="35"><b>Q35</b>: Does uCON64 support DAT (Goodxxxx, RomCenter, etc.)
+   files?</a><br>
 <b>A</b>: Yes, starting with version 1.9.8beta8 it does. First use the option
    -version to see which configuration file uCON64 uses
    (see <a href="#24">question 24</a>). Then open that file in an editor and
-   look for a line that starts with "configdir=" (without the quotes). If that
+   look for a line that starts with "datdir=" (without the quotes). If that
    line isn't present add one. For example on Unix:<br>
-   &nbsp;&nbsp; configdir=~/.ucon64<br>
+   &nbsp;&nbsp; datdir=~/.ucon64/dat<br>
    or on Windows:<br>
-   &nbsp;&nbsp; configdir=c:\ucon64<br>
-   You can also set an environment variable with the name configdir. Note that
+   &nbsp;&nbsp; datdir=c:\ucon64\dat<br>
+   You can use the tilde ('~') also on DOS and Windows. It will be interpreted
+   by uCON64 as the "home directory". The home directory is the directory
+   specified by the environment variable HOME or USERPROFILE or HOMEDRIVE and
+   HOMEPATH. If none of those environment variables are set, the current
+   directory will be handled as the home directory. Again, see
+   <a href="#24">question 24</a>.<br>
+   You can also set an environment variable with the name datdir. Note that
    the value of the environment variable takes precedence over the value in
    the configuration file.<br>
    Then copy all DAT files you have into that directory. You can download DAT
    files from sites like
-   <a href="http://www.romcenter.com/" target="_blank">http://www.romcenter.com/</a>
+   <a href="http://gooddat.emu-france.com/" target="_blank">http://gooddat.emu-france.com/</a>
    or
-   <a href="http://gooddat.emu-france.com/" target="_blank">http://gooddat.emu-france.com/</a>.
+   <a href="http://www.romcenter.com/" target="_blank">http://www.romcenter.com/</a>.
    uCON64 will automatically create index files which speed up the access to
    the DAT files dramatically. Now uCON64 uses the information inside the DAT
    files to identify or rename ROMs without an internal header.<br>
    Note that starting with version 1.9.8beta8 uCON64 doesn't have an internal
-   database anymore, so you'll <b>need</b> DAT files for file types like NES
-   ROMs.<br>
+   database anymore, so you'll <b>need</b> DAT files for files like NES ROM
+   dumps.<br>
 <br>
 <p>
 <a name="36"><b>Q36</b>: Some SNES games don't work on my Super Pro Fighter Q(+).

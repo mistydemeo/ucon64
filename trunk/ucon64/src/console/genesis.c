@@ -43,8 +43,8 @@ static void interleave_buffer (unsigned char *buffer, int size);
 static void deinterleave_chunk (unsigned char *dest, unsigned char *src);
 static int genesis_chksum (st_rominfo_t *rominfo, unsigned char *rom_buffer);
 static unsigned char *load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer);
-static int save_smd (const char *name, unsigned char *rom_buffer, st_smd_header_t *header, long size);
-static int save_bin (const char *name, unsigned char *rom_buffer, long size);
+static int save_smd (const char *name, unsigned char *buffer, st_smd_header_t *header, long size);
+static int save_bin (const char *name, unsigned char *buffer, long size);
 
 
 const st_usage_t genesis_usage[] =
@@ -143,7 +143,6 @@ genesis_smd (st_rominfo_t *rominfo)
   header.id2 = 0xbb;
   header.type = 6;
 
-
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".SMD");
   ucon64_file_handler (dest_name, NULL, 0);
@@ -159,35 +158,24 @@ genesis_smd (st_rominfo_t *rominfo)
 int
 genesis_smds (st_rominfo_t *rominfo)
 {
-  char buf[MAXBUFSIZE], buf2[32768]/*, p = NULL */;
+  char dest_name[FILENAME_MAX], buf[32768];
   st_smd_header_t header;
 
-#if 0
-  if (!(p = malloc (ucon64.file_size)))
-    {
-      fprintf (stderr, ucon64_msg[BUFFER_ERROR], ucon64.file_size);
-      return -1;
-    }
-#endif
-
   memset (&header, 0, SMD_HEADER_LEN);
-  memset (&buf2, 0, 32768);
+  memset (&buf, 0, 32768);
 
-  header.size = 0;
-  header.id0 = 0;
-  header.split = 0;
   header.id1 = 0xaa;
   header.id2 = 0xbb;
   header.type = 7;                              // SRAM file
 
-  strcpy (buf, ucon64.rom);
-  set_suffix (buf, ".SAV");
+  strcpy (dest_name, ucon64.rom);
+  set_suffix (dest_name, ".SAV");
+  ucon64_file_handler (dest_name, NULL, 0);
 
-  q_fread (buf2, 0, ucon64.file_size, ucon64.rom);
-  save_smd (buf, buf2, &header, 32768); // sram's are interleaved too
-//  free (p);
-  
-  printf (ucon64_msg[WROTE], buf);
+  q_fread (buf, 0, ucon64.file_size, ucon64.rom);
+  save_smd (dest_name, buf, &header, 32768);   // SMD SRAM files are interleaved
+
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -195,8 +183,8 @@ genesis_smds (st_rominfo_t *rominfo)
 int
 genesis_mgd (st_rominfo_t *rominfo)
 {
-  unsigned char dest_name[FILENAME_MAX], *rom_buffer = NULL, buf[FILENAME_MAX], mgh[512];
-  unsigned char *p = NULL;
+  unsigned char dest_name[FILENAME_MAX], *rom_buffer = NULL, buf[FILENAME_MAX],
+                mgh[512], *p = NULL;
   int x, y;
   const char mghcharset[1024] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -682,19 +670,19 @@ load_rom (st_rominfo_t *rominfo, const char *name, unsigned char *rom_buffer)
 
 
 int
-save_smd (const char *name, unsigned char *rom_buffer, st_smd_header_t *header,
+save_smd (const char *name, unsigned char *buffer, st_smd_header_t *header,
           long size)
 {
-  interleave_buffer (rom_buffer, size);
+  interleave_buffer (buffer, size);
   q_fwrite (header, 0, SMD_HEADER_LEN, name, "wb");
-  return q_fwrite (rom_buffer, SMD_HEADER_LEN, size, name, "ab");
+  return q_fwrite (buffer, SMD_HEADER_LEN, size, name, "ab");
 }
 
 
 int
-save_bin (const char *name, unsigned char *rom_buffer, long size)
+save_bin (const char *name, unsigned char *buffer, long size)
 {
-  return q_fwrite (rom_buffer, 0, size, name, "wb");
+  return q_fwrite (buffer, 0, size, name, "wb");
 }
 
 

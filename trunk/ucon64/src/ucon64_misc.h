@@ -44,7 +44,7 @@ extern void outportw (unsigned short port, unsigned short word);
 /*
   defines for unknown backup units/emulators
 */
-typedef struct //st_unknown_header
+typedef struct // st_unknown_header
 {
 /*
   Don't create fields that are larger than one byte! For example size_low and size_high
@@ -104,13 +104,13 @@ extern const st_usage_t ucon64_patching_usage[];
   uCON64 workflow flags for st_ucon64_wf_t
 
   WF_PROBE          probe for console type
-  WF_INIT           init ROM nfo (ucon64_init()) necessary
+  WF_INIT           init ROM info (ucon64_init()) necessary
                       w/o this flag WF_NFO and WF_NFO_AFTER
                       will be ignored
-  WF_NFO            show nfo output before processing rom
-  WF_NFO_AFTER      show nfo output AFTER processing rom
+  WF_NFO            show info output before processing rom
+  WF_NFO_AFTER      show info output AFTER processing rom
   WF_ROM_REQ        for this option a [--rom=]ROM is required
-  WF_NOCRC32        no CRC32 calculation necessary for this option this
+  WF_NOCRC32        no CRC32 calculation necessary for this option; this
                       overrides even WF_INIT, WF_NFO and WF_NFO_AFTER
   WF_STOP           a "stop" option:
                     - -multi (and -xfalmulti) takes more than one file as
@@ -126,7 +126,7 @@ extern const st_usage_t ucon64_patching_usage[];
 
   example:
   WF_NFO|WF_MFO_AFTER|WF_ROM_REQ
-                    a ROM is required and nfo will be shown before and after
+                    a ROM is required and info will be shown before and after
                     it has been processed
 */
 #define WF_DEFAULT (WF_PROBE|WF_INIT|WF_NFO)

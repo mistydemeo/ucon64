@@ -100,7 +100,7 @@ typedef signed __int64 int64_t;
 //#define RANDOM(min, max) ((rand () % (max - min)) + min)
 #define OFFSET(a, offset) ((((unsigned char *)&(a))+(offset))[0])
 
-#ifdef WORDS_BIGENDIAN
+#ifdef  WORDS_BIGENDIAN
 #undef WORDS_BIGENDIAN
 #endif
 
@@ -156,7 +156,7 @@ typedef signed __int64 int64_t;
   #define CURRENT_OS_S "?"
 #endif
 
-#ifdef WORDS_BIGENDIAN
+#ifdef  WORDS_BIGENDIAN
 #define me2be_16(x) (x)
 #define me2be_32(x) (x)
 #define me2be_64(x) (x)

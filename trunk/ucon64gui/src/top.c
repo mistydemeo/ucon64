@@ -24,13 +24,13 @@ ucon64gui_top(void)
   h2g_("$ROM: ");
 
 //  h2g_input_text ("rom", ucon64gui.rom, "Enter $ROM", 20, 0, FALSE);
-  h2g_input_file ("rom","Select $ROM", ucon64gui.rom, 0, 0, open_xpm);
+  h2g_input_file ("rom","Select $ROM", ucon64gui.rom);//, 0, 0, open_xpm);
   
   h2g_br();
   h2g_("$FILE:  ");
 
 //  h2g_input_text ("file", ucon64gui.file, "Enter $FILE", 0, 0, FALSE);
-  h2g_input_file ("file", ucon64gui.file, "Select $FILE", 0, 0, open_xpm);
+  h2g_input_file ("file", ucon64gui.file, "Select $FILE");//, 0, 0, open_xpm);
   
   h2g_br ();
   h2g_img (trans_1x3_xpm, 0, 0, 0, NULL);

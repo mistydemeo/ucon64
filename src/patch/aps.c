@@ -154,20 +154,7 @@ readN64header (void)
   fread (buffer, 1, 8, n64aps_modfile);
   fread (APSbuffer, 1, 8, n64aps_apsfile);
   if (n64aps_magictest == 0x12408037)
-    {
-      temp = buffer[0];
-      buffer[0] = buffer[1];
-      buffer[1] = temp;
-      temp = buffer[2];
-      buffer[2] = buffer[3];
-      buffer[3] = temp;
-      temp = buffer[4];
-      buffer[4] = buffer[5];
-      buffer[5] = temp;
-      temp = buffer[6];
-      buffer[6] = buffer[7];
-      buffer[7] = temp;
-    }
+    mem_swap (buffer, 8);
   if (memcmp (APSbuffer, buffer, 8))
     {
       printf ("WARNING: Incorrect image\n");
@@ -305,6 +292,7 @@ n64caps_checkfile (FILE *file, const char *filename)
 #ifdef  WORDS_BIGENDIAN
   n64aps_magictest = bswap_32 (n64aps_magictest);
 #endif
+  fseek (file, 0, SEEK_SET);
 
   if (n64aps_magictest != 0x12408037 && n64aps_magictest != 0x40123780)
     {
@@ -366,27 +354,11 @@ writeN64header (void)
   fseek (n64aps_orgfile, 0x10, SEEK_SET);       // CRC header position
   fread (buffer, 1, 8, n64aps_orgfile);
   if (n64aps_magictest == 0x12408037)
-    {
-      temp = buffer[0];
-      buffer[0] = buffer[1];
-      buffer[1] = temp;
-      temp = buffer[2];
-      buffer[2] = buffer[3];
-      buffer[3] = temp;
-      temp = buffer[4];
-      buffer[4] = buffer[5];
-      buffer[5] = temp;
-      temp = buffer[6];
-      buffer[6] = buffer[7];
-      buffer[7] = temp;
-    }
+    mem_swap (buffer, 8);
 
   fwrite (buffer, 1, 8, n64aps_apsfile);
-  fputc (0, n64aps_apsfile);                    // pad
-  fputc (0, n64aps_apsfile);
-  fputc (0, n64aps_apsfile);
-  fputc (0, n64aps_apsfile);
-  fputc (0, n64aps_apsfile);
+  memset (buffer, 0, 5);
+  fwrite (buffer, 1, 5, n64aps_apsfile);        // pad
 
   fseek (n64aps_orgfile, 0, SEEK_SET);
 }
@@ -481,7 +453,7 @@ aps_create (const char *orgname, const char *modname)
       fclose (n64aps_orgfile);
       return -1;
     }
-  strcpy (apsname, orgname);
+  strcpy (apsname, modname);
   set_suffix (apsname, ".APS");
   ucon64_file_handler (apsname, NULL, 0);
   if ((n64aps_apsfile = fopen (apsname, "wb")) == NULL)

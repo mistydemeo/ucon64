@@ -102,7 +102,7 @@ static unsigned long CalculateFileCRC (FILE * file);
 
 const char *unknown_usage[] =
   {
-    "Unknown backup unit/emulator",
+    "Unknown backup unit/Emulator",
     NULL
   };
 
@@ -895,7 +895,7 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
         case UCON64_RROM:
           if (ucon64.console != UCON64_UNKNOWN)
             {
-              sprintf (buf, "%s.%s", strtrim (rominfo.name), getext (ucon64.rom));
+              sprintf (buf, "%s.%s", (!strlen(strtrim (rominfo.name))) ? UCON64_UNKNOWN_S : strtrim (rominfo.name) , getext (ucon64.rom));
               printf ("Renaming %s to %s\n", ucon64.rom, mkfile (strlwr (buf), '_'));
               rename (ucon64.rom, strlwr (buf));
             }
@@ -905,6 +905,7 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
           if (ucon64.console != UCON64_UNKNOWN)
             {
               strcpy (buf, strtrim (rominfo.name));
+              if (!strlen (buf)) strcpy (buf, UCON64_UNKNOWN_S);
               buf[8] = 0;
               strcat (buf, ".");
               strcat (buf, getext (ucon64.rom));

@@ -2168,17 +2168,18 @@ snes_bs_name (void)
   unsigned int value;
   int n, n_valid = 0;
 
-  for (n = 0; n < 8; n++)
+  for (n = 0; n < 16; n++)
     {
-      value = snes_header.name[n * 2];
+      value = snes_header.name[n];
       if (check_char (value) != 0)
         {
-          value = snes_header.name[n * 2 + 1];
+          value = snes_header.name[n + 1];
           if (value < 0x20)
             if ((n_valid != 11) || (value != 0))     // Dr. Mario Hack
               break;
 
           n_valid++;
+          n++;
         }
       else
         {
@@ -2199,7 +2200,7 @@ snes_bs_name (void)
         }
     }
 
-  return n == 8 && n_valid > 0 ? 1 : 0;
+  return n == 16 && n_valid > 0 ? 1 : 0;
 }
 
 

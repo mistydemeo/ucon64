@@ -1429,10 +1429,11 @@ inportb (unsigned short port)
   */
 
   if (DoIO ((struct IORequest *) ucon64_io_req))
-	{
-		//fprintf	(stderr,	"Couldn't Read from parallel port: %s\n",	ucon64_io_req->IOPar.io_Error);
-    return -1; // what is a error?
-	}
+    {
+      fprintf (stderr, "ERROR: Could not communicate with parallel port:\n"
+                       "       %s\n", ucon64_io_req->IOPar.io_Error);
+      exit (1);
+    }
 
   return (unsigned char) ucon64_io_req->io_Data;
 #elif   defined _WIN32 || defined __CYGWIN__
@@ -1470,10 +1471,11 @@ inportw (unsigned short port)
 */
 
   if (DoIO ((struct IORequest *) ucon64_io_req))
-  {
-		//fprintf (stderr, "Couldn't Read from parallel port: %s\n",  ucon64_io_req->IOPar.io_Error);
-    return -1; // what is a error?
-	}
+    {
+      fprintf (stderr, "ERROR: Could not communicate with parallel port:\n"
+                       "       %s\n", ucon64_io_req->IOPar.io_Error);
+      exit (1);
+    }
 
   return (unsigned short) ucon64_io_req->io_Data;
 #elif   defined _WIN32 || defined __CYGWIN__
@@ -1510,11 +1512,12 @@ outportb (unsigned short port, unsigned char byte)
   WaitIO ((struct IORequest *) ucon64_io_req);
 */
 
-  if(DoIO ((struct IORequest *) ucon64_io_req))
-  {
-		//fprintf(stderr,"Couldn't Read from parallel port: %s\n",ucon64_io_req->IOPar.io_Error);
-    //return -1; // what is a error?
-	}
+  if (DoIO ((struct IORequest *) ucon64_io_req))
+    {
+      fprintf (stderr, "ERROR: Could not communicate with parallel port:\n"
+                       "       %s\n", ucon64_io_req->IOPar.io_Error);
+      exit (1);
+    }
 
 #elif   defined _WIN32 || defined __CYGWIN__
   output_byte (port, byte);
@@ -1550,11 +1553,12 @@ outportw (unsigned short port, unsigned short word)
   WaitIO ((struct IORequest *) ucon64_io_req);
 */
 
-  if(DoIO ((struct IORequest *) ucon64_io_req))
-  {
-		//fprintf(stderr,"Couldn't Read from parallel port: %s\n",ucon64_io_req->IOPar.io_Error);
-    //return -1; // what is a error?
-	}
+  if (DoIO ((struct IORequest *) ucon64_io_req))
+    {
+      fprintf (stderr, "ERROR: Could not communicate with parallel port:\n"
+                       "       %s\n", ucon64_io_req->IOPar.io_Error);
+      exit (1);
+    }
 
 #elif   defined _WIN32 || defined __CYGWIN__
   output_word (port, word);
@@ -1648,7 +1652,7 @@ ucon64_parport_init (int port)
 
   if (atexit (close_io_port) == -1)
     {
-      //AbortIO ((struct IORequest *) ucon64_io_req); // should not be necessary with DoIO()
+      // AbortIO ((struct IORequest *) ucon64_io_req); // should not be necessary with DoIO()
       CloseDevice ((struct IORequest *) ucon64_io_req);
       DeleteExtIO (ucon64_io_req);
       DeletePort (ucon64_parport);

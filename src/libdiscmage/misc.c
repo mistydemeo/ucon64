@@ -2202,20 +2202,23 @@ kbhit (void)
   return GetKey () != 0xff ? 1 : 0;
 }
 
+
 int
 getch (void)
 {
-	BPTR ucon64_con_fileh;
+  BPTR con_fileh;
   int temp;
 
-	ucon64_con_fileh = Input();
-	if(ucon64_con_fileh)
-	  SetMode (ucon64_con_fileh, 1); // put the console into RAW mode which makes getchar() behave like getch()?
- 	temp = getchar();
-	if(ucon64_con_fileh)
-  	SetMode (ucon64_con_fileh, 0); // put the console out of RAW mode (might make sense)
+  con_fileh = Input ();
+  // put the console into RAW mode which makes getchar() behave like getch()?
+  if (con_fileh)
+    SetMode (con_fileh, 1);
+  temp = getchar ();
+  // put the console out of RAW mode (might make sense)
+  if (con_fileh)
+    SetMode (con_fileh, 0);
 
-  return (temp);
+  return temp;
 }
 #endif                                          // AMIGA
 

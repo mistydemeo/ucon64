@@ -74,7 +74,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_VERSION "1.9.8beta3"
 
 #ifdef  __UNIX__
-#ifdef   defined __CYGWIN__
+#ifdef  __CYGWIN__
 #define ucon64_TITLE "uCON64 " ucon64_VERSION " Win32 1999-2002 by (various)"
 #else
 #define ucon64_TITLE "uCON64 " ucon64_VERSION " UNIX 1999-2002 by (various)"

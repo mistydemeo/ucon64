@@ -48,13 +48,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define DETECT_MAX_CNT 1000
 #define CRC32_POLYNOMIAL     0xEDB88320L
 
-unsigned long CRCTable[256];
+static unsigned long CRCTable[256];
 
 #if     defined BACKUP && defined __BEOS__
 static int ucon64_io_fd;
 #endif
 
-char
+static void BuildCRCTable ();
+static unsigned long CalculateFileCRC (FILE * file);
+
+extern char
 hexDigit (int value)
 {
   switch (toupper (value))
@@ -97,7 +100,7 @@ hexDigit (int value)
   return '?';
 }
 
-int
+extern int
 hexValue (char digit)
 {
   switch (toupper (digit))
@@ -140,13 +143,13 @@ hexValue (char digit)
   return 0;
 }
 
-int
+extern int
 hexByteValue (char x, char y)
 {
   return (hexValue (x) << 4) + hexValue (y);
 }
 
-void
+static void
 BuildCRCTable ()
 {
   int i, j;
@@ -166,7 +169,7 @@ BuildCRCTable ()
     }
 }
 
-unsigned long
+extern unsigned long
 CalculateBufferCRC (unsigned int count, unsigned long crc, void *buffer)
 {
   unsigned char *p;
@@ -182,7 +185,7 @@ CalculateBufferCRC (unsigned int count, unsigned long crc, void *buffer)
   return crc;
 }
 
-unsigned long
+static unsigned long
 CalculateFileCRC (FILE * file)
 {
   unsigned long crc;
@@ -197,7 +200,7 @@ CalculateFileCRC (FILE * file)
   return crc ^= 0xFFFFFFFFL;
 }
 
-unsigned long
+extern unsigned long
 fileCRC32 (char *filename, long start)
 {
   unsigned long val;
@@ -219,7 +222,7 @@ fileCRC32 (char *filename, long start)
   this is just a wrapper
 */
 /*
-unsigned long
+extern unsigned long
 unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size)
 {
   unsigned long crc = 0;
@@ -228,7 +231,7 @@ unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size)
 }
 */
 
-char *
+extern char *
 ucon64_fbackup (struct ucon64_ *rom, char *filename)
 {
   if (!rom->backup)
@@ -242,7 +245,7 @@ ucon64_fbackup (struct ucon64_ *rom, char *filename)
   return filebackup (filename);
 }
 
-size_t
+extern size_t
 filepad (char *filename, long start, long unit)
 /*
   pad file (if necessary) from start size_t size;
@@ -263,7 +266,7 @@ filepad (char *filename, long start, long unit)
   return size;
 }
 
-long
+extern long
 filetestpad (char *filename)
 // test if EOF is padded (repeating bytes)
 {
@@ -290,7 +293,7 @@ filetestpad (char *filename)
 
 #ifdef  BACKUP
 #if     defined __unix__ || defined __BEOS__ // DJGPP (DOS) has outportX() & inportX()
-unsigned char
+extern unsigned char
 inportb (unsigned short port)
 {
 #ifdef  __BEOS__
@@ -309,7 +312,7 @@ inportb (unsigned short port)
 #endif
 }
 
-unsigned short
+extern unsigned short
 inportw (unsigned short port)
 {
 #ifdef  __BEOS__
@@ -328,7 +331,7 @@ inportw (unsigned short port)
 #endif
 }
 
-void
+extern void
 outportb (unsigned short port, unsigned char byte)
 {
 #ifdef  __BEOS__
@@ -342,7 +345,7 @@ outportb (unsigned short port, unsigned char byte)
 #endif
 }
 
-void
+extern void
 outportw (unsigned short port, unsigned short word)
 {
 #ifdef  __BEOS__
@@ -357,7 +360,7 @@ outportw (unsigned short port, unsigned short word)
 }
 #endif // defined __unix__ || defined __BEOS__
 
-int
+extern int
 detect_parport (unsigned int port)
 {
   int i;
@@ -410,7 +413,7 @@ close_io_port (void)
 }
 #endif
 
-unsigned int
+extern unsigned int
 parport_probe (unsigned int port)
 // detect parallel port
 {
@@ -491,7 +494,7 @@ parport_probe (unsigned int port)
   return port;
 }
 
-int
+extern int
 ucon64_gauge (struct ucon64_ *rom, time_t init_time, long pos, long size)
 {
   int percentage;
@@ -535,7 +538,7 @@ testsplit (char *filename)
   return (x != 0) ? (x + 1) : 0;
 }
 
-int
+extern int
 trackmode_probe (long imagesize)
 // tries to figure out the used track mode of the cd image
 {

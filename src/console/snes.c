@@ -753,7 +753,7 @@ make_gd_name (const char *filename, st_rominfo_t *rominfo, char *name,
   else
     p = basename2 (filename);
 
-  sprintf (name, "%s%d%s", is_func (p, strlen (p), isupper) ? "SF" : "sf",
+  sprintf (name, "%s%d%s", is_func (p, strlen (p), isupper2) ? "SF" : "sf",
            newsize / MBIT, p);
   if (newsize < 10 * MBIT)
     {

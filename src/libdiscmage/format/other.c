@@ -111,7 +111,7 @@ dm_other_gc_init (dm_image_t *image)
   fread (&boot_bin, sizeof (st_boot_bin_t), 1, fh);
   fseek (fh, header_start, SEEK_SET);
   fread (&opening_bnr, sizeof (st_opening_bnr_t), 1, fh);
-  
+
   fclose (fh);
 
 #ifdef  DEBUG
@@ -149,7 +149,7 @@ other_init (dm_image_t *image)
     uint32_t start;
     uint32_t len;
     char *version_long;
-    dm_image_t *(* func) (dm_image_t *);
+    dm_image_t *(*func) (dm_image_t *);
   } st_probe_t;
 
   static const st_probe_t probe[] = {

@@ -69,16 +69,16 @@ static int sam2wav (const char *filename);
 int
 neogeo_bios (const char *fname)
 {
-  char buf[MAXBUFSIZE];
-  strcpy (buf, fname);
-  set_suffix (buf, ".NEW");
+  char dest_name[FILENAME_MAX];
 
-  ucon64_file_handler (buf, NULL, 0);
-  q_fcpy (fname, 0, MBIT, buf, "wb");
-  printf (ucon64_msg[WROTE], buf);
+  strcpy (dest_name, fname);
+  set_suffix (dest_name, ".TMP");
 
-  q_fswap (buf, 0, MBIT);
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fcpy (fname, 0, MBIT, dest_name, "wb");
+  q_fswap (dest_name, 0, MBIT);
 
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 

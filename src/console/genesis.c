@@ -149,9 +149,9 @@ genesis_smd (st_rominfo_t *rominfo)
   ucon64_file_handler (dest_name, NULL, 0);
 
   save_smd (dest_name, rom_buffer, &header, genesis_rom_size);
-  printf (ucon64_msg[WROTE], dest_name);
   free (rom_buffer);
 
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -178,7 +178,6 @@ genesis_smds (st_rominfo_t *rominfo)
   q_fcpy (ucon64.rom, 0, ucon64.file_size, buf, "ab");
 
   printf (ucon64_msg[WROTE], buf);
-
   return 0;
 }
 
@@ -358,13 +357,14 @@ genesis_mgd (st_rominfo_t *rominfo)
     }
 
   set_suffix (dest_name, ".MGH");
+  ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
   /*
     If a backup would be created it would overwrite the backup of the ROM. The
     ROM backup is more important, so we don't write a backup of the MGH file.
   */
   q_fwrite (mgh, 0, sizeof (mgh), dest_name, "wb");
-  printf (ucon64_msg[WROTE], dest_name);
 
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -478,7 +478,7 @@ genesis_j (st_rominfo_t *rominfo)
       remove (dest_name);
 
       strcpy (src_name, ucon64.rom);
-      block_size = (q_fsize (src_name) - rominfo->buheader_len) / 2;
+      block_size = (ucon64.file_size - rominfo->buheader_len) / 2;
       while (q_fcpy (src_name, rominfo->buheader_len, block_size, dest_name, "ab") != -1)
         (*(strrchr (src_name, '.') - 1))++;
 
@@ -500,7 +500,7 @@ genesis_j (st_rominfo_t *rominfo)
       ucon64_file_handler (dest_name, NULL, 0);
 
       q_fcpy (src_name, 0, rominfo->buheader_len, dest_name, "wb");
-      block_size = q_fsize (src_name) - rominfo->buheader_len;
+      block_size = ucon64.file_size - rominfo->buheader_len;
       while (q_fcpy (src_name, rominfo->buheader_len, block_size, dest_name, "ab") != -1)
         {
           printf ("Joined: %s\n", src_name);
@@ -545,8 +545,7 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
     }
 
   strcpy (buf, ucon64.rom);
-  if (!ucon64_file_handler (buf, NULL, 0))
-    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), buf, "wb");
+  ucon64_file_handler (buf, NULL, 0);
   if (type == SMD)
     {
       st_smd_header_t smd_header;
@@ -557,9 +556,9 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
   else
     save_bin (buf, rom_buffer, genesis_rom_size);
 
-  printf (ucon64_msg[WROTE], buf);
   free (rom_buffer);
 
+  printf (ucon64_msg[WROTE], buf);
   return 0;
 }
 
@@ -600,8 +599,7 @@ genesis_chk (st_rominfo_t *rominfo)
   mem_hexdump (&rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e);
 
   strcpy (dest_name, ucon64.rom);
-  if (!ucon64_file_handler (dest_name, NULL, 0))
-    q_fcpy (ucon64.rom, 0, q_fsize (ucon64.rom), dest_name, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
   if (type == SMD)
     {
       st_smd_header_t smd_header;
@@ -612,9 +610,9 @@ genesis_chk (st_rominfo_t *rominfo)
   else
     save_bin (dest_name, rom_buffer, genesis_rom_size);
 
-  printf (ucon64_msg[WROTE], dest_name);
   free (rom_buffer);
 
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 

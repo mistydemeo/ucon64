@@ -68,6 +68,7 @@ swan_chk (st_rominfo_t *rominfo)
   q_fread (buf, SWAN_HEADER_START + 8, 2, dest_name);
   mem_hexdump (buf, 2, SWAN_HEADER_START + 8);
 
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 

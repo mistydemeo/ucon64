@@ -614,7 +614,7 @@ pce_compare (const void *key, const void *found)
 int
 pcengine_smg (st_rominfo_t *rominfo)
 {
-  char buf[MAXBUFSIZE];
+  char dest_name[FILENAME_MAX];
   st_unknown_header_t header;
   int size = q_fsize (ucon64.rom) - rominfo->buheader_len;
 
@@ -631,15 +631,14 @@ pcengine_smg (st_rominfo_t *rominfo)
   header.id2 = 0xbb;
   header.type = 2;
 
-  strcpy (buf, ucon64.rom);
-  set_suffix (buf, ".SMG");
+  strcpy (dest_name, ucon64.rom);
+  set_suffix (dest_name, ".SMG");
 
-  ucon64_file_handler (buf, NULL, 0);
-  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
+  ucon64_file_handler (dest_name, NULL, 0);
+  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
+  q_fcpy (ucon64.rom, 0, size, dest_name, "ab");
 
-  q_fcpy (ucon64.rom, 0, size, buf, "ab");
-  printf (ucon64_msg[WROTE], buf);
-
+  printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
 
@@ -672,7 +671,7 @@ identifying the game title. (0 is Super Mario World, 1 is F-
 Zero, etc). I was told that the Game Doctor copier produces a
 random number when backing up games.
 */
-  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], *p = NULL;
+  char buf[FILENAME_MAX], buf2[FILENAME_MAX], *p = NULL;
 
   if (!rominfo->buheader_len)
     {
@@ -688,8 +687,7 @@ random number when backing up games.
   strcat (buf, "________");
   buf[7] = '_';
   buf[8] = 0;
-  sprintf (buf2, "%s.%03u", buf,
-           (unsigned int) ((q_fsize (ucon64.rom) - rominfo->buheader_len) / MBIT));
+  sprintf (buf2, "%s.%03u", buf, (ucon64.file_size - rominfo->buheader_len) / MBIT);
 
   ucon64_file_handler (buf2, NULL, 0);
   q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), buf2, "wb");

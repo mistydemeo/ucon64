@@ -343,7 +343,9 @@ main (int argc, char *argv[])
           break;
 
         case ucon64_HDN:
-          ucon64.buheader_len = atoi (optarg);
+          if (atoi (optarg) > MAXBUFSIZE)
+              printf ("ERROR: BYTES > %d does not work\n\n", MAXBUFSIZE);
+          else ucon64.buheader_len = atoi (optarg);
           strcpy (rom.copier, unknown_title);
           break;
 
@@ -2208,46 +2210,28 @@ ucon64_usage (int argc, char *argv[])
 
   if (!single)
     {
-      gamecube_usage ();
       dc_usage ();
-      psx_usage ();
-#if 0
-      ps2_usage ();
-      sat_usage ();
-      3do_usage ();
-      cd32_usage ();
-      cdi_usage ();
-#endif
-      printf ("%s\n%s\n%s\n%s\n%s\n%s\n"
-              "  " OPTION_LONG_S "xbox, " OPTION_LONG_S "ps2, " OPTION_LONG_S "sat, " OPTION_LONG_S "3do, " OPTION_LONG_S "cd32, " OPTION_LONG_S "cdi\n"
-              "                force recognition; NEEDED\n"
-//            "  " OPTION_LONG_S "iso         force image is MODE1/2048\n"
-//            "  " OPTION_LONG_S "raw         force image is MODE2_RAW/BIN\n"
-              "  " OPTION_LONG_S "iso         convert RAW/BIN to MODE1/2048; " OPTION_LONG_S "rom=RAW_IMAGE\n",
-              xbox_title,
-              ps2_title, saturn_title, real3do_title, cd32_title,
-              cdi_title);
-
-//      ppf_usage ();
-//      xps_usage ();
-
-//      cdrw_usage ();
-
-      printf ("\n");
-
       gbadvance_usage ();
       nintendo64_usage ();
       snes_usage ();
-      neogeopocket_usage ();
       neogeo_usage ();
       genesis_usage ();
       gameboy_usage ();
-      jaguar_usage ();
       lynx_usage ();
       pcengine_usage ();
       sms_usage ();
       nes_usage ();
       wonderswan_usage ();
+
+#if 0
+      psx_usage ();
+      ps2_usage ();
+      xbox_usage ();
+      sat_usage ();
+      3do_usage ();
+      cd32_usage ();
+      cdi_usage ();
+#endif
 #if 0
       sys16_usage ();
       atari_usage ();
@@ -2256,20 +2240,57 @@ ucon64_usage (int argc, char *argv[])
       wonderswan_usage ();
       vectrex_usage ();
       intelli_usage ();
+      jaguar_usage ();
+      neogeopocket_usage ();
+      gamecube_usage ();
 #endif
 
       printf ("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
-              "  " OPTION_LONG_S "s16, " OPTION_LONG_S "ata, " OPTION_LONG_S "coleco, " OPTION_LONG_S "vboy, " OPTION_LONG_S "vec, " OPTION_LONG_S "intelli, " OPTION_LONG_S "gp32\n"
+              "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
+              "  " 
+              OPTION_LONG_S "gc, "
+              OPTION_LONG_S "jag, "
+              OPTION_LONG_S "ngp, "
+              OPTION_LONG_S "s16, "
+              OPTION_LONG_S "ata, "
+              OPTION_LONG_S "coleco, " 
+              OPTION_LONG_S "vboy, "
+              OPTION_LONG_S "vec, "
+              OPTION_LONG_S "intelli, "
+              OPTION_LONG_S "gp32\n"
               "                force recognition"
 #ifndef DB
               "; NEEDED"
 #endif
-              "\n"
-//              "  " OPTION_LONG_S "hd          force ROM has header (+512 Bytes)\n"
-//              "  " OPTION_LONG_S "nhd         force ROM has no header\n"
-              "\n", system16_title,
+              "\n                  these consoles have no specific options\n"
+              "                  see the miscellaneous options at the top for more\n"
+              "  "
+              OPTION_LONG_S "psx, " 
+              OPTION_LONG_S "ps2, " 
+              OPTION_LONG_S "xbox, " 
+              OPTION_LONG_S "sat, " 
+              OPTION_LONG_S "3do, " 
+              OPTION_LONG_S "cd32, " 
+              OPTION_LONG_S "cdi\n"
+              "                force recognition; NEEDED\n"
+              "                  these consoles have no specific options\n"
+              "                  see the miscellaneous options at the top for more\n"
+              "                  uCON64 can make backups for most CD-based consoles\n",
+              gamecube_title,
+              jaguar_title,
+              neogeopocket_title,
+              system16_title,
               atari_title, coleco_title, virtualboy_title,
-              vectrex_title, intelli_title, gp32_title);
+              vectrex_title, intelli_title, gp32_title,
+              psx_title, ps2_title,
+              xbox_title,
+              saturn_title, real3do_title, cd32_title,
+              cdi_title
+              );
+
+              cdrw_usage ();
+
+              printf("\n");
     }
 
   printf ("Database: %ld known ROMs in db.h (%+ld)\n\n"

@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include "config.h"
 char *doctor64jr_title = "Doctor64 Jr\n"
-                         "19XX Bung Enterprises Ltd http://www.bung.com.hk";
+                         "  19XX Bung Enterprises Ltd http://www.bung.com.hk";
 
 #ifdef BACKUP
 #include "misc.h"

@@ -49,7 +49,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include "config.h"
 char *smd_title = "Super Com Pro (HK)/Super Magic Drive/SMD\n"
-                  "19XX Front Far East/FFE http://www.front.com.tw";
+                  "  19XX Front Far East/FFE http://www.front.com.tw";
 
 #ifdef BACKUP
 #ifdef  __unix__

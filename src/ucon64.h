@@ -276,10 +276,8 @@ struct rom_
   char rom[FILENAME_MAX];               //rom (cmdline) with path
 
   long console;                 //integer for the detected console system
-//  char title[4096];             //console system name
-  char *title;
-//  char copier[4096];            //name of backup unit
-  char *copier;
+  char *title;                  //console system name
+  char *copier;                 //name of backup unit
   unsigned long bytes;          //size in bytes
   float mbit;                   //size in mbit
   int interleaved;              //rom is interleaved (swapped)
@@ -301,7 +299,7 @@ struct rom_
   long internal_crc2_start;     //start of 2nd/inverse internal CRC
   int internal_crc2_len;        //length (in bytes) of 2nd/inverse internal CRC
 
-  unsigned char buheader[512];  //(possible) header of backup unit
+  unsigned char buheader[MAXBUFSIZE];  //(possible) header of backup unit
   long buheader_start;          //start of backup unit header (mostly 0)
   long buheader_len;            //length of backup unit header (==0)?no bu header
 

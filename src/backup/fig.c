@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 
 char *fig_title = "Super Pro Fighter (Q)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)/FIG\n"
-                  "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw";
+                  "  1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw";
 
 #ifdef BACKUP
 #include "misc.h"

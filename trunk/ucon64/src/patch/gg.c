@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.1 2002-05-29 15:45:48 noisyb Exp $
+ * $Id: gg.c,v 1.2 2002-06-04 21:17:42 dbjh Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.  
  * All rights reserved. Distributed under the BSD Software License.
@@ -43,10 +43,11 @@
  *
  * This application is 100% ANSI C.  Compile with
  *   gcc uggconv.c -o uggconv
- * or the equivalent for your platform.  
+ * or the equivalent for your platform.
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include "misc.h"

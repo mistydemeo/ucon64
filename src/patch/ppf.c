@@ -315,7 +315,7 @@ makeppf_main (int argc, const char *argv[])
  * ApplyPPF v2.0 for Linux/Unix. Coded by Icarus/Paradox 2k
  * If you want to compile applyppf just enter "gcc applyppf.c"
  * that's it but i think the Linux users know :)
- * 
+ *
  * This one applies both, PPF1.0 and PPF2.0 patches.
  *
  * Sorry for the bad code i had no time for some cleanup.. but
@@ -504,17 +504,17 @@ addppfid (const char *filename)
   printf ("Adding file_id.diz .. ");
   fsize = q_fsize (filename);
   q_fread (fileidbuf, 0, (fsize > 3072) ? 3072 : fsize, ucon64.file);
-  fileidbuf[fsize] = 0;
+  fileidbuf[(fsize > 3071) ? 3071 : fsize] = 0;
   sprintf (buf, "@BEGIN_FILE_ID.DIZ%s@END_FILE_ID.DIZ", fileidbuf);
 
-  pos = q_fncmp (filename, 0, q_fsize (filename), "@BEGIN_FILE_ID.DIZ", 18, -1);
+  pos = q_fncmp (filename, 0, fsize, "@BEGIN_FILE_ID.DIZ", 18, -1);
   if (pos == -1)
-    pos = q_fsize (filename);
+    pos = fsize;
   truncate (filename, pos);
 
   q_fwrite (buf, pos, strlen (buf), filename, "r+b");
 
-  q_fwrite (&fsize, q_fsize (filename), 4, filename, "r+b");
+  q_fwrite (&fsize, fsize, 4, filename, "r+b");
   printf ("done!\n");
   return 0;
 }

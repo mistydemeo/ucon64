@@ -1018,11 +1018,13 @@ ucon64_nfo (void)
       printf ("\n");
     }
 
-  if (ucon64.rominfo && ucon64.console != UCON64_UNKNOWN)
-    ucon64_rom_nfo (ucon64.rominfo);
-  else if (ucon64.discmage_enabled)
+  if (ucon64.discmage_enabled)
     if (ucon64.image)
       libdm_nfo (ucon64.image);
+      
+  if (!ucon64.image /* libdm_nfo() and ucon64_rom_nfo() interfere */
+       && ucon64.rominfo && ucon64.console != UCON64_UNKNOWN)
+    ucon64_rom_nfo (ucon64.rominfo);
 
   if (ucon64.fcrc32)                    // SNES & Genesis interleaved/N64 non-interleaved
     printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32);

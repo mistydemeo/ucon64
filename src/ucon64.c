@@ -633,7 +633,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       if (value == -1)
         strcpy (rominfo->misc, "Track Mode: Unknown (Maybe CDI or NRG?)\n");
       else
-        sprintf (rominfo->misc, "Track Mode: %s (Cdrdao: %s)\n", track_modes[value].common, track_modes[value].cdrdao);
+        sprintf (rominfo->misc, "Track Mode: %s (cdrdao: %s)\n", track_modes[value].common, track_modes[value].cdrdao);
 
 //      rominfo->console_usage =
 
@@ -934,7 +934,7 @@ ucon64_usage (int argc, char *argv[])
 
 
   printf (
-    "  " OPTION_LONG_S "sheet       generate sheet files (TOC (Cdrdao) and CUE); " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
+    "  " OPTION_LONG_S "sheet       generate sheet files (TOC (cdrdao) and CUE); " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
 //    "  " OPTION_LONG_S "mktoc       generate TOC file for cdrdao; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
 //    "  " OPTION_LONG_S "mkcue       generate CUE file; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
 //    "                TRACK_MODE='CD_DA'     (2352 Bytes; AUDIO)\n"
@@ -948,10 +948,10 @@ ucon64_usage (int argc, char *argv[])
     "                  " OPTION_LONG_S "file=TRACK_MODE is optional, uCON64 will always try to\n"
     "                  detect the correct TRACK_MODE from the CD_IMAGE itself\n"
 #ifdef TODO
-#warning TODO  --toc    convert *.cue file to Cdrdao *.toc;
+#warning TODO  --toc    convert *.cue file to cdrdao *.toc;
 #endif // TODO
-//    "TODO:  " OPTION_LONG_S "toc    convert *.cue file to Cdrdao *.toc\n"
-//    "TODO:  " OPTION_LONG_S "cue    convert Cdrdao *.toc file to *.cue; " OPTION_LONG_S "rom=TOC_FILE\n"
+//    "TODO:  " OPTION_LONG_S "toc    convert *.cue file to cdrdao *.toc\n"
+//    "TODO:  " OPTION_LONG_S "cue    convert cdrdao *.toc file to *.cue; " OPTION_LONG_S "rom=TOC_FILE\n"
     "  " OPTION_LONG_S "iso         convert BIN/RAW CD_IMAGE to MODE1 (2048 Bytes); " OPTION_LONG_S "rom=CD_IMAGE\n"
     "                  this might be useful if you made a MODE2_RAW image of a\n"
     "                  MODE1 CD and want to "

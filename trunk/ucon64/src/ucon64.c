@@ -28,6 +28,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 first I want to thank SiGMA SEVEN! who was my mentor and taught me how to
 write programs in C
 */
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,17 +38,18 @@ write programs in C
 #include <time.h>
 #include <stdarg.h>
 #include <stddef.h>
+#ifdef  HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef  HAVE_DIRENT_H
 #include <dirent.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 #ifdef  __linux__
 #include <sys/io.h>
 #endif
 
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
 #ifdef  DEBUG
 #warning DEBUG active
 #endif
@@ -481,6 +485,9 @@ main (int argc, char **argv)
     ucon64.dat_enabled = 1;
   else
     ucon64.dat_enabled = 0;
+
+//  if (!access (ucon64.configfile, F_OK))
+//    fprintf (stdout, ucon64_msg[READ_CONFIG_FILE], ucon64.configfile);
 
   // Use "0" to force probing if the config file doesn't contain a parport line
   sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
@@ -1224,6 +1231,7 @@ ucon64_usage (int argc, char *argv[])
       "  " OPTION_LONG_S "dbv         like " OPTION_LONG_S "db but more verbose\n"
       "  " OPTION_LONG_S "lsd         generate ROM list for all ROMs using DATabase info; " OPTION_LONG_S "rom=DIR\n"
       "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
+      "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"
       "                  with " OPTION_LONG_S "good it will use DATabase instead of internal names\n"
       "                  and sort the ROMs into subdirs (DAT files: %s)\n"
       GOOD_EXAMPLE
@@ -1231,8 +1239,7 @@ ucon64_usage (int argc, char *argv[])
       "                  %s,\n"
       "                  %s,\n"
       "                  %s,\n"
-      "                  %s, and %s\n"
-      "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n\n",
+      "                  %s, and %s\n\n",
       ucon64.configdir,
       argv[0],
       snes_usage[0],

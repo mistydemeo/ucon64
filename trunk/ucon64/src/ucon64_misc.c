@@ -21,17 +21,19 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#ifdef  HAVE_DIRENT_H
 #include <dirent.h>
+#endif
 #include <limits.h>
 #include <sys/stat.h>
-#ifdef  HAVE_CONFIG_H
-#include "config.h"
-#endif
 #if     defined __unix__ || defined __BEOS__ || defined AMIGA || HAVE_UNISTD_H
   #include <unistd.h>                           // ioperm() (libc5)
 #endif
@@ -95,6 +97,7 @@ const char *ucon64_msg[] = {
   "ERROR: Not enough memory for ROM buffer (%d bytes)\n",
   "ERROR: Not enough memory for file buffer (%d bytes)\n",
   "DAT info: No ROM with 0x%08x as checksum found\n",
+  "Reading config file %s\n",
   NULL
 };
 
@@ -1237,7 +1240,9 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
   ucon64.console = console;
   ucon64.rom = filename;
   ucon64_flush (&rominfo);
+  ucon64_dat = NULL;
   result = ucon64_init (ucon64.rom, &rominfo);
+
   ucon64.type = (ucon64.file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_DISC;
 
   switch (mode)
@@ -1267,10 +1272,21 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
         {
           char buf2[FILENAME_MAX];
 
+          buf[0] = 0;
+
           if (ucon64.good_enabled)
-            strcpy (buf, ucon64_dat ? ucon64_dat->fname : "");
+            {
+              if (ucon64_dat)
+                if (ucon64_dat->fname)
+                  if (ucon64_dat->fname[0])
+                    strcpy (buf, ucon64_dat->fname);
+            }
           else
-            strcpy (buf, ucon64_dat ? ucon64_dat->fname : rominfo.name);
+            {
+              if (rominfo.name)
+                if (rominfo.name[0])
+                  strcpy (buf, rominfo.name);
+            }
 
           strcpy (buf2, strtrim (buf));
 
@@ -1288,8 +1304,8 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
                   return 0;
                 }
               printf ("Renaming %s to %s\n", ucon64.rom, buf);
-              remove (buf);
-              rename (ucon64.rom, buf);
+//              remove (buf);
+//              rename (ucon64.rom, buf);
             }
         }
       break;

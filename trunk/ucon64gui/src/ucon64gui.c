@@ -34,11 +34,11 @@ ucon64gui_bottom (void)
 {
 
   html2gui_br ();
-  html2gui_img (trans_1x3_xpm, 0, 0, 0);
+  html2gui_img (trans_1x3_xpm, 0, 0, 0, NULL);
   html2gui_br ();
-  html2gui_img (icon_16x16_xpm, 0, 0, 0);
+  html2gui_img (icon_16x16_xpm, 0, 0, 0, "uCON64gui");
 
-//  html2gui_img (ucon64gui_xpm,0,0,0);
+//  html2gui_img (ucon64gui_xpm, 0, 0, 0, NULL);
 
   html2gui_ ("uCON64gui "
 #ifdef __GTK__
@@ -54,13 +54,16 @@ void html2gui_system(char *name, char *value)
 printf("%s=%s\n", name, value);
 fflush(stdout);
 
+strcpy(ucon64gui.rom,value);
+
 if(!strdcmp(value,"ucon64gui_rom"))  html2gui_input_file ("ROM=", ucon64gui.rom, "Select ROM");
 if(!strdcmp(value,"ucon64gui_file"))  html2gui_input_file ("FILE=", ucon64gui.file, "Select ROM");
 
-if(!strdcmp(value,"ucon64gui_snes")) ucon64gui_snes();
-if(!strdcmp(value,"ucon64gui_swc")) ucon64gui_swc();
+if(!strdcmp(value,"ucon64gui_snes")) return ucon64gui_snes();
+if(!strdcmp(value,"ucon64gui_root")) return ucon64gui_root();
+if(!strdcmp(value,"ucon64gui_swc")) return ucon64gui_swc();
 
-
+ucon64gui_root();
 
 return;
 
@@ -112,23 +115,23 @@ ucon64gui_top(void)
   html2gui_input_submit ("Config", "",
                          buf);
   html2gui_br();
-  html2gui_img(trans_1x3_xpm, 0, 0, 0);
+  html2gui_img(trans_1x3_xpm, 0, 0, 0, NULL);
 
   html2gui_br();
 
   html2gui_("$ROM: ");
 
-  html2gui_input_text ("i_ls",ucon64gui.rom,"test",20,1,0);
+  html2gui_input_text ("ROM=", ucon64gui.rom, "Enter $ROM", 20, 0, FALSE);
   html2gui_input_image ("Open", "ucon64gui_rom", open_xpm, 0, 0, "Open");
 
   html2gui_br();
   html2gui_("$FILE:  ");
 
-  html2gui_input_text ("i_ls",ucon64gui.file,"test",20,1,0);
+  html2gui_input_text ("FILE=", ucon64gui.file, "Enter $FILE", 20, 0, FALSE);
   html2gui_input_image ("Open", "ucon64gui_file", open_xpm, 0, 0, "Open");
 
   html2gui_br ();
-  html2gui_img (trans_1x3_xpm, 0, 0, 0);
+  html2gui_img (trans_1x3_xpm, 0, 0, 0, NULL);
   html2gui_br ();
 
   html2gui_ ("Miscellaneous options");
@@ -157,7 +160,7 @@ ucon64gui_top(void)
   html2gui_input_submit ("Truncate", "-strip", "(-strip) strip Bytes from end of ROM; $FILE=VALUE");
 
   html2gui_br();
-  html2gui_img(trans_1x3_xpm, 0, 0, 0);
+  html2gui_img(trans_1x3_xpm, 0, 0, 0, NULL);
 
   html2gui_br();
 
@@ -170,7 +173,7 @@ ucon64gui_top(void)
 
   html2gui_input_submit ("Swap/(De)Interleave ROM", "-swap", "(-swap) swap/(de)interleave ALL Bytes in ROM (1234<->2143)");
   html2gui_br ();
-  html2gui_img (trans_1x3_xpm, 0, 0, 0);
+  html2gui_img (trans_1x3_xpm, 0, 0, 0, NULL);
   html2gui_br ();
 
   html2gui_("List ROMs: ");
@@ -186,7 +189,7 @@ ucon64gui_top(void)
   html2gui_input_submit ("similarities", "-cs", "(-cs) compare ROMs for similarities; $FILE=OTHER_ROM");
 
   html2gui_br ();
-  html2gui_img (trans_1x3_xpm, 0, 0, 0);
+  html2gui_img (trans_1x3_xpm, 0, 0, 0, NULL);
   html2gui_br ();
 
   html2gui_("Database: ");
@@ -207,13 +210,13 @@ ucon64gui_top(void)
   html2gui_input_submit ("Check", "-ispad", "(-ispad) check if ROM is padded");
 
   html2gui_br();
-  html2gui_img(trans_1x3_xpm, 0, 0, 0);
+  html2gui_img(trans_1x3_xpm, 0, 0, 0, NULL);
 
   html2gui_br();
 
   html2gui_hr();
   html2gui_br();
-  html2gui_img(trans_1x3_xpm, 0, 0, 0);
+  html2gui_img(trans_1x3_xpm, 0, 0, 0, NULL);
 
   html2gui_br();
   html2gui_("Patches");
@@ -243,7 +246,7 @@ ucon64gui_top(void)
   html2gui_input_submit ("Rename", "-na", "(-na) change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION");
   
   html2gui_br ();
-  html2gui_img (trans_1x3_xpm, 0, 0, 0);
+  html2gui_img (trans_1x3_xpm, 0, 0, 0, NULL);
   html2gui_br ();
   
   html2gui_("PPF: ");
@@ -258,7 +261,7 @@ ucon64gui_top(void)
   
   
   html2gui_br ();
-  html2gui_img (trans_1x3_xpm, 0, 0, 0);
+  html2gui_img (trans_1x3_xpm, 0, 0, 0, NULL);
   html2gui_br();
 
   html2gui_hr();
@@ -284,7 +287,7 @@ ucon64gui_root (void)
   html2gui_input_submit ("Super Nintendo", "ucon64gui_snes", "(-snes) Options for Super Nintendo");
 
   html2gui_br ();
-  html2gui_img (trans_1x3_xpm, 0, 0, 0);
+  html2gui_img (trans_1x3_xpm, 0, 0, 0, NULL);
 //  html2gui_hr ();
   html2gui_ ("Backup unit specific options");
   html2gui_br ();

@@ -1827,7 +1827,7 @@ ucon64_configfile (void)
 {
   char buf2[MAXBUFSIZE];
 /*
-   configfile handling
+  configfile handling
 */
   sprintf (ucon64.configfile, "%s" FILE_SEPARATOR_S
 #ifdef  __MSDOS__
@@ -1957,12 +1957,18 @@ ucon64_usage (int argc, char *argv[])
   int single = 0;
 
   printf ("USAGE: %s [OPTION(S)] [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE]\n\n"
-           "  " OPTION_LONG_S "nbak        prevents backup files (*.bak)\n"
-           "  " OPTION_LONG_S "hd=n        force ROM has backup unit/emulator header with n Bytes size\n"
+           "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
+           "  " OPTION_LONG_S "hd=BYTES    force ROM has backup unit/emulator header with BYTES size\n"
+           "TODO: " OPTION_LONG_S "hd=TYPE     force ROM has TYPE backup unit/emulator header:\n"
+           "                FFE, SMC, FIG, SWC, SMD, SMG, SSC or LNX\n"
            "NOTE: most backup units use a header with 512 Bytes size\n"
            "  " OPTION_LONG_S "nhd         force ROM has no backup unit/emulator header\n"
+           "  " OPTION_LONG_S "stp         strip header from ROM; default size 512 Bytes\n"
+           "  " OPTION_LONG_S "ins         insert empty header before ROM; default size 512 Bytes\n"
+           "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
            "  " OPTION_LONG_S "int         force ROM is interleaved (2143)\n"
            "  " OPTION_LONG_S "nint        force ROM is not interleaved (1234)\n"
+           "  " OPTION_LONG_S "swap        swap/(de)interleave ALL Bytes in ROM (1234<->2143)\n"
            "  " OPTION_LONG_S "ns          force ROM is not splitted\n"
 #ifdef	__MSDOS__
            "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
@@ -1970,7 +1976,6 @@ ucon64_usage (int argc, char *argv[])
            "  " OPTION_S "e           emulate/run ROM (see %s for more)\n"
 #endif
            "  " OPTION_LONG_S "crc         show CRC32 value of ROM\n"
-//obsolete since -hd and -nhd are global   "  " OPTION_LONG_S "crchd       show CRC32 value of ROM (regarding to +512 Bytes header)\n"
            "  " OPTION_LONG_S "dbs         search ROM database (all entries) by CRC32; " OPTION_LONG_S "rom=0xCRC32\n"
            "  " OPTION_LONG_S "db          ROM database statistics (# of entries)\n"
            "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
@@ -1989,13 +1994,8 @@ ucon64_usage (int argc, char *argv[])
            "  " OPTION_LONG_S "find        find string in ROM; " OPTION_LONG_S "file=STRING ('?'==wildcard for ONE char!)\n"
            "  " OPTION_S "c           compare ROMs for differencies; " OPTION_LONG_S "file=OTHER_ROM\n"
            "  " OPTION_LONG_S "cs          compare ROMs for similarities; " OPTION_LONG_S "file=OTHER_ROM\n"
-           "  " OPTION_LONG_S "swap        swap/(de)interleave ALL Bytes in ROM (1234<->2143)\n"
            "  " OPTION_LONG_S "ispad       check if ROM is padded\n"
            "  " OPTION_LONG_S "pad         pad ROM to full Mb\n"
-//obsolete since -hd and -nhd are global  "  " OPTION_LONG_S "padhd       pad ROM to full Mb (regarding to +512 Bytes header)\n"
-           "  " OPTION_LONG_S "stp         strip first 512 Bytes (possible header) from ROM\n"
-           "  " OPTION_LONG_S "ins         insert 512 Bytes (0x00) before ROM\n"
-           "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; " OPTION_LONG_S "file=VALUE\n"
            , argv[0], ucon64.configfile);
 
   bsl_usage ();
@@ -2163,10 +2163,10 @@ ucon64_usage (int argc, char *argv[])
               ps2_title, saturn_title, real3do_title, cd32_title,
               cdi_title);
 
-      ppf_usage ();
-      xps_usage ();
+//      ppf_usage ();
+//      xps_usage ();
 
-      cdrw_usage ();
+//      cdrw_usage ();
 
       printf ("\n");
 
@@ -2200,8 +2200,8 @@ ucon64_usage (int argc, char *argv[])
               "; NEEDED"
 #endif
               "\n"
-              "  " OPTION_LONG_S "hd          force ROM has header (+512 Bytes)\n"
-              "  " OPTION_LONG_S "nhd         force ROM has no header\n"
+//              "  " OPTION_LONG_S "hd          force ROM has header (+512 Bytes)\n"
+//              "  " OPTION_LONG_S "nhd         force ROM has no header\n"
               "\n", system16_title,
               atari_title, coleco_title, virtualboy_title,
               vectrex_title, intelli_title, gp32_title);

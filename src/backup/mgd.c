@@ -31,10 +31,12 @@ int
 mgd_usage (int argc, char *argv[])
 {
 #ifdef BACKUP
+#if 0
     printf (mgd_TITLE "\n"
 
     "TODO:  -xmgd    send/receive ROM to/from Multi Game* /MGD2/MGH/RAW; $FILE=PORT\n"
      "		receives automatically when $ROM does not exist\n");
+#endif
 #endif // BACKUP
   return 0;
 }

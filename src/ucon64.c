@@ -1102,8 +1102,8 @@ else
   ,cdi_TITLE
   );
 
-  ppf_usage( argc, argv );
-  xps_usage( argc, argv );
+//  ppf_usage( argc, argv );
+//  xps_usage( argc, argv );
 
   #ifdef BACKUP
     cdrdao_usage(argc,argv);

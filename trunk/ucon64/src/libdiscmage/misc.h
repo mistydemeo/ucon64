@@ -247,6 +247,7 @@ extern char *mkprint (char *str, const unsigned char replacement);
 extern char *mkfile (char *str, const unsigned char replacement);
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
+#define stristr strcasestr
 extern char *setext (char *filename, const char *ext);
 extern const char *getext (const char *filename);
 #define EXTCMP(filename, ext) (strcasecmp (getext (filename), ext))

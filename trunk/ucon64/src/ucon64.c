@@ -783,7 +783,10 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       if (rominfo->current_crc32 == 0)
         rominfo->current_crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
 
-      rominfo->dat = ucon64_dbsearch (rominfo->current_crc32, &ucon64_dat);
+      if (ucon64.dat_enabled)
+        rominfo->dat = ucon64_dbsearch (rominfo->current_crc32, &ucon64_dat);
+      else
+        rominfo->dat = NULL;
 
       switch (ucon64.console)
         {

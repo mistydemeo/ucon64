@@ -740,13 +740,13 @@ int ucon64_e (const char *romfile)
 
 
 int
-ucon64_ls_main (const char *filename, struct stat *puffer, int mode)
+ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console)
 {
   int result;
   char buf[MAXBUFSIZE];
   st_rominfo_t rominfo;
 
-//  ucon64.console = UCON64_UNKNOWN;
+  ucon64.console = console;
   ucon64.rom = filename;
   ucon64.type = (quickftell (ucon64.rom) <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
   ucon64_flush (&rominfo);
@@ -786,6 +786,7 @@ int ucon64_ls (const char *path, int mode)
   char dir[FILENAME_MAX];
   char old_dir[FILENAME_MAX];
   DIR *dp;
+  int console = ucon64.console;
 
   dir[0]=0;
   
@@ -795,7 +796,7 @@ int ucon64_ls (const char *path, int mode)
         if (!stat (path, &puffer))
           {
             if (S_ISREG (puffer.st_mode))
-              return ucon64_ls_main (path, &puffer, mode);
+              return ucon64_ls_main (path, &puffer, mode, console);
           }
         strcpy (dir, path);
       }
@@ -811,7 +812,7 @@ int ucon64_ls (const char *path, int mode)
   while ((ep = readdir (dp)))
     if (!stat (ep->d_name, &puffer))
       if (S_ISREG (puffer.st_mode))
-        ucon64_ls_main (ep->d_name, &puffer, mode);
+        ucon64_ls_main (ep->d_name, &puffer, mode, console);
 
   closedir (dp);
 

@@ -24,26 +24,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <stdio.h>
 #include <stdlib.h>
-
-#ifdef PARALLEL
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "fig.h"
-#endif // PARALLEL
 
 const st_usage_t fig_usage[] =
   {
     {NULL, "Super Pro Fighter (Q/Q+)/Pro Fighter X (Turbo 2)/Double Pro Fighter (X Turbo)"},
-    // adding "/FIG" causes a wrap around on 80 column terminals (DOS!) which is ugly
     {NULL, "1993/1994/19XX China Coach Limited/CCL http://www.ccltw.com.tw"},
-#ifdef TODO
-#warning TODO --xfig        send/receive ROM to/from *Pro Fighter* /(all)FIG
-#endif // TODO
+#ifdef  PARALLEL
 #if 0
-    "TODO:  " OPTION_LONG_S "xfig        send/receive ROM to/from *Pro Fighter* /(all)FIG; " OPTION_LONG_S "port=PORT\n"
-    "                  receives automatically when " OPTION_LONG_S "rom does not exist\n",
+// TODO
+    {"xfig", "send/receive ROM to/from *Pro Fighter*/(all)FIG; " OPTION_LONG_S "port=PORT\n"
+                "receives automatically when " OPTION_LONG_S "rom does not exist"},
 #endif
+#endif  // PARALLEL
     {NULL, NULL}
   };

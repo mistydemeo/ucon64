@@ -48,11 +48,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t ppf_usage[] =
 {
-    {"ppf", "apply PPF PATCH to IMAGE (PPF<=v2.0); " OPTION_LONG_S "rom=IMAGE"},
-    {"mkppf=ORG_IMG", "create PPF patch; " OPTION_LONG_S "rom=MOD_IMAGE"},
-    {"nppf=DESC", "change PPF single line DESCRIPTION"},
-    {"idppf=FILE_ID.DIZ", "change FILE_ID.DIZ of PPF PATCH (PPF v2.0)"},
-    {NULL, NULL}
+    {"ppf", NULL, "apply PPF PATCH to IMAGE (PPF<=v2.0); " OPTION_LONG_S "rom=IMAGE"},
+    {"mkppf", "ORG_IMG", "create PPF patch; " OPTION_LONG_S "rom=MOD_IMAGE"},
+    {"nppf", "DESC", "change PPF single line DESCRIPTION"},
+    {"idppf", "FILE_ID.DIZ", "change FILE_ID.DIZ of PPF PATCH (PPF v2.0)"},
+    {NULL, NULL, NULL}
 };
 
 /*

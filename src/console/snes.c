@@ -67,42 +67,42 @@ static int score_hirom (unsigned char *rom_buffer, int rom_size);
 
 const st_usage_t snes_usage[] =
   {
-    {NULL, "Super Nintendo Entertainment System/SNES/Super Famicom"},
-    {NULL, "1990 Nintendo http://www.nintendo.com"},
-    {"snes", "force recognition"},
-    {"hi", "force ROM is HiROM"},
-    {"nhi", "force ROM is not HiROM"},
+    {NULL, NULL, "Super Nintendo Entertainment System/SNES/Super Famicom"},
+    {NULL, NULL, "1990 Nintendo http://www.nintendo.com"},
+    {"snes", NULL, "force recognition"},
+    {"hi", NULL, "force ROM is HiROM"},
+    {"nhi", NULL, "force ROM is not HiROM"},
 #if 0
-    {"hd", "force ROM has SMC/FIG/SWC header (+512 Bytes)"},
-    {"nhd", "force ROM has no SMC/FIG/SWC header (MGD2/MGH/RAW)"},
-    {"ns", "force ROM is not split"},
+    {"hd", NULL, "force ROM has SMC/FIG/SWC header (+512 Bytes)"},
+    {"nhd", NULL, "force ROM has no SMC/FIG/SWC header (MGD2/MGH/RAW)"},
+    {"ns", NULL, "force ROM is not split"},
 #endif
-    {"int", "force ROM is in interleaved format"},
-    {"int2", "force ROM is in interleaved format 2"},
-    {"nint", "force ROM is not in interleaved format"},
-    {"bs", "force ROM is a Broadcast Satellaview dump"},
-    {"nbs", "force ROM is a regular cartridge dump"},
-    {"n=NEW_NAME", "change internal ROM name to NEW_NAME"},
-    {"smc", "convert to Super Magicom/SMC"},
-    {"fig", "convert to *Pro Fighter*/(all)FIG"},
-    {"figs", "convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG;\n"
+    {"int", NULL, "force ROM is in interleaved format"},
+    {"int2", NULL, "force ROM is in interleaved format 2"},
+    {"nint", NULL, "force ROM is not in interleaved format"},
+    {"bs", NULL, "force ROM is a Broadcast Satellaview dump"},
+    {"nbs", NULL, "force ROM is a regular cartridge dump"},
+    {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
+    {"smc", NULL, "convert to Super Magicom/SMC"},
+    {"fig", NULL, "convert to *Pro Fighter*/(all)FIG"},
+    {"figs", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to *Pro Fighter*/(all)FIG;\n"
                 OPTION_LONG_S "rom=SRAM"},
-    {"swc", "convert to Super Wild Card*/(all)SWC"},
-    {"swcs", "convert Snes9x/ZSNES *.srm (SRAM) to Super Wild Card*/(all)SWC;\n"
+    {"swc", NULL, "convert to Super Wild Card*/(all)SWC"},
+    {"swcs", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to Super Wild Card*/(all)SWC;\n"
                 OPTION_LONG_S "rom=SRAM"},
-    {"mgd", "convert to Multi Game*/MGD2/MGH/RAW"},
-    {"gd3", "convert to Professor SF(2) Game Doctor SF3/6/7"},
-    {"ufos", "convert Snes9x/ZSNES *.srm (SRAM) to Super UFO; " OPTION_LONG_S "rom=SRAM"},
-    {"stp", "convert SRAM from backup unit for use with an emulator\n"
+    {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
+    {"gd3", NULL, "convert to Professor SF(2) Game Doctor SF3/6/7"},
+    {"ufos", NULL, "convert Snes9x/ZSNES *.srm (SRAM) to Super UFO; " OPTION_LONG_S "rom=SRAM"},
+    {"stp", NULL, "convert SRAM from backup unit for use with an emulator\n"
                OPTION_LONG_S "stp just strips the first 512 bytes"},
-    {"dbuh", "display (relevant part of) backup unit header"},
-    {"dint", "convert ROM to non-interleaved format"},
-    {"ctrl=TYPE", "specify type of controller in port 1 for emu when converting\n"
+    {"dbuh", NULL, "display (relevant part of) backup unit header"},
+    {"dint", NULL, "convert ROM to non-interleaved format"},
+    {"ctrl", "TYPE", "specify type of controller in port 1 for emu when converting\n"
                      "TYPE='0' gamepad\n"
                      "TYPE='1' mouse\n"
                      "TYPE='2' mouse / gamepad\n"
                      "TYPE='6' multitap"},
-    {"ctrl2=TYPE", "specify type of controller in port 2 for emu when converting\n"
+    {"ctrl2", "TYPE", "specify type of controller in port 2 for emu when converting\n"
                       "TYPE='0' gamepad\n"
                       "TYPE='1' mouse\n"
                       "TYPE='2' mouse / gamepad\n"
@@ -111,7 +111,7 @@ const st_usage_t snes_usage[] =
                       "TYPE='5' Konami's justifier\n"
                       "TYPE='6' multitap\n"
                       "TYPE='7' mouse / super scope / gamepad"},
-    {"col=0xCOLOR", "convert 0xRRGGBB (html) <-> 0xXXXX (SNES)\n"
+    {"col", "0xCOLOR", "convert 0xRRGGBB (html) <-> 0xXXXX (SNES)\n"
                        "this routine was used to find green colors in games and\n"
                        "to replace them with red colors (blood mode)"},
 #if 0
@@ -121,17 +121,17 @@ const st_usage_t snes_usage[] =
     {"xzs", "extract GFX from ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE"},
     {"spc", "convert SPC sound to WAV; " OPTION_LONG_S "rom=SPCFILE"},
 #endif
-    {"j", "join split ROM"},
-    {"s", "split ROM into 8 Mb parts (for backup unit(s) with fdd)"},
-    {"ssize=SIZE", "specify split part size in Mbit (not for Game Doctor SF3)"},
+    {"j", NULL, "join split ROM"},
+    {"s", NULL, "split ROM into 8 Mb parts (for backup unit(s) with fdd)"},
+    {"ssize", "SIZE", "specify split part size in Mbit (not for Game Doctor SF3)"},
 #if 0
-    {"p", "pad ROM to full Mb"},
+    {"p", NULL, "pad ROM to full Mb"},
 #endif
-    {"k", "remove protection (crack)"},
-    {"f", "remove NTSC/PAL protection"},
-    {"l", "remove SlowROM checks"},
-    {"chk", "fix ROM checksum"},
-    {NULL, NULL}
+    {"k", NULL, "remove protection (crack)"},
+    {"f", NULL, "remove NTSC/PAL protection"},
+    {"l", NULL, "remove SlowROM checks"},
+    {"chk", NULL, "fix ROM checksum"},
+    {NULL, NULL, NULL}
   };
 
 typedef struct st_snes_header

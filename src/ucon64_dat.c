@@ -75,14 +75,14 @@ static int warning = 0;                         // show the warning only once wh
 
 
 const st_usage_t ucon64_dat_usage[] = {
-  {NULL, "DATabase (support of DAT files)"},
-  {"db", "DATabase statistics"},
-  {"dbv", "like " OPTION_LONG_S "db but more verbose"},
-  {"dbs=CRC32", "search ROM with CRC32 in DATabase"},
-  {"lsd", "generate ROM list for all ROMs using DATabase; " OPTION_LONG_S "rom=ROM or DIR"},
-  {"rrom", "rename ROMs in DIR to their internal names; " OPTION_LONG_S "rom=ROM or DIR"},
-  {"rr83", "like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=ROM or DIR"},
-  {"good", "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed and sorted\n"
+  {NULL, NULL, "DATabase (support of DAT files)"},
+  {"db", NULL, "DATabase statistics"},
+  {"dbv", NULL, "like " OPTION_LONG_S "db but more verbose"},
+  {"dbs", "CRC32", "search ROM with CRC32 in DATabase"},
+  {"lsd", NULL, "generate ROM list for all ROMs using DATabase; " OPTION_LONG_S "rom=ROM or DIR"},
+  {"rrom", NULL, "rename ROMs in DIR to their internal names; " OPTION_LONG_S "rom=ROM or DIR"},
+  {"rr83", NULL, "like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=ROM or DIR"},
+  {"good", NULL, "used with " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 ROMs will be renamed and sorted\n"
               "into subdirs according to the DATabase (\"ROM manager\")"},
 /*
 GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
@@ -120,7 +120,7 @@ Good_RAR     = log of RAR errors
 
 Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
 */
-  {NULL, NULL}
+  {NULL, NULL, NULL}
 };
 
 

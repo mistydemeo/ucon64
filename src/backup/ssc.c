@@ -33,8 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t ssc_usage[] =
   { 
-    {NULL, "Super Smart Card/SSC"},
-    {NULL, NULL}
+    {NULL, NULL, "Super Smart Card/SSC"},
+    {NULL, NULL, NULL}
   };
 
 

@@ -37,13 +37,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 const st_usage_t lynxit_usage[] = {
-    {NULL, "Lynxit (Lynx Cartridge Backup Board)"},
-    {NULL, "1997 K.Wilkins (selfmade)"},
+    {NULL, NULL, "Lynxit (Lynx Cartridge Backup Board)"},
+    {NULL, NULL, "1997 K.Wilkins (selfmade)"},
 #ifdef PARALLEL
-    {"xlit", "receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT"},
+    {"xlit", NULL, "receive ROM from Lynxit interface; " OPTION_LONG_S "port=PORT"},
 //    "                  receives automatically when ROM does not exist\n"
 #endif // PARALLEL
-    {NULL, NULL}
+    {NULL, NULL, NULL}
   };
 
 #ifdef PARALLEL

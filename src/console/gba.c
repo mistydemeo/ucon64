@@ -43,16 +43,16 @@ static int gbautil (const unsigned char *filein, const unsigned char *fileout);
 
 const st_usage_t gba_usage[] =
   {
-    {NULL, "Game Boy Advance"},
-    {NULL, "2001 Nintendo http://www.nintendo.com"},
-    {"gba", "force recognition"},
+    {NULL, NULL, "Game Boy Advance"},
+    {NULL, NULL, "2001 Nintendo http://www.nintendo.com"},
+    {"gba", NULL, "force recognition"},
 //    {"hd",  "force ROM has header (+512 Bytes)"},
 //    "  " OPTION_LONG_S "nhd         force ROM has no header\n"
-    {"n=NEW_NAME", "change internal ROM name to NEW_NAME"},
-    {"logo", "restore ROM logo character data (offset: 0x04-0x9F)"},
+    {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
+    {"logo", NULL, "restore ROM logo character data (offset: 0x04-0x9F)"},
 //    "  " OPTION_LONG_S "chk         fix ROM header checksum\n"
-    {"sram", "patch ROM for SRAM saving"},
-    {"crp=WAIT_TIME", "slow down Flash Advance Linker access for ROM (crash patch);\n"
+    {"sram", NULL, "patch ROM for SRAM saving"},
+    {"crp", "WAIT_TIME", "slow down Flash Advance Linker access for ROM (crash patch);\n"
                          "WAIT_TIME='0'  (default in most crash patches)\n"
                          "WAIT_TIME='4'  (faster than 0, slower than 8)\n"
                          "WAIT_TIME='8'  (faster than 4, slower than 28)\n"
@@ -62,11 +62,11 @@ const st_usage_t gba_usage[] =
                          "WAIT_TIME='24' (fastest cartridge access speed)\n"
                          "WAIT_TIME='28' (faster than 8 but slower than 16)"},
 //  "n 0 and 28, with a stepping of 4. I.e 0, 4, 8, 12 ...\n"
-    {"strip=N", "strip N Bytes from end of ROM (use " OPTION_LONG_S "ispad before)"},
-    {"multi=SIZE", "make multirom for Flash Advance Linker, truncated to SIZE Mbit;\n"
+    {"strip", "N", "strip N Bytes from end of ROM (use " OPTION_LONG_S "ispad before)"},
+    {"multi", "SIZE", "make multirom for Flash Advance Linker, truncated to SIZE Mbit;\n"
                       "file with loader must be specified first, then all the ROMs,\n"
                       "multirom to create last"},
-    {NULL, NULL}
+    {NULL, NULL, NULL}
   };
 
 

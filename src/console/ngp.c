@@ -36,10 +36,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t ngp_usage[] =
   {
-    {NULL, "Neo Geo Pocket/Neo Geo Pocket Color"},
-    {NULL, "1998/1999 SNK http://www.neogeo.co.jp"},
-    {"ngp", "force recognition"},
-    {NULL, NULL}
+    {NULL, NULL, "Neo Geo Pocket/Neo Geo Pocket Color"},
+    {NULL, NULL, "1998/1999 SNK http://www.neogeo.co.jp"},
+    {"ngp", NULL, "force recognition"},
+    {NULL, NULL, NULL}
 };
 
 

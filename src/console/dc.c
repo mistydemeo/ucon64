@@ -40,11 +40,11 @@ static int dc_ip(char *dev,char *name)
 
 
 const st_usage_t dc_usage[] = {
-    {NULL, "Dreamcast"},
-    {NULL, "1998 SEGA http://www.sega.com"},
-    {"dc", "force recognition"},
-//TODO    {"ip=FILE", "extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE"},
-    {NULL, NULL}
+    {NULL, NULL, "Dreamcast"},
+    {NULL, NULL, "1998 SEGA http://www.sega.com"},
+    {"dc", NULL, "force recognition"},
+//TODO    {"ip", "FILE", "extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE"},
+    {NULL, NULL, NULL}
   };
 
 

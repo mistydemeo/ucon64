@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.23 2003-02-21 11:12:33 noisyb Exp $
+ * $Id: gg.c,v 1.24 2003-02-28 12:15:50 noisyb Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -72,7 +72,7 @@ modified by 2001 - 2002 NoisyB (noisyb@gmx.net)
 
 
 const st_usage_t gg_usage[] = {
-  {"gge=CODE", "encode and display Game Genie code\n"
+  {"gge", "CODE", "encode and display Game Genie code\n"
                   "example: " OPTION_LONG_S "gge=CODE " OPTION_LONG_S "sms or " OPTION_LONG_S "gge=CODE " OPTION_LONG_S "gb\n"
                   "CODE='AAAA:VV' or CODE='AAAA:VV:CC'\n"
                   OPTION_LONG_S "gge=CODE " OPTION_LONG_S "gen\n"
@@ -81,7 +81,7 @@ const st_usage_t gg_usage[] = {
                   "CODE='AAAA:VV' or CODE='AAAA:VV:CC'\n"
                   OPTION_LONG_S "gge=CODE " OPTION_LONG_S "snes\n"
                   "CODE='AAAAAA:VV'"},
-  {"ggd=GG_CODE", "decode Game Genie code\n"
+  {"ggd", "GG_CODE", "decode Game Genie code\n"
                   "example: " OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "sms or " OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "gb\n"
                   "GG_CODE='XXX-XXX' or GG_CODE='XXX-XXX-XXX'\n"
                   OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "gen\n"
@@ -90,9 +90,9 @@ const st_usage_t gg_usage[] = {
                   "GG_CODE='XXXXXX' or GG_CODE='XXXXXXXX'\n"
                   OPTION_LONG_S "ggd=GG_CODE " OPTION_LONG_S "snes\n"
                   "GG_CODE='XXXX-XXXX'"},
-  {"gg=GG_CODE", "apply Game Genie code (permanently)\n"
+  {"gg", "GG_CODE", "apply Game Genie code (permanently)\n"
                    "example: like above but " OPTION_LONG_S "rom is required"},
-  {NULL, NULL}
+  {NULL, NULL, NULL}
 };
 
 

@@ -36,10 +36,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t psx_usage[] =
   {
-    {NULL, "Playstation (One)/Playstation 2 (CD only)"},
-    {NULL, "1994/(2000) Sony http://www.playstation.com"},
-    {"psx", "force recognition"},
-    {NULL, NULL}
+    {NULL, NULL, "Playstation (One)/Playstation 2 (CD only)"},
+    {NULL, NULL, "1994/(2000) Sony http://www.playstation.com"},
+    {"psx", NULL, "force recognition"},
+    {NULL, NULL, NULL}
 };
 
 

@@ -101,166 +101,167 @@ const char *ucon64_msg[] = {
   "         configuration file or the environment) points to an incorrect\n"
   "         directory. Read the FAQ for more information.\n",
   "Reading config file %s\n",
+  "NOTE: %s not found or too old, support disabled\n",
   NULL
 };
 
 const st_usage_t unknown_usage[] =
   {
-    {NULL, "Unknown backup unit/emulator"},
-    {NULL, NULL}
+    {NULL, NULL, "Unknown backup unit/emulator"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t gc_usage[] =
   {
-    {NULL, "Nintendo Game Cube/Panasonic Gamecube Q\n"},
-    {NULL, "2001/2002 Nintendo http://www.nintendo.com\n"},
-    {"gc", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "Nintendo Game Cube/Panasonic Gamecube Q\n"},
+    {NULL, NULL, "2001/2002 Nintendo http://www.nintendo.com\n"},
+    {"gc", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t s16_usage[] =
   {
-    {NULL, "Sega System 16(A/B)/Sega System 18/dual 68000\n"},
-    {NULL, "1987/19XX/19XX SEGA http://www.sega.com\n"},
-    {"s16", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "Sega System 16(A/B)/Sega System 18/dual 68000\n"},
+    {NULL, NULL, "1987/19XX/19XX SEGA http://www.sega.com\n"},
+    {"s16", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t atari_usage[] =
   {
-    {NULL, "Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr\n"},
-    {NULL, "1977/1982/1984/1986 Atari\n"},
-    {"ata", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "Atari VCS 2600(aka Stella)/Atari 5200 SuperSystem/Atari CX7800/Atari 2600 Jr\n"},
+    {NULL, NULL, "1977/1982/1984/1986 Atari\n"},
+    {"ata", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t coleco_usage[] =
   {
-    {NULL, "ColecoVision\n"},
-    {NULL, "1982\n"},
-    {"coleco", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "ColecoVision\n"},
+    {NULL, NULL, "1982\n"},
+    {"coleco", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t vboy_usage[] =
   {
-    {NULL, "Nintendo Virtual Boy\n"},
-    {NULL, "19XX Nintendo http://www.nintendo.com\n"},
-    {"vboy", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "Nintendo Virtual Boy\n"},
+    {NULL, NULL, "19XX Nintendo http://www.nintendo.com\n"},
+    {"vboy", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t vectrex_usage[] =
   {
-    {NULL, "Vectrex\n"},
-    {NULL, "1982\n"},
-    {"vec", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "Vectrex\n"},
+    {NULL, NULL, "1982\n"},
+    {"vec", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t intelli_usage[] =
   {
-    {NULL, "Intellivision\n"},
-    {NULL, "1979 Mattel\n"},
-    {"intelli", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "Intellivision\n"},
+    {NULL, NULL, "1979 Mattel\n"},
+    {"intelli", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t gp32_usage[] =
   {
-    {NULL, "GP32 Game System\n"},
-    {NULL, "2002 Gamepark http://www.gamepark.co.kr\n"},
-    {"gp32", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "GP32 Game System\n"},
+    {NULL, NULL, "2002 Gamepark http://www.gamepark.co.kr\n"},
+    {"gp32", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t ps2_usage[] =
   {
-    {NULL, "Playstation 2\n"},
-    {NULL, "2000 Sony http://www.playstation.com\n"},
-    {"ps2", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "Playstation 2\n"},
+    {NULL, NULL, "2000 Sony http://www.playstation.com\n"},
+    {"ps2", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t xbox_usage[] =
   {
-    {NULL, "XBox\n"},
-    {NULL, "2001 Microsoft http://www.xbox.com\n"},
-    {"xbox", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "XBox\n"},
+    {NULL, NULL, "2001 Microsoft http://www.xbox.com\n"},
+    {"xbox", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t sat_usage[] =
   {
-    {NULL, "Saturn\n"},
-    {NULL, "1994 SEGA http://www.sega.com\n"},
-    {"sat", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "Saturn\n"},
+    {NULL, NULL, "1994 SEGA http://www.sega.com\n"},
+    {"sat", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t real3do_usage[] =
   {
-    {NULL, "Real3DO\n"},
-    {NULL, "1993 Panasonic/Goldstar/Philips\n"},
-    {"3do", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "Real3DO\n"},
+    {NULL, NULL, "1993 Panasonic/Goldstar/Philips\n"},
+    {"3do", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t cd32_usage[] =
   {
-    {NULL, "CD32\n"},
-    {NULL, "1993 Commodore\n"},
-    {"cd32", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "CD32\n"},
+    {NULL, NULL, "1993 Commodore\n"},
+    {"cd32", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t cdi_usage[] =
   {
-    {NULL, "CD-i"},
-    {NULL, "1991 Philips"},
-    {"cdi", "force recognition\n"},
-    {NULL, NULL}
+    {NULL, NULL, "CD-i"},
+    {NULL, NULL, "1991 Philips"},
+    {"cdi", NULL, "force recognition\n"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t vc4000_usage[] =
   {
-    {NULL, "Interton VC4000"},
-    {NULL, "~1980"},
-    {NULL, NULL}
+    {NULL, NULL, "Interton VC4000"},
+    {NULL, NULL, "~1980"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t odyssey2_usage[] =
   {
-    {NULL, "G7400+/Odyssey²"},
-    {NULL, "1978"},
-    {NULL, NULL}
+    {NULL, NULL, "G7400+/Odyssey²"},
+    {NULL, NULL, "1978"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t channelf_usage[] =
   {
-    {NULL, "FC Channel F"},
-    {NULL, "1976"},
-    {NULL, NULL}
+    {NULL, NULL, "FC Channel F"},
+    {NULL, NULL, "1976"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t odyssey_usage[] =
   {
-    {NULL, "Magnavox Odyssey"},
-    {NULL, "1972 Ralph Baer (USA)"},
-    {NULL, NULL}
+    {NULL, NULL, "Magnavox Odyssey"},
+    {NULL, NULL, "1972 Ralph Baer (USA)"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t gamecom_usage[] =
   {
-    {NULL, "Game.com"},
-    {NULL, "? Tiger"},
-    {NULL, NULL}
+    {NULL, NULL, "Game.com"},
+    {NULL, NULL, "? Tiger"},
+    {NULL, NULL, NULL}
   };
 
 const st_usage_t mame_usage[] =
   {
-    {NULL, "M.A.M.E. (Multiple Arcade Machine Emulator)"},
-    {NULL, NULL}
+    {NULL, NULL, "M.A.M.E. (Multiple Arcade Machine Emulator)"},
+    {NULL, NULL, NULL}
   };
 
 #if 0
@@ -313,76 +314,76 @@ sys2064.com
 
 
 const st_usage_t ucon64_options_usage[] = {
-  {NULL, "Options"},
-  {"nbak", "prevents backup files (*.BAK)"},
+  {NULL, NULL, "Options"},
+  {"nbak", NULL, "prevents backup files (*.BAK)"},
 #ifdef  ANSI_COLOR
-  {"ncol", "disable ANSI colors in output"},
+  {"ncol", NULL, "disable ANSI colors in output"},
 #endif
 #ifdef  PARALLEL
-  {"port=PORT", "specify parallel PORT={3bc, 378, 278, ...}"},
+  {"port", "PORT", "specify parallel PORT={3bc, 378, 278, ...}"},
 #endif
-  {"hdn=N", "force ROM has backup unit/emulator header with N Bytes size"},
-  {"hd", "same as " OPTION_LONG_S "hdn=512\n"
+  {"hdn", "N", "force ROM has backup unit/emulator header with N Bytes size"},
+  {"hd", NULL, "same as " OPTION_LONG_S "hdn=512\n"
                    "most backup units use a header with 512 Bytes size"},
-  {"nhd", "force ROM has no backup unit/emulator header"},
-  {"int", "force ROM is interleaved (2143)"},
-  {"nint", "force ROM is not interleaved (1234)"},
-  {"dint", "convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
+  {"nhd", NULL, "force ROM has no backup unit/emulator header"},
+  {"int", NULL, "force ROM is interleaved (2143)"},
+  {"nint", NULL, "force ROM is not interleaved (1234)"},
+  {"dint", NULL, "convert ROM to (non-)interleaved format (1234 <-> 2143)\n"
              "this differs from the SNES & NES " OPTION_LONG_S "dint option"},
-  {"ns", "force ROM is not split"},
+  {"ns", NULL, "force ROM is not split"},
 #ifdef  __MSDOS__
-  {"e", "emulate/run ROM (check ucon64.cfg for more)"},
+  {"e", NULL, "emulate/run ROM (check ucon64.cfg for more)"},
 #else
-  {"e", "emulate/run ROM (check .ucon64rc for more)"},
+  {"e", NULL, "emulate/run ROM (check .ucon64rc for more)"},
 #endif
-  {"crc", "show CRC32 value of ROM"  //; this will also force calculation for\n"
+  {"crc", NULL, "show CRC32 value of ROM"  //; this will also force calculation for\n"
              /* "files bigger than %d Bytes (%.4f Mb)" */},
-  {"ls", "generate ROM list for all ROMs; " OPTION_LONG_S "rom=ROM or DIR"},
-  {"lsv", "like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=ROM or DIR"},
+  {"ls", NULL, "generate ROM list for all ROMs; " OPTION_LONG_S "rom=ROM or DIR"},
+  {"lsv", NULL, "like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=ROM or DIR"},
 #if 0
-  {"rl", "rename all files in DIR to lowercase; " OPTION_LONG_S "rom=ROM or DIR"},
-  {"ru", "rename all files in DIR to uppercase; " OPTION_LONG_S "rom=ROM or DIR"},
+  {"rl", NULL, "rename all files in DIR to lowercase; " OPTION_LONG_S "rom=ROM or DIR"},
+  {"ru", NULL, "rename all files in DIR to uppercase; " OPTION_LONG_S "rom=ROM or DIR"},
 #endif
 #ifdef  __MSDOS__
-  {"hex", "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\""},
+  {"hex", NULL, "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\""},
 #else
-  {"hex", "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\""},       // less is more ;-)
+  {"hex", NULL, "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\""},       // less is more ;-)
 #endif
-  {"find=STRING", "find STRING in ROM (wildcard: '?')"},
-  {"c=FILE", "compare FILE with ROM for differences"},
-  {"cs=FILE", "compare FILE with ROM for similarities"},
-  {"help", "display this help and exit"},
-  {"version", "output version information and exit"},
-  {"q", "be quiet (don't show ROM info)"},
-//  {"qq", "be even more quiet"},
-  {NULL, NULL}
+  {"find", "STRING", "find STRING in ROM (wildcard: '?')"},
+  {"c", "FILE", "compare FILE with ROM for differences"},
+  {"cs" ,"FILE", "compare FILE with ROM for similarities"},
+  {"help", NULL, "display this help and exit"},
+  {"version", NULL, "output version information and exit"},
+  {"q", NULL, "be quiet (don't show ROM info)"},
+//  {"qq", NULL, "be even more quiet"},
+  {NULL, NULL, NULL}
 };
 
 
 const st_usage_t ucon64_padding_usage[] = {
-  {NULL, "Padding"},
-  {"ispad", "check if ROM is padded"},
-  {"pad", "pad ROM to full Mb"},
-  {"p", "same as " OPTION_LONG_S "pad"},
-  {"padn=N", "pad ROM to N Bytes (put Bytes with value 0x00 after end)"},
-  {"strip=N", "strip N Bytes from end of ROM"},
-  {"stpn=N", "strip N Bytes from ROM beginning"},
-  {"stp", "same as " OPTION_LONG_S "stpn=512\n"
+  {NULL, NULL, "Padding"},
+  {"ispad", NULL, "check if ROM is padded"},
+  {"pad", NULL, "pad ROM to full Mb"},
+  {"p", NULL, "same as " OPTION_LONG_S "pad"},
+  {"padn", "N", "pad ROM to N Bytes (put Bytes with value 0x00 after end)"},
+  {"strip", "N", "strip N Bytes from end of ROM"},
+  {"stpn", "N", "strip N Bytes from ROM beginning"},
+  {"stp", NULL, "same as " OPTION_LONG_S "stpn=512\n"
             "most backup units use a header with 512 Bytes size"},
-  {"insn=N", "insert N Bytes (0x00) before ROM"},
-  {"ins", "same as " OPTION_LONG_S "insn=512\n"
+  {"insn", "N", "insert N Bytes (0x00) before ROM"},
+  {"ins", NULL, "same as " OPTION_LONG_S "insn=512\n"
              "most backup units use a header with 512 Bytes size"},
-  {NULL, NULL}
+  {NULL, NULL, NULL}
 };
 
 
 const st_usage_t ucon64_patching_usage[] =
   {
-    {NULL, "Patching"},
-    {"patch=PATCH", "specify the PATCH for the following options\n"
+    {NULL, NULL, "Patching"},
+    {"patch", "PATCH", "specify the PATCH for the following options\n"
                       "use this option or uCON64 expects the last commandline\n"
                       "argument to be the name of the PATCH file"},
-    {NULL, NULL}
+    {NULL, NULL, NULL}
   };
 
 

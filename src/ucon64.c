@@ -401,18 +401,22 @@ main (int argc, char *argv[])
 
   if (argcmp (argc, argv, "-swap"))
     {
+
       fileswap (ucon64_fbackup (&rom, rom.rom), 0, quickftell (rom.rom));
       return (0);
     }
 
   if (argcmp (argc, argv, "-pad"))
     {
+      ucon64_fbackup (&rom, rom.rom);
+      
       filepad (rom.rom, 0, MBIT);
       return (0);
     }
 
   if (argcmp (argc, argv, "-padhd"))
     {
+      ucon64_fbackup (&rom, rom.rom);
       filepad (rom.rom, 512, MBIT);
       return (0);
     }
@@ -435,6 +439,8 @@ main (int argc, char *argv[])
 
   if (argcmp (argc, argv, "-strip"))
     {
+      ucon64_fbackup (&rom, rom.rom);
+
       truncate (rom.rom, quickftell (rom.rom) - atol (rom.file));
       return (0);
     }

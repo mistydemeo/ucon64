@@ -162,7 +162,8 @@ typedef struct st_snes_header
 st_snes_header_t snes_header;
 
 static int snes_split, force_interleaved, bs_dump, rom_is_top,  // flag for interleaved ROM dump
-           snes_sramsize, snes_hirom, snes_hirom_changed;       //  of "Tales of Phantasia"
+           snes_sramsize, snes_hirom, snes_hirom_changed,       //  of "Tales of Phantasia"
+           nsrt_header;
 /*
   The flag `snes_hirom_changed' is necessary for ROMs that are in the normal
   interleaved format (type 1). The variable `snes_hirom' changes the first time
@@ -477,15 +478,8 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
   int x;
   char checksum = -1;                           // byte => no need to take the modulus of 256
 
-  if (rominfo->buheader_len && !memcmp (&OFFSET (header, 0x1e8), "NSRT", 4))
-    {
-      // an NSRT header is already present
-      ((unsigned char *) header)[0x1ec] = NSRT_HEADER_VERSION;
-      return;                                   // don't do anything else
-    }
-
-
-  if (UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
+  if ((UCON64_ISSET (ucon64.controller) || UCON64_ISSET (ucon64.controller2))
+      && !nsrt_header)                          // don't overwrite these values
     {
       if (rominfo->current_internal_crc != rominfo->internal_crc)
         {
@@ -540,6 +534,21 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
 }
 
 
+static void
+reset_header (void *header)
+{
+  // preserve possible NSRT header
+  if (nsrt_header)
+    {
+      memset (header, 0, 0x1d0);
+      memset (header + 0x1f0, 0, 16);
+      ((unsigned char *) header)[0x1ec] = NSRT_HEADER_VERSION;
+    }
+  else
+    memset (header, 0, SMC_HEADER_LEN);
+}
+
+
 static int
 snes_ffe (st_rominfo_t *rominfo, char *ext, int smc)
 {
@@ -550,7 +559,8 @@ snes_ffe (st_rominfo_t *rominfo, char *ext, int smc)
   if (snes_hirom && smc)
     printf ("NOTE: This game might not work with a Super Magicom because it's HiROM\n");
 
-  memset (&header, 0, SWC_HEADER_LEN);
+  q_fread (&header, 0, rominfo->buheader_len, ucon64.rom);
+  reset_header (&header);
   size = rominfo->file_size - rominfo->buheader_len;
   header.size_low = size / 8192;
   header.size_high = size / 8192 >> 8;
@@ -608,7 +618,8 @@ snes_fig (st_rominfo_t *rominfo)
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   st_fig_header_t header;
 
-  memset (&header, 0, FIG_HEADER_LEN);
+  q_fread (&header, 0, rominfo->buheader_len, ucon64.rom);
+  reset_header (&header);
   size = rominfo->file_size - rominfo->buheader_len;
   header.size_low = size / 8192;
   header.size_high = size / 8192 >> 8;
@@ -883,7 +894,8 @@ snes_gd3 (st_rominfo_t *rominfo)
         }
 
       // create the header
-      memset (header, 0, SMC_HEADER_LEN);
+      q_fread (header, 0, rominfo->buheader_len, ucon64.rom);
+      reset_header (header);
       memcpy (header, "GAME DOCTOR SF 3", 0x10);
 
       if (snes_sramsize == 8 * 1024)
@@ -980,7 +992,8 @@ snes_gd3 (st_rominfo_t *rominfo)
           return -1;
         }
 
-      memset (header, 0, SMC_HEADER_LEN);
+      q_fread (header, 0, rominfo->buheader_len, ucon64.rom);
+      reset_header (header);
       memcpy (header, "GAME DOCTOR SF 3", 0x10);
 
       if (snes_sramsize == 8 * 1024)
@@ -1031,7 +1044,8 @@ snes_gdf (st_rominfo_t *rominfo)
       return -1;
     }
 
-  memset (header, 0, SMC_HEADER_LEN);
+  q_fread (header, 0, rominfo->buheader_len, ucon64.rom);
+  reset_header (header);
   header[0x10] = 0x81;
   header[0x29] = 0x0c;
   header[0x30] = 0x0c;
@@ -2089,7 +2103,11 @@ snes_init (st_rominfo_t *rominfo)
                str_list[ctrl2],
                OFFSET (header, 0x1ec) / 10.f);
       strcat (rominfo->misc, buf);
+
+      nsrt_header = 1;
     }
+  else
+    nsrt_header = 0;
 
   free (rom_buffer);
   return result;

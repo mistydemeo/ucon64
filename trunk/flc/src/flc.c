@@ -192,7 +192,7 @@ if(flc.sort && !single_file)
 {
 /*
     find out how many regular files are in the current dir
-    and malloc files*struct for them 
+    and malloc files * struct for them 
 */
 
   while((ep=readdir(dp))!=NULL)
@@ -230,7 +230,7 @@ while( (!single_file) ?
   strcpy(files->name,(!single_file) ? ep->d_name : flc.path);  
   if(single_file)flc.path[0]=0;
 
-//  extract(&flc,files);
+  extract(&flc,files);
 
   if(!flc.sort)
   {

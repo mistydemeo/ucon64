@@ -66,7 +66,7 @@ struct files_
   off_t size;
   unsigned long date;
   int checked;
-  char files_id[FID_LINES_MAX+1][49];
+  char file_id[FID_LINES_MAX+1][49];
 };
 
 

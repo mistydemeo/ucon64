@@ -86,8 +86,9 @@ extern char *ucon64_temp_file;
   if move_name != NULL then filename will just be moved (renamed) and NOT
   duplicated (faster); move_name will contain the new name then
 */
-extern char *ucon64_fbackup (char *move_name, const char *filename);
+//extern char *ucon64_fbackup (char *move_name, const char *filename);
 extern void handle_existing_file (const char *dest, char *src);
+#define ucon64_fbackup(a,b) (handle_existing_file(b,a))
 extern void remove_temp_file (void); // possible temp file created by handle_existing_file()
 
 extern int ucon64_fhexdump (const char *filename, long start, long len);

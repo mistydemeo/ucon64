@@ -249,7 +249,7 @@ Game Title    : TITLE OF THE SOFTWARE
 */
   const char *in = NULL;
   FILE *fh;
-  static char ip[0x8000] = {};
+  static char ip[0x8000];
 
   if (!(fh = fopen (in, "r"))) return -1;
 
@@ -260,7 +260,8 @@ Game Title    : TITLE OF THE SOFTWARE
 
   update_crc (ip);
 
-  q_fwrite (ip, 0, 0x8000, ucon64_fbackup (NULL, ucon64.file), "wb");
+  ucon64_fbackup (NULL, ucon64.file);
+  q_fwrite (ip, 0, 0x8000, ucon64.file, "wb");
 
   ucon64_wrote (ucon64.file);
 

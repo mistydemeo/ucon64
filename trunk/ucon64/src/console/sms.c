@@ -172,8 +172,9 @@ e.g. The first 16Mbit file of Donkey Kong Country (assuming it
            (unsigned long) ((q_fsize (ucon64.rom) - rominfo->buheader_len) /
                             MBIT));
 
+  ucon64_fbackup (NULL, buf2);
   q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom),
-            ucon64_fbackup (NULL, buf2), "wb");
+            buf2, "wb");
 
   ucon64_wrote (buf2);
   return 0;
@@ -203,7 +204,8 @@ sms_smd (st_rominfo_t *rominfo)
   strcpy (buf, ucon64.rom);
   setext (buf, ".SMD");
 
-  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, ucon64_fbackup (NULL, buf), "wb");
+  ucon64_fbackup (NULL, buf);
+  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
 
   q_fcpy (ucon64.rom, 0, size, buf, "ab");
 
@@ -229,7 +231,8 @@ sms_smds (st_rominfo_t *rominfo)
 
   strcpy (buf, ucon64.rom);
   setext (buf, ".TMP");
-  rename (ucon64_fbackup (NULL, ucon64.rom), buf);
+  ucon64_fbackup (NULL, ucon64.rom);
+  rename (ucon64.rom, buf);
 
   q_fwrite (&header, 0, SMD_HEADER_LEN, ucon64.rom, "wb");
   q_fcpy (buf, 0, q_fsize (ucon64.rom), ucon64.rom, "ab");

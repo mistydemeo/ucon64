@@ -421,14 +421,16 @@ genesis_s (st_rominfo_t *rominfo)
 
       for (x = 0; x < n4Mbparts; x++)
         {
-          q_fcpy (ucon64.rom, x * 4 * MBIT, 4 * MBIT, ucon64_fbackup (NULL, buf2), "wb");
+          ucon64_fbackup (NULL, buf2);
+          q_fcpy (ucon64.rom, x * 4 * MBIT, 4 * MBIT, buf2, "wb");
           ucon64_wrote (buf2);
           (*(strrchr (buf2, '.') - 1))++;
         }
 
       if (surplus4Mb != 0)
         {
-          q_fcpy (ucon64.rom, x * 4 * MBIT, surplus4Mb, ucon64_fbackup (NULL, buf2), "wb");
+          ucon64_fbackup (NULL, buf2);
+          q_fcpy (ucon64.rom, x * 4 * MBIT, surplus4Mb, buf2, "wb");
           ucon64_wrote (buf2);
         }
     }
@@ -448,7 +450,8 @@ genesis_s (st_rominfo_t *rominfo)
           if (surplus4Mb == 0 && x == n4Mbparts - 1)
             smd_header.split = 0;               // last file -> clear bit 6
 
-          q_fwrite (&smd_header, 0, SMD_HEADER_LEN, ucon64_fbackup (NULL, buf), "wb");
+          ucon64_fbackup (NULL, buf);
+          q_fwrite (&smd_header, 0, SMD_HEADER_LEN, buf, "wb");
           q_fcpy (ucon64.rom, x * 4 * MBIT + rominfo->buheader_len, 4 * MBIT, buf, "ab");
           ucon64_wrote (buf);
 
@@ -460,7 +463,8 @@ genesis_s (st_rominfo_t *rominfo)
           smd_header.size = surplus4Mb / 16384;
           smd_header.split = 0;                 // last file -> clear bit 6
 
-          q_fwrite (&smd_header, 0, SMD_HEADER_LEN, ucon64_fbackup (NULL, buf), "wb");
+          ucon64_fbackup (NULL, buf);
+          q_fwrite (&smd_header, 0, SMD_HEADER_LEN, buf, "wb");
           q_fcpy (ucon64.rom, x * 4 * MBIT + rominfo->buheader_len, surplus4Mb, buf, "ab");
           ucon64_wrote (buf);
         }
@@ -472,7 +476,7 @@ genesis_s (st_rominfo_t *rominfo)
 static int
 genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
 {
-  char *rom_buffer = NULL, buf[MAXBUFSIZE], *src_name;
+  char *rom_buffer = NULL, buf[FILENAME_MAX];
 
   if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
     {
@@ -494,12 +498,12 @@ genesis_name (st_rominfo_t *rominfo, const char *name1, const char *name2)
       memcpy (&rom_buffer[GENESIS_HEADER_START + 32 + 48], buf, 48);
     }
 
-  src_name = ucon64_fbackup (buf, ucon64.rom);  // contents of buf is not important
+  ucon64_fbackup (buf, ucon64.rom);  // contents of buf is not important
   if (type == SMD)
     {
       st_smd_header_t smd_header;
 
-      q_fread (&smd_header, 0, SMD_HEADER_LEN, src_name);
+      q_fread (&smd_header, 0, SMD_HEADER_LEN, buf);
       save_smd_from (ucon64.rom, rom_buffer, &smd_header, genesis_rom_size);
     }
   else
@@ -536,7 +540,7 @@ genesis_1991 (st_rominfo_t *rominfo)
 int
 genesis_chk (st_rominfo_t *rominfo)
 {
-  unsigned char *rom_buffer, buf[MAXBUFSIZE], *src_name;
+  unsigned char *rom_buffer, buf[FILENAME_MAX];
   int chksum = 0;
 
   if (!(rom_buffer = (unsigned char *) malloc (genesis_rom_size)))
@@ -554,12 +558,12 @@ genesis_chk (st_rominfo_t *rominfo)
 
   mem_hexdump (&rom_buffer[GENESIS_HEADER_START + 0x8e], 2, GENESIS_HEADER_START + 0x8e);
 
-  src_name = ucon64_fbackup (buf, ucon64.rom);  // contents of buf is not important
+  ucon64_fbackup (buf, ucon64.rom);
   if (type == SMD)
     {
       st_smd_header_t smd_header;
 
-      q_fread (&smd_header, 0, SMD_HEADER_LEN, src_name);
+      q_fread (&smd_header, 0, SMD_HEADER_LEN, buf);
       save_smd_from (ucon64.rom, rom_buffer, &smd_header, genesis_rom_size);
     }
   else
@@ -870,7 +874,8 @@ genesis_j (st_rominfo_t *rominfo)
 */
       strcpy (buf2, ucon64.rom);
       setext (buf2, ".078");
-      remove (ucon64_fbackup (NULL, buf2));
+      ucon64_fbackup (NULL, buf2);
+      remove (buf2);
 
       strcpy (buf, ucon64.rom);
       while (q_fcpy (buf, rominfo->buheader_len,
@@ -894,7 +899,8 @@ genesis_j (st_rominfo_t *rominfo)
       setext (buf2, ".SMD");
       strcpy (buf, ucon64.rom);
 
-      q_fcpy (buf, 0, rominfo->buheader_len, ucon64_fbackup (NULL, buf2), "wb");
+      ucon64_fbackup (NULL, buf2);
+      q_fcpy (buf, 0, rominfo->buheader_len, buf2, "wb");
       file_size = q_fsize (buf);
       while (q_fcpy (buf, rominfo->buheader_len, file_size, buf2, "ab") != -1)
         {

@@ -1431,7 +1431,8 @@ nes_ffe (st_rominfo_t *rominfo)
       return -1;
     }
 
-  strcpy (buf, ucon64_fbackup (NULL, ucon64.rom));
+  ucon64_fbackup (NULL, ucon64.rom);
+  strcpy (buf, ucon64.rom);
   setext (buf, ".FFE");
 
   memset (&header, 0, UNKNOWN_HEADER_LEN);
@@ -1441,7 +1442,8 @@ nes_ffe (st_rominfo_t *rominfo)
   header.id_code1 = 0xaa;
   header.id_code2 = 0xbb;
 #endif
-  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, ucon64_fbackup (NULL, buf), "wb");
+  ucon64_fbackup (NULL, buf);
+  q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
   q_fcpy (ucon64.rom, rominfo->buheader_len, size, buf, "ab");
   ucon64_wrote (buf);
 
@@ -1462,7 +1464,8 @@ nes_ineshd (st_rominfo_t *rominfo)
 
   strcpy (dest_name, ucon64.rom);
   setext (dest_name, ".HDR");
-  q_fcpy (ucon64.rom, rominfo->buheader_start, 16, ucon64_fbackup (NULL, dest_name), "wb");
+  ucon64_fbackup (NULL, dest_name);
+  q_fcpy (ucon64.rom, rominfo->buheader_start, 16, dest_name, "wb");
   ucon64_wrote (dest_name);
 
   return 0;

@@ -124,7 +124,7 @@ const char *unknown_usage[] =
   via q_fbackup()), which is not a pointer to constant characters.
 */
 char *
-ucon64_fbackup (char *move_name, const char *filename)
+u64_fbackup (char *move_name, const char *filename)
 {
   if (!ucon64.backup)
     return (char *) filename;
@@ -139,53 +139,6 @@ ucon64_fbackup (char *move_name, const char *filename)
 }
 
 
-#if 0
-char *
-handle_existing_file (const char *filename, char *new_file)
-/*
-  We have to handle the following cases (for example -swc and rom.swc exists):
-  1) ucon64 -swc rom.swc
-    a) with backup creation enabled
-       Create backup of rom.swc
-       postcondition: new_file == name of backup
-    b) with backup creation disabled
-       Create temporary backup of rom.swc by renaming rom.swc
-       postcondition: new_file == name of backup
-  2) ucon64 -swc rom.fig
-    a) with backup creation enabled
-       Create backup of rom.swc
-       postcondition: new_file == rom.fig
-    b) with backup creation disabled
-       Do nothing
-       postcondition: new_file == rom.fig
-*/
-{
-  ucon64_temp_file = 0;
-
-  if (ucon64.backup && !access (filename, F_OK))
-    {
-      printf ("Writing backup of: %s\n", filename); // verbose
-      fflush (stdout);
-    }
-
-  if (ucon64.backup)
-    {
-      if (strcmp (filename, ucon64.rom) != 0)
-        return q_fbackup (NULL, filename);            // case 2 (q_fbackup() handles a & b)
-
-      setext (new_file, ".BAK"); // case 1a
-      return q_fbackup (NULL, filename);
-    }                                   // must match with what q_fbackup() does
-  else
-    {                                   // case 1b
-      char *result = 
-        q_fbackup (new_file, filename);       // arg 1 != NULL -> rename
-
-      ucon64_temp_file = new_file;
-      return result;
-    }
-}
-#else
 void
 handle_existing_file (const char *dest, char *src)
 /*
@@ -213,22 +166,21 @@ handle_existing_file (const char *dest, char *src)
         {                                       // case 1
           if (ucon64.backup)
             {                                   // case 1a
-              ucon64_fbackup (NULL, dest);
+              u64_fbackup (NULL, dest);
               setext (src, ".BAK");
             }                                   // must match with what q_fbackup() does
           else
             {                                   // case 1b
               ucon64.backup = 1;                // force ucon64_fbackup() to _rename_ file
-              ucon64_fbackup (src, dest);       // arg 1 != NULL -> rename
+              u64_fbackup (src, dest);       // arg 1 != NULL -> rename
               ucon64.backup = 0;
               ucon64_temp_file = src;
             }
         }
       else
-        ucon64_fbackup (NULL, dest);            // case 2 (ucon64_fbackup() handles a & b)
+        u64_fbackup (NULL, dest);            // case 2 (ucon64_fbackup() handles a & b)
     }
 }
-#endif
 
 
 void

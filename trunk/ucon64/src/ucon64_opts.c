@@ -1265,7 +1265,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_FIGS:
-      snes_figs ();
+      snes_figs (ucon64.rominfo);
       break;
 
     case UCON64_GBX:
@@ -1277,7 +1277,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_GD3S:
-      snes_gd3s ();
+      snes_gd3s (ucon64.rominfo);
       break;
 
     case UCON64_GG:
@@ -1588,7 +1588,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_SWCS:
-      snes_swcs ();
+      snes_swcs (ucon64.rominfo);
       break;
 
     case UCON64_UFO:
@@ -1596,7 +1596,7 @@ ucon64_options (st_ucon64_t *p)
       break;
 
     case UCON64_UFOS:
-      snes_ufos ();
+      snes_ufos (ucon64.rominfo);
       break;
 
     case UCON64_UNIF:

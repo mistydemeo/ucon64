@@ -170,7 +170,7 @@ const st_getopt2_t snes_usage[] =
     {
       "figs", 0, 0, UCON64_FIGS,
       NULL, "convert emulator *.srm (SRAM) to *Pro Fighter*/FIG",
-      &ucon64_wf[WF_OBJ_SNES_NULL]
+      &ucon64_wf[WF_OBJ_SNES_INIT_PROBE]
     },
     {
       "gd3", 0, 0, UCON64_GD3,
@@ -180,7 +180,7 @@ const st_getopt2_t snes_usage[] =
     {
       "gd3s", 0, 0, UCON64_GD3S,
       NULL, "convert emulator *.srm (SRAM) to GD SF3(SF6/SF7)/Professor SF*",
-      &ucon64_wf[WF_OBJ_SNES_NULL]
+      &ucon64_wf[WF_OBJ_SNES_INIT_PROBE]
     },
     {
       "mgd", 0, 0, UCON64_MGD,
@@ -200,7 +200,7 @@ const st_getopt2_t snes_usage[] =
     {
       "swcs", 0, 0, UCON64_SWCS,
       NULL, "convert emulator *.srm (SRAM) to Super Wild Card*/SWC",
-      &ucon64_wf[WF_OBJ_SNES_NULL]
+      &ucon64_wf[WF_OBJ_SNES_INIT_PROBE]
     },
     {
       "ufo", 0, 0, UCON64_UFO,
@@ -210,7 +210,7 @@ const st_getopt2_t snes_usage[] =
     {
       "ufos", 0, 0, UCON64_UFOS,
       NULL, "convert emulator *.srm (SRAM) to Super UFO",
-      &ucon64_wf[WF_OBJ_SNES_NULL]
+      &ucon64_wf[WF_OBJ_SNES_INIT_PROBE]
     },
     {
       "stp", 0, 0, UCON64_STP,
@@ -521,16 +521,16 @@ Remember to load the lowest 8 bits first, then the top 7 bits.
 
 
 static int
-snes_convert_sramfile (const void *header)
+snes_convert_sramfile (int org_header_len, const void *new_header)
 {
   FILE *srcfile, *destfile;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX], buf[32 * 1024];
-  unsigned int blocksize, byteswritten, header_len;
+  unsigned int blocksize, byteswritten, new_header_len;
 
   strcpy (src_name, ucon64.rom);
-  if (header)
+  if (new_header)
     {
-      header_len = SWC_HEADER_LEN;
+      new_header_len = SWC_HEADER_LEN;
       strcpy (dest_name, ucon64.rom);
       set_suffix (dest_name, ".sav");
     }
@@ -538,7 +538,7 @@ snes_convert_sramfile (const void *header)
     {
       int n;
 
-      header_len = 0;
+      new_header_len = 0;
       sprintf (dest_name, "SF8%.3s", basename2 (ucon64.rom));
       strupr (dest_name);
       // avoid trouble with filenames containing spaces
@@ -560,21 +560,22 @@ snes_convert_sramfile (const void *header)
       return -1;
     }
 
-  if (header)
+  fseek (srcfile, org_header_len, SEEK_SET);
+  if (new_header)
     {
-      fwrite (header, 1, SWC_HEADER_LEN, destfile); // write header
-      byteswritten = SWC_HEADER_LEN;
+      fwrite (new_header, 1, new_header_len, destfile); // write header
+      byteswritten = new_header_len;
     }
   else
     byteswritten = 0;
 
   blocksize = fread (buf, 1, 32 * 1024, srcfile); // read 32 kB at max
-  while (byteswritten < 32 * 1024 + header_len)
+  while (byteswritten < 32 * 1024 + new_header_len)
     {
       // Pad SRAM data to 32 kB by repeating it. At least the SWC DX2 does
       //  something similar.
-      fwrite (buf, 1, byteswritten + blocksize <= 32 * 1024 + header_len ?
-                blocksize : 32 * 1024 + header_len - byteswritten, destfile);
+      fwrite (buf, 1, byteswritten + blocksize <= 32 * 1024 + new_header_len ?
+                blocksize : 32 * 1024 + new_header_len - byteswritten, destfile);
       byteswritten += blocksize;
     }
 
@@ -587,7 +588,7 @@ snes_convert_sramfile (const void *header)
 
 
 int
-snes_swcs (void)
+snes_swcs (st_rominfo_t *rominfo)
 {
   st_swc_header_t header;
 
@@ -596,38 +597,38 @@ snes_swcs (void)
   header.id2 = 0xbb;
   header.type = 5;                              // size needn't be set for the SWC
                                                 //  (SWC itself doesn't set it either)
-  return snes_convert_sramfile (&header);
+  return snes_convert_sramfile (rominfo->buheader_len, &header);
 }
 
 
 int
-snes_figs (void)
+snes_figs (st_rominfo_t *rominfo)
 {
   st_fig_header_t header;
 
   memset (&header, 0, FIG_HEADER_LEN);
   header.size_low = 4;                          // 32 kB == 4*8 kB, size_high is already 0
 
-  return snes_convert_sramfile (&header);
+  return snes_convert_sramfile (rominfo->buheader_len, &header);
 }
 
 
 int
-snes_ufos (void)
+snes_ufos (st_rominfo_t *rominfo)
 {
   unsigned char header[SWC_HEADER_LEN];
 
   memset (&header, 0, SWC_HEADER_LEN);
   memcpy (&header[8], "SUPERUFO", 8);
 
-  return snes_convert_sramfile (&header);
+  return snes_convert_sramfile (rominfo->buheader_len, &header);
 }
 
 
 int
-snes_gd3s (void)
+snes_gd3s (st_rominfo_t *rominfo)
 {
-  return snes_convert_sramfile (NULL);
+  return snes_convert_sramfile (rominfo->buheader_len, NULL);
 }
 
 

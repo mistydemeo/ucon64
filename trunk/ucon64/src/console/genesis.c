@@ -579,7 +579,7 @@ genesis_chk (st_rominfo_t *rominfo)
 static int
 genesis_testinterleaved (st_rominfo_t *rominfo)
 {
-  unsigned char buf[8192 + (GENESIS_HEADER_START + 4) / 2], buf2[16384];
+  unsigned char buf[16384], buf2[16384];
 
   q_fread (buf, rominfo->buheader_len, 8192 + (GENESIS_HEADER_START + 4) / 2, ucon64.rom);
   deinterleave_chunk (buf2, buf);

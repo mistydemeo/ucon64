@@ -54,5 +54,8 @@ void ucon64gui_root (void);
 
 void ucon64gui_system (void);
 
+void
+ucon64gui_output (char *output);
+
 
 #endif /* UCON64GUI_H */

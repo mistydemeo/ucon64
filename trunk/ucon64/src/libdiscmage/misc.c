@@ -52,7 +52,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <fcntl.h>
 #include <dos/dos.h>
 #include <dos/var.h>
+#include <libraries/lowlevel.h>                 //GetKey()
 #include <proto/dos.h>
+#include <proto/lowlevel.h>
 #elif   defined _WIN32
 #include <windows.h>                            // Sleep(), milliseconds
 #endif
@@ -2197,7 +2199,14 @@ kbhit (void)
 int
 kbhit (void)
 {
-  return 0;
+  char key_pressed;
+
+	if(0xFF != GetKey() )
+		key_pressed = 1;
+	else
+		key_pressed = 0;
+
+  return key_pressed;
 }
 #endif                                          // AMIGA
 
@@ -2753,47 +2762,6 @@ readlink (const char *path, char *buf, int bufsize)
   // always return -1 as if anything passed to it isn't a soft link
   return -1;
 }
-
-
-char *
-_getenv (const char *name)
-{
-  static char *var;
-  size_t len,i;
-
-  var = NULL;
-  i = 0;
-
-  do
-    {
-      i += 256;
-      if (var!= NULL)                           // free old buffer
-        free (var);
-      var = malloc (i);                         // and get a new one
-      if (var == NULL)                          // oh, dear
-        return NULL;
-      len = GetVar ((char *) name, var, i, GVF_BINARY_VAR) + 1;
-    }
-  while (len >= i);                             // just to be sure we got everything,
-                                                //  we _require_ 1 unused byte
-  if (len == 0)                                 // variable doesn't exist
-    return NULL;
-  else
-    return var;
-/*
-  static char *buffer;
-
-  buffer = NULL;
-
-  if (GetVar (name, buffer, sizeof (buffer), GVF_BINARY_VAR) < 0)
-    return NULL;
-  else
-    return buffer;
-
-  return NULL;
-*/
-}
-
 
 // custom _popen() and _pclose(), because the standard ones (named popen() and
 //  pclose()) are buggy

@@ -67,6 +67,8 @@ ucon64_ls (void)
   strcpy (ucon64.cmd, "ucon64 -ls .");
   ucon64_system ();
 }
+void
+ucon64_main (void);
 
 void
 ucon64_snes (void)
@@ -74,15 +76,8 @@ ucon64_snes (void)
 #include "xpm/snes.xpm"
 #include "xpm/info.xpm"
 #include "xpm/icon.xpm"
+#include "xpm/back.xpm"
 
-  if(snes_window)
-  {
-    html2gui_html_end ();
-    snes_window=0;
-    return;
-  }
-  snes_window=1;
-  
 //<html>
   html2gui_html (640, 400, 0);
 
@@ -92,8 +87,9 @@ ucon64_snes (void)
 
   html2gui_br ();
 
-  html2gui_button (ucon64_nfo, "NFO", "Click here to see ROM info", 10, 10, info_xpm);
+  html2gui_button (ucon64_main, "BACK", "Return", 10, 10, back_xpm);
 
+  html2gui_button (ucon64_nfo, "NFO", "Click here to see ROM info", 10, 10, info_xpm);
 //</html>
 }
 

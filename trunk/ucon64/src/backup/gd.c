@@ -321,7 +321,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
       gd3_dram_unit[i].name[11] = 0;            // terminate string so we can print it (debug)
       // Use memcpy() instead of strcpy() so that the string terminator in
       //  names[i] won't be copied.
-      memcpy (gd3_dram_unit[i].name, strupr (names[i]), strlen ((const char *) names[i]));
+      memcpy (gd3_dram_unit[i].name, strupr (names[i]), strlen (names[i]));
 
       sprintf (filenames[i], "%s.078", names[i]); // should match with what code of -s does
       if (split)

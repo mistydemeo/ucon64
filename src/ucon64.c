@@ -1621,23 +1621,18 @@ ucon64_usage (int argc, char *argv[])
         }
 #endif
     
-      if (!single)
+      for (x = 0; usage_array[x].console != 0; x++)
         {
-          for (x = 0; usage_array[x].console != 0; x++)
-            {
-              int y = 0;
-              for (; usage_array[x].usage[y]; y++)
-                ucon64_render_usage (usage_array[x].usage[y]);
-    
-              fputc ('\n', stdout);
-            }
-      }
+          int y = 0;
+          for (; usage_array[x].usage[y]; y++)
+            ucon64_render_usage (usage_array[x].usage[y]);
+
+          fputc ('\n', stdout);
+        }
     }
 
-  printf (
-     "DATabase: %d known ROMs (DAT files: %s)\n\n",
-       ucon64_dat_total_entries (),
-       ucon64.datdir);
+  printf ("DATabase: %d known ROMs (DAT files: %s)\n\n",
+          ucon64_dat_total_entries (), ucon64.datdir);
 
 #ifdef  DISCMAGE          
   name_discmage =
@@ -1674,21 +1669,22 @@ ucon64_usage (int argc, char *argv[])
 #define PARALLEL_MSG ""
 #endif
 
-#ifdef  __MSDOS__
+#if     defined __MSDOS__ || defined _WIN32
 #define MORE_MSG "     %s " OPTION_LONG_S "help|more (to see everything in more)\n"
 #else
 #define MORE_MSG "     %s " OPTION_LONG_S "help|less (to see everything in less)\n" // less is more ;-)
 #endif
 
-  printf (
-    PARALLEL_MSG
-    "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
-    MORE_MSG
-    "     Give the force recognition switch a try if something went wrong\n"
-    "\n"
-    "Please report any problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
-    "\n",
-    name_exe, name_exe);
+  if (!single)
+    printf (
+      PARALLEL_MSG
+      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
+      MORE_MSG
+      "     Give the force recognition switch a try if something went wrong\n"
+      "\n"
+      "Please report any problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
+      "\n",
+      name_exe, name_exe);
 }
 
 

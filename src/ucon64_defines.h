@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_UNKNOWN_S "Unknown"
 #define NULL_TO_UNKNOWN_S(str) ((str) ? (str) : (UCON64_UNKNOWN_S))
 
-#define UCON64_VERSION_S "1.9.8beta9"
+#define UCON64_VERSION_S "1.9.8-1"
 
 /* program version counter */
 //#define UCON64_VERSION (198)

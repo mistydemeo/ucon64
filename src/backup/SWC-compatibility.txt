@@ -1,7 +1,7 @@
 A Super Wild Card compatibility list
-Version: 1.8
+Version: 1.9
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 17 january 2003
+Date: 19 january 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
 Software: uCON64 1.9.8beta7
 
@@ -32,6 +32,12 @@ Non-playing music seems to be a BS-specific problem.
 For some games I put an extra comment after the character sequence "<=". In
 some comments I mention the so-called emulation mode select byte. This is the
 byte at offset 2 in the header.
+I have sent all games to the Super Wild Card via a parallel cable. Note that
+for LoROM games that don't use SRAM uCON64 adjusts the emulation mode select
+byte before sending the game. This causes that some games don't have code 3,
+because uCON64 already makes the required modification. For example, if Addams
+Family Values is loaded from diskette the emulation mode select byte should
+have the value 0x2c instead of the value 0x0c.
 
 
 Code    Game

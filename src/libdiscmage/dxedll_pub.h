@@ -32,6 +32,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <dos.h>
 #include <ctype.h>
 #include <dpmi.h>
+#include "config.h"
+#ifdef  HAVE_ZLIB_H
+#include <zlib.h>
+#include "unzip.h"
+#endif
 
 
 #ifdef __cplusplus
@@ -88,6 +93,7 @@ typedef struct st_symbol
   char *(*strpbrk) (const char *, const char *);
   size_t (*strspn) (const char *, const char *);
   size_t (*strcspn) (const char *, const char *);
+  size_t (*strlen) (const char *);
 
   int (*stat) (const char *, struct stat *);
   time_t (*time) (time_t *);
@@ -104,6 +110,36 @@ typedef struct st_symbol
   int (*isatty) (int);
   int (*chdir) (const char *);
   char *(*getcwd) (char *, size_t);
+
+#ifdef  HAVE_ZLIB_H
+  // zlib functions
+  gzFile (*gzopen) (const char *path, const char *mode);
+  int (*gzclose) (gzFile file);
+  int (*gzwrite) (gzFile file, const voidp buf, unsigned len);
+  char *(*gzgets) (gzFile file, char *buf, int len);
+  int (*gzeof) (gzFile file);
+  z_off_t (*gzseek) (gzFile file, z_off_t offset, int whence);
+  int (*gzputc) (gzFile file, int c);
+  int (*gzread) (gzFile file, voidp buf, unsigned len);
+  int (*gzgetc) (gzFile file);
+  int (*gzrewind) (gzFile file);
+
+  // unzip functions
+  unzFile (*unzOpen) (const char *path);
+  int (*unzOpenCurrentFile) (unzFile file);
+  int (*unzGoToFirstFile) (unzFile file);
+  int (*unzClose) (unzFile file);
+  int (*unzGetGlobalInfo) (unzFile file, unz_global_info *pglobal_info);
+  int (*unzGoToNextFile) (unzFile file);
+  int (*unzCloseCurrentFile) (unzFile file);
+  int (*unzeof) (unzFile file);
+  int (*unzReadCurrentFile) (unzFile file, voidp buf, unsigned len);
+  z_off_t (*unztell) (unzFile file);
+  int (*unzGetCurrentFileInfo) (unzFile file, unz_file_info *pfile_info,
+                                char *szFileName, uLong fileNameBufferSize,
+                                void *extraField, uLong extraFieldBufferSize,
+                                char *szComment, uLong commentBufferSize);
+#endif // HAVE_ZLIB_H
 
   // Put all variables AFTER the functions. This makes it easy to catch
   //  uninitialized function pointers.

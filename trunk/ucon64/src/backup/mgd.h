@@ -27,7 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                    "19XX Bung Enterprises Ltd http://www.bung.com.hk\n" \
                    "?Makko Toys Co., Ltd.?"
 
-int mgd_usage(int argc,char *argv[]);
+int mgd_usage (int argc, char *argv[]);
 #define mgd_HEADER_START 0
 #define mgd_HEADER_LEN 0
 #endif /* MGD_H */

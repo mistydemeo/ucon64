@@ -20,20 +20,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "mgd.h"
 
-int mgd_usage(int argc,char *argv[])
+int
+mgd_usage (int argc, char *argv[])
 {
-if(argcmp(argc,argv,"-help"))printf("%s\n",mgd_TITLE);
+  if (argcmp (argc, argv, "-help"))
+    printf ("%s\n", mgd_TITLE);
 
 
-printf(
-	"TODO:  -xmgd    send/receive ROM to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT\n"
-	"		receives automatically when $ROM does not exist\n"
-	);
+  printf
+    ("TODO:  -xmgd    send/receive ROM to/from Multi Game*/MGD2/MGH/RAW; $FILE=PORT\n"
+     "		receives automatically when $ROM does not exist\n");
 
-if(argcmp(argc,argv,"-help"))
-{
+  if (argcmp (argc, argv, "-help"))
+    {
 //TODO more info like technical info about cabeling and stuff for the copier
 
-}
-	return(0);
+    }
+  return (0);
 }

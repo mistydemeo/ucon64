@@ -33,17 +33,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <unistd.h>                             // ioperm() (libc5)
+#include <unistd.h>		// ioperm() (libc5)
 #include "misc.h"
 
 #ifdef  BACKUP
 #ifdef  __linux__
 #ifdef  __GLIBC__
-#include <sys/io.h>                             // ioperm() (glibc)
+#include <sys/io.h>		// ioperm() (glibc)
 #endif
 
 #elif   __DOS__
-#include <pc.h>                                 // inportb(), inportw()
+#include <pc.h>			// inportb(), inportw()
 
 #elif   __BEOS__
 #include <fcntl.h>
@@ -56,16 +56,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 typedef struct IO_Tuple
 {
   unsigned long Port;
-  unsigned char  Data;
+  unsigned char Data;
   unsigned short Data16;
-} IO_Tuple;
-#endif                                          // __BEOS__
-#endif                                          // BACKUP
+}
+IO_Tuple;
+#endif // __BEOS__
+#endif // BACKUP
 
 #define MBIT 131072
 
-#define PARPORT_DATA    0                       // output
-#define PARPORT_STATUS  1                       // input
+#define PARPORT_DATA    0	// output
+#define PARPORT_STATUS  1	// input
 #define PARPORT_CONTROL 2
 
 #define out1byte(p,x)   outportb(p,x)
@@ -73,34 +74,35 @@ typedef struct IO_Tuple
 // DJGPP (DOS) has outportX() & inportX()
 
 // GameGenie "codec" routines
-char hexDigit(int value);
-int hexValue(char digit);
+char hexDigit (int value);
+int hexValue (char digit);
 //#define hexByteValue(x ,y) ((hexValue(x) << 4) + hexValue(y))
-int hexByteValue(char x, char y);
+int hexByteValue (char x, char y);
 
 // CRC32 routines
-void BuildCRCTable();
-unsigned long CalculateBufferCRC(unsigned int count, unsigned long crc, void *buffer);
-unsigned long CalculateFileCRC(FILE *file);
-unsigned long fileCRC32(char *filename, long start);    // calculate CRC32 of filename beginning from start
+void BuildCRCTable ();
+unsigned long CalculateBufferCRC (unsigned int count, unsigned long crc,
+				  void *buffer);
+unsigned long CalculateFileCRC (FILE * file);
+unsigned long fileCRC32 (char *filename, long start);	// calculate CRC32 of filename beginning from start
 
-char *ucon64_fbackup(char *filename);
+char *ucon64_fbackup (char *filename);
 
-size_t filepad(char *filename, long start, long unit);
-long filetestpad(char *filename);
+size_t filepad (char *filename, long start, long unit);
+long filetestpad (char *filename);
 
-int testsplit(char *filename);
+int testsplit (char *filename);
 
 #if     (__UNIX__ || __BEOS__)
-unsigned char inportb(unsigned short port);
-unsigned short inportw(unsigned short port);
-void outportb(unsigned short port, unsigned char byte);
-void outportw(unsigned short port, unsigned short word);
+unsigned char inportb (unsigned short port);
+unsigned short inportw (unsigned short port);
+void outportb (unsigned short port, unsigned char byte);
+void outportw (unsigned short port, unsigned short word);
 #endif
 
-unsigned int parport_probe(unsigned int parport);
-int parport_gauge(time_t init_time, long pos, long size);
-int raw2iso(char *filename);
-//int trackmode(long imagesize);
+unsigned int parport_probe (unsigned int parport);
+int parport_gauge (time_t init_time, long pos, long size);
+int raw2iso (char *filename);
+int trackmode (long imagesize);
 
-#endif                                          // #ifndef UCON64_MISC_H
+#endif // #ifndef UCON64_MISC_H

@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef BSL_H
 #define BSL_H
-int bsl(char *name,char *option2);
-int bsl_usage(int argc,char *argv[]);
+int bsl (char *name, char *option2);
+int bsl_usage (int argc, char *argv[]);
 
 #endif /* BSL_H */

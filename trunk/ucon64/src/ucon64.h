@@ -31,7 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "ucon64_db.h"
 
-//#define ucon64_KNOWN		-1
+//#define ucon64_KNOWN          -1
 #define ucon64_UNKNOWN		0
 #define ucon64_GB		1
 #define ucon64_GENESIS		2
@@ -65,17 +65,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_VERSION "1.9.8"
 
 #ifdef __UNIX__
-#ifdef __SOLARIS__				// Hmmm, Solaris *is* a UNIX
-  #define ucon64_TITLE "uCON64 1.9.8 Solaris 1999-2002 by (various)"
+#ifdef __SOLARIS__		// Hmmm, Solaris *is* a UNIX
+#define ucon64_TITLE "uCON64 1.9.8 Solaris 1999-2002 by (various)"
 #else
-  #define ucon64_TITLE "uCON64 1.9.8 UNIX 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 1.9.8 UNIX 1999-2002 by (various)"
 #endif
 #elif __DOS__
-  #define ucon64_TITLE "uCON64 1.9.8 DOS 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 1.9.8 DOS 1999-2002 by (various)"
 #elif __BEOS__
-  #define ucon64_TITLE "uCON64 1.9.8 BeOS 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 1.9.8 BeOS 1999-2002 by (various)"
 #else
-  #define ucon64_TITLE "uCON64 1.9.8 1999-2002 by (various)"
+#define ucon64_TITLE "uCON64 1.9.8 1999-2002 by (various)"
 #endif
 
 #define MBIT	131072
@@ -89,18 +89,18 @@ struct ucon64_
   char *argv[128];
 
   char rom[4096];		//$ROM (cmdline) with path
-  char file[4096];	//$FILE (cmdline) with path
+  char file[4096];		//$FILE (cmdline) with path
   unsigned int parport;
-  int parport_mode;	//parallel port mode: ECP, EPP, SPP, other
+  int parport_mode;		//parallel port mode: ECP, EPP, SPP, other
 
-  long console;	//integer for the detected console system
+  long console;			//integer for the detected console system
 //  long console_forced;
 //  int show_nfo;
 
   char title[4096];
   char copier[4096];
-  unsigned long bytes;	//size in bytes
-  float mbit;		//size in mbit
+  unsigned long bytes;		//size in bytes
+  float mbit;			//size in mbit
   int interleaved;
   unsigned long padded;
   unsigned long intro;
@@ -109,34 +109,34 @@ struct ucon64_
   unsigned long current_crc32;	//current crc32 value of ROM
   unsigned long db_crc32;	//crc32 value of ROM in internal database
 
-  int has_internal_crc;	//ROM has internal CRC (Super Nintendo, Mega Drive, Gameboy)
-    unsigned long current_internal_crc;	//calculated CRC
-    unsigned long internal_crc;	//internal CRC
-    long internal_crc_start;	//start of internal CRC in ROM header
-    int internal_crc_len;	//length (in bytes) of internal CRC in ROM header
+  int has_internal_crc;		//ROM has internal CRC (Super Nintendo, Mega Drive, Gameboy)
+  unsigned long current_internal_crc;	//calculated CRC
+  unsigned long internal_crc;	//internal CRC
+  long internal_crc_start;	//start of internal CRC in ROM header
+  int internal_crc_len;		//length (in bytes) of internal CRC in ROM header
   char internal_crc2[4096];	//2nd or inverse internal CRC
-    long internal_crc2_start;	//start of 2nd/inverse internal CRC
-    int internal_crc2_len;	//length (in bytes) of 2nd/inverse internal CRC
+  long internal_crc2_start;	//start of 2nd/inverse internal CRC
+  int internal_crc2_len;	//length (in bytes) of 2nd/inverse internal CRC
 
   unsigned char buheader[512];	//(possible) header of backup unit
-  long buheader_start;	//start of backup unit header (mostly 0)
-  long buheader_len;	//length of backup unit header (==0)?no bu header
+  long buheader_start;		//start of backup unit header (mostly 0)
+  long buheader_len;		//length of backup unit header (==0)?no bu header
 
   unsigned char header[MAXBUFSIZE];	//(possible) internal ROM header
-  long header_start;	//start of internal ROM header
-  long header_len;	//length of internal ROM header (==0)?no header
+  long header_start;		//start of internal ROM header
+  long header_len;		//length of internal ROM header (==0)?no header
 
-  char name[4096];	//ROM name
-  long name_start;	//start of internal ROM name (==0)?name comes from database
+  char name[4096];		//ROM name
+  long name_start;		//start of internal ROM name (==0)?name comes from database
   long name_len;		//length of ROM name
 
   char manufacturer[4096];	//manufacturer name of the ROM
   long manufacturer_start;	//start of internal manufacturer name (==0)?manufacturer comes from database
   long manufacturer_len;	//length of manufacturer name
 
-  char country[4096];	//country name of the ROM
-  long country_start;	//start of internal country name (==0)? country comes from database
-  long country_len;	//length of country name
+  char country[4096];		//country name of the ROM
+  long country_start;		//start of internal country name (==0)? country comes from database
+  long country_len;		//length of country name
 
   char misc[MAXBUFSIZE];	//some miscellaneous information about the ROM in one single string
 };
@@ -146,11 +146,11 @@ struct ucon64_
 #define ucon64_ROM	1
 #define ucon64_FILE	2
 
-int ucon64_usage(int argc,char *argv[]);
-int ucon64_init(struct ucon64_ *rom);
-int ucon64_main(int argc,char *argv[]);
-int ucon64_nfo(struct ucon64_ *rom);
+int ucon64_usage (int argc, char *argv[]);
+int ucon64_init (struct ucon64_ *rom);
+int ucon64_main (int argc, char *argv[]);
+int ucon64_nfo (struct ucon64_ *rom);
 
-int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom);
+int ucon64_flush (int argc, char *argv[], struct ucon64_ *rom);
 
-#endif                                          // #ifndef UCON64_H
+#endif // #ifndef UCON64_H

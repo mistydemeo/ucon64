@@ -355,8 +355,8 @@ doctor64_usage (int argc, char *argv[])
     printf ("%s\n", doctor64_TITLE);
 
   printf
-    ("  -xv64		send/receive ROM to/from Doctor V64; $FILE=PORT\n"
-     "		receives automatically when $ROM does not exist\n");
+    ("  -xv64         send/receive ROM to/from Doctor V64; $FILE=PORT\n"
+     "                receives automatically when $ROM does not exist\n");
 
 //TODO more info like technical info about cabeling and stuff for the copier
 

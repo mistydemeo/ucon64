@@ -120,8 +120,7 @@ bsl (char *name, char *option2)
 int
 bsl_usage (int argc, char *argv[])
 {
-  printf ("  -b		apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE\n\
-");
+  printf ("  -b            apply Baseline/BSL patch (<=x.x); $FILE=PATCHFILE\n");
   return 0;
 }
 

@@ -186,7 +186,7 @@ h2g_system (char *query)
 /*
   options
 */
-  sprintf (buf2, "ucon64 %s %s \"%s\" \"%s\"", 
+  sprintf (buf2, "ucon64 2>&1 %s %s \"%s\" \"%s\"", 
   (ucon64gui.console != NULL) ? ucon64gui.console : "",
   value,
            (ucon64gui.rom != NULL) ? ucon64gui.rom : "",

@@ -116,15 +116,15 @@ swc_write_rom (char *filename, unsigned int parport, int sram_size)
   send_block (0x400, buffer, HEADERSIZE);	// send header
   bytessend = HEADERSIZE;
 
-  emu_mode_select = buffer[2];	// this byte is needed later
-  if (buffer[3] & 0x80)		// Pro Fighter (FIG) HiROM dump
-    emu_mode_select |= 0x30;	// set bit 5&4 (SRAM & DRAM mem map mode 21)
+  emu_mode_select = buffer[2];                  // this byte is needed later
+  if (buffer[3] & 0x80)                         // Pro Fighter (FIG) HiROM dump
+    emu_mode_select |= 0x30;                    // set bit 5&4 (SRAM & DRAM mem map mode 21)
   if (sram_size == 0)
     {
-      if (emu_mode_select & 0x10)	// bit 4 == 1 => DRAM mode 21 (HiROM)
-	emu_mode_select &= ~0x20;	// disable SRAM by setting SRAM mem map mode 20
-      else			// bit 4 == 0 => DRAM mode 20 (LoROM)
-	emu_mode_select |= 0x20;	// disable SRAM by setting SRAM mem map mode 21
+      if (emu_mode_select & 0x10)               // bit 4 == 1 => DRAM mode 21 (HiROM)
+	emu_mode_select &= ~0x20;               // disable SRAM by setting SRAM mem map mode 20
+      else                                      // bit 4 == 0 => DRAM mode 20 (LoROM)
+	emu_mode_select |= 0x20;                // disable SRAM by setting SRAM mem map mode 21
     }
 
   printf ("Press q to abort\n\n");	// print here, NOT before first SWC I/O,

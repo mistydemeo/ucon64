@@ -2577,7 +2577,7 @@ snes_init (st_rominfo_t *rominfo)
 
   calc_checksums = !UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0;
 
-  // We want the CRC32 of the "raw" data. Only really necessary for interleaved
+  // we want the CRC32 of the "raw" data
   if (calc_checksums)
     ucon64.fcrc32 = crc32 (0, rom_buffer, size);
   // bs_dump has to be set before calling snes_chksum(), but snes_check_bs()
@@ -2627,6 +2627,7 @@ snes_init (st_rominfo_t *rominfo)
           unsigned short int *bs_date_ptr = (unsigned short int *)
             (rom_buffer + snes_header_base + SNES_HEADER_START + snes_hirom + 38);
           unsigned short int bs_date = *bs_date_ptr;
+          // we follow the "uCONSRT standard" for calculating the CRC32 of BS dumps
 #ifdef  WORDS_BIGENDIAN
           *bs_date_ptr = 0x4200;
 #else

@@ -19,6 +19,27 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+/*
+fal.h - Flash Linker Advance support for uCON64
+
+written by 2001        Jeff Frohwein
+           2001        NoisyB (noisyb@gmx.net)
+           2001 - 2002 dbjh
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
 /********************************************************/
 /* Flash Linker Advance                                 */
 /*   by Jeff Frohwein, 2001-Jun-28                      */
@@ -914,11 +935,13 @@ ProgramNonTurboIntelFlash (FILE * fp)
   // Get file size
   FileSize = GetFileSize (fp);
 
-  printf ("Erasing Visoly non-turbo flash cart...\n");
+  printf ("Erasing Visoly non-turbo flash cart...\n\n");
 
   // Erase as many 128k blocks as are required
   Ready = EraseNonTurboFABlocks (0, ((FileSize - 1) >> 17) + 1);
 
+  printf("\r                                        "
+         "                                      \r"); // remove "erase gauge"
   if (Ready)
     {
       printf ("Programming Visoly non-turbo flash cart...\n\n");
@@ -1003,6 +1026,9 @@ ProgramNonTurboIntelFlash (FILE * fp)
 	    }
 	}
 
+      printf("\r                                        "
+             "                                      \r"); // remove last gauge
+      parport_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
@@ -1037,11 +1063,13 @@ ProgramTurboIntelFlash (FILE * fp)
   // Get file size
   FileSize = GetFileSize (fp);
 
-  printf ("Erasing Visoly turbo flash cart...\n");
+  printf ("Erasing Visoly turbo flash cart...\n\n");
 
   // Erase as many 256k blocks as are required
   Ready = EraseTurboFABlocks (0, ((FileSize - 1) >> 18) + 1);
 
+  printf("\r                                        "
+         "                                      \r"); // remove "erase gauge"
   if (Ready)
     {
       printf ("Programming Visoly turbo flash cart...\n\n");
@@ -1119,6 +1147,10 @@ ProgramTurboIntelFlash (FILE * fp)
 	  else
 	    break;
 	}
+
+      printf("\r                                        "
+             "                                      \r"); // remove last gauge
+      parport_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
       WriteFlash (1, INTEL28F_READARRAY);
@@ -1154,11 +1186,13 @@ ProgramSharpFlash (FILE * fp)
   // Get file size
   FileSize = GetFileSize (fp);
 
-  printf ("Erasing flash cart...\n");
+  printf ("Erasing flash cart...\n\n");
 
   // Erase as many 64k blocks as are required
   Ready = EraseNintendoFlashBlocks (0, ((FileSize - 1) >> 16) + 1);
 
+  printf("\r                                        "
+         "                                      \r"); // remove "erase gauge"
   if (Ready)
     {
       printf ("Programming Nintendo flash cart...\n\n");
@@ -1186,6 +1220,9 @@ ProgramSharpFlash (FILE * fp)
 	    parport_gauge (starttime, addr << 1, FileSize);
 	}
 
+      printf("\r                                        "
+             "                                      \r"); // remove last gauge
+      parport_gauge (starttime, addr << 1, FileSize);   // make gauge reach 100% when size % 32k != 0
       WriteFlash (0, INTEL28F_READARRAY);
       outpb (SPPCtrlPort, 0);
 
@@ -1660,7 +1697,7 @@ fal_read_sram (char *filename, unsigned int parport, int bank)
   if (bank == -1)
     {
       fal_argv[4] = "1";
-      fal_argv[5] = "4";	// 256 kB
+      fal_argv[5] = "4";	                // 256 kB
     }
   else
     {

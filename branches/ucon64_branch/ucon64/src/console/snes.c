@@ -2660,7 +2660,7 @@ snes_init (st_rominfo_t *rominfo)
 
   if (!bs_dump)
     {
-      snes_sramsize = snes_header.sram_size ? 1 << snes_header.sram_size + 10 : 0;
+      snes_sramsize = snes_header.sram_size ? (1 << snes_header.sram_size + 10) : 0;
       if (!snes_sramsize)
         sprintf (buf, "Save RAM: No\n");
       else

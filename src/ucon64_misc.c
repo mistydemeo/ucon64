@@ -478,6 +478,8 @@ fparport_gauge (FILE *output, time_t init_time, long pos, long size)
   if (output != stdout)
     {
       fprintf (output, "%u\n", percentage);
+      printf ("%u\n", percentage); //added until seeucon changes
+      fflush (stdout);  //added until seeucon changes
       fflush (output);
     }
   else

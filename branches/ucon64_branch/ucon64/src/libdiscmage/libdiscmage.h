@@ -90,6 +90,7 @@ typedef struct
   uint32_t track_len; // in sectors
   uint32_t total_len; // in sectors; pregap_len + track_len == total_len 
                            // (less if the track is truncated)
+  int min, sec, fps;
 
 // start of the iso header inside the track (inside the image)
   int32_t iso_header_start; // if -1 then no iso header

@@ -479,11 +479,12 @@ ucon64_switches (int c, const char *optarg)
 static int
 ucon64_rename (int mode)
 {
-  char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1],
-       *suffix = (char *) get_suffix (ucon64.rom), *p = NULL;
+  char buf[FILENAME_MAX + 1], buf2[FILENAME_MAX + 1], suffix[80], *p = NULL;
   int good_name;
 
   buf[0] = 0;
+  strncpy (suffix, get_suffix (ucon64.rom), 80);
+  suffix[80 - 1] = 0;                           // in case suffix is >= 80 chars
 
   switch (mode)
     {
@@ -547,9 +548,21 @@ ucon64_rename (int mode)
     //  command)
     good_name = 1;
   else
-    good_name = 0;
+    {
+      // Another test if the file already has a correct name. This is necessary
+      //  for files without a "normal" suffix (e.g. ".smc"). Take for example a
+      //  name like "Final Fantasy III (V1.1) (U) [!]".
+      strcat (buf, suffix);
+      if (!strcmp (buf, buf2))
+        {
+          good_name = 1;
+          suffix[0] = 0;                        // discard "suffix" (part after period)
+        }
+      else
+        good_name = 0;
+    }
 
-  // DON'T use set_suffix()! Consider file names like
+  // DON'T use set_suffix()! Consider file names (in the DAT file) like
   //  "Final Fantasy III (V1.1) (U) [!]". The suffix is ".1) (U) [!]"...
   strcat (buf2, suffix);
 
@@ -557,6 +570,13 @@ ucon64_rename (int mode)
     buf2[12] = 0;
 
   ucon64_output_fname (buf2, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
+
+  if (one_file (ucon64.rom, buf2))
+    {
+      printf ("Skipping \"%s\"\n", basename (ucon64.rom));
+      return 0;
+    }
+
   if (!good_name)
     /*
       Note that the previous statement causes whatever file is present in the
@@ -1372,24 +1392,24 @@ ucon64_options (int c, const char *optarg)
     case UCON64_POKE:
       ucon64_file_handler (dest_name, src_name, 0);
       q_fcpy (src_name, 0, ucon64.file_size, dest_name, "wb");
-      {
-        sscanf (optarg, "%x:%x", &x, &value);
-        if (x >= ucon64.file_size)
-          {
-            fprintf (stderr, "ERROR: Offset 0x%x is too large\n", x);
-            remove (dest_name);
-            break;
-          }
-        printf ("\n");
-        buf[0] = q_fgetc (dest_name, x);
-        mem_hexdump (buf, 1, x);
 
-        q_fputc (dest_name, x, value, "r+b");
+      sscanf (optarg, "%x:%x", &x, &value);
+      if (x >= ucon64.file_size)
+        {
+          fprintf (stderr, "ERROR: Offset 0x%x is too large\n", x);
+          remove (dest_name);
+          break;
+        }
+      printf ("\n");
+      buf[0] = q_fgetc (dest_name, x);
+      mem_hexdump (buf, 1, x);
 
-        buf[0] = value;
-        mem_hexdump (buf, 1, x);
-        printf ("\n");
-      }
+      q_fputc (dest_name, x, value, "r+b");
+
+      buf[0] = value;
+      mem_hexdump (buf, 1, x);
+      printf ("\n");
+
       printf (ucon64_msg[WROTE], dest_name);
       remove_temp_file ();
       break;

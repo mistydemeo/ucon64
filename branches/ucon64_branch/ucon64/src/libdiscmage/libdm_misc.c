@@ -60,13 +60,6 @@ static const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
 static const char vdt_magic[] = {(const char) 0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
 
 
-typedef struct
-{
-  int mode;
-  int seek_header; // sync, head, sub
-  int sector_size; // data
-  int seek_ecc;    // EDC, zero, ECC, spare
-} st_track_probe_t;
 
 
 /*
@@ -141,10 +134,10 @@ Easy CD Creator image file (*.cif)|*.cif
 
 const st_track_probe_t track_probe[] = 
   {
-    {1, 0,  2048, 0},   // MODE1/2048, MODE1
-    {1, 16, 2352, 288}, // MODE1/2352, MODE1_RAW
-    {2, 8,  2336, 280}, // MODE2/2336, MODE2
-    {2, 24, 2352, 280}, // MODE2/2352, MODE2_RAW
+    {1, 0,  2048, 0,   "MODE1/2048", "MODE1"}, // MODE2_FORM1
+    {1, 16, 2352, 288, "MODE1/2352", "MODE1_RAW"},
+    {2, 8,  2336, 280, "MODE2/2336", "MODE2"}, // MODE2_FORM_MIX
+    {2, 24, 2352, 280, "MODE2/2352", "MODE2_RAW"},
 #if 0
     {2, 24, 2324, 4},   // MODE2/2328, MODE2_FORM2
     {2, 0,  2340, 0},
@@ -155,43 +148,23 @@ const st_track_probe_t track_probe[] =
     {2, 0,  2336, 280},  // MODE2/2336, Macintosh
     {2, 16, 2352, 280}, // MODE2/2352, Macintosh
     {2, 0,  2056, 0},  // MODE2/2056, Macintosh
+    {0, 0,    NULL,         "MODE0"},
+    {0, 0,    NULL,         "MODE2_FORM2"},
 #endif
-    {0, 0,  2352, 0},  // AUDIO/2352, AUDIO
-    {0, 0, 0, 0}
+    {0, 0,  2352, 0, "AUDIO", "AUDIO"},
+    {0, 0, 0, 0, NULL, NULL}
   };
 
 
 const char *
 dm_get_track_desc (int mode, int sector_size, int cue)
-// if cue == TRUE return track_desc[x].cue
+// if cue == TRUE return track_probe[x].cue
 {
-  typedef struct
-    {
-      int mode;
-      int sector_size;
-//      int multiple_sessions;
-      const char *cue;
-      const char *toc;
-    } st_track_desc_t;
-
   int x = 0;
-  static const st_track_desc_t track_desc[] = {
-      {1, 2048, "MODE1/2048", "MODE1"}, // MODE2_FORM1
-      {1, 2352, "MODE1/2352", "MODE1_RAW"},
-      {2, 2336, "MODE2/2336", "MODE2"}, // MODE2_FORM_MIX
-      {2, 2352, "MODE2/2352", "MODE2_RAW"},
-      {0, 2352, "AUDIO",      "AUDIO"},
-#if 0
-      {0, 0,    NULL,         "MODE0"},
-      {0, 0,    NULL,         "MODE2_FORM2"},
-#endif
-      {0, 0,    NULL,         NULL}
-    };
-
-  for (x = 0; track_desc[x].sector_size; x++)
-    if (track_desc[x].mode == mode &&
-        track_desc[x].sector_size == sector_size)
-      return (cue ? track_desc[x].cue : track_desc[x].toc);
+  for (x = 0; track_probe[x].sector_size; x++)
+    if (track_probe[x].mode == mode &&
+        track_probe[x].sector_size == sector_size)
+      return (cue ? track_probe[x].cue : track_probe[x].toc);
 
   return NULL;
 }

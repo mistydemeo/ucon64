@@ -34,6 +34,16 @@ enum
 };
 extern const char *dm_msg[];
 
+typedef struct
+{
+  int mode;
+  int seek_header; // sync, head, sub
+  int sector_size; // data
+  int seek_ecc;    // EDC, zero, ECC, spare
+  const char *cue;
+  const char *toc;
+} st_track_probe_t;
+extern const st_track_probe_t track_probe[];
 
 /*
   dm_track_init()     fillup current dm_track_t

@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP DEFINE_GUI_MAKE DEFINE_DLOPEN_MAKE DEFINE_ZLIB_MAKE LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP DEFINE_GUI_MAKE DEFINE_DISCMAGE_MAKE DEFINE_DLOPEN_MAKE DEFINE_ZLIB_MAKE LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -846,6 +846,7 @@ Optional Features:
   --enable-parallel       enable support for parallel port backup units
                           (default: yes)
   --enable-gui            enable Gui (default: no)
+  --enable-discmage       enable libdiscmage (default: yes)
   --enable-dload          enable dynamic loading of add-on libraries (default:
                           yes)
   --enable-ansi-color     enable usage of color (default: yes)
@@ -2314,6 +2315,28 @@ _ACEOF
 fi
 echo "$as_me:$LINENO: result: $enable_gui" >&5
 echo "${ECHO_T}$enable_gui" >&6
+
+
+
+echo "$as_me:$LINENO: checking whether libdiscmage is enabled" >&5
+echo $ECHO_N "checking whether libdiscmage is enabled... $ECHO_C" >&6
+# Check whether --enable-discmage or --disable-discmage was given.
+if test "${enable_discmage+set}" = set; then
+  enableval="$enable_discmage"
+  enable_discmage=$enableval
+else
+  enable_discmage=yes
+fi;
+if test $enable_discmage = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define DISCMAGE 1
+_ACEOF
+
+  DEFINE_DISCMAGE_MAKE="DISCMAGE=1"
+fi
+echo "$as_me:$LINENO: result: $enable_discmage" >&5
+echo "${ECHO_T}$enable_discmage" >&6
 
 
 
@@ -4603,6 +4626,7 @@ s,@OBJEXT@,$OBJEXT,;t t
 s,@CPP@,$CPP,;t t
 s,@EGREP@,$EGREP,;t t
 s,@DEFINE_GUI_MAKE@,$DEFINE_GUI_MAKE,;t t
+s,@DEFINE_DISCMAGE_MAKE@,$DEFINE_DISCMAGE_MAKE,;t t
 s,@DEFINE_DLOPEN_MAKE@,$DEFINE_DLOPEN_MAKE,;t t
 s,@DEFINE_ZLIB_MAKE@,$DEFINE_ZLIB_MAKE,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t

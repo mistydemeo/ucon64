@@ -1,7 +1,7 @@
 A Super Wild Card compatibility list
-Version: 1.16
+Version: 1.17
 Author: dbjh "of uCON64" with great help from CL "of NSRT" and The Dumper
-Date: 17 april 2003
+Date: 30 april 2003
 Hardware: Super Wild Card 2.8cc 32 Mbit PAL
 Software: uCON64 1.9.8beta8
 
@@ -81,6 +81,7 @@ Code    Game
 0 -     BS Dr. Mario (J)
 0 -     BS Dynami Tracer! (J)
 0 -     BS F-Zero 2 (J)
+0 -     BS Koi ha Balance - Battle of Lovers (J)
 9 -     BS Legend of Zelda 1 - Kodai no Sekiban (J)
 9 -     BS Legend of Zelda 3 - Kodai no Sekiban (J)
 1 -     BS Legend of Zelda Remix, The (J)
@@ -121,7 +122,7 @@ Code    Game
 0 -     Der Langrisser (V1.1) (J)
 0 -     Desert Strike - Return to the Gulf (U)
 1 -     Diddy's Kong Quest (E)
-1 + 2 + 4* - Diddy's Kong Quest (V1.1) (U) <= can't get past the first level
+1 + 2 + 4 - Diddy's Kong Quest (V1.1) (U) <= can't get past the first level
 0 -     Digital Devil Story (V1.0) (J)
 9 -     Dirt Trax FX (E)
 6 -     Dixie Kong's Double Trouble (E) <= works on an SWC DX2 64 Mbit PAL
@@ -140,9 +141,9 @@ Code    Game
 0 -     Dragon's Lair (Beta)
 0 -     Dragon's Lair (E)
 0 -     Dragon - The Bruce Lee Story (E) [a1]
-2* -    Dragon - The Bruce Lee Story (U)
-2* -    Dr. Mario (J) (NP)
-2* -    Dual Orb 2 (J)
+2 -     Dragon - The Bruce Lee Story (U)
+2 -     Dr. Mario (J) (NP)
+2 -     Dual Orb 2 (J)
 1 + 2 - Earthbound (U)
 0 -     Earthworm Jim 2 (U)
 0 -     Earthworm Jim (U)
@@ -204,7 +205,7 @@ Code    Game
 0 -     Magical Quest Starring Mickey Mouse, The (Beta)
 0 -     Magical Quest Starring Mickey Mouse, The (E)
 0 -     Mario and Wario (J) <= I don't have a SNES mouse...
-1 + 2*- Mario no Super Picross (J)
+1 + 2 - Mario no Super Picross (J)
 0 -     Mario Paint (E) <= idem
 2 -     Mega Man 7 (U)
 2 -     Mega Man Soccer (U)
@@ -362,7 +363,7 @@ Code    Game
 0 -     Wario's Woods (U)
 0 -     Williams Arcade's Greatest Hits (E)
 0 -     Wolfenstein 3D (E)
-2* -    Wolfenstein 3D (U)
+2 -     Wolfenstein 3D (U)
 0 -     Wolverine - Adamantium Rage (U)
 0 -     Worms (E)
 0 -     WWF Super Wrestlemania (E)

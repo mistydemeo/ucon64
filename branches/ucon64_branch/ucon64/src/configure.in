@@ -76,6 +76,20 @@ AC_MSG_RESULT($enable_gui)
 AC_SUBST(DEFINE_GUI_MAKE)
 
 
+AC_MSG_CHECKING(whether libdiscmage is enabled)
+AC_ARG_ENABLE(discmage,
+              AC_HELP_STRING([--enable-discmage],
+                             [enable libdiscmage (default: yes)]),
+              enable_discmage=$enableval,
+              enable_discmage=yes)
+if test $enable_discmage = yes; then
+  AC_DEFINE(DISCMAGE,1,[enable libdiscmage (default: yes)])
+  DEFINE_DISCMAGE_MAKE="DISCMAGE=1"
+fi
+AC_MSG_RESULT($enable_discmage)
+AC_SUBST(DEFINE_DISCMAGE_MAKE)
+
+
 AC_MSG_CHECKING(whether add-on libraries are dynamically loaded)
 AC_ARG_ENABLE(dload,
               AC_HELP_STRING([--enable-dload],

@@ -934,8 +934,8 @@ ucon64_output_fname (char *requested_fname, int flags)
   if (!(flags & OF_FORCE_SUFFIX) &&
       !(stricmp (suffix, ".zip") && stricmp (suffix, ".gz")))
     strcpy (suffix, ".tmp");
-  set_suffix (requested_fname, suffix);
-
+  set_suffix_i (requested_fname, suffix);       // use set_suffix_i(), because
+                                                //  the suffix must keep its case
   return requested_fname;
 }
 
@@ -1506,20 +1506,23 @@ int
 ucon64_testsplit (const char *filename)
 // test if ROM is split into parts based on the name of files
 {
-  int x, parts = 0;
+  int x, parts = 0, l;
   char buf[FILENAME_MAX], *p = NULL;
-
-  if (!strchr (filename, '.'))
-    return 0;
 
   for (x = -1; x < 2; x += 2)
     {
       parts = 0;
       strcpy (buf, filename);
-      p = strrchr (buf, '.') + x;               // if x == -1 change char before '.'
-                                                // else if x == 1 change char behind '.'
-      if (buf > p ||                            // filename starts with a period
-          p - buf > ((int) strlen (buf)) - 1)   // filename ends with a period
+      p = strrchr (buf, '.');
+      l = strlen (buf);
+
+      if (p == NULL)                            // filename doesn't contain a period
+        p = buf + l - 1;
+      else
+        p += x;                                 // if x == -1 change char before '.'
+                                                //  else if x == 1 change char after '.'
+      if (buf > p ||                            // filename starts with '.' (x == -1)
+          p - buf > l - 1)                      // filename ends with '.' (x == 1)
         continue;
 
       while (!access (buf, F_OK))

@@ -6,6 +6,9 @@
 /* enable debug output (default: no) */
 #undef DEBUG
 
+/* enable libdiscmage (default: yes) */
+#undef DISCMAGE
+
 /* enable dynamic loading of add-on libraries (default: yes) */
 #undef DLOPEN
 

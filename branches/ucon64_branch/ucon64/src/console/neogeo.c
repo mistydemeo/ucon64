@@ -54,7 +54,7 @@ const st_usage_t neogeo_usage[] =
     {"sam", "SAMFILE", "convert SAM/M.A.M.E. sound to WAV"},
 //    "TODO: " OPTION_LONG_S "chkm    check/fix Multiple Arcade Machine Emulator/M.A.M.E. ROMs;\n"
 //    "                  " OPTION_LONG_S "rom=DIRECTORY"
-//    "INFO: actually this option does the same as Goodxxxx, Romcenter, etc.\n"
+//    "INFO: actually this option does the same as GoodXXXX, RomCenter, etc.\n"
 //    "      Therefore you must have the DAT files for Arcade installed\n"
     {NULL, NULL, NULL}
   };

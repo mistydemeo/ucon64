@@ -41,6 +41,8 @@ struct flc_
   int files;
   int sort;
   int fr;
+  int html;
+  
   char path[4096];
 };
 

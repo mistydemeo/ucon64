@@ -19,6 +19,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */ 
 
+/*
+  I dedicate this to dbjh who told me to use 2 spaces instead of tabs!
+*/
 #include "flc.h"
 
 #include "extract.h"
@@ -33,10 +36,11 @@ struct file_ *file,*file0,file_ns;
 struct dirent *ep;
 struct stat puffer;
 long x = 0;
+int single_file=0;
 DIR *dp;
 
 if (
-    argcmp(argc, argv, "-h") ||
+//    argcmp(argc, argv, "-h") ||
     argcmp(argc, argv, "-help") ||
     argcmp(argc, argv, "-?"))
   {
@@ -62,24 +66,34 @@ flc.argc=argc;
 for( x = 0 ; x < argc ; x++ )flc.argv[x]=argv[x];
 
 flc.kb = (argcmp(argc,argv,"-k")) ? 1 : 0;
+flc.html = (argcmp(argc,argv,"-h")) ? 1 : 0 ;
 flc.files = 0;
 
 strcpy(flc.path,getarg(argc,argv,flc_FILE));
-if(!flc.path[0])
-  getcwd(flc.path,(size_t)sizeof(flc.path));
-if(flc.path[strlen(flc.path)-1]==FILE_SEPARATOR)
-  flc.path[strlen(flc.path)-1]=0;
 
-if(!(dp=opendir(flc.path)))
+if(stat(flc.path,&puffer)!=-1 &&
+   S_ISREG(puffer.st_mode)==TRUE)
 {
-  flc_usage(argc,argv);
-  return(-1);
+  single_file=1;
+  flc.sort=0;
+}
+else
+{
+  if(!flc.path[0])
+    getcwd(flc.path,(size_t)sizeof(flc.path));
+  if(flc.path[strlen(flc.path)-1]==FILE_SEPARATOR)
+    flc.path[strlen(flc.path)-1]=0;
+
+  if(!(dp=opendir(flc.path)))
+  {
+    flc_usage(argc,argv);
+    return(-1);
+  }
 }
 
-if(argcmp(argc,argv,"-h"))
-  printf("<html><head><title></title></head><body><pre><tt>");
+if(flc.html)  printf("<html><head><title></title></head><body><pre><tt>");
 
-if(flc.sort)
+if(flc.sort && !single_file)
 {
 /*
     find out how many regular files are in the current dir
@@ -103,22 +117,30 @@ if(flc.sort)
 }
 else file=&file_ns;
 
+
 flc.files=0;
-while((ep=readdir(dp))!=NULL)
+while( (!single_file) ?
+       ((ep=readdir(dp))!=NULL) : 1
+)
 {
-  sprintf(buf,"%s/%s",flc.path,ep->d_name);
+  if(!single_file)sprintf(buf,"%s/%s",flc.path,ep->d_name);
+  else strcpy(buf,flc.path);
+  
   if(stat(buf,&puffer)==-1)continue;
   if(S_ISREG(puffer.st_mode)!=TRUE)continue;
 
   file->date=puffer.st_mtime;
   file->size=puffer.st_size;  
-  strcpy(file->name,ep->d_name);  
+  file->checked='N';
+  strcpy(file->name,(!single_file) ? ep->d_name : flc.path);  
+  if(single_file)flc.path[0]=0;
 
   extract(&flc,file);
 
   if(!flc.sort)
   {
     output(&flc,file);
+    if(single_file)break;
     continue;
   }
 
@@ -126,7 +148,7 @@ while((ep=readdir(dp))!=NULL)
   file++;
   flc.files++;
 }
-(void)closedir(dp);
+if(!single_file)(void)closedir(dp);
 file=file0;
 
 if(flc.sort)
@@ -140,7 +162,7 @@ for( x = 0 ; x < flc.files ; x++ )
 
 
 printf(
-  (argcmp(argc,argv,"-h")) ?
+  (flc.html) ?
   "</pre></tt></body></html>\n" :
   "\n"
 );
@@ -153,18 +175,16 @@ int flc_usage(int argc, char *argv[])
 printf(
   "\n%s\n"
   "This may be freely redistributed under the terms of the GNU Public License\n\n"
-  "USAGE: %s [OPTION[MODIFIERS]] DIR\n\n"
+  "USAGE: %s [OPTION]... [FILE]...\n\n"
   "  -t		also check/test every archive/file in DIRECTORY\n"
   "		flags: N=not checked (default), P=passed, F=failed\n"
   "  -h		output as HTML document with links to the files\n"
-  "  -ap		append at NEW_FILELISTING\n"
-  "  -d		sort chronological\n"
-  "  -a		sort alphabetical\n"
-  "  -b		sort by byte size\n"
-  "  -fr		sort reverse\n"
+//  "  -d		sort chronological\n"
+//  "  -a		sort alphabetical\n"
+//  "  -b		sort by byte size\n"
+//  "  -fr		sort reverse\n"
   "  -k		show sizes in kilobytes\n"
   "\n"
-  "Amiga version: noC-FLC Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
   "Report problems to noisyb@gmx.net\n\n"
   ,flc_TITLE
   ,getarg(argc,argv,flc_NAME)

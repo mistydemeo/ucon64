@@ -382,16 +382,16 @@ int addppfid(int argc, char *argv[])
 	char buf[4095];
 
         printf("Adding file_id.diz .. ");
-	fsize=quickftell(ucon64_rom());
+	fsize=quickftell(getarg(argc,argv,ucon64_ROM));
         if(fsize>3072) fsize=3072;	/* File id only up to 3072 bytes! */
-        quickfread(fileidbuf, 0, fsize ,ucon64_file());
+        quickfread(fileidbuf, 0, fsize ,getarg(argc,argv,ucon64_FILE));
 
 	sprintf(buf,"@BEGIN_FILE_ID.DIZ%s@END_FILE_ID.DIZ",fileidbuf);
 
-        quickfwrite(buf,quickftell(ucon64_rom()), strlen(buf), ucon64_rom(),"r+b");
+        quickfwrite(buf,quickftell(getarg(argc,argv,ucon64_ROM)), strlen(buf), getarg(argc,argv,ucon64_ROM),"r+b");
 
 
-        quickfwrite(&fsize, quickftell(ucon64_rom()), 4, ucon64_rom(),"r+b");
+        quickfwrite(&fsize, quickftell(getarg(argc,argv,ucon64_ROM)), 4, getarg(argc,argv,ucon64_ROM),"r+b");
         printf("done!\n");
 
 	return(0);

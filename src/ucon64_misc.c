@@ -196,27 +196,15 @@ long filetestpad(	char *filename
 )
 {
 	long size;
-	register long x;
+	long x;
 	int y;
 	char *buf;
-	FILE *fh;
 
 	size=quickftell(filename);
 
-	if(!(fh=fopen(filename,"rb")))return(-1);
+	if( !( buf=(char *)malloc( (size+2)*sizeof(char) ) ) )return(-1);
 
-	if( !( buf=(char *)malloc( (size+2)*sizeof(char) ) ) )
-	{
-		fclose(fh);
-       		return(-1);
-	}
-	if( !fread(buf,size,1,fh) )
-	{
-		fclose(fh);
-		free(buf);
-		return(-1);
-	}
-	fclose(fh);
+	quickfread(buf,0,size,filename);
 
 	y=buf[size-1]&0xff;
 	x=size-2;
@@ -224,8 +212,10 @@ long filetestpad(	char *filename
 //	if(y!=(buf[x+1]&0xff))x++;
 
 	free(buf);
-	if( ( ( ( size )-x )-1 )==1)return(0);
-	return( ( ( size )-x )-1 );
+
+	return(
+		( ( ( ( size )-x )-1 )==1) ? 0 : ( ( ( size )-x )-1 )
+	);
 }
 
 #ifdef BACKUP

@@ -1,5 +1,5 @@
 /*
-uCON64 1.9.7 - a tool to modify video game ROMs and to transfer ROMs to the
+uCON64 - a tool to modify video game ROMs and to transfer ROMs to the
 different backup units/emulators that exist. It is based on the old uCON but
 with completely new source. It aims to support all cartridge consoles and
 handhelds like N64, JAG, SNES, NG, GENESIS, GB, LYNX, PCE, SMS, GG, NES and
@@ -61,67 +61,13 @@ write programs in C
 #include "patch/bsl.h"
 #include "patch/xps.h"
 
-
-#define MAXBUFSIZE 32768
-
-
 int main(int argc,char *argv[])
 {
-
-/*if(	!argcmp(argc, argv, "-ls") &&
-	!argcmp(argc, argv, "-lsv")
-)*/
-{
-  printf("%s\n",ucon64_TITLE);
-  printf("Uses code from various people. See 'DEVELOPERS' for more!\n");
-  printf("This may be freely redistributed under the terms of the GNU Public License\n\n");
-}
-  if (argc<2 ||
-      argcmp(argc, argv, "-h") ||
-      argcmp(argc, argv, "--help") ||
-      argcmp(argc, argv, "-?"))
-  {
-    ucon64_usage(argc,argv);
-    return 0;
-  }
-/*
-if(argcmp(argc, argv, "-sh"))
-{
-//TODO shell modus
-	printf(
-"                                                            ___\n"
-"   .,,,,     .---._ Oo  .::::. ::  :: .::::: :::   :::    __\\__\\\n"
-"   ( oo)__   ( oo) /..\\ ::  `' ::  :: ::     :::   :::    \\ / Oo\\o  (\\(\\\n"
-"  /\\_  \\__) /\\_  \\/\\_,/ `::::. :::::: ::::.  ::'   ::'    _\\\\`--_/ o/oO \\\n"
-"  \\__)_/   _\\__)_/_/    ..  :: ::  :: ::     ::....::.... \\_ \\  \\  \\.--'/\n"
-"  /_/_/    \\ /_/_//     `::::' ::  :: `::::: `:::::`:::::: /_/__/   / \\ \\___\n"
-"_(__)_)_,   (__)_/  .::::.                             ;::  |_|_    \\_/_/\\_/\\\n"
-" o    o      (__)) ,:' `:::::::::::::::::::::::::::::::::' (__)_)   (_(_)\n"
-"\n"
-"\nShell modus active. Enter q to exit\n\n"
-"BEFORE:           %s -help\n"
-"NOW: (enter just) help\n\n"
-,ucon64_name());
-
-	for(;;)
-	{
-		
-	}
-	return(0);
-}
-*/
-  return(ucon64_main(argc,argv));
-}
-
-int ucon64_main(int argc,char *argv[])
-{
-  long x, y = 0, console=ucon64_UNKNOWN;
+  long x, y = 0;
   int ucon64_argc;
   struct dirent *ep;
   struct stat puffer;
   DIR *dp;
-//  struct ucon64_ ucon64;
-  struct ucon64_DB db;
   char buf[MAXBUFSIZE], buf2[4096], buf3[4096], *ucon64_argv[128], *forceargs[] =
   {
     "",
@@ -157,113 +103,68 @@ int ucon64_main(int argc,char *argv[])
   gid_t gid;
 #endif
 
+struct ucon64_ rom;
+ucon64_flush(argc,argv,&rom);
 
-//find out which console type
+  printf("%s\n",ucon64_TITLE);
+  printf("Uses code from various people. See 'DEVELOPERS' for more!\n");
+  printf("This may be freely redistributed under the terms of the GNU Public License\n\n");
 
+  if (argc<2 ||
+      argcmp(argc, argv, "-h") ||
+      argcmp(argc, argv, "-help") ||
+      argcmp(argc, argv, "-?"))
+    {
+    ucon64_usage(argc,argv);
+    return 0;
+  }
 
-
-if(argcmp(argc,argv,"-ata"))console=ucon64_ATARI;
-if(argcmp(argc,argv,"-s16"))console=ucon64_SYSTEM16;
-if(argcmp(argc,argv,"-n64"))console=ucon64_N64;
-if(argcmp(argc,argv,"-psx"))console=ucon64_PSX;
-if(argcmp(argc,argv,"-psx2"))console=ucon64_PSX2;
-if(argcmp(argc,argv,"-lynx"))console=ucon64_LYNX;
-if(argcmp(argc,argv,"-jag"))console=ucon64_JAGUAR;
-if(argcmp(argc,argv,"-sms"))console=ucon64_SMS;
-if(argcmp(argc,argv,"-snes"))console=ucon64_SNES;
-if(argcmp(argc,argv,"-gen"))console=ucon64_GENESIS;
-if(argcmp(argc,argv,"-gb"))console=ucon64_GB;
-if(argcmp(argc,argv,"-gba"))console=ucon64_GBA;
-if(argcmp(argc,argv,"-ng"))console=ucon64_NEOGEO;
-if(argcmp(argc,argv,"-ngp"))console=ucon64_NEOGEOPOCKET;
-if(argcmp(argc,argv,"-nes"))console=ucon64_NES;
-if(argcmp(argc,argv,"-pce"))console=ucon64_PCE;
-if(argcmp(argc,argv,"-sat"))console=ucon64_SATURN;
-if(argcmp(argc,argv,"-dc"))console=ucon64_DC;
-if(argcmp(argc,argv,"-cdi"))console=ucon64_CDI;
-if(argcmp(argc,argv,"-cd32"))console=ucon64_CD32;
-if(argcmp(argc,argv,"-3do"))console=ucon64_REAL3DO;
-if(argcmp(argc,argv,"-coleco"))console=ucon64_COLECO;
-if(argcmp(argc,argv,"-vboy"))console=ucon64_VIRTUALBOY;
-if(argcmp(argc,argv,"-swan"))console=ucon64_WONDERSWAN;
-if(argcmp(argc,argv,"-vec"))console=ucon64_VECTREX;
-if(argcmp(argc,argv,"-int"))console=ucon64_INTELLI;
-
-if(argcmp(argc,argv,"-col"))console=ucon64_SNES;
-if(argcmp(argc,argv,"-ip"))console=ucon64_DC;
-if(argcmp(argc,argv,"-sam"))console=ucon64_NEOGEO;
-if(argcmp(argc,argv,"-stp"))console=ucon64_KNOWN;
-if(argcmp(argc,argv,"-ins"))console=ucon64_KNOWN;
-if(argcmp(argc,argv,"-cdrom"))console=ucon64_KNOWN;
-if(argcmp(argc,argv,"-b2i"))console=ucon64_KNOWN;
-if(argcmp(argc,argv,"-hex"))console=ucon64_KNOWN;
-if(argcmp(argc,argv,"-xv64"))console=ucon64_N64;
-if(argcmp(argc,argv,"-xdjr"))console=ucon64_N64;
-if(argcmp(argc,argv,"-bot"))console=ucon64_N64;
-if(argcmp(argc,argv,"-n2gb"))console=ucon64_GB;
-if(argcmp(argc,argv,"-xfal"))console=ucon64_GBA;
-if(argcmp(argc,argv,"-xswc"))console=ucon64_SNES;
-if(argcmp(argc,argv,"-xswcs"))console=ucon64_SNES;
-if(argcmp(argc,argv,"-xfalm"))console=ucon64_GBA;
-if(argncmp(argc,argv,"-xfalc",6))console=ucon64_GBA;
-if(argcmp(argc,argv,"-xgbx"))console=ucon64_GB;
-if(argcmp(argc,argv,"-xgbxs"))console=ucon64_GB;
-if(argncmp(argc,argv,"-xgbxb",6))console=ucon64_GB;
-
-
-
-if(argcmp(argc,argv,"-db"))
+/*
+if(argcmp(argc, argv, "-sh"))
 {
+//TODO shell modus
 	printf(
-		"Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n"
-		,ucon64_dbsize(console)
-		,ucon64_dbsize(console)-ucon64_DBSIZE
-	);
+"                                                            ___\n"
+"   .,,,,     .---._ Oo  .::::. ::  :: .::::: :::   :::    __\\__\\\n"
+"   ( oo)__   ( oo) /..\\ ::  `' ::  :: ::     :::   :::    \\ / Oo\\o  (\\(\\\n"
+"  /\\_  \\__) /\\_  \\/\\_,/ `::::. :::::: ::::.  ::'   ::'    _\\\\`--_/ o/oO \\\n"
+"  \\__)_/   _\\__)_/_/    ..  :: ::  :: ::     ::....::.... \\_ \\  \\  \\.--'/\n"
+"  /_/_/    \\ /_/_//     `::::' ::  :: `::::: `:::::`:::::: /_/__/   / \\ \\___\n"
+"_(__)_)_,   (__)_/  .::::.                             ;::  |_|_    \\_/_/\\_/\\\n"
+" o    o      (__)) ,:' `:::::::::::::::::::::::::::::::::' (__)_)   (_(_)\n"
+"\n"
+"\nShell modus active. Enter q to exit\n\n"
+"BEFORE:           %s -help\n"
+"NOW: (enter just) help\n\n"
+,ucon64_name());
 
-	printf("TIP: %s -db -nes would show only the number of known NES ROMs\n\n",ucon64_name());
+	for(;;)
+	{
+		
+	}
 	return(0);
 }
+*/
 
-if(argcmp(argc,argv,"-dbs"))
-{
-	sscanf(ucon64_rom(), "%lx", &x);
 
-	ucon64_dbsearch(	&db
-				,console
-				,x
-	);
 
-	printf("%s\n",db.name);
-	printf("%s\n",db.maker);
-	printf("%s\n",db.country);
-	printf("%s\n\n",db.misc);
-
-	printf("TIP: %s -dbs -nes would search only for a NES ROM\n\n",ucon64_name());
-
-	return(0);
-}
-
-if(argcmp(argc,argv,"-dbv"))
-{
-	ucon64_dbview(console);
-
-	printf("\nTIP: %s -db -nes would view only NES ROMs\n\n",ucon64_name());
-	return(0);
-}
-
-if (!strlen(ucon64_rom()))
+/*TODO
+if (!strlen(rom.rom))
 {
   ucon64_usage(argc,argv);
   return 0;
 }
+*/
 
-if (strlen( ucon64_file() ))
+
+
+#ifdef BACKUP
+if (strlen( rom.file ))
 {
-  strcpy(buf, ucon64_file());
+  strcpy(buf, rom.file);
   sscanf(buf, "%x", &ucon64_parport);
 }
 
-#ifdef BACKUP
 if (!(ucon64_parport = parport_probe(ucon64_parport)))
   ;
 /*
@@ -306,74 +207,254 @@ if (setgid(gid) == -1)                          //  was used, but just in case (
 
 if (argcmp(argc, argv, "-crc"))
 {
-  printf("Checksum: %08lx\n\n", fileCRC32(ucon64_rom(), 0));
+  printf("Checksum: %08lx\n\n", fileCRC32(rom.rom, 0));
   return 0;
 }
 
 if(argcmp(argc,argv,"-crchd"))
 {
-	printf("Checksum: %08lx\n\n",fileCRC32(ucon64_rom(),512));
+	printf("Checksum: %08lx\n\n",fileCRC32(rom.rom,512));
 	return(0);
 }
 
 
 if(argcmp(argc,argv,"-rl"))
 {
-	renlwr(ucon64_rom());
+	renlwr(rom.rom);
 	return(0);
 }
 
 if(argcmp(argc,argv,"-ru"))
 {
-	renupr(ucon64_rom());
+	renupr(rom.rom);
 	return(0);
 }
 
 if(argcmp(argc,argv,"-hex"))
 {
-	filehexdump(ucon64_rom(),0,quickftell(ucon64_rom()));
+	filehexdump(rom.rom,0,quickftell(rom.rom));
 	return(0);
 }
 
-if (argcmp(argc, argv, "-ls"))
+
+
+
+if(argcmp(argc,argv,"-c"))
 {
-  if (access(ucon64_rom(), R_OK) == -1 || (dp = opendir(ucon64_rom())) == NULL)
-    return -1;
+	if(filefile(rom.rom,0,rom.file,0,FALSE)==-1)
+		printf("ERROR: file not found/out of memory\n");
+	return(0);
+}
 
-  chdir(ucon64_rom());
+if (argcmp(argc, argv, "-cs"))
+{
+  if (filefile(rom.rom, 0, rom.file, 0, TRUE) == -1)
+    printf("ERROR: file not found/out of memory\n");
+  return 0;
+}
 
-  while ((ep = readdir(dp)) != 0)
-  {
-    if (!stat(ep->d_name, &puffer))
-    {
-      if (S_ISREG(puffer.st_mode))
-      {
+if(argcmp(argc,argv,"-find"))
+{
+	x=0;
+	y=quickftell(rom.rom);
+	while((x=filencmp2(rom.rom,x,y,rom.file,strlen(rom.file),'?'))!=-1)
+	{
+		filehexdump(rom.rom,x,strlen(rom.file));
+		x++;
+		printf("\n");
+	}
+	return(0);
+}
+
+if(argcmp(argc,argv,"-swap"))
+{
+	fileswap(filebackup(rom.rom),0,quickftell(rom.rom));
+	return(0);
+}
+
+if(argcmp(argc,argv,"-pad"))
+{
+	filepad(rom.rom,0,MBIT);
+	return(0);
+}
+
+if(argcmp(argc,argv,"-padhd"))
+{
+	filepad(rom.rom,512,MBIT);
+	return(0);
+}
+
+if(argcmp(argc,argv,"-ispad"))
+{
+	unsigned long padded;
+
+	if((padded=filetestpad(rom.rom))!=-1)
+	{
+		if(!padded)printf("Padded: No\n");
+		else printf("Padded: Maybe, %ld Bytes (%.4f Mb)\n",padded,(float)padded/MBIT);
+	}
+	printf("\n");
+	return(0);
+}
+
+
+
+if(argcmp(argc,argv,"-strip"))
+{
+	truncate(rom.rom,quickftell(rom.rom)-atol(rom.file));
+	return(0);
+}
+
+
+
+if(argcmp(argc,argv,"-stp"))
+{
+	strcpy(buf,filebackup(rom.rom));
+	newext(buf,".TMP");
+	rename(rom.rom,buf);
+
+	filecopy(buf,512,quickftell(buf),rom.rom,"wb");
+	remove(buf);
+	return(0);
+}
+
+if(argcmp(argc,argv,"-ins"))
+{
+	strcpy(buf,filebackup(rom.rom));
+	newext(buf,".TMP");
+	rename(rom.rom,buf);
+
+        memset(buf2,0,512);
+	quickfwrite(buf2,0,512,rom.rom,"wb");
+
+	filecopy(buf,0,quickftell(buf),rom.rom,"ab");
+
+	remove(buf);
+	return(0);
+}
+
+if(argcmp(argc,argv,"-b"))
+{
+	if(bsl(rom.rom,rom.file)!=0)printf("ERROR: failed\n");
+	return(0);
+}
+
+if(argcmp(argc,argv,"-i"))
+{
+	ucon64_argv[0]="ucon64";
+	ucon64_argv[1]=rom.file;
+	ucon64_argv[2]=rom.rom;
+	ucon64_argc=3;
+
+	return(ips_main(ucon64_argc,ucon64_argv));
+}
+
+if(argcmp(argc,argv,"-a"))
+{
+	ucon64_argv[0]="ucon64";
+	ucon64_argv[1]="-f";
+	ucon64_argv[2]=rom.rom;
+	ucon64_argv[3]=rom.file;
+	ucon64_argc=4;
+
+	return(n64aps_main(ucon64_argc,ucon64_argv));
+}
+
+if(argcmp(argc,argv,"-ppf"))
+{
+	ucon64_argv[0]="ucon64";
+	ucon64_argv[1]=rom.rom;
+	ucon64_argv[2]=rom.file;
+	ucon64_argc=3;
+
+	return(applyppf_main(ucon64_argc,ucon64_argv));
+}
+
+if(argcmp(argc,argv,"-mki"))
+{
+	cips(rom.rom,rom.file);
 /*
-TODO this completely sucks.. its a dirty hack and i'll have to make some
-changes to uCON64 to fix this..
+	ucon64_argv[0]=ucon64_name();
+	ucon64_argv[1]=rom.file;
+	ucon64_argv[2]=rom.rom;
+	ucon64_argc=3;
+
+	return(cips_main(ucon64_argc,ucon64_argv));
 */
-        ucon64_argv[0] = ucon64_name();
-        ucon64_argv[1] = "-ls";
-        ucon64_argv[2] = ep->d_name;
-        ucon64_argc = 3;
-        db.name = "";
-        ucon64_probe(ucon64_argc, ucon64_argv, &db);
-        strftime(buf, 13, "%b %d %H:%M", localtime(&puffer.st_mtime));
-        printf("%-22.22s %10d %s %s\n", db.name, (int) puffer.st_size, buf, ep->d_name);
-      }
-    }
-  }
-  closedir(dp);
+	return(0);
+}
+
+if(argcmp(argc,argv,"-mka"))
+{
+	ucon64_argv[0]="ucon64";
+	ucon64_argv[1]="-d \"\"";
+	ucon64_argv[2]=rom.rom;
+	ucon64_argv[3]=rom.file;
+	ucon64_argv[4]="test";
+	ucon64_argc=5;
+
+	return(n64caps_main(ucon64_argc,ucon64_argv));
+}
+
+if (argcmp(argc, argv, "-na"))
+{
+  strcpy(buf2, rom.file);
+  strcat(buf2, "                                                            ");
+
+  quickfwrite(buf2, 7, 50, filebackup(rom.rom), "r+b");
 
   return 0;
 }
 
-if (argcmp(argc, argv, "-lsv"))
+if(argcmp(argc,argv,"-mkppf"))
 {
-  if (access(ucon64_rom(), R_OK) == -1 || (dp = opendir(ucon64_rom())) == NULL)
+	ucon64_argv[0]="ucon64";
+	ucon64_argv[1]=rom.rom;
+	ucon64_argv[2]=rom.file;
+
+	strcpy(buf,rom.file);
+	newext(buf,".PPF");
+
+	ucon64_argv[3]=buf;
+	ucon64_argc=4;
+
+	return(makeppf_main(ucon64_argc,ucon64_argv));
+}
+
+if(argcmp(argc,argv,"-nppf"))
+{
+	strcpy(buf2,rom.file);
+	strcat(buf2
+,"                                                            ");
+                                                            
+	quickfwrite(buf2,6,50,filebackup(rom.rom),"r+b");
+	return(0);
+}
+
+
+if (argcmp(argc, argv, "-nppf"))
+{
+  strcpy(buf2, rom.file);
+  strcat(buf2, "                                                            ");
+
+  quickfwrite(buf2, 6, 50, filebackup(rom.rom), "r+b");
+  return 0;
+}
+
+if(argcmp(argc,argv,"-idppf"))
+{
+	addppfid(argc,argv);
+	return(0);
+}
+
+
+
+if (argcmp(argc, argv, "-ls") || argcmp(argc, argv, "-lsv"))
+{
+  if (access(rom.rom, R_OK) == -1 || (dp = opendir(rom.rom)) == NULL)
     return -1;
 
-  chdir(ucon64_rom());
+  chdir(rom.rom);
 
   while ((ep = readdir(dp)) != 0)
   {
@@ -381,21 +462,30 @@ if (argcmp(argc, argv, "-lsv"))
     {
       if (S_ISREG(puffer.st_mode))
       {
-        sprintf(buf, "%s \"%s\"", argv[0], ep->d_name);
-	system(buf);
+	ucon64_flush(argc,argv,&rom);
+	strcpy(rom.rom,ep->d_name);
+        ucon64_init(&rom);
+	if (argcmp(argc, argv, "-ls"))
+	{
+          strftime(buf, 13, "%b %d %H:%M", localtime(&puffer.st_mtime));
+          printf("%-22.22s %10d %s %s\n", rom.name, (int) puffer.st_size, buf, rom.rom);
+        }
+        else ucon64_nfo(&rom);
       }
     }
   }
   closedir(dp);
+
   return 0;
 }
 
+/*TODO
 if(argcmp(argc,argv,"-rrom"))
 {
-if(access( ucon64_rom() ,R_OK)==-1 ||
-(dp=opendir( ucon64_rom() ))==NULL)return(-1);
+if(access( rom.rom ,R_OK)==-1 ||
+(dp=opendir( rom.rom ))==NULL)return(-1);
 
-chdir( ucon64_rom() );
+chdir( rom.rom );
 
 while((ep=readdir(dp))!=0)
 {
@@ -413,216 +503,107 @@ while((ep=readdir(dp))!=0)
 	return(0);
 }
 
-if(argcmp(argc,argv,"-c"))
-{
-	if(filefile(ucon64_rom(),0,ucon64_file(),0,FALSE)==-1)
-		printf("ERROR: file not found/out of memory\n");
-	return(0);
-}
-
-if (argcmp(argc, argv, "-cs"))
-{
-  if (filefile(ucon64_rom(), 0, ucon64_file(), 0, TRUE) == -1)
-    printf("ERROR: file not found/out of memory\n");
-  return 0;
-}
-
-if(argcmp(argc,argv,"-find"))
-{
-	x=0;
-	y=quickftell(ucon64_rom());
-	while((x=filencmp2(ucon64_rom(),x,y,ucon64_file(),strlen(ucon64_file()),'?'))!=-1)
-	{
-		filehexdump(ucon64_rom(),x,strlen(ucon64_file()));
-		x++;
-		printf("\n");
-	}
-	return(0);
-}
-
-if(argcmp(argc,argv,"-swap"))
-{
-	fileswap(filebackup(ucon64_rom()),0,quickftell(ucon64_rom()));
-	return(0);
-}
-
-if(argcmp(argc,argv,"-pad"))
-{
-	filepad(ucon64_rom(),0,MBIT);
-	return(0);
-}
-
-if(argcmp(argc,argv,"-padhd"))
-{
-	filepad(ucon64_rom(),512,MBIT);
-	return(0);
-}
-
-if(argcmp(argc,argv,"-ispad"))
-{
-	unsigned long padded;
-
-	if((padded=filetestpad(ucon64_rom()))!=-1)
-	{
-		if(!padded)printf("Padded: No\n");
-		else printf("Padded: Maybe, %ld Bytes (%.4f Mb)\n",padded,(float)padded/MBIT);
-	}
-	printf("\n");
-	return(0);
-}
-
-
-
-if(argcmp(argc,argv,"-strip"))
-{
-	truncate(ucon64_rom(),quickftell(ucon64_rom())-atol(ucon64_file()));
-	return(0);
-}
-
-
-
-if(argcmp(argc,argv,"-stp"))
-{
-	strcpy(buf,filebackup(ucon64_rom()));
-	newext(buf,".TMP");
-	rename(ucon64_rom(),buf);
-
-	filecopy(buf,512,quickftell(buf),ucon64_rom(),"wb");
-	remove(buf);
-	return(0);
-}
-
-if(argcmp(argc,argv,"-ins"))
-{
-	strcpy(buf,filebackup(ucon64_rom()));
-	newext(buf,".TMP");
-	rename(ucon64_rom(),buf);
-
-        memset(buf2,0,512);
-	quickfwrite(buf2,0,512,ucon64_rom(),"wb");
-
-	filecopy(buf,0,quickftell(buf),ucon64_rom(),"ab");
-
-	remove(buf);
-	return(0);
-}
-
-if(argcmp(argc,argv,"-b"))
-{
-	if(bsl(ucon64_rom(),ucon64_file())!=0)printf("ERROR: failed\n");
-	return(0);
-}
-
-if(argcmp(argc,argv,"-i"))
-{
-	ucon64_argv[0]=ucon64_name();
-	ucon64_argv[1]=ucon64_file();
-	ucon64_argv[2]=ucon64_rom();
-	ucon64_argc=3;
-
-	return(ips_main(ucon64_argc,ucon64_argv));
-}
-
-if(argcmp(argc,argv,"-a"))
-{
-	ucon64_argv[0]=ucon64_name();
-	ucon64_argv[1]="-f";
-	ucon64_argv[2]=ucon64_rom();
-	ucon64_argv[3]=ucon64_file();
-	ucon64_argc=4;
-
-	return(n64aps_main(ucon64_argc,ucon64_argv));
-}
-
-if(argcmp(argc,argv,"-ppf"))
-{
-	ucon64_argv[0]=ucon64_name();
-	ucon64_argv[1]=ucon64_rom();
-	ucon64_argv[2]=ucon64_file();
-	ucon64_argc=3;
-
-	return(applyppf_main(ucon64_argc,ucon64_argv));
-}
-
-if(argcmp(argc,argv,"-mki"))
-{
-	cips(ucon64_rom(),ucon64_file());
-/*
-	ucon64_argv[0]=ucon64_name();
-	ucon64_argv[1]=ucon64_file();
-	ucon64_argv[2]=ucon64_rom();
-	ucon64_argc=3;
-
-	return(cips_main(ucon64_argc,ucon64_argv));
 */
+
+strcpy(buf,rom.rom);
+if(!strcmp(strupr(&buf[strlen(buf)-4]),".FDS")&&(quickftell(rom.rom)%65500)==0)
+	rom.console=ucon64_NES;
+
+if(!access(rom.rom,F_OK))
+{
+	ucon64_init(&rom);
+if(rom.console!=ucon64_UNKNOWN)ucon64_nfo(&rom);
+}
+
+if(argcmp(argc,argv,"-ata"))rom.console=ucon64_ATARI;
+if(argcmp(argc,argv,"-s16"))rom.console=ucon64_SYSTEM16;
+if(argcmp(argc,argv,"-n64"))rom.console=ucon64_N64;
+if(argcmp(argc,argv,"-psx"))rom.console=ucon64_PSX;
+if(argcmp(argc,argv,"-psx2"))rom.console=ucon64_PSX2;
+if(argcmp(argc,argv,"-lynx"))rom.console=ucon64_LYNX;
+if(argcmp(argc,argv,"-jag"))rom.console=ucon64_JAGUAR;
+if(argcmp(argc,argv,"-sms"))rom.console=ucon64_SMS;
+if(argcmp(argc,argv,"-snes"))rom.console=ucon64_SNES;
+if(argcmp(argc,argv,"-gen"))rom.console=ucon64_GENESIS;
+if(argcmp(argc,argv,"-gb"))rom.console=ucon64_GB;
+if(argcmp(argc,argv,"-gba"))rom.console=ucon64_GBA;
+if(argcmp(argc,argv,"-ng"))rom.console=ucon64_NEOGEO;
+if(argcmp(argc,argv,"-ngp"))rom.console=ucon64_NEOGEOPOCKET;
+if(argcmp(argc,argv,"-nes"))rom.console=ucon64_NES;
+if(argcmp(argc,argv,"-pce"))rom.console=ucon64_PCE;
+if(argcmp(argc,argv,"-sat"))rom.console=ucon64_SATURN;
+if(argcmp(argc,argv,"-dc"))rom.console=ucon64_DC;
+if(argcmp(argc,argv,"-cdi"))rom.console=ucon64_CDI;
+if(argcmp(argc,argv,"-cd32"))rom.console=ucon64_CD32;
+if(argcmp(argc,argv,"-3do"))rom.console=ucon64_REAL3DO;
+if(argcmp(argc,argv,"-coleco"))rom.console=ucon64_COLECO;
+if(argcmp(argc,argv,"-vboy"))rom.console=ucon64_VIRTUALBOY;
+if(argcmp(argc,argv,"-swan"))rom.console=ucon64_WONDERSWAN;
+if(argcmp(argc,argv,"-vec"))rom.console=ucon64_VECTREX;
+if(argcmp(argc,argv,"-int"))rom.console=ucon64_INTELLI;
+
+if(argcmp(argc,argv,"-col"))rom.console=ucon64_SNES;
+if(argcmp(argc,argv,"-ip"))rom.console=ucon64_DC;
+if(argcmp(argc,argv,"-sam"))rom.console=ucon64_NEOGEO;
+if(argcmp(argc,argv,"-stp"))rom.console=ucon64_KNOWN;
+if(argcmp(argc,argv,"-ins"))rom.console=ucon64_KNOWN;
+if(argcmp(argc,argv,"-cdrom"))rom.console=ucon64_KNOWN;
+if(argcmp(argc,argv,"-b2i"))rom.console=ucon64_KNOWN;
+if(argcmp(argc,argv,"-hex"))rom.console=ucon64_KNOWN;
+if(argcmp(argc,argv,"-xv64"))rom.console=ucon64_N64;
+if(argcmp(argc,argv,"-xdjr"))rom.console=ucon64_N64;
+if(argcmp(argc,argv,"-bot"))rom.console=ucon64_N64;
+if(argcmp(argc,argv,"-n2gb"))rom.console=ucon64_GB;
+if(argcmp(argc,argv,"-xfal"))rom.console=ucon64_GBA;
+if(argcmp(argc,argv,"-xswc"))rom.console=ucon64_SNES;
+if(argcmp(argc,argv,"-xswcs"))rom.console=ucon64_SNES;
+if(argcmp(argc,argv,"-swcs"))rom.console=ucon64_SNES;
+if(argcmp(argc,argv,"-xfalm"))rom.console=ucon64_GBA;
+if(argncmp(argc,argv,"-xfalc",6))rom.console=ucon64_GBA;
+if(argcmp(argc,argv,"-xgbx"))rom.console=ucon64_GB;
+if(argcmp(argc,argv,"-xgbxs"))rom.console=ucon64_GB;
+if(argncmp(argc,argv,"-xgbxb",6))rom.console=ucon64_GB;
+
+
+if(argcmp(argc,argv,"-db"))
+{
+	printf(
+		"Database: %ld known ROMs in ucon64_db.c (%+ld)\n\n"
+		,ucon64_dbsize(rom.console)
+		,ucon64_dbsize(rom.console)-ucon64_DBSIZE
+	);
+
+	printf("TIP: %s -db -nes would show only the number of known NES ROMs\n\n",getarg(argc,argv,ucon64_NAME));
 	return(0);
 }
 
-if(argcmp(argc,argv,"-mka"))
+if(argcmp(argc,argv,"-dbs"))
 {
-	ucon64_argv[0]=ucon64_name();
-	ucon64_argv[1]="-d \"\"";
-	ucon64_argv[2]=ucon64_rom();
-	ucon64_argv[3]=ucon64_file();
-	ucon64_argv[4]="test";
-	ucon64_argc=5;
+	sscanf(rom.rom, "%lx", &x);
 
-	return(n64caps_main(ucon64_argc,ucon64_argv));
-}
+	ucon64_dbsearch(	&rom
+//				,rom.console
+//				,x
+	);
 
-if (argcmp(argc, argv, "-na"))
-{
-  strcpy(buf2, ucon64_file());
-  strcat(buf2, "                                                            ");
+	printf("%s\n",rom.name);
+	printf("%s\n",rom.manufacturer);
+	printf("%s\n",rom.country);
+	printf("%s\n\n",rom.misc);
 
-  quickfwrite(buf2, 7, 50, filebackup(ucon64_rom()), "r+b");
+	printf("TIP: %s -dbs -nes would search only for a NES ROM\n\n",getarg(argc,argv,ucon64_NAME));
 
-  return 0;
-}
-
-if(argcmp(argc,argv,"-mkppf"))
-{
-	ucon64_argv[0]=ucon64_name();
-	ucon64_argv[1]=ucon64_rom();
-	ucon64_argv[2]=ucon64_file();
-
-	strcpy(buf,ucon64_file());
-	newext(buf,".PPF");
-
-	ucon64_argv[3]=buf;
-	ucon64_argc=4;
-
-	return(makeppf_main(ucon64_argc,ucon64_argv));
-}
-
-if (argcmp(argc, argv, "-nppf"))
-{
-  strcpy(buf2, ucon64_file());
-  strcat(buf2, "                                                            ");
-
-  quickfwrite(buf2, 6, 50, filebackup(ucon64_rom()), "r+b");
-  return 0;
-}
-
-
-if(argcmp(argc,argv,"-idppf"))
-{
-	addppfid(argc,argv);
 	return(0);
 }
 
-
-strcpy(buf,ucon64_rom());
-if(!strcmp(strupr(&buf[strlen(buf)-4]),".FDS")&&(quickftell(ucon64_rom())%65500)==0)
-	console=ucon64_NES;
-
-
-if(console==ucon64_UNKNOWN)
+if(argcmp(argc,argv,"-dbv"))
 {
-//the same but automatic
-        if(!access(ucon64_rom(),F_OK))
-        	console=ucon64_probe(argc,argv,NULL);
+	ucon64_dbview(rom.console);
+
+	printf("\nTIP: %s -db -nes would view only NES ROMs\n\n",getarg(argc,argv,ucon64_NAME));
+	return(0);
 }
+
 
 
 
@@ -632,88 +613,88 @@ if(console==ucon64_UNKNOWN)
 
 //options which depend on a special console system
 
-switch(console)
+switch(rom.console)
 {
 
 case ucon64_GB:
-	gameboy_main(argc,argv);
+	gameboy_main(&rom);
 break;
 case ucon64_GBA:
-	gbadvance_main(argc,argv);
+	gbadvance_main(&rom);
 break;
 case ucon64_GENESIS:
-	genesis_main(argc,argv);
+	genesis_main(&rom);
 break;
 case ucon64_SMS:
-	sms_main(argc,argv);
+	sms_main(&rom);
 break;
 case ucon64_JAGUAR:
-	jaguar_main(argc,argv);
+	jaguar_main(&rom);
 break;
 case ucon64_LYNX:
-	lynx_main(argc,argv);
+	lynx_main(&rom);
 break;
 case ucon64_N64:
-	nintendo64_main(argc,argv);
+	nintendo64_main(&rom);
 break;
 case ucon64_NEOGEO:
-	neogeo_main(argc,argv);
+	neogeo_main(&rom);
 break;
 case ucon64_NES:
-	nes_main(argc,argv);
+	nes_main(&rom);
 break;
 case ucon64_PCE:
-	pcengine_main(argc,argv);
+	pcengine_main(&rom);
 break;
 /*
 case ucon64_PSX:
 case ucon64_PSX2:
-	playstation_main(argc,argv);
+	playstation_main(&rom);
 break;
 */
 /*
 case ucon64_DC:
-	dreamcast_main(argc,argv);
+	dreamcast_main(&rom);
 break;
 */
 case ucon64_SYSTEM16:
-	system16_main(argc,argv);
+	system16_main(&rom);
 break;
 case ucon64_ATARI:
-	atari_main(argc,argv);
+	atari_main(&rom);
 break;
 case ucon64_SNES:
-	supernintendo_main(argc,argv);
+	supernintendo_main(&rom);
 break;
 case ucon64_NEOGEOPOCKET:
-	neogeopocket_main(argc,argv);
+	neogeopocket_main(&rom);
 break;
 case ucon64_VECTREX:
-	vectrex_main(argc,argv);
+	vectrex_main(&rom);
 break;
 case ucon64_VIRTUALBOY:
-	virtualboy_main(argc,argv);
+	virtualboy_main(&rom);
 break;
 case ucon64_WONDERSWAN:
-	wonderswan_main(argc,argv);
+	wonderswan_main(&rom);
 break;
 case ucon64_COLECO:
-	coleco_main(argc,argv);
+	coleco_main(&rom);
 break;
 case ucon64_INTELLI:
-	intelli_main(argc,argv);
+	intelli_main(&rom);
 break;
 case ucon64_UNKNOWN:
 default:
-	if(!access(ucon64_rom(),F_OK))
+	if(!access(rom.rom,F_OK))
 	{
-		filehexdump(ucon64_rom(),0,512);//show possible header or maybe the internal rom header
+		filehexdump(rom.rom,0,512);//show possible header or maybe the internal rom header
 		printf(
 "\n"
 "ERROR: unknown ROM: %s (not found in internal DB)\n"
 "TIP:   if this is a ROM you can force recognition with the -<CONSOLE> option\n"
 "       if you compiled from the sources you can add it to ucon64_db.c and\n"
-"       recompile\n",ucon64_rom());
+"       recompile\n",rom.rom);
 	}
 	else ucon64_usage(argc,argv);
 break;
@@ -729,8 +710,8 @@ if (argcmp(argc, argv, "-e"))
   sprintf(buf, "%s%c.ucon64rc", getenv("HOME"), FILE_SEPARATOR);
 #endif
 
-  if (console != ucon64_UNKNOWN && console != ucon64_KNOWN)
-    sprintf(buf3, "emulate_%s", &forceargs[console][1]);
+  if (rom.console != ucon64_UNKNOWN && rom.console != ucon64_KNOWN)
+    sprintf(buf3, "emulate_%s", &forceargs[rom.console][1]);
   else
   {
     printf("ERROR: could not auto detect the right ROM/console type; please use the\n"
@@ -755,13 +736,13 @@ if (argcmp(argc, argv, "-e"))
     return -1;
   }
 
-  sprintf(buf, "%s %s", buf2, ucon64_file());
+  sprintf(buf, "%s %s", buf2, rom.file);
   for (x = 0; x < argc; x++)
   {
-    if (strdcmp(argv[x], "-e") && strdcmp(argv[x], ucon64_name()) &&
-        strdcmp(argv[x], ucon64_file()))
+    if (strdcmp(argv[x], "-e") && strdcmp(argv[x], getarg(argc,argv,ucon64_NAME)) &&
+        strdcmp(argv[x], rom.file))
     {
-      sprintf(buf2, ((!strdcmp(argv[x], ucon64_rom())) ? " \"%s\"" : /*" %s"*/""), argv[x]);
+      sprintf(buf2, ((!strdcmp(argv[x], rom.rom)) ? " \"%s\"" : /*" %s"*/""), argv[x]);
       strcat(buf, buf2);
     }
   }
@@ -786,7 +767,7 @@ if (argcmp(argc, argv, "-e"))
     printf("ERROR: the Emulator returned an error code (%d)\n"
            "       maybe %s is corrupt...\n"
            "       or use the \"-<CONSOLE> force recognition\" option next time\n",
-           (int) x, ucon64_rom());
+           (int) x, rom.rom);
     return x;
   }
 #endif
@@ -799,43 +780,115 @@ if (argcmp(argc, argv, "-e"))
 return(0);
 }
 
-
-int ucon64_probe(int argc,char *argv[],struct ucon64_DB *buf)
+/*
+	flush the ucon64 struct with default values
+*/
+int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
 {
-	int console=ucon64_UNKNOWN;
+  long x = 0;
+	
+  rom->argc=argc;
+//  for( x = 0 ; x < argc ; x++ )strcpy(rom->argv[x],argv[x]);
+  for( x = 0 ; x < argc ; x++ )rom->argv[x]=argv[x];
 
-	if(supernintendo_probe(argc,argv,buf)!=-1)console=ucon64_SNES;
-	else if(genesis_probe(argc,argv,buf)!=-1)console=ucon64_GENESIS;
-	else if(nintendo64_probe(argc,argv,buf)!=-1)console=ucon64_N64;
-	else if(atari_probe(argc,argv,buf)!=-1)console=ucon64_ATARI;
-	else if(nes_probe(argc,argv,buf)!=-1)console=ucon64_NES;
-	else if(lynx_probe(argc,argv,buf)!=-1)console=ucon64_LYNX;
-	else if(gameboy_probe(argc,argv,buf)!=-1)console=ucon64_GB;
-	else if(gbadvance_probe(argc,argv,buf)!=-1)console=ucon64_GBA;
-	else if(jaguar_probe(argc,argv,buf)!=-1)console=ucon64_JAGUAR;
-	else if(pcengine_probe(argc,argv,buf)!=-1)console=ucon64_PCE;
-	else if(coleco_probe(argc,argv,buf)!=-1)console=ucon64_COLECO;
-	else if(intelli_probe(argc,argv,buf)!=-1)console=ucon64_INTELLI;
-	else if(neogeo_probe(argc,argv,buf)!=-1)console=ucon64_NEOGEO;
-	else if(neogeopocket_probe(argc,argv,buf)!=-1)console=ucon64_NEOGEOPOCKET;
-	else if(sms_probe(argc,argv,buf)!=-1)console=ucon64_SMS;
-	else if(system16_probe(argc,argv,buf)!=-1)console=ucon64_SYSTEM16;
-	else if(virtualboy_probe(argc,argv,buf)!=-1)console=ucon64_VIRTUALBOY;
-	else if(vectrex_probe(argc,argv,buf)!=-1)console=ucon64_VECTREX;
-	else if(wonderswan_probe(argc,argv,buf)!=-1)console=ucon64_WONDERSWAN;
-	else console=ucon64_UNKNOWN;
-	return(console);
+  strcpy(rom->name,"");
+  strcpy(rom->name2,"");
+
+  rom->bytes=quickftell(rom->rom);
+
+  strcpy(rom->rom,getarg(argc,argv,ucon64_ROM));
+  strcpy(rom->file,getarg(argc,argv,ucon64_FILE));
+
+  strcpy(rom->title,"");
+  strcpy(rom->copier,"?");
+
+  rom->mbit=0;
+  rom->bytes=0;
+
+  rom->console=ucon64_UNKNOWN;	//integer for the console system
+
+  rom->swapped=0;
+//  for( x = 0 ; x < sizeof( rom->splitted ) / sizeof( rom->splitted[0] ) ; x++ )rom->splitted[x]=0;
+  rom->padded=0;
+  rom->intro=0;
+
+  rom->db_crc32=0;
+  rom->current_crc32=0;	//standart current_crc32 checksum of the rom
+
+  rom->has_internal_crc=0;
+  rom->current_internal_crc=0;	//current custom crc
+  rom->internal_crc=0;	//custom crc (if not current_crc32)
+  rom->internal_crc_start=0;
+  rom->internal_crc_len=0;	//size in bytes
+  rom->internal_inverse_crc=0;	//crc complement
+  rom->internal_inverse_crc_start=0;
+  rom->internal_inverse_crc_len=0;		//size in bytes
+
+  memset(rom->buheader,0,sizeof(rom->buheader));
+  rom->buheader_start=0;
+  rom->buheader_len=0;	//header of backup unit
+
+  memset(rom->header,0,sizeof(rom->header));
+  rom->header_start=0;
+  rom->header_len=0;	//header of rom itself (if there is one)
+
+  strcpy(rom->name,"?");
+  rom->name_start=0;
+  rom->name_len=0;
+	
+  strcpy(rom->manufacturer,"?");
+  rom->manufacturer_start=0;
+  rom->manufacturer_len=0;
+	
+  strcpy(rom->country,"?");
+  rom->country_start=0;
+  rom->country_len=0;
+	
+  strcpy(rom->misc,"");
+
+  return(0);
+}
+
+int ucon64_init(struct ucon64_ *rom)
+{
+  if(
+    (supernintendo_init(rom)==-1) &&
+    (genesis_init(rom)==-1) &&
+    (nintendo64_init(rom)==-1) &&
+    (atari_init(rom)==-1) &&
+    (nes_init(rom)==-1) &&
+    (lynx_init(rom)==-1) &&
+    (gameboy_init(rom)==-1) &&
+    (gbadvance_init(rom)==-1) &&
+    (jaguar_init(rom)==-1) &&
+    (pcengine_init(rom)==-1) &&
+    (coleco_init(rom)==-1) &&
+    (intelli_init(rom)==-1) &&
+    (neogeo_init(rom)==-1) &&
+    (neogeopocket_init(rom)==-1) &&
+    (sms_init(rom)==-1) &&
+    (system16_init(rom)==-1) &&
+    (virtualboy_init(rom)==-1) &&
+    (vectrex_init(rom)==-1) &&
+    (wonderswan_init(rom)==-1)
+  ) return(-1);
+  else
+  {
+    rom->bytes=quickftell(rom->rom);
+    rom->mbit=(float)((rom->bytes-rom->buheader_len)/MBIT);
+
+    rom->padded=filetestpad(rom->rom);
+    rom->intro=(rom->bytes-rom->buheader_len)&MBIT;
+  }
+  return(0);
 }
 
 
 int ucon64_usage(int argc,char *argv[])
 {
-	printf("USAGE: %s [OPTION(S)] ROM [FILE]\n"
-	"\n"
-,ucon64_name()
-);
+  printf("USAGE: %s [OPTION(S)] ROM [FILE]\n\n",getarg(argc,argv,ucon64_NAME));
 
-printf(/*"TODO: $ROM could also be the name of a *.ZIP archive\n"
+  printf(/*"TODO: $ROM could also be the name of a *.ZIP archive\n"
 	"      it will automatically find and extract the ROM\n"
 	"\n"*/
 	"TODO:  -sh      use uCON64 in shell modus\n"
@@ -929,8 +982,11 @@ else
 */
 printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 	"  -s16, -ata, -coleco, -vboy, -swan, -vec, -int\n"
-	"		force recognition\n"
-	"  *		show info (default)\n\n"
+	"		force recognition"
+#ifndef DB
+"; NEEDED"
+#endif
+	"\n  *		show info (default)\n\n"
 ,system16_TITLE
 ,atari_TITLE
 ,coleco_TITLE
@@ -957,12 +1013,61 @@ printf("TIP: %s -help -snes (would show only Super Nintendo related help)\n"
 	"All CD-based consoles are supported by uCONCD; go to http://ucon64.sf.net\n"
 	"Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
 	"\n"
-,ucon64_name(),ucon64_name()
+,getarg(argc,argv,ucon64_NAME),getarg(argc,argv,ucon64_NAME)
 );
 	return(0);
 }
 
+/*
+  this is the now centralized nfo output for all kinds of ROMs
+*/
+int ucon64_nfo(struct ucon64_ *rom)
+{
+  if(rom->header_len)
+  {
+//	filehexdump(rom.rom,rom->header_start+rom->buheader_len,rom->header_len);
+     strhexdump(rom->header,rom->header_start+rom->buheader_len,rom->header_len);
+     printf("\n");
+  }	
 
+  printf("%s\n%s\n%s\n%s\n%s%s%s\n%s\n%ld bytes (%.4f Mb)\n\n"
+    ,rom->rom
+    ,rom->title
+    ,rom->copier
+    ,rom->name
+    ,rom->name2,(rom->name2[0])?"\n":""
+    ,rom->manufacturer
+    ,rom->country
+    ,rom->bytes-rom->buheader_len
+    ,rom->mbit
+  );
+        
+  if(!rom->padded)printf("Padded: No\n");
+  else if(rom->padded)printf("Padded: Maybe, %ld Bytes (%.4f Mb)\n",rom->padded,(float)rom->padded/MBIT);
+
+  if(!rom->intro)printf("Intro/Trainer: No\n");
+  else if(rom->intro)printf("Intro/Trainer: Maybe, %ld Bytes\n",rom->intro);
+
+  if(rom->misc[0])printf("%s\n",rom->misc);
+
+if(rom->has_internal_crc)
+{
+  printf("Checksum: %s, %04lx %s= %04lx\n",
+  	 (rom->current_internal_crc == rom->internal_crc) ? "ok" : "bad",
+         rom->current_internal_crc,
+         (rom->current_internal_crc == rom->internal_crc) ? "" : "!",
+         rom->internal_crc);
+  printf("Inverse checksum: %s, %04lx + %04lx = %04lx %s\n",
+  	 (rom->current_internal_crc + rom->internal_inverse_crc == 0xffff) ? "ok" : "bad",
+	 rom->current_internal_crc, rom->internal_inverse_crc, rom->current_internal_crc + rom->internal_inverse_crc,
+	 (rom->current_internal_crc + rom->internal_inverse_crc == 0xffff) ? "" : "~0xffff");
+}
+  printf("CheckSum (CRC32): %08lx\n",rom->current_crc32);
+
+  printf("\n");
+
+  return(0);
+}
 
 /*
 _ __ ________________________________________________________________ __ _

@@ -110,6 +110,7 @@ UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
 
 getopt.o: getopt.h
 misc.o: misc.h config.h
+quick_io.o: misc.h
 ucon64.o: switches.c options.c $(UCON64_STD_H)
 ucon64_misc.o: $(UCON64_STD_H)
 ucon64_db.o: ucon64_db.h $(UCON64_STD_H)

@@ -251,7 +251,7 @@ flc_usage (int argc, char *argv[])
 {
   printf ("\n%s\n"
           "This may be freely redistributed under the terms of the GNU Public License\n\n"
-          "USAGE: %s [OPTION]... [FILE]...\n\n"
+          "Usage: %s [OPTION]... [FILE]...\n\n"
           "  " OPTION_S "c           also test every possible archive in DIRECTORY for errors\n"
           "                return flags: N=not checked (default), P=passed, F=failed\n"
           "  " OPTION_LONG_S "html        output as HTML document with links to the files\n"

@@ -414,7 +414,7 @@ int
 load_smd (const char *filename)
 {
   uint8 header[0x200], count, *buf;
-  int file_size, block_size, is_smd = 0;
+  int fsize, block_size, is_smd = 0;
   FILE *fd = NULL;
   time_t starttime;
 
@@ -424,23 +424,23 @@ load_smd (const char *filename)
     return 0;
 
   /* Get file size */
-  file_size = quick_fsize (filename);
+  fsize = file_size (filename);
 
   /* Load SMD header */
   if (EXTCMP (filename, ".smd") == 0)
     {
       is_smd = 1;
       fread (header, 0x200, 1, fd);
-      file_size -= 0x200;
+      fsize -= 0x200;
     }
 
   /* Set up file buffer */
-  block_size = (file_size / 0x4000) + ((file_size & 0x3FFF) ? 1 : 0);
+  block_size = (fsize / 0x4000) + ((fsize & 0x3FFF) ? 1 : 0);
   buf = malloc (block_size * 0x4000);
   if (!buf)
     return 0;
   memset (buf, 0, block_size * 0x4000);
-  fread (buf, file_size, 1, fd);
+  fread (buf, fsize, 1, fd);
   fclose (fd);
 
   /* Set up file data and header if the file is not in SMD foramt */

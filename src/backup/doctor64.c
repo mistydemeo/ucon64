@@ -317,7 +317,7 @@ doctor64_read (const char *filename, unsigned int parport)
           return (0);
         }
       fwrite (buf, 1, sizeof (buf), fh);
-      ucon64_gauge (inittime, quick_fsize (filename), size);
+      ucon64_gauge (inittime, file_size (filename), size);
     }
   sync ();
   fclose (fh);
@@ -340,15 +340,15 @@ doctor64_write (const char *filename, long start, long len,
 
 
   strcpy (buf, filename);
-  if (sendUploadHeader (parport, buf, (quick_fsize (filename) - start)) != 0)
+  if (sendUploadHeader (parport, buf, (file_size (filename) - start)) != 0)
     return (-1);
 
   if (!(fh = fopen (filename, "rb")))
     return (-1);
 
-  printf ("Send: %ld Bytes (%.4f Mb)\n\n", (quick_fsize (filename) - start),
-          (float) (quick_fsize (filename) - start) / MBIT);
-  size = quick_fsize (filename);
+  printf ("Send: %ld Bytes (%.4f Mb)\n\n", (file_size (filename) - start),
+          (float) (file_size (filename) - start) / MBIT);
+  size = file_size (filename);
 
   for (;;)
     {
@@ -357,8 +357,8 @@ doctor64_write (const char *filename, long start, long len,
       if (parport_write (buf, pos, parport) != 0)
         break;
       size = size - pos;
-      ucon64_gauge (inittime, (quick_fsize (filename) - start) - size,
-                    (quick_fsize (filename) - start));
+      ucon64_gauge (inittime, (file_size (filename) - start) - size,
+                    (file_size (filename) - start));
     }
   fclose (fh);
   return (0);

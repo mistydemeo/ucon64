@@ -50,7 +50,7 @@ bsl (const char *name, const char *option2)
   if (!(fh2 = fopen (option2, "rb")))
     return -1;
 
-  fsize = quick_fsize (option2);
+  fsize = file_size (option2);
   printf ("BSL/Baseline\n");
   printf ("%d (%.4f Mb)\n", fsize, (float) fsize / MBIT);
   printf ("\n"

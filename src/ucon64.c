@@ -561,7 +561,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   if (S_ISREG (fstate.st_mode) != TRUE)
     return result;
 
-  ucon64_fsize = quick_fsize (ucon64.rom);       // save size in ucon64_fsize
+  ucon64_fsize = file_size (ucon64.rom);       // save size in ucon64_fsize
   rominfo->file_size = ucon64_fsize;
 
 /*

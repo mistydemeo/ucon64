@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.7 2002-08-25 11:32:05 noisyb Exp $
+ * $Id: gg.c,v 1.8 2002-08-25 12:15:47 noisyb Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.  
  * All rights reserved. Distributed under the BSD Software License.
@@ -1066,7 +1066,7 @@ gg_ggd (void)
 int
 gg_gg (st_rominfo_t *rominfo)
 {
-  long size = quick_fsize (ucon64.rom) - rominfo->buheader_len;
+  long size = file_size (ucon64.rom) - rominfo->buheader_len;
   long add, value;
   char buf[MAXBUFSIZE];
   int result = -1;

@@ -645,7 +645,7 @@ RestoreSRAM (FILE * fp, int StartOS)
   time_t starttime;
   int fsize;
 
-  fsize = quick_fsize (ucon64.rom);
+  fsize = file_size (ucon64.rom);
   starttime = time (NULL);
 
   i = fgetc (fp);

@@ -196,7 +196,7 @@ filepad (const char *filename, int start, int size)
 */
 {
   FILE *file;
-  int oldsize = quick_fsize (filename) - start, sizeleft;
+  int oldsize = file_size (filename) - start, sizeleft;
   unsigned char padbuffer[MAXBUFSIZE];
 
   // Now we can also "pad" to smaller sizes
@@ -632,7 +632,7 @@ ucon64_bin2iso (const char *image, int track_mode)
 
   strcpy (buf, filename_only(image));
   setext (buf, ".ISO");
-  size = quick_fsize (image) / sector_size;
+  size = file_size (image) / sector_size;
 
   if (!(src = fopen (image, "rb"))) return -1;
   if (!(dest = fopen (buf, "wb")))
@@ -818,7 +818,7 @@ ucon64_mktoc (st_rominfo_t *rominfo)
   int result, fsize;
 
   result = ucon64_trackmode_probe (ucon64.rom);
-  fsize = quick_fsize (ucon64.rom);
+  fsize = file_size (ucon64.rom);
 
   sprintf (buf, "%s\n" "\n" "\n" "// Track 1\n"
            "TRACK %s\n"
@@ -1161,7 +1161,7 @@ ucon64_configfile (void)
 
       printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
 
-      filecopy (ucon64.configfile, 0, quick_fsize (ucon64.configfile), buf2, "wb");
+      filecopy (ucon64.configfile, 0, file_size (ucon64.configfile), buf2, "wb");
 
       sprintf (buf, "%d", UCON64_VERSION);
       set_property (ucon64.configfile, "version", buf);

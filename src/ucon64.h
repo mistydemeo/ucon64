@@ -43,10 +43,8 @@ typedef struct st_ucon64
   char **argv;
 
   const char *rom;                              // rom (cmdline) with path
-
-  DIR *temp;                                    // ptr to tempdir with archive contents
   char rom_in_archive[FILENAME_MAX];            // filename holder if the rom comes from an archive
-                                                // (const char *)rom will point then to this
+
   const char *file;                             // file (cmdline) with path
 
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)

@@ -302,9 +302,6 @@ const struct option long_options[] = {
 void
 ucon64_exit (void)
 {
-  if (ucon64.temp)
-    closedir2 (ucon64.temp);
-
   handle_registered_funcs ();
   fflush (stdout);
 }
@@ -400,8 +397,10 @@ main (int argc, char **argv)
   if (optind < argc)
     ucon64.rom = argv[optind++];
 
+#if 0
   ucon64.rom = ucon64_rom_in_archive (&ucon64.temp, ucon64.rom, ucon64.rom_in_archive,
                                       ucon64.configfile);
+#endif                                      
 
   if (optind < argc)
     ucon64.file = argv[optind++];
@@ -849,7 +848,7 @@ ucon64_usage (int argc, char *argv[])
   int single = 0;
 
   printf (
-    "Usage: %s [OPTION]... [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE] [-o=OUTPUT_PATH]\n\n"
+    "Usage: %s [OPTION]... [" OPTION_LONG_S "rom=]ROM [[" OPTION_LONG_S "file=]FILE]" /* [-o=OUTPUT_PATH] */ "\n\n"
     "  " OPTION_LONG_S "nbak        prevents backup files (*.BAK)\n"
 #ifdef  ANSI_COLOR
     "  " OPTION_LONG_S "ncol        disable ANSI colors in output\n"
@@ -958,11 +957,13 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "help        display this help and exit\n"
     "  " OPTION_LONG_S "version     output version information and exit\n"
 //    "  " OPTION_LONG_S "quiet       don't show output\n"
+#if 0
 #ifdef DEBUG
     "  " OPTION_LONG_S "test        run selftest (DEBUG)\n"
     "                  if you can read this uCON64 was compiled with active DEBUG\n"
     "                  this should only happen for development versions\n"
 #endif // DEBUG
+#endif
     "\n");
 
   optind = option_index = 0;

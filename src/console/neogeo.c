@@ -56,7 +56,7 @@ const char *neogeo_usage[] =
 //    "                  " OPTION_LONG_S "rom=DIRECTORY\n"
 //    "INFO: actually this option does the same as Goodxxxx, Romcenter, etc.\n"
 //    "      Therefore you must have the DAT files for Arcade installed\n"
-    "INFO: for more options check the support for DISC-based consoles\n"
+    "                  for more options check the support for DISC-based consoles\n"
     ,
     NULL
   };

@@ -48,7 +48,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  * CDROM IOCTL structures
  *******************************************************/
 
-/* Address in MSF libdiscmage */
+/* Address in MSF format */
 struct cdrom_msf0		
 {
 	unsigned char	minute;
@@ -56,7 +56,7 @@ struct cdrom_msf0
 	unsigned char	frame;
 };
 
-/* Address in either MSF or logical libdiscmage */
+/* Address in either MSF or logical format */
 union cdrom_addr		
 {
 	struct cdrom_msf0	msf;
@@ -79,9 +79,9 @@ struct cdrom_msf
  * A CD-ROM physical sector size is 2048, 2052, 2056, 2324, 2332, 2336, 
  * 2340, or 2352 bytes long.  
 
-*         Sector types of the standard CD-ROM data libdiscmages:
+*         Sector types of the standard CD-ROM data formats:
  *
- * libdiscmage   sector type               user data size (bytes)
+ * format   sector type               user data size (bytes)
  * -----------------------------------------------------------------------------
  *   1     (Red Book)    CD-DA          2352    (CD_FRAMESIZE_RAW)
  *   2     (Yellow Book) Mode1 Form1    2048    (CD_FRAMESIZE)
@@ -90,7 +90,7 @@ struct cdrom_msf
  *   5     (Green Book)  Mode2 Form2    2328    (2324+4 spare bytes)
  *
  *
- *       The layout of the standard CD-ROM data libdiscmages:
+ *       The layout of the standard CD-ROM data formats:
  * -----------------------------------------------------------------------------
  * - audio (red):                  | audio_sample_bytes |
  *                                 |        2352        |
@@ -109,7 +109,7 @@ struct cdrom_msf
  *
  */
 
-/* Some generally useful CD-ROM inlibdiscmageion -- mostly based on the above */
+/* Some generally useful CD-ROM information -- mostly based on the above */
 #define CD_MINS              74 /* max. minutes per CD, not really a limit */
 #define CD_SECS              60 /* seconds per minute */
 #define CD_FRAMES            75 /* frames per second */
@@ -134,7 +134,7 @@ struct cdrom_msf
 #define CD_XA_TAIL        (CD_EDC_SIZE+CD_ECC_SIZE) /* "after data" part of raw XA frame */
 #define CD_XA_SYNC_HEAD   (CD_SYNC_SIZE+CD_XA_HEAD) /* sync bytes + header of XA frame */
 
-/* CD-ROM address types (cdrom_tocentry.cdte_libdiscmage) */
+/* CD-ROM address types (cdrom_tocentry.cdte_format) */
 #define	CDROM_LBA 0x01 /* "logical block": first frame is #0 */
 #define	CDROM_MSF 0x02 /* "minute-second-frame": binary, not bcd here! */
 
@@ -172,7 +172,7 @@ typedef struct
   unsigned char type[4];
   unsigned char fmt[4];
   uint32_t header_length;
-  unsigned short libdiscmage;
+  unsigned short format;
   unsigned short channels;
   uint32_t samplerate;
   uint32_t bitrate;

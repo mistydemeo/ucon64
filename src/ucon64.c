@@ -594,7 +594,12 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   currently the media type is determined by its size
 */
   if (ucon64.type == UCON64_UNKNOWN)
-    ucon64.type = (rominfo->file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
+    {
+      image = dm_init(romfile);
+//      ucon64.type = (rominfo->file_size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
+      ucon64.type = image ? UCON64_CD : UCON64_ROM;
+      if (image) dm_close (image);
+    }
 
   ucon64_flush (rominfo);
 
@@ -946,19 +951,18 @@ ucon64_usage (int argc, char *argv[])
     "All DISC-based consoles (using libdiscmage)\n"
     "  " OPTION_LONG_S "mksheet     generate TOC and CUE sheet files for CD_IMAGE; " OPTION_LONG_S "rom=CD_IMAGE\n"
 //    "                  " OPTION_LONG_S "rom could also be an existing TOC or CUE file\n"
-//    "                TRACK_MODE='CD_DA'     (2352 Bytes; AUDIO)\n"
-    "                  TRACK_MODE='MODE2_RAW' (2352 Bytes; default)\n"
-    "                  TRACK_MODE='MODE1'     (2048 Bytes; standard ISO9660)\n"
-    "                  TRACK_MODE='MODE1_RAW' (2352 Bytes)\n"
-    "                  TRACK_MODE='MODE2'     (2336 Bytes)\n"
-//    "                TRACK_MODE='MODE2_FORM1'    (2048 Bytes)\n"
-//    "                TRACK_MODE='MODE2_FORM2'    (2324 Bytes)\n"
-//    "                TRACK_MODE='MODE2_FORM_MIX' (2336 Bytes)\n"
-    "                  " OPTION_LONG_S "file=TRACK_MODE is optional, uCON64 will always try to\n"
-    "                  detect the correct TRACK_MODE from the CD_IMAGE itself\n"
-    "TODO: " OPTION_LONG_S "cdirip  rip track(s) from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
-    "TODO: " OPTION_LONG_S "nrgrip  rip track(s) from Nero/NRG IMAGE; " OPTION_LONG_S "rom=NRG_IMAGE\n"
-    "TODO: " OPTION_LONG_S "iso     convert BIN/RAW CD_IMAGE to MODE1 (2048 Bytes); " OPTION_LONG_S "rom=CD_IMAGE\n"
+    "TODO: " OPTION_LONG_S "cdirip=Nrip/dump track N from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
+    "TODO: " OPTION_LONG_S "nrgrip=Nrip/dump track N from Nero/NRG IMAGE; " OPTION_LONG_S "rom=NRG_IMAGE\n"
+    "TODO: " OPTION_LONG_S "rip     rip/dump file(s) from a track; " OPTION_LONG_S "rom=TRACK\n"
+#if 0
+  OPTION_LONG_S "file=SECTOR_SIZE\n"
+    "TODO: " OPTION_LONG_S "iso     strip SECTOR_SIZE of any CD_IMAGE to MODE1/2048; " OPTION_LONG_S "rom=CD_IMAGE\n"
+    "                  " OPTION_LONG_S "file=SECTOR_SIZE\n"
+    "                  " OPTION_LONG_S "file=SECTOR_SIZE is optional, uCON64 will always try to\n"
+    "                  detect the correct SECTOR_SIZE from the CD_IMAGE itself\n"
+    "                  SECTOR_SIZE can be 2048, 2052, 2056, 2324, 2332, 2336, 2340,\n"
+    "                  2352 (default), or custom values\n"
+#endif
     "\n");
 #endif // LIBDISCMAGE
 

@@ -39,7 +39,7 @@ const char *jaguar_usage[] =
     "  " OPTION_LONG_S "hd          force ROM has header (+512 Bytes)\n"
     "  " OPTION_LONG_S "nhd         force ROM has no header\n"
 #endif
-    "INFO: for more options check the support for DISC-based consoles\n"
+    "                  for more options check the support for DISC-based consoles\n"
     ,
     NULL
 };

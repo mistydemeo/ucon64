@@ -54,7 +54,7 @@ const char *pcengine_usage[] =
 #endif
     "  " OPTION_LONG_S "smg         convert to Super Magic Griffin/SMG\n"
     "  " OPTION_LONG_S "mgd         convert to Multi Game Doctor*/MGD2/RAW\n"
-    "INFO: for more options check the support for DISC-based consoles\n"
+    "                  for more options check the support for DISC-based consoles\n"
     ,
     NULL
 };

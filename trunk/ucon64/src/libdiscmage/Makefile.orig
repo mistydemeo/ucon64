@@ -118,9 +118,9 @@ endif
 	dlltool $(DLLTOOLFLAGS) --base-file tmp.base --output-exp tmp.exp
 
 	ld --base-file tmp.base tmp.exp $(DLLFLAGS)
-	dlltool $(DLLTOOLFLAGS) --base-file tmp.base
+#	dlltool $(DLLTOOLFLAGS) --base-file tmp.base
 
-	ld tmp.exp $(DLLFLAGS)
+#	ld tmp.exp $(DLLFLAGS)
 ifndef DLOPEN
 	dlltool $(DLLTOOLFLAGS) --output-lib $(LIBNAME).a
 endif

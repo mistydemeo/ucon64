@@ -1,5 +1,5 @@
 /*
-dxedll_pub.h - DXE client support code for uCON64
+dxedll_pub.h - DXE client support code
 
 written by 2002 dbjh
 

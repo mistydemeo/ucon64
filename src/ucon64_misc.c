@@ -1402,10 +1402,10 @@ ucon64_configfile (void)
                    "# F2A support files\n"
                    "#\n"
                    "f2afirmware=f2afirm.hex\n"
-                   "f2aloader=loader.bin\n"
-                   "ilclient=ilclient.bin\n"
-                   "ilclient2=ilclient2.bin\n"
-                   "illogo=illogo.bin\n"
+                   "iclientu=iclientu.bin\n"
+                   "iclientp=iclientp.bin\n"
+                   "ilogo=ilogo.bin\n"
+                   "gbaloader=loader.bin\n"
                    "#\n"
                    "# emulate_<console shortcut>=<emulator with options>\n"
                    "#\n"
@@ -1543,10 +1543,10 @@ ucon64_configfile (void)
 #endif
 
       set_property (ucon64.configfile, "f2afirmware", "f2afirm.hex");
-      set_property (ucon64.configfile, "f2aloader", "loader.bin");
-      set_property (ucon64.configfile, "ilclient", "ilclient.bin");
-      set_property (ucon64.configfile, "ilclient2", "ilclient2.bin");
-      set_property (ucon64.configfile, "illogo", "illogo.bin");
+      set_property (ucon64.configfile, "iclientu", "iclientu.bin\n");
+      set_property (ucon64.configfile, "iclientp", "iclientp.bin\n");
+      set_property (ucon64.configfile, "ilogo", "ilogo.bin\n");
+      set_property (ucon64.configfile, "gbaloader", "loader.bin\n");
 
       sync ();
       printf ("OK\n\n");

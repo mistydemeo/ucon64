@@ -365,7 +365,7 @@ ips_create (const char *orgname, const char *modname)
       fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], modname);
       exit (1);
     }
-  strcpy (ipsname, orgname);
+  strcpy (ipsname, modname);
   set_suffix (ipsname, ".IPS");
   ucon64_file_handler (ipsname, NULL, 0);
   if ((ipsfile = fopen (ipsname, "wb")) == NULL)

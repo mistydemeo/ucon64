@@ -314,7 +314,7 @@ ppf_create (const char *orgname, const char *modname)
       fclose (orgfile);
       return -1;
     }
-  strcpy (ppfname, orgname);
+  strcpy (ppfname, modname);
   set_suffix (ppfname, ".PPF");
   ucon64_file_handler (ppfname, NULL, 0);
   if ((ppffile = fopen (ppfname, "wb")) == NULL)

@@ -325,13 +325,13 @@ The original uCON for SNES and Genesis was written by Chicken & chp in ~1995<br>
   --find, -c, --cs, --dbs, -b, -i, --mki, -a, --mka, --na, --ppf, --mkppf,
   --nppf, --idppf, --crp, -n, --bot, --lsram, --usms, --n2, --n2gb, --b0, --b1,
   --sam, --bios and --dumpinfo (by NoisyB)<br>
-- fixed (PSX) PPF code works correctly and generates correct patches on
+- updated (PSX) PPF code works correctly and generates correct patches on
   big-endian machines (by dbjh)<br>
 - added (patch) --patch option to specify the patch file for APS, IPS, BSL
   and PPF (by NoisyB)<br>
 - updated (SNES) added NTSC/PAL fix for Dual Orb 2 (thanks to John), Dr. Mario,
   Dragon - The Bruce Lee Story (U) and Wolfenstein 3D (U) (by dbjh)<br>
-- fixed (N64) APS code works correctly and generates correct patches on
+- updated (N64) APS code works correctly and generates correct patches on
   big-endian machines (by dbjh)<br>
 - added (all) -o specify output directory. Note that now uCON64 by default
   writes its output files to the current directory (by NoisyB and dbjh)<br>
@@ -463,6 +463,14 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   -gba (by dbjh)<br>
 - added (Genesis) -f can fix region protections, addendum files are genpal.txt
   and mdntsc.txt (by dbjh)<br>
+- added (SNES) -id force -gd3 to produce a unique file name. This switch
+  doesn't show in the help, because it "fails" for 130 dumps of the GoodSNES
+  "0.999.6--" set. 128 IDs are each shared by 2 games, 2 IDs are shared by 3
+  games (by dbjh)<br>
+- updated (all) the patch generation options (-mka, -mki, -mkppf) use the
+  modified ROM name for the patch to create. They used to use the name of the
+  original ROM (by dbjh)<br>
+- updated (N64) fixed major bug in APS creation code (by dbjh)<br>
 <br>
 <br>
 <br>

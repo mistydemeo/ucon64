@@ -74,7 +74,7 @@ const char *n64_usage[] =
     "  " OPTION_LONG_S "lsram=SRAM  LAC's Makesram; " OPTION_LONG_S "rom=(LAC's SRAM ROM image);\n"
     "                  the SRAM must have a size of 512 Bytes\n"
     "                  this option generates a ROM which can be used to transfer\n"
-    "                  SRAMs to/from your console\n"
+    "                  SRAMs to your console\n"
     "  " OPTION_LONG_S "usms=SMSROM Jos Kwanten's ultraSMS (Sega Master System/GameGear emulator);\n"
     "                  " OPTION_LONG_S "rom=(Jos Kwanten's ultraSMS ROM image)\n"
     "                  works only for SMSROMs which are <= 4 Mb in size\n"

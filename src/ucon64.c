@@ -1189,9 +1189,9 @@ ucon64_usage (int argc, char *argv[])
 #endif
 
 #ifdef  __MSDOS__
-#define GOOD_EXAMPLE  "                  example:\n                    %s " OPTION_LONG_S "rrom " OPTION_LONG_S "good C:\\MAME_ROMS\\\n"
+#define GOOD_EXAMPLE  "                    %s " OPTION_LONG_S "rrom " OPTION_LONG_S "good C:\\MAME_ROMS\\\n\n"
 #else
-#define GOOD_EXAMPLE  "                  example:\n                    %s " OPTION_LONG_S "rrom " OPTION_LONG_S "good /home/joe/mame/\n"
+#define GOOD_EXAMPLE  "                    %s " OPTION_LONG_S "rrom " OPTION_LONG_S "good /home/joe/mame/\n\n"
 #endif
 
 #ifdef  PARALLEL
@@ -1252,27 +1252,28 @@ ucon64_usage (int argc, char *argv[])
 
 //  if (ucon64.dat_enabled)
     printf ("DATabase (support for DAT files and ROM managing)\n"
-      "  " OPTION_LONG_S "db          DATabase statistics\n"
+      "  " OPTION_LONG_S "db          DATabase statistics (DAT files: %s)\n"
       "  " OPTION_LONG_S "dbv         like " OPTION_LONG_S "db but more verbose\n"
       "  " OPTION_LONG_S "dbs=CRC32   search ROM with CRC32 in DATabase\n"
       "  " OPTION_LONG_S "lsd         generate ROM list for all ROMs using DATabase info; " OPTION_LONG_S "rom=DIR\n"
       "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
-      "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"
-      "                  with " OPTION_LONG_S "good it will use DATabase instead of internal names\n"
-      "                  and sort the ROMs into subdirs (DAT files: %s)\n"
-      GOOD_EXAMPLE
       "                  Only ROMs of these consoles have internal names:\n"
       "                  %s,\n"
       "                  %s,\n"
       "                  %s,\n"
-      "                  %s, and %s\n\n",
+      "                  %s, and %s\n"
+      "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"
+      "                  combined with " OPTION_LONG_S "good, " OPTION_LONG_S "rrom and " OPTION_LONG_S "rr83 use the filenames\n"
+      "                  from the DATabase instead of internal names and sort the ROMs\n"
+      "                  into subdirs. For example:\n"
+      GOOD_EXAMPLE,
       ucon64.configdir,
-      argv[0],
       snes_usage[0],
       genesis_usage[0],
       gameboy_usage[0],
       gba_usage[0],
-      n64_usage[0]);
+      n64_usage[0],
+      argv[0]);
 
 /*
 GoodSNES: Copyright 1999-2002 Cowering (hotemu@hotmail.com) V 0.999.5 BETA
@@ -1614,7 +1615,7 @@ Stats: 3792 entries, 290 redumps, 83 hacks/trainers, 5 bad/overdumps
      PARALLEL_MSG
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"
      MORE_MSG
-     "     give the force recognition switch a try if something went wrong\n"
+     "     Give the force recognition switch a try if something went wrong\n"
      "\n"
      "Report problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
      "\n",

@@ -212,7 +212,9 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
    Under Unix this command will ask for root's password, because uCON64 needs
    to be setuid root for parallel port access. If you configured uCON64 without
    support for parallel port backup units, uCON64 needn't be setuid root. Just
-   copy uCON64 to any directory you like.<br>
+   copy ucon64 to any directory you like. "make install" also creates a
+   configuration directory for uCON64 and copies discmage.so to it, so you
+   might find it easier to use it.<br>
    Under BeOS the last command will open a dialog window. Just follow the
    instructions.<br>
 <br>
@@ -868,8 +870,9 @@ Q40: <a href="#40">Is it possible to force uCON64 to send or dump (an) SRAM
 <b>A</b>: No, but you could use a simple script or batch file to force sending
    or dumping. Here is an example batch file to force dumping SRAM with a Pro
    Fighter:<br>
-   &nbsp;&nbsp;if exist "%1" goto error<br>
-   &nbsp;&nbsp;ucon64 -xfigs "%1"<br>
+   &nbsp;&nbsp;@echo off<br>
+   &nbsp;&nbsp;if exist %1 goto error<br>
+   &nbsp;&nbsp;ucon64 -xfigs %1<br>
    &nbsp;&nbsp;goto exit<br>
    &nbsp;&nbsp;:error<br>
    &nbsp;&nbsp;echo %1 already exists, use a different name<br>

@@ -46,6 +46,8 @@ ucon64gui_top(void)
 
   h2g_("$ROM: ");
 
+  h2g_input_text ("rom",ucon64gui.rom, 50, 0, 0, "Select $ROM");
+
   h2g_input_file ("rom",ucon64gui.rom, 50, 0, open_xpm, 0, 0, "Select $ROM");
   
   h2g_br();

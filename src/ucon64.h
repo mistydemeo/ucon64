@@ -121,10 +121,6 @@ struct ucon64_
   long name_start;	//start of internal ROM name (==0)?name comes from database
   long name_len;		//length of ROM name
 	
-  char name2[4096];	//2nd ROM name (japanese)
-  long name2_start;	//start of internal ROM name (==0)?name comes from database
-  long name2_len;		//length of ROM name
-
   char manufacturer[4096];	//manufacturer name of the ROM
   long manufacturer_start;	//start of internal manufacturer name (==0)?manufacturer comes from database
   long manufacturer_len;	//length of manufacturer name

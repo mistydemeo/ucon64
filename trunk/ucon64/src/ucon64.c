@@ -509,11 +509,21 @@ main (int argc, char **argv)
   x = optind = 0;
   memset (&arg, 0, sizeof (st_args_t) * ARG_MAX);
   while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
-    if (x < ARG_MAX) 
-      {
-        arg[x].val = c;
-        arg[x++].optarg = (optarg ? optarg : NULL);
-      }
+    {
+      if (c == UCON64_GETOPT_ERROR)
+        {
+          fprintf (stderr,
+               "Try '%s " OPTION_LONG_S "help' for more information.\n",
+               argv[0]);
+          exit (1);
+        }
+        
+      if (x < ARG_MAX) 
+        {
+          arg[x].val = c;
+          arg[x++].optarg = (optarg ? optarg : NULL);
+        }
+    }
 
 #ifdef  DEBUG
   for (x = 0; arg[x].val; x++) 

@@ -17,7 +17,7 @@ endif
 LDFLAGS=-s
 
 LIBNAME=discmage
-OBJECTS=libdm_misc.o cdi.o nero.o sheets.o dllinit.o misc.o
+OBJECTS=libdiscmage.o cdi.o nero.o sheets.o dllinit.o misc.o
 
 
 # The test for Cygwin should be done before the test for DJGPP, because the
@@ -185,13 +185,13 @@ endif                                   # cygwin
 #endif
 
 # Dependencies
-libdiscmage/libdm_misc.o: libdiscmage/libdiscmage.h libdiscmage/libdm_misc.h \
-                           libdiscmage/libdm_misc_cfg.h \
+libdiscmage/libdiscmage.o: libdiscmage/libdiscmage.h \
+                           libdiscmage/libdiscmage_cfg.h \
                            libdiscmage/dxedll_priv.h
-libdiscmage/nero.o: libdiscmage/libdiscmage.h libdiscmage/libdm_misc.h libdiscmage/nero.h \
+libdiscmage/nero.o: libdiscmage/libdiscmage.h libdiscmage/nero.h \
                     libdiscmage/cdi.h config.h libdiscmage/dxedll_priv.h
-libdiscmage/cdi.o: libdiscmage/libdiscmage.h libdiscmage/libdm_misc.h libdiscmage/cdi.h \
+libdiscmage/cdi.o: libdiscmage/libdiscmage.h libdiscmage/cdi.h \
                    libdiscmage/dxedll_priv.h
-libdiscmage/sheets.o: libdiscmage/libdiscmage.h libdiscmage/libdm_misc.h libdiscmage/dxedll_priv.h
-libdiscmage/dllinit.o: libdiscmage/libdiscmage.h libdiscmage/libdm_misc.h libdiscmage/dxedll_priv.h
+libdiscmage/sheets.o: libdiscmage/libdiscmage.h libdiscmage/dxedll_priv.h
+libdiscmage/dllinit.o: libdiscmage/libdiscmage.h libdiscmage/dxedll_priv.h
 libdiscmage/misc.o: libdiscmage/dxedll_priv.h

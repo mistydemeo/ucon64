@@ -49,32 +49,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t gameboy_usage[] =
   {
-    {NULL, "Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)"},
-    {NULL, "1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com"},
-    {"gb", "force recognition"},
-#if 0
-    "  " OPTION_LONG_S "hd          force ROM has SSC header (+512 Bytes)\n"
-    "  " OPTION_LONG_S "nhd         force ROM has no SSC header\n"
-#endif
-    {"n=NEW_NAME", "change internal ROM name to NEW_NAME"},
-    {"mgd", "convert to Multi Game*/MGD2/RAW"},
-    {"ssc", "convert to Super Smart Card/SSC (+512 Bytes)"},
-    {"sgb", "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX"},
-    {"gbx", "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC"},
-    {"n2gb=EMU", "convert for use with Kami's FC EMUlator (NES emulator);\n"
-                    OPTION_LONG_S "rom=NES_ROM"},
-    {"chk", "fix ROM checksum"},
-#if 0
-    "  " OPTION_LONG_S "gge         encode GameGenie code; " OPTION_LONG_S "rom=AAAA:VV or " OPTION_LONG_S "rom=AAAA:VV:CC\n"
-    "  " OPTION_LONG_S "ggd         decode GameGenie code; " OPTION_LONG_S "rom=XXX-XXX or " OPTION_LONG_S "rom=XXX-XXX-XXX\n"
-    "  " OPTION_LONG_S "gg          apply GameGenie code (permanent);\n"
-    "                  " OPTION_LONG_S "file=XXX-XXX or " OPTION_LONG_S "file=XXX-XXX-XXX\n"
-#ifdef TODO
-#warning TODO  --gs     apply GameShark code (permanent)
-#endif // TODO
-    "TODO:  " OPTION_LONG_S "gs     apply GameShark code (permanent)\n"
-#endif
-    {NULL, NULL}
+    {NULL, NULL, "Game Boy/(Super GB)/GB Pocket/Color GB/(GB Advance)"},
+    {NULL, NULL, "1989/1994/1996/1998/2001 Nintendo http://www.nintendo.com"},
+    {"gb", NULL, "force recognition"},
+    {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
+    {"mgd", NULL, "convert to Multi Game*/MGD2/RAW"},
+    {"ssc", NULL, "convert to Super Smart Card/SSC (+512 Bytes)"},
+    {"sgb", NULL, "convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX"},
+    {"gbx", NULL, "convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC"},
+    {"n2gb", "EMU", "convert for use with Kami's FC EMUlator (NES emulator);\n"
+                    OPTION_LONG_S "rom" OPTARG_S "NES_ROM"},
+    {"chk", NULL, "fix ROM checksum"},
+    {NULL, NULL, NULL}
   };
 
 
@@ -203,7 +189,7 @@ gameboy_gbx (st_rominfo_t *rominfo)
                        OFFSET (dest_name, strlen (dest_name) - 2) == 'b') ? ".GBC" : ".GB"));
 
   ucon64_output_fname (dest_name, 0);
-  ucon64_fbackup (NULL, dest_name);
+  handle_existing_file (dest_name, NULL);
   q_fcpy (ucon64.rom, 0, rominfo->buheader_len, dest_name, "wb");
 
   x = 0;
@@ -263,7 +249,7 @@ gameboy_sgb (st_rominfo_t *rominfo)
   set_suffix (buf, ((OFFSET (buf, strlen (buf) - 2) == 'B' ||
                  OFFSET (buf, strlen (buf) - 2) == 'b') ? ".GBX" : ".GX"));
 
-  ucon64_fbackup (NULL, buf);
+  handle_existing_file (buf, NULL);
   q_fwrite (ucon64.rom, 0, rominfo->buheader_len, buf, "wb");
 
   x = 0;
@@ -285,7 +271,7 @@ gameboy_n (st_rominfo_t *rominfo, const char *name)
 
   memset (buf, 0, MAXBUFSIZE);
   strcpy (buf, name);
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
   q_fwrite (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x034, 16,
             ucon64.rom, "r+b");
 
@@ -299,7 +285,7 @@ gameboy_chk (st_rominfo_t *rominfo)
 {
   char buf[4];
 
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
 
   q_fputc (ucon64.rom,
               GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d,
@@ -342,7 +328,7 @@ gameboy_mgd (st_rominfo_t *rominfo)
   sprintf (dest_name, "%s.%03lu", buf,
            (unsigned long) ((q_fsize (ucon64.rom) - rominfo->buheader_len) / MBIT));
   ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
-  ucon64_fbackup (NULL, dest_name);
+  handle_existing_file (dest_name, NULL);
   q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), dest_name, "wb");
 
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -376,7 +362,7 @@ gameboy_ssc (st_rominfo_t *rominfo)
   set_suffix (dest_name, ".GB");
 
   ucon64_output_fname (dest_name, 0);
-  ucon64_fbackup (NULL, dest_name);
+  handle_existing_file (dest_name, NULL);
   q_fwrite (&unknown_header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
   q_fcpy (ucon64.rom, 0, size, dest_name, "ab");
 

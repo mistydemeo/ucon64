@@ -803,7 +803,7 @@ snes_mgd (st_rominfo_t *rominfo)
 
   set_suffix (dest_name, ".078");
   ucon64_output_fname (dest_name, OF_FORCE_BASENAME);
-  ucon64_fbackup (NULL, dest_name);
+  handle_existing_file (dest_name, NULL);
   q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
@@ -826,7 +826,7 @@ snes_mgd (st_rominfo_t *rominfo)
   buf[8] = 0;
   sprintf (buf2, "%s.%03u", buf, (ucon64.file_size - rominfo->buheader_len) / MBIT);
 
-  ucon64_fbackup (NULL, buf2);
+  handle_existing_file (buf2, NULL);
   q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, buf2, "wb");
   fprintf (stdout, ucon64_msg[WROTE], buf2);
 
@@ -1019,7 +1019,7 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       set_nsrt_info (rominfo, (unsigned char *) &header);
 
-      ucon64_fbackup (NULL, dest_name);
+      handle_existing_file (dest_name, NULL);
       q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
       q_fwrite (dstbuf, SWC_HEADER_LEN, newsize, dest_name, "ab");
       fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -1067,7 +1067,7 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       set_nsrt_info (rominfo, (unsigned char *) &header);
 
-      ucon64_fbackup (NULL, dest_name);
+      handle_existing_file (dest_name, NULL);
       q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
       q_fcpy (ucon64.rom, rominfo->buheader_len, size, dest_name, "ab");
       fprintf (stdout, ucon64_msg[WROTE], dest_name);
@@ -1286,7 +1286,7 @@ snes_j (st_rominfo_t *rominfo)
   set_suffix (dest_name, ".TMP");
 
   ucon64_output_fname (dest_name, 0);
-  ucon64_fbackup (NULL, dest_name);
+  handle_existing_file (dest_name, NULL);
   q_fcpy (src_name, 0, rominfo->buheader_len, dest_name, "wb"); // copy header (if any)
   block_size = q_fsize (src_name) - header_len;
   // Split GD3 files don't have a header _except_ the first one
@@ -1818,7 +1818,7 @@ snes_n (st_rominfo_t *rominfo, const char *name)
   memset (buf, ' ', SNES_NAME_LEN);
   strncpy (buf, name, strlen (name) > SNES_NAME_LEN ?
                         SNES_NAME_LEN : strlen (name));
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
   q_fwrite (buf, rominfo->header_start + rominfo->buheader_len + 16, SNES_NAME_LEN,
             ucon64.rom, "r+b");
 
@@ -1833,7 +1833,7 @@ snes_chk (st_rominfo_t *rominfo)
   char buf[10];
   int image = rominfo->header_start + rominfo->buheader_len;
 
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
 
   // change inverse checksum
   q_fputc (ucon64.rom, image + 44, (0xffff - rominfo->current_internal_crc), "r+b");      // low byte

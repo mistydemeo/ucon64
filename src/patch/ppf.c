@@ -147,7 +147,7 @@ ppf_apply (const char *modname, const char *ppfname)
   int x, method, dizlen = 0, modlen, ppfsize, bytes_to_skip = 0, n_changes;
   unsigned int pos;
 
-  ucon64_fbackup (NULL, modname);
+  handle_existing_file (modname, NULL);
 
   if ((modfile = fopen (modname, "rb+")) == NULL)
     {
@@ -310,7 +310,7 @@ ppf_create (const char *orgname, const char *modname)
     }
   strcpy (ppfname, orgname);
   set_suffix (ppfname, ".PPF");
-  ucon64_fbackup (NULL, ppfname);
+  handle_existing_file (ppfname, NULL);
   if ((ppffile = fopen (ppfname, "wb")) == NULL)
     {
       fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], ppfname);
@@ -431,7 +431,7 @@ ppf_set_desc (const char *ppfname, const char *description)
 
   memset (desc, ' ', 50);
   strncpy (desc, description, strlen (description));
-  ucon64_fbackup (NULL, ppfname);
+  handle_existing_file (ppfname, NULL);
   q_fwrite (desc, 6, 50, ppfname, "r+b");
 
   return 0;
@@ -444,7 +444,7 @@ ppf_set_fid (const char *ppfname, const char *fidname)
   int fidsize, ppfsize, pos;
   char fidbuf[MAX_ID_SIZE + 34 + 1] = "@BEGIN_FILE_ID.DIZ"; // +1 for string terminator
 
-  ucon64_fbackup (NULL, ppfname);
+  handle_existing_file (ppfname, NULL);
 
   printf ("Adding file_id.diz (%s)...\n", fidname);
   fidsize = q_fread (fidbuf + 18, 0, MAX_ID_SIZE, fidname);

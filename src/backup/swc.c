@@ -39,19 +39,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t swc_usage[] =
   {
-    {NULL, "Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC)/SWC DX(2)"},
-    {NULL, "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
+    {NULL, NULL, "Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC)/SWC DX(2)"},
+    {NULL, NULL, "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
 #ifdef PARALLEL
-    {"xswc", "send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "port=PORT\n"
+    {"xswc", NULL, "send/receive ROM to/from Super Wild Card*/(all)SWC; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically when ROM does not exist\n"
                 "Press q to abort; ^C will cause invalid state of backup unit"},
-    {"xswc2", "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)"},
-    {"xswcs", "send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
+    {"xswc2", NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)"},
+    {"xswcs", NULL, "send/receive SRAM to/from Super Wild Card*/(all)SWC;\n"
                  OPTION_LONG_S "port=PORT\n"
                  "receives automatically when SRAM does not exist\n"
                  "Press q to abort; ^C will cause invalid state of backup unit"},
 #endif // PARALLEL
-    {NULL, NULL}
+    {NULL, NULL, NULL}
   };
 
 #ifdef PARALLEL

@@ -250,7 +250,7 @@ Game Title    : TITLE OF THE SOFTWARE
 
   update_crc (ip);
 
-  ucon64_fbackup (NULL, ip_file);
+  handle_existing_file (ip_file, NULL);
   q_fwrite (ip, 0, 0x8000, ip_file, "wb");
 
   fprintf (stdout, ucon64_msg[WROTE], ip_file);

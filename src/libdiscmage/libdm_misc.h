@@ -21,82 +21,48 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef LIBDM_MISC_H
 #define LIBDM_MISC_H
-// struct for LBA <-> MSF conversions
-typedef struct
-{
-  uint8_t    cdmsf_min0;     /* start minute */
-  uint8_t    cdmsf_sec0;     /* start second */
-  uint8_t    cdmsf_frame0;   /* start frame */
-  uint8_t    cdmsf_min1;     /* end minute */
-  uint8_t    cdmsf_sec1;     /* end second */
-  uint8_t    cdmsf_frame1;   /* end frame */
-} dm_msf_t;
-
-/*
-  dm_lba_to_msf() convert LBA to minutes, seconds, frames
-  dm_msf_to_lba() convert minutes, seconds, frames to LBA
-  dm_from_bcd()   convert BCD to integer
-  dm_to_bcd()     convert integer to BCD
-*/
-
-extern int32_t dm_lba_to_msf (int32_t lba, dm_msf_t * mp);
-extern int32_t dm_msf_to_lba (int32_t m, int32_t s, int32_t f, int32_t force_positive);
-extern int32_t dm_from_bcd (int32_t b);
-extern int32_t dm_to_bcd (int32_t i);
-
-
-/*
-  libdm messages
-  
-  usage example: fprintf (stdout, libdm_msg[DEPRECATED], filename);
-*/
-enum
-{
-  DEPRECATED = 0
-};
-                          
-extern const char *libdm_msg[];
-
-#if 0
-extern int32_t cdi_init (dm_image_t *image);
-
-extern int32_t ask_type (FILE * fsource, int32_t header_position);
-extern int32_t cdi_read_track (dm_image_t * cdi_image);
-extern void cdi_get_sessions (dm_image_t * cdi_image);
-extern void cdi_get_tracks (dm_image_t * cdi_image);
-extern void cdi_skip_next_session (dm_image_t * cdi_image);
-
-extern int32_t nrg_init (dm_image_t * image);
-
-extern void nrg_write_cues_hdr (char *fcues, int32_t *fcues_i, dm_image_t * image);
-extern void nrg_write_daoi_hdr (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image);
-extern void nrg_write_cues_track (char *fcues, int32_t *fcues_i, dm_image_t * image);
-extern void nrg_write_daoi_track (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image, int32_t nrg_offset);
-extern void nrg_write_cues_tail (char *fcues, int32_t *fcues_i, dm_image_t * image);
-extern void nrg_write_sinf (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image);
-extern void nrg_write_etnf_hdr (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image);
-extern void nrg_write_etnf_track (char *fdaoi, int32_t *fdaoi_i, dm_image_t * image, int32_t nrg_offset);
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
 #endif
 
-typedef struct
-{
-  unsigned char magic[4];
-  uint32_t total_length;
-  unsigned char type[4];
-  unsigned char fmt[4];
-  uint32_t header_length;
-  unsigned short format;
-  unsigned short channels;
-  uint32_t samplerate;
-  uint32_t bitrate;
-  unsigned short blockalign;
-  unsigned short bitspersample;
-  unsigned char data[4];
-  uint32_t data_length;
-} wav_header_t;
+#ifdef  HAVE_CDROM_H
+#include <linux/cdrom.h>
+#else
+#define CD_MINS              74 /* max. minutes per CD, not really a limit */
+#define CD_SECS              60 /* seconds per minute */
+#define CD_FRAMES            75 /* frames per second */
+#define CD_SYNC_SIZE         12 /* 12 sync bytes per raw data frame */
+#define CD_MSF_OFFSET       150 /* MSF numbering offset of first frame */
+#define CD_CHUNK_SIZE        24 /* lowest-level "data bytes piece" */
+#define CD_NUM_OF_CHUNKS     98 /* chunks per frame */
+#define CD_FRAMESIZE_SUB     96 /* subchannel data "frame" size */
+#define CD_HEAD_SIZE          4 /* header (address) bytes per raw data frame */
+#define CD_SUBHEAD_SIZE       8 /* subheader bytes per raw XA data frame */
+#define CD_EDC_SIZE           4 /* bytes EDC per most raw data frame types */
+#define CD_ZERO_SIZE          8 /* bytes zero per yellow book mode 1 frame */
+#define CD_ECC_SIZE         276 /* bytes ECC per most raw data frame types */
+#define CD_FRAMESIZE       2048 /* bytes per frame, "cooked" mode */
+#define CD_FRAMESIZE_RAW   2352 /* bytes per frame, "raw" mode */
+#define CD_FRAMESIZE_RAWER 2646 /* The maximum possible returned bytes */ 
+/* most drives don't deliver everything: */
+#define CD_FRAMESIZE_RAW1 (CD_FRAMESIZE_RAW-CD_SYNC_SIZE) /*2340*/
+#define CD_FRAMESIZE_RAW0 (CD_FRAMESIZE_RAW-CD_SYNC_SIZE-CD_HEAD_SIZE) /*2336*/
 
+#define CD_XA_HEAD        (CD_HEAD_SIZE+CD_SUBHEAD_SIZE) /* "before data" part of raw XA frame */
+#define CD_XA_TAIL        (CD_EDC_SIZE+CD_ECC_SIZE) /* "after data" part of raw XA frame */
+#define CD_XA_SYNC_HEAD   (CD_SYNC_SIZE+CD_XA_HEAD) /* sync bytes + header of XA frame */
 
+/* CD-ROM address types (cdrom_tocentry.cdte_format) */
+#define	CDROM_LBA 0x01 /* "logical block": first frame is #0 */
+#define	CDROM_MSF 0x02 /* "minute-second-frame": binary, not bcd here! */
 
+/* bit to tell whether track is data or audio (cdrom_tocentry.cdte_ctrl) */
+#define	CDROM_DATA_TRACK	0x04
+
+/* The leadout track is always 0xAA, regardless of # of tracks on disc */
+#define	CDROM_LEADOUT		0xAA
+
+#if 0
 #define ISODCL(from, to) (to - from + 1)
 typedef struct st_iso_header
 {
@@ -134,21 +100,84 @@ typedef struct st_iso_header
   char application_data[ISODCL (884, 1395)];
   char unused5[ISODCL (1396, 2048)];
 } st_iso_header_t;
+#endif
+#endif  // HAVE_CDROM_H
+
+
+/*
+  dm_msf_t struct for LBA <-> MSF conversions
+
+  dm_lba_to_msf() convert LBA to minutes, seconds, frames
+  dm_msf_to_lba() convert minutes, seconds, frames to LBA
+  dm_from_bcd()   convert BCD to integer
+  dm_to_bcd()     convert integer to BCD
+*/
+typedef struct
+{
+  uint8_t    cdmsf_min0;     /* start minute */
+  uint8_t    cdmsf_sec0;     /* start second */
+  uint8_t    cdmsf_frame0;   /* start frame */
+  uint8_t    cdmsf_min1;     /* end minute */
+  uint8_t    cdmsf_sec1;     /* end second */
+  uint8_t    cdmsf_frame1;   /* end frame */
+} dm_msf_t;
+extern int lba_to_msf (int lba, dm_msf_t * mp);
+extern int msf_to_lba (int m, int s, int f, int force_positive);
+extern int from_bcd (int b);
+extern int to_bcd (int i);
+
+
+/*
+  libdm messages
+  
+  usage example: fprintf (stdout, libdm_msg[DEPRECATED], filename);
+*/
+enum
+{
+  DEPRECATED = 0,
+  UNKNOWN_IMAGE,
+  ALREADY_2048
+};
+extern const char *libdm_msg[];
+
+// get file size of fname
+extern int fsize (const char *fname);
+
+
+// wav header
+typedef struct
+{
+  unsigned char magic[4];
+  uint32_t total_length;
+  unsigned char type[4];
+  unsigned char fmt[4];
+  uint32_t header_length;
+  unsigned short format;
+  unsigned short channels;
+  uint32_t samplerate;
+  uint32_t bitrate;
+  unsigned short blockalign;
+  unsigned short bitspersample;
+  unsigned char data[4];
+  uint32_t data_length;
+} wav_header_t;
+
 
 #define ISO_HEADER_START 0
 #define ISO_HEADER_LEN (sizeof (st_iso_header_t))
 
+// TODO: remove
+enum
+{
+  LIBDM_UNKNOWN = -1,
+  LIBDM_ISO_FORMAT,
+  LIBDM_BIN_FORMAT,
+  LIBDM_CDI_FORMAT,
+  LIBDM_NRG_FORMAT,
+  LIBDM_CCD_FORMAT
+};
 
-#define DEFAULT_FORMAT   0
-#define ISO_FORMAT       1
-#define BIN_FORMAT       2
-#define CDI_FORMAT       3
-#define NRG_FORMAT       4
-#define CCD_FORMAT       5
-
+//TODO: remove these
 #define READ_BUF_SIZE  (1024*1024)
 #define WRITE_BUF_SIZE (1024*1024)
-
-extern int fsize (const char *filename);
-
 #endif  // LIBDM_MISC_H

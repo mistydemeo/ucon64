@@ -164,7 +164,7 @@ n64_sram (st_rominfo_t *rominfo, const char *sramfile)
   if (rominfo->interleaved != 0)
     mem_swap (sram, N64_SRAM_SIZE);
 
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
   q_fwrite (sram, 0x286C0, N64_SRAM_SIZE, ucon64.rom, "r+b");
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
 
@@ -187,7 +187,7 @@ n64_v64 (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".V64");
   ucon64_output_fname (dest_name, 0);
-  ucon64_fbackup (NULL, dest_name);
+  handle_existing_file (dest_name, NULL);
   q_fcpy (ucon64.rom, 0, size, dest_name, "wb");
   q_fswap (dest_name, 0, size);
 
@@ -211,7 +211,7 @@ n64_z64 (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".Z64");
   ucon64_output_fname (dest_name, 0);
-  ucon64_fbackup (NULL, dest_name);
+  handle_existing_file (dest_name, NULL);
   q_fcpy (ucon64.rom, 0, size, dest_name, "wb");
   q_fswap (dest_name, 0, size);
 
@@ -232,7 +232,7 @@ n64_n (st_rominfo_t *rominfo, const char *name)
   if (rominfo->interleaved != 0)
     mem_swap (buf, N64_NAME_LEN);
 
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
   q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 32, 20, ucon64.rom,
             "r+b");
 
@@ -255,7 +255,7 @@ n64_chk (st_rominfo_t *rominfo)
   int x;
   char buf[8];
 
-  ucon64_fbackup (NULL, ucon64.rom);
+  handle_existing_file (ucon64.rom, NULL);
 
   // n64crc is set by n64_checksum() when called from n64_init()
   for (x = 0; x < 4; x++)
@@ -295,7 +295,7 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
       if (rominfo->interleaved != 0)
         mem_swap (buf, N64_BOT_SIZE);
 
-      ucon64_fbackup (NULL, ucon64.rom);
+      handle_existing_file (ucon64.rom, NULL);
       q_fwrite (buf, N64_HEADER_START + rominfo->buheader_len + 0x40,
         N64_BOT_SIZE, ucon64.rom, "r+b");
     }
@@ -304,7 +304,7 @@ n64_bot (st_rominfo_t *rominfo, const char *bootfile)
       strcpy (buf, ucon64.rom);
       set_suffix (buf, ".BOT");
 
-      ucon64_fbackup (NULL, buf);
+      handle_existing_file (buf, NULL);
       q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len + 0x040,
         N64_BOT_SIZE, buf, "wb");
 
@@ -340,7 +340,7 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
       if (rominfo->interleaved != 0)
         mem_swap (usmsbuf, size);
 
-      ucon64_fbackup (NULL, "patched.v64");
+      handle_existing_file ("patched.v64", NULL);
       q_fwrite (usmsbuf, N64_HEADER_START + rominfo->buheader_len + 0x01b410,
         size, "patched.v64", "r+b");
       fprintf (stdout, ucon64_msg[WROTE], "patched.v64");
@@ -351,7 +351,7 @@ n64_usms (st_rominfo_t *rominfo, const char *smsrom)
     {
       strcpy (buf, ucon64.rom);
       set_suffix (buf, ".GG");
-      ucon64_fbackup (NULL, buf);
+      handle_existing_file (buf, NULL);
 
       q_fcpy (ucon64.rom, N64_HEADER_START + rominfo->buheader_len + 0x040,
         0x01000 - 0x040, buf, "wb");

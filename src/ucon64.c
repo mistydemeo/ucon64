@@ -1140,6 +1140,15 @@ ucon64_render_usage (const st_usage_t *usage)
   int x, pos = 0;
   char buf[MAXBUFSIZE];
 
+#ifdef  DEBUG
+// look for malformed usages
+  for (x = 0; usage[x].option_s || usage[x].optarg || usage[x].desc; x++)
+    fprintf (stderr, "{\"%s\", \"%s\", \"%s\"},\n",
+      usage[x].option_s,
+      usage[x].optarg,
+      usage[x].desc);
+#endif            
+
   for (x = 0; usage[x].option_s || usage[x].desc; x++)
     {
       if (!usage[x].option_s) // title
@@ -1193,13 +1202,6 @@ ucon64_render_usage (const st_usage_t *usage)
 #endif
               printf ("\n");
             }
-#ifdef  DEBUG
-// malformed usage entries use to have no desc == NULL
-          else
-            {
-              fprintf (stderr, "\n\nERROR: Usage entry for (%s) is malformed", usage[x].option_s);
-            }
-#endif
         }
     }
 }

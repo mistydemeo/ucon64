@@ -4941,28 +4941,28 @@ static const st_nes_data_t nes_data[] = {
 nes_file_t type;
 
 static const st_usage_t ines_usage[] = {
-    {NULL, "iNES header"},
-    {NULL, NULL}
+    {NULL, NULL, "iNES header"},
+    {NULL, NULL, NULL}
   };
 
 static const st_usage_t unif_usage[] = {
-    {NULL, "UNIF header"},
-    {NULL, NULL}
+    {NULL, NULL, "UNIF header"},
+    {NULL, NULL, NULL}
   };
 
 static const st_usage_t ffe_usage[] = {
-    {NULL, "FFE header"},
-    {NULL, NULL}
+    {NULL, NULL, "FFE header"},
+    {NULL, NULL, NULL}
   };
 
 static const st_usage_t pasofami_usage[] = {
-    {NULL, "Pasofami file"},
-    {NULL, NULL}
+    {NULL, NULL, "Pasofami file"},
+    {NULL, NULL, NULL}
   };
 
 static const st_usage_t fds_usage[] = {
-    {NULL, "Famicom Disk System file (diskimage)"},
-    {NULL, NULL}
+    {NULL, NULL, "Famicom Disk System file (diskimage)"},
+    {NULL, NULL, NULL}
   };
 
 static st_ines_header_t ines_header;
@@ -6259,7 +6259,7 @@ nes_ffe (st_rominfo_t *rominfo)
   header.id1 = 0xaa;
   header.id2 = 0xbb;
 #endif
-  ucon64_fbackup (NULL, buf);
+  handle_existing_file (buf, NULL);
   q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
   q_fcpy (ucon64.rom, rominfo->buheader_len, size, buf, "ab");
   fprintf (stdout, ucon64_msg[WROTE], buf);
@@ -6282,7 +6282,7 @@ nes_ineshd (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".HDR");
   ucon64_output_fname (dest_name, 0);
-  ucon64_fbackup (NULL, dest_name);
+  handle_existing_file (dest_name, NULL);
   q_fcpy (ucon64.rom, rominfo->buheader_start, 16, dest_name, "wb");
   fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
@@ -6424,7 +6424,7 @@ nes_j (st_rominfo_t *rominfo, unsigned char **mem_image)
   if (write_file)
     {
       ucon64_output_fname (dest_name, 0);
-      ucon64_fbackup (NULL, dest_name);
+      handle_existing_file (dest_name, NULL);
     }
 
   // build iNES header

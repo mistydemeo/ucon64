@@ -33,18 +33,21 @@ Would you like to do install it?" "No" "Yes, install driver")
     if [ -e "$HOME/ioport" ]; then
       cd "$HOME/ioport/driver"
       install_ioport
+    elif [ -e ioport.zip ]; then
+      unzip ioport.zip -d "$HOME"
+      cd "$HOME/ioport/driver"
+      install_ioport
+    elif [ -e "$HOME/ioport.zip" ]; then
+      unzip "$HOME/ioport.zip" -d "$HOME"
+      cd "$HOME/ioport/driver"
+      install_ioport
     else
-      if [ -e "$HOME/ioport.zip" ]; then
-        unzip $HOME/ioport.zip -d $HOME
-        cd "$HOME/ioport/driver"
-        install_ioport
-      else
-        alert "Please download the latest version of the ioport driver from either
+      alert "Please download the latest version of the ioport driver from either
 http://www.infernal.currantbun.com or
 http://ucon64.sourceforge.net
 and copy it to $HOME. Then retry to install the driver."
-        exit
-      fi
+      # exit
+      # Don't exit as uCON64 itself has been successfully installed
     fi
   fi
 

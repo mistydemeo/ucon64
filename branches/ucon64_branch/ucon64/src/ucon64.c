@@ -1323,11 +1323,13 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
 void
 ucon64_fname_arch (const char *fname)
 {
+  char name[FILENAME_MAX];
+  
   unzFile file = unzOpen (fname);
   unzip_goto_file (file, unzip_current_file_nr);
-  unzGetCurrentFileInfo (file, NULL, ucon64.fname_arch, FILENAME_MAX,
-                         NULL, 0, NULL, 0);
+  unzGetCurrentFileInfo (file, NULL, name, FILENAME_MAX, NULL, 0, NULL, 0);
   unzClose (file);
+  strncpy (ucon64.fname_arch, basename2 (name), FILENAME_MAX);
 }
 #endif
 

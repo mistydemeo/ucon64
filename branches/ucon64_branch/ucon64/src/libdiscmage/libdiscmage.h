@@ -36,10 +36,12 @@ extern "C" {
 #include <sys/types.h>
 #ifndef OWN_INTTYPES
 #define OWN_INTTYPES                            // signal that these are defined
+#if     __GNUC__ < 3
 typedef u_int8_t uint8_t;
 typedef u_int16_t uint16_t;
 typedef u_int32_t uint32_t;
 typedef u_int64_t uint64_t;
+#endif
 #endif // OWN_INTTYPES
 #else
 #ifndef OWN_INTTYPES

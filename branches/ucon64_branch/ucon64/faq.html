@@ -12,7 +12,7 @@ Q1: <a href="#1">Why uCON64?</a><br>
 <br>
 Q2: <a href="#2">How do I get started using uCON64?</a><br>
 <br>
-Q3: <a href="#3">How do I compile uCON64?</a><br>
+Q3: <a href="#3">How do I compile/build uCON64?</a><br>
 <br>
 Q4: <a href="#4">How do I install uCON64?</a><br>
 <br>
@@ -134,7 +134,7 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
 <b>A</b>: On the uCON64 homepage you can find a link to a
    <a href="http://sourceforge.net/project/showfiles.php?group_id=12381" target="_blank">download section</a>.
    There are two types of packages, binary and source. You can tell a package
-   is a binary packages if it has "bin" (without the quotes) in its name. The
+   is a binary package if it has "bin" (without the quotes) in its name. The
    source code packages have "src" in their name. Unless you are a software
    developer you probably do not need to download any of the source packages.<br>
    Choose a binary package for your system. GNU/Linux users should choose a
@@ -143,8 +143,8 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    choose any or all of the packages with "win32", "dos" or "cygwin" in their
    name. Normally, they should choose a package with "win32" in its name. The
    DOS version also runs under Windows, but has some limitations. For example,
-   the DOS version can't handle long command lines. The Cygwin version doesn't
-   have any serious limitations compared to the "normal" Win32 version, but
+   the DOS version cannot handle long command lines. The Cygwin version does
+   not have any serious limitations compared to the "normal" Win32 version, but
    behaves a bit more Unix-like than Windows users might want. Users accustomed
    to Unix might prefer the Cygwin version. The Cygwin version needs some
    additional files, though. See <a href="#27">question 27</a>.<br>
@@ -152,7 +152,7 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    <a href="#4">question 4</a>.<br>
 <br>
 <p>
-<a name="3"><b>Q3</b>: How do I compile uCON64?</a><br>
+<a name="3"><b>Q3</b>: How do I compile/build uCON64?</a><br>
 <b>A</b>: Unless you are a software developer you probably do not need to
    compile it. Just download one of the pre-built binary distributions and
    proceed to <a href="#4">question 4</a>.<br>
@@ -217,7 +217,7 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    <a href="http://www.gzip.org/zlib/" target="_blank">http://www.gzip.org/zlib/</a>.
    There are two ways to get gzip &amp; zip support for uCON64:<br>
    1.) When using the configure script.<br>
-   By default gzip &amp; zip support will be enabled if configure can find it
+   By default gzip &amp; zip support will be enabled if configure can find zlib
    on your system. If you want to disable the feature, pass the option
    --without-zlib to the configure script.<br>
    2.) When using config.h and Makefile "templates".<br>
@@ -241,12 +241,12 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    If you do not have a reason not to compile discmage and you are using DJGPP
    or Cygwin you need the library libgcc.a. This library comes with those
    compilers but is usually not located in the standard library directory.
-   However, the compiler needs to know where it can find it. There are two
-   possible ways to solve this problem:<br>
+   However, the compiler needs to know where to find it. There are two possible
+   ways to solve this problem:<br>
    1.) Copy the file libgcc.a to the standard library directory.<br>
    2.) Edit the file libdiscmage/Makefile so that the variable GCCA_DIR points
    to the directory containing libgcc.a.<br>
-   The first technique (copying the file) is preferred.<br>
+   The first option (copying the file) is preferred.<br>
 <br>
    Now read the relevant section for the compiler you are using.<br>
 <br>
@@ -540,7 +540,7 @@ Q41: <a href="#41">Is it possible to force uCON64 to send or dump (an) SRAM
    optional. For many options you have to specify either a ROM or a CD image or
    an SRAM file or some other file or a directory or an archive. However, there
    are a few options that do not need any of those arguments.<br>
-   The elipses indicate that you may specify one or more ROMs, CD images etc.
+   The ellipses indicate that you may specify one or more ROMs, CD images etc.
    Several options even support combinations of ROMs, directories and
    archives.<br>
    For the current version of uCON64, archive should be read as "ZIP file".<br>

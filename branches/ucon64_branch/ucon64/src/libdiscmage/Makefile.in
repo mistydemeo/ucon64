@@ -41,8 +41,12 @@ endif                                   # ZLIB
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
-GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/
-LIBS+=-lcygwin -lkernel32 -L$(GCCA_DIR) -lgcc
+GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/3.2/
+ifeq ($(CC),g++)
+# talk about unnecessary dependencies...
+LIBS+=-lstdc++ -lc -lpthread
+endif
+LIBS+=-L$(GCCA_DIR) -lgcc -lcygwin -lkernel32
 # kernel32 for DLOPEN and DisableThreadLibraryCalls()
 
 ifdef DLOPEN
@@ -147,7 +151,7 @@ endif
 # specify explicitly (in the source code) which symbols should be exported
 
 	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
-	@echo "      symbols, read faq.html question 2"
+	@echo "      symbols, read faq.html question 3"
 	ld --base-file tmp.base $(DLLFLAGS)
 	dlltool $(DLLTOOLFLAGS)
 	ld tmp.exp $(DLLFLAGS)
@@ -161,7 +165,7 @@ else
 $(LIBNAME).dxe: $(OBJECTS)
 endif
 	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
-	@echo "      symbols, read faq.html question 2"
+	@echo "      symbols, read faq.html question 3"
 	dxegen $(LIBNAME).dxe _import_export $(DLLFLAGS)
 ifndef DLOPEN
 # Recompile map.c, because it has to be a normal object file for the import

@@ -36,7 +36,7 @@ h2g_system (char *query)
   int len;
   char name[4096];
   char value[4096];
-  char buf[MAXBUFSIZE];
+//  char buf[MAXBUFSIZE];
   char buf2[MAXBUFSIZE];
 
 #ifdef DEBUG
@@ -177,15 +177,17 @@ void
 ucon64gui_output (char *output)
 {
 #include "xpm/icon.xpm"
+#include "xpm/back.xpm"
 
   h2g_html (0, 0, 0);
   h2g_head ();
   h2g_title ("uCON64gui - Output", icon_xpm);
   h2g_head_end ();
   h2g_body (NULL, "#c0c0c0");
-  h2g_form ("http://ucon64");
+  
+  h2g_input_image ("Back", "ucon64gui_root", back_xpm, 0, 0, "Back");
 
-  ucon64gui_top ();
+//  h2g_br();
 
   h2g_textarea ("output", output, 80, 20, TRUE, FALSE, NULL);
 

@@ -190,6 +190,12 @@ static unsigned char gd3_hirom_32mb_map[GD3_HEADER_MAPSIZE] = {
   0x20, 0x21, 0x22, 0x23, 0x20, 0x21, 0x22, 0x23,
   0x24, 0x25, 0x26, 0x27, 0x24, 0x25, 0x26, 0x27
 };
+// map for Tales of Phantasia
+static unsigned char gd3_hirom_48mb_map[GD3_HEADER_MAPSIZE] = {
+  0x20, 0x21, 0x20, 0x21, 0x20, 0x21, 0x40, 0x40,
+  0x24, 0x25, 0x26, 0x27, 0x24, 0x25, 0x26, 0x27,
+  0x22, 0x23, 0x40, 0x40, 0x28, 0x29, 0x2a, 0x2b
+};
 
 static unsigned char gd3_lorom_4mb_map[GD3_HEADER_MAPSIZE] = {
   0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
@@ -760,15 +766,11 @@ snes_mirror (unsigned char *dstbuf, unsigned int start, unsigned int data_end,
 int
 snes_gd3 (st_rominfo_t *rominfo)
 {
-  char header[GD_HEADER_LEN], dest_name[FILENAME_MAX], *p;
+  char header[GD_HEADER_LEN], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
+       *p;
   unsigned char *srcbuf, *dstbuf;
-  int n, len, n4Mbparts, surplus4Mb, total4Mbparts, size, newsize, pad;
-
-  if (rominfo->interleaved)
-    {
-      fprintf (stderr, "ERROR: This ROM seems to be interleaved\n");
-      return -1;
-    }
+  int n, len, n4Mbparts, surplus4Mb, total4Mbparts, size, newsize, pad,
+      half_size_4Mb, half_size_1Mb;
 
   size = ucon64.file_size - rominfo->buheader_len;
   n4Mbparts = size / (4 * MBIT);
@@ -791,18 +793,37 @@ snes_gd3 (st_rominfo_t *rominfo)
     dest_name[6] = 0;
   else
     dest_name[7] = 0;
+  strcpy (src_name, ucon64.rom);
 
   if (snes_hirom)
     {
-      if (total4Mbparts > 8)
+      if (rominfo->interleaved)
         {
-          fprintf (stderr, "ERROR: This ROM > 32 Mbit -- conversion not yet implemented\n");
+          fprintf (stderr, "ERROR: This ROM seems to be interleaved\n");
+          return -1;
+        }
+      if (total4Mbparts > 12)
+        {
+          fprintf (stderr, "ERROR: This ROM > 48 Mbit -- conversion not yet implemented\n");
           return -1;
         }
       if (n4Mbparts < 1)
         {
           fprintf (stderr, "ERROR: This ROM < 4 Mbit -- conversion not yet implemented\n");
           return -1;
+        }
+
+      if (total4Mbparts == 5)
+        total4Mbparts = 6;                      // 20 Mbit HiROMs get padded to 24 Mbit
+      else if (total4Mbparts > 8 && total4Mbparts < 12)
+        {                                       // 36-44 Mbit HiROMs get padded to 48 Mbit
+          if (snes_header_base != SNES_EROM)
+            {
+              fprintf (stderr, "ERROR: Normal ROM > 32 Mbit -- conversion not yet implemented\n");
+              return -1;
+            }
+          total4Mbparts = 12;
+          printf ("WARNING: Paddding to 48 Mbit -- hasn't been tested on a real Game Doctor yet\n");
         }
 
       // create the header
@@ -818,17 +839,16 @@ snes_gd3 (st_rominfo_t *rominfo)
       else
         header[0x10] = (unsigned char) 0x80;    // 0 kb or 256 kb
 
-      if (total4Mbparts == 5)
-        total4Mbparts = 6;                      // 20 Mbit HiROMs get padded to 24 Mbit
-
       if (total4Mbparts <= 2)
         memcpy (&header[0x11], gd3_hirom_8mb_map, GD3_HEADER_MAPSIZE);
       else if (total4Mbparts <= 4)
         memcpy (&header[0x11], gd3_hirom_16mb_map, GD3_HEADER_MAPSIZE);
       else if (total4Mbparts <= 6)
         memcpy (&header[0x11], gd3_hirom_24mb_map, GD3_HEADER_MAPSIZE);
-      else
+      else if (total4Mbparts <= 8)
         memcpy (&header[0x11], gd3_hirom_32mb_map, GD3_HEADER_MAPSIZE);
+      else
+        memcpy (&header[0x11], gd3_hirom_48mb_map, GD3_HEADER_MAPSIZE);
 
       if (snes_sramsize != 0)
         {
@@ -857,19 +877,7 @@ snes_gd3 (st_rominfo_t *rominfo)
       q_fread (srcbuf, rominfo->buheader_len, size, ucon64.rom);
       memset (dstbuf, 0, newsize);
 
-      if (total4Mbparts != 6)
-        {
-          n = newsize / 2;
-          snes_int_blocks (srcbuf, dstbuf + n, dstbuf, size / 0x10000);
-          if (pad > 0)
-            {
-              snes_mirror (dstbuf, (size / 2) & ~0x7ffff,
-                           (size / 2 + 0x1ffff) & ~0x1ffff, newsize / 2);
-              snes_mirror (dstbuf, n + (size / 2 & ~0x7ffff),
-                           n + ((size / 2 + 0x1ffff) & ~0x1ffff), newsize);
-            }
-        }
-      else
+      if (total4Mbparts == 6)
         {
           snes_int_blocks (srcbuf, dstbuf + 16 * MBIT, dstbuf,
                            16 * MBIT / 0x10000);
@@ -881,10 +889,42 @@ snes_gd3 (st_rominfo_t *rominfo)
               snes_mirror (dstbuf, 12 * MBIT, 14 * MBIT, 16 * MBIT);
             }
         }
+      else if (total4Mbparts == 12)
+        {
+          int size2 = size - 32 * MBIT,         // size of smaller ROM (16 Mbit if ToP)
+              newsize2 = newsize - size;
+          n = size2 / 2;
+          // interleave the 32 Mbit ROM
+          snes_int_blocks (srcbuf, dstbuf + 32 * MBIT, dstbuf + 16 * MBIT,
+                           (32 * MBIT) / 0x10000);
+          // interleave the smaller ROM
+          snes_int_blocks (srcbuf + 32 * MBIT, dstbuf + n, dstbuf, size2 / 0x10000);
+          if (pad > 0)
+            {
+              half_size_4Mb = (size2 / 2) & ~(4 * MBIT - 1);
+              half_size_1Mb = (size2 / 2 + MBIT - 1) & ~(MBIT - 1);
+              snes_mirror (dstbuf, half_size_4Mb, half_size_1Mb, newsize2 / 2);
+              snes_mirror (dstbuf, n + half_size_4Mb, n + half_size_1Mb, newsize2);
+            }
+        }
+      else
+        {
+          n = newsize / 2;
+          snes_int_blocks (srcbuf, dstbuf + n, dstbuf, size / 0x10000);
+          if (pad > 0)
+            {
+              half_size_4Mb = (size / 2) & ~(4 * MBIT - 1);
+              half_size_1Mb = (size / 2 + MBIT - 1) & ~(MBIT - 1);
+              snes_mirror (dstbuf, half_size_4Mb, half_size_1Mb, newsize / 2);
+              snes_mirror (dstbuf, n + half_size_4Mb, n + half_size_1Mb, newsize);
+            }
+        }
 
       set_nsrt_info (rominfo, (unsigned char *) &header);
 
-      ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
+      // here we could also use NULL as second argument for
+      //  ucon64_file_handler(), because we've already loaded the data
+      ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
       q_fwrite (header, 0, GD_HEADER_LEN, dest_name, "wb");
       q_fwrite (dstbuf, GD_HEADER_LEN, newsize, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);
@@ -932,9 +972,12 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       set_nsrt_info (rominfo, (unsigned char *) &header);
 
-      ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
+      ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
       q_fwrite (header, 0, GD_HEADER_LEN, dest_name, "wb");
-      q_fcpy (ucon64.rom, rominfo->buheader_len, size, dest_name, "ab");
+      if (rominfo->interleaved)
+        write_deinterleaved_data (rominfo, dest_name, size);
+      else
+        q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);
 
       rominfo->buheader_len = GD_HEADER_LEN;

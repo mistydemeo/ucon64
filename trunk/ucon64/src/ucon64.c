@@ -67,10 +67,14 @@ write programs in C
 
 int main(int argc,char *argv[])
 {
+/*if(	!argcmp(argc, argv, "-ls") &&
+	!argcmp(argc, argv, "-lsv")
+)*/
+{
   printf("%s\n",ucon64_TITLE);
   printf("Uses code from various people. See 'DEVELOPERS' for more!\n");
   printf("This may be freely redistributed under the terms of the GNU Public License\n\n");
-
+}
   if (argc<2 ||
       argcmp(argc, argv, "-h") ||
       argcmp(argc, argv, "--help") ||
@@ -325,8 +329,6 @@ if(argcmp(argc,argv,"-hex"))
 
 if(argcmp(argc,argv,"-ls"))
 {
-//TODO change and optimize
-
 if(access( ucon64_rom() ,R_OK)==-1 ||
 (dp=opendir( ucon64_rom() ))==NULL)return(-1);
 
@@ -338,20 +340,24 @@ while((ep=readdir(dp))!=0)
 	{
 		if(S_ISREG(puffer.st_mode)==1)
 		{
-			strftime(buf,13,"%b %d %H:%M",localtime(&puffer.st_ctime));
-			printf("%-31s %10ld %s %s\n","ROMNAME",puffer.st_size,buf,ep->d_name);
+			strftime(buf,13,"%b %d %H:%M",localtime(&puffer.st_mtime));
+
+	ucon64_argv[0]=ucon64_name();
+	ucon64_argv[1]="-ls";
+	ucon64_argv[2]=ep->d_name;
+	ucon64_argc=3;
+			ucon64_probe(ucon64_argc,ucon64_argv);
+			printf("%10ld %s %s\n",puffer.st_size,buf,ep->d_name);
 		}
 	}
 }
 (void)closedir(dp);
 
-	return(0);
+return(0);
 }
 
 if(argcmp(argc,argv,"-lsv"))
 {
-//TODO change and optimize
-
 if(access( ucon64_rom() ,R_OK)==-1 ||
 (dp=opendir( ucon64_rom() ))==NULL)return(-1);
 
@@ -375,8 +381,6 @@ while((ep=readdir(dp))!=0)
 
 if(argcmp(argc,argv,"-rrom"))
 {
-//TODO change and optimize
-
 if(access( ucon64_rom() ,R_OK)==-1 ||
 (dp=opendir( ucon64_rom() ))==NULL)return(-1);
 

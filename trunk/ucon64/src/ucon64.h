@@ -86,6 +86,6 @@ int ucon64_probe(int argc,char *argv[]);
 int ucon64_main(int argc,char *argv[]);
 
 unsigned int ucon64_parport;
-
+long ucon64_hsize;
 
 #endif                                          // #ifndef UCON64_H

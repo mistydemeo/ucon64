@@ -494,20 +494,20 @@ int cd64_ghemor_grab(struct cd64_t *cd64, void *io_id, uint8_t slow, int *elapse
 	}
 
 	cd64_send_byte(cd64, slow);
-	/* Receiving we need 2 dummy imports */
-	cd64_grab_byte(cd64, &tmp); /* dummy */
-	cd64_grab_byte(cd64, &tmp); /* dummy */
-	cd64_grab_byte(cd64, &tmp); /* Ghemor status */
-	if (tmp != 1) {
-		cd64->notice_callback2("Ghemor was not ready.");
-		return 0;
+	i = 0;
+	while (cd64_grab_byte(cd64, &tmp) && tmp != 1) {
+		i++;
+		if (i > 25) {
+			cd64->notice_callback2("Ghemor was not ready.");
+			return 0;
+		}
 	}
 
 	cd64_grab_dword(cd64, &len);
 	cd64->notice_callback("Downloading %lu megabits via Ghemor.",
 	                      (long unsigned int) len/BYTES_IN_MBIT);
 	for (i = 0; i < len; i++) {
-		cd64_grab_byte(cd64, &tmp);
+		if (!cd64_grab_byte(cd64, &tmp)) return 0;
 		if (!cd64->write_callback(io_id, &tmp, 1)) {
 			cd64->notice_callback2("Error writing to output.");
 			return 0;
@@ -567,12 +567,13 @@ int cd64_ghemor_send(struct cd64_t *cd64, void *io_id, uint32_t length,
 	}
 
 	cd64_send_byte(cd64, 0); /* No slow mode for sends */
-	/* Sending we only need 1 dummy */
-	cd64_grab_byte(cd64, &tmp); /* dummy */
-	cd64_grab_byte(cd64, &tmp); /* Ghemor status */
-	if (tmp != 1) {
-		cd64->notice_callback2("Ghemor was not ready.");
-		return 0;
+	i = 0;
+	while (cd64_grab_byte(cd64, &tmp) && tmp != 1) {
+		i++;
+		if (i > 25) {
+			cd64->notice_callback2("Ghemor was not ready.");
+			return 0;
+		}
 	}
 
 	cd64_send_dword(cd64, length);
@@ -581,7 +582,7 @@ int cd64_ghemor_send(struct cd64_t *cd64, void *io_id, uint32_t length,
 			cd64->notice_callback2("Error reading from input.");
 			return 0;
 		}
-		cd64_send_byte(cd64, tmp);
+		if (!cd64_send_byte(cd64, tmp)) return 0;
 		mycsum += tmp;
 		mycsum &= 0xfff;
 		if ((i % CD64_BUFFER_SIZE == 0) && cd64->progress_callback) {

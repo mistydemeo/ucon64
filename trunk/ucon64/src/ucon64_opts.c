@@ -172,6 +172,10 @@ ucon64_switches (int c, const char *optarg)
       break;
 #endif
 
+    case UCON64_DISC:
+      ucon64.force_disc = 1;
+      break;
+
     case UCON64_NS:
       ucon64.split = 0;
       break;

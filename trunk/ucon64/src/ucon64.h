@@ -138,6 +138,7 @@ typedef struct
   int dat_enabled;                              // flag if DAT file(s) are usable/enabled
   int quiet;                                    // quiet == -1 means verbose + 1
 
+  int force_disc;                               // --disc was used
   uint32_t flags;                                 // detect and init ROM info
 
   // has higher priority than crc_big_files!

@@ -1260,7 +1260,7 @@ ucon64_ls_main (const char *filename, struct stat *fstate, int mode, int console
             strcpy (buf, ucon64_dat ? ucon64_dat->fname : "");
           else
             strcpy (buf, ucon64_dat ? ucon64_dat->fname : rominfo.name);
-          
+
           strcpy (buf2, strtrim (buf));
 
           if (buf2[0])
@@ -1422,11 +1422,11 @@ ucon64_configfile (void)
                  "#parport=378\n"
                  "#\n"
 #if     defined __MSDOS__
-                 "discmage_path=discmage.dxe\n"
-                 "configdir=\n"
+                 "discmage_path=~\\discmage.dxe\n" // realpath2() expands the tilde
+                 "configdir=~\n"
 #elif   defined __CYGWIN__
-                 "discmage_path=discmage.dll\n"
-                 "configdir=\n"
+                 "discmage_path=~/discmage.dll\n"
+                 "configdir=~\n"
 #elif   defined __unix__ || defined __BEOS__
                  "discmage_path=~/.ucon64/discmage.so\n"
                  "configdir=~/.ucon64\n"
@@ -1522,9 +1522,9 @@ ucon64_configfile (void)
 
       set_property (ucon64.configfile, "discmage_path",
 #if     defined __MSDOS__
-        "discmage.dxe"
+        "~\\discmage.dxe"                       // realpath2() expands the tilde
 #elif   defined __CYGWIN__
-        "discmage.dll"
+        "~/discmage.dll"
 #elif   defined __unix__ || defined __BEOS__
         "~/.ucon64/discmage.so"
 #else
@@ -1534,9 +1534,9 @@ ucon64_configfile (void)
 
       set_property (ucon64.configfile, "configdir",
 #if     defined __MSDOS__
-        ""
+        "~"                                     // realpath2() expands the tilde
 #elif   defined __CYGWIN__
-        ""
+        "~"
 #elif   defined __unix__ || defined __BEOS__
         "~/.ucon64"
 #else

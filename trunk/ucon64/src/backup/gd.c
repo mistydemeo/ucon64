@@ -268,7 +268,7 @@ gd_add_filename (const char *filename)
       p = strrchr (buf, '.');
       if (p)
         *p = 0;
-      strncpy (gd_names[gd_name_i], basename2 (buf), 11);
+      strncpy (gd_names[gd_name_i], basename (buf), 11);
       gd_names[gd_name_i][11] = 0;
       gd_name_i++;
     }

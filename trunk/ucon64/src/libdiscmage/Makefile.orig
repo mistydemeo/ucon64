@@ -1,7 +1,7 @@
 .PHONY: all clean install
 
 DLOPEN=1
-ZLIB=1
+#ZLIB=1
 
 libdir = ${exec_prefix}/lib
 #INSTALL = @INSTALL@
@@ -61,7 +61,8 @@ GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/2.953
 LIBS+=-L$(GCCA_DIR) -lgcc
 
 CFLAGS+=-DDXE
-DLLFLAGS=$(OBJECTS) $(LIBS)
+DLLFLAGS=$(OBJECTS) $(LIBS) $(LDFLAGS)  
+# $(LDFLAGS) must come after $(OBJECTS)
 FULLLIBNAME=$(LIBNAME).dxe
 
 else                                    # Unix or BeOS

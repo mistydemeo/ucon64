@@ -262,7 +262,8 @@ ansi_strip (char *str)
 int
 isfname (int c)
 {
-  if (isalnum (c)) return TRUE;
+  if (isalnum (c))
+    return TRUE;
 
   switch (c)
     {
@@ -288,7 +289,8 @@ isfname (int c)
 int
 isprint2 (int c)
 {
-  if (isprint (c)) return TRUE;
+  if (isprint (c))
+    return TRUE;
 
   switch (c)
     {
@@ -341,7 +343,7 @@ to_func (unsigned char *s, int size, int (*func) (int))
 
   for (; size > 0; p++, size--)
     *p = func (*p);
-      
+
   return s;
 }
 
@@ -351,13 +353,14 @@ strcasestr2 (const char *str, const char *search)
 {
   char *p = (char *) str;
   int len = strlen (search);
-  
-  if (!len) return p;
-  
+
+  if (!len)
+    return p;
+
   for (; *p; p++)
     if (!strnicmp (p, search, len))
       return p;
-  
+
   return NULL;
 }
 
@@ -507,7 +510,7 @@ ren (const char *path, int (*func) (int))
 int
 renlwr (const char *path)
 {
-  return ren (path, tolower); 
+  return ren (path, tolower);
 }
 
 
@@ -571,8 +574,9 @@ dirname2 (char *str)
 // dirname() clone
 {
   char *p = strrchr (str, FILE_SEPARATOR);
-  if (p) *(++p) = 0;
-  
+  if (p)
+    *(++p) = 0;
+
   return str;
 }
 
@@ -583,19 +587,30 @@ realpath2 (const char *src, char *full_path)
 {
   char path1[FILENAME_MAX], path2[FILENAME_MAX];
 
-  if (src[0] == '~' && src[1] == FILE_SEPARATOR)
+  if (src[0] == '~')
     {
-      strcpy (path1, getenv2 ("HOME"));
-      strcpy (path2, &src[2]);
-      sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
+      if (src[1] == FILE_SEPARATOR)
+        {
+          strcpy (path1, getenv2 ("HOME"));
+          strcpy (path2, &src[2]);
+          sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
+        }
+      else if (src[1] == 0)
+        strcpy (full_path, getenv2 ("HOME"));
     }
-
-  if (src[0] == '.' && src[1] == FILE_SEPARATOR)
+  else if (src[0] == '.')
     {
-      getcwd (path1, FILENAME_MAX);
-      strcpy (path2, &src[2]);
-      sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
-    }
+      if (src[1] == FILE_SEPARATOR)
+        {
+          getcwd (path1, FILENAME_MAX);
+          strcpy (path2, &src[2]);
+          sprintf (full_path, "%s"FILE_SEPARATOR_S"%s", path1, path2);
+        }
+      else if (src[1] == 0)
+        getcwd (full_path, FILENAME_MAX);       // callers should always pass
+    }                                           //  arrays that are large enough
+   else
+     strcpy (full_path, src);
 
   return full_path;
 }
@@ -610,7 +625,8 @@ strargv (int *argc, char ***argv, char *cmdline, int separator_char)
   char buf[MAXBUFSIZE];
 
   if (*cmd)
-    for (; (argv[i] = strtok (!i?cmd:NULL, " ")) && i < (argc - 1); i++);
+    for (; (argv[i] = strtok (!i?cmd:NULL, " ")) && i < (argc - 1); i++)
+      ;
 #endif
   return NULL;
 }

@@ -258,7 +258,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 
   memset (dat, 0, sizeof (st_ucon64_dat_t));
 
-  strcpy (dat->datfile, basename2 (fname));
+  strcpy (dat->datfile, basename (fname));
 
   if (dat_field[5])
     sscanf (dat_field[5], "%x", &dat->current_crc32);
@@ -413,7 +413,7 @@ ucon64_dat_view (int console)
         "  Author: %s\n"
         "  Comment: %s\n"
         "  Entries: %d\n\n",
-        basename2 (buf),
+        basename (buf),
 //        dat.console_usage[0],
         dat.version,
         dat.date,
@@ -533,7 +533,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
           while (get_dat_entry (buf, dat, crc32, idx_entry->filepos))
             if (crc32 == dat->current_crc32)
               {
-                strcpy (dat->datfile, basename2 (buf));
+                strcpy (dat->datfile, basename (buf));
                 get_dat_header (buf, dat);
                 free (p);
                 return dat;
@@ -551,7 +551,7 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
             while (get_dat_entry (buf, dat, crc32, -1))
               if (crc32 == dat->current_crc32)
                 {
-                  strcpy (dat->datfile, basename2 (buf));
+                  strcpy (dat->datfile, basename (buf));
                   get_dat_header (buf, dat);
                   return dat;
                 }
@@ -618,7 +618,7 @@ ucon64_dat_indexer (void)
       size = q_fsize (buf);
 
       fprintf (stdout, "%s: %s\n",
-        (!update ? "Create" : "Update"), basename2 (buf2));
+        (!update ? "Create" : "Update"), basename (buf2));
 
       fclose_fdat ();
       pos = 0;

@@ -352,7 +352,7 @@ ucon64_exit (void)
 int
 main (int argc, char **argv)
 {
-  int c = 0, console, show_nfo, rom_index, file_message = 0, n_entries;
+  int c = 0, console, show_nfo, rom_index, file_message = 0;
   char buf[MAXBUFSIZE], *ptr;
 
   printf ("%s\n"
@@ -382,11 +382,8 @@ main (int argc, char **argv)
 #ifdef  __CYGWIN__
   strcpy (ucon64.discmage_path, cygwin_fix (ucon64.discmage_path));
 #endif
-  if (strlen (ucon64.discmage_path) >= 3)
-    {
-      strcpy (buf, ucon64.discmage_path);
-      realpath2 (buf, ucon64.discmage_path);
-    }
+  strcpy (buf, ucon64.discmage_path);
+  realpath2 (buf, ucon64.discmage_path);
 
   // if ucon64.discmage_path points to an existing file then load it
   if (!access (ucon64.discmage_path, F_OK))
@@ -477,11 +474,8 @@ main (int argc, char **argv)
 #ifdef  __CYGWIN__
   strcpy (ucon64.configdir, cygwin_fix (ucon64.configdir));
 #endif
-  if (strlen (ucon64.configdir) >= 3)
-    {
-      strcpy (buf, ucon64.configdir);
-      realpath2 (buf, ucon64.configdir);
-    }
+  strcpy (buf, ucon64.configdir);
+  realpath2 (buf, ucon64.configdir);
 
   if (!access (ucon64.configdir, F_OK))
     ucon64.dat_enabled = 1;
@@ -565,7 +559,7 @@ main (int argc, char **argv)
   while (rom_index < argc)                      // use argc, NOT ucon64.argc!
     {
 #ifdef  HAVE_ZLIB_H
-      int process_multizips;
+      int process_multizips, n_entries;
 
       /*
         See the comment in ucon64_process_rom(). I (dbjh) prefer the GBA

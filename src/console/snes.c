@@ -2316,7 +2316,7 @@ snes_init (st_rominfo_t *rominfo)
     {
       y = ((header.size_high << 8) + header.size_low) * 8 * 1024;
       y += SWC_HEADER_LEN;                      // if SWC-like header -> hdr[1] high byte,
-      if (y == ucon64.file_size)              //  hdr[0] low byte of # 8 kB blocks in ROM
+      if (y == ucon64.file_size)                //  hdr[0] low byte of # 8 kB blocks in ROM
         rominfo->buheader_len = SWC_HEADER_LEN;
       else
         {

@@ -1317,7 +1317,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   if (rominfo->misc[0])
     {
       strcpy (buf, rominfo->misc);
-      puts (to_func (buf, strlen (buf), toprint2));
+      printf ("%s\n", to_func (buf, strlen (buf), toprint2));
     }
 
   // internal checksums?
@@ -1355,7 +1355,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
       if (rominfo->internal_crc2[0])
         {
           strcpy (buf, rominfo->internal_crc2);
-          puts (to_func (buf, strlen (buf), toprint2));
+          printf ("%s\n", to_func (buf, strlen (buf), toprint2));
         }
     }
 

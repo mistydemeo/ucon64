@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+// NOTE: The people at Sega refer to their company as Sega in normal text (not as SEGA)
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -56,7 +57,7 @@ static int save_mgd (const char *name, unsigned char **buffer, long size);
 const st_usage_t genesis_usage[] =
   {
     {NULL, NULL, "Genesis/Sega Mega Drive/Sega CD/32X/Nomad"},
-    {NULL, NULL, "1989/19XX/19XX SEGA http://www.sega.com"},
+    {NULL, NULL, "1989/19XX/19XX Sega http://www.sega.com"},
     {"gen", NULL, "force recognition"},
     {"int", NULL, "force ROM is in interleaved format (SMD)"},
     {"int2", NULL, "force ROM is in interleaved format 2 (MGD)"},
@@ -109,7 +110,7 @@ typedef struct st_genesis_header
 
 static st_genesis_header_t genesis_header;
 static genesis_file_t type;
-static int genesis_rom_size, genesis_has_sram, genesis_tv_standard;
+static int genesis_rom_size, genesis_has_ram, genesis_tv_standard;
 
 
 genesis_file_t
@@ -898,7 +899,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
   fputc (0, destfile);                          // 0x1d = 0
   fputc (totalsize / (2 * MBIT), destfile);     // 0x1e = bank code
 
-  if (genesis_has_sram)
+  if (genesis_has_ram)
     {
 #if 0 // TODO: ask Leo how to use S1 & S0
       flags = sram_page++;
@@ -1097,55 +1098,56 @@ genesis_testinterleaved (st_rominfo_t *rominfo)
   unsigned char buf[16384];
 
   q_fread (buf, rominfo->buheader_len, 8192 + (GENESIS_HEADER_START + 4) / 2, ucon64.rom);
+  if (!memcmp (buf + GENESIS_HEADER_START, "SEGA", 4))
+    return 0;
+
   smd_deinterleave (buf, 16384);
   if (!memcmp (buf + GENESIS_HEADER_START, "SEGA", 4))
     return 1;
-  else
-    {
-      q_fread_mgd (buf, rominfo->buheader_len + GENESIS_HEADER_START, 4, ucon64.rom);
-      if (!memcmp (buf, "SEGA", 4))
-        return 2;
-      else
-        return 0;
-    }
+  
+  q_fread_mgd (buf, rominfo->buheader_len + GENESIS_HEADER_START, 4, ucon64.rom);
+  if (!memcmp (buf, "SEGA", 4))
+    return 2;
+
+  return 0;                                     // unknown, act as if it's BIN
 }
 
 
 int
 genesis_init (st_rominfo_t *rominfo)
 {
-  int result = -1, value = 0, x;
+  int result = -1, value = 0, x, y;
   unsigned char *rom_buffer = NULL, buf[MAXBUFSIZE], name[GENESIS_NAME_LEN + 1];
   static char maker[9], country[200]; // 200 characters should be enough for 5 country names
   static const char *genesis_maker[0x100] = {
-    NULL, "Accolade", "Virgin Games", "Parker Brothers", "Westone",
+    NULL, "Accolade/Infogrames", "Virgin Games", "Parker Brothers", "Westone",
     NULL, NULL, NULL, NULL, "Westone",
-    "Takara", "Taito or Accolade", "Capcom", "Data East", "Namco or Tengen",
+    "Takara", "Taito/Accolade", "Capcom", "Data East", "Namco/Tengen",
     "Sunsoft", "Bandai", "Dempa", "Technosoft", "Technosoft",
-    "Asmik", NULL, "Extreme or Micronet", "Vic Tokai", "American Sammy",
-    NULL, NULL, NULL, NULL, "Kyugo",
+    "Asmik", NULL, "Extreme/Micronet", "Vic Tokai", "American Sammy",
+    "NCS", "Sigma Enterprises", "Toho", NULL, "Kyugo",
     NULL, NULL, "Wolfteam", "Kaneko", NULL,
     "Toaplan", "Tecmo", NULL, NULL, NULL,
-    "Toaplan", NULL, "UFL Company Limited", "Human", NULL,
-    "Game Arts", NULL, "Sage's Creation", "Tengen", "Renovation or Telenet",
+    "Toaplan", "Unipac", "UFL Company Ltd.", "Human", NULL,
+    "Game Arts", "Hot-B", "Sage's Creation", "Tengen/Time Warner", "Renovation/Telenet",
     "Electronic Arts", NULL, NULL, NULL, NULL,
     "Psygnosis", "Razorsoft", NULL, "Mentrix", NULL,
-    "JVC or Victor Musical Industries", NULL, NULL, NULL, NULL,
-    NULL, NULL, "CRI", "Arena", "Virgin Games",
-    NULL, NULL, NULL, "Soft Vision", "Palsoft",
+    "JVC/Victor Musical Industries", NULL, NULL, NULL, "IGS Corp.",
+    NULL, NULL, "CRI/Home Data", "Arena", "Virgin Games",
+    NULL, "Nichibutsu", NULL, "Soft Vision", "Palsoft",
     NULL, "KOEI", NULL, NULL, "U.S. Gold",
-    NULL, "Acclaim or Flying Edge", NULL, "Gametek", NULL,
-    NULL, "Absolute", "Mindscape", "Domark", NULL,
+    NULL, "Acclaim/Flying Edge", NULL, "Gametek", NULL,
+    NULL, "Absolute", "Mindscape", "Domark", "Parker Brothers",
     NULL, NULL, NULL, "Sony Imagesoft", "Sony Imagesoft",
-    "Konami", NULL, "Tradewest", NULL, "Codemasters",
+    "Konami", NULL, "Tradewest/Williams", NULL, "Codemasters",
     "T*HQ Software", "TecMagik", NULL, "Takara", NULL,
     NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, "Hi Tech Entertainment or Designer Software", "Psygnosis", NULL,
+    NULL, NULL, "Hi Tech Entertainment/Designer Software", "Psygnosis", NULL,
     NULL, NULL, NULL, NULL, "Accolade",
     "Code Masters", NULL, NULL, NULL, "Spectrum HoloByte",
     "Interplay", NULL, NULL, NULL, NULL,
     "Activision", NULL, "Shiny & Playmates", NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, "Viacom International",
     NULL, NULL, NULL, NULL, "Atlus",
     NULL, NULL, NULL, NULL, NULL,
     NULL, "Infogrames", NULL, NULL, NULL,
@@ -1291,25 +1293,32 @@ genesis_init (st_rominfo_t *rominfo)
 
   // ROM maker
   memcpy (maker, &OFFSET (genesis_header, 16), 8);
-  maker[8] = 0;
   if (maker[3] == 'T' && maker[4] == '-')
     {
-      memcpy (buf, &maker[5], 3);
-      sscanf ((char *) buf, "%03d", &value);
+      sscanf (&maker[5], "%03d", &value);
       rominfo->maker = NULL_TO_UNKNOWN_S (genesis_maker[value & 0xff]);
     }
   else
     {
+      // Don't use genesis_maker here. If it would be corrected an incorrect
+      //  publisher name would be displayed.
       rominfo->maker =
-        (!strcmp (maker, "(C)ACLD ")) ? NULL_TO_UNKNOWN_S (genesis_maker[1]) :
-        (!strcmp (maker, "(C)VRGN ")) ? NULL_TO_UNKNOWN_S (genesis_maker[2]) :
-        (!strcmp (maker, "(C)WADN ")) ? NULL_TO_UNKNOWN_S (genesis_maker[3]) :
-        (!strcmp (maker, "(C)WSTN ")) ? NULL_TO_UNKNOWN_S (genesis_maker[4]) :
-        (!strcmp (maker, "(C)ASCI ")) ? "ASCII" :
-        (!strcmp (maker, "(C)RSI  ")) ? NULL_TO_UNKNOWN_S (genesis_maker[0x38]) :
-        (!strcmp (maker, "(C)SEGA ")) ? "SEGA" :
-        (!strcmp (maker, "(C)TREC ")) ? "Treco" :
-      maker;
+        (!strncmp (maker, "(C)ACLD", 7)) ? "Ballistic" :
+        (!strncmp (maker, "(C)AESI", 7)) ? "ASCII" :
+        (!strncmp (maker, "(C)ASCI", 7)) ? "ASCII" :
+        (!strncmp (maker, "(C)KANEKO", 9)) ? "Kaneko" :
+        (!strncmp (maker, "(C)PPP", 6)) ? "Gametek" :
+        (!strncmp (maker, "(C)RSI", 6)) ? "Razorsoft" : // or is it "(C)1RSI"?
+        (!strncmp (maker, "(C)SEGA", 7)) ? "Sega" :
+        (!strncmp (maker, "(C)TREC", 7)) ? "Treco" :
+        (!strncmp (maker, "(C)VRGN", 7)) ? "Virgin Games" :
+        (!strncmp (maker, "(C)WADN", 7)) ? "Parker Brothers" :
+        (!strncmp (maker, "(C)WSTN", 7)) ? "Westone" : NULL;
+      if (!rominfo->maker)
+        {
+          maker[8] = 0;
+          rominfo->maker = maker;
+        }
     }
 
   genesis_tv_standard = 1;              // default to PAL; NTSC has higher precedence
@@ -1336,43 +1345,68 @@ genesis_init (st_rominfo_t *rominfo)
   memcpy (name, &OFFSET (genesis_header, 80), GENESIS_NAME_LEN);
   name[GENESIS_NAME_LEN] = 0;
   sprintf ((char *) buf, "Overseas game name: %s\n", name);
-  strcat (rominfo->misc, (const char *) buf);
+  strcat (rominfo->misc, (char *) buf);
 
-#if 0
-  if (OFFSET (genesis_header, 166) == 255 &&
-      OFFSET (genesis_header, 167) == 255)
-    strcpy(buf, "Internal Size: ? Mb\n");
+  sprintf ((char *) buf, "Date: %.8s\n", &OFFSET (genesis_header, 24));
+  strcat (rominfo->misc, (char *) buf);
+
+  x = (OFFSET (genesis_header, 160) << 24) +
+      (OFFSET (genesis_header, 161) << 16) +
+      (OFFSET (genesis_header, 162) << 8) +
+       OFFSET (genesis_header, 163);
+  y = (OFFSET (genesis_header, 164) << 24) +
+      (OFFSET (genesis_header, 165) << 16) +
+      (OFFSET (genesis_header, 166) << 8) +
+       OFFSET (genesis_header, 167);
+  sprintf ((char *) buf, "Internal size: %.4f Mb\n", (float) (y - x) / MBIT);
+  strcat (rominfo->misc, (char *) buf);
+
+  sprintf ((char *) buf, "ROM start: %08x\n", x);
+  strcat (rominfo->misc, (char *) buf);
+
+  sprintf ((char *) buf, "ROM end: %08x\n", y);
+  strcat (rominfo->misc, (char *) buf);
+
+  genesis_has_ram = OFFSET (genesis_header, 176) == 'R' &&
+                    OFFSET (genesis_header, 177) == 'A';
+  if (genesis_has_ram)
+    {
+      x = (OFFSET (genesis_header, 180) << 24) +
+          (OFFSET (genesis_header, 181) << 16) +
+          (OFFSET (genesis_header, 182) << 8) +
+           OFFSET (genesis_header, 183);
+      y = (OFFSET (genesis_header, 184) << 24) +
+          (OFFSET (genesis_header, 185) << 16) +
+          (OFFSET (genesis_header, 186) << 8) +
+           OFFSET (genesis_header, 187);
+      sprintf ((char *) buf, "Cartridge RAM: Yes, %d kBytes (%s)\n",
+               y - x >> 10,
+               OFFSET (genesis_header, 178) & 0x40 ? "backup" : "non-backup");
+      strcat (rominfo->misc, (char *) buf);
+
+      sprintf ((char *) buf, "RAM start: %08x\n", x);
+      strcat (rominfo->misc, (char *) buf);
+    
+      sprintf ((char *) buf, "RAM end: %08x\n", y);
+      strcat (rominfo->misc, (char *) buf);
+    }
   else
-#endif
-  sprintf ((char *) buf, "Internal size: %.4f Mb\n", (float)
-           (OFFSET (genesis_header, 165) + 1) / 2);
-  strcat (rominfo->misc, (const char *) buf);
-
-  sprintf ((char *) buf, "Start: %02x%02x%02x%02x\n",
-           OFFSET (genesis_header, 160),
-           OFFSET (genesis_header, 161),
-           OFFSET (genesis_header, 162),
-           OFFSET (genesis_header, 163));
-  strcat (rominfo->misc, (const char *) buf);
-
-  sprintf ((char *) buf, "End: %02x%02x%02x%02x\n",
-           OFFSET (genesis_header, 164),
-           OFFSET (genesis_header, 165),
-           OFFSET (genesis_header, 166),
-           OFFSET (genesis_header, 167));
-  strcat (rominfo->misc, (const char *) buf);
+    strcat (rominfo->misc, "Cartridge RAM: No\n");
 
 #if 1
-// This code seems to give better results than the old code.
-  sprintf ((char *) buf, "ROM type: %s\n",
+/*
+  This code seems to give better results than the old code.
+  "Officially" "GM" indicates it's a game and "Al" that it's educational.
+*/
+  sprintf ((char *) buf, "Product type: %s\n",
            (OFFSET (genesis_header, 128) == 'G') ? "Game" : "Education");
-  strcat (rominfo->misc, (const char *) buf);
+  strcat (rominfo->misc, (char *) buf);
 #else
   if (OFFSET (genesis_header, 128) == 'G')
     {
       sprintf ((char *) buf, "ROM type: %s\n",
                (OFFSET (genesis_header, 129) == 'M') ? "Game" : "Education");
-      strcat (rominfo->misc, (const char *) buf);
+      strcat (rominfo->misc, (char *) buf);
     }
 #endif
 
@@ -1387,27 +1421,19 @@ genesis_init (st_rominfo_t *rominfo)
       strcat ((char *) buf, io_device);
     }
   strcat ((char *) buf, "\n");
-  strcat (rominfo->misc, (const char *) buf);
+  strcat (rominfo->misc, (char *) buf);
 
-  sprintf ((char *) buf, "Product code: %-11.11s\n", &OFFSET (genesis_header, 128));
-  strcat (rominfo->misc, (const char *) buf);
+  sprintf ((char *) buf, "Modem data: %.10s\n", &OFFSET (genesis_header, 188));
+  strcat (rominfo->misc, (char *) buf);
 
-  sprintf ((char *) buf, "Date: %-8.8s\n", &OFFSET (genesis_header, 24));
-  strcat (rominfo->misc, (const char *) buf);
+  sprintf ((char *) buf, "Memo: %.40s\n", &OFFSET (genesis_header, 200));
+  strcat (rominfo->misc, (char *) buf);
 
-  sprintf ((char *) buf, "Modem data: %-20.20s\n", &OFFSET (genesis_header, 188));
-  strcat (rominfo->misc, (const char *) buf);
-
-  sprintf ((char *) buf, "Memo: %-40.40s\n", &OFFSET (genesis_header, 200));
-  strcat (rominfo->misc, (const char *) buf);
-
-  genesis_has_sram = OFFSET (genesis_header, 176) == 'R' &&
-                     OFFSET (genesis_header, 177) == 'A';
-  sprintf ((char *) buf, "Backup RAM: %s\n", genesis_has_sram ? "Yes" : "No");
-  strcat (rominfo->misc, (const char *) buf);
+  sprintf ((char *) buf, "Product code: %.8s\n", &OFFSET (genesis_header, 131));
+  strcat (rominfo->misc, (char *) buf);
 
   sprintf ((char *) buf, "Version: 1.%c%c", OFFSET (genesis_header, 140), OFFSET (genesis_header, 141));
-  strcat (rominfo->misc, (const char *) buf);
+  strcat (rominfo->misc, (char *) buf);
 
   // internal ROM crc
   if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)

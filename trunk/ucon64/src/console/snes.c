@@ -3141,7 +3141,7 @@ snes_init (st_rominfo_t *rominfo)
 {
   int x, y, size, calc_checksums, result = -1;  // it's no SNES ROM dump until detected otherwise
   unsigned char *rom_buffer;
-  st_unknown_header_t header;
+  st_unknown_header_t header = { 0, 0, 0, 0, 0, 0, { 0 }, 0, 0, 0, { 0 } };
   char buf[MAXBUFSIZE], *str;
 #define SNES_COUNTRY_MAX 0xe
   static const char *snes_country[SNES_COUNTRY_MAX] =

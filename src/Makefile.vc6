@@ -40,7 +40,7 @@ OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
         backup/cd64.obj backup/dex.obj backup/doctor64.obj \
         backup/doctor64jr.obj backup/f2a.obj backup/fal.obj backup/ffe.obj \
         backup/fig.obj backup/fpl.obj backup/gbx.obj backup/gd.obj \
-        backup/interceptor.obj backup/lynxit.obj backup/mccl.obj \
+        backup/interceptor.obj backup/lynxit.obj backup/mccl.obj backup/mcd.obj \
         backup/md-pro.obj backup/mgd.obj backup/msg.obj backup/smc.obj \
         backup/smd.obj backup/smsgg-pro.obj backup/ssc.obj backup/swc.obj \
         backup/pce-pro.obj backup/psxpblib.obj backup/tototek.obj \
@@ -146,10 +146,10 @@ ucon64.obj: dlopen.h getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
             backup/cd64.h backup/dex.h backup/doctor64.h backup/doctor64jr.h \
             backup/f2a.h backup/fal.h backup/ffe.h backup/fig.h backup/fpl.h \
             backup/gbx.h backup/gd.h backup/interceptor.h backup/lynxit.h \
-            backup/mccl.h backup/md-pro.h backup/mgd.h backup/msg.h \
-            backup/pce-pro.h backup/smc.h backup/smd.h backup/smsgg-pro.h \
-            backup/ssc.h backup/swc.h backup/tototek.h backup/ufo.h \
-            backup/yoko.h backup/z64.h \
+            backup/mccl.h backup/mcd.h backup/md-pro.h backup/mgd.h \
+            backup/msg.h backup/pce-pro.h backup/smc.h backup/smd.h \
+            backup/smsgg-pro.h backup/ssc.h backup/swc.h backup/tototek.h \
+            backup/ufo.h backup/yoko.h backup/z64.h \
             patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/pal4u.h \
             patch/ppf.h patch/xps.h $(UCON64_STD_H)
 ucon64_dat.obj: ucon64_dat.h $(UCON64_STD_H)
@@ -164,10 +164,10 @@ ucon64_opts.obj: dlopen.h getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
                  backup/doctor64jr.h backup/f2a.h backup/fal.h backup/ffe.h \
                  backup/fig.h backup/fpl.h backup/gbx.h backup/gd.h \
                  backup/interceptor.h backup/lynxit.h backup/mccl.h \
-                 backup/md-pro.h backup/mgd.h backup/msg.h backup/pce-pro.h \
-                 backup/smc.h backup/smd.h backup/smsgg-pro.h backup/ssc.h \
-                 backup/swc.h backup/tototek.h backup/ufo.h backup/yoko.h \
-                 backup/z64.h \
+                 backup/mcd.h backup/md-pro.h backup/mgd.h backup/msg.h \
+                 backup/pce-pro.h backup/smc.h backup/smd.h backup/smsgg-pro.h \
+                 backup/ssc.h backup/swc.h backup/tototek.h backup/ufo.h \
+                 backup/yoko.h backup/z64.h \
                  patch/aps.h patch/bsl.h patch/gg.h patch/ips.h patch/pal4u.h \
                  patch/ppf.h patch/xps.h $(UCON64_STD_H)
 unzip.obj: unzip.h config.h
@@ -198,6 +198,7 @@ backup/fpl.obj: backup/fpl.h $(UCON64_STD_H)
 backup/gd.obj: backup/gd.h console/snes.h $(UCON64_STD_H)
 backup/gbx.obj: backup/gbx.h $(UCON64_STD_H)
 backup/lynxit.obj: backup/lynxit.h $(UCON64_STD_H)
+backup/mcd.obj: backup/mcd.h $(UCON64_STD_H)
 backup/mccl.obj: backup/mccl.h $(UCON64_STD_H)
 backup/md-pro.obj: backup/md-pro.h backup/tototek.h $(UCON64_STD_H)
 backup/mgd.obj: backup/mgd.h $(UCON64_STD_H)

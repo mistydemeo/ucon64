@@ -104,8 +104,8 @@ OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
         backup/cd64.o backup/dex.o backup/doctor64.o backup/doctor64jr.o \
         backup/f2a.o backup/fal.o backup/ffe.o backup/fig.o backup/fpl.o \
         backup/gbx.o backup/gd.o backup/interceptor.o backup/lynxit.o \
-        backup/mccl.o backup/md-pro.o backup/mgd.o backup/msg.o backup/smc.o \
-        backup/smd.o backup/smsgg-pro.o backup/ssc.o backup/swc.o \
+        backup/mccl.o backup/mcd.o backup/md-pro.o backup/mgd.o backup/msg.o \
+        backup/smc.o backup/smd.o backup/smsgg-pro.o backup/ssc.o backup/swc.o \
         backup/pce-pro.o backup/psxpblib.o backup/tototek.o backup/ufo.o \
         backup/yoko.o backup/z64.o
 ifdef USE_ZLIB
@@ -303,7 +303,7 @@ ucon64.o: dlopen.h getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
           backup/cd64.h backup/dex.h backup/doctor64.h backup/doctor64jr.h \
           backup/f2a.h backup/fal.h backup/ffe.h backup/fig.h backup/fpl.h \
           backup/gbx.h backup/gd.h backup/interceptor.h backup/lynxit.h \
-          backup/mccl.h backup/md-pro.h backup/mgd.h backup/msg.h \
+          backup/mccl.h backup/mcd.h backup/md-pro.h backup/mgd.h backup/msg.h \
           backup/pce-pro.h backup/smc.h backup/smd.h backup/smsgg-pro.h \
           backup/ssc.h backup/swc.h backup/tototek.h backup/ufo.h backup/yoko.h \
           backup/z64.h \
@@ -320,7 +320,7 @@ ucon64_opts.o: dlopen.h getopt.h ucon64_dat.h ucon64_dm.h ucon64_opts.h \
                backup/cd64.h backup/dex.h backup/doctor64.h \
                backup/doctor64jr.h backup/f2a.h backup/fal.h backup/ffe.h \
                backup/fig.h backup/fpl.h backup/gbx.h backup/gd.h \
-               backup/interceptor.h backup/lynxit.h backup/mccl.h \
+               backup/interceptor.h backup/lynxit.h backup/mccl.h backup/mcd.h \
                backup/md-pro.h backup/mgd.h backup/msg.h backup/pce-pro.h \
                backup/smc.h backup/smd.h backup/smsgg-pro.h backup/ssc.h \
                backup/swc.h backup/tototek.h backup/ufo.h backup/yoko.h \
@@ -356,6 +356,7 @@ backup/gd.o: backup/gd.h console/snes.h $(UCON64_STD_H)
 backup/gbx.o: backup/gbx.h $(UCON64_STD_H)
 backup/lynxit.o: backup/lynxit.h $(UCON64_STD_H)
 backup/mccl.o: backup/mccl.h $(UCON64_STD_H)
+backup/mcd.o: backup/mcd.h $(UCON64_STD_H)
 backup/md-pro.o: backup/md-pro.h backup/tototek.h $(UCON64_STD_H)
 backup/mgd.o: backup/mgd.h $(UCON64_STD_H)
 backup/msg.o: backup/msg.h backup/ffe.h $(UCON64_STD_H)

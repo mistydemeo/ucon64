@@ -1442,13 +1442,12 @@ f2a_wait_par (void)
 
 #if     defined USE_PARALLEL || defined USE_USB
 int
-f2a_read_rom (const char *filename, unsigned int parport, int size)
+f2a_read_rom (const char *filename, int size)
 {
   int offset = 0;
 
   starttime = time (NULL);
 #ifdef  USE_USB
-  (void) parport;                               // warning remover if only USE_USB
   if (ucon64.usbport)
     {
       f2a_init_usb ();
@@ -1461,7 +1460,7 @@ f2a_read_rom (const char *filename, unsigned int parport, int size)
 #endif
 #ifdef  USE_PARALLEL
     {
-      f2a_init_par (parport, 10);
+      f2a_init_par (ucon64.parport, 10);
       f2a_read_par (0x08000000 + offset * MBIT, size * MBIT, filename);
     }
 #endif
@@ -1470,7 +1469,7 @@ f2a_read_rom (const char *filename, unsigned int parport, int size)
 
 
 int
-f2a_write_rom (const char *filename, unsigned int parport, int size)
+f2a_write_rom (const char *filename, int size)
 {
   int offset = 0, n, n_files, n_files_max = 0, fsize, totalsize = LOADER_SIZE;
   char **files = NULL, *file_mem[1];
@@ -1523,7 +1522,6 @@ f2a_write_rom (const char *filename, unsigned int parport, int size)
 
   starttime = time (NULL);
 #ifdef  USE_USB
-  (void) parport;                               // warning remover if only USE_USB
   if (ucon64.usbport)
     {
       f2a_init_usb ();
@@ -1536,7 +1534,7 @@ f2a_write_rom (const char *filename, unsigned int parport, int size)
 #endif
 #ifdef  USE_PARALLEL
     {
-      f2a_init_par (parport, 10);
+      f2a_init_par (ucon64.parport, 10);
       //f2a_erase_par (0x08000000, size * MBIT);
       f2a_write_par (n_files, files, 0x8000000 + offset * MBIT);
     }
@@ -1550,7 +1548,7 @@ f2a_write_rom (const char *filename, unsigned int parport, int size)
 
 
 int
-f2a_read_sram (const char *filename, unsigned int parport, int bank)
+f2a_read_sram (const char *filename, int bank)
 {
   int size;
 
@@ -1572,7 +1570,6 @@ f2a_read_sram (const char *filename, unsigned int parport, int bank)
 
   starttime = time (NULL);
 #ifdef  USE_USB
-  (void) parport;                               // warning remover if only USE_USB
   if (ucon64.usbport)
     {
       f2a_init_usb ();
@@ -1585,7 +1582,7 @@ f2a_read_sram (const char *filename, unsigned int parport, int bank)
 #endif
 #ifdef  USE_PARALLEL
     {
-      f2a_init_par (parport, 10);
+      f2a_init_par (ucon64.parport, 10);
       f2a_read_par (0xe000000 + bank * 64 * 1024, size, filename);
     }
 #endif
@@ -1594,7 +1591,7 @@ f2a_read_sram (const char *filename, unsigned int parport, int bank)
 
 
 int
-f2a_write_sram (const char *filename, unsigned int parport, int bank)
+f2a_write_sram (const char *filename, int bank)
 {
   char *files[1] = { (char *) filename };
 
@@ -1611,7 +1608,6 @@ f2a_write_sram (const char *filename, unsigned int parport, int bank)
 
   starttime = time (NULL);
 #ifdef  USE_USB
-  (void) parport;                               // warning remover if only USE_USB
   if (ucon64.usbport)
     {
       f2a_init_usb ();
@@ -1624,7 +1620,7 @@ f2a_write_sram (const char *filename, unsigned int parport, int bank)
 #endif
 #ifdef  USE_PARALLEL
     {
-      f2a_init_par (parport, 10);
+      f2a_init_par (ucon64.parport, 10);
       //f2a_erase_par (0xe000000, size * MBIT);
       f2a_write_par (1, files, 0xe000000 + bank * 64 * 1024);
     }

@@ -25,8 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <stdarg.h>
 #include <ultra64/host/cd64lib.h>
-#include "ucon64.h"
 #include "misc.h"
+#include "misc_par.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
@@ -226,6 +226,10 @@ cd64_init (void)
   cd64->seek_callback = fseek_wrapper;
   cd64->progress_callback = cd64_progress;
   strcpy (cd64->io_driver_dir, ucon64.configdir);
+
+  // misc_parport_print_info() displays a reasonable message (even if we're
+  //  using a comms link)
+  misc_parport_print_info ();
 
   if (!cd64->devopen (cd64))
     {

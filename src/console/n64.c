@@ -184,7 +184,7 @@ n64_v64 (st_rominfo_t *rominfo)
   long size = q_fsize (ucon64.rom);
   char buf[FILENAME_MAX];
 
-  if (rominfo->interleaved != 0)
+  if (rominfo->interleaved)
     {
       fprintf (stderr, "ERROR: Already in V64 format\n");
       return -1;
@@ -541,16 +541,33 @@ cd64_usage
 #define CHECKSUM_LENGTH 0x100000L
 #define CHECKSUM_HEADERPOS 0x10
 #define CHECKSUM_STARTVALUE 0xf8ca4ddc
+#define CALC_CRC32
 
 int
 n64_chksum (st_rominfo_t *rominfo)
 {
-  char readchunk3[MAXBUFSIZE];
+  char chunk[MAXBUFSIZE];
   unsigned long i, c1, k1, k2, t1, t2, t3, t4, t5, t6, clen = CHECKSUM_LENGTH,
                 rlen = (ucon64.file_size - rominfo->buheader_len) - CHECKSUM_START,
                 sum1, sum2;
-  unsigned int n;
-  FILE *fh;
+  unsigned int n = 0;
+  FILE *file;
+#ifdef  CALC_CRC32
+  unsigned int scrc32 = 0, fcrc32 = 0;          // search CRC32 & file CRC32
+  unsigned char *crc32_mem;
+
+  if (!rominfo->interleaved)
+    {
+      if ((crc32_mem = (unsigned char *) malloc (MAXBUFSIZE)) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[BUFFER_ERROR], MAXBUFSIZE);
+          return -1;
+        }
+    }
+  else
+    crc32_mem = chunk;
+#endif
+
   t1 = CHECKSUM_STARTVALUE;
   t2 = CHECKSUM_STARTVALUE;
   t3 = CHECKSUM_STARTVALUE;
@@ -561,20 +578,40 @@ n64_chksum (st_rominfo_t *rominfo)
   if (rlen < 0x0100000)                         // 0x0101000
     return -1;                                  // rom is too short
 
-  if (!(fh = fopen (ucon64.rom, "rb")))
+  if (!(file = fopen (ucon64.rom, "rb")))
     return -1;
-  fseek (fh, CHECKSUM_START + rominfo->buheader_len, SEEK_SET);
+#ifdef  CALC_CRC32
+  fseek (file, rominfo->buheader_len, SEEK_SET);
+  fread (crc32_mem, 1, CHECKSUM_START, file);
+  if (!rominfo->interleaved)
+    {
+      fcrc32 = mem_crc32 (CHECKSUM_START, 0, crc32_mem);
+      mem_swap (crc32_mem, CHECKSUM_START);
+    }
+  scrc32 = mem_crc32 (CHECKSUM_START, 0, crc32_mem);
+#else
+  fseek (file, CHECKSUM_START + rominfo->buheader_len, SEEK_SET);
+#endif
 
   for (;;)
     {
       if (rlen > 0)
         {
-          n = fread (readchunk3, 1, MIN (sizeof (readchunk3), clen), fh);
+          n = fread (chunk, 1, MIN (sizeof (chunk), clen), file);
           if ((n & 3) != 0)
-            n += fread (readchunk3 + n, 1, 4 - (n & 3), fh);
+            n += fread (chunk + n, 1, 4 - (n & 3), file);
+#ifdef  CALC_CRC32
+          if (!rominfo->interleaved)
+            {
+              memcpy (crc32_mem, chunk, n);
+              fcrc32 = mem_crc32 (n, fcrc32, crc32_mem);
+              mem_swap (crc32_mem, n);
+            }
+          scrc32 = mem_crc32 (n, scrc32, crc32_mem);
+#endif
         }
       else
-        n = MIN (sizeof (readchunk3), clen);
+        n = MIN (sizeof (chunk), clen);
 
       if ((n == 0) || ((n & 3) != 0))
         {
@@ -584,7 +621,7 @@ n64_chksum (st_rominfo_t *rominfo)
         }
       for (i = 0; i < n; i += 4)
         {
-          c1 = BYTES2LONG (&readchunk3[i], rominfo->interleaved);
+          c1 = BYTES2LONG (&chunk[i], rominfo->interleaved);
           k1 = t6 + c1;
           if (k1 < t6)
             t4++;
@@ -603,17 +640,40 @@ n64_chksum (st_rominfo_t *rominfo)
         {
           rlen -= n;
           if (rlen <= 0)
-            memset (readchunk3, 0, sizeof (readchunk3));
+            memset (chunk, 0, sizeof (chunk));
         }
       clen -= n;
     }
   sum1 = t6 ^ t4 ^ t3;
   sum2 = t5 ^ t2 ^ t1;
 
-  fclose (fh);
+#ifdef  CALC_CRC32
+  if (!rominfo->interleaved)
+    {
+      free (crc32_mem);
+      crc32_mem = chunk;
+    }
+  while ((n = fread (crc32_mem, 1, sizeof (chunk), file)))
+    {
+      if (!rominfo->interleaved)
+        {
+          fcrc32 = mem_crc32 (n, fcrc32, crc32_mem);
+          mem_swap (crc32_mem, n);
+        }
+      scrc32 = mem_crc32 (n, scrc32, crc32_mem);
+    }
+#endif
+
+  fclose (file);
 
   n64crc.crc1 = sum1;
   n64crc.crc2 = sum2;
+
+#ifdef  CALC_CRC32
+  ucon64.crc32 = scrc32;
+  if (!rominfo->interleaved)
+    ucon64.fcrc32 = fcrc32;
+#endif
 
   return 0;
 }

@@ -795,7 +795,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       image = dm_open (ucon64.rom);
       ucon64.type = (image ? UCON64_DISC : UCON64_ROM);
       dm_close (image);
-#endif      
+#endif
       image = NULL;
     }
 
@@ -809,7 +809,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       if (ucon64.crc32 == 0)
 //        if (ucon64.do_not_calc_crc != UCON64_UNKNOWN)
           if (ucon64.crc_big_files != UCON64_UNKNOWN ||
-            UCON64_TYPE_ISROM (ucon64.type))
+              UCON64_TYPE_ISROM (ucon64.type))
         ucon64.crc32 = q_fcrc32 (romfile, rominfo->buheader_len);
 
       if (ucon64.dat_enabled)
@@ -869,12 +869,14 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 //        dm_image_nfo (image);
     }
   else if (UCON64_TYPE_ISROM (ucon64.type))
-    {        
+    {
       if (rominfo && ucon64.console != UCON64_UNKNOWN)
         ucon64_rom_nfo (rominfo);
     }
 
-  if (ucon64.crc32)
+  if (ucon64.fcrc32)                            // SNES interleaved ROMs
+    printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32);
+  else if (ucon64.crc32)
     printf ("Checksum (CRC32): 0x%08x\n", ucon64.crc32);
 
   if (ucon64.dat_enabled)
@@ -889,13 +891,12 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 void
 ucon64_rom_nfo (const st_rominfo_t *rominfo)
 {
-  unsigned int padded = ucon64_testpad (ucon64.rom, (st_rominfo_t *) rominfo);
-  unsigned int intro = ((ucon64.file_size - rominfo->buheader_len) > MBIT) ?
-    ((ucon64.file_size - rominfo->buheader_len) % MBIT) : 0;
-  int split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
+  unsigned int padded = ucon64_testpad (ucon64.rom, (st_rominfo_t *) rominfo),
+    intro = ((ucon64.file_size - rominfo->buheader_len) > MBIT) ?
+      ((ucon64.file_size - rominfo->buheader_len) % MBIT) : 0;
+  int x, split = (UCON64_ISSET (ucon64.split)) ? ucon64.split :
     ucon64_testsplit (ucon64.rom);
   char buf[MAXBUFSIZE];
-  int x;
 
 // backup unit header
   if (rominfo->buheader && rominfo->buheader_len && rominfo->buheader_len != SWC_HEADER_LEN)
@@ -944,7 +945,13 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
     }
 
 // maker, country and size
-  strcpy (buf, NULL_TO_EMPTY (rominfo->name));
+  if (ucon64.dat_enabled && ucon64.console == UCON64_NES &&
+      (nes_get_file_type () == UNIF ||
+       nes_get_file_type () == INES ||
+       nes_get_file_type () == PASOFAMI))
+    strcpy (buf, NULL_TO_EMPTY (ucon64_dat->name));
+  else
+    strcpy (buf, NULL_TO_EMPTY (rominfo->name));
   x = UCON64_ISSET (rominfo->data_size) ?
     rominfo->data_size :
     ucon64.file_size - rominfo->buheader_len;
@@ -956,49 +963,47 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
           x,
           TOMBIT_F (x));
 
-
 // padded?
-      if (!padded)
-        printf ("Padded: No\n");
-      else
-        printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n", padded,
-                TOMBIT_F (padded));
+  if (!padded)
+    printf ("Padded: No\n");
+  else
+    printf ("Padded: Maybe, %d Bytes (%.4f Mb)\n", padded,
+            TOMBIT_F (padded));
 
 // intro, trainer?
-      // nes.c determines itself whether or not there is a trainer
-      if (intro && ucon64.console != UCON64_NES)
-        printf ("Intro/Trainer: Maybe, %d Bytes\n", intro);
+  // nes.c determines itself whether or not there is a trainer
+  if (intro && ucon64.console != UCON64_NES)
+    printf ("Intro/Trainer: Maybe, %d Bytes\n", intro);
 
 // interleaved?
-      if (rominfo->interleaved != UCON64_UNKNOWN)
-        // printing this is handy for SNES, N64 & Genesis ROMs, but maybe
-        //  nonsense for others
-        printf ("Interleaved/Swapped: %s\n",
-          rominfo->interleaved ?
-            (rominfo->interleaved > 1 ?
-              "Yes (2)" :
-              "Yes") :
-            "No");
+  if (rominfo->interleaved != UCON64_UNKNOWN)
+    // printing this is handy for SNES, N64 & Genesis ROMs, but maybe
+    //  nonsense for others
+    printf ("Interleaved/Swapped: %s\n",
+      rominfo->interleaved ?
+        (rominfo->interleaved > 1 ?
+          "Yes (2)" :
+          "Yes") :
+        "No");
 
 // backup unit header?
-      if (rominfo->buheader_len)
-        printf ("Backup unit/emulator header: Yes, %d Bytes\n",
-          rominfo->buheader_len);
-      else
+  if (rominfo->buheader_len)
+    printf ("Backup unit/emulator header: Yes, %d Bytes\n",
+      rominfo->buheader_len);
+  else
 // for NoisyB: <read only mode ON>
-        printf ("Backup unit/emulator header: No\n"); // printing No is handy for SNES ROMs
+    printf ("Backup unit/emulator header: No\n"); // printing No is handy for SNES ROMs
 // for NoisyB: <read only mode OFF>
 
 // split?
-      if (split)
-        {
-          printf ("Split: Yes, %d part%s\n", split, (split != 1) ? "s" : "");
-          // nes.c calculates the correct checksum for split ROMs (=Pasofami
-          // format), so there is no need to join the files
-          if (ucon64.console != UCON64_NES)
-            printf ("NOTE: to get the correct checksum the ROM must be joined\n");
-        }
-
+  if (split)
+    {
+      printf ("Split: Yes, %d part%s\n", split, (split != 1) ? "s" : "");
+      // nes.c calculates the correct checksum for split ROMs (=Pasofami
+      // format), so there is no need to join the files
+      if (ucon64.console != UCON64_NES)
+        printf ("NOTE: to get the correct checksum the ROM must be joined\n");
+    }
 
 // miscellaneous info
   if (rominfo->misc[0])
@@ -1008,35 +1013,35 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
     }
 
 // internal checksums?
-      if (rominfo->has_internal_crc)
+  if (rominfo->has_internal_crc)
+    {
+      char *fstr;
+
+      // the internal checksum of GBA ROMS stores only the checksum of the
+      //  internal header
+      if (ucon64.console != UCON64_GBA)
+        fstr = "Checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)\n";
+      else
+        fstr = "Header checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)\n";
+
+      sprintf (buf, fstr,
+        rominfo->internal_crc_len * 2, rominfo->internal_crc_len * 2);
+      printf (buf,
+        ucon64.ansi_color ?
+          ((rominfo->current_internal_crc == rominfo->internal_crc) ?
+            "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
+          :
+          ((rominfo->current_internal_crc == rominfo->internal_crc) ? "ok" : "bad"),
+        rominfo->current_internal_crc,
+        (rominfo->current_internal_crc == rominfo->internal_crc) ? "=" : "!",
+        rominfo->internal_crc);
+
+      if (rominfo->internal_crc2[0])
         {
-          char *fstr;
-
-          // the internal checksum of GBA ROMS stores only the checksum of the
-          //  internal header
-          if (ucon64.console != UCON64_GBA)
-            fstr = "Checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)\n";
-          else
-            fstr = "Header checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)\n";
-
-          sprintf (buf, fstr,
-            rominfo->internal_crc_len * 2, rominfo->internal_crc_len * 2);
-          printf (buf,
-            ucon64.ansi_color ?
-              ((rominfo->current_internal_crc == rominfo->internal_crc) ?
-                "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
-              :
-              ((rominfo->current_internal_crc == rominfo->internal_crc) ? "ok" : "bad"),
-            rominfo->current_internal_crc,
-            (rominfo->current_internal_crc == rominfo->internal_crc) ? "=" : "!",
-            rominfo->internal_crc);
-
-          if (rominfo->internal_crc2[0])
-            {
-              strcpy (buf, rominfo->internal_crc2);
-              printf ("%s\n", to_func (buf, strlen (buf), toprint2));
-            }
+          strcpy (buf, rominfo->internal_crc2);
+          printf ("%s\n", to_func (buf, strlen (buf), toprint2));
         }
+    }
 
   fflush (stdout);
 }
@@ -1069,6 +1074,8 @@ ucon64_usage (int argc, char *argv[])
 
 #ifdef  ANSI_COLOR
 #define ANSI_COLOR_MSG "  " OPTION_LONG_S "ncol        disable ANSI colors in output\n"
+#else
+#define ANSI_COLOR_MSG ""
 #endif
 
 #ifdef  __MSDOS__

@@ -162,7 +162,7 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t * dat)
   static const char *dat_country[] = {
     "(1) Japan & Korea",
     "(A) Australia",
-    "(B) non USA (Genesis)",
+    "(B) non U.S.A. (Genesis)",
     "(C) China",
     "(E) Europe",
     "(F) France",
@@ -171,14 +171,14 @@ line_to_dat (const char *fname, const char *dat_entry, ucon64_dat_t * dat)
     "(G) Germany",
     "(GR) Greece",
     "(HK) Hong Kong",
-    "(4) USA & Brazil NTSC",
+    "(4) U.S.A. & Brazil NTSC",
     "(J) Japan",
     "(K) Korea",
     "(NL) Netherlands",
     "(PD) Public Domain",
     "(S) Spain",
     "(SW) Sweden",
-    "(U) USA",
+    "(U) U.S.A.",
     "(UK) England",
     "(Unk) Unknown Country",
     "(I) Italy",
@@ -584,8 +584,9 @@ ucon64_dat_nfo (const ucon64_dat_t *dat)
     {
       if (!(p = strchr (dat->country, ' '))) // sttart after the (country)
         p = (char *)dat->country;
-      else p++;
-      
+      else
+        p++;
+
       printf ("  %s\n", p);
     }
 

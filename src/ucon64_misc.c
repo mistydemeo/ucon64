@@ -205,7 +205,7 @@ filepad (const char *filename, long start, long unit)
   return size;
 }
 
-
+#if 1
 long
 filetestpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
@@ -227,7 +227,32 @@ filetestpad (const char *filename, st_rominfo_t *rominfo)
   size -= (pos + 1);
   return size > 1 ? size : 0;
 }
+#else
 
+
+long
+filetestpad (const char *filename, st_rominfo_t *rominfo)
+// test if EOF is padded (repeating bytes)
+{
+  long pos = rominfo->file_size - 2;
+  int c = quickfgetc (filename, pos + 1);
+  char buf[MAXBUFSIZE];
+
+  while (quickfread (buf, pos - (pos % MAXBUFSIZE),
+      pos % MAXBUFSIZE, filename) > 0)
+    {
+
+     while ((pos % MAXBUFSIZE) >= 0)
+       {
+          if (c != buf[pos % MAXBUFSIZE])
+            return rominfo->file_size - pos + 1;
+          pos--;
+       }
+   }
+
+  return 0;   
+}
+#endif
 
 #ifdef  BACKUP
 #ifdef  __BEOS__

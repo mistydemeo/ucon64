@@ -320,7 +320,7 @@ The original uCON for SNES and Genesis was written by Chicken &amp; chp in ~1995
 - added (SNES) -dbuh display backup unit header and see if it matches with what
   uCON64 found while analyzing the ROM data (by dbjh, based on an idea by
   JohnDie)<br>
-- removed (SNES) -gdf (fix Game Doctor savegame problems) because -gd3 already
+- removed (SNES) -gdf (fix Game Doctor savegame problems), because -gd3 already
   provides this functionality (by dbjh)<br>
 - updated (SNES) fixed some -xgd3 problems, uppercase filenames sent to unit,
   buffer data correct for all files, transfer file size fixed (by John)<br>
@@ -599,6 +599,9 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
   with a header (by dbjh)<br>
 - added support for Mac OS X (including libdiscmage) (by dbjh; many thanks to
   Steve Paige for his help)<br>
+- added (SNES) -xswc-dm=MODE specify SWC dump mode (by dbjh)<br>
+  You should explicitly specify the parallel port address when using this switch<br>
+- removed (SNES) -xswc-super, use -xswc -xswc-dm=1 instead (by dbjh)<br>
 <br>
 <br>
 <br>

@@ -207,7 +207,9 @@ endif                                   # beos
 endif                                   # DJGPP
 endif                                   # msys
 endif                                   # cygwin
+ifndef DLOPEN
 	cd libdiscmage && $(MAKE) install
+endif
 
 
 uninstall:
@@ -225,7 +227,9 @@ endif                                   # beos
 endif                                   # DJGPP
 endif                                   # msys
 endif                                   # cygwin
+ifndef DLOPEN
 	cd libdiscmage && $(MAKE) uninstall
+endif
 
 
 # Dependencies

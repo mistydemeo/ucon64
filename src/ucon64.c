@@ -343,7 +343,7 @@ const struct option options[] = {
     {"xsmds", 0, 0, UCON64_XSMDS},
     {"xswc", 0, 0, UCON64_XSWC},
     {"xswc2", 0, 0, UCON64_XSWC2},
-    {"xswc-super", 0, 0, UCON64_XSWC_SUPER},
+    {"xswc-dm", 1, 0, UCON64_XSWC_DM},
     {"xswcr", 0, 0, UCON64_XSWCR},
     {"xswcs", 0, 0, UCON64_XSWCS},
     {"xswcc", 0, 0, UCON64_XSWCC},
@@ -818,7 +818,8 @@ ucon64_execute_options (void)
 
   ucon64.file_size =
   ucon64.crc32 =
-  ucon64.fcrc32 = 0;
+  ucon64.fcrc32 =
+  ucon64.swc_dumping_mode = 0;
 
   // switches
   for (x = 0; arg[x].val; x++)

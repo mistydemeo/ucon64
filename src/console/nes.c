@@ -2,7 +2,7 @@
 nes.c - Nintendo Entertainment System support for uCON64
 
 written by 1999 - 2003 NoisyB (noisyb@gmx.net)
-           2002 - 2003 dbjh
+           2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -60,12 +60,12 @@ const st_usage_t nes_usage[] =
                      "and iNES"},
     {"dint", NULL, "convert to non-interleaved format"},
     {"ctrl", "TYPE", "specify controller type (UNIF only)\n"
-                     "TYPE='0' regular joypad\n"
-                     "TYPE='1' zapper\n"
-                     "TYPE='2' R.O.B.\n"
-                     "TYPE='3' Arkanoid controller\n"
-                     "TYPE='4' powerpad\n"
-                     "TYPE='5' four-score adapter"},
+                     "TYPE=0 regular joypad\n"
+                     "TYPE=1 zapper\n"
+                     "TYPE=2 R.O.B.\n"
+                     "TYPE=3 Arkanoid controller\n"
+                     "TYPE=4 powerpad\n"
+                     "TYPE=5 four-score adapter"},
     {"ntsc", NULL, "specify TV standard is NTSC (UNIF only)"},
     {"pal", NULL, "specify TV standard is PAL (UNIF only)"},
     {"bat", NULL, "specify battery is present"},
@@ -73,12 +73,12 @@ const st_usage_t nes_usage[] =
     {"vram", NULL, "specify VRAM override (UNIF only)"},
     {"nvram", NULL, "specify no VRAM override (UNIF only)"},
     {"mirr", "MTYPE", "specify mirroring type\n"
-                      "MTYPE='0' horizontal mirroring\n"
-                      "MTYPE='1' vertical mirroring\n"
-                      "MTYPE='2' mirror all pages from $2000 (UNIF only)\n"
-                      "MTYPE='3' mirror all pages from $2400 (UNIF only)\n"
-                      "MTYPE='4' four screens of VRAM\n"
-                      "MTYPE='5' mirroring controlled by mapper hardware (UNIF only)"},
+                      "MTYPE=0 horizontal mirroring\n"
+                      "MTYPE=1 vertical mirroring\n"
+                      "MTYPE=2 mirror all pages from $2000 (UNIF only)\n"
+                      "MTYPE=3 mirror all pages from $2400 (UNIF only)\n"
+                      "MTYPE=4 four screens of VRAM\n"
+                      "MTYPE=5 mirroring controlled by mapper hardware (UNIF only)"},
 #if     UNIF_REVISION > 7
     {"cmnt", "TEXT", "specify that TEXT should be used as comment (UNIF only)"},
 #endif

@@ -2,7 +2,7 @@
 genesis.c - Sega Genesis/Mega Drive support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2002 - 2003 dbjh
+           2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -89,11 +89,11 @@ const st_usage_t genesis_usage[] =
     {"multi", "SIZE", "make multi-game file for use with MD-PRO flash card,\n"
                       "truncated to SIZE Mbit; file with loader must be specified\n"
                       "first, then all the ROMs, multi-game file to create last"},
-    {"region=CODE", NULL, "enable region function; use with -multi\n"
-                     "CODE='0' force NTSC/Japan for all games\n"
-                     "CODE='1' force NTSC/U.S.A. for all games\n"
-                     "CODE='2' force PAL for all games\n"
-                     "CODE='x' use whatever setting games expect"},
+    {"region", "CODE", "enable region function; use with -multi\n"
+                       "CODE=0 force NTSC/Japan for all games\n"
+                       "CODE=1 force NTSC/U.S.A. for all games\n"
+                       "CODE=2 force PAL for all games\n"
+                       "CODE=x use whatever setting games expect"},
     {NULL, NULL, NULL}
   };
 

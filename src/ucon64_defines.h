@@ -2,7 +2,7 @@
 ucon64_defines.h - definitions for uCON64
 
 written by 2002 - 2003 NoisyB (noisyb@gmx.net)
-           2002 - 2003 dbjh
+           2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -268,7 +268,7 @@ enum {
   UCON64_XSMDS,
   UCON64_XSWC,
   UCON64_XSWC2,
-  UCON64_XSWC_SUPER,
+  UCON64_XSWC_DM,
   UCON64_XSWCR,
   UCON64_XSWCS,
   UCON64_XSWCC,

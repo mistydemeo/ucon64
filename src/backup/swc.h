@@ -2,7 +2,7 @@
 swc.h - Super Wild Card support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-           2001 - 2003 dbjh
+           2001 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef SWC_H
 #define SWC_H
+
+#define SWC_DM_FORCE_32MBIT 0x01
+#define SWC_DM_ALT_ROM_SIZE 0x02
+#define SWC_DM_SUPER_FX     0x04
+#define SWC_DM_SDD1         0x08
+#define SWC_DM_SA1          0x10
+#define SWC_DM_DX2_TRICK    0x20
+#define SWC_DM_MMX2         0x40
+
+#define SWC_DM_MAX          0x7f                // highest valid dumping mode value
 
 extern const st_usage_t swc_usage[];
 
@@ -46,7 +56,7 @@ typedef struct st_swc_header
 #define SWC_HEADER_LEN (sizeof (st_swc_header_t))
 
 #ifdef PARALLEL
-extern int swc_read_rom (const char *filename, unsigned int parport, int superdump);
+extern int swc_read_rom (const char *filename, unsigned int parport, int dumping_mode);
 extern int swc_write_rom (const char *filename, unsigned int parport, int enableRTS);
 extern int swc_read_sram (const char *filename, unsigned int parport);
 extern int swc_write_sram (const char *filename, unsigned int parport);

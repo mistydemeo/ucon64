@@ -279,7 +279,6 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XSMD:
     case UCON64_XSMDS:
     case UCON64_XSWC:
-    case UCON64_XSWC_SUPER:
     case UCON64_XSWC2:
     case UCON64_XSWCR:
     case UCON64_XSWCS:
@@ -302,6 +301,27 @@ ucon64_switches (int c, const char *optarg)
 
     case UCON64_XFALM:
       ucon64.parport_mode = UCON64_EPP;
+      break;
+
+    case UCON64_XSWC_DM:
+      ucon64.swc_dumping_mode = strtol (optarg, NULL, 16);
+
+      if (ucon64.swc_dumping_mode &
+          (SWC_DM_ALT_ROM_SIZE | SWC_DM_SUPER_FX | SWC_DM_DX2_TRICK))
+        printf ("WARNING: Dumping mode(s) not yet implemented\n");
+      if (ucon64.swc_dumping_mode & (SWC_DM_SDD1 | SWC_DM_SA1 | SWC_DM_MMX2))
+        printf ("WARNING: Be sure to compile swc.c with the appropriate constants defined\n");
+
+      if (ucon64.swc_dumping_mode > SWC_DM_MAX)
+        {
+          printf ("WARNING: Invalid value for MODE (0x%x), using 0\n", ucon64.swc_dumping_mode);
+          ucon64.swc_dumping_mode = 0;
+        }
+      else
+        printf ("Dumping mode: 0x%02x\n", ucon64.swc_dumping_mode);
+
+      if (!access (ucon64.rom, F_OK))
+        printf ("WARNING: Dumping mode flags are ignored, because file already exists\n");
       break;
 #endif // PARALLEL
 
@@ -1620,19 +1640,11 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
-    case UCON64_XSWC_SUPER:
-      if (access (ucon64.rom, F_OK) != 0)
-        swc_read_rom (ucon64.rom, ucon64.parport, 1);
-      else
-        fprintf (stderr,
-                 "ERROR: Super dump requested but ROM image file already exists\n");
-      break;
-
     case UCON64_XSWC:
       enableRTS = 0;                            // falling through
     case UCON64_XSWC2:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
-        swc_read_rom (ucon64.rom, ucon64.parport, 0);
+        swc_read_rom (ucon64.rom, ucon64.parport, ucon64.swc_dumping_mode);
       else
         {
           if (!ucon64.rominfo->buheader_len)

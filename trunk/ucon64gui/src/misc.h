@@ -22,6 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define MISC_H
 
 #include <time.h>                               // gauge() prototype contains time_t
+#include <dirent.h>                             // for DIR2_t
 
 #ifndef FALSE
 #define FALSE 0
@@ -64,9 +65,11 @@ extern int renlwr (const char *dir, int lower);
 #define RENLWR(dir) (renlwr (dir, TRUE))
 #define RENUPR(dir) (renlwr (dir, FALSE))
 
+#if 0
 #define CAT(a,b)  a##b
 #define CAT3(a,b,c)       a##b##c
 #define CAT4(a,b,c,d)     a##b##c##d
+#endif
 
 #ifndef MAXBUFSIZE
 #define MAXBUFSIZE 32768
@@ -228,12 +231,12 @@ extern const char *filenameonly (const char *str);
   memwcmp()    memcmp with wildcard support
   memswap()    swap n Bytes from add on
   memhexdump() hexdump n Bytes from add on; you can use here a virtual_start for the displayed counter
-  memcrc32()   calculate the crc32 of add for n bytes
+  mem_crc32()   calculate the crc32 of add for n bytes
 */
 extern int memwcmp (const void *add, const void *add_with_wildcards, size_t n, int wildcard);
 extern void *memswap (void *add, size_t n);
 extern void memhexdump (const void *add, size_t n, long virtual_start);
-extern unsigned long memcrc32 (const void *add, size_t n);
+extern unsigned long mem_crc32 (unsigned int size, unsigned long crc, const void *buffer);
 
 
 /*
@@ -320,13 +323,16 @@ extern void change_string (char *searchstr, int strsize, char wc, char esc,
 extern int gauge (time_t init_time, long pos, long size);
 extern char *getenv2 (const char *variable);
 extern char *tmpnam2 (char *temp);
-#if 0
-extern DIR *opendir2 (const char *archive_or_dir);
-extern int closedir2 (DIR *p);
-#endif
+typedef struct
+{
+  DIR *dir;
+  char fullpath[FILENAME_MAX];//==temppath
+} DIR2_t;
+
+extern DIR2_t *opendir2 (const char *archive_or_dir);
+extern int closedir2 (DIR2_t *p);
 int rmdir_R (const char *path);
 extern int fsystem (FILE *output, const char *cmdline);
-extern unsigned long calculate_buffer_crc (unsigned int size, unsigned long crc, void *buffer);
 #ifdef  __unix__
 extern int drop_privileges (void);
 #endif

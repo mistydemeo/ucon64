@@ -90,7 +90,7 @@ build_crc_table ()
 
 
 unsigned long
-calculate_buffer_crc (unsigned int size, unsigned long crc, void *buffer)
+mem_crc32 (unsigned int size, unsigned long crc, const void *buffer)
 // zlib: crc32 (crc, buffer, size);
 {
   unsigned char *p;
@@ -118,7 +118,7 @@ calculate_file_crc (FILE * file)
   unsigned char buffer[512];
 
   while ((count = fread (buffer, 1, 512, file)))
-    crc = calculate_buffer_crc (count, crc, buffer); // zlib: crc32 (crc, buffer, count);
+    crc = mem_crc32 (count, crc, buffer); // zlib: crc32 (crc, buffer, count);
   return crc;
 }
 
@@ -407,15 +407,6 @@ memwcmp (const void *add, const void *add_with_wildcards, size_t n, int wildcard
     }
 
   return 0;
-}
-
-
-unsigned long
-memcrc32 (const void *add, size_t n)
-{
-  unsigned long crc = 0;
-
-  return calculate_buffer_crc (n, crc, (unsigned char *) add);
 }
 
 
@@ -1542,6 +1533,26 @@ tmpnam2 (char *temp) // tmpnam() replacement
 }
 
 
+DIR2_t *
+opendir2 (const char *archive_or_dir)
+{
+  return NULL;
+}
+
+
+int closedir2 (DIR2_t *p)
+{
+  int result = closedir (p->dir);
+
+  if (p)
+    { 
+      rmdir_R (p->fullpath);
+      free (p);
+    }
+  return result;
+}
+
+
 char *
 html_parser (const char *filename, char *buffer)
 {
@@ -1618,25 +1629,34 @@ cmd2args (char **argv, const char *cmdline)
 
 
 char *
-query2cmd (char *str, const char *uri, const char *query)
+query2cmd (char *cmd, const char *uri, const char *query)
 {
   register int x = 0;
-  int c = 0, len = query?strlen(query):0;
+  int c = 0, query_len = query?strlen(query):0;
   char buf[16], *p = NULL;
+  const char *query_p = NULL;
   
-  if (!str) str = (char *) malloc ((strlen (uri) + len) * 2); //* 2 should be enough
+  if (!cmd) cmd = (char *) malloc ((strlen (uri) + query_len) * 2); //* 2 should be enough
   
-  strcpy (str, uri);  //the uri is argv[0]
+  strcpy (cmd, uri);  //the uri is argv[0]
 
-  if (!len) return str;
+  if (!query_len) return cmd;
 
-  strcat (str, " ");
+  if (!strchr (query, OPTION)) return cmd;//only queries with '-' in front will be passed
 
-  for (x = 0; x < len; x++)
+  strcat (cmd, " ");
+
+  if (query[0] != OPTION) query_p = strchr (query, OPTION);
+  if (!query_p) query_p = query;
+
+  for (x = 0; x < query_len; x++)
     {
       p = NULL;
-      switch (query[x])
+      switch (query_p[x])
         {
+          case 0:
+            break;
+            
 //          case '?':
           case '&':
           case '+':
@@ -1644,43 +1664,45 @@ query2cmd (char *str, const char *uri, const char *query)
             break;
 
           case '%':
-            sscanf (&query[x+1], "%02x", &c);
+            sscanf (&query_p[x+1], "%02x", &c);
             sprintf (buf, "%c", c);
             x += 2;
             break;
 
           default:
-            sprintf (buf, "%c", query[x]);
+            sprintf (buf, "%c", query_p[x]);
             break;
         }
+        if (query_p[x] == 0) break;
 
-        strcat (str, p?
+        strcat (cmd, p?
 #ifdef __GNUC__
         p
 #endif // __GNUC__
         :buf);
      }
 
-  return str;
+  return cmd;
 }
 
-
+#if 0
+//custom tag parsing (could also involve getopt)
 char *
-tag2cmd (char *str, const char *uri, const char *query)
+tag2cmd (char *str, const char *tag)
 {
   register int x = 0;
-  int c = 0, len = query?strlen(query):0;
+  int c = 0, query_len = query?strlen(query):0;
   char buf[16], *p = NULL;
   
-  if (!str) str = (char *) malloc ((strlen (uri) + len) * 2); //* 2 should be enough
+  if (!str) str = (char *) malloc ((strlen (uri) + query_len) * 2); //* 2 should be enough
 
   strcpy (str, uri);  //the uri is argv[0]
 
-  if (!len) return str;
+  if (!query_len) return str;
 
   strcat (str, " ");
 
-  for (x = 0; x < len; x++)
+  for (x = 0; x < query_len; x++)
     {
       p = NULL;
       switch (query[x])
@@ -1711,6 +1733,7 @@ tag2cmd (char *str, const char *uri, const char *query)
 
   return str;
 }
+#endif
 
 
 #if     defined __unix__ || defined __BEOS__

@@ -132,9 +132,6 @@ output (FILE *fp, const st_file_t *file)
   if (!file)
     return -1;
     
-  if (!fp)
-    fp = stdout;
-
   if (flc.html)
     {
       int len = strlen (basename2 (file->fname));
@@ -198,7 +195,7 @@ compare (const void *a, const void *b)
     }
   
   if (flc.fr)
-    result = !result ? 1 : 0;
+    result = !result;
   
   return result;
 }

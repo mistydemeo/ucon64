@@ -1,4 +1,3 @@
-
 /*
 flc
 shows the FILE_ID.DIZ of archives/files
@@ -51,9 +50,6 @@ flc_exit (void)
 
   if (flc.temp[0])
     rmdir2 (flc.temp);
-
-  printf ("+++EOF");
-  fflush (stdout);
 }
 
 
@@ -88,6 +84,7 @@ main (int argc, char *argv[])
     {"fr",      0, 0, 2,   NULL,   "sort reverse", NULL},
     {"k",       0, 0, 'k', NULL,   "show sizes in kilobytes", NULL},
     {"version", 0, 0, 'v', NULL,   "output version information and exit", NULL},
+    {"ver",     0, 0, 'v', NULL,   NULL, NULL},
     {"help",    0, 0, 'h', NULL,   "display this help and exit", NULL},
     {"h",       0, 0, 'h', NULL,   NULL, NULL},
     {NULL,      0, 0, 0,   NULL,
@@ -100,16 +97,14 @@ main (int argc, char *argv[])
   
   flc_configfile ();
 
+  atexit (flc_exit);
+
   getopt2_short (short_options, options, ARGS_MAX);
   getopt2_long (long_options, options, ARGS_MAX);
   
   while ((c = getopt_long_only (argc, argv, short_options, long_options, &option_index)) != -1)
     switch (c)
       {
-        case 1:
-          atexit (flc_exit);
-          break;
-
         case 4:
           flc.bbs = 1;
           break;
@@ -238,17 +233,18 @@ main (int argc, char *argv[])
 
   if (flc.output[0])
     fh = fopen (flc.output, "wb");
+  if (!fh)
+    fh = stdout;
 
   if (flc.html)
-    fprintf (fh ? fh : stdout, "<html><head><title></title></head><body><pre><tt>");
+    fprintf (fh, "<html><head><title></title></head><body><pre><tt>");
 
-  for (x = 0; x < flc.files; x++)
-    output (fh ? fh : stdout, &file[x]);
+  for (x = 0; x < flc.files; output (fh, &file[x++]));
 
   if (flc.html)
-    fprintf (fh ? fh : stdout, "</pre></tt></body></html>\n");
+    fprintf (fh, "</pre></tt></body></html>\n");
 
-  if (fh)
+  if (fh != stdout)
     fclose (fh);
 
   return 0;

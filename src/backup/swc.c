@@ -59,7 +59,7 @@ static unsigned char receiveb(void);
 static inline unsigned char wait_while_busy(void);
 static inline void wait_for_ready(void);
 
-static int swc_port, interleaved;       	// the name `interleaved' is just a guess :)
+static int swc_port, interleaved;               // the name `interleaved' is just a guess :)
 
 void init_io(unsigned int port)
 /*
@@ -76,7 +76,7 @@ void init_io(unsigned int port)
     exit(1);
   }
 
-#ifdef	__UNIX__
+#ifdef  __UNIX__
   init_conio();
 #endif
 
@@ -106,14 +106,16 @@ int swc_write_rom(char *filename, unsigned int parport)
   }
 
   stat(filename, &fstate);
-  size = fstate.st_size - HEADERSIZE;		// size of ROM in bytes
-  printf("Send (excl. header): %d Bytes (%.4f Mb)\n\n", size, (float) size/MBIT);
+  size = fstate.st_size - HEADERSIZE;           // size of ROM in bytes
+  printf("Send (excl. header): %d Bytes (%.4f Mb)\n", size, (float) size/MBIT);
 
   fread(buffer, 1, HEADERSIZE, file);
   emu_mode_select = buffer[2];                  // this byte is needed later
   send_address(0xc008, 0);
   send_block(0x400, buffer, HEADERSIZE);        // send header
 
+  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O
+                                                //  because if we get here q works ;)
   address = 0x200;                              // vgs '00 uses 0x200, vgs '96 uses 0,
   starttime = time(NULL);                       //  but then some ROMs don't work
   while ((bytesread = fread(buffer, 1, BUFFERSIZE, file)))
@@ -128,8 +130,8 @@ int swc_write_rom(char *filename, unsigned int parport)
   }
 
   send_command(5, 0, 0);
-  size = (size + BUFFERSIZE - 1) / BUFFERSIZE;	// size in 8KB blocks (rounded up)
-  send_command(6, 5 | (size << 8), size >> 8);	// bytes: 6, 5, #8K L, #8K H, 0
+  size = (size + BUFFERSIZE - 1) / BUFFERSIZE;  // size in 8KB blocks (rounded up)
+  send_command(6, 5 | (size << 8), size >> 8);  // bytes: 6, 5, #8K L, #8K H, 0
   send_command(6, 1 | (emu_mode_select << 8), 0);
 
   wait_for_ready();
@@ -161,7 +163,7 @@ int swc_write_sram(char *filename, unsigned int parport)
     exit(1);
   }
 
-  printf("Send: %d Bytes\n\n", 32*1024);
+  printf("Send: %d Bytes\n", 32*1024);
   fseek(file, HEADERSIZE, SEEK_SET);            // skip the header
 
   send_command(5, 0, 0);
@@ -174,6 +176,8 @@ int swc_write_sram(char *filename, unsigned int parport)
   sendb(0);
   sendb(0x81);
 
+  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O,
+                                                //  because if we get here q works ;)
   address = 0x100;
   starttime = time(NULL);
   while ((bytesread = fread(buffer, 1, BUFFERSIZE, file)))
@@ -231,7 +235,7 @@ void sendb(unsigned char byte)
   wait_for_ready();
   outportb(swc_port + PARPORT_DATA, byte);
   outportb(swc_port + PARPORT_CONTROL, inportb(swc_port + PARPORT_CONTROL)^STROBE_BIT);
-  wait_for_ready();                       	// necessary if followed by receiveb()
+  wait_for_ready();                             // necessary if followed by receiveb()
 }
 
 int swc_read_rom(char *filename, unsigned int parport)
@@ -262,10 +266,10 @@ int swc_read_rom(char *filename, unsigned int parport)
     remove(filename);
     exit(1);
   }
-  blocksleft = size * 16; 			// 1 Mb (128KB) unit == 16 8KB units
-  printf("Receive: %d Bytes (%.4f Mb) %s\n\n",
+  blocksleft = size * 16;                       // 1 Mb (128KB) unit == 16 8KB units
+  printf("Receive: %d Bytes (%.4f Mb) %s\n",
          size*MBIT, (float) size, interleaved ?  "INTERLEAVED" : "");
-  size *= MBIT;					// size in bytes for parport_gauge() below
+  size *= MBIT;                                 // size in bytes for parport_gauge() below
 
   send_command(5, 0, 0);
 
@@ -288,6 +292,8 @@ int swc_read_rom(char *filename, unsigned int parport)
   if (interleaved)
     blocksleft >>= 1;
 
+  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O
+                                                //  because if we get here q works ;)
   address1 = 0x300;
   address2 = 0x200;
   starttime = time(NULL);
@@ -526,7 +532,7 @@ int swc_read_sram(char *filename, unsigned int parport)
     exit(1);
   }
 
-  printf("Receive: %d Bytes\n\n", 32*1024);
+  printf("Receive: %d Bytes\n", 32*1024);
   memset(buffer, 0, HEADERSIZE);
   buffer[8] = 0xaa;
   buffer[9] = 0xbb;
@@ -543,6 +549,8 @@ int swc_read_sram(char *filename, unsigned int parport)
   sendb(0);
   sendb(0x81);
 
+  printf("Press q to abort\n\n");               // print here, NOT before first swc I/O
+                                                //  because if we get here q works ;)
   blocksleft = 4;                               // SRAM is 4*8KB
   address = 0x100;
   starttime = time(NULL);
@@ -575,7 +583,7 @@ void receive_block(unsigned short address, unsigned char *buffer, int len)
     checksum ^= buffer[n];
   }
   if (checksum != receiveb())
-    printf(": received data is corrupt\n");
+    printf("\nreceived data is corrupt\n");
 
   for (m = 0; m < 65536; m++)                   // a delay is necessary here
     ;
@@ -611,7 +619,7 @@ unsigned char wait_while_busy(void)
 */
   if (n_try >= N_TRY_MAX)
   {
-    fprintf(STDERR, "The Super Wild Card is not ready\n"	// yes, "ready" :)
+    fprintf(STDERR, "The Super Wild Card is not ready\n"        // yes, "ready" :)
                     "Turn it off for a few seconds then turn it on and try again\n");
     exit(1);
   }
@@ -654,21 +662,21 @@ void checkabort(int status)
 int swc_usage(int argc, char *argv[])
 {
   if (argcmp(argc, argv, "-help"))
-//  {
     printf("\n%s\n", swc_TITLE);
-    printf("  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
-           "                receives automatically when $ROM does not exist\n"
-           "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
-           "                receives automatically when $ROM does not exist\n"
+
+  printf("  -xswc         send/receive ROM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
+         "                receives automatically when $ROM does not exist\n"
+         "  -xswcs        send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT\n"
+         "                receives automatically when $ROM does not exist\n"
 #if 1
-           "\n"
-           "Press q to abort sending or receiving. Don't press Ctrl-C. If you do the copier\n"
-           "can get in an invalid state. Only press Ctrl-C when the program appears to\n"
-           "hang. The program can appear to hang if you selected the wrong port for your\n"
-           "copier or if the copier is in a wrong state.\n"
+         "\n"
+         "Press q to abort sending or receiving. Don't press Ctrl-C. If you do the copier\n"
+         "can get in an invalid state. Only press Ctrl-C when the program appears to\n"
+         "hang. The program can appear to hang if you selected the wrong port for your\n"
+         "copier or if the copier is in a wrong state.\n"
 #endif
-          );
+        );
   //TODO more info like technical info about cabeling and stuff for the copier
-//  }
+
   return 0;
 }

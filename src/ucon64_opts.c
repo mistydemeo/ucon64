@@ -42,11 +42,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/backup.h"
 
 
+int ucon64_parport_needed = 0;
+
+
 int
 ucon64_switches (int c)
 {
   char *ptr = NULL;
-  static int parport_inited = 0; // has the parallel port already been init'ed?
 
 /*
   Handle options or switches that cause other _options_ to be ignored except
@@ -132,11 +134,10 @@ switch (c)
             DISCMAGE_STATUS_MSG
             "discmage enabled:                  %s\n"
             "configuration directory:           %s\n"
-            "directory containing DAT files:    %s\n"
+            "DAT file directory:                %s\n"
             "entries in DATabase:               %d\n"
             "DATabase enabled:                  %s\n",
-            UCON64_VERSION_S,
-            __DATE__,
+            UCON64_VERSION_S, __DATE__,
             CURRENT_OS_S,
             ENDIANESS_STATUS,
             DEBUG_STATUS,
@@ -238,20 +239,7 @@ switch (c)
           // Yes, we don't get here if ucon64.argv[ucon64.argc - 1] is [0x]278, [0x]378 or
           //  [0x]3bc and a file with the same name (path) exists.
           ucon64.parport = strtol (ucon64.argv[ucon64.argc - 1], NULL, 16);
-
-// the copier options need root privileges for ucon64_parport_init()
-    if (!parport_inited || (ucon64.flags & WF_PAR))
-      {
-        ucon64.parport = ucon64_parport_init (ucon64.parport);
-
-        if (ucon64.parport != 1 && ucon64.parport != -1)
-          parport_inited = 1; // do not init twice;
-
-#if     defined __unix__ && !defined __MSDOS__
-        // now we can drop privileges
-        drop_privileges ();
-#endif
-      }
+    ucon64_parport_needed = 1;
     break;
 #endif // PARALLEL
 
@@ -413,8 +401,8 @@ switch (c)
 static int
 ucon64_rename (int mode)
 {
-  char buf[FILENAME_MAX + 1], *suffix = (char *) get_suffix (ucon64.rom);
-  char buf2[FILENAME_MAX + 1];
+  char buf[FILENAME_MAX + 1], *suffix = (char *) get_suffix (ucon64.rom),
+       buf2[FILENAME_MAX + 1];
 
   buf[0] = 0;
 
@@ -433,7 +421,7 @@ ucon64_rename (int mode)
 
           if (p)
             if (p[0])
-              if (strlen (p) < 5) //TODO: what is a suffix and what is a dot in a name?
+              if (strlen (p) < 5) // TODO: what is a suffix and what is a dot in a name?
                 if (stricmp (p, ".nes") &&                    // NES
                     stricmp (p, ".fds") &&                    // NES FDS
 //                    stricmp (p, ".smd") &&                    // Genesis
@@ -448,7 +436,8 @@ ucon64_rename (int mode)
                 }
         }
 
-  if (!buf[0]) return 0;
+  if (!buf[0])
+    return 0;
 
   if (ucon64.fname_len == 2)
     buf[63] = 0;
@@ -473,7 +462,7 @@ ucon64_rename (int mode)
   if (access (buf2, F_OK))
     { // file with name buf doesn't exist
       printf ("Renaming \"%s\" to \"%s\"\n", basename2 (ucon64.rom),
-      basename2 (buf2));
+              basename2 (buf2));
 #ifndef DEBUG
       rename (ucon64.rom, buf2);
 #endif      
@@ -571,11 +560,10 @@ ucon64_options (int c)
 #ifdef  PARALLEL
   int enableRTS = -1;                             // for UCON64_XSWC & UCON64_XSWC2
 #endif
-  int value = 0, x = 0;
-  int result = 0;
+  int value = 0, x = 0, result = 0;
   unsigned int padded;
   char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
-    *p = NULL;
+       *p = NULL;
   struct stat fstate;
 
   if (ucon64.rom)
@@ -616,14 +604,14 @@ switch (c)
         return -1;                              // it's logical to stop for this file
       }
 #if 0
-//TODO: make compare more verbose
+    // TODO: make compare more verbose
     else if (result == 1)
       {
-        printf ("Both files are similar.\n");
+        printf ("The files are similar.\n");
       }
     else if (!result)
       {
-        printf ("Both files are different.\n");
+        printf ("The files are different.\n");
       }
 #endif      
     break;
@@ -814,15 +802,16 @@ switch (c)
     if (ucon64.dat)
       {
         if (!p)
-           p = ucon64.dat->name;
+          p = ucon64.dat->name;
         else if (!p[0])
-           p = ucon64.dat->name;
+          p = ucon64.dat->name;
       }
 
     if (p)
       if (p[0])
         {
-          if (stat (ucon64.rom, &fstate) != 0) break;
+          if (stat (ucon64.rom, &fstate) != 0)
+            break;
           strftime (buf, 13, "%b %d %Y", localtime (&fstate.st_mtime));
           printf ("%-31.31s ", to_func (p, strlen (p), toprint2));
 

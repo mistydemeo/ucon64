@@ -538,7 +538,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_FIG, UCON64_SNES, snes_usage,        WF_DEFAULT},
   {UCON64_FIGS, UCON64_SNES, snes_usage,       0},
   {UCON64_GBX, UCON64_GB, gameboy_usage,       WF_DEFAULT},
-  {UCON64_GD3, UCON64_SNES, snes_usage,        WF_DEFAULT},
+  {UCON64_GD3, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_ROM_REQ},
   {UCON64_INES, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_INESHD, UCON64_NES, nes_usage,       WF_DEFAULT},
 //  {UCON64_IP, UCON64_DC, dc_usage,             WF_DEFAULT},
@@ -577,102 +577,102 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_V64, UCON64_N64, n64_usage,          WF_DEFAULT},
   {UCON64_VRAM, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_XDEX, UCON64_N64, dex_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
-  {UCON64_XDJR, UCON64_N64, doctor64jr_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
+  {UCON64_XDJR, UCON64_N64, doctor64jr_usage,  WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
   {UCON64_XFAL, UCON64_GBA, fal_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
   {UCON64_XFALB, UCON64_GBA, fal_usage,        WF_STOP|WF_NO_SPLIT},
   {UCON64_XFALC, UCON64_GBA, fal_usage,        WF_STOP|WF_NO_SPLIT},
   {UCON64_XFALMULTI, UCON64_GBA, fal_usage,    WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
   {UCON64_XFALS, UCON64_GBA, fal_usage,        WF_STOP|WF_NO_SPLIT},
-  {UCON64_XGBX, UCON64_GB, gbx_usage,      WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
-  {UCON64_XGBXB, UCON64_GB, gbx_usage,     WF_STOP|WF_NO_SPLIT},
-  {UCON64_XGBXS, UCON64_GB, gbx_usage,     WF_STOP|WF_NO_SPLIT},
-  {UCON64_XGD3, UCON64_SNES, gd_usage,       WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
-  {UCON64_XLIT, UCON64_GB, lynxit_usage,      WF_STOP|WF_NO_SPLIT},
+  {UCON64_XGBX, UCON64_GB, gbx_usage,          WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
+  {UCON64_XGBXB, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_SPLIT},
+  {UCON64_XGBXS, UCON64_GB, gbx_usage,         WF_STOP|WF_NO_SPLIT},
+  {UCON64_XGD3, UCON64_SNES, gd_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
+  {UCON64_XLIT, UCON64_GB, lynxit_usage,       WF_STOP|WF_NO_SPLIT},
   {UCON64_XMCCL, UCON64_LYNX, mccl_usage,      WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
 #if 0
-  {UCON64_XSMD, UCON64_UNKNOWN, smd_usage, WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
-  {UCON64_XSMDS, UCON64_UNKNOWN, smd_usage, WF_STOP|WF_NO_SPLIT},
+  {UCON64_XSMD, UCON64_UNKNOWN, smd_usage,     WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
+  {UCON64_XSMDS, UCON64_UNKNOWN, smd_usage,    WF_STOP|WF_NO_SPLIT},
 #else
-  {UCON64_XSMD, UCON64_GENESIS, smd_usage, WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
-  {UCON64_XSMDS, UCON64_GENESIS, smd_usage, WF_STOP|WF_NO_SPLIT},
+  {UCON64_XSMD, UCON64_GENESIS, smd_usage,     WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
+  {UCON64_XSMDS, UCON64_GENESIS, smd_usage,    WF_STOP|WF_NO_SPLIT},
 #endif
-  {UCON64_XSWC, UCON64_SNES, swc_usage,       WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
-  {UCON64_XSWC2, UCON64_SNES, swc_usage,      WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
-  {UCON64_XSWCS, UCON64_SNES, swc_usage,      WF_STOP|WF_NO_SPLIT},
-  {UCON64_XV64, UCON64_N64, doctor64_usage,         WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
-//  {UCON64_Z64, UCON64_N64, z64_usage,          WF_DEFAULT},
+  {UCON64_XSWC, UCON64_SNES, swc_usage,        WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
+  {UCON64_XSWC2, UCON64_SNES, swc_usage,       WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
+  {UCON64_XSWCS, UCON64_SNES, swc_usage,       WF_STOP|WF_NO_SPLIT},
+  {UCON64_XV64, UCON64_N64, doctor64_usage,    WF_DEFAULT|WF_STOP|WF_NO_SPLIT},
+  {UCON64_Z64, UCON64_N64, z64_usage,          WF_DEFAULT},
 /*
   these consoles do not (need to) know the console or work for more than one
 */
   {UCON64_HELP, UCON64_UNKNOWN, NULL,          WF_STOP},
-  {UCON64_A, UCON64_UNKNOWN, aps_usage,             WF_STOP},
-  {UCON64_B, UCON64_UNKNOWN, bsl_usage,             WF_STOP},
-  {UCON64_C, UCON64_UNKNOWN, ucon64_options_usage,             0},
+  {UCON64_A, UCON64_UNKNOWN, aps_usage,        WF_STOP},
+  {UCON64_B, UCON64_UNKNOWN, bsl_usage,        WF_STOP},
+  {UCON64_C, UCON64_UNKNOWN, ucon64_options_usage, 0},
   {UCON64_CDIRIP, UCON64_UNKNOWN, NULL,        WF_DEFAULT},
-  {UCON64_CHK, UCON64_UNKNOWN, NULL,                           WF_DEFAULT},
-  {UCON64_CRC, UCON64_UNKNOWN, ucon64_options_usage,           WF_INIT|WF_PROBE},
+  {UCON64_CHK, UCON64_UNKNOWN, NULL,           WF_DEFAULT},
+  {UCON64_CRC, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE},
   {UCON64_CRCHD, UCON64_UNKNOWN, NULL,         WF_INIT|WF_PROBE},
-  {UCON64_CS, UCON64_UNKNOWN, ucon64_options_usage,            0},
-  {UCON64_DB, UCON64_UNKNOWN, ucon64_dat_usage,            0},
-  {UCON64_DBS, UCON64_UNKNOWN, ucon64_dat_usage,           WF_INIT|WF_NO_SPLIT},
-  {UCON64_DBV, UCON64_UNKNOWN, ucon64_dat_usage,           0},
-  {UCON64_DINT, UCON64_UNKNOWN, ucon64_options_usage,          0},
-  {UCON64_E, UCON64_UNKNOWN, ucon64_options_usage,             WF_DEFAULT},
-  {UCON64_FIND, UCON64_UNKNOWN, ucon64_options_usage,          WF_INIT},
-  {UCON64_GG, UCON64_UNKNOWN, gg_usage,            WF_DEFAULT|WF_NO_SPLIT},
-  {UCON64_GGD, UCON64_UNKNOWN, gg_usage,           0},
-  {UCON64_GGE, UCON64_UNKNOWN, gg_usage,           0},
-  {UCON64_HEX, UCON64_UNKNOWN, ucon64_options_usage,           WF_INIT}, // get size only
-  {UCON64_I, UCON64_UNKNOWN, ips_usage,             WF_STOP|WF_NO_SPLIT},
-  {UCON64_IDPPF, UCON64_UNKNOWN, ppf_usage,         0},
-  {UCON64_INS, UCON64_UNKNOWN, ucon64_padding_usage,           0},
-  {UCON64_INSN, UCON64_UNKNOWN, ucon64_padding_usage,          0},
-  {UCON64_INT, UCON64_UNKNOWN, ucon64_options_usage,           WF_DEFAULT},
+  {UCON64_CS, UCON64_UNKNOWN, ucon64_options_usage, 0},
+  {UCON64_DB, UCON64_UNKNOWN, ucon64_dat_usage, 0},
+  {UCON64_DBS, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_NO_SPLIT},
+  {UCON64_DBV, UCON64_UNKNOWN, ucon64_dat_usage, 0},
+  {UCON64_DINT, UCON64_UNKNOWN, ucon64_options_usage, 0},
+  {UCON64_E, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
+  {UCON64_FIND, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT},
+  {UCON64_GG, UCON64_UNKNOWN, gg_usage,        WF_DEFAULT|WF_NO_SPLIT},
+  {UCON64_GGD, UCON64_UNKNOWN, gg_usage,       0},
+  {UCON64_GGE, UCON64_UNKNOWN, gg_usage,       0},
+  {UCON64_HEX, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT}, // get size only
+  {UCON64_I, UCON64_UNKNOWN, ips_usage,        WF_STOP|WF_NO_SPLIT},
+  {UCON64_IDPPF, UCON64_UNKNOWN, ppf_usage,    0},
+  {UCON64_INS, UCON64_UNKNOWN, ucon64_padding_usage, 0},
+  {UCON64_INSN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
+  {UCON64_INT, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
   {UCON64_INT2, UCON64_UNKNOWN, NULL,          WF_DEFAULT},
-//  {UCON64_ISO, UCON64_UNKNOWN, ucon64_options_usage,           0},
-  {UCON64_ISPAD, UCON64_UNKNOWN, ucon64_padding_usage,         WF_INIT|WF_ROM_REQ|WF_NO_SPLIT},
+//  {UCON64_ISO, UCON64_UNKNOWN, ucon64_options_usage, 0},
+  {UCON64_ISPAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_INIT|WF_ROM_REQ|WF_NO_SPLIT},
   {UCON64_J, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
-  {UCON64_LS, UCON64_UNKNOWN, ucon64_options_usage,            WF_INIT|WF_PROBE|WF_NO_SPLIT},
-  {UCON64_LSD, UCON64_UNKNOWN, ucon64_dat_usage,           WF_INIT|WF_PROBE|WF_NO_SPLIT},
-//  {UCON64_LSV, UCON64_UNKNOWN, ucon64_options_usage,           WF_DEFAULT},
-//  {UCON64_MGD, UCON64_UNKNOWN, mgd_usage,                      WF_DEFAULT},
-//  {UCON64_MGH, UCON64_UNKNOWN, ucon64_options_usage,           WF_DEFAULT},
-  {UCON64_MKA, UCON64_UNKNOWN, aps_usage,           0},
-//  {UCON64_MKCUE, UCON64_UNKNOWN, ucon64_options_usage,         0},
-  {UCON64_MKI, UCON64_UNKNOWN, ips_usage,           0},
-  {UCON64_MKPPF, UCON64_UNKNOWN, ppf_usage,         0},
+  {UCON64_LS, UCON64_UNKNOWN, ucon64_options_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
+  {UCON64_LSD, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
+//  {UCON64_LSV, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
+//  {UCON64_MGD, UCON64_UNKNOWN, mgd_usage,      WF_DEFAULT},
+//  {UCON64_MGH, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
+  {UCON64_MKA, UCON64_UNKNOWN, aps_usage,      0},
+//  {UCON64_MKCUE, UCON64_UNKNOWN, ucon64_options_usage, 0},
+  {UCON64_MKI, UCON64_UNKNOWN, ips_usage,      0},
+  {UCON64_MKPPF, UCON64_UNKNOWN, ppf_usage,    0},
   {UCON64_MKSHEET, UCON64_UNKNOWN, NULL,       0},
-//  {UCON64_MKTOC, UCON64_UNKNOWN, ucon64_options_usage,         0},
+//  {UCON64_MKTOC, UCON64_UNKNOWN, ucon64_options_usage, 0},
   {UCON64_N, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
-  {UCON64_NA, UCON64_UNKNOWN, aps_usage,            0},
-  {UCON64_NPPF, UCON64_UNKNOWN, ppf_usage,          0},
+  {UCON64_NA, UCON64_UNKNOWN, aps_usage,       0},
+  {UCON64_NPPF, UCON64_UNKNOWN, ppf_usage,     0},
   {UCON64_NRGRIP, UCON64_UNKNOWN, NULL,        WF_DEFAULT|WF_ROM_REQ},
-  {UCON64_P, UCON64_UNKNOWN, ucon64_padding_usage,             WF_DEFAULT|WF_ROM_REQ},
-  {UCON64_PAD, UCON64_UNKNOWN, ucon64_padding_usage,           WF_DEFAULT|WF_ROM_REQ},
+  {UCON64_P, UCON64_UNKNOWN, ucon64_padding_usage, WF_DEFAULT|WF_ROM_REQ},
+  {UCON64_PAD, UCON64_UNKNOWN, ucon64_padding_usage, WF_DEFAULT|WF_ROM_REQ},
   {UCON64_PADHD, UCON64_UNKNOWN, NULL,         WF_DEFAULT|WF_ROM_REQ},
-  {UCON64_PADN, UCON64_UNKNOWN, ucon64_padding_usage,          WF_DEFAULT|WF_ROM_REQ},
-  {UCON64_PATCH, UCON64_UNKNOWN, ucon64_patching_usage,         WF_DEFAULT},
-  {UCON64_POKE, UCON64_UNKNOWN, ucon64_patching_usage,          WF_DEFAULT|WF_ROM_REQ},
-  {UCON64_PPF, UCON64_UNKNOWN, ppf_usage,           WF_DEFAULT|WF_ROM_REQ|WF_STOP},
-  {UCON64_RENAME, UCON64_UNKNOWN, ucon64_dat_usage,        WF_INIT|WF_PROBE|WF_NO_SPLIT|WF_ROM_REQ},
-  {UCON64_RROM, UCON64_UNKNOWN, ucon64_dat_usage,          WF_INIT|WF_PROBE|WF_NO_SPLIT|WF_ROM_REQ},
+  {UCON64_PADN, UCON64_UNKNOWN, ucon64_padding_usage, WF_DEFAULT|WF_ROM_REQ},
+  {UCON64_PATCH, UCON64_UNKNOWN, ucon64_patching_usage, WF_DEFAULT},
+  {UCON64_POKE, UCON64_UNKNOWN, ucon64_patching_usage, WF_DEFAULT|WF_ROM_REQ},
+  {UCON64_PPF, UCON64_UNKNOWN, ppf_usage,      WF_DEFAULT|WF_ROM_REQ|WF_STOP},
+  {UCON64_RENAME, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT|WF_ROM_REQ},
+  {UCON64_RROM, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT|WF_ROM_REQ},
   {UCON64_RR83, UCON64_UNKNOWN, NULL,          WF_INIT|WF_PROBE|WF_NO_SPLIT|WF_ROM_REQ},
   {UCON64_RL, UCON64_UNKNOWN, NULL,            WF_ROM_REQ},
   {UCON64_S, UCON64_UNKNOWN, NULL,             WF_DEFAULT|WF_ROM_REQ},
-  {UCON64_SCAN, UCON64_UNKNOWN, ucon64_dat_usage,        WF_INIT|WF_PROBE|WF_NO_SPLIT|WF_ROM_REQ},
+  {UCON64_SCAN, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT|WF_ROM_REQ},
 #if 1
   {UCON64_SMD, UCON64_UNKNOWN, NULL,           WF_DEFAULT},
   {UCON64_SMDS, UCON64_UNKNOWN, NULL,          WF_INIT},
 #else
-  {UCON64_SMD, UCON64_GENESIS, genesis_usage,           WF_DEFAULT},
-  {UCON64_SMDS, UCON64_GENESIS, genesis_usage,          WF_INIT},
+  {UCON64_SMD, UCON64_GENESIS, genesis_usage,  WF_DEFAULT},
+  {UCON64_SMDS, UCON64_GENESIS, genesis_usage, WF_INIT},
 #endif
-  {UCON64_STP, UCON64_UNKNOWN, ucon64_padding_usage,           WF_ROM_REQ},
-  {UCON64_STPN, UCON64_UNKNOWN, ucon64_padding_usage,          WF_ROM_REQ},
-  {UCON64_STRIP, UCON64_UNKNOWN, ucon64_padding_usage,         WF_ROM_REQ},
+  {UCON64_STP, UCON64_UNKNOWN, ucon64_padding_usage, WF_ROM_REQ},
+  {UCON64_STPN, UCON64_UNKNOWN, ucon64_padding_usage, WF_ROM_REQ},
+  {UCON64_STRIP, UCON64_UNKNOWN, ucon64_padding_usage, WF_ROM_REQ},
   {UCON64_SWAP, UCON64_UNKNOWN, NULL,          WF_ROM_REQ},
-  {UCON64_VER, UCON64_UNKNOWN, ucon64_options_usage,           WF_STOP},
-//  {UCON64_XCDRW, UCON64_UNKNOWN, ucon64_options_usage,         WF_DEFAULT},
+  {UCON64_VER, UCON64_UNKNOWN, ucon64_options_usage, WF_STOP},
+//  {UCON64_XCDRW, UCON64_UNKNOWN, ucon64_options_usage, WF_DEFAULT},
 /*
   force recognition switches
 */
@@ -708,28 +708,28 @@ const st_ucon64_wf_t ucon64_wf[] = {
 /*
   other switches
 */
-  {UCON64_83, UCON64_UNKNOWN, ucon64_dat_usage,          WF_SWITCH},
-  {UCON64_BS, UCON64_SNES, snes_usage,            WF_SWITCH},
+  {UCON64_83, UCON64_UNKNOWN, ucon64_dat_usage, WF_SWITCH},
+  {UCON64_BS, UCON64_SNES, snes_usage,         WF_SWITCH},
   {UCON64_FILE, UCON64_UNKNOWN, NULL,          WF_SWITCH},
-  {UCON64_FORCE63, UCON64_UNKNOWN, ucon64_dat_usage,          WF_SWITCH},
+  {UCON64_FORCE63, UCON64_UNKNOWN, ucon64_dat_usage, WF_SWITCH},
   {UCON64_FRONTEND, UCON64_UNKNOWN, NULL,      WF_SWITCH},
-//  {UCON64_GOOD, UCON64_UNKNOWN, ucon64_dat_usage,          WF_SWITCH},
-  {UCON64_HD, UCON64_UNKNOWN, ucon64_options_usage,            WF_SWITCH},
-  {UCON64_HDN, UCON64_UNKNOWN, ucon64_options_usage,           WF_SWITCH},
-  {UCON64_HI, UCON64_SNES, snes_usage,            WF_SWITCH},
-  {UCON64_NBS, UCON64_SNES, snes_usage,           WF_SWITCH},
-  {UCON64_NBAK, UCON64_UNKNOWN, ucon64_options_usage,          WF_SWITCH},
-  {UCON64_NCOL, UCON64_UNKNOWN, ucon64_options_usage,          WF_SWITCH},
-  {UCON64_NHD, UCON64_UNKNOWN, ucon64_options_usage,           WF_SWITCH},
-  {UCON64_NHI, UCON64_SNES, snes_usage,           WF_SWITCH},
-  {UCON64_NINT, UCON64_UNKNOWN, ucon64_options_usage,          WF_SWITCH},
-  {UCON64_NS, UCON64_UNKNOWN, ucon64_options_usage,            WF_SWITCH},
-  {UCON64_O, UCON64_UNKNOWN, ucon64_options_usage,             WF_SWITCH},
-  {UCON64_PORT, UCON64_UNKNOWN, ucon64_options_usage,          WF_SWITCH},
-  {UCON64_Q, UCON64_UNKNOWN, ucon64_options_usage,             WF_SWITCH},
+//  {UCON64_GOOD, UCON64_UNKNOWN, ucon64_dat_usage, WF_SWITCH},
+  {UCON64_HD, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_HDN, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_HI, UCON64_SNES, snes_usage,         WF_SWITCH},
+  {UCON64_NBS, UCON64_SNES, snes_usage,        WF_SWITCH},
+  {UCON64_NBAK, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_NCOL, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_NHD, UCON64_UNKNOWN, ucon64_options_usage,  WF_SWITCH},
+  {UCON64_NHI, UCON64_SNES, snes_usage,        WF_SWITCH},
+  {UCON64_NINT, UCON64_UNKNOWN, ucon64_options_usage,WF_SWITCH},
+  {UCON64_NS, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_O, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_PORT, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_Q, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_QQ, UCON64_UNKNOWN, NULL,            WF_SWITCH},
   {UCON64_ROM, UCON64_UNKNOWN, NULL,           WF_SWITCH},
-  {UCON64_V, UCON64_UNKNOWN, ucon64_options_usage,             WF_SWITCH},
+  {UCON64_V, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {0, 0, NULL, 0}
 };
 
@@ -1026,8 +1026,8 @@ ucon64_output_fname (char *requested_fname, int flags)
 {
   char ext[80], fname[FILENAME_MAX];
 
-  // We have to make a copy, because get_suffix() returns a pointer to a location
-  //  in the original string
+  // We have to make a copy, because get_suffix() returns a pointer to a
+  //  location in the original string
   strcpy (ext, get_suffix (requested_fname));
 
   // force_requested_fname is necessary for options like -gd3. Of course that
@@ -1051,7 +1051,8 @@ ucon64_output_fname (char *requested_fname, int flags)
     ".zip" or ".gz". Now ucon64_output_fname() can be used when renaming/moving
     files.
   */
-  if (!(flags & OF_FORCE_SUFFIX) && !(stricmp (ext, ".zip") && stricmp (ext, ".gz")))
+  if (!(flags & OF_FORCE_SUFFIX) &&
+      !(stricmp (ext, ".zip") && stricmp (ext, ".gz")))
     strcpy (ext, ".tmp");
   set_suffix (requested_fname, ext);
 
@@ -1213,9 +1214,8 @@ int
 ucon64_testpad (const char *filename)
 // test if EOF is padded (repeating bytes)
 {
-  int pos = ucon64.file_size - 1;
-  int buf_pos = pos % MAXBUFSIZE;
-  int c = q_fgetc (filename, pos);
+  int pos = ucon64.file_size - 1, buf_pos = pos % MAXBUFSIZE,
+      c = q_fgetc (filename, pos);
   unsigned char buf[MAXBUFSIZE];
   FILE *fh = fopen (filename, "rb");
 
@@ -1223,7 +1223,7 @@ ucon64_testpad (const char *filename)
     return -1;
 
   for (pos -= buf_pos; !fseek (fh, pos, SEEK_SET) && pos > -1;
-        pos -= MAXBUFSIZE, buf_pos = MAXBUFSIZE)
+       pos -= MAXBUFSIZE, buf_pos = MAXBUFSIZE)
     {
       fread (buf, 1, buf_pos, fh);
 
@@ -1246,9 +1246,8 @@ int
 ucon64_testpad (const char *filename)
 // test if EOF is padded (repeating bytes)
 {
-  int size = ucon64.file_size;
-  int pos = ucon64.file_size - 2;
-  int c = q_fgetc (filename, ucon64.file_size - 1);
+  int size = ucon64.file_size, pos = ucon64.file_size - 2,
+      c = q_fgetc (filename, ucon64.file_size - 1);
   unsigned char *buf;
 
   if (!(buf = (unsigned char *) malloc ((size + 2) * sizeof (unsigned char))))
@@ -1568,11 +1567,11 @@ ucon64_testsplit (const char *filename)
 }
 
 
-//  configfile handling
+// configfile handling
 int
 ucon64_configfile (void)
 {
-  char buf[256], buf2[MAXBUFSIZE], *dirname;
+  char buf[MAXBUFSIZE], *dirname;
 
   dirname = getenv2 ("HOME");
   sprintf (ucon64.configfile, "%s" FILE_SEPARATOR_S
@@ -1711,14 +1710,14 @@ ucon64_configfile (void)
           printf ("OK\n\n");
         }
     }
-  else if (strtol (get_property (ucon64.configfile, "version", buf2, "0"), NULL, 10) < UCON64_CONFIG_VERSION)
+  else if (strtol (get_property (ucon64.configfile, "version", buf, "0"), NULL, 10) < UCON64_CONFIG_VERSION)
     {
-      strcpy (buf2, ucon64.configfile);
-      set_suffix (buf2, ".OLD");
+      strcpy (buf, ucon64.configfile);
+      set_suffix (buf, ".OLD");
 
-      printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
+      printf ("NOTE: Updating config, old version will be renamed to %s...", buf);
 
-      q_fcpy (ucon64.configfile, 0, q_fsize (ucon64.configfile), buf2, "wb"); // "wb" is correct for copying
+      q_fcpy (ucon64.configfile, 0, q_fsize (ucon64.configfile), buf, "wb"); // "wb" is correct for copying
 
       sprintf (buf, "%d", UCON64_CONFIG_VERSION);
       set_property (ucon64.configfile, "version", buf);

@@ -231,8 +231,8 @@ const struct option options[] =   {
     {"rr83", 0, 0, UCON64_RR83},
     {"rrom", 0, 0, UCON64_RROM},
     {"rl", 0, 0, UCON64_RL},
-// yes, in reality --rom doesn't take an argument... it's just a dummy to make
-// the usage easier to understand and might be gone soon...
+    // yes, in reality --rom doesn't take an argument... it's just a dummy to
+    //  make the usage easier to understand and might be gone soon...
     {"rom", 0, 0, UCON64_ROM},
     {"rotl", 0, 0, UCON64_ROTL},
     {"rotr", 0, 0, UCON64_ROTR},
@@ -315,40 +315,41 @@ ucon64_runtime_debug (void)
   int x = 0, y = 0;
   char buf[MAXBUFSIZE];
 
-// sanity check at runtime 
-// does ucon64_wf cover all getopt() options and vice versa?
+  // sanity check at runtime
+  // Does ucon64_wf cover all getopt() options and vice versa?
   for (x = 0; options[x].val; x++)
     if (!ucon64_get_wf (options[x].val)) // compare options with workflow
       {
-        fprintf (stderr, "DEBUG: sanity check failed (option \"%s\" in (struct option *) options)\n", options[x].name);
+        fprintf (stderr, "DEBUG: Sanity check failed (option \"%s\" in (struct option *) options)\n", options[x].name);
         exit (1);
       }
 
-// how many option do we have?
+  // How many option do we have?
   printf ("DEBUG: Total options: %d\n", x);
 
-// the other way
+  // the other way
   for (x = 0; ucon64_wf[x].option; x++)
     if (!ucon64_get_opt (ucon64_wf[x].option)) // compare workflow with options
       {
-        fprintf (stderr, "DEBUG: sanity check failed (entry %d in ucon64_wf with value %d)\n", x, ucon64_wf[x].option);
+        fprintf (stderr, "DEBUG: Sanity check failed (entry %d in ucon64_wf with value %d)\n", x, ucon64_wf[x].option);
         exit (1);
       }
 
-// any duplicates in ucon64_wf?
+  // Any duplicates in ucon64_wf?
   for (x = 0; ucon64_wf[x].option; x++)
     {
       for (y = 0; ucon64_wf[y].option; y++)
-        if (ucon64_wf[x].option == ucon64_wf[y].option && x != y) break;
+        if (ucon64_wf[x].option == ucon64_wf[y].option && x != y)
+          break;
 
       if (ucon64_wf[x].option == ucon64_wf[y].option && x != y)
         {
-          fprintf (stderr, "DEBUG: sanity check failed (entry %d in ucon64_wf with value %d is a dupe)\n", x, ucon64_wf[x].option);
+          fprintf (stderr, "DEBUG: Sanity check failed (entry %d in ucon64_wf with value %d is a dupe)\n", x, ucon64_wf[x].option);
           exit (1);
         }
     }
 
-// check for wrong usage assignments in ucon64_wf
+  // Check for wrong usage assignments in ucon64_wf
   for (x = 0; ucon64_wf[x].option; x++)
     if (ucon64_wf[x].usage)
       {
@@ -358,26 +359,26 @@ ucon64_runtime_debug (void)
 
         for (y = 0; p[y].option_s || p[y].desc; y++)
           if (p[y].option_s) 
-            if (!stricmp (buf, p[y].option_s)) break;
-
+            if (!stricmp (buf, p[y].option_s))
+              break;
 
         if (p[y].option_s)
           if (stricmp (buf, p[y].option_s) != 0 || (!p[y].option_s && !p[y].desc))
             {
-              fprintf (stderr, "DEBUG: wrong usage assigned (option: %s in ucon64_wf)\n", buf);
+              fprintf (stderr, "DEBUG: Wrong usage assigned (option: %s in ucon64_wf)\n", buf);
               exit (1);
             }
 
           if (!p[y].option_s && !p[y].desc)
             {
-              fprintf (stderr, "DEBUG: wrong usage assigned (option: %s in ucon64_wf)\n", buf);
+              fprintf (stderr, "DEBUG: Wrong usage assigned (option: %s in ucon64_wf)\n", buf);
               exit (1);
             }
       }
     else
-      printf ("DEBUG: no usage assigned (option: %d in ucon64_wf)\n", x);
+      printf ("DEBUG: No usage assigned (option: %d in ucon64_wf)\n", x);
 
-  printf ("DEBUG: sanity check finished\n");
+  printf ("DEBUG: Sanity check finished\n");
 }
 #endif  // DEBUG
 
@@ -415,8 +416,7 @@ main (int argc, char **argv)
   // flush st_ucon64_t
   memset (&ucon64, 0, sizeof (st_ucon64_t));
 
-  ucon64.parport = 0x378;
-  ucon64.rom = 
+  ucon64.rom =
   ucon64.file =
   ucon64.mapr =
   ucon64.comment = "";
@@ -437,20 +437,20 @@ main (int argc, char **argv)
   ucon64_configfile ();
 
 #ifdef  ANSI_COLOR
-// ansi colors?
+  // ansi colors?
   ucon64.ansi_color = get_property_int (ucon64.configfile, "ansi_color", '=');
   if (ucon64.ansi_color)
     ucon64.ansi_color = ansi_init ();
 #endif
 
-// parallel port?
+  // parallel port?
   // Use "0" to force probing if the config file doesn't contain a parport line
   sscanf (get_property (ucon64.configfile, "parport", buf, "0"), "%x", &ucon64.parport);
 
-// make backups?
+  // make backups?
   ucon64.backup = get_property_int (ucon64.configfile, "backups", '=');
 
-// $HOME/.ucon64/ ?
+  // $HOME/.ucon64/ ?
   strcpy (ucon64.configdir, get_property (ucon64.configfile, "configdir", buf, ""));
 #ifdef  __CYGWIN__
   strcpy (ucon64.configdir, cygwin_fix (ucon64.configdir));
@@ -458,7 +458,7 @@ main (int argc, char **argv)
   strcpy (buf, ucon64.configdir);
   realpath2 (buf, ucon64.configdir);
 
-// DAT file handling
+  // DAT file handling
   ucon64.dat_enabled = 0;
   strcpy (ucon64.datdir, get_property (ucon64.configfile, "datdir", buf, ""));
 #ifdef  __CYGWIN__
@@ -467,7 +467,7 @@ main (int argc, char **argv)
   strcpy (buf, ucon64.datdir);
   realpath2 (buf, ucon64.datdir);
 
-// we use ucon64.datdir as path to the dats
+  // we use ucon64.datdir as path to the dats
   if (!access (ucon64.datdir, R_OK | W_OK | X_OK))
     if (!stat (ucon64.datdir, &fstate))
       if (S_ISDIR (fstate.st_mode))
@@ -486,10 +486,10 @@ main (int argc, char **argv)
   if (ucon64.dat_enabled)
     ucon64_dat_indexer ();  // update cache (index) files if necessary
 
-// load libdiscmage
+  // load libdiscmage
   ucon64.discmage_enabled = ucon64_load_discmage ();
 
-// ucon64.dat_enabled and ucon64.discmage_enabled can affect the usage output
+  // ucon64.dat_enabled and ucon64.discmage_enabled can affect the usage output
   if (argc < 2)
     {
       ucon64_usage (argc, argv);
@@ -497,8 +497,9 @@ main (int argc, char **argv)
     }
 
   optind = 0;
-// TODO?: the getopt() is only left here to produce rom_index
-  while ((c = getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1);
+  // TODO?: the getopt() is only left here to produce rom_index
+  while ((c = getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
+    ;
 
   rom_index = optind;                           // save index of first file
 #if 1
@@ -519,7 +520,7 @@ main (int argc, char **argv)
         {
           if (S_ISREG (fstate.st_mode))
             result = ucon64_process_rom (argv[rom_index]);
-          else if (S_ISDIR (fstate.st_mode)) // a dir!?
+          else if (S_ISDIR (fstate.st_mode))    // a dir!?
             {
               if ((dp = opendir (path)))
                 while ((ep = readdir (dp)))
@@ -590,12 +591,17 @@ ucon64_process_rom (char *fname)
 
 int
 ucon64_execute_options (void)
-// execute all options for a single file
-// PLEASE!!! if you experience problems then try your luck with the flags
-// in ucon64_misc.c/ucon64_wf[] before changing things here or in ucon64_rom_handling()
+/*
+  execute all options for a single file
+  PLEASE!!! if you experience problems then try your luck with the flags
+  in ucon64_misc.c/ucon64_wf[] before changing things here or in
+  ucon64_rom_handling()
+*/
 {
-  int c = 0, result = 0;
-  int opts = 0;
+  int c = 0, result = 0, opts = 0;
+#if     defined __unix__ && !defined __MSDOS__
+  static int privileges_droppped = 0;
+#endif
   const st_ucon64_wf_t *wf = NULL;
   
   ucon64.console = UCON64_UNKNOWN;
@@ -624,24 +630,37 @@ ucon64_execute_options (void)
   ucon64.crc32 =
   ucon64.fcrc32 = 0;
 
-// switches
-// TODO?: more "elegance" needed or merge them into options?
+  // switches
+  // TODO?: more "elegance" needed or merge them into options?
   optind = 0;
   while ((c = getopt_long_only (ucon64.argc, ucon64.argv, "", options, NULL)) != -1)
     {
-      wf = ucon64_get_wf (c); // get workflow for that option
-
-      if (wf)
+      if ((wf = ucon64_get_wf (c)))             // get workflow for that option
         {
           if (wf->console != UCON64_UNKNOWN)
             ucon64.console = wf->console;
-
           ucon64.flags = wf->flags;
         }
-
 //        if (wf->flags & WF_SWITCH)
-          ucon64_switches (c);
+        ucon64_switches (c);
     }
+
+    /*
+      The copier options need root privileges for ucon64_parport_init()
+      We can't use ucon64.flags & WF_PAR to detect whether a (parallel port)
+      copier option has been specified, because another switch might've been
+      specified after -port.
+    */
+    if (ucon64_parport_needed)
+      ucon64.parport = ucon64_parport_init (ucon64.parport);
+#if     defined __unix__ && !defined __MSDOS__
+    if (!privileges_droppped)
+      {
+        // now we can drop privileges
+        drop_privileges ();
+        privileges_droppped = 1; 		// call drop_privileges() only once
+      }
+#endif
 
 
   optind = 0;                                   // start with first option
@@ -729,7 +748,7 @@ ucon64_rom_handling (void)
 
   ucon64_rom_flush (&rominfo);
 
-// a ROM (File)?
+  // a ROM (file)?
   if (!ucon64.rom)
     no_rom = 1;
   else if (!ucon64.rom[0])
@@ -750,13 +769,13 @@ ucon64_rom_handling (void)
     {
       if (ucon64.flags & WF_ROM_REQ)
         {
-          fprintf (stderr, "ERROR: a ROM is required for this option\n");
+          fprintf (stderr, "ERROR: A ROM is required for this option\n");
           return -1;
         }
       return 0;
     }
 
-// does the option allow split ROMs?
+  // Does the option allow split ROMs?
   if (ucon64.flags & WF_NO_SPLIT)
     if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.rom))
       {
@@ -770,7 +789,7 @@ ucon64_rom_handling (void)
   ucon64.file_size = q_fsize (ucon64.rom);
   ucon64.crc32 = ucon64.fcrc32 = 0;
 
-// "walk through" <console>_init()
+  // "walk through" <console>_init()
   if (ucon64.flags & WF_PROBE)
     {
       ucon64.rominfo = ucon64_probe (&rominfo); // returns console type
@@ -820,7 +839,7 @@ ucon64_rom_handling (void)
     }
 
 
-// DAtabase
+  // DAtabase
   ucon64.dat = NULL;
   if (ucon64.crc32 != 0 && ucon64.dat_enabled)
     {
@@ -834,7 +853,7 @@ ucon64_rom_handling (void)
             case UCON64_GB:
             case UCON64_GBA:
             case UCON64_N64:
-                  // These ROMs have internal headers with name, country, maker, etc.
+              // These ROMs have internal headers with name, country, maker, etc.
               break;
     
             default:
@@ -850,7 +869,7 @@ ucon64_rom_handling (void)
           }
     }
       
-// display info
+  // display info
   if ((ucon64.flags & WF_NFO || ucon64.flags & WF_NFO_AFTER) && ucon64.quiet < 1)
     ucon64_nfo ();
 
@@ -868,7 +887,7 @@ ucon64_probe (st_rominfo_t * rominfo)
       uint32_t flags;
     } st_probe_t;
 
-//auto recognition
+// auto recognition
 #define AUTO (1)
 
   int x = 0;
@@ -968,8 +987,8 @@ ucon64_nfo (void)
     printf ("Checksum (CRC32): 0x%08x\n", ucon64.crc32);
 
   // The check for the size of the file is made, so that uCON64 won't display a
-  //  (nonsense) DAT info line when dumping a ROM (file doesn't exist and has
-  //  size 0).
+  //  (nonsense) DAT info line when dumping a ROM (file doesn't exist, so
+  //  ucon64.file_size is 0).
   if (ucon64.file_size > 0 && ucon64.dat_enabled)
     if (ucon64.dat)
       ucon64_dat_nfo (ucon64.dat, 1);
@@ -1164,12 +1183,12 @@ ucon64_fname_arch (const char *fname)
 void
 ucon64_render_usage (const st_usage_t *usage)
 {
-// TODO speed up
+  // TODO: speed up
   int x, pos = 0;
   char buf[MAXBUFSIZE];
 
 #ifdef  DEBUG
-// look for malformed usages
+  // look for malformed usages
   for (x = 0; usage[x].option_s || usage[x].optarg || usage[x].desc; x++)
     fprintf (stderr, "{\"%s\", \"%s\", \"%s\"},\n",
       usage[x].option_s,
@@ -1190,7 +1209,8 @@ ucon64_render_usage (const st_usage_t *usage)
             {
               int len = strlen (usage[x].option_s);
 
-// adjust tabs for OPTION_S and OPTION_LONG_S here not in the OPTION_S definition
+              // adjust tabs for OPTION_S and OPTION_LONG_S here not in the
+              //  OPTION_S definition
               sprintf (buf,
                         (len == 1 ?
                          ("   " OPTION_S "%s%c") :
@@ -1216,7 +1236,7 @@ ucon64_render_usage (const st_usage_t *usage)
 #if 1
               for (pos = 0; usage[x].desc[pos]; pos++)
                 {
-                  printf ("%c", usage[x].desc[pos]); // TODO speed this up
+                  printf ("%c", usage[x].desc[pos]); // TODO: speed this up
 
                   if (usage[x].desc[pos] == '\n')
                     printf ("                  ");
@@ -1351,7 +1371,7 @@ ucon64_usage (int argc, char *argv[])
   printf ("\n");
 
 //  if (ucon64.dat_enabled)
-    ucon64_render_usage (ucon64_dat_usage);
+  ucon64_render_usage (ucon64_dat_usage);
 
   printf ("\n");
 

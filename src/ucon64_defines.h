@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef UCON64_DEFINES_H
 #define UCON64_DEFINES_H
-//  please make sure that NO definition except FALSE has 0 as value
+// please make sure that NO definition except FALSE has 0 as value
 
 #define UCON64_UNKNOWN_S "Unknown"
 
@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define UCON64_UNKNOWN (-1)
 
-//definitions for file types
+// definitions for file types
 #define UCON64_TYPE_UNKNOWN (UCON64_UNKNOWN)
 #define UCON64_TYPE_ROM (1)
 #define UCON64_TYPE_DISC (2)

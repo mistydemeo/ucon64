@@ -146,7 +146,7 @@ Q50: <a href="#50">I configured uCON64 to use ppdev and tried to send a file to
    my backup unit as a regular user. I got an error message that the parallel
    port device could not be opened. What did I do wrong?</a><br>
 <br>
-Q51: <a href="#51">What do I need before I can upload files to my Flash 2
+Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
    Advance?</a><br>
 <br>
 <br>
@@ -217,6 +217,8 @@ Q51: <a href="#51">What do I need before I can upload files to my Flash 2
    - whether uCON64 will be able to use the discmage library (default: yes)<br>
    - whether uCON64 will be able to read .gz and .zip files (default: not if a
    Makefile "template" is used, see below)<br>
+   - whether uCON64 will use libusb/have support for USB backup units (default:
+   no)<br>
 <br>
    The presence or settings of these features is controlled by the header file
    config.h in combination with the makefiles. There are two ways to create a
@@ -246,7 +248,7 @@ Q51: <a href="#51">What do I need before I can upload files to my Flash 2
    so, but do not complain if these instructions do not seem to be right after
    having done that.<br>
    To save us some work, for MinGW we only support configuring and building
-   uCON64 from within Msys (MinGW's POSIX build environment, a port of Bash).<br>
+   uCON64 from within MSYS (MinGW's POSIX build environment, a port of Bash).<br>
 <br>
    <b>Support for files in gzip (.gz) or zip format (.zip)</b><br>
    For gzip &amp; zip support you need zlib. If you do not have zlib you can
@@ -307,6 +309,10 @@ Q51: <a href="#51">What do I need before I can upload files to my Flash 2
    Otherwise it should look like this:<br>
    &nbsp;&nbsp; make ucon64<br>
 <br>
+   If you use Mac OS X and get an error message that dlfcn.h cannot be found,
+   please install the library
+   <a href="http://www.opendarwin.org/projects/dlcompat/" target="_blank">dlcompat</a>
+   and try again.<br>
    On Unix systems other than GNU/Linux you might need to use "gmake" (GNU
    make) instead of "make". If the last make command has been successfully
    executed you can find the executable in the directory where you ran make.
@@ -559,7 +565,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
   </tr>
   <tr>
     <td><tt>gbaloader</tt></td>
-    <td><tt>path to multi-game loader</tt></td>
+    <td><tt>path to GBA multi-game loader</tt></td>
   </tr>
 </table><br>
    Each of these variables can also be set in the command line environment. If
@@ -850,7 +856,11 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    MB) card use a command line like this:<br>
    &nbsp;&nbsp; ucon64 -gba -multi=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba multi.bin<br>
    You can also send it directly by using -xfalmulti:<br>
-   &nbsp;&nbsp; ucon64 -xfalmulti=128 loader.bin rom1.gba rom2.gba rom3.gba rom4.gba<br>
+   &nbsp;&nbsp; ucon64 -xfalmulti=128 rom1.gba rom2.gba rom3.gba rom4.gba<br>
+   Please note that when using -multi you have to specify a loader and the name
+   of the multirom file to create, while when using -xfalmulti you must omit
+   them. -xfalmulti uses the variable gbaloader to find the loader. See
+   <a href="#configbin">"How to configure the uCON64 executable"</a>.<br>
    Just like sometimes happens with Visoly's tool it is possible to get the
    same message when the multirom is small enough. It will probably work when
    you try again (with the same multirom).<br>
@@ -1791,15 +1801,16 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    <b>sed "s/ /,/g"</b> replaces all spaces with commas.<br>
 <br>
 <p>
-<a name="51"><b>Q51</b>: What do I need before I can upload files to my Flash 2
-   Advance?</a><br>
+<a name="51"><b>Q51</b>: What do I need to do before I can upload files to my
+   Flash 2 Advance?</a><br>
 <b>A</b>: Download the package that contains the support files from
    <a href="http://ucon64.sourceforge.net/" target="_blank">the uCON64 homepage</a>.
    Extract the package and update the configuration file. See
    <a href="#configbin">"How to configure the uCON64 executable"</a>.
-   If you want to use the parallel port version, you should set at least the variable
-   iclientp. If you want to send multiple files to your F2A, also set gbaloader.
-   If you want to see a different background while uploading, set ilogo.<br>
+   If you want to use the parallel port version of the F2A, you should set at
+   least the variable iclientp. If you want to send multiple files to your F2A,
+   also set gbaloader. If you want to see a different background while
+   uploading, set ilogo.<br>
    The USB version of the F2A is currently only supported under GNU/Linux. If
    you want to use the USB version, you should set at least the variables
    f2afirmware and iclientu. If you want to send multiple files to your F2A, set

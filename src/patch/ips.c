@@ -37,6 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define RLE_START_THRESHOLD 6                   // must be smaller than RLE_RESTART_THRESHOLD!
 #define RLE_RESTART_THRESHOLD 13
 #define BRIDGE_LEN 5
+#define BUFSIZE 65535
 //#define DEBUG_IPS
 
 const char *ips_usage[] =
@@ -271,7 +272,7 @@ check_for_rle (unsigned char byte, unsigned char *buf)
       if (ndiffs > RLE_RESTART_THRESHOLD)
         {
           use_rle = 1;
-          for (i = ndiffs - RLE_RESTART_THRESHOLD; i <= ndiffs - 1; i++)
+          for (i = ndiffs - RLE_RESTART_THRESHOLD; i < ndiffs; i++)
             if (buf[i] != byte)
               {
                 use_rle = 0;
@@ -343,7 +344,7 @@ int
 ips_create (const char *orgname, const char *modname)
 {
   int i, orgfilesize, modfilesize;
-  unsigned char ipsname[FILENAME_MAX], byte, byte2, buf[65535];
+  unsigned char ipsname[FILENAME_MAX], byte, byte2, buf[BUFSIZE];
 
   if ((orgfile = fopen (orgname, "rb")) == NULL)
     {
@@ -360,7 +361,7 @@ ips_create (const char *orgname, const char *modname)
   ucon64_fbackup (NULL, ipsname);
   if ((ipsfile = fopen (ipsname, "wb")) == NULL)
     {
-      fprintf (stderr, "ERROR: Could not open %s\n", ipsname);
+      fprintf (stderr, "ERROR: Can't open %s for writing\n", ipsname);
       exit (1);
     }
 
@@ -392,7 +393,7 @@ next_byte:
           modfile.
         */
         {
-          if (address < 0 || address + ndiffs != 0x454f46 - 1 || ndiffs > 65535 - 2)
+          if (address < 0 || address + ndiffs != 0x454f46 - 1 || ndiffs > BUFSIZE - 2)
             {
               flush_diffs (buf);                // commit any pending data
               write_address (0x454f46 - 1);
@@ -430,7 +431,6 @@ next_byte:
           check_for_rle (byte2, buf);
         }
       else if (address >= 0)                    // byte == byte2 && !feof (orgfile)
-        // TODO: convert this monstrosity into decent code
         {
           int n, n2, n_compare;
           unsigned char bridge[BRIDGE_LEN + 1];
@@ -438,7 +438,7 @@ next_byte:
           bridge[0] = byte;
           buf[ndiffs] = byte2;
           n = fread (bridge + 1, 1, BRIDGE_LEN, orgfile);
-          n2 = fread (&buf[ndiffs + 1], 1, MIN (BRIDGE_LEN, 65535 - ndiffs), modfile);
+          n2 = fread (&buf[ndiffs + 1], 1, MIN (BRIDGE_LEN, BUFSIZE - ndiffs), modfile);
           n_compare = 1 + MIN (n, n2);
 
           for (i = 0; i < n_compare; i++)
@@ -469,7 +469,7 @@ next_byte:
           if (i == n_compare)                   // next few bytes are equal (between the files)
             address = -1;
         }
-      if (ndiffs == 65535)
+      if (ndiffs == BUFSIZE)
         flush_diffs (buf);
     }
 

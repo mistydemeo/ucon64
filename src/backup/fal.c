@@ -528,7 +528,7 @@ void
 LinkerInit (void)               // 4027c4
 {
   int linker_found = 0;
-  
+
   /*
     uCON64 comment:
     Accessing I/O ports with addresses higher than 0x3ff causes an access
@@ -541,13 +541,15 @@ LinkerInit (void)               // 4027c4
   */
   if (EPPMode)
     {
+#ifndef PPDEV
       outpb (ECPRegECR, 4);     // Set EPP mode for ECP chipsets
+#endif
       if (LookForLinker ())
         {
           // Linker found using EPP mode.
           linker_found = 1;
           printf ("Linker found. EPP found.\n");
-  
+
           if (SPPDataPort == 0x3bc)
             return;
           outpb (SPPCtrlPort, 4);
@@ -556,8 +558,10 @@ LinkerInit (void)               // 4027c4
   if (!linker_found)
     {
       // Look for linker in SPP mode.
+#ifndef PPDEV
       if (EPPMode)
-        outpb (ECPRegECR, 0);   // Set EPP mode for ECP chipsets
+        outpb (ECPRegECR, 0);   // Set SPP mode for ECP chipsets
+#endif
 
       EPPMode = 0;
       if (LookForLinker ())

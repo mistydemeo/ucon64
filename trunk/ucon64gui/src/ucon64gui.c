@@ -1,5 +1,5 @@
 /*
-ucon64gui.c - a GUI for ucon64
+ucon64gui.c - a GUI for ucon64 (using html2gui framework)
 
 written by 2002 NoisyB (noisyb@gmx.net)
            
@@ -39,6 +39,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/swc.h"
 #include "backup/cdrw.h"
 
+
+struct ucon64gui_ ucon64gui;
 
 #define DEBUG
 

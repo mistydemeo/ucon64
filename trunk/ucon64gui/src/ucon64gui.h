@@ -1,5 +1,5 @@
 /*
-ucon64gui.h - a GUI for ucon64
+ucon64gui.h - a GUI for ucon64 (using html2gui framework)
 
 written by 2002 NoisyB (noisyb@gmx.net)
            
@@ -47,8 +47,7 @@ extern struct ucon64gui_
   int ns; // not splitted
 
   char configfile[FILENAME_MAX];
-}
-ucon64gui;
+} ucon64gui;
 
 
 extern void ucon64gui_root (void);
@@ -58,4 +57,4 @@ extern void ucon64gui_system (void);
 extern void ucon64gui_output (char *output);
 
 
-#endif /* UCON64GUI_H */
+#endif // UCON64GUI_H

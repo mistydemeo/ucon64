@@ -445,7 +445,7 @@ dm_track_init (dm_track_t *track, FILE *fh)
       fread (value_s, 1, 16, fh);
 
 #ifdef  DEBUG          
-      mem_hexdump (value_s, 16, pos);
+      mem_hexdump (value_s, 16, ftell (fh));
 #endif          
 
       if (!memcmp (pvd_magic, &value_s, 8))

@@ -427,10 +427,12 @@ ucon64_exit (void)
     if (ucon64.image)
       libdm_close (ucon64.image);
 
+#ifdef  GUI
   if (ucon64.netgui_enabled)
     if (ucon64.netgui)
       libng_close (ucon64.netgui);
-      
+#endif
+
   handle_registered_funcs ();
   fflush (stdout);
 }
@@ -547,8 +549,10 @@ main (int argc, char **argv)
   // load libdiscmage
   ucon64.discmage_enabled = ucon64_load_discmage ();
 
+#ifdef  GUI
   // load libnetgui
   ucon64.netgui_enabled = ucon64_load_netgui ();
+#endif
 
   // ucon64.dat_enabled and ucon64.discmage_enabled can affect the usage output
   if (argc < 2)
@@ -1499,11 +1503,13 @@ ucon64_usage (int argc, char *argv[])
 #endif
   printf (USAGE_S, name_exe);
 
+#ifdef  GUI
   if (ucon64.netgui_enabled)
     {
       ucon64_render_usage (libng_usage);
       printf ("\n");
     }
+#endif
 
   ucon64_render_usage (ucon64_options_usage);
 

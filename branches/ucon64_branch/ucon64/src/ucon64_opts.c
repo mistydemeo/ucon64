@@ -37,7 +37,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_opts.h"
 #include "quick_io.h"
 #include "libdiscmage/libdiscmage.h"
+#ifdef  GUI
 #include "libnetgui/libnetgui.h"
+#endif
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
@@ -70,12 +72,13 @@ ucon64_switches (int c, const char *optarg)
       ucon64_usage (ucon64.argc, ucon64.argv);
       exit (0);
 
+#ifdef  GUI
     case UCON64_GUI:
       if (ucon64.netgui_enabled)
         if (optarg)
           ucon64.netgui = libng_open (optarg, NG_SERVER);
       exit (0);
-
+#endif
     /*
       It's also common to exit after displaying version information.
       On some configurations printf is a macro (Red Hat Linux 6.2 + GCC 3.2),
@@ -162,7 +165,11 @@ ucon64_switches (int c, const char *optarg)
 #endif // DLOPEN
       if (ucon64.netgui_enabled)
         {
+#ifdef  GUI
           x = libng_get_version();
+#else
+          x = 0;
+#endif                    
           sprintf (buf2, "%d.%d.%d", x >> 16, x >> 8, x);
         }
       else

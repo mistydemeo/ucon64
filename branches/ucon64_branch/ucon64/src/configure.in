@@ -62,6 +62,20 @@ dnl fi
 dnl AC_MSG_RESULT($enable_usb)
 
 
+AC_MSG_CHECKING(whether Gui is enabled)
+AC_ARG_ENABLE(gui,
+              AC_HELP_STRING([--enable-gui],
+                             [enable Gui (default: no)]),
+              enable_gui=$enableval,
+              enable_gui=no)
+if test $enable_gui = yes; then
+  AC_DEFINE(GUI,1,[enable Gui (default: no)])
+  DEFINE_GUI_MAKE="GUI=1"
+fi
+AC_MSG_RESULT($enable_gui)
+AC_SUBST(DEFINE_GUI_MAKE)
+
+
 AC_MSG_CHECKING(whether add-on libraries are dynamically loaded)
 AC_ARG_ENABLE(dload,
               AC_HELP_STRING([--enable-dload],

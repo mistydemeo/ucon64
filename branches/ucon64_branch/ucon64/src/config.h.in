@@ -9,6 +9,9 @@
 /* enable dynamic loading of add-on libraries (default: yes) */
 #undef DLOPEN
 
+/* enable Gui (default: no) */
+#undef GUI
+
 /* Define to 1 if you have the `basename' function. */
 #undef HAVE_BASENAME
 

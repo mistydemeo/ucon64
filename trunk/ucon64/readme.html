@@ -40,7 +40,7 @@ Nebula Driver
 
 For console specific options check the following usage:
 
-uCON64 1.9.8beta8 Unix (Linux) 1999-2003
+uCON64 1.9.8beta8 BeOS 1999-2003
 Uses code from various people. See 'developers.html' for more!
 This may be freely redistributed under the terms of the GNU Public License
 
@@ -62,7 +62,7 @@ Options
   --ns          force ROM is not split
    -e           emulate/run ROM (check .ucon64rc for more)
   --crc         show CRC32 value of ROM
-  --ls          generate ROM list for all ROMs
+  --ls          generate ROM list for all recognized ROMs
   --lsv         like --ls but more verbose
   --hex         show ROM as hexdump; use "ucon64 --hex ...|less"
   --find=STRING find STRING in ROM (wildcard: '?')
@@ -86,24 +86,25 @@ Padding
   --ins         same as --insn=512
                   most backup units use a header with 512 Bytes size
 
-DATabase (support of DAT files)
+DATabase (support for DAT files)
   --db          DATabase statistics
   --dbv         like --db but more verbose
   --dbs=CRC32   search ROM with CRC32 in DATabase
   --scan        generate ROM list for all ROMs using DATabase
-                  same as: GoodXXXX scan ...
+                  like: GoodXXXX scan ...
   --lsd         same as --scan
   --rrom        rename ROMs to their internal names
   --rename      rename ROMs to their DATabase names
-                  same as: GoodXXXX rename inplace ...
+                  use -o to specify an output directory
   --83          force to rename to 8.3 filenames
   --force63     force to rename all filenames into Joliet CD format
                   same as: GoodXXXX rename inplace force63 ...
                   TIP: using --nes would process only NES ROMs
   --rl          rename all ROMs to lowercase
+  --ru          rename all ROMs to uppercase
 
 Patching
-  --poke=OFF:V  change byte at file offset OFF to value V
+  --poke=OFF:V  change byte at file offset OFF to value V (both in hexadecimal)
   --patch=PATCH specify the PATCH for the following options
                   use this option or uCON64 expects the last commandline
                   argument to be the name of the PATCH file
@@ -143,9 +144,8 @@ Patching
                   Nintendo Entertainment System/NES/Famicom/Game Axe (Redant),
                   Super Nintendo Entertainment System/SNES/Super Famicom
 
-All disc-based consoles (using /home/daniel/.ucon64/discmage.so)
-  --bin2iso     convert binary TRACK to ISO (if possible)
-  --mksheet     generate TOC and CUE sheet files for IMAGE
+All disc-based consoles
+  --disc        force recognition; NEEDED
 
 Dreamcast
   --dc          force recognition
@@ -174,7 +174,7 @@ Game Boy Advance
   --strip=N     strip N Bytes from end of ROM (use --ispad before)
   --multi=SIZE  make multirom for Flash Advance Linker, truncated to SIZE Mbit;
                   file with loader must be specified first, then all the ROMs,
-                  multirom to create last
+                  multirom to create last; use -o to specify output directory
 Flash Advance Linker
   --xfal        send/receive ROM to/from Flash Advance Linker; --port=PORT
                   receives automatically (32 Mbits) when ROM does not exist
@@ -188,6 +188,7 @@ Flash Advance Linker
   --xfalb=BANK  send/receive SRAM to/from Flash Advance Linker BANK
                   BANK can be 1, 2, 3 or 4; --port=PORT
                   receives automatically when SRAM does not exist
+  --xfalm       try to enable EPP mode, default is SPP mode
 
 Nintendo 64
   --n64         force recognition
@@ -261,7 +262,7 @@ Super Nintendo Entertainment System/SNES/Super Famicom
    -f           remove NTSC/PAL protection
    -l           remove SlowROM checks
   --chk         fix ROM checksum
-Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC)/SWC DX(2)
+Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC
   --xswc        send/receive ROM to/from Super Wild Card*/(all)SWC; --port=PORT
                   receives automatically when ROM does not exist
                   Press q to abort; ^C will cause invalid state of backup unit
@@ -394,7 +395,7 @@ Panther(32bit prototype)/Jaguar64/Jaguar64 CD
 Neo Geo Pocket/Neo Geo Pocket Color
   --ngp         force recognition
 
-DATabase: 25510 known ROMs (DAT files: /home/daniel/.ucon64/dat)
+DATabase: 10559 known ROMs (DAT files: /boot/home/.ucon64/dat)
 
 NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)
       parallel port. If that is the case give a hardware address. For example:

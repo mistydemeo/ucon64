@@ -437,7 +437,7 @@ ucon64_rename (int mode)
             strcpy (buf, strtrim (ucon64.rominfo->name));
         break;
 
-      case UCON64_RENAME: // GoodXXXX style rename
+      case UCON64_RENAME:                       // GoodXXXX style rename
         if (ucon64.dat)
           if (ucon64.dat->fname)
             {
@@ -460,7 +460,7 @@ ucon64_rename (int mode)
         break;
 
       default:
-        return 0; // invalid mode
+        return 0;                               // invalid mode
     }
 
   if (!buf[0])
@@ -500,18 +500,19 @@ ucon64_rename (int mode)
   if (ucon64.fname_len == UCON64_83)
     buf2[12] = 0;
 
-  ucon64_output_fname (buf2, OF_FORCE_SUFFIX);
+  ucon64_output_fname (buf2, OF_FORCE_BASENAME | OF_FORCE_SUFFIX);
   if (!good_name)
     /*
       Note that the previous statement causes whatever file is present in the
       dir specified with -o (or the current dir) to be overwritten. This seems
       bad, but is actually better than making a backup. It isn't so bad,
-      because the file that gets overwritten doesn't deserve its name anyway.
+      because the file that gets overwritten is either the same as the file it
+      is overwritten with or doesn't deserve its name.
       Without this statement repeating a rename action for already renamed
       files would result in a real mess. And I (dbjh) mean a *real* mess...
     */
     if (!access (buf2, F_OK))                   // a file with that name exists already?
-      ucon64_file_handler (buf2, NULL, OF_FORCE_SUFFIX);
+      ucon64_file_handler (buf2, NULL, OF_FORCE_BASENAME);
 
   if (!good_name)
     printf ("Renaming \"%s\" to \"%s\"\n", basename2 (ucon64.rom), basename2 (buf2));
@@ -519,6 +520,9 @@ ucon64_rename (int mode)
     printf ("Moving \"%s\"\n", basename2 (ucon64.rom));
 #ifndef DEBUG
   rename (ucon64.rom, buf2);
+#endif
+#ifdef  HAVE_ZLIB_H
+  unzip_current_file_nr = 0x7fffffff - 1;       // dirty hack, will be removed later
 #endif
   return 0;
 }

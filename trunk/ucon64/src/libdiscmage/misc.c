@@ -212,6 +212,71 @@ q_fsize (const char *filename)
 
 
 #if     defined _WIN32 && defined ANSI_COLOR
+#if 0
+static WORD
+ansi_parser (char *str)
+{
+  typedef struct
+    {
+      int ansi;
+      int win32;
+    } st_ansi_codes_t;
+
+  st_ansi_codes_t ansi_codes[] = {
+      {1, FOREGROUND_INTENSITY},
+
+      {30, },
+      {31, FOREGROUND_RED},
+      {32, },
+      {33, FOREGROUND_RED | FOREGROUND_GREEN},
+      {34, },
+      {35, },
+      {36, },
+      {37, },
+      
+      {40, },
+      {41, },
+      {42, },
+      {43, },
+      {44, },
+      {45, },
+      {46, },
+      {47, },
+
+      {-1, -1}
+    };
+  int ansi = 0;
+  char *p = str, *s = str;
+
+  for (; *p; p++)
+    switch (*p)
+      {
+        case '\x1b':                            // escape
+          ansi = 1;
+          break;
+
+        case 'm':
+          if (ansi)
+            {
+              ansi = 0;
+              break;
+            }
+
+        default:
+          if (!ansi)
+            {
+              *s = *p;
+              s++;
+            }
+          break;
+      }
+  *s = 0;
+
+  return str;
+}
+#endif
+
+
 int
 vprintf2 (const char *format, va_list argptr)
 // Cheap hack to get the Visual C++ port support "ANSI colors". Cheap,

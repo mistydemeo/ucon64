@@ -71,7 +71,7 @@ const st_usage_t ucon64_dat_usage[] = {
   {"dbv", NULL, "like " OPTION_LONG_S "db but more verbose"},
   {"dbs", "CRC32", "search ROM with CRC32 in DATabase"},
   {"scan", NULL, "generate ROM list for all ROMs using DATabase\n"
-                    "same as: GoodXXXX scan ..."},
+                    "like: GoodXXXX scan ..."},
   {"lsd", NULL, "same as " OPTION_LONG_S "scan"},
   {"rrom", NULL, "rename ROMs to their internal names"},
   {"rename", NULL, "rename ROMs to their DATabase names\n"

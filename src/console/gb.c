@@ -568,26 +568,25 @@ gameboy_init (st_rominfo_t *rominfo)
 st_gameboy_chksum_t
 gameboy_chksum (st_rominfo_t *rominfo)
 {
-  FILE *fh;
   st_gameboy_chksum_t sum = {0, 0};
-  int ch, i = 0;
+  unsigned char *rom_buffer;
+  int size = ucon64.file_size - rominfo->buheader_len, i;
 
-  if (!(fh = fopen (ucon64.rom, "rb")))
+  if (!(rom_buffer = (unsigned char *) malloc (size)))
     {
-      fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.rom);
-      exit (1);
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+      return sum;
     }
+  q_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
 
-  fseek (fh, rominfo->buheader_len, SEEK_SET);
-  while ((ch = fgetc (fh)) != EOF)
+  for (i = 0; i < size; i++)
     {
       if (i != 0x014d && i != 0x014e && i != 0x014f)
-        sum.value += ch;
+        sum.value += rom_buffer[i];
       if (i >= 0x0134 && i < 0x014d)
-        sum.complement += ch;
-      i++;
+        sum.complement += rom_buffer[i];
     }
-  fclose (fh);
+  free (rom_buffer);
 
   sum.complement = 0xe7 - sum.complement;
   sum.value += sum.complement;

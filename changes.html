@@ -1,8 +1,6 @@
 <html><head><title>CHANGES</title></head><body bgcolor="#c0c0c0"><tt><pre>
 the original uCON for snes and genesis was written by chicken & chp in ~1995
 
-1.9.x	development versions
-
 1.9.0	completely re-written
 	this is the first real version with support for the most consoles
 
@@ -85,4 +83,11 @@ the original uCON for snes and genesis was written by chicken & chp in ~1995
 	added (GBA) -crp slow down Flash Advance Linker access for ROM (crash patch)
 	added (GBA) -strip strip Bytes from end of ROM (use -ispad before); $FILE=VALUE
 	added (GBA) -xfal send/receive to/from Flash Advance Linker; $FILE=PORT
+
+1.9.6   this release brings you full support of the Super Wildcard (thats definately worth an update)
+	added (SNES) -xswc send/receive to/from Super Wild Card*/(all)SWC; $FILE=PORT (by dbjh)
+	added (SNES) -xswcs send/receive SRAM to/from Super Wild Card*/(all)SWC; $FILE=PORT (by dbjh)
+	added (GameBoy) -sgb convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX (by NoisyB)
+	added (GameBoy) -gbx convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC (by NoisyB)
+	first tries to make the code portable to other platforms (by NoisyB and dbjh) 
 </pre></tt></body></html>

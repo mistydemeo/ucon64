@@ -916,7 +916,9 @@ const char *nintendo_maker[NINTENDO_MAKER_LEN] = {
 
 #if     defined PPDEV || defined __BEOS__ || defined __FreeBSD__
 static int ucon64_io_fd;
+#ifdef  PPDEV
 static int ucon64_io_direction;
+#endif
 #endif
 
 #ifdef  __BEOS__

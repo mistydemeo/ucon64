@@ -1193,7 +1193,7 @@ int cd64_usage(int argc, char *argv[])
   if (argcmp(argc, argv, "-help"))
     printf("\n%s\n", cd64_TITLE);
 
-  printf("TODO:  -xcd64		send/receive ROM to/from CD64; $FILE=PORT\n"
+  printf("TODO:  -xcd64	send/receive ROM to/from CD64; $FILE=PORT\n"
          "		receives automatically when $ROM does not exist\n"
         );
   //TODO more info like technical info about cabeling and stuff for the copier

@@ -327,6 +327,43 @@ unknown_init (st_rominfo_t *rominfo)
 }
 
 
+const char *
+ucon64_get_option_s (int option)
+{
+  int x = 0;
+
+  for (x = 0; options[x].name; x++)
+    if (options[x].val == option)
+      return options[x].name;
+
+  return NULL;
+}
+            
+
+const char *
+ucon64_get_desc (int option)
+{
+  const char *option_s = NULL;
+  int x = 0;
+  const st_usage_t *usage = NULL;
+
+  if (!(option_s = ucon64_get_option_s (option)))
+    return NULL;
+
+  if (!(usage = (const st_usage_t *) (ucon64_get_wf (option))->usage))
+    return NULL;
+   
+  for (x = 0; usage[x].option_s || usage[x].optarg || usage[x].desc; x++)
+    if (usage[x].option_s)
+      if (!strcmp (option_s, usage[x].option_s))
+        {
+          return usage[x].desc;
+        }
+
+  return NULL;
+}
+            
+
 const st_usage_t ucon64_options_usage[] = {
   {NULL, NULL, "Options"},
   {"o", "DIRECTORY", "specify output directory"},

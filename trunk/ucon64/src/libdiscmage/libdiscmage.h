@@ -21,10 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef LIBDISCMAGE_H
 #define LIBDISCMAGE_H
-
-//#ifdef  HAVE_CONFIG_H
-//#include "config.h"
-//#endif
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #ifdef  __cplusplus
 extern "C" {
@@ -67,7 +66,6 @@ typedef signed __int64 int64_t;
 // a cd can have max. 99 tracks; this value might change in the future
 #define DM_MAX_TRACKS (99)
 
-
 #define DM_UNKNOWN (-1)
 
 #define DM_SHEET (1)
@@ -76,8 +74,6 @@ typedef signed __int64 int64_t;
 #define DM_CDI (2)
 #define DM_NRG (3)
 #define DM_CCD (4)
-
-
 
 
 typedef struct
@@ -105,23 +101,6 @@ typedef struct
 
   const char *desc;
 //  const char *desc_toc;
-#if 0
-// from mplayer sources
-   uint16_t mode;
-   uint16_t minute;
-   uint16_t second;
-   uint16_t frame;
-
-   /* (min*60 + sec) * 75 + fps   */
-
-   uint32_t start_sector;
-
-   /* = the sizes in bytes off all tracks bevor this one */
-   /* its needed if there are mode1 tracks befor the mpeg tracks */
-   uint32_t start_offset;
-
-   /*   unsigned char num[3]; */
-#endif
 } dm_track_t;
 
 
@@ -147,25 +126,14 @@ typedef struct
 
 /*
   dm_get_version()  returns version of libdiscmage as uint32_t
-TODO: DM_FILES   rip files from track instead of track
-  DM_RIP_2048    (bin2iso) convert binary Mx/xxxx image to M1/2048
-  DM_FIX         (isofix) takes an ISO image with PVD pointing
-                 to bad DR offset and add padding data so actual DR
-                 gets located in right absolute address.
-                 Original boot area, PVD, SVD and VDT are copied to
-                 the start of new, fixed ISO image.
-                 Supported input images are: 2048, 2336,
-                 2352 and 2056 bytes per sector. All of them are
-                 converted to 2048 bytes per sector when writing
-                 excluding 2056 image which is needed by Mac users.
   dm_open()      this is the first function to call with the filename of the
-                 image; it will try to recognize the image format, etc.
+                   image; it will try to recognize the image format, etc.
   dm_reopen()    like dm_open() but can reuse an existing dm_image_t
   dm_close()     the last function; close image
   dm_fdopen()    returns a FILE ptr from the start of a track (in image)
   dm_fseek()     seek for tracks inside image
-                 dm_fseek (image, 2, SEEK_END);
-                 will seek to the end of the 2nd track in image
+                   dm_fseek (image, 2, SEEK_END);
+                   will seek to the end of the 2nd track in image
   dm_set_gauge() enter here the name of a function that takes two integers
                  gauge (pos, total)
                    {
@@ -178,9 +146,24 @@ TODO: dm_write()     write single sector to track (in image)
   dm_cue_read()  read CUE sheet into dm_image_t
   dm_cue_write() write dm_image_t as CUE sheet
   dm_disc_read() deprecated reading or writing images is done
-                 by those scripts in contrib/
+                   by those scripts in contrib/
   dm_disc_write()deprecated reading or writing images is done
-                 by those scripts in contrib/
+                   by those scripts in contrib/
+  dm_rip()       a (example) routine that uses dm_open() and dm_read() to
+                   perform different tasks as specified by the flags
+
+TODO: DM_FILES   rip files from track instead of track
+  DM_2048        (bin2iso) convert binary sector_size to 2048 bytes
+                   (could result in a malformed output image)
+  DM_FIX         (isofix) takes an ISO image with PVD pointing
+                   to bad DR offset and add padding data so actual DR
+                   gets located in right absolute address.
+                   Original boot area, PVD, SVD and VDT are copied to
+                   the start of new, fixed ISO image.
+                   Supported input images are: 2048, 2336,
+                   2352 and 2056 bytes per sector. All of them are
+                   converted to 2048 bytes per sector when writing
+                   excluding 2056 image which is needed by Mac users.
 */
 extern uint32_t dm_get_version (void);
 extern void dm_set_gauge (void (*gauge) (int, int));
@@ -191,7 +174,7 @@ extern void dm_set_gauge (void (*gauge) (int, int));
 //#define DM_CREAT (8)
 #define DM_FIX (16)
 #define DM_2048 (32)
-#define DM_FILES (64)
+//#define DM_FILES (64)
 extern dm_image_t *dm_open (const char *fname, uint32_t flags);
 extern dm_image_t *dm_reopen (const char *fname, uint32_t flags, dm_image_t *image);
 extern int dm_close (dm_image_t *image);

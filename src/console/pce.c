@@ -95,7 +95,7 @@ pcengine_smg (st_rominfo_t *rominfo)
   q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, buf, "wb");
 
   q_fcpy (ucon64.rom, 0, size, buf, "ab");
-  fprintf (stderr, ucon64_msg[WROTE], buf);
+  fprintf (stdout, ucon64_msg[WROTE], buf);
 
   return 0;
 }
@@ -150,7 +150,7 @@ random number when backing up games.
   ucon64_fbackup (NULL, buf2);
   q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), buf2, "wb");
 
-  fprintf (stderr, ucon64_msg[WROTE], buf2);
+  fprintf (stdout, ucon64_msg[WROTE], buf2);
   return 0;
 }
 

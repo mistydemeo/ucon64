@@ -29,12 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define BUFFERSIZE      8192                    // don't change, only 8192 works!
 #define HEADERSIZE      512                     // SWC header is 512 bytes
 
-#ifndef __DOS__
-#define STDERR          stderr
-#else
-#define STDERR          stdout                  // Stupid DOS has no error
-#endif                                          //  stream (direct video writes)
-                                                //  this makes redir possible
 #include "swc.h"
 #include "../misc.h"                            // kbhit(), getch()
 #include <stdio.h>
@@ -87,7 +81,7 @@ int swc_write_rom(char *filename, unsigned int parport, int sram_size)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend, totalblocks, blocksdone = 0, emu_mode_select, hdr_4th_byte;
+  int bytesread, bytessend, totalblocks, blocksdone = 0, emu_mode_select;
   unsigned short address;
   struct stat fstate;
   time_t starttime;
@@ -110,11 +104,20 @@ int swc_write_rom(char *filename, unsigned int parport, int sram_size)
 
   send_command0(0xc008, 0);
   fread(buffer, 1, HEADERSIZE, file);
-  emu_mode_select = buffer[2];                  // these bytes are needed later
-  hdr_4th_byte = buffer[3];
   send_command(5, 0, 0);
   send_block(0x400, buffer, HEADERSIZE);        // send header
   bytessend = HEADERSIZE;
+
+  emu_mode_select = buffer[2];                  // this byte is needed later
+  if (buffer[3] & 0x80)                         // Pro Fighter (FIG) HiROM dump
+    emu_mode_select |= 0x30;                    // set bit 5&4 (SRAM & DRAM mem map mode 21)
+  if (sram_size == 0)
+  {
+    if (emu_mode_select & 0x10)                 // bit 4 == 1 => DRAM mode 21 (HiROM)
+      emu_mode_select &= ~0x20;                 // disable SRAM by setting SRAM mem map mode 20
+    else                                        // bit 4 == 0 => DRAM mode 20 (LoROM)
+      emu_mode_select |= 0x20;                  // disable SRAM by setting SRAM mem map mode 21
+  }
 
   printf("Press q to abort\n\n");               // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;)
@@ -133,18 +136,8 @@ int swc_write_rom(char *filename, unsigned int parport, int sram_size)
     checkabort(2);
   }
 
-  if (hdr_4th_byte & 0x80)                      // Pro Fighter (FIG) HiROM dump
-    emu_mode_select = 0x30;                     // set bit 5&4 (SRAM & DRAM mem map mode 21)
   if (blocksdone > 0x200)                       // ROM dump > 512 8KB blocks (=32Mb (=4MB))
     send_command0(0xc010, 2);
-
-  if (sram_size == 0)
-  {
-    if (emu_mode_select & 0x10)                 // bit 4 == 1 => DRAM mode 21 (HiROM)
-      emu_mode_select &= ~0x20;                 // disable SRAM by setting SRAM mem map mode 20
-    else                                        // bit 4 == 0 => DRAM mode 20 (LoROM)
-      emu_mode_select |= 0x20;                  // disable SRAM by setting SRAM mem map mode 21
-  }
 
   send_command(5, 0, 0);
   totalblocks = (fstate.st_size - HEADERSIZE + BUFFERSIZE - 1) / BUFFERSIZE; // round up

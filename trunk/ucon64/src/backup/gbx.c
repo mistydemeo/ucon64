@@ -1304,13 +1304,14 @@ check_port (void)
       if (check_port_mode ())
         return 1;
       else
-        {
-          fputs ("GBX found. EPP not found or not enabled - SPP used\n", stdout);
-          end_port ();
-        }
+        end_port ();
     }
-  else
+
+  // If we get here, a GBX was detected
+  if (port_mode == UCON64_EPP)
     fputs ("GBX found. EPP found\n", stdout);
+  else
+    fputs ("GBX found. EPP not found or not enabled - SPP used\n", stdout);
 
   return 0;
 }

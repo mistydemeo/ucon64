@@ -2394,7 +2394,7 @@ int gbx_usage(int argc, char *argv[])
   if (verbose)
     printf("\n"
            "                You only need to specify PORT if uCON64 doesn't detect the\n"
-           "                (right) parallel port. If this is the case give a hardware\n"
+           "                (right) parallel port. If that is the case give a hardware\n"
            "                address, for example:\n"
            "                ucon64 -xgbx \"Pokemon (Green).gb\" 0x378\n");
   //TODO more info like technical info about cabeling and stuff for the copier

@@ -1286,7 +1286,7 @@ int fal_usage(int argc, char *argv[])
   {
     printf("\n"
            "                You only need to specify PORT if uCON64 doesn't detect the\n"
-           "                (right) parallel port. If this is the case give a hardware\n"
+           "                (right) parallel port. If that is the case give a hardware\n"
            "                address, for example:\n"
            "                ucon64 -xfal \"0087 - Mario Kart Super Circuit (U).gba\" 0x378\n");
     printf("\n"

@@ -39,10 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#ifdef  __linux__
-#include <fcntl.h>
-#include <linux/joystick.h>
-#endif
 
 #ifdef  PARALLEL
 #if     defined __linux__ && defined __GLIBC__
@@ -1044,7 +1040,7 @@ ucon64_fhexdump (const char *filename, int start, int len)
   for (pos = 0; pos < len; pos += buf_size)
     {
       value = fread (buf, 1, MIN (len, buf_size), fh);
-      mem_hexdump (buf, value, pos + start);
+      mem_hexdump_code (buf, value, pos + start);
     }
 
   fclose (fh);

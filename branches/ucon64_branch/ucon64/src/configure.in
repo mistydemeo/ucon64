@@ -62,6 +62,7 @@ dnl fi
 dnl AC_MSG_RESULT($enable_usb)
 
 
+DEFINE_GUI_MAKE=""
 AC_MSG_CHECKING(whether GUI is enabled)
 AC_ARG_ENABLE(gui,
               AC_HELP_STRING([--enable-gui],
@@ -73,27 +74,50 @@ if test $enable_gui = yes; then
   DEFINE_GUI_MAKE="GUI=1"
 
   dnl check for GTK+
-  DEFINE_GTK_MAKE="GTK=1"
-  AM_PATH_GTK(1.2.10, AC_SUBST(DEFINE_GTK_MAKE))
+  DEFINE_GTK_MAKE=""
+  AM_PATH_GTK(1.2.10, DEFINE_GTK_MAKE="GTK=1")
+  AC_SUBST(DEFINE_GTK_MAKE)
 
   dnl check for libgtkhtml
-  DEFINE_GTK_HTML_MAKE="GTK_HTML=1"
-//  AC_SUBST(DEFINE_GTK_HTML_MAKE)
+  DEFINE_GTK_HTML_MAKE=""
+  dnl AM_PATH_GTK(1.2.10, DEFINE_GTK_HTML_MAKE="GTK_HTML=1")
+  AC_SUBST(DEFINE_GTK_HTML_MAKE)
 
   dnl Check for GDK-Pixbuf
-  DEFINE_GDK_PIXBUF_MAKE="GDK_PIXBUF=1"
-  AM_PATH_GDK_PIXBUF(0.8.0, AC_SUBST(DEFINE_GDK_PIXBUF_MAKE))
+  DEFINE_GDK_PIXBUF_MAKE=""
+  AM_PATH_GDK_PIXBUF(0.8.0, DEFINE_GDK_PIXBUF_MAKE="GDK_PIXBUF=1")
+  AC_SUBST(DEFINE_GDK_PIXBUF_MAKE)
 
   dnl check for WXW
-  DEFINE_WXW_MAKE="WXW=1"
-  dnl WX_AM_PATH(2.4.0, AC_SUBST(DEFINE_WXW_MAKE))
-  dnl AC_CHECK_LIB (wx, , AC_SUBST(DEFINE_WXW_MAKE),,)
+  DEFINE_WXW_MAKE=""
+  dnl WX_AM_PATH(2.4.0, DEFINE_WXW_MAKE="WXW=1")
+  dnl AC_CHECK_LIB (wx, , DEFINE_WXW_MAKE="WXW=1",,)
   AC_SUBST(DEFINE_WXW_MAKE)
 
   dnl check for SDL
-  DEFINE_SDL_MAKE="SDL=1"
-  dnl AM_PATH_SDL(1.2.4, AC_SUBST(DEFINE_SDL_MAKE))
+  DEFINE_SDL_MAKE=""
+  dnl AM_PATH_SDL(1.2.4, DEFINE_SDL_MAKE="SDL=1")
   AC_SUBST(DEFINE_SDL_MAKE)
+
+  dnl check for PNG
+  AC_CHECK_LIB(png, png_create_read_struct, have_libpng=yes, , -lz)
+  if test $have_libpng == yes; then
+  DEFINE_PNG_MAKE="PNG=1"
+  else
+  DEFINE_PNG_MAKE=""
+  AC_MSG_WARN([*** Unable to find PNG library (http://www.libpng.org/pub/png/libpng.html)])
+  fi
+  AC_SUBST(DEFINE_PNG_MAKE)
+
+  dnl AC_CHECK_LIB(z, uncompress, have_libz=yes)
+  dnl if test x$have_libz != xyes; then
+  dnl AC_MSG_WARN([*** Unable to find Zlib library (http://www.gzip.org/zlib/)])
+  dnl fi
+
+  dnl if test x$have_libpng = xyes -a x$have_libz = xyes; then
+  dnl CFLAGS="$CFLAGS -DLOAD_PNG"
+  dnl IMG_LIBS="$IMG_LIBS -lpng -lz"
+  dnl fi
 
   AC_HAVE_LIBRARY(socket)
   AC_HAVE_LIBRARY(nsl)

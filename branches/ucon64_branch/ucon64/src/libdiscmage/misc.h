@@ -137,7 +137,7 @@ typedef signed __int64 int64_t;
   #else
     #define CURRENT_OS_S "Win32 (Visual C++)"
   #endif
-#elif   defined __APPLE__
+#elif   defined __APPLE__ || defined macintosh
   #if   defined __POWERPC__ || defined __ppc__
     #define CURRENT_OS_S "Apple (ppc)"
   #else

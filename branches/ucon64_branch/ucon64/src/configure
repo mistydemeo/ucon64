@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP DEFINE_GTK_MAKE GTK_CONFIG GTK_CFLAGS GTK_LIBS DEFINE_GTK_HTML_MAKE DEFINE_GDK_PIXBUF_MAKE GDK_PIXBUF_CONFIG GDK_PIXBUF_CFLAGS GDK_PIXBUF_LIBS DEFINE_WXW_MAKE DEFINE_SDL_MAKE DEFINE_GUI_MAKE DEFINE_DISCMAGE_MAKE DEFINE_DLOPEN_MAKE DEFINE_ZLIB_MAKE LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP GTK_CONFIG GTK_CFLAGS GTK_LIBS DEFINE_GTK_MAKE DEFINE_GTK_HTML_MAKE GDK_PIXBUF_CONFIG GDK_PIXBUF_CFLAGS GDK_PIXBUF_LIBS DEFINE_GDK_PIXBUF_MAKE DEFINE_WXW_MAKE DEFINE_SDL_MAKE DEFINE_PNG_MAKE DEFINE_GUI_MAKE DEFINE_DISCMAGE_MAKE DEFINE_DLOPEN_MAKE DEFINE_ZLIB_MAKE LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -2302,6 +2302,7 @@ echo "${ECHO_T}$enable_parallel" >&6
 
 
 
+DEFINE_GUI_MAKE=""
 echo "$as_me:$LINENO: checking whether GUI is enabled" >&5
 echo $ECHO_N "checking whether GUI is enabled... $ECHO_C" >&6
 # Check whether --enable-gui or --disable-gui was given.
@@ -2319,7 +2320,7 @@ _ACEOF
 
   DEFINE_GUI_MAKE="GUI=1"
 
-    DEFINE_GTK_MAKE="GTK=1"
+    DEFINE_GTK_MAKE=""
 
 # Check whether --with-gtk-prefix or --without-gtk-prefix was given.
 if test "${with_gtk_prefix+set}" = set; then
@@ -2542,7 +2543,7 @@ fi
   if test "x$no_gtk" = x ; then
      echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-     :
+     DEFINE_GTK_MAKE="GTK=1"
   else
      echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
@@ -2626,10 +2627,11 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   rm -f conf.gtktest
 
 
-    DEFINE_GTK_HTML_MAKE="GTK_HTML=1"
-//
 
-    DEFINE_GDK_PIXBUF_MAKE="GDK_PIXBUF=1"
+    DEFINE_GTK_HTML_MAKE=""
+
+
+    DEFINE_GDK_PIXBUF_MAKE=""
 
 # Check whether --with-gdk-pixbuf-prefix or --without-gdk-pixbuf-prefix was given.
 if test "${with_gdk_pixbuf_prefix+set}" = set; then
@@ -2824,7 +2826,7 @@ fi
   if test "x$no_gdk_pixbuf" = x ; then
      echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-     :
+     DEFINE_GDK_PIXBUF_MAKE="GDK_PIXBUF=1"
   else
      echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
@@ -2903,10 +2905,80 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   rm -f conf.gdk_pixbuftest
 
 
-    DEFINE_WXW_MAKE="WXW=1"
+
+    DEFINE_WXW_MAKE=""
 
 
-    DEFINE_SDL_MAKE="SDL=1"
+    DEFINE_SDL_MAKE=""
+
+
+    echo "$as_me:$LINENO: checking for png_create_read_struct in -lpng" >&5
+echo $ECHO_N "checking for png_create_read_struct in -lpng... $ECHO_C" >&6
+if test "${ac_cv_lib_png_png_create_read_struct+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpng -lz $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char png_create_read_struct ();
+int
+main ()
+{
+png_create_read_struct ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_png_png_create_read_struct=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_png_png_create_read_struct=no
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_png_png_create_read_struct" >&5
+echo "${ECHO_T}$ac_cv_lib_png_png_create_read_struct" >&6
+if test $ac_cv_lib_png_png_create_read_struct = yes; then
+  have_libpng=yes
+fi
+
+  if test $have_libpng == yes; then
+  DEFINE_PNG_MAKE="PNG=1"
+  else
+  DEFINE_PNG_MAKE=""
+  { echo "$as_me:$LINENO: WARNING: *** Unable to find PNG library (http://www.libpng.org/pub/png/libpng.html)" >&5
+echo "$as_me: WARNING: *** Unable to find PNG library (http://www.libpng.org/pub/png/libpng.html)" >&2;}
+  fi
+
+
 
 
 
@@ -5224,17 +5296,18 @@ s,@EXEEXT@,$EXEEXT,;t t
 s,@OBJEXT@,$OBJEXT,;t t
 s,@CPP@,$CPP,;t t
 s,@EGREP@,$EGREP,;t t
-s,@DEFINE_GTK_MAKE@,$DEFINE_GTK_MAKE,;t t
 s,@GTK_CONFIG@,$GTK_CONFIG,;t t
 s,@GTK_CFLAGS@,$GTK_CFLAGS,;t t
 s,@GTK_LIBS@,$GTK_LIBS,;t t
+s,@DEFINE_GTK_MAKE@,$DEFINE_GTK_MAKE,;t t
 s,@DEFINE_GTK_HTML_MAKE@,$DEFINE_GTK_HTML_MAKE,;t t
-s,@DEFINE_GDK_PIXBUF_MAKE@,$DEFINE_GDK_PIXBUF_MAKE,;t t
 s,@GDK_PIXBUF_CONFIG@,$GDK_PIXBUF_CONFIG,;t t
 s,@GDK_PIXBUF_CFLAGS@,$GDK_PIXBUF_CFLAGS,;t t
 s,@GDK_PIXBUF_LIBS@,$GDK_PIXBUF_LIBS,;t t
+s,@DEFINE_GDK_PIXBUF_MAKE@,$DEFINE_GDK_PIXBUF_MAKE,;t t
 s,@DEFINE_WXW_MAKE@,$DEFINE_WXW_MAKE,;t t
 s,@DEFINE_SDL_MAKE@,$DEFINE_SDL_MAKE,;t t
+s,@DEFINE_PNG_MAKE@,$DEFINE_PNG_MAKE,;t t
 s,@DEFINE_GUI_MAKE@,$DEFINE_GUI_MAKE,;t t
 s,@DEFINE_DISCMAGE_MAKE@,$DEFINE_DISCMAGE_MAKE,;t t
 s,@DEFINE_DLOPEN_MAKE@,$DEFINE_DLOPEN_MAKE,;t t

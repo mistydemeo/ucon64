@@ -25,12 +25,14 @@
 #endif
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <sys/stat.h>
 #ifdef  HAVE_DIRENT_H
 #include <dirent.h>
 #endif
-#include <stdio.h>
-#include <sys/stat.h>
+#ifdef  HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include "getopt.h"
 #include "misc.h"
 #include "flc.h"

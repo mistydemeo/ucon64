@@ -30,7 +30,9 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <stdlib.h>
+#ifdef  HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <ctype.h>
 #include "misc.h"
 #include "flc.h"

@@ -3077,9 +3077,7 @@ done
 
 
 
-
-
-for ac_header in OS.h inttypes.h libintl.h limits.h stddef.h stdlib.h string.h termios.h unistd.h
+for ac_header in inttypes.h limits.h stddef.h stdlib.h string.h unistd.h dirent.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then

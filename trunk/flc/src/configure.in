@@ -51,7 +51,7 @@ AC_MSG_RESULT($enable_ansi_color)
 # Checks for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STDC
-AC_CHECK_HEADERS([OS.h inttypes.h libintl.h limits.h stddef.h stdlib.h string.h termios.h unistd.h])
+AC_CHECK_HEADERS([inttypes.h limits.h stddef.h stdlib.h string.h unistd.h dirent.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST

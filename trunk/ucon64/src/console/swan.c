@@ -73,43 +73,6 @@ swan_chk (st_rominfo_t *rominfo)
 }
 
 
-int
-swan_init (st_rominfo_t *rominfo)
-{
-  int result = -1;
-  unsigned char *rom_buffer, buf[MAXBUFSIZE];
-#define SWAN_MAKER_MAX 0x30
-  const char *swan_maker[SWAN_MAKER_MAX] = {
-    "BAN", "BAN", NULL, NULL, NULL,
-    "DTE", NULL, NULL, NULL, NULL,
-    NULL, "SUM", "SUM", NULL, "BPR",
-    NULL, NULL, NULL, "KNM", NULL,
-    NULL, NULL, "KGT", NULL, NULL,
-    NULL, NULL, "MGH", NULL, "BEC",
-    "NAP", "BVL", NULL, NULL, NULL,
-    NULL, NULL, NULL, "KDK", NULL,
-    "SQR", NULL, NULL, NULL, NULL,
-    "NMC", NULL, NULL};
-
-  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-    ucon64.buheader_len : 0;
-
-  q_fread (&swan_header, SWAN_HEADER_START +
-      rominfo->buheader_len, SWAN_HEADER_LEN, ucon64.rom);
-
-  rominfo->header = &swan_header;
-  rominfo->header_start = SWAN_HEADER_START;
-  rominfo->header_len = SWAN_HEADER_LEN;
-
-  // ROM maker
-  rominfo->maker = NULL_TO_UNKNOWN_S (swan_maker[MIN (OFFSET (swan_header, 0),
-    SWAN_MAKER_MAX - 1)]);
-
-  // misc stuff
-  sprintf ((char *) buf, "Minimum supported system: %s",
-           (!OFFSET (swan_header, 1) ? "WS Monochrome" : "WS Color"));
-  strcat (rominfo->misc, (const char *) buf);
-
 /*
 Byte2 - Cartridge ID number for this developer
 
@@ -120,7 +83,6 @@ Byte3 - ?Unknown?
 03 - sdej/BAN006
 04 - srv2/BPR006
 
-  sprintf (buf, "Internal Size: %.4f Mb\n", (float) rominfo->header[4]);
 Byte4 - ROM Size:
 01 - ?
 02 - 4Mbit
@@ -144,6 +106,42 @@ Byte6 - Additional capabilities(?)
 05 - ?? game played in "vertical" position
 10 - ?? (SUN003)
 */
+int
+swan_init (st_rominfo_t *rominfo)
+{
+  int result = -1;
+  unsigned char *rom_buffer, buf[MAXBUFSIZE];
+#define SWAN_MAKER_MAX 0x30
+  const char *swan_maker[SWAN_MAKER_MAX] = {
+    "BAN", "BAN", NULL, NULL, NULL,
+    "DTE", NULL, NULL, NULL, NULL,
+    NULL, "SUM", "SUM", NULL, "BPR",
+    NULL, NULL, NULL, "KNM", NULL,
+    NULL, NULL, "KGT", NULL, NULL,
+    NULL, NULL, "MGH", NULL, "BEC",
+    "NAP", "BVL", NULL, NULL, NULL,
+    NULL, NULL, NULL, "KDK", NULL,
+    "SQR", NULL, NULL, NULL, NULL,
+    "NMC", NULL, NULL};
+
+  rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
+                            ucon64.buheader_len : 0;
+
+  q_fread (&swan_header, SWAN_HEADER_START + rominfo->buheader_len,
+           SWAN_HEADER_LEN, ucon64.rom);
+
+  rominfo->header = &swan_header;
+  rominfo->header_start = SWAN_HEADER_START;
+  rominfo->header_len = SWAN_HEADER_LEN;
+
+  // ROM maker
+  rominfo->maker = NULL_TO_UNKNOWN_S (swan_maker[MIN (OFFSET (swan_header, 0),
+                                      SWAN_MAKER_MAX - 1)]);
+
+  // misc stuff
+  sprintf ((char *) buf, "Minimum supported system: %s",
+           (!OFFSET (swan_header, 1) ? "WS Monochrome" : "WS Color"));
+  strcat (rominfo->misc, (const char *) buf);
 
   if (!(rom_buffer = (unsigned char *) malloc (ucon64.file_size)))
     {
@@ -156,12 +154,15 @@ Byte6 - Additional capabilities(?)
   rominfo->internal_crc_len = rominfo->internal_crc2_len = 2;
   rominfo->current_internal_crc = swan_chksum (rom_buffer);
 
-  rominfo->internal_crc = OFFSET (swan_header, 8);              // low byte of checksum
-  rominfo->internal_crc += OFFSET (swan_header, 9) << 8;        // high byte of checksum
-  if (rominfo->current_internal_crc == rominfo->internal_crc)
-    result = 0;
-  else
-    result = -1;
+  if (ucon64.file_size > 10)                    // header itself is already 10 bytes
+    {
+      rominfo->internal_crc = OFFSET (swan_header, 8);          // low byte of checksum
+      rominfo->internal_crc += OFFSET (swan_header, 9) << 8;    // high byte of checksum
+      if (rominfo->current_internal_crc == rominfo->internal_crc)
+        result = 0;
+      else
+        result = -1;
+    }
   if (ucon64.console == UCON64_SWAN)
     result = 0;
 

@@ -71,6 +71,7 @@ enum
   ucon64_GDF,
   ucon64_GEN,
   ucon64_GENESIS,
+  ucon64_GETOPT_ERROR = '?',//getopt() returns 0x3f when a unknown option was given
   ucon64_GG,
   ucon64_GGD,
   ucon64_GGE,

@@ -1556,6 +1556,10 @@ ucon64_options (int c, const char *optarg)
       neogeo_sam (optarg);
       break;
 
+    case UCON64_SCRAMBLE:
+      dc_scramble ();
+      break;
+
     case UCON64_SGB:
       gameboy_sgb (ucon64.rominfo);
       break;
@@ -1626,6 +1630,10 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_UNIF:
       nes_unif ();
+      break;
+
+    case UCON64_UNSCRAMBLE:
+      dc_unscramble ();
       break;
 
     case UCON64_USMS:

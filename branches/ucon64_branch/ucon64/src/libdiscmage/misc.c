@@ -2729,10 +2729,11 @@ fdopen (int fd, const char *mode)
 
 int
 argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
+#if 1
 {
 // TODO: replace with argz_extract()
 #ifdef  DEBUG
-  int pos = 0;
+  int x = 0;
 #endif
   int argc = 0;
 
@@ -2745,12 +2746,48 @@ argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
     argc < (max_args - 1); argc++);
 
 #ifdef  DEBUG
-  fprintf (stderr, "argc:     %d\n", argc);
-  for (pos = 0; pos < argc; pos++)
-    fprintf (stderr, "argv[%d]:  %s\n", pos, argv[pos]);
+  fprintf (stderr, "0: %d\n", argc);
+  for (x = 0; x < argc; x++)
+    fprintf (stderr, "0: argv[%d]==\"%s\"\n", x, argv[x]);
 
   fflush (stderr);
 #endif
-
   return argc;
 }
+#else
+{
+// TODO: replace with argz_extract()
+//#ifdef  DEBUG
+  int x = 0;
+//#endif
+  int argc = 0;
+  char *p = NULL;
+
+  if (!str)
+    return 0;
+  if (!str[0])
+    return 0;
+
+// does strtok use malloc or some kind of internal state information?
+  for (p = str; argc < max_args; argc++)
+    {
+      int len = strcspn (p, separator_s);
+
+      if (!len)
+        break;
+
+      argv[argc] = p;
+      p += (len + 1);
+      *(p - 1) = 0; // terminate
+    }
+
+#ifdef  DEBUG
+  fprintf (stderr, "0: %d\n", argc);
+  for (x = 0; x < argc; x++)
+    fprintf (stderr, "0: argv[%d]==\"%s\"\n", x, argv[x]);
+
+  fflush (stderr);
+#endif
+  return argc;
+}
+#endif

@@ -23,6 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 extern int dc_init (st_rominfo_t *rominfo);
 extern const st_usage_t dc_usage[];
 //extern int ip0000 (char *dev, char *name);
+extern int dc_scramble (void);
+extern int dc_unscramble (void);
 
 typedef struct
 {

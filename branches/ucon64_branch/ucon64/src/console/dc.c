@@ -33,10 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "dc.h"
-#if 0
-
-static int dc_ip(char *dev,char *name)
-#endif
 
 
 // header for SAV -> VMS conversion 
@@ -172,12 +168,59 @@ static const uint8_t nstrsave_bin[1024] = {
 };
 
 
+struct field;
+
+static int check_areasym (char *ptr, struct field *f);
+//static int parse_input (FILE *fh, char *ip);
+static int calcCRC (const unsigned char *buf, int size);
+#if 0
+static int dc_ip(char *dev,char *name)
+#endif
+static void update_crc (char *ip);
+//static int dc_mkip (const char *ip_file); // make ip
+#define MAXCHUNK (2048*1024)
+
+static unsigned int seed;
+
+static void my_srand (unsigned int n);
+static unsigned int my_rand ();
+static void load (FILE * fh, unsigned char *ptr, uint32_t sz);
+static void load_chunk (FILE * fh, unsigned char *ptr, uint32_t sz);
+static void load_file (FILE * fh, unsigned char *ptr, uint32_t filesz);
+static void read_file (const char *filename, unsigned char **ptr, uint32_t *sz);
+static void save (FILE * fh, unsigned char *ptr, uint32_t sz);
+static void save_chunk (FILE * fh, unsigned char *ptr, uint32_t sz);
+static void save_file (FILE * fh, unsigned char *ptr, uint32_t filesz);
+static void write_file (char *filename, unsigned char *ptr, uint32_t sz);
+static void descramble (const char *src, char *dst);
+static void scramble (const char *src, char *dst);
+
+
+static void
+trim (char *str)
+{
+  int l = strlen(str);
+  while (l > 0 && (str[l-1] == '\r' || str[l-1] == '\n' ||
+         str[l-1] == ' ' || str[l-1] == '\t'))
+    str[--l] = 0;
+}
+
+
 const st_usage_t dc_usage[] = {
     {NULL, NULL, "Dreamcast"},
     {NULL, NULL, "1998 SEGA http://www.sega.com"},
     {"dc", NULL, "force recognition"},
 //TODO    {"ip", "FILE", "extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE"},
-    {"vms", "SAV", "convert NES SAV file to a VMS file for use with NesterDC"},
+//    {"vms", "SAV", "convert NES SAV file to a VMS file for use with NesterDC"},
+//    {"scramble", NULL, "scramble 1ST_READ.BIN for selfboot CD's"},
+//    {"unscramble", NULL, "unscramble 1ST_READ.BIN for non-selfboot CD's"},
+#if 0
+//TODO
+    {"mkip", NULL, "generate IP.BIN file"},
+    {"boot", "FILE", "which file to boot (default: 1ST_READ.BIN) (IP.BIN only)"},
+    {"maker", "NAME", "name of manufacturer (default: YOUR NAME HERE) (IP.BIN only)"},
+    {"title", "NAME", "name of game (default: TITLE OF THE SOFTWARE) (IP.BIN only)"},
+#endif
     {NULL, NULL, NULL}
   };
 
@@ -198,10 +241,6 @@ dc_init (st_rominfo_t *rominfo)
 
 
 #define NUM_FIELDS 11
-
-struct field;
-
-int check_areasym(char *, struct field *);
 
 struct field {
   char *name;
@@ -255,16 +294,7 @@ check_areasym (char *ptr, struct field *f)
 }
 
 
-void
-trim (char *str)
-{
-  int l = strlen(str);
-  while (l > 0 && (str[l-1] == '\r' || str[l-1] == '\n' ||
-         str[l-1] == ' ' || str[l-1] == '\t'))
-    str[--l] = 0;
-}
-
-
+#if 0
 int
 parse_input (FILE *fh, char *ip)
 {
@@ -321,6 +351,7 @@ parse_input (FILE *fh, char *ip)
 
   return 1;
 }
+#endif
 
 
 int
@@ -354,6 +385,7 @@ update_crc (char *ip)
 }
 
 
+#if 0
 int
 dc_mkip (const char *ip_file) // make ip
 {
@@ -388,7 +420,7 @@ Game Title    : TITLE OF THE SOFTWARE
   printf (ucon64_msg[WROTE], dest_name);
   return 0;
 }
-
+#endif
 
 
 /*
@@ -533,3 +565,282 @@ out in your Dreamcast.
 */
 
 
+#define MAXCHUNK (2048*1024)
+
+static unsigned int seed;
+
+void
+my_srand (unsigned int n)
+{
+  seed = n & 0xffff;
+}
+
+unsigned int
+my_rand ()
+{
+  seed = (seed * 2109 + 9273) & 0x7fff;
+  return (seed + 0xc000) & 0xffff;
+}
+
+void
+load (FILE * fh, unsigned char *ptr, uint32_t sz)
+{
+  if (fread (ptr, 1, sz, fh) != sz)
+    {
+      fprintf (stderr, "Read error!\n");
+      exit (1);
+    }
+}
+
+void
+load_chunk (FILE * fh, unsigned char *ptr, uint32_t sz)
+{
+  static int idx[MAXCHUNK / 32];
+  uint32_t i;
+
+  /* Convert chunk size to number of slices */
+  sz /= 32;
+
+  /* Initialize index table with unity,
+     so that each slice gets loaded exactly once */
+  for (i = 0; i < sz; i++)
+    idx[i] = i;
+
+  for (i = sz - 1; i; --i)
+    {
+      /* Select a replacement index */
+      int x = (my_rand () * i) >> 16;
+
+      /* Swap */
+      int tmp = idx[i];
+      idx[i] = idx[x];
+      idx[x] = tmp;
+
+      /* Load resulting slice */
+      load (fh, ptr + 32 * idx[i], 32);
+    }
+}
+
+void
+load_file (FILE * fh, unsigned char *ptr, uint32_t filesz)
+{
+  uint32_t chunksz;
+
+  my_srand (filesz);
+
+  /* Descramble 2 meg blocks for as long as possible, then
+     gradually reduce the window down to 32 bytes (1 slice) */
+  for (chunksz = MAXCHUNK; chunksz >= 32; chunksz >>= 1)
+    while (filesz >= chunksz)
+      {
+        load_chunk (fh, ptr, chunksz);
+        filesz -= chunksz;
+        ptr += chunksz;
+      }
+
+  /* Load final incomplete slice */
+  if (filesz)
+    load (fh, ptr, filesz);
+}
+
+void
+read_file (const char *filename, unsigned char **ptr, uint32_t *sz)
+{
+  FILE *fh = fopen (filename, "rb");
+  if (fh == NULL)
+    {
+      fprintf (stderr, "Can't open \"%s\".\n", filename);
+      exit (1);
+    }
+  if (fseek (fh, 0, SEEK_END) < 0)
+    {
+      fprintf (stderr, "Seek error.\n");
+      exit (1);
+    }
+  *sz = ftell (fh);
+  *ptr = malloc (*sz);
+  if (*ptr == NULL)
+    {
+      fprintf (stderr, "Out of memory.\n");
+      exit (1);
+    }
+  if (fseek (fh, 0, SEEK_SET) < 0)
+    {
+      fprintf (stderr, "Seek error.\n");
+      exit (1);
+    }
+  load_file (fh, *ptr, *sz);
+  fclose (fh);
+}
+
+void
+save (FILE * fh, unsigned char *ptr, uint32_t sz)
+{
+  if (fwrite (ptr, 1, sz, fh) != sz)
+    {
+      fprintf (stderr, "Write error!\n");
+      exit (1);
+    }
+}
+
+void
+save_chunk (FILE * fh, unsigned char *ptr, uint32_t sz)
+{
+  static int idx[MAXCHUNK / 32];
+  uint32_t i;
+
+  /* Convert chunk size to number of slices */
+  sz /= 32;
+
+  /* Initialize index table with unity,
+     so that each slice gets saved exactly once */
+  for (i = 0; i < sz; i++)
+    idx[i] = i;
+
+  for (i = sz - 1; i; --i)
+    {
+      /* Select a replacement index */
+      int x = (my_rand () * i) >> 16;
+
+      /* Swap */
+      int tmp = idx[i];
+      idx[i] = idx[x];
+      idx[x] = tmp;
+
+      /* Save resulting slice */
+      save (fh, ptr + 32 * idx[i], 32);
+    }
+}
+
+void
+save_file (FILE * fh, unsigned char *ptr, uint32_t filesz)
+{
+  uint32_t chunksz;
+
+  my_srand (filesz);
+
+  /* Descramble 2 meg blocks for as long as possible, then
+     gradually reduce the window down to 32 bytes (1 slice) */
+  for (chunksz = MAXCHUNK; chunksz >= 32; chunksz >>= 1)
+    while (filesz >= chunksz)
+      {
+        save_chunk (fh, ptr, chunksz);
+        filesz -= chunksz;
+        ptr += chunksz;
+      }
+
+  /* Save final incomplete slice */
+  if (filesz)
+    save (fh, ptr, filesz);
+}
+
+void
+write_file (char *filename, unsigned char *ptr, uint32_t sz)
+{
+  FILE *fh = fopen (filename, "wb");
+  if (fh == NULL)
+    {
+      fprintf (stderr, "Can't open \"%s\".\n", filename);
+      exit (1);
+    }
+  save_file (fh, ptr, sz);
+  fclose (fh);
+}
+
+
+void
+descramble (const char *src, char *dst)
+{
+  unsigned char *ptr = NULL;
+  uint32_t sz = 0;
+  FILE *fh;
+
+  read_file (src, &ptr, &sz);
+
+  fh = fopen (dst, "wb");
+  if (fh == NULL)
+    {
+      fprintf (stderr, "Can't open \"%s\".\n", dst);
+      exit (1);
+    }
+  if (fwrite (ptr, 1, sz, fh) != sz)
+    {
+      fprintf (stderr, "Write error.\n");
+      exit (1);
+    }
+  fclose (fh);
+  free (ptr);
+}
+
+
+void
+scramble (const char *src, char *dst)
+{
+  unsigned char *ptr = NULL;
+  uint32_t sz = 0;
+  FILE *fh;
+
+  fh = fopen (src, "rb");
+  if (fh == NULL)
+    {
+      fprintf (stderr, "Can't open \"%s\".\n", src);
+      exit (1);
+    }
+  if (fseek (fh, 0, SEEK_END) < 0)
+    {
+      fprintf (stderr, "Seek error.\n");
+      exit (1);
+    }
+  sz = ftell (fh);
+  ptr = malloc (sz);
+  if (ptr == NULL)
+    {
+      fprintf (stderr, "Out of memory.\n");
+      exit (1);
+    }
+  if (fseek (fh, 0, SEEK_SET) < 0)
+    {
+      fprintf (stderr, "Seek error.\n");
+      exit (1);
+    }
+  if (fread (ptr, 1, sz, fh) != sz)
+    {
+      fprintf (stderr, "Read error.\n");
+      exit (1);
+    }
+  fclose (fh);
+
+  write_file (dst, ptr, sz);
+
+  free (ptr);
+}
+
+
+int
+dc_scramble (void)
+{
+  char dest_name[FILENAME_MAX];
+
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, NULL, 0);
+                        
+  scramble (ucon64.rom, dest_name);
+
+  printf (ucon64_msg[WROTE], dest_name);
+  return 0;
+}
+
+
+int
+dc_unscramble (void)
+{
+  char dest_name[FILENAME_MAX];
+
+  strcpy (dest_name, ucon64.rom);
+  ucon64_file_handler (dest_name, NULL, 0);
+                        
+  descramble (ucon64.rom, dest_name);
+
+  printf (ucon64_msg[WROTE], dest_name);
+  return 0;
+}

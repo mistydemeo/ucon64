@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP DEFINE_GTK_MAKE GTK_CONFIG GTK_CFLAGS GTK_LIBS DEFINE_GDK_PIXBUF_MAKE GDK_PIXBUF_CONFIG GDK_PIXBUF_CFLAGS GDK_PIXBUF_LIBS DEFINE_GUI_MAKE DEFINE_DISCMAGE_MAKE DEFINE_DLOPEN_MAKE DEFINE_ZLIB_MAKE LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP DEFINE_GTK_MAKE GTK_CONFIG GTK_CFLAGS GTK_LIBS DEFINE_GDK_PIXBUF_MAKE GDK_PIXBUF_CONFIG GDK_PIXBUF_CFLAGS GDK_PIXBUF_LIBS DEFINE_WXW_MAKE DEFINE_SDL_MAKE DEFINE_GUI_MAKE DEFINE_DISCMAGE_MAKE DEFINE_DLOPEN_MAKE DEFINE_ZLIB_MAKE LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -2900,6 +2900,10 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   rm -f conf.gdk_pixbuftest
 
 
+    DEFINE_WXW_MAKE="WXW=1"
+
+
+    DEFINE_SDL_MAKE="SDL=1"
 
 
 
@@ -5225,6 +5229,8 @@ s,@DEFINE_GDK_PIXBUF_MAKE@,$DEFINE_GDK_PIXBUF_MAKE,;t t
 s,@GDK_PIXBUF_CONFIG@,$GDK_PIXBUF_CONFIG,;t t
 s,@GDK_PIXBUF_CFLAGS@,$GDK_PIXBUF_CFLAGS,;t t
 s,@GDK_PIXBUF_LIBS@,$GDK_PIXBUF_LIBS,;t t
+s,@DEFINE_WXW_MAKE@,$DEFINE_WXW_MAKE,;t t
+s,@DEFINE_SDL_MAKE@,$DEFINE_SDL_MAKE,;t t
 s,@DEFINE_GUI_MAKE@,$DEFINE_GUI_MAKE,;t t
 s,@DEFINE_DISCMAGE_MAKE@,$DEFINE_DISCMAGE_MAKE,;t t
 s,@DEFINE_DLOPEN_MAKE@,$DEFINE_DLOPEN_MAKE,;t t

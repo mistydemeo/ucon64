@@ -499,7 +499,7 @@ main (int argc, char **argv)
   ucon64.backup = get_property_int (ucon64.configfile, "backups", '=');
 
   // $HOME/.ucon64/ ?
-  strcpy (ucon64.configdir, get_property (ucon64.configfile, "configdir", buf, ""));
+  strcpy (ucon64.configdir, get_property (ucon64.configfile, "ucon64_configdir", buf, ""));
 #ifdef  __CYGWIN__
   strcpy (ucon64.configdir, fix_character_set (ucon64.configdir));
 #endif
@@ -508,7 +508,7 @@ main (int argc, char **argv)
 
   // DAT file handling
   ucon64.dat_enabled = 0;
-  strcpy (ucon64.datdir, get_property (ucon64.configfile, "datdir", buf, ""));
+  strcpy (ucon64.datdir, get_property (ucon64.configfile, "ucon64_datdir", buf, ""));
 #ifdef  __CYGWIN__
   strcpy (ucon64.datdir, fix_character_set (ucon64.datdir));
 #endif

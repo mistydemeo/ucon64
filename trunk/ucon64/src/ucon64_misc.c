@@ -747,7 +747,7 @@ ucon64_bin2iso (const char *image, int track_mode)
         return -1;
     }
 
-  strcpy (buf, basename(image));
+  strcpy (buf, basename2(image));
   setext (buf, ".ISO");
   size = q_fsize (image) / sector_size;
 

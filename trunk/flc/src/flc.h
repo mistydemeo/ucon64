@@ -26,7 +26,9 @@
 
 extern void flc_usage (int argc, char *argv[]);
 
-#define FLC_VERSION_S "1.0.1"
+#define FLC_VERSION_S "1.0.2"
+#define FLC_VERSION 103
+
 
 typedef struct st_flc
 {

@@ -307,7 +307,7 @@ flc_configfile (void)
 
   if (access (flc.configfile, F_OK) == -1)
     printf ("ERROR: %s not found: creating...", flc.configfile);
-  else if (strtol (getProperty (flc.configfile, "version", buf, "0"), NULL, 10) < 102)
+  else if (strtol (getProperty (flc.configfile, "version", buf, "0"), NULL, 10) < FLC_VERSION)
     {
       strcpy (buf, flc.configfile);
       setext (buf, ".OLD");
@@ -331,41 +331,41 @@ flc_configfile (void)
         }
       else
         {
-          fputs ("# flc config\n"
+          fprintf (fh, "# flc config\n"
                  "#\n"
-                 "version=102\n"
+                 "version=%d\n"
                  "#\n"
                  "# LHA support\n"
                  "#\n"
-                 "lha_test=lha 2>&1 t %s\n"
-                 "lha_extract=lha 2>&1 efi %s *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
+                 "lha_test=lha 2>&1 t \"%%s\"\n"
+                 "lha_extract=lha 2>&1 efi \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
                  "#\n"
                  "# LZH support\n"
                  "#\n"
-                 "lzh_test=lha 2>&1 t %s\n"
-                 "lzh_extract=lha 2>&1 efi %s *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
+                 "lzh_test=lha 2>&1 t \"%%s\"\n"
+                 "lzh_extract=lha 2>&1 efi \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
                  "#\n"
                  "# ZIP support\n"
                  "#\n"
-                 "zip_test=unzip 2>&1 -t %s\n"
-                 "zip_extract=unzip 2>&1 -xojC %s *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
+                 "zip_test=unzip 2>&1 -t \"%%s\"\n"
+                 "zip_extract=unzip 2>&1 -xojC \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
                  "#\n"
                  "# RAR support\n"
                  "#\n"
-                 "rar_test=unrar 2>&1 t %s\n"
-                 "rar_extract=unrar 2>&1 x %s *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
+                 "rar_test=unrar 2>&1 t \"%%s\"\n"
+                 "rar_extract=unrar 2>&1 x \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
                  "#\n"
                  "# ACE support\n"
                  "#\n"
-                 "ace_test=unace 2>&1 t %s\n"
-                 "ace_extract=unace 2>&1 e %s *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
+                 "ace_test=unace 2>&1 t \"%%s\"\n"
+                 "ace_extract=unace 2>&1 e \"%%s\" *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
                  "#\n"
                  "# TXT/NFO/FAQ support\n"
                  "#\n"
-                 "txt_extract=txtextract %s\n"
-                 "nfo_extract=txtextract %s\n"
-                 "faq_extract=txtextract %s\n",
-                 fh);
+                 "txt_extract=txtextract \"%%s\"\n"
+                 "nfo_extract=txtextract \"%%s\"\n"
+                 "faq_extract=txtextract \"%%s\"\n",
+                 FLC_VERSION);
 
           fclose (fh);
           printf ("OK\n\n");

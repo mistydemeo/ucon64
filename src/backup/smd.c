@@ -703,9 +703,9 @@ smd_usage (void)
 
     printf ("%s\n"
     "  " OPTION_LONG_S "xsmd        send/receive ROM to/from Super Magic Drive/SMD; " OPTION_LONG_S "file=PORT\n"
-     "                receives automatically when " OPTION_LONG_S "rom does not exist\n"
+     "                  receives automatically when " OPTION_LONG_S "rom does not exist\n"
      "  " OPTION_LONG_S "xsmds       send/receive SRAM to/from Super Magic Drive/SMD; " OPTION_LONG_S "file=PORT\n"
-     "                receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n", smd_title);
+     "                  receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n", smd_title);
 }
 
 int

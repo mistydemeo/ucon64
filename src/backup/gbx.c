@@ -2633,12 +2633,12 @@ gbx_usage (void)
 {
   printf ("%s\n"
           "  " OPTION_LONG_S "xgbx        send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "file=PORT\n"
-          "                receives automatically when " OPTION_LONG_S "rom does not exist\n"
+          "                  receives automatically when " OPTION_LONG_S "rom does not exist\n"
           "  " OPTION_LONG_S "xgbxs       send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "file=PORT\n"
-          "                receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n"
+          "                  receives automatically when " OPTION_LONG_S "rom(=SRAM) does not exist\n"
           "  " OPTION_LONG_S "xgbxb=BANK  send/receive 64kbits SRAM to/from GB Xchanger BANK\n"
-          "                BANK can be a number from 0 to 15; " OPTION_LONG_S "file=PORT\n"
-          "                receives automatically when " OPTION_LONG_S "rom does not exist\n"
+          "                  BANK can be a number from 0 to 15; " OPTION_LONG_S "file=PORT\n"
+          "                  receives automatically when " OPTION_LONG_S "rom does not exist\n"
 "                  You only need to specify PORT if uCON64 doesn't detect the\n"
 "                  (right) parallel port. If that is the case give a hardware\n"
 "                  address: ucon64 " OPTION_LONG_S "xgbx \"rom.gb\" 0x378\n", gbx_title);

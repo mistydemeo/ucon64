@@ -469,8 +469,11 @@ set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header)
   NSRT is a SNES ROM tool. See developers.html.
 
   NSRT header format (0x1d0 - 0x1ef, offsets in _copier header_):
-  0x1d0                 low nibble = original country byte
-                        high nibble = 2 for HiROM games, 1 for LoROM
+  0x1d0                 low nibble = original country value
+                        high nibble = bank type
+                        1 = LoROM
+                        2 = HiROM
+                        3 = "Very" HiROM
   0x1d1 - 0x1e5         original game name
   0x1e6                 low byte of original SNES checksum
   0x1e7                 high byte of original SNES checksum
@@ -505,8 +508,12 @@ set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header)
           return;
         }
 
-      x = bs_dump ? 0 : snes_header.country;
-      header[0x1d0] = x | (snes_hirom ? 0x20 : 0x10);
+      header[0x1d0] = bs_dump ? 0 : snes_header.country;
+      if (rominfo->header_start == SNES_HEADER_START + SNES_HIROM + 0x400000)
+        header[0x1d0] |= 0x30;
+      else
+        header[0x1d0] |= snes_hirom ? 0x20 : 0x10;
+
       memcpy (header + 0x1d1, &snes_header.name, SNES_NAME_LEN);
       header[0x1e6] = snes_header.checksum_low;
       header[0x1e7] = snes_header.checksum_high;

@@ -887,9 +887,10 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
   fputc (0, destfile);                          // 0x1d = 0
   fputc (totalsize / (2 * MBIT), destfile);     // 0x1e = bank code
 
+  flags = 0x80;                                 // set F (?, default)
   if (genesis_has_ram)
     {
-      flags = sram_page++;
+      flags |= sram_page++;
       if (sram_page == 3)
         file_no_sram = file_no;
       else if (sram_page > 3)
@@ -897,8 +898,8 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
           printf ("WARNING: This ROM will share SRAM with ROM %d\n", file_no_sram);
           sram_page = 3;
         }
-      if ((ucon64.file_size - rominfo->buheader_len) > 16 * MBIT)
-        flags |= 0x80;                          // set F (>16 Mb & SRAM)
+      if ((ucon64.file_size - rominfo->buheader_len) <= 16 * MBIT)
+        flags &= ~0x80;                         // clear F (<=16 Mb & SRAM)
     }
   else
     flags |= 4;                                 // set T (no SRAM)

@@ -93,7 +93,7 @@ extern long filetestpad (char *filename); //test if a ROM is padded
 
 extern int ucon64_testsplit (char *filename);//test if a ROM is splitted
 
-extern unsigned int parport_probe (unsigned int parport);
+extern unsigned int ucon64_parport_probe (unsigned int parport); 
 
 //ucon64 specific wrapper for misc.c/gauge()
 extern int ucon64_gauge (time_t init_time, long pos, long size);

@@ -180,15 +180,15 @@ if(stat(flc.path,&puffer)!=-1 &&
   file=&file_ns;
 
   file->next=NULL;
-  file->date=puffer.st_mtime;
-  file->size=puffer.st_size;  
-  file->checked='N';
-  strcpy(file->name,flc.path);
+  (file->sub).date=puffer.st_mtime;
+  (file->sub).size=puffer.st_size;  
+  (file->sub).checked='N';
+  strcpy((file->sub).name,flc.path);
   flc.path[0]=0;
 
-  extract(&flc,file);
+  extract(&flc,&file->sub);
 
-  output(&flc,file);
+  output(&flc,&file->sub);
 
   return(0);
 }
@@ -228,11 +228,11 @@ while((ep=readdir(dp))!=NULL)
     file=file->next;
   }
 
-  file->date=puffer.st_mtime;
-  file->size=puffer.st_size;  
-  file->checked='N';
-  strcpy(file->name,ep->d_name);
-  extract(&flc,file);
+  (file->sub).date=puffer.st_mtime;
+  (file->sub).size=puffer.st_size;  
+  (file->sub).checked='N';
+  strcpy((file->sub).name,ep->d_name);
+  extract(&flc,&file->sub);
 }
 
 (void)closedir(dp);
@@ -243,7 +243,7 @@ if(flc.sort)sort(&flc,file);
 
 for(;;)
 {
-  output(&flc,file);
+  output(&flc,&file->sub);
   if(file->next==NULL)break;
   file=file->next;
 }

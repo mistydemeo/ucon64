@@ -59,15 +59,20 @@ struct flc_
 
 #define FID_LINES_MAX 20
 
-struct file_
+struct sub_
 {
-  struct file_ *next;
-
   char name[NAME_MAX+1];
   off_t size;
   unsigned long date;
   int checked;
   char file_id[FID_LINES_MAX+1][49];
+};
+
+struct file_
+{
+  struct file_ *next;
+
+  struct sub_ sub;
 };
 
 

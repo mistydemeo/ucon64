@@ -136,7 +136,6 @@ main (int argc, char *argv[])
   uid_t uid;
   gid_t gid;
 #endif
-//  struct ucon64_ rom;
 
 /*
   int option_index = 0;

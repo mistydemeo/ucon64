@@ -193,7 +193,7 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
               drjr_set_ai_data (3, 0x10 | (hi_word >> 8));
               drjr_set_ai_data (2, (hi_word & 0xff));
               if (unpass == 0)
-                return (1);
+                return 1;
             }
           else
             unpass = 0;
@@ -204,7 +204,7 @@ write_32k (unsigned short int hi_word, unsigned short int lo_word)
 //   outportb(ai,1);
 //   printf("a[15..8]=%02x\n",inportb(data));
 //   drjr_end_port();
-  return (0);
+  return 0;
 }
 
 char
@@ -243,7 +243,7 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
                   drjr_set_ai_data (2, (hi_word & 0xff));
                   unpass--;
                   if (unpass == 0)
-                    return (1);
+                    return 1;
                   else
                     break;
                 }
@@ -257,7 +257,7 @@ verify_32k (unsigned short int hi_word, unsigned short int lo_word)
 //   outportb(ai,1);
 //   printf("a[15..8]=%02x\n",inportb(data));
 //   drjr_end_port();
-  return (0);
+  return 0;
 }
 
 void
@@ -310,21 +310,21 @@ drjr_check_card (void)
   drjr_set_ai (3);
   set_data_read                 // ninit=0, nwrite=1
     if ((inportb (port_c) & 0x1f) != 0x12)
-    return (1);
+    return 1;
   drjr_set_ai (2);
   set_data_read                 // ninit=0, nwrite=1
     if (inportb (port_c) != 0x34)
-    return (1);
+    return 1;
   drjr_set_ai (1);
   set_data_read                 // ninit=0, nwrite=1
     if (inportb (port_c) != 0x56)
-    return (1);
+    return 1;
   drjr_set_ai (0);
   set_data_read                 // ninit=0, nwrite=1
     if (inportb (port_c) != 0x78)
-    return (1);
+    return 1;
   drjr_end_port ();
-  return (0);
+  return 0;
 }
 
 short int
@@ -334,11 +334,11 @@ read_file (void)
       trans_size)
     {
       fclose (fptr);            /* read data error */
-      return (-1);
+      return -1;
     }
   printf (".");
   fflush (stdout);
-  return (0);
+  return 0;
 }
 
 short int
@@ -347,7 +347,7 @@ download_n64 ()
   if ((fptr = fopen (drjr_file_name, "rb")) == NULL)
     {                           /* open error */
       printf ("open error !!!\07\n");
-      return (-1);
+      return -1;
     }
   if (sel == 0)
     printf ("Downloading");
@@ -359,7 +359,7 @@ download_n64 ()
         {
           /*fclose(fptr); */
           printf ("\n");
-          return (0);
+          return 0;
         }
       if (sel == 0)
         {
@@ -367,7 +367,7 @@ download_n64 ()
             {
               read_adr ();
               /*fclose(fptr); */
-              return (-1);
+              return -1;
             }
         }
       else
@@ -376,13 +376,13 @@ download_n64 ()
             {
               read_adr ();
               /*fclose(fptr); */
-              return (-1);
+              return -1;
             }
         }
       if (read_file () != 0)
         {
           /*fclose(fptr); */
-          return (-1);
+          return -1;
         }
       if (sel == 0)
         {
@@ -390,7 +390,7 @@ download_n64 ()
             {
               read_adr ();
               /*fclose(fptr); */
-              return (-1);
+              return -1;
             }
         }
       else
@@ -399,7 +399,7 @@ download_n64 ()
             {
               read_adr ();
               /*fclose(fptr); */
-              return (-1);
+              return -1;
             }
         }
 
@@ -407,7 +407,7 @@ download_n64 ()
   printf ("\n");
   /*fclose(fptr); */
   drjr_end_port ();
-  return (0);
+  return 0;
 }
 
 void
@@ -446,13 +446,13 @@ test_dram (void)
     {
       gen_pat_32k (page * 2);
       if (write_32k (page, 0))
-        return (0);
+        return 0;
       else
         printf ("w");
       fflush (stdout);
       gen_pat_32k (page * 2 + 1);
       if (write_32k (page, 0x80))
-        return (0);
+        return 0;
       else
         printf ("w");
       fflush (stdout);
@@ -461,18 +461,18 @@ test_dram (void)
     {
       gen_pat_32k (page * 2);
       if (verify_32k (page, 0))
-        return (0);
+        return 0;
       else
         printf ("v");
       fflush (stdout);
       gen_pat_32k (page * 2 + 1);
       if (verify_32k (page, 0x80))
-        return (0);
+        return 0;
       else
         printf ("v");
       fflush (stdout);
     }
-  return (pages);
+  return pages;
 }
 
 
@@ -542,7 +542,7 @@ d64jr_main (int argc, char *argv[])
    port[1]=peek(0x40,10);		// lpt2 base address
    if (port[0]==0){
       printf("No Printer Port Avialable!\07\n");
-      return(-1);
+      return -1;
    }
 */
 //  port[0] = 0x378;
@@ -631,7 +631,7 @@ d64jr_main (int argc, char *argv[])
   if (card_present == 0)
     {
       printf ("\nNo V64jr card present!!!\07\n\n");
-      return (-1);
+      return -1;
     }
   else
     printf ("V64jr card found at port%d\n", port_no);
@@ -665,7 +665,7 @@ d64jr_main (int argc, char *argv[])
 
 //   drjr_set_ai_data(5,write_en);              // d0=0 is write protect mode
   drjr_end_port ();
-  return (0);
+  return 0;
 }
 
 
@@ -683,10 +683,10 @@ doctor64jr_read (char *filename, unsigned int parport)
 
   if (!d64jr_main (doctor64jr_argc, doctor64jr_argv))
     {
-      return (0);
+      return 0;
     }
 */
-  return (0);
+  return 0;
 }
 
 int
@@ -700,9 +700,9 @@ doctor64jr_write (char *filename, long start, long len, unsigned int parport)
 
   if (!d64jr_main (doctor64jr_argc, doctor64jr_argv))
     {
-      return (0);
+      return 0;
     }
-  return (-1);
+  return -1;
 }
 
 
@@ -719,5 +719,5 @@ doctor64jr_usage (int argc, char *argv[])
 
 //TODO more info like technical info about cabeling and stuff for the copier
 
-  return (0);
+  return 0;
 }

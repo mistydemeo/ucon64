@@ -473,7 +473,7 @@ set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header)
                         high nibble = bank type
                         1 = LoROM
                         2 = HiROM
-                        3 = "Very" HiROM
+                        3 = "Extended" HiROM
   0x1d1 - 0x1e5         original game name
   0x1e6                 low byte of original SNES checksum
   0x1e7                 high byte of original SNES checksum
@@ -569,14 +569,11 @@ reset_header (void *header)
 
 
 static int
-snes_ffe (st_rominfo_t *rominfo, char *ext, int smc)
+snes_ffe (st_rominfo_t *rominfo, char *ext)
 {
   st_swc_header_t header;
   int size;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-
-  if ((snes_header.map_type & 0x10) && smc)
-    printf ("NOTE: This game might not work with a Super Magicom because it's a FastROM game\n");
 
   q_fread (&header, 0, rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
@@ -617,7 +614,10 @@ snes_ffe (st_rominfo_t *rominfo, char *ext, int smc)
 int
 snes_smc (st_rominfo_t *rominfo)
 {
-  return snes_ffe (rominfo, ".SMC", 1);
+  if (snes_header.map_type & 0x10)
+    printf ("NOTE: This game might not work with a Super Magicom because it's a FastROM game\n");
+
+  return snes_ffe (rominfo, ".SMC");
 }
 
 
@@ -625,7 +625,7 @@ snes_smc (st_rominfo_t *rominfo)
 int
 snes_swc (st_rominfo_t *rominfo)
 {
-  return snes_ffe (rominfo, ".SWC", 0);
+  return snes_ffe (rominfo, ".SWC");
 }
 
 
@@ -925,7 +925,7 @@ snes_gd3 (st_rominfo_t *rominfo)
         header[0x10] = 0x80;                    // 0 kb or 256 kb
 
       if (total4Mbparts == 5)
-        total4Mbparts = 6;                      // 20 Mbit HiRoms get padded to 24 Mbit
+        total4Mbparts = 6;                      // 20 Mbit HiROMs get padded to 24 Mbit
 
       if (total4Mbparts <= 2)
         memcpy (&header[0x11], gd3_hirom_8mb_map, GD3_HEADER_MAPSIZE);
@@ -942,7 +942,7 @@ snes_gd3 (st_rominfo_t *rominfo)
           header[0x2a] = 0x0c;
         }
 
-      // Adjust sram map for exceptions - a couple of 10-12 Mb HiRom games
+      // Adjust sram map for exceptions - a couple of 10-12 Mb HiROM games
       //  (Liberty or Death, Brandish). May not be necessary
 
       // interleave the image
@@ -1110,7 +1110,7 @@ snes_s (st_rominfo_t *rominfo)
       if (snes_hirom && ((nparts + ((surplus > 0) ? 1 : 0)) <= 2))
         {
           half_size = size / 2;
-          // 8 Mbit or less HiRoms, X is used to pad filename to 8 (SF4###XA)
+          // 8 Mbit or less HiROMs, X is used to pad filename to 8 (SF4###XA)
 
           *(strrchr (dest_name, '.') - 2) = areupper (basename2 (ucon64.rom)) ? 'X' : 'x';
 //          dest_name[strrcspn (dest_name, ".") - 2] = areupper (basename2 (ucon64.rom)) ? 'X' : 'x';

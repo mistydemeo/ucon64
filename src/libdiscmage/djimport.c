@@ -35,10 +35,10 @@ char djimport_path[FILENAME_MAX] = "discmage.dxe"; // default value
 
 static void *libdm;
 static uint32_t (*dm_get_version_ptr) (void);
-static dm_image_t *(*dm_open_ptr) (const char *);
-static dm_image_t *(*dm_reopen_ptr) (const char *, dm_image_t *);
+static dm_image_t *(*dm_open_ptr) (const char *, uint32_t);
+static dm_image_t *(*dm_reopen_ptr) (const char *, uint32_t, dm_image_t *);
 static int (*dm_close_ptr) (dm_image_t *);
-static int (*dm_rip_ptr) (const dm_image_t *, int, int);
+static int (*dm_rip_ptr) (const dm_image_t *, int);
 static int (*dm_disc_read_ptr) (const dm_image_t *);
 static int (*dm_disc_write_ptr) (const dm_image_t *);
 static int (*dm_mktoc_ptr) (const dm_image_t *);
@@ -82,18 +82,18 @@ dm_get_version (void)
 
 
 dm_image_t *
-dm_open (const char *a)
+dm_open (const char *a, uint32_t b)
 {
   CHECK
-  return dm_open_ptr (a);
+  return dm_open_ptr (a, b);
 }
 
 
 dm_image_t *
-dm_reopen (const char *a, dm_image_t *b)
+dm_reopen (const char *a, uint32_t b, dm_image_t *c)
 {
   CHECK
-  return dm_reopen_ptr (a, b);
+  return dm_reopen_ptr (a, b, c);
 }
 
 
@@ -106,10 +106,10 @@ dm_close (dm_image_t *a)
 
 
 int
-dm_rip (const dm_image_t *a, int b, int c)
+dm_rip (const dm_image_t *a, int b)
 {
   CHECK
-  return dm_rip_ptr (a, b, c);
+  return dm_rip_ptr (a, b);
 }
 
 

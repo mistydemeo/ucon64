@@ -381,7 +381,7 @@ gba_init (st_rominfo_t *rominfo)
   strncpy (rominfo->name, (const char *) gba_header.name, GBA_NAME_LEN);
   rominfo->name[GBA_NAME_LEN] = 0;
 
-  //ROM maker
+  // ROM maker
   value = (gba_header.maker_high - '0') * 36 + gba_header.maker_low - '0';
   if (value < 0 || value >= NINTENDO_MAKER_LEN)
     value = 0;

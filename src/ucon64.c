@@ -576,7 +576,7 @@ main (int argc, char **argv)
     for (; rom_index < argc; rom_index++)
       {
         int result = 0;
-        char buf2[FILENAME_MAX], buf3[FILENAME_MAX];
+        char buf2[FILENAME_MAX];
 #ifndef _WIN32
         struct dirent *ep;
         DIR *dp;
@@ -599,12 +599,10 @@ main (int argc, char **argv)
                     while ((ep = readdir (dp)))
                       {
                         sprintf (buf2, "%s" FILE_SEPARATOR_S "%s", buf, ep->d_name);
-                        realpath2 (buf2, buf3);
-
-                        if (stat (buf3, &fstate) != -1)
+                        if (stat (buf2, &fstate) != -1)
                           if (S_ISREG (fstate.st_mode))
                             {
-                              result = ucon64_process_rom (buf3);
+                              result = ucon64_process_rom (buf2);
                               if (result == 1)
                                 break;
                             }
@@ -618,12 +616,10 @@ main (int argc, char **argv)
                     do
                       {
                         sprintf (buf2, "%s" FILE_SEPARATOR_S "%s", buf, find_data.cFileName);
-                        realpath2 (buf2, buf3);
-
-                        if (stat (buf3, &fstate) != -1)
+                        if (stat (buf2, &fstate) != -1)
                           if (S_ISREG (fstate.st_mode))
                             {
-                              result = ucon64_process_rom (buf3);
+                              result = ucon64_process_rom (buf2);
                               if (result == 1)
                                 break;
                             }
@@ -816,7 +812,7 @@ ucon64_execute_options (void)
         break;
     }
 
-  if (!opts) // no options == just display ROM info
+  if (!opts) // no options => just display ROM info
     {
       ucon64.flags = WF_DEFAULT;
       // WF_NO_SPLIT WF_INIT, WF_PROBE, CRC32, DATabase and WF_NFO
@@ -1452,7 +1448,7 @@ ucon64_usage (int argc, char *argv[])
   };
   int x = 0, c = 0, single = 0;
   char *name_exe = basename (argv[0]), *name_discmage;
-  (void) argc;
+  (void) argc;                                  // warning remover
 
 #ifdef  HAVE_ZLIB_H
 #define USAGE_S "Usage: %s [OPTION]... [ROM|IMAGE|SRAM|FILE|DIR|ARCHIVE]...\n\n"
@@ -1494,21 +1490,6 @@ ucon64_usage (int argc, char *argv[])
 //    genesis_usage[0].desc,
     nes_usage[0].desc, snes_usage[0].desc);
 
-  name_discmage =
-#ifdef  DLOPEN
-    ucon64.discmage_path;
-#else
-#if     defined __MSDOS__
-    "discmage.dxe";
-#elif   defined __CYGWIN__ || defined _WIN32
-    "discmage.dll";
-#elif   defined __unix__ || defined __BEOS__
-    "libdiscmage.so";
-#else
-    "unknown";
-#endif
-#endif
-
   if (ucon64.discmage_enabled)
     {
       ucon64_render_usage (libdm_usage);
@@ -1540,6 +1521,32 @@ ucon64_usage (int argc, char *argv[])
         }
   }
 
+  printf (
+     "DATabase: %d known ROMs (DAT files: %s)\n\n",
+       ucon64_dat_total_entries (),
+       ucon64.datdir);
+          
+  name_discmage =
+#ifdef  DLOPEN
+    ucon64.discmage_path;
+#else
+#if     defined __MSDOS__
+    "discmage.dxe";
+#elif   defined __CYGWIN__ || defined _WIN32
+    "discmage.dll";
+#elif   defined __unix__ || defined __BEOS__
+    "libdiscmage.so";
+#else
+    "unknown";
+#endif
+#endif
+
+  if (!ucon64.discmage_enabled)
+    {
+      printf (ucon64_msg[NO_LIB], name_discmage);
+      printf ("\n");
+    }
+    
 #undef  PARALLEL_MSG
 #ifdef  PARALLEL
 #define PARALLEL_MSG "NOTE: You only need to specify PORT if uCON64 doesn't detect the (right)\n" \
@@ -1558,17 +1565,6 @@ ucon64_usage (int argc, char *argv[])
 #define MORE_MSG "     %s " OPTION_LONG_S "help|less (to see everything in less)\n" // less is more ;-)
 #endif
 
-  printf (
-     "DATabase: %d known ROMs (DAT files: %s)\n\n",
-       ucon64_dat_total_entries (),
-       ucon64.datdir);
-          
-  if (!ucon64.discmage_enabled)
-    {
-      printf (ucon64_msg[NO_LIB], name_discmage);
-      printf ("\n");
-    }
-    
   printf (
      PARALLEL_MSG
      "TIP: %s " OPTION_LONG_S "help " OPTION_LONG_S "snes (would show only SNES related help)\n"

@@ -79,7 +79,7 @@ const char *ucon64_msg[] = {
   "ERROR: Please check cables and connection\n"
   "       Turn the backup unit off and on\n"
   "       Split ROMs must be joined first\n"
-  "       Use " OPTION_LONG_S "file={3bc, 378, 278, ...} to specify your port\n"
+  "       Use " OPTION_LONG_S "port={3bc, 378, 278, ...} to specify your port\n"
   "       Set the port to SPP (Standard, Normal) mode in your BIOS\n"
   "       Some backup units do not support EPP and ECP style parports\n"
   "       Read the backup unit's manual\n",

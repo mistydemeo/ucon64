@@ -93,7 +93,7 @@ typedef struct st_symbol
   char *(*getenv) (const char *);
   void (*srand) (unsigned);
   int (*rand) (void);
-  int *(*atoi) (const char *);
+  int (*atoi) (const char *);
 
   void *(*memcpy) (void *, const void *, size_t);
   void *(*memset) (void *, int, size_t);

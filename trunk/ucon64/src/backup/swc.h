@@ -25,11 +25,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define swc_HEADER_START 0
 #define swc_HEADER_LEN 512
 
-int swc_read_rom (char *filename, unsigned int parport);
-int swc_write_rom (char *filename, unsigned int parport);
-int swc_read_sram (char *filename, unsigned int parport);
-int swc_write_sram (char *filename, unsigned int parport);
-void swc_unlock (unsigned int parport);
-int swc_usage (int argc, char *argv[]);
+extern int swc_read_rom (char *filename, unsigned int parport);
+extern int swc_write_rom (char *filename, unsigned int parport);
+extern int swc_read_sram (char *filename, unsigned int parport);
+extern int swc_write_sram (char *filename, unsigned int parport);
+extern void swc_unlock (unsigned int parport);
+extern int swc_usage (int argc, char *argv[]);
 
 #endif /* SWC_H */

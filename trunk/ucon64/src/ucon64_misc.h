@@ -58,38 +58,37 @@ IO_Tuple;
 #define PARPORT_CONTROL 2
 
 // GameGenie "codec" routines
-char hexDigit (int value);
-int hexValue (char digit);
+extern char hexDigit (int value);
+extern int hexValue (char digit);
 //#define hexByteValue(x ,y) ((hexValue(x) << 4) + hexValue(y))
-int hexByteValue (char x, char y);
+extern int hexByteValue (char x, char y);
 
 // CRC32 routines
-void BuildCRCTable ();
-unsigned long CalculateBufferCRC (unsigned int count, unsigned long crc,
+extern void BuildCRCTable ();
+extern unsigned long CalculateBufferCRC (unsigned int count, unsigned long crc,
                                   void *buffer);
-unsigned long CalculateFileCRC (FILE * file);
+extern unsigned long CalculateFileCRC (FILE * file);
 
 /*
   like zlib/crc32(); uCON64 has it's own crc calc. stuff
   this is just a wrapper
 */
-//unsigned long unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size);
-unsigned long fileCRC32 (char *filename, long start);   // calculate CRC32 of filename beginning from start
+//extern unsigned long unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size);
+extern unsigned long fileCRC32 (char *filename, long start);   // calculate CRC32 of filename beginning from start
 
 //ucon64 specific wrapper for misc.c/filebackup()
-char *ucon64_fbackup (struct ucon64_ *rom, char *filename);
+extern char *ucon64_fbackup (struct ucon64_ *rom, char *filename);
 
-size_t filepad (char *filename, long start, long unit);//pad a ROM in Mb
-long filetestpad (char *filename); //test if a ROM is padded
+extern size_t filepad (char *filename, long start, long unit);//pad a ROM in Mb
+extern long filetestpad (char *filename); //test if a ROM is padded
 
-int testsplit (char *filename);//test if a ROM is splitted
+extern int testsplit (char *filename);//test if a ROM is splitted
 
-unsigned int parport_probe (unsigned int parport);
+extern unsigned int parport_probe (unsigned int parport);
 
 //ucon64 specific wrapper for misc.c/gauge()
-int
-ucon64_gauge (struct ucon64_ *rom, time_t init_time, long pos, long size);
+extern int ucon64_gauge (struct ucon64_ *rom, time_t init_time, long pos, long size);
 
-int trackmode_probe (long imagesize);
+extern int trackmode_probe (long imagesize);
 
 #endif // #ifndef UCON64_MISC_H

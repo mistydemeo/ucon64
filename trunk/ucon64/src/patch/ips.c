@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include "../config.h"
+#include "config.h"
 #include "misc.h"
 #include "ucon64.h"
 #include "ips.h"

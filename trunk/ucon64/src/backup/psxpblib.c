@@ -22,7 +22,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>             // ioperm() (libc5)
-#include "../config.h"
+#include "config.h"
 #include "ucon64.h"
 #include "misc.h"
 #include "ucon64_misc.h"

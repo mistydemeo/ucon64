@@ -73,9 +73,9 @@ const st_usage_t snes_usage[] =
     {"hi", "force ROM is HiROM"},
     {"nhi", "force ROM is not HiROM"},
 #if 0
-    "  " OPTION_LONG_S "hd          force ROM has SMC/FIG/SWC header (+512 Bytes)\n"
-    "  " OPTION_LONG_S "nhd         force ROM has no SMC/FIG/SWC header (MGD2/MGH/RAW)\n"
-    "  " OPTION_LONG_S "ns          force ROM is not split\n"
+    {"hd", "force ROM has SMC/FIG/SWC header (+512 Bytes)"},
+    {"nhd", "force ROM has no SMC/FIG/SWC header (MGD2/MGH/RAW)"},
+    {"ns", "force ROM is not split"},
 #endif
     {"int", "force ROM is in interleaved format"},
     {"int2", "force ROM is in interleaved format 2"},
@@ -115,16 +115,17 @@ const st_usage_t snes_usage[] =
                        "this routine was used to find green colors in games and\n"
                        "to replace them with red colors (blood mode)"},
 #if 0
-    "TODO:  " OPTION_LONG_S "sx     convert to Snes9X (emulator)/S9X save state; " OPTION_LONG_S "rom=SAVESTATE\n"
-    "TODO:  " OPTION_LONG_S "zs     convert to ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE\n"
-    "TODO:  " OPTION_LONG_S "xzs    extract GFX from ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE\n"
-    "TODO:  " OPTION_LONG_S "spc    convert SPC sound to WAV; " OPTION_LONG_S "rom=SPCFILE\n"
+//TODO
+    {"sx", "convert to Snes9X (emulator)/S9X save state; " OPTION_LONG_S "rom=SAVESTATE"},
+    {"zs", "convert to ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE"},
+    {"xzs", "extract GFX from ZSNES (emulator) save state; " OPTION_LONG_S "rom=SAVESTATE"},
+    {"spc", "convert SPC sound to WAV; " OPTION_LONG_S "rom=SPCFILE"},
 #endif
     {"j", "join split ROM"},
     {"s", "split ROM into 8 Mb parts (for backup unit(s) with fdd)"},
     {"ssize=SIZE", "specify split part size in Mbit (not for Game Doctor SF3)"},
 #if 0
-    "  " OPTION_S "p           pad ROM to full Mb\n"
+    {"p", "pad ROM to full Mb"},
 #endif
     {"k", "remove protection (crack)"},
     {"f", "remove NTSC/PAL protection"},

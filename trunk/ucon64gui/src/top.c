@@ -54,9 +54,8 @@ ucon64gui_top (void)
   h2g_input_file ("--file", ucon64gui.file, 50, 0, open_xpm, 0, 0,
                   "Select $FILE or enter a value by hand");
 
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
+
+  ucon64gui_spacer ();
 
   h2g_ ("Miscellaneous options");
   h2g_br ();
@@ -88,10 +87,7 @@ ucon64gui_top (void)
   h2g_input_submit ("Truncate", "--strip",
                     "(--strip) strip Bytes from end of ROM; $FILE=VALUE");
 
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-
-  h2g_br ();
+  ucon64gui_spacer ();
 
   h2g_input_submit ("Hexdump", "--hex", "(--hex) show ROM as hexdump");
 
@@ -103,9 +99,8 @@ ucon64gui_top (void)
 
   h2g_input_submit ("Swap/(De)Interleave ROM", "--swap",
                     "(--swap) swap/(de)interleave ALL Bytes in ROM (1234<->2143)");
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
+
+  ucon64gui_spacer ();
 
   h2g_ ("List ROMs: ");
 
@@ -123,9 +118,7 @@ ucon64gui_top (void)
   h2g_input_submit ("similarities", "--cs",
                     "(--cs) compare ROMs for similarities; $FILE=OTHER_ROM");
 
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
+  ucon64gui_spacer ();
 
 #ifdef DB
 
@@ -154,16 +147,8 @@ ucon64gui_top (void)
 
   h2g_input_submit ("Check", "--ispad", "(--ispad) check if ROM is padded");
 
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
+  ucon64gui_divider ();
 
-  h2g_br ();
-
-  h2g_hr ();
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-
-  h2g_br ();
   h2g_ ("Patches");
 
   h2g_br ();
@@ -196,9 +181,7 @@ ucon64gui_top (void)
   h2g_input_submit ("Rename", "--na",
                     "(--na) change APS description; $ROM=PATCHFILE $FILE=DESCRIPTION");
 
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
+  ucon64gui_spacer ();
 
   h2g_ ("PPF: ");
 
@@ -215,11 +198,18 @@ ucon64gui_top (void)
                     "(--idppf) change PPF FILE_ID.DIZ (2.0); $ROM=PATCHFILE $FILE=FILE_ID.DIZ");
 
 
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
+  ucon64gui_spacer ();
 
-  h2g_hr ();
-  h2g_br ();
+  h2g_ ("GameGenie: ");
 
+  h2g_input_submit ("Encode", "--gge",
+                    "(--gge) encode GameGenie code; $ROM=AAAAAA:VV");
+
+  h2g_input_submit ("Decode", "--ggd",
+                    "(--ggd) decode GameGenie code; $ROM=XXXX-XXXX");
+
+  h2g_input_submit ("Apply", "--gg",
+                    "(--gg) apply GameGenie code (permanent); $FILE=XXXX-XXXX");
+
+  ucon64gui_divider ();
 }

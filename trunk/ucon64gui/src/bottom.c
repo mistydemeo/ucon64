@@ -29,12 +29,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 void
 ucon64gui_bottom (void)
 {
-#include "xpm/trans.xpm"
 #include "xpm/icon_16x16.xpm"
 
-  h2g_br ();
-  h2g_img (trans_xpm, 0, 3, 0, NULL);
-  h2g_br ();
+  ucon64gui_spacer ();
+  
   h2g_img (icon_16x16_xpm, 0, 0, 0, "uCON64gui");
 
 //  h2g_img (ucon64gui_xpm, 0, 0, 0, NULL);

@@ -1274,6 +1274,8 @@ int fal_usage(int argc, char *argv[])
 
   printf("  -xfal         send/receive ROM to/from Flash Advance Linker; $FILE=PORT\n"
          "                receives automatically when $ROM does not exist\n"
+         "TODO:  -xfals   send/receive SRAM to/from Flash Advance Linker; $FILE=PORT\n"
+         "                receives automatically when $ROM(=SRAM) does not exist\n"
          "  -xfalc<n>     specify chip size in mbits of ROM in Flash Advance Linker when\n"
          "                receiving. n can be 8,16,32,64,128 or 256. default is -xfalc32\n"
          "  -xfalm        use SPP mode, default is EPP\n");

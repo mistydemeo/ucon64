@@ -683,6 +683,9 @@ if(!access(rom.rom,F_OK))
 }
 else
 {
+/*
+    sometimes the ROM does not exist but will be received
+*/
 rom.console=
 (argcmp(argc,argv,"-xdjr") ||
  argcmp(argc,argv,"-xv64")) ? ucon64_N64 :
@@ -773,7 +776,6 @@ if (argcmp(argc, argv, "-e"))
 
 return(0);
 }
-
 
 switch(rom.console)
 {
@@ -973,7 +975,7 @@ break;
   case ucon64_DC:
     return(
       (argcmp(argc,argv,"-ip")) ? /* ip0000(char *dev,char *name) */ 0 :
-      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+      (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
 /*  backup */
       (argcmp(argc,argv,"-isot")) ? dc_isot(&rom) :
       (argcmp(argc,argv,"-xiso")) ? dc_xiso(&rom) : 0
@@ -982,7 +984,7 @@ break;
 
   case ucon64_PSX:
     return(
-      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+      (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
 /*  backup */
       (argcmp(argc,argv,"-rawt")) ? psx_rawt(&rom) :
       (argcmp(argc,argv,"-xraw")) ? psx_xraw(&rom) : 0
@@ -991,7 +993,7 @@ break;
 
   case ucon64_PS2:
     return(
-      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+      (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
 /*  backup */
       (argcmp(argc,argv,"-rawt")) ? ps2_rawt(&rom) :
       (argcmp(argc,argv,"-xraw")) ? ps2_xraw(&rom) : 0
@@ -1000,7 +1002,7 @@ break;
 
   case ucon64_SATURN:
     return(
-      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+      (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
 /*  backup */
       (argcmp(argc,argv,"-rawt")) ? saturn_rawt(&rom) :
       (argcmp(argc,argv,"-xraw")) ? saturn_xraw(&rom) : 0
@@ -1009,7 +1011,7 @@ break;
 
   case ucon64_CDI:
     return(
-      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+      (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
 /*  backup */
       (argcmp(argc,argv,"-rawt")) ? cdi_rawt(&rom) :
       (argcmp(argc,argv,"-xraw")) ? cdi_xraw(&rom) : 0
@@ -1018,7 +1020,7 @@ break;
 
   case ucon64_CD32:
     return(
-      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+      (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
 /*  backup */
       (argcmp(argc,argv,"-rawt")) ? cd32_rawt(&rom) :
       (argcmp(argc,argv,"-xraw")) ? cd32_xraw(&rom) : 0
@@ -1027,7 +1029,7 @@ break;
 
   case ucon64_REAL3DO:
     return(
-      (argcmp(argc,argv,"-r2i")) ? raw2iso(rom.rom) :
+      (argcmp(argc,argv,"-iso")) ? raw2iso(rom.rom) :
 /*  backup */
       (argcmp(argc,argv,"-rawt")) ? real3do_rawt(&rom) :
       (argcmp(argc,argv,"-xraw")) ? real3do_rawt(&rom) : 0
@@ -1076,52 +1078,68 @@ return(0);
 
 int ucon64_init(struct ucon64_ *rom)
 {
-  if( quickftell(rom->rom) <= MAXROMSIZE )
+  long bytes = 0;
+
+  bytes = quickftell(rom->rom);
+
+  if( bytes <= MAXROMSIZE )
     rom->current_crc32=fileCRC32(rom->rom,0);
 
 
 if(rom->console != ucon64_UNKNOWN)
 {
-  if( quickftell(rom->rom) <= MAXROMSIZE )
-  {  
-    (rom->console == ucon64_GB) ? gameboy_init(rom) :
-    (rom->console == ucon64_GBA) ? gbadvance_init(rom) :
-    (rom->console == ucon64_GENESIS) ? genesis_init(rom) :
-    (rom->console == ucon64_SMS) ? sms_init(rom) :
-    (rom->console == ucon64_JAGUAR) ? jaguar_init(rom) :
-    (rom->console == ucon64_LYNX) ? lynx_init(rom) :
-    (rom->console == ucon64_N64) ? nintendo64_init(rom) :
-    (rom->console == ucon64_NEOGEO) ? neogeo_init(rom) :
-    (rom->console == ucon64_NES) ? nes_init(rom) :
-    (rom->console == ucon64_PCE) ? pcengine_init(rom) :
-    (rom->console == ucon64_SYSTEM16) ? system16_init(rom) :
-    (rom->console == ucon64_ATARI) ? atari_init(rom) :
-    (rom->console == ucon64_SNES) ? snes_init(rom) :
-    (rom->console == ucon64_NEOGEOPOCKET) ? neogeopocket_init(rom) :
-    (rom->console == ucon64_VECTREX) ? vectrex_init(rom) :
-    (rom->console == ucon64_VIRTUALBOY) ? virtualboy_init(rom) :
-    (rom->console == ucon64_WONDERSWAN) ? wonderswan_init(rom) :
-    (rom->console == ucon64_COLECO) ? coleco_init(rom) :
-    (rom->console == ucon64_INTELLI) ? intelli_init(rom) :
-                                         (rom->console = ucon64_UNKNOWN);
-  }
-  else
-  {  
+  (rom->console == ucon64_GB &&
+   bytes <= MAXROMSIZE ) ? gameboy_init(rom) :
+  (rom->console == ucon64_GBA &&
+   bytes <= MAXROMSIZE ) ? gbadvance_init(rom) :
+  (rom->console == ucon64_GENESIS &&
+   bytes <= MAXROMSIZE ) ? genesis_init(rom) :
+  (rom->console == ucon64_SMS &&
+   bytes <= MAXROMSIZE ) ? sms_init(rom) :
+  (rom->console == ucon64_JAGUAR &&
+   bytes <= MAXROMSIZE ) ? jaguar_init(rom) :
+  (rom->console == ucon64_LYNX &&
+   bytes <= MAXROMSIZE ) ? lynx_init(rom) :
+  (rom->console == ucon64_N64 &&
+   bytes <= MAXROMSIZE ) ? nintendo64_init(rom) :
+  (rom->console == ucon64_NEOGEO &&
+   bytes <= MAXROMSIZE ) ? neogeo_init(rom) :
+  (rom->console == ucon64_NES &&
+   bytes <= MAXROMSIZE ) ? nes_init(rom) :
+  (rom->console == ucon64_PCE &&
+   bytes <= MAXROMSIZE ) ? pcengine_init(rom) :
+  (rom->console == ucon64_SYSTEM16 &&
+   bytes <= MAXROMSIZE ) ? system16_init(rom) :
+  (rom->console == ucon64_ATARI &&
+   bytes <= MAXROMSIZE ) ? atari_init(rom) :
+  (rom->console == ucon64_SNES &&
+   bytes <= MAXROMSIZE ) ? snes_init(rom) :
+  (rom->console == ucon64_NEOGEOPOCKET &&
+   bytes <= MAXROMSIZE ) ? neogeopocket_init(rom) :
+  (rom->console == ucon64_VECTREX &&
+   bytes <= MAXROMSIZE ) ? vectrex_init(rom) :
+  (rom->console == ucon64_VIRTUALBOY &&
+   bytes <= MAXROMSIZE ) ? virtualboy_init(rom) :
+  (rom->console == ucon64_WONDERSWAN &&
+   bytes <= MAXROMSIZE ) ? wonderswan_init(rom) :
+  (rom->console == ucon64_COLECO &&
+   bytes <= MAXROMSIZE ) ? coleco_init(rom) :
+  (rom->console == ucon64_INTELLI &&
+   bytes <= MAXROMSIZE ) ? intelli_init(rom) :
 #ifdef	CD
-    (rom->console == ucon64_PS2) ? ps2_init(rom) :
-    (rom->console == ucon64_DC) ? dc_init(rom) :
-    (rom->console == ucon64_SATURN) ? saturn_init(rom) :
-    (rom->console == ucon64_CDI) ? cdi_init(rom) :
-    (rom->console == ucon64_CD32) ? cd32_init(rom) :
-    (rom->console == ucon64_PSX) ? psx_init(rom) :
-    (rom->console == ucon64_GAMECUBE) ? gamecube_init(rom) :
-    (rom->console == ucon64_XBOX) ? xbox_init(rom) :
+  (rom->console == ucon64_PS2) ? ps2_init(rom) :
+  (rom->console == ucon64_DC) ? dc_init(rom) :
+  (rom->console == ucon64_SATURN) ? saturn_init(rom) :
+  (rom->console == ucon64_CDI) ? cdi_init(rom) :
+  (rom->console == ucon64_CD32) ? cd32_init(rom) :
+  (rom->console == ucon64_PSX) ? psx_init(rom) :
+  (rom->console == ucon64_GAMECUBE) ? gamecube_init(rom) :
+  (rom->console == ucon64_XBOX) ? xbox_init(rom) :
 #endif
-                                         (rom->console = ucon64_UNKNOWN);
-  }
+                                  (rom->console = ucon64_UNKNOWN);
 }
 
-if(rom->console == ucon64_UNKNOWN && rom->bytes <= MAXROMSIZE )
+if(rom->console == ucon64_UNKNOWN && bytes <= MAXROMSIZE )
 {
 
   if(
@@ -1295,7 +1313,7 @@ else
 //	"  -iso		force image is ISO9660\n"
 //	"  -raw		force image is MODE2_RAW/BIN\n"
 	"  *		show info (default); ONLY $ROM=RAW_IMAGE\n"
-	"  -r2i          convert MODE2_RAW/BIN to ISO9660; $ROM=RAW_IMAGE\n"
+	"  -iso          convert RAW/BIN to ISO9660; $ROM=RAW_IMAGE\n"
 //  ,xbox_TITLE
   ,ps2_TITLE
   ,saturn_TITLE
@@ -1325,6 +1343,7 @@ else
 	pcengine_usage(argc,argv);
 	sms_usage(argc,argv);
 	nes_usage(argc,argv);
+        wonderswan_usage(argc,argv);
 /*
 	sys16_usage(argc,argv);
 	atari_usage(argc,argv);
@@ -1335,8 +1354,8 @@ else
 	intelli_usage(argc,argv);
 */
 
-printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
-	"  -s16, -ata, -coleco, -vboy, -swan, -vec, -intelli\n"
+printf("%s\n%s\n%s\n%s\n%s\n%s\n"
+	"  -s16, -ata, -coleco, -vboy, -vec, -intelli\n"
 	"		force recognition"
 #ifndef DB
 "; NEEDED"
@@ -1348,7 +1367,6 @@ printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n"
 ,atari_TITLE
 ,coleco_TITLE
 ,virtualboy_TITLE
-,wonderswan_TITLE
 ,vectrex_TITLE
 ,intelli_TITLE
 );
@@ -1382,6 +1400,17 @@ Intellivision (1979)
 G7400+/Odyssey² (1978)
 Channel F (1976)
 Odyssey (Ralph Baer/USA/1972)
+Virtual Boy
+Real 3DO 1993 Panasonic/Goldstar/Philips? 
+Game.com ? Tiger 
+CD-i (1991) 1991 
+Vectrex 1982 
+Colecovision 1982 
+Interton VC4000 ~1980 
+Intellivision 1979 
+G7400+/Odyssey² 1978 
+Channel F 1976
+Odyssey 1972 Ralph Baer 
 
 gametz.com
 gameaxe.com

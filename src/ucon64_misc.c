@@ -550,3 +550,14 @@ fclose(fsource);
 
 return(0);
 }
+
+int trackmode(long imagesize)
+{
+  return(
+    (!(imagesize%2048)) ? 2048 : // MODE1, MODE2_FORM1
+    (!(imagesize%2324)) ? 2324 : // MODE2_FORM2
+    (!(imagesize%2336)) ? 2336 : // MODE2, MODE2_FORM_MIX
+    (!(imagesize%2352)) ? 2352 : // AUDIO, MODE1_RAW, MODE2_RAW
+                           -1   // unknown
+  );
+}

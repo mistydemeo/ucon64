@@ -74,18 +74,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define ucon64_VERSION "1.9.8beta3"
 
 #ifdef  __UNIX__
-#ifdef  __CYGWIN__
-#define ucon64_TITLE "uCON64 " ucon64_VERSION " Win32 1999-2002 by (various)"
-#else
-#define ucon64_TITLE "uCON64 " ucon64_VERSION " Unix 1999-2002 by (various)"
-#endif
+  #ifdef  __CYGWIN__
+    #define ucon64_OS "Win32"
+  #elif __FreeBSD__
+    #define ucon64_OS "Unix (FreeBSD)"
+  #elif __linux__
+    #define ucon64_OS "Unix (Linux)"
+  #elif sun
+    #define ucon64_OS "Unix (Solaris)"
+  #else
+    #define ucon64_OS "Unix"
+  #endif
 #elif   defined __MSDOS__
-#define ucon64_TITLE "uCON64 " ucon64_VERSION " MSDOS 1999-2002 by (various)"
+  #define ucon64_OS "MSDOS"
 #elif   defined __BEOS__
-#define ucon64_TITLE "uCON64 " ucon64_VERSION " BeOS 1999-2002 by (various)"
+  #define ucon64_OS "BeOS"
 #else
-#define ucon64_TITLE "uCON64 " ucon64_VERSION " 1999-2002 by (various)"
+  #define ucon64_OS ""
 #endif
+
+#define ucon64_TITLE "uCON64 " ucon64_VERSION " " ucon64_OS " 1999-2002 by (various)"
+
 
 #define MBIT	131072
 #define MAXROMSIZE ( ( 512+1 ) * MBIT )

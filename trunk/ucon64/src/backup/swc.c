@@ -83,7 +83,7 @@ static int hirom;                               // `hirom' was `special'
 int
 receive_rom_info (unsigned char *buffer)
 /*
-  - returns size of ROM in Mb (128KB) units
+  - returns size of ROM in Mb (128 KB) units
   - returns ROM header in buffer (index 2 (emulation mode select) is not yet
     filled in)
   - sets global `hirom'
@@ -120,8 +120,8 @@ receive_rom_info (unsigned char *buffer)
     size <<= 1;
 
   memset (buffer, 0, SWC_HEADER_LEN);
-  buffer[0] = size << 4 & 0xff;                 // *16 for 8KB units; low byte
-  buffer[1] = size >> 4;                        // *16 for 8KB units /256 for high byte
+  buffer[0] = size << 4 & 0xff;                 // *16 for 8 KB units; low byte
+  buffer[1] = size >> 4;                        // *16 for 8 KB units /256 for high byte
   buffer[8] = 0xaa;
   buffer[9] = 0xbb;
   buffer[10] = 4;
@@ -302,7 +302,7 @@ swc_read_rom (const char *filename, unsigned int parport)
       remove (filename);
       exit (1);
     }
-  blocksleft = size * 16;                       // 1 Mb (128KB) unit == 16 8KB units
+  blocksleft = size * 16;                       // 1 Mb (128 KB) unit == 16 8 KB units
   printf ("Receive: %d Bytes (%.4f Mb)\n", size * MBIT, (float) size);
   size *= MBIT;                                 // size in bytes for ucon64_gauge() below
 
@@ -434,12 +434,12 @@ swc_write_rom (const char *filename, unsigned int parport)
       ffe_checkabort (2);
     }
 
-  if (blocksdone > 0x200)                       // ROM dump > 512 8KB blocks (=32Mb (=4MB))
+  if (blocksdone > 0x200)                       // ROM dump > 512 8 KB blocks (=32 Mb (=4 MB))
     ffe_send_command0 (0xc010, 2);
 
   ffe_send_command (5, 0, 0);
   totalblocks = (fsize - SWC_HEADER_LEN + BUFFERSIZE - 1) / BUFFERSIZE; // round up
-  ffe_send_command (6, 5 | (totalblocks << 8), totalblocks >> 8); // bytes: 6, 5, #8K L, #8K H, 0
+  ffe_send_command (6, 5 | (totalblocks << 8), totalblocks >> 8); // bytes: 6, 5, #8 K L, #8 K H, 0
   ffe_send_command (6, 1 | (emu_mode_select << 8), 0);
 
   ffe_wait_for_ready ();
@@ -489,7 +489,7 @@ swc_read_sram (const char *filename, unsigned int parport)
 
   printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
-  blocksleft = 4;                               // SRAM is 4*8KB
+  blocksleft = 4;                               // SRAM is 4*8 KB
   address = 0x100;
   starttime = time (NULL);
   while (blocksleft > 0)
@@ -535,7 +535,7 @@ swc_write_sram (const char *filename, unsigned int parport)
       exit (1);
     }
 
-  size = q_fsize (filename) - SWC_HEADER_LEN;   // SWC SRAM is 4*8KB, emu SRAM often not
+  size = q_fsize (filename) - SWC_HEADER_LEN;   // SWC SRAM is 4*8 KB, emu SRAM often not
   printf ("Send: %d Bytes\n", size);
   fseek (file, SWC_HEADER_LEN, SEEK_SET);       // skip the header
 

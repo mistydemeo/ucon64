@@ -47,7 +47,7 @@ int ffe_port;
 void
 ffe_init_io (unsigned int port)
 /*
-  - sets static global `ffe_port'. Then the send/receive functions don't need to pass `port' all
+  - sets global `ffe_port'. Then the send/receive functions don't need to pass `port' all
     the way to ffe_sendb()/ffe_receiveb().
   - calls init_conio(). Necessary for kbhit() and DOS-like behaviour of getch().
 */

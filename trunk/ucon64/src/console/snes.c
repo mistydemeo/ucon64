@@ -450,15 +450,15 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
 
   NSRT header format (0x1d0 - 0x1ef, offsets in _copier header_):
   0x1d0                 low nibble = original country byte
-                        high nibble = 2 for HiROM games, 1 for LOROM
+                        high nibble = 2 for HiROM games, 1 for LoROM
   0x1d1 - 0x1e5         original game name
   0x1e6                 low byte of original SNES checksum
   0x1e7                 high byte of original SNES checksum
   0x1e8 - 0x1eb         "NSRT"
   0x1ec                 header version; a value of for example 15 should be
                         interpreted as 1.5
-  0x1ed                 low nibble = port 1 controller type
-                        high nibble = port 2 controller type
+  0x1ed                 low nibble = port 2 controller type
+                        high nibble = port 1 controller type
                         0 = gamepad
                         1 = mouse
                         2 = mouse / gamepad
@@ -469,7 +469,7 @@ set_nsrt_info (st_rominfo_t *rominfo, void *header)
                         7 = mouse / super scope / gamepad
   0x1ee                 NSRT header checksum
                         the checksum is calculated by adding all bytes of the
-                        NSRT header (except the checksum bytes themselves) 
+                        NSRT header (except the checksum bytes themselves)
                         subtracting 1 and then taking the modulus of 256
   0x1ef                 inverse NSRT header checksum
 */
@@ -542,7 +542,7 @@ snes_ffe (st_rominfo_t *rominfo, char *ext, int smc)
   header.size_high = size / 8192 >> 8;
 
   header.emulation = snes_split ? 0x40 : 0;
-  header.emulation |= snes_hirom ? 0x30 : 0;    // TODO: check if this is ok on an SMC
+  header.emulation |= snes_hirom ? 0x30 : 0;
   // bit 3 & 2 are already ok for 32 kB SRAM size
   if (snes_sramsize == 8 * 1024)
     header.emulation |= 0x04;
@@ -602,7 +602,7 @@ snes_fig (st_rominfo_t *rominfo)
   header.hirom = snes_hirom ? 0x80 : 0;
 
   uses_DSP = snes_header.rom_type == 3 || snes_header.rom_type == 4 ||
-             snes_header.rom_type == 5;
+             snes_header.rom_type == 5 || snes_header.rom_type == 0xf6;
 
   if ((snes_header.rom_type & 0xf0) == 0x10)    // uses FX(2) chip
     {
@@ -1487,7 +1487,7 @@ snes_chk (st_rominfo_t *rominfo)
 }
 
 
-int
+static int
 snes_testinterleaved (st_rominfo_t *rominfo)
 {
   int interleaved = 0;

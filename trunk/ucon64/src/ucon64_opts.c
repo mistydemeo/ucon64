@@ -1577,6 +1577,63 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
+    case UCON64_XFAL:
+      if (access (ucon64.rom, F_OK) != 0)
+        fal_read_rom (ucon64.rom, ucon64.parport, 32);
+      else
+        fal_write_rom (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XFALMULTI:
+      tmpnam2 (src_name);
+      ucon64_temp_file = src_name;
+      register_func (remove_temp_file);
+      // gba_multi() calls ucon64_file_handler() so the directory part will be
+      //  stripped from src_name. The directory should be used though.
+      if (!ucon64.output_path[0])
+        {
+          char *dir = dirname2 (src_name);
+          strcpy (ucon64.output_path, dir);
+          if (ucon64.output_path[strlen (ucon64.output_path) - 1] != FILE_SEPARATOR)
+            strcat (ucon64.output_path, FILE_SEPARATOR_S);
+          free (dir);
+        }
+      if (gba_multi (strtol (optarg, NULL, 10) * MBIT, src_name) == 0)
+        { // Don't try to start a transfer if there was a problem
+          fputc ('\n', stdout);
+          ucon64.file_size = q_fsize (src_name);
+          fal_write_rom (src_name, ucon64.parport);
+        }
+
+      unregister_func (remove_temp_file);
+      remove_temp_file ();
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XFALC:
+      if (!access (ucon64.rom, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", q_fbackup (ucon64.rom, BAK_MOVE));
+      fal_read_rom (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XFALS:
+      if (access (ucon64.rom, F_OK) != 0)
+        fal_read_sram (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
+      else
+        fal_write_sram (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XFALB:
+      if (access (ucon64.rom, F_OK) != 0)
+        fal_read_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
+      else
+        fal_write_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+
     case UCON64_XFIG:
       if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge
         fig_read_rom (ucon64.rom, ucon64.parport);
@@ -1608,6 +1665,30 @@ ucon64_options (int c, const char *optarg)
         fig_read_cart_sram (ucon64.rom, ucon64.parport);
       else                                      // file exists -> restore SRAM
         fig_write_cart_sram (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGBX:
+      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge/flash card
+        gbx_read_rom (ucon64.rom, ucon64.parport);
+      else                                      // file exists -> send it to the programmer
+        gbx_write_rom (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGBXS:
+      if (access (ucon64.rom, F_OK) != 0)
+        gbx_read_sram (ucon64.rom, ucon64.parport, -1);
+      else
+        gbx_write_sram (ucon64.rom, ucon64.parport, -1);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XGBXB:
+      if (access (ucon64.rom, F_OK) != 0)
+        gbx_read_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
+      else
+        gbx_write_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
       fputc ('\n', stdout);
       break;
 
@@ -1702,6 +1783,20 @@ ucon64_options (int c, const char *optarg)
         smsgg_read_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
       else
         smsgg_write_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XLIT:
+      if (!access (ucon64.rom, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", q_fbackup (ucon64.rom, BAK_MOVE));
+      lynxit_read_rom (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XMCCL:
+      if (!access (ucon64.rom, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", q_fbackup (ucon64.rom, BAK_MOVE));
+      mccl_read (ucon64.rom, ucon64.parport);
       fputc ('\n', stdout);
       break;
 
@@ -1872,97 +1967,8 @@ ucon64_options (int c, const char *optarg)
         }
       fputc ('\n', stdout);
       break;
-
-    case UCON64_XLIT:
-      lynxit_read_rom (ucon64.rom, ucon64.parport);
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XFAL:
-      if (access (ucon64.rom, F_OK) != 0)
-        fal_read_rom (ucon64.rom, ucon64.parport, 32);
-      else
-        fal_write_rom (ucon64.rom, ucon64.parport);
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XFALMULTI:
-      tmpnam2 (src_name);
-      ucon64_temp_file = src_name;
-      register_func (remove_temp_file);
-      // gba_multi() calls ucon64_file_handler() so the directory part will be
-      //  stripped from src_name. The directory should be used though.
-      if (!ucon64.output_path[0])
-        {
-          char *dir = dirname2 (src_name);
-          strcpy (ucon64.output_path, dir);
-          if (ucon64.output_path[strlen (ucon64.output_path) - 1] != FILE_SEPARATOR)
-            strcat (ucon64.output_path, FILE_SEPARATOR_S);
-          free (dir);
-        }
-      if (gba_multi (strtol (optarg, NULL, 10) * MBIT, src_name) == 0)
-        { // Don't try to start a transfer if there was a problem
-          fputc ('\n', stdout);
-          ucon64.file_size = q_fsize (src_name);
-          fal_write_rom (src_name, ucon64.parport);
-        }
-
-      unregister_func (remove_temp_file);
-      remove_temp_file ();
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XFALC:
-      fal_read_rom (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XFALS:
-      if (access (ucon64.rom, F_OK) != 0)
-        fal_read_sram (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
-      else
-        fal_write_sram (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XFALB:
-      if (access (ucon64.rom, F_OK) != 0)
-        fal_read_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
-      else
-        fal_write_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XMCCL:
-      mccl_read (ucon64.rom, ucon64.parport);
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XGBX:
-      if (access (ucon64.rom, F_OK) != 0)       // file does not exist -> dump cartridge/flash card
-        gbx_read_rom (ucon64.rom, ucon64.parport);
-      else                                      // file exists -> send it to the programmer
-        gbx_write_rom (ucon64.rom, ucon64.parport);
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XGBXS:
-      if (access (ucon64.rom, F_OK) != 0)
-        gbx_read_sram (ucon64.rom, ucon64.parport, -1);
-      else
-        gbx_write_sram (ucon64.rom, ucon64.parport, -1);
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XGBXB:
-      if (access (ucon64.rom, F_OK) != 0)
-        gbx_read_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
-      else
-        gbx_write_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
-      fputc ('\n', stdout);
-      break;
-
 #endif // USE_PARALLEL
+
 #if     defined USE_PARALLEL || defined USE_USB
     case UCON64_XF2A:
       if (access (ucon64.rom, F_OK) != 0)
@@ -1978,6 +1984,8 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_XF2AC:
+      if (!access (ucon64.rom, F_OK) && ucon64.backup)
+        printf ("Wrote backup to: %s\n", q_fbackup (ucon64.rom, BAK_MOVE));
       f2a_read_rom (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
       fputc ('\n', stdout);
       break;

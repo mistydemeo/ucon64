@@ -272,6 +272,7 @@ main (int argc, char *argv[])
   unsigned long padded;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], *ucon64_argv[128];
   int option_index = 0;
+
   printf ("%s\n", ucon64_TITLE);
   printf ("Uses code from various people. See 'developers.html' for more!\n");
   printf ("This may be freely redistributed under the terms of the GNU Public License\n\n");
@@ -1064,68 +1065,33 @@ while ((c =
         break;
 
       default:
-/*      if (!access (rom.rom, F_OK) || argcmp (argc, argv, "-xsmd") ||    // the SMD made backups for Genesis and Sega Master System
-          argcmp (argc, argv, "-xsmds")
-        )
-        {
-//    filehexdump (rom.rom, 0, 512); // show possible header or maybe the internal rom header
-          printf
-            ("\nERROR: Unknown ROM: %s not found (in internal database)\n"
-             "TIP:   If this is a ROM you might try to force the recognition\n"
-             "       The force recognition option for Super Nintendo would be -snes\n"
-             "       This is also needed for backup units which support more than one\n"
-             "       console system\n"
-//      "       if you compiled from the sources you can add it to ucon64_db.c and\n"
-//      "       recompile\n"
-             , rom.rom);
-          return -1;
-        }
-      else
-        return ucon64_usage (argc, argv);
-*/
         fprintf (STDERR, "Try '%s --help' for more information.\n", argv[0]);
         return -1;
     }
   }
 
-  if (!access (rom.rom, F_OK) && !skip_init_nfo)
-    {
-      ucon64_init (&rom);
-      if (rom.console != ucon64_UNKNOWN)
-        ucon64_nfo (&rom);
-    }
 
-/*
-  switch (rom.console)
+  if (!access (rom.rom, F_OK))
     {
-    case ucon64_GB:
-      break;
-    case ucon64_GBA:
-      break;
-    case ucon64_GENESIS:
-      break;
-    case ucon64_LYNX:
-      break;
-    case ucon64_N64:
-      break;
-    case ucon64_NEOGEO:
-      break;
-    case ucon64_NES:
-      break;
-    case ucon64_SNES:
-      break;
-    case ucon64_PCE:
-      break;
-    case ucon64_JAGUAR:
-      break;
-    case ucon64_WONDERSWAN:
-      break;
-    case ucon64_DC:
-      break;
-    default:
-      break;
+      if(!skip_init_nfo)
+      {
+        ucon64_init (&rom);
+        if (rom.console != ucon64_UNKNOWN)
+          ucon64_nfo (&rom);
+      }
     }
-*/
+  else
+    {
+      printf (
+        "\nERROR: Unknown ROM: %s not found (in internal database)\n"
+        "TIP:   If this is a ROM you might try to force the recognition\n"
+        "       The force recognition option for Super Nintendo would be -snes\n"
+        "       This is also needed for backup units which support more than one\n"
+        "       console system\n"
+        , rom.rom
+        );
+      return -1;
+    }
 
   return 0;
 }

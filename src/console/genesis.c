@@ -55,26 +55,26 @@ const char *genesis_usage[] =
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
 #endif
     "  " OPTION_LONG_S "smd         convert to Super Magic Drive/SMD\n"
-    "  " OPTION_LONG_S "smds        convert Emulator (*.srm) SRAM to Super Magic Drive/SMD\n"
+    "  " OPTION_LONG_S "smds        convert emulator (*.srm) SRAM to Super Magic Drive/SMD\n"
     "                  " OPTION_LONG_S "rom=SRAM\n"
-    "  " OPTION_LONG_S "stp         convert SRAM from backup unit for use with an Emulator\n"
+    "  " OPTION_LONG_S "stp         convert SRAM from backup unit for use with an emulator\n"
     "                  " OPTION_LONG_S "stp just strips the first 512 bytes\n"
     "  " OPTION_LONG_S "mgd         convert to Multi Game*/MGD2/MGH/RAW\n"
 #ifdef TODO
 #warning TODO  --gf     convert Sega CD country code to Europe
 #warning TODO  --ga     convert Sega CD country code to U.S.A.
-#warning TODO  --gc     convert to Genecyst (Emulator)/GSV save state
-#warning TODO  --ge     convert to GenEm (Emulator)/SAV save state
+#warning TODO  --gc     convert to Genecyst (emulator)/GSV save state
+#warning TODO  --ge     convert to GenEm (emulator)/SAV save state
 #warning TODO  --gym    convert GYM (Genecyst) sound to WAV
-#warning TODO  --cym    convert CYM (Callus Emulator) sound to WAV
+#warning TODO  --cym    convert CYM (Callus emulator) sound to WAV
 #endif // TODO
 #if 0
     "TODO:  " OPTION_LONG_S "gf     convert Sega CD country code to Europe; ROM=$CD_IMAGE\n"
     "TODO:  " OPTION_LONG_S "ga     convert Sega CD country code to U.S.A.; ROM=$CD_IMAGE\n"
-    "TODO:  " OPTION_LONG_S "gc     convert to Genecyst (Emulator)/GSV save state; " OPTION_LONG_S "rom=SAVESTATE\n"
-    "TODO:  " OPTION_LONG_S "ge     convert to GenEm (Emulator)/SAV save state; " OPTION_LONG_S "rom=SAVESTATE\n"
+    "TODO:  " OPTION_LONG_S "gc     convert to Genecyst (emulator)/GSV save state; " OPTION_LONG_S "rom=SAVESTATE\n"
+    "TODO:  " OPTION_LONG_S "ge     convert to GenEm (emulator)/SAV save state; " OPTION_LONG_S "rom=SAVESTATE\n"
     "TODO:  " OPTION_LONG_S "gym    convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE\n"
-    "TODO:  " OPTION_LONG_S "cym    convert CYM (Callus Emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE\n"
+    "TODO:  " OPTION_LONG_S "cym    convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE\n"
 #endif
     "  " OPTION_S "n           change foreign ROM name; " OPTION_LONG_S "file=NEWNAME\n"
     "  " OPTION_LONG_S "n2          change Japanese ROM name; " OPTION_LONG_S "file=NEWNAME\n"

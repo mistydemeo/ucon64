@@ -743,11 +743,11 @@ ucon64_nfo (const st_rominfo_t *rominfo)
             "No");
 
       if (rominfo->buheader_len)
-        printf ("Backup unit/Emulator header: Yes, %d Bytes\n",
+        printf ("Backup unit/emulator header: Yes, %d Bytes\n",
           rominfo->buheader_len);
       else
 // for NoisyB: <read only mode ON>
-        printf ("Backup unit/Emulator header: No\n"); // printing No is handy for SNES ROMs
+        printf ("Backup unit/emulator header: No\n"); // printing No is handy for SNES ROMs
 // for NoisyB: <read only mode OFF>
 
       if (split)

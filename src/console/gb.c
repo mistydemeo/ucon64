@@ -4,6 +4,7 @@ gb.c - GameBoy support for uCON64
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
            2001 - 2002 dbjh
 
+           
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -56,8 +57,8 @@ const char *gameboy_usage[] =
     "  " OPTION_LONG_S "ssc         convert to Super Smart Card/SSC (+512 Bytes)\n"
     "  " OPTION_LONG_S "sgb         convert from GB Xchanger/GB/GBC to Super Backup Card/GX/GBX\n"
     "  " OPTION_LONG_S "gbx         convert from Super Backup Card/GX/GBX to GB Xchanger/GB/GBC\n"
-    "  " OPTION_LONG_S "n2gb        convert for use with Kami's FC Emulator (NES Emulator);\n"
-    "                  " OPTION_LONG_S "rom=NES_ROM " OPTION_LONG_S "file=FC.GB (the Emulator)\n"
+    "  " OPTION_LONG_S "n2gb        convert for use with Kami's FC emulator (NES emulator);\n"
+    "                  " OPTION_LONG_S "rom=NES_ROM " OPTION_LONG_S "file=FC.GB (the emulator)\n"
     "                  m-kami@da2.so-net.ne.jp www.playoffline.com\n"
     "  " OPTION_LONG_S "chk         fix ROM checksum\n"
 #if 0 
@@ -193,7 +194,7 @@ gameboy_n2gb (st_rominfo_t *rominfo)
   unsigned char buf[EMULATOR_LEN];
 
 #if 0
-  printf("FC-Emulator for GameBoy\n");
+  printf("FC emulator for GameBoy\n");
 #endif
 
   if (q_fsize (ucon64.rom) != EMULATOR_LEN)

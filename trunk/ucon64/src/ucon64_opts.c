@@ -1586,12 +1586,8 @@ switch (c)
     n64_z64 (ucon64.rominfo);
     break;
 
-  case UCON64_GETOPT_ERROR:
     default:
-      fprintf (stderr,
-               "Try '%s " OPTION_LONG_S "help' for more information.\n",
-               ucon64.argv[0]);
-      return -1;
+    break;
    }
 
   return 0;

@@ -508,6 +508,7 @@ main (int argc, char **argv)
 // parse the cmdline
   x = optind = 0;
   memset (&arg, 0, sizeof (st_args_t) * ARG_MAX);
+// getopt() is utilized to make uCON64 handle cmdlines in a sane and expected way
   while ((c = getopt_long_only (argc, argv, "", options, NULL)) != -1)
     {
       if (c == UCON64_GETOPT_ERROR)

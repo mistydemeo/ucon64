@@ -899,7 +899,7 @@ dm_disc_write (const dm_image_t *image)
 uint32_t
 dm_get_version (void)
 {
-  static const uint32_t dm_version = LIB_VERSION (0, 0, 2);
+  static const uint32_t dm_version = LIB_VERSION (0, 0, 3);
   return dm_version;
 }
 

@@ -7207,6 +7207,16 @@ nes_init (st_rominfo_t *rominfo)
       rominfo->buheader = &ffe_header;
       strcat (rominfo->misc, "\n");
       nes_fdsl (rominfo, rominfo->misc);        // will also fill in rominfo->name
+
+      rom_size = ucon64.file_size - FAM_HEADER_LEN;
+      if ((rom_buffer = (unsigned char *) malloc (rom_size)) == NULL)
+        {
+          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
+          return -1;
+        }
+      q_fread (rom_buffer, 0, rom_size, ucon64.rom);
+      ucon64.crc32 = crc32 (0, rom_buffer, rom_size);
+      free (rom_buffer);
       break;
     }
 

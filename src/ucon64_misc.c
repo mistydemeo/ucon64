@@ -188,7 +188,7 @@ long filetestpad(	char *filename
 	int y;
 	char *buf;
 	FILE *fh;
-	
+
 	size=quickftell(filename);
 
 	if(!(fh=fopen(filename,"rb")))return(-1);
@@ -220,13 +220,12 @@ long filetestpad(	char *filename
 unsigned char inportb(unsigned short port)
 {
 #ifdef __BEOS__
-	IO_Tuple temp;
-        
-	temp.Port = port;
-                
-	ioctl(fd, DRV_READ_IO_8, &temp, 0);
-                        
-	return (temp.Data);
+  IO_Tuple temp;
+
+  temp.Port = port;
+  ioctl(fd, DRV_READ_IO_8, &temp, 0);
+
+  return (temp.Data);
 #else
   unsigned char byte;
 
@@ -243,12 +242,12 @@ unsigned char inportb(unsigned short port)
 unsigned short inportw(unsigned short port)
 {
 #ifdef __BEOS__
-	IO_Tuple temp;
+  IO_Tuple temp;
 
-	temp.Port = port;
-	ioctl(fd, DRV_READ_IO_16, &temp, 0);
+  temp.Port = port;
+  ioctl(fd, DRV_READ_IO_16, &temp, 0);
 
-	return (temp.Data16);
+  return (temp.Data16);
 #else
   unsigned short word;
 
@@ -265,13 +264,13 @@ unsigned short inportw(unsigned short port)
 void outportb(unsigned short port, unsigned char byte)
 {
 #ifdef __BEOS__
-	IO_Tuple temp;
+  IO_Tuple temp;
 
-	temp.Port = port;
-	temp.Data = byte;
-	ioctl(fd, DRV_WRITE_IO_8, &temp, 0);
-                            
-	return;
+  temp.Port = port;
+  temp.Data = byte;
+  ioctl(fd, DRV_WRITE_IO_8, &temp, 0);
+
+  return;
 #else
   __asm__ __volatile__
   ("outb %1, %0"
@@ -284,13 +283,13 @@ void outportb(unsigned short port, unsigned char byte)
 void outportw(unsigned short port, unsigned short word)
 {
 #ifdef __BEOS__
-	IO_Tuple temp;
-        
-	temp.Port = port;
-	temp.Data16 = word;
-	ioctl(fd, DRV_WRITE_IO_16, &temp, 0);
-                                
-	return;
+  IO_Tuple temp;
+
+  temp.Port = port;
+  temp.Data16 = word;
+  ioctl(fd, DRV_WRITE_IO_16, &temp, 0);
+
+  return;
 #else
   __asm__ __volatile__
   ("outw %1, %0"
@@ -340,7 +339,7 @@ unsigned int parport_probe(unsigned int port)
 {
 #ifdef __BEOS__
 //TODO uhm..
-	fd = open("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
+  fd = open("/dev/misc/parnew", O_RDWR | O_NONBLOCK);
 #else
   unsigned int parPortAddresses[] = {0x3bc, 0x378, 0x278};
   int i;
@@ -398,7 +397,7 @@ int parport_gauge(time_t init_time, long pos, long size)
     else
       curr = 1;					// `round up' to at least 1 sec (no division
   }						//  by zero below)
-  if (pos > size)				
+  if (pos > size)
     return -1;
 
   cps = pos/curr;				// # bytes/second
@@ -424,7 +423,7 @@ int parport_gauge(time_t init_time, long pos, long size)
 
 
 #define SEND_MAX_WAIT 0x300000
-                                                
+
 int parport_write(	char src[]
 			,unsigned int len
 			,unsigned int parport
@@ -433,7 +432,7 @@ int parport_write(	char src[]
 long maxwait;
 unsigned int i;
 
-for( i=0; i<len; i++ ) 
+for( i=0; i<len; i++ )
 {
 	maxwait = SEND_MAX_WAIT;
 	if( (in1byte(parport+2) & 1) == 0 )       /* check ~strobe */
@@ -470,7 +469,7 @@ int i;
 long maxwait;
 unsigned char c;
 
-for( i=0; i<len; i++ ) 
+for( i=0; i<len; i++ )
 {
 	out1byte(parport, REC_HIGH_NIBBLE);
 	maxwait = REC_MAX_WAIT;

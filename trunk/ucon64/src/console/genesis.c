@@ -681,11 +681,11 @@ genesis_chk (st_rominfo_t *rominfo)
 
 static int
 genesis_fix_pal_protection (st_rominfo_t *rominfo)
-{
 /*
   This function searches for PAL protection codes. If it finds one it will
   fix the code so that the game will run on a Genesis (NTSC).
 */
+{
   char fname[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
   int offset = 0, block_size, n = 0, n_extra_patterns, n2;
@@ -731,11 +731,11 @@ genesis_fix_pal_protection (st_rominfo_t *rominfo)
 
 static int
 genesis_fix_ntsc_protection (st_rominfo_t *rominfo)
-{
 /*
   This function searches for NTSC protection codes. If it finds one it will
   fix the code so that the game will run on a Mega Drive (PAL).
 */
+{
   char fname[FILENAME_MAX];
   unsigned char *rom_buffer = NULL;
   int offset = 0, block_size, n = 0, n_extra_patterns, n2;
@@ -907,7 +907,7 @@ write_game_table_entry (FILE *destfile, int file_no, st_rominfo_t *rominfo,
   if (genesis_tv_standard == 1)
     flags |= 0x10;                              // set P(AL)
 
-  // I (dbjh) don't know if the next compound statement is correct when -ntsc
+  // I (dbjh) don't know if the next compound statement is correct when -pal
   //  is specified
   if (UCON64_ISSET (ucon64.tv_standard))
     {
@@ -1291,8 +1291,8 @@ genesis_init (st_rominfo_t *rominfo)
     }
   else
     {
-      // Don't use genesis_maker here. If it would be corrected an incorrect
-      //  publisher name would be displayed.
+      // Don't use genesis_maker here. If it would be corrected/updated an
+      //  incorrect publisher name would be displayed.
       rominfo->maker =
         (!strncmp (maker, "(C)ACLD", 7)) ? "Ballistic" :
         (!strncmp (maker, "(C)AESI", 7)) ? "ASCII" :

@@ -1184,7 +1184,7 @@ ucon64_options (int c, const char *optarg)
       snes_buheader_info (ucon64.rominfo);
       break;
 
-    case UCON64_SWAP:                           // deprecated
+    case UCON64_SWAP:
     case UCON64_DINT:
       switch (ucon64.console)
         {
@@ -1193,6 +1193,9 @@ ucon64_options (int c, const char *optarg)
           break;
         case UCON64_NES:
           nes_dint ();
+          break;
+        case UCON64_PCE:
+          pcengine_swap (ucon64.rominfo);
           break;
         default:                                // Nintendo 64
           puts ("Converting to deinterleaved format...");
@@ -1293,10 +1296,6 @@ ucon64_options (int c, const char *optarg)
         case UCON64_IP:
           break;
 #endif
-
-    case UCON64_INVERT:
-      pcengine_invert (ucon64.rominfo);
-      break;
 
     case UCON64_J:
       switch (ucon64.console)

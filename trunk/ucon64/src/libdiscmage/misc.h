@@ -304,7 +304,7 @@ extern int argz_extract2 (char **argv, char *str, const char *separator_s, int m
   crc16()      calculate the crc16 of buffer for size bytes
   crc32()      calculate the crc32 of buffer for size bytes
 */
-extern int memwcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildcard);
+extern int memwcmp (const void *data, const void *search, uint32_t searchlen, int wildcard);
 extern void mem_hexdump (const void *add, uint32_t n, int virtual_start);
 extern void *mem_swap (void *add, uint32_t size);
 #ifdef  HAVE_BYTESWAP_H

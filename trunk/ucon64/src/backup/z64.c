@@ -1,5 +1,5 @@
 /*
-z64.c - Z64 support for uCON64
+z64.c - Mr. Backup Z64 support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
 
@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include "ucon64.h"
-#include "misc.h"                               // kbhit(), getch()
+#include "misc.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "z64.h"
@@ -37,7 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t z64_usage[] =
   {
-    {NULL, NULL, "Z64"},
+    {NULL, NULL, "Mr. Backup Z64"},
     {NULL, NULL, NULL}
   };
 

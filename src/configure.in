@@ -1,14 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(ucon64.c)
 
-dnl Most of these things are boiler plate (from autoscan);
-dnl but here's some of my stuff
-dnl BEGIN MARK's BLOCK OF STUFF
-
-dnl NOTHING IN HERE YET
-
-dnl END MARK's BLOCK OF STUFF
-
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
@@ -37,3 +29,6 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(getcwd mkdir rmdir strcspn strdup strerror strstr strtol)
 
 AC_OUTPUT(Makefile config.h)
+
+echo
+echo NOTE: On non-Linux systems you might need to use gmake instead of make

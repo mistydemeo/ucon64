@@ -522,9 +522,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 #endif
 
       rominfo->current_crc32 = fileCRC32 (romfile, rominfo->buheader_len);
-
-      if (ucon64.console == UCON64_UNKNOWN)     // don't call if console type is already
-        ucon64_dbsearch (rominfo);              //  known (destroys rominfo fields)
+      ucon64_dbsearch (rominfo);
     }
   else if (UCON64_TYPE_ISCD (ucon64.type))
     {

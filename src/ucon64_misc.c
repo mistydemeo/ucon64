@@ -101,14 +101,35 @@ ucon64_wrote (const char *filename)
 static int ucon64_io_fd;
 #endif
 
-#define DETECT_MAX_CNT 1000
 
 
 const char *unknown_usage[] =
-  {
-    "Unknown backup unit/Emulator",
-    NULL
-  };
+{
+  "Unknown backup unit/Emulator",
+  NULL,
+  NULL,
+  NULL
+};
+
+
+#if 0
+int
+read_raw_frame (int fd, int lba, unsigned char *buf)
+{
+  struct cdrom_msf *msf = (struct cdrom_msf *) buf;
+  int rc;
+
+//  msf = (struct cdrom_msf *) buf;
+  msf->cdmsf_min0 = (lba + CD_MSF_OFFSET) / CD_FRAMES / CD_SECS;
+  msf->cdmsf_sec0 = (lba + CD_MSF_OFFSET) / CD_FRAMES % CD_SECS;
+  msf->cdmsf_frame0 = (lba + CD_MSF_OFFSET) % CD_FRAMES;
+
+  if ((rc = ioctl (fd, CDROMREADMODE2, buf)) == -1)
+    fprintf (stderr, "ERROR: ioctl CDROMREADMODE2\n");
+
+  return rc;
+}
+#endif
 
 
 /*
@@ -131,6 +152,53 @@ ucon64_fbackup (char *move_name, const char *filename)
 }
 
 
+#if 0
+char *
+handle_existing_file (const char *filename, char *new_file)
+/*
+  We have to handle the following cases (for example -swc and rom.swc exists):
+  1) ucon64 -swc rom.swc
+    a) with backup creation enabled
+       Create backup of rom.swc
+       postcondition: new_file == name of backup
+    b) with backup creation disabled
+       Create temporary backup of rom.swc by renaming rom.swc
+       postcondition: new_file == name of backup
+  2) ucon64 -swc rom.fig
+    a) with backup creation enabled
+       Create backup of rom.swc
+       postcondition: new_file == rom.fig
+    b) with backup creation disabled
+       Do nothing
+       postcondition: new_file == rom.fig
+*/
+{
+  ucon64_temp_file = 0;
+
+  if (ucon64.backup && !access (filename, F_OK))
+    {
+      printf ("Writing backup of: %s\n", filename); // verbose
+      fflush (stdout);
+    }
+
+  if (ucon64.backup)
+    {
+      if (strcmp (filename, ucon64.rom) != 0)
+        return q_fbackup (NULL, filename);            // case 2 (q_fbackup() handles a & b)
+
+      setext (new_file, ".BAK"); // case 1a
+      return q_fbackup (NULL, filename);
+    }                                   // must match with what q_fbackup() does
+  else
+    {                                   // case 1b
+      char *result = 
+        q_fbackup (new_file, filename);       // arg 1 != NULL -> rename
+
+      ucon64_temp_file = new_file;
+      return result;
+    }
+}
+#else
 void
 handle_existing_file (const char *dest, char *src)
 /*
@@ -173,6 +241,7 @@ handle_existing_file (const char *dest, char *src)
         ucon64_fbackup (NULL, dest);            // case 2 (ucon64_fbackup() handles a & b)
     }
 }
+#endif
 
 
 void
@@ -376,23 +445,23 @@ outportw (unsigned short port, unsigned short word)
 #endif // defined __unix__ || defined __BEOS__
 
 
-int
-detect_parport (unsigned int port)
+static int
+ucon64_parport_probe (unsigned int port)
 {
-  int i;
+  int i = 0;
+#define DETECT_MAX_CNT 1000
 
-#if     defined  __linux__
-  if (ioperm (port, 1, 1) == -1)
-    return -1;
-#elif   defined __FreeBSD__
+#ifdef __FreeBSD__
   if (i386_set_ioperm (port, 1, 1) == -1)
-    return -1;
+#else
+  if (ioperm (port, 1, 1) == -1)
 #endif
+    return -1;
 
   outportb (port, 0xaa);
   for (i = 0; i < DETECT_MAX_CNT; i++)
-    if (inportb (port) == 0xaa)
-      break;
+    if (inportb (port) == 0xaa) break;
+    
   if (i < DETECT_MAX_CNT)
     {
       outportb (port, 0x55);
@@ -401,13 +470,12 @@ detect_parport (unsigned int port)
           break;
     }
 
-#if     defined  __linux__
-  if (ioperm (port, 1, 0) == -1)
-    return -1;
-#elif   defined __FreeBSD__
+#ifdef __FreeBSD__
   if (i386_set_ioperm (port, 1, 0) == -1)
-    return -1;
+#else
+  if (ioperm (port, 1, 0) == -1)
 #endif
+    return -1; 
 
   if (i >= DETECT_MAX_CNT)
     return 0;
@@ -417,12 +485,8 @@ detect_parport (unsigned int port)
 
 
 unsigned int
-parport_probe (unsigned int port)
-// detect parallel port
+ucon64_parport_init (unsigned int port)
 {
-  unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };
-  int i;
-
 #ifdef  __BEOS__
   ucon64_io_fd = open ("/dev/misc/ioport", O_RDWR | O_NONBLOCK);
   if (ucon64_io_fd == -1)
@@ -450,35 +514,35 @@ parport_probe (unsigned int port)
       fprintf (stderr, "ERROR: Could not register function with atexit()\n");
       exit (1);
     }
-#endif // __BEOS__
+#else 
 
-  if (port <= 3)
+#ifdef __i386__
+
+  if (!port) // no port specified or forced yet?
     {
-      for (i = 0; i < 3; i++)
+      unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };
+      int x, found = 0;
+      
+      for (x = 0; x < 3; x++)
+        if ((found = ucon64_parport_probe (parport_addresses[x])) == 1) break;
+      
+      if (found != 1)
         {
-          if (detect_parport (parport_addresses[i]) == 1)
-            {
-              port = parport_addresses[i];
-              break;
-            }
-        }
-      if (i >= 3)
-        return 0;
-    }
-  else
-    if ((port != parport_addresses[0]) &&
-        (port != parport_addresses[1]) &&
-        (port != parport_addresses[2]))
-    return 0;
+          fprintf (stderr, "ERROR: Could not find a parallel port on your system\n"
+                           "       Try " OPTION_LONG_S "port=PORT to specify it by hand\n\n"
+           );
 
-  if (port != 0)
-    {
-#if     defined  __linux__ || defined __FreeBSD__
-#ifdef  __linux__
-      if (ioperm (port, 3, 1) == -1)            // data, status & control
+           exit (1);
+        }
+    }      
+
+#endif // __i386__
+
+#ifdef  __FreeBSD__
+      if (i386_set_ioperm (port, 3, 1) == -1)            // data, status & control
 #else
-      if (i386_set_ioperm (port, 3, 1) == -1)   // data, status & control
-#endif // __linux__
+      if (ioperm (port, 3, 1) == -1)   // data, status & control
+#endif
         {
           fprintf (stderr,
                    "ERROR: Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
@@ -486,25 +550,11 @@ parport_probe (unsigned int port)
                    port + PARPORT_DATA, port + PARPORT_STATUS, port + PARPORT_CONTROL);
           exit (1);                             // Don't return, if ioperm() fails port access
         }                                       //  causes core dump
-#endif
-      outportb (port + PARPORT_CONTROL,
-                inportb (port + PARPORT_CONTROL) & 0x0f);
-    }                                           // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
+#endif // __BEOS__
 
-  return port;
-}
-
-
-unsigned int
-ucon64_parport_probe (unsigned int port)
-{
-  if (!(port = parport_probe (port)))
-    ;
-/*
-    fprintf (stderr, "ERROR: no parallel port 0x%s found\n\n", strupr (buf));
-  else
-    printf ("0x%x\n\n", port);
-*/
+  outportb (port + PARPORT_CONTROL,
+    inportb (port + PARPORT_CONTROL) & 0x0f); // bit 4 = 0 -> IRQ disable for
+                                              //  ACK, bit 5-7 unused
 
 #ifdef  __unix__
   /*
@@ -514,19 +564,18 @@ ucon64_parport_probe (unsigned int port)
     users to run all code without being root (of course with the uCON64
     executable setuid root). Anyone a better idea?
   */
-#if     defined  __linux__ || defined __FreeBSD__
-#ifdef  __linux__
-  if (iopl (3) == -1)
-#else
+#ifdef  __FreeBSD__
   if (i386_iopl (3) == -1)
+#else
+  if (iopl (3) == -1)
 #endif
     {
       fprintf (stderr, "ERROR: Could not set the I/O privilege level to 3\n"
                        "       (This program needs root privileges for the requested action)\n");
       return 1;
     }
-#endif // __linux__ || __FreeBSD__
 #endif // __unix__
+
   return port;
 }
 #endif // BACKUP

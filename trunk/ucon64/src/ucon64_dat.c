@@ -96,17 +96,17 @@ const st_getopt2_t ucon64_dat_usage[] =
     {
       "db", 0, 0, UCON64_DB,
       NULL, "DATabase statistics",
-      &ucon64_wf[WF_OBJ_ALL_NO_ROM]
+      &ucon64_wf[WF_OBJ_ALL_STOP_NO_ROM]
     },
     {
       "dbv", 0, 0, UCON64_DBV,
       NULL, "like " OPTION_LONG_S "db but more verbose",
-      &ucon64_wf[WF_OBJ_ALL_NO_ROM]
+      &ucon64_wf[WF_OBJ_ALL_STOP_NO_ROM]
     },
     {
       "dbs", 1, 0, UCON64_DBS,
       "CRC32", "search ROM with CRC32 in DATabase",
-      &ucon64_wf[WF_OBJ_ALL_NO_ROM]
+      &ucon64_wf[WF_OBJ_ALL_STOP_NO_ROM]
     },
     {
       "scan", 0, 0, UCON64_SCAN,

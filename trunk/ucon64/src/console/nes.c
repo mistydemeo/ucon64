@@ -110,7 +110,7 @@ const st_getopt2_t nes_usage[] =
     },
     {
       "dint", 0, 0, UCON64_DINT,
-      NULL, "convert to non-interleaved format",
+      NULL, "deinterleave ROM (regardless whether the ROM is interleaved)",
       &ucon64_wf[WF_OBJ_ALL_INIT_PROBE_NO_SPLIT]
     },
     {

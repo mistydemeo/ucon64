@@ -499,22 +499,12 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
   // verify header or sheet informations
   for (t = 0; t < image->tracks; t++)
     {
-//      dm_track_t track2;
       dm_track_t *track = (dm_track_t *) &image->track[t];
 
-      fseek (fh, track->track_start +
-                 (track->sector_size * 16) +
-                 (track->sector_size * track->pregap_len) + 8 +
-                 track->seek_header, SEEK_SET);
-        
+      if (track->mode != 0) // AUDIO/2352 has no iso header
+        track->iso_header_start = track->track_start + (track->sector_size * (16 + track->pregap_len)) + track->seek_header;
 #ifdef  DEBUG
-      printf ("track offset: %ld %lx\n\n", ftell (fh), ftell (fh));
-      fflush (stdout);
-#endif
-        
-#if 0
-      if (dm_track_init (&track2, fh) != NULL)
-        track->iso_header_start = (track2.sector_size * 16) + track2.seek_header;
+      printf ("iso header offset: %d\n\n", track->iso_header_start);
 #endif
       track->desc = dm_get_track_desc (track->mode, track->sector_size, TRUE);
     }

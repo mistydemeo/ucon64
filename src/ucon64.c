@@ -93,18 +93,18 @@ write programs in C
 #include "backup/cdrw.h"
 
 static int ucon64_usage (int argc, char *argv[]);
-static int ucon64_init (struct ucon64_ *rom);
-static int ucon64_nfo (struct ucon64_ *rom);
-static int ucon64_flush (int argc, char *argv[], struct ucon64_ *rom);
+static int ucon64_init (struct rom_ *rom);
+static int ucon64_nfo (struct rom_ *rom);
+static int ucon64_flush (int argc, char *argv[], struct rom_ *rom);
 static void ucon64_exit (void);
 static int ucon64_ls (int verbose);
-static int ucon64_e (struct ucon64_ *rom);
+static int ucon64_e (struct rom_ *rom);
 static int ucon64_configfile (void);
 static int ucon64_parport_probe (void); 
 
-struct ucon64_ rom;
+struct rom_ rom;
 
-struct ucon64__ ucon64;
+struct ucon64_ ucon64;
 
 static struct option long_options[] = {
     {"1991", 0, 0, ucon64_1991},
@@ -1335,7 +1335,7 @@ main (int argc, char *argv[])
     flush the ucon64 struct with default values
 */
 int
-ucon64_flush (int argc, char *argv[], struct ucon64_ *rom)
+ucon64_flush (int argc, char *argv[], struct rom_ *rom)
 {
   memset (rom, 0L, sizeof (struct ucon64_));
 
@@ -1353,7 +1353,7 @@ ucon64_flush (int argc, char *argv[], struct ucon64_ *rom)
 }
 
 int
-ucon64_init (struct ucon64_ *rom)
+ucon64_init (struct rom_ *rom)
 {
   rom->bytes = quickftell (rom->rom);
 
@@ -1534,7 +1534,7 @@ ucon64_init (struct ucon64_ *rom)
     this is the now centralized nfo output for all kinds of ROMs
 */
 int
-ucon64_nfo (struct ucon64_ *rom)
+ucon64_nfo (struct rom_ *rom)
 {
   char buf[4096];
   int n;
@@ -1616,7 +1616,7 @@ ucon64_nfo (struct ucon64_ *rom)
 }
 
 
-int ucon64_e(struct ucon64_ *rom)
+int ucon64_e(struct rom_ *rom)
 {
   int result, x;
   char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[4096];
@@ -1726,7 +1726,9 @@ int ucon64_ls (int verbose)
                 {
                   strftime (buf, 13, "%b %d %H:%M",
                             localtime (&puffer.st_mtime));
-                  printf ("%-31.31s %10d %s %s\n", rom.name,
+//                  printf ("%-31.31s %10d %s %s\n", rom.name,
+//                          (int) puffer.st_size, buf, rom.rom);
+                  printf ("%-31.31s %10d %s %s\n", str2filename(rom.name),
                           (int) puffer.st_size, buf, rom.rom);
                 }
               else if (verbose == 1 && !result)

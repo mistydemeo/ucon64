@@ -208,33 +208,6 @@ const char *dm_msg[] = {
 };
 
 
-#if 0
-void
-writewavheader (FILE * fdest, int track_length)
-{
-  wav_header_t wav_header;
-
-  memset (&wav_header, 0, sizeof (wav_header_t));
-
-  strcpy ((char *) wav_header.magic, "RIFF");
-  strcpy ((char *) wav_header.type, "WAVE");
-  strcpy ((char *) wav_header.fmt, "fmt ");
-  strcpy ((char *) wav_header.data, "data");
-
-  wav_header.header_length = me2le_32 (16);
-  wav_header.format = me2le_16 (1);
-  wav_header.channels = me2le_16 (2);
-  wav_header.samplerate = me2le_32 (44100);
-  wav_header.bitrate = me2le_32 (176400);
-  wav_header.blockalign = me2le_16 (4);
-  wav_header.bitspersample = me2le_16 (16);
-
-  wav_header.data_length = me2le_32 (track_length * 2352);
-  wav_header.total_length = me2le_32 (wav_header.data_length + 8 + 16 + 12);
-
-  fwrite (&wav_header, 1, sizeof (wav_header_t), fdest);
-}
-#endif
 
 
 int
@@ -356,7 +329,7 @@ dm_clean (dm_image_t *image)
 int
 dm_free (dm_image_t *image)
 {
-#if 0
+#if 1
   memset (image, 0, sizeof (dm_image_t));
 #else
   free (image);
@@ -500,7 +473,7 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
       {0, NULL}
     };
   int x = 0, identified = 0;
-//  static dm_image_t image2;
+  static dm_image_t image2;
 
 #ifdef  DEBUG
   printf ("sizeof (dm_track_t) == %d\n", sizeof (dm_track_t));
@@ -517,8 +490,8 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
     return NULL;
 
   if (!image)
-    image = (dm_image_t *) malloc (sizeof (dm_image_t));
-//    image = (dm_image_t *) &image2;
+//    image = (dm_image_t *) malloc (sizeof (dm_image_t));
+    image = (dm_image_t *) &image2;
   if (!image)
     return NULL;
 
@@ -571,60 +544,168 @@ dm_close (dm_image_t *image)
 }
 
 
-int
-dm_bin2iso (const dm_image_t *image, int track_num)
+static void
+writewavheader (FILE * fh, int track_length)
 {
-  (void) image;
-  (void) track_num;
-#if 0
-  dm_track_t *track = NULL;
-  uint32_t i, size;
-  char buf[MAXBUFSIZE];
-  FILE *dest, *src;
+  typedef struct
+    {
+      uint8_t magic[4];
+      uint32_t total_length;
+      uint8_t type[4];
+      uint8_t fmt[4];
+      uint32_t header_length;
+      uint16_t format;
+      uint16_t channels;
+      uint32_t samplerate;
+      uint32_t bitrate;
+      uint16_t blockalign;
+      uint16_t bitspersample;
+      uint8_t data[4];
+      uint32_t data_length;
+    } st_wav_header_t;
 
-  if (!image)
+  st_wav_header_t wav_header;
+  memset (&wav_header, 0, sizeof (st_wav_header_t));
+
+  strcpy ((char *) wav_header.magic, "RIFF");
+  strcpy ((char *) wav_header.type, "WAVE");
+  strcpy ((char *) wav_header.fmt, "fmt ");
+  strcpy ((char *) wav_header.data, "data");
+
+  wav_header.header_length = me2le_32 (16);
+  wav_header.format = me2le_16 (1);
+  wav_header.channels = me2le_16 (2);
+  wav_header.samplerate = me2le_32 (44100);
+  wav_header.bitrate = me2le_32 (176400);
+  wav_header.blockalign = me2le_16 (4);
+  wav_header.bitspersample = me2le_16 (16);
+
+  wav_header.data_length = me2le_32 (track_length * 2352);
+  wav_header.total_length = me2le_32 (wav_header.data_length + 8 + 16 + 12);
+
+  fwrite (&wav_header, 1, sizeof (st_wav_header_t), fh);
+}
+
+
+int
+dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
+{
+  dm_track_t *track = (dm_track_t * ) &image->track[track_num];
+#if     FILENAME_MAX > MAXBUFSIZE
+  char buf[FILENAME_MAX];
+  char buf2[FILENAME_MAX];
+#else
+  char buf[MAXBUFSIZE];
+  char buf2[MAXBUFSIZE];
+#endif
+  unsigned int x = 0;
+  int result = 0;
+  char *p = NULL;
+  FILE *fh = NULL, *fh2 = NULL;
+
+
+// set dest. name
+  strcpy (buf, basename (image->fname));
+  p = (char *) get_suffix (buf);
+  if (p)
+    buf[strlen (buf) - strlen (p)] = 0;
+  sprintf (buf2, "%s_%d", buf, track_num);
+
+  switch (track->mode)
+    {
+      case 0:
+        if (flags & DM_WAV)
+          set_suffix (buf2, ".WAV");
+        else
+          set_suffix (buf2, ".RAW");
+        break;
+
+      case 1:
+      case 2:
+      default:
+        if (flags & DM_2048 || track->sector_size == 2048)
+          set_suffix (buf2, ".ISO");
+        else
+          set_suffix (buf2, ".BIN");
+        break;
+    }
+
+// open source and check
+  if (!(fh = fopen (image->fname, "rb")))
     return -1;
 
-  track = (dm_track_t *) &image->track[track_num];
+  fseek (fh, track->track_start, SEEK_SET); // start of track
 
-  if (track->mode == 1 && track->sector_size == 2048)
+  if (track->pregap_len != 150) // 0x96
+    fprintf (stderr, "WARNING: track seems to have a non-standard pregap (%d Bytes)\n",
+             track->pregap_len);
+  fseek (fh, track->pregap_len * track->sector_size, SEEK_CUR); // always? skip pregap
+#if 0
+  if (image->pregap && track->mode == 0 && remaining_tracks > 1) // quick hack to save next track pregap (audio tracks only)
+    track->track_len += pregap_length;       // if this isn't last track in current session
+// does this mean i shouldn't skip pregrap if it's a audio track?
+#endif
+
+  if (track->total_len < track->track_len + track->pregap_len)
+    {
+      fprintf (stderr, "SKIPPING: track seems truncated\n");
+      fclose (fh);
+      return -1;
+    }
+
+  if (flags & DM_2048 && track->mode == 1 && track->sector_size == 2048)
     {
       fprintf (stderr, dm_msg[ALREADY_2048]);
       return -1;
     }
 
-  strcpy (buf, basename (image->fname));
-  set_suffix (buf, ".ISO");
-
-  if (!(dest = fopen (buf, "wb")))
+// open dest.
+  if (!(fh2 = fopen (buf2, "wb")))
     {
-      fclose (src);
+      fclose (fh);
       return -1;
     }
 
-  size = q_fsize (image->fname);
-// TODO: float point exception
+  if (!track->mode && flags & DM_WAV)
+    writewavheader (fh2, track->track_len);
 
-  for (i = 0; i < size / track->sector_size; i++)
+  for (x = 0; x < track->track_len; x++)
     {
-      if (dm_read (buf, track_num, i, image) == track->sector_size)
-        fwrite (&buf[track->seek_header], 2048, 1, dest);
-      else break; // truncated?
+      fread (&buf, track->sector_size, 1, fh);
 
-      if (!(i % 100) && dm_ext_gauge)
-        dm_ext_gauge (i * track->sector_size, size);
+      if (flags & DM_2048)
+        result = fwrite (&buf[track->seek_header], 2048, 1, fh2);
+      else
+        result = fwrite (&buf, track->sector_size, 1, fh2);
+
+      if (!result)
+        {
+          fprintf (stderr, "ERROR: writing sector %d\n", x);
+          fclose (fh);
+          fclose (fh2);
+          return -1;
+        }
+
+      if (!(x % 100) && dm_ext_gauge)
+        dm_ext_gauge (x * track->sector_size,
+                      track->track_len * track->sector_size);
     }
-
+                  
   if (dm_ext_gauge)
-    dm_ext_gauge (i * track->sector_size, size * track->sector_size);
+    dm_ext_gauge (x * track->sector_size,
+                  track->track_len * track->sector_size);
+                        
+//  fseek (fh, track->total_len * track->sector_size, SEEK_CUR);
 
-  fclose (dest);
-  fclose (src);
-#endif
+  fclose (fh);
+  fclose (fh2);
+
   return 0;
 }
 
 
+#if 0
+// TODO: merge into dm_rip
 int
 dm_isofix (const dm_image_t * image, int start_lba, int track_num)
 {
@@ -795,34 +876,13 @@ dm_isofix (const dm_image_t * image, int start_lba, int track_num)
 
   return 0;
 }
-
+#endif
 
 int
 dm_disc_read (const dm_image_t *image)
 {
-#if 1
   fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_read()");
   (void) image;                                 // warning remover
-#else
-  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
-
-  get_property (ucon64.configfile, "cdrw_raw_read", buf2,
-    get_property (ucon64.configfile, "cdrw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile"));
-
-  strcpy (buf3, ucon64.rom);
-  setext (buf3, ".TOC");
-  sprintf (buf, "%s \"%s\" \"%s\"", buf2, ucon64.rom, buf3);
-
-  printf ("%s\n", buf);
-  fflush (stdout);
-  sync ();
-
-  return system (buf)
-#ifndef __MSDOS__
-      >> 8                                      // the exit code is coded in bits 8-15
-#endif                                          //  (that is, under non-DOS)
-  ;
-#endif
   return 0;
 }
 
@@ -830,32 +890,8 @@ dm_disc_read (const dm_image_t *image)
 int
 dm_disc_write (const dm_image_t *image)
 {
-#if 1
   fprintf (stderr, dm_msg[DEPRECATED], "dm_disc_write()");
   (void) image;                                 // warning remover
-#else
-  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[MAXBUFSIZE];
-
-  get_property (ucon64.configfile, "cdrw_raw_write", buf2,
-    get_property (ucon64.configfile, "cdrw_write", buf2, "cdrdao write --eject --device 0,0,0 --driver generic-mmc"));
-
-  strcpy (buf3, ucon64.rom);
-  setext (buf3, ".TOC");
-  if (access (buf3, F_OK) != 0 || !strncmp (ucon64.file, "MODE", 4))
-    ucon64_mktoc (rominfo);
-
-  sprintf (buf, "%s \"%s\"", buf2, buf3);
-
-  printf ("%s\n", buf);
-  fflush (stdout);
-  sync ();
-
-  return system (buf)
-#ifndef __MSDOS__
-      >> 8                                      // the exit code is coded in bits 8-15
-#endif                                          //  (that is, under non-DOS)
-  ;
-#endif 
   return 0;
 }
 

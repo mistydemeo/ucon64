@@ -15,3 +15,4 @@ dm_cue_read
 dm_cue_write
 dm_toc_read
 dm_toc_write
+dm_rip

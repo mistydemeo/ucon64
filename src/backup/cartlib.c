@@ -1,3 +1,23 @@
+/*
+fal.h - Flash Linker Advance support for uCON64
+
+written by 2001        Jeff Frohwein
+           2002        dbjh
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
 // *** GBA flash cart support routines in GCC ***
 //  This library allows programming FA/Visoly (both Turbo
 // and non-Turbo) and official Nintendo flash carts. They
@@ -309,6 +329,7 @@ EraseNintendoFlashBlocks (u32 StartAddr, u32 BlockCount)
 {
   int i = 0;
   int j, k;
+  time_t starttime = time (NULL);
 
   for (k = 0; k < BlockCount; k++)
     {
@@ -321,6 +342,7 @@ EraseNintendoFlashBlocks (u32 StartAddr, u32 BlockCount)
       while ((j & 0x80) == 0);
       WriteFlash (i, SHARP28F_BLOCKERASE);	// Erase a 64k byte block
       WriteFlash (i, SHARP28F_CONFIRM);	// Comfirm block erase
+      parport_gauge (starttime, (k + 1) * 64 * 1024, BlockCount * 64 * 1024);
     }
 
   do
@@ -346,6 +368,7 @@ EraseNonTurboFABlocks (u32 StartAddr, u32 BlockCount)
   u16 Ready = 1;
   u32 i = 0;
   u32 Timeout;
+  time_t starttime = time (NULL);
 
   for (k = 0; k < BlockCount; k++)
     {
@@ -403,6 +426,7 @@ EraseNonTurboFABlocks (u32 StartAddr, u32 BlockCount)
 	}
       else
 	break;
+      parport_gauge (starttime, (k + 1) * 128 * 1024, BlockCount * 128 * 1024);
     }
 
   if (!Ready)
@@ -431,6 +455,7 @@ EraseTurboFABlocks (u32 StartAddr, u32 BlockCount)
   u16 Ready = 1;
   u32 i = 0;
   u32 Timeout;
+  time_t starttime = time (NULL);
 
   for (k = 0; k < BlockCount; k++)
     {
@@ -491,6 +516,7 @@ EraseTurboFABlocks (u32 StartAddr, u32 BlockCount)
 	}
       else
 	break;
+      parport_gauge (starttime, (k + 1) * 256 * 1024, BlockCount * 256 * 1024);
     }
 
   if (!Ready)

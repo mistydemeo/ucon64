@@ -596,7 +596,8 @@ if(argcmp(argc, argv, "-sh"))
           strcpy(buf,&rom.rom[findlast(rom.rom,".")+1]);
           printf("%s.%s\n",rom.name,buf);
         }
-*/ fflush (stdout);
+*/
+                  fflush (stdout);
 		}
 	    }
 	}
@@ -814,6 +815,8 @@ if(argcmp(argc, argv, "-sh"))
 	      (argcmp (argc, argv, "-logo")) ? gbadvance_logo (&rom) :
 	      (argcmp (argc, argv, "-n")) ? gbadvance_n (&rom) :
 	      (argcmp (argc, argv, "-sram")) ? gbadvance_sram (&rom) :
+	      (argcmp (argc, argv, "-multi")) ? gbadvance_multi (&rom, FALSE) :
+	      (argcmp (argc, argv, "-multi2")) ? gbadvance_multi (&rom, TRUE) :
 #ifdef	BACKUP
 	      (argcmp (argc, argv, "-xfal")) ? gbadvance_xfal (&rom) :
 	      (argncmp (argc, argv, "-xfalc", 6)) ? gbadvance_xfal (&rom) :
@@ -1340,10 +1343,10 @@ ucon64_usage (int argc, char *argv[])
       printf ("%s\n%s\n%s\n%s\n%s\n"
 //      "  -xbox, -ps2, -sat, -3do, -cd32, -cdi\n"
 	      "  -ps2, -sat, -3do, -cd32, -cdi\n"
-	      "		force recognition; NEEDED\n"
+	      "                force recognition; NEEDED\n"
 //      "  -iso         force image is ISO9660\n"
 //      "  -raw         force image is MODE2_RAW/BIN\n"
-	      "  *		show info (default); ONLY $ROM=RAW_IMAGE\n"
+	      "  *             show info (default); ONLY $ROM=RAW_IMAGE\n"
 	      "  -iso          convert RAW/BIN to ISO9660; $ROM=RAW_IMAGE\n"
 //  ,xbox_TITLE
 	      , ps2_TITLE, saturn_TITLE, real3do_TITLE, cd32_TITLE,
@@ -1382,7 +1385,7 @@ ucon64_usage (int argc, char *argv[])
 
       printf ("%s\n%s\n%s\n%s\n%s\n%s\n"
 	      "  -s16, -ata, -coleco, -vboy, -vec, -intelli\n"
-	      "		force recognition"
+	      "                force recognition"
 #ifndef DB
 	      "; NEEDED"
 #endif
@@ -1422,13 +1425,13 @@ G7400+/Odyssey² (1978)
 Channel F (1976)
 Odyssey (Ralph Baer/USA/1972)
 Virtual Boy
-Real 3DO 1993 Panasonic/Goldstar/Philips? 
-Game.com ? Tiger 
-CD-i (1991) 1991 
-Vectrex 1982 
-Colecovision 1982 
-Interton VC4000 ~1980 
-Intellivision 1979 
+Real 3DO 1993 Panasonic/Goldstar/Philips?
+Game.com ? Tiger
+CD-i (1991) 1991
+Vectrex 1982
+Colecovision 1982
+Interton VC4000 ~1980
+Intellivision 1979
 G7400+/Odyssey² 1978 
 Channel F 1976
 Odyssey 1972 Ralph Baer 

@@ -475,7 +475,7 @@ parport_gauge (time_t init_time, long pos, long size)
 	  pos, buf, (unsigned long) 100 * pos / size, (unsigned long) cps);
 
   if (pos == size)
-    printf ("TOTAL=%03ld:%02ld\n", (long) curr / 60, (long) curr % 60);
+    printf ("TOTAL=%03ld:%02ld", (long) curr / 60, (long) curr % 60); // DON'T print a newline -> gauge can be cleared
   else
     printf ("ETA=%03ld:%02ld   ", (long) left / 60, (long) left % 60);
 

@@ -1364,6 +1364,10 @@ knowing when that is necessary.
    8f XX YY 77 e2 XX af XX YY 77 c9 XX f0
 => 8f XX YY 77 e2 XX af XX YY 77 c9 XX 80
 
+- Mario no Super Picross (b0, b1)
+   8f/af XX YY b0/b1/b2/b3 cf XX YY b0/b1/b2/b3 d0
+=> 8f/af XX YY b0/b1/b2/b3 cf XX YY b0/b1/b2/b3 ea ea
+
 - most probably only Killer Instinct
    5c 7f d0 83 18 fb 78 c2 30           jmp $83d07f; clc; xce; sei; rep #$30
 => ea ea ea ea ea ea ea ea ea           nop; nop; nop; nop; nop; nop; nop; nop; nop
@@ -1480,6 +1484,8 @@ Same here.
 
       change_string ("!**!!**!\xd0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
                      "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\xcf\xdf", 2, "\x30\x31\x32\x33", 4);
+      change_string ("!**!\xcf**!\xd0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
+                     "\x8f\xaf", 2, "\xb0\xb1\xb2\xb3", 4, "\xb0\xb1\xb2\xb3", 4);
       change_string ("!**!\xaf**!\xc9**\xd0", 12, '*', '!', "\x80", 1, buffer, bytesread, 0,
                      "\x8f\x9f", 2, "\x30\x31\x32\x33", 4, "\x30\x31\x32\x33", 4);
       change_string ("\xa9\x00\x00\xa2\xfe\x1f\xdf\x00\x00\x70\xd0", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, 0);
@@ -1605,7 +1611,8 @@ Search for                            Replace with
 3f 21 29/89 10 f0                     3f 21 29/89 10 80
 ad 3f 21 29 10 d0                     ad 3f 21 29 10 ea ea
 ad 3f 21 89 10 d0                     ad 3f 21 89 10 80/(ea ea)        - Live-a-Live (ea ea)
-3f 21 29/89 10 00 f0                  3f 21 29/89 10 00 80
+3f 21 29/89 10 00 f0                  3f 21 29/89 10 00 80             - Clock Tower (29)
+3f 21 29/89 10 00 d0                  3f 21 29/89 10 00 ea ea          - Mario no Super Picross (89)
    3f 21 89 10 c2 XX d0                  3f 21 89 10 c2 XX ea ea       - Robotrek
 3f 21 29/89 10 c9 10 f0               3f 21 29/89 10 c9 10 80
 ad 3f 21 29 10 c9 00 f0               ad 3f 21 29 10 c9 00 80/(ea ea) <= original uCON used 80
@@ -1659,6 +1666,8 @@ a2 18 01 bd 27 20 89 10 00 d0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
         change_string ("\xad\x3f\x21\x89\x10\xd0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0);
 
       change_string ("\x3f\x21\x02\x10\x00\xf0", 6, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,
+                     "\x29\x89", 2);
+      change_string ("\x3f\x21\x02\x10\x00\xd0", 6, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0,
                      "\x29\x89", 2);
       change_string ("\x3f\x21\x89\x10\xc2\x01\xd0", 7, '\x01', '\x02', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\x3f\x21\x02\x10\xc9\x10\xf0", 7, '\x01', '\x02', "\x80", 1, buffer, bytesread, 0,

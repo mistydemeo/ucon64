@@ -148,6 +148,8 @@ int ucon64_init(struct ucon64_ *rom);
 int ucon64_main(int argc,char *argv[]);
 int ucon64_nfo(struct ucon64_ *rom);
 
+int ucon64_exit(int value,struct ucon64_ *rom);
+
 
 unsigned int ucon64_parport;
 

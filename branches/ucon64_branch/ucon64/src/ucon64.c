@@ -539,6 +539,15 @@ main (int argc, char **argv)
   strcpy (buf, ucon64.configdir);
   realpath2 (buf, ucon64.configdir);
 
+#ifdef  GUI
+  strcpy (ucon64.skindir, get_property (ucon64.configfile, "ucon64_skindir", buf, ""));
+#ifdef  __CYGWIN__
+  strcpy (ucon64.skindir, fix_character_set (ucon64.skindir));
+#endif
+  strcpy (buf, ucon64.skindir);
+  realpath2 (buf, ucon64.skindir);
+#endif
+
   // DAT file handling
   ucon64.dat_enabled = 0;
   strcpy (ucon64.datdir, get_property (ucon64.configfile, "ucon64_datdir", buf, ""));

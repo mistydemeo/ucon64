@@ -426,6 +426,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_BOT, UCON64_N64, n64_usage,          WF_DEFAULT},
   {UCON64_CRP, UCON64_GBA, gba_usage,          WF_DEFAULT},
   {UCON64_COL, UCON64_SNES, snes_usage,        WF_NO_ROM},
+  {UCON64_DMIRR, UCON64_SNES, snes_usage,      WF_DEFAULT},
   {UCON64_DBUH, UCON64_SNES, snes_usage,       WF_DEFAULT},
   {UCON64_F, UCON64_SNES, snes_usage,          WF_DEFAULT},
   {UCON64_FDS, UCON64_NES, nes_usage,          WF_DEFAULT},
@@ -1723,20 +1724,28 @@ ucon64_configfile (void)
                  "#\n"
 #if     defined __MSDOS__
                  "discmage_path=~\\discmage.dxe\n" // realpath2() expands the tilde
+                 "netgui_path=~\\netgui.dxe\n"
                  "ucon64_configdir=~\n"
                  "ucon64_datdir=~\n"
+                 "ucon64_skindir=~\n"
 #elif   defined __CYGWIN__
                  "discmage_path=~/discmage.dll\n"
+                 "netgui_path=~/netgui.dll\n"
                  "ucon64_configdir=~\n"
                  "ucon64_datdir=~\n"
+                 "ucon64_skindir=~\n"
 #elif   defined _WIN32
                  "discmage_path=~\\discmage.dll\n"
+                 "netgui_path=~/netgui.dll\n"
                  "ucon64_configdir=~\n"
                  "ucon64_datdir=~\n"
+                 "ucon64_skindir=~\n"
 #elif   defined __unix__ || defined __BEOS__
                  "discmage_path=~/.ucon64/discmage.so\n"
+                 "netgui_path=~/.ucon64/netgui.so\n"
                  "ucon64_configdir=~/.ucon64\n"
                  "ucon64_datdir=~/.ucon64/dat\n"
+                 "ucon64_skindir=~/.ucon64/skin\n"
 #endif
                  "#\n"
                  "# emulate_<console shortcut>=<emulator with options>\n"
@@ -1841,6 +1850,20 @@ ucon64_configfile (void)
 #endif
       );
 
+      set_property (ucon64.configfile, "netgui_path",
+#if     defined __MSDOS__
+        "~\\netgui.dxe"                       // realpath2() expands the tilde
+#elif   defined __CYGWIN__
+        "~/netgui.dll"
+#elif   defined _WIN32
+        "~\\netgui.dll"
+#elif   defined __unix__ || defined __BEOS__
+        "~/.ucon64/netgui.so"
+#else
+        ""
+#endif
+      );
+
       set_property (ucon64.configfile, "ucon64_configdir",
 #if     defined __MSDOS__
         "~"                                     // realpath2() expands the tilde
@@ -1864,6 +1887,20 @@ ucon64_configfile (void)
         "~"
 #elif   defined __unix__ || defined __BEOS__
         "~/.ucon64/dat"
+#else
+        ""
+#endif
+      );
+
+      set_property (ucon64.configfile, "ucon64_skindir",
+#if     defined __MSDOS__
+        "~"                                     // realpath2() expands the tilde
+#elif   defined __CYGWIN__
+        "~"
+#elif   defined _WIN32
+        "~"
+#elif   defined __unix__ || defined __BEOS__
+        "~/.ucon64/skin"
 #else
         ""
 #endif

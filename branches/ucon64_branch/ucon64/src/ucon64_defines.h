@@ -33,13 +33,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_UNKNOWN_S "Unknown"
 #define NULL_TO_UNKNOWN_S(str) ((str) ? (str) : (UCON64_UNKNOWN_S))
 
-#define UCON64_VERSION_S "1.9.9beta1"
+#define UCON64_VERSION_S "1.9.8beta9"
 
 /* program version counter */
 //#define UCON64_VERSION (198)
 
 /* version of config file layout */
-#define UCON64_CONFIG_VERSION (205)
+#define UCON64_CONFIG_VERSION (206)
 
 #define MBIT (131072)
 #define TOMBIT(x) ((int)(x) / MBIT)
@@ -106,24 +106,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_DBUH (UCON64_OPTION + 22)
 #define UCON64_DBV (UCON64_OPTION + 23)
 #define UCON64_DINT (UCON64_OPTION + 24)
-#define UCON64_DUMPINFO (UCON64_OPTION + 25)
-#define UCON64_E (UCON64_OPTION + 26)
-#define UCON64_EROM (UCON64_OPTION + 27)
-#define UCON64_F (UCON64_OPTION + 28)
-#define UCON64_FDS (UCON64_OPTION + 29)
-#define UCON64_FDSL (UCON64_OPTION + 30)
-#define UCON64_FFE (UCON64_OPTION + 31)
-#define UCON64_FIG (UCON64_OPTION + 32)
-#define UCON64_FIGS (UCON64_OPTION + 33)
-#define UCON64_FILE (UCON64_OPTION + 34)
-#define UCON64_FIND (UCON64_OPTION + 35)
-#define UCON64_FRONTEND (UCON64_OPTION + 36)
-#define UCON64_GBX (UCON64_OPTION + 37)
-#define UCON64_GD3 (UCON64_OPTION + 38)
-#define UCON64_GG (UCON64_OPTION + 39)
-#define UCON64_GGD (UCON64_OPTION + 40)
-#define UCON64_GGE (UCON64_OPTION + 41)
-#define UCON64_GP32 (UCON64_OPTION + 42)
+#define UCON64_DMIRR (UCON64_OPTION + 25)
+#define UCON64_DUMPINFO (UCON64_OPTION + 26)
+#define UCON64_E (UCON64_OPTION + 27)
+#define UCON64_EROM (UCON64_OPTION + 28)
+#define UCON64_F (UCON64_OPTION + 29)
+#define UCON64_FDS (UCON64_OPTION + 30)
+#define UCON64_FDSL (UCON64_OPTION + 31)
+#define UCON64_FFE (UCON64_OPTION + 32)
+#define UCON64_FIG (UCON64_OPTION + 33)
+#define UCON64_FIGS (UCON64_OPTION + 34)
+#define UCON64_FILE (UCON64_OPTION + 35)
+#define UCON64_FIND (UCON64_OPTION + 36)
+#define UCON64_FRONTEND (UCON64_OPTION + 37)
+#define UCON64_GBX (UCON64_OPTION + 38)
+#define UCON64_GD3 (UCON64_OPTION + 39)
+#define UCON64_GG (UCON64_OPTION + 40)
+#define UCON64_GGD (UCON64_OPTION + 41)
+#define UCON64_GGE (UCON64_OPTION + 42)
+#define UCON64_GP32 (UCON64_OPTION + 43)
 //#define UCON64_GOOD (UCON64_OPTION + 43)
 #define UCON64_HD (UCON64_OPTION + 44)
 #define UCON64_HDN (UCON64_OPTION + 45)
@@ -232,7 +233,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_XFALMULTI (UCON64_OPTION + 148)
 #define UCON64_XFALS (UCON64_OPTION + 149)
 #define UCON64_XFALM (UCON64_OPTION + 150) // actually only necessary for the Windows
-#define UCON64_XFIG (UCON64_OPTION + 151)  //  ports, but might be usefull for others too
+#define UCON64_XFIG (UCON64_OPTION + 151)  //  ports, but might be useful for others too
 #define UCON64_XFIGS (UCON64_OPTION + 152)
 #define UCON64_XGBX (UCON64_OPTION + 153)
 #define UCON64_XGBXB (UCON64_OPTION + 154)

@@ -57,4 +57,5 @@ extern int snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char
 extern int snes_get_snes_hirom (void);
 extern snes_file_t snes_get_file_type (void);
 extern void snes_set_fig_header (st_rominfo_t *rominfo, st_fig_header_t *header);
+extern int snes_demirror (st_rominfo_t *rominfo);
 #endif /* SNES_H */

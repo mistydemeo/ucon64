@@ -134,6 +134,9 @@ typedef struct
   char configfile[FILENAME_MAX];                // path and name of the config file
   char configdir[FILENAME_MAX];                 // directory for config
   char datdir[FILENAME_MAX];                    // directory for DAT files
+#ifdef  GUI
+  char skindir[FILENAME_MAX];                 // path to the pictures used with the netgui DLL
+#endif
   char output_path[FILENAME_MAX];               // -o argument (default: cwd)
 #ifdef  DISCMAGE
   char discmage_path[FILENAME_MAX];             // path to the discmage DLL

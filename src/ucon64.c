@@ -167,8 +167,37 @@ main (int argc, char *argv[])
     {"frontend", 0, 0, 2},
     {"crc", 0, 0, 3},
     {"nbak", 0, 0, 4},
+    {"crchd", 0, 0, 5},
+    {"rl", 0, 0, 6},
+    {"ru", 0, 0, 7},
+    {"hex", 0, 0, 8},
+    {"c", 0, 0, 'c'},
+    {"cs", 0, 0, 9},
+    {"find", 0, 0, 10},
+    {"swap", 0, 0, 11},
+    {"pad", 0, 0, 12},
+    {"padhd", 0, 0, 13},
+    {"ispad", 0, 0, 14},
+    {"strip", 0, 0, 15},
+    {"stp", 0, 0, 16},
+    {"ins", 0, 0, 17},
+    {"b", 0, 0, 'b'},
+    {"i", 0, 0, 'i'},
+    {"a", 0, 0, 'a'},
+    {"mki", 0, 0, 18},
+    {"mka", 0, 0, 19},
+    {"na", 0, 0, 20},
+    {"ppf", 0, 0, 21},
+    {"mkppf", 0, 0, 22},
+    {"nppf", 0, 0, 23},
+    {"idppf", 0, 0, 24},
+    {"ls", 0, 0, 25},
+    {"lsv", 0, 0, 26},
     {0, 0, 0, 0}
   };
+
+  unsigned long padded;
+  char current_dir[FILENAME_MAX];
 
   printf ("%s\n", ucon64_TITLE);
   printf ("Uses code from various people. See 'developers.html' for more!\n");
@@ -377,7 +406,7 @@ while ((c =
       break;        
 
       case 4:
-//        rom.backup = 0;
+        rom.backup = 0;
       break;
 
       case 1:
@@ -390,301 +419,269 @@ while ((c =
         return 0;
       break;
 
+      case 5:
+        printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, 512));
+        return 0;
+      break;
+      
+      case 6:
+        renlwr (rom.rom);
+        return 0;
+      break;
 
-//TODO ...to be continued 
+      case 7:
+        renupr (rom.rom);
+        return 0;
+      break;
+      
+      case 8:
+        filehexdump (rom.rom, 0, quickftell (rom.rom));
+        return 0;
+      break;
+          
+      case 'c':
+        if (filefile (rom.rom, 0, rom.file, 0, FALSE) == -1)
+          printf ("ERROR: file not found/out of memory\n");
+        return 0;
+      break;
+            
+      case 9:
+        if (filefile (rom.rom, 0, rom.file, 0, TRUE) == -1)
+          printf ("ERROR: file not found/out of memory\n");
+        return 0;
+      break;
+      
+      case 10:
+        x = 0;
+        y = quickftell (rom.rom);
+        while ((x =
+                filencmp2 (rom.rom, x, y, rom.file, strlen (rom.file),
+                           '?')) != -1)
+          {
+            filehexdump (rom.rom, x, strlen (rom.file));
+            x++;
+            printf ("\n");
+          }
+        return 0;
+      break;
+
+      case 11:
+        fileswap (ucon64_fbackup (&rom, rom.rom), 0, quickftell (rom.rom));
+        return 0;
+      break;
+      
+      case 12:
+        ucon64_fbackup (&rom, rom.rom);
+
+        filepad (rom.rom, 0, MBIT);
+        return 0;
+      break;
+
+      case 13:
+        ucon64_fbackup (&rom, rom.rom);
+
+        filepad (rom.rom, 512, MBIT);
+        return 0;
+      break;
+
+      case 14:
+        if ((padded = filetestpad (rom.rom)) != -1)
+          {
+            if (!padded)
+              printf ("Padded: No\n");
+            else
+              printf ("Padded: Maybe, %ld Bytes (%.4f Mb)\n", padded,
+                      (float) padded / MBIT);
+          }
+        printf ("\n");
+        return 0;
+      break;
+
+      case 15:
+        ucon64_fbackup (&rom, rom.rom);
+
+        truncate (rom.rom, quickftell (rom.rom) - atol (rom.file));
+        return 0;
+      break;
+      
+      case 16://stp
+        strcpy (buf, rom.rom);
+        newext (buf, ".BAK");
+        remove (buf);                             // try to remove or rename will fail
+        rename (rom.rom, buf);
+
+        filecopy (buf, 512, quickftell (buf), rom.rom, "wb");
+        return 0;
+      break;
+
+      case 17://ins
+        strcpy (buf, rom.rom);
+        newext (buf, ".BAK");
+        remove (buf);                             // try to remove or rename will fail
+        rename (rom.rom, buf);
+
+        memset (buf2, 0, 512);
+        quickfwrite (buf2, 0, 512, rom.rom, "wb");
+
+        filecopy (buf, 0, quickftell (buf), rom.rom, "ab");
+        return 0;
+      break;
+
+      case 'b':
+        ucon64_fbackup(&rom, rom.rom);
+
+        if (bsl (rom.rom, rom.file) != 0)
+          printf ("ERROR: failed\n");
+        return 0;
+      break;
+
+      case 'i':
+        ucon64_argv[0] = "ucon64";
+        ucon64_argv[1] = rom.file;
+        ucon64_argv[2] = rom.rom;
+        ucon64_argc = 3;
+
+        ucon64_fbackup(&rom, rom.rom);
+
+        ips_main (ucon64_argc, ucon64_argv);
+      break;
+
+      case 'a':
+        ucon64_argv[0] = "ucon64";
+        ucon64_argv[1] = "-f";
+        ucon64_argv[2] = rom.rom;
+        ucon64_argv[3] = rom.file;
+        ucon64_argc = 4;
+
+        ucon64_fbackup(&rom, rom.rom);
+
+        n64aps_main (ucon64_argc, ucon64_argv);
+        return 0;
+      break;
+
+      case 18://mki
+        cips (rom.rom, rom.file);
+        return 0;
+      break;
+
+      case 19://mka
+        ucon64_argv[0] = "ucon64";
+        ucon64_argv[1] = "-d \"\"";
+        ucon64_argv[2] = rom.rom;
+        ucon64_argv[3] = rom.file;
+        strcpy (buf, rom.rom);
+        newext (buf, ".APS");
+
+        ucon64_argv[4] = buf;
+        ucon64_argc = 5;
+
+        n64caps_main (ucon64_argc, ucon64_argv);
+        return 0;
+      break;
+      
+      case 20://na
+        memset (buf2, ' ', 50);
+        strncpy (buf2, rom.file, strlen (rom.file));
+        quickfwrite (buf2, 7, 50, ucon64_fbackup (&rom, rom.rom), "r+b");
+
+        return 0;
+      break;
+
+      case 21://ppf
+        ucon64_argv[0] = "ucon64";
+        ucon64_argv[1] = rom.rom;
+        ucon64_argv[2] = rom.file;
+        ucon64_argc = 3;
+
+        applyppf_main (ucon64_argc, ucon64_argv);
+        return 0;
+      break;
+
+      case 22://mkppf
+        ucon64_argv[0] = "ucon64";
+        ucon64_argv[1] = rom.rom;
+        ucon64_argv[2] = rom.file;
+
+        strcpy (buf, rom.file);
+        newext (buf, ".PPF");
+
+        ucon64_argv[3] = buf;
+        ucon64_argc = 4;
+
+        makeppf_main (ucon64_argc, ucon64_argv);
+        return 0;
+      break;
+
+      case 23://nppf
+        memset (buf2, ' ', 50);
+        strncpy (buf2, rom.file, strlen (rom.file));
+        quickfwrite (buf2, 6, 50, ucon64_fbackup (&rom, rom.rom), "r+b");
+
+        return 0;
+      break;
+
+      case 24://idppf
+        addppfid (argc, argv);
+        return 0;
+      break;
+
+      case 25://ls
+      case 26://lsv
+        if (access (rom.rom, R_OK) != 0 || (dp = opendir (rom.rom)) == NULL)
+          return -1;
+
+        getcwd (current_dir, FILENAME_MAX);
+        chdir (rom.rom);
+
+        while ((ep = readdir (dp)) != 0)
+          {
+            if (!stat (ep->d_name, &puffer))
+              {
+                if (S_ISREG (puffer.st_mode))
+                  {
+                    ucon64_argv[0] = "ucon64";
+                    ucon64_argv[1] = ep->d_name;
+                    ucon64_argc = 2;
+
+                    ucon64_flush (ucon64_argc, ucon64_argv, &rom);
+                    strcpy (rom.rom, ep->d_name);
+                    ucon64_init (&rom);
+
+                    if (argcmp (argc, argv, "-ls"))
+                      {
+                        strftime (buf, 13, "%b %d %H:%M",
+                                  localtime (&puffer.st_mtime));
+                        printf ("%-31.31s %10d %s %s\n", rom.name,
+                                (int) puffer.st_size, buf, rom.rom);
+                      }
+                    else if (argcmp (argc, argv, "-lsv"))
+                      ucon64_nfo (&rom);
+/*        
+                    else if (argcmp (argc, argv, "-rrom") &&
+                             rom.console != ucon64_UNKNOWN)
+                             // && rom.console != ucon64_KNOWN)
+                      {
+                        strcpy (buf, &rom.rom[findlast (rom.rom, ".") + 1]);
+                        printf ("%s.%s\n", rom.name, buf);
+                      }
+*/
+                    fflush (stdout);
+                  }
+              }
+          }
+        closedir (dp);
+        chdir (current_dir);
+
+        return 0;
+      break;
 
       default:
+        ucon64_usage (argc, argv);
+        return 0;
       break;
     }
   }
 
-
-  if (argcmp (argc, argv, "-crchd"))
-    {
-      printf ("Checksum (CRC32): %08lx\n\n", fileCRC32 (rom.rom, 512));
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-rl"))
-    {
-      renlwr (rom.rom);
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-ru"))
-    {
-      renupr (rom.rom);
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-hex"))
-    {
-      filehexdump (rom.rom, 0, quickftell (rom.rom));
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-c"))
-    {
-      if (filefile (rom.rom, 0, rom.file, 0, FALSE) == -1)
-        printf ("ERROR: file not found/out of memory\n");
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-cs"))
-    {
-      if (filefile (rom.rom, 0, rom.file, 0, TRUE) == -1)
-        printf ("ERROR: file not found/out of memory\n");
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-find"))
-    {
-      x = 0;
-      y = quickftell (rom.rom);
-      while ((x =
-              filencmp2 (rom.rom, x, y, rom.file, strlen (rom.file),
-                         '?')) != -1)
-        {
-          filehexdump (rom.rom, x, strlen (rom.file));
-          x++;
-          printf ("\n");
-        }
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-swap"))
-    {
-      fileswap (ucon64_fbackup (&rom, rom.rom), 0, quickftell (rom.rom));
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-pad"))
-    {
-      ucon64_fbackup (&rom, rom.rom);
-
-      filepad (rom.rom, 0, MBIT);
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-padhd"))
-    {
-      ucon64_fbackup (&rom, rom.rom);
-      filepad (rom.rom, 512, MBIT);
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-ispad"))
-    {
-      unsigned long padded;
-
-      if ((padded = filetestpad (rom.rom)) != -1)
-        {
-          if (!padded)
-            printf ("Padded: No\n");
-          else
-            printf ("Padded: Maybe, %ld Bytes (%.4f Mb)\n", padded,
-                    (float) padded / MBIT);
-        }
-      printf ("\n");
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-strip"))
-    {
-      ucon64_fbackup (&rom, rom.rom);
-
-      truncate (rom.rom, quickftell (rom.rom) - atol (rom.file));
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-stp"))
-    {
-      strcpy (buf, rom.rom);
-      newext (buf, ".BAK");
-      remove (buf);                             // try to remove or rename will fail
-      rename (rom.rom, buf);
-
-      filecopy (buf, 512, quickftell (buf), rom.rom, "wb");
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-ins"))
-    {
-      strcpy (buf, rom.rom);
-      newext (buf, ".BAK");
-      remove (buf);                             // try to remove or rename will fail
-      rename (rom.rom, buf);
-
-      memset (buf2, 0, 512);
-      quickfwrite (buf2, 0, 512, rom.rom, "wb");
-
-      filecopy (buf, 0, quickftell (buf), rom.rom, "ab");
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-b"))
-    {
-      ucon64_fbackup(&rom, rom.rom);
-
-      if (bsl (rom.rom, rom.file) != 0)
-        printf ("ERROR: failed\n");
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-i"))
-    {
-      ucon64_argv[0] = "ucon64";
-      ucon64_argv[1] = rom.file;
-      ucon64_argv[2] = rom.rom;
-      ucon64_argc = 3;
-
-      ucon64_fbackup(&rom, rom.rom);
-
-      ips_main (ucon64_argc, ucon64_argv);
-
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-a"))
-    {
-      ucon64_argv[0] = "ucon64";
-      ucon64_argv[1] = "-f";
-      ucon64_argv[2] = rom.rom;
-      ucon64_argv[3] = rom.file;
-      ucon64_argc = 4;
-
-      ucon64_fbackup(&rom, rom.rom);
-
-      n64aps_main (ucon64_argc, ucon64_argv);
-      return 0;
-    }
-
-
-  if (argcmp (argc, argv, "-mki"))
-    {
-      cips (rom.rom, rom.file);
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-mka"))
-    {
-      ucon64_argv[0] = "ucon64";
-      ucon64_argv[1] = "-d \"\"";
-      ucon64_argv[2] = rom.rom;
-      ucon64_argv[3] = rom.file;
-      strcpy (buf, rom.rom);
-      newext (buf, ".APS");
-
-      ucon64_argv[4] = buf;
-      ucon64_argc = 5;
-
-      n64caps_main (ucon64_argc, ucon64_argv);
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-na"))
-    {
-      memset (buf2, ' ', 50);
-      strncpy (buf2, rom.file, strlen (rom.file));
-      quickfwrite (buf2, 7, 50, ucon64_fbackup (&rom, rom.rom), "r+b");
-
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-ppf"))
-    {
-      ucon64_argv[0] = "ucon64";
-      ucon64_argv[1] = rom.rom;
-      ucon64_argv[2] = rom.file;
-      ucon64_argc = 3;
-
-      applyppf_main (ucon64_argc, ucon64_argv);
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-mkppf"))
-    {
-      ucon64_argv[0] = "ucon64";
-      ucon64_argv[1] = rom.rom;
-      ucon64_argv[2] = rom.file;
-
-      strcpy (buf, rom.file);
-      newext (buf, ".PPF");
-
-      ucon64_argv[3] = buf;
-      ucon64_argc = 4;
-
-      makeppf_main (ucon64_argc, ucon64_argv);
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-nppf"))
-    {
-      memset (buf2, ' ', 50);
-      strncpy (buf2, rom.file, strlen (rom.file));
-      quickfwrite (buf2, 6, 50, ucon64_fbackup (&rom, rom.rom), "r+b");
-
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-idppf"))
-    {
-      addppfid (argc, argv);
-      return 0;
-    }
-
-  if (argcmp (argc, argv, "-ls") || argcmp (argc, argv, "-lsv"))
-//    || argcmp (argc, argv, "-rrom") || argcmp(argc,argv, "-rr83")
-    {
-      char current_dir[FILENAME_MAX];
-
-      if (access (rom.rom, R_OK) != 0 || (dp = opendir (rom.rom)) == NULL)
-        return -1;
-
-      getcwd (current_dir, FILENAME_MAX);
-      chdir (rom.rom);
-
-      while ((ep = readdir (dp)) != 0)
-        {
-          if (!stat (ep->d_name, &puffer))
-            {
-              if (S_ISREG (puffer.st_mode))
-                {
-                  ucon64_argv[0] = "ucon64";
-                  ucon64_argv[1] = ep->d_name;
-                  ucon64_argc = 2;
-
-                  ucon64_flush (ucon64_argc, ucon64_argv, &rom);
-                  strcpy (rom.rom, ep->d_name);
-                  ucon64_init (&rom);
-
-                  if (argcmp (argc, argv, "-ls"))
-                    {
-                      strftime (buf, 13, "%b %d %H:%M",
-                                localtime (&puffer.st_mtime));
-                      printf ("%-31.31s %10d %s %s\n", rom.name,
-                              (int) puffer.st_size, buf, rom.rom);
-                    }
-                  else if (argcmp (argc, argv, "-lsv"))
-                    ucon64_nfo (&rom);
-/*        
-                  else if (argcmp (argc, argv, "-rrom") &&
-                           rom.console != ucon64_UNKNOWN)
-                           // && rom.console != ucon64_KNOWN)
-                    {
-                      strcpy (buf, &rom.rom[findlast (rom.rom, ".") + 1]);
-                      printf ("%s.%s\n", rom.name, buf);
-                    }
-*/
-                  fflush (stdout);
-                }
-            }
-        }
-      closedir (dp);
-      chdir (current_dir);
-
-      return 0;
-    }
 
   rom.console =
     (argcmp (argc, argv, "-ata")) ? ucon64_ATARI :

@@ -51,7 +51,7 @@ write programs in C
 #include "misc.h"
 #include "quick_io.h"
 #include "ucon64.h"
-#include "ucon64_db.h"
+#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #ifdef  DLOPEN
 #include "dlopen.h"
@@ -134,7 +134,6 @@ const struct option options[] = {
     {"crchd", 0, 0, UCON64_CRCHD},
     {"crp", 0, 0, UCON64_CRP},
     {"cs", 0, 0, UCON64_CS},
-    {"dat", 0, 0, UCON64_DAT},
     {"db", 0, 0, UCON64_DB},
     {"dbs", 0, 0, UCON64_DBS},
     {"dbuh", 0, 0, UCON64_DBUH},
@@ -181,6 +180,7 @@ const struct option options[] = {
     {"lnx", 0, 0, UCON64_LNX},
     {"logo", 0, 0, UCON64_LOGO},
     {"ls", 0, 0, UCON64_LS},
+    {"lsdat", 0, 0, UCON64_LSDAT},
     {"lsv", 0, 0, UCON64_LSV},
     {"lynx", 0, 0, UCON64_LYNX},
     {"lyx", 0, 0, UCON64_LYX},
@@ -1091,6 +1091,7 @@ ucon64_usage (int argc, char *argv[])
     "  " OPTION_LONG_S "dbv         view ROM database (all entries)\n"
     "  " OPTION_LONG_S "ls          generate ROM list for all ROMs; " OPTION_LONG_S "rom=DIRECTORY\n"
     "  " OPTION_LONG_S "lsv         like " OPTION_LONG_S "ls but more verbose; " OPTION_LONG_S "rom=DIRECTORY\n"
+    "TODO:  " OPTION_LONG_S "lsdat  like " OPTION_LONG_S "ls but uses only DAT files as source\n"
     "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
     "                  this is often used by people who lose control of their ROMs\n"
     "  " OPTION_LONG_S "rr83        like " OPTION_LONG_S "rrom but with 8.3 filenames; " OPTION_LONG_S "rom=DIRECTORY\n"

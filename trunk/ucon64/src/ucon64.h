@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"                             // ANSI_COLOR
 #include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
-#include "ucon64_db.h"
+#include "ucon64_dat.h"
 #include "misc.h"
 #include "libdiscmage/libdiscmage.h"            // dm_image_t
 

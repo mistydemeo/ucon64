@@ -40,7 +40,7 @@ const char *cd64_usage[] =
 #ifdef PARALLEL
 #include "misc.h"
 #include "ucon64.h"
-#include "ucon64_db.h"
+#include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "cd64.h"
 

@@ -40,7 +40,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 static const char pvd_magic[] = {0x01, 'C', 'D', '0', '0', '1', 0x01, 0};
 static const char svd_magic[] = {0x02, 'C', 'D', '0', '0', '1', 0x01, 0};
-static const char vdt_magic[] = {0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
+static const char vdt_magic[] = {(const char) 0xff, 'C', 'D', '0', '0', '1', 0x01, 0};
 
 typedef struct
 {
@@ -272,7 +272,11 @@ read_raw_frame (int32_t fd, int32_t lba, unsigned char *buf)
 const dm_track_t *
 dm_track_init (dm_track_t *track, FILE *fh)
 {
-  const char sync_data[] = {0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0};
+  const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff,
+                            (const char) 0xff, (const char) 0xff, 0};
   char buf[32];
   st_iso_header_t iso_header;
   int x = 0, identified = 0;
@@ -480,9 +484,8 @@ dm_isofix (const dm_image_t * image, int start_lba)
 {
 #define BOOTFILE_S "bootfile.bin"
 #define HEADERFILE_S "header.iso"
-  int32_t size_left, last_pos;
+  int32_t size_left, last_pos, i, size;
   dm_track_t *track = NULL;
-  uint32_t i, size;
   char buf[MAXBUFSIZE], buf2[FILENAME_MAX];
   FILE *dest = NULL, *src = NULL, *boot = NULL, *header = NULL;
   int mac = FALSE;
@@ -601,7 +604,7 @@ dm_isofix (const dm_image_t * image, int start_lba)
   fclose (header);
 
   // add padding data to iso image
-  if (last_pos > start_lba * track->sector_size)
+  if (last_pos > (signed int) (start_lba * track->sector_size))
     {
       fprintf (stderr, "ERROR: LBA value is too small\n"
                "       It should be at least %d for current ISO image (probably greater)",

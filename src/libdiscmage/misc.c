@@ -215,11 +215,7 @@ q_fsize (const char *filename)
 int
 ansi_init (void)
 {
-#ifndef WIN32
   int result = isatty (STDOUT_FILENO);
-#else
-  int result = 1;
-#endif
 
 #ifdef  DJGPP
   if (result)
@@ -1210,7 +1206,8 @@ cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns)
 int
 gauge (time_t init_time, int pos, int size)
 {
-#define GAUGE_LENGTH 24LL
+#define GAUGE_LENGTH ((int64_t) 24)
+
   int curr, bps, left, p, percentage;
   char progress[MAXBUFSIZE];
 
@@ -1224,7 +1221,7 @@ gauge (time_t init_time, int pos, int size)
   left = size - pos;
   left /= bps ? bps : 1;
 
-  p = (GAUGE_LENGTH * pos) / size;
+  p = (int) ((GAUGE_LENGTH * pos) / size);
   *progress = 0;
   strncat (progress, "========================", p);
 
@@ -1235,9 +1232,9 @@ gauge (time_t init_time, int pos, int size)
         strcat(progress, "\x1b[31;41m");
     }
 
-  strncat (&progress[p], "------------------------", GAUGE_LENGTH - p);
+  strncat (&progress[p], "------------------------", (int) (GAUGE_LENGTH - p));
 
-  percentage = (100LL * pos) / size;
+  percentage = (int) ((((int64_t) 100) * pos) / size);
 
   printf (
     misc_ansi_color ? "\r%10d Bytes [\x1b[32;42m%s\x1b[0m] %d%%, BPS=%d, " :
@@ -1491,7 +1488,7 @@ set_property2 (const char *filename, const char *propname, char divider, const c
     {                                           //  avoids trouble under DOS
       while (fgets (buf, sizeof buf, fh) != NULL)
         {
-          if (!strncasecmp (buf, propname, strlen (propname)))
+          if (!strnicmp (buf, propname, strlen (propname)))
             {
               found = 1;
               if (value == NULL)
@@ -2045,3 +2042,33 @@ q_fncmp (const char *filename, int start, int len, const char *search,
   fclose (fh);
   return -1;
 }
+
+
+#ifdef  _WIN32
+#include <windows.h>
+
+int
+truncate (const char *path, off_t size)
+{
+  int retval;
+  HANDLE file = CreateFile (path, GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
+                            FILE_ATTRIBUTE_NORMAL, NULL);
+  if (file == INVALID_HANDLE_VALUE)
+    return -1;
+
+  SetFilePointer (file, size, 0, FILE_BEGIN);
+  retval = SetEndOfFile (file); // returns nonzero on success
+  CloseHandle (file);
+
+  return !retval;               // truncate returns zero on success
+}
+
+
+int
+sync (void)
+{
+  _commit (fileno (stdout));
+  _commit (fileno (stderr));
+  return 0;
+}
+#endif

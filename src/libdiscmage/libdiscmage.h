@@ -24,7 +24,40 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "inttypes.h"
+
+#if     defined __linux__ || defined __FreeBSD__ || \
+        defined __BEOS__ || defined __solaris__ || defined HAVE_INTTYPES_H
+#include <inttypes.h>
+#elif   defined __CYGWIN__
+#include <sys/types.h>
+#ifndef OWN_INTTYPES
+#define OWN_INTTYPES                            // signal that these are defined
+typedef u_int8_t uint8_t;
+typedef u_int16_t uint16_t;
+typedef u_int32_t uint32_t;
+typedef u_int64_t uint64_t;
+#endif // OWN_INTTYPES
+#else
+#ifndef OWN_INTTYPES
+#define OWN_INTTYPES                            // signal that these are defined
+typedef unsigned char uint8_t;
+typedef unsigned short int uint16_t;
+typedef unsigned int uint32_t;
+#ifndef _WIN32
+typedef unsigned long long int uint64_t;
+#else
+typedef unsigned __int64 uint64_t;
+#endif
+typedef signed char int8_t;
+typedef signed short int int16_t;
+typedef signed int int32_t;
+#ifndef _WIN32
+typedef signed long long int int64_t;
+#else
+typedef signed __int64 int64_t;
+#endif
+#endif // OWN_INTTYPES
+#endif
 
 
 #define ISODCL(from, to) (to - from + 1)

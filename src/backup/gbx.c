@@ -98,7 +98,7 @@ static void end_port (void);
 //#include <zlib.h>
 #include <sys/stat.h>
 /*
-#ifdef WIN32
+#ifdef _WIN32
 
 #include <dos.h>
 #include <io.h>

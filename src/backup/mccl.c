@@ -63,7 +63,6 @@ Data Read Procedure:
 #endif
 #include <stdio.h>
 #include "misc.h"
-#include "quick_io.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "mccl.h"

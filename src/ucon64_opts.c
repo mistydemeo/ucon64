@@ -37,7 +37,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dm.h"
 #endif
 #include "ucon64_opts.h"
-#include "quick_io.h"
 #include "console/console.h"
 #include "patch/patch.h"
 #include "backup/backup.h"
@@ -357,7 +356,7 @@ ucon64_switches (int c, const char *optarg)
         }
       else
         {
-          printf ("I/O mode: 0x%02x", ucon64.swc_io_mode);
+          printf ("I/O mode: 0x%03x", ucon64.swc_io_mode);
           if (ucon64.swc_io_mode)
             {
               char flagstr[100];
@@ -1241,6 +1240,17 @@ ucon64_options (int c, const char *optarg)
           break;
 #endif
 
+    case UCON64_VMS:
+      break;
+
+    case UCON64_PARSE:
+      dc_parse (optarg);
+      break;
+
+    case UCON64_MKIP:
+      dc_mkip ();
+      break;
+
     case UCON64_J:
       switch (ucon64.console)
         {
@@ -1446,6 +1456,10 @@ ucon64_options (int c, const char *optarg)
       neogeo_sam (optarg);
       break;
 
+    case UCON64_SCR:
+      dc_scramble ();
+      break;
+
     case UCON64_SGB:
       gameboy_sgb (ucon64.rominfo);
       break;
@@ -1508,6 +1522,10 @@ ucon64_options (int c, const char *optarg)
 
     case UCON64_UNIF:
       nes_unif ();
+      break;
+
+    case UCON64_UNSCR:
+      dc_unscramble ();
       break;
 
     case UCON64_USMS:

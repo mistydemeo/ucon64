@@ -30,7 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include <sys/stat.h>
 #include "misc.h"
-#include "quick_io.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
@@ -44,7 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GBA_HEADER_LEN (sizeof (st_gba_header_t))
 
 
-static int gba_chksum (st_rominfo_t *rominfo);
+static int gba_chksum (void);
 static int gbautil (const char *filein, const char *fileout);
 
 const st_usage_t gba_usage[] =
@@ -436,7 +435,7 @@ gba_init (st_rominfo_t *rominfo)
     {
       rominfo->has_internal_crc = 1;
       rominfo->internal_crc_len = 1;
-      rominfo->current_internal_crc = gba_chksum (rominfo);
+      rominfo->current_internal_crc = gba_chksum ();
 
       rominfo->internal_crc = gba_header.checksum;
       rominfo->internal_crc2[0] = 0;
@@ -451,26 +450,16 @@ gba_init (st_rominfo_t *rominfo)
 
 
 int
-gba_chksum (st_rominfo_t *rominfo)
+gba_chksum (void)
 // Note that this function only calculates the checksum of the internal header
 {
-  int x = 0x19, y = 0xa0, z = GBA_HEADER_START + rominfo->buheader_len;
-  FILE *fh;
+  unsigned char sum = 0x19, *ptr = (unsigned char *) &gba_header + 0xa0;
 
-  if (!(fh = fopen (ucon64.rom, "rb")))
-    return -1;
+  while (ptr < (unsigned char *) &gba_header + 0xbd)
+    sum += *ptr++;
+  sum = -sum;
 
-  fseek (fh, z + y, SEEK_SET);
-  z += 0xbd;
-  while (y < z)
-    {
-      x += fgetc (fh);
-      y++;
-    }
-  x = (0x100 - (x & 0xff)) & 0xff;
-
-  fclose (fh);
-  return x;
+  return sum;
 }
 
 
@@ -752,7 +741,7 @@ static waitstate waitstates[] = {
   {28, 0x1C}                    /* faster than 8 but slower than 16 */
 };
 
-#define WAITSTATE_SIZE (sizeof(waitstates) / sizeof(waitstate))
+#define WAITSTATE_SIZE (sizeof (waitstates) / sizeof (waitstate))
 #define MAX_WAITSTATE waitstates[WAITSTATE_SIZE-1].speed
 
 

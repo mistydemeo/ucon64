@@ -77,7 +77,7 @@ endif                                   # GCC_WIN
 
 
 OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
-        misc.o misc_par.o misc_chk.o getopt.o quick_io.o \
+        misc.o misc_par.o misc_chk.o getopt.o \
         patch/aps.o patch/bsl.o patch/ips.o patch/gg.o patch/pal4u.o \
         patch/ppf.o patch/xps.o \
         console/gb.o console/gba.o console/genesis.o console/lynx.o \
@@ -241,7 +241,7 @@ endif
 # Dependencies
 
 # Most source files include these
-UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
+UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h
 
 getopt.o: getopt.h
 unzip.o: unzip.h config.h
@@ -251,7 +251,6 @@ misc_z.o: misc_z.h map.h config.h
 misc_par.o: misc_par.h config.h
 misc_usb.o: misc_usb.h config.h
 misc_chk.o: misc_chk.h config.h
-quick_io.o: quick_io.h misc.h config.h
 dlopen.o: dlopen.h dxedll_pub.h config.h
 ucon64.o: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
           console/snes.h console/gb.h console/gba.h console/n64.h \

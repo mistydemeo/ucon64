@@ -28,7 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include "misc.h"                               // kbhit(), getch()
-#include "quick_io.h"
 #include "ucon64_misc.h"
 #include "ffe.h"
 #include "misc_par.h"

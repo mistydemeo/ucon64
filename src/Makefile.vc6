@@ -20,7 +20,7 @@ LDFLAGS=$(LDFLAGS) libdiscmage/$(LIBNAME_DM).lib
 
 
 OBJECTS=ucon64.obj ucon64_opts.obj ucon64_misc.obj ucon64_dat.obj \
-        misc.obj misc_par.obj misc_chk.obj getopt.obj quick_io.obj dlopen.obj \
+        misc.obj misc_par.obj misc_chk.obj getopt.obj dlopen.obj \
         patch/aps.obj patch/bsl.obj patch/ips.obj patch/gg.obj patch/pal4u.obj \
         patch/ppf.obj patch/xps.obj \
         console/gb.obj console/gba.obj console/genesis.obj console/lynx.obj \
@@ -100,7 +100,7 @@ uninstall:
 # Dependencies
 
 # Most source files include these
-UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h quick_io.h
+UCON64_STD_H=ucon64.h ucon64_misc.h misc.h config.h ucon64_defines.h
 
 getopt.obj: getopt.h
 unzip.obj: unzip.h config.h
@@ -110,7 +110,6 @@ misc_z.obj: misc_z.h map.h config.h
 misc_par.obj: misc_par.h config.h
 misc_usb.obj: misc_usb.h config.h
 misc_chk.obj: misc_chk.h config.h
-quick_io.obj: quick_io.h misc.h config.h
 dlopen.obj: dlopen.h dxedll_pub.h config.h
 ucon64.obj: ucon64_opts.h ucon64_dat.h ucon64_dm.h dlopen.h getopt.h \
             console/snes.h console/gb.h console/gba.h console/n64.h \

@@ -40,7 +40,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
-#include "quick_io.h"
 #include "console/console.h"
 
 #define MAX_FIELDS_IN_DAT 32
@@ -281,7 +280,6 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
     {"Good2600", custom_strnicmp, UCON64_ATA, atari_usage},
     {"Good5200", custom_strnicmp, UCON64_ATA, atari_usage},
     {"Good7800", custom_strnicmp, UCON64_ATA, atari_usage},
-//
     {"SNES", custom_strnicmp, UCON64_SNES, snes_usage},
     {"NES", custom_strnicmp, UCON64_NES, nes_usage},
     {"FDS", custom_stristr, UCON64_NES, nes_usage},

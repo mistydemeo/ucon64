@@ -28,7 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <time.h>
 #include <string.h>
 #include "misc.h"
-#include "quick_io.h"
 #include "ucon64.h"
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
@@ -171,6 +170,7 @@ void l40226c (void);
 
 #include "cartlib.c"
 
+
 static int debug, verbose, DataSize16, Device, EPPMode, RepairHeader,
            VisolyTurbo, WaitDelay, FileHeader[0xc0], HeaderBad, Complement = 0;
 
@@ -191,6 +191,7 @@ const u8 GoodHeader[] = {
 };
 #endif
 
+
 void
 iodelay (void)
 {
@@ -202,11 +203,13 @@ iodelay (void)
     }
 }
 
+
 void
 ProgramExit (int code)
 {
   exit (code);
 }
+
 
 #if 0
 void
@@ -265,6 +268,7 @@ usage (char *name)
 }
 #endif
 
+
 void
 InitPort (int port)
 {
@@ -305,6 +309,7 @@ InitPort (int port)
 //#endif
 }
 
+
 void
 l4020a4 (int reg)
 {
@@ -314,6 +319,7 @@ l4020a4 (int reg)
   outpb (SPPCtrlPort, 1);
 }
 
+
 void
 SPPWriteByte (int i)            // l4020dc
 {
@@ -322,12 +328,14 @@ SPPWriteByte (int i)            // l4020dc
   outpb (SPPCtrlPort, 1);
 }
 
+
 void
 l402108 (int reg, int adr)
 {
   l4020a4 (reg);
   SPPWriteByte (adr);
 }
+
 
 int
 SPPReadByte (void)              // 402124
@@ -344,12 +352,14 @@ SPPReadByte (void)              // 402124
   return v;
 }
 
+
 void
 l402188 (int reg)
 {
   outpb (SPPCtrlPort, 1);
   outpb (EPPAddrPort, reg);
 }
+
 
 void
 l4021a8 (int reg, int adr)
@@ -358,6 +368,7 @@ l4021a8 (int reg, int adr)
   outpb (SPPCtrlPort, 1);
   outpb (EPPDataPort, adr);
 }
+
 
 void
 l4021d0 (int i)
@@ -370,6 +381,7 @@ l4021d0 (int i)
     l4020a4 (i);
 }
 
+
 void
 l402200 (int reg, int adr)
 {
@@ -378,6 +390,7 @@ l402200 (int reg, int adr)
   else
     l402108 (reg, adr);
 }
+
 
 void
 l402234 (void)
@@ -388,6 +401,7 @@ l402234 (void)
     l402200 (4, 0xc3);
 }
 
+
 void
 l40226c (void)
 {
@@ -396,6 +410,7 @@ l40226c (void)
   else
     l402200 (4, 0x47);
 }
+
 
 void
 PPWriteByte (int i)             // 4022d0
@@ -407,6 +422,7 @@ PPWriteByte (int i)             // 4022d0
   else
     SPPWriteByte (i);
 }
+
 
 void
 PPWriteWord (int i)             // 4022d0
@@ -430,6 +446,7 @@ PPWriteWord (int i)             // 4022d0
     }
 }
 
+
 int
 PPReadByte (void)               // 40234c
 {
@@ -442,6 +459,7 @@ PPReadByte (void)               // 40234c
 
   return v;
 }
+
 
 int
 PPReadWord (void)               // 402368  // ReadFlash
@@ -466,6 +484,7 @@ PPReadWord (void)               // 402368  // ReadFlash
   return v;
 }
 
+
 void
 SetCartAddr (int addr)          // 4023cc
 {
@@ -474,6 +493,7 @@ SetCartAddr (int addr)          // 4023cc
   l402200 (0, addr);
 }
 
+
 void
 WriteFlash (int addr, int data) // 402414
 {
@@ -481,6 +501,7 @@ WriteFlash (int addr, int data) // 402414
   l4021d0 (3);
   PPWriteWord (data);
 }
+
 
 int
 ReadFlash (int addr)
@@ -491,14 +512,16 @@ ReadFlash (int addr)
   return PPReadWord ();
 }
 
+
 void
 l402684 (void)
 {
-#ifndef USE_PPDEV // probably #if 0, but first test if this works with ppdev - dbjh
+#if 0 // not necessary *and* not correct (read-only register) - dbjh
   outpb (SPPStatPort, 1);
 #endif
   l40226c ();
 }
+
 
 int
 LookForLinker (void)            // 4026a8
@@ -525,6 +548,7 @@ LookForLinker (void)            // 4026a8
   outpb (SPPCtrlPort, 4);
   return 1;
 }
+
 
 void
 LinkerInit (void)               // 4027c4
@@ -577,6 +601,7 @@ LinkerInit (void)               // 4027c4
     }
 }
 
+
 int
 ReadStatusRegister (int addr)   // 402dd8
 {
@@ -587,6 +612,7 @@ ReadStatusRegister (int addr)   // 402dd8
   v = PPReadWord ();            // & 0xff;
   return v;
 }
+
 
 //void OldDumpSRAM (void)                    // 4046f4
 //   {
@@ -618,6 +644,7 @@ ReadStatusRegister (int addr)   // 402dd8
 
 // StartOffSet: 1 = 0, 2 = 64k, 3 = 128k, 4 = 192k
 // Size: 1 = 32k, 2 = 64k, 3 = 128k, 4 = 256k
+
 
 void
 BackupSRAM (FILE * fp, int StartOS, int Size)   // 4046f4
@@ -657,8 +684,8 @@ BackupSRAM (FILE * fp, int StartOS, int Size)   // 4046f4
     }
 }
 
-// StartOffSet: 1 = 0, 2 = 64k, 3 = 128k, 4 = 192k
 
+// StartOffSet: 1 = 0, 2 = 64k, 3 = 128k, 4 = 192k
 void
 RestoreSRAM (FILE * fp, int StartOS)
 {
@@ -701,6 +728,7 @@ RestoreSRAM (FILE * fp, int StartOS)
     }
 }
 
+
 void
 BackupROM (FILE * fp, int SizekW)
 {
@@ -730,6 +758,7 @@ BackupROM (FILE * fp, int SizekW)
         ucon64_gauge (starttime, bytesread, size);
     }
 }
+
 
 void
 dump (u8 BaseAdr)
@@ -791,6 +820,7 @@ dump (u8 BaseAdr)
     }
 }
 
+
 void
 CheckForFC (void)
 {
@@ -805,7 +835,7 @@ CheckForFC (void)
   Device = CartTypeDetect ();
   VisolyTurbo = 0;
 
-  printf ("Device ID = 0x%x : ", Device);
+  printf ("Device ID = 0x%x: ", Device);
 
   switch (Device)
     {
@@ -837,7 +867,7 @@ CheckForFC (void)
       printf ("Hudson");
       break;
     case 0xe2:
-      printf ("Nintendo Flash Cart (LH28F320BJE)");
+      printf ("Nintendo Flash Card (LH28F320BJE)");
       break;
     default:
       printf ("Unknown");
@@ -845,6 +875,7 @@ CheckForFC (void)
     }
   fputc ('\n', stdout);
 }
+
 
 int
 GetFileByte (FILE * fp)
@@ -884,6 +915,7 @@ GetFileByte (FILE * fp)
   return i;
 }
 
+
 int
 GetFileSize2 (FILE * fp)
 /*
@@ -902,9 +934,7 @@ GetFileSize2 (FILE * fp)
 
       FileSize = 0;
       while (!feof (fp) && (FileSize < 0xc0))
-        {
-          FileHeader[FileSize++] = fgetc (fp);
-        }
+        FileHeader[FileSize++] = fgetc (fp);
 
       if (feof (fp))
         {
@@ -966,9 +996,9 @@ GetFileSize2 (FILE * fp)
 #endif
 }
 
-// Program older (non-Turbo) Visoly flash cart
-// (Single flash chip)
 
+// Program older (non-Turbo) Visoly flash card
+// (Single flash chip)
 void
 ProgramNonTurboIntelFlash (FILE * fp)
 {
@@ -982,7 +1012,7 @@ ProgramNonTurboIntelFlash (FILE * fp)
   // Get file size
   FileSize = GetFileSize2 (fp);
 
-  printf ("Erasing Visoly non-turbo flash cart...\n\n");
+  printf ("Erasing Visoly non-turbo flash card...\n");
 
   // Erase as many 128k blocks as are required
   Ready = EraseNonTurboFABlocks (0, ((FileSize - 1) >> 17) + 1);
@@ -990,7 +1020,7 @@ ProgramNonTurboIntelFlash (FILE * fp)
   printf ("\r                                                                              \r");     // remove "erase gauge"
   if (Ready)
     {
-      printf ("Programming Visoly non-turbo flash cart...\n\n");
+      printf ("Programming Visoly non-turbo flash card...\n");
       //403018
 
       starttime = time (NULL);
@@ -1067,9 +1097,7 @@ ProgramNonTurboIntelFlash (FILE * fp)
                 }
             }
           else
-            {
-              break;
-            }
+            break;
         }
 
       printf ("\r                                                                              \r"); // remove last gauge
@@ -1080,19 +1108,15 @@ ProgramNonTurboIntelFlash (FILE * fp)
       if (Ready)
         ; //printf ("\n\nDone.\n");
       else
-        {
-          printf ("\n\nFlash cart write failed!\n");
-        }
+        printf ("\nFlash card write failed!\n");
     }
   else
-    {
-      printf ("\nFlash cart erase failed!\n");
-    }
+    printf ("\nFlash card erase failed!\n");
 }
 
-// Program newer (Turbo) Visoly flash cart
-// (Dual chip / Interleave)
 
+// Program newer (Turbo) Visoly flash card
+// (Dual chip / Interleave)
 void
 ProgramTurboIntelFlash (FILE * fp)
 {
@@ -1108,7 +1132,7 @@ ProgramTurboIntelFlash (FILE * fp)
   // Get file size
   FileSize = GetFileSize2 (fp);
 
-  printf ("Erasing Visoly turbo flash cart...\n\n");
+  printf ("Erasing Visoly turbo flash card...\n");
 
   // Erase as many 256k blocks as are required
   Ready = EraseTurboFABlocks (0, ((FileSize - 1) >> 18) + 1);
@@ -1116,7 +1140,7 @@ ProgramTurboIntelFlash (FILE * fp)
   printf ("\r                                                                              \r");     // remove "erase gauge"
   if (Ready)
     {
-      printf ("Programming Visoly turbo flash cart...\n\n");
+      printf ("Programming Visoly turbo flash card...\n");
       //403018
       starttime = time (NULL);
       j = GetFileByte (fp);
@@ -1205,17 +1229,15 @@ ProgramTurboIntelFlash (FILE * fp)
         {
           WriteFlash (0, INTEL28F_CLEARSR);
           PPWriteWord (INTEL28F_CLEARSR);
-          printf ("\n\nFlash cart write failed!\n");
+          printf ("\nFlash card write failed!\n");
         }
     }
   else
-    {
-      printf ("\nFlash cart erase failed!\n");
-    }
+    printf ("\nFlash card erase failed!\n");
 }
 
-// Program official Nintendo flash cart
 
+// Program official Nintendo flash card
 void
 ProgramSharpFlash (FILE * fp)
 {
@@ -1229,7 +1251,7 @@ ProgramSharpFlash (FILE * fp)
   // Get file size
   FileSize = GetFileSize2 (fp);
 
-  printf ("Erasing flash cart...\n\n");
+  printf ("Erasing flash card...\n");
 
   // Erase as many 64k blocks as are required
   Ready = EraseNintendoFlashBlocks (0, ((FileSize - 1) >> 16) + 1);
@@ -1237,7 +1259,7 @@ ProgramSharpFlash (FILE * fp)
   printf ("\r                                                                              \r");     // remove "erase gauge"
   if (Ready)
     {
-      printf ("Programming Nintendo flash cart...\n\n");
+      printf ("Programming Nintendo flash card...\n");
 
       starttime = time (NULL);
       j = GetFileByte (fp);
@@ -1250,8 +1272,7 @@ ProgramSharpFlash (FILE * fp)
           i = ((k & 0xff) << 8) + (j & 0xff);
 
           while ((ReadStatusRegister (0) & 0x80) == 0)
-            {
-            }
+            ;
 
           WriteFlash (addr, SHARP28F_WORDWRITE);
           WriteFlash (addr, i);
@@ -1270,8 +1291,9 @@ ProgramSharpFlash (FILE * fp)
       //printf ("\n\nDone.\n");
     }
   else
-    printf ("\n\nFlash cart erase failed!\n");
+    printf ("\nFlash card erase failed!\n");
 }
+
 
 void
 VerifyFlash (FILE * fp)
@@ -1305,12 +1327,12 @@ VerifyFlash (FILE * fp)
 
           if (m != j)
             {
-              printf ("Address %x - Cartridge %x : File %hx\n", addr, m, j);
+              printf ("Address %x - Cartridge %x: File %hx\n", addr, m, j);
               CompareFail = 1;
             }
           if ((n != k) && (k != EOF))
             {
-              printf ("Address %x - Cartridge %x : File %hx\n", addr + 1, n,
+              printf ("Address %x - Cartridge %x: File %hx\n", addr + 1, n,
                       k);
               CompareFail = 1;
             }
@@ -1326,6 +1348,7 @@ VerifyFlash (FILE * fp)
     printf ("%d bytes compared ok.\n", addr);
 }
 
+
 void
 SpaceCheck (char c)
 {
@@ -1336,6 +1359,7 @@ SpaceCheck (char c)
       ProgramExit (1);
     }
 }
+
 
 int
 fal_main (int argc, char **argv)
@@ -1421,7 +1445,7 @@ fal_main (int argc, char **argv)
           SpaceCheck (argv[arg][2]);
           if (argv[++arg] != NULL)
             Base = (u8) (atoi (argv[arg]));
-          printf ("Base address : %hx\n", Base * 256);
+          printf ("Base address: %hx\n", Base * 256);
           OptD = 1;
           break;
         case 's':

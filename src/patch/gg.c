@@ -55,7 +55,6 @@ modified by 2001 - 2002 NoisyB (noisyb@gmx.net)
 #include <string.h>
 #include <ctype.h>
 #include "misc.h"
-#include "quick_io.h"
 #include "ucon64.h"
 #include "ucon64_misc.h"
 #include "patch/gg.h"

@@ -209,25 +209,22 @@ long
 filetestpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)
 {
-  long size, x;
-  int y;
+  long size = rominfo->file_size;
+  long pos = size - 2;
+  int c = quickfgetc (filename, size - 1);
   char *buf;
-
-  size = rominfo->file_size;
 
   if (!(buf = (char *) malloc ((size + 2) * sizeof (char))))
     return -1;
 
   quickfread (buf, 0, size, filename);
 
-  y = buf[size - 1] & 0xff;
-  x = size - 2;
-  while (y == (buf[x] & 0xff))
-    x--;
+  while (c == (buf[pos] & 0xff)) pos--;
 
   free (buf);
 
-  return (size - x - 1 == 1) ? 0 : size - x - 1;
+  size -= (pos + 1);
+  return size > 1 ? size : 0;
 }
 
 
@@ -1068,6 +1065,7 @@ ucon64_configfile (void)
                  "emulate_cdi=\n"
                  "emulate_3do=\n"
                  "emulate_gp32=\n"
+#if 0
 #ifndef __MSDOS__
                  "#\n"
                  "# LHA support\n"
@@ -1089,6 +1087,7 @@ ucon64_configfile (void)
                  "# ACE support\n"
                  "#\n"
                  "ace_extract=unace e \"%%s\"\n"
+#endif
 #endif
 #ifdef BACKUP_CD
                  "#\n"
@@ -1139,11 +1138,13 @@ ucon64_configfile (void)
       DELETEPROPERTY (ucon64.configfile, "cdrw_iso_read");
       DELETEPROPERTY (ucon64.configfile, "cdrw_iso_write");
 
+#if 0
       setProperty (ucon64.configfile, "lha_extract", "lha efi \"%s\"");
       setProperty (ucon64.configfile, "lzh_extract", "lha efi \"%s\"");
       setProperty (ucon64.configfile, "zip_extract", "unzip -xojC \"%s\"");
       setProperty (ucon64.configfile, "rar_extract", "unrar x \"%s\"");
       setProperty (ucon64.configfile, "ace_extract", "unace e \"%s\"");
+#endif
 
       sync ();
       printf ("OK\n\n");
@@ -1348,3 +1349,25 @@ static int VERBOSE = 1;
 #endif
   return 0;
 }
+
+
+#if 0
+void
+frame2msf (unsigned long i, struct cdrom_msf *msf)
+{
+  msf->cdmsf_min0 = i / CD_SECS / CD_FRAMES;
+  msf->cdmsf_sec0 = (i / CD_FRAMES) % CD_SECS;
+  msf->cdmsf_frame0 = i % CD_FRAMES;
+  msf->cdmsf_min1 = (i + 1) / CD_SECS / CD_FRAMES;
+  msf->cdmsf_sec1 = ((i + 1) / CD_FRAMES) % CD_SECS;
+  msf->cdmsf_frame1 = (i + 1) % CD_FRAMES;
+}
+
+
+unsigned long
+msf2frame (struct cdrom_msf0 *msf)
+{
+  return (msf->minute * CD_SECS * CD_FRAMES +
+          msf->second * CD_FRAMES + msf->frame);
+}
+#endif

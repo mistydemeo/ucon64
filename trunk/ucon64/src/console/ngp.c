@@ -30,7 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "ngp.h"
-#include "backup/fpl.h"
+#include "backup/pl.h"
 
 
 const st_getopt2_t ngp_usage[] =
@@ -46,7 +46,7 @@ const st_getopt2_t ngp_usage[] =
       (void *) (UCON64_NGP|WF_SWITCH)
     },
     {NULL, 0, 0, 0, NULL, NULL, NULL}
-};
+  };
 
 
 typedef struct st_ngp_header
@@ -68,7 +68,7 @@ ngp_init (st_rominfo_t *rominfo)
        *third_code = " LICENSED BY SNK CORPORATION", buf[MAXBUFSIZE];
 
   rominfo->buheader_len = UCON64_ISSET (ucon64.buheader_len) ?
-    ucon64.buheader_len : 0;
+                            ucon64.buheader_len : 0;
 
   q_fread (&ngp_header, NGP_HEADER_START +
       rominfo->buheader_start, NGP_HEADER_LEN, ucon64.rom);
@@ -96,13 +96,13 @@ ngp_init (st_rominfo_t *rominfo)
 
   // misc stuff
   sprintf (buf, "Mode: %s",
-      (OFFSET (ngp_header, 0x23) == 0x00) ? "Mono" :
-      (OFFSET (ngp_header, 0x23) == 0x10) ? "Color" :
-      "Unknown");
+           (OFFSET (ngp_header, 0x23) == 0x00) ? "Mono" :
+           (OFFSET (ngp_header, 0x23) == 0x10) ? "Color" :
+           "Unknown");
   strcat (rominfo->misc, buf);
 
   rominfo->console_usage = ngp_usage;
-  rominfo->copier_usage = (!rominfo->buheader_len ? fpl_usage : unknown_usage);
+  rominfo->copier_usage = (!rominfo->buheader_len ? pl_usage : unknown_usage);
 
   return result;
 }

@@ -308,6 +308,8 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_XMDB:
     case UCON64_XMSG:
     case UCON64_XPCE:
+    case UCON64_XPL:
+    case UCON64_XPLI:
     case UCON64_XSMC:
     case UCON64_XSMCR:
     case UCON64_XSMD:
@@ -373,6 +375,7 @@ ucon64_switches (int c, const char *optarg)
 
     case UCON64_XFALM:
     case UCON64_XGBXM:
+    case UCON64_XPLM:
       ucon64.parport_mode = UCON64_EPP;
       break;
 
@@ -1959,6 +1962,19 @@ ucon64_options (int c, const char *optarg)
         pce_read_rom (ucon64.rom, ucon64.parport, 32 * MBIT);
       else
         pce_write_rom (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XPL:
+      if (access (ucon64.rom, F_OK) != 0)
+        pl_read_rom (ucon64.rom, ucon64.parport);
+      else
+        pl_write_rom (ucon64.rom, ucon64.parport);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XPLI:
+      pl_info (ucon64.parport);
       fputc ('\n', stdout);
       break;
 

@@ -637,7 +637,7 @@ ucon64_flush (st_rominfo_t *rominfo)
   memset (rominfo, 0L, sizeof (st_rominfo_t));
   rominfo->data_size = UCON64_UNKNOWN;
   ucon64.file_size = ucon64_fsize;
-  ucon64.crc32 = 0;
+//  ucon64.crc32 = 0;
 #if 0
   rominfo->maker = rominfo->country = "";
   rominfo->console_usage = rominfo->copier_usage = NULL;
@@ -802,7 +802,6 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   if (UCON64_TYPE_ISROM (ucon64.type))
     {
       ucon64_flush (rominfo); // clear rominfo
-
       result = ucon64_console_probe (rominfo);
 
       // Calculating the CRC for the ROM data of a UNIF file (NES) shouldn't
@@ -1139,10 +1138,10 @@ ucon64_usage (int argc, char *argv[])
       "  " OPTION_LONG_S "dbv         like " OPTION_LONG_S "db but more verbose\n"
       "  " OPTION_LONG_S "lsd         generate ROM list for all ROMs using DATabase info; " OPTION_LONG_S "rom=DIR\n"
       "  " OPTION_LONG_S "rrom        rename all ROMs in DIRECTORY to their internal names; " OPTION_LONG_S "rom=DIR\n"
-      "                  with " OPTION_LONG_S "good you will use DATabase instead of internal names\n"
+      "                  with " OPTION_LONG_S "good it will use DATabase instead of internal names\n"
       "                  and sort the ROMs into subdirs (DAT files: %s)\n"
       GOOD_EXAMPLE
-      "                  Only ROMs of these consoles use to have internal names:\n"
+      "                  Only ROMs of these consoles have internal names:\n"
       "                  %s,\n"
       "                  %s,\n"
       "                  %s,\n"

@@ -245,7 +245,7 @@ endif
 
 
 # Dependencies
-LIBDM_STD_H=libdiscmage.h misc.h dxedll_priv.h format/format.h
+LIBDM_STD_H=libdiscmage.h misc.h dxedll_priv.h format/format.h config.h
 
 libdm_misc.o: $(LIBDM_STD_H)
 format/format.o: $(LIBDM_STD_H)

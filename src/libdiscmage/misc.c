@@ -406,6 +406,18 @@ strcasestr2 (const char *str, const char *search)
 
 
 char *
+strncpy2 (char *dest, const char *src, size_t size)
+{
+  if (dest)
+    {
+      strncpy (dest, src ? src : "", size);
+      dest[size] = 0;
+    }
+  return dest;
+}
+
+
+char *
 set_suffix (char *filename, const char *suffix)
 {
   char suffix2[FILENAME_MAX], *p, *p2;

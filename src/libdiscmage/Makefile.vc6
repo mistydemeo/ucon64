@@ -53,7 +53,7 @@ uninstall:
 
 
 # Dependencies
-LIBDM_STD_H=libdiscmage.h misc.h dxedll_priv.h format/format.h
+LIBDM_STD_H=libdiscmage.h misc.h dxedll_priv.h format/format.h config.h
 
 libdm_misc.obj: $(LIBDM_STD_H)
 format/format.obj: $(LIBDM_STD_H)

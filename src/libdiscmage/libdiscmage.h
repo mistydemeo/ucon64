@@ -64,7 +64,7 @@ typedef signed __int64 int64_t;
 
 #define DM_VERSION_MAJOR 0
 #define DM_VERSION_MINOR 0
-#define DM_VERSION_STEP 6
+#define DM_VERSION_STEP 7
 
 
 // a CD can have max. 99 tracks; this value might change in the future
@@ -130,7 +130,7 @@ typedef struct
   dm_reopen()    like dm_open() but can reuse an existing dm_image_t
   dm_close()     the last function; close image
   dm_fdopen()    returns a FILE ptr from the start of a track (in image)
-  dm_fseek()     seek for tracks inside image
+TODO:  dm_seek()     seek for tracks inside image
                    dm_fseek (image, 2, SEEK_END);
                    will seek to the end of the 2nd track in image
   dm_set_gauge() enter here the name of a function that takes two integers
@@ -138,31 +138,30 @@ typedef struct
                    {
                      printf ("%d of %d done", pos, total);
                    }
+  dm_nfo()      display dm_image_t
   dm_read()      read single sector from track (in image)
 TODO: dm_write()     write single sector to track (in image)
-  dm_toc_read()  read TOC sheet into dm_image_t
-  dm_toc_write() write dm_image_t as TOC sheet
-  dm_cue_read()  read CUE sheet into dm_image_t
-  dm_cue_write() write dm_image_t as CUE sheet
+
+  dm_toc_read()  read TOC sheet into dm_image_t (deprecated)
+  dm_toc_write() write dm_image_t as TOC sheet (deprecated)
+  dm_cue_read()  read CUE sheet into dm_image_t (deprecated)
+  dm_cue_write() write dm_image_t as CUE sheet (deprecated)
   dm_disc_read() deprecated reading or writing images is done
-                   by those scripts in contrib/
+                   by those scripts in contrib/ (deprecated)
   dm_disc_write() deprecated reading or writing images is done
-                   by those scripts in contrib/
+                   by those scripts in contrib/ (deprecated)
 */
 extern uint32_t dm_get_version (void);
 extern const char *dm_get_version_s (void);
 extern void dm_set_gauge (void (*gauge) (int, int));
 
-#define DM_RDONLY 1
-#define DM_WRONLY 2
-#define DM_RDWR 4
-#define DM_CREAT 8
 extern dm_image_t *dm_open (const char *fname, uint32_t flags);
 extern dm_image_t *dm_reopen (const char *fname, uint32_t flags, dm_image_t *image);
 extern int dm_close (dm_image_t *image);
 
-//extern int dm_fseek (FILE *fp, int track_num, int how);
+//extern int dm_seek (FILE *fp, int track_num, int how);
 extern FILE *dm_fdopen (dm_image_t *image, int track_num, const char *mode);
+extern void dm_nfo (const dm_image_t *image, int verbose, int ansi_color);
 
 extern int dm_read (char *buffer, int track_num, int sector, const dm_image_t *image);
 extern int dm_write (const char *buffer, int track_num, int sector, const dm_image_t *image);
@@ -175,6 +174,7 @@ extern int dm_cue_write (const dm_image_t *image);
 
 extern int dm_disc_read (const dm_image_t *image);
 extern int dm_disc_write (const dm_image_t *image);
+
 
 /*
   dm_rip()       convert/rip a track from an image
@@ -192,33 +192,12 @@ TODO: DM_FIX     (isofix) takes an ISO image with PVD pointing
                    converted to 2048 bytes per sector when writing
                    excluding 2056 image which is needed by Mac users.
 */
+#define DM_CDMAGE 0
 #define DM_FILES 1
 #define DM_WAV 2
 #define DM_2048 4
 #define DM_FIX 8
-//#define DM_CDMAGE 16
 extern int dm_rip (const dm_image_t *image, int track_num, uint32_t flags);
-
-
-/*
-  dm_lba_to_msf() convert LBA to minutes, seconds, frames
-  dm_msf_to_lba() convert minutes, seconds, frames to LBA
-
-  LBA represents the logical block address for the CD-ROM absolute
-  address field or for the offset from the beginning of the current track
-  expressed as a number of logical blocks in a CD-ROM track relative
-  address field.
-  MSF represents the physical address written on CD-ROM discs,
-  expressed as a sector count relative to either the beginning of the
-  medium or the beginning of the current track.
-
-  dm_bcd_to_int() convert BCD to integer
-  dm_int_to_bcd() convert integer to BCD
-*/
-extern int dm_lba_to_msf (int lba, int *m, int *s, int *f);
-extern int dm_msf_to_lba (int m, int s, int f, int force_positive);
-extern int dm_bcd_to_int (int b);
-extern int dm_int_to_bcd (int i);
 
 #ifdef  __cplusplus
 }

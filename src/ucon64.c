@@ -908,7 +908,7 @@ ucon64_execute_options (void)
 //            ucon64_render_usage (p);
 
           fprintf (stderr, "       Is the option you used available for the current console system?\n"
-                           "       Please report bugs to noisyb@gmx.net\n\n");
+                           "       Please report bugs to noisyb@gmx.net or ucon64-announce@lists.sf.net\n\n");
 
           return -1;
         }
@@ -1217,7 +1217,7 @@ ucon64_nfo (void)
   if (ucon64.discmage_enabled)
     if (ucon64.image)
       {
-        libdm_nfo (ucon64.image);
+        dm_nfo (ucon64.image, ucon64.quiet < 0 ? 1 : 0, ucon64.ansi_color ? 1 : 0);
         fputc ('\n', stdout);
 
         return 0; // no crc calc. for disc images and therefore no dat entry either
@@ -1760,8 +1760,8 @@ ucon64_usage (int argc, char *argv[])
       MORE_MSG
       "     Give the force recognition switch a try if something went wrong\n"
       "\n"
-      "Please report any problems/ideas/fixes to noisyb@gmx.net or go to\n"
-      "http://ucon64.sf.net\n"
+      "Please report any problems/ideas/fixes to noisyb@gmx.net or\n"
+      "ucon64-announce@lists.sf.net or visit http://ucon64.sf.net\n"
       "\n",
       name_exe, name_exe);
 }

@@ -275,7 +275,7 @@ toc_init (dm_image_t *image)
         }
     }
 
-  image->desc = "ISO/BIN track with external toc file";
+  image->desc = "ISO/BIN track";
 
   fclose (fh);
   return 0;

@@ -248,6 +248,7 @@ extern char *fix_character_set (char *value);
   to_func()   use all to*() functions on an array of char
 
   strtrim()   trim isspace()'s from start and end of string
+  strncpy2()  a safer strncpy that DOES terminate a string
 
   get_suffix() get suffix of filename
   set_suffix() set/replace suffix of filename with suffix
@@ -288,6 +289,7 @@ extern char *strcasestr2 (const char *str, const char *search);
 #define strnicmp strncasecmp
 #endif
 extern char *strtrim (char *str);
+extern char *strncpy2 (char *dest, const char *src, size_t size);
 extern const char *get_suffix (const char *filename);
 extern char *set_suffix (char *filename, const char *suffix);
 extern char *set_suffix_i (char *filename, const char *suffix);

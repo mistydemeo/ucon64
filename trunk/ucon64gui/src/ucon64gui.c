@@ -19,6 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "ucon64gui.h"
+#include "ucon64.h"
 
 struct ucon64gui_
 {
@@ -28,43 +29,53 @@ struct ucon64gui_
   char file[NAME_MAX];
 
   char *ucon64_output;
-}
-ucon64;
 
-int snes_window=0;
+  int console;
+}
+ucon64gui;
 
 void
 ucon64_system (void)
 {
-//TODO pipe?!
-  system (ucon64.cmd);
+  switch(ucon64gui.console)
+  {
+    case ucon64_SNES:
+      strcat(ucon64gui.cmd," -snes");
+    break;
+    
+    default:
+    break;
+  }
+
+//TODO pipe? ucon64gui.ucon64_output
+  system (ucon64gui.cmd);
 }
 
 void
 ucon64_rom (void)
 {
-  html2gui_file ("Select ROM", ucon64.rom);
+  html2gui_file ("Select ROM", ucon64gui.rom);
 }
 
 void
 ucon64_file (void)
 {
 //_text nutzen
-  html2gui_file ("Select ROM", ucon64.file);
+  html2gui_file ("Select ROM", ucon64gui.file);
 }
 
 void
-ucon64_nfo (void)
+ucon64_info (void)
 {
-  strcpy(ucon64.rom, html2gui_filename);
-  sprintf (ucon64.cmd, "ucon64 \"%s\"", ucon64.rom);
+  strcpy(ucon64gui.rom, html2gui_filename);
+  sprintf (ucon64gui.cmd, "ucon64 \"%s\"", ucon64gui.rom);
   ucon64_system ();
 }
 
 void
 ucon64_ls (void)
 {
-  strcpy (ucon64.cmd, "ucon64 -ls .");
+  strcpy (ucon64gui.cmd, "ucon64 -ls .");
   ucon64_system ();
 }
 
@@ -73,6 +84,8 @@ ucon64_snes (void)
 {
 #include "xpm/snes.xpm"
 //#include "xpm/icon.xpm"
+
+ucon64gui.console = ucon64_SNES;
 
 //<html>
   html2gui_html (640, 400, 0);
@@ -83,18 +96,20 @@ ucon64_snes (void)
 
   html2gui_br ();
 
-  html2gui_button (ucon64_main, "Back", "Return", 10, 10, NULL);
+  html2gui_button (ucon64_root, "Back", "Return", 10, 10, NULL);
   
   html2gui_br ();
 
-  html2gui_button (ucon64_nfo, "Show info", "Click here to see information about ROM", 10, 10, NULL);
+  html2gui_button (ucon64_info, "Show info", "Click here to see information about ROM", 10, 10, NULL);
 //</html>
 }
 
 void
-ucon64_main (void)
+ucon64_root (void)
 {
 #include "xpm/icon.xpm"
+
+ucon64gui.console = ucon64_UNKNOWN;
 
 //<html>
   html2gui_html (640, 400, 0);
@@ -111,7 +126,7 @@ ucon64_main (void)
 
   html2gui_button (ucon64_rom, "Open ROM", "Click here to select a Video Game Console ROM from a FileDialog", 10, 10, NULL);
 
-  html2gui_button (ucon64_nfo, "Show info", "Click here to see information about ROM", 10, 10, NULL);
+  html2gui_button (ucon64_info, "Show info", "Click here to see information about ROM", 10, 10, NULL);
 
   html2gui_br ();
   html2gui_button (ucon64_snes, "Super Nintendo", "Super Nintendo specific options", 10, 10, NULL);
@@ -123,7 +138,7 @@ main (int argc, char *argv[])
 {
   html2gui_start(argc, argv);
 
-  ucon64_main();
+  ucon64_root();
 
   html2gui_end();
 

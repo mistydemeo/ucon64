@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "html2gui/src/html2gui_misc.h"
 
 void
-ucon64_main (void);
+ucon64_root (void);
 
 void
 ucon64_snes (void);

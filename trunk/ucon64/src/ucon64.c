@@ -181,10 +181,9 @@ const struct option long_options[] = {
     {"mgd", 0, 0, UCON64_MGD},
 //    {"mgh", 0, 0, UCON64_MGH},
     {"mka", 0, 0, UCON64_MKA},
-    {"mkcue", 0, 0, UCON64_MKCUE},
     {"mki", 0, 0, UCON64_MKI},
     {"mkppf", 0, 0, UCON64_MKPPF},
-    {"mktoc", 0, 0, UCON64_MKTOC},
+    {"mksheet", 0, 0, UCON64_MKSHEET},
     {"multi", 1, 0, UCON64_MULTI},
     {"mvs", 0, 0, UCON64_MVS},
     {"n", 0, 0, UCON64_N},
@@ -605,6 +604,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
     }
   else if (UCON64_TYPE_ISCD (ucon64.type))
     {
+#if 0
       st_iso_header_t iso_header;
 //      int value;
 
@@ -640,6 +640,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 //      rominfo->copier_usage = cdrw_usage;
       
       dm_close (image);
+#endif
    }
   return result;
 }

@@ -1,7 +1,7 @@
 /*
 djimport.c - discmage import library for DJGPP
 
-written by 2002 dbjh
+written by 2002 - 2003 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -34,11 +34,11 @@ static int dxe_loaded = 0;
 char djimport_path[FILENAME_MAX] = "discmage.dxe"; // default value
 
 static void *libdm;
-static dm_image_t *(*dm_init_ptr) (const char *);
+static dm_image_t *(*dm_open_ptr) (const char *);
 static int (*dm_close_ptr) (dm_image_t *);
-static int32_t (*dm_bin2iso_ptr) (dm_image_t *);
+static int32_t (*dm_rip_ptr) (dm_image_t *);
 static int32_t (*dm_cdirip_ptr) (dm_image_t *);
-static int32_t (*dm_cdi2nero_ptr) (dm_image_t *);
+static int32_t (*dm_nrgrip_ptr) (dm_image_t *);
 static int (*dm_disc_read_ptr) (dm_image_t *);
 static int (*dm_disc_write_ptr) (dm_image_t *);
 static int32_t (*dm_mksheets_ptr) (dm_image_t *);
@@ -50,12 +50,12 @@ load_dxe (void)
 {
   libdm = open_module (djimport_path);
 
-  dm_init_ptr = get_symbol (libdm, "dm_init");
+  dm_open_ptr = get_symbol (libdm, "dm_open");
   dm_close_ptr = get_symbol (libdm, "dm_close");
 
-  dm_bin2iso_ptr = get_symbol (libdm, "dm_bin2iso");
+  dm_rip_ptr = get_symbol (libdm, "dm_rip");
   dm_cdirip_ptr = get_symbol (libdm, "dm_cdirip");
-  dm_cdi2nero_ptr = get_symbol (libdm, "dm_cdi2nero");
+  dm_nrgrip_ptr = get_symbol (libdm, "dm_nrgrip");
 
   dm_disc_read_ptr = get_symbol (libdm, "dm_disc_read");
   dm_disc_write_ptr = get_symbol (libdm, "dm_disc_write");
@@ -67,7 +67,7 @@ load_dxe (void)
 
 
 dm_image_t *
-dm_init (const char *a)
+dm_open (const char *a)
 {
   CHECK
   return dm_init_ptr (a);
@@ -83,10 +83,10 @@ dm_close (dm_image_t *a)
 
 
 int32_t
-dm_bin2iso (dm_image_t *a)
+dm_rip (dm_image_t *a)
 {
   CHECK
-  return dm_bin2iso_ptr (a);
+  return dm_rip_ptr (a);
 }
 
 
@@ -99,10 +99,10 @@ dm_cdirip (dm_image_t *a)
 
 
 int32_t
-dm_cdi2nero (dm_image_t *a)
+dm_nrgrip (dm_image_t *a)
 {
   CHECK
-  return dm_cdi2nero_ptr (a);
+  return dm_nrgrip_ptr (a);
 }
 
 

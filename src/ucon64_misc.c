@@ -1184,7 +1184,7 @@ ucon64_configfile (void)
                  "discmage_path=discmage.dll\n"
                  "cache_path=\n"
 #elif   defined __unix__ || defined __BEOS__
-                 "discmage_path=~/ucon64/discmage.so\n"
+                 "discmage_path=~/.ucon64/discmage.so\n"
                  "cache_path=~/.ucon64\n"
 #endif
                  "#\n"
@@ -1277,7 +1277,7 @@ ucon64_configfile (void)
 #elif   defined __CYGWIN__
         "discmage.dll"
 #elif   defined __unix__ || defined __BEOS__
-        "~/discmage.so"
+        "~/.ucon64/discmage.so"
 #else
         ""
 #endif

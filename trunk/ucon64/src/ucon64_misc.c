@@ -98,15 +98,15 @@ ucon64_wrote (const char *filename)
 #define DETECT_MAX_CNT 1000
 #define CRC32_POLYNOMIAL     0xEDB88320L
 
-static unsigned long CRCTable[256];
+static unsigned long crc_table[256];
+static int crc_table_built = 0;
 
 #if     defined BACKUP && defined __BEOS__
 static int ucon64_io_fd;
 #endif
 
-static void BuildCRCTable ();
-static unsigned long CalculateFileCRC (FILE * file);
-
+static void build_crc_table ();
+static unsigned long calculate_file_crc (FILE * file);
 
 const char *unknown_usage[] =
   {
@@ -115,7 +115,7 @@ const char *unknown_usage[] =
   };
 
 void
-BuildCRCTable ()
+build_crc_table ()
 {
   int i, j;
   unsigned long crc;
@@ -130,75 +130,62 @@ BuildCRCTable ()
           else
             crc >>= 1;
         }
-      CRCTable[i] = crc;
+      crc_table[i] = crc;
     }
+  crc_table_built = 1;
 }
 
 
 unsigned long
-CalculateBufferCRC (unsigned int size, unsigned long crc, void *buffer)
+calculate_buffer_crc (unsigned int size, unsigned long crc, void *buffer)
+// zlib: crc32 (crc, buffer, size);
 {
   unsigned char *p;
   unsigned long temp1, temp2;
 
+  if (!crc_table_built)
+    build_crc_table ();
+
+  crc ^= 0xFFFFFFFFL;
   p = (unsigned char *) buffer;
   while (size-- != 0)
     {
       temp1 = (crc >> 8) & 0x00FFFFFFL;
-      temp2 = CRCTable[((int) crc ^ *p++) & 0xff];
+      temp2 = crc_table[((int) crc ^ *p++) & 0xff];
       crc = temp1 ^ temp2;
     }
+  return crc ^ 0xFFFFFFFFL;
+}
+
+
+unsigned long
+calculate_file_crc (FILE * file)
+{
+  unsigned long count, crc = 0;
+  unsigned char buffer[512];
+
+  while ((count = fread (buffer, 1, 512, file)))
+    crc = calculate_buffer_crc (count, crc, buffer); // zlib: crc32 (crc, buffer, count);
   return crc;
 }
 
 
 unsigned long
-CalculateFileCRC (FILE * file)
-{
-  unsigned long crc;
-  int count, i;
-  unsigned char buffer[512];
-
-  crc = 0xFFFFFFFFL;
-  i = 0;
-  while ((count = fread (buffer, 1, 512, file)))
-    crc = CalculateBufferCRC (count, crc, buffer);
-
-  return crc ^= 0xFFFFFFFFL;
-}
-
-
-unsigned long
-fileCRC32 (const char *filename, long start)
+file_crc32 (const char *filename, long start)
 {
   unsigned long val;
   FILE *fh;
 
-  BuildCRCTable ();
+  build_crc_table ();
 
   if (!(fh = fopen (filename, "rb")))
     return -1;
   fseek (fh, start, SEEK_SET);
-  val = CalculateFileCRC (fh);
+  val = calculate_file_crc (fh);
   fclose (fh);
 
   return val;
 }
-
-
-/*
-  like zlib/crc32(); uCON64 has it's own crc calc. stuff
-  this is just a wrapper
-*/
-/*
-unsigned long
-unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size)
-{
-  unsigned long crc = 0;
-
-  return CalculateBufferCRC ((unsigned int) size, crc, (void *) prg_code);
-}
-*/
 
 
 const char *

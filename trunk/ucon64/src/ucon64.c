@@ -538,7 +538,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
         ucon64.buheader_len : rominfo->buheader_len;
 #endif
 
-      rominfo->current_crc32 = fileCRC32 (romfile, rominfo->buheader_len);
+      rominfo->current_crc32 = file_crc32 (romfile, rominfo->buheader_len);
 
 #ifdef DB
       switch (ucon64.console)

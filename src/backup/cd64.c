@@ -203,7 +203,7 @@ int control_reg;
 int ecp_reg;
 int ecp_mode;
 int ecp=0;
-char buf[32768];
+char buf[MAXBUFSIZE];
 
 void c_break (int signum)
 {

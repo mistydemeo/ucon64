@@ -138,7 +138,7 @@ const struct option options[] = {
     {"dint", 0, 0, UCON64_DINT},
 #ifdef  DISCMAGE
     {"disc", 0, 0, UCON64_DISC},
-#endif    
+#endif
     {"dumpinfo", 1, 0, UCON64_DUMPINFO},
     {"e", 0, 0, UCON64_E},
     {"erom", 0, 0, UCON64_EROM},
@@ -208,7 +208,7 @@ const struct option options[] = {
 #ifdef  DISCMAGE
     {"mksheet", 0, 0, UCON64_MKSHEET},
     {"mktoc", 0, 0, UCON64_MKTOC},
-#endif    
+#endif
     {"multi", 1, 0, UCON64_MULTI},
 //    {"mvs", 0, 0, UCON64_MVS},
     {"n", 1, 0, UCON64_N},
@@ -1127,7 +1127,7 @@ ucon64_nfo (void)
   if (ucon64.console == UCON64_UNKNOWN && !ucon64.image)
 #else
   if (ucon64.console == UCON64_UNKNOWN)
-#endif     
+#endif
     {
       fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
       printf ("\n");
@@ -1135,7 +1135,7 @@ ucon64_nfo (void)
 
   if (ucon64.rominfo && ucon64.console != UCON64_UNKNOWN && !ucon64.force_disc)
     ucon64_rom_nfo (ucon64.rominfo);
-  
+
 #ifdef  DISCMAGE
   if (ucon64.discmage_enabled)
     if (ucon64.image)
@@ -1147,7 +1147,10 @@ ucon64_nfo (void)
       }
 #endif
   // Use ucon64.fcrc32 for SNES & Genesis interleaved/N64 non-interleaved
-  if (ucon64.fcrc32 || ucon64.crc32)
+  if (ucon64.fcrc32 && ucon64.crc32)
+    printf ("Search checksum (CRC32): 0x%08x\n"
+            "Data checksum (CRC32): 0x%08x\n", ucon64.crc32, ucon64.fcrc32);
+  else if (ucon64.fcrc32 || ucon64.crc32)
     printf ("Checksum (CRC32): 0x%08x\n", ucon64.fcrc32 ? ucon64.fcrc32 : ucon64.crc32);
 
   // The check for the size of the file is made, so that uCON64 won't display a

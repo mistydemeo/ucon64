@@ -1263,6 +1263,10 @@ knowing when that is necessary.
    af XX YY 84 cf XX YY 84 f0
 => af XX YY 84 cf XX YY 84 ea ea
 
+- Demon's Crest (af, cf)
+   af/bf XX ff 80 cf/df XX ff 40 f0
+=> af/bf XX ff 80 cf/df XX ff 40 80
+
 - Super Metroid
    a9 00 00 a2 fe 1f df 00 00 70 d0     lda #$0000; ldx #$1ffe; cmp $700000,x; bne ...
 => a9 00 00 a2 fe 1f df 00 00 70 ea ea  lda #$0000; ldx #$1ffe; cmp $700000,x; nop; nop
@@ -1293,11 +1297,11 @@ TODO: make sense of Diddy's Kong Quest codes
    22 08 5c 10 b0 28                    jsl $105c08; bcs ...
 => ea ea ea ea ea ea                    nop; nop; nop; nop; nop; nop
 
-- most probably only BS The Legend of Zelda Remix (enables sound)
+- most probably only BS The Legend of Zelda Remix (enables music)
    da e2 30 c9 01 f0 18 c9 02
 => da e2 30 c9 09 f0 18 c9 07
 
-- most probably only BS The Legend of Zelda Remix (enables sound)
+- most probably only BS The Legend of Zelda Remix (enables music)
    29 ff 00 c9 07 00 90 16
 => 29 ff 00 c9 00 00 90 16
 */
@@ -1351,10 +1355,14 @@ TODO: make sense of Diddy's Kong Quest codes
       // uCON64
       change_string ("!**\x70!**\x70\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
                      "\x8f\x9f", 2, "\xcf\xdf", 2);
+
       change_string ("\xa9\x00\x00\xa2\xfe\x1f\xdf\x00\x00\x70\xd0", 11, '*', '!', "\xea\xea", 2, buffer, bytesread, 0);
       change_string ("\x5c\x7f\xd0\x83\x18\xfb\x78\xc2\x30", 9, '*', '!',
                      "\xea\xea\xea\xea\xea\xea\xea\xea\xea", 9, buffer, bytesread, -8);
+
       change_string ("!*\x80\x00!*\x80\x40\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
+                     "\xaf\xbf", 2, "\xcf\xdf", 2);
+      change_string ("!*\xff\x80!*\xff\x40\xf0", 9, '*', '!', "\x80", 1, buffer, bytesread, 0,
                      "\xaf\xbf", 2, "\xcf\xdf", 2);
       change_string ("\xaf**\x84\xcf**\x84\xf0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0);
 

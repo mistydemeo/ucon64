@@ -477,13 +477,13 @@ genesis_j (st_rominfo_t *rominfo)
           block_size = q_fsize (src_name) - rominfo->buheader_len;
         }
                                                 // fix header
-      buf[0] = total_size / 16384;		// # 16K blocks
-      buf[1] = 3;				// ID 0
-      buf[2] = 0;				// last file -> clear bit 6
+      buf[0] = total_size / 16384;              // # 16K blocks
+      buf[1] = 3;                               // ID 0
+      buf[2] = 0;                               // last file -> clear bit 6
       q_fwrite (buf, 0, 3, dest_name, "r+b");
-      buf[0] = 0xaa;				// ID 1
-      buf[1] = 0xbb;				// ID 2
-      buf[2] = 6;				// type Genesis
+      buf[0] = 0xaa;                            // ID 1
+      buf[1] = 0xbb;                            // ID 2
+      buf[2] = 6;                               // type Genesis
       q_fwrite (buf, 8, 3, dest_name, "r+b");
 
       printf (ucon64_msg[WROTE], dest_name);

@@ -345,6 +345,10 @@ genesis_mgd (st_rominfo_t *rominfo)
     *p = 0;
   strcat (buf, "______");
   buf[8] = 0;
+  // avoid trouble with filenames containing spaces
+  for (x = 2; x < 8; x++)                       // skip "md"
+    if (buf[x] == ' ')
+      buf[x] = '_';
   sprintf (dest_name, "%s.%03u", buf, genesis_rom_size / MBIT);
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
 

@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.13 2002-09-26 14:15:32 noisyb Exp $
+ * $Id: gg.c,v 1.14 2002-10-15 23:12:29 dbjh Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.  
  * All rights reserved. Distributed under the BSD Software License.
@@ -929,7 +929,7 @@ gg_main (int argc, const char **argv)
     {
       if (strchr (argv[i], ':') == 0)
         {
-          printf ("SHIT!");
+//          printf ("SHIT!");
           fflush (stdout);
 
           switch (argv[1][1])
@@ -1012,7 +1012,7 @@ gg_gge (void)
       break;
 
     default:
-      fprintf (stderr, 
+      fprintf (stderr,
            "ERROR: You must specify the console via force recognition\n"
            "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n");
       return -1;
@@ -1070,8 +1070,7 @@ gg_ggd (void)
 int
 gg_gg (st_rominfo_t *rominfo)
 {
-  long size = q_fsize (ucon64.rom) - rominfo->buheader_len;
-  long add, value;
+  long size = rominfo->file_size - rominfo->buheader_len, add, value;
   char buf[MAXBUFSIZE];
   int result = -1;
 

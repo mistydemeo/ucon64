@@ -171,8 +171,9 @@ gba_n (st_rominfo_t *rominfo)
 
   memset(buf, 0L, MAXBUFSIZE - 1);
   strcpy (buf, ucon64.file);
+  ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (buf, GBA_HEADER_START + rominfo->buheader_len + 0xa0,
-               0x0b, ucon64_fbackup (NULL, ucon64.rom), "r+b");
+               0x0b, ucon64.rom, "r+b");
 
   ucon64_wrote (ucon64.rom);
   return 0;
@@ -204,9 +205,10 @@ gba_logo (st_rominfo_t *rominfo)
   0x87, 0xf0, 0x3c, 0xaf, 0xd6, 0x25, 0xe4, 0x8b,
   0x38, 0x0a, 0xac, 0x72, 0x21, 0xd4, 0xf8, 0x07};
 
+  ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (logodata,
                GBA_HEADER_START + rominfo->buheader_len + 0x04,
-               LOGODATA_LEN, ucon64_fbackup (NULL, ucon64.rom), "r+b");
+               LOGODATA_LEN, ucon64.rom, "r+b");
 
   ucon64_wrote (ucon64.rom);
   return 0;
@@ -238,7 +240,8 @@ gba_sram (st_rominfo_t *rominfo)
 {
   char buf[MAXBUFSIZE];
 
-  strcpy (buf, ucon64_fbackup (NULL, ucon64.rom));
+  ucon64_fbackup (NULL, ucon64.rom);
+  strcpy (buf, ucon64.rom);
   setext (buf, ".TMP");
   rename (ucon64.rom, buf);
 

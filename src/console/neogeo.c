@@ -87,7 +87,8 @@ neogeo_bios (st_rominfo_t *rominfo)
   strcpy (buf, ucon64.rom);
   setext (buf, ".NEW");
 
-  q_fcpy (ucon64.rom, 0, MBIT, ucon64_fbackup (NULL, buf), "wb");
+  ucon64_fbackup (NULL, buf);
+  q_fcpy (ucon64.rom, 0, MBIT, buf, "wb");
   q_fswap (buf, 0, MBIT);
 
   return 0;

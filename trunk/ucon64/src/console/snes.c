@@ -998,11 +998,9 @@ snes_ufo (st_rominfo_t *rominfo)
   q_fread (&header, 0, rominfo->buheader_len > (int) UFO_HEADER_LEN ?
                          (int) UFO_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
-  header.size_low = size / 8192;
-  header.size_high = size / 8192 >> 8;
   header.multi = snes_split ? 0x40 : 0; // TODO
   memcpy (header.id, "SUPERUFO", 8);
-  header.size = size / MBIT;
+  header.size = size / MBIT; // Should this byte match the padded ROM size?
   header.banktype = snes_hirom ? 0 : 1;
 
   if (snes_sramsize == 128 * 1024)
@@ -1023,12 +1021,17 @@ snes_ufo (st_rominfo_t *rominfo)
   strcpy (dest_name, ucon64.rom);
   set_suffix (dest_name, ".UFO");
   ucon64_file_handler (dest_name, src_name, 0);
-  q_fwrite (&header, 0, UFO_HEADER_LEN, dest_name, "wb");
 
   if (snes_hirom)
     {
       unsigned char *srcbuf, *dstbuf;
-      int newsize, half_newsize, half_size_4Mb, half_size_1Mb, pad;
+      int half_size_4Mb, half_size_1Mb,
+          newsize = size >= 10 * MBIT && size <= 12 * MBIT ?
+                      12 * MBIT : ((size + MBIT - 1) & ~(MBIT - 1)),
+          half_newsize = newsize / 2, pad = (newsize - size) / 2;
+
+      header.size_low = newsize / 8192;
+      header.size_high = newsize / 8192 >> 8;
 
       // TODO: wait for a newer revision of John's UFO header spec as it
       //       is way too unclear
@@ -1045,10 +1048,6 @@ snes_ufo (st_rominfo_t *rominfo)
           // header.sram_a22_a23 = 0; already ok
           // Tales of Phantasia (J) & Dai Kaiju Monogatari 2 (J): 0 0x0e 0
         }
-
-      newsize = size >= 10 * MBIT && size <= 12 * MBIT ?
-                  12 * MBIT : ((size + MBIT - 1) & ~(MBIT - 1));
-      pad = (newsize - size) / 2;
 
       if (!(srcbuf = (unsigned char *) malloc (size)))
         {
@@ -1067,7 +1066,6 @@ snes_ufo (st_rominfo_t *rominfo)
       if (newsize > size)
         memset (dstbuf + size, 0, newsize - size);
 
-      half_newsize = newsize / 2;
       snes_int_blocks (srcbuf, dstbuf + half_newsize, dstbuf, size / 0x10000);
       if (pad > 0)
         {
@@ -1078,6 +1076,7 @@ snes_ufo (st_rominfo_t *rominfo)
                        half_newsize + half_size_1Mb, newsize);
         }
 
+      q_fwrite (&header, 0, UFO_HEADER_LEN, dest_name, "wb");
       q_fwrite (dstbuf, UFO_HEADER_LEN, newsize, dest_name, "ab");
 
       free (srcbuf);
@@ -1085,6 +1084,9 @@ snes_ufo (st_rominfo_t *rominfo)
     }
   else
     {
+      header.size_low = size / 8192;
+      header.size_high = size / 8192 >> 8;
+
       // TODO: wait for a newer revision of John's UFO header spec as it
       //       is way too unclear
       if (snes_sramsize == 0)
@@ -1112,6 +1114,7 @@ snes_ufo (st_rominfo_t *rominfo)
           header.sram_a22_a23 = 3;
         }
 
+      q_fwrite (&header, 0, UFO_HEADER_LEN, dest_name, "wb");
       if (rominfo->interleaved)
         write_deinterleaved_data (rominfo, src_name, dest_name, size);
       else
@@ -1188,8 +1191,6 @@ snes_split_gd3 (st_rominfo_t *rominfo, int size)
        names_mem[GD3_MAX_UNITS][9];
   int nparts, surplus, n, half_size, name_i = 0;
 
-  size = ucon64.file_size - rominfo->buheader_len;
-
   // Don't use part_size here, because the Game Doctor doesn't support
   //  arbitrary part sizes
   nparts = size / (8 * MBIT);
@@ -1246,10 +1247,15 @@ snes_split_ufo (st_rominfo_t *rominfo, int size, int part_size)
   char header[512], dest_name[FILENAME_MAX];
   int nparts, surplus, n;
 
-  if (snes_hirom && size > 32 * MBIT)
+  if (snes_hirom)
     {
-      fprintf (stderr, "ERROR: HiROM > 32 Mbit -- conversion not yet implemented\n");
-      return;
+      if (size > 32 * MBIT)
+        {
+          fprintf (stderr, "ERROR: HiROM > 32 Mbit -- conversion not yet implemented\n");
+          return;
+        }
+      if (UCON64_ISSET (ucon64.part_size))
+        printf ("WARNING: Splitting Super UFO HiROM, ignoring switch "OPTION_LONG_S"ssize\n");
     }
 
   strcpy (dest_name, ucon64.rom);

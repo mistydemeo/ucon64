@@ -294,13 +294,14 @@ main (int argc, char *argv[])
        return 0;
     }
 
+  memset (&rom, 0, sizeof (struct ucon64_));
   rom.console = ucon64_UNKNOWN;
   ucon64_flush (argc, argv, &rom);
 
   if (!strlen (rom.rom))//no $ROM? then just use current working dir
     getcwd (rom.rom, sizeof (rom.rom));
 
-  if (!access (rom.rom, F_OK))
+  if (!access (rom.rom, F_OK|R_OK))
     {
       ucon64_init (&rom);
     }

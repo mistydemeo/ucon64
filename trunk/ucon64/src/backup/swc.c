@@ -630,13 +630,13 @@ sub (void)
 int
 mram_helper (int x)
 {
-  ffe_send_command (5, x, 0);
+  ffe_send_command (5, (unsigned short) x, 0);
   x = ffe_send_command1 (0x8000);
-  ffe_send_command0 (0x8000, x ^ 0xff);
+  ffe_send_command0 (0x8000, (unsigned char) (x ^ 0xff));
   if (ffe_send_command1 (0x8000) != (x ^ 0xff))
     return 0;
 
-  ffe_send_command0 (0x8000, x);
+  ffe_send_command0 (0x8000, (unsigned char) x);
   return 1;
 }
 

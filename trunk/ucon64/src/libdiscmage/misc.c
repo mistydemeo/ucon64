@@ -586,14 +586,12 @@ strcasestr2 (const char *str, const char *search)
 char *
 set_suffix (char *filename, const char *suffix)
 {
-  char suffix2[FILENAME_MAX], *p, *p2 = NULL;
+  char suffix2[FILENAME_MAX], *p, *p2;
 
-  p = basename (filename);
-  if (!p)
+  if (!(p = basename (filename)))
     p = filename;
-
   if ((p2 = strrchr (p, '.')))
-    if (strcmp (p2 ,p) != 0)                    // some files start with '.'
+    if (p2 != p)                                // files can start with '.'
       *p2 = 0;
 
   strcpy (suffix2, suffix);
@@ -606,14 +604,12 @@ set_suffix (char *filename, const char *suffix)
 char *
 set_suffix_i (char *filename, const char *suffix)
 {
-  char *p, *p2 = NULL;
+  char *p, *p2;
 
-  p = basename (filename);
-  if (!p)
+  if (!(p = basename (filename)))
     p = filename;
-
   if ((p2 = strrchr (p, '.')))
-    if (strcmp (p2 ,p) != 0)                    // some files start with '.'
+    if (p2 != p)                                // files can start with '.'
       *p2 = 0;
 
   strcat (filename, suffix);
@@ -626,13 +622,15 @@ const char *
 get_suffix (const char *filename)
 // Note that get_suffix() never returns NULL. Other code relies on that!
 {
-  const char *p = NULL;
+  char *p, *p2;
 
-  if (!(p = strrchr (filename, FILE_SEPARATOR)))
-    p = filename;
-  if (!(p = strrchr (p, '.')))
+  if (!(p = basename (filename)))
+    p = (char *) filename;
+  if (!(p2 = strrchr (p, '.')))
     p = "";
-
+  if (p2 == p)
+    p = "";                                     // files can start with '.'; be
+                                                //  consistent with set_suffix[_i]()
   return p;
 }
 

@@ -29,7 +29,7 @@ dex_usage (int argc, char *argv[])
 
   printf
     ("TODO:  -xdex    send/receive SRAM to/from DexDrive; $FILE=PORT\n"
-     "		receives automatically when $ROM does not exist\n");
+     "		receives automatically when $ROM(=SRAM) does not exist\n");
 
   if (argcmp (argc, argv, "-help"))
     {

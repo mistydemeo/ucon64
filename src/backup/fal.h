@@ -26,4 +26,4 @@ int fal_read(char *filename, unsigned int parport, int argc, char *argv[]);
 int fal_write(char *filename, long start, long len, unsigned int parport, int argc, char *argv[]);
 int fal_usage(int argc, char *argv[]);
 
-#define fal_TITLE "Flash Advance Linker"
+#define fal_TITLE "Flash Advance Linker\n2001 Visoly http://www.visoly.com"

@@ -123,11 +123,12 @@ const char *unknown_usage[] =
   Return type is not const char *, because it may return move_name (indirectly
   via q_fbackup()), which is not a pointer to constant characters.
 */
-char *
+#if 0
+void
 ucon64_fbackup (char *move_name, const char *filename)
 {
   if (!ucon64.backup)
-    return (char *) filename;
+    return;// (char *) filename;
 
   if (!access (filename, F_OK))
     {
@@ -135,8 +136,16 @@ ucon64_fbackup (char *move_name, const char *filename)
       fflush (stdout);
     }
 
-  return q_fbackup (move_name, filename);
+  q_fbackup (move_name, filename);
+  return;// q_fbackup (move_name, filename);
 }
+#else
+void
+ucon64_fbackup (char *move_name, const char *filename)
+{
+  handle_existing_file (filename, move_name);
+}
+#endif
 
 
 void
@@ -452,7 +461,7 @@ ucon64_pad (const char *filename, int start, int size)
 }
 
 
-#if 1
+#if 0
 long
 ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)

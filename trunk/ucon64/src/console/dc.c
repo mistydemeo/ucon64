@@ -70,7 +70,7 @@ dc_init (st_rominfo_t *rominfo)
 //#ifdef CONSOLE_PROBE
 //#endif // CONSOLE_PROBE
 
-//printf ("%d\n", sizeof (dc_ip0000_header_t));
+//  printf ("%d\n", sizeof (dc_ip0000_header_t));
 
   rominfo->console_usage = dc_usage;
   rominfo->copier_usage = cdrw_usage;

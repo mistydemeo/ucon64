@@ -139,6 +139,7 @@ const struct option options[] = {
 #ifdef  DISCMAGE
     {"disc", 0, 0, UCON64_DISC},
 #endif
+    {"dmirr", 0, 0, UCON64_DMIRR},
     {"dumpinfo", 1, 0, UCON64_DUMPINFO},
     {"e", 0, 0, UCON64_E},
     {"erom", 0, 0, UCON64_EROM},

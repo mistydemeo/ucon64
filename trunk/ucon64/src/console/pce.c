@@ -30,7 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "pce.h"
 #include "backup/mgd.h"
-#include "backup/cdrw.h"
 
 
 #define PCENGINE_HEADER_START 0x448

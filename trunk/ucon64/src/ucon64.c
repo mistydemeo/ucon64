@@ -47,15 +47,15 @@ write programs in C
 #ifdef DEBUG
 #warning DEBUG active
 #endif
-
-
 #include "getopt.h"
 #include "misc.h"
 #include "quick_io.h"
-#include "libdiscmage/libdiscmage.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"
+#ifdef  LIBDISCMAGE
+#include "libdiscmage/libdiscmage.h"
+#endif
 
 #include "console/snes.h"
 #include "console/gb.h"
@@ -84,7 +84,6 @@ write programs in C
 
 #include "backup/fig.h"
 #include "backup/swc.h"
-#include "backup/cdrw.h"
 #include "backup/doctor64jr.h"
 #include "backup/doctor64.h"
 #include "backup/smd.h"
@@ -250,9 +249,9 @@ const struct option long_options[] = {
     {"vboy", 0, 0, UCON64_VBOY},
     {"vec", 0, 0, UCON64_VEC},
     {"xbox", 0, 0, UCON64_XBOX},
-#ifdef BACKUP_CD
+#ifdef LIBDISCMAGE
     {"xcdrw", 0, 0, UCON64_XCDRW},
-#endif // BACKUP_CD
+#endif // LIBDISCMAGE
 #ifdef BACKUP
     {"xdex", 1, 0, UCON64_XDEX},
     {"xdjr", 0, 0, UCON64_XDJR},
@@ -639,7 +638,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 
 //      rominfo->console_usage =
 
-      rominfo->copier_usage = cdrw_usage;
+//      rominfo->copier_usage = cdrw_usage;
       
       dm_close (image);
    }
@@ -926,22 +925,21 @@ ucon64_usage (int argc, char *argv[])
 //    genesis_usage[0],
     nes_usage[0], snes_usage[0]);
 
-#if 0
-  printf ("\n"
-    "%s\n", cdrw_usage[0]);
-
+#ifdef  LIBDISCMAGE
   printf (
-    "  " OPTION_LONG_S "cd          force recognition (of CD IMAGES)\n"
-    "                  this is the support for the most CD-based consoles\n");
-
-//  UCON64_USAGE (cdrw_usage);
-  printf ("%s", cdrw_usage[2]);
-
-
-  printf (
-    "  " OPTION_LONG_S "sheet       generate sheet files (TOC (cdrdao) and CUE); " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
-//    "  " OPTION_LONG_S "mktoc       generate TOC file for cdrdao; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
-//    "  " OPTION_LONG_S "mkcue       generate CUE file; " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
+    "\n"
+    "Support for DISC-based consoles (libdiscmage)\n"
+    "  " OPTION_LONG_S "xcdrw       read/write IMAGE from/to CD-Writer;\n"
+    "                  " OPTION_LONG_S "rom=CD_IMAGE " OPTION_LONG_S "file=TRACK_MODE\n"
+    "                  reads automatically when CD_IMAGE does not exist\n"
+    "                  " OPTION_LONG_S "xcdrw is depricated for portability reasons\n"
+    "                  use the scripts in contrib/ instead\n"
+    "TODO: " OPTION_LONG_S "mksheet generate TOC and CUE sheet files for CD_IMAGE; " OPTION_LONG_S "rom=CD_IMAGE\n"
+    "                  " OPTION_LONG_S "rom could also be an existing TOC or CUE file\n"
+    "TODO: " OPTION_LONG_S "iso     convert BIN/RAW CD_IMAGE to MODE1 (2048 Bytes); " OPTION_LONG_S "rom=CD_IMAGE\n"
+    "TODO: " OPTION_LONG_S "cdirip  rip/split track(s) from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
+    "TODO: " OPTION_LONG_S "nero    convert DiscJuggler/CDI IMAGE for use with Nero;\n"
+    "                  " OPTION_LONG_S "rom=CDI_IMAGE\n"
 //    "                TRACK_MODE='CD_DA'     (2352 Bytes; AUDIO)\n"
     "                  TRACK_MODE='MODE2_RAW' (2352 Bytes; default)\n"
     "                  TRACK_MODE='MODE1'     (2048 Bytes; standard ISO9660)\n"
@@ -952,26 +950,9 @@ ucon64_usage (int argc, char *argv[])
 //    "                TRACK_MODE='MODE2_FORM_MIX' (2336 Bytes)\n"
     "                  " OPTION_LONG_S "file=TRACK_MODE is optional, uCON64 will always try to\n"
     "                  detect the correct TRACK_MODE from the CD_IMAGE itself\n"
-#ifdef TODO
-#warning TODO  --toc    convert *.cue file to cdrdao *.toc;
-#endif // TODO
-//    "TODO:  " OPTION_LONG_S "toc    convert *.cue file to cdrdao *.toc\n"
-//    "TODO:  " OPTION_LONG_S "cue    convert cdrdao *.toc file to *.cue; " OPTION_LONG_S "rom=TOC_FILE\n"
-    "  " OPTION_LONG_S "iso         convert BIN/RAW CD_IMAGE to MODE1 (2048 Bytes); " OPTION_LONG_S "rom=CD_IMAGE\n"
-    "                  this might be useful if you made a MODE2_RAW image of a\n"
-    "                  MODE1 CD and want to "
-#ifdef __unix__
-    "mount or "
-#endif
-    "burn it as MODE1 (2048 Bytes)\n"
-    "                  this does only work for MODE1_RAW and MODE2(_RAW) CD_IMAGEs\n"
-#if 0
-    "TEST: " OPTION_LONG_S "cdirip  rip/split track(s) from DiscJuggler/CDI IMAGE; " OPTION_LONG_S "rom=CDI_IMAGE\n"
-    "TODO: " OPTION_LONG_S "nero    convert DiscJuggler/CDI IMAGE for use with Nero;\n"
-    "                  " OPTION_LONG_S "rom=CDI_IMAGE\n"
-#endif
     "\n");
-#endif
+#endif // LIBDISCMAGE
+
   optind = option_index = 0;
   single = 0;
 

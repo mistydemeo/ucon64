@@ -33,7 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/genesis.h"
 #include "backup/mgd.h"
 #include "backup/smd.h"
-#include "backup/cdrw.h"
 
 
 static void interleave_buffer (unsigned char *buffer, int size);

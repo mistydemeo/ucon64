@@ -1335,7 +1335,7 @@ ucon64_configfile (void)
                  "ace_extract=unace e \"%%s\"\n"
 #endif
 #endif
-#ifdef  BACKUP_CD
+#ifdef  LIBDISCMAGE
                  "#\n"
                  "# uCON64 can operate as frontend for CD burning software to make backups\n"
                  "# for CD-based consoles \n"

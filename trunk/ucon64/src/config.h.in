@@ -52,16 +52,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 @DEFINE_BACKUP@
 
 
-#ifndef __MSDOS__                               // AFAIK there is no cdrdao for MSDOS
 /*
-  enables/disables support for cd backups
-
-  comment this if there is no cdrdao (http://cdrdao.sourceforge.net)
-  port available for your platform
+  enables/disables support for disc backups 
 */
-@DEFINE_BACKUP_CD@
-
-#endif // __MSDOS__
+@DEFINE_LIBDISCMAGE@
 
 
 /* enables/disables the use of color in the display output */

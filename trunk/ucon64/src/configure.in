@@ -50,19 +50,19 @@ fi
 AC_MSG_RESULT($enable_backup)
 AC_SUBST(DEFINE_BACKUP)
 
-AC_MSG_CHECKING(whether support for CD backups is enabled)
-AC_ARG_ENABLE(backup_cd,
-              AC_HELP_STRING([--enable-backup-cd],
-                             [enable support for CD backups (default: yes)]),
-              enable_backup_cd=$enableval,
-              enable_backup_cd=yes)
-if test $enable_backup_cd = yes; then
-  DEFINE_BACKUP_CD="#define BACKUP_CD"
+AC_MSG_CHECKING(whether support for DISC backups is enabled)
+AC_ARG_ENABLE(libdiscmage,
+              AC_HELP_STRING([--enable-libdiscmage],
+                             [enable support for DISC backups (default: yes)]),
+              enable_libdiscmage=$enableval,
+              enable_libdiscmage=yes)
+if test $enable_libdiscmage = yes; then
+  DEFINE_LIBDISCMAGE="#define LIBDISCMAGE"
 else
-  DEFINE_BACKUP_CD="//#define BACKUP_CD"
+  DEFINE_LIBDISCMAGE="//#define LIBDISCMAGE"
 fi
-AC_MSG_RESULT($enable_backup_cd)
-AC_SUBST(DEFINE_BACKUP_CD)
+AC_MSG_RESULT($enable_libdiscmage)
+AC_SUBST(DEFINE_LIBDISCMAGE)
 
 AC_MSG_CHECKING(whether the use of color is enabled)
 AC_ARG_ENABLE(ansi_color,

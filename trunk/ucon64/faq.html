@@ -655,8 +655,8 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    sourceforge page. You should be able to find a page where you can browse the
    CVS repository. Download the latest version of the file snes.c. Open the
    file in an editor and search for the text snes_k. If you are looking for
-   NTSC/PAL fixes search either for snes_fix_pal_protection or
-   snes_fix_ntsc_protection, depending on what you need. For example you will
+   NTSC or PAL fixes search either for snes_fix_pal_protection or
+   snes_fix_ntsc_protection, depending on what you need. For example, you will
    have to search for snes_fix_pal_protection, if you want to fix a game so
    that it will run on an NTSC SNES.<br>
    Then read the comment to see what "code" your game requires. However, surely
@@ -666,7 +666,7 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    &nbsp;&nbsp; af/bf XX 80 00 cf/df XX 80 40 f0<br>
    =&#62; af/bf XX 80 00 cf/df XX 80 40 80<br>
    Then you could search for the sequence \x80\x40\xf0. It's just a subset of
-   the search pattern with each element suffixed with "\x".Searching for
+   the search pattern with each element suffixed with "\x". Searching for
    \xaf/\xbf won't bring you far. Searching for \xXX\x80 neither. It takes a
    bit too much text to explain all the details, so just follow the directions.
    Note that I didn't advise to search for \x80\x40\x80, because that's what
@@ -703,9 +703,9 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    you will run uCON64 (note that this is not necessarily the same directory as
    the one where the uCON64 executable might be located!) or in uCON64's
    configuration directory. Use the option -version to find out which directory
-   that is. Then try if uCON64 can now crack your game. uCON64 will display a
-   warning if it detects an error in your new line. If you made a mistake with
-   escape symbols uCON64 might very well crash.<br>
+   that is. Then try if uCON64 is able to crack your game. uCON64 will display
+   a warning message if it detects an error in your new line. If you made a
+   mistake with escape symbols uCON64 might very well crash.<br>
    If you can't find which line you need you will either have to add a line to
    snescopy.txt, snespal.txt or snesntsc.txt for every code that isn't already
    mentioned in those files or ask someone else to do it for you. For example
@@ -736,8 +736,8 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    A wildcard value in the search pattern matches with any value.<br>
    Using the above search pattern, uCON64 will search and replace two bytes six
    bytes "back" from the end of any matched byte sequence.
-   For example, any sequence 01 22 01 19 42 84 19 75 will be changed into
-   01 02 03 19 42 84 19 75.
+   For example, any occurence of the byte sequence 01 22 01 19 42 84 19 75 will
+   be changed into 01 02 03 19 42 84 19 75.
 <br>
 <br>
 <br>

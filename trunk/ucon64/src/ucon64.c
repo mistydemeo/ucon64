@@ -80,7 +80,6 @@ static int ucon64_execute_options (void);
 static void ucon64_rom_nfo (const st_rominfo_t *rominfo);
 static st_rominfo_t *ucon64_probe (st_rominfo_t *rominfo);
 static int ucon64_rom_handling (void);
-static void ucon64_render_usage (const st_usage_t *usage);
 static int ucon64_process_rom (char *fname);
 
 
@@ -909,7 +908,7 @@ ucon64_execute_options (void)
                            opt ? opt : "uCON64");
 
 //          if (p)
-//            ucon64_render_usage (p);
+//            render_usage (p, ucon64.quiet < 0);
 
           fprintf (stderr, "       Is the option you used available for the current console system?\n"
                            "       Please report bugs to noisyb@gmx.net or ucon64-announce@lists.sf.net\n\n");
@@ -1441,94 +1440,6 @@ ucon64_fname_arch (const char *fname)
 
 
 void
-ucon64_render_usage (const st_usage_t *usage)
-{
-  // TODO: speed up
-  int x;
-  char buf[MAXBUFSIZE];
-
-#ifdef  DEBUG
-  // look for malformed usages
-  for (x = 0; usage[x].option_s || usage[x].optarg || usage[x].desc; x++)
-    fprintf (stderr, "{\"%s\", \"%s\", \"%s\"},\n",
-      usage[x].option_s,
-      usage[x].optarg,
-      usage[x].desc);
-#endif
-
-  for (x = 0; usage[x].option_s || usage[x].desc; x++)
-    {
-      if (!usage[x].option_s) // title
-        {
-          if (!x) // do not show date, manufacturer, etc..
-            puts (usage[x].desc);
-        }
-      else  // options
-        {
-          if (usage[x].option_s)
-            {
-              int len = strlen (usage[x].option_s);
-
-              // adjust tabs for OPTION_S and OPTION_LONG_S here not in the
-              //  OPTION_S definition
-              sprintf (buf,
-                        (len == 1 ?
-                         ("   " OPTION_S "%s%c") :
-                         ("  " OPTION_LONG_S "%s%c")),
-                         usage[x].option_s,
-                         (usage[x].optarg ? OPTARG : '\0'));
-
-              if (usage[x].optarg)
-                strcat (buf, usage[x].optarg);
-
-              strcat (buf, " ");
-
-              if (strlen (buf) < 16)
-                {
-                  strcat (buf, "                             ");
-                  buf[16] = 0;
-                }
-              fputs (buf, stdout);
-            }
-
-          if (usage[x].desc)
-            {
-#if 1
-              // this code is slightly faster, because usage of fputc() is avoided
-              if (strchr (usage[x].desc, '\n') == NULL)
-                fputs (usage[x].desc, stdout);
-              else
-                {
-                  char c, *ptr = buf, *ptr2;
-
-                  strcpy (buf, usage[x].desc);
-                  for (; (ptr2 = strchr (ptr, '\n')); ptr = ptr2 + 1)
-                    {
-                      c = ptr2[1];
-                      ptr2[1] = 0;
-                      fputs (ptr, stdout);
-                      fputs ("                  ", stdout);
-                      ptr2[1] = c;
-                    }
-                  fputs (ptr, stdout);
-                }
-#else
-              int pos = 0;
-              for (pos = 0; usage[x].desc[pos]; pos++)
-                {
-                  fputc (usage[x].desc[pos], stdout);
-                  if (usage[x].desc[pos] == '\n')
-                    fputs ("                  ", stdout);
-                }
-#endif
-              fputc ('\n', stdout);
-            }
-        }
-    }
-}
-
-
-void
 ucon64_usage (int argc, char *argv[])
 {
   typedef struct
@@ -1687,7 +1598,7 @@ ucon64_usage (int argc, char *argv[])
         {
           int y = 0;
           for (; usage_array[x].usage[y]; y++)
-            ucon64_render_usage (usage_array[x].usage[y]);
+            render_usage (usage_array[x].usage[y], ucon64.quiet < 0);
           single = 1; // we show only the usage for the specified console(s)
 
           fputc ('\n', stdout);
@@ -1695,25 +1606,25 @@ ucon64_usage (int argc, char *argv[])
 
   if (!single)
     {
-      ucon64_render_usage (ucon64_options_usage);
+      render_usage (ucon64_options_usage, ucon64.quiet < 0);
       fputc ('\n', stdout);
 
-      ucon64_render_usage (ucon64_padding_usage);
+      render_usage (ucon64_padding_usage, ucon64.quiet < 0);
       fputc ('\n', stdout);
 
 //      if (ucon64.dat_enabled)
-      ucon64_render_usage (ucon64_dat_usage);
+      render_usage (ucon64_dat_usage, ucon64.quiet < 0);
       fputc ('\n', stdout);
 
-      ucon64_render_usage (ucon64_patching_usage);
+      render_usage (ucon64_patching_usage, ucon64.quiet < 0);
 
-      ucon64_render_usage (bsl_usage);
-      ucon64_render_usage (ips_usage);
-      ucon64_render_usage (aps_usage);
-      ucon64_render_usage (pal4u_usage);
-      ucon64_render_usage (ppf_usage);
-      ucon64_render_usage (xps_usage);
-      ucon64_render_usage (gg_usage);
+      render_usage (bsl_usage, ucon64.quiet < 0);
+      render_usage (ips_usage, ucon64.quiet < 0);
+      render_usage (aps_usage, ucon64.quiet < 0);
+      render_usage (pal4u_usage, ucon64.quiet < 0);
+      render_usage (ppf_usage, ucon64.quiet < 0);
+      render_usage (xps_usage, ucon64.quiet < 0);
+      render_usage (gg_usage, ucon64.quiet < 0);
 
       printf ("                  supported are:\n"
         "                  %s,\n"
@@ -1728,7 +1639,7 @@ ucon64_usage (int argc, char *argv[])
 #ifdef  USE_DISCMAGE
       if (ucon64.discmage_enabled)
         {
-          ucon64_render_usage (libdm_usage);
+          render_usage (libdm_usage, ucon64.quiet < 0);
           fputc ('\n', stdout);
         }
 #endif
@@ -1737,7 +1648,7 @@ ucon64_usage (int argc, char *argv[])
         {
           int y = 0;
           for (; usage_array[x].usage[y]; y++)
-            ucon64_render_usage (usage_array[x].usage[y]);
+            render_usage (usage_array[x].usage[y], ucon64.quiet < 0);
 
           fputc ('\n', stdout);
         }

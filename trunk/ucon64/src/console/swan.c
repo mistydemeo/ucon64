@@ -34,11 +34,10 @@ static int swan_chksum (unsigned char *rom_buffer);
 
 const st_usage_t swan_usage[] =
   {
-    {NULL, NULL, "WonderSwan/WonderSwan Color/SwanCrystal"},
-    {NULL, NULL, "19XX/19XX/2002 Bandai"},
-    {"swan", NULL, "force recognition"},
-    {"chk", NULL, "fix ROM checksum"},
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, "WonderSwan/WonderSwan Color/SwanCrystal", "19XX/19XX/2002 Bandai"},
+    {"swan", 0, NULL, "force recognition", NULL},
+    {"chk", 0, NULL, "fix ROM checksum", NULL},
+    {NULL, 0, NULL, NULL, NULL}
 };
 
 

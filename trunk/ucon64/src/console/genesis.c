@@ -54,54 +54,52 @@ static int save_rom (st_rominfo_t *rominfo, const char *name,
 
 const st_usage_t genesis_usage[] =
   {
-    {NULL, NULL, "Genesis/Sega Mega Drive/Sega CD/32X/Nomad"},
-    {NULL, NULL, "1989/19XX/19XX Sega http://www.sega.com"},
-    {"gen", NULL, "force recognition"},
-    {"int", NULL, "force ROM is in interleaved format (SMD)"},
-    {"int2", NULL, "force ROM is in interleaved format 2 (MGD)"},
-    {"nint", NULL, "force ROM is not in interleaved format (BIN/RAW)"},
-    {"n", "NEW_NAME", "change foreign ROM name to NEW_NAME"},
-    {"n2", "NEW_NAME", "change Japanese ROM name to NEW_NAME"},
-    {"smd", NULL, "convert to Super Magic Drive/SMD"},
-    {"smds", NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD"},
-    {"bin", NULL, "convert to binary format/BIN/RAW"},
-    {"mgd", NULL, "convert to Multi Game*/MGD2/MGH"},
+    {NULL, 0, NULL, "Genesis/Sega Mega Drive/Sega CD/32X/Nomad", "1989/19XX/19XX Sega http://www.sega.com"},
+    {"gen", 0, NULL, "force recognition", NULL},
+    {"int", 0, NULL, "force ROM is in interleaved format (SMD)", NULL},
+    {"int2", 0, NULL, "force ROM is in interleaved format 2 (MGD)", NULL},
+    {"nint", 0, NULL, "force ROM is not in interleaved format (BIN/RAW)", NULL},
+    {"n", 1, "NEW_NAME", "change foreign ROM name to NEW_NAME", NULL},
+    {"n2", 1, "NEW_NAME", "change Japanese ROM name to NEW_NAME", NULL},
+    {"smd", 0, NULL, "convert to Super Magic Drive/SMD", NULL},
+    {"smds", 0, NULL, "convert emulator (*.srm) SRAM to Super Magic Drive/SMD", NULL},
+    {"bin", 0, NULL, "convert to binary format/BIN/RAW", NULL},
+    {"mgd", 0, NULL, "convert to Multi Game*/MGD2/MGH", NULL},
 #if 0
-    {"gf", NULL, "convert Sega CD country code to Europe; ROM=$CD_IMAGE"},
-    {"ga", NULL, "convert Sega CD country code to U.S.A.; ROM=$CD_IMAGE"},
-    {"gc", NULL, "convert to Genecyst (emulator)/GSV save state; " OPTION_LONG_S "rom=SAVESTATE"},
-    {"ge", NULL, "convert to GenEm (emulator)/SAV save state; " OPTION_LONG_S "rom=SAVESTATE"},
-    {"gym", NULL, "convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE"},
-    {"cym", NULL, "convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE"},
+    {"gf", 0, NULL, "convert Sega CD country code to Europe; ROM=$CD_IMAGE", NULL},
+    {"ga", 0, NULL, "convert Sega CD country code to U.S.A.; ROM=$CD_IMAGE", NULL},
+    {"gc", 0, NULL, "convert to Genecyst (emulator)/GSV save state; " OPTION_LONG_S "rom=SAVESTATE", NULL},
+    {"ge", 0, NULL, "convert to GenEm (emulator)/SAV save state; " OPTION_LONG_S "rom=SAVESTATE", NULL},
+    {"gym", 0, NULL, "convert GYM (Genecyst) sound to WAV; " OPTION_LONG_S "rom=GYMFILE", NULL},
+    {"cym", 0, NULL, "convert CYM (Callus emulator) sound to WAV; " OPTION_LONG_S "rom=CYMFILE", NULL},
 #endif
-    {"stp", NULL, "convert SRAM from backup unit for use with an emulator\n"
-               OPTION_LONG_S "stp just strips the first 512 bytes"},
-    {"j", NULL, "join split ROM"},
-    {"s", NULL, "split ROM; default part size is 4 Mb"},
-    {"ssize", "SIZE", "specify split part size in Mbit"},
+    {"stp", 0, NULL, "convert SRAM from backup unit for use with an emulator\n"
+               OPTION_LONG_S "stp just strips the first 512 bytes", NULL},
+    {"j", 0, NULL, "join split ROM", NULL},
+    {"s", 0, NULL, "split ROM; default part size is 4 Mb", NULL},
+    {"ssize", 1, "SIZE", "specify split part size in Mbit", NULL},
 #if 0
-    {"p", NULL, "pad ROM to full Mb"},
+    {"p", 0, NULL, "pad ROM to full Mb", NULL},
 #endif
-    {"f", NULL, "remove NTSC/PAL protection"},
-    {"chk", NULL, "fix ROM checksum"},
-    {"1991", NULL, "fix old third party ROMs to work with consoles build after\n"
-                "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\""},
-    {"multi", "SIZE", "make multi-game file for use with MD-PRO flash card,\n"
+    {"f", 0, NULL, "remove NTSC/PAL protection", NULL},
+    {"chk", 0, NULL, "fix ROM checksum", NULL},
+    {"1991", 0, NULL, "fix old third party ROMs to work with consoles build after\n"
+                "October 1991 by inserting \"(C) SEGA\" and \"(C)SEGA\"", NULL},
+    {"multi", 1, "SIZE", "make multi-game file for use with MD-PRO flash card,\n"
                       "truncated to SIZE Mbit; file with loader must be specified\n"
-                      "first, then all the ROMs, multi-game file to create last"},
-    {"region", "CODE", "enable region function; use with -multi\n"
+                      "first, then all the ROMs, multi-game file to create last", NULL},
+    {"region", 1, "CODE", "enable region function; use with -multi\n"
                        "CODE=0 force NTSC/Japan for all games\n"
                        "CODE=1 force NTSC/U.S.A. for all games\n"
                        "CODE=2 force PAL for all games\n"
-                       "CODE=x use whatever setting games expect"},
-    {NULL, NULL, NULL}
+                       "CODE=x use whatever setting games expect", NULL},
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 const st_usage_t bin_usage[] =
   {
-    {NULL, NULL, "Binary file/BIN/RAW"},
-    {NULL, NULL, "Emulator format?"},
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, "Binary file/BIN/RAW", "Emulator format?"},
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 typedef struct st_genesis_header

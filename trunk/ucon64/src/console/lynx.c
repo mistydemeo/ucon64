@@ -38,19 +38,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t lynx_usage[] =
   {
-    {NULL, NULL, "Handy (prototype)/Lynx/Lynx II"},
-    {NULL, NULL, "1987 Epyx/1989 Atari/1991 Atari"},
-    {"lynx", NULL, "force recognition"},
-    {"lyx", NULL, "convert to LYX/RAW (strip 64 Bytes LNX header)"},
-    {"lnx", NULL, "convert to LNX (uses default values for the header);\n"
-              "adjust the LNX header with the following options"},
-    {"n", "NEW_NAME", "change internal ROM name to NEW_NAME (LNX only)"},
-    {"nrot", NULL, "set no rotation (LNX only)"},
-    {"rotl", NULL, "set rotation left (LNX only)"},
-    {"rotr", NULL, "set rotation right (LNX only)"},
-    {"b0", "N", "change Bank0 kBytes size to N={0,64,128,256,512} (LNX only)"},
-    {"b1", "N", "change Bank1 kBytes size to N={0,64,128,256,512} (LNX only)"},
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, "Handy (prototype)/Lynx/Lynx II", "1987 Epyx/1989 Atari/1991 Atari"},
+    {"lynx", 0, NULL, "force recognition", NULL},
+    {"lyx", 0, NULL, "convert to LYX/RAW (strip 64 Bytes LNX header)", NULL},
+    {"lnx", 0, NULL, "convert to LNX (uses default values for the header);\n"
+              "adjust the LNX header with the following options", NULL},
+    {"n", 1, "NEW_NAME", "change internal ROM name to NEW_NAME (LNX only)", NULL},
+    {"nrot", 0, NULL, "set no rotation (LNX only)", NULL},
+    {"rotl", 0, NULL, "set rotation left (LNX only)", NULL},
+    {"rotr", 0, NULL, "set rotation right (LNX only)", NULL},
+    {"b0", 1, "N", "change Bank0 kBytes size to N={0,64,128,256,512} (LNX only)", NULL},
+    {"b1", 1, "N", "change Bank1 kBytes size to N={0,64,128,256,512} (LNX only)", NULL},
+    {NULL, 0, NULL, NULL, NULL}
 };
 
 const char *lynx_lyx_desc = "convert to LYX/RAW (strip 64 Bytes LNX header)";

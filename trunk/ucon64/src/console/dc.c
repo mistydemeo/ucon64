@@ -35,17 +35,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 const st_usage_t dc_usage[] = {
-    {NULL, NULL, "Dreamcast"},
-    {NULL, NULL, "1998 SEGA http://www.sega.com"},
-    {"dc", NULL, "force recognition"},
-//    {"vms", "SAV", "convert NES SAV file to a VMS file for use with NesterDC"},
-    {"scr", NULL, "scramble 1ST_READ.BIN for selfboot CD's"},
-    {"unscr", NULL, "unscramble 1ST_READ.BIN for non-selfboot CD's"},
-//    {"ip", "FILE", "extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE"},
-    {"mkip", NULL, "generate IP.BIN file with default values"},
-    {"parse", "TEMPLATE", "parse TEMPLATE file into a IP.BIN;\n"
-                          "creates an empty template when TEMPLATE does not exist"},
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, "Dreamcast", "1998 SEGA http://www.sega.com"},
+    {"dc", 0, NULL, "force recognition", NULL},
+//    {"vms", 1, "SAV", "convert NES SAV file to a VMS file for use with NesterDC", NULL},
+    {"scr", 0, NULL, "scramble 1ST_READ.BIN for selfboot CD's", NULL},
+    {"unscr", 0, NULL, "unscramble 1ST_READ.BIN for non-selfboot CD's", NULL},
+//    {"ip", 1, "FILE", "extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE", NULL},
+    {"mkip", 0, NULL, "generate IP.BIN file with default values", NULL},
+    {"parse", 1, "TEMPLATE", "parse TEMPLATE file into a IP.BIN;\n"
+                             "creates an empty template when TEMPLATE does not exist", NULL},
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 

@@ -73,45 +73,45 @@ static void handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
 
 const st_usage_t snes_usage[] =
   {
-    {NULL, NULL, "Super Nintendo Entertainment System/SNES/Super Famicom"},
-    {NULL, NULL, "1990 Nintendo http://www.nintendo.com"},
-    {"snes", NULL, "force recognition"},
-    {"hi", NULL, "force ROM is HiROM"},
-    {"nhi", NULL, "force ROM is not HiROM"},
-    {"erom", NULL, "force ROM is \"Extended\" (combine with -hi for Extended HiROM)"},
+    {NULL, 0, NULL, "Super Nintendo Entertainment System/SNES/Super Famicom",
+                    "1990 Nintendo http://www.nintendo.com"},
+    {"snes", 0, NULL, "force recognition", NULL},
+    {"hi", 0, NULL, "force ROM is HiROM", NULL},
+    {"nhi", 0, NULL, "force ROM is not HiROM", NULL},
+    {"erom", 0, NULL, "force ROM is \"Extended\" (combine with -hi for Extended HiROM)", NULL},
 #if 0
-    {"hd", NULL, "force ROM has SMC/FIG/SWC header (+512 Bytes)"},
-    {"nhd", NULL, "force ROM has no SMC/FIG/SWC header (MGD2/MGH/RAW)"},
-    {"ns", NULL, "force ROM is not split"},
+    {"hd", 0, NULL, "force ROM has SMC/FIG/SWC header (+512 Bytes)", NULL},
+    {"nhd", 0, NULL, "force ROM has no SMC/FIG/SWC header (MGD2/MGH/RAW)", NULL},
+    {"ns", 0, NULL, "force ROM is not split", NULL},
 #endif
 // the next switch remains undocumented until we know of a good checksum algorithm
-//    {"id", NULL, "force -gd3 to produce a unique file name"},
-    {"int", NULL, "force ROM is in interleaved format (GD3/UFO)"},
-    {"int2", NULL, "force ROM is in interleaved format 2 (SFX)"},
-    {"nint", NULL, "force ROM is not in interleaved format"},
-    {"bs", NULL, "force ROM is a Broadcast Satellaview dump"},
-    {"nbs", NULL, "force ROM is a regular cartridge dump"},
-    {"n", "NEW_NAME", "change internal ROM name to NEW_NAME"},
-    {"fig", NULL, "convert to *Pro Fighter*/FIG"},
-    {"figs", NULL, "convert emulator *.srm (SRAM) to *Pro Fighter*/FIG"},
-    {"gd3", NULL, "convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)"},
-    {"gd3s", NULL, "convert emulator *.srm (SRAM) to GD SF3(SF6/SF7)/Professor SF*"},
-    {"mgd", NULL, "convert to Multi Game*/MGD2/MGH/RAW"},
-    {"smc", NULL, "convert to Super Magicom/SMC"},
-    {"swc", NULL, "convert to Super Wild Card*/SWC"},
-    {"swcs", NULL, "convert emulator *.srm (SRAM) to Super Wild Card*/SWC"},
-    {"ufo", NULL, "convert to Super UFO"},
-    {"ufos", NULL, "convert emulator *.srm (SRAM) to Super UFO"},
-    {"stp", NULL, "convert SRAM from backup unit for use with an emulator\n"
-               OPTION_LONG_S "stp just strips the first 512 bytes"},
-    {"dbuh", NULL, "display (relevant part of) backup unit header"},
-    {"dint", NULL, "convert ROM to non-interleaved format"},
-    {"ctrl", "TYPE", "specify type of controller in port 1 for emu when converting\n"
+//    {"id", 0, NULL, "force -gd3 to produce a unique file name", NULL},
+    {"int", 0, NULL, "force ROM is in interleaved format (GD3/UFO)", NULL},
+    {"int2", 0, NULL, "force ROM is in interleaved format 2 (SFX)", NULL},
+    {"nint", 0, NULL, "force ROM is not in interleaved format", NULL},
+    {"bs", 0, NULL, "force ROM is a Broadcast Satellaview dump", NULL},
+    {"nbs", 0, NULL, "force ROM is a regular cartridge dump", NULL},
+    {"n", 1, "NEW_NAME", "change internal ROM name to NEW_NAME", NULL},
+    {"fig", 0, NULL, "convert to *Pro Fighter*/FIG", NULL},
+    {"figs", 0, NULL, "convert emulator *.srm (SRAM) to *Pro Fighter*/FIG", NULL},
+    {"gd3", 0, NULL, "convert to Game Doctor SF3(SF6/SF7)/Professor SF(SF II)", NULL},
+    {"gd3s", 0, NULL, "convert emulator *.srm (SRAM) to GD SF3(SF6/SF7)/Professor SF*", NULL},
+    {"mgd", 0, NULL, "convert to Multi Game*/MGD2/MGH/RAW", NULL},
+    {"smc", 0, NULL, "convert to Super Magicom/SMC", NULL},
+    {"swc", 0, NULL, "convert to Super Wild Card*/SWC", NULL},
+    {"swcs", 0, NULL, "convert emulator *.srm (SRAM) to Super Wild Card*/SWC", NULL},
+    {"ufo", 0, NULL, "convert to Super UFO", NULL},
+    {"ufos", 0, NULL, "convert emulator *.srm (SRAM) to Super UFO", NULL},
+    {"stp", 0, NULL, "convert SRAM from backup unit for use with an emulator\n"
+               OPTION_LONG_S "stp just strips the first 512 bytes", NULL},
+    {"dbuh", 0, NULL, "display (relevant part of) backup unit header", NULL},
+    {"dint", 0, NULL, "convert ROM to non-interleaved format", NULL},
+    {"ctrl", 1, "TYPE", "specify type of controller in port 1 for emu when converting\n"
                      "TYPE=0 gamepad\n"
                      "TYPE=1 mouse\n"
                      "TYPE=2 mouse / gamepad\n"
-                     "TYPE=6 multitap"},
-    {"ctrl2", "TYPE", "specify type of controller in port 2 for emu when converting\n"
+                     "TYPE=6 multitap", NULL},
+    {"ctrl2", 1, "TYPE", "specify type of controller in port 2 for emu when converting\n"
                       "TYPE=0 gamepad\n"
                       "TYPE=1 mouse\n"
                       "TYPE=2 mouse / gamepad\n"
@@ -119,23 +119,23 @@ const st_usage_t snes_usage[] =
                       "TYPE=4 super scope / gamepad\n"
                       "TYPE=5 Konami's justifier\n"
                       "TYPE=6 multitap\n"
-                      "TYPE=7 mouse / super scope / gamepad"},
-    {"col", "0xCOLOR", "convert 0xRRGGBB (HTML) <-> 0xXXXX (SNES)"},
-//                       "this routine was used to find green colors in games and\n"
-//                       "to replace them with red colors (blood mode)"},
-    {"j", NULL, "join split ROM"},
-    {"s", NULL, "split ROM; default part size is 8 Mb"},
-    {"ssize", "SIZE", "specify split part size in Mbit (not for Game Doctor SF3)"},
+                      "TYPE=7 mouse / super scope / gamepad", NULL},
+    {"col", 1, "0xCOLOR", "convert 0xRRGGBB (HTML) <-> 0xXXXX (SNES)",
+                          "this routine was used to find green colors in games and\n"
+                          "to replace them with red colors (blood mode)"},
+    {"j", 0, NULL, "join split ROM", NULL},
+    {"s", 0, NULL, "split ROM; default part size is 8 Mb", NULL},
+    {"ssize", 1, "SIZE", "specify split part size in Mbit (not for Game Doctor SF3)", NULL},
 #if 0
-    {"p", NULL, "pad ROM to full Mb"},
+    {"p", 0, NULL, "pad ROM to full Mb", NULL},
 #endif
-    {"k", NULL, "remove protection (crack)"},
-    {"f", NULL, "remove NTSC/PAL protection"},
-    {"l", NULL, "remove SlowROM checks"},
-    {"chk", NULL, "fix ROM checksum"},
-    {"dmirr", NULL, "\"de-mirror\" ROM (strip mirrored block from end of ROM)"},
-    {"dnsrt", NULL, "\"de-NSRT\" ROM (restore name and checksum from NSRT header)"},
-    {NULL, NULL, NULL}
+    {"k", 0, NULL, "remove protection (crack)", NULL},
+    {"f", 0, NULL, "remove NTSC/PAL protection", NULL},
+    {"l", 0, NULL, "remove SlowROM checks", NULL},
+    {"chk", 0, NULL, "fix ROM checksum", NULL},
+    {"dmirr", 0, NULL, "\"de-mirror\" ROM (strip mirrored block from end of ROM)", NULL},
+    {"dnsrt", 0, NULL, "\"de-NSRT\" ROM (restore name and checksum from NSRT header)", NULL},
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 typedef struct st_snes_header

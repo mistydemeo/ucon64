@@ -40,12 +40,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t swc_usage[] =
   {
-    {NULL, NULL, "Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC"},
-    {NULL, NULL, "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
+    {NULL, 0, NULL, "Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC",
+                    "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
 #ifdef USE_PARALLEL
-    {"xswc", NULL, "send/receive ROM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
-                   "receives automatically when ROM does not exist"},
-    {"xswc2", NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)"},
+    {"xswc", 0, NULL, "send/receive ROM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
+                   "receives automatically when ROM does not exist", NULL},
+    {"xswc2", 0, NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)", NULL},
 #if 1
 /*
   The following help used to be hidden because we wanted to avoid people to
@@ -53,7 +53,7 @@ const st_usage_t swc_usage[] =
   (SA-1). However, now that ucon64.swc_io_mode is useful for -xswcc I guess the
   help should be complete - dbjh
 */
-    {"xswc-io", "MODE", "specify SWC I/O mode; use with -xswc or -xswcc\n"
+    {"xswc-io", 1, "MODE", "specify SWC I/O mode; use with -xswc or -xswcc\n"
                         "MODE=0x001 force 32 Mbit dump\n"
                         "MODE=0x002 use alternative method for determining ROM size\n"
                         "MODE=0x004 Super FX\n"
@@ -64,17 +64,17 @@ const st_usage_t swc_usage[] =
                         "MODE=0x080 Mega Man X 2\n"
                         "MODE=0x100 dump BIOS\n"
                         "It is possible to combine flags. MODE=0x44 makes it possible\n"
-                        "to dump for example Yoshi's Island"},
+                        "to dump for example Yoshi's Island", NULL},
 #endif
-    {"xswcs", NULL, "send/receive SRAM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when SRAM does not exist"},
-    {"xswcc", NULL, "send/receive SRAM to/from cartridge in Super Wild Card*/SWC;\n"
+    {"xswcs", 0, NULL, "send/receive SRAM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when SRAM does not exist", NULL},
+    {"xswcc", 0, NULL, "send/receive SRAM to/from cartridge in Super Wild Card*/SWC;\n"
                     OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when SRAM does not exist"},
-    {"xswcr", NULL, "send/receive RTS data to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when RTS file does not exist"},
+                    "receives automatically when SRAM does not exist", NULL},
+    {"xswcr", 0, NULL, "send/receive RTS data to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
+                    "receives automatically when RTS file does not exist", NULL},
 #endif // USE_PARALLEL
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 #ifdef USE_PARALLEL

@@ -28,8 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 const st_usage_t cd64_usage[] =
   {
-    {NULL, NULL, "CD64"},
-    {NULL, NULL, "19XX UFO http://www.cd64.com"},
+    {NULL, 0, NULL, "CD64", "19XX UFO http://www.cd64.com"},
 #ifdef TODO
 #warning TODO -xcd64        send/receive ROM to/from CD64
 #endif // TODO
@@ -39,7 +38,7 @@ const st_usage_t cd64_usage[] =
     "             receives automatically when " OPTION_LONG_S "rom does not exist\n",
 #endif
 #endif // USE_PARALLEL
-    {NULL, NULL, NULL}
+    {NULL, 0, NULL, NULL, NULL}
   };
 
 #ifdef USE_PARALLEL

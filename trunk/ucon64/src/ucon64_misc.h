@@ -98,14 +98,16 @@ extern const st_usage_t ucon64_padding_usage[];
 extern const st_usage_t ucon64_patching_usage[];
 
 
+#define WF_SHOW_NFO 1
+#define WF_SHOW_NFO_AFTER 2
+#define WF_ROM_REQUIRED 4
 typedef struct
 // more workflow related stuff
 {
   int option;
   int console;                                // UCON64_SNES, ...
   const st_usage_t *usage;
-  uint8_t show_nfo;
-  uint8_t show_nfo_after;
+  uint32_t flags;                             // flags for workflow, etc..
 } st_option2_t;
 
 

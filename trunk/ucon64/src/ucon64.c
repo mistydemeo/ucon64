@@ -475,7 +475,7 @@ main (int argc, char **argv)
         if (options2[x].option == c)
           { 
             ucon64.console = options2[x].console;
-            ucon64.show_nfo = (options2[x].show_nfo ? UCON64_YES : UCON64_NO);
+            ucon64.show_nfo = ((options2[x].flags & WF_SHOW_NFO) ? UCON64_YES : UCON64_NO);
             break;
           }
 
@@ -1002,9 +1002,9 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
       printf ("%s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
-      if (rominfo->copier_usage[1]->desc)
+      if (rominfo->copier_usage[1].desc)
         {
-          strcpy (buf, rominfo->copier_usage[1]->desc);
+          strcpy (buf, rominfo->copier_usage[1].desc);
           printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
         }
 #endif
@@ -1026,9 +1026,9 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
       printf ("%s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
-      if (rominfo->console_usage[1]->desc)
+      if (rominfo->console_usage[1].desc)
         {
-          strcpy (buf, rominfo->console_usage[1]->desc);
+          strcpy (buf, rominfo->console_usage[1].desc);
           printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
         }
 #endif

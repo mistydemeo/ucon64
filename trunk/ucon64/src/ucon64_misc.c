@@ -340,10 +340,6 @@ const st_usage_t ucon64_options_usage[] = {
   {"crc", NULL, "show CRC32 value of ROM"  //; this will also force calculation for\n"
              /* "files bigger than %d Bytes (%.4f Mb)" */},
   {"ls", NULL, "generate ROM list for all ROMs"},
-#if 0
-  {"rl", NULL, "rename all ROM(s) to lowercase"},
-  {"ru", NULL, "rename all ROM(s) to uppercase"},
-#endif
 #ifdef  __MSDOS__
   {"hex", NULL, "show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex ...|more\""},
 #else

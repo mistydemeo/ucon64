@@ -25,6 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <ctype.h>
 #include "ucon64.h"
 #include "ucon64_defines.h"
 #include "ucon64_dat.h"
@@ -594,7 +595,9 @@ switch (c)
     break;
 
   case UCON64_RL:
-    renlwr (ucon64.rom);
+    strcpy (buf, ucon64.rom);
+    strlwr (basename2 (buf));
+    rename (ucon64.rom, buf);
     break;
 
   case UCON64_HEX:

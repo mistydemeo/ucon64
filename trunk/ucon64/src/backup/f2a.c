@@ -189,7 +189,7 @@ enum
 {
   UPLOAD_FAILED = 0,
   CANNOT_GET_FILE_SIZE,
-  UPLOAD_ROM
+  UPLOAD_FILE
 };
 
 static time_t starttime = 0;
@@ -269,7 +269,7 @@ find_f2a:
           if ((dev->descriptor.idVendor == 0x547) &&
               (dev->descriptor.idProduct == 0x2131) && !firmware_loaded)
             {
-              if ((fp = open ("/proc/ezusb/dev0", O_WRONLY)))
+              if ((fp = open ("/proc/ezusb/dev0", O_WRONLY)) != -1)
                 {
                   write (fp, f2afirmware, F2A_FIRM_SIZE);
                   close (fp);
@@ -445,7 +445,7 @@ static int
 f2a_write_usb (int n_files, char **files, int address)
 {
   f2a_sendmsg_t sm;
-  int i, j, fsize, size, n;
+  int i, j, fsize, size, n, is_sram_data = address >= 0xe000000 ? 1 : 0;
   char buffer[1024], loader_fname[FILENAME_MAX];
   unsigned char loader[LOADER_SIZE];
   FILE *file;
@@ -454,9 +454,10 @@ f2a_write_usb (int n_files, char **files, int address)
   memset (&sm, 0, SENDMSG_SIZE);
   sm.command = me2le_32 (CMD_WRITEDATA);
   sm.magic = me2le_32 (MAGIC_NUMBER);
-  sm.unknown = me2le_32 (0xa);                  // no idea what this is...
+//  sm.unknown = me2le_32 (0xa);                  // no idea what this is...
+  sm.unknown = me2le_32 (is_sram_data ? 0x06 : 0x0a); // SRAM => 0x06, ROM => 0x0a
 
-  if (n_files > 1)
+  if (n_files > 1 && !is_sram_data)
     {
       printf ("Uploading multiloader\n");
       get_property_fname (ucon64.configfile, "gbaloader", loader_fname, "loader.bin");
@@ -496,7 +497,7 @@ f2a_write_usb (int n_files, char **files, int address)
       if (size & (32768 - 1))
         size += 32768;
       size &= ~(32768 - 1);
-      printf (f2a_msg[UPLOAD_ROM], files[j], fsize / 1024, size / 1024);
+      printf (f2a_msg[UPLOAD_FILE], files[j], fsize / 1024, size / 1024);
 
       if ((file = fopen (files[j], "rb")) == NULL)
         {
@@ -767,11 +768,11 @@ f2a_boot_par (const char *iclientp_fname, const char *ilogo_fname)
 int
 f2a_write_par (int n_files, char **files, unsigned int address)
 {
-  int j, fsize, size;
+  int j, fsize, size, is_sram_data = address >= 0xe000000 ? 1 : 0;;
   char loader_fname[FILENAME_MAX];
   unsigned char loader[LOADER_SIZE];
 
-  if (n_files > 1)
+  if (n_files > 1 && !is_sram_data)
     {
       printf ("Uploading multiloader\n");
       get_property_fname (ucon64.configfile, "gbaloader", loader_fname, "loader.bin");
@@ -799,7 +800,7 @@ f2a_write_par (int n_files, char **files, unsigned int address)
       if (size & (32768 - 1))
         size += 32768;
       size &= ~(32768 - 1);
-      printf (f2a_msg[UPLOAD_ROM], files[j], fsize / 1024, size / 1024);
+      printf (f2a_msg[UPLOAD_FILE], files[j], fsize / 1024, size / 1024);
       if (f2a_send_buffer_par (PP_CMD_WRITEROM, address, size,
                                (unsigned char *) files[j], HEAD, FLIP, 0, 1))
         {

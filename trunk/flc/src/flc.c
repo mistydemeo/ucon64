@@ -230,7 +230,7 @@ main (int argc, char *argv[])
       file_p->sub.size = puffer.st_size;
       file_p->sub.checked = 'N';
       strcpy (file_p->sub.fullpath, buf);
-      strcpy (file_p->sub.name, basename (buf));
+      strcpy (file_p->sub.name, basename2 (buf));
       extract (&file_p->sub);
     }
   (void) closedir (dp);

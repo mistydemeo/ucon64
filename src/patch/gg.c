@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: gg.c,v 1.36 2003-04-16 17:09:23 dbjh Exp $
+ * $Id: gg.c,v 1.37 2003-05-31 00:57:29 dbjh Exp $
  *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
@@ -831,11 +831,13 @@ gameGenieDecodeSNES (const char *in, char *out)
   decodeSNES (10, 3);
   decodeSNES (11, 6);
 
-  if (gg_rominfo != 0)
-    hirom = gg_rominfo->header_start > SNES_HEADER_START ? 1 : 0;
   // if a ROM was specified snes.c will handle ucon64.snes_hirom
-  else if (UCON64_ISSET (ucon64.snes_hirom))    // -hi or -nhi option was specified
+  if (UCON64_ISSET (ucon64.snes_hirom))         // -hi or -nhi option was specified
     hirom = ucon64.snes_hirom;
+  // if only a ROM was specified (not -hi or -nhi) the next if will fail for a
+  //  handful of ROMs, namely Sufami Turbo ROMs and Extended ROMs
+  else if (gg_rominfo != 0)
+    hirom = gg_rominfo->header_start > SNES_HEADER_START ? 1 : 0;
   else
     hirom = 1;                                  // I am less sure about the LoROM
                                                 //  CPU -> ROM address conversion

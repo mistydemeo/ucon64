@@ -132,7 +132,7 @@ const struct option options[] = {
     {"disc", 0, 0, UCON64_DISC},
     {"dumpinfo", 1, 0, UCON64_DUMPINFO},
     {"e", 0, 0, UCON64_E},
-    {"ehi", 0, 0, UCON64_EHI},
+    {"erom", 0, 0, UCON64_EROM},
     {"f", 0, 0, UCON64_F},
     {"fds", 0, 0, UCON64_FDS},
     {"fdsl", 0, 0, UCON64_FDSL},
@@ -733,6 +733,7 @@ ucon64_execute_options (void)
   ucon64.interleaved =
   ucon64.split =
   ucon64.part_size =
+  ucon64.snes_header_base =
   ucon64.snes_hirom =
   ucon64.bs_dump =
   ucon64.controller =
@@ -923,6 +924,9 @@ ucon64_rom_handling (void)
           // restore any overrides from st_ucon64_t
           if (UCON64_ISSET (ucon64.buheader_len))
             rominfo.buheader_len = ucon64.buheader_len;
+
+          if (UCON64_ISSET (ucon64.snes_header_base))
+            rominfo.snes_header_base = ucon64.snes_header_base;
 
           if (UCON64_ISSET (ucon64.snes_hirom))
             rominfo.snes_hirom = ucon64.snes_hirom;

@@ -1015,10 +1015,6 @@ ucon64_options (int c, const char *optarg)
               case UCON64_ISOFIX:
                 flags |= DM_FIX; // DM_RDONLY|DM_FIX read sectors and fix (if needed/possbile)
                 break;
-
-              case UCON64_CDMAGE:
-                flags |= DM_CDMAGE;
-                break;
             }
 
           ucon64.image = libdm_reopen (ucon64.rom, DM_RDONLY, ucon64.image);

@@ -691,7 +691,7 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
 
       if (flags & DM_2048)
         result = fwrite (&buf[track->seek_header], 1, 2048, fh2);
-      else // if (flags & DM_CDMAGE) // cdmage compat. flag
+      else
         {
           const char sync_data[] = {0, (const char) 0xff, (const char) 0xff,
                             (const char) 0xff, (const char) 0xff,
@@ -710,8 +710,6 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
           result += fwrite (&buf, 1, track->sector_size, fh2);
           result += fwrite (&buf2, 1, track->seek_ecc, fh2); // padding
         }
-//      else
-//        result = fwrite (&buf, 1, track->sector_size, fh2);
 
       if (!result)
         {

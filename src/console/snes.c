@@ -870,7 +870,7 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       if (snes_header_base == SNES_EROM)
         {
-          int size2 = size - 32 * MBIT;         // size of second ROM (16 Mbit if ToP)
+          int size2 = newsize - 32 * MBIT;      // size of second ROM (16 Mbit if ToP)
           // interleave the 32 Mbit ROM
           snes_int_blocks (srcbuf, dstbuf + size2 + 16 * MBIT, dstbuf + size2,
                            32 * MBIT / 0x10000);

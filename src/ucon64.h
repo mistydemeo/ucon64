@@ -40,8 +40,8 @@ typedef struct st_ucon64
   int argc;
   char **argv;
 
-  const char *rom;                              // rom (cmdline) with path
-//  char rom_in_archive[FILENAME_MAX];            // filename holder if the rom comes from an archive
+  const char *rom;                              // ROM (cmdline) with path
+//  char rom_in_archive[FILENAME_MAX];            // filename holder if the ROM comes from an archive
 
   const char *file;                             // file (cmdline) with path
 
@@ -82,7 +82,7 @@ typedef struct st_ucon64
 
 #define UCON64_TYPE_ISROM(x) (x == UCON64_ROM)
 #define UCON64_TYPE_ISCD(x) (x == UCON64_CD)
-  int type;                                     // rom type ROM or CD image
+  int type;                                     // ROM type ROM or CD image
 } st_ucon64_t;
 
 extern st_ucon64_t ucon64;
@@ -124,8 +124,8 @@ typedef struct st_rominfo
   int internal_crc2_start;                      // start of 2nd/inverse internal checksum
   int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal checksum
 #ifdef  LIBDISCMAGE
-//  st_dm_image_t *image;                         // cd image?
-#endif  
+//  st_dm_image_t *image;                         // CD image?
+#endif
 } st_rominfo_t;
 
 extern dm_image_t *image;

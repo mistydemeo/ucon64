@@ -339,6 +339,10 @@ extern unsigned int crc32 (unsigned int crc32, const void *buffer, unsigned int 
   Misc stuff
 
   change_mem[2]() see header of implementation for usage
+  build_cm_patterns helper function for change_mem2() to read search patterns
+                  from a file
+  cleanup_cm_patterns helper function for build_cm_patterns() to free all
+                  memory allocated for a (list of) st_pattern_t structure(s)
   ansi_init ()    initialize ANSI output
   ansi_strip ()   strip ANSI codes from a string
   gauge()         init_time == time when gauge() was first started or when
@@ -370,7 +374,7 @@ typedef struct st_cm_set
 typedef struct st_cm_pattern
 {
   char *search, wildcard, escape, *replace;
-  int search_size, replace_size, offset;
+  int search_size, replace_size, offset, n_sets;
   st_cm_set_t *sets;
 } st_cm_pattern_t;
 
@@ -379,6 +383,11 @@ extern int change_mem (char *buf, int bufsize, char *searchstr, int strsize,
 extern int change_mem2 (char *buf, int bufsize, char *searchstr, int strsize,
                         char wc, char esc, char *newstr, int newsize,
                         int offset, st_cm_set_t *sets);
+#if     defined PARALLEL && !defined DXE // currently there is no uCON64-specific defined constant
+extern int build_cm_patterns (st_cm_pattern_t **patterns, const char *filename,
+                              char *fullfilename);
+#endif
+extern void cleanup_cm_patterns (st_cm_pattern_t **patterns, int n_patterns);
 extern int ansi_init (void);
 extern char *ansi_strip (char *str);
 extern int gauge (time_t init_time, int pos, int size);

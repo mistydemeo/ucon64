@@ -449,7 +449,16 @@ extern int set_property (const char *filename, const char *propname, const char 
 
 int truncate (const char *path, off_t size);
 int sync (void);
+
+#if     defined _WIN32 && defined ANSI_COLOR
+int vprintf2 (const char *format, va_list argptr);
+int printf2 (const char *format, ...);
+int fprintf2 (FILE *file, const char *format, ...);
+#define vprintf vprintf2
+#define printf  printf2
+#define fprintf fprintf2
 #endif
+#endif // _WIN32
 
 #ifdef __cplusplus
 }

@@ -1273,16 +1273,16 @@ ucon64_parport_probe (unsigned int port)
     return -1;
 #endif
 
-  outportb (port, 0xaa);
+  outportb ((unsigned short) port, 0xaa);
   for (i = 0; i < DETECT_MAX_CNT; i++)
-    if (inportb (port) == 0xaa)
+    if (inportb ((unsigned short) port) == 0xaa)
       break;
 
   if (i < DETECT_MAX_CNT)
     {
-      outportb (port, 0x55);
+      outportb ((unsigned short) port, 0x55);
       for (i = 0; i < DETECT_MAX_CNT; i++)
-        if (inportb (port) == 0x55)
+        if (inportb ((unsigned short) port) == 0x55)
           break;
     }
 
@@ -1346,7 +1346,7 @@ ucon64_parport_init (unsigned int port)
       exit(1);
     }
 #endif
-#ifdef  __i386__                                // 0x3bc, 0x378, 0x278
+#if     defined __i386__ || defined _WIN32      // 0x3bc, 0x378, 0x278
   if (!port)                                    // no port specified or forced?
     {
       unsigned int parport_addresses[] = { 0x3bc, 0x378, 0x278 };

@@ -21,8 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef IPS_H
 #define IPS_H
-int ips_main (int argc, char* argv[]);
-int ips(char *name, char *option2);
-int cips(char *name, char *option2);
-int ips_usage(int argc,char *argv[]);
+int ips_main (int argc, char *argv[]);
+int ips (char *name, char *option2);
+int cips (char *name, char *option2);
+int ips_usage (int argc, char *argv[]);
 #endif /* IPS_H */

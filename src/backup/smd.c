@@ -48,11 +48,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <malloc.h>
 #include <string.h>
 #ifdef  __UNIX__
-#include <unistd.h>                             // usleep(), microseconds
+#include <unistd.h>		// usleep(), microseconds
 #elif   __DOS__
-#include <dos.h>                                // delay(), milliseconds
+#include <dos.h>		// delay(), milliseconds
 #elif   __BEOS__
-#include <OS.h>                                 // snooze(), microseconds
+#include <OS.h>			// snooze(), microseconds
 #endif
 
 #ifndef __BEOS__
@@ -65,49 +65,66 @@ static int smd_argc;
 static char *smd_argv[128];
 static uint16 lpt;
 static uint8 block[0x4000];
-static char *opts[] = {"-bc", "-lc", "-bs", "-ls", "-ci", "-db", "-rc", NULL};
+static char *opts[] =
+  { "-bc", "-lc", "-bs", "-ls", "-ci", "-db", "-rc", NULL };
 
 /* from loader.asm */
-static unsigned char loader[0x100] =
-{
-         0xF3, 0xDB, 0xBF, 0x31, 0xF0, 0xDF, 0x21, 0x00, 0xC0, 0x11, 0x01, 0xC0, 0x01, 0xFF, 0x0F, 0xAF,
-         0x77, 0xED, 0xB0, 0x21, 0x00, 0xD1, 0x11, 0x01, 0xD1, 0x01, 0xFF, 0x0E, 0xAF, 0x77, 0xED, 0xB0,
-         0x21, 0xB0, 0xD0, 0x01, 0xBF, 0x16, 0xED, 0xB3, 0xAF, 0xD3, 0xBF, 0x3E, 0xC0, 0xD3, 0xBF, 0xAF,
-         0x0E, 0x3E, 0xD3, 0xBE, 0x0D, 0x20, 0xFB, 0xAF, 0xD3, 0xBF, 0x3E, 0x40, 0xD3, 0xBF, 0xAF, 0x06,
-         0x3F, 0x0E, 0x00, 0xD3, 0xBE, 0x0D, 0x20, 0xFB, 0x05, 0x20, 0xF6, 0xAF, 0xD3, 0xBF, 0xD3, 0xBF,
-         0xDD, 0xE5, 0xDD, 0xE1, 0xDB, 0xBE, 0xDD, 0xE5, 0xDD, 0xE1, 0xAF, 0xD3, 0xBF, 0x3E, 0x40, 0xD3,
-         0xBF, 0xDB, 0xBF, 0xAF, 0xED, 0x47, 0xED, 0x4F, 0xDD, 0x21, 0xFF, 0xFF, 0xFD, 0x21, 0xFF, 0xFF,
-         0x01, 0x00, 0x00, 0x11, 0x00, 0x00, 0x21, 0x00, 0x00, 0xE5, 0xF1, 0x08, 0xD9, 0x01, 0x00, 0x00,
-         0x11, 0x00, 0x00, 0x21, 0x00, 0x00, 0xE5, 0xF1, 0x08, 0xD9, 0x31, 0x00, 0x00, 0xFB, 0xED, 0x46,
-         0xAF, 0x32, 0x00, 0x20, 0x3E, 0x01, 0x32, 0x01, 0x20, 0x00, 0x00, 0x00, 0x00, 0xAF, 0x32, 0xFC,
-         0xFF, 0x32, 0xFD, 0xFF, 0x3C, 0x32, 0xFE, 0xFF, 0x3C, 0x32, 0xFF, 0xFF, 0xAF, 0xC3, 0x00, 0x00,
-         0x00, 0x80, 0x00, 0x81, 0x00, 0x82, 0x00, 0x83, 0x00, 0x84, 0x00, 0x85, 0x00, 0x86, 0x00, 0x87,
-         0x00, 0x88, 0x00, 0x89, 0x00, 0x8A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+static unsigned char loader[0x100] = {
+  0xF3, 0xDB, 0xBF, 0x31, 0xF0, 0xDF, 0x21, 0x00, 0xC0, 0x11, 0x01, 0xC0,
+  0x01, 0xFF, 0x0F, 0xAF,
+  0x77, 0xED, 0xB0, 0x21, 0x00, 0xD1, 0x11, 0x01, 0xD1, 0x01, 0xFF, 0x0E,
+  0xAF, 0x77, 0xED, 0xB0,
+  0x21, 0xB0, 0xD0, 0x01, 0xBF, 0x16, 0xED, 0xB3, 0xAF, 0xD3, 0xBF, 0x3E,
+  0xC0, 0xD3, 0xBF, 0xAF,
+  0x0E, 0x3E, 0xD3, 0xBE, 0x0D, 0x20, 0xFB, 0xAF, 0xD3, 0xBF, 0x3E, 0x40,
+  0xD3, 0xBF, 0xAF, 0x06,
+  0x3F, 0x0E, 0x00, 0xD3, 0xBE, 0x0D, 0x20, 0xFB, 0x05, 0x20, 0xF6, 0xAF,
+  0xD3, 0xBF, 0xD3, 0xBF,
+  0xDD, 0xE5, 0xDD, 0xE1, 0xDB, 0xBE, 0xDD, 0xE5, 0xDD, 0xE1, 0xAF, 0xD3,
+  0xBF, 0x3E, 0x40, 0xD3,
+  0xBF, 0xDB, 0xBF, 0xAF, 0xED, 0x47, 0xED, 0x4F, 0xDD, 0x21, 0xFF, 0xFF,
+  0xFD, 0x21, 0xFF, 0xFF,
+  0x01, 0x00, 0x00, 0x11, 0x00, 0x00, 0x21, 0x00, 0x00, 0xE5, 0xF1, 0x08,
+  0xD9, 0x01, 0x00, 0x00,
+  0x11, 0x00, 0x00, 0x21, 0x00, 0x00, 0xE5, 0xF1, 0x08, 0xD9, 0x31, 0x00,
+  0x00, 0xFB, 0xED, 0x46,
+  0xAF, 0x32, 0x00, 0x20, 0x3E, 0x01, 0x32, 0x01, 0x20, 0x00, 0x00, 0x00,
+  0x00, 0xAF, 0x32, 0xFC,
+  0xFF, 0x32, 0xFD, 0xFF, 0x3C, 0x32, 0xFE, 0xFF, 0x3C, 0x32, 0xFF, 0xFF,
+  0xAF, 0xC3, 0x00, 0x00,
+  0x00, 0x80, 0x00, 0x81, 0x00, 0x82, 0x00, 0x83, 0x00, 0x84, 0x00, 0x85,
+  0x00, 0x86, 0x00, 0x87,
+  0x00, 0x88, 0x00, 0x89, 0x00, 0x8A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00,
 };
 
 /* Function prototypes */
-static void smd_send_byte(uint8 data);
-static uint8 smd_recieve_byte(void);
-static void smd_send_command(uint8 parameter, uint16 address, uint16 length);
-static uint8 smd_recieve_block(uint32 length, uint8 *buffer);
-static void smd_send_block(uint32 length, uint8 *buffer);
-static void smd_poke(uint16 address, uint8 data);
-static uint8 smd_peek(uint16 address);
-static int save_smd(char *filename);
-static int load_smd(char *filename);
-static void interleave_buffer(uint8 *buffer, int size);
-static int load_sram(char *filename);
-static int save_sram(char *filename);
-static int dump_bios(char *filename);
+static void smd_send_byte (uint8 data);
+static uint8 smd_recieve_byte (void);
+static void smd_send_command (uint8 parameter, uint16 address, uint16 length);
+static uint8 smd_recieve_block (uint32 length, uint8 * buffer);
+static void smd_send_block (uint32 length, uint8 * buffer);
+static void smd_poke (uint16 address, uint8 data);
+static uint8 smd_peek (uint16 address);
+static int save_smd (char *filename);
+static int load_smd (char *filename);
+static void interleave_buffer (uint8 * buffer, int size);
+static int load_sram (char *filename);
+static int save_sram (char *filename);
+static int dump_bios (char *filename);
 
-int smd_main (int argc, char **argv)
+int
+smd_main (int argc, char **argv)
 {
-    int i;
+  int i;
 
-    /* Print help text */
+  /* Print help text */
 /*
     if(argc < 2)
     {
@@ -117,7 +134,7 @@ int smd_main (int argc, char **argv)
         exit(1);
     }
 */
-        /* Print help text */
+  /* Print help text */
 /*
     if(strcmp(argv[1], "-help") == 0)
     {
@@ -133,211 +150,221 @@ int smd_main (int argc, char **argv)
     }
 */
 
-    /* Check options */
-    for(i = 0; opts[i] != NULL; i += 1)
+  /* Check options */
+  for (i = 0; opts[i] != NULL; i += 1)
     {
-        if(strcmp(opts[i], argv[1]) == 0)
-        {
-            switch(i)
-            {
-                case 0: /* Backup cartridge */
-                    save_smd(argv[2]);
-                    break;
+      if (strcmp (opts[i], argv[1]) == 0)
+	{
+	  switch (i)
+	    {
+	    case 0:		/* Backup cartridge */
+	      save_smd (argv[2]);
+	      break;
 
-                case 1: /* Send cartridge */
-                    load_smd(argv[2]);
-                    break;
+	    case 1:		/* Send cartridge */
+	      load_smd (argv[2]);
+	      break;
 
-                case 2: /* Backup SRAM */
-                    save_sram(argv[2]);
-                    break;
+	    case 2:		/* Backup SRAM */
+	      save_sram (argv[2]);
+	      break;
 
-                case 3: /* Send SRAM */
-                    load_sram(argv[2]);
-                    break;
+	    case 3:		/* Send SRAM */
+	      load_sram (argv[2]);
+	      break;
 
-                case 4: /* Show cartridge information */
-                    {
-                        uint8 mem;
-                        uint8 blocks;
-                        mem = smd_peek(0xDFF0);
-                        blocks = smd_peek(0xDFF1);
+	    case 4:		/* Show cartridge information */
+	      {
+		uint8 mem;
+		uint8 blocks;
+		mem = smd_peek (0xDFF0);
+		blocks = smd_peek (0xDFF1);
 
-                        printf("The SMD has %d bytes of RAM. (%dMB)\n", mem * 0x4000, (mem * 0x4000) / 0x20000);
+		printf ("The SMD has %d bytes of RAM. (%dMB)\n", mem * 0x4000,
+			(mem * 0x4000) / 0x20000);
 
-                        if(!blocks)
-                            printf("The SMD does not detect a cartridge.\n");
-                        else
-                            printf("The cartidge size is %d bytes. (%dMB)\n", blocks * 0x4000, (blocks * 0x4000) / 0x20000);
-                    }
-                    break;
+		if (!blocks)
+		  printf ("The SMD does not detect a cartridge.\n");
+		else
+		  printf ("The cartidge size is %d bytes. (%dMB)\n",
+			  blocks * 0x4000, (blocks * 0x4000) / 0x20000);
+	      }
+	      break;
 
-                case 5: /* Dump BIOS */
-                    dump_bios(argv[2]);
-                    break;
+	    case 5:		/* Dump BIOS */
+	      dump_bios (argv[2]);
+	      break;
 
-                case 6: /* Run loaded cartridge */
-                    smd_poke(0x2001, 0x02);
-                    break;
-            }
-        }
+	    case 6:		/* Run loaded cartridge */
+	      smd_poke (0x2001, 0x02);
+	      break;
+	    }
+	}
     }
 
-    return (0);
+  return (0);
 }
 
 /*--------------------------------------------------------------------------*/
 /*                                                                          */
 /*--------------------------------------------------------------------------*/
 
-void smd_wait_busy(int state)
+void
+smd_wait_busy (int state)
 {
-    int timeout = 0x2000;
-    int busy = (inportb(lpt + PARPORT_STATUS) >> 7) & 1;
+  int timeout = 0x2000;
+  int busy = (inportb (lpt + PARPORT_STATUS) >> 7) & 1;
 
-    while((busy == state) && (timeout))
+  while ((busy == state) && (timeout))
     {
-        busy = (inportb(lpt + PARPORT_STATUS) >> 7) & 1;
-        timeout -= 1;
+      busy = (inportb (lpt + PARPORT_STATUS) >> 7) & 1;
+      timeout -= 1;
     }
 
-    if(!timeout)
+  if (!timeout)
     {
-        printf("Timeout - check connections and try again.\n");
-        exit(1);
+      printf ("Timeout - check connections and try again.\n");
+      exit (1);
     }
 }
 
-void smd_send_byte(uint8 data)
+void
+smd_send_byte (uint8 data)
 {
-    /* Wait for SMD busy flag to be set */
-    smd_wait_busy(0);
+  /* Wait for SMD busy flag to be set */
+  smd_wait_busy (0);
 
-    /* Send data to SMD */
-    outportb(lpt + PARPORT_DATA, data);
+  /* Send data to SMD */
+  outportb (lpt + PARPORT_DATA, data);
 
-    /* Invert PC busy flag */
-    outportb(lpt + PARPORT_CONTROL, inportb(lpt + PARPORT_CONTROL) ^ 1);
+  /* Invert PC busy flag */
+  outportb (lpt + PARPORT_CONTROL, inportb (lpt + PARPORT_CONTROL) ^ 1);
 }
 
-uint8 smd_recieve_byte(void)
+uint8
+smd_recieve_byte (void)
 {
-    uint8 temp;
+  uint8 temp;
 
-    /* Wait for SMD busy flag to be cleared */
-    smd_wait_busy(1);
+  /* Wait for SMD busy flag to be cleared */
+  smd_wait_busy (1);
 
-    /* Read low nibble from SMD */
-    temp = (inportb(lpt + PARPORT_STATUS) & 0x78) >> 3;
+  /* Read low nibble from SMD */
+  temp = (inportb (lpt + PARPORT_STATUS) & 0x78) >> 3;
 
-    /* Invert PC busy flag */
-    outportb(lpt + PARPORT_CONTROL, inportb(lpt + PARPORT_CONTROL) ^ 1);
+  /* Invert PC busy flag */
+  outportb (lpt + PARPORT_CONTROL, inportb (lpt + PARPORT_CONTROL) ^ 1);
 
-    /* Wait for SMD busy flag to be cleared */
-    smd_wait_busy(1);
+  /* Wait for SMD busy flag to be cleared */
+  smd_wait_busy (1);
 
-    /* Read high nibble from SMD */
-    temp |= (inportb(lpt + PARPORT_STATUS) & 0x78) << 1;
+  /* Read high nibble from SMD */
+  temp |= (inportb (lpt + PARPORT_STATUS) & 0x78) << 1;
 
-    /* Invert PC busy flag */
-    outportb(lpt + PARPORT_CONTROL, inportb(lpt + PARPORT_CONTROL) ^ 1);
+  /* Invert PC busy flag */
+  outportb (lpt + PARPORT_CONTROL, inportb (lpt + PARPORT_CONTROL) ^ 1);
 
-    return (temp);
+  return (temp);
 }
 
-void smd_send_command(uint8 parameter, uint16 address, uint16 length)
+void
+smd_send_command (uint8 parameter, uint16 address, uint16 length)
 {
-    uint8 temp;
-    uint8 count;
-    uint8 checksum = 0x81;
-    uint8 packet[5];
+  uint8 temp;
+  uint8 count;
+  uint8 checksum = 0x81;
+  uint8 packet[5];
 
-    packet[0] = parameter;
-    packet[1] = (address & 0xFF);
-    packet[2] = (address >> 8) & 0xFF;
-    packet[3] = (length & 0xFF);
-    packet[4] = (length >> 8) & 0xFF;
+  packet[0] = parameter;
+  packet[1] = (address & 0xFF);
+  packet[2] = (address >> 8) & 0xFF;
+  packet[3] = (length & 0xFF);
+  packet[4] = (length >> 8) & 0xFF;
 
-    smd_send_byte(0xD5);
-    smd_send_byte(0xAA);
-    smd_send_byte(0x96);
+  smd_send_byte (0xD5);
+  smd_send_byte (0xAA);
+  smd_send_byte (0x96);
 
 
-    /* Send command packet to SMD */
-    for(count = 0; count < 5; count += 1)
+  /* Send command packet to SMD */
+  for (count = 0; count < 5; count += 1)
     {
-        temp = packet[count];
-        checksum ^= temp;
-        smd_send_byte(temp);
+      temp = packet[count];
+      checksum ^= temp;
+      smd_send_byte (temp);
     }
 
-    /* Send packet checksum */
-    smd_send_byte(checksum);
+  /* Send packet checksum */
+  smd_send_byte (checksum);
 }
 
 /*--------------------------------------------------------------------------*/
 /*                                                                          */
 /*--------------------------------------------------------------------------*/
 
-uint8 smd_recieve_block(uint32 length, uint8 *buffer)
+uint8
+smd_recieve_block (uint32 length, uint8 * buffer)
 {
-    uint32 count;
-    uint8 temp, checksum = 0x81;
+  uint32 count;
+  uint8 temp, checksum = 0x81;
 
-#ifdef  __UNIX__                                // wait 32 milliseconds
-    usleep(32000);
+#ifdef  __UNIX__		// wait 32 milliseconds
+  usleep (32000);
 #elif   __DOS__
-    delay(32);
+  delay (32);
 #elif   __BEOS__
-    snooze(32000);
+  snooze (32000);
 #endif
 
-    /* Read data from the SMD */
-    for(count = 0; count < length; count += 1)
+  /* Read data from the SMD */
+  for (count = 0; count < length; count += 1)
     {
-        temp = smd_recieve_byte();
-        checksum ^= temp;
-        buffer[count] = temp;
+      temp = smd_recieve_byte ();
+      checksum ^= temp;
+      buffer[count] = temp;
     }
 
-    checksum = smd_recieve_byte();
+  checksum = smd_recieve_byte ();
 
-    /* Were the checksums the same? */
-    return (checksum);
+  /* Were the checksums the same? */
+  return (checksum);
 }
 
 
-void smd_send_block(uint32 length, uint8 *buffer)
+void
+smd_send_block (uint32 length, uint8 * buffer)
 {
-    uint32 count;
-    uint8 temp, checksum = 0x81;
+  uint32 count;
+  uint8 temp, checksum = 0x81;
 
-    /* Write data to the SMD */
-    for(count = 0; count < length; count += 1)
+  /* Write data to the SMD */
+  for (count = 0; count < length; count += 1)
     {
-        temp = buffer[count];
-        checksum ^= temp;
-        smd_send_byte(temp);
+      temp = buffer[count];
+      checksum ^= temp;
+      smd_send_byte (temp);
     }
 
-    /* Send our checksum */
-    smd_send_byte(checksum);
+  /* Send our checksum */
+  smd_send_byte (checksum);
 }
 
-void smd_poke(uint16 address, uint8 data)
+void
+smd_poke (uint16 address, uint8 data)
 {
-    uint8 temp[1];
-    temp[0] = data;
-    smd_send_command(0x00, address, 1);
-    smd_send_block(1, temp);
+  uint8 temp[1];
+  temp[0] = data;
+  smd_send_command (0x00, address, 1);
+  smd_send_block (1, temp);
 }
 
-uint8 smd_peek(uint16 address)
+uint8
+smd_peek (uint16 address)
 {
-    uint8 temp[1];
-    smd_send_command(0x01, address, 1);
-    smd_recieve_block(1, temp);
-    return (temp[0]);
+  uint8 temp[1];
+  smd_send_command (0x01, address, 1);
+  smd_recieve_block (1, temp);
+  return (temp[0]);
 }
 
 /*--------------------------------------------------------------------------*/
@@ -345,324 +372,342 @@ uint8 smd_peek(uint16 address)
 /*--------------------------------------------------------------------------*/
 
 /* Convert binary data to the SMD interleaved format */
-void interleave_buffer(uint8 *buffer, int size)
+void
+interleave_buffer (uint8 * buffer, int size)
 {
-    int count, offset;
+  int count, offset;
 
-    for(count = 0; count < size; count += 1)
+  for (count = 0; count < size; count += 1)
     {
-        memcpy(block, &buffer[count * 0x4000], 0x4000);
+      memcpy (block, &buffer[count * 0x4000], 0x4000);
 
-        for(offset = 0; offset < 0x2000; offset += 1)
-        {
-            buffer[(count * 0x4000) + 0x0000 + offset] = block[(offset << 1) | (1)];
-            buffer[(count * 0x4000) + 0x2000 + offset] = block[(offset << 1) | (0)];
-        }
+      for (offset = 0; offset < 0x2000; offset += 1)
+	{
+	  buffer[(count * 0x4000) + 0x0000 + offset] =
+	    block[(offset << 1) | (1)];
+	  buffer[(count * 0x4000) + 0x2000 + offset] =
+	    block[(offset << 1) | (0)];
+	}
     }
 }
 
-int load_smd(char *filename)
+int
+load_smd (char *filename)
 {
-    uint8 header[0x200];
-    uint8 count;
-    uint8 *buf;
-    int file_size;
-    int block_size;
-    int is_smd = 0;
-    FILE *fd = NULL;
-    time_t starttime;
+  uint8 header[0x200];
+  uint8 count;
+  uint8 *buf;
+  int file_size;
+  int block_size;
+  int is_smd = 0;
+  FILE *fd = NULL;
+  time_t starttime;
 
-    /* Attempt to open file */
-    fd = fopen(filename, "rb");
-    if(!fd) return (0);
+  /* Attempt to open file */
+  fd = fopen (filename, "rb");
+  if (!fd)
+    return (0);
 
-    /* Get file size */
-    fseek(fd, 0, SEEK_END);
-    file_size = ftell(fd);
-    fseek(fd, 0, SEEK_SET);
+  /* Get file size */
+  fseek (fd, 0, SEEK_END);
+  file_size = ftell (fd);
+  fseek (fd, 0, SEEK_SET);
 
-    /* Load SMD header */
-    if(extcmp(filename, ".smd") == 0)
+  /* Load SMD header */
+  if (extcmp (filename, ".smd") == 0)
     {
-        is_smd = 1;
-        fread(header, 0x200, 1, fd);
-        file_size -= 0x200;
+      is_smd = 1;
+      fread (header, 0x200, 1, fd);
+      file_size -= 0x200;
     }
 
-    /* Set up file buffer */
-    block_size = (file_size / 0x4000) + ((file_size & 0x3FFF) ? 1 : 0);
-    buf = malloc(block_size * 0x4000);
-    if(!buf) return (0);
-    memset(buf, 0, block_size * 0x4000);
-    fread(buf, file_size, 1, fd);
-    fclose(fd);
+  /* Set up file buffer */
+  block_size = (file_size / 0x4000) + ((file_size & 0x3FFF) ? 1 : 0);
+  buf = malloc (block_size * 0x4000);
+  if (!buf)
+    return (0);
+  memset (buf, 0, block_size * 0x4000);
+  fread (buf, file_size, 1, fd);
+  fclose (fd);
 
-    /* Set up file data and header if the file is not in SMD foramt */
-    if(!is_smd)
+  /* Set up file data and header if the file is not in SMD foramt */
+  if (!is_smd)
     {
-        /* Initialize header and size field */
-        memset(header, 0, 0x200);
-        header[0] = block_size;
+      /* Initialize header and size field */
+      memset (header, 0, 0x200);
+      header[0] = block_size;
 
-        /* 68000 binary files need file data to be interleaved */
-        if(extcmp(filename, ".bin") == 0)
-        {
-            header[1] = 0x03;
-            interleave_buffer(buf, block_size);
-        }
-        else
-        {
-            /* Assume all other extensions are Z80 programs */
-            header[1] = 0x01;
-        }
+      /* 68000 binary files need file data to be interleaved */
+      if (extcmp (filename, ".bin") == 0)
+	{
+	  header[1] = 0x03;
+	  interleave_buffer (buf, block_size);
+	}
+      else
+	{
+	  /* Assume all other extensions are Z80 programs */
+	  header[1] = 0x01;
+	}
     }
-    else
+  else
     {
-        /* Use actual file size in case header had it wrong */
-        header[0] = block_size;
+      /* Use actual file size in case header had it wrong */
+      header[0] = block_size;
     }
 
-    starttime = time(NULL);
-    
-    /* Send blocks to SMD */
-    for(count = 0; count < header[0]; count += 1)
+  starttime = time (NULL);
+
+  /* Send blocks to SMD */
+  for (count = 0; count < header[0]; count += 1)
     {
 //        printf("Sending block %d of %d\r", 1+count, header[0]);
-        parport_gauge(starttime, (1+count)*16384, header[0]*16384);
-        fflush(stdout);
-        smd_send_command(0x05, count, 0x00);
-        smd_send_command(0x00, 0x8000, 0x4000);
-        smd_send_block(0x4000, buf + (count * 0x4000));
+      parport_gauge (starttime, (1 + count) * 16384, header[0] * 16384);
+      fflush (stdout);
+      smd_send_command (0x05, count, 0x00);
+      smd_send_command (0x00, 0x8000, 0x4000);
+      smd_send_block (0x4000, buf + (count * 0x4000));
     }
 
-    /* Advance to next line */
-    printf("\n");
+  /* Advance to next line */
+  printf ("\n");
 
-    /* Load and run loader program for Z80 files */
-    if(header[1] == 0x01)
+  /* Load and run loader program for Z80 files */
+  if (header[1] == 0x01)
     {
-        /* Send load command to D000 */
-        smd_send_command(0x00, 0xD000, 0x0100);
+      /* Send load command to D000 */
+      smd_send_command (0x00, 0xD000, 0x0100);
 
-        /* Upload loader program to D000-D0FF */
-        smd_send_block(0x0100, loader);
+      /* Upload loader program to D000-D0FF */
+      smd_send_block (0x0100, loader);
 
-        /* Force Z80 jump to $D000 */
-        smd_send_command(0x04, 0xD000, 0x0000);
+      /* Force Z80 jump to $D000 */
+      smd_send_command (0x04, 0xD000, 0x0000);
     }
-    else
+  else
     {
-        /* Disable M3 and enable program execution out of copier DRAM.
-           For >2MB games, write 0x07 on SMD+ copiers.
-           This turns off DRAM refresh on my original 16MB SMD, since
-           bit 3 enables battery backed SRAM instead of having a
-           special functions */
+      /* Disable M3 and enable program execution out of copier DRAM.
+         For >2MB games, write 0x07 on SMD+ copiers.
+         This turns off DRAM refresh on my original 16MB SMD, since
+         bit 3 enables battery backed SRAM instead of having a
+         special functions */
 
-        smd_poke(0x2001, (header[0] > 0x80) ? 0x07 : 0x03);
+      smd_poke (0x2001, (header[0] > 0x80) ? 0x07 : 0x03);
     }
 
-    /* Free file buffer */
-    if(buf) free(buf);
+  /* Free file buffer */
+  if (buf)
+    free (buf);
 
-    return (1);
+  return (1);
 }
 
 /*--------------------------------------------------------------------------*/
 /*                                                                          */
 /*--------------------------------------------------------------------------*/
 
-int save_smd(char *filename)
+int
+save_smd (char *filename)
 {
-    uint8 header[0x200];
-    int count;
-    FILE *fd;
-    time_t starttime;
-    
-    fd = fopen(filename, "wb");
-    if(!fd) return (0);
+  uint8 header[0x200];
+  int count;
+  FILE *fd;
+  time_t starttime;
 
-    /* The BIOS stores the cartridge size (in blocks) at $DFF1 */
-    memset(header, 0, 0x200);
-    header[0x00] = smd_peek(0xDFF1);
+  fd = fopen (filename, "wb");
+  if (!fd)
+    return (0);
 
-    header[0x01] = 0x03; /* File type: 68000 program */
-    header[0x08] = 0xAA; /* Identifier #1 */
-    header[0x09] = 0xBB; /* Identifier #2 */
-    header[0x0A] = 0x06; /* File type: 68000 program */
+  /* The BIOS stores the cartridge size (in blocks) at $DFF1 */
+  memset (header, 0, 0x200);
+  header[0x00] = smd_peek (0xDFF1);
 
-    /* Write header to disk */
-    fwrite(header, 0x200, 1, fd);
+  header[0x01] = 0x03;		/* File type: 68000 program */
+  header[0x08] = 0xAA;		/* Identifier #1 */
+  header[0x09] = 0xBB;		/* Identifier #2 */
+  header[0x0A] = 0x06;		/* File type: 68000 program */
 
-    starttime = time(NULL);
+  /* Write header to disk */
+  fwrite (header, 0x200, 1, fd);
 
-    for(count = 0; count < header[0]; count += 1)
+  starttime = time (NULL);
+
+  for (count = 0; count < header[0]; count += 1)
     {
-        parport_gauge(starttime, (1+count)*16384, header[0]*16384);
+      parport_gauge (starttime, (1 + count) * 16384, header[0] * 16384);
 //        printf("Recieving block %d of %d\r", 1+count, header[0]);
-        fflush(stdout);
-        smd_send_command(0x05, count, 0x00);
-        smd_send_command(0x01, 0x4000, 0x4000);
-        if(!smd_recieve_block(0x4000, block))
-        {
-            printf("Checksum mismatch - check connections and try again.\n");
-            exit(1);            
-        }
-        fwrite(block, 0x4000, 1, fd);
+      fflush (stdout);
+      smd_send_command (0x05, count, 0x00);
+      smd_send_command (0x01, 0x4000, 0x4000);
+      if (!smd_recieve_block (0x4000, block))
+	{
+	  printf ("Checksum mismatch - check connections and try again.\n");
+	  exit (1);
+	}
+      fwrite (block, 0x4000, 1, fd);
     }
 
-    printf("\n");
-    fclose(fd);
-    return (1);
+  printf ("\n");
+  fclose (fd);
+  return (1);
 }
 
 /*--------------------------------------------------------------------------*/
 /*                                                                          */
 /*--------------------------------------------------------------------------*/
 
-int load_sram(char *filename)
+int
+load_sram (char *filename)
 {
-    uint8 header[0x200];
-    FILE *fd = NULL;
-    time_t starttime;
-    
-    /* Attempt to open file */
-    fd = fopen(filename, "rb");
-    if(!fd) return (0);
+  uint8 header[0x200];
+  FILE *fd = NULL;
+  time_t starttime;
 
-    /* Load header */
-    fread(header, 0x200, 1, fd);
+  /* Attempt to open file */
+  fd = fopen (filename, "rb");
+  if (!fd)
+    return (0);
 
-    /* Map SRAM */
-    smd_poke(0x2000, 0x00);
-    smd_poke(0x2001, 0x04);
+  /* Load header */
+  fread (header, 0x200, 1, fd);
 
-    starttime = time(NULL);
-   
+  /* Map SRAM */
+  smd_poke (0x2000, 0x00);
+  smd_poke (0x2001, 0x04);
 
-    parport_gauge(starttime, 0x4000, 0x8000);
-    fflush(stdout);
-    smd_send_command(0x00, 0x4000, 0x4000);
-    fread(block, 0x4000, 1, fd);
-    smd_send_block(0x4000, block);
+  starttime = time (NULL);
 
-    parport_gauge(starttime, 0x8000, 0x8000);
-    fflush(stdout);
-    smd_send_command(0x00, 0x8000, 0x4000);
-    fread(block, 0x4000, 1, fd);
-    smd_send_block(0x4000, block);
 
-    fclose(fd);
+  parport_gauge (starttime, 0x4000, 0x8000);
+  fflush (stdout);
+  smd_send_command (0x00, 0x4000, 0x4000);
+  fread (block, 0x4000, 1, fd);
+  smd_send_block (0x4000, block);
 
-    /* Advance to next line */
-    printf("\n");
+  parport_gauge (starttime, 0x8000, 0x8000);
+  fflush (stdout);
+  smd_send_command (0x00, 0x8000, 0x4000);
+  fread (block, 0x4000, 1, fd);
+  smd_send_block (0x4000, block);
 
-    /* Un-map SRAM */
-    smd_poke(0x2001, 0x00);
+  fclose (fd);
 
-    return (1);
+  /* Advance to next line */
+  printf ("\n");
+
+  /* Un-map SRAM */
+  smd_poke (0x2001, 0x00);
+
+  return (1);
 }
 
 
-int save_sram(char *filename)
+int
+save_sram (char *filename)
 {
-    uint8 header[0x200];
-    FILE *fd = NULL;
-    time_t starttime;
+  uint8 header[0x200];
+  FILE *fd = NULL;
+  time_t starttime;
 
-    /* Attempt to open file */
-    fd = fopen(filename, "wb");
-    if(!fd) return (0);
+  /* Attempt to open file */
+  fd = fopen (filename, "wb");
+  if (!fd)
+    return (0);
 
-    /* Set up header */
-    memset(header, 0, 0x200);
-    header[0x00] = 0x00;
-    header[0x01] = 0x00; /* SRAM file */
-    header[0x02] = 0x00;
-    header[0x08] = 0xAA;
-    header[0x09] = 0xBB;
-    header[0x0A] = 0x07; /* SRAM file */
-    fwrite(header, 0x200, 1, fd);
+  /* Set up header */
+  memset (header, 0, 0x200);
+  header[0x00] = 0x00;
+  header[0x01] = 0x00;		/* SRAM file */
+  header[0x02] = 0x00;
+  header[0x08] = 0xAA;
+  header[0x09] = 0xBB;
+  header[0x0A] = 0x07;		/* SRAM file */
+  fwrite (header, 0x200, 1, fd);
 
-    /* Map SRAM */
-    smd_poke(0x2000, 0x00);
-    smd_poke(0x2001, 0x04);
+  /* Map SRAM */
+  smd_poke (0x2000, 0x00);
+  smd_poke (0x2001, 0x04);
 
-    starttime = time(NULL);
+  starttime = time (NULL);
 
 //    printf("Saving SRAM block 1\r");
-    parport_gauge(starttime, 0x4000, 0x8000);
-    fflush(stdout);
-    smd_send_command(0x01, 0x4000, 0x4000);
-    smd_recieve_block(0x4000, block);
-    fwrite(block, 0x4000, 1, fd);
+  parport_gauge (starttime, 0x4000, 0x8000);
+  fflush (stdout);
+  smd_send_command (0x01, 0x4000, 0x4000);
+  smd_recieve_block (0x4000, block);
+  fwrite (block, 0x4000, 1, fd);
 
 //    printf("Saving SRAM block 2\r");
-    parport_gauge(starttime, 0x8000, 0x8000);
-    fflush(stdout);
-    smd_send_command(0x01, 0x8000, 0x4000);
-    smd_recieve_block(0x4000, block);
-    fwrite(block, 0x4000, 1, fd);
+  parport_gauge (starttime, 0x8000, 0x8000);
+  fflush (stdout);
+  smd_send_command (0x01, 0x8000, 0x4000);
+  smd_recieve_block (0x4000, block);
+  fwrite (block, 0x4000, 1, fd);
 
-    fclose(fd);
+  fclose (fd);
 
-    /* Un-map SRAM */
-    smd_poke(0x2001, 0x00);
+  /* Un-map SRAM */
+  smd_poke (0x2001, 0x00);
 
-    /* Advance to next line */
-    printf("\n");
+  /* Advance to next line */
+  printf ("\n");
 
-    return (1);
+  return (1);
 }
 
 /*--------------------------------------------------------------------------*/
 /*                                                                          */
 /*--------------------------------------------------------------------------*/
 
-int dump_bios(char *filename)
+int
+dump_bios (char *filename)
 {
-    FILE *fd = NULL;
+  FILE *fd = NULL;
 
-    /* Attempt to open file */
-    fd = fopen(filename, "wb");
-    if(!fd) return (0);
+  /* Attempt to open file */
+  fd = fopen (filename, "wb");
+  if (!fd)
+    return (0);
 
-    /* Map SRAM */
-    smd_poke(0x2000, 0x00);
-    smd_poke(0x2001, 0x00);
+  /* Map SRAM */
+  smd_poke (0x2000, 0x00);
+  smd_poke (0x2001, 0x00);
 
-    printf("Saving BIOS\r");
-    fflush(stdout);
-    smd_send_command(0x01, 0x0000, 0x2000);
-    smd_recieve_block(0x2000, block);
-    fwrite(block, 0x2000, 1, fd);
+  printf ("Saving BIOS\r");
+  fflush (stdout);
+  smd_send_command (0x01, 0x0000, 0x2000);
+  smd_recieve_block (0x2000, block);
+  fwrite (block, 0x2000, 1, fd);
 
-    fclose(fd);
+  fclose (fd);
 
-    /* Advance to next line */
-    printf("\n");
+  /* Advance to next line */
+  printf ("\n");
 
-    return (1);
+  return (1);
 }
 
-int smd_usage(int argc, char *argv[])
+int
+smd_usage (int argc, char *argv[])
 {
-  if(argcmp(argc, argv, "-help"))
-    printf("%s\n",smd_TITLE);
+  if (argcmp (argc, argv, "-help"))
+    printf ("%s\n", smd_TITLE);
 
-  printf("TEST:  -xsmd    send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT\n"
-         "                receives automatically when $ROM does not exist\n"
-         "TEST:  -xsmds   send/receive SRAM to/from Super Magic Drive/SMD; $FILE=PORT\n"
-         "                receives automatically when $ROM(=SRAM) does not exist\n");
+  printf
+    ("TEST:  -xsmd    send/receive ROM to/from Super Magic Drive/SMD; $FILE=PORT\n"
+     "                receives automatically when $ROM does not exist\n"
+     "TEST:  -xsmds   send/receive SRAM to/from Super Magic Drive/SMD; $FILE=PORT\n"
+     "                receives automatically when $ROM(=SRAM) does not exist\n");
 
-  if(argcmp(argc, argv, "-help"))
-  {
-  //TODO more info like technical info about cabeling and stuff for the copier
-  }
+  if (argcmp (argc, argv, "-help"))
+    {
+      //TODO more info like technical info about cabeling and stuff for the copier
+    }
 
   return 0;
 }
 
-int smd_read_rom(char *filename, unsigned int parport)
+int
+smd_read_rom (char *filename, unsigned int parport)
 {
   lpt = parport;
 
@@ -671,12 +716,13 @@ int smd_read_rom(char *filename, unsigned int parport)
   smd_argv[2] = filename;
   smd_argc = 3;
 
-  smd_main(smd_argc, smd_argv);
+  smd_main (smd_argc, smd_argv);
 
   return 0;
 }
 
-int smd_write_rom(char *filename, unsigned int parport)
+int
+smd_write_rom (char *filename, unsigned int parport)
 {
   lpt = parport;
 
@@ -685,18 +731,19 @@ int smd_write_rom(char *filename, unsigned int parport)
   smd_argv[2] = filename;
   smd_argc = 3;
 
-  smd_main(smd_argc, smd_argv);
+  smd_main (smd_argc, smd_argv);
 
   smd_argv[0] = "ucon64";
   smd_argv[1] = "-rc";
   smd_argc = 2;
 
-  smd_main(smd_argc, smd_argv);
+  smd_main (smd_argc, smd_argv);
 
   return 0;
 }
 
-int smd_read_sram(char *filename, unsigned int parport)
+int
+smd_read_sram (char *filename, unsigned int parport)
 {
   lpt = parport;
 
@@ -705,12 +752,13 @@ int smd_read_sram(char *filename, unsigned int parport)
   smd_argv[2] = filename;
   smd_argc = 3;
 
-  smd_main(smd_argc, smd_argv);
+  smd_main (smd_argc, smd_argv);
 
   return 0;
 }
 
-int smd_write_sram(char *filename, unsigned int parport)
+int
+smd_write_sram (char *filename, unsigned int parport)
 {
   lpt = parport;
 
@@ -719,7 +767,7 @@ int smd_write_sram(char *filename, unsigned int parport)
   smd_argv[2] = filename;
   smd_argc = 3;
 
-  smd_main(smd_argc, smd_argv);
+  smd_main (smd_argc, smd_argv);
 
   return 0;
 }

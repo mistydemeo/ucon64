@@ -45,5 +45,5 @@ int send (char comm, unsigned long saddr, char *str);
 int grab (char comm, unsigned long addr, unsigned long length, char *str);
 main (int argc, char *argv[]);
 */
-int cd64_usage(int argc, char *argv[]);
+int cd64_usage (int argc, char *argv[]);
 #endif /* CD64_H */

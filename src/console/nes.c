@@ -492,7 +492,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
     {
       unif_chunk.id = TVCI_ID;
       unif_chunk.length = 1;
-      b = ucon64.tv_standard;                   // necessary for big endian
+      b = ucon64.tv_standard;                   // necessary for big endian machines
       unif_chunk.data = &b;
       write_chunk (&unif_chunk, destfile);
     }
@@ -525,7 +525,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
     {
       unif_chunk.id = CTRL_ID;
       unif_chunk.length = 1;
-      b = ucon64.controller;                    // necessary for big endian
+      b = ucon64.controller;                    // necessary for big endian machines
       unif_chunk.data = &b;
       write_chunk (&unif_chunk, destfile);
     }
@@ -595,7 +595,7 @@ nes_ines_unif (FILE *srcfile, FILE *destfile)
           printf ("WARNING: Invalid mirroring type specified, using \"%d\"\n",
                   ucon64.mirror);
         }
-      b = ucon64.mirror;                        // necessary for big endian
+      b = ucon64.mirror;                        // necessary for big endian machines
       unif_chunk.data = &b;
       write_chunk (&unif_chunk, destfile);
     }
@@ -622,10 +622,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
   st_unif_chunk_t *unif_chunk1, unif_chunk2, *unif_chunk3;
   unsigned char b;
 
-#ifdef  WORDS_BIGENDIAN
-  unif_header.revision = bswap_32 (unif_header.revision);
-#endif
-  if (unif_header.revision > UNIF_REVISION)
+  if (unif_header.revision > UNIF_REVISION)     // conversion already done on b.e. machines
     printf ("WARNING: The UNIF file is of a revision later than %d (%d), but uCON64\n"
             "         doesn't support that revision yet. Some chunks may be discarded.\n",
             UNIF_REVISION, unif_header.revision);
@@ -750,7 +747,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
     {
       unif_chunk2.id = TVCI_ID;
       unif_chunk2.length = 1;
-      b = ucon64.tv_standard;                   // necessary for big endian
+      b = ucon64.tv_standard;                   // necessary for big endian machines
       unif_chunk2.data = &b;
       write_chunk (&unif_chunk2, destfile);
     }
@@ -804,7 +801,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
     {
       unif_chunk2.id = CTRL_ID;
       unif_chunk2.length = 1;
-      b = ucon64.controller;                    // necessary for big endian
+      b = ucon64.controller;                    // necessary for big endian machines
       unif_chunk2.data = &b;
       write_chunk (&unif_chunk2, destfile);
     }
@@ -929,7 +926,7 @@ nes_unif_unif (unsigned char *rom_buffer, FILE *destfile)
         }
       unif_chunk2.id = MIRR_ID;
       unif_chunk2.length = 1;
-      b = ucon64.mirror;                        // necessary for big endian
+      b = ucon64.mirror;                        // necessary for big endian machines
       unif_chunk2.data = &b;
       write_chunk (&unif_chunk2, destfile);
     }
@@ -1215,10 +1212,7 @@ nes_unif_ines (unsigned char *rom_buffer, FILE *destfile)
   int n, x, prg_size = 0, chr_size = 0;
   st_unif_chunk_t *unif_chunk;
 
-#ifdef  WORDS_BIGENDIAN
-  unif_header.revision = bswap_32 (unif_header.revision);
-#endif
-  if (unif_header.revision > UNIF_REVISION)
+  if (unif_header.revision > UNIF_REVISION)     // conversion already done on b.e. machines
     printf ("WARNING: The UNIF file is of a revision later than %d (%d), but uCON64\n"
             "         doesn't support that revision yet. Some chunks may be discarded.\n",
             UNIF_REVISION, unif_header.revision);

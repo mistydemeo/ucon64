@@ -848,7 +848,7 @@ ucon64_gauge (time_t init_time, int pos, int size)
 
 int
 ucon64_testsplit (const char *filename)
-// test if ROM is split into parts
+// test if ROM is split into parts based on the name of files
 {
   int x, parts = 0;
   char buf[FILENAME_MAX], *p = NULL;
@@ -862,8 +862,13 @@ ucon64_testsplit (const char *filename)
       strcpy (buf, filename);
       p = strrchr (buf, '.') + x;               // if x == -1 change char before '.'
                                                 // else if x == 1 change char behind '.'
+
+      if (buf > p ||                            // filename starts with a period
+          p - buf > strlen (buf) - 1)           // filename ends with a period
+        continue;
+
       while (!access (buf, F_OK))
-        (*p)--;                                 // "rewind"
+        (*p)--;                                 // "rewind" (find the first part)
       (*p)++;
 
       while (!access (buf, F_OK))               // count split parts

@@ -1028,6 +1028,7 @@ int
 lynxit_read_rom (const char *filename, unsigned int parport)
 {
   print_data = parport;
+  misc_parport_print_info ();
 
   lynxit_argv[0] = "ucon64";
   lynxit_argv[1] = "READ";
@@ -1044,6 +1045,7 @@ int
 lynxit_write_rom (const char *filename, unsigned int parport)
 {
   print_data = parport;
+  misc_parport_print_info ();
 
   lynxit_argv[0] = "ucon64";
   lynxit_argv[1] = "WRITE";

@@ -302,6 +302,7 @@ doctor64_read (const char *filename, unsigned int parport)
   FILE *fh;
   int size, inittime, bytesreceived = 0;
 
+  misc_parport_print_info ();
   if (initCommunication (parport) == -1)
     return -1;
 
@@ -337,6 +338,7 @@ doctor64_write (const char *filename, int start, int len, unsigned int parport)
   FILE *fh;
   unsigned int size, inittime, pos, bytessend = 0;
 
+  misc_parport_print_info ();
   size = len - start;
   if (initCommunication (parport) == -1)
     return -1;

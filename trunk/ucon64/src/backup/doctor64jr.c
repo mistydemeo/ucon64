@@ -1014,6 +1014,8 @@ int
 doctor64jr_read (const char *filename, unsigned int parport)
 {
   char buf[MAXBUFSIZE];
+
+  misc_parport_print_info ();
   init_time = time (0);
 
   port[0] = parport;
@@ -1035,7 +1037,10 @@ int
 doctor64jr_write (const char *filename, unsigned int parport)
 {
   char buf[MAXBUFSIZE];
+
+  misc_parport_print_info ();
   init_time = time (0);
+
   port[0] = parport;
   port[1] = 0;
   strcpy (buf, filename);

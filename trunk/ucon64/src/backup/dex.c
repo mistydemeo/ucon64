@@ -44,6 +44,8 @@ const st_usage_t dex_usage[] =
 #ifdef PARALLEL
 #include "dex.h"
 #include "psxpblib.h"
+#include "misc_par.h"
+
 
 static int print_data = 0x378;
 
@@ -95,7 +97,9 @@ int
 dex_read_block (const char *filename, int block_num, unsigned int parport)
 {
   unsigned char *result = NULL, data[BLOCK_SIZE];
+
   print_data = parport;
+  misc_parport_print_info ();
 
   result = read_block (block_num, data);
 
@@ -110,7 +114,9 @@ dex_write_block (const char *filename, int block_num, unsigned int parport)
 {
   int result;
   unsigned char data[BLOCK_SIZE];
+
   print_data = parport;
+  misc_parport_print_info ();
 
   q_fread (data, 0, BLOCK_SIZE, filename);
 

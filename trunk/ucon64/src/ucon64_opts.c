@@ -268,11 +268,11 @@ ucon64_switches (int c, const char *optarg)
     // We detect the presence of these options here so that we can drop privileges ASAP
     case UCON64_XDEX:
     case UCON64_XDJR:
-    case UCON64_XF2A:
-    case UCON64_XF2AMULTI:
-    case UCON64_XF2AC:
-    case UCON64_XF2AS:
-    case UCON64_XF2AB:
+    case UCON64_XF2A:                           // could be for USB version
+    case UCON64_XF2AMULTI:                      // idem
+    case UCON64_XF2AC:                          // idem
+    case UCON64_XF2AS:                          // idem
+    case UCON64_XF2AB:                          // idem
     case UCON64_XFAL:
     case UCON64_XFALMULTI:
     case UCON64_XFALC:
@@ -1207,7 +1207,7 @@ ucon64_options (int c, const char *optarg)
           gg_apply (ucon64.rominfo, optarg);
           break;
         default:
-          fprintf (stderr, "ERROR: Can not apply Game Genie code for this ROM/console\n");
+          fprintf (stderr, "ERROR: Cannot apply Game Genie code for this ROM/console\n");
 // The next msg has already been printed
 //          fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
           return -1;
@@ -1813,40 +1813,6 @@ ucon64_options (int c, const char *optarg)
       fputc ('\n', stdout);
       break;
 
-    case UCON64_XF2A:
-      if (access (ucon64.rom, F_OK) != 0)
-        f2a_read_rom (ucon64.rom, ucon64.parport, 32);
-      else
-        f2a_write_rom (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XF2AMULTI:
-      f2a_write_rom (NULL, ucon64.parport, strtol (optarg, NULL, 10) * MBIT);
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XF2AC:
-      f2a_read_rom (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XF2AS:
-      if (access (ucon64.rom, F_OK) != 0)
-        f2a_read_sram (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
-      else
-        f2a_write_sram (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
-      fputc ('\n', stdout);
-      break;
-
-    case UCON64_XF2AB:
-      if (access (ucon64.rom, F_OK) != 0)
-        f2a_read_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
-      else
-        f2a_write_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
-      fputc ('\n', stdout);
-      break;
-
     case UCON64_XFAL:
       if (access (ucon64.rom, F_OK) != 0)
         fal_read_rom (ucon64.rom, ucon64.parport, 32);
@@ -1930,6 +1896,41 @@ ucon64_options (int c, const char *optarg)
       break;
 
 #endif // PARALLEL
+#if     defined PARALLEL || defined HAVE_USB_H
+    case UCON64_XF2A:
+      if (access (ucon64.rom, F_OK) != 0)
+        f2a_read_rom (ucon64.rom, ucon64.parport, 32);
+      else
+        f2a_write_rom (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XF2AMULTI:
+      f2a_write_rom (NULL, ucon64.parport, strtol (optarg, NULL, 10) * MBIT);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XF2AC:
+      f2a_read_rom (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XF2AS:
+      if (access (ucon64.rom, F_OK) != 0)
+        f2a_read_sram (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
+      else
+        f2a_write_sram (ucon64.rom, ucon64.parport, UCON64_UNKNOWN);
+      fputc ('\n', stdout);
+      break;
+
+    case UCON64_XF2AB:
+      if (access (ucon64.rom, F_OK) != 0)
+        f2a_read_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
+      else
+        f2a_write_sram (ucon64.rom, ucon64.parport, strtol (optarg, NULL, 10));
+      fputc ('\n', stdout);
+      break;
+#endif // PARALLEL || HAVE_USB_H
 
     case UCON64_Z64:
       n64_z64 (ucon64.rominfo);

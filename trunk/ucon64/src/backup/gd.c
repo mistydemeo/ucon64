@@ -143,7 +143,7 @@ init_io (unsigned int port)
   init_conio ();
 #endif
 
-  printf ("Using I/O port 0x%x\n", gd_port);
+  misc_parport_print_info ();
 }
 
 

@@ -73,6 +73,10 @@ const st_usage_t gd_usage[] =
 #define GD6_TIMEOUT_ATTEMPTS 0x4000
 #define GD6_SYNC_RETRIES 16
 
+#if     defined _WIN32 && !defined __MINGW32__
+ // somebody please explain why this isn't proof that VC++ 6 is broken
+#define inline __inline
+#endif
 
 static void init_io (unsigned int port);
 static void deinit_io (void);
@@ -312,7 +316,7 @@ gd6_send_byte_helper (unsigned char data, unsigned int timeout)
 
   gd6_send_toggle ^= 2;
   outportb ((unsigned short) gd_port, data);
-  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4 | (gd6_send_toggle >> 1));
+  outportb ((unsigned short) (gd_port + PARPORT_CONTROL), (unsigned char) (4 | (gd6_send_toggle >> 1)));
 
   return GD_OK;
 }
@@ -690,7 +694,7 @@ gd6_write_sram (const char *filename, unsigned int parport)
     }
   else
     {
-      fprintf (stderr, "ERROR: GD SRAM file size must 32768 or 33280 bytes\n");
+      fprintf (stderr, "ERROR: GD SRAM file size must be 32768 or 33280 bytes\n");
       exit (1);
     }
 

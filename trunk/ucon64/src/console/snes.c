@@ -414,7 +414,9 @@ snes_convert_sramfile (const void *header)
     {
       // Pad SRAM to 32.5 kB by repeating the SRAM data. At least the SWC DX2
       //  does something similar.
-      fwrite (buf, 1, blocksize, destfile);
+      fwrite (buf, 1, byteswritten + blocksize <= 32 * 1024 + SWC_HEADER_LEN ?
+                blocksize : 32 * 1024 + SWC_HEADER_LEN - byteswritten,
+              destfile);
       byteswritten += blocksize;
     }
 

@@ -331,10 +331,13 @@ extern uint32_t bswap_32 (uint32_t x);
 extern uint64_t bswap_64 (uint64_t x);
 #endif // OWN_BYTESWAP
 #endif
-//extern unsigned short crc16 (unsigned short crc16, const void *buffer, unsigned int size);
+extern unsigned short crc16 (unsigned short crc, const void *buffer, unsigned int size);
 #ifndef  HAVE_ZLIB_H
-// use zlib's crc32() if HAVE_ZLIB_H is defined
-extern unsigned int crc32 (unsigned int crc32, const void *buffer, unsigned int size);
+// use zlib's crc32() if HAVE_ZLIB_H is defined...
+#define crc32(C, B, S) crc32_2(C, B, S)
+// ... but make it possible to link against a library that uses zlib while this
+//  code does not use it
+extern unsigned int crc32_2 (unsigned int crc, const void *buffer, unsigned int size);
 #endif
 
 

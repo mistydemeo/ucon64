@@ -374,7 +374,7 @@ char write_32k(unsigned short int hi_word, unsigned short int lo_word)
 	 set_data_read			// ninit=0, nwrite=1
 	 if (inportb(port_c)!=0x00){
 	    unpass--;
-	    printf("counter=%x ",inportb(data));
+//	    printf("counter=%x ",inportb(data));
 	    outportb(port_a,0x0b);	// set all pin=0 for debug
 	    if (disp_on) printf("*");
 	    init_port();

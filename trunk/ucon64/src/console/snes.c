@@ -3381,7 +3381,6 @@ int
 snes_demirror (st_rominfo_t *rominfo)           // nice verb :-)
 {
   int fixed = 0, size = ucon64.file_size - rominfo->buheader_len, mirror_size;
-  unsigned int crc;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
   unsigned char *buffer;
 
@@ -3400,8 +3399,8 @@ snes_demirror (st_rominfo_t *rominfo)           // nice verb :-)
   if (size % (12 * MBIT) == 0)                  // 12, 24 or 48 Mbit dumps can be mirrored
     {
       mirror_size = size / 12 * 2;
-      crc = crc32 (0, buffer + size - mirror_size, mirror_size);
-      if (crc == crc32 (0, buffer + size - 2 * mirror_size, mirror_size))
+      if (memcmp (buffer + size - mirror_size, buffer + size - 2 * mirror_size,
+                  mirror_size) == 0)
         {
           if (ucon64.quiet == -1)
             printf ("Mirrored: %d - %d == %d - %d\n",

@@ -48,7 +48,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #ifdef  __UNIX__
 #include <unistd.h>             // usleep(), microseconds
-#elif   defined __DOS__
+#elif   defined __MSDOS__
 #include <dos.h>                // delay(), milliseconds
 #elif   defined __BEOS__
 #include <OS.h>                 // snooze(), microseconds
@@ -309,7 +309,7 @@ smd_recieve_block (uint32 length, uint8 * buffer)
 
 #ifdef  __UNIX__                // wait 32 milliseconds
   usleep (32000);
-#elif   defined __DOS__
+#elif   defined __MSDOS__
   delay (32);
 #elif   defined __BEOS__
   snooze (32000);

@@ -108,7 +108,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_DINT (UCON64_OPTION + 24)
 #define UCON64_DUMPINFO (UCON64_OPTION + 25)
 #define UCON64_E (UCON64_OPTION + 26)
-#define UCON64_EHI (UCON64_OPTION + 27)
+#define UCON64_EROM (UCON64_OPTION + 27)
 #define UCON64_F (UCON64_OPTION + 28)
 #define UCON64_FDS (UCON64_OPTION + 29)
 #define UCON64_FDSL (UCON64_OPTION + 30)
@@ -250,10 +250,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define UCON64_83 (UCON64_OPTION + 166)
 #define UCON64_FORCE63 (UCON64_OPTION + 167)
-
-
 #define UCON64_GUI (UCON64_OPTION + 168)
-
 
 // Keep these (libdiscmage) options separate
 #define UCON64_DISC (UCON64_OPTION + 250)

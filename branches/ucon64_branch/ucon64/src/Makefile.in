@@ -41,14 +41,14 @@ else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 
 ifdef DISCMAGE
-FULLLIBNAME=$(LIBNAME).dll
+FULLLIBNAME=$(LIBNAME_DM).dll
 ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME).a
+LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
 endif
 endif
 
 ifdef GUI
-FULLLIBNAME_NG=$(LIBNAME_NG).dxe
+FULLLIBNAME_NG=$(LIBNAME_NG).dll
 ifndef DLOPEN
 LDFLAGS+=libnetgui/$(LIBNAME_NG).a
 endif
@@ -174,6 +174,7 @@ clean:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~
 	cd libdiscmage && $(MAKE) clean
+        cd libnetgui && $(MAKE) clean
 else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~
@@ -211,6 +212,7 @@ else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 	rm -f Makefile config.log config.status config.cache config.h
 	cd libdiscmage && $(MAKE) distclean
+        cd libnetgui && $(MAKE) distclean
 else
 ifdef DJGPP
 	del Makefile
@@ -262,7 +264,7 @@ ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	cd libnetgui && $(MAKE)
 else
 ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
-	cd libdiscmage && $(MAKE)
+	cd libnetgui && $(MAKE)
 else
 ifdef DJGPP
 	cd libnetgui

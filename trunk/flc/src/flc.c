@@ -161,10 +161,8 @@ for( x = 0 ; x < flc.files ; x++ )
 }
 
 
-printf(
-  (flc.html) ?
-  "</pre></tt></body></html>\n" :
-  "\n"
+if(flc.html)printf(
+  "</pre></tt></body></html>\n"
 );
 
 return(0);

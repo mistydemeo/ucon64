@@ -822,7 +822,7 @@ main (int argc, char *argv[])
           return quickfwrite (buf2, 6, 50, ucon64_fbackup (rom.rom), "r+b");
 
         case ucon64_IDPPF:
-          return addppfid (argc, argv);
+          return addppfid (rom.rom);
   
         case ucon64_LS:
           return ucon64_ls (0);
@@ -857,7 +857,7 @@ main (int argc, char *argv[])
                   "TIP: %s " OPTION_LONG_S "db " OPTION_LONG_S "nes would show only the number of known NES ROMs\n\n",
                   ucon64_dbsize (rom.console),
                   ucon64_dbsize (rom.console) - ucon64_DBSIZE,
-                  getarg (argc, argv, ucon64_NAME));
+                  argv[0]);
           break;
 
         case ucon64_DBS:
@@ -867,7 +867,7 @@ main (int argc, char *argv[])
           ucon64_nfo (&rom);
 //          ucon64_dbview (rom.console);
           printf ("TIP: %s "OPTION_LONG_S "dbs "OPTION_LONG_S "nes would search only for a NES ROM\n\n",
-                  getarg (argc, argv, ucon64_NAME));
+                  argv[0]);
   
           break;
   
@@ -875,7 +875,7 @@ main (int argc, char *argv[])
           ucon64_dbview (rom.console);
   
           printf ("\nTIP: %s " OPTION_LONG_S "db " OPTION_LONG_S "nes would view only NES ROMs\n\n",
-                  getarg (argc, argv, ucon64_NAME));
+                  argv[0]);
           break;
   
         case ucon64_MULTI:
@@ -1283,6 +1283,12 @@ main (int argc, char *argv[])
         case ucon64_GC:
         case ucon64_GP32:
         case ucon64_NS:
+        case ucon64_INT:
+        case ucon64_NINT:
+        case ucon64_HD:
+        case ucon64_NHD:
+        case ucon64_HI:
+        case ucon64_NHI:
         case ucon64_FRONTEND:
         case ucon64_NBAK:
           break;
@@ -1333,7 +1339,7 @@ ucon64_flush (int argc, char *argv[], struct ucon64_ *rom)
 {
   memset (rom, 0L, sizeof (struct ucon64_));
 
-  strcpy (rom->rom, getarg (argc, argv, ucon64_ROM));
+//  strcpy (rom->rom, getarg (argc, argv, ucon64_ROM));
   rom->bytes = quickftell (rom->rom);
   rom->splitted[0] = ucon64_testsplit (rom->rom);
 
@@ -1993,7 +1999,7 @@ ucon64_usage (int argc, char *argv[])
            "  " OPTION_LONG_S "stp         strip first 512 Bytes (possible header) from ROM\n"
            "  " OPTION_LONG_S "ins         insert 512 Bytes (0x00) before ROM\n"
            "  " OPTION_LONG_S "strip       strip Bytes from end of ROM; $FILE=VALUE\n"
-           ,getarg (argc, argv, ucon64_NAME));
+           ,argv[0]);
 
   bsl_usage ();
   ips_usage ();
@@ -2187,7 +2193,7 @@ ucon64_usage (int argc, char *argv[])
      "\n"
      , ucon64_dbsize (ucon64_UNKNOWN)
      , ucon64_dbsize (ucon64_UNKNOWN) - ucon64_DBSIZE
-     , getarg (argc, argv, ucon64_NAME), getarg (argc, argv, ucon64_NAME)
+     , argv[0], argv[0]
    );
 
   return 0;

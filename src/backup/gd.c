@@ -261,8 +261,7 @@ int
 gd6_sync_hardware (void)
 // Sets the SF7 up for an SF6/SF7 protocol transfer
 {
-  volatile int delay;
-  int timeout, retries;
+  int timeout, retries, delay;
 
   for (retries = GD6_SYNC_RETRIES; retries > 0; retries--)
     {
@@ -280,26 +279,34 @@ gd6_sync_hardware (void)
 
       while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x08) == 0)
         if (--timeout == 0)
-          continue;
+          break;
+      if (timeout == 0)
+        continue;
 
       outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
 
       while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x08) != 0)
         if (--timeout == 0)
-          continue;
+          break;
+      if (timeout == 0)
+        continue;
 
       outportb ((unsigned short) gd_port, 0x55);
       outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 0);
 
       while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x08) == 0)
         if (--timeout == 0)
-          continue;
+          break;
+      if (timeout == 0)
+        continue;
 
       outportb ((unsigned short) (gd_port + PARPORT_CONTROL), 4);
 
       while ((inportb ((unsigned short) (gd_port + PARPORT_CONTROL)) & 0x08) != 0)
         if (--timeout == 0)
-          continue;
+          break;
+      if (timeout == 0)
+        continue;
 
       return GD_OK;
     }
@@ -556,14 +563,12 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo,
   //  correct.
   gd_starttime = time (NULL);
 
-
   // Send the ROM to the hardware
-  memcpy (buffer, prolog_str, 4);
-  buffer[4] = num_units;
-
-  if (memcmp (buffer, GD6_PROLOG_STRING, 4) == 0)
+  if (memcmp (prolog_str, GD6_PROLOG_STRING, 4) == 0)
     if (gd6_sync_hardware () == GD_ERROR)
       io_error ();
+  memcpy (buffer, prolog_str, 4);
+  buffer[4] = num_units;
   if (gd_send_prolog_bytes (buffer, 5) == GD_ERROR)
     io_error ();
 

@@ -201,14 +201,14 @@ unif_crc32 (unsigned long dummy, unsigned char *prg_code, size_t size)
 {
   unsigned long crc = 0;
 
-  return (CalculateBufferCRC ((unsigned int) size, crc, (void *) prg_code));
+  return CalculateBufferCRC ((unsigned int) size, crc, (void *) prg_code);
 }
 
 char *
 ucon64_fbackup (struct ucon64_ *rom, char *filename)
 {
   if (!rom->backup)
-    return (filename);
+    return filename;
 
   if (!access (filename, F_OK))
     {
@@ -464,7 +464,7 @@ parport_probe (unsigned int port)
 int
 parport_gauge (time_t init_time, long pos, long size)
 {
-  long cps;
+  long bps;
   int p, percentage;
   time_t curr, left;
   char progress[24 + 1];
@@ -479,16 +479,16 @@ parport_gauge (time_t init_time, long pos, long size)
       if (pos > size)                           //  by zero below)
         return -1;
 
-      cps = pos / curr;                         // # bytes/second (average transfer speed)
-      left = (size - pos) / cps;
+      bps = pos / curr;                         // # bytes/second (average transfer speed)
+      left = (size - pos) / bps;
 
       p = 24 * pos / size;
       progress[0] = 0;
       strncat (progress, "========================", p);
       strncat (&progress[p], "------------------------", 24 - p);
 
-      printf ("\r%10lu Bytes [%s] %u%%, CPS=%lu, ",
-              pos, progress, percentage, (unsigned long) cps);
+      printf ("\r%10lu Bytes [%s] %u%%, BPS=%lu, ",
+              pos, progress, percentage, (unsigned long) bps);
 
       if (pos == size)
         printf ("TOTAL=%03ld:%02ld", (long) curr / 60, (long) curr % 60); // DON'T print a newline
@@ -534,12 +534,12 @@ int
 trackmode (long imagesize)
 // tries to figure out the used track mode of the cd image
 {
-  return ((!(imagesize % 2048)) ? 2048 :        // MODE1, MODE2_FORM1
-          (!(imagesize % 2324)) ? 2324 :        // MODE2_FORM2
-          (!(imagesize % 2336)) ? 2336 :        // MODE2, MODE2_FORM_MIX
-          (!(imagesize % 2352)) ? 2352 :        // AUDIO, MODE1_RAW, MODE2_RAW
-          -1                    // unknown
-    );
+  return (!(imagesize % 2048)) ? 2048 :        // MODE1, MODE2_FORM1
+         (!(imagesize % 2324)) ? 2324 :        // MODE2_FORM2
+         (!(imagesize % 2336)) ? 2336 :        // MODE2, MODE2_FORM_MIX
+         (!(imagesize % 2352)) ? 2352 :        // AUDIO, MODE1_RAW, MODE2_RAW
+         -1                    // unknown
+    ;
 }
 
 

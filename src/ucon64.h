@@ -129,11 +129,11 @@ typedef struct st_rominfo
   char internal_crc2[MAXBUFSIZE];               // 2nd or inverse internal checksum
   int internal_crc2_start;                      // start of 2nd/inverse internal checksum
   int internal_crc2_len;                        // length (in bytes) of 2nd/inverse internal checksum
-//  dm_image_t *image;                         // DISC image
+  dm_image_t *image;                            // DISC image
   ucon64_dat_t *dat;                            // info from dat
 } st_rominfo_t;
 
-extern dm_image_t *image;
+//extern dm_image_t *image;
 
 //extern const option_t options[];
 extern const struct option options[];

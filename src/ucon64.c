@@ -105,6 +105,7 @@ static void ucon64_dat_nfo (const ucon64_dat_t *dat);
 st_ucon64_t ucon64;
 static st_rominfo_t rom;
 static ucon64_dat_t ucon64_dat;
+static dm_image_t *image = NULL;
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
 static int ucon64_fsize = 0, ucon64_option = 0;
 
@@ -305,7 +306,6 @@ const struct option options[] = {
     {0, 0, 0, 0}
   };
 
-dm_image_t *image = NULL;
 #ifdef  DLOPEN
 void *libdm;
 
@@ -817,6 +817,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       result = 0;
 
       image = dm_open (romfile);
+      rominfo->image = image;
 
       q_fread (&iso_header, ISO_HEADER_START +
           UCON64_ISSET (ucon64.buheader_len) ?
@@ -853,11 +854,12 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 void
 ucon64_dat_nfo (const ucon64_dat_t *dat)
 {
-  printf ("DAT: %s\n"
-          "DAT: Version: %s (%s, %s)\n"
-//          "DAT: Author: %s\n"
-//          "DAT: Comment: %s\n"
-          "DAT: %s\n",
+  printf ("DAT info:\n"
+          "  %s\n"
+          "  Version: %s (%s, %s)\n"
+//          "  Author: %s\n"
+//          "  Comment: %s\n"
+          "  %s\n",
           dat->datfile,
           dat->version,
           dat->date,
@@ -867,9 +869,9 @@ ucon64_dat_nfo (const ucon64_dat_t *dat)
           dat->name);
 
   if (stricmp (dat->name, dat->fname) != 0)
-    printf ("DAT: Filename: %s\n", dat->fname);
+    printf ("  Filename: %s\n", dat->fname);
 
-  printf ("DAT: Size: %d Bytes (%.4f Mb)\n",
+  printf ("  Size: %d Bytes (%.4f Mb)\n",
           dat->fsize,
           TOMBIT_F (dat->fsize));
 }

@@ -63,7 +63,7 @@ void init_conio (void);
 int kbhit (void);                               // may only be used after init_conio()!
 #endif
 
-int allascii (char *b, int size);               // test if a string is completely ascii
+int areprint (char *str, int size);    // like isprint() but for a whole string
 
 int strdcmp (char *str, char *str1);            //compares case AND length
 
@@ -72,19 +72,13 @@ int stricmp(const char *s1, const char *s2);
 int strnicmp(const char *s1, const char *s2, size_t n);
 
 /*
-  that person who invented _makepath() and _splitpath() should suck dicks in hell
+  don't use _splitpath() and or _makepath()
 */
-void _makepath( char *path,	//do not use
-        const char *node,
-        const char *dir,
-        const char *fname,
-        const char *ext );
+void _makepath (char *path, const char *node, const char *dir,
+                const char *fname, const char *ext);//do not use
 
-void _splitpath( const char *path,	//do not use
-                 char *node,
-                 char *dir,
-                 char *fname,
-                 char *ext );
+void _splitpath (const char *path,
+                 char *node, char *dir, char *fname, char *ext);//do not use
 
 int argcmp (int argc, char *argv[], char *str); // check the cmdline options for str
 

@@ -44,16 +44,18 @@ static void deinit_conio (void);
 static void set_tty (tty_t param);
 #endif
 
+/*
+  like isprint() but for strings
+*/
 int
-allascii (char *b, int size)
+areprint (char *str, int size)
 {
-  int i;
-
-  for (i = 0; i < size; i++)
-    if (b[i] < 32)                              // " || b[i] > 127" is unnecessary, b is signed
-      return 0;                                 //  (unsigned char) b[i] > 127 == b[i] < 0 == b[i] < 32
-
-  return 1;
+  while (size > 0)
+    {
+      if (!isprint ((int) str[--size]))
+        return FALSE;//0
+    }
+  return TRUE;//1
 }
 
 int
@@ -65,31 +67,34 @@ strdcmp (char *str, char *str1)
 }
 
 /*
-Description
+  Description
 
-stricmp() and strnicmp() functions lexicographically compare the nullterminated strings s1 and s2 
-case independent
+  stricmp() and strnicmp() functions lexicographically compare the nullterminated
+  strings s1 and s2 case independent
 
-Return Values
+  Return Values
 
-The strimp() and strnicmp() return an integer greater than, equal to, or less than 0, according as the string s1 is greater than, equal to, or less than the string s2. The comparison is done using
-unsigned characters, so that '\\200' is greater than '\\0'. 
+  The strimp() and strnicmp() return an integer greater than, equal to, or less
+  than 0, according as the string s1 is greater than, equal to, or less than the
+  string s2. The comparison is done using unsigned characters, so that '\\200'
+  is greater than '\\0'.
 
-The strnicmp() compares not more than n characters. 
+  The strnicmp() compares not more than n characters.
 */
 int
-strnicmp(const char *s1, const char *s2, size_t n) 
+strnicmp (const char *s1, const char *s2, size_t n)
 {
-  int result=0;
-  char *sb1,*sb2;
+  int result = 0;
+  char *sb1, *sb2;
 
-  if (!strcmp (s1, s2)) return 0;
+  if (!strcmp (s1, s2))
+    return 0;
 
   if (!(sb1 = (char *) malloc (strlen(s1) * sizeof (char))))
     {
       return (-1);
     }
-  
+
   if (!(sb2 = (char *) malloc (strlen(s2) * sizeof (char))))
     {
       free (sb1);
@@ -98,17 +103,17 @@ strnicmp(const char *s1, const char *s2, size_t n)
 
   strcpy(sb1, s1);
   strcpy(sb2, s2);
-  
+
   result = strncmp (strlwr(sb1), strlwr(sb2), n);
 
   free (sb1);
   free (sb2);
-  
+
   return (result);
 }
 
 int
-stricmp(const char *s1, const char *s2) 
+stricmp (const char *s1, const char *s2)
 {
   size_t l1,l2;
 
@@ -127,81 +132,65 @@ stricmp(const char *s1, const char *s2)
   fname: stdio
   ext:   .h
 */
-void _makepath( char *path,
-        const char *node,
-        const char *dir,
-        const char *fname,
-        const char *ext )
+void
+_makepath (char *path,
+           const char *node,
+           const char *dir, const char *fname, const char *ext)
 {
-  sprintf (path,"%s%s%s.%s", node, dir, fname, ext);
+  sprintf (path, "%s%s%s.%s", node, dir, fname, ext);
 }
 
-void _splitpath( const char *path,
-                 char *node,
-                 char *dir,
-                 char *fname,
-                 char *ext )
+void
+_splitpath (const char *path, char *node, char *dir, char *fname, char *ext)
 {
-  int pos=0;
-  char path_[NAME_MAX];
+  int pos = 0;
+  char path_[FILENAME_MAX];
 
   sscanf (path,
 #ifdef __DOS__
-                "%s:"
-#endif               
-                FILE_SEPARATOR_S
-#ifndef __DOS__
-                FILE_SEPARATOR_S
-                "%s"
-                FILE_SEPARATOR_S
+          "%s:"
 #endif
-                "%s"
-                FILE_SEPARATOR_S
-                "%s.%s", node, dir, fname, ext);
+          FILE_SEPARATOR_S
+#ifndef __DOS__
+          FILE_SEPARATOR_S "%s" FILE_SEPARATOR_S
+#endif
+          "%s" FILE_SEPARATOR_S "%s.%s", node, dir, fname, ext);
 
+  pos = ((strchr (&path[1], FILE_SEPARATOR) == NULL) ||
+         (findlast (path, ".") > (findlast (path, FILE_SEPARATOR_S) + 1))) ?
+    findlast (path, ".") : strlen (path);
 
-//TODO i hate this functions.. they suck.. they suck... and people who use them suck too
+  strncpy (path_, path, pos);
+  path_[pos] = 0;
 
-  
-  pos = ((strchr(&path[1],FILE_SEPARATOR) == NULL) ||
-          (findlast (path, ".") > (findlast (path, FILE_SEPARATOR_S) + 1 ))) ?
-    findlast (path, ".") : strlen(path);
+  strcpy (fname, filenameonly (path_));
 
-  strncpy(path_, path, pos);
-  path_[pos]=0;
-
-  strcpy(fname, filenameonly(path_));
-
-  strcpy(ext, &path[pos+1]);
+  strcpy (ext, &path[pos + 1]);
 }
 
 int
 argcmp (int argc, char *argv[], char *str)
 {
-  register int x = 0;
-
-  for (x = 1; x < argc; x++)                    // leave out first arg
+  while (argc > 1)                    // leave out first arg
     {
-      if (argv[x][0] == '-' && (!strdcmp (argv[x], str) || !strdcmp (&argv[x][1], str)  //'--' also!
-          ))
-        return (x);
+      argc--;
+      if (argv[argc][0] == '-' &&
+          (!strdcmp (argv[argc], str) || !strdcmp (&argv[argc][1], str))) //'--' also!
+        return (argc);
     }
-
-  return (0);                                   // not found
+  return 0;                                   // not found
 }
 
 int
 argncmp (int argc, char *argv[], char *str, size_t len)
 {
-  register int x = 0;
-
-  for (x = 1; x < argc; x++)                    // leave out first arg
+  while (argc > 1)                    // leave out first arg
     {
-      if (argv[x][0] == '-' &&
-          (!strncmp (argv[x], str, len) || !strncmp (&argv[x][1], str, len)))
-        return (x);
+      argc--;
+      if (argv[argc][0] == '-' &&
+          (!strncmp (argv[argc], str, len) || !strncmp (&argv[argc][1], str, len)))
+        return (argc);
     }
-
   return (0);                                   // not found
 }
 
@@ -228,12 +217,15 @@ getarg (int argc, char *argv[], int pos)
 long
 getarg_intval (int argc, char **argv, char *argname)
 {
-  int n, len = strlen (argname);
+  int len = strlen (argname);
 
-  for (n = 1; n < argc; n++)
-    if (!strncmp (argv[n], argname, len))
-      return atol (&argv[n][len]);
-
+  while (argc > 1)                    // leave out first arg
+    {
+      argc--;
+      if (argv[argc][0] == '-' &&
+          (!strncmp (argv[argc], argname, len) || !strncmp (&argv[argc][1], argname, len))) //'--' also!
+        return atol (&argv[argc][len]);
+    }
   return 0;
 }
 
@@ -242,7 +234,7 @@ findlwr (char *str)
 // searches the string for ANY lowercase char
 {
   char *str2;
-//TODO filenames which consist only of numbers
+// TODO filenames which consist only of numbers
 
   if (!(str2 = strrchr (str, FILE_SEPARATOR)))
     str2 = str;                                 // strip path if it is a filename
@@ -263,7 +255,7 @@ int
 findlast (const char *str, const char *str2)
 /*
   same as strcspn() but looks for the last appearance of str2
-  findlast(".1234.6789",".") == 5
+  findlast (".1234.6789",".") == 5
 */
 {
   register int x = 0;
@@ -311,9 +303,9 @@ newext (char *filename, char *ext)
   int pos = 0;
   char ext2[4096];
 
-  pos = ((strchr(&filename[1],FILE_SEPARATOR) == NULL) ||
-          (findlast (filename, ".") > (findlast (filename, FILE_SEPARATOR_S) + 1 ))) ?
-    findlast (filename, ".") : strlen(filename);
+  pos = ((strchr (&filename[1], FILE_SEPARATOR) == NULL) ||
+         (findlast (filename, ".") > (findlast (filename, FILE_SEPARATOR_S) + 1 ))) ?
+    findlast (filename, ".") : strlen (filename);
 
 //  if (filename[pos - 1] != FILE_SEPARATOR) // some files might start with a dot (.)
       filename[pos] = 0;
@@ -368,16 +360,26 @@ stplcr (char *str)
 char *
 strswap (char *str, long start, long len)
 {
-  register unsigned long x;
+/*  register unsigned long x;
   char c;
-
 
   for (x = start; x < (len - start); x += 2)
     {
       c = str[x];
       str[x] = str[x + 1];
       str[x + 1] = c;
+    }*/
+  char c;
+  len += start;
+
+  while (start < len)
+    {
+      c = str[start];
+      str[start] = str[start + 1];
+      str[start + 1] = c;
+      start += 2;
     }
+
   return (str);
 }
 
@@ -550,14 +552,13 @@ quickfread (void *dest, size_t start, size_t len, char *src)
   size_t result = 0;
   FILE *fh;
 
-  len =
-    (((quickftell (src) - start) < len) ? (quickftell (src) - start) : len);
+  len = (((quickftell (src) - start) < len) ? (quickftell (src) - start) : len);
 
   if (!(fh = fopen (src, "rb")))
     return (-1);
   fseek (fh, start, SEEK_SET);
   result = fread ((void *) dest, 1, len, fh);
-//      dest[len]=0;
+//  dest[len]=0;
   fclose (fh);
   return (result);
 }
@@ -954,14 +955,11 @@ fileswap (char *filename, long start, long len)
   FILE *in, *out;
   char buf[MAXBUFSIZE], buf2[3], buf3;
 
-
   if (access (filename, R_OK) != 0)
     return (-1);
 
-  len =
-    (((quickftell (filename) - start) <
-      len) ? (quickftell (filename) - start) : len);
-
+  len = (((quickftell (filename) - start) < len) ?
+          (quickftell (filename) - start) : len);
 
   if (!(in = fopen (filename, "rb")))
     return (-1);
@@ -1042,10 +1040,10 @@ getchd (char *buffer, size_t buffer_size)
     change_string ("\x81", 1, 0, 0, "\xfc", 1, homedir, l, 0); // u diaeresis
   }
 #endif
-  
+
   return homedir;
 }
-  
+
 char *
 getProperty (char *filename, char *propname, char *buffer, char *def)
 {

@@ -46,8 +46,9 @@ A: You should leave out those angle brackets. This should work<br />
 Q: How do I make uCON64 display only information about a ROM? When I use * I get
 strange results.<br />
 A: The help says that * will show info to indicate that <u>every</u> uCON64 option
-will show information about a ROM. Note that sometimes you will need to specify the
-console type for uCON64, because the ROM dump is damaged. For example<br />
+will show information about a ROM. Note that sometimes you will have to specify the
+console type for uCON64, because the ROM dump is damaged or simply not detected
+correctly by uCON64. For example<br />
 &nbsp;&nbsp; ucon64 -snes "Super Aleste (J) [t1].swc"<br />
 </tt></p>
 <p><tt>
@@ -64,5 +65,37 @@ Q: I tried to dump a SNES cartridge using a Super Wild Card connected to my PC w
 interlink cable, but it didn't work. What's wrong?<br />
 A: You shouldn't use an interlink cable, but an ordinary parallel cable. Use the options
 "-snes -help|more" to see how the pins of the connectors should be connected.<br />
+</tt></p>
+<p><tt>
+Q: I have a SNES ROM of which GoodSNES says it's good, but uCON64 says it's bad.
+Who is right?<br />
+A: GoodSNES.<br />
+There may be several reasons why uCON64 reports that the checksum is bad. It could have
+made a mistake in determining if the ROM is a HiROM or a LoROM dump. Try the options -hi
+and -nhi and see if uCON64 reports the checksum differently. A bigger problem is that the
+interleave detection code (stolen from Snes9x ;-) is not reliable. Especially BS ROMs are
+often detected as not being interleaved while they actually are. Try the options -int
+and -int2 and see if you get better results. If the checksum is reported as good it is
+very likely that the ROM is really good. Alternatively, you may want to convert the ROM
+to a non-interleaved format with -dint and run uCON64 on the converted ROM. This gives
+the best results. Luckily you won't find many interleaved ROM dumps that uCON64 can't
+handle, probably because Snes9x and ZSNES often can't handle them either.<br />
+</tt></p>
+<p><tt>
+Q: I have a SNES ROM of which Snes9x and ZSNES say it's bad, but uCON64 says it's good.
+Who is right?<br />
+A: uCON64, probably :-)<br />
+Neither Snes9x 1.39 nor ZSNES 1.337 calculate the checksum correctly for BS ROMs, so you
+can be pretty sure the ROM is good if it's a BS ROM. See previous answer.<br />
+</tt></p>
+<p><tt>
+Q: I have a SNES ROM of which uCON64 said it was bad, so I used the -chk option. Now
+uCON64, Snes9x and ZSNES all say the ROM is good, but GoodSNES still says it's bad. How
+can that be, I did fix the ROM, right?<br />
+A: No, you did not. When you use -chk uCON64 changes four bytes in the ROM dump, so that
+they match with the calculated checksum. However, the ROM stays just as bad as it was.
+Use -chk with care. -chk might be useful if you want to store a ROM somewhere without
+using a database with it's checksum. You can then later check if the ROM is still in the
+same form as when you stored it by using the checksum that is stored in the ROM.
 </tt></p>
 </tt></body></html>

@@ -854,12 +854,13 @@ ucon64_ls_main (const char *filename, struct stat *puffer, int mode, int console
   ucon64_flush (&rominfo);
 
   result = ucon64_init (ucon64.rom, &rominfo);
-  switch (mode)
-    {
+
+  if (!result)
+    switch (mode)
+      {
     case UCON64_LSV:
-      if (!result)
         ucon64_nfo (&rominfo);
-      break;
+        break;
 
     case UCON64_RROM:
     case UCON64_RR83:

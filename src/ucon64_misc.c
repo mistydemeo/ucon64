@@ -268,7 +268,7 @@ ucon64_pad (const char *filename, int start, int size)
 }
 
 
-#if 0
+#if 1
 long
 ucon64_testpad (const char *filename, st_rominfo_t *rominfo)
 // test if EOF is padded (repeating bytes)

@@ -940,7 +940,9 @@ main (int argc, char *argv[])
               (argcmp (argc, argv, "-j")) ? nes_j (&rom) :
               (argcmp (argc, argv, "-pas")) ? nes_pas (&rom) :
               (argcmp (argc, argv, "-unif")) ? nes_unif (&rom) :
-              (argcmp (argc, argv, "-s")) ? nes_s (&rom) : 0);
+              (argcmp (argc, argv, "-s")) ? nes_s (&rom) :
+              (argcmp (argc, argv, "-n")) ? nes_n (&rom) :
+               0);
       break;
 
     case ucon64_SNES:

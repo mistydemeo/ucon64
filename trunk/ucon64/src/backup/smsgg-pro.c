@@ -131,7 +131,7 @@ smsgg_read_rom (const char *filename, unsigned int parport, int size)
   unsigned char buffer[0x100];
   int blocksleft, address = 0;
   time_t starttime;
-  void (*read_block) (int, unsigned char *) = ttt_read_rom_b; // ttt_read_rom_w
+  void (*read_block) (int, unsigned char *) = ttt_read_rom_w; // ttt_read_rom_b
 
   if ((file = fopen (filename, "wb")) == NULL)
     {
@@ -322,3 +322,4 @@ smsgg_write_sram (const char *filename, unsigned int parport, int start_bank)
 }
 
 #endif // USE_PARALLEL
+

@@ -121,7 +121,7 @@ struct ucon64_
   long buheader_start;	//start of backup unit header (mostly 0)
   long buheader_len;	//length of backup unit header (==0)?no bu header
 
-  unsigned char header[4096];	//(possible) internal ROM header
+  unsigned char header[MAXBUFSIZE];	//(possible) internal ROM header
   long header_start;	//start of internal ROM header
   long header_len;	//length of internal ROM header (==0)?no header
 

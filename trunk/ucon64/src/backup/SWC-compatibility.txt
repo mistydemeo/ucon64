@@ -243,10 +243,10 @@ Code    Game
 0 -     Romancing SaGa (V1.0) (J)
 0 -     R-Type 3 (E)(21451)
 0 -     Secret of Evermore (U)
-7 -     Secret of Mana (U)
+2* -    Secret of Mana (U)
 0 -     Secret of Mana (V1.0) (E)
 0 -     Secret of Mana (V1.1) (E) [!]
-7 -     Seiken Densetsu 2 (J)
+2* -    Seiken Densetsu 2 (J)
 2* -    Seiken Densetsu 3 (J)
 0 -     Seiken Densetsu 3 - Sample (J)
 0 -     Sim Ant (U)(37113)

@@ -239,7 +239,7 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    info. If one of those options has been specified on the command line
    ucon64.show_nfo will be set to UCON64_NO.<br>
    Then uCON64 starts scanning the command line for options. This code can be
-   found in options.c. From this code allmost all operations of uCON64 are
+   found in options.c. From this code almost all operations of uCON64 are
    executed. Under Unix this is also the point where root privileges are given
    up if uCON64 had them and a "normal", i.e. non-copier I/O, option was
    specified. If a copier I/O option was specified under Unix, root privileges
@@ -319,9 +319,9 @@ Q7: <a href="#7">What coding style is preferred?</a><br>
    file should contain an <i>extern</i> statement for the variable.<br>
 <br>
    <b>Types (<i>struct</i>s)</b><br>
-   A <i>struct</i> tag of a <i>struct</i> should have the suffix "_t". A new
-   type based on a <i>struct</i> should have the same suffix and the prefix
-   "st_". Example:<br>
+   A <i>struct</i> tag of a <i>struct</i> should have the prefix "st_". A new
+   type based on a <i>struct</i> should have the same prefix and the suffix
+   "_t". Example:<br>
 <pre>
  typedef struct
  {

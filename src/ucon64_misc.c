@@ -979,12 +979,23 @@ ucon64_filefile (const char *filename1, int start1, const char *filename2,
   unsigned char buf1[MAXBUFSIZE], buf2[MAXBUFSIZE];
 #endif
   FILE *file1, *file2;
+#ifndef _WIN32
   struct stat finfo1, finfo2;
 
-  // not the name, but the combination inode & device identify a file
+  /*
+    Not the name, but the combination inode & device identify a file. However,
+    the field st_ino does not contain useful information for the Visual C++
+    exe. Since it's ridiculously inefficient to determine if two files point to
+    the same file (believe it or not but it involves scanning the *entire*
+    volume!), i.e., one of the files is a hard link, we just use the names for
+    the Visual C++ exe.
+  */
   stat (filename1, &finfo1);
   stat (filename2, &finfo2);
   if (finfo1.st_dev == finfo2.st_dev && finfo1.st_ino == finfo2.st_ino)
+#else
+  if (!stricmp (filename1, filename2))
+#endif
     return -2;                                  // one file
   if (access (filename1, R_OK) != 0 || access (filename2, R_OK) != 0)
     return -1;

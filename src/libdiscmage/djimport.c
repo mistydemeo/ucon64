@@ -45,7 +45,7 @@ static int (*dm_mktoc_ptr) (const dm_image_t *);
 static int (*dm_mkcue_ptr) (const dm_image_t *);
 static void (*dm_set_gauge_ptr) (void (*) (int, int));
 
-void
+static void
 load_dxe (void)
 {
   libdm = open_module (djimport_path);
@@ -143,6 +143,7 @@ dm_mkcue (const dm_image_t *a)
   CHECK
   return dm_mkcue_ptr (a);
 }
+
 
 void
 dm_set_gauge (void (*a) (int, int))

@@ -188,17 +188,17 @@ typedef signed __int64 int64_t;
 #define ARGS_MAX 128
 #endif // ARGS_MAX
 
-#if (defined __unix__ || defined __BEOS__ || defined AMIGA) && !defined __MSDOS__
+#if (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || defined AMIGA
 extern void init_conio (void);
 extern void deinit_conio (void);
 #define getch           getchar                 // getchar() acts like DOS getch() after init_conio()
 extern int kbhit (void);                        // may only be used after init_conio()!
 
-#elif defined __MSDOS__
+#elif   defined __MSDOS__
 #include <conio.h>                              // getch()
 #include <pc.h>                                 // kbhit()
 
-#elif defined _WIN32
+#elif   defined _WIN32
 #include <conio.h>                              // kbhit() & getch()
 #endif
 
@@ -300,7 +300,7 @@ extern unsigned int crc32 (unsigned int crc32, const void *buffer, unsigned int 
 /*
   Misc stuff
 
-  change_mem[2]() see header of implementation for usage
+  change_mem{2}() see header of implementation for usage
   build_cm_patterns() helper function for change_mem2() to read search patterns
                   from a file
   cleanup_cm_patterns() helper function for build_cm_patterns() to free all

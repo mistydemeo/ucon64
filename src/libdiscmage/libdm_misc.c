@@ -3,6 +3,7 @@ libdm_misc.c - libdiscmage miscellaneous
 
 written by 2002 NoisyB (noisyb@gmx.net)
 
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -322,13 +323,10 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
       {DM_SHEET, sheet_init, "Image with external sheet file (like: CUE, TOC, ...)"},
       {0, NULL, NULL}
     };
-  static dm_image_t image_temp;
   int x = 0;
   FILE *fh;
 
 #if 0
-  (void) image_p;                               // warning remover
-
   memset (&track, 0, sizeof (dm_track_t));
 #endif
 
@@ -336,8 +334,7 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
     dm_free (image);
 
   if (!image)
-    image = (dm_image_t *) &image_temp; 
-//    image = (dm_image_t *) malloc (sizeof (dm_image_t));
+    image = (dm_image_t *) malloc (sizeof (dm_image_t));
   if (!image)
     return NULL;
 
@@ -412,7 +409,6 @@ dm_close (dm_image_t *image)
   dm_free (image);
 //  fclose (image->fh);
 //  free (image);
-  (void) image;                                 // warning remover
   return 0;
 }
 

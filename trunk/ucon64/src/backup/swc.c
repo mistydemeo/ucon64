@@ -87,7 +87,7 @@ int swc_write_rom(char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer;
-  int bytesread, bytessend, size, emu_mode_select, hdr_4th_byte, blocksdone = 0;
+  int bytesread, bytessend, totalblocks, emu_mode_select, hdr_4th_byte, blocksdone = 0;
   unsigned short address;
   struct stat fstate;
   time_t starttime;
@@ -99,15 +99,14 @@ int swc_write_rom(char *filename, unsigned int parport)
     fprintf(STDERR, "Can't open %s for reading\n", filename);
     exit(1);
   }
-  if ((buffer = malloc(BUFFERSIZE)) == NULL)
+  if ((buffer = (unsigned char *) malloc(BUFFERSIZE)) == NULL)
   {
     fprintf(STDERR, "Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
     exit(1);
   }
 
   stat(filename, &fstate);
-  size = fstate.st_size;                        // size of ROM in bytes
-  printf("Send: %d Bytes (%.4f Mb)\n", size, (float) size/MBIT);
+  printf("Send: %ld Bytes (%.4f Mb)\n", fstate.st_size, (float) fstate.st_size/MBIT);
 
   send_command0(0xc008, 0);
   fread(buffer, 1, HEADERSIZE, file);
@@ -131,7 +130,7 @@ int swc_write_rom(char *filename, unsigned int parport)
     blocksdone++;
 
     bytessend += bytesread;
-    parport_gauge(starttime, bytessend, size);
+    parport_gauge(starttime, bytessend, fstate.st_size);
     checkabort(2);
   }
 
@@ -148,8 +147,8 @@ int swc_write_rom(char *filename, unsigned int parport)
     send_command0(0xc010, 2);
 
   send_command(5, 0, 0);
-  size = (size + BUFFERSIZE - 1) / BUFFERSIZE;  // size in 8KB blocks (rounded up)
-  send_command(6, 5 | (size << 8), size >> 8);  // bytes: 6, 5, #8K L, #8K H, 0
+  totalblocks = (fstate.st_size - HEADERSIZE + BUFFERSIZE - 1) / BUFFERSIZE; // round up
+  send_command(6, 5 | (totalblocks << 8), totalblocks >> 8); // bytes: 6, 5, #8K L, #8K H, 0
   send_command(6, 1 | (emu_mode_select << 8), 0);
 
   wait_for_ready();
@@ -176,7 +175,7 @@ int swc_write_sram(char *filename, unsigned int parport)
     fprintf(STDERR, "Can't open %s for reading\n", filename);
     exit(1);
   }
-  if ((buffer = malloc(BUFFERSIZE)) == NULL)
+  if ((buffer = (unsigned char *) malloc(BUFFERSIZE)) == NULL)
   {
     fprintf(STDERR, "Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
     exit(1);
@@ -266,7 +265,7 @@ int swc_read_rom(char *filename, unsigned int parport)
     fprintf(STDERR, "Can't open %s for writing\n", filename);
     exit(1);
   }
-  if ((buffer = malloc(BUFFERSIZE)) == NULL)
+  if ((buffer = (unsigned char *) malloc(BUFFERSIZE)) == NULL)
   {
     fprintf(STDERR, "Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
     exit(1);
@@ -527,7 +526,7 @@ int swc_read_sram(char *filename, unsigned int parport)
     fprintf(STDERR, "Can't open %s for writing\n", filename);
     exit(1);
   }
-  if ((buffer = malloc(BUFFERSIZE)) == NULL)
+  if ((buffer = (unsigned char *) malloc(BUFFERSIZE)) == NULL)
   {
     fprintf(STDERR, "Not enough memory for file buffer (%d bytes)\n", BUFFERSIZE);
     exit(1);

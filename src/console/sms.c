@@ -128,7 +128,7 @@ NOTE: Can anyone explain to me (dbjh) what the relationship is between the
   sprintf (suffix, ".%03u", size / MBIT);
   set_suffix (dest_name, suffix);
 
-  ucon64_file_handler (dest_name, src_name, 0);
+  ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
   if (!(buffer = (unsigned char *) malloc (size)))
     {

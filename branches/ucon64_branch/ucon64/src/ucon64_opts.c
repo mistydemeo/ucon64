@@ -1031,18 +1031,27 @@ ucon64_options (int c, const char *optarg)
         {
           if (ucon64.image)
             {
+              char buf[FILENAME_MAX];
+              strcpy (buf, ucon64.image->fname);
+              
               if (c == UCON64_MKTOC || c == UCON64_MKSHEET)
                 {
+                  set_suffix (buf, ".TOC");
+                  ucon64_file_handler (buf, NULL, 0);
+
                   if (!libdm_toc_write (ucon64.image))
-                    printf (ucon64_msg[WROTE], "toc sheet");
+                    printf (ucon64_msg[WROTE], basename2 (buf));
                   else
                     fprintf (stderr, "ERROR: Could not generate toc sheet\n");
                 }
 
               if (c == UCON64_MKCUE || c == UCON64_MKSHEET)
                 {
+                  set_suffix (buf, ".CUE");
+                  ucon64_file_handler (buf, NULL, 0);
+
                   if (!libdm_cue_write (ucon64.image))
-                    printf (ucon64_msg[WROTE], "cue sheet");
+                    printf (ucon64_msg[WROTE], basename2 (buf));
                   else
                     fprintf (stderr, "ERROR: Could not generate cue sheet\n");
                 }

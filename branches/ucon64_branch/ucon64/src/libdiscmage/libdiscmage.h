@@ -63,17 +63,8 @@ typedef signed __int64 int64_t;
 #endif // OWN_INTTYPES
 #endif
 
-// a cd can have max. 99 tracks; this value might change in the future
+// a CD can have max. 99 tracks; this value might change in the future
 #define DM_MAX_TRACKS (99)
-
-#define DM_UNKNOWN (-1)
-
-#define DM_SHEET (1)
-#define DM_CUE (DM_SHEET)
-#define DM_TOC (DM_SHEET)
-#define DM_CDI (2)
-#define DM_NRG (3)
-#define DM_CCD (4)
 
 
 typedef struct
@@ -90,7 +81,6 @@ typedef struct
   uint32_t track_len; // in sectors
   uint32_t total_len; // in sectors; pregap_len + track_len == total_len 
                            // (less if the track is truncated)
-  int min, sec, fps;
 
 // start of the iso header inside the track (inside the image)
   int32_t iso_header_start; // if -1 then no iso header
@@ -199,6 +189,27 @@ TODO: DM_FIX     (isofix) takes an ISO image with PVD pointing
 #define DM_FIX (8)
 #define DM_CDMAGE (16)
 extern int dm_rip (const dm_image_t *image, int track_num, uint32_t flags);
+
+
+/*
+  dm_lba_to_msf() convert LBA to minutes, seconds, frames
+  dm_msf_to_lba() convert minutes, seconds, frames to LBA
+
+  LBA represents the logical block address for the CD-ROM absolute
+  address field or for the offset from the beginning of the current track
+  expressed as a number of logical blocks in a CD-ROM track relative
+  address field.
+  MSF represents the physical address written on CD-ROM discs,
+  expressed as a sector count relative to either the beginning of the
+  medium or the beginning of the current track.
+
+  dm_bcd_to_int() convert BCD to integer
+  dm_int_to_bcd() convert integer to BCD
+*/
+extern int dm_lba_to_msf (int lba, int *m, int *s, int *f);
+extern int dm_msf_to_lba (int m, int s, int f, int force_positive);
+extern int dm_bcd_to_int (int b);
+extern int dm_int_to_bcd (int i);
 
 #ifdef  __cplusplus
 }

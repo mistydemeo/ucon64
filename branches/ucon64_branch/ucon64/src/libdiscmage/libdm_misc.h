@@ -45,6 +45,17 @@ typedef struct
 } st_track_probe_t;
 extern const st_track_probe_t track_probe[];
 
+
+#define DM_UNKNOWN (-1)
+
+#define DM_SHEET (1)
+#define DM_CUE (DM_SHEET)
+#define DM_TOC (DM_SHEET)
+#define DM_CDI (2)
+#define DM_NRG (3)
+#define DM_CCD (4)
+
+
 /*
   dm_track_init()     fillup current dm_track_t
   dm_free()           free all dm_track_t, dm_session_t and dm_image_t recursively
@@ -61,25 +72,4 @@ extern int dm_free (dm_image_t *image);
 //extern void writewavheader (FILE * fdest, int track_length);
 extern const char *dm_get_track_desc (int mode, int sector_size, int cue);
 //extern int callibrate (const char *fname, int track_num);
-
-
-/*
-  dm_lba_to_msf() convert LBA to minutes, seconds, frames
-  dm_msf_to_lba() convert minutes, seconds, frames to LBA
-
-  LBA represents the logical block address for the CD-ROM absolute
-  address field or for the offset from the beginning of the current track
-  expressed as a number of logical blocks in a CD-ROM track relative
-  address field.
-  MSF represents the physical address written on CD-ROM discs,
-  expressed as a sector count relative to either the beginning of the
-  medium or the beginning of the current track.
-
-  dm_bcd_to_int() convert BCD to integer
-  dm_int_to_bcd() convert integer to BCD
-*/
-extern int dm_lba_to_msf (int lba, int *m, int *s, int *f);
-extern int dm_msf_to_lba (int m, int s, int f, int force_positive);
-extern int dm_bcd_to_int (int b);
-extern int dm_int_to_bcd (int i);
 #endif  // LIBDM_MISC_H

@@ -1,5 +1,5 @@
 /*
-doctor64.c - Bung Doctor 64 support for uCON64
+doctor64.h - Bung Doctor 64 support for uCON64
 
 Copyright (C) 1999 - 2001 NoisyB (noisyb@gmx.net)
 

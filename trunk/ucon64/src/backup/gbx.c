@@ -2347,7 +2347,7 @@ int gbx_usage(int argc,char *argv[])
 if(argcmp(argc,argv,"-help"))printf("\n%s\n",gbx_TITLE);
 
 
-printf("TODO:  -xgbx    send/receive to/from GB Xchanger; $FILE=PORT\n\
+printf("TODO:  -xgbx    send/receive ROM to/from GB Xchanger; $FILE=PORT\n\
 		receives automatically when $ROM does not exist\n\
 ");
 

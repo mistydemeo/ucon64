@@ -1899,11 +1899,17 @@ snes_init (st_rominfo_t *rominfo)
     snes_hirom = (ucon64.snes_hirom) ? SNES_HIROM : 0;
 
   rominfo->header_start = SNES_HEADER_START + snes_hirom;
-  // Dai Kaiju Monogatari 2 (J) has its SNES header at an odd location. We
-  //  identify that ROM dump by its internal name.
+  /*
+    Dai Kaiju Monogatari 2 (J) and Tales of Phantasia (J) have their SNES
+    header at an odd location. We identify those ROM dumps by their internal
+    name (including DeJap's ToP patch).
+  */
   x = SNES_HEADER_START + SNES_HIROM + 0x400000;
   if (size > x + SNES_HEADER_LEN)
-    if (!memcmp(rom_buffer + x + 16, "DAIKAIJYUMONOGATARI2", 20)) // yes, kaijYu
+    if (!memcmp(rom_buffer + x + 16, "DAIKAIJYUMONOGATARI2", 20) || // yes, kaijYu
+        !memcmp(rom_buffer + x + 16, "TALES OF PHANTASIA", 18) ||
+        (!memcmp(rom_buffer + x + 16, "ToP", 3) && // skip language string
+         !memcmp(rom_buffer + x + 16 + 12, "(C) DeJap", 9)))
       {
         rominfo->header_start = x;
         // -hi/-nhi has no effect so we better give snes_hirom the right value
@@ -2133,7 +2139,7 @@ snes_check_bs (void)
     return 0;
 
   if (snes_header.maker != 0x33 && snes_header.maker != 0xff)
-    return 0;                                   // 0x33 = Nintendo
+    return 0;
 
   value = ((unsigned char *) &snes_header)[39] << 8 |
           ((unsigned char *) &snes_header)[38];

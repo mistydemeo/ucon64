@@ -1624,7 +1624,7 @@ fal_read_rom (const char *filename, unsigned int parport, int size)
   fal_args (parport);
 
   fal_argv[3] = "-c";
-  if (size != -1)
+  if (size != UCON64_UNKNOWN)
     {
       if (size == 8)
         fal_argv[4] = "8";
@@ -1674,7 +1674,7 @@ fal_write_rom (const char *filename, unsigned int parport, int size)
     
   fal_args (parport);
 
-  if (size != -1)
+  if (size != UCON64_UNKNOWN)
     {
       printf ("-xfalc=n can only be used when receiving a ROM\n"); // stdout for frontend
       exit (1);

@@ -87,6 +87,8 @@ const char *ucon64_console_error =
   "TIP:   If this is a ROM or CD IMAGE you might try to force the recognition\n"
   "       The force recognition option for Super Nintendo would be " OPTION_LONG_S "snes\n";
 
+static char *ucon64_temp_file = 0;
+
 void
 ucon64_wrote (const char *filename)
 {
@@ -222,6 +224,66 @@ ucon64_fbackup (char *move_name, const char *filename)
     }
 
   return filebackup (move_name, filename);
+}
+
+
+void
+handle_existing_file (const char *dest, char *src)
+/*
+  We have to handle the following cases (for example -swc and rom.swc exists):
+  1) ucon64 -swc rom.swc
+    a) with backup creation enabled
+       Create backup of rom.swc
+       postcondition: src == name of backup
+    b) with backup creation disabled
+       Create temporary backup of rom.swc by renaming rom.swc
+       postcondition: src == name of backup
+  2) ucon64 -swc rom.fig
+    a) with backup creation enabled
+       Create backup of rom.swc
+       postcondition: src == rom.fig
+    b) with backup creation disabled
+       Do nothing
+       postcondition: src == rom.fig
+*/
+{
+  ucon64_temp_file = 0;
+  if (!access (dest, F_OK))
+    {
+      if (!strcmp (dest, ucon64.rom))
+        {                                       // case 1
+          if (ucon64.backup)
+            {                                   // case 1a
+              ucon64_fbackup (NULL, dest);
+#ifdef __MSDOS__
+              setext (src, ".BAK");
+#else
+              strcat (src, (findlwr (FILENAME_ONLY (src)) ? ".bak" : ".BAK"));
+#endif
+            }                                   // must match with what filebackup() does
+          else
+            {                                   // case 1b
+              ucon64.backup = 1;                // force ucon64_fbackup() to _rename_ file
+              ucon64_fbackup (src, dest);       // arg 1 != NULL -> rename
+              ucon64.backup = 0;
+              ucon64_temp_file = src;
+            }
+        }
+      else
+        ucon64_fbackup (NULL, dest);            // case 2 (ucon64_fbackup() handles a & b)
+    }
+}
+
+
+void
+remove_temp_file (void)
+{
+  if (ucon64_temp_file)
+    {
+      printf ("Removing: %s\n", ucon64_temp_file);
+      remove (ucon64_temp_file);
+      ucon64_temp_file = 0;
+    }
 }
 
 
@@ -473,15 +535,34 @@ parport_probe (unsigned int port)
   return port;
 }
 
+#ifdef __unix__
+int
+drop_privileges (void)
+{
+  uid_t uid;
+  gid_t gid;
+
+  // now we can drop privileges
+  uid = getuid ();
+  if (setuid (uid) == -1)
+    {
+      fprintf (stderr, "Could not set uid\n");
+      return 1;
+    }
+  gid = getgid ();                              // This shouldn't be necessary
+  if (setgid (gid) == -1)                       //  if `make install' was
+    {                                           //  used, but just in case
+      fprintf (stderr, "Could not set gid\n");  //  (root did `chmod +s')
+      return 1;
+    }
+
+  return 0;
+}
+#endif
 
 unsigned int
 ucon64_parport_probe (unsigned int port)
 {
-#ifdef __unix__
-  uid_t uid;
-  gid_t gid;
-#endif
-
   if (!(port = parport_probe (port)))
     ;
 /*
@@ -506,20 +587,11 @@ ucon64_parport_probe (unsigned int port)
       return 1;
     }
 #endif
-
-  // now we can drop privileges
-  uid = getuid ();
-  if (setuid (uid) == -1)
-    {
-      fprintf (stderr, "Could not set uid\n");
-      return 1;
-    }
-  gid = getgid ();                              // This shouldn't be necessary
-  if (setgid (gid) == -1)                       //  if `make install' was
-    {                                           //  used, but just in case
-      fprintf (stderr, "Could not set gid\n");  //  (root did `chmod +s')
-      return 1;
-    }
+  {
+    int val = drop_privileges ();
+    if (val != 0)
+      return val;
+  }
 #endif // __unix__
   return port;
 }

@@ -262,6 +262,7 @@ typedef struct st_ucon64
   int split;                    //rom is split
   int snes_hirom;               //Super Nintendo ROM is HiROM
   int bs_dump;                  //Super Nintendo "ROM" is a Broadcast Satellaview dump
+  int fal_size;                 //Flash Advance Linker cart size
   int interleaved;              //rom is interleaved (swapped)
   int console;                  //integer for the detected console system
   int do_not_calc_crc;          //disable crc calculation to speed up --ls,--lsv, etc.

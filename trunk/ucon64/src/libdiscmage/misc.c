@@ -2745,8 +2745,8 @@ strunesc (char *dest, const char *src)
           buf[0] = *src++;
           buf[1] = *src++;
           buf[2] = 0;
-        
-          sscanf (buf, "%x", &c);
+
+          sscanf ((const char *) buf, "%x", &c);
         }
 
        *p++ = c;
@@ -2763,8 +2763,8 @@ stresc (char *dest, const char *src)
 //TODO: what if the src was already escaped?
   unsigned char c;
   char *p = dest;
-  const unsigned char *positiv =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ" 
+  const char *positiv =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "abcdefghijklmnopqrstuvwxyz"
     "0123456789"
 #if 1
@@ -2782,7 +2782,7 @@ stresc (char *dest, const char *src)
     return NULL;
   if (!src[0])
     return "";
-            
+
   while ((c = *src++))
     if (strchr (positiv, c) != NULL || c >= 0x7f)
       *p++ = c;

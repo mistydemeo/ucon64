@@ -66,7 +66,6 @@ typedef struct st_symbol
   int (*sprintf) (char *, const char *, ...);
   int (*vsprintf) (char *, const char *, va_list);
   int (*fputs) (const char *, FILE *);
-  int (*sscanf) (const char *, const char *, ...);
   FILE *(*fopen) (const char *, const char *);
   FILE *(*fdopen) (int, const char *);
   FILE *(*popen) (const char *, const char *);
@@ -113,7 +112,6 @@ typedef struct st_symbol
   size_t (*strlen) (const char *);
   char *(*strstr) (const char *, const char *);
   char *(*strdup) (const char *);
-  char *(*strtok) (char *, const char *);
 
   int (*tolower) (int);
   int (*toupper) (int);

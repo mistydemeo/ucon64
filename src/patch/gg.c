@@ -1,6 +1,4 @@
 /********************************************************************
- * $Id: gg.c,v 1.37 2003-05-31 00:57:29 dbjh Exp $
- *
  * Copyright (c) 2001 by WyrmCorp <http://wyrmcorp.com>.
  * All rights reserved. Distributed under the BSD Software License.
  *

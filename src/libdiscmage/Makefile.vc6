@@ -49,12 +49,11 @@ $(LIBNAME).dll: $(OBJECTS)
 
 
 # Dependencies
-CONFIG_H=../config.h
-
 libdm_misc.obj: libdiscmage.h misc.h dxedll_priv.h
 cdi.obj: libdiscmage.h misc.h cdi.h dxedll_priv.h
-nero.obj: libdiscmage.h misc.h $(CONFIG_H) nero.h cdi.h dxedll_priv.h
-sheets.obj: libdiscmage.h misc.h dxedll_priv.h
+nero.obj: libdiscmage.h misc.h nero.h dxedll_priv.h
+sheets.obj: libdiscmage.h misc.h sheets.h dxedll_priv.h
+other.obj: libdiscmage.h misc.h other.h dxedll_priv.h
 dllinit.obj: libdiscmage.h misc.h dxedll_priv.h
 misc.obj: misc.h dxedll_priv.h
 miscz.obj: miscz.h misc.h dxedll_priv.h

@@ -2564,7 +2564,7 @@ q_fswap (const char *filename, int start, int len)
 
 
 int
-q_fncmp (const char *filename, int start, int len, const char *search,
+q_fncmp (const char *filename, int start, int len, const void *search,
          int searchlen, int wildcard)
 {
 #define BUFSIZE 8192
@@ -2728,3 +2728,5 @@ argz_extract2 (char **argv, char *str, const char *separator_s, int max_args)
 
   return argc;
 }
+
+

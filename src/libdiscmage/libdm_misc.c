@@ -48,6 +48,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "cdi.h"
 #include "nero.h"
 #include "sheets.h"
+#include "other.h"
 
 #ifndef CD_MINS
 #define CD_MINS              74 /* max. minutes per CD, not really a limit */
@@ -452,10 +453,9 @@ dm_reopen (const char *fname, uint32_t flags, dm_image_t *image)
     {
       {DM_CDI, cdi_init},
       {DM_NRG, nrg_init},
-#if 0
-      {DM_CCD, ccd_init},
-#endif
+//      {DM_CCD, ccd_init},
       {DM_SHEET, sheet_init},
+      {DM_OTHER, other_init},
       {0, NULL}
     };
   int x = 0, identified = 0;

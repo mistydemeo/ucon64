@@ -250,7 +250,7 @@ void c_break (int signum)
                 printf ("\nControl-Break pressed.  Program aborting ...\n");
                 exit (13);
 }
-                                                                                                  
+
 
 void test_key (void)
 {
@@ -810,7 +810,7 @@ int send (char comm, unsigned long saddr, char *str)
                                         header_pbyte ('B');
                                         temp=header_pbyte ('B');
                                         temp2=header_pbyte ('B');
-                                }                               
+                                }
                                 while ((temp!='R')||(temp2!='W'));
 
                                 printf ("\nSending file %s to CD64...\n", str);

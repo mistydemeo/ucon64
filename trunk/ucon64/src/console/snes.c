@@ -149,7 +149,9 @@ typedef struct st_snes_header
   unsigned char game_id_high;                   // 4
   unsigned char game_id_country;                // 5
   // 'E' = USA, 'F' = France, 'G' = Germany, 'J' = Japan, 'P' = Europe, 'S' = Spain
-  unsigned char pad[10];                        // 6
+  unsigned char pad1[7];                        // 6
+  unsigned char sfx_sram_size;			// 13
+  unsigned char pad2[2];			// 14
   unsigned char name[SNES_NAME_LEN];            // 16
   unsigned char map_type;                       // 37, a.k.a. ROM makeup
   unsigned char rom_type;                       // 38
@@ -174,7 +176,7 @@ typedef struct st_snes_header
 } st_snes_header_t;
 
 static st_snes_header_t snes_header;
-static int snes_split, snes_sramsize, snes_header_base, snes_hirom,
+static int snes_split, snes_sramsize, snes_sfx_sramsize, snes_header_base, snes_hirom,
            snes_hirom_ok, nsrt_header, bs_dump, st_dump;
 static snes_file_t type;
 
@@ -2904,8 +2906,8 @@ snes_init (st_rominfo_t *rominfo)
     "South Korea"},
     *snes_rom_type[3] = {
     "ROM",                                      // NOT ROM only, ROM + other chip is possible
-    "ROM + RAM",
-    "ROM + Save RAM"},
+    "ROM + SRAM",
+    "ROM + SRAM + Battery"},
     *snes_bs_type[4] = {
     "Full size + Sound link",
     "Full size",
@@ -3165,7 +3167,7 @@ snes_init (st_rominfo_t *rominfo)
           if (snes_header.rom_type == 3 || snes_header.rom_type == 5)
             str = "DSP";
           else if (snes_header.rom_type == 0x13)
-            str = "Super FX (Mario Chip 1)";
+            str = "SRAM + Super FX (Mario Chip 1)";
           else if (snes_header.rom_type == 0x1a)
             str = "Super FX";
           else if (snes_header.rom_type == 0x14 || snes_header.rom_type == 0x15)
@@ -3210,11 +3212,25 @@ snes_init (st_rominfo_t *rominfo)
                snes_header.map_type & 0x10 ? "120 ns (FastROM)" : "200 ns (SlowROM)");
       strcat (rominfo->misc, buf);
 
-      snes_sramsize = snes_header.sram_size ? 1 << (snes_header.sram_size + 10) : 0;
-      if (!snes_sramsize)
-        sprintf (buf, "Save RAM: No\n");
+      if (snes_header.rom_type == 0x13 || snes_header.rom_type == 0x1a ||
+          snes_header.rom_type == 0x14 || snes_header.rom_type == 0x15)
+        {
+          snes_sramsize = 32*1024;
+          if (snes_header.maker == 0x33)
+            snes_sfx_sramsize = snes_header.sfx_sram_size ? 1 << (snes_header.sfx_sram_size + 10) : 0;
+          else
+            snes_sfx_sramsize = 32*1024;
+        }
       else
-        sprintf (buf, "Save RAM: Yes, %d kBytes\n", snes_sramsize / 1024);
+        {
+          snes_sramsize = snes_header.sram_size ? 1 << (snes_header.sram_size + 10) : 0;
+          snes_sfx_sramsize = 0;
+        }
+
+      if (!snes_sramsize && !snes_sfx_sramsize)
+        sprintf (buf, "SRAM: No\n");
+      else
+        sprintf (buf, "SRAM: Yes, %d kBytes\n", (snes_sfx_sramsize ? snes_sfx_sramsize : snes_sramsize) / 1024);
       strcat (rominfo->misc, buf);
     }
   else                                          // BS info

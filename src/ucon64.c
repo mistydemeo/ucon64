@@ -807,6 +807,7 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
 
 int ucon64_init_(struct ucon64_ *rom)
 {
+/*
 rom->buheader_len=0;
 rom->current_crc32=fileCRC32(rom->rom,rom->buheader_len);
 
@@ -821,15 +822,13 @@ if(rom->db_crc32==0)
 
 	if(rom->db_crc32==0)
 	{
-//		if(!argcmp(rom->argc,rom->argv,"-ngp"))
-		{
 			return(-1);
-		}
 	}
 }
 
-
 	return(0);
+*/
+	return(-1);
 }
 
 int ucon64_init(struct ucon64_ *rom)
@@ -862,7 +861,7 @@ int ucon64_init(struct ucon64_ *rom)
   }
 
   quickfread(rom->buheader,rom->buheader_start,rom->buheader_len,rom->rom);
-  quickfread(rom->header,rom->header_start,rom->header_len,rom->rom);
+//  quickfread(rom->header,rom->header_start,rom->header_len,rom->rom);
 
   if(!rom->current_crc32)rom->current_crc32=fileCRC32(rom->rom,rom->buheader_len);
 

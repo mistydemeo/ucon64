@@ -470,8 +470,8 @@ ucon64_console_probe (st_rominfo_t *rominfo)
             (!n64_init (ucon64_flush (rominfo))) ? UCON64_N64 :
             (!genesis_init (ucon64_flush (rominfo))) ? UCON64_GENESIS :
             (!snes_init (ucon64_flush (rominfo))) ? UCON64_SNES :
-            (!lynx_init (ucon64_flush (rominfo))) ? UCON64_LYNX :
             (!gameboy_init (ucon64_flush (rominfo))) ? UCON64_GB :
+            (!lynx_init (ucon64_flush (rominfo))) ? UCON64_LYNX :
             (!ngp_init (ucon64_flush (rominfo))) ? UCON64_NEOGEOPOCKET :
             (!swan_init (ucon64_flush (rominfo))) ? UCON64_WONDERSWAN :
             (!jaguar_init (ucon64_flush (rominfo))) ? UCON64_JAGUAR :

@@ -44,14 +44,14 @@ ips_main (int argc, char *argv[])
       exit (0);
     }
 
-  ipsfile = fopen (argv[1], "r");
+  ipsfile = fopen (argv[1], "rb");
   if (ipsfile == NULL)
     {
       printf ("Could not open the file %s\n", argv[1]);
       exit (0);
     }
 
-  patchee = fopen (argv[2], "r+");
+  patchee = fopen (argv[2], "rb+");
   if (patchee == NULL)
     {
       printf ("Could not open the file %s\n", argv[2]);

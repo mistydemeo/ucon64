@@ -76,6 +76,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef  __UNIX__
 #ifdef  __SOLARIS__                             // Hmmm, Solaris *is* a UNIX
 #define ucon64_TITLE "uCON64 " ucon64_VERSION " Solaris 1999-2002 by (various)"
+#elif   defined __CYGWIN__
+#define ucon64_TITLE "uCON64 " ucon64_VERSION " Win32 1999-2002 by (various)"
 #else
 #define ucon64_TITLE "uCON64 " ucon64_VERSION " UNIX 1999-2002 by (various)"
 #endif
@@ -107,7 +109,7 @@ struct ucon64_
   char file[4096];              //$FILE (cmdline) with path
   unsigned int parport;
   int parport_mode;             //parallel port mode: ECP, EPP, SPP, other
-  char config_file[NAME_MAX];   //path and name of the config file
+  char config_file[FILENAME_MAX]; //path and name of the config file
 
   int backup;			//flag if backups files (*.bak) should be created
 /*
@@ -166,7 +168,6 @@ struct ucon64_
 };
 
 
-extern int frontend;
 extern FILE *frontend_file;
 
 #include "ucon64_misc.h"

@@ -104,8 +104,8 @@ main (int argc, char *argv[])
   struct dirent *ep;
   struct stat puffer;
   DIR *dp;
-  char buf[MAXBUFSIZE], buf2[FILENAME_MAX], buf3[4096], *ucon64_argv[128];
-  char *forceargs[] = {
+  char buf[MAXBUFSIZE], buf2[MAXBUFSIZE], buf3[4096], *ucon64_argv[128],
+       *forceargs[] = {
     "",
     "-gb",
     "-gen",
@@ -176,12 +176,12 @@ main (int argc, char *argv[])
 */
 
 #ifdef  __UNIX__
-/*
-  Some code needs us to switch to the real uid and gid. However, other code needs access to
-  I/O ports other than the standard printer port registers. We just do an iopl(3) and all
-  code should be happy. Using iopl(3) enables users to run all code without being root (of
-  course with the uCON64 executable setuid root). Anyone a better idea?
-*/
+  /*
+    Some code needs us to switch to the real uid and gid. However, other code needs access to
+    I/O ports other than the standard printer port registers. We just do an iopl(3) and all
+    code should be happy. Using iopl(3) enables users to run all code without being root (of
+    course with the uCON64 executable setuid root). Anyone a better idea?
+  */
 #ifdef  __linux__
   if (iopl (3) == -1)
     {
@@ -218,12 +218,8 @@ main (int argc, char *argv[])
   this should disappear before 1.9.8
 */
       atexit (ucon64_exit);
-#ifndef __BEOS__ // keep behaviour like 1.9.7 under BeOS until BeOS frontend is updated
-      // if we can't create a file to write the parport_gauge() status to, set
-      // frontend to 0, so we won't accidentily write to frontend_file
       if ((frontend_file = fopen (FRONTEND_FILENAME, "wt")) == NULL)
         frontend_file = stdout;
-#endif
     }
 
 
@@ -232,22 +228,29 @@ main (int argc, char *argv[])
 */
 #ifdef  __DOS__
   sprintf (rom.config_file, "%s%cucon64.cfg", getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
-//  strcpy (rom.config_file, "ucon64.cfg");
 #else
-  sprintf (rom.config_file, "%s%c.ucon64rc", getenv ("HOME"), FILE_SEPARATOR);
+  /*
+    Use getchd() here too. If this code gets compiled under Windows the compiler has to be
+    Cygwin. So, uCON64 will be a Win32 executable which will run only in an environment
+    where long filenames are available and where files can have more than three characters
+    as "extension". Under Bash HOME will be set, but most Windows people will propably run
+    uCON64 under cmd or command where HOME is not set by default. Under Windows XP/2000
+    (/NT?) USERPROFILE and/or HOMEDRIVE+HOMEPATH will be set which getchd() will "detect".
+  */
+  sprintf (rom.config_file, "%s%c.ucon64rc", getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
 #endif
 
-  if (access (rom.config_file, F_OK) == -1)
+  if (access (rom.config_file, F_OK) != 0)
     {
       FILE *fh;
 
-    printf ("WARNING: %s not found: creating...", rom.config_file);
+      printf ("WARNING: %s not found: creating...", rom.config_file);
 
       if (!(fh = fopen (rom.config_file, "wb")))
         {
           printf ("FAILED\n\n");
 
-//    return -1;
+//          return -1;
         }
       else
         {
@@ -306,38 +309,30 @@ main (int argc, char *argv[])
           fclose (fh);
           printf ("OK\n\n");
         }
-
-//      return 0;
     }
-  else if (strcmp(getProperty (rom.config_file, "version", buf2, "198"), "198") != 0)
+  else if (strcmp (getProperty (rom.config_file, "version", buf2, "198"), "198") != 0)
     {
       strcpy (buf2, rom.config_file);
-
       newext (buf2, ".OLD");
 
       printf ("NOTE: updating config: old version will be renamed to %s...", buf2);
 
-      filecopy (rom.config_file, 0, quickftell(rom.config_file), buf2, "wb");
+      filecopy (rom.config_file, 0, quickftell (rom.config_file), buf2, "wb");
 
-      setProperty(rom.config_file,"version","198");
+      setProperty (rom.config_file, "version", "198");
+      setProperty (rom.config_file, "backups", "1");
+      setProperty (rom.config_file, "cdrw_read",
+        getProperty (rom.config_file, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
+      setProperty (rom.config_file, "cdrw_write",
+        getProperty (rom.config_file, "cdrw_raw_write", buf2, "cdrdao write --device 0,0,0 --driver generic-mmc "));
 
-      setProperty(rom.config_file,"backups","1");
-
-      setProperty(rom.config_file,"cdrw_read",
-         getProperty (rom.config_file, "cdrw_raw_read", buf2, "cdrdao read-cd --read-raw --device 0,0,0 --driver generic-mmc-raw --datafile "));
-      setProperty(rom.config_file,"cdrw_write",
-         getProperty (rom.config_file, "cdrw_raw_write", buf2, "cdrdao write --device 0,0,0 --driver generic-mmc "));
-
-      deleteProperty(rom.config_file,"cdrw_raw_read");
-      deleteProperty(rom.config_file,"cdrw_raw_write");
-      deleteProperty(rom.config_file,"cdrw_iso_read");
-      deleteProperty(rom.config_file,"cdrw_iso_write");
+      deleteProperty (rom.config_file, "cdrw_raw_read");
+      deleteProperty (rom.config_file, "cdrw_raw_write");
+      deleteProperty (rom.config_file, "cdrw_iso_read");
+      deleteProperty (rom.config_file, "cdrw_iso_write");
 
       sync ();
-
       printf ("OK\n\n");
-
-//      return 0;
     }
 
   rom.backup = (argcmp (argc, argv, "-nbak")) ? 0 :
@@ -446,27 +441,26 @@ main (int argc, char *argv[])
 
   if (argcmp (argc, argv, "-stp"))
     {
-      strcpy (buf, ucon64_fbackup (&rom, rom.rom));
-      newext (buf, ".TMP");
+      strcpy (buf, rom.rom);
+      newext (buf, ".BAK");
+      remove (buf);                             // try to remove or rename will fail
       rename (rom.rom, buf);
 
       filecopy (buf, 512, quickftell (buf), rom.rom, "wb");
-      remove (buf);
       return (0);
     }
 
   if (argcmp (argc, argv, "-ins"))
     {
-      strcpy (buf, ucon64_fbackup (&rom, rom.rom));
-      newext (buf, ".TMP");
+      strcpy (buf, rom.rom);
+      newext (buf, ".BAK");
+      remove (buf);                             // try to remove or rename will fail
       rename (rom.rom, buf);
 
       memset (buf2, 0, 512);
       quickfwrite (buf2, 0, 512, rom.rom, "wb");
 
       filecopy (buf, 0, quickftell (buf), rom.rom, "ab");
-
-      remove (buf);
       return (0);
     }
 
@@ -1416,20 +1410,21 @@ ucon64_usage (int argc, char *argv[])
     cd32_usage (argc, argv);
   else if (argcmp (argc, argv, "-cdi"))
     cdi_usage (argc, argv);
-//  else if(argcmp(argc,argv,"-gc"))gamecube_usage(argc,argv);
+//  else if (argcmp (argc, argv, "-gc"))
+//    gamecube_usage (argc, argv);
   else if (argcmp (argc, argv, "-xbox"))
     xbox_usage (argc, argv);
   else
     {
-//  gamecube_usage(argc,argv);
+//      gamecube_usage (argc, argv);
       dc_usage (argc, argv);
       psx_usage (argc, argv);
 /*
-  ps2_usage(argc,argv);
-  sat_usage(argc,argv);
-  3do_usage(argc,argv);
-  cd32_usage(argc,argv);
-  cdi_usage(argc,argv);
+      ps2_usage(argc,argv);
+      sat_usage(argc,argv);
+      3do_usage(argc,argv);
+      cd32_usage(argc,argv);
+      cdi_usage(argc,argv);
 */
       printf ("%s\n%s\n%s\n%s\n%s\n"
 //            "  -xbox, -ps2, -sat, -3do, -cd32, -cdi\n"
@@ -1466,13 +1461,13 @@ ucon64_usage (int argc, char *argv[])
       nes_usage (argc, argv);
       wonderswan_usage (argc, argv);
 /*
-      sys16_usage(argc,argv);
-      atari_usage(argc,argv);
-      coleco_usage(argc,argv);
-      virtualboy_usage(argc,argv);
-      wonderswan_usage(argc,argv);
-      vectrex_usage(argc,argv);
-      intelli_usage(argc,argv);
+      sys16_usage (argc, argv);
+      atari_usage (argc, argv);
+      coleco_usage (argc, argv);
+      virtualboy_usage (argc, argv);
+      wonderswan_usage (argc, argv);
+      vectrex_usage (argc, argv);
+      intelli_usage (argc, argv);
 */
 
       printf ("%s\n%s\n%s\n%s\n%s\n%s\n"
@@ -1523,9 +1518,9 @@ Vectrex 1982
 Colecovision 1982
 Interton VC4000 ~1980
 Intellivision 1979
-G7400+/Odyssey² 1978 
+G7400+/Odyssey² 1978
 Channel F 1976
-Odyssey 1972 Ralph Baer 
+Odyssey 1972 Ralph Baer
 
 gametz.com
 gameaxe.com

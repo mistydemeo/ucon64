@@ -30,7 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #ifdef  HAVE_UNISTD_H
-#include <unistd.h>                             // ioperm() (libc5)
+#include <unistd.h>
 #endif
 #ifdef _WIN32
 #include <windows.h>
@@ -1343,9 +1343,9 @@ static int
 ucon64_configfile_update (void)
 {
   char buf[MAXBUFSIZE];
-  
+
   sprintf (buf, "%d", UCON64_CONFIG_VERSION);
-  set_property (ucon64.configfile, "version",     buf, "uCON64 configuration");
+  set_property (ucon64.configfile, "version", buf, "uCON64 configuration");
 
   return 0;
 }

@@ -961,7 +961,7 @@ snes_gd3 (st_rominfo_t *rominfo)
   strcpy (src_name, ucon64.rom);
   if (!(srcbuf = (unsigned char *) malloc (size)))
     {
-      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], (int) size);
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
       exit (1);
     }
   q_fread (srcbuf, rominfo->buheader_len, size, ucon64.rom);
@@ -1044,7 +1044,7 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       if (!(dstbuf = (unsigned char *) malloc (newsize)))
         {
-          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], (int) newsize);
+          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], newsize);
           exit (1);
         }
       if (newsize > size)
@@ -1201,12 +1201,12 @@ snes_ufo (st_rominfo_t *rominfo)
 
       if (!(srcbuf = (unsigned char *) malloc (size)))
         {
-          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], (int) size);
+          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
           exit (1);
         }
       if (!(dstbuf = (unsigned char *) malloc (newsize)))
         {
-          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], (int) newsize);
+          fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], newsize);
           exit (1);
         }
 

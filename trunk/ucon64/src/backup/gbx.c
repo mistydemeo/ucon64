@@ -553,7 +553,6 @@ intel_read_status (void)
 {
   out_adr_data (0, 0x70);                       // read status command
   return read_byte ();
-
 }
 
 
@@ -766,10 +765,8 @@ check_card (void)
     puts ("NOTE: Rocket Games cartridge detected");
   else if (memcmp (buffer + 4, gb_logodata, GB_LOGODATA_LEN) != 0)
     {
-      fputs ("ERROR: Cartridge does not contain official Nintendo logo data\n", stderr);
+      puts ("WARNING: Cartridge does not contain official Nintendo logo data");
       mem_hexdump (buffer, 0x50, 0x100);
-      end_port ();
-      exit (1);
     }
 
   memcpy (game_name, buffer + 0x34, 15);

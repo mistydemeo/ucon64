@@ -18,10 +18,6 @@ LDFLAGS=-s
 
 LIBNAME=discmage
 OBJECTS=libdm_misc.o cdi.o nero.o sheets.o dllinit.o misc.o
-#ifdef ZLIB
-#LIBS=-lz
-#OBJECTS+=unzip.o
-#else
 LIBS=
 #endif
 

@@ -40,10 +40,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <ctype.h>
 #include <dos.h>
 #include <dpmi.h>
-#ifdef  HAVE_ZLIB_H
-#include <zlib.h>
-#include "unzip.h"
-#endif
 
 
 #ifdef __cplusplus
@@ -133,39 +129,6 @@ typedef struct st_symbol
   time_t (*time) (time_t *);
   void (*delay) (unsigned);
   int (*__dpmi_int) (int, __dpmi_regs *);
-
-#ifdef  HAVE_ZLIB_H
-#if 0
-  // zlib functions
-  gzFile (*gzopen) (const char *path, const char *mode);
-  int (*gzclose) (gzFile file);
-  int (*gzwrite) (gzFile file, const voidp buf, unsigned len);
-  char *(*gzgets) (gzFile file, char *buf, int len);
-  int (*gzeof) (gzFile file);
-  z_off_t (*gzseek) (gzFile file, z_off_t offset, int whence);
-  int (*gzputc) (gzFile file, int c);
-  int (*gzread) (gzFile file, voidp buf, unsigned len);
-  int (*gzgetc) (gzFile file);
-  int (*gzrewind) (gzFile file);
-  z_off_t (*gztell) (gzFile file);
-
-  // unzip functions
-  unzFile (*unzOpen) (const char *path);
-  int (*unzOpenCurrentFile) (unzFile file);
-  int (*unzGoToFirstFile) (unzFile file);
-  int (*unzClose) (unzFile file);
-  int (*unzGetGlobalInfo) (unzFile file, unz_global_info *pglobal_info);
-  int (*unzGoToNextFile) (unzFile file);
-  int (*unzCloseCurrentFile) (unzFile file);
-  int (*unzeof) (unzFile file);
-  int (*unzReadCurrentFile) (unzFile file, voidp buf, unsigned len);
-  z_off_t (*unztell) (unzFile file);
-  int (*unzGetCurrentFileInfo) (unzFile file, unz_file_info *pfile_info,
-                                char *szFileName, uLong fileNameBufferSize,
-                                void *extraField, uLong extraFieldBufferSize,
-                                char *szComment, uLong commentBufferSize);
-#endif
-#endif // HAVE_ZLIB_H
 
   // Put all variables AFTER the functions. This makes it easy to catch
   //  uninitialized function pointers.

@@ -22,61 +22,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <inttypes.h>
 #include "libdiscmage_cfg.h"
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef MAXBUFSIZE
-#define MAXBUFSIZE 32768
-#endif // MAXBUFSIZE
-
-#ifdef WORDS_BIGENDIAN
-#undef WORDS_BIGENDIAN
-#endif
-
-#ifdef __MSDOS__
-#define FILE_SEPARATOR '\\'
-#define FILE_SEPARATOR_S "\\"
-#else
-#define FILE_SEPARATOR '/'
-#define FILE_SEPARATOR_S "/"
-#endif
-
-#if     defined _LIBC || defined __GLIBC__
-  #include <endian.h>
-  #if __BYTE_ORDER == __BIG_ENDIAN
-    #define WORDS_BIGENDIAN 1
-  #endif
-#elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || defined __APPLE__
-  #define WORDS_BIGENDIAN 1
-#endif
-
-#ifdef WORDS_BIGENDIAN
-#define me2be_16(x) (x)
-#define me2be_32(x) (x)
-#define me2be_64(x) (x)
-#define me2be_n(x,n) 
-#define me2le_16(x) (bswap_16(x))
-#define me2le_32(x) (bswap_32(x))
-#define me2le_64(x) (bswap_64(x))
-#define me2le_n(x,n) (mem_swap(x,n))
-#else
-#define me2be_16(x) (bswap_16(x))
-#define me2be_32(x) (bswap_32(x))
-#define me2be_64(x) (bswap_64(x))
-#define me2be_n(x,n) (mem_swap(x,n))
-#define me2le_16(x) (x)
-#define me2le_32(x) (x)
-#define me2le_64(x) (x)
-#define me2le_n(x,n) 
-#endif
+#include "misc.h"                               // integer types
 
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
@@ -197,7 +144,7 @@ struct cdrom_msf
 
 /* The leadout track is always 0xAA, regardless of # of tracks on disc */
 #define	CDROM_LEADOUT		0xAA
-#endif // #ifndef __linux__
+#endif                                          // #ifdef __linux__
 
 #if 0
 #define MODE1_2048 0
@@ -234,8 +181,7 @@ typedef struct
   unsigned short bitspersample;
   unsigned char data[4];
   uint32_t data_length;
-}
-wav_header_t;
+} wav_header_t;
 
 
 typedef struct
@@ -274,15 +220,14 @@ typedef struct
   char filename[FILENAME_MAX];
   FILE *fh;
 
-  int32_t track_type,save_as_iso,pregap,convert, fulldata, cutall, cutfirst;
+  int32_t track_type, save_as_iso, pregap,convert, fulldata, cutall, cutfirst;
   char do_convert, do_cut;
 
   uint32_t seek_header;
   uint32_t seek_ecc;
   char *common;
   char *cdrdao;
-}
-dm_image_t;
+} dm_image_t;
 
 
 #include "sheets.h"

@@ -104,7 +104,7 @@ main (int argc, char *argv[])
   struct dirent *ep;
   struct stat puffer;
   DIR *dp;
-  char buf[MAXBUFSIZE], buf2[4096], buf3[4096], *ucon64_argv[128];
+  char buf[MAXBUFSIZE], buf2[FILENAME_MAX], buf3[4096], *ucon64_argv[128];
   char *forceargs[] = {
     "",
     "-gb",
@@ -231,7 +231,8 @@ main (int argc, char *argv[])
    configfile handling
 */
 #ifdef  __DOS__
-  strcpy (buf, "ucon64.cfg");
+  sprintf (buf, "%s%cucon64.cfg", getchd (buf2, FILENAME_MAX), FILE_SEPARATOR);
+//  strcpy (buf, "ucon64.cfg");
 #else
   sprintf (buf, "%s%c.ucon64rc", getenv ("HOME"), FILE_SEPARATOR);
 #endif

@@ -974,8 +974,11 @@ get_property2 (const char *filename, const char *propname, char divider, char *b
           if (!strnicmp (buf, propname, strlen (propname)))
             {
               p = strchr (buf, divider);
-              p++;
-              strcpy (buffer, p + strspn (p, "\t "));
+              if (p) 
+                {
+                  p++;
+                  strcpy (buffer, p + strspn (p, "\t "));
+                }
 
               prop_found = 1;
               break;                            // an environment variable
@@ -1008,23 +1011,25 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
 }
 
 
-int
-get_property_bool (const char *filename, const char *propname, char divider)
+int32_t
+get_property_int (const char *filename, const char *propname, char divider)
 {
   char buf[MAXBUFSIZE];
+  int32_t value = 0;
   
   get_property2 (filename, propname, divider, buf, NULL);
 
   if (buf[0])
     switch (tolower (buf[0]))
       {
-        case '1': // 1
-        case 'y': // [Yy]es
-        case 'o': // [Oo]k
-          return TRUE;
+        case '0': // 0
+        case 'n': // [Nn]o
+          return 0;
       }
 
-  return FALSE;
+  value = strtol (buf, NULL, 10);
+  return value ? value : 1; // if buf was only text like 'Yes' we'll return at
+                                                                 // least 1
 }
 
 

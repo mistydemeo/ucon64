@@ -207,10 +207,8 @@ remove_temp_file (void)
 int
 ucon64_fhexdump (const char *filename, int start, int len)
 {
-  int pos, size = q_fsize (filename);
-  int value = 0;
-  int buf_size = MAXBUFSIZE - (MAXBUFSIZE % 16);
-                                  // buf_size must be < MAXBUFSIZE && 16 * n
+  int pos, size = q_fsize (filename), value = 0,
+      buf_size = MAXBUFSIZE - (MAXBUFSIZE % 16); // buf_size must be < MAXBUFSIZE && 16 * n
   char buf[MAXBUFSIZE];
   FILE *fh = fopen (filename, "rb");
 
@@ -223,7 +221,7 @@ ucon64_fhexdump (const char *filename, int start, int len)
   fseek (fh, start, SEEK_SET);
   for (pos = 0; pos < len; pos += buf_size)
     {
-      value = fread (buf, 1, buf_size, fh);
+      value = fread (buf, 1, MIN (len, buf_size), fh);
       mem_hexdump (buf, value, pos + start);
     }
 

@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "gbx.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 /* Modified version of gbt15.c - (C) Bung Enterprises */
 
@@ -132,7 +133,7 @@ void disp_buffer(unsigned int disp_len)
 	int i, j, x, y;
 	for(i = 0; i < disp_len; i++) {
 		if((i & 0xf) == 0)
-			printf("%04x : ", i & 0xfff0);
+			printf("%04x: ", i & 0xfff0);
 		if((i & 0xf) == 8)
 			printf("- ");
 		printf("%02x ", mix.buffer[i]);
@@ -214,7 +215,7 @@ char spp_read_data(void)
 	// nibble_sel ___|~~~ and ndstb ~~~~|___|~~~~
 	temp = (((high_nibble << 1) & 0xf0) | ((low_nibble >> 3) & 0x0f));
 //   printf("temp=%x",temp);
-	return(temp);
+	return temp;
 }
 
 
@@ -255,11 +256,10 @@ void write_data(unsigned char _data)
 
 unsigned char read_data(void)
 {
-	if(port_type) {
-		return(spp_read_data());	// spp read data
-	} else {
-		return(inportb(data));	// epp read data
-	}
+	if (port_type)
+		return spp_read_data();	        // spp read data
+	else
+		return inportb(data);	        // epp read data
 }
 
 void init_port(void)
@@ -278,45 +278,45 @@ void end_port(void)
 
 unsigned char write_32k_file(void)
 {
-	if(fwrite((char *) mix.buffer, sizeof(char), trans_size, fptr) != trans_size) {
+	if(fwrite((char *) mix.buffer, sizeof (char), trans_size, fptr) != trans_size) {
 		fclose(fptr);			/* write data error */
-		return(1);
+		return 1;
 	}
 //   printf(".");
-	return(0);
+	return 0;
 }
 
 unsigned char read_8k_file()
 {
-	if(fread((char *) mix.buffer, sizeof(char), 0x2000, fptr) != 0x2000) {
-		printf("read error!!!\07\n");
+	if(fread((char *) mix.buffer, sizeof (char), 0x2000, fptr) != 0x2000) {
+		printf("read error\n");
 		fclose(fptr);			/* read data error */
-		return(1);
+		return 1;
 	}
 //   printf(".");
-	return(0);
+	return 0;
 }
 
 unsigned char read_16k_file()
 {
-	if(fread((char *) mix.buffer, sizeof(char), 0x4000, fptr) != 0x4000) {
-		printf("read error!!!\07\n");
+	if(fread((char *) mix.buffer, sizeof (char), 0x4000, fptr) != 0x4000) {
+		printf("read error\n");
 		fclose(fptr);			/* read data error */
-		return(1);
+		return 1;
 	}
 //   printf(".");
-	return(0);
+	return 0;
 }
 
 unsigned char read_32k_file()
 {
-	if(fread((char *) mix.buffer, sizeof(char), trans_size, fptr) != trans_size) {
-		printf("read error!!!\07\n");
+	if(fread((char *) mix.buffer, sizeof (char), trans_size, fptr) != trans_size) {
+		printf("read error\n");
 		fclose(fptr);			/* read data error */
-		return(1);
+		return 1;
 	}
 	//printf(".");
-	return(0);
+	return 0;
 }
 
 void set_adr(unsigned int adr)	// *****
@@ -330,22 +330,22 @@ void set_adr(unsigned int adr)	// *****
 
 int write_file_32k(void)
 {
-	if(fwrite((char *) mix.buffer, sizeof(char), trans_size, fptr) != trans_size) {
+	if(fwrite((char *) mix.buffer, sizeof (char), trans_size, fptr) != trans_size) {
 		fclose(fptr);			/* write data error */
-		return(-1);
+		return -1;
 	}
 	//printf(".");
-	return(0);
+	return 0;
 }
 
 char write_file_xxk(unsigned int write_size)
 {
-	if(fwrite((char *) mix.buffer, sizeof(char), write_size, fptr) != write_size) {
+	if(fwrite((char *) mix.buffer, sizeof (char), write_size, fptr) != write_size) {
 		fclose(fptr);			/* write data error */
-		return(-1);
+		return -1;
 	}
 	//printf(".");
-	return(0);
+	return 0;
 }
 
 void set_bank(unsigned int adr, unsigned char bank)
@@ -369,26 +369,21 @@ void set_rom_bank(unsigned char bank)
 
 
 volatile void delay_10us()
+// Hmmm, usleep() can be used on UNIX, but default under DOS is delay() which
+//  waits for a number of milliseconds... Best use the same code on all platforms.
 {
-//      usleep(1);      /* TODO */
-//printf("x\n");
 	long x;
 	for(x = 0; x < 0x3000; x++);            // 0x2000
 }
 
-volatile void delay_100us()
+volatile void delay_20ms()
 {
-//      usleep(1);
-//printf("y\n");
 	long x;
 	for(x = 0; x < 0x10000; x++);
 }
 
-
-volatile void delay_20ms()
+volatile void delay_100us()
 {
-//      usleep(1);
-//printf("z\n");
 	long x;
 	for(x = 0; x < 0xfffff; x++);
 }
@@ -499,8 +494,8 @@ unsigned char read_byte(void)
 {
 	set_ai(3);					// default write mode
 	set_data_read				// ninit=0, nWrite=1
-		return(read_data());
-//   return(inportb(data));
+	return read_data();
+//   return inportb(data);
 }
 
 void enable_protection(void)
@@ -534,7 +529,7 @@ int data_polling_data(unsigned char last_data)
 		timeout++;
 	}
 //   printf("timeout = %x\n",timeout);
-	return(loop);
+	return loop;
 }
 
 int data_polling(void)
@@ -552,7 +547,7 @@ int data_polling(void)
 		timeout++;
 	}
 //   printf("timeout = %x\n",timeout);
-	return(loop);
+	return loop;
 }
 
 void reset_to_read(void)		// return to read mode
@@ -582,18 +577,18 @@ char wait_status(void)
 	while((temp & 0xfc) != 0x80) {
 //      printf("temp=%x ",temp);
 		if((temp & 0x20) == 0x20) {
-			printf("Fail in erase!!!\07\n");	/* had to comment out because this wouldnt work on 16 meg */
-			return(-1);
+			printf("Fail in erase\n");	/* had to comment out because this wouldnt work on 16 meg */
+			return -1;
 		}
 		if((temp & 0x10) == 0x10) {
-			printf("Fail in program!!!\07\n");
-			return(-2);
+			printf("Fail in program\n");
+			return -2;
 		}
 		temp = read_data();
 //      temp=inportb(data);
 	}
 //   reset_to_read();
-	return(0);
+	return 0;
 }
 
 
@@ -611,11 +606,11 @@ char mx_erase(void)
 	if(wait_status() == 0) {
 		reset_to_read();
 		printf("erase ok\n");
-		return(0);
+		return 0;
 	} else {
 		reset_to_read();
-		printf("erase error!!!\07\n");
-		return(-1);
+		printf("erase error\n");
+		return -1;
 	}
 }
 
@@ -630,18 +625,18 @@ char win_erase(void)
 	delay_20ms();
 
 	if(data_polling()) {
-		printf("erase error!!!\n");
-		return(-1);
+		printf("erase error\n");
+		return -1;
 	} else {
-		printf("erase ok!\n");
-		return(0);
+		printf("erase ok\n");
+		return 0;
 	}
 }
 
 unsigned char intel_read_status(void)
 {
 	out_adr_data(0, 0x70);		// read status command
-	return(read_byte());
+	return read_byte();
 
 }
 
@@ -654,10 +649,10 @@ char intel_check_status(void)
 			printf("Intel read status time out\n");
 			printf("status = %x\n", intel_read_status());
 			out_adr_data(0, 0x50);	// clear status register
-			return(-1);
+			return -1;
 		}
 	}
-	return(0);
+	return 0;
 }
 
 
@@ -669,7 +664,7 @@ char intel_block_erase(unsigned long block)
 		if(time_out == 0) {
 			printf("Intel Block erase time out\n");
 			printf("status = %x\n", intel_read_status());
-			return(-1);
+			return -1;
 		}
 	}
 	out_adr_data(block, 0x20);	// Block erase
@@ -682,20 +677,20 @@ char intel_block_erase(unsigned long block)
 			printf("status = %x\n", intel_read_status());
 			out_adr_data(block, 0x50);	// clear status register
 			printf("status = %x\n", intel_read_status());
-			return(-1);
+			return -1;
 		}
 	}
 
 	if((intel_read_status()) == 0x80) {
 //      printf("e");
-		return(0);
+		return 0;
 	} else {
 		printf("Intel Block erase error at %lx\n", block);
 		printf("status = %x\n", intel_read_status());
 		out_adr_data(block, 0x50);	// clear status register
 		printf("status = %x\n", intel_read_status());
 		out_adr_data(0x0000, 0xff);	// read array
-		return(-1);
+		return -1;
 	}
 }
 
@@ -706,23 +701,23 @@ char intel_erase(void)
 	unsigned long block;
 	for(block = 0; block < 64; block++) {
 		if(intel_block_erase(block * 0x20000))
-			return(-1);		// something error
+			return -1;		// something error
 	}
-	printf("\nErase completed\n");
-	return(0);
+	printf("Erase completed\n");
+	return 0;
 }
 
 
 char erase(void)
 {
 	if(eeprom_type == 4)
-		return(win_erase());
+		return win_erase();
 	if(eeprom_type == 16)
-		return(mx_erase());
+		return mx_erase();
 	if(eeprom_type == 64)
-		return(intel_erase());
-	printf("eeprom type error!\07\n");
-	return(-1);
+		return intel_erase();
+	printf("eeprom type error\n");
+	return -1;
 
 }
 
@@ -741,11 +736,11 @@ char sector_erase(unsigned long sector)
 //      reset_to_read();
 //      printf("erase ok\n");
 		printf("s");
-		return(0);
+		return 0;
 	} else {
 		reset_to_read();
-		printf("sector erase error!!!\07\n");
-		return(-1);
+		printf("sector erase error\n");
+		return -1;
 	}
 }
 
@@ -756,11 +751,11 @@ void mx_id(void)
 	out_adr2_data(0x5555, 0x90);	/* adr2,adr1,adr0,data */
 //   delay_10us();
 	set_adr(0);					/* adr2,adr1,adr0 */
-	printf("Manufacturer Code : %x\n", read_byte());
+	printf("Manufacturer Code: %x\n", read_byte());
 	set_adr(2);					/* adr2,adr1,adr0 */
-	printf("Device Code : %x\n", read_byte());
+	printf("Device Code: %x\n", read_byte());
 	set_adr(4);					/* adr2,adr1,adr0 */
-	printf("First 16k protection Code : %x\n", read_byte());
+	printf("First 16k protection Code: %x\n", read_byte());
 	reset_to_read();			// reset to read mode
 }
 
@@ -776,9 +771,9 @@ void win_id(void)
 
 	delay_10us();
 	set_adr(0);					/* adr2,adr1,adr0 */
-	printf("Manufacturer Code : %x\n", read_byte());
+	printf("Manufacturer Code: %x\n", read_byte());
 	set_adr(1);					/* adr2,adr1,adr0 */
-	printf("Device Code : %x\n", read_byte());
+	printf("Device Code: %x\n", read_byte());
 //   set_adr(2);                        /* adr2,adr1,adr0 */
 //   printf("First 16k protection Code : %x\n",read_byte());
 //   set_bank(0x2000,0x1f);
@@ -824,7 +819,6 @@ void out_adr_data_32k(unsigned int adr, unsigned char data)
 
 char check_eeprom(void)
 {
-
 // check 4M flash
 //   out_data(0,0x55,0x55,0xaa);        /* softwave product ID entry */
 //   out_data(0,0x2a,0xaa,0x55);        /* adr2,adr1,adr0,data */
@@ -858,7 +852,7 @@ char check_eeprom(void)
 	out_adr_data_32k(0x2aaa, 0x55);	/* adr2,adr1,adr0,data */
 	out_adr_data_32k(0x5555, 0xf0);	/* adr2,adr1,adr0,data */
 	eeprom_type = 4;			// windbond 4M flash
-	return(0);
+	return 0;
 
 
 // 16M flash
@@ -873,18 +867,18 @@ char check_eeprom(void)
 	if(read_byte() != 0xc2) {
 		reset_to_read();
 		goto check_64m;
-//      return(1);
+//      return 1;
 	}
 	set_adr(2);					/* adr2,adr1,adr0 */
 //   printf("Device Code : %x\n",read_byte());
 	if(read_byte() != 0xf1) {
 		reset_to_read();
 		goto check_64m;
-//      return(1);
+//      return 1;
 	}
 	reset_to_read();			// reset to read mode
 	eeprom_type = 16;			// MX 16M flash
-	return(0);
+	return 0;
 
   check_64m:
 	init_port();
@@ -898,10 +892,10 @@ char check_eeprom(void)
 		&& mix.buffer[0x11] == 'R' && mix.buffer[0x12] == 'Y') {
 		eeprom_type = 64;
 		out_adr_data(0x0000, 0xff);	// read array
-		return(0);
+		return 0;
 	} else {
 		eeprom_type = 0;
-		return(1);
+		return 1;
 	}
 
 }
@@ -976,14 +970,14 @@ char verify_eeprom_16k(unsigned int bank_16k)
 //       temp=inportb(data);
 			if(temp != mix.buffer[idx + i]) {
 //init_port();
-				printf(" error at %ulx!\07\n", (bank_16k * 16384) + (j * 256) + i);
-				return(-1);
+				printf(" error at %ulx\n", (bank_16k * 16384) + (j * 256) + i);
+				return -1;
 			}
 		}
 		idx = idx + 256;
 	}
 //   printf(" ok\n");
-	return(0);
+	return 0;
 }
 
 
@@ -1023,12 +1017,12 @@ char page_write_128(unsigned int bank_16k, unsigned char hi_lo)
 //       set_ai_data(1,0x00);           // ce=lo
 //       set_ai_data(0,hi_lo|0x7f);     // point to last address
 		if(wait_status()) {
-			printf("write error !!!\n");
-			return(-1);
+			printf("write error\n");
+			return -1;
 		}
 // verify data
 		reset_to_read();		// return to read mode
-//return(0);
+//return 0;
 		verify_ok = 1;			// verify ok
 		set_bank(0x2000, bank_16k);	// for MCB1 16k bank
 		if(bank_16k)
@@ -1054,17 +1048,17 @@ char page_write_128(unsigned int bank_16k, unsigned char hi_lo)
 //          printf("%d",retry);
 			retry--;
 			if(retry == 0) {
-				printf("retry write error!!!\n");
+				printf("retry write error\n");
 //read_status_reg_cmd();
 //wait_status();
 //reset_to_read();
-				return(-1);
+				return -1;
 			}
 		}
 	}
 	idx += 128;
 //   printf("idx=%x",idx);
-	return(0);
+	return 0;
 }
 
 char win_write_eeprom_16k(unsigned int bank_16k)
@@ -1104,7 +1098,7 @@ char win_write_eeprom_16k(unsigned int bank_16k)
 			set_ai_data(2, 0x80);	// disable wr/rd inc.
 			set_ai_data(0, 0xff);	// point to xxff
 			if(data_polling())
-				printf("write error check(d6)!!!\n");
+				printf("write error check(d6)\n");
 
 			wr_done = 0;
 //   delay_20ms();
@@ -1129,8 +1123,8 @@ char win_write_eeprom_16k(unsigned int bank_16k)
 				}
 			}
 			if(err_cnt == 0) {
-				printf("retry write error!!!\07\n");
-				return(-1);
+				printf("retry write error\n");
+				return -1;
 			}
 		}
 		idx = idx + 256;
@@ -1139,8 +1133,8 @@ char win_write_eeprom_16k(unsigned int bank_16k)
 //   enable_protection();
 //   disable_protection();
 //   delay_20ms();
-	return(verify_eeprom_16k(bank_16k));
-//   return(0);
+	return verify_eeprom_16k(bank_16k);
+//   return 0;
 }
 
 
@@ -1151,14 +1145,14 @@ char mx_write_eeprom_16k(unsigned int bank_16k)
 
 	for(j = 0; j < 64; j++) {	// 16k bytes = 64 x 256 bytes
 		if(page_write_128(bank_16k, 0))	// write first 128 bytes
-			return(-1);
+			return -1;
 		if(page_write_128(bank_16k, 0x80))	// write second 128 bytes
-			return(-1);
+			return -1;
 	}
 	reset_to_read();			// return to read mode
 //   printf(" ok\n");
-//   return(0);
-	return(verify_eeprom_16k(bank_16k));
+//   return 0;
+	return verify_eeprom_16k(bank_16k);
 }
 
 
@@ -1188,13 +1182,13 @@ char intel_byte_write_32(unsigned long block_adr)
 			printf("Intel byte write command time out\n");
 			printf("status = %x\n", intel_read_status());
 //          dump_intel_data();
-			return(-1);
+			return -1;
 		}
 	}
 	if(intel_read_status() == 0x80)
-		return(0);
+		return 0;
 	else
-		return(-1);			// error
+		return -1;			// error
 }
 
 
@@ -1213,7 +1207,7 @@ char intel_buffer_write_32(unsigned long block_adr)
 			printf("Intel buffer write command time out\n");
 			printf("status = %x\n", intel_read_status());
 //       dump_intel_data();
-			return(-1);
+			return -1;
 		}
 		set_data_write write_data(0xe8);	// out data
 		set_data_read
@@ -1229,7 +1223,7 @@ char intel_buffer_write_32(unsigned long block_adr)
 		write_data(mix.buffer[idx + i]);	// write data to eeprom
 	}
 	write_data(0xd0);			// write confirm command
-	return(0);
+	return 0;
 }
 
 
@@ -1241,7 +1235,7 @@ char intel_write_eeprom_16k(unsigned int bank_16k)
 	block_adr = block_adr << 14;	// convert to real address
 	if((bank_16k & 0x07) == 0) {
 		if(intel_block_erase(block_adr))
-			return(-1);
+			return -1;
 	}
 	//printf("w");
 
@@ -1249,11 +1243,11 @@ char intel_write_eeprom_16k(unsigned int bank_16k)
 	for(j = 0; j < 512; j++) {	// 16k bytes = 512 X 32 bytes
 //      time_out=0x8000;
 		idx = j * 32;
-//      if(intel_byte_write_32(block_adr)) return(-1);
+//      if(intel_byte_write_32(block_adr)) return -1;
 		if(intel_buffer_write_32(block_adr)) {
-			printf("write error\07\n");
+			printf("write error\n");
 			printf("status = %x\n", intel_read_status());
-			return(-1);
+			return -1;
 		}
 	}
 
@@ -1262,18 +1256,18 @@ char intel_write_eeprom_16k(unsigned int bank_16k)
 		printf("Intel buffer write command error\n");
 		printf("status = %x\n", intel_read_status());
 //      dump_intel_data();
-		return(-1);
+		return -1;
 	}
 	if(intel_read_status() != 0x80)
-		return(-1);			// error
+		return -1;			// error
 
 
 
 	out_adr_data(0, 0xff);		// read array
 	set_data_read
 //   printf(" ok\n");
-//   return(0);
-		return(verify_eeprom_16k(bank_16k));
+//   return 0;
+		return verify_eeprom_16k(bank_16k);
 }
 
 
@@ -1301,53 +1295,53 @@ char verify_cart_from_file(void)
 
 	filesize = newfsize(file_name);
 	if(filesize == -1) {
-		perror("file not found\07");
+		perror("file not found");
 		return -1;
 	}
 
-	printf("file length= %ld\n", filesize);
+	printf("file length = %ld\n", filesize);
 
 	if((filesize < 0x8000) || (filesize & 0x7fff)
 		|| (filesize > maxfilesize)) {
-		printf("filesize error!\07\n");
-		return(-1);
+		printf("filesize error\n");
+		return -1;
 	}
 	num_page = (filesize / 0x8000) * 2;	// how many 16k banks
 //   printf("num_page=%d\n",num_page);
 	if((fptr = fopen(file_name, "rb")) == NULL) {	/* open error */
-		printf("open error !!!\07\n");
-		return(-1);
+		printf("open error\n");
+		return -1;
 	}
 
 	for(page = 0; page < num_page; page++) {
 		if(read_16k_file() != 0) {
 			printf("load file error\n");
 			fclose(fptr);
-			return(-1);
+			return -1;
 		}
 		if(page == 0)
 			chk_dsp_name(1);	// display game name and check mbc1_exp
 		if(verify_eeprom_16k(page)) {
-			printf("verify cart error at bank=%x\n", page);
+			printf("verify cart error at bank = %x\n", page);
 			fclose(fptr);
-			return(-1);
+			return -1;
 		}
 	}
 	printf("verify cart ok\n");
 	fclose(fptr);
-	return(0);
+	return 0;
 }
 
 
 char write_eeprom_16k(unsigned int bank_16k)
 {
 	if(eeprom_type == 4)		// winbond 4Mbits eeprom
-		return(win_write_eeprom_16k(bank_16k));
+		return win_write_eeprom_16k(bank_16k);
 	if(eeprom_type == 16)		// MX 16Mbits eeprom
-		return(mx_write_eeprom_16k(bank_16k));
+		return mx_write_eeprom_16k(bank_16k);
 	if(eeprom_type == 64)		// Intel 64Mbits eeprom
-		return(intel_write_eeprom_16k(bank_16k));
-	return(-1);
+		return intel_write_eeprom_16k(bank_16k);
+	return -1;
 }
 
 
@@ -1361,7 +1355,7 @@ char write_cart_from_file(void)
 
 	filesize = newfsize(file_name);
 	if(filesize == -1) {
-		perror("file not found\07");
+		perror("file not found");
 		return -1;
 	}
 
@@ -1369,21 +1363,21 @@ char write_cart_from_file(void)
 
 	if((filesize < 0x8000) || (filesize & 0x7fff)
 		|| (filesize > maxfilesize)) {
-		printf("filesize error!\07\n");
-		return(-1);
+		printf("filesize error\n");
+		return -1;
 	}
 
 	num_page = (filesize / 0x8000) * 2;	// how many 16k banks
 //   printf("num_page=%d\n",num_page);
 	if((fptr = fopen(file_name, "rb")) == NULL) {	/* open error */
-		printf("open error !!!\07\n");
-		return(-1);
+		printf("open error\n");
+		return -1;
 	}
 
 	if(eeprom_type == 16) {	// erase 16M flash
 		if(erase()) {			// erase error
 			fclose(fptr);		// close file handle
-			return(-1);
+			return -1;
 		}
 	}
 
@@ -1394,27 +1388,27 @@ char write_cart_from_file(void)
 		if(read_16k_file() != 0) {
 			printf("load file error\n");
 			fclose(fptr);
-			return(-1);
+			return -1;
 		}
 		if(page == 0)
 			chk_dsp_name(0);	// display game name only
 		if(write_eeprom_16k(page)) {
-			printf("write cart error at bank=%x\n", page);
+			printf("write cart error at bank = %x\n", page);
 			fclose(fptr);
-			return(-1);
+			return -1;
 		}
 		if(report_progress)
 			if(report_progress((page + 1) * 80 / (num_page))) {
 				/* Asked to cancel */
 				fclose(fptr);
-				return(-2);
+				return -2;
 			}
 	}
 	//printf("write cart ok\n");
 	fclose(fptr);
 	if((fptr = fopen(file_name, "rb")) == NULL) {	/* open error */
-		printf("open error !!!\07\n");
-		return(-1);
+		printf("open error\n");
+		return -1;
 	}
 
 	if(report_status)
@@ -1423,27 +1417,27 @@ char write_cart_from_file(void)
 		if(read_16k_file() != 0) {
 			printf("load file error\n");
 			fclose(fptr);
-			return(-1);
+			return -1;
 		}
 		if(verify_eeprom_16k(page)) {
-			printf("verify cart error at bank=%x\n", page);
+			printf("verify cart error at bank = %x\n", page);
 			fclose(fptr);
-			return(-1);
+			return -1;
 		}
 		if(report_progress)
 			if(report_progress((page + 1) * 20 / (num_page) + 80)) {
 				/* Asked to cancel */
 				fclose(fptr);
-				return(-2);
+				return -2;
 			}
 	}
 	// printf("verify cart ok\n");
 	fclose(fptr);
 
 	if(report_status)
-		report_status("Cart sent successfully!");
+		report_status("Cart sent successfully");
 
-	return(0);
+	return 0;
 }
 
 char backup_rom(void)			//no_page=how many 32K
@@ -1478,14 +1472,14 @@ char backup_rom(void)			//no_page=how many 32K
 
 		if(write_file_xxk(0x4000) != 0) {
 			fclose(fptr);
-			return(-1);
+			return -1;
 		}
 
 		if(report_progress)
 			if(report_progress((rom_bank + 1) * 100 / (max_bank))) {
 				/* Asked to cancel */
 				fclose(fptr);
-				return(-2);
+				return -2;
 			}
 
 
@@ -1493,9 +1487,9 @@ char backup_rom(void)			//no_page=how many 32K
 	fclose(fptr);
 
 	if(report_status)
-		report_status("Backup Successful!");
+		report_status("Backup Successful");
 
-	return(0);
+	return 0;
 }
 
 char check_card(void)
@@ -1538,9 +1532,9 @@ char check_card(void)
 		}
 	}
 	if(!header_ok) {
-		printf("no GB data present!\07\n");
+		printf("no GB data present\n");
 		disp_buffer(0x50);
-		return(-1);
+		return -1;
 	}
 	for(i = 0; i < 16; i++)
 		game_name[i] = mix.buffer[i + 0x34];
@@ -1636,15 +1630,15 @@ char check_card(void)
 	// printf("Cartridge type(%d) = %s\n",cart_type,cts);
 	rom_size = mix.buffer[0x48];
 	if(rom_size > 8) {
-		printf("Rom size error!!! (%d)\n", rom_size);
-		return(-1);
+		printf("Rom size error (%d)\n", rom_size);
+		return -1;
 	}
 	//else
 	//   printf("Rom size(%d) = %s\n",rom_size,rom_size_define[rom_size]);
 	ram_size = mix.buffer[0x49];
 	if(ram_size > 4) {
-		printf("Ram size error!!! (%d)\n", ram_size);
-		return(-1);
+		printf("Ram size error (%d)\n", ram_size);
+		return -1;
 	}
 	//else
 	//   printf("Ram size(%d) = %s\n",ram_size,ram_size_define[ram_size]);
@@ -1658,11 +1652,11 @@ char check_card(void)
 	for(i = 0x4; i < 0x4d; i++)
 		sum += mix.buffer[i];
 	if((sum + mix.buffer[0x4d]) & 0xff) {
-		printf("Error Complement($%x), Correct Complement($%x)\07\n", mix.buffer[0x4d],
+		printf("Error Complement($%x), Correct Complement($%x)\n", mix.buffer[0x4d],
 			   (0x100 - (sum & 0xff)));
 
 	}
-	return(0);
+	return 0;
 }
 
 
@@ -1672,29 +1666,29 @@ char open_read()
 
 	filesize = newfsize(file_name);
 	if(filesize == -1) {
-		perror("file not found\07");
+		perror("file not found");
 		return -1;
 	}
 
 	if((filesize < 0x8000) || (filesize & 0x7fff)
 		|| (filesize > maxfilesize)) {
-		printf("filesize error!\07\n");
-		return(-1);
+		printf("filesize error\n");
+		return -1;
 	}
 //   num_page=(filesize/0x8000)*2;      // how many 16k banks
 //   printf("num_page=%d\n",num_page);
 	if((fptr = fopen(file_name, "rb")) == NULL) {	/* open error */
-		printf("open error !!!\07\n");
-		return(-1);
+		printf("open error\n");
+		return -1;
 	}
 
 	if(read_16k_file() != 0) {
 		printf("load file error\n");
 		fclose(fptr);
-		return(-1);
+		return -1;
 	}
 	fclose(fptr);
-	return(0);
+	return 0;
 }
 
 
@@ -1709,13 +1703,13 @@ char check_header(char mode)
 	} else {
 
 		if(open_read())
-			return(-1);
+			return -1;
 		for(i = 0; i < 0x50; i++) {
 			mix.buffer[i] = mix.buffer[i + 0x100];
 		}
 
 	}
-	return(check_card());
+	return check_card();
 }
 
 char chk_gcrc(void)
@@ -1726,20 +1720,20 @@ char chk_gcrc(void)
 
 	filesize = newfsize(file_name);
 	if(filesize == -1) {
-		perror("file not found\07");
+		perror("file not found");
 		return -1;
 	}
 
 	if((filesize < 0x8000) || (filesize & 0x7fff)
 		|| (filesize > maxfilesize)) {
-		printf("filesize error!\07\n");
-		return(-1);
+		printf("filesize error\n");
+		return -1;
 	}
 	num_page = (filesize / 0x8000) * 2;	// how many 16k banks
 //   printf("num_page=%d\n",num_page);
 	if((fptr = fopen(file_name, "rb")) == NULL) {	/* open error */
-		printf("open error !!!\07\n");
-		return(-1);
+		printf("open error\n");
+		return -1;
 	}
 
 	sum_gcrc = 0;
@@ -1747,7 +1741,7 @@ char chk_gcrc(void)
 		if(read_16k_file() != 0) {
 			printf("load file error\n");
 			fclose(fptr);
-			return(-1);
+			return -1;
 		}
 		if(page == 0) {
 			for(i = 0; i < 0x4000; i++)
@@ -1763,8 +1757,8 @@ char chk_gcrc(void)
 
 	fclose(fptr);
 	if(gcrc != sum_gcrc)
-		printf("Error Checksum($%x), Correct Checksum($%x)\07\n", gcrc, sum_gcrc);
-	return(0);
+		printf("Error Checksum($%x), Correct Checksum($%x)\n", gcrc, sum_gcrc);
+	return 0;
 }
 
 void backup(void)
@@ -1774,11 +1768,11 @@ void backup(void)
 		return;
 	}
 	if((fptr = fopen(file_name, "w+b")) == NULL) {	/* open error */
-		printf("open error !!!\07\n");
+		printf("open error\n");
 		return;
 	}
 	if(backup_rom())
-		printf("Backup Error!!!\07\n");
+		printf("Backup Error\n");
 	else
 		printf("Backup Rom success\n");
 	return;
@@ -1838,9 +1832,9 @@ char test_sram_v(void)
 				temp = read_data();
 //          temp=inportb(data);
 				if(mix.buffer[i + idx] != temp) {
-					printf("sram verify error!\07\n");
+					printf("sram verify error\n");
 //             printf("sram verify error! bank=%x j=%x i=%x temp=%x pat=%x\n",bank,j,i,temp,mix.buffer[idx+i]);
-					return(-1);
+					return -1;
 				}
 			}
 			set_ai_data(2, 0x80);	// disable inc
@@ -1851,7 +1845,7 @@ char test_sram_v(void)
 		printf("256k sram verify ok\n");
 	if(bank_size == 16)
 		printf("1M sram verify ok\n");
-	return(0);
+	return 0;
 }
 
 
@@ -1882,14 +1876,14 @@ char test_sram_wv(void)
 		printf("256k sram pattern written\n");
 	if(bank_size == 16)
 		printf("1M sram pattern written\n");
-	return(test_sram_v());
+	return test_sram_v();
 }
 
 char test_all(void)
 {
 	if(write_cart_from_file())
-		return(-1);
-	return(test_sram_wv());
+		return -1;
+	return test_sram_wv();
 }
 
 /*void usage(char *progname)
@@ -1920,13 +1914,13 @@ char check_port_xpp(void)
 	set_ai(1);
 	set_data_read				// ninit=0, nwrite=1
 		if(read_data() != 0x12)
-		return(1);
+		return 1;
 	set_ai(0);
 	set_data_read				// ninit=0, nwrite=1
 		if(read_data() != 0x34)
-		return(1);
+		return 1;
 	end_port();
-	return(0);
+	return 0;
 }
 
 char check_port(void)
@@ -1936,18 +1930,18 @@ char check_port(void)
 		epp_spp = 1;			// epp port present
 	}
 	if(port_8 == 0x3bc) {		// if port=0x3bc skip epp test
-		return(!epp_spp);
+		return !epp_spp;
 	}
 	port_type = 0;
 	if(check_port_xpp()) {
 		if(epp_spp) {
 			port_type = 1;
 			end_port();
-			return(0);
+			return 0;
 		} else
-			return(1);			// no port found
+			return 1;			// no port found
 	}
-	return(0);
+	return 0;
 }
 
 char open_read_sram()
@@ -1957,58 +1951,58 @@ char open_read_sram()
 	stat(file_name, &buf);
 	filesize = buf.st_size;
 	if(filesize == -1) {
-		perror("file not found\07");
+		perror("file not found");
 		return -1;
 	}
-	printf("file length= %ld\n", filesize);
+	printf("file length = %ld\n", filesize);
 //   printf("bank_size=%d\n",bank_size);
 
 
 	if(cmd == 'L') {			// check file size 256k/1Mbits
 		if((filesize / 0x2000) > bank_size) {
-			printf("filesize error!\07\n");
-			return(-1);
+			printf("filesize error\n");
+			return -1;
 		}
 
 
 	} else {
 		if(filesize != 0x2000) {	// check file size 8kBytes
-			printf("filesize error!\07\n");
-			return(-1);
+			printf("filesize error\n");
+			return -1;
 		}
 	}
 
 	if((fptr = fopen(file_name, "rb")) == NULL) {	/* open error */
-		printf("open error !!!\07\n");
-		return(-1);
+		printf("open error\n");
+		return -1;
 	}
 
-	bank_size = filesize / 0x2000;	//********* over write bank of size
+	bank_size = filesize / 0x2000;	        // overwrite bank_size
 	if(cmd == 'L') {
-		return(0);
+		return 0;
 	} else {
 		if(read_8k_file() != 0) {
 			printf("load file error\n");
 			fclose(fptr);
-			return(-1);
+			return -1;
 		}
 	}
 	fclose(fptr);
-	return(0);
+	return 0;
 }
 
 char write_sram_xxk(unsigned int length)
 {
 	if((fptr = fopen(file_name, "w+b")) == NULL) {	/* open error */
-		printf("open error !!!\07\n");
-		return(-1);
+		printf("open error\n");
+		return -1;
 	}
 	if(write_file_xxk(length) != 0) {
 		fclose(fptr);
-		return(-1);
+		return -1;
 	}
 	fclose(fptr);
-	return(0);
+	return 0;
 }
 
 
@@ -2016,8 +2010,8 @@ char read_all_sram_to_file(void)
 {
 	enable_sram_bank();
 	if((fptr = fopen(file_name, "w+b")) == NULL) {	/* open error */
-		printf("open error !!!\07\n");
-		return(-1);
+		printf("open error\n");
+		return -1;
 	}
 
 	for(bank = 0; bank < bank_size; bank++) {
@@ -2038,9 +2032,9 @@ char read_all_sram_to_file(void)
 		}
 		if((bank & 3) == 3) {
 			if(write_file_xxk(0x8000) != 0) {
-				printf("write file error\07\n");
+				printf("write file error\n");
 				fclose(fptr);
-				return(-1);
+				return -1;
 			}
 		}
 	}
@@ -2051,20 +2045,20 @@ char read_all_sram_to_file(void)
 	if(bank_size == 16)
 		printf("sram 1Mbits saved\n");
 
-	return(0);
+	return 0;
 }
 
 char read_8k_sram_to_file(void)
 {
 	if(bank_size == 4) {
 		if(sram_bank_num > 3) {
-			printf("bank number error!!!\07\n");
-			return(-1);
+			printf("bank number error\n");
+			return -1;
 		}
 	} else {
 		if(sram_bank_num > 15) {
-			printf("bank number error!!!\07\n");
-			return(-1);
+			printf("bank number error\n");
+			return -1;
 		}
 	}
 
@@ -2089,11 +2083,11 @@ char read_8k_sram_to_file(void)
 	}
 
 	if(write_sram_xxk(0x2000) != 0) {
-		printf("write file 64kbits error\07\n");
-		return(-1);
+		printf("write file 64kbits error\n");
+		return -1;
 	} else
 		printf("sram 64kbits saved from bank %d\n", sram_bank_num);
-	return(0);
+	return 0;
 }
 
 
@@ -2101,14 +2095,14 @@ char write_all_sram_from_file(void)
 {
 	enable_sram_bank();
 	if(open_read_sram() != 0)	// read sram data from file to buffer
-		return(-1);
+		return -1;
 	for(bank = 0; bank < bank_size; bank++) {
 		if((bank & 3) == 0) {
 			idx = 0;
 			if(read_32k_file() != 0) {
 				printf("load file error\n");
 				fclose(fptr);
-				return(-1);
+				return -1;
 			}
 
 		}
@@ -2134,28 +2128,28 @@ char write_all_sram_from_file(void)
 		printf("write sram 256kbits ok\n");
 	if(bank_size == 16)
 		printf("write sram 1Mbits ok\n");
-	return(0);
+	return 0;
 }
 
 char write_8k_sram_from_file(void)
 {
 	if(bank_size == 4) {
 		if(sram_bank_num > 3) {
-			printf("bank number error!!!\07\n");
-			return(-1);
+			printf("bank number error\n");
+			return -1;
 		}
 
 	} else {
 		if(sram_bank_num > 15) {
-			printf("bank number error!!!\07\n");
-			return(-1);
+			printf("bank number error\n");
+			return -1;
 		}
 
 	}
 
 	enable_sram_bank();
 	if(open_read_sram() != 0)	// read sram data from file to buffer
-		return(-1);
+		return -1;
 
 	idx = 0;
 	bank = sram_bank_num;
@@ -2169,7 +2163,7 @@ char write_8k_sram_from_file(void)
 			set_ai_data(2, 0x81);	// enable inc
 			set_ai(3);			// point to data r/w port
 			set_data_write for(i = 0; i < 256; i++) {
-				write_data(mix.buffer[i + idx]);
+			write_data(mix.buffer[i + idx]);
 //          outportb(data,mix.buffer[i+idx]);
 			}
 			set_ai_data(2, 0x80);	// disable inc
@@ -2177,7 +2171,7 @@ char write_8k_sram_from_file(void)
 		}
 	}
 	printf("write sram 64kbits at bank %d ok\n", sram_bank_num);
-	return(0);
+	return 0;
 }
 
 void try_read(void)
@@ -2278,6 +2272,12 @@ void gbx_init(unsigned int parport, char *filename)
   port_a = parport + 2;
   port_b = parport + 3;
   port_c = parport + 4;
+  if (port_8 != 0x3bc && port_8 != 0x378 && port_8 != 0x278)
+  {
+    printf("PORT must be 0x3bc, 0x378 or 0x278\n");
+    exit(1);
+  }
+  printf("Using I/O port 0x%x\n", port_8);
 
 // TODO: make use of parport_gauge()
   report_progress = prog_func;
@@ -2285,7 +2285,7 @@ void gbx_init(unsigned int parport, char *filename)
 
   if (check_port() != 0)
   {
-    printf("\nNo GBX card present!!!\07\n\n");
+    printf("No GBX card present\n");
     exit(1);
   }
   init_port();

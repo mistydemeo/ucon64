@@ -602,7 +602,7 @@ snes_ffe (st_rominfo_t *rominfo, char *ext, int smc)
 }
 
 
-// header format is specified in src/backup/smc.h
+// header format is specified in src/backup/ffe.h
 int
 snes_smc (st_rominfo_t *rominfo)
 {
@@ -610,7 +610,7 @@ snes_smc (st_rominfo_t *rominfo)
 }
 
 
-// header format is specified in src/backup/swc.h
+// header format is specified in src/backup/ffe.h
 int
 snes_swc (st_rominfo_t *rominfo)
 {
@@ -1217,16 +1217,17 @@ int
 snes_k (st_rominfo_t *rominfo)
 {
 /*
-Some SNES games check to see how much SRAM is connected to the
-SNES as a form of copy protection. As most copiers have
-256 kbits standard, the game will know it's running on a backup
-unit and stop to prevent people copying the games. However,
-the newer copiers get around this detection somehow.
+Some SNES games check to see how much SRAM is connected to the SNES as a form
+of copy protection. As most copiers have 256 kbits standard, the game will
+know it's running on a backup unit and stop to prevent people copying the
+games. However, the newer copiers get around this detection somehow.
 
 (original uCON)
    8F/9F xx xx 70 CF/DF xx xx 70 D0
 => 8F/9F xx xx 70 CF/DF xx xx 70 EA EA          if snes_sramsize == 64 kbits
 => 8F/9F xx xx 70 CF/DF xx xx 70 80
+
+   sta $70xxxx/sta $70xxxx,x; cmp $70xxxx/cmp $70xxxx,x; bne
 
 TODO: The following three codes should be verfied for many games. For example,
 the first code replaces D0 (bne) with 80 (bra), but for some games (like Donkey
@@ -1234,11 +1235,11 @@ Kong Country (U|E)) it should do the opposite, i.e., writing EA EA (nop nop).
    8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 D0
 => 8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 80
 
-   8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 F0
-=> 8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 EA EA
+   8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 F0     beq
+=> 8F/9F xx xx 30/31/32/33 CF/DF xx xx 30/31/32/33 EA EA  nop; nop
 
-   8F/9F xx xx 30/31/32/33 AF xx xx 30/31/32/33 C9 xx xx D0
-=> 8F/9F xx xx 30/31/32/33 AF xx xx 30/31/32/33 C9 xx xx 80
+   8F/9F xx xx 30/31/32/33 AF xx xx 30/31/32/33 C9 xx xx D0   bne
+=> 8F/9F xx xx 30/31/32/33 AF xx xx 30/31/32/33 C9 xx xx 80   bra
 
 (uCON64)
 - Super Metroid
@@ -1927,12 +1928,12 @@ snes_init (st_rominfo_t *rominfo)
     SNES_HIROM : 0;
 #endif
   /*
-    It should be possible to use snes_header.map_type & 1 to verify that
-    snes_hirom has the correct value, but that method is less trustworthy.
-    For games like Batman Revenge of the Joker (U) it matches what
-    score_hirom() finds. snes_hirom must be 0x8000 for that game in order to
-    display correct information. However it should be 0 when writing a copier
-    header.
+    It would be nice if snes_header.map_type & 1 could be used to verify that
+    snes_hirom has the correct value, but it doesn't help much. For games like
+    Batman Revenge of the Joker (U) it matches what score_hirom() finds.
+    snes_hirom must be 0x8000 for that game in order to display correct
+    information. However it should be 0 when writing a copier header.
+    So, snes_header.map_type can't be used to recognize such cases.
   */
 
   // step 3.

@@ -1565,7 +1565,7 @@ parse_prm (st_ines_header_t *header, const char *fname)
   // ignore "partial horizontal scroll?" (always 'X')
   // ignore "don't scroll up to this scanline?" (always "02")
   // ignore "line to do a scroll in?" (always '2')
-  // igmore "comment?" (always 'A')
+  // ignore "comment?" (always 'A')
 
   return 0;
 }

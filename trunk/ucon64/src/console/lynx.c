@@ -55,7 +55,6 @@ const char *lynx_usage[] =
 };
 
 
-
 //static const char *lnx_usage[] = "LNX header";
 #define LNX_HEADER_START 0
 #define LNX_HEADER_LEN (sizeof (st_lnx_header_t))
@@ -70,7 +69,7 @@ lynx_lyx (st_rominfo_t *rominfo)
 
   if (!rominfo->buheader_len)
     {
-      fprintf (stderr, "ERROR: this is no LNX file\n\n");
+      fprintf (stderr, "ERROR: This is no LNX file\n\n");
       return -1;
     }
 
@@ -78,8 +77,7 @@ lynx_lyx (st_rominfo_t *rominfo)
   setext (buf, ".LYX");
 
   ucon64_fbackup (NULL, buf);
-  q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom),
-            buf, "wb");
+  q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom), buf, "wb");
 
   ucon64_wrote (buf);
   return 0;
@@ -95,12 +93,12 @@ lynx_lnx (st_rominfo_t *rominfo)
 
   if (rominfo->buheader_len != 0)
     {
-      fprintf (stderr, "ERROR: this seems to be already an LNX file\n\n");
+      fprintf (stderr, "ERROR: This seems to already be an LNX file\n\n");
       return -1;
     }
 
-  header.page_size_bank0 = size > (4 * MBIT) ? (4 * MBIT / 256) : (size / 256);
-  header.page_size_bank1 = size > (4 * MBIT) ? (size - (4 * MBIT)) / 256 : 0;
+  header.page_size_bank0 = size > 4 * MBIT ? 4 * MBIT / 256 : size / 256;
+  header.page_size_bank1 = size > 4 * MBIT ? (size - (4 * MBIT)) / 256 : 0;
 #ifdef  WORDS_BIGENDIAN
   header.page_size_bank0 = bswap_16 (header.page_size_bank0);
   header.page_size_bank1 = bswap_16 (header.page_size_bank1);
@@ -140,17 +138,16 @@ lynx_rot (st_rominfo_t *rominfo, int rotation)
 
   if (!rominfo->buheader_len)
     {
-      fprintf (stderr, "ERROR: this is no LNX file\n\n");
+      fprintf (stderr, "ERROR: This is no LNX file\n\n");
       return -1;
     }
 
   q_fread (&header, 0, sizeof (st_lnx_header_t), ucon64.rom);
 
-  header.rotation = rotation;
+  header.rotation = rotation;                   // header.rotation is an 8-bit field
 
   ucon64_fbackup (NULL, ucon64.rom);
-  q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom,
-               "r+b");
+  q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom, "r+b");
 
   ucon64_wrote (ucon64.rom);
 
@@ -186,7 +183,7 @@ lynx_n (st_rominfo_t *rominfo)
 
   if (!rominfo->buheader_len)
     {
-      fprintf (stderr, "ERROR: this is no LNX file\n\n");
+      fprintf (stderr, "ERROR: This is no LNX file\n\n");
       return -1;
     }
 
@@ -196,8 +193,7 @@ lynx_n (st_rominfo_t *rominfo)
   strncpy (header.cartname, ucon64.file, sizeof (header.cartname));
 
   ucon64_fbackup (NULL, ucon64.rom);
-  q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom,
-               "r+b");
+  q_fwrite (&header, 0, sizeof (st_lnx_header_t), ucon64.rom, "r+b");
 
   ucon64_wrote (ucon64.rom);
   return 0;
@@ -212,7 +208,7 @@ lynx_b (st_rominfo_t *rominfo, int bank)
 
   if (!rominfo->buheader_len)
     {
-      fprintf (stderr, "ERROR: this is no LNX file\n\n");
+      fprintf (stderr, "ERROR: This is no LNX file\n\n");
       return -1;
     }
 

@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 #define NO_RLE  256
-// for some strange reason 6 seems to be a general optimum vaule for RLE_START_TRESHOLD
+// for some strange reason 6 seems to be a general optimum value for RLE_START_TRESHOLD
 #define RLE_START_TRESHOLD 6                    // must be smaller than RLE_RESTART_TRESHOLD!
 #define RLE_RESTART_TRESHOLD 13
 // 6 seems to be better than 5 for BRIDGE_LEN
@@ -173,7 +173,6 @@ ips_apply (const char *modname, const char *ipsname)
 }
 
 
-// TODO: cleaning up most of the IPS creation code
 static void
 write_address (int new_address)
 {

@@ -9,7 +9,7 @@ echo "$DESTDIR does not exist, installing to /usr/local/bin"
 DESTDIR=/usr/local/bin
 fi
 
-echo Give root\'s password:
+echo "Give root's password:"
 # The version of su on Mac OS X requires the user name to be specified
 su root -c "
 echo Continueing installation.

@@ -1,0 +1,199 @@
+.PHONY: all clean install
+
+DLOPEN=1
+#ZLIB=1
+
+libdir = ${exec_prefix}/lib
+#INSTALL = @INSTALL@
+#LIBTOOL = @LIBTOOL@
+INSTALL = install -c
+LIBTOOL = libtool
+
+CC=gcc
+CFLAGS0=-I. -Wall -W -O3 -DHAVE_CONFIG_H -I..
+CFLAGS=$(CFLAGS0) -DDLL
+# The order of . and .. is important if header files are specified between
+# angle brackets
+ifdef DLOPEN
+CFLAGS+=-DDLOPEN
+endif
+LDFLAGS=-s
+
+LIBNAME=discmage
+OBJECTS=libdm_misc.o cdi.o nero.o sheets.o dllinit.o misc.o
+ifdef ZLIB
+LIBS=-lz
+OBJECTS+=unzip.o map.o miscz.o
+else
+LIBS=
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+else
+ifdef DJGPP                             # DJGPP code in dllinit needs map code                          
+OBJECTS+=map.o
+endif                                   # DJGPP
+endif                                   # cygwin
+endif                                   # ZLIB
+
+
+# The test for Cygwin should be done before the test for DJGPP, because the
+# environment variable DJGPP can be set under Bash for people who have
+# installed both gcc (and friends) ports.
+
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+
+GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/
+LIBS+=-lcygwin -lkernel32 -L$(GCCA_DIR) -lgcc
+# kernel32 for DLOPEN and DisableThreadLibraryCalls()
+
+ifdef DLOPEN
+ENTRY=__cygwin_dll_entry@12
+else
+ENTRY=_DllMain@12
+endif
+
+FULLLIBNAME=$(LIBNAME).dll
+DLLFLAGS=$(LDFLAGS) --dll -o $(LIBNAME).dll $(OBJECTS) $(LIBS) -e $(ENTRY)
+DLLTOOLFLAGS=-d tmp.def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
+ifndef DLOPEN
+DLLTOOLFLAGS+=-l $(LIBNAME).a
+endif
+
+else
+ifdef DJGPP
+
+OBJECTS+=dxe_misc.o
+# This file is only really necessary when zlib support is/should be enabled,
+# but it's wise to have as little conditionally compiled code as possible.
+# Besides it currently gets used even if zlib support is disabled.
+
+GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/2.953
+LIBS+=-L$(GCCA_DIR) -lgcc
+
+DLLFLAGS=$(OBJECTS) $(LIBS) $(LDFLAGS)  
+# $(LDFLAGS) must come after $(OBJECTS)
+FULLLIBNAME=$(LIBNAME).dxe
+
+else                                    # Unix or BeOS
+
+CFLAGS+=-fPIC
+ifdef DLOPEN
+FULLLIBNAME=$(LIBNAME).so
+else
+FULLLIBNAME=lib$(LIBNAME).so
+endif
+
+ifeq ($(OSTYPE),beos)
+LDFLAGS+=-nostart
+else
+LDFLAGS+=-shared
+endif
+DLLFLAGS+=$(LDFLAGS) -o $(FULLLIBNAME) $(OBJECTS) $(LIBS)
+
+endif                                   # DJGPP
+endif                                   # cygwin
+
+
+all: $(FULLLIBNAME)
+
+
+clean:
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	rm -f $(LIBNAME).dll $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
+              tmp.def tmp.base tmp.exp
+else
+ifdef DJGPP
+	del $(LIBNAME).dxe
+ifndef DLOPEN
+	del $(LIBNAME).a
+endif
+	del *.o
+else                                    # Unix or BeOS
+	rm -f *.so $(OBJECTS) *.core *.stackdump *.o
+endif                                   # DJGPP
+endif                                   # cygwin
+
+
+distclean: clean
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	rm -f Makefile config.log config.status config.cache config.h
+else
+ifdef DJGPP
+	del Makefile
+	del config.log
+	del config.status
+	del config.cache
+	del config.h
+else
+	rm -f Makefile config.log config.status config.cache config.h
+endif                                   # DJGPP
+endif                                   # cygwin
+
+
+.c.o:
+	$(CC) $(CFLAGS) -c $< -o $@
+
+
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+
+ifndef DLOPEN
+$(LIBNAME).dll $(LIBNAME).a: $(OBJECTS)
+else
+$(LIBNAME).dll: $(OBJECTS)
+endif
+	echo EXPORTS > tmp.def
+#	nm $(OBJECTS) | grep ' T _' | sed 's/.* T _//' >> tmp.def
+	nm $(OBJECTS) | grep '^........ [T] _' | sed 's/[^_]*_//' >> tmp.def
+# We use nm instead of dlltool --output-def, so that we don't have to
+# specify explicitly (in the source code) which symbols should be exported
+
+	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
+	@echo "      symbols, read faq.html question 2"
+	ld --base-file tmp.base $(DLLFLAGS)
+	dlltool $(DLLTOOLFLAGS)
+	ld tmp.exp $(DLLFLAGS)
+
+else
+ifdef DJGPP
+
+ifndef DLOPEN
+$(LIBNAME).dxe $(LIBNAME).a: $(OBJECTS) djimport.o dlopen.o
+else
+$(LIBNAME).dxe: $(OBJECTS)
+endif
+	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
+	@echo "      symbols, read faq.html question 2"
+	dxegen $(LIBNAME).dxe _import_export $(DLLFLAGS)
+ifndef DLOPEN
+# Recompile map.c, because it has to be a normal object file for the import
+# library (no references to import_export)
+	$(CC) $(CFLAGS0) -c map.c -o map.o
+	ar rs $(LIBNAME).a djimport.o map.o dlopen.o
+endif
+
+else                                    # Unix or BeOS
+# Unix uses LD_LIBRARY_PATH for dynamic linking, BeOS uses LIBRARY_PATH
+
+$(FULLLIBNAME): $(OBJECTS)
+	$(CC) $(DLLFLAGS)
+
+endif                                   # DJGPP
+endif                                   # cygwin
+
+
+#ifndef DLOPEN
+#install:
+#	$(LIBTOOL) --mode=install $(INSTALL) $(FULLLIBNAME) $(libdir)/$(FULLLIBNAME)
+#endif
+
+# Dependencies
+CONFIG_H=../config.h
+
+libdm_misc.o: libdiscmage.h misc.h dxedll_priv.h
+cdi.o: libdiscmage.h misc.h cdi.h dxedll_priv.h
+nero.o: libdiscmage.h misc.h $(CONFIG_H) nero.h cdi.h dxedll_priv.h
+sheets.o: libdiscmage.h misc.h dxedll_priv.h
+dllinit.o: libdiscmage.h misc.h dxedll_priv.h
+misc.o: misc.h dxedll_priv.h
+dxe_misc.o: $(CONFIG_H) dxedll_pub.h
+djimport.o: libdiscmage.h dlopen.h dxedll_pub.h
+dlopen.o: $(CONFIG_H) dlopen.h dxedll_pub.h

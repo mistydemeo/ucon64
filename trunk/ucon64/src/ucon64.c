@@ -180,6 +180,7 @@ const struct option long_options[] = {
     {"multi", 0, 0, UCON64_MULTI},
     {"multi1", 0, 0, UCON64_MULTI1},
     {"multi2", 0, 0, UCON64_MULTI2},
+    {"multi3", 0, 0, UCON64_MULTI3},
     {"mvs", 0, 0, UCON64_MVS},
     {"n", 0, 0, UCON64_N},
     {"n2", 0, 0, UCON64_N2},
@@ -332,7 +333,7 @@ main (int argc, char **argv)
 
   while ((c = getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
     {
-#include "switches.h"
+#include "switches.c"
     }
 
   if (optind < argc)
@@ -347,18 +348,20 @@ main (int argc, char **argv)
 #endif
 
   if (!ucon64_init (ucon64.rom, &rom))
-    if (ucon64.show_nfo == UCON64_YES) ucon64_nfo (&rom);
+    if (ucon64.show_nfo == UCON64_YES)
+      ucon64_nfo (&rom);
   ucon64.show_nfo = UCON64_NO;
 
   optind = option_index = 0;
 
   while ((c = getopt_long_only (argc, argv, "", long_options, &option_index)) != -1)
     {
-#include "options.h"
+#include "options.c"
     }
 
   if (ucon64.show_nfo == UCON64_YES)
-    if (!ucon64_init (ucon64.rom, &rom)) ucon64_nfo (&rom);
+    if (!ucon64_init (ucon64.rom, &rom))
+      ucon64_nfo (&rom);
 
   return 0;
 }
@@ -455,7 +458,7 @@ ucon64_console_probe (st_rominfo_t *rominfo)
       case UCON64_VIRTUALBOY:
 #ifdef SAMPLE
         sample_init (rominfo);
-#endif // SAMPLE        
+#endif // SAMPLE
         break;
 
       case UCON64_UNKNOWN:
@@ -492,9 +495,12 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
   struct stat puffer;
   long size;
 
-  if (access (romfile, F_OK | R_OK) == -1) return result;
-  if (!stat (romfile, &puffer) == -1) return result;
-  if (S_ISREG (puffer.st_mode) != TRUE) return result;
+  if (access (romfile, F_OK | R_OK) == -1)
+    return result;
+  if (!stat (romfile, &puffer) == -1)
+    return result;
+  if (S_ISREG (puffer.st_mode) != TRUE)
+    return result;
 
   size = quickftell (romfile);
 
@@ -503,7 +509,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 */
   if (ucon64.type == UCON64_UNKNOWN)
     ucon64.type = (size <= MAXROMSIZE) ? UCON64_ROM : UCON64_CD;
-        
+
   ucon64_flush (rominfo);
 
   result = ucon64_console_probe (rominfo);
@@ -515,11 +521,10 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
         ucon64.buheader_len : rominfo->buheader_len;
 #endif
 
-      rominfo->current_crc32 =
-        fileCRC32 (romfile, rominfo->buheader_len);
+      rominfo->current_crc32 = fileCRC32 (romfile, rominfo->buheader_len);
 
-      if (ucon64.console == UCON64_UNKNOWN)    // don't call if console type is already
-        ucon64_dbsearch (rominfo);               //  known (destroys rominfo fields)
+      if (ucon64.console == UCON64_UNKNOWN)     // don't call if console type is already
+        ucon64_dbsearch (rominfo);              //  known (destroys rominfo fields)
     }
   else if (UCON64_TYPE_ISCD (ucon64.type))
     {
@@ -530,11 +535,11 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 
       result = 0;
 
-      quickfread (&iso_header, ISO_HEADER_START + 
+      quickfread (&iso_header, ISO_HEADER_START +
           UCON64_ISSET (ucon64.buheader_len) ?
-          ucon64.buheader_len :
-          CDRW_HEADER_START(ucon64_trackmode_probe (romfile)), ISO_HEADER_LEN, romfile
-        );
+            ucon64.buheader_len :
+            CDRW_HEADER_START (ucon64_trackmode_probe (romfile)),
+              ISO_HEADER_LEN, romfile);
       rominfo->header_start = ISO_HEADER_START;
       rominfo->header_len = ISO_HEADER_LEN;
       rominfo->header = &iso_header;
@@ -552,7 +557,7 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
       else
         sprintf (rominfo->misc, "Track Mode: %s (Cdrdao: %s)\n", track_modes[value].common, track_modes[value].cdrdao);
 
-//      rominfo->console_usage = 
+//      rominfo->console_usage =
 
       rominfo->copier_usage = cdrw_usage;
     }
@@ -611,7 +616,9 @@ ucon64_nfo (const st_rominfo_t *rominfo)
     }
 
   strcpy (buf, rominfo->name);
-  printf ("%s\n%s\n%s\n%ld Bytes (%.4f Mb)\n\n", mkprint (buf, '.'),  // some ROMs have a name with control chars in it -> replace control chars
+  printf ("%s\n%s\n%s\n%ld Bytes (%.4f Mb)\n\n",
+          // some ROMs have a name with control chars in it -> replace control chars
+          mkprint (buf, '.'),
           NULL_TO_EMPTY (rominfo->maker),
           NULL_TO_EMPTY (rominfo->country),
           quickftell (ucon64.rom) - rominfo->buheader_len,
@@ -671,20 +678,20 @@ ucon64_nfo (const st_rominfo_t *rominfo)
           sprintf (buf,
             "Checksum: %%s, 0x%%0%dlx (calculated) %%s= 0x%%0%dlx (internal)\n",
             rominfo->internal_crc_len * 2, rominfo->internal_crc_len * 2);
-    
+
           printf (buf,
             (rominfo->current_internal_crc == rominfo->internal_crc) ? "ok" : "bad",
             rominfo->current_internal_crc,
             (rominfo->current_internal_crc == rominfo->internal_crc) ? "=" : "!",
             rominfo->internal_crc);
-    
+
           if (rominfo->internal_crc2[0])
             {
               strcpy (buf, rominfo->internal_crc2);
               printf ("%s\n", mkprint (buf, '.'));
             }
         }
-    
+
       if (rominfo->current_crc32)
         printf ("Checksum (CRC32): 0x%08lx\n", rominfo->current_crc32);
 
@@ -692,7 +699,6 @@ ucon64_nfo (const st_rominfo_t *rominfo)
 
       if (ucon64.console == UCON64_UNKNOWN)
         fprintf (stderr, ucon64_console_error);
-
     }
 
   fflush (stdout);
@@ -753,7 +759,7 @@ ucon64_usage (int argc, char *argv[])
 #ifdef	__MSDOS__
     "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|more\"\n"
 #else
-    "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\"\n"       // less is better ;-)
+    "  " OPTION_LONG_S "hex         show ROM as hexdump; use \"ucon64 " OPTION_LONG_S "hex " OPTION_LONG_S "rom=ROM|less\"\n"       // less is more ;-)
 #endif
     "  " OPTION_LONG_S "find        find string in ROM; " OPTION_LONG_S "file=STRING (wildcard: '?')\n"
     "  " OPTION_S "c           compare ROMs for differencies; " OPTION_LONG_S "file=OTHER_ROM\n"
@@ -1050,7 +1056,7 @@ ucon64_usage (int argc, char *argv[])
 #ifdef	__MSDOS__
      "     %s " OPTION_LONG_S "help|more (to see everything in more)\n"
 #else
-     "     %s " OPTION_LONG_S "help|less (to see everything in less)\n" // less is better ;-)
+     "     %s " OPTION_LONG_S "help|less (to see everything in less)\n" // less is more ;-)
 #endif
      "     give the force recognition option a try if something went wrong\n"
      "\n"

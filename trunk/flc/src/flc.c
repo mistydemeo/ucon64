@@ -20,18 +20,24 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */ 
 
-/*
-  I dedicate this to dbjh who told me to use 2 spaces instead of tabs!
-*/
 #include "flc.h"
 
 #include "extract.h"
 #include "sort.h"
 #include "output.h"
 
+
+void flc_exit(void)
+{
+  printf("+++EOF");
+  fflush(stdout);
+}
+
+
 int main(int argc,char *argv[])
 {
 char buf[NAME_MAX+1];
+char buf2[4096];
 struct flc_ flc;
 struct files_ *files,*file0,file_ns;
 struct dirent *ep;
@@ -40,45 +46,86 @@ long x = 0;
 int single_file=0;
 DIR *dp;
 
+
 /*
-.flcrc
-flc.cfg
-
-
-#
-# flc config
-#
-# LHA
-#
-lha_test=lha t
-lha_extract=lha efi 
-#lha_extract=lha e 
-#
-# LZH
-#
-lzh_test=lha t
-lzh_extract=lha efi
-#lzh_extract=lha e
-#
-# ZIP
-#
-zip_test=unzip -t
-zip_extract=unzip -xojC
-#zip_extract=unzip -xoj
-#
-# TXT/NFO/FAQ
-#
-txt_extract=txtextract
-nfo_extract=txtextract
-faq_extract=txtextract
-#
-# FILE_ID.DIZ names/synonyms
-#
-file_id_diz=*_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]
-
-
-
+    support for frontends
 */
+if(argcmp(argc, argv, "-frontend"))atexit(flc_exit);
+
+/*
+   configfile handling
+*/
+#ifdef	__DOS__
+  strcpy(buf, "flc.cfg");
+#else
+  sprintf(buf, "%s%c.flcrc", getenv("HOME"), FILE_SEPARATOR);
+#endif
+
+if(access(buf,F_OK)==-1)printf("ERROR: %s not found: creating...",buf);
+else if(getProperty(buf, "version", buf2, NULL) == NULL)
+{
+  strcpy(buf2,buf);
+  newext(buf2,".OLD");
+
+  printf("NOTE: updating config: will be renamed to %s...",buf2);
+
+  rename(buf,buf2);
+
+  sync();
+}
+
+if(access(buf,F_OK)==-1)
+{
+  FILE *fh;
+
+  if(!(fh=fopen(buf,"wb")))
+  {
+    printf("FAILED\n\n");
+
+    return -1;
+  }
+  else
+  {
+    fputs(       
+"# flc config\n"
+"#\n"
+"version=093\n"
+"#\n"
+"# LHA\n"
+"#\n"
+"lha_test=lha t\n"
+"lha_extract=lha efi \n"
+"#lha_extract=lha e \n"
+"#\n"
+"# LZH\n"
+"#\n"
+"lzh_test=lha t\n"
+"lzh_extract=lha efi\n"
+"#lzh_extract=lha e\n"
+"#\n"
+"# ZIP\n"
+"#\n"
+"zip_test=unzip -t\n"
+"zip_extract=unzip -xojC\n"
+"#zip_extract=unzip -xoj\n"
+"#\n"
+"# TXT/NFO/FAQ\n"
+"#\n"
+"txt_extract=txtextract\n"
+"nfo_extract=txtextract\n"
+"faq_extract=txtextract\n"
+"#\n"
+"# FILE_ID.DIZ names/synonyms\n"
+"#\n"
+"file_id_diz=*_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
+    ,fh);
+
+    fclose(fh);
+    printf("OK\n\n");
+  }
+
+  return 0;
+}
 
 if (
     argcmp(argc, argv, "-h") ||
@@ -230,6 +277,7 @@ printf(
   "  -fr		sort reverse\n"
   "  -k		show sizes in kilobytes\n"
   "\n"
+  "Amiga version: noC-FLC Version v1.O (File-Listing Creator) - (C)1994 nocTurne deSign/MST\n"
   "Report problems to noisyb@gmx.net or go to http://ucon64.sf.net\n\n"
   ,flc_TITLE
   ,getarg(argc,argv,flc_NAME)

@@ -1,5 +1,5 @@
 /*
-dlopen.h - DLL support for uCON64
+dlopen.h - DLL support code
 
 written by 2002 dbjh
 

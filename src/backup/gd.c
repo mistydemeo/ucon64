@@ -56,8 +56,6 @@ const char *gd_usage[] =
 #define OK 0
 #define ERROR 1
 
-#define DEBUG
-
 static void init_io (unsigned int port);
 static void deinit_io (void);
 static void io_error (void);
@@ -327,8 +325,7 @@ gd_write_rom (const char *filename, unsigned int parport, st_rominfo_t *rominfo)
       if (split)
         {
           x = q_fsize (filenames[i]);
-          if (x > 0)                            // q_fsize() returns a value < 0 on error
-            gd_fsize += x;                      //  Should we act on such an error?
+          gd_fsize += x;
           gd3_dram_unit[i].size = x;
           if (i == 0)                           // Correct for header of first file
             gd3_dram_unit[i].size -= GD_HEADER_LEN;

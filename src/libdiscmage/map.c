@@ -1,5 +1,5 @@
 /*
-map.c - map (associative array) code for uCON64
+map.c - a map (associative array) implementation
 
 written by 2002 dbjh
 
@@ -25,8 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "map.h"
 #if     defined DJGPP && defined DXE
-//#include "dll_pub.h"
-//#include "dll_priv.h"
+#include "dxedll_priv.h"
 #endif
 
 
@@ -53,6 +52,7 @@ void
 map_copy (st_map_t *dest, st_map_t *src)
 {
   memcpy (dest->data, src->data, src->size * sizeof (st_map_element_t));
+  dest->cmp_key = src->cmp_key;
 }
 
 

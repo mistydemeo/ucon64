@@ -1,5 +1,5 @@
 /*
-dlopen.c - DLL support for uCON64
+dlopen.c - DLL support code
 
 written by 2002 dbjh
 
@@ -33,9 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if     (defined __unix__ && !defined __CYGWIN__) || defined __BEOS__
-#include <unistd.h>                             // for getcwd()
-#endif
 
 
 #ifdef  DJGPP
@@ -127,7 +124,7 @@ open_module (char *module_name)
 
   if (new_handle == INITIAL_HANDLE)
     dxe_map = map_create (10);
-  map_put (dxe_map, (void *) new_handle, sym);
+  dxe_map = map_put (dxe_map, (void *) new_handle, sym);
   handle = (void *) new_handle++;
 #elif   defined __unix__
   void *handle;

@@ -15,27 +15,27 @@ LIBNAME=discmage
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
-ifndef  DLOPEN
+ifndef DLOPEN
 LDFLAGS+=libdiscmage/$(LIBNAME).a
 endif
 
 else
 ifdef DJGPP
 
-ifndef  DLOPEN
+ifndef DLOPEN
 LDFLAGS+=libdiscmage/$(LIBNAME).a
 endif
 
 else                                    # Unix or BeOS
 ifeq ($(OSTYPE),beos)                   # BeOS
 
-ifndef  DLOPEN
+ifndef DLOPEN
 LDFLAGS+=-Llibdiscmage -l$(LIBNAME)
 endif
 
 else                                    # Unix
 
-ifdef   DLOPEN
+ifdef DLOPEN
 LDFLAGS+=-ldl
 else
 LDFLAGS+=-Llibdiscmage -l$(LIBNAME)

@@ -337,11 +337,6 @@ ucon64_exit (void)
 }
 
 
-#if     !defined DLOPEN && defined DJGPP
-extern char djimport_path[FILENAME_MAX];
-#endif
-
-
 int
 main (int argc, char **argv)
 {
@@ -416,18 +411,20 @@ main (int argc, char **argv)
     }
   else
     ucon64.discmage_enabled = 0;
-#else
-#ifdef DJGPP
-  strcpy (buf, argv[0]);     
-  // this is DJGPP specific - not necessary, but causes less confusion
-  change_string ("/", 1, 0, 0, FILE_SEPARATOR_S, 1, buf, strlen (buf), 0);
+#else // !defined DLOPEN
+#ifdef  DJGPP
   {
-    char *p = strrchr (buf, FILE_SEPARATOR);
-    if (p)
+    extern char djimport_path[FILENAME_MAX];
+    char *p;
+
+    strcpy (buf, argv[0]);
+    // the next statement is not necessary, but will caus less confusion
+    change_string ("/", 1, 0, 0, FILE_SEPARATOR_S, 1, buf, strlen (buf), 0);
+    if ((p = strrchr (buf, FILE_SEPARATOR)))
       *p = 0;
+    sprintf (djimport_path, "%s"FILE_SEPARATOR_S"%s", buf, "discmage.dxe");
   }
-  sprintf (djimport_path, "%s"FILE_SEPARATOR_S"%s", buf, "discmage.dxe");
-#endif
+#endif // DJGPP
   ucon64.discmage_enabled = 1;
 #endif
 

@@ -77,19 +77,19 @@ dxe_init (void)
   symbol = map_create (10);                     // Read comment in map.h!
   symbol->cmp_key = (int (*) (void *, void *)) strcmp; // How beautiful! ;-)
 
-  map_put (symbol, "dm_init", dm_init);
-  map_put (symbol, "dm_close", dm_close);
+  symbol = map_put (symbol, "dm_init", dm_init);
+  symbol = map_put (symbol, "dm_close", dm_close);
 
-  map_put (symbol, "dm_bin2iso", dm_bin2iso);
-  map_put (symbol, "dm_cdirip", dm_cdirip);
-  map_put (symbol, "dm_cdi2nero", dm_cdi2nero);
+  symbol = map_put (symbol, "dm_bin2iso", dm_bin2iso);
+  symbol = map_put (symbol, "dm_cdirip", dm_cdirip);
+  symbol = map_put (symbol, "dm_cdi2nero", dm_cdi2nero);
 
-  map_put (symbol, "dm_disc_read", dm_disc_read);
-  map_put (symbol, "dm_disc_write", dm_disc_write);
+  symbol = map_put (symbol, "dm_disc_read", dm_disc_read);
+  symbol = map_put (symbol, "dm_disc_write", dm_disc_write);
 
-  map_put (symbol, "dm_mksheets", dm_mksheets);
-  map_put (symbol, "dm_mktoc", dm_mktoc);
-  map_put (symbol, "dm_mkcue", dm_mkcue);
+  symbol = map_put (symbol, "dm_mksheets", dm_mksheets);
+  symbol = map_put (symbol, "dm_mktoc", dm_mktoc);
+  symbol = map_put (symbol, "dm_mkcue", dm_mkcue);
 
   return 0;
 }

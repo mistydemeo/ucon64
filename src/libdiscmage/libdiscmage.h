@@ -19,13 +19,81 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef LIBDISCMAGE_H
 #define LIBDISCMAGE_H
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "libdiscmage_cfg.h"
 #include "config.h"
-#include "misc.h"                               // YES NoisyB, MISC.H! (dbjh)
+#include "libdiscmage_cfg.h"
+#ifdef  HAVE_INTTYPES_H
+#include <inttypes.h>
+#else
+typedef unsigned char uint8_t;
+typedef unsigned short int uint16_t;
+typedef unsigned int uint32_t;
+typedef unsigned long long int uint64_t;
+
+typedef signed char int8_t;
+typedef signed short int int16_t;
+typedef signed int int32_t;
+typedef signed long long int int64_t;
+#endif
+
+#ifdef __MSDOS__
+#define FILE_SEPARATOR '\\'
+#define FILE_SEPARATOR_S "\\"
+#else
+#define FILE_SEPARATOR '/'
+#define FILE_SEPARATOR_S "/"
+#endif
+
+#if 0
+#ifdef  HAVE_BASENAME
+#else
+extern char *basename2 (const char *str);
+#define basename basename2
+#endif
+#endif
+
+#define stricmp strcasecmp
+#define strnicmp strncasecmp
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifdef WORDS_BIGENDIAN
+#undef WORDS_BIGENDIAN
+#endif
+
+#if     defined _LIBC || defined __GLIBC__
+  #include <endian.h>
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    #define WORDS_BIGENDIAN 1
+  #endif
+#elif   defined AMIGA || defined __sparc__ || defined __BIG_ENDIAN__ || defined __APPLE__
+  #define WORDS_BIGENDIAN 1
+#endif
+
+#ifdef WORDS_BIGENDIAN
+#define me2be_16(x) (x)
+#define me2be_32(x) (x)
+#define me2be_64(x) (x)
+#define me2le_16(x) (bswap_16(x))
+#define me2le_32(x) (bswap_32(x))
+#define me2le_64(x) (bswap_64(x))
+#else
+#define me2be_16(x) (bswap_16(x))
+#define me2be_32(x) (bswap_32(x))
+#define me2be_64(x) (bswap_64(x))
+#define me2le_16(x) (x)
+#define me2le_32(x) (x)
+#define me2le_64(x) (x)
+#endif
+
 
 #if     defined __linux__ || defined HAVE_LINUX_CDROM_H
 #include <linux/cdrom.h>

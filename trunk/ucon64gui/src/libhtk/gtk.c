@@ -18,14 +18,16 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include <stdio.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
-#include "trans.xpm"
-
-
-#ifdef img_src
-#undef img_src
+#include "config.h"
+#include "libhtk.h"
+#include "misc.h"
+#ifdef  DJGPP
+#include "dxedll_priv.h"
 #endif
+#include "trans.xpm"
 
 
 typedef struct
@@ -164,7 +166,7 @@ event (htk_widget_t * p)
   printf ("url: %s?%s=%s\n", target, name, value);
   sprintf (buf, "%s=%s", name, value);
 
-  htk_request (target, buf);       /* target == uri */
+  htk_request (buf);       /* target == uri */
 }
 
 
@@ -205,7 +207,7 @@ file_dialog (htk_widget_t * p)
 
 
 void
-gtk_add_img (GtkWidget * p, char **img_src)
+gtk_add_img (GtkWidget * p, char *img_src)
 {
   GdkBitmap *mask;
   GtkStyle *style = gtk_widget_get_style (window.widget);
@@ -308,7 +310,7 @@ htk_html (int width, int height, int border)
 
 
 void
-htk_title (const char *title, char **img_src)
+htk_title (const char *title, char *img_src)
 {
   if (title)
     gtk_window_set_title (GTK_WINDOW (window.widget), title);
@@ -355,7 +357,7 @@ htk_hr (void)
 
 void
 htk_button (const char *name, const char *value,
-            char **img_src, int width, int height, const char *alt)
+            char *img_src, int width, int height, const char *alt)
 {
   htk_widget_t *p = new_widget ();
 
@@ -380,7 +382,7 @@ htk_button (const char *name, const char *value,
 
 
 void
-htk_img (char **img_src, int width, int height, int border, const char *alt)
+htk_img (char *img_src, int width, int height, int border, const char *alt)
 {
   GdkBitmap *mask;
   GtkStyle *style = gtk_widget_get_style (window.widget);
@@ -448,7 +450,7 @@ htk_input_text (const char *name, const char *value, int size, int maxsize,
 
 void
 htk_input_file (const char *name, const char *value, int size, int maxsize,
-                char **img_src, int width, int height, const char *alt)
+                char *img_src, int width, int height, const char *alt)
 {
 
   htk_widget_t *p = new_widget ();
@@ -597,7 +599,7 @@ htk_html_end (void)
 
 
 void
-htk_body (char **img_src, const char *bgcolor)
+htk_body (char *img_src, const char *bgcolor)
 {
 }
 
@@ -631,5 +633,3 @@ void
 htk_form_end (void)
 {
 }
-
-#define img_src *img_src

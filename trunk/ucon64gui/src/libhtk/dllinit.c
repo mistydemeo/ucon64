@@ -28,7 +28,7 @@ DECLARE_CYGWIN_DLL(DllMain);
 
 #include <stdio.h>
 #include <string.h>
-#include "libdiscmage.h"
+#include "libhtk.h"
 
 
 #if     defined __CYGWIN__ || defined _WIN32

@@ -7,6 +7,9 @@
 /* enable debug output (default: no) */
 /* #undef DEBUG */
 
+/* enable dynamic loading of add-on libraries (default: yes) */
+#define DLOPEN 1
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #define HAVE_DIRENT_H 1
@@ -14,8 +17,8 @@
 /* Define to 1 if you have the `getcwd' function. */
 #define HAVE_GETCWD 1
 
-/* whether we build using GTK or not */
-#define HAVE_GTK 1
+/* Define to 1 if you have the <gtk.h> header file. */
+/* #undef HAVE_GTK_H */
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1

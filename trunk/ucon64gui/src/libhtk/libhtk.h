@@ -20,12 +20,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef LIBHTK_H
 #define LIBHTK_H
+#include "config.h"
 #include "libhtk_cfg.h"
+#include "libhtk_defines.h"
 
-#define stricmp strcasecmp
-#define strnicmp strncasecmp
-
-#define NULL_TO_EMPTY(str) ((str) ? (str) : (""))
 
 struct htk_option
 {
@@ -39,6 +37,7 @@ struct htk_option
   int has_arg;
   int *flag;
   int val;
+//  const char *desc; // description of option (for usage)
 };
 
 extern const char *optindex;
@@ -50,10 +49,10 @@ extern const char *optindex;
   htk_getopt_long_only()    getopt_long_only() clone for libhtk
 */
 extern void htk_parser (const char *html);
-extern int htk_getopt_long_only (const char *uri, const char *query,
+extern int htk_getopt_long_only (const char *url,
                             const struct htk_option *long_options, 
                             int *option_index);
-extern void htk_request (const char *uri, const char *query);
+extern void htk_request (const char *url);
 
 
 

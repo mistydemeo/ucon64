@@ -159,13 +159,14 @@ htk_render (int argc, const char **argv)
 #endif
 
 int 
-htk_getopt_long_only (const char *uri, const char *query,
+htk_getopt_long_only (const char *url,
                  const struct htk_option *long_options, int *option_index)
 {
 #ifdef USE_GETOPT
   return getopt_long_only (argc, argv, "", long_options, &option_index);
 #else 
   const char *p = NULL;
+  const char *query = url;
   char *p2 = NULL;
   int ind = 0; //&option_index;
   char buf[MAXBUFSIZE];

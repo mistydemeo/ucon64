@@ -1,42 +1,170 @@
-.PHONY: all clean install uninstall
+.PHONY: all clean distclean install uninstall
+
+@DEFINE_DLOPEN_MAKE@
 
 CC=@CC@
 
-CFLAGS=@CFLAGS@
+CFLAGS=@CFLAGS@ @DEFS@
 LDFLAGS=@LDFLAGS@
+
+LIBNAME=htk
+
+# The test for Cygwin should be done before the test for DJGPP, because the
+# environment variable DJGPP can be set under Bash for people who have
+# installed both gcc (and friends) ports.
+
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+
+FULLLIBNAME=$(LIBNAME).dll
+ifndef DLOPEN
+LDFLAGS+=libhtk/$(LIBNAME).a
+endif
+
+else
+ifdef DJGPP
+
+FULLLIBNAME=$(LIBNAME).dxe
+ifndef DLOPEN
+LDFLAGS+=libhtk/$(LIBNAME).a
+endif
+
+else                                    # Unix or BeOS
+
+ifdef DLOPEN
+FULLLIBNAME=$(LIBNAME).so
+
+ifneq ($(OSTYPE),beos)
+LDFLAGS+=-ldl
+endif
+
+else
+FULLLIBNAME=lib$(LIBNAME).so
+LDFLAGS+=-Llibhtk -l$(LIBNAME)
+endif
+
+endif                                   # DJGPP
+endif                                   # cygwin
+
 
 OBJECTS=ucon64gui.o misc.o fopen3.o configmenu.o top.o bottom.o libhtk/libhtk.o \
         console/snes.o console/swan.o console/gba.o console/nes.o \
 	console/n64.o console/gb.o console/sms.o \
 	console/genesis.o console/dc.o console/lynx.o \
         console/jaguar.o console/pce.o console/neogeo.o console/ngp.o
+ifdef DLOPEN
+OBJECTS+=dlopen.o
+endif
 
-all: ucon64gui
+TARGET=ucon64
+ifeq ($(TERM),cygwin)                   # OSTYPE is not a real env var on Cygwin
+TARGET:=$(addsuffix .exe, $(TARGET))    # GNU specific: "simply expanded variable"
+else                                    # adding .exe avoids "problems" with Cygwin
+ifdef DJGPP                             # OSTYPE is not defined by default under DOS
+TARGET:=$(addsuffix .exe, $(TARGET))
+endif                                   # DJGPP
+endif                                   # cygwin
+
+all: libhtk/$(FULLLIBNAME) $(TARGET) 
+
 
 clean:
-	rm -f $(OBJECTS) DEADJOE */DEADJOE ucon64gui *~ */*~ */*/*~ *.core
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
+              DEADJOE */DEADJOE *~ */*~ */*/*~
+	cd libhtk && $(MAKE) clean
+else
+ifdef DJGPP
+	del *.o
+	del console\*.o
+	del $(TARGET)
+	cd libhtk
+	$(MAKE) clean
+	cd ..
+else                                    # Unix or BeOS
+	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
+              DEADJOE */DEADJOE *~ */*~ */*/*~
+	cd libhtk && $(MAKE) clean
+endif                                   # DJGPP
+endif                                   # cygwin
+
 
 distclean: clean
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	rm -f Makefile config.log config.status config.cache config.h
+	cd libhtk && $(MAKE) distclean
+else
+ifdef DJGPP
+	del Makefile
+	del config.log
+	del config.status
+	del config.cache
+	del config.h
+	cd libhtk
+	$(MAKE) distclean
+	cd ..
+else
+	rm -f Makefile config.log config.status config.cache config.h
+	cd libhtk && $(MAKE) distclean
+endif                                   # DJGPP
+endif                                   # cygwin
+
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@
 
-ucon64gui: $(OBJECTS)
+
+libhtk/$(FULLLIBNAME):
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	cd libhtk && $(MAKE)
+else
+ifdef DJGPP
+	cd libhtk
+	$(MAKE)
+	cd ..
+else
+	cd libhtk && $(MAKE)
+endif                                   # DJGPP
+endif                                   # cygwin
+
+
+$(TARGET): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
 
+
 install:
-#	./install.sh
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+else
+ifdef DJGPP
+else
+ifeq ($(OSTYPE),beos)
+	./install_beos.sh
+else
+	./install.sh
+endif                                   # beos
+endif                                   # DJGPP
+endif                                   # cygwin
+#	cd libhtk && $(MAKE) install
+
 
 uninstall:
-	rm -f /usr/local/bin/ucon64gui
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+else
+ifdef DJGPP
+else
+ifeq ($(OSTYPE),beos)
+	rm -f $(HOME)/config/bin/$(TARGET)
+else
+	rm -f /usr/local/bin/$(TARGET)
+endif                                   # beos
+endif                                   # DJGPP
+endif                                   # cygwin
+#	cd libhtk && $(MAKE) uninstall
 
 # Dependencies
 UCON64GUI_STD_H=ucon64_defines.h misc.h config.h ucon64gui.h configmenu.h
 
 misc.o: misc.h
 ucon64_gui.o: switches.c options.c libhtk/libhtk.h $(UCON64GUI_STD_H)
-libhtk/libhtk.o: libhtk/libhtk.h libhtk/libhtk_cfg.h libhtk/libhtk_defines.h libhtk/gtk.c $(UCON64GUI_STD_H)
 configmenu.o: $(UCON64GUI_STD_H)
 console/gb.o: console/gb.h $(UCON64GUI_STD_H)
 console/n64.o: console/n64.h $(UCON64GUI_STD_H)

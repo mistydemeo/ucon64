@@ -310,7 +310,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA gtkpath apxspath CPP EGREP LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA DEFINE_DLOPEN_MAKE gtkpath CPP EGREP LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -845,6 +845,8 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-todo           enable todo output (default: no)
   --enable-debug          enable debug output (default: no)
+  --enable-dload          enable dynamic loading of add-on libraries (default:
+                          yes)
   --enable-ansi-color     enable usage of color (default: yes)
 
 Some influential environment variables:
@@ -1276,6 +1278,9 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
           ac_config_headers="$ac_config_headers config.h"
 
+
+CFLAGS="-I. -Wall -O3"
+LDFLAGS="-s"
 
 # Checks for programs.
 ac_ext=c
@@ -2249,9 +2254,6 @@ test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL}'
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 
-CFLAGS="-I. -Wall -O3"
-LDFLAGS="-s"
-
 
 echo "$as_me:$LINENO: checking whether todo output is enabled" >&5
 echo $ECHO_N "checking whether todo output is enabled... $ECHO_C" >&6
@@ -2291,6 +2293,28 @@ _ACEOF
 fi
 echo "$as_me:$LINENO: result: $enable_debug" >&5
 echo "${ECHO_T}$enable_debug" >&6
+
+
+echo "$as_me:$LINENO: checking whether add-on libraries are dynamically loaded" >&5
+echo $ECHO_N "checking whether add-on libraries are dynamically loaded... $ECHO_C" >&6
+# Check whether --enable-dload or --disable-dload was given.
+if test "${enable_dload+set}" = set; then
+  enableval="$enable_dload"
+  enable_dload=$enableval
+else
+  enable_dload=yes
+fi;
+if test $enable_dload = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define DLOPEN 1
+_ACEOF
+
+  DEFINE_DLOPEN_MAKE="DLOPEN=1"
+fi
+echo "$as_me:$LINENO: result: $enable_dload" >&5
+echo "${ECHO_T}$enable_dload" >&6
+
 
 
 echo "$as_me:$LINENO: checking whether the use of color is enabled" >&5
@@ -2357,56 +2381,11 @@ fi
 echo "$as_me:$LINENO: checking for GTK compile flags" >&5
 echo $ECHO_N "checking for GTK compile flags... $ECHO_C" >&6
 if test -x $gtkpath; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_GTK 1
-_ACEOF
-
 GTK_CFLAGS=`$gtkpath --cflags 2>/dev/null`
 GTK_LDFLAGS=`$gtkpath --libs gthread 2>/dev/null`
 fi
 echo "$as_me:$LINENO: result: ok" >&5
 echo "${ECHO_T}ok" >&6
-
-# Extract the first word of "apxs", so it can be a program name with args.
-set dummy apxs; ac_word=$2
-echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_path_apxspath+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  case $apxspath in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_apxspath="$apxspath" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_path_apxspath="$as_dir/$ac_word$ac_exec_ext"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-
-  ;;
-esac
-fi
-apxspath=$ac_cv_path_apxspath
-
-if test -n "$apxspath"; then
-  echo "$as_me:$LINENO: result: $apxspath" >&5
-echo "${ECHO_T}$apxspath" >&6
-else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-
 
 
 # Checks for header files.
@@ -3170,7 +3149,8 @@ done
 
 
 
-for ac_header in OS.h inttypes.h stdlib.h string.h unistd.h
+
+for ac_header in OS.h inttypes.h stdlib.h string.h unistd.h gtk.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
@@ -3962,7 +3942,7 @@ CFLAGS="$CFLAGS $GTK_CFLAGS"
 LDFLAGS="$LDFLAGS $LIBS $GTK_LDFLAGS"
 
 
-          ac_config_files="$ac_config_files Makefile"
+                    ac_config_files="$ac_config_files Makefile libhtk/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -4489,6 +4469,7 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+  "libhtk/Makefile" ) CONFIG_FILES="$CONFIG_FILES libhtk/Makefile" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -4584,8 +4565,8 @@ s,@OBJEXT@,$OBJEXT,;t t
 s,@INSTALL_PROGRAM@,$INSTALL_PROGRAM,;t t
 s,@INSTALL_SCRIPT@,$INSTALL_SCRIPT,;t t
 s,@INSTALL_DATA@,$INSTALL_DATA,;t t
+s,@DEFINE_DLOPEN_MAKE@,$DEFINE_DLOPEN_MAKE,;t t
 s,@gtkpath@,$gtkpath,;t t
-s,@apxspath@,$apxspath,;t t
 s,@CPP@,$CPP,;t t
 s,@EGREP@,$EGREP,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t

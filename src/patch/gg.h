@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef GG_H
 #define GG_H
-extern const st_usage_t gg_usage[];
+extern const st_getopt2_t gg_usage[];
 extern int gg_apply (st_rominfo_t *rominfo, const char *code);
 extern int gg_display (st_rominfo_t *rominfo, const char *code);
 #endif // GG_H

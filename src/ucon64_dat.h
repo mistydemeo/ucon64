@@ -27,7 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc.h"
 #include "ucon64.h"
 
-extern const st_usage_t ucon64_dat_usage[];
+extern const st_getopt2_t ucon64_dat_usage[];
 
 typedef struct
 {
@@ -47,8 +47,8 @@ typedef struct
   char comment[25 * 80];                        // comment of dat file
   char refname[100];                            // ref name
 
-  const st_usage_t *console_usage;              // console system usage
-  const st_usage_t *copier_usage;               // backup unit usage
+  const st_getopt2_t *console_usage;              // console system usage
+  const st_getopt2_t *copier_usage;               // backup unit usage
 } st_ucon64_dat_t;
 
 /*

@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef N64_H
 #define N64_H
 
-extern const st_usage_t n64_usage[];
+extern const st_getopt2_t n64_usage[];
 
 extern int n64_bot (st_rominfo_t *rominfo, const char *bootfile);
 extern int n64_chk (st_rominfo_t *rominfo);

@@ -36,20 +36,60 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "lynx.h"
 
 
-const st_usage_t lynx_usage[] =
+const st_getopt2_t lynx_usage[] =
   {
-    {NULL, 0, NULL, "Handy (prototype)/Lynx/Lynx II", "1987 Epyx/1989 Atari/1991 Atari"},
-    {"lynx", 0, NULL, "force recognition", NULL},
-    {"lyx", 0, NULL, "convert to LYX/RAW (strip 64 Bytes LNX header)", NULL},
-    {"lnx", 0, NULL, "convert to LNX (uses default values for the header);\n"
-              "adjust the LNX header with the following options", NULL},
-    {"n", 1, "NEW_NAME", "change internal ROM name to NEW_NAME (LNX only)", NULL},
-    {"nrot", 0, NULL, "set no rotation (LNX only)", NULL},
-    {"rotl", 0, NULL, "set rotation left (LNX only)", NULL},
-    {"rotr", 0, NULL, "set rotation right (LNX only)", NULL},
-    {"b0", 1, "N", "change Bank0 kBytes size to N={0,64,128,256,512} (LNX only)", NULL},
-    {"b1", 1, "N", "change Bank1 kBytes size to N={0,64,128,256,512} (LNX only)", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Handy (prototype)/Lynx/Lynx II"/*"1987 Epyx/1989 Atari/1991 Atari"*/,
+      NULL
+    },
+    {
+      "lynx", 0, 0, UCON64_LYNX,
+      NULL, "force recognition",
+      (void *) (UCON64_LYNX|WF_SWITCH)
+    },
+    {
+      "lyx", 0, 0, UCON64_LYX,
+      NULL, "convert to LYX/RAW (strip 64 Bytes LNX header)",
+      (void *) (UCON64_LYNX|WF_DEFAULT)
+    },
+    {
+      "lnx", 0, 0, UCON64_LNX,
+      NULL, "convert to LNX (uses default values for the header);\n"
+      "adjust the LNX header with the following options",
+      (void *) (UCON64_LYNX|WF_DEFAULT)
+    },
+    {
+      "n", 1, 0, UCON64_N,
+      "NEW_NAME", "change internal ROM name to NEW_NAME (LNX only)",
+      (void *) WF_DEFAULT
+    },
+    {
+      "nrot", 0, 0, UCON64_NROT,
+      NULL, "set no rotation (LNX only)",
+      (void *) (UCON64_LYNX|WF_DEFAULT)
+    },
+    {
+      "rotl", 0, 0, UCON64_ROTL,
+      NULL, "set rotation left (LNX only)",
+      (void *) (UCON64_LYNX|WF_DEFAULT)
+    },
+    {
+      "rotr", 0, 0, UCON64_ROTR,
+      NULL, "set rotation right (LNX only)",
+      (void *) (UCON64_LYNX|WF_DEFAULT)
+    },
+    {
+      "b0", 1, 0, UCON64_B0,
+      "N", "change Bank0 kBytes size to N={0,64,128,256,512} (LNX only)",
+      (void *) (UCON64_LYNX|WF_DEFAULT)
+    },
+    {
+      "b1", 1, 0, UCON64_B1,
+      "N", "change Bank1 kBytes size to N={0,64,128,256,512} (LNX only)",
+      (void *) (UCON64_LYNX|WF_DEFAULT)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 const char *lynx_lyx_desc = "convert to LYX/RAW (strip 64 Bytes LNX header)";

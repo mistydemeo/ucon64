@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define GB_LOGODATA_LEN 48
 
-extern const st_usage_t gameboy_usage[];
+extern const st_getopt2_t gameboy_usage[];
 extern const unsigned char gb_logodata[];
 
 extern int gameboy_chk (st_rominfo_t *rominfo);

@@ -33,11 +33,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "backup/fpl.h"
 
 
-const st_usage_t ngp_usage[] =
+const st_getopt2_t ngp_usage[] =
   {
-    {NULL, 0, NULL, "Neo Geo Pocket/Neo Geo Pocket Color", "1998/1999 SNK http://www.neogeo.co.jp"},
-    {"ngp", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Neo Geo Pocket/Neo Geo Pocket Color"/*"1998/1999 SNK http://www.neogeo.co.jp"*/,
+      NULL
+    },
+    {
+      "ngp", 0, 0, UCON64_NGP,
+      NULL, "force recognition",
+      (void *) (UCON64_NGP|WF_SWITCH)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 

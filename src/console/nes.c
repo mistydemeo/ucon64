@@ -42,54 +42,163 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define STD_COMMENT     "Written with uCON64 "  // first part of text to put in READ chunk
 
 
-const st_usage_t nes_usage[] =
+const st_getopt2_t nes_usage[] =
   {
-    {NULL, 0, NULL, "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)", "1983 Nintendo http://www.nintendo.com"},
-    {"nes", 0, NULL, "force recognition", NULL},
-    {"n", 1, "NEW_NAME", "change internal ROM name to NEW_NAME (UNIF only)", NULL},
-    {"unif", 0, NULL, "convert to UNIF format/UNF (uses default values)", NULL},
-    {"ines", 0, NULL, "convert to iNES format/NES (uses default values)", NULL},
-    {"ineshd", 0, NULL, "extract iNES header from ROM (16 Bytes)", NULL},
-    {"j", 0, NULL, "join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)", NULL},
-    {"pasofami", 0, NULL, "convert to Pasofami/PRM/700/PRG/CHR", NULL},
-    {"s", 0, NULL, "convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)", NULL},
-    {"ffe", 0, NULL, "convert to FFE format (Super Magic Card)", NULL},
-    {"mapr", 1, "MAPR", "specify board name or mapper number for conversion options\n"
-                     "MAPR must be a board name for UNIF or a number for Pasofami\n"
-                     "and iNES", NULL},
-    {"dint", 0, NULL, "convert to non-interleaved format", NULL},
-    {"ctrl", 1, "TYPE", "specify controller type (UNIF only)\n"
-                     "TYPE=0 regular joypad\n"
-                     "TYPE=1 zapper\n"
-                     "TYPE=2 R.O.B.\n"
-                     "TYPE=3 Arkanoid controller\n"
-                     "TYPE=4 powerpad\n"
-                     "TYPE=5 four-score adapter", NULL},
-    {"ntsc", 0, NULL, "specify TV standard is NTSC (UNIF only)", NULL},
-    {"pal", 0, NULL, "specify TV standard is PAL (UNIF only)", NULL},
-    {"bat", 0, NULL, "specify battery is present", NULL},
-    {"nbat", 0, NULL, "specify battery is not present", NULL},
-    {"vram", 0, NULL, "specify VRAM override (UNIF only)", NULL},
-    {"nvram", 0, NULL, "specify no VRAM override (UNIF only)", NULL},
-    {"mirr", 1, "MTYPE", "specify mirroring type\n"
-                      "MTYPE=0 horizontal mirroring\n"
-                      "MTYPE=1 vertical mirroring\n"
-                      "MTYPE=2 mirror all pages from $2000 (UNIF only)\n"
-                      "MTYPE=3 mirror all pages from $2400 (UNIF only)\n"
-                      "MTYPE=4 four screens of VRAM\n"
-                      "MTYPE=5 mirroring controlled by mapper hardware (UNIF only)", NULL},
+    {
+      NULL, 0, 0, 0,
+      NULL, "Nintendo Entertainment System/NES/Famicom/Game Axe (Redant)"
+      /*"1983 Nintendo http://www.nintendo.com"*/,
+      NULL
+    },
+    {
+      "nes", 0, 0, UCON64_NES,
+      NULL, "force recognition",
+      (void *) (UCON64_NES|WF_SWITCH)
+    },
+    {
+      "n", 1, 0, UCON64_N,
+      "NEW_NAME", "change internal ROM name to NEW_NAME (UNIF only)",
+      (void *) WF_DEFAULT
+    },
+    {
+      "unif", 0, 0, UCON64_UNIF,
+      NULL, "convert to UNIF format/UNF (uses default values)",
+      (void *) (UCON64_NES|WF_DEFAULT)
+    },
+    {
+      "ines", 0, 0, UCON64_INES,
+      NULL, "convert to iNES format/NES (uses default values)",
+      (void *) (UCON64_NES|WF_DEFAULT)
+    },
+    {
+      "ineshd", 0, 0, UCON64_INESHD,
+      NULL, "extract iNES header from ROM (16 Bytes)",
+      (void *) (UCON64_NES|WF_DEFAULT)
+    },
+    {
+      "j", 0, 0, UCON64_J,
+      NULL, "join Pasofami/PRM/700/PRG/CHR/split ROM (Pasofami -> iNES)",
+      (void *) (WF_INIT|WF_PROBE)
+    },
+    {
+      "pasofami", 0, 0, UCON64_PASOFAMI,
+      NULL, "convert to Pasofami/PRM/700/PRG/CHR",
+      (void *) (UCON64_NES|WF_DEFAULT)
+    },
+    {
+      "s", 0, 0, UCON64_S,
+      NULL, "convert/split to Pasofami/PRM/700/PRG/CHR (iNES -> Pasofami)",
+      (void *) (WF_DEFAULT|WF_NO_SPLIT)
+    },
+    {
+      "ffe", 0, 0, UCON64_FFE,
+      NULL, "convert to FFE format (Super Magic Card)",
+      (void *) (UCON64_NES|WF_DEFAULT)
+    },
+    {
+      "mapr", 1, 0, UCON64_MAPR,
+      "MAPR", "specify board name or mapper number for conversion options\n"
+      "MAPR must be a board name for UNIF or a number for Pasofami\n"
+      "and iNES",
+      (void *) (UCON64_NES|WF_SWITCH)
+    },
+    {
+      "dint", 0, 0, UCON64_DINT,
+      NULL, "convert to non-interleaved format",
+      (void *) (WF_INIT|WF_PROBE|WF_NO_SPLIT)
+    },
+    {
+      "ctrl", 1, 0, UCON64_CTRL,
+      "TYPE", "specify controller type (UNIF only)\n"
+      "TYPE=0 regular joypad\n"
+      "TYPE=1 zapper\n"
+      "TYPE=2 R.O.B.\n"
+      "TYPE=3 Arkanoid controller\n"
+      "TYPE=4 powerpad\n"
+      "TYPE=5 four-score adapter",
+      (void *) WF_SWITCH
+    },
+    {
+      "ntsc", 0, 0, UCON64_NTSC,
+      NULL, "specify TV standard is NTSC (UNIF only)",
+      (void *) (UCON64_NES|WF_SWITCH)
+    },
+    {
+      "pal", 0, 0, UCON64_PAL,
+      NULL, "specify TV standard is PAL (UNIF only)",
+      (void *) (UCON64_NES|WF_SWITCH)
+    },
+    {
+      "bat", 0, 0, UCON64_BAT,
+      NULL, "specify battery is present",
+      (void *) (UCON64_NES|WF_SWITCH)
+    },
+    {
+      "nbat", 0, 0, UCON64_NBAT,
+      NULL, "specify battery is not present",
+      (void *) (UCON64_NES|WF_SWITCH)
+    },
+    {
+      "vram", 0, 0, UCON64_VRAM,
+      NULL, "specify VRAM override (UNIF only)",
+      (void *) (UCON64_NES|WF_SWITCH)
+    },
+    {
+      "nvram", 0, 0, UCON64_NVRAM,
+      NULL, "specify no VRAM override (UNIF only)",
+      (void *) (UCON64_NES|WF_SWITCH)
+    },
+    {
+      "mirr", 1, 0, UCON64_MIRR,
+      "MTYPE", "specify mirroring type\n"
+      "MTYPE=0 horizontal mirroring\n"
+      "MTYPE=1 vertical mirroring\n"
+      "MTYPE=2 mirror all pages from $2000 (UNIF only)\n"
+      "MTYPE=3 mirror all pages from $2400 (UNIF only)\n"
+      "MTYPE=4 four screens of VRAM\n"
+      "MTYPE=5 mirroring controlled by mapper hardware (UNIF only)",
+      (void *) (UCON64_NES|WF_SWITCH)
+    },
 #if     UNIF_REVISION > 7
-    {"cmnt", 1, "TEXT", "specify that TEXT should be used as comment (UNIF only)", NULL},
+    {
+      "cmnt", 1, 0, UCON64_CMNT,
+      "TEXT", "specify that TEXT should be used as comment (UNIF only)",
+      (void *) (UCON64_NES|WF_SWITCH)
+    },
 #endif
-    {"dumpinfo", 1, "FILE", "use dumper info from FILE when converting to UNIF", NULL},
-    {"fds", 0, NULL, "convert Famicom Disk System file (diskimage) from FAM to FDS", NULL},
-    {"fdsl", 0, NULL, "list Famicom Disk System/FDS (diskimage) contents", NULL},
+    {
+      "dumpinfo", 1, 0, UCON64_DUMPINFO,
+      "FILE", "use dumper info from FILE when converting to UNIF",
+      (void *) (UCON64_NES|WF_SWITCH)
+    },
+    {
+      "fds", 0, 0, UCON64_FDS,
+      NULL, "convert Famicom Disk System file (diskimage) from FAM to FDS",
+      (void *) (UCON64_NES|WF_DEFAULT)
+    },
+    {
+      "fdsl", 0, 0, UCON64_FDSL,
+      NULL, "list Famicom Disk System/FDS (diskimage) contents",
+      (void *) (UCON64_NES|WF_DEFAULT)
+    },
 #if 0
-    {"fam", 0, NULL, "convert Famicom Disk System file (diskimage) from FDS to FAM", NULL},
-    {"tr", 0, NULL, "truncate doubled PRG/CHR", NULL},
-    {"nfs", 0, NULL, "convert NFS sound to WAV; " OPTION_LONG_S "rom=NFSFILE", NULL},
+    {
+      "fam", 0, 0, UCON64_FAM,
+      NULL, "convert Famicom Disk System file (diskimage) from FDS to FAM",
+      NULL
+    },
+    {
+      "tr", 0, 0, UCON64_TR,
+      NULL, "truncate doubled PRG/CHR",
+      NULL
+    },
+    {
+      "nfs", 0, 0, UCON64_NFS,
+      NULL, "convert NFS sound to WAV; " OPTION_LONG_S "rom=NFSFILE",
+      NULL
+    },
 #endif
-      {NULL, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 #if 0
@@ -4942,24 +5051,24 @@ static const st_nes_data_t nes_data[] = {
 
 static nes_file_t type;
 
-static const st_usage_t ines_usage[] = {
-    {NULL, 0, NULL, "iNES header", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+static const st_getopt2_t ines_usage[] = {
+    {NULL, 0, 0, 0, NULL, "iNES header", NULL},
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-static const st_usage_t unif_usage[] = {
-    {NULL, 0, NULL, "UNIF header", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+static const st_getopt2_t unif_usage[] = {
+    {NULL, 0, 0, 0, NULL, "UNIF header", NULL},
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-static const st_usage_t pasofami_usage[] = {
-    {NULL, 0, NULL, "Pasofami file", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+static const st_getopt2_t pasofami_usage[] = {
+    {NULL, 0, 0, 0, NULL, "Pasofami file", NULL},
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
-static const st_usage_t fds_usage[] = {
-    {NULL, 0, NULL, "Famicom Disk System file (diskimage)", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+static const st_getopt2_t fds_usage[] = {
+    {NULL, 0, 0, 0, NULL, "Famicom Disk System file (diskimage)", NULL},
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 static st_ines_header_t ines_header;

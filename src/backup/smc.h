@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SMC_H
 #define SMC_H
 
-extern const st_usage_t smc_usage[];
+extern const st_getopt2_t smc_usage[];
 
 typedef struct st_smc_header
 {

@@ -34,17 +34,53 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "dc.h"
 
 
-const st_usage_t dc_usage[] = {
-    {NULL, 0, NULL, "Dreamcast", "1998 SEGA http://www.sega.com"},
-    {"dc", 0, NULL, "force recognition", NULL},
-//    {"vms", 1, "SAV", "convert NES SAV file to a VMS file for use with NesterDC", NULL},
-    {"scr", 0, NULL, "scramble 1ST_READ.BIN for selfboot CDs", NULL},
-    {"unscr", 0, NULL, "unscramble 1ST_READ.BIN for non-selfboot CDs", NULL},
-//    {"ip", 1, "FILE", "extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE", NULL},
-    {"mkip", 0, NULL, "generate IP.BIN file with default values", NULL},
-    {"parse", 1, "TEMPLATE", "parse TEMPLATE file into a IP.BIN;\n"
-                             "creates an empty template when TEMPLATE does not exist", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+const st_getopt2_t dc_usage[] = {
+    {
+      NULL, 0, 0, 0,
+      NULL, "Dreamcast" /* "1998 SEGA http://www.sega.com" */,
+      NULL
+    },
+    {
+      "dc", 0, 0, UCON64_DC,
+      NULL, "force recognition",
+      (void *) (UCON64_DC|WF_SWITCH)
+    },
+#if 0
+    {
+      "vms", 1, 0, UCON64_VMS,
+      "SAV", "convert NES SAV file to a VMS file for use with NesterDC",
+      NULL
+    },
+#endif
+    {
+      "scr", 0, 0, UCON64_SCR,
+      NULL, "scramble 1ST_READ.BIN for selfboot CDs",
+      (void *) (UCON64_DC|WF_DEFAULT)
+    },
+    {
+      "unscr", 0, 0, UCON64_UNSCR,
+      NULL, "unscramble 1ST_READ.BIN for non-selfboot CDs",
+      (void *) (UCON64_DC|WF_DEFAULT)
+    },
+#if 0
+    {
+      "ip", 1, 0, UCON64_IP,
+      "FILE", "extract ip.bin FILE from IMAGE; " OPTION_LONG_S "rom=IMAGE",
+      NULL
+    },
+#endif
+    {
+      "mkip", 0, 0, UCON64_MKIP,
+      NULL, "generate IP.BIN file with default values",
+      (void *) (UCON64_DC|WF_NO_ROM)
+    },
+    {
+      "parse", 1, 0, UCON64_PARSE,
+      "TEMPLATE", "parse TEMPLATE file into a IP.BIN;\n"
+      "creates an empty template when TEMPLATE does not exist",
+      (void *) (UCON64_DC|WF_NO_ROM)
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

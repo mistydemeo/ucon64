@@ -24,11 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 // Please make sure that NO definition except FALSE has 0 as value!
 
-/*
-  maximum # of arguments uCON64 takes
-  (DEBUG checks this against struct option)
-*/
-#define UCON64_MAX_ARGS (255)
+// maximum number of arguments uCON64 takes
+#define UCON64_MAX_ARGS 512
 
 #define UCON64_UNKNOWN (-1)
 #define UCON64_UNKNOWN_S "Unknown"
@@ -52,6 +49,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_CONSOLE (0)
 
 // options (consoles)
+// these defines shall not exceed 0xffff since they share the same integer
+// with the workflow flags (below) in st_getopt2_t
 enum {
   UCON64_3DO = UCON64_CONSOLE + 1,
   UCON64_ATA,
@@ -63,6 +62,7 @@ enum {
   UCON64_GBA,
   UCON64_GC,
   UCON64_GEN,
+  UCON64_GP32,
   UCON64_INTELLI,
   UCON64_JAG,
   UCON64_LYNX,
@@ -133,7 +133,6 @@ enum {
   UCON64_GG,
   UCON64_GGD,
   UCON64_GGE,
-  UCON64_GP32,
   UCON64_HD,
   UCON64_HDN,
   UCON64_HELP,
@@ -294,7 +293,6 @@ enum {
   UCON64_XV64,
   UCON64_Z64,
 
-  UCON64_83,
   UCON64_FORCE63,
   UCON64_GUI,
 
@@ -309,5 +307,53 @@ enum {
   UCON64_XCDRW,
   UCON64_CDMAGE
 };
+
+
+/*
+  uCON64 workflow flags
+
+  WF_PROBE          probe for console type
+  WF_INIT           init ROM info (ucon64_init()) necessary
+                      w/o this flag WF_NFO and WF_NFO_AFTER
+                      will be ignored
+  WF_NFO            show info output before processing rom
+  WF_NFO_AFTER      show info output AFTER processing rom
+  WF_NO_ROM         for this option no ROM is required
+  WF_NOCRC32        no CRC32 calculation necessary for this option; this
+                      overrides even WF_INIT, WF_NFO and WF_NFO_AFTER
+  WF_STOP           a "stop" option:
+                    - -multi (and -xfalmulti) takes more than one file as
+                      argument, but should be executed only once.
+                    - stop after sending one ROM to a copier ("multizip")
+                    - stop after applying a patch so that the patch file won't
+                      be interpreted as ROM
+  WF_PAR            this option requires a parallel port
+  WF_USB            this option requires a USB port
+  WF_SERIAL         this option requires a serial port
+  WF_NO_SPLIT       this option does not work with split ROMs
+  WF_DEFAULT        same as WF_INIT|WF_PROBE|WF_NFO
+
+  example:
+  WF_NFO|WF_MFO_AFTER
+                    a ROM is required and info will be shown before and
+                    after it has been processed
+
+  important:
+    we shift these flags 16 bit because they share the same integer with
+    those UCON64_<console> defines in st_getopt2_t
+*/
+#define WF_DEFAULT (WF_PROBE|WF_INIT|WF_NFO)
+#define WF_PROBE (1<<16)
+#define WF_INIT (2<<16)
+#define WF_NFO (4<<16)
+#define WF_STOP (8<<16)
+#define WF_NFO_AFTER (16<<16)
+#define WF_NO_ROM (32<<16)
+#define WF_PAR (64<<16)
+#define WF_USB (128<<16)
+#define WF_SERIAL (256<<16)
+#define WF_NOCRC32 (512<<16)
+#define WF_NO_SPLIT (1024<<16)
+#define WF_SWITCH (2048<<16)
 
 #endif // UCON64_DEFINES_H

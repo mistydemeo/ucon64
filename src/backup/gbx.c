@@ -71,20 +71,40 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc_par.h"
 
 
-const st_usage_t gbx_usage[] =
+const st_getopt2_t gbx_usage[] =
   {
-    {NULL, 0, NULL, "Game Boy Xchanger/GBDoctor", "19XX Bung Enterprises Ltd http://www.bung.com.hk"},
+    {
+      NULL, 0, 0, 0,
+      NULL, "Game Boy Xchanger/GBDoctor"/*"19XX Bung Enterprises Ltd http://www.bung.com.hk"*/,
+      NULL
+    },
 #ifdef USE_PARALLEL
-    {"xgbx", 0, NULL, "send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
-                      "receives automatically when ROM does not exist", NULL},
-    {"xgbxs", 0, NULL, "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
-                       "receives automatically when SRAM does not exist", NULL},
-    {"xgbxb", 1, "BANK", "send/receive 64 kbits SRAM to/from GB Xchanger BANK\n"
-                         "BANK can be a number from 0 to 15; " OPTION_LONG_S "port=PORT\n"
-                         "receives automatically when ROM does not exist", NULL},
-    {"xgbxm", 0, NULL, "try to enable EPP mode, default is SPP mode", NULL},
+    {
+      "xgbx", 0, 0, UCON64_XGBX,
+      NULL, "send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when ROM does not exist",
+      (void *) (UCON64_GB|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xgbxs", 0, 0, UCON64_XGBXS,
+      NULL, "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when SRAM does not exist",
+      (void *) (UCON64_GB|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xgbxb", 1, 0, UCON64_XGBXB,
+      "BANK", "send/receive 64 kbits SRAM to/from GB Xchanger BANK\n"
+      "BANK can be a number from 0 to 15; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when ROM does not exist",
+      (void *) (UCON64_GB|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xgbxm", 0, 0, UCON64_XGBXM,
+      NULL, "try to enable EPP mode, default is SPP mode",
+      (void *) (UCON64_GB|WF_SWITCH)
+    },
 #endif // USE_PARALLEL
-    {NULL, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 #ifdef USE_PARALLEL

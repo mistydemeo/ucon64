@@ -34,11 +34,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "psx.h"
 
 
-const st_usage_t psx_usage[] =
+const st_getopt2_t psx_usage[] =
   {
-    {NULL, 0, NULL, "Playstation (One)/Playstation 2 (CD only)", "1994/(2000) Sony http://www.playstation.com"},
-    {"psx", 0, NULL, "force recognition", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, "Playstation (One)/Playstation 2 (CD only)"/*"1994/(2000) Sony http://www.playstation.com"*/, NULL},
+    {"psx", 0, 0, UCON64_PSX, NULL, "force recognition", (void *) (UCON64_PSX|WF_SWITCH)},
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 

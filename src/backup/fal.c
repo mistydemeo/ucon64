@@ -36,25 +36,53 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/gba.h"
 
 
-const st_usage_t fal_usage[] =
+const st_getopt2_t fal_usage[] =
   {
-    {NULL, 0, NULL, "Flash Advance Linker", "2001 Visoly http://www.visoly.com"},
+    {
+      NULL, 0, 0, 0,
+      NULL, "Flash Advance Linker"/*"2001 Visoly http://www.visoly.com"*/,
+      NULL
+    },
 #ifdef USE_PARALLEL
-    {"xfal", 0, NULL, "send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
-                "receives automatically (32 Mbits) when ROM does not exist", NULL},
-    {"xfalmulti", 1, "SIZE", "send multiple ROMs to Flash Advance Linker (makes temporary\n"
-                          "multi-game file truncated to SIZE Mbit); specify a loader in\n"
-                          "the configuration file; " OPTION_LONG_S "port=PORT", NULL},
-    {"xfalc", 1, "N", "receive N Mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
-                   "N can be 8, 16, 32, 64, 128 or 256", NULL},
-    {"xfals", 0, NULL, "send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
-                 "receives automatically when SRAM does not exist", NULL},
-    {"xfalb", 1, "BANK", "send/receive SRAM to/from Flash Advance Linker BANK\n"
-                     "BANK can be 1, 2, 3 or 4; " OPTION_LONG_S "port=PORT\n"
-                     "receives automatically when SRAM does not exist", NULL},
-    {"xfalm", 0, NULL, "try to enable EPP mode, default is SPP mode", NULL},
+    {
+      "xfal", 0, 0, UCON64_XFAL,
+      NULL, "send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically (32 Mbits) when ROM does not exist",
+      (void *) (UCON64_GBA|WF_DEFAULT|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xfalmulti", 1, 0, UCON64_XFALMULTI, // send only
+      "SIZE", "send multiple ROMs to Flash Advance Linker (makes temporary\n"
+      "multi-game file truncated to SIZE Mbit); specify a loader in\n"
+      "the configuration file; " OPTION_LONG_S "port=PORT",
+      (void *) (UCON64_GBA|WF_DEFAULT|WF_STOP)
+    },
+    {
+      "xfalc", 1, 0, UCON64_XFALC,
+      "N", "receive N Mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
+      "N can be 8, 16, 32, 64, 128 or 256",
+      (void *) (UCON64_GBA|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xfals", 0, 0, UCON64_XFALS,
+      NULL, "send/receive SRAM to/from Flash Advance Linker; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when SRAM does not exist",
+      (void *) (UCON64_GBA|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xfalb", 1, 0, UCON64_XFALB,
+      "BANK", "send/receive SRAM to/from Flash Advance Linker BANK\n"
+      "BANK can be 1, 2, 3 or 4; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when SRAM does not exist",
+      (void *) (UCON64_GBA|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xfalm", 0, 0, UCON64_XFALM,
+      NULL, "try to enable EPP mode, default is SPP mode",
+      (void *) (UCON64_GBA|WF_SWITCH)
+    },
 #endif // USE_PARALLEL
-    {NULL, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 

@@ -31,10 +31,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "interceptor.h"
 
 
-const st_usage_t interceptor_usage[] =
+const st_getopt2_t interceptor_usage[] =
   {
-    {NULL, 0, NULL, "Mega Disk/Super Disk (Interceptor),", "19XX Taiwan Sang Ting Co. Ltd."},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Mega Disk/Super Disk (Interceptor),"/*"19XX Taiwan Sang Ting Co. Ltd."*/,
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 #ifdef USE_PARALLEL

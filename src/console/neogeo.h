@@ -28,6 +28,6 @@ extern int neogeo_mvs (void);
 extern int neogeo_s (void);
 extern int neogeo_sam (const char *fname);
 
-extern const st_usage_t neogeo_usage[];
+extern const st_getopt2_t neogeo_usage[];
 
 #endif /* NEOGEO_H */

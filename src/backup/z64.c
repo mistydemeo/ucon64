@@ -31,10 +31,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "z64.h"
 
 
-const st_usage_t z64_usage[] =
+const st_getopt2_t z64_usage[] =
   {
-    {NULL, 0, NULL, "Mr. Backup Z64", NULL},
-    {NULL, 0, NULL, NULL, NULL}
+    {
+      NULL, 0, 0, 0,
+      NULL, "Mr. Backup Z64",
+      NULL
+    },
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 #ifdef USE_PARALLEL

@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 typedef enum { INES, UNIF, PASOFAMI, FFE, FDS, FAM } nes_file_t;
 
-extern const st_usage_t nes_usage[];
+extern const st_getopt2_t nes_usage[];
 
 /*
  iNES Format (.NES)

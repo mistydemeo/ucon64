@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef FIG_H
 #define FIG_H
-extern const st_usage_t fig_usage[];
+extern const st_getopt2_t fig_usage[];
 
 #ifdef USE_PARALLEL
 #endif // USE_PARALLEL

@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UFO_H
 #define UFO_H
 
-extern const st_usage_t ufo_usage[];
+extern const st_getopt2_t ufo_usage[];
 
 /*
 Super UFO Pro 8 Header Format (researched by John Weidman)

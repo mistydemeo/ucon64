@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 typedef enum { SMD, BIN, MGD_GEN } genesis_file_t;
 
-extern const st_usage_t genesis_usage[];
+extern const st_getopt2_t genesis_usage[];
 
 extern genesis_file_t genesis_get_file_type (void);
 extern int genesis_1991 (st_rominfo_t *rominfo);

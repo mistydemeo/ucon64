@@ -33,28 +33,44 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_misc.h"
 #include "neogeo.h"
 
-const st_usage_t neogeo_usage[] =
+const st_getopt2_t neogeo_usage[] =
   {
-    {NULL, 0, NULL, "Neo Geo/Neo Geo CD(Z)/MVS", "1990/1994 SNK http://www.neogeo.co.jp"},
-    {"ng", 0, NULL, "force recognition", NULL},
+    {
+      NULL, 0, 0, 0,
+      NULL, "Neo Geo/Neo Geo CD(Z)/MVS"/*"1990/1994 SNK http://www.neogeo.co.jp"*/,
+      NULL
+    },
+    {
+      "ng", 0, 0, UCON64_NG,
+      NULL, "force recognition",
+      (void *) (UCON64_NG|WF_SWITCH)
+    },
 #if 0
     "  " OPTION_LONG_S "ns          force ROM is not split\n"
     "TODO:  " OPTION_LONG_S "mgd   convert to Multi Game Doctor/MGD2/RAW\n"
     "TODO:  " OPTION_LONG_S "mvs   convert to Arcade/MVS\n"
 #endif
-    {"bios", 1, "BIOS", "convert NeoCD BIOS to work with NeoCD emulator" /*;\n"
-               "http://www.illusion-city.com/neo/"*/, NULL},
+    {
+      "bios", 1, 0, UCON64_BIOS,
+      "BIOS", "convert NeoCD BIOS to work with NeoCD emulator" /*;\n"
+      "http://www.illusion-city.com/neo/"*/,
+      (void *) (UCON64_NG|WF_DEFAULT)
+    },
 #if 0
     "TODO:  " OPTION_S "j     join split ROM"
     "TODO:  " OPTION_S "s     split ROM into 4Mb parts (for backup unit(s) with fdd)"
     "TODO:  " OPTION_LONG_S "ngs   convert Neo Geo sound to WAV; " OPTION_LONG_S "rom=*_m1.rom or *_v*.rom"
 #endif
-    {"sam", 1, "SAMFILE", "convert SAM/M.A.M.E. sound to WAV", NULL},
+    {
+      "sam", 1, 0, UCON64_SAM,
+      "SAMFILE", "convert SAM/M.A.M.E. sound to WAV",
+      (void *) (UCON64_NG|WF_DEFAULT)
+    },
 //    "TODO: " OPTION_LONG_S "chkm    check/fix Multiple Arcade Machine Emulator/M.A.M.E. ROMs;\n"
 //    "                  " OPTION_LONG_S "rom=DIRECTORY"
 //    "INFO: actually this option does the same as GoodXXXX, RomCenter, etc.\n"
 //    "      Therefore you must have the DAT files for Arcade installed\n"
-    {NULL, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 

@@ -49,36 +49,100 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define N64_BOT_SIZE 4032
 #define LAC_ROM_SIZE  1310720
 
-const st_usage_t n64_usage[] =
+const st_getopt2_t n64_usage[] =
   {
-    {NULL, 0, NULL, "Nintendo 64", "1996 Nintendo http://www.nintendo.com"},
-    {"n64", 0, NULL, "force recognition", NULL},
-    {"int", 0, NULL, "force ROM is in interleaved format (2143, V64)", NULL},
-    {"nint", 0, NULL, "force ROM is not in interleaved format (1234, Z64)", NULL},
-    {"n", 1, "NEW_NAME", "change internal ROM name to NEW_NAME", NULL},
-    {"v64", 0, NULL, "convert to Doctor V64 (and compatibles/interleaved)", NULL},
-    {"z64", 0, NULL, "convert to Mr. Backup Z64 (not interleaved)", NULL},
-    {"dint", 0, NULL, "convert ROM to (non-)interleaved format (1234 <-> 2143)", NULL},
-    {"swap", 0, NULL, "same as " OPTION_LONG_S "dint, byte-swap ROM", NULL},
-    {"swap2", 0, NULL, "word-swap ROM (1234 <-> 3412)", NULL},
+    {
+      NULL, 0, 0, 0,
+      NULL, "Nintendo 64"/*"1996 Nintendo http://www.nintendo.com"*/,
+      NULL
+    },
+    {
+      "n64", 0, 0, UCON64_N64,
+      NULL, "force recognition",
+      (void *) (UCON64_N64|WF_SWITCH)
+    },
+    {
+      "int", 0, 0, UCON64_INT,
+      NULL, "force ROM is in interleaved format (2143, V64)",
+      (void *) WF_SWITCH
+    },
+    {
+      "nint", 0, 0, UCON64_NINT,
+      NULL, "force ROM is not in interleaved format (1234, Z64)",
+      (void *) WF_SWITCH
+    },
+    {
+      "n", 1, 0, UCON64_N,
+      "NEW_NAME", "change internal ROM name to NEW_NAME",
+      (void *) WF_DEFAULT
+    },
+    {
+      "v64", 0, 0, UCON64_V64,
+      NULL, "convert to Doctor V64 (and compatibles/interleaved)",
+      (void *) (UCON64_N64|WF_DEFAULT)
+    },
+    {
+      "z64", 0, 0, UCON64_Z64,
+      NULL, "convert to Mr. Backup Z64 (not interleaved)",
+      (void *) (UCON64_N64|WF_DEFAULT)
+    },
+    {
+      "dint", 0, 0, UCON64_DINT,
+      NULL, "convert ROM to (non-)interleaved format (1234 <-> 2143)",
+      (void *) (WF_INIT|WF_PROBE|WF_NO_SPLIT)
+    },
+    {
+      "swap", 0, 0, UCON64_SWAP,
+      NULL, "same as " OPTION_LONG_S "dint, byte-swap ROM",
+      (void *) (WF_INIT|WF_PROBE)
+    },
+    {
+      "swap2", 0, 0, UCON64_SWAP2,
+      NULL, "word-swap ROM (1234 <-> 3412)",
+      NULL
+    },
 #if 0
-    {"f", 0, NULL, "remove NTSC/PAL protection", NULL},
+    {
+      "f", 0, 0, UCON64_F,
+      NULL, "remove NTSC/PAL protection",
+      NULL
+    },
 #endif
-    {"bot", 1, "BOOTCODE", "add/extract BOOTCODE (4032 Bytes) to/from ROM;\n"
-                        "extracts automatically if BOOTCODE does not exist", NULL},
-    {"lsram", 1, "SRAM", "LaC's SRAM upload tool; ROM should be LaC's ROM image\n"
-                       "the SRAM must have a size of 512 Bytes\n"
-                       "this option generates a ROM which can be used to transfer\n"
-                       "SRAMs to your cartridge's SRAM (EEPROM)", NULL},
-    {"usms", 1, "SMSROM", "Jos Kwanten's UltraSMS (Sega Master System/Game Gear emulator);\n"
-                       "ROM should be Jos Kwanten's UltraSMS ROM image\n"
-                       "works only for SMS ROMs which are <= 4 Mb in size", NULL},
-    {"chk", 0, NULL, "fix ROM checksum\n"
-              "supports only 6101 and 6102 boot codes", NULL},
+    {
+      "bot", 1, 0, UCON64_BOT,
+      "BOOTCODE", "add/extract BOOTCODE (4032 Bytes) to/from ROM;\n"
+      "extracts automatically if BOOTCODE does not exist",
+      (void *) (UCON64_N64|WF_DEFAULT)
+    },
+    {
+      "lsram", 1, 0, UCON64_LSRAM,
+      "SRAM", "LaC's SRAM upload tool; ROM should be LaC's ROM image\n"
+      "the SRAM must have a size of 512 Bytes\n"
+      "this option generates a ROM which can be used to transfer\n"
+      "SRAMs to your cartridge's SRAM (EEPROM)",
+      (void *) (UCON64_N64|WF_INIT|WF_PROBE)
+    },
+    {
+      "usms", 1, 0, UCON64_USMS,
+      "SMSROM", "Jos Kwanten's UltraSMS (Sega Master System/Game Gear emulator);\n"
+      "ROM should be Jos Kwanten's UltraSMS ROM image\n"
+      "works only for SMS ROMs which are <= 4 Mb in size",
+      (void *) (UCON64_N64|WF_DEFAULT)
+    },
+    {
+      "chk", 0, 0, UCON64_CHK,
+      NULL, "fix ROM checksum\n"
+      "supports only 6101 and 6102 boot codes",
+      (void *) WF_DEFAULT
+    },
 #if 0
-    {"bios", 1, "BIOS", "enable backup in Doctor V64 BIOS", NULL},
+    {
+      "bios", 1, 0, UCON64_BIOS,
+      "BIOS", "enable backup in Doctor V64 BIOS",
+      NULL
+    },
 #endif
-    {NULL, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 

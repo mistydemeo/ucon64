@@ -31,7 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 typedef enum { SWC, GD3, UFO, FIG, MGD_SNES, SMC } snes_file_t;
 
-extern const st_usage_t snes_usage[];
+extern const st_getopt2_t snes_usage[];
 
 extern snes_file_t snes_get_file_type (void);
 extern int snes_buheader_info (st_rominfo_t *rominfo);

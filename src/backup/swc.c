@@ -38,14 +38,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc_par.h"
 
 
-const st_usage_t swc_usage[] =
+const st_getopt2_t swc_usage[] =
   {
-    {NULL, 0, NULL, "Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC",
-                    "1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"},
+    {
+      NULL, 0, 0, 0,
+      NULL, "Super Com Pro/Super Magicom/SMC/Super Wild Card (1.6XC/2.7CC/2.8CC/DX/DX2)/SWC"
+      /*"1993/1994/1995/19XX Front Far East/FFE http://www.front.com.tw"*/,
+      NULL
+    },
 #ifdef USE_PARALLEL
-    {"xswc", 0, NULL, "send/receive ROM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
-                   "receives automatically when ROM does not exist", NULL},
-    {"xswc2", 0, NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)", NULL},
+    {
+      "xswc", 0, 0, UCON64_XSWC,
+      NULL, "send/receive ROM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when ROM does not exist",
+      (void *) (UCON64_SNES|WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM)
+    },
+    {
+      "xswc2", 0, 0, UCON64_XSWC2,
+      NULL, "same as " OPTION_LONG_S "xswc, but enables Real Time Save mode (SWC only)",
+      (void *) (UCON64_SNES|WF_DEFAULT|WF_STOP|WF_NO_SPLIT|WF_NO_ROM)
+    },
 #if 1
 /*
   The following help used to be hidden because we wanted to avoid people to
@@ -53,28 +65,44 @@ const st_usage_t swc_usage[] =
   (SA-1). However, now that ucon64.swc_io_mode is useful for -xswcc I guess the
   help should be complete - dbjh
 */
-    {"xswc-io", 1, "MODE", "specify SWC I/O mode; use with -xswc or -xswcc\n"
-                        "MODE=0x001 force 32 Mbit dump\n"
-                        "MODE=0x002 use alternative method for determining ROM size\n"
-                        "MODE=0x004 Super FX\n"
-                        "MODE=0x008 S-DD1\n"
-                        "MODE=0x010 SA-1\n"
-                        "MODE=0x020 SPC7110\n"
-                        "MODE=0x040 DX2 trick (might work with other SWC models)\n"
-                        "MODE=0x080 Mega Man X 2\n"
-                        "MODE=0x100 dump BIOS\n"
-                        "It is possible to combine flags. MODE=0x44 makes it possible\n"
-                        "to dump for example Yoshi's Island", NULL},
+    {
+      "xswc-io", 1, 0, UCON64_XSWC_IO,
+      "MODE", "specify SWC I/O mode; use with -xswc or -xswcc\n"
+      "MODE=0x001 force 32 Mbit dump\n"
+      "MODE=0x002 use alternative method for determining ROM size\n"
+      "MODE=0x004 Super FX\n"
+      "MODE=0x008 S-DD1\n"
+      "MODE=0x010 SA-1\n"
+      "MODE=0x020 SPC7110\n"
+      "MODE=0x040 DX2 trick (might work with other SWC models)\n"
+      "MODE=0x080 Mega Man X 2\n"
+      "MODE=0x100 dump BIOS\n"
+      "It is possible to combine flags. MODE=0x44 makes it possible\n"
+      "to dump for example Yoshi's Island",
+      (void *) (UCON64_SNES|WF_SWITCH)
+    },
 #endif
-    {"xswcs", 0, NULL, "send/receive SRAM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when SRAM does not exist", NULL},
-    {"xswcc", 0, NULL, "send/receive SRAM to/from cartridge in Super Wild Card*/SWC;\n"
-                    OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when SRAM does not exist", NULL},
-    {"xswcr", 0, NULL, "send/receive RTS data to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
-                    "receives automatically when RTS file does not exist", NULL},
+    {
+      "xswcs", 0, 0, UCON64_XSWCS,
+      NULL,
+      "send/receive SRAM to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when SRAM does not exist",
+      (void *) (UCON64_SNES|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xswcc", 0, 0, UCON64_XSWCC,
+      NULL, "send/receive SRAM to/from cartridge in Super Wild Card*/SWC;\n"
+      OPTION_LONG_S "port=PORT\n" "receives automatically when SRAM does not exist",
+      (void *) (UCON64_SNES|WF_STOP|WF_NO_ROM)
+    },
+    {
+      "xswcr", 0, 0, UCON64_XSWCR,
+      NULL, "send/receive RTS data to/from Super Wild Card*/SWC; " OPTION_LONG_S "port=PORT\n"
+      "receives automatically when RTS file does not exist",
+      (void *) (UCON64_SNES|WF_STOP|WF_NO_ROM)
+    },
 #endif // USE_PARALLEL
-    {NULL, 0, NULL, NULL, NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
 #ifdef USE_PARALLEL

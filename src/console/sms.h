@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef SMS_H
 #define SMS_H
 
-extern const st_usage_t sms_usage[];
+extern const st_getopt2_t sms_usage[];
 
 extern int sms_gg (st_rominfo_t *rominfo);
 extern int sms_ggd (st_rominfo_t *rominfo);

@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef Z64_H
 #define Z64_H
-extern const st_usage_t z64_usage[];
+extern const st_getopt2_t z64_usage[];
 
 #define Z64_HEADER_START 0
 #define Z64_HEADER_LEN 0

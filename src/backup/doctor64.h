@@ -28,7 +28,7 @@ extern int doctor64_write (const char *filename, int start, int len, unsigned in
 
 #endif // USE_PARALLEL
 
-extern const st_usage_t doctor64_usage[];
+extern const st_getopt2_t doctor64_usage[];
 
 #define DOCTOR64_HEADER_START 0
 #define DOCTOR64_HEADER_LEN 0

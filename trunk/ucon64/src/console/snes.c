@@ -747,7 +747,7 @@ make_gd_name (const char *filename, st_rominfo_t *rominfo, char *name,
 
   if ((p = strrchr (name, '.')))
     *p = 0;
-  strcat (name, "_____");
+  strcat (name, "___");
   if (newsize < 10 * MBIT)
     name[6] = 0;
   else

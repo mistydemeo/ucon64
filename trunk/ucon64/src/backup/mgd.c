@@ -174,7 +174,7 @@ q_fread_mgd (void *buffer, size_t start, size_t len, const char *filename)
 void
 mgd_make_name (const char *filename, const char *prefix0, int size, char *name)
 {
-  char *fname, *size_str = 0, *suffix = 0, prefix[3]; // copy of prefix0 that can be modified
+  char *p, *fname, *size_str = 0, *suffix = 0, prefix[3]; // copy of prefix0 that can be modified
   int n;
 
   fname = basename (filename);
@@ -198,6 +198,8 @@ mgd_make_name (const char *filename, const char *prefix0, int size, char *name)
           suffix = ".078";
           if (size <= 16 * MBIT)
             size_str = "16";
+          else if (size <= 20 * MBIT)
+            size_str = "20";
           else if (size <= 24 * MBIT)
             size_str = "24";
           else // MGD supports SNES games with sizes up to 32 Mbit
@@ -228,7 +230,9 @@ mgd_make_name (const char *filename, const char *prefix0, int size, char *name)
           else
             {
               suffix = ".038";
-              if (size <= 24 * MBIT)
+              if (size <= 20 * MBIT)
+                size_str = "20";
+              else if (size <= 24 * MBIT)
                 size_str = "24";
               else // MGD supports Genesis games with sizes up to 32 Mbit
                 size_str = "32";
@@ -278,16 +282,19 @@ mgd_make_name (const char *filename, const char *prefix0, int size, char *name)
     {
       if (!strnicmp (name, fname, 3))
         strcpy (name, fname);
-      name[6] = '0';                            // last character must be a number
-      name[7] = 0;
     }
   else
     {
       if (!strnicmp (name, fname, 4))
         strcpy (name, fname);
-      name[7] = '0';
-      name[8] = 0;
     }
+  if ((p = strchr (name, '.')))
+    *p = 0;
+  n = strlen (name);
+  if (n > 7)
+    n = 7;
+  name[n] = '0';                                // last character must be a number
+  name[n + 1] = 0;
   for (n = 3; n < 7; n++)                       // we can skip the prefix
     if (name[n] == ' ')
       name[n] = '_';

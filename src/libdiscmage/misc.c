@@ -73,9 +73,7 @@ typedef struct termios tty_t;
 #endif
 #endif
 
-#ifndef DXE
 extern int errno;
-#endif
 
 typedef struct st_func_node
 {
@@ -261,40 +259,17 @@ ansi_strip (char *str)
 #endif
 
 
-char *
-mkprint (char *str, const unsigned char replacement)
+int
+isfname (int c)
 {
-  char *p = str;
+  if (isalnum (c)) return TRUE;
 
-  for (; *p; p++)
-    switch (*p)
-      {
-      case '\n':
-        break;
-
-      case '\x1b':                              // escape
-        if (misc_ansi_color)
-          break;
-
-      default:
-        if (iscntrl ((int) *p))
-          *p = replacement;
-        break;
-      }
-
-  return str;
-}
-
-
-char *
-mkfile (char *str, const unsigned char replacement)
-{
-  int pos = 0;
-  char *p = str;
-
-  for (; *p && pos < FILENAME_MAX; p++, pos++)
-    switch (*p)
-      {
+  switch (c)
+    {
+// characters that are also allowed in filenames
+#ifdef  __unix__
+#else
+#endif
       case '.':
       case '-':
       case ' ':
@@ -302,38 +277,57 @@ mkfile (char *str, const unsigned char replacement)
       case ')':
       case '[':
       case ']':
-        break;
+      case '!':
+        return TRUE;
+    }
 
-      default:
-        if (!isalnum ((int) *p))
-          *p = replacement;
-        break;
-      }
-
-  *p = 0;
-
-  return str;
+  return FALSE;
 }
 
 
 int
-areprint (const char *str, int size)
-// like isprint() but for strings
+isprint2 (int c)
 {
-  while (size > 0)
-    if (!isprint ((int) str[--size]))
-      return FALSE;
+  if (isprint (c)) return TRUE;
 
-  return TRUE;
+  switch (c)
+    {
+// characters that are also work with printf
+#ifdef  __unix__
+#else
+#endif
+      case '\x1b':
+        return (misc_ansi_color) ? TRUE : FALSE;
+
+      case '\n':
+        return TRUE;
+    }
+
+  return FALSE;
 }
 
 
 int
-areupper (const char *str)
-// searches the string for ANY lowercase char
+tofname (int c)
 {
-  for (; *str; str++)
-    if (islower ((int) *str))
+  return isfname (c) ? c : '_';
+}
+
+
+int
+toprint2 (int c)
+{
+  return isprint2 (c) ? c : '.';
+}
+
+
+int
+is_func (unsigned char *s, int size, int (*func) (int))
+{
+  unsigned char *p = s;
+
+  for (; size >= 0; p++, size--)
+    if (!func (*p))
       return FALSE;
 
   return TRUE;
@@ -341,26 +335,14 @@ areupper (const char *str)
 
 
 char *
-strupr (char *str)
+to_func (unsigned char *s, int size, int (*func) (int))
 {
-  char *p = str;
+  unsigned char *p = s;
 
-  for (; *p; p++)
-    *p = toupper (*p);
-
-  return str;
-}
-
-
-char *
-strlwr (char *str)
-{
-  char *p = str;
-
-  for (; *p; p++)
-    *p = tolower (*p);
-
-  return str;
+  for (; size > 0; p++, size--)
+    *p = func (*p);
+      
+  return s;
 }
 
 
@@ -392,7 +374,9 @@ setext (char *filename, const char *ext)
       *p2 = 0;
 
   strcpy (ext2, ext);
-  strcat (filename, areupper (basename (filename)) ? strupr (ext2) : strlwr (ext2));
+
+  p = basename (filename);
+  strcat (filename, is_func (p, strlen (p), isupper) ? strupr (ext2) : strlwr (ext2));
 
   return filename;
 }
@@ -527,30 +511,49 @@ renlwr (const char *path)
 }
 
 
-// create a directory and check its permissions
-#if 0
-void
+int
 mkdir2 (const char *name)
+// create a directory and check its permissions
 {
-  struct stat *st;
-  if (lstat (name, st) == -1)
+  struct stat *st = NULL;
+
+  if (stat (name, st) == -1)
     {
       if (errno != ENOENT)
-        fprintf (stderr, "lstat %s", name);
+        {
+          fprintf (stderr, "stat %s", name);
+          return -1;
+        }
       if (mkdir (name, 0700) == -1)
-        fprintf (stderr, "mkdir %s", name);
-      if (lstat (name, st) == -1)
-        fprintf (stderr, "lstat %s", name);
+        {
+          fprintf (stderr, "mkdir %s", name);
+          return -1;
+        }
+      if (stat (name, st) == -1)
+        {
+          fprintf (stderr, "stat %s", name);
+          return -1;
+        }
     }
 
   if (!S_ISDIR (st->st_mode))
-    fprintf (stderr, "%s is not a directory\n", name);
+    {
+      fprintf (stderr, "%s is not a directory\n", name);
+      return -1;
+    }
   if (st->st_uid != getuid ())
-    fprintf (stderr, "%s is not owned by you\n", name);
+    {
+      fprintf (stderr, "%s is not owned by you\n", name);
+      return -1;
+    }
   if (st->st_mode & 077)
-    fprintf (stderr, "%s must not be accessible by other users\n", name);
+    {
+      fprintf (stderr, "%s must not be accessible by other users\n", name);
+      return -1;
+    }
+
+  return 0;
 }
-#endif
 
 
 char *

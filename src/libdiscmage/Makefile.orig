@@ -18,6 +18,12 @@ LDFLAGS=-s
 
 LIBNAME=discmage
 OBJECTS=libdm_misc.o cdi.o nero.o sheets.o dllinit.o misc.o
+ifdef ZLIB
+LIBS=-lz
+OBJECTS+=unzip.o
+else
+LIBS=
+endif
 
 
 # The test for Cygwin should be done before the test for DJGPP, because the
@@ -27,12 +33,8 @@ OBJECTS=libdm_misc.o cdi.o nero.o sheets.o dllinit.o misc.o
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
 GCCA_DIR=/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/
-LIBS=-lcygwin -lkernel32 -L$(GCCA_DIR) -lgcc
+LIBS+=-lcygwin -lkernel32 -L$(GCCA_DIR) -lgcc
 # kernel32 for DLOPEN and DisableThreadLibraryCalls()
-ifdef ZLIB
-LIBS+=-lz
-OBJECTS+=unzip.o
-endif
 
 ifdef DLOPEN
 ENTRY=__cygwin_dll_entry@12
@@ -42,7 +44,10 @@ endif
 
 FULLLIBNAME=$(LIBNAME).dll
 DLLFLAGS=$(LDFLAGS) --dll -o $(LIBNAME).dll $(OBJECTS) $(LIBS) -e $(ENTRY)
-DLLTOOLFLAGS=--dllname $(LIBNAME).dll --def tmp.def
+DLLTOOLFLAGS=-d tmp.def -b tmp.base -e tmp.exp -D $(LIBNAME).dll
+ifndef DLOPEN
+DLLTOOLFLAGS+=-l $(LIBNAME).a
+endif
 
 else
 ifdef DJGPP
@@ -55,22 +60,11 @@ OBJECTS+=dxe_misc.o
 GCCA_DIR=c:/djgpp/lib/gcc-lib/djgpp/2.953
 LIBS+=-L$(GCCA_DIR) -lgcc
 
-#ifdef ZLIB
-#LIBS=-lz
-#OBJECTS+=unzip.o
-#endif
-# All that doesn't work... So, we just improve the grand DXE hack
-
 CFLAGS+=-DDXE
 DLLFLAGS=$(OBJECTS) $(LIBS)
 FULLLIBNAME=$(LIBNAME).dxe
 
 else                                    # Unix or BeOS
-
-ifdef ZLIB
-LIBS=-lz
-OBJECTS+=unzip.o
-endif
 
 CFLAGS+=-fPIC
 ifdef DLOPEN
@@ -140,19 +134,14 @@ endif
 	echo EXPORTS > tmp.def
 #	nm $(OBJECTS) | grep ' T _' | sed 's/.* T _//' >> tmp.def
 	nm $(OBJECTS) | grep '^........ [T] _' | sed 's/[^_]*_//' >> tmp.def
+# We use nm instead of dlltool --output-def, so that we don't have to
+# specify explicitly (in the source code) which symbols should be exported
 
 	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
 	@echo "      symbols, read faq.html question 2"
 	ld --base-file tmp.base $(DLLFLAGS)
-	dlltool $(DLLTOOLFLAGS) --base-file tmp.base --output-exp tmp.exp
-
-	ld --base-file tmp.base tmp.exp $(DLLFLAGS)
-#	dlltool $(DLLTOOLFLAGS) --base-file tmp.base
-
-#	ld tmp.exp $(DLLFLAGS)
-ifndef DLOPEN
-	dlltool $(DLLTOOLFLAGS) --output-lib $(LIBNAME).a
-endif
+	dlltool $(DLLTOOLFLAGS)
+	ld tmp.exp $(DLLFLAGS)
 
 else
 ifdef DJGPP
@@ -185,12 +174,14 @@ endif                                   # cygwin
 #endif
 
 # Dependencies
+CONFIG_H=../config.h
+
 libdm_misc.o: libdiscmage.h misc.h dxedll_priv.h
 cdi.o: libdiscmage.h misc.h cdi.h dxedll_priv.h
-nero.o: libdiscmage.h misc.h ../config.h nero.h cdi.h dxedll_priv.h
+nero.o: libdiscmage.h misc.h $(CONFIG_H) nero.h cdi.h dxedll_priv.h
 sheets.o: libdiscmage.h misc.h dxedll_priv.h
 dllinit.o: libdiscmage.h misc.h dxedll_priv.h
 misc.o: misc.h dxedll_priv.h
-dxe_misc.o: dxedll_pub.h
+dxe_misc.o: $(CONFIG_H) dxedll_pub.h
 djimport.o: libdiscmage.h dlopen.h dxedll_pub.h
-dlopen.o: ../config.h dlopen.h dxedll_pub.h
+dlopen.o: $(CONFIG_H) dlopen.h dxedll_pub.h

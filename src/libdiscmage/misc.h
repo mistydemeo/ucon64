@@ -224,41 +224,52 @@ char *cygwin_fix (char *value);
 /*
   String manipulation
 
-  areprint() like isprint() but for a whole string
-  areupper() like isupper() but for a whole string
-  strupr()   convert string to upper-case
-  strlwr()   convert string to lower-case
-  mkprint()  convert all chars to isprint()'s
-  mkfile()   convert string into a correct file name
-  strtrim()  trim isspace()'s from start and end of string
+  isfname()   test if char could be used for filenames
+  isprint2()  test if char could be used for stdout
+  tofname()   replaces chars that can not be used for filenames
+  toprint2()  replaces chars that should not be used for stdout
 
-  setext() set/replace extension of filename with ext
-  getext() get extension of filename
+  is_func()   use all is*() functions on an array of unsigned char
+  to_func()   use all to*() functions on an array of unsigned char
+
+  strtrim()   trim isspace()'s from start and end of string
+
+  setext()    set/replace extension of filename with ext
+  getext()    get extension of filename
     extension means in this case the extension INCLUDING the dot '.'
 
-  basename() GNU basename() clone
+  basename()  GNU basename() clone
   realpath2() realpath() clone
   argz_extract2() temporary argz_extract() clone
+  mkdir2()    mkdir() wrapper who automatically cares for rights, etc.
 */
-extern int areupper (const char *str);
-extern int areprint (const char *str, int size);
-extern char *strupr (char *str);
-extern char *strlwr (char *str);
-extern char *strtrim (char *str);
-extern char *mkprint (char *str, const unsigned char replacement);
-extern char *mkfile (char *str, const unsigned char replacement);
+extern int isfname (int c);
+extern int isprint2 (int c);
+extern int tofname (int c);
+extern int toprint2 (int c);
+extern int is_func (unsigned char *s, int size, int (*func) (int));
+extern char *to_func (unsigned char *s, int size, int (*func) (int));
+#define strupr(s) (to_func(s, strlen(s), toupper))
+#define strlwr(s) (to_func(s, strlen(s), tolower))
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
-extern const char *strcasestr2 (const char *haystack, const char *needle);
+extern char *strtrim (char *str);
+extern const char *strcasestr2 (const char *str, const char *search);
 #define stristr strcasestr2
 extern char *setext (char *filename, const char *ext);
 extern const char *getext (const char *filename);
 #define EXTCMP(filename, ext) (strcasecmp (getext (filename), ext))
 extern char *basename2 (const char *str);
+/*
+  the following define *IS* important since it's said that XPG basename()
+  alters the src - and I (NoisyB) don't like my basename() to do that
+*/
 #define basename basename2
 extern char *dirname2 (char *str);
 extern char *realpath2 (const char *src, char *full_path);
-extern void argz_extract2 (char *cmd, size_t argc, char ***argv);
+//extern void argz_extract2 (char *cmd, size_t argc, char ***argv);
+extern int mkdir2 (const char *name);
+
 
 /*
   mem functions

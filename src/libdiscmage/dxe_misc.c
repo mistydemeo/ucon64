@@ -30,8 +30,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <stdio.h>
 #include "dxedll_pub.h"
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
+#endif
+#ifdef  HAVE_ZLIB_H
+#include <zlib.h>
+#include "unzip.h"
+#endif
 
 extern st_symbol_t import_export;
+int errno = 0; // TODO: verify how dangerous this is (is it?)
 
 
 FILE *
@@ -94,4 +102,144 @@ int
 fputc (int character, FILE *file)
 {
   return import_export.fputc (character, file);
+}
+
+
+// The functions below are only necessary if zlib support is enabled. They are 
+//  used by zlib and/or unzip.c.
+void
+free (void *mem)
+{
+  return import_export.free (mem);
+}
+
+
+void *
+malloc (size_t size)
+{
+  return import_export.malloc (size);
+}
+
+
+void *
+calloc (size_t n_elements, size_t size)
+{
+  return import_export.calloc (n_elements, size);
+}
+
+
+void *
+memcpy (void *dest, const void *src, size_t size)
+{
+  return import_export.memcpy (dest, src, size);
+}
+
+
+void *
+memset (void *mem, int value, size_t size)
+{
+  return import_export.memset (mem, value, size);
+}
+
+
+int
+strcmp (const char *s1, const char *s2)
+{
+  return import_export.strcmp (s1, s2);
+}
+
+
+char *
+strcpy (char *dest, const char *src)
+{
+  return import_export.strcpy (dest, src);
+}
+
+
+char *
+strcat (char *s1, const char *s2)
+{
+  return import_export.strcat (s1, s2);
+}
+
+
+int
+fprintf (FILE *file, const char *format, ...)
+{
+  va_list argptr;
+  int n_chars;
+  
+  va_start (argptr, format);
+  n_chars = import_export.vfprintf (file, format, argptr);
+  va_end (argptr);
+  return n_chars;
+}
+
+
+int
+sprintf (char *buffer, const char *format, ...)
+{
+  va_list argptr;
+  int n_chars;
+  
+  va_start (argptr, format);
+  n_chars = import_export.vsprintf (buffer, format, argptr);
+  va_end (argptr);
+  return n_chars;
+}
+
+
+int
+vsprintf (char *buffer, const char *format, va_list argptr)
+{
+  return import_export.vsprintf (buffer, format, argptr);
+}
+
+
+long
+ftell (FILE *file)
+{
+  return import_export.ftell (file);
+}
+
+
+int
+fflush (FILE *file)
+{
+  return import_export.fflush (file);
+}
+
+
+int
+ferror (FILE *file)
+{
+  return import_export.ferror (file);
+}
+
+
+FILE *
+fdopen (int fd, const char *mode)
+{
+  return import_export.fdopen (fd, mode);
+}
+
+
+int
+mkdir (const char *path, mode_t mode)
+{
+  return import_export.mkdir (path, mode);
+}
+
+
+void
+rewind (FILE *file)
+{
+  return import_export.rewind (file);
+}
+
+
+int
+getuid (void)
+{
+  return import_export.getuid ();
 }

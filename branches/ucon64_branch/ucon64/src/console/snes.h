@@ -24,6 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define SNES_H
 
 #define SNES_HEADER_START 0x7fb0
+#define SNES_HIROM 0x8000
+#define SNES_EHIROM (SNES_HIROM + 0x400000)
 
 typedef enum { SWC, GD3, FIG, MGD, SMC } snes_file_t;
 

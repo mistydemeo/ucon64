@@ -58,6 +58,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "misc.h"
 #include "ucon64.h"
 #include "ucon64_lib.h"
+#ifdef  GUI
+#include "ucon64_libng.h"
+#endif
 #include "quick_io.h"
 #include "ucon64_misc.h"
 #include "console/console.h"
@@ -600,6 +603,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_CTRL, UCON64_UNKNOWN, NULL,          WF_SWITCH}, // for NES & SNES
   {UCON64_CTRL2, UCON64_SNES, snes_usage,      WF_SWITCH},
   {UCON64_DUMPINFO, UCON64_NES, nes_usage,     WF_SWITCH},
+  {UCON64_EHI, UCON64_SNES, snes_usage,        WF_SWITCH},
   {UCON64_FILE, UCON64_UNKNOWN, NULL,          WF_SWITCH},
   {UCON64_FORCE63, UCON64_UNKNOWN, ucon64_dat_usage, WF_SWITCH},
   {UCON64_FRONTEND, UCON64_UNKNOWN, NULL,      WF_SWITCH},

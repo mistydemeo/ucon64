@@ -34,6 +34,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "ucon64_lib.h"
+#ifdef  GUI
+#include "ucon64_libng.h"
+#endif
 #include "ucon64_opts.h"
 #include "quick_io.h"
 #include "libdiscmage/libdiscmage.h"
@@ -76,14 +79,7 @@ ucon64_switches (int c, const char *optarg)
     case UCON64_GUI:
       if (ucon64.netgui_enabled)
         if (optarg)
-          {
-            ucon64.netgui = libng_open (optarg, NG_SERVER);
-            if (ucon64.netgui)
-              {
-                libng_gui (ucon64.netgui);
-                libng_close (ucon64.netgui);
-              }
-          }
+          libng_gui (optarg);
       exit (0);
 #endif
     /*
@@ -384,7 +380,11 @@ ucon64_switches (int c, const char *optarg)
       break;
 
     case UCON64_HI:
-      ucon64.snes_hirom = 1;
+      ucon64.snes_hirom = SNES_HIROM;
+      break;
+
+    case UCON64_EHI:
+      ucon64.snes_hirom = SNES_EHIROM;
       break;
 
     case UCON64_BS:

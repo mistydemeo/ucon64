@@ -67,6 +67,9 @@ write programs in C
 #include "ucon64_dat.h"
 #include "ucon64_misc.h"
 #include "ucon64_lib.h"
+#ifdef  GUI
+#include "ucon64_libng.h"
+#endif
 #include "ucon64_opts.h"
 #include "console/console.h"
 #include "patch/patch.h"
@@ -132,6 +135,7 @@ const struct option options[] = {
     {"disc", 0, 0, UCON64_DISC},
     {"dumpinfo", 1, 0, UCON64_DUMPINFO},
     {"e", 0, 0, UCON64_E},
+    {"ehi", 0, 0, UCON64_EHI},
     {"f", 0, 0, UCON64_F},
     {"fds", 0, 0, UCON64_FDS},
     {"fdsl", 0, 0, UCON64_FDSL},

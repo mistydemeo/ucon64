@@ -49,8 +49,8 @@ const st_usage_t pcengine_usage[] =
     {NULL, NULL, "PC-Engine (CD Unit/Core Grafx(II)/Shuttle/GT/LT/Super CDROM/DUO(-R(X)))\nSuper Grafx/Turbo (Grafx(16)/CD/DUO/Express)"},
     {NULL, NULL, "1987/19XX/19XX NEC"},
     {"pce", NULL, "force recognition"},
-    {"int", NULL, "force ROM is in interleaved format"},
-    {"nint", NULL, "force ROM is not in interleaved format"},
+    {"int", NULL, "force ROM is in interleaved (bit-swapped) format"},
+    {"nint", NULL, "force ROM is not in interleaved (bit-swapped) format"},
     {"smg", NULL, "convert to Super Magic Griffin/SMG"},
     {"mgd", NULL, "convert to Multi Game Doctor*/MGD2/RAW"},
     {"swap", NULL, "swap bits of all bytes in file (TurboGrafx-16 <-> PC-Engine)"},
@@ -646,7 +646,7 @@ pcengine_smg (st_rominfo_t *rominfo)
   st_unknown_header_t header;
   int size = ucon64.file_size - rominfo->buheader_len;
 
-  if (!rominfo->interleaved)
+  if (rominfo->interleaved)
     if (!(rom_buffer = (unsigned char *) malloc (size)))
       {
         fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
@@ -666,9 +666,9 @@ pcengine_smg (st_rominfo_t *rominfo)
   ucon64_file_handler (dest_name, src_name, 0);
 
   q_fwrite (&header, 0, UNKNOWN_HEADER_LEN, dest_name, "wb");
-  if (!rominfo->interleaved)
+  if (rominfo->interleaved)
     {
-      // That Super Magic Griffin files should be interleaved is just a guess - dbjh
+      // Super Magic Griffin files should not be "interleaved"
       q_fread (rom_buffer, rominfo->buheader_len, size, src_name);
       swapbits (rom_buffer, size);
       q_fwrite (rom_buffer, UNKNOWN_HEADER_LEN, size, dest_name, "ab");
@@ -691,7 +691,7 @@ pcengine_mgd (st_rominfo_t *rominfo)
   unsigned char *rom_buffer = NULL;
   int size = ucon64.file_size - rominfo->buheader_len;
 
-  if (rominfo->interleaved)
+  if (!rominfo->interleaved)
     if (!(rom_buffer = (unsigned char *) malloc (size)))
       {
         fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
@@ -702,7 +702,9 @@ pcengine_mgd (st_rominfo_t *rominfo)
   mgd_make_name (ucon64.rom, UCON64_PCE, size, dest_name);
   ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
 
-  if (rominfo->interleaved)
+  // bit-swapping images for the MGD2 only makes sense for onwners of a TG-16
+  //  (American version of the PCE)
+  if (!rominfo->interleaved)
     {
       q_fread (rom_buffer, rominfo->buheader_len, size, src_name);
       swapbits (rom_buffer, size);
@@ -843,7 +845,7 @@ pcengine_init (st_rominfo_t *rominfo)
 
     According to Cowering 2 or 3 games don't use these opcodes to check if a
     Japanese game is running on an American console. If they are present then
-    it is in the first 500 bytes.
+    it is in the first 500 (or so) bytes.
   */
 #if 1
   // I don't feel like writing a new memory search function at the moment...

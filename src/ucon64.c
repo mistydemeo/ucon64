@@ -93,6 +93,7 @@ write programs in C
 #include "backup/smc.h"
 #include "backup/fpl.h"
 #include "backup/mgd.h"
+#include "backup/gd.h"
 #include "backup/mccl.h"
 #include "backup/lynxit.h"
 
@@ -131,6 +132,7 @@ const struct option long_options[] = {
     {"cs", 0, 0, UCON64_CS},
     {"db", 0, 0, UCON64_DB},
     {"dbs", 0, 0, UCON64_DBS},
+    {"dbuh", 0, 0, UCON64_DBUH},
     {"dbv", 0, 0, UCON64_DBV},
     {"dc", 0, 0, UCON64_DC},
     {"dint", 0, 0, UCON64_DINT},
@@ -260,12 +262,12 @@ const struct option long_options[] = {
     {"xfalb", 1, 0, UCON64_XFALB},
     {"xfalc", 1, 0, UCON64_XFALC},
     {"xfals", 0, 0, UCON64_XFALS},
-    {"xlit", 0, 0, UCON64_XLIT},
-    {"xmccl", 0, 0, UCON64_XMCCL},
     {"xgbx", 0, 0, UCON64_XGBX},
     {"xgbxb", 1, 0, UCON64_XGBXB},
     {"xgbxs", 0, 0, UCON64_XGBXS},
-    {"xmgd", 0, 0, UCON64_XMGD},
+    {"xgd3", 0, 0, UCON64_XGD3},
+    {"xlit", 0, 0, UCON64_XLIT},
+    {"xmccl", 0, 0, UCON64_XMCCL},
     {"xsmd", 0, 0, UCON64_XSMD},
     {"xsmds", 0, 0, UCON64_XSMDS},
     {"xswc", 0, 0, UCON64_XSWC},
@@ -1010,9 +1012,10 @@ ucon64_usage (int argc, char *argv[])
         UCON64_USAGE (snes_usage);
 #ifdef BACKUP
         UCON64_USAGE (swc_usage);
+        UCON64_USAGE (gd_usage);
 //        UCON64_USAGE (fig_usage);
 //        UCON64_USAGE (smc_usage);
-        UCON64_USAGE (mgd_usage);
+//        UCON64_USAGE (mgd_usage);
 #endif // BACKUP
         single = 1;
         break;
@@ -1148,9 +1151,10 @@ ucon64_usage (int argc, char *argv[])
       UCON64_USAGE (snes_usage);
 #ifdef BACKUP
       UCON64_USAGE (swc_usage);
+        UCON64_USAGE (gd_usage);
 //      UCON64_USAGE (fig_usage);
 //      UCON64_USAGE (smc_usage);
-      UCON64_USAGE (mgd_usage);
+//      UCON64_USAGE (mgd_usage);
 #endif // BACKUP
       printf ("\n");
 

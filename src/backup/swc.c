@@ -51,11 +51,10 @@ const char *swc_usage[] =
     "                  address: ucon64 " OPTION_LONG_S "xswc \"rom.swc\" 0x378\n"
     "                  In order to connect the Super Wild Card to a PC's parallel\n"
     "                  port you need a standard bidirectional parallel cable like\n"
-    "                  for the most backup units\n"
+    "                  for the most backup units\n",
 #else
-    ""
+    "",
 #endif // BACKUP
-    ,
     NULL
   };
 

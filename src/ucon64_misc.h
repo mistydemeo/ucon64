@@ -69,6 +69,7 @@ typedef struct //st_unknown_header
 #define UNKNOWN_HEADER_LEN (sizeof (st_unknown_header_t))
 extern const char *unknown_usage[];
 extern char *ucon64_temp_file;
+extern int (*ucon64_testsplit_callback) (const char *filename);
 extern const char *nintendo_maker[];
 
 /*
@@ -88,7 +89,7 @@ enum
   FILE_BUFFER_ERROR
 };
 
-extern const char *ucon64_msg[]; 
+extern const char *ucon64_msg[];
 
 
 /*

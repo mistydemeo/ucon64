@@ -34,6 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "snes.h"
 #include "backup/smc.h"
 #include "backup/mgd.h"
+#include "backup/gd.h"
 #include "backup/swc.h"
 #include "backup/fig.h"
 
@@ -88,6 +89,7 @@ const char *snes_usage[] =
     "  " OPTION_LONG_S "mgd         convert to Multi Game*/MGD2/MGH/RAW\n"
     "  " OPTION_LONG_S "gd3         convert to Professor SF(2) Game Doctor SF3/6/7\n"
     "  " OPTION_LONG_S "ufos        convert Snes9x/ZSNES *.srm (SRAM) to Super UFO; " OPTION_LONG_S "rom=SRAM\n"
+    "  " OPTION_LONG_S "dbuh        display (relevant part of) backup unit header\n"
     "  " OPTION_LONG_S "stp         convert SRAM from backup unit for use with an emulator\n"
     "                  " OPTION_LONG_S "stp just strips the first 512 bytes\n"
 #if 0
@@ -1076,51 +1078,90 @@ snes_gdf (st_rominfo_t *rominfo)
 }
 
 
+int
+snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
+// This function assumes file with name filename is in GD3 format
+{
+  char dest_name[FILENAME_MAX], *p = NULL;
+  int nparts, surplus, x, sf_romname, size, n_names = 0;
+
+  size = rominfo->file_size - rominfo->buheader_len;
+  sf_romname = (ucon64.rom[0] == 'S' || ucon64.rom[0] == 's') &&
+               (ucon64.rom[1] == 'F' || ucon64.rom[1] == 'f');
+
+  // Don't use PARTSIZE here, because the Game Doctor doesn't support
+  //  arbitrary part sizes
+  nparts = size / (8 * MBIT);
+  surplus = size % (8 * MBIT);
+
+  if (sf_romname)
+    strcpy (dest_name, basename (ucon64.rom));
+  else
+    {
+      strcpy (dest_name, "SF");
+      strcat (dest_name, basename (ucon64.rom));
+    }
+  strupr (dest_name);
+  if ((p = strrchr (dest_name, '.')))
+    *p = 0;
+  strcat (dest_name, "______");
+  dest_name[7] = 'A';
+  dest_name[8] = 0;
+
+  if (snes_hirom && ((nparts + ((surplus > 0) ? 1 : 0)) <= 2))
+    {
+      // 8 Mbit or less HiROMs, X is used to pad filename to 8 (SF4###XA)
+      if (size < 10 * MBIT)
+        dest_name[strlen (dest_name) - 2] = 'X';
+      strcpy (names[n_names++], dest_name);
+
+      dest_name[strlen (dest_name) - 1]++;
+      strcpy (names[n_names++], dest_name);
+    }
+  else
+    {
+      for (x = 0; x < nparts; x++)
+        {
+          strcpy (names[n_names++], dest_name);
+          dest_name[strlen (dest_name) - 1]++;
+        }
+      if (surplus != 0)
+        strcpy (names[n_names++], dest_name);
+    }
+  return n_names;
+}
+
+
 #define PARTSIZE  (8 * MBIT)
 int
 snes_s (st_rominfo_t *rominfo)
 {
-  char header[512], buf[FILENAME_MAX], dest_name[FILENAME_MAX], *p = NULL;
-  int nparts, surplus, x, gd3_format, sf_romname, half_size, size;
+  char header[512], dest_name[FILENAME_MAX], *names[4], names_mem[4][12];
+  int nparts, surplus, x, half_size, size, name_i = 0;
 
   size = rominfo->file_size - rominfo->buheader_len;
-  sf_romname = ((ucon64.rom[0] == 'S') || (ucon64.rom[0] == 's')) &&
-    ((ucon64.rom[1] == 'F') || (ucon64.rom[1] == 'f'));
-  gd3_format = !rominfo->buheader_len || (type == GD3 && sf_romname);
-
-  if (gd3_format)
+  if (!rominfo->buheader_len || type == GD3)    // GD3 format
     {
-      nparts = size / (8 * MBIT);               // Don't use PARTSIZE here, because
-      surplus = size % (8 * MBIT);              //  I (dbjh) don't know if other sizes
-                                                //  are also valid
-      if (sf_romname)
-        strcpy (buf, basename (ucon64.rom));
-      else
-        {
-          strcpy (buf, areupper (basename (ucon64.rom)) ? "SF" : "sf");
-          strcat (buf, basename (ucon64.rom));
-        }
-      if ((p = strrchr (buf, '.')))
-        *p = 0;
-      strcat (buf, "________");
-      buf[7] = areupper (buf) ? 'A' : 'a';
-      buf[8] = 0;
-      sprintf (dest_name, "%s.078", buf);
+      // Don't use PARTSIZE here, because the Game Doctor doesn't support
+      //  arbitrary part sizes
+      nparts = size / (8 * MBIT);
+      surplus = size % (8 * MBIT);
+
+      // We don't want to malloc() ridiculous small chunks (of 12 bytes)
+      for (x = 0; x < 4; x++)
+        names[x] = names_mem[x];
+      snes_make_gd_names (ucon64.rom, rominfo, (char **) names);
 
       if (snes_hirom && ((nparts + ((surplus > 0) ? 1 : 0)) <= 2))
         {
           half_size = size / 2;
-          // 8 Mbit or less HiROMs, X is used to pad filename to 8 (SF4###XA)
 
-          if (size < 0x140000)
-            *(strrchr (dest_name, '.') - 2) = areupper (basename (ucon64.rom)) ? 'X' : 'x';
-//          dest_name[strrcspn (dest_name, ".") - 2] = areupper (basename (ucon64.rom)) ? 'X' : 'x';
-
+          sprintf (dest_name, "%s.078", names[name_i++]);
           // don't write backups of parts, because one name is used
           q_fcpy (ucon64.rom, 0, half_size + rominfo->buheader_len, dest_name, "wb");
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
 
-          (*(strrchr (dest_name, '.') - 1))++;
+          sprintf (dest_name, "%s.078", names[name_i++]);
           q_fcpy (ucon64.rom, half_size + rominfo->buheader_len, size - half_size, dest_name, "wb");
           fprintf (stdout, ucon64_msg[WROTE], dest_name);
         }
@@ -1129,21 +1170,21 @@ snes_s (st_rominfo_t *rominfo)
           for (x = 0; x < nparts; x++)
             {
               // don't write backups of parts, because one name is used
+              sprintf (dest_name, "%s.078", names[name_i++]);
               q_fcpy (ucon64.rom, x * 8 * MBIT + (x ? rominfo->buheader_len : 0),
                         8 * MBIT + (x ? 0 : rominfo->buheader_len), dest_name, "wb");
               fprintf (stdout, ucon64_msg[WROTE], dest_name);
-              (*(strrchr (dest_name, '.') - 1))++;
             }
 
           if (surplus != 0)
             {
               // don't write backups of parts, because one name is used
+              sprintf (dest_name, "%s.078", names[name_i++]);
               q_fcpy (ucon64.rom, x * 8 * MBIT + (x ? rominfo->buheader_len : 0),
                         surplus + (x ? 0 : rominfo->buheader_len), dest_name, "wb");
               fprintf (stdout, ucon64_msg[WROTE], dest_name);
             }
         }
-
       return 0;
     }
   else
@@ -1372,8 +1413,8 @@ Same here.
 
   while ((bytesread = fread (buffer, 1, 32 * 1024, srcfile)))
     {                                           // '!' == ASCII 33 (\x21), '*' == 42 (\x2a)
-      // SRAM                                   // 8 kB == 64 kb
-      if (snes_sramsize == 8 * 1024)
+      // SRAM
+      if (snes_sramsize == 8 * 1024)            // 8 kB == 64 kb
         {
           // unknown
           change_string ("!**\x70!**\x70\xd0", 9, '*', '!', "\xea\xea", 2, buffer, bytesread, 0,
@@ -1659,7 +1700,7 @@ snes_n (st_rominfo_t *rominfo)
            SNES_NAME_LEN : strlen (ucon64.file));
   ucon64_fbackup (NULL, ucon64.rom);
   q_fwrite (buf, rominfo->header_start + rominfo->buheader_len + 16, SNES_NAME_LEN,
-               ucon64.rom, "r+b");
+            ucon64.rom, "r+b");
 
   fprintf (stdout, ucon64_msg[WROTE], ucon64.rom);
 
@@ -1823,6 +1864,141 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_siz
       return -1;
     }
 #endif
+
+  return 0;
+}
+
+
+static char *
+matches_deviates (int equal)
+{
+  return
+#ifdef  ANSI_COLOR
+    ucon64.ansi_color ?
+      (equal ? "\x1b[01;32mmatches\x1b[0m" : "\x1b[01;33mdeviates\x1b[0m") :
+      (equal ? "matches" : "deviates");
+#else
+      (equal ? "matches" : "deviates");
+#endif
+}
+
+
+int
+snes_buheader_info (st_rominfo_t *rominfo)
+{
+  unsigned char header[512];
+  int x, y;
+
+  if (rominfo->buheader_len == 0)
+    {
+      printf ("This ROM has no backup unit header\n");
+      return -1;
+    }
+  else
+    printf ("Backup unit header info\n\n");
+  q_fread (&header, 0, rominfo->buheader_len, ucon64.rom);
+  mem_hexdump (header, 48, 0);                  // show only the part that is
+  puts ("");                                    //  interpreted by copier
+
+  if (type == SWC || type == FIG || type == SMC)
+    {
+      x = rominfo->file_size - rominfo->buheader_len;
+      y = (header[0] + (header[1] << 8)) * 8 * 1024;
+      printf ("[0-1]   File size: %d Bytes (%.4f Mb) => %s\n",
+        y, TOMBIT_F (y), matches_deviates (x == y));
+    }
+
+  if (type == SWC || type == SMC)
+    {
+      unsigned char sram_sizes[] = {0, 2, 8, 32};
+
+      y = header[2] & 0x01;
+      printf ("[2:0]   (Reserved): %d\n", y);
+      if (y)
+        printf ("WARNING: [2:0] is set while it is a reserved bit\n");
+
+      printf ("[2:1]   External cartridge memory: %s\n",
+        header[2] & 0x02 ? "Enabled" : "Disabled");
+
+      y = sram_sizes[(~header[2] & 0x0c) >> 2]; // 32 => 12, 8 => 8, 2 => 4, 0 => 0
+      printf ("[2:2-3] SRAM size: %d kB => %s\n",
+        y , matches_deviates (snes_sramsize == y * 1024));
+
+      x = snes_hirom ? 1 : 0;
+      y = header[2] & 0x10 ? 1 : 0;
+      printf ("[2:4]   DRAM mapping mode: %s => %s\n",
+        y ? "HiROM" : "LoROM", matches_deviates (x == y));
+
+      y = header[2] & 0x20 ? 1 : 0;
+      printf ("[2:5]   SRAM mapping mode: %s => %s\n",
+        y ? "HiROM" : "LoROM", matches_deviates (x == y));
+
+      y = header[2] & 0x40 ? 1 : 0;
+      printf ("[2:6]   Split: %s => %s\n",
+        y ? "Yes" : "No", matches_deviates (snes_split == y));
+
+      printf ("[2:7]   Run program in mode: %d\n", (header[2] & 0x80) >> 7);
+    }
+  else if (type == FIG)
+    {
+      y = header[2] & 0x40 ? 1 : 0;
+      printf ("[2]     Split: %s => %s\n",
+        y ? "Yes" : "No", matches_deviates (snes_split == y));
+
+      y = header[3] & 0x80 ? 1 : 0;
+      printf ("[3]     Memory mapping mode: %s => %s\n",
+        y ? "HiROM" : "LoROM", matches_deviates ((snes_hirom ? 1 : 0) == y));
+
+      y = -1;
+      if (snes_hirom)
+        {
+          if ((header[4] == 0x77 && header[5] == 0x83) ||
+              (header[4] == 0xf7 && header[5] == 0x83))
+            y = 0;
+          else if (header[4] == 0xfd && header[5] == 0x82)
+            y = 2 * 1024;
+          else if (header[4] == 0xdd && header[5] == 0x82)
+            y = 8 * 1024; // or 2 * 1024
+          else if (header[4] == 0xdd && header[5] == 0x02)
+            y = 32 * 1024;
+        }
+      else
+        {
+          if ((header[4] == 0x77 && header[5] == 0x83) ||
+              (header[4] == 0x47 && header[5] == 0x83) ||
+              (header[4] == 0x11 && header[5] == 0x02))
+            y = 0;
+          else if (header[4] == 0x00 && header[5] == 0x80)
+            y = 8 * 1024; // or 2 * 1024
+          else if (header[4] == 0x00 && header[5] == 0x00)
+            y = 32 * 1024;
+        }
+
+      if (y == 8 * 1024)
+        printf ("[4-5]   SRAM size: 2 kB / 8 kB => %s\n",
+          matches_deviates (snes_sramsize == 2 * 1024 ||
+                            snes_sramsize == 8 * 1024));
+      else
+        printf ("[4-5]   SRAM size: %d kB => %s\n",
+          y / 1024, matches_deviates (snes_sramsize == y));
+    }
+
+  if (type == GD3)
+    {
+      y = -1;
+      if (header[0x10] == 0x81)
+        y = 8 * 1024;
+      else if (header[0x10] == 0x82)
+        y = 2 * 1024;
+      else if (header[0x10] == 0x80)
+        y = 32 * 1024; // or 0
+      if (y == 32 * 1024)
+        printf ("[10]    SRAM size: 0 kB / 32 kB => %s\n",
+          matches_deviates (snes_sramsize == 0 || snes_sramsize == 32 * 1024));
+      else
+        printf ("[10]    SRAM size: %d kB => %s\n",
+          y / 1024, matches_deviates (snes_sramsize == y));
+    }
 
   return 0;
 }
@@ -2140,7 +2316,7 @@ snes_init (st_rominfo_t *rominfo)
           rominfo->copier_usage = swc_usage;
           break;
         case GD3:
-          rominfo->copier_usage = mgd_usage;
+          rominfo->copier_usage = gd_usage;
           break;
         case FIG:
           rominfo->copier_usage = fig_usage;

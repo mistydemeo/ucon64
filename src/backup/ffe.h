@@ -33,10 +33,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
                    x             : 0 = Last file of the ROM dump (multi-file)
                                  : 1 = Multi-file (there is another file to follow)
                      x           : SWC & SMC:
-                                     0 = SRAM memory mapping mode 20 (LoROM)
+                                     0 = SRAM mapping mode 20 (LoROM)
                                      1 = mode 21 (HiROM)
                        x         : SWC & SMC:
-                                     0 = DRAM memory mapping mode 20 (LoROM)
+                                     0 = DRAM mapping mode 20 (LoROM)
                                      1 = mode 21 (HiROM)
                          x x     : SWC & SMC:
                                      00 = 256kb SRAM, 01 = 64kb, 10 = 16kb, 11 = no SRAM

@@ -379,14 +379,11 @@ detect_parport (unsigned int port)
 {
   int i;
 
-#if     defined  __linux__ || defined __FreeBSD__
-  if (
-#ifdef  __linux__
-      ioperm
-#else
-      i386_set_ioperm
-#endif // __linux__
-      (port, 1, 1) == -1)
+#if     defined  __linux__
+  if (ioperm (port, 1, 1) == -1)
+    return -1;
+#elif   defined __FreeBSD__
+  if (i386_set_ioperm (port, 1, 1) == -1)
     return -1;
 #endif
 
@@ -402,14 +399,11 @@ detect_parport (unsigned int port)
           break;
     }
 
-#if     defined  __linux__ || defined __FreeBSD__
-  if (
-#ifdef  __linux__
-      ioperm
-#else
-      i386_set_ioperm
-#endif // __linux__
-      (port, 1, 0) == -1)
+#if     defined  __linux__
+  if (ioperm (port, 1, 0) == -1)
+    return -1;
+#elif   defined __FreeBSD__
+  if (i386_set_ioperm (port, 1, 0) == -1)
     return -1;
 #endif
 
@@ -541,13 +535,11 @@ parport_probe (unsigned int port)
   if (port != 0)
     {
 #if     defined  __linux__ || defined __FreeBSD__
-  if (
-#ifdef __linux__
-      ioperm
+#ifdef  __linux__
+      if (ioperm (port, 3, 1) == -1)            // data, status & control
 #else
-      i386_set_ioperm
+      if (i386_set_ioperm (port, 3, 1) == -1)   // data, status & control
 #endif // __linux__
-      (port, 3, 1) == -1)                       // data, status & control
         {
           fprintf (stderr,
                    "Could not set port permissions for I/O ports 0x%x, 0x%x and 0x%x\n"
@@ -628,7 +620,7 @@ ucon64_bin2iso (const char *image, int track_mode)
         seek_ecc = 288;
         sector_size = 2352;
         break;
-      
+
       case MODE2_2336:
 #ifdef __MAC__ // macintosh
         seek_header = 0;
@@ -637,7 +629,7 @@ ucon64_bin2iso (const char *image, int track_mode)
 #endif      
         seek_ecc = 280;
         sector_size = 2336;
-        break;        
+        break;
 
       case MODE2_2352:
 #ifdef __MAC__ // macintosh
@@ -702,35 +694,84 @@ ucon64_trackmode_probe (const char *image)
 
   quickfread (buf, 0, 16, image);
 
-          printf ("\n");
-          strhexdump (buf, 0, 0, 16);
-          printf ("\n");
+  printf ("\n");
+  strhexdump (buf, 0, 0, 16);
+  printf ("\n");
   if (memcmp (SYNC_HEADER, buf, 12))
-{printf("MODE2_2336");
+  {
+    printf("MODE2_2336");
     result = MODE2_2336;
- } else
+  }
+  else
     switch (buf[15])
       {
         case 2:
           result = MODE2_2352;
-printf("MODE2_2352");
+          printf("MODE2_2352");
           break;
 
         case 1:
-printf("MODE1_2352");
+          printf("MODE1_2352");
           result = MODE1_2352;
           break;
 
         case 0://TODO test this... at least we know MODE1_2048 has no sync headers
-printf("MODE1_2048");
+          printf("MODE1_2048");
           result = MODE1_2048;
           break;
-          
+
         default:
           printf ("\n");
           strhexdump (buf, 0, 0, 16);
           printf ("\n");
           break;
-        }
+      }
   return result;
 }
+
+
+/*
+  TODO: remove me?
+  Here follows a (hopefully temporary) fix for lazy programmers :-)
+  The <console>_init functions should return rominfo the way it was before they
+  were called if they don't return 0 (=ROM is detected as being comaptible with
+  that console). This is only important for force options (fields) like -hd,
+  -nhd, -hdn etc, but now no functions have to be checked to see if they modify
+  those members (and add code to not change them). Instead it was sufficient to
+  just put a ucon64_save_rominfo() call at the beginning and a
+  ucon64_restore_rominfo() call at the end of the <console>_init functions.
+*/
+static struct
+{
+  int interleaved;
+  int splitted;
+  int snes_hirom;
+  long buheader_len;
+} force_fields;
+
+void
+ucon64_save_rominfo (st_rom_t *rominfo)
+{
+  // only these fields need to be preserved (st_rom_t is quite big)
+  force_fields.interleaved = rominfo->interleaved;
+  force_fields.splitted = rominfo->splitted;
+  force_fields.snes_hirom = rominfo->snes_hirom;
+  force_fields.buheader_len = rominfo->buheader_len;
+}
+
+
+int
+ucon64_restore_rominfo (int result, st_rom_t *rominfo)
+{
+  // rominfo has to be restored only if the ROM doesn't belong to a specific console
+  if (result != 0)
+  {
+    rominfo->interleaved = force_fields.interleaved;
+    rominfo->splitted = force_fields.splitted;
+    rominfo->snes_hirom = force_fields.snes_hirom;
+    rominfo->buheader_len = force_fields.buheader_len;
+  }
+
+  return result;
+}
+

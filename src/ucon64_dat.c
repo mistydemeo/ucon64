@@ -189,27 +189,28 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
     {"Good2600", custom_strnicmp, UCON64_ATARI, atari_usage},
     {"Good5200", custom_strnicmp, UCON64_ATARI, atari_usage},
     {"Good7800", custom_strnicmp, UCON64_ATARI, atari_usage},
-//  more or less unique names could be compared with custom_strnicmp()
+//  more or less unique names could be compared with custom_stristr()
     {"Neo-Geo", custom_strnicmp, UCON64_NEOGEO, neogeo_usage},
     {"MAME", custom_stristr, UCON64_MAME, mame_usage},
     {"Dreamcast", custom_stristr, UCON64_DC, dc_usage},
     {"Saturn", custom_stristr, UCON64_SATURN, sat_usage},
     {"3do", custom_stristr, UCON64_REAL3DO, real3do_usage},
-    {"cdi", custom_stristr, UCON64_CDI, cdi_usage},
+    {"CDi", custom_stristr, UCON64_CDI, cdi_usage},
+    {"XBox", custom_stristr, UCON64_XBOX, xbox_usage},
+    {"CD32", custom_stristr, UCON64_CD32, cd32_usage},
+    {"Vectrex", custom_stristr, UCON64_VECTREX, vectrex_usage},
+    {"swan", custom_stristr, UCON64_WONDERSWAN, swan_usage},
+    {"Coleco", custom_stristr, UCON64_COLECO, coleco_usage},
+    {"Intelli", custom_stristr, UCON64_INTELLI, intelli_usage},
 /* TODO:
     {"psx", custom_stristr, UCON64_PSX, psx_usage},
     {"ps1", custom_stristr, UCON64_PSX, psx_usage},
     {"psone", custom_stristr, UCON64_PSX, psx_usage},
     {"ps2", custom_stristr, UCON64_PS2, ps2_usage},
     {"dc", custom_stristr, UCON64_DC, dc_usage},
-    {"cd32", custom_stristr, UCON64_CD32, cd32_usage},
     {"system", custom_stristr, UCON64_SYSTEM16, s16_usage},
     {"pocket", custom_stristr, UCON64_NEOGEOPOCKET, ngp_usage},
-    {"vectrex", custom_stristr, UCON64_VECTREX, vectrex_usage},
     {"virtual", custom_stristr, UCON64_VIRTUALBOY, vboy_usage},
-    {"swan", custom_stristr, UCON64_WONDERSWAN, swan_usage},
-    {"coleco", custom_stristr, UCON64_COLECO, coleco_usage},
-    {"intelli", custom_stristr, UCON64_INTELLI, intelli_usage},
     {"", custom_stristr, 0, cd32_usage},
     {"", custom_stristr, 0, cdi_usage},
     {"", custom_stristr, 0, channelf_usage},
@@ -226,7 +227,6 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
     {"", custom_stristr, 0, vboy_usage},
     {"", custom_stristr, 0, vc4000_usage},
     {"", custom_stristr, 0, vectrex_usage},
-    {"", custom_stristr, 0, xbox_usage},
 */
     {0, 0, 0, 0}
   };

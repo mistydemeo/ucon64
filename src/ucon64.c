@@ -444,8 +444,7 @@ main (int argc, char **argv)
   ucon64.show_nfo = UCON64_YES;
 
 #ifdef  ANSI_COLOR
-  ucon64.ansi_color = ((!strcmp (get_property (ucon64.configfile, "ansi_color", buf, "1"), "1")) ?
-               1 : 0);
+  ucon64.ansi_color = get_property_int (ucon64.configfile, "ansi_color", '=');
 #endif
 
 //  ucon64.type =
@@ -767,7 +766,7 @@ ucon64_console_probe (st_rominfo_t *rominfo)
       {0, NULL}
     };
 
-  if (ucon64.console != UCON64_UNKNOWN)
+  if (ucon64.console != UCON64_UNKNOWN) //  force recognition option was used
     {
       for (x = 0; probe[x].console != 0; x++)
         if (probe[x].console == ucon64.console)
@@ -777,18 +776,20 @@ ucon64_console_probe (st_rominfo_t *rominfo)
             break;
           }
     }
-  else
-    if (UCON64_TYPE_ISROM (ucon64.type))
-      for (x = 0; probe[x].console != 0; x++)
-        if (probe[x].auto_recognition)
-          {
-            ucon64_flush (rominfo);
-            if (!probe[x].init (rominfo)) 
-              {
-                ucon64.console = probe[x].console;
-                break;
-              }
-          }
+  else // give auto_recognition a try
+    {
+      if (UCON64_TYPE_ISROM (ucon64.type)) // TODO: still needed?
+        for (x = 0; probe[x].console != 0; x++)
+          if (probe[x].auto_recognition)
+            {
+              ucon64_flush (rominfo);
+              if (!probe[x].init (rominfo)) 
+                {
+                  ucon64.console = probe[x].console;
+                  break;
+                }
+            }
+    }
 
   return (ucon64.console == UCON64_UNKNOWN) ? (-1) : 0;
 }

@@ -1925,8 +1925,7 @@ snes_n (st_rominfo_t *rominfo, const char *name)
   char buf[SNES_NAME_LEN], dest_name[FILENAME_MAX];
 
   memset (buf, ' ', SNES_NAME_LEN);
-  strncpy (buf, name, strlen (name) > SNES_NAME_LEN ?
-                        SNES_NAME_LEN : strlen (name));
+  strncpy (buf, name, strlen (name) > SNES_NAME_LEN ? SNES_NAME_LEN : strlen (name));
   strcpy (dest_name, ucon64.rom);
   ucon64_file_handler (dest_name, NULL, 0);
   q_fcpy (ucon64.rom, 0, ucon64.file_size, dest_name, "wb");
@@ -1959,13 +1958,13 @@ snes_chk (st_rominfo_t *rominfo)
                                     snes_header.checksum_high) +
                                    2 * 0xff; // + 2 * 0;
   // change inverse checksum
-  q_fputc (dest_name, image + 44, (0xffff - rominfo->current_internal_crc), "r+b");      // low byte
-  q_fputc (dest_name, image + 45, (0xffff - rominfo->current_internal_crc) >> 8, "r+b"); // high byte
+  buf[0] = 0xffff - rominfo->current_internal_crc;        // low byte
+  buf[1] = (0xffff - rominfo->current_internal_crc) >> 8; // high byte
   // change checksum
-  q_fputc (dest_name, image + 46, rominfo->current_internal_crc, "r+b");      // low byte
-  q_fputc (dest_name, image + 47, rominfo->current_internal_crc >> 8, "r+b"); // high byte
+  buf[2] = rominfo->current_internal_crc;       // low byte
+  buf[3] = rominfo->current_internal_crc >> 8;  // high byte
+  q_fwrite (buf, image + 44, 4, dest_name, "r+b");
 
-  q_fread (buf, image + 44, 4, dest_name);
   mem_hexdump (buf, 4, image + 44);
 
   printf (ucon64_msg[WROTE], dest_name);
@@ -2972,12 +2971,11 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
       //  the last file doesn't get detected as being split. Besides, we don't
       //  want to crash on *any* input data.
       int i_max = half_internal_rom_size > rom_size ? rom_size : half_internal_rom_size;
-
-      for (i = 0; i < i_max; i++) // normal ROM
+      for (i = 0; i < i_max; i++)               // normal ROM
         sum1 += (*rom_buffer)[i];
 
       remainder = rom_size - half_internal_rom_size;
-      if (!remainder)                           // don't devide by zero below
+      if (!remainder)                           // don't divide by zero below
         remainder = half_internal_rom_size;
 
       sum2 = 0;

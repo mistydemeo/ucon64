@@ -1343,7 +1343,7 @@ ucon64_options (int c, const char *optarg)
       break;
 
     case UCON64_N2GB:
-      gameboy_n2gb (optarg);
+      gameboy_n2gb (ucon64.rominfo, optarg);
       break;
 
     case UCON64_NROT:

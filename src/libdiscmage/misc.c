@@ -906,13 +906,13 @@ get_property (const char *filename, const char *propname, char *buffer, const ch
     {                                           //  avoids trouble under DOS
       while (fgets (buf, sizeof buf, fh) != NULL)
         {
-          if ((p = strpbrk (buf, "\n")))        // strip any returns
+          if ((p = strpbrk (buf, "\n\r")))        // strip *ANY* returns
             *p = 0;
 
           if (*(buf + strspn (buf, "\t ")) == '#')
             continue;
 
-          *(buf + strcspn (buf, "#")) = 0;      // comment at end of a line
+//          *(buf + strcspn (buf, "#")) = 0;      // comment at end of a line
 
           if (!strnicmp (buf, propname, strlen (propname)))
             {

@@ -853,8 +853,19 @@ ucon64_init (const char *romfile, st_rominfo_t *rominfo)
 void
 ucon64_dat_nfo (const ucon64_dat_t *dat)
 {
-  printf ("DAT: %s\nDAT: %s\nDAT: Filename: %s\nDAT: Size: %d Bytes (%.4f Mb)\n",
+  printf ("DAT: %s\n"
+          "DAT: Version: %s (%s, %s)\n"
+          "DAT: Author: %s\n"
+//          "DAT: Comment: %s\n"
+          "DAT: %s\n"
+          "DAT: Filename: %s\n"
+          "DAT: Size: %d Bytes (%.4f Mb)\n",
           dat->datfile,
+          dat->version,
+          dat->date,
+          dat->refname,
+          dat->author,
+//          dat->comment,
           dat->name,
           dat->fname,
           dat->fsize,

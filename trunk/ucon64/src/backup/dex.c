@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include "config.h"
 char *dex_title = "DexDrive\n"
-                  "InterAct http://www.dexdrive.de";
+                  "  InterAct http://www.dexdrive.de";
 
 
 #ifdef BACKUP

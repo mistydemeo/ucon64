@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include "config.h"
 char *cd64_title = "CD64\n"
-                   "19XX UFO http://www.cd64.com";
+                   "  19XX UFO http://www.cd64.com";
 
 
 #ifdef BACKUP

@@ -67,7 +67,7 @@ endif                                   # cygwin
 
 distclean: clean
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f ../bin/$(TARGET) Makefile config.log config.status config.cache
+	rm -f ../bin/$(TARGET) Makefile config.log config.status config.cache config.h
 else
 ifdef DJGPP
 	del ..\bin\$(TARGET)
@@ -76,7 +76,7 @@ ifdef DJGPP
 	del config.status
 	del config.cache
 else
-	rm -f ../bin/$(TARGET) Makefile config.log config.status config.cache
+	rm -f ../bin/$(TARGET) Makefile config.log config.status config.cache config.h
 endif                                   # DJGPP
 endif                                   # cygwin
 

@@ -27,9 +27,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define UCON64_H
 
 #include <dirent.h>                             // for *temp
+#include "config.h"                             // ANSI_COLOR
 #include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
-#include "config.h"                             // ANSI_COLOR
+#ifdef  ANSI_COLOR
+#ifdef  DJGPP
+#include <dpmi.h>
+#endif
+#endif
 
 /*
   this struct holds only workflow relevant information
@@ -49,6 +54,10 @@ typedef struct st_ucon64
                                                 // (const char *)rom will point then to this
 
   const char *file;                             // file (cmdline) with path
+
+#ifdef  ANSI_COLOR
+  int ansi_color;
+#endif
 
   unsigned int parport;                         // parallel port address
   int parport_mode;                             // parallel port mode: ECP, EPP, SPP, other
@@ -122,9 +131,6 @@ typedef struct st_rominfo
 } st_rominfo_t;
 
 extern const struct option long_options[];
-#ifdef  ANSI_COLOR
-extern int ucon64_ansi_color;
-#endif
 
 extern int ucon64_nfo (const st_rominfo_t *);
 extern int ucon64_init (const char *romfile, st_rominfo_t *);

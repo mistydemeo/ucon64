@@ -102,12 +102,7 @@ static void ucon64_exit (void);
 static void ucon64_usage (int argc, char *argv[]);
 
 st_ucon64_t ucon64;
-#ifdef  ANSI_COLOR
-int ucon64_ansi_color = 0;
-#ifdef  DJGPP
-#include <dpmi.h>
-#endif
-#endif
+
 static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S
 #if 0
                              "/" CURRENT_ENDIAN_S
@@ -225,7 +220,6 @@ const struct option long_options[] = {
     {"rom", 1, 0, UCON64_ROM},
     {"rotl", 0, 0, UCON64_ROTL},
     {"rotr", 0, 0, UCON64_ROTR},
-    {"ru", 0, 0, UCON64_RU},
     {"s", 0, 0, UCON64_S},
     {"s16", 0, 0, UCON64_S16},
     {"sam", 0, 0, UCON64_SAM},
@@ -324,22 +318,6 @@ main (int argc, char **argv)
   const char *ucon64_argv[128];
   st_rominfo_t rom;
 
-#ifdef  ANSI_COLOR
-  ucon64_ansi_color = isatty (STDOUT_FILENO);
-#ifdef  DJGPP
-// Don't use __MSDOS__, because __dpmi_regs and __dpmi_int are DJGPP specific
-  if (ucon64_ansi_color)
-    {
-      __dpmi_regs reg;
-
-      reg.x.ax = 0x1a00;                        // DOS 4.0+ ANSI.SYS installation check
-      __dpmi_int (0x2f, &reg);
-      if (reg.h.al != 0xff)                     // AL == 0xff if installed
-        ucon64_ansi_color = 0;
-    }
-#endif
-#endif
-
   printf ("%s\n"
     "Uses code from various people. See 'developers.html' for more!\n"
     "This may be freely redistributed under the terms of the GNU Public License\n\n",
@@ -363,6 +341,10 @@ main (int argc, char **argv)
   ucon64_configfile ();
 
   ucon64.show_nfo = UCON64_YES;
+
+#ifdef  ANSI_COLOR
+  ucon64.ansi_color = ansi_init ();
+#endif
 
   ucon64.type =
   ucon64.buheader_len =
@@ -788,7 +770,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
             rominfo->internal_crc_len * 2, rominfo->internal_crc_len * 2);
           printf (buf,
 #ifdef  ANSI_COLOR
-            ucon64_ansi_color ?
+            ucon64.ansi_color ?
               ((rominfo->current_internal_crc == rominfo->internal_crc) ?
                 "\x1b[01;32mok\x1b[0m" : "\x1b[01;31mbad\x1b[0m")
               :

@@ -44,11 +44,11 @@ typedef struct st_smd_header
   unsigned char size;
   unsigned char id0;
   unsigned char split;
-  char pad2[5];
+  char pad[5];
   unsigned char id1;
   unsigned char id2;
   unsigned char type;
-  char pad3[501];
+  char pad2[501];
 } st_smd_header_t;
 
 

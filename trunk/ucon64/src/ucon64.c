@@ -731,6 +731,8 @@ ucon64_console_probe (st_rominfo_t *rominfo)
           (!jaguar_init (ucon64_flush (rominfo))) ? UCON64_JAGUAR :
           UCON64_UNKNOWN;
 
+      ucon64_flush (rominfo);
+
       return (ucon64.console == UCON64_UNKNOWN) ? (-1) : 0;
 
     default:

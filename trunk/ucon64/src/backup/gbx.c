@@ -2,7 +2,7 @@
 gbx.c - Gameboy Xchanger support for uCON64
 
 written by 1999 - 2001 NoisyB (noisyb@gmx.net)
-                  2001 dbjh
+           2001 - 2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -128,7 +128,6 @@ newfsize (char *fname)
   return sbuf.st_size;
 }
 
-
 void
 disp_buffer (unsigned int disp_len)
 {
@@ -193,8 +192,8 @@ void
 spp_set_ai (unsigned char _ai)
 {
   set_data_write
-//   outportb(port_a,1);                // nastb=1,nib_sel=0,ndstb=1,nwrite=0
-    outportb (port_8, _ai);     // put ai at data bus
+//  outportb(port_a,1);           // nastb=1,nib_sel=0,ndstb=1,nwrite=0
+  outportb (port_8, _ai);       // put ai at data bus
   outportb (port_a, 9);         // nastb=0,nib_sel=0,ndstb=1,nwrite=0
   outportb (port_a, 1);         // nastb=1,nib_sel=0,ndstb=1,nwrite=0
   // nastb ~~~~|___|~~~~
@@ -221,7 +220,8 @@ char
 spp_read_data (void)
 {
   char low_nibble, high_nibble, temp;
-  set_data_read outportb (port_a, 2);   // nastb=1,nib_sel=0,ndstb=0,nwrite=1
+  set_data_read
+  outportb (port_a, 2);         // nastb=1,nib_sel=0,ndstb=0,nwrite=1
   low_nibble = inportb (port_9);
   outportb (port_a, 6);         // nastb=1,nib_sel=1,ndstb=0,nwrite=1
   high_nibble = inportb (port_9);
@@ -232,24 +232,26 @@ spp_read_data (void)
   return temp;
 }
 
-
 void
 epp_set_ai (unsigned char _ai)
 {
-  set_data_write outportb (ai, _ai);
+  set_data_write
+  outportb (ai, _ai);
 }
 
 void
 epp_set_ai_data (unsigned char _ai, unsigned char _data)
 {
   epp_set_ai (_ai);
-  set_data_write outportb (data, _data);
+  set_data_write
+  outportb (data, _data);
 }
 
 void
 set_ai (unsigned char _ai)
 {
-  set_data_write if (port_type)
+  set_data_write
+  if (port_type)
       spp_set_ai (_ai);
   else
     epp_set_ai (_ai);
@@ -296,7 +298,6 @@ end_port (void)
   set_ai_data (2, 0);           // rst=0, wei=0(dis.), rdi=0(dis.)
   set_normal                    // ninit=1, nWrite=1
 }
-
 
 unsigned char
 write_32k_file (void)
@@ -408,7 +409,6 @@ set_rom_bank (unsigned char bank)
     set_bank (0x2100, bank);    // for MCB2
 }
 
-
 volatile void
 delay_10us ()
 // Hmmm, usleep() can be used on UNIX, but default under DOS is delay() which
@@ -438,7 +438,8 @@ out_byte_eeprom (unsigned char d)
   set_ai_data (2, 0x82);        // wei enable
   set_ai (3);                   // default write mode
 //   set_data_read              // ninit=0, nWrite=1
-  set_data_write write_data (d);        // out data
+  set_data_write
+  write_data (d);               // out data
 //   outportb(data,d);          // out data
   set_ai_data (2, 0x80);        // wei disable
   set_ai (3);                   // default write mode
@@ -449,11 +450,10 @@ out_byte (unsigned char d)
 {
   set_ai (3);
 //   set_data_read              // ninit=0, nWrite=1
-  set_data_write write_data (d);        // out data
+  set_data_write
+  write_data (d);               // out data
 //   outportb(data,d);          // out data
 }
-
-
 
 void
 out_data (unsigned char h, unsigned char m, unsigned char l, unsigned char d)
@@ -465,15 +465,14 @@ out_data (unsigned char h, unsigned char m, unsigned char l, unsigned char d)
   else
     m = m & 0x3f;               // bank 0
 
-
   set_adr (0x2000);             // write 2000:h
-  set_data_write write_data (h);        // set rom bank value
+  set_data_write
+  write_data (h);               // set rom bank value
 //   outportb(data,h);          // set rom bank value
   set_ai_data (1, m);           // a[15..8]
   set_ai_data (0, l);           // a[7..0]
   out_byte_eeprom (d);          // write data to eeprom
 }
-
 
 void
 out_adr2_data (unsigned long adr, unsigned char d)      // address shift 1 bit
@@ -488,13 +487,13 @@ out_adr2_data (unsigned long adr, unsigned char d)      // address shift 1 bit
     m |= 0x40;                  // >bank 0
 
   set_adr (0x2000);             // write 2000:h
-  set_data_write write_data (h);        // set rom bank value
+  set_data_write
+  write_data (h);               // set rom bank value
 //   outportb(data,h);          // set rom bank value
   set_ai_data (1, m);           // a[15..8]
   set_ai_data (0, l);           // a[7..0]
   out_byte_eeprom (d);          // write data to eeprom
 }
-
 
 void
 out_adr_data (unsigned long adr, unsigned char d)       // real address
@@ -509,9 +508,11 @@ out_adr_data (unsigned long adr, unsigned char d)       // real address
     m |= 0x40;                  // >bank 0
 
   set_adr (0x3000);             // write 3000:sh
-  set_data_write write_data (xh);       // set rom bank extend value
+  set_data_write
+  write_data (xh);              // set rom bank extend value
   set_adr (0x2000);             // write 2000:h
-  set_data_write write_data (h);        // set rom bank value
+  set_data_write
+  write_data (h);               // set rom bank value
 //   outportb(data,h);          // set rom bank value
   set_ai_data (1, m);           // a[15..8]
   set_ai_data (0, l);           // a[7..0]
@@ -531,21 +532,22 @@ set_adr_long (unsigned long adr)        // real address
     m |= 0x40;                  // >bank 0
 
   set_adr (0x3000);             // write 3000:sh
-  set_data_write write_data (xh);       // set rom bank extend value
+  set_data_write
+  write_data (xh);              // set rom bank extend value
   set_adr (0x2000);             // write 2000:h
-  set_data_write write_data (h);        // set rom bank value
+  set_data_write
+  write_data (h);               // set rom bank value
 //   outportb(data,h);          // set rom bank value
   set_ai_data (1, m);           // a[15..8]
   set_ai_data (0, l);           // a[7..0]
 }
-
 
 unsigned char
 read_byte (void)
 {
   set_ai (3);                   // default write mode
   set_data_read                 // ninit=0, nWrite=1
-    return read_data ();
+  return read_data ();
 //   return inportb(data);
 }
 
@@ -615,7 +617,6 @@ reset_to_read (void)            // return to read mode
   out_adr2_data (0x5555, 0xf0); // 5555:f0
 }
 
-
 void
 read_status_reg_cmd (void)
 {
@@ -623,9 +624,6 @@ read_status_reg_cmd (void)
   out_adr2_data (0x2aaa, 0x55); // 2aaa:55
   out_adr2_data (0x5555, 0x70); // 5555:70
 }
-
-
-
 
 char
 wait_status (void)
@@ -653,7 +651,6 @@ wait_status (void)
 //   reset_to_read();
   return 0;
 }
-
 
 char
 mx_erase (void)
@@ -730,7 +727,6 @@ intel_check_status (void)
   return 0;
 }
 
-
 char
 intel_block_erase (unsigned long block)
 {
@@ -777,11 +773,9 @@ intel_block_erase (unsigned long block)
     }
 }
 
-
 char
 intel_erase (void)
 {
-
   unsigned long block;
   for (block = 0; block < 64; block++)
     {
@@ -791,7 +785,6 @@ intel_erase (void)
   printf ("Erase completed\n");
   return 0;
 }
-
 
 char
 erase (void)
@@ -850,7 +843,6 @@ mx_id (void)
   reset_to_read ();             // reset to read mode
 }
 
-
 void
 win_id (void)
 {
@@ -877,7 +869,6 @@ win_id (void)
   out_data (0, 0x55, 0x55, 0xf0);       /* adr2,adr1,adr0,data */
 }
 
-
 void
 intel_id (void)
 {
@@ -893,7 +884,6 @@ intel_id (void)
   printf ("Device Code = %x\n", mix.buffer[1]);
 }
 
-
 void
 disp_id (void)
 {
@@ -904,7 +894,6 @@ disp_id (void)
   if (eeprom_type == 64)
     intel_id ();
 }
-
 
 void
 out_adr_data_32k (unsigned int adr, unsigned char data)
@@ -1001,7 +990,6 @@ check_64m:
       eeprom_type = 0;
       return 1;
     }
-
 }
 
 void
@@ -1010,7 +998,6 @@ set_sram_bank (unsigned char bank)
   set_adr (0x4000);             // set sram adr
   out_byte (bank);              // sram bank 0
 }
-
 
 void
 read_eeprom_16k (unsigned int bank_16k)
@@ -1038,7 +1025,8 @@ read_eeprom_16k (unsigned int bank_16k)
       set_ai_data (0, 0);       // a[7..0]
       set_ai_data (2, 0x81);    // enable read inc.
       set_ai (3);               // read/write data
-      set_data_read for (i = 0; i < 256; i++)
+      set_data_read
+      for (i = 0; i < 256; i++)
         {                       // page=256
 //       set_ai_data(0,i);              // a[7..0]
 //       mix.buffer[idx+i]=read_byte();
@@ -1079,7 +1067,8 @@ verify_eeprom_16k (unsigned int bank_16k)
       set_ai_data (0, 0);       // a[7..0]
       set_ai_data (2, 0x81);    // enable read inc.
       set_ai (3);               // read/write data
-      set_data_read for (i = 0; i < 256; i++)
+      set_data_read
+      for (i = 0; i < 256; i++)
         {
           temp = read_data ();
 //       temp=inportb(data);
@@ -1096,7 +1085,6 @@ verify_eeprom_16k (unsigned int bank_16k)
   return 0;
 }
 
-
 void
 set_page_write (void)           // start page write command
 {
@@ -1104,7 +1092,6 @@ set_page_write (void)           // start page write command
   out_adr2_data (0x2aaa, 0x55); // 2aaa:55
   out_adr2_data (0x5555, 0xa0); // 5555:a0
 }
-
 
 char
 page_write_128 (unsigned int bank_16k, unsigned char hi_lo)
@@ -1154,7 +1141,8 @@ page_write_128 (unsigned int bank_16k, unsigned char hi_lo)
       set_ai_data (0, hi_lo);   // a[7..0]
       set_ai_data (2, 0x81);    // enable inc.
       set_ai (3);               // read/write data
-      set_data_read for (i = 0; i < 128; i++)
+      set_data_read
+      for (i = 0; i < 128; i++)
         {                       // page=128
           temp = read_data ();
 //          temp=inportb(data);
@@ -1236,7 +1224,8 @@ win_write_eeprom_16k (unsigned int bank_16k)
           set_ai_data (0, 0);   // a[7..0]
           set_ai_data (2, 0x81);        // enable read inc.
           set_ai (3);           // read/write data
-          set_data_read for (i = 0; i < 256; i++)
+          set_data_read
+          for (i = 0; i < 256; i++)
             {
 //          set_ai_data(0,i);           // a[7..0]
               temp = read_data ();
@@ -1269,7 +1258,6 @@ win_write_eeprom_16k (unsigned int bank_16k)
 //   return 0;
 }
 
-
 char
 mx_write_eeprom_16k (unsigned int bank_16k)
 {
@@ -1289,10 +1277,6 @@ mx_write_eeprom_16k (unsigned int bank_16k)
   return verify_eeprom_16k (bank_16k);
 }
 
-
-
-
-
 /*void dump_intel_data(void)
 {
    out_adr_data(0,0xff);// read array command
@@ -1303,7 +1287,6 @@ mx_write_eeprom_16k (unsigned int bank_16k)
    disp_buffer(64);
 }
 */
-
 
 char
 intel_byte_write_32 (unsigned long block_adr)
@@ -1328,7 +1311,6 @@ intel_byte_write_32 (unsigned long block_adr)
     return -1;                  // error
 }
 
-
 char
 intel_buffer_write_32 (unsigned long block_adr)
 {
@@ -1337,7 +1319,7 @@ intel_buffer_write_32 (unsigned long block_adr)
   set_ai (3);                   // default write mode
 //   write_data(0xe8);          // Write buffer command
   set_data_read                 // ninit=0, nWrite=1
-    time_out = 0x80000;
+  time_out = 0x80000;
 //   while(!(read_byte() & 0x80)){
   while (!(read_data () & 0x80))
     {
@@ -1349,7 +1331,8 @@ intel_buffer_write_32 (unsigned long block_adr)
 //       dump_intel_data();
           return -1;
         }
-      set_data_write write_data (0xe8); // out data
+      set_data_write
+      write_data (0xe8);        // out data
       set_data_read
 //      out_byte_eeprom(0xe8);  // write buffer command
     }
@@ -1366,7 +1349,6 @@ intel_buffer_write_32 (unsigned long block_adr)
   write_data (0xd0);            // write confirm command
   return 0;
 }
-
 
 char
 intel_write_eeprom_16k (unsigned int bank_16k)
@@ -1396,7 +1378,6 @@ intel_write_eeprom_16k (unsigned int bank_16k)
         }
     }
 
-
   if (intel_check_status ())
     {
       printf ("Intel buffer write command error\n");
@@ -1407,15 +1388,12 @@ intel_write_eeprom_16k (unsigned int bank_16k)
   if (intel_read_status () != 0x80)
     return -1;                  // error
 
-
-
   out_adr_data (0, 0xff);       // read array
   set_data_read
 //   printf(" ok\n");
 //   return 0;
     return verify_eeprom_16k (bank_16k);
 }
-
 
 void
 chk_dsp_name (char chk)
@@ -1486,7 +1464,6 @@ verify_cart_from_file (void)
   return 0;
 }
 
-
 char
 write_eeprom_16k (unsigned int bank_16k)
 {
@@ -1498,7 +1475,6 @@ write_eeprom_16k (unsigned int bank_16k)
     return intel_write_eeprom_16k (bank_16k);
   return -1;
 }
-
 
 char
 write_cart_from_file (void)
@@ -1638,7 +1614,7 @@ backup_rom (void)               //no_page=how many 32K
         {
           printf ("\nverify cart error at bank = %x\n", rom_bank);
 //                      fclose(fptr);
-//                      return -1;              // dbjh: why not return?
+//                      return -1;              // why not return? (dbjh)
         }
 
       if (write_file_xxk (0x4000) != 0)
@@ -1830,12 +1806,9 @@ check_card (void)
   return 0;
 }
 
-
-
 char
 open_read ()
 {
-
   filesize = newfsize (file_name);
   if (filesize == -1)
     {
@@ -1866,7 +1839,6 @@ open_read ()
   return 0;
 }
 
-
 char
 check_header (char mode)
 {
@@ -1881,14 +1853,12 @@ check_header (char mode)
     }
   else
     {
-
       if (open_read ())
         return -1;
       for (i = 0; i < 0x50; i++)
         {
           mix.buffer[i] = mix.buffer[i + 0x100];
         }
-
     }
   return check_card ();
 }
@@ -2012,7 +1982,6 @@ gen_pat (unsigned int offset)
     }
 }
 
-
 char
 test_sram_v (void)
 {
@@ -2029,7 +1998,8 @@ test_sram_v (void)
           set_ai_data (0, 0);   // a[7..0]=0
           set_ai_data (2, 0x81);        // enable inc
           set_ai (3);           // point to data r/w port
-          set_data_read for (i = 0; i < 256; i++)
+          set_data_read
+          for (i = 0; i < 256; i++)
             {
               temp = read_data ();
 //          temp=inportb(data);
@@ -2051,8 +2021,6 @@ test_sram_v (void)
   return 0;
 }
 
-
-
 char
 test_sram_wv (void)
 {
@@ -2070,7 +2038,8 @@ test_sram_wv (void)
           set_ai_data (0, 0);   // a[7..0]=0
           set_ai_data (2, 0x81);        // enable inc
           set_ai (3);           // point to data r/w port
-          set_data_write for (i = 0; i < 256; i++)
+          set_data_write
+          for (i = 0; i < 256; i++)
             {
               write_data (mix.buffer[i + idx]);
 //          outportb(data,mix.buffer[i+idx]);
@@ -2124,11 +2093,11 @@ check_port_xpp (void)
   set_ai_data (0, 0x34);
   set_ai (1);
   set_data_read                 // ninit=0, nwrite=1
-    if (read_data () != 0x12)
+  if (read_data () != 0x12)
     return 1;
   set_ai (0);
   set_data_read                 // ninit=0, nwrite=1
-    if (read_data () != 0x34)
+  if (read_data () != 0x34)
     return 1;
   end_port ();
   return 0;
@@ -2184,8 +2153,6 @@ open_read_sram ()
           printf ("filesize error\n");
           return -1;
         }
-
-
     }
   else
     {
@@ -2237,7 +2204,6 @@ write_sram_xxk (unsigned int length)
   return 0;
 }
 
-
 char
 read_all_sram_to_file (void)
 {
@@ -2265,7 +2231,8 @@ read_all_sram_to_file (void)
           set_ai_data (0, 0);   // a[7..0]=0
           set_ai_data (2, 0x81);        // enable inc
           set_ai (3);           // point to data r/w port
-          set_data_read for (i = 0; i < 256; i++)
+          set_data_read
+          for (i = 0; i < 256; i++)
             {
               mix.buffer[i + idx] = read_data ();
 //          mix.buffer[i+idx]=inportb(data);
@@ -2332,7 +2299,8 @@ read_8k_sram_to_file (void)
         set_ai_data (0, 0);     // a[7..0]=0
         set_ai_data (2, 0x81);  // enable inc
         set_ai (3);             // point to data r/w port
-        set_data_read for (i = 0; i < 256; i++)
+        set_data_read
+        for (i = 0; i < 256; i++)
           {
             mix.buffer[i + idx] = read_data ();
 //          mix.buffer[i+idx]=inportb(data);
@@ -2341,7 +2309,7 @@ read_8k_sram_to_file (void)
         idx = idx + 256;
       }
   }
-  nbytes += 8 * 1024;           // dbjh: should this be in loop?
+  nbytes += 8 * 1024;           // should this be in loop? (dbjh)
   parport_gauge (starttime, nbytes, 8 * 1024);
 
   if (write_sram_xxk (0x2000) != 0)
@@ -2354,7 +2322,6 @@ read_8k_sram_to_file (void)
 
   return 0;
 }
-
 
 char
 write_all_sram_from_file (void)
@@ -2380,7 +2347,6 @@ write_all_sram_from_file (void)
               fclose (fptr);
               return -1;
             }
-
         }
 //      printf("w");
       set_sram_bank (bank);
@@ -2391,7 +2357,8 @@ write_all_sram_from_file (void)
           set_ai_data (0, 0);   // a[7..0]=0
           set_ai_data (2, 0x81);        // enable inc
           set_ai (3);           // point to data r/w port
-          set_data_write for (i = 0; i < 256; i++)
+          set_data_write
+          for (i = 0; i < 256; i++)
             {
               write_data (mix.buffer[i + idx]);
 //          outportb(data,mix.buffer[i+idx]);
@@ -2453,7 +2420,8 @@ write_8k_sram_from_file (void)
         set_ai_data (0, 0);     // a[7..0]=0
         set_ai_data (2, 0x81);  // enable inc
         set_ai (3);             // point to data r/w port
-        set_data_write for (i = 0; i < 256; i++)
+        set_data_write
+        for (i = 0; i < 256; i++)
           {
             write_data (mix.buffer[i + idx]);
 //          outportb(data,mix.buffer[i+idx]);
@@ -2462,7 +2430,7 @@ write_8k_sram_from_file (void)
         idx = idx + 256;
       }
   }
-  nbytes += 8 * 1024;           // dbjh: should this be in loop?
+  nbytes += 8 * 1024;           // should this be in loop? (dbjh)
   parport_gauge (starttime, nbytes, 8 * 1024);
 
   printf ("\nwrite sram 64kbits at bank %d ok\n", sram_bank_num);
@@ -2483,11 +2451,9 @@ try_read (void)
   disp_buffer (16);
 }
 
-
 void
 try_read0 (void)
 {
-
   set_rom_bank (1);
   for (j = 0; j < 4; j++)
     {
@@ -2509,7 +2475,6 @@ try_read0 (void)
       try_read ();
     }
 }
-
 
 void
 test_intel (void)
@@ -2655,8 +2620,7 @@ gbx_write_sram (char *filename, unsigned int parport, int bank)
 int
 gbx_usage (int argc, char *argv[])
 {
-
-    printf ("%s\n", gbx_TITLE);
+  printf ("%s\n", gbx_TITLE);
 
   printf ("  -xgbx         send/receive ROM to/from GB Xchanger; $FILE=PORT\n"
           "                receives automatically when $ROM does not exist\n"

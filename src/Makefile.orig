@@ -16,17 +16,17 @@ endif
 # environment variable DJGPP can be set under Bash for people who have
 # installed both gcc (and friends) ports.
 
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-
-ifdef DISCMAGE
-FULLLIBNAME_DM=$(LIBNAME_DM).dll
-ifndef DLOPEN
-LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
+GCC_WIN=0
+# test cygwin before DJGPP; OSTYPE is not a real env var on Cygwin
+ifeq ($(TERM),cygwin)                   
+GCC_WIN=1
 endif
+# test msys before DJGPP; Msys, MinGW's POSIX build environment
+ifeq ($(OSTYPE),msys)
+GCC_WIN=1
 endif
 
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(GCC_WIN),1)
 
 ifdef DISCMAGE
 FULLLIBNAME_DM=$(LIBNAME_DM).dll
@@ -65,15 +65,14 @@ endif
 
 else                                    # DLOPEN
 ifdef DISCMAGE                          # GNU specific: "simply expanded variable"
-FULLLIBNAME_DM:=$(addprefix lib, $(FULLLIBNAME_DM))
+FULLLIBNAME_DM:=$(addprefix lib,$(FULLLIBNAME_DM))
 LDFLAGS+=-Llibdiscmage -l$(LIBNAME_DM)
 endif
 
 endif
 
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
 
 OBJECTS=ucon64.o ucon64_opts.o ucon64_misc.o ucon64_dat.o \
@@ -101,39 +100,28 @@ endif
 ifdef DLOPEN
 OBJECTS+=dlopen.o
 ifndef ZLIB
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-else
-ifeq ($(OSTYPE),msys)
+ifeq ($(GCC_WIN),1)
 else
 ifdef DJGPP                             # DJGPP code in dlopen needs map code
 OBJECTS+=map.o
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 endif                                   # ZLIB
 else
-ifeq ($(TERM),cygwin)                   # Cygwin code in ucon64_misc needs dlopen code
+ifeq ($(GCC_WIN),1)                     # Cygwin/MinGW code in ucon64_misc needs dlopen code
 OBJECTS+=dlopen.o
-else
-ifeq ($(OSTYPE),msys)
-OBJECTS+=dlopen.o
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 endif                                   # DLOPEN
 
 
 TARGET=ucon64
-ifeq ($(TERM),cygwin)                   # OSTYPE is not a real env var on Cygwin
-TARGET:=$(addsuffix .exe, $(TARGET))    # adding .exe avoids "problems" with Cygwin
-else
-ifeq ($(OSTYPE),msys)                   # Msys, MinGW's POSIX build environment
-TARGET:=$(addsuffix .exe, $(TARGET))
+ifeq ($(GCC_WIN),1)
+TARGET:=$(addsuffix .exe,$(TARGET))     # adding .exe avoids "problems" with Cygwin/MinGW
 else
 ifdef DJGPP                             # OSTYPE is not defined by default under DOS
-TARGET:=$(addsuffix .exe, $(TARGET))
+TARGET:=$(addsuffix .exe,$(TARGET))
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
 all: libdiscmage/$(FULLLIBNAME_DM) $(TARGET)
 
@@ -142,10 +130,7 @@ CLEAN_CMD=rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~; \
 cd libdiscmage && $(MAKE) clean
 
 clean:
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	$(CLEAN_CMD)
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(GCC_WIN),1)
 	$(CLEAN_CMD)
 else
 ifdef DJGPP
@@ -157,21 +142,17 @@ ifdef DJGPP
 	cd libdiscmage
 	$(MAKE) clean
 	cd ..
-else                                    # Unix or BeOS
+else                                    # Unix, BeOS or Mac OS X (Darwin)
 	$(CLEAN_CMD)
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
 
 DISTCLEAN_CMD=rm -f Makefile config.log config.status config.cache config.h; \
 cd libdiscmage && $(MAKE) distclean
 
 distclean: clean
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	$(DISTCLEAN_CMD)
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(GCC_WIN),1)
 	$(DISTCLEAN_CMD)
 else
 ifdef DJGPP
@@ -186,8 +167,7 @@ ifdef DJGPP
 else
 	$(DISTCLEAN_CMD)
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
 
 .c.o:
@@ -196,10 +176,7 @@ endif                                   # cygwin
 
 ifdef DISCMAGE
 libdiscmage/$(FULLLIBNAME_DM):
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	cd libdiscmage && $(MAKE)
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(GCC_WIN),1)
 	cd libdiscmage && $(MAKE)
 else
 ifdef DJGPP
@@ -209,8 +186,7 @@ ifdef DJGPP
 else
 	cd libdiscmage && $(MAKE)
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 endif                                   # DISCMAGE
 
 $(TARGET): $(OBJECTS)

@@ -1695,7 +1695,7 @@ ucon64_usage (int argc, char *argv[])
 #elif   defined __CYGWIN__ || defined _WIN32
     "discmage.dll";
 #elif   defined __APPLE__                       // Mac OS X actually
-    "libdiscmage.dylib"
+    "libdiscmage.dylib";
 #elif   defined __unix__ || defined __BEOS__
     "libdiscmage.so";
 #else

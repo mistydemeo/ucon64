@@ -16,6 +16,22 @@ ifdef DLOPEN
 CFLAGS+=-DDLOPEN
 endif
 LDFLAGS=-s
+# On Mac OS X using -s gives the following warning:
+# /usr/bin/libtool: -static not specified, -s invalid
+# However, if we don't use -s we get a host of warning messages when linking to
+# the lib (DLOPEN not defined).
+
+# The test for Cygwin should be done before the test for DJGPP, because the
+# environment variable DJGPP can be set under Bash for people who have
+# installed both gcc (and friends) ports.
+
+GCC_WIN=0
+ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+GCC_WIN=1
+endif
+ifeq ($(OSTYPE),msys)                   # test msys (MinGW's POSIX build env.) before DJGPP
+GCC_WIN=1
+endif
 
 LIBNAME=discmage
 OBJECTS=libdm_misc.o cdi.o nero.o sheets.o other.o dllinit.o misc.o
@@ -24,21 +40,14 @@ LIBS=-lz
 OBJECTS+=unzip.o map.o miscz.o
 else
 LIBS=
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-else
-ifeq ($(OSTYPE),msys)                   # test msys (MinGW's POSIX build env.) before DJGPP
+ifeq ($(GCC_WIN),1)
 else
 ifdef DJGPP                             # DJGPP code in dllinit needs map code
 OBJECTS+=map.o
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 endif                                   # ZLIB
 
-
-# The test for Cygwin should be done before the test for DJGPP, because the
-# environment variable DJGPP can be set under Bash for people who have
-# installed both gcc (and friends) ports.
 
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 
@@ -104,7 +113,7 @@ FULLLIBNAME=$(LIBNAME).so
 endif
 
 ifndef DLOPEN                           # GNU specific: "simply expanded variable"
-FULLLIBNAME:=$(addprefix lib, $(FULLLIBNAME))
+FULLLIBNAME:=$(addprefix lib,$(FULLLIBNAME))
 endif
 
 ifeq ($(OSTYPE),beos)
@@ -128,11 +137,7 @@ all: $(FULLLIBNAME)
 
 
 clean:
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f $(FULLLIBNAME) $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
-              tmp.def tmp.base tmp.exp
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(GCC_WIN),1)
 	rm -f $(FULLLIBNAME) $(LIBNAME).a $(OBJECTS) *.core *.stackdump *.o \
               tmp.def tmp.base tmp.exp
 else
@@ -145,15 +150,11 @@ endif
 else                                    # Unix, BeOS or Mac OS X (Darwin)
 	rm -f $(FULLLIBNAME) $(OBJECTS) *.core *.stackdump *.o
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
 
 distclean: clean
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f Makefile config.log config.status config.cache config.h
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(GCC_WIN),1)
 	rm -f Makefile config.log config.status config.cache config.h
 else
 ifdef DJGPP
@@ -165,35 +166,14 @@ ifdef DJGPP
 else
 	rm -f Makefile config.log config.status config.cache config.h
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
-ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-
-ifndef DLOPEN
-$(LIBNAME).dll $(LIBNAME).a: $(OBJECTS)
-else
-$(LIBNAME).dll: $(OBJECTS)
-endif
-	echo EXPORTS > tmp.def
-#	nm $(OBJECTS) | grep ' T _' | sed 's/.* T _//' >> tmp.def
-	nm $(OBJECTS) | grep '^........ [T] _' | sed 's/[^_]*_//' >> tmp.def
-# We use nm instead of dlltool --output-def, so that we don't have to
-# specify explicitly (in the source code) which symbols should be exported
-
-	@echo "NOTE: If you get an error about -lgcc or errors about undefined"
-	@echo "      symbols, read faq.html question 3"
-	ld --base-file tmp.base $(DLLFLAGS)
-	dlltool $(DLLTOOLFLAGS)
-	ld tmp.exp $(DLLFLAGS)
-
-else
-ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+ifeq ($(GCC_WIN),1)
 
 ifndef DLOPEN
 $(LIBNAME).dll $(LIBNAME).a: $(OBJECTS)
@@ -238,8 +218,7 @@ $(FULLLIBNAME): $(OBJECTS)
 	$(CC) $(DLLFLAGS)
 
 endif                                   # DJGPP
-endif                                   # msys
-endif                                   # cygwin
+endif                                   # GCC_WIN
 
 
 #ifndef DLOPEN

@@ -308,7 +308,7 @@ unknown_init (st_rominfo_t *rominfo)
   ucon64.rominfo = NULL;
   ucon64.dat = NULL;
   ucon64.image = NULL;
- 
+
   return 0;
 }
 
@@ -397,7 +397,7 @@ ucon64_get_wf (const int option)
   for (x = 0; ucon64_wf[x].option != 0; x++)
     if (ucon64_wf[x].option == option)
       return (st_ucon64_wf_t *) &ucon64_wf[x];
-      
+
   return NULL;
 }
 
@@ -430,7 +430,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_L, UCON64_SNES, snes_usage,          WF_DEFAULT},
   {UCON64_LNX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
   {UCON64_LOGO, UCON64_GBA, gba_usage,         WF_DEFAULT},
-  {UCON64_LSRAM, UCON64_N64, n64_usage,                 0},
+  {UCON64_LSRAM, UCON64_N64, n64_usage,        0},
   {UCON64_LYX, UCON64_LYNX, lynx_usage,        WF_DEFAULT},
   {UCON64_MULTI, UCON64_GBA, gba_usage,        WF_STOP},
 //  {UCON64_MVS, UCON64_NEOGEO, neogeo_usage,    WF_DEFAULT},
@@ -444,7 +444,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_SGB, UCON64_GB, gameboy_usage,       WF_DEFAULT},
   {UCON64_SMC, UCON64_SNES, snes_usage,        WF_DEFAULT},
   {UCON64_SMG, UCON64_PCE, pcengine_usage,     WF_DEFAULT},
-  {UCON64_SRAM, UCON64_GBA, gba_usage,          0},
+  {UCON64_SRAM, UCON64_GBA, gba_usage,         0},
   {UCON64_SSC, UCON64_GB, gameboy_usage,       WF_DEFAULT},
   {UCON64_SWC, UCON64_SNES, snes_usage,        WF_DEFAULT},
   {UCON64_SWCS, UCON64_SNES, snes_usage,       0},
@@ -535,13 +535,8 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_RL, UCON64_UNKNOWN, NULL,            0},
   {UCON64_S, UCON64_UNKNOWN, NULL,             WF_DEFAULT},
   {UCON64_SCAN, UCON64_UNKNOWN, ucon64_dat_usage, WF_INIT|WF_PROBE|WF_NO_SPLIT},
-#if 1
-  {UCON64_SMD, UCON64_UNKNOWN, NULL,           WF_DEFAULT},
-  {UCON64_SMDS, UCON64_UNKNOWN, NULL,          WF_INIT},
-#else
-  {UCON64_SMD, UCON64_GENESIS, genesis_usage,  WF_DEFAULT},
-  {UCON64_SMDS, UCON64_GENESIS, genesis_usage, WF_INIT},
-#endif
+  {UCON64_SMD, UCON64_UNKNOWN, NULL,           WF_DEFAULT}, // Genesis AND Sega Master System
+  {UCON64_SMDS, UCON64_UNKNOWN, NULL,          0}, // Genesis AND Sega Master System
   {UCON64_STP, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_STPN, UCON64_UNKNOWN, ucon64_padding_usage, 0},
   {UCON64_STRIP, UCON64_UNKNOWN, ucon64_padding_usage, 0},
@@ -598,7 +593,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_HDN, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
   {UCON64_HI, UCON64_SNES, snes_usage,         WF_SWITCH},
   {UCON64_INT, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
-  {UCON64_INT2, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},
+  {UCON64_INT2, UCON64_SNES, snes_usage, WF_SWITCH},
   {UCON64_MAPR, UCON64_NES, nes_usage,         WF_SWITCH},
   {UCON64_MIRR, UCON64_NES, nes_usage,         WF_SWITCH},
   {UCON64_NBAK, UCON64_UNKNOWN, ucon64_options_usage, WF_SWITCH},

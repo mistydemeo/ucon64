@@ -172,10 +172,6 @@ sms_smds (st_rominfo_t *rominfo)
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   memset (&header, 0, SMD_HEADER_LEN);
-
-  header.size = 0;
-  header.id0 = 0;
-  header.split = 0;
   header.id1 = 0xaa;
   header.id2 = 0xbb;
   header.type = 7;                              // SRAM file

@@ -31,11 +31,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #include "getopt.h"                             // for struct option
 #include "ucon64_defines.h"
+#include "misc.h"
+#include "libdiscmage/libdiscmage.h"            // dm_image_t
 
 
 typedef struct
 {
-  const char *option_s;                         // "chk", ..
+  const char *option_s;                         // "chk", ...
   const char *optarg;
   const char *desc;                             // "fix checksum", ...
 //  const char *desc_long;                        // long description
@@ -43,12 +45,7 @@ typedef struct
                                                   // 0 = OK, 1 = TODO, 2 = TEST
 } st_usage_t;
 
-
 #include "ucon64_dat.h"
-#include "misc.h"
-#include "libdiscmage/libdiscmage.h"            // dm_image_t
-
-extern int ucon64_parport_needed;
 
 
 /*
@@ -184,10 +181,6 @@ typedef struct
   st_rominfo_t *rominfo;                        // info from <console>_init()
 } st_ucon64_t;
 
-extern st_ucon64_t ucon64;
-
-extern const struct option options[];
-
 // init st_rominfo_t, st_ucon64_dat_t and st_dm_image_t
 extern int ucon64_init (void);
 // display contents of st_rominfo_t, st_ucon64_dat_t and st_dm_image_t
@@ -197,10 +190,13 @@ extern int ucon64_nfo (void);
 // flush only st_rominfo_t
 extern st_rominfo_t *ucon64_flush_rom (st_rominfo_t *);
 
-
 extern void ucon64_usage (int argc, char *argv[]);
 #ifdef  HAVE_ZLIB_H
 extern void ucon64_fname_arch (const char *fname);
 #endif
+
+extern st_ucon64_t ucon64;
+extern int ucon64_parport_needed;
+extern const struct option options[];
 
 #endif // #ifndef UCON64_H

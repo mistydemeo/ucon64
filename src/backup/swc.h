@@ -29,3 +29,5 @@ int swc_read_sram(char *filename, unsigned int parport);
 int swc_write_sram(char *filename, unsigned int parport);
 void swc_unlock(unsigned int parport);
 int swc_usage(int argc, char *argv[]);
+#define swc_HEADER_START 0
+#define swc_HEADER_LEN 512

@@ -23,3 +23,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define smd_TITLE "Super Magicom Drive/SMD"
 
 int smd_usage(int argc,char *argv[]);
+#define smd_HEADER_START 0
+#define smd_HEADER_LEN 512

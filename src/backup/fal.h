@@ -26,3 +26,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 int fal_read(char *filename, unsigned int parport, int argc, char *argv[]);
 int fal_write(char *filename, long start, long len, unsigned int parport, int argc, char *argv[]);
 int fal_usage(int argc, char *argv[]);
+#define fal_HEADER_START 0
+#define fal_HEADER_LEN 0

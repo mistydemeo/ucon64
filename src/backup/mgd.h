@@ -23,3 +23,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define mgd_TITLE "Multi Game Doctor(2)/Multi Game Hunter/MGH/RAW"
 
 int mgd_usage(int argc,char *argv[]);
+#define mgd_HEADER_START 0
+#define mgd_HEADER_LEN 0

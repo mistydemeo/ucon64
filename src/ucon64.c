@@ -851,23 +851,34 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
   return(0);
 }
 
+#include "backup/unknown_bu.h"
+#include "backup/unknown_bu512.h"
+
 int ucon64_init_(struct ucon64_ *rom)
 {
-/*    (atari_init(rom)==-1) &&
-    (nes_init(rom)==-1) &&
-    (lynx_init(rom)==-1) &&
-    (jaguar_init(rom)==-1) &&
-    (pcengine_init(rom)==-1) &&
-    (coleco_init(rom)==-1) &&
-    (intelli_init(rom)==-1) &&
-    (neogeo_init(rom)==-1) &&
-    (neogeopocket_init(rom)==-1) &&
-    (sms_init(rom)==-1) &&
-    (system16_init(rom)==-1) &&
-    (virtualboy_init(rom)==-1) &&
-    (vectrex_init(rom)==-1) &&
-    (wonderswan_init(rom)==-1)
-*/	return(0);
+rom->buheader_len=0;
+rom->current_crc32=fileCRC32(rom->rom,rom->buheader_len);
+
+ucon64_dbsearch(rom);
+
+if(rom->db_crc32==0)
+{
+	rom->buheader_len=unknown_bu512_HEADER_LEN;
+	rom->current_crc32=fileCRC32(rom->rom,rom->buheader_len);
+
+	ucon64_dbsearch(rom);
+
+	if(rom->db_crc32==0)
+	{
+//		if(!argcmp(rom->argc,rom->argv,"-ngp"))
+		{
+			return(-1);
+		}
+	}
+}
+
+
+	return(0);
 }
 
 int ucon64_init(struct ucon64_ *rom)
@@ -878,21 +889,23 @@ int ucon64_init(struct ucon64_ *rom)
     (nintendo64_init(rom)==-1) &&
     (gameboy_init(rom)==-1) &&
     (gbadvance_init(rom)==-1) &&
-
     (atari_init(rom)==-1) &&
     (nes_init(rom)==-1) &&
     (lynx_init(rom)==-1) &&
     (jaguar_init(rom)==-1) &&
     (pcengine_init(rom)==-1) &&
-    (coleco_init(rom)==-1) &&
-    (intelli_init(rom)==-1) &&
     (neogeo_init(rom)==-1) &&
     (neogeopocket_init(rom)==-1) &&
+    (ucon64_init_(rom)==-1)
+/*
     (sms_init(rom)==-1) &&
     (system16_init(rom)==-1) &&
     (virtualboy_init(rom)==-1) &&
     (vectrex_init(rom)==-1) &&
+    (coleco_init(rom)==-1) &&
+    (intelli_init(rom)==-1) &&
     (wonderswan_init(rom)==-1)
+    */
   )
   {
     rom->console=ucon64_UNKNOWN;
@@ -1062,7 +1075,7 @@ int ucon64_nfo(struct ucon64_ *rom)
   if(rom->header_len)
   {
 //	filehexdump(rom.rom,rom->header_start+rom->buheader_len,rom->header_len);
-     strhexdump(rom->header,rom->header_start+rom->buheader_len,rom->header_len);
+     strhexdump(rom->header,rom->header_start+rom->buheader_len,rom->header_start+rom->buheader_len,rom->header_len);
      printf("\n");
   }	
 

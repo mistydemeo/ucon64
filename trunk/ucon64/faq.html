@@ -210,7 +210,7 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    inpout32.dll. They are also included with the binary release. With GiveIO
    sending ROMs seems to go faster than with UserPort, but UserPort is much
    easier to use. To install inpout32.dll, put it in uCON64's configuration
-   directory. Use the switch -version to see which directory that is. You can
+   directory. Use the option -version to see which directory that is. You can
    change the directory by editing the configuration file or by setting an
    environment variable with the name configdir. Note however, that although
    inpout32.dll is even easier to use than UserPort the transfer speed is much
@@ -324,17 +324,18 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    What can I do about that?</a><br>
 <b>A</b>: You can do several things. First make sure the original game
    cartridge doesn't contain any special chips that your Super Wild Card
-   doesn't support (look at the rom type information). For example, if you are
+   doesn't support (look at the ROM type information). For example, if you are
    trying to upload a game like Super Mario Kart (which uses a DSP chip) your
    Super Wild Card should have an extension with the correct DSP chip (or have
    the right cartridge with that chip plugged in your SWC). Then, make sure you
    are using a good dump (look at the checksum information). Also verify that
-   the backup header is correct. You can make uCON64 rewrite the header with
-   -swc. uCON64 uses the information in the ROM dump's header, so this is
-   important! You can also try to rewrite the header in combination with the
-   switch -hi or -nhi to force uCON64 to handle it as a HiROM or a LoROM dump.
-   Additionally you could use the switch -hd, -nhd or -hdn to specify the
-   backup unit header size. For example:<br>
+   the backup header is correct. The option -dbuh can be helpful for that. You
+   can make uCON64 rewrite the header with -swc. uCON64 uses the information in
+   the ROM dump's header, so this is important! You can also try to rewrite the
+   header while using one of the switches -hi or -nhi to force uCON64 to handle
+   it as a HiROM or a LoROM dump. Additionally you could use one of the
+   switches -hd, -nhd or -hdn to specify the backup unit header size. For
+   example:<br>
    &nbsp;&nbsp; ucon64 -swc -nhi -hd "Batman Revenge of the Joker (U).swc"<br>
    There are many (good) ROMs on the internet with incorrect headers, so this
    might well solve the problem.<br>
@@ -345,6 +346,10 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    protection. Some other games check the ROM speed. You can use -l for those.
    Note that some games have more than one type of copy protection, so it might
    be necessary to use uCON64 several times with a different option.<br>
+   See <a href="#38">question 38</a> and <a href="#39">question 39</a> for more
+   information about a new feature in uCON64 1.9.8beta8 that can be used to
+   update or improve the options -k, -f and -l without having to (re)compile
+   the source code.<br>
 <br>
    Some games seem to work, but after a while it becomes clear that they don't
    run as was intended. Two examples of such games are Demon's Crest and Mega
@@ -370,6 +375,11 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    However, starting from version 1.9.8beta6 the method described above isn't
    necessary anymore for Demon's Crest. Use the option -k instead. For
    Mega Man X you will need version 1.9.8beta7 or later.<br>
+<br>
+   Finally, you could have a look at an (incomplete) Super Wild Card
+   compatibility list on the uCON64 homepage (it can also be found in the
+   source package) to see if it is possible to run a certain game on a Super
+   Wild Card <u>2.8cc 32 Mbit PAL</u>.<br>
 <br>
 <p>
 <a name="12"><b>Q12</b>: Which backup devices are supported by uCON64?</a><br>
@@ -704,7 +714,7 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
 <p>
 <a name="38"><b>Q38</b>: When will the next version of uCON64 be released? I
    have heard the next version is able to crack my favourite SNES game, but I
-   don't know how to use a compiler.</a><br>
+   don't know how to use CVS or a compiler.</a><br>
 <b>A</b>: We know when we will release a new version only just before we do so.
    But starting with uCON64 1.9.8beta8 this is not a problem for you at all.
    The only requirement is that you are able to read and use a text editor ;-)<br>
@@ -762,7 +772,9 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    configuration directory. Use the option -version to find out which directory
    that is. Then try if uCON64 is able to crack your game. uCON64 will display
    a warning message if it detects an error in your new line. If you made a
-   mistake with escape symbols uCON64 might very well crash.<br>
+   mistake with escape symbols uCON64 might very well crash. You can use the
+   switch -v (in combination with -k, -f or -l) to make uCON64 display what
+   information it reads from the file.<br>
    If you can't find which line you need you will either have to add a line to
    snescopy.txt, snespal.txt or snesntsc.txt for every code that isn't already
    mentioned in those files or ask someone else to do it for you. For example

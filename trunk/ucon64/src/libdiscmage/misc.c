@@ -217,7 +217,6 @@ vprintf2 (const char *format, va_list argptr)
 // Cheap hack to get the Visual C++ port support "ANSI colors". Cheap,
 //  because it only supports the ANSI escape sequences uCON64 uses.
 {
-#undef  vprintf
 #undef  printf
 #undef  fprintf
   int n_chars = 0, n_ctrl, n_print, done = 0;
@@ -309,7 +308,6 @@ vprintf2 (const char *format, va_list argptr)
         }
     }
   return n_chars;
-#define vprintf vprintf2
 #define printf  printf2
 #define fprintf fprintf2
 }
@@ -318,7 +316,6 @@ vprintf2 (const char *format, va_list argptr)
 int
 printf2 (const char *format, ...)
 {
-#undef  printf
   va_list argptr;
   int n_chars;
 
@@ -326,14 +323,12 @@ printf2 (const char *format, ...)
   n_chars = vprintf2 (format, argptr);
   va_end (argptr);
   return n_chars;
-#define printf  printf2
 }
 
 
 int
 fprintf2 (FILE *file, const char *format, ...)
 {
-#undef  fprintf
   va_list argptr;
   int n_chars;
 
@@ -344,7 +339,6 @@ fprintf2 (FILE *file, const char *format, ...)
     n_chars = vprintf2 (format, argptr);
   va_end (argptr);      
   return n_chars;
-#define fprintf fprintf2
 }
 #endif // defined _WIN32 && defined ANSI_COLOR
 
@@ -771,7 +765,7 @@ realpath (const char *path, char *full_path)
 #define MAX_READLINKS 32
   char copy_path[FILENAME_MAX], got_path[FILENAME_MAX], *new_path = got_path,
        *max_path;
-#if     defined __MSDOS__ || defined _WIN32
+#if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
   char c;
 #endif
 #ifdef  S_IFLNK
@@ -790,7 +784,7 @@ realpath (const char *path, char *full_path)
   strcpy (copy_path, path);
   path = copy_path;
   max_path = copy_path + FILENAME_MAX - 2;
-#if     defined __MSDOS__ || defined _WIN32
+#if     defined __MSDOS__ || defined _WIN32 || defined __CYGWIN__
   c = toupper (*path);
   if (c >= 'A' && c <= 'Z' && path[1] == ':')
     ;
@@ -799,6 +793,10 @@ realpath (const char *path, char *full_path)
   if (*path != FILE_SEPARATOR)
     {
       getcwd (new_path, FILENAME_MAX - 1);
+#ifdef  DJGPP
+      // DJGPP's getcwd() retuns a path with forward slashes
+      change_mem (new_path, strlen (new_path), "/", 1, 0, 0, FILE_SEPARATOR_S, 1, 0);
+#endif
       new_path += strlen (new_path);
       if (*(new_path - 1) != FILE_SEPARATOR)
         *new_path++ = FILE_SEPARATOR;
@@ -862,7 +860,7 @@ realpath (const char *path, char *full_path)
           // EINVAL means the file exists but isn't a symlink
           if (errno != EINVAL
 #ifdef  __BEOS__
-              // make this function work for a mounted ext2 fs ("/:")
+              // Make this function work for a mounted ext2 fs ("/:")
               && errno != B_NAME_TOO_LONG
 #endif
              )
@@ -884,7 +882,6 @@ realpath (const char *path, char *full_path)
             // Otherwise back up over this component
             while (*(--new_path) != FILE_SEPARATOR)
               ;
-          // Safe sex check
           if (strlen (path) + n >= FILENAME_MAX - 2)
             return NULL;
           // Insert symlink contents into path
@@ -1821,8 +1818,8 @@ tmpnam2 (char *temp)
 }
 
 
-#if     defined __unix__ || defined __BEOS__ || defined AMIGA
-#ifndef __MSDOS__
+#if     (defined __unix__ && !defined __MSDOS__) || defined __BEOS__ || \
+        defined AMIGA
 static int oldtty_set = 0, stdin_tty = 1;       // 1 => stdin is a tty, 0 => it's not
 static tty_t oldtty, newtty;
 
@@ -1921,8 +1918,7 @@ kbhit (void)
   return key_pressed;
 #endif
 }
-#endif                                          // !__MSDOS__
-#endif                                          // __unix__ || __BEOS__ || AMIGA
+#endif                                          // (__unix__ && !__MSDOS__) || __BEOS__ || AMIGA
 
 
 #if     defined __unix__ && !defined __MSDOS__

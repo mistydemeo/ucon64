@@ -69,8 +69,7 @@ void init_io(unsigned int port)
 */
 {
   swc_port = port;
-  if (swc_port != 0x3bc && swc_port != 0x378 && swc_port != 0x278 &&
-      swc_port != BEOS_PARPORT)
+  if (swc_port != 0x3bc && swc_port != 0x378 && swc_port != 0x278)
   {
     fprintf(STDERR, "PORT must be 0x3bc, 0x378 or 0x278\n");
     fflush(stdout);

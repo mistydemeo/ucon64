@@ -364,8 +364,7 @@ handle_fig_header (unsigned char *header)
 {
   if ((header[4] == 0x77 && header[5] == 0x83) ||
       (header[4] == 0xf7 && header[5] == 0x83) ||
-      (header[4] == 0x47 && header[5] == 0x83) ||
-      (header[4] == 0x11 && header[5] == 0x02))
+      (header[4] == 0x47 && header[5] == 0x83))
     header[2] = 0x0c;                           // 0 kB
   else if (header[4] == 0xfd && header[5] == 0x82)
     header[2] = 0x08;                           // 2 kB
@@ -381,7 +380,8 @@ handle_fig_header (unsigned char *header)
     */
     header[2] = 0x04;
   else // if ((header[4] == 0xdd && header[5] == 0x02) ||
-       //     (header[4] == 0x00 && header[5] == 0x00))
+       //     (header[4] == 0x00 && header[5] == 0x00) ||
+       //     (header[4] == 0x11 && header[5] == 0x02))
     header[2] = 0;                              // 32 kB
 
   if (header[3] & 0x80)                         // Pro Fighter (FIG) HiROM dump

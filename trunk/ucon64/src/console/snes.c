@@ -2551,12 +2551,12 @@ snes_buheader_info (st_rominfo_t *rominfo)
       else
         {
           if ((header[4] == 0x77 && header[5] == 0x83) ||
-              (header[4] == 0x47 && header[5] == 0x83) ||
-              (header[4] == 0x11 && header[5] == 0x02))
+              (header[4] == 0x47 && header[5] == 0x83))
             y = 0;
           else if (header[4] == 0x00 && header[5] == 0x80)
             y = 8 * 1024; // or 2 * 1024
-          else if (header[4] == 0x00 && header[5] == 0x00)
+          else if ((header[4] == 0x00 && header[5] == 0x00) ||
+                   (header[4] == 0x11 && header[5] == 0x02))
             y = 32 * 1024;
         }
 

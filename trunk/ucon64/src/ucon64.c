@@ -869,7 +869,7 @@ int ucon64_init(struct ucon64_ *rom)
   rom->mbit=(rom->bytes-rom->buheader_len)/(float) MBIT;
 
   rom->padded=filetestpad(rom->rom);
-  rom->intro=(rom->bytes-rom->buheader_len)&MBIT;
+  rom->intro=(rom->bytes-rom->buheader_len)%MBIT;
 
   rom->splitted[0] = testsplit(rom->rom);
   if (argcmp(rom->argc, rom->argv, "-ns"))
@@ -1047,6 +1047,9 @@ int ucon64_nfo(struct ucon64_ *rom)
 
   if(!rom->intro)printf("Intro/Trainer: No\n");
   else if(rom->intro)printf("Intro/Trainer: Maybe, %ld Bytes\n",rom->intro);
+
+  if(!rom->buheader_len)printf("Backup Unit Header: No\n");
+  else if(rom->buheader_len)printf("Backup Unit Header: Yes, %ld Bytes\n",rom->buheader_len);
 
   if(!rom->splitted[0])printf("Splitted: No\n");
   else if(rom->splitted[0])printf("Splitted: Yes, %d parts (Note: for most options the ROM must be joined)\n",rom->splitted[0]);

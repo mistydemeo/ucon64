@@ -126,8 +126,8 @@ extern const st_usage_t ucon64_patching_usage[];
 
   example:
   WF_NFO|WF_MFO_AFTER|WF_NO_ROM
-                    a ROM is required and info will be shown before and after
-                    it has been processed
+                    a ROM is not required and info will be shown before and
+                    after it has been processed
 */
 #define WF_DEFAULT (WF_PROBE|WF_INIT|WF_NFO)
 #define WF_PROBE 1

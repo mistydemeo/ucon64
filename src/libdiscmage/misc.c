@@ -1011,6 +1011,8 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
                    (char *) realloc ((*patterns)[n_codes].search, currentsize2)))
                 {
                   fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize2);
+                  free (*patterns);
+                  *patterns = NULL;
                   return -1;
                 }
             }
@@ -1027,7 +1029,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
       last = token;
       if (!token)
         {
-          printf ("WARNING: Line %d is invalid, no wildcard character is specified\n",
+          printf ("WARNING: Line %d is invalid, no wildcard value is specified\n",
                   line_num);
           continue;
         }
@@ -1040,7 +1042,7 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
       last = token;
       if (!token)
         {
-          printf ("WARNING: Line %d is invalid, no escape character is specified\n",
+          printf ("WARNING: Line %d is invalid, no escape value is specified\n",
                   line_num);
           continue;
         }
@@ -1070,6 +1072,9 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
                    (char *) realloc ((*patterns)[n_codes].replace, currentsize2)))
                 {
                   fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize2);
+                  free ((*patterns)[n_codes].search);
+                  free (*patterns);
+                  *patterns = NULL;
                   return -1;
                 }
             }
@@ -1104,8 +1109,8 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
                   "escape:       %02x\n"
                   "replacement:  ",
                   (*patterns)[n_codes].search_size,
-                  (*patterns)[n_codes].wildcard,
-                  (*patterns)[n_codes].escape);
+                  (unsigned char) (*patterns)[n_codes].wildcard,
+                  (unsigned char) (*patterns)[n_codes].escape);
           for (n = 0; n < (*patterns)[n_codes].replace_size; n++)
             printf ("%02x ", (unsigned char) (*patterns)[n_codes].replace[n]);
           printf ("(%d)\n"
@@ -1131,6 +1136,10 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
                     realloc ((*patterns)[n_codes].sets, currentsize2)))
                 {
                   fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize2);
+                  free ((*patterns)[n_codes].replace);
+                  free ((*patterns)[n_codes].search);
+                  free (*patterns);
+                  *patterns = NULL;
                   return -1;
                 }
             }
@@ -1150,6 +1159,11 @@ build_cm_patterns (st_cm_pattern_t **patterns, const char *filename, char *fullf
                         realloc ((*patterns)[n_codes].sets[n_sets].data, currentsize3)))
                     {
                       fprintf (stderr, ucon64_msg[BUFFER_ERROR], currentsize3);
+                      free ((*patterns)[n_codes].sets);
+                      free ((*patterns)[n_codes].replace);
+                      free ((*patterns)[n_codes].search);
+                      free (*patterns);
+                      *patterns = NULL;
                       return -1;
                     }
                 }

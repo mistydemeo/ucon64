@@ -150,6 +150,7 @@ ifndef DLOPEN
 	del $(LIBNAME).a
 endif
 	del *.o
+	del format\*.o
 else                                    # Unix, BeOS or Mac OS X (Darwin)
 	rm -f $(FULLLIBNAME) $(OBJECTS) *.core *.stackdump *.o
 endif                                   # DJGPP

@@ -46,14 +46,21 @@ ucon64gui_bottom (void)
              "(GTK) "
 #endif
              "0.1.0 2002 by NoisyB ");
-//  html2gui_a ("http://ucon64.sf.net", "_blank",NULL,NULL,"http://ucon64.sf.net");
+  html2gui_input_image ("http://ucon64.sf.net", "http://ucon64.sf.net", "http://ucon64.sf.net", 0, 0, NULL);
 
 }
 
-void html2gui_system(char *shit)
+void html2gui_system(char *name, char *value)
 {
-printf(shit);
+printf("%s=%s\n", name, value);
 fflush(stdout);
+
+if(strdcmp(value,"ucon64gui_rom"))  html2gui_input_file ("ROM=", ucon64gui.rom, "Select ROM");
+if(strdcmp(value,"ucon64gui_file"))  html2gui_input_file ("FILE=", ucon64gui.file, "Select ROM");
+
+
+
+
 return;
 
 /*
@@ -93,20 +100,6 @@ return;
 }
 
 void
-ucon64gui_rom (void)
-{
-  html2gui_input_file ("Select ROM", "ROM=", ucon64gui.rom);
-
-}
-
-void
-ucon64gui_file (void)
-{
-//_text nutzen?
-  html2gui_input_file ("Select ROM", "FILE=", ucon64gui.file);
-}
-
-void
 ucon64gui_top(void)
 {
   char buf[NAME_MAX];
@@ -123,18 +116,16 @@ ucon64gui_top(void)
   html2gui_br();
 
   html2gui_("$ROM: ");
-  strcpy (ucon64gui.rom, html2gui_filename);
-  
-//  html2gui_input_text (i_ls,ucon64gui.rom,"test",20,1,0);
-  html2gui_a (ucon64gui_rom, "Open", "_blank", open_xpm, "Open");
+
+  html2gui_input_text ("i_ls",ucon64gui.rom,"test",20,1,0);
+  html2gui_input_image ("Open", "ucon64gui_rom", "Open", 0, 0, open_xpm);
 
   html2gui_br();
   html2gui_("$FILE:  ");
-  strcpy (ucon64gui.rom, html2gui_filename);
-  
-//  html2gui_input_text (ucon64gui_ls,ucon64gui.file,"test",20,1,0);
 
-  html2gui_a (ucon64gui_file, "Open", "_blank", open_xpm, "Open");
+  html2gui_input_text ("i_ls",ucon64gui.file,"test",20,1,0);
+  html2gui_input_image ("Open", "ucon64gui_file", "Open", 0, 0, open_xpm);
+
   html2gui_br ();
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
   html2gui_br ();
@@ -318,16 +309,14 @@ ucon64gui_root (void)
 
   html2gui_ ("Console specific options");
   html2gui_br ();
-//  html2gui_input_a (ucon64gui_snes, "Super Nintendo",
-//                         "(-snes) Options for Super Nintendo", 0, 0, NULL);
+  html2gui_input_image ("Super Nintendo", "ucon64gui_snes", "(-snes) Options for Super Nintendo", 0, 0, NULL);
 
   html2gui_br ();
   html2gui_img (trans_1x3_xpm, 0, 0, 0);
 //  html2gui_hr ();
   html2gui_ ("Backup unit specific options");
   html2gui_br ();
-//  html2gui_input_submit (ucon64gui_swc, "Super Wild Card",
-//                         "Options for Super Wild Card", 0, 0);
+  html2gui_input_image ("Super Wild Card", "ucon64gui_swc", "Options for Super Wild Card", 0, 0, NULL);
 
   ucon64gui_bottom ();
 

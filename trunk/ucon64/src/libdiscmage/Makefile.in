@@ -251,6 +251,7 @@ LIBDM_STD_H=libdiscmage.h misc.h dxedll_priv.h format/format.h config.h
 
 libdm_misc.o: $(LIBDM_STD_H)
 format/format.o: $(LIBDM_STD_H)
+format/ccd.o: format/ccd.h $(LIBDM_STD_H)
 format/cdi.o: format/cdi.h $(LIBDM_STD_H)
 format/nero.o: format/nero.h $(LIBDM_STD_H)
 format/cue.o: format/cue.h $(LIBDM_STD_H)
@@ -263,4 +264,4 @@ misc_z.o: misc_z.h misc.h dxedll_priv.h
 dxe_misc.o: dxedll_pub.h
 djimport.o: libdiscmage.h dlopen.h dxedll_pub.h
 dlopen.o: dlopen.h dxedll_pub.h
-
+map.o: map.h

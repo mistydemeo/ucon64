@@ -965,13 +965,16 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
    then you did not install an I/O driver (correctly). In this case "install"
    means that the I/O driver is running at the time uCON64 tries to access the
    parallel port. See <a href="#4">question 4</a>.<br>
-   You will also see this message if you tried to enable EPP mode for the FAL
-   under Windows XP (NT/2000), i.e., you specified the switch -xfalm, without
-   an appropriate I/O port driver. UserPort is <i>inappropriate</i> for this,
-   because it enables access to I/O ports up to 0x3ff. However, in order to
-   enable EPP mode the FAL code tries to access an I/O port with an address
-   higher than 0x3ff. If you want to be able to use EPP mode try io.dll or
-   inpout32.dll.<br>
+   You will also see this message (with a Windows version of uCON64) if you
+   tried to enable EPP mode for the FAL under Windows XP (NT/2000) , i.e., you
+   specified the switch -xfalm, without an appropriate I/O port driver.
+   UserPort is <i>inappropriate</i> for this, because it enables access to I/O
+   ports up to 0x3ff. However, in order to enable EPP mode the FAL code tries
+   to access an I/O port with an address higher than 0x3ff. If you want to be
+   able to use EPP mode try io.dll or inpout32.dll.<br>
+   Starting with version 2.0.0 uCON64 will not crash anymore if it cannot
+   access the parallel port at start up (unless you use UserPort in combination
+   with a Windows version of uCON64).<br>
 <br>
 <p>
 <a name="30"><b>Q30</b>: I want to convert a NES ROM in iNES format to UNIF.
@@ -1367,7 +1370,7 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
   </tr>
   <tr>
     <td><tt>Neo Geo Pocket</tt></td>
-    <td><tt>GoodNGPX</tt></td>
+    <td><tt>GoodNGPX or NGP</tt></td>
   </tr>
   <tr>
     <td><tt>NES</tt></td>
@@ -1395,7 +1398,7 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
   </tr>
   <tr>
     <td><tt>Virtual Boy</tt></td>
-    <td><tt>GoodVBOY</tt></td>
+    <td><tt>GoodVBOY or VBOY</tt></td>
   </tr>
   <tr>
     <td><tt>WonderSwan</tt></td>
@@ -1483,8 +1486,8 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
 <b>A</b>: Strictly speaking, interleaved ROMs do not exist. Interleaved ROM
    dumps do. Or perhaps it is better to say ROM dumps in interleaved format.
    The meaning of "interleaved" depends on the console type. Interleaved
-   formats exist for NES, Sega Master System, Game Gear, Genesis, SNES and
-   Nintendo 64.<br>
+   formats exist for NES, Sega Master System, Game Gear, PC-Engine, Genesis,
+   SNES and Nintendo 64.<br>
    Deinterleaving is the opposite of interleaving a ROM dump. It is the process
    of converting the data to "binary" format. Binary in the sense as how the
    data (in a cartridge) is presented to the CPU.<br>
@@ -1509,6 +1512,18 @@ Q51: <a href="#51">What do I need to do before I can upload files to my Flash 2
    file, all even bytes in the second half.<br>
    Can be interleaved with uCON64 using the option -smd or -mgd.<br>
    Can be deinterleaved with uCON64 using the option -bin.<br>
+<br>
+   PC-Engine<br>
+   Interleaved PC-Engine or TurboGrafx-16 dumps are not produced by a specific
+   copier. It depends on the HuCARD (PC-Engine/TurboGrafx-16 game cartridge).
+   American HuCARDs produce an interleaved dump, because the 8 data pins are
+   reversed compared to Japanese HuCARDs. Perhaps "bit-swapped" is a better
+   word to describe the format, but using the word interleaved prevents
+   confusion (as bit-swapped implies a non bit-swapped reference).<br>
+   Can be interleaved with uCON64 using the option -mgd, making the game
+   suitable for a TurboGrafx-16. You can use the option -swap afterwards if you
+   want to play the game on a PC-Engine.<br>
+   Can be deinterleaved with uCON64 using the option -msg.<br>
 <br>
    SNES<br>
    Interleaved SNES dumps are produced by the Game Doctor and the Super UFO

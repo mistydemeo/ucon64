@@ -68,8 +68,7 @@ static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer,
                               int rom_size);
 static unsigned short int get_internal_sums (st_rominfo_t *rominfo);
 static int snes_check_bs (void);
-static inline int snes_isprint (int c);
-static inline int is_func (char *s, int len, int (*func) (int));
+static inline int snes_isprint (char *s, int len);
 static int check_banktype (unsigned char *rom_buffer, int header_offset);
 static void reset_header (void *header);
 static void set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header);
@@ -683,7 +682,7 @@ snes_ffe (st_rominfo_t *rominfo, char *ext)
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   ucon64_fread (&header, 0, rominfo->buheader_len > (int) SWC_HEADER_LEN ?
-                         (int) SWC_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
+                  (int) SWC_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
   header.size_low = size / 8192;
   header.size_high = size / 8192 >> 8;
@@ -800,7 +799,7 @@ snes_fig (st_rominfo_t *rominfo)
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   ucon64_fread (&header, 0, rominfo->buheader_len > (int) FIG_HEADER_LEN ?
-                         (int) FIG_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
+                  (int) FIG_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
   snes_set_fig_header (rominfo, &header);
   set_nsrt_info (rominfo, (unsigned char *) &header);
@@ -1199,7 +1198,7 @@ snes_ufo (st_rominfo_t *rominfo)
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   ucon64_fread (&header, 0, rominfo->buheader_len > (int) UFO_HEADER_LEN ?
-                         (int) UFO_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
+                  (int) UFO_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
   header.multi = snes_split ? 0x40 : 0; // TODO
   memcpy (header.id, "SUPERUFO", 8);
@@ -2421,8 +2420,12 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
 */
 {
   int interleaved = 0, check_map_type = 1;
-  unsigned int crc = crc32 (0, rom_buffer, 512);
+  unsigned int crc;
 
+  if (size < 64 * 1024)                         // snes_deinterleave() reads blocks of 32 kB
+    return 0;                                   // file cannot be interleaved
+    
+  crc = crc32 (0, rom_buffer, 512);
   /*
     Special case hell
 
@@ -2469,8 +2472,8 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
     0x4ef3d27b: BS Lord Monarke (J)
     These games are *not* special cases. uCON64 detects them correctly, but the
     tool that was used to create GoodSNES - 0.999.5 for RC 2.5.dat, does not.
-    This has been verified on a real SNES for the games with crc 0x29226b62 and
-    0x4ef3d27b. The games with crc 0xbd7bc39f don't seem to run on a copier.
+    This has been verified on a real SNES for the games with CRC 0x29226b62 and
+    0x4ef3d27b. The games with CRC 0xbd7bc39f don't seem to run on a copier.
 
     0xc3194ad7: Yu Yu No Quiz De Go! Go! (J)
     0x89d09a77: Infernal's Evil Demo! (PD)
@@ -2535,7 +2538,7 @@ snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
   else
     {
 #ifdef  DETECT_SMC_COM_FUCKED_UP_LOROM
-      if (size > (int) (SNES_HEADER_START + SNES_HIROM + 0x4d))
+      if (size > SNES_HEADER_START + SNES_HIROM + 0x4d)
         if (check_banktype (rom_buffer, size / 2) > banktype_score)
           {
             interleaved = 1;
@@ -3009,15 +3012,20 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
               type = MGD_SNES;
             }
           /*
-            16384 instead of MAXBUFSIZE (32768) to detect "Joystick Sampler
-            with Still Picture (PD)". Don't do <= 16384 or else "Super Wild
-            Card V2.255 DOS ROM (BIOS)" won't be detected if it has no header.
+            Check for surplus being smaller than 31232 instead of MAXBUFSIZE
+            (32768) to detect "Joystick Sampler with Still Picture (PD)" (64000
+            bytes, including SWC header).
+            "Super Wild Card V2.255 DOS ROM (BIOS)" is 16384 bytes (without
+            header), so check for surplus being smaller than 16384.
+            Shadow, The (Beta) [b3] has a surplus of 7680 bytes (15 * 512). So,
+            accept a surplus of up to 7680 bytes as a header...
           */
-          else if (surplus % SWC_HEADER_LEN == 0 && surplus < 16384 &&
+          else if (surplus % SWC_HEADER_LEN == 0 &&
+                   surplus < (int) (15 * SWC_HEADER_LEN) &&
                    ucon64.file_size > surplus)
             rominfo->buheader_len = surplus;
-          // special case for Infinity Demo (PD)... Don't add "|| type == FIG"
-          //  as it is too unreliable
+          // special case for Infinity Demo (PD)... (has odd size, but SWC
+          //  header). Don't add "|| type == FIG" as it is too unreliable
           else if (type == SWC || type == GD3 || type == UFO)
             rominfo->buheader_len = SWC_HEADER_LEN;
         }
@@ -3062,7 +3070,7 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
       x = SNES_HIROM;
     }
 
-  if (size > (int) (SNES_HEADER_START + SNES_HIROM + 0x4d))
+  if (size > SNES_HEADER_START + SNES_HIROM + 0x4d)
     {
       score_hi = check_banktype (rom_buffer, x);
       score_lo = check_banktype (rom_buffer, snes_header_base);
@@ -3090,10 +3098,11 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
   if (UCON64_ISSET (ucon64.snes_hirom))         // -hi or -nhi switch was specified
     {
       snes_hirom = ucon64.snes_hirom;
-      snes_hirom_ok = 1;                        // keep snes_deinterleave()
-      if (size < (int) (SNES_HEADER_START + snes_hirom + SNES_HEADER_LEN))
+      // keep snes_deinterleave() from changing snes_hirom
+      snes_hirom_ok = 1;
+      if (size < (int) (SNES_HEADER_START + SNES_HIROM + SNES_HEADER_LEN))
         snes_hirom = 0;
-    }                                           //  from changing snes_hirom
+    }                                           
 
   if (UCON64_ISSET (ucon64.snes_header_base))   // -erom switch was specified
     {
@@ -3153,7 +3162,7 @@ snes_init (st_rominfo_t *rominfo)
       "Finland",
       "Denmark",
       "France",
-      "Holland",
+      "The Netherlands",                        // Holland is an incorrect name for The Netherlands
       "Spain",
       "Germany, Austria and Switzerland",
       "Italy",
@@ -3253,6 +3262,8 @@ snes_init (st_rominfo_t *rominfo)
       if (UCON64_ISSET (ucon64.snes_hirom))     // see snes_set_hirom()
         snes_hirom = ucon64.snes_hirom;
       snes_hirom_ok = 1;
+
+      rominfo->interleaved = 0;
       if (UCON64_ISSET (ucon64.interleaved))
         rominfo->interleaved = ucon64.interleaved;
       return -1;                                // don't continue (seg faults!)
@@ -3788,27 +3799,14 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
 
 
 int
-snes_isprint (int c)
-// we don't want to get different results of check_banktype() for different
-//  locale settings
+snes_isprint (char *s, int len)
 {
-  return c >= 0x20 && c <= 0x7e ? 1 : 0;
-}
+  unsigned char *p = (unsigned char *) s;
 
-
-int
-is_func (char *s, int len, int (*func) (int))
-{
-  char *p = s;
-
-  /*
-    Casting to unsigned char * is necessary to avoid differences between the
-    different compilers' run-time environments. At least for isprint(). Without
-    the cast the isprint() of (older versions of) DJGPP, MinGW, Cygwin and
-    Visual C++ returns nonzero values for ASCII characters > 126.
-  */
   for (; len >= 0; p++, len--)
-    if (!func (*(unsigned char *) p))
+    // we don't use isprint(), because we don't want to get different results
+    //  of check_banktype() for different locale settings
+    if (*p < 0x20 || *p > 0x7e)
       return FALSE;
 
   return TRUE;
@@ -3830,14 +3828,13 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
 //           SNES_HEADER_LEN, SNES_HEADER_START + header_offset, DUMPER_HEX);
 
   // game ID info (many games don't have useful info here)
-  if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset + 2, 4,
-               snes_isprint))
+  if (snes_isprint ((char *) rom_buffer + SNES_HEADER_START + header_offset + 2, 4))
     score += 1;
 
   if (!bs_dump)
     {
-      if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset + 16,
-                   SNES_NAME_LEN, snes_isprint))
+      if (snes_isprint ((char *) rom_buffer + SNES_HEADER_START + header_offset + 16,
+                        SNES_NAME_LEN))
         score += 1;
 
       // map type
@@ -3875,8 +3872,7 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
   if (rom_buffer[SNES_HEADER_START + header_offset + 42] == 0x33)
     score += 2;
   else // publisher code
-    if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset, 2,
-                 snes_isprint))
+    if (snes_isprint ((char *) rom_buffer + SNES_HEADER_START + header_offset, 2))
       score += 2;
 
   // version

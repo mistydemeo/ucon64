@@ -101,7 +101,7 @@ typedef struct
 
 
 /*
- * A CD-ROM physical sector size is 2048, 2052, 2056, 2324, 2332, 2336, 
+ * A CD-ROM physical sector size is 2048, 2052, 2056, 2324, 2332, 2336,
  * 2340, or 2352 bytes long.  
 
 *         Sector types of the standard CD-ROM data formats:
@@ -170,7 +170,7 @@ WinOnCD full CD image file (*.c2d)|*.c2d
 Easy CD Creator image file (*.cif)|*.cif
 */
 
-const st_track_probe_t track_probe[] = 
+const st_track_probe_t track_probe[] =
   {
     {1, 0,  2048, 0,   DM_MODE1_2048, ".iso"}, // MODE2_FORM1
     {1, 16, 2352, 288, DM_MODE1_2352, ".bin.tao.iso.img.bwi"},
@@ -195,8 +195,6 @@ const st_track_probe_t track_probe[] =
     {0, 0, 0, 0, 0, NULL}
   };
 
-
-
 const char *dm_msg[] = {
   "ERROR: %s has been deprecated\n",
   "ERROR: Unknown/unsupported track mode\n",
@@ -205,12 +203,15 @@ const char *dm_msg[] = {
   NULL
 };
 
+static void (*dm_gauge_ptr) (int pos, int size);
+int dm_gauge_set;
+
 
 int
 dm_get_track_mode_id (int mode, int sector_size)
 {
   int x = 0;
-  
+
   for (x = 0; track_probe[x].sector_size; x++)
     if (track_probe[x].mode == mode &&
         track_probe[x].sector_size == sector_size)
@@ -224,7 +225,7 @@ void
 dm_get_track_mode_by_id (int id, int8_t *mode, uint16_t *sector_size)
 {
   int x = 0;
-  
+
   for (x = 0; track_probe[x].sector_size; x++)
     if (track_probe[x].id == id)
       {
@@ -358,9 +359,6 @@ dm_clean (dm_image_t *image)
 }
 
 
-void (* dm_ext_gauge) (int, int);
-
-
 uint32_t
 dm_get_version (void)
 {
@@ -379,9 +377,17 @@ dm_get_version_s (void)
 
 
 void
-dm_set_gauge (void (* gauge) (int, int))
+dm_set_gauge (void (*gauge) (int, int))
 {
-  dm_ext_gauge = gauge;
+  dm_gauge_ptr = gauge;
+  dm_gauge_set = gauge ? 1 : 0;
+}
+
+
+void
+dm_gauge (int pos, int size)
+{
+  dm_gauge_ptr (pos, size);
 }
 
 
@@ -390,7 +396,7 @@ dm_fdopen (dm_image_t *image, int track_num, const char *mode)
 {
   dm_track_t *track = (dm_track_t *) &image->track[track_num];
   FILE *fh;
-  
+
   if (!(fh = fopen (image->fname, mode)))
     return NULL;
 
@@ -575,14 +581,12 @@ dm_rip (const dm_image_t *image, int track_num, uint32_t flags)
           return -1;
         }
 
-      if (!(x % 100) && dm_ext_gauge)
-        dm_ext_gauge (x * track->sector_size,
-                      track->track_len * track->sector_size);
+      if (!(x % 100) && dm_gauge_set)
+        dm_gauge (x * track->sector_size, track->track_len * track->sector_size);
     }
                   
-  if (dm_ext_gauge)
-    dm_ext_gauge (x * track->sector_size,
-                  track->track_len * track->sector_size);
+  if (dm_gauge_set)
+    dm_gauge (x * track->sector_size, track->track_len * track->sector_size);
                         
 //  fseek (fh, track->total_len * track->sector_size, SEEK_CUR);
 

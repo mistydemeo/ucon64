@@ -2,7 +2,7 @@
 libdm_misc.h - libdiscmage miscellaneous
 
 written by 2002 - 2003 NoisyB (noisyb@gmx.net)
-           2002 - 2003 dbjh
+           2002 - 2004 dbjh
 
 
 This library is free software; you can redistribute it and/or
@@ -57,7 +57,6 @@ typedef struct
 } st_track_desc_t; // used in toc.c and cue.c
 
 
-
 enum {
   DM_AUDIO = 1,
 #if 0
@@ -89,15 +88,16 @@ enum {
 
 /*
   writewavheader()    write header for a wav file
-  dm_get_track_desc() returns a string like "MODE1/2352" depending on the 
+  dm_get_track_desc() returns a string like "MODE1/2352" depending on the
                       mode and sector_size specified; if cue == FALSE
                       it will return the string in TOC format
 */
 //extern void writewavheader (FILE * fdest, int track_length);
 extern int dm_get_track_mode_id (int mode, int sector_size);
 extern void dm_get_track_mode_by_id (int id, int8_t *mode, uint16_t *sector_size);
-extern void (* dm_ext_gauge) (int, int);
 extern void dm_clean (dm_image_t *image);
+extern void dm_gauge (int, int);
+extern int dm_gauge_set;
 
 extern const char pvd_magic[];
 extern const char svd_magic[];

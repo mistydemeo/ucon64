@@ -94,8 +94,8 @@ jaguar_init (st_rominfo_t *rominfo)
   rominfo->header_len = JAGUAR_HEADER_LEN;
   rominfo->header = &jaguar_header;
 
-  rominfo->console_usage = (const st_usage_t **)jaguar_usage;
-  rominfo->copier_usage = (const st_usage_t **)unknown_usage;
+  rominfo->console_usage = (const st_usage_t *)jaguar_usage;
+  rominfo->copier_usage = (const st_usage_t *)unknown_usage;
 
   return result;
 }

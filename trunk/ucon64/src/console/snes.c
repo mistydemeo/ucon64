@@ -2264,7 +2264,7 @@ snes_init (st_rominfo_t *rominfo)
       rominfo->buheader_len = SWC_HEADER_LEN;
       strcpy (rominfo->name, "Name: N/A");
       rominfo->console_usage = NULL;
-      rominfo->copier_usage = (const st_usage_t **)swc_usage;
+      rominfo->copier_usage = (const st_usage_t *)swc_usage;
       rominfo->maker = "Manufacturer: You?";
       rominfo->country = "Country: Your country?";
       rominfo->has_internal_crc = 0;
@@ -2465,23 +2465,23 @@ snes_init (st_rominfo_t *rominfo)
       rominfo->name[x] = '.';
   rominfo->name[SNES_NAME_LEN] = 0;             // terminate string (at 1st byte _after_ string)
 
-  rominfo->console_usage = (const st_usage_t **)snes_usage;
+  rominfo->console_usage = (const st_usage_t *)snes_usage;
   if (!rominfo->buheader_len)
-    rominfo->copier_usage = (const st_usage_t **)mgd_usage;
+    rominfo->copier_usage = (const st_usage_t *)mgd_usage;
   else
     {
       switch (type)
         {
         case GD3:
-          rominfo->copier_usage = (const st_usage_t **)gd_usage;
+          rominfo->copier_usage = (const st_usage_t *)gd_usage;
           break;
         case FIG:
-          rominfo->copier_usage = (const st_usage_t **)fig_usage;
+          rominfo->copier_usage = (const st_usage_t *)fig_usage;
           break;
         // just assume it's in SWC format... (there are _many_ ROMs on the
         //  internet with incorrect headers)
         default:
-          rominfo->copier_usage = (const st_usage_t **)swc_usage;
+          rominfo->copier_usage = (const st_usage_t *)swc_usage;
         }
     }
 

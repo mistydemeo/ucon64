@@ -1135,8 +1135,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   // backup unit type?
   if (rominfo->copier_usage != NULL)
     {
-//      strcpy (buf, rominfo->copier_usage[0]->desc);
-      strcpy (buf, "");
+      strcpy (buf, rominfo->copier_usage[0].desc);
       printf ("%s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0
@@ -1160,8 +1159,7 @@ ucon64_rom_nfo (const st_rominfo_t *rominfo)
   // console type
   if (rominfo->console_usage != NULL)
     {
-//      strcpy (buf, rominfo->console_usage[0]->desc);
-      strcpy (buf, "");
+      strcpy (buf, rominfo->console_usage[0].desc);
       printf ("%s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0

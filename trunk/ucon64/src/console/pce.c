@@ -729,8 +729,8 @@ pcengine_init (st_rominfo_t *rominfo)
   rominfo->internal_crc2[0] = 0;
 #endif
 
-  rominfo->console_usage = (const st_usage_t **)pcengine_usage;
-  rominfo->copier_usage = (const st_usage_t **)(!rominfo->buheader_len ? mgd_usage : unknown_usage);
+  rominfo->console_usage = (const st_usage_t *)pcengine_usage;
+  rominfo->copier_usage = (const st_usage_t *)(!rominfo->buheader_len ? mgd_usage : unknown_usage);
 
   ucon64.crc32 = q_fcrc32 (ucon64.rom, rominfo->buheader_len);
   // additional info

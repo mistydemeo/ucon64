@@ -59,7 +59,7 @@ typedef struct
   int (*compare) (const void *a, const void *b); // the function which compares the id with the filename
      // compare() == 0 means success
   int8_t console;                              // UCON64_SNES, UCON64_NES, etc.
-  const st_usage_t **console_usage;
+  const st_usage_t *console_usage;
 } st_console_t;
 
 typedef struct
@@ -171,59 +171,59 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
   // We use the filename to find out for what console a DAT file is meant.
   //  The field "refname" seems too unreliable.
   static const st_console_t console_type[] = {
-    {"GoodSNES", custom_strnicmp, UCON64_SNES, (const st_usage_t **)snes_usage},
-    {"GoodNES", custom_strnicmp, UCON64_NES, (const st_usage_t **)nes_usage},
-    {"FDS", custom_stristr, UCON64_NES, (const st_usage_t **)nes_usage},
-    {"GoodGBA", custom_strnicmp, UCON64_GBA, (const st_usage_t **)gba_usage},
-    {"GoodGBX", custom_strnicmp, UCON64_GB, (const st_usage_t **)gameboy_usage},
-    {"GoodGEN", custom_strnicmp, UCON64_GENESIS, (const st_usage_t **)genesis_usage},
-    {"GoodGG", custom_strnicmp, UCON64_SMS, (const st_usage_t **)sms_usage},
-    {"GoodSMS", custom_strnicmp, UCON64_SMS, (const st_usage_t **)sms_usage},
-    {"GoodJAG", custom_strnicmp, UCON64_JAGUAR, (const st_usage_t **)jaguar_usage},
-    {"GoodLynx", custom_strnicmp, UCON64_LYNX, (const st_usage_t **)lynx_usage},
-    {"GoodN64", custom_strnicmp, UCON64_N64, (const st_usage_t **)n64_usage},
-    {"GoodPCE", custom_strnicmp, UCON64_PCE, (const st_usage_t **)pcengine_usage},
-    {"Good2600", custom_strnicmp, UCON64_ATARI, (const st_usage_t **)atari_usage},
-    {"Good5200", custom_strnicmp, UCON64_ATARI, (const st_usage_t **)atari_usage},
-    {"Good7800", custom_strnicmp, UCON64_ATARI, (const st_usage_t **)atari_usage},
+    {"GoodSNES", custom_strnicmp, UCON64_SNES, (const st_usage_t *)snes_usage},
+    {"GoodNES", custom_strnicmp, UCON64_NES, (const st_usage_t *)nes_usage},
+    {"FDS", custom_stristr, UCON64_NES, (const st_usage_t *)nes_usage},
+    {"GoodGBA", custom_strnicmp, UCON64_GBA, (const st_usage_t *)gba_usage},
+    {"GoodGBX", custom_strnicmp, UCON64_GB, (const st_usage_t *)gameboy_usage},
+    {"GoodGEN", custom_strnicmp, UCON64_GENESIS, (const st_usage_t *)genesis_usage},
+    {"GoodGG", custom_strnicmp, UCON64_SMS, (const st_usage_t *)sms_usage},
+    {"GoodSMS", custom_strnicmp, UCON64_SMS, (const st_usage_t *)sms_usage},
+    {"GoodJAG", custom_strnicmp, UCON64_JAGUAR, (const st_usage_t *)jaguar_usage},
+    {"GoodLynx", custom_strnicmp, UCON64_LYNX, (const st_usage_t *)lynx_usage},
+    {"GoodN64", custom_strnicmp, UCON64_N64, (const st_usage_t *)n64_usage},
+    {"GoodPCE", custom_strnicmp, UCON64_PCE, (const st_usage_t *)pcengine_usage},
+    {"Good2600", custom_strnicmp, UCON64_ATARI, (const st_usage_t *)atari_usage},
+    {"Good5200", custom_strnicmp, UCON64_ATARI, (const st_usage_t *)atari_usage},
+    {"Good7800", custom_strnicmp, UCON64_ATARI, (const st_usage_t *)atari_usage},
 //  more or less unique names could be compared with custom_stristr()
-    {"Neo-Geo", custom_strnicmp, UCON64_NEOGEO, (const st_usage_t **)neogeo_usage},
-    {"MAME", custom_stristr, UCON64_MAME, (const st_usage_t **)mame_usage},
-    {"Dreamcast", custom_stristr, UCON64_DC, (const st_usage_t **)dc_usage},
-    {"Saturn", custom_stristr, UCON64_SATURN, (const st_usage_t **)sat_usage},
-    {"3do", custom_stristr, UCON64_REAL3DO, (const st_usage_t **)real3do_usage},
-    {"CDi", custom_stristr, UCON64_CDI, (const st_usage_t **)cdi_usage},
-    {"XBox", custom_stristr, UCON64_XBOX, (const st_usage_t **)xbox_usage},
-    {"CD32", custom_stristr, UCON64_CD32, (const st_usage_t **)cd32_usage},
-    {"Vectrex", custom_stristr, UCON64_VECTREX, (const st_usage_t **)vectrex_usage},
-    {"swan", custom_stristr, UCON64_WONDERSWAN, (const st_usage_t **)swan_usage},
-    {"Coleco", custom_stristr, UCON64_COLECO, (const st_usage_t **)coleco_usage},
-    {"Intelli", custom_stristr, UCON64_INTELLI, (const st_usage_t **)intelli_usage},
+    {"Neo-Geo", custom_strnicmp, UCON64_NEOGEO, (const st_usage_t *)neogeo_usage},
+    {"MAME", custom_stristr, UCON64_MAME, (const st_usage_t *)mame_usage},
+    {"Dreamcast", custom_stristr, UCON64_DC, (const st_usage_t *)dc_usage},
+    {"Saturn", custom_stristr, UCON64_SATURN, (const st_usage_t *)sat_usage},
+    {"3do", custom_stristr, UCON64_REAL3DO, (const st_usage_t *)real3do_usage},
+    {"CDi", custom_stristr, UCON64_CDI, (const st_usage_t *)cdi_usage},
+    {"XBox", custom_stristr, UCON64_XBOX, (const st_usage_t *)xbox_usage},
+    {"CD32", custom_stristr, UCON64_CD32, (const st_usage_t *)cd32_usage},
+    {"Vectrex", custom_stristr, UCON64_VECTREX, (const st_usage_t *)vectrex_usage},
+    {"swan", custom_stristr, UCON64_WONDERSWAN, (const st_usage_t *)swan_usage},
+    {"Coleco", custom_stristr, UCON64_COLECO, (const st_usage_t *)coleco_usage},
+    {"Intelli", custom_stristr, UCON64_INTELLI, (const st_usage_t *)intelli_usage},
 /* TODO:
-    {"psx", custom_stristr, UCON64_PSX, (const st_usage_t **)psx_usage},
-    {"ps1", custom_stristr, UCON64_PSX, (const st_usage_t **)psx_usage},
-    {"psone", custom_stristr, UCON64_PSX, (const st_usage_t **)psx_usage},
-    {"ps2", custom_stristr, UCON64_PS2, (const st_usage_t **)ps2_usage},
-    {"dc", custom_stristr, UCON64_DC, (const st_usage_t **)dc_usage},
-    {"system", custom_stristr, UCON64_SYSTEM16, (const st_usage_t **)s16_usage},
-    {"pocket", custom_stristr, UCON64_NEOGEOPOCKET, (const st_usage_t **)ngp_usage},
-    {"virtual", custom_stristr, UCON64_VIRTUALBOY, (const st_usage_t **)vboy_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)cd32_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)cdi_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)channelf_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)coleco_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)gamecom_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)gc_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)gp32_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)intelli_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)odyssey2_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)odyssey_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)real3do_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)s16_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)sat_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)vboy_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)vc4000_usage},
-    {"", custom_stristr, 0, (const st_usage_t **)vectrex_usage},
+    {"psx", custom_stristr, UCON64_PSX, (const st_usage_t *)psx_usage},
+    {"ps1", custom_stristr, UCON64_PSX, (const st_usage_t *)psx_usage},
+    {"psone", custom_stristr, UCON64_PSX, (const st_usage_t *)psx_usage},
+    {"ps2", custom_stristr, UCON64_PS2, (const st_usage_t *)ps2_usage},
+    {"dc", custom_stristr, UCON64_DC, (const st_usage_t *)dc_usage},
+    {"system", custom_stristr, UCON64_SYSTEM16, (const st_usage_t *)s16_usage},
+    {"pocket", custom_stristr, UCON64_NEOGEOPOCKET, (const st_usage_t *)ngp_usage},
+    {"virtual", custom_stristr, UCON64_VIRTUALBOY, (const st_usage_t *)vboy_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)cd32_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)cdi_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)channelf_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)coleco_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)gamecom_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)gc_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)gp32_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)intelli_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)odyssey2_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)odyssey_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)real3do_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)s16_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)sat_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)vboy_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)vc4000_usage},
+    {"", custom_stristr, 0, (const st_usage_t *)vectrex_usage},
 */
     {0, 0, 0, 0}
   };
@@ -233,7 +233,7 @@ fname_to_console (const char *fname, st_ucon64_dat_t *dat)
       if (!console_type[pos].compare (fname, console_type[pos].id))
         {
           dat->console = console_type[pos].console;
-          dat->console_usage = (const st_usage_t **)(console_type[pos].console_usage);
+          dat->console_usage = (const st_usage_t *)(console_type[pos].console_usage);
           break;
         }
     }
@@ -354,7 +354,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     }
 
   fname_to_console (dat->datfile, dat);
-  dat->copier_usage = (const st_usage_t **)unknown_usage;
+  dat->copier_usage = (const st_usage_t *)unknown_usage;
 
   return dat;
 }
@@ -743,7 +743,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
   // console type?
   if (dat->console_usage != NULL)
     {
-      strcpy (buf, dat->console_usage[0]->desc);
+      strcpy (buf, dat->console_usage[0].desc);
       printf ("  %s\n", to_func (buf, strlen (buf), toprint2));
 
 #if 0

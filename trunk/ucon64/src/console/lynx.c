@@ -252,8 +252,8 @@ lynx_init (st_rominfo_t *rominfo)
 {
   int result = -1;
 
-  rominfo->console_usage = (const st_usage_t **)lynx_usage;
-  rominfo->copier_usage = (const st_usage_t **)unknown_usage;
+  rominfo->console_usage = (const st_usage_t *)lynx_usage;
+  rominfo->copier_usage = (const st_usage_t *)unknown_usage;
 
   q_fread (&lnx_header, 0, LNX_HEADER_LEN, ucon64.rom);
   if (!strncmp (lnx_header.magic, "LYNX", 4))

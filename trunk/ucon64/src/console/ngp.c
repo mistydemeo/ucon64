@@ -94,8 +94,8 @@ ngp_init (st_rominfo_t *rominfo)
       "Unknown");
   strcat (rominfo->misc, buf);
 
-  rominfo->console_usage = (const st_usage_t **)ngp_usage;
-  rominfo->copier_usage = (const st_usage_t **)(!rominfo->buheader_len ? fpl_usage : unknown_usage);
+  rominfo->console_usage = (const st_usage_t *)ngp_usage;
+  rominfo->copier_usage = (const st_usage_t *)(!rominfo->buheader_len ? fpl_usage : unknown_usage);
 
   return result;
 }

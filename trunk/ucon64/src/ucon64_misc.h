@@ -23,8 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef UCON64_MISC_H
 #define UCON64_MISC_H
 
-#include "misc.h" // for DIR2_t
-
 #ifdef  BACKUP
 #ifdef  __BEOS__
 #define DRV_READ_IO_8 'r'
@@ -126,9 +124,10 @@ extern void ucon64_wrote (const char *filename);
 
   to delete the tempdir *dp must be closed with closedir2()
 */
-extern char *ucon64_rom_in_archive (void *dp, const char *archive, char *romname,
+#if 0
+extern char *ucon64_rom_in_archive (DIR2_t *dp, const char *archive, char *romname,
                                     char *configfile);
-
+#endif
 extern int ucon64_bin2iso (const char *image, int track_mode);
 extern int ucon64_trackmode_probe (const char *image);
 extern int ucon64_mktoc (st_rominfo_t *rominfo);

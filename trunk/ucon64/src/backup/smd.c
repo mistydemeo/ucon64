@@ -78,15 +78,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
-#ifndef __DOS__
-#include <unistd.h>                             // usleep()
-#else
-#include <dos.h>                                // delay()
+#ifdef  __UNIX__
+#include <unistd.h>                             // usleep(), microseconds
+#elif   __DOS__
+#include <dos.h>                                // delay(), milliseconds
+#elif   __BEOS__
+#include <OS.h>                                 // snooze(), microseconds
 #endif
 
+#ifndef __BEOS__
 typedef unsigned char uint8;
 typedef unsigned short int uint16;
 typedef unsigned long int uint32;
+#endif
 
 static int smd_argc;
 static char *smd_argv[128];
@@ -311,10 +315,12 @@ uint8 smd_recieve_block(uint32 length, uint8 *buffer)
     uint32 count;
     uint8 temp, checksum = 0x81;
 
-#ifndef __DOS__                                 // wait 32 milliseconds
+#ifdef  __UNIX__                                // wait 32 milliseconds
     usleep(32000);
-#else
+#elif   __DOS__
     delay(32);
+#elif   __BEOS__
+    snooze(32000);
 #endif
 
     /* Read data from the SMD */
@@ -450,6 +456,7 @@ int load_smd(char *filename)
     for(count = 0; count < header[0]; count += 1)
     {
         printf("Sending block %d of %d\r", 1+count, header[0]);
+        fflush(stdout);
         smd_send_command(0x05, count, 0x00);
         smd_send_command(0x00, 0x8000, 0x4000);
         smd_send_block(0x4000, buf + (count * 0x4000));
@@ -515,6 +522,7 @@ int save_smd(char *filename)
     for(count = 0; count < header[0]; count += 1)
     {
         printf("Recieving block %d of %d\r", 1+count, header[0]);
+        fflush(stdout);
         smd_send_command(0x05, count, 0x00);
         smd_send_command(0x01, 0x4000, 0x4000);
         if(!smd_recieve_block(0x4000, block))
@@ -551,11 +559,13 @@ int load_sram(char *filename)
     smd_poke(0x2001, 0x04);
 
     printf("Loading SRAM block 1\r");
+    fflush(stdout);
     smd_send_command(0x00, 0x4000, 0x4000);
     fread(block, 0x4000, 1, fd);
     smd_send_block(0x4000, block);
 
     printf("Loading SRAM block 2\r");
+    fflush(stdout);
     smd_send_command(0x00, 0x8000, 0x4000);
     fread(block, 0x4000, 1, fd);
     smd_send_block(0x4000, block);
@@ -596,11 +606,13 @@ int save_sram(char *filename)
     smd_poke(0x2001, 0x04);
 
     printf("Saving SRAM block 1\r");
+    fflush(stdout);
     smd_send_command(0x01, 0x4000, 0x4000);
     smd_recieve_block(0x4000, block);
     fwrite(block, 0x4000, 1, fd);
 
     printf("Saving SRAM block 2\r");
+    fflush(stdout);
     smd_send_command(0x01, 0x8000, 0x4000);
     smd_recieve_block(0x4000, block);
     fwrite(block, 0x4000, 1, fd);
@@ -633,6 +645,7 @@ int dump_bios(char *filename)
     smd_poke(0x2001, 0x00);
 
     printf("Saving BIOS\r");
+    fflush(stdout);
     smd_send_command(0x01, 0x0000, 0x2000);
     smd_recieve_block(0x2000, block);
     fwrite(block, 0x2000, 1, fd);

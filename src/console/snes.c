@@ -136,7 +136,12 @@ typedef struct st_snes_header
 {
   unsigned char maker_high;                     // 0
   unsigned char maker_low;                      // 1
-  unsigned char pad[14];                        // 2
+  unsigned char game_id_prefix;                 // 2
+  unsigned char game_id_low;                    // 3
+  unsigned char game_id_high;                   // 4
+  unsigned char game_id_country;                // 5
+  // 'E' = USA, 'P' = Europe, 'F' = France, 'G' = Germany, 'S' = Spain
+  unsigned char pad[10];                        // 6
   unsigned char name[SNES_NAME_LEN];            // 16
   unsigned char map_type;                       // 37, a.k.a. ROM makeup
   unsigned char rom_type;                       // 38

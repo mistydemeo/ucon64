@@ -501,10 +501,10 @@ aps_create (const char *orgname, const char *modname)
   writeN64header ();
   writesizeheader (q_fsize (orgname), q_fsize (modname));
 
-  printf ("Finding changes...");
+  printf ("Searching differences...");
   fflush (stdout);
   writepatch ();
-  printf (" Done\n");
+  printf (" done\n");
 
   fclose (n64aps_modfile);
   fclose (n64aps_orgfile);
@@ -512,7 +512,7 @@ aps_create (const char *orgname, const char *modname)
 
   if (!n64aps_changefound)
     {
-      printf ("No changes found\n");
+      printf ("No differences found\n");
       remove (apsname);
     }
   else

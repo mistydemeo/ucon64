@@ -39,22 +39,21 @@ const st_usage_t gbx_usage[] =
 #ifdef PARALLEL
     {"xgbx", NULL, "send/receive ROM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically when ROM does not exist"},
-    {"xgbxs", NULL, "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"  
+    {"xgbxs", NULL, "send/receive SRAM to/from GB Xchanger; " OPTION_LONG_S "port=PORT\n"
                 "receives automatically when SRAM does not exist"},
-    {"xgbxb", "BANK", "send/receive 64kbits SRAM to/from GB Xchanger BANK\n"
+    {"xgbxb", "BANK", "send/receive 64 kbits SRAM to/from GB Xchanger BANK\n"
                      "BANK can be a number from 0 to 15; " OPTION_LONG_S "port=PORT\n"
                      "receives automatically when ROM does not exist"},
 #endif // PARALLEL
     {NULL, NULL, NULL}
   };
-  
+
 #ifdef PARALLEL
 static void set_ai_data (unsigned char _ai, unsigned char _data);
 static char check_card (void);
 static void set_ai(unsigned char _ai);
 static void init_port (void);
 static void end_port (void);
-      
 
 
 /* Modified version of gbt15.c - (C) Bung Enterprises */
@@ -158,6 +157,7 @@ newfsize (const char *fname)
   return sbuf.st_size;
 }
 
+
 void
 disp_buffer (unsigned int disp_len)
 {
@@ -209,14 +209,16 @@ disp_buffer (unsigned int disp_len)
     }
 }
 
+
 /*void port_set_read(void)
 {
-   outportb(port_a,0);		// nastb=1,nib_sel=0,ndstb=1,nwrite=1
+   outportb(port_a,0);      // nastb=1,nib_sel=0,ndstb=1,nwrite=1
 }
 void port_set_write(void)
 {
-   outportb(port_a,1);		// nastb=1,nib_sel=0,ndstb=1,nwrite=0
+   outportb(port_a,1);      // nastb=1,nib_sel=0,ndstb=1,nwrite=0
 }*/
+
 
 void
 spp_set_ai (unsigned char _ai)
@@ -229,6 +231,7 @@ spp_set_ai (unsigned char _ai)
   // nastb ~~~~|___|~~~~
 }
 
+
 void
 spp_write_data (unsigned char _data)
 {
@@ -239,12 +242,14 @@ spp_write_data (unsigned char _data)
   // ndstb ~~~~|___|~~~~
 }
 
+
 void
 spp_set_ai_data (unsigned char _ai, unsigned char _data)
 {
   spp_set_ai (_ai);
   spp_write_data (_data);
 }
+
 
 char
 spp_read_data (void)
@@ -262,12 +267,14 @@ spp_read_data (void)
   return temp;
 }
 
+
 void
 epp_set_ai (unsigned char _ai)
 {
   set_data_write
   outportb (ai, _ai);
 }
+
 
 void
 epp_set_ai_data (unsigned char _ai, unsigned char _data)
@@ -276,6 +283,7 @@ epp_set_ai_data (unsigned char _ai, unsigned char _data)
   set_data_write
   outportb (data, _data);
 }
+
 
 void
 set_ai (unsigned char _ai)
@@ -287,6 +295,7 @@ set_ai (unsigned char _ai)
     epp_set_ai (_ai);
 }
 
+
 void
 set_ai_data (unsigned char _ai, unsigned char _data)
 {
@@ -295,6 +304,7 @@ set_ai_data (unsigned char _ai, unsigned char _data)
   else
     epp_set_ai_data (_ai, _data);       // epp mode
 }
+
 
 void
 write_data (unsigned char _data)
@@ -305,6 +315,7 @@ write_data (unsigned char _data)
     outportb (data, _data);     // epp write data
 }
 
+
 unsigned char
 read_data (void)
 {
@@ -314,6 +325,7 @@ read_data (void)
     return inportb (data);      // epp read data
 }
 
+
 void
 init_port (void)
 {
@@ -322,12 +334,14 @@ init_port (void)
   set_ai_data (2, 0x80);        // rst=1, wei=0(dis.), rdi=0(dis.)
 }
 
+
 void
 end_port (void)
 {
   set_ai_data (2, 0);           // rst=0, wei=0(dis.), rdi=0(dis.)
   set_normal                    // ninit=1, nWrite=1
 }
+
 
 unsigned char
 write_32k_file (void)
@@ -342,12 +356,13 @@ write_32k_file (void)
   return 0;
 }
 
+
 unsigned char
 read_8k_file ()
 {
   if (fread ((char *) mix.buffer, sizeof (char), 0x2000, fptr) != 0x2000)
     {
-      printf ("read error\n");
+      printf ("Read error\n");
       fclose (fptr);            /* read data error */
       return 1;
     }
@@ -355,18 +370,20 @@ read_8k_file ()
   return 0;
 }
 
+
 unsigned char
 read_16k_file ()
 {
   if (fread ((char *) mix.buffer, sizeof (char), 0x4000, fptr) != 0x4000)
     {
-      printf ("read error\n");
+      printf ("Read error\n");
       fclose (fptr);            /* read data error */
       return 1;
     }
 //   printf(".");
   return 0;
 }
+
 
 unsigned char
 read_32k_file ()
@@ -374,13 +391,14 @@ read_32k_file ()
   if (fread ((char *) mix.buffer, sizeof (char), trans_size, fptr) !=
       trans_size)
     {
-      printf ("read error\n");
+      printf ("Read error\n");
       fclose (fptr);            /* read data error */
       return 1;
     }
   //printf(".");
   return 0;
 }
+
 
 void
 set_adr (unsigned int adr)      // *****
@@ -391,6 +409,7 @@ set_adr (unsigned int adr)      // *****
   set_ai (3);
   set_data_read                 // ninit=0, nWrite=1
 }
+
 
 int
 write_file_32k (void)
@@ -405,6 +424,7 @@ write_file_32k (void)
   return 0;
 }
 
+
 char
 write_file_xxk (unsigned int write_size)
 {
@@ -418,6 +438,7 @@ write_file_xxk (unsigned int write_size)
   return 0;
 }
 
+
 void
 set_bank (unsigned int adr, unsigned char bank)
 {
@@ -429,6 +450,7 @@ set_bank (unsigned int adr, unsigned char bank)
   set_data_read                 // ninit=0, nWrite=1
 }
 
+
 void
 set_rom_bank (unsigned char bank)
 {
@@ -439,28 +461,35 @@ set_rom_bank (unsigned char bank)
     set_bank (0x2100, bank);    // for MCB2
 }
 
+
 volatile void
 delay_10us ()
 // Hmmm, usleep() can be used on UNIX, but default under DOS is delay() which
 //  waits for a number of milliseconds... Better use the same code on all platforms.
 {
-  long x;
-  for (x = 0; x < 0x3000; x++); // 0x2000
+  int x;
+  for (x = 0; x < 0x3000; x++)                  // 0x2000
+    ;
 }
+
 
 volatile void
 delay_20ms ()
 {
-  long x;
-  for (x = 0; x < 0x10000; x++);
+  int x;
+  for (x = 0; x < 0x10000; x++)
+    ;
 }
+
 
 volatile void
 delay_100us ()
 {
-  long x;
-  for (x = 0; x < 0xfffff; x++);
+  int x;
+  for (x = 0; x < 0xfffff; x++)
+    ;
 }
+
 
 void
 out_byte_eeprom (unsigned char d)
@@ -475,6 +504,7 @@ out_byte_eeprom (unsigned char d)
   set_ai (3);                   // default write mode
 }
 
+
 void
 out_byte (unsigned char d)
 {
@@ -484,6 +514,7 @@ out_byte (unsigned char d)
   write_data (d);               // out data
 //   outportb(data,d);          // out data
 }
+
 
 void
 out_data (unsigned char h, unsigned char m, unsigned char l, unsigned char d)
@@ -503,6 +534,7 @@ out_data (unsigned char h, unsigned char m, unsigned char l, unsigned char d)
   set_ai_data (0, l);           // a[7..0]
   out_byte_eeprom (d);          // write data to eeprom
 }
+
 
 void
 out_adr2_data (unsigned long adr, unsigned char d)      // address shift 1 bit
@@ -524,6 +556,7 @@ out_adr2_data (unsigned long adr, unsigned char d)      // address shift 1 bit
   set_ai_data (0, l);           // a[7..0]
   out_byte_eeprom (d);          // write data to eeprom
 }
+
 
 void
 out_adr_data (unsigned long adr, unsigned char d)       // real address
@@ -549,6 +582,7 @@ out_adr_data (unsigned long adr, unsigned char d)       // real address
   out_byte_eeprom (d);          // write data to eeprom
 }
 
+
 void
 set_adr_long (unsigned long adr)        // real address
 {
@@ -572,6 +606,7 @@ set_adr_long (unsigned long adr)        // real address
   set_ai_data (0, l);           // a[7..0]
 }
 
+
 unsigned char
 read_byte (void)
 {
@@ -581,6 +616,7 @@ read_byte (void)
 //   return inportb(data);
 }
 
+
 void
 enable_protection (void)
 {
@@ -589,6 +625,7 @@ enable_protection (void)
   out_data (0, 0x2a, 0xaa, 0x55);
   out_data (0, 0x55, 0x55, 0xa0);
 }
+
 
 void
 disable_protection (void)
@@ -601,6 +638,7 @@ disable_protection (void)
   out_data (0, 0x55, 0x55, 0x20);
   delay_20ms ();
 }
+
 
 int
 data_polling_data (unsigned char last_data)
@@ -618,6 +656,7 @@ data_polling_data (unsigned char last_data)
 //   printf("timeout = %x\n",timeout);
   return loop;
 }
+
 
 int
 data_polling (void)
@@ -639,6 +678,7 @@ data_polling (void)
   return loop;
 }
 
+
 void
 reset_to_read (void)            // return to read mode
 {
@@ -646,6 +686,7 @@ reset_to_read (void)            // return to read mode
   out_adr2_data (0x2aaa, 0x55); // 2aaa:55
   out_adr2_data (0x5555, 0xf0); // 5555:f0
 }
+
 
 void
 read_status_reg_cmd (void)
@@ -655,12 +696,13 @@ read_status_reg_cmd (void)
   out_adr2_data (0x5555, 0x70); // 5555:70
 }
 
+
 char
 wait_status (void)
 {
   unsigned temp;
   temp = read_byte ();          // read first status byte
-//      printf("temp=%x ",temp);        
+//      printf("temp=%x ",temp);
 #ifdef TODO
 #warning TODO is 16meg status different?
 #endif // TODO
@@ -685,6 +727,7 @@ wait_status (void)
   return 0;
 }
 
+
 char
 mx_erase (void)
 {
@@ -700,16 +743,17 @@ mx_erase (void)
   if (wait_status () == 0)
     {
       reset_to_read ();
-      printf ("erase ok\n");
+      printf ("Erase ok\n");
       return 0;
     }
   else
     {
       reset_to_read ();
-      printf ("erase error\n");
+      printf ("Erase error\n");
       return -1;
     }
 }
+
 
 char
 win_erase (void)
@@ -724,15 +768,16 @@ win_erase (void)
 
   if (data_polling ())
     {
-      printf ("erase error\n");
+      printf ("Erase error\n");
       return -1;
     }
   else
     {
-      printf ("erase ok\n");
+      printf ("Erase ok\n");
       return 0;
     }
 }
+
 
 unsigned char
 intel_read_status (void)
@@ -741,6 +786,7 @@ intel_read_status (void)
   return read_byte ();
 
 }
+
 
 char
 intel_check_status (void)
@@ -752,13 +798,14 @@ intel_check_status (void)
       if (time_out == 0)
         {
           printf ("Intel read status time out\n");
-          printf ("status = %x\n", intel_read_status ());
+          printf ("Status = %x\n", intel_read_status ());
           out_adr_data (0, 0x50);       // clear status register
           return -1;
         }
     }
   return 0;
 }
+
 
 char
 intel_block_erase (unsigned long block)
@@ -770,7 +817,7 @@ intel_block_erase (unsigned long block)
       if (time_out == 0)
         {
           printf ("Intel Block erase time out\n");
-          printf ("status = %x\n", intel_read_status ());
+          printf ("Status = %x\n", intel_read_status ());
           return -1;
         }
     }
@@ -783,9 +830,9 @@ intel_block_erase (unsigned long block)
       if (time_out == 0)
         {
           printf ("Intel Block erase time out at %lx\n", block);
-          printf ("status = %x\n", intel_read_status ());
+          printf ("Status = %x\n", intel_read_status ());
           out_adr_data (block, 0x50);   // clear status register
-          printf ("status = %x\n", intel_read_status ());
+          printf ("Status = %x\n", intel_read_status ());
           return -1;
         }
     }
@@ -798,13 +845,14 @@ intel_block_erase (unsigned long block)
   else
     {
       printf ("Intel Block erase error at %lx\n", block);
-      printf ("status = %x\n", intel_read_status ());
+      printf ("Status = %x\n", intel_read_status ());
       out_adr_data (block, 0x50);       // clear status register
-      printf ("status = %x\n", intel_read_status ());
+      printf ("Status = %x\n", intel_read_status ());
       out_adr_data (0x0000, 0xff);      // read array
       return -1;
     }
 }
+
 
 char
 intel_erase (void)
@@ -819,6 +867,7 @@ intel_erase (void)
   return 0;
 }
 
+
 char
 erase (void)
 {
@@ -828,10 +877,11 @@ erase (void)
     return mx_erase ();
   if (eeprom_type == 64)
     return intel_erase ();
-  printf ("eeprom type error\n");
+  printf ("EEPROM type error\n");
   return -1;
 
 }
+
 
 char
 sector_erase (unsigned long sector)
@@ -848,17 +898,18 @@ sector_erase (unsigned long sector)
   if (wait_status () == 0)
     {
 //      reset_to_read();
-//      printf("erase ok\n");
+//      printf("Erase ok\n");
       printf ("s");
       return 0;
     }
   else
     {
       reset_to_read ();
-      printf ("sector erase error\n");
+      printf ("Sector erase error\n");
       return -1;
     }
 }
+
 
 void
 mx_id (void)
@@ -868,13 +919,14 @@ mx_id (void)
   out_adr2_data (0x5555, 0x90); /* adr2,adr1,adr0,data */
 //   delay_10us();
   set_adr (0);                  /* adr2,adr1,adr0 */
-  printf ("Manufacturer Code: %x\n", read_byte ());
+  printf ("Manufacturer code: %x\n", read_byte ());
   set_adr (2);                  /* adr2,adr1,adr0 */
-  printf ("Device Code: %x\n", read_byte ());
+  printf ("Device code: %x\n", read_byte ());
   set_adr (4);                  /* adr2,adr1,adr0 */
-  printf ("First 16k protection Code: %x\n", read_byte ());
+  printf ("First 16 k protection code: %x\n", read_byte ());
   reset_to_read ();             // reset to read mode
 }
+
 
 void
 win_id (void)
@@ -888,19 +940,20 @@ win_id (void)
 
   delay_10us ();
   set_adr (0);                  /* adr2,adr1,adr0 */
-  printf ("Manufacturer Code: %x\n", read_byte ());
+  printf ("Manufacturer code: %x\n", read_byte ());
   set_adr (1);                  /* adr2,adr1,adr0 */
-  printf ("Device Code: %x\n", read_byte ());
+  printf ("Device code: %x\n", read_byte ());
 //   set_adr(2);                        /* adr2,adr1,adr0 */
-//   printf("First 16k protection Code : %x\n",read_byte());
+//   printf("First 16 k protection code : %x\n",read_byte());
 //   set_bank(0x2000,0x1f);
 //   set_adr(0x7ff2);                   /* adr2,adr1,adr0=0x7fff2 */
-//   printf("Last 16k protection Code : %x\n",read_byte());
+//   printf("Last 16 k protection code : %x\n",read_byte());
 
   out_data (0, 0x55, 0x55, 0xaa);       /* softwave product ID exit */
   out_data (0, 0x2a, 0xaa, 0x55);       /* adr2,adr1,adr0,data */
   out_data (0, 0x55, 0x55, 0xf0);       /* adr2,adr1,adr0,data */
 }
+
 
 void
 intel_id (void)
@@ -913,9 +966,10 @@ intel_id (void)
     }
 //   disp_buffer(64);
 
-  printf ("Manufacture Code = %x\n", mix.buffer[0]);
-  printf ("Device Code = %x\n", mix.buffer[1]);
+  printf ("Manufacture code = %x\n", mix.buffer[0]);
+  printf ("Device code = %x\n", mix.buffer[1]);
 }
+
 
 void
 disp_id (void)
@@ -928,12 +982,14 @@ disp_id (void)
     intel_id ();
 }
 
+
 void
 out_adr_data_32k (unsigned int adr, unsigned char data)
 {
   set_adr (adr);                // write adr:data
   out_byte_eeprom (data);       // write data to eeprom
 }
+
 
 char
 check_eeprom (void)
@@ -955,12 +1011,12 @@ check_eeprom (void)
 
   delay_10us ();
   set_adr (0);                  /* adr2,adr1,adr0 */
-//   printf("Manufacturer Code : %x\n",read_byte());
+//   printf("Manufacturer code : %x\n",read_byte());
 
   if (read_byte () != 0xda)
     goto check_16m;
   set_adr (1);                  /* adr2,adr1,adr0 */
-//   printf("Device Code : %x\n",read_byte());
+//   printf("Device code : %x\n",read_byte());
   if (read_byte () != 0x46)
     goto check_16m;
 
@@ -982,7 +1038,7 @@ check_16m:
 
 //   delay_10us();
   set_adr (0);                  /* adr2,adr1,adr0 */
-//   printf("Manufacturer Code : %x\n",read_byte());
+//   printf("Manufacturer code : %x\n",read_byte());
   if (read_byte () != 0xc2)
     {
       reset_to_read ();
@@ -990,7 +1046,7 @@ check_16m:
 //      return 1;
     }
   set_adr (2);                  /* adr2,adr1,adr0 */
-//   printf("Device Code : %x\n",read_byte());
+//   printf("Device code : %x\n",read_byte());
   if (read_byte () != 0xf1)
     {
       reset_to_read ();
@@ -1025,12 +1081,14 @@ check_64m:
     }
 }
 
+
 void
 set_sram_bank (unsigned char bank)
 {
   set_adr (0x4000);             // set sram adr
   out_byte (bank);              // sram bank 0
 }
+
 
 void
 read_eeprom_16k (unsigned int bank_16k)
@@ -1070,6 +1128,7 @@ read_eeprom_16k (unsigned int bank_16k)
     }
 //   printf(" ok\n");
 }
+
 
 char
 verify_eeprom_16k (unsigned int bank_16k)
@@ -1118,6 +1177,7 @@ verify_eeprom_16k (unsigned int bank_16k)
   return 0;
 }
 
+
 void
 set_page_write (void)           // start page write command
 {
@@ -1125,6 +1185,7 @@ set_page_write (void)           // start page write command
   out_adr2_data (0x2aaa, 0x55); // 2aaa:55
   out_adr2_data (0x5555, 0xa0); // 5555:a0
 }
+
 
 char
 page_write_128 (unsigned int bank_16k, unsigned char hi_lo)
@@ -1158,7 +1219,7 @@ page_write_128 (unsigned int bank_16k, unsigned char hi_lo)
 //       set_ai_data(0,hi_lo|0x7f);     // point to last address
       if (wait_status ())
         {
-          printf ("write error\n");
+          printf ("Write error\n");
           return -1;
         }
 // verify data
@@ -1194,7 +1255,7 @@ page_write_128 (unsigned int bank_16k, unsigned char hi_lo)
           retry--;
           if (retry == 0)
             {
-              printf ("retry write error\n");
+              printf ("Retry write error\n");
 //read_status_reg_cmd();
 //wait_status();
 //reset_to_read();
@@ -1206,6 +1267,7 @@ page_write_128 (unsigned int bank_16k, unsigned char hi_lo)
 //   printf("idx=%x",idx);
   return 0;
 }
+
 
 char
 win_write_eeprom_16k (unsigned int bank_16k)
@@ -1248,7 +1310,7 @@ win_write_eeprom_16k (unsigned int bank_16k)
           set_ai_data (2, 0x80);        // disable wr/rd inc.
           set_ai_data (0, 0xff);        // point to xxff
           if (data_polling ())
-            printf ("write error check(d6)\n");
+            printf ("Write error check (d6)\n");
 
           wr_done = 0;
 //   delay_20ms();
@@ -1277,7 +1339,7 @@ win_write_eeprom_16k (unsigned int bank_16k)
             }
           if (err_cnt == 0)
             {
-              printf ("retry write error\n");
+              printf ("Retry write error\n");
               return -1;
             }
         }
@@ -1290,6 +1352,7 @@ win_write_eeprom_16k (unsigned int bank_16k)
   return verify_eeprom_16k (bank_16k);
 //   return 0;
 }
+
 
 char
 mx_write_eeprom_16k (unsigned int bank_16k)
@@ -1310,16 +1373,18 @@ mx_write_eeprom_16k (unsigned int bank_16k)
   return verify_eeprom_16k (bank_16k);
 }
 
+
 /*void dump_intel_data(void)
 {
    out_adr_data(0,0xff);// read array command
-   for(i=0;i<64;i++){	// read 0x100~0x150 to buffer
+   for(i=0;i<64;i++){   // read 0x100~0x150 to buffer
       set_adr(i);
       mix.buffer[i]=read_data();
    }
    disp_buffer(64);
 }
 */
+
 
 char
 intel_byte_write_32 (unsigned long block_adr)
@@ -1333,7 +1398,7 @@ intel_byte_write_32 (unsigned long block_adr)
       if (intel_check_status ())
         {
           printf ("Intel byte write command time out\n");
-          printf ("status = %x\n", intel_read_status ());
+          printf ("Status = %x\n", intel_read_status ());
 //          dump_intel_data();
           return -1;
         }
@@ -1343,6 +1408,7 @@ intel_byte_write_32 (unsigned long block_adr)
   else
     return -1;                  // error
 }
+
 
 char
 intel_buffer_write_32 (unsigned long block_adr)
@@ -1360,7 +1426,7 @@ intel_buffer_write_32 (unsigned long block_adr)
       if (time_out == 0)
         {
           printf ("Intel buffer write command time out\n");
-          printf ("status = %x\n", intel_read_status ());
+          printf ("Status = %x\n", intel_read_status ());
 //       dump_intel_data();
           return -1;
         }
@@ -1382,6 +1448,7 @@ intel_buffer_write_32 (unsigned long block_adr)
   write_data (0xd0);            // write confirm command
   return 0;
 }
+
 
 char
 intel_write_eeprom_16k (unsigned int bank_16k)
@@ -1405,8 +1472,8 @@ intel_write_eeprom_16k (unsigned int bank_16k)
 //      if(intel_byte_write_32(block_adr)) return -1;
       if (intel_buffer_write_32 (block_adr))
         {
-          printf ("write error\n");
-          printf ("status = %x\n", intel_read_status ());
+          printf ("Write error\n");
+          printf ("Status = %x\n", intel_read_status ());
           return -1;
         }
     }
@@ -1414,7 +1481,7 @@ intel_write_eeprom_16k (unsigned int bank_16k)
   if (intel_check_status ())
     {
       printf ("Intel buffer write command error\n");
-      printf ("status = %x\n", intel_read_status ());
+      printf ("Status = %x\n", intel_read_status ());
 //      dump_intel_data();
       return -1;
     }
@@ -1428,6 +1495,7 @@ intel_write_eeprom_16k (unsigned int bank_16k)
     return verify_eeprom_16k (bank_16k);
 }
 
+
 void
 chk_dsp_name (char chk)
 {
@@ -1435,7 +1503,7 @@ chk_dsp_name (char chk)
   for (i = 0; i < 16; i++)
     game_name[i] = mix.buffer[i + 0x134];
   game_name[i] = 0;
-  printf ("Game Name = %s\n", game_name);
+  printf ("Game name = %s\n", game_name);
 
   cart_type = mix.buffer[0x147];
   rom_size = mix.buffer[0x148];
@@ -1445,6 +1513,7 @@ chk_dsp_name (char chk)
 //      printf("mbc1_exp=1\n");
     }
 }
+
 
 char headbuf[0x150];
 
@@ -1456,22 +1525,22 @@ verify_cart_from_file (void)
   filesize = newfsize (file_name);
   if (filesize == -1)
     {
-      perror ("file not found");
+      perror ("File not found");
       return -1;
     }
 
-  printf ("file length = %ld\n", filesize);
+  printf ("File length = %ld\n", filesize);
 
   if ((filesize < 0x8000) || (filesize & 0x7fff) || (filesize > maxfilesize))
     {
-      printf ("filesize error\n");
+      printf ("File size error\n");
       return -1;
     }
   num_page = (filesize / 0x8000) * 2;   // how many 16k banks
 //   printf("num_page=%d\n",num_page);
   if ((fptr = fopen (file_name, "rb")) == NULL)
     {                           /* open error */
-      printf ("open error\n");
+      printf ("Open error\n");
       return -1;
     }
 
@@ -1479,7 +1548,7 @@ verify_cart_from_file (void)
     {
       if (read_16k_file () != 0)
         {
-          printf ("load file error\n");
+          printf ("Load file error\n");
           fclose (fptr);
           return -1;
         }
@@ -1487,15 +1556,16 @@ verify_cart_from_file (void)
         chk_dsp_name (1);       // display game name and check mbc1_exp
       if (verify_eeprom_16k (page))
         {
-          printf ("verify cart error at bank = %x\n", page);
+          printf ("Verify cart error at bank = %x\n", page);
           fclose (fptr);
           return -1;
         }
     }
-  printf ("verify cart ok\n");
+  printf ("Verify cart ok\n");
   fclose (fptr);
   return 0;
 }
+
 
 char
 write_eeprom_16k (unsigned int bank_16k)
@@ -1508,6 +1578,7 @@ write_eeprom_16k (unsigned int bank_16k)
     return intel_write_eeprom_16k (bank_16k);
   return -1;
 }
+
 
 char
 write_cart_from_file (void)
@@ -1522,13 +1593,13 @@ write_cart_from_file (void)
   filesize = newfsize (file_name);
   if (filesize == -1)
     {
-      perror ("file not found");
+      perror ("File not found");
       return -1;
     }
 
   if ((filesize < 0x8000) || (filesize & 0x7fff) || (filesize > maxfilesize))
     {
-      printf ("filesize error\n");
+      printf ("File size error\n");
       return -1;
     }
 
@@ -1536,7 +1607,7 @@ write_cart_from_file (void)
 //   printf("num_page=%d\n",num_page);
   if ((fptr = fopen (file_name, "rb")) == NULL)
     {                           /* open error */
-      printf ("open error\n");
+      printf ("Open error\n");
       return -1;
     }
 
@@ -1549,14 +1620,14 @@ write_cart_from_file (void)
         }
     }
 
-  printf ("Writing Cart...\n");
+  printf ("Writing cart...\n");
   nbytes = 0;
   starttime = time (NULL);
   for (page = 0; page < num_page; page++)
     {
       if (read_16k_file () != 0)
         {
-          printf ("\nload file error\n");
+          printf ("\nLoad file error\n");
           fclose (fptr);
           return -1;
         }
@@ -1567,35 +1638,35 @@ write_cart_from_file (void)
         }
       if (write_eeprom_16k (page))
         {
-          printf ("\nwrite cart error at bank = %x\n", page);
+          printf ("\nWrite cart error at bank = %x\n", page);
           fclose (fptr);
           return -1;
         }
       nbytes += 16 * 1024;
       ucon64_gauge (starttime, nbytes, filesize);
     }
-  //printf("write cart ok\n");
+  //printf("Write cart ok\n");
   fclose (fptr);
   if ((fptr = fopen (file_name, "rb")) == NULL)
     {                           /* open error */
-      printf ("open error\n");
+      printf ("Open error\n");
       return -1;
     }
 
-  printf ("\nVerifying Cart...\n\n");
+  printf ("\nVerifying cart...\n\n");
   nbytes = 0;
   starttime = time (NULL);
   for (page = 0; page < num_page; page++)
     {
       if (read_16k_file () != 0)
         {
-          printf ("\nload file error\n");
+          printf ("\nLoad file error\n");
           fclose (fptr);
           return -1;
         }
       if (verify_eeprom_16k (page))
         {
-          printf ("\nverify cart error at bank = %x\n", page);
+          printf ("\nVerify cart error at bank = %x\n", page);
           fclose (fptr);
           return -1;
         }
@@ -1609,6 +1680,7 @@ write_cart_from_file (void)
 
   return 0;
 }
+
 
 char
 backup_rom (void)               //no_page=how many 32K
@@ -1636,7 +1708,7 @@ backup_rom (void)               //no_page=how many 32K
     }
 //   printf("max_bank=%d\n",max_bank);
 
-  printf ("Backing up Cart...\n\n");
+  printf ("Backing up cart...\n\n");
   totalbytes = max_bank * 16 * 1024;
   nbytes = 0;
   starttime = time (NULL);
@@ -1645,7 +1717,7 @@ backup_rom (void)               //no_page=how many 32K
       read_eeprom_16k (rom_bank);
       if (verify_eeprom_16k (rom_bank))
         {
-          printf ("\nverify cart error at bank = %x\n", rom_bank);
+          printf ("\nVerify cart error at bank = %x\n", rom_bank);
 //                      fclose(fptr);
 //                      return -1;              // why not return? (dbjh)
         }
@@ -1662,6 +1734,7 @@ backup_rom (void)               //no_page=how many 32K
 
   return 0;
 }
+
 
 char
 check_card (void)
@@ -1697,7 +1770,7 @@ check_card (void)
 */
   char game_name[17];
 
-  printf ("checking rom information...\n");
+  printf ("Checking ROM information...\n");
   header_ok = 1;
   for (i = 0; i < 48; i++)
     {
@@ -1709,14 +1782,14 @@ check_card (void)
     }
   if (!header_ok)
     {
-      printf ("no GB data present\n");
+      printf ("No GB data present\n");
       disp_buffer (0x50);
       return -1;
     }
   for (i = 0; i < 16; i++)
     game_name[i] = mix.buffer[i + 0x34];
   game_name[i] = 0;
-  printf ("Game Name = %s\n", game_name);
+  printf ("Game name = %s\n", game_name);
 
   cart_type = mix.buffer[0x47];
 
@@ -1809,7 +1882,7 @@ check_card (void)
   rom_size = mix.buffer[0x48];
   if (rom_size > 8)
     {
-      printf ("Rom size error (%d)\n", rom_size);
+      printf ("ROM size error (%d)\n", rom_size);
       return -1;
     }
   //else
@@ -1817,11 +1890,11 @@ check_card (void)
   ram_size = mix.buffer[0x49];
   if (ram_size > 4)
     {
-      printf ("Ram size error (%d)\n", ram_size);
+      printf ("RAM size error (%d)\n", ram_size);
       return -1;
     }
   //else
-  //   printf("Ram size(%d) = %s\n",ram_size,ram_size_define[ram_size]);
+  //   printf("RAM size (%d) = %s\n",ram_size,ram_size_define[ram_size]);
 
   if (cart_type > 0 && cart_type < 4 && rom_size > 4)
     {                           // mbc1 8M/16M
@@ -1834,12 +1907,13 @@ check_card (void)
     sum += mix.buffer[i];
   if ((sum + mix.buffer[0x4d]) & 0xff)
     {
-      printf ("Error Complement($%x), Correct Complement($%x)\n",
+      printf ("Error complement (0x%x), correct complement (0x%x)\n",
               mix.buffer[0x4d], (0x100 - (sum & 0xff)));
 
     }
   return 0;
 }
+
 
 char
 open_read ()
@@ -1847,32 +1921,33 @@ open_read ()
   filesize = newfsize (file_name);
   if (filesize == -1)
     {
-      perror ("file not found");
+      perror ("File not found");
       return -1;
     }
 
   if ((filesize < 0x8000) || (filesize & 0x7fff) || (filesize > maxfilesize))
     {
-      printf ("filesize error\n");
+      printf ("File size error\n");
       return -1;
     }
 //   num_page=(filesize/0x8000)*2;      // how many 16k banks
 //   printf("num_page=%d\n",num_page);
   if ((fptr = fopen (file_name, "rb")) == NULL)
     {                           /* open error */
-      printf ("open error\n");
+      printf ("Open error\n");
       return -1;
     }
 
   if (read_16k_file () != 0)
     {
-      printf ("load file error\n");
+      printf ("Load file error\n");
       fclose (fptr);
       return -1;
     }
   fclose (fptr);
   return 0;
 }
+
 
 char
 check_header (char mode)
@@ -1898,6 +1973,7 @@ check_header (char mode)
   return check_card ();
 }
 
+
 char
 chk_gcrc (void)
 {
@@ -1908,20 +1984,20 @@ chk_gcrc (void)
   filesize = newfsize (file_name);
   if (filesize == -1)
     {
-      perror ("file not found");
+      perror ("File not found");
       return -1;
     }
 
   if ((filesize < 0x8000) || (filesize & 0x7fff) || (filesize > maxfilesize))
     {
-      printf ("filesize error\n");
+      printf ("File size error\n");
       return -1;
     }
   num_page = (filesize / 0x8000) * 2;   // how many 16k banks
 //   printf("num_page=%d\n",num_page);
   if ((fptr = fopen (file_name, "rb")) == NULL)
     {                           /* open error */
-      printf ("open error\n");
+      printf ("Open error\n");
       return -1;
     }
 
@@ -1930,7 +2006,7 @@ chk_gcrc (void)
     {
       if (read_16k_file () != 0)
         {
-          printf ("load file error\n");
+          printf ("Load file error\n");
           fclose (fptr);
           return -1;
         }
@@ -1951,30 +2027,32 @@ chk_gcrc (void)
 
   fclose (fptr);
   if (gcrc != sum_gcrc)
-    printf ("Error Checksum($%x), Correct Checksum($%x)\n", gcrc, sum_gcrc);
+    printf ("Error checksum (0x%x), correct checksum (0x%x)\n", gcrc, sum_gcrc);
   return 0;
 }
+
 
 void
 backup (void)
 {
   if (check_header (1))
-    {                           // something error
+    {
 //      disp_buffer(0x50);
       return;
     }
   if ((fptr = fopen (file_name, "w+b")) == NULL)
     {                           /* open error */
-      printf ("open error\n");
+      printf ("Open error\n");
       return;
     }
   if (backup_rom ())
-    printf ("\nBackup Error\n");
+    printf ("\nBackup error\n");
   else
-    printf ("\nBackup Successful\n");
+    printf ("\nBackup successful\n");
 
   return;
 }
+
 
 void
 SetSramBank (void)
@@ -1990,6 +2068,7 @@ SetSramBank (void)
   if (eeprom_type == 16 || eeprom_type == 64)
     bank_size = 16;             // 16 x 8K =128K
 }
+
 
 void
 enable_sram_bank (void)
@@ -2008,6 +2087,7 @@ enable_sram_bank (void)
   out_byte (0x0a);              // enable sram
 }
 
+
 void
 gen_pat (unsigned int offset)
 {
@@ -2016,6 +2096,7 @@ gen_pat (unsigned int offset)
       mix.bufferx[i] = i + offset;
     }
 }
+
 
 char
 test_sram_v (void)
@@ -2040,7 +2121,7 @@ test_sram_v (void)
 //          temp=inportb(data);
               if (mix.buffer[i + idx] != temp)
                 {
-                  printf ("sram verify error\n");
+                  printf ("SRAM verify error\n");
 //             printf("sram verify error! bank=%x j=%x i=%x temp=%x pat=%x\n",bank,j,i,temp,mix.buffer[idx+i]);
                   return -1;
                 }
@@ -2050,11 +2131,12 @@ test_sram_v (void)
         }
     }
   if (bank_size == 4)
-    printf ("256k sram verify ok\n");
+    printf ("256 k SRAM verify ok\n");
   if (bank_size == 16)
-    printf ("1M sram verify ok\n");
+    printf ("1 M SRAM verify ok\n");
   return 0;
 }
+
 
 char
 test_sram_wv (void)
@@ -2084,11 +2166,12 @@ test_sram_wv (void)
         }
     }
   if (bank_size == 4)
-    printf ("256k sram pattern written\n");
+    printf ("256 k SRAM pattern written\n");
   if (bank_size == 16)
-    printf ("1M sram pattern written\n");
+    printf ("1 M SRAM pattern written\n");
   return test_sram_v ();
 }
+
 
 char
 test_all (void)
@@ -2098,27 +2181,29 @@ test_all (void)
   return test_sram_wv ();
 }
 
+
 /*
 void usage(char *progname)
 {
-	fprintf(stderr, "Usage: %s [-option] <Filename>\n", progname);
-	fprintf(stderr, "-l   : load ROM file to GB Card.\n");
-	fprintf(stderr, "-lsa : load 256k/1Mbits sram from PC to GB Card.\n");
-	fprintf(stderr,
-			"-lsn : load 64kbits sram file from PC to specific sram bank(-n) in GB card.\n");
-	fprintf(stderr, "-lsc : load 1Mbits sram file from PC to Pocket Camera.\n");
-	fprintf(stderr, "-b   : auto-detect size and backup entire GB Card to PC.\n");
-	fprintf(stderr, "-ba  : backup full 4Mbits/16Mbits GB Card to PC.\n");
-	fprintf(stderr, "-bsa : retrieve all sram data (256k/1Mbits) from GB Card to PC.\n");
-	fprintf(stderr,
-			"-bsn : retrieve specific bank(-n) sram data(64kbits) from GB Card to PC .\n");
-	fprintf(stderr, "-bsc : retrieve 1Mbits sram from Pocket Camera to PC.\n");
-	fprintf(stderr, "-v   : verify file in PC with GB Card.\n");
-	fprintf(stderr, "-e   : erase Flash rom.\n");
-	fprintf(stderr, "-c   : check ROM file header.\n");
-	exit(2);
+  fprintf(stderr, "Usage: %s [-option] <Filename>\n", progname);
+  fprintf(stderr, "-l   : load ROM file to GB Card.\n");
+  fprintf(stderr, "-lsa : load 256k/1Mbits sram from PC to GB Card.\n");
+  fprintf(stderr,
+          "-lsn : load 64kbits sram file from PC to specific sram bank(-n) in GB card.\n");
+  fprintf(stderr, "-lsc : load 1Mbits sram file from PC to Pocket Camera.\n");
+  fprintf(stderr, "-b   : auto-detect size and backup entire GB Card to PC.\n");
+  fprintf(stderr, "-ba  : backup full 4Mbits/16Mbits GB Card to PC.\n");
+  fprintf(stderr, "-bsa : retrieve all sram data (256k/1Mbits) from GB Card to PC.\n");
+  fprintf(stderr,
+          "-bsn : retrieve specific bank(-n) sram data(64kbits) from GB Card to PC .\n");
+  fprintf(stderr, "-bsc : retrieve 1Mbits sram from Pocket Camera to PC.\n");
+  fprintf(stderr, "-v   : verify file in PC with GB Card.\n");
+  fprintf(stderr, "-e   : erase Flash rom.\n");
+  fprintf(stderr, "-c   : check ROM file header.\n");
+  exit(2);
 }
 */
+
 
 char
 check_port_xpp (void)
@@ -2137,6 +2222,7 @@ check_port_xpp (void)
   end_port ();
   return 0;
 }
+
 
 char
 check_port (void)
@@ -2165,6 +2251,7 @@ check_port (void)
   return 0;
 }
 
+
 char
 open_read_sram ()
 {
@@ -2174,10 +2261,10 @@ open_read_sram ()
   filesize = buf.st_size;
   if (filesize == -1)
     {
-      perror ("file not found");
+      perror ("File not found");
       return -1;
     }
-  printf ("file length = %ld\n", filesize);
+  printf ("File length = %ld\n", filesize);
 //   printf("bank_size=%d\n",bank_size);
 
 
@@ -2185,7 +2272,7 @@ open_read_sram ()
     {                           // check file size 256k/1Mbits
       if ((filesize / 0x2000) > bank_size)
         {
-          printf ("filesize error\n");
+          printf ("File size error\n");
           return -1;
         }
     }
@@ -2193,14 +2280,14 @@ open_read_sram ()
     {
       if (filesize != 0x2000)
         {                       // check file size 8kBytes
-          printf ("filesize error\n");
+          printf ("File size error\n");
           return -1;
         }
     }
 
   if ((fptr = fopen (file_name, "rb")) == NULL)
     {                           /* open error */
-      printf ("open error\n");
+      printf ("Open error\n");
       return -1;
     }
 
@@ -2213,7 +2300,7 @@ open_read_sram ()
     {
       if (read_8k_file () != 0)
         {
-          printf ("load file error\n");
+          printf ("Load file error\n");
           fclose (fptr);
           return -1;
         }
@@ -2222,12 +2309,13 @@ open_read_sram ()
   return 0;
 }
 
+
 char
 write_sram_xxk (unsigned int length)
 {
   if ((fptr = fopen (file_name, "w+b")) == NULL)
     {                           /* open error */
-      printf ("open error\n");
+      printf ("Open error\n");
       return -1;
     }
   if (write_file_xxk (length) != 0)
@@ -2239,6 +2327,7 @@ write_sram_xxk (unsigned int length)
   return 0;
 }
 
+
 char
 read_all_sram_to_file (void)
 {
@@ -2248,7 +2337,7 @@ read_all_sram_to_file (void)
   enable_sram_bank ();
   if ((fptr = fopen (file_name, "w+b")) == NULL)
     {                           /* open error */
-      printf ("open error\n");
+      printf ("Open error\n");
       return -1;
     }
 
@@ -2279,7 +2368,7 @@ read_all_sram_to_file (void)
         {
           if (write_file_xxk (0x8000) != 0)
             {
-              printf ("\nwrite file error\n");
+              printf ("\nWrite file error\n");
               fclose (fptr);
               return -1;
             }
@@ -2290,12 +2379,13 @@ read_all_sram_to_file (void)
   fclose (fptr);
 
   if (bank_size == 4)
-    printf ("\nsram 256kbits saved\n");
+    printf ("\nSRAM 256 kbits saved\n");
   if (bank_size == 16)
-    printf ("\nsram 1Mbits saved\n");
+    printf ("\nSRAM 1 Mbits saved\n");
 
   return 0;
 }
+
 
 char
 read_8k_sram_to_file (void)
@@ -2307,7 +2397,7 @@ read_8k_sram_to_file (void)
     {
       if (sram_bank_num > 3)
         {
-          printf ("bank number error\n");
+          printf ("Bank number error\n");
           return -1;
         }
     }
@@ -2315,7 +2405,7 @@ read_8k_sram_to_file (void)
     {
       if (sram_bank_num > 15)
         {
-          printf ("bank number error\n");
+          printf ("Bank number error\n");
           return -1;
         }
     }
@@ -2349,14 +2439,15 @@ read_8k_sram_to_file (void)
 
   if (write_sram_xxk (0x2000) != 0)
     {
-      printf ("\nwrite file 64kbits error\n");
+      printf ("\nWrite file 64 kbits error\n");
       return -1;
     }
   else
-    printf ("\nsram 64kbits saved from bank %d\n", sram_bank_num);
+    printf ("\nSRAM 64 kbits saved from bank %d\n", sram_bank_num);
 
   return 0;
 }
+
 
 char
 write_all_sram_from_file (void)
@@ -2378,7 +2469,7 @@ write_all_sram_from_file (void)
           idx = 0;
           if (read_32k_file () != 0)
             {
-              printf ("load file error\n");
+              printf ("Load file error\n");
               fclose (fptr);
               return -1;
             }
@@ -2407,12 +2498,13 @@ write_all_sram_from_file (void)
   fclose (fptr);
 
   if (bank_size == 4)
-    printf ("\nwrite sram 256kbits ok\n");
+    printf ("\nWrite SRAM 256 kbits ok\n");
   if (bank_size == 16)
-    printf ("\nwrite sram 1Mbits ok\n");
+    printf ("\nWrite SRAM 1 Mbits ok\n");
 
   return 0;
 }
+
 
 char
 write_8k_sram_from_file (void)
@@ -2424,7 +2516,7 @@ write_8k_sram_from_file (void)
     {
       if (sram_bank_num > 3)
         {
-          printf ("bank number error\n");
+          printf ("Bank number error\n");
           return -1;
         }
     }
@@ -2432,7 +2524,7 @@ write_8k_sram_from_file (void)
     {
       if (sram_bank_num > 15)
         {
-          printf ("bank number error\n");
+          printf ("Bank number error\n");
           return -1;
         }
     }
@@ -2468,10 +2560,11 @@ write_8k_sram_from_file (void)
   nbytes += 8 * 1024;           // should this be in loop? (dbjh)
   ucon64_gauge (starttime, nbytes, 8 * 1024);
 
-  printf ("\nwrite sram 64kbits at bank %d ok\n", sram_bank_num);
+  printf ("\nWrite SRAM 64 kbits at bank %d ok\n", sram_bank_num);
 
   return 0;
 }
+
 
 void
 try_read (void)
@@ -2485,6 +2578,7 @@ try_read (void)
     mix.buffer[i] = read_data ();
   disp_buffer (16);
 }
+
 
 void
 try_read0 (void)
@@ -2511,6 +2605,7 @@ try_read0 (void)
     }
 }
 
+
 void
 test_intel (void)
 {
@@ -2524,7 +2619,7 @@ test_intel (void)
 
   out_adr2_data (0x0000, 0x70); // read status register
 
-  printf ("status register = %x\n", read_byte ());
+  printf ("Status register = %x\n", read_byte ());
 
 }
 
@@ -2562,11 +2657,11 @@ gbx_init (unsigned int parport, const char *filename)
   init_port ();
   check_eeprom ();
   if (eeprom_type == 4)
-    maxfilesize = 512 * 1024;                   // 4Mb
+    maxfilesize = 512 * 1024;                   // 4 Mb
   if (eeprom_type == 16)
-    maxfilesize = 2 * 1024 * 1024;              // 16Mb
+    maxfilesize = 2 * 1024 * 1024;              // 16 Mb
   if (eeprom_type == 64)
-    maxfilesize = 8 * 1024 * 1024;              // 64Mb
+    maxfilesize = 8 * 1024 * 1024;              // 64 Mb
 }
 
 
@@ -2581,6 +2676,7 @@ gbx_read_rom (const char *filename, unsigned int parport)
 
   return 0;
 }
+
 
 int
 gbx_write_rom (const char *filename, unsigned int parport)
@@ -2602,6 +2698,7 @@ gbx_write_rom (const char *filename, unsigned int parport)
     }
 }
 
+
 int
 gbx_read_sram (const char *filename, unsigned int parport, int bank)
 {
@@ -2622,6 +2719,7 @@ gbx_read_sram (const char *filename, unsigned int parport, int bank)
   return 0;
 }
 
+
 int
 gbx_write_sram (const char *filename, unsigned int parport, int bank)
 {
@@ -2634,9 +2732,9 @@ gbx_write_sram (const char *filename, unsigned int parport, int bank)
     sram_bank_num = bank;
 
   if (check_eeprom () != 0)
-    bank_size = 4;                              // no flash card -> 4*8kB = 32kB sram
+    bank_size = 4;                              // no flash card -> 4*8 kB = 32 kB sram
   else
-    SetSramBank ();                             // set bank_size = 4/16 banks of 8kB
+    SetSramBank ();                             // set bank_size = 4/16 banks of 8 kB
 
   fsize = q_fsize (filename);
   if (fsize == 8 * 1024 || bank != -1)

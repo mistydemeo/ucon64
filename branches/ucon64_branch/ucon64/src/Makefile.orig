@@ -6,7 +6,7 @@ DISCMAGE=1
 #GUI=1
 
 CC=gcc
-CFLAGS=-I../src/ -Wall -W -O3 -DHAVE_CONFIG_H
+CFLAGS=-I. -Wall -W -O3 -DHAVE_CONFIG_H
 LDFLAGS=-s
 
 ifdef DISCMAGE

@@ -36,7 +36,7 @@ LDFLAGS=$(LDFLAGS) zlib.lib
 OBJECTS=$(OBJECTS) unzip.obj map.obj miscz.obj
 !endif
 !ifdef DISCMAGE
-OBJECTS=$(OBJECTS) ucon64_dm.obj url.obj
+OBJECTS=$(OBJECTS) ucon64_dm.obj
 !endif
 
 

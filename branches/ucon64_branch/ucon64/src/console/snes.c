@@ -44,23 +44,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #define SNES_HEADER_LEN (sizeof (st_snes_header_t))
 #define SNES_NAME_LEN 21
-#define ALT_HILO                                // use alternative Hi/LoROM detection method
 #define GD3_HEADER_MAPSIZE 0x18
 #define NSRT_HEADER_VERSION 22                  // version 2.2 header
+#define DETECT_SMC_COM_FUCKED_UP_LOROM 1        // adds support for interleaved LoROMs
+#define DETECT_INSNEST_FUCKED_UP_LOROM 1        // only adds support for its 24 Mbit
+                                                //  interleaved LoROM "format"
 
 static int snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer);
-static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_size);
-static int snes_convert_sramfile (const void *header);
-static int snes_fix_pal_protection (st_rominfo_t *rominfo);
-static int snes_fix_ntsc_protection (st_rominfo_t *rominfo);
+static int snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer,
+                              int rom_size);
 static unsigned short int get_internal_sums (st_rominfo_t *rominfo);
 //static int snes_special_bs (void);
 static int snes_bs_name(void);
 static int snes_check_bs (void);
 static int check_char (unsigned char c);
-#ifdef  ALT_HILO
 static int check_banktype (unsigned char *rom_buffer, int header_offset);
-#endif
 static void reset_header (void *header);
 static void set_nsrt_info (st_rominfo_t *rominfo, unsigned char *header);
 static void handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
@@ -143,7 +141,7 @@ typedef struct st_snes_header
   unsigned char game_id_low;                    // 3
   unsigned char game_id_high;                   // 4
   unsigned char game_id_country;                // 5
-  // 'E' = USA, 'P' = Europe, 'F' = France, 'G' = Germany, 'S' = Spain
+  // 'E' = USA, 'F' = France, 'G' = Germany, 'J' = Japan, 'P' = Europe, 'S' = Spain
   unsigned char pad[10];                        // 6
   unsigned char name[SNES_NAME_LEN];            // 16
   unsigned char map_type;                       // 37, a.k.a. ROM makeup
@@ -152,7 +150,7 @@ typedef struct st_snes_header
   unsigned char rom_size;                       // 39
 #define bs_day rom_size                         // release date, day
   unsigned char sram_size;                      // 40
-#define bs_makeup sram_size                     // "ROM" speed
+#define bs_map_type sram_size
   unsigned char country;                        // 41
 #define bs_type country
   unsigned char maker;                          // 42
@@ -168,19 +166,9 @@ typedef struct st_snes_header
   unsigned char checksum_high;                  // 47
 } st_snes_header_t;
 
-st_snes_header_t snes_header;
-
-static int snes_split, force_interleaved, bs_dump, st_dump,
-           snes_sramsize, nsrt_header, rom_is_top,           // flag for interleaved ROM dump
-           snes_header_base, snes_hirom, snes_hirom_changed; //  of "Tales of Phantasia"
-/*
-  The flag `snes_hirom_changed' is necessary for ROMs that are in the normal
-  interleaved format (type 1). The variable `snes_hirom' changes the first time
-  when snes_deinterleave() is called from snes_chksum(). However, it should not
-  change a second time. Without this flag it would change a second time when
-  called from snes_dint().
-*/
-
+static st_snes_header_t snes_header;
+static int snes_split, snes_sramsize, snes_header_base, snes_hirom,
+           snes_hirom_ok, nsrt_header, force_interleaved, bs_dump, st_dump;
 static snes_file_t type;
 
 static unsigned char gd3_hirom_8mb_map[GD3_HEADER_MAPSIZE] = {
@@ -202,6 +190,12 @@ static unsigned char gd3_hirom_32mb_map[GD3_HEADER_MAPSIZE] = {
   0x20, 0x21, 0x22, 0x23, 0x20, 0x21, 0x22, 0x23,
   0x20, 0x21, 0x22, 0x23, 0x20, 0x21, 0x22, 0x23,
   0x24, 0x25, 0x26, 0x27, 0x24, 0x25, 0x26, 0x27
+};
+// map for Tales of Phantasia
+static unsigned char gd3_hirom_48mb_map[GD3_HEADER_MAPSIZE] = {
+  0x20, 0x21, 0x20, 0x21, 0x20, 0x21, 0x40, 0x40,
+  0x24, 0x25, 0x26, 0x27, 0x24, 0x25, 0x26, 0x27,
+  0x22, 0x23, 0x40, 0x40, 0x28, 0x29, 0x2a, 0x2b
 };
 
 static unsigned char gd3_lorom_4mb_map[GD3_HEADER_MAPSIZE] = {
@@ -289,7 +283,7 @@ snes_dint (st_rominfo_t *rominfo)
     }
 
   force_interleaved = 1;                        // force snes_deinterleave() to do its work
-  snes_deinterleave (rominfo, buffer, size);
+  snes_deinterleave (rominfo, &buffer, size);
 
   if (rominfo->buheader_len)
     fwrite (&header, 1, SWC_HEADER_LEN, destfile);
@@ -387,7 +381,7 @@ Remember to load the lowest 8 bits first, then the top 7 bits.
 }
 
 
-int
+static int
 snes_convert_sramfile (const void *header)
 {
   FILE *srcfile, *destfile;
@@ -470,17 +464,33 @@ snes_ufos (void)
 }
 
 
+static void
+write_deinterleaved_data (st_rominfo_t *rominfo, const char *dest_name, int size)
+{
+  unsigned char *buffer;
+  if (!(buffer = (unsigned char *) malloc (size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], size);
+      exit (1);
+    }
+  q_fread (buffer, rominfo->buheader_len, size, ucon64.rom);
+  force_interleaved = 1;
+  snes_deinterleave (rominfo, &buffer, size);
+  q_fwrite (buffer, SWC_HEADER_LEN, size, dest_name, "ab");
+  free (buffer);
+}
+
+
 static int
 snes_ffe (st_rominfo_t *rominfo, char *ext)
 {
   st_swc_header_t header;
-  int size;
+  int size = ucon64.file_size - rominfo->buheader_len;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   q_fread (&header, 0, rominfo->buheader_len > (int) SWC_HEADER_LEN ?
                          (int) SWC_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
   reset_header (&header);
-  size = ucon64.file_size - rominfo->buheader_len;
   header.size_low = size / 8192;
   header.size_high = size / 8192 >> 8;
 
@@ -506,7 +516,10 @@ snes_ffe (st_rominfo_t *rominfo, char *ext)
   ucon64_file_handler (dest_name, src_name, 0);
 
   q_fwrite (&header, 0, SWC_HEADER_LEN, dest_name, "wb");
-  q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
+  if (rominfo->interleaved)
+    write_deinterleaved_data (rominfo, dest_name, size);
+  else
+    q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -518,7 +531,7 @@ snes_ffe (st_rominfo_t *rominfo, char *ext)
 int
 snes_smc (st_rominfo_t *rominfo)
 {
-  if (snes_header.map_type & 0x10)
+  if ((bs_dump ? snes_header.bs_map_type : snes_header.map_type) & 0x10)
     printf ("NOTE: This game might not work with a Super Magicom because it's a FastROM game\n");
 
   return snes_ffe (rominfo, ".SMC");
@@ -590,6 +603,7 @@ int
 snes_fig (st_rominfo_t *rominfo)
 {
   st_fig_header_t header;
+  int size = ucon64.file_size - rominfo->buheader_len;
   char src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
 
   q_fread (&header, 0, rominfo->buheader_len > (int) FIG_HEADER_LEN ?
@@ -604,8 +618,10 @@ snes_fig (st_rominfo_t *rominfo)
   ucon64_file_handler (dest_name, src_name, 0);
 
   q_fwrite (&header, 0, FIG_HEADER_LEN, dest_name, "wb");
-  q_fcpy (src_name, rominfo->buheader_len, ucon64.file_size - rominfo->buheader_len,
-          dest_name, "ab");
+  if (rominfo->interleaved)
+    write_deinterleaved_data (rominfo, dest_name, size);
+  else
+    q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
 
   printf (ucon64_msg[WROTE], dest_name);
   remove_temp_file ();
@@ -666,7 +682,6 @@ snes_mgd (st_rominfo_t *rominfo)
 // What should we do with this function? snes_gd3() is probably sufficient
 //  (and tested on a real Game Doctor!).
 {
-#if 1
   char mgh[32], dest_name[FILENAME_MAX], *fname;
   int n, len;
 
@@ -692,59 +707,29 @@ snes_mgd (st_rominfo_t *rominfo)
 
   set_suffix (dest_name, ".078");
   ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
-  q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
+  if (rominfo->interleaved)
+    write_deinterleaved_data (rominfo, dest_name, ucon64.file_size - rominfo->buheader_len);
+  else
+    q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, dest_name, "wb");
   printf (ucon64_msg[WROTE], dest_name);
 
   strcpy (dest_name, "MULTI-GD.MGH");
+  ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
   q_fwrite (&mgh, 0, sizeof (mgh), dest_name, "wb");
-
   printf (ucon64_msg[WROTE], dest_name);
+
   return 0;
-#else
-  char mgh[32], buf[FILENAME_MAX], buf2[FILENAME_MAX], *p = NULL;
-
-  p = basename (ucon64.rom);
-  strcpy (buf, is_func (p, strlen (p), isupper) ? "SF" : "sf");
-  strcpy (buf2, ucon64.rom);
-  strcat (buf, basename (buf2));
-  if ((p = strrchr (buf, '.')))
-    *p = 0;
-  strcat (buf, "________");
-  buf[7] = '_';
-  buf[8] = 0;
-  sprintf (buf2, "%s.%03u", buf, (ucon64.file_size - rominfo->buheader_len) / MBIT);
-
-  ucon64_file_handler (buf2, NULL, OF_FORCE_BASENAME);
-  q_fcpy (ucon64.rom, rominfo->buheader_len, ucon64.file_size, buf2, "wb");
-  printf (ucon64_msg[WROTE], buf2);
-
-  // create MGH name file
-  memset (mgh, 0, sizeof (mgh));
-  mgh[0] = 'M';
-  mgh[1] = 'G';
-  mgh[2] = 'H';
-  mgh[3] = 0x1a;
-  mgh[31] = 0xff;
-  memcpy (&mgh[16], snes_header.name, 15);
-
-  strcpy (buf, buf2);
-  set_suffix (buf, ".MGH");
-  q_fwrite (&mgh, 0, sizeof (mgh), buf, "wb");
-
-  printf (ucon64_msg[WROTE], buf);
-  return 0;
-#endif
 }
 
 
 void
 snes_int_blocks (unsigned char *deintptr, unsigned char *ipl,
-                 unsigned char *iph, int blocks)
+                 unsigned char *iph, int nblocks)
 {
   int i;
 
   // interleave 64K blocks
-  for (i = blocks; i > 0; i--)
+  for (i = nblocks; i > 0; i--)
     {
       memmove (ipl, deintptr, 0x8000);
       memmove (iph, deintptr + 0x8000, 0x8000);
@@ -756,11 +741,10 @@ snes_int_blocks (unsigned char *deintptr, unsigned char *ipl,
 
 
 void
-snes_mirror (unsigned char *dstbuf, unsigned start, unsigned data_end,
-             unsigned mirror_end)
+snes_mirror (unsigned char *dstbuf, unsigned int start, unsigned int data_end,
+             unsigned int mirror_end)
 {
-  int datasize, totsize;
-  int num_chunks, surplus;
+  int datasize, totsize, nchunks, surplus;
 
   datasize = data_end - start;
   totsize = mirror_end - start;
@@ -768,9 +752,9 @@ snes_mirror (unsigned char *dstbuf, unsigned start, unsigned data_end,
   if (datasize >= totsize)
     return;
 
-  num_chunks = totsize / datasize - 1;
+  nchunks = totsize / datasize - 1;
   surplus = totsize % datasize;
-  while (num_chunks-- > 0)
+  while (nchunks-- > 0)
     {
       memcpy (dstbuf + data_end, dstbuf + start, datasize);
       data_end += datasize;
@@ -783,15 +767,11 @@ snes_mirror (unsigned char *dstbuf, unsigned start, unsigned data_end,
 int
 snes_gd3 (st_rominfo_t *rominfo)
 {
-  char header[512], dest_name[FILENAME_MAX], *p = NULL;
+  char header[GD_HEADER_LEN], src_name[FILENAME_MAX], dest_name[FILENAME_MAX],
+       *p;
   unsigned char *srcbuf, *dstbuf;
-  int n, len, n4Mbparts, surplus4Mb, total4Mbparts, size, newsize, pad;
-
-  if (rominfo->interleaved)
-    {
-      fprintf (stderr, "ERROR: This ROM seems to be interleaved\n");
-      return -1;
-    }
+  int n, len, n4Mbparts, surplus4Mb, total4Mbparts, size, newsize, pad,
+      half_size_4Mb, half_size_1Mb;
 
   size = ucon64.file_size - rominfo->buheader_len;
   n4Mbparts = size / (4 * MBIT);
@@ -799,26 +779,33 @@ snes_gd3 (st_rominfo_t *rominfo)
   total4Mbparts = n4Mbparts + (surplus4Mb > 0 ? 1 : 0);
 
   p = basename (ucon64.rom);
-  sprintf (dest_name, "%s%d", is_func (p, strlen (p), isupper) ? "SF" : "sf", total4Mbparts * 4);
+  sprintf (dest_name, "%s%d", is_func (p, strlen (p), isupper) ? "SF" : "sf",
+           total4Mbparts * 4);
   strcat (dest_name, p);
   // avoid trouble with filenames containing spaces
   len = strlen (dest_name);
-  for (n = 0; n < len; n++)
+  for (n = 3; n < len; n++)                     // skip "sf" and fist digit
     if (dest_name[n] == ' ')
       dest_name[n] = '_';
   if ((p = strrchr (dest_name, '.')))
     *p = 0;
-  strcat (dest_name, "________");
-  if (total4Mbparts < 3)
+  strcat (dest_name, "_____");
+  if (total4Mbparts * 4 < 10)
     dest_name[6] = 0;
   else
     dest_name[7] = 0;
+  strcpy (src_name, ucon64.rom);
 
   if (snes_hirom)
     {
-      if (total4Mbparts > 8)
+      if (rominfo->interleaved)
         {
-          fprintf (stderr, "ERROR: This ROM > 32 Mbit -- conversion not yet implemented\n");
+          fprintf (stderr, "ERROR: This ROM seems to be interleaved\n");
+          return -1;
+        }
+      if (total4Mbparts > 12)
+        {
+          fprintf (stderr, "ERROR: This ROM > 48 Mbit -- conversion not yet implemented\n");
           return -1;
         }
       if (n4Mbparts < 1)
@@ -827,9 +814,22 @@ snes_gd3 (st_rominfo_t *rominfo)
           return -1;
         }
 
+      if (total4Mbparts == 5)
+        total4Mbparts = 6;                      // 20 Mbit HiROMs get padded to 24 Mbit
+      else if (total4Mbparts > 8 && total4Mbparts < 12)
+        {                                       // 36-44 Mbit HiROMs get padded to 48 Mbit
+          if (snes_header_base != SNES_EROM)
+            {
+              fprintf (stderr, "ERROR: Normal ROM > 32 Mbit -- conversion not yet implemented\n");
+              return -1;
+            }
+          total4Mbparts = 12;
+          printf ("WARNING: Paddding to 48 Mbit -- hasn't been tested on a real Game Doctor yet\n");
+        }
+
       // create the header
-      q_fread (header, 0, rominfo->buheader_len > 512 ? 512 : rominfo->buheader_len,
-               ucon64.rom);
+      q_fread (header, 0, rominfo->buheader_len > GD_HEADER_LEN ?
+               GD_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
       reset_header (header);
       memcpy (header, "GAME DOCTOR SF 3", 0x10);
 
@@ -840,17 +840,16 @@ snes_gd3 (st_rominfo_t *rominfo)
       else
         header[0x10] = (unsigned char) 0x80;    // 0 kb or 256 kb
 
-      if (total4Mbparts == 5)
-        total4Mbparts = 6;                      // 20 Mbit HiROMs get padded to 24 Mbit
-
       if (total4Mbparts <= 2)
         memcpy (&header[0x11], gd3_hirom_8mb_map, GD3_HEADER_MAPSIZE);
       else if (total4Mbparts <= 4)
         memcpy (&header[0x11], gd3_hirom_16mb_map, GD3_HEADER_MAPSIZE);
       else if (total4Mbparts <= 6)
         memcpy (&header[0x11], gd3_hirom_24mb_map, GD3_HEADER_MAPSIZE);
-      else
+      else if (total4Mbparts <= 8)
         memcpy (&header[0x11], gd3_hirom_32mb_map, GD3_HEADER_MAPSIZE);
+      else
+        memcpy (&header[0x11], gd3_hirom_48mb_map, GD3_HEADER_MAPSIZE);
 
       if (snes_sramsize != 0)
         {
@@ -879,42 +878,62 @@ snes_gd3 (st_rominfo_t *rominfo)
       q_fread (srcbuf, rominfo->buheader_len, size, ucon64.rom);
       memset (dstbuf, 0, newsize);
 
-      if (total4Mbparts != 6)
+      if (total4Mbparts == 6)
         {
-          n = newsize / 2;
-          snes_int_blocks (srcbuf, &dstbuf[n], dstbuf, size / 0x10000);
-          if (pad > 0)
-            {
-              snes_mirror (dstbuf, (size / 2) & ~0x7ffff,
-                           (size / 2 + 0x1ffff) & ~0x1ffff, newsize / 2);
-              snes_mirror (dstbuf, n + (size / 2 & ~0x7ffff),
-                           n + ((size / 2 + 0x1ffff) & ~0x1ffff), newsize);
-            }
-        }
-      else
-        {
-          snes_int_blocks (srcbuf, &dstbuf[16 * MBIT], dstbuf,
+          snes_int_blocks (srcbuf, dstbuf + 16 * MBIT, dstbuf,
                            16 * MBIT / 0x10000);
-          snes_int_blocks (&srcbuf[16 * MBIT], &dstbuf[12 * MBIT],
-                           &dstbuf[8 * MBIT], (size - 16 * MBIT) / 0x10000);
+          snes_int_blocks (srcbuf + 16 * MBIT, dstbuf + 12 * MBIT,
+                           dstbuf + 8 * MBIT, (size - 16 * MBIT) / 0x10000);
           if (size <= 20 * MBIT)
             {
               snes_mirror (dstbuf, 8 * MBIT, 10 * MBIT, 12 * MBIT);
               snes_mirror (dstbuf, 12 * MBIT, 14 * MBIT, 16 * MBIT);
             }
         }
+      else if (total4Mbparts == 12)
+        {
+          int size2 = size - 32 * MBIT,         // size of smaller ROM (16 Mbit if ToP)
+              newsize2 = newsize - size;
+          n = size2 / 2;
+          // interleave the 32 Mbit ROM
+          snes_int_blocks (srcbuf, dstbuf + 32 * MBIT, dstbuf + 16 * MBIT,
+                           (32 * MBIT) / 0x10000);
+          // interleave the smaller ROM
+          snes_int_blocks (srcbuf + 32 * MBIT, dstbuf + n, dstbuf, size2 / 0x10000);
+          if (pad > 0)
+            {
+              half_size_4Mb = (size2 / 2) & ~(4 * MBIT - 1);
+              half_size_1Mb = (size2 / 2 + MBIT - 1) & ~(MBIT - 1);
+              snes_mirror (dstbuf, half_size_4Mb, half_size_1Mb, newsize2 / 2);
+              snes_mirror (dstbuf, n + half_size_4Mb, n + half_size_1Mb, newsize2);
+            }
+        }
+      else
+        {
+          n = newsize / 2;
+          snes_int_blocks (srcbuf, dstbuf + n, dstbuf, size / 0x10000);
+          if (pad > 0)
+            {
+              half_size_4Mb = (size / 2) & ~(4 * MBIT - 1);
+              half_size_1Mb = (size / 2 + MBIT - 1) & ~(MBIT - 1);
+              snes_mirror (dstbuf, half_size_4Mb, half_size_1Mb, newsize / 2);
+              snes_mirror (dstbuf, n + half_size_4Mb, n + half_size_1Mb, newsize);
+            }
+        }
 
       set_nsrt_info (rominfo, (unsigned char *) &header);
 
-      ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
-      q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
-      q_fwrite (dstbuf, SWC_HEADER_LEN, newsize, dest_name, "ab");
+      // here we could also use NULL as second argument for
+      //  ucon64_file_handler(), because we've already loaded the data
+      ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
+      q_fwrite (header, 0, GD_HEADER_LEN, dest_name, "wb");
+      q_fwrite (dstbuf, GD_HEADER_LEN, newsize, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);
 
       free (srcbuf);
       free (dstbuf);
 
-      rominfo->buheader_len = SWC_HEADER_LEN;
+      rominfo->buheader_len = GD_HEADER_LEN;
       rominfo->interleaved = 1;
     }
   else
@@ -925,8 +944,8 @@ snes_gd3 (st_rominfo_t *rominfo)
           return -1;
         }
 
-      q_fread (header, 0, rominfo->buheader_len > 512 ? 512 : rominfo->buheader_len,
-               ucon64.rom);
+      q_fread (header, 0, rominfo->buheader_len > GD_HEADER_LEN ?
+               GD_HEADER_LEN : rominfo->buheader_len, ucon64.rom);
       reset_header (header);
       memcpy (header, "GAME DOCTOR SF 3", 0x10);
 
@@ -954,12 +973,15 @@ snes_gd3 (st_rominfo_t *rominfo)
 
       set_nsrt_info (rominfo, (unsigned char *) &header);
 
-      ucon64_file_handler (dest_name, NULL, OF_FORCE_BASENAME);
-      q_fwrite (header, 0, SWC_HEADER_LEN, dest_name, "wb");
-      q_fcpy (ucon64.rom, rominfo->buheader_len, size, dest_name, "ab");
+      ucon64_file_handler (dest_name, src_name, OF_FORCE_BASENAME);
+      q_fwrite (header, 0, GD_HEADER_LEN, dest_name, "wb");
+      if (rominfo->interleaved)
+        write_deinterleaved_data (rominfo, dest_name, size);
+      else
+        q_fcpy (src_name, rominfo->buheader_len, size, dest_name, "ab");
       printf (ucon64_msg[WROTE], dest_name);
 
-      rominfo->buheader_len = SWC_HEADER_LEN;
+      rominfo->buheader_len = GD_HEADER_LEN;
       rominfo->interleaved = 1;
     }
 
@@ -971,12 +993,12 @@ int
 snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
 // This function assumes file with name filename is in GD3 format
 {
-  char dest_name[FILENAME_MAX], *p = NULL;
-  int nparts, surplus, x, sf_romname, size, n_names = 0, len;
+  char dest_name[FILENAME_MAX], *p;
+  int nparts, surplus, x, sf_romname, size, n_names = 0;
 
   size = ucon64.file_size - rominfo->buheader_len;
-  sf_romname = (ucon64.rom[0] == 'S' || ucon64.rom[0] == 's') &&
-               (ucon64.rom[1] == 'F' || ucon64.rom[1] == 'f');
+  p = basename (filename);
+  sf_romname = (p[0] == 'S' || p[0] == 's') && (p[1] == 'F' || p[1] == 'f');
 
   // Don't use PARTSIZE here, because the Game Doctor doesn't support
   //  arbitrary part sizes
@@ -984,11 +1006,11 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
   surplus = size % (8 * MBIT);
 
   if (sf_romname)
-    strcpy (dest_name, basename (filename));
+    strcpy (dest_name, p);
   else
     {
       strcpy (dest_name, "SF");
-      strcat (dest_name, basename (filename));
+      strcat (dest_name, p);
     }
   strupr (dest_name);
   if ((p = strrchr (dest_name, '.')))
@@ -996,16 +1018,15 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
   strcat (dest_name, "______");
   dest_name[7] = 'A';
   dest_name[8] = 0;
-  len = strlen (dest_name);
 
-  if (snes_hirom && ((nparts + ((surplus > 0) ? 1 : 0)) <= 2))
+  if (snes_hirom && size <= 16 * MBIT)
     {
       // 8 Mbit or less HiROMs, X is used to pad filename to 8 (SF4###XA)
       if (size < 10 * MBIT)
-        dest_name[len - 2] = 'X';
+        dest_name[8 - 2] = 'X';
       strcpy (names[n_names++], dest_name);
 
-      dest_name[len - 1]++;
+      dest_name[8 - 1]++;
       strcpy (names[n_names++], dest_name);
     }
   else
@@ -1013,7 +1034,7 @@ snes_make_gd_names (const char *filename, st_rominfo_t *rominfo, char **names)
       for (x = 0; x < nparts; x++)
         {
           strcpy (names[n_names++], dest_name);
-          dest_name[len - 1]++;
+          dest_name[8 - 1]++;
         }
       if (surplus != 0)
         strcpy (names[n_names++], dest_name);
@@ -1027,7 +1048,7 @@ int
 snes_s (st_rominfo_t *rominfo)
 {
   char header[512], dest_name[FILENAME_MAX], *names[GD3_MAX_UNITS],
-       names_mem[GD3_MAX_UNITS][12];
+       names_mem[GD3_MAX_UNITS][9];
   int nparts, surplus, x, half_size, size, name_i = 0, part_size;
 
   size = ucon64.file_size - rominfo->buheader_len;
@@ -1089,12 +1110,12 @@ snes_s (st_rominfo_t *rominfo)
       nparts = size / (8 * MBIT);
       surplus = size % (8 * MBIT);
 
-      // We don't want to malloc() ridiculously small chunks (of 12 bytes)
+      // We don't want to malloc() ridiculously small chunks (of 9 bytes)
       for (x = 0; x < GD3_MAX_UNITS; x++)
         names[x] = names_mem[x];
       snes_make_gd_names (ucon64.rom, rominfo, (char **) names);
 
-      if (snes_hirom && ((nparts + ((surplus > 0) ? 1 : 0)) <= 2))
+      if (snes_hirom && size <= 16 * MBIT)
         {
           half_size = size / 2;
 
@@ -1473,7 +1494,7 @@ Same here.
 }
 
 
-int
+static int
 snes_fix_pal_protection (st_rominfo_t *rominfo)
 {
 /*
@@ -1561,7 +1582,7 @@ a2 18 01 bd 27 20 89 10 00 f0 01      a2 18 01 bd 27 20 89 10 00 ea ea - Donkey 
 }
 
 
-int
+static int
 snes_fix_ntsc_protection (st_rominfo_t *rominfo)
 {
 /*
@@ -1853,44 +1874,94 @@ snes_chk (st_rominfo_t *rominfo)
 
 
 static int
-snes_testinterleaved (void)
+snes_testinterleaved (unsigned char *rom_buffer, int size, int banktype_score)
+/*
+  The only way to determine whether a HiROM dump is interleaved or not seems to
+  be to check the value of the map type byte. Valid HiROM values (hexadecimal):
+  21, 31, 35, 3a
+  Valid LoROM values:
+  20, 23, 30, 32, 44 [, 41, 53]
+  41 is the hexadecimal value of 'A' (WWF Super Wrestlemania (E)). 53 is the
+  hexadecimal value value of 'S' (Contra III - The Alien Wars (U)).
+  So, if a ROM dump seems LoROM, but the map type byte is that of a HiROM dump
+  we assume it is interleaved. Interleaved LoROM dumps are not produced by any
+  copier, but by incorrect ROM tools...
+*/
 {
-  int interleaved = 0;
+  int interleaved = 0, check_map_type = 1, org_snes_header_base;
+  unsigned int crc1 = crc32 (0, rom_buffer, 512),
+               crc2 = crc32 (0, rom_buffer + size / 2, 512);
 
-  if (snes_hirom)
+  /*
+    0xfa83b519: Mortal Kombat (Beta) doesn't have an internal header...
+    By coincidence no special if statement is needed for the interleaved dump
+
+    0x4a54adc7: Super Aleste (J) [t1] has its header overwritten with the
+    trainer. The CRC is the same as for Super Aleste (J) (1st 512 bytes)
+
+    0xe43491b8: Street Fighter Alpha 2 (E) {[b1]}
+    0x44ca1045: Street Fighter Alpha 2 (U)
+    0x0c0bc8c5: Street Fighter Zero 2 (J)
+    These games have two nearly identical headers which can't be used to
+    determine whether the dump is interleaved or not.
+  */
+  if (crc1 == 0xfa83b519 || crc1 == 0x4a54adc7)
+    check_map_type = 0;                         // not interleaved
+  else if (crc2 == 0x4a54adc7 || crc2 == 0xe43491b8 || crc2 == 0x44ca1045 ||
+           crc2 == 0x0c0bc8c5)
     {
-      if ((snes_header.map_type & 0xf0) == 0x20 || (snes_header.map_type & 0xf0) == 0x30)
-        {
-          switch (snes_header.map_type & 0xf)
-            {
-            case 0:
-            case 3:
-              interleaved = 1;
-              break;
-            }
-        }
+      interleaved = 1;
+      snes_hirom = 0;
+      snes_hirom_ok = 1;
+      check_map_type = 0;                       // interleaved
     }
   else
     {
-      if ((snes_header.map_type & 0xf0) == 0x20 || (snes_header.map_type & 0xf0) == 0x30)
+      org_snes_header_base = snes_header_base;
+#ifdef  DETECT_SMC_COM_FUCKED_UP_LOROM
+      snes_header_base = size / 2;
+      if (check_banktype (rom_buffer, snes_header_base) > banktype_score)
         {
-          switch (snes_header.map_type & 0xf)
+          interleaved = 1;
+          snes_hirom = 0;
+          snes_hirom_ok = 1;                    // keep snes_deinterleave()
+          check_map_type = 0;                   //  from changing snes_hirom
+        }
+#endif
+#ifdef  DETECT_INSNEST_FUCKED_UP_LOROM
+// "the most advanced and researched Super Nintendo ROM utility available", what a joke
+// They don't support their own "format"...
+      if (!interleaved && size == 24 * MBIT)
+        {
+          snes_header_base = 16 * MBIT;
+          if (check_banktype (rom_buffer, snes_header_base) > banktype_score)
             {
-            case 1:
-              if (strncmp ((char *) snes_header.name, "TREASURE HUNTER G", 17))
-                interleaved = 1;
-              break;
-            case 5:
               interleaved = 1;
-              rom_is_top = 1;
-              break;
+              snes_hirom = 0;
+              snes_hirom_ok = 2;                // fix for snes_deinterleave()
+              force_interleaved = 1;            //  and another
+              check_map_type = 0;
             }
         }
-
-      if (!strncmp ((char *) snes_header.name, "YUYU NO QUIZ DE GO!GO!", 22))
-        interleaved = 0;
-      else if (!strncmp ((char *) snes_header.name, "SP MOMOTAROU DENTETSU2", 22))
-        interleaved = 0;
+#endif
+      snes_header_base = org_snes_header_base;
+    }
+  if (check_map_type && !snes_hirom)
+    {
+      // first check if it's an interleaved Extended HiROM dump
+      if (size >= (int) (SNES_HEADER_START + SNES_EROM + SNES_HEADER_LEN))
+        {
+          org_snes_header_base = snes_header_base;
+          snes_header_base = size - SNES_EROM;
+          if (check_banktype (rom_buffer, snes_header_base) >= banktype_score)
+            snes_header_base = SNES_EROM;
+          else
+            snes_header_base = org_snes_header_base;
+        }
+      if (snes_header.map_type == 0x21 || snes_header.map_type == 0x31 ||
+          snes_header.map_type == 0x35 || snes_header.map_type == 0x3a ||
+          snes_header.bs_map_type == 0x21 || snes_header.bs_map_type == 0x31)
+        interleaved = 1;
     }
 
   return interleaved;
@@ -1898,60 +1969,39 @@ snes_testinterleaved (void)
 
 
 int
-snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_size)
+snes_deinterleave (st_rominfo_t *rominfo, unsigned char **rom_buffer, int rom_size)
 {
-  unsigned char blocks[256], tmp[0x8000], b;
+  unsigned char blocks[256], *rom_buffer2, tmp[0x8000];
   int nblocks, i, j, org_hirom;
-#ifdef  ALT_HILO
-  int hi_score, lo_score;
-#endif
 
   org_hirom = snes_hirom;
   nblocks = rom_size >> 16;                     // # 64 kB blocks
   if (nblocks * 2 > 256)
     return -1;                                  // file > 8 MB
 
-  if (0)
-    /*
-       "if (rom_is_top)" does not seem to work for interleaved ToP, but this does!
-       This code comes from Snes9x, but for Snes9x applies the same...
-    */
-    {
-      nblocks = 0x60;
-      for (i = 0; i < 0x40; i += 2)
-        {
-          blocks[i + 0] = (i >> 1) + 0x20;
-          blocks[i + 1] = (i >> 1);
-        }
-      for (i = 0; i < 0x80; i += 2)
-        {
-          blocks[i + 0x40] = (i >> 1) + 0x80;
-          blocks[i + 0x41] = (i >> 1) + 0x40;
-        }
-      snes_hirom = SNES_HIROM;
-    }
-  else if (rominfo->interleaved == 2)
+  if (rominfo->interleaved == 2)                // WTF is this format? Is it a format at all?
     {
       for (i = 0; i < nblocks * 2; i++)
         blocks[i] = (i & ~0x1e) | ((i & 2) << 2) | ((i & 4) << 2) |
           ((i & 8) >> 2) | ((i & 16) >> 2);
     }
-  else
+  else // rominfo->interleaved == 1
     {
-      if (!snes_hirom_changed)
+      if (!snes_hirom_ok)
         {
-          snes_hirom = snes_hirom ? 0 : SNES_HIROM;
-          snes_hirom_changed = 1;
+          snes_hirom = SNES_HIROM;
+          snes_hirom_ok = 1;
         }
-      if (snes_hirom && type == GD3 && rom_size == 24 * MBIT)
-        {
-          // Fix-up the weird 24 Mbit Game Doctor HiROM format
+      // TODO: replace the following code with code that fills the array
+      //       `blocks' with correct values
+      if ((snes_hirom || snes_hirom_ok == 2) && type == GD3 && rom_size == 24 * MBIT)
+        { // Fix-up the weird 24 Mbit Game Doctor HiROM format
           unsigned char *p1, *p2, *p3;
 
-          p1 = &rom_buffer[0x180000];
-          p2 = &rom_buffer[0x200000];
-          p3 = &rom_buffer[0x280000];
-          for (; p1 < &rom_buffer[0x200000]; p1 += 0x8000, p2 += 0x8000, p3 += 0x8000)
+          p1 = &(*rom_buffer)[0x180000];
+          p2 = &(*rom_buffer)[0x200000];
+          p3 = &(*rom_buffer)[0x280000];
+          for (; p1 < &(*rom_buffer)[0x200000]; p1 += 0x8000, p2 += 0x8000, p3 += 0x8000)
             {
               memmove (tmp, p1, 0x8000);
               memmove (p1, p2, 0x8000);
@@ -1959,46 +2009,40 @@ snes_deinterleave (st_rominfo_t *rominfo, unsigned char *rom_buffer, int rom_siz
               memmove (p3, tmp, 0x8000);
             }
         }
-      for (i = 0; i < nblocks; i++)
-        {
-          blocks[i * 2] = i + nblocks;
-          blocks[i * 2 + 1] = i;
-        }
-    }
 
-  for (i = 0; i < nblocks * 2; i++)
-    {
-      for (j = i; j < nblocks * 2; j++)
+      if (snes_header_base == SNES_EROM)
         {
-          if (blocks[j] == i)
+          j = (32 * MBIT) >> 16;
+          for (i = 0; i < j; i++)
             {
-              memmove (tmp, &rom_buffer[blocks[j] * 0x8000], 0x8000);
-              memmove (&rom_buffer[blocks[j] * 0x8000],
-                       &rom_buffer[blocks[i] * 0x8000], 0x8000);
-              memmove (&rom_buffer[blocks[i] * 0x8000], tmp, 0x8000);
-              b = blocks[j];
-              blocks[j] = blocks[i];
-              blocks[i] = b;
-              break;
+              blocks[i * 2] = i + j + ((16 * MBIT) >> 15);
+              blocks[i * 2 + 1] = i + ((16 * MBIT) >> 15);
+            }
+          j = (rom_size - (32 * MBIT)) >> 16;
+          for (; i < j + ((32 * MBIT) >> 16); i++)
+            {
+              blocks[i * 2] = i - ((32 * MBIT) >> 16) + j;
+              blocks[i * 2 + 1] = i - ((32 * MBIT) >> 16);
             }
         }
+      else
+        for (i = 0; i < nblocks; i++)
+          {
+            blocks[i * 2] = i + nblocks;
+            blocks[i * 2 + 1] = i;
+          }
     }
 
-#ifdef  ALT_HILO
-  hi_score = check_banktype (rom_buffer, snes_header_base + SNES_HIROM);
-  lo_score = check_banktype (rom_buffer, snes_header_base + 0);
-
-  if (!force_interleaved &&
-       ((snes_hirom && (lo_score >= hi_score)) ||
-        (!snes_hirom && (hi_score > lo_score))))
-    {                                           // ROM seems to be non-interleaved after all
-      q_fread (rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
-      rominfo->interleaved = 0;
-      snes_hirom = org_hirom;
-      return -1;
+  if (!(rom_buffer2 = (unsigned char *) malloc (rom_size)))
+    {
+      fprintf (stderr, ucon64_msg[ROM_BUFFER_ERROR], rom_size);
+      exit (1);
     }
-#endif
+  for (i = 0; i < nblocks * 2; i++)
+    memcpy (rom_buffer2 + i * 0x8000, (*rom_buffer) + blocks[i] * 0x8000, 0x8000);
 
+  free (*rom_buffer);
+  *rom_buffer = rom_buffer2;
   return 0;
 }
 
@@ -2040,7 +2084,7 @@ snes_buheader_info (st_rominfo_t *rominfo)
         type = SWC;
     }
 
-  q_fread (&header, 0, rominfo->buheader_len, ucon64.rom);
+  q_fread (&header, 0, 512, ucon64.rom);
   mem_hexdump (header, 48, 0);                  // show only the part that is
   puts ("");                                    //  interpreted by copier
 
@@ -2195,10 +2239,9 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
           if ((x = get_internal_sums (rominfo)) != 0xffff)
             {
               snes_hirom = 0;
-              rominfo->buheader_len = 0;
               if ((x = get_internal_sums (rominfo)) != 0xffff)
                 {
-                  rominfo->buheader_len = SWC_HEADER_LEN;
+                  rominfo->buheader_len = 0;
                   x = get_internal_sums (rominfo);
                 }
             }
@@ -2215,10 +2258,9 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
           if ((x = get_internal_sums (rominfo)) != 0xffff)
             {
               snes_hirom = SNES_HIROM;
-              rominfo->buheader_len = 0;
               if ((x = get_internal_sums (rominfo)) != 0xffff)
                 {
-                  rominfo->buheader_len = SWC_HEADER_LEN;
+                  rominfo->buheader_len = 0;
                   x = get_internal_sums (rominfo);
                 }
             }
@@ -2284,10 +2326,15 @@ snes_handle_buheader (st_rominfo_t *rominfo, st_unknown_header_t *header)
 }
 
 
-static void
+static int
 snes_set_hirom (unsigned char *rom_buffer, int size)
+/*
+  This function tries to determine if the ROM dump is LoROM or HiROM. It returns
+  the highest value that check_banktype() returns. A higher value means a higher
+  chance the bank type is correct.
+*/
 {
-  int x;
+  int x, score_hi, score_lo;
 
   if (size >= (int) (8 * MBIT + SNES_HEADER_START + SNES_HIROM + SNES_HEADER_LEN) &&
       !strncmp ((char *) rom_buffer + SNES_HEADER_START + 16, "ADD-ON BASE CASSETE", 19))
@@ -2297,7 +2344,6 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
       snes_header_base = 8 * MBIT;
       x = 8 * MBIT + SNES_HIROM;
     }
-#ifdef  ALT_HILO
   else if (snes_header_base == SNES_EROM)
     x = SNES_EROM + SNES_HIROM;
   else
@@ -2305,13 +2351,23 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
       snes_header_base = 0;
       x = SNES_HIROM;
     }
-  snes_hirom = check_banktype (rom_buffer, x) >
-               check_banktype (rom_buffer, snes_header_base) ? SNES_HIROM : 0;
-#endif
+
+  score_hi = check_banktype (rom_buffer, x);
+  score_lo = check_banktype (rom_buffer, snes_header_base);
+  if (score_hi > score_lo)
+    {
+      snes_hirom = SNES_HIROM;
+      x = score_hi;
+    }
+  else
+    {
+      snes_hirom = 0;
+      x = score_lo;
+    }
   /*
     It would be nice if snes_header.map_type & 1 could be used to verify that
     snes_hirom has the correct value, but it doesn't help much. For games like
-    Batman Revenge of the Joker (U) it matches what score_hirom() finds.
+    Batman Revenge of the Joker (U) it matches what check_banktype() finds.
     snes_hirom must be 0x8000 for that game in order to display correct
     information. However it should be 0 when writing a copier header.
     So, snes_header.map_type can't be used to recognize such cases.
@@ -2321,8 +2377,8 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
   if (UCON64_ISSET (ucon64.snes_hirom))         // -hi or -nhi switch was specified
     {
       snes_hirom = ucon64.snes_hirom;
-      snes_hirom_changed = 1;                   // keep snes_deinterleave() from
-    }                                           //  changing snes_hirom
+      snes_hirom_ok = 1;                        // keep snes_deinterleave()
+    }                                           //  from changing snes_hirom
 
   if (UCON64_ISSET (ucon64.snes_header_base))   // -erom switch was specified
     {
@@ -2331,13 +2387,15 @@ snes_set_hirom (unsigned char *rom_buffer, int size)
           size < (int) (snes_header_base + SNES_HEADER_START + snes_hirom + SNES_HEADER_LEN))
         snes_header_base = 0;                   // Don't let -erom crash on a too small ROM
     }
+
+  return x;
 }
 
 
 int
 snes_init (st_rominfo_t *rominfo)
 {
-  int x, y, size, result = -1;                  // it's no SNES ROM dump until detected otherwise
+  int x, y, size, calc_checksums, result = -1;  // it's no SNES ROM dump until detected otherwise
   unsigned char *rom_buffer;
   st_unknown_header_t header;
   char buf[MAXBUFSIZE], *str;
@@ -2357,18 +2415,17 @@ snes_init (st_rominfo_t *rominfo)
     "Hong Kong and China",
     "Indonesia",
     "South Korea"},
-    *snes_romtype[3] = {
+    *snes_rom_type[3] = {
     "ROM",                                      // NOT ROM only, ROM + other chip is possible
     "ROM + RAM",
     "ROM + Save RAM"},
-    *snes_bstype[4] = {
+    *snes_bs_type[4] = {
     "Full size + Sound link",
     "Full size",
     "Part size + Sound link",
     "Part size"};
 
-  rom_is_top = 0;                               // init these vars here, for -lsv
-  snes_hirom_changed = 0;                       // idem
+  snes_hirom_ok = 0;                            // init these vars here, for -lsv
   snes_sramsize = 0;                            // idem
   type = SMC;                                   // idem, SMC indicates unknown copier type
   bs_dump = 0;                                  // for -lsv, but also just to init it
@@ -2392,11 +2449,11 @@ snes_init (st_rominfo_t *rominfo)
 
   /*
     snes_testinterleaved() needs the correct value for snes_hirom and
-    rominfo->header_start. snes_hirom may be used only after the check for -hi/-nhi
-    has been done. If ALT_HILO is defined however, rominfo->buheader_len must have
-    the correct value in order to determine the value for snes_hirom. This can only
-    be known after the backup unit header length detection (including the check for
-    -hd/-nhd/-hdn). So, the order must be
+    rominfo->header_start. snes_hirom may be used only after the check for
+    -hi/-nhi has been done. However, rominfo->buheader_len must have the
+    correct value in order to determine the value for snes_hirom. This can only
+    be known after the backup unit header length detection (including the check
+    for -hd/-nhd/-hdn). So, the order must be
     1. - rominfo->buheader_len
     2. - snes_hirom
     3. - check for -hi/-nhi
@@ -2434,7 +2491,7 @@ snes_init (st_rominfo_t *rominfo)
     }                                           //  called with -lsv
   q_fread (rom_buffer, rominfo->buheader_len, size, ucon64.rom);
 
-  snes_set_hirom (rom_buffer, size);            // second part of step 2. (#ifdef ALT_HILO)
+  x = snes_set_hirom (rom_buffer, size);        // second part of step 2. (#ifdef ALT_HILO)
 
   rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
   rominfo->header_len = SNES_HEADER_LEN;
@@ -2445,13 +2502,27 @@ snes_init (st_rominfo_t *rominfo)
   // step 4.
   force_interleaved = UCON64_ISSET (ucon64.interleaved) ? 1 : 0;
   rominfo->interleaved = UCON64_ISSET (ucon64.interleaved) ?
-    ucon64.interleaved : snes_testinterleaved ();
+    ucon64.interleaved : snes_testinterleaved (rom_buffer, size, x);
+
+  calc_checksums = !UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0;
+
+  // bs_dump has to be set before calling snes_chksum(), but snes_check_bs()
+  //  needs snes_header to be filled with the correct data
+  if (rominfo->interleaved)
+    {
+      if (calc_checksums)
+        ucon64.fcrc32 = crc32 (0, rom_buffer, size);
+      snes_deinterleave (rominfo, &rom_buffer, size);
+      snes_set_hirom (rom_buffer, size);
+      rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
+      memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
+    }
 
   bs_dump = snes_check_bs ();
   if (UCON64_ISSET (ucon64.bs_dump))            // -bs or -nbs switch was specified
     bs_dump = ucon64.bs_dump;
 
-  if (!UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0)
+  if (calc_checksums)
     {
       // internal ROM crc
       rominfo->has_internal_crc = 1;
@@ -2477,13 +2548,7 @@ snes_init (st_rominfo_t *rominfo)
 #endif
                rominfo->current_internal_crc, x, rominfo->current_internal_crc + x,
                (rominfo->current_internal_crc + x == 0xffff) ? "" : "~0xffff");
-    }
-  else if (rominfo->interleaved)
-    {
-      snes_deinterleave (rominfo, rom_buffer, size);
-      snes_set_hirom (rom_buffer, size);
-      rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
-      memcpy (&snes_header, rom_buffer + rominfo->header_start, rominfo->header_len);
+      ucon64.crc32 = crc32 (0, rom_buffer, size);
     }
 
   // internal ROM name
@@ -2549,9 +2614,12 @@ snes_init (st_rominfo_t *rominfo)
 
       sprintf (buf, "Internal size: %d Mb\n", 1 << (snes_header.rom_size - 7));
       strcat (rominfo->misc, buf);
-
+/*
+      sprintf (buf, "Map type: %x\n", snes_header.map_type);
+      strcat (rominfo->misc, buf);
+*/
       sprintf (buf, "ROM type: (%x) %s", snes_header.rom_type,
-        snes_romtype[(snes_header.rom_type & 7) % 3]);
+        snes_rom_type[(snes_header.rom_type & 7) % 3]);
       strcat (rominfo->misc, buf);
       if ((snes_header.rom_type & 0xf) >= 3)
         {
@@ -2594,7 +2662,7 @@ snes_init (st_rominfo_t *rominfo)
       strcat (rominfo->misc, "\n");
 
       sprintf (buf, "ROM speed: %s\n",
-              snes_header.map_type & 0x10 ? "120ns (FastROM)" : "200ns (SlowROM)");
+               snes_header.map_type & 0x10 ? "120ns (FastROM)" : "200ns (SlowROM)");
       strcat (rominfo->misc, buf);
 
       snes_sramsize = snes_header.sram_size ? 1 << (snes_header.sram_size + 10) : 0;
@@ -2628,14 +2696,22 @@ snes_init (st_rominfo_t *rominfo)
       // misc stuff
       sprintf (buf, "Internal size: %d Mb\n", 8 - (snes_header.bs_type >> (4 + 1)) * 4);
       strcat (rominfo->misc, buf);
-
+/*
+      sprintf (buf, "Map type: %x\n", snes_header.bs_map_type);
+      strcat (rominfo->misc, buf);
+*/
       x = snes_header.bs_type >> 4;
       sprintf (buf, "ROM type: (%x) %s\n", snes_header.bs_type,
-        x > 3 ? "Unknown" : snes_bstype[x]);
+        x > 3 ? "Unknown" : snes_bs_type[x]);
       strcat (rominfo->misc, buf);
 
+      /*
+        It seems logical that the same condition as for regular cartridge dumps
+        tells whether it's a FastROM or a SlowROM. The original condition was
+        "(snes_header.bs_map_type >> 4) > 2".
+      */
       sprintf (buf, "ROM speed: %s\n",
-        (snes_header.bs_makeup >> 4) > 2 ? "120ns (FastROM)" : "200ns (SlowROM)");
+               snes_header.bs_map_type & 0x10 ? "120ns (FastROM)" : "200ns (SlowROM)");
       strcat (rominfo->misc, buf);
     }
 
@@ -2671,7 +2747,7 @@ snes_check_bs (void)
         return 0;
     }
 
-  if (snes_header.bs_makeup & 0xce || ((snes_header.bs_makeup & 0x30) == 0))
+  if (snes_header.bs_map_type & 0xce || ((snes_header.bs_map_type & 0x30) == 0))
     return 0;
 
   if ((snes_header.map_type & 0x03) != 0)
@@ -2788,9 +2864,9 @@ snes_check_bs (void)
     return 0;
   if (snes_header.maker != 0x33 && snes_header.maker != 0 && snes_header.maker != 0xff)
     return 0;
-  if (snes_header.bs_makeup & 0x8e)
+  if (snes_header.bs_map_type & 0x8e)
     return 0;
-  if (!(snes_header.bs_makeup & 0x70))
+  if (!(snes_header.bs_map_type & 0x70))
     return 0;
   byte = ((char *) &snes_header)[32];           // 32
   if (byte != 0x01 && byte != 0x03 && byte != 0x07 && byte != 0x0f && byte != 0xff)
@@ -2801,8 +2877,8 @@ snes_check_bs (void)
       snes_header.bs_size != 0x20 && snes_header.bs_size != 0x30 &&
       snes_header.bs_size != 0x80)
     return 0;
-//  if (!isalnum (snes_header.maker_x) return 0;
-//  if (!isalnum (snes_header.maker_y) return 0;
+//  if (!isalnum (snes_header.maker_high) return 0;
+//  if (!isalnum (snes_header.maker_low) return 0;
   for (i = 0; i < 12; i++)
     if (snes_header.name[i] == 0xff)
       return 0;
@@ -2831,15 +2907,6 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
   unsigned short int sum1, sum2;
 
   rom_size = ucon64.file_size - rominfo->buheader_len;
-  if (rominfo->interleaved)
-    {
-      ucon64.fcrc32 = crc32 (0, *rom_buffer, rom_size);
-      snes_deinterleave (rominfo, *rom_buffer, rom_size);
-      snes_set_hirom (*rom_buffer, rom_size);
-      rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
-      memcpy (&snes_header, *rom_buffer + rominfo->header_start, rominfo->header_len);
-    }
-  ucon64.crc32 = crc32 (0, *rom_buffer, rom_size);
 
   if (!bs_dump && snes_header.rom_size <= 13)   // largest known cart size is 64 Mbit
     internal_rom_size = 1 << (snes_header.rom_size + 10);
@@ -2886,27 +2953,6 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
 //              internal_rom_size, half_internal_rom_size, remainder);
     }
 
-#if 0 // We *want* rom_buffer to contain deinterleaved data
-  /*
-    Load rom_buffer with the ROM again if uCON64 detected it as interleaved or
-    if uCON64 was forced to handle it as being interleaved, so that rom_buffer
-    matches with the ROM dump on disk. rom_buffer was "deinterleaved" (=changed)
-    in order to calculate the checksum. However, it isn't necessary to load
-    rom_buffer again in the case that uCON64 wasn't forced to handle the ROM as
-    interleaved and snes_deinterleave() detected that the ROM wasn't interleaved
-    after all. In that case snes_deinterleave() already reloaded rom_buffer. Of
-    course, it also isn't necessary to reload rom_buffer if ROM is a normal ROM.
-    In short:
-      force_interleaved?  interleaved?    reload?
-      yes                 yes             yes
-      yes                 no              yes
-      no                  yes             yes
-      no                  no              no
-  */
-  if (force_interleaved || rominfo->interleaved)
-    q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
-#endif
-
   return sum1;
 }
 #else
@@ -2918,15 +2964,6 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
   unsigned short int sum;
 
   rom_size = ucon64.file_size - rominfo->buheader_len;
-  if (rominfo->interleaved)
-    {
-      ucon64.fcrc32 = crc32 (0, *rom_buffer, rom_size);
-      snes_deinterleave (rominfo, *rom_buffer, rom_size);
-      snes_set_hirom (*rom_buffer, rom_size);
-      rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
-      memcpy (&snes_header, *rom_buffer + rominfo->header_start, rominfo->header_len);
-    }
-  ucon64.crc32 = crc32 (0, *rom_buffer, rom_size);
 
   if (!bs_dump)
     {
@@ -2983,17 +3020,11 @@ snes_chksum (st_rominfo_t *rominfo, unsigned char **rom_buffer)
         sum += (*rom_buffer)[i];
     }
 
-#if 0
-  if (force_interleaved || rominfo->interleaved)
-    q_fread (*rom_buffer, rominfo->buheader_len, rom_size, ucon64.rom);
-#endif
-
   return sum;
 }
 #endif
 
 
-#ifdef  ALT_HILO
 int
 check_banktype (unsigned char *rom_buffer, int header_offset)
 /*
@@ -3014,6 +3045,7 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
       if (is_func ((char *) rom_buffer + SNES_HEADER_START + header_offset + 16,
                    SNES_NAME_LEN, isprint))
         score += 1;
+
       // map type
       if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0xf) < 4)
         score += 2;
@@ -3021,17 +3053,26 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
       if ((rom_buffer[SNES_HEADER_START + header_offset + 37] & 0x01) ==
           (header_offset >= snes_header_base + SNES_HIROM) ? 0x01 : 0x00)
         score += 1;
+
+      // ROM size
+      if (1 << (rom_buffer[SNES_HEADER_START + header_offset + 39] - 7) <= 64)
+        score += 1;
+
+      // SRAM size
+      if (1 << rom_buffer[SNES_HEADER_START + header_offset + 40] <= 256)
+        score += 1;
+
       // country
       if (rom_buffer[SNES_HEADER_START + header_offset + 41] <= 13)
         score += 1;
     }
-
-  // ROM size
-  if (1 << (rom_buffer[SNES_HEADER_START + header_offset + 39] - 7) <= 64)
-    score += 1;
-  // SRAM size
-  if (1 << rom_buffer[SNES_HEADER_START + header_offset + 40] <= 256)
-    score += 1;
+  else
+    {
+      // map type, HiROM flag
+      if ((rom_buffer[SNES_HEADER_START + header_offset + 40] & 0x01) ==
+          (header_offset >= snes_header_base + SNES_HIROM) ? 0x01 : 0x00)
+        score += 1;
+    }
 
   // publisher "escape code"
   if (rom_buffer[SNES_HEADER_START + header_offset + 42] == 0x33)
@@ -3057,7 +3098,6 @@ check_banktype (unsigned char *rom_buffer, int header_offset)
 
   return score;
 }
-#endif
 
 
 static void
@@ -3196,9 +3236,9 @@ handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
           "Super Scope / Gamepad", "Konami's Justifier", "Multitap",
           "Mouse / Super Scope / Gamepad", "Unknown"
         };
-      int x = OFFSET (header, 0x1ed), ctrl1 = x >> 4, ctrl2 = x & 0xf;
+      int x = header[0x1ed], ctrl1 = x >> 4, ctrl2 = x & 0xf;
 
-      memcpy (name, &OFFSET (header, 0x1d1), SNES_NAME_LEN);
+      memcpy (name, header + 0x1d1, SNES_NAME_LEN);
       name[SNES_NAME_LEN] = 0;
       for (x = 0; x < SNES_NAME_LEN; x++)
         if (!isprint ((int) name[x]))
@@ -3215,12 +3255,12 @@ handle_nsrt_header (st_rominfo_t *rominfo, unsigned char *header,
                       "  Port 1 controller type: %s\n"
                       "  Port 2 controller type: %s\n"
                       "  Header version: %.1f",
-               NULL_TO_UNKNOWN_S (snes_country[MIN (OFFSET (header, 0x1d0) & 0xf, SNES_COUNTRY_MAX - 1)]),
+               NULL_TO_UNKNOWN_S (snes_country[MIN (header[0x1d0] & 0xf, SNES_COUNTRY_MAX - 1)]),
                name,
-               OFFSET (header, 0x1e6) + (OFFSET (header, 0x1e7) << 8),
+               header[0x1e6] + (header[0x1e7] << 8),
                str_list[ctrl1],
                str_list[ctrl2],
-               OFFSET (header, 0x1ec) / 10.f);
+               header[0x1ec] / 10.f);
       strcat (rominfo->misc, buf);
 
       nsrt_header = 1;

@@ -484,6 +484,7 @@ const st_ucon64_wf_t ucon64_wf[] = {
   {UCON64_FIGS, UCON64_SNES, snes_usage,       0},
   {UCON64_GBX, UCON64_GB, gameboy_usage,       WF_DEFAULT},
   {UCON64_GD3, UCON64_SNES, snes_usage,        WF_DEFAULT|WF_NO_SPLIT},
+  {UCON64_GD3S, UCON64_SNES, snes_usage,       0},
   {UCON64_INES, UCON64_NES, nes_usage,         WF_DEFAULT},
   {UCON64_INESHD, UCON64_NES, nes_usage,       WF_DEFAULT},
 //  {UCON64_IP, UCON64_DC, dc_usage,             WF_DEFAULT},

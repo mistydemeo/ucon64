@@ -1074,6 +1074,10 @@ ucon64_options (int c, const char *optarg)
       snes_gd3 (ucon64.rominfo);
       break;
 
+    case UCON64_GD3S:
+      snes_gd3s ();
+      break;
+
     case UCON64_GG:
       switch (ucon64.console)
         {

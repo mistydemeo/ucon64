@@ -63,6 +63,9 @@ const st_usage_t swc_usage[] =
 
 #define BUFFERSIZE 8192                         // don't change, only 8192 works!
 
+//#define DUMP_MMX2
+//#define DUMP_SA1
+//#define DUMP_SDD1
 
 static int receive_rom_info (unsigned char *buffer, int superdump);
 static int get_rom_size (unsigned char *info_block);
@@ -76,6 +79,15 @@ static int mram_helper (int x);
 static int mram (void);
 
 static int hirom;                               // `hirom' was `special'
+
+#ifdef  DUMP_SA1
+static void set_sa1_map (unsigned short chunk);
+/*extern*/ int snes_sa1;
+#endif
+#ifdef  DUMP_SDD1
+static void set_sdd1_map (unsigned short chunk);
+/*extern*/ int snes_sdd1;
+#endif
 
 
 #if BUFFERSIZE < 512
@@ -95,7 +107,6 @@ receive_rom_info (unsigned char *buffer, int superdump)
   unsigned short address;
   unsigned char byte;
 
-//#define DUMP_MMX2
 #ifdef  DUMP_MMX2
   /*
     MMX2 can be dumped after writing a 0 to SNES register 0x7f52. Before we can
@@ -161,12 +172,52 @@ receive_rom_info (unsigned char *buffer, int superdump)
   else
     {
       size = get_rom_size (buffer);
+#ifdef  DUMP_SA1
+      if (!snes_sa1)
+#endif
       if (hirom)
         size <<= 1;
     }
 
+#ifdef  DUMP_SDD1
+  // Adjust size to 48 Mbit for Star Ocean
+  if (snes_sdd1 && size == 0x20)
+    {
+      ffe_send_command (5, 3, 0);
+      byte = ffe_send_command1 (0xbfd7);
+      if (byte == 0x0d)
+        size = 0x30;
+    }
+#endif
+
+#ifdef  DUMP_SA1
+  // Fixup size for SA-1 chips
+  if (snes_sa1)
+    {
+      ffe_send_command (5, 3, 0);
+      byte = ffe_send_command1 (0xbfd7);
+      switch (byte)
+        {
+        case 0x09:
+          size = 0x04;
+          break;
+        case 0x0a:
+          size = 0x08;
+          break;
+        case 0x0b:
+          size = 0x10;
+          break;
+        case 0x0c:
+          size = 0x20;
+          break;
+        default:
+          break;
+        }
+    }
+#endif
+
   memset (buffer, 0, SWC_HEADER_LEN);
-  buffer[0] = size << 4 & 0xff;                 // *16 for 8 kB units; low byte
+  buffer[0] = size << 4;                        // *16 for 8 kB units; low byte
   buffer[1] = size >> 4;                        // *16 for 8 kB units /256 for high byte
   buffer[8] = 0xaa;
   buffer[9] = 0xbb;
@@ -348,6 +399,40 @@ swc_unlock (unsigned int parport)
 }
 
 
+#ifdef  DUMP_SA1
+void
+set_sa1_map (unsigned short chunk)
+{
+  int m;
+
+  chunk = (chunk & 0x07) | 0x80;
+
+  // map the 8 Mbit ROM chunk specified by chunk into the F0 bank
+  ffe_send_command (5, 1, 0);
+  ffe_send_command0 (0x2223, chunk);            // $00:2223
+  for (m = 0; m < 65536; m++)
+    ;
+}
+#endif
+
+
+#ifdef  DUMP_SDD1
+void
+set_sdd1_map (unsigned short chunk)
+{
+  int m;
+
+  chunk &= 0x07;
+
+  // map the 8 Mbit ROM chunk specified by chunk into the F0 bank
+  ffe_send_command (5, 2, 0);
+  ffe_send_command0 (0x2807, chunk);            // $00:4807
+  for (m = 0; m < 65536; m++)
+    ;
+}
+#endif
+
+
 int
 swc_read_rom (const char *filename, unsigned int parport, int superdump)
 {
@@ -356,6 +441,18 @@ swc_read_rom (const char *filename, unsigned int parport, int superdump)
   int n, size, blocksleft, bytesreceived = 0;
   unsigned short address1, address2;
   time_t starttime;
+#if     defined DUMP_SA1 || defined DUMP_SDD1
+  int s_chip = 0;
+  unsigned short chunk_num = 0;         // 0 = 1st 8Mb ROM chunk, 1 = 2nd 8Mb, ...
+#endif
+
+#ifdef  DUMP_SA1
+  s_chip = snes_sa1;
+#endif
+#ifdef  DUMP_SDD1
+  if (!s_chip)
+    s_chip = snes_sdd1;
+#endif
 
   ffe_init_io (parport);
 
@@ -380,6 +477,14 @@ swc_read_rom (const char *filename, unsigned int parport, int superdump)
     }
   blocksleft = size * 16;                       // 1 Mb (128 kB) unit == 16 8 kB units
   printf ("Receive: %d Bytes (%.4f Mb)\n", size * MBIT, (float) size);
+#ifdef  DUMP_SA1
+  if (snes_sa1)
+    puts ("NOTE: Dumping SA-1 cartridge");
+#endif
+#ifdef  DUMP_SDD1
+  if (snes_sdd1)
+    puts ("NOTE: Dumping S-DD1 cartridge");
+#endif
   size *= MBIT;                                 // size in bytes for ucon64_gauge() below
 
   ffe_send_command (5, 0, 0);
@@ -389,17 +494,47 @@ swc_read_rom (const char *filename, unsigned int parport, int superdump)
   buffer[2] = get_emu_mode_select (byte, blocksleft / 16);
   fwrite (buffer, 1, SWC_HEADER_LEN, file);     // write header (other necessary fields are
                                                 //  filled in by receive_rom_info())
-  if (hirom)
+  if (hirom
+#if     defined DUMP_SA1 || defined DUMP_SDD1
+      || s_chip
+#endif
+     )
     blocksleft >>= 1;                           // this must come _after_ get_emu_mode_select()!
 
   printf ("Press q to abort\n\n");              // print here, NOT before first SWC I/O,
                                                 //  because if we get here q works ;-)
-  address1 = 0x300;                             // address1 = 0x100, address2 = 0 should
-  address2 = 0x200;                             //  also work
+#if     defined DUMP_SA1 || defined DUMP_SDD1
+  if (!s_chip)
+    {
+#endif
+      address1 = 0x300;                         // address1 = 0x100, address2 = 0 should
+      address2 = 0x200;                         //  also work
+#if     defined DUMP_SA1 || defined DUMP_SDD1
+    }
+  else                                          // SA-1 or S-DD1
+    {
+      address1 = 0x3c0;
+      address2 = 0x3c0;
+
+#ifdef  DUMP_SA1
+      if (snes_sa1)
+        set_sa1_map (chunk_num++);
+#endif
+#ifdef  DUMP_SDD1
+      if (snes_sdd1)
+        set_sdd1_map (chunk_num++);
+#endif
+    }
+#endif
+
   starttime = time (NULL);
   while (blocksleft > 0)
     {
-      if (hirom)
+      if (hirom
+#if     defined DUMP_SA1 || defined DUMP_SDD1
+          || s_chip
+#endif
+         )
         for (n = 0; n < 4; n++)
           {
             ffe_send_command (5, address1, 0);
@@ -424,7 +559,32 @@ swc_read_rom (const char *filename, unsigned int parport, int superdump)
           ucon64_gauge (starttime, bytesreceived, size);
           ffe_checkabort (2);
         }
+
+#if     defined DUMP_SA1 || defined DUMP_SDD1
+      if (s_chip && address2 == 0x400)
+        {
+#ifdef  DUMP_SA1
+          if (snes_sa1)
+            set_sa1_map (chunk_num++);
+#endif
+#ifdef  DUMP_SDD1
+          if (snes_sdd1)
+            set_sdd1_map (chunk_num++);
+#endif
+          address1 = 0x3c0;
+          address2 = 0x3c0;
+        }
+#endif
     }
+
+#ifdef  DUMP_SA1
+  if (snes_sa1)
+    set_sa1_map (3);
+#endif
+#ifdef  DUMP_SDD1
+  if (snes_sdd1)
+    set_sdd1_map (3);
+#endif
   ffe_send_command (5, 0, 0);
 
   free (buffer);

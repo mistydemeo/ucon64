@@ -106,7 +106,7 @@ Q34: <a href="#34">How do I enable or disable colors in the display output of
 Q35: <a href="#35">When I try to convert a large number of files using
    wildcards, uCON64 will only convert the first file. Is this a bug?</a><br>
 <br>
-Q36: <a href="#36">Does uCON64 support DAT (GoodXXXX, RomCenter, etc.) files?</a><br>
+Q36: <a href="#36">Does uCON64 support DAT (RomCenter/GoodXXXX) files?</a><br>
 <br>
 Q37: <a href="#37">Some SNES games do not work on my Super Pro Fighter Q(+).
    What can I do about that?</a><br>
@@ -314,12 +314,12 @@ Q49: <a href="#49">How do I use the command line?</a><br>
    <b>Visual C++</b><br>
    Start a command shell or "prompt" and go to the correct directory. If you
    have compiled uCON64 in the same directory before, first type:<br>
-   &nbsp;&nbsp; nmake -f Makefile.vc6 clean<br>
+   &nbsp;&nbsp; nmake /f Makefile.vc6 clean<br>
 <br>
    If you want to compile the source code including discmage, type:<br>
-   &nbsp;&nbsp; nmake -f Makefile.vc6<br>
+   &nbsp;&nbsp; nmake /f Makefile.vc6<br>
    If you do not want to compile discmage the last command should like this:<br>
-   &nbsp;&nbsp; nmake -f Makefile.vc6 ucon64.exe<br>
+   &nbsp;&nbsp; nmake /f Makefile.vc6 ucon64.exe<br>
 <br>
    Under GNU/Linux, DOS and Windows you could use UPX to compress the
    executable. UPX is available from
@@ -913,12 +913,11 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
 <a name="30"><b>Q30</b>: I want to convert a NES ROM in iNES format to UNIF.
    How do I know what board name to use?</a><br>
 <b>A</b>: The file
-   <a href="http://www.parodius.com/~veilleux/boardtable.txt" target="_blank">
-   http://www.parodius.com/~veilleux/boardtable.txt</a> contains a table where
-   you can find what game uses what board. The file
-   <a href="http://www.parodius.com/~veilleux/boardnames" target="_blank">
-   http://www.parodius.com/~veilleux/boardnames</a> contains a list of all
-   known board names.<br>
+   <a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/ucon64/ucon64/src/console/boardtable.txt?rev=1.1" target="_blank">
+   boardtable.txt</a> contains a table where you can find what game uses what
+   board. The file
+   <a href="http://cvs.sourceforge.net/viewcvs.py/*checkout*/ucon64/ucon64/src/console/boardnames?rev=1.1" target="_blank">
+   boardnames</a> contains a list of all known board names.<br>
 <br>
 <p>
 <a name="31"><b>Q31</b>: How do I convert a NES ROM from Pasofami to FFE? Or
@@ -1002,8 +1001,7 @@ Dr. Dobb's Journal (http://www.ddj.com/), but only aftering registering.
    processed and not only the files before the crash.<br>
 <br>
 <p>
-<a name="36"><b>Q36</b>: Does uCON64 support DAT (GoodXXXX, RomCenter, etc.)
-   files?</a><br>
+<a name="36"><b>Q36</b>: Does uCON64 support DAT (RomCenter/GoodXXXX) files?</a><br>
 <b>A</b>: Yes, starting with version 1.9.8beta8 it does. First use the option
    -version to see which configuration file uCON64 uses
    (see <a href="#25">question 25</a>). Then open that file in an editor and

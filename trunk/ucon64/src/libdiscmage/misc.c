@@ -215,6 +215,25 @@ q_fsize (const char *filename)
 
 
 #if     defined _WIN32 && defined ANSI_COLOR
+static void
+print_string (char *string, int length)
+{
+  // TODO: Is there a function that prints a string without interpreting it?
+  //       printf() can't be used, because it interprets its argument.
+  int x;
+  char *ptr = string + length - 1;
+
+  if (*ptr == '\n')
+    {
+      *ptr = 0;
+      puts (string);
+    }
+  else
+    for (x = 0; x < length; x++)
+      fputc (string[x], stdout);
+}
+
+
 int
 vprintf2 (const char *format, va_list argptr)
 // Cheap hack to get the Visual C++ port support "ANSI colors". Cheap,
@@ -232,13 +251,14 @@ vprintf2 (const char *format, va_list argptr)
   n_chars = vsprintf (output, format, argptr);
   if (n_chars > MAXBUFSIZE)
     {
-      fprintf (stderr, "INTERNAL ERROR: Output buffer in fprintf2() is too small (%d bytes).\n"
-                       "                %d bytes were needed.\n", MAXBUFSIZE, n_chars);
+      fprintf (stderr, "INTERNAL ERROR: Output buffer in vprintf2() is too small (%d bytes).\n"
+                       "                %d bytes were needed. Please send a bug report\n", 
+               MAXBUFSIZE, n_chars);
       exit (1);
     }
 
   if ((ptr = strchr (output, 0x1b)) == NULL)
-    printf (output);
+    print_string (output, n_chars);
   else
     {
       stdout_handle = GetStdHandle (STD_OUTPUT_HANDLE);
@@ -248,7 +268,7 @@ vprintf2 (const char *format, va_list argptr)
       if (ptr > output)
         {
           *ptr = 0;
-          printf (output);
+          print_string (output, ptr - output);
           *ptr = 0x1b;
         }
       while (!done)
@@ -305,7 +325,7 @@ vprintf2 (const char *format, va_list argptr)
 
           ptr[n_print] = 0;
           ptr += n_ctrl;
-          printf (ptr);
+          print_string (ptr, n_print - n_ctrl);
           (ptr - n_ctrl)[n_print] = 0x1b;
           ptr = ptr2;
         }

@@ -24,12 +24,12 @@ ucon64gui_top(void)
 
   h2g_("$ROM: ");
 
-  h2g_input_file ("rom","", 0, 0, open_xpm, 0, 0, "Select $ROM");
+  h2g_input_file ("rom","", 350, 0, open_xpm, 0, 0, "Select $ROM");
   
   h2g_br();
   h2g_("$FILE:  ");
 
-  h2g_input_file ("file", "", 0, 0, open_xpm, 0, 0,
+  h2g_input_file ("file", "", 350, 0, open_xpm, 0, 0,
     "Select $FILE or enter a value by hand");
   
   h2g_br ();

@@ -76,6 +76,25 @@ if(!strdcmp(buf,"ucon64gui_config"))
   return;
 }
 
+if(!strncmp(buf,"emulate_",8))
+{
+  setProperty (ucon64gui.configfile, buf, &query[len+1]);
+  return;
+}
+
+if(!strncmp(buf,"cdrw_",5))
+{
+  setProperty (ucon64gui.configfile, buf, &query[len+1]);
+  return;
+}
+
+if(!strdcmp(buf,"backups"))
+{
+  setProperty (ucon64gui.configfile, buf, &query[len+1]);
+  return;
+}
+
+
 // switches/overrides
 if(!strdcmp(buf,"-hd"))
 {
@@ -99,7 +118,7 @@ if(!strdcmp(buf,"-ns"))
   options
 */
 
-  sprintf(buf2,"ucon64 %s %s %s", buf
+  sprintf(buf2,"ucon64 %s \"%s\" \"%s\"", buf
   , (ucon64gui.rom != NULL) ? ucon64gui.rom : ""
   , (ucon64gui.file != NULL) ? ucon64gui.file : ""
   );

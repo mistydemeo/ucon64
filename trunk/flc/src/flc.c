@@ -77,9 +77,6 @@ main (int argc, char *argv[])
 
   flc_configfile ();
 
-//TODO use temp dir
-//  flc.tmppath = tempnam (getenv2("TEMP"), "flc");
-
   while ((c =
           getopt_long (argc, argv, "tXSkchv", long_options,
                        &option_index)) != -1)
@@ -274,7 +271,6 @@ int
 flc_configfile (void)
 {
   char buf[FILENAME_MAX + 1];
-  char buf2[FILENAME_MAX];
 /*
    configfile handling
 */
@@ -297,14 +293,14 @@ flc_configfile (void)
 
   if (access (flc.configfile, F_OK) == -1)
     printf ("ERROR: %s not found: creating...", flc.configfile);
-  else if (getProperty (flc.configfile, "version", buf2, NULL) == NULL)
+  else if (strtol (getProperty (flc.configfile, "version", buf, "0"), NULL, 10) < 102)
     {
-      strcpy (buf2, buf);
-      setext (buf2, ".OLD");
+      strcpy (buf, flc.configfile);
+      setext (buf, ".OLD");
 
-      printf ("NOTE: updating config: will be renamed to %s...", buf2);
+      printf ("NOTE: updating config: will be renamed to %s...", buf);
 
-      rename (flc.configfile, buf2);
+      rename (flc.configfile, buf);
 
       sync ();
     }
@@ -323,45 +319,38 @@ flc_configfile (void)
         {
           fputs ("# flc config\n"
                  "#\n"
-                 "version=101\n"
+                 "version=102\n"
                  "#\n"
                  "# LHA support\n"
                  "#\n"
-                 "lha_test=lha 2>&1 >/dev/null t\n"
-                 "lha_extract=lha 2>&1 >/dev/null efi \n"
-                 "#lha_extract=lha 2>&1 >/dev/null e \n"
+                 "lha_test=lha 2>&1 t %s\n"
+                 "lha_extract=lha 2>&1 efi %s *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
                  "#\n"
                  "# LZH support\n"
                  "#\n"
-                 "lzh_test=lha 2>&1 >/dev/null t\n"
-                 "lzh_extract=lha 2>&1 >/dev/null efi\n"
-                 "#lzh_extract=lha 2>&1 >/dev/null e\n"
+                 "lzh_test=lha 2>&1 t %s\n"
+                 "lzh_extract=lha 2>&1 efi %s *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
                  "#\n"
                  "# ZIP support\n"
                  "#\n"
-                 "zip_test=unzip 2>&1 >/dev/null -t\n"
-                 "zip_extract=unzip 2>&1 >/dev/null -xojC\n"
-                 "#zip_extract=unzip 2>&1 >/dev/null -xoj\n"
+                 "zip_test=unzip 2>&1 -t %s\n"
+                 "zip_extract=unzip 2>&1 -xojC %s *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
                  "#\n"
                  "# RAR support\n"
                  "#\n"
-                 "rar_test=unrar 2>&1 >/dev/null t\n"
-                 "rar_extract=unrar 2>&1 >/dev/null x\n"
+                 "rar_test=unrar 2>&1 t %s\n"
+                 "rar_extract=unrar 2>&1 x %s *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
                  "#\n"
                  "# ACE support\n"
                  "#\n"
-                 "ace_test=unace 2>&1 >/dev/null t\n"
-                 "ace_extract=unace 2>&1 >/dev/null e\n"
+                 "ace_test=unace 2>&1 t %s\n"
+                 "ace_extract=unace 2>&1 e %s *_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n"
                  "#\n"
                  "# TXT/NFO/FAQ support\n"
                  "#\n"
-                 "txt_extract=txtextract\n"
-                 "nfo_extract=txtextract\n"
-                 "faq_extract=txtextract\n"
-                 "#\n"
-                 "# FILE_ID.DIZ names/synonyms\n"
-                 "#\n"
-                 "file_id_diz=*_Id.* *_iD.* *_ID.* *_id.* FILE_ID.DIZ file_id.diz File_id.diz File_Id.Diz [Ff][Ii][Ll][Ee]_[Ii][Dd].[Dd][Ii][Zz]\n",
+                 "txt_extract=txtextract %s\n"
+                 "nfo_extract=txtextract %s\n"
+                 "faq_extract=txtextract %s\n",
                  fh);
 
           fclose (fh);

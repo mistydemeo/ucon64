@@ -1,5 +1,5 @@
 /*
-ucon64gui.c - a GUI for ucon64
+ucon64gui.h - a GUI for ucon64
 
 written by 2002 NoisyB (noisyb@gmx.net)
            

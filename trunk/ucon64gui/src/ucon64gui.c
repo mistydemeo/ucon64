@@ -60,7 +60,7 @@ ucon64_rom (void)
 void
 ucon64_file (void)
 {
-//_text nutzen
+//_text nutzen?
   html2gui_file ("Select ROM", ucon64gui.file);
 }
 

@@ -444,7 +444,7 @@ gd6_receive_bytes (unsigned char *buffer, int len)
           return GD_ERROR;
 
       nibble1 = (inportb ((unsigned short) (gd_port + PARPORT_STATUS)) >> 3) & 0x0f;
-      outportb ((unsigned short) gd_port, 0x00);	// Signal the SF6/SF7 to send the next nibble
+      outportb ((unsigned short) gd_port, 0x00); // Signal the SF6/SF7 to send the next nibble
 
       while ((inportb ((unsigned short) (gd_port + PARPORT_STATUS)) & 0x80) != 0)
         if (--timeout == 0)
@@ -707,9 +707,8 @@ gd6_read_sram (const char *filename, unsigned int parport)
 {
   FILE *file;
   unsigned char *buffer, gdfilename[12];
-  unsigned bytesreceived = 0, gd6_transfer_size;
+  int len, bytesreceived = 0, transfer_size;
   time_t starttime;
-  int len;
 
   init_io (parport);
 
@@ -749,23 +748,23 @@ gd6_read_sram (const char *filename, unsigned int parport)
   if (gd6_receive_bytes (buffer, 16) == GD_ERROR )
     io_error ();
 
-  gd6_transfer_size = buffer[1] | (buffer[2] << 8) | (buffer[3] << 16) | (buffer[4] << 24);
-  if (gd6_transfer_size != 0x8000)
+  transfer_size = buffer[1] | (buffer[2] << 8) | (buffer[3] << 16) | (buffer[4] << 24);
+  if (transfer_size != 0x8000)
     {
       fprintf (stderr, "ERROR: SRAM transfer size from Game Doctor != 32768 bytes\n");
       exit (1);
     }
 
-  printf ("Receive: %d Bytes\n", gd6_transfer_size);
+  printf ("Receive: %d Bytes\n", transfer_size);
   printf ("Press q to abort\n\n");
 
   starttime = time (NULL);
-  while (bytesreceived < gd6_transfer_size)
+  while (bytesreceived < transfer_size)
     {
-      if (gd6_transfer_size - bytesreceived >= BUFFERSIZE)
+      if (transfer_size - bytesreceived >= BUFFERSIZE)
         len = BUFFERSIZE;
       else
-        len = gd6_transfer_size - bytesreceived;
+        len = transfer_size - bytesreceived;
 
       if (gd6_receive_bytes (buffer, len) == GD_ERROR)
         io_error ();

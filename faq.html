@@ -67,8 +67,9 @@ Q22: <a href="#22">Where can I get that loader or "game pack" file?</a><br>
 <br>
 Q23: <a href="#23">What is the meaning of the -col option (SNES)?</a><br>
 <br>
-Q24: <a href="#24">Why does uCON64 create ucon64.cfg (DOS executable) or .ucon64rc (Win32 executable)
-   files all over the place under DOS and Windows&nbsp;9x (command.com)?</a><br>
+Q24: <a href="#24">Why does uCON64 create ucon64.cfg (DOS executable) or
+   .ucon64rc (Win32 executable) files all over the place under DOS and
+   Windows&nbsp;9x (command.com)?</a><br>
 <br>
 Q25: <a href="#25">When I try to create a multirom under Windows I get the message
    "The system cannot execute the specified program." (or something like that).
@@ -185,21 +186,22 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
 <p>
 <a name="3"><b>Q3</b>: How do I install uCON64?</a><br>
 <b>A</b>: You already did if you followed the directions in the previous answer
-   (you downloaded the source package). If you don't use WinDOS run install.sh
+   (you downloaded the source package). If you downloaded the binary package
+   you can ignore the previous question. If you don't use WinDOS run install.sh
    (Unix) or install_beos.sh (BeOS) and edit $HOME/.ucon64rc. If you use WinDOS
    you may want to copy ucon64.exe to a directory in your PATH and maybe edit
-   ucon64.cfg.<br>
-   If you use DOS or Windows&nbsp;9x and don't want uCON64 to create ucon64.cfg
-   or .ucon64rc files all over the place (current directories) see
-   <a href="#24">question 24</a>.<br>
+   ucon64.cfg (DOS version) or .ucon64rc (Win32 version). uCON64 will create
+   a configuration file if it can't find one. If you use DOS or Windows&nbsp;9x
+   and don't want uCON64 to create ucon64.cfg or .ucon64rc files all over the
+   place (current directories) see <a href="#24">question 24</a>.<br>
    You might also want to make use of DAT files. See
    <a href="#35">question 35</a> for more information.<br>
 <br>
    For copier I/O BeOS users will need Caz's driver inside ioport.zip or
    available at
    <a href="http://www.infernal.currantbun.com" target="_blank">http://www.infernal.currantbun.com</a>.<br>
-   Windows&nbsp;NT/2000/XP users might also need a driver. You could use
-   GiveIO, UserPort or inpout32.dll. At
+   Windows&nbsp;NT/2000/XP users might also need a driver (only necessary for
+   copier I/O). You could use GiveIO, UserPort or inpout32.dll. At
    <a href="http://www.devrs.com/gba/files/mbv2faqs.php" target="_blank">http://www.devrs.com/gba/files/mbv2faqs.php</a>
    you can find links to GiveIO and UserPort. You can find inpout32.dll in a
    file named parport.zip at
@@ -219,10 +221,11 @@ Q39: <a href="#39">What is the format of the snes*.txt files?</a><br>
    communicating with a copier. It displays this message before it displays
    file information, so you might want to use the command line switch -q. Only
    the Windows versions of uCON64 are able to use inpout32.dll.<br>
-   It <i>is</i> possible to use uCON64 as a transfer tool under Windows&nbsp;XP
-   without GiveIO, UserPort or inpout32.dll. We have had reports from
-   people who were able to send and receive ROMs under Windows&nbsp;XP as a
-   regular user (no Administrator rights and not "Power Users").<br>
+   It <i>is</i> possible to use the DOS version of uCON64 as a transfer tool
+   under Windows&nbsp;XP without GiveIO, UserPort or inpout32.dll. We have had
+   reports from people who were able to send and receive ROMs under
+   Windows&nbsp;XP as a regular user (no Administrator rights and not "Power
+   Users").<br>
 <br>
 <p>
 <a name="4"><b>Q4</b>: Sometimes my terminal seems to be locked after "ucon64 -xswc &#60;file&#62; | more"</a><br>

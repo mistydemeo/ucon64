@@ -1403,7 +1403,7 @@ ucon64_parport_init (unsigned int port)
   */
   char fname[FILENAME_MAX];
   sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir, "inpout32.dll");
-#ifdef  __CYGWIN__
+#if 0 // We must not do this for Cygwin or access() won't "find" the file
   change_mem (fname, strlen (fname), "/", 1, 0, 0, "\\", 1, 0);
 #endif
   if (access (fname, F_OK) == 0)

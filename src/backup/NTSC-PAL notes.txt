@@ -57,6 +57,7 @@ on a PAL SNES and vice versa.
 Code1   Code2   Game
 2       N5      Clock Tower (J) <= 0x29
 1 + 2   N1      Demon's Crest (U) <= (0xad) 0x29
+1 + 2 + 4  N6   Diddy's Kong Quest (V1.1) (U) <= can't get past the first level; 0x29
 1       P29     Donkey Kong Country (V1.0) (E)
 1 + 2   N30     Donkey Kong Country (V1.0) (U)
 1       P29     Donkey Kong Country (V1.1) (E)

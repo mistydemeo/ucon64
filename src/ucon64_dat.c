@@ -375,11 +375,12 @@ static st_ucon64_dat_t *
 line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
 // parse a dat entry into st_ucon64_dat_t
 {
-  static const char *dat_country[27][2] = {
+  static const char *dat_country[28][2] = {
     {"(FC)", "French Canadian"},
     {"(FN)", "Finland"},
     {"(G)", "Germany"},
     {"(GR)", "Greece"},
+    {"(H)", "Holland"}, // other (incorrect) name for The Netherlands
     {"(HK)", "Hong Kong"},
     {"(I)", "Italy"},
     {"(J)", "Japan"},
@@ -397,9 +398,10 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     {"(Unk)", "Unknown Country"},
     /*
       At least (A), (B), (C), (D), (E) and (F) have to come after the other
-      countries, because some games have (A), (B) etc. in their name. For
-      example "SD Gundam Generations (A) 1 Nen Sensouki (J) (ST)" or
-      "SD Gundam Generations (B) Guripus Senki (J) (ST)" (SNES games).
+      countries, because some games have (A), (B) etc. in their name (the
+      non-country part). For example, the SNES games
+      "SD Gundam Generations (A) 1 Nen Sensouki (J) (ST)" or
+      "SD Gundam Generations (B) Guripus Senki (J) (ST)".
     */
     {"(1)", "Japan & Korea"},
     {"(4)", "U.S.A. & Brazil NTSC"},

@@ -608,6 +608,10 @@ main (int argc, char **argv)
 #ifdef  GUI
   // load libnetgui
   ucon64.netgui_enabled = ucon64_load_netgui ();
+
+  if (!stricmp (ucon64.argv[0], "ucon64gui") ||
+      !stricmp (ucon64.argv[0], "gucon64"))
+    libng_gui ("gtk");
 #endif
 
   // ucon64.dat_enabled and ucon64.discmage_enabled can affect the usage output

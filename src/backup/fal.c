@@ -38,11 +38,11 @@ const char *fal_usage[] =
     "2001 Visoly http://www.visoly.com",
 #ifdef BACKUP
     "  " OPTION_LONG_S "xfal        send/receive ROM to/from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
-    "                  receives automatically (32 mbits) when ROM does not exist\n"
+    "                  receives automatically (32 Mbits) when ROM does not exist\n"
     "  " OPTION_LONG_S "xfalmulti=SIZE send multiple ROMs to Flash Advance Linker (makes temporary\n"
     "                  multirom truncated to SIZE Mbit); file with loader must be\n"
     "                  specified first, then all the ROMs; " OPTION_LONG_S "file=PORT\n"
-    "  " OPTION_LONG_S "xfalc=N     receive N mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
+    "  " OPTION_LONG_S "xfalc=N     receive N Mbits of ROM from Flash Advance Linker; " OPTION_LONG_S "file=PORT\n"
     "                  N can be 8, 16, 32, 64, 128 or 256\n"
 #if 0
     "  " OPTION_LONG_S "xfalm       use SPP mode, default is EPP\n"
@@ -1558,7 +1558,7 @@ fal_main (int argc, char **argv)
           fprintf (stderr, "ERROR trying to open file '%s'\n", fname);
           ProgramExit (1);
         }
-      printf ("Backing up %d mbits of ROM to file '%s'. Please wait...\n\n",
+      printf ("Backing up %d Mbits of ROM to file '%s'. Please wait...\n\n",
               ChipSize, fname);
 
       BackupROM (fp, ChipSize << 16);

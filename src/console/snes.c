@@ -2,7 +2,7 @@
 snes.c - Super NES support for uCON64
 
 written by 1999 - 2002 NoisyB (noisyb@gmx.net)
-           2001 - 2002 dbjh
+           2001 - 2003 dbjh
                   2002 John Weidman
 
 

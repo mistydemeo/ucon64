@@ -29,13 +29,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <dirent.h>
 #include <limits.h>
 #include <sys/stat.h>
-
-#if     defined __unix__ || defined __BEOS__ || defined AMIGA
-#include <unistd.h>                             // ioperm() (libc5)
-#endif
-
 #include "config.h"
-
+#if     defined __unix__ || defined __BEOS__ || defined AMIGA || HAVE_UNISTD_H
+  #include <unistd.h>                             // ioperm() (libc5)
+#endif
 #ifdef  BACKUP
   #ifdef  __FreeBSD__
     #include <machine/sysarch.h>
@@ -69,19 +66,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "console/jaguar.h"
 
 
-const char *ucon64_parport_error =
+const char *ucon64_msg[] = {
   "ERROR: Please check cables and connection\n"
   "       Turn the backup unit off and on\n"
   "       Split ROMs must be joined first\n"
   "       Use " OPTION_LONG_S "file={3bc, 378, 278, ...} to specify your port\n"
   "       Set the port to SPP (Standard, Normal) mode in your BIOS\n"
   "       Some backup units do not support EPP and ECP style parports\n"
-  "       Read the backup unit's manual\n";
+  "       Read the backup unit's manual\n",
 
-const char *ucon64_console_error =
   "ERROR: Could not auto detect the right ROM/IMAGE/console type\n"
   "TIP:   If this is a ROM or CD IMAGE you might try to force the recognition\n"
-  "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n";
+  "       The force recognition option for SNES would be " OPTION_LONG_S "snes\n",
+
+  "Wrote output to: %s\n",
+  NULL
+};
 
 char *ucon64_temp_file = NULL;
 
@@ -273,13 +273,6 @@ const char *nintendo_maker[792] = {
   NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL,
   NULL};                                        // LZ
-
-
-void
-ucon64_wrote (const char *filename)
-{
-  printf ("Wrote output to: %s\n", filename);
-}
 
 
 #if     defined BACKUP && (defined __BEOS__ || defined AMIGA)
@@ -891,7 +884,7 @@ ucon64_parport_init (unsigned int port)
   outportb (port + PARPORT_CONTROL, inportb (port + PARPORT_CONTROL) & 0x0f);
   // bit 4 = 0 -> IRQ disable for ACK, bit 5-7 unused
 
-#if     defined __linux__
+#ifdef  __linux__
   /*
     Some code needs us to switch to the real uid and gid. However, other code
     needs access to I/O ports other than the standard printer port registers.
@@ -910,83 +903,6 @@ ucon64_parport_init (unsigned int port)
   return port;
 }
 #endif // BACKUP
-
-
-#if 0
-const char *
-ucon64_extract (const char *archive)
-{
-#ifndef __MSDOS__
-  DIR *dp;
-  struct dirent *ep;
-  struct stat fstate;
-  char buf[FILENAME_MAX], cwd[FILENAME_MAX];
-  int result = 0;
-  char temp[FILENAME_MAX];
-  char path[FILENAME_MAX];
-  char property_name[MAXBUFSIZE], buf2[MAXBUFSIZE];
-  const char *property_format = NULL;
-
-  if (!archive) return archive;
-  if (!archive[0]) return archive;
-
-  getcwd (cwd, FILENAME_MAX);
-  sprintf (path, "%s" FILE_SEPARATOR_S "%s", cwd, basename (archive));
-
-  sprintf (property_name, "%s_extract", &getext (archive)[1]);
-  property_format = get_property (ucon64.configfile, strlwr (property_name), buf2, NULL);
-
-  if (!property_format)
-    return archive;
-
-  sprintf (buf, property_format, path);
-
-  if (!buf[0])
-    return archive;
-
-  tmpnam3 (temp, TYPE_DIR);
-  chdir (temp);
-
-#ifdef  DEBUG
-  fprintf (stderr, "%s\n", temp);
-#endif
-
-#if 1
-  result = system (buf)
-#ifndef __MSDOS__
-      >> 8                                      // the exit code is coded in bits 8-15
-#endif                                          //  (that is, under non-DOS)
-    ;
-  sync ();
-#else
-  fprintf (stderr, "%s\n", buf);
-  fflush (stdout);
-#endif
-
-  chdir (cwd);
-
-  if ((dp = opendir (temp)) != NULL)
-    while ((ep = readdir (dp)))
-      {
-        strcpy (ucon64.rom_in_archive, ep->d_name);
-        sprintf (path, "%s" FILE_SEPARATOR_S "%s", temp, ucon64.rom_in_archive);
-
-        if (!stat (path, &fstate))
-          if (S_ISREG (fstate.st_mode) && fstate.st_size >= MBIT)
-            {
-#ifdef  DEBUG
-              fprintf (stderr, "%s\n\n", path);
-#endif
-              q_fcpy (path, 0, q_fsize (path), ucon64.rom_in_archive, "wb");
-              rmdir2 (temp);
-              return ucon64.rom_in_archive;
-            }
-      }
-  rmdir2 (temp);
-#endif
-  return archive;
-}
-#endif
 
 
 int

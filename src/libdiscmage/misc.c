@@ -55,12 +55,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 typedef struct termios tty_t;
 #endif
 
-#ifdef  ZLIB
+#ifdef  HAVE_ZLIB_H
 #include <zlib.h>
 #include "unzip.h"
 #endif
 
-#if     defined ANSI_COLOR && defined DJGPP
+#if     defined DJGPP
 #include <dpmi.h>                               // needed for __dpmi_int() by ansi_init()
 #endif
 
@@ -139,7 +139,7 @@ mem_crc16 (unsigned int size, unsigned short crc16, const void *buf)
 #endif
 
 
-#ifndef ZLIB
+#ifndef HAVE_ZLIB_H
 /*
   crc32 routines
 
@@ -194,7 +194,6 @@ mem_crc32 (unsigned int size, unsigned int crc32, const void *buffer)
 #endif
 
 
-#ifdef  ANSI_COLOR
 int
 ansi_init (void)
 {
@@ -253,7 +252,6 @@ ansi_strip (char *str)
   return str;
 }
 #endif
-#endif // ANSI_COLOR
 
 
 char *
@@ -472,7 +470,7 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
                                pos ? "\n" : "",
                                (int) pos + virtual_start);
       printf ("%02x %s", *p, !((pos + 1) % 4) ? " ": "");
-#if 1
+#if 0
       sprintf (buf + (pos % 16), "%c", isprint (*p) ? *p : '.');
 #else
       *(buf + (pos % 16)) = isprint (*p) ? *p : '.';
@@ -484,20 +482,21 @@ mem_hexdump (const void *mem, uint32_t n, int virtual_start)
 
 
 int
-renlwr (const char *dir)
+ren (const char *path, int (*func) (int))
 {
   struct dirent *ep;
   struct stat fstate;
   DIR *dp;
-  char buf[MAXBUFSIZE];
+  char buf[FILENAME_MAX];
+  char *p = NULL;
 
-  if (access (dir, R_OK) != 0 || (dp = opendir (dir)) == NULL)
+  if (access (path, R_OK) != 0 || (dp = opendir (path)) == NULL)
     {
       errno = ENOENT;
       return -1;
     }
 
-  chdir (dir);
+  chdir (path);
 
   while ((ep = readdir (dp)) != 0)
     {
@@ -506,13 +505,31 @@ renlwr (const char *dir)
 //              if (S_ISREG (fstate.st_mode))
           {
             strcpy (buf, ep->d_name);
-            rename (ep->d_name, strlwr (buf));
+  
+            for (p = buf; *p; p++)
+              *p = func (*p);
+
+            rename (ep->d_name, buf);
           }
         }
     }
   (void) closedir (dp);
   return 0;
 }
+
+
+#if 0
+char *
+mkstr (char *str, int (*func) (int), int replacement)
+{
+  int r = func (replacement) ? replacement : '_';
+
+  for (; *str; str++)
+        *str = func (*str) ? *str : r;
+
+  return 0;
+}
+#endif
 
 
 char *
@@ -683,24 +700,20 @@ gauge (time_t init_time, int pos, int size)
   progress[0] = 0;
   strncat (progress, "========================", p);
 
-#ifdef  ANSI_COLOR
   if (misc_ansi_color)
     {
       progress[p] = 0;
       if (p < GAUGE_LENGTH)
         strcat(progress, "\x1b[31;41m");
     }
-#endif
 
   strncat (&progress[p], "------------------------", GAUGE_LENGTH - p);
 
   percentage = (100LL * pos) / size;
 
     printf (
-#ifdef ANSI_COLOR
-    misc_ansi_color ? "\r%10d Bytes [\x1b[32;42m%s\x1b[0m] %d%%, BPS=%d, " :
-#endif
-    "\r%10d Bytes [%s] %d%%, BPS=%d, ", pos, progress, percentage, bps);
+      misc_ansi_color ? "\r%10d Bytes [\x1b[32;42m%s\x1b[0m] %d%%, BPS=%d, " :
+      "\r%10d Bytes [%s] %d%%, BPS=%d, ", pos, progress, percentage, bps);
 
   if (pos == size)
     printf ("TOTAL=%03d:%02d", curr / 60, curr % 60); // DON'T print a newline
@@ -971,31 +984,6 @@ tmpnam2 (char *temp)
 }
 
 
-char *
-tmpnam3 (char *temp, int type)
-// tmpnam() clone
-{
-  FILE *fh;
-  tmpnam2 (temp);
-
-// create file or dir in the same moment to prevent double usage
-  switch (type)
-    {
-      case TYPE_DIR:
-        mkdir (temp, S_IRUSR|S_IWUSR);
-        break;
-
-      case TYPE_FILE:
-      default: // a file is the default
-        if ((fh = fopen (temp, "wb+")) != 0)
-          fclose (fh);
-        break;
-    }
-
-  return temp;
-}
-
-
 #if     defined __unix__ || defined __BEOS__ || defined AMIGA
 #ifndef __MSDOS__
 static int oldtty_set = 0, stdin_tty = 1;       // 1 => stdin is a tty, 0 => it's not
@@ -1183,7 +1171,7 @@ handle_registered_funcs (void)
 }
 
 
-#ifdef  ZLIB
+#ifdef  HAVE_ZLIB_H
 st_map_t *
 map_create (int n_elements)
 {
@@ -1734,7 +1722,7 @@ fputc2 (int character, FILE *file)
     return EOF;                                 // writing to zip files is not supported
 #define fputc   fputc2
 }
-#endif // ZLIB
+#endif // HAVE_ZLIB_H
 
 
 #ifndef HAVE_BYTESWAP_H

@@ -37,9 +37,9 @@ extern "C" {
 #include <time.h>                               // gauge() prototype contains time_t
 #include <stdio.h>
 #include <dirent.h>
-#include "config.h"                             // ZLIB, ANSI_COLOR support
+#include "config.h"                             // HAVE_ZLIB_H, ANSI_COLOR support
 
-#ifdef  ZLIB
+#ifdef  HAVE_ZLIB_H
 #include <zlib.h>
 #include "unzip.h"
 
@@ -65,7 +65,7 @@ extern int fputc2 (int character, FILE *file);
 #define fwrite  fwrite2
 #define fputc   fputc2
 
-#endif                                          // ZLIB
+#endif                                          // HAVE_ZLIB_H
 
 #if     defined __linux__ || defined __FreeBSD__ || \
         defined __BEOS__ || defined __solaris__ || HAVE_INTTYPES_H
@@ -162,20 +162,16 @@ typedef signed long long int int64_t;
 #define me2be_16(x) (x)
 #define me2be_32(x) (x)
 #define me2be_64(x) (x)
-#define me2be_n(x,n)
 #define me2le_16(x) (bswap_16(x))
 #define me2le_32(x) (bswap_32(x))
 #define me2le_64(x) (bswap_64(x))
-#define me2le_n(x,n) (mem_swap(x,n))
 #else
 #define me2be_16(x) (bswap_16(x))
 #define me2be_32(x) (bswap_32(x))
 #define me2be_64(x) (bswap_64(x))
-#define me2be_n(x,n) (mem_swap(x,n))
 #define me2le_16(x) (x)
 #define me2le_32(x) (x)
 #define me2le_64(x) (x)
-#define me2le_n(x,n)
 #endif
 
 #ifdef __MSDOS__
@@ -257,7 +253,7 @@ extern char *basename2 (const char *str);
 extern int memwcmp (const void *add, const void *add_with_wildcards, uint32_t n, int wildcard);
 extern void mem_hexdump (const void *add, uint32_t n, int virtual_start);
 extern unsigned short mem_crc16 (unsigned int size, unsigned short crc16, const void *buffer);
-#ifdef  ZLIB
+#ifdef  HAVE_ZLIB_H
 #define mem_crc32(SIZE, CRC, BUF)       crc32(CRC, BUF, SIZE)
 #else
 extern unsigned int mem_crc32 (unsigned int size, unsigned int crc32, const void *buffer);
@@ -289,9 +285,8 @@ extern unsigned long long int bswap_64 (unsigned long long int x);
   getenv2()       getenv() clone for enviroments w/o HOME, TMP or TEMP variables
   rmdir2()        like rmdir but removes non-empty directories recursively
   tmpnam2()       replacement for tmpnam() temp must have the size of FILENAME_MAX
-  tmpnam3()       like tmpnam2() but creates file or dir at the same time to
-                  prevent double usage
-  renlwr()        rename all files in dir to lowercase
+  ren()           renames all files tolower() or toupper() 
+  mkstr()         transforms a string to isalnum(), isalpha(), etc.
   drop_privileges() switch to the real user and group id (leave "root mode")
   register_func() atexit() replacement
                   returns -1 if it fails, 0 if it was successful
@@ -303,19 +298,15 @@ extern unsigned long long int bswap_64 (unsigned long long int x);
 extern void change_string (char *searchstr, int strsize, char wc, char esc,
                            char *newstr, int newsize, char *buf, int bufsize,
                            int offset, ...);
-#ifdef  ANSI_COLOR
 extern int ansi_init (void);
 extern char *ansi_strip (char *str);
-#endif
 extern int gauge (time_t init_time, int pos, int size);
 extern char *getenv2 (const char *variable);
 //#define getenv getenv2
 extern char *tmpnam2 (char *temp);
-#define TYPE_FILE 0
-#define TYPE_DIR 1
-extern char *tmpnam3 (char *temp, int type);
 extern int rmdir2 (const char *path);
-extern int renlwr (const char *dir);
+extern int ren (const char *path, int (*func) (int));
+//extern char *mkstr (char *str, int (*func) (int), int replacement);
 #if     defined __unix__ && !defined __MSDOS__
 extern int drop_privileges (void);
 #endif
@@ -344,11 +335,11 @@ extern void wait2 (int nmillis);
   that value.
 
   NOTE: Currently the map functions are only used by the zlib wrapper
-        functions, so they are only available if ZLIB is defined.
-        Remove the #ifdef ZLIB in this file and in misc.c if other code should
+        functions, so they are only available if HAVE_ZLIB_H is defined.
+        Remove the #ifdef HAVE_ZLIB_H in this file and in misc.c if other code should
         use them.
 */
-#ifdef  ZLIB
+#ifdef  HAVE_ZLIB_H
 
 #define MAP_FREE_KEY 0
 
@@ -371,7 +362,7 @@ extern st_map_t *map_put (st_map_t *map, void *key, void *object);
 extern void *map_get (st_map_t *map, void *key);
 extern void map_del (st_map_t *map, void *key);
 extern void map_dump (st_map_t *map);
-#endif // ZLIB
+#endif // HAVE_ZLIB_H
 
 /*
   Configuration file handling
@@ -387,7 +378,7 @@ extern int set_property (const char *filename, const char *propname, const char 
 #define DELETE_PROPERTY(a, b) (set_property(a, b, NULL))
 
 
-#ifdef  ZLIB
+#ifdef  HAVE_ZLIB_H
 // Returns the number of files in the "central dir of this disk" or -1 if
 //  filename is not a ZIP file or an error occured.
 extern int unzip_get_number_entries (const char *filename);

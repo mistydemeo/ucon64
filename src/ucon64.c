@@ -806,7 +806,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
       printf ("\n");
 
       if (ucon64.console == UCON64_UNKNOWN)
-        fprintf (stderr, ucon64_console_error);
+        fprintf (stderr, ucon64_msg[CONSOLE_ERROR]);
     }
 
   fflush (stdout);

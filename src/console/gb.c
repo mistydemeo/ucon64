@@ -153,7 +153,7 @@ gameboy_n2gb (st_rominfo_t *rominfo)
   buf[0x14f] = crc & 0xff;
 
   q_fwrite (buf, 0, EMULATOR_LEN, ucon64.file, "wb");
-  ucon64_wrote (ucon64.file);
+  fprintf (stderr, ucon64_msg[WROTE], ucon64.file);
   return 0;
 }
 
@@ -212,7 +212,7 @@ gameboy_gbx (st_rominfo_t *rominfo)
       q_fwrite (&gbx2gbc[c], rominfo->buheader_len + x, 1, buf, "ab");
       x++;
     }
-  ucon64_wrote (buf);
+  fprintf (stderr, ucon64_msg[WROTE], buf);
 
   return 0;
 }
@@ -272,7 +272,7 @@ gameboy_sgb (st_rominfo_t *rominfo)
       q_fwrite (&gbc2gbx[c], rominfo->buheader_len + x, 1, buf, "ab");
       x++;
     }
-  ucon64_wrote (buf);
+  fprintf (stderr, ucon64_msg[WROTE], buf);
 
   return 0;
 }
@@ -289,7 +289,7 @@ gameboy_n (st_rominfo_t *rominfo)
   q_fwrite (buf, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x034, 16,
                ucon64.rom, "r+b");
 
-  ucon64_wrote (ucon64.rom);
+  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 
@@ -314,7 +314,7 @@ gameboy_chk (st_rominfo_t *rominfo)
 
   mem_hexdump (buf, 3, GAMEBOY_HEADER_START + rominfo->buheader_len + 0x4d);
 
-  ucon64_wrote (ucon64.rom);
+  fprintf (stderr, ucon64_msg[WROTE], ucon64.rom);
   return 0;
 }
 
@@ -346,7 +346,7 @@ gameboy_mgd (st_rominfo_t *rominfo)
   q_fcpy (ucon64.rom, rominfo->buheader_len, q_fsize (ucon64.rom),
             buf2, "wb");
 
-  ucon64_wrote (buf2);
+  fprintf (stderr, ucon64_msg[WROTE], buf2);
   return 0;
 }
 
@@ -380,7 +380,7 @@ gameboy_ssc (st_rominfo_t *rominfo)
 
   q_fcpy (ucon64.rom, 0, size, buf, "ab");
 
-  ucon64_wrote (buf);
+  fprintf (stderr, ucon64_msg[WROTE], buf);
   return 0;
 }
 

@@ -729,8 +729,8 @@ int cd64_upload_eeprom(struct cd64_t *cd64, FILE *infile) {
 	cd64->seek_callback(infile, origpos, SEEK_SET);
 
 	if (length != CART_EEPROM_LENGTH && length != CART_2XEEPROM_LENGTH) {
-		char buf[200];
-		snprintf(buf, 200, "Wrong length of EEPROM data: %d bytes", length);
+		char buf[200]; /* should be large enough (35 for constant chars + 4 for 32-bit int) */
+		sprintf(buf, "Wrong length of EEPROM data: %d bytes", (int) length);
 		cd64->notice_callback2(buf);
 		return 0;
 	}
@@ -801,6 +801,18 @@ int cd64_download_cart(struct cd64_t *cd64, FILE *outfile, uint32_t length,
 
 			while(i+j < length) {
 				cd64->read_callback(outfile, &buf, 4);
+
+				/* To elaborate on what we are checking here:
+				 * When the CD64 accesses an address which is not
+				 * decoded, in each 32-bit word is the lower 16 bits
+				 * of the address of that 32-bit word, repeated twice.
+				 * The pattern therefore looks like:
+				 * 00 00 00 00 00 04 00 04 00 08 00 08 00 0c 00 0c
+				 * and continues on like that.  This pattern is what
+				 * we are looking for here.  It is possible, but
+				 * extremely unlikely, that this pattern appears in a
+				 * actual game and begins on a 8Mbit boundary too. */
+
 				if (
 					   ((uint8_t*)buf)[0] != ((j >> 8) & 0xff)
 					|| ((uint8_t*)buf)[1] != (j & 0xff)

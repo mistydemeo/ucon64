@@ -23,9 +23,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "config.h"                             // config.h might define BACKUP
-#include "misc.h"                               // including misc.h after OS.h
-#include "quick_io.h"                           //  avoids warnings about MIN & MAX
+#include "config.h"
+#include "misc.h"
+#include "quick_io.h"
 #include "ucon64.h"
 #include "ucon64_db.h"
 #include "ucon64_misc.h"

@@ -45,13 +45,17 @@ LDFLAGS+=libdiscmage/$(LIBNAME_DM).a
 endif
 endif
 
-else                                    # Unix or BeOS
-
-ifdef DLOPEN
+else                                    # Unix, BeOS or Mac OS X (Darwin)
 
 ifdef DISCMAGE
+ifeq ($(findstring darwin,$(OSTYPE)),darwin) # for example "darwin7.0"
+FULLLIBNAME_DM=$(LIBNAME_DM).dylib
+else
 FULLLIBNAME_DM=$(LIBNAME_DM).so
 endif
+endif
+
+ifdef DLOPEN
 
 ifneq ($(OSTYPE),beos)
 ifeq ($(findstring freebsd,$(OSTYPE)),) # false if OSTYPE contains "freebsd"
@@ -60,8 +64,8 @@ endif
 endif
 
 else                                    # DLOPEN
-ifdef DISCMAGE
-FULLLIBNAME_DM=lib$(LIBNAME_DM).so
+ifdef DISCMAGE                          # GNU specific: "simply expanded variable"
+FULLLIBNAME_DM:=$(addprefix lib, $(FULLLIBNAME_DM))
 LDFLAGS+=-Llibdiscmage -l$(LIBNAME_DM)
 endif
 
@@ -120,8 +124,8 @@ endif                                   # DLOPEN
 
 TARGET=ucon64
 ifeq ($(TERM),cygwin)                   # OSTYPE is not a real env var on Cygwin
-TARGET:=$(addsuffix .exe, $(TARGET))    # GNU specific: "simply expanded variable"
-else                                    # adding .exe avoids "problems" with Cygwin
+TARGET:=$(addsuffix .exe, $(TARGET))    # adding .exe avoids "problems" with Cygwin
+else
 ifeq ($(OSTYPE),msys)                   # Msys, MinGW's POSIX build environment
 TARGET:=$(addsuffix .exe, $(TARGET))
 else

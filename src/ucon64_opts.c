@@ -2,7 +2,7 @@
 ucon64_opts.c - switch()'es for all uCON64 options
 
 written by 2002 - 2003 NoisyB (noisyb@gmx.net)
-           2002 - 2003 dbjh
+           2002 - 2004 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -124,6 +124,8 @@ ucon64_switches (int c, const char *optarg)
         "discmage.dxe";
 #elif   defined __CYGWIN__ || defined _WIN32
         "discmage.dll";
+#elif   defined __APPLE__                       // Mac OS X actually
+        "libdiscmage.dylib"
 #elif   defined __unix__ || defined __BEOS__
         "libdiscmage.so";
 #else

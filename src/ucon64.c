@@ -83,7 +83,7 @@ static int ucon64_process_rom (char *fname);
 
 st_ucon64_t ucon64;                             // containes ptr to image, dat and rominfo
 
-static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2003";
+static const char *ucon64_title = "uCON64 " UCON64_VERSION_S " " CURRENT_OS_S " 1999-2004";
 
 #ifdef  AMIGA
 unsigned long __stacksize = 102400;             // doesn't work on PPC? is StormC specific?
@@ -1694,6 +1694,8 @@ ucon64_usage (int argc, char *argv[])
     "discmage.dxe";
 #elif   defined __CYGWIN__ || defined _WIN32
     "discmage.dll";
+#elif   defined __APPLE__                       // Mac OS X actually
+    "libdiscmage.dylib"
 #elif   defined __unix__ || defined __BEOS__
     "libdiscmage.so";
 #else
@@ -1733,7 +1735,8 @@ ucon64_usage (int argc, char *argv[])
       MORE_MSG
       "     Give the force recognition switch a try if something went wrong\n"
       "\n"
-      "Please report any problems/ideas/fixes to noisyb@gmx.net or go to http://ucon64.sf.net\n"
+      "Please report any problems/ideas/fixes to noisyb@gmx.net or go to\n"
+      "http://ucon64.sf.net\n"
       "\n",
       name_exe, name_exe);
 }

@@ -1007,7 +1007,7 @@ ucon64_rom_handling (void)
         ucon64.console == UCON64_GEN || ucon64.console == UCON64_NG)
       if ((UCON64_ISSET (ucon64.split)) ? ucon64.split : ucon64_testsplit (ucon64.rom))
         {
-          fprintf (stderr, "ERROR: %s seems to be split. You have to join it first.\n",
+          fprintf (stderr, "ERROR: %s seems to be split. You have to join it first\n",
                    basename2 (ucon64.rom));
           return -1;
         }

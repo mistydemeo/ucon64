@@ -242,7 +242,7 @@ The original uCON for SNES and Genesis was written by chicken & chp in ~1995<br>
 - added --padn=N pad ROM to N Bytes (put Bytes with value 0x00 after end) (by dbjh)<br>
 <!-- beta4 -->
 - updated (NES) FDS images are now recognized without -fdsl (by dbjh)<br>
-- added (GBA) added -xfalmulti send multiple ROMs to Flash Advance Linker (by dbjh)<br>
+- added (GBA) -xfalmulti send multiple ROMs to Flash Advance Linker (by dbjh)<br>
 - updated (GBA) changed -multi so that it takes a size argument (by dbjh)<br>
 - removed (GBA) -multi{1,2,3}, -multi can be used instead (by dbjh)<br>
 - some code clean ups (by NoisyB)<br>
@@ -418,7 +418,9 @@ Of course we test things... Should be put in a file like testsdone.html ;-) (dbj
 - updated (SNES) uCON64 now recognises a complete GoodSNES 0.999.5 set (by
   JohnDie and dbjh)<br>
 - added (SNES) -dmirr strip mirrored block from end of ROM (by dbjh)<br>
-- fixed Super UFO header problems caused by errors in my ufo header doc (by jw).
+- added (SNES) support for native Super UFO file format (by jw and dbjh) Use
+  -ufo to convert a file to Super UFO format, use -s to split the resulting
+  file (required for HiROM games)<br>
 <br>
 <br>
 <br>

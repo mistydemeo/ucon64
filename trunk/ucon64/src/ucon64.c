@@ -949,7 +949,7 @@ ucon64_nfo (const st_rominfo_t *rominfo)
     printf ("Checksum (CRC32): 0x%08x\n", ucon64.crc32);
 
   if (ucon64.dat_enabled)
-    ucon64_dat_nfo (ucon64_dat);
+    ucon64_dat_nfo (ucon64_dat, 1);
 
   printf ("\n");
 

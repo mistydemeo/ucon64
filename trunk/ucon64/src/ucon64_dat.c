@@ -56,8 +56,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 typedef struct
 {
-  const char *id; // strings to detect console from the datfile name
-  uint8_t console; // UCON64_SNES, UCON64_NES, etc.
+  const char *id;                               // string to detect console from datfile name
+  uint8_t console;                              // UCON64_SNES, UCON64_NES, etc.
   const char **console_usage;
 } st_console_t;
 
@@ -67,17 +67,17 @@ typedef struct
   long filepos;
 } st_idx_entry_t;
 
-static DIR *dptr = NULL;
+static DIR *ddat = NULL;
 static FILE *fdat = NULL;
 static long filepos_line = 0;
 
 
 static void
-closedir_dptr (void)
+closedir_ddat (void)
 {
-  if (dptr)
-    closedir (dptr);
-  dptr = NULL;
+  if (ddat)
+    closedir (ddat);
+  ddat = NULL;
 }
 
 
@@ -90,27 +90,19 @@ fclose_fdat (void)
 }
 
 
-static uint32_t
-get_uint32 (unsigned char *buf)
-{
-  return (uint32_t) (buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
-}
-
-
 static char *
 get_next_file (char *fname)
 {
   struct dirent *ep;
 
-  if (!dptr)
-    if (!(dptr = opendir (ucon64.configdir)))
+  if (!ddat)
+    if (!(ddat = opendir (ucon64.configdir)))
       {
         fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], ucon64.configdir);
-        dptr = NULL;
         return NULL;
       }
 
-  while ((ep = readdir (dptr)) != NULL)
+  while ((ep = readdir (ddat)) != NULL)
     if (!stricmp (getext (ep->d_name), ".dat"))
       {
         sprintf (fname, "%s" FILE_SEPARATOR_S "%s", ucon64.configdir,
@@ -118,7 +110,7 @@ get_next_file (char *fname)
         return fname;
       }
 
-  closedir_dptr ();
+  closedir_ddat ();
   return NULL;
 }
 
@@ -144,6 +136,97 @@ get_dat_header (char *fname, st_ucon64_dat_t *dat)
   dat->date[sizeof (dat->date) - 1] = 0;
 
   return dat;
+}
+
+
+static int
+fname_to_console (const char *fname, st_ucon64_dat_t *dat)
+{
+  // We use the filename to find out for what console a DAT file is meant.
+  //  The field "refname" seems too unreliable.
+  // TODO: update this list to contain only strings that real DAT filenames
+  //  start with
+  static const st_console_t console_type[] = {
+    {"GoodSNES", UCON64_SNES, snes_usage},
+    {"GoodNES", UCON64_NES, nes_usage},
+    {"GoodGBX", UCON64_GB, gameboy_usage},
+    {"GoodGEN", UCON64_GENESIS, genesis_usage},
+/*
+    {"sms", UCON64_SMS, sms_usage},
+    {"jag", UCON64_JAGUAR, jaguar_usage},
+    {"lynx", UCON64_LYNX, lynx_usage},
+*/
+    {"GoodN64", UCON64_N64, n64_usage},
+/*
+    {"neo", UCON64_NEOGEO, neogeo_usage},
+    {"geo", UCON64_NEOGEO, neogeo_usage},
+    {"pce", UCON64_PCE, pcengine_usage},
+    {"engine", UCON64_PCE, pcengine_usage},
+    {"psx", UCON64_PSX, psx_usage},
+    {"ps1", UCON64_PSX, psx_usage},
+    {"psone", UCON64_PSX, psx_usage},
+    {"ps2", UCON64_PS2, ps2_usage},
+    {"sat", UCON64_SATURN, sat_usage},
+    {"dreamcast", UCON64_DC, dc_usage},
+    {"dc", UCON64_DC, dc_usage},
+    {"cd32", UCON64_CD32, cd32_usage},
+    {"cdi", UCON64_CDI, cdi_usage},
+    {"3do", UCON64_REAL3DO, real3do_usage},
+    {"2600", UCON64_ATARI, atari_usage},
+    {"5200", UCON64_ATARI, atari_usage},
+    {"7800", UCON64_ATARI, atari_usage},
+    {"system", UCON64_SYSTEM16, s16_usage},
+    {"pocket", UCON64_NEOGEOPOCKET, ngp_usage},
+*/
+    {"GoodGBA", UCON64_GBA, gba_usage},
+/*
+    {"vectrex", UCON64_VECTREX, vectrex_usage},
+    {"virtual", UCON64_VIRTUALBOY, vboy_usage},
+    {"swan", UCON64_WONDERSWAN, swan_usage},
+    {"coleco", UCON64_COLECO, coleco_usage},
+    {"intelli", UCON64_INTELLI, intelli_usage},
+*/
+#if 0
+    {"", 0, cd32_usage},
+    {"", 0, cdi_usage},
+    {"", 0, channelf_usage},
+    {"", 0, coleco_usage},
+    {"", 0, gamecom_usage},
+    {"", 0, gc_usage},
+    {"", 0, gp32_usage},
+    {"", 0, intelli_usage},
+    {"", 0, odyssey2_usage},
+    {"", 0, odyssey_usage},
+    {"", 0, real3do_usage},
+    {"", 0, s16_usage},
+    {"", 0, sat_usage},
+    {"", 0, vboy_usage},
+    {"", 0, vc4000_usage},
+    {"", 0, vectrex_usage},
+    {"", 0, xbox_usage},
+#endif
+    {0, 0, 0}
+  };
+  int pos;
+
+  for (pos = 0; console_type[pos].id; pos++)
+    {
+      // Don't use stristr(), because it is less reliable.
+      if (!strnicmp (fname, console_type[pos].id, strlen (console_type[pos].id)))
+        {
+          dat->console = console_type[pos].console;
+          dat->console_usage = console_type[pos].console_usage;
+          break;
+        }
+    }
+  if (console_type[pos].id == 0)
+    {
+      printf ("WARNING: \"%s\" is meant for a console unknown to uCON64\n\n", fname);
+      dat->console = UCON64_UNKNOWN;
+      dat->console_usage[0] = 0;
+    }
+
+  return dat->console;
 }
 
 
@@ -175,72 +258,11 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
     "(UK) England",
     "(Unk) Unknown Country",
     "(I) Italy",
-    "(UE) U.S.A. & Europe",
+    "(JE) Japan & Europe",
     "(JU) Japan & U.S.A.",
     "(JUE) Japan, U.S.A. & Europe",
+    "(UE) U.S.A. & Europe",
     NULL
-  };
-
-  static const st_console_t console_type[] = {
-    {"snes", UCON64_SNES, snes_usage},
-    {"super nintendo", UCON64_SNES, snes_usage},
-    {"goodnes", UCON64_NES, nes_usage},
-    {"nes", UCON64_NES, nes_usage},
-    {"gb", UCON64_GB, gameboy_usage},
-    {"gbx", UCON64_GB, gameboy_usage},
-    {"genesis", UCON64_GENESIS, genesis_usage},
-    {"gen", UCON64_GENESIS, genesis_usage},
-    {"sms", UCON64_SMS, sms_usage},
-    {"jag", UCON64_JAGUAR, jaguar_usage},
-    {"lynx", UCON64_LYNX, lynx_usage},
-    {"n64", UCON64_N64, n64_usage},
-    {"ultra", UCON64_N64, n64_usage},
-    {"neo", UCON64_NEOGEO, neogeo_usage},
-    {"geo", UCON64_NEOGEO, neogeo_usage},
-    {"pce", UCON64_PCE, pcengine_usage},
-    {"engine", UCON64_PCE, pcengine_usage},
-    {"psx", UCON64_PSX, psx_usage},
-    {"ps1", UCON64_PSX, psx_usage},
-    {"psone", UCON64_PSX, psx_usage},
-    {"ps2", UCON64_PS2, ps2_usage},
-    {"sat", UCON64_SATURN, sat_usage},
-    {"dreamcast", UCON64_DC, dc_usage},
-    {"dc", UCON64_DC, dc_usage},
-    {"cd32", UCON64_CD32, cd32_usage},
-    {"cdi", UCON64_CDI, cdi_usage},
-    {"3do", UCON64_REAL3DO, real3do_usage},
-    {"2600", UCON64_ATARI, atari_usage},
-    {"5200", UCON64_ATARI, atari_usage},
-    {"7800", UCON64_ATARI, atari_usage},
-    {"system", UCON64_SYSTEM16, s16_usage},
-    {"pocket", UCON64_NEOGEOPOCKET, ngp_usage},
-    {"gba", UCON64_GBA, gba_usage},
-    {"advance", UCON64_GBA, gba_usage},
-    {"vectrex", UCON64_VECTREX, vectrex_usage},
-    {"virtual", UCON64_VIRTUALBOY, vboy_usage},
-    {"swan", UCON64_WONDERSWAN, swan_usage},
-    {"coleco", UCON64_COLECO, coleco_usage},
-    {"intelli", UCON64_INTELLI, intelli_usage},
-#if 0
-    {"", 0, cd32_usage},
-    {"", 0, cdi_usage},
-    {"", 0, channelf_usage},
-    {"", 0, coleco_usage},
-    {"", 0, gamecom_usage},
-    {"", 0, gc_usage},
-    {"", 0, gp32_usage},
-    {"", 0, intelli_usage},
-    {"", 0, odyssey2_usage},
-    {"", 0, odyssey_usage},
-    {"", 0, real3do_usage},
-    {"", 0, s16_usage},
-    {"", 0, sat_usage},
-    {"", 0, vboy_usage},
-    {"", 0, vc4000_usage},
-    {"", 0, vectrex_usage},
-    {"", 0, xbox_usage},
-#endif
-    {0, 0, 0}
   };
 
   unsigned char *dat_field[MAX_FIELDS_IN_DAT + 2] = { NULL };
@@ -306,24 +328,7 @@ line_to_dat (const char *fname, const char *dat_entry, st_ucon64_dat_t *dat)
         }
     }
 
-  dat->console = UCON64_UNKNOWN;
-#if 0
-  if (ucon64.console != UCON64_UNKNOWN)
-    dat->console = (uint8_t) ucon64.console;  // important
-  else
-#endif
-    {
-      for (pos = 0; console_type[pos].id; pos++)
-        {
-          if (stristr (dat->datfile, console_type[pos].id))
-            {
-              dat->console = console_type[pos].console;
-              dat->console_usage = console_type[pos].console_usage;
-              break;
-            }
-        }
-    }
-
+  fname_to_console (dat->datfile, dat);
   dat->copier_usage = unknown_usage;
 
   return dat;
@@ -345,7 +350,8 @@ line_to_crc (const char *dat_entry)
 
   for (pos = 0;
        (dat_field[pos] = strtok (!pos ? buf : NULL, DAT_FIELD_SEPARATOR_S))
-       && pos < (MAX_FIELDS_IN_DAT - 1); pos++);
+       && pos < (MAX_FIELDS_IN_DAT - 1); pos++)
+    ;
 
   if (dat_field[5])
     sscanf (dat_field[5], "%x", &crc32);
@@ -385,21 +391,29 @@ get_dat_entry (char *fname, st_ucon64_dat_t *dat, uint32_t crc32, long start)
 
 
 int
-ucon64_dat_view (int console)
+ucon64_dat_view (int console, int verbose)
 {
-//  char *p = "";
-  char buf[FILENAME_MAX], buf2[FILENAME_MAX];
+  char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX], *fname, *p;
   static st_ucon64_dat_t dat;
-  uint32_t entries, dat_counter = 0;
+  uint32_t n_entries, n_entries_sum = 0, n_datfiles = 0;
+  int n, fsize;
+  st_idx_entry_t *idx_entry;
 
-  closedir_dptr ();
-  while (get_next_file (buf))
+  while (get_next_file (fname_dat))
     {
-      get_dat_header (buf, &dat);
-      strcpy (buf2, buf);
-      setext (buf2, ".idx");
-      entries = q_fsize (buf2) / sizeof (st_idx_entry_t);
-      dat_counter++;
+      fname = basename (fname_dat);
+      if (console != UCON64_UNKNOWN)
+        if (fname_to_console (fname, &dat) != console)
+          continue;
+
+      get_dat_header (fname_dat, &dat);
+      strcpy (fname_index, fname_dat);
+      setext (fname_index, ".idx");
+
+      fsize = q_fsize (fname_index);
+      n_entries = fsize / sizeof (st_idx_entry_t);
+      n_entries_sum += n_entries;
+      n_datfiles++;
 
       printf ("DAT info:\n"
         "  %s\n"
@@ -408,18 +422,46 @@ ucon64_dat_view (int console)
         "  Author: %s\n"
         "  Comment: %s\n"
         "  Entries: %d\n\n",
-        basename (buf),
+        fname,
 //        dat.console_usage[0],
         dat.version,
         dat.date,
         dat.refname,
         dat.author,
         dat.comment,
-        entries);
+        n_entries);
+
+      if (!(p = (unsigned char *) malloc (fsize)))
+        {
+          fprintf (stderr, ucon64_msg[BUFFER_ERROR], fsize);
+          continue;
+        }
+
+      if (q_fread (p, 0, fsize, fname_index) != fsize)
+        {
+          fprintf (stderr, ucon64_msg[READ_ERROR], fname_index);
+          free (p);
+          continue;
+        }
+
+      if (verbose)
+        {
+          // display all DAT entries
+          for (n = 0; n < n_entries; n++)
+            {
+              idx_entry = &((st_idx_entry_t *) p)[n];
+              printf ("Checksum (CRC32): 0x%08x\n", idx_entry->crc32);
+              if (get_dat_entry (fname_dat, &dat, idx_entry->crc32, idx_entry->filepos))
+                ucon64_dat_nfo (&dat, 0);
+              puts ("");
+            }
+          fclose_fdat ();
+        }
+      free (p);
     }
 
-  printf ("Total DAT files: %d; Total entries: %d\n",
-    dat_counter, ucon64_dat_total_entries (UCON64_UNKNOWN));
+  printf ("DAT files: %d; entries: %d; total entries: %d\n",
+    n_datfiles, n_entries_sum, ucon64_dat_total_entries (UCON64_UNKNOWN));
 
   return 0;
 }
@@ -430,17 +472,16 @@ ucon64_dat_total_entries (int console)
 {
   uint32_t entries = 0;
   int fsize;
-  char buf[FILENAME_MAX];
+  char fname[FILENAME_MAX];
 
   if (!ucon64.dat_enabled)
     return 0;
 
-  closedir_dptr ();
-  while (get_next_file (buf))
+  while (get_next_file (fname))
     {
-      setext (buf, ".idx");
-      fsize = q_fsize (buf);
-      entries += (fsize < 0 ? 0 : fsize / sizeof (st_idx_entry_t)); // TODO: handle this case gracefully
+      setext (fname, ".idx");
+      fsize = q_fsize (fname);
+      entries += (fsize < 0 ? 0 : fsize / sizeof (st_idx_entry_t));
     }
 
   return entries;
@@ -464,45 +505,40 @@ idx_compare (const void *key, const void *found)
 st_ucon64_dat_t *
 ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
 {
-  char buf[FILENAME_MAX];
+  char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX], *fname;
   unsigned char *p = NULL;
   uint32_t fsize = 0;
-  FILE *fh = NULL;
   st_idx_entry_t *idx_entry, key;
 
   if (!crc32)
     return NULL;
 
-  closedir_dptr ();
-  while (get_next_file (buf) != NULL)
+  while (get_next_file (fname_dat))
     {
-      // load the index for the current dat file
-      setext (buf, ".idx");
+      fname = basename (fname_dat);
+      if (ucon64.console != UCON64_UNKNOWN)
+        if (fname_to_console (fname, dat) != ucon64.console)
+          continue;
 
-      if (!(fh = fopen (buf, "rb")))
-        {
-          fprintf (stderr, ucon64_msg[OPEN_READ_ERROR], buf);
-          return NULL;
-        }
-
-      fsize = q_fsize (buf);
+      strcpy (fname_index, fname_dat);
+      setext (fname_index, ".idx");
+      fsize = q_fsize (fname_index);
 
       if (!(p = (unsigned char *) malloc (fsize)))
         {
           fprintf (stderr, ucon64_msg[BUFFER_ERROR], fsize);
-          fclose (fh);
+          closedir_ddat ();
           return NULL;
         }
 
-      if (fread (p, 1, fsize, fh) != fsize)
+      // load the index for the current dat file
+      if (q_fread (p, 0, fsize, fname_index) != fsize)
         {
-          fprintf (stderr, ucon64_msg[READ_ERROR], buf);
-          fclose (fh);
+          fprintf (stderr, ucon64_msg[READ_ERROR], fname_index);
+          closedir_ddat ();
           free (p);
           return NULL;
         }
-
-      fclose (fh);
 
       // search index for crc
       key.crc32 = crc32;
@@ -511,22 +547,20 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
       if (idx_entry)                            // crc32 found
         {
           // open dat file and read entry
-          setext (buf, ".dat");
-
-          fclose_fdat ();
-          while (get_dat_entry (buf, dat, crc32, idx_entry->filepos))
+          while (get_dat_entry (fname_dat, dat, crc32, idx_entry->filepos))
             if (crc32 == dat->current_crc32)
               {
-                strcpy (dat->datfile, basename (buf));
-                get_dat_header (buf, dat);
+                strcpy (dat->datfile, basename (fname_dat));
+                get_dat_header (fname_dat, dat);
+                closedir_ddat ();
+                fclose_fdat ();
                 free (p);
                 return dat;
               }
+          fclose_fdat ();
         }
-
       free (p);
     }
-
   return NULL;
 }
 
@@ -534,15 +568,15 @@ ucon64_dat_search (uint32_t crc32, st_ucon64_dat_t *dat)
 #define MAX_GAMES_FOR_CONSOLE 50000             // TODO?: dynamic size
 int
 ucon64_dat_indexer (void)
-// create or update index of cache
+// create or update index of DAT file
 {
-  char buf[FILENAME_MAX], buf2[FILENAME_MAX], errorfname[FILENAME_MAX];
-  struct stat cache, index;
+  char fname_dat[FILENAME_MAX], fname_index[FILENAME_MAX], errorfname[FILENAME_MAX];
+  struct stat fstate_dat, fstate_index;
   st_ucon64_dat_t dat;
-  FILE *fh = NULL, *errorfile;
+  FILE *errorfile;
   uint32_t size = 0, pos;
   time_t start_time = 0;
-  int update = 0, duplicates, n;
+  int update = 0, n_duplicates, n;
   st_idx_entry_t *idx_entries, *idx_entry;
 
   if (!(idx_entries = (st_idx_entry_t *)
@@ -553,39 +587,30 @@ ucon64_dat_indexer (void)
       exit (1);
     }
 
-  closedir_dptr ();
-  while (get_next_file (buf))
+  while (get_next_file (fname_dat))
     {
-      strcpy (buf2, buf);
-      setext (buf2, ".idx");
+      strcpy (fname_index, fname_dat);
+      setext (fname_index, ".idx");
 
-      if (!stat (buf, &cache) && !stat (buf2, &index))
+      if (!stat (fname_dat, &fstate_dat) && !stat (fname_index, &fstate_index))
         {
-          if (cache.st_mtime < index.st_mtime)
-            {
-              // index file seems to be present and up-to-date
-              continue;
-            }
-          update = 1; // idx file is present
-        }
-
-      if (!(fh = fopen (buf2, "wb")))
-        {
-          fprintf (stderr, ucon64_msg[OPEN_WRITE_ERROR], buf2);
-          continue;
+          if (fstate_dat.st_mtime < fstate_index.st_mtime)
+            continue;                   // index file seems to be present and up-to-date
+          update = 1;
         }
 
       start_time = time (0);
-      size = q_fsize (buf);
+      size = q_fsize (fname_dat);
 
-      fprintf (stdout, "%s: %s\n",
-        (!update ? "Create" : "Update"), basename (buf2));
-
-      fclose_fdat ();
+#if 1 // We never update the index file, we always create it - dbjh
+      fprintf (stdout, "%s: %s\n", "Create", basename (fname_index));
+#else
+      fprintf (stdout, "%s: %s\n", (update ? "Update" : "Create"), basename (fname_index));
+#endif
       pos = 0;
-      duplicates = 0;
+      n_duplicates = 0;
       errorfile = NULL;
-      while (get_dat_entry (buf, &dat, 0, -1))
+      while (get_dat_entry (fname_dat, &dat, 0, -1))
         {
           if (pos == MAX_GAMES_FOR_CONSOLE)
             {
@@ -614,7 +639,7 @@ ucon64_dat_indexer (void)
 
               if (!errorfile)
                 {
-                  strcpy (errorfname, buf2);
+                  strcpy (errorfname, fname_index);
                   setext (errorfname, ".err");
                   if (!(errorfile = fopen (errorfname, "w"))) // text file for WinDOS
                     {
@@ -624,7 +649,7 @@ ucon64_dat_indexer (void)
                 }
 
               strcpy (current_name, dat.name);
-              get_dat_entry (buf, &dat, 0, idx_entry->filepos);
+              get_dat_entry (fname_dat, &dat, 0, idx_entry->filepos);
               fprintf (errorfile,
                        "\n"
                        "WARNING: DAT file contains a duplicate CRC32 (0x%x)!\n"
@@ -632,7 +657,7 @@ ucon64_dat_indexer (void)
                        "  Ignoring game:              \"%s\"\n",
                        dat.current_crc32, dat.name, current_name);
 
-              duplicates++;
+              n_duplicates++;
               fseek (fdat, current_filepos, SEEK_SET);
               continue;
             }
@@ -644,25 +669,29 @@ ucon64_dat_indexer (void)
             ucon64_gauge (start_time, ftell (fdat), size);
           pos++;
         }
+      fclose_fdat ();
+
       qsort (idx_entries, pos, sizeof (st_idx_entry_t), idx_compare);
-      fwrite (idx_entries, 1, pos * sizeof (st_idx_entry_t), fh);
+      if (q_fwrite (idx_entries, 0, pos * sizeof (st_idx_entry_t), fname_index, "wb")
+          != pos * sizeof (st_idx_entry_t))
+        {
+          fputc ('\n', stderr);
+          fprintf (stderr, ucon64_msg[WRITE_ERROR], fname_index);
+        }
 
       ucon64_gauge (start_time, size, size);
-
-      if (duplicates > 0)
+      if (n_duplicates > 0)
         printf ("\n"
                 "\n"
                 "WARNING: DAT file contains %d duplicate CRC32%s\n"
                 "         Warnings have been written to \"%s\"",
-                duplicates, duplicates != 1 ? "s" : "", errorfname);
+                n_duplicates, n_duplicates != 1 ? "s" : "", errorfname);
       if (errorfile)
         {
           fclose (errorfile);
           errorfile = NULL;
         }
-
-      fprintf (stdout, "\n\n");
-      fclose (fh);
+      printf ("\n\n");
     }
 // stats
   free (idx_entries);
@@ -672,7 +701,7 @@ ucon64_dat_indexer (void)
 
 
 void
-ucon64_dat_nfo (const st_ucon64_dat_t *dat)
+ucon64_dat_nfo (const st_ucon64_dat_t *dat, int display_version)
 {
   char buf[MAXBUFSIZE], *p = NULL;
   int n;
@@ -721,6 +750,7 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat)
   p = (char *) getext (dat->fname);
   if (stricmp (p, ".nes") &&                    // NES
       stricmp (p, ".gb") &&                     // Game Boy
+      stricmp (p, ".gbc") &&                    // Game Boy Color
       stricmp (p, ".smc") &&                    // SNES
       stricmp (p, ".smd") &&                    // Genesis
       stricmp (p, ".v64"))                      // Nintendo 64
@@ -742,15 +772,18 @@ ucon64_dat_nfo (const st_ucon64_dat_t *dat)
   if (dat->misc[0])
     printf ("  %s\n", dat->misc);
 
-  if (stristr (dat->datfile, dat->version))
-    printf ("  %s (%s, %s)\n",
-      dat->datfile,
-      dat->date,
-      dat->refname);
-  else
-    printf ("  %s (%s, %s, %s)\n",
-      dat->datfile,
-      dat->version,
-      dat->date,
-      dat->refname);
+  if (display_version)
+    {
+      if (stristr (dat->datfile, dat->version))
+        printf ("  %s (%s, %s)\n",
+          dat->datfile,
+          dat->date,
+          dat->refname);
+      else
+        printf ("  %s (%s, %s, %s)\n",
+          dat->datfile,
+          dat->version,
+          dat->date,
+          dat->refname);
+    }
 }

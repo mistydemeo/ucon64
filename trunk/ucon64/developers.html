@@ -11,6 +11,8 @@ Q5: <a href="#5">How do I connect to CVS as developer with read/write access?</a
 <br>
 Q6: <a href="#6">How is the source of uCON64 organized?</a><br>
 <br>
+Q7: <a href="#7">What syntax style is preferred?</a><br>
+<br>
 <br>
 <p><!-- <p> instead of <br> to make lynx display a blank line between questions -->
 <a name="1"><b>Q1</b>: Who develops uCON64?</a><br>
@@ -179,7 +181,37 @@ Q6: <a href="#6">How is the source of uCON64 organized?</a><br>
    strings. ucon64.c/ucon64_nfo() displays the values and strings of struct
    ucon64_.
 <br>
+<p>
+<a name="7"><b>Q7</b>: What syntax style is preferred?</a><br>
+<b>A</b>: Two spaces instead if a real tab. For the rest just look below...
+<form><textarea rows="40" cols="80" readonly>
+#include <stdio.h>
+
+#ifndef BLA
+#define BLA "bla"
+#endif // BLA
+
+int
+main (int argc, char *argv[])
+{
+  int x;
+  char buf[256];
+
+  for (x = 0; x < 3; x++)
+    {
+      {
+        {
+          strcpy (buf, BLA);
+          printf (buf);
+        }
+      }
+    }
+
+  return 0;
+}
+</textarea></form>
 <br>
+<p>
 <br>
 <br>
 <br>

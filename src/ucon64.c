@@ -781,7 +781,7 @@ return(ucon64_exit(0,&rom));
 int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
 {
   long x = 0;
-	
+
   rom->argc=argc;
 //  for( x = 0 ; x < argc ; x++ )strcpy(rom->argv[x],argv[x]);
   for( x = 0 ; x < argc ; x++ )rom->argv[x]=argv[x];
@@ -834,31 +834,16 @@ int ucon64_flush(int argc,char *argv[],struct ucon64_ *rom)
   strcpy(rom->name,"?");
   rom->name_start=0;
   rom->name_len=0;
-<<<<<<< ucon64.c
 
-  strcpy(rom->manufacturer,"?");
-=======
-	
   strcpy(rom->manufacturer,"Unknown Manufacturer");
->>>>>>> 1.112
   rom->manufacturer_start=0;
   rom->manufacturer_len=0;
-<<<<<<< ucon64.c
 
-  strcpy(rom->country,"?");
-=======
-	
   strcpy(rom->country,"Unknown Country");
->>>>>>> 1.112
   rom->country_start=0;
   rom->country_len=0;
-<<<<<<< ucon64.c
 
-  strcpy(rom->misc,"");
-=======
-	
   rom->misc[0]=0;
->>>>>>> 1.112
 
   return(0);
 }
@@ -1079,11 +1064,7 @@ else if(argcmp(argc,argv,"-dc"));
 else if(argcmp(argc,argv,"-psx"));
 else if(argcmp(argc,argv,"-psx2"));
 #endif
-#endif
-<<<<<<< ucon64.c
-=======
 //#endif
->>>>>>> 1.112
 else
 {
 //#ifdef BACKUP

@@ -98,8 +98,6 @@ char *forceargs[]={
 int ucon64_argc;
 char *ucon64_argv[128];
 
-
-
 printf("%s\n",ucon64_TITLE);
 printf("Uses code from various people. See 'DEVELOPERS' for more!\n");
 printf("This may be freely redistributed under the terms of the GNU Public License\n\n");

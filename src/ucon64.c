@@ -496,6 +496,7 @@ if(argcmp(argc,argv,"-n2gb"))console=ucon64_GB;
 if(argcmp(argc,argv,"-xfal"))console=ucon64_GBA;
 if(argcmp(argc,argv,"-xswc"))console=ucon64_SNES;
 if(argcmp(argc,argv,"-xswcs"))console=ucon64_SNES;
+if(argcmp(argc,argv,"-swcs"))console=ucon64_SNES;
 
 strcpy(buf,ucon64_rom());
 if(!strcmp(strupr(&buf[strlen(buf)-4]),".FDS")&&(quickftell(ucon64_rom())%65500)==0)

@@ -3,6 +3,7 @@ ips.c - IPS support for uCON64
 
 written by ???? - ???? madman
            1999 - 2001 NoisyB (noisyb@gmx.net)
+                  2002 dbjh
 
 
 This program is free software; you can redistribute it and/or modify
@@ -26,339 +27,449 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "config.h"
 #include "misc.h"
 #include "ucon64.h"
+#include "ucon64_misc.h"
+#include "quick_io.h"
 #include "ips.h"
 
+
+#define NO_RLE  256
+// for some strange reason 6 seems to be a general optimum vaule for RLE_START_TRESHOLD
+#define RLE_START_TRESHOLD 6                    // must be smaller than RLE_RESTART_TRESHOLD!
+#define RLE_RESTART_TRESHOLD 13
+// 6 seems to be better than 5 for BRIDGE_LEN
+#define BRIDGE_LEN 6
+//#define DEBUG_IPS
 
 const char *ips_usage[] =
 {
   NULL,
   NULL,
   "  " OPTION_S "i           apply IPS patch (<=v1.2); " OPTION_LONG_S "file=PATCHFILE\n"
-  "  "OPTION_LONG_S "mki         create IPS patch; " OPTION_LONG_S "file=CHANGED_ROM\n",
+  "  " OPTION_LONG_S "mki         create IPS patch; " OPTION_LONG_S "file=CHANGED_ROM\n",
   NULL
 };
 
+static FILE *orgfile, *modfile, *ipsfile;
+static int ndiffs = 0, address = -1, rle_value = NO_RLE, filepos = 0;
+static char ipsname[FILENAME_MAX];
 
-/*
 
-  IPS v1.0 for UNIX by madman
-
-*/
-int
-ips_main (int argc, const char *argv[])
+static unsigned char
+read_byte (FILE *file)
 {
-  FILE *ipsfile, *patchee;
-  char patch[5];
-  char byte;
-  int done = 0, add2, add1, add0, len2, len1, len0;
-  unsigned long offset, length, i;
+  int byte;                                     // this must be an int!
 
-//   printf("IPS Patcher v1.0 for UNIX by madman\n\n");
-
-  if (argc < 3)
+  byte = fgetc (file);
+  if (byte == EOF)
     {
-//      printf ("Usage: %s <patchfile> <file_to_patch>\n", argv[0]);
-      exit (0);
+      fprintf (stderr, "ERROR: Unexpected end of file\n");
+      exit (1);
+    }
+  return byte;
+}
+
+
+// Based on IPS v1.0 for UNIX by madman
+int
+ips_apply (const char *destname, const char *patchname)
+{
+  FILE *destfile;
+  unsigned char byte, byte2, byte3, magic[5];
+  unsigned int offset, length, i;
+
+  ucon64_fbackup (NULL, destname);
+
+  if ((destfile = fopen (destname, "rb+")) == NULL)
+    {
+      fprintf (stderr, "ERROR: Could not open %s\n", destname);
+      exit (1);
+    }
+  if ((ipsfile = fopen (patchname, "rb")) == NULL)
+    {
+      fprintf (stderr, "ERROR: Could not open %s\n", patchname);
+      exit (1);
     }
 
-  ipsfile = fopen (argv[1], "rb");
-  if (ipsfile == NULL)
-    {
-      printf ("Could not open the file %s\n", argv[1]);
-      exit (0);
+  fgets (magic, 6, ipsfile);
+  if (strcmp (magic, "PATCH") != 0)
+    {                                           // do at least one check for validity
+      fprintf (stderr, "ERROR: %s is not a valid IPS file\n", patchname);
+      exit (1);
     }
 
-  patchee = fopen (argv[2], "rb+");
-  if (patchee == NULL)
+  printf ("Applying IPS patch...\n");
+  while (!feof (ipsfile))
     {
-      printf ("Could not open the file %s\n", argv[2]);
-      exit (0);
-    }
+      byte = read_byte (ipsfile);
+      byte2 = read_byte (ipsfile);
+      byte3 = read_byte (ipsfile);
+      offset = (byte << 16) + (byte2 << 8) + byte3;
+      if (offset == 0x454f46)                   // numerical representation of ASCII "EOF"
+        break;
+      fseek (destfile, offset, SEEK_SET);
 
-  fgets (patch, 6, ipsfile);
-  if (strcmp (patch, "PATCH") != 0)
-    {                           //make sure its a valid IPS
-      printf ("Invalid IPS File!\n");
-      exit (0);
-    }
-
-  printf ("Applying IPS Patch...\n");
-  while (done == 0)
-    {
-      fread (&byte, 1, 1, ipsfile);
-      if ((add2 = byte) < 0)
-        add2 += 256;
-      fread (&byte, 1, 1, ipsfile);
-      if ((add1 = byte) < 0)
-        add1 += 256;
-      fread (&byte, 1, 1, ipsfile);
-      if ((add0 = byte) < 0)
-        add0 += 256;
-      offset = ((add2 * 256 * 256) + (add1 * 256) + add0);
-      if (offset == 4542278)
-        {
-          done = 1;
-          break;
-        }
-      fseek (patchee, offset, SEEK_SET);
-      fread (&byte, 1, 1, ipsfile);
-      if ((len1 = byte) < 0)
-        len1 += 256;
-      fread (&byte, 1, 1, ipsfile);
-      if ((len0 = byte) < 0)
-        len0 += 256;
-      length = ((len1 * 256) + len0);
-
+      byte = read_byte (ipsfile);
+      byte2 = read_byte (ipsfile);
+      length = (byte << 8) + byte2;
       if (length == 0)
-        {                       //code for RLE compressed block
-          fread (&byte, 1, 1, ipsfile);
-          if ((len1 = byte) < 0)
-            len1 += 256;
-          fread (&byte, 1, 1, ipsfile);
-          if ((len0 = byte) < 0)
-            len0 += 256;
-          length = ((len1 * 256) + len0);
-          fread (&byte, 1, 1, ipsfile);
+        {                                       // code for RLE compressed block
+          byte = read_byte (ipsfile);
+          byte2 = read_byte (ipsfile);
+          length = (byte << 8) + byte2;
+          byte = read_byte (ipsfile);
+#ifdef  DEBUG_IPS
+          printf ("[%02x] <= %02x (* %d)\n", offset, byte, length);
+#endif
           for (i = 0; i < length; i++)
-            fwrite (&byte, 1, 1, patchee);
+            fputc (byte, destfile);
         }
       else
-        {                       //non compressed
+        {                                       // non compressed
           for (i = 0; i < length; i++)
             {
-              fread (&byte, 1, 1, ipsfile);
-              fwrite (&byte, 1, 1, patchee);
+              byte = read_byte (ipsfile);
+#ifdef  DEBUG_IPS
+              printf ("[%02x] <= %02x\n", offset + i, byte);
+#endif
+              fputc (byte, destfile);
             }
         }
     }
+  fclose (destfile);                            // commit changes before calling ucon64_pad()
 
-  fread (&byte, 1, 1, ipsfile);
-  if (!feof (ipsfile))
-    {                           //IPS2 stuff
-      if ((len2 = byte) < 0)
-        len2 += 256;
-      fread (&byte, 1, 1, ipsfile);
-      if ((len1 = byte) < 0)
-        len1 += 256;
-      fread (&byte, 1, 1, ipsfile);
-      if ((len0 = byte) < 0)
-        len0 += 256;
-      length = ((len2 * 256 * 256) + (len1 * 256) + len0);
-      truncate (argv[2], length);
-      printf ("File truncated to %ld MBit\n", (length / 1048576) * 8);
+  byte = fgetc (ipsfile);                       // don't use read_byte() here;
+  if (!feof (ipsfile))                          //  this part is optional
+    {                                           // IPS2 stuff
+      byte2 = read_byte (ipsfile);
+      byte3 = read_byte (ipsfile);
+      length = (byte << 16) + (byte2 << 8) + byte3;
+      ucon64_pad (destname, 0, length);
+      printf ("File truncated to %.4f MBit\n", length / (float) MBIT);
     }
 
   printf ("Patching complete\n\n"
-          "NOTE: sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
+          "NOTE: Sometimes you have to add/strip a 512 bytes header when you patch a ROM\n"
           "      This means you must convert for example a Super Nintendo ROM with -swc\n"
           "      or -mgd or the patch will not work\n");
-  fclose (patchee);
+
   fclose (ipsfile);
   return 0;
 }
 
-/*
-#define ips_TOP 4542278 //tales of phantasia had 6291968 (incl 512bytes header)
 
-int ips(const char *name, const char *option2)
+// The ULTIMATE IPS creation code ;-) Ultimate as in generating the
+//  smallest IPS file possible.
+// TODO: cleaning up this code
+
+static void
+write_address (FILE *file, const char *name, int address)
 {
-	FILE *ipsfile, *patchee;
-	char patch[5];
-	char byte;
-	int done=0,  add2, add1, add0, len2, len1, len0;
-	unsigned long offset, length, i;
-
-	if(!(ipsfile=fopen(option2,"rb")))return(-1);
-	if(!(patchee=fopen(name,"r+b")))return(-1);
-
-	fgets(patch,6,ipsfile);
-	if(strcmp(patch,"PATCH")!=0) return(-1);
-
-	n_hexdump(option2,0,5);
-	printf("\n");
-	printf("IPS/International Patch Standard\n");
-	printf("%ld (%.4f Mb)\n",n_size(option2),(float)n_size(option2)/MBIT);
-	printf("\n");
-
-	printf("Internal Size: %.4f Mb\n",(float)(n_size(option2)-8)/MBIT);
-	printf("Version: 1.%s\n","?");
-	printf("\n");
-   
-
-	while(done==0) 
-	{
-		fread(&byte, 1, 1, ipsfile);
-		if ((add2=byte)<0) add2+=256;
-
-		fread(&byte, 1, 1, ipsfile);
-		if ((add1=byte)<0) add1+=256;
-
-		fread(&byte, 1, 1, ipsfile);
-		if ((add0=byte)<0) add0+=256;
-
-		offset=((add2*256*256)+(add1*256)+add0);
-
-		if(offset>=ips_TOP)
-		{
-			done=1;
-			break;
-		}
-
-		fseek(patchee, offset, SEEK_SET);
-		fread(&byte, 1, 1, ipsfile);
-		if ((len1=byte)<0) len1+=256;
-		fread(&byte, 1, 1, ipsfile);
-		if ((len0=byte)<0) len0+=256;
-		length=((len1*256)+len0);
-    
-		if (length==0) 
-		{
-//code for RLE compressed block
-			fread(&byte, 1, 1, ipsfile);
-			if((len1=byte)<0) len1+=256;
-			fread(&byte, 1, 1, ipsfile);
-			if ((len0=byte)<0) len0+=256;
-			length=((len1*256)+len0);
-			fread(&byte, 1, 1, ipsfile);
-			for (i=0; i<length; i++) 
-			fwrite(&byte, 1, 1, patchee);
-		}
-		else 
-		{
-//non compressed
-	 		for (i=0; i<length; i++) 
-	 		{
-	    			fread(&byte, 1, 1, ipsfile);
-	    			fwrite(&byte, 1, 1, patchee);
-		 	}
-	      	}
-	}
-	fread(&byte, 1, 1, ipsfile);
-
-	if(!feof(ipsfile))
-	{  
-//IPS2 stuff     
-		if ((len2=byte)<0) len2+=256;
-	      	fread(&byte, 1, 1, ipsfile);
-	      	if ((len1=byte)<0) len1+=256;
-	      	fread(&byte, 1, 1, ipsfile);
-	      	if ((len0=byte)<0) len0+=256;
-	      	length=((len2*256*256)+(len1*256)+len0);
-	      	truncate (name, length);
-	      	printf("File truncated to %lu Mb\n", (length/1048576)*8);
-	}
-   
-	fclose(patchee);
-	fclose(ipsfile);
-	return(0);
+  if (address < 16777216)
+    /*
+      16777216 = 2^24. The original code checked for 16711680
+      (2^24 - 64K), but that is an artificial limit.
+    */
+    {
+      fputc (address >> 16, file);
+      fputc (address >> 8, file);
+      fputc (address, file);
+    }
+  else
+    {
+      fprintf (stderr, "ERROR: IPS doesn't support addresses greater than 16777215\n"
+                      "       Consider using another patch format\n");
+      fclose (file);
+      remove (name);
+      exit (1);
+    }
 }
-*/
 
 
-
-int
-cips (const char *name, const char *option2)
+static void
+write_block (FILE *file, int ndiffs, unsigned char *buffer, int rle_value)
 {
-  FILE *fp, *fp2, *fp3;
-//      FILE *ORGFile, *NEWFile;
-  int done = 0, diffdone = 0;
-  unsigned long filepos = 0, add0, add1, add2;
-  unsigned long diffcount = 0;
-  char infp, infp2;
-  char buf[65537];
-
-  if (!(fp = fopen (name, "rb")))
+  if (rle_value == NO_RLE)
     {
-      return -1;
+      fputc (ndiffs >> 8, file);
+      fputc (ndiffs, file);
+      fwrite (buffer, 1, ndiffs, file);
     }
-
-  if (!(fp2 = fopen (option2, "rb")))
+  else
     {
-      fclose (fp);
-      return -1;
+      fputc (0, file);
+      fputc (0, file);
+      fputc (ndiffs >> 8, file);
+      fputc (ndiffs, file);
+      fputc (rle_value, file);
+#ifdef  DEBUG_IPS
+      printf ("RLE ");
+#endif
     }
+#ifdef  DEBUG_IPS
+  printf ("length: %d\n", ndiffs);
+#endif
+}
 
-  strcpy (buf, name);
-  setext (buf, ".IPS");
 
-  if (!(fp3 = fopen (buf, "wb")))
+static void
+flush_diffs (unsigned char *buffer)
+{
+  if (ndiffs)
     {
-      fclose (fp);
-      fclose (fp2);
-      return -1;
+      write_block (ipsfile, ndiffs, buffer, rle_value);
+      ndiffs = 0;
+      rle_value = NO_RLE;
+      address = -1;
     }
+}
 
-  fprintf (fp3, "PATCH");
 
-  while (!done)
+static int
+rle_end (int value, unsigned char *buffer)
+{
+  if (rle_value != NO_RLE && rle_value != value)
     {
-      /* Grab each character from fp and fp2, compare, keep pos */
-      infp = fgetc (fp);
-      infp2 = fgetc (fp2);
-      if (infp != infp2)
-        {
-
-          /* Save current pos in patch file */
-          /* Go through a loop until infp is equal to infp2 */
-          if (filepos < 256)
-            {
-              add2 = add1 = 0;
-              add0 = filepos;
-              fprintf (fp3, "%c%c%c", 0, 0, (char) filepos);
-            }
-          else if (filepos < 65536)
-            {
-              add2 = 0;
-              add1 = filepos / 256;
-              add0 = filepos % 256;
-              fprintf (fp3, "%c%c%c", 0, (char) (filepos / 256),
-                       (char) (filepos % 256));
-            }
-          else if (filepos < 16711680)
-            {
-              add2 = filepos / 65536;
-              add1 = (filepos % 65536) / 256;
-              add0 = ((filepos % 65536) % 256);
-              fprintf (fp3, "%c%c%c", (char) (filepos / 65536),
-                       (char) ((filepos % 65536) / 256),
-                       (char) ((filepos % 65536) % 256));
-            }
-
-          diffcount = 0;
-          diffdone = 0;
-          while (!diffdone)
-            {
-              buf[diffcount++] = infp2;
-              infp = fgetc (fp);
-              infp2 = fgetc (fp2);
-              if (feof (fp2))
-                {
-                  diffdone = 1;
-                  continue;
-                }
-              filepos++;
-              if ((!feof (fp) && (infp == infp2)) || (diffcount >= 65535))
-                {
-                  diffdone = 1;
-                  continue;
-                }
-            }
-          fprintf (fp3, "%c%c",
-                   (char) ((diffcount > 256) ? (diffcount / 256) : 0),
-                   (char) ((diffcount >
-                            256) ? (diffcount % 256) : diffcount));
-          fwrite (buf, diffcount, 1, fp3);
-        }
-      if (feof (fp2))
-        done = 1;
-      filepos++;
+      flush_diffs (buffer);
+      filepos--;
+      fseek (orgfile, filepos, SEEK_SET);
+      fseek (modfile, filepos, SEEK_SET);
+#ifdef  DEBUG_IPS
+      printf ("->normal\n");
+#endif
+      return 1;
     }
-  fprintf (fp3, "EOF");
-  fclose (fp3);
-  fclose (fp2);
-  fclose (fp);
   return 0;
 }
 
 
+static int
+check_for_rle (unsigned char byte, unsigned char *buf)
+{
+  int use_rle, i, retval = 0;
 
+  if (rle_value == NO_RLE)
+    {
+      /*
+        Start with a new block (and stop with the current one) only
+        if there are at least RLE_RESTART_TRESHOLD + 1 equal bytes
+        in a row. Restarting for RLE has some overhead: possibly 5
+        bytes for the interrupted current block plus 7 bytes for
+        the RLE block. So, values smaller than 11 for
+        RLE_RESTART_TRESHOLD only make the IPS file larger than if
+        no RLE compression would be used.
+      */
+      if (ndiffs > RLE_RESTART_TRESHOLD)
+        {
+          use_rle = 1;
+          for (i = ndiffs - RLE_RESTART_TRESHOLD; i <= ndiffs - 1; i++)
+            if (buf[i] != byte)
+              {
+                use_rle = 0;
+                break;
+              }
+          if (use_rle)
+            // we are not using RLE, but we should => start a new block
+            {
+              ndiffs -= RLE_RESTART_TRESHOLD;
+              filepos -= RLE_RESTART_TRESHOLD;
+              fseek (orgfile, filepos, SEEK_SET);
+              fseek (modfile, filepos, SEEK_SET);
+
+              flush_diffs (buf);
+              address = filepos;
+              write_address (ipsfile, ipsname, address);
+              retval = 1;
+#ifdef  DEBUG_IPS
+              printf ("restart (%x)\n", address);
+#endif
+            }
+        }
+      /*
+        Use RLE only if the last RLE_START_TRESHOLD + 1 (or more)
+        bytes were the same. Values smaller than 7 for
+        RLE_START_TRESHOLD will make the IPS file larger than if no
+        RLE would be used (for this block).
+        normal block:
+        i      address high byte
+        i + 1  address medium byte
+        i + 2  address low byte
+        i + 3  length high byte
+        i + 4  length low byte
+        i + 5  new byte
+        ...
+        RLE block:
+        i      address high byte
+        i + 1  address medium byte
+        i + 2  address low byte
+        i + 3  0
+        i + 4  0
+        i + 5  length high byte
+        i + 6  length low byte
+        i + 7  new byte
+        The value 7 (instead of 2) is to compensate for normal
+        blocks that immediately follow the RLE block.
+      */
+      else if (ndiffs > RLE_START_TRESHOLD)
+        {
+          use_rle = 1;
+          for (i = 0; i < ndiffs; i++)
+            if (buf[i] != byte)
+              {
+                use_rle = 0;
+                break;
+              }
+          if (use_rle)
+            {
+              rle_value = byte;
+#ifdef  DEBUG_IPS
+              printf ("->RLE\n");
+#endif
+            }
+        }
+    }
+  return retval;
+}
+
+
+int
+ips_create (const char *orgname, const char *modname)
+{
+  int i, orgfilesize, modfilesize;
+  unsigned char byte, byte2, buf[65535];
+
+  if ((orgfile = fopen (orgname, "rb")) == NULL)
+    {
+      fprintf (stderr, "ERROR: Could not open %s\n", orgname);
+      exit (1);
+    }
+  if ((modfile = fopen (modname, "rb")) == NULL)
+    {
+      fprintf (stderr, "ERROR: Could not open %s\n", modname);
+      exit (1);
+    }
+  strcpy (ipsname, orgname);
+  setext (ipsname, ".IPS");
+  if ((ipsfile = fopen (ipsname, "wb")) == NULL)
+    {
+      fprintf (stderr, "ERROR: Could not open %s\n", ipsname);
+      exit (1);
+    }
+
+  orgfilesize = q_fsize (orgname);
+  modfilesize = q_fsize (modname);
+
+  fprintf (ipsfile, "PATCH");
+
+next_byte:
+  while (1)
+    {
+      byte = fgetc (orgfile);
+      byte2 = fgetc (modfile);
+      filepos++;
+      if (feof (modfile))
+        break;
+
+      if (modfilesize >= 0x454f46 && filepos == 0x454f46)
+        /*
+          We must avoid writing 0x454f46 (4542278) as offset, because it has a
+          special meaning. Offset 0x454f46 is interpreted as EOF marker. It is
+          the numerical representation of the ASCII string "EOF".
+          We solve the problem by writing 2 patch bytes for offsets 0x454f45
+          and 0x454f46 regardless whether those bytes differ for orgfile and
+          modfile.
+        */
+        {
+          flush_diffs (buf);                // commit any pending data
+
+          write_address (ipsfile, ipsname, 0x454f46 - 1);
+          // write 2 patch bytes (for offsets 0x454f45 and 0x454f46)
+          buf[0] = byte2;
+          buf[1] = read_byte (modfile);
+          filepos++;
+          ndiffs = 2;
+          flush_diffs (buf);
+
+          fseek (orgfile, filepos, SEEK_SET); // keep the files synchronized
+#ifdef  DEBUG_IPS
+          printf ("[%02x] => %02x\n"
+                  "[%02x] => %02x\n"
+                  "length: 2\n", filepos - 2, buf[0], filepos - 1, buf[1]);
+#endif
+          continue;
+        }
+
+      if (byte != byte2 || feof (orgfile))
+        {
+          if (rle_end (byte2, buf))
+            continue;
+
+          if (address < 0)
+            {
+              flush_diffs (buf);                // commit previous block
+              address = filepos - 1;
+              write_address (ipsfile, ipsname, address);
+            }
+
+          buf[ndiffs++] = byte2;
+#ifdef  DEBUG_IPS
+          printf ("[%02x] => %02x%s\n", filepos - 1, byte2,
+            rle_value != NO_RLE ? " *" : "");
+#endif
+          check_for_rle (byte2, buf);
+        }
+      else if (address >= 0)                    // byte == byte2 && !feof (orgfile)
+        // TODO: convert this monstrosity into decent code
+        {
+          int n, n2, n_compare;
+          unsigned char bridge[BRIDGE_LEN];
+
+          bridge[0] = byte;
+          buf[ndiffs] = byte2;
+          n = fread (bridge + 1, 1, BRIDGE_LEN - 1, orgfile);
+          n2 = fread (&buf[ndiffs + 1], 1, MIN (BRIDGE_LEN - 1, 65535 - ndiffs), modfile);
+          n_compare = 1 + MIN (n, n2);
+
+          for (i = 0; i < n_compare; i++)
+            if (buf[ndiffs + i] != bridge[i])
+              {
+                for (n = 0; n < i; n++)
+                  {
+                    if (rle_end (buf[ndiffs], buf))
+                      goto next_byte;           // yep, ugly
+#ifdef  DEBUG_IPS
+                    printf ("[%02x] => %02x b%s\n", filepos - 1,
+                      buf[ndiffs], rle_value != NO_RLE ? " *" : "");
+#endif
+                    ndiffs++;
+                    if (check_for_rle (buf[ndiffs - 1], buf))
+                      goto next_byte;           // even uglier
+                    filepos++;
+                  }
+                filepos--;
+                byte = bridge[n];
+                byte2 = buf[ndiffs];
+                break;
+              }
+
+          fseek (orgfile, filepos, SEEK_SET);
+          fseek (modfile, filepos, SEEK_SET);
+
+          if (i == n_compare)                   // next few bytes are equal (between the files)
+            address = -1;
+        }
+      if (ndiffs == 65535)
+        flush_diffs (buf);
+    }
+
+  flush_diffs (buf);
+  fprintf (ipsfile, "EOF");
+  if (modfilesize < orgfilesize)
+    write_address (ipsfile, ipsname, modfilesize);
+
+  fclose (orgfile);
+  fclose (modfile);
+  fclose (ipsfile);
+  ucon64_wrote (ipsname);
+
+  return 0;
+}

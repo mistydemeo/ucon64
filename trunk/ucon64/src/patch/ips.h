@@ -3,7 +3,8 @@ ips.h - IPS support for uCON64
 
 written by ???? - ???? madman
            1999 - 2001 NoisyB (noisyb@gmx.net)
-           
+                  2002 dbjh
+
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,8 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef IPS_H
 #define IPS_H
-extern int ips_main (int argc, const char *argv[]);
-extern int ips (const char *name, const char *option2);
-extern int cips (const char *name, const char *option2);
+extern int ips_apply (const char *destname, const char *ipsname);
+extern int ips_create (const char *orgname, const char *modname);
 extern const char *ips_usage[];
 #endif /* IPS_H */

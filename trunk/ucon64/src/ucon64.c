@@ -670,11 +670,9 @@ int
 ucon64_execute_options (void)
 // execute all options for a single file
 {
-//  int ucon64_argc;
   int c, result = 0, value = 0, special_option = 0, x = 0;
   unsigned int padded;
   char buf[MAXBUFSIZE], src_name[FILENAME_MAX], dest_name[FILENAME_MAX];
-//  const char *ucon64_argv[128];
 
   optind = 0;                                   // start with first option
   while ((ucon64_option = c =

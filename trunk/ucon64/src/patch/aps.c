@@ -1,5 +1,5 @@
 /*
-aps.c - APS support for uCON64
+aps.c - Advanced Patch System support for uCON64
 
 written by        1998 Silo / BlackBag
            1999 - 2001 NoisyB (noisyb@gmx.net)
@@ -93,7 +93,7 @@ readstdheader (void)
 
 
 static void
-readN64header ()
+readN64header (void)
 {
   unsigned int n64aps_magictest;
   unsigned char buffer[8], APSbuffer[8], cartid[2], temp, teritory, APSteritory;
@@ -135,7 +135,6 @@ readN64header ()
     fseek (n64aps_modfile, 63, SEEK_SET);       // teritory
   else
     fseek (n64aps_modfile, 62, SEEK_SET);
-
   teritory = fgetc (n64aps_modfile);
   APSteritory = fgetc (n64aps_apsfile);
   if (teritory != APSteritory)
@@ -151,7 +150,7 @@ readN64header ()
 #endif
     }
 
-  fseek (n64aps_modfile, 16, SEEK_SET);       // CRC header position
+  fseek (n64aps_modfile, 16, SEEK_SET);         // CRC header position
   fread (buffer, 1, 8, n64aps_modfile);
   fread (APSbuffer, 1, 8, n64aps_apsfile);
   if (n64aps_magictest == 0x12408037)
@@ -236,7 +235,7 @@ readpatch (void)
             }
           fwrite (buffer, 1, size, n64aps_modfile);
         }
-      else // apply an RLE block
+      else                                      // apply an RLE block
         {
           unsigned char data, len;
           int i;
@@ -322,7 +321,7 @@ writestdheader (void)
 
 
 static void
-writeN64header ()
+writeN64header (void)
 {
   unsigned int n64aps_magictest;
   unsigned char buffer[8], teritory, cartid[2], temp;
@@ -356,7 +355,6 @@ writeN64header ()
 
   fseek (n64aps_orgfile, 0x10, SEEK_SET);       // CRC header position
   fread (buffer, 1, 8, n64aps_orgfile);
-
   if (n64aps_magictest == 0x12408037)
     {
       temp = buffer[0];
@@ -374,7 +372,7 @@ writeN64header ()
     }
 
   fwrite (buffer, 1, 8, n64aps_apsfile);
-  fputc (0, n64aps_apsfile);   // pad
+  fputc (0, n64aps_apsfile);                    // pad
   fputc (0, n64aps_apsfile);
   fputc (0, n64aps_apsfile);
   fputc (0, n64aps_apsfile);
@@ -407,7 +405,6 @@ writepatch (void)
 
   fseek (n64aps_orgfile, 0, SEEK_SET);
   fseek (n64aps_modfile, 0, SEEK_SET);
-
   filepos = 0;
   while ((newreadlen = fread (newbuffer, 1, N64APS_BUFFERSIZE, n64aps_modfile)))
     {

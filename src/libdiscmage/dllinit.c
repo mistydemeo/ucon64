@@ -34,6 +34,10 @@ DECLARE_CYGWIN_DLL(DllMain);
 #if     defined __CYGWIN__ || defined _WIN32
 #include <windows.h>
 
+#if     defined __MINGW32__ && defined __cplusplus
+extern "C" BOOL WINAPI DllMain (HINSTANCE h, DWORD reason, LPVOID ptr);
+#endif
+
 // Visual C++ (at least the command line tools) seem to require that this
 //  function is named DllMain or else it won't be called at load time.
 //  This applies regardless whether DLOPEN is defined.

@@ -279,16 +279,16 @@ ansi_parser (char *str)
 
 int
 vprintf2 (const char *format, va_list argptr)
-// Cheap hack to get the Visual C++ port support "ANSI colors". Cheap,
-//  because it only supports the ANSI escape sequences uCON64 uses.
+// Cheap hack to get the Visual C++ and MinGW ports support "ANSI colors".
+//  Cheap, because it only supports the ANSI escape sequences uCON64 uses.
 {
 #undef  printf
 #undef  fprintf
-  int n_chars = 0, n_ctrl, n_print, done = 0;
+  int n_chars = 0, n_ctrl = 0, n_print, done = 0;
   char output[MAXBUFSIZE], *ptr, *ptr2;
   HANDLE stdout_handle;
   CONSOLE_SCREEN_BUFFER_INFO info;
-  WORD org_attr, new_attr;
+  WORD org_attr, new_attr = 0;
 
   n_chars = vsprintf (output, format, argptr);
   if (n_chars > MAXBUFSIZE)
@@ -2657,4 +2657,15 @@ sync (void)
   fflush (NULL);                                // flushes all streams opened for output
   return 0;
 }
+
+
+#if     defined __MINGW32__ && defined DLL
+// Ugly hack in order to fix something in zlib (yep, it's that bad)
+FILE *
+fdopen (int fd, const char *mode)
+{
+  return _fdopen (fd, mode);
+}
 #endif
+
+#endif // _WIN32

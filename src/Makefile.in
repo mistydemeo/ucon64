@@ -21,6 +21,14 @@ LDFLAGS+=libdiscmage/$(LIBNAME).a
 endif
 
 else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+
+FULLLIBNAME=$(LIBNAME).dll
+ifndef DLOPEN
+LDFLAGS+=libdiscmage/$(LIBNAME).a
+endif
+
+else
 ifdef DJGPP
 
 FULLLIBNAME=$(LIBNAME).dxe
@@ -45,6 +53,7 @@ LDFLAGS+=-Llibdiscmage -l$(LIBNAME)
 endif
 
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 
 
@@ -70,14 +79,21 @@ OBJECTS+=dlopen.o
 ifndef ZLIB
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 else
+ifeq ($(OSTYPE),msys)
+else
 ifdef DJGPP                             # DJGPP code in dlopen needs map code
 OBJECTS+=map.o
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 endif                                   # ZLIB
 else
 ifeq ($(TERM),cygwin)                   # Cygwin code in ucon64_misc needs dlopen code
 OBJECTS+=dlopen.o
+else
+ifeq ($(OSTYPE),msys)
+OBJECTS+=dlopen.o
+endif                                   # msys
 endif                                   # cygwin
 endif                                   # DLOPEN
 
@@ -86,9 +102,13 @@ TARGET=ucon64
 ifeq ($(TERM),cygwin)                   # OSTYPE is not a real env var on Cygwin
 TARGET:=$(addsuffix .exe, $(TARGET))    # GNU specific: "simply expanded variable"
 else                                    # adding .exe avoids "problems" with Cygwin
+ifeq ($(OSTYPE),msys)                   # Msys, MinGW's POSIX build environment
+TARGET:=$(addsuffix .exe, $(TARGET))
+else
 ifdef DJGPP                             # OSTYPE is not defined by default under DOS
 TARGET:=$(addsuffix .exe, $(TARGET))
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 
 all: libdiscmage/$(FULLLIBNAME) $(TARGET)
@@ -96,8 +116,11 @@ all: libdiscmage/$(FULLLIBNAME) $(TARGET)
 
 clean:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
-	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
-              DEADJOE */DEADJOE *~ */*~ */*/*~
+	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~
+	cd libdiscmage && $(MAKE) clean
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~
 	cd libdiscmage && $(MAKE) clean
 else
 ifdef DJGPP
@@ -111,14 +134,19 @@ ifdef DJGPP
 	cd ..
 else                                    # Unix or BeOS
 	rm -f $(TARGET) $(OBJECTS) *.core *.stackdump *~ */*~ */*/*~ \
-              DEADJOE */DEADJOE *~ */*~ */*/*~
+              DEADJOE */DEADJOE
 	cd libdiscmage && $(MAKE) clean
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 
 
 distclean: clean
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+	rm -f Makefile config.log config.status config.cache config.h
+	cd libdiscmage && $(MAKE) distclean
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 	rm -f Makefile config.log config.status config.cache config.h
 	cd libdiscmage && $(MAKE) distclean
 else
@@ -135,6 +163,7 @@ else
 	rm -f Makefile config.log config.status config.cache config.h
 	cd libdiscmage && $(MAKE) distclean
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 
 
@@ -146,6 +175,9 @@ libdiscmage/$(FULLLIBNAME):
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 	cd libdiscmage && $(MAKE)
 else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+	cd libdiscmage && $(MAKE)
+else
 ifdef DJGPP
 	cd libdiscmage
 	$(MAKE)
@@ -153,6 +185,7 @@ ifdef DJGPP
 else
 	cd libdiscmage && $(MAKE)
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 
 
@@ -163,6 +196,8 @@ $(TARGET): $(OBJECTS)
 install:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
 else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
+else
 ifdef DJGPP
 else
 ifeq ($(OSTYPE),beos)
@@ -171,12 +206,15 @@ else
 	./install.sh
 endif                                   # beos
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 #	cd libdiscmage && $(MAKE) install
 
 
 uninstall:
 ifeq ($(TERM),cygwin)                   # test cygwin before DJGPP
+else
+ifeq ($(OSTYPE),msys)                   # test msys before DJGPP
 else
 ifdef DJGPP
 else
@@ -186,6 +224,7 @@ else
 	rm -f /usr/local/bin/$(TARGET)
 endif                                   # beos
 endif                                   # DJGPP
+endif                                   # msys
 endif                                   # cygwin
 #	cd libdiscmage && $(MAKE) uninstall
 

@@ -874,6 +874,9 @@ ucon64_dat_nfo (const ucon64_dat_t *dat)
   if (dat->misc[0])
     printf ("  %s\n", dat->misc);
 
+  if (dat->country)
+    printf ("  Country: %s\n", dat->country);
+
   if (stricmp (dat->name, dat->fname) != 0)
     printf ("  Filename: %s\n", dat->fname);
 

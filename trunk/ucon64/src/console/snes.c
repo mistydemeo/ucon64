@@ -2577,12 +2577,13 @@ snes_init (st_rominfo_t *rominfo)
 
   calc_checksums = !UCON64_ISSET (ucon64.do_not_calc_crc) && result == 0;
 
+  // We want the CRC32 of the "raw" data. Only really necessary for interleaved
+  if (calc_checksums)
+    ucon64.fcrc32 = crc32 (0, rom_buffer, size);
   // bs_dump has to be set before calling snes_chksum(), but snes_check_bs()
   //  needs snes_header to be filled with the correct data
   if (rominfo->interleaved)
     {
-      if (calc_checksums)
-        ucon64.fcrc32 = crc32 (0, rom_buffer, size);
       snes_deinterleave (rominfo, &rom_buffer, size);
       snes_set_hirom (rom_buffer, size);
       rominfo->header_start = snes_header_base + SNES_HEADER_START + snes_hirom;
@@ -2619,7 +2620,26 @@ snes_init (st_rominfo_t *rominfo)
 #endif
                rominfo->current_internal_crc, x, rominfo->current_internal_crc + x,
                (rominfo->current_internal_crc + x == 0xffff) ? "" : "~0xffff");
-      ucon64.crc32 = crc32 (0, rom_buffer, size);
+      if (rominfo->interleaved)
+        ucon64.crc32 = crc32 (0, rom_buffer, size);
+      else if (bs_dump)
+        {
+          unsigned short int *bs_date_ptr = (unsigned short int *)
+            (rom_buffer + snes_header_base + SNES_HEADER_START + snes_hirom + 38);
+          unsigned short int bs_date = *bs_date_ptr;
+#ifdef  WORDS_BIGENDIAN
+          *bs_date_ptr = 0x4200;
+#else
+          *bs_date_ptr = 0x0042;
+#endif
+          ucon64.crc32 = crc32 (0, rom_buffer, size);
+          *bs_date_ptr = bs_date;
+        }
+      else
+        {
+          ucon64.crc32 = ucon64.fcrc32;
+          ucon64.fcrc32 = 0;
+        }
     }
 
   // internal ROM name

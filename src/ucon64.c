@@ -162,7 +162,7 @@ struct ucon64_ ucon64;
 
 
 
-if(argcmp(argc,argv,"-ata"))ucon64.console=ucon64_ATARI;
+if(argcmp(argc,argv,"-ata"))console=ucon64_ATARI;
 if(argcmp(argc,argv,"-s16"))console=ucon64_SYSTEM16;
 if(argcmp(argc,argv,"-n64"))console=ucon64_N64;
 if(argcmp(argc,argv,"-psx"))console=ucon64_PSX;
